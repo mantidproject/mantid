@@ -25,7 +25,7 @@ class AlignComponents(PythonAlgorithm):
     """
 
     _optionsList = ["Xposition", "Yposition", "Zposition", "AlphaRotation", "BetaRotation", "GammaRotation"]
-    adjustment_items = ['Component', 'Xposition', 'Yposition', 'Zposition',
+    adjustment_items = ['ComponentName', 'Xposition', 'Yposition', 'Zposition',
                         'XdirectionCosine', 'YdirectionCosine', 'ZdirectionCosine', 'RotationAngle']
     _optionsDict = {}
     _initialPos = None
@@ -299,9 +299,12 @@ class AlignComponents(PythonAlgorithm):
 
         detID = calWS.column('detid')
 
-        wks_name = self.getPropertyValue("OutputWorkspace")  # workspace whose counts will be DIFC values
+        output_workspace = self.getPropertyValue("OutputWorkspace")
+        wks_name = '__alignedworkspace'  # workspace whose counts will be DIFC values
         if bool(input_workspace) is True:
             api.CloneWorkspace(InputWorkspace=input_workspace, OutputWorkspace=wks_name)
+            if output_workspace != str(input_workspace):
+                api.CloneWorkspace(InputWorkspace=input_workspace, OutputWorkspace=output_workspace)
         else:
             api.LoadEmptyInstrument(Filename=self.getProperty("InstrumentFilename").value, OutputWorkspace=wks_name)
 
@@ -359,7 +362,7 @@ class AlignComponents(PythonAlgorithm):
 
                 # Save translation and rotations, if requested
                 if saving_adjustments:
-                    instrument = input_workspace.getInstrument()
+                    instrument = api.mtd[wks_name].getInstrument()
                     name_finder = {'Source': instrument.getSource().getName(),
                                    'Sample': instrument.getSample().getName()}
                     component_adjustments = [name_finder[component]] + xmap[:3] + [0.0] * 4 # no rotations
@@ -368,6 +371,7 @@ class AlignComponents(PythonAlgorithm):
                 # Need to grab the component again, as things have changed
                 kwargs = dict(X=xmap[0], Y=xmap[1], Z=xmap[2], RelativePosition=False)
                 api.MoveInstrumentComponent(wks_name, componentName, **kwargs) # adjust workspace
+                api.MoveInstrumentComponent(output_workspace, componentName, **kwargs) # adjust workspace
                 comp = api.mtd[wks_name].getInstrument().getComponentByName(componentName)
                 logger.notice("Finished " + componentName + " Final position is " + str(comp.getPos()))
                 self._move = False
@@ -437,12 +441,14 @@ class AlignComponents(PythonAlgorithm):
             if self._move:
                 kwargs = dict(X=xmap[0], Y=xmap[1], Z=xmap[2], RelativePosition=False)
                 api.MoveInstrumentComponent(wks_name, component, **kwargs)  # adjust workspace
+                api.MoveInstrumentComponent(output_workspace, component, **kwargs)  # adjust workspace
                 component_adjustments[:3] = xmap[:3]
 
             if self._rotate:
                 (rotw, rotx, roty, rotz) = self._eulerToAngleAxis(xmap[3], xmap[4], xmap[5], self._eulerConvention)
                 kwargs = dict(X=rotx, Y=roty, Z=rotz, Angle=rotw, RelativeRotation=False)
                 api.RotateInstrumentComponent(wks_name, component, **kwargs)  # adjust workspace
+                api.RotateInstrumentComponent(output_workspace, component, **kwargs)  # adjust workspace
                 component_adjustments[3:] = [rotx, roty, rotz, rotw]
 
             if saving_adjustments and (self._move or self._rotate):
@@ -454,7 +460,8 @@ class AlignComponents(PythonAlgorithm):
                           + " Final rotation is " + str(comp.getRotation().getEulerAngles(self._eulerConvention)))
 
             prog.report()
-        self.setProperty("OutputWorkspace", wks_name)
+        api.DeleteWorkspace(wks_name)
+        self.setProperty("OutputWorkspace", output_workspace)
         logger.notice("Results applied to workspace "+wks_name)
 
     def _initialize_adjustments_table(self, table_name):

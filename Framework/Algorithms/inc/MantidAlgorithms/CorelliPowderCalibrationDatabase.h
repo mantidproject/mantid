@@ -51,7 +51,7 @@ struct ComponentPosition {
 /// workspaces
 class MANTID_ALGORITHMS_DLL CalibrationTableHandler {
 public:
-  /// Load a single component calibration table
+  /// Load a single-component calibration table
   static DataObjects::TableWorkspace_sptr
   loadComponentCalibrationTable(const std::string &filename,
                                 const std::string &tablewsname);
@@ -126,8 +126,16 @@ public:
   const std::string category() const override {
     return "Diffraction\\Calibration";
   };
+
+  /// Extra help info
+  const std::vector<std::string> seeAlso() const override {
+    return {"CorelliPowderCalibrationCreate", "CorelliPowderCalibrationLoad",
+            "CorelliPowderCalibrationApply"};
+  };
+
   const std::string summary() const override {
-    return "Save calibrated components' positions to database."; // TODO
+    return "Save calibrated components' positions and orientations to "
+           "database.";
   };
 
   /// get standard component calibration database (CSV) file name

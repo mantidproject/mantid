@@ -4,6 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from Muon.GUI.Common.ADSHandler.workspace_naming import get_run_numbers_as_string_from_workspace_name
 from Muon.GUI.Common.fitting_tab_widget.fitting_tab_model import FitPlotInformation
 from Muon.GUI.Common.fitting_tab_widget.workspace_selector_view import WorkspaceSelectorView
 from mantidqt.utils.observer_pattern import GenericObserver, GenericObserverWithArgPassing, GenericObservable
@@ -70,7 +71,9 @@ class FittingTabPresenter(object):
         self.disable_editing_notifier = GenericObservable()
 
     def disable_view(self):
-        self.view.setEnabled(False)
+        self.update_selected_workspace_list_for_fit()
+        if not self.selected_data:
+            self.view.setEnabled(False)
 
     def enable_view(self):
         if self.selected_data:
@@ -501,9 +504,16 @@ class FittingTabPresenter(object):
     def update_fit_specifier_list(self):
         if self.view.simultaneous_fit_by == "Run":
             # extract runs from run list of lists, which is in the format [ [run,...,runs],[runs],...,[runs] ]
-            flattened_run_list = [str(item) for sublist in self.context.data_context.current_runs for item in sublist]
-            flattened_run_list.sort()
-            simul_choices = flattened_run_list
+            current_runs = self.context.data_context.current_runs
+            if len(current_runs) > 1:
+                run_numbers = [str(item) for sub_list in current_runs for item in sub_list]
+            else:
+                # extract runs from workspace
+                ws_list = self.context.data_context.current_data["OutputWorkspace"]
+                run_numbers = [str(get_run_numbers_as_string_from_workspace_name(
+                    ws.workspace_name, self.context.data_context.instrument)) for ws in ws_list]
+            run_numbers.sort()
+            simul_choices = run_numbers
         elif self.view.simultaneous_fit_by == "Group/Pair":
             simul_choices = self._get_selected_groups_and_pairs()
         else:

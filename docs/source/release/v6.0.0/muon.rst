@@ -18,6 +18,7 @@ New Features
 Improvements
 ############
 - Phasequads are now available for analysis in both GUI's.
+- Ticking co-add now works in the GUI's so you can analyse multiple runs as one run
 
 Bug fixes
 #########
@@ -29,6 +30,8 @@ Bug fixes
 - Fixed an error caused by switching to Simultaneous fitting when TF Asymmetry mode is ticked.
 - Fixed an error caused by switching between the Run and Group/Pair selection when TF Asymmetry mode is ticked.
 - Fixed a bug that can sometimes cause the MaxEnt calculation to fail in frequency domain analysis.
+- Fixed a crash when trying to do a simultaneous fit with no data loaded after pressing clear all.
+
 
 ALC
 ---
