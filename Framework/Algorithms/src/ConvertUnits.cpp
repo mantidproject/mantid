@@ -462,7 +462,7 @@ bool ConvertUnits::getDetectorValues(const API::SpectrumInfo &spectrumInfo,
       std::vector<detid_t> warnDetIds;
       try {
         auto [difa, difc, tzero] =
-            ws.spectrumInfo().diffractometerConstants(wsIndex, warnDetIds);
+            spectrumInfo.diffractometerConstants(wsIndex, warnDetIds);
         pmap[UnitConversionParameters::difa] = difa;
         pmap[UnitConversionParameters::difc] = difc;
         pmap[UnitConversionParameters::tzero] = tzero;

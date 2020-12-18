@@ -325,9 +325,8 @@ void populateTable(ITableWorkspace_sptr &t, const MatrixWorkspace_sptr &ws,
       if (includeDiffConstants) {
         std::vector<detid_t> warnDetIds;
         auto [difaValue, difcValue, tzeroValue] =
-            ws->spectrumInfo().diffractometerConstants(wsIndex, warnDetIds);
-        auto difcValueUncalibrated =
-            ws->spectrumInfo().difcUncalibrated(wsIndex);
+            spectrumInfo.diffractometerConstants(wsIndex, warnDetIds);
+        auto difcValueUncalibrated = spectrumInfo.difcUncalibrated(wsIndex);
         colValues << difaValue << difcValue << difcValueUncalibrated
                   << tzeroValue;
       }
