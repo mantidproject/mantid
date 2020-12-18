@@ -13,8 +13,8 @@ from mantid.api import FileFinder
 import os
 
 # Expected densities for PG3AbsorptionCorrection and PG3InfoFromLogs
-test_density = 0.049960265513165146
-test_density_effective = 0.02498013275658258
+SI_NUMBER_DENSITY = 0.049960265513165146
+SI_NUMBER_DENSITY_EFFECTIVE = 0.02498013275658258
 
 
 def _skip_test():
@@ -149,8 +149,8 @@ class PG3AbsorptionCorrection(systemtesting.MantidSystemTest):
 
         # Check name, number density, effective density
         assert mtd['PG3_46577'].sample().getMaterial().name() == 'Si'
-        assert mtd['PG3_46577'].sample().getMaterial().numberDensity == test_density
-        assert mtd['PG3_46577'].sample().getMaterial().numberDensityEffective == test_density_effective
+        assert mtd['PG3_46577'].sample().getMaterial().numberDensity == SI_NUMBER_DENSITY
+        assert mtd['PG3_46577'].sample().getMaterial().numberDensityEffective == SI_NUMBER_DENSITY_EFFECTIVE
 
         # Check volume using height value from log - pi*(r^2)*h, r and h in meters
         assert mtd['PG3_46577'].sample().getShape().volume() == np.pi * np.square(.00295) * .040
@@ -474,8 +474,8 @@ class PG3InfoFromLogs(systemtesting.MantidSystemTest):
 
         # Check name, number density, effective density
         assert mtd['PG3_46577'].sample().getMaterial().name() == 'Si'
-        assert mtd['PG3_46577'].sample().getMaterial().numberDensity == test_density
-        assert mtd['PG3_46577'].sample().getMaterial().numberDensityEffective == test_density_effective
+        assert mtd['PG3_46577'].sample().getMaterial().numberDensity == SI_NUMBER_DENSITY
+        assert mtd['PG3_46577'].sample().getMaterial().numberDensityEffective == SI_NUMBER_DENSITY_EFFECTIVE
 
         # Check volume using height value from log - pi*(r^2)*h, r and h in meters
         assert mtd['PG3_46577'].sample().getShape().volume() == np.pi * np.square(.00295) * .040
