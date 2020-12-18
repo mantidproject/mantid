@@ -159,10 +159,11 @@ void PlotPeakByLogValue::init() {
                   "A list of pairs of real numbers, defining the regions to "
                   "exclude from the fit for all spectra.");
 
-  declareProperty(std::make_unique<ArrayProperty<std::string>>("ExcludeMultiple", ""),
-                  "A list of Exclusion ranges, defining the regions to "
-                  "exclude from the fit for each spectra. Must have the "
-                  "same number of sets as the number of the spectra.");
+  declareProperty(
+      std::make_unique<ArrayProperty<std::string>>("ExcludeMultiple", ""),
+      "A list of Exclusion ranges, defining the regions to "
+      "exclude from the fit for each spectra. Must have the "
+      "same number of sets as the number of the spectra.");
 
   declareProperty("IgnoreInvalidData", false,
                   "Flag to ignore infinities, NaNs and data with zero errors.");
