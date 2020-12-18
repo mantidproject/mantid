@@ -42,9 +42,7 @@ def do_cleanup():
              'PG3_46577.nxs',
              'PG3_46577.py',
              'PP_absorption_PG3_46577.nxs',
-             'PP_absorption_PG3_46577.py',
-             'Sample_absorption_PG3_46214.nxs',
-             'Sample_absorption_PG3_46214.py']
+             'PP_absorption_PG3_46577.py']
 
     for filename in Files:
         absfile = FileFinder.getFullPath(filename)
@@ -423,6 +421,8 @@ class ToPDFgetNTest(systemtesting.MantidSystemTest):
 
 
 class PG3InfoFromLogs(systemtesting.MantidSystemTest):
+    cal_file = "PG3_PAC_HR_d46168_2020_05_06.h5"
+    char_files = ["PG3_char_2020_01_04_PAC_limit_1.4MW.txt", "PG3_char_2020_05_06-HighRes-PAC_1.4_MW.txt"]
 
     def skipTests(self):
         return _skip_test()
@@ -431,37 +431,47 @@ class PG3InfoFromLogs(systemtesting.MantidSystemTest):
         return do_cleanup()
 
     def requiredFiles(self):
-        files = []
-        files.append("PG3_46214.nxs.h5")
+        files = [self.cal_file]
+        files.append(self.char_files[0])
+        files.append(self.char_files[1])
+        files.append("PG3_46577.nxs.h5")  # /SNS/PG3/IPTS-2767/nexus/
+        files.append("PG3_46190.nxs.h5")
+        files.append("PG3_46199.nxs.h5")
+        files.append("PG3_46202.nxs.h5")
         return files
 
     def runTest(self):
         savedir = getSaveDir()
 
+        charfile = ','.join(self.char_files)
+
         # Get the result without any absorption correction first
-        SNSPowderReduction("PG3_46214.nxs.h5",
-                           CalibrationFile="/SNS/PG3/shared/CALIBRATION/2020_1_11A_CAL/PG3_PAC_HR_d46168_2020_05_06.h5",
-                           CharacterizationRunsFile="/SNS/PG3/shared/CALIBRATION/2020_2_11A_CAL/PG3_char_2020_01_04_PAC_limit_1.4MW.txt,/SNS/PG3/shared/CALIBRATION/2020_2_11A_CAL/PG3_char_2020_05_06-HighRes-PAC_1.4 MW.txt",
+        SNSPowderReduction("PG3_46577.nxs.h5",
+                           CalibrationFile=self.cal_file,
+                           CharacterizationRunsFile=charfile,
                            Binning=-0.001,
                            SaveAs="nexus",
                            OutputDirectory=savedir)
 
-        SNSPowderReduction("PG3_46214.nxs.h5",
-                           CalibrationFile="/SNS/PG3/shared/CALIBRATION/2020_1_11A_CAL/PG3_PAC_HR_d46168_2020_05_06.h5",
-                           CharacterizationRunsFile="/SNS/PG3/shared/CALIBRATION/2020_2_11A_CAL/PG3_char_2020_01_04_PAC_limit_1.4MW.txt,/SNS/PG3/shared/CALIBRATION/2020_2_11A_CAL/PG3_char_2020_05_06-HighRes-PAC_1.4 MW.txt",
+        assert not mtd['PG3_46577'].sample().getMaterial().name().strip()
+
+        # Silicon Full Paalman-Pings test
+        SNSPowderReduction("PG3_46577.nxs.h5",
+                           CalibrationFile=self.cal_file,
+                           CharacterizationRunsFile=charfile,
                            Binning=-0.001,
-                           SaveAs="topas",
-                           TypeOfCorrection="SampleOnly",
-                           SampleFormula="La-(B11)5.94-(B10)0.06",
-                           MeasuredMassDensity=2.36,  # Need to verify 'packing density' = 'measured mass density'?
+                           SaveAs="nexus",
+                           TypeOfCorrection="FullPaalmanPings",
+                           SampleFormula="Si",
+                           MeasuredMassDensity=1.165,
                            ContainerShape="",
-                           OutputFilePrefix='Sample_absorption_',
+                           OutputFilePrefix='PP_absorption_',
                            OutputDirectory=savedir)
 
         # Check name, number density, effective density
-        assert mtd['PG3_46214'].sample().getMaterial().name() == "La-(B11)5.94-(B10)0.06"
-        assert mtd['PG3_46214'].sample().getMaterial().numberDensity == 0.04855296793778777
-        assert mtd['PG3_46214'].sample().getMaterial().numberDensityEffective == 0.04855296793778777
+        assert mtd['PG3_46577'].sample().getMaterial().name() == 'Si'
+        assert mtd['PG3_46577'].sample().getMaterial().numberDensity == 0.049960265513165146
+        assert mtd['PG3_46577'].sample().getMaterial().numberDensityEffective == 0.02498013275658258
 
         # Check volume using height value from log - pi*(r^2)*h, r and h in meters
-        assert mtd['PG3_46214'].sample().getShape().volume() == np.pi * np.square(.00295) * .055
+        assert mtd['PG3_46577'].sample().getShape().volume() == np.pi * np.square(.00295) * .040
