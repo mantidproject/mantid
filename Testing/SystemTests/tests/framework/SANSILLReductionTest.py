@@ -169,8 +169,7 @@ class ILL_D33_VTOF_Test(systemtesting.MantidSystemTest):
         SANSILLReduction(Run='093410', ProcessAs='Sample', BeamInputWorkspace='beam', TransmissionInputWorkspace='str',
                          ContainerInputWorkspace='can', MaskedInputWorkspace='mask', OutputWorkspace='sample', FluxInputWorkspace='flux')
         # I(Q)
-        SANSILLIntegration(InputWorkspace='sample', OutputBinning='0.005,-0.1,1',
-                           OutputWorkspace='iq', BinMaskingCriteria='x<1 || x>10')
+        SANSILLIntegration(InputWorkspace='sample', OutputBinning='0.005,-0.1,1', OutputWorkspace='iq')
 
 
 class ILL_D33_LTOF_Test(systemtesting.MantidSystemTest):
@@ -214,8 +213,7 @@ class ILL_D33_LTOF_Test(systemtesting.MantidSystemTest):
                          ContainerInputWorkspace='can', MaskedInputWorkspace='mask', OutputWorkspace='sample', FluxInputWorkspace='flux')
 
         # I(Q)
-        SANSILLIntegration(InputWorkspace='sample', OutputBinning='0.005,-0.1,1',
-                           OutputWorkspace='iq', BinMaskingCriteria='x<1 || x>10')
+        SANSILLIntegration(InputWorkspace='sample', OutputBinning='0.005,-0.1,1', OutputWorkspace='iq')
 
 
 class ILL_D33_Test(systemtesting.MantidSystemTest):
