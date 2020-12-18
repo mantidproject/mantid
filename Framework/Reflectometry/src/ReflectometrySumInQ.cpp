@@ -35,6 +35,7 @@ const static std::string INPUT_WS{"InputWorkspace"};
 const static std::string IS_FLAT_SAMPLE{"FlatSample"};
 const static std::string OUTPUT_WS{"OutputWorkspace"};
 const static std::string PARTIAL_BINS{"IncludePartialBins"};
+const static std::string USE_BOUNDING_BOX{"KnownPixelEdges"};
 } // namespace Prop
 
 /**
@@ -199,6 +200,7 @@ double getBoundingBoxExtent(const Mantid::Geometry::BoundingBox &boundingBox,
   }
   return result;
 }
+
 /** Get the twoTheta angle range for the top/bottom of the detector associated
  * with the given spectrum
  *
@@ -340,6 +342,10 @@ void ReflectometrySumInQ::init() {
   declareProperty(Prop::PARTIAL_BINS, false,
                   "If true, use the full projected wavelength range possibly "
                   "including partially filled bins.");
+  declareProperty(Prop::USE_BOUNDING_BOX, false,
+                  "If true, use the bounding box to find detector pixel edges. "
+                  "Requires full instrument geometry to be set up. Otherwise, "
+                  "assume pixel edges are mid-way between the pixel centres.");
 }
 
 /** Execute the algorithm.
@@ -464,7 +470,7 @@ ReflectometrySumInQ::MinMax ReflectometrySumInQ::findWavelengthMinMax(
   MinMax inputLambdaRange;
   MinMax inputTwoThetaRange;
   for (const auto i : indices) {
-    const auto twoThetas = twoThetaBoxWidth(i, spectrumInfo, detectorWS);
+    const auto twoThetas = twoThetaWidth(i, spectrumInfo, detectorWS);
     inputTwoThetaRange.testAndSetMin(includePartialBins ? twoThetas.min
                                                         : twoThetas.max);
     inputTwoThetaRange.testAndSetMax(includePartialBins ? twoThetas.max
@@ -618,8 +624,7 @@ ReflectometrySumInQ::sumInQ(const API::MatrixWorkspace &detectorWS,
       continue;
     }
     // Get the size of this detector in twoTheta
-    const auto twoThetaRange =
-        twoThetaBoxWidth(spIdx, spectrumInfo, detectorWS);
+    const auto twoThetaRange = twoThetaWidth(spIdx, spectrumInfo, detectorWS);
     const auto inputBinEdges = detectorWS.binEdges(spIdx);
     const auto inputCounts = detectorWS.counts(spIdx);
     const auto inputStdDevs = detectorWS.countStandardDeviations(spIdx);
@@ -651,5 +656,15 @@ ReflectometrySumInQ::sumInQ(const API::MatrixWorkspace &detectorWS,
   return IvsLam;
 }
 
+Mantid::Reflectometry::ReflectometrySumInQ::MinMax
+ReflectometrySumInQ::twoThetaWidth(
+    const size_t wsIndex, const Mantid::API::SpectrumInfo &spectrumInfo,
+    const Mantid::API::MatrixWorkspace &workspace) {
+  const bool useBoundingBox = getProperty(Prop::USE_BOUNDING_BOX);
+  if (useBoundingBox)
+    return ::twoThetaBoxWidth(wsIndex, spectrumInfo, workspace);
+  else
+    return ::twoThetaWidth(wsIndex, spectrumInfo);
+}
 } // namespace Reflectometry
 } // namespace Mantid

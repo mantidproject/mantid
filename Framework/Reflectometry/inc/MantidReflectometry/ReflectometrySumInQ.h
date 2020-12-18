@@ -77,6 +77,10 @@ private:
   Angles referenceAngles(const API::SpectrumInfo &spectrumInfo);
   API::MatrixWorkspace_sptr sumInQ(const API::MatrixWorkspace &detectorWS,
                                    const Indexing::SpectrumIndexSet &indices);
+  Mantid::Reflectometry::ReflectometrySumInQ::MinMax
+  twoThetaWidth(const size_t wsIndex,
+                const Mantid::API::SpectrumInfo &spectrumInfo,
+                const Mantid::API::MatrixWorkspace &workspace);
 };
 
 } // namespace Reflectometry
