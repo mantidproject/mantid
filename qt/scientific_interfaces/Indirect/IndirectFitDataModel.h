@@ -88,7 +88,8 @@ public:
   std::vector<double>
   getExcludeRegionVector(FitDomainIndex index) const override;
   std::string getExcludeRegion(FitDomainIndex index) const override;
-  void setExcludeRegion(const std::string &exclude, FitDomainIndex index);
+  void setExcludeRegion(const std::string &exclude,
+                        FitDomainIndex index) override;
   std::pair<TableDatasetIndex, WorkspaceIndex>
       getSubIndices(FitDomainIndex) const override;
 

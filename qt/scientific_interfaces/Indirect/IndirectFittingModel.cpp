@@ -688,17 +688,15 @@ IndirectFittingModel::createSequentialFit(const IFunction_sptr &function,
   fitAlgorithm->setProperty("StartX", startX.str());
   fitAlgorithm->setProperty("EndX", endX.str());
 
-  std::stringstream excludeRegions;
+  std::vector<std::string> excludeRegions;
   for (size_t i = 0; i < m_fitDataModel->getNumberOfDomains(); i++) {
     if (!m_fitDataModel->getExcludeRegionVector(FitDomainIndex{i}).empty()) {
-      excludeRegions << m_fitDataModel->getExcludeRegion(FitDomainIndex{i})
-                     << ",";
+      excludeRegions.emplace_back(m_fitDataModel->getExcludeRegion(FitDomainIndex{i}));
     } else {
-      excludeRegions << "0.0,0.0,";
+      excludeRegions.emplace_back("");
     }
   }
-  auto regeanstring = excludeRegions.str();
-  fitAlgorithm->setProperty("Exclude", regeanstring);
+  fitAlgorithm->setProperty("ExcludeMultiple", excludeRegions);
 
   return fitAlgorithm;
 }

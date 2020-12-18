@@ -625,11 +625,13 @@ public:
                                 2, HistogramData::Histogram(points, counts))
                                 .release());
     AnalysisDataService::Instance().addOrReplace("InputWS", ws);
-
+    std::vector<std::string> excludeRanges;
+    excludeRanges.emplace_back("-0.5, 0.0");
+    excludeRanges.emplace_back("0.5, 1.5");
     PlotPeakByLogValue alg;
     alg.initialize();
     alg.setPropertyValue("Input", "InputWS,i0");
-    alg.setPropertyValue("Exclude", "-0.5, 0.5, 0.5, 0.5");
+    alg.setProperty("ExcludeMultiple", excludeRanges);
     alg.setPropertyValue("OutputWorkspace", "PlotPeakResult");
     alg.setProperty("CreateOutput", true);
     alg.setPropertyValue("Function", "name=FlatBackground,A0=2");
