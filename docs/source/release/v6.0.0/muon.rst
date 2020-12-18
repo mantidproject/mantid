@@ -28,6 +28,7 @@ Bug fixes
 - Fixed a crash when adding the DynamicKuboToyabe function on the fitting tab of Muon Analysis.
 - Fixed an error caused by switching to Simultaneous fitting when TF Asymmetry mode is ticked.
 - Fixed an error caused by switching between the Run and Group/Pair selection when TF Asymmetry mode is ticked.
+- Fixed a crash when trying to do a simultaneous fit with no data loaded after pressing clear all.
 
 ALC
 ---

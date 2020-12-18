@@ -35,6 +35,7 @@ class TransformWidget(QtWidgets.QWidget):
         self.updateDisplay('FFT')
         self.update_view_from_model_observer = GenericObserver(
             self.update_view_from_model)
+        self.disable_view()
         # to make it compatable with the old GUI
         try:
             self.load.update_view_from_model_notifier.add_subscriber(
@@ -71,6 +72,10 @@ class TransformWidget(QtWidgets.QWidget):
     def handle_new_data_loaded(self):
         self._maxent.runChanged()
         self._fft.runChanged()
+        if self.getViews()["FFT"].workspace == "":
+            self.disable_view()
+        else:
+            self.enable_view()
 
     def handle_new_instrument(self):
         self._maxent.clear()

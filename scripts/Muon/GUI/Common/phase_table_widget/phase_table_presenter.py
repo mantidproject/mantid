@@ -225,6 +225,11 @@ class PhaseTablePresenter(object):
         self.view.set_group_combo_boxes(self.context.group_pair_context.group_names)
         self.update_model_from_view()
 
+        if self.view.input_workspace == "":
+            self.view.disable_widget()
+        else:
+            self.view.setEnabled(True)
+
     def update_current_groups_list(self):
         self.view.set_group_combo_boxes(self.context.group_pair_context.group_names)
         self.update_model_from_view()
