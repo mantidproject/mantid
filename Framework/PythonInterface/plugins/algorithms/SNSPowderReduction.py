@@ -1414,11 +1414,14 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
             if "Height" not in geometry or not geometry['Height']:
                 # Check units - SetSample expects cm
                 if absorptionWS.run()['BL11A:CS:ITEMS:HeightInContainerUnits'].lastValue() == "mm":
-                    geometry['Height'] = absorptionWS.run()['BL11A:CS:ITEMS:HeightInContainer'].lastValue()*(0.1)
+                    conversion = 0.1
                 elif absorptionWS.run()['BL11A:CS:ITEMS:HeightInContainerUnits'].lastValue() == "cm":
-                    geometry['Height'] = absorptionWS.run()['BL11A:CS:ITEMS:HeightInContainer'].lastValue()
+                    conversion = 1.0
                 else:
-                    pass
+                    raise ValueError("HeightInContainerUnits expects cm or mm; specified units not recognized: ",
+                                     absorptionWS.run()['BL11A:CS:ITEMS:HeightInContainerUnits'].lastValue())
+
+                geometry['Height'] = absorptionWS.run()['BL11A:CS:ITEMS:HeightInContainer'].lastValue() * conversion
 
         # Set container if not set
         if environment is not None:
