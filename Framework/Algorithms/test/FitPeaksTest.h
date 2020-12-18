@@ -1015,22 +1015,22 @@ public:
     std::transform(xvals.cbegin(), xvals.cend(), WS->mutableY(0).begin(),
                    [](const double x) {
                      return exp(-0.5 * pow((x - 10) / 0.1, 2)) +
-                            2.0 * exp(-0.5 * pow((x - 5) / 0.15, 2)) + 1.E-10;
+                            2.0 * exp(-0.5 * pow((x - 5) / 0.15, 2)) + 1;
                    });
     const auto &yvals = WS->histogram(0).y();
     std::transform(yvals.cbegin(), yvals.cend(), WS->mutableE(0).begin(),
-                   [](const double y) { return sqrt(y); });
+                   [](const double y) { return 0.2 * sqrt(y); });
 
     if (num_spec > 1) {
       const auto &xvals1 = WS->points(1);
       std::transform(xvals1.cbegin(), xvals1.cend(), WS->mutableY(1).begin(),
                      [](const double x) {
                        return 2. * exp(-0.5 * pow((x - 9.98) / 0.12, 2)) +
-                              4.0 * exp(-0.5 * pow((x - 5.01) / 0.17, 2));
+                              4.0 * exp(-0.5 * pow((x - 5.01) / 0.17, 2)) + 1;
                      });
       const auto &yvals1 = WS->histogram(1).y();
       std::transform(yvals1.cbegin(), yvals1.cend(), WS->mutableE(1).begin(),
-                     [](const double y) { return sqrt(y); });
+                     [](const double y) { return 0.2 * sqrt(y); });
     }
 
     if (num_spec > 2) {
@@ -1038,20 +1038,14 @@ public:
       std::transform(xvals2.cbegin(), xvals2.cend(), WS->mutableY(2).begin(),
                      [](const double x) {
                        return 10 * exp(-0.5 * pow((x - 10.02) / 0.14, 2)) +
-                              3.0 * exp(-0.5 * pow((x - 5.03) / 0.19, 2));
+                              3.0 * exp(-0.5 * pow((x - 5.03) / 0.19, 2)) + 1;
                      });
       const auto &yvals2 = WS->histogram(2).y();
       std::transform(yvals2.cbegin(), yvals2.cend(), WS->mutableE(2).begin(),
-                     [](const double y) { return sqrt(y); });
+                     [](const double y) { return 0.2 * sqrt(y); });
     }
 
     AnalysisDataService::Instance().addOrReplace(workspacename, WS);
-
-    //    auto vecx = WS->x(2);
-    //    auto vecy = WS->y(2);
-    //    for (size_t i = 0; i < vecx.size(); ++i)
-    //      std::cout << vecx[i] << "\t" << vecy[i] << "\n";
-
     return;
   }
 
