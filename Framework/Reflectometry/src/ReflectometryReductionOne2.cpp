@@ -712,10 +712,10 @@ ReflectometryReductionOne2::convertToQ(const MatrixWorkspace_sptr &inputWS) {
 
     // The angle to use in conversion is different for each mode
     double theta = 0.0;
-    if (summingInQ())
-      theta = getDetectorTwoTheta(m_spectrumInfo,
-                                  twoThetaRDetectorIdx(detectorGroups()[0])) *
-              radToDeg / 2.;
+    if (summingInQ() && getPropertyValue("ReductionType") == "DivergentBeam")
+      theta = (twoThetaR(detectorGroups()[0]) - theta0()) * radToDeg;
+    else if (summingInQ())
+      theta = twoThetaR(detectorGroups()[0]) * radToDeg / 2.;
     else
       theta = getProperty("ThetaIn");
 
@@ -842,17 +842,7 @@ void ReflectometryReductionOne2::findTheta0() {
 double
 ReflectometryReductionOne2::twoThetaR(const std::vector<size_t> &detectors) {
   // Get the twoTheta value for the destinaion pixel that we're projecting onto
-  double twoThetaR =
-      getDetectorTwoTheta(m_spectrumInfo, twoThetaRDetectorIdx(detectors));
-  if (getPropertyValue("ReductionType") == "DivergentBeam") {
-    // The angle that should be used in the final conversion to Q is
-    // (twoThetaR-theta0). However, the angle actually used by ConvertUnits is
-    // twoThetaD/2 where twoThetaD is the detector's twoTheta angle. Since it
-    // is not easy to change what angle ConvertUnits uses, we can compensate by
-    // setting twoThetaR = twoThetaD/2+theta0
-    twoThetaR = twoThetaR / 2.0 + theta0();
-  }
-  return twoThetaR;
+  return getDetectorTwoTheta(m_spectrumInfo, twoThetaRDetectorIdx(detectors));
 }
 
 /**
