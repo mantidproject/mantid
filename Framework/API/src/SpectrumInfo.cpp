@@ -200,8 +200,6 @@ SpectrumInfo::diffractometerConstants(const size_t index) const {
  */
 double SpectrumInfo::difcUncalibrated(const size_t index) const {
   double difc{0.0};
-
-  bool atLeastOneCalibrated = false, atLeastOneUncalibrated = false;
   if (m_detectorInfo.isScanning()) {
     throw std::runtime_error("Retrieval of diffractometer constants not "
                              "implemented for scanning instrument");
