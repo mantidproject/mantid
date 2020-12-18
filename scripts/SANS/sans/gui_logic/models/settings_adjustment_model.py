@@ -17,8 +17,8 @@ from sans.gui_logic.gui_common import (meter_2_millimeter, millimeter_2_meter)
 
 
 class SettingsAdjustmentModel(ModelCommon):
-    def __init__(self, user_file_items=None):
-        super(SettingsAdjustmentModel, self).__init__(user_file_items=user_file_items)
+    def __init__(self, all_states=None):
+        super(SettingsAdjustmentModel, self).__init__(all_states=all_states)
 
     def __eq__(self, other):
         return self.__dict__ == other.__dict__
@@ -35,8 +35,8 @@ class SettingsAdjustmentModel(ModelCommon):
         return True if self.instrument is SANSInstrument.ZOOM else False
 
     def has_transmission_fit_got_separate_settings_for_sample_and_can(self):
-        can_vals = self._user_file_items.adjustment.calculate_transmission.fit[DataType.CAN.value]
-        sample_vals = self._user_file_items.adjustment.calculate_transmission.fit[DataType.SAMPLE.value]
+        can_vals = self._all_states.adjustment.calculate_transmission.fit[DataType.CAN.value]
+        sample_vals = self._all_states.adjustment.calculate_transmission.fit[DataType.SAMPLE.value]
         return can_vals == sample_vals
 
     # ------------------------------------------------------------------------------------------------------------------
@@ -45,18 +45,18 @@ class SettingsAdjustmentModel(ModelCommon):
 
     @property
     def pixel_adjustment_det_1(self):
-        val = self._user_file_items.adjustment.wavelength_and_pixel_adjustment\
+        val = self._all_states.adjustment.wavelength_and_pixel_adjustment\
                 .adjustment_files[DetectorType.LAB.value].pixel_adjustment_file
         return val if val else ""
 
     @pixel_adjustment_det_1.setter
     def pixel_adjustment_det_1(self, value):
-        self._user_file_items.adjustment.wavelength_and_pixel_adjustment\
+        self._all_states.adjustment.wavelength_and_pixel_adjustment\
             .adjustment_files[DetectorType.LAB.value].pixel_adjustment_file = value
 
     @property
     def pixel_adjustment_det_2(self):
-        adj_files = self._user_file_items.adjustment.wavelength_and_pixel_adjustment.adjustment_files
+        adj_files = self._all_states.adjustment.wavelength_and_pixel_adjustment.adjustment_files
         if DetectorType.HAB.value in adj_files:
             val = adj_files[DetectorType.HAB.value].pixel_adjustment_file
             return val if val else ""
@@ -64,24 +64,24 @@ class SettingsAdjustmentModel(ModelCommon):
 
     @pixel_adjustment_det_2.setter
     def pixel_adjustment_det_2(self, value):
-        adj_files = self._user_file_items.adjustment.wavelength_and_pixel_adjustment.adjustment_files
+        adj_files = self._all_states.adjustment.wavelength_and_pixel_adjustment.adjustment_files
         if DetectorType.HAB.value in adj_files:
             adj_files[DetectorType.HAB.value].pixel_adjustment_file = value
 
     @property
     def wavelength_adjustment_det_1(self):
-        val = self._user_file_items.adjustment.wavelength_and_pixel_adjustment\
+        val = self._all_states.adjustment.wavelength_and_pixel_adjustment\
                 .adjustment_files[DetectorType.LAB.value].wavelength_adjustment_file
         return val if val else ""
 
     @wavelength_adjustment_det_1.setter
     def wavelength_adjustment_det_1(self, value):
-        self._user_file_items.adjustment.wavelength_and_pixel_adjustment \
+        self._all_states.adjustment.wavelength_and_pixel_adjustment \
             .adjustment_files[DetectorType.LAB.value].wavelength_adjustment_file = value
 
     @property
     def wavelength_adjustment_det_2(self):
-        adj_files = self._user_file_items.adjustment.wavelength_and_pixel_adjustment.adjustment_files
+        adj_files = self._all_states.adjustment.wavelength_and_pixel_adjustment.adjustment_files
         if DetectorType.HAB.value in adj_files:
             val = adj_files[DetectorType.HAB.value].wavelength_adjustment_file
             return val if val else ""
@@ -89,7 +89,7 @@ class SettingsAdjustmentModel(ModelCommon):
 
     @wavelength_adjustment_det_2.setter
     def wavelength_adjustment_det_2(self, value):
-        adj_files = self._user_file_items.adjustment.wavelength_and_pixel_adjustment.adjustment_files
+        adj_files = self._all_states.adjustment.wavelength_and_pixel_adjustment.adjustment_files
         if DetectorType.HAB.value in adj_files:
             adj_files[DetectorType.HAB.value].wavelength_adjustment_file = value
     # ------------------------------------------------------------------------------------------------------------------
@@ -97,7 +97,7 @@ class SettingsAdjustmentModel(ModelCommon):
     # ------------------------------------------------------------------------------------------------------------------
 
     def _get_fit_val(self, data_type: DataType) -> StateTransmissionFit:
-        return self._user_file_items.adjustment.calculate_transmission.fit[data_type.value]
+        return self._all_states.adjustment.calculate_transmission.fit[data_type.value]
 
     @property
     def transmission_sample_fit_type(self):
@@ -177,22 +177,22 @@ class SettingsAdjustmentModel(ModelCommon):
 
     @property
     def normalization_interpolate(self):
-        val = self._user_file_items.adjustment.normalize_to_monitor.rebin_type
+        val = self._all_states.adjustment.normalize_to_monitor.rebin_type
         return val is RebinType.INTERPOLATING_REBIN
 
     @normalization_interpolate.setter
     def normalization_interpolate(self, value):
         new_type = RebinType.INTERPOLATING_REBIN if value else RebinType.REBIN
-        self._user_file_items.adjustment.normalize_to_monitor.rebin_type = new_type
+        self._all_states.adjustment.normalize_to_monitor.rebin_type = new_type
 
     @property
     def normalization_incident_monitor(self):
-        val = self._user_file_items.adjustment.normalize_to_monitor.incident_monitor
+        val = self._all_states.adjustment.normalize_to_monitor.incident_monitor
         return val if val else ""
 
     @normalization_incident_monitor.setter
     def normalization_incident_monitor(self, value):
-        self._user_file_items.adjustment.normalize_to_monitor.incident_monitor = value
+        self._all_states.adjustment.normalize_to_monitor.incident_monitor = value
 
     # ------------------------------------------------------------------------------------------------------------------
     # Transmission
@@ -200,79 +200,79 @@ class SettingsAdjustmentModel(ModelCommon):
 
     @property
     def transmission_incident_monitor(self):
-        val = self._user_file_items.adjustment.calculate_transmission.incident_monitor
+        val = self._all_states.adjustment.calculate_transmission.incident_monitor
         return val if val else ""
 
     @transmission_incident_monitor.setter
     def transmission_incident_monitor(self, value):
-        self._user_file_items.adjustment.calculate_transmission.incident_monitor = value
+        self._all_states.adjustment.calculate_transmission.incident_monitor = value
 
     @property
     def transmission_interpolate(self):
-        val = self._user_file_items.adjustment.calculate_transmission.rebin_type
+        val = self._all_states.adjustment.calculate_transmission.rebin_type
         return val is RebinType.INTERPOLATING_REBIN
 
     @transmission_interpolate.setter
     def transmission_interpolate(self, value):
         new_type = RebinType.INTERPOLATING_REBIN if value else RebinType.REBIN
-        self._user_file_items.adjustment.calculate_transmission.rebin_type = new_type
+        self._all_states.adjustment.calculate_transmission.rebin_type = new_type
 
     @property
     def transmission_roi_files(self):
-        val = self._user_file_items.adjustment.calculate_transmission.transmission_roi_files
+        val = self._all_states.adjustment.calculate_transmission.transmission_roi_files
         return val if val else ""
 
     @transmission_roi_files.setter
     def transmission_roi_files(self, value):
-        self._user_file_items.adjustment.calculate_transmission.transmission_roi_files = value
+        self._all_states.adjustment.calculate_transmission.transmission_roi_files = value
 
     @property
     def transmission_mask_files(self):
-        val = self._user_file_items.adjustment.calculate_transmission.transmission_mask_files
+        val = self._all_states.adjustment.calculate_transmission.transmission_mask_files
         return val if val else ""
 
     @transmission_mask_files.setter
     def transmission_mask_files(self, value):
-        self._user_file_items.adjustment.calculate_transmission.transmission_mask_files = value
+        self._all_states.adjustment.calculate_transmission.transmission_mask_files = value
 
     @property
     def transmission_radius(self):
-        val = self._user_file_items.adjustment.calculate_transmission.transmission_radius_on_detector
+        val = self._all_states.adjustment.calculate_transmission.transmission_radius_on_detector
         return val if val else ""
 
     @transmission_radius.setter
     def transmission_radius(self, value):
-        self._user_file_items.adjustment.calculate_transmission.transmission_radius_on_detector = value
+        self._all_states.adjustment.calculate_transmission.transmission_radius_on_detector = value
 
     @property
     def transmission_monitor(self):
-        val = self._user_file_items.adjustment.calculate_transmission.transmission_monitor
+        val = self._all_states.adjustment.calculate_transmission.transmission_monitor
         return val if val else 3
 
     @transmission_monitor.setter
     def transmission_monitor(self, value):
-        self._user_file_items.adjustment.calculate_transmission.transmission_monitor = value
+        self._all_states.adjustment.calculate_transmission.transmission_monitor = value
 
     @property
     def transmission_mn_4_shift(self):
         # Note that this is actually part of the move operation, but is conceptually part of transmission
-        val = getattr(self._user_file_items.move, "monitor_4_offset", None)
+        val = getattr(self._all_states.move, "monitor_4_offset", None)
         return meter_2_millimeter(val) if val else ""
 
     @transmission_mn_4_shift.setter
     def transmission_mn_4_shift(self, value):
         # Note that this is actually part of the move operation, but is conceptually part of transmission
-        if hasattr(self._user_file_items.move, "monitor_4_offset"):
-            self._user_file_items.move.monitor_4_offset = millimeter_2_meter(value)
+        if hasattr(self._all_states.move, "monitor_4_offset"):
+            self._all_states.move.monitor_4_offset = millimeter_2_meter(value)
 
     @property
     def transmission_mn_5_shift(self):
         # Note that this is actually part of the move operation, but is conceptually part of transmission
-        val = getattr(self._user_file_items.move, "monitor_5_offset", None)
+        val = getattr(self._all_states.move, "monitor_5_offset", None)
         return meter_2_millimeter(val) if val else ""
 
     @transmission_mn_5_shift.setter
     def transmission_mn_5_shift(self, value):
         # Note that this is actually part of the move operation, but is conceptually part of transmission
-        if hasattr(self._user_file_items.move, "monitor_5_offset"):
-            self._user_file_items.move.monitor_5_offset = millimeter_2_meter(value)
+        if hasattr(self._all_states.move, "monitor_5_offset"):
+            self._all_states.move.monitor_5_offset = millimeter_2_meter(value)
