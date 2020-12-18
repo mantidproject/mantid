@@ -34,6 +34,11 @@ class DrillModelTest(unittest.TestCase):
             "a2": "a2"
             }
 
+    EXPORT_ALGORITHMS = {
+            "a1": {"ea1": True},
+            "a2": {"ea2": True}
+            }
+
     SETTINGS = {
             "a1": [
                 "str",
@@ -110,6 +115,13 @@ class DrillModelTest(unittest.TestCase):
         patch = mock.patch.dict(
                 'Interface.ui.drill.model.DrillModel.RundexSettings.ALGORITHM',
                 self.ALGORITHM, clear=True
+                )
+        self.mAlgo = patch.start()
+        self.addCleanup(patch.stop)
+
+        patch = mock.patch.dict(
+                'Interface.ui.drill.model.DrillModel.RundexSettings.EXPORT_ALGORITHMS',
+                self.EXPORT_ALGORITHMS, clear=True
                 )
         self.mAlgo = patch.start()
         self.addCleanup(patch.stop)
