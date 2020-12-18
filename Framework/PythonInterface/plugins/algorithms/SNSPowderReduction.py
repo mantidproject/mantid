@@ -766,7 +766,11 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
                                          WaveLengthLogNames=self.getProperty("WaveLengthLogNames").value,
                                          ReductionProperties="__snspowderreduction",
                                          **otherArgs)
-
+        """
+        if absorptionWksp:
+            api.CopySample(InputWorkspace=absorptionWksp, OutputWorkspace=final_name,
+                           CopyEnvironment=False)
+        """
         #TODO make sure that this funny function is called
         #self.checkInfoMatch(info, tempinfo)
 
@@ -1450,7 +1454,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         """
         Purpose: process vanadium runs
         Requirements: if more than 1 run in given run number list, then samRunIndex must be given.
-        Guarantees: have vanadium run reduced.
+        uarantees: have vanadium run reduced.
         :param van_run_number_list: list of vanadium run
         :param timeFilterWall: time filter wall
         :param samRunIndex: sample run index
@@ -1483,6 +1487,11 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
                                                               'Height': 7.,
                                                               'Radius': self._vanRadius,
                                                               'Center': [0., 0., 0.]})
+
+            api.AbsorptionCorrection(absWksp,
+                                     OutputWorkspace='__V_corr_abs',
+                                     ScatterFrom='Sample',
+                                     ElementSize=self._elementSize)
 
             # calculate the correction which is 1/normal carpenter correction - it doesn't look at sample shape
             api.CalculateCarpenterSampleCorrection(InputWorkspace=absWksp, OutputWorkspaceBaseName='__V_corr',
