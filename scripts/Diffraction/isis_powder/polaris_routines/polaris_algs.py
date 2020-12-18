@@ -150,10 +150,10 @@ def _obtain_focused_run(run_number, focus_file_path):
     :return: The focused workspace.
     """
     # Try the ADS first to avoid undesired loading
-    if mantid.mtd.doesExist('%s-Results-TOF-Grp' % run_number):
-        focused_ws = mantid.mtd['%s-Results-TOF-Grp' % run_number]
-    elif mantid.mtd.doesExist('%s-Results-D-Grp' % run_number):
-        focused_ws = mantid.mtd['%s-Results-D-Grp' % run_number]
+    if mantid.mtd.doesExist('%s-ResultTOF' % run_number):
+        focused_ws = mantid.mtd['%s-ResultTOF' % run_number]
+    elif mantid.mtd.doesExist('%s-ResultD' % run_number):
+        focused_ws = mantid.mtd['%s-ResultD' % run_number]
     else:
         # Check output directory
         print('No loaded focused files found. Searching in output directory...')
