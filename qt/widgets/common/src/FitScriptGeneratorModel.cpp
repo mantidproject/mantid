@@ -108,18 +108,17 @@ namespace MantidWidgets {
  * FitDomain struct methods.
  */
 
-FitDomain::FitDomain(std::string const &prefix,
-                     std::string const &workspaceName,
+FitDomain::FitDomain(std::string const &workspaceName,
                      WorkspaceIndex workspaceIndex, double startX, double endX)
-    : m_multiDomainFunctionPrefix(prefix), m_workspaceName(workspaceName),
-      m_workspaceIndex(workspaceIndex), m_startX(startX), m_endX(endX) {}
+    : m_workspaceName(workspaceName), m_workspaceIndex(workspaceIndex),
+      m_startX(startX), m_endX(endX) {}
 
 /**
  * FitScriptGeneratorModel class methods.
  */
 
 FitScriptGeneratorModel::FitScriptGeneratorModel()
-    : m_fitDomains(), m_function(nullptr) {}
+    : m_fitDomains(), m_function(createMultiDomainFunction(0)) {}
 
 FitScriptGeneratorModel::~FitScriptGeneratorModel() {}
 
@@ -127,31 +126,12 @@ void FitScriptGeneratorModel::removeWorkspaceDomain(
     std::string const &workspaceName, WorkspaceIndex workspaceIndex) {
   auto const removeIter = findWorkspaceDomain(workspaceName, workspaceIndex);
   if (removeIter != m_fitDomains.cend()) {
-    auto const removePrefix = removeIter->m_multiDomainFunctionPrefix;
-    auto const removeIndex = getPrefixIndexAt(removePrefix, 0);
+    auto const removeIndex = std::distance(m_fitDomains.cbegin(), removeIter);
 
-    removeWorkspaceDomain(removeIndex, removeIter);
-    removeCompositeAtPrefix(removePrefix);
+    removeCompositeAtDomainIndex(removeIndex);
+    if (removeIter != m_fitDomains.cend())
+      m_fitDomains.erase(removeIter);
   }
-}
-
-void FitScriptGeneratorModel::removeWorkspaceDomain(
-    std::size_t const &removeIndex,
-    std::vector<FitDomain>::const_iterator const &removeIter) {
-  if (removeIter != m_fitDomains.cend())
-    m_fitDomains.erase(removeIter);
-
-  auto const decrementPrefixes = [&](FitDomain &fitDomain) {
-    auto thisIndex = getPrefixIndexAt(fitDomain.m_multiDomainFunctionPrefix, 0);
-    if (removeIndex < thisIndex) {
-      --thisIndex;
-      fitDomain.m_multiDomainFunctionPrefix = "f" + std::to_string(thisIndex);
-    }
-    return fitDomain;
-  };
-
-  std::transform(m_fitDomains.begin(), m_fitDomains.end(), m_fitDomains.begin(),
-                 decrementPrefixes);
 }
 
 void FitScriptGeneratorModel::addWorkspaceDomain(
@@ -162,16 +142,9 @@ void FitScriptGeneratorModel::addWorkspaceDomain(
                                 std::to_string(workspaceIndex.value) +
                                 ")' domain already exists.");
 
-  addWorkspaceDomain(nextAvailableCompositePrefix(), workspaceName,
-                     workspaceIndex, startX, endX);
-}
-
-void FitScriptGeneratorModel::addWorkspaceDomain(
-    std::string const &functionPrefix, std::string const &workspaceName,
-    WorkspaceIndex workspaceIndex, double startX, double endX) {
-  addEmptyCompositeAtPrefix(functionPrefix);
+  addEmptyCompositeAtDomainIndex(numberOfDomains());
   m_fitDomains.emplace_back(
-      FitDomain(functionPrefix, workspaceName, workspaceIndex, startX, endX));
+      FitDomain(workspaceName, workspaceIndex, startX, endX));
 }
 
 std::size_t
@@ -292,7 +265,7 @@ void FitScriptGeneratorModel::addFunction(std::string const &workspaceName,
 void FitScriptGeneratorModel::setFunction(std::string const &workspaceName,
                                           WorkspaceIndex workspaceIndex,
                                           std::string const &function) {
-  clearCompositeAtIndex(findDomainIndex(workspaceName, workspaceIndex));
+  clearCompositeAtDomainIndex(findDomainIndex(workspaceName, workspaceIndex));
 
   if (auto const iFunction = createIFunction(function)) {
     if (auto const composite = toComposite(iFunction)) {
@@ -378,59 +351,35 @@ void FitScriptGeneratorModel::updateParameterTie(IFunction_sptr const &function,
   }
 }
 
-void FitScriptGeneratorModel::removeCompositeAtPrefix(
-    std::string const &functionPrefix) {
-  removeCompositeAtIndex(getPrefixIndexAt(functionPrefix, 0));
+void FitScriptGeneratorModel::removeCompositeAtDomainIndex(
+    std::size_t const &domainIndex) {
+  if (domainIndex >= numberOfDomains())
+    throw std::runtime_error("The domain index provided does not exist");
+
+  clearCompositeAtDomainIndex(domainIndex);
+  m_function->removeFunction(domainIndex);
 }
 
-void FitScriptGeneratorModel::addEmptyCompositeAtPrefix(
-    std::string const &functionPrefix) {
-  if (!m_function) {
-    m_function = createMultiDomainFunction(1);
-  } else {
-    addEmptyCompositeAtPrefix(getTopFunctionPrefix(functionPrefix),
-                              getPrefixIndexAt(functionPrefix, 0));
-  }
-}
+void FitScriptGeneratorModel::clearCompositeAtDomainIndex(
+    std::size_t const &domainIndex) {
+  if (domainIndex >= numberOfDomains())
+    throw std::runtime_error("The domain index provided does not exist");
 
-void FitScriptGeneratorModel::addEmptyCompositeAtPrefix(
-    std::string const &functionPrefix, std::size_t const &functionIndex) {
-  if (functionIndex != numberOfDomains())
-    throw std::runtime_error("The composite index provided is invalid.");
-
-  if (hasCompositeAtPrefix(functionPrefix))
-    throw std::runtime_error("The composite prefix provided already exists.");
-
-  m_function->addFunction(createEmptyComposite());
-  m_function->setDomainIndex(functionIndex, functionIndex);
-}
-
-void FitScriptGeneratorModel::removeCompositeAtIndex(
-    std::size_t const &functionIndex) {
-  if (functionIndex > numberOfDomains())
-    throw std::runtime_error("The composite index provided does not exist");
-
-  clearCompositeAtIndex(functionIndex);
-  m_function->removeFunction(functionIndex);
-}
-
-void FitScriptGeneratorModel::clearCompositeAtIndex(
-    std::size_t const &functionIndex) {
-  if (functionIndex > numberOfDomains())
-    throw std::runtime_error("The composite index provided does not exist");
-
-  auto composite = toComposite(m_function->getFunction(functionIndex));
+  auto composite = toComposite(m_function->getFunction(domainIndex));
   for (auto i = composite->nFunctions() - 1u; i < composite->nFunctions(); --i)
     composite->removeFunction(i);
 }
 
-bool FitScriptGeneratorModel::hasCompositeAtPrefix(
-    std::string const &functionPrefix) const {
-  return static_cast<bool>(
-      toComposite(getFunctionAtPrefix(functionPrefix, m_function)));
+void FitScriptGeneratorModel::addEmptyCompositeAtDomainIndex(
+    std::size_t const &domainIndex) {
+  if (domainIndex != numberOfDomains())
+    throw std::runtime_error("The domain index provided is invalid.");
+
+  m_function->addFunction(createEmptyComposite());
+  m_function->setDomainIndex(domainIndex, domainIndex);
 }
 
-std::string FitScriptGeneratorModel::nextAvailableCompositePrefix() const {
+std::string FitScriptGeneratorModel::nextAvailableDomainPrefix() const {
   return "f" + std::to_string(numberOfDomains());
 }
 

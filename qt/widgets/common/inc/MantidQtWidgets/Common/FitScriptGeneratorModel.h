@@ -24,15 +24,13 @@ namespace MantidWidgets {
 /**
  * This struct is used to store all data relating to a single domain to be
  * fitted. This includes the location of the domain (workspace Name & index),
- * the location of its composite function in the multi-domain function (the
- * prefix), and the fit range (start and end X).
+ * and the fit range (start and end X).
  */
 struct FitDomain {
 
-  FitDomain(std::string const &prefix, std::string const &workspaceName,
-            WorkspaceIndex workspaceIndex, double startX, double endX);
+  FitDomain(std::string const &workspaceName, WorkspaceIndex workspaceIndex,
+            double startX, double endX);
 
-  std::string m_multiDomainFunctionPrefix;
   std::string m_workspaceName;
   WorkspaceIndex m_workspaceIndex;
   double m_startX;
@@ -95,14 +93,6 @@ public:
                           std::string const &tie) override;
 
 private:
-  void removeWorkspaceDomain(
-      std::size_t const &removeIndex,
-      std::vector<FitDomain>::const_iterator const &removeIter);
-  void addWorkspaceDomain(std::string const &functionPrefix,
-                          std::string const &workspaceName,
-                          WorkspaceIndex workspaceIndex, double startX,
-                          double endX);
-
   [[nodiscard]] std::pair<double, double>
   xLimits(std::string const &workspaceName,
           WorkspaceIndex workspaceIndex) const;
@@ -126,19 +116,12 @@ private:
   void updateParameterTie(Mantid::API::IFunction_sptr const &function,
                           std::string const &parameter, std::string const &tie);
 
-  void removeCompositeAtPrefix(std::string const &functionPrefix);
+  void removeCompositeAtDomainIndex(std::size_t const &domainIndex);
+  void clearCompositeAtDomainIndex(std::size_t const &domainIndex);
 
-  void addEmptyCompositeAtPrefix(std::string const &functionPrefix);
-  void addEmptyCompositeAtPrefix(std::string const &functionPrefix,
-                                 std::size_t const &functionIndex);
+  void addEmptyCompositeAtDomainIndex(std::size_t const &domainIndex);
 
-  void removeCompositeAtIndex(std::size_t const &functionIndex);
-  void clearCompositeAtIndex(std::size_t const &functionIndex);
-
-  [[nodiscard]] bool
-  hasCompositeAtPrefix(std::string const &functionPrefix) const;
-
-  [[nodiscard]] std::string nextAvailableCompositePrefix() const;
+  [[nodiscard]] std::string nextAvailableDomainPrefix() const;
 
   [[nodiscard]] inline std::size_t numberOfDomains() const noexcept {
     return m_fitDomains.size();
