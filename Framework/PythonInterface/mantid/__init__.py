@@ -49,11 +49,7 @@ def _bin_dirs():
     # standard packaged install
     yield _moduledir
 
-    # conda environment
-    if 'CONDA_PREFIX' in os.environ:
-        yield os.path.join(os.environ['CONDA_PREFIX'], 'bin')
-
-    # base conda layout
+    # conda layout
     yield os.path.dirname(sys.executable)
 
     # iterate over the PYTHONPATH, to scan all possible bin dirs
