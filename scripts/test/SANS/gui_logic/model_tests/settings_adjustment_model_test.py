@@ -107,11 +107,11 @@ class SettingsTransmissionModelTest(unittest.TestCase):
 
     def test_that_transmission_mn_shift_default_is_empty(self):
         state_gui_model = self.create_model({}, self.create_mock_inst_file_information(SANSInstrument.SANS2D))
-        self.assertEqual(state_gui_model.transmission_mn_4_shift, "")
+        self.assertEqual(state_gui_model.transmission_mn_4_shift, 0.0)
 
     def test_that_transmission_mn_5_shift_default_is_empty(self):
         state_gui_model = self.create_model({}, self.create_mock_inst_file_information(SANSInstrument.SANS2D))
-        self.assertEqual(state_gui_model.transmission_mn_5_shift, "")
+        self.assertEqual(state_gui_model.transmission_mn_5_shift, 0.0)
 
     def test_that_transmission_mn_shift_can_be_set(self):
         state_gui_model = self.create_model({})

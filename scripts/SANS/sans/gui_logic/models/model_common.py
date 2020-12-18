@@ -27,3 +27,12 @@ class ModelCommon(metaclass=ABCMeta):
     def instrument(self, value):
         assert isinstance(value, SANSInstrument)
         self._instrument = value
+
+    @staticmethod
+    def _get_val_or_default(val, default_val=""):
+        # These are Falsey in Python but are acceptable
+        good_vals = [0., 0, False, [0]]
+
+        if not val and val not in good_vals:
+            return default_val
+        return val

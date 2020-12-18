@@ -47,7 +47,7 @@ class SettingsAdjustmentModel(ModelCommon):
     def pixel_adjustment_det_1(self):
         val = self._all_states.adjustment.wavelength_and_pixel_adjustment\
                 .adjustment_files[DetectorType.LAB.value].pixel_adjustment_file
-        return val if val else ""
+        return self._get_val_or_default(val)
 
     @pixel_adjustment_det_1.setter
     def pixel_adjustment_det_1(self, value):
@@ -59,7 +59,7 @@ class SettingsAdjustmentModel(ModelCommon):
         adj_files = self._all_states.adjustment.wavelength_and_pixel_adjustment.adjustment_files
         if DetectorType.HAB.value in adj_files:
             val = adj_files[DetectorType.HAB.value].pixel_adjustment_file
-            return val if val else ""
+            return self._get_val_or_default(val)
         return ""
 
     @pixel_adjustment_det_2.setter
@@ -72,7 +72,7 @@ class SettingsAdjustmentModel(ModelCommon):
     def wavelength_adjustment_det_1(self):
         val = self._all_states.adjustment.wavelength_and_pixel_adjustment\
                 .adjustment_files[DetectorType.LAB.value].wavelength_adjustment_file
-        return val if val else ""
+        return self._get_val_or_default(val)
 
     @wavelength_adjustment_det_1.setter
     def wavelength_adjustment_det_1(self, value):
@@ -84,7 +84,7 @@ class SettingsAdjustmentModel(ModelCommon):
         adj_files = self._all_states.adjustment.wavelength_and_pixel_adjustment.adjustment_files
         if DetectorType.HAB.value in adj_files:
             val = adj_files[DetectorType.HAB.value].wavelength_adjustment_file
-            return val if val else ""
+            return self._get_val_or_default(val)
         return ""
 
     @wavelength_adjustment_det_2.setter
@@ -102,7 +102,7 @@ class SettingsAdjustmentModel(ModelCommon):
     @property
     def transmission_sample_fit_type(self):
         val = self._get_fit_val(DataType.SAMPLE).fit_type
-        return val if val else ""
+        return self._get_val_or_default(val)
 
     @transmission_sample_fit_type.setter
     def transmission_sample_fit_type(self, value):
@@ -111,7 +111,7 @@ class SettingsAdjustmentModel(ModelCommon):
     @property
     def transmission_can_fit_type(self):
         val = self._get_fit_val(DataType.CAN).fit_type
-        return val if val else ""
+        return self._get_val_or_default(val)
 
     @transmission_can_fit_type.setter
     def transmission_can_fit_type(self, value):
@@ -120,7 +120,7 @@ class SettingsAdjustmentModel(ModelCommon):
     @property
     def transmission_sample_polynomial_order(self):
         val = self._get_fit_val(DataType.SAMPLE).polynomial_order
-        return val if val is not None else ""
+        return self._get_val_or_default(val)
 
     @transmission_sample_polynomial_order.setter
     def transmission_sample_polynomial_order(self, value):
@@ -129,7 +129,7 @@ class SettingsAdjustmentModel(ModelCommon):
     @property
     def transmission_can_polynomial_order(self):
         val = self._get_fit_val(DataType.CAN).polynomial_order
-        return val if val is not None else ""
+        return self._get_val_or_default(val)
 
     @transmission_can_polynomial_order.setter
     def transmission_can_polynomial_order(self, value):
@@ -138,7 +138,7 @@ class SettingsAdjustmentModel(ModelCommon):
     @property
     def transmission_sample_wavelength_min(self):
         val = self._get_fit_val(DataType.SAMPLE).wavelength_low
-        return val if val else ""
+        return self._get_val_or_default(val)
 
     @transmission_sample_wavelength_min.setter
     def transmission_sample_wavelength_min(self, value):
@@ -147,7 +147,7 @@ class SettingsAdjustmentModel(ModelCommon):
     @property
     def transmission_sample_wavelength_max(self):
         val = self._get_fit_val(DataType.SAMPLE).wavelength_high
-        return val if val else ""
+        return self._get_val_or_default(val)
 
     @transmission_sample_wavelength_max.setter
     def transmission_sample_wavelength_max(self, value):
@@ -156,7 +156,7 @@ class SettingsAdjustmentModel(ModelCommon):
     @property
     def transmission_can_wavelength_min(self):
         val = self._get_fit_val(DataType.CAN).wavelength_low
-        return val if val else ""
+        return self._get_val_or_default(val)
 
     @transmission_can_wavelength_min.setter
     def transmission_can_wavelength_min(self, value):
@@ -165,7 +165,7 @@ class SettingsAdjustmentModel(ModelCommon):
     @property
     def transmission_can_wavelength_max(self):
         val = self._get_fit_val(DataType.CAN).wavelength_high
-        return val if val else ""
+        return self._get_val_or_default(val)
 
     @transmission_can_wavelength_max.setter
     def transmission_can_wavelength_max(self, value):
@@ -188,7 +188,7 @@ class SettingsAdjustmentModel(ModelCommon):
     @property
     def normalization_incident_monitor(self):
         val = self._all_states.adjustment.normalize_to_monitor.incident_monitor
-        return val if val else ""
+        return self._get_val_or_default(val)
 
     @normalization_incident_monitor.setter
     def normalization_incident_monitor(self, value):
@@ -201,7 +201,7 @@ class SettingsAdjustmentModel(ModelCommon):
     @property
     def transmission_incident_monitor(self):
         val = self._all_states.adjustment.calculate_transmission.incident_monitor
-        return val if val else ""
+        return self._get_val_or_default(val)
 
     @transmission_incident_monitor.setter
     def transmission_incident_monitor(self, value):
@@ -220,7 +220,7 @@ class SettingsAdjustmentModel(ModelCommon):
     @property
     def transmission_roi_files(self):
         val = self._all_states.adjustment.calculate_transmission.transmission_roi_files
-        return val if val else ""
+        return self._get_val_or_default(val)
 
     @transmission_roi_files.setter
     def transmission_roi_files(self, value):
@@ -229,7 +229,7 @@ class SettingsAdjustmentModel(ModelCommon):
     @property
     def transmission_mask_files(self):
         val = self._all_states.adjustment.calculate_transmission.transmission_mask_files
-        return val if val else ""
+        return self._get_val_or_default(val)
 
     @transmission_mask_files.setter
     def transmission_mask_files(self, value):
@@ -238,7 +238,7 @@ class SettingsAdjustmentModel(ModelCommon):
     @property
     def transmission_radius(self):
         val = self._all_states.adjustment.calculate_transmission.transmission_radius_on_detector
-        return val if val else ""
+        return self._get_val_or_default(val)
 
     @transmission_radius.setter
     def transmission_radius(self, value):
@@ -247,7 +247,7 @@ class SettingsAdjustmentModel(ModelCommon):
     @property
     def transmission_monitor(self):
         val = self._all_states.adjustment.calculate_transmission.transmission_monitor
-        return val if val else 3
+        return self._get_val_or_default(val, 3)
 
     @transmission_monitor.setter
     def transmission_monitor(self, value):
@@ -257,7 +257,7 @@ class SettingsAdjustmentModel(ModelCommon):
     def transmission_mn_4_shift(self):
         # Note that this is actually part of the move operation, but is conceptually part of transmission
         val = getattr(self._all_states.move, "monitor_4_offset", None)
-        return meter_2_millimeter(val) if val else ""
+        return meter_2_millimeter(self._get_val_or_default(val, 0))
 
     @transmission_mn_4_shift.setter
     def transmission_mn_4_shift(self, value):
@@ -269,7 +269,7 @@ class SettingsAdjustmentModel(ModelCommon):
     def transmission_mn_5_shift(self):
         # Note that this is actually part of the move operation, but is conceptually part of transmission
         val = getattr(self._all_states.move, "monitor_5_offset", None)
-        return meter_2_millimeter(val) if val else ""
+        return meter_2_millimeter(self._get_val_or_default(val, 0))
 
     @transmission_mn_5_shift.setter
     def transmission_mn_5_shift(self, value):

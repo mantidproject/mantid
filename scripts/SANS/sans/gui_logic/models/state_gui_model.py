@@ -35,6 +35,7 @@ class StateGuiModel(ModelCommon):
     @property
     def all_states(self) -> AllStates:
         return self._all_states
+
     # ==================================================================================================================
     # ==================================================================================================================
     # FRONT TAB
@@ -47,7 +48,7 @@ class StateGuiModel(ModelCommon):
     @property
     def compatibility_mode(self):
         val = self._all_states.compatibility.use_compatibility_mode
-        return True if val is None else val
+        return self._get_val_or_default(val, True)
 
     @compatibility_mode.setter
     def compatibility_mode(self, value):
@@ -56,7 +57,7 @@ class StateGuiModel(ModelCommon):
     @property
     def event_slice_optimisation(self):
         val = self._all_states.compatibility.use_event_slice_optimisation
-        return False if val is None else val
+        return self._get_val_or_default(val, False)
 
     @event_slice_optimisation.setter
     def event_slice_optimisation(self, value):
@@ -69,7 +70,7 @@ class StateGuiModel(ModelCommon):
     def zero_error_free(self):
         val = self._all_states.save.zero_free_correction
         # Default on
-        return True if val is None else val
+        return self._get_val_or_default(val, True)
 
     @zero_error_free.setter
     def zero_error_free(self, value):
@@ -78,7 +79,7 @@ class StateGuiModel(ModelCommon):
     @property
     def save_types(self):
         val = self._all_states.save.file_format
-        return [SaveType.NX_CAN_SAS] if val is None else val
+        return self._get_val_or_default(val, [SaveType.NX_CAN_SAS])
 
     @save_types.setter
     def save_types(self, value):
@@ -87,7 +88,7 @@ class StateGuiModel(ModelCommon):
     @property
     def user_file(self):
         val = self._all_states.save.user_file
-        return val if val else ""
+        return self._get_val_or_default(val)
 
     @user_file.setter
     def user_file(self, value):
@@ -96,7 +97,7 @@ class StateGuiModel(ModelCommon):
     @property
     def batch_file(self):
         val = self._all_states.save.batch_file
-        return val if val else ""
+        return self._get_val_or_default(val)
 
     @batch_file.setter
     def batch_file(self, value):
@@ -110,7 +111,7 @@ class StateGuiModel(ModelCommon):
     @property
     def lab_pos_1(self):
         val = self._all_states.move.detectors[DetectorType.LAB.value].sample_centre_pos1
-        return meter_2_millimeter(val) if val else ""
+        return meter_2_millimeter(self._get_val_or_default(val, 0))
 
     @lab_pos_1.setter
     def lab_pos_1(self, value):
@@ -119,7 +120,7 @@ class StateGuiModel(ModelCommon):
     @property
     def lab_pos_2(self):
         val = self._all_states.move.detectors[DetectorType.LAB.value].sample_centre_pos2
-        return meter_2_millimeter(val) if val else ""
+        return meter_2_millimeter(self._get_val_or_default(val, 0))
 
     @lab_pos_2.setter
     def lab_pos_2(self, value):
@@ -130,7 +131,7 @@ class StateGuiModel(ModelCommon):
         val = None
         if DetectorType.HAB.value in self._all_states.move.detectors:
             val = self._all_states.move.detectors[DetectorType.HAB.value].sample_centre_pos1
-        return meter_2_millimeter(val) if val else ""
+        return meter_2_millimeter(self._get_val_or_default(val, 0))
 
     @hab_pos_1.setter
     def hab_pos_1(self, value):
@@ -142,7 +143,7 @@ class StateGuiModel(ModelCommon):
         val = None
         if DetectorType.HAB.value in self._all_states.move.detectors:
             val = self._all_states.move.detectors[DetectorType.HAB.value].sample_centre_pos2
-        return meter_2_millimeter(val) if val else ""
+        return meter_2_millimeter(self._get_val_or_default(val, 0))
 
     @hab_pos_2.setter
     def hab_pos_2(self, value):
@@ -161,7 +162,7 @@ class StateGuiModel(ModelCommon):
     @property
     def event_slices(self):
         val = self._all_states.slice.event_slice_str
-        return val if val else ""
+        return self._get_val_or_default(val)
 
     @event_slices.setter
     def event_slices(self, value):
@@ -176,7 +177,7 @@ class StateGuiModel(ModelCommon):
     @property
     def reduction_dimensionality(self):
         val = self._all_states.reduction.reduction_dimensionality
-        return ReductionDimensionality.ONE_DIM if val is None else val
+        return self._get_val_or_default(val, ReductionDimensionality.ONE_DIM)
 
     @reduction_dimensionality.setter
     def reduction_dimensionality(self, value):
@@ -192,7 +193,7 @@ class StateGuiModel(ModelCommon):
     @property
     def reduction_mode(self):
         val = self._all_states.reduction.reduction_mode
-        return val if val is not None else ReductionMode.LAB
+        return self._get_val_or_default(val, ReductionMode.LAB)
 
     @reduction_mode.setter
     def reduction_mode(self, value):
@@ -205,7 +206,7 @@ class StateGuiModel(ModelCommon):
     @property
     def merge_scale(self):
         val = self._all_states.reduction.merge_scale
-        return "1.0" if val is None else val
+        return self._get_val_or_default(val, "1.0")
 
     @merge_scale.setter
     def merge_scale(self, value):
@@ -214,7 +215,7 @@ class StateGuiModel(ModelCommon):
     @property
     def merge_shift(self):
         val = self._all_states.reduction.merge_shift
-        return "0.0" if val is None else val
+        return self._get_val_or_default(val, "0.0")
 
     @merge_shift.setter
     def merge_shift(self, value):
@@ -259,7 +260,7 @@ class StateGuiModel(ModelCommon):
     @property
     def merge_q_range_start(self):
         val = self._all_states.reduction.merge_range_min
-        return val if val else ""
+        return self._get_val_or_default(val)
 
     @merge_q_range_start.setter
     def merge_q_range_start(self, value):
@@ -268,7 +269,7 @@ class StateGuiModel(ModelCommon):
     @property
     def merge_q_range_stop(self):
         val = self._all_states.reduction.merge_range_max
-        return val if val else ""
+        return self._get_val_or_default(val)
 
     @merge_q_range_stop.setter
     def merge_q_range_stop(self, value):
@@ -277,7 +278,7 @@ class StateGuiModel(ModelCommon):
     @property
     def merge_mask(self):
         val = self._all_states.reduction.merge_mask
-        return val if val is not None else False
+        return self._get_val_or_default(val, False)
 
     @merge_mask.setter
     def merge_mask(self, value):
@@ -286,7 +287,7 @@ class StateGuiModel(ModelCommon):
     @property
     def merge_max(self):
         val = self._all_states.reduction.merge_max
-        return val if val else None
+        return self._get_val_or_default(val, None)
 
     @merge_max.setter
     def merge_max(self, value):
@@ -295,7 +296,7 @@ class StateGuiModel(ModelCommon):
     @property
     def merge_min(self):
         val = self._all_states.reduction.merge_min
-        return val if val else None
+        return self._get_val_or_default(val, None)
 
     @merge_min.setter
     def merge_min(self, value):
@@ -307,7 +308,7 @@ class StateGuiModel(ModelCommon):
     @property
     def event_binning(self):
         val = self._all_states.compatibility.time_rebin_string
-        return val if val else ""
+        return self._get_val_or_default(val)
 
     @event_binning.setter
     def event_binning(self, value):
@@ -357,7 +358,7 @@ class StateGuiModel(ModelCommon):
         self._assert_all_wavelength_same("wavelength_low")
         val = self._all_states.wavelength.wavelength_low
         val = val[0] if isinstance(val, list) else val
-        return val if val else ""
+        return self._get_val_or_default(val)
 
     @wavelength_min.setter
     def wavelength_min(self, value):
@@ -369,7 +370,7 @@ class StateGuiModel(ModelCommon):
         self._assert_all_wavelength_same("wavelength_high")
         val = self._all_states.wavelength.wavelength_high
         val = val[0] if isinstance(val, list) else val
-        return val if val else ""
+        return self._get_val_or_default(val)
 
     @wavelength_max.setter
     def wavelength_max(self, value):
@@ -380,7 +381,7 @@ class StateGuiModel(ModelCommon):
     def wavelength_step(self):
         self._assert_all_wavelength_same("wavelength_step")
         val = self._all_states.wavelength.wavelength_step
-        return val if val else ""
+        return self._get_val_or_default(val)
 
     @wavelength_step.setter
     def wavelength_step(self, value):
@@ -389,7 +390,7 @@ class StateGuiModel(ModelCommon):
     @property
     def wavelength_range(self):
         val = self._wavelength_range
-        return val if val else ""
+        return self._get_val_or_default(val)
 
     @wavelength_range.setter
     def wavelength_range(self, value):
@@ -405,7 +406,7 @@ class StateGuiModel(ModelCommon):
     @property
     def absolute_scale(self):
         val = self._all_states.scale.scale
-        return val if val else ""
+        return self._get_val_or_default(val)
 
     @absolute_scale.setter
     def absolute_scale(self, value):
@@ -414,7 +415,7 @@ class StateGuiModel(ModelCommon):
     @property
     def sample_height(self):
         val = self._all_states.scale.height
-        return val if val else ""
+        return self._get_val_or_default(val)
 
     @sample_height.setter
     def sample_height(self, value):
@@ -423,7 +424,7 @@ class StateGuiModel(ModelCommon):
     @property
     def sample_width(self):
         val = self._all_states.scale.width
-        return val if val else ""
+        return self._get_val_or_default(val)
 
     @sample_width.setter
     def sample_width(self, value):
@@ -432,7 +433,7 @@ class StateGuiModel(ModelCommon):
     @property
     def sample_thickness(self):
         val = self._all_states.scale.thickness
-        return val if val else ""
+        return self._get_val_or_default(val)
 
     @sample_thickness.setter
     def sample_thickness(self, value):
@@ -453,7 +454,7 @@ class StateGuiModel(ModelCommon):
     @property
     def z_offset(self):
         val = self._all_states.move.sample_offset
-        return meter_2_millimeter(val) if val else ""
+        return meter_2_millimeter(self._get_val_or_default(val, 0))
 
     @z_offset.setter
     def z_offset(self, value):
@@ -471,7 +472,7 @@ class StateGuiModel(ModelCommon):
     @property
     def q_1d_rebin_string(self):
         val = self._all_states.convert_to_q.q_1d_rebin_string
-        return val if val else ""
+        return self._get_val_or_default(val)
 
     @q_1d_rebin_string.setter
     def q_1d_rebin_string(self, value):
@@ -480,7 +481,7 @@ class StateGuiModel(ModelCommon):
     @property
     def q_xy_max(self):
         val = self._all_states.convert_to_q.q_xy_max
-        return val if val else ""
+        return self._get_val_or_default(val)
 
     @q_xy_max.setter
     def q_xy_max(self, value):
@@ -489,7 +490,7 @@ class StateGuiModel(ModelCommon):
     @property
     def q_xy_step(self):
         val = self._all_states.convert_to_q.q_xy_step
-        return val if val else ""
+        return self._get_val_or_default(val)
 
     @q_xy_step.setter
     def q_xy_step(self, value):
@@ -507,7 +508,7 @@ class StateGuiModel(ModelCommon):
     @property
     def r_cut(self):
         val = self._all_states.convert_to_q.radius_cutoff
-        return meter_2_millimeter(val) if val else ""
+        return meter_2_millimeter(self._get_val_or_default(val, 0))
 
     @r_cut.setter
     def r_cut(self, value):
@@ -516,7 +517,7 @@ class StateGuiModel(ModelCommon):
     @property
     def w_cut(self):
         val = self._all_states.convert_to_q.wavelength_cutoff
-        return val if val else ""
+        return self._get_val_or_default(val)
 
     @w_cut.setter
     def w_cut(self, value):
@@ -528,7 +529,7 @@ class StateGuiModel(ModelCommon):
     @property
     def gravity_on_off(self):
         val = self._all_states.convert_to_q.use_gravity
-        return True if val is None else val
+        return self._get_val_or_default(val, True)
 
     @gravity_on_off.setter
     def gravity_on_off(self, value):
@@ -537,7 +538,7 @@ class StateGuiModel(ModelCommon):
     @property
     def gravity_extra_length(self):
         val = self._all_states.convert_to_q.gravity_extra_length
-        return val if val else ""
+        return self._get_val_or_default(val)
 
     @gravity_extra_length.setter
     def gravity_extra_length(self, value):
@@ -549,7 +550,7 @@ class StateGuiModel(ModelCommon):
     @property
     def use_q_resolution(self):
         val = self._all_states.convert_to_q.use_q_resolution
-        return False if not val else val
+        return self._get_val_or_default(val, False)
 
     @use_q_resolution.setter
     def use_q_resolution(self, value):
@@ -558,7 +559,7 @@ class StateGuiModel(ModelCommon):
     @property
     def q_resolution_source_a(self):
         val = self._all_states.convert_to_q.q_resolution_a1
-        return meter_2_millimeter(val) if val else ""
+        return meter_2_millimeter(self._get_val_or_default(val, 0))
 
     @q_resolution_source_a.setter
     def q_resolution_source_a(self, value):
@@ -567,7 +568,7 @@ class StateGuiModel(ModelCommon):
     @property
     def q_resolution_sample_a(self):
         val = self._all_states.convert_to_q.q_resolution_a2
-        return meter_2_millimeter(val) if val else ""
+        return meter_2_millimeter(self._get_val_or_default(val, 0))
 
     @q_resolution_sample_a.setter
     def q_resolution_sample_a(self, value):
@@ -576,7 +577,7 @@ class StateGuiModel(ModelCommon):
     @property
     def q_resolution_source_h(self):
         val = self._all_states.convert_to_q.q_resolution_h1
-        return meter_2_millimeter(val) if val else ""
+        return meter_2_millimeter(self._get_val_or_default(val, 0))
 
     @q_resolution_source_h.setter
     def q_resolution_source_h(self, value):
@@ -585,7 +586,7 @@ class StateGuiModel(ModelCommon):
     @property
     def q_resolution_sample_h(self):
         val = self._all_states.convert_to_q.q_resolution_h2
-        return meter_2_millimeter(val) if val else ""
+        return meter_2_millimeter(self._get_val_or_default(val, 0))
 
     @q_resolution_sample_h.setter
     def q_resolution_sample_h(self, value):
@@ -594,7 +595,7 @@ class StateGuiModel(ModelCommon):
     @property
     def q_resolution_source_w(self):
         val = self._all_states.convert_to_q.q_resolution_w1
-        return meter_2_millimeter(val) if val else ""
+        return meter_2_millimeter(self._get_val_or_default(val, 0))
 
     @q_resolution_source_w.setter
     def q_resolution_source_w(self, value):
@@ -603,7 +604,7 @@ class StateGuiModel(ModelCommon):
     @property
     def q_resolution_sample_w(self):
         val = self._all_states.convert_to_q.q_resolution_w2
-        return meter_2_millimeter(val) if val else ""
+        return meter_2_millimeter(self._get_val_or_default(val, 0))
 
     @q_resolution_sample_w.setter
     def q_resolution_sample_w(self, value):
@@ -612,7 +613,7 @@ class StateGuiModel(ModelCommon):
     @property
     def q_resolution_delta_r(self):
         val = self._all_states.convert_to_q.q_resolution_delta_r
-        return meter_2_millimeter(val) if val else ""
+        return meter_2_millimeter(self._get_val_or_default(val, 0))
 
     @q_resolution_delta_r.setter
     def q_resolution_delta_r(self, value):
@@ -621,7 +622,7 @@ class StateGuiModel(ModelCommon):
     @property
     def q_resolution_moderator_file(self):
         val = self._all_states.convert_to_q.moderator_file
-        return val if val else ""
+        return self._get_val_or_default(val)
 
     @q_resolution_moderator_file.setter
     def q_resolution_moderator_file(self, value):
@@ -630,7 +631,7 @@ class StateGuiModel(ModelCommon):
     @property
     def q_resolution_collimation_length(self):
         val = self._all_states.convert_to_q.q_resolution_collimation_length
-        return val if val else ""
+        return self._get_val_or_default(val)
 
     @q_resolution_collimation_length.setter
     def q_resolution_collimation_length(self, value):
@@ -648,7 +649,7 @@ class StateGuiModel(ModelCommon):
     @property
     def phi_limit_min(self):
         val = self._all_states.mask.phi_min
-        return "-90" if not val else val
+        return self._get_val_or_default(val, "-90")
 
     @phi_limit_min.setter
     def phi_limit_min(self, value):
@@ -657,7 +658,7 @@ class StateGuiModel(ModelCommon):
     @property
     def phi_limit_max(self):
         val = self._all_states.mask.phi_max
-        return "90" if not val else val
+        return self._get_val_or_default(val, "90")
 
     @phi_limit_max.setter
     def phi_limit_max(self, value):
@@ -666,7 +667,7 @@ class StateGuiModel(ModelCommon):
     @property
     def phi_limit_use_mirror(self):
         val = self._all_states.mask.use_mask_phi_mirror
-        return True if not val else val
+        return self._get_val_or_default(val, True)
 
     @phi_limit_use_mirror.setter
     def phi_limit_use_mirror(self, value):
@@ -678,7 +679,7 @@ class StateGuiModel(ModelCommon):
     @property
     def radius_limit_min(self):
         val = self._all_states.mask.radius_min
-        return meter_2_millimeter(val) if val else ""
+        return meter_2_millimeter(self._get_val_or_default(val, 0))
 
     @radius_limit_min.setter
     def radius_limit_min(self, value):
@@ -687,7 +688,7 @@ class StateGuiModel(ModelCommon):
     @property
     def radius_limit_max(self):
         val = self._all_states.mask.radius_max
-        return meter_2_millimeter(val) if val else ""
+        return meter_2_millimeter(self._get_val_or_default(val, 0))
 
     @radius_limit_max.setter
     def radius_limit_max(self, value):
@@ -699,7 +700,7 @@ class StateGuiModel(ModelCommon):
     @property
     def mask_files(self):
         val = self._all_states.mask.mask_files
-        return [] if not val else val
+        return self._get_val_or_default(val, [])
 
     @mask_files.setter
     def mask_files(self, value):
@@ -711,7 +712,7 @@ class StateGuiModel(ModelCommon):
     @property
     def output_name(self):
         val = self._all_states.save.user_specified_output_name
-        return val if val else ""
+        return self._get_val_or_default(val)
 
     @output_name.setter
     def output_name(self, value):
