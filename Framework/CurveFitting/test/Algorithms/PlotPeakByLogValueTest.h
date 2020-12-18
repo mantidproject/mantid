@@ -569,18 +569,11 @@ public:
   }
 
   void test_single_exclude_range_single_Spectra() {
-    HistogramData::Points points{-2, -1, 0, 1, 2};
-    HistogramData::Counts counts(points.size(), 0.0);
-    // This value should be excluded.
-    counts.mutableData()[2] = 10.0;
-    MatrixWorkspace_sptr ws(DataObjects::create<Workspace2D>(
-                                1, HistogramData::Histogram(points, counts))
-                                .release());
-    AnalysisDataService::Instance().addOrReplace("InputWS", ws);
+    createData();
 
     PlotPeakByLogValue alg;
     alg.initialize();
-    alg.setPropertyValue("Input", "InputWS,i0");
+    alg.setPropertyValue("Input", "PlotPeakGroup_0");
     alg.setPropertyValue("Exclude", "-0.5, 0.5");
     alg.setPropertyValue("OutputWorkspace", "PlotPeakResult");
     alg.setProperty("CreateOutput", true);
@@ -589,22 +582,17 @@ public:
     alg.execute();
 
     TS_ASSERT(alg.isExecuted());
-    AnalysisDataService::Instance().remove("InputWS");
+
+    deleteData();
+    WorkspaceCreationHelper::removeWS("PlotPeakResult");
   }
 
   void test_single_exclude_range_multiple_Spectra() {
-    HistogramData::Points points{-2, -1, 0, 1, 2};
-    HistogramData::Counts counts(points.size(), 0.0);
-    // This value should be excluded.
-    counts.mutableData()[2] = 10.0;
-    MatrixWorkspace_sptr ws(DataObjects::create<Workspace2D>(
-                                2, HistogramData::Histogram(points, counts))
-                                .release());
-    AnalysisDataService::Instance().addOrReplace("InputWS", ws);
+    createData();
 
     PlotPeakByLogValue alg;
     alg.initialize();
-    alg.setPropertyValue("Input", "InputWS,i0");
+    alg.setPropertyValue("Input", "PlotPeakGroup_0;PlotPeakGroup_1");
     alg.setPropertyValue("Exclude", "-0.5, 0.5");
     alg.setPropertyValue("OutputWorkspace", "PlotPeakResult");
     alg.setProperty("CreateOutput", true);
@@ -613,24 +601,19 @@ public:
     alg.execute();
 
     TS_ASSERT(alg.isExecuted());
-    AnalysisDataService::Instance().remove("InputWS");
+
+    deleteData();
+    WorkspaceCreationHelper::removeWS("PlotPeakResult");
   }
 
   void test_multiple_exclude_range_multiple_Spectra() {
-    HistogramData::Points points{-2, -1, 0, 1, 2};
-    HistogramData::Counts counts(points.size(), 0.0);
-    // This value should be excluded.
-    counts.mutableData()[2] = 10.0;
-    MatrixWorkspace_sptr ws(DataObjects::create<Workspace2D>(
-                                2, HistogramData::Histogram(points, counts))
-                                .release());
-    AnalysisDataService::Instance().addOrReplace("InputWS", ws);
+    createData();
     std::vector<std::string> excludeRanges;
     excludeRanges.emplace_back("-0.5, 0.0");
     excludeRanges.emplace_back("0.5, 1.5");
     PlotPeakByLogValue alg;
     alg.initialize();
-    alg.setPropertyValue("Input", "InputWS,i0");
+    alg.setPropertyValue("Input", "PlotPeakGroup_0;PlotPeakGroup_1");
     alg.setProperty("ExcludeMultiple", excludeRanges);
     alg.setPropertyValue("OutputWorkspace", "PlotPeakResult");
     alg.setProperty("CreateOutput", true);
@@ -639,7 +622,9 @@ public:
     alg.execute();
 
     TS_ASSERT(alg.isExecuted());
-    AnalysisDataService::Instance().remove("InputWS");
+
+    deleteData();
+    WorkspaceCreationHelper::removeWS("PlotPeakResult");
   }
 
   void test_startX_single_value() {

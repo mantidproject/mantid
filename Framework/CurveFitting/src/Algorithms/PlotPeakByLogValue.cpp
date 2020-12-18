@@ -182,7 +182,7 @@ std::map<std::string, std::string> PlotPeakByLogValue::validateInputs() {
   const std::vector<InputSpectraToFit> wsNames =
       makeNames(inputList, default_wi, default_spec);
   std::vector<std::string> excludeList = getProperty("ExcludeMultiple");
-  if (!wsNames.size() == excludeList.size()) {
+  if (!excludeList.empty() && excludeList.size() != wsNames.size()) {
     errors["ExcludeMultiple"] =
         "ExcludeMultiple must be the same size has the number of spectra.";
   }
