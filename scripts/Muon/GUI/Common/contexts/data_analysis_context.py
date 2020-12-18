@@ -23,6 +23,10 @@ class DataAnalysisContext(MuonContext):
     def get_names_of_time_domain_workspaces_to_fit(
             self, runs='', group_and_pair='', rebin=False):
         group, pair = self.get_group_and_pair(group_and_pair)
+
+        if runs.find(',') != -1 or runs.find('-') != -1:
+            # Can assume to be all as if found then must be using co-add which is all runs
+            runs = 'All'
         run_list = self.get_runs(runs)
 
         group_names = self.group_pair_context.get_group_workspace_names(
