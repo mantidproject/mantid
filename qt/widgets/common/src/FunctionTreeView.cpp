@@ -86,7 +86,8 @@ namespace MantidWidgets {
 FunctionTreeView::FunctionTreeView(QWidget *parent, bool multi,
                                    const std::vector<std::string> &categories)
     : IFunctionView(parent), m_multiDataset(multi),
-      m_allowedCategories(categories), m_selectFunctionDialog(nullptr)
+      m_multiDomainFunctionPrefix(), m_allowedCategories(categories),
+      m_selectFunctionDialog(nullptr)
 
 {
   // create m_browser
@@ -449,6 +450,8 @@ void FunctionTreeView::setFunction(QtProperty *prop,
   auto children = prop->subProperties();
   foreach (QtProperty *child, children) { removeProperty(child); }
   // m_localParameterValues.clear();
+  if (!m_multiDomainFunctionPrefix.isEmpty())
+    addMultiDomainIndexProperty(prop);
   addAttributeAndParameterProperties(prop, std::move(fun));
 }
 
@@ -782,6 +785,19 @@ bool FunctionTreeView::addParameterTieInComposite(
 }
 
 /**
+ * Adds a property showing the function index of a domain within a
+ * MultiDomainFunction. It is used when we don't want to display an entire
+ * MultiDomainFunction, just a specific function within it.
+ * @param prop :: The property to add the function index on to.
+ */
+void FunctionTreeView::addMultiDomainIndexProperty(QtProperty *prop) {
+  QtProperty *indexProperty = m_indexManager->addProperty("Index");
+  indexProperty->setEnabled(false);
+  m_indexManager->setValue(indexProperty, m_multiDomainFunctionPrefix);
+  (void)addProperty(prop, indexProperty);
+}
+
+/**
  * Add property showing function's index in the composite function
  * @param prop :: A function property
  * @return :: AProperty struct for added property. If all fields are NULL -
@@ -830,7 +846,7 @@ void FunctionTreeView::updateFunctionIndices(QtProperty *prop,
       updateFunctionIndices(child, index + "f" + QString::number(i) + ".");
       ++i;
     } else if (isIndex(child)) {
-      m_indexManager->setValue(child, index);
+      m_indexManager->setValue(child, m_multiDomainFunctionPrefix + index);
     }
   }
 }
@@ -2088,6 +2104,19 @@ void FunctionTreeView::setColumnSizes(int s0, int s1, int s2) {
 void FunctionTreeView::hideGlobals() { m_browser->hideColumn(2); }
 // Hide global column
 void FunctionTreeView::showGlobals() { m_browser->showColumn(2); }
+
+/**
+ * The function index displayed as a multi-domain function index at the top of
+ * the FunctionTreeView. It is used as an offset for the other function
+ * prefixes. It is used when we don't want to display an entire
+ * MultiDomainFunction, just a specific function within it.
+ * @param functionPrefix :: The function prefix of the domain currently being
+ * displayed in the FunctionTreeView.
+ */
+void FunctionTreeView::setMultiDomainFunctionPrefix(
+    const QString &functionPrefix) {
+  m_multiDomainFunctionPrefix = functionPrefix;
+}
 
 /**
  * Emit a signal when any of the Global options change.

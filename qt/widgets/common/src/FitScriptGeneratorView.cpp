@@ -54,6 +54,8 @@ FitScriptGeneratorView::FitScriptGeneratorView(
   m_ui.splitter->addWidget(m_functionTreeView.get());
   m_ui.splitter->addWidget(m_fitOptionsBrowser.get());
 
+  m_functionTreeView->setMultiDomainFunctionPrefix("f0.");
+
   setFitBrowserOptions(fitOptions);
   connectUiSignals();
 }
@@ -273,6 +275,9 @@ void FitScriptGeneratorView::clearFunction() { m_functionTreeView->clear(); }
 
 void FitScriptGeneratorView::setFunction(
     CompositeFunction_sptr composite) const {
+  m_functionTreeView->setMultiDomainFunctionPrefix(
+      m_dataTable->selectedDomainFunctionPrefix());
+
   if (composite->nFunctions() > 1)
     m_functionTreeView->setFunction(composite);
   else if (composite->nFunctions() == 1)

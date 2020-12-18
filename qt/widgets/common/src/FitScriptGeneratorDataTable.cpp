@@ -219,6 +219,13 @@ std::vector<FitDomainIndex> FitScriptGeneratorDataTable::selectedRows() const {
   return rowIndices;
 }
 
+QString FitScriptGeneratorDataTable::selectedDomainFunctionPrefix() const {
+  auto const rows = selectedRows();
+  if (rows.empty())
+    return "";
+  return this->verticalHeaderItem(static_cast<int>(rows[0].value))->text();
+}
+
 void FitScriptGeneratorDataTable::removeDomain(
     std::string const &workspaceName,
     MantidWidgets::WorkspaceIndex workspaceIndex) {

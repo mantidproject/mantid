@@ -58,6 +58,8 @@ public:
   [[nodiscard]] std::vector<FitDomainIndex> allRows() const;
   [[nodiscard]] std::vector<FitDomainIndex> selectedRows() const;
 
+  [[nodiscard]] QString selectedDomainFunctionPrefix() const;
+
   void removeDomain(std::string const &workspaceName,
                     MantidWidgets::WorkspaceIndex workspaceIndex);
   void addDomain(QString const &workspaceName,

@@ -133,6 +133,10 @@ public:
   // Show global boxes
   void showGlobals();
 
+  // Sets the function prefix of a domain to be displayed within a
+  // MultiDomainFunction
+  void setMultiDomainFunctionPrefix(const QString &functionPrefix);
+
 protected:
   /// Create the Qt property browser
   void createBrowser();
@@ -171,6 +175,9 @@ protected:
       QtProperty *property, const std::string &parameterName,
       const Mantid::API::CompositeFunction_sptr &composite,
       const std::size_t &index);
+  /// Adds an index property representing the function index of a specific
+  /// domain within a MultiDomainFunction.
+  void addMultiDomainIndexProperty(QtProperty *prop);
   /// Add property showing function's index in the composite function
   AProperty addIndexProperty(QtProperty *prop);
   /// Update function index properties
@@ -374,6 +381,9 @@ protected:
   /// Set true if the constructed function is intended to be used in a
   /// multi-dataset fit
   bool m_multiDataset;
+  /// The function prefix of the domain with a MultiDomainFunction currently
+  /// being displayed.
+  QString m_multiDomainFunctionPrefix;
   std::vector<std::string> m_allowedCategories;
   SelectFunctionDialog *m_selectFunctionDialog;
   QtProperty *m_selectedFunctionProperty;
