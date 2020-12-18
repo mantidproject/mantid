@@ -4,7 +4,7 @@ digraph Vanadium {
   subgraph decisions {
     $decision_style
     AverageCounts
-    SelfAttenuationApproach
+    SelfAttenuationMethod
   }
 
   subgraph params {
@@ -46,17 +46,17 @@ digraph Vanadium {
   TransmissionInputWorkspace -> Minus
   Minus -> Multiply
   QuartzInputWorkspace -> Multiply
-  Multiply -> SelfAttenuationApproach
-  SelfAttenuationApproach -> PaalmanPingsMonteCarloAbsorption
+  Multiply -> SelfAttenuationMethod
+  SelfAttenuationMethod -> PaalmanPingsMonteCarloAbsorption
   SampleAndEnvironmentProperties -> PaalmanPingsMonteCarloAbsorption
   PaalmanPingsMonteCarloAbsorption -> ApplyPaalmanPingsCorrection
-  SelfAttenuationApproach -> PaalmanPingsAbsorptionCorrection
+  SelfAttenuationMethod -> PaalmanPingsAbsorptionCorrection
   SampleAndEnvironmentProperties -> PaalmanPingsAbsorptionCorrection
   PaalmanPingsAbsorptionCorrection -> ApplyPaalmanPingsCorrection
-  SelfAttenuationApproach -> SampleSelfAttenuationFactors
+  SelfAttenuationMethod -> SampleSelfAttenuationFactors
   SampleSelfAttenuationFactors -> ApplyPaalmanPingsCorrection
   ApplyPaalmanPingsCorrection -> AverageCounts
-  SelfAttenuationApproach -> AverageCounts
+  SelfAttenuationMethod -> AverageCounts
   AverageCounts -> Divide2
   AverageCounts -> Plus
   Plus -> Divide2

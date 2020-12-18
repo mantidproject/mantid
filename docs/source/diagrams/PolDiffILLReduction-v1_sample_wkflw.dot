@@ -4,7 +4,7 @@ digraph Sample {
   subgraph decisions {
     $decision_style
     AverageCounts
-    SelfAttenuationApproach
+    SelfAttenuationMethod
   }
 
   subgraph params {
@@ -47,17 +47,17 @@ digraph Sample {
   TransmissionInputWorkspace -> Minus
   Minus -> Multiply
   QuartzInputWorkspace -> Multiply
-  Multiply -> SelfAttenuationApproach
-  SelfAttenuationApproach -> PaalmanPingsMonteCarloAbsorption
+  Multiply -> SelfAttenuationMethod
+  SelfAttenuationMethod -> PaalmanPingsMonteCarloAbsorption
   SampleAndEnvironmentProperties -> PaalmanPingsMonteCarloAbsorption
   PaalmanPingsMonteCarloAbsorption -> ApplyPaalmanPingsCorrection
-  SelfAttenuationApproach -> PaalmanPingsAbsorptionCorrection
+  SelfAttenuationMethod -> PaalmanPingsAbsorptionCorrection
   SampleAndEnvironmentProperties -> PaalmanPingsAbsorptionCorrection
   PaalmanPingsAbsorptionCorrection -> ApplyPaalmanPingsCorrection
-  SelfAttenuationApproach -> SampleSelfAttenuationFactors
+  SelfAttenuationMethod -> SampleSelfAttenuationFactors
   SampleSelfAttenuationFactors -> ApplyPaalmanPingsCorrection
   ApplyPaalmanPingsCorrection -> AverageCounts
-  SelfAttenuationApproach -> AverageCounts
+  SelfAttenuationMethod -> AverageCounts
   AverageCounts -> SumOverlappingTubes
   AverageCounts -> Plus
   AverageCounts -> OutputWorkspace

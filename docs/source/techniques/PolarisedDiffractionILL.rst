@@ -148,11 +148,18 @@ Workflow diagrams and working example
 
 Below are the relevant workflow diagrams describing reduction steps of the transmission calculation.
 
+Absorber
+--------
+
 .. diagram:: PolDiffILLReduction-v1_absorber_wkflw.dot
 
+Empty container
+---------------
 
 .. diagram:: PolDiffILLReduction-v1_beam_wkflw.dot
 
+Transmission
+------------
 
 .. diagram:: PolDiffILLReduction-v1_transmission_wkflw.dot
 
@@ -627,9 +634,17 @@ Each entry of the output group is a workspace with X-axis unit being either mome
 Workflow diagrams and working example
 -------------------------------------
 
-Below is the relevant workflow diagram describing reduction steps of the sample reduction.
+Below is the relevant workflow diagram describing reduction steps of the sample reduction and normalisation.
+
+Sample reduction
+----------------
 
 .. diagram:: PolDiffILLReduction-v1_sample_wkflw.dot
+
+Sample normalisation
+--------------------
+
+.. diagram:: D7AbsoluteCrossSections-v1_wkflw.dot
 
 .. include:: ../usagedata-note.txt
 
