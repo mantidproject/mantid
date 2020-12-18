@@ -9,7 +9,7 @@
 #include "DllOption.h"
 #include "ui_FitScriptGenerator.h"
 
-#include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/AddWorkspaceDialog.h"
 #include "MantidQtWidgets/Common/FitOptionsBrowser.h"
@@ -75,8 +75,7 @@ public:
   bool isApplyFunctionChangesToAllChecked() const override;
 
   void clearFunction() override;
-  void
-  setFunction(Mantid::API::CompositeFunction_sptr composite) const override;
+  void setFunction(Mantid::API::IFunction_sptr const &function) const override;
 
   void displayWarning(std::string const &message) override;
 

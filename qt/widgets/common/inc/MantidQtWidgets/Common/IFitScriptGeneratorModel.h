@@ -7,8 +7,7 @@
 #pragma once
 
 #include "DllOption.h"
-#include "MantidAPI/CompositeFunction.h"
-#include "MantidAPI/IFunction_fwd.h"
+#include "MantidAPI/IFunction.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
 
 #include <string>
@@ -27,17 +26,12 @@ public:
                                   WorkspaceIndex workspaceIndex, double startX,
                                   double endX) = 0;
 
-  [[nodiscard]] virtual bool isStartXValid(std::string const &workspaceName,
-                                           WorkspaceIndex workspaceIndex,
-                                           double startX) const = 0;
-  [[nodiscard]] virtual bool isEndXValid(std::string const &workspaceName,
-                                         WorkspaceIndex workspaceIndex,
-                                         double endX) const = 0;
-
-  virtual void updateStartX(std::string const &workspaceName,
-                            WorkspaceIndex workspaceIndex, double startX) = 0;
-  virtual void updateEndX(std::string const &workspaceName,
-                          WorkspaceIndex workspaceIndex, double endX) = 0;
+  [[nodiscard]] virtual bool updateStartX(std::string const &workspaceName,
+                                          WorkspaceIndex workspaceIndex,
+                                          double startX) = 0;
+  [[nodiscard]] virtual bool updateEndX(std::string const &workspaceName,
+                                        WorkspaceIndex workspaceIndex,
+                                        double endX) = 0;
 
   virtual void removeFunction(std::string const &workspaceName,
                               WorkspaceIndex workspaceIndex,
@@ -48,7 +42,7 @@ public:
   virtual void setFunction(std::string const &workspaceName,
                            WorkspaceIndex workspaceIndex,
                            std::string const &function) = 0;
-  virtual Mantid::API::CompositeFunction_sptr
+  virtual Mantid::API::IFunction_sptr
   getFunction(std::string const &workspaceName,
               WorkspaceIndex workspaceIndex) = 0;
 

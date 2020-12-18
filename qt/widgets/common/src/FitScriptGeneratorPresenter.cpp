@@ -9,6 +9,7 @@
 #include "MantidQtWidgets/Common/IFitScriptGeneratorView.h"
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
 #include <algorithm>
@@ -130,8 +131,8 @@ void FitScriptGeneratorPresenter::handleSelectionChanged() {
     auto const workspaceName = m_view->workspaceName(selectedRows[0]);
     auto const workspaceIndex = m_view->workspaceIndex(selectedRows[0]);
 
-    auto const composite = m_model->getFunction(workspaceName, workspaceIndex);
-    m_view->setFunction(composite);
+    auto const function = m_model->getFunction(workspaceName, workspaceIndex);
+    m_view->setFunction(function);
   } else {
     m_view->clearFunction();
   }
@@ -269,9 +270,7 @@ void FitScriptGeneratorPresenter::addWorkspace(std::string const &workspaceName,
 void FitScriptGeneratorPresenter::updateStartX(std::string const &workspaceName,
                                                WorkspaceIndex workspaceIndex,
                                                double startX) {
-  if (m_model->isStartXValid(workspaceName, workspaceIndex, startX))
-    m_model->updateStartX(workspaceName, workspaceIndex, startX);
-  else {
+  if (!m_model->updateStartX(workspaceName, workspaceIndex, startX)) {
     m_view->resetSelection();
     m_view->displayWarning("The StartX provided must be within the x limits of "
                            "its workspace, and less than the EndX.");
@@ -281,9 +280,7 @@ void FitScriptGeneratorPresenter::updateStartX(std::string const &workspaceName,
 void FitScriptGeneratorPresenter::updateEndX(std::string const &workspaceName,
                                              WorkspaceIndex workspaceIndex,
                                              double endX) {
-  if (m_model->isEndXValid(workspaceName, workspaceIndex, endX))
-    m_model->updateEndX(workspaceName, workspaceIndex, endX);
-  else {
+  if (!m_model->updateEndX(workspaceName, workspaceIndex, endX)) {
     m_view->resetSelection();
     m_view->displayWarning("The EndX provided must be within the x limits of "
                            "its workspace, and greater than the StartX.");

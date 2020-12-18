@@ -273,15 +273,12 @@ bool FitScriptGeneratorView::isApplyFunctionChangesToAllChecked() const {
 
 void FitScriptGeneratorView::clearFunction() { m_functionTreeView->clear(); }
 
-void FitScriptGeneratorView::setFunction(
-    CompositeFunction_sptr composite) const {
+void FitScriptGeneratorView::setFunction(IFunction_sptr const &function) const {
   m_functionTreeView->setMultiDomainFunctionPrefix(
       m_dataTable->selectedDomainFunctionPrefix());
 
-  if (composite->nFunctions() > 1)
-    m_functionTreeView->setFunction(composite);
-  else if (composite->nFunctions() == 1)
-    m_functionTreeView->setFunction(composite->getFunction(0));
+  if (function)
+    m_functionTreeView->setFunction(function);
   else
     m_functionTreeView->clear();
 }
