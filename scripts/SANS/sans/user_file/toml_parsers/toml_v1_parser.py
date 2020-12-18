@@ -250,7 +250,11 @@ class _TomlV1ParserImpl(TomlParserImplBase):
     def _parse_reduction(self):
         reduction_dict = self.get_val(["reduction"])
 
-        self.compatibility.time_rebin_string = self.get_val(["events", "binning"], reduction_dict, default="")
+        events_binning = self.get_val(["events", "binning"], reduction_dict, default="")
+        if (events_binning and len(events_binning.split(',')) != 3) or \
+                self.instrument is SANSInstrument.ZOOM and not events_binning:
+            raise ValueError("Events.binning: Three comma separated values are required")
+        self.compatibility.time_rebin_string = events_binning
 
         merge_range_dict = self.get_val(["merged", "merge_range"], reduction_dict)
         self.reduction_mode.merge_min = self.get_val("min", merge_range_dict)
@@ -361,14 +365,17 @@ class _TomlV1ParserImpl(TomlParserImplBase):
 
         # Mandatory as its subtle if missing
         monitor_spec_num = monitor_dict["spectrum_number"]
-        background = monitor_dict["background"]
-        if len(background) != 2:
-            raise ValueError("Two background values required")
-        self.calculate_transmission.background_TOF_monitor_start.update({str(monitor_spec_num): background[0]})
-        self.calculate_transmission.background_TOF_monitor_stop.update({str(monitor_spec_num): background[1]})
-        self.normalize_to_monitor.background_TOF_monitor_start.update({str(monitor_spec_num): background[0]})
-        self.normalize_to_monitor.background_TOF_monitor_stop.update({str(monitor_spec_num): background[1]})
+        background = self.get_val("background", monitor_dict, )
+
         self.normalize_to_monitor.incident_monitor = monitor_spec_num
+
+        if background:
+            if len(background) != 2:
+                raise ValueError("Two background values required")
+            self.calculate_transmission.background_TOF_monitor_start.update({str(monitor_spec_num): background[0]})
+            self.calculate_transmission.background_TOF_monitor_stop.update({str(monitor_spec_num): background[1]})
+            self.normalize_to_monitor.background_TOF_monitor_start.update({str(monitor_spec_num): background[0]})
+            self.normalize_to_monitor.background_TOF_monitor_stop.update({str(monitor_spec_num): background[1]})
 
     def _parse_spatial_masks(self):
         mask_dict = self.get_val("mask")
