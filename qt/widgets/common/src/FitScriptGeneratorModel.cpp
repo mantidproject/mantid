@@ -19,6 +19,7 @@
 #include <stdexcept>
 
 using namespace Mantid::API;
+using namespace MantidQt::MantidWidgets;
 
 namespace {
 Mantid::Kernel::Logger g_log("FitScriptGeneratorModel");
@@ -58,10 +59,18 @@ std::string getTieRHS(std::string const &tie) {
   return tieSplit.size() > 1 ? tieSplit[1] : tieSplit[0];
 }
 
-std::string getTieExpression(std::string const &tie, bool isSimultaneous) {
-  if (!tie.empty() && isSimultaneous)
+std::string getTieExpression(std::string const &tie,
+                             FittingMode const &fittingMode) {
+  if (!tie.empty() && fittingMode == FittingMode::Simultaneous)
     return removeTopFunctionIndex(getTieRHS(tie));
   return tie;
+}
+
+std::string getParameterToTie(std::string const &parameter,
+                              FittingMode const &fittingMode) {
+  if (!parameter.empty() && fittingMode == FittingMode::Simultaneous)
+    return removeTopFunctionIndex(parameter);
+  return parameter;
 }
 
 } // namespace
@@ -69,7 +78,8 @@ std::string getTieExpression(std::string const &tie, bool isSimultaneous) {
 namespace MantidQt {
 namespace MantidWidgets {
 
-FitScriptGeneratorModel::FitScriptGeneratorModel() : m_fitDomains() {}
+FitScriptGeneratorModel::FitScriptGeneratorModel()
+    : m_fitDomains(), m_fittingMode(FittingMode::Sequential) {}
 
 FitScriptGeneratorModel::~FitScriptGeneratorModel() {}
 
@@ -188,11 +198,21 @@ void FitScriptGeneratorModel::updateParameterTie(
     std::string const &parameter, std::string const &tie) {
   auto const domainIndex = findDomainIndex(workspaceName, workspaceIndex);
 
-  auto tieSuccess = m_fitDomains[domainIndex].updateParameterTie(
-      removeTopFunctionIndex(parameter), getTieExpression(tie, true));
+  auto const parameterToTie = getParameterToTie(parameter, m_fittingMode);
+  auto const tieExpression = getTieExpression(tie, m_fittingMode);
+
+  auto const tieSuccess = m_fitDomains[domainIndex].updateParameterTie(
+      parameterToTie, tieExpression);
 
   if (!tieSuccess)
     g_log.warning("Failed to tie '" + parameter + "' to '" + tie + "'.");
+}
+
+void FitScriptGeneratorModel::setFittingMode(FittingMode const &fittingMode) {
+  if (fittingMode == FittingMode::SimultaneousAndSequential)
+    throw std::invalid_argument(
+        "The fitting mode must be Sequential or Simultaneous.");
+  m_fittingMode = fittingMode;
 }
 
 } // namespace MantidWidgets

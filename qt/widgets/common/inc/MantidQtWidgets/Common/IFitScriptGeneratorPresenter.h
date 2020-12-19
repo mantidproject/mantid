@@ -8,6 +8,7 @@
 
 #include "DllOption.h"
 #include "IFitScriptGeneratorView.h"
+#include "MantidQtWidgets/Common/FittingMode.h"
 
 #include <string>
 
@@ -23,6 +24,8 @@ public:
   virtual void notifyPresenter(ViewEvent const &event,
                                std::string const &arg1 = "",
                                std::string const &arg2 = "") = 0;
+  virtual void notifyPresenter(ViewEvent const &event,
+                               FittingMode const &fittingMode) = 0;
 
   virtual void openFitScriptGenerator() = 0;
 };

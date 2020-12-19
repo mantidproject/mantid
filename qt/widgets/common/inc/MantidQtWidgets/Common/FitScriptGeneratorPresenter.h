@@ -8,6 +8,7 @@
 
 #include "DllOption.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidQtWidgets/Common/FittingMode.h"
 #include "MantidQtWidgets/Common/IFitScriptGeneratorPresenter.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
 
@@ -33,6 +34,8 @@ public:
 
   void notifyPresenter(ViewEvent const &event, std::string const &arg1 = "",
                        std::string const &arg2 = "") override;
+  void notifyPresenter(ViewEvent const &event,
+                       FittingMode const &fittingMode) override;
 
   void openFitScriptGenerator() override;
 
@@ -49,6 +52,7 @@ private:
   void handleAttributeChanged(std::string const &attribute);
   void handleParameterTieChanged(std::string const &parameter,
                                  std::string const &tie);
+  void handleFittingModeChanged(FittingMode const &fittingMode);
 
   void setWorkspaces(QStringList const &workspaceNames, double startX,
                      double endX);

@@ -269,11 +269,11 @@ namespace IDA {
 
 std::unordered_map<FittingMode, std::string> fitModeToName =
     std::unordered_map<FittingMode, std::string>(
-        {{FittingMode::SEQUENTIAL, "Seq"}, {FittingMode::SIMULTANEOUS, "Sim"}});
+        {{FittingMode::Sequential, "Seq"}, {FittingMode::Simultaneous, "Sim"}});
 
 IndirectFittingModel::IndirectFittingModel()
     : m_fitDataModel(std::make_unique<IndirectFitDataModel>()),
-      m_previousModelSelected(false), m_fittingMode(FittingMode::SEQUENTIAL),
+      m_previousModelSelected(false), m_fittingMode(FittingMode::Sequential),
       m_fitOutput(std::make_unique<IndirectFitOutputModel>()) {}
 
 bool IndirectFittingModel::hasWorkspace(
@@ -613,7 +613,7 @@ IAlgorithm_sptr IndirectFittingModel::getFittingAlgorithm() const {
 
 IAlgorithm_sptr
 IndirectFittingModel::getFittingAlgorithm(FittingMode mode) const {
-  if (mode == FittingMode::SEQUENTIAL) {
+  if (mode == FittingMode::Sequential) {
     if (m_activeFunction->getNumberDomains() == 0) {
       throw std::runtime_error("Function is undefined");
     }

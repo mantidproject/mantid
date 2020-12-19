@@ -13,6 +13,7 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/AddWorkspaceDialog.h"
 #include "MantidQtWidgets/Common/FitOptionsBrowser.h"
+#include "MantidQtWidgets/Common/FittingMode.h"
 #include "MantidQtWidgets/Common/FunctionTreeView.h"
 #include "MantidQtWidgets/Common/IFitScriptGeneratorView.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
@@ -77,6 +78,8 @@ public:
   void clearFunction() override;
   void setFunction(Mantid::API::IFunction_sptr const &function) const override;
 
+  void showMultiDomainPrefix(bool showPrefix) override;
+
   void displayWarning(std::string const &message) override;
 
 public:
@@ -105,6 +108,8 @@ private slots:
   void onParameterTieChanged(QString const &parameter, QString const &tie);
   void onCopyFunctionToClipboard();
   void onFunctionHelpRequested();
+  void onChangeToSequentialFitting();
+  void onChangeToSimultaneousFitting();
 
 private:
   void connectUiSignals();

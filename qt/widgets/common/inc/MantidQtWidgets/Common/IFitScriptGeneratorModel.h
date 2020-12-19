@@ -8,6 +8,7 @@
 
 #include "DllOption.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidQtWidgets/Common/FittingMode.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
 
 #include <string>
@@ -59,6 +60,9 @@ public:
                                   WorkspaceIndex workspaceIndex,
                                   std::string const &parameter,
                                   std::string const &tie) = 0;
+
+  virtual void setFittingMode(FittingMode const &fittingMode) = 0;
+  virtual FittingMode getFittingMode() const = 0;
 };
 
 } // namespace MantidWidgets

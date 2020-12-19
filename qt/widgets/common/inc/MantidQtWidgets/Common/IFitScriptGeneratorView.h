@@ -10,6 +10,7 @@
 
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidQtWidgets/Common/FittingMode.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
 #include "MantidQtWidgets/Common/MantidWidget.h"
 
@@ -43,7 +44,8 @@ public:
     FunctionReplaced,
     ParameterChanged,
     AttributeChanged,
-    ParameterTieChanged
+    ParameterTieChanged,
+    FittingModeChanged
   };
 
   IFitScriptGeneratorView(QWidget *parent = nullptr)
@@ -86,6 +88,8 @@ public:
   virtual void clearFunction() = 0;
   virtual void
   setFunction(Mantid::API::IFunction_sptr const &function) const = 0;
+
+  virtual void showMultiDomainPrefix(bool showPrefix) = 0;
 
   virtual void displayWarning(std::string const &message) = 0;
 

@@ -307,6 +307,10 @@ void FitScriptGeneratorDataTable::resetSelection() {
   setSelectedXValue(m_selectedValue);
 }
 
+void FitScriptGeneratorDataTable::setFunctionPrefixVisible(bool visible) {
+  this->verticalHeader()->setVisible(visible);
+}
+
 void FitScriptGeneratorDataTable::setSelectedXValue(double xValue) {
   this->blockSignals(true);
   if (!m_selectedRows.empty())

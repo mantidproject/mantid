@@ -11,6 +11,7 @@
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
+#include "MantidQtWidgets/Common/FittingMode.h"
 #include "MantidQtWidgets/Common/PropertyHandler.h"
 #include "MantidQtWidgets/Common/SignalBlocker.h"
 
@@ -448,7 +449,7 @@ void IndirectFitAnalysisTab::updateFitBrowserParameterValuesFromAlg() {
     updateFitBrowserParameterValues();
     if (m_fittingAlgorithm) {
       MantidQt::API::SignalBlocker blocker(m_fitPropertyBrowser);
-      if (m_fittingModel->getFittingMode() == FittingMode::SEQUENTIAL) {
+      if (m_fittingModel->getFittingMode() == FittingMode::Sequential) {
         auto const paramWsName =
             m_fittingAlgorithm->getPropertyValue("OutputParameterWorkspace");
         auto paramWs =
@@ -478,7 +479,7 @@ void IndirectFitAnalysisTab::updateFitBrowserParameterValuesFromAlg() {
  */
 void IndirectFitAnalysisTab::updateFitStatus() {
 
-  if (m_fittingModel->getFittingMode() == FittingMode::SIMULTANEOUS) {
+  if (m_fittingModel->getFittingMode() == FittingMode::Simultaneous) {
     std::string fit_status = m_fittingAlgorithm->getProperty("OutputStatus");
     double chi2 = m_fittingAlgorithm->getProperty("OutputChiSquared");
     const std::vector<std::string> status(m_fittingModel->getNumberOfDomains(),
@@ -561,7 +562,7 @@ void IndirectFitAnalysisTab::singleFit(TableDatasetIndex dataIndex,
     m_plotPresenter->setFitSingleSpectrumIsFitting(true);
     enableFitButtons(false);
     enableOutputOptions(false);
-    m_fittingModel->setFittingMode(FittingMode::SIMULTANEOUS);
+    m_fittingModel->setFittingMode(FittingMode::Simultaneous);
     m_currentTableDatasetIndex = dataIndex;
     runSingleFit(m_fittingModel->getSingleFit(dataIndex, spectrum));
   }
@@ -606,9 +607,9 @@ void IndirectFitAnalysisTab::run() {
   enableOutputOptions(false);
   auto const fitType = m_fitPropertyBrowser->selectedFitType();
   if (fitType == "Simultaneous") {
-    m_fittingModel->setFittingMode(FittingMode::SIMULTANEOUS);
+    m_fittingModel->setFittingMode(FittingMode::Simultaneous);
   } else {
-    m_fittingModel->setFittingMode(FittingMode::SEQUENTIAL);
+    m_fittingModel->setFittingMode(FittingMode::Sequential);
   }
   runFitAlgorithm(m_fittingModel->getFittingAlgorithm());
 }
@@ -703,7 +704,7 @@ void IndirectFitAnalysisTab::setAlgorithmProperties(
                               m_fitPropertyBrowser->outputCompositeMembers());
   }
 
-  if (m_fittingModel->getFittingMode() == FittingMode::SEQUENTIAL) {
+  if (m_fittingModel->getFittingMode() == FittingMode::Sequential) {
     fitAlgorithm->setProperty("FitType", m_fitPropertyBrowser->fitType());
   }
   fitAlgorithm->setProperty("OutputFitStatus", true);

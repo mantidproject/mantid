@@ -22,6 +22,7 @@
 
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
 #include "MantidQtWidgets/Common/FitOptionsBrowser.h"
+#include "MantidQtWidgets/Common/FittingMode.h"
 #include "MantidQtWidgets/Common/FunctionBrowser.h"
 
 #include <QMessageBox>
@@ -188,8 +189,7 @@ void MultiDatasetFit::initLayout() {
           m_functionBrowser, SLOT(addDatasets(const QStringList &)));
 
   m_fitOptionsBrowser = new MantidQt::MantidWidgets::FitOptionsBrowser(
-      nullptr,
-      MantidQt::MantidWidgets::FitOptionsBrowser::SimultaneousAndSequential);
+      nullptr, MantidQt::MantidWidgets::FittingMode::SimultaneousAndSequential);
   connect(m_fitOptionsBrowser, SIGNAL(changedToSequentialFitting()), this,
           SLOT(setLogNames()));
   splitter->addWidget(m_fitOptionsBrowser);
@@ -390,7 +390,7 @@ void MultiDatasetFit::fit() {
   }
   int fitAll = QMessageBox::Yes;
 
-  if (fittingType == MantidWidgets::FitOptionsBrowser::Simultaneous || n == 1) {
+  if (fittingType == MantidWidgets::FittingMode::Simultaneous || n == 1) {
     if (n > 20 && m_fitAllSettings == QMessageBox::No) {
       fitAll = QMessageBox::question(this, "Fit All?",
                                      "Are you sure you would like to fit " +
@@ -405,7 +405,7 @@ void MultiDatasetFit::fit() {
       fitSimultaneous();
     }
 
-  } else if (fittingType == MantidWidgets::FitOptionsBrowser::Sequential) {
+  } else if (fittingType == MantidWidgets::FittingMode::Sequential) {
     if (n > 100 && m_fitAllSettings == QMessageBox::No) {
       fitAll = QMessageBox::question(this, "Fit All?",
                                      "Are you sure you would like to fit " +
@@ -496,7 +496,7 @@ void MultiDatasetFit::finishFit(bool error) {
     Mantid::API::IFunction_sptr fun;
     auto algorithm = m_fitRunner->getAlgorithm();
     if (m_fitOptionsBrowser->getCurrentFittingType() ==
-            MantidWidgets::FitOptionsBrowser::Simultaneous ||
+            MantidWidgets::FittingMode::Simultaneous ||
         getNumberOfSpectra() == 1) {
       // After a simultaneous fit
       fun = algorithm->getProperty("Function");
@@ -739,7 +739,7 @@ void MultiDatasetFit::checkFittingType() {
     m_fitOptionsBrowser->unlockCurrentFittingType();
   } else {
     m_fitOptionsBrowser->lockCurrentFittingType(
-        MantidWidgets::FitOptionsBrowser::Simultaneous);
+        MantidWidgets::FittingMode::Simultaneous);
   }
 }
 

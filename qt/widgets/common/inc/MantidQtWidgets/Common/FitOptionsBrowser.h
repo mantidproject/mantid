@@ -7,6 +7,7 @@
 #pragma once
 
 #include "DllOption.h"
+#include "MantidQtWidgets/Common/FittingMode.h"
 
 #include <QMap>
 #include <QWidget>
@@ -42,25 +43,17 @@ namespace MantidWidgets {
 class EXPORT_OPT_MANTIDQT_COMMON FitOptionsBrowser : public QWidget {
   Q_OBJECT
 public:
-  /// Support for fitting algorithms:
-  ///   Simultaneous: Fit
-  ///   Sequential:   PlotPeakByLogValue
-  ///   SimultaneousAndSequential: both Fit and PlotPeakByLogValue, toggled with
-  ///       "Fitting" property.
-  enum FittingType { Simultaneous = 0, Sequential, SimultaneousAndSequential };
-
-  /// Constructor
   FitOptionsBrowser(QWidget *parent = nullptr,
-                    FittingType fitType = Simultaneous);
+                    FittingMode fitType = FittingMode::Simultaneous);
   ~FitOptionsBrowser();
   QString getProperty(const QString &name) const;
   void setProperty(const QString &name, const QString &value);
   void copyPropertiesToAlgorithm(Mantid::API::IAlgorithm &fit) const;
   void saveSettings(QSettings &settings) const;
   void loadSettings(const QSettings &settings);
-  FittingType getCurrentFittingType() const;
-  void setCurrentFittingType(FittingType fitType);
-  void lockCurrentFittingType(FittingType fitType);
+  FittingMode getCurrentFittingType() const;
+  void setCurrentFittingType(FittingMode fitType);
+  void lockCurrentFittingType(FittingMode fitType);
   void unlockCurrentFittingType();
   void setLogNames(const QStringList &logNames);
   void setParameterNamesForPlotting(const QStringList &parNames);
@@ -69,6 +62,7 @@ public:
 
 signals:
   void changedToSequentialFitting();
+  void changedToSimultaneousFitting();
   // emitted when m_doubleManager reports a change
   void doublePropertyChanged(const QString &propertyName);
 
@@ -181,7 +175,7 @@ private:
   QMap<QtProperty *, GetterType> m_getters;
 
   /// The Fitting Type
-  FittingType m_fittingType;
+  FittingMode m_fittingType;
   /// Store special properties of the normal Fit
   QList<QtProperty *> m_simultaneousProperties;
   QList<QtProperty *> m_blacklist;

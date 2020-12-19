@@ -10,6 +10,7 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/FitDomain.h"
+#include "MantidQtWidgets/Common/FittingMode.h"
 #include "MantidQtWidgets/Common/IFitScriptGeneratorModel.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
 
@@ -69,6 +70,11 @@ public:
                           std::string const &parameter,
                           std::string const &tie) override;
 
+  void setFittingMode(FittingMode const &fittingMode) override;
+  [[nodiscard]] inline FittingMode getFittingMode() const noexcept override {
+    return m_fittingMode;
+  }
+
 private:
   [[nodiscard]] std::size_t
   findDomainIndex(std::string const &workspaceName,
@@ -84,6 +90,7 @@ private:
   }
 
   std::vector<FitDomain> m_fitDomains;
+  FittingMode m_fittingMode;
 };
 
 } // namespace MantidWidgets

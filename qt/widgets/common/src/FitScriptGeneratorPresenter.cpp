@@ -79,6 +79,17 @@ void FitScriptGeneratorPresenter::notifyPresenter(ViewEvent const &event,
   throw std::runtime_error("Failed to notify the FitScriptGeneratorPresenter.");
 }
 
+void FitScriptGeneratorPresenter::notifyPresenter(
+    ViewEvent const &event, FittingMode const &fittingMode) {
+  switch (event) {
+  case ViewEvent::FittingModeChanged:
+    handleFittingModeChanged(fittingMode);
+    return;
+  }
+
+  throw std::runtime_error("Failed to notify the FitScriptGeneratorPresenter.");
+}
+
 void FitScriptGeneratorPresenter::openFitScriptGenerator() { m_view->show(); }
 
 void FitScriptGeneratorPresenter::handleRemoveClicked() {
@@ -126,13 +137,14 @@ void FitScriptGeneratorPresenter::handleEndXChanged() {
 }
 
 void FitScriptGeneratorPresenter::handleSelectionChanged() {
+  m_view->showMultiDomainPrefix(m_model->getFittingMode() ==
+                                FittingMode::Simultaneous);
+
   auto const selectedRows = m_view->selectedRows();
   if (!selectedRows.empty()) {
     auto const workspaceName = m_view->workspaceName(selectedRows[0]);
     auto const workspaceIndex = m_view->workspaceIndex(selectedRows[0]);
-
-    auto const function = m_model->getFunction(workspaceName, workspaceIndex);
-    m_view->setFunction(function);
+    m_view->setFunction(m_model->getFunction(workspaceName, workspaceIndex));
   } else {
     m_view->clearFunction();
   }
@@ -216,6 +228,12 @@ void FitScriptGeneratorPresenter::handleParameterTieChanged(
     m_model->updateParameterTie(workspaceName, workspaceIndex, parameter, tie);
   }
 
+  handleSelectionChanged();
+}
+
+void FitScriptGeneratorPresenter::handleFittingModeChanged(
+    FittingMode const &fittingMode) {
+  m_model->setFittingMode(fittingMode);
   handleSelectionChanged();
 }
 

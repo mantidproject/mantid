@@ -69,6 +69,8 @@ public:
   void formatSelection();
   void resetSelection();
 
+  void setFunctionPrefixVisible(bool visible);
+
 signals:
   void itemExited(int newRowIndex);
 

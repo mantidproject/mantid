@@ -16,6 +16,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 
 #include "MantidQtWidgets/Common/FitOptionsBrowser.h"
+#include "MantidQtWidgets/Common/FittingMode.h"
 #include "MantidQtWidgets/Common/FunctionBrowser.h"
 #include "MantidQtWidgets/Common/SignalBlocker.h"
 
@@ -77,10 +78,10 @@ void IndirectFitPropertyBrowser::initFitOptionsBrowser() {
   // this object is added as a child to the stacked widget m_templateBrowser
   // which is a child of this class so the lifetime of this pointer is handled
   // by Qt
-  m_fitOptionsBrowser = new FitOptionsBrowser(
-      nullptr, FitOptionsBrowser::SimultaneousAndSequential);
+  m_fitOptionsBrowser =
+      new FitOptionsBrowser(nullptr, FittingMode::SimultaneousAndSequential);
   m_fitOptionsBrowser->setObjectName("fitOptionsBrowser");
-  m_fitOptionsBrowser->setCurrentFittingType(FitOptionsBrowser::Sequential);
+  m_fitOptionsBrowser->setCurrentFittingType(FittingMode::Sequential);
 }
 
 void IndirectFitPropertyBrowser::setHiddenProperties(
@@ -315,7 +316,7 @@ void IndirectFitPropertyBrowser::updateFitStatus(const FitDomainIndex index) {
  */
 QString IndirectFitPropertyBrowser::selectedFitType() const {
   return m_fitOptionsBrowser->getCurrentFittingType() ==
-                 FitOptionsBrowser::Simultaneous
+                 FittingMode::Simultaneous
              ? "Simultaneous"
              : "Sequential";
 }
@@ -448,9 +449,9 @@ void IndirectFitPropertyBrowser::browserVisibilityChanged(bool isVisible) {
 void IndirectFitPropertyBrowser::updateFitType() {
   auto const nGlobals = m_functionBrowser->getGlobalParameters().size();
   if (nGlobals == 0) {
-    m_fitOptionsBrowser->setCurrentFittingType(FitOptionsBrowser::Sequential);
+    m_fitOptionsBrowser->setCurrentFittingType(FittingMode::Sequential);
   } else {
-    m_fitOptionsBrowser->setCurrentFittingType(FitOptionsBrowser::Simultaneous);
+    m_fitOptionsBrowser->setCurrentFittingType(FittingMode::Simultaneous);
   }
 }
 
