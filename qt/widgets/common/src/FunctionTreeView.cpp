@@ -68,6 +68,16 @@ QString removePrefix(QString &param) {
     return param;
   }
 }
+
+bool isTieConstant(std::string const &tie) {
+  return !tie.empty() &&
+         tie.find_first_not_of("0123456789.-") == std::string::npos;
+}
+
+bool containsOneOf(std::string const &str, std::string const &delimiters) {
+  return !str.empty() && str.find_first_of(delimiters) != std::string::npos;
+}
+
 // These attributes require the function to be fully reconstructed, as a
 // different number of properties will be required
 const std::vector<QString> REQUIRESRECONSTRUCTIONATTRIBUTES = {QString("n")};
@@ -1048,7 +1058,7 @@ void FunctionTreeView::addTieProperty(QtProperty *prop, const QString &tie) {
   // Create and add a QtProperty for the tie.
   m_tieManager->blockSignals(true);
   QtProperty *tieProp = m_tieManager->addProperty("Tie");
-  m_tieManager->setValue(tieProp, tie);
+  m_tieManager->setValue(tieProp, getFullTie(tie));
   addProperty(prop, tieProp);
   m_tieManager->blockSignals(false);
 
@@ -1059,6 +1069,19 @@ void FunctionTreeView::addTieProperty(QtProperty *prop, const QString &tie) {
   atie.paramName = parName;
   atie.tieProp = tieProp;
   m_ties.insert(funProp, atie);
+}
+
+/**
+ * Returns the full tie to add as a Tie property. This will add the
+ * m_multiDomainFunctionPrefix to the start if we are using multiple datasets.
+ * @param tie :: The original tie.
+ * @returns The full tue to use as a tie property.
+ */
+QString FunctionTreeView::getFullTie(const QString &tie) const {
+  if (!isTieConstant(tie.toStdString()) &&
+      !containsOneOf(tie.toStdString(), "="))
+    return m_multiDomainFunctionPrefix + tie;
+  return tie;
 }
 
 /**

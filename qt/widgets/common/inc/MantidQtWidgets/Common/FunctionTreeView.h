@@ -402,6 +402,9 @@ private:
   void setVectorAttribute(const QString &attrName,
                           std::vector<double> &val) override;
 
+  /// Gets the full tie when using the m_multiDomainFunctionPrefix
+  QString getFullTie(const QString &tie) const;
+
   // Intended for testing only
   QTreeWidgetItem *getPropertyWidgetItem(QtProperty *prop) const;
   QRect visualItemRect(QtProperty *prop) const;

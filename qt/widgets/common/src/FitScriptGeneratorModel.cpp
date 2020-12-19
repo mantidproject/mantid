@@ -9,6 +9,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/ParameterTie.h"
 #include "MantidKernel/Logger.h"
 
 #include <boost/algorithm/string.hpp>
@@ -52,25 +53,14 @@ std::string removeTopFunctionIndex(std::string const &functionPrefix) {
   return resultPrefix;
 }
 
-bool isTieNumber(std::string const &tie) {
-  return !tie.empty() &&
-         tie.find_first_not_of("0123456789.-") == std::string::npos;
-}
-
 std::string getTieRHS(std::string const &tie) {
   auto const tieSplit = splitStringBy(tie, "=");
   return tieSplit.size() > 1 ? tieSplit[1] : tieSplit[0];
 }
 
-std::string getTieForFitType(std::string const &tie, bool isSimultaneous) {
-  if (isSimultaneous)
-    return isTieNumber(tie) ? tie : removeTopFunctionIndex(tie);
-  return tie;
-}
-
 std::string getTieExpression(std::string const &tie, bool isSimultaneous) {
-  if (!tie.empty())
-    return getTieForFitType(getTieRHS(tie), isSimultaneous);
+  if (!tie.empty() && isSimultaneous)
+    return removeTopFunctionIndex(getTieRHS(tie));
   return tie;
 }
 
