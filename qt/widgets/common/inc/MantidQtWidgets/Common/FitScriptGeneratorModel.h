@@ -79,9 +79,6 @@ private:
   [[nodiscard]] bool hasWorkspaceDomain(std::string const &workspaceName,
                                         WorkspaceIndex workspaceIndex) const;
 
-  void updateParameterTie(Mantid::API::IFunction_sptr const &function,
-                          std::string const &parameter, std::string const &tie);
-
   [[nodiscard]] inline std::size_t numberOfDomains() const noexcept {
     return m_fitDomains.size();
   }

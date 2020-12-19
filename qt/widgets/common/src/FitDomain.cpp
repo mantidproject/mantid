@@ -9,6 +9,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/Logger.h"
 
 #include <boost/algorithm/string.hpp>
 
@@ -18,6 +19,7 @@
 using namespace Mantid::API;
 
 namespace {
+Mantid::Kernel::Logger g_log("FitDomain");
 
 IFunction_sptr createIFunction(std::string const &functionString) {
   return FunctionFactory::Instance().createInitialized(functionString);
@@ -138,31 +140,39 @@ void FitDomain::addFunctionToExisting(IFunction_sptr const &function) {
 
 void FitDomain::setParameterValue(std::string const &parameter,
                                   double newValue) {
-  if (m_function->hasParameter(parameter))
+  if (m_function && m_function->hasParameter(parameter))
     m_function->setParameter(parameter, newValue);
 }
 
 void FitDomain::setAttributeValue(std::string const &attribute,
                                   IFunction::Attribute newValue) {
-  if (m_function->hasAttribute(attribute))
+  if (m_function && m_function->hasAttribute(attribute))
     m_function->setAttribute(attribute, newValue);
 }
 
-void FitDomain::updateParameterTie(std::string const &parameter,
+bool FitDomain::updateParameterTie(std::string const &parameter,
                                    std::string const &tie) {
-  if (m_function->hasParameter(parameter)) {
-    if (tie.empty()) {
+  if (m_function && m_function->hasParameter(parameter)) {
+    if (tie.empty())
       m_function->removeTie(m_function->parameterIndex(parameter));
-    } else {
+    else
+      return setParameterTie(parameter, tie);
+  }
+  // We want to silently ignore if the function doesn't have the parameter
+  return true;
+}
 
-      try {
-        m_function->tie(parameter, tie);
-      } catch (std::invalid_argument const &ex) {
-        // g_log.error(ex.what());
-      } catch (std::runtime_error const &ex) {
-        // g_log.error(ex.what());
-      }
-    }
+bool FitDomain::setParameterTie(std::string const &parameter,
+                                std::string const &tie) {
+  try {
+    m_function->tie(parameter, tie);
+    return true;
+  } catch (std::invalid_argument const &ex) {
+    g_log.warning(ex.what());
+    return false;
+  } catch (std::runtime_error const &ex) {
+    g_log.warning(ex.what());
+    return false;
   }
 }
 

@@ -46,9 +46,11 @@ public:
   void setAttributeValue(std::string const &attribute,
                          Mantid::API::IFunction::Attribute newValue);
 
-  void updateParameterTie(std::string const &parameter, std::string const &tie);
+  bool updateParameterTie(std::string const &parameter, std::string const &tie);
 
 private:
+  bool setParameterTie(std::string const &parameter, std::string const &tie);
+
   [[nodiscard]] bool isValidStartX(double startX) const;
   [[nodiscard]] bool isValidEndX(double endX) const;
   std::pair<double, double> xLimits() const;

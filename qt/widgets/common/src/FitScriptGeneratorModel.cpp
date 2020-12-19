@@ -20,7 +20,7 @@
 using namespace Mantid::API;
 
 namespace {
-Mantid::Kernel::Logger g_log("FitScriptGenerator");
+Mantid::Kernel::Logger g_log("FitScriptGeneratorModel");
 
 IFunction_sptr createIFunction(std::string const &functionString) {
   return FunctionFactory::Instance().createInitialized(functionString);
@@ -55,6 +55,23 @@ std::string removeTopFunctionIndex(std::string const &functionPrefix) {
 bool isTieNumber(std::string const &tie) {
   return !tie.empty() &&
          tie.find_first_not_of("0123456789.-") == std::string::npos;
+}
+
+std::string getTieRHS(std::string const &tie) {
+  auto const tieSplit = splitStringBy(tie, "=");
+  return tieSplit.size() > 1 ? tieSplit[1] : tieSplit[0];
+}
+
+std::string getTieForFitType(std::string const &tie, bool isSimultaneous) {
+  if (isSimultaneous)
+    return isTieNumber(tie) ? tie : removeTopFunctionIndex(tie);
+  return tie;
+}
+
+std::string getTieExpression(std::string const &tie, bool isSimultaneous) {
+  if (!tie.empty())
+    return getTieForFitType(getTieRHS(tie), isSimultaneous);
+  return tie;
 }
 
 } // namespace
@@ -181,45 +198,11 @@ void FitScriptGeneratorModel::updateParameterTie(
     std::string const &parameter, std::string const &tie) {
   auto const domainIndex = findDomainIndex(workspaceName, workspaceIndex);
 
-  auto const tieSplit = splitStringBy(tie, "=");
-  auto const tieValue = tieSplit.size() > 1 ? tieSplit[1] : tieSplit[0];
+  auto tieSuccess = m_fitDomains[domainIndex].updateParameterTie(
+      removeTopFunctionIndex(parameter), getTieExpression(tie, true));
 
-  auto const tieExpression =
-      isTieNumber(tieValue) ? tieValue : removeTopFunctionIndex(tieValue);
-
-  m_fitDomains[domainIndex].updateParameterTie(
-      removeTopFunctionIndex(parameter), tieExpression);
-
-  // if (auto composite = toComposite(m_function->getFunction(domainIndex))) {
-
-  //  if (composite->nFunctions() == 1) {
-  //    auto function = composite->getFunction(0);
-  //    if (function->hasParameter(parameter))
-  //      updateParameterTie(function, parameter, tie);
-  //  } else {
-  //    if (composite->hasParameter(parameter))
-  //      updateParameterTie(composite, parameter, tie);
-  //  }
-  //}
-}
-
-void FitScriptGeneratorModel::updateParameterTie(IFunction_sptr const &function,
-                                                 std::string const &parameter,
-                                                 std::string const &tie) {
-  // if (tie.empty()) {
-  //  function->removeTie(function->parameterIndex(parameter));
-  //} else {
-  //  auto const tieSplit = splitStringBy(tie, "=");
-  //  auto const tieValue = tieSplit.size() > 1 ? tieSplit[1] : tieSplit[0];
-
-  //  try {
-  //    function->tie(parameter, tieValue);
-  //  } catch (std::invalid_argument const &ex) {
-  //    g_log.error(ex.what());
-  //  } catch (std::runtime_error const &ex) {
-  //    g_log.error(ex.what());
-  //  }
-  //}
+  if (!tieSuccess)
+    g_log.warning("Failed to tie '" + parameter + "' to '" + tie + "'.");
 }
 
 } // namespace MantidWidgets
