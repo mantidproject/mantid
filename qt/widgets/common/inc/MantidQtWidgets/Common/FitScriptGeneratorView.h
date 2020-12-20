@@ -78,7 +78,7 @@ public:
   void clearFunction() override;
   void setFunction(Mantid::API::IFunction_sptr const &function) const override;
 
-  void showMultiDomainPrefix(bool showPrefix) override;
+  void setSimultaneousMode(bool simultaneousMode) override;
 
   void displayWarning(std::string const &message) override;
 

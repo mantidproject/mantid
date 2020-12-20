@@ -287,10 +287,15 @@ bool FitScriptGeneratorView::isApplyFunctionChangesToAllChecked() const {
 
 void FitScriptGeneratorView::clearFunction() { m_functionTreeView->clear(); }
 
-void FitScriptGeneratorView::showMultiDomainPrefix(bool showPrefix) {
-  m_dataTable->setFunctionPrefixVisible(showPrefix);
+void FitScriptGeneratorView::setSimultaneousMode(bool simultaneousMode) {
+  m_dataTable->setFunctionPrefixVisible(simultaneousMode);
   m_functionTreeView->setMultiDomainFunctionPrefix(
-      showPrefix ? m_dataTable->selectedDomainFunctionPrefix() : "");
+      simultaneousMode ? m_dataTable->selectedDomainFunctionPrefix() : "");
+
+  if (simultaneousMode)
+    m_functionTreeView->showGlobals();
+  else
+    m_functionTreeView->hideGlobals();
 }
 
 void FitScriptGeneratorView::setFunction(IFunction_sptr const &function) const {

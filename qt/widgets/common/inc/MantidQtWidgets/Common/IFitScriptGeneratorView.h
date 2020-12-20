@@ -89,7 +89,7 @@ public:
   virtual void
   setFunction(Mantid::API::IFunction_sptr const &function) const = 0;
 
-  virtual void showMultiDomainPrefix(bool showPrefix) = 0;
+  virtual void setSimultaneousMode(bool simultaneousMode) = 0;
 
   virtual void displayWarning(std::string const &message) = 0;
 

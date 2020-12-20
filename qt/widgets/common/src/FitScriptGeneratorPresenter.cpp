@@ -137,8 +137,8 @@ void FitScriptGeneratorPresenter::handleEndXChanged() {
 }
 
 void FitScriptGeneratorPresenter::handleSelectionChanged() {
-  m_view->showMultiDomainPrefix(m_model->getFittingMode() ==
-                                FittingMode::Simultaneous);
+  m_view->setSimultaneousMode(m_model->getFittingMode() ==
+                              FittingMode::Simultaneous);
 
   auto const selectedRows = m_view->selectedRows();
   if (!selectedRows.empty()) {
