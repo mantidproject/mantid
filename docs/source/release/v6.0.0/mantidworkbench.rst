@@ -56,5 +56,6 @@ Bugfixes
 - Fix replot of colorfill image after a workspace is replaced.
 - Fixed a bug in generating plot scripts for figures containing data for a particular bin.
 - Fixed a bug causing an error when double clicking a ragged workspace.
+- Fixed a bug which caused a terminate dialogue to be raised if the user zoomed in far enough while using the SliceViewer on MDE workspaces.
 
 :ref:`Release 6.0.0 <v6.0.0>`
