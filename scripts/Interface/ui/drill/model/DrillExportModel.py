@@ -90,17 +90,14 @@ class DrillExportModel:
         """
         exportPath = config.getString("defaultsave.directory")
         tasks = list()
-        ws = mtd[workspaceName]
-        if isinstance(ws, WorkspaceGroup):
-            workspaceNames = ws.getNames()
-        else:
-            workspaceNames = [workspaceName]
-        for name in workspaceNames:
-            for a,s in self._exportAlgorithms.items():
-                if s:
-                    filename = exportPath + name \
-                              + RundexSettings.EXPORT_ALGO_EXTENSION[a]
-                    task = DrillTask(-1, a, InputWorkspace=name,
-                                     FileName=filename)
-                    tasks.append(task)
+        for wsName in mtd.getObjectNames():
+            if ((workspaceName in wsName)
+                    and (not isinstance(mtd[wsName], WorkspaceGroup))):
+                for a,s in self._exportAlgorithms.items():
+                    if s:
+                        filename = exportPath + wsName \
+                                   + RundexSettings.EXPORT_ALGO_EXTENSION[a]
+                        task = DrillTask(-1, a, InputWorkspace=wsName,
+                                         FileName=filename)
+                        tasks.append(task)
         self._pool.addProcesses(tasks)
