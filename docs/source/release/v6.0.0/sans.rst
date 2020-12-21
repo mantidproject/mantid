@@ -35,5 +35,6 @@ Bugfixes
   in a colour fill plot on Workbench.
 - Wavelength limits entered with comma ranges larger than 10, e.g. `1,5,10,15` no longer
   throw a Runtime Error.
+- ISIS SANS will print the name of any missing maskfiles instead of an empty name.
 
 :ref:`Release 6.0.0 <v6.0.0>`
