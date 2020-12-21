@@ -193,8 +193,8 @@ double getDiff(const API::IFunction &fun, size_t nParams,
   double chiSquared = 0.0;
   double chiSquaredWeighted = 0.0;
   double dof = 0;
-  CalculateChiSquared::calcChiSquared(fun, nParams, domain, values, chiSquared, chiSquaredWeighted,
-                 dof);
+  CalculateChiSquared::calcChiSquared(fun, nParams, domain, values, chiSquared,
+                                      chiSquaredWeighted, dof);
   double res = 0.0;
   if (sigma2 > 0) {
     res = (chiSquared - chi0) / 2 / sigma2;
