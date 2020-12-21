@@ -225,7 +225,10 @@ void FitScriptGeneratorPresenter::handleParameterTieChanged(
   for (auto const &rowIndex : rowIndices) {
     auto const workspaceName = m_view->workspaceName(rowIndex);
     auto const workspaceIndex = m_view->workspaceIndex(rowIndex);
-    m_model->updateParameterTie(workspaceName, workspaceIndex, parameter, tie);
+    auto const equivalentParameter = m_model->getEquivalentParameterForDomain(
+        workspaceName, workspaceIndex, parameter);
+    m_model->updateParameterTie(workspaceName, workspaceIndex,
+                                equivalentParameter, tie);
   }
 
   handleSelectionChanged();

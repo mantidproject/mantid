@@ -46,7 +46,11 @@ public:
   void setAttributeValue(std::string const &attribute,
                          Mantid::API::IFunction::Attribute newValue);
 
-  bool updateParameterTie(std::string const &parameter, std::string const &tie);
+  [[nodiscard]] bool hasParameter(std::string const &parameter) const;
+
+  [[nodiscard]] bool updateParameterTie(std::string const &parameter,
+                                        std::string const &tie);
+  void clearParameterTie(std::string const &parameter);
 
 private:
   bool setParameterTie(std::string const &parameter, std::string const &tie);

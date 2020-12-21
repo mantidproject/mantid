@@ -21,6 +21,17 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
+struct GlobalTie {
+
+  GlobalTie(std::string const &parameter, std::string const &tie) {
+    m_parameter = parameter;
+    m_tie = tie;
+  }
+
+  std::string m_parameter;
+  std::string m_tie;
+};
+
 /**
  * This class stores the domain and fit data to be fitted to. This data is used
  * to generate a python script for complex Mantid fitting.
@@ -57,6 +68,10 @@ public:
   getFunction(std::string const &workspaceName,
               WorkspaceIndex workspaceIndex) override;
 
+  std::string getEquivalentParameterForDomain(
+      std::string const &workspaceName, WorkspaceIndex workspaceIndex,
+      std::string const &fullParameter) const override;
+
   void updateParameterValue(std::string const &workspaceName,
                             WorkspaceIndex workspaceIndex,
                             std::string const &parameter,
@@ -85,11 +100,30 @@ private:
   [[nodiscard]] bool hasWorkspaceDomain(std::string const &workspaceName,
                                         WorkspaceIndex workspaceIndex) const;
 
+  void updateParameterTie(std::size_t const &domainIndex,
+                          std::string const &fullParameter,
+                          std::string const &fullTie);
+  void updateLocalParameterTie(std::size_t const &domainIndex,
+                               std::string const &fullParameter,
+                               std::string const &fullTie);
+  void updateGlobalParameterTie(std::size_t const &domainIndex,
+                                std::string const &fullParameter,
+                                std::string const &fullTie);
+
+  [[nodiscard]] bool validParameter(std::string const &fullParameter) const;
+
+  [[nodiscard]] bool validGlobalTie(std::string const &fullTie) const;
+  void clearGlobalTie(std::string const &fullParameter);
+  [[nodiscard]] std::vector<GlobalTie>::const_iterator
+  findGlobalTie(std::string const &fullParameter) const;
+
   [[nodiscard]] inline std::size_t numberOfDomains() const noexcept {
     return m_fitDomains.size();
   }
 
   std::vector<FitDomain> m_fitDomains;
+  // A vector of global ties. E.g. f0.f0.A0=f1.f0.A0
+  std::vector<GlobalTie> m_globalTies;
   FittingMode m_fittingMode;
 };
 

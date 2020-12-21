@@ -47,6 +47,11 @@ public:
   getFunction(std::string const &workspaceName,
               WorkspaceIndex workspaceIndex) = 0;
 
+  virtual std::string
+  getEquivalentParameterForDomain(std::string const &workspaceName,
+                                  WorkspaceIndex workspaceIndex,
+                                  std::string const &fullParameter) const = 0;
+
   virtual void updateParameterValue(std::string const &workspaceName,
                                     WorkspaceIndex workspaceIndex,
                                     std::string const &parameter,

@@ -140,7 +140,7 @@ void FitDomain::addFunctionToExisting(IFunction_sptr const &function) {
 
 void FitDomain::setParameterValue(std::string const &parameter,
                                   double newValue) {
-  if (m_function && m_function->hasParameter(parameter))
+  if (hasParameter(parameter))
     m_function->setParameter(parameter, newValue);
 }
 
@@ -150,9 +150,15 @@ void FitDomain::setAttributeValue(std::string const &attribute,
     m_function->setAttribute(attribute, newValue);
 }
 
+bool FitDomain::hasParameter(std::string const &parameter) const {
+  if (m_function)
+    return m_function->hasParameter(parameter);
+  return false;
+}
+
 bool FitDomain::updateParameterTie(std::string const &parameter,
                                    std::string const &tie) {
-  if (m_function && m_function->hasParameter(parameter)) {
+  if (hasParameter(parameter)) {
     if (tie.empty())
       m_function->removeTie(m_function->parameterIndex(parameter));
     else
@@ -174,6 +180,11 @@ bool FitDomain::setParameterTie(std::string const &parameter,
     g_log.warning(ex.what());
     return false;
   }
+}
+
+void FitDomain::clearParameterTie(std::string const &parameter) {
+  if (hasParameter(parameter))
+    m_function->removeTie(m_function->parameterIndex(parameter));
 }
 
 bool FitDomain::isValidStartX(double startX) const {
