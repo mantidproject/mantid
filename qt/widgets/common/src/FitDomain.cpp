@@ -156,6 +156,12 @@ bool FitDomain::hasParameter(std::string const &parameter) const {
   return false;
 }
 
+double FitDomain::getParameterValue(std::string const &parameter) const {
+  if (hasParameter(parameter))
+    return m_function->getParameter(parameter);
+  throw std::runtime_error("The function does not contain this parameter.");
+}
+
 bool FitDomain::updateParameterTie(std::string const &parameter,
                                    std::string const &tie) {
   if (hasParameter(parameter)) {

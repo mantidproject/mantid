@@ -55,6 +55,9 @@ public:
   getEquivalentParameterForDomain(std::string const &workspaceName,
                                   WorkspaceIndex workspaceIndex,
                                   std::string const &fullParameter) const = 0;
+  [[nodiscard]] virtual std::string getEquivalentParameterTieForDomain(
+      std::string const &workspaceName, WorkspaceIndex workspaceIndex,
+      std::string const &fullParameter, std::string const &fullTie) const = 0;
 
   virtual void updateParameterValue(std::string const &workspaceName,
                                     WorkspaceIndex workspaceIndex,

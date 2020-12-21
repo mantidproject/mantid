@@ -47,6 +47,7 @@ public:
                          Mantid::API::IFunction::Attribute newValue);
 
   [[nodiscard]] bool hasParameter(std::string const &parameter) const;
+  [[nodiscard]] double getParameterValue(std::string const &parameter) const;
 
   [[nodiscard]] bool updateParameterTie(std::string const &parameter,
                                         std::string const &tie);

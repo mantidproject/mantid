@@ -730,6 +730,9 @@ void FunctionTreeView::addAttributeAndParameterProperties(
       if (!fun->isActive(i))
         addParameterTie(ap.prop, fun, name.toStdString(), i, parentComposite,
                         parentIndex);
+      else
+        addGlobalParameterTie(ap.prop, name.toStdString(), parentComposite,
+                              parentIndex);
 
       if (auto c = fun->getConstraint(i)) {
         addConstraintProperties(ap.prop, QString::fromStdString(c->asString()));
@@ -792,6 +795,31 @@ bool FunctionTreeView::addParameterTieInComposite(
     }
   }
   return false;
+}
+
+/**
+ * Add a global tie to a function property if one exists for the specified
+ * parameter.
+ * @param property :: A function property.
+ * @param parameterName :: The name of the parameter to check for a global tie.
+ * @param parameterIndex :: The index of the parameter within its function.
+ */
+void FunctionTreeView::addGlobalParameterTie(
+    QtProperty *property, const std::string &parameterName,
+    const CompositeFunction_sptr &parentComposite,
+    const std::size_t &parentIndex) {
+  if (m_multiDomainFunctionPrefix.isEmpty() || m_globalTies.empty())
+    return;
+
+  auto const fullName = getFullParameterName(
+      parameterName, parentComposite ? static_cast<int>(parentIndex) : -1);
+
+  for (auto const &globalTie : m_globalTies) {
+    if (fullName == globalTie.m_parameter) {
+      addTieProperty(property, QString::fromStdString(globalTie.m_tie), true);
+      break;
+    }
+  }
 }
 
 /**
@@ -1045,7 +1073,8 @@ QtProperty *FunctionTreeView::getFunctionProperty(const QString &index) const {
  * @param prop :: Parent parameter property
  * @param tie :: A tie string
  */
-void FunctionTreeView::addTieProperty(QtProperty *prop, const QString &tie) {
+void FunctionTreeView::addTieProperty(QtProperty *prop, const QString &tie,
+                                      bool globalTie) {
   if (!prop) {
     throw std::runtime_error("FunctionTreeView: null property pointer");
   }
@@ -1058,7 +1087,7 @@ void FunctionTreeView::addTieProperty(QtProperty *prop, const QString &tie) {
   // Create and add a QtProperty for the tie.
   m_tieManager->blockSignals(true);
   QtProperty *tieProp = m_tieManager->addProperty("Tie");
-  m_tieManager->setValue(tieProp, getFullTie(tie));
+  m_tieManager->setValue(tieProp, globalTie ? tie : getFullTie(tie));
   addProperty(prop, tieProp);
   m_tieManager->blockSignals(false);
 
@@ -1075,13 +1104,29 @@ void FunctionTreeView::addTieProperty(QtProperty *prop, const QString &tie) {
  * Returns the full tie to add as a Tie property. This will add the
  * m_multiDomainFunctionPrefix to the start if we are using multiple datasets.
  * @param tie :: The original tie.
- * @returns The full tue to use as a tie property.
+ * @returns The full tie to use as a tie property.
  */
 QString FunctionTreeView::getFullTie(const QString &tie) const {
   if (!isTieConstant(tie.toStdString()) &&
       !containsOneOf(tie.toStdString(), "="))
     return m_multiDomainFunctionPrefix + tie;
   return tie;
+}
+
+/**
+ * Returns the full parameter name. This will add the
+ * m_multiDomainFunctionPrefix to the start if we are using multiple datasets,
+ * and will add the composite index if it is within a composite.
+ * @param parameter :: The original parameter.
+ * @returns The full parameter name.
+ */
+std::string FunctionTreeView::getFullParameterName(const std::string &parameter,
+                                                   int compositeIndex) const {
+  auto fullParameterName = m_multiDomainFunctionPrefix.toStdString();
+  if (compositeIndex != -1)
+    fullParameterName += "f" + std::to_string(compositeIndex) + ".";
+  fullParameterName += parameter;
+  return fullParameterName;
 }
 
 /**

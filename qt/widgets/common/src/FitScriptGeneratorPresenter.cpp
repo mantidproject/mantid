@@ -200,8 +200,10 @@ void FitScriptGeneratorPresenter::handleParameterChanged(
   for (auto const &rowIndex : rowIndices) {
     auto const workspaceName = m_view->workspaceName(rowIndex);
     auto const workspaceIndex = m_view->workspaceIndex(rowIndex);
-    m_model->updateParameterValue(workspaceName, workspaceIndex, parameter,
-                                  newValue);
+    auto const equivalentParameter = m_model->getEquivalentParameterForDomain(
+        workspaceName, workspaceIndex, parameter);
+    m_model->updateParameterValue(workspaceName, workspaceIndex,
+                                  equivalentParameter, newValue);
   }
 
   handleSelectionChanged();
@@ -229,8 +231,10 @@ void FitScriptGeneratorPresenter::handleParameterTieChanged(
     auto const workspaceIndex = m_view->workspaceIndex(rowIndex);
     auto const equivalentParameter = m_model->getEquivalentParameterForDomain(
         workspaceName, workspaceIndex, parameter);
+    auto const equivalentTie = m_model->getEquivalentParameterTieForDomain(
+        workspaceName, workspaceIndex, parameter, tie);
     m_model->updateParameterTie(workspaceName, workspaceIndex,
-                                equivalentParameter, tie);
+                                equivalentParameter, equivalentTie);
   }
 
   setGlobalTies(m_model->getGlobalTies());

@@ -179,6 +179,11 @@ protected:
       QtProperty *property, const std::string &parameterName,
       const Mantid::API::CompositeFunction_sptr &composite,
       const std::size_t &index);
+  /// Adds a global tie for a parameter if one exists
+  void
+  addGlobalParameterTie(QtProperty *property, const std::string &parameterName,
+                        const CompositeFunction_sptr &parentComposite = nullptr,
+                        const std::size_t &parentIndex = 0);
   /// Adds an index property representing the function index of a specific
   /// domain within a MultiDomainFunction.
   void addMultiDomainIndexProperty(QtProperty *prop);
@@ -229,7 +234,8 @@ protected:
   QtProperty *getTieProperty(QtProperty *prop) const;
 
   /// Add a tie property
-  void addTieProperty(QtProperty *prop, const QString &tie);
+  void addTieProperty(QtProperty *prop, const QString &tie,
+                      bool globalTie = false);
   /// Check if a parameter property has a tie
   bool hasTie(QtProperty *prop) const;
   /// Check if a property is a tie
@@ -410,6 +416,9 @@ private:
 
   /// Gets the full tie when using the m_multiDomainFunctionPrefix
   QString getFullTie(const QString &tie) const;
+  /// Gets the full parameter name when using the m_multiDomainFunctionPrefix
+  std::string getFullParameterName(const std::string &parameter,
+                                   int compositeIndex = -1) const;
 
   // Intended for testing only
   QTreeWidgetItem *getPropertyWidgetItem(QtProperty *prop) const;

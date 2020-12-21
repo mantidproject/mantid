@@ -58,13 +58,18 @@ public:
   void setFunction(std::string const &workspaceName,
                    WorkspaceIndex workspaceIndex,
                    std::string const &function) override;
-  Mantid::API::IFunction_sptr
+  [[nodiscard]] Mantid::API::IFunction_sptr
   getFunction(std::string const &workspaceName,
               WorkspaceIndex workspaceIndex) override;
 
-  std::string getEquivalentParameterForDomain(
+  [[nodiscard]] std::string getEquivalentParameterForDomain(
       std::string const &workspaceName, WorkspaceIndex workspaceIndex,
       std::string const &fullParameter) const override;
+  [[nodiscard]] std::string
+  getEquivalentParameterTieForDomain(std::string const &workspaceName,
+                                     WorkspaceIndex workspaceIndex,
+                                     std::string const &fullParameter,
+                                     std::string const &fullTie) const override;
 
   void updateParameterValue(std::string const &workspaceName,
                             WorkspaceIndex workspaceIndex,
@@ -99,6 +104,11 @@ private:
   [[nodiscard]] bool hasWorkspaceDomain(std::string const &workspaceName,
                                         WorkspaceIndex workspaceIndex) const;
 
+  std::string
+  getEquivalentParameterTieForDomain(std::size_t const &domainIndex,
+                                     std::string const &fullParameter,
+                                     std::string const &fullTie) const;
+
   void updateParameterTie(std::size_t const &domainIndex,
                           std::string const &fullParameter,
                           std::string const &fullTie);
@@ -109,10 +119,15 @@ private:
                                 std::string const &fullParameter,
                                 std::string const &fullTie);
 
+  void updateParameterValuesWithGlobalTieTo(std::string const &fullTie);
+
+  double getParameterValue(std::string const &fullParameter) const;
+
   [[nodiscard]] bool validParameter(std::string const &fullParameter) const;
 
   [[nodiscard]] bool validGlobalTie(std::string const &fullTie) const;
   void clearGlobalTie(std::string const &fullParameter);
+  [[nodiscard]] bool hasGlobalTie(std::string const &fullParameter) const;
   [[nodiscard]] std::vector<GlobalTie>::const_iterator
   findGlobalTie(std::string const &fullParameter) const;
   void checkGlobalTies();
