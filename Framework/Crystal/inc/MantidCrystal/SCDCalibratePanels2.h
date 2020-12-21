@@ -28,23 +28,27 @@ namespace Crystal {
 */
 class MANTID_CRYSTAL_DLL SCDCalibratePanels2 : public Mantid::API::Algorithm{
 public:
-
+    /// Algorithm's name for identification
     const std::string name() const override {
         return "SCDCalibratePanels2";
     }
 
+    /// Summary of algorithm's purpose
     const std::string summary() const override {
     return "Panel parameters and L0 are optimized to "
            "minimize errors between theoretical and actual q values for the "
            "peaks";
     }
 
+    /// Algorithm's version, overriding a virtual method
     int version() const override {return 1;}
 
+    /// Algorithm's category, overriding a virtual method
     const std::string category() const override {
         return "Crystal\\Corrections";
     }
 
+    /// Extra help info
     const std::vector<std::string> seeAlso() const override {
         return {"CalculateUMatrix"};
     }

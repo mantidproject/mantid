@@ -21,9 +21,49 @@ public:
   static SCDCalibratePanels2Test *createSuite() { return new SCDCalibratePanels2Test(); }
   static void destroySuite( SCDCalibratePanels2Test *suite ) { delete suite; }
 
-  void test_Name() {
+  void testName() {
     SCDCalibratePanels2 alg;
     TS_ASSERT_EQUALS(alg.name(), "SCDCalibratePanels2");
   }
+
+  void testInit(){
+    SCDCalibratePanels2 alg;
+    alg.initialize();
+    TS_ASSERT(alg.isInitialized());
+  }
+
+  //TODO: the remaining test needs to be implemented
+  // ///TODO: test validators
+
+  ///NULL case
+  void testNullCase(){
+    SCDCalibratePanels2 alg;
+  }
+
+  ///Adjust T0 and L1
+  void testGlobalShiftOnly(){
+    SCDCalibratePanels2 alg;
+  }
+
+  ///Ideal global with one panels moved
+  void testSinglePanelMoved(){
+    SCDCalibratePanels2 alg;
+  }
+
+  ///Ideal global with two panels moved
+  void testDualPanelMoved(){
+    SCDCalibratePanels2 alg;
+  }
+
+  // Test with mocked CORELLI instrument
+  // T0, L1 adjusted
+  // Two panels moved
+  void testExec(){
+    SCDCalibratePanels2 alg;
+  }
+
+  /// Helper functions for unittest
+
+  // generate a peaktable with given movement void
 
 };
