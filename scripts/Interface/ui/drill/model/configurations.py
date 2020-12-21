@@ -10,13 +10,16 @@ class RundexSettings(object):
 
     # instruments
     D11 =    "D11"
+    D11B =   "D11B"
     D16 =    "D16"
     D22 =    "D22"
+    D22B =   "D22B"
     D33 =    "D33"
     D17 =    "D17"
     FIGARO = "FIGARO"
     D2B =    "D2B"
     D20 =    "D20"
+    D1B =    "D1B"
 
     # techniques (see instrument/Facilities.xml)
     SANS =   "SANS"
@@ -28,13 +31,15 @@ class RundexSettings(object):
     REFL_POL =     "Polarized"
     REFL_NPOL =    "Unpolarized"
     POWDER_DSCAN = "Detector scan"
-    POWDER_PSCAN = "Parameter scan"
+    POWDER_PSCAN = "Sample scan"
 
     # correspondance between instrument and technique
     TECHNIQUE = {
             D11:    SANS,
+            D11B:    SANS,
             D16:    SANS,
             D22:    SANS,
+            D22B:    SANS,
             D33:    SANS,
             D17:    REFL,
             FIGARO: REFL,
@@ -45,8 +50,10 @@ class RundexSettings(object):
     # correspondance between instrument and acquisition mode
     ACQUISITION_MODES = {
             D11:    [SANS_ACQ],
+            D11B:    [SANS_ACQ],
             D16:    [SANS_ACQ],
             D22:    [SANS_ACQ],
+            D22B:    [SANS_ACQ],
             D33:    [SANS_ACQ],
             D17:    [REFL_POL, REFL_NPOL],
             FIGARO: [REFL_NPOL],
@@ -120,8 +127,9 @@ class RundexSettings(object):
             POWDER_PSCAN: "PowderILLParameterScan",
             }
 
-    # ideal number of threads for each acquisition mode (optional).
-    # If not provided, Qt will decide
+    # ideal number of threads for each acquisition mode (optional)
+    # if not provided, Qt will decide, which will likely be the number of cores
+    # for the moment, limit those to 1 until the algorithms are made truly thread safe
     THREADS_NUMBER = {
             SANS_ACQ:     1,
             REFL_POL:     1,
