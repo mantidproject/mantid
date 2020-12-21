@@ -45,6 +45,7 @@ class RundexSettings(object):
             FIGARO: REFL,
             D2B:    POWDER,
             D20:    POWDER,
+            D1B:    POWDER
             }
 
     # correspondance between instrument and acquisition mode
@@ -59,6 +60,7 @@ class RundexSettings(object):
             FIGARO: [REFL_NPOL],
             D2B:    [POWDER_DSCAN],
             D20:    [POWDER_DSCAN, POWDER_PSCAN],
+            D1B:    [POWDER_PSCAN]
             }
 
     # parameters for each acquisition mode
