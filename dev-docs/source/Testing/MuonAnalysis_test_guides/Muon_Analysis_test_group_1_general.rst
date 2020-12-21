@@ -78,14 +78,17 @@ Test 3: Old style data analysis GUI
 	- Right click the empty table area; Select **Add Function**
 	- Add **Abragam** (*Muon* > *MuonSpecific* > *Abragam*)
 	- Set ``Omega = 8.5`` and ``Tau = 0.5``
+	- In the bottom table, check **Fit To Raw Data** to be ``false``
 	- Click **Fit**
 - The fit should be applied to the rebinned data
 
-image apvwibeq
+.. image:: /images/MuonAnalysisTests/emu20918_rebin_fitted.png
+	:align: center
+	:alt: emu20918_rebin_fitted.png
 
-- Now tick the ``Fit to raw data`` box in the bottom section and fit again. This time it will fit to the raw data, but the rebinned data will still be shown in the plot.
-
-imagdewfui
+- Now set **Fit To Raw Data** to be ``true`` and click **Fit** again. This time 
+  it will fit to the raw data, but the rebinned data will still be shown in the 
+  plot
 
 Test 5: New style data analysis GUI
 -----------------------------------

@@ -175,7 +175,7 @@ Transverse Field Asymmetry Test
 	- Right click the empty table area; Select **Add Function**
 	- Add a **Flat Background** (*Background* > *Flat Background*)
 	- Similarly, add **GuasOsc** (*Muon* > *MuonGeneric* > *GausOsc*)
-	- In the bottom table, check **TF Asymmetry Mode** to be true
+	- In the bottom table, check **TF Asymmetry Mode** to be ``true``
 	- Click **Fit**
 	
 Possible Prolems
