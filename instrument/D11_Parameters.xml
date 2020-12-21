@@ -14,7 +14,7 @@
       <parameter name="grouping" type="string">
         <value val="0-65535"/>
       </parameter>
-      <!-- The pixel sizes used by SolidAngle -->
+      <!-- The pixel sizes [mm] used by SolidAngle, resolution and default Q binning calculations.-->
       <parameter name="x-pixel-size" type="number">
         <value val="3.75"/>
       </parameter>
