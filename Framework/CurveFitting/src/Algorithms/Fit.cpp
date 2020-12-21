@@ -239,7 +239,7 @@ void Fit::createOutput() {
   double chisq = 0.0;  // chi sq
   double wchisq = 0.0; // weighted chi sq
   CalculateChiSquared::calcChiSquared(
-      *m_function, m_costFunction->nParams(), *m_costFunction->getDomain(),
+      m_costFunction->nParams(), *m_costFunction->getDomain(),
       *m_costFunction->getValues(), chisq, wchisq, dof);
   double rchisq = wchisq / dof;
   setProperty("OutputChi2overDoF", rchisq);

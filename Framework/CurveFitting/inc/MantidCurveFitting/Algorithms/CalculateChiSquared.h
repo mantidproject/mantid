@@ -21,8 +21,7 @@ namespace Algorithms {
 */
 class MANTID_CURVEFITTING_DLL CalculateChiSquared : public IFittingAlgorithm {
 public:
-  static void calcChiSquared(const API::IFunction &fun, size_t nParams,
-                             const API::FunctionDomain &domain,
+  static void calcChiSquared(size_t nParams, const API::FunctionDomain &domain,
                              API::FunctionValues &values, double &chiSquared,
                              double &chiSquaredWeighted, double &dof);
   const std::string name() const override;

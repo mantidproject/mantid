@@ -1414,7 +1414,7 @@ public:
 
     // test the output from fit
     double dummy = fit.getProperty("OutputChi2overDoF");
-    TS_ASSERT_DELTA(dummy, 0.035, 0.01);
+    TS_ASSERT_DELTA(dummy, 0.0717, 0.01);
 
     IFunction_sptr out = fit.getProperty("Function");
     TS_ASSERT_DELTA(out->getParameter("Height"), 97.8036, 0.0001);
@@ -1460,7 +1460,7 @@ public:
     TS_ASSERT(minimizer.compare("Simplex") == 0);
 
     double dummy = fit.getProperty("OutputChi2overDoF");
-    TS_ASSERT_DELTA(dummy, 0.035, 0.01);
+    TS_ASSERT_DELTA(dummy, 0.0717, 0.01);
 
     IFunction_sptr out = fit.getProperty("Function");
     TS_ASSERT_DELTA(out->getParameter("Height"), 97.8091, 0.01);
@@ -1570,7 +1570,7 @@ public:
     TS_ASSERT(minimizer.compare("Simplex") == 0);
 
     double dummy = fit.getProperty("OutputChi2overDoF");
-    TS_ASSERT_DELTA(dummy, 2.5911, 1);
+    TS_ASSERT_DELTA(dummy, 4.92496, 1);
 
     IFunction_sptr out = fit.getProperty("Function");
     TS_ASSERT_DELTA(out->getParameter("f1.Height"), 232, 1);

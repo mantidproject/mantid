@@ -25,7 +25,6 @@ DECLARE_ALGORITHM(CalculateChiSquared)
 
 /// Caclculate the chi squared, weighted chi squared and the number of degrees
 /// of freedom.
-/// @param fun :: Fitting function
 /// @param nParams :: Number of fitting parameters.
 /// @param domain :: Function's domain.
 /// @param values :: Function's values.
@@ -33,13 +32,12 @@ DECLARE_ALGORITHM(CalculateChiSquared)
 /// @param chiSquaredWeighted :: Weighted chi squared  value
 /// @param dof :: Number of degrees of freedom in the fit -> numDataPoints -
 /// numFreeParameters.
-void CalculateChiSquared::calcChiSquared(
-    const API::IFunction &fun, size_t nParams,
-    const API::FunctionDomain &domain, API::FunctionValues &values,
-    double &chiSquared, double &chiSquaredWeighted, double &dof) {
-
-  // Calculate function values.
-  fun.function(domain, values);
+void CalculateChiSquared::calcChiSquared(size_t nParams,
+                                         const API::FunctionDomain &domain,
+                                         API::FunctionValues &values,
+                                         double &chiSquared,
+                                         double &chiSquaredWeighted,
+                                         double &dof) {
 
   // Calculate the chi squared.
   chiSquared = 0.0;
@@ -133,8 +131,8 @@ void CalculateChiSquared::execConcrete() {
   double chiSquared = 0.0;
   double chiSquaredWeighted = 0.0;
   double dof = 0.0;
-  calcChiSquared(*m_function, nParams, *domain, *values, chiSquared,
-                 chiSquaredWeighted, dof);
+  calcChiSquared(nParams, *domain, *values, chiSquared, chiSquaredWeighted,
+                 dof);
   g_log.notice() << "Chi squared " << chiSquared << "\n"
                  << "Chi squared weighted " << chiSquaredWeighted << "\n";
 
@@ -193,7 +191,7 @@ double getDiff(const API::IFunction &fun, size_t nParams,
   double chiSquared = 0.0;
   double chiSquaredWeighted = 0.0;
   double dof = 0;
-  CalculateChiSquared::calcChiSquared(fun, nParams, domain, values, chiSquared,
+  CalculateChiSquared::calcChiSquared(nParams, domain, values, chiSquared,
                                       chiSquaredWeighted, dof);
   double res = 0.0;
   if (sigma2 > 0) {
@@ -230,6 +228,7 @@ public:
       par0[ip] = m_function.getParameter(ip);
       m_function.setParameter(ip, par0[ip] + p * m_direction[ip]);
     }
+    m_function.function(m_domain, m_values);
     double res = getDiff(m_function, m_function.nParams(), m_domain, m_values,
                          m_chi0, m_sigma2);
     for (size_t ip = 0; ip < m_function.nParams(); ++ip) {
@@ -360,8 +359,9 @@ void CalculateChiSquared::estimateErrors() {
   API::FunctionDomain_sptr domain;
   API::FunctionValues_sptr values;
   m_domainCreator->createDomain(domain, values);
-  calcChiSquared(*m_function, nParams, *domain, *values, chiSquared,
-                 chiSquaredWeighted, dof);
+  m_function->function(*domain, *values);
+  calcChiSquared(nParams, *domain, *values, chiSquared, chiSquaredWeighted,
+                 dof);
   // Value of chi squared for current parameters in m_function
   double chi0 = chiSquared;
   // Fit data variance
