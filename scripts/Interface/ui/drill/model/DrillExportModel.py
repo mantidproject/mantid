@@ -98,7 +98,8 @@ class DrillExportModel:
         for name in workspaceNames:
             for a,s in self._exportAlgorithms.items():
                 if s:
-                    filename = exportPath + name
+                    filename = exportPath + name \
+                              + RundexSettings.EXPORT_ALGO_EXTENSION[a]
                     task = DrillTask(-1, a, InputWorkspace=name,
                                      FileName=filename)
                     tasks.append(task)

@@ -151,6 +151,15 @@ class RundexSettings(object):
                 }
             }
 
+    EXPORT_ALGO_EXTENSION = {
+            "SaveNexusProcessed": ".nxs",
+            "SaveAscii": ".txt",
+            "SaveCanSAS1D": ".xml",
+            "SaveNISTDAT": ".dat",
+            "SaveReflectometryAscii": ".mft",
+            "SaveFocussedXYE": ".dat"
+            }
+
     # ideal number of threads for each acquisition mode (optional).
     # If not provided, Qt will decide
     THREADS_NUMBER = {
