@@ -323,14 +323,20 @@ void populateTable(ITableWorkspace_sptr &t, const MatrixWorkspace_sptr &ws,
                 << isMonitorDisplay; // monitor
 
       if (includeDiffConstants) {
-        std::vector<detid_t> warnDetIds;
-        auto [difaValue, difcValue, tzeroValue] =
-            spectrumInfo.diffractometerConstants(wsIndex, warnDetIds);
-        auto difcValueUncalibrated = spectrumInfo.difcUncalibrated(wsIndex);
-        colValues << difaValue << difcValue << difcValueUncalibrated
-                  << tzeroValue;
+        if (isMonitor) {
+          colValues << 0. << 0. << 0. << 0.;
+        } else {
+          std::vector<detid_t> warnDetIds;
+          auto [difaValue, difcValue, tzeroValue] =
+              spectrumInfo.diffractometerConstants(wsIndex, warnDetIds);
+          auto difcValueUncalibrated = spectrumInfo.difcUncalibrated(wsIndex);
+          colValues << difaValue << difcValue << difcValueUncalibrated
+                    << tzeroValue;
+        }
       }
     } catch (const std::exception &) {
+      colValues.row(row);
+      colValues << static_cast<double>(wsIndex);
       // spectrumNo=-1, detID=0
       colValues << -1 << "0";
       // Y/E
@@ -344,7 +350,7 @@ void populateTable(ITableWorkspace_sptr &t, const MatrixWorkspace_sptr &ws,
       colValues << 0.0    // rtp
                 << "n/a"; // monitor
       if (includeDiffConstants) {
-        colValues << 0.0 << 0.0 << 0.0;
+        colValues << 0.0 << 0.0 << 0.0 << 0.0;
       }
     } // End catch for no spectrum
   }
