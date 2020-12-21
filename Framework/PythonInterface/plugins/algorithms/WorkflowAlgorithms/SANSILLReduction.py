@@ -505,7 +505,7 @@ class SANSILLReduction(PythonAlgorithm):
         instrument = mtd[ws].getInstrument()
         if instrument.hasParameter('tau'):
             tau = instrument.getNumberParameter('tau')[0]
-            if self._instrument == 'D33' || self._instrument == 'D11B':
+            if self._instrument == 'D33' or self._instrument == 'D11B':
                 grouping_filename = 'D33_Grouping.xml'
                 grouping_file = os.path.join(config['groupingFiles.directory'], grouping_filename)
                 DeadTimeCorrection(InputWorkspace=ws, Tau=tau, MapFile=grouping_file, OutputWorkspace=ws)
