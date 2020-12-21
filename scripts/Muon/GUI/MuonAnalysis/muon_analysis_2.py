@@ -242,6 +242,9 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.context.gui_context.gui_variables_notifier.add_subscriber(
             self.fitting_tab.fitting_tab_presenter.gui_context_observer)
 
+        self.context.gui_context.gui_variables_notifier.add_subscriber(
+            self.plot_widget.presenter.rebin_options_set_observer)
+
         self.context.gui_context.gui_variable_non_calulation_notifier.add_subscriber(
             self.fitting_tab.fitting_tab_presenter.gui_context_observer)
 
