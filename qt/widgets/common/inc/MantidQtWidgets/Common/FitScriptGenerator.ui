@@ -46,9 +46,9 @@
     </widget>
    </item>
    <item row="0" column="3">
-    <widget class="QCheckBox" name="ckApplyFunctionChangesToAll">
+    <widget class="QCheckBox" name="ckAddRemoveFunctionForAllDatasets">
      <property name="text">
-      <string>Apply function changes to all datasets</string>
+      <string>Add/Remove function for all datasets</string>
      </property>
      <property name="checked">
       <bool>true</bool>

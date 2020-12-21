@@ -73,7 +73,7 @@ public:
 
   void resetSelection() override;
 
-  bool isApplyFunctionChangesToAllChecked() const override;
+  bool isAddRemoveFunctionForAllChecked() const override;
 
   void clearFunction() override;
   void setFunction(Mantid::API::IFunction_sptr const &function) const override;

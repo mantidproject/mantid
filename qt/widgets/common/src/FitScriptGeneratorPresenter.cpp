@@ -154,7 +154,7 @@ void FitScriptGeneratorPresenter::handleSelectionChanged() {
 
 void FitScriptGeneratorPresenter::handleFunctionRemoved(
     std::string const &function) {
-  auto const rowIndices = m_view->isApplyFunctionChangesToAllChecked()
+  auto const rowIndices = m_view->isAddRemoveFunctionForAllChecked()
                               ? m_view->allRows()
                               : m_view->selectedRows();
 
@@ -166,7 +166,7 @@ void FitScriptGeneratorPresenter::handleFunctionRemoved(
 
 void FitScriptGeneratorPresenter::handleFunctionAdded(
     std::string const &function) {
-  auto const rowIndices = m_view->isApplyFunctionChangesToAllChecked()
+  auto const rowIndices = m_view->isAddRemoveFunctionForAllChecked()
                               ? m_view->allRows()
                               : m_view->selectedRows();
 
@@ -180,7 +180,7 @@ void FitScriptGeneratorPresenter::handleFunctionAdded(
 
 void FitScriptGeneratorPresenter::handleFunctionReplaced(
     std::string const &function) {
-  auto const rowIndices = m_view->isApplyFunctionChangesToAllChecked()
+  auto const rowIndices = m_view->isAddRemoveFunctionForAllChecked()
                               ? m_view->allRows()
                               : m_view->selectedRows();
 

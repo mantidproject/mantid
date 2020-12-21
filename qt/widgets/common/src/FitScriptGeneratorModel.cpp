@@ -292,13 +292,13 @@ void FitScriptGeneratorModel::updateParameterValue(
 }
 
 void FitScriptGeneratorModel::updateParameterValuesWithGlobalTieTo(
-    std::string const &fullTie) {
+    std::string const &parameter) {
   for (auto const &globalTie : m_globalTies) {
-    if (fullTie == globalTie.m_tie) {
+    if (parameter == globalTie.m_tie) {
       auto const domainIndex = getFunctionIndexAt(globalTie.m_parameter, 0);
       m_fitDomains[domainIndex].setParameterValue(
           removeTopFunctionIndex(globalTie.m_parameter),
-          getParameterValue(fullTie));
+          getParameterValue(parameter));
     }
   }
 }

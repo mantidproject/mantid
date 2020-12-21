@@ -282,8 +282,8 @@ FitScriptGeneratorView::getDialogWorkspaceIndices() const {
 
 void FitScriptGeneratorView::resetSelection() { m_dataTable->resetSelection(); }
 
-bool FitScriptGeneratorView::isApplyFunctionChangesToAllChecked() const {
-  return m_ui.ckApplyFunctionChangesToAll->isChecked();
+bool FitScriptGeneratorView::isAddRemoveFunctionForAllChecked() const {
+  return m_ui.ckAddRemoveFunctionForAllDatasets->isChecked();
 }
 
 void FitScriptGeneratorView::clearFunction() { m_functionTreeView->clear(); }

@@ -119,7 +119,7 @@ private:
                                 std::string const &fullParameter,
                                 std::string const &fullTie);
 
-  void updateParameterValuesWithGlobalTieTo(std::string const &fullTie);
+  void updateParameterValuesWithGlobalTieTo(std::string const &parameter);
 
   double getParameterValue(std::string const &fullParameter) const;
 
