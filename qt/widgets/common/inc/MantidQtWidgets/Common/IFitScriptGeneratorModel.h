@@ -16,10 +16,14 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
+class IFitScriptGeneratorPresenter;
+
 class EXPORT_OPT_MANTIDQT_COMMON IFitScriptGeneratorModel {
 
 public:
   virtual ~IFitScriptGeneratorModel() = default;
+
+  virtual void subscribePresenter(IFitScriptGeneratorPresenter *presenter) = 0;
 
   virtual void removeWorkspaceDomain(std::string const &workspaceName,
                                      WorkspaceIndex workspaceIndex) = 0;
@@ -43,11 +47,11 @@ public:
   virtual void setFunction(std::string const &workspaceName,
                            WorkspaceIndex workspaceIndex,
                            std::string const &function) = 0;
-  virtual Mantid::API::IFunction_sptr
+  [[nodiscard]] virtual Mantid::API::IFunction_sptr
   getFunction(std::string const &workspaceName,
               WorkspaceIndex workspaceIndex) = 0;
 
-  virtual std::string
+  [[nodiscard]] virtual std::string
   getEquivalentParameterForDomain(std::string const &workspaceName,
                                   WorkspaceIndex workspaceIndex,
                                   std::string const &fullParameter) const = 0;
@@ -67,7 +71,9 @@ public:
                                   std::string const &tie) = 0;
 
   virtual void setFittingMode(FittingMode const &fittingMode) = 0;
-  virtual FittingMode getFittingMode() const = 0;
+  [[nodiscard]] virtual FittingMode getFittingMode() const = 0;
+
+  [[nodiscard]] virtual std::vector<GlobalTie> getGlobalTies() const = 0;
 };
 
 } // namespace MantidWidgets

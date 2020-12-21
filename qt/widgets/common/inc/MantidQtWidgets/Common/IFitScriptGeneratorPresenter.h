@@ -17,6 +17,8 @@ namespace MantidWidgets {
 
 using ViewEvent = IFitScriptGeneratorView::Event;
 
+struct GlobalTie;
+
 class EXPORT_OPT_MANTIDQT_COMMON IFitScriptGeneratorPresenter {
 public:
   virtual ~IFitScriptGeneratorPresenter() = default;
@@ -28,6 +30,8 @@ public:
                                FittingMode const &fittingMode) = 0;
 
   virtual void openFitScriptGenerator() = 0;
+
+  virtual void setGlobalTies(std::vector<GlobalTie> const &globalTies) = 0;
 };
 
 } // namespace MantidWidgets

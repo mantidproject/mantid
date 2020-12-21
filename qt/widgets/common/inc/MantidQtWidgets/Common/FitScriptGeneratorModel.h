@@ -10,6 +10,7 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/FitDomain.h"
+#include "MantidQtWidgets/Common/FittingGlobals.h"
 #include "MantidQtWidgets/Common/FittingMode.h"
 #include "MantidQtWidgets/Common/IFitScriptGeneratorModel.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
@@ -21,16 +22,7 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
-struct GlobalTie {
-
-  GlobalTie(std::string const &parameter, std::string const &tie) {
-    m_parameter = parameter;
-    m_tie = tie;
-  }
-
-  std::string m_parameter;
-  std::string m_tie;
-};
+class IFitScriptGeneratorPresenter;
 
 /**
  * This class stores the domain and fit data to be fitted to. This data is used
@@ -41,6 +33,8 @@ class EXPORT_OPT_MANTIDQT_COMMON FitScriptGeneratorModel
 public:
   FitScriptGeneratorModel();
   ~FitScriptGeneratorModel();
+
+  void subscribePresenter(IFitScriptGeneratorPresenter *presenter) override;
 
   void removeWorkspaceDomain(std::string const &workspaceName,
                              WorkspaceIndex workspaceIndex) override;
@@ -90,6 +84,11 @@ public:
     return m_fittingMode;
   }
 
+  [[nodiscard]] inline std::vector<GlobalTie>
+  getGlobalTies() const noexcept override {
+    return m_globalTies;
+  }
+
 private:
   [[nodiscard]] std::size_t
   findDomainIndex(std::string const &workspaceName,
@@ -116,11 +115,13 @@ private:
   void clearGlobalTie(std::string const &fullParameter);
   [[nodiscard]] std::vector<GlobalTie>::const_iterator
   findGlobalTie(std::string const &fullParameter) const;
+  void checkGlobalTies();
 
   [[nodiscard]] inline std::size_t numberOfDomains() const noexcept {
     return m_fitDomains.size();
   }
 
+  IFitScriptGeneratorPresenter *m_presenter;
   std::vector<FitDomain> m_fitDomains;
   // A vector of global ties. E.g. f0.f0.A0=f1.f0.A0
   std::vector<GlobalTie> m_globalTies;

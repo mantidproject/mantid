@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/FitScriptGeneratorPresenter.h"
 #include "MantidQtWidgets/Common/FitScriptGeneratorModel.h"
+#include "MantidQtWidgets/Common/FittingGlobals.h"
 #include "MantidQtWidgets/Common/IFitScriptGeneratorView.h"
 
 #include "MantidAPI/AnalysisDataService.h"
@@ -26,6 +27,7 @@ FitScriptGeneratorPresenter::FitScriptGeneratorPresenter(
     IFitScriptGeneratorView *view, IFitScriptGeneratorModel *model,
     QStringList const &workspaceNames, double startX, double endX)
     : m_warnings(), m_view(view), m_model(model) {
+  m_model->subscribePresenter(this);
   m_view->subscribePresenter(this);
   setWorkspaces(workspaceNames, startX, endX);
 }
@@ -231,6 +233,7 @@ void FitScriptGeneratorPresenter::handleParameterTieChanged(
                                 equivalentParameter, tie);
   }
 
+  setGlobalTies(m_model->getGlobalTies());
   handleSelectionChanged();
 }
 
@@ -238,6 +241,11 @@ void FitScriptGeneratorPresenter::handleFittingModeChanged(
     FittingMode const &fittingMode) {
   m_model->setFittingMode(fittingMode);
   handleSelectionChanged();
+}
+
+void FitScriptGeneratorPresenter::setGlobalTies(
+    std::vector<GlobalTie> const &globalTies) {
+  m_view->setGlobalTies(globalTies);
 }
 
 void FitScriptGeneratorPresenter::setWorkspaces(

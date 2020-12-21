@@ -22,6 +22,7 @@ namespace MantidWidgets {
 
 class IFitScriptGeneratorModel;
 class IFitScriptGeneratorView;
+struct GlobalTie;
 
 class EXPORT_OPT_MANTIDQT_COMMON FitScriptGeneratorPresenter
     : public IFitScriptGeneratorPresenter {
@@ -38,6 +39,8 @@ public:
                        FittingMode const &fittingMode) override;
 
   void openFitScriptGenerator() override;
+
+  void setGlobalTies(std::vector<GlobalTie> const &globalTies) override;
 
 private:
   void handleRemoveClicked();

@@ -2142,6 +2142,17 @@ void FunctionTreeView::setMultiDomainFunctionPrefix(
 }
 
 /**
+ * The global ties within a multi-domain function. It is used when we don't want
+ * to display an entire MultiDomainFunction, and so we have to store the
+ * GlobalTies manually in this vector.
+ * @param globalTies :: A vector of global ties to be displayed within the
+ * function tree.
+ */
+void FunctionTreeView::setGlobalTies(std::vector<GlobalTie> const &globalTies) {
+  m_globalTies = globalTies;
+}
+
+/**
  * Emit a signal when any of the Global options change.
  */
 void FunctionTreeView::globalChanged(QtProperty *, const QString &, bool) {

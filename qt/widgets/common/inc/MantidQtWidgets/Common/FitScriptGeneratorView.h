@@ -13,7 +13,6 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/AddWorkspaceDialog.h"
 #include "MantidQtWidgets/Common/FitOptionsBrowser.h"
-#include "MantidQtWidgets/Common/FittingMode.h"
 #include "MantidQtWidgets/Common/FunctionTreeView.h"
 #include "MantidQtWidgets/Common/IFitScriptGeneratorView.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
@@ -32,6 +31,7 @@ namespace MantidWidgets {
 
 class FitScriptGeneratorDataTable;
 class IFitScriptGeneratorPresenter;
+struct GlobalTie;
 
 class EXPORT_OPT_MANTIDQT_COMMON FitScriptGeneratorView
     : public IFitScriptGeneratorView {
@@ -79,6 +79,8 @@ public:
   void setFunction(Mantid::API::IFunction_sptr const &function) const override;
 
   void setSimultaneousMode(bool simultaneousMode) override;
+
+  void setGlobalTies(std::vector<GlobalTie> const &globalTies) override;
 
   void displayWarning(std::string const &message) override;
 

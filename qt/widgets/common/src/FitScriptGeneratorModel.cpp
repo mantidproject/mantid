@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/FitScriptGeneratorModel.h"
+#include "MantidQtWidgets/Common/IFitScriptGeneratorPresenter.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FunctionFactory.h"
@@ -128,15 +129,22 @@ namespace MantidQt {
 namespace MantidWidgets {
 
 FitScriptGeneratorModel::FitScriptGeneratorModel()
-    : m_fitDomains(), m_fittingMode(FittingMode::Sequential) {}
+    : m_presenter(), m_fitDomains(), m_fittingMode(FittingMode::Sequential) {}
 
 FitScriptGeneratorModel::~FitScriptGeneratorModel() {}
+
+void FitScriptGeneratorModel::subscribePresenter(
+    IFitScriptGeneratorPresenter *presenter) {
+  m_presenter = presenter;
+}
 
 void FitScriptGeneratorModel::removeWorkspaceDomain(
     std::string const &workspaceName, WorkspaceIndex workspaceIndex) {
   auto const removeIter = findWorkspaceDomain(workspaceName, workspaceIndex);
-  if (removeIter != m_fitDomains.cend())
+  if (removeIter != m_fitDomains.cend()) {
     m_fitDomains.erase(removeIter);
+    checkGlobalTies();
+  }
 }
 
 void FitScriptGeneratorModel::addWorkspaceDomain(
@@ -199,6 +207,7 @@ void FitScriptGeneratorModel::removeFunction(std::string const &workspaceName,
                                              std::string const &function) {
   auto const domainIndex = findDomainIndex(workspaceName, workspaceIndex);
   m_fitDomains[domainIndex].removeFunction(function);
+  checkGlobalTies();
 }
 
 void FitScriptGeneratorModel::addFunction(std::string const &workspaceName,
@@ -206,6 +215,7 @@ void FitScriptGeneratorModel::addFunction(std::string const &workspaceName,
                                           std::string const &function) {
   auto const domainIndex = findDomainIndex(workspaceName, workspaceIndex);
   m_fitDomains[domainIndex].addFunction(createIFunction(function));
+  checkGlobalTies();
 }
 
 void FitScriptGeneratorModel::setFunction(std::string const &workspaceName,
@@ -213,6 +223,7 @@ void FitScriptGeneratorModel::setFunction(std::string const &workspaceName,
                                           std::string const &function) {
   auto const domainIndex = findDomainIndex(workspaceName, workspaceIndex);
   m_fitDomains[domainIndex].setFunction(createIFunction(function));
+  checkGlobalTies();
 }
 
 IFunction_sptr
@@ -309,7 +320,9 @@ bool FitScriptGeneratorModel::validParameter(
     std::string const &fullParameter) const {
   auto const domainIndex = getFunctionIndexAt(fullParameter, 0);
   auto const parameter = getLocalParameter(fullParameter, m_fittingMode);
-  return m_fitDomains[domainIndex].hasParameter(parameter);
+  if (domainIndex < numberOfDomains())
+    return m_fitDomains[domainIndex].hasParameter(parameter);
+  return false;
 }
 
 bool FitScriptGeneratorModel::validGlobalTie(std::string const &fullTie) const {
@@ -322,6 +335,21 @@ void FitScriptGeneratorModel::clearGlobalTie(std::string const &fullParameter) {
   auto const removeIter = findGlobalTie(fullParameter);
   if (removeIter != m_globalTies.cend())
     m_globalTies.erase(removeIter);
+}
+
+void FitScriptGeneratorModel::checkGlobalTies() {
+  auto const valid = [&](GlobalTie const &globalTie) {
+    return !validParameter(globalTie.m_parameter) ||
+           !validGlobalTie(globalTie.m_tie);
+  };
+
+  auto const iter =
+      std::remove_if(m_globalTies.begin(), m_globalTies.end(), valid);
+
+  if (iter != m_globalTies.cend()) {
+    m_globalTies.erase(iter, m_globalTies.cend());
+    m_presenter->setGlobalTies(m_globalTies);
+  }
 }
 
 std::vector<GlobalTie>::const_iterator

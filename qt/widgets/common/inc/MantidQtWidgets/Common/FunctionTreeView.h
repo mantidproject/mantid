@@ -11,6 +11,7 @@
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidKernel/EmptyValues.h"
+#include "MantidQtWidgets/Common/FittingGlobals.h"
 #include "MantidQtWidgets/Common/IFunctionView.h"
 
 #include <QMap>
@@ -54,6 +55,7 @@ namespace MantidWidgets {
 
 class CreateAttributePropertyForFunctionTreeView;
 class SelectFunctionDialog;
+struct GlobalTie;
 
 /**
  * Class FitPropertyBrowser implements QtPropertyBrowser to display
@@ -136,6 +138,8 @@ public:
   // Sets the function prefix of a domain to be displayed within a
   // MultiDomainFunction
   void setMultiDomainFunctionPrefix(const QString &functionPrefix);
+  // Sets the global ties to be displayed within a MultiDomainFunction
+  void setGlobalTies(std::vector<GlobalTie> const &globalTies);
 
 protected:
   /// Create the Qt property browser
@@ -384,6 +388,8 @@ protected:
   /// The function prefix of the domain with a MultiDomainFunction currently
   /// being displayed.
   QString m_multiDomainFunctionPrefix;
+  // A vector of global ties. E.g. f0.f0.A0=f1.f0.A0
+  std::vector<GlobalTie> m_globalTies;
   std::vector<std::string> m_allowedCategories;
   SelectFunctionDialog *m_selectFunctionDialog;
   QtProperty *m_selectedFunctionProperty;

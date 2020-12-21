@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/FitScriptGeneratorView.h"
 #include "MantidQtWidgets/Common/FitScriptGeneratorDataTable.h"
+#include "MantidQtWidgets/Common/FittingGlobals.h"
 #include "MantidQtWidgets/Common/IFitScriptGeneratorPresenter.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/DoubleDialogEditor.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h"
@@ -303,6 +304,11 @@ void FitScriptGeneratorView::setFunction(IFunction_sptr const &function) const {
     m_functionTreeView->setFunction(function);
   else
     m_functionTreeView->clear();
+}
+
+void FitScriptGeneratorView::setGlobalTies(
+    std::vector<GlobalTie> const &globalTies) {
+  m_functionTreeView->setGlobalTies(globalTies);
 }
 
 void FitScriptGeneratorView::displayWarning(std::string const &message) {
