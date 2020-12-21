@@ -2,6 +2,10 @@
 <parameter-file instrument = "D22B">
 
     <component-link name="D22B">
+      <!-- The name of the panels for separate I(Q) calculations, the names are from the IDF -->
+      <parameter name="detector_panels" type="string">
+        <value val="detector,detector_right"/>
+      </parameter>
       <!-- Tau coefficient for DeadTimeCorrection, to be applied tube by tube -->
       <parameter name="tau" type="number">
         <value val="0.0000015" />
