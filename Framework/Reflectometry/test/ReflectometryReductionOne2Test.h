@@ -491,13 +491,7 @@ public:
     TS_ASSERT_DELTA(outLam->y(0)[3], 2.792649, 1e-6);
     TS_ASSERT_DELTA(outLam->y(0)[7], 2.787410, 1e-6);
 
-    MatrixWorkspace_sptr outQ = runAlgorithmQ(alg, 12);
-    TS_ASSERT_DELTA(outQ->x(0)[0], 0.265534, 1e-6);
-    TS_ASSERT_DELTA(outQ->x(0)[3], 0.347983, 1e-6);
-    TS_ASSERT_DELTA(outQ->x(0)[7], 0.593830, 1e-6);
-    TS_ASSERT_DELTA(outQ->y(0)[0], 2.816015, 1e-6);
-    TS_ASSERT_DELTA(outQ->y(0)[3], 2.794903, 1e-6);
-    TS_ASSERT_DELTA(outQ->y(0)[7], 2.654336, 1e-6);
+    checkConversionToQ(alg, twoThetaForDetector3() / 2.0);
   }
 
   void test_sum_in_q_non_flat_sample() {
@@ -520,13 +514,7 @@ public:
     TS_ASSERT_DELTA(outLam->y(0)[3], 3.141885, 1e-6);
     TS_ASSERT_DELTA(outLam->y(0)[7], 3.141920, 1e-6);
 
-    MatrixWorkspace_sptr outQ = runAlgorithmQ(alg, 10);
-    TS_ASSERT_DELTA(outQ->x(0)[0], 0.317653, 1e-6);
-    TS_ASSERT_DELTA(outQ->x(0)[3], 0.443303, 1e-6);
-    TS_ASSERT_DELTA(outQ->x(0)[7], 0.938025, 1e-6);
-    TS_ASSERT_DELTA(outQ->y(0)[0], 3.141937, 1e-6);
-    TS_ASSERT_DELTA(outQ->y(0)[3], 3.141912, 1e-6);
-    TS_ASSERT_DELTA(outQ->y(0)[7], 3.141877, 1e-6);
+    checkConversionToQ(alg, twoThetaForDetector3() / 2.0);
   }
 
   void test_sum_in_q_monitor_normalization() {
@@ -562,13 +550,7 @@ public:
     TS_ASSERT_DELTA(outLam->y(0)[5], 2.193650, 1e-6);
     TS_ASSERT_DELTA(outLam->y(0)[9], 2.255101, 1e-6);
 
-    MatrixWorkspace_sptr outQ = runAlgorithmQ(alg, 13);
-    TS_ASSERT_DELTA(outQ->x(0)[0], -6.423295, 1e-6);
-    TS_ASSERT_DELTA(outQ->x(0)[5], 0.761430, 1e-6);
-    TS_ASSERT_DELTA(outQ->x(0)[9], 0.401845, 1e-6);
-    TS_ASSERT_DELTA(outQ->y(0)[0], 5.040302, 1e-6);
-    TS_ASSERT_DELTA(outQ->y(0)[5], 2.193650, 1e-6);
-    TS_ASSERT_DELTA(outQ->y(0)[9], 2.255101, 1e-6);
+    checkConversionToQ(alg, twoThetaForDetector4() / 2.0, false, false);
   }
 
   void test_sum_in_q_transmission_correction_run() {
@@ -589,13 +571,7 @@ public:
     TS_ASSERT_DELTA(outLam->y(0)[3], 0.888541, 1e-6);
     TS_ASSERT_DELTA(outLam->y(0)[7], 0.886874, 1e-6);
 
-    MatrixWorkspace_sptr outQ = runAlgorithmQ(alg, 12);
-    TS_ASSERT_DELTA(outQ->x(0)[0], 0.265534, 1e-6);
-    TS_ASSERT_DELTA(outQ->x(0)[3], 0.347983, 1e-6);
-    TS_ASSERT_DELTA(outQ->x(0)[7], 0.593830, 1e-6);
-    TS_ASSERT_DELTA(outQ->y(0)[0], 3.959740, 1e-6);
-    TS_ASSERT_DELTA(outQ->y(0)[3], 0.889259, 1e-6);
-    TS_ASSERT_DELTA(outQ->y(0)[7], 0.844534, 1e-6);
+    checkConversionToQ(alg, twoThetaForDetector3() / 2.0, true, false);
   }
 
   void test_sum_in_q_exponential_correction() {
@@ -618,13 +594,7 @@ public:
     TS_ASSERT_DELTA(outLam->y(0)[3], 23.963534, 1e-6);
     TS_ASSERT_DELTA(outLam->y(0)[7], 39.756736, 1e-6);
 
-    MatrixWorkspace_sptr outQ = runAlgorithmQ(alg, 11);
-    TS_ASSERT_DELTA(outQ->x(0)[0], 0.292123, 1e-6);
-    TS_ASSERT_DELTA(outQ->x(0)[3], 0.393419, 1e-6);
-    TS_ASSERT_DELTA(outQ->x(0)[7], 0.731735, 1e-6);
-    TS_ASSERT_DELTA(outQ->y(0)[0], 58.425212, 1e-6);
-    TS_ASSERT_DELTA(outQ->y(0)[3], 39.756737, 1e-6);
-    TS_ASSERT_DELTA(outQ->y(0)[7], 23.963535, 1e-6);
+    checkConversionToQ(alg, twoThetaForDetector4() / 2.0);
   }
 
   void test_sum_in_q_point_detector() {
@@ -669,13 +639,7 @@ public:
     TS_ASSERT_DELTA(outLam->y(0)[3], 2.792424, 1e-6);
     TS_ASSERT_DELTA(outLam->y(0)[7], 2.787199, 1e-6);
 
-    MatrixWorkspace_sptr outQ = runAlgorithmQ(alg, 11);
-    TS_ASSERT_DELTA(outQ->x(0)[0], 0.288113, 1e-6);
-    TS_ASSERT_DELTA(outQ->x(0)[3], 0.387812, 1e-6);
-    TS_ASSERT_DELTA(outQ->x(0)[7], 0.720023, 1e-6);
-    TS_ASSERT_DELTA(outQ->y(0)[0], 2.808998, 1e-6);
-    TS_ASSERT_DELTA(outQ->y(0)[3], 2.787199, 1e-6);
-    TS_ASSERT_DELTA(outQ->y(0)[7], 2.792423, 1e-6);
+    checkConversionToQ(alg, twoThetaForDetector3() / 2.0);
   }
 
   void test_sum_in_q_exclude_partial_bins_multiple_detectors() {
@@ -695,13 +659,7 @@ public:
     TS_ASSERT_DELTA(outLam->y(0)[3], 8.521195, 1e-6);
     TS_ASSERT_DELTA(outLam->y(0)[7], 8.306563, 1e-6);
 
-    MatrixWorkspace_sptr outQ = runAlgorithmQ(alg, 11);
-    TS_ASSERT_DELTA(outQ->x(0)[0], 0.291466, 1e-6);
-    TS_ASSERT_DELTA(outQ->x(0)[3], 0.392230, 1e-6);
-    TS_ASSERT_DELTA(outQ->x(0)[7], 0.727631, 1e-6);
-    TS_ASSERT_DELTA(outQ->y(0)[0], 8.554743, 1e-6);
-    TS_ASSERT_DELTA(outQ->y(0)[3], 8.306564, 1e-6);
-    TS_ASSERT_DELTA(outQ->y(0)[7], 8.521194, 1e-6);
+    checkConversionToQ(alg, twoThetaForDetector4() / 2.0);
   }
 
   void test_angle_correction_is_done_for_sum_in_lambda_when_theta_provided() {
@@ -1302,6 +1260,50 @@ private:
     TS_ASSERT_EQUALS(outQ->blocksize(), blocksize);
 
     return outQ;
+  }
+
+  /** Check conversion of x values in a workspace in lambda to a workspace in Q
+   * has been done correctly. Optionally also check the counts.
+   *
+   * @param alg : the algorithm, which has already been executed
+   * @param theta : the theta to use in the conversion in degrees
+   * @param invert : if true, the Q bins are in inverted order to the lambda
+   * bins
+   * @param checkCounts : if true, also check the counts in the bins are the
+   * same
+   */
+  void checkConversionToQ(ReflectometryReductionOne2 &alg, const double theta,
+                          const bool invert = true,
+                          const bool checkCounts = true) {
+    // Extract arrays for convenience
+    MatrixWorkspace_sptr outLam = alg.getProperty("OutputWorkspaceWavelength");
+    MatrixWorkspace_sptr outQ = alg.getProperty("OutputWorkspace");
+    auto const &edgesLam = outLam->binEdges(0);
+    auto const &edgesQ = outQ->binEdges(0);
+    auto const &countsLam = outLam->counts(0);
+    auto const &countsQ = outQ->counts(0);
+
+    // Check lengths match
+    TS_ASSERT_EQUALS(edgesLam.size(), edgesQ.size());
+    TS_ASSERT_EQUALS(countsLam.size(), countsQ.size());
+
+    // Convenience function for optionally inverting an index
+    auto lamIdx = [&invert](auto const idx, auto const len) {
+      return invert ? len - 1 - idx : idx;
+    };
+
+    // Check converting the lambda value to Q gives the result we got
+    auto const nEdges = edgesQ.size();
+    auto const factor = 4 * M_PI * std::sin(theta * degToRad);
+    for (size_t i = 0; i < nEdges; ++i)
+      TS_ASSERT_DELTA(edgesQ[i], factor / edgesLam[lamIdx(i, nEdges)], 1e-6);
+
+    if (checkCounts) {
+      // Counts should be the same in matching bins
+      auto const nCounts = countsQ.size();
+      for (size_t i = 0; i < nCounts; ++i)
+        TS_ASSERT_DELTA(countsQ[i], countsLam[lamIdx(i, nCounts)], 1e-6);
+    }
   }
 
   void setYValuesToWorkspace(MatrixWorkspace &ws) {
