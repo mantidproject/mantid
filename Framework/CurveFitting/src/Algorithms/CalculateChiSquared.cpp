@@ -23,20 +23,20 @@ using namespace Functions;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CalculateChiSquared)
 
-//----------------------------------------------------------------------------------------------
-namespace {
-
 /// Caclculate the chi squared, weighted chi squared and the number of degrees
 /// of freedom.
+/// @param fun :: Fitting function
+/// @param nParams :: Number of fitting parameters.
 /// @param domain :: Function's domain.
-/// @param nParams :: Number of free fitting parameters.
-/// @param values :: Functin's values.
-/// @param chi0 :: Chi squared at the minimum.
-/// @param sigma2 :: Estimated variance of the fitted data.
-void calcChiSquared(const API::IFunction &fun, size_t nParams,
-                    const API::FunctionDomain &domain,
-                    API::FunctionValues &values, double &chiSquared,
-                    double &chiSquaredWeighted, double &dof) {
+/// @param values :: Function's values.
+/// @param chiSquared :: Chi squared  value
+/// @param chiSquaredWeighted :: Weighted chi squared  value
+/// @param dof :: Number of degrees of freedom in the fit -> numDataPoints -
+/// numFreeParameters.
+void CalculateChiSquared::calcChiSquared(
+    const API::IFunction &fun, size_t nParams,
+    const API::FunctionDomain &domain, API::FunctionValues &values,
+    double &chiSquared, double &chiSquaredWeighted, double &dof) {
 
   // Calculate function values.
   fun.function(domain, values);
@@ -59,8 +59,6 @@ void calcChiSquared(const API::IFunction &fun, size_t nParams,
     dof = 1.0;
   }
 }
-} // namespace
-
 //----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
@@ -195,7 +193,7 @@ double getDiff(const API::IFunction &fun, size_t nParams,
   double chiSquared = 0.0;
   double chiSquaredWeighted = 0.0;
   double dof = 0;
-  calcChiSquared(fun, nParams, domain, values, chiSquared, chiSquaredWeighted,
+  CalculateChiSquared::calcChiSquared(fun, nParams, domain, values, chiSquared, chiSquaredWeighted,
                  dof);
   double res = 0.0;
   if (sigma2 > 0) {

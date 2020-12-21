@@ -70,7 +70,6 @@ using namespace Mantid::API;
 int getNumberOfSpectra(const MatrixWorkspace_sptr &workspace) {
   return static_cast<int>(workspace->getNumberHistograms());
 }
-
 } // namespace
 
 /**
@@ -1742,10 +1741,13 @@ void FitPropertyBrowser::finishHandle(const Mantid::API::IAlgorithm *alg) {
   emit fitResultsChanged(status);
   // update Quality string
   if (m_displayActionQuality->isChecked()) {
-    double quality = alg->getProperty("OutputChi2overDoF");
     std::string costFunction = alg->getProperty("CostFunction");
     std::shared_ptr<Mantid::API::ICostFunction> costfun =
         Mantid::API::CostFunctionFactory::Instance().create(costFunction);
+    double quality = alg->getProperty("FinalCostFunctionValue");
+    if (costFunction == "Least squares") {
+      quality = alg->getProperty("OutputChi2overDoF");
+    }
     if (status != "success") {
       status = "failed";
     }

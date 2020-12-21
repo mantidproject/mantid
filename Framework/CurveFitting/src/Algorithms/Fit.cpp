@@ -8,6 +8,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Algorithms/Fit.h"
+#include "MantidCurveFitting/Algorithms/CalculateChiSquared.h"
 #include "MantidCurveFitting/CostFunctions/CostFuncFitting.h"
 
 #include "MantidAPI/CompositeFunction.h"
@@ -82,6 +83,10 @@ void Fit::initConcrete() {
       "CostFunction", "Least squares", costFuncValidator,
       "The cost function to be used for the fit, default is Least squares",
       Kernel::Direction::InOut);
+  declareProperty("FinalCostFunctionValue", 0.0,
+                  "Returns the final value of the cost function normalised by "
+                  "the number of degrees of freedom",
+                  Kernel::Direction::Output);
   declareProperty(
       "CreateOutput", false,
       "Set to true to create output workspaces with the results of the fit"
@@ -229,14 +234,19 @@ void Fit::finalizeMinimizer(size_t nIterations) {
 /// Create algorithm output worksapces.
 void Fit::createOutput() {
 
-  // degrees of freedom
-  size_t dof = m_costFunction->getDomain()->size() - m_costFunction->nParams();
-  if (dof == 0)
-    dof = 1;
-  double rawcostfuncval = m_minimizer->costFunctionVal();
-  double finalCostFuncVal = rawcostfuncval / double(dof);
+  // calculate chisq
+  double dof = 0;
+  double chisq = 0.0;  // chi sq
+  double wchisq = 0.0; // weighted chi sq
+  CalculateChiSquared::calcChiSquared(
+      *m_function, m_costFunction->nParams(), *m_costFunction->getDomain(),
+      *m_costFunction->getValues(), chisq, wchisq, dof);
+  double rchisq = wchisq / dof;
+  setProperty("OutputChi2overDoF", rchisq);
 
-  setProperty("OutputChi2overDoF", finalCostFuncVal);
+  double rawcostfuncval = m_minimizer->costFunctionVal();
+  double finalCostFuncVal = rawcostfuncval / dof;
+  setProperty("FinalCostFunctionValue", finalCostFuncVal);
 
   bool doCreateOutput = getProperty("CreateOutput");
   std::string baseName = getPropertyValue("Output");
@@ -255,7 +265,7 @@ void Fit::createOutput() {
   if (doCalcErrors) {
     // Calculate the covariance matrix and the errors.
     m_costFunction->calCovarianceMatrix(covar);
-    m_costFunction->calFittingErrors(covar, rawcostfuncval);
+    m_costFunction->calFittingErrors(covar, chisq);
   }
 
   if (doCreateOutput) {
@@ -397,7 +407,6 @@ void Fit::execConcrete() {
 
   progress(1.0);
 }
-
 } // namespace Algorithms
 } // namespace CurveFitting
 } // namespace Mantid
