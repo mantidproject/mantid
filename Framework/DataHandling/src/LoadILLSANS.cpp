@@ -147,6 +147,10 @@ void LoadILLSANS::exec() {
     const double angle = firstEntry.getFloat(instrumentPath + "/Gamma/value");
     placeD16(-angle, distance, "detector");
 
+  } else if (m_instrumentName == "D11B") {
+    initWorkSpaceD11B(firstEntry, instrumentPath);
+    progress.report("Loading the instrument " + m_instrumentName);
+    runLoadInstrument();
   } else {
     initWorkSpace(firstEntry, instrumentPath);
     progress.report("Loading the instrument " + m_instrumentName);
@@ -187,6 +191,11 @@ void LoadILLSANS::setInstrumentName(const NeXus::NXEntry &firstEntry,
       firstEntry, instrumentNamePath + "/name");
   const auto inst = std::find(m_supportedInstruments.begin(),
                               m_supportedInstruments.end(), m_instrumentName);
+
+  if (m_instrumentName == "D11" && firstEntry.containsGroup("data1")) {
+    m_instrumentName = "D11B";
+  }
+
   if (inst == m_supportedInstruments.end()) {
     throw std::runtime_error(
         "Instrument " + m_instrumentName +
@@ -264,6 +273,44 @@ void LoadILLSANS::initWorkSpace(NeXus::NXEntry &firstEntry,
   if (data.dim1() == 128) {
     m_resMode = "low";
   }
+}
+
+/**
+ * @brief LoadILLSANS::initWorkSpaceD11B Load D11B data
+ * @param firstEntry
+ * @param instrumentPath
+ */
+void LoadILLSANS::initWorkSpaceD11B(NeXus::NXEntry &firstEntry,
+                                    const std::string &instrumentPath) {
+  g_log.debug("Fetching data...");
+
+  NXData data1 = firstEntry.openNXData("data1");
+  NXInt dataCenter = data1.openIntData();
+  dataCenter.load();
+  NXData data2 = firstEntry.openNXData("data2");
+  NXInt dataRight = data2.openIntData();
+  dataRight.load();
+  NXData data3 = firstEntry.openNXData("data3");
+  NXInt dataLeft = data3.openIntData();
+  dataLeft.load();
+
+  size_t numberOfHistograms =
+      static_cast<size_t>(dataCenter.dim0() * dataCenter.dim1() +
+                          dataRight.dim0() * dataRight.dim1() +
+                          dataLeft.dim0() * dataLeft.dim1()) +
+      N_MONITORS;
+
+  createEmptyWorkspace(numberOfHistograms, 1);
+  loadMetaData(firstEntry, instrumentPath);
+
+  size_t nextIndex;
+  nextIndex =
+      loadDataIntoWorkspaceFromVerticalTubes(dataCenter, m_defaultBinning, 0);
+  nextIndex = loadDataIntoWorkspaceFromVerticalTubes(dataLeft, m_defaultBinning,
+                                                     nextIndex);
+  nextIndex = loadDataIntoWorkspaceFromVerticalTubes(
+      dataRight, m_defaultBinning, nextIndex);
+  nextIndex = loadDataIntoWorkspaceFromMonitors(firstEntry, nextIndex);
 }
 
 /**
@@ -459,6 +506,7 @@ size_t LoadILLSANS::loadDataIntoWorkspaceFromVerticalTubes(
     numberOfTubes = data.dim0();
     histogramWidth = data.dim2();
   }
+
   const int numberOfPixelsPerTube = data.dim1();
   const HistogramData::BinEdges binEdges(timeBinning);
 
