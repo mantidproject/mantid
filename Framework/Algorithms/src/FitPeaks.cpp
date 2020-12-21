@@ -967,7 +967,6 @@ FitPeaks::fitPeaks() {
           std::make_shared<FitPeaksAlgorithm::PeakFitResult>(m_numPeaksToFit,
                                                              numfuncparams);
 
-      (m_peakFunction->nParams(), 0.);
       fitSpectrumPeaks(static_cast<size_t>(wi), expected_peak_centers,
                        fit_result, lastGoodPeakParameters);
 
@@ -1080,11 +1079,11 @@ void FitPeaks::fitSpectrumPeaks(
 
     double expected_peak_pos = expected_peak_centers[peak_index];
 
-    bool foundAnyPeak =
-        (lastGoodPeakParameters[fit_index].size() >
-         std::count_if(lastGoodPeakParameters[fit_index].begin(),
-                       lastGoodPeakParameters[fit_index].end(),
-                       [&](auto const &val) { return val <= 1e-10; }));
+    bool foundAnyPeak = (lastGoodPeakParameters[fit_index].size() >
+                         static_cast<size_t>(std::count_if(
+                             lastGoodPeakParameters[fit_index].begin(),
+                             lastGoodPeakParameters[fit_index].end(),
+                             [&](auto const &val) { return val <= 1e-10; })));
     if (foundAnyPeak) {
       // set the peak parameters from last good fit to that peak
       for (size_t i = 0; i < lastGoodPeakParameters[fit_index].size(); ++i) {
