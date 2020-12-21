@@ -333,7 +333,7 @@ class DrillView(QMainWindow):
                 and (shape != (0, 0))):
             for i in range(len(cells)):
                 self.table.setCellContents(cells[i][0], cells[i][1],
-                                           self.buffer[i % shape[1]])
+                                           self.buffer[int(i / shape[0])])
         elif self.buffer and shape != self.bufferShape and shape != (0, 0):
             QMessageBox.warning(self, "Paste error",
                                 "The selection does not correspond to the "
