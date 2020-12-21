@@ -31,7 +31,7 @@ Bug fixes
 - Fixed an error caused by switching between the Run and Group/Pair selection when TF Asymmetry mode is ticked.
 - Fixed a bug that can sometimes cause the MaxEnt calculation to fail in frequency domain analysis.
 - Fixed a crash when trying to do a simultaneous fit with no data loaded after pressing clear all.
-
+- Fixed a bug where changing rebin wouldn't update the plot in the GUI
 
 ALC
 ---
