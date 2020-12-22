@@ -26,7 +26,7 @@ class EngineeringDiffractionEncoder(EngineeringDiffractionUIAttributes):
         if data_widget.presenter.get_loaded_workspaces():
             obj_dic["data_loaded_workspaces"] = [*data_widget.presenter.get_loaded_workspaces().keys()]
             obj_dic["plotted_workspaces"] = [*data_widget.presenter.plotted]
-            if plot_widget.view.fit_browser.get_fitprop():
+            if plot_widget.view.fit_browser.read_current_fitprop():
                 obj_dic["fit_properties"] = plot_widget.view.fit_browser.read_current_fitprop()
                 obj_dic["plot_diff"] = str(plot_widget.view.fit_browser.plotDiff())
             else:
