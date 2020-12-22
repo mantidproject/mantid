@@ -54,6 +54,7 @@ Elemental Analysis
 
 New Features
 ############
+- Added a new XrayAbsorptionCorrection algorithm. See :ref:`XrayAbsorptionCorrection <algm-XrayAbsorptionCorrection>`
 
 Bug fixes
 #########
