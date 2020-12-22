@@ -554,7 +554,7 @@ public:
     TS_ASSERT_DELTA(outLam->y(0)[5], 2.249948, 1e-6);
     TS_ASSERT_DELTA(outLam->y(0)[9], 2.044359, 1e-6);
 
-    checkConversionToQ(alg, twoThetaForDetector4() / 2.0, false, false);
+    checkConversionToQ(alg, twoThetaForDetector4() / 2.0, false);
 
     TS_ASSERT_DELTA(sumCounts(outLam->counts(0)), 61.622606, 1e-6);
   }
@@ -577,7 +577,7 @@ public:
     TS_ASSERT_DELTA(outLam->y(0)[3], 0.883535, 1e-6);
     TS_ASSERT_DELTA(outLam->y(0)[7], 0.893197, 1e-6);
 
-    checkConversionToQ(alg, twoThetaForDetector3() / 2.0, true, false);
+    checkConversionToQ(alg, twoThetaForDetector3() / 2.0, false);
 
     TS_ASSERT_DELTA(sumCounts(outLam->counts(0)), 12.865793, 1e-6);
   }
@@ -1283,13 +1283,10 @@ private:
    *
    * @param alg : the algorithm, which has already been executed
    * @param theta : the theta to use in the conversion in degrees
-   * @param invert : if true, the Q bins are in inverted order to the lambda
-   * bins
    * @param checkCounts : if true, also check the counts in the bins are the
    * same
    */
   void checkConversionToQ(ReflectometryReductionOne2 &alg, const double theta,
-                          const bool invert = true,
                           const bool checkCounts = true) {
     // Extract arrays for convenience
     MatrixWorkspace_sptr outLam = alg.getProperty("OutputWorkspaceWavelength");
@@ -1303,22 +1300,17 @@ private:
     TS_ASSERT_EQUALS(edgesLam.size(), edgesQ.size());
     TS_ASSERT_EQUALS(countsLam.size(), countsQ.size());
 
-    // Convenience function for optionally inverting an index
-    auto lamIdx = [&invert](auto const idx, auto const len) {
-      return invert ? len - 1 - idx : idx;
-    };
-
     // Check converting the lambda value to Q gives the result we got
     auto const nEdges = edgesQ.size();
     auto const factor = 4 * M_PI * std::sin(theta * degToRad);
     for (size_t i = 0; i < nEdges; ++i)
-      TS_ASSERT_DELTA(edgesQ[i], factor / edgesLam[lamIdx(i, nEdges)], 1e-6);
+      TS_ASSERT_DELTA(edgesQ[i], factor / edgesLam[nEdges - 1 - i], 1e-6);
 
     if (checkCounts) {
       // Counts should be the same in matching bins
       auto const nCounts = countsQ.size();
       for (size_t i = 0; i < nCounts; ++i)
-        TS_ASSERT_DELTA(countsQ[i], countsLam[lamIdx(i, nCounts)], 1e-6);
+        TS_ASSERT_DELTA(countsQ[i], countsLam[nCounts - 1 - i], 1e-6);
     }
   }
 
