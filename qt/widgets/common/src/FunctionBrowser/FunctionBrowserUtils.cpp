@@ -7,6 +7,8 @@
 #include "MantidQtWidgets/Common/FunctionBrowser/FunctionBrowserUtils.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/Expression.h"
+
+#include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 
 namespace MantidQt {
@@ -121,6 +123,32 @@ splitConstraintString(const QString &constraint) {
   }
   return std::make_pair(paramName,
                         std::make_pair(lowerBoundStr, upperBoundStr));
+}
+
+bool isNumber(std::string const &str) {
+  return !str.empty() &&
+         str.find_first_not_of("0123456789.-") == std::string::npos;
+}
+
+std::vector<std::string> splitStringBy(std::string const &str,
+                                       std::string const &delimiter) {
+  std::vector<std::string> subStrings;
+  boost::split(subStrings, str, boost::is_any_of(delimiter));
+  subStrings.erase(std::remove_if(subStrings.begin(), subStrings.end(),
+                                  [](std::string const &subString) {
+                                    return subString.empty();
+                                  }),
+                   subStrings.cend());
+  return subStrings;
+}
+
+std::size_t getFunctionIndexAt(std::string const &parameter,
+                               std::size_t const &index) {
+  auto subStrings = splitStringBy(parameter, "f.");
+  if (index < subStrings.size())
+    return std::stoull(subStrings[index]);
+
+  throw std::invalid_argument("Incorrect function index provided.");
 }
 
 } // namespace MantidWidgets

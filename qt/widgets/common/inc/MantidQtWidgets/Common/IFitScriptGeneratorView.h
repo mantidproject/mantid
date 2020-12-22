@@ -46,6 +46,8 @@ public:
     ParameterChanged,
     AttributeChanged,
     ParameterTieChanged,
+    ParameterConstraintRemoved,
+    ParameterConstraintChanged,
     FittingModeChanged
   };
 

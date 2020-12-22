@@ -11,6 +11,9 @@
 #include <QString>
 #include <boost/optional.hpp>
 
+#include <string>
+#include <vector>
+
 namespace MantidQt {
 namespace MantidWidgets {
 
@@ -43,6 +46,17 @@ splitFunctionPrefix(const QString &prefix);
 /// for example -1 < f0.A1 < 2 ==> (f0.A1, (-1, 2))
 EXPORT_OPT_MANTIDQT_COMMON std::pair<QString, std::pair<QString, QString>>
 splitConstraintString(const QString &constraint);
+
+/// Checks if a string contains a number, or whether it contains characters
+EXPORT_OPT_MANTIDQT_COMMON bool isNumber(std::string const &str);
+
+/// Splits the string by the given delimiters
+EXPORT_OPT_MANTIDQT_COMMON std::vector<std::string>
+splitStringBy(std::string const &str, std::string const &delimiter);
+
+/// Returns the function index found at index of a parameter
+EXPORT_OPT_MANTIDQT_COMMON std::size_t
+getFunctionIndexAt(std::string const &parameter, std::size_t const &index);
 
 class ScopedFalse {
   bool &m_ref;

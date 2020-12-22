@@ -49,9 +49,14 @@ public:
   [[nodiscard]] bool hasParameter(std::string const &parameter) const;
   [[nodiscard]] double getParameterValue(std::string const &parameter) const;
 
+  void clearParameterTie(std::string const &parameter);
   [[nodiscard]] bool updateParameterTie(std::string const &parameter,
                                         std::string const &tie);
-  void clearParameterTie(std::string const &parameter);
+
+  void removeParameterConstraint(std::string const &parameter);
+  void updateParameterConstraint(std::string const &functionIndex,
+                                 std::string const &parameter,
+                                 std::string const &constraint);
 
 private:
   bool setParameterTie(std::string const &parameter, std::string const &tie);
@@ -69,6 +74,11 @@ private:
   removeFunctionFromComposite(std::string const &function,
                               Mantid::API::CompositeFunction_sptr &composite);
   void addFunctionToExisting(Mantid::API::IFunction_sptr const &function);
+
+  void updateParameterConstraint(Mantid::API::CompositeFunction_sptr &composite,
+                                 std::string const &functionIndex,
+                                 std::string const &parameter,
+                                 std::string const &constraint);
 
   std::string m_workspaceName;
   WorkspaceIndex m_workspaceIndex;

@@ -69,11 +69,6 @@ QString removePrefix(QString &param) {
   }
 }
 
-bool isTieConstant(std::string const &tie) {
-  return !tie.empty() &&
-         tie.find_first_not_of("0123456789.-") == std::string::npos;
-}
-
 bool containsOneOf(std::string const &str, std::string const &delimiters) {
   return !str.empty() && str.find_first_of(delimiters) != std::string::npos;
 }
@@ -1107,8 +1102,7 @@ void FunctionTreeView::addTieProperty(QtProperty *prop, const QString &tie,
  * @returns The full tie to use as a tie property.
  */
 QString FunctionTreeView::getFullTie(const QString &tie) const {
-  if (!isTieConstant(tie.toStdString()) &&
-      !containsOneOf(tie.toStdString(), "="))
+  if (!isNumber(tie.toStdString()) && !containsOneOf(tie.toStdString(), "="))
     return m_multiDomainFunctionPrefix + tie;
   return tie;
 }

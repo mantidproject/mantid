@@ -62,9 +62,9 @@ public:
   getFunction(std::string const &workspaceName,
               WorkspaceIndex workspaceIndex) override;
 
-  [[nodiscard]] std::string getEquivalentParameterForDomain(
+  [[nodiscard]] std::string getEquivalentFunctionIndexForDomain(
       std::string const &workspaceName, WorkspaceIndex workspaceIndex,
-      std::string const &fullParameter) const override;
+      std::string const &functionIndex) const override;
   [[nodiscard]] std::string
   getEquivalentParameterTieForDomain(std::string const &workspaceName,
                                      WorkspaceIndex workspaceIndex,
@@ -73,16 +73,24 @@ public:
 
   void updateParameterValue(std::string const &workspaceName,
                             WorkspaceIndex workspaceIndex,
-                            std::string const &parameter,
+                            std::string const &fullParameter,
                             double newValue) override;
   void updateAttributeValue(
       std::string const &workspaceName, WorkspaceIndex workspaceIndex,
-      std::string const &attribute,
+      std::string const &fullAttribute,
       Mantid::API::IFunction::Attribute const &newValue) override;
+
   void updateParameterTie(std::string const &workspaceName,
                           WorkspaceIndex workspaceIndex,
-                          std::string const &parameter,
+                          std::string const &fullParameter,
                           std::string const &tie) override;
+  void removeParameterConstraint(std::string const &workspaceName,
+                                 WorkspaceIndex workspaceIndex,
+                                 std::string const &fullParameter) override;
+  void updateParameterConstraint(std::string const &workspaceName,
+                                 WorkspaceIndex workspaceIndex,
+                                 std::string const &functionIndex,
+                                 std::string const &constraint) override;
 
   void setFittingMode(FittingMode const &fittingMode) override;
   [[nodiscard]] inline FittingMode getFittingMode() const noexcept override {
@@ -104,10 +112,12 @@ private:
   [[nodiscard]] bool hasWorkspaceDomain(std::string const &workspaceName,
                                         WorkspaceIndex workspaceIndex) const;
 
-  std::string
+  [[nodiscard]] std::string
   getEquivalentParameterTieForDomain(std::size_t const &domainIndex,
                                      std::string const &fullParameter,
                                      std::string const &fullTie) const;
+  [[nodiscard]] std::string
+  getAdjustedFunctionIndex(std::string const &parameter) const;
 
   void updateParameterTie(std::size_t const &domainIndex,
                           std::string const &fullParameter,
@@ -121,11 +131,13 @@ private:
 
   void updateParameterValuesWithGlobalTieTo(std::string const &parameter);
 
-  double getParameterValue(std::string const &fullParameter) const;
+  [[nodiscard]] double
+  getParameterValue(std::string const &fullParameter) const;
 
   [[nodiscard]] bool validParameter(std::string const &fullParameter) const;
-
+  [[nodiscard]] bool validTie(std::string const &fullTie) const;
   [[nodiscard]] bool validGlobalTie(std::string const &fullTie) const;
+
   void clearGlobalTie(std::string const &fullParameter);
   [[nodiscard]] bool hasGlobalTie(std::string const &fullParameter) const;
   [[nodiscard]] std::vector<GlobalTie>::const_iterator

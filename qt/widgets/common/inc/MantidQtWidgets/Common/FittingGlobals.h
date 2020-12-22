@@ -15,8 +15,6 @@ struct GlobalTie {
 
   GlobalTie(std::string const &parameter, std::string const &tie);
 
-  std::string removeTopIndex(std::string const &parameter) const;
-
   std::string m_parameter;
   std::string m_tie;
 };

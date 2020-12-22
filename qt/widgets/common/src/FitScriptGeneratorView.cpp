@@ -75,20 +75,27 @@ void FitScriptGeneratorView::connectUiSignals() {
           SLOT(onItemPressed()));
 
   connect(m_functionTreeView.get(),
-          SIGNAL(functionRemovedString(const QString &)), this,
-          SLOT(onFunctionRemoved(const QString &)));
-  connect(m_functionTreeView.get(), SIGNAL(functionAdded(const QString &)),
+          SIGNAL(functionRemovedString(QString const &)), this,
+          SLOT(onFunctionRemoved(QString const &)));
+  connect(m_functionTreeView.get(), SIGNAL(functionAdded(QString const &)),
           this, SLOT(onFunctionAdded(const QString &)));
-  connect(m_functionTreeView.get(), SIGNAL(functionReplaced(const QString &)),
-          this, SLOT(onFunctionReplaced(const QString &)));
-  connect(m_functionTreeView.get(), SIGNAL(parameterChanged(const QString &)),
-          this, SLOT(onParameterChanged(const QString &)));
+  connect(m_functionTreeView.get(), SIGNAL(functionReplaced(QString const &)),
+          this, SLOT(onFunctionReplaced(QString const &)));
+  connect(m_functionTreeView.get(), SIGNAL(parameterChanged(QString const &)),
+          this, SLOT(onParameterChanged(QString const &)));
   connect(m_functionTreeView.get(),
-          SIGNAL(attributePropertyChanged(const QString &)), this,
-          SLOT(onAttributeChanged(const QString &)));
+          SIGNAL(attributePropertyChanged(QString const &)), this,
+          SLOT(onAttributeChanged(QString const &)));
   connect(m_functionTreeView.get(),
-          SIGNAL(parameterTieChanged(const QString &, const QString &)), this,
-          SLOT(onParameterTieChanged(const QString &, const QString &)));
+          SIGNAL(parameterTieChanged(QString const &, QString const &)), this,
+          SLOT(onParameterTieChanged(QString const &, QString const &)));
+  connect(m_functionTreeView.get(),
+          SIGNAL(parameterConstraintRemoved(QString const &)), this,
+          SLOT(onParameterConstraintRemoved(QString const &)));
+  connect(m_functionTreeView.get(),
+          SIGNAL(parameterConstraintAdded(QString const &, QString const &)),
+          this,
+          SLOT(onParameterConstraintChanged(QString const &, QString const &)));
   connect(m_functionTreeView.get(), SIGNAL(copyToClipboardRequest()), this,
           SLOT(onCopyFunctionToClipboard()));
   connect(m_functionTreeView.get(), SIGNAL(functionHelpRequest()), this,
@@ -190,6 +197,19 @@ void FitScriptGeneratorView::onParameterTieChanged(QString const &parameter,
                                                    QString const &tie) {
   m_presenter->notifyPresenter(ViewEvent::ParameterTieChanged,
                                parameter.toStdString(), tie.toStdString());
+}
+
+void FitScriptGeneratorView::onParameterConstraintRemoved(
+    QString const &parameter) {
+  m_presenter->notifyPresenter(ViewEvent::ParameterConstraintRemoved,
+                               parameter.toStdString());
+}
+
+void FitScriptGeneratorView::onParameterConstraintChanged(
+    QString const &functionIndex, QString const &constraint) {
+  m_presenter->notifyPresenter(ViewEvent::ParameterConstraintChanged,
+                               functionIndex.toStdString(),
+                               constraint.toStdString());
 }
 
 void FitScriptGeneratorView::onCopyFunctionToClipboard() {

@@ -76,6 +76,12 @@ void FitScriptGeneratorPresenter::notifyPresenter(ViewEvent const &event,
   case ViewEvent::ParameterTieChanged:
     handleParameterTieChanged(arg1, arg2);
     return;
+  case ViewEvent::ParameterConstraintRemoved:
+    handleParameterConstraintRemoved(arg1);
+    return;
+  case ViewEvent::ParameterConstraintChanged:
+    handleParameterConstraintChanged(arg1, arg2);
+    return;
   }
 
   throw std::runtime_error("Failed to notify the FitScriptGeneratorPresenter.");
@@ -200,8 +206,9 @@ void FitScriptGeneratorPresenter::handleParameterChanged(
   for (auto const &rowIndex : rowIndices) {
     auto const workspaceName = m_view->workspaceName(rowIndex);
     auto const workspaceIndex = m_view->workspaceIndex(rowIndex);
-    auto const equivalentParameter = m_model->getEquivalentParameterForDomain(
-        workspaceName, workspaceIndex, parameter);
+    auto const equivalentParameter =
+        m_model->getEquivalentFunctionIndexForDomain(workspaceName,
+                                                     workspaceIndex, parameter);
     m_model->updateParameterValue(workspaceName, workspaceIndex,
                                   equivalentParameter, newValue);
   }
@@ -229,8 +236,9 @@ void FitScriptGeneratorPresenter::handleParameterTieChanged(
   for (auto const &rowIndex : rowIndices) {
     auto const workspaceName = m_view->workspaceName(rowIndex);
     auto const workspaceIndex = m_view->workspaceIndex(rowIndex);
-    auto const equivalentParameter = m_model->getEquivalentParameterForDomain(
-        workspaceName, workspaceIndex, parameter);
+    auto const equivalentParameter =
+        m_model->getEquivalentFunctionIndexForDomain(workspaceName,
+                                                     workspaceIndex, parameter);
     auto const equivalentTie = m_model->getEquivalentParameterTieForDomain(
         workspaceName, workspaceIndex, parameter, tie);
     m_model->updateParameterTie(workspaceName, workspaceIndex,
@@ -238,6 +246,37 @@ void FitScriptGeneratorPresenter::handleParameterTieChanged(
   }
 
   setGlobalTies(m_model->getGlobalTies());
+  handleSelectionChanged();
+}
+
+void FitScriptGeneratorPresenter::handleParameterConstraintRemoved(
+    std::string const &parameter) {
+  auto const rowIndices = m_view->allRows();
+
+  for (auto const &rowIndex : rowIndices) {
+    auto const workspaceName = m_view->workspaceName(rowIndex);
+    auto const workspaceIndex = m_view->workspaceIndex(rowIndex);
+    m_model->removeParameterConstraint(workspaceName, workspaceIndex,
+                                       parameter);
+  }
+
+  handleSelectionChanged();
+}
+
+void FitScriptGeneratorPresenter::handleParameterConstraintChanged(
+    std::string const &functionIndex, std::string const &constraint) {
+  auto const rowIndices = m_view->allRows();
+
+  for (auto const &rowIndex : rowIndices) {
+    auto const workspaceName = m_view->workspaceName(rowIndex);
+    auto const workspaceIndex = m_view->workspaceIndex(rowIndex);
+    auto const equivalentFunctionIndex =
+        m_model->getEquivalentFunctionIndexForDomain(
+            workspaceName, workspaceIndex, functionIndex);
+    m_model->updateParameterConstraint(workspaceName, workspaceIndex,
+                                       equivalentFunctionIndex, constraint);
+  }
+
   handleSelectionChanged();
 }
 

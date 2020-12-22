@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/FitDomain.h"
+#include "MantidQtWidgets/Common/FunctionBrowser/FunctionBrowserUtils.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FunctionFactory.h"
@@ -162,6 +163,11 @@ double FitDomain::getParameterValue(std::string const &parameter) const {
   throw std::runtime_error("The function does not contain this parameter.");
 }
 
+void FitDomain::clearParameterTie(std::string const &parameter) {
+  if (hasParameter(parameter))
+    m_function->removeTie(m_function->parameterIndex(parameter));
+}
+
 bool FitDomain::updateParameterTie(std::string const &parameter,
                                    std::string const &tie) {
   if (hasParameter(parameter)) {
@@ -188,9 +194,33 @@ bool FitDomain::setParameterTie(std::string const &parameter,
   }
 }
 
-void FitDomain::clearParameterTie(std::string const &parameter) {
+void FitDomain::removeParameterConstraint(std::string const &parameter) {
   if (hasParameter(parameter))
-    m_function->removeTie(m_function->parameterIndex(parameter));
+    m_function->removeConstraint(parameter);
+}
+
+void FitDomain::updateParameterConstraint(std::string const &functionIndex,
+                                          std::string const &parameter,
+                                          std::string const &constraint) {
+  if (m_function) {
+    if (functionIndex.empty() && m_function->hasParameter(parameter))
+      m_function->addConstraints(constraint);
+    else if (auto composite = toComposite(m_function))
+      updateParameterConstraint(composite, functionIndex, parameter,
+                                constraint);
+  }
+}
+
+void FitDomain::updateParameterConstraint(CompositeFunction_sptr &composite,
+                                          std::string const &functionIndex,
+                                          std::string const &parameter,
+                                          std::string const &constraint) {
+  auto const index = getFunctionIndexAt(functionIndex, 0);
+  if (index < composite->nFunctions()) {
+    auto function = composite->getFunction(index);
+    if (function->hasParameter(parameter))
+      function->addConstraints(constraint);
+  }
 }
 
 bool FitDomain::isValidStartX(double startX) const {

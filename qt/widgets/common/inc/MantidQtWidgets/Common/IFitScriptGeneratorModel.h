@@ -51,27 +51,35 @@ public:
   getFunction(std::string const &workspaceName,
               WorkspaceIndex workspaceIndex) = 0;
 
-  [[nodiscard]] virtual std::string
-  getEquivalentParameterForDomain(std::string const &workspaceName,
-                                  WorkspaceIndex workspaceIndex,
-                                  std::string const &fullParameter) const = 0;
+  [[nodiscard]] virtual std::string getEquivalentFunctionIndexForDomain(
+      std::string const &workspaceName, WorkspaceIndex workspaceIndex,
+      std::string const &functionIndex) const = 0;
   [[nodiscard]] virtual std::string getEquivalentParameterTieForDomain(
       std::string const &workspaceName, WorkspaceIndex workspaceIndex,
       std::string const &fullParameter, std::string const &fullTie) const = 0;
 
   virtual void updateParameterValue(std::string const &workspaceName,
                                     WorkspaceIndex workspaceIndex,
-                                    std::string const &parameter,
+                                    std::string const &fullParameter,
                                     double newValue) = 0;
   virtual void
   updateAttributeValue(std::string const &workspaceName,
                        WorkspaceIndex workspaceIndex,
-                       std::string const &attribute,
+                       std::string const &fullAttribute,
                        Mantid::API::IFunction::Attribute const &newValue) = 0;
+
   virtual void updateParameterTie(std::string const &workspaceName,
                                   WorkspaceIndex workspaceIndex,
-                                  std::string const &parameter,
+                                  std::string const &fullParameter,
                                   std::string const &tie) = 0;
+
+  virtual void removeParameterConstraint(std::string const &workspaceName,
+                                         WorkspaceIndex workspaceIndex,
+                                         std::string const &fullParameter) = 0;
+  virtual void updateParameterConstraint(std::string const &workspaceName,
+                                         WorkspaceIndex workspaceIndex,
+                                         std::string const &functionIndex,
+                                         std::string const &constraint) = 0;
 
   virtual void setFittingMode(FittingMode const &fittingMode) = 0;
   [[nodiscard]] virtual FittingMode getFittingMode() const = 0;

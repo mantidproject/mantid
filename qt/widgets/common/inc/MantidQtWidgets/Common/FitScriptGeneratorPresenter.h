@@ -55,6 +55,9 @@ private:
   void handleAttributeChanged(std::string const &attribute);
   void handleParameterTieChanged(std::string const &parameter,
                                  std::string const &tie);
+  void handleParameterConstraintRemoved(std::string const &parameter);
+  void handleParameterConstraintChanged(std::string const &functionIndex,
+                                        std::string const &constraint);
   void handleFittingModeChanged(FittingMode const &fittingMode);
 
   void setWorkspaces(QStringList const &workspaceNames, double startX,

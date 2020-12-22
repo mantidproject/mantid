@@ -108,6 +108,9 @@ private slots:
   void onParameterChanged(QString const &parameter);
   void onAttributeChanged(QString const &attribute);
   void onParameterTieChanged(QString const &parameter, QString const &tie);
+  void onParameterConstraintRemoved(QString const &parameter);
+  void onParameterConstraintChanged(QString const &functionIndex,
+                                    QString const &constraint);
   void onCopyFunctionToClipboard();
   void onFunctionHelpRequested();
   void onChangeToSequentialFitting();
