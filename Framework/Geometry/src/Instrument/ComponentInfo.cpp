@@ -221,7 +221,31 @@ Kernel::V3D ComponentInfo::samplePosition() const {
 
 bool ComponentInfo::hasSource() const { return m_componentInfo->hasSource(); }
 
+/*
+ * @brief Check the sources of two componentInfo objects coincide
+ *
+ * @details check both objects either lack or have a source. If the latter,
+ * check their positions differ by less than 1 nm = 1e-9 m.
+ *
+ * @returns true if sources are equivalent
+ */
+bool ComponentInfo::hasEquivalentSource(const ComponentInfo &other) const {
+  return m_componentInfo->hasEquivalentSource(*(other.m_componentInfo));
+}
+
 bool ComponentInfo::hasSample() const { return m_componentInfo->hasSample(); }
+
+/*
+ * @brief Check the samples of two componentInfo objects coincide
+ *
+ * @details check both objects either lack or have a sample. If the latter,
+ * check their positions differ by less than 1 nm = 1e-9 m.
+ *
+ * @returns true if sources are equivalent
+ */
+bool ComponentInfo::hasEquivalentSample(const ComponentInfo &other) const {
+  return m_componentInfo->hasEquivalentSample(*(other.m_componentInfo));
+}
 
 bool ComponentInfo::hasDetectors(const size_t componentIndex) const {
   if (isDetector(componentIndex))

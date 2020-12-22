@@ -4,6 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from copy import deepcopy
 import unittest
 import argparse
 import numpy as np
@@ -103,10 +104,26 @@ class ComponentInfoTest(unittest.TestCase):
         info = self._ws.componentInfo()
         self.assertEqual(info.hasSource(), True)
 
+    def test_hasEquivalentSource(self):
+        """ Check if the sources are equivalent"""
+        info = self._ws.componentInfo()
+        info_other = deepcopy(info)
+        self.assertEqual(info.hasEquivalentSource(info_other))
+        info_other.setPosition(info.source(), V3D(info.sourcePosition()) + V3D(1.-6, 0, 0))
+        self.assertNotEqual(info.hasEquivalentSource(info_other))
+
     def test_hasSample(self):
         """ Check if there is a sample """
         info = self._ws.componentInfo()
         self.assertEqual(info.hasSample(), True)
+
+    def test_hasEquivalentSample(self):
+        """ Check if the samples are equivalent"""
+        info = self._ws.componentInfo()
+        info_other = deepcopy(info)
+        self.assertEqual(info.hasEquivalentSample(info_other))
+        info_other.setPosition(info.sample(), V3D(info.samplePosition()) + V3D(1.-6, 0, 0))
+        self.assertNotEqual(info.hasEquivalentSample(info_other))
 
     def test_source(self):
         """ Check if a source component is returned """
