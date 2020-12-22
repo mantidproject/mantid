@@ -377,8 +377,8 @@ class MainWindow(QMainWindow):
         # these register scripts contain code to register encoders and decoders to work with project save before the
         # corresponding interface has been initialised. This is a temporary measure pending harmonisation of cpp/python
         # interfaces
-        for reg_list in registers_to_run:
-            for register in registers_to_run[reg_list]:
+        for reg_list in registers_to_run.values():
+            for register in reg_list:
                 file_path = os.path.join(interface_dir, register)
                 self.interface_executor.execute(open(file_path).read(), file_path)
 
