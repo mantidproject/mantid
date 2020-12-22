@@ -68,13 +68,13 @@ Test 2: Data Loading and Rebinning
 
 -----------------------------------
   
-Test 3: Old style data analysis GUI
+Test 3: Old Style Data Analysis GUI
 -----------------------------------
 
 **Time required 5-10 minutes**
 
 - Start with the same data loaded and rebin settings from :ref:`test_2`
-- Go to the **Fitting** Tab
+- Go to the **Fitting** tab
 	- Right click the empty table area; Select **Add Function**
 	- Add **Abragam** (*Muon* > *MuonSpecific* > *Abragam*)
 	- Set ``Omega = 8.5`` and ``Tau = 0.5``
@@ -89,11 +89,6 @@ Test 3: Old style data analysis GUI
 - Now set **Fit To Raw Data** to be ``true`` and click **Fit** again. This time 
   it will fit to the raw data, but the rebinned data will still be shown in the 
   plot
+- There should now be two new workspaces in the workspace toolbox; One for 
+  fitted raw data and one for fitted rebinned data
 
-Test 5: New style data analysis GUI
------------------------------------
-
-- On the *Settings* tab, turn "Enable multiple fitting" **on**.
-- Go back to *Data Analysis*. The new UI should be there, and the fit function should have been cleared (so the Fit option is disabled until a new function is set up).
-- Set up the Abragam function as in test 3 and fit.
-- Try this with and without "Fit to raw data" as in test 4.
