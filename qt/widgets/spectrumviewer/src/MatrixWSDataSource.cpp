@@ -295,6 +295,7 @@ std::vector<std::string> MatrixWSDataSource::getInfoList(double x, double y) {
     /* and efixed that will work for any matrix workspace! */
     int emode = 0;
     double efixed = 0.0;
+    double delta = 0.0;
 
     // First try to get emode & efixed from the user
     if (m_emodeHandler != nullptr) {
@@ -353,31 +354,29 @@ std::vector<std::string> MatrixWSDataSource::getInfoList(double x, double y) {
       m_emodeHandler->setEMode(emode);
     }
 
-    double tof = old_unit->convertSingleToTOF(
-        x, l1, l2, two_theta, emode,
-        {{UnitConversionParameters::efixed, efixed}});
+    double tof = old_unit->convertSingleToTOF(x, l1, l2, two_theta, emode,
+                                              efixed, delta);
     if (!(x_label == "Time-of-flight"))
       SVUtils::PushNameValue("Time-of-flight", 8, 1, tof, list);
 
     if (!(x_label == "Wavelength")) {
       const Unit_sptr &wl_unit = UnitFactory::Instance().create("Wavelength");
-      double wavelength = wl_unit->convertSingleFromTOF(
-          tof, l1, l2, two_theta, emode,
-          {{UnitConversionParameters::efixed, efixed}});
+      double wavelength = wl_unit->convertSingleFromTOF(tof, l1, l2, two_theta,
+                                                        emode, efixed, delta);
       SVUtils::PushNameValue("Wavelength", 8, 4, wavelength, list);
     }
 
     if (!(x_label == "Energy")) {
       const Unit_sptr &e_unit = UnitFactory::Instance().create("Energy");
-      double energy = e_unit->convertSingleFromTOF(tof, l1, l2, two_theta, emode,
-          {{UnitConversionParameters::efixed, efixed}});
+      double energy = e_unit->convertSingleFromTOF(tof, l1, l2, two_theta,
+                                                   emode, efixed, delta);
       SVUtils::PushNameValue("Energy", 8, 4, energy, list);
     }
 
     if ((!(x_label == "d-Spacing")) && (two_theta != 0.0) && (emode == 0)) {
       const Unit_sptr &d_unit = UnitFactory::Instance().create("dSpacing");
-      double d_spacing = d_unit->convertSingleFromTOF(tof, l1, l2, two_theta, emode,
-          {{UnitConversionParameters::efixed, efixed}});
+      double d_spacing = d_unit->convertSingleFromTOF(tof, l1, l2, two_theta,
+                                                      emode, efixed, delta);
       SVUtils::PushNameValue("d-Spacing", 8, 4, d_spacing, list);
     }
 
@@ -385,14 +384,14 @@ std::vector<std::string> MatrixWSDataSource::getInfoList(double x, double y) {
       const Unit_sptr &q_unit =
           UnitFactory::Instance().create("MomentumTransfer");
       double mag_q = q_unit->convertSingleFromTOF(tof, l1, l2, two_theta, emode,
-          {{UnitConversionParameters::efixed, efixed}});
+                                                  efixed, delta);
       SVUtils::PushNameValue("|Q|", 8, 4, mag_q, list);
     }
 
     if ((!(x_label == "DeltaE")) && (two_theta != 0.0) && (emode != 0)) {
       const Unit_sptr &deltaE_unit = UnitFactory::Instance().create("DeltaE");
-      double delta_E = deltaE_unit->convertSingleFromTOF(tof, l1, l2, two_theta, emode,
-          {{UnitConversionParameters::efixed, efixed}});
+      double delta_E = deltaE_unit->convertSingleFromTOF(tof, l1, l2, two_theta,
+                                                         emode, efixed, delta);
       SVUtils::PushNameValue("DeltaE", 8, 4, delta_E, list);
     }
   } catch (std::exception &e) {
