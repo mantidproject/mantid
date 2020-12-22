@@ -295,7 +295,6 @@ std::vector<std::string> MatrixWSDataSource::getInfoList(double x, double y) {
     /* and efixed that will work for any matrix workspace! */
     int emode = 0;
     double efixed = 0.0;
-    double delta = 0.0;
 
     // First try to get emode & efixed from the user
     if (m_emodeHandler != nullptr) {
