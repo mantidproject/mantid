@@ -370,16 +370,6 @@ class EnggFitPeaks(PythonAlgorithm):
             # If the log difc is present, then use these GSAS calibration parameters from the logs
             return [(epd * difc + tzero) for epd in expected_peaks]
 
-        # When receiving a (for example) focused workspace we still do not know how
-        # to properly deal with it. CreateWorkspace won't copy the instrument sample
-        # and source even if given the option ParentWorkspace. Resort to old style
-        # hard-coded calculation.
-        # The present behavior of 'ConvertUnits' is to show an information log:
-        # "Unable to calculate sample-detector distance for 1 spectra. Masking spectrum"
-        # and silently produce a wrong output workspace. That might need revisiting.
-        if 1 == in_wks.getNumberHistograms():
-            return self._do_approx_hard_coded_convert_units_to_ToF(expected_peaks, in_wks, wks_index)
-
         # Create workspace just to convert dSpacing -> ToF, yVals are irrelevant
         # this used to be calculated with:
         # lambda d: 252.816 * 2 * (50 + detL2) * math.sin(detTwoTheta / 2.0) * d
@@ -397,7 +387,6 @@ class EnggFitPeaks(PythonAlgorithm):
         create_alg.execute()
 
         ws_from = create_alg.getProperty("OutputWorkspace").value
-
         # finally convert units, like: sapi.ConvertUnits(InputWorkspace=ws_from, Target=target_units)
         conv_alg = self.createChildAlgorithm("ConvertUnits")
         conv_alg.setProperty("InputWorkspace", ws_from)
@@ -419,7 +408,9 @@ class EnggFitPeaks(PythonAlgorithm):
                                format(len(peaks_tof), len(expected_peaks)))
 
         tof_values = [peaks_tof[i] for i in range(0, len(peaks_tof))]
+
         # catch potential failures because of geometry issues, etc.
+        # CreateWorkspace won't copy SpectrumInfo over properly if nhists different in parentws and ws
         if tof_values == expected_peaks:
             vals = self._do_approx_hard_coded_convert_units_to_ToF(expected_peaks, in_wks, wks_index)
             return vals
