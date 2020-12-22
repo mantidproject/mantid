@@ -5,7 +5,10 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import AnalysisDataService as ADS  # noqa
+from mantid.simpleapi import logger
 from Engineering.gui.engineering_diffraction.engineering_diffraction import EngineeringDiffractionGui
+
+IO_VERSION = 1
 
 
 class EngineeringDiffractionUIAttributes(object):
@@ -22,6 +25,7 @@ class EngineeringDiffractionEncoder(EngineeringDiffractionUIAttributes):
         data_widget = obj.fitting_presenter.data_widget  # data widget
         plot_widget = obj.fitting_presenter.plot_widget  # plot presenter
         obj_dic = dict()
+        obj_dic["encoder_version"] = IO_VERSION
         obj_dic["current_tab"] = obj.tabs.currentIndex()
         if data_widget.presenter.get_loaded_workspaces():
             obj_dic["data_loaded_workspaces"] = [*data_widget.presenter.get_loaded_workspaces().keys()]
@@ -44,6 +48,9 @@ class EngineeringDiffractionDecoder(EngineeringDiffractionUIAttributes):
 
     @staticmethod
     def decode(obj_dic, _=None):
+        if obj_dic["encoder_version"] != IO_VERSION:
+            logger.error("Engineering Diffraction Interface encoder used different version, restoration may fail")
+
         ws_names = obj_dic["data_loaded_workspaces"]  # workspaces are in ADS, need restoring into interface
         gui = EngineeringDiffractionGui()
         gui.tabs.setCurrentIndex(obj_dic["current_tab"])
