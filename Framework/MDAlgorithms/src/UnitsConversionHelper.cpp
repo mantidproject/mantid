@@ -10,7 +10,7 @@
 #include "MantidKernel/UnitFactory.h"
 #include <cmath>
 
-using Mantid::Kernel::UnitConversionParameters;
+using Mantid::Kernel::UnitParams;
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -262,16 +262,16 @@ void UnitsConversionHelper::initialize(const std::string &unitsFrom, const std::
   m_TZERO = (*m_pTZEROs)[0];
 
   m_TargetUnit->initialize(m_L1, m_L2, m_TwoTheta, m_Emode,
-                           {{UnitConversionParameters::efixed, Efix},
-                            {UnitConversionParameters::difa, m_DIFA},
-                            {UnitConversionParameters::difc, m_DIFC},
-                            {UnitConversionParameters::tzero, m_TZERO}});
+                           {{UnitParams::efixed, Efix},
+                            {UnitParams::difa, m_DIFA},
+                            {UnitParams::difc, m_DIFC},
+                            {UnitParams::tzero, m_TZERO}});
   if (m_SourceWSUnit) {
     m_SourceWSUnit->initialize(m_L1, m_L2, m_TwoTheta, m_Emode,
-                               {{UnitConversionParameters::efixed, Efix},
-                                {UnitConversionParameters::difa, m_DIFA},
-                                {UnitConversionParameters::difc, m_DIFC},
-                                {UnitConversionParameters::tzero, m_TZERO}});
+                               {{UnitParams::efixed, Efix},
+                                {UnitParams::difa, m_DIFA},
+                                {UnitParams::difc, m_DIFC},
+                                {UnitParams::tzero, m_TZERO}});
   }
 }
 /** Method updates unit conversion given the index of detector parameters in the
@@ -293,10 +293,10 @@ void UnitsConversionHelper::updateConversion(size_t i) {
     m_TZERO = (*m_pTZEROs)[i];
 
     m_TargetUnit->initialize(m_L1, m_L2, m_TwoTheta, m_Emode,
-                             {{UnitConversionParameters::efixed, Efix},
-                              {UnitConversionParameters::difa, m_DIFA},
-                              {UnitConversionParameters::difc, m_DIFC},
-                              {UnitConversionParameters::tzero, m_TZERO}});
+                             {{UnitParams::efixed, Efix},
+                              {UnitParams::difa, m_DIFA},
+                              {UnitParams::difc, m_DIFC},
+                              {UnitParams::tzero, m_TZERO}});
     return;
   }
   case (CnvrtToMD::ConvertByTOF): {
@@ -310,15 +310,15 @@ void UnitsConversionHelper::updateConversion(size_t i) {
     m_TZERO = (*m_pTZEROs)[i];
 
     m_TargetUnit->initialize(m_L1, m_L2, m_TwoTheta, m_Emode,
-                             {{UnitConversionParameters::efixed, Efix},
-                              {UnitConversionParameters::difa, m_DIFA},
-                              {UnitConversionParameters::difc, m_DIFC},
-                              {UnitConversionParameters::tzero, m_TZERO}});
+                             {{UnitParams::efixed, Efix},
+                              {UnitParams::difa, m_DIFA},
+                              {UnitParams::difc, m_DIFC},
+                              {UnitParams::tzero, m_TZERO}});
     m_SourceWSUnit->initialize(m_L1, m_L2, m_TwoTheta, m_Emode,
-                               {{UnitConversionParameters::efixed, Efix},
-                                {UnitConversionParameters::difa, m_DIFA},
-                                {UnitConversionParameters::difc, m_DIFC},
-                                {UnitConversionParameters::tzero, m_TZERO}});
+                               {{UnitParams::efixed, Efix},
+                                {UnitParams::difa, m_DIFA},
+                                {UnitParams::difc, m_DIFC},
+                                {UnitParams::tzero, m_TZERO}});
     return;
   }
   default:

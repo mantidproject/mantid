@@ -42,7 +42,7 @@ double UnitConversion::run(const std::string &src, const std::string &dest,
                            const ExtraParametersMap &params) {
   Unit_sptr srcUnit = UnitFactory::Instance().create(src);
   Unit_sptr destUnit = UnitFactory::Instance().create(dest);
-  ExtraParametersMap params{{UnitConversionParameters::efixed, efixed}};
+  ExtraParametersMap params{{UnitParams::efixed, efixed}};
   return UnitConversion::run(*srcUnit, *destUnit, srcValue, l1, l2, theta,
                              emode, params);
 }

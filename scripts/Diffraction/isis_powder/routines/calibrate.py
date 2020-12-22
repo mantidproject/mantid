@@ -9,6 +9,7 @@ import mantid.simpleapi as mantid
 import isis_powder.routines.common as common
 from isis_powder.routines.common_enums import INPUT_BATCHING
 
+
 def create_van(instrument, run_details, absorb):
     """
     Creates a splined vanadium run for the following instrument. Requires the run_details for the

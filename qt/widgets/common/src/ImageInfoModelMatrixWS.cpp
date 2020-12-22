@@ -112,12 +112,11 @@ void ImageInfoModelMatrixWS::setUnitsInfo(ImageInfoModel::ImageInfo *info, int i
     tof = x;
   } else {
     try {
-      tof = m_xunit->convertSingleToTOF(
-          x, l1, l2, twoTheta, emode,
-          {{UnitConversionParameters::efixed, efixed},
-           {UnitConversionParameters::difa, difa},
-           {UnitConversionParameters::difc, difc},
-           {UnitConversionParameters::tzero, tzero}});
+      tof = m_xunit->convertSingleToTOF(x, l1, l2, twoTheta, emode,
+                                        {{UnitParams::efixed, efixed},
+                                         {UnitParams::difa, difa},
+                                         {UnitParams::difc, difc},
+                                         {UnitParams::tzero, tzero}});
       info->setValue(infoIndex, defaultFormat(tof));
       ++infoIndex;
     } catch (std::exception &exc) {
@@ -133,12 +132,12 @@ void ImageInfoModelMatrixWS::setUnitsInfo(ImageInfoModel::ImageInfo *info, int i
     if (!requiresEFixed || efixed > 0.0) {
       try {
         // the final parameter is unused and a relic
-        const auto unitValue = unit->convertSingleFromTOF(
-            tof, l1, l2, twoTheta, emode,
-            {{UnitConversionParameters::efixed, efixed},
-             {UnitConversionParameters::difa, difa},
-             {UnitConversionParameters::difc, difc},
-             {UnitConversionParameters::tzero, tzero}});
+        const auto unitValue =
+            unit->convertSingleFromTOF(tof, l1, l2, twoTheta, emode,
+                                       {{UnitParams::efixed, efixed},
+                                        {UnitParams::difa, difa},
+                                        {UnitParams::difc, difc},
+                                        {UnitParams::tzero, tzero}});
         info->setValue(infoIndex, defaultFormat(unitValue));
       } catch (std::exception &exc) {
         if (g_log.is(Logger::Priority::PRIO_DEBUG))

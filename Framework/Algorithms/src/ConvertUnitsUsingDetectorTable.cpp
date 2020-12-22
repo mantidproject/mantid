@@ -149,8 +149,7 @@ MatrixWorkspace_sptr ConvertUnitsUsingDetectorTable::convertViaTOF(Kernel::Unit_
     // Convert the input unit to time-of-flight
     auto checkFromUnit = std::unique_ptr<Unit>(fromUnit->clone());
     auto checkOutputUnit = std::unique_ptr<Unit>(outputUnit->clone());
-    ExtraParametersMap pmap{
-        {UnitConversionParameters::efixed, efixedColumn[detectorRow]}};
+    ExtraParametersMap pmap{{UnitParams::efixed, efixedColumn[detectorRow]}};
     checkFromUnit->toTOF(checkXValues, emptyVec, l1Column[detectorRow],
                          l2Column[detectorRow], twoThetaColumn[detectorRow],
                          emodeColumn[detectorRow], pmap);
@@ -213,7 +212,7 @@ MatrixWorkspace_sptr ConvertUnitsUsingDetectorTable::convertViaTOF(Kernel::Unit_
         std::vector<double> values(outputWS->x(wsid).begin(),
                                    outputWS->x(wsid).end());
 
-        ExtraParametersMap pmap{{UnitConversionParameters::efixed, efixed}};
+        ExtraParametersMap pmap{{UnitParams::efixed, efixed}};
         // Convert the input unit to time-of-flight
         localFromUnit->toTOF(values, emptyVec, l1, l2, twoTheta, emode, pmap);
         // Convert from time-of-flight to the desired unit

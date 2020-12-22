@@ -1228,11 +1228,10 @@ void IFunction::convertValue(std::vector<double> &values, Kernel::Unit_sptr &out
     auto [difa, difc, tzero] = spectrumInfo.diffractometerConstants(wsIndex);
 
     std::vector<double> emptyVec;
-    Kernel::ExtraParametersMap pmap{
-        {Kernel::UnitConversionParameters::efixed, efixed},
-        {Kernel::UnitConversionParameters::difa, difa},
-        {Kernel::UnitConversionParameters::difc, difc},
-        {Kernel::UnitConversionParameters::tzero, tzero}};
+    Kernel::ExtraParametersMap pmap{{Kernel::UnitParams::efixed, efixed},
+                                    {Kernel::UnitParams::difa, difa},
+                                    {Kernel::UnitParams::difc, difc},
+                                    {Kernel::UnitParams::tzero, tzero}};
     wsUnit->toTOF(values, emptyVec, l1, l2, twoTheta, emode, pmap);
     outUnit->fromTOF(values, emptyVec, l1, l2, twoTheta, emode, pmap);
   }
