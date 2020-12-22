@@ -114,10 +114,10 @@ void AddPeak::exec() {
     std::vector<double> xdata(1, tof);
     std::vector<double> ydata;
     unit->toTOF(xdata, ydata, l1, l2, theta2, emode,
-                {{Kernel::UnitConversionParameters::efixed, efixed},
-                 {Kernel::UnitConversionParameters::difa, difa},
-                 {Kernel::UnitConversionParameters::difc, difc},
-                 {Kernel::UnitConversionParameters::tzero, tzero}});
+                {{Kernel::UnitParams::efixed, efixed},
+                 {Kernel::UnitParams::difa, difa},
+                 {Kernel::UnitParams::difc, difc},
+                 {Kernel::UnitParams::tzero, tzero}});
     tof = xdata[0];
   }
 

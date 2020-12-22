@@ -256,6 +256,8 @@ class CreateCalTest(systemtesting.MantidSystemTest):
 
     calibration_results = None
     existing_config = config["datasearch.directories"]
+    run_number = 98494
+    run_details = None
 
     def requiredFiles(self):
         return _gen_required_files()
@@ -263,10 +265,12 @@ class CreateCalTest(systemtesting.MantidSystemTest):
     def runTest(self):
         setup_mantid_paths()
         inst_object = setup_inst_object(tt_mode="tt88", focus_mode="trans")
-        self.calibration_results = run_create_cal(inst_object, focus_mode="all")
+        self.calibration_results = run_create_cal(inst_object, focus_mode="all", ceria_run=self.run_number)
 
         # Make sure that inst_settings reverted to the default after create_cal
         self.assertEqual(inst_object._inst_settings.focus_mode, "trans")
+
+        self.run_details = inst_object._get_run_details(self.run_number)
 
     def validate(self):
         self.tolerance = 1e-5
@@ -274,6 +278,7 @@ class CreateCalTest(systemtesting.MantidSystemTest):
 
     def cleanup(self):
         try:
+            _try_delete(self.run_details.offset_file_path)
             _try_delete(spline_path)
             _try_delete(output_dir)
         finally:
@@ -292,8 +297,7 @@ def _gen_required_files():
     return input_files
 
 
-def run_create_cal(inst_object, focus_mode):
-    ceria_run = 98494
+def run_create_cal(inst_object, focus_mode, ceria_run):
     return inst_object.create_cal(run_number=ceria_run, focus_mode=focus_mode)
 
 

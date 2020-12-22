@@ -142,13 +142,13 @@ public:
     Kernel::Units::dSpacing dSpacingUnit;
     std::vector<double> yunused;
     dSpacingUnit.toTOF(inTofPos, yunused, -1, -1, -1, 0,
-                       {{Kernel::UnitConversionParameters::difa, difa},
-                        {Kernel::UnitConversionParameters::difc, difc},
-                        {Kernel::UnitConversionParameters::tzero, tzero}});
+                       {{Kernel::UnitParams::difa, difa},
+                        {Kernel::UnitParams::difc, difc},
+                        {Kernel::UnitParams::tzero, tzero}});
     dSpacingUnit.toTOF(inTofWindows, yunused, -1, -1, -1, 0,
-                       {{Kernel::UnitConversionParameters::difa, difa},
-                        {Kernel::UnitConversionParameters::difc, difc},
-                        {Kernel::UnitConversionParameters::tzero, tzero}});
+                       {{Kernel::UnitParams::difa, difa},
+                        {Kernel::UnitParams::difc, difc},
+                        {Kernel::UnitParams::tzero, tzero}});
   }
 
   std::size_t wkspIndex;
@@ -673,10 +673,9 @@ void PDCalibration::exec() {
       Mantid::Kernel::Units::dSpacing dSpacingUnit;
       dSpacingUnit.initialize(
           -1., -1., -1., 0,
-          Kernel::ExtraParametersMap{
-              {Kernel::UnitConversionParameters::difa, difa},
-              {Kernel::UnitConversionParameters::difc, difc},
-              {Kernel::UnitConversionParameters::tzero, t0}});
+          Kernel::ExtraParametersMap{{Kernel::UnitParams::difa, difa},
+                                     {Kernel::UnitParams::difc, difc},
+                                     {Kernel::UnitParams::tzero, t0}});
       for (std::size_t i = 0; i < numPeaks; ++i) {
         if (std::isnan(tof_vec_full[i]))
           continue;
@@ -785,10 +784,9 @@ double gsl_costFunction(const gsl_vector *v, void *peaks) {
   Mantid::Kernel::Units::dSpacing dSpacingUnit;
   dSpacingUnit.initialize(
       -1., -1., -1., 0,
-      Kernel::ExtraParametersMap{
-          {Kernel::UnitConversionParameters::difa, difa},
-          {Kernel::UnitConversionParameters::difc, difc},
-          {Kernel::UnitConversionParameters::tzero, tzero}});
+      Kernel::ExtraParametersMap{{Kernel::UnitParams::difa, difa},
+                                 {Kernel::UnitParams::difc, difc},
+                                 {Kernel::UnitParams::tzero, tzero}});
 
   // calculate the sum of the residuals from observed peaks
   double errsum = 0.0;

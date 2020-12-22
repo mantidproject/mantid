@@ -853,10 +853,12 @@ bool CompareWorkspaces::checkInstrument(
   const Geometry::ParameterMap &ws1_parmap = ws1->constInstrumentParameters();
   const Geometry::ParameterMap &ws2_parmap = ws2->constInstrumentParameters();
 
-  if (ws1_parmap != ws2_parmap) {
+  const bool checkAllData = getProperty("CheckAllData");
+  auto errorStr = ws1_parmap.diff(ws2_parmap, !checkAllData);
+  if (!errorStr.empty()) {
     g_log.debug()
         << "Here information to help understand parameter map differences:\n";
-    g_log.debug() << ws1_parmap.diff(ws2_parmap);
+    g_log.debug() << errorStr;
     recordMismatch(
         "Instrument ParameterMap mismatch (differences in ordering ignored)");
     return false;

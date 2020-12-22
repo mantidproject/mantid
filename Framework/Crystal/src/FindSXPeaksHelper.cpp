@@ -98,10 +98,14 @@ SXPeak::SXPeak(double t, double phi, double intensity,
 
   const auto unit = Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
   unit->initialize(l1, l2, m_twoTheta, 0,
-                   {{Kernel::UnitConversionParameters::difa, difa},
-                    {Kernel::UnitConversionParameters::difc, difc},
-                    {Kernel::UnitConversionParameters::tzero, tzero}});
-  m_dSpacing = unit->singleFromTOF(m_tof);
+                   {{Kernel::UnitParams::difa, difa},
+                    {Kernel::UnitParams::difc, difc},
+                    {Kernel::UnitParams::tzero, tzero}});
+  try {
+    m_dSpacing = unit->singleFromTOF(m_tof);
+  } catch (std::exception &) {
+    m_dSpacing = 0;
+  }
 
   const auto samplePos = spectrumInfo.samplePosition();
   const auto sourcePos = spectrumInfo.sourcePosition();
@@ -376,9 +380,9 @@ double PeakFindingStrategy::convertToTOF(const double xValue,
     // we're using d-spacing, convert the point to TOF
     unit->initialize(m_spectrumInfo.l1(), m_spectrumInfo.l2(workspaceIndex),
                      m_spectrumInfo.twoTheta(workspaceIndex), 0,
-                     {{Kernel::UnitConversionParameters::difa, difa},
-                      {Kernel::UnitConversionParameters::difc, difc},
-                      {Kernel::UnitConversionParameters::tzero, tzero}});
+                     {{Kernel::UnitParams::difa, difa},
+                      {Kernel::UnitParams::difc, difc},
+                      {Kernel::UnitParams::tzero, tzero}});
     return unit->singleToTOF(xValue);
   }
 }

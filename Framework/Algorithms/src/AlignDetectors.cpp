@@ -119,8 +119,11 @@ const std::string AlignDetectors::summary() const {
          "values to account for small errors in the detector positions.";
 }
 
-/// (Empty) Constructor
-AlignDetectors::AlignDetectors() : m_numberOfSpectra(0) {}
+/// Constructor
+AlignDetectors::AlignDetectors() : m_numberOfSpectra(0) {
+  useAlgorithm("ConvertUnits");
+  deprecatedDate("2021-01-04");
+}
 
 void AlignDetectors::init() {
   auto wsValidator = std::make_shared<CompositeValidator>();
@@ -291,9 +294,9 @@ void AlignDetectors::align(const ConversionFactors &converter,
       std::vector<double> yunused;
       dSpacingUnit.fromTOF(
           x, yunused, -1., -1., -1., 0,
-          ExtraParametersMap{{Kernel::UnitConversionParameters::difa, difa},
-                             {Kernel::UnitConversionParameters::difc, difc},
-                             {Kernel::UnitConversionParameters::tzero, tzero}});
+          ExtraParametersMap{{Kernel::UnitParams::difa, difa},
+                             {Kernel::UnitParams::difc, difc},
+                             {Kernel::UnitParams::tzero, tzero}});
 
       if (eventW) {
         Kernel::Units::TOF tofUnit;

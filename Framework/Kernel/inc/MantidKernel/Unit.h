@@ -23,7 +23,7 @@
 namespace Mantid {
 namespace Kernel {
 
-enum class UnitConversionParameters { efixed, delta, difa, difc, tzero };
+enum class UnitParams { efixed, delta, difa, difc, tzero };
 
 /** The base units (abstract) class. All concrete units should inherit from
     this class and provide implementations of the caption(), label(),
@@ -90,12 +90,10 @@ public:
   toTOF(std::vector<double> &xdata, std::vector<double> &ydata,
         const double &_l1, const double &_l2, const double &_twoTheta,
         const int &_emode,
-        std::initializer_list<std::pair<const UnitConversionParameters, double>>
-            params = {});
+        std::initializer_list<std::pair<const UnitParams, double>> params = {});
   void toTOF(std::vector<double> &xdata, std::vector<double> &ydata,
              const double &_l1, const double &_l2, const double &_twoTheta,
-             const int &_emode,
-             const std::map<UnitConversionParameters, double> &params);
+             const int &_emode, const std::map<UnitParams, double> &params);
 
   /** Convert from the concrete unit to time-of-flight. TOF is in microseconds.
    *  @param xvalue ::   A single X-value to convert
@@ -109,10 +107,10 @@ public:
    *                    Delta (not currently used)
    *  @return the value in TOF units.
    */
-  double
-  convertSingleToTOF(const double xvalue, const double &l1, const double &l2,
-                     const double &twoTheta, const int &emode,
-                     const std::map<UnitConversionParameters, double> &params);
+  double convertSingleToTOF(const double xvalue, const double &l1,
+                            const double &l2, const double &twoTheta,
+                            const int &emode,
+                            const std::map<UnitParams, double> &params);
 
   /** Convert from time-of-flight to the concrete unit. TOF is in microseconds.
    *  @param xdata ::    The array of X data to be converted
@@ -130,13 +128,11 @@ public:
   void fromTOF(
       std::vector<double> &xdata, std::vector<double> &ydata, const double &_l1,
       const double &_l2, const double &_twoTheta, const int &_emode,
-      std::initializer_list<std::pair<const UnitConversionParameters, double>>
-          params = {});
+      std::initializer_list<std::pair<const UnitParams, double>> params = {});
 
   void fromTOF(std::vector<double> &xdata, std::vector<double> &ydata,
                const double &_l1, const double &_l2, const double &_twoTheta,
-               const int &_emode,
-               const std::map<UnitConversionParameters, double> &params);
+               const int &_emode, const std::map<UnitParams, double> &params);
 
   /** Convert from the time-of-flight to the concrete unit. TOF is in
    * microseconds.
@@ -151,10 +147,10 @@ public:
    *                    Delta (not currently used)
    *  @return the value in these units.
    */
-  double convertSingleFromTOF(
-      const double xvalue, const double &l1, const double &l2,
-      const double &twoTheta, const int &emode,
-      const std::map<UnitConversionParameters, double> &params = {});
+  double convertSingleFromTOF(const double xvalue, const double &l1,
+                              const double &l2, const double &twoTheta,
+                              const int &emode,
+                              const std::map<UnitParams, double> &params = {});
 
   /** Initialize the unit to perform conversion using singleToTof() and
    *singleFromTof()
@@ -169,10 +165,9 @@ public:
    *                      Diffractometer constants (DIFA, DIFC, TZERO)
    *                      Delta: unused
    */
-  void
-  initialize(const double &_l1, const double &_l2, const double &_twoTheta,
-             const int &_emode,
-             const std::map<UnitConversionParameters, double> &params = {});
+  void initialize(const double &_l1, const double &_l2, const double &_twoTheta,
+                  const int &_emode,
+                  const std::map<UnitParams, double> &params = {});
 
   /** Finalize the initialization. This will be overridden by subclasses as
    * needed. */
@@ -211,9 +206,8 @@ protected:
   void addConversion(std::string to, const double &factor,
                      const double &power = 1.0) const;
 
-  virtual void
-  validateExtraParams(const int emode,
-                      const std::map<UnitConversionParameters, double> &params);
+  virtual void validateExtraParams(const int emode,
+                                   const std::map<UnitParams, double> &params);
 
   /// The unit values have been initialized
   bool initialized;
@@ -229,7 +223,7 @@ protected:
   /// additional parameters
   /// efixed ::   Value of fixed energy: EI (emode=1) or EF (emode=2) (in meV)
   /// difc :: diffractometer constant DIFC
-  std::map<UnitConversionParameters, double> m_params;
+  std::map<UnitParams, double> m_params;
 
 private:
   /// A 'quick conversion' requires the constant by which to multiply the input
@@ -247,7 +241,7 @@ private:
   static ConversionsMap s_conversionFactors;
 };
 
-using ExtraParametersMap = std::map<UnitConversionParameters, double>;
+using ExtraParametersMap = std::map<UnitParams, double>;
 
 /// Shared pointer to the Unit base class
 using Unit_sptr = std::shared_ptr<Unit>;
@@ -341,9 +335,8 @@ public:
   Wavelength();
 
 protected:
-  void validateExtraParams(
-      const int emode,
-      const std::map<UnitConversionParameters, double> &params) override;
+  void validateExtraParams(const int emode,
+                           const std::map<UnitParams, double> &params) override;
   double efixed;
   double sfpTo;      ///< Extra correction factor in to conversion
   double factorTo;   ///< Constant factor for to conversion
@@ -422,9 +415,8 @@ public:
   dSpacing();
 
 protected:
-  void validateExtraParams(
-      const int emode,
-      const std::map<UnitConversionParameters, double> &params) override;
+  void validateExtraParams(const int emode,
+                           const std::map<UnitParams, double> &params) override;
   double difa;
   double difc;
   double tzero;
@@ -581,9 +573,8 @@ public:
   Momentum();
 
 protected:
-  void validateExtraParams(
-      const int emode,
-      const std::map<UnitConversionParameters, double> &params) override;
+  void validateExtraParams(const int emode,
+                           const std::map<UnitParams, double> &params) override;
   double efixed;
   double sfpTo;      ///< Extra correction factor in to conversion
   double factorTo;   ///< Constant factor for to conversion

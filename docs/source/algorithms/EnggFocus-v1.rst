@@ -84,9 +84,9 @@ Output:
 .. testoutput:: ExSimpleFocussing
 
    No. of spectra: 1
-   For TOF of 20165.642 normalized intensity is 1.769
-   For TOF of 33547.826 normalized intensity is 2.895
-   For TOF of 38619.804 normalized intensity is 5.181
+   For TOF of 20113.941 normalized intensity is 1.774
+   For TOF of 33461.814 normalized intensity is 2.903
+   For TOF of 38520.789 normalized intensity is 5.195
    
 .. categories::
 

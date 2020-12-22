@@ -48,10 +48,10 @@ public:
     auto pWSUnit = UnitFactory::Instance().create("MomentumTransfer");
     double L1(10), L2(10), TwoTheta(0.1), efix(10);
     int emode(0);
-    TS_ASSERT_THROWS_NOTHING(pWSUnit->initialize(
-        L1, L2, TwoTheta, emode, {{UnitConversionParameters::efixed, efix}}));
+    TS_ASSERT_THROWS_NOTHING(pWSUnit->initialize(L1, L2, TwoTheta, emode,
+                                                 {{UnitParams::efixed, efix}}));
     TS_ASSERT_THROWS_NOTHING(pSourceWSUnit->initialize(
-        L1, L2, TwoTheta, emode, {{UnitConversionParameters::efixed, efix}}));
+        L1, L2, TwoTheta, emode, {{UnitParams::efixed, efix}}));
 
     double X0(5);
     double tof(0);

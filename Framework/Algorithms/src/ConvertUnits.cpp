@@ -442,49 +442,47 @@ bool ConvertUnits::getDetectorValues(const API::SpectrumInfo &spectrumInfo,
       twoTheta = std::numeric_limits<double>::quiet_NaN();
     }
     // If an indirect instrument, try getting Efixed from the geometry
-    if (emode == 2 &&
-        pmap[UnitConversionParameters::efixed] == EMPTY_DBL()) // indirect
+    if (emode == 2 && pmap.find(UnitParams::efixed) == pmap.end()) // indirect
     {
       if (spectrumInfo.hasUniqueDetector(wsIndex)) {
         const auto &det = spectrumInfo.detector(wsIndex);
         auto par = ws.constInstrumentParameters().getRecursive(&det, "Efixed");
         if (par) {
-          pmap[UnitConversionParameters::efixed] = par->value<double>();
+          pmap[UnitParams::efixed] = par->value<double>();
           g_log.debug() << "Detector: " << det.getID()
-                        << " EFixed: " << pmap[UnitConversionParameters::efixed]
-                        << "\n";
+                        << " EFixed: " << pmap[UnitParams::efixed] << "\n";
+        } else {
+          return false;
         }
       }
       // Non-unique detector (i.e., DetectorGroup): use single provided value
     }
-    auto detids = ws.getSpectrum(wsIndex).getDetectorIDs();
-    if (detids.size() > 0) {
-      std::vector<detid_t> warnDetIds;
-      try {
-        auto [difa, difc, tzero] =
-            spectrumInfo.diffractometerConstants(wsIndex, warnDetIds);
-        pmap[UnitConversionParameters::difa] = difa;
-        pmap[UnitConversionParameters::difc] = difc;
-        pmap[UnitConversionParameters::tzero] = tzero;
-        if (warnDetIds.size() > 0) {
-          createDetectorIdLogMessages(warnDetIds, wsIndex);
-        }
-        if ((outputUnit.unitID().find("dSpacing") != std::string::npos) &&
-            (difa == 0) && (difc == 0)) {
-          return false;
-        }
-      } catch (const std::runtime_error &e) {
-        g_log.warning(e.what());
+
+    std::vector<detid_t> warnDetIds;
+    try {
+      auto [difa, difc, tzero] =
+          spectrumInfo.diffractometerConstants(wsIndex, warnDetIds);
+      pmap[UnitParams::difa] = difa;
+      pmap[UnitParams::difc] = difc;
+      pmap[UnitParams::tzero] = tzero;
+      if (warnDetIds.size() > 0) {
+        createDetectorIdLogMessages(warnDetIds, wsIndex);
       }
+      if ((outputUnit.unitID().find("dSpacing") != std::string::npos) &&
+          (difa == 0) && (difc == 0)) {
+        return false;
+      }
+    } catch (const std::runtime_error &e) {
+      g_log.warning(e.what());
     }
   } else {
     twoTheta = 0.0;
-    pmap[UnitConversionParameters::efixed] = DBL_MIN;
+    pmap[UnitParams::efixed] = DBL_MIN;
     // Energy transfer is meaningless for a monitor, so set l2 to 0.
     if (outputUnit.unitID().find("DeltaE") != std::string::npos) {
       l2 = 0.0;
     }
-    pmap[UnitConversionParameters::difc] = 0;
+    pmap[UnitParams::difc] = 0;
     // can't do a conversion to d spacing with theta=0
     if (outputUnit.unitID().find("dSpacing") != std::string::npos) {
       return false;
@@ -569,12 +567,13 @@ ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit,
   auto localOutputUnit = std::unique_ptr<Unit>(outputUnit->clone());
 
   // Perform Sanity Validation before creating workspace
-  double checkefixed = efixedProp;
   double checkl2;
   double checktwoTheta;
   const double checkdelta = 0.0;
-  ExtraParametersMap pmap = {{UnitConversionParameters::efixed, checkefixed},
-                             {UnitConversionParameters::delta, checkdelta}};
+  ExtraParametersMap pmap = {{UnitParams::delta, checkdelta}};
+  if (efixedProp != EMPTY_DBL()) {
+    pmap[UnitParams::efixed] = efixedProp;
+  }
   size_t checkIndex = 0;
   if (getDetectorValues(spectrumInfo, *outputUnit, emode, *inputWS, signedTheta,
                         checkIndex, checkl2, checktwoTheta, pmap)) {
@@ -606,8 +605,10 @@ ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit,
     const double delta = 0.0;
 
     // TODO toTOF and fromTOF need to be reimplemented outside of kernel
-    ExtraParametersMap pmap = {{UnitConversionParameters::efixed, efixed},
-                               {UnitConversionParameters::delta, delta}};
+    ExtraParametersMap pmap = {{UnitParams::delta, delta}};
+    if (efixedProp != EMPTY_DBL()) {
+      pmap[UnitParams::efixed] = efixed;
+    }
     if (getDetectorValues(outSpectrumInfo, *outputUnit, emode, *outputWS,
                           signedTheta, i, l2, twoTheta, pmap)) {
       localFromUnit->toTOF(outputWS->dataX(i), emptyVec, l1, l2, twoTheta,

@@ -269,10 +269,10 @@ void BackgroundHelper::removeBackground(int nHist, HistogramX &x_data,
     // use thread-specific unit conversion class to avoid multithreading issues
     Kernel::Unit *unitConv = m_WSUnit[threadNum].get();
     unitConv->initialize(L1, L2, twoTheta, m_Emode,
-                         {{UnitConversionParameters::efixed, m_Efix},
-                          {UnitConversionParameters::difa, difa},
-                          {UnitConversionParameters::difc, difc},
-                          {UnitConversionParameters::tzero, tzero}});
+                         {{UnitParams::efixed, m_Efix},
+                          {UnitParams::difa, difa},
+                          {UnitParams::difc, difc},
+                          {UnitParams::tzero, tzero}});
 
     x_data[0] = XValues[0];
     double tof1 = unitConv->singleToTOF(x_data[0]);

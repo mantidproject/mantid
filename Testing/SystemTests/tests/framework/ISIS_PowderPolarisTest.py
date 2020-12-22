@@ -63,8 +63,8 @@ class CreateVanadiumTest(systemtesting.MantidSystemTest):
         splined_ws, unsplined_ws = self.calibration_results
         for ws in splined_ws+unsplined_ws:
             self.assertEqual(ws.sample().getMaterial().name(), 'V')
-        return (unsplined_ws.name(), "ISIS_Powder-POLARIS00098533_unsplined.nxs",
-                splined_ws.name(), "ISIS_Powder-POLARIS00098533_splined.nxs")
+        return (unsplined_ws.name(), "ISIS_Powder-POLARIS00098532_unsplined.nxs",
+                splined_ws.name(), "ISIS_Powder-POLARIS00098532_splined.nxs")
 
     def cleanup(self):
         try:

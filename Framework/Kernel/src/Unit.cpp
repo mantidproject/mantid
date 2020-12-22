@@ -127,8 +127,8 @@ void Unit::initialize(const double &_l1, const double &_l2,
   this->init();
 }
 
-void Unit::validateExtraParams(
-    const int, const std::map<UnitConversionParameters, double> &) {}
+void Unit::validateExtraParams(const int,
+                               const std::map<UnitParams, double> &) {}
 
 //---------------------------------------------------------------------------------------
 /** Perform the conversion to TOF on a vector of data
@@ -137,8 +137,7 @@ void Unit::validateExtraParams(
 void Unit::toTOF(
     std::vector<double> &xdata, std::vector<double> &ydata, const double &_l1,
     const double &_l2, const double &_twoTheta, const int &_emode,
-    std::initializer_list<std::pair<const UnitConversionParameters, double>>
-        params) {
+    std::initializer_list<std::pair<const UnitParams, double>> params) {
   ExtraParametersMap paramsMap(params);
   toTOF(xdata, ydata, _l1, _l2, _twoTheta, _emode, paramsMap);
 }
@@ -161,10 +160,10 @@ void Unit::toTOF(std::vector<double> &xdata, std::vector<double> &ydata,
 @param emode
 @param params (eg efixed or delta)
 */
-double Unit::convertSingleToTOF(
-    const double xvalue, const double &l1, const double &l2,
-    const double &twoTheta, const int &emode,
-    const std::map<UnitConversionParameters, double> &params) {
+double Unit::convertSingleToTOF(const double xvalue, const double &l1,
+                                const double &l2, const double &twoTheta,
+                                const int &emode,
+                                const std::map<UnitParams, double> &params) {
   this->initialize(l1, l2, twoTheta, emode, params);
   return this->singleToTOF(xvalue);
 }
@@ -175,8 +174,7 @@ double Unit::convertSingleToTOF(
 void Unit::fromTOF(
     std::vector<double> &xdata, std::vector<double> &ydata, const double &_l1,
     const double &_l2, const double &_twoTheta, const int &_emode,
-    std::initializer_list<std::pair<const UnitConversionParameters, double>>
-        params) {
+    std::initializer_list<std::pair<const UnitParams, double>> params) {
   ExtraParametersMap paramsMap(params);
   fromTOF(xdata, ydata, _l1, _l2, _twoTheta, _emode, paramsMap);
 }
@@ -200,10 +198,10 @@ void Unit::fromTOF(std::vector<double> &xdata, std::vector<double> &ydata,
 @param emode
 @param params (eg efixed or delta)
 */
-double Unit::convertSingleFromTOF(
-    const double xvalue, const double &l1, const double &l2,
-    const double &twoTheta, const int &emode,
-    const std::map<UnitConversionParameters, double> &params) {
+double Unit::convertSingleFromTOF(const double xvalue, const double &l1,
+                                  const double &l2, const double &twoTheta,
+                                  const int &emode,
+                                  const std::map<UnitParams, double> &params) {
   this->initialize(l1, l2, twoTheta, emode, params);
   return this->singleFromTOF(xvalue);
 }
@@ -334,8 +332,8 @@ Wavelength::Wavelength()
 const UnitLabel Wavelength::label() const { return Symbol::Angstrom; }
 
 void Wavelength::validateExtraParams(
-    const int emode, const std::map<UnitConversionParameters, double> &params) {
-  auto it = params.find(UnitConversionParameters::efixed);
+    const int emode, const std::map<UnitParams, double> &params) {
+  auto it = params.find(UnitParams::efixed);
   if ((emode != 0) && (it == params.end())) {
     throw std::runtime_error(
         "An efixed value must be supplied in the extra parameters when "
@@ -350,7 +348,7 @@ void Wavelength::init() {
   double toAngstroms = 1e10;
   sfpTo = 0.0;
 
-  auto it = m_params.find(UnitConversionParameters::efixed);
+  auto it = m_params.find(UnitParams::efixed);
   if (it != m_params.end()) {
     efixed = it->second;
   }
@@ -583,9 +581,9 @@ dSpacing::dSpacing() : Unit(), difa(0), difc(DBL_MIN), tzero(0) {
   addConversion("QSquared", (factor * factor), -2.0);
 }
 
-void dSpacing::validateExtraParams(
-    const int, const std::map<UnitConversionParameters, double> &params) {
-  auto it = params.find(UnitConversionParameters::difc);
+void dSpacing::validateExtraParams(const int,
+                                   const std::map<UnitParams, double> &params) {
+  auto it = params.find(UnitParams::difc);
   if (it == params.end()) {
     throw std::runtime_error(
         "A difc value must be supplied in the extra parameters when "
@@ -603,15 +601,15 @@ void dSpacing::init() {
   difa = 0.;
   difc = 0.;
   tzero = 0.;
-  auto it = m_params.find(UnitConversionParameters::difc);
+  auto it = m_params.find(UnitParams::difc);
   if (it != m_params.end()) {
     difc = it->second;
   }
-  it = m_params.find(UnitConversionParameters::difa);
+  it = m_params.find(UnitParams::difa);
   if (it != m_params.end()) {
     difa = it->second;
   }
-  it = m_params.find(UnitConversionParameters::tzero);
+  it = m_params.find(UnitParams::tzero);
   if (it != m_params.end()) {
     tzero = it->second;
   }
@@ -687,20 +685,18 @@ double dSpacing::conversionTOFMax() const {
 
 double dSpacing::calcTofMin(const double difc, const double difa,
                             const double tzero, const double tofmin) {
-  Kernel::ExtraParametersMap params{
-      {Kernel::UnitConversionParameters::difa, difa},
-      {Kernel::UnitConversionParameters::difc, difc},
-      {Kernel::UnitConversionParameters::tzero, tzero}};
+  Kernel::ExtraParametersMap params{{Kernel::UnitParams::difa, difa},
+                                    {Kernel::UnitParams::difc, difc},
+                                    {Kernel::UnitParams::tzero, tzero}};
   initialize(-1., -1., -1., 0, params);
   return std::max(conversionTOFMin(), tofmin);
 }
 
 double dSpacing::calcTofMax(const double difc, const double difa,
                             const double tzero, const double tofmax) {
-  Kernel::ExtraParametersMap params{
-      {Kernel::UnitConversionParameters::difa, difa},
-      {Kernel::UnitConversionParameters::difc, difc},
-      {Kernel::UnitConversionParameters::tzero, tzero}};
+  Kernel::ExtraParametersMap params{{Kernel::UnitParams::difa, difa},
+                                    {Kernel::UnitParams::difc, difc},
+                                    {Kernel::UnitParams::tzero, tzero}};
   initialize(-1, -1, -1, 0, params);
   return std::min(conversionTOFMax(), tofmax);
 }
@@ -897,7 +893,7 @@ DeltaE::DeltaE()
 }
 
 void DeltaE::init() {
-  auto it = m_params.find(UnitConversionParameters::efixed);
+  auto it = m_params.find(UnitParams::efixed);
   if (it != m_params.end()) {
     efixed = it->second;
   }
@@ -1100,9 +1096,9 @@ Momentum::Momentum()
   //
 }
 
-void Momentum::validateExtraParams(
-    const int emode, const std::map<UnitConversionParameters, double> &params) {
-  auto it = params.find(UnitConversionParameters::efixed);
+void Momentum::validateExtraParams(const int emode,
+                                   const std::map<UnitParams, double> &params) {
+  auto it = params.find(UnitParams::efixed);
   if ((emode != 0) && (it == params.end())) {
     throw std::runtime_error(
         "An efixed value must be supplied in the extra parameters when "
@@ -1117,7 +1113,7 @@ void Momentum::init() {
   double toAngstroms = 1e10;
   sfpTo = 0.0;
 
-  auto it = m_params.find(UnitConversionParameters::efixed);
+  auto it = m_params.find(UnitParams::efixed);
   if (it != m_params.end()) {
     efixed = it->second;
   }
@@ -1216,7 +1212,7 @@ const UnitLabel SpinEchoLength::label() const { return Symbol::Nanometre; }
 SpinEchoLength::SpinEchoLength() : Wavelength() {}
 
 void SpinEchoLength::init() {
-  auto it = m_params.find(UnitConversionParameters::efixed);
+  auto it = m_params.find(UnitParams::efixed);
   if (it != m_params.end()) {
     efixed = it->second;
   }
@@ -1271,7 +1267,7 @@ const UnitLabel SpinEchoTime::label() const { return Symbol::Nanosecond; }
 SpinEchoTime::SpinEchoTime() : Wavelength(), efixed(0.) {}
 
 void SpinEchoTime::init() {
-  auto it = m_params.find(UnitConversionParameters::efixed);
+  auto it = m_params.find(UnitParams::efixed);
   if (it != m_params.end()) {
     efixed = it->second;
   }

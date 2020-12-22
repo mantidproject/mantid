@@ -273,9 +273,9 @@ void RemoveBins::transformRangeUnit(const int index, double &startX,
     std::vector<double> endPoints;
     endPoints.emplace_back(startX);
     endPoints.emplace_back(endX);
-    ExtraParametersMap pmap = {{UnitConversionParameters::difa, difa},
-                               {UnitConversionParameters::difc, difc},
-                               {UnitConversionParameters::tzero, tzero}};
+    ExtraParametersMap pmap = {{UnitParams::difa, difa},
+                               {UnitParams::difc, difc},
+                               {UnitParams::tzero, tzero}};
     std::vector<double> emptyVec;
     // assume elastic
     m_rangeUnit->toTOF(endPoints, emptyVec, l1, l2, theta, 0, pmap);

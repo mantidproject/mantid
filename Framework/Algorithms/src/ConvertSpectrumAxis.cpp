@@ -111,10 +111,10 @@ void ConvertSpectrumAxis::exec() {
         efixed =
             getEfixed(spectrumInfo.detector(i), inputWS, emode); // get efixed
         auto [difa, difc, tzero] = spectrumInfo.diffractometerConstants(i);
-        pmap = {{UnitConversionParameters::efixed, efixed},
-                {UnitConversionParameters::difa, difa},
-                {UnitConversionParameters::difc, difc},
-                {UnitConversionParameters::tzero, tzero}};
+        pmap = {{UnitParams::efixed, efixed},
+                {UnitParams::difa, difa},
+                {UnitParams::difc, difc},
+                {UnitParams::tzero, tzero}};
       } else {
         twoTheta = 0.0;
         l2 = l1;
