@@ -6,13 +6,16 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidCrystal/SCDCalibratePanels2.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
+
 #include <cxxtest/TestSuite.h>
 #include <stdexcept>
 
-#include "MantidCrystal/SCDCalibratePanels2.h"
 
-
-using Mantid::Crystal::SCDCalibratePanels2;
+using namespace Mantid::API;
+using namespace Mantid::Crystal;
 
 class SCDCalibratePanels2Test : public CxxTest::TestSuite {
 public:
@@ -38,6 +41,8 @@ public:
   ///NULL case
   void testNullCase(){
     SCDCalibratePanels2 alg;
+
+    generateSimulatedworkspace();
   }
 
   ///Adjust T0 and L1
@@ -64,6 +69,50 @@ public:
 
   /// Helper functions for unittest
 
-  // generate a peaktable with given movement void
+
+private:
+
+  // lattice constants of silicon
+  const double silicon_a = 5.431;
+  const double silicon_b = 5.431;
+  const double silicon_c = 5.431;
+  const double silicon_alpha = 90;
+  const double silicon_beta = 90;
+  const double silicon_gamma = 90;
+
+  // constants that select the recriprocal space
+  const double dspacing_min = 1.0;
+  const double dspacing_max = 10.0;
+  const double wavelength_min = 0.8;
+  const double wavelength_max = 2.9;
+
+  void generateSimulatedworkspace(){
+    // create simulated workspace
+    IAlgorithm_sptr csws_alg = 
+      AlgorithmFactory::Instance().create("CreateSimulationWorkspace", 1);
+    csws_alg->initialize();
+    csws_alg->setProperty("Instrument", "CORELLI");
+    csws_alg->setProperty("BinParams", "1,100,10000");
+    csws_alg->setProperty("UnitX", "TOF");
+    csws_alg->setProperty("OutputWorkspace", "cws");
+    csws_alg->execute();
+
+    // set UB
+    IAlgorithm_sptr sub_alg = 
+      AlgorithmFactory::Instance().create("SetUB", 1);
+    sub_alg->initialize();
+    sub_alg->setProperty("Workspace", "cws");
+    sub_alg->setProperty("u", "1,0,0");
+    sub_alg->setProperty("v", "0,1,0");
+    sub_alg->setProperty("a", silicon_a);
+    sub_alg->setProperty("b", silicon_b);
+    sub_alg->setProperty("c", silicon_c);
+    sub_alg->setProperty("alpha", silicon_alpha);
+    sub_alg->setProperty("beta", silicon_beta);
+    sub_alg->setProperty("gamma", silicon_gamma);
+    sub_alg->execute();
+
+    //
+  }
 
 };
