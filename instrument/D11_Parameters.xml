@@ -14,7 +14,9 @@
       <parameter name="grouping" type="string">
         <value val="0-65535"/>
       </parameter>
-      <!-- The pixel sizes [mm] used by SolidAngle, resolution and default Q binning calculations.-->
+      <!-- The pixel sizes [mm] used by SolidAngle, resolution and default Q binning calculations.
+      Note that for the panels, often pixels have transposed shape, but the surface is the same.
+      Q binning is based on the maximum of the 2 dimensions, so it is also invariant.-->
       <parameter name="x-pixel-size" type="number">
         <value val="3.75"/>
       </parameter>
