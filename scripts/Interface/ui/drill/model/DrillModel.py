@@ -504,16 +504,22 @@ class DrillModel(QObject):
 
         Args:
             samples (list(int)): sample indexes
+
+        Returns:
+            list(str): list of groups that changed
         """
+        groups = []
         for sample in samples:
             for group in self.groups:
                 if sample in self.groups[group]:
                     self.groups[group].remove(sample)
+                    groups.append(group)
                 if ((group in self.masterSamples)
                         and (self.masterSamples[group] == sample)):
                     del self.masterSamples[group]
 
         self.groups = {k:v for k,v in self.groups.items() if v}
+        return [group for group in groups if group in self.groups]
 
     def setSamplesGroups(self, groups):
         """

@@ -106,8 +106,15 @@ class DrillPresenter:
         Args:
             rows (list(int)): row indexes
         """
-        self.model.ungroupSamples(rows)
+        groups = self.model.ungroupSamples(rows)
         self.view.labelRowsInGroup(None, rows, None)
+        if groups:
+            for group in groups:
+                rows = self.model.getSamplesGroups()[group]
+                self.view.labelRowsInGroup(group, rows, None, "This row "
+                                           "belongs to the sample group {}"
+                                           .format(group),
+                                           None)
 
     def onMasterRowRequested(self, row):
         group = self.model.setGroupMaster(row)
