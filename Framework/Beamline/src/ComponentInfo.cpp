@@ -490,7 +490,7 @@ bool ComponentInfo::hasSource() const { return m_sourceIndex >= 0; }
  */
 bool ComponentInfo::hasEquivalentSource(const ComponentInfo &other) const {
   if (this->hasSource() != other.hasSource())
-    return false;  // one has a source while the other does not
+    return false; // one has a source while the other does not
   if (this->hasSource() && other.hasSource()) {
     return (this->sourcePosition() - other.sourcePosition()).norm() < 1e-9;
   }
@@ -509,7 +509,7 @@ bool ComponentInfo::hasSample() const { return m_sampleIndex >= 0; }
  */
 bool ComponentInfo::hasEquivalentSample(const ComponentInfo &other) const {
   if (this->hasSample() != other.hasSample())
-    return false;  // one has a source while the other does not
+    return false; // one has a source while the other does not
   if (this->hasSample() && other.hasSample()) {
     return (this->samplePosition() - other.samplePosition()).norm() < 1e-9;
   }
