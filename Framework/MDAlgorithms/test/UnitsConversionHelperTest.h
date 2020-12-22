@@ -281,7 +281,8 @@ public:
     azimutal[4] = (180. / 180.) * M_PI;
 
     int numBins = 10;
-    ws2D = WorkspaceCreationHelper::createProcessedInelasticWS(L2, polar, azimutal, numBins, -1, 3, 3);
+    ws2D = WorkspaceCreationHelper::createProcessedInelasticWS(
+        L2, polar, azimutal, numBins, -1, 3, 3);
 
     auto ppDets_alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
         "PreprocessDetectorsToMD");
