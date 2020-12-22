@@ -9,6 +9,7 @@
 #include "MantidCrystal/SCDCalibratePanels2.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidKernel/Logger.h"
 
 #include <cxxtest/TestSuite.h>
 #include <stdexcept>
@@ -16,6 +17,7 @@
 
 using namespace Mantid::API;
 using namespace Mantid::Crystal;
+using namespace Mantid::DataObjects;
 
 class SCDCalibratePanels2Test : public CxxTest::TestSuite {
 public:
@@ -42,7 +44,11 @@ public:
   void testNullCase(){
     SCDCalibratePanels2 alg;
 
-    generateSimulatedworkspace();
+    const std::string wsname("ws_nullcase");
+    generateSimulatedworkspace(wsname);
+
+    EventWorkspace_sptr ws =
+        AnalysisDataService::Instance().retrieveWS<EventWorkspace>(wsname);
   }
 
   ///Adjust T0 and L1
@@ -86,7 +92,7 @@ private:
   const double wavelength_min = 0.8;
   const double wavelength_max = 2.9;
 
-  void generateSimulatedworkspace(){
+  void generateSimulatedworkspace(const std::string &WSName){
     // create simulated workspace
     IAlgorithm_sptr csws_alg = 
       AlgorithmFactory::Instance().create("CreateSimulationWorkspace", 1);
@@ -94,14 +100,14 @@ private:
     csws_alg->setProperty("Instrument", "CORELLI");
     csws_alg->setProperty("BinParams", "1,100,10000");
     csws_alg->setProperty("UnitX", "TOF");
-    csws_alg->setProperty("OutputWorkspace", "cws");
+    csws_alg->setProperty("OutputWorkspace", WSName);
     csws_alg->execute();
 
     // set UB
     IAlgorithm_sptr sub_alg = 
       AlgorithmFactory::Instance().create("SetUB", 1);
     sub_alg->initialize();
-    sub_alg->setProperty("Workspace", "cws");
+    sub_alg->setProperty("Workspace", WSName);
     sub_alg->setProperty("u", "1,0,0");
     sub_alg->setProperty("v", "0,1,0");
     sub_alg->setProperty("a", silicon_a);
