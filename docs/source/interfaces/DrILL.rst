@@ -137,7 +137,7 @@ Groups
 To avoid entering exactly the same value several times in the table, it is also
 possible to create groups of samples. Within a group, a master sample can be
 designated. The values of the parameters of the master sample will be used when
-processinga all rows in the group.
+processing all rows in the group.
 
 Paramaters can still be overriden manually whithin a group by entering a sample
 specific value in the table. The priority for the parameter values is as follow:
