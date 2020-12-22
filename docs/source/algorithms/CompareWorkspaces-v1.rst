@@ -32,6 +32,10 @@ workspaces matched, the message workspace will be empty.
 
 Please note that details about the comparisons will be only available when the log level is set to debug.
 
+Check Instrument
+================
+The following checks are performed with comparing the instrument embedded in the workspaces:
+-
 
 Usage
 -----
