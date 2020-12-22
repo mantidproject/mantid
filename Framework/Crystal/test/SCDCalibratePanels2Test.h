@@ -9,6 +9,8 @@
 #include "MantidCrystal/SCDCalibratePanels2.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/Logger.h"
 
 #include <cxxtest/TestSuite.h>
@@ -54,16 +56,21 @@ public:
   ///Adjust T0 and L1
   void testGlobalShiftOnly(){
     SCDCalibratePanels2 alg;
+    const std::string wsname("ws_changeL1");
+
+    //TODO:
   }
 
   ///Ideal global with one panels moved
   void testSinglePanelMoved(){
     SCDCalibratePanels2 alg;
+    const std::string wsname("ws_moveBank");
   }
 
   ///Ideal global with two panels moved
   void testDualPanelMoved(){
     SCDCalibratePanels2 alg;
+    const std::string wsname("ws_moveBanks");
   }
 
   // Test with mocked CORELLI instrument
@@ -71,13 +78,10 @@ public:
   // Two panels moved
   void testExec(){
     SCDCalibratePanels2 alg;
+    const std::string wsname("ws_moveAll");
   }
 
-  /// Helper functions for unittest
-
-
 private:
-
   // lattice constants of silicon
   const double silicon_a = 5.431;
   const double silicon_b = 5.431;
