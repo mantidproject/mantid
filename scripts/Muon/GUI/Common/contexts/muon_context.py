@@ -8,11 +8,16 @@ from Muon.GUI.Common.ADSHandler.workspace_naming import (get_raw_data_workspace_
                                                          get_pair_asymmetry_name, get_base_data_directory,
                                                          get_group_asymmetry_name,
                                                          get_group_asymmetry_unnorm_name,
-                                                         get_deadtime_data_workspace_name)
+                                                         get_deadtime_data_workspace_name,
+                                                         get_pair_phasequad_name,
+                                                         add_phasequad_extensions)
 from Muon.GUI.Common.calculate_pair_and_group import calculate_group_data, calculate_pair_data, \
     estimate_group_asymmetry_data, run_pre_processing
 from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string, run_string_to_list
+from Muon.GUI.Common.utilities.algorithm_utils import run_PhaseQuad, split_phasequad, rebin_ws, apply_deadtime
+from Muon.GUI.Common.muon_base_pair import MuonBasePair
 import Muon.GUI.Common.ADSHandler.workspace_naming as wsName
+from Muon.GUI.Common.ADSHandler.ADS_calls import retrieve_ws
 from Muon.GUI.Common.contexts.muon_group_pair_context import get_default_grouping
 from Muon.GUI.Common.contexts.muon_gui_context import PlotMode
 from Muon.GUI.Common.contexts.muon_context_ADS_observer import MuonContextADSObserver
@@ -86,7 +91,8 @@ class MuonContext(object):
         # of the runs. This filters out periods which are not in a given run.
         periods = [period for period in group.periods if period <= self.num_periods(run)]
 
-        # If not periods match return nothing here. The caller then needs to handle this gracefully.
+        # If not periods match return nothing here. The caller then needs to
+        # handle this gracefully.
         if not periods:
             return None, None, None
 
@@ -169,11 +175,33 @@ class MuonContext(object):
         if(self._do_rebin()):
             self._calculate_pairs(rebin=True)
 
+    def _update_phasequads(self, rebin):
+        # lets remove the phasequad pairs
+        to_rm = []
+        for pair in self._group_pair_context.pairs:
+            if not isinstance(
+                    pair, MuonPair) and isinstance(
+                    pair, MuonBasePair):
+                to_rm.append(pair)
+        # this is to force a reset of phasequads
+        for pair in to_rm:
+            self.group_pair_context.remove_pair_from_selected_pairs(pair.name)
+        # lets remove the phasequads for now -> later will recalculate
+        for pair in self.group_pair_context.phasequads:
+            self.group_pair_context.remove_phasequad(pair)
+
     def _calculate_pairs(self, rebin):
         for run in self._data_context.current_runs:
+
+            self._update_phasequads(rebin)
+            # construct the pairs
             for pair in self._group_pair_context.pairs:
-                pair_asymmetry_workspace = self.calculate_pair(
-                    pair, run, rebin=rebin)
+                if isinstance(pair, MuonPair):
+                    pair_asymmetry_workspace = self.calculate_pair(
+                        pair, run, rebin=rebin)
+                else:
+                    continue
+
                 if not pair_asymmetry_workspace:
                     continue
                 pair.update_asymmetry_workspace(
@@ -201,6 +229,70 @@ class MuonContext(object):
                 self.group_pair_context[group.name].update_workspaces(run, group_workspace, group_asymmetry,
                                                                       group_asymmetry_unormalised, rebin=rebin)
 
+    def calculate_phasequads(self, name, phasequad_obj):
+        self._calculate_phasequads(name, phasequad_obj, rebin=False)
+        if self._do_rebin():
+            self._calculate_phasequads(name, phasequad_obj, rebin=True)
+
+    def calculate_phasequad(self, phasequad, run, rebin):
+        parameters = {}
+        parameters['PhaseTable'] = phasequad.phase_table
+        run_string = run_list_to_string(run)
+
+        ws_name = get_pair_phasequad_name(
+            self, add_phasequad_extensions(
+                phasequad.name), run_string, rebin=rebin)
+
+        parameters['InputWorkspace'] = self._run_deadtime(run_string, ws_name)
+
+        phase_quad = run_PhaseQuad(parameters, ws_name)
+        phase_quad = self._run_rebin(phase_quad, rebin)
+
+        workspaces = split_phasequad(phase_quad)
+        return workspaces
+
+    def _calculate_phasequads(self, name, phasequad_obj, rebin):
+        for run in self._data_context.current_runs:
+            if self._data_context.num_periods(run) >1:
+                raise ValueError("Cannot support multiple periods")
+
+            ws_list = self.calculate_phasequad(phasequad_obj, run, rebin)
+            run_string = run_list_to_string(run)
+            directory = get_base_data_directory(self, run_string)
+            for ws in ws_list:
+                muon_workspace_wrapper = MuonWorkspaceWrapper(directory + ws)
+                muon_workspace_wrapper.show()
+
+            phasequad_obj.update_asymmetry_workspaces(
+                ws_list,
+                run,
+                rebin=rebin)
+
+    def _run_deadtime(self, run_string, output):
+        name =get_raw_data_workspace_name(self.data_context.instrument,
+                                          run_string,
+                                          multi_period=False,
+                                          workspace_suffix=self.workspace_suffix)
+        deadtime_table = self.dead_time_table(run_string)
+        if deadtime_table:
+            return apply_deadtime(name, output, deadtime_table)
+        return name
+
+    def _run_rebin(self, name, rebin):
+        if rebin:
+            params = "1"
+            if self.gui_context['RebinType'] == 'Variable' and self.gui_context["RebinVariable"]:
+                params = self.gui_context["RebinVariable"]
+
+            if self.gui_context['RebinType'] == 'Fixed' and self.gui_context["RebinFixed"]:
+                ws = retrieve_ws(name)
+                x_data = ws.dataX(0)
+                original_step = x_data[1] - x_data[0]
+                params = float(self.gui_context["RebinFixed"]) * original_step
+            return rebin_ws(name,params)
+        else:
+            return name
+
     def update_current_data(self):
         # Update the current data; resetting the groups and pairs to their
         # default values
@@ -222,9 +314,8 @@ class MuonContext(object):
         for run in self.data_context.current_runs:
             with WorkspaceGroupDefinition():
                 run_string = run_list_to_string(run)
-                loaded_workspace = \
-                    self.data_context._loaded_data.get_data(run=run, instrument=self.data_context.instrument)['workspace'][
-                        'OutputWorkspace']
+                loaded_workspace = self.data_context._loaded_data.get_data(run=run, instrument=self.data_context.instrument)['workspace'][
+                                       'OutputWorkspace']
                 loaded_workspace_deadtime_table = self.data_context._loaded_data.get_data(
                     run=run, instrument=self.data_context.instrument)['workspace']['DataDeadTimeTable']
                 directory = get_base_data_directory(
@@ -317,7 +408,7 @@ class MuonContext(object):
         if self.gui_context['DeadTimeSource'] == 'FromADS':
             return self.gui_context['DeadTimeTable']
         elif self.gui_context['DeadTimeSource'] == 'FromFile':
-            return self.data_context.get_loaded_data_for_run(run)["DataDeadTimeTable"]
+            return self.data_context.get_loaded_data_for_run([float(run)])["DataDeadTimeTable"]
         elif self.gui_context['DeadTimeSource'] == 'None':
             return None
 

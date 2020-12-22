@@ -41,6 +41,7 @@ private slots:
   bool isOptionHidden(QString const &option);
   void removeGroupingOption(QString const &option);
   void includeExtraGroupingOption(bool includeOption, QString const &option);
+  void handleSaveCustomGroupingClicked();
 
   void
   setInstrumentDefault(); ///< Sets default parameters for current instrument
@@ -70,6 +71,8 @@ private:
                                      QString const &instrumentProperty);
 
   void setFileExtensionsByName(bool filter) override;
+
+  void createCustomGroupingWorkspace();
 
   std::pair<std::string, std::string> createMapFile(
       const std::string

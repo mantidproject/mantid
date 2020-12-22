@@ -9,6 +9,7 @@ import unittest
 from Muon.GUI.Common.contexts.muon_group_pair_context import MuonGroupPairContext
 from Muon.GUI.Common.muon_group import MuonGroup
 from Muon.GUI.Common.muon_pair import MuonPair
+from Muon.GUI.Common.muon_phasequad import MuonPhasequad
 from Muon.GUI.Common.test_helpers.general_test_helpers import create_group_populated_by_two_workspace
 from mantid.simpleapi import CreateSampleWorkspace, LoadInstrument
 
@@ -190,6 +191,35 @@ class MuonGroupPairContextTest(unittest.TestCase):
 
         self.assertEqual(group_name, 'group_1')
         self.assertEqual(run, '62260-62261')
+
+    def test_add_phasequad(self):
+        phasequad = MuonPhasequad("test", "table")
+        self.assertEqual(len(self.context._phasequad),0)
+        self.assertEqual(len(self.context._pairs),0)
+
+        self.context.add_phasequad(phasequad)
+        self.assertEqual(len(self.context._phasequad),1)
+        self.assertEqual(len(self.context._pairs),2)
+
+        self.assertEqual(self.context._phasequad[0].name,"test")
+        self.assertEqual(self.context._pairs[0].name,"test_Re_")
+        self.assertEqual(self.context._pairs[1].name,"test_Im_")
+
+    def test_rm_phasequad(self):
+        phasequad = MuonPhasequad("test", "table")
+        phasequad2 = MuonPhasequad("test2", "table2")
+        self.context.add_phasequad(phasequad)
+        self.context.add_phasequad(phasequad2)
+        self.assertEqual(len(self.context._phasequad),2)
+        self.assertEqual(len(self.context._pairs),4)
+
+        self.context.remove_phasequad(phasequad)
+        self.assertEqual(len(self.context._phasequad),1)
+        self.assertEqual(len(self.context._pairs),2)
+
+        self.assertEqual(self.context._phasequad[0].name,"test2")
+        self.assertEqual(self.context._pairs[0].name,"test2_Re_")
+        self.assertEqual(self.context._pairs[1].name,"test2_Im_")
 
 
 if __name__ == '__main__':

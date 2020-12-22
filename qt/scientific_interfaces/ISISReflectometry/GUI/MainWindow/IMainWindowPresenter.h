@@ -13,6 +13,8 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
+class IBatchPresenter;
+
 /** @class IMainWindowPresenter
 
 IMainWindowPresenter is the interface defining the functions that the main
@@ -27,15 +29,16 @@ public:
   virtual bool isWarnProcessPartialGroupChecked() const = 0;
   virtual bool isProcessAllPrevented() const = 0;
   virtual bool isProcessPartialGroupPrevented() const = 0;
-  virtual bool isWarnDiscardChangesChecked() const = 0;
   virtual bool isRoundChecked() const = 0;
   virtual int &getRoundPrecision() const = 0;
   virtual boost::optional<int> roundPrecision() const = 0;
   virtual bool isCloseEventPrevented() = 0;
   virtual bool isCloseBatchPrevented(int batchIndex) const = 0;
   virtual bool isOverwriteBatchPrevented(int tabIndex) const = 0;
+  virtual bool
+  isOverwriteBatchPrevented(IBatchPresenter const *batchPresenter) const = 0;
   virtual bool isBatchUnsaved(int batchIndex) const = 0;
-  virtual bool isAnyBatchUnsaved() = 0;
+  virtual bool isAnyBatchUnsaved() const = 0;
   virtual void notifyAnyBatchAutoreductionResumed() = 0;
   virtual void notifyAnyBatchAutoreductionPaused() = 0;
   virtual void notifyAnyBatchReductionResumed() = 0;
@@ -45,6 +48,7 @@ public:
   virtual void notifyUpdateInstrumentRequested() = 0;
   virtual Mantid::Geometry::Instrument_const_sptr instrument() const = 0;
   virtual std::string instrumentName() const = 0;
+  virtual bool discardChanges(std::string const &message) const = 0;
   virtual ~IMainWindowPresenter() = default;
 };
 } // namespace ISISReflectometry

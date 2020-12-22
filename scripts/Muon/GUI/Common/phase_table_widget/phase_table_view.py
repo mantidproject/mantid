@@ -22,6 +22,7 @@ class PhaseTableView(QtWidgets.QWidget, ui_muon_phases_tab):
 
         self.backward_group_combo.currentIndexChanged.connect(self.ensure_groups_different)
         self.forward_group_combo.currentIndexChanged.connect(self.ensure_groups_different)
+        self.setEnabled(False)
 
     @property
     def first_good_time(self):
@@ -70,18 +71,12 @@ class PhaseTableView(QtWidgets.QWidget, ui_muon_phases_tab):
             self.backward_group_combo.setCurrentIndex(index)
 
     @property
-    def phase_quad_input_workspace(self):
-        return str(self.phase_quad_input_workspace_combo.currentText())
-
-    @phase_quad_input_workspace.setter
-    def phase_quad_input_workspace(self, value):
-        index = self.phase_quad_input_workspace_combo.findText(value)
-        if index != -1:
-            self.phase_quad_input_workspace_combo.setCurrentIndex(index)
-
-    @property
     def phase_table_for_phase_quad(self):
         return str(self.phase_quad_phase_table_combo.currentText())
+
+    @property
+    def number_of_phase_tables(self):
+        return self.phase_quad_phase_table_combo.count()
 
     @phase_table_for_phase_quad.setter
     def phase_table_for_phase_quad(self, value):
@@ -97,10 +92,6 @@ class PhaseTableView(QtWidgets.QWidget, ui_muon_phases_tab):
         self.input_workspace_combo_box.clear()
         self.input_workspace_combo_box.addItems(input_list)
         self.input_workspace_combo_box.setCurrentIndex(0)
-
-        self.phase_quad_input_workspace_combo.clear()
-        self.phase_quad_input_workspace_combo.addItems(input_list)
-        self.phase_quad_input_workspace_combo.setCurrentIndex(0)
 
     def set_group_combo_boxes(self, group_list):
         self.forward_group_combo.clear()
@@ -147,6 +138,11 @@ class PhaseTableView(QtWidgets.QWidget, ui_muon_phases_tab):
     @staticmethod
     def warning_popup(message):
         warning(message)
+
+    def enter_pair_name(self):
+        new_pair_name, ok = QtWidgets.QInputDialog.getText(self, 'Phasequad Name', 'Enter name of new phasequad:')
+        if ok:
+            return new_pair_name
 
     def enable_widget(self):
         for widget in self.children():
@@ -201,14 +197,9 @@ class PhaseTableView(QtWidgets.QWidget, ui_muon_phases_tab):
         table_utils.setTableHeaders(self.phase_table_options_table)
 
         self.phase_quad_table.setColumnWidth(0, 300)
-        self.phase_quad_table.setColumnWidth(1, 300)
 
-        # self.calculate_phase_table_button = QtWidgets.QPushButton('Calculate Phase Table', self)
-        table_utils.setRowName(self.phase_quad_table, 0, 'InputWorkspace')
-        self.phase_quad_input_workspace_combo = table_utils.addComboToTable(self.phase_quad_table, 0, options)
-
-        table_utils.setRowName(self.phase_quad_table, 1, 'PhaseTable')
-        self.phase_quad_phase_table_combo = table_utils.addComboToTable(self.phase_quad_table, 1, options)
+        table_utils.setRowName(self.phase_quad_table, 0, 'PhaseTable')
+        self.phase_quad_phase_table_combo = table_utils.addComboToTable(self.phase_quad_table, 0, options)
 
         self.phase_quad_table.resizeRowsToContents()
 

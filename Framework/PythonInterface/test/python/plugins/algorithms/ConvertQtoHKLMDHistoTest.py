@@ -37,9 +37,9 @@ class ConvertQtoHKLMDHistoTest(unittest.TestCase):
 
         self.assertEqual(mtd["peaks"].getNumberPeaks(), 12)
         peak = mtd["peaks"].getPeak(0)
-        self.assertAlmostEqual(peak.getH(), -0.995644, delta=1.0e-5)
-        self.assertAlmostEqual(peak.getK(), 0.977317, delta=1.0e-5)
-        self.assertAlmostEqual(peak.getL(), 3.93929, delta=1.0e-5)
+        self.assertEqual(peak.getH(), -1)
+        self.assertEqual(peak.getK(), 1)
+        self.assertEqual(peak.getL(), 4)
 
     def test_qtohkl_corelli(self):
         Load(Filename='CORELLI_29782.nxs', OutputWorkspace='data')

@@ -127,10 +127,17 @@ def mask_with_mask_files(mask_info, inst_info, workspace):
         load_alg = create_unmanaged_algorithm(load_name, **load_options)
         mask_alg = create_unmanaged_algorithm("MaskDetectors")
 
-        # Masker
-        for mask_file in mask_files:
-            mask_file = find_full_file_path(mask_file)
+        file_paths = [find_full_file_path(i) for i in mask_files]
+        # Find full file path returns an empty string, so we need to remake it
+        missing_file_paths = [mask_files[i] for i, path in enumerate(file_paths) if not path]
 
+        if missing_file_paths:
+            err_str = "The following mask files are missing:"
+            err_str += "\n".join(missing_file_paths)
+            raise FileNotFoundError(err_str)
+
+        # Masker
+        for mask_file in file_paths:
             # Get the detector ids which need to be masked
             load_alg.setProperty("InputFile", mask_file)
             load_alg.execute()

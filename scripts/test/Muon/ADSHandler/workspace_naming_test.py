@@ -43,6 +43,24 @@ class WorkspaceNamingTest(unittest.TestCase):
         self.assertEqual(name, expected_workspace_name)
         self.assertEqual(directory, expected_directory_name)
 
+    def test_get_run_numbers_as_string_from_workspace_name(self):
+        instrument = "MUSR"
+        runs = "62260"
+
+        # test formatting
+        workspace_name = "MUSR62260_raw_data MA"
+        self.assertEqual(runs, get_run_numbers_as_string_from_workspace_name(
+            workspace_name, instrument))
+        workspace_name = "MUSR62260; GROUP; fwd; Asymmetry; MA"
+        self.assertEqual(runs, get_run_numbers_as_string_from_workspace_name(
+            workspace_name, instrument))
+
+        # test multiple run numbers
+        runs = "62260-62261,62263"
+        workspace_name = "MUSR62260-62261,62263; GROUP; fwd; Asymmetry; MA"
+        self.assertEqual(runs, get_run_numbers_as_string_from_workspace_name(
+            workspace_name, instrument))
+
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)
