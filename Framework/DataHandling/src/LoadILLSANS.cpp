@@ -151,6 +151,12 @@ void LoadILLSANS::exec() {
     initWorkSpaceD11B(firstEntry, instrumentPath);
     progress.report("Loading the instrument " + m_instrumentName);
     runLoadInstrument();
+
+  } else if (m_instrumentName == "D22B") {
+    initWorkSpaceD22B(firstEntry, instrumentPath);
+    progress.report("Loading the instrument " + m_instrumentName);
+    runLoadInstrument();
+
   } else {
     initWorkSpace(firstEntry, instrumentPath);
     progress.report("Loading the instrument " + m_instrumentName);
@@ -192,8 +198,9 @@ void LoadILLSANS::setInstrumentName(const NeXus::NXEntry &firstEntry,
   const auto inst = std::find(m_supportedInstruments.begin(),
                               m_supportedInstruments.end(), m_instrumentName);
 
-  if (m_instrumentName == "D11" && firstEntry.containsGroup("data1")) {
-    m_instrumentName = "D11B";
+  if ((m_instrumentName == "D11" || m_instrumentName == "D22") &&
+      firstEntry.containsGroup("data1")) {
+    m_instrumentName += "B";
   }
 
   if (inst == m_supportedInstruments.end()) {
@@ -310,6 +317,38 @@ void LoadILLSANS::initWorkSpaceD11B(NeXus::NXEntry &firstEntry,
                                                      nextIndex);
   nextIndex = loadDataIntoWorkspaceFromVerticalTubes(
       dataRight, m_defaultBinning, nextIndex);
+  nextIndex = loadDataIntoWorkspaceFromMonitors(firstEntry, nextIndex);
+}
+
+/**
+ * @brief LoadILLSANS::initWorkSpaceD22B Load D22B data
+ * @param firstEntry
+ * @param instrumentPath
+ */
+void LoadILLSANS::initWorkSpaceD22B(NeXus::NXEntry &firstEntry,
+                                    const std::string &instrumentPath) {
+  g_log.debug("Fetching data...");
+
+  NXData data1 = firstEntry.openNXData("data1");
+  NXInt dataCenter = data1.openIntData();
+  dataCenter.load();
+  NXData data2 = firstEntry.openNXData("data2");
+  NXInt dataSide = data2.openIntData();
+  dataSide.load();
+
+  size_t numberOfHistograms =
+      static_cast<size_t>(dataCenter.dim0() * dataCenter.dim1() +
+                          dataSide.dim0() * dataSide.dim1()) +
+      N_MONITORS;
+
+  createEmptyWorkspace(numberOfHistograms, 1);
+  loadMetaData(firstEntry, instrumentPath);
+
+  size_t nextIndex;
+  nextIndex =
+      loadDataIntoWorkspaceFromVerticalTubes(dataCenter, m_defaultBinning, 0);
+  nextIndex = loadDataIntoWorkspaceFromVerticalTubes(dataSide, m_defaultBinning,
+                                                     nextIndex);
   nextIndex = loadDataIntoWorkspaceFromMonitors(firstEntry, nextIndex);
 }
 
