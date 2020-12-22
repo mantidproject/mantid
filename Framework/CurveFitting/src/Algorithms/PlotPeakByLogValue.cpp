@@ -566,8 +566,9 @@ std::vector<std::string>
 PlotPeakByLogValue::getExclude(const size_t numSpectra) {
   std::string exclude = getPropertyValue("Exclude");
   std::vector<std::string> excludeList = getProperty("ExcludeMultiple");
-  if (excludeList.size() == 0) {
+  if (excludeList.empty()) {
     std::vector<std::string> excludeVector;
+    excludeVector.reserve(numSpectra);
     for (size_t i = 0; i < numSpectra; i++) {
       excludeVector.emplace_back(exclude);
     }

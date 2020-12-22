@@ -689,6 +689,7 @@ IndirectFittingModel::createSequentialFit(const IFunction_sptr &function,
   fitAlgorithm->setProperty("EndX", endX.str());
 
   std::vector<std::string> excludeRegions;
+  excludeRegions.reserve(m_fitDataModel->getNumberOfDomains());
   for (size_t i = 0; i < m_fitDataModel->getNumberOfDomains(); i++) {
     if (!m_fitDataModel->getExcludeRegionVector(FitDomainIndex{i}).empty()) {
       excludeRegions.emplace_back(
