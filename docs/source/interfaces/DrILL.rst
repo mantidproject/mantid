@@ -161,8 +161,10 @@ To group samples, one has to select them (at least one cell per row) and press
 Ctrl + G or use the context menu. To set a row as master, one has to select it
 (again, one cell is sufficient) and press Ctrl + M or use the context menu.
 Grouped samples will appear with a specific label in the table. The master
-of a group will have a bold label. One can also ungroup samples by selecting
-them and pressing Ctrl + Alt + G or using the context menu.
+of a group will have a bold label. There can be only one master row per group,
+if a second row is selected as the master row, it will replace the previous one.
+One can also ungroup samples by selecting them and pressing Ctrl + Alt + G or
+using the context menu.
 
 
 Processing
