@@ -492,6 +492,8 @@ public:
     TS_ASSERT_DELTA(outLam->y(0)[7], 2.787410, 1e-6);
 
     checkConversionToQ(alg, twoThetaForDetector3() / 2.0);
+
+    TS_ASSERT_DELTA(sumCounts(outLam->counts(0)), 33.310938, 1e-6);
   }
 
   void test_sum_in_q_non_flat_sample() {
@@ -515,6 +517,8 @@ public:
     TS_ASSERT_DELTA(outLam->y(0)[7], 3.141920, 1e-6);
 
     checkConversionToQ(alg, twoThetaForDetector3() / 2.0);
+
+    TS_ASSERT_DELTA(sumCounts(outLam->counts(0)), 31.418985, 1e-6);
   }
 
   void test_sum_in_q_monitor_normalization() {
@@ -551,6 +555,8 @@ public:
     TS_ASSERT_DELTA(outLam->y(0)[9], 2.255101, 1e-6);
 
     checkConversionToQ(alg, twoThetaForDetector4() / 2.0, false, false);
+
+    TS_ASSERT_DELTA(sumCounts(outLam->counts(0)), 66.514113, 1e-6);
   }
 
   void test_sum_in_q_transmission_correction_run() {
@@ -572,6 +578,8 @@ public:
     TS_ASSERT_DELTA(outLam->y(0)[7], 0.886874, 1e-6);
 
     checkConversionToQ(alg, twoThetaForDetector3() / 2.0, true, false);
+
+    TS_ASSERT_DELTA(sumCounts(outLam->counts(0)), 21.030473, 1e-6);
   }
 
   void test_sum_in_q_exponential_correction() {
@@ -595,6 +603,8 @@ public:
     TS_ASSERT_DELTA(outLam->y(0)[7], 39.756736, 1e-6);
 
     checkConversionToQ(alg, twoThetaForDetector4() / 2.0);
+
+    TS_ASSERT_DELTA(sumCounts(outLam->counts(0)), 365.843555, 1e-6);
   }
 
   void test_sum_in_q_point_detector() {
@@ -620,6 +630,8 @@ public:
     TS_ASSERT_DELTA(outQ->y(0)[0], 2.900303, 1e-6);
     TS_ASSERT_DELTA(outQ->y(0)[3], 2.886945, 1e-6);
     TS_ASSERT_DELTA(outQ->y(0)[7], 2.607357, 1e-6);
+
+    TS_ASSERT_DELTA(sumCounts(outQ->counts(0)), 79.113420, 1e-6);
   }
 
   void test_sum_in_q_exclude_partial_bins() {
@@ -640,6 +652,8 @@ public:
     TS_ASSERT_DELTA(outLam->y(0)[7], 2.787199, 1e-6);
 
     checkConversionToQ(alg, twoThetaForDetector3() / 2.0);
+
+    TS_ASSERT_DELTA(sumCounts(outLam->counts(0)), 30.492737, 1e-6);
   }
 
   void test_sum_in_q_exclude_partial_bins_multiple_detectors() {
@@ -660,6 +674,8 @@ public:
     TS_ASSERT_DELTA(outLam->y(0)[7], 8.306563, 1e-6);
 
     checkConversionToQ(alg, twoThetaForDetector4() / 2.0);
+
+    TS_ASSERT_DELTA(sumCounts(outLam->counts(0)), 93.056874, 1e-6);
   }
 
   void test_angle_correction_is_done_for_sum_in_lambda_when_theta_provided() {
@@ -1525,5 +1541,9 @@ private:
     TS_ASSERT_DELTA(qY[0], 140.267317, 1e-6);
     TS_ASSERT_DELTA(qY[6], 62.816137, 1e-6);
     TS_ASSERT_DELTA(qY[9], 24.275146, 1e-6);
+  }
+
+  double sumCounts(Mantid::HistogramData::Counts const &counts) {
+    return std::accumulate(counts.cbegin(), counts.cend(), 0.0);
   }
 };
