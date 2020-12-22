@@ -389,7 +389,7 @@
       <item>
        <widget class="QToolButton" name="processRows">
         <property name="toolTip">
-         <string>Process selected rows</string>
+         <string>Process selected row(s)</string>
         </property>
         <property name="text">
          <string>...</string>
