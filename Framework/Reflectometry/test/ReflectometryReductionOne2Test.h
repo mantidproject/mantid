@@ -477,21 +477,22 @@ public:
     // No transmission correction
     // SummationType : SumInQ
     // ReductionType : DivergentBeam
+    auto const thetaIn = 25.0;
     ReflectometryReductionOne2 alg;
     setupAlgorithm(alg, 1.5, 15.0, "3");
     alg.setProperty("SummationType", "SumInQ");
     alg.setProperty("ReductionType", "DivergentBeam");
-    alg.setProperty("ThetaIn", 25.0);
+    alg.setProperty("ThetaIn", thetaIn);
 
-    MatrixWorkspace_sptr outLam = runAlgorithmLam(alg, 10);
-    TS_ASSERT_DELTA(outLam->x(0)[0], 1.695454, 1e-6);
-    TS_ASSERT_DELTA(outLam->x(0)[3], 5.934062, 1e-6);
-    TS_ASSERT_DELTA(outLam->x(0)[7], 11.585539, 1e-6);
-    TS_ASSERT_DELTA(outLam->y(0)[0], 2.717365, 1e-6);
-    TS_ASSERT_DELTA(outLam->y(0)[3], 2.776916, 1e-6);
-    TS_ASSERT_DELTA(outLam->y(0)[7], 2.807281, 1e-6);
+    MatrixWorkspace_sptr outLam = runAlgorithmLam(alg, 9);
+    TS_ASSERT_DELTA(outLam->x(0)[0], 1.491372, 1e-6);
+    TS_ASSERT_DELTA(outLam->x(0)[3], 5.729980, 1e-6);
+    TS_ASSERT_DELTA(outLam->x(0)[7], 11.381457, 1e-6);
+    TS_ASSERT_DELTA(outLam->y(0)[0], 3.158397, 1e-6);
+    TS_ASSERT_DELTA(outLam->y(0)[3], 3.157400, 1e-6);
+    TS_ASSERT_DELTA(outLam->y(0)[7], 3.156215, 1e-6);
 
-    checkConversionToQ(alg, twoThetaForDetector3() / 2.0);
+    checkConversionToQ(alg, twoThetaForDetector3() - thetaIn);
 
     TS_ASSERT_DELTA(sumCounts(outLam->counts(0)), 27.512893, 1e-6);
   }
@@ -540,21 +541,22 @@ public:
     auto &Y = m_multiDetectorWS->mutableY(0);
     std::fill(Y.begin(), Y.begin() + 2, 1.0);
 
+    auto const thetaIn = 25.0;
     ReflectometryReductionOne2 alg;
     setupAlgorithmMonitorCorrection(alg, 0.0, 15.0, "4", inputWS, false);
     alg.setProperty("SummationType", "SumInQ");
     alg.setProperty("ReductionType", "DivergentBeam");
-    alg.setProperty("ThetaIn", 25.0);
+    alg.setProperty("ThetaIn", thetaIn);
 
-    MatrixWorkspace_sptr outLam = runAlgorithmLam(alg, 11);
+    MatrixWorkspace_sptr outLam = runAlgorithmLam(alg, 10);
     TS_ASSERT_DELTA(outLam->x(0)[0], 0.000000, 1e-6);
     TS_ASSERT_DELTA(outLam->x(0)[5], 7.064346, 1e-6);
     TS_ASSERT_DELTA(outLam->x(0)[9], 12.715824, 1e-6);
-    TS_ASSERT_DELTA(outLam->y(0)[0], 10.721647, 1e-6);
-    TS_ASSERT_DELTA(outLam->y(0)[5], 2.249948, 1e-6);
-    TS_ASSERT_DELTA(outLam->y(0)[9], 2.044359, 1e-6);
+    TS_ASSERT_DELTA(outLam->y(0)[0], 12.061187, 1e-6);
+    TS_ASSERT_DELTA(outLam->y(0)[5], 2.499377, 1e-6);
+    TS_ASSERT_DELTA(outLam->y(0)[9], 2.499407, 1e-6);
 
-    checkConversionToQ(alg, twoThetaForDetector4() / 2.0, false);
+    checkConversionToQ(alg, twoThetaForDetector4() - thetaIn, false);
 
     TS_ASSERT_DELTA(sumCounts(outLam->counts(0)), 61.622606, 1e-6);
   }
@@ -562,22 +564,23 @@ public:
   void test_sum_in_q_transmission_correction_run() {
     // Transmission run is the same as input run
 
+    auto const thetaIn = 25.0;
     ReflectometryReductionOne2 alg;
     setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "3", m_multiDetectorWS,
                                          false);
     alg.setProperty("SummationType", "SumInQ");
     alg.setProperty("ReductionType", "DivergentBeam");
-    alg.setProperty("ThetaIn", 25.0);
+    alg.setProperty("ThetaIn", thetaIn);
 
-    MatrixWorkspace_sptr outLam = runAlgorithmLam(alg, 10);
-    TS_ASSERT_DELTA(outLam->x(0)[0], 1.695454, 1e-6);
-    TS_ASSERT_DELTA(outLam->x(0)[3], 5.934062, 1e-6);
-    TS_ASSERT_DELTA(outLam->x(0)[7], 11.585539, 1e-6);
-    TS_ASSERT_DELTA(outLam->y(0)[0], 1.188741, 1e-6);
-    TS_ASSERT_DELTA(outLam->y(0)[3], 0.883535, 1e-6);
-    TS_ASSERT_DELTA(outLam->y(0)[7], 0.893197, 1e-6);
+    MatrixWorkspace_sptr outLam = runAlgorithmLam(alg, 9);
+    TS_ASSERT_DELTA(outLam->x(0)[0], 1.491372, 1e-6);
+    TS_ASSERT_DELTA(outLam->x(0)[3], 5.729980, 1e-6);
+    TS_ASSERT_DELTA(outLam->x(0)[7], 11.381457, 1e-6);
+    TS_ASSERT_DELTA(outLam->y(0)[0], 1.357239, 1e-6);
+    TS_ASSERT_DELTA(outLam->y(0)[3], 1.004595, 1e-6);
+    TS_ASSERT_DELTA(outLam->y(0)[7], 1.004218, 1e-6);
 
-    checkConversionToQ(alg, twoThetaForDetector3() / 2.0, false);
+    checkConversionToQ(alg, twoThetaForDetector3() - thetaIn, false);
 
     TS_ASSERT_DELTA(sumCounts(outLam->counts(0)), 12.865793, 1e-6);
   }
@@ -585,24 +588,25 @@ public:
   void test_sum_in_q_exponential_correction() {
     // CorrectionAlgorithm: ExponentialCorrection
 
+    auto const thetaIn = 25.0;
     ReflectometryReductionOne2 alg;
     setupAlgorithm(alg, 1.5, 15.0, "4");
     alg.setProperty("SummationType", "SumInQ");
     alg.setProperty("ReductionType", "DivergentBeam");
-    alg.setProperty("ThetaIn", 25.0);
+    alg.setProperty("ThetaIn", thetaIn);
     alg.setProperty("CorrectionAlgorithm", "ExponentialCorrection");
     alg.setProperty("C0", 0.2);
     alg.setProperty("C1", 0.1);
 
-    MatrixWorkspace_sptr outLam = runAlgorithmLam(alg, 10);
-    TS_ASSERT_DELTA(outLam->x(0)[0], 1.669169, 1e-6);
-    TS_ASSERT_DELTA(outLam->x(0)[3], 5.907776, 1e-6);
-    TS_ASSERT_DELTA(outLam->x(0)[7], 11.559254, 1e-6);
-    TS_ASSERT_DELTA(outLam->y(0)[0], 17.132968, 1e-6);
-    TS_ASSERT_DELTA(outLam->y(0)[3], 25.610289, 1e-6);
-    TS_ASSERT_DELTA(outLam->y(0)[7], 42.722014, 1e-6);
+    MatrixWorkspace_sptr outLam = runAlgorithmLam(alg, 9);
+    TS_ASSERT_DELTA(outLam->x(0)[0], 1.491806, 1e-6);
+    TS_ASSERT_DELTA(outLam->x(0)[3], 5.730413, 1e-6);
+    TS_ASSERT_DELTA(outLam->x(0)[7], 11.381891, 1e-6);
+    TS_ASSERT_DELTA(outLam->y(0)[0], 19.769842, 1e-6);
+    TS_ASSERT_DELTA(outLam->y(0)[3], 30.257466, 1e-6);
+    TS_ASSERT_DELTA(outLam->y(0)[7], 53.358769, 1e-6);
 
-    checkConversionToQ(alg, twoThetaForDetector4() / 2.0);
+    checkConversionToQ(alg, twoThetaForDetector4() - thetaIn);
 
     TS_ASSERT_DELTA(sumCounts(outLam->counts(0)), 327.981277, 1e-6);
   }
@@ -620,60 +624,62 @@ public:
     alg.setProperty("SummationType", "SumInQ");
     alg.setProperty("ReductionType", "DivergentBeam");
     alg.setProperty("ThetaIn", 25.0);
-    MatrixWorkspace_sptr outQ = runAlgorithmQ(alg, 26);
+    MatrixWorkspace_sptr outQ = runAlgorithmQ(alg, 24);
 
     // X range in outQ
-    TS_ASSERT_DELTA(outQ->x(0)[0], 0.293891, 1e-6);
-    TS_ASSERT_DELTA(outQ->x(0)[3], 0.327862, 1e-6);
-    TS_ASSERT_DELTA(outQ->x(0)[7], 0.387600, 1e-6);
+    TS_ASSERT_DELTA(outQ->x(0)[0], 0.285477, 1e-6);
+    TS_ASSERT_DELTA(outQ->x(0)[3], 0.321705, 1e-6);
+    TS_ASSERT_DELTA(outQ->x(0)[7], 0.387227, 1e-6);
     // Y counts
-    TS_ASSERT_DELTA(outQ->y(0)[0], 2.632384, 1e-6);
-    TS_ASSERT_DELTA(outQ->y(0)[3], 2.891120, 1e-6);
-    TS_ASSERT_DELTA(outQ->y(0)[7], 2.871725, 1e-6);
+    TS_ASSERT_DELTA(outQ->y(0)[0], 3.150078, 1e-6);
+    TS_ASSERT_DELTA(outQ->y(0)[3], 3.149922, 1e-6);
+    TS_ASSERT_DELTA(outQ->y(0)[7], 3.149693, 1e-6);
 
     TS_ASSERT_DELTA(sumCounts(outQ->counts(0)), 73.065241, 1e-6);
   }
 
   void test_sum_in_q_exclude_partial_bins() {
     // Sum in Q, single detector
+    auto const thetaIn = 25.0;
     ReflectometryReductionOne2 alg;
     setupAlgorithm(alg, 1.5, 15.0, "3");
     alg.setProperty("SummationType", "SumInQ");
     alg.setProperty("ReductionType", "DivergentBeam");
-    alg.setProperty("ThetaIn", 25.0);
+    alg.setProperty("ThetaIn", thetaIn);
     alg.setProperty("IncludePartialBins", "0");
 
-    MatrixWorkspace_sptr outLam = runAlgorithmLam(alg, 10);
-    TS_ASSERT_DELTA(outLam->x(0)[0], 1.715192, 1e-6);
-    TS_ASSERT_DELTA(outLam->x(0)[3], 5.953800, 1e-6);
-    TS_ASSERT_DELTA(outLam->x(0)[7], 11.605277, 1e-6);
-    TS_ASSERT_DELTA(outLam->y(0)[0], 2.717365, 1e-6);
-    TS_ASSERT_DELTA(outLam->y(0)[3], 2.776507, 1e-6);
-    TS_ASSERT_DELTA(outLam->y(0)[7], 2.806906, 1e-6);
+    MatrixWorkspace_sptr outLam = runAlgorithmLam(alg, 9);
+    TS_ASSERT_DELTA(outLam->x(0)[0], 1.508734, 1e-6);
+    TS_ASSERT_DELTA(outLam->x(0)[3], 5.747342, 1e-6);
+    TS_ASSERT_DELTA(outLam->x(0)[7], 11.398819, 1e-6);
+    TS_ASSERT_DELTA(outLam->y(0)[0], 3.157970, 1e-6);
+    TS_ASSERT_DELTA(outLam->y(0)[3], 3.157001, 1e-6);
+    TS_ASSERT_DELTA(outLam->y(0)[7], 3.155848, 1e-6);
 
-    checkConversionToQ(alg, twoThetaForDetector3() / 2.0);
+    checkConversionToQ(alg, twoThetaForDetector3() - thetaIn);
 
     TS_ASSERT_DELTA(sumCounts(outLam->counts(0)), 27.509726, 1e-6);
   }
 
   void test_sum_in_q_exclude_partial_bins_multiple_detectors() {
     // Sum in Q, multiple detectors in group
+    auto const thetaIn = 25.0;
     ReflectometryReductionOne2 alg;
     setupAlgorithm(alg, 1.5, 15.0, "3-5");
     alg.setProperty("SummationType", "SumInQ");
     alg.setProperty("ReductionType", "DivergentBeam");
-    alg.setProperty("ThetaIn", 25.0);
+    alg.setProperty("ThetaIn", thetaIn);
     alg.setProperty("IncludePartialBins", "0");
 
-    MatrixWorkspace_sptr outLam = runAlgorithmLam(alg, 10);
-    TS_ASSERT_DELTA(outLam->x(0)[0], 1.736385, 1e-6);
-    TS_ASSERT_DELTA(outLam->x(0)[3], 5.974993, 1e-6);
-    TS_ASSERT_DELTA(outLam->x(0)[7], 11.626470, 1e-6);
-    TS_ASSERT_DELTA(outLam->y(0)[0], 8.387969, 1e-6);
-    TS_ASSERT_DELTA(outLam->y(0)[3], 8.474204, 1e-6);
-    TS_ASSERT_DELTA(outLam->y(0)[7], 8.473021, 1e-6);
+    MatrixWorkspace_sptr outLam = runAlgorithmLam(alg, 9);
+    TS_ASSERT_DELTA(outLam->x(0)[0], 1.551880, 1e-6);
+    TS_ASSERT_DELTA(outLam->x(0)[3], 5.790487, 1e-6);
+    TS_ASSERT_DELTA(outLam->x(0)[7], 11.441965, 1e-6);
+    TS_ASSERT_DELTA(outLam->y(0)[0], 9.498023, 1e-6);
+    TS_ASSERT_DELTA(outLam->y(0)[3], 9.440089, 1e-6);
+    TS_ASSERT_DELTA(outLam->y(0)[7], 9.462861, 1e-6);
 
-    checkConversionToQ(alg, twoThetaForDetector4() / 2.0);
+    checkConversionToQ(alg, twoThetaForDetector4() - thetaIn);
 
     TS_ASSERT_DELTA(sumCounts(outLam->counts(0)), 84.540593, 1e-6);
   }
@@ -769,12 +775,12 @@ public:
     TS_ASSERT_THROWS(alg.execute(), const std::invalid_argument &);
   }
 
-  void test_angle_correction_is_not_done_for_sum_in_q_for_single_detector() {
+  void test_angle_correction_is_done_for_sum_in_q_for_single_detector() {
     ReflectometryReductionOne2 alg;
     setupAlgorithm(alg, 1.5, 15.0, "4");
 
-    double const detectorTheta = twoThetaForDetector4() / 2.0;
     double const thetaIn = 22.0;
+    double const thetaFinal = twoThetaForDetector4() - thetaIn;
     auto inputWS = MatrixWorkspace_sptr(m_multiDetectorWS->clone());
     setYValuesToWorkspace(*inputWS);
 
@@ -786,7 +792,7 @@ public:
 
     MatrixWorkspace_sptr outLam = alg.getProperty("OutputWorkspaceWavelength");
     MatrixWorkspace_sptr outQ = alg.getProperty("OutputWorkspace");
-    checkAngleCorrection(outLam, outQ, detectorTheta);
+    checkAngleCorrection(outLam, outQ, thetaFinal);
     checkDetector4SummedInQ(outLam, outQ);
   }
 
@@ -797,8 +803,8 @@ public:
     // The reference angle when summing in Q is taken from the centre of the
     // ROI. If we have an even number of pixels it clips the the lower value,
     // i.e. detector 3 here
-    double const detectorTheta = twoThetaForDetector3() / 2.0;
     double const thetaIn = 22.0;
+    double const thetaFinal = twoThetaForDetector3() - thetaIn;
     auto inputWS = MatrixWorkspace_sptr(m_multiDetectorWS->clone());
     setYValuesToWorkspace(*inputWS);
 
@@ -810,7 +816,7 @@ public:
 
     MatrixWorkspace_sptr outLam = alg.getProperty("OutputWorkspaceWavelength");
     MatrixWorkspace_sptr outQ = alg.getProperty("OutputWorkspace");
-    checkAngleCorrection(outLam, outQ, detectorTheta);
+    checkAngleCorrection(outLam, outQ, thetaFinal);
     checkDetector3And4SummedInQ(outLam, outQ);
   }
 
@@ -1366,6 +1372,11 @@ private:
     return ws;
   }
 
+  double horizon() {
+    // The horizon is at half the centre pixel's twoTheta
+    return std::atan(m_detPosY / m_detPosX) * radToDeg / 2.0;
+  }
+
   // Get twoTheta for detector 4 in m_multiDetectorWS, in degrees
   double twoThetaForDetector4() {
     // Detector 4 is the centre pixel at m_detPosY
@@ -1472,15 +1483,15 @@ private:
                                MatrixWorkspace_sptr outQ, int const wsIdx = 0) {
     auto const &lamY = outLam->y(wsIdx);
     TS_ASSERT_EQUALS(lamY.size(), 9);
-    TS_ASSERT_DELTA(lamY[0], 17.593911, 1e-6);
-    TS_ASSERT_DELTA(lamY[6], 64.674833, 1e-6);
-    TS_ASSERT_DELTA(lamY[8], 80.012043, 1e-6);
+    TS_ASSERT_DELTA(lamY[0], 17.095495, 1e-6);
+    TS_ASSERT_DELTA(lamY[6], 62.578823, 1e-6);
+    TS_ASSERT_DELTA(lamY[8], 77.362542, 1e-6);
 
     auto const &qY = outQ->y(wsIdx);
     TS_ASSERT_EQUALS(qY.size(), 9);
-    TS_ASSERT_DELTA(qY[0], 80.012043, 1e-6);
-    TS_ASSERT_DELTA(qY[6], 33.352157, 1e-6);
-    TS_ASSERT_DELTA(qY[8], 17.593911, 1e-6);
+    TS_ASSERT_DELTA(qY[0], 77.362542, 1e-6);
+    TS_ASSERT_DELTA(qY[6], 32.285556, 1e-6);
+    TS_ASSERT_DELTA(qY[8], 17.095495, 1e-6);
   }
 
   void
@@ -1505,15 +1516,15 @@ private:
                                    int const wsIdx = 0) {
     auto const &lamY = outLam->y(wsIdx);
     TS_ASSERT_EQUALS(lamY.size(), 9);
-    TS_ASSERT_DELTA(lamY[0], 30.305029, 1e-6);
-    TS_ASSERT_DELTA(lamY[6], 108.995220, 1e-6);
-    TS_ASSERT_DELTA(lamY[8], 134.619316, 1e-6);
+    TS_ASSERT_DELTA(lamY[0], 29.936070, 1e-6);
+    TS_ASSERT_DELTA(lamY[6], 107.271561, 1e-6);
+    TS_ASSERT_DELTA(lamY[8], 132.418518, 1e-6);
 
     auto const &qY = outQ->y(wsIdx);
     TS_ASSERT_EQUALS(qY.size(), 9);
-    TS_ASSERT_DELTA(qY[0], 134.619316, 1e-6);
-    TS_ASSERT_DELTA(qY[6], 56.637071, 1e-6);
-    TS_ASSERT_DELTA(qY[8], 30.305029, 1e-6);
+    TS_ASSERT_DELTA(qY[0], 132.418518, 1e-6);
+    TS_ASSERT_DELTA(qY[6], 55.858217, 1e-6);
+    TS_ASSERT_DELTA(qY[8], 29.936070, 1e-6);
   }
 
   double sumCounts(Mantid::HistogramData::Counts const &counts) {
