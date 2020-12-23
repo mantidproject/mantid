@@ -128,6 +128,16 @@ class DrillModel(QObject):
         self.tasksPool.signals.progressUpdate.connect(self._onProcessingProgress)
         self.tasksPool.signals.processingDone.connect(self._onProcessingDone)
 
+    def clear(self):
+        """
+        Clear the sample list and the settings.
+        """
+        self.samples = list()
+        self.groups = dict()
+        self.masterSamples = dict()
+        self.visualSettings = dict()
+        self._setDefaultSettings()
+
     def setInstrument(self, instrument, log=True):
         """
         Set the instrument. This methods change the current instrument and all

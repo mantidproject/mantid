@@ -119,6 +119,11 @@ class DrillView(QMainWindow):
     processStopped = Signal()
 
     """
+    Sent when the user asks for an empty table.
+    """
+    newTable = Signal()
+
+    """
     Sent when the user asks for data loading from file.
     """
     loadRundex = Signal()
@@ -162,6 +167,7 @@ class DrillView(QMainWindow):
         """
         Setup the window header. Set the buttons icons and connect the signals.
         """
+        self.actionNew.triggered.connect(self.newTable.emit)
         self.actionLoadRundex.triggered.connect(self.loadRundex.emit)
         self.actionSaveAs.triggered.connect(self.saveRundexAs.emit)
         self.actionSave.triggered.connect(self.saveRundex.emit)

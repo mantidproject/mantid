@@ -446,6 +446,7 @@
     <property name="title">
      <string>&amp;File</string>
     </property>
+    <addaction name="actionNew"/>
     <addaction name="actionLoadRundex"/>
     <addaction name="actionSaveAs"/>
     <addaction name="actionSave"/>
@@ -610,6 +611,11 @@
   <action name="actiona">
    <property name="text">
     <string>a</string>
+   </property>
+  </action>
+  <action name="actionNew">
+   <property name="text">
+    <string>New</string>
    </property>
   </action>
  </widget>

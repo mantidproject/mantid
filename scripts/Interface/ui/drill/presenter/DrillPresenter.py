@@ -53,6 +53,7 @@ class DrillPresenter:
         self.view.processGroup.connect(self.onProcessGroup)
         self.view.processAll.connect(self.onProcessAll)
         self.view.processStopped.connect(self.stopProcessing)
+        self.view.newTable.connect(self.onNew)
         self.view.loadRundex.connect(self.onLoad)
         self.view.saveRundex.connect(self.onSave)
         self.view.saveRundexAs.connect(self.onSaveAs)
@@ -348,6 +349,16 @@ class DrillPresenter:
         """
         if self.view.isWindowModified():
             self._saveDataQuestion()
+
+    def onNew(self):
+        """
+        Triggered when the user wants an empty table.
+        """
+        if self.view.isWindowModified():
+            self._saveDataQuestion()
+        self.model.clear()
+        self.model.resetIOFile()
+        self.updateViewFromModel()
 
     def _saveDataQuestion(self):
         """
