@@ -158,8 +158,11 @@ private:
     // set the crystal structure
     EventWorkspace_sptr ws =
         AnalysisDataService::Instance().retrieveWS<EventWorkspace>(WSName);
-    
-    // auto sample = ws->sample();
+
+    Sample sample;
+    sample.setCrystalStructure(silicon_cs);
+
+    // ws->sample();
     // sample.setCrystalStructure(silicon_cs);
   }
 
