@@ -11,6 +11,7 @@ from mantid.simpleapi import AbsorptionCorrection, DeleteWorkspace, Divide, Load
 import numpy as np
 import os
 
+VAN_SAMPLE_DENSITY = 0.0721
 _EXTENSIONS_NXS = ["_event.nxs", ".nxs.h5"]
 
 

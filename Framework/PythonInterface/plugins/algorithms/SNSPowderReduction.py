@@ -1314,7 +1314,8 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
             absWksp = AbsorptionCorrUtils.create_absorption_input(van_run_number, self._info,
                                                                   self._num_wl_bins,
                                                                   material={'ChemicalFormula': 'V',
-                                                                            'SampleNumberDensity': 0.0721},
+                                                                            'SampleNumberDensity':
+                                                                                AbsorptionCorrUtils.VAN_SAMPLE_DENSITY},
                                                                   geometry={'Shape': 'Cylinder',
                                                                             'Height': 7.,
                                                                             'Radius': self._vanRadius,
