@@ -1,5 +1,6 @@
 .. _Muon_Analysis_TestGuide_3_Results-ref:
 
+==========================================================
 Muon Analysis Unscripted Testing: Group 3 (Results Tables)
 ==========================================================
 
@@ -7,21 +8,35 @@ Muon Analysis Unscripted Testing: Group 3 (Results Tables)
     :local:
     
 Introduction
-^^^^^^^^^^^^
+------------
 
 These are unscripted tests for the :program:`Muon Analysis` interface.
-The tests here in group 3 are concerned with generating results tables from fits that have previously been run.
-In this case, the fits previously run are those in test group 2, so those tests need to be run before these ones.
+The tests here in group 3 are concerned with generating results tables from 
+fits that have previously been run. In this case, the fits previously run are 
+those in :ref:`Muon_Analysis_TestGuide_2_Fitting-ref`, so those tests need to 
+be run before these ones. Once you have comepleted group 2 tests, go to the 
+**Reults** tab.
 
 The master testing guide is located at :ref:`Muon_Analysis_TestGuide-ref`.
 
-Tests
-^^^^^
 
-Ensure that you have first run all the tests in group 2, then go to the *Results Table* tab.
-
-Test 1: individual fits
+Test 1: Individual Fits
 -----------------------
+
+**Time required 5-10 minutes**
+
+- In the **Results** tab, in the tob love values table, check **run_number** 
+  and **sample_temp**
+- Change **Function Name** to be **FlatBackground,Abragam** or equivalent
+- The table should have two rows, one for a single run ``20918`` and one run 
+  ``20918-20`` which was co-added
+- Change the name of the table to **IndividualFitsTable**
+- Click **Output Results**
+- In the main workbench window, in the workspace toolbox, open the results 
+  table
+
+``Not sure if sample_temp is right for co-added runs need to come back to this after confirming``
+
 - Top group box: select ``run_number`` and ``sample_temp`` as logs
 - Centre group box: keep the default, which should be the *Individual fits* radio button with both individual fits selected
 - Create the table with the default name ``ResultsTable``.
@@ -33,14 +48,6 @@ Like this:
 
 .. image:: /images/MuonAnalysisTests/results_test1.png
   :align: center
-
-Test 2: Sequential fit (simple)
--------------------------------
-- Top group box: keep same logs as before
-- Select the *Sequential fits* radio button in the centre group box, and "Label" in the drop-down, *i.e.* the first sequential fit you did. Keep all three runs included.
-- Create the table - check that, if you don't change the name, it warns you about overwriting. (Say yes to create the table ``ResultsTable``.)
-- The table should have three rows, one for each run, with the correct sample log values (180, 190, 200).
-- Again there should be one pair of columns for each parameter and error, and a cost function column at the end.
 
 Test 3: Sequential fit of simultaneous fits
 -------------------------------------------
