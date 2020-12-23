@@ -373,17 +373,20 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         # ENDIF
 
         # calculate absorption from first sample run
-        if self._info is None:
+        metaws = None
+        if self._absMethod != "None" and self._info is None:
             absName = '__{}_abs'.format(getBasename(samRuns[0]))
             api.Load(Filename=samRuns[0], OutputWorkspace=absName, MetaDataOnly=True)
             self._info = self._getinfo(absName)
+            metaws = absName
         a_sample, a_container = AbsorptionCorrUtils.calculate_absorption_correction(samRuns[0], self._absMethod,
                                                                                     self._info, self._sampleFormula,
                                                                                     self._massDensity,
                                                                                     self._numberDensity,
                                                                                     self._containerShape,
                                                                                     self._num_wl_bins,
-                                                                                    self._elementSize)
+                                                                                    self._elementSize,
+                                                                                    metaws)
 
         if self.getProperty("Sum").value and len(samRuns) > 1:
             self.log().information('Ignoring value of "Sum" property')

@@ -30,7 +30,8 @@ def calculate_absorption_correction(filename, abs_method, props, sample_formula,
                                     number_density=Property.EMPTY_DBL,
                                     container_shape="PAC06",
                                     num_wl_bins=1000,
-                                    element_size=1):
+                                    element_size=1,
+                                    metaws=None):
     """The absorption correction is applied by (I_s - I_c*k*A_csc/A_cc)/A_ssc for pull Paalman-Ping
 
     If no cross-term then I_s/A_ss - I_c/A_cc
@@ -65,6 +66,7 @@ def calculate_absorption_correction(filename, abs_method, props, sample_formula,
     :param container_shape: Shape definition of container, such as PAC06.
     :param num_wl_bins: Number of bins for calculating wavelength
     :param element_size: Size of one side of the integration element cube in mm
+    :param metaws: Optional workspace containing metadata to use instead of reading from filename
     :return:
     """
     if abs_method == "None":
@@ -79,7 +81,7 @@ def calculate_absorption_correction(filename, abs_method, props, sample_formula,
     environment = {'Name': 'InAir', 'Container': container_shape}
 
     donorWS = create_absorption_input(filename, props, num_wl_bins, material=material,
-                                      environment=environment)
+                                      environment=environment, metaws=metaws)
 
     absName = '__{}_abs_correction'.format(_getBasename(filename))
 
@@ -143,7 +145,8 @@ def calc_absorption_corr_using_wksp(donor_wksp, abs_method, element_size=1, pref
 
 def create_absorption_input(filename, props, num_wl_bins=1000,
                             material=None, geometry=None, environment=None,
-                            opt_wl_min=0, opt_wl_max=Property.EMPTY_DBL):
+                            opt_wl_min=0, opt_wl_max=Property.EMPTY_DBL,
+                            metaws=None):
     """
     Create an input workspace for carpenter or other absorption corrections
 
@@ -155,10 +158,9 @@ def create_absorption_input(filename, props, num_wl_bins=1000,
     :param environment: Optional environment to use in SetSample
     :param opt_wl_min: Optional minimum wavelength. If specified, this is used instead of from the props
     :param opt_wl_max: Optional maximum wavelength. If specified, this is used instead of from the props
+    :param metaws: Optional workspace name with metadata to use for donor workspace instead of reading from filename
     :return: Name of the donor workspace created
     """
-    absName = '__{}_abs'.format(_getBasename(filename))
-
     if props is None:
         raise RuntimeError("props is required to create donor workspace, props is None")
 
@@ -167,7 +169,11 @@ def create_absorption_input(filename, props, num_wl_bins=1000,
 
     log = Logger('CreateAbsorptionInput')
 
-    Load(Filename=filename, OutputWorkspace=absName, MetaDataOnly=True)
+    # Load from file if no workspace with metadata has been given, otherwise avoid a duplicate load with the metaws
+    absName = metaws
+    if metaws is None:
+        absName = '__{}_abs'.format(_getBasename(filename))
+        Load(Filename=filename, OutputWorkspace=absName, MetaDataOnly=True)
 
     # first attempt to get the wavelength range from the properties file
     wl_min, wl_max = props['wavelength_min'].value, props['wavelength_max'].value
