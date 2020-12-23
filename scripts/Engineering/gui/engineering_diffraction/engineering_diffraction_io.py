@@ -10,6 +10,7 @@ from Engineering.gui.engineering_diffraction.engineering_diffraction import Engi
 
 IO_VERSION = 1
 
+# TODO debug why the focus crashes
 
 class EngineeringDiffractionUIAttributes(object):
     # WARNING: If you delete a tag from here instead of adding a new one, it will make old project files obsolete so
@@ -22,8 +23,9 @@ class EngineeringDiffractionEncoder(EngineeringDiffractionUIAttributes):
         super(EngineeringDiffractionEncoder, self).__init__()
 
     def encode(self, obj, _=None):  # what obj = EngineeringDiffractionGui
-        data_widget = obj.fitting_presenter.data_widget  # data widget
-        plot_widget = obj.fitting_presenter.plot_widget  # plot presenter
+        presenter = obj.presenter
+        data_widget = presenter.fitting_presenter.data_widget  # data widget
+        plot_widget = presenter.fitting_presenter.plot_widget  # plot presenter
         obj_dic = dict()
         obj_dic["encoder_version"] = IO_VERSION
         obj_dic["current_tab"] = obj.tabs.currentIndex()
@@ -53,14 +55,15 @@ class EngineeringDiffractionDecoder(EngineeringDiffractionUIAttributes):
 
         ws_names = obj_dic["data_loaded_workspaces"]  # workspaces are in ADS, need restoring into interface
         gui = EngineeringDiffractionGui()
+        presenter = gui.presenter
         gui.tabs.setCurrentIndex(obj_dic["current_tab"])
-        gui.fitting_presenter.data_widget.model.restore_files(ws_names)
-        gui.fitting_presenter.data_widget.presenter.plotted = set(obj_dic["plotted_workspaces"])
-        gui.fitting_presenter.data_widget.presenter.restore_table()
+        presenter.fitting_presenter.data_widget.model.restore_files(ws_names)
+        presenter.fitting_presenter.data_widget.presenter.plotted = set(obj_dic["plotted_workspaces"])
+        presenter.fitting_presenter.data_widget.presenter.restore_table()
 
         if obj_dic["fit_properties"]:
-            fit_browser = gui.fitting_presenter.plot_widget.view.fit_browser
-            gui.fitting_presenter.plot_widget.view.fit_toggle()  # show the fit browser, default is off
+            fit_browser = presenter.fitting_presenter.plot_widget.view.fit_browser
+            presenter.fitting_presenter.plot_widget.view.fit_toggle()  # show the fit browser, default is off
             fit_props = obj_dic["fit_properties"]["properties"]
             fit_function = fit_props["Function"]
             output_name = fit_props["Output"]
