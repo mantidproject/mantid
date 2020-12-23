@@ -24,6 +24,12 @@ using namespace Mantid::API;
 using namespace Mantid::Crystal;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
+using namespace Mantid::Kernel;
+
+namespace {
+/// static logger
+  Logger g_log("SCDCalibratePanels2Test");
+} // namespace
 
 class SCDCalibratePanels2Test : public CxxTest::TestSuite {
 public:
