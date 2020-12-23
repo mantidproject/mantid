@@ -234,22 +234,42 @@ private:
     cpws_alg->setProperty("OutputWorkspace", PWSName);
     cpws_alg->execute();
 
+    // prepare the algs pointer
+    IAlgorithm_sptr sg_alg = 
+        AlgorithmFactory::Instance().create("SetGoniometer", 1);
+    IAlgorithm_sptr pp_alg = 
+        AlgorithmFactory::Instance().create("PredictPeaks", 1);
+    IAlgorithm_sptr cpw_alg = 
+        AlgorithmFactory::Instance().create("CombinePeaksWorkspaces", 1);
+
     // generate peaks for a range of omega values
     for(double omega=0; omega<=180; omega=omega+3){
       std::ostringstream os;
       os << omega << ",0,1,0,1";
 
       // set the SetGoniometer
-      IAlgorithm_sptr sg_alg = 
-        AlgorithmFactory::Instance().create("SetGoniometer", 1);
       sg_alg->initialize();
       sg_alg->setProperty("Workspace", WSName);
       sg_alg->setProperty("Axis0", os.str());
       sg_alg->execute();
 
       // predict peak positions
+      pp_alg->initialize();
+      pp_alg->setProperty("InputWorkspace", WSName);
+      pp_alg->setProperty("WavelengthMin", wavelength_min);
+      pp_alg->setProperty("wavelengthMax", wavelength_max);
+      pp_alg->setProperty("MinDSpacing", dspacing_min);
+      pp_alg->setProperty("MaxDSpacing", dspacing_max);
+      pp_alg->setProperty("ReflectionCondition", "All-face centred");
+      pp_alg->setProperty("OutputWorkspace", tmpPWSName);
+      pp_alg->execute();
 
       // add the peaks to output peaks workspace
+      cpw_alg->initialize();
+      cpw_alg->setProperty("LHSWorkspace", tmpPWSName);
+      cpw_alg->setProperty("RHSWorkspace", PWSName);
+      cpw_alg->setProperty("OutputWorkspace", PWSName);
+      cpw_alg->execute();
     }
   }
 
