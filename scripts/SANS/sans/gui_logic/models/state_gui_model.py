@@ -166,12 +166,12 @@ class StateGuiModel(ModelCommon):
 
     @event_slices.setter
     def event_slices(self, value):
-        self._user_file_items.slice.event_slice_str = value
+        self._all_states.slice.event_slice_str = value
         pairs = get_ranges_from_event_slice_setting(value)
         start = [i[0] for i in pairs]
         stop = [i[1] for i in pairs]
-        self._user_file_items.slice.start_time = start
-        self._user_file_items.slice.end_time = stop
+        self._all_states.slice.start_time = start
+        self._all_states.slice.end_time = stop
 
     # ------------------------------------------------------------------------------------------------------------------
     # Reduction dimensionality
@@ -342,14 +342,10 @@ class StateGuiModel(ModelCommon):
     def _assert_all_wavelength_same(self, attr_name):
         # For god knows what reason we have the same data duplicated in 4 places
         # Ensure they stay in sync
-        calc_trans = self._all_states.adjustment.calculate_transmission
-        norm_mon = self._all_states.adjustment.normalize_to_monitor
-        wav_pixel = self._all_states.adjustment.wavelength_and_pixel_adjustment
-        wavelength = self._all_states.wavelength
-        to_check = [getattr(calc_trans, attr_name), getattr(norm_mon, attr_name),
-                    getattr(wav_pixel, attr_name), getattr(wavelength, attr_name)]
-        assert all(x == to_check[0] for x in to_check), \
-            "Wavelength attributes have got out of sync. This should not happen!"
+        to_check = self._get_wavelength_objs(attr_name)
+        seen = getattr(to_check[0], attr_name)
+        for o in to_check:
+            assert(getattr(o, attr_name) == seen)
 
     def _set_on_all_wavelength(self, attr_name, value):
         objs_to_set = self._get_wavelength_objs(attr_name)
