@@ -30,6 +30,10 @@ Improvements
 Bugfixes
 ########
 
+- Fixed a bug in ISIS SANS GUI where all changes to settings on the adjustment page would be ignored, so that
+  it only used parameters from the user file instead.
+- Fixed "Falsey" values such as 0.0 or False getting replaced with a default value in the ISIS SANS settings.
+  For example, a Phi limit of 0.0 remains at 0.0 rather than defaulting back to -90
 - Detector IDs are no longer copied during a 2D reduction. This also resolves
   a bug where the first two spectra were marked as monitors and would not appear
   in a colour fill plot on Workbench.

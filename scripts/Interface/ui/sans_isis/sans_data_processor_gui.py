@@ -959,9 +959,8 @@ class SANSDataProcessorGui(QMainWindow,
         return expected_type(value_as_string) if value_as_string else None
 
     def update_simple_line_edit_field(self, line_edit, value):
-        if value:
-            gui_element = getattr(self, line_edit)
-            gui_element.setText(str(value))
+        gui_element = getattr(self, line_edit)
+        gui_element.setText(str(value))
 
     def is_multi_period_view(self):
         return self.multi_period_check_box.isChecked()
