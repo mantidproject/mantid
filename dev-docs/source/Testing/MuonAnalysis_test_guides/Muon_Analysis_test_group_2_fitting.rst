@@ -101,7 +101,7 @@ Test 4: Simultaneous Fit Across Runs
 	  to **Group/Pair**
 	- The **Display parameters for** drop down should contain three workspaces
 	- Using the same fit function as before, check the **Global** checkbox for 
-	  the parameters **A**, **Omega**,**Phi** and **Sigma**
+	  the parameters **A**, **Omega**, **Phi** and **Sigma**
 	- Click **Fit**
 	- Use the **<<** and **>>** buttons, or drop-down list, to see the fitted 
 	  parameters for each run in the function browser.

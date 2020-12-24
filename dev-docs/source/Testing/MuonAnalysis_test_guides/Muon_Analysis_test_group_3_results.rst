@@ -19,27 +19,37 @@ be run before these ones. Once you have comepleted group 2 tests, go to the
 
 The master testing guide is located at :ref:`Muon_Analysis_TestGuide-ref`.
 
+-----------
 
-Test 1: Individual Fits
------------------------
+.. _test_1:
+
+Test 1: Individual And Co-Added Fits
+------------------------------------
 
 **Time required 5-10 minutes**
 
-- In the **Results** tab, in the tob love values table, check **run_number** 
+- In the **Results** tab, in the top log values table, check **run_number** 
   and **sample_temp**
 - Change **Function Name** to be **FlatBackground,Abragam** or equivalent
-- The table should have two rows, one for a single run ``20918`` and one run 
-  ``20918-20`` which was co-added
-- Change the name of the table to **IndividualFitsTable**
+- The bottom table should have all fit workspaces which used both 
+  **Flat Background** and the **Abragam** functions
+- Click **Unselect All**
+- Change **Table Name** to ``IndividualFitsTable``
+- Check all boxes next to workspaces which are individual fits, including the 
+  co-added workspace
+- This should look a little something like this:
+
+.. image:: /images/MuonAnalysisTests/results_test1_table.png
+	:align: center
+	:alt: results_test1_table.png
+	:width: 600
+
 - Click **Output Results**
 - In the main workbench window, in the workspace toolbox, open the results 
   table
 
 ``Not sure if sample_temp is right for co-added runs need to come back to this after confirming``
 
-- Top group box: select ``run_number`` and ``sample_temp`` as logs
-- Centre group box: keep the default, which should be the *Individual fits* radio button with both individual fits selected
-- Create the table with the default name ``ResultsTable``.
 - Table should have two rows, one for runs 20918-20 (co-added) and one for run 20918.
 - Sample temp should be expressed correctly as a range "180 to 200" for co-added runs
 - Should be one pair of columns for each parameter + error, plus a final column for "cost function value"
@@ -51,7 +61,24 @@ Like this:
 
 Test 3: Sequential fit of simultaneous fits
 -------------------------------------------
-- Now select "LabelSeq" in the drop-down next to *Sequential fits* (see test 2).
+
+- For this test we will use the same **Fucntion Name** as in :ref:`test_1` 
+  (*FlatBackground,Abragam*)
+- Change the **Table Name** to ``SeqFitOfSimFits``
+- Click **Unselect All**
+- Check the three workspaces that were simultaneous fits over groups and 
+  sequentially fit for all runs
+- At this point the table should look something like this:
+
+.. image:: /images/MuonAnalysisTests/results_test2_table.png
+	:align: center
+	:alt: results_test2_table.png
+	:width: 600
+	
+- Click **Output Results**
+- In the main workbench window, in the workspace toolbox, open the results 
+  table
+
 - The top box should have extra log values for ``group`` and ``period`` - select ``group`` (as well as ``run_number``)
 - Keep all runs selected and create table, this time with the name ``ResultsTable2``.
 - There should be six rows in all, two per run (one for fwd, one for bwd).
