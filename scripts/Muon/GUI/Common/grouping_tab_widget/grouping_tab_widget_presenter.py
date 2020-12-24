@@ -78,8 +78,10 @@ class GroupingTabPresenter(object):
         instrument = self._model.instrument
         n_detectors = self._model.num_detectors
         main_field = self._model.main_field_direction
-        text = "{} , {} detectors, main field : {} to muon polarization".format(
-            instrument, n_detectors, main_field)
+        text = "{}, {} detectors".format(
+            instrument, n_detectors)
+        if main_field:
+            text += ", main field : {} to muon polarization".format(main_field)
         return text
 
     def update_description_text(self, description_text=''):
