@@ -133,27 +133,60 @@ public:
 
   }
 
-  ///Ideal global with two panels moved
+  /**
+   * @brief Test moving/translating two panels at the same time
+   * 
+   */
   void testDualPanelMoved(){
     g_log.notice() << "testDualPanelMoved() start\n";
 
     SCDCalibratePanels2 alg;
     const std::string wsname("ws_moveBanks");
+    const std::string pwsname("pws_moveBanks");
+    // for bank_xcenter
+    const double dx1 = boost::math::constants::euler<double>();
+    const double dy1 = boost::math::constants::ln_ln_two<double>();
+    const double dz1 = boost::math::constants::pi_minus_three<double>();
+    // for bank_yright
+    const double dx2 = boost::math::constants::ln_ln_two<double>();
+    const double dy2 = boost::math::constants::pi_minus_three<double>();
+    const double dz2 = boost::math::constants::euler<double>();
 
+    // prepare a workspace 
     generateSimulatedworkspace(wsname);
+
+    // move banks
+    moveBank(wsname, bank_xcenter, dx1, dy1, dz1);
+    moveBank(wsname, bank_yright, dx2, dy2, dz2);
+
+    // generate the peak workspace from shifted configuration
+    generateSimulatedPeaks(wsname, pwsname);
+
+    // TODO: run through calibrator and validate
 
   }
 
-  // Test with mocked CORELLI instrument
-  // T0, L1 adjusted
-  // Two panels moved
+  /**
+   * @brief Test using case with all seven banks twiddled plus
+   *        the moderator shifted
+   * 
+   */
   void testExec(){
     g_log.notice() << "testExec() start\n";
 
     SCDCalibratePanels2 alg;
     const std::string wsname("ws_moveAll");
+    const std::string pwsname("pws_moveAll");
 
+    // prepare a workspace 
     generateSimulatedworkspace(wsname);
+
+    // specify the movement of banks
+
+    // generate the peak workspace from shifted configuration
+    generateSimulatedPeaks(wsname, pwsname);
+
+    // TODO: run through calibrator and validate
 
   }
 
