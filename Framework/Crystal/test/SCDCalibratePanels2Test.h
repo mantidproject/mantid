@@ -19,7 +19,6 @@
 #include <cxxtest/TestSuite.h>
 #include <stdexcept>
 
-
 using namespace Mantid::API;
 using namespace Mantid::Crystal;
 using namespace Mantid::DataObjects;
@@ -56,11 +55,13 @@ public:
   void testNullCase(){
     SCDCalibratePanels2 alg;
     const std::string wsname("ws_nullcase");
+    const std::string pwsname("pws_nullcase");
 
     generateSimulatedworkspace(wsname);
+    generateSimulatedPeaks(wsname, pwsname);
 
-    EventWorkspace_sptr ws =
-        AnalysisDataService::Instance().retrieveWS<EventWorkspace>(wsname);
+    // EventWorkspace_sptr ws =
+    //     AnalysisDataService::Instance().retrieveWS<EventWorkspace>(wsname);
   }
 
   ///Adjust T0 and L1
@@ -162,6 +163,11 @@ private:
     Sample sample;
     sample.setCrystalStructure(silicon_cs);
 
+    // TODO:
+    // ws->componentInfo().sample().setCrystalStructure(silicon_cs);
+    // how do we update the sample field in a simulation workspace
+    // ws->mutableSample() = sample;
+
     // ws->sample();
     // sample.setCrystalStructure(silicon_cs);
   }
@@ -224,15 +230,22 @@ private:
    * @param WSName 
    * @param PWSName
    */
-  void generatePeaks(const std::string &WSName, const std::string &PWSName){
+  void generateSimulatedPeaks(const std::string &WSName, const std::string &PWSName){
     const std::string tmpPWSName{"_tmpPWS"};
-
+    
+    // TODO:
+    // Why can AlgorithmFactory found CreatePeaksWorkspace???
+    // ERROR messages:
+    // terminate called after throwing an instance of 'std::runtime_error'
+    //   what():  algorithm not registered CreatePeaksWorkspace
+    // Child aborted
     // create an empty PeakWorkspace as container
-    IAlgorithm_sptr cpws_alg =
-      AlgorithmFactory::Instance().create("CreatePeaksWorkspace", 1);
-    cpws_alg->initialize();
-    cpws_alg->setProperty("OutputWorkspace", PWSName);
-    cpws_alg->execute();
+    // IAlgorithm_sptr cpws_alg =
+    //   AlgorithmFactory::Instance().create("CreatePeaksWorkspace", 1);
+    // // CreatePeaksWorkspace cp_swap;
+    // cpws_alg->initialize();
+    // cpws_alg->setProperty("OutputWorkspace", PWSName);
+    // cpws_alg->execute();
 
     // prepare the algs pointer
     IAlgorithm_sptr sg_alg = 
@@ -242,8 +255,27 @@ private:
     IAlgorithm_sptr cpw_alg = 
         AlgorithmFactory::Instance().create("CombinePeaksWorkspaces", 1);
 
+    // CreatePeaksWorkspace cannot be used here due to strange compiling errors
+    // so we have to run the peak generation outside the loop to get started
+    // set the SetGoniometer
+    // init case: omega=0
+    sg_alg->initialize();
+    sg_alg->setProperty("Workspace", WSName);
+    sg_alg->setProperty("Axis0", "0,0,1,0,1");
+    sg_alg->execute();
+    // predict peak positions
+    pp_alg->initialize();
+    pp_alg->setProperty("InputWorkspace", WSName);
+    pp_alg->setProperty("WavelengthMin", wavelength_min);
+    pp_alg->setProperty("wavelengthMax", wavelength_max);
+    pp_alg->setProperty("MinDSpacing", dspacing_min);
+    pp_alg->setProperty("MaxDSpacing", dspacing_max);
+    pp_alg->setProperty("ReflectionCondition", "All-face centred");
+    pp_alg->setProperty("OutputWorkspace", PWSName);
+    pp_alg->execute();
+
     // generate peaks for a range of omega values
-    for(double omega=0; omega<=180; omega=omega+3){
+    for(double omega=3; omega<=180; omega=omega+3){
       std::ostringstream os;
       os << omega << ",0,1,0,1";
 
