@@ -18,6 +18,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include <stdexcept>
+#include <boost/math/constants/constants.hpp>
 
 using namespace Mantid::API;
 using namespace Mantid::Crystal;
@@ -51,8 +52,15 @@ public:
   //TODO: the remaining test needs to be implemented
   // ///TODO: test validators
 
-  ///NULL case
+  /**
+   * @brief Trivial case where all components are in ideal/starting position
+   *        Therefore the calibration results should be close to a zero
+   *        vector.
+   * 
+   */
   void testNullCase(){
+    g_log.notice() << "testNullCase() Start \n";
+
     SCDCalibratePanels2 alg;
     const std::string wsname("ws_nullcase");
     const std::string pwsname("pws_nullcase");
@@ -60,31 +68,75 @@ public:
     generateSimulatedworkspace(wsname);
     generateSimulatedPeaks(wsname, pwsname);
 
-    // EventWorkspace_sptr ws =
-    //     AnalysisDataService::Instance().retrieveWS<EventWorkspace>(wsname);
+    EventWorkspace_sptr ws =
+        AnalysisDataService::Instance().retrieveWS<EventWorkspace>(wsname);
+    
+    // TODO: need a way to extract the delta from the calibration
+
+    // Do we need to remove the workspace here?
   }
 
-  ///Adjust T0 and L1
+  /**
+   * @brief Single variant case where only global var is adjusted.
+   * 
+   * NOTE: technically we should also check T0, but the client, CORELLI
+   *       team does not seem to care about using T0, therefore we are
+   *       not implmenting T0 calibration here.
+   * 
+   */
   void testGlobalShiftOnly(){
+    g_log.notice() << "testGlobalShiftOnly() start \n";
+
     SCDCalibratePanels2 alg;
     const std::string wsname("ws_changeL1");
+    const std::string pwsname("pws_changeL1");
+    const double dL1 = boost::math::constants::e<double>();
 
+    // prepare a workspace
     generateSimulatedworkspace(wsname);
 
-    //TODO:
+    // move moderator along z by dL1
+    moveModerator(wsname, dL1);
+
+    // generate the peak workspace from shifted configuration
+    generateSimulatedPeaks(wsname, pwsname);
+
+    //TODO: run the calibration and check if we can backout the
+    //      the correct L1
   }
 
-  ///Ideal global with one panels moved
+  /**
+   * @brief Move a single bank in the high order zone to see if the
+   *        calibration can backout the correct shift vector.
+   * 
+   */
   void testSinglePanelMoved(){
+    g_log.notice() << "testSinglePanelMoved() start\n";
+
     SCDCalibratePanels2 alg;
     const std::string wsname("ws_moveBank");
+    const std::string pwsname("pws_moveBank");
+    const double dx = boost::math::constants::euler<double>();
+    const double dy = boost::math::constants::ln_ln_two<double>();
+    const double dz = boost::math::constants::pi_minus_three<double>();
 
+    // prepare a workspace 
     generateSimulatedworkspace(wsname);
+
+    // move x center bank
+    moveBank(wsname, bank_xcenter, dx, dy, dz);
+
+    // generate the peak workspace from shifted configuration
+    generateSimulatedPeaks(wsname, pwsname);
+
+    //TODO: run the calibration and check if we can dv back
 
   }
 
   ///Ideal global with two panels moved
   void testDualPanelMoved(){
+    g_log.notice() << "testDualPanelMoved() start\n";
+
     SCDCalibratePanels2 alg;
     const std::string wsname("ws_moveBanks");
 
@@ -96,6 +148,8 @@ public:
   // T0, L1 adjusted
   // Two panels moved
   void testExec(){
+    g_log.notice() << "testExec() start\n";
+
     SCDCalibratePanels2 alg;
     const std::string wsname("ws_moveAll");
 
@@ -104,6 +158,19 @@ public:
   }
 
 private:
+  // bank&panel names selected for testing
+  // batch_1: high order zone selection
+  const std::string bank_xtop    {"bank73/sixteenpack"};
+  const std::string bank_xcenter {"bank12/sixteenpack"};
+  const std::string bank_ybotoom {"bank11/sixteenpack"};
+  // batch_2: low order zone selection
+  // NOTE: limited reflections from experiment, often
+  //       considered as a chanllegening case
+  const std::string bank_yright  {"bank59/sixteenpack"};
+  const std::string bank_yleft   {"bank58/sixteenpack"};
+  const std::string bank_ytop    {"bank88/sixteenpack"};
+  const std::string bank_ybottom {"bank26/sixteenpack"};
+
   // lattice constants of silicon
   const double silicon_a = 5.431;
   const double silicon_b = 5.431;
@@ -180,9 +247,20 @@ private:
    * @param deltaL1 
    */
   void moveModerator(const std::string &WSName, double deltaL1){
+    // NOTE:
+    // We could reuse the moveBank func here, but it is better
+    // to make this a separate func due to the significant difference
+    // between a moderator and banks (in reality)
     IAlgorithm_sptr mv_alg = 
       AlgorithmFactory::Instance().create("MoveInstrumentComponent", 1);
     mv_alg->initialize();
+    mv_alg->setProperty("Workspace", WSName);
+    mv_alg->setProperty("ComponentName", "moderator");
+    mv_alg->setProperty("X", 0.0);
+    mv_alg->setProperty("Y", 0.0);
+    mv_alg->setProperty("Z", deltaL1);
+    mv_alg->setProperty("RelativePosition", true);
+    mv_alg->execute();
   }
 
   /**
@@ -201,13 +279,20 @@ private:
     IAlgorithm_sptr mv_alg = 
       AlgorithmFactory::Instance().create("MoveInstrumentComponent", 1);
     mv_alg->initialize();
+    mv_alg->setProperty("Workspace", WSName);
+    mv_alg->setProperty("ComponentName", BankName);
+    mv_alg->setProperty("X", deltaX);
+    mv_alg->setProperty("Y", deltaY);
+    mv_alg->setProperty("Z", deltaZ);
+    mv_alg->setProperty("RelativePosition", true);
+    mv_alg->execute();
   }
 
   /**
    * @brief Rotate the selected bank by
-   *  deltaRX around (1,0,0)_lab
-   *  deltaRY around (0,1,0)_lab
-   *  deltaRZ around (0,0,1)_lab
+   *  deltaRX around (1,0,0)_lab in degree
+   *  deltaRY around (0,1,0)_lab in degree
+   *  deltaRZ around (0,0,1)_lab in degree
    * 
    * @param WSName 
    * @param BankName 
@@ -222,6 +307,32 @@ private:
     IAlgorithm_sptr rot_alg = 
       AlgorithmFactory::Instance().create("RotateInstrumentComponent", 1);
     rot_alg->initialize();
+    rot_alg->setProperty("Workspace", WSName);
+    rot_alg->setProperty("ComponentName", BankName);
+
+    // rotate around lab x by deltaRX
+    rot_alg->setProperty("X", 1);
+    rot_alg->setProperty("Y", 0);
+    rot_alg->setProperty("Z", 0);
+    rot_alg->setProperty("Angle", deltaRX);
+    rot_alg->setProperty("RelativeRotation", true);
+    rot_alg->execute();
+
+    // rotate around lab y by deltaRY
+    rot_alg->setProperty("X", 0);
+    rot_alg->setProperty("Y", 1);
+    rot_alg->setProperty("Z", 0);
+    rot_alg->setProperty("Angle", deltaRY);
+    rot_alg->setProperty("RelativeRotation", true);
+    rot_alg->execute();
+
+    // rotate around lab z by deltaRZ
+    rot_alg->setProperty("X", 0);
+    rot_alg->setProperty("Y", 0);
+    rot_alg->setProperty("Z", 1);
+    rot_alg->setProperty("Angle", deltaRZ);
+    rot_alg->setProperty("RelativeRotation", true);
+    rot_alg->execute();
   }
 
   /**
