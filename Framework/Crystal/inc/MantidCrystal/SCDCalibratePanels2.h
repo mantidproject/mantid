@@ -70,6 +70,11 @@ private:
                      const boost::container::flat_set<std::string> &AllBankNames,
                      const Geometry::Instrument &instrument);
 
+    /// Save to ISAW type det calibration output for backward compatiblity
+    void saveIsawDetCal(std::shared_ptr<Geometry::Instrument> &instrument,
+                        boost::container::flat_set<std::string> &AllBankName,
+                        double T0, const std::string &filename);
+
 };
 
 } // namespace Crystal

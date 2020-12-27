@@ -8,7 +8,9 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/Logger.h"
 #include "MantidCrystal/SCDCalibratePanels2.h"
@@ -236,6 +238,43 @@ namespace Crystal {
         boost::property_tree::write_xml(
             FileName, tree, std::locale(),
             boost::property_tree::xml_writer_settings<std::string>(' ', 2));
+    }
+
+    /**
+     * Really this is the operator SaveIsawDetCal but only the results of the given
+     * banks are saved.  L1 and T0 are also saved.
+     *
+     * @param instrument   -The instrument with the correct panel geometries
+     *                      and initial path length
+     * @param AllBankName  -the set of the NewInstrument names of the banks(panels)
+     * @param T0           -The time offset from the DetCal file
+     * @param filename     -The name of the DetCal file to save the results to
+     */
+    void SCDCalibratePanels2::saveIsawDetCal(
+        std::shared_ptr<Instrument> &instrument,
+        boost::container::flat_set<std::string> &AllBankName, double T0,
+        const std::string &filename) {
+        g_log.notice() << "Saving DetCal file in " << filename << "\n";
+
+        // create a workspace to pass to SaveIsawDetCal
+        const size_t number_spectra = instrument->getNumberDetectors();
+        Workspace2D_sptr wksp =
+            std::dynamic_pointer_cast<Workspace2D>(
+                WorkspaceFactory::Instance().create("Workspace2D", number_spectra, 2,
+                                                    1));
+        wksp->setInstrument(instrument);
+        wksp->rebuildSpectraMapping(true /* include monitors */);
+
+        // convert the bank names into a vector
+        std::vector<std::string> banknames(AllBankName.begin(), AllBankName.end());
+
+        // call SaveIsawDetCal
+        API::IAlgorithm_sptr alg = createChildAlgorithm("SaveIsawDetCal");
+        alg->setProperty("InputWorkspace", wksp);
+        alg->setProperty("Filename", filename);
+        alg->setProperty("TimeOffset", T0);
+        alg->setProperty("BankNames", banknames);
+        alg->executeAsChildAlg();
     }
 
 } // namespace Crystal
