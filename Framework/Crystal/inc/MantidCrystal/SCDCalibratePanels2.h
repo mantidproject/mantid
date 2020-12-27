@@ -25,6 +25,8 @@ namespace Crystal {
  *       distance between sample and the center of each panel
  * - Rot: degrees
  *       Euler angles (xyz )
+ * 
+ * Spirit successor of ISAW and its reincarnation: SCDCalibratePanels
 */
 class MANTID_CRYSTAL_DLL SCDCalibratePanels2 : public Mantid::API::Algorithm{
 public:
