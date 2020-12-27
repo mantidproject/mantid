@@ -65,6 +65,11 @@ private:
     /// Private validator for inputs
     std::map<std::string, std::string> validateInputs() override;
 
+    /// Save to xml file for Mantid to load
+    void saveXmlFile(const std::string &FileName,
+                     const boost::container::flat_set<std::string> &AllBankNames,
+                     const Geometry::Instrument &instrument);
+
 };
 
 } // namespace Crystal
