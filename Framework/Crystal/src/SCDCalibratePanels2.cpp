@@ -136,7 +136,7 @@ namespace Crystal {
      * 
      */
     void SCDCalibratePanels2::exec() {
-        int a = 1;
+        PeaksWorkspace_sptr peaksWs = getProperty("PeakWorkspace");
     }
 
     /// ------------------------------------------- ///
