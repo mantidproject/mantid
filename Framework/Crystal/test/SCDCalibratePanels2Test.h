@@ -241,6 +241,9 @@ private:
     csws_alg->setProperty("OutputWorkspace", WSName);
     csws_alg->execute();
 
+    MatrixWorkspace_sptr ws = 
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(WSName);
+
     // set UB
     IAlgorithm_sptr sub_alg = 
       AlgorithmFactory::Instance().create("SetUB", 1);
@@ -256,20 +259,9 @@ private:
     sub_alg->setProperty("gamma", silicon_gamma);
     sub_alg->execute();
 
-    // set the crystal structure
-    EventWorkspace_sptr ws =
-        AnalysisDataService::Instance().retrieveWS<EventWorkspace>(WSName);
-
-    Sample sample;
+    auto& sample = ws->mutableSample();
     sample.setCrystalStructure(silicon_cs);
 
-    // TODO:
-    // ws->componentInfo().sample().setCrystalStructure(silicon_cs);
-    // how do we update the sample field in a simulation workspace
-    // ws->mutableSample() = sample;
-
-    // ws->sample();
-    // sample.setCrystalStructure(silicon_cs);
   }
 
   /**
