@@ -9,6 +9,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidCrystal/DllConfig.h"
 
+#include <boost/container/flat_set.hpp>
 
 namespace Mantid {
 namespace Crystal {
@@ -67,14 +68,19 @@ private:
 
     /// Save to xml file for Mantid to load
     void saveXmlFile(const std::string &FileName,
-                     const boost::container::flat_set<std::string> &AllBankNames,
-                     const Geometry::Instrument &instrument);
+                     boost::container::flat_set<std::string> &AllBankNames,
+                     std::shared_ptr<Geometry::Instrument> &instrument);
 
     /// Save to ISAW type det calibration output for backward compatiblity
-    void saveIsawDetCal(std::shared_ptr<Geometry::Instrument> &instrument,
+    void saveIsawDetCal(const std::string &filename,
                         boost::container::flat_set<std::string> &AllBankName,
-                        double T0, const std::string &filename);
-
+                        std::shared_ptr<Geometry::Instrument> &instrument,
+                        double T0);
+    
+    /// unique vars for a given instance of calibration
+    boost::container::flat_set<std::string> m_BankNames;
+    double m_T0 = 0.0;
+    double m_L1 = 2000.0;
 };
 
 } // namespace Crystal

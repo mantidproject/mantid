@@ -136,7 +136,28 @@ namespace Crystal {
      * 
      */
     void SCDCalibratePanels2::exec() {
+        // parse all inputs
         PeaksWorkspace_sptr peaksWs = getProperty("PeakWorkspace");
+
+        bool calibrateT0 = getProperty("CalibrateT0");
+        bool calibrateL1 = getProperty("CalibrateL1");
+        bool calibrateBanks = getProperty("CalibrateBanks");
+
+        const std::string DetCalFilename = getProperty("DetCalFilename");
+        const std::string XmlFilename = getProperty("XmlFilename");
+
+        // ????
+
+        // Write to disk if required
+        Instrument_sptr instCalibrated =
+            std::const_pointer_cast<Geometry::Instrument>(peaksWs->getInstrument());
+
+        if (!XmlFilename.empty())
+            saveXmlFile(XmlFilename, m_BankNames, instCalibrated);
+
+        if (!DetCalFilename.empty())
+            saveIsawDetCal(DetCalFilename, m_BankNames, instCalibrated, m_T0);
+
     }
 
     /// ------------------------------------------- ///
@@ -161,24 +182,24 @@ namespace Crystal {
     */
     void SCDCalibratePanels2::saveXmlFile(
         const std::string &FileName,
-        const boost::container::flat_set<std::string> &AllBankNames,
-        const Instrument &instrument) {
+        boost::container::flat_set<std::string> &AllBankNames,
+        std::shared_ptr<Instrument> &instrument) {
         //
         g_log.notice() << "Generating xml tree" << "\n";
 
         // use Boost.PropertyTree to handle XML generation
         boost::property_tree::ptree tree;
         tree.add("parameter-file.<xmlattr>.instrument",
-                 instrument.getName());
+                 instrument->getName());
         tree.add("parameter-file.<xmlattr>.valid-from",
-                 instrument.getValidFromDate().toISO8601String());
+                 instrument->getValidFromDate().toISO8601String());
         
         // add element node for each detector as component-link
         for (auto bankName : AllBankNames) {
             // Prepare data for node
-            if (instrument.getName().compare("CORELLI") == 0)
+            if (instrument->getName().compare("CORELLI") == 0)
                 bankName.append("/sixteenpack");
-            std::shared_ptr<const IComponent> bank = instrument.getComponentByName(bankName);
+            std::shared_ptr<const IComponent> bank = instrument->getComponentByName(bankName);
             Quat relRot = bank->getRelativeRot();
             std::vector<double> relRotAngles = relRot.getEulerAngles("XYZ");
             V3D pos1 = bank->getRelativePos();
@@ -218,7 +239,7 @@ namespace Crystal {
 
         // add the source as the final component-link
         // -- get positional data from source
-        IComponent_const_sptr source = instrument.getSource();
+        IComponent_const_sptr source = instrument->getSource();
         V3D sourceRelPos = source->getRelativePos();
         // -- add date to node
         boost::property_tree::ptree cmplink_src = 
@@ -251,9 +272,10 @@ namespace Crystal {
      * @param filename     -The name of the DetCal file to save the results to
      */
     void SCDCalibratePanels2::saveIsawDetCal(
+        const std::string &filename,
+        boost::container::flat_set<std::string> &AllBankName,
         std::shared_ptr<Instrument> &instrument,
-        boost::container::flat_set<std::string> &AllBankName, double T0,
-        const std::string &filename) {
+        double T0) {
         g_log.notice() << "Saving DetCal file in " << filename << "\n";
 
         // create a workspace to pass to SaveIsawDetCal
