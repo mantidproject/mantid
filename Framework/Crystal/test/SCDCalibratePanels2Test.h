@@ -18,6 +18,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include <stdexcept>
+#include <boost/filesystem.hpp>
 #include <boost/math/constants/constants.hpp>
 
 using namespace Mantid::API;
@@ -57,6 +58,8 @@ public:
    *        Therefore the calibration results should be close to a zero
    *        vector.
    * 
+   * Note: doubled as a quick test for two writters
+   * 
    */
   void testNullCase(){
     g_log.notice() << "testNullCase() Start \n";
@@ -64,12 +67,34 @@ public:
     SCDCalibratePanels2 alg;
     const std::string wsname("ws_nullcase");
     const std::string pwsname("pws_nullcase");
+    auto isawFilename = boost::filesystem::temp_directory_path();
+    isawFilename /= boost::filesystem::unique_path("nullcase_%%%%%%%%.DetCal");
+    auto xmlFilename = boost::filesystem::temp_directory_path();
+    xmlFilename /= boost::filesystem::unique_path("nullcase_%%%%%%%%.xml");
 
     generateSimulatedworkspace(wsname);
     generateSimulatedPeaks(wsname, pwsname);
 
     EventWorkspace_sptr ws =
         AnalysisDataService::Instance().retrieveWS<EventWorkspace>(wsname);
+
+    // Perform the calibration
+    alg.initialize();
+    alg.setProperty("PeakWorkspace", pwsname);
+    alg.setProperty("a", silicon_a);
+    alg.setProperty("b", silicon_b);
+    alg.setProperty("c", silicon_c);
+    alg.setProperty("alpha", silicon_alpha);
+    alg.setProperty("beta", silicon_beta);
+    alg.setProperty("gamma", silicon_gamma);
+    alg.setProperty("CalibrateT0", false);
+    alg.setProperty("CalibrateL1", true);
+    alg.setProperty("CalibrateBanks", true);
+    alg.setProperty("DetCalFilename", isawFilename.string());
+    alg.setProperty("XmlFilename", xmlFilename.string());
+    alg.execute();
+
+    TS_ASSERT(alg.isExecuted());
     
     // TODO: need a way to extract the delta from the calibration
 
