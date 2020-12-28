@@ -215,22 +215,25 @@ namespace Crystal {
      *
      * @param instrument   The instrument with the new values for the banks in
      *                     Groups
+     * 
+     * TODO: 
+     *  - Need to find a way to add the information regarding calibrated T0
     */
     void SCDCalibratePanels2::saveXmlFile(
         const std::string &FileName,
         boost::container::flat_set<std::string> &AllBankNames,
         std::shared_ptr<Instrument> &instrument) {
-        //
         g_log.notice() << "Generating xml tree" << "\n";
 
-        // use Boost.PropertyTree to handle XML generation
-        boost::property_tree::ptree tree;
-        tree.add("parameter-file.<xmlattr>.instrument",
-                 instrument->getName());
-        tree.add("parameter-file.<xmlattr>.valid-from",
-                 instrument->getValidFromDate().toISO8601String());
-        
-        // add element node for each detector as component-link
+        using boost::property_tree::ptree;
+        ptree root;
+        ptree parafile;
+
+        // configure root node
+        parafile.put("<xmlattr>.instrument", instrument->getName());
+        parafile.put("<xmlattr>.valid-from", instrument->getValidFromDate().toISO8601String());
+
+        // cnofigure and add each bank
         for (auto bankName : AllBankNames) {
             // Prepare data for node
             if (instrument->getName().compare("CORELLI") == 0)
@@ -243,57 +246,92 @@ namespace Crystal {
             double scalex = 1.0;
             double scaley = 1.0;
 
-            //add nodes for each component
-            boost::property_tree::ptree cmplink = 
-                tree.add("parameter-file.component-link.<xmlattr>.name", bankName);
-            boost::property_tree::ptree pararotx = 
-                cmplink.add("parameter.<xmlattr>.name", "rotx");
-            pararotx.add("value.<xmlattr>.val", relRotAngles[0]);
-            boost::property_tree::ptree pararoty = 
-                cmplink.add("parameter.<xmlattr>.name", "roty");
-            pararoty.add("value.<xmlattr>.val", relRotAngles[1]);
-            boost::property_tree::ptree pararotz = 
-                cmplink.add("parameter.<xmlattr>.name", "rotz");
-            pararotz.add("value.<xmlattr>.val", relRotAngles[2]);
-            boost::property_tree::ptree parax = 
-                cmplink.add("parameter.<xmlattr>.name", "x");
-            parax.add("value.<xmlattr>.val", pos1.X());
-            boost::property_tree::ptree paray = 
-                cmplink.add("parameter.<xmlattr>.name", "y");
-            paray.add("value.<xmlattr>.val", pos1.Y());
-            boost::property_tree::ptree paraz = 
-                cmplink.add("parameter.<xmlattr>.name", "z");
-            paraz.add("value.<xmlattr>.val", pos1.Z());
-            // TODO: default to 1 for now
-            boost::property_tree::ptree parascalex = 
-                cmplink.add("parameter.<xmlattr>.name", "scalex");
-            parascalex.add("value.<xmlattr>.val", scalex);
-            boost::property_tree::ptree parascaley = 
-                cmplink.add("parameter.<xmlattr>.name", "scaley");
-            parascaley.add("value.<xmlattr>.val", scaley);
+            // prepare node
+            ptree bank_root;
+            ptree bank_dx, bank_dy, bank_dz;
+            ptree bank_dx_val, bank_dy_val, bank_dz_val;
+            ptree bank_drotx, bank_droty, bank_drotz;
+            ptree bank_drotx_val, bank_droty_val, bank_drotz_val;
+            ptree bank_sx, bank_sy;
+            ptree bank_sx_val, bank_sy_val;
+
+            // add data to node
+            bank_dx_val.put("<xmlattr>.val", pos1.X());
+            bank_dy_val.put("<xmlattr>.val", pos1.Y());
+            bank_dz_val.put("<xmlattr>.val", pos1.Z());
+            bank_dx.put("<xmlattr>.name", "x");
+            bank_dy.put("<xmlattr>.name", "y");
+            bank_dz.put("<xmlattr>.name", "z");
+
+            bank_drotx_val.put("<xmlattr>.val", relRot[0]);
+            bank_droty_val.put("<xmlattr>.val", relRot[1]);
+            bank_drotz_val.put("<xmlattr>.val", relRot[2]);
+            bank_drotx.put("<xmlattr>.name", "rotx");
+            bank_droty.put("<xmlattr>.name", "roty");
+            bank_drotz.put("<xmlattr>.name", "rotz");
+
+            bank_sx_val.put("<xmlattr>.val", scalex);
+            bank_sy_val.put("<xmlattr>.val", scaley);
+            bank_sx.put("<xmlattr>.name", "scalex");
+            bank_sy.put("<xmlattr>.name", "scaley");
+
+            bank_root.put("<xmlattr>.name", bankName);
+
+            // configure structure
+            bank_dx.add_child("value", bank_dx_val);
+            bank_dy.add_child("value", bank_dy_val);
+            bank_dz.add_child("value", bank_dz_val);
+
+            bank_drotx.add_child("value", bank_drotx_val);
+            bank_droty.add_child("value", bank_droty_val);
+            bank_drotz.add_child("value", bank_drotz_val);
+
+            bank_sx.add_child("value", bank_sx_val);
+            bank_sy.add_child("value", bank_sy_val);
+
+            bank_root.add_child("parameter", bank_drotx);
+            bank_root.add_child("parameter", bank_droty);
+            bank_root.add_child("parameter", bank_drotz);
+            bank_root.add_child("parameter", bank_dx);
+            bank_root.add_child("parameter", bank_dy);
+            bank_root.add_child("parameter", bank_dz);
+            bank_root.add_child("parameter", bank_sx);
+            bank_root.add_child("parameter", bank_sy);
+
+            parafile.add_child("component-link", bank_root);
         }
 
-        // add the source as the final component-link
+        // get L1 info for source
+        ptree src;
+        ptree src_dx, src_dy, src_dz;
+        ptree src_dx_val, src_dy_val, src_dz_val;
         // -- get positional data from source
         IComponent_const_sptr source = instrument->getSource();
         V3D sourceRelPos = source->getRelativePos();
         // -- add date to node
-        boost::property_tree::ptree cmplink_src = 
-            tree.add("parameter-file.component-link.<xmlattr>.name", source->getName());
-        boost::property_tree::ptree parax_src =
-            cmplink_src.add("parameter.<xmlattr>.name", "x");
-        parax_src.add("value.<xmlattr>.val", sourceRelPos.X());
-        boost::property_tree::ptree paray_src =
-            cmplink_src.add("parameter.<xmlattr>.name", "y");
-        paray_src.add("value.<xmlattr>.val", sourceRelPos.Y());
-        boost::property_tree::ptree paraz_src =
-            cmplink_src.add("parameter.<xmlattr>.name", "z");
-        paraz_src.add("value.<xmlattr>.val", sourceRelPos.Z());
+        src_dx_val.put("<xmlattr>.val", sourceRelPos.X());
+        src_dy_val.put("<xmlattr>.val", sourceRelPos.Y());
+        src_dz_val.put("<xmlattr>.val", sourceRelPos.Z());
+        src_dx.put("<xmlattr>.name", "x");
+        src_dy.put("<xmlattr>.name", "y");
+        src_dz.put("<xmlattr>.name", "z");
+        src.put("<xmlattr>.name", source->getName());
 
+        src_dx.add_child("value", src_dx_val);
+        src_dy.add_child("value", src_dy_val);
+        src_dz.add_child("value", src_dz_val);
+        src.add_child("parameter", src_dx);
+        src.add_child("parameter", src_dy);
+        src.add_child("parameter", src_dz);
+
+        parafile.add_child("component-link", src);
+
+        // give everything to root
+        root.add_child("parameter-file", parafile);
         // write the xml tree to disk
         g_log.notice() << "\tSaving parameter file as " << FileName << "\n";
         boost::property_tree::write_xml(
-            FileName, tree, std::locale(),
+            FileName, root, std::locale(),
             boost::property_tree::xml_writer_settings<std::string>(' ', 2));
     }
 
