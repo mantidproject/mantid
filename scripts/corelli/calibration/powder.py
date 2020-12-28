@@ -12,7 +12,7 @@ from mantid.kernel import logger
 from mantid.simpleapi import DeleteWorkspace, LoadEventNexus, Plus, Rebin
 
 
-def load_and_rebin(run_numbers: List[int],
+def load_and_rebin(runs: List[int],
                    output_workspace: str,
                    rebin_params: List[float],
                    banks: Optional[List[int]] = None) -> Workspace2D:
@@ -34,8 +34,8 @@ def load_and_rebin(run_numbers: List[int],
     kwargs = {} if banks is None else {'BankName': ','.join([f'bank{b}' for b in banks])}
 
     # Load the first run
-    logger.info(f'Loading run {run_numbers[0]}. {len(run_numbers)} runs remaining to be loaded')
-    LoadEventNexus(Filename=f'{instrument}_{run_numbers[0]}', OutputWorkspace=output_workspace,
+    logger.information(f'Loading run {runs[0]}. {len(runs)} runs remaining to be loaded')
+    LoadEventNexus(Filename=f'{instrument}_{runs[0]}', OutputWorkspace=output_workspace,
                    LoadLogs=False, **kwargs)
     if rebin_params is not None:
         Rebin(InputWorkspace=output_workspace, OutputWorkspace=output_workspace,
@@ -43,8 +43,8 @@ def load_and_rebin(run_numbers: List[int],
     # Iteratively load the remaining run, adding to the final workspace each time
     try:
         single_run = '__single_run_' + output_workspace
-        for i, run in enumerate(run_numbers[1:]):
-            logger.info(f'Loading run {run}. {len(run_numbers) - 1 - i} runs remaining to be loaded')
+        for i, run in enumerate(runs[1:]):
+            logger.information(f'Loading run {run}. {len(runs) - 1 - i} runs remaining to be loaded')
             LoadEventNexus(Filename=f'{instrument}_{run}', OutputWorkspace=single_run, LoadLogs=False, **kwargs)
             if rebin_params is not None:
                 Rebin(InputWorkspace=single_run, OutputWorkspace=single_run, Params=rebin_params, PreserveEvents=False)
