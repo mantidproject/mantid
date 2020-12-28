@@ -53,6 +53,7 @@ set(SRC_FILES
     src/PredictSatellitePeaks.cpp
     src/SCDCalibratePanels.cpp
     src/SCDCalibratePanels2.cpp
+    src/SCDCalibratePanels2ObjFunc.cpp
     src/SCDPanelErrors.cpp
     src/SaveHKL.cpp
     src/SaveIsawPeaks.cpp
@@ -130,6 +131,7 @@ set(INC_FILES
     inc/MantidCrystal/PredictSatellitePeaks.h
     inc/MantidCrystal/SCDCalibratePanels.h
     inc/MantidCrystal/SCDCalibratePanels2.h
+    inc/MantidCrystal/SCDCalibratePanels2ObjFunc.h
     inc/MantidCrystal/SCDPanelErrors.h
     inc/MantidCrystal/SaveHKL.h
     inc/MantidCrystal/SaveIsawPeaks.h
