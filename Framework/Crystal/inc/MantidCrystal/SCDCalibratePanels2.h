@@ -8,6 +8,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidCrystal/DllConfig.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 
 #include <boost/container/flat_set.hpp>
 
@@ -66,6 +67,9 @@ private:
     /// Private validator for inputs
     std::map<std::string, std::string> validateInputs() override;
 
+    /// Private function dedicated for parsing lattice constant
+    void parseLatticeConstant(std::shared_ptr<Mantid::DataObjects::PeaksWorkspace> pws);
+
     /// Save to xml file for Mantid to load
     void saveXmlFile(const std::string &FileName,
                      boost::container::flat_set<std::string> &AllBankNames,
@@ -78,9 +82,11 @@ private:
                         double T0);
     
     /// unique vars for a given instance of calibration
-    boost::container::flat_set<std::string> m_BankNames;
+    // PeaksWorkspace_sptr m_pws;
+    double m_a, m_b, m_c, m_alpha, m_beta, m_gamma;
     double m_T0 = 0.0;
     double m_L1 = 2000.0;
+    boost::container::flat_set<std::string> m_BankNames;
 };
 
 } // namespace Crystal

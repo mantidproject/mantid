@@ -7,10 +7,13 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/Sample.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/Logger.h"
 #include "MantidCrystal/SCDCalibratePanels2.h"
@@ -137,7 +140,9 @@ namespace Crystal {
      */
     void SCDCalibratePanels2::exec() {
         // parse all inputs
-        PeaksWorkspace_sptr peaksWs = getProperty("PeakWorkspace");
+        PeaksWorkspace_sptr m_pws = getProperty("PeakWorkspace");
+
+        parseLatticeConstant(m_pws);
 
         bool calibrateT0 = getProperty("CalibrateT0");
         bool calibrateL1 = getProperty("CalibrateL1");
@@ -150,7 +155,7 @@ namespace Crystal {
 
         // Write to disk if required
         Instrument_sptr instCalibrated =
-            std::const_pointer_cast<Geometry::Instrument>(peaksWs->getInstrument());
+            std::const_pointer_cast<Geometry::Instrument>(m_pws->getInstrument());
 
         if (!XmlFilename.empty())
             saveXmlFile(XmlFilename, m_BankNames, instCalibrated);
@@ -167,6 +172,37 @@ namespace Crystal {
     /// ---------------- ///
     /// helper functions ///
     /// ---------------- ///
+
+    /**
+     * @brief get lattice constants from either inputs or the
+     *        input peak workspace
+     * 
+     */
+    void SCDCalibratePanels2::parseLatticeConstant(std::shared_ptr<PeaksWorkspace> pws) {
+        m_a = getProperty("a");
+        m_b = getProperty("b");
+        m_c = getProperty("c");
+        m_alpha = getProperty("alpha");
+        m_beta = getProperty("beta");
+        m_gamma = getProperty("gamma");
+        // if any one of the six lattice constants is missing, try to get
+        // one from the workspace
+        if((m_a == EMPTY_DBL() ||
+            m_b == EMPTY_DBL() ||
+            m_c == EMPTY_DBL() ||
+            m_alpha == EMPTY_DBL() ||
+            m_beta == EMPTY_DBL() ||
+            m_gamma == EMPTY_DBL()) &&
+           (pws->sample().hasOrientedLattice())){
+            OrientedLattice lattice = pws->mutableSample().getOrientedLattice();
+            m_a = lattice.a();
+            m_b = lattice.b();
+            m_c = lattice.c();
+            m_alpha = lattice.alpha();
+            m_beta = lattice.beta();
+            m_gamma = lattice.gamma();
+        }
+    }
 
     /**
      * Saves the new instrument to an xml file that can be used with the
