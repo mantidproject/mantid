@@ -151,9 +151,29 @@ namespace Crystal {
         const std::string DetCalFilename = getProperty("DetCalFilename");
         const std::string XmlFilename = getProperty("XmlFilename");
 
-        // ????
+        // STEP_0: sort the peaks
+        // NOTE: why??
+        std::vector<std::pair<std::string, bool>> criteria{{"BankName", true}};
+        m_pws->sort(criteria);
 
-        // Write to disk if required
+        // STEP_1: preparation
+        // get names of banks that can be calibrated
+        getBankNames(m_pws);
+
+        // STEP_2: optimize T0,L1,L2,etc.
+        // calibrate T0 if required
+        if (calibrateT0)
+            optimizeT0(m_pws);
+
+        // calibrate L1 if required
+        if (calibrateL1)
+            optimizeL1(m_pws);
+
+        // calibrate each bank
+        if (calibrateBanks)
+            optimizeBanks(m_pws);
+
+        // STEP_3: Write to disk if required
         Instrument_sptr instCalibrated =
             std::const_pointer_cast<Geometry::Instrument>(m_pws->getInstrument());
 
@@ -163,11 +183,39 @@ namespace Crystal {
         if (!DetCalFilename.empty())
             saveIsawDetCal(DetCalFilename, m_BankNames, instCalibrated, m_T0);
 
+        // STEP_4: Cleanup
     }
 
     /// ------------------------------------------- ///
     /// Core functions for Calibration&Optimizatoin ///
     /// ------------------------------------------- ///
+
+    /**
+     * @brief 
+     * 
+     * @param pws 
+     */
+    void SCDCalibratePanels2::optimizeT0(std::shared_ptr<PeaksWorkspace> pws){
+
+    }
+
+    /**
+     * @brief 
+     * 
+     * @param pws 
+     */
+    void SCDCalibratePanels2::optimizeL1(std::shared_ptr<PeaksWorkspace> pws){
+
+    }
+
+    /**
+     * @brief 
+     * 
+     * @param pws 
+     */
+    void SCDCalibratePanels2::optimizeBanks(std::shared_ptr<PeaksWorkspace> pws){
+
+    }
 
     /// ---------------- ///
     /// helper functions ///
@@ -201,6 +249,20 @@ namespace Crystal {
             m_alpha = lattice.alpha();
             m_beta = lattice.beta();
             m_gamma = lattice.gamma();
+        }
+    }
+
+    /**
+     * @brief Gather names for bank for calibration
+     * 
+     * @param pws 
+     */
+    void SCDCalibratePanels2::getBankNames(std::shared_ptr<PeaksWorkspace> pws) {
+        int npeaks = static_cast<int>(pws->getNumberPeaks());
+        for (int i=0; i<npeaks; ++i){
+            std::string bname = pws->getPeak(i).getBankName();
+            if (bname != "None")
+                m_BankNames.insert(bname);
         }
     }
 

@@ -10,10 +10,10 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/Sample.h"
-#include "MantidGeometry/Crystal/CrystalStructure.h"
 #include "MantidCrystal/SCDCalibratePanels2.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Crystal/CrystalStructure.h"
 #include "MantidKernel/Logger.h"
 
 #include <cxxtest/TestSuite.h>

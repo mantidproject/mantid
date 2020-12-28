@@ -70,6 +70,18 @@ private:
     /// Private function dedicated for parsing lattice constant
     void parseLatticeConstant(std::shared_ptr<Mantid::DataObjects::PeaksWorkspace> pws);
 
+    /// Private function for getting names of banks to be calibrated
+    void getBankNames(std::shared_ptr<Mantid::DataObjects::PeaksWorkspace> pws);
+
+    /// Private function for calibrating T0
+    void optimizeT0(std::shared_ptr<Mantid::DataObjects::PeaksWorkspace> pws);
+
+    /// Private function for calibrating L1
+    void optimizeL1(std::shared_ptr<Mantid::DataObjects::PeaksWorkspace> pws);
+
+    /// Private function for calibrating banks
+    void optimizeBanks(std::shared_ptr<Mantid::DataObjects::PeaksWorkspace> pws);
+
     /// Save to xml file for Mantid to load
     void saveXmlFile(const std::string &FileName,
                      boost::container::flat_set<std::string> &AllBankNames,
