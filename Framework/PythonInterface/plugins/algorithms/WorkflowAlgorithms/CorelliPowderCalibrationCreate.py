@@ -10,7 +10,7 @@ import string
 from typing import List, Optional, Union
 
 from mantid.api import (
-    AlgorithmFactory, AnalysisDataService, DataProcessorAlgorithm, IEventWorkspaceProperty, mtd, Progress, TextAxis,
+    AlgorithmFactory, AnalysisDataService, DataProcessorAlgorithm, WorkspaceProperty, mtd, Progress, TextAxis,
     Workspace, WorkspaceGroup, WorkspaceUnitValidator)
 from mantid.dataobjects import TableWorkspace, Workspace2D
 from mantid.simpleapi import (
@@ -106,9 +106,9 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
 
     def PyInit(self):
         self.declareProperty(
-            IEventWorkspaceProperty('InputWorkspace', '',
-                                    direction=Direction.Input,
-                                    validator=WorkspaceUnitValidator('TOF')),
+            WorkspaceProperty('InputWorkspace', '',
+                              direction=Direction.Input,
+                              validator=WorkspaceUnitValidator('TOF')),
             doc='Powder event data, ideally from a highly symmetric space group',
         )
         self.declareProperty(name='OutputWorkspacesPrefix', defaultValue='pdcal_', direction=Direction.Input,
