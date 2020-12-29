@@ -21,8 +21,7 @@ def load_and_rebin(runs: List[int],
 
     This function assumes the runs are large and events cannot be all loaded into memory. Hence, a run is loaded
     at a time, rebinned to TOF counts, events are dropped, and counts are added to the cumulative histogram
-    resulting from loading the previous runs. This process typically results in a decrease in memory footprint
-    by a factor of 10 to 50.
+    resulting from loading the previous runs.
 
     @param runs : list of run numbers
     @param rebin_params : a triad of first, step, and last. A negative step indicates logarithmic binning
