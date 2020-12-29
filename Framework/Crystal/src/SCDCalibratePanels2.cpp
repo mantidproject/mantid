@@ -401,11 +401,11 @@ namespace Crystal {
      * Really this is the operator SaveIsawDetCal but only the results of the given
      * banks are saved.  L1 and T0 are also saved.
      *
+     * @param filename     -The name of the DetCal file to save the results to
+     * @param AllBankName  -the set of the NewInstrument names of the banks(panels)
      * @param instrument   -The instrument with the correct panel geometries
      *                      and initial path length
-     * @param AllBankName  -the set of the NewInstrument names of the banks(panels)
      * @param T0           -The time offset from the DetCal file
-     * @param filename     -The name of the DetCal file to save the results to
      */
     void SCDCalibratePanels2::saveIsawDetCal(
         const std::string &filename,
