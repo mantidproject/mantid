@@ -50,9 +50,6 @@ public:
     TS_ASSERT(alg.isInitialized());
   }
 
-  //TODO: the remaining test needs to be implemented
-  // ///TODO: test validators
-
   /**
    * @brief Trivial case where all components are in ideal/starting position
    *        Therefore the calibration results should be close to a zero
@@ -73,10 +70,8 @@ public:
     xmlFilename /= boost::filesystem::unique_path("nullcase_%%%%%%%%.xml");
 
     generateSimulatedworkspace(wsname);
+    // trivial case, no component undergoes any affine transformation
     generateSimulatedPeaks(wsname, pwsname);
-
-    EventWorkspace_sptr ws =
-        AnalysisDataService::Instance().retrieveWS<EventWorkspace>(wsname);
 
     // Perform the calibration
     alg.initialize();
@@ -95,10 +90,12 @@ public:
     alg.execute();
 
     TS_ASSERT(alg.isExecuted());
-    
-    // TODO: need a way to extract the delta from the calibration
 
-    // Do we need to remove the workspace here?
+    PeaksWorkspace_sptr pws =
+        AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>(pwsname);
+
+    // Check if the calibration returns the same instrument as we put in
+    TS_ASSERT(CompareInstrument(pws, xmlFilename.string()));
   }
 
   /**
@@ -250,6 +247,10 @@ private:
   const double wavelength_max = 2.9;
   const double omega_step = 3.0;
 
+  // check praramerter
+  const double TOLERANCE_L = 0.001;  // distance
+  const double TOLERANCE_R = 0.1;    // rotation angle
+
   /**
    * @brief Generate a generic workspace using silicon as the single
    *        crystal sample
@@ -266,6 +267,7 @@ private:
     csws_alg->setProperty("UnitX", "TOF");
     csws_alg->setProperty("OutputWorkspace", WSName);
     csws_alg->execute();
+    TS_ASSERT(csws_alg->isExecuted());
 
     MatrixWorkspace_sptr ws = 
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(WSName);
@@ -284,6 +286,7 @@ private:
     sub_alg->setProperty("beta", silicon_beta);
     sub_alg->setProperty("gamma", silicon_gamma);
     sub_alg->execute();
+    TS_ASSERT(sub_alg->isExecuted());
 
     auto& sample = ws->mutableSample();
     sample.setCrystalStructure(silicon_cs);
@@ -312,6 +315,7 @@ private:
     mv_alg->setProperty("Z", deltaL1);
     mv_alg->setProperty("RelativePosition", true);
     mv_alg->execute();
+    TS_ASSERT(mv_alg->isExecuted());
   }
 
   /**
@@ -337,6 +341,7 @@ private:
     mv_alg->setProperty("Z", deltaZ);
     mv_alg->setProperty("RelativePosition", true);
     mv_alg->execute();
+    TS_ASSERT(mv_alg->isExecuted());
   }
 
   /**
@@ -446,4 +451,82 @@ private:
     }
   }
 
+  /**
+   * @brief Check if the calibrated instrument is the same as the input reference
+   * 
+   * @param WSName
+   * @param xmlFileName
+   * 
+   * NOTE: There is no easy way to extract the relative affine transformation with
+   *       respect to the ideal position for each instruments, therefore we can not
+   *       use the delta input values to check instrument.
+   */
+  bool CompareInstrument(
+    std::shared_ptr<PeaksWorkspace> pws,
+    const std::string &xmlFileName) {
+    // blank innocent temp simulation workspace adjusted using calibration results
+    const std::string wstmp("ws_tmp");
+    generateSimulatedworkspace(wstmp);
+    IAlgorithm_sptr lpf_alg = 
+        AlgorithmFactory::Instance().create("LoadParameterFile", 1);
+    lpf_alg->initialize();
+    lpf_alg->setProperty("Workspace", wstmp);
+    lpf_alg->setProperty("Filename", xmlFileName);
+    TS_ASSERT(lpf_alg->execute());
+
+    // compare each bank
+    // -- get the names
+    MatrixWorkspace_sptr ws = 
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wstmp);
+    boost::container::flat_set<std::string> BankNames;
+    int npeaks = static_cast<int>(pws->getNumberPeaks());
+    for (int i=0; i<npeaks; ++i){
+        std::string bname = pws->getPeak(i).getBankName();
+        if (bname != "None")
+            BankNames.insert(bname);
+    }
+    // -- perform per bank comparison
+    Instrument_sptr inst1 = 
+      std::const_pointer_cast<Instrument>(ws->getInstrument());   // based on calibration
+    Instrument_sptr inst2 =
+      std::const_pointer_cast<Instrument>(pws->getInstrument());  // reference one
+
+    for (auto bankname : BankNames) {
+      if (!compareBank(inst1, inst2, bankname))
+        return false;
+    }
+
+    // all banks are the same, mark it as the same
+    return true;
+  }
+
+  /**
+   * @brief compare if two banks have similar translation and rotation
+   * 
+   * @param instr1 
+   * @param instr2 
+   * @param bn 
+   * @return true 
+   * @return false 
+   */
+  bool compareBank(
+    std::shared_ptr<Instrument> &instr1,
+    std::shared_ptr<Instrument> &instr2,
+    std::string bn) {
+      std::shared_ptr<const IComponent> bnk1 = instr1->getComponentByName(bn);
+      std::shared_ptr<const IComponent> bnk2 = instr2->getComponentByName(bn);
+      V3D p1 = bnk1->getRelativePos();
+      V3D p2 = bnk2->getRelativePos();
+      Quat q1 = bnk1->getRelativeRot();
+      Quat q2 = bnk2->getRelativeRot();
+      std::vector<double> r1 = q1.getEulerAngles("XYZ");
+      std::vector<double> r2 = q2.getEulerAngles("XYZ");
+
+      return (std::abs(p1.X() - p2.X()) < TOLERANCE_L) &&
+             (std::abs(p1.Y() - p2.Y()) < TOLERANCE_L) &&
+             (std::abs(p1.Z() - p2.Z()) < TOLERANCE_L) &&
+             (std::abs(r1[0] - r2[0]) < TOLERANCE_R) &&
+             (std::abs(r1[1] - r2[1]) < TOLERANCE_R) &&
+             (std::abs(r1[2] - r2[2]) < TOLERANCE_R);
+  }
 };
