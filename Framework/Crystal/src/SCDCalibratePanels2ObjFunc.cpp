@@ -8,9 +8,13 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/Sample.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidCrystal/SCDCalibratePanels2ObjFunc.h"
+
+#include <boost/math/special_functions/round.hpp>
 
 namespace Mantid {
 namespace Crystal {
@@ -48,7 +52,8 @@ namespace Crystal {
     /**
      * @brief Evalute the objective function with given feature vector X
      * 
-     * @param out     :: Q_calculated
+     * @param out     :: Q_calculated, which means yValues should be set to Q_measured
+     *                   when setting up the Fit algorithm
      * @param xValues :: feature vector [shiftx3, rotx3, T0]
      * @param order   :: dimensionality of feature vector
      */
@@ -87,18 +92,48 @@ namespace Crystal {
         // NOTE: Since the feature vectors are all deltas with respect to the starting position,
         //       we need to only operate on a copy instead of the original to avoid changing the
         //       base value
-        std::shared_ptr<API::Workspace> wstmp = m_ws->clone();
+        std::shared_ptr<API::Workspace> calc_ws = m_ws->clone();
 
         // translation
-        moveInstruentComponentBy(dx, dy, dz, m_cmpt, wstmp);
+        moveInstruentComponentBy(dx, dy, dz, m_cmpt, calc_ws);
 
         // rotation
         // NOTE: moderator should not be reoriented
-        rotateInstrumentComponentBy(drotx, droty, drotz, m_cmpt, wstmp);
+        rotateInstrumentComponentBy(drotx, droty, drotz, m_cmpt, calc_ws);
 
-        //
+        // generate a flatten Q_sampleframe from calculated ws (by moving instrument component)
+        // so that a direct comparison can be performed between measured and calculated
+        PeaksWorkspace_sptr calc_pws =
+            std::dynamic_pointer_cast<PeaksWorkspace>(calc_ws);
+        Instrument_sptr calc_inst =
+            std::const_pointer_cast<Instrument>(calc_pws->getInstrument());
+        OrientedLattice calc_lattice =
+            calc_pws->mutableSample().getOrientedLattice();
+        for (int i = 0; i < calc_pws->getNumberPeaks(); ++i) {
+            const Peak pk = calc_pws->getPeak(i);
 
-        // TODO:
+            V3D hkl = V3D(boost::math::iround(pk.getH()),
+                          boost::math::iround(pk.getK()),
+                          boost::math::iround(pk.getL()));
+            if (hkl == UNSET_HKL)
+                throw std::runtime_error("Found unindexed peak in input workspace!");
+
+            Peak calc_pk(calc_inst, pk.getDetectorID(), pk.getWavelength(), hkl, pk.getGoniometerMatrix());
+            Units::Wavelength wl;
+            wl.initialize(
+                calc_pk.getL1(),
+                calc_pk.getL2(),
+                calc_pk.getScattering(),
+                0,
+                calc_pk.getInitialEnergy(),
+                0.0);
+            // adding the TOF shift here
+            calc_pk.setWavelength(wl.singleFromTOF(pk.getTOF() + dT0));
+            // get the updated/calculated q vector in sample frame and set it to out
+            V3D calc_qv = calc_pk.getQSampleFrame();
+            for (int j = 0; j < 3; ++j)
+                out[i*3+j] = calc_qv[j];
+        }
     }
 
     /**
