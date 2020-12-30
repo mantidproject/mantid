@@ -70,9 +70,22 @@ public:
     xmlFilename /= boost::filesystem::unique_path("nullcase_%%%%%%%%.xml");
 
     generateSimulatedworkspace(wsname);
+    MatrixWorkspace_sptr ws =
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsname);
+    MatrixWorkspace_sptr wsraw = ws->clone();
+
     // trivial case, no component undergoes any affine transformation
     generateSimulatedPeaks(wsname, pwsname);
 
+    // we need to reset the instrument def for the peakworkspace as it
+    // already contains the correct answer, therefore the optimization
+    // will always return at 0.
+    // set the pws instrument to the one
+    PeaksWorkspace_sptr pws =
+      AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>(pwsname);
+    PeaksWorkspace_sptr pwsref = pws->clone();
+    // resetInstrument(pwsname);
+    pws->setInstrument(wsraw->getInstrument());
     // Perform the calibration
     alg.initialize();
     alg.setProperty("PeakWorkspace", pwsname);
@@ -91,11 +104,9 @@ public:
 
     TS_ASSERT(alg.isExecuted());
 
-    PeaksWorkspace_sptr pws =
-        AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>(pwsname);
-
     // Check if the calibration returns the same instrument as we put in
-    TS_ASSERT(CompareInstrument(pws, xmlFilename.string()));
+    g_log.notice() << "-- validate calibration output\n";
+    TS_ASSERT(CompareInstrument(pwsref, xmlFilename.string()));
   }
 
   /**
