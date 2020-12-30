@@ -32,78 +32,78 @@ namespace Crystal {
 */
 class MANTID_CRYSTAL_DLL SCDCalibratePanels2 : public Mantid::API::Algorithm{
 public:
-    /// Algorithm's name for identification
-    const std::string name() const override {
-        return "SCDCalibratePanels2";
-    }
+  /// Algorithm's name for identification
+  const std::string name() const override {
+    return "SCDCalibratePanels2";
+  }
 
-    /// Summary of algorithm's purpose
-    const std::string summary() const override {
+  /// Summary of algorithm's purpose
+  const std::string summary() const override {
     return "Panel parameters and L0 are optimized to "
            "minimize errors between theoretical and actual q values for the "
            "peaks";
-    }
+  }
 
-    /// Algorithm's version, overriding a virtual method
-    int version() const override {return 1;}
+  /// Algorithm's version, overriding a virtual method
+  int version() const override {return 1;}
 
-    /// Algorithm's category, overriding a virtual method
-    const std::string category() const override {
-        return "Crystal\\Corrections";
-    }
+  /// Algorithm's category, overriding a virtual method
+  const std::string category() const override {
+    return "Crystal\\Corrections";
+  }
 
-    /// Extra help info
-    const std::vector<std::string> seeAlso() const override {
-        return {"CalculateUMatrix"};
-    }
+  /// Extra help info
+  const std::vector<std::string> seeAlso() const override {
+    return {"CalculateUMatrix"};
+  }
 
 private:
-    /// Overwrites Algorithm method. Does nothing at present
-    void init() override;
+  /// Overwrites Algorithm method. Does nothing at present
+  void init() override;
 
-    /// Overwrites Algorithm method
-    void exec() override;
+  /// Overwrites Algorithm method
+  void exec() override;
 
-    /// Private validator for inputs
-    std::map<std::string, std::string> validateInputs() override;
+  /// Private validator for inputs
+  std::map<std::string, std::string> validateInputs() override;
 
-    /// Private function dedicated for parsing lattice constant
-    void parseLatticeConstant(std::shared_ptr<Mantid::DataObjects::PeaksWorkspace> pws);
+  /// Private function dedicated for parsing lattice constant
+  void parseLatticeConstant(std::shared_ptr<Mantid::DataObjects::PeaksWorkspace> pws);
 
-    /// Private function for getting names of banks to be calibrated
-    void getBankNames(std::shared_ptr<Mantid::DataObjects::PeaksWorkspace> pws);
+  /// Private function for getting names of banks to be calibrated
+  void getBankNames(std::shared_ptr<Mantid::DataObjects::PeaksWorkspace> pws);
 
-    /// Private function for calibrating T0
-    void optimizeT0(std::shared_ptr<Mantid::DataObjects::PeaksWorkspace> pws);
+  /// Private function for calibrating T0
+  void optimizeT0(std::shared_ptr<Mantid::DataObjects::PeaksWorkspace> pws);
 
-    /// Private function for calibrating L1
-    void optimizeL1(std::shared_ptr<Mantid::DataObjects::PeaksWorkspace> pws);
+  /// Private function for calibrating L1
+  void optimizeL1(std::shared_ptr<Mantid::DataObjects::PeaksWorkspace> pws);
 
-    /// Private function for calibrating banks
-    void optimizeBanks(std::shared_ptr<Mantid::DataObjects::PeaksWorkspace> pws);
+  /// Private function for calibrating banks
+  void optimizeBanks(std::shared_ptr<Mantid::DataObjects::PeaksWorkspace> pws);
 
-    /// Helper functions for adjusting components
-    void adjustComponent(double dx, double dy, double dz, double drotx,
-                         double droty, double drotz, std::string cmptName,
-                         DataObjects::PeaksWorkspace_sptr &pws);
+  /// Helper functions for adjusting components
+  void adjustComponent(double dx, double dy, double dz, double drotx,
+                       double droty, double drotz, std::string cmptName,
+                       DataObjects::PeaksWorkspace_sptr &pws);
 
-    /// Save to xml file for Mantid to load
-    void saveXmlFile(const std::string &FileName,
-                     boost::container::flat_set<std::string> &AllBankNames,
-                     std::shared_ptr<Geometry::Instrument> &instrument);
+  /// Save to xml file for Mantid to load
+  void saveXmlFile(const std::string &FileName,
+                   boost::container::flat_set<std::string> &AllBankNames,
+                   std::shared_ptr<Geometry::Instrument> &instrument);
 
-    /// Save to ISAW type det calibration output for backward compatiblity
-    void saveIsawDetCal(const std::string &filename,
-                        boost::container::flat_set<std::string> &AllBankName,
-                        std::shared_ptr<Geometry::Instrument> &instrument,
-                        double T0);
+  /// Save to ISAW type det calibration output for backward compatiblity
+  void saveIsawDetCal(const std::string &filename,
+                      boost::container::flat_set<std::string> &AllBankName,
+                      std::shared_ptr<Geometry::Instrument> &instrument,
+                      double T0);
 
-    /// unique vars for a given instance of calibration
-    double m_a, m_b, m_c, m_alpha, m_beta, m_gamma;
-    double m_T0 = 0.0;
-    double m_L1 = 2000.0;
-    boost::container::flat_set<std::string> m_BankNames;
-    const bool LOGCHILDALG{false};
+  /// unique vars for a given instance of calibration
+  double m_a, m_b, m_c, m_alpha, m_beta, m_gamma;
+  double m_T0 = 0.0;
+  double m_L1 = 2000.0;
+  boost::container::flat_set<std::string> m_BankNames;
+  const bool LOGCHILDALG{false};
 };
 
 } // namespace Crystal

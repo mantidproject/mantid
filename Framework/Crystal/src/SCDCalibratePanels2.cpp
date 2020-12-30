@@ -25,17 +25,17 @@
 namespace Mantid {
 namespace Crystal {
 
-    using namespace Mantid::API;
-    using namespace Mantid::DataObjects;
-    using namespace Mantid::Geometry;
-    using namespace Mantid::Kernel;
+  using namespace Mantid::API;
+  using namespace Mantid::DataObjects;
+  using namespace Mantid::Geometry;
+  using namespace Mantid::Kernel;
 
-    /// Config logger
-    namespace {
-    Logger logger("SCDCalibratePanels2");
-    }
+  /// Config logger
+  namespace {
+  Logger logger("SCDCalibratePanels2");
+  }
 
-    DECLARE_ALGORITHM(SCDCalibratePanels2)
+  DECLARE_ALGORITHM(SCDCalibratePanels2)
 
   /**
    * @brief Initialization
