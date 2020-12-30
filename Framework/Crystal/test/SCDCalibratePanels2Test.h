@@ -69,12 +69,16 @@ public:
     auto xmlFilename = boost::filesystem::temp_directory_path();
     xmlFilename /= boost::filesystem::unique_path("nullcase_%%%%%%%%.xml");
 
+    g_log.notice() << "-- generate simulated workspace\n";
     generateSimulatedworkspace(wsname);
     MatrixWorkspace_sptr ws =
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsname);
     MatrixWorkspace_sptr wsraw = ws->clone();
 
     // trivial case, no component undergoes any affine transformation
+    g_log.notice() << "-- trivial case, no components moved\n";
+
+    g_log.notice() << "-- generate peaks\n";
     generateSimulatedPeaks(wsname, pwsname);
 
     // we need to reset the instrument def for the peakworkspace as it
@@ -84,9 +88,13 @@ public:
     PeaksWorkspace_sptr pws =
       AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>(pwsname);
     PeaksWorkspace_sptr pwsref = pws->clone();
+
+    g_log.notice() << "-- reset instrument in peaks workspace to remove the answer\n";
     // resetInstrument(pwsname);
     pws->setInstrument(wsraw->getInstrument());
+
     // Perform the calibration
+    g_log.notice() << "-- start calibration\n";
     alg.initialize();
     alg.setProperty("PeakWorkspace", pwsname);
     alg.setProperty("a", silicon_a);
@@ -101,7 +109,6 @@ public:
     alg.setProperty("DetCalFilename", isawFilename.string());
     alg.setProperty("XmlFilename", xmlFilename.string());
     alg.execute();
-
     TS_ASSERT(alg.isExecuted());
 
     // Check if the calibration returns the same instrument as we put in
@@ -273,6 +280,7 @@ private:
     IAlgorithm_sptr csws_alg = 
       AlgorithmFactory::Instance().create("CreateSimulationWorkspace", 1);
     csws_alg->initialize();
+    csws_alg->setLogging(false);
     csws_alg->setProperty("Instrument", "CORELLI");
     csws_alg->setProperty("BinParams", "1,100,10000");
     csws_alg->setProperty("UnitX", "TOF");
@@ -287,6 +295,7 @@ private:
     IAlgorithm_sptr sub_alg = 
       AlgorithmFactory::Instance().create("SetUB", 1);
     sub_alg->initialize();
+    sub_alg->setLogging(false);
     sub_alg->setProperty("Workspace", WSName);
     sub_alg->setProperty("u", "1,0,0");
     sub_alg->setProperty("v", "0,1,0");
@@ -431,12 +440,14 @@ private:
 
       // set the SetGoniometer
       sg_alg->initialize();
+      sg_alg->setLogging(false);
       sg_alg->setProperty("Workspace", WSName);
       sg_alg->setProperty("Axis0", os.str());
       sg_alg->execute();
 
       // predict peak positions
       pp_alg->initialize();
+      pp_alg->setLogging(false);
       pp_alg->setProperty("InputWorkspace", WSName);
       pp_alg->setProperty("WavelengthMin", wavelength_min);
       pp_alg->setProperty("wavelengthMax", wavelength_max);
@@ -453,6 +464,7 @@ private:
 
         // add the peaks to output peaks workspace
         cpw_alg->initialize();
+        cpw_alg->setLogging(false);
         cpw_alg->setProperty("LHSWorkspace", tmpPWSName);
         cpw_alg->setProperty("RHSWorkspace", PWSName);
         cpw_alg->setProperty("OutputWorkspace", PWSName);
@@ -540,4 +552,5 @@ private:
              (std::abs(r1[1] - r2[1]) < TOLERANCE_R) &&
              (std::abs(r1[2] - r2[2]) < TOLERANCE_R);
   }
+
 };
