@@ -90,7 +90,6 @@ public:
     PeaksWorkspace_sptr pwsref = pws->clone();
 
     g_log.notice() << "-- reset instrument in peaks workspace to remove the answer\n";
-    // resetInstrument(pwsname);
     pws->setInstrument(wsraw->getInstrument());
 
     // Perform the calibration
@@ -131,18 +130,53 @@ public:
     const std::string wsname("ws_changeL1");
     const std::string pwsname("pws_changeL1");
     const double dL1 = boost::math::constants::e<double>();
+    auto isawFilename = boost::filesystem::temp_directory_path();
+    isawFilename /= boost::filesystem::unique_path("changeL1_%%%%%%%%.DetCal");
+    auto xmlFilename = boost::filesystem::temp_directory_path();
+    xmlFilename /= boost::filesystem::unique_path("changeL1_%%%%%%%%.xml");
 
     // prepare a workspace
+    g_log.notice() << "-- generate simulated workspace\n";
     generateSimulatedworkspace(wsname);
+    MatrixWorkspace_sptr ws =
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsname);
+    MatrixWorkspace_sptr wsraw = ws->clone();
 
     // move moderator along z by dL1
+    g_log.notice() << "--move moderator/source by " << dL1 << "\n";
     moveModerator(wsname, dL1);
 
     // generate the peak workspace from shifted configuration
+    g_log.notice() << "-- generate peaks\n";
     generateSimulatedPeaks(wsname, pwsname);
+    PeaksWorkspace_sptr pws =
+      AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>(pwsname);
+    PeaksWorkspace_sptr pwsref = pws->clone();
 
-    //TODO: run the calibration and check if we can backout the
-    //      the correct L1
+    g_log.notice() << "-- reset instrument in peaks workspace to remove the answer\n";
+    pws->setInstrument(wsraw->getInstrument());
+
+    // Perform the calibration
+    g_log.notice() << "-- start calibration\n";
+    alg.initialize();
+    alg.setProperty("PeakWorkspace", pwsname);
+    alg.setProperty("a", silicon_a);
+    alg.setProperty("b", silicon_b);
+    alg.setProperty("c", silicon_c);
+    alg.setProperty("alpha", silicon_alpha);
+    alg.setProperty("beta", silicon_beta);
+    alg.setProperty("gamma", silicon_gamma);
+    alg.setProperty("CalibrateT0", false);
+    alg.setProperty("CalibrateL1", true);
+    alg.setProperty("CalibrateBanks", true);
+    alg.setProperty("DetCalFilename", isawFilename.string());
+    alg.setProperty("XmlFilename", xmlFilename.string());
+    alg.execute();
+    TS_ASSERT(alg.isExecuted());
+
+    // Check if the calibration returns the same instrument as we put in
+    g_log.notice() << "-- validate calibration output\n";
+    TS_ASSERT(CompareInstrument(pwsref, xmlFilename.string()));
   }
 
   /**
@@ -328,6 +362,7 @@ private:
     IAlgorithm_sptr mv_alg = 
       AlgorithmFactory::Instance().create("MoveInstrumentComponent", 1);
     mv_alg->initialize();
+    mv_alg->setLogging(false);
     mv_alg->setProperty("Workspace", WSName);
     mv_alg->setProperty("ComponentName", "moderator");
     mv_alg->setProperty("X", 0.0);
@@ -354,6 +389,7 @@ private:
     IAlgorithm_sptr mv_alg = 
       AlgorithmFactory::Instance().create("MoveInstrumentComponent", 1);
     mv_alg->initialize();
+    mv_alg->setLogging(false);
     mv_alg->setProperty("Workspace", WSName);
     mv_alg->setProperty("ComponentName", BankName);
     mv_alg->setProperty("X", deltaX);
@@ -383,6 +419,7 @@ private:
     IAlgorithm_sptr rot_alg = 
       AlgorithmFactory::Instance().create("RotateInstrumentComponent", 1);
     rot_alg->initialize();
+    rot_alg->setLogging(false);
     rot_alg->setProperty("Workspace", WSName);
     rot_alg->setProperty("ComponentName", BankName);
 
@@ -515,11 +552,18 @@ private:
       std::const_pointer_cast<Instrument>(pws->getInstrument());  // reference one
 
     for (auto bankname : BankNames) {
-      if (!compareBank(inst1, inst2, bankname))
+      if (!compareBank(inst1, inst2, bankname)) {
+        g_log.error() << "--" << bankname << " mismatch\n";
         return false;
+      }
     }
 
-    // all banks are the same, mark it as the same
+    // all banks are the same, now the source check will make the call
+    if (!compareBank(inst1, inst2, inst1->getSource()->getName())) {
+      g_log.error() << "-- " << inst1->getSource()->getName() << " mismatch\n";
+      return false;
+    }
+
     return true;
   }
 
