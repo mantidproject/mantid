@@ -38,8 +38,8 @@ private:
     /// temp workspace holder
     mutable std::shared_ptr<API::Workspace> m_ws;
     mutable std::string m_cmpt;
-    const bool LOGCHILDALG {false};
-    const V3D UNSET_HKL{0,0,0};
+    const bool LOGCHILDALG{false};
+    const Kernel::V3D UNSET_HKL{0, 0, 0};
 
     /// helper functions
     void moveInstruentComponentBy(

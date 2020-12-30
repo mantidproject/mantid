@@ -85,7 +85,7 @@ private:
     /// Helper functions for adjusting components
     void adjustComponent(double dx, double dy, double dz, double drotx,
                          double droty, double drotz, std::string cmptName,
-                         PeaksWorkspace_sptr &pws);
+                         DataObjects::PeaksWorkspace_sptr &pws);
 
     /// Save to xml file for Mantid to load
     void saveXmlFile(const std::string &FileName,
