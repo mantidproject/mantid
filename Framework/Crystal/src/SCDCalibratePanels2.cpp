@@ -5,19 +5,19 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 
+#include "MantidCrystal/SCDCalibratePanels2.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/Sample.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidCrystal/SCDCalibratePanels2ObjFunc.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/Logger.h"
-#include "MantidCrystal/SCDCalibratePanels2.h"
-
 #include <boost/container/flat_set.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>

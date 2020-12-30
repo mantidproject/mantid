@@ -44,6 +44,7 @@ namespace Crystal {
         declareParameter("droty", 0.0, "relative rotation around Y");
         declareParameter("drotz", 0.0, "relative rotation around Z");
         declareParameter("dT0", 0.0, "delta of TOF");
+
         // attributes
         declareAttribute("Workspace", Attribute(""));
         declareAttribute("ComponentName", Attribute(""));

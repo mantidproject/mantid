@@ -580,21 +580,24 @@ private:
     std::shared_ptr<Instrument> &instr1,
     std::shared_ptr<Instrument> &instr2,
     std::string bn) {
-      std::shared_ptr<const IComponent> bnk1 = instr1->getComponentByName(bn);
-      std::shared_ptr<const IComponent> bnk2 = instr2->getComponentByName(bn);
-      V3D p1 = bnk1->getRelativePos();
-      V3D p2 = bnk2->getRelativePos();
-      Quat q1 = bnk1->getRelativeRot();
-      Quat q2 = bnk2->getRelativeRot();
-      std::vector<double> r1 = q1.getEulerAngles("XYZ");
-      std::vector<double> r2 = q2.getEulerAngles("XYZ");
 
-      return (std::abs(p1.X() - p2.X()) < TOLERANCE_L) &&
-             (std::abs(p1.Y() - p2.Y()) < TOLERANCE_L) &&
-             (std::abs(p1.Z() - p2.Z()) < TOLERANCE_L) &&
-             (std::abs(r1[0] - r2[0]) < TOLERANCE_R) &&
-             (std::abs(r1[1] - r2[1]) < TOLERANCE_R) &&
-             (std::abs(r1[2] - r2[2]) < TOLERANCE_R);
+    std::shared_ptr<const IComponent> bnk1 = instr1->getComponentByName(bn);
+    std::shared_ptr<const IComponent> bnk2 = instr2->getComponentByName(bn);
+
+    V3D p1 = bnk1->getRelativePos();
+    V3D p2 = bnk2->getRelativePos();
+
+    Quat q1 = bnk1->getRelativeRot();
+    Quat q2 = bnk2->getRelativeRot();
+    std::vector<double> r1 = q1.getEulerAngles("XYZ");
+    std::vector<double> r2 = q2.getEulerAngles("XYZ");
+
+    return (std::abs(p1.X() - p2.X()) < TOLERANCE_L) &&
+            (std::abs(p1.Y() - p2.Y()) < TOLERANCE_L) &&
+            (std::abs(p1.Z() - p2.Z()) < TOLERANCE_L) &&
+            (std::abs(r1[0] - r2[0]) < TOLERANCE_R) &&
+            (std::abs(r1[1] - r2[1]) < TOLERANCE_R) &&
+            (std::abs(r1[2] - r2[2]) < TOLERANCE_R);
   }
 
 };

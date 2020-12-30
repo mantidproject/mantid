@@ -92,9 +92,8 @@ private:
                         boost::container::flat_set<std::string> &AllBankName,
                         std::shared_ptr<Geometry::Instrument> &instrument,
                         double T0);
-    
+
     /// unique vars for a given instance of calibration
-    // PeaksWorkspace_sptr m_pws;
     double m_a, m_b, m_c, m_alpha, m_beta, m_gamma;
     double m_T0 = 0.0;
     double m_L1 = 2000.0;
