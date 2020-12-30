@@ -32,9 +32,9 @@ namespace Crystal {
 
     DECLARE_FUNCTION(SCDCalibratePanels2ObjFunc)
 
-    // --------------------------
-    // ----- Core functions -----
-    // --------------------------
+    /// ---------------///
+    /// Core functions ///
+    /// ---------------///
     SCDCalibratePanels2ObjFunc::SCDCalibratePanels2ObjFunc() {
         // parameters
         declareParameter("dx", 0.0, "relative shift along X");
@@ -152,9 +152,9 @@ namespace Crystal {
     }
 
 
-    // ------------------
-    // ----- Helper -----
-    // ------------------
+    // -------///
+    // Helper ///
+    // -------///
 
     /**
      * @brief Translate the component of given workspace by delta_(x, y, z)

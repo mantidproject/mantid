@@ -241,7 +241,7 @@ namespace Crystal {
             m_alpha == EMPTY_DBL() ||
             m_beta == EMPTY_DBL() ||
             m_gamma == EMPTY_DBL()) &&
-           (pws->sample().hasOrientedLattice())){
+           (pws->sample().hasOrientedLattice())) {
             OrientedLattice lattice = pws->mutableSample().getOrientedLattice();
             m_a = lattice.a();
             m_b = lattice.b();
