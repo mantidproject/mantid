@@ -82,6 +82,11 @@ private:
     /// Private function for calibrating banks
     void optimizeBanks(std::shared_ptr<Mantid::DataObjects::PeaksWorkspace> pws);
 
+    /// Helper functions for adjusting components
+    void adjustComponent(double dx, double dy, double dz, double drotx,
+                         double droty, double drotz, std::string cmptName,
+                         PeaksWorkspace_sptr &pws);
+
     /// Save to xml file for Mantid to load
     void saveXmlFile(const std::string &FileName,
                      boost::container::flat_set<std::string> &AllBankNames,
@@ -98,6 +103,7 @@ private:
     double m_T0 = 0.0;
     double m_L1 = 2000.0;
     boost::container::flat_set<std::string> m_BankNames;
+    const bool LOGCHILDALG{false};
 };
 
 } // namespace Crystal
