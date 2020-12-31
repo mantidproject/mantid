@@ -105,8 +105,7 @@ public:
 
     // Perform the calibration
     g_log.notice() << "-- start calibration\n";
-    g_log.notice() << "   starting L1 is "
-                   << pws->getInstrument()->getSource()->getPos().Z() << "\n";
+
     SCDCalibratePanels2 alg;
     alg.initialize();
     alg.setProperty("PeakWorkspace", pwsname);
@@ -168,7 +167,11 @@ public:
     PeaksWorkspace_sptr pwsref = pws->clone();
 
     g_log.notice() << "-- reset instrument in peaks workspace to remove the answer\n";
+    g_log.notice() << "    * before reset L1 = "
+                   << pws->getInstrument()->getSource()->getPos().Z() << "\n";
     pws->setInstrument(wsraw->getInstrument());
+    g_log.notice() << "    * after reset L1 = "
+                   << pws->getInstrument()->getSource()->getPos().Z() << "\n";
 
     // Perform the calibration
     g_log.notice() << "-- start calibration\n";
