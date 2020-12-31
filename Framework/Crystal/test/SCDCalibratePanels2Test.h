@@ -205,23 +205,81 @@ public:
     g_log.notice() << "testSinglePanelMoved() start\n";
 
     SCDCalibratePanels2 alg;
-    const std::string wsname("ws_moveBank");
-    const std::string pwsname("pws_moveBank");
-    const double dx = boost::math::constants::euler<double>();
-    const double dy = boost::math::constants::ln_ln_two<double>();
-    const double dz = boost::math::constants::pi_minus_three<double>();
+    std::string wsname("ws_moveBank");
+    std::string pwsname("pws_moveBank");
+    double dx = boost::math::constants::euler<double>();
+    double dy = boost::math::constants::ln_ln_two<double>();
+    double dz = boost::math::constants::pi_minus_three<double>();
+    auto isawFilename = boost::filesystem::temp_directory_path();
+    isawFilename /= boost::filesystem::unique_path("changeL1_%%%%%%%%.DetCal");
+    auto xmlFilename = boost::filesystem::temp_directory_path();
+    xmlFilename /= boost::filesystem::unique_path("changeL1_%%%%%%%%.xml");
 
-    // prepare a workspace 
+    // prepare a workspace
+    g_log.notice() << "-- generate simulated workspace\n";
     generateSimulatedworkspace(wsname);
+    MatrixWorkspace_sptr ws =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsname);
+    MatrixWorkspace_sptr wsraw = ws->clone();
 
     // move x center bank
+    g_log.notice() << "-- move bank12 (x center) by (" << dx << "," << dy << ","
+                   << dz << ")\n";
     moveBank(wsname, bank_xcenter, dx, dy, dz);
 
     // generate the peak workspace from shifted configuration
+    g_log.notice() << "-- generate peaks\n";
     generateSimulatedPeaks(wsname, pwsname);
+    PeaksWorkspace_sptr pws =
+        AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>(pwsname);
+    PeaksWorkspace_sptr pwsref = pws->clone();
 
-    //TODO: run the calibration and check if we can dv back
+    g_log.notice() << "-- Current source at "
+                   << pws->getInstrument()->getSource()->getPos().Z() << "\n";
 
+    g_log.notice()
+        << "-- reset instrument in peaks workspace to remove the answer\n";
+    g_log.notice()
+        << "    * before reset bank12 is at: ("
+        << pws->getInstrument()->getComponentByName(bank_xcenter)->getPos().X()
+        << ","
+        << pws->getInstrument()->getComponentByName(bank_xcenter)->getPos().Y()
+        << ","
+        << pws->getInstrument()->getComponentByName(bank_xcenter)->getPos().Z()
+        << ")\n";
+    pws->setInstrument(wsraw->getInstrument());
+    g_log.notice()
+        << "    * after reset bank12 is at: ("
+        << pws->getInstrument()->getComponentByName(bank_xcenter)->getPos().X()
+        << ","
+        << pws->getInstrument()->getComponentByName(bank_xcenter)->getPos().Y()
+        << ","
+        << pws->getInstrument()->getComponentByName(bank_xcenter)->getPos().Z()
+        << ")\n";
+
+    // Perform the calibration
+    g_log.notice() << "-- start calibration\n";
+    alg.initialize();
+    alg.setProperty("PeakWorkspace", pws);
+    alg.setProperty("a", silicon_a);
+    alg.setProperty("b", silicon_b);
+    alg.setProperty("c", silicon_c);
+    alg.setProperty("alpha", silicon_alpha);
+    alg.setProperty("beta", silicon_beta);
+    alg.setProperty("gamma", silicon_gamma);
+    alg.setProperty("CalibrateT0", false);
+    alg.setProperty("CalibrateL1", true);
+    alg.setProperty("CalibrateBanks", true);
+    alg.setProperty("DetCalFilename", isawFilename.string());
+    alg.setProperty("XmlFilename", xmlFilename.string());
+    alg.execute();
+    TS_ASSERT(alg.isExecuted());
+
+    // Check if the calibration returns the same instrument as we put in
+    g_log.notice() << "-- validate calibration output\n";
+    TS_ASSERT(CompareInstrument(pwsref, xmlFilename.string()));
+
+    TS_ASSERT(false);
   }
 
   /**

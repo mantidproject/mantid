@@ -207,6 +207,8 @@ namespace Crystal {
    * @param pws 
    */
   void SCDCalibratePanels2::optimizeL1(std::shared_ptr<PeaksWorkspace> pws){
+    // cache starting L1 position
+    double original_L1 = -pws->getInstrument()->getSource()->getPos().Z();
     int npks = pws->getNumberPeaks();
     MatrixWorkspace_sptr l1ws = std::dynamic_pointer_cast<MatrixWorkspace>(
         WorkspaceFactory::Instance().create(
@@ -256,10 +258,10 @@ namespace Crystal {
 
     //-- log
     g_log.notice() << "-- Fit L1 rst:\n"
-                   << "    dL1\t= " << dL1_optimized << " \n"
-                   << "    L1\t= "
+                   << "    dL1: " << dL1_optimized << " \n"
+                   << "    L1 " << original_L1 << " -> "
                    << -pws->getInstrument()->getSource()->getPos().Z() << " \n"
-                   << "    chi2/DOF\t= " << chi2OverDOF << "\n";
+                   << "    chi2/DOF = " << chi2OverDOF << "\n";
   }
 
   /**
