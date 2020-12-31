@@ -61,7 +61,18 @@ public:
   void testNullCase(){
     g_log.notice() << "testNullCase() Start \n";
 
-    SCDCalibratePanels2 alg;
+    // NOTE:
+    //  The MAGIC PIECE, basically we need to let AlgorithmFactory
+    //  to load a non-related algorithm, then somehow it can find
+    //  the Fit algorithm now
+    std::shared_ptr<Algorithm> darkmagic =
+        AlgorithmFactory::Instance().create("LoadIsawPeaks", 1);
+    darkmagic->initialize();
+    darkmagic->setPropertyValue("Filename", "Peaks5637.integrate");
+    darkmagic->setPropertyValue("OutputWorkspace", "TOPAZ_5637");
+    TS_ASSERT(darkmagic->execute());
+
+    // SCDCalibratePanels2 alg;
     const std::string wsname("ws_nullcase");
     const std::string pwsname("pws_nullcase");
     auto isawFilename = boost::filesystem::temp_directory_path();
@@ -94,6 +105,9 @@ public:
 
     // Perform the calibration
     g_log.notice() << "-- start calibration\n";
+    g_log.notice() << "   starting L1 is "
+                   << pws->getInstrument()->getSource()->getPos().Z() << "\n";
+    SCDCalibratePanels2 alg;
     alg.initialize();
     alg.setProperty("PeakWorkspace", pwsname);
     alg.setProperty("a", silicon_a);
