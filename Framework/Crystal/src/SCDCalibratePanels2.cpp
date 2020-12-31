@@ -8,8 +8,10 @@
 #include "MantidCrystal/SCDCalibratePanels2.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/ConstraintFactory.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidCrystal/SCDCalibratePanels2ObjFunc.h"
@@ -205,7 +207,59 @@ namespace Crystal {
    * @param pws 
    */
   void SCDCalibratePanels2::optimizeL1(std::shared_ptr<PeaksWorkspace> pws){
+    int npks = pws->getNumberPeaks();
+    MatrixWorkspace_sptr l1ws = std::dynamic_pointer_cast<MatrixWorkspace>(
+        WorkspaceFactory::Instance().create(
+            "Workspace2D", // use workspace 2D to mock a histogram
+            1,             // one vector
+            3 * npks,      // X :: anything is fine
+            3 * npks));    // Y :: flattened Q vector
 
+    auto &measured = l1ws->getSpectrum(0);
+    auto &xv = measured.mutableX();
+    auto &yv = measured.mutableY();
+    auto &ev = measured.mutableE();
+
+    for (int i = 0; i < npks; ++i) {
+      const Peak &pk = pws->getPeak(i);
+      V3D qv = pk.getQSampleFrame();
+      for (int j = 0; j < 3; ++j) {
+        xv[i * 3 + j] = i * 3 + j;
+        yv[i * 3 + j] = qv[j];
+        ev[i * 3 + j] = 1;
+      }
+    }
+
+    // fit algorithm for the optimization of L1
+    IAlgorithm_sptr fitL1_alg = createChildAlgorithm("Fit", -1, -1, false);
+    //-- obj func def
+    std::ostringstream fun_str;
+    fun_str << "name=SCDCalibratePanels2ObjFunc,Workspace=" << pws->getName()
+            << ",ComponentName=moderator";
+    //-- bounds&constraints def
+    std::ostringstream tie_str;
+    tie_str << "dx=0.0,dy=0.0,drotx=0.0,droty=0.0,drotz=0.0,dT0=" << m_T0;
+    //-- set and go
+    fitL1_alg->setPropertyValue("Function", fun_str.str());
+    fitL1_alg->setProperty("Ties", tie_str.str());
+    fitL1_alg->setProperty("InputWorkspace", l1ws);
+    fitL1_alg->setProperty("CreateOutput", true);
+    fitL1_alg->setProperty("Output", "fit");
+    fitL1_alg->executeAsChildAlg();
+    //-- parse output
+    std::string status = fitL1_alg->getProperty("OutputStatus");
+    double chi2OverDOF = fitL1_alg->getProperty("OutputChi2overDoF");
+    ITableWorkspace_sptr rst = fitL1_alg->getProperty("OutputParameters");
+    double dL1_optimized = rst->getRef<double>("Value", 2);
+    adjustComponent(0, 0, dL1_optimized, 0, 0, 0,
+                    pws->getInstrument()->getSource()->getName(), pws);
+
+    //-- log
+    g_log.notice() << "-- Fit L1 rst:\n"
+                   << "    dL1\t= " << dL1_optimized << " \n"
+                   << "    L1\t= "
+                   << -pws->getInstrument()->getSource()->getPos().Z() << " \n"
+                   << "    chi2/DOF\t= " << chi2OverDOF << "\n";
   }
 
   /**
@@ -458,45 +512,45 @@ namespace Crystal {
     boost::property_tree::write_xml(
         FileName, root, std::locale(),
         boost::property_tree::xml_writer_settings<std::string>(' ', 2));
-    }
+  }
 
-    /**
-     * Really this is the operator SaveIsawDetCal but only the results of the given
-     * banks are saved.  L1 and T0 are also saved.
-     *
-     * @param filename     -The name of the DetCal file to save the results to
-     * @param AllBankName  -the set of the NewInstrument names of the banks(panels)
-     * @param instrument   -The instrument with the correct panel geometries
-     *                      and initial path length
-     * @param T0           -The time offset from the DetCal file
-     */
-    void SCDCalibratePanels2::saveIsawDetCal(
-      const std::string &filename,
-      boost::container::flat_set<std::string> &AllBankName,
-      std::shared_ptr<Instrument> &instrument,
-      double T0) {
-      g_log.notice() << "Saving DetCal file in " << filename << "\n";
+  /**
+   * Really this is the operator SaveIsawDetCal but only the results of the given
+   * banks are saved.  L1 and T0 are also saved.
+   *
+   * @param filename     -The name of the DetCal file to save the results to
+   * @param AllBankName  -the set of the NewInstrument names of the banks(panels)
+   * @param instrument   -The instrument with the correct panel geometries
+   *                      and initial path length
+   * @param T0           -The time offset from the DetCal file
+   */
+  void SCDCalibratePanels2::saveIsawDetCal(
+    const std::string &filename,
+    boost::container::flat_set<std::string> &AllBankName,
+    std::shared_ptr<Instrument> &instrument,
+    double T0) {
+    g_log.notice() << "Saving DetCal file in " << filename << "\n";
 
-      // create a workspace to pass to SaveIsawDetCal
-      const size_t number_spectra = instrument->getNumberDetectors();
-      Workspace2D_sptr wksp =
-          std::dynamic_pointer_cast<Workspace2D>(
-              WorkspaceFactory::Instance().create("Workspace2D", number_spectra, 2,
-                                                  1));
-      wksp->setInstrument(instrument);
-      wksp->rebuildSpectraMapping(true /* include monitors */);
+    // create a workspace to pass to SaveIsawDetCal
+    const size_t number_spectra = instrument->getNumberDetectors();
+    Workspace2D_sptr wksp =
+        std::dynamic_pointer_cast<Workspace2D>(
+            WorkspaceFactory::Instance().create("Workspace2D", number_spectra, 2,
+                                                1));
+    wksp->setInstrument(instrument);
+    wksp->rebuildSpectraMapping(true /* include monitors */);
 
-      // convert the bank names into a vector
-      std::vector<std::string> banknames(AllBankName.begin(), AllBankName.end());
+    // convert the bank names into a vector
+    std::vector<std::string> banknames(AllBankName.begin(), AllBankName.end());
 
-      // call SaveIsawDetCal
-      API::IAlgorithm_sptr alg = createChildAlgorithm("SaveIsawDetCal");
-      alg->setProperty("InputWorkspace", wksp);
-      alg->setProperty("Filename", filename);
-      alg->setProperty("TimeOffset", T0);
-      alg->setProperty("BankNames", banknames);
-      alg->executeAsChildAlg();
-    }
+    // call SaveIsawDetCal
+    API::IAlgorithm_sptr alg = createChildAlgorithm("SaveIsawDetCal");
+    alg->setProperty("InputWorkspace", wksp);
+    alg->setProperty("Filename", filename);
+    alg->setProperty("TimeOffset", T0);
+    alg->setProperty("BankNames", banknames);
+    alg->executeAsChildAlg();
+  }
 
 } // namespace Crystal
 } // namespace Mantid

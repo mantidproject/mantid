@@ -143,7 +143,7 @@ public:
     MatrixWorkspace_sptr wsraw = ws->clone();
 
     // move moderator along z by dL1
-    g_log.notice() << "--move moderator/source by " << dL1 << "\n";
+    g_log.notice() << "-- move moderator/source by " << dL1 << "\n";
     moveModerator(wsname, dL1);
 
     // generate the peak workspace from shifted configuration
