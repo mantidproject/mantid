@@ -83,7 +83,7 @@ public:
    * @brief test name
    *
    */
-  void testName() {
+  void test_Name() {
     SCDCalibratePanels2 alg;
     TS_ASSERT_EQUALS(alg.name(), "SCDCalibratePanels2");
   }
@@ -92,7 +92,7 @@ public:
    * @brief test init
    *
    */
-  void testInit(){
+  void test_Init() {
     SCDCalibratePanels2 alg;
     alg.initialize();
     TS_ASSERT(alg.isInitialized());
@@ -104,7 +104,7 @@ public:
    *        vector.
    */
   void test_Null_Case() {
-    g_log.notice() << "testNullCase() Start \n";
+    g_log.notice() << "test: !Null case!\n";
 
     // Generate unique temp files
     auto isawFile = boost::filesystem::temp_directory_path();
@@ -139,76 +139,67 @@ public:
     doCleanup();
   }
 
-  // /**
-  //  * @brief Single variant case where only global var is adjusted.
-  //  *
-  //  * NOTE: technically we should also check T0, but the client, CORELLI
-  //  *       team does not seem to care about using T0, therefore we are
-  //  *       not implmenting T0 calibration here.
-  //  *
-  //  */
-  // void testGlobalShiftOnly(){
-  //   g_log.notice() << "testGlobalShiftOnly() start \n";
+  /**
+   * @brief Single variant case where only global var is adjusted.
+   *
+   * NOTE: technically we should also check T0, but the client, CORELLI
+   *       team does not seem to care about using T0, therefore we are
+   *       not implmenting T0 calibration here.
+   *
+   */
+  void test_L1_Shift() {
+    g_log.notice() << "test: !Source Shift (L1 change)!\n";
 
-  //   SCDCalibratePanels2 alg;
-  //   const std::string wsname("ws_changeL1");
-  //   const std::string pwsname("pws_changeL1");
-  //   const double dL1 = boost::math::constants::e<double>();
-  //   auto isawFilename = boost::filesystem::temp_directory_path();
-  //   isawFilename /=
-  //   boost::filesystem::unique_path("changeL1_%%%%%%%%.DetCal"); auto
-  //   xmlFilename = boost::filesystem::temp_directory_path(); xmlFilename /=
-  //   boost::filesystem::unique_path("changeL1_%%%%%%%%.xml");
+    // prescribed shift
+    const double dL1 = boost::math::constants::e<double>();
 
-  //   // prepare a workspace
-  //   g_log.notice() << "-- generate simulated workspace\n";
-  //   generateSimulatedworkspace(wsname);
-  //   MatrixWorkspace_sptr ws =
-  //     AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsname);
-  //   MatrixWorkspace_sptr wsraw = ws->clone();
+    // Generate unique temp files
+    auto isawFile = boost::filesystem::temp_directory_path();
+    isawFile /= boost::filesystem::unique_path("changeL1_%%%%%%%%.DetCal");
+    auto xmlFile = boost::filesystem::temp_directory_path();
+    xmlFile /= boost::filesystem::unique_path("changeL1_%%%%%%%%.xml");
 
-  //   // move moderator along z by dL1
-  //   g_log.notice() << "-- move moderator/source by " << dL1 << "\n";
-  //   moveModerator(wsname, dL1);
+    g_log.notice() << "-- generate simulated workspace\n";
+    MatrixWorkspace_sptr ws = generateSimulatedWorkspace();
+    MatrixWorkspace_sptr wsraw = ws->clone();
 
-  //   // generate the peak workspace from shifted configuration
-  //   g_log.notice() << "-- generate peaks\n";
-  //   generateSimulatedPeaks(wsname, pwsname);
-  //   PeaksWorkspace_sptr pws =
-  //     AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>(pwsname);
-  //   PeaksWorkspace_sptr pwsref = pws->clone();
+    // move source
+    adjustComponent(0.0, 0.0, dL1, 0.0, 0.0, 0.0,
+                    ws->getInstrument()->getSource()->getName());
 
-  //   g_log.notice() << "-- reset instrument in peaks workspace to remove the
-  //   answer\n"; g_log.notice() << "    * before reset L1 = "
-  //                  << pws->getInstrument()->getSource()->getPos().Z() <<
-  //                  "\n";
-  //   pws->setInstrument(wsraw->getInstrument());
-  //   g_log.notice() << "    * after reset L1 = "
-  //                  << pws->getInstrument()->getSource()->getPos().Z() <<
-  //                  "\n";
+    g_log.notice() << "-- generate peaks\n";
+    PeaksWorkspace_sptr pws = generateSimulatedPeaksWorkspace();
+    PeaksWorkspace_sptr pwsref = pws->clone();
 
-  //   // Perform the calibration
-  //   g_log.notice() << "-- start calibration\n";
-  //   alg.initialize();
-  //   alg.setProperty("PeakWorkspace", pwsname);
-  //   alg.setProperty("a", silicon_a);
-  //   alg.setProperty("b", silicon_b);
-  //   alg.setProperty("c", silicon_c);
-  //   alg.setProperty("alpha", silicon_alpha);
-  //   alg.setProperty("beta", silicon_beta);
-  //   alg.setProperty("gamma", silicon_gamma);
-  //   alg.setProperty("CalibrateT0", false);
-  //   alg.setProperty("CalibrateL1", true);
-  //   alg.setProperty("CalibrateBanks", true);
-  //   alg.setProperty("DetCalFilename", isawFilename.string());
-  //   alg.setProperty("XmlFilename", xmlFilename.string());
-  //   alg.execute();
-  //   TS_ASSERT(alg.isExecuted());
+    // Pretend we don't know the answer
+    g_log.notice() << "-- reset instrument positions&orientations\n";
+    g_log.notice() << "    * before reset L1 = "
+                   << pws->getInstrument()->getSource()->getPos().Z() << "\n";
+    pws->setInstrument(wsraw->getInstrument());
+    g_log.notice() << "    * after reset L1 = "
+                   << pws->getInstrument()->getSource()->getPos().Z() << "\n";
 
-  //   // Check if the calibration returns the same instrument as we put in
-  //   g_log.notice() << "-- validate calibration output\n";
-  //   TS_ASSERT(CompareInstrument(pwsref, xmlFilename.string()));
-  // }
+    // Perform the calibration
+    g_log.notice() << "-- start calibration\n";
+    runCalibration(isawFile.string(), xmlFile.string());
+
+    // Check if the calibration returns the same instrument as we put in
+    g_log.notice() << "-- validate calibration output\n";
+    TS_ASSERT(validateCalibrationResults(pwsref, wsraw, xmlFile.string()));
+
+    // Cleanup
+    doCleanup();
+  }
+
+  void test_Single_Panel_Shift() {}
+
+  void test_Single_Panel_Rotate() {}
+
+  void test_Single_Panel_Move() {}
+
+  void test_Duo_Panels_Move() {}
+
+  void test_Exec() {}
 
   // /**
   //  * @brief Move a single bank in the high order zone to see if the
@@ -338,30 +329,6 @@ public:
 
   // }
 
-  // /**
-  //  * @brief Test using case with all seven banks twiddled plus
-  //  *        the moderator shifted
-  //  *
-  //  */
-  // void testExec(){
-  //   g_log.notice() << "testExec() start\n";
-
-  //   SCDCalibratePanels2 alg;
-  //   const std::string wsname("ws_moveAll");
-  //   const std::string pwsname("pws_moveAll");
-
-  //   // prepare a workspace
-  //   generateSimulatedworkspace(wsname);
-
-  //   // specify the movement of banks
-
-  //   // generate the peak workspace from shifted configuration
-  //   generateSimulatedPeaks(wsname, pwsname);
-
-  //   // TODO: run through calibrator and validate
-
-  // }
-
 private:
   // ---------------------------- //
   // ----- Helper Functions ----- //
@@ -463,6 +430,59 @@ private:
       }
     }
     return AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>(pwsname);
+  }
+
+  void adjustComponent(double dx, double dy, double dz, double drotx,
+                       double droty, double drotz, std::string cmptName) {
+    // translation
+    IAlgorithm_sptr mv_alg = Mantid::API::AlgorithmFactory::Instance().create(
+        "MoveInstrumentComponent", -1);
+    mv_alg->initialize();
+    mv_alg->setLogging(LOGCHILDALG);
+    mv_alg->setProperty("Workspace", wsname);
+    mv_alg->setProperty("ComponentName", cmptName);
+    mv_alg->setProperty("X", dx);
+    mv_alg->setProperty("Y", dy);
+    mv_alg->setProperty("Z", dz);
+    mv_alg->setProperty("RelativePosition", true);
+    mv_alg->executeAsChildAlg();
+
+    // orientation
+    IAlgorithm_sptr rot_alg = Mantid::API::AlgorithmFactory::Instance().create(
+        "RotateInstrumentComponent", -1);
+    //-- rotAngX@(1,0,0)
+    rot_alg->initialize();
+    rot_alg->setLogging(LOGCHILDALG);
+    rot_alg->setProperty("Workspace", wsname);
+    rot_alg->setProperty("ComponentName", cmptName);
+    rot_alg->setProperty("X", 1.0);
+    rot_alg->setProperty("Y", 0.0);
+    rot_alg->setProperty("Z", 0.0);
+    rot_alg->setProperty("Angle", drotx);
+    rot_alg->setProperty("RelativeRotation", true);
+    rot_alg->executeAsChildAlg();
+    //-- rotAngY@(0,1,0)
+    rot_alg->initialize();
+    rot_alg->setLogging(LOGCHILDALG);
+    rot_alg->setProperty("Workspace", wsname);
+    rot_alg->setProperty("ComponentName", cmptName);
+    rot_alg->setProperty("X", 0.0);
+    rot_alg->setProperty("Y", 1.0);
+    rot_alg->setProperty("Z", 0.0);
+    rot_alg->setProperty("Angle", droty);
+    rot_alg->setProperty("RelativeRotation", true);
+    rot_alg->executeAsChildAlg();
+    //-- rotAngZ@(0,0,1)
+    rot_alg->initialize();
+    rot_alg->setLogging(LOGCHILDALG);
+    rot_alg->setProperty("Workspace", wsname);
+    rot_alg->setProperty("ComponentName", cmptName);
+    rot_alg->setProperty("X", 0.0);
+    rot_alg->setProperty("Y", 0.0);
+    rot_alg->setProperty("Z", 1.0);
+    rot_alg->setProperty("Angle", drotz);
+    rot_alg->setProperty("RelativeRotation", true);
+    rot_alg->executeAsChildAlg();
   }
 
   /**
