@@ -49,18 +49,22 @@ public:
   SCDCalibratePanels2Test()
       : wsname("wsSCDCalibratePanels2Test"),
         pwsname("pwsSCDCalibratePanels2Test"),
-        tmppwsname("tmppwsSCDCalibratePanels2Test"),
-        bank_xtop("bank73/sixteenpack"), bank_xcenter("bank12/sixteenpack"),
-        bank_ybotoom("bank11/sixteenpack"), bank_yright("bank59/sixteenpack"),
-        bank_yleft("bank58/sixteenpack"), bank_ytop("bank88/sixteenpack"),
-        bank_ybottom("bank26/sixteenpack"), silicon_a(5.431), silicon_b(5.431),
-        silicon_c(5.431), silicon_alpha(90), silicon_beta(90),
-        silicon_gamma(90),
+        tmppwsname("tmppwsSCDCalibratePanels2Test"),  // fixed workspace name
+        bank_xtop("bank73/sixteenpack"),     //
+        bank_xcenter("bank12/sixteenpack"),  //
+        bank_xbottom("bank11/sixteenpack"),  //
+        bank_yright("bank59/sixteenpack"),  //
+        bank_yleft("bank58/sixteenpack"),   //
+        bank_ytop("bank88/sixteenpack"),    //
+        bank_ybottom("bank26/sixteenpack"), //
+        silicon_a(5.431), silicon_b(5.431), silicon_c(5.431),   // angstrom
+        silicon_alpha(90), silicon_beta(90), silicon_gamma(90), // degree
         silicon_cs(CrystalStructure("5.431 5.431 5.431", "F d -3 m",
                                     "Si 0 0 0 1.0 0.02")),
-        dspacing_min(1.0), dspacing_max(10.0), wavelength_min(0.8),
-        wavelength_max(2.9), omega_step(3.0), TOLERANCE_L(1e-4),
-        TOLERANCE_R(1e-2), LOGCHILDALG(true) {
+        dspacing_min(1.0), dspacing_max(10.0),  //
+        wavelength_min(0.8), wavelength_max(2.9), //
+        omega_step(3.0),  //
+        TOLERANCE_L(1e-4), TOLERANCE_R(1e-2), LOGCHILDALG(false) {
     // NOTE:
     //  The MAGIC PIECE, basically we need to let AlgorithmFactory
     //  to load a non-related algorithm, then somehow AlgorithmFactory
@@ -72,6 +76,8 @@ public:
     darkmagic->setPropertyValue("Filename", "Peaks5637.integrate");
     darkmagic->setPropertyValue("OutputWorkspace", "TOPAZ_5637");
     TS_ASSERT(darkmagic->execute());
+
+    m_ws = generateSimulatedWorkspace();
   }
 
 
@@ -113,14 +119,14 @@ public:
     xmlFile /= boost::filesystem::unique_path("nullcase_%%%%%%%%.xml");
 
     g_log.notice() << "-- generate simulated workspace\n";
-    MatrixWorkspace_sptr ws = generateSimulatedWorkspace();
+    MatrixWorkspace_sptr ws = m_ws->clone();
     MatrixWorkspace_sptr wsraw = ws->clone();
 
     // Trivial case, no component undergoes any affine transformation
     g_log.notice() << "-- trivial case, no components moved\n";
 
     g_log.notice() << "-- generate peaks\n";
-    PeaksWorkspace_sptr pws = generateSimulatedPeaksWorkspace();
+    PeaksWorkspace_sptr pws = generateSimulatedPeaksWorkspace(ws);
     PeaksWorkspace_sptr pwsref = pws->clone();
 
     // Pretend we don't know the answer
@@ -129,7 +135,7 @@ public:
 
     // Perform the calibration
     g_log.notice() << "-- start calibration\n";
-    runCalibration(isawFile.string(), xmlFile.string());
+    runCalibration(isawFile.string(), xmlFile.string(), pws);
 
     // Check if the calibration returns the same instrument as we put in
     g_log.notice() << "-- validate calibration output\n";
@@ -160,15 +166,15 @@ public:
     xmlFile /= boost::filesystem::unique_path("changeL1_%%%%%%%%.xml");
 
     g_log.notice() << "-- generate simulated workspace\n";
-    MatrixWorkspace_sptr ws = generateSimulatedWorkspace();
+    MatrixWorkspace_sptr ws = m_ws->clone();
     MatrixWorkspace_sptr wsraw = ws->clone();
 
     // move source
     adjustComponent(0.0, 0.0, dL1, 0.0, 0.0, 0.0,
-                    ws->getInstrument()->getSource()->getName());
+                    ws->getInstrument()->getSource()->getName(), ws);
 
     g_log.notice() << "-- generate peaks\n";
-    PeaksWorkspace_sptr pws = generateSimulatedPeaksWorkspace();
+    PeaksWorkspace_sptr pws = generateSimulatedPeaksWorkspace(ws);
     PeaksWorkspace_sptr pwsref = pws->clone();
 
     // Pretend we don't know the answer
@@ -181,7 +187,7 @@ public:
 
     // Perform the calibration
     g_log.notice() << "-- start calibration\n";
-    runCalibration(isawFile.string(), xmlFile.string());
+    runCalibration(isawFile.string(), xmlFile.string(), pws);
 
     // Check if the calibration returns the same instrument as we put in
     g_log.notice() << "-- validate calibration output\n";
@@ -191,7 +197,54 @@ public:
     doCleanup();
   }
 
-  void test_Single_Panel_Shift() {}
+  void test_Single_Panel_Shift() {
+    g_log.notice() << "test: !Single Panel Shift!\n";
+
+    //prescribed shift
+    double dx = boost::math::constants::euler<double>();
+    double dy = boost::math::constants::ln_ln_two<double>();
+    double dz = boost::math::constants::pi_minus_three<double>();
+
+    // Generate unique temp files
+    auto isawFile = boost::filesystem::temp_directory_path();
+    isawFile /= boost::filesystem::unique_path("unoPanelShift_%%%%%%%%.DetCal");
+    auto xmlFile = boost::filesystem::temp_directory_path();
+    xmlFile /= boost::filesystem::unique_path("unoPanelShift_%%%%%%%%.xml");
+
+    g_log.notice() << "-- generate simulated workspace\n";
+    MatrixWorkspace_sptr ws = m_ws->clone();
+    MatrixWorkspace_sptr wsraw = ws->clone();
+
+    // move xcenter
+    g_log.notice() << "-- move bank12 (x center) by (" << dx << "," << dy << ","
+                   << dz << ")\n";
+    adjustComponent(dx, dy, dz, 0.0, 0.0, 0.0, bank_xcenter, ws);
+
+    g_log.notice() << "-- generate peaks\n";
+    PeaksWorkspace_sptr pws = generateSimulatedPeaksWorkspace(ws);
+    PeaksWorkspace_sptr pwsref = pws->clone();
+
+    // Pretend we don't know the answer
+    g_log.notice() << "-- reset instrument positions&orientations\n";
+    g_log.notice() << "    * before reset L1 = "
+                   << pws->getInstrument()->getSource()->getPos().Z() << "\n";
+    pws->setInstrument(wsraw->getInstrument());
+    g_log.notice() << "    * after reset L1 = "
+                   << pws->getInstrument()->getSource()->getPos().Z() << "\n";
+
+    // Perform the calibration
+    g_log.notice() << "-- start calibration\n";
+    runCalibration(isawFile.string(), xmlFile.string(), pws);
+
+    // Check if the calibration returns the same instrument as we put in
+    g_log.notice() << "-- validate calibration output\n";
+    TS_ASSERT(validateCalibrationResults(pwsref, wsraw, xmlFile.string()));
+
+    // Cleanup
+    doCleanup();
+
+    TS_ASSERT(false);
+  }
 
   void test_Single_Panel_Rotate() {}
 
@@ -201,100 +254,6 @@ public:
 
   void test_Exec() {}
 
-  // /**
-  //  * @brief Move a single bank in the high order zone to see if the
-  //  *        calibration can backout the correct shift vector.
-  //  *
-  //  */
-  // void testSinglePanelMoved(){
-  //   g_log.notice() << "testSinglePanelMoved() start\n";
-
-  //   SCDCalibratePanels2 alg;
-  //   std::string wsname("ws_moveBank");
-  //   std::string pwsname("pws_moveBank");
-  //   double dx = boost::math::constants::euler<double>();
-  //   double dy = boost::math::constants::ln_ln_two<double>();
-  //   double dz = boost::math::constants::pi_minus_three<double>();
-  //   auto isawFilename = boost::filesystem::temp_directory_path();
-  //   isawFilename /=
-  //   boost::filesystem::unique_path("changeL1_%%%%%%%%.DetCal"); auto
-  //   xmlFilename = boost::filesystem::temp_directory_path(); xmlFilename /=
-  //   boost::filesystem::unique_path("changeL1_%%%%%%%%.xml");
-
-  //   // prepare a workspace
-  //   g_log.notice() << "-- generate simulated workspace\n";
-  //   generateSimulatedworkspace(wsname);
-  //   MatrixWorkspace_sptr ws =
-  //       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsname);
-  //   MatrixWorkspace_sptr wsraw = ws->clone();
-
-  //   // move x center bank
-  //   g_log.notice() << "-- move bank12 (x center) by (" << dx << "," << dy <<
-  //   ","
-  //                  << dz << ")\n";
-  //   moveBank(wsname, bank_xcenter, dx, dy, dz);
-
-  //   // generate the peak workspace from shifted configuration
-  //   g_log.notice() << "-- generate peaks\n";
-  //   generateSimulatedPeaks(wsname, pwsname);
-  //   PeaksWorkspace_sptr pws =
-  //       AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>(pwsname);
-  //   PeaksWorkspace_sptr pwsref = pws->clone();
-
-  //   g_log.notice() << "-- Current source at "
-  //                  << pws->getInstrument()->getSource()->getPos().Z() <<
-  //                  "\n";
-
-  //   g_log.notice()
-  //       << "-- reset instrument in peaks workspace to remove the answer\n";
-  //   g_log.notice()
-  //       << "    * before reset bank12 is at: ("
-  //       <<
-  //       pws->getInstrument()->getComponentByName(bank_xcenter)->getPos().X()
-  //       << ","
-  //       <<
-  //       pws->getInstrument()->getComponentByName(bank_xcenter)->getPos().Y()
-  //       << ","
-  //       <<
-  //       pws->getInstrument()->getComponentByName(bank_xcenter)->getPos().Z()
-  //       << ")\n";
-  //   pws->setInstrument(wsraw->getInstrument());
-  //   g_log.notice()
-  //       << "    * after reset bank12 is at: ("
-  //       <<
-  //       pws->getInstrument()->getComponentByName(bank_xcenter)->getPos().X()
-  //       << ","
-  //       <<
-  //       pws->getInstrument()->getComponentByName(bank_xcenter)->getPos().Y()
-  //       << ","
-  //       <<
-  //       pws->getInstrument()->getComponentByName(bank_xcenter)->getPos().Z()
-  //       << ")\n";
-
-  //   // Perform the calibration
-  //   g_log.notice() << "-- start calibration\n";
-  //   alg.initialize();
-  //   alg.setProperty("PeakWorkspace", pws);
-  //   alg.setProperty("a", silicon_a);
-  //   alg.setProperty("b", silicon_b);
-  //   alg.setProperty("c", silicon_c);
-  //   alg.setProperty("alpha", silicon_alpha);
-  //   alg.setProperty("beta", silicon_beta);
-  //   alg.setProperty("gamma", silicon_gamma);
-  //   alg.setProperty("CalibrateT0", false);
-  //   alg.setProperty("CalibrateL1", true);
-  //   alg.setProperty("CalibrateBanks", true);
-  //   alg.setProperty("DetCalFilename", isawFilename.string());
-  //   alg.setProperty("XmlFilename", xmlFilename.string());
-  //   alg.execute();
-  //   TS_ASSERT(alg.isExecuted());
-
-  //   // Check if the calibration returns the same instrument as we put in
-  //   g_log.notice() << "-- validate calibration output\n";
-  //   TS_ASSERT(CompareInstrument(pwsref, xmlFilename.string()));
-
-  //   TS_ASSERT(false);
-  // }
 
   // /**
   //  * @brief Test moving/translating two panels at the same time
@@ -340,6 +299,7 @@ private:
    * @return MatrixWorkspace_sptr
    */
   MatrixWorkspace_sptr generateSimulatedWorkspace() {
+
     // create simulated workspace
     IAlgorithm_sptr csws_alg =
         AlgorithmFactory::Instance().create("CreateSimulationWorkspace", 1);
@@ -382,7 +342,7 @@ private:
    * 
    * @return PeaksWorkspace_sptr 
    */
-  PeaksWorkspace_sptr generateSimulatedPeaksWorkspace() {
+  PeaksWorkspace_sptr generateSimulatedPeaksWorkspace(MatrixWorkspace_sptr ws) {
     // prepare the algs pointer
     IAlgorithm_sptr sg_alg =
         AlgorithmFactory::Instance().create("SetGoniometer", 1);
@@ -399,14 +359,14 @@ private:
       // set the SetGoniometer
       sg_alg->initialize();
       sg_alg->setLogging(LOGCHILDALG);
-      sg_alg->setProperty("Workspace", wsname);
+      sg_alg->setProperty("Workspace", ws);
       sg_alg->setProperty("Axis0", os.str());
       sg_alg->execute();
 
       // predict peak positions
       pp_alg->initialize();
       pp_alg->setLogging(LOGCHILDALG);
-      pp_alg->setProperty("InputWorkspace", wsname);
+      pp_alg->setProperty("InputWorkspace", ws);
       pp_alg->setProperty("WavelengthMin", wavelength_min);
       pp_alg->setProperty("wavelengthMax", wavelength_max);
       pp_alg->setProperty("MinDSpacing", dspacing_min);
@@ -429,17 +389,19 @@ private:
         cpw_alg->execute();
       }
     }
+
     return AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>(pwsname);
   }
 
   void adjustComponent(double dx, double dy, double dz, double drotx,
-                       double droty, double drotz, std::string cmptName) {
+                       double droty, double drotz, std::string cmptName,
+                       MatrixWorkspace_sptr ws) {
     // translation
     IAlgorithm_sptr mv_alg = Mantid::API::AlgorithmFactory::Instance().create(
         "MoveInstrumentComponent", -1);
     mv_alg->initialize();
     mv_alg->setLogging(LOGCHILDALG);
-    mv_alg->setProperty("Workspace", wsname);
+    mv_alg->setProperty("Workspace", ws);
     mv_alg->setProperty("ComponentName", cmptName);
     mv_alg->setProperty("X", dx);
     mv_alg->setProperty("Y", dy);
@@ -453,7 +415,7 @@ private:
     //-- rotAngX@(1,0,0)
     rot_alg->initialize();
     rot_alg->setLogging(LOGCHILDALG);
-    rot_alg->setProperty("Workspace", wsname);
+    rot_alg->setProperty("Workspace", ws);
     rot_alg->setProperty("ComponentName", cmptName);
     rot_alg->setProperty("X", 1.0);
     rot_alg->setProperty("Y", 0.0);
@@ -464,7 +426,7 @@ private:
     //-- rotAngY@(0,1,0)
     rot_alg->initialize();
     rot_alg->setLogging(LOGCHILDALG);
-    rot_alg->setProperty("Workspace", wsname);
+    rot_alg->setProperty("Workspace", ws);
     rot_alg->setProperty("ComponentName", cmptName);
     rot_alg->setProperty("X", 0.0);
     rot_alg->setProperty("Y", 1.0);
@@ -475,7 +437,7 @@ private:
     //-- rotAngZ@(0,0,1)
     rot_alg->initialize();
     rot_alg->setLogging(LOGCHILDALG);
-    rot_alg->setProperty("Workspace", wsname);
+    rot_alg->setProperty("Workspace", ws);
     rot_alg->setProperty("ComponentName", cmptName);
     rot_alg->setProperty("X", 0.0);
     rot_alg->setProperty("Y", 0.0);
@@ -492,10 +454,11 @@ private:
    * @param xmlFilename
    */
   void runCalibration(const std::string &isawFilename,
-                      const std::string &xmlFilename) {
+                      const std::string &xmlFilename,
+                      PeaksWorkspace_sptr pws) {
     SCDCalibratePanels2 alg;
     alg.initialize();
-    alg.setProperty("PeakWorkspace", pwsname);
+    alg.setProperty("PeakWorkspace", pws);
     alg.setProperty("a", silicon_a);
     alg.setProperty("b", silicon_b);
     alg.setProperty("c", silicon_c);
@@ -605,9 +568,9 @@ private:
    *
    */
   void doCleanup() {
-    Mantid::API::AnalysisDataService::Instance().remove(wsname);
-    Mantid::API::AnalysisDataService::Instance().remove(pwsname);
-    Mantid::API::AnalysisDataService::Instance().remove(tmppwsname);
+    // AnalysisDataService::Instance().remove(wsname);
+    AnalysisDataService::Instance().remove(pwsname);
+    AnalysisDataService::Instance().remove(tmppwsname);
   }
 
   // ------------------- //
@@ -618,11 +581,14 @@ private:
   const std::string pwsname;
   const std::string tmppwsname;
 
+  MatrixWorkspace_sptr m_ws;
+
   // bank&panel names selected for testing
   // batch_1: high order zone selection
   const std::string bank_xtop;
   const std::string bank_xcenter;
-  const std::string bank_ybotoom;
+  const std::string bank_xbottom;
+
   // batch_2: low order zone selection
   // NOTE: limited reflections from experiment, often
   //       considered as a chanllegening case
