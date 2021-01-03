@@ -242,8 +242,6 @@ public:
 
     // Cleanup
     doCleanup();
-
-    TS_ASSERT(false);
   }
 
   void test_Single_Panel_Rotate() {}
@@ -568,7 +566,6 @@ private:
    *
    */
   void doCleanup() {
-    // AnalysisDataService::Instance().remove(wsname);
     AnalysisDataService::Instance().remove(pwsname);
     AnalysisDataService::Instance().remove(tmppwsname);
   }

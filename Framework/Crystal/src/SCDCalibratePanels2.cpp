@@ -265,12 +265,107 @@ namespace Crystal {
   }
 
   /**
-   * @brief 
-   * 
-   * @param pws 
+   * @brief Calibrate the position and rotation of each Bank, one at a time
+   *
+   * @param pws
    */
   void SCDCalibratePanels2::optimizeBanks(std::shared_ptr<PeaksWorkspace> pws){
+    Instrument_const_sptr instOriginal = pws->getInstrument();
 
+    PARALLEL_FOR_IF(Kernel::threadSafe(*pws))
+    for (int i = 0; i < static_cast<int>(m_BankNames.size()); ++i) {
+      PARALLEL_START_INTERUPT_REGION
+      // prepare local copies to work with
+      const std::string bankname = *std::next(m_BankNames.begin(), i);
+      std::vector<Peak> &allPeaks = pws->getPeaks();
+
+      //-- step 0: extract peaks that lies on the current bank
+      // NOTE: The original filter is cloning the whole pws, then subtracting
+      //       those that are not on the current bank.
+      // NOTE: The original implementation is also doing some additinoal check,
+      //       which I do not understand the reason behind it (and what these
+      //       checks are doing)
+      PeaksWorkspace_sptr pwsBanki = std::dynamic_pointer_cast<PeaksWorkspace>(
+          WorkspaceFactory::Instance().createPeaks());
+      pwsBanki->setInstrument(pws->getInstrument());
+      for (int j = 0; j < pws->getNumberPeaks(); ++j) {
+        const Peak &pk = pws->getPeak(j);
+        if (pk.getBankName() == bankname)
+          pwsBanki->addPeak(pk);
+      }
+      // Do not attempt correct panels with less than 6 peaks as the system will
+      // be under-determined
+      int nBankPeaks = pwsBanki->getNumberPeaks();
+      if (nBankPeaks < MINIMUM_PEAKS_PER_BANK) {
+        g_log.notice() << "-- Bank " << bankname << " have only " << nBankPeaks
+                       << " (<" << MINIMUM_PEAKS_PER_BANK
+                       << ") Peaks, skipping\n";
+        continue;
+      }
+
+      //-- step 1: prepare a mocked workspace with QSample as its yValues
+      MatrixWorkspace_sptr wsBankCali =
+          std::dynamic_pointer_cast<MatrixWorkspace>(
+              WorkspaceFactory::Instance().create(
+                  "Workspace2D",    // use workspace 2D to mock a histogram
+                  1,                // one vector
+                  3 * nBankPeaks,   // X :: anything is fine
+                  3 * nBankPeaks)); // Y :: flattened Q vector
+      auto &measured = wsBankCali->getSpectrum(0);
+      auto &xv = measured.mutableX();
+      auto &yv = measured.mutableY();
+      auto &ev = measured.mutableE();
+      // TODO: non-uniform weighting (ev) will be implemented at a later date
+      for (int i = 0; i < nBankPeaks; ++i) {
+        const Peak &pk = pwsBanki->getPeak(i);
+        V3D qv = pk.getQSampleFrame();
+        for (int j = 0; j < 3; ++j) {
+          xv[i * 3 + j] = i * 3 + j;
+          yv[i * 3 + j] = qv[j];
+          ev[i * 3 + j] = 1;
+        }
+      }
+
+      //-- step 2: invoke Fit to find the translation and rotation
+      IAlgorithm_sptr fitBank_alg = createChildAlgorithm("Fit", -1, -1, false);
+      //---- setup obj fun def
+      std::ostringstream fun_str;
+      fun_str << "name=SCDCalibratePanels2ObjFunc,Workspace="
+              << pwsBanki->getName() << ",Bank=" << bankname;
+      //---- bounds&constraints def
+      std::ostringstream tie_str;
+      tie_str << "dT0=" << m_T0;
+      //---- set&go
+      fitBank_alg->setPropertyValue("Function", fun_str.str());
+      fitBank_alg->setProperty("Ties", tie_str.str());
+      fitBank_alg->setProperty("InputWorkspace", wsBankCali);
+      fitBank_alg->setProperty("CreateOutput", true);
+      fitBank_alg->setProperty("Output", "fit");
+      fitBank_alg->executeAsChildAlg();
+
+      //-- step 3: extract optimization results and update instrument component
+      std::string status = fitBank_alg->getProperty("OutputStatus");
+      double chi2OverDOF = fitBank_alg->getProperty("OutputChi2overDoF");
+      ITableWorkspace_sptr rst = fitBank_alg->getProperty("OutputParameters");
+      double dx = rst->getRef<double>("Value", 0);
+      double dy = rst->getRef<double>("Value", 1);
+      double dz = rst->getRef<double>("Value", 2);
+      double drotx = rst->getRef<double>("Value", 3);
+      double droty = rst->getRef<double>("Value", 4);
+      double drotz = rst->getRef<double>("Value", 5);
+      adjustComponent(dx, dy, dz, drotx, droty, drotz, bankname, pws);
+
+      //-- step 4: logging
+      g_log.notice() << "-- Fit " << bankname << " rst:\n"
+                     << "    d(x,y,z) = (" << dx << "," << dy << "," << dz
+                     << ")\n"
+                     << "    drot(x,y,z) = (" << drotx << "," << droty << ","
+                     << drotz << ")\n"
+                     << "    chi2/DOF = " << chi2OverDOF << "\n";
+
+      PARALLEL_END_INTERUPT_REGION
+    }
+    PARALLEL_CHECK_INTERUPT_REGION
   }
 
   /// ---------------- ///

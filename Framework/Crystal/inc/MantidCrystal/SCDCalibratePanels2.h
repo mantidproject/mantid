@@ -104,6 +104,7 @@ private:
   double m_L1 = 2000.0;
   boost::container::flat_set<std::string> m_BankNames;
   const bool LOGCHILDALG{false};
+  const int MINIMUM_PEAKS_PER_BANK{6};
 };
 
 } // namespace Crystal
