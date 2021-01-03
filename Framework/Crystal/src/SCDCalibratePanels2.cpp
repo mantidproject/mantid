@@ -269,30 +269,26 @@ namespace Crystal {
    *
    * @param pws
    */
-  void SCDCalibratePanels2::optimizeBanks(std::shared_ptr<PeaksWorkspace> pws){
-    Instrument_const_sptr instOriginal = pws->getInstrument();
+  void SCDCalibratePanels2::optimizeBanks(std::shared_ptr<PeaksWorkspace> pws) {
 
     PARALLEL_FOR_IF(Kernel::threadSafe(*pws))
     for (int i = 0; i < static_cast<int>(m_BankNames.size()); ++i) {
       PARALLEL_START_INTERUPT_REGION
       // prepare local copies to work with
       const std::string bankname = *std::next(m_BankNames.begin(), i);
-      std::vector<Peak> &allPeaks = pws->getPeaks();
 
       //-- step 0: extract peaks that lies on the current bank
-      // NOTE: The original filter is cloning the whole pws, then subtracting
+      // NOTE: We are cloning the whole pws, then subtracting
       //       those that are not on the current bank.
-      // NOTE: The original implementation is also doing some additinoal check,
-      //       which I do not understand the reason behind it (and what these
-      //       checks are doing)
-      PeaksWorkspace_sptr pwsBanki = std::dynamic_pointer_cast<PeaksWorkspace>(
-          WorkspaceFactory::Instance().createPeaks());
-      pwsBanki->setInstrument(pws->getInstrument());
-      for (int j = 0; j < pws->getNumberPeaks(); ++j) {
-        const Peak &pk = pws->getPeak(j);
-        if (pk.getBankName() == bankname)
-          pwsBanki->addPeak(pk);
-      }
+      PeaksWorkspace_sptr pwsBanki = pws->clone();
+      const std::string pwsBankiName = "_pws_" + bankname;
+      AnalysisDataService::Instance().addOrReplace(pwsBankiName, pwsBanki);
+      std::vector<Peak> &allPeaks = pwsBanki->getPeaks();
+      auto notMyPeaks = std::remove_if(
+          allPeaks.begin(), allPeaks.end(),
+          [&bankname](const Peak &pk) { return pk.getBankName() != bankname; });
+      allPeaks.erase(notMyPeaks, allPeaks.end());
+
       // Do not attempt correct panels with less than 6 peaks as the system will
       // be under-determined
       int nBankPeaks = pwsBanki->getNumberPeaks();
@@ -330,8 +326,8 @@ namespace Crystal {
       IAlgorithm_sptr fitBank_alg = createChildAlgorithm("Fit", -1, -1, false);
       //---- setup obj fun def
       std::ostringstream fun_str;
-      fun_str << "name=SCDCalibratePanels2ObjFunc,Workspace="
-              << pwsBanki->getName() << ",Bank=" << bankname;
+      fun_str << "name=SCDCalibratePanels2ObjFunc,Workspace=" << pwsBankiName
+              << ",ComponentName=" << bankname;
       //---- bounds&constraints def
       std::ostringstream tie_str;
       tie_str << "dT0=" << m_T0;
@@ -362,6 +358,9 @@ namespace Crystal {
                      << "    drot(x,y,z) = (" << drotx << "," << droty << ","
                      << drotz << ")\n"
                      << "    chi2/DOF = " << chi2OverDOF << "\n";
+
+      // -- cleanup
+      AnalysisDataService::Instance().remove(pwsBankiName);
 
       PARALLEL_END_INTERUPT_REGION
     }
