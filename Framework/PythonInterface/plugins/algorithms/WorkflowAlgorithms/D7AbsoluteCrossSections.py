@@ -412,10 +412,10 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                                             OutputWorkspace=norm_ws)
                     ws_name = '{0}_{1}'.format(tmp_name, spectrum_no)
                     tmp_names.append(ws_name)
-
-                    Divide(LHSWorkspace=cross_section_ws,
+                    Divide(LHSWorkspace=mtd[cross_section_ws][2],
                            RHSWorkspace=norm_ws,
                            OutputWorkspace=ws_name)
+                    to_clean.append(norm_ws)
 
             GroupWorkspaces(tmp_names, OutputWorkspace=det_efficiency_ws)
 
