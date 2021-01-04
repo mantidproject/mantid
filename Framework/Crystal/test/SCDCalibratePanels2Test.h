@@ -64,7 +64,11 @@ public:
         dspacing_min(1.0), dspacing_max(10.0),    //
         wavelength_min(0.8), wavelength_max(2.9), //
         omega_step(3.0),                          //
-        TOLERANCE_L(1e-3), TOLERANCE_R(1e-2), LOGCHILDALG(false) {
+        TOLERANCE_L(1e-2), // this calibration has intrinsic accuracy limit of
+                           // 0.01m for translation
+        TOLERANCE_R(1e-4), // this calibration has intrinsic accuracy limit of
+                           // 1e-4 deg for rotation
+        LOGCHILDALG(false) {
     // NOTE:
     //  The MAGIC PIECE, basically we need to let AlgorithmFactory
     //  to load a non-related algorithm, then somehow AlgorithmFactory
@@ -430,43 +434,71 @@ public:
     doCleanup();
   }
 
-  void test_Duo_Panels_Move() {}
+  void test_Duo_Panels_Move() {
+    g_log.notice() << "test: !Duo Panel move (translation and rotation)!\n";
+
+    // NOTE: using the same move for both panels
+    // prescribed shift
+    double dx = boost::math::constants::euler<double>();
+    double dy = boost::math::constants::ln_ln_two<double>();
+    double dz = boost::math::constants::pi_minus_three<double>();
+
+    // prescribed rotate
+    double drotx = boost::math::constants::euler<double>() / 3;
+    double droty = boost::math::constants::ln_ln_two<double>() / 3;
+    double drotz = boost::math::constants::pi_minus_three<double>() / 3;
+
+    // Generate unique temp files
+    auto isawFile = boost::filesystem::temp_directory_path();
+    isawFile /= boost::filesystem::unique_path("unoPanelMove_%%%%%%%%.DetCal");
+    auto xmlFile = boost::filesystem::temp_directory_path();
+    xmlFile /= boost::filesystem::unique_path("unoPanelMove_%%%%%%%%.xml");
+
+    g_log.notice() << "-- generate simulated workspace\n";
+    MatrixWorkspace_sptr ws = m_ws->clone();
+    MatrixWorkspace_sptr wsraw = ws->clone();
+
+    g_log.notice() << "-- translate bank12 (x center) by (" << dx << "," << dy
+                   << "," << dz << ")\n"
+                   << "-- rotate bank12 (x center) by\n"
+                   << "    drotx@(100) = " << drotx << "\n"
+                   << "    droty@(010) = " << droty << "\n"
+                   << "    drotz@(001) = " << drotz << "\n"
+                   << "-- translate bank88 (y top) by (" << dx << "," << dy
+                   << "," << dz << ")\n"
+                   << "-- rotate bank88 (y top) by\n"
+                   << "    drotx@(100) = " << drotx << "\n"
+                   << "    droty@(010) = " << droty << "\n"
+                   << "    drotz@(001) = " << drotz << "\n";
+
+    adjustComponent(dx, dy, dz, drotx, droty, drotz, bank_xcenter, ws);
+    adjustComponent(dx, dy, dz, drotx, droty, drotz, bank_ytop, ws);
+
+    g_log.notice() << "-- generate peaks\n";
+    PeaksWorkspace_sptr pws = generateSimulatedPeaksWorkspace(ws);
+    PeaksWorkspace_sptr pwsref = pws->clone();
+
+    // Pretend we don't know the answer
+    g_log.notice() << "-- reset instrument positions&orientations\n";
+    g_log.notice() << "    * before reset L1 = "
+                   << pws->getInstrument()->getSource()->getPos().Z() << "\n";
+    pws->setInstrument(wsraw->getInstrument());
+    g_log.notice() << "    * after reset L1 = "
+                   << pws->getInstrument()->getSource()->getPos().Z() << "\n";
+
+    // Perform the calibration
+    g_log.notice() << "-- start calibration\n";
+    runCalibration(isawFile.string(), xmlFile.string(), pws, false, true, true);
+
+    // Check if the calibration returns the same instrument as we put in
+    g_log.notice() << "-- validate calibration output\n";
+    TS_ASSERT(validateCalibrationResults(pwsref, wsraw, xmlFile.string()));
+
+    // Cleanup
+    doCleanup();
+  }
 
   void test_Exec() {}
-
-
-  // /**
-  //  * @brief Test moving/translating two panels at the same time
-  //  *
-  //  */
-  // void testDualPanelMoved(){
-  //   g_log.notice() << "testDualPanelMoved() start\n";
-
-  //   SCDCalibratePanels2 alg;
-  //   const std::string wsname("ws_moveBanks");
-  //   const std::string pwsname("pws_moveBanks");
-  //   // for bank_xcenter
-  //   const double dx1 = boost::math::constants::euler<double>();
-  //   const double dy1 = boost::math::constants::ln_ln_two<double>();
-  //   const double dz1 = boost::math::constants::pi_minus_three<double>();
-  //   // for bank_yright
-  //   const double dx2 = boost::math::constants::ln_ln_two<double>();
-  //   const double dy2 = boost::math::constants::pi_minus_three<double>();
-  //   const double dz2 = boost::math::constants::euler<double>();
-
-  //   // prepare a workspace
-  //   generateSimulatedworkspace(wsname);
-
-  //   // move banks
-  //   moveBank(wsname, bank_xcenter, dx1, dy1, dz1);
-  //   moveBank(wsname, bank_yright, dx2, dy2, dz2);
-
-  //   // generate the peak workspace from shifted configuration
-  //   generateSimulatedPeaks(wsname, pwsname);
-
-  //   // TODO: run through calibrator and validate
-
-  // }
 
 private:
   // ---------------------------- //
