@@ -47,14 +47,13 @@ Test 1: Individual And Co-Added Fits
 - Click **Output Results**
 - In the main workbench window, in the workspace toolbox, open the results 
   table
-
-``Not sure if sample_temp is right for co-added runs need to come back to this after confirming``
-
-- Table should have two rows, one for runs 20918-20 (co-added) and one for run 20918.
-- Sample temp should be expressed correctly as a range "180 to 200" for co-added runs
-- Should be one pair of columns for each parameter + error, plus a final column for "cost function value"
-
-Like this:
+- View the table
+- The table should hae four rows
+- **sample_temp** should be correctly expresses as a range ``180-200`` for the 
+  co-added runs
+- There should be several pairs of columns, one for each parameter and one for 
+  the error of the parameter, plus a final column **Cost function value**
+- The table should look similar to this:
 
 .. image:: /images/MuonAnalysisTests/results_test1.png
   :align: center

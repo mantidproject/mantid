@@ -124,6 +124,7 @@ Test 5: Simultaneous Fit Across Groups
 - Go to the **Grouping** tab
 	- Uncheck **Analyse (plot/fit)** for the pair **long**, and check 
 	  **Analyse (plot/fit)** for both groups; **fwd** and **bwd**
+- Go to the **Fitting** tab
 	- Keep fit function and global parameters as before
 	- Change from **Group/Pair** to **Run**
 	- The **Display parameters for** drop down should contain two workspaces
