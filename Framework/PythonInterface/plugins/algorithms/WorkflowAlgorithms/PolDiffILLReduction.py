@@ -655,11 +655,11 @@ class PolDiffILLReduction(PythonAlgorithm):
         return ws
 
     def _set_units(self, ws, process):
-        unit = 'd\sigma / d\Omega ({})'
+        unit = r'd#\sigma# / d#\Omega$ ({})'
         if process == 'Sample' and self.getPropertyValue('OutputTreatment') in  ['Average','Sum']:
             self._merge_polarisations(ws, average_detectors=(self.getPropertyValue('OutputTreatment') == 'Average'))
         if self.getPropertyValue('OutputTreatment') == 'Sum':
-            unit = unit.format('2\theta')
+            unit = unit.format(r'2$\theta$')
         else:
             unit = unit.format('Spectrum')
 
