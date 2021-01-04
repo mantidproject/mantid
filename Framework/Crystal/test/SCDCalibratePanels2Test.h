@@ -135,7 +135,7 @@ public:
 
     // Perform the calibration
     g_log.notice() << "-- start calibration\n";
-    runCalibration(isawFile.string(), xmlFile.string(), pws);
+    runCalibration(isawFile.string(), xmlFile.string(), pws, false, true, true);
 
     // Check if the calibration returns the same instrument as we put in
     g_log.notice() << "-- validate calibration output\n";
@@ -187,7 +187,8 @@ public:
 
     // Perform the calibration
     g_log.notice() << "-- start calibration\n";
-    runCalibration(isawFile.string(), xmlFile.string(), pws);
+    runCalibration(isawFile.string(), xmlFile.string(), pws, false, true,
+                   false);
 
     // Check if the calibration returns the same instrument as we put in
     g_log.notice() << "-- validate calibration output\n";
@@ -234,7 +235,8 @@ public:
 
     // Perform the calibration
     g_log.notice() << "-- start calibration\n";
-    runCalibration(isawFile.string(), xmlFile.string(), pws);
+    runCalibration(isawFile.string(), xmlFile.string(), pws, false, false,
+                   true);
 
     // Check if the calibration returns the same instrument as we put in
     g_log.notice() << "-- validate calibration output\n";
@@ -452,8 +454,8 @@ private:
    * @param xmlFilename
    */
   void runCalibration(const std::string &isawFilename,
-                      const std::string &xmlFilename,
-                      PeaksWorkspace_sptr pws) {
+                      const std::string &xmlFilename, PeaksWorkspace_sptr pws,
+                      bool calibrateT0, bool calibrateL1, bool calibrateBanks) {
     SCDCalibratePanels2 alg;
     alg.initialize();
     alg.setProperty("PeakWorkspace", pws);
@@ -463,9 +465,9 @@ private:
     alg.setProperty("alpha", silicon_alpha);
     alg.setProperty("beta", silicon_beta);
     alg.setProperty("gamma", silicon_gamma);
-    alg.setProperty("CalibrateT0", false);
-    alg.setProperty("CalibrateL1", true);
-    alg.setProperty("CalibrateBanks", true);
+    alg.setProperty("CalibrateT0", calibrateT0);
+    alg.setProperty("CalibrateL1", calibrateL1);
+    alg.setProperty("CalibrateBanks", calibrateBanks);
     alg.setProperty("DetCalFilename", isawFilename);
     alg.setProperty("XmlFilename", xmlFilename);
     alg.execute();
