@@ -10,7 +10,7 @@ import string
 from typing import List, Optional, Union
 
 from mantid.api import (
-    AlgorithmFactory, AnalysisDataService, DataProcessorAlgorithm, IEventWorkspaceProperty, mtd, Progress, TextAxis,
+    AlgorithmFactory, AnalysisDataService, DataProcessorAlgorithm, WorkspaceProperty, mtd, Progress, TextAxis,
     Workspace, WorkspaceGroup, WorkspaceUnitValidator)
 from mantid.dataobjects import TableWorkspace, Workspace2D
 from mantid.simpleapi import (
@@ -84,7 +84,7 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
     #: - Xposition, YPosition, ZPosition: location of the instrument component in the lab frame (units in meters)
     #: - XdirectionCosine, YdirectionCosine, ZdirectionCosine, RotationAngle: direction cosines and rotation angle
     #: (in degress) defining a rotation in the lab frame that orients the instrument component
-    adjustment_items = ['Component', 'Xposition', 'Yposition', 'Zposition',
+    adjustment_items = ['ComponentName', 'Xposition', 'Yposition', 'Zposition',
                         'XdirectionCosine', 'YdirectionCosine', 'ZdirectionCosine', 'RotationAngle']
 
     def name(self):
@@ -106,9 +106,9 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
 
     def PyInit(self):
         self.declareProperty(
-            IEventWorkspaceProperty('InputWorkspace', '',
-                                    direction=Direction.Input,
-                                    validator=WorkspaceUnitValidator('TOF')),
+            WorkspaceProperty('InputWorkspace', '',
+                              direction=Direction.Input,
+                              validator=WorkspaceUnitValidator('TOF')),
             doc='Powder event data, ideally from a highly symmetric space group',
         )
         self.declareProperty(name='OutputWorkspacesPrefix', defaultValue='pdcal_', direction=Direction.Input,
@@ -142,7 +142,7 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
         prefix_output = self.getProperty('OutputWorkspacesPrefix').value
         progress_percent_start, progress_percent_end, reports_count = 0.0, 0.01, 5
         progress = Progress(self, progress_percent_start, progress_percent_end, reports_count)
-        input_workspace = self.getProperty('InputWorkspace').value
+        input_workspace = self.getPropertyValue('InputWorkspace')  # name of the input workspace
         adjustment_diagnostics = list()  # list workspace names that analyze the orientation of the banks
 
         # Create a grouping workspace whereby we group detectors by banks

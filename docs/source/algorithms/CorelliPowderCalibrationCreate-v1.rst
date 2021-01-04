@@ -70,16 +70,16 @@ Workspace ``LaB6_adjustments`` is the main result, a table containing adjustment
 In our example, we have adjusted the moderator and banks 42 and 87.
 
 +--------------------+------------+-----------+-----------+------------------+------------------+------------------+---------------+
-| Component          | Xposition  | Yposition | Zposition | XdirectionCosine | YdirectionCosine | ZdirectionCosine | RotationAngle |
+| ComponentName      | Xposition  | Yposition | Zposition | XdirectionCosine | YdirectionCosine | ZdirectionCosine | RotationAngle |
 +====================+============+===========+===========+==================+==================+==================+===============+
 | moderator          | 0.0        | 0.0       | -19.9944  |      0.0         |      0.0         |      0.0         |      0.0      |
 +--------------------+------------+-----------+-----------+------------------+------------------+------------------+---------------+
 | bank42/sixteenpack | 2.5941     | 0.0625    | 0.0870    | 0.0009           | -0.9997          | 0.0210           |       92.3187 |
 +--------------------+------------+-----------+-----------+------------------+------------------+------------------+---------------+
 
-- ``Xposition``, ``Yposition``, ``Zposition``: coordinates for the center of ``Component`` in the lab's frame of reference. Units are in Angstroms.
-- ``XdirectionCosine``, ``YdirectionCosine``, ``ZdirectionCosine``: direction cosines in the lab's frame of reference. They define a rotation axis to set the orientation of ``Component``.
-- ``RotationAngle``: rotate this many degrees around the previous rotation axis to set the orientation of ``Component``.
+- ``Xposition``, ``Yposition``, ``Zposition``: coordinates for the center of ``ComponentName`` in the lab's frame of reference. Units are in Angstroms.
+- ``XdirectionCosine``, ``YdirectionCosine``, ``ZdirectionCosine``: direction cosines in the lab's frame of reference. They define a rotation axis to set the orientation of ``ComponentName``.
+- ``RotationAngle``: rotate this many degrees around the previous rotation axis to set the orientation of ``ComponentName``.
 
 The diagnostics workspaces are stored within ``WorkspaceGroup LaB6_bank_adjustment_diagnostics``. These are:
 

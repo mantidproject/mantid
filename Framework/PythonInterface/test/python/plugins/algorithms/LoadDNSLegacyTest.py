@@ -172,7 +172,7 @@ class LoadDNSLegacyTest(unittest.TestCase):
         ws = AnalysisDataService.retrieve(outputWorkspaceName)
         # dimensions
         self.assertEqual(24, ws.getNumberHistograms())
-        self.assertEqual(100,  ws.getNumberBins())
+        self.assertEqual(100,  ws.blocksize())
         # data array
         self.assertEqual(8, ws.readY(19)[23])
         self.assertAlmostEqual(tof1, ws.readX(0)[0], 3)

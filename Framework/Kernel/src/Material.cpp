@@ -189,6 +189,11 @@ void Material::setAttenuationProfile(AttenuationProfile attenuationOverride) {
   m_attenuationOverride = std::move(attenuationOverride);
 }
 
+void Material::setXRayAttenuationProfile(
+    AttenuationProfile attenuationProfile) {
+  m_xRayAttenuationProfile = std::move(attenuationProfile);
+}
+
 /**
  * Returns the name
  * @returns A string containing the name of the material
@@ -297,6 +302,30 @@ double Material::attenuation(const double distance, const double lambda) const {
   return exp(-attenuationCoefficient(lambda) * distance);
 }
 
+/**
+ * @param distance Distance (m) travelled
+ * @param energy KeV to compute the attenuation
+ * @return The dimensionless attenuation factor
+ */
+double Material::xRayAttenuation(const double distance,
+                                 const double energy) const {
+  if (m_xRayAttenuationProfile) {
+    return exp(-m_xRayAttenuationProfile->getAttenuationCoefficient(energy) *
+               distance);
+  } else {
+    throw std::runtime_error("xRayAttenuationProfile override not set");
+  }
+}
+/*
+ * @returns true if m_xRayAttenuationOverride is set and false if not
+ */
+bool Material::hasValidXRayAttenuationProfile() {
+  if (m_xRayAttenuationProfile) {
+    return true;
+  } else {
+    return false;
+  }
+}
 // NOTE: the angstrom^-2 to barns and the angstrom^-1 to cm^-1
 // will cancel for mu to give units: cm^-1
 double Material::linearAbsorpCoef(const double lambda) const {

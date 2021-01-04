@@ -80,6 +80,7 @@ set(PYTHON_PLUGINS
     algorithms/HB3AAdjustSampleNorm.py
     algorithms/HB3AFindPeaks.py
     algorithms/HB3AIntegratePeaks.py
+    algorithms/HB3APredictPeaks.py
     algorithms/HFIRSANS2Wavelength.py
     algorithms/IndexSatellitePeaks.py
     algorithms/IndirectTransmission.py
@@ -154,6 +155,7 @@ set(PYTHON_PLUGINS
     algorithms/SNSPowderReduction.py
     algorithms/SaveGEMMAUDParamFile.py
     algorithms/SaveGSSCW.py
+    algorithms/SaveHKLCW.py
     algorithms/SaveNexusPD.py
     algorithms/SaveP2D.py
     algorithms/SavePlot1DAsJson.py

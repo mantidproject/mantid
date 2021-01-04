@@ -1,6 +1,6 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
@@ -8,6 +8,7 @@
 
 import unittest
 import systemtesting
+from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 
 from mantid.dataobjects import (Workspace2D, EventWorkspace)
 from mantid.api import (AnalysisDataService, AlgorithmManager)
@@ -21,7 +22,7 @@ from sans.common.constants import (CALIBRATION_WORKSPACE_TAG, SANS_FILE_TAG)
 # pylint: disable=no-name-in-module
 from sans.state.Serializer import Serializer
 from sans.test_helper.test_director import TestDirector
-from sans.common.enums import SANSFacility
+from sans.common.enums import SANSFacility, SANSInstrument
 from sans.state.StateObjects.StateData import get_data_builder
 from sans.common.file_information import SANSFileInformationFactory
 
@@ -80,6 +81,7 @@ class SANSLoadFactoryTest(unittest.TestCase):
 # -----------------------------------------------
 # Tests for the SANSLoad algorithm
 # -----------------------------------------------
+@ISISSansSystemTest(SANSInstrument.LARMOR, SANSInstrument.SANS2D)
 class SANSLoadTest(unittest.TestCase):
     @staticmethod
     def _get_simple_state(sample_scatter, sample_trans=None, sample_direct=None,
