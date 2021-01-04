@@ -252,7 +252,7 @@ namespace Crystal {
                     pws->getInstrument()->getSource()->getName(), pws);
 
     //-- log
-    g_log.notice() << "-- Fit L1 rst:\n"
+    g_log.notice() << "-- Fit L1 results using " << npks << " peaks:\n"
                    << "    dL1: " << dL1_optimized << " \n"
                    << "    L1 " << original_L1 << " -> "
                    << -pws->getInstrument()->getSource()->getPos().Z() << " \n"
@@ -401,7 +401,8 @@ namespace Crystal {
       adjustComponent(dx, dy, dz, drotx, droty, drotz, bankname, pws);
 
       //-- step 5: logging
-      g_log.notice() << "-- Fit " << bankname << " results:\n"
+      g_log.notice() << "-- Fit " << bankname << " results using " << nBankPeaks
+                     << " peaks:\n"
                      << "    d(x,y,z) = (" << dx << "," << dy << "," << dz
                      << ")\n"
                      << "    drot(x,y,z) = (" << drotx << "," << droty << ","
