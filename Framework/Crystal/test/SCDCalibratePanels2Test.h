@@ -220,7 +220,7 @@ public:
     MatrixWorkspace_sptr ws = m_ws->clone();
     MatrixWorkspace_sptr wsraw = ws->clone();
 
-    // move xcenter
+    // adjust xcenter
     g_log.notice() << "-- translate bank12 (x center) by (" << dx << "," << dy
                    << "," << dz << ")\n";
     adjustComponent(dx, dy, dz, 0.0, 0.0, 0.0, bank_xcenter, ws);
@@ -257,7 +257,7 @@ public:
   void test_Single_Panel_Rotate() {
     g_log.notice() << "test: !Single Panel Rotate!\n";
 
-    // prescribed shift
+    // prescribed rotate
     double drotx = boost::math::constants::euler<double>() / 3;
     double droty = boost::math::constants::ln_ln_two<double>() / 3;
     double drotz = boost::math::constants::pi_minus_three<double>() / 3;
@@ -273,7 +273,7 @@ public:
     MatrixWorkspace_sptr ws = m_ws->clone();
     MatrixWorkspace_sptr wsraw = ws->clone();
 
-    // move xcenter
+    // adjust xcenter
     g_log.notice() << "-- rotate bank12 (x center) by\n("
                    << "    drotx@(100) = " << drotx << "\n"
                    << "    droty@(010) = " << droty << "\n"
@@ -305,7 +305,66 @@ public:
     doCleanup();
   }
 
-  void test_Single_Panel_Move() {}
+  /**
+   * @brief Test compound movement of panel
+   *
+   */
+  void test_Single_Panel_Move() {
+    g_log.notice() << "test: !Single Panel move (translation and rotation)!\n";
+
+    // prescribed shift
+    double dx = boost::math::constants::euler<double>();
+    double dy = boost::math::constants::ln_ln_two<double>();
+    double dz = boost::math::constants::pi_minus_three<double>();
+
+    // prescribed rotate
+    double drotx = boost::math::constants::euler<double>() / 3;
+    double droty = boost::math::constants::ln_ln_two<double>() / 3;
+    double drotz = boost::math::constants::pi_minus_three<double>() / 3;
+
+    // Generate unique temp files
+    auto isawFile = boost::filesystem::temp_directory_path();
+    isawFile /= boost::filesystem::unique_path("unoPanelMove_%%%%%%%%.DetCal");
+    auto xmlFile = boost::filesystem::temp_directory_path();
+    xmlFile /= boost::filesystem::unique_path("unoPanelMove_%%%%%%%%.xml");
+
+    g_log.notice() << "-- generate simulated workspace\n";
+    MatrixWorkspace_sptr ws = m_ws->clone();
+    MatrixWorkspace_sptr wsraw = ws->clone();
+
+    // Adjust panel
+    g_log.notice() << "-- translate bank12 (x center) by (" << dx << "," << dy
+                   << "," << dz << ")\n";
+    g_log.notice() << "-- rotate bank12 (x center) by\n("
+                   << "    drotx@(100) = " << drotx << "\n"
+                   << "    droty@(010) = " << droty << "\n"
+                   << "    drotz@(001) = " << drotz << "\n";
+    adjustComponent(dx, dy, dz, drotx, droty, drotz, bank_xcenter, ws);
+
+    g_log.notice() << "-- generate peaks\n";
+    PeaksWorkspace_sptr pws = generateSimulatedPeaksWorkspace(ws);
+    PeaksWorkspace_sptr pwsref = pws->clone();
+
+    // Pretend we don't know the answer
+    g_log.notice() << "-- reset instrument positions&orientations\n";
+    g_log.notice() << "    * before reset L1 = "
+                   << pws->getInstrument()->getSource()->getPos().Z() << "\n";
+    pws->setInstrument(wsraw->getInstrument());
+    g_log.notice() << "    * after reset L1 = "
+                   << pws->getInstrument()->getSource()->getPos().Z() << "\n";
+
+    // Perform the calibration
+    g_log.notice() << "-- start calibration\n";
+    runCalibration(isawFile.string(), xmlFile.string(), pws, false, false,
+                   true);
+
+    // Check if the calibration returns the same instrument as we put in
+    g_log.notice() << "-- validate calibration output\n";
+    TS_ASSERT(validateCalibrationResults(pwsref, wsraw, xmlFile.string()));
+
+    // Cleanup
+    doCleanup();
+  }
 
   void test_Duo_Panels_Move() {}
 
