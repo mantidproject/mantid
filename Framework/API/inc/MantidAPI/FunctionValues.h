@@ -81,9 +81,10 @@ public:
   /// Set all calculated values by copying them from another FunctionValues
   /// instance.
   void setFitDataFromCalculated(const FunctionValues &values);
-
   /// Return the calculated values as a vector
   std::vector<double> toVector() const { return m_calculated; }
+  /// Return whether fit data has been set
+  [[nodiscard]] bool fitDataSet() const;
 
 protected:
   /// Copy calculated values to a buffer

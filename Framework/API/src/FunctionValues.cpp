@@ -223,6 +223,14 @@ double FunctionValues::getFitWeight(size_t i) const {
 }
 
 /**
+Return whether the fit data has been set
+*/
+bool FunctionValues::fitDataSet() const {
+  return m_weights.size() == m_calculated.size() &&
+         m_data.size() == m_calculated.size();
+}
+
+/**
  * Set fitting data copied from other FunctionValues' calculated values.
  * @param values :: An instance of FunctionValues to copy the data from.
  */

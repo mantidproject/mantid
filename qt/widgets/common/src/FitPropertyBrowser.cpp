@@ -1741,18 +1741,11 @@ void FitPropertyBrowser::finishHandle(const Mantid::API::IAlgorithm *alg) {
   emit fitResultsChanged(status);
   // update Quality string
   if (m_displayActionQuality->isChecked()) {
-    std::string costFunction = alg->getProperty("CostFunction");
-    std::shared_ptr<Mantid::API::ICostFunction> costfun =
-        Mantid::API::CostFunctionFactory::Instance().create(costFunction);
-    double quality = alg->getProperty("FinalCostFunctionValue");
-    if (costFunction == "Least squares") {
-      quality = alg->getProperty("OutputChi2overDoF");
-    }
+    double quality = alg->getProperty("OutputChi2overDoF");
     if (status != "success") {
       status = "failed";
     }
-    emit changeWindowTitle(QString("Fit Function (") +
-                           costfun->shortName().c_str() + " = " +
+    emit changeWindowTitle(QString("Fit Function (") + "Chi-squared" + " = " +
                            QString::number(quality) + ", " + status + ")");
   } else
     emit changeWindowTitle("Fit Function");

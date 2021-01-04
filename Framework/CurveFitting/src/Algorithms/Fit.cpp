@@ -83,10 +83,6 @@ void Fit::initConcrete() {
       "CostFunction", "Least squares", costFuncValidator,
       "The cost function to be used for the fit, default is Least squares",
       Kernel::Direction::InOut);
-  declareProperty("FinalCostFunctionValue", 0.0,
-                  "Returns the final value of the cost function normalised by "
-                  "the number of degrees of freedom",
-                  Kernel::Direction::Output);
   declareProperty(
       "CreateOutput", false,
       "Set to true to create output workspaces with the results of the fit"
@@ -238,15 +234,14 @@ void Fit::createOutput() {
   double dof = 0;
   double chisq = 0.0;  // chi sq
   double wchisq = 0.0; // weighted chi sq
-  CalculateChiSquared::calcChiSquared(
-      m_costFunction->nParams(), *m_costFunction->getDomain(),
-      *m_costFunction->getValues(), chisq, wchisq, dof);
+  CalculateChiSquared::calcChiSquared(m_costFunction->nParams(),
+                                      *m_costFunction->getValues(), chisq,
+                                      wchisq, dof);
   double rchisq = wchisq / dof;
   setProperty("OutputChi2overDoF", rchisq);
 
   double rawcostfuncval = m_minimizer->costFunctionVal();
   double finalCostFuncVal = rawcostfuncval / dof;
-  setProperty("FinalCostFunctionValue", finalCostFuncVal);
 
   bool doCreateOutput = getProperty("CreateOutput");
   std::string baseName = getPropertyValue("Output");
