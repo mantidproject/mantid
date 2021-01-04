@@ -72,6 +72,7 @@ Bugfixes
 Improvements
 ############
 - The user is no longer asked to overwrite an automatically generated model that is saved in as a Custom Setup in the fit browser (it is overwritten).
+- Generic Sequential Fit button removed from fit menu (users should use sequential fit button below the table in the fitting tab of the UI).
 
 New features
 ############
