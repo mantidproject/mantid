@@ -205,3 +205,10 @@ class PhaseTableView(QtWidgets.QWidget, ui_muon_phases_tab):
 
         # add to layout
         table_utils.setTableHeaders(self.phase_quad_table)
+
+    # Signal / Slot Connections
+    def on_first_good_data_changed(self, slot):
+        self.first_good_data_item.editingFinished.connect(slot)
+
+    def on_last_good_data_changed(self, slot):
+        self.last_good_data_item.editingFinished.connect(slot)

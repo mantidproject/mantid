@@ -235,6 +235,30 @@ class PhaseTablePresenterTest(unittest.TestCase):
         self.presenter.selected_phasequad_changed_notifier.notify_subscribers.assert_any_call({"is_added":True, "name":"test_Re_"})
         self.presenter.selected_phasequad_changed_notifier.notify_subscribers.assert_any_call({"is_added":True, "name":"test_Im_"})
 
+    def test_handle_first_good_data_too_small(self):
+        self.view.first_good_time = 0.01
+        self.presenter.handle_first_good_data_changed()
+
+        self.view.warning_popup.assert_called_with('First Good Data cannot be smaller than 0.1')
+
+    def test_handle_first_good_data_too_big(self):
+        self.view.first_good_time = 20.0
+        self.presenter.handle_first_good_data_changed()
+
+        self.view.warning_popup.assert_called_with('First Good Data cannot be greater than Last Good Data')
+
+    def test_handle_last_good_data_too_small(self):
+        self.view.last_good_time = 0.01
+        self.presenter.handle_last_good_data_changed()
+
+        self.view.warning_popup.assert_called_with('First Good Data cannot be greater than Last Good Data')
+
+    def test_handle_last_good_data_too_big(self):
+        self.view.last_good_time = 16.0
+        self.presenter.handle_last_good_data_changed()
+
+        self.view.warning_popup.assert_called_with('Last Good Data cannot be greater than 15.0')
+
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)

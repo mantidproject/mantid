@@ -41,6 +41,9 @@ class PhaseTablePresenter(object):
         self.update_view_from_model_observer = GenericObserver(self.update_view_from_model)
         self.update_current_phase_tables()
 
+        self.view.on_first_good_data_changed(self.handle_first_good_data_changed)
+        self.view.on_last_good_data_changed(self.handle_last_good_data_changed)
+
     def update_view_from_model(self):
         self.view.set_input_combo_box(self.context.getGroupedWorkspaceNames())
         self.view.set_group_combo_boxes(self.context.group_pair_context.group_names)
@@ -237,3 +240,23 @@ class PhaseTablePresenter(object):
     def update_current_phase_tables(self):
         phase_table_list = self.context.phase_context.get_phase_table_list(self.context.data_context.instrument)
         self.view.set_phase_table_combo_box(phase_table_list)
+
+    def handle_first_good_data_changed(self):
+        self._validate_data_changed(self.view.first_good_time, "First Good Data")
+
+    def handle_last_good_data_changed(self):
+        self._validate_data_changed(self.view.last_good_time, "Last Good Data")
+
+    def _validate_data_changed(self, data, string):
+        first_good_time = self.context.phase_context.options_dict['first_good_time']
+        last_good_time = self.context.phase_context.options_dict['last_good_time']
+        if self.view.first_good_time > self.view.last_good_time:
+            self.view.first_good_time = first_good_time
+            self.view.last_good_time = last_good_time
+            self.view.warning_popup("First Good Data cannot be greater than Last Good Data")
+        elif data < first_good_time:
+            self.view.first_good_time = first_good_time
+            self.view.warning_popup(f"{string} cannot be smaller than {first_good_time}")
+        elif data > last_good_time:
+            self.view.last_good_time = last_good_time
+            self.view.warning_popup(f"{string} cannot be greater than {last_good_time}")
