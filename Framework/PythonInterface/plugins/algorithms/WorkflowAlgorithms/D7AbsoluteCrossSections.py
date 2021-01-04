@@ -554,6 +554,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
             else:
                 RenameWorkspace(InputWorkspace=component_ws, OutputWorkspace=output_ws)
         self._set_units(output_ws, nMeasurements)
+        self._set_as_distribution(output_ws)
         self.setProperty('OutputWorkspace', mtd[output_ws])
 
 
