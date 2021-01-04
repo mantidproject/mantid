@@ -314,10 +314,6 @@ class PolDiffILLReduction(PythonAlgorithm):
                 absorber_entry = mtd[absorber_ws][entry_no % nMeasurements].name()
             else:
                 absorber_entry = mtd[absorber_ws][entry_no].name()
-            mtd[container_entry].setYUnit('')
-            mtd[transmission_ws].setYUnit('')
-            mtd[absorber_entry].setYUnit('')
-            entry.setYUnit('')
             container_corr = container_entry + '_corr'
             tmp_names.append(container_corr)
             Multiply(LHSWorkspace=transmission_ws, RHSWorkspace=container_entry, OutputWorkspace=container_corr)
