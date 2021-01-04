@@ -18,6 +18,7 @@ from mantidqt.interfacemanager import InterfaceManager
 
 from ..presenter.DrillPresenter import DrillPresenter
 from .DrillTableWidget import DrillTableWidget
+from .DrillContextMenu import DrillContextMenu
 
 
 class DrillView(QMainWindow):
@@ -584,45 +585,13 @@ class DrillView(QMainWindow):
 
     def showContextMenu(self, pos):
         """
-        Context menu. It contains:
-        * add/delete menu with a list of visible and hidden columns
+        Display the context menu.
 
         Args:
             pos (QPoint): mouse position in the widget frame
         """
-        # get position in global frame
-        mousePos = None
-        mouseRow = None
-        if isinstance(self.sender(), DrillTableWidget):
-            mousePos = self.table.viewport().mapToGlobal(pos)
-            mouseRow = self.table.indexAt(pos).row()
-        if not mousePos:
-            return
-
-        rightClickMenu = QMenu(self)
-
-        # add/delete column submenu
-        colMenu = rightClickMenu.addMenu("Add/Delete column")
-        allColumns = self.table.getColumnsOrder()
-        hiddenColumns = self.table.getHiddenColumns()
-        for column in allColumns:
-            if column in hiddenColumns:
-                action = colMenu.addAction(icons.get_icon("mdi.close"), column)
-            else:
-                action = colMenu.addAction(icons.get_icon("mdi.check"), column)
-            action.triggered.connect(lambda checked, c=column:
-                                     self.table.toggleColumnVisibility(c))
-
-        # group submenu
-        rows = self.table.getRowsFromSelectedCells()
-        groupAction = rightClickMenu.addAction("Group selected rows")
-        groupAction.triggered.connect(lambda : self.groupRows(rows))
-        ungroupAction = rightClickMenu.addAction("Ungroup selected rows")
-        ungroupAction.triggered.connect(lambda : self.ungroupRows(rows))
-        masterAction = rightClickMenu.addAction("Set row as master row")
-        masterAction.triggered.connect(lambda : self.setMasterRow(mouseRow))
-
-        rightClickMenu.exec(mousePos)
+        menu = DrillContextMenu(self.table.viewport().mapToGlobal(pos), self)
+        self._presenter.onShowContextMenu(menu)
 
     ###########################################################################
     # for model calls                                                         #

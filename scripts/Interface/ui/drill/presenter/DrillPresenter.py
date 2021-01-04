@@ -9,6 +9,7 @@ from qtpy.QtWidgets import QFileDialog, QMessageBox
 
 from ..view.DrillSettingsDialog import DrillSettingsDialog
 from ..model.DrillModel import DrillModel
+from .DrillContextMenuPresenter import DrillContextMenuPresenter
 
 
 class DrillPresenter:
@@ -342,6 +343,15 @@ class DrillPresenter:
                 lambda : self.model.setSettings(sw.getSettings())
                 )
         sw.show()
+
+    def onShowContextMenu(self, menu):
+        """
+        Triggered when the user ask the context menu (right click).
+
+        Args:
+            menu (DrillContextMenu): view of the context menu
+        """
+        DrillContextMenuPresenter(self.view, self.model, menu)
 
     def onClose(self):
         """
