@@ -49,22 +49,22 @@ public:
   SCDCalibratePanels2Test()
       : wsname("wsSCDCalibratePanels2Test"),
         pwsname("pwsSCDCalibratePanels2Test"),
-        tmppwsname("tmppwsSCDCalibratePanels2Test"),  // fixed workspace name
-        bank_xtop("bank73/sixteenpack"),     //
-        bank_xcenter("bank12/sixteenpack"),  //
-        bank_xbottom("bank11/sixteenpack"),  //
-        bank_yright("bank59/sixteenpack"),  //
-        bank_yleft("bank58/sixteenpack"),   //
-        bank_ytop("bank88/sixteenpack"),    //
-        bank_ybottom("bank26/sixteenpack"), //
+        tmppwsname("tmppwsSCDCalibratePanels2Test"), // fixed workspace name
+        bank_xtop("bank73/sixteenpack"),             //
+        bank_xcenter("bank12/sixteenpack"),          //
+        bank_xbottom("bank11/sixteenpack"),          //
+        bank_yright("bank59/sixteenpack"),           //
+        bank_yleft("bank58/sixteenpack"),            //
+        bank_ytop("bank88/sixteenpack"),             //
+        bank_ybottom("bank26/sixteenpack"),          //
         silicon_a(5.431), silicon_b(5.431), silicon_c(5.431),   // angstrom
         silicon_alpha(90), silicon_beta(90), silicon_gamma(90), // degree
         silicon_cs(CrystalStructure("5.431 5.431 5.431", "F d -3 m",
                                     "Si 0 0 0 1.0 0.02")),
-        dspacing_min(1.0), dspacing_max(10.0),  //
+        dspacing_min(1.0), dspacing_max(10.0),    //
         wavelength_min(0.8), wavelength_max(2.9), //
-        omega_step(3.0),  //
-        TOLERANCE_L(1e-4), TOLERANCE_R(1e-2), LOGCHILDALG(false) {
+        omega_step(3.0),                          //
+        TOLERANCE_L(1e-3), TOLERANCE_R(1e-2), LOGCHILDALG(false) {
     // NOTE:
     //  The MAGIC PIECE, basically we need to let AlgorithmFactory
     //  to load a non-related algorithm, then somehow AlgorithmFactory

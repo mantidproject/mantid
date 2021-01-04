@@ -163,33 +163,12 @@ namespace Crystal {
     getBankNames(m_pws);
 
     // STEP_2: optimize T0,L1,L2,etc.
-    // calibrate T0 if required
     if (calibrateT0)
-        optimizeT0(m_pws);
-
-    // see if multiple run will get better results
-    if (calibrateL1 && calibrateBanks) {
-      // L1 and banks are inter-dependent
-      double l1 = -m_pws->getInstrument()->getSource()->getPos().Z();
-      double dl1;
-      int n_iter = 0;
-      do {
-        optimizeL1(m_pws);
-        optimizeBanks(m_pws);
-        dl1 = std::abs(-m_pws->getInstrument()->getSource()->getPos().Z() - l1);
-        l1 = -m_pws->getInstrument()->getSource()->getPos().Z();
-        n_iter++;
-        g_log.notice() << "--@iter " << n_iter << " with l1=" << l1
-                       << ", deltaL1=" << dl1 << "\n";
-        if (n_iter > 1000)
-          break;
-      } while (dl1 > 1e-5);
-    } else {
-      if (calibrateL1)
-        optimizeL1(m_pws);
-      if (calibrateBanks)
-        optimizeBanks(m_pws);
-    }
+      optimizeT0(m_pws);
+    if (calibrateL1)
+      optimizeL1(m_pws);
+    if (calibrateBanks)
+      optimizeBanks(m_pws);
 
     // STEP_3: Write to disk if required
     Instrument_sptr instCalibrated =
@@ -337,56 +316,86 @@ namespace Crystal {
           ev[i * 3 + j] = 1;
         }
       }
-
-      //-- step 2: invoke Fit to find the translation
-      IAlgorithm_sptr fitBankTrans_alg =
-          createChildAlgorithm("Fit", -1, -1, false);
+      //-- step 2&3: invoke fit to find both traslation and rotation
+      IAlgorithm_sptr fitBank_alg = createChildAlgorithm("Fit", -1, -1, false);
       //---- setup obj fun def
       std::ostringstream fun_str;
       fun_str << "name=SCDCalibratePanels2ObjFunc,Workspace=" << pwsBankiName
               << ",ComponentName=" << bankname;
       //---- bounds&constraints def
       std::ostringstream tie_str;
-      tie_str << "drotx=0.0,droty=0.0,drotz=0.0,dT0=" << m_T0;
+      tie_str << "dT0=" << m_T0;
+      std::ostringstream constraint_str;
+      constraint_str << "-5 < drotx < 5, -5 < droty < 5, -5 < drotz < 5";
       //---- set&go
-      fitBankTrans_alg->setPropertyValue("Function", fun_str.str());
-      fitBankTrans_alg->setProperty("Ties", tie_str.str());
-      fitBankTrans_alg->setProperty("InputWorkspace", wsBankCali);
-      fitBankTrans_alg->setProperty("CreateOutput", true);
-      fitBankTrans_alg->setProperty("Output", "fit");
-      fitBankTrans_alg->executeAsChildAlg();
+      fitBank_alg->setPropertyValue("Function", fun_str.str());
+      fitBank_alg->setProperty("Ties", tie_str.str());
+      fitBank_alg->setProperty("Constraints", constraint_str.str());
+      fitBank_alg->setProperty("InputWorkspace", wsBankCali);
+      fitBank_alg->setProperty("CreateOutput", true);
+      fitBank_alg->setProperty("Output", "fit");
+      fitBank_alg->executeAsChildAlg();
       //---- cache results
-      double chi2OverDOFTrans =
-          fitBankTrans_alg->getProperty("OutputChi2overDoF");
-      ITableWorkspace_sptr rstFitBankTrans =
-          fitBankTrans_alg->getProperty("OutputParameters");
-      double dx = rstFitBankTrans->getRef<double>("Value", 0);
-      double dy = rstFitBankTrans->getRef<double>("Value", 1);
-      double dz = rstFitBankTrans->getRef<double>("Value", 2);
-      adjustComponent(dx, dy, dz, 0.0, 0.0, 0.0, bankname, pwsBanki);
+      double chi2OverDOF = fitBank_alg->getProperty("OutputChi2overDoF");
+      ITableWorkspace_sptr rstFitBank =
+          fitBank_alg->getProperty("OutputParameters");
+      double dx = rstFitBank->getRef<double>("Value", 0);
+      double dy = rstFitBank->getRef<double>("Value", 1);
+      double dz = rstFitBank->getRef<double>("Value", 2);
+      double drotx = rstFitBank->getRef<double>("Value", 3);
+      double droty = rstFitBank->getRef<double>("Value", 4);
+      double drotz = rstFitBank->getRef<double>("Value", 5);
 
-      //-- step 3: invoki Fit to find the rotation
-      IAlgorithm_sptr fitBankRot_alg =
-          createChildAlgorithm("Fit", -1, -1, false);
-      //---- reuse the fun def since it should be the same
-      //---- bounds&constraints def
-      std::ostringstream tie2_str;
-      tie_str << "dx=0.0,dy=0.0,dz=0.0,dT0=" << m_T0;
-      // tie2_str << "dx=" << dx << ",dy=" << dy << ",dz=" << dz
-      //          << ",dT0=" << m_T0;
-      //----set&go
-      fitBankRot_alg->setPropertyValue("Function", fun_str.str());
-      fitBankRot_alg->setProperty("Ties", tie2_str.str());
-      fitBankRot_alg->setProperty("InputWorkspace", wsBankCali);
-      fitBankRot_alg->setProperty("CreateOutput", true);
-      fitBankRot_alg->setProperty("Output", "fit");
-      fitBankRot_alg->executeAsChildAlg();
-      double chi2OverDOFRot = fitBankRot_alg->getProperty("OutputChi2overDoF");
-      ITableWorkspace_sptr rstFitBankRot =
-          fitBankRot_alg->getProperty("OutputParameters");
-      double drotx = rstFitBankRot->getRef<double>("Value", 3);
-      double droty = rstFitBankRot->getRef<double>("Value", 4);
-      double drotz = rstFitBankRot->getRef<double>("Value", 5);
+      // //-- step 2: invoke Fit to find the translation
+      // IAlgorithm_sptr fitBankTrans_alg =
+      //     createChildAlgorithm("Fit", -1, -1, false);
+      // //---- setup obj fun def
+      // std::ostringstream fun_str;
+      // fun_str << "name=SCDCalibratePanels2ObjFunc,Workspace=" << pwsBankiName
+      //         << ",ComponentName=" << bankname;
+      // //---- bounds&constraints def
+      // std::ostringstream tie_str;
+      // tie_str << "drotx=0.0,droty=0.0,drotz=0.0,dT0=" << m_T0;
+      // //---- set&go
+      // fitBankTrans_alg->setPropertyValue("Function", fun_str.str());
+      // fitBankTrans_alg->setProperty("Ties", tie_str.str());
+      // fitBankTrans_alg->setProperty("InputWorkspace", wsBankCali);
+      // fitBankTrans_alg->setProperty("CreateOutput", true);
+      // fitBankTrans_alg->setProperty("Output", "fit");
+      // fitBankTrans_alg->executeAsChildAlg();
+      // //---- cache results
+      // double chi2OverDOFTrans =
+      //     fitBankTrans_alg->getProperty("OutputChi2overDoF");
+      // ITableWorkspace_sptr rstFitBankTrans =
+      //     fitBankTrans_alg->getProperty("OutputParameters");
+      // double dx = rstFitBankTrans->getRef<double>("Value", 0);
+      // double dy = rstFitBankTrans->getRef<double>("Value", 1);
+      // double dz = rstFitBankTrans->getRef<double>("Value", 2);
+      // adjustComponent(dx, dy, dz, 0.0, 0.0, 0.0, bankname, pwsBanki);
+
+      // //-- step 3: invoki Fit to find the rotation
+      // IAlgorithm_sptr fitBankRot_alg =
+      //     createChildAlgorithm("Fit", -1, -1, false);
+      // //---- reuse the fun def since it should be the same
+      // //---- bounds&constraints def
+      // std::ostringstream tie2_str;
+      // tie_str << "dx=0.0,dy=0.0,dz=0.0,dT0=" << m_T0;
+      // // tie2_str << "dx=" << dx << ",dy=" << dy << ",dz=" << dz
+      // //          << ",dT0=" << m_T0;
+      // //----set&go
+      // fitBankRot_alg->setPropertyValue("Function", fun_str.str());
+      // fitBankRot_alg->setProperty("Ties", tie2_str.str());
+      // fitBankRot_alg->setProperty("InputWorkspace", wsBankCali);
+      // fitBankRot_alg->setProperty("CreateOutput", true);
+      // fitBankRot_alg->setProperty("Output", "fit");
+      // fitBankRot_alg->executeAsChildAlg();
+      // double chi2OverDOFRot =
+      // fitBankRot_alg->getProperty("OutputChi2overDoF"); ITableWorkspace_sptr
+      // rstFitBankRot =
+      //     fitBankRot_alg->getProperty("OutputParameters");
+      // double drotx = rstFitBankRot->getRef<double>("Value", 3);
+      // double droty = rstFitBankRot->getRef<double>("Value", 4);
+      // double drotz = rstFitBankRot->getRef<double>("Value", 5);
 
       //-- step 4: update the instrument with optimization results
       adjustComponent(dx, dy, dz, drotx, droty, drotz, bankname, pws);
@@ -394,9 +403,15 @@ namespace Crystal {
       //-- step 5: logging
       g_log.notice() << "-- Fit " << bankname << " results:\n"
                      << "    d(x,y,z) = (" << dx << "," << dy << "," << dz
-                     << ") with chi2/DOF=" << chi2OverDOFTrans   << "\n"
+                     << ")\n"
                      << "    drot(x,y,z) = (" << drotx << "," << droty << ","
-                     << drotz << ") with chi2/DOF=" << chi2OverDOFRot << "\n";
+                     << drotz << ")\n"
+                     << "    chi2/DOF = " << chi2OverDOF << "\n";
+      // g_log.notice() << "-- Fit " << bankname << " results:\n"
+      //           << "    d(x,y,z) = (" << dx << "," << dy << "," << dz
+      //           << ") with chi2/DOF=" << chi2OverDOFTrans   << "\n"
+      //           << "    drot(x,y,z) = (" << drotx << "," << droty << ","
+      //           << drotz << ") with chi2/DOF=" << chi2OverDOFRot << "\n";
 
       // -- cleanup
       AnalysisDataService::Instance().remove(pwsBankiName);
