@@ -33,9 +33,7 @@ namespace Crystal {
 class MANTID_CRYSTAL_DLL SCDCalibratePanels2 : public Mantid::API::Algorithm{
 public:
   /// Algorithm's name for identification
-  const std::string name() const override {
-    return "SCDCalibratePanels2";
-  }
+  const std::string name() const override { return "SCDCalibratePanels"; }
 
   /// Summary of algorithm's purpose
   const std::string summary() const override {
@@ -45,7 +43,7 @@ public:
   }
 
   /// Algorithm's version, overriding a virtual method
-  int version() const override {return 1;}
+  int version() const override { return 2; }
 
   /// Algorithm's category, overriding a virtual method
   const std::string category() const override {
