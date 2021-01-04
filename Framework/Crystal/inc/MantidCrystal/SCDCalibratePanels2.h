@@ -102,6 +102,8 @@ private:
   double m_a, m_b, m_c, m_alpha, m_beta, m_gamma;
   double m_T0 = 0.0;
   double m_L1 = 2000.0;
+  double m_tolerance_translation = 1e-4; // meters
+  double m_tolerance_rotation = 1e-3;    // degree
   boost::container::flat_set<std::string> m_BankNames;
   const bool LOGCHILDALG{false};
   const int MINIMUM_PEAKS_PER_BANK{6};

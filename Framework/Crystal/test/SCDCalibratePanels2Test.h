@@ -64,8 +64,8 @@ public:
         dspacing_min(1.0), dspacing_max(10.0),    //
         wavelength_min(0.8), wavelength_max(2.9), //
         omega_step(3.0),                          //
-        TOLERANCE_L(1e-2), // this calibration has intrinsic accuracy limit of
-                           // 0.01m for translation
+        TOLERANCE_L(1e-3), // this calibration has intrinsic accuracy limit of
+                           // 1mm for translation
         TOLERANCE_R(1e-4), // this calibration has intrinsic accuracy limit of
                            // 1e-4 deg for rotation
         LOGCHILDALG(false) {
@@ -108,102 +108,99 @@ public:
     TS_ASSERT(alg.isInitialized());
   }
 
-  // /**
-  //  * @brief Trivial case where all components are in ideal/starting position
-  //  *        Therefore the calibration results should be close to a zero
-  //  *        vector.
-  //  */
-  // void test_Null_Case() {
-  //   g_log.notice() << "test: !Null case!\n";
+  /**
+   * @brief Trivial case where all components are in ideal/starting position
+   *        Therefore the calibration results should be close to a zero
+   *        vector.
+   */
+  void test_Null_Case() {
+    g_log.notice() << "test: !Null case!\n";
 
-  //   // Generate unique temp files
-  //   auto isawFile = boost::filesystem::temp_directory_path();
-  //   isawFile /= boost::filesystem::unique_path("nullcase_%%%%%%%%.DetCal");
-  //   auto xmlFile = boost::filesystem::temp_directory_path();
-  //   xmlFile /= boost::filesystem::unique_path("nullcase_%%%%%%%%.xml");
+    // Generate unique temp files
+    auto isawFile = boost::filesystem::temp_directory_path();
+    isawFile /= boost::filesystem::unique_path("nullcase_%%%%%%%%.DetCal");
+    auto xmlFile = boost::filesystem::temp_directory_path();
+    xmlFile /= boost::filesystem::unique_path("nullcase_%%%%%%%%.xml");
 
-  //   g_log.notice() << "-- generate simulated workspace\n";
-  //   MatrixWorkspace_sptr ws = m_ws->clone();
-  //   MatrixWorkspace_sptr wsraw = ws->clone();
+    g_log.notice() << "-- generate simulated workspace\n";
+    MatrixWorkspace_sptr ws = m_ws->clone();
+    MatrixWorkspace_sptr wsraw = ws->clone();
 
-  //   // Trivial case, no component undergoes any affine transformation
-  //   g_log.notice() << "-- trivial case, no components moved\n";
+    // Trivial case, no component undergoes any affine transformation
+    g_log.notice() << "-- trivial case, no components moved\n";
 
-  //   g_log.notice() << "-- generate peaks\n";
-  //   PeaksWorkspace_sptr pws = generateSimulatedPeaksWorkspace(ws);
-  //   PeaksWorkspace_sptr pwsref = pws->clone();
+    g_log.notice() << "-- generate peaks\n";
+    PeaksWorkspace_sptr pws = generateSimulatedPeaksWorkspace(ws);
+    PeaksWorkspace_sptr pwsref = pws->clone();
 
-  //   // Pretend we don't know the answer
-  //   g_log.notice() << "-- reset instrument positions&orientations\n";
-  //   pws->setInstrument(wsraw->getInstrument());
+    // Pretend we don't know the answer
+    g_log.notice() << "-- reset instrument positions&orientations\n";
+    pws->setInstrument(wsraw->getInstrument());
 
-  //   // Perform the calibration
-  //   g_log.notice() << "-- start calibration\n";
-  //   runCalibration(isawFile.string(), xmlFile.string(), pws, false, true,
-  //   true);
+    // Perform the calibration
+    g_log.notice() << "-- start calibration\n";
+    runCalibration(isawFile.string(), xmlFile.string(), pws, false, true, true);
 
-  //   // Check if the calibration returns the same instrument as we put in
-  //   g_log.notice() << "-- validate calibration output\n";
-  //   TS_ASSERT(validateCalibrationResults(pwsref, wsraw, xmlFile.string()));
+    // Check if the calibration returns the same instrument as we put in
+    g_log.notice() << "-- validate calibration output\n";
+    TS_ASSERT(validateCalibrationResults(pwsref, wsraw, xmlFile.string()));
 
-  //   // Cleanup
-  //   doCleanup();
-  // }
+    // Cleanup
+    doCleanup();
+  }
 
-  // /**
-  //  * @brief Single variant case where only global var is adjusted.
-  //  *
-  //  * NOTE: technically we should also check T0, but the client, CORELLI
-  //  *       team does not seem to care about using T0, therefore we are
-  //  *       not implmenting T0 calibration here.
-  //  *
-  //  */
-  // void test_L1_Shift() {
-  //   g_log.notice() << "test: !Source Shift (L1 change)!\n";
+  /**
+   * @brief Single variant case where only global var is adjusted.
+   *
+   * NOTE: technically we should also check T0, but the client, CORELLI
+   *       team does not seem to care about using T0, therefore we are
+   *       not implmenting T0 calibration here.
+   *
+   */
+  void test_L1_Shift() {
+    g_log.notice() << "test: !Source Shift (L1 change)!\n";
 
-  //   // prescribed shift
-  //   const double dL1 = boost::math::constants::e<double>();
+    // prescribed shift
+    const double dL1 = boost::math::constants::e<double>();
 
-  //   // Generate unique temp files
-  //   auto isawFile = boost::filesystem::temp_directory_path();
-  //   isawFile /= boost::filesystem::unique_path("changeL1_%%%%%%%%.DetCal");
-  //   auto xmlFile = boost::filesystem::temp_directory_path();
-  //   xmlFile /= boost::filesystem::unique_path("changeL1_%%%%%%%%.xml");
+    // Generate unique temp files
+    auto isawFile = boost::filesystem::temp_directory_path();
+    isawFile /= boost::filesystem::unique_path("changeL1_%%%%%%%%.DetCal");
+    auto xmlFile = boost::filesystem::temp_directory_path();
+    xmlFile /= boost::filesystem::unique_path("changeL1_%%%%%%%%.xml");
 
-  //   g_log.notice() << "-- generate simulated workspace\n";
-  //   MatrixWorkspace_sptr ws = m_ws->clone();
-  //   MatrixWorkspace_sptr wsraw = ws->clone();
+    g_log.notice() << "-- generate simulated workspace\n";
+    MatrixWorkspace_sptr ws = m_ws->clone();
+    MatrixWorkspace_sptr wsraw = ws->clone();
 
-  //   // move source
-  //   adjustComponent(0.0, 0.0, dL1, 0.0, 0.0, 0.0,
-  //                   ws->getInstrument()->getSource()->getName(), ws);
+    // move source
+    adjustComponent(0.0, 0.0, dL1, 0.0, 0.0, 0.0,
+                    ws->getInstrument()->getSource()->getName(), ws);
 
-  //   g_log.notice() << "-- generate peaks\n";
-  //   PeaksWorkspace_sptr pws = generateSimulatedPeaksWorkspace(ws);
-  //   PeaksWorkspace_sptr pwsref = pws->clone();
+    g_log.notice() << "-- generate peaks\n";
+    PeaksWorkspace_sptr pws = generateSimulatedPeaksWorkspace(ws);
+    PeaksWorkspace_sptr pwsref = pws->clone();
 
-  //   // Pretend we don't know the answer
-  //   g_log.notice() << "-- reset instrument positions&orientations\n";
-  //   g_log.notice() << "    * before reset L1 = "
-  //                  << pws->getInstrument()->getSource()->getPos().Z() <<
-  //                  "\n";
-  //   pws->setInstrument(wsraw->getInstrument());
-  //   g_log.notice() << "    * after reset L1 = "
-  //                  << pws->getInstrument()->getSource()->getPos().Z() <<
-  //                  "\n";
+    // Pretend we don't know the answer
+    g_log.notice() << "-- reset instrument positions&orientations\n";
+    g_log.notice() << "    * before reset L1 = "
+                   << pws->getInstrument()->getSource()->getPos().Z() << "\n";
+    pws->setInstrument(wsraw->getInstrument());
+    g_log.notice() << "    * after reset L1 = "
+                   << pws->getInstrument()->getSource()->getPos().Z() << "\n";
 
-  //   // Perform the calibration
-  //   g_log.notice() << "-- start calibration\n";
-  //   runCalibration(isawFile.string(), xmlFile.string(), pws, false, true,
-  //                  false);
+    // Perform the calibration
+    g_log.notice() << "-- start calibration\n";
+    runCalibration(isawFile.string(), xmlFile.string(), pws, false, true,
+                   false);
 
-  //   // Check if the calibration returns the same instrument as we put in
-  //   g_log.notice() << "-- validate calibration output\n";
-  //   TS_ASSERT(validateCalibrationResults(pwsref, wsraw, xmlFile.string()));
+    // Check if the calibration returns the same instrument as we put in
+    g_log.notice() << "-- validate calibration output\n";
+    TS_ASSERT(validateCalibrationResults(pwsref, wsraw, xmlFile.string()));
 
-  //   // Cleanup
-  //   doCleanup();
-  // }
+    // Cleanup
+    doCleanup();
+  }
 
   // /**
   //  * @brief Single panel translated by (dx, dy, dz)
@@ -528,6 +525,8 @@ public:
   /**
    * @brief Everything goes
    *
+   * NOTE: not enough peaks on the y_panels, so we have to work with only the
+   *       x_panels
    */
   void test_Exec() {
     g_log.notice()
@@ -558,7 +557,6 @@ public:
 
     g_log.notice() << "-- translate source by " << dL1 << "\n"
                    << "-- for x(top,center,bottom) - bank(73,12,11)\n"
-                   << "       y(right,left,top,bottom) - bank(59,58,88,26)\n"
                    << "   translate by (" << dx << "," << dy << "," << dz
                    << ")\n"
                    << "   rotate by\n"
@@ -571,10 +569,6 @@ public:
     adjustComponent(dx, dy, dz, drotx, droty, drotz, bank_xtop, ws);
     adjustComponent(dx, dy, dz, drotx, droty, drotz, bank_xcenter, ws);
     adjustComponent(dx, dy, dz, drotx, droty, drotz, bank_xbottom, ws);
-    adjustComponent(dx, dy, dz, drotx, droty, drotz, bank_yright, ws);
-    adjustComponent(dx, dy, dz, drotx, droty, drotz, bank_yleft, ws);
-    adjustComponent(dx, dy, dz, drotx, droty, drotz, bank_ytop, ws);
-    adjustComponent(dx, dy, dz, drotx, droty, drotz, bank_ybottom, ws);
 
     g_log.notice() << "-- generate peaks\n";
     PeaksWorkspace_sptr pws = generateSimulatedPeaksWorkspace(ws);

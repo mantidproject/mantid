@@ -165,10 +165,39 @@ namespace Crystal {
     // STEP_2: optimize T0,L1,L2,etc.
     if (calibrateT0)
       optimizeT0(m_pws);
-    if (calibrateL1)
-      optimizeL1(m_pws);
-    if (calibrateBanks)
-      optimizeBanks(m_pws);
+    
+    if (calibrateL1 && calibrateBanks){
+      // double l1 = -m_pws->getInstrument()->getSource()->getPos().Z();
+      // double dl1;
+      // int niter = 0;
+      // do{
+      //   niter++;
+      //   optimizeL1(m_pws);
+      //   optimizeBanks(m_pws);
+      //   dl1 = std::abs(-m_pws->getInstrument()->getSource()->getPos().Z() - l1);
+      //   l1 = -m_pws->getInstrument()->getSource()->getPos().Z();
+
+      //   g_log.notice() << "--@iter" << niter << "\n"
+      //                  << "  l1 = " << l1 << "\n"
+      //                  << "  dl1 = " << dl1 << "\n";
+      //   if (niter > 2)
+      //     break;
+      // } while(dl1>m_tolerance_translation);
+
+      // NOTE: two iter is the sweet spot
+      for (int i = 0; i < 2; ++i){
+        optimizeL1(m_pws);
+        optimizeBanks(m_pws);
+      }
+
+    }
+    else {
+      if (calibrateL1)
+        optimizeL1(m_pws);
+      if (calibrateBanks)
+        optimizeBanks(m_pws);
+    }
+
 
     // STEP_3: Write to disk if required
     Instrument_sptr instCalibrated =
@@ -398,16 +427,38 @@ namespace Crystal {
       // double drotz = rstFitBankRot->getRef<double>("Value", 5);
 
       //-- step 4: update the instrument with optimization results
-      adjustComponent(dx, dy, dz, drotx, droty, drotz, bankname, pws);
+      //           if the fit results are above the tolerance/threshold
+      if ((std::abs(dx) < m_tolerance_translation) &&
+          (std::abs(dy) < m_tolerance_translation) &&
+          (std::abs(dz) < m_tolerance_translation) &&
+          (std::abs(drotx) < m_tolerance_rotation) &&
+          (std::abs(droty) < m_tolerance_rotation) &&
+          (std::abs(drotz) < m_tolerance_rotation)) {
+        // skip the adjustment of the component as it is juat noise
+        g_log.notice() << "-- Fit " << bankname
+                       << " results below tolerance, skippping\n";
+      } else {
+        adjustComponent(dx, dy, dz, drotx, droty, drotz, bankname, pws);
+        g_log.notice() << "-- Fit " << bankname << " results using "
+                       << nBankPeaks << " peaks:\n"
+                       << "    d(x,y,z) = (" << dx << "," << dy << "," << dz
+                       << ")\n"
+                       << "    drot(x,y,z) = (" << drotx << "," << droty << ","
+                       << drotz << ")\n"
+                       << "    chi2/DOF = " << chi2OverDOF << "\n";
+      }
 
-      //-- step 5: logging
-      g_log.notice() << "-- Fit " << bankname << " results using " << nBankPeaks
-                     << " peaks:\n"
-                     << "    d(x,y,z) = (" << dx << "," << dy << "," << dz
-                     << ")\n"
-                     << "    drot(x,y,z) = (" << drotx << "," << droty << ","
-                     << drotz << ")\n"
-                     << "    chi2/DOF = " << chi2OverDOF << "\n";
+      // adjustComponent(dx, dy, dz, drotx, droty, drotz, bankname, pws);
+
+      // //-- step 5: logging
+      // g_log.notice() << "-- Fit " << bankname << " results using " <<
+      // nBankPeaks
+      //                << " peaks:\n"
+      //                << "    d(x,y,z) = (" << dx << "," << dy << "," << dz
+      //                << ")\n"
+      //                << "    drot(x,y,z) = (" << drotx << "," << droty << ","
+      //                << drotz << ")\n"
+      //                << "    chi2/DOF = " << chi2OverDOF << "\n";
       // g_log.notice() << "-- Fit " << bankname << " results:\n"
       //           << "    d(x,y,z) = (" << dx << "," << dy << "," << dz
       //           << ") with chi2/DOF=" << chi2OverDOFTrans   << "\n"
