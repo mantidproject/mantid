@@ -181,6 +181,7 @@ class DrillView(QMainWindow):
         self.actionPasteRow.triggered.connect(self.pasteCells)
         self.actionErase.triggered.connect(self.eraseSelectedCells)
         self.actionProcessRow.triggered.connect(self.process.emit)
+        self.actionProcessGroup.triggered.connect(self.processGroup.emit)
         self.actionProcessAll.triggered.connect(self.processAll.emit)
         self.actionStopProcessing.triggered.connect(self.processStopped.emit)
         self.actionHelp.triggered.connect(self.helpWindow)
