@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import systemtesting
 from mantid.api import MatrixWorkspace, WorkspaceGroup, Run
-from mantid.simpleapi import CloneWorkspace, config, Load, mtd, PolDiffILLReduction
+from mantid.simpleapi import CloneWorkspace, config, D7AbsoluteCrossSections, Load, mtd, PolDiffILLReduction
 from mantid.geometry import Instrument
 
 
@@ -32,7 +32,8 @@ class PolDiffILLReductionTest(systemtesting.MantidSystemTest):
                                   'ContainerRadius': 2.7, 'ContainerInnerRadius':1.99, 'ContainerOuterRadius':2.7,
                                   'ContainerFrontThickness':0.2, 'ContainerBackThickness':0.2,
                                   'ContainerChemicalFormula': 'Al', 'ContainerDensity': 0.01,
-                                  'EventsPerPoint':100, 'ElementSize':1.0}
+                                  'EventsPerPoint':100, 'ElementSize':1.0, 'IncoherentCrossSection':0.1,
+                                  'SampleSpin':1.5}
 
     def cleanup(self):
         mtd.clear()
@@ -166,6 +167,44 @@ class PolDiffILLReductionTest(systemtesting.MantidSystemTest):
                             OutputTreatment='Individual')
         self._check_output(mtd['sample_individual'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
         self._check_process_flag(mtd['sample_individual'], 'Sample')
+        D7AbsoluteCrossSections(InputWorkspace='sample_individual', OutputWorkspace='sample_individual_not_normalised',
+                                CrossSectionSeparationMethod='XYZ',
+                                NormalisationMethod='None',
+                                OutputTreatment='Sum',
+                                OutputUnits='Q',
+                                SampleAndEnvironmentProperties=self._sampleProperties)
+        self._check_output(mtd['sample_individual_not_normalised'], 263, 1, 6, 'q', 'MomentumTransfer', 'Height',
+                           'Label', post_processed=True)
+
+    def d7_reduction_test_sample_individual_incoherent(self):
+        PolDiffILLReduction(Run='397004,397005', ProcessAs='Sample', OutputWorkspace='sample_individual',
+                            SampleAndEnvironmentProperties=self._sampleProperties,
+                            OutputTreatment='Individual')
+        self._check_output(mtd['sample_individual'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
+        self._check_process_flag(mtd['sample_individual'], 'Sample')
+        D7AbsoluteCrossSections(InputWorkspace='sample_individual', OutputWorkspace='sample_individual_incoherent',
+                                CrossSectionSeparationMethod='XYZ',
+                                NormalisationMethod='Incoherent',
+                                OutputTreatment='Sum',
+                                OutputUnits='TwoTheta',
+                                SampleAndEnvironmentProperties=self._sampleProperties)
+        self._check_output(mtd['sample_individual_incoherent'], 263, 1, 6, 'Scattering Angle', 'Label', 'Height',
+                           'Label', post_processed=True)
+
+    def d7_reduction_test_sample_individual_paramagnetic(self):
+        PolDiffILLReduction(Run='397004,397005', ProcessAs='Sample', OutputWorkspace='sample_individual',
+                            SampleAndEnvironmentProperties=self._sampleProperties,
+                            OutputTreatment='Individual')
+        self._check_output(mtd['sample_individual'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
+        self._check_process_flag(mtd['sample_individual'], 'Sample')
+        D7AbsoluteCrossSections(InputWorkspace='sample_individual', OutputWorkspace='sample_individual_paramagnetic',
+                                CrossSectionSeparationMethod='XYZ',
+                                NormalisationMethod='Paramagnetic',
+                                OutputTreatment='Individual',
+                                OutputUnits='Q',
+                                SampleAndEnvironmentProperties=self._sampleProperties)
+        self._check_output(mtd['sample_individual_paramagnetic'], 132, 1, 6, 'q', 'MomentumTransfer', 'Wavelength',
+                           'Wavelength', post_processed=True, normalised_individually=True)
 
     def d7_reduction_test_sample_sum(self):
         PolDiffILLReduction(Run='397004,397005', ProcessAs='Sample', OutputWorkspace='sample_sum',
@@ -208,17 +247,35 @@ class PolDiffILLReductionTest(systemtesting.MantidSystemTest):
         self._check_output(mtd['sample_full'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
         self._check_process_flag(mtd['sample_full'], 'Sample')
 
+        D7AbsoluteCrossSections(InputWorkspace='sample_full', OutputWorkspace='sample_full_normalised',
+                                CrossSectionSeparationMethod='XYZ',
+                                VanadiumInputWorkspace='vanadium_full',
+                                NormalisationMethod='Vanadium',
+                                OutputTreatment='Sum',
+                                OutputUnits='Q',
+                                SampleAndEnvironmentProperties=self._sampleProperties,
+                                AbsoluteUnitsNormalisation=True)
+        self._check_output(mtd['sample_full_normalised'], 263, 1, 6, 'q', 'MomentumTransfer', 'Height', 'Label',
+                           post_processed=True)
+
     def _check_process_flag(self, ws, value):
         self.assertTrue(ws[0].getRun().getLogData('ProcessedAs').value, value)
 
-    def _check_output(self, ws, blocksize, spectra, nEntries, x_unit, x_unit_id, y_unit, y_unit_id):
+    def _check_output(self, ws, blocksize, spectra, nEntries, x_unit, x_unit_id, y_unit, y_unit_id, post_processed=False,
+                      normalised_individually=False):
         self.assertTrue(ws)
         self.assertTrue(isinstance(ws, WorkspaceGroup))
         self.assertTrue(ws.getNumberOfEntries(), nEntries)
         for entry in ws:
             self.assertTrue(isinstance(entry, MatrixWorkspace))
-            self.assertTrue(entry.isHistogramData())
-            self.assertTrue(not entry.isDistribution())
+            if post_processed:
+                self.assertTrue(entry.isDistribution())
+            else:
+                self.assertTrue(not entry.isDistribution())
+            if normalised_individually:
+                self.assertTrue(not entry.isHistogramData())
+            else:
+                self.assertTrue(entry.isHistogramData())
             self.assertEqual(entry.getAxis(0).getUnit().caption(), x_unit)
             self.assertEqual(entry.getAxis(0).getUnit().unitID(), x_unit_id)
             self.assertEqual(entry.getAxis(1).getUnit().caption(), y_unit)
@@ -245,5 +302,7 @@ class PolDiffILLReductionTest(systemtesting.MantidSystemTest):
         self.d7_reduction_test_vanadium_sum_annulus()
         self.d7_reduction_test_vanadium_sum_user()
         self.d7_reduction_test_sample_individual()
+        self.d7_reduction_test_sample_individual_incoherent()
+        self.d7_reduction_test_sample_individual_paramagnetic()
         self.d7_reduction_test_sample_sum()
         self.d7_reduction_test_sample_full_reduction()
