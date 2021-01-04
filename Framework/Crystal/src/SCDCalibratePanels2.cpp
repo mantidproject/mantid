@@ -167,20 +167,36 @@ namespace Crystal {
     if (calibrateT0)
         optimizeT0(m_pws);
 
-    // calibrate L1 if required
-    if (calibrateL1)
+    // see if multiple run will get better results
+    if (calibrateL1 && calibrateBanks) {
+      // L1 and banks are inter-dependent
+      double l1 = -m_pws->getInstrument()->getSource()->getPos().Z();
+      double dl1;
+      int n_iter = 0;
+      do {
         optimizeL1(m_pws);
-
-    // calibrate each bank
-    if (calibrateBanks)
         optimizeBanks(m_pws);
+        dl1 = std::abs(-m_pws->getInstrument()->getSource()->getPos().Z() - l1);
+        l1 = -m_pws->getInstrument()->getSource()->getPos().Z();
+        n_iter++;
+        g_log.notice() << "--@iter " << n_iter << " with l1=" << l1
+                       << ", deltaL1=" << dl1 << "\n";
+        if (n_iter > 1000)
+          break;
+      } while (dl1 > 1e-3);
+    } else {
+      if (calibrateL1)
+        optimizeL1(m_pws);
+      if (calibrateBanks)
+        optimizeBanks(m_pws);
+    }
 
     // STEP_3: Write to disk if required
     Instrument_sptr instCalibrated =
         std::const_pointer_cast<Geometry::Instrument>(m_pws->getInstrument());
 
     if (!XmlFilename.empty())
-        saveXmlFile(XmlFilename, m_BankNames, instCalibrated);
+      saveXmlFile(XmlFilename, m_BankNames, instCalibrated);
 
     if (!DetCalFilename.empty())
         saveIsawDetCal(DetCalFilename, m_BankNames, instCalibrated, m_T0);
@@ -206,7 +222,7 @@ namespace Crystal {
    * 
    * @param pws 
    */
-  void SCDCalibratePanels2::optimizeL1(std::shared_ptr<PeaksWorkspace> pws){
+  void SCDCalibratePanels2::optimizeL1(std::shared_ptr<PeaksWorkspace> pws) {
     // cache starting L1 position
     double original_L1 = -pws->getInstrument()->getSource()->getPos().Z();
     int npks = pws->getNumberPeaks();
