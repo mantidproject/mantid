@@ -183,7 +183,7 @@ namespace Crystal {
                        << ", deltaL1=" << dl1 << "\n";
         if (n_iter > 1000)
           break;
-      } while (dl1 > 1e-6);
+      } while (dl1 > 1e-5);
     } else {
       if (calibrateL1)
         optimizeL1(m_pws);
@@ -363,6 +363,7 @@ namespace Crystal {
       double dx = rstFitBankTrans->getRef<double>("Value", 0);
       double dy = rstFitBankTrans->getRef<double>("Value", 1);
       double dz = rstFitBankTrans->getRef<double>("Value", 2);
+      adjustComponent(dx, dy, dz, 0.0, 0.0, 0.0, bankname, pwsBanki);
 
       //-- step 3: invoki Fit to find the rotation
       IAlgorithm_sptr fitBankRot_alg =
@@ -370,8 +371,9 @@ namespace Crystal {
       //---- reuse the fun def since it should be the same
       //---- bounds&constraints def
       std::ostringstream tie2_str;
-      tie2_str << "dx=" << dx << ",dy=" << dy << ",dz=" << dz
-               << ",dT0=" << m_T0;
+      tie_str << "dx=0.0,dy=0.0,dz=0.0,dT0=" << m_T0;
+      // tie2_str << "dx=" << dx << ",dy=" << dy << ",dz=" << dz
+      //          << ",dT0=" << m_T0;
       //----set&go
       fitBankRot_alg->setPropertyValue("Function", fun_str.str());
       fitBankRot_alg->setProperty("Ties", tie2_str.str());
