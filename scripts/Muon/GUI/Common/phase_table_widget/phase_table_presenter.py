@@ -11,7 +11,6 @@ from Muon.GUI.Common.muon_phasequad import MuonPhasequad
 from mantidqt.utils.observer_pattern import Observable, GenericObserver, GenericObservable
 import re
 from Muon.GUI.Common.ADSHandler.workspace_naming import get_phase_table_workspace_name, \
-    get_phase_table_workspace_group_name, \
     get_fitting_workspace_name, get_base_data_directory
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 from Muon.GUI.Common.utilities.run_string_utils import valid_name_regex
