@@ -163,8 +163,7 @@ class PhaseTablePresenterTest(unittest.TestCase):
         self.presenter.add_fitting_info_to_ADS_if_required('MUSR22222_PhaseTable',
                                                            'MUSR22222_PhaseTable; fit_information')
 
-        workspace_wrapper_mock.assert_called_once_with(
-            'MUSR22222 MA/MUSR22222 Phase Tab MA/MUSR22222_PhaseTable; fit_information')
+        workspace_wrapper_mock.assert_called_once_with('MUSR22222_PhaseTable; fit_information')
         workspace_wrapper_mock.return_value.show.assert_called_once_with()
 
     def test_that_disable_observer_calls_on_view_when_triggered(self):
