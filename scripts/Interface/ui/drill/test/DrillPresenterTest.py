@@ -43,12 +43,14 @@ class DrillPresenterTest(unittest.TestCase):
         self.view.unsetRowBackground.assert_called_once_with(2)
 
     def test_onParamOk(self):
+        self.view.columns = ["test1", "test2"]
         self.presenter._invalidCells = {(0, "test1"), (4, "test2")}
         self.presenter.onParamOk(4, "test2")
         self.assertEqual(self.presenter._invalidCells, {(0, "test1")})
         self.view.setCellOk.assert_called_once_with(4, "test2")
 
     def test_onParamError(self):
+        self.view.columns = ["test"]
         self.assertEqual(self.presenter._invalidCells, set())
         self.presenter.onParamError(1, "test", "message")
         self.assertEqual(self.presenter._invalidCells, {(1, "test")})

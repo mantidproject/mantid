@@ -96,7 +96,8 @@ class DrillRundexIO:
         # samples
         if ((RundexSettings.SAMPLES_JSON_KEY in json_data)
                 and (json_data[RundexSettings.SAMPLES_JSON_KEY])):
-            drill.setSamples(json_data[RundexSettings.SAMPLES_JSON_KEY])
+            for sample in json_data[RundexSettings.SAMPLES_JSON_KEY]:
+                drill.addSample(-1, sample)
         else:
             logger.warning("No sample found when importing {0}."
                            .format(self._filename))
@@ -136,7 +137,10 @@ class DrillRundexIO:
         # samples
         samples = drill.getSamples()
         if samples:
-            json_data[RundexSettings.SAMPLES_JSON_KEY] = samples
+            json_data[RundexSettings.SAMPLES_JSON_KEY] = list()
+            for sample in samples:
+                json_data[RundexSettings.SAMPLES_JSON_KEY].append(
+                        sample.getParameters())
 
         # groups
         groups = drill.getSamplesGroups()

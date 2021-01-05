@@ -20,6 +20,7 @@ from .DrillAlgorithmPool import DrillAlgorithmPool
 from .DrillTask import DrillTask
 from .DrillParameterController import DrillParameter, DrillParameterController
 from .DrillRundexIO import DrillRundexIO
+from .DrillSample import DrillSample
 
 
 class DrillModel(QObject):
@@ -410,72 +411,36 @@ class DrillModel(QObject):
         """
         self.controller.addParameter(DrillParameter(param, value, sample))
 
-    def checkAllParameters(self):
+    def changeParameter(self, sampleIndex, name, value):
         """
-        Check all the parameters.
-        """
-        for i in range(len(self.samples)):
-            for (n, v) in self.samples[i].items():
-                if n == "CustomOptions":
-                    for (nn, vv) in v.items():
-                        self.controller.addParameter(DrillParameter(nn, vv, i))
-                else:
-                    self.controller.addParameter(DrillParameter(n, v, i))
-        for (n, v) in self.settings.items():
-            self.controller.addParameter(DrillParameter(n, v, -1))
-
-    def changeParameter(self, row, column, contents):
-        """
-        Change parameter value and update the model samples. The method is able
-        to parse usual parameters (present in self.columns) and those coming
-        from the custom options. It submits the new value to the parameters
-        controller to check it. In case of empty value, the paramOk signal is
-        sent without any submission to the controller.
+        Change parameter value and update the model samples. It submits the new
+        value to the parameters controller to check it. In case of empty value,
+        the paramOk signal is sent without any submission to the controller.
 
         Args:
-            row (int): index of the sample in self.samples
-            column (int): index of the parameter in self.columns
-            contents (str): new value
+            sampleIndex (int): index of the sample in self.samples
+            name (str): name of the parameter
+            value (str): new value
         """
-        if (not contents):
-            self.paramOk.emit(row, self.columns[column])
-            if (self.columns[column] in self.samples[row]):
-                del self.samples[row][self.columns[column]]
-            return
-
-        if (self.columns[column] == RundexSettings.CUSTOM_OPT_JSON_KEY):
-            options = dict()
-            for option in contents.split(';'):
-                if ('=' not in option):
-                    self.paramError.emit(row, self.columns[column],
-                                         "Badly formatted custom options")
-                    return
-                name = option.split("=")[0]
-                value = option.split("=")[1]
-                # everything is a str, we try to find bool
-                if value in ['true', 'True', 'TRUE']:
-                    value = True
-                if value in ['false', 'False', 'FALSE']:
-                    value = False
-                options[name] = value
-            for (k, v) in options.items():
-                self.checkParameter(k, v, row)
-            self.samples[row][RundexSettings.CUSTOM_OPT_JSON_KEY] = options
+        self.samples[sampleIndex].changeParameter(name, value)
+        if not value:
+            self.paramOk.emit(sampleIndex, name)
         else:
-            self.samples[row][self.columns[column]] = contents
-            self.checkParameter(self.columns[column], contents, row)
+            self.checkParameter(name, value, sampleIndex)
 
-    def groupSamples(self, samples, groupName=None):
+    def groupSamples(self, sampleIndexes, groupName=None):
         """
         Group samples.
 
         Args:
-            samples (list(int)): sample indexes
+            sampleIndexes (list(int)): sample indexes
+            groupName (str): optional name for the new group
 
         Returns:
             str: name of the created group
         """
-        for sample in samples:
+        for i in sampleIndexes:
+            sample = self.samples[i]
             for group in self.groups:
                 if sample in self.groups[group]:
                     self.groups[group].remove(sample)
@@ -504,22 +469,24 @@ class DrillModel(QObject):
             groupName = 'A'
             while groupName in self.groups:
                 groupName = incrementName(groupName)
+        samples = set(self.samples[i] for i in sampleIndexes)
         self.groups[groupName] = samples
 
         return groupName
 
-    def ungroupSamples(self, samples):
+    def ungroupSamples(self, sampleIndexes):
         """
         Ungroup samples.
 
         Args:
-            samples (list(int)): sample indexes
+            sampleIndexes (list(int)): sample indexes
 
         Returns:
             list(str): list of groups that changed
         """
         groups = []
-        for sample in samples:
+        for i in sampleIndexes:
+            sample = self.samples[i]
             for group in self.groups:
                 if sample in self.groups[group]:
                     self.groups[group].remove(sample)
@@ -547,7 +514,10 @@ class DrillModel(QObject):
         Returns:
             dict(str, list(int)): groups of samples
         """
-        return {k:v for k,v in self.groups.items()}
+        groups = {}
+        for k,v in self.groups.items():
+            groups[k] = set(self.samples.index(s) for s in v)
+        return groups
 
     def setMasterSamples(self, masterSamples):
         """
@@ -565,21 +535,21 @@ class DrillModel(QObject):
         Returns:
             dict(str, int): master samples for each group.
         """
-        return {k:v for k,v in self.masterSamples.items()}
+        return {k:self.samples.index(v) for k,v in self.masterSamples.items()}
 
-    def setGroupMaster(self, sample):
+    def setGroupMaster(self, sampleIndex):
         """
         Set the sample as master for its group.
 
         Args:
-            sample (int): sample index
+            sampleIndex (int): sample index
 
         Returns:
             str: name of the group, None if the row is not in a group
         """
         for group in self.groups:
-            if sample in self.groups[group]:
-                self.masterSamples[group] = sample
+            if self.samples[sampleIndex] in self.groups[group]:
+                self.masterSamples[group] = self.samples[sampleIndex]
                 return group
         return None
 
@@ -611,7 +581,7 @@ class DrillModel(QObject):
                 if master is not None:
                     params.update(self.samples[master])
 
-        params.update(self.samples[sample])
+        params.update(self.samples[sample].getParameters())
         # override global params with custom ones
         if "CustomOptions" in params:
             params.update(params["CustomOptions"])
@@ -782,18 +752,17 @@ class DrillModel(QObject):
 
         return self.columns, tooltips
 
-    def setSamples(self, samples):
-        self.samples = [s for s in samples]
-
-    def addSample(self, ref):
+    def addSample(self, index, params=None):
         """
-        Add a sample.
+        Add an empty sample.
 
         Args:
-            ref (int): sample index; if -1 the sample is added to the end
-            contents (dict(str:str)): sample parameters
+            index (int): sample index; if -1 the sample is added to the end
         """
-        self.samples.insert(ref, dict())
+        sample = DrillSample()
+        if params:
+            sample.setParameters(params)
+        self.samples.insert(index, sample)
 
     def deleteSample(self, ref):
         """
@@ -829,15 +798,16 @@ class DrillModel(QObject):
         """
         rows = list()
         for sample in self.samples:
+            params = sample.getParameters()
             row = list()
             for column in self.columns[:-1]:
-                if column in sample:
-                    row.append(str(sample[column]))
+                if column in params:
+                    row.append(str(params[column]))
                 else:
                     row.append("")
-            if self.columns[-1] in sample:
+            if self.columns[-1] in params:
                 options = list()
-                for (k, v) in sample[self.columns[-1]].items():
+                for (k, v) in params[self.columns[-1]].items():
                     options.append(str(k) + "=" + str(v))
                 row.append(';'.join(options))
             rows.append(row)

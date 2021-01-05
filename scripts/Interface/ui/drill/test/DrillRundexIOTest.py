@@ -49,7 +49,7 @@ class DrillRundexIOTest(unittest.TestCase):
         mD = self.mDrillModel
         mD.setCycleAndExperiment.assert_called_once_with("cycle", "exp")
         mD.setVisualSettings.assert_called_once_with({})
-        mD.setSamples.assert_called_once_with([{"param1": "value1"}])
+        mD.addSample.assert_called_once_with(-1, {"param1": "value1"})
         mD.setSamplesGroups.assert_called_once_with({"A": 0})
         mD.setMasterSamples.assert_called_once_with({"A": 0})
 
@@ -60,7 +60,9 @@ class DrillRundexIOTest(unittest.TestCase):
         mD.getCycleAndExperiment.return_value = "cycle", "exp"
         mD.getVisualSettings.return_value = {"key": "value"}
         mD.getSettings.return_value = {"setting1": "value1"}
-        mD.getSamples.return_value = [{"param1": "value1"}]
+        s0 = mock.Mock()
+        s0.getParameters.return_value = {"param1": "value1"}
+        mD.getSamples.return_value = [s0]
         mD.getSamplesGroups.return_value = {"A": 0}
         mD.getMasterSamples.return_value = {"A": 0}
 

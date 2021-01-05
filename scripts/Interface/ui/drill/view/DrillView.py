@@ -66,9 +66,9 @@ class DrillView(QMainWindow):
     Sent when a cell contents has changed.
     Args:
         int: row index
-        int: column index
+        str: column name
     """
-    dataChanged = Signal(int, int)
+    dataChanged = Signal(int, str)
 
     """
     Sent when a new group is requested.
@@ -251,7 +251,8 @@ class DrillView(QMainWindow):
         """
         Setup the main table widget.
         """
-        self.table.cellChanged.connect(self.dataChanged.emit)
+        self.table.cellChanged.connect(
+                lambda r,c: self.dataChanged.emit(r, self.columns[c]))
         self.table.setContextMenuPolicy(Qt.CustomContextMenu)
         self.table.customContextMenuRequested.connect(self.showContextMenu)
 
@@ -683,9 +684,9 @@ class DrillView(QMainWindow):
 
         Args:
             row (int): row index
-            column (int): column index
+            column (str): column name
         """
-        return self.table.getCellContents(row, column)
+        return self.table.getCellContents(row, self.columns.index(column))
 
     def setAddRemoveColumnMenu(self, columns):
         """

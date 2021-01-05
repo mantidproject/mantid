@@ -82,11 +82,24 @@ class DrillPresenter:
             column (int): column index
         """
         contents = self.view.getCellContents(row, column)
-        self.model.changeParameter(row, column, contents)
         if row in self._processError:
             self.view.unsetRowBackground(row)
             self._processError.remove(row)
         self.view.setWindowModified(True)
+        if column == "CustomOptions":
+            for option in contents.split(';'):
+                if '=' not in option:
+                    self.onParamError(row, column, "Bad")
+                    return
+                name = option.split("=")[0]
+                value = option.split("=")[1]
+                if value in ['true', 'True', 'TRUE']:
+                    value = True
+                if value in ['false', 'False', 'FALSE']:
+                    value = False
+                self.model.changeParameter(row, name, value)
+        else:
+            self.model.changeParameter(row, column, contents)
 
     def onGroupRequested(self, rows):
         """
@@ -134,6 +147,8 @@ class DrillPresenter:
             row (int): row index
             columnName (str): parameter name
         """
+        if columnName not in self.view.columns:
+            columnName = "CustomOptions"
         self._invalidCells.discard((row, columnName))
         self.view.setCellOk(row, columnName)
 
@@ -146,6 +161,8 @@ class DrillPresenter:
             columnName (str): parameter name
             msg (str): error message
         """
+        if columnName not in self.view.columns:
+            columnName = "CustomOptions"
         self._invalidCells.add((row, columnName))
         self.view.setCellError(row, columnName, msg)
 

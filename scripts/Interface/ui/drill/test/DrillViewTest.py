@@ -352,7 +352,8 @@ class DrillViewTest(unittest.TestCase):
         self.assertEqual(rows, [0, 1, 4])
 
     def test_getCellContents(self):
-        self.view.getCellContents(1, 2)
+        self.view.columns = ["test", "test1", "test2"]
+        self.view.getCellContents(1, "test2")
         self.view.table.getCellContents.assert_called_once_with(1, 2)
 
     def test_fillTable(self):
