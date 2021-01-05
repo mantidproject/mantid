@@ -277,7 +277,7 @@ namespace Crystal {
     double chi2OverDOF = fitL1_alg->getProperty("OutputChi2overDoF");
     ITableWorkspace_sptr rst = fitL1_alg->getProperty("OutputParameters");
     double dL1_optimized = rst->getRef<double>("Value", 2);
-    adjustComponent(0, 0, dL1_optimized, 0, 0, 0,
+    adjustComponent(0.0, 0.0, dL1_optimized, 1.0, 0.0, 0.0, 0.0,
                     pws->getInstrument()->getSource()->getName(), pws);
 
     //-- log
@@ -455,65 +455,6 @@ namespace Crystal {
       if (bname != "None")
         m_BankNames.insert(bname);
     }
-  }
-
-  void SCDCalibratePanels2::adjustComponent(double dx, double dy, double dz,
-                                            double drotx, double droty,
-                                            double drotz, std::string cmptName,
-                                            PeaksWorkspace_sptr &pws) {
-    // translation
-    IAlgorithm_sptr mv_alg = Mantid::API::AlgorithmFactory::Instance().create(
-        "MoveInstrumentComponent", -1);
-    mv_alg->initialize();
-    mv_alg->setChild(true);
-    mv_alg->setLogging(LOGCHILDALG);
-    mv_alg->setProperty<Workspace_sptr>("Workspace", pws);
-    mv_alg->setProperty("ComponentName", cmptName);
-    mv_alg->setProperty("X", dx);
-    mv_alg->setProperty("Y", dy);
-    mv_alg->setProperty("Z", dz);
-    mv_alg->setProperty("RelativePosition", true);
-    mv_alg->executeAsChildAlg();
-
-    // orientation
-    IAlgorithm_sptr rot_alg = Mantid::API::AlgorithmFactory::Instance().create(
-        "RotateInstrumentComponent", -1);
-    //-- rotAngX@(1,0,0)
-    rot_alg->initialize();
-    rot_alg->setChild(true);
-    rot_alg->setLogging(LOGCHILDALG);
-    rot_alg->setProperty<Workspace_sptr>("Workspace", pws);
-    rot_alg->setProperty("ComponentName", cmptName);
-    rot_alg->setProperty("X", 1.0);
-    rot_alg->setProperty("Y", 0.0);
-    rot_alg->setProperty("Z", 0.0);
-    rot_alg->setProperty("Angle", drotx);
-    rot_alg->setProperty("RelativeRotation", true);
-    rot_alg->executeAsChildAlg();
-    //-- rotAngY@(0,1,0)
-    rot_alg->initialize();
-    rot_alg->setChild(true);
-    rot_alg->setLogging(LOGCHILDALG);
-    rot_alg->setProperty<Workspace_sptr>("Workspace", pws);
-    rot_alg->setProperty("ComponentName", cmptName);
-    rot_alg->setProperty("X", 0.0);
-    rot_alg->setProperty("Y", 1.0);
-    rot_alg->setProperty("Z", 0.0);
-    rot_alg->setProperty("Angle", droty);
-    rot_alg->setProperty("RelativeRotation", true);
-    rot_alg->executeAsChildAlg();
-    //-- rotAngZ@(0,0,1)
-    rot_alg->initialize();
-    rot_alg->setChild(true);
-    rot_alg->setLogging(LOGCHILDALG);
-    rot_alg->setProperty<Workspace_sptr>("Workspace", pws);
-    rot_alg->setProperty("ComponentName", cmptName);
-    rot_alg->setProperty("X", 0.0);
-    rot_alg->setProperty("Y", 0.0);
-    rot_alg->setProperty("Z", 1.0);
-    rot_alg->setProperty("Angle", drotz);
-    rot_alg->setProperty("RelativeRotation", true);
-    rot_alg->executeAsChildAlg();
   }
 
   void

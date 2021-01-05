@@ -81,10 +81,6 @@ private:
   void optimizeBanks(std::shared_ptr<Mantid::DataObjects::PeaksWorkspace> pws);
 
   /// Helper functions for adjusting components
-  void adjustComponent(double dx, double dy, double dz, double drotx,
-                       double droty, double drotz, std::string cmptName,
-                       DataObjects::PeaksWorkspace_sptr &pws);
-
   void adjustComponent(double dx, double dy, double dz, double rvx, double rvy,
                        double rvz, double rang, std::string cmptName,
                        DataObjects::PeaksWorkspace_sptr &pws);

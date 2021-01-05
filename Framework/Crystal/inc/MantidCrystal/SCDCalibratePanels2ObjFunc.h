@@ -40,15 +40,11 @@ private:
   mutable std::string m_cmpt;
   const bool LOGCHILDALG{false};
   const Kernel::V3D UNSET_HKL{0, 0, 0};
+  const double PI{3.141592653589793238462643383279502884};
 
   /// helper functions
   void moveInstruentComponentBy(
     double deltaX, double deltaY, double deltaZ,
-    std::string componentName,
-    const API::Workspace_sptr &ws) const;
-
-  void rotateInstrumentComponentBy(
-    double rotAngX, double rotAngY, double rotAngZ,
     std::string componentName,
     const API::Workspace_sptr &ws) const;
 

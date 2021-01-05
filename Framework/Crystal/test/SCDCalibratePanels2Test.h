@@ -14,6 +14,10 @@
 //       You might need to do one at a time to avoid ctest timeout error
 //       locally.
 
+// DEVNOTE:
+//  - cos, sin func uses radians
+//  - Quat class uses degrees
+
 #pragma once
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -160,10 +164,6 @@ public:
     g_log.notice() << "-- validate calibration output\n";
     TS_ASSERT(validateCalibrationResults(pwsref, wsraw, xmlFile.string()));
 
-    // quick test
-    g_log.notice() << "cos(PI) = " << cos(PI) << "\n";
-    TS_ASSERT(false);
-
     // Cleanup
     doCleanup();
   }
@@ -261,6 +261,95 @@ public:
     TS_ASSERT(false);
     // Cleanup
     doCleanup();
+  }
+
+  void test_bank_moved() {
+    g_log.notice() << "test: !single bank moved!\n";
+
+    g_log.notice() << "Tolerance of Distance (meter) :" << TOLERANCE_L << "\n";
+    g_log.notice() << "Tolerance of Rotation (degree) :" << TOLERANCE_R << "\n";
+
+    // prescribed shift
+    // NOTE: the common range for dx, dy ,dz is +-5cm
+    double dx = 1.1e-2;
+    double dy = 0.9e-2;
+    double dz = 1.5e-2;
+
+    // prescribed rotation
+    double rvx = 1.0;
+    double rvy = 0.0;
+    double rvz = 0.0;
+    double ang = 3; // degrees
+
+    // Generate unique temp files
+    auto isawFile = boost::filesystem::temp_directory_path();
+    isawFile /= boost::filesystem::unique_path("panelMove_%%%%%%%%.DetCal");
+    auto xmlFile = boost::filesystem::temp_directory_path();
+    xmlFile /= boost::filesystem::unique_path("panelMove_%%%%%%%%.xml");
+
+    g_log.notice() << "-- generate simulated workspace\n";
+    MatrixWorkspace_sptr ws = m_ws->clone();
+    MatrixWorkspace_sptr wsraw = ws->clone();
+
+    g_log.notice() << "-- for x(top) - bank73\n"
+                   << "   translated by (" << dx << "," << dy << "," << dz
+                   << ")\n"
+                   << "   rotated by " << ang << "@(" << rvx << "," << rvy
+                   << "," << rvz << ")\n";
+    adjustComponent(dx, dy, dz, rvx, rvy, rvz, ang, bank_xtop, ws);
+
+    g_log.notice() << "-- generate peaks\n";
+    PeaksWorkspace_sptr pws = generateSimulatedPeaksWorkspace(ws);
+    PeaksWorkspace_sptr pwsref = pws->clone();
+
+    // Pretend we don't know the answer
+    g_log.notice() << "-- reset instrument positions&orientations\n";
+    g_log.notice()
+        << "    * before reset x(top) - bank73:\n"
+        << "    pos(abs) = "
+        << pws->getInstrument()->getComponentByName(bank_xtop)->getPos() << "\n"
+        << "    pos(rel) = "
+        << pws->getInstrument()->getComponentByName(bank_xtop)->getRelativePos()
+        << "\n"
+        << "    quat(rel) = "
+        << pws->getInstrument()->getComponentByName(bank_xtop)->getRelativeRot()
+        << "\n";
+    pws->setInstrument(wsraw->getInstrument());
+    g_log.notice()
+        << "    * after reset x(top) - bank73:\n"
+        << "    pos(abs) = "
+        << pws->getInstrument()->getComponentByName(bank_xtop)->getPos() << "\n"
+        << "    pos(rel) = "
+        << pws->getInstrument()->getComponentByName(bank_xtop)->getRelativePos()
+        << "\n"
+        << "    quat(rel) = "
+        << pws->getInstrument()->getComponentByName(bank_xtop)->getRelativeRot()
+        << "\n";
+
+    // Perform the calibration
+    g_log.notice() << "-- start calibration\n";
+    runCalibration(isawFile.string(), xmlFile.string(), pws, false, false,
+                   true);
+
+    g_log.notice()
+        << "    * after calibration x(top) - bank73:\n"
+        << "    pos(abs) = "
+        << pws->getInstrument()->getComponentByName(bank_xtop)->getPos() << "\n"
+        << "    pos(rel) = "
+        << pws->getInstrument()->getComponentByName(bank_xtop)->getRelativePos()
+        << "\n"
+        << "    quat(rel) = "
+        << pws->getInstrument()->getComponentByName(bank_xtop)->getRelativeRot()
+        << "\n";
+
+    // Check if the calibration returns the same instrument as we put in
+    g_log.notice() << "-- validate calibration output\n";
+    TS_ASSERT(validateCalibrationResults(pwsref, wsraw, xmlFile.string()));
+
+    // Cleanup
+    doCleanup();
+
+    TS_ASSERT(false);
   }
 
   /**
