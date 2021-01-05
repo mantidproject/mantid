@@ -40,13 +40,16 @@ class DrillContextMenuPresenter:
         # fill the menu
         allColumns, _ = self._samplesModel.getColumnHeaderData()
         hiddenColumns = self._view.table.getHiddenColumns()
+        groups = self._samplesModel.getSamplesGroups().keys()
         self._menu.setColumns(allColumns, hiddenColumns)
+        self._menu.setGroups(groups)
 
         # connect signals
         self._menu.toogleColumnVisibility.connect(self.onToggleColumnVisibility)
         self._menu.groupSelectedRows.connect(self.onGroupSelectedRows)
         self._menu.ungroupSelectedRows.connect(self.onUngroupSelectedRows)
         self._menu.setMasterRow.connect(self.onSetMasterRow)
+        self._menu.addToGroup.connect(self.onAddToGroup)
 
         self._menu.show()
 
@@ -77,3 +80,14 @@ class DrillContextMenuPresenter:
         of its group.
         """
         self._view.setMasterRow.emit()
+
+    def onAddToGroup(self, group):
+        """
+        Triggered when the user wants to add the selected rows to an existing
+        group.
+
+        Args:
+            group (str): name of the group
+        """
+        rows = self._view.table.getRowsFromSelectedCells()
+        self._samplesModel.addToGroup(rows, group)

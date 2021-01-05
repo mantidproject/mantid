@@ -479,6 +479,21 @@ class DrillModel(QObject):
 
         self.groupUpdated.emit(groupName)
 
+    def addToGroup(self, sampleIndexes, groupName):
+        """
+        Add some samples in an existing group.
+
+        Args:
+            sampleIndexes (list(int)): list of sample indexes
+            groupName (str): name of the group
+        """
+        if groupName not in self.groups:
+            return
+        self.ungroupSamples(sampleIndexes)
+        samples = set(self.samples[i] for i in sampleIndexes)
+        self.groups[groupName].update(samples)
+        self.groupUpdated.emit(groupName)
+
     def ungroupSamples(self, sampleIndexes):
         """
         Ungroup samples.

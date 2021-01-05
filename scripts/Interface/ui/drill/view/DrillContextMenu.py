@@ -38,6 +38,13 @@ class DrillContextMenu(QMenu):
     """
     setMasterRow = Signal()
 
+    """
+    Sent when the selected rows have to be added to an existing group.
+    Args:
+        (str): name of the group
+    """
+    addToGroup = Signal(str)
+
     def __init__(self, position, parent=None):
         """
         Create a DrillContextMenu.
@@ -51,6 +58,7 @@ class DrillContextMenu(QMenu):
         self._colMenu = self.addMenu("Add/Delete column")
         action = self.addAction("Group selected rows")
         action.triggered.connect(self.groupSelectedRows.emit)
+        self._groupMenu = self.addMenu("Add to a group")
         action = self.addAction("Ungroup selected rows")
         action.triggered.connect(self.ungroupSelectedRows.emit)
         action = self.addAction("Set row as master row")
@@ -82,6 +90,18 @@ class DrillContextMenu(QMenu):
                                                  column)
             action.triggered.connect(lambda _, c=column:
                                      self.toogleColumnVisibility.emit(c))
+
+    def setGroups(self, groups):
+        """
+        Set the list of existing groups in the context menu.
+
+        Args:
+            groups (list(str)): list of group names
+        """
+        for group in groups:
+            action = self._groupMenu.addAction(group)
+            action.triggered.connect(lambda _, g=group:
+                                     self.addToGroup.emit(g))
 
     def show(self):
         """
