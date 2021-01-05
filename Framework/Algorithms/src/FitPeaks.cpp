@@ -986,8 +986,8 @@ FitPeaks::fitPeaks() {
 
 namespace {
 /// Supported peak profiles for observation
-std::vector<std::string> supported_peak_profiles{"Gaussian", "Lorentzian",
-                                                 "PseudoVoigt", "Voigt"};
+std::vector<std::string> supported_peak_profiles{
+    "Gaussian", "Lorentzian", "PseudoVoigt", "Voigt", "BackToBackExponential"};
 
 double numberCounts(const Histogram &histogram) {
   double total = 0.;
@@ -1373,49 +1373,6 @@ void FitPeaks::calculateFittedPeaks(
   return;
 }
 
-namespace {
-// calculate the moments about the mean
-vector<double> calculateMomentsAboutMean(const Histogram &histogram,
-                                         const double mean,
-                                         FunctionValues &bkgd_values,
-                                         size_t start_index,
-                                         size_t stop_index) {
-  // Calculate second moment about the mean should be the variance. Assume that
-  // the peak center is correct
-  const auto &x_vec = histogram.points();
-  const auto &y_vec = histogram.y();
-
-  const size_t numPoints =
-      min(start_index - stop_index, bkgd_values.size()) - 1;
-
-  double zeroth = 0.; // total counts
-  double first = 0.;  // peak center
-  double second = 0.; // variance = sigma * sigma
-
-  // zeroth and first don't require the mean
-  for (size_t i = 0; i < numPoints; ++i) {
-    // integrate using Newton's method
-    const double y_adj =
-        .5 * (y_vec[start_index + i] + y_vec[start_index + i + 1]) -
-        .5 * (bkgd_values.getCalculated(i) + bkgd_values.getCalculated(i + 1));
-    if (y_adj <= 0.)
-      continue; // just skip to the next
-    const double dx = x_vec[start_index + i + 1] - x_vec[start_index + i];
-    const double x_adj = x_vec[start_index + i] - mean;
-
-    zeroth += y_adj * dx;
-    first += x_adj * y_adj * dx;
-    second += x_adj * x_adj * y_adj * dx;
-  }
-  // need to normalize by the total to get the right position because
-  // method of moments assumes a distribution normalized to one
-  first = first / zeroth;
-  second = second / zeroth;
-
-  return vector<double>{zeroth, first, second};
-}
-} // namespace
-
 //----------------------------------------------------------------------------------------------
 /**  Estimate background: There are two methods that will be tried.
  * First, algorithm FindPeakBackground will be tried;
@@ -1501,13 +1458,10 @@ int FitPeaks::estimatePeakParameters(
   // Estimate FHWM (peak width)
   if (observe_peak_width &&
       m_peakWidthEstimateApproach != EstimatePeakWidth::NoEstimation) {
-    double peak_width = observePeakWidth(
+    double peak_fwhm = observePeakFwhm(
         histogram, bkgd_values, peak_center_index, start_index, stop_index);
-
-    // proper factor for gaussian
-    const double CONVERSION = 1.; // 2. * std::sqrt(2.);
-    if (peak_width > 0.) {        // TODO promote to property?
-      peakfunction->setFwhm(CONVERSION * peak_width);
+    if (peak_fwhm > 0.0) {
+      peakfunction->setFwhm(peak_fwhm);
     }
   }
 
@@ -1593,32 +1547,40 @@ int FitPeaks::observePeakCenter(const Histogram &histogram,
  * @param istop :: array index for the right boundary of the peak
  * @return peak width as double
  */
-double FitPeaks::observePeakWidth(const Histogram &histogram,
-                                  FunctionValues &bkgd_values, size_t ipeak,
-                                  size_t istart, size_t istop) {
-  double peak_width(-0.);
+double FitPeaks::observePeakFwhm(const Histogram &histogram,
+                                 FunctionValues &bkgd_values, size_t ipeak,
+                                 size_t istart, size_t istop) {
+  double peak_fwhm(-0.);
 
   if (m_peakWidthEstimateApproach == EstimatePeakWidth::InstrumentResolution) {
     // width from guessing from delta(D)/D
     const double peak_center = histogram.points()[ipeak];
-    peak_width = peak_center * m_peakWidthPercentage;
+    peak_fwhm = peak_center * m_peakWidthPercentage;
   } else if (m_peakWidthEstimateApproach == EstimatePeakWidth::Observation) {
-    const auto moments = calculateMomentsAboutMean(
-        histogram, histogram.points()[ipeak], bkgd_values, istart, istop);
+    // estimate fwhm from area assuming Gaussian (more robust than using
+    // moments which overestimates variance by factor ~5 depending on background
+    // estimation over window much wider than peak)
+    const auto &x_vec = histogram.points();
+    const auto &y_vec = histogram.y();
+    const size_t numPoints = std::min(istart - istop, bkgd_values.size()) - 1;
 
-    // not enough total weight in range
-    if (moments[0] < m_minPeakHeight)
-      peak_width = -1.; // set to bad value
-    else
-      peak_width = std::sqrt(moments[2]);
-
+    double area = 0.0;
+    // integrate using Newton's method
+    for (size_t i = 0; i < numPoints; ++i) {
+      const auto yavg =
+          0.5 * (y_vec[istart + i] - bkgd_values.getCalculated(i) +
+                 y_vec[istart + i + 1] - bkgd_values.getCalculated(i + 1));
+      const auto dx = x_vec[istart + i + 1] - x_vec[istart + i];
+      area += yavg * dx;
+    }
+    peak_fwhm = 2 * std::sqrt(M_LN2 / M_PI) * area / y_vec[ipeak];
   } else {
     // get from last peak or from input!
     throw std::runtime_error(
         "This case for observing peak width is not supported.");
   }
 
-  return peak_width;
+  return peak_fwhm;
 }
 
 //----------------------------------------------------------------------------------------------

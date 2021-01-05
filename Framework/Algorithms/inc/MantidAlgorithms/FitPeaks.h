@@ -207,9 +207,9 @@ private:
                         size_t &peak_center_index, double &peak_height);
 
   /// Observe peak width
-  double observePeakWidth(const HistogramData::Histogram &histogram,
-                          API::FunctionValues &bkgd_values, size_t ipeak,
-                          size_t istart, size_t istop);
+  double observePeakFwhm(const HistogramData::Histogram &histogram,
+                         API::FunctionValues &bkgd_values, size_t ipeak,
+                         size_t istart, size_t istop);
 
   /// Process the result from fitting a single peak
   void processSinglePeakFitResult(
