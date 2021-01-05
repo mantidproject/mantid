@@ -37,8 +37,6 @@ class FocusModel(object):
         :param rb_num: The experiment number, used to create directories. Can be None
         :param spectrum_numbers: The specific spectra that should be focused. Used instead of banks.
         """
-        import pydevd_pycharm
-        pydevd_pycharm.settrace('localhost', port=8080, stdoutToServer=True, stderrToServer=True)
         if not Ads.doesExist(vanadium_corrections.INTEGRATED_WORKSPACE_NAME) and not Ads.doesExist(
                 vanadium_corrections.CURVES_WORKSPACE_NAME):
             return

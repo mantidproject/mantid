@@ -8,7 +8,7 @@
 from qtpy import QtCore, QtWidgets
 
 from mantidqt.icons import get_icon
-from mantidqt.utils.observer_pattern import GenericObserverWithArgPassing, GenericObservable
+from mantidqt.utils.observer_pattern import GenericObserverWithArgPassing
 from mantidqt.utils.qt import load_ui
 from Engineering.gui.engineering_diffraction.presenter import EngineeringDiffractionPresenter
 from .tabs.common import SavedirObserver
@@ -23,11 +23,6 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
     """
     The engineering diffraction interface
     """
-
-    # TODO 2021
-    # Currently project save testing cannot work with the state of play in engdiffui
-    # Need to seperate the ui into presenter and view, however the view will probably need to own the presenter
-
 
     status_savdirMaxwidth = 300
 
@@ -49,9 +44,6 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
         self.status_label = QtWidgets.QLabel()
         self.savedir_label = QtWidgets.QLabel()
         self.savedir_label.setMaximumWidth(self.status_savdirMaxwidth)
-
-        # observables
-        self.close_event_observable = GenericObservable()
 
         # observers
         self.update_statusbar_text_observable = GenericObserverWithArgPassing(self.set_statusbar_text)
@@ -84,7 +76,6 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
 
     def setup_presenter(self):
         presenter = EngineeringDiffractionPresenter(self)
-        self.close_event_observable.add_subscriber(presenter.close_event_observer)
         presenter.statusbar_observable.add_subscriber(self.update_statusbar_text_observable)
         presenter.savedir_observable.add_subscriber(self.update_savedir_observable)
         self.set_on_settings_clicked(presenter.open_settings)
@@ -97,9 +88,6 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
 
     def setup_savedir_notifier(self):
         self.settings_presenter.savedir_notifier.add_subscriber(self.savedir_observer)
-
-    def closeEvent(self, _):
-        self.close_event_observable.notify_subscribers()
 
     def setup_statusbar(self):
         self.statusbar.addWidget(self.status_label)
@@ -114,6 +102,9 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
         savedir_text = "SaveDir: " + savedir
         self.savedir_label.setToolTip(savedir_text)
         self.savedir_label.setText(savedir_text)
+
+    def closeEvent(self, _):
+        self.presenter.handle_close()
 
     def get_rb_no(self):
         return self.lineEdit_RBNumber.text()

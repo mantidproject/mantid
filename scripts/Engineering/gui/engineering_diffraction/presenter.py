@@ -16,7 +16,7 @@ from .tabs.focus.presenter import FocusPresenter
 from .tabs.fitting.view import FittingView
 from .tabs.fitting.presenter import FittingPresenter
 from mantidqt.interfacemanager import InterfaceManager
-from mantidqt.utils.observer_pattern import GenericObserver, GenericObservable
+from mantidqt.utils.observer_pattern import GenericObservable
 
 
 class EngineeringDiffractionPresenter(object):
@@ -36,7 +36,6 @@ class EngineeringDiffractionPresenter(object):
 
         # Setup observers
         self.calibration_observer = CalibrationObserver(self)
-        self.close_event_observer = GenericObserver(self.handle_close)
 
         # Setup observables
         self.statusbar_observable = GenericObservable()
@@ -44,10 +43,6 @@ class EngineeringDiffractionPresenter(object):
 
         # Setup notifiers
         self.setup_calibration_notifier()
-
-    def handle_close(self):
-        self.fitting_presenter.data_widget.ads_observer.unsubscribe()
-        self.fitting_presenter.plot_widget.view.ensure_fit_dock_closed()
 
     def setup_calibration(self):
         cal_model = CalibrationModel()
@@ -71,6 +66,10 @@ class EngineeringDiffractionPresenter(object):
         self.calibration_presenter.calibration_notifier.add_subscriber(
             self.focus_presenter.calibration_observer)
         self.calibration_presenter.calibration_notifier.add_subscriber(self.calibration_observer)
+
+    def handle_close(self):
+        self.fitting_presenter.data_widget.ads_observer.unsubscribe()
+        self.fitting_presenter.plot_widget.view.ensure_fit_dock_closed()
 
     def open_help_window(self):
         InterfaceManager().showCustomInterfaceHelp(self.doc)
