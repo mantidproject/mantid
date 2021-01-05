@@ -430,8 +430,26 @@ class DrillPresenter:
         # update the table
         columns, tooltips = self.model.getColumnHeaderData()
         self.view.set_table(columns, tooltips)
-        contents = self.model.getRowsContents()
-        self.view.fill_table(contents)
+        samples = self.model.getSamples()
+        self.view.blockSignals(True)
+        if not samples:
+            self.view.add_row_after()
+            self.model.addSample(-1)
+        else:
+            for i in range(len(samples)):
+                self.view.add_row_after()
+                params = samples[i].getParameters()
+                for k,v in params.items():
+                    if k not in self.view.columns:
+                        co = self.view.getCellContents(i, "CustomOptions")
+                        if co:
+                            co = co + ';' + str(k) + '=' + str(v)
+                        else:
+                            co = str(k) + '=' + str(v)
+                        self.view.setCellContents(i, "CustomOptions", co)
+                    else:
+                        self.view.setCellContents(i, k, v)
+        self.view.blockSignals(False)
         self._invalidCells = set()
         groups = self.model.getSamplesGroups()
         masters = self.model.getMasterSamples()
@@ -445,3 +463,4 @@ class DrillPresenter:
         vs = self.model.getVisualSettings()
         if vs:
             self.view.setVisualSettings(vs)
+        self.view.setWindowModified(False)

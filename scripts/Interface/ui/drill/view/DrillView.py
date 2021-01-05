@@ -712,24 +712,18 @@ class DrillView(QMainWindow):
         self.menuAddRemoveColumn.triggered.connect(
                 lambda action: self.table.toggleColumnVisibility(action.text()))
 
-    def fill_table(self, rows_contents):
+    def setCellContents(self, row, column, value):
         """
-        Fill the table.
+        Set the contents of a specific cell.
 
         Args:
-            rows_contents (list(list(str))): list of rows contents
+            row (int): row index
+            column (str): column name
+            value (str): column contents
         """
-        if (not self.table.columnCount()):
+        if row >= self.table.rowCount() or column not in self.columns:
             return
-        if rows_contents:
-            self.blockSignals(True)
-            self.table.setRowCount(len(rows_contents))
-            for row in range(len(rows_contents)):
-                self.table.setRowContents(row, rows_contents[row])
-            self.blockSignals(False)
-        else:
-            self.table.addRow(0)
-            self.rowAdded.emit(0)
+        self.table.setCellContents(row, self.columns.index(column), value)
 
     def set_progress(self, n, nmax):
         """

@@ -356,20 +356,6 @@ class DrillViewTest(unittest.TestCase):
         self.view.getCellContents(1, "test2")
         self.view.table.getCellContents.assert_called_once_with(1, 2)
 
-    def test_fillTable(self):
-        # empty contents
-        self.view.fill_table([])
-        self.view.table.addRow.assert_called_once()
-        # contents
-        self.view.table.reset_mock()
-        self.view.fill_table([["test", "test"],
-                              ["test", "test"]])
-        self.view.table.addRow.assert_not_called()
-        self.view.table.setRowCount.assert_called_once()
-        calls = [mock.call(0, ["test", "test"]),
-                 mock.call(1, ["test", "test"])]
-        self.view.table.setRowContents.assert_has_calls(calls)
-
     def test_setProgress(self):
         self.view.set_progress(0, 100)
         self.assertEqual(self.view.progressBar.maximum(), 100)

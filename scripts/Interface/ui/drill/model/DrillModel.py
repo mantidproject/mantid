@@ -787,7 +787,7 @@ class DrillModel(QObject):
         Return:
             list(dict(str:str)): samples
         """
-        return [s for s in self.samples]
+        return self.samples
 
     def getRowsContents(self):
         """
