@@ -63,38 +63,17 @@ class DrillContextMenuPresenter:
         """
         Triggered when the user wants to group the selected rows.
         """
-        rows = self._view.table.getRowsFromSelectedCells()
-        group = self._samplesModel.groupSamples(rows)
-        self._view.labelRowsInGroup(
-                group, rows, None, "This row belongs to the sample group {}"
-                .format(group), None)
+        self._view.groupSelectedRows.emit()
 
     def onUngroupSelectedRows(self):
         """
         Triggered when the user wants to ungroup the selected rows.
         """
-        rows = self._view.table.getRowsFromSelectedCells()
-        groups = self._samplesModel.ungroupSamples(rows)
-        self._view.labelRowsInGroup(None, rows, None)
-        if groups:
-            for group in groups:
-                rows = self._samplesModel.getSamplesGroups()[group]
-                self._view.labelRowsInGroup(
-                        group, rows, None, "This row belongs to the sample "
-                        "group {}".format(group), None)
+        self._view.ungroupSelectedRows.emit()
 
     def onSetMasterRow(self):
         """
         Triggered when the user wants to set the selected row as the master row
         of its group.
         """
-        rows = self._view.table.getRowsFromSelectedCells()
-        if len(rows) != 1:
-            return
-        row = rows[0]
-        group = self._samplesModel.setGroupMaster(row)
-        if group:
-            rows = self._samplesModel.getSamplesGroups()[group]
-            self._view.labelRowsInGroup(
-                    group, rows, row, None, "This is the master row of the "
-                    "group {}".format(group))
+        self._view.setMasterRow.emit()

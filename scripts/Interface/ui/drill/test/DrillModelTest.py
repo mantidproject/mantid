@@ -404,17 +404,14 @@ class DrillModelTest(unittest.TestCase):
         s2 = mock.Mock()
         s3 = mock.Mock()
         self.model.samples = [s0, s1, s2, s3]
-        name = self.model.groupSamples([0, 1, 3])
-        self.assertEqual(name, 'A')
+        self.model.groupSamples([0, 1, 3])
         self.assertDictEqual(self.model.groups, {'A': {s0, s1, s3}})
         self.model.masterSamples['A'] = s3
-        name = self.model.groupSamples([0, 2, 3])
-        self.assertEqual(name, 'B')
+        self.model.groupSamples([0, 2, 3])
         self.assertDictEqual(self.model.groups, {'A': {s1},
                                                  'B': {s0, s2, s3}})
         self.assertDictEqual(self.model.masterSamples, {})
-        name = self.model.groupSamples([1, 3])
-        self.assertEqual(name, 'A')
+        self.model.groupSamples([1, 3])
         self.assertDictEqual(self.model.groups, {'A': {s1, s3},
                                                  'B': {s0, s2}})
 
@@ -458,10 +455,9 @@ class DrillModelTest(unittest.TestCase):
         s3 = mock.Mock()
         s4 = mock.Mock()
         self.model.samples = [s0, s1, s2, s3, s4]
-        self.model.groups = {'A': [s0, s2], 'B': {s1, s3, s4}}
+        self.model.groups = {'A': {s0, s2}, 'B': {s1, s3, s4}}
         self.model.masterSamples['A'] = s2
-        name = self.model.setGroupMaster(0)
-        self.assertEqual(name, 'A')
+        self.model.setGroupMaster(0)
         self.assertDictEqual(self.model.masterSamples, {'A': s0})
 
     def test_geMasterSamples(self):

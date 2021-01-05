@@ -72,32 +72,18 @@ class DrillView(QMainWindow):
 
     """
     Sent when a new group is requested.
-    Args:
-        list(int): row indexes
     """
-    groupRequested = Signal(list)
+    groupSelectedRows = Signal()
 
     """
     Sent when the removing of row(s) from their group is requested.
-    Args:
-        list(int): row indexes
     """
-    ungroupRequested = Signal(list)
-
-    """
-    Sent when the addition of row(s) to an existing group is requested.
-    Args:
-        list(int): row indexes
-        str: name of the group
-    """
-    addToGroup = Signal(list, str)
+    ungroupSelectedRows = Signal()
 
     """
     Sent when a row is set as master row.
-    Args:
-        int: row index
     """
-    setMaster = Signal(int)
+    setMasterRow = Signal()
 
     """
     Sent when the user asks to process the selected row(s).
@@ -422,48 +408,6 @@ class DrillView(QMainWindow):
         """
         return self.table.getRowLabel(row)
 
-    def groupRows(self, rows):
-        """
-        Add a list of row(s) to a new group. This method changes the row labels.
-
-        Args:
-            rows (list(int)): row indexes
-        """
-        if not rows:
-            return
-        self.groupRequested.emit(rows)
-
-    def ungroupRows(self, rows):
-        """
-        Remove a list of row(s) to all their potential groups.
-
-        Args:
-            rows (list(int)): row indexes
-        """
-        if not rows:
-            return
-        self.ungroupRequested.emit(rows)
-
-    def addRowsToGroup(self, rows, group):
-        """
-        Add row(s) to an existing group. This will reset all the label in the
-        group.
-
-        Args:
-            rows (list(int)): row indexes
-            group (str): group name
-        """
-        self.addToGroup.emit(rows, group)
-
-    def setMasterRow(self, row):
-        """
-        This method sets a row as the master row for the group it belongs to.
-
-        Args:
-            row (int): row index
-        """
-        self.setMaster.emit(row)
-
     def helpWindow(self):
         """
         Popup the help window.
@@ -566,17 +510,13 @@ class DrillView(QMainWindow):
             self.eraseSelectedCells()
         elif (event.key() == Qt.Key_G
                 and event.modifiers() == Qt.ControlModifier):
-            rows = self.table.getRowsFromSelectedCells()
-            self.groupRows(rows)
+            self.groupSelectedRows.emit()
         elif (event.key() == Qt.Key_G
                 and event.modifiers() == Qt.ControlModifier | Qt.ShiftModifier):
-            rows = self.table.getRowsFromSelectedCells()
-            self.ungroupRows(rows)
+            self.ungroupSelectedRows.emit()
         elif (event.key() == Qt.Key_M
                 and event.modifiers() == Qt.ControlModifier):
-            rows = self.table.getRowsFromSelectedCells()
-            if len(rows) == 1:
-                self.setMasterRow(rows[0])
+            self.setMasterRow.emit()
 
     def show_directory_manager(self):
         """

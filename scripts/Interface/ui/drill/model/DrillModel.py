@@ -103,6 +103,13 @@ class DrillModel(QObject):
     """
     paramError = Signal(int, str, str)
 
+    """
+    Raised when a specific group is updated.
+    Args:
+        (str): name of the updated group
+    """
+    groupUpdated = Signal(str)
+
     def __init__(self):
         super(DrillModel, self).__init__()
         self.instrument = None
@@ -435,15 +442,13 @@ class DrillModel(QObject):
         Args:
             sampleIndexes (list(int)): sample indexes
             groupName (str): optional name for the new group
-
-        Returns:
-            str: name of the created group
         """
         for i in sampleIndexes:
             sample = self.samples[i]
             for group in self.groups:
                 if sample in self.groups[group]:
                     self.groups[group].remove(sample)
+                    self.groupUpdated.emit(group)
                 if ((group in self.masterSamples)
                         and (self.masterSamples[group] == sample)):
                     del self.masterSamples[group]
@@ -472,7 +477,7 @@ class DrillModel(QObject):
         samples = set(self.samples[i] for i in sampleIndexes)
         self.groups[groupName] = samples
 
-        return groupName
+        self.groupUpdated.emit(groupName)
 
     def ungroupSamples(self, sampleIndexes):
         """
@@ -480,9 +485,6 @@ class DrillModel(QObject):
 
         Args:
             sampleIndexes (list(int)): sample indexes
-
-        Returns:
-            list(str): list of groups that changed
         """
         groups = []
         for i in sampleIndexes:
@@ -490,13 +492,13 @@ class DrillModel(QObject):
             for group in self.groups:
                 if sample in self.groups[group]:
                     self.groups[group].remove(sample)
+                    self.groupUpdated.emit(group)
                     groups.append(group)
                 if ((group in self.masterSamples)
                         and (self.masterSamples[group] == sample)):
                     del self.masterSamples[group]
 
         self.groups = {k:v for k,v in self.groups.items() if v}
-        return [group for group in groups if group in self.groups]
 
     def setSamplesGroups(self, groups):
         """
@@ -543,15 +545,11 @@ class DrillModel(QObject):
 
         Args:
             sampleIndex (int): sample index
-
-        Returns:
-            str: name of the group, None if the row is not in a group
         """
         for group in self.groups:
             if self.samples[sampleIndex] in self.groups[group]:
                 self.masterSamples[group] = self.samples[sampleIndex]
-                return group
-        return None
+                self.groupUpdated.emit(group)
 
     def getProcessingParameters(self, sample):
         """

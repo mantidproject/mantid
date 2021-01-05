@@ -47,9 +47,9 @@ class DrillPresenter:
         self.view.rowAdded.connect(self.model.addSample)
         self.view.rowDeleted.connect(self.model.deleteSample)
         self.view.dataChanged.connect(self.onDataChanged)
-        self.view.groupRequested.connect(self.onGroupRequested)
-        self.view.ungroupRequested.connect(self.onUngroupRequested)
-        self.view.setMaster.connect(self.onMasterRowRequested)
+        self.view.groupSelectedRows.connect(self.onGroupSelectedRows)
+        self.view.ungroupSelectedRows.connect(self.onUngroupSelectedRows)
+        self.view.setMasterRow.connect(self.onSetMasterRow)
         self.view.process.connect(self.onProcess)
         self.view.processGroup.connect(self.onProcessGroup)
         self.view.processAll.connect(self.onProcessAll)
@@ -70,6 +70,7 @@ class DrillPresenter:
         self.model.processingDone.connect(self.onProcessingDone)
         self.model.paramOk.connect(self.onParamOk)
         self.model.paramError.connect(self.onParamError)
+        self.model.groupUpdated.connect(self.onGroupUpdated)
 
         self._syncViewHeader()
         self._syncViewTable()
@@ -119,43 +120,53 @@ class DrillPresenter:
         else:
             self.model.changeParameter(row, column, contents)
 
-    def onGroupRequested(self, rows):
+    def onGroupSelectedRows(self):
         """
         Triggered when the view request the creation of a group.
-
-        Args:
-            rows (list(int)): row indexes
         """
-        group = self.model.groupSamples(rows)
-        self.view.labelRowsInGroup(group, rows, None,
-                                   "This row belongs to the sample group {}"
-                                   .format(group),
-                                   None)
+        rows = self.view.table.getRowsFromSelectedCells()
+        self.model.groupSamples(rows)
 
-    def onUngroupRequested(self, rows):
+    def onUngroupSelectedRows(self):
         """
         Triggered when the view request the removing of row from their group(s).
+        """
+        rows = self.view.table.getRowsFromSelectedCells()
+        self.model.ungroupSamples(rows)
+
+    def onSetMasterRow(self):
+        """
+        Triggered when a master row is set for a group.
+        """
+        rows = self.view.table.getRowsFromSelectedCells()
+        if len(rows) != 1:
+            return
+        row = rows[0]
+        self.model.setGroupMaster(row)
+
+    def onGroupUpdated(self, group):
+        """
+        Triggered when the groups are updated in the model. This method update
+        the row labels in the table.
 
         Args:
-            rows (list(int)): row indexes
+            group (str): name of the updated group
         """
-        groups = self.model.ungroupSamples(rows)
-        self.view.labelRowsInGroup(None, rows, None)
-        if groups:
-            for group in groups:
-                rows = self.model.getSamplesGroups()[group]
-                self.view.labelRowsInGroup(group, rows, None, "This row "
-                                           "belongs to the sample group {}"
-                                           .format(group),
-                                           None)
+        groups = self.model.getSamplesGroups()
+        masters = self.model.getMasterSamples()
 
-    def onMasterRowRequested(self, row):
-        group = self.model.setGroupMaster(row)
-        if group:
-            rows = self.model.getSamplesGroups()[group]
-            self.view.labelRowsInGroup(group, rows, row, None,
-                                       "This is the master row of the group {}"
-                                       .format(group))
+        if group in groups:
+            rows = groups[group]
+        else:
+            rows = None
+        if group in masters:
+            master = masters[group]
+        else:
+            master = None
+        self.view.labelRowsInGroup(group, rows, master,
+                                   "This row belongs to the sample group {}"
+                                   .format(group), "This is the master row of "
+                                   "the group {}".format(group))
 
     def onParamOk(self, row, columnName):
         """
