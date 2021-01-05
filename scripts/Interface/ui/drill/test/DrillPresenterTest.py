@@ -191,21 +191,6 @@ class DrillPresenterTest(unittest.TestCase):
         mQMessageBox.question.assert_called_once()
         self.presenter.onSaveAs.assert_called_once()
 
-    def test_updateViewFromModel(self):
-        self.view.reset_mock()
-        self.model.reset_mock()
-        self.presenter.updateViewFromModel()
-
-        self.model.getAvailableAcquisitionModes.assert_called_once()
-        self.model.getAcquisitionMode.assert_called_once()
-        self.model.getColumnHeaderData.assert_called_once()
-        self.model.getRowsContents.assert_called_once()
-
-        self.view.set_available_modes.assert_called_once()
-        self.view.set_acquisition_mode.assert_called_once()
-        self.view.set_table.assert_called_once()
-        self.view.fill_table.assert_called_once()
-
 
 if __name__ == "__main__":
     unittest.main()

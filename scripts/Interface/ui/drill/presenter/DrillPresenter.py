@@ -71,7 +71,8 @@ class DrillPresenter:
         self.model.paramOk.connect(self.onParamOk)
         self.model.paramError.connect(self.onParamError)
 
-        self.updateViewFromModel()
+        self._syncViewHeader()
+        self._syncViewTable()
 
     def onDataChanged(self, row, column):
         """
@@ -296,7 +297,8 @@ class DrillPresenter:
 
         self.model.setInstrument(instrument)
         self.model.resetIOFile()
-        self.updateViewFromModel()
+        self._syncViewHeader()
+        self._syncViewTable()
 
     def acquisitionModeChanged(self, mode):
         """
@@ -310,7 +312,8 @@ class DrillPresenter:
 
         self.model.setAcquisitionMode(mode)
         self.model.resetIOFile()
-        self.updateViewFromModel()
+        self._syncViewHeader()
+        self._syncViewTable()
 
     def onLoad(self):
         """
@@ -323,8 +326,9 @@ class DrillPresenter:
             return
         self.model.setIOFile(filename[0])
         self.model.importRundexData()
+        self._syncViewHeader()
+        self._syncViewTable()
         self.view.setWindowModified(False)
-        self.updateViewFromModel()
 
     def onSave(self):
         """
@@ -402,7 +406,8 @@ class DrillPresenter:
             self._saveDataQuestion()
         self.model.clear()
         self.model.resetIOFile()
-        self.updateViewFromModel()
+        self._syncViewHeader()
+        self._syncViewTable()
 
     def _saveDataQuestion(self):
         """
@@ -417,21 +422,23 @@ class DrillPresenter:
         if (q == QMessageBox.Yes):
             self.onSaveAs()
 
-    def updateViewFromModel(self):
-        """
-        Update the view (header and table) from the model.
-        """
-        # update the header
-        self.view.set_available_modes(
-                self.model.getAvailableAcquisitionModes())
-        self.view.set_acquisition_mode(self.model.getAcquisitionMode())
+    def _syncViewHeader(self):
+        availableModes = self.model.getAvailableAcquisitionModes()
+        acquisitionMode = self.model.getAcquisitionMode()
         cycle, exp = self.model.getCycleAndExperiment()
+
+        self.view.set_available_modes(availableModes)
+        self.view.set_acquisition_mode(acquisitionMode)
         self.view.setCycleAndExperiment(cycle, exp)
-        # update the table
+
+    def _syncViewTable(self):
         columns, tooltips = self.model.getColumnHeaderData()
-        self.view.set_table(columns, tooltips)
         samples = self.model.getSamples()
+        groups = self.model.getSamplesGroups()
+        masters = self.model.getMasterSamples()
+
         self.view.blockSignals(True)
+        self.view.set_table(columns, tooltips)
         if not samples:
             self.view.add_row_after()
             self.model.addSample(-1)
@@ -449,10 +456,6 @@ class DrillPresenter:
                         self.view.setCellContents(i, "CustomOptions", co)
                     else:
                         self.view.setCellContents(i, k, v)
-        self.view.blockSignals(False)
-        self._invalidCells = set()
-        groups = self.model.getSamplesGroups()
-        masters = self.model.getMasterSamples()
         for group in groups:
             if group in masters:
                 master = masters[group]
@@ -463,4 +466,4 @@ class DrillPresenter:
         vs = self.model.getVisualSettings()
         if vs:
             self.view.setVisualSettings(vs)
-        self.view.setWindowModified(False)
+        self.view.blockSignals(False)
