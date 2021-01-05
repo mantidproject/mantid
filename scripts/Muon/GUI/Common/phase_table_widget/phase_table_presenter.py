@@ -195,13 +195,7 @@ class PhaseTablePresenter(object):
         if not self.view.output_fit_information:
             return
 
-        run = re.search('[0-9]+', base_name).group()
-        phase_table_group = get_phase_table_workspace_group_name(base_name,
-                                                                 self.context.data_context.instrument,
-                                                                 self.context.workspace_suffix)
-        directory = get_base_data_directory(self.context, run) + phase_table_group
-
-        muon_workspace_wrapper = MuonWorkspaceWrapper(directory + fit_workspace_name)
+        muon_workspace_wrapper = MuonWorkspaceWrapper(fit_workspace_name)
         muon_workspace_wrapper.show()
 
     def create_parameters_for_cal_muon_phase_algorithm(self):
