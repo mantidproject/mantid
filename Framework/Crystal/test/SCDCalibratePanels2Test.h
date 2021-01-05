@@ -4,6 +4,16 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
+
+// NOTE: Generating a synthetic peakworkspace for testing is very time
+//       consuming, therefore only one wholesome unittest with calibration
+//       is enabled for regression test.
+//       To test other testing targets, change the lead word from
+//                 run_ to test_
+//       to run them within the ctest framework.
+//       You might need to do one at a time to avoid ctest timeout error
+//       locally.
+
 #pragma once
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -66,10 +76,10 @@ public:
         dspacing_min(1.0), dspacing_max(10.0),    //
         wavelength_min(0.8), wavelength_max(2.9), //
         omega_step(3.0),                          //
-        TOLERANCE_L(1e-8), // this calibration has intrinsic accuracy limit of
-                           // 1mm for translation
-        TOLERANCE_R(1e-8), // this calibration has intrinsic accuracy limit of
-                           // 1e-4 deg for rotation
+        TOLERANCE_L(1e-16), // this calibration has intrinsic accuracy limit of
+                            // 1mm for translation
+        TOLERANCE_R(1e-8),  // this calibration has intrinsic accuracy limit of
+                            // 1e-4 deg for rotation
         LOGCHILDALG(false) {
     // NOTE:
     //  The MAGIC PIECE, basically we need to let AlgorithmFactory
@@ -97,7 +107,7 @@ public:
    */
   void test_Name() {
     SCDCalibratePanels2 alg;
-    TS_ASSERT_EQUALS(alg.name(), "SCDCalibratePanels2");
+    TS_ASSERT_EQUALS(alg.name(), "SCDCalibratePanels");
   }
 
   /**
@@ -114,8 +124,11 @@ public:
    * @brief Trivial case where all components are in ideal/starting position
    *        Therefore the calibration results should be close to a zero
    *        vector.
+   *
+   * NOTE: Change the name from run_Null_Case to test_Null_Case to run it
+   *       within the ctest framework.
    */
-  void test_Null_Case() {
+  void run_Null_Case() {
     g_log.notice() << "test: !Null case!\n";
 
     // Generate unique temp files
@@ -147,6 +160,10 @@ public:
     g_log.notice() << "-- validate calibration output\n";
     TS_ASSERT(validateCalibrationResults(pwsref, wsraw, xmlFile.string()));
 
+    // quick test
+    g_log.notice() << "cos(PI) = " << cos(PI) << "\n";
+    TS_ASSERT(false);
+
     // Cleanup
     doCleanup();
   }
@@ -155,7 +172,7 @@ public:
    * @brief Only adjust T0
    *
    */
-  void test_T0_Shift() {
+  void run_T0_Shift() {
     g_log.notice() << "test: !T0 Shift!\n";
 
     // prescribed shift
@@ -187,9 +204,13 @@ public:
    *       team does not seem to care about using T0, therefore we are
    *       not implmenting T0 calibration here.
    *
+   * NOTE: change the name from run_L1_Shift to test_L1_Shift to run
+   *       it within the ctest framework
    */
-  void test_L1_Shift() {
+  void run_L1_Shift() {
     g_log.notice() << "test: !Source Shift (L1 change)!\n";
+
+    g_log.notice() << "Tolerance of Distance (meter) :" << TOLERANCE_L << "\n";
 
     // prescribed shift
     // NOTE: the common range for dL1 is +-10cm
@@ -230,6 +251,14 @@ public:
     g_log.notice() << "-- validate calibration output\n";
     TS_ASSERT(validateCalibrationResults(pwsref, wsraw, xmlFile.string()));
 
+    // this is just for documentation purpose, the validation func above
+    // is better for robust testing
+    double L1_prescribed = ws->getInstrument()->getSource()->getPos().Z();
+    double L1_calibrated = pws->getInstrument()->getSource()->getPos().Z();
+    double dl = std::abs(L1_prescribed - L1_calibrated);
+    g_log.notice() << "-- |L1_prescribed-L1_calibrated| = " << dl << "\n";
+
+    TS_ASSERT(false);
     // Cleanup
     doCleanup();
   }
@@ -240,7 +269,7 @@ public:
    * NOTE: not enough peaks on the y_panels, so we have to work with only the
    *       x_panels
    */
-  void test_Exec() {
+  void run_Exec() {
     g_log.notice()
         << "test: !multi components move (translation and rotation)!\n";
 
@@ -428,6 +457,50 @@ private:
     return AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>(pwsname);
   }
 
+  /**
+   * @brief Adjust the position of a component through translation and rotation
+   *
+   * @param dx
+   * @param dy
+   * @param dz
+   * @param rvx  x-component of rotation axis
+   * @param rvy  y-component of rotation axis
+   * @param rvz  z-component of rotation axis
+   * @param drotang  rotation angle
+   * @param cmptName
+   * @param ws
+   */
+  void adjustComponent(double dx, double dy, double dz, double rvx, double rvy,
+                       double rvz, double drotang, std::string cmptName,
+                       MatrixWorkspace_sptr ws) {
+    // translation
+    IAlgorithm_sptr mv_alg = Mantid::API::AlgorithmFactory::Instance().create(
+        "MoveInstrumentComponent", -1);
+    mv_alg->initialize();
+    mv_alg->setLogging(LOGCHILDALG);
+    mv_alg->setProperty("Workspace", ws);
+    mv_alg->setProperty("ComponentName", cmptName);
+    mv_alg->setProperty("X", dx);
+    mv_alg->setProperty("Y", dy);
+    mv_alg->setProperty("Z", dz);
+    mv_alg->setProperty("RelativePosition", true);
+    mv_alg->executeAsChildAlg();
+
+    // rotation
+    IAlgorithm_sptr rot_alg = Mantid::API::AlgorithmFactory::Instance().create(
+        "RotateInstrumentComponent", -1);
+    rot_alg->initialize();
+    rot_alg->setLogging(LOGCHILDALG);
+    rot_alg->setProperty("Workspace", ws);
+    rot_alg->setProperty("ComponentName", cmptName);
+    rot_alg->setProperty("X", rvx);
+    rot_alg->setProperty("Y", rvy);
+    rot_alg->setProperty("Z", rvz);
+    rot_alg->setProperty("Angle", drotang);
+    rot_alg->setProperty("RelativeRotation", true);
+    rot_alg->executeAsChildAlg();
+  }
+
   void adjustComponent(double dx, double dy, double dz, double drotx,
                        double droty, double drotz, std::string cmptName,
                        MatrixWorkspace_sptr ws) {
@@ -613,15 +686,16 @@ private:
 
     Quat q1 = cmpt1->getRelativeRot();
     Quat q2 = cmpt2->getRelativeRot();
-    std::vector<double> r1 = q1.getEulerAngles("XYZ");
-    std::vector<double> r2 = q2.getEulerAngles("XYZ");
 
-    return  (std::abs(p1.X() - p2.X()) < TOLERANCE_L) &&
-            (std::abs(p1.Y() - p2.Y()) < TOLERANCE_L) &&
-            (std::abs(p1.Z() - p2.Z()) < TOLERANCE_L) &&
-            (std::abs(r1[0] - r2[0]) < TOLERANCE_R) &&
-            (std::abs(r1[1] - r2[1]) < TOLERANCE_R) &&
-            (std::abs(r1[2] - r2[2]) < TOLERANCE_R);
+    q2.inverse();
+    Quat dq = q1 * q2;
+    double ang, ax0, ax1, ax2;
+    dq.getAngleAxis(ang, ax0, ax1, ax2); // what is the unit of this angle?
+
+    return (std::abs(p1.X() - p2.X()) < TOLERANCE_L) &&
+           (std::abs(p1.Y() - p2.Y()) < TOLERANCE_L) &&
+           (std::abs(p1.Z() - p2.Z()) < TOLERANCE_L) &&
+           (std::abs(ang) < TOLERANCE_R);
   }
 
   /**
@@ -679,4 +753,5 @@ private:
   const double TOLERANCE_L; // distance
   const double TOLERANCE_R; // rotation angle
   const bool LOGCHILDALG; // whether to show individual alg log
+  const double PI{3.141592653589793238462643383279502884};
 };

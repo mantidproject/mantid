@@ -51,6 +51,10 @@ private:
     double rotAngX, double rotAngY, double rotAngZ,
     std::string componentName,
     const API::Workspace_sptr &ws) const;
+
+  void rotateInstrumentComponentBy(double rotVx, double rotVy, double rotVz,
+                                   double rotAng, std::string componentName,
+                                   const API::Workspace_sptr &ws) const;
 };
 
 } // namespace Crystal

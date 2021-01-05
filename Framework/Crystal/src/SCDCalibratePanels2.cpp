@@ -264,7 +264,7 @@ namespace Crystal {
             << ",ComponentName=moderator";
     //-- bounds&constraints def
     std::ostringstream tie_str;
-    tie_str << "dx=0.0,dy=0.0,drotx=0.0,droty=0.0,drotz=0.0,dT0=" << m_T0;
+    tie_str << "dx=0.0,dy=0.0,theta=1.0,phi=0.0,drotang=0.0,dT0=" << m_T0;
     //-- set and go
     fitL1_alg->setPropertyValue("Function", fun_str.str());
     fitL1_alg->setProperty("Ties", tie_str.str());
@@ -355,16 +355,8 @@ namespace Crystal {
       std::ostringstream tie_str;
       tie_str << "dT0=" << m_T0;
       std::ostringstream constraint_str;
-      constraint_str << -m_bank_translation_bounds << "<dx<"
-                     << m_bank_translation_bounds << ", "
-                     << -m_bank_translation_bounds << "<dy<"
-                     << m_bank_translation_bounds << ", "
-                     << -m_bank_translation_bounds << "<dz<"
-                     << m_bank_translation_bounds << ", "
-                     << -m_bank_rotation_bounds << "<drotx<"
-                     << m_bank_rotation_bounds << "," << -m_bank_rotation_bounds
-                     << "<droty<" << m_bank_rotation_bounds << ","
-                     << -m_bank_rotation_bounds << "<drotz<"
+      constraint_str << "0<theta<" << PI << ",0<phi<" << PI * 2 << ","
+                     << -m_bank_rotation_bounds << "<drotang<"
                      << m_bank_rotation_bounds;
       //---- set&go
       fitBank_alg->setPropertyValue("Function", fun_str.str());
@@ -381,29 +373,30 @@ namespace Crystal {
       double dx = rstFitBank->getRef<double>("Value", 0);
       double dy = rstFitBank->getRef<double>("Value", 1);
       double dz = rstFitBank->getRef<double>("Value", 2);
-      double drotx = rstFitBank->getRef<double>("Value", 3);
-      double droty = rstFitBank->getRef<double>("Value", 4);
-      double drotz = rstFitBank->getRef<double>("Value", 5);
+      double theta = rstFitBank->getRef<double>("Value", 3);
+      double phi = rstFitBank->getRef<double>("Value", 4);
+      double rotang = rstFitBank->getRef<double>("Value", 5);
 
       //-- step 4: update the instrument with optimization results
       //           if the fit results are above the tolerance/threshold
       if ((std::abs(dx) < m_tolerance_translation) &&
           (std::abs(dy) < m_tolerance_translation) &&
           (std::abs(dz) < m_tolerance_translation) &&
-          (std::abs(drotx) < m_tolerance_rotation) &&
-          (std::abs(droty) < m_tolerance_rotation) &&
-          (std::abs(drotz) < m_tolerance_rotation)) {
+          (std::abs(rotang) < m_tolerance_rotation)) {
         // skip the adjustment of the component as it is juat noise
         g_log.notice() << "-- Fit " << bankname
                        << " results below tolerance, skippping\n";
       } else {
-        adjustComponent(dx, dy, dz, drotx, droty, drotz, bankname, pws);
+        double rvx = sin(theta) * cos(phi);
+        double rvy = sin(theta) * sin(phi);
+        double rvz = cos(theta);
+        adjustComponent(dx, dy, dz, rvx, rvy, rvz, rotang, bankname, pws);
         g_log.notice() << "-- Fit " << bankname << " results using "
                        << nBankPeaks << " peaks:\n"
                        << "    d(x,y,z) = (" << dx << "," << dy << "," << dz
                        << ")\n"
-                       << "    drot(x,y,z) = (" << drotx << "," << droty << ","
-                       << drotz << ")\n"
+                       << "    rotang(rx,ry,rz) =" << rotang << "(" << rvx
+                       << "," << rvy << "," << rvz << ")\n"
                        << "    chi2/DOF = " << chi2OverDOF << "\n";
       }
 
@@ -519,6 +512,42 @@ namespace Crystal {
     rot_alg->setProperty("Y", 0.0);
     rot_alg->setProperty("Z", 1.0);
     rot_alg->setProperty("Angle", drotz);
+    rot_alg->setProperty("RelativeRotation", true);
+    rot_alg->executeAsChildAlg();
+  }
+
+  void
+  SCDCalibratePanels2::adjustComponent(double dx, double dy, double dz,
+                                       double rvx, double rvy, double rvz,
+                                       double rang, std::string cmptName,
+                                       DataObjects::PeaksWorkspace_sptr &pws) {
+    // translation
+    IAlgorithm_sptr mv_alg = Mantid::API::AlgorithmFactory::Instance().create(
+        "MoveInstrumentComponent", -1);
+    mv_alg->initialize();
+    mv_alg->setChild(true);
+    mv_alg->setLogging(LOGCHILDALG);
+    mv_alg->setProperty<Workspace_sptr>("Workspace", pws);
+    mv_alg->setProperty("ComponentName", cmptName);
+    mv_alg->setProperty("X", dx);
+    mv_alg->setProperty("Y", dy);
+    mv_alg->setProperty("Z", dz);
+    mv_alg->setProperty("RelativePosition", true);
+    mv_alg->executeAsChildAlg();
+
+    // orientation
+    IAlgorithm_sptr rot_alg = Mantid::API::AlgorithmFactory::Instance().create(
+        "RotateInstrumentComponent", -1);
+    //-- rotAngX@(1,0,0)
+    rot_alg->initialize();
+    rot_alg->setChild(true);
+    rot_alg->setLogging(LOGCHILDALG);
+    rot_alg->setProperty<Workspace_sptr>("Workspace", pws);
+    rot_alg->setProperty("ComponentName", cmptName);
+    rot_alg->setProperty("X", rvx);
+    rot_alg->setProperty("Y", rvy);
+    rot_alg->setProperty("Z", rvz);
+    rot_alg->setProperty("Angle", rang);
     rot_alg->setProperty("RelativeRotation", true);
     rot_alg->executeAsChildAlg();
   }

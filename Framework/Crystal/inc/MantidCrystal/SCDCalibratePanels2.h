@@ -85,6 +85,10 @@ private:
                        double droty, double drotz, std::string cmptName,
                        DataObjects::PeaksWorkspace_sptr &pws);
 
+  void adjustComponent(double dx, double dy, double dz, double rvx, double rvy,
+                       double rvz, double rang, std::string cmptName,
+                       DataObjects::PeaksWorkspace_sptr &pws);
+
   /// Save to xml file for Mantid to load
   void saveXmlFile(const std::string &FileName,
                    boost::container::flat_set<std::string> &AllBankNames,
@@ -110,6 +114,7 @@ private:
   boost::container::flat_set<std::string> m_BankNames;
   const bool LOGCHILDALG{false};
   const int MINIMUM_PEAKS_PER_BANK{6};
+  const double PI{3.141592653589793238462643383279502884};
 };
 
 } // namespace Crystal

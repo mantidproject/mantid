@@ -40,9 +40,12 @@ namespace Crystal {
     declareParameter("dx", 0.0, "relative shift along X");
     declareParameter("dy", 0.0, "relative shift along Y");
     declareParameter("dz", 0.0, "relative shift along Z");
-    declareParameter("drotx", 0.0, "relative rotation around X");
-    declareParameter("droty", 0.0, "relative rotation around Y");
-    declareParameter("drotz", 0.0, "relative rotation around Z");
+    // rotation axis is defined as (1, theta, phi)
+    // https://en.wikipedia.org/wiki/Spherical_coordinate_system
+    declareParameter("theta", 0.0, "Polar coorindates theta");
+    declareParameter("phi", 0.0, "Polar coorindates phi");
+    // rotation angle
+    declareParameter("drotang", 0.0, "angle in degree of relative rotation");
     declareParameter("dT0", 0.0, "delta of TOF");
 
     // attributes
@@ -67,10 +70,18 @@ namespace Crystal {
     const double dx = getParameter("dx");
     const double dy = getParameter("dy");
     const double dz = getParameter("dz");
-    //-- delta in rotation/orientation
-    const double drotx = getParameter("drotx");
-    const double droty = getParameter("droty");
-    const double drotz = getParameter("drotz");
+    //-- delta in rotation/orientation as angle axis pair
+    //   using polar coordinates to ensure a unit vector
+    //   (r, theta, phi) where r=1
+    const double theta = getParameter("theta");
+    const double phi = getParameter("phi");
+    // compute the rotation axis
+    double vx = sin(theta) * cos(phi);
+    double vy = sin(theta) * sin(phi);
+    double vz = cos(theta);
+    //
+    const double drotang = getParameter("drotang");
+
     //-- delta in TOF
     const double dT0 = getParameter("dT0");
     //-- NOTE: given that these components are never used as
@@ -100,7 +111,7 @@ namespace Crystal {
 
     // rotation
     // NOTE: moderator should not be reoriented
-    rotateInstrumentComponentBy(drotx, droty, drotz, m_cmpt, calc_ws);
+    rotateInstrumentComponentBy(vx, vy, vz, drotang, m_cmpt, calc_ws);
 
     // generate a flatten Q_sampleframe from calculated ws (by moving instrument component)
     // so that a direct comparison can be performed between measured and calculated
@@ -183,6 +194,26 @@ namespace Crystal {
     mv_alg->setProperty("Z", deltaZ);
     mv_alg->setProperty("RelativePosition", true);
     mv_alg->executeAsChildAlg();
+  }
+
+  void SCDCalibratePanels2ObjFunc::rotateInstrumentComponentBy(
+      double rotVx, double rotVy, double rotVz, double rotAng,
+      std::string componentName, const API::Workspace_sptr &ws) const {
+    // rotate
+    IAlgorithm_sptr rot_alg = Mantid::API::AlgorithmFactory::Instance().create(
+        "RotateInstrumentComponent", -1);
+    //
+    rot_alg->initialize();
+    rot_alg->setChild(true);
+    rot_alg->setLogging(LOGCHILDALG);
+    rot_alg->setProperty<Workspace_sptr>("Workspace", ws);
+    rot_alg->setProperty("ComponentName", componentName);
+    rot_alg->setProperty("X", rotVx);
+    rot_alg->setProperty("Y", rotVy);
+    rot_alg->setProperty("Z", rotVz);
+    rot_alg->setProperty("Angle", rotAng);
+    rot_alg->setProperty("RelativeRotation", true);
+    rot_alg->executeAsChildAlg();
   }
 
   /**
