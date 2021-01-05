@@ -243,7 +243,7 @@ class PhaseTablePresenter(object):
 
     def _validate_data_changed(self, data, string):
         run = float(get_run_number_from_workspace_name(self.view.input_workspace,
-                                                 self.context.data_context.instrument))
+                                                       self.context.data_context.instrument))
         last_good_time = self.context.last_good_data([run])
         first_good_time = self.context.first_good_data([run])
 
