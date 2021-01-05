@@ -63,7 +63,7 @@ class DrillRundexIOTest(unittest.TestCase):
         s0 = mock.Mock()
         s0.getParameters.return_value = {"param1": "value1"}
         mD.getSamples.return_value = [s0]
-        mD.getSamplesGroups.return_value = {"A": 0}
+        mD.getSamplesGroups.return_value = {"A": [0]}
         mD.getMasterSamples.return_value = {"A": 0}
 
         json = {
@@ -74,7 +74,7 @@ class DrillRundexIOTest(unittest.TestCase):
                 "VisualSettings": {"key": "value"},
                 "GlobalSettings": {"setting1": "value1"},
                 "Samples": [{"param1": "value1"}],
-                "SamplesGroups": {"A": 0},
+                "SamplesGroups": {"A": [0]},
                 "MasterSamples": {"A": 0}
                 }
         self.model.save()
