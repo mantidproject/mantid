@@ -11,7 +11,8 @@ from Muon.GUI.Common.muon_phasequad import MuonPhasequad
 from mantidqt.utils.observer_pattern import Observable, GenericObserver, GenericObservable
 import re
 from Muon.GUI.Common.ADSHandler.workspace_naming import get_phase_table_workspace_name, \
-    get_fitting_workspace_name, get_base_data_directory
+    get_fitting_workspace_name, get_base_data_directory, \
+    get_run_number_from_workspace_name
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 from Muon.GUI.Common.utilities.run_string_utils import valid_name_regex
 import mantid
@@ -241,8 +242,11 @@ class PhaseTablePresenter(object):
         self._validate_data_changed(self.view.last_good_time, "Last Good Data")
 
     def _validate_data_changed(self, data, string):
-        first_good_time = self.context.phase_context.options_dict['first_good_time']
-        last_good_time = self.context.phase_context.options_dict['last_good_time']
+        run = get_run_number_from_workspace_name(self.view.input_workspace,
+                                                 self.context.data_context.instrument)
+        last_good_time = self.context.last_good_data([float(run)])
+        first_good_time = self.context.first_good_data([float(run)])
+
         if self.view.first_good_time > self.view.last_good_time:
             self.view.first_good_time = first_good_time
             self.view.last_good_time = last_good_time

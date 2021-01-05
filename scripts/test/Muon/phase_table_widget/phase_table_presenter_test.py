@@ -235,28 +235,72 @@ class PhaseTablePresenterTest(unittest.TestCase):
         self.presenter.selected_phasequad_changed_notifier.notify_subscribers.assert_any_call({"is_added":True, "name":"test_Im_"})
 
     def test_handle_first_good_data_too_small(self):
-        self.view.first_good_time = 0.01
+        self.view.input_workspace_combo_box.currentText = mock.Mock(return_value="MUSR62260_raw_data MA")
+        self.context.data_context.instrument = 'MUSR'
+        self.view.first_good_time = 0.0
+        self.context.first_good_data = mock.Mock(return_value=0.102)
         self.presenter.handle_first_good_data_changed()
 
-        self.view.warning_popup.assert_called_with('First Good Data cannot be smaller than 0.1')
+        self.view.warning_popup.assert_called_once_with('First Good Data cannot be smaller than 0.102')
 
     def test_handle_first_good_data_too_big(self):
-        self.view.first_good_time = 20.0
+        self.view.input_workspace_combo_box.currentText = mock.Mock(return_value="MUSR62260_raw_data MA")
+        self.context.data_context.instrument = 'MUSR'
+        self.view.first_good_time = 40.0
+        self.view.last_good_time = 41.0
+        self.context.last_good_data = mock.Mock(return_value=32.29)
         self.presenter.handle_first_good_data_changed()
 
-        self.view.warning_popup.assert_called_with('First Good Data cannot be greater than Last Good Data')
+        self.view.warning_popup.assert_called_once_with('First Good Data cannot be greater than 32.29')
 
     def test_handle_last_good_data_too_small(self):
-        self.view.last_good_time = 0.01
+        self.view.input_workspace_combo_box.currentText = mock.Mock(return_value="MUSR62260_raw_data MA")
+        self.context.data_context.instrument = 'MUSR'
+        self.view.first_good_time = -1.0
+        self.view.last_good_time = 0.0
+        self.context.first_good_data = mock.Mock(return_value=0.102)
         self.presenter.handle_last_good_data_changed()
 
-        self.view.warning_popup.assert_called_with('First Good Data cannot be greater than Last Good Data')
+        self.view.warning_popup.assert_called_once_with('Last Good Data cannot be smaller than 0.102')
 
     def test_handle_last_good_data_too_big(self):
-        self.view.last_good_time = 16.0
+        self.view.input_workspace_combo_box.currentText = mock.Mock(return_value="MUSR62260_raw_data MA")
+        self.context.data_context.instrument = 'MUSR'
+        self.view.last_good_time = 41.0
+        self.context.last_good_data = mock.Mock(return_value=32.29)
         self.presenter.handle_last_good_data_changed()
 
-        self.view.warning_popup.assert_called_with('Last Good Data cannot be greater than 15.0')
+        self.view.warning_popup.assert_called_once_with('Last Good Data cannot be greater than 32.29')
+
+    def test_handle_first_good_greater_than_last_good(self):
+        self.view.input_workspace_combo_box.currentText = mock.Mock(return_value="MUSR62260_raw_data MA")
+        self.context.data_context.instrument = 'MUSR'
+        self.view.first_good_time = 20.0
+        self.view.last_good_time = 10.0
+        self.presenter.handle_first_good_data_changed()
+
+        self.view.warning_popup.assert_called_once_with('First Good Data cannot be greater than Last Good Data')
+
+    def test_handle_last_good_less_than_first_good(self):
+        self.view.input_workspace_combo_box.currentText = mock.Mock(return_value="MUSR62260_raw_data MA")
+        self.context.data_context.instrument = 'MUSR'
+        self.view.first_good_time = 20.0
+        self.view.last_good_time = 10.0
+        self.presenter.handle_last_good_data_changed()
+
+        self.view.warning_popup.assert_called_once_with('First Good Data cannot be greater than Last Good Data')
+
+    def test_handle_first_good_and_last_good_pass_validation(self):
+        self.view.input_workspace_combo_box.currentText = mock.Mock(return_value="MUSR62260_raw_data MA")
+        self.context.data_context.instrument = 'MUSR'
+        self.context.first_good_data = mock.Mock(return_value=0.102)
+        self.context.last_good_data = mock.Mock(return_value=32.29)
+        self.view.first_good_time = 10.0
+        self.view.last_good_time = 20.0
+        self.presenter.handle_first_good_data_changed()
+        self.presenter.handle_last_good_data_changed()
+
+        self.view.warning_popup.assert_not_called()
 
 
 if __name__ == '__main__':
