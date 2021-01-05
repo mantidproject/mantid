@@ -14,7 +14,7 @@ from mantid.api import mtd, AlgorithmFactory, AnalysisDataService, DistributedDa
 from mantid.kernel import ConfigService, Direction, FloatArrayProperty, FloatBoundedValidator, \
     IntArrayBoundedValidator, IntArrayProperty, Property, PropertyManagerDataService, StringListValidator
 from mantid.dataobjects import SplittersWorkspace  # SplittersWorkspace
-from mantid.utils import AbsorptionCorrUtils
+from mantid.utils import absorptioncorrutils
 if AlgorithmFactory.exists('GatherWorkspaces'):
     HAVE_MPI = True
     from mpi4py import MPI
@@ -379,7 +379,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
             api.Load(Filename=samRuns[0], OutputWorkspace=absName, MetaDataOnly=True)
             self._info = self._getinfo(absName)
             metaws = absName
-        a_sample, a_container = AbsorptionCorrUtils.calculate_absorption_correction(samRuns[0], self._absMethod,
+        a_sample, a_container = absorptioncorrutils.calculate_absorption_correction(samRuns[0], self._absMethod,
                                                                                     self._info, self._sampleFormula,
                                                                                     self._massDensity,
                                                                                     self._numberDensity,
@@ -1311,11 +1311,11 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
             self.log().notice('Processing vanadium {}'.format(van_run_ws_name))
 
             # create the donor workspace for calculating the sample correction
-            absWksp = AbsorptionCorrUtils.create_absorption_input(van_run_number, self._info,
+            absWksp = absorptioncorrutils.create_absorption_input(van_run_number, self._info,
                                                                   self._num_wl_bins,
                                                                   material={'ChemicalFormula': 'V',
                                                                             'SampleNumberDensity':
-                                                                                AbsorptionCorrUtils.VAN_SAMPLE_DENSITY},
+                                                                                absorptioncorrutils.VAN_SAMPLE_DENSITY},
                                                                   geometry={'Shape': 'Cylinder',
                                                                             'Height': 7.,
                                                                             'Radius': self._vanRadius,

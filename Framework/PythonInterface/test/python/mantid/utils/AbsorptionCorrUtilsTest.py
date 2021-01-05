@@ -7,13 +7,13 @@
 import unittest
 from mantid.kernel import PropertyManagerDataService
 from mantid.simpleapi import Load, PDLoadCharacterizations, PDDetermineCharacterizations, DeleteWorkspaces
-from mantid.utils import AbsorptionCorrUtils
+from mantid.utils import absorptioncorrutils
 
 
 class AbsorptionCorrUtilsTest(unittest.TestCase):
 
     def test_correction_props(self):
-        self.assertRaises(RuntimeError, AbsorptionCorrUtils.create_absorption_input, '', None)
+        self.assertRaises(RuntimeError, absorptioncorrutils.create_absorption_input, '', None)
 
         charfile = "PG3_char_2020_01_04_PAC_limit_1.4MW.txt"
         charTable = PDLoadCharacterizations(Filename=charfile)
@@ -27,7 +27,7 @@ class AbsorptionCorrUtilsTest(unittest.TestCase):
         props = PropertyManagerDataService.retrieve("props")
 
         # Sample only absorption correction
-        abs_sample = AbsorptionCorrUtils.calculate_absorption_correction("PG3_46577.nxs.h5", "SampleOnly", props, "Si",
+        abs_sample = absorptioncorrutils.calculate_absorption_correction("PG3_46577.nxs.h5", "SampleOnly", props, "Si",
                                                                          1.165, element_size=2)
         self.assertIsNotNone(abs_sample[0])
 
@@ -35,7 +35,7 @@ class AbsorptionCorrUtilsTest(unittest.TestCase):
         PropertyManagerDataService.remove('props')
 
     def test_correction_methods(self):
-        sample_ws, container_ws = AbsorptionCorrUtils.calculate_absorption_correction('', "None", None, "V", 1.0)
+        sample_ws, container_ws = absorptioncorrutils.calculate_absorption_correction('', "None", None, "V", 1.0)
 
         self.assertIsNone(sample_ws)
         self.assertIsNone(container_ws)
