@@ -572,12 +572,12 @@ class DrillModel(QObject):
         # search for master sample
         master = None
         for group in self.groups:
-            if sample in self.groups[group]:
+            if self.samples[sample] in self.groups[group]:
                 master = None
                 if group in self.masterSamples:
                     master = self.masterSamples[group]
                 if master is not None:
-                    params.update(self.samples[master])
+                    params.update(master.getParameters())
 
         params.update(self.samples[sample].getParameters())
         # override global params with custom ones
