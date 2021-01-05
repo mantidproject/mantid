@@ -40,7 +40,7 @@ list(APPEND ExternalData_URL_TEMPLATES
      "http://ndw1598.isis.cclrc.ac.uk/externaldata/%(algo)/%(hash)" )
 # This should always be last as it's the main read/write cache
 list(APPEND ExternalData_URL_TEMPLATES
-     "http://198.74.56.37/ftp/external-data/%(algo)/%(hash)" )
+     "https://testdata.mantidproject.org/ftp/external-data/%(algo)/%(hash)" )
 
 # Increase network timeout defaults to avoid our slow server connection but don't override what a user provides
 if(NOT ExternalData_TIMEOUT_INACTIVITY)
