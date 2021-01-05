@@ -464,9 +464,9 @@ public:
     } // checking chisq for some peaks
     TS_ASSERT_EQUALS(outbraggws->rowCount(), 12);
     TS_ASSERT_EQUALS(outbraggws->columnCount(), 10);
-    TS_ASSERT_DELTA(outbraggws->Double(0, 9), 0.47, 0.1);
-    TS_ASSERT_DELTA(outbraggws->Double(5, 9), 0.57, 0.1);
-    TS_ASSERT_DELTA(outbraggws->Double(9, 9), 0.52, 0.1);
+    TS_ASSERT_DELTA(outbraggws->Double(0, 9), 0.94, 0.1);
+    TS_ASSERT_DELTA(outbraggws->Double(5, 9), 1.14, 0.1);
+    TS_ASSERT_DELTA(outbraggws->Double(9, 9), 1.04, 0.1);
 
     AnalysisDataService::Instance().remove("DataWorkspace");
     AnalysisDataService::Instance().remove("PeakParameters");

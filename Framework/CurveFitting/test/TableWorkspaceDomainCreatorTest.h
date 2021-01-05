@@ -137,7 +137,7 @@ public:
             API::AnalysisDataService::Instance().retrieve("Output_Parameters"));
 
     double chi2 = fit->getProperty("OutputChi2overDoF");
-    TS_ASSERT_DELTA(chi2, 0.0, 1e-8);
+    TS_ASSERT_DELTA(chi2, 0.0, 1e-6);
 
     TS_ASSERT(params);
     TS_ASSERT_EQUALS(params->columnCount(), 3);
@@ -147,7 +147,7 @@ public:
     TS_ASSERT_EQUALS(params->String(2, 0), "Cost function value");
     TS_ASSERT_EQUALS(params->Double(0, 1), fun->getParameter(0));
     TS_ASSERT_EQUALS(params->Double(1, 1), fun->getParameter(1));
-    TS_ASSERT_EQUALS(params->Double(2, 1), chi2);
+    TS_ASSERT_DELTA(params->Double(2, 1), chi2, 1e-6);
     TS_ASSERT_EQUALS(params->Double(0, 2), fun->getError(0));
     TS_ASSERT_EQUALS(params->Double(1, 2), fun->getError(1));
     TS_ASSERT_EQUALS(params->Double(2, 2), 0.0);

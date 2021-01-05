@@ -190,6 +190,7 @@ double getDiff(const API::IFunction &fun, size_t nParams,
   double chiSquared = 0.0;
   double chiSquaredWeighted = 0.0;
   double dof = 0;
+  fun.function(domain, values);
   CalculateChiSquared::calcChiSquared(nParams, values, chiSquared,
                                       chiSquaredWeighted, dof);
   double res = 0.0;
@@ -227,7 +228,6 @@ public:
       par0[ip] = m_function.getParameter(ip);
       m_function.setParameter(ip, par0[ip] + p * m_direction[ip]);
     }
-    m_function.function(m_domain, m_values);
     double res = getDiff(m_function, m_function.nParams(), m_domain, m_values,
                          m_chi0, m_sigma2);
     for (size_t ip = 0; ip < m_function.nParams(); ++ip) {

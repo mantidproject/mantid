@@ -77,7 +77,7 @@ Output:
 
 .. testoutput:: ExTOSCABankCorrectionAutomatic
 
-    Target peak centre: 1080
+    Target peak centre: 1079
 
 **Example - Manual peak selection.**
 

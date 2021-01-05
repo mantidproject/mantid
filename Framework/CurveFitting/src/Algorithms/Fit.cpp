@@ -234,9 +234,18 @@ void Fit::createOutput() {
   double dof = 0;
   double chisq = 0.0;  // chi sq
   double wchisq = 0.0; // weighted chi sq
+  // Calculate function values.
+  try {
+    m_function->function(*m_costFunction->getDomain(),
+                         *m_costFunction->getValues());
+  } catch (std::invalid_argument &) {
+    // TODO: For seq domains we will throw here, we need to be able to handle
+    // obtaining the chi squared values for these domain types.
+  }
   CalculateChiSquared::calcChiSquared(m_costFunction->nParams(),
                                       *m_costFunction->getValues(), chisq,
                                       wchisq, dof);
+
   double rchisq = wchisq / dof;
   setProperty("OutputChi2overDoF", rchisq);
 

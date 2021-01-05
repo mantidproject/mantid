@@ -192,8 +192,8 @@ public:
     if (newgeomparamws) {
       std::map<std::string, double> fitparamvalues;
       parseParameterTableWorkspace(newgeomparamws, fitparamvalues);
-      TS_ASSERT_DELTA(fitparamvalues["Chi2_Init"], 118348, 1);
-      TS_ASSERT_DELTA(fitparamvalues["Chi2_Result"], 4896, 1);
+      TS_ASSERT_DELTA(fitparamvalues["Chi2_Init"], 236695, 1);
+      TS_ASSERT_DELTA(fitparamvalues["Chi2_Result"], 9792, 1);
       TS_ASSERT_DELTA(fitparamvalues["Dtt1"], 22610, 1);
       TS_ASSERT_DELTA(fitparamvalues["Dtt1t"], 22747, 1);
       TS_ASSERT_DELTA(fitparamvalues["Dtt2"], 0, 0);
@@ -271,7 +271,7 @@ public:
     if (newgeomparamws) {
       std::map<std::string, double> fitparamvalues;
       parseParameterTableWorkspace(newgeomparamws, fitparamvalues);
-      TS_ASSERT_DELTA(fitparamvalues["Chi2_Init"], 118348, 1);
+      TS_ASSERT_DELTA(fitparamvalues["Chi2_Init"], 236695, 1);
       TS_ASSERT_DELTA(fitparamvalues["Chi2_Result"], 127307, 1);
       TS_ASSERT_DELTA(fitparamvalues["Dtt1"], 22778, 1);
       TS_ASSERT_DELTA(fitparamvalues["Dtt1t"], 22747, 1);
