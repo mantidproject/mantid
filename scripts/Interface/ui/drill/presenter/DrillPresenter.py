@@ -87,16 +87,33 @@ class DrillPresenter:
             self._processError.remove(row)
         self.view.setWindowModified(True)
         if column == "CustomOptions":
+            params = {}
+            if not contents:
+                self.onParamOk(row, column)
+                return
             for option in contents.split(';'):
-                if '=' not in option:
-                    self.onParamError(row, column, "Bad")
+                if option and '=' not in option:
+                    self.onParamError(row, column, "Please provide semicolon "
+                                      "separated key=value pairs.")
                     return
-                name = option.split("=")[0]
-                value = option.split("=")[1]
+                try:
+                    name = option.split("=")[0]
+                    value = option.split("=")[1]
+                except:
+                    self.onParamError(row, column, "Please provide semicolon "
+                                      "separated key=value pairs.")
+                    return
+                if name in self.view.columns:
+                    self.onParamError(row, column, "Please use the table to "
+                                      "set a parameter for which a column "
+                                      "exists.")
+                    return
                 if value in ['true', 'True', 'TRUE']:
                     value = True
                 if value in ['false', 'False', 'FALSE']:
                     value = False
+                params[name] = value
+            for name,value in params.items():
                 self.model.changeParameter(row, name, value)
         else:
             self.model.changeParameter(row, column, contents)
