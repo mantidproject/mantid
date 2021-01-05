@@ -202,44 +202,48 @@ namespace Crystal {
     std::string componentName,
     const API::Workspace_sptr &ws) const {
     // rotate
-    IAlgorithm_sptr rot_alg =
-      Mantid::API::AlgorithmFactory::Instance().create("RotateInstrumentComponent", -1);
+    IAlgorithm_sptr rotx_alg = Mantid::API::AlgorithmFactory::Instance().create(
+        "RotateInstrumentComponent", -1);
     //-- rotAngX@(1,0,0)
-    rot_alg->initialize();
-    rot_alg->setChild(true);
-    rot_alg->setLogging(LOGCHILDALG);
-    rot_alg->setProperty<Workspace_sptr>("Workspace", ws);
-    rot_alg->setProperty("ComponentName", componentName);
-    rot_alg->setProperty("X", 1.0);
-    rot_alg->setProperty("Y", 0.0);
-    rot_alg->setProperty("Z", 0.0);
-    rot_alg->setProperty("Angle", rotAngX);
-    rot_alg->setProperty("RelativeRotation", true);
-    rot_alg->executeAsChildAlg();
+    rotx_alg->initialize();
+    rotx_alg->setChild(true);
+    rotx_alg->setLogging(LOGCHILDALG);
+    rotx_alg->setProperty<Workspace_sptr>("Workspace", ws);
+    rotx_alg->setProperty("ComponentName", componentName);
+    rotx_alg->setProperty("X", 1.0);
+    rotx_alg->setProperty("Y", 0.0);
+    rotx_alg->setProperty("Z", 0.0);
+    rotx_alg->setProperty("Angle", rotAngX);
+    rotx_alg->setProperty("RelativeRotation", true);
+    rotx_alg->executeAsChildAlg();
     //-- rotAngY@(0,1,0)
-    rot_alg->initialize();
-    rot_alg->setChild(true);
-    rot_alg->setLogging(LOGCHILDALG);
-    rot_alg->setProperty<Workspace_sptr>("Workspace", ws);
-    rot_alg->setProperty("ComponentName", componentName);
-    rot_alg->setProperty("X", 0.0);
-    rot_alg->setProperty("Y", 1.0);
-    rot_alg->setProperty("Z", 0.0);
-    rot_alg->setProperty("Angle", rotAngY);
-    rot_alg->setProperty("RelativeRotation", true);
-    rot_alg->executeAsChildAlg();
+    IAlgorithm_sptr roty_alg = Mantid::API::AlgorithmFactory::Instance().create(
+        "RotateInstrumentComponent", -1);
+    roty_alg->initialize();
+    roty_alg->setChild(true);
+    roty_alg->setLogging(LOGCHILDALG);
+    roty_alg->setProperty<Workspace_sptr>("Workspace", ws);
+    roty_alg->setProperty("ComponentName", componentName);
+    roty_alg->setProperty("X", 0.0);
+    roty_alg->setProperty("Y", 1.0);
+    roty_alg->setProperty("Z", 0.0);
+    roty_alg->setProperty("Angle", rotAngY);
+    roty_alg->setProperty("RelativeRotation", true);
+    roty_alg->executeAsChildAlg();
     //-- rotAngZ@(0,0,1)
-    rot_alg->initialize();
-    rot_alg->setChild(true);
-    rot_alg->setLogging(LOGCHILDALG);
-    rot_alg->setProperty<Workspace_sptr>("Workspace", ws);
-    rot_alg->setProperty("ComponentName", componentName);
-    rot_alg->setProperty("X", 0.0);
-    rot_alg->setProperty("Y", 0.0);
-    rot_alg->setProperty("Z", 1.0);
-    rot_alg->setProperty("Angle", rotAngZ);
-    rot_alg->setProperty("RelativeRotation", true);
-    rot_alg->executeAsChildAlg();
+    IAlgorithm_sptr rotz_alg = Mantid::API::AlgorithmFactory::Instance().create(
+        "RotateInstrumentComponent", -1);
+    rotz_alg->initialize();
+    rotz_alg->setChild(true);
+    rotz_alg->setLogging(LOGCHILDALG);
+    rotz_alg->setProperty<Workspace_sptr>("Workspace", ws);
+    rotz_alg->setProperty("ComponentName", componentName);
+    rotz_alg->setProperty("X", 0.0);
+    rotz_alg->setProperty("Y", 0.0);
+    rotz_alg->setProperty("Z", 1.0);
+    rotz_alg->setProperty("Angle", rotAngZ);
+    rotz_alg->setProperty("RelativeRotation", true);
+    rotz_alg->executeAsChildAlg();
   }
 
 } // namespace Crystal

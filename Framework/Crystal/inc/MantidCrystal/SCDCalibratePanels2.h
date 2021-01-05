@@ -102,6 +102,11 @@ private:
   double m_L1 = 2000.0;
   double m_tolerance_translation = 1e-4; // meters
   double m_tolerance_rotation = 1e-3;    // degree
+  // The following bounds are set based on information provided by the
+  // CORELLI team
+  double m_bank_translation_bounds = 5e-2;  // meter
+  double m_bank_rotation_bounds = 5;        // degree
+  double m_source_translation_bounds = 0.1; // meter
   boost::container::flat_set<std::string> m_BankNames;
   const bool LOGCHILDALG{false};
   const int MINIMUM_PEAKS_PER_BANK{6};

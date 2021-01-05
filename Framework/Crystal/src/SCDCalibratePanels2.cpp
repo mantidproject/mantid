@@ -167,11 +167,28 @@ namespace Crystal {
       optimizeT0(m_pws);
 
     if (calibrateL1 && calibrateBanks) {
-      // NOTE: two iter is the sweet spot
-      for (int i = 0; i < 2; ++i){
+      double l1 = -m_pws->getInstrument()->getSource()->getPos().Z();
+      double dl1 = 1;
+      int niter = 1;
+      do {
         optimizeL1(m_pws);
         optimizeBanks(m_pws);
-      }
+        dl1 = std::abs(-m_pws->getInstrument()->getSource()->getPos().Z() - l1);
+        l1 = -m_pws->getInstrument()->getSource()->getPos().Z();
+        // logging
+        g_log.notice() << "--@iter_" << niter << "\n"
+                       << "    l1 = " << l1 << "\n"
+                       << "    dl1 = " << dl1 << "\n";
+
+        niter++;
+        if (niter > 100)
+          break;
+      } while (dl1 > m_tolerance_translation);
+      // NOTE: two iter is the sweet spot
+      // for (int i = 0; i < 2; ++i){
+      //   optimizeL1(m_pws);
+      //   optimizeBanks(m_pws);
+      // }
 
     }
     else {
@@ -338,7 +355,17 @@ namespace Crystal {
       std::ostringstream tie_str;
       tie_str << "dT0=" << m_T0;
       std::ostringstream constraint_str;
-      constraint_str << "-5 < drotx < 5, -5 < droty < 5, -5 < drotz < 5";
+      constraint_str << -m_bank_translation_bounds << "<dx<"
+                     << m_bank_translation_bounds << ", "
+                     << -m_bank_translation_bounds << "<dy<"
+                     << m_bank_translation_bounds << ", "
+                     << -m_bank_translation_bounds << "<dz<"
+                     << m_bank_translation_bounds << ", "
+                     << -m_bank_rotation_bounds << "<drotx<"
+                     << m_bank_rotation_bounds << "," << -m_bank_rotation_bounds
+                     << "<droty<" << m_bank_rotation_bounds << ","
+                     << -m_bank_rotation_bounds << "<drotz<"
+                     << m_bank_rotation_bounds;
       //---- set&go
       fitBank_alg->setPropertyValue("Function", fun_str.str());
       fitBank_alg->setProperty("Ties", tie_str.str());

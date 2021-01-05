@@ -9,11 +9,13 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ExperimentInfo.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidCrystal/SCDCalibratePanels2.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Crystal/CrystalStructure.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/Logger.h"
 
 #include <cxxtest/TestSuite.h>
@@ -64,9 +66,9 @@ public:
         dspacing_min(1.0), dspacing_max(10.0),    //
         wavelength_min(0.8), wavelength_max(2.9), //
         omega_step(3.0),                          //
-        TOLERANCE_L(1e-3), // this calibration has intrinsic accuracy limit of
+        TOLERANCE_L(1e-8), // this calibration has intrinsic accuracy limit of
                            // 1mm for translation
-        TOLERANCE_R(1e-4), // this calibration has intrinsic accuracy limit of
+        TOLERANCE_R(1e-8), // this calibration has intrinsic accuracy limit of
                            // 1e-4 deg for rotation
         LOGCHILDALG(false) {
     // NOTE:
@@ -150,6 +152,35 @@ public:
   }
 
   /**
+   * @brief Only adjust T0
+   *
+   */
+  void test_T0_Shift() {
+    g_log.notice() << "test: !T0 Shift!\n";
+
+    // prescribed shift
+    const double dT0 = boost::math::constants::e<double>() / 2;
+
+    // Generate unique temp files
+    auto isawFile = boost::filesystem::temp_directory_path();
+    isawFile /= boost::filesystem::unique_path("changeT0_%%%%%%%%.DetCal");
+    auto xmlFile = boost::filesystem::temp_directory_path();
+    xmlFile /= boost::filesystem::unique_path("changeT0_%%%%%%%%.xml");
+
+    g_log.notice() << "-- generate simulated workspace\n";
+    MatrixWorkspace_sptr ws = m_ws->clone();
+    MatrixWorkspace_sptr wsraw = ws->clone();
+
+    // Trivial case, no component undergoes any affine transformation
+    g_log.notice() << "-- generate peaks\n";
+    PeaksWorkspace_sptr pws = generateSimulatedPeaksWorkspace(ws);
+    PeaksWorkspace_sptr pwsref = pws->clone();
+
+    // Adjust T0
+    adjustT0(dT0, pws);
+  }
+
+  /**
    * @brief Single variant case where only global var is adjusted.
    *
    * NOTE: technically we should also check T0, but the client, CORELLI
@@ -161,7 +192,8 @@ public:
     g_log.notice() << "test: !Source Shift (L1 change)!\n";
 
     // prescribed shift
-    const double dL1 = boost::math::constants::e<double>();
+    // NOTE: the common range for dL1 is +-10cm
+    const double dL1 = boost::math::constants::e<double>() / 100;
 
     // Generate unique temp files
     auto isawFile = boost::filesystem::temp_directory_path();
@@ -213,17 +245,20 @@ public:
         << "test: !multi components move (translation and rotation)!\n";
 
     // prescribed shift of source
-    const double dL1 = boost::math::constants::e<double>();
+    // NOTE: the common range for dL1 is +-10cm
+    const double dL1 = 2e-2;  // 1cm
 
     // prescribed shift
-    double dx = boost::math::constants::euler<double>();
-    double dy = boost::math::constants::ln_ln_two<double>();
-    double dz = boost::math::constants::pi_minus_three<double>();
+    // NOTE: the common range for dx, dy ,dz is +-5cm
+    double dx = 1e-2;
+    double dy = 1e-2;
+    double dz = 2e-2;
 
     // prescribed rotate
-    double drotx = boost::math::constants::euler<double>() / 3;
-    double droty = boost::math::constants::ln_ln_two<double>() / 3;
-    double drotz = boost::math::constants::pi_minus_three<double>() / 3;
+    // NOTE: the common range for drx, dry, drz is +-5deg
+    double drotx = 1;
+    double droty = 1;
+    double drotz = 1;
 
     // Generate unique temp files
     auto isawFile = boost::filesystem::temp_directory_path();
@@ -236,19 +271,33 @@ public:
     MatrixWorkspace_sptr wsraw = ws->clone();
 
     g_log.notice() << "-- translate source by " << dL1 << "\n"
-                   << "-- for x(top,center,bottom) - bank(73,12,11)\n"
+                   << "-- for x(top) - bank73\n"
                    << "   translate by (" << dx << "," << dy << "," << dz
                    << ")\n"
                    << "   rotate by\n"
                    << "    drotx@(100) = " << drotx << "\n"
                    << "    droty@(010) = " << droty << "\n"
-                   << "    drotz@(001) = " << drotz << "\n";
+                   << "    drotz@(001) = " << drotz << "\n"
+                   << "-- for x(center) - bank12\n"
+                   << "   translate by (" << dx << "," << dy << "," << dz
+                   << ")\n"
+                   << "   rotate by\n"
+                   << "    drotx@(100) = " << drotx << "\n"
+                   << "    droty@(010) = " << 0 << "\n"
+                   << "    drotz@(001) = " << 0 << "\n"
+                   << "-- for x(top,center,bottom) - bank(73,12,11)\n"
+                   << "   translate by (" << dx << "," << dy << "," << dz
+                   << ")\n"
+                   << "   rotate by\n"
+                   << "    drotx@(100) = " << 0 << "\n"
+                   << "    droty@(010) = " << droty << "\n"
+                   << "    drotz@(001) = " << 0 << "\n";
 
     adjustComponent(0.0, 0.0, dL1, 0.0, 0.0, 0.0,
                     ws->getInstrument()->getSource()->getName(), ws);
     adjustComponent(dx, dy, dz, drotx, droty, drotz, bank_xtop, ws);
-    adjustComponent(dx, dy, dz, drotx, droty, drotz, bank_xcenter, ws);
-    adjustComponent(dx, dy, dz, drotx, droty, drotz, bank_xbottom, ws);
+    adjustComponent(dx, dy, dz, drotx, 0, 0, bank_xcenter, ws);
+    adjustComponent(dx, dy, dz, 0, droty, 0, bank_xbottom, ws);
 
     g_log.notice() << "-- generate peaks\n";
     PeaksWorkspace_sptr pws = generateSimulatedPeaksWorkspace(ws);
@@ -431,6 +480,32 @@ private:
     rot_alg->setProperty("Angle", drotz);
     rot_alg->setProperty("RelativeRotation", true);
     rot_alg->executeAsChildAlg();
+  }
+
+  /**
+   * @brief shift T0 for both peakworkspace and all peaks
+   *
+   * @param dT0
+   * @param pws
+   */
+  void adjustT0(double dT0, PeaksWorkspace_sptr pws) {
+    // update the T0 record in peakworkspace
+    Mantid::API::Run &run = pws->mutableRun();
+    double T0 = 0.0;
+    if (run.hasProperty("T0")) {
+      T0 = run.getPropertyValueAsType<double>("T0");
+    }
+    T0 += dT0;
+    run.addProperty<double>("T0", T0, true);
+
+    // update wavelength of each peak using new T0
+    for (int i = 0; i < pws->getNumberPeaks(); ++i) {
+      Peak &pk = pws->getPeak(i);
+      Units::Wavelength wl;
+      wl.initialize(pk.getL1(), pk.getL2(), pk.getScattering(), 0,
+                    pk.getInitialEnergy(), 0.0);
+      pk.setWavelength(wl.singleFromTOF(pk.getTOF() + dT0));
+    }
   }
 
   /**
