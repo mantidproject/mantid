@@ -206,7 +206,7 @@ class DrillPresenter:
             return
         for cell in self._invalidCells:
             if cell[0] in rows:
-                QMessageBox.warning(self, "Error", "Please check the "
+                QMessageBox.warning(self.view, "Error", "Please check the "
                                     "parameters value before processing.")
                 return
         self._processError = set()

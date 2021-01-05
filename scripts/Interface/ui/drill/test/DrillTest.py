@@ -143,8 +143,7 @@ class DrillTest(unittest.TestCase):
         patch = mock.patch('Interface.ui.drill.view.DrillView.QMessageBox')
         self.mMessageBox = patch.start()
         self.addCleanup(patch.stop)
-        patch = mock.patch('Interface.ui.drill.presenter.DrillPresenter'
-                           '.QMessageBox')
+        patch = mock.patch('Interface.ui.drill.presenter.DrillPresenter.QMessageBox')
         self.mMessageBoxP = patch.start()
         self.addCleanup(patch.stop)
         # mock the controller
@@ -163,7 +162,7 @@ class DrillTest(unittest.TestCase):
         self.model = self.presenter.model
 
         # mock popup
-        self.view._saveDataQuestion = mock.Mock()
+        self.presenter._saveDataQuestion = mock.Mock()
 
         # shown window
         self.view.isHidden = mock.Mock()
