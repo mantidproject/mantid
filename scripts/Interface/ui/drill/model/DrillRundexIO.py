@@ -145,7 +145,9 @@ class DrillRundexIO:
         # groups
         groups = drill.getSamplesGroups()
         if groups:
-            json_data["SamplesGroups"] = groups
+            json_data["SamplesGroups"] = dict()
+        for k,v in groups.items():
+            json_data["SamplesGroups"][k] = list(v)
         masters = drill.getMasterSamples()
         if masters:
             json_data["MasterSamples"] = masters

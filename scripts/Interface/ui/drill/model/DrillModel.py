@@ -507,7 +507,7 @@ class DrillModel(QObject):
         Args:
             groups (dict(str:list(int))): samples groups
         """
-        self.groups = {k:v for k,v in groups.items()}
+        self.groups = {k:set(self.samples[i] for i in v) for k,v in groups.items()}
 
     def getSamplesGroups(self):
         """
@@ -528,7 +528,7 @@ class DrillModel(QObject):
         Args:
             masterSamples (dict(str:int)): master samples
         """
-        self.masterSamples = {k:v for k,v in masterSamples.items()}
+        self.masterSamples = {k:self.samples[v] for k,v in masterSamples.items()}
 
     def getMasterSamples(self):
         """
@@ -760,7 +760,10 @@ class DrillModel(QObject):
         sample = DrillSample()
         if params:
             sample.setParameters(params)
-        self.samples.insert(index, sample)
+        if (index == -1):
+            self.samples.append(sample)
+        else:
+            self.samples.insert(index, sample)
 
     def deleteSample(self, ref):
         """
