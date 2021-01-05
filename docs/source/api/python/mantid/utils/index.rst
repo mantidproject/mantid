@@ -28,10 +28,10 @@ from Mantid Workbench.
 
 .. code-block:: python
 
-    from mantid.utils import ExampleLibrary
+    from mantid.utils import examplelibrary
 
-    # Call a stand-alone function defined in ExampleLibrary:
-    result = ExampleLibrary.do_something()
+    # Call a stand-alone function defined in examplelibrary:
+    result = examplelibrary.do_something()
 
 A basic real-world example is shown below to compute absorption
 correction on data using functions extracted from
@@ -42,7 +42,7 @@ can be called from different algorithms.
 
     from mantid.kernel import PropertyManagerDataService
     from mantid.simpleapi import Load, PDLoadCharacterizations, PDDetermineCharacterizations
-    from mantid.utils import AbsorptionCorrUtils
+    from mantid.utils import absorptioncorrutils
 
     # Load characterization file
     char_files = ["PG3_char_2020_01_04_PAC_limit_1.4MW.txt", "PG3_char_2020_05_06-HighRes-PAC_1.4_MW.txt"]
@@ -59,6 +59,6 @@ can be called from different algorithms.
     props = PropertyManagerDataService.retrieve("props")
 
     # Sample only absorption correction
-    abs_sample = AbsorptionCorrUtils.calculate_absorption_correction("PG3_46577.nxs.h5", "SampleOnly", props, "Si", 1.165, element_size=2)
+    abs_sample = absorptioncorrutils.calculate_absorption_correction("PG3_46577.nxs.h5", "SampleOnly", props, "Si", 1.165, element_size=2)
 
 
