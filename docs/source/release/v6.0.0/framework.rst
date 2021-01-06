@@ -37,6 +37,7 @@ Data Objects
 Python
 ------
 
+- Created a new module :ref:`mantid.utils <mantid.utils>` to allow for code sharing between algorithms.
 
 .. contents:: Table of Contents
    :local:
