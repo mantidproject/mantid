@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MDFAddWorkspaceDialog.h"
+#include "MantidQtWidgets/Common/AddWorkspaceDialog.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -16,8 +16,7 @@
 #include <limits>
 
 namespace MantidQt {
-namespace CustomInterfaces {
-namespace MDF {
+namespace MantidWidgets {
 
 using namespace Mantid::API;
 
@@ -46,6 +45,33 @@ AddWorkspaceDialog::AddWorkspaceDialog(QWidget *parent)
 
   connect(m_uiForm.cbAllSpectra, SIGNAL(stateChanged(int)), this,
           SLOT(selectAllSpectra(int)));
+}
+
+std::vector<MatrixWorkspace_const_sptr>
+AddWorkspaceDialog::getWorkspaces() const {
+  auto const workspaceName = this->workspaceName().trimmed().toStdString();
+  std::vector<MatrixWorkspace_const_sptr> workspaces;
+
+  auto &ads = AnalysisDataService::Instance();
+  if (ads.doesExist(workspaceName)) {
+    if (auto const workspace = ads.retrieveWS<MatrixWorkspace>(workspaceName))
+      workspaces.emplace_back(workspace);
+    else if (auto const group = ads.retrieveWS<WorkspaceGroup>(workspaceName))
+      addWorkspacesFromGroup(workspaces, group);
+  }
+  return workspaces;
+}
+
+void AddWorkspaceDialog::addWorkspacesFromGroup(
+    std::vector<MatrixWorkspace_const_sptr> &workspaces,
+    WorkspaceGroup_const_sptr const &group) const {
+  auto const groupSize = static_cast<std::size_t>(group->getNumberOfEntries());
+  for (auto i = 0u; i < groupSize; ++i) {
+    if (auto const workspace =
+            std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(i))) {
+      workspaces.emplace_back(workspace);
+    }
+  }
 }
 
 /// Slot. Reacts on change of workspace name in the selection combo box.
@@ -157,6 +183,5 @@ void AddWorkspaceDialog::reject() {
   QDialog::reject();
 }
 
-} // namespace MDF
-} // namespace CustomInterfaces
+} // namespace MantidWidgets
 } // namespace MantidQt

@@ -1066,3 +1066,46 @@ public:
     WorkspaceSelector(QWidget *parent = nullptr, bool init = true) /KeywordArgs="All"/;
     void setOptional(bool optional);
 };
+
+// ----------------------------------------------------------------------------
+// FitScriptGeneratorView
+// ----------------------------------------------------------------------------
+
+class FitScriptGeneratorView : QWidget {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/FitScriptGeneratorView.h"
+%End
+public:
+    FitScriptGeneratorView(
+        QWidget *parent = nullptr,
+        const QMap<QString, QString> &fitOptions = QMap<QString, QString>()) /KeywordArgs="All"/;
+};
+
+// ----------------------------------------------------------------------------
+// FitScriptGeneratorModel
+// ----------------------------------------------------------------------------
+
+class FitScriptGeneratorModel {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/FitScriptGeneratorModel.h"
+%End
+public:
+    FitScriptGeneratorModel();
+};
+
+// ----------------------------------------------------------------------------
+// FitScriptGeneratorPresenter
+// ----------------------------------------------------------------------------
+
+class FitScriptGeneratorPresenter {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/FitScriptGeneratorPresenter.h"
+%End
+public:
+    FitScriptGeneratorPresenter(
+	    FitScriptGeneratorView *view, FitScriptGeneratorModel *model,
+        const QStringList &workspaceNames = QStringList(),
+        double startX = 0.0, double endX = 0.0) /KeywordArgs="All"/;
+
+    void openFitScriptGenerator();
+};
