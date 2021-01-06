@@ -60,6 +60,10 @@ class FittingPlotView(QtWidgets.QWidget, Ui_plot):
 
         self.fit_browser = EngDiffFitPropertyBrowser(self.figure.canvas,
                                                      ToolbarStateManager(self.toolbar))
+        # remove SequentialFit from fit menu (implemented a different way)
+        qmenu = self.fit_browser.getFitMenu()
+        qmenu.removeAction([qact for qact in qmenu.actions() if qact.text() == "Sequential Fit"][0])
+        # hide unnecessary properties of browser
         hide_props = ['StartX', 'EndX', 'Minimizer', 'Cost function', 'Max Iterations', 'Output',
                       'Ignore invalid data', 'Peak Radius', 'Plot Composite Members',
                       'Convolve Composite Members', 'Show Parameter Errors', 'Evaluate Function As']
