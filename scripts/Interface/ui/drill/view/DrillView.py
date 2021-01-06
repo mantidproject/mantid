@@ -385,6 +385,11 @@ class DrillView(QMainWindow):
             groupName (str): name of the group
             rows (list(int)): row indexes
         """
+        if not rows:
+            rows = [row for row in range(self.table.rowCount())
+                    if groupName in self.table.getRowLabel(row)]
+            groupName = None
+
         rowName = 1
         for row in rows:
             bold = (row == masterRow)
