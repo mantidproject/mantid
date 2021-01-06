@@ -263,6 +263,10 @@ public:
     doCleanup();
   }
 
+  /**
+   * @brief Moving (rotation and translation) single panel
+   *
+   */
   void test_bank_moved() {
     g_log.notice() << "test: !single bank moved!\n";
 
@@ -344,92 +348,92 @@ public:
    * NOTE: not enough peaks on the y_panels, so we have to work with only the
    *       x_panels
    */
-  // void run_Exec() {
-  //   g_log.notice()
-  //       << "test: !multi components move (translation and rotation)!\n";
+  void test_Exec() {
+    g_log.notice() << "test: !calibrate L1 and two panels at the same time!\n";
 
-  //   // prescribed shift of source
-  //   // NOTE: the common range for dL1 is +-10cm
-  //   const double dL1 = 2e-2;  // 1cm
+    g_log.notice() << "Tolerance of Distance (meter) :" << TOLERANCE_L << "\n";
+    g_log.notice() << "Tolerance of Rotation (degree) :" << TOLERANCE_R << "\n";
 
-  //   // prescribed shift
-  //   // NOTE: the common range for dx, dy ,dz is +-5cm
-  //   double dx = 1e-2;
-  //   double dy = 1e-2;
-  //   double dz = 2e-2;
+    // ----------------------------- //
+    // ----- Precribe movement ----- //
+    // ----------------------------- //
+    //-- source
+    const double dL1 = boost::math::constants::e<double>() / 100;
+    //-- xtop
+    double dx1 = 1.1e-2;
+    double dy1 = -0.9e-2;
+    double dz1 = 1.5e-2;
+    double theta1 = PI / 3;
+    double phi1 = PI / 8;
+    double rvx1 = sin(theta1) * cos(phi1);
+    double rvy1 = sin(theta1) * sin(phi1);
+    double rvz1 = cos(theta1);
+    double ang1 = 1.414; // degrees
+    //-- xbottom
+    double dx2 = 0.5e-2;
+    double dy2 = 1.3e-2;
+    double dz2 = -0.9e-2;
+    double theta2 = PI / 4;
+    double phi2 = PI / 3;
+    double rvx2 = sin(theta2) * cos(phi2);
+    double rvy2 = sin(theta2) * sin(phi2);
+    double rvz2 = cos(theta2);
+    double ang2 = 3.3; // degrees
 
-  //   // prescribed rotate
-  //   // NOTE: the common range for drx, dry, drz is +-5deg
-  //   double drotx = 1;
-  //   double droty = 1;
-  //   double drotz = 1;
+    // ----------------------------------- //
+    // ----- Generate Synthetic Data ----- //
+    // ----------------------------------- //
+    // Generate unique temp files
+    auto isawFile = boost::filesystem::temp_directory_path();
+    isawFile /= boost::filesystem::unique_path("testExec_%%%%%%%%.DetCal");
+    auto xmlFile = boost::filesystem::temp_directory_path();
+    xmlFile /= boost::filesystem::unique_path("testExec_%%%%%%%%.xml");
 
-  //   // Generate unique temp files
-  //   auto isawFile = boost::filesystem::temp_directory_path();
-  //   isawFile /=
-  //   boost::filesystem::unique_path("duoPanelMove_%%%%%%%%.DetCal"); auto
-  //   xmlFile = boost::filesystem::temp_directory_path(); xmlFile /=
-  //   boost::filesystem::unique_path("duoPanelMove_%%%%%%%%.xml");
+    g_log.notice() << "-- generate simulated workspace\n";
+    MatrixWorkspace_sptr ws = m_ws->clone();
+    MatrixWorkspace_sptr wsraw = ws->clone();
 
-  //   g_log.notice() << "-- generate simulated workspace\n";
-  //   MatrixWorkspace_sptr ws = m_ws->clone();
-  //   MatrixWorkspace_sptr wsraw = ws->clone();
+    // Source
+    adjustComponent(0.0, 0.0, dL1, 1.0, 0.0, 0.0, 0.0,
+                    ws->getInstrument()->getSource()->getName(), ws);
+    g_log.notice() << "--Shift source by dL1 = " << dL1 << "\n";
 
-  //   g_log.notice() << "-- translate source by " << dL1 << "\n"
-  //                  << "-- for x(top) - bank73\n"
-  //                  << "   translate by (" << dx << "," << dy << "," << dz
-  //                  << ")\n"
-  //                  << "   rotate by\n"
-  //                  << "    drotx@(100) = " << drotx << "\n"
-  //                  << "    droty@(010) = " << droty << "\n"
-  //                  << "    drotz@(001) = " << drotz << "\n"
-  //                  << "-- for x(center) - bank12\n"
-  //                  << "   translate by (" << dx << "," << dy << "," << dz
-  //                  << ")\n"
-  //                  << "   rotate by\n"
-  //                  << "    drotx@(100) = " << drotx << "\n"
-  //                  << "    droty@(010) = " << 0 << "\n"
-  //                  << "    drotz@(001) = " << 0 << "\n"
-  //                  << "-- for x(top,center,bottom) - bank(73,12,11)\n"
-  //                  << "   translate by (" << dx << "," << dy << "," << dz
-  //                  << ")\n"
-  //                  << "   rotate by\n"
-  //                  << "    drotx@(100) = " << 0 << "\n"
-  //                  << "    droty@(010) = " << droty << "\n"
-  //                  << "    drotz@(001) = " << 0 << "\n";
+    // Bank73
+    adjustComponent(dx1, dy1, dz1, rvx1, rvy1, rvz1, ang1, bank_xtop, ws);
+    g_log.notice() << "-- for x(top) - bank73\n"
+                   << "   translated by (" << dx1 << "," << dy1 << "," << dz1
+                   << ")\n"
+                   << "   rotated by " << ang1 << "@(" << rvx1 << "," << rvy1
+                   << "," << rvz1 << ")\n";
 
-  //   adjustComponent(0.0, 0.0, dL1, 1.0, 0.0, 0.0, 0.0,
-  //                   ws->getInstrument()->getSource()->getName(), ws);
-  //   adjustComponent(dx, dy, dz, drotx, droty, drotz, bank_xtop, ws);
-  //   adjustComponent(dx, dy, dz, drotx, 0, 0, bank_xcenter, ws);
-  //   adjustComponent(dx, dy, dz, 0, droty, 0, bank_xbottom, ws);
+    // Bank11
+    adjustComponent(dx2, dy2, dz2, rvx2, rvy2, rvz2, ang2, bank_xbottom, ws);
+    g_log.notice() << "-- for x(bottom) - bank11\n"
+                   << "   translated by (" << dx2 << "," << dy2 << "," << dz2
+                   << ")\n"
+                   << "   rotated by " << ang2 << "@(" << rvx2 << "," << rvy2
+                   << "," << rvz2 << ")\n";
 
-  //   g_log.notice() << "-- generate peaks\n";
-  //   PeaksWorkspace_sptr pws = generateSimulatedPeaksWorkspace(ws);
-  //   PeaksWorkspace_sptr pwsref = pws->clone();
+    g_log.notice() << "-- generate peaks\n";
+    PeaksWorkspace_sptr pws = generateSimulatedPeaksWorkspace(ws);
+    PeaksWorkspace_sptr pwsref = pws->clone();
 
-  //   // Pretend we don't know the answer
-  //   g_log.notice() << "-- reset instrument positions&orientations\n";
-  //   g_log.notice() << "    * before reset L1 = "
-  //                  << pws->getInstrument()->getSource()->getPos().Z() <<
-  //                  "\n";
-  //   pws->setInstrument(wsraw->getInstrument());
-  //   g_log.notice() << "    * after reset L1 = "
-  //                  << pws->getInstrument()->getSource()->getPos().Z() <<
-  //                  "\n";
+    g_log.notice() << "-- reset instrument positions&orientations\n";
+    pws->setInstrument(wsraw->getInstrument());
 
-  //   // Perform the calibration
-  //   g_log.notice() << "-- start calibration\n";
-  //   runCalibration(isawFile.string(), xmlFile.string(), pws, false, true,
-  //   true);
+    // Perform the calibration
+    g_log.notice() << "-- start calibration\n";
+    runCalibration(isawFile.string(), xmlFile.string(), pws, false, true, true);
 
-  //   // Check if the calibration returns the same instrument as we put in
-  //   g_log.notice() << "-- validate calibration output\n";
-  //   TS_ASSERT(validateCalibrationResults(pwsref, wsraw, xmlFile.string()));
+    // Check if the calibration returns the same instrument as we put in
+    g_log.notice() << "-- validate calibration output\n";
+    TS_ASSERT(validateCalibrationResults(pwsref, wsraw, xmlFile.string()));
 
-  //   // Cleanup
-  //   doCleanup();
-  // }
+    TS_ASSERT(false);
+
+    // Cleanup
+    doCleanup();
+  }
 
 private:
   // ---------------------------- //
