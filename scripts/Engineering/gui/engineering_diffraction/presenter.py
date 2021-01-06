@@ -5,34 +5,32 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
+from .tabs.common import CalibrationObserver
+from .tabs.common.path_handling import get_run_number_from_path
 from .tabs.calibration.model import CalibrationModel
 from .tabs.calibration.view import CalibrationView
 from .tabs.calibration.presenter import CalibrationPresenter
-from .tabs.common import CalibrationObserver
-from .tabs.common.path_handling import get_run_number_from_path
 from .tabs.focus.model import FocusModel
 from .tabs.focus.view import FocusView
 from .tabs.focus.presenter import FocusPresenter
 from .tabs.fitting.view import FittingView
 from .tabs.fitting.presenter import FittingPresenter
+from .settings.settings_model import SettingsModel
+from .settings.settings_view import SettingsView
+from .settings.settings_presenter import SettingsPresenter
+
 from mantidqt.interfacemanager import InterfaceManager
 from mantidqt.utils.observer_pattern import GenericObservable
 
 
 class EngineeringDiffractionPresenter(object):
-    def __init__(self, view):
-        self.view_tabs = view.tabs
+    def __init__(self):
         self.calibration_presenter = None
         self.focus_presenter = None
         self.fitting_presenter = None
         self.settings_presenter = None
 
         self.doc = "Engineering Diffraction"
-
-        # Setup Elements
-        self.setup_calibration()
-        self.setup_focus()
-        self.setup_fitting()
 
         # Setup observers
         self.calibration_observer = CalibrationObserver(self)
@@ -41,31 +39,43 @@ class EngineeringDiffractionPresenter(object):
         self.statusbar_observable = GenericObservable()
         self.savedir_observable = GenericObservable()
 
-        # Setup notifiers
-        self.setup_calibration_notifier()
+    # the following setup functions should only be called from the view, this ensures both that the presenter object
+    # itself doesn't own the view (vice versa in this instance) and that the 'child' tabs of the presenter can be mocked
+    # /subbed in for other purposes i.e. testing, agnostic of the view
 
-    def setup_calibration(self):
+    def setup_calibration(self, view):
         cal_model = CalibrationModel()
-        cal_view = CalibrationView(parent=self.view_tabs)
+        cal_view = CalibrationView(parent=view.tabs)
         self.calibration_presenter = CalibrationPresenter(cal_model, cal_view)
-        self.view_tabs.addTab(cal_view, "Calibration")
-
-    def setup_focus(self):
-        focus_model = FocusModel()
-        focus_view = FocusView()
-        self.focus_presenter = FocusPresenter(focus_model, focus_view)
-        self.view_tabs.addTab(focus_view, "Focus")
-
-    def setup_fitting(self):
-        fitting_view = FittingView()
-        self.fitting_presenter = FittingPresenter(fitting_view)
-        self.focus_presenter.add_focus_subscriber(self.fitting_presenter.data_widget.presenter.focus_run_observer)
-        self.view_tabs.addTab(fitting_view, "Fitting")
+        view.tabs.addTab(cal_view, "Calibration")
 
     def setup_calibration_notifier(self):
         self.calibration_presenter.calibration_notifier.add_subscriber(
             self.focus_presenter.calibration_observer)
         self.calibration_presenter.calibration_notifier.add_subscriber(self.calibration_observer)
+
+    def setup_focus(self, view):
+        focus_model = FocusModel()
+        focus_view = FocusView()
+        self.focus_presenter = FocusPresenter(focus_model, focus_view)
+        view.tabs.addTab(focus_view, "Focus")
+
+    def setup_fitting(self, view):
+        fitting_view = FittingView()
+        self.fitting_presenter = FittingPresenter(fitting_view)
+        self.focus_presenter.add_focus_subscriber(self.fitting_presenter.data_widget.presenter.focus_run_observer)
+        view.tabs.addTab(fitting_view, "Fitting")
+
+    def setup_settings(self, view):
+        settings_model = SettingsModel()
+        settings_view = SettingsView(view)
+        settings_presenter = SettingsPresenter(settings_model, settings_view)
+        settings_presenter.load_settings_from_file_or_default()
+        self.settings_presenter = settings_presenter
+        self.setup_savedir_notifier(view)
+
+    def setup_savedir_notifier(self, view):
+        self.settings_presenter.savedir_notifier.add_subscriber(view.savedir_observer)
 
     def handle_close(self):
         self.fitting_presenter.data_widget.ads_observer.unsubscribe()

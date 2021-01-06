@@ -10,7 +10,6 @@ from Engineering.gui.engineering_diffraction.engineering_diffraction import Engi
 
 IO_VERSION = 1
 
-# TODO debug why the focus crashes
 
 class EngineeringDiffractionUIAttributes(object):
     # WARNING: If you delete a tag from here instead of adding a new one, it will make old project files obsolete so

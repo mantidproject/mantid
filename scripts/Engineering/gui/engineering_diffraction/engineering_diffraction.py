@@ -12,9 +12,6 @@ from mantidqt.utils.observer_pattern import GenericObserverWithArgPassing
 from mantidqt.utils.qt import load_ui
 from Engineering.gui.engineering_diffraction.presenter import EngineeringDiffractionPresenter
 from .tabs.common import SavedirObserver
-from .settings.settings_model import SettingsModel
-from .settings.settings_view import SettingsView
-from .settings.settings_presenter import SettingsPresenter
 
 Ui_main_window, _ = load_ui(__file__, "main_window.ui")
 
@@ -35,7 +32,6 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
         # Main Window
         self.setupUi(self)
         self.tabs = self.tab_main
-        self.settings_presenter = None
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
 
         self.btn_settings.setIcon(get_icon("mdi.settings", "black", 1.2))
@@ -54,8 +50,11 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
         self.presenter = self.setup_presenter()
 
         # setup that can only happen with presenter created
-        self.setup_settings()
         self.setup_statusbar()
+        self.set_on_instrument_changed(self.presenter.calibration_presenter.set_instrument_override)
+        self.set_on_rb_num_changed(self.presenter.calibration_presenter.set_rb_num)
+        self.set_on_instrument_changed(self.presenter.focus_presenter.set_instrument_override)
+        self.set_on_rb_num_changed(self.presenter.focus_presenter.set_rb_num)
 
         # Usage Reporting
         try:
@@ -67,33 +66,24 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
         except ImportError:
             pass
 
-    def setup_settings(self):
-        model = SettingsModel()
-        view = SettingsView(self)
-        self.settings_presenter = SettingsPresenter(model, view)
-        self.settings_presenter.load_settings_from_file_or_default()
-        self.setup_savedir_notifier()
-
     def setup_presenter(self):
-        presenter = EngineeringDiffractionPresenter(self)
+        presenter = EngineeringDiffractionPresenter()
+        presenter.setup_calibration(self)
+        presenter.setup_focus(self)
+        presenter.setup_fitting(self)
+        presenter.setup_settings(self)
+        presenter.setup_calibration_notifier()
         presenter.statusbar_observable.add_subscriber(self.update_statusbar_text_observable)
         presenter.savedir_observable.add_subscriber(self.update_savedir_observable)
         self.set_on_settings_clicked(presenter.open_settings)
         self.set_on_help_clicked(presenter.open_help_window)
-        self.set_on_instrument_changed(presenter.calibration_presenter.set_instrument_override)
-        self.set_on_rb_num_changed(presenter.calibration_presenter.set_rb_num)
-        self.set_on_instrument_changed(presenter.focus_presenter.set_instrument_override)
-        self.set_on_rb_num_changed(presenter.focus_presenter.set_rb_num)
         return presenter
-
-    def setup_savedir_notifier(self):
-        self.settings_presenter.savedir_notifier.add_subscriber(self.savedir_observer)
 
     def setup_statusbar(self):
         self.statusbar.addWidget(self.status_label)
         self.set_statusbar_text("No Calibration Loaded.")
         self.statusbar.addWidget(self.savedir_label)
-        self.update_savedir(self.settings_presenter.settings["save_location"])
+        self.update_savedir(self.presenter.settings_presenter.settings["save_location"])
 
     def set_statusbar_text(self, text):
         self.status_label.setText(text)
