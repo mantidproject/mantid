@@ -122,6 +122,41 @@ namespace Crystal {
     const std::string OUTPUT("Output");
     setPropertyGroup("DetCalFilename", OUTPUT);
     setPropertyGroup("XmlFilename", OUTPUT);
+
+    // Add new section for advanced control of the calibration/optimization
+    declareProperty(
+        "ToleranceOfTranslation", 5e-5, mustBePositive,
+        "Translations in meters found below this value will be set "
+        "to 0 as this is the accuracy limit for this calibration algorithm");
+    declareProperty("ToleranceOfReorientation", 5e-3, mustBePositive,
+                    "Reorientation (rotation) angles in degress found below "
+                    "this value will be set to 0 as this is the accuracy limit "
+                    "for this calibration algorithm");
+    declareProperty(
+        "TranslationSearchRadius", 5e-2, mustBePositive,
+        "This is the search radius when calibrating component translations "
+        "using optimization. For CORELLI instrument, most panels will shift "
+        "within 5cm, therefore the search radius is set to 5e-2.");
+    declareProperty(
+        "RotationSearchRadius", 5.0, mustBePositive,
+        "This is the search radius when calibrating component orientations "
+        "using optimization.  For CORELLI instrument, most panels will wobble "
+        "within 5 degrees, therefore the default values is set to 5 here.");
+    declareProperty(
+        "SourceShiftSearchRadius", 0.1, mustBePositive,
+        "This is the search radius when calibrating source shift, L1, using "
+        "optimization.  For CORELLI instrument, the source shift is often "
+        "within 10 cm, therefore the default value is set to 0.1.");
+    declareProperty("VerboseOutput", false,
+                    "Toggle of child algorithm console output.");
+    // grouping into one category
+    const std::string ADVCNTRL("AdvancedControl");
+    setPropertyGroup("ToleranceOfTranslation", ADVCNTRL);
+    setPropertyGroup("ToleranceOfReorientation", ADVCNTRL);
+    setPropertyGroup("TranslationSearchRadius", ADVCNTRL);
+    setPropertyGroup("RotationSearchRadius", ADVCNTRL);
+    setPropertyGroup("SourceShiftSearchRadius", ADVCNTRL);
+    setPropertyGroup("VerboseOutput", ADVCNTRL);
   }
 
   /**
@@ -153,8 +188,15 @@ namespace Crystal {
     const std::string DetCalFilename = getProperty("DetCalFilename");
     const std::string XmlFilename = getProperty("XmlFilename");
 
+    // parsing advance control parameters
+    m_tolerance_translation = getProperty("ToleranceOfTranslation");
+    m_tolerance_rotation = getProperty("ToleranceOfReorientation");
+    m_bank_translation_bounds = getProperty("TranslationSearchRadius");
+    m_bank_rotation_bounds = getProperty("RotationSearchRadius");
+    m_source_translation_bounds = getProperty("SourceShiftSearchRadius");
+    LOGCHILDALG = getProperty("VerboseOutput");
+
     // STEP_0: sort the peaks
-    // NOTE: why??
     std::vector<std::pair<std::string, bool>> criteria{{"BankName", true}};
     m_pws->sort(criteria);
 

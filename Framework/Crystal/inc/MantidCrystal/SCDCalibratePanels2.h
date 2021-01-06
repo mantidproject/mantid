@@ -37,7 +37,7 @@ public:
 
   /// Summary of algorithm's purpose
   const std::string summary() const override {
-    return "Panel parameters and L0 are optimized to "
+    return "Panel parameters and L1 are optimized to "
            "minimize errors between theoretical and actual q values for the "
            "peaks";
   }
@@ -105,12 +105,13 @@ private:
   // The following bounds are set based on information provided by the
   // CORELLI team
   double m_bank_translation_bounds = 5e-2;  // meter
-  double m_bank_rotation_bounds = 5;        // degree
+  double m_bank_rotation_bounds = 5.0;      // degree
   double m_source_translation_bounds = 0.1; // meter
-  boost::container::flat_set<std::string> m_BankNames;
-  const bool LOGCHILDALG{false};
+  bool LOGCHILDALG{false};
   const int MINIMUM_PEAKS_PER_BANK{6};
   const double PI{3.141592653589793238462643383279502884};
+
+  boost::container::flat_set<std::string> m_BankNames;
 };
 
 } // namespace Crystal
