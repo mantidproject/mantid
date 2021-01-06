@@ -1,6 +1,6 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
@@ -20,6 +20,7 @@ Test was first created to apply to Mantid Release 3.0.
 """
 
 import systemtesting
+from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 from mantid.simpleapi import *
 import isis_reducer
 import ISISCommandInterface as i
@@ -27,14 +28,14 @@ import isis_instrument
 import isis_reduction_steps
 import copy
 
-MASKFILE = FileFinder.getFullPath('MaskSANS2DReductionGUI.txt')
-BATCHFILE = FileFinder.getFullPath('sans2d_reduction_gui_batch.csv')
+from sans.common.enums import SANSInstrument
 
 
 def s(obj):
     print('!'+str(obj)+'!',type(obj))
 
 
+@ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANS2DMinimalBatchReduction(systemtesting.MantidSystemTest):
     """Minimal script to perform full reduction in batch mode
   """
@@ -48,20 +49,22 @@ class SANS2DMinimalBatchReduction(systemtesting.MantidSystemTest):
     def runTest(self):
         import SANSBatchMode as batch
         i.SANS2D()
-        i.MaskFile(MASKFILE)
-        batch.BatchReduce(BATCHFILE,'.nxs', combineDet='rear')
+        i.MaskFile('MaskSANS2DReductionGUI.txt')
+        batch_file = FileFinder.getFullPath('sans2d_reduction_gui_batch.csv')
+        batch.BatchReduce(batch_file, '.nxs', combineDet='rear')
 
     def validate(self):
         self.disableChecking.append('Instrument')
         return "trans_test_rear_1D_1.5_12.5","SANSReductionGUI.nxs"
 
 
+@ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANS2DMinimalSingleReduction(SANS2DMinimalBatchReduction):
     """Minimal script to perform full reduction in single mode"""
 
     def runTest(self):
         i.SANS2D()
-        i.MaskFile(MASKFILE)
+        i.MaskFile('MaskSANS2DReductionGUI.txt')
         i.AssignSample('22048')
         i.AssignCan('22023')
         i.TransmissionSample('22041','22024')
@@ -70,6 +73,7 @@ class SANS2DMinimalSingleReduction(SANS2DMinimalBatchReduction):
         RenameWorkspace(reduced, OutputWorkspace='trans_test_rear_1D_1.5_12.5')
 
 
+@ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANS2DGUIBatchReduction(SANS2DMinimalBatchReduction):
     """Script executed by SANS GUI Interface to perform Batch Reduction"""
 
@@ -182,7 +186,7 @@ class SANS2DGUIBatchReduction(SANS2DMinimalBatchReduction):
 
         i.ReductionSingleton.clean(isis_reducer.ISISReducer)
         i.ReductionSingleton().set_instrument(isis_instrument.SANS2D())
-        i.ReductionSingleton().user_settings =isis_reduction_steps.UserFile(MASKFILE)
+        i.ReductionSingleton().user_settings =isis_reduction_steps.UserFile('MaskSANS2DReductionGUI.txt')
         i.ReductionSingleton().user_settings.execute(i.ReductionSingleton())
         return i
 
@@ -195,8 +199,9 @@ class SANS2DGUIBatchReduction(SANS2DMinimalBatchReduction):
 
         self.applyGUISettings()
 
-        fit_settings={'scale':1.0,'shift':0.0}
-        fit_settings = batch.BatchReduce(BATCHFILE,'.nxs', saveAlgs={}, reducer=i.ReductionSingleton().reference(),combineDet='rear')
+        batch_path = FileFinder.getFullPath('sans2d_reduction_gui_batch.csv')
+        fit_settings = batch.BatchReduce(batch_path,'.nxs', saveAlgs={},
+                                         reducer=i.ReductionSingleton().reference(),combineDet='rear')
 
         self.checkFittingSettings(fit_settings)
 
@@ -207,6 +212,7 @@ class SANS2DGUIBatchReduction(SANS2DMinimalBatchReduction):
         return "trans_test_rear_1D_1.5_12.5","SANSReductionGUI.nxs"
 
 
+@ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANS2DGUIReduction(SANS2DGUIBatchReduction):
     """Script executed by SANS GUI Interface to perform reduction in single mode"""
 

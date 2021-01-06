@@ -80,7 +80,7 @@ mtd_add_qt_library(TARGET_NAME MantidScientificInterfacesGeneral
                      MantidQtWidgetsCommon
                      MantidQtWidgetsMplCpp
                    INSTALL_DIR_BASE
-                     ${PLUGINS_DIR}
+                     ${WORKBENCH_PLUGINS_DIR}
                    OSX_INSTALL_RPATH
                      @loader_path/../../Contents/MacOS
                      @loader_path/../../Contents/Frameworks

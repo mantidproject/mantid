@@ -1,19 +1,24 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+#pylint: disable=no-init
 
 import systemtesting
 import os
+
+from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 from mantid.kernel import config
 from mantid.api import AnalysisDataService
 from sans.command_interface.ISISCommandInterface import (Set1D, Detector, MaskFile, Gravity, AssignSample,
                                                          WavRangeReduction, DefaultTrans, UseCompatibilityMode,
                                                          AddRuns, LARMOR)
+from sans.common.enums import SANSInstrument
 
 
+@ISISSansSystemTest(SANSInstrument.LARMOR)
 class LARMORMultiPeriodAddEventFilesTest_V2(systemtesting.MantidSystemTest):
     def requiredMemoryMB(self):
         """Requires 2.5Gb"""
@@ -24,7 +29,7 @@ class LARMORMultiPeriodAddEventFilesTest_V2(systemtesting.MantidSystemTest):
         LARMOR()
         Set1D()
         Detector("DetectorBench")
-        MaskFile('LARMOR_151B_80tube_BenchRot1p4_M4_r3699.toml')
+        MaskFile('USER_LARMOR_151B_LarmorTeam_80tubes_BenchRot1p4_M4_r3699.txt')
         Gravity(True)
         AddRuns(('13065', '13065'), 'LARMOR', 'nxs', lowMem=True)
 

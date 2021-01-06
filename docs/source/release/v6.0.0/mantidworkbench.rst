@@ -40,6 +40,7 @@ Improvements
 - Add a Python function to replace the workspace being shown by an instrument window.
 - Slice Viewer replots the workspace when it is modified outside the Slice Viewer.
 - A system to group samples and avoid repetition in DrILL has been added. See the :ref:`DrILL documentation <DrILL-ref>` for more information.
+- In the plot config, multiple curves can be selected and removed at once. The delete key was added as a shortcut.
 
 Bugfixes
 ########
@@ -54,6 +55,8 @@ Bugfixes
 - Fix sort order of peaks in the peaks overlay on SliceViewer.
 - The colorfill plot on ragged workspaces will have the correct horizontal extent.
 - Fix replot of colorfill image after a workspace is replaced.
+- Fixed a bug in generating plot scripts for figures containing data for a particular bin.
 - Fixed a bug causing an error when double clicking a ragged workspace.
+- Fixed a bug which caused a terminate dialogue to be raised if the user zoomed in far enough while using the SliceViewer on MDE workspaces.
 
 :ref:`Release 6.0.0 <v6.0.0>`

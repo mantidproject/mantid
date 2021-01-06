@@ -51,10 +51,15 @@ CalibrationTableHandler::CalibrationTableHandler()
 
 //-----------------------------------------------------------------------------
 /**
- * @brief Create single component calibration table
- * @param wsname: workspace name.  If it is not empty, then add workspace to ADS
- * @param iscomponent: flag if True single component workspace
- * @return
+ * @brief Create an empty calibration table (multi-component) or an emtpy
+ * history-of-compoment-positions table
+ *
+ * @param wsname: workspace name.  If we pass a name, then register the
+ * table in the Analysis Data Service
+ * @param iscomponent: if True, then create a history-of-compoment-positions
+ * table, otherwise a calibration table
+ *
+ * @return shared pointer to the table workspace
  */
 DataObjects::TableWorkspace_sptr
 CalibrationTableHandler::createCalibrationTableWorkspace(
@@ -89,8 +94,11 @@ CalibrationTableHandler::createCalibrationTableWorkspace(
 
 //-----------------------------------------------------------------------------
 /**
- * @brief Check whether a TableWorkspace is a valid Corelli calibraion table for
- * all components
+ * @brief Check whether a TableWorkspace is a valid Corelli calibration table
+ * for all components.
+ *
+ * @details Cheks performed are correct number of columns and columns names
+ *
  * @param calibws: Calibration table workspace
  * @param errormsg: (output) error message
  * @return
@@ -134,10 +142,11 @@ bool CalibrationTableHandler::isValidCalibrationTableWorkspace(
 
 //-----------------------------------------------------------------------------
 /**
- * @brief Append a calibration position to the table
+ * @brief Append a new dated position to the table of history of positions
+ *
  * @param tablews: table workspace
- * @param datestamp:
- * @param pos
+ * @param datestamp: a day-stamp with format YYYYMMDD
+ * @param pos: location and orientation of the component
  */
 void CalibrationTableHandler::appendCalibration(
     DataObjects::TableWorkspace_sptr tablews, const std::string &datestamp,
@@ -156,7 +165,8 @@ void CalibrationTableHandler::appendCalibration(
 }
 
 /**
- * @brief Set a valid calibration table to the handler
+ * @brief Set a valid calibration table to the handler. This cannot be a
+ * table for history-of-component-positions, but a calibration table.
  * @param calibws
  */
 void CalibrationTableHandler::setCalibrationTable(
@@ -172,8 +182,13 @@ void CalibrationTableHandler::setCalibrationTable(
 }
 
 /**
- * @brief Get column names of the table workspace
- * @return
+ * @brief Get component names of the table workspace
+ *
+ * @details the component names are the first column of the table
+ *
+ * @throws std::runtime_error for single-component tables
+ *
+ * @return names as a vector or strings
  */
 std::vector<std::string> CalibrationTableHandler::getComponentNames() {
 
@@ -188,7 +203,8 @@ std::vector<std::string> CalibrationTableHandler::getComponentNames() {
 }
 
 /**
- * @brief Get the calibration position of a single
+ * @brief extract the location and orientation for one of the components
+ * in a calibration table
  * @param component
  * @return
  */
@@ -224,10 +240,15 @@ ComponentPosition CalibrationTableHandler::getComponentCalibratedPosition(
 }
 
 /**
- * @brief Load single component calibration file to table workspace
+ * @brief Load a single-component database file to a table workspace of
+ * history of positions for the component
+ *
+ * @details the single-component calibration file contains the history of
+ * positions for said component
+ *
  * @param filename
  * @package tablewsname : name for TableWorkspace the file is loaded to
- * @return
+ * @return shared pointer to the table workspace
  */
 DataObjects::TableWorkspace_sptr
 CalibrationTableHandler::loadComponentCalibrationTable(
@@ -256,19 +277,26 @@ CalibrationTableHandler::loadComponentCalibrationTable(
 //-----------------------------------------------------------------------------
 /**
  * @brief Save a specific component to database (csv) file
+ *
+ * @details Extract the position of a specific component from the full
+ * calibration table, and append to a database file. If the database file
+ * does not exits, then create it.
+ *
  * @param datestamp: YYYYMMDD date stamp
  * @param component: component name
- * @param filename: full path of the database file
+ * @param filename: full path of the database file for the specific component
+ *
+ * @returns table of history of positions for the specific component
  */
 TableWorkspace_sptr
 CalibrationTableHandler::saveCompomentDatabase(const std::string &datestamp,
                                                const std::string &component,
                                                const std::string &filename) {
 
-  // create worksapce name
   std::string tablewsname = component + "_" + datestamp;
 
-  // Check whether the file does exist or not: new or append
+  // Load the database file for the specific component to a table workspace
+  // if extant, otherwise instantiate an empty table
   TableWorkspace_sptr compcaltable = nullptr;
   if (boost::filesystem::exists(filename)) {
     compcaltable = loadComponentCalibrationTable(filename, tablewsname);
@@ -276,11 +304,14 @@ CalibrationTableHandler::saveCompomentDatabase(const std::string &datestamp,
     compcaltable = createCalibrationTableWorkspace(tablewsname, true);
   }
 
-  // Append the row
+  // Append a new row to the table containing the hisotry of positions for
+  // the specific component
   ComponentPosition componentpos = getComponentCalibratedPosition(component);
   appendCalibration(compcaltable, datestamp, componentpos);
 
-  // create algorithm: only version 2 of SaveAscii can work with TableWorkspace
+  // save the updated history of positions to the database file. Will overwrite
+  // the file if extant
+  // Note: only version 2 of SaveAscii can work with TableWorkspace
   IAlgorithm_sptr saveAsciiAlg =
       AlgorithmFactory::Instance().create("SaveAscii", 2);
   saveAsciiAlg->initialize();
@@ -359,12 +390,13 @@ void CorelliPowderCalibrationDatabase::init() {
   // Input MatrixWorkspace which the calibration run is from
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
-                  "An input workspace.");
+                  "Workspace containing the day-stamp of the calibration");
 
   // Input calibration patch TableWorkspace
   declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>(
                       "InputCalibrationPatchWorkspace", "", Direction::Input),
-                  "An input table workspace for calibration patch.");
+                  "Table workspace containing calibrated positions and "
+                  "orientations for a subset of the banks");
 
   // Output directory
   declareProperty(std::make_unique<FileProperty>("DatabaseDirectory", "",
@@ -374,7 +406,8 @@ void CorelliPowderCalibrationDatabase::init() {
   // Optional output calibration TableWorkspace
   declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
-                  "An output calibration workspace.");
+                  "Table workspace containing calibrated positions and "
+                  "orientations for all banks");
 }
 
 // Validate inputs workspace first.
@@ -610,13 +643,25 @@ CorelliPowderCalibrationDatabase::convertTimeStamp(std::string run_start_time) {
 //-----------------------------------------------------------------------------
 /**
  * @brief Compose a standard full path of a component CSV file
+ *
+ * @details names for bank components follow the pattern bankXX/sixteenpack
+ * and we drop the "/sixteenpack" suffix when composing the name of the CSV file
+ *
  * @param componentname
  * @param directory
  * @return
  */
 std::string CorelliPowderCalibrationDatabase::corelliComponentDatabaseName(
     const std::string &componentname, const std::string &directory) {
-  std::string basename = componentname + ".csv";
+
+  // drop the suffix "/sixteenpack" if found in the component name
+  std::string shortName = componentname;
+  std::string suffix{"/sixteenpack"};
+  size_t pos = componentname.find(suffix);
+  if (pos != std::string::npos)
+    shortName.erase(pos, suffix.length());
+
+  std::string basename = shortName + ".csv";
   std::string filename = joinPath(directory, basename);
 
   return filename;
@@ -669,6 +714,9 @@ CorelliPowderCalibrationDatabase::joinPath(const std::string directory,
 
 /**
  * @brief Set up component map
+ *
+ * @details keys of this map are "moderator", "sample-position",
+ * "bank1/sixteenpack",..,"bank91/sixteenpack"
  * @param componentnames
  * @param compmap
  */
@@ -681,8 +729,11 @@ void CorelliPowderCalibrationDatabase::setComponentMap(
 }
 
 /**
- * @brief Retrieve the compoments including banks, source (moderator) and sample
- * (sample-position) names from an workspace
+ * @brief Retrieve the names of certain intrument compoments
+ *
+ * @details names of interest are are "moderator", "sample-position",
+ * "bank1/sixteenpack",..,"bank91/sixteenpack"
+ *
  * @param ws : Any workspace containing instrument
  * @return  : vector including of all the compoments in the order as
  * moderator, sample-position, bank1, bank2, ...
@@ -696,13 +747,13 @@ CorelliPowderCalibrationDatabase::retrieveInstrumentComponents(
   // Init output
   std::vector<std::string> componentnames = {"moderator", "sample-position"};
 
-  // Loop over all the compoments for bank
+  // Loop over all the components for bankX/sixteenpack
   const size_t num_components = component_info.size();
   for (size_t i = 0; i < num_components; ++i) {
     std::string compname = component_info.name(i);
     // a component starts with bank must be a bank
     if (compname.compare(0, 4, "bank") == 0) {
-      componentnames.push_back(compname);
+      componentnames.push_back(compname + "/sixteenpack");
     }
   }
 

@@ -133,10 +133,12 @@ def _get_mantid_specific_plot_kwargs(artist):
         return dict()
     sample_log_plot_details = ax.get_artists_sample_log_plot_details(artist)
     if sample_log_plot_details is None:
-        return {
-            'specNum': ax.get_artists_workspace_and_spec_num(artist)[1],
-            'distribution': not ax.get_artist_normalization_state(artist)
-        }
+        plot_kwargs = {"wkspIndex": ax.get_artists_workspace_and_workspace_index(artist)[1],
+                       "distribution": not ax.get_artist_normalization_state(artist)}
+        ax_type = ax.creation_args[0].get('axis', None)
+        if ax_type:
+            plot_kwargs["axis"] = ax_type
+        return plot_kwargs
     else:
         sample_log_details_map =  {'LogName': sample_log_plot_details[0]}
         if sample_log_plot_details[1] is not None:

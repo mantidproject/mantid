@@ -22,6 +22,7 @@ class PhaseTableView(QtWidgets.QWidget, ui_muon_phases_tab):
 
         self.backward_group_combo.currentIndexChanged.connect(self.ensure_groups_different)
         self.forward_group_combo.currentIndexChanged.connect(self.ensure_groups_different)
+        self.setEnabled(False)
 
     @property
     def first_good_time(self):

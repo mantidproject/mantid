@@ -93,15 +93,16 @@ class PhaseTablePresenterTest(unittest.TestCase):
         workspace_wrapper.show.assert_called_once_with()
 
     @mock.patch('Muon.GUI.Common.phase_table_widget.phase_table_presenter.run_CalMuonDetectorPhases')
-    def test_handle_calculate_phase_table_clicked_behaves_correctly_for_succesful_calculation(self, run_algorith_mock):
+    def test_handle_calculate_phase_table_clicked_behaves_correctly_for_succesful_calculation(self, run_algorithm_mock):
         detector_table_mock = mock.MagicMock()
         self.view.set_input_combo_box(['MUSR22222_raw_data_period_1'])
         self.context.getGroupedWorkspaceNames = mock.MagicMock(return_value=['MUSR22222_raw_data_period_1'])
         self.context.phase_context.options_dict['input_workspace'] = 'MUSR22222_raw_data_period_1'
         self.presenter.update_view_from_model()
-        run_algorith_mock.return_value = (detector_table_mock, mock.MagicMock())
+        run_algorithm_mock.return_value = (detector_table_mock, mock.MagicMock())
         self.presenter.add_phase_table_to_ADS = mock.MagicMock()
 
+        self.presenter.update_current_run_list()
         self.presenter.handle_calulate_phase_table_clicked()
         self.wait_for_thread(self.presenter.calculation_thread)
 
@@ -109,14 +110,16 @@ class PhaseTablePresenterTest(unittest.TestCase):
         self.assertTrue(self.view.isEnabled())
 
     @mock.patch('Muon.GUI.Common.phase_table_widget.phase_table_presenter.run_CalMuonDetectorPhases')
-    def test_handle_calculate_phase_table_clicked_behaves_correctly_for_error_in_calculation(self, run_algorith_mock):
+    def test_handle_calculate_phase_table_clicked_behaves_correctly_for_error_in_calculation(self, run_algorithm_mock):
+        self.context.getGroupedWorkspaceNames = mock.MagicMock(return_value=['MUSR22222_raw_data_period_1'])
         self.context.phase_context.options_dict['input_workspace'] = 'MUSR22222_raw_data_period_1'
         self.presenter.update_view_from_model()
-        run_algorith_mock.side_effect = RuntimeError('CalMuonDetectorPhases has failed')
+        run_algorithm_mock.side_effect = RuntimeError('CalMuonDetectorPhases has failed')
         self.presenter.add_phase_table_to_ADS = mock.MagicMock()
         self.presenter.calculate_base_name_and_group = mock.MagicMock(
             return_value=('MUSR22222_raw_data_period_1', 'MUSR22222 PhaseTable'))
 
+        self.presenter.update_current_run_list()
         self.presenter.handle_calulate_phase_table_clicked()
         self.wait_for_thread(self.presenter.calculation_thread)
 

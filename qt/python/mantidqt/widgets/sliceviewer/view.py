@@ -16,7 +16,7 @@ from mantid.plots.datafunctions import get_normalize_by_bin_width
 from matplotlib.figure import Figure
 from mpl_toolkits.axisartist import Subplot as CurveLinearSubPlot
 from mpl_toolkits.axisartist.grid_helper_curvelinear import GridHelperCurveLinear
-from qtpy.QtCore import Qt, Signal
+from qtpy.QtCore import Qt, QTimer, Signal
 from qtpy.QtWidgets import (QCheckBox, QComboBox, QGridLayout, QLabel, QHBoxLayout, QSplitter,
                             QStatusBar, QVBoxLayout, QWidget)
 
@@ -570,6 +570,11 @@ class SliceViewerView(QWidget, ObservingView):
             self._splitter.addWidget(self._peaks_view)
 
         return self._peaks_view
+
+    def delayed_refresh(self):
+        """Post an event to the event loop that causes the view to
+        update on the next cycle"""
+        QTimer.singleShot(0, self.presenter.refresh_view)
 
     def peaks_overlay_clicked(self):
         """Peaks overlay button has been toggled
