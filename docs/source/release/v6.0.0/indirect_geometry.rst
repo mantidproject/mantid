@@ -22,6 +22,7 @@ Improvements
 - The context menu for plots in the  indirect data analysis GUI is now enabled.
 - The function browser in the ConvFit tab should now correctly show Q values for Q dependent functions.
 - The ConvFit tab in the Indirect Data Analysis GUI will now set default parameters for the FWHM when a resolution file is loaded.
+- QENSFitSequential and PlotPeakByLogValue can accept a different mask range for each spectra via the `ExcludeMultiple` Parameter.
 
 Bug Fixes
 #########
@@ -30,5 +31,6 @@ Bug Fixes
 - Fixed a bug in Indirect Data Reduction causing the colon separator in Custom Grouping to act like a dash separator. This colon separator should now act
   as expected (i.e. `1:5` means the same as `1,2,3,4,5`).
 - Fixed a crash on Indirect Bayes ResNorm when clicking `Plot Current Preview` without a workspace loaded.
+- A bug has been fixed that caused fitting tabs in data analysis to use the X mask of the first spectra for every single spectra.
 
 :ref:`Release 6.0.0 <v6.0.0>`
