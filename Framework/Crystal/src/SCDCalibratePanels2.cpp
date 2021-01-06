@@ -345,6 +345,7 @@ namespace Crystal {
           ev[i * 3 + j] = 1;
         }
       }
+
       //-- step 2&3: invoke fit to find both traslation and rotation
       IAlgorithm_sptr fitBank_alg = createChildAlgorithm("Fit", -1, -1, false);
       //---- setup obj fun def
@@ -355,14 +356,18 @@ namespace Crystal {
       std::ostringstream tie_str;
       tie_str << "dT0=" << m_T0;
       std::ostringstream constraint_str;
-      constraint_str << "0<theta<" << PI << ",0<phi<" << PI * 2 << ","
-                     << -m_bank_rotation_bounds << "<drotang<"
-                     << m_bank_rotation_bounds;
+      double brb = std::abs(m_bank_rotation_bounds);
+      constraint_str << "0.0<theta<3.1415926,0<phi<6.28318530718," << -brb
+                     << "<drotang<" << brb << ",";
+      // double btb = std::abs(m_bank_translation_bounds);
+      // constraint_str << -btb << "<dx<" << btb << "," << -btb << "<dy<" << btb
+      //                << "," << -btb << "<dz<" << btb;
       //---- set&go
       fitBank_alg->setPropertyValue("Function", fun_str.str());
       fitBank_alg->setProperty("Ties", tie_str.str());
       fitBank_alg->setProperty("Constraints", constraint_str.str());
       fitBank_alg->setProperty("InputWorkspace", wsBankCali);
+      // fitBank_alg->setProperty("Minimizer", "Simplex");
       fitBank_alg->setProperty("CreateOutput", true);
       fitBank_alg->setProperty("Output", "fit");
       fitBank_alg->executeAsChildAlg();
@@ -402,7 +407,6 @@ namespace Crystal {
 
       // -- cleanup
       AnalysisDataService::Instance().remove(pwsBankiName);
-
       PARALLEL_END_INTERUPT_REGION
     }
     PARALLEL_CHECK_INTERUPT_REGION
@@ -462,19 +466,6 @@ namespace Crystal {
                                        double rvx, double rvy, double rvz,
                                        double rang, std::string cmptName,
                                        DataObjects::PeaksWorkspace_sptr &pws) {
-    // translation
-    IAlgorithm_sptr mv_alg = Mantid::API::AlgorithmFactory::Instance().create(
-        "MoveInstrumentComponent", -1);
-    mv_alg->initialize();
-    mv_alg->setChild(true);
-    mv_alg->setLogging(LOGCHILDALG);
-    mv_alg->setProperty<Workspace_sptr>("Workspace", pws);
-    mv_alg->setProperty("ComponentName", cmptName);
-    mv_alg->setProperty("X", dx);
-    mv_alg->setProperty("Y", dy);
-    mv_alg->setProperty("Z", dz);
-    mv_alg->setProperty("RelativePosition", true);
-    mv_alg->executeAsChildAlg();
 
     // orientation
     IAlgorithm_sptr rot_alg = Mantid::API::AlgorithmFactory::Instance().create(
@@ -491,6 +482,20 @@ namespace Crystal {
     rot_alg->setProperty("Angle", rang);
     rot_alg->setProperty("RelativeRotation", true);
     rot_alg->executeAsChildAlg();
+
+    // translation
+    IAlgorithm_sptr mv_alg = Mantid::API::AlgorithmFactory::Instance().create(
+        "MoveInstrumentComponent", -1);
+    mv_alg->initialize();
+    mv_alg->setChild(true);
+    mv_alg->setLogging(LOGCHILDALG);
+    mv_alg->setProperty<Workspace_sptr>("Workspace", pws);
+    mv_alg->setProperty("ComponentName", cmptName);
+    mv_alg->setProperty("X", dx);
+    mv_alg->setProperty("Y", dy);
+    mv_alg->setProperty("Z", dz);
+    mv_alg->setProperty("RelativePosition", true);
+    mv_alg->executeAsChildAlg();
   }
 
   /**

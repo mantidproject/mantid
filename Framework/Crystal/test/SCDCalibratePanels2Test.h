@@ -77,9 +77,9 @@ public:
         silicon_alpha(90), silicon_beta(90), silicon_gamma(90), // degree
         silicon_cs(CrystalStructure("5.431 5.431 5.431", "F d -3 m",
                                     "Si 0 0 0 1.0 0.02")),
-        dspacing_min(1.0), dspacing_max(10.0),    //
-        wavelength_min(0.8), wavelength_max(2.9), //
-        omega_step(3.0),                          //
+        dspacing_min(1.0), dspacing_max(10.0),   //
+        wavelength_min(0.1), wavelength_max(10), //
+        omega_step(3.0),                         //
         TOLERANCE_L(1e-16), // this calibration has intrinsic accuracy limit of
                             // 1mm for translation
         TOLERANCE_R(1e-8),  // this calibration has intrinsic accuracy limit of
@@ -227,7 +227,7 @@ public:
     MatrixWorkspace_sptr wsraw = ws->clone();
 
     // move source
-    adjustComponent(0.0, 0.0, dL1, 0.0, 0.0, 0.0,
+    adjustComponent(0.0, 0.0, dL1, 1.0, 0.0, 0.0, 0.0,
                     ws->getInstrument()->getSource()->getName(), ws);
 
     g_log.notice() << "-- generate peaks\n";
@@ -272,14 +272,16 @@ public:
     // prescribed shift
     // NOTE: the common range for dx, dy ,dz is +-5cm
     double dx = 1.1e-2;
-    double dy = 0.9e-2;
+    double dy = -0.9e-2;
     double dz = 1.5e-2;
 
     // prescribed rotation
-    double rvx = 1.0;
-    double rvy = 0.0;
-    double rvz = 0.0;
-    double ang = 3; // degrees
+    double theta = PI / 3;
+    double phi = PI / 8;
+    double rvx = sin(theta) * cos(phi);
+    double rvy = sin(theta) * sin(phi);
+    double rvz = cos(theta);
+    double ang = 1.414; // degrees
 
     // Generate unique temp files
     auto isawFile = boost::filesystem::temp_directory_path();
@@ -308,20 +310,17 @@ public:
         << "    * before reset x(top) - bank73:\n"
         << "    pos(abs) = "
         << pws->getInstrument()->getComponentByName(bank_xtop)->getPos() << "\n"
-        << "    pos(rel) = "
-        << pws->getInstrument()->getComponentByName(bank_xtop)->getRelativePos()
-        << "\n"
         << "    quat(rel) = "
         << pws->getInstrument()->getComponentByName(bank_xtop)->getRelativeRot()
         << "\n";
+    Quat q0 = pws->getInstrument()
+                  ->getComponentByName(bank_xtop)
+                  ->getRelativeRot(); // this is the answer
     pws->setInstrument(wsraw->getInstrument());
     g_log.notice()
         << "    * after reset x(top) - bank73:\n"
         << "    pos(abs) = "
         << pws->getInstrument()->getComponentByName(bank_xtop)->getPos() << "\n"
-        << "    pos(rel) = "
-        << pws->getInstrument()->getComponentByName(bank_xtop)->getRelativePos()
-        << "\n"
         << "    quat(rel) = "
         << pws->getInstrument()->getComponentByName(bank_xtop)->getRelativeRot()
         << "\n";
@@ -331,16 +330,30 @@ public:
     runCalibration(isawFile.string(), xmlFile.string(), pws, false, false,
                    true);
 
-    g_log.notice()
-        << "    * after calibration x(top) - bank73:\n"
-        << "    pos(abs) = "
-        << pws->getInstrument()->getComponentByName(bank_xtop)->getPos() << "\n"
-        << "    pos(rel) = "
-        << pws->getInstrument()->getComponentByName(bank_xtop)->getRelativePos()
-        << "\n"
-        << "    quat(rel) = "
-        << pws->getInstrument()->getComponentByName(bank_xtop)->getRelativeRot()
-        << "\n";
+    // Quat q1 = pws->getInstrument()
+    //               ->getComponentByName(bank_xtop)
+    //               ->getRelativeRot(); // this is calibration results
+    // Quat qq = pws->getInstrument()
+    //               ->getComponentByName(bank_xtop)
+    //               ->getRelativeRot(); // this is calibration results
+
+    // qq.inverse();
+    // Quat dq = q0 * qq;
+    // double ra, rx, ry, rz;
+    // dq.getAngleAxis(ra, rx, ry, rz);
+
+    // g_log.notice()
+    //     << "    * after calibration x(top) - bank73:\n"
+    //     << "    pos(abs) = "
+    //     << pws->getInstrument()->getComponentByName(bank_xtop)->getPos() <<
+    //     "\n"
+    //     << "    quat(rel) = "
+    //     <<
+    //     pws->getInstrument()->getComponentByName(bank_xtop)->getRelativeRot()
+    //     << "\n"
+    //     << "    q_prescribed = " << q0 << "\n"
+    //     << "    q_calibrated = " << q1 << "\n"
+    //     << "    rotation wise off by: " << ra << " deg\n";
 
     // Check if the calibration returns the same instrument as we put in
     g_log.notice() << "-- validate calibration output\n";
@@ -358,88 +371,92 @@ public:
    * NOTE: not enough peaks on the y_panels, so we have to work with only the
    *       x_panels
    */
-  void run_Exec() {
-    g_log.notice()
-        << "test: !multi components move (translation and rotation)!\n";
+  // void run_Exec() {
+  //   g_log.notice()
+  //       << "test: !multi components move (translation and rotation)!\n";
 
-    // prescribed shift of source
-    // NOTE: the common range for dL1 is +-10cm
-    const double dL1 = 2e-2;  // 1cm
+  //   // prescribed shift of source
+  //   // NOTE: the common range for dL1 is +-10cm
+  //   const double dL1 = 2e-2;  // 1cm
 
-    // prescribed shift
-    // NOTE: the common range for dx, dy ,dz is +-5cm
-    double dx = 1e-2;
-    double dy = 1e-2;
-    double dz = 2e-2;
+  //   // prescribed shift
+  //   // NOTE: the common range for dx, dy ,dz is +-5cm
+  //   double dx = 1e-2;
+  //   double dy = 1e-2;
+  //   double dz = 2e-2;
 
-    // prescribed rotate
-    // NOTE: the common range for drx, dry, drz is +-5deg
-    double drotx = 1;
-    double droty = 1;
-    double drotz = 1;
+  //   // prescribed rotate
+  //   // NOTE: the common range for drx, dry, drz is +-5deg
+  //   double drotx = 1;
+  //   double droty = 1;
+  //   double drotz = 1;
 
-    // Generate unique temp files
-    auto isawFile = boost::filesystem::temp_directory_path();
-    isawFile /= boost::filesystem::unique_path("duoPanelMove_%%%%%%%%.DetCal");
-    auto xmlFile = boost::filesystem::temp_directory_path();
-    xmlFile /= boost::filesystem::unique_path("duoPanelMove_%%%%%%%%.xml");
+  //   // Generate unique temp files
+  //   auto isawFile = boost::filesystem::temp_directory_path();
+  //   isawFile /=
+  //   boost::filesystem::unique_path("duoPanelMove_%%%%%%%%.DetCal"); auto
+  //   xmlFile = boost::filesystem::temp_directory_path(); xmlFile /=
+  //   boost::filesystem::unique_path("duoPanelMove_%%%%%%%%.xml");
 
-    g_log.notice() << "-- generate simulated workspace\n";
-    MatrixWorkspace_sptr ws = m_ws->clone();
-    MatrixWorkspace_sptr wsraw = ws->clone();
+  //   g_log.notice() << "-- generate simulated workspace\n";
+  //   MatrixWorkspace_sptr ws = m_ws->clone();
+  //   MatrixWorkspace_sptr wsraw = ws->clone();
 
-    g_log.notice() << "-- translate source by " << dL1 << "\n"
-                   << "-- for x(top) - bank73\n"
-                   << "   translate by (" << dx << "," << dy << "," << dz
-                   << ")\n"
-                   << "   rotate by\n"
-                   << "    drotx@(100) = " << drotx << "\n"
-                   << "    droty@(010) = " << droty << "\n"
-                   << "    drotz@(001) = " << drotz << "\n"
-                   << "-- for x(center) - bank12\n"
-                   << "   translate by (" << dx << "," << dy << "," << dz
-                   << ")\n"
-                   << "   rotate by\n"
-                   << "    drotx@(100) = " << drotx << "\n"
-                   << "    droty@(010) = " << 0 << "\n"
-                   << "    drotz@(001) = " << 0 << "\n"
-                   << "-- for x(top,center,bottom) - bank(73,12,11)\n"
-                   << "   translate by (" << dx << "," << dy << "," << dz
-                   << ")\n"
-                   << "   rotate by\n"
-                   << "    drotx@(100) = " << 0 << "\n"
-                   << "    droty@(010) = " << droty << "\n"
-                   << "    drotz@(001) = " << 0 << "\n";
+  //   g_log.notice() << "-- translate source by " << dL1 << "\n"
+  //                  << "-- for x(top) - bank73\n"
+  //                  << "   translate by (" << dx << "," << dy << "," << dz
+  //                  << ")\n"
+  //                  << "   rotate by\n"
+  //                  << "    drotx@(100) = " << drotx << "\n"
+  //                  << "    droty@(010) = " << droty << "\n"
+  //                  << "    drotz@(001) = " << drotz << "\n"
+  //                  << "-- for x(center) - bank12\n"
+  //                  << "   translate by (" << dx << "," << dy << "," << dz
+  //                  << ")\n"
+  //                  << "   rotate by\n"
+  //                  << "    drotx@(100) = " << drotx << "\n"
+  //                  << "    droty@(010) = " << 0 << "\n"
+  //                  << "    drotz@(001) = " << 0 << "\n"
+  //                  << "-- for x(top,center,bottom) - bank(73,12,11)\n"
+  //                  << "   translate by (" << dx << "," << dy << "," << dz
+  //                  << ")\n"
+  //                  << "   rotate by\n"
+  //                  << "    drotx@(100) = " << 0 << "\n"
+  //                  << "    droty@(010) = " << droty << "\n"
+  //                  << "    drotz@(001) = " << 0 << "\n";
 
-    adjustComponent(0.0, 0.0, dL1, 0.0, 0.0, 0.0,
-                    ws->getInstrument()->getSource()->getName(), ws);
-    adjustComponent(dx, dy, dz, drotx, droty, drotz, bank_xtop, ws);
-    adjustComponent(dx, dy, dz, drotx, 0, 0, bank_xcenter, ws);
-    adjustComponent(dx, dy, dz, 0, droty, 0, bank_xbottom, ws);
+  //   adjustComponent(0.0, 0.0, dL1, 1.0, 0.0, 0.0, 0.0,
+  //                   ws->getInstrument()->getSource()->getName(), ws);
+  //   adjustComponent(dx, dy, dz, drotx, droty, drotz, bank_xtop, ws);
+  //   adjustComponent(dx, dy, dz, drotx, 0, 0, bank_xcenter, ws);
+  //   adjustComponent(dx, dy, dz, 0, droty, 0, bank_xbottom, ws);
 
-    g_log.notice() << "-- generate peaks\n";
-    PeaksWorkspace_sptr pws = generateSimulatedPeaksWorkspace(ws);
-    PeaksWorkspace_sptr pwsref = pws->clone();
+  //   g_log.notice() << "-- generate peaks\n";
+  //   PeaksWorkspace_sptr pws = generateSimulatedPeaksWorkspace(ws);
+  //   PeaksWorkspace_sptr pwsref = pws->clone();
 
-    // Pretend we don't know the answer
-    g_log.notice() << "-- reset instrument positions&orientations\n";
-    g_log.notice() << "    * before reset L1 = "
-                   << pws->getInstrument()->getSource()->getPos().Z() << "\n";
-    pws->setInstrument(wsraw->getInstrument());
-    g_log.notice() << "    * after reset L1 = "
-                   << pws->getInstrument()->getSource()->getPos().Z() << "\n";
+  //   // Pretend we don't know the answer
+  //   g_log.notice() << "-- reset instrument positions&orientations\n";
+  //   g_log.notice() << "    * before reset L1 = "
+  //                  << pws->getInstrument()->getSource()->getPos().Z() <<
+  //                  "\n";
+  //   pws->setInstrument(wsraw->getInstrument());
+  //   g_log.notice() << "    * after reset L1 = "
+  //                  << pws->getInstrument()->getSource()->getPos().Z() <<
+  //                  "\n";
 
-    // Perform the calibration
-    g_log.notice() << "-- start calibration\n";
-    runCalibration(isawFile.string(), xmlFile.string(), pws, false, true, true);
+  //   // Perform the calibration
+  //   g_log.notice() << "-- start calibration\n";
+  //   runCalibration(isawFile.string(), xmlFile.string(), pws, false, true,
+  //   true);
 
-    // Check if the calibration returns the same instrument as we put in
-    g_log.notice() << "-- validate calibration output\n";
-    TS_ASSERT(validateCalibrationResults(pwsref, wsraw, xmlFile.string()));
+  //   // Check if the calibration returns the same instrument as we put in
+  //   g_log.notice() << "-- validate calibration output\n";
+  //   TS_ASSERT(validateCalibrationResults(pwsref, wsraw, xmlFile.string()));
 
-    // Cleanup
-    doCleanup();
-  }
+  //   // Cleanup
+  //   doCleanup();
+  // }
 
 private:
   // ---------------------------- //
@@ -562,18 +579,6 @@ private:
   void adjustComponent(double dx, double dy, double dz, double rvx, double rvy,
                        double rvz, double drotang, std::string cmptName,
                        MatrixWorkspace_sptr ws) {
-    // translation
-    IAlgorithm_sptr mv_alg = Mantid::API::AlgorithmFactory::Instance().create(
-        "MoveInstrumentComponent", -1);
-    mv_alg->initialize();
-    mv_alg->setLogging(LOGCHILDALG);
-    mv_alg->setProperty("Workspace", ws);
-    mv_alg->setProperty("ComponentName", cmptName);
-    mv_alg->setProperty("X", dx);
-    mv_alg->setProperty("Y", dy);
-    mv_alg->setProperty("Z", dz);
-    mv_alg->setProperty("RelativePosition", true);
-    mv_alg->executeAsChildAlg();
 
     // rotation
     IAlgorithm_sptr rot_alg = Mantid::API::AlgorithmFactory::Instance().create(
@@ -588,11 +593,7 @@ private:
     rot_alg->setProperty("Angle", drotang);
     rot_alg->setProperty("RelativeRotation", true);
     rot_alg->executeAsChildAlg();
-  }
 
-  void adjustComponent(double dx, double dy, double dz, double drotx,
-                       double droty, double drotz, std::string cmptName,
-                       MatrixWorkspace_sptr ws) {
     // translation
     IAlgorithm_sptr mv_alg = Mantid::API::AlgorithmFactory::Instance().create(
         "MoveInstrumentComponent", -1);
@@ -605,43 +606,6 @@ private:
     mv_alg->setProperty("Z", dz);
     mv_alg->setProperty("RelativePosition", true);
     mv_alg->executeAsChildAlg();
-
-    // orientation
-    IAlgorithm_sptr rot_alg = Mantid::API::AlgorithmFactory::Instance().create(
-        "RotateInstrumentComponent", -1);
-    //-- rotAngX@(1,0,0)
-    rot_alg->initialize();
-    rot_alg->setLogging(LOGCHILDALG);
-    rot_alg->setProperty("Workspace", ws);
-    rot_alg->setProperty("ComponentName", cmptName);
-    rot_alg->setProperty("X", 1.0);
-    rot_alg->setProperty("Y", 0.0);
-    rot_alg->setProperty("Z", 0.0);
-    rot_alg->setProperty("Angle", drotx);
-    rot_alg->setProperty("RelativeRotation", true);
-    rot_alg->executeAsChildAlg();
-    //-- rotAngY@(0,1,0)
-    rot_alg->initialize();
-    rot_alg->setLogging(LOGCHILDALG);
-    rot_alg->setProperty("Workspace", ws);
-    rot_alg->setProperty("ComponentName", cmptName);
-    rot_alg->setProperty("X", 0.0);
-    rot_alg->setProperty("Y", 1.0);
-    rot_alg->setProperty("Z", 0.0);
-    rot_alg->setProperty("Angle", droty);
-    rot_alg->setProperty("RelativeRotation", true);
-    rot_alg->executeAsChildAlg();
-    //-- rotAngZ@(0,0,1)
-    rot_alg->initialize();
-    rot_alg->setLogging(LOGCHILDALG);
-    rot_alg->setProperty("Workspace", ws);
-    rot_alg->setProperty("ComponentName", cmptName);
-    rot_alg->setProperty("X", 0.0);
-    rot_alg->setProperty("Y", 0.0);
-    rot_alg->setProperty("Z", 1.0);
-    rot_alg->setProperty("Angle", drotz);
-    rot_alg->setProperty("RelativeRotation", true);
-    rot_alg->executeAsChildAlg();
   }
 
   /**
