@@ -113,6 +113,13 @@ BACK/M[n]/TIMES x y
         spectrum_number = 1
         background = [30000.0, 40000.0]
 
+COMPATIBILITY ON
+----------------
+
+**Replacement**
+Unsupported
+
+
 DET/CORR [FRONT][REAR] [X][Y][Z][ROT] a
 ---------------------------------------
 
@@ -224,6 +231,54 @@ FIT/TRANS/LIN x y
         parameters = {lambda_min = 3.0, lambda_max = 11.0}
         function = "Linear"
 
+GRAVITY/ON
+----------
+
+**Replacement**
+
+..  code-block:: none
+
+    [gravity]
+      enabled = true
+
+**Existing Example**
+
+..  code-block:: none
+
+    GRAVITY/ON
+
+**Existing Replacement**
+
+..  code-block:: none
+
+    [gravity]
+      enabled = true
+
+GRAVITY/LEXTRA x
+----------------
+
+**Replacement**
+
+..  code-block:: none
+
+    [instrument.configuration]
+      gravity_extra_length = x
+
+**Existing Example**
+
+..  code-block:: none
+
+    GRAVITY/LEXTRA 2.0
+
+**Existing Replacement**
+
+..  code-block:: none
+
+    [instrument.configuration]
+      gravity_extra_length = 2.0
+
+
+
 L/EVENTSTIME str
 ----------------
 
@@ -245,7 +300,7 @@ L/EVENTSTIME str
 ..  code-block:: none
 
   [reduction.events]
-    # A negative step indicates Log
+    # A negative step (middle val) indicates Log
     binning = "7000.0,500.0,60000.0"
 
 
@@ -423,6 +478,9 @@ L/WAV min max step [/LIN]
 ..  code-block:: none
 
     wavelength = {start = min, step = step, stop = max, type = "Lin"}
+    # Alternative for ranges
+    wavelength = {binning = "min,max", step = step, type = "RangeLin"}
+
 
 **Existing Example**
 
@@ -435,8 +493,10 @@ L/WAV min max step [/LIN]
 ..  code-block:: none
 
     [binning]
-      #type can only be "Lin", "Log"
+      # Only for "Lin", "Log"
       wavelength = {start = 2.0, step=0.125, stop=14.0, type = "Lin"}
+      # Only for "RangeLin" or "RangeLog
+      wavelength = {binning="2.0-7.0, 7.0-14.0", type = "RangeLin"}
 
 MASKFILE str
 ------------
@@ -755,6 +815,52 @@ MON [/TRANS] /SPECTRUM=n [/INTERPOLATE]
     [normalisation.monitor.M1]
       spectrum_number = 1
 
+QRESOL[/ON][/OFF]
+-----------------
+
+**Replacement**
+
+..  code-block:: none
+
+  [q_resolution]
+    enabled = true  # Or false
+
+**Existing Example:**
+
+..  code-block:: none
+
+    QRESOL/ON
+
+**Existing Replacement**
+
+..  code-block:: none
+
+  [q_resolution]
+    enabled = true  # Or false
+
+SAMPLE/OFFSET x
+---------------
+
+**Replacement**
+
+..  code-block:: none
+
+  [instrument.configuration]
+    sample_offset = n
+
+**Existing Example:**
+
+..  code-block:: none
+
+    SAMPLE/OFFSET -60
+
+**Existing Replacement**
+
+..  code-block:: none
+
+  [instrument.configuration]
+    sample_offset = -0.06
+
 
 set centre a b c d
 ------------------
@@ -865,28 +971,5 @@ TUBECALIBFILE=str
 
   [detector.calibration.tube]
     file = "Tube.nxs"
-
-QRESOL[/ON][/OFF]
------------------
-
-**Replacement**
-
-..  code-block:: none
-
-  [q_resolution]
-    enabled = true  # Or false
-
-**Existing Example:**
-
-..  code-block:: none
-
-    QRESOL/ON
-
-**Existing Replacement**
-
-..  code-block:: none
-
-  [q_resolution]
-    enabled = true  # Or false
 
 .. categories:: Techniques

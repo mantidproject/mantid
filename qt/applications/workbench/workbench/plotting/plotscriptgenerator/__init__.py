@@ -57,7 +57,8 @@ def generate_script(fig, exclude_headers=False):
     :return: A String. A script to recreate the given figure
     """
     plot_commands = []
-    plot_headers = ['import matplotlib.pyplot as plt']
+    plot_headers = ['import matplotlib.pyplot as plt', "from mantid.plots.utility import MantidAxType"]
+
     for ax in fig.get_axes():
         if not isinstance(ax, MantidAxes):
             continue

@@ -15,6 +15,7 @@ set(TEST_PY_FILES
     CalculateSampleTransmissionTest.py
     CheckForSampleLogsTest.py
     ConjoinSpectraTest.py
+    ConvertQtoHKLMDHistoTest.py
     ConvertWANDSCDtoQTest.py
     CompareSampleLogsTest.py
     ComputeCalibrationCoefVanTest.py
@@ -50,6 +51,7 @@ set(TEST_PY_FILES
     HB3AAdjustSampleNormTest.py
     HB3AFindPeaksTest.py
     HB3AIntegratePeaksTest.py
+    HB3APredictPeaksTest.py
     HFIRSANS2WavelengthTest.py
     IndirectTransmissionTest.py
     IndexSatellitePeaksTest.py
@@ -92,6 +94,7 @@ set(TEST_PY_FILES
     SaveGEMMAUDParamFileTest.py
     SaveNexusPDTest.py
     SaveGSSCWTest.py
+    SaveHKLCWTest.py
     SavePlot1DAsJsonTest.py
     SaveReflectionsTest.py
     ExtractMonitorsTest.py

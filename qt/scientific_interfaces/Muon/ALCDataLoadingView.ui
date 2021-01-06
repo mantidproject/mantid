@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>943</width>
-    <height>543</height>
+    <height>615</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -84,7 +84,7 @@
            </layout>
           </item>
           <item>
-           <layout class="QGridLayout" name="pathLayout" columnstretch="1,10,0">
+           <layout class="QGridLayout" name="pathLayout" columnstretch="1,10">
             <property name="leftMargin">
              <number>9</number>
             </property>
@@ -168,7 +168,7 @@
            <widget class="MantidQt::MantidWidgets::LogValueSelector" name="logValueSelector" native="true"/>
           </item>
           <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_5">
+           <layout class="QHBoxLayout" name="loadLayout">
             <property name="leftMargin">
              <number>0</number>
             </property>
@@ -339,14 +339,14 @@
            </layout>
           </item>
           <item>
-           <layout class="QHBoxLayout" name="horizontalLayoutGrouping_2">
+           <layout class="QHBoxLayout" name="horizontalLayoutGrouping_2" stretch="0,7,7">
             <item>
              <widget class="QLabel" name="labelForward">
               <property name="enabled">
                <bool>false</bool>
               </property>
               <property name="text">
-               <string>Forward:</string>
+               <string>Forward:  </string>
               </property>
              </widget>
             </item>
@@ -357,6 +357,23 @@
               </property>
              </widget>
             </item>
+            <item>
+             <spacer name="horizontalSpacer_6">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_7" stretch="0,6,1,0,2">
             <item>
              <widget class="QLabel" name="labelBackward">
               <property name="enabled">
@@ -374,7 +391,59 @@
               </property>
              </widget>
             </item>
+            <item>
+             <spacer name="horizontalSpacer_5">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QLabel" name="alphaLabel">
+              <property name="toolTip">
+               <string>The balance parameter for the back spectra</string>
+              </property>
+              <property name="text">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Alpha:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="alpha">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+             </widget>
+            </item>
            </layout>
+          </item>
+          <item>
+           <widget class="QLabel" name="alphaMessage">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="text">
+             <string>Alpha is only avaiable with single period data</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+           </widget>
           </item>
          </layout>
         </widget>
@@ -774,8 +843,8 @@
   </connection>
  </connections>
  <buttongroups>
-  <buttongroup name="calculationType"/>
-  <buttongroup name="detectorGroupingType"/>
   <buttongroup name="deadTimeCorrType"/>
+  <buttongroup name="detectorGroupingType"/>
+  <buttongroup name="calculationType"/>
  </buttongroups>
 </ui>

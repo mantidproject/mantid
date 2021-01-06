@@ -274,7 +274,7 @@ if [[ ${DO_BUILD_PKG} == true ]]; then
             echo "Using PACKAGE_SUFFIX=${PACKAGE_SUFFIX} from job parameter"
         elif [[ ${JOB_NAME} == release* ]]; then  # starts with "release"
             PACKAGE_SUFFIX=""
-        elif [[ ${JOB_NAME} == ornl ]]; then
+        elif [[ ${JOB_NAME} == ornl-stable ]]; then
             PACKAGE_SUFFIX=""
         elif [[ ${JOB_NAME} == ornl-qa ]]; then
             PACKAGE_SUFFIX="qa"

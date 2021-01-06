@@ -24,7 +24,6 @@ from unittest import mock  # noqa
 from mantidqt.project import projectloader, projectsaver  # noqa
 from mantidqt.utils.qt.testing import start_qapplication  # noqa
 
-
 project_file_ext = ".mtdproj"
 working_directory = tempfile.mkdtemp()
 working_project_file = join(working_directory, "temp" + project_file_ext)
@@ -66,7 +65,7 @@ class ProjectLoaderTest(unittest.TestCase):
 
         loader.workspace_loader = mock.MagicMock()
 
-        loader.load_project(working_directory, load_workspaces=False)
+        loader.load_project(working_project_file, load_workspaces=False)
         self.assertEqual(0, loader.workspace_loader.load_workspaces.call_count)
 
 
@@ -101,7 +100,7 @@ class ProjectReaderTest(unittest.TestCase):
             f.write(mantidplot_project_partial)
         project_reader = projectloader.ProjectReader(project_file_ext)
         project_reader.read_project(mplot_project_file)
-        self.assertEqual(["ws1","ws2"], project_reader.workspace_names)
+        self.assertEqual(["ws1", "ws2"], project_reader.workspace_names)
 
 
 if __name__ == "__main__":
