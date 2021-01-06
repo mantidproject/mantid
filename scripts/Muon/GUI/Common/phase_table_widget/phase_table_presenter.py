@@ -12,7 +12,8 @@ from mantidqt.utils.observer_pattern import Observable, GenericObserver, Generic
 import re
 from Muon.GUI.Common.ADSHandler.workspace_naming import get_phase_table_workspace_name, \
     get_fitting_workspace_name, get_base_data_directory, \
-    get_run_number_from_workspace_name
+    get_run_number_from_workspace_name, \
+    get_run_numbers_as_string_from_workspace_name
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 from Muon.GUI.Common.utilities.run_string_utils import valid_name_regex
 import mantid
@@ -183,7 +184,7 @@ class PhaseTablePresenter(object):
         return parameters['DetectorTable']
 
     def add_phase_table_to_ADS(self, base_name):
-        run = re.search('[0-9]+', base_name).group()
+        run = get_run_numbers_as_string_from_workspace_name(base_name, self.context.data_context.instrument)
 
         directory = get_base_data_directory(self.context, run)
         muon_workspace_wrapper = MuonWorkspaceWrapper(directory + base_name)

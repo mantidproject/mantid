@@ -202,7 +202,7 @@ def get_first_run_from_run_string(run_string):
     index_1 = run_string.find('-')
     index_2 = run_string.find(',')
     if index_1 != -1 and index_2 != -1:
-        index = index_1 if index_1 < index_2 else index_2
+        index = min(index_1, index_2)
     elif index_1 != -1:
         index = index_1
     elif index_2 != -1:
