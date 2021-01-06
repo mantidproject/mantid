@@ -73,7 +73,7 @@ DEFAULTS = {
         'position': (10, 10),
     },
     'AdditionalWindows': {
-        'behaviour': "ontop"
+        'behaviour': "On top"
     },
     'project': {
         'prompt_save_on_close': True,
@@ -95,7 +95,7 @@ def get_window_config():
     """
     try:
         windows_behaviour = CONF.get("AdditionalWindows", "behaviour", type=str)
-        windows_on_top = True if windows_behaviour == "ontop" else False
+        windows_on_top = True if windows_behaviour == "On top" else False
     except KeyError:
         windows_on_top = False
     if windows_on_top:
