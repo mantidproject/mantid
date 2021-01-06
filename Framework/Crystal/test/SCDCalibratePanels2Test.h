@@ -425,12 +425,10 @@ public:
 
     // Check if the calibration returns the same instrument as we put in
     g_log.notice() << "-- validate calibration output\n";
-    TS_ASSERT(validateCalibrationResults(pwsref, wsraw, isawFile.string()));
+    TS_ASSERT(validateCalibrationResults(pwsref, wsraw, xmlFile.string()));
 
     // Cleanup
     doCleanup();
-
-    // TS_ASSERT(false);
   }
 
 private:
@@ -651,21 +649,21 @@ private:
                                   MatrixWorkspace_sptr refws,
                                   const std::string &fileName) {
     // Adjust components in reference workspace using calibration results
-    // IAlgorithm_sptr lpf_alg =
-    //     AlgorithmFactory::Instance().create("LoadParameterFile", 1);
-    // lpf_alg->initialize();
-    // lpf_alg->setLogging(LOGCHILDALG);
-    // lpf_alg->setProperty("Workspace", refws);
-    // lpf_alg->setProperty("Filename", fileName);
-    // TS_ASSERT(lpf_alg->execute());
-
     IAlgorithm_sptr lpf_alg =
-        AlgorithmFactory::Instance().create("LoadIsawDetCal", 1);
+        AlgorithmFactory::Instance().create("LoadParameterFile", 1);
     lpf_alg->initialize();
     lpf_alg->setLogging(LOGCHILDALG);
-    lpf_alg->setProperty("InputWorkspace", refws);
+    lpf_alg->setProperty("Workspace", refws);
     lpf_alg->setProperty("Filename", fileName);
     lpf_alg->execute();
+
+    // IAlgorithm_sptr lpf_alg =
+    //     AlgorithmFactory::Instance().create("LoadIsawDetCal", 1);
+    // lpf_alg->initialize();
+    // lpf_alg->setLogging(LOGCHILDALG);
+    // lpf_alg->setProperty("InputWorkspace", refws);
+    // lpf_alg->setProperty("Filename", fileName);
+    // lpf_alg->execute();
 
     // compare each bank
     // -- get the names

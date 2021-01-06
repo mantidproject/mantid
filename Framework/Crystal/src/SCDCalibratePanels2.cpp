@@ -507,8 +507,10 @@ namespace Crystal {
       // Prepare data for node
       if (instrument->getName().compare("CORELLI") == 0)
         bankName.append("/sixteenpack");
+
       std::shared_ptr<const IComponent> bank =
           instrument->getComponentByName(bankName);
+
       Quat relRot = bank->getRelativeRot();
       std::vector<double> relRotAngles = relRot.getEulerAngles("XYZ");
       V3D pos1 = bank->getRelativePos();
@@ -533,9 +535,9 @@ namespace Crystal {
       bank_dy.put("<xmlattr>.name", "y");
       bank_dz.put("<xmlattr>.name", "z");
 
-      bank_drotx_val.put("<xmlattr>.val", relRot[0]);
-      bank_droty_val.put("<xmlattr>.val", relRot[1]);
-      bank_drotz_val.put("<xmlattr>.val", relRot[2]);
+      bank_drotx_val.put("<xmlattr>.val", relRotAngles[0]);
+      bank_droty_val.put("<xmlattr>.val", relRotAngles[1]);
+      bank_drotz_val.put("<xmlattr>.val", relRotAngles[2]);
       bank_drotx.put("<xmlattr>.name", "rotx");
       bank_droty.put("<xmlattr>.name", "roty");
       bank_drotz.put("<xmlattr>.name", "rotz");
@@ -560,6 +562,7 @@ namespace Crystal {
       bank_sy.add_child("value", bank_sy_val);
 
       bank_root.add_child("parameter", bank_drotx);
+
       bank_root.add_child("parameter", bank_droty);
       bank_root.add_child("parameter", bank_drotz);
       bank_root.add_child("parameter", bank_dx);
