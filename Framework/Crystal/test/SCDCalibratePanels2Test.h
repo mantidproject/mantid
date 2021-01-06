@@ -80,10 +80,10 @@ public:
         dspacing_min(1.0), dspacing_max(10.0),   //
         wavelength_min(0.1), wavelength_max(10), //
         omega_step(3.0),                         //
-        TOLERANCE_L(1e-16), // this calibration has intrinsic accuracy limit of
-                            // 1mm for translation
-        TOLERANCE_R(1e-8),  // this calibration has intrinsic accuracy limit of
-                            // 1e-4 deg for rotation
+        TOLERANCE_L(5e-5),   // this calibration has intrinsic accuracy limit of
+                             // 1mm for translation
+        TOLERANCE_R(5e-3), // this calibration has intrinsic accuracy limit of
+                             // 1e-3 deg for rotation
         LOGCHILDALG(false) {
     // NOTE:
     //  The MAGIC PIECE, basically we need to let AlgorithmFactory
@@ -267,7 +267,7 @@ public:
    * @brief Moving (rotation and translation) single panel
    *
    */
-  void test_bank_moved() {
+  void run_bank_moved() {
     g_log.notice() << "test: !single bank moved!\n";
 
     g_log.notice() << "Tolerance of Distance (meter) :" << TOLERANCE_L << "\n";
@@ -317,9 +317,7 @@ public:
         << "    quat(rel) = "
         << pws->getInstrument()->getComponentByName(bank_xtop)->getRelativeRot()
         << "\n";
-    Quat q0 = pws->getInstrument()
-                  ->getComponentByName(bank_xtop)
-                  ->getRelativeRot(); // this is the answer
+
     pws->setInstrument(wsraw->getInstrument());
     g_log.notice()
         << "    * after reset x(top) - bank73:\n"
@@ -427,12 +425,12 @@ public:
 
     // Check if the calibration returns the same instrument as we put in
     g_log.notice() << "-- validate calibration output\n";
-    TS_ASSERT(validateCalibrationResults(pwsref, wsraw, xmlFile.string()));
-
-    TS_ASSERT(false);
+    TS_ASSERT(validateCalibrationResults(pwsref, wsraw, isawFile.string()));
 
     // Cleanup
     doCleanup();
+
+    // TS_ASSERT(false);
   }
 
 private:
@@ -651,23 +649,32 @@ private:
    */
   bool validateCalibrationResults(PeaksWorkspace_sptr refpws,
                                   MatrixWorkspace_sptr refws,
-                                  const std::string &xmlFileName) {
+                                  const std::string &fileName) {
     // Adjust components in reference workspace using calibration results
+    // IAlgorithm_sptr lpf_alg =
+    //     AlgorithmFactory::Instance().create("LoadParameterFile", 1);
+    // lpf_alg->initialize();
+    // lpf_alg->setLogging(LOGCHILDALG);
+    // lpf_alg->setProperty("Workspace", refws);
+    // lpf_alg->setProperty("Filename", fileName);
+    // TS_ASSERT(lpf_alg->execute());
+
     IAlgorithm_sptr lpf_alg =
-        AlgorithmFactory::Instance().create("LoadParameterFile", 1);
+        AlgorithmFactory::Instance().create("LoadIsawDetCal", 1);
     lpf_alg->initialize();
     lpf_alg->setLogging(LOGCHILDALG);
-    lpf_alg->setProperty("Workspace", refws);
-    lpf_alg->setProperty("Filename", xmlFileName);
-    TS_ASSERT(lpf_alg->execute());
+    lpf_alg->setProperty("InputWorkspace", refws);
+    lpf_alg->setProperty("Filename", fileName);
+    lpf_alg->execute();
 
     // compare each bank
     // -- get the names
     boost::container::flat_set<std::string> BankNames;
     for (int i = 0; i < refpws->getNumberPeaks(); ++i) {
       std::string bname = refpws->getPeak(i).getBankName();
-      if (bname != "None")
+      if (bname != "None"){
         BankNames.insert(bname);
+      }
     }
     // -- perform per bank comparison
     Instrument_sptr inst1 = std::const_pointer_cast<Instrument>(
@@ -675,10 +682,15 @@ private:
     Instrument_sptr inst2 = std::const_pointer_cast<Instrument>(
         refpws->getInstrument()); // reference one
 
+    bool sameInstrument = true;
     for (auto bankname : BankNames) {
+      // update bankname for CORELLI
+      if (refpws->getInstrument()->getName().compare("CORELLI") == 0)
+          bankname.append("/sixteenpack");
+
       if (!compareComponent(inst1, inst2, bankname)) {
         g_log.error() << "--" << bankname << " mismatch\n";
-        return false;
+        sameInstrument = false;
       }
     }
 
@@ -686,10 +698,10 @@ private:
     if (!compareComponent(inst1, inst2, inst1->getSource()->getName())) {
         g_log.error() << "-- " << inst1->getSource()->getName()
                       << " mismatch\n";
-        return false;
+        sameInstrument = false;
       }
 
-    return true;
+    return sameInstrument;
   }
 
   /**
@@ -719,13 +731,34 @@ private:
 
     q2.inverse();
     Quat dq = q1 * q2;
-    double ang, ax0, ax1, ax2;
-    dq.getAngleAxis(ang, ax0, ax1, ax2); // what is the unit of this angle?
+    double dang = (2*acos(dq.real())/PI*180);
+    dang = dang>180 ? 360-dang : dang;
 
-    return (std::abs(p1.X() - p2.X()) < TOLERANCE_L) &&
-           (std::abs(p1.Y() - p2.Y()) < TOLERANCE_L) &&
-           (std::abs(p1.Z() - p2.Z()) < TOLERANCE_L) &&
-           (std::abs(ang) < TOLERANCE_R);
+    double dx = std::abs(p1.X() - p2.X());
+    double dy = std::abs(p1.Y() - p2.Y());
+    double dz = std::abs(p1.Z() - p2.Z());
+
+    bool sameComponent;
+    if (dx > TOLERANCE_L || dy > TOLERANCE_L || dz > TOLERANCE_L ||
+        dang > TOLERANCE_R) {
+      sameComponent = false;
+    } else {
+      sameComponent = true;
+    }
+
+    if (!sameComponent)
+      g_log.notice() << std::setprecision(8)
+                     << "--Component " << componentName << "\n"
+                     << "  cali: " << p1 << "\n"
+                     << "  ref: " << p2 << "\n"
+                     << "    dx = " << dx << "\n"
+                     << "    dy = " << dy << "\n"
+                     << "    dz = " << dz << "\n"
+                     << "  cali: " << cmpt1->getRelativeRot() << "\n"
+                     << "  ref: " << cmpt2->getRelativeRot() << "\n"
+                     << "    misorientation = " << dang << "\n";
+
+    return sameComponent;
   }
 
   /**
