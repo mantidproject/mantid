@@ -165,39 +165,10 @@ namespace Crystal {
     // STEP_2: optimize T0,L1,L2,etc.
     if (calibrateT0)
       optimizeT0(m_pws);
-
-    if (calibrateL1 && calibrateBanks) {
-      double l1 = -m_pws->getInstrument()->getSource()->getPos().Z();
-      double dl1 = 1;
-      int niter = 1;
-      do {
-        optimizeL1(m_pws);
-        optimizeBanks(m_pws);
-        dl1 = std::abs(-m_pws->getInstrument()->getSource()->getPos().Z() - l1);
-        l1 = -m_pws->getInstrument()->getSource()->getPos().Z();
-        // logging
-        g_log.notice() << "--@iter_" << niter << "\n"
-                       << "    l1 = " << l1 << "\n"
-                       << "    dl1 = " << dl1 << "\n";
-
-        niter++;
-        if (niter > 100)
-          break;
-      } while (dl1 > m_tolerance_translation);
-      // NOTE: two iter is the sweet spot
-      // for (int i = 0; i < 2; ++i){
-      //   optimizeL1(m_pws);
-      //   optimizeBanks(m_pws);
-      // }
-
-    }
-    else {
-      if (calibrateL1)
-        optimizeL1(m_pws);
-      if (calibrateBanks)
-        optimizeBanks(m_pws);
-    }
-
+    if (calibrateL1)
+      optimizeL1(m_pws);
+    if (calibrateBanks)
+      optimizeBanks(m_pws);
 
     // STEP_3: Write to disk if required
     Instrument_sptr instCalibrated =
@@ -383,20 +354,23 @@ namespace Crystal {
 
       //-- step 4: update the instrument with optimization results
       //           if the fit results are above the tolerance/threshold
+      std::string bn = bankname;
+      if (pws->getInstrument()->getName().compare("CORELLI") == 0)
+        bn.append("/sixteenpack");
       if ((std::abs(dx) < m_tolerance_translation) &&
           (std::abs(dy) < m_tolerance_translation) &&
           (std::abs(dz) < m_tolerance_translation) &&
           (std::abs(rotang) < m_tolerance_rotation)) {
         // skip the adjustment of the component as it is juat noise
-        g_log.notice() << "-- Fit " << bankname
+        g_log.notice() << "-- Fit " << bn
                        << " results below tolerance, skippping\n";
       } else {
         double rvx = sin(theta) * cos(phi);
         double rvy = sin(theta) * sin(phi);
         double rvz = cos(theta);
-        adjustComponent(dx, dy, dz, rvx, rvy, rvz, rotang, bankname, pws);
-        g_log.notice() << "-- Fit " << bankname << " results using "
-                       << nBankPeaks << " peaks:\n"
+        adjustComponent(dx, dy, dz, rvx, rvy, rvz, rotang, bn, pws);
+        g_log.notice() << "-- Fit " << bn << " results using " << nBankPeaks
+                       << " peaks:\n"
                        << "    d(x,y,z) = (" << dx << "," << dy << "," << dz
                        << ")\n"
                        << "    rotang(rx,ry,rz) =" << rotang << "(" << rvx
@@ -469,7 +443,6 @@ namespace Crystal {
     // orientation
     IAlgorithm_sptr rot_alg = Mantid::API::AlgorithmFactory::Instance().create(
         "RotateInstrumentComponent", -1);
-    //-- rotAngX@(1,0,0)
     rot_alg->initialize();
     rot_alg->setChild(true);
     rot_alg->setLogging(LOGCHILDALG);
