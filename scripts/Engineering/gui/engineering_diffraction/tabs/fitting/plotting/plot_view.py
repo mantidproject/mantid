@@ -45,6 +45,7 @@ class FittingPlotView(QtWidgets.QWidget, Ui_plot):
         self.figure.add_subplot(111, projection="mantid")
         self.figure.tight_layout()
         self.toolbar = FittingPlotToolbar(self.figure.canvas, self, False)
+        self.toolbar.setMovable(False)
 
         self.dock_window = QMainWindow(self.group_plot)
         self.dock_window.setWindowFlags(Qt.Widget)
