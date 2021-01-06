@@ -73,7 +73,7 @@ bool FitDomain::setStartX(double startX) {
 }
 
 bool FitDomain::setEndX(double endX) {
-  auto const validEndX = isValidStartX(endX);
+  auto const validEndX = isValidEndX(endX);
   if (validEndX)
     m_endX = endX;
   return validEndX;
@@ -141,7 +141,7 @@ void FitDomain::addFunctionToExisting(IFunction_sptr const &function) {
 
 void FitDomain::setParameterValue(std::string const &parameter,
                                   double newValue) {
-  if (hasParameter(parameter))
+  if (hasParameter(parameter) && isValidParameterValue(parameter, newValue))
     m_function->setParameter(parameter, newValue);
 }
 
@@ -221,6 +221,17 @@ void FitDomain::updateParameterConstraint(CompositeFunction_sptr &composite,
     if (function->hasParameter(parameter))
       function->addConstraints(constraint);
   }
+}
+
+bool FitDomain::isValidParameterValue(std::string const &parameter,
+                                      double value) const {
+  auto const parameterIndex = m_function->parameterIndex(parameter);
+  if (auto const constraint = m_function->getConstraint(parameterIndex)) {
+    auto const limits = splitConstraintString(constraint->asString()).second;
+    return limits.first.toDouble() <= value &&
+           value <= limits.second.toDouble();
+  }
+  return true;
 }
 
 bool FitDomain::isValidStartX(double startX) const {

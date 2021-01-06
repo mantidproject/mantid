@@ -61,6 +61,8 @@ public:
 private:
   bool setParameterTie(std::string const &parameter, std::string const &tie);
 
+  [[nodiscard]] bool isValidParameterValue(std::string const &parameter,
+                                           double value) const;
   [[nodiscard]] bool isValidStartX(double startX) const;
   [[nodiscard]] bool isValidEndX(double endX) const;
   std::pair<double, double> xLimits() const;

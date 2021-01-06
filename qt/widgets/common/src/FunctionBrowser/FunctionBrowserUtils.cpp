@@ -63,6 +63,11 @@ std::pair<QString, int> splitFunctionPrefix(const QString &prefix) {
 }
 
 std::pair<QString, std::pair<QString, QString>>
+splitConstraintString(const std::string &constraint) {
+  return splitConstraintString(QString::fromStdString(constraint));
+}
+
+std::pair<QString, std::pair<QString, QString>>
 splitConstraintString(const QString &constraint) {
   std::pair<QString, std::pair<QString, QString>> error;
   if (constraint.isEmpty())

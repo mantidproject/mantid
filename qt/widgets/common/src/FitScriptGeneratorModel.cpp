@@ -11,7 +11,6 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/ParameterTie.h"
 #include "MantidKernel/Logger.h"
 
 #include <algorithm>
@@ -320,10 +319,8 @@ void FitScriptGeneratorModel::updateParameterConstraint(
     std::string const &functionIndex, std::string const &constraint) {
   auto const domainIndex = findDomainIndex(workspaceName, workspaceIndex);
 
-  auto const constraintSplit =
-      splitConstraintString(QString::fromStdString(constraint));
-
-  auto const parameterName = constraintSplit.first.toStdString();
+  auto const parameterName =
+      splitConstraintString(constraint).first.toStdString();
   m_fitDomains[domainIndex].updateParameterConstraint(
       getAdjustedFunctionIndex(functionIndex), parameterName, constraint);
 }

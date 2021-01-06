@@ -45,6 +45,8 @@ splitFunctionPrefix(const QString &prefix);
 /// Split a constraint definition into a parameter name and a pair of bounds,
 /// for example -1 < f0.A1 < 2 ==> (f0.A1, (-1, 2))
 EXPORT_OPT_MANTIDQT_COMMON std::pair<QString, std::pair<QString, QString>>
+splitConstraintString(const std::string &constraint);
+EXPORT_OPT_MANTIDQT_COMMON std::pair<QString, std::pair<QString, QString>>
 splitConstraintString(const QString &constraint);
 
 /// Checks if a string contains a number, or whether it contains characters
