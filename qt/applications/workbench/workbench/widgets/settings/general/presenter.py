@@ -44,7 +44,7 @@ class GeneralSettings(object):
     be handled here.
     """
 
-    WINDOW_BEHAVIOUR = ["ontop", "floating"]
+    WINDOW_BEHAVIOUR = ["On top", "Floating"]
 
     def __init__(self, parent, view=None, settings_presenter=None):
         self.view = view if view else GeneralSettingsView(parent, self)
