@@ -330,39 +330,12 @@ public:
     runCalibration(isawFile.string(), xmlFile.string(), pws, false, false,
                    true);
 
-    // Quat q1 = pws->getInstrument()
-    //               ->getComponentByName(bank_xtop)
-    //               ->getRelativeRot(); // this is calibration results
-    // Quat qq = pws->getInstrument()
-    //               ->getComponentByName(bank_xtop)
-    //               ->getRelativeRot(); // this is calibration results
-
-    // qq.inverse();
-    // Quat dq = q0 * qq;
-    // double ra, rx, ry, rz;
-    // dq.getAngleAxis(ra, rx, ry, rz);
-
-    // g_log.notice()
-    //     << "    * after calibration x(top) - bank73:\n"
-    //     << "    pos(abs) = "
-    //     << pws->getInstrument()->getComponentByName(bank_xtop)->getPos() <<
-    //     "\n"
-    //     << "    quat(rel) = "
-    //     <<
-    //     pws->getInstrument()->getComponentByName(bank_xtop)->getRelativeRot()
-    //     << "\n"
-    //     << "    q_prescribed = " << q0 << "\n"
-    //     << "    q_calibrated = " << q1 << "\n"
-    //     << "    rotation wise off by: " << ra << " deg\n";
-
     // Check if the calibration returns the same instrument as we put in
     g_log.notice() << "-- validate calibration output\n";
     TS_ASSERT(validateCalibrationResults(pwsref, wsraw, xmlFile.string()));
 
     // Cleanup
     doCleanup();
-
-    TS_ASSERT(false);
   }
 
   /**

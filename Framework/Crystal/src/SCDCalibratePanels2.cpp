@@ -367,7 +367,6 @@ namespace Crystal {
       fitBank_alg->setProperty("Ties", tie_str.str());
       fitBank_alg->setProperty("Constraints", constraint_str.str());
       fitBank_alg->setProperty("InputWorkspace", wsBankCali);
-      // fitBank_alg->setProperty("Minimizer", "Simplex");
       fitBank_alg->setProperty("CreateOutput", true);
       fitBank_alg->setProperty("Output", "fit");
       fitBank_alg->executeAsChildAlg();

@@ -148,22 +148,6 @@ namespace Crystal {
     }
   }
 
-  // /**
-  //  * @brief function derivatives
-  //  *
-  //  * @param out      :: The output Jacobian matrix: function derivatives over its parameters
-  //  * @param xValues  :: feature vector [shiftx3, rotx3, T0]
-  //  * @param order    :: dimensionality of feature vector
-  //  */
-  // void SCDCalibratePanels2ObjFunc::functionDeriv1D(
-  //   API::Jacobian *out,
-  //   const double *xValues,
-  //   const size_t order) {
-  //   FunctionDomain1DView domain(xValues, order);
-  //   calNumericalDeriv(domain, *out);
-  // }
-
-
   // -------///
   // Helper ///
   // -------///

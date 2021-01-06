@@ -31,10 +31,6 @@ public:
   /// base objective function
   void function1D(double *out, const double *xValues, const size_t order) const override;
 
-  /// based 1st order derivative
-  // void functionDeriv1D(API::Jacobian *out, const double *xValues, const
-  // size_t order) override;
-
 private:
   /// temp workspace holder
   mutable std::shared_ptr<API::Workspace> m_ws;
