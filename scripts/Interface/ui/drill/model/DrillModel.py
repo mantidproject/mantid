@@ -501,19 +501,20 @@ class DrillModel(QObject):
         Args:
             sampleIndexes (list(int)): sample indexes
         """
-        groups = []
+        modifiedGroups = set()
         for i in sampleIndexes:
             sample = self.samples[i]
             for group in self.groups:
                 if sample in self.groups[group]:
                     self.groups[group].remove(sample)
-                    self.groupUpdated.emit(group)
-                    groups.append(group)
+                    modifiedGroups.add(group)
                 if ((group in self.masterSamples)
                         and (self.masterSamples[group] == sample)):
                     del self.masterSamples[group]
 
         self.groups = {k:v for k,v in self.groups.items() if v}
+        for group in modifiedGroups:
+            self.groupUpdated.emit(group)
 
     def setSamplesGroups(self, groups):
         """
