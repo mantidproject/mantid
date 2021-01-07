@@ -33,6 +33,7 @@ class PlotWidgetPresenterCommonTest(unittest.TestCase):
         self.model = mock.Mock(spec=PlotWidgetModel)
         self.view = mock.Mock(spec=PlotWidgetViewInterface)
         self.view.warning_popup = mock.MagicMock()
+        self.view.setEnabled = mock.MagicMock()
         self.external_plotting_model = mock.Mock(spec=ExternalPlottingModel)
         self.external_plotting_view = mock.Mock(spec=ExternalPlottingView)
         self.figure_presenter = mock.Mock(spec=PlottingCanvasPresenterInterface)
