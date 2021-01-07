@@ -225,7 +225,7 @@ class GroupingTabPresenter(object):
         self._model.clear()
         self.grouping_table_widget.update_view_from_model()
         self.pairing_table_widget.update_view_from_model()
-        self.update_description_text()
+        self.update_description_text(description_text=' ')
 
     def handle_new_data_loaded(self):
         if self._model.is_data_loaded():
