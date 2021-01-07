@@ -205,6 +205,8 @@ class SliceViewerViewTest(unittest.TestCase, QtWidgetFinder):
 
         renamed = RenameWorkspace(ws)  # noqa F841
 
+        QApplication.sendPostedEvents()
+
         # View didn't close
         self.assertTrue(pres.view in self.find_widgets_of_type(str(type(pres.view))))
         self.assertNotEqual(pres.ads_observer, None)
