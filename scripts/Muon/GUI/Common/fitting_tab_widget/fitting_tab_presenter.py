@@ -462,7 +462,8 @@ class FittingTabPresenter(object):
 
         self.reset_start_time_to_first_good_data_value()
         self.view.update_displayed_data_combo_box(self.selected_data)
-        self.update_model_from_view(fit_function=self._fit_function[0])
+        fitting_options = {"fit_function": self._fit_function[0], "startX": self.start_x[0], "endX": self.end_x[0]}
+        self.update_model_from_view(**fitting_options)
         self.update_fit_status_information_in_view()
 
     def clear_fit_information(self):
