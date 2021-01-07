@@ -1267,7 +1267,7 @@
            <number>0</number>
           </property>
           <property name="bottomMargin">
-           <number>7</number>
+           <number>3</number>
           </property>
           <item>
            <spacer name="horizontalSpacer_3">

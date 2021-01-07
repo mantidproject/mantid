@@ -23,7 +23,7 @@
       <property name="geometry">
        <rect>
         <x>0</x>
-        <y>0</y>
+        <y>-97</y>
         <width>966</width>
         <height>807</height>
        </rect>
@@ -290,7 +290,7 @@
            <number>0</number>
           </property>
           <property name="bottomMargin">
-           <number>7</number>
+           <number>3</number>
           </property>
           <item>
            <spacer name="horizontalSpacer_2">
