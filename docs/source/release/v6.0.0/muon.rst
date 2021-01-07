@@ -20,6 +20,7 @@ Improvements
 - Phasequads are now available for analysis in both GUI's.
 - Ticking co-add now works in the GUI's so you can analyse multiple runs as one run
 - Added some input validation to First and Last good Data in the Phase Table tab
+- When using co-add and creating a phasequad, the deadtime table will be taken from the first file only
 
 Bug fixes
 #########
