@@ -106,12 +106,15 @@ namespace Crystal {
     //       base value
     std::shared_ptr<API::Workspace> calc_ws = m_ws->clone();
 
-    // rotation
-    // NOTE: moderator should not be reoriented
-    rotateInstrumentComponentBy(vx, vy, vz, drotang, m_cmpt, calc_ws);
+    // NOTE: when optimizing T0, a none component will be passed in.
+    if (m_cmpt != "none/sixteenpack") {
+      // rotation
+      // NOTE: moderator should not be reoriented
+      rotateInstrumentComponentBy(vx, vy, vz, drotang, m_cmpt, calc_ws);
 
-    // translation
-    moveInstruentComponentBy(dx, dy, dz, m_cmpt, calc_ws);
+      // translation
+      moveInstruentComponentBy(dx, dy, dz, m_cmpt, calc_ws);
+    }
 
     // generate a flatten Q_sampleframe from calculated ws (by moving instrument component)
     // so that a direct comparison can be performed between measured and calculated

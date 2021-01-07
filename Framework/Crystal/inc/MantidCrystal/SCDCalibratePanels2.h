@@ -80,6 +80,9 @@ private:
   /// Private function for calibrating banks
   void optimizeBanks(std::shared_ptr<Mantid::DataObjects::PeaksWorkspace> pws);
 
+  /// Helper functions for adjusting T0 for all peaks
+  void adjustT0(double dT0, DataObjects::PeaksWorkspace_sptr &pws);
+
   /// Helper functions for adjusting components
   void adjustComponent(double dx, double dy, double dz, double rvx, double rvy,
                        double rvz, double rang, std::string cmptName,

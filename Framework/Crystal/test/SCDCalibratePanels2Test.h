@@ -172,11 +172,11 @@ public:
    * @brief Only adjust T0
    *
    */
-  void run_T0_Shift() {
+  void test_T0_Shift() {
     g_log.notice() << "test: !T0 Shift!\n";
 
     // prescribed shift
-    const double dT0 = boost::math::constants::e<double>() / 2;
+    const double dT0 = 11;
 
     // Generate unique temp files
     auto isawFile = boost::filesystem::temp_directory_path();
@@ -195,6 +195,27 @@ public:
 
     // Adjust T0
     adjustT0(dT0, pws);
+
+    // for (int i = 0; i < pws->getNumberPeaks(); ++i) {
+    //   Peak pk_before = pwsref->getPeak(i);
+    //   Peak pk_after = pws->getPeak(i);
+
+    //   g_log.notice() << "Peak_" << i << " with dT0=" << dT0 << "\n"
+    //                  << "  wavelength:" << pk_before.getWavelength() << "->"
+    //                  << pk_after.getWavelength() << "\n"
+    //                  << "  q:" << pk_before.getQSampleFrame() << "->"
+    //                  << pk_after.getQSampleFrame() << "\n";
+    // }
+
+    // T0 got absorbed into peak wavelength, therefore there is no need to reset
+    // the instrument
+    // Perform the calibration
+    g_log.notice() << "-- start calibration\n";
+    runCalibration(isawFile.string(), xmlFile.string(), pws, true, false,
+                   false);
+
+    // current no easy way to check the T0, we just need to read off the console
+    TS_ASSERT(false);
   }
 
   /**
@@ -346,7 +367,7 @@ public:
    * NOTE: not enough peaks on the y_panels, so we have to work with only the
    *       x_panels
    */
-  void test_Exec() {
+  void run_Exec() {
     g_log.notice() << "test: !calibrate L1 and two panels at the same time!\n";
 
     g_log.notice() << "Tolerance of Distance (meter) :" << TOLERANCE_L << "\n";
@@ -587,7 +608,7 @@ private:
    * @param dT0
    * @param pws
    */
-  void adjustT0(double dT0, PeaksWorkspace_sptr pws) {
+  void adjustT0(double dT0, PeaksWorkspace_sptr &pws) {
     // update the T0 record in peakworkspace
     Mantid::API::Run &run = pws->mutableRun();
     double T0 = 0.0;

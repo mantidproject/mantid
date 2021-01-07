@@ -10,6 +10,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ConstraintFactory.h"
 #include "MantidAPI/ExperimentInfo.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/Sample.h"
@@ -86,16 +87,11 @@ namespace Crystal {
     declareProperty("CalibrateL1", true, "Change the L1(source to sample) distance");
     declareProperty("CalibrateBanks", true, "Calibrate position and orientation of each bank.");
     // TODO:
+    //  - add support to ignore edge pixels (EdgePixels)
+    //  - add support for composite panels like SNAP (CalibrateSNAPPanels)
+    //  - add support for calibration panels with non-standard size (ChangePanelSize)
     //     Once the core functionality of calibration is done, we can consider adding the
     //     following control calibration parameters.
-    // declareProperty("EdgePixels", 0, "Remove peaks that are at pixels this close to edge. ");
-    // declareProperty("ChangePanelSize", true, 
-    //                 "Change the height and width of the "
-    //                 "detectors.  Implemented only for "
-    //                 "RectangularDetectors.");
-    // declareProperty("CalibrateSNAPPanels", false,
-    //                 "Calibrate the 3 X 3 panels of the "
-    //                 "sides of SNAP.");
     const std::string PARAMETERS("Calibration Parameters");
     setPropertyGroup("CalibrateT0" ,PARAMETERS);
     setPropertyGroup("CalibrateL1" ,PARAMETERS);
@@ -113,12 +109,10 @@ namespace Crystal {
                                         FileProperty::OptionalSave, ".xml"),
         "Path to an Mantid .xml description(for LoadParameterFile) file to "
         "save.");
-    // NOTE: we need to make some significant changes to the output interface considering
-    //       50% of the time is spent on writing to file for the version 1.
-    // Tentative options: all calibration output should be stored as a group workspace
-    //                    for interactive analysis
-    //  - peak positions comparison between theoretical and measured
-    //  - TOF comparision between theoretical and measured
+    // TODO:
+    //  - add option to output a CORELLI calibration table as output workspace
+    //  - add option to store intermedia calibration results for additional
+    //    analysis if needed
     const std::string OUTPUT("Output");
     setPropertyGroup("DetCalFilename", OUTPUT);
     setPropertyGroup("XmlFilename", OUTPUT);
@@ -235,7 +229,58 @@ namespace Crystal {
    * @param pws 
    */
   void SCDCalibratePanels2::optimizeT0(std::shared_ptr<PeaksWorkspace> pws){
+    // mocking a matrix workspace to store the target Qvectors
+    int npks = pws->getNumberPeaks();
+    MatrixWorkspace_sptr t0ws = std::dynamic_pointer_cast<MatrixWorkspace>(
+        WorkspaceFactory::Instance().create(
+            "Workspace2D", // use workspace 2D to mock a histogram
+            1,             // one vector
+            3 * npks,      // X :: anything is fine
+            3 * npks));    // Y :: flattened Q vector
+    // setting values to t0ws
+    auto &measured = t0ws->getSpectrum(0);
+    auto &xv = measured.mutableX();
+    auto &yv = measured.mutableY();
+    auto &ev = measured.mutableE();
 
+    for (int i = 0; i < npks; ++i) {
+      const Peak &pk = pws->getPeak(i);
+      V3D qv = pk.getQSampleFrame();
+      for (int j = 0; j < 3; ++j) {
+        xv[i * 3 + j] = i * 3 + j;
+        yv[i * 3 + j] = qv[j];
+        ev[i * 3 + j] = 1;
+      }
+    }
+
+    // create child Fit alg to optimize T0
+    IAlgorithm_sptr fitT0_alg = createChildAlgorithm("Fit", -1, -1, false);
+    //-- obj func def
+    std::ostringstream fun_str;
+    fun_str << "name=SCDCalibratePanels2ObjFunc,Workspace=" << pws->getName()
+            << ",ComponentName=none";
+    //-- bounds&constraints def
+    std::ostringstream tie_str;
+    tie_str << "dx=0.0,dy=0.0,dz=0.0,theta=1.0,phi=0.0,drotang=0.0";
+    //-- set&go
+    fitT0_alg->setPropertyValue("Function", fun_str.str());
+    fitT0_alg->setProperty("Ties", tie_str.str());
+    fitT0_alg->setProperty("InputWorkspace", t0ws);
+    fitT0_alg->setProperty("CreateOutput", true);
+    fitT0_alg->setProperty("Output", "fit");
+    fitT0_alg->executeAsChildAlg();
+    //-- parse output
+    std::string status = fitT0_alg->getProperty("OutputStatus");
+    double chi2OverDOF = fitT0_alg->getProperty("OutputChi2overDoF");
+    ITableWorkspace_sptr rst = fitT0_alg->getProperty("OutputParameters");
+    double dT0_optimized = rst->getRef<double>("Value", 6);
+    // update T0 for all peaks
+    adjustT0(dT0_optimized, pws);
+
+    //-- log
+    g_log.notice() << "-- Fit T0 results using " << npks << " peaks:\n"
+                   << "    dT0: " << dT0_optimized << " \n"
+                   << "    chi2/DOF = " << chi2OverDOF << "\n";
   }
 
   /**
@@ -476,6 +521,45 @@ namespace Crystal {
     }
   }
 
+  /**
+   * @brief shift T0 for both peakworkspace and all peaks
+   *
+   * @param dT0
+   * @param pws
+   */
+  void SCDCalibratePanels2::adjustT0(double dT0, PeaksWorkspace_sptr &pws) {
+    // update the T0 record in peakworkspace
+    Mantid::API::Run &run = pws->mutableRun();
+    double T0 = 0.0;
+    if (run.hasProperty("T0")) {
+      T0 = run.getPropertyValueAsType<double>("T0");
+    }
+    T0 += dT0;
+    run.addProperty<double>("T0", T0, true);
+
+    // update wavelength of each peak using new T0
+    for (int i = 0; i < pws->getNumberPeaks(); ++i) {
+      Peak &pk = pws->getPeak(i);
+      Units::Wavelength wl;
+      wl.initialize(pk.getL1(), pk.getL2(), pk.getScattering(), 0,
+                    pk.getInitialEnergy(), 0.0);
+      pk.setWavelength(wl.singleFromTOF(pk.getTOF() + dT0));
+    }
+  }
+
+  /**
+   * @brief adjust instrument component position and orientation
+   * 
+   * @param dx 
+   * @param dy 
+   * @param dz 
+   * @param rvx 
+   * @param rvy 
+   * @param rvz 
+   * @param rang 
+   * @param cmptName 
+   * @param pws 
+   */
   void
   SCDCalibratePanels2::adjustComponent(double dx, double dy, double dz,
                                        double rvx, double rvy, double rvz,
