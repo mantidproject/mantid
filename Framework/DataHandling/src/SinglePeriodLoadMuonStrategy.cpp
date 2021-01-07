@@ -94,6 +94,15 @@ Workspace_sptr SinglePeriodLoadMuonStrategy::loadDeadTimeTable() const {
   return createDeadTimeTable(m_detectors, deadTimes);
 }
 /**
+ * Gets time zero table from loaded time zeros
+ * @returns :: Time zero table
+ */
+Workspace_sptr SinglePeriodLoadMuonStrategy::getTimeZeroTable() {
+  const auto numSpec = m_workspace.getNumberHistograms();
+  auto timeZeros = m_nexusLoader.loadTimeZeroListFromNexusFile(numSpec);
+  return createTimeZeroTable(numSpec, timeZeros);
+}
+/**
  * Performs time-zero correction on the loaded workspace.
  */
 void SinglePeriodLoadMuonStrategy::applyTimeZeroCorrection() {

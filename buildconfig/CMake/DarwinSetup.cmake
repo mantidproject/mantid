@@ -1,4 +1,17 @@
-# ##############################################################################
+###########################################################################
+# Set installation variables
+###########################################################################
+set ( BIN_DIR bin )
+set ( ETC_DIR etc )
+set ( LIB_DIR lib )
+set ( SITE_PACKAGES ${LIB_DIR} )
+set ( PLUGINS_DIR plugins )
+
+set ( WORKBENCH_BIN_DIR ${BIN_DIR} )
+set ( WORKBENCH_LIB_DIR ${LIB_DIR} )
+set ( WORKBENCH_SITE_PACKAGES ${LIB_DIR} )
+set ( WORKBENCH_PLUGINS_DIR ${PLUGINS_DIR} )
+
 # Determine the version of macOS that we are running
 # ##############################################################################
 
@@ -122,7 +135,7 @@ if(NOT OPENSSL_ROOT_DIR)
 endif(NOT OPENSSL_ROOT_DIR)
 
 if(NOT HDF5_ROOT)
-  set(HDF5_ROOT /usr/local/opt/hdf5)
+    set(HDF5_ROOT /usr/local/opt/hdf5) # Only for homebrew! 
 endif()
 
 if(ENABLE_MANTIDPLOT OR ENABLE_WORKBENCH)
@@ -139,7 +152,7 @@ if(ENABLE_MANTIDPLOT OR ENABLE_WORKBENCH)
   set(MACOSX_BUNDLE_ICON_FILE MantidPlot.icns)
   string(REPLACE " " "" CPACK_SYSTEM_NAME ${MACOS_CODENAME})
 
-  if(ENABLE_MANTIDPLOT)
+  if(ENABLE_MANTIDPLOT AND NOT ENABLE_WORKBENCH)
     set(INBUNDLE MantidPlot.app/Contents/)
     # Copy the launcher script to the correct location
     configure_file(
@@ -180,7 +193,7 @@ if(ENABLE_MANTIDPLOT OR ENABLE_WORKBENCH)
     )
   endif()
 
-  if(ENABLE_WORKBENCH)
+  if(ENABLE_WORKBENCH AND NOT ENABLE_MANTIDPLOT)
     set(WORKBENCH_BUNDLE MantidWorkbench.app/Contents/)
     set(WORKBENCH_BIN_DIR ${WORKBENCH_BUNDLE}MacOS)
     set(WORKBENCH_LIB_DIR ${WORKBENCH_BUNDLE}MacOS)

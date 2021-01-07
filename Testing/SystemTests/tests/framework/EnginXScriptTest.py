@@ -39,7 +39,7 @@ class CreateCalibrationWholeTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
         _make_test_directories()
-        main(vanadium_run="236516", user="test", focus_run=None, do_cal=True, directory=cal_directory)
+        main(vanadium_run="236516", user="test", focus_run=None, do_cal=True, force_cal=True, directory=cal_directory)
 
     def validate(self):
         self.tolerance_is_rel_err = True
@@ -70,7 +70,7 @@ class CreateCalibrationCroppedTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
         _make_test_directories()
-        main(vanadium_run="236516", user="test", focus_run=None, do_cal=True, directory=cal_directory,
+        main(vanadium_run="236516", user="test", focus_run=None, do_cal=True, force_cal=True, directory=cal_directory,
              crop_type="spectra", crop_on="1-20")
 
     def validate(self):
@@ -80,9 +80,9 @@ class CreateCalibrationCroppedTest(systemtesting.MantidSystemTest):
         # this is neccesary due to appendspectra creating spectrum numbers of 0
         self.disableChecking.append('SpectraMap')
         if systemtesting.using_gsl_v1():
-            return ("cropped", "engggui_calibration_bank_cropped.nxs_gsl1.nxs",
+            return ("cropped", "engggui_calibration_bank_cropped_gsl1.nxs",
                     "engg_calibration_banks_parameters", "engggui_calibration_cropped_parameters_gsl1.nxs",
-                    "Engg difc Zero Peaks Bank cropped", "engggui_difc_zero_peaks_bank_cropped.nxs")
+                    "Engg difc Zero Peaks Bank cropped", "engggui_difc_zero_peaks_bank_cropped_gsl1.nxs")
         else:
             return ("cropped", "engggui_calibration_bank_cropped.nxs",
                     "engg_calibration_banks_parameters", "engggui_calibration_bank_cropped_parameters.nxs",
@@ -97,7 +97,7 @@ class CreateCalibrationBankTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
         _make_test_directories()
-        main(vanadium_run="236516", user="test", focus_run=None, do_cal=True, directory=cal_directory,
+        main(vanadium_run="236516", user="test", focus_run=None, do_cal=True, force_cal=True, directory=cal_directory,
              crop_type="banks", crop_on="South")
 
     def validate(self):

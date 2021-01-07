@@ -26,6 +26,7 @@
 #include "GUI/Runs/IRunsPresenter.h"
 #include "GUI/Runs/ISearchModel.h"
 #include "GUI/Runs/ISearcher.h"
+#include "GUI/Runs/SearchCriteria.h"
 #include "GUI/Save/IAsciiSaver.h"
 #include "GUI/Save/ISavePresenter.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -83,7 +84,8 @@ public:
   MOCK_CONST_METHOD0(isAutoreducing, bool());
   MOCK_CONST_METHOD0(isAnyBatchProcessing, bool());
   MOCK_CONST_METHOD0(isAnyBatchAutoreducing, bool());
-  MOCK_CONST_METHOD0(isWarnDiscardChangesChecked, bool());
+  MOCK_CONST_METHOD0(isOverwriteBatchPrevented, bool());
+  MOCK_CONST_METHOD1(discardChanges, bool(std::string const &));
   MOCK_CONST_METHOD0(getUnsavedBatchFlag, bool());
   MOCK_METHOD1(setUnsavedBatchFlag, void(bool));
   MOCK_CONST_METHOD0(percentComplete, int());
@@ -92,7 +94,8 @@ public:
   MOCK_CONST_METHOD0(instrument, Mantid::Geometry::Instrument_const_sptr());
   MOCK_CONST_METHOD0(instrumentName, std::string());
   MOCK_CONST_METHOD0(isBatchUnsaved, bool());
-  MOCK_METHOD1(setBatchUnsaved, void(bool));
+  MOCK_METHOD0(setBatchUnsaved, void());
+  MOCK_METHOD0(notifyChangesSaved, void());
 };
 
 class MockRunsPresenter : public IRunsPresenter {
@@ -101,7 +104,7 @@ public:
   MOCK_METHOD0(initInstrumentList, void());
   MOCK_CONST_METHOD0(runsTable, RunsTable const &());
   MOCK_METHOD0(mutableRunsTable, RunsTable &());
-  MOCK_METHOD1(notifyChangeInstrumentRequested, void(std::string const &));
+  MOCK_METHOD1(notifyChangeInstrumentRequested, bool(std::string const &));
   MOCK_METHOD0(notifyResumeReductionRequested, void());
   MOCK_METHOD0(notifyPauseReductionRequested, void());
   MOCK_METHOD0(notifyRowStateChanged, void());
@@ -121,6 +124,8 @@ public:
   MOCK_METHOD1(notifyInstrumentChanged, void(std::string const &));
   MOCK_METHOD0(notifyTableChanged, void());
   MOCK_METHOD0(settingsChanged, void());
+  MOCK_METHOD0(notifyChangesSaved, void());
+  MOCK_CONST_METHOD0(hasUnsavedChanges, bool());
   MOCK_CONST_METHOD0(isAnyBatchProcessing, bool());
   MOCK_CONST_METHOD0(isAnyBatchAutoreducing, bool());
   MOCK_CONST_METHOD0(isOperationPrevented, bool());
@@ -132,6 +137,7 @@ public:
   MOCK_METHOD1(setRoundPrecision, void(int &));
   MOCK_METHOD0(resetRoundPrecision, void());
   MOCK_METHOD0(notifySearchComplete, void());
+  MOCK_CONST_METHOD0(instrumentName, std::string());
 };
 
 class MockEventPresenter : public IEventPresenter {
@@ -206,17 +212,14 @@ public:
 class MockSearcher : public ISearcher {
 public:
   MOCK_METHOD1(subscribe, void(SearcherSubscriber *notifyee));
-  MOCK_METHOD4(search,
-               SearchResults(const std::string &, const std::string &,
-                             const std::string &, SearchType searchType));
-  MOCK_METHOD4(startSearchAsync, bool(const std::string &, const std::string &,
-                                      const std::string &, SearchType));
+  MOCK_METHOD1(search, SearchResults(SearchCriteria));
+  MOCK_METHOD1(startSearchAsync, bool(SearchCriteria));
   MOCK_CONST_METHOD0(searchInProgress, bool());
   MOCK_CONST_METHOD1(getSearchResult, SearchResult const &(int));
   MOCK_METHOD0(reset, void());
-  MOCK_CONST_METHOD4(searchSettingsChanged,
-                     bool(const std::string &, const std::string &,
-                          const std::string &, SearchType));
+  MOCK_CONST_METHOD0(hasUnsavedChanges, bool());
+  MOCK_METHOD0(setSaved, void());
+  MOCK_CONST_METHOD0(searchCriteria, SearchCriteria());
 };
 
 class MockSearcherSubscriber : public SearcherSubscriber {
@@ -240,12 +243,13 @@ public:
 class MockSearchModel : public ISearchModel {
 public:
   MOCK_METHOD1(mergeNewResults, void(SearchResults const &));
+  MOCK_METHOD1(replaceResults, void(SearchResults const &));
   MOCK_CONST_METHOD1(getRowData, SearchResult const &(int));
-  MOCK_METHOD2(setError, void(int, std::string const &));
+  MOCK_CONST_METHOD0(getRows, SearchResults const &());
   MOCK_METHOD0(clear, void());
-
-private:
-  SearchResult m_searchResult;
+  MOCK_CONST_METHOD0(hasUnsavedChanges, bool());
+  MOCK_METHOD0(setUnsaved, void());
+  MOCK_METHOD0(setSaved, void());
 };
 
 class MockMessageHandler : public IMessageHandler {
@@ -253,8 +257,7 @@ public:
   MOCK_METHOD2(giveUserCritical,
                void(const std::string &, const std::string &));
   MOCK_METHOD2(giveUserInfo, void(const std::string &, const std::string &));
-  MOCK_METHOD2(askUserYesNo, bool(const std::string &, const std::string &));
-  MOCK_METHOD0(askUserDiscardChanges, bool());
+  MOCK_METHOD2(askUserOkCancel, bool(const std::string &, const std::string &));
   MOCK_METHOD1(askUserForLoadFileName, std::string(const std::string &));
   MOCK_METHOD1(askUserForSaveFileName, std::string(const std::string &));
 };

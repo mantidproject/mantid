@@ -20,7 +20,7 @@ import numpy as np
 
 # Mock out simpleapi to import expensive import of something we patch out anyway
 sys.modules['mantid.simpleapi'] = MagicMock()
-from mantidqt.widgets.sliceviewer.model import SliceViewerModel, WS_TYPE  # noqa: E402
+from mantidqt.widgets.sliceviewer.model import SliceViewerModel, WS_TYPE, MIN_WIDTH  # noqa: E402
 
 
 # Mock helpers
@@ -69,7 +69,7 @@ def _create_mock_mdeventworkspace(ndims: int, coords: SpecialCoordinateSystem, e
     :param isq: Boolean for each dimension defining if Q or not
     """
     ws = _create_mock_workspace(IMDEventWorkspace, coords, has_oriented_lattice=False, ndims=ndims)
-    return _add_dimensions(ws, names, isq, extents, nbins=(1, ) * ndims, units=units)
+    return _add_dimensions(ws, names, isq, extents, nbins=(1,) * ndims, units=units)
 
 
 def _create_mock_matrixworkspace(x_axis: tuple,
@@ -338,6 +338,28 @@ class SliceViewerModelTest(unittest.TestCase):
 
         model.get_data((None, None, 0), (1, 2, 4), ((-2, 2), (-1, 1)))
         mock_binmd.assert_called_once_with(**call_params)
+
+    @patch('mantidqt.widgets.sliceviewer.model.BinMD')
+    def test_get_ws_mde_sets_minimum_width_on_data_limits(self, mock_binmd):
+        model = SliceViewerModel(self.ws_MDE_3D)
+        mock_binmd.return_value = self.ws_MD_3D
+        xmin = -5e-8
+        xmax = 5e-8
+
+        self.assertNotEqual(model.get_ws((None, None, 0), (1, 2, 4), ((xmin, xmax), (-1, 1))),
+                            self.ws_MDE_3D)
+
+        call_params = dict(AxisAligned=False,
+                           BasisVector0='h,rlu,1.0,0.0,0.0',
+                           BasisVector1='k,rlu,0.0,1.0,0.0',
+                           BasisVector2='l,rlu,0.0,0.0,1.0',
+                           EnableLogging=False,
+                           InputWorkspace=self.ws_MDE_3D,
+                           OutputBins=[1, 2, 1],
+                           OutputExtents=[xmin, xmin + MIN_WIDTH, -1, 1, -2.0, 2.0],
+                           OutputWorkspace='ws_MDE_3D_svrebinned')
+        mock_binmd.assert_called_once_with(**call_params)
+        mock_binmd.reset_mock()
 
     def test_model_matrix(self):
         model = SliceViewerModel(self.ws2d_histo)
@@ -824,9 +846,8 @@ class SliceViewerModelTest(unittest.TestCase):
                                                                 mock_binmd):
         def assert_error_returned_in_help(workspace, export_type, mock_alg, err_msg):
             model = SliceViewerModel(workspace)
-            slicepoint, bin_params = MagicMock(), MagicMock()
+            slicepoint, bin_params = (None, None, None), MagicMock()
             mock_alg.side_effect = RuntimeError(err_msg)
-
             try:
                 if export_type == 'r':
                     help_msg = model.export_roi_to_workspace(slicepoint, bin_params,

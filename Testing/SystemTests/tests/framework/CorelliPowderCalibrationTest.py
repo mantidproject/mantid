@@ -3,15 +3,41 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
+from numpy.testing import assert_allclose
 from systemtesting import MantidSystemTest
-from mantid.simpleapi import mtd
-from mantid.simpleapi import CreateEmptyTableWorkspace
-from mantid.simpleapi import LoadEmptyInstrument
-from mantid.simpleapi import ConvertToEventWorkspace
-from mantid.simpleapi import CompareWorkspaces
-from mantid.simpleapi import MoveInstrumentComponent
-from mantid.simpleapi import RotateInstrumentComponent
-from mantid.simpleapi import CorelliPowderCalibrationApply
+from mantid.simpleapi import (
+    CompareWorkspaces, ConvertToEventWorkspace, CorelliPowderCalibrationApply, CorelliPowderCalibrationCreate,
+    CreateEmptyTableWorkspace, LoadEmptyInstrument, LoadNexus, MoveInstrumentComponent, mtd, RotateInstrumentComponent)
+
+
+class CorelliPowderCalibrationCreateTest(MantidSystemTest):
+    def requiredFiles(self):
+        r"""
+        Runs for standard sample CsLaNb2O7
+        """
+        return ['CORELLI_124036_banks42_87.nxs', 'CORELLI_124036_adjustments.nxs']
+
+    def runTest(self):
+        LoadNexus(Filename='CORELLI_124036_banks42_87.nxs', OutputWorkspace='LaB6')
+        CorelliPowderCalibrationCreate(InputWorkspace='LaB6',
+                                       OutputWorkspacesPrefix='LaB6_',
+                                       TubeDatabaseDir='/tmp',
+                                       TofBinning=[3000, -0.001, 16660],
+                                       PeakFunction='Gaussian',
+                                       PeakPositions=[1.3143, 1.3854, 1.6967, 1.8587, 2.0781, 2.3995, 2.9388, 4.1561],
+                                       SourceMaxTranslation=0.1,
+                                       # ComponentList='',  # comment to calibrate all banks
+                                       ComponentMaxTranslation=0.02,
+                                       ComponentMaxRotation=3.0)
+        table = mtd['LaB6_adjustments']
+        # Check position of the moderator
+        assert_allclose(table.row(0)['Zposition'], -19.994, atol=0.002)
+        # Check position of bank42
+        assert_allclose([table.row(1)[x] for x in ('Xposition', 'Yposition', 'Zposition')],
+                        [2.594, 0.063, 0.087], atol=0.007)
+        # Check rotation of bank87
+        assert_allclose([table.row(2)[x] for x in ('XdirectionCosine', 'YdirectionCosine', 'ZdirectionCosine')],
+                        [-0.01, -1.00, 0.03], atol=0.05)
 
 
 class CorelliPowderCalibrationApplyTest(MantidSystemTest):

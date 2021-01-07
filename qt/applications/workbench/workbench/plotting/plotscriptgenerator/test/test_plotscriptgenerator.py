@@ -28,6 +28,7 @@ GET_AUTOSCALE_LIMITS = 'workbench.plotting.plotscriptgenerator.axes.get_autoscal
 GET_FIT_COMMANDS = 'workbench.plotting.plotscriptgenerator.get_fit_cmds'
 
 SAMPLE_SCRIPT = ("import matplotlib.pyplot as plt\n"
+                 "from mantid.plots.utility import MantidAxType\n"
                  "from mantid.api import AnalysisDataService\n"
                  "\n"
                  "ADS.retrieve(...)\n"
@@ -50,6 +51,7 @@ SAMPLE_SCRIPT = ("import matplotlib.pyplot as plt\n"
 
 SAMPLE_SCRIPT_WITH_FIT = ("from mantid.simpleapi import Fit\n"
                           "import matplotlib.pyplot as plt\n"
+                          "from mantid.plots.utility import MantidAxType\n"
                           "# Fit definition, see https://docs.mantidproject.org/algorithms/Fit-v1.html for more details\n"
                           "Function=\"GaussOsc\"\n"
                           "InputWorkspace=\"TestWorkspace\"\n"

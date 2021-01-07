@@ -138,6 +138,27 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("EventsPerPoint", 1000));
     TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
   }
+  void test_single_path() {
+    using namespace Mantid::Kernel;
+    const int NPEAKS = 10;
+    // this sets up a sample with a spherical shape of radius = 1mm
+    auto peaksWS = WorkspaceCreationHelper::createPeaksWorkspace(NPEAKS);
+    auto shape =
+        ComponentCreationHelper::createSphere(0.001, {0, 0, 0}, "sample-shape");
+    peaksWS->mutableSample().setShape(shape);
+    setMaterialToVanadium(peaksWS);
+
+    Mantid::Algorithms::AddAbsorptionWeightedPathLengths alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", peaksWS));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("UseSinglePath", true));
+    TS_ASSERT_THROWS_NOTHING(alg.execute(););
+
+    Mantid::Geometry::IPeak &peak = peaksWS->getPeak(0);
+    const double delta(1e-06);
+    TS_ASSERT_DELTA(0.2, peak.getAbsorptionWeightedPathLength(), delta);
+  }
 
 private:
   void setTestInstrument(std::shared_ptr<PeaksWorkspace> peaksWS) {

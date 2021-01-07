@@ -114,6 +114,9 @@ void GroupDetectors2::init() {
       "A file that consists of lists of spectra numbers to group. See the "
       "help for the file format");
   declareProperty(
+      std::make_unique<ArrayProperty<int>>("ExcludeGroupNumbers"),
+      "An array of group IDs to exclude when reading from an XML file.");
+  declareProperty(
       "IgnoreGroupNumber", true,
       "If true, use sequential spectrum numbers, otherwise use the group "
       "number from MapFile as spectrum numbers.");
@@ -568,6 +571,16 @@ void GroupDetectors2::processXMLFile(
       loader.getGroupDetectorsMap();
   std::map<int, std::vector<int>> mGroupSpectraMap =
       loader.getGroupSpectraMap();
+
+  const std::vector<int> groupIDsToExclude = getProperty("ExcludeGroupNumbers");
+  for (const auto &groupID : groupIDsToExclude) {
+    const auto detectorIter = mGroupDetectorsMap.find(groupID);
+    if (detectorIter != mGroupDetectorsMap.cend())
+      mGroupDetectorsMap.erase(detectorIter);
+    const auto spectraIter = mGroupSpectraMap.find(groupID);
+    if (spectraIter != mGroupSpectraMap.cend())
+      mGroupSpectraMap.erase(spectraIter);
+  }
 
   // 3. Build m_GroupWsInds
   for (const auto &det : mGroupDetectorsMap) {

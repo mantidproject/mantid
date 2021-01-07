@@ -58,10 +58,10 @@ class WorkspaceSelectorView(QtWidgets.QDialog, ui_workspace_selector):
             self.time_domain_combo.setCurrentIndex(index)
 
     def get_workspace_list(self):
-        filtered_list = self.context.get_names_of_workspaces_to_fit(runs='All', group_and_pair='All', phasequad=True,
+        filtered_list = self.context.get_names_of_workspaces_to_fit(runs='All', group_and_pair='All',
                                                                     rebin=self.rebin, freq = "All")
 
-        filtered_list += self.context.get_names_of_workspaces_to_fit(runs='All', group_and_pair='All', phasequad=True,
+        filtered_list += self.context.get_names_of_workspaces_to_fit(runs='All', group_and_pair='All',
                                                                      rebin=self.rebin, freq = "None")
 
         filtered_list = [item for item in filtered_list if item not in self.current_workspaces]
@@ -79,12 +79,12 @@ class WorkspaceSelectorView(QtWidgets.QDialog, ui_workspace_selector):
 
         filtered_list = self.context.get_names_of_workspaces_to_fit(runs=self.runs,
                                                                     group_and_pair=self.groups_and_pairs,
-                                                                    phasequad=self.phasequad, rebin=self.rebin, freq = self.is_it_freq)
+                                                                    rebin=self.rebin, freq = self.is_it_freq)
 
-        excluded_list = self.context.get_names_of_workspaces_to_fit(runs='All', group_and_pair='All', phasequad=True,
+        excluded_list = self.context.get_names_of_workspaces_to_fit(runs='All', group_and_pair='All',
                                                                     rebin=self.rebin, freq="None")
         # add frequency list to excluded - needed for searching
-        excluded_list += self.context.get_names_of_workspaces_to_fit(runs='All', group_and_pair='All', phasequad=True,
+        excluded_list += self.context.get_names_of_workspaces_to_fit(runs='All', group_and_pair='All',
                                                                      rebin=self.rebin, freq="All")
 
         excluded_list = [item for item in excluded_list if item not in filtered_list]

@@ -71,7 +71,7 @@ class TomlSchemaV1Validator(object):
                                                       "rear_x_tilt", "rear_y_tilt", "rear_z_tilt"}},
                          "radius_limit": {"min", "max"}}
 
-        binning_keys = {"wavelength": {"start", "step", "stop", "type"},
+        binning_keys = {"wavelength": {"start", "step", "stop", "type", "binning"},
                         "1d_reduction": {"binning", "radius_cut", "wavelength_cut"},
                         "2d_reduction": {"step", "stop", "type", "interpolate"}}
 
