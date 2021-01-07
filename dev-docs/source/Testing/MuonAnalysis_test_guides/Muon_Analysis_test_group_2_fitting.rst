@@ -61,10 +61,21 @@ Test 2: Sequential Fit
 
 **Time required 5 minutes**
 
-- Following the set up from :ref:`test_1`, load runs ``20918-20`` and reset 
-  ``Time Start = 0.113`` and ``Time End = 15``
+- Now load runs ``20918-20``
+- Go to the **Fitting** tab
+	- Right click **Composite Function** and click **Remove function**
+	- Right click the empty table area; Select **Add Function**
+	- Add a **Flat Background** (*Background* > *Flat Background*)
+	- Similarly, add **Abragam** (*Muon* > *MuonSpecific* > *Abragam*)
+	- Set ``Omega = 8.5`` and ``Tau = 0.4``
+	- Set ``Time Start = 0.113`` and ``Time End = 15``
 - Go to the **Sequential Fitting** tab
-	- Click **Sequentially fit all**
+	- Click **Sequentially fit all**, all fits should succeed
+	- Select each row in the table and see that the plot updates corrctly
+	- Select the first row, and change ``Omega = 9.0`` and ``Tau = 0.2`` in the 
+	  table
+	- Then click **Fit selected**. This should update the fit for run ``20918`` 
+	  but the other fits should remain the same
 
 -----------
 	
@@ -105,6 +116,8 @@ Test 4: Simultaneous Fit Across Runs
 	- Click **Fit**
 	- Use the **<<** and **>>** buttons, or drop-down list, to see the fitted 
 	  parameters for each run in the function browser.
+	- In the **Plotting Window**, check **Tile plot by** and change to **Run**
+	  from **Group/Pair**
 	- The fit should look something like this:
 	
 .. image:: /images/MuonAnalysisTests/fitting_test4.png
@@ -147,7 +160,7 @@ Test 6: Sequential Fit of Simultaneous Fits
 	- This should fit the **fwd** and **bwd** groups simultaneously for each 
 	  run in sequence; ``20918``, ``20919``, ``20920``
 - In the workspace toolbox there should be a group workspace for each run 
-  which contains fitted data for both **fwd** and **bwd**
+  that contains fitted data for both **fwd** and **bwd**
 
 ---------------------------------------
 	  
@@ -157,7 +170,7 @@ Test 7: Simultaneous Fit Across Periods
 **Time required 5 minutes**
 
 The data used so far has been single period, so here we will use MUSR data 
-which has multiple periods.
+that has multiple periods.
 
 - Go back to the **Home** tab and set *Instrument* to **MUSR**
 - Load run ``15189``
@@ -169,6 +182,8 @@ which has multiple periods.
 	- Make sure **Simultaneous fit over** is checked and is over **Run**
 	- Add a **Linear Background** (*Background* > *Linear Background*)
 	- Click **Fit**
+	- In the **Plotting Window**, check **Tile plot by** and change to **Run**
+	  from **Group/Pair** 
 - The fit should look something like this:
 
 .. image:: /images/MuonAnalysisTests/fitting_test7.png
@@ -185,10 +200,8 @@ Test 8: TF Asymmetry Fit
 - Now load run ``62260``
 - There should be a warning to say **MainFieldDirection** has changed
 - Go to the **Grouping** tab
-	- Remove the rows from the table which are highlighted by right clicking 
-	  the row then remove
-	- Uncheck **Analyse (plot/fit)** for the pair, and check 
-	  **Analyse (plot/fit)** for the **fwd** group
+	- Click the **Default** button to reset the grouping and pairing tables
+	- Check **Analyse (plot/fit)** for the **fwd** group only
 - Go to the **Fitting** tab
 	- Clear the fitting function as before, and uncheck
 	  **Simultaneous fit over**
@@ -205,16 +218,18 @@ Test 8: TF Asymmetry Fit
 	- Click **Fit**
 	- Now check the parameters for flat background, they should be closer to 0
 	
-----------------------------------
+------------
 
-Test 9: Multiple TF Asymmetry Fits
-----------------------------------
+.. _test_9::
+
+Test 9: Simultaneous TF Asymmetry Fits
+--------------------------------------
 
 **Time required 5 minutes**
 
 - Load run ``62261`` (still using *Instrument* **MUSR**)
 - Go to the **Grouping** tab
-	- Check  **Analyse (plot/fit)** for both groups
+	- Check  **Analyse (plot/fit)** for all 4 groups
 - Go to the **Fitting** tab
 	- Check **Simultaneous fit over** and make sure it is over **Run**
 	- Clear all functions
@@ -224,3 +239,22 @@ Test 9: Multiple TF Asymmetry Fits
 	- Enable **TF Asymmetry Mode**
 	- Click **Fit**
 	- Check that all values for the flat background are different to each other
+	
+-------------------------------------
+
+Test 10: Sequential TF Asymmetry Fits
+-------------------------------------
+
+**Time required 10 minutes**
+
+- Load runs ``62260-2`` (still using *Instrument* **MUSR**)
+- In the **Fitting** tab
+	- Uncheck **Simultaneous fit over**
+	- Add **GausOsc** (*Muon* > *MuonGeneric* > *GausOsc*) and set 
+	  ``Frequency = 1.3``
+	- Enable **TF Asymmetry Mode**
+- Go to the **Sequential Fitting** tab
+	- Click **Sequentially fit all**
+	- In the **Plotting Window**, check **Tile plot by** and change to **Run**
+	  from **Group/Pair**
+	- You should be able to select each row in the table to see each individual fit
