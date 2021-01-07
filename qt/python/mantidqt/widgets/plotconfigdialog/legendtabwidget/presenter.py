@@ -14,12 +14,12 @@ import matplotlib.font_manager
 
 
 class LegendTabWidgetPresenter:
-    def __init__(self, fig, view=None, parent=None, parent_presenter=None):
+    def __init__(self, fig, view=None, parent_view=None, parent_presenter=None):
         self.fig = fig
         self.axes = fig.get_axes()
 
         if not view:
-            self.view = LegendTabWidgetView(parent)
+            self.view = LegendTabWidgetView(parent_view)
         else:
             self.view = view
 

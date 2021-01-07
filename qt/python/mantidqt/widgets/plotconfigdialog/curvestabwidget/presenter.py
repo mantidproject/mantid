@@ -20,7 +20,7 @@ from workbench.plotting.figureerrorsmanager import FigureErrorsManager
 
 class CurvesTabWidgetPresenter:
 
-    def __init__(self, fig, view=None, parent=None, parent_presenter=None, legend_tab=None):
+    def __init__(self, fig, view=None, parent_view=None, parent_presenter=None, legend_tab=None):
         self.fig = fig
 
         # The legend tab is passed in so that it can be removed if all curves are removed.
@@ -28,7 +28,7 @@ class CurvesTabWidgetPresenter:
         self.legend_props = None
 
         if not view:
-            self.view = CurvesTabWidgetView(parent)
+            self.view = CurvesTabWidgetView(parent_view)
         else:
             self.view = view
 
