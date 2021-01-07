@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=no-init,invalid-name,attribute-defined-outside-init
+# pylint: disable=no-init,invalid-name,attribute-defined-outside-init
 import numpy as np
 import systemtesting
 from mantid.simpleapi import *
@@ -56,8 +56,8 @@ def do_cleanup():
 
 
 class PG3Analysis(systemtesting.MantidSystemTest):
-    ref_file  = 'PG3_4844_reference.gsa'
-    cal_file  = "PG3_FERNS_d4832_2011_08_24.cal"
+    ref_file = 'PG3_4844_reference.gsa'
+    cal_file = "PG3_FERNS_d4832_2011_08_24.cal"
     char_file = "PG3_characterization_2011_08_31-HR.txt"
 
     def skipTests(self):
@@ -68,9 +68,9 @@ class PG3Analysis(systemtesting.MantidSystemTest):
 
     def requiredFiles(self):
         files = [self.ref_file, self.cal_file, self.char_file]
-        files.append("PG3_4844_event.nxs") # /SNS/PG3/IPTS-2767/0/
-        files.append("PG3_4866_event.nxs") # /SNS/PG3/IPTS-2767/0/
-        files.append("PG3_5226_event.nxs") # /SNS/PG3/IPTS-2767/0/
+        files.append("PG3_4844_event.nxs")  # /SNS/PG3/IPTS-2767/0/
+        files.append("PG3_4866_event.nxs")  # /SNS/PG3/IPTS-2767/0/
+        files.append("PG3_5226_event.nxs")  # /SNS/PG3/IPTS-2767/0/
         return files
 
     def runTest(self):
@@ -96,7 +96,7 @@ class PG3Analysis(systemtesting.MantidSystemTest):
 
     def validate(self):
         self.tolerance = 1.0e-2
-        return ('PG3_4844','PG3_4844_golden')
+        return ('PG3_4844', 'PG3_4844_golden')
 
 
 class PG3AbsorptionCorrection(systemtesting.MantidSystemTest):
@@ -184,7 +184,7 @@ class PG3AbsorptionCorrection(systemtesting.MantidSystemTest):
 
 class PG3StripPeaks(systemtesting.MantidSystemTest):
     ref_file = 'PG3_4866_reference.gsa'
-    cal_file  = "PG3_FERNS_d4832_2011_08_24.cal"
+    cal_file = "PG3_FERNS_d4832_2011_08_24.cal"
 
     def skipTests(self):
         return _skip_test()
@@ -194,7 +194,7 @@ class PG3StripPeaks(systemtesting.MantidSystemTest):
 
     def requiredFiles(self):
         files = [self.ref_file, self.cal_file]
-        files.append("PG3_4866_event.nxs") # vanadium
+        files.append("PG3_4866_event.nxs")  # vanadium
         return files
 
     def runTest(self):
@@ -238,7 +238,7 @@ class PG3StripPeaks(systemtesting.MantidSystemTest):
                      Target="dSpacing")
         Rebin(InputWorkspace="PG3_4866",
               OutputWorkspace="PG3_4866",
-              Params=(0.1,-0.0004,2.2))
+              Params=(0.1, -0.0004, 2.2))
         SortEvents(InputWorkspace="PG3_4866")
         DiffractionFocussing(InputWorkspace="PG3_4866",
                              OutputWorkspace="PG3_4866",
@@ -284,13 +284,13 @@ class PG3StripPeaks(systemtesting.MantidSystemTest):
 
     def validate(self):
         self.tolerance = 1.0e-2
-        return ('PG3_4866','PG3_4866_golden')
+        return ('PG3_4866', 'PG3_4866_golden')
 
 
 class SeriesAndConjoinFilesTest(systemtesting.MantidSystemTest):
-    cal_file   = "PG3_FERNS_d4832_2011_08_24.cal"
-    char_file  = "PG3_characterization_2012_02_23-HR-ILL.txt"
-    ref_files  = ['PG3_9829_reference.gsa', 'PG3_9830_reference.gsa']
+    cal_file = "PG3_FERNS_d4832_2011_08_24.cal"
+    char_file = "PG3_characterization_2012_02_23-HR-ILL.txt"
+    ref_files = ['PG3_9829_reference.gsa', 'PG3_9830_reference.gsa']
     data_files = ['PG3_9829_event.nxs', 'PG3_9830_event.nxs']
 
     def cleanup(self):
@@ -324,7 +324,7 @@ class SeriesAndConjoinFilesTest(systemtesting.MantidSystemTest):
         config['default.instrument'] = 'POWGEN'
 
         # load back in the resulting gsas files
-        ConjoinFiles(RunNumbers=[9829,9830], OutputWorkspace='ConjoinFilesTest', Directory=savedir)
+        ConjoinFiles(RunNumbers=[9829, 9830], OutputWorkspace='ConjoinFilesTest', Directory=savedir)
         # convert units makes sure the geometry was picked up
         ConvertUnits(InputWorkspace='ConjoinFilesTest', OutputWorkspace='ConjoinFilesTest',
                      Target="dSpacing")
@@ -341,17 +341,17 @@ class SeriesAndConjoinFilesTest(systemtesting.MantidSystemTest):
 
     def validate(self):
         # these are an ordered pair
-        return ('PG3_9829','PG3_9829_golden', 'PG3_9830','PG3_9830_golden')
+        return ('PG3_9829', 'PG3_9829_golden', 'PG3_9830', 'PG3_9830_golden')
 
 
 class SumFilesTest(systemtesting.MantidSystemTest):
-    cal_file  = "PG3_FERNS_d4832_2011_08_24.cal"
+    cal_file = "PG3_FERNS_d4832_2011_08_24.cal"
     char_file = "PG3_characterization_2012_02_23-HR-ILL.txt"
-    ref_file  = 'PG3_9829_sum_reference.gsa'
+    ref_file = 'PG3_9829_sum_reference.gsa'
     data_file = 'PG3_9829_event.nxs'
 
     def cleanup(self):
-        return True #do_cleanup()
+        return True  # do_cleanup()
 
     def requiredMemoryMB(self):
         """Requires 3Gb"""
@@ -386,12 +386,12 @@ class SumFilesTest(systemtesting.MantidSystemTest):
         return "ValidateWorkspaceToWorkspace"
 
     def validate(self):
-        return ('PG3_9829','PG3_9829_golden')
+        return ('PG3_9829', 'PG3_9829_golden')
 
 
 class ToPDFgetNTest(systemtesting.MantidSystemTest):
-    cal_file   = "PG3_FERNS_d4832_2011_08_24.cal"
-    char_file  = "PG3_characterization_2012_02_23-HR-ILL.txt"
+    cal_file = "PG3_FERNS_d4832_2011_08_24.cal"
+    char_file = "PG3_characterization_2012_02_23-HR-ILL.txt"
     data_file = "PG3_9829_event.nxs"
     getn_file = "PG3_9829.getn"
 
@@ -418,7 +418,7 @@ class ToPDFgetNTest(systemtesting.MantidSystemTest):
                     Binning=-.0004)
 
     def validateMethod(self):
-        return None # it running is all that we need
+        return None  # it running is all that we need
 
     def validate(self):
         pass

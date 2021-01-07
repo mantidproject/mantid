@@ -227,7 +227,7 @@ Output:
 .. testoutput:: ExPlotPeakByLogValueSeqWithExclusionRange
 
     Fit status = ['success', 'success', 'success']
-    Fit chi2 = [5.0965e-08, 0.0000e+00, 6.8943e-09]
+    Fit chi2 = [5.8947e-08, 0.0000e+00, 6.8943e-09]
 
 .. categories::
 
