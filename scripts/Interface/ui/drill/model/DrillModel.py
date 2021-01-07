@@ -788,13 +788,16 @@ class DrillModel(QObject):
         Args:
             ref (int): sample index
         """
+        sample = self.samples[ref]
         del self.samples[ref]
         # remove from groups if needed
         for group in self.groups:
-            if ref in self.groups[group]:
-                self.groups[group].remove(ref)
+            if sample in self.groups[group]:
+                self.groups[group].remove(sample)
+                if not self.groups[group]:
+                    del self.groups[group]
                 if ((group in self.masterSamples)
-                        and (self.masterSamples[group] == ref)):
+                        and (self.masterSamples[group] == sample)):
                     del self.masterSamples[group]
 
     def getSamples(self):
