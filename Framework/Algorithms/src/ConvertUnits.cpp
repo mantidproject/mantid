@@ -388,109 +388,6 @@ ConvertUnits::convertQuickly(const API::MatrixWorkspace_const_sptr &inputWS,
   return outputWS;
 }
 
-void ConvertUnits::createDetectorIdLogMessages(
-    const std::vector<detid_t> &detids, int64_t wsIndex) const {
-  std::string detIDstring;
-  auto iter = detids.begin();
-  auto itEnd = detids.end();
-  for (; iter != itEnd; ++iter) {
-    detIDstring += std::to_string(*iter) + ",";
-  }
-
-  if (!detIDstring.empty()) {
-    detIDstring.pop_back(); // Drop last comma
-  }
-  g_log.warning(
-      "Incomplete set of calibrated diffractometer constants found for "
-      "workspace index" +
-      std::to_string(wsIndex) + ". Using uncalibrated values for detectors " +
-      detIDstring);
-}
-
-/** Get the detector values relevant to unit conversion for a workspace index
- * @param spectrumInfo :: SpectrumInfo of the workspace
- * @param outputUnit :: The output unit
- * @param emode :: The energy mode
- * @param ws :: The workspace
- * @param signedTheta :: Return twotheta with sign or without
- * @param wsIndex :: The workspace index
- * @param l2 :: The returned sample - detector distance
- * @param twoTheta :: the returned two theta angle
- * @param pmap :: a map containing optional unit conversion parameters eg efixed
- * @returns true if lookup successful, false on error
- */
-bool ConvertUnits::getDetectorValues(const API::SpectrumInfo &spectrumInfo,
-                                     const Kernel::Unit &outputUnit, int emode,
-                                     const MatrixWorkspace &ws,
-                                     const bool signedTheta, int64_t wsIndex,
-                                     double &l2, double &twoTheta,
-                                     ExtraParametersMap &pmap) {
-  if (!spectrumInfo.hasDetectors(wsIndex))
-    return false;
-
-  l2 = spectrumInfo.l2(wsIndex);
-
-  if (!spectrumInfo.isMonitor(wsIndex)) {
-    // The scattering angle for this detector (in radians).
-    try {
-      if (signedTheta)
-        twoTheta = spectrumInfo.signedTwoTheta(wsIndex);
-      else
-        twoTheta = spectrumInfo.twoTheta(wsIndex);
-    } catch (const std::runtime_error &e) {
-      g_log.warning(e.what());
-      twoTheta = std::numeric_limits<double>::quiet_NaN();
-    }
-    // If an indirect instrument, try getting Efixed from the geometry
-    if (emode == 2 && pmap.find(UnitParams::efixed) == pmap.end()) // indirect
-    {
-      if (spectrumInfo.hasUniqueDetector(wsIndex)) {
-        const auto &det = spectrumInfo.detector(wsIndex);
-        auto par = ws.constInstrumentParameters().getRecursive(&det, "Efixed");
-        if (par) {
-          pmap[UnitParams::efixed] = par->value<double>();
-          g_log.debug() << "Detector: " << det.getID()
-                        << " EFixed: " << pmap[UnitParams::efixed] << "\n";
-        } else {
-          return false;
-        }
-      }
-      // Non-unique detector (i.e., DetectorGroup): use single provided value
-    }
-
-    std::vector<detid_t> warnDetIds;
-    try {
-      auto [difa, difc, tzero] =
-          spectrumInfo.diffractometerConstants(wsIndex, warnDetIds);
-      pmap[UnitParams::difa] = difa;
-      pmap[UnitParams::difc] = difc;
-      pmap[UnitParams::tzero] = tzero;
-      if (warnDetIds.size() > 0) {
-        createDetectorIdLogMessages(warnDetIds, wsIndex);
-      }
-      if ((outputUnit.unitID().find("dSpacing") != std::string::npos) &&
-          (difa == 0) && (difc == 0)) {
-        return false;
-      }
-    } catch (const std::runtime_error &e) {
-      g_log.warning(e.what());
-    }
-  } else {
-    twoTheta = 0.0;
-    pmap[UnitParams::efixed] = DBL_MIN;
-    // Energy transfer is meaningless for a monitor, so set l2 to 0.
-    if (outputUnit.unitID().find("DeltaE") != std::string::npos) {
-      l2 = 0.0;
-    }
-    pmap[UnitParams::difc] = 0;
-    // can't do a conversion to d spacing with theta=0
-    if (outputUnit.unitID().find("dSpacing") != std::string::npos) {
-      return false;
-    }
-  }
-  return true;
-}
-
 /** Convert the workspace units using TOF as an intermediate step in the
  * conversion
  * @param fromUnit :: The unit of the input workspace
@@ -528,33 +425,13 @@ ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit,
   // empty
   // vector
   std::vector<double> emptyVec;
-  const bool needEfixed =
-      (outputUnit->unitID().find("DeltaE") != std::string::npos ||
-       outputUnit->unitID().find("Wave") != std::string::npos);
   double efixedProp = getProperty("Efixed");
-  if (emode == 1) {
-    //... direct efixed gather
-    if (efixedProp == EMPTY_DBL()) {
-      // try and get the value from the run parameters
-      const API::Run &run = inputWS->run();
-      if (run.hasProperty("Ei")) {
-        try {
-          efixedProp = run.getPropertyValueAsType<double>("Ei");
-        } catch (Kernel::Exception::NotFoundError &) {
-          throw std::runtime_error("Cannot retrieve Ei value from the logs");
-        }
-      } else {
-        if (needEfixed) {
-          throw std::invalid_argument(
-              "Could not retrieve incident energy from run object");
-        } else {
-          efixedProp = 0.0;
-        }
-      }
+  if (efixedProp == EMPTY_DBL() && emode == 1) {
+    try {
+      efixedProp =
+          inputWS->getEFixedGivenEMode(nullptr, DeltaEMode::Type::Direct);
+    } catch (std::runtime_error &) {
     }
-  } else if (emode == 0 && efixedProp == EMPTY_DBL()) // Elastic
-  {
-    efixedProp = 0.0;
   }
 
   std::vector<std::string> parameters =
@@ -575,8 +452,8 @@ ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit,
     pmap[UnitParams::efixed] = efixedProp;
   }
   size_t checkIndex = 0;
-  if (getDetectorValues(spectrumInfo, *outputUnit, emode, *inputWS, signedTheta,
-                        checkIndex, checkl2, checktwoTheta, pmap)) {
+  if (inputWS->getDetectorValues(*outputUnit, emode, signedTheta, checkIndex,
+                                 checkl2, checktwoTheta, pmap)) {
     // copy the X values for the check
     auto checkXValues = inputWS->readX(checkIndex);
     // Convert the input unit to time-of-flight
@@ -609,8 +486,8 @@ ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit,
     if (efixedProp != EMPTY_DBL()) {
       pmap[UnitParams::efixed] = efixed;
     }
-    if (getDetectorValues(outSpectrumInfo, *outputUnit, emode, *outputWS,
-                          signedTheta, i, l2, twoTheta, pmap)) {
+    if (outputWS->getDetectorValues(*outputUnit, emode, signedTheta, i, l2,
+                                    twoTheta, pmap)) {
       localFromUnit->toTOF(outputWS->dataX(i), emptyVec, l1, l2, twoTheta,
                            emode, pmap);
       // Convert from time-of-flight to the desired unit

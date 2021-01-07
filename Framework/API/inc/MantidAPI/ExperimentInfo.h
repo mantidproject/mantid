@@ -12,6 +12,7 @@
 #include "MantidGeometry/Instrument_fwd.h"
 
 #include "MantidKernel/DeltaEMode.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/cow_ptr.h"
 
@@ -110,6 +111,9 @@ public:
   double getEFixed(const std::shared_ptr<const Geometry::IDetector> &detector =
                        std::shared_ptr<const Geometry::IDetector>{
                            nullptr}) const;
+  double getEFixedGivenEMode(
+      const std::shared_ptr<const Geometry::IDetector> &detector,
+      Kernel::DeltaEMode::Type emode) const;
   /// Set the efixed value for a given detector ID
   void setEFixed(const detid_t detID, const double value);
 
@@ -158,6 +162,13 @@ public:
 
   void invalidateSpectrumDefinition(const size_t index);
   void updateSpectrumDefinitionIfNecessary(const size_t index) const;
+
+  bool getDetectorValues(const Kernel::Unit &outputUnit, int emode,
+                         const bool signedTheta, int64_t wsIndex, double &l2,
+                         double &twoTheta,
+                         Kernel::ExtraParametersMap &pmap) const;
+  void createDetectorIdLogMessages(const std::vector<detid_t> &detids,
+                                   int64_t wsIndex) const;
 
 protected:
   size_t numberOfDetectorGroups() const;

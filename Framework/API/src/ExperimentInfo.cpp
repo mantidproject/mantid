@@ -676,6 +676,19 @@ double ExperimentInfo::getEFixed(
     const std::shared_ptr<const Geometry::IDetector> &detector) const {
   populateIfNotLoaded();
   Kernel::DeltaEMode::Type emode = getEMode();
+  return getEFixedGivenEMode(detector, emode);
+}
+
+/**
+ * Easy access to the efixed value for this run & detector
+ * @param detector :: The detector object to ask for the efixed mode. Only
+ * required for Indirect mode
+ * @param emode :: enum value indicating whether elastic, direct or indirect
+ * @return The current efixed value
+ */
+double ExperimentInfo::getEFixedGivenEMode(
+    const std::shared_ptr<const Geometry::IDetector> &detector,
+    Kernel::DeltaEMode::Type emode) const {
   if (emode == Kernel::DeltaEMode::Direct) {
     try {
       return this->run().getPropertyValueAsType<double>("Ei");
@@ -1333,6 +1346,108 @@ void ExperimentInfo::populateWithParameter(
 void ExperimentInfo::populateIfNotLoaded() const {
   // The default implementation does nothing. Used by subclasses
   // (FileBackedExperimentInfo) to load content from files upon access.
+}
+
+/** Get the detector values relevant to unit conversion for a workspace index
+ * @param outputUnit :: The output unit
+ * @param emode :: The energy mode
+ * @param signedTheta :: Return twotheta with sign or without
+ * @param wsIndex :: The workspace index
+ * @param l2 :: The returned sample - detector distance
+ * @param twoTheta :: the returned two theta angle
+ * @param pmap :: a map containing optional unit conversion parameters eg efixed
+ * @returns true if lookup successful, false on error
+ */
+bool ExperimentInfo::getDetectorValues(const Kernel::Unit &outputUnit,
+                                       int emode, const bool signedTheta,
+                                       int64_t wsIndex, double &l2,
+                                       double &twoTheta,
+                                       ExtraParametersMap &pmap) const {
+  auto &specInfo = spectrumInfo();
+  if (!specInfo.hasDetectors(wsIndex))
+    return false;
+
+  l2 = specInfo.l2(wsIndex);
+
+  if (!specInfo.isMonitor(wsIndex)) {
+    // The scattering angle for this detector (in radians).
+    try {
+      if (signedTheta)
+        twoTheta = specInfo.signedTwoTheta(wsIndex);
+      else
+        twoTheta = specInfo.twoTheta(wsIndex);
+    } catch (const std::runtime_error &e) {
+      g_log.warning(e.what());
+      twoTheta = std::numeric_limits<double>::quiet_NaN();
+    }
+    // If an indirect instrument, try getting Efixed from the geometry
+    if (emode == 2 && pmap.find(UnitParams::efixed) == pmap.end()) // indirect
+    {
+      if (specInfo.hasUniqueDetector(wsIndex)) {
+        std::shared_ptr<const IDetector> det(&specInfo.detector(wsIndex),
+                                             Mantid::NoDeleting());
+        try {
+          pmap[UnitParams::efixed] =
+              getEFixedGivenEMode(det, DeltaEMode::Type::Indirect);
+          g_log.debug() << "Detector: " << det->getID()
+                        << " EFixed: " << pmap[UnitParams::efixed] << "\n";
+        } catch (std::runtime_error) {
+          return false;
+        }
+      }
+      // Non-unique detector (i.e., DetectorGroup): use single provided value
+    }
+
+    std::vector<detid_t> warnDetIds;
+    try {
+      auto [difa, difc, tzero] =
+          specInfo.diffractometerConstants(wsIndex, warnDetIds);
+      pmap[UnitParams::difa] = difa;
+      pmap[UnitParams::difc] = difc;
+      pmap[UnitParams::tzero] = tzero;
+      if (warnDetIds.size() > 0) {
+        createDetectorIdLogMessages(warnDetIds, wsIndex);
+      }
+      if ((outputUnit.unitID().find("dSpacing") != std::string::npos) &&
+          (difa == 0) && (difc == 0)) {
+        return false;
+      }
+    } catch (const std::runtime_error &e) {
+      g_log.warning(e.what());
+    }
+  } else {
+    twoTheta = 0.0;
+    pmap[UnitParams::efixed] = DBL_MIN;
+    // Energy transfer is meaningless for a monitor, so set l2 to 0.
+    if (outputUnit.unitID().find("DeltaE") != std::string::npos) {
+      l2 = 0.0;
+    }
+    pmap[UnitParams::difc] = 0;
+    // can't do a conversion to d spacing with theta=0
+    if (outputUnit.unitID().find("dSpacing") != std::string::npos) {
+      return false;
+    }
+  }
+  return true;
+}
+
+void ExperimentInfo::createDetectorIdLogMessages(
+    const std::vector<detid_t> &detids, int64_t wsIndex) const {
+  std::string detIDstring;
+  auto iter = detids.begin();
+  auto itEnd = detids.end();
+  for (; iter != itEnd; ++iter) {
+    detIDstring += std::to_string(*iter) + ",";
+  }
+
+  if (!detIDstring.empty()) {
+    detIDstring.pop_back(); // Drop last comma
+  }
+  g_log.warning(
+      "Incomplete set of calibrated diffractometer constants found for "
+      "workspace index" +
+      std::to_string(wsIndex) + ". Using uncalibrated values for detectors " +
+      detIDstring);
 }
 
 } // namespace API
