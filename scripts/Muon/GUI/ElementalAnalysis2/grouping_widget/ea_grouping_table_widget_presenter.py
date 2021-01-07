@@ -11,7 +11,9 @@ from mantidqt.utils.observer_pattern import GenericObservable
 from Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_table_widget_view import inverse_group_table_columns
 
 
-maximum_number_of_groups = 20
+MAXIMUM_NUMBER_OF_GROUPS = 20
+REBIN_FIXED_OPTION = "1"
+REBIN_VARIABLE_OPTION = "2"
 
 
 class EAGroupingTablePresenter(object):
@@ -30,18 +32,15 @@ class EAGroupingTablePresenter(object):
 
         self._dataChangedNotifier = lambda: 0
 
-    def on_data_changed(self, notifier):
-        self._dataChangedNotifier = notifier
-
     def notify_data_changed(self):
         self._dataChangedNotifier()
 
     def _is_edited_name_duplicated(self, new_name):
         is_name_column_being_edited = self._view.grouping_table.currentColumn() == 0
-        is_name_unique = True
+        is_name_not_unique = False
         if new_name in self._model.group_and_pair_names:
-            is_name_unique = False
-        return is_name_column_being_edited and not is_name_unique
+            is_name_not_unique = True
+        return is_name_column_being_edited and is_name_not_unique
 
     def validate_group_name(self, text):
         if self._is_edited_name_duplicated(text):
@@ -96,9 +95,9 @@ class EAGroupingTablePresenter(object):
             update_model = False
             self.to_analyse_data_checkbox_changed(changed_item.checkState(), workspace_name)
         if col == inverse_group_table_columns['rebin']:
-            if changed_item.text() == "1":
+            if changed_item.text() == REBIN_FIXED_OPTION:
                 self._view.rebin_fixed_chosen(row)
-            elif changed_item.text() == "2":
+            elif changed_item.text() == REBIN_VARIABLE_OPTION:
                 self._view.rebin_variable_chosen(row)
 
         if not update_model:
@@ -133,8 +132,8 @@ class EAGroupingTablePresenter(object):
         self._view.clear()
 
         for group in self._model.groups:
-            if self._view.num_rows() >= maximum_number_of_groups:
-                self._view.warning_popup("Cannot add more than {} groups.".format(maximum_number_of_groups))
+            if self._view.num_rows() >= MAXIMUM_NUMBER_OF_GROUPS:
+                self._view.warning_popup("Cannot add more than {} groups.".format(MAXIMUM_NUMBER_OF_GROUPS))
                 break
             else:
                 to_analyse = True if group.name in self._model.selected_groups else False

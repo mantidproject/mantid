@@ -157,7 +157,7 @@ class EAGroupingTableView(QtWidgets.QWidget):
 
     def remove_selected_groups(self):
         indices = self._get_selected_row_indices()
-        for index in reversed(sorted(indices)):
+        for index in sorted(indices,reverse=True):
             self.grouping_table.removeRow(index)
 
     def remove_last_row(self):
@@ -247,13 +247,13 @@ class EAGroupingTableView(QtWidgets.QWidget):
     def get_table_contents(self):
         if self._updating:
             return []
-        ret = []
+        table_by_row = []
         for row in range(self.num_rows()):
             row_list = []
             for col in range(self.num_cols()):
                 row_list.append(str(self.grouping_table.item(row, col).text()))
-            ret.append(row_list)
-        return ret
+            table_by_row.append(row_list)
+        return table_by_row
 
     def clear(self):
         # Go backwards to preserve indices
@@ -262,12 +262,7 @@ class EAGroupingTableView(QtWidgets.QWidget):
 
     def on_rebin_combo_changed(self, index, row):
         self.change_once = False
-        if index == 0:
-            self.grouping_table.setItem(row, 4, QTableWidgetItem("0"))
-        if index == 1:
-            self.grouping_table.setItem(row, 4, QTableWidgetItem("1"))
-        if index == 2:
-            self.grouping_table.setItem(row, 4, QTableWidgetItem("2"))
+        self.grouping_table.setItem(row, 4, QTableWidgetItem(str(index)))
 
     def rebin_fixed_chosen(self, row):
         steps, ok = QtWidgets.QInputDialog.getInt(self, 'Steps',

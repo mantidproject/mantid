@@ -4,8 +4,10 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantidqt.utils.observer_pattern import Observer, Observable, GenericObservable, GenericObserver
+from mantidqt.utils.observer_pattern import GenericObservable, GenericObserver,GenericObserverWithArgPassing
 from Muon.GUI.Common.utilities.run_string_utils import run_string_to_list
+from Muon.GUI.Common import thread_model
+from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapper
 
 
 class EAGroupingTabPresenter(object):
@@ -27,19 +29,19 @@ class EAGroupingTabPresenter(object):
         self._view.set_description_text(self.text_for_description())
 
         # monitors for loaded data changing
-        self.loadObserver = EAGroupingTabPresenter.LoadObserver(self)
-        self.instrumentObserver = EAGroupingTabPresenter.InstrumentObserver(self)
+        self.loadObserver = GenericObserver(self.handle_new_data_loaded)
+        self.instrumentObserver = GenericObserver(self.on_clear_requested)
 
         # notifiers
-        self.groupingNotifier = EAGroupingTabPresenter.GroupingNotifier(self)
-        self.enable_editing_notifier = EAGroupingTabPresenter.EnableEditingNotifier(self)
-        self.disable_editing_notifier = EAGroupingTabPresenter.DisableEditingNotifier(self)
+        self.groupingNotifier = GenericObservable()
+        self.enable_editing_notifier = GenericObservable()
+        self.disable_editing_notifier = GenericObservable()
         self.calculation_finished_notifier = GenericObservable()
 
-        self.message_observer = EAGroupingTabPresenter.MessageObserver(self)
-        self.gui_variables_observer = EAGroupingTabPresenter.GuiVariablesChangedObserver(self)
-        self.enable_observer = EAGroupingTabPresenter.EnableObserver(self)
-        self.disable_observer = EAGroupingTabPresenter.DisableObserver(self)
+        self.message_observer = GenericObserverWithArgPassing(self._view.display_warning_box)
+        self.gui_variables_observer = GenericObserver(self.handle_update_all_clicked)
+        self.enable_observer = GenericObserver(self.enable_editing)
+        self.disable_observer = GenericObserver(self.disable_editing)
 
         self.disable_tab_observer = GenericObserver(self.disable_editing_without_notifying_subscribers)
         self.enable_tab_observer = GenericObserver(self.enable_editing_without_notifying_subscribers)
@@ -105,81 +107,13 @@ class EAGroupingTabPresenter(object):
         if len(self._model.selected_groups) == 0:
             self.grouping_table_widget.plot_default_case()
 
-    # ------------------------------------------------------------------------------------------------------------------
-    # Observer / Observable
-    # ------------------------------------------------------------------------------------------------------------------
+    def handle_update_all_clicked(self):
+        self.update_thread = self.create_update_thread()
+        self.update_thread.threadWrapperSetUp(self.disable_editing,
+                                              self.handle_update_finished,
+                                              self.error_callback)
+        self.update_thread.start()
 
-    class LoadObserver(Observer):
-
-        def __init__(self, outer):
-            Observer.__init__(self)
-            self.outer = outer
-
-        def update(self, observable, arg):
-            self.outer.handle_new_data_loaded()
-
-    class InstrumentObserver(Observer):
-
-        def __init__(self, outer):
-            Observer.__init__(self)
-            self.outer = outer
-
-        def update(self, observable, arg):
-            self.outer.on_clear_requested()
-
-    class GuiVariablesChangedObserver(Observer):
-        def __init__(self, outer):
-            Observer.__init__(self)
-            self.outer = outer
-
-    class GroupingNotifier(Observable):
-
-        def __init__(self, outer):
-            Observable.__init__(self)
-            self.outer = outer  # handle to containing class
-
-        def notify_subscribers(self, *args, **kwargs):
-            Observable.notify_subscribers(self, *args, **kwargs)
-
-    class MessageObserver(Observer):
-
-        def __init__(self, outer):
-            Observer.__init__(self)
-            self.outer = outer
-
-        def update(self, observable, arg):
-            self.outer._view.display_warning_box(arg)
-
-    class EnableObserver(Observer):
-        def __init__(self, outer):
-            Observer.__init__(self)
-            self.outer = outer
-
-        def update(self, observable, arg):
-            self.outer.enable_editing()
-
-    class DisableObserver(Observer):
-        def __init__(self, outer):
-            Observer.__init__(self)
-            self.outer = outer
-
-        def update(self, observable, arg):
-            self.outer.disable_editing()
-
-    class DisableEditingNotifier(Observable):
-
-        def __init__(self, outer):
-            Observable.__init__(self)
-            self.outer = outer  # handle to containing class
-
-        def notify_subscribers(self, *args, **kwargs):
-            Observable.notify_subscribers(self, *args, **kwargs)
-
-    class EnableEditingNotifier(Observable):
-
-        def __init__(self, outer):
-            Observable.__init__(self)
-            self.outer = outer  # handle to containing class
-
-        def notify_subscribers(self, *args, **kwargs):
-            Observable.notify_subscribers(self, *args, **kwargs)
+    def create_update_thread(self):
+        self._update_model = ThreadModelWrapper(self.calculate_all_data)
+        return thread_model.ThreadModel(self._update_model)

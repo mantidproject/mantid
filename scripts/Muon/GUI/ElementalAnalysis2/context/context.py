@@ -10,7 +10,7 @@ from mantidqt.utils.observer_pattern import Observable
 
 class ElementalAnalysisContext(object):
 
-    def __init__(self, ea_group_context=None, muon_gui_context=None, workspace_suffix=' MA'):
+    def __init__(self ,ea_group_context=None, muon_gui_context=None, workspace_suffix=' EA'):
         self._window_title = "Elemental Analysis 2"
         self.data_context = DataContext()
         self._gui_context = muon_gui_context

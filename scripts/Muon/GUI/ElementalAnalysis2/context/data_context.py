@@ -35,9 +35,8 @@ class DataContext(object):
             # default to 1
             n_det = 1
         if n_det == 0:
-            # The number of histograms commonly used for PSI data, in real data,
-            # very often the number of detectors == number of histograms
-            return self.current_workspace.getNumberHistograms()
+            #Number of detectors is number of workspace in group
+            return self.current_workspace.size()
         return n_det
 
     def is_data_loaded(self):

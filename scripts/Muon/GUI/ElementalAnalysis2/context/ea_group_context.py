@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 from Muon.GUI.ElementalAnalysis2.ea_group import EAGroup
-from mantidqt.utils.observer_pattern import Observable
+from mantidqt.utils.observer_pattern import GenericObservable
 
 
 def get_default_grouping(loadedData):
@@ -17,20 +17,13 @@ def get_default_grouping(loadedData):
         for workspace in loadedData.get_data(run=run_item)["workspace"]:
             group_name = str(workspace)
             '''For single workspace names the detector is found by taking everything after ; in the name
-            For co-added workspaces the detector is found by taking everything before '''
+            For example : 2695; Detector 1 --> Detector 1
+            For co-added workspaces the detector is found by taking everything before
+            For example : Detector 1_2695-2686 --> Detector 1 '''
             detector_name = (group_name.split(';', 1)[-1].lstrip()).split('_', 1)[0]
             run_number = str(run_item).replace('[', '').replace(']', '')
             groups += [EAGroup(group_name=group_name, detector=detector_name, run_number=run_number)]
     return groups
-
-
-class MessageNotifier(Observable):
-    def __init__(self, outer):
-        Observable.__init__(self)
-        self.outer = outer  # handle to containing class
-
-    def notify_subscribers(self, *args, **kwargs):
-        Observable.notify_subscribers(self, *args)
 
 
 class EAGroupContext(object):
@@ -41,7 +34,7 @@ class EAGroupContext(object):
         self._selected_type = ''
         self._selected_groups = []
 
-        self.message_notifier = MessageNotifier(self)
+        self.message_notifier = GenericObservable()
 
         self._check_group_contains_valid_detectors = check_group_contains_valid_detectors
 

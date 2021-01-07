@@ -80,14 +80,6 @@ class EAGroup(object):
         else:
             raise ValueError("detectors must be a list of ints.")
 
-    # @property
-    # def periods(self):
-    #     return self._periods
-    #
-    # @periods.setter
-    # def periods(self, value):
-    #     self._periods = value
-
     def show_raw(self, run: List[int], name: str):
         run_object = MuonRun(run)
         run_object not in self._counts_workspace or self._counts_workspace[run_object].show(name)

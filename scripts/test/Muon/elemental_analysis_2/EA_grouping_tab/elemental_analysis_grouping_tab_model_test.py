@@ -12,15 +12,20 @@ from Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_tab_model import EA
 class EAGroupingTabModelTest(unittest.TestCase):
     def setUp(self):
         self.context = mock.MagicMock()
-        self._num_periods_store = {62260: 4, 62261: 2, 62263: 1}
-        self.context.num_periods = lambda run: self._num_periods_store[run]
 
-    def test_reset_group_and_pairs_to_default_for_no_loaded_runs(self):
+    def test_reset_group_and_pairs_to_default_for_no_loaded_runs_when_fails(self):
         self.context.current_runs = []
         model = EAGroupingTabModel(self.context)
 
         status = model.reset_groups_to_default()
-        self.assertEquals(status, "failed")
+        self.assertEqual(status, "failed")
+
+    def test_reset_group_and_pairs_to_default_for_no_loaded_runs_when_passes(self):
+        self.context.current_runs = ["NotEmpty"]
+        model = EAGroupingTabModel(self.context)
+
+        status = model.reset_groups_to_default()
+        self.assertEqual(status, "success")
 
 
 if __name__ == '__main__':

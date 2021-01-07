@@ -64,6 +64,7 @@ class GroupingTablePresenterTest(unittest.TestCase):
         self.assert_model_empty()
         self.assert_view_empty()
         self.create_group_workspace_and_load()
+        self.assertEqual(len(self.context.group_context.group_names),3)
 
     # ------------------------------------------------------------------------------------------------------------------
     # TESTS
@@ -129,8 +130,11 @@ class GroupingTablePresenterTest(unittest.TestCase):
         self.assertEqual(len(self.model.groups), 3)
 
         groups_remove = ['9999; Detector 1', '9999; Detector 3']
+        groups_remaining = ['9999; Detector 2']
         self.view._get_selected_row_indices = mock.Mock(return_value=[0, 2])
         self.presenter.remove_selected_rows_in_view_and_model(groups_remove)
+
+        self.assertEqual(self.context.group_context.group_names,groups_remaining)
         self.assertEqual(self.view.num_rows(), 1)
         self.assertEqual(len(self.model.groups), 1)
 

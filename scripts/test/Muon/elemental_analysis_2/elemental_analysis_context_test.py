@@ -35,14 +35,14 @@ class DataContextTest(unittest.TestCase):
     # ------------------------------------------------------------------------------------------------------------------
 
     def test_initialised_empty(self):
-        self.assertEquals(self.context.current_runs, [])
-        self.assertEquals(self.context.run_info, [])
+        self.assertEqual(self.context.current_runs, [])
+        self.assertEqual(self.context.run_info, [])
 
     def test_add_run_object_to_run_info(self):
         new_run_object = mock.Mock(run_number=1234)
         self.context.run_info_update(new_run_object)
         self.assertEqual(len(self.context.run_info), 1)
-        self.assertEquals(self.context.run_info[0].run_number, 1234)
+        self.assertEqual(self.context.run_info[0].run_number, 1234)
 
     def test_clear_run_info(self):
         new_run_object = mock.Mock()
@@ -50,7 +50,7 @@ class DataContextTest(unittest.TestCase):
         self.assertEqual(len(self.context.run_info), 1)
 
         self.context.clear_run_info()
-        self.assertEquals(self.context.run_info, [])
+        self.assertEqual(self.context.run_info, [])
 
 
 class EAGroupContextTest(unittest.TestCase):
@@ -76,13 +76,13 @@ class EAGroupContextTest(unittest.TestCase):
         self.create_group_workspace_and_load()
         empty_group = []
         new_group = self.context.add_new_group(empty_group, self.loadedData)
-        self.assertEquals(len(new_group), 2)
+        self.assertEqual(len(new_group), 2)
 
     def test_remove_group(self):
         self.loadedData.clear()
         self.create_group_workspace_and_load()
         self.context.reset_group_to_default(self.loadedData)
-        self.assertEquals(len(self.context.groups), 2)
+        self.assertEqual(len(self.context.groups), 2)
         group_name1 = '9999; Detector 1'
         self.assertTrue(group_name1 in self.context.group_names)
 
@@ -91,18 +91,19 @@ class EAGroupContextTest(unittest.TestCase):
 
     def test_reset_group_to_default(self):
         self.loadedData.clear()
+        self.assertEqual(self.loadedData.num_items(),0)
         self.create_group_workspace_and_load()
         self.context.reset_group_to_default(self.loadedData)
-        self.assertEquals(len(self.context.groups), 2)
+        self.assertEqual(len(self.context.groups), 2)
 
     def test_clear(self):
         self.loadedData.clear()
         self.create_group_workspace_and_load()
         self.context.reset_group_to_default(self.loadedData)
-        self.assertEquals(len(self.context.groups), 2)
+        self.assertEqual(len(self.context.groups), 2)
 
         self.context.clear()
-        self.assertEquals(len(self.context.groups), 0)
+        self.assertEqual(len(self.context.groups), 0)
 
 
 if __name__ == '__main__':

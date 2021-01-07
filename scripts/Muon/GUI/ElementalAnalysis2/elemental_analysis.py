@@ -36,7 +36,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         self.data_context = DataContext(self.loaded_data)
         self.group_context = EAGroupContext(self.data_context.check_group_contains_valid_detectors)
         self.gui_context = MuonGuiContext()
-        self.context = ElementalAnalysisContext(self.group_context, self.gui_context)
+        self.context = ElementalAnalysisContext(self.group_context,self.group_context, self.gui_context)
         self.current_tab = ''
 
         self.setup_dummy()
