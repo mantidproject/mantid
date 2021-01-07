@@ -219,8 +219,8 @@ public:
     double ws1peak0_height = param_ws->cell<double>(2, 2);
     double ws1peak0_width = param_ws->cell<double>(2, 4);
 #if GSL_MAJOR_VERSION < 2
-    TS_ASSERT_DELTA(ws1peak0_height, 3.5371346, 1E-6);
-    TS_ASSERT_DELTA(ws1peak0_width, 0.1934177, 1E-6);
+    TS_ASSERT_DELTA(ws1peak0_height, 3.5371346, 1E-2);
+    TS_ASSERT_DELTA(ws1peak0_width, 0.1934177, 1E-2);
 #else
     TS_ASSERT_DELTA(ws1peak0_height, 4., 1E-6);
     TS_ASSERT_DELTA(ws1peak0_width, 0.17, 1E-6);
@@ -331,8 +331,8 @@ public:
     double ws1peak0_height = param_ws->cell<double>(2, 4);
     double ws1peak0_width = param_ws->cell<double>(2, 3);
 #if GSL_MAJOR_VERSION < 2
-    TS_ASSERT_DELTA(ws1peak0_height, 3.5371346, 1E-6);
-    TS_ASSERT_DELTA(ws1peak0_width, 0.1934177 * 2.3548, 1E-4);
+    TS_ASSERT_DELTA(ws1peak0_height, 3.5371346, 1E-2);
+    TS_ASSERT_DELTA(ws1peak0_width, 0.1934177 * 2.3548, 1E-2);
 #else
     TS_ASSERT_DELTA(ws1peak0_height, 4., 1E-6);
     TS_ASSERT_DELTA(ws1peak0_width, 0.17 * 2.3548, 1E-4);
