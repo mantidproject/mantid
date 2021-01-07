@@ -60,16 +60,17 @@ Test 2: Data Loading and Rebinning
   :alt: emu20918.png
 
 - On the **Home** tab, under the *Rebin* section, change **Rebin** to 
-  **Fixed** with steps of ``5``. The data should now look like this:
+  **Fixed** with steps of ``5``. Then on the Plotting Window make sure 
+  **Plot Raw** is unchecked. The data should now look like this:
 
 .. image:: /images/MuonAnalysisTests/emu20918_rebin.png
   :align: center
   :alt: emu20918_rebin.png
 
------------------------------------
+--------------------------------
   
-Test 3: Old Style Data Analysis GUI
------------------------------------
+Test 3: Basic Fitting In The GUI
+--------------------------------
 
 **Time required 5-10 minutes**
 
