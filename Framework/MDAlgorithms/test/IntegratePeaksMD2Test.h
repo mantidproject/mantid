@@ -52,7 +52,7 @@ public:
 
   //-------------------------------------------------------------------------------
   /** Run the IntegratePeaksMD2 with the given peak radius integration param */
-  static void doRun(double PeakRadius, double BackgroundRadius,
+  static void doRun(std::vector<double> PeakRadius, double BackgroundRadius,
                     std::string OutputWorkspace = "IntegratePeaksMD2Test_peaks",
                     double BackgroundStartRadius = 0.0, bool edge = true,
                     bool cyl = false, std::string fnct = "NoFit",
@@ -219,7 +219,7 @@ public:
     AnalysisDataService::Instance().add("IntegratePeaksMD2Test_peaks", peakWS0);
 
     // ------------- Integrating with cylinder ------------------------
-    doRun(0.1, 0.0, "IntegratePeaksMD2Test_peaks", 0.0, true, true);
+    doRun({0.1}, 0.0, "IntegratePeaksMD2Test_peaks", 0.0, true, true);
 
     TS_ASSERT_DELTA(peakWS0->getPeak(0).getIntensity(), 2.0, 1e-2);
 
@@ -228,7 +228,7 @@ public:
 
     // Test profile Gaussian
     std::string fnct = "Gaussian";
-    doRun(0.1, 0.0, "IntegratePeaksMD2Test_peaks", 0.0, true, true, fnct);
+    doRun({0.1}, 0.0, "IntegratePeaksMD2Test_peaks", 0.0, true, true, fnct);
     // More accurate integration changed values
     TS_ASSERT_DELTA(peakWS0->getPeak(0).getIntensity(), 2.0, 1e-2);
     // Error is also calculated
@@ -240,7 +240,7 @@ public:
 
     // Test profile back to back exponential
     fnct = "BackToBackExponential";
-    doRun(0.1, 0.0, "IntegratePeaksMD2Test_peaks", 0.0, true, true, fnct);
+    doRun({0.1}, 0.0, "IntegratePeaksMD2Test_peaks", 0.0, true, true, fnct);
 
     // TS_ASSERT_DELTA( peakWS0->getPeak(0).getIntensity(), 2.0, 0.2);
     // Error is also calculated
@@ -262,7 +262,7 @@ public:
     // ------------- Adaptive Integration r=MQ+b where b is PeakRadius and m is
     // 0.01 ------------------------
     peakWS0->addPeak(Peak(inst, 15050, 1.0, V3D(2., 3., 4.)));
-    doRun(0.1, 0.0, "IntegratePeaksMD2Test_peaks", 0.0, true, false, "NoFit",
+    doRun({0.1}, 0.0, "IntegratePeaksMD2Test_peaks", 0.0, true, false, "NoFit",
           0.01);
     TS_ASSERT_DELTA(peakWS0->getPeak(1).getIntensity(), 29.0, 1e-2);
 
@@ -271,7 +271,7 @@ public:
 
     // ------------- Integrate with 0.1 radius but IntegrateIfOnEdge
     // false------------------------
-    doRun(0.1, 0.0, "IntegratePeaksMD2Test_peaks", 0.0, false);
+    doRun({0.1}, 0.0, "IntegratePeaksMD2Test_peaks", 0.0, false);
 
     TS_ASSERT_DELTA(peakWS0->getPeak(0).getIntensity(), 2.0, 1e-2);
 
@@ -290,7 +290,7 @@ public:
     AnalysisDataService::Instance().add("IntegratePeaksMD2Test_peaks", peakWS);
 
     // ------------- Integrate with 1.0 radius ------------------------
-    doRun(1.0, 0.0);
+    doRun({1.0}, 0.0);
 
     TS_ASSERT_DELTA(peakWS->getPeak(0).getIntensity(), 1000.0, 1e-2);
     TS_ASSERT_DELTA(peakWS->getPeak(1).getIntensity(), 1000.0, 1e-2);
@@ -304,7 +304,7 @@ public:
                     sqrt(peakWS->getPeak(2).getIntensity()), 1e-2);
 
     // ------------- Let's do it again with 2.0 radius ------------------------
-    doRun(2.0, 0.0);
+    doRun({2.0}, 0.0);
 
     // All peaks are fully contained
     TS_ASSERT_DELTA(peakWS->getPeak(0).getIntensity(), 1000.0, 1e-2);
@@ -312,7 +312,7 @@ public:
     TS_ASSERT_DELTA(peakWS->getPeak(2).getIntensity(), 1000.0, 1e-2);
 
     // ------------- Let's do it again with 0.5 radius ------------------------
-    doRun(0.5, 0.0);
+    doRun({0.5}, 0.0);
 
     TS_ASSERT_DELTA(peakWS->getPeak(0).getIntensity(), 125.0, 10.0);
     TS_ASSERT_DELTA(peakWS->getPeak(1).getIntensity(), 1000.0, 1e-2);
@@ -324,7 +324,7 @@ public:
 
     // ------------- Integrate with 1.0 radius and 2.0
     // background------------------------
-    doRun(1.0, 2.0);
+    doRun({1.0}, 2.0);
     // Same 1000 since the background (~125) was subtracted, with some random
     // variation of the BG around
     //    TS_ASSERT_DELTA( peakWS->getPeak(0).getIntensity(), 1000.0, 10.0);
@@ -346,7 +346,7 @@ public:
 
     // ------------- Integrating without the background gives higher counts
     // ------------------------
-    doRun(1.0, 0.0);
+    doRun({1.0}, 0.0);
 
     // +125 counts due to background
     TS_ASSERT_DELTA(peakWS->getPeak(0).getIntensity(), 1125.0, 10.0);
@@ -374,7 +374,7 @@ public:
     AnalysisDataService::Instance().add("IntegratePeaksMD2Test_peaks", peakWS);
 
     // Integrate and copy to a new peaks workspace
-    doRun(1.0, 0.0, "IntegratePeaksMD2Test_peaks_out");
+    doRun({1.0}, 0.0, "IntegratePeaksMD2Test_peaks_out");
 
     // Old workspace is unchanged
     TS_ASSERT_EQUALS(peakWS->getPeak(0).getIntensity(), 0.0);
@@ -412,7 +412,7 @@ public:
                                                  peakWS);
 
     // First, a check with no background
-    doRun(1.0, 0.0, "IntegratePeaksMD2Test_peaks", 0.0);
+    doRun({1.0}, 0.0, "IntegratePeaksMD2Test_peaks", 0.0);
     // approx. + 500 + 333 counts due to 2 backgrounds
     TS_ASSERT_DELTA(peakWS->getPeak(0).getIntensity(), 1000 + 500 + 333, 30.0);
     TSM_ASSERT_DELTA("Simple sqrt() error",
@@ -421,7 +421,7 @@ public:
     // Set background from 2.0 to 3.0.
     // So the 1/2 density background remains, we subtract the 1/3 density =
     // about 1500 counts
-    doRun(1.0, 3.0, "IntegratePeaksMD2Test_peaks", 2.0);
+    doRun({1.0}, 3.0, "IntegratePeaksMD2Test_peaks", 2.0);
     TS_ASSERT_DELTA(peakWS->getPeak(0).getIntensity(), 1000 + 500, 80.0);
     // Error is larger, since it is error of peak + error of background
     TSM_ASSERT_DELTA("Error has increased",
@@ -429,7 +429,7 @@ public:
 
     // Now do the same without the background start radius
     // So we subtract both densities = a lower count
-    doRun(1.0, 3.0);
+    doRun({1.0}, 3.0);
     TSM_ASSERT_LESS_THAN("Peak intensity is lower if you do not include the "
                          "spacer shell (higher background)",
                          peakWS->getPeak(0).getIntensity(), 1500);
@@ -503,7 +503,7 @@ public:
                                                  peakWS);
 
     // Integrate and copy to a new peaks workspace
-    doRun(peakRadius, bgOuterRadius, "IntegratePeaksMD2Test_peaks_out",
+    doRun({peakRadius}, bgOuterRadius, "IntegratePeaksMD2Test_peaks_out",
           bgInnerRadius, false, /* edge correction */
           false,                /* cylinder*/
           "NoFit", 0.0,         /* adaptive*/
@@ -593,7 +593,7 @@ public:
     const double backgroundOuterRadius = 3;
     const double backgroundInnerRadius = 2.5;
 
-    doRun(peakRadius, backgroundOuterRadius, "OutWS", backgroundInnerRadius);
+    doRun({peakRadius}, backgroundOuterRadius, "OutWS", backgroundInnerRadius);
 
     auto outWS =
         AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>("OutWS");
@@ -631,7 +631,7 @@ public:
     const double backgroundOuterRadius = 3;
     const double backgroundInnerRadius = 2.5;
 
-    doRun(peakRadius, backgroundOuterRadius, "OutWS", backgroundInnerRadius);
+    doRun({peakRadius}, backgroundOuterRadius, "OutWS", backgroundInnerRadius);
 
     PeaksWorkspace_sptr outWS =
         AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>("OutWS");
@@ -731,7 +731,7 @@ public:
 
   void test_performance_NoBackground() {
     for (size_t i = 0; i < 10; i++) {
-      IntegratePeaksMD2Test::doRun(0.02, 0.0);
+      IntegratePeaksMD2Test::doRun({0.02}, 0.0);
     }
     // All peaks should be at least 1000 counts (some might be more if they
     // overla)
@@ -745,7 +745,7 @@ public:
 
   void test_performance_WithBackground() {
     for (size_t i = 0; i < 10; i++) {
-      IntegratePeaksMD2Test::doRun(0.02, 0.03);
+      IntegratePeaksMD2Test::doRun({0.02}, 0.03);
     }
   }
 };

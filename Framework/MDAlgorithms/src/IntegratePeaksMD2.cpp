@@ -445,27 +445,10 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
               bgDensity, eigenvects, eigenvals);
         } else {
           eigenvals = PeakRadius;
-          Matrix<double> idenMat = Matrix<double>(3, 3, true);
-          // idenMat = idenMat * eigenvals;
-          eigenvects.push_back(
-              V3D(idenMat[0][0], idenMat[0][1], idenMat[0][2]));
-          eigenvects.push_back(
-              V3D(idenMat[1][0], idenMat[1][1], idenMat[1][2]));
-          eigenvects.push_back(
-              V3D(idenMat[2][0], idenMat[2][1], idenMat[2][2]));
+          eigenvects.push_back(V3D(1.0, 0.0, 0.0));
+          eigenvects.push_back(V3D(0.0, 1.0, 0.0));
+          eigenvects.push_back(V3D(0.0, 0.0, 1.0));
         }
-
-        /*
-        g_log.notice() << "----- Eigenvects: \n";
-        for(uint ii = 0; ii < eigenvects.size(); ii++) {
-          g_log.notice() << ii << ": " << eigenvects[ii].X() << ", " <<
-        eigenvects[ii].Y() << ", " << eigenvects[ii].Z() << "\n";
-        }
-        g_log.notice() << "----- Eigenvals: \n";
-        for(uint ii = 0; ii < eigenvals.size(); ii++) {
-          g_log.notice() << ii << ": " << eigenvals[ii] << "\n";
-        }
-        */
 
         // transform ellispoid onto sphere of radius = R
         getRadiusSq =
