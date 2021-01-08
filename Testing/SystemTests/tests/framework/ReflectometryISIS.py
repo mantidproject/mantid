@@ -28,7 +28,6 @@ class ReflectometryISIS(systemtesting.MantidSystemTest, metaclass=ABCMeta):
         workspace_nexus_file = workspace_name + ".nxs"
 
         PIX=1.1E-3 #m
-        SC=75
         avgDB=29
         Load(Filename=workspace_nexus_file,OutputWorkspace=workspace_name)
         X=mtd[workspace_name]
@@ -46,7 +45,7 @@ class ReflectometryISIS(systemtesting.MantidSystemTest, metaclass=ABCMeta):
         I=mtd['I'][0]
 
         # Move the detector so that the detector channel matching the reflected beam is at 0,0
-        MoveInstrumentComponent(Workspace=I,ComponentName="lineardetector",X=0,Y=0,Z=-PIX*( (SC-avgDB)/2.0 +avgDB) )
+        MoveInstrumentComponent(Workspace=I,ComponentName="lineardetector",X=0,Y=0,Z=-PIX*avgDB)
 
         # Should now have signed theta vs Lambda
         ConvertSpectrumAxis(InputWorkspace=I,OutputWorkspace='SignedTheta_vs_Wavelength',Target='signed_theta')
