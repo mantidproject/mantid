@@ -314,6 +314,15 @@ class PlotWidgetPresenterCommonTest(unittest.TestCase):
         ws_rebin_names = ['MUSR62260; Group; bottom; Asymmetry; Rebin; MA']
         self.assertEqual(self.presenter.match_raw_selection(ws_rebin_names, False), ws_rebin_names)
 
+    def test_tab_enabled_with_data_loaded(self):
+        self.presenter.plot_all_selected_data(False, False)
+        self.view.setEnabled.assert_called_once_with(True)
+
+    def test_tab_disbaled_with_no_data_loaded(self):
+        self.model.get_workspace_list_and_indices_to_plot.return_value = [[], indices]
+        self.presenter.plot_all_selected_data(False, False)
+        self.view.setEnabled.assert_called_once_with(False)
+
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)
