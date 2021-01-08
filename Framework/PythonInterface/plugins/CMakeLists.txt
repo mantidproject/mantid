@@ -139,6 +139,7 @@ set(PYTHON_PLUGINS
     algorithms/PDConvertReciprocalSpace.py
     algorithms/PDToGUDRUN.py
     algorithms/PDToPDFgetN.py
+	algorithms/PeakMatching.py
     algorithms/PearlMCAbsorption.py
     algorithms/PEARLTransfit.py
     algorithms/PoldiCreatePeaksFromFile.py
