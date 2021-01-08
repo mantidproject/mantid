@@ -104,7 +104,7 @@ private slots:
   void onRemoveClicked();
   void onAddWorkspaceClicked();
   void onCellChanged(int row, int column);
-  void onItemPressed();
+  void onItemSelected();
   void onFunctionRemoved(QString const &function);
   void onFunctionAdded(QString const &function);
   void onFunctionReplaced(QString const &function);
