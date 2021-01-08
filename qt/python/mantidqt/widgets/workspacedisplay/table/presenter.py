@@ -7,6 +7,8 @@
 #  This file is part of mantidqt package.
 from functools import partial
 
+from PyQt5.QtCore import Qt
+
 from mantid.kernel import logger
 from mantid.plots.utility import legend_set_draggable
 from mantidqt.widgets.observers.ads_observer import WorkspaceDisplayADSObserver
@@ -47,8 +49,9 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
     def __init__(
             self,
             ws,
-            plot=None,
             parent=None,
+            window_flags=Qt.Window,
+            plot=None,
             model=None,
             view=None,
             name=None,
@@ -63,6 +66,7 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
 
         :param ws: Workspace to be displayed
         :param parent: Parent of the widget
+        :param window_flags: An optional set of window flags
         :param plot: Plotting function that will be used to plot workspaces. This requires Matplotlib directly.
                      Passed in as parameter to allow mocking
         :param model: Model to be used by the widget. Passed in as parameter to allow mocking
@@ -71,7 +75,7 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
         :param ads_observer: ADS observer to be used by the presenter. If not provided the default
                              one is used. Mainly intended for testing.
         """
-        view, model = self.create_table(ws, parent, model, view, batch)
+        view, model = self.create_table(ws, parent, window_flags, model, view, batch)
         self.view = view
         self.model = model
         self.name = name if name else model.get_name()
@@ -96,24 +100,24 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
     def show_view(self):
         self.container.show()
 
-    def create_table(self, ws, parent, model, view, batch):
+    def create_table(self, ws, parent, window_flags, model, view, batch):
         if batch:
-            view, model = self._create_table_batch(ws, parent, view, model)
+            view, model = self._create_table_batch(ws, parent, window_flags, view, model)
         else:
-            view, model = self._create_table_standard(ws, parent, view, model)
+            view, model = self._create_table_standard(ws, parent, window_flags, view, model)
         view.set_context_menu_actions(view)
         return view, model
 
-    def _create_table_standard(self, ws, parent, view, model):
+    def _create_table_standard(self, ws, parent, window_flags, view, model):
         model = model if model is not None else TableWorkspaceDisplayModel(ws)
-        view = view if view else TableWorkspaceDisplayView(presenter=self, parent=parent)
+        view = view if view else TableWorkspaceDisplayView(presenter=self, parent=parent, window_flags=window_flags)
         self.presenter = TableWorkspaceDataPresenterStandard(model, view)
         return view, model
 
-    def _create_table_batch(self, ws, parent, view, model):
+    def _create_table_batch(self, ws, parent, window_flags, view, model):
         model = model if model is not None else TableWorkspaceDisplayModel(ws)
         table_model = TableModel(parent=parent, data_model=model)
-        view = view if view else TableWorkspaceDisplayView(presenter=self, parent=parent, table_model=table_model)
+        view = view if view else TableWorkspaceDisplayView(presenter=self, parent=parent, window_flags=window_flags, table_model=table_model)
         self.presenter = TableWorkspaceDataPresenterBatch(model, view)
         return view, model
 
