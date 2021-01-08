@@ -369,6 +369,15 @@ std::string IndirectFitDataModel::getExcludeRegion(FitDomainIndex index) const {
   return getExcludeRegion(subIndices.first, subIndices.second);
 }
 
+void IndirectFitDataModel::setExcludeRegion(const std::string &exclude,
+                                            FitDomainIndex index) {
+  if (m_fittingData->empty())
+    return;
+  auto subIndices = getSubIndices(index);
+  m_fittingData->at(subIndices.first.value)
+      .setExcludeRegionString(exclude, subIndices.second);
+}
+
 std::pair<TableDatasetIndex, WorkspaceIndex>
 IndirectFitDataModel::getSubIndices(FitDomainIndex index) const {
   size_t sum{0};

@@ -293,7 +293,7 @@ class EnginXCalibrateFullThenCalibrateTest(systemtesting.MantidSystemTest):
             self.assertTrue(abs(self.pos_table.cell(1199, 9)) < 15)
 
             # === check difc, zero parameters for GSAS produced by EnggCalibrate
-            if sys.platform == "win32":  # Windows performs the fit differently enough to cause problems.
+            if not systemtesting.using_gsl_v1():  # GSLv1/v2 difference.
                 # Bank 1
                 self.assertTrue(rel_err_less_delta(self.difa, -4.07055, exdelta_special),
                                 "difa parameter for bank 1 is not what was expected, got: %f" % self.difa)

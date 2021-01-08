@@ -160,6 +160,9 @@ void PlotAsymmetryByLogValue::init() {
   declareProperty(std::make_unique<ArrayProperty<std::string>>(
                       "WorkspaceNames", Direction::Input),
                   "The range of workspaces");
+
+  declareProperty("Alpha", 1.0,
+                  "The balance parameter passed to AsymmetryCalc");
 }
 
 /// Validate the input properties
@@ -306,6 +309,8 @@ void PlotAsymmetryByLogValue::checkProperties(size_t &firstRunNumber,
   m_dtcFile = getPropertyValue("DeadTimeCorrFile");
   // Get runs
   m_fileNames = getProperty("WorkspaceNames");
+  // Get balance parameter
+  m_alpha = getProperty("Alpha");
 
   // If file names empty, first and last provided so need to populate vector
   if (m_fileNames.empty()) {
@@ -343,7 +348,8 @@ void PlotAsymmetryByLogValue::checkProperties(size_t &firstRunNumber,
      << getPropertyValue("BackwardSpectra") << ",";
   ss << m_int << "," << m_minTime << "," << m_maxTime << ",";
   ss << m_red << "," << m_green << ",";
-  ss << m_logName << ", " << m_logFunc;
+  ss << m_logName << ", " << m_logFunc << ",";
+  ss << m_alpha;
 
   // Add run numbers to all properties
   for (const auto &run : m_rmap) {
@@ -837,6 +843,7 @@ void PlotAsymmetryByLogValue::calcIntAsymmetry(const MatrixWorkspace_sptr &ws,
     IAlgorithm_sptr asym = createChildAlgorithm("AsymmetryCalc");
     asym->setLogging(false);
     asym->setProperty("InputWorkspace", intWS);
+    asym->setProperty("Alpha", m_alpha);
     asym->execute();
     out = asym->getProperty("OutputWorkspace");
   }

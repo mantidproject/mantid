@@ -459,7 +459,6 @@ public:
   }
 
   void test_sum_in_q_with_bad_reduction_type() {
-    // Test IvsLam workspace
     // No monitor normalization
     // No direct beam normalization
     // No transmission correction
@@ -473,7 +472,6 @@ public:
   }
 
   void test_sum_in_q_divergent_beam() {
-    // Test IvsLam workspace
     // No monitor normalization
     // No direct beam normalization
     // No transmission correction
@@ -484,18 +482,21 @@ public:
     alg.setProperty("SummationType", "SumInQ");
     alg.setProperty("ReductionType", "DivergentBeam");
     alg.setProperty("ThetaIn", 25.0);
-    MatrixWorkspace_sptr outLam = runAlgorithmLam(alg, 12);
 
+    MatrixWorkspace_sptr outLam = runAlgorithmLam(alg, 12);
     TS_ASSERT_DELTA(outLam->x(0)[0], 0.934992, 1e-6);
     TS_ASSERT_DELTA(outLam->x(0)[3], 5.173599, 1e-6);
     TS_ASSERT_DELTA(outLam->x(0)[7], 10.825076, 1e-6);
     TS_ASSERT_DELTA(outLam->y(0)[0], 2.768185, 1e-6);
     TS_ASSERT_DELTA(outLam->y(0)[3], 2.792649, 1e-6);
     TS_ASSERT_DELTA(outLam->y(0)[7], 2.787410, 1e-6);
+
+    checkConversionToQ(alg, twoThetaForDetector3() / 2.0);
+
+    TS_ASSERT_DELTA(sumCounts(outLam->counts(0)), 33.310938, 1e-6);
   }
 
   void test_sum_in_q_non_flat_sample() {
-    // Test IvsLam workspace
     // No monitor normalization
     // No direct beam normalization
     // No transmission correction
@@ -506,18 +507,21 @@ public:
     setupAlgorithm(alg, 1.5, 15.0, "3");
     alg.setProperty("SummationType", "SumInQ");
     alg.setProperty("ReductionType", "NonFlatSample");
-    MatrixWorkspace_sptr outLam = runAlgorithmLam(alg, 10);
 
+    MatrixWorkspace_sptr outLam = runAlgorithmLam(alg, 10);
     TS_ASSERT_DELTA(outLam->x(0)[0], 0.825488, 1e-6);
     TS_ASSERT_DELTA(outLam->x(0)[3], 5.064095, 1e-6);
     TS_ASSERT_DELTA(outLam->x(0)[7], 10.715573, 1e-6);
     TS_ASSERT_DELTA(outLam->y(0)[0], 3.141859, 1e-6);
     TS_ASSERT_DELTA(outLam->y(0)[3], 3.141885, 1e-6);
     TS_ASSERT_DELTA(outLam->y(0)[7], 3.141920, 1e-6);
+
+    checkConversionToQ(alg, twoThetaForDetector3() / 2.0);
+
+    TS_ASSERT_DELTA(sumCounts(outLam->counts(0)), 31.418985, 1e-6);
   }
 
   void test_sum_in_q_monitor_normalization() {
-    // Test IvsLam workspace
     // Monitor normalization
     // No direct beam normalization
     // No transmission correction
@@ -541,14 +545,18 @@ public:
     alg.setProperty("SummationType", "SumInQ");
     alg.setProperty("ReductionType", "DivergentBeam");
     alg.setProperty("ThetaIn", 25.0);
-    MatrixWorkspace_sptr outLam = runAlgorithmLam(alg, 13);
 
+    MatrixWorkspace_sptr outLam = runAlgorithmLam(alg, 13);
     TS_ASSERT_DELTA(outLam->x(0)[0], -0.748672, 1e-6);
     TS_ASSERT_DELTA(outLam->x(0)[5], 6.315674, 1e-6);
     TS_ASSERT_DELTA(outLam->x(0)[9], 11.967151, 1e-6);
     TS_ASSERT_DELTA(outLam->y(0)[0], 5.040302, 1e-6);
     TS_ASSERT_DELTA(outLam->y(0)[5], 2.193650, 1e-6);
     TS_ASSERT_DELTA(outLam->y(0)[9], 2.255101, 1e-6);
+
+    checkConversionToQ(alg, twoThetaForDetector4() / 2.0, false, false);
+
+    TS_ASSERT_DELTA(sumCounts(outLam->counts(0)), 66.514113, 1e-6);
   }
 
   void test_sum_in_q_transmission_correction_run() {
@@ -560,14 +568,18 @@ public:
     alg.setProperty("SummationType", "SumInQ");
     alg.setProperty("ReductionType", "DivergentBeam");
     alg.setProperty("ThetaIn", 25.0);
-    MatrixWorkspace_sptr outLam = runAlgorithmLam(alg, 12);
 
+    MatrixWorkspace_sptr outLam = runAlgorithmLam(alg, 12);
     TS_ASSERT_DELTA(outLam->x(0)[0], 0.934992, 1e-6);
     TS_ASSERT_DELTA(outLam->x(0)[3], 5.173599, 1e-6);
     TS_ASSERT_DELTA(outLam->x(0)[7], 10.825076, 1e-6);
     TS_ASSERT_DELTA(outLam->y(0)[0], 0.631775, 1e-6);
     TS_ASSERT_DELTA(outLam->y(0)[3], 0.888541, 1e-6);
     TS_ASSERT_DELTA(outLam->y(0)[7], 0.886874, 1e-6);
+
+    checkConversionToQ(alg, twoThetaForDetector3() / 2.0, true, false);
+
+    TS_ASSERT_DELTA(sumCounts(outLam->counts(0)), 21.030473, 1e-6);
   }
 
   void test_sum_in_q_exponential_correction() {
@@ -581,41 +593,21 @@ public:
     alg.setProperty("CorrectionAlgorithm", "ExponentialCorrection");
     alg.setProperty("C0", 0.2);
     alg.setProperty("C1", 0.1);
-    MatrixWorkspace_sptr outLam = runAlgorithmLam(alg, 11);
 
+    MatrixWorkspace_sptr outLam = runAlgorithmLam(alg, 11);
     TS_ASSERT_DELTA(outLam->x(0)[0], 0.920496, 1e-6);
     TS_ASSERT_DELTA(outLam->x(0)[3], 5.159104, 1e-6);
     TS_ASSERT_DELTA(outLam->x(0)[7], 10.810581, 1e-6);
     TS_ASSERT_DELTA(outLam->y(0)[0], 16.351599, 1e-6);
     TS_ASSERT_DELTA(outLam->y(0)[3], 23.963534, 1e-6);
     TS_ASSERT_DELTA(outLam->y(0)[7], 39.756736, 1e-6);
+
+    checkConversionToQ(alg, twoThetaForDetector4() / 2.0);
+
+    TS_ASSERT_DELTA(sumCounts(outLam->counts(0)), 365.843555, 1e-6);
   }
 
-  void test_sum_in_q_IvsQ() {
-    // Test IvsQ workspace
-    // No monitor normalization
-    // No direct beam normalization
-    // No transmission correction
-    // Processing instructions : 3
-
-    ReflectometryReductionOne2 alg;
-    setupAlgorithm(alg, 1.5, 15.0, "4");
-    alg.setProperty("SummationType", "SumInQ");
-    alg.setProperty("ReductionType", "DivergentBeam");
-    alg.setProperty("ThetaIn", 25.0);
-    MatrixWorkspace_sptr outQ = runAlgorithmQ(alg, 11);
-
-    // X range in outQ
-    TS_ASSERT_DELTA(outQ->x(0)[0], 0.292122, 1e-6);
-    TS_ASSERT_DELTA(outQ->x(0)[3], 0.393419, 1e-6);
-    TS_ASSERT_DELTA(outQ->x(0)[7], 0.731734, 1e-6);
-    // Y counts
-    TS_ASSERT_DELTA(outQ->y(0)[0], 2.852088, 1e-6);
-    TS_ASSERT_DELTA(outQ->y(0)[3], 2.833380, 1e-6);
-    TS_ASSERT_DELTA(outQ->y(0)[7], 2.841288, 1e-6);
-  }
-
-  void test_sum_in_q_IvsQ_point_detector() {
+  void test_sum_in_q_point_detector() {
     // Test IvsQ workspace for a point detector
     // No monitor normalization
     // No direct beam normalization
@@ -638,6 +630,8 @@ public:
     TS_ASSERT_DELTA(outQ->y(0)[0], 2.900303, 1e-6);
     TS_ASSERT_DELTA(outQ->y(0)[3], 2.886945, 1e-6);
     TS_ASSERT_DELTA(outQ->y(0)[7], 2.607357, 1e-6);
+
+    TS_ASSERT_DELTA(sumCounts(outQ->counts(0)), 79.113420, 1e-6);
   }
 
   void test_sum_in_q_exclude_partial_bins() {
@@ -648,14 +642,18 @@ public:
     alg.setProperty("ReductionType", "DivergentBeam");
     alg.setProperty("ThetaIn", 25.0);
     alg.setProperty("IncludePartialBins", "0");
-    MatrixWorkspace_sptr outLam = runAlgorithmLam(alg, 11);
 
+    MatrixWorkspace_sptr outLam = runAlgorithmLam(alg, 11);
     TS_ASSERT_DELTA(outLam->x(0)[0], 0.945877, 1e-6);
     TS_ASSERT_DELTA(outLam->x(0)[3], 5.184485, 1e-6);
     TS_ASSERT_DELTA(outLam->x(0)[7], 10.835962, 1e-6);
     TS_ASSERT_DELTA(outLam->y(0)[0], 2.767944, 1e-6);
     TS_ASSERT_DELTA(outLam->y(0)[3], 2.792424, 1e-6);
     TS_ASSERT_DELTA(outLam->y(0)[7], 2.787199, 1e-6);
+
+    checkConversionToQ(alg, twoThetaForDetector3() / 2.0);
+
+    TS_ASSERT_DELTA(sumCounts(outLam->counts(0)), 30.492737, 1e-6);
   }
 
   void test_sum_in_q_exclude_partial_bins_multiple_detectors() {
@@ -666,14 +664,18 @@ public:
     alg.setProperty("ReductionType", "DivergentBeam");
     alg.setProperty("ThetaIn", 25.0);
     alg.setProperty("IncludePartialBins", "0");
-    MatrixWorkspace_sptr outLam = runAlgorithmLam(alg, 11);
 
+    MatrixWorkspace_sptr outLam = runAlgorithmLam(alg, 11);
     TS_ASSERT_DELTA(outLam->x(0)[0], 0.957564, 1e-6);
     TS_ASSERT_DELTA(outLam->x(0)[3], 5.196172, 1e-6);
     TS_ASSERT_DELTA(outLam->x(0)[7], 10.847649, 1e-6);
     TS_ASSERT_DELTA(outLam->y(0)[0], 8.458467, 1e-6);
     TS_ASSERT_DELTA(outLam->y(0)[3], 8.521195, 1e-6);
     TS_ASSERT_DELTA(outLam->y(0)[7], 8.306563, 1e-6);
+
+    checkConversionToQ(alg, twoThetaForDetector4() / 2.0);
+
+    TS_ASSERT_DELTA(sumCounts(outLam->counts(0)), 93.056874, 1e-6);
   }
 
   void test_angle_correction_is_done_for_sum_in_lambda_when_theta_provided() {
@@ -1276,6 +1278,50 @@ private:
     return outQ;
   }
 
+  /** Check conversion of x values in a workspace in lambda to a workspace in Q
+   * has been done correctly. Optionally also check the counts.
+   *
+   * @param alg : the algorithm, which has already been executed
+   * @param theta : the theta to use in the conversion in degrees
+   * @param invert : if true, the Q bins are in inverted order to the lambda
+   * bins
+   * @param checkCounts : if true, also check the counts in the bins are the
+   * same
+   */
+  void checkConversionToQ(ReflectometryReductionOne2 &alg, const double theta,
+                          const bool invert = true,
+                          const bool checkCounts = true) {
+    // Extract arrays for convenience
+    MatrixWorkspace_sptr outLam = alg.getProperty("OutputWorkspaceWavelength");
+    MatrixWorkspace_sptr outQ = alg.getProperty("OutputWorkspace");
+    auto const &edgesLam = outLam->binEdges(0);
+    auto const &edgesQ = outQ->binEdges(0);
+    auto const &countsLam = outLam->counts(0);
+    auto const &countsQ = outQ->counts(0);
+
+    // Check lengths match
+    TS_ASSERT_EQUALS(edgesLam.size(), edgesQ.size());
+    TS_ASSERT_EQUALS(countsLam.size(), countsQ.size());
+
+    // Convenience function for optionally inverting an index
+    auto lamIdx = [&invert](auto const idx, auto const len) {
+      return invert ? len - 1 - idx : idx;
+    };
+
+    // Check converting the lambda value to Q gives the result we got
+    auto const nEdges = edgesQ.size();
+    auto const factor = 4 * M_PI * std::sin(theta * degToRad);
+    for (size_t i = 0; i < nEdges; ++i)
+      TS_ASSERT_DELTA(edgesQ[i], factor / edgesLam[lamIdx(i, nEdges)], 1e-6);
+
+    if (checkCounts) {
+      // Counts should be the same in matching bins
+      auto const nCounts = countsQ.size();
+      for (size_t i = 0; i < nCounts; ++i)
+        TS_ASSERT_DELTA(countsQ[i], countsLam[lamIdx(i, nCounts)], 1e-6);
+    }
+  }
+
   void setYValuesToWorkspace(MatrixWorkspace &ws) {
     for (size_t i = 0; i < ws.getNumberHistograms(); ++i) {
       auto &y = ws.mutableY(i);
@@ -1495,5 +1541,9 @@ private:
     TS_ASSERT_DELTA(qY[0], 140.267317, 1e-6);
     TS_ASSERT_DELTA(qY[6], 62.816137, 1e-6);
     TS_ASSERT_DELTA(qY[9], 24.275146, 1e-6);
+  }
+
+  double sumCounts(Mantid::HistogramData::Counts const &counts) {
+    return std::accumulate(counts.cbegin(), counts.cend(), 0.0);
   }
 };

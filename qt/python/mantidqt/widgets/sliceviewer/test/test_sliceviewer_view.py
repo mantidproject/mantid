@@ -5,6 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
+import io
+import sys
 import unittest
 
 import matplotlib as mpl
@@ -13,7 +15,9 @@ from mantidqt.widgets.colorbar.colorbar import MIN_LOG_VALUE
 
 mpl.use('Agg')
 from mantid.simpleapi import (  # noqa: E402
-    CreateMDHistoWorkspace, CreateMDWorkspace, CreateSampleWorkspace, SetUB)
+    CreateMDHistoWorkspace, CreateMDWorkspace, CreateSampleWorkspace, DeleteWorkspace,
+    FakeMDEventData, ConvertToDistribution, Scale, SetUB, RenameWorkspace)
+from mantid.api import AnalysisDataService  # noqa: E402
 from mantidqt.utils.qt.testing import start_qapplication  # noqa: E402
 from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder  # noqa: E402
 from mantidqt.widgets.sliceviewer.presenter import SliceViewer  # noqa: E402
@@ -53,6 +57,7 @@ class SliceViewerViewTest(unittest.TestCase, QtWidgetFinder):
         QApplication.sendPostedEvents()
 
         self.assert_no_toplevel_widgets()
+        self.assertEqual(pres.ads_observer, None)
 
     def test_enable_nonorthogonal_view_disables_lineplots_if_enabled(self):
         pres = SliceViewer(self.hkl_ws)
@@ -117,6 +122,120 @@ class SliceViewerViewTest(unittest.TestCase, QtWidgetFinder):
         self.assertEqual(colorbar.cmin.validator().bottom(), -inf)
 
         pres.view.close()
+
+    def test_view_closes_on_shown_workspace_deleted(self):
+        ws = CreateSampleWorkspace()
+        pres = SliceViewer(ws)
+        DeleteWorkspace(ws)
+
+        QApplication.sendPostedEvents()
+
+        self.assert_no_toplevel_widgets()
+        self.assertEqual(pres.ads_observer, None)
+
+    def test_view_does_not_close_on_other_workspace_deleted(self):
+        ws = CreateSampleWorkspace()
+        pres = SliceViewer(ws)
+        other_ws = CreateSampleWorkspace()
+        DeleteWorkspace(other_ws)
+
+        QApplication.sendPostedEvents()
+
+        # Strange behaviour between tests where views don't close properly means
+        # we cannot use self.assert_widget_exists, as many instances of SliceViewerView
+        # may be active at this time. As long as this view hasn't closed we are OK.
+        self.assertTrue(pres.view in self.find_widgets_of_type(str(type(pres.view))))
+        self.assertNotEqual(pres.ads_observer, None)
+
+        pres.view.close()
+
+    def test_view_closes_on_replace_when_model_properties_change(self):
+        ws = CreateSampleWorkspace()
+        pres = SliceViewer(ws)
+        ConvertToDistribution(ws)
+
+        QApplication.sendPostedEvents()
+
+        self.assert_no_toplevel_widgets()
+        self.assertEqual(pres.ads_observer, None)
+
+    def test_view_updates_on_replace_when_model_properties_dont_change_matrixws(self):
+        ws = CreateSampleWorkspace()
+        pres = SliceViewer(ws)
+        ws = Scale(ws, 100, "Multiply")
+
+        QApplication.sendPostedEvents()
+
+        self.assertTrue(pres.view in self.find_widgets_of_type(str(type(pres.view))))
+        self.assertNotEqual(pres.ads_observer, None)
+
+        pres.view.close()
+
+    def test_view_updates_on_replace_when_model_properties_dont_change_mdeventws(self):
+        ws = CreateMDWorkspace(Dimensions='3',
+                               EventType='MDEvent',
+                               Extents='-10,10,-5,5,-1,1',
+                               Names='Q_lab_x,Q_lab_y,Q_lab_z',
+                               Units='1\\A,1\\A,1\\A')
+        FakeMDEventData(ws, UniformParams="1000000")
+        pres = SliceViewer(ws)
+        try:
+            # the ads handler catches all exceptions so that the handlers don't
+            # bring down the sliceviewer. Check if anything is writtent to stderr
+            stderr_capture = io.StringIO()
+            stderr_orig = sys.stderr
+            sys.stderr = stderr_capture
+            ws *= 100
+            self.assertTrue('Error occurred in handler' not in stderr_capture.getvalue(),
+                            msg=stderr_capture.getvalue())
+        finally:
+            sys.stderr = stderr_orig
+
+        QApplication.sendPostedEvents()
+
+        self.assertTrue(pres.view in self.find_widgets_of_type(str(type(pres.view))))
+        self.assertNotEqual(pres.ads_observer, None)
+
+        pres.view.close()
+
+    def test_view_title_correct_and_view_didnt_close_on_workspace_rename(self):
+        ws = CreateSampleWorkspace()
+        pres = SliceViewer(ws)
+        old_title = pres.model.get_title()
+
+        renamed = RenameWorkspace(ws)  # noqa F841
+
+        QApplication.sendPostedEvents()
+
+        # View didn't close
+        self.assertTrue(pres.view in self.find_widgets_of_type(str(type(pres.view))))
+        self.assertNotEqual(pres.ads_observer, None)
+
+        # Window title correct
+        self.assertNotEqual(pres.model.get_title(), old_title)
+        self.assertEqual(pres.view.windowTitle(), pres.model.get_title())
+
+        pres.view.close()
+
+    def test_view_title_did_not_change_other_workspace_rename(self):
+        ws = CreateSampleWorkspace()
+        pres = SliceViewer(ws)
+        title = pres.model.get_title()
+        other_workspace = CreateSampleWorkspace()
+        other_renamed = RenameWorkspace(other_workspace)  # noqa F841
+
+        self.assertEqual(pres.model.get_title(), title)
+        self.assertEqual(pres.view.windowTitle(), pres.model.get_title())
+
+    def test_view_closes_on_ADS_cleared(self):
+        ws = CreateSampleWorkspace()
+        pres = SliceViewer(ws)
+        AnalysisDataService.clear()
+
+        QApplication.sendPostedEvents()
+
+        self.assert_no_toplevel_widgets()
+        self.assertEqual(pres.ads_observer, None)
 
 
 # private helper functions

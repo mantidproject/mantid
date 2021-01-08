@@ -50,6 +50,13 @@ public:
   std::size_t size() const override { return m_spectra.size() * m_blocksize; }
   /// Returns the size of each block of data returned by the dataY accessors
   std::size_t blocksize() const override { return m_blocksize; }
+  /// Returns the number of bins for a given histogram index.
+  std::size_t getNumberBins(const std::size_t &index) const override {
+    UNUSED_ARG(index);
+    return m_blocksize;
+  }
+  /// Returns the maximum number of bins in a workspace (works on ragged data).
+  std::size_t getMaxNumberBins() const override { return m_blocksize; }
   /// Returns the number of histograms in the workspace
   std::size_t getNumberHistograms() const override { return m_spectra.size(); }
 

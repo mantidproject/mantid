@@ -60,7 +60,9 @@ set ( TEST_PY_FILES
    transformWidget_test.py
    transform_widget_new_test.py
    utilities/muon_group_test.py
+   utilities/muon_base_pair_test.py
    utilities/muon_pair_test.py
+   utilities/muon_phasequad_test.py
    utilities/load_utils_test.py
    utilities/thread_model_test.py
    utilities/muon_workspace_wrapper_test.py

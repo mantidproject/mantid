@@ -20,6 +20,7 @@ using testing::_;
 using testing::AtLeast;
 using testing::Mock;
 using testing::NiceMock;
+using testing::ReturnRef;
 
 namespace {
 static constexpr const char *RUN1_NAME = "run1";
@@ -156,34 +157,34 @@ public:
 
   void test_constructor_subscribes_to_view() {
     EXPECT_CALL(m_view, subscribeSearch(_)).Times(1);
-    auto searcher = MockQtCatalogSearcher(&m_view);
+    auto searcher = makeCatalogSearcher();
     searcher.subscribe(&m_notifyee);
     verifyAndClear();
   }
 
   void test_journal_search() {
-    auto searcher = MockQtCatalogSearcher(&m_view);
+    auto searcher = makeCatalogSearcher();
     searcher.subscribe(&m_notifyee);
     auto results = doJournalSearch(searcher);
     checkSearchResults(results);
   }
 
   void test_catalog_search() {
-    auto searcher = MockQtCatalogSearcher(&m_view);
+    auto searcher = makeCatalogSearcher();
     searcher.subscribe(&m_notifyee);
     auto results = doCatalogSearch(searcher);
     checkSearchResults(results);
   }
 
   void test_catalog_search_returns_empty_results_if_incorrect_instrument() {
-    auto searcher = MockQtCatalogSearcher(&m_view);
+    auto searcher = makeCatalogSearcher();
     searcher.subscribe(&m_notifyee);
     auto results = doCatalogSearch(searcher, "BAD_INSTR");
     TS_ASSERT_EQUALS(results.size(), 0);
   }
 
   void test_async_journal_search_returns_success() {
-    auto searcher = MockQtCatalogSearcher(&m_view, m_searchAlg);
+    auto searcher = makeCatalogSearcher();
     searcher.subscribe(&m_notifyee);
     expectGetAlgorithmRunner();
     auto success = startAsyncJournalSearch(searcher);
@@ -192,7 +193,7 @@ public:
   }
 
   void test_async_catalog_search_returns_success_if_has_active_session() {
-    auto searcher = MockQtCatalogSearcher(&m_view, m_searchAlg);
+    auto searcher = makeCatalogSearcher();
     searcher.subscribe(&m_notifyee);
     expectGetAlgorithmRunner();
     auto success = startAsyncCatalogSearch(searcher);
@@ -201,7 +202,7 @@ public:
   }
 
   void test_async_journal_search_sets_in_progress_flag() {
-    auto searcher = MockQtCatalogSearcher(&m_view);
+    auto searcher = makeCatalogSearcher();
     searcher.subscribe(&m_notifyee);
     expectGetAlgorithmRunner();
     startAsyncJournalSearch(searcher);
@@ -210,7 +211,7 @@ public:
   }
 
   void test_async_catalog_search_sets_in_progress_flag() {
-    auto searcher = MockQtCatalogSearcher(&m_view);
+    auto searcher = makeCatalogSearcher();
     searcher.subscribe(&m_notifyee);
     expectGetAlgorithmRunner();
     startAsyncCatalogSearch(searcher);
@@ -219,7 +220,7 @@ public:
   }
 
   void test_async_journal_search_starts_algorithm_runner() {
-    auto searcher = MockQtCatalogSearcher(&m_view, m_searchAlg);
+    auto searcher = makeCatalogSearcher();
     searcher.subscribe(&m_notifyee);
     auto algRunner = expectGetAlgorithmRunner();
     expectAlgorithmStarted(m_searchAlg, algRunner);
@@ -228,7 +229,7 @@ public:
   }
 
   void test_async_catalog_search_starts_algorithm_runner() {
-    auto searcher = MockQtCatalogSearcher(&m_view, m_searchAlg);
+    auto searcher = makeCatalogSearcher();
     searcher.subscribe(&m_notifyee);
     auto algRunner = expectGetAlgorithmRunner();
     expectAlgorithmStarted(m_searchAlg, algRunner);
@@ -237,21 +238,21 @@ public:
   }
 
   void test_async_catalog_search_returns_success_when_not_logged_in() {
-    auto searcher = MockQtCatalogSearcher(&m_view, m_searchAlg, false);
+    auto searcher = makeCatalogSearcher(false);
     searcher.subscribe(&m_notifyee);
     auto success = startAsyncCatalogSearch(searcher);
     TS_ASSERT_EQUALS(success, true);
   }
 
   void test_async_catalog_search_starts_login_when_not_logged_in() {
-    auto searcher = MockQtCatalogSearcher(&m_view, m_searchAlg, false);
+    auto searcher = makeCatalogSearcher(false);
     searcher.subscribe(&m_notifyee);
     startAsyncCatalogSearch(searcher);
     TS_ASSERT_EQUALS(searcher.logInWasCalled(), true);
   }
 
   void test_async_catalog_search_does_not_start_search_when_not_logged_in() {
-    auto searcher = MockQtCatalogSearcher(&m_view, m_searchAlg, false);
+    auto searcher = makeCatalogSearcher(false);
     searcher.subscribe(&m_notifyee);
     EXPECT_CALL(m_view, getAlgorithmRunner()).Times(0);
     auto success = startAsyncCatalogSearch(searcher);
@@ -260,7 +261,7 @@ public:
   }
 
   void test_finish_handle_starts_async_search_if_active_session() {
-    auto searcher = MockQtCatalogSearcher(&m_view, m_searchAlg, true);
+    auto searcher = makeCatalogSearcher(true);
     searcher.subscribe(&m_notifyee);
     auto algRunner = expectGetAlgorithmRunner();
     expectAlgorithmStarted(m_searchAlg, algRunner);
@@ -269,7 +270,7 @@ public:
   }
 
   void test_finish_does_not_notify_failure_if_active_session() {
-    auto searcher = MockQtCatalogSearcher(&m_view, m_searchAlg, true);
+    auto searcher = makeCatalogSearcher(true);
     searcher.subscribe(&m_notifyee);
     expectGetAlgorithmRunner();
     expectNotNotifiedSearchFailed();
@@ -278,7 +279,7 @@ public:
   }
 
   void test_finish_handle_notifies_failure_if_no_active_session() {
-    auto searcher = MockQtCatalogSearcher(&m_view, m_searchAlg, false);
+    auto searcher = makeCatalogSearcher(false);
     searcher.subscribe(&m_notifyee);
     expectNotifySearchFailed();
     searcher.finishHandle(m_searchAlg.get());
@@ -286,7 +287,7 @@ public:
   }
 
   void test_error_handle_notifies_failure_if_no_active_session() {
-    auto searcher = MockQtCatalogSearcher(&m_view, m_searchAlg, false);
+    auto searcher = makeCatalogSearcher(false);
     searcher.subscribe(&m_notifyee);
     expectNotifySearchFailed();
     searcher.errorHandle(m_searchAlg.get(), "test error message");
@@ -294,10 +295,24 @@ public:
   }
 
   void test_error_handle_does_not_notify_failure_if_active_session() {
-    auto searcher = MockQtCatalogSearcher(&m_view, m_searchAlg, true);
+    auto searcher = makeCatalogSearcher(true);
     searcher.subscribe(&m_notifyee);
     expectNotNotifiedSearchFailed();
     searcher.errorHandle(m_searchAlg.get(), "test error message");
+    verifyAndClear();
+  }
+
+  void test_set_saved_flag() {
+    auto searcher = makeCatalogSearcher(true);
+    EXPECT_CALL(m_searchResults, setSaved()).Times(1);
+    searcher.setSaved();
+    verifyAndClear();
+  }
+
+  void test_notify_search_results_changed_sets_unsaved_flag() {
+    auto searcher = makeCatalogSearcher(true);
+    EXPECT_CALL(m_searchResults, setUnsaved()).Times(1);
+    searcher.notifySearchResultsChanged();
     verifyAndClear();
   }
 
@@ -305,6 +320,14 @@ private:
   NiceMock<MockRunsView> m_view;
   NiceMock<MockSearcherSubscriber> m_notifyee;
   IAlgorithm_sptr m_searchAlg;
+  NiceMock<MockSearchModel> m_searchResults;
+
+  MockQtCatalogSearcher
+  makeCatalogSearcher(bool const hasActiveSession = true) {
+    ON_CALL(m_view, mutableSearchResults())
+        .WillByDefault(ReturnRef(m_searchResults));
+    return MockQtCatalogSearcher(&m_view, m_searchAlg, hasActiveSession);
+  }
 
   void checkSearchResults(SearchResults const &actual) {
     auto const expected = SearchResults{SearchResult(RUN1_NUMBER, RUN1_TITLE),
@@ -318,6 +341,7 @@ private:
   void verifyAndClear() {
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_view));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_notifyee));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_searchResults));
   }
 
   std::shared_ptr<NiceMock<MockAlgorithmRunner>> expectGetAlgorithmRunner() {
@@ -345,26 +369,23 @@ private:
 
   SearchResults doJournalSearch(MockQtCatalogSearcher &searcher) {
     // Passing non-empty cycle performs journal search
-    return searcher.search("6543210", "INTER", "19_4",
-                           ISearcher::SearchType::MANUAL);
+    return searcher.search(SearchCriteria{"INTER", "19_4", "6543210"});
   }
 
   SearchResults doCatalogSearch(MockQtCatalogSearcher &searcher,
                                 std::string const &instrument = "INTER") {
     // Passing empty cycle performs catalog search
-    return searcher.search("6543210", instrument, "",
-                           ISearcher::SearchType::MANUAL);
+    return searcher.search(SearchCriteria{instrument, "", "6543210"});
   }
 
   bool startAsyncJournalSearch(MockQtCatalogSearcher &searcher) {
     // Passing non-empty cycle performs journal search
-    return searcher.startSearchAsync("6543210", "INTER", "19_4",
-                                     ISearcher::SearchType::MANUAL);
+    return searcher.startSearchAsync(
+        SearchCriteria{"INTER", "19_4", "6543210"});
   }
 
   bool startAsyncCatalogSearch(MockQtCatalogSearcher &searcher) {
     // Passing empty cycle performs catalog search
-    return searcher.startSearchAsync("6543210", "INTER", "",
-                                     ISearcher::SearchType::MANUAL);
+    return searcher.startSearchAsync(SearchCriteria{"INTER", "", "6543210"});
   }
 };

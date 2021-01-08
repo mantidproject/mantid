@@ -5,11 +5,16 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name,attribute-defined-outside-init
+import numpy as np
 import systemtesting
 from mantid.simpleapi import *
 from mantid.api import FileFinder
 
 import os
+
+# Expected densities for PG3AbsorptionCorrection and PG3InfoFromLogs
+SI_NUMBER_DENSITY = 0.049960265513165146
+SI_NUMBER_DENSITY_EFFECTIVE = 0.02498013275658258
 
 
 def _skip_test():
@@ -42,6 +47,7 @@ def do_cleanup():
              'PG3_46577.py',
              'PP_absorption_PG3_46577.nxs',
              'PP_absorption_PG3_46577.py']
+
     for filename in Files:
         absfile = FileFinder.getFullPath(filename)
         if os.path.exists(absfile):
@@ -126,6 +132,8 @@ class PG3AbsorptionCorrection(systemtesting.MantidSystemTest):
                            SaveAs="nexus",
                            OutputDirectory=savedir)
 
+        assert not mtd['PG3_46577'].sample().getMaterial().name().strip()
+
         # Silicon Full Paalman-Pings test
         SNSPowderReduction("PG3_46577.nxs.h5",
                            CalibrationFile=self.cal_file,
@@ -138,6 +146,14 @@ class PG3AbsorptionCorrection(systemtesting.MantidSystemTest):
                            ContainerShape="PAC06",
                            OutputFilePrefix='PP_absorption_',
                            OutputDirectory=savedir)
+
+        # Check name, number density, effective density
+        assert mtd['PG3_46577'].sample().getMaterial().name() == 'Si'
+        assert mtd['PG3_46577'].sample().getMaterial().numberDensity == SI_NUMBER_DENSITY
+        assert mtd['PG3_46577'].sample().getMaterial().numberDensityEffective == SI_NUMBER_DENSITY_EFFECTIVE
+
+        # Check volume using height value from log - pi*(r^2)*h, r and h in meters
+        assert mtd['PG3_46577'].sample().getShape().volume() == np.pi * np.square(.00295) * .040
 
         LoadNexus(Filename="PG3_46577.nxs", OutputWorkspace="PG3_46577")
         LoadNexus(Filename="PP_absorption_PG3_46577.nxs", OutputWorkspace="PP_46577")
@@ -406,3 +422,60 @@ class ToPDFgetNTest(systemtesting.MantidSystemTest):
 
     def validate(self):
         pass
+
+
+class PG3InfoFromLogs(systemtesting.MantidSystemTest):
+    cal_file = "PG3_PAC_HR_d46168_2020_05_06.h5"
+    char_files = ["PG3_char_2020_01_04_PAC_limit_1.4MW.txt", "PG3_char_2020_05_06-HighRes-PAC_1.4_MW.txt"]
+
+    def skipTests(self):
+        return _skip_test()
+
+    def cleanup(self):
+        return do_cleanup()
+
+    def requiredFiles(self):
+        files = [self.cal_file]
+        files.append(self.char_files[0])
+        files.append(self.char_files[1])
+        files.append("PG3_46577.nxs.h5")  # /SNS/PG3/IPTS-2767/nexus/
+        files.append("PG3_46190.nxs.h5")
+        files.append("PG3_46199.nxs.h5")
+        files.append("PG3_46202.nxs.h5")
+        return files
+
+    def runTest(self):
+        savedir = getSaveDir()
+
+        charfile = ','.join(self.char_files)
+
+        # Get the result without any absorption correction first
+        SNSPowderReduction("PG3_46577.nxs.h5",
+                           CalibrationFile=self.cal_file,
+                           CharacterizationRunsFile=charfile,
+                           Binning=-0.001,
+                           SaveAs="nexus",
+                           OutputDirectory=savedir)
+
+        assert not mtd['PG3_46577'].sample().getMaterial().name().strip()
+
+        # Silicon Full Paalman-Pings test
+        SNSPowderReduction("PG3_46577.nxs.h5",
+                           CalibrationFile=self.cal_file,
+                           CharacterizationRunsFile=charfile,
+                           Binning=-0.001,
+                           SaveAs="nexus",
+                           TypeOfCorrection="FullPaalmanPings",
+                           SampleFormula="Si",
+                           MeasuredMassDensity=1.165,
+                           ContainerShape="",
+                           OutputFilePrefix='PP_absorption_',
+                           OutputDirectory=savedir)
+
+        # Check name, number density, effective density
+        assert mtd['PG3_46577'].sample().getMaterial().name() == 'Si'
+        assert mtd['PG3_46577'].sample().getMaterial().numberDensity == SI_NUMBER_DENSITY
+        assert mtd['PG3_46577'].sample().getMaterial().numberDensityEffective == SI_NUMBER_DENSITY_EFFECTIVE
+
+        # Check volume using height value from log - pi*(r^2)*h, r and h in meters
+        assert mtd['PG3_46577'].sample().getShape().volume() == np.pi * np.square(.00295) * .040

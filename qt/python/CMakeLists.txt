@@ -82,6 +82,7 @@ if(ENABLE_MANTIDPLOT OR ENABLE_WORKBENCH)
       mantidqt/project/test/test_projectsaver.py
       mantidqt/project/test/test_workspaceloader.py
       mantidqt/project/test/test_workspacesaver.py
+      mantidqt/project/test/test_projectparser_mantidplot.py
       mantidqt/utils/test/test_async.py
       mantidqt/utils/test/test_modal_tester.py
       mantidqt/utils/test/test_qt_utils.py

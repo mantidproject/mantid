@@ -82,6 +82,7 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
         self._view.on_external_plot_pressed(self.handle_external_plot_requested)
         self._view.on_rebin_options_changed(self.handle_use_raw_workspaces_changed)
         self._view.on_plot_mode_changed(self.handle_plot_mode_changed_by_user)
+        self._view.on_plot_diff_checkbox_changed(self.handle_plot_diff_changed)
 
     def handle_data_updated(self, autoscale=False):
         """
@@ -164,6 +165,9 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
 
         self.handle_plot_mode_changed(plot_mode)
 
+    def handle_plot_diff_changed(self):
+        self.update_plot()
+
     def handle_workspace_deleted_from_ads(self, workspace: Workspace2D):
         """
         Handles a workspace being deleted from ads by removing the workspace from the plot
@@ -238,6 +242,7 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
         workspace_list, indices = self._model.get_workspace_list_and_indices_to_plot(self._view.is_raw_plot(),
                                                                                      self._view.get_plot_type())
         self._figure_presenter.plot_workspaces(workspace_list, indices, hold_on=False, autoscale=False)
+        self.update_plot()
 
     def handle_added_or_removed_group_or_pair_to_plot(self, group_pair_info: Dict):
         """

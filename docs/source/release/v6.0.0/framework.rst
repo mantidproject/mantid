@@ -9,6 +9,11 @@ Framework Changes
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
 
+Installation
+------------
+
+- The macOS bundle is now suffixed with ``Nightly`` if it comes from a nightly development build and can be installed alongside a full release build.
+
 Concepts
 --------
 
@@ -23,6 +28,8 @@ Algorithms
 - The calculation of a distance has been updated in Track to correctly calculate the distance for objects that have multiple intercepting surfaces, e.g. hollow cylinder. This affect algorithms such as :ref:`AbsorptionCorrection <algm-AbsorptionCorrection>` where you may now get slightly different values.
 - Added the ability to specify the packing fraction and effective number density to :ref:`SetSample <algm-SetSample>` and :ref:`SetSampleMaterial <algm-SetSampleMaterial>`.
 - :ref:`CropWorkspaceRagged <algm-CropWorkspaceRagged>` now produces ragged workspace and can now be used on large data sets.
+- Added the ability to specify a ``CustomGroupingString`` when creating a detector grouping workspace using :ref:`CreateGroupingWorkspace <algm-CreateGroupingWorkspace>`.
+- :ref:`LoadLamp <algm-LoadLamp>` is corrected to load sample logs as well under python3.
 
 Fitting
 -------
@@ -35,25 +42,7 @@ Data Objects
 Python
 ------
 
-
-.. contents:: Table of Contents
-   :local:
-
-.. warning:: **Developers:** Sort changes under appropriate heading
-    putting new features at the top of the section, followed by
-    improvements, followed by bug fixes.
-
-Installation
-------------
-
-
-MantidWorkbench
----------------
-
-See :doc:`mantidworkbench`.
-
-SliceViewer and Vates Simple Interface
---------------------------------------
+- Created a new module :ref:`mantid.utils <mantid.utils>` to allow for code sharing between algorithms.
 
 Improvements
 ############

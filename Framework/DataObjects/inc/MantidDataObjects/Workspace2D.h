@@ -51,12 +51,17 @@ public:
   /// Returns true if the workspace is ragged (has differently sized spectra).
   bool isRaggedWorkspace() const override;
 
-  /// Returns the histogram number
-  std::size_t getNumberHistograms() const override;
-
   // section required for iteration
   std::size_t size() const override;
+
   std::size_t blocksize() const override;
+  /// Returns the number of bins for a given histogram index.
+  std::size_t getNumberBins(const std::size_t &index) const override;
+  /// Returns the maximum number of bins in a workspace (works on ragged data).
+  std::size_t getMaxNumberBins() const override;
+
+  /// Returns the histogram number
+  std::size_t getNumberHistograms() const override;
 
   Histogram1D &getSpectrum(const size_t index) override {
     invalidateCommonBinsFlag();

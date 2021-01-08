@@ -5,7 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from mantid.simpleapi import AlignComponents, CreateSampleWorkspace, MoveInstrumentComponent, CreateEmptyTableWorkspace, mtd, RotateInstrumentComponent
+from mantid.simpleapi import (AlignComponents, CreateSampleWorkspace, MoveInstrumentComponent,
+                              CreateEmptyTableWorkspace, mtd, RotateInstrumentComponent)
 from mantid.api import AlgorithmFactory
 
 
@@ -50,7 +51,8 @@ class AlignComponentsTest(unittest.TestCase):
         startPos = ws.getInstrument().getComponentByName(component).getPos()
         startRot = ws.getInstrument().getComponentByName(component).getRotation().getEulerAngles()
         AlignComponents(CalibrationTable="calTable",
-                        Workspace="testWS",
+                        InputWorkspace="testWS",
+                        OutputWorkspace="testWS",
                         ComponentList=component,
                         Xposition=True,
                         Yposition=True)
@@ -105,7 +107,8 @@ class AlignComponentsTest(unittest.TestCase):
         startPos = ws.getInstrument().getComponentByName(component).getPos()
         startRot = ws.getInstrument().getComponentByName(component).getRotation().getEulerAngles("YZX") #YZX
         AlignComponents(CalibrationTable="calTable",
-                        Workspace="testWS",
+                        InputWorkspace="testWS",
+                        OutputWorkspace="testWS",
                         ComponentList=component,
                         AlphaRotation=True)
         ws = mtd["testWS"]
@@ -115,6 +118,7 @@ class AlignComponentsTest(unittest.TestCase):
         self.assertAlmostEqual(endRot[0],45.0,places=0)
         self.assertEqual(startRot[1], endRot[1])
         self.assertEqual(startRot[2], endRot[2])
+
 
 if __name__ == "__main__":
     # Only test is Algorithm is loaded
