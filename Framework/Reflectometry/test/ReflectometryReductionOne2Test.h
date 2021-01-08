@@ -554,7 +554,7 @@ public:
     TS_ASSERT_DELTA(outLam->y(0)[5], 2.193650, 1e-6);
     TS_ASSERT_DELTA(outLam->y(0)[9], 2.255101, 1e-6);
 
-    checkConversionToQ(alg, twoThetaForDetector4() / 2.0, false, false);
+    checkConversionToQ(alg, twoThetaForDetector4() / 2.0, false);
 
     TS_ASSERT_DELTA(sumCounts(outLam->counts(0)), 66.514113, 1e-6);
   }
@@ -577,7 +577,7 @@ public:
     TS_ASSERT_DELTA(outLam->y(0)[3], 0.888541, 1e-6);
     TS_ASSERT_DELTA(outLam->y(0)[7], 0.886874, 1e-6);
 
-    checkConversionToQ(alg, twoThetaForDetector3() / 2.0, true, false);
+    checkConversionToQ(alg, twoThetaForDetector3() / 2.0, false);
 
     TS_ASSERT_DELTA(sumCounts(outLam->counts(0)), 21.030473, 1e-6);
   }
@@ -760,6 +760,15 @@ public:
     TS_ASSERT_THROWS(alg.execute(), const std::invalid_argument &);
   }
 
+  void test_requesting_angle_for_sum_in_q_throws_for_multiple_groups() {
+    ReflectometryReductionOne2 alg;
+    setupAlgorithm(alg, 1.5, 15.0, "3+4, 4");
+    alg.setProperty("ThetaIn", 22.0);
+    alg.setProperty("SummationType", "SumInQ");
+    alg.setProperty("ReductionType", "DivergentBeam");
+    TS_ASSERT_THROWS(alg.execute(), const std::invalid_argument &);
+  }
+
   void test_angle_correction_is_not_done_for_sum_in_q_for_single_detector() {
     ReflectometryReductionOne2 alg;
     setupAlgorithm(alg, 1.5, 15.0, "4");
@@ -803,33 +812,6 @@ public:
     MatrixWorkspace_sptr outQ = alg.getProperty("OutputWorkspace");
     checkAngleCorrection(outLam, outQ, detectorTheta);
     checkDetector3And4SummedInQ(outLam, outQ);
-  }
-
-  void test_angle_correction_is_not_done_for_sum_in_q_for_multiple_groups() {
-    ReflectometryReductionOne2 alg;
-    setupAlgorithm(alg, 1.5, 15.0, "3+4, 4");
-
-    double const detectorTheta = twoThetaForDetector3() / 2.0;
-    double const thetaIn = 22.0;
-    auto inputWS = MatrixWorkspace_sptr(m_multiDetectorWS->clone());
-    setYValuesToWorkspace(*inputWS);
-
-    alg.setProperty("InputWorkspace", inputWS);
-    alg.setProperty("ThetaIn", thetaIn);
-    alg.setProperty("SummationType", "SumInQ");
-    alg.setProperty("ReductionType", "DivergentBeam");
-    alg.execute();
-
-    MatrixWorkspace_sptr outLam = alg.getProperty("OutputWorkspaceWavelength");
-    MatrixWorkspace_sptr outQ = alg.getProperty("OutputWorkspace");
-    checkAngleCorrection(outLam, outQ, detectorTheta);
-
-    // The output workspace has two spectra, containing the results for each
-    // group. Note that the cropping in wavelength is done based on all groups
-    // so the results for detector 4 here are slightly different to other tests
-    // that process this detector in a solo group
-    checkDetector3And4SummedInQ(outLam, outQ);
-    checkDetector4SummedInQCroppedToDetector3And4(outLam, outQ, 1);
   }
 
   void test_outputs_when_debug_is_false_and_IvsLam_name_not_set() {
@@ -1079,7 +1061,7 @@ public:
     auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve("IvsQ"));
     checkWorkspaceHistory(outputWS,
-                          {"ConvertUnits", "CropWorkspace", "ConvertUnits"});
+                          {"ConvertUnits", "CropWorkspace", "RefRoi"});
   }
 
   void test_history_for_sum_in_q_with_monitor_normalisation() {
@@ -1096,7 +1078,7 @@ public:
     checkWorkspaceHistory(outputWS,
                           {"ConvertUnits", "CropWorkspace", "ConvertUnits",
                            "CalculateFlatBackground", "RebinToWorkspace",
-                           "Divide", "CropWorkspace", "ConvertUnits"});
+                           "Divide", "CropWorkspace", "RefRoi"});
   }
 
   void test_history_for_sum_in_q_with_transmission_normalisation() {
@@ -1110,10 +1092,9 @@ public:
     alg.execute();
     auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve("IvsQ"));
-    checkWorkspaceHistory(outputWS,
-                          {"ConvertUnits", "CreateTransmissionWorkspace",
-                           "RebinToWorkspace", "Divide", "CropWorkspace",
-                           "ConvertUnits"});
+    checkWorkspaceHistory(
+        outputWS, {"ConvertUnits", "CreateTransmissionWorkspace",
+                   "RebinToWorkspace", "Divide", "CropWorkspace", "RefRoi"});
   }
 
   void test_IvsQ_is_not_distribution_data() {
@@ -1182,7 +1163,7 @@ public:
         AnalysisDataService::Instance().retrieve("IvsQ"));
     checkWorkspaceHistory(outputWS,
                           {"ReflectometryBackgroundSubtraction", "ConvertUnits",
-                           "CropWorkspace", "ConvertUnits"});
+                           "CropWorkspace", "RefRoi"});
   }
 
 private:
@@ -1283,13 +1264,10 @@ private:
    *
    * @param alg : the algorithm, which has already been executed
    * @param theta : the theta to use in the conversion in degrees
-   * @param invert : if true, the Q bins are in inverted order to the lambda
-   * bins
    * @param checkCounts : if true, also check the counts in the bins are the
    * same
    */
   void checkConversionToQ(ReflectometryReductionOne2 &alg, const double theta,
-                          const bool invert = true,
                           const bool checkCounts = true) {
     // Extract arrays for convenience
     MatrixWorkspace_sptr outLam = alg.getProperty("OutputWorkspaceWavelength");
@@ -1303,22 +1281,17 @@ private:
     TS_ASSERT_EQUALS(edgesLam.size(), edgesQ.size());
     TS_ASSERT_EQUALS(countsLam.size(), countsQ.size());
 
-    // Convenience function for optionally inverting an index
-    auto lamIdx = [&invert](auto const idx, auto const len) {
-      return invert ? len - 1 - idx : idx;
-    };
-
     // Check converting the lambda value to Q gives the result we got
     auto const nEdges = edgesQ.size();
     auto const factor = 4 * M_PI * std::sin(theta * degToRad);
     for (size_t i = 0; i < nEdges; ++i)
-      TS_ASSERT_DELTA(edgesQ[i], factor / edgesLam[lamIdx(i, nEdges)], 1e-6);
+      TS_ASSERT_DELTA(edgesQ[i], factor / edgesLam[nEdges - 1 - i], 1e-6);
 
     if (checkCounts) {
       // Counts should be the same in matching bins
       auto const nCounts = countsQ.size();
       for (size_t i = 0; i < nCounts; ++i)
-        TS_ASSERT_DELTA(countsQ[i], countsLam[lamIdx(i, nCounts)], 1e-6);
+        TS_ASSERT_DELTA(countsQ[i], countsLam[nCounts - 1 - i], 1e-6);
     }
   }
 
