@@ -39,7 +39,7 @@ class MatrixWorkspaceTableView(QTableView):
 
 class MatrixWorkspaceDisplayView(QTabWidget):
 
-    def __init__(self, presenter, parent=None):
+    def __init__(self, presenter, parent=None, window_flags=Qt.Window):
         super(MatrixWorkspaceDisplayView, self).__init__(parent)
 
         self.presenter = presenter
@@ -54,6 +54,7 @@ class MatrixWorkspaceDisplayView(QTabWidget):
         self.setPalette(palette)
 
         self.setAttribute(Qt.WA_DeleteOnClose, True)
+        self.setWindowFlags(window_flags)
 
         self.active_tab_index = 0
         self.currentChanged.connect(self.set_scroll_position_on_new_focused_tab)

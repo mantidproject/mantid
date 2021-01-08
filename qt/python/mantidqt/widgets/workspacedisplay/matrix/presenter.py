@@ -7,6 +7,8 @@
 #  This file is part of the mantid workbench.
 #
 #
+from PyQt5.QtCore import Qt
+
 from mantid.plots.utility import MantidAxType
 from mantidqt.widgets.observers.ads_observer import WorkspaceDisplayADSObserver
 from mantidqt.widgets.workspacedisplay.data_copier import DataCopier
@@ -22,7 +24,7 @@ class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
     A_LOT_OF_THINGS_TO_PLOT_MESSAGE = "You selected {} spectra to plot. Are you sure you want to plot that many?"
     NUM_SELECTED_FOR_CONFIRMATION = 10
 
-    def __init__(self, ws, plot=None, parent=None, model=None, view=None, ads_observer=None, container=None,
+    def __init__(self, ws, plot=None, parent=None, window_flags=Qt.Window, model=None, view=None, ads_observer=None, container=None,
                  window_width=600, window_height=400):
         """
         Creates a display for the provided workspace.
@@ -39,7 +41,7 @@ class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
 
         # Create model and view, or accept mocked versions
         self.model = model if model else MatrixWorkspaceDisplayModel(ws)
-        self.view = view if view else MatrixWorkspaceDisplayView(self, parent)
+        self.view = view if view else MatrixWorkspaceDisplayView(self, parent, window_flags)
         self.container = container if container else StatusBarView(parent, self.view, self.model.get_name(),
                                                                    window_width=window_width,
                                                                    window_height=window_height,
