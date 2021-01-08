@@ -239,6 +239,7 @@ Test 9: Simultaneous TF Asymmetry Fits
 	- Enable **TF Asymmetry Mode**
 	- Click **Fit**
 	- Check that all values for the flat background are different to each other
+- Before moving to the final test, disable **TF Asymmetry Mode**
 	
 -------------------------------------
 

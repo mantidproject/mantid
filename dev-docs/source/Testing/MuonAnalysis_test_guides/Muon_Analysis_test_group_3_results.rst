@@ -33,7 +33,7 @@ Test 1: Individual And Co-Added Fits
 - Change **Function Name** to be **FlatBackground,Abragam** or equivalent
 - The bottom table should have all fit workspaces that used both 
   **Flat Background** and the **Abragam** functions
-- Click **Unselect All**
+- Click **Unselect All** for the workspaces table
 - Change **Table Name** to ``IndividualFitsTable``
 - Check all boxes next to workspaces that are individual fits, including the 
   co-added workspace
@@ -58,13 +58,15 @@ Test 1: Individual And Co-Added Fits
 .. image:: /images/MuonAnalysisTests/results_test1.png
   :align: center
 
-Test 3: Sequential fit of simultaneous fits
--------------------------------------------
+Test 2: Sequential Fits And Simultaneous Fits
+---------------------------------------------
 
-- For this test we will use the same **Fucntion Name** as in :ref:`test_1` 
+*Time required 5-10 minutes*
+
+- For this test we will use the same **Function Name** as in :ref:`test_1` 
   (*FlatBackground,Abragam*)
 - Change the **Table Name** to ``SeqFitOfSimFits``
-- Click **Unselect All**
+- Click **Unselect All** for the workspaces table
 - Check the three workspaces that were simultaneous fits over groups and 
   sequentially fit for all runs
 - At this point the table should look something like this:
@@ -77,47 +79,44 @@ Test 3: Sequential fit of simultaneous fits
 - Click **Output Results**
 - In the main workbench window, in the workspace toolbox, open the results 
   table
+- There should be 3 rows
+- In particular, there should be only one column for ``A``, ``Omega``, ``Phi`` 
+  and ``Sigma`` (plus one for each paramaters error) as these paramaters are 
+  global
+- There should be a column for ``f0.f0.A0`` and ``f1.f0.A0`` as this was not 
+  a global paramater, and similarly for the ``Tau`` Parameter. They should all 
+  have their own error associated with them
+- The table should look similar to this:
 
-- The top box should have extra log values for ``group`` and ``period`` - select ``group`` (as well as ``run_number``)
-- Keep all runs selected and create table, this time with the name ``ResultsTable2``.
-- There should be six rows in all, two per run (one for fwd, one for bwd).
-
-Like this:
-
-.. image:: /images/MuonAnalysisTests/results_tests2and3.png
+.. image:: /images/MuonAnalysisTests/results_test2.png
   :align: center
+	:alt: results_test2.png
+	:width: 600
+  
+Test 3: TF Asymmetry Results
+----------------------------
 
-Test 4: Simultaneous fits
--------------------------
-- Select the "Simultaneous fits" radio button above the centre group box.
-- Keep the first label, "20918", selected in the drop-down list. (This was the fit across groups in the same run)
-- Create the table with the name ``Results20918``
-- There should be one row per run
-- For the global parameters (``f1.A``, ``f1.Omega``, ``f1.Phi``, ``f1.Sigma``), note the error is non-zero for the first run and zero for the others as they were all fitted together.
+*Time required 5-10 minutes*
 
-Test 5: Simultaneous fits (2)
------------------------------
-- Now in the drop-down list next to the "Simultaneous fits" radio button, select the label "20918-20", which was the fit across runs.
-- Create the table with the name ``Results20918-20``
-- In the drop-down list, select the label "MUSRlabel", the fit across periods for MUSR data. Have the ``period`` log value selected in the top box for this one, and create the table ``ResultsMUSR``.
+- Click **Unselect All** for the log values table
+- Now Select **Field_Danfysik**
+- Change **Function Name** to be **GausOsc,TFAsymmetry** or equivalent
+- There is one workspace which was fit simultaneously so will not be included 
+  in this results table. Deselect that worksapce
+- Change the table name to ``TFAsymmetryFits``
+- The table should look like this:
 
-Should look like this:
+.. image:: /images/MuonAnalysisTests/results_test3_table.png
+	:align: center
+	:alt: results_test3_table.png
+	:width: 600
 
-.. image:: /images/MuonAnalysisTests/results_tests4and5.png
-  :align: center
+- Click **Output Results**
+- There should be 12 rows and a column for **Field_Danfysik**, like this:
 
-Test 6: Multiple simultaneous fits
-----------------------------------
-- Select the last radio button, "Multiple", above the centre group box.
-- Three simultaneous fit labels are listed: 20918, 20918#2, 20918-20 and MUSRlabel.
-- Note that they have different colours, because the number of datasets and fit models differ. You should not be able to create a table with all of these selected.
-- Select just the first two, i.e. "20918" and "20918#2", log values ``run_number`` and ``sample_temp``, and create the table.
-- There should be columns for label, run number/sample temp (with correct ranges) and fit parameters.
-- Non-global parameters should have a column for each dataset - so ``f0.f0.A0``, ``f1.f0.A0``, ``f2.f0.A0``
-- Global parameters should share a column - so just ``f1.A``, ``f1.Omega`` etc.
+.. image:: /images/MuonAnalysisTests/results_test3.png
+	:align: center
+	:alt: results_test3.png
+	:width: 600
 
-Should look like this:
-
-.. image:: /images/MuonAnalysisTests/results_test6.png
-  :align: center
 
