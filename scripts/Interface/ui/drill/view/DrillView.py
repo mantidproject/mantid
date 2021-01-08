@@ -725,6 +725,7 @@ class DrillView(QMainWindow):
         self.datadirs.setDisabled(state)
         self.load.setDisabled(state)
         self.settings.setDisabled(state)
+        self.export.setDisabled(state)
         self.paste.setDisabled(state)
         self.copy.setDisabled(state)
         self.cut.setDisabled(state)
