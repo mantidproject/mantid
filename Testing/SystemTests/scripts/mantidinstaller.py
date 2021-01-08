@@ -289,7 +289,7 @@ class DMGInstaller(MantidInstaller):
         MantidInstaller.__init__(self, package_dir, 'mantid*.dmg', do_install)
         package = os.path.basename(self.mantidInstaller)
         if 'mantidnightly' in package:
-            self.bundle_name += 'MantidWorkbenchNightly.app'
+            self.bundle_name = 'MantidWorkbenchNightly.app'
         elif 'mantidunstable' in package:
             self.bundle_name = 'MantidWorkbenchUnstable.app'
         else:
