@@ -143,6 +143,9 @@ public:
    * @brief test_multiPeaksMultiSpectra
    */
   void test_multiPeaksMultiSpectra() {
+    // run serially so values don't depend on no. cores etc.
+    FrameworkManager::Instance().setNumOMPThreads(1);
+
     // set up parameters with starting value
     std::vector<string> peakparnames;
     std::vector<double> peakparvalues;
@@ -218,13 +221,8 @@ public:
     // spectrum 2
     double ws1peak0_height = param_ws->cell<double>(2, 2);
     double ws1peak0_width = param_ws->cell<double>(2, 4);
-#if GSL_MAJOR_VERSION < 2
-    TS_ASSERT_DELTA(ws1peak0_height, 3.5371346, 1E-2);
-    TS_ASSERT_DELTA(ws1peak0_width, 0.1934177, 1E-2);
-#else
     TS_ASSERT_DELTA(ws1peak0_height, 4., 1E-6);
     TS_ASSERT_DELTA(ws1peak0_width, 0.17, 1E-6);
-#endif
     double ws1peak1_height = param_ws->cell<double>(3, 2);
     double ws1peak1_width = param_ws->cell<double>(3, 4);
     TS_ASSERT_DELTA(ws1peak1_height, 2., 1E-6);
@@ -247,6 +245,8 @@ public:
     AnalysisDataService::Instance().remove("PeakPositionsWS");
     AnalysisDataService::Instance().remove("FittedPeaksWS");
     AnalysisDataService::Instance().remove("PeakParametersWS");
+
+    FrameworkManager::Instance().setNumOMPThreadsToConfigValue();
   }
 
   //----------------------------------------------------------------------------------------------
@@ -254,6 +254,9 @@ public:
    * @brief test_effectivePeakParameters
    */
   void test_effectivePeakParameters() {
+    // run serially so values don't depend on no. cores etc.
+    FrameworkManager::Instance().setNumOMPThreads(1);
+
     // set up parameters with starting value
     std::vector<string> peakparnames;
     std::vector<double> peakparvalues;
@@ -330,13 +333,8 @@ public:
     // spectrum 2: (center, width, height, intensity)
     double ws1peak0_height = param_ws->cell<double>(2, 4);
     double ws1peak0_width = param_ws->cell<double>(2, 3);
-#if GSL_MAJOR_VERSION < 2
-    TS_ASSERT_DELTA(ws1peak0_height, 3.5371346, 1E-2);
-    TS_ASSERT_DELTA(ws1peak0_width, 0.1934177 * 2.3548, 1E-2);
-#else
     TS_ASSERT_DELTA(ws1peak0_height, 4., 1E-6);
     TS_ASSERT_DELTA(ws1peak0_width, 0.17 * 2.3548, 1E-4);
-#endif
 
     double ws1peak1_height = param_ws->cell<double>(3, 4);
     double ws1peak1_width = param_ws->cell<double>(3, 3);
@@ -360,6 +358,8 @@ public:
     AnalysisDataService::Instance().remove("PeakPositionsWS");
     AnalysisDataService::Instance().remove("FittedPeaksWS");
     AnalysisDataService::Instance().remove("PeakParametersWS");
+
+    FrameworkManager::Instance().setNumOMPThreadsToConfigValue();
   }
 
   //----------------------------------------------------------------------------------------------
