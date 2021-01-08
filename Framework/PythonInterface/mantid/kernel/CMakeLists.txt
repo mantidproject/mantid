@@ -61,6 +61,7 @@ set(EXPORT_FILES
     src/Exports/StringContainsValidator.cpp
     src/Exports/PropertyFactory.cpp
     src/Exports/RebinParamsValidator.cpp
+    src/Exports/PhysicalConstants.cpp
 )
 
 set(MODULE_DEFINITION ${CMAKE_CURRENT_BINARY_DIR}/kernel.cpp)
