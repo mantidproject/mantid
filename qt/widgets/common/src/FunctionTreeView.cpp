@@ -2269,7 +2269,12 @@ void FunctionTreeView::setGlobalParameters(const QStringList &globals) {
     auto prop = ap.prop;
     if (!prop->hasOption(globalOptionName))
       continue;
-    auto isGlobal = globals.contains(getParameterName(prop));
+
+    auto const parameterName = getParameterName(prop);
+    auto const isGlobal = std::any_of(
+        globals.cbegin(), globals.cend(), [&](QString const &global) {
+          return m_multiDomainFunctionPrefix + global == parameterName;
+        });
     prop->setOption(globalOptionName, isGlobal);
   }
 }

@@ -73,7 +73,8 @@ namespace MantidQt {
 namespace MantidWidgets {
 
 FitScriptGeneratorModel::FitScriptGeneratorModel()
-    : m_presenter(), m_fitDomains(), m_fittingMode(FittingMode::Sequential) {}
+    : m_presenter(), m_fitDomains(), m_globalParameters(), m_globalTies(),
+      m_fittingMode(FittingMode::Sequential) {}
 
 FitScriptGeneratorModel::~FitScriptGeneratorModel() {}
 
@@ -266,6 +267,8 @@ void FitScriptGeneratorModel::updateParameterTie(
 void FitScriptGeneratorModel::updateParameterTie(
     std::size_t const &domainIndex, std::string const &fullParameter,
     std::string const &fullTie) {
+  checkParameterIsNotGlobal(fullParameter);
+
   if (m_fittingMode == FittingMode::Sequential ||
       isSameDomain(domainIndex, fullTie))
     updateLocalParameterTie(domainIndex, fullParameter, fullTie);
@@ -401,6 +404,18 @@ FitScriptGeneratorModel::findGlobalTie(std::string const &fullParameter) const {
                       });
 }
 
+void FitScriptGeneratorModel::setGlobalParameters(
+    std::vector<std::string> const &parameters) {
+  m_globalParameters.clear();
+  for (auto const &fullParameter : parameters) {
+    auto const globalParameter = removeTopFunctionIndex(fullParameter);
+    checkParameterIsInAllDomains(globalParameter);
+    checkGlobalParameterhasNoTies(globalParameter);
+
+    m_globalParameters.emplace_back(GlobalParameter(globalParameter));
+  }
+}
+
 void FitScriptGeneratorModel::setFittingMode(FittingMode const &fittingMode) {
   if (fittingMode == FittingMode::SimultaneousAndSequential)
     throw std::invalid_argument(
@@ -408,6 +423,51 @@ void FitScriptGeneratorModel::setFittingMode(FittingMode const &fittingMode) {
   m_fittingMode = fittingMode;
   m_globalTies.clear();
   m_presenter->setGlobalTies(m_globalTies);
+  m_globalParameters.clear();
+  m_presenter->setGlobalParameters(m_globalParameters);
+}
+
+void FitScriptGeneratorModel::checkParameterIsInAllDomains(
+    std::string const &globalParameter) const {
+  auto const hasParameter = [&globalParameter](FitDomain const &fitDomain) {
+    return fitDomain.hasParameter(globalParameter);
+  };
+
+  if (!std::all_of(m_fitDomains.cbegin(), m_fitDomains.cend(), hasParameter))
+    throw std::invalid_argument(
+        globalParameter +
+        " cannot be global because it doesn't exist for ALL domains.");
+}
+
+void FitScriptGeneratorModel::checkGlobalParameterhasNoTies(
+    std::string const &globalParameter) const {
+  auto const isNotActive = [&globalParameter](FitDomain const &fitDomain) {
+    return !fitDomain.isParameterActive(globalParameter);
+  };
+
+  auto const hasGlobalTie = [&globalParameter](GlobalTie const &globalTie) {
+    return globalParameter == removeTopFunctionIndex(globalTie.m_parameter);
+  };
+
+  if (std::any_of(m_fitDomains.cbegin(), m_fitDomains.cend(), isNotActive) ||
+      std::any_of(m_globalTies.cbegin(), m_globalTies.cend(), hasGlobalTie))
+    throw std::invalid_argument(globalParameter +
+                                " cannot be global because it already has a "
+                                "tie in at least one of the domains.");
+}
+
+void FitScriptGeneratorModel::checkParameterIsNotGlobal(
+    std::string const &fullParameter) const {
+  auto const parameter = getAdjustedFunctionIndex(fullParameter);
+  auto const isGlobal = [&parameter](GlobalParameter const &globalParameter) {
+    return parameter == globalParameter.m_parameter;
+  };
+
+  if (std::any_of(m_globalParameters.cbegin(), m_globalParameters.cend(),
+                  isGlobal)) {
+    throw std::invalid_argument(
+        fullParameter + " cannot be tied because it is a global parameter.");
+  }
 }
 
 } // namespace MantidWidgets

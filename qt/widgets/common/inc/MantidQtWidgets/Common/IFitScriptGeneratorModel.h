@@ -12,6 +12,7 @@
 #include "MantidQtWidgets/Common/IndexTypes.h"
 
 #include <string>
+#include <vector>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -81,10 +82,15 @@ public:
                                          std::string const &functionIndex,
                                          std::string const &constraint) = 0;
 
+  virtual void
+  setGlobalParameters(std::vector<std::string> const &parameters) = 0;
+
   virtual void setFittingMode(FittingMode const &fittingMode) = 0;
   [[nodiscard]] virtual FittingMode getFittingMode() const = 0;
 
   [[nodiscard]] virtual std::vector<GlobalTie> getGlobalTies() const = 0;
+  [[nodiscard]] virtual std::vector<GlobalParameter>
+  getGlobalParameters() const = 0;
 };
 
 } // namespace MantidWidgets

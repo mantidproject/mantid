@@ -32,6 +32,24 @@ convertToWorkspaceIndex(std::vector<int> const &indices) {
   return workspaceIndices;
 }
 
+std::vector<std::string> convertToStdVector(QStringList const &qList) {
+  std::vector<std::string> vec;
+  vec.reserve(qList.size());
+  std::transform(qList.cbegin(), qList.cend(), std::back_inserter(vec),
+                 [](QString const &element) { return element.toStdString(); });
+  return vec;
+}
+
+QStringList convertToQStringList(std::vector<GlobalParameter> const &vec) {
+  QStringList qList;
+  qList.reserve(static_cast<int>(vec.size()));
+  std::transform(vec.cbegin(), vec.cend(), std::back_inserter(qList),
+                 [](GlobalParameter const &element) {
+                   return QString::fromStdString(element.m_parameter);
+                 });
+  return qList;
+}
+
 } // namespace
 
 namespace MantidQt {
@@ -96,6 +114,8 @@ void FitScriptGeneratorView::connectUiSignals() {
           SIGNAL(parameterConstraintAdded(QString const &, QString const &)),
           this,
           SLOT(onParameterConstraintChanged(QString const &, QString const &)));
+  connect(m_functionTreeView.get(), SIGNAL(globalsChanged(QStringList const &)),
+          this, SLOT(onGlobalParametersChanged(QStringList const &)));
   connect(m_functionTreeView.get(), SIGNAL(copyToClipboardRequest()), this,
           SLOT(onCopyFunctionToClipboard()));
   connect(m_functionTreeView.get(), SIGNAL(functionHelpRequest()), this,
@@ -210,6 +230,12 @@ void FitScriptGeneratorView::onParameterConstraintChanged(
   m_presenter->notifyPresenter(ViewEvent::ParameterConstraintChanged,
                                functionIndex.toStdString(),
                                constraint.toStdString());
+}
+
+void FitScriptGeneratorView::onGlobalParametersChanged(
+    QStringList const &globalParameters) {
+  m_presenter->notifyPresenter(ViewEvent::GlobalParametersChanged,
+                               convertToStdVector(globalParameters));
 }
 
 void FitScriptGeneratorView::onCopyFunctionToClipboard() {
@@ -329,6 +355,12 @@ void FitScriptGeneratorView::setFunction(IFunction_sptr const &function) const {
 void FitScriptGeneratorView::setGlobalTies(
     std::vector<GlobalTie> const &globalTies) {
   m_functionTreeView->setGlobalTies(globalTies);
+}
+
+void FitScriptGeneratorView::setGlobalParameters(
+    std::vector<GlobalParameter> const &globalParameters) {
+  m_functionTreeView->setGlobalParameters(
+      convertToQStringList(globalParameters));
 }
 
 void FitScriptGeneratorView::displayWarning(std::string const &message) {

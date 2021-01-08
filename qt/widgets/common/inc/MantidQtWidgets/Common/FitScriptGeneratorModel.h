@@ -92,14 +92,21 @@ public:
                                  std::string const &functionIndex,
                                  std::string const &constraint) override;
 
-  void setFittingMode(FittingMode const &fittingMode) override;
-  [[nodiscard]] inline FittingMode getFittingMode() const noexcept override {
-    return m_fittingMode;
-  }
-
   [[nodiscard]] inline std::vector<GlobalTie>
   getGlobalTies() const noexcept override {
     return m_globalTies;
+  }
+
+  void setGlobalParameters(std::vector<std::string> const &parameters) override;
+
+  [[nodiscard]] inline std::vector<GlobalParameter>
+  getGlobalParameters() const noexcept override {
+    return m_globalParameters;
+  }
+
+  void setFittingMode(FittingMode const &fittingMode) override;
+  [[nodiscard]] inline FittingMode getFittingMode() const noexcept override {
+    return m_fittingMode;
   }
 
 private:
@@ -148,8 +155,14 @@ private:
     return m_fitDomains.size();
   }
 
+  void checkParameterIsInAllDomains(std::string const &globalParameter) const;
+  void checkGlobalParameterhasNoTies(std::string const &globalParameter) const;
+  void checkParameterIsNotGlobal(std::string const &fullParameter) const;
+
   IFitScriptGeneratorPresenter *m_presenter;
   std::vector<FitDomain> m_fitDomains;
+  // A vector of global parameters. E.g. f0.A0
+  std::vector<GlobalParameter> m_globalParameters;
   // A vector of global ties. E.g. f0.f0.A0=f1.f0.A0
   std::vector<GlobalTie> m_globalTies;
   FittingMode m_fittingMode;

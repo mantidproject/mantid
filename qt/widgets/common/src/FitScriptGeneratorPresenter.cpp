@@ -88,6 +88,17 @@ void FitScriptGeneratorPresenter::notifyPresenter(ViewEvent const &event,
 }
 
 void FitScriptGeneratorPresenter::notifyPresenter(
+    ViewEvent const &event, std::vector<std::string> const &vec) {
+  switch (event) {
+  case ViewEvent::GlobalParametersChanged:
+    handleGlobalParametersChanged(vec);
+    return;
+  }
+
+  throw std::runtime_error("Failed to notify the FitScriptGeneratorPresenter.");
+}
+
+void FitScriptGeneratorPresenter::notifyPresenter(
     ViewEvent const &event, FittingMode const &fittingMode) {
   switch (event) {
   case ViewEvent::FittingModeChanged:
@@ -153,6 +164,7 @@ void FitScriptGeneratorPresenter::handleSelectionChanged() {
     auto const workspaceName = m_view->workspaceName(selectedRows[0]);
     auto const workspaceIndex = m_view->workspaceIndex(selectedRows[0]);
     m_view->setFunction(m_model->getFunction(workspaceName, workspaceIndex));
+    setGlobalParameters(m_model->getGlobalParameters());
   } else {
     m_view->clearFunction();
   }
@@ -160,9 +172,7 @@ void FitScriptGeneratorPresenter::handleSelectionChanged() {
 
 void FitScriptGeneratorPresenter::handleFunctionRemoved(
     std::string const &function) {
-  auto const rowIndices = m_view->isAddRemoveFunctionForAllChecked()
-                              ? m_view->allRows()
-                              : m_view->selectedRows();
+  auto const rowIndices = getRowIndices();
 
   if (!rowIndices.empty()) {
     removeFunctionForDomains(function, rowIndices);
@@ -172,9 +182,7 @@ void FitScriptGeneratorPresenter::handleFunctionRemoved(
 
 void FitScriptGeneratorPresenter::handleFunctionAdded(
     std::string const &function) {
-  auto const rowIndices = m_view->isAddRemoveFunctionForAllChecked()
-                              ? m_view->allRows()
-                              : m_view->selectedRows();
+  auto const rowIndices = getRowIndices();
 
   if (!rowIndices.empty()) {
     addFunctionForDomains(function, rowIndices);
@@ -186,9 +194,7 @@ void FitScriptGeneratorPresenter::handleFunctionAdded(
 
 void FitScriptGeneratorPresenter::handleFunctionReplaced(
     std::string const &function) {
-  auto const rowIndices = m_view->isAddRemoveFunctionForAllChecked()
-                              ? m_view->allRows()
-                              : m_view->selectedRows();
+  auto const rowIndices = getRowIndices();
 
   if (!rowIndices.empty()) {
     setFunctionForDomains(function, rowIndices);
@@ -200,10 +206,9 @@ void FitScriptGeneratorPresenter::handleFunctionReplaced(
 
 void FitScriptGeneratorPresenter::handleParameterChanged(
     std::string const &parameter) {
-  auto const rowIndices = m_view->allRows();
   auto const newValue = m_view->parameterValue(parameter);
 
-  for (auto const &rowIndex : rowIndices) {
+  for (auto const &rowIndex : m_view->allRows()) {
     auto const workspaceName = m_view->workspaceName(rowIndex);
     auto const workspaceIndex = m_view->workspaceIndex(rowIndex);
     auto const equivalentParameter =
@@ -218,10 +223,9 @@ void FitScriptGeneratorPresenter::handleParameterChanged(
 
 void FitScriptGeneratorPresenter::handleAttributeChanged(
     std::string const &attribute) {
-  auto const rowIndices = m_view->allRows();
   auto const newValue = m_view->attributeValue(attribute);
 
-  for (auto const &rowIndex : rowIndices) {
+  for (auto const &rowIndex : m_view->allRows()) {
     auto const workspaceName = m_view->workspaceName(rowIndex);
     auto const workspaceIndex = m_view->workspaceIndex(rowIndex);
     m_model->updateAttributeValue(workspaceName, workspaceIndex, attribute,
@@ -231,29 +235,20 @@ void FitScriptGeneratorPresenter::handleAttributeChanged(
 
 void FitScriptGeneratorPresenter::handleParameterTieChanged(
     std::string const &parameter, std::string const &tie) {
-  auto const rowIndices = m_view->allRows();
-
-  for (auto const &rowIndex : rowIndices) {
+  for (auto const &rowIndex : m_view->allRows()) {
     auto const workspaceName = m_view->workspaceName(rowIndex);
     auto const workspaceIndex = m_view->workspaceIndex(rowIndex);
-    auto const equivalentParameter =
-        m_model->getEquivalentFunctionIndexForDomain(workspaceName,
-                                                     workspaceIndex, parameter);
-    auto const equivalentTie = m_model->getEquivalentParameterTieForDomain(
-        workspaceName, workspaceIndex, parameter, tie);
-    m_model->updateParameterTie(workspaceName, workspaceIndex,
-                                equivalentParameter, equivalentTie);
+    updateParameterTie(workspaceName, workspaceIndex, parameter, tie);
   }
 
+  checkForWarningMessages();
   setGlobalTies(m_model->getGlobalTies());
   handleSelectionChanged();
 }
 
 void FitScriptGeneratorPresenter::handleParameterConstraintRemoved(
     std::string const &parameter) {
-  auto const rowIndices = m_view->allRows();
-
-  for (auto const &rowIndex : rowIndices) {
+  for (auto const &rowIndex : m_view->allRows()) {
     auto const workspaceName = m_view->workspaceName(rowIndex);
     auto const workspaceIndex = m_view->workspaceIndex(rowIndex);
     m_model->removeParameterConstraint(workspaceName, workspaceIndex,
@@ -265,9 +260,7 @@ void FitScriptGeneratorPresenter::handleParameterConstraintRemoved(
 
 void FitScriptGeneratorPresenter::handleParameterConstraintChanged(
     std::string const &functionIndex, std::string const &constraint) {
-  auto const rowIndices = m_view->allRows();
-
-  for (auto const &rowIndex : rowIndices) {
+  for (auto const &rowIndex : m_view->allRows()) {
     auto const workspaceName = m_view->workspaceName(rowIndex);
     auto const workspaceIndex = m_view->workspaceIndex(rowIndex);
     auto const equivalentFunctionIndex =
@@ -280,6 +273,16 @@ void FitScriptGeneratorPresenter::handleParameterConstraintChanged(
   handleSelectionChanged();
 }
 
+void FitScriptGeneratorPresenter::handleGlobalParametersChanged(
+    std::vector<std::string> const &globalParameters) {
+  try {
+    m_model->setGlobalParameters(globalParameters);
+  } catch (std::invalid_argument const &ex) {
+    m_view->displayWarning(ex.what());
+  }
+  handleSelectionChanged();
+}
+
 void FitScriptGeneratorPresenter::handleFittingModeChanged(
     FittingMode const &fittingMode) {
   m_model->setFittingMode(fittingMode);
@@ -289,6 +292,11 @@ void FitScriptGeneratorPresenter::handleFittingModeChanged(
 void FitScriptGeneratorPresenter::setGlobalTies(
     std::vector<GlobalTie> const &globalTies) {
   m_view->setGlobalTies(globalTies);
+}
+
+void FitScriptGeneratorPresenter::setGlobalParameters(
+    std::vector<GlobalParameter> const &globalParameters) {
+  m_view->setGlobalParameters(globalParameters);
 }
 
 void FitScriptGeneratorPresenter::setWorkspaces(
@@ -387,6 +395,27 @@ void FitScriptGeneratorPresenter::setFunctionForDomains(
     auto const workspaceIndex = m_view->workspaceIndex(domainIndex);
     m_model->setFunction(workspaceName, workspaceIndex, function);
   }
+}
+
+void FitScriptGeneratorPresenter::updateParameterTie(
+    std::string const &workspaceName, WorkspaceIndex workspaceIndex,
+    std::string const &parameter, std::string const &tie) {
+  auto const equivalentParameter = m_model->getEquivalentFunctionIndexForDomain(
+      workspaceName, workspaceIndex, parameter);
+  auto const equivalentTie = m_model->getEquivalentParameterTieForDomain(
+      workspaceName, workspaceIndex, parameter, tie);
+
+  try {
+    m_model->updateParameterTie(workspaceName, workspaceIndex,
+                                equivalentParameter, equivalentTie);
+  } catch (std::invalid_argument const &ex) {
+    m_warnings.emplace_back(ex.what());
+  }
+}
+
+std::vector<FitDomainIndex> FitScriptGeneratorPresenter::getRowIndices() const {
+  return m_view->isAddRemoveFunctionForAllChecked() ? m_view->allRows()
+                                                    : m_view->selectedRows();
 }
 
 void FitScriptGeneratorPresenter::checkForWarningMessages() {

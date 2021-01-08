@@ -31,6 +31,7 @@ namespace MantidWidgets {
 
 class FitScriptGeneratorDataTable;
 class IFitScriptGeneratorPresenter;
+struct GlobalParameter;
 struct GlobalTie;
 
 class EXPORT_OPT_MANTIDQT_COMMON FitScriptGeneratorView
@@ -81,6 +82,8 @@ public:
   void setSimultaneousMode(bool simultaneousMode) override;
 
   void setGlobalTies(std::vector<GlobalTie> const &globalTies) override;
+  void setGlobalParameters(
+      std::vector<GlobalParameter> const &globalParameter) override;
 
   void displayWarning(std::string const &message) override;
 
@@ -111,6 +114,7 @@ private slots:
   void onParameterConstraintRemoved(QString const &parameter);
   void onParameterConstraintChanged(QString const &functionIndex,
                                     QString const &constraint);
+  void onGlobalParametersChanged(QStringList const &globalParameters);
   void onCopyFunctionToClipboard();
   void onFunctionHelpRequested();
   void onChangeToSequentialFitting();

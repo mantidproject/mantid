@@ -48,6 +48,7 @@ public:
 
   [[nodiscard]] bool hasParameter(std::string const &parameter) const;
   [[nodiscard]] double getParameterValue(std::string const &parameter) const;
+  [[nodiscard]] bool isParameterActive(std::string const &parameter) const;
 
   void clearParameterTie(std::string const &parameter);
   [[nodiscard]] bool updateParameterTie(std::string const &parameter,

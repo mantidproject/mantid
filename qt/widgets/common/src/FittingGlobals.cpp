@@ -9,6 +9,9 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
+GlobalParameter::GlobalParameter(std::string const &parameter)
+    : m_parameter(parameter) {}
+
 GlobalTie::GlobalTie(std::string const &parameter, std::string const &tie)
     : m_parameter(parameter), m_tie(tie) {}
 

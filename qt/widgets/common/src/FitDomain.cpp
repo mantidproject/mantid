@@ -163,6 +163,13 @@ double FitDomain::getParameterValue(std::string const &parameter) const {
   throw std::runtime_error("The function does not contain this parameter.");
 }
 
+bool FitDomain::isParameterActive(std::string const &parameter) const {
+  if (hasParameter(parameter))
+    return m_function->getParameterStatus(m_function->parameterIndex(
+               parameter)) == IFunction::ParameterStatus::Active;
+  return false;
+}
+
 void FitDomain::clearParameterTie(std::string const &parameter) {
   if (hasParameter(parameter))
     m_function->removeTie(m_function->parameterIndex(parameter));

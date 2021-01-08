@@ -27,6 +27,7 @@ namespace MantidWidgets {
 class AddWorkspaceDialog;
 class FitScriptGeneratorDataTable;
 class IFitScriptGeneratorPresenter;
+struct GlobalParameter;
 struct GlobalTie;
 
 class EXPORT_OPT_MANTIDQT_COMMON IFitScriptGeneratorView
@@ -48,6 +49,7 @@ public:
     ParameterTieChanged,
     ParameterConstraintRemoved,
     ParameterConstraintChanged,
+    GlobalParametersChanged,
     FittingModeChanged
   };
 
@@ -95,6 +97,8 @@ public:
   virtual void setSimultaneousMode(bool simultaneousMode) = 0;
 
   virtual void setGlobalTies(std::vector<GlobalTie> const &globalTies) = 0;
+  virtual void
+  setGlobalParameters(std::vector<GlobalParameter> const &globalParameter) = 0;
 
   virtual void displayWarning(std::string const &message) = 0;
 
