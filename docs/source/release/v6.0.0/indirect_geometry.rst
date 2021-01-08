@@ -23,6 +23,7 @@ Improvements
 - The function browser in the ConvFit tab should now correctly show Q values for Q dependent functions.
 - The ConvFit tab in the Indirect Data Analysis GUI will now set default parameters for the FWHM when a resolution file is loaded.
 - QENSFitSequential and PlotPeakByLogValue can accept a different mask range for each spectra via the `ExcludeMultiple` Parameter.
+- Tabs in the Indirect Corrections interface not has a scroll bar to prevent being squashed on small screens.
 
 Bug Fixes
 #########
