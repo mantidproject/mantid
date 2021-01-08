@@ -51,6 +51,7 @@ public:
   virtual void loadFromProject(const std::string &lines) override;
   /// Save settings for the 3D projection to a project file
   virtual std::string saveToProject() const override;
+  virtual void saveShapesToTableWorkspace() override;
 
 signals:
   void finishedMove();
