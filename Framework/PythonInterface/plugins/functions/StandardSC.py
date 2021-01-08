@@ -32,8 +32,8 @@ class StandardSC(IFunction1D):
         FieldBG = self.getParameterValue("FieldBG")
         phi = self.getParameterValue("Phi")
         Abg = self.getParameterValue("Abg")
-        omegaSC = FieldSC * 0.1355 * 2 * np.pi
-        omegaBG = FieldBG * 0.1355 * 2 * np.pi
+        omegaSC = FieldSC * 0.01355 * 2 * np.pi
+        omegaBG = FieldBG * 0.01355 * 2 * np.pi
         return A0 * np.exp(- 0.5 * sigma * sigma * x * x) * np.cos(omegaSC * x + phi) + Abg * np.cos(omegaBG * x + phi)
 
 
