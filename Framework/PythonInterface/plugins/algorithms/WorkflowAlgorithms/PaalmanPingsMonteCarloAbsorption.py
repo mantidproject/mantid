@@ -293,6 +293,13 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
         self.setPropertyGroup('ContainerDensityType', 'Container Material')
         self.setPropertyGroup('ContainerNumberDensityUnit', 'Container Material')
         self.setPropertyGroup('ContainerDensity', 'Container Material')
+        self.setPropertySettings('ContainerChemicalFormula', not_preset_condition)
+        self.setPropertySettings('ContainerCoherentXSection', not_preset_condition)
+        self.setPropertySettings('ContainerIncoherentXSection', not_preset_condition)
+        self.setPropertySettings('ContainerAttenuationXSection', not_preset_condition)
+        self.setPropertySettings('ContainerDensityType', not_preset_condition)
+        self.setPropertySettings('ContainerNumberDensityUnit', not_preset_condition)
+        self.setPropertySettings('ContainerDensity', not_preset_condition)
 
         # Output Workspace Group
         self.declareProperty(WorkspaceGroupProperty(name='CorrectionsWorkspace',
@@ -302,7 +309,7 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
                              doc='Name of the workspace group to save correction factors')
 
     def PyExec(self):
-        progess_steps = 1.
+        progess_steps = 1. if not self._has_can else 0.25
         input_wave_ws = self._convert_to_wavelength(self._input_ws)
         self._set_beam(input_wave_ws)
         if self._is_override_sample:
