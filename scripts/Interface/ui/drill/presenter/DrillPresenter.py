@@ -70,7 +70,7 @@ class DrillPresenter:
         self.model.processingDone.connect(self.onProcessingDone)
         self.model.paramOk.connect(self.onParamOk)
         self.model.paramError.connect(self.onParamError)
-        self.model.groupUpdated.connect(self.onGroupUpdated)
+        self.model.groupsUpdated.connect(self.onGroupsUpdated)
 
         self._syncViewHeader()
         self._syncViewTable()
@@ -144,7 +144,7 @@ class DrillPresenter:
         row = rows[0]
         self.model.setGroupMaster(row)
 
-    def onGroupUpdated(self, group):
+    def onGroupsUpdated(self):
         """
         Triggered when the groups are updated in the model. This method update
         the row labels in the table.
@@ -154,19 +154,7 @@ class DrillPresenter:
         """
         groups = self.model.getSamplesGroups()
         masters = self.model.getMasterSamples()
-
-        if group in groups:
-            rows = groups[group]
-        else:
-            rows = None
-        if group in masters:
-            master = masters[group]
-        else:
-            master = None
-        self.view.labelRowsInGroup(group, rows, master,
-                                   "This row belongs to the sample group {}"
-                                   .format(group), "This is the master row of "
-                                   "the group {}".format(group))
+        self.view.updateLabelsFromGroups(groups, masters)
 
     def onParamOk(self, row, columnName):
         """
@@ -467,12 +455,7 @@ class DrillPresenter:
                         self.view.setCellContents(i, "CustomOptions", co)
                     else:
                         self.view.setCellContents(i, k, v)
-        for group in groups:
-            if group in masters:
-                master = masters[group]
-            else:
-                master = None
-            self.view.labelRowsInGroup(group, groups[group], master)
+        self.view.updateLabelsFromGroups(groups, masters)
         # set the visual settings if they exist
         vs = self.model.getVisualSettings()
         if vs:

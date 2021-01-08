@@ -376,30 +376,30 @@ class DrillView(QMainWindow):
             self.rowDeleted.emit(row)
             self.setWindowModified(True)
 
-    def labelRowsInGroup(self, groupName, rows, masterRow, toolTip=None,
-                         masterToolTip=None):
+    def updateLabelsFromGroups(self, groups, masters):
         """
-        Change the row label to contain the name of the group and a number.
+        Update all the row labels from the current groups.
 
         Args:
-            groupName (str): name of the group
-            rows (list(int)): row indexes
+            groups (dict(str:set(int))): group name and rows
+            master (dict(str:int)): group name and master row
         """
-        if not rows:
-            rows = [row for row in range(self.table.rowCount())
-                    if groupName in self.table.getRowLabel(row)]
-            groupName = None
-
-        rowName = 1
-        for row in rows:
-            bold = (row == masterRow)
-            _toolTip = masterToolTip if row == masterRow else toolTip
-            if groupName:
-                self.table.setRowLabel(row, groupName + str(rowName), bold,
-                                       _toolTip)
-            else:
-                self.table.delRowLabel(row)
-            rowName += 1
+        for row in range(self.table.rowCount()):
+            self.table.delRowLabel(row)
+        for groupName,rows in groups.items():
+            rowName = 1
+            for row in sorted(rows):
+                if groupName in masters and masters[groupName] == row:
+                    _bold = True
+                    _tooltip = "This is the master row of the group {}" \
+                               .format(groupName)
+                else:
+                    _bold = False
+                    _tooltip = "This row belongs to the sample group {}" \
+                               .format(groupName)
+                self.table.setRowLabel(row, groupName + str(rowName),
+                                       _bold, _tooltip)
+                rowName += 1
 
     def getRowLabel(self, row):
         """

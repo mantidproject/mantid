@@ -227,11 +227,18 @@ class DrillViewTest(unittest.TestCase):
         calls = [mock.call(2), mock.call(1), mock.call(0)]
         self.view.table.deleteRow.assert_has_calls(calls)
 
-    def test_labelRowsInGroup(self):
-        self.view.labelRowsInGroup("A", {1, 2, 3}, None)
-        calls = [mock.call(1, "A1", False, None),
-                 mock.call(2, "A2", False, None),
-                 mock.call(3, "A3", False, None)]
+    def test_updateLabelsFromGroups(self):
+        self.view.table.rowCount.return_value = 6
+        groups = {'A': {1, 2, 3},
+                  'B': {5, 6}}
+        masters = {'B': 6}
+        self.view.updateLabelsFromGroups(groups, masters)
+        self.view.table.delRowLabel.assert_called()
+        calls = [mock.call(1, "A1", False, "This row belongs to the sample group A"),
+                 mock.call(2, "A2", False, "This row belongs to the sample group A"),
+                 mock.call(3, "A3", False, "This row belongs to the sample group A"),
+                 mock.call(5, "B1", False, "This row belongs to the sample group B"),
+                 mock.call(6, "B2", True,  "This is the master row of the group B")]
         self.view.table.setRowLabel.assert_has_calls(calls)
 
     def test_automaticFilling(self):
