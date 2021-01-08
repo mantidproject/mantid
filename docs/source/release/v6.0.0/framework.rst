@@ -35,6 +35,7 @@ Fitting
 -------
 
 - Corrected a bug in the calculation of uncertainty bands on the calculated fit curve. This correction has been tested against the python fitting package `kmpfit`, where an agreement between the two was seen.
+- Added button to clear all custom setups in Setup > Manage Setups menu
 
 Data Objects
 ------------
