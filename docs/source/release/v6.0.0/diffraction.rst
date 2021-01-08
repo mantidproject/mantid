@@ -36,6 +36,7 @@ New features
 - New algorithm :ref:`CorelliPowderCalibrationCreate <algm-CorelliPowderCalibrationCreate>` adjusts the position and orientation of Corelli banks in order to optimize the comparison of observed peaks to reference data
 - New algorithm :ref:`LeadPressureCalc <algm-LeadPressureCalc>` to calculate the pressure of a sample given the dSpacing of the Lead (111) peak and the sample temperature.
 - Modified creation of absorption input in :ref:`SNSPowderReduction <algm-SNSPowderReduction>` to automatically get information from sample logs.
+- Added refined back to back exponential coeficients (from standard sample) to WISH Parameters.xml so A, B and S are guessed automatically.
 
 Improvements
 ############
