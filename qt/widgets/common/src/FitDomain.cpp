@@ -129,6 +129,9 @@ void FitDomain::addFunction(IFunction_sptr const &function) {
 }
 
 void FitDomain::addFunctionToExisting(IFunction_sptr const &function) {
+  if (auto const isComposite = toComposite(function))
+    throw std::invalid_argument("Nested composite functions are not supported");
+
   if (auto composite = toComposite(m_function)) {
     composite->addFunction(function);
   } else {

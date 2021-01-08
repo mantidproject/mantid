@@ -184,11 +184,16 @@ void FitScriptGeneratorPresenter::handleFunctionAdded(
     std::string const &function) {
   auto const rowIndices = getRowIndices();
 
-  if (!rowIndices.empty()) {
-    addFunctionForDomains(function, rowIndices);
-  } else {
+  if (rowIndices.empty()) {
     m_view->displayWarning("Data needs to be loaded before adding a function.");
     m_view->clearFunction();
+    return;
+  }
+
+  try {
+    addFunctionForDomains(function, rowIndices);
+  } catch (std::invalid_argument const &ex) {
+    m_view->displayWarning(ex.what());
   }
 }
 
