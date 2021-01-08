@@ -98,7 +98,7 @@ class EngineeringDiffractionIOTest(unittest.TestCase):
         self.fitprop_browser.get_fitprop.return_value = FIT_DICT
         self.fitprop_browser.read_current_fitprop.return_value = FIT_DICT
         self.fitprop_browser.plotDiff.return_value = True
-        self.presenter.fitting_presenter.data_widget.presenter.plotted = [FIT_WS]
+        self.presenter.fitting_presenter.data_widget.presenter.plotted = {FIT_WS}
         test_dic = self.encoder.encode(self.mock_view)
         self.assertEqual(test_dic, {'encoder_version': self.io_version, 'current_tab': 0, 'data_loaded_workspaces':
                                     [TEST_WS], 'plotted_workspaces': [FIT_WS], 'fit_properties': FIT_DICT, 'plot_diff':
