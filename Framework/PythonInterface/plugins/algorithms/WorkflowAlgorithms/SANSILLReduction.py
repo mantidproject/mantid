@@ -382,6 +382,33 @@ class SANSILLReduction(PythonAlgorithm):
             @param ws: input workspace
             @param sensitivity_out: sensitivity output map
         """
+        if self._instrument == 'D22' and isinstance(mtd[ws], WorkspaceGroup):
+            n_entries = mtd[ws].getNumberOfEntries()
+            ws_tmp = ws + '_tmp'
+            MergeRuns(InputWorkspaces=ws, OutputWorkspace=ws_tmp)
+            normalisation_ws = ws_tmp + '_normalisation'
+            CreateSingleValuedWorkspace(DataValue=n_entries, OutputWorkspace=normalisation_ws)
+            Divide(LHSWorkspace=ws_tmp, RHSWorkspace=normalisation_ws, OutputWorkspace=ws_tmp)
+            for spec_no in range(mtd[ws_tmp].getNumberHistograms()):
+                if mtd[ws_tmp].readY(spec_no)[0] == 0:
+                    dataY = 0
+                    dataE = 0
+                    for entry in mtd[ws]:
+                        dataY = entry.readY(spec_no)[0]
+                        if dataY != 0:
+                            dataE = entry.readE(spec_no)[0]
+                            break
+                    if dataE != 0:
+                        mtd[ws_tmp].setY(spec_no, np.array(dataY))
+                        mtd[ws_tmp].setE(spec_no, np.array(dataE))
+            ClearMaskFlag(Workspace=ws_tmp)
+            # Apply the default masks again
+            default_mask_ws = self.getProperty('DefaultMaskedInputWorkspace').value
+            if default_mask_ws:
+                self._mask(ws, default_mask_ws)
+            DeleteWorkspaces(WorkspaceList=[ws, normalisation_ws])
+            RenameWorkspace(InputWorkspace=ws_tmp, OutputWorkspace=ws)
+
         CalculateEfficiency(InputWorkspace=ws, OutputWorkspace=sensitivity_out)
         mtd[sensitivity_out].getRun().addProperty('ProcessedAs', 'Sensitivity', True)
         self.setProperty('SensitivityOutputWorkspace', mtd[sensitivity_out])
