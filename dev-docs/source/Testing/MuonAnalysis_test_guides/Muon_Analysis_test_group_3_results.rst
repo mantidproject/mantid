@@ -31,11 +31,11 @@ Test 1: Individual And Co-Added Fits
 - In the **Results** tab, in the top log values table, check **run_number** 
   and **sample_temp**
 - Change **Function Name** to be **FlatBackground,Abragam** or equivalent
-- The bottom table should have all fit workspaces which used both 
+- The bottom table should have all fit workspaces that used both 
   **Flat Background** and the **Abragam** functions
 - Click **Unselect All**
 - Change **Table Name** to ``IndividualFitsTable``
-- Check all boxes next to workspaces which are individual fits, including the 
+- Check all boxes next to workspaces that are individual fits, including the 
   co-added workspace
 - This should look a little something like this:
 
@@ -47,12 +47,12 @@ Test 1: Individual And Co-Added Fits
 - Click **Output Results**
 - In the main workbench window, in the workspace toolbox, open the results 
   table
-- View the table
-- The table should hae four rows
-- **sample_temp** should be correctly expresses as a range ``180-200`` for the 
-  co-added runs
+- The table should have four rows, one for each individual fit
+- **sample_temp** should be correctly expresses as an average for the co-added 
+  runs, in this case the average is ``190`` (``180+190+200/3``)
 - There should be several pairs of columns, one for each parameter and one for 
-  the error of the parameter, plus a final column **Cost function value**
+  the error of the parameter, plus a final column called 
+  **Cost function value**
 - The table should look similar to this:
 
 .. image:: /images/MuonAnalysisTests/results_test1.png

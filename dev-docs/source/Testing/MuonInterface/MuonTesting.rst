@@ -42,18 +42,21 @@ Ionic Diffusion Test
 	- Set ``A0 = 0.05``, ``Asym = 0.15``, ``Delta = 0.2`` and ``Nu = 0.1``
 	- Click the value for the **Field** parameter; A ``...`` should appear next 
 	  to it, click it. A new window should appear
-	- On the **Set** dropdown menu, select **Fix All**
-	- Enter values ``0``, ``5`` and ``10`` for each run respectively
+	- Check the box called **Log**
+	- Change the log to be **field_danfysik**
+	- Click a row in the table
+	- Click the **Set** drop down menu and choose **Set all to log**
+	- Do the same but this time choose **Fix all**, then click **Ok**
 	- Click Fit
 - Go to the **Results** tab
 	- At the bottom of the interface, click **Output Results**
 	- A table should appear in the workspaces toolbox called *Results Table*
 - Click on the main Workbench window and open the results table
 - Expected Values are (similar to within 50%):
-	- **f0.A0:** ``-0.083439833711330152``
-	- **f1.Asym:** ``0.19125607982528858``
-	- **f1.Delta:** ``0.3301445010124604``
-	- **f1.Nu:** ``0.8574644977974730220884``
+	- **f0.A0:** ``-0.0467``
+	- **f1.Asym:** ``0.155``
+	- **f1.Delta:** ``0.389``
+	- **f1.Nu:** ``0.474``
 	
 - Back in the workspaces toolbox, click the workspace group for the fitted,
   data (Name similar to *EMU51341; Pair Asym; long; MA+ ...; Fitted; FlatBackground,DynamicKuboToyabe*)
@@ -75,7 +78,7 @@ Superconducting Copper Test
 
 - Open **Muon Analysis** (*Interfaces* > *Muon* > *Muon Analysis*)
 - Change *Instrument* to **EMU**, found in the *Home* tab
-- Load run ``20882``
+- Load run ``20889-20900``
 - Using the **>** button, step through a couple files (Plot should
   update each time)
 - Go to the **Fitting** tab
@@ -87,17 +90,10 @@ Superconducting Copper Test
 - Go to the **Results** tab
 	- In the **Log Values** table, check **run_number** and **Field_Danfysik**
 	- Click **Output Results**
-- In the main Workbench window, in the **Algorithms Toolbox**, search for the 
-  algorithm **ConvertTableToMatrixWorkspace** and click **Execute**
-- In the resulting dialog, set the following parameters
-	- **Input Workspace:** ``ResultsTable``
-	- **Output Workspace:** ``ResultsWorkspace``
-	- **Column X:** ``Field_Danfysik``
-	- **Column Y:** ``Lambda``
-	- **Column E:** ``set as empty``
-	- Click **Run**
-- Double click the resulting workspace. You should get something like the 
-  following plot	
+- Open the results table by double clicking the table in the workspace toolbox
+- Ctrl-Click the **field_danfysik** and the **lambda** column
+- Right click **lambda** column, click **Plot...** and then **Line**
+- You should get something like the following plot:
 	  
 .. figure:: ../../images/MuonAnalysisTests/Cu-fitting.png
 	:alt: Cu-fitting.png
@@ -113,13 +109,12 @@ HIFI Transverse Field Simultaneous Fitting
 
 - Open **Muon Analysis** (*Interfaces* > *Muon* > *Muon Analysis*)
 - Change *Instrument* to **HIFI**, found in the *Home* tab
-- Load the first file; ``134028``
-- Using the **>** button, step through and load all files until file 
-  ``134034`` is loaded
+- Load runs ``134028-39``
 - Go to the **Grouping** tab
-	- In the Pair table, click **Guess Alpha** 
+	- In the Pair table, click **Guess Alpha**
+	- In the resulting dialog, change the run to ``HIFI134034`` to be used for 
+	  the calculation
 	- A value close to ``1.3`` should appear
-- Using the **>** button again, load all runs up to ``134039``
 - Go to the **Fitting** tab
 	- Check the **Simultaneous fit over** checkbox, and change from **Run** 
 	  to **Group/Pair**
@@ -131,28 +126,18 @@ HIFI Transverse Field Simultaneous Fitting
 	- Click **Fit**
 - The fit should fail with a large **Chi** value (``>100``)
 - Now to try the fit a different way.
-- In the main workbench window, delete all the workspaces from the workspace 
-  toolbox
-- Open **Muon Analysis** again (*Interfaces* > *Muon* > *Muon Analysis*) 
-- Make sure the instrument **HIFI** is still selected, load run ``134034``
-- Go to the **Grouping** tab once again
-	- Click **Guess Alpha** in the **Pair table**
-- Load in runs ``134028-39``
-- Go to the **Fitting** tab
-	- Check the **Simultaneous fit over** checkbox, and change from **Run** 
-	  to **Group/Pair**
-	- Add the same functions as above (**Flat Background** and **ExpDecOsc**),
-	  and set all parameters to **Global** again except for **Frequency**
+	- Click **Undo Fits**
 	- Click the value for the **Frequency** parameter; A ``...`` should appear 
 	  next to it, click it. A new window should appear
-	- Enter values for each run in the table as ``0.1-1.1`` in steps of ``0.1``
+	- Enter values for each run in the table as from ``0.1`` to ``1.1`` in 
+	  steps of ``0.1``
 	- Click **Ok**
-- Click **Fit**
+	- Click **Fit**
 - This time the fit should work with a significantly lower value for **Chi 
   squared** (``<10``)
-- Back in the main workbench window, Click on the fitting workspace
-- Pick one of the workspaces, double click and with plot type as **Individual**,
-  click **Plot All**
+- Back in the main workbench window, expand the fitting workspace and pick one 
+  of the fitted workspaces
+- Double click and with plot type as **Individual**, click **Plot All**
 - You should get plots that look like this:
 
 .. figure:: ../../images/MuonAnalysisTests/HIFI-TF-Result.png
@@ -171,10 +156,11 @@ Transverse Field Asymmetry Test
 - Change *Instrument* to **MUSR**, found in the *Home* tab
 - Load run ``62260``
 - Go to the **Fitting** tab
-	- Change **Select Sorkspace** to the **fwd** group
+	- Change **Select Workspace** to workspace containing the **fwd** in the 
+	  name 
 	- Right click the empty table area; Select **Add Function**
-	- Add a **Flat Background** (*Background* > *Flat Background*)
-	- Similarly, add **GuasOsc** (*Muon* > *MuonGeneric* > *GausOsc*)
+	- Add **GuasOsc** (*Muon* > *MuonGeneric* > *GausOsc*)
+	- Set ``Frequency = 1.3``
 	- In the bottom table, check **TF Asymmetry Mode** to be ``true``
 	- Click **Fit**
 	
