@@ -35,6 +35,7 @@ Bug fixes
 - Fixed a crash when trying to do a simultaneous fit with no data loaded after pressing clear all.
 - Fixed a bug where changing rebin wouldn't update the plot in the GUI
 - Fixed a bug where the plot would update incorrectly when changing plot raw and plot difference
+- Fixed a crash when pressing autoscale y without any data loaded
 
 ALC
 ---
