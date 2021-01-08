@@ -119,6 +119,8 @@ FitScriptGeneratorDataTable::FitScriptGeneratorDataTable(QWidget *parent)
           SLOT(handleItemClicked(QTableWidgetItem *)));
   connect(this, SIGNAL(itemSelectionChanged()), this,
           SLOT(handleItemSelectionChanged()));
+  disconnect(this->verticalHeader(), SIGNAL(sectionPressed(int)), this,
+             SLOT(selectRow(int)));
 }
 
 bool FitScriptGeneratorDataTable::eventFilter(QObject *widget, QEvent *event) {
@@ -253,7 +255,7 @@ void FitScriptGeneratorDataTable::addDomain(
 
   this->setVerticalHeaderItem(
       rowIndex, createTableItem("f" + QString::number(rowIndex) + ".",
-                                Qt::AlignCenter, false, QColor(35, 140, 35)));
+                                Qt::AlignCenter, false, QColor(30, 144, 255)));
   this->setItem(rowIndex, ColumnIndex::WorkspaceName,
                 createTableItem(workspaceName, Qt::AlignVCenter, false));
   this->setItem(rowIndex, ColumnIndex::WorkspaceIndex,
