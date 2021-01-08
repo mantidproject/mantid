@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import DataProcessorAlgorithm, MatrixWorkspaceProperty, MultipleFileProperty, PropertyMode, Progress, \
-    WorkspaceGroupProperty, FileAction
+    WorkspaceGroup, WorkspaceGroupProperty, FileAction
 from mantid.kernel import Direction, FloatBoundedValidator, FloatArrayProperty
 from mantid.simpleapi import *
 import numpy as np
