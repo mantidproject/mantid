@@ -114,7 +114,8 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
         self.declareProperty(name='OutputWorkspacesPrefix', defaultValue='pdcal_', direction=Direction.Input,
                              doc="Prefix to be added to output workspaces")
         # Tube Calibration properties
-        self.declareProperty(name='TubeDatabaseDir', defaultValue='', direction=Direction.Input,
+        self.declareProperty(name='TubeDatabaseDir',
+                             defaultValue='/SNS/CORELLI/shared/calibration/tube', direction=Direction.Input,
                              doc='path to database containing detector heights')
         # PDCalibration properties exposed, grouped
         property_names = ['TofBinning', 'PeakFunction', 'PeakPositions']
@@ -210,7 +211,8 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
             dz = self.getProperty('SourceMaxTranslation').value
             kwargs = dict(InputWorkspace=input_workspace,
                           OutputWorkspace=input_workspace,
-                          CalibrationTable=difc_table,
+                          PeakCentersTofTable=peak_centers_in_tof,
+                          PeakPositions=self.getProperty('PeakPositions').value,
                           MaskWorkspace=f'{difc_table}_mask',
                           AdjustmentsTable=adjustments_table_name,
                           FitSourcePosition=True,
@@ -224,7 +226,8 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
         dr = self.getProperty('ComponentMaxRotation').value  # maximum rotation along either axis
         kwargs = dict(InputWorkspace=input_workspace,
                       OutputWorkspace=input_workspace,
-                      CalibrationTable=difc_table,
+                      PeakCentersTofTable=peak_centers_in_tof,
+                      PeakPositions=self.getProperty('PeakPositions').value,
                       MaskWorkspace=f'{difc_table}_mask',
                       AdjustmentsTable=adjustments_table_name + '_banks',
                       FitSourcePosition=False,
