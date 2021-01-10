@@ -67,7 +67,7 @@ class AlignComponentsTest(unittest.TestCase):
         peak_positions = [5.1483, 5.2070]  # reference peak positions in d-spacing (Angstroms)
 
         # Generate a table of peak centers in TOF units
-        table_tofs = CreateEmptyTableWorkspace('table_tofs')
+        table_tofs = CreateEmptyTableWorkspace(OutputWorkspace='table_tofs')
         column_info = [('int', 'detid'), ('double', '@5.1483'), ('double', '@5.2070')]
         [table_tofs.addColumn(c_type, c_name) for c_type, c_name in column_info]
         table_tofs.addRow([4, float('nan'), 10000.0])
