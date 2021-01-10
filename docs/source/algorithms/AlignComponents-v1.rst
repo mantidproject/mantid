@@ -9,16 +9,34 @@
 Description
 -----------
 
-This algorithm will take a calibration in the form of a
-:ref:`diffractioncalibration
-workspace<DiffractionCalibrationWorkspace>` from the output of *for
-example* :ref:`algm-GetDetOffsetsMultiPeaks` or
-:ref:`algm-CalibrateRectangularDetectors` and minimize the difference
-between the DIFC of the instrument and calibration workspace by moving
-and rotating instrument components.
+This algorithm will take a table of peak-center positions (TOF units) for every pixel,
+and minimize the following quantity by moving and rotating instrument components.
 
-The resulting calibrated geometry can be exported by
-:ref:`algm-ExportGeometry`.
+.. math:: \sum_i^{N_d}\sum_j^{M_i} \frac{|d_{i,j} - d^*_j|}{d^*_j}
+
+where the sums is for all :math:`N_d` detector pixels in a given instrument component and all
+:math:`M_i` peak centers observed at detector pixel :math:`i`. The quantity to be summed is
+the absolute value of the fractional difference between the observed peak center in d-spacing units
+for detector pixel :math:`i` and peak :math:`j` and a reference value for the d-spacing of peak :math:`j`.
+As we change the location of the instrument components during the minimization, the
+:math:`d_{i,j}` values are bound to change.
+
+Below's an example of the table of peak-center positions in TOF units for a sample having two peaks
+with reference peak centers of 5.1483 and 5.2070 Angstroms for an instrument consisting of one bank
+with four pixels:
+
+| detid | @5.1483 | @7.2070 |
+|-------|---------|---------|
+| 1     | 10000.0 | nan     |
+| 2     | 10010.0 | nan     |
+| 3     | nan     | 6000.0  |
+| 4     | 10030.0 | 6010.0  |
+
+The first pixel contains the 5.1483A peak at :math:`TOF = 10000.0 \mu s` and the 7.2070A peak is not
+observed. Similary for the second pixel. The third pixels observes the second peak but not the first,
+and the fourth pixel observes both peaks.
+
+It is required that the reference peak centers in d-spacing have at least a precision of 5 digits.
 
 ComponentList
 #############
@@ -58,7 +76,7 @@ components are aligned.
 Usage
 -----
 
-**Example - Align the Y and Z position of bank26 in POWGEN:**
+**Example - Align the Y and Z position of bank26:**
 
 .. testcode:: position
 
