@@ -25,12 +25,14 @@ Below's an example of the table of peak-center positions in TOF units for a samp
 with reference peak centers of 5.1483 and 5.2070 Angstroms for an instrument consisting of one bank
 with four pixels:
 
-| detid | @5.1483 | @7.2070 |
-|-------|---------|---------|
-| 1     | 10000.0 | nan     |
-| 2     | 10010.0 | nan     |
-| 3     | nan     | 6000.0  |
-| 4     | 10030.0 | 6010.0  |
+===== ======= =======
+detid @5.1483 @7.2070
+===== ======= =======
+1     10000.0 nan
+2     10010.0 nan
+3     nan     6000.0
+4     10030.0 6010.0
+===== ======= =======
 
 The first pixel contains the 5.1483A peak at :math:`TOF = 10000.0 \mu s` and the 7.2070A peak is not
 observed. Similary for the second pixel. The third pixels observes the second peak but not the first,
