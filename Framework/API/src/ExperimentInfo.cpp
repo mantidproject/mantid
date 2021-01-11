@@ -1265,6 +1265,9 @@ void ExperimentInfo::populateIfNotLoaded() const {
 }
 
 /** Get the detector values relevant to unit conversion for a workspace index
+ * @param specInfo :: SpectrumInfo object (should be available from
+ * ExperimentInfo::spectrumInfo() but avoiding that for now because of
+ * performance issue)
  * @param outputUnit :: The output unit
  * @param emode :: The energy mode
  * @param signedTheta :: Return twotheta with sign or without
@@ -1274,12 +1277,12 @@ void ExperimentInfo::populateIfNotLoaded() const {
  * @param pmap :: a map containing optional unit conversion parameters eg efixed
  * @returns true if lookup successful, false on error
  */
-bool ExperimentInfo::getDetectorValues(const Kernel::Unit &outputUnit,
+bool ExperimentInfo::getDetectorValues(const API::SpectrumInfo &specInfo,
+                                       const Kernel::Unit &outputUnit,
                                        int emode, const bool signedTheta,
                                        int64_t wsIndex, double &l2,
                                        double &twoTheta,
                                        ExtraParametersMap &pmap) const {
-  auto &specInfo = spectrumInfo();
   if (!specInfo.hasDetectors(wsIndex))
     return false;
 
