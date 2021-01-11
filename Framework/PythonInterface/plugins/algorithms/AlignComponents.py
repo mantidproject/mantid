@@ -240,6 +240,7 @@ class AlignComponents(PythonAlgorithm):
         def with_precision(the_number, precision):
             r"""Analog of C++'s std::setprecision"""
             return round(the_number, precision - len(str(int(the_number))))
+
         for column_name, peak_position in zip(column_names, sorted(peak_positions)):
             if (float(column_name[1:]) - with_precision(peak_position, 5)) > 1.e-5:
                 issues['PeakCentersTofTable'] = f'{column_name} and {peak_position} differ up to precision 5'
