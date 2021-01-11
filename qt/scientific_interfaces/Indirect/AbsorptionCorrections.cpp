@@ -167,7 +167,7 @@ AbsorptionCorrections::AbsorptionCorrections(QWidget *parent)
           SLOT(doValidation()));
   connect(m_uiForm.leCanChemicalFormula, SIGNAL(editingFinished()), this,
           SLOT(doValidation()));
-  connect(m_uiForm.overrideShape, SIGNAL(stateChanged(int)), this,
+  connect(m_uiForm.cbUseCan, SIGNAL(stateChanged(int)), this,
           SLOT(doValidation()));
 
   // Allows empty workspace selector when initially selected
@@ -186,7 +186,7 @@ void AbsorptionCorrections::setup() { doValidation(); }
 void AbsorptionCorrections::run() {
   setRunIsRunning(true);
 
-  bool const overrideShapes = m_uiForm.overrideShape->isChecked();
+  bool const isUseCan = m_uiForm.cbUseCan->isChecked();
 
   IAlgorithm_sptr monteCarloAbsCor =
       AlgorithmManager::Instance().create("PaalmanPingsMonteCarloAbsorption");
@@ -208,12 +208,13 @@ void AbsorptionCorrections::run() {
       static_cast<long>(m_uiForm.spMaxScatterPtAttempts->value());
   monteCarloAbsCor->setProperty("MaxScatterPtAttempts", maxAttempts);
 
-  if (overrideShapes) {
+  QString const sampleShape = m_uiForm.cbShape->currentText().replace(" ", "");
+  const bool isPreset = sampleShape == "Preset";
+
+  if (!isPreset) {
 
     // Get correct corrections algorithm
-    QString const sampleShape =
-        m_uiForm.cbShape->currentText().replace(" ", "");
-
+    
     monteCarloAbsCor->setProperty("Shape", sampleShape.toStdString());
 
     addShapeSpecificSampleOptions(monteCarloAbsCor, sampleShape);
@@ -245,32 +246,38 @@ void AbsorptionCorrections::run() {
           m_uiForm.spSampleAttenuationXSection->value());
     }
 
-    // Can details
-    auto const containerDensityType =
-        m_uiForm.cbCanDensity->currentText().toStdString();
-    monteCarloAbsCor->setProperty("ContainerDensityType",
-                                  getDensityType(containerDensityType));
-    if (containerDensityType != "Mass Density")
-      monteCarloAbsCor->setProperty("ContainerNumberDensityUnit",
-                                    getNumberDensityUnit(containerDensityType));
+    if (isUseCan) {
 
-    monteCarloAbsCor->setProperty("ContainerDensity",
-                                  m_uiForm.spCanDensity->value());
+      // Can details
+      auto const containerDensityType =
+          m_uiForm.cbCanDensity->currentText().toStdString();
+      monteCarloAbsCor->setProperty("ContainerDensityType",
+                                    getDensityType(containerDensityType));
+      if (containerDensityType != "Mass Density")
+        monteCarloAbsCor->setProperty(
+            "ContainerNumberDensityUnit",
+            getNumberDensityUnit(containerDensityType));
 
-    if (m_uiForm.cbCanMaterialMethod->currentText() == "Chemical Formula") {
-      auto const canChemicalFormula = m_uiForm.leCanChemicalFormula->text();
-      monteCarloAbsCor->setProperty("ContainerChemicalFormula",
-                                    canChemicalFormula.toStdString());
-    } else {
-      monteCarloAbsCor->setProperty("ContainerCoherentXSection",
-                                    m_uiForm.spCanCoherentXSection->value());
-      monteCarloAbsCor->setProperty("ContainerIncoherentXSection",
-                                    m_uiForm.spCanIncoherentXSection->value());
-      monteCarloAbsCor->setProperty("ContainerAttenuationXSection",
-                                    m_uiForm.spCanAttenuationXSection->value());
+      monteCarloAbsCor->setProperty("ContainerDensity",
+                                    m_uiForm.spCanDensity->value());
+
+      if (m_uiForm.cbCanMaterialMethod->currentText() == "Chemical Formula") {
+        auto const canChemicalFormula = m_uiForm.leCanChemicalFormula->text();
+        monteCarloAbsCor->setProperty("ContainerChemicalFormula",
+                                      canChemicalFormula.toStdString());
+      } else {
+        monteCarloAbsCor->setProperty("ContainerCoherentXSection",
+                                      m_uiForm.spCanCoherentXSection->value());
+        monteCarloAbsCor->setProperty(
+            "ContainerIncoherentXSection",
+            m_uiForm.spCanIncoherentXSection->value());
+        monteCarloAbsCor->setProperty(
+            "ContainerAttenuationXSection",
+            m_uiForm.spCanAttenuationXSection->value());
+      }
+
+      addShapeSpecificCanOptions(monteCarloAbsCor, sampleShape);
     }
-
-    addShapeSpecificCanOptions(monteCarloAbsCor, sampleShape);
   }
 
   // Generate workspace names
@@ -384,9 +391,11 @@ UserInputValidator AbsorptionCorrections::doValidation() {
     uiv.addErrorMessage(
         "Invalid sample workspace. Ensure a MatrixWorkspace is provided.");
 
-  bool overrideShapes = m_uiForm.overrideShape->isChecked();
+  QString const sampleShape = m_uiForm.cbShape->currentText().replace(" ", "");
+  const bool isPreset = sampleShape == "Preset";
+  const bool isUseCan = m_uiForm.cbUseCan->isChecked();
 
-  if (overrideShapes) {
+  if (isUseCan && !isPreset) {
     if (m_uiForm.cbCanMaterialMethod->currentText() == "Chemical Formula") {
       auto const containerChem =
           m_uiForm.leCanChemicalFormula->text().toStdString();

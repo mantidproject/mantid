@@ -2,6 +2,9 @@
 <ui version="4.0">
  <class>AbsorptionCorrections</class>
  <widget class="QWidget" name="AbsorptionCorrections">
+  <property name="enabled">
+   <bool>true</bool>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -35,16 +38,6 @@
           <string>Input</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_11">
-          <item row="1" column="0">
-           <widget class="QCheckBox" name="overrideShape">
-            <property name="text">
-             <string>Override Sample/Can from Workspace</string>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
           <item row="0" column="1">
            <widget class="MantidQt::MantidWidgets::DataSelector" name="dsSampleInput" native="true">
             <property name="sizePolicy">
@@ -73,6 +66,19 @@
             </property>
             <property name="ShowGroups" stdset="0">
              <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QCheckBox" name="cbUseCan">
+            <property name="maximumSize">
+             <size>
+              <width>16777208</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>Use Container</string>
             </property>
            </widget>
           </item>
@@ -252,6 +258,14 @@
             </item>
             <item>
              <widget class="QComboBox" name="cbShape">
+              <property name="currentText">
+               <string>Preset</string>
+              </property>
+              <item>
+               <property name="text">
+                <string>Preset</string>
+               </property>
+              </item>
               <item>
                <property name="text">
                 <string>Flat Plate</string>
@@ -282,6 +296,7 @@
             <property name="currentIndex">
              <number>0</number>
             </property>
+            <widget class="QWidget" name="pgAbsCorPreset"/>
             <widget class="QWidget" name="pgAbsCorFlatPlate">
              <layout class="QGridLayout" name="loFlatPlate">
               <property name="leftMargin">
@@ -359,7 +374,7 @@
               <item row="3" column="0">
                <widget class="QLabel" name="lbFlatCanFrontThickness">
                 <property name="enabled">
-                 <bool>false</bool>
+                 <bool>true</bool>
                 </property>
                 <property name="text">
                  <string>Container Front Thickness:</string>
@@ -405,7 +420,7 @@
               <item row="3" column="2">
                <widget class="QLabel" name="lbFlatCanBackThickness">
                 <property name="enabled">
-                 <bool>false</bool>
+                 <bool>true</bool>
                 </property>
                 <property name="text">
                  <string>Container Back Thickness:</string>
@@ -512,7 +527,7 @@
               <item row="6" column="0">
                <widget class="QLabel" name="lbAnnCanInnerRadius">
                 <property name="enabled">
-                 <bool>false</bool>
+                 <bool>true</bool>
                 </property>
                 <property name="text">
                  <string>Inner Container Inner Radius:</string>
@@ -522,7 +537,7 @@
               <item row="6" column="2">
                <widget class="QLabel" name="lbAnnCanOuterRadius">
                 <property name="enabled">
-                 <bool>false</bool>
+                 <bool>true</bool>
                 </property>
                 <property name="text">
                  <string>Outer Container Outer Radius:</string>
@@ -615,7 +630,7 @@
               <item row="2" column="2">
                <widget class="QLabel" name="lbCylCanOuterRadius">
                 <property name="enabled">
-                 <bool>false</bool>
+                 <bool>true</bool>
                 </property>
                 <property name="text">
                  <string>Container Outer Radius</string>
@@ -918,7 +933,7 @@
        <item>
         <widget class="QGroupBox" name="gbContainerDetails">
          <property name="enabled">
-          <bool>true</bool>
+          <bool>false</bool>
          </property>
          <property name="title">
           <string>Container Details</string>
@@ -1303,7 +1318,6 @@
   </customwidget>
  </customwidgets>
  <tabstops>
-  <tabstop>overrideShape</tabstop>
   <tabstop>spNumberEvents</tabstop>
   <tabstop>spBeamHeight</tabstop>
   <tabstop>spBeamWidth</tabstop>
@@ -1359,46 +1373,94 @@
    </hints>
   </connection>
   <connection>
-   <sender>overrideShape</sender>
+   <sender>cbUseCan</sender>
    <signal>toggled(bool)</signal>
-   <receiver>gbShapeDetails</receiver>
+   <receiver>spFlatCanBackThickness</receiver>
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>334</x>
+     <x>256</x>
      <y>69</y>
     </hint>
     <hint type="destinationlabel">
-     <x>486</x>
-     <y>304</y>
+     <x>832</x>
+     <y>350</y>
     </hint>
    </hints>
   </connection>
   <connection>
-   <sender>overrideShape</sender>
+   <sender>cbUseCan</sender>
    <signal>toggled(bool)</signal>
-   <receiver>gbSampleDetails</receiver>
+   <receiver>spFlatCanFrontThickness</receiver>
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>308</x>
+     <x>256</x>
      <y>69</y>
     </hint>
     <hint type="destinationlabel">
-     <x>486</x>
-     <y>445</y>
+     <x>371</x>
+     <y>350</y>
     </hint>
    </hints>
   </connection>
   <connection>
-   <sender>overrideShape</sender>
+   <sender>cbUseCan</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>spAnnCanInnerRadius</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>256</x>
+     <y>69</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>371</x>
+     <y>350</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbUseCan</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>spAnnCanOuterRadius</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>256</x>
+     <y>69</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>832</x>
+     <y>350</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbUseCan</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>spCylCanOuterRadius</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>256</x>
+     <y>69</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>832</x>
+     <y>340</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbUseCan</sender>
    <signal>toggled(bool)</signal>
    <receiver>gbContainerDetails</receiver>
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>38</x>
-     <y>66</y>
+     <x>256</x>
+     <y>69</y>
     </hint>
     <hint type="destinationlabel">
      <x>486</x>
