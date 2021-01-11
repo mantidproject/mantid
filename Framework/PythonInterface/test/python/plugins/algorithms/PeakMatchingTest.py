@@ -1,9 +1,9 @@
-from  plugins.algorithms.PeakMatching import PeakMatching
+from  plugins.algorithms.PeakMatching import PeakMatching as _PeakMatching
 import unittest
 from unittest import mock
-from mantid.simpleapi import DeleteWorkspace,CreateEmptyTableWorkspace
-from mantid.api import mtd
-
+from mantid.simpleapi import DeleteWorkspace,CreateEmptyTableWorkspace,PeakMatching,CreateWorkspace
+from mantid.api import mtd , ITableWorkspace
+TABLE_COLUMNS = ["Peak centre","Database Energy","Element","Transition","Error","Difference"]
 class PeakMatchingTest(unittest.TestCase):
 
     def setUp(self):
@@ -27,23 +27,39 @@ class PeakMatchingTest(unittest.TestCase):
                                                   '8->6': 122.2}}}
 
         self.input_peaks = [(900, 0.8), (306, 0.8), (567, 0.8), (3, 0.8)]
-        self.input_table =CreateEmptyTableWorkspace(OutputWorkSpace = "input")
+        self.input_table =CreateEmptyTableWorkspace(OutputWorkSpace="input")
         self.input_table.addColumn("double","centre")
         self.input_table.addColumn("double", "sigma")
         for row in self.input_peaks:
             self.input_table.addRow(row)
-        self.algo = PeakMatching()
+        self.algo = _PeakMatching()
 
     def tearDown(self):
         self.delete_if_present("input")
+        self.delete_if_present("primary_matches")
+        self.delete_if_present("secondary_matches")
+        self.delete_if_present("all_matches")
+        self.delete_if_present("all_matches_sorted_by_energy")
+        self.delete_if_present("element_count")
+        self.delete_if_present("Test")
         self.algo = None
+
+    def assertPeaksMatch(self,table,peaks):
+        assert(len(peaks) == table.columnCount())
+        for column in peaks:
+            column_data = table.column(column)
+            assert(len(peaks[column]) == len(column_data))
+            for i in range(len(peaks[column])):
+                if type(peaks[column][i]) == float:
+                    self.assertAlmostEqual(peaks[column][i],column_data[i])
+
     @staticmethod
     def delete_if_present(workspace):
         if workspace in mtd:
             DeleteWorkspace(workspace)
 
     def test_get_input_peaks(self):
-        table_data = self.algo.get_input_peaks(self.input_table)
+        table_data = self.algo.get_input_peaks(self.input_table.name(),"centre","sigma")
         self.assertEqual(table_data,self.input_peaks)
         self.delete_if_present("Test")
 
@@ -134,12 +150,143 @@ class PeakMatchingTest(unittest.TestCase):
         self.assertEqual(mock_set_value.call_count,5)
         self.assertEqual(mock_set_property.call_count, 5)
 
-    def test_algorithm_with_valid_inputs(self):
-        #PeakMatching()
-        pass
+    @mock.patch('plugins.algorithms.PeakMatching.PeakMatching.get_default_peak_data')
+    def test_algorithm_with_valid_inputs(self,mock_get_default_peak_data):
+        mock_get_default_peak_data.return_value = dict({
+            "Ag": {
+                "Z": 47,
+                "A": 107.87,
+                "Primary": {
+                    "K(4->1)": 3177.7,
+                    "L(4->2)": 900.7,
+                    "M(4->3)": 304.7,
+                    "6->5": 141
+                },
+                "Secondary": {
+                    "K(2->1)": 3140.6,
+                    "L(8->2)": 1347.8,
+                    "M(10->3)": 567,
+                    "8->6": 122.2
+                },
+                "Gammas": {
+                    "72Ge(n,n')72Ge": 691,
+                    "73Ge(n,g)74Ge": None,
+                    "74Ge(n,n')74Ge": 595.7
+                }
+            }
+        })
+
+        PeakMatching(PeakTable =self.input_table)
+        prim = mtd['primary_matches']
+        secon = mtd['secondary_matches']
+        all = mtd['all_matches']
+        sort = mtd['all_matches_sorted_by_energy']
+        count = mtd['element_count']
+
+        correct_prim = {'Peak centre': [900.0, 306.0], 'Database Energy': [900.7, 304.7], 'Element': ['Ag', 'Ag'],
+                      'Transition': ['L(4->2)', 'M(4->3)'], 'Error': [0.8, 1.6],
+                      'Difference': [0.7, 1.3]}
+
+        correct_secon = {'Peak centre': [567.0], 'Database Energy': [567.0], 'Element': ['Ag'],
+                         'Transition': ['M(10->3)'], 'Error': [0.0], 'Difference': [0.0]}
+
+        correct_all = {'Peak centre': [567.0, 900.0, 306.0], 'Database Energy': [567.0, 900.7, 304.7],
+                       'Element': ['Ag', 'Ag', 'Ag'], 'Transition': ['M(10->3)', 'L(4->2)', 'M(4->3)'],
+                       'Error': [0.0, 0.8, 1.6], 'Difference': [0.0, 0.7, 1.3]}
+
+        correct_sort = {'Peak centre': [306.0, 567.0, 900.0], 'Database Energy': [304.7, 567.0, 900.7],
+                          'Element': ['Ag', 'Ag', 'Ag'], 'Transition': ['M(4->3)', 'M(10->3)', 'L(4->2)'],
+                          'Error': [1.6, 0.0, 0.8], 'Difference': [1.3, 0.0, 0.7]}
+
+        correct_count = {'Element': ['Ag'], 'Counts': [4]}
+
+        self.assertPeaksMatch(prim,correct_prim)
+        self.assertPeaksMatch(secon, correct_secon)
+        self.assertPeaksMatch(all, correct_all)
+        self.assertPeaksMatch(sort, correct_sort)
+        self.assertPeaksMatch(count, correct_count)
 
     def test_algorithm_with_invalid_arguments(self):
-        pass
+        testWorkspace = CreateWorkspace(DataX = [1] , DataY = [1], OutputWorkspace = "Test")
+
+        with  self.assertRaises(ValueError):
+            PeakMatching(PeakTable = "Spam")
+
+        with  self.assertRaises(ValueError):
+            PeakMatching(PeakTable = testWorkspace)
+
+        with  self.assertRaises(TypeError):
+            PeakMatching(PeakTable = self.input_table,PeakCentreColumn = 1)
+
+        with  self.assertRaises(TypeError):
+            PeakMatching(PeakTable = self.input_table,SigmaColumn = 1.7)
+
+    @mock.patch('plugins.algorithms.PeakMatching.PeakMatching.get_default_peak_data')
+    def test_algorithm_correctly_names_tables(self,mock_get_default_peak_data):
+        mock_get_default_peak_data.return_value = dict({
+            "Ag": {
+                "Z": 47,
+                "A": 107.87,
+                "Primary": {
+                    "K(4->1)": 3177.7,
+                    "L(4->2)": 900.7,
+                    "M(4->3)": 304.7,
+                    "6->5": 141
+                },
+                "Secondary": {
+                    "K(2->1)": 3140.6,
+                    "L(8->2)": 1347.8,
+                    "M(10->3)": 567,
+                    "8->6": 122.2
+                },
+                "Gammas": {
+                    "72Ge(n,n')72Ge": 691,
+                    "73Ge(n,g)74Ge": None,
+                    "74Ge(n,n')74Ge": 595.7
+                }
+            }
+        })
+
+        PeakMatching(PeakTable=self.input_table,
+                     AllPeaks = "rename_all",
+                     PrimaryPeaks= "rename_prim",
+                     SecondaryPeaks="rename_secon",
+                     SortedByEnergy="rename_sort",
+                     ElementCount="rename_count")
+        prim = mtd['rename_prim']
+        secon = mtd['rename_secon']
+        all = mtd['rename_all']
+        sort = mtd['rename_sort']
+        count = mtd['rename_count']
+
+        correct_prim = {'Peak centre': [900.0, 306.0], 'Database Energy': [900.7, 304.7], 'Element': ['Ag', 'Ag'],
+                        'Transition': ['L(4->2)', 'M(4->3)'], 'Error': [0.8, 1.6],
+                        'Difference': [0.7, 1.3]}
+
+        correct_secon = {'Peak centre': [567.0], 'Database Energy': [567.0], 'Element': ['Ag'],
+                         'Transition': ['M(10->3)'], 'Error': [0.0], 'Difference': [0.0]}
+
+        correct_all = {'Peak centre': [567.0, 900.0, 306.0], 'Database Energy': [567.0, 900.7, 304.7],
+                       'Element': ['Ag', 'Ag', 'Ag'], 'Transition': ['M(10->3)', 'L(4->2)', 'M(4->3)'],
+                       'Error': [0.0, 0.8, 1.6], 'Difference': [0.0, 0.7, 1.3]}
+
+        correct_sort = {'Peak centre': [306.0, 567.0, 900.0], 'Database Energy': [304.7, 567.0, 900.7],
+                        'Element': ['Ag', 'Ag', 'Ag'], 'Transition': ['M(4->3)', 'M(10->3)', 'L(4->2)'],
+                        'Error': [1.6, 0.0, 0.8], 'Difference': [1.3, 0.0, 0.7]}
+
+        correct_count = {'Element': ['Ag'], 'Counts': [4]}
+
+        self.assertPeaksMatch(prim, correct_prim)
+        self.assertPeaksMatch(secon, correct_secon)
+        self.assertPeaksMatch(all, correct_all)
+        self.assertPeaksMatch(sort, correct_sort)
+        self.assertPeaksMatch(count, correct_count)
+
+        self.delete_if_present('rename_all')
+        self.delete_if_present('rename_prim')
+        self.delete_if_present('rename_secon')
+        self.delete_if_present('rename_sort')
+        self.delete_if_present('rename_count')
 
 if __name__ == '__main__':
     unittest.main()
