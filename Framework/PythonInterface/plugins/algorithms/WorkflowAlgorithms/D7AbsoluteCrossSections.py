@@ -240,23 +240,23 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                     RenameWorkspace(InputWorkspace=data_total, OutputWorkspace=total_cs)
                     separated_cs.append(total_cs)
                     # Magnetic component
-                    dataY_nsf_magnetic = 2.0 * (2.0 * sigma_z_nsf - sigma_x_nsf - sigma_y_nsf)
-                    dataY_sf_magnetic = 2.0 * (-2.0 * sigma_z_sf + sigma_x_sf + sigma_y_sf)
-                    dataY_average_magnetic = 0.5 * (dataY_nsf_magnetic + dataY_sf_magnetic)
+                    data_nsf_magnetic = 2.0 * (2.0 * sigma_z_nsf - sigma_x_nsf - sigma_y_nsf)
+                    data_sf_magnetic = 2.0 * (-2.0 * sigma_z_sf + sigma_x_sf + sigma_y_sf)
+                    data_average_magnetic = 0.5 * (data_nsf_magnetic + data_sf_magnetic)
                     # Nuclear coherent component
-                    dataY_nuclear = (2.0*(sigma_x_nsf + sigma_y_nsf + sigma_z_nsf)
-                                     - (sigma_x_sf + sigma_y_sf + sigma_z_sf)) / 6.0
-                    RenameWorkspace(InputWorkspace=dataY_nuclear, OutputWorkspace=nuclear_cs)
+                    data_nuclear = (2.0*(sigma_x_nsf + sigma_y_nsf + sigma_z_nsf)
+                                    - (sigma_x_sf + sigma_y_sf + sigma_z_sf)) / 6.0
+                    RenameWorkspace(InputWorkspace=data_nuclear, OutputWorkspace=nuclear_cs)
                     separated_cs.append(nuclear_cs)
                     # Incoherent component
-                    dataY_incoherent= 0.5 * (sigma_x_sf + sigma_y_sf + sigma_z_sf) - dataY_average_magnetic
-                    RenameWorkspace(InputWorkspace=dataY_incoherent, OutputWorkspace=incoherent_cs)
+                    data_incoherent= 0.5 * (sigma_x_sf + sigma_y_sf + sigma_z_sf) - data_average_magnetic
+                    RenameWorkspace(InputWorkspace=data_incoherent, OutputWorkspace=incoherent_cs)
                     separated_cs.append(incoherent_cs)
-                    RenameWorkspace(InputWorkspace=dataY_average_magnetic, OutputWorkspace=average_magnetic_cs)
+                    RenameWorkspace(InputWorkspace=data_average_magnetic, OutputWorkspace=average_magnetic_cs)
                     separated_cs.append(average_magnetic_cs)
-                    RenameWorkspace(InputWorkspace=dataY_sf_magnetic, OutputWorkspace=sf_magnetic_cs)
+                    RenameWorkspace(InputWorkspace=data_sf_magnetic, OutputWorkspace=sf_magnetic_cs)
                     separated_cs.append(sf_magnetic_cs)
-                    RenameWorkspace(InputWorkspace=dataY_nsf_magnetic, OutputWorkspace=nsf_magnetic_cs)
+                    RenameWorkspace(InputWorkspace=data_nsf_magnetic, OutputWorkspace=nsf_magnetic_cs)
                     separated_cs.append(nsf_magnetic_cs)
                 else:
                     if not double_xyz_method:
@@ -317,32 +317,32 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                     tmp_names.add('magnetic_nsf_sin2alpha')
                     tmp_names.add('magnetic_sf_sin2alpha')
 
-                    dataY_nsf_magnetic = magnetic_nsf_cos2alpha * cos_2alpha \
+                    data_nsf_magnetic = magnetic_nsf_cos2alpha * cos_2alpha \
                         + magnetic_nsf_sin2alpha * sin_2alpha
-                    dataY_nsf_magnetic.getAxis(0).setUnit(mtd[ws][entry_no].getAxis(0).getUnit().unitID())
-                    dataY_nsf_magnetic.getAxis(1).setUnit(mtd[ws][entry_no].getAxis(1).getUnit().unitID())
+                    data_nsf_magnetic.getAxis(0).setUnit(mtd[ws][entry_no].getAxis(0).getUnit().unitID())
+                    data_nsf_magnetic.getAxis(1).setUnit(mtd[ws][entry_no].getAxis(1).getUnit().unitID())
 
-                    dataY_sf_magnetic = magnetic_sf_cos2alpha * cos_2alpha + magnetic_sf_sin2alpha * sin_2alpha
-                    dataY_sf_magnetic.getAxis(0).setUnit(mtd[ws][entry_no].getAxis(0).getUnit().unitID())
-                    dataY_sf_magnetic.getAxis(1).setUnit(mtd[ws][entry_no].getAxis(1).getUnit().unitID())
+                    data_sf_magnetic = magnetic_sf_cos2alpha * cos_2alpha + magnetic_sf_sin2alpha * sin_2alpha
+                    data_sf_magnetic.getAxis(0).setUnit(mtd[ws][entry_no].getAxis(0).getUnit().unitID())
+                    data_sf_magnetic.getAxis(1).setUnit(mtd[ws][entry_no].getAxis(1).getUnit().unitID())
 
-                    dataY_average_magnetic = 0.5 * (dataY_nsf_magnetic + dataY_sf_magnetic)
+                    data_average_magnetic = 0.5 * (data_nsf_magnetic + data_sf_magnetic)
 
                     # Nuclear coherent component
-                    dataY_nuclear = (2.0 * (sigma_x_nsf + sigma_y_nsf + 2*sigma_z_nsf + sigma_xpy_nsf + sigma_xmy_nsf)
-                                     - (sigma_x_sf + sigma_y_sf + 2*sigma_z_sf + sigma_xpy_sf + sigma_xmy_sf)) / 12.0
-                    RenameWorkspace(InputWorkspace=dataY_nuclear, OutputWorkspace=nuclear_cs)
+                    data_nuclear = (2.0 * (sigma_x_nsf + sigma_y_nsf + 2*sigma_z_nsf + sigma_xpy_nsf + sigma_xmy_nsf)
+                                    - (sigma_x_sf + sigma_y_sf + 2*sigma_z_sf + sigma_xpy_sf + sigma_xmy_sf)) / 12.0
+                    RenameWorkspace(InputWorkspace=data_nuclear, OutputWorkspace=nuclear_cs)
                     separated_cs.append(nuclear_cs)
                     # Incoherent component
                     data_incoherent_lhs = 0.25 * (sigma_x_sf + sigma_y_sf + 2*sigma_z_sf + sigma_xpy_sf + sigma_xmy_sf)
                     tmp_names.add('data_incoherent_lhs')
-                    Minus(LHSWOrkspace=data_incoherent_lhs, RHSWorkspace=dataY_average_magnetic, OutputWorkspace=incoherent_cs)
+                    Minus(LHSWOrkspace=data_incoherent_lhs, RHSWorkspace=data_average_magnetic, OutputWorkspace=incoherent_cs)
                     separated_cs.append(incoherent_cs)
-                    RenameWorkspace(InputWorkspace=dataY_average_magnetic, OutputWorkspace=average_magnetic_cs)
+                    RenameWorkspace(InputWorkspace=data_average_magnetic, OutputWorkspace=average_magnetic_cs)
                     separated_cs.append(average_magnetic_cs)
-                    RenameWorkspace(InputWorkspace=dataY_sf_magnetic, OutputWorkspace=sf_magnetic_cs)
+                    RenameWorkspace(InputWorkspace=data_sf_magnetic, OutputWorkspace=sf_magnetic_cs)
                     separated_cs.append(sf_magnetic_cs)
-                    RenameWorkspace(InputWorkspace=dataY_nsf_magnetic, OutputWorkspace=nsf_magnetic_cs)
+                    RenameWorkspace(InputWorkspace=data_nsf_magnetic, OutputWorkspace=nsf_magnetic_cs)
                     separated_cs.append(nsf_magnetic_cs)
 
         if tmp_names != set(): # clean only when non-empty
