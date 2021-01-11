@@ -1,9 +1,16 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2021 ISIS Rutherford Appleton Laboratory UKRI,
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+# SPDX - License - Identifier: GPL - 3.0 +
 from  plugins.algorithms.PeakMatching import PeakMatching as _PeakMatching
 import unittest
 from unittest import mock
 from mantid.simpleapi import DeleteWorkspace,CreateEmptyTableWorkspace,PeakMatching,CreateWorkspace
 from mantid.api import mtd , ITableWorkspace
-TABLE_COLUMNS = ["Peak centre","Database Energy","Element","Transition","Error","Difference"]
+
+
 class PeakMatchingTest(unittest.TestCase):
 
     def setUp(self):
