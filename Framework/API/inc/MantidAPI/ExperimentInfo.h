@@ -163,7 +163,8 @@ public:
   void invalidateSpectrumDefinition(const size_t index);
   void updateSpectrumDefinitionIfNecessary(const size_t index) const;
 
-  bool getDetectorValues(const Kernel::Unit &outputUnit, int emode,
+  bool getDetectorValues(const API::SpectrumInfo &spectrumInfo,
+                         const Kernel::Unit &outputUnit, int emode,
                          const bool signedTheta, int64_t wsIndex, double &l2,
                          double &twoTheta,
                          Kernel::ExtraParametersMap &pmap) const;

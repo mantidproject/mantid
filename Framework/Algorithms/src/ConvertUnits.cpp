@@ -452,8 +452,8 @@ ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit,
     pmap[UnitParams::efixed] = efixedProp;
   }
   size_t checkIndex = 0;
-  if (inputWS->getDetectorValues(*outputUnit, emode, signedTheta, checkIndex,
-                                 checkl2, checktwoTheta, pmap)) {
+  if (inputWS->getDetectorValues(spectrumInfo, *outputUnit, emode, signedTheta,
+                                 checkIndex, checkl2, checktwoTheta, pmap)) {
     // copy the X values for the check
     auto checkXValues = inputWS->readX(checkIndex);
     // Convert the input unit to time-of-flight
@@ -486,8 +486,8 @@ ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit,
     if (efixedProp != EMPTY_DBL()) {
       pmap[UnitParams::efixed] = efixed;
     }
-    if (outputWS->getDetectorValues(*outputUnit, emode, signedTheta, i, l2,
-                                    twoTheta, pmap)) {
+    if (outputWS->getDetectorValues(outSpectrumInfo, *outputUnit, emode,
+                                    signedTheta, i, l2, twoTheta, pmap)) {
       localFromUnit->toTOF(outputWS->dataX(i), emptyVec, l1, l2, twoTheta,
                            emode, pmap);
       // Convert from time-of-flight to the desired unit
