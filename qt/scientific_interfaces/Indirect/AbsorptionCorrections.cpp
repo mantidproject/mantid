@@ -214,7 +214,7 @@ void AbsorptionCorrections::run() {
   if (!isPreset) {
 
     // Get correct corrections algorithm
-    
+
     monteCarloAbsCor->setProperty("Shape", sampleShape.toStdString());
 
     addShapeSpecificSampleOptions(monteCarloAbsCor, sampleShape);
