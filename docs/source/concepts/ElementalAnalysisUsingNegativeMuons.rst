@@ -9,34 +9,38 @@ Elemental analysis using negative muons
   
 Overview
 --------
-This is a non-destructive , depth selective method of determining the elemental composition of a sample using characteristic Xrays 
-from  Muonic atoms.
+Elemental analysis is a non-destructive, depth selective method of determining the elemental composition of a sample by using negative muons.
+This leads to the sample emitting gamma and X-rays that can be detected.
  
 What happens when a muon is implanted in a sample?
 --------------------------------------------------
-* Muon is captured by an atom, forming a mounic atom.
-* Muon cascades down atom to N = 1  (1s) energy level within :math:`~10e-13` seconds emitting muonic x-rays [#HIL1]_.
-* Muon maybe captured by the nucleus releasing gamma rays and following reaction may occur [#MEA]_. 
+A Muon is captured by an atom, forming a mounic atom.
+Muon cascades down atom to the first energy level :math:`N = 1` (1s) within :math:`~10e-13` seconds, resulting in the emission of muonic x-rays [#HIL1]_.
+Radiative muon capture could occur and result in a the emission of a gamma ray [#MEA]_. 
 
-	µ-  +  p   →    ν  + n
-		
+.. math::	\mu^-  +  p   \rightarrow   \nu_\mu  + n + \gamma,
+
+where :math:`\nu_mu` is muon neutrino.
+
 .. figure:: ../images/MuonCascadeProcess.png
    :alt: Muon cascade process from [HIL1]. 
    :scale: 100%
 
 Controlling implantation depth of muons 
 ---------------------------------------
-* Implantation depth is proportional to momentum of muons and is also dependent on the density of materials.
-* At ISIS, the momentum of muons can be tuned from 17 MeV/c to 120 MeV/c [#MAT]_.
-* The maximum depth is a few metres for most gases depending on the pressure and about a few centimetres for most metals with a resolution of few 10s to 100s of microns.
+The implantation depth depends on the density of the target material and is proportional to the momentum of the incident muons.
+At ISIS, the momentum of the muons can be tuned from :math:`17 \textit{MeV/c}` to :math:`120 \textit{MeV/c}` [#MAT]_.
+The maximum penetration depth is a few metres for most gases depending on the pressure.
+For most metals the maximum penetration depth is a few centimetres, with a resolution of few :math:`10's` to :math:`100's` of microns.
 
 Advantages over other methods
 -----------------------------
-* Compared with X-ray fluorescence it releases energy of higher magnitude as the mass of a muon is over 200 times greater than an electron.
-* Can probe beneath the surface of material.
-* Is non destructive.
-* Can detect elements with low atomic numbers.
-* Can distinguish different isotopes.
+Another method for determining the elemental composition of a material is X-ray fluorescene, which uses electrons to create X-rays. 
+The mass of a muon is over :math:`200` times greater than the mass of an electron.
+This allows muon elemental analysis to probe energies that are an order of magnitude higher X-ray fluorescenes.
+Unlike X-ray fluorescene, muon elemental analysis is non destructive and can detect low atomic numbers.
+Selecting the momentum of the muon allows for penetration depth within the material to be chosen.
+Muons are also able to distinguish between different isotopes of the same element.
 
 
 References
