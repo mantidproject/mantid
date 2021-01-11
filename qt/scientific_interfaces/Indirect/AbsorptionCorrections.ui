@@ -259,7 +259,10 @@
             <item>
              <widget class="QComboBox" name="cbShape">
               <property name="currentText">
-               <string>Preset</string>
+               <string>Flat Plate</string>
+              </property>
+              <property name="currentIndex">
+               <number>1</number>
               </property>
               <item>
                <property name="text">
@@ -294,7 +297,7 @@
              </sizepolicy>
             </property>
             <property name="currentIndex">
-             <number>0</number>
+             <number>3</number>
             </property>
             <widget class="QWidget" name="pgAbsCorPreset"/>
             <widget class="QWidget" name="pgAbsCorFlatPlate">
@@ -384,7 +387,7 @@
               <item row="3" column="1">
                <widget class="QDoubleSpinBox" name="spFlatCanFrontThickness">
                 <property name="enabled">
-                 <bool>false</bool>
+                 <bool>true</bool>
                 </property>
                 <property name="suffix">
                  <string> cm</string>
@@ -430,7 +433,7 @@
               <item row="3" column="3">
                <widget class="QDoubleSpinBox" name="spFlatCanBackThickness">
                 <property name="enabled">
-                 <bool>false</bool>
+                 <bool>true</bool>
                 </property>
                 <property name="suffix">
                  <string> cm</string>
@@ -462,7 +465,7 @@
               <item row="6" column="3">
                <widget class="QDoubleSpinBox" name="spAnnCanOuterRadius">
                 <property name="enabled">
-                 <bool>false</bool>
+                 <bool>true</bool>
                 </property>
                 <property name="suffix">
                  <string> cm</string>
@@ -478,7 +481,7 @@
               <item row="6" column="1">
                <widget class="QDoubleSpinBox" name="spAnnCanInnerRadius">
                 <property name="enabled">
-                 <bool>false</bool>
+                 <bool>true</bool>
                 </property>
                 <property name="suffix">
                  <string> cm</string>
@@ -640,7 +643,7 @@
               <item row="2" column="3">
                <widget class="QDoubleSpinBox" name="spCylCanOuterRadius">
                 <property name="enabled">
-                 <bool>false</bool>
+                 <bool>true</bool>
                 </property>
                 <property name="suffix">
                  <string> cm</string>
@@ -1465,6 +1468,86 @@
     <hint type="destinationlabel">
      <x>486</x>
      <y>589</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbUseCan</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>lbFlatCanBackThickness</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>256</x>
+     <y>69</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>602</x>
+     <y>350</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbUseCan</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>lbFlatCanFrontThickness</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>256</x>
+     <y>69</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>141</x>
+     <y>350</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbUseCan</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>lbAnnCanInnerRadius</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>256</x>
+     <y>69</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>141</x>
+     <y>350</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbUseCan</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>lbAnnCanOuterRadius</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>256</x>
+     <y>69</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>602</x>
+     <y>350</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbUseCan</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>lbCylCanOuterRadius</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>256</x>
+     <y>69</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>602</x>
+     <y>340</y>
     </hint>
    </hints>
   </connection>

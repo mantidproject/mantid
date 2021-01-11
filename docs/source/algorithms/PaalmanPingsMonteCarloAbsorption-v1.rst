@@ -13,7 +13,7 @@ This algorithm calculates the attenuation factors in the Paalman Pings formalism
 
 Three simple shapes are supported: *FlatPlate*, *Cylinder*, and *Annulus*. Each shape is defined by the corresponding set of geometric parameters.
 
-If the shape is left as the default value *Preset*, the algorithm will use the sample and container shapes defined in the workspace.
+If the *Preset* shape option is chosen, the algorithm will use the sample and container shapes defined in the workspace.
 
 Inelastic, quasielastic and elastic measurements are supported, both for direct and indirect geometry instruments.
 

@@ -120,7 +120,7 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
         self.setPropertyGroup('BeamWidth', 'Beam Options')
 
         # Shape Options
-        self.declareProperty(name='Shape', defaultValue='Preset',
+        self.declareProperty(name='Shape', defaultValue='FlatPlate',
                              validator=StringListValidator(['Preset', 'FlatPlate', 'Cylinder', 'Annulus']),
                              doc='Geometric shape of the sample environment')
 
