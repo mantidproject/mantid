@@ -79,9 +79,9 @@ void IndirectFitPropertyBrowser::initFitOptionsBrowser() {
   // which is a child of this class so the lifetime of this pointer is handled
   // by Qt
   m_fitOptionsBrowser =
-      new FitOptionsBrowser(nullptr, FittingMode::SimultaneousAndSequential);
+      new FitOptionsBrowser(nullptr, FittingMode::SIMULTANEOUS_SEQUENTIAL);
   m_fitOptionsBrowser->setObjectName("fitOptionsBrowser");
-  m_fitOptionsBrowser->setCurrentFittingType(FittingMode::Sequential);
+  m_fitOptionsBrowser->setCurrentFittingType(FittingMode::SEQUENTIAL);
 }
 
 void IndirectFitPropertyBrowser::setHiddenProperties(
@@ -316,7 +316,7 @@ void IndirectFitPropertyBrowser::updateFitStatus(const FitDomainIndex index) {
  */
 QString IndirectFitPropertyBrowser::selectedFitType() const {
   return m_fitOptionsBrowser->getCurrentFittingType() ==
-                 FittingMode::Simultaneous
+                 FittingMode::SIMULTANEOUS
              ? "Simultaneous"
              : "Sequential";
 }
@@ -449,9 +449,9 @@ void IndirectFitPropertyBrowser::browserVisibilityChanged(bool isVisible) {
 void IndirectFitPropertyBrowser::updateFitType() {
   auto const nGlobals = m_functionBrowser->getGlobalParameters().size();
   if (nGlobals == 0) {
-    m_fitOptionsBrowser->setCurrentFittingType(FittingMode::Sequential);
+    m_fitOptionsBrowser->setCurrentFittingType(FittingMode::SEQUENTIAL);
   } else {
-    m_fitOptionsBrowser->setCurrentFittingType(FittingMode::Simultaneous);
+    m_fitOptionsBrowser->setCurrentFittingType(FittingMode::SIMULTANEOUS);
   }
 }
 

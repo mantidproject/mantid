@@ -24,6 +24,7 @@ double X_EXTENT(100000.0);
 int X_PRECISION(5);
 
 QStringList const COLUMN_HEADINGS({"Name", "WS Index", "StartX", "EndX"});
+QColor const FUNCTION_INDEX_COLOR(QColor(30, 144, 255));
 QString const TABLE_STYLESHEET("QTableWidget {\n"
                                "    font-size: 8pt;\n"
                                "    border: 1px solid #828790;\n"
@@ -71,6 +72,10 @@ QTableWidgetItem *createXTableItem(double value,
                                    bool editable) {
   return createTableItem(QString::number(value, 'f', X_PRECISION), alignment,
                          editable);
+}
+
+QString toFunctionIndex(MantidQt::MantidWidgets::FitDomainIndex index) {
+  return "f" + QString::number(index.value) + ".";
 }
 
 } // namespace
@@ -254,8 +259,8 @@ void FitScriptGeneratorDataTable::addDomain(
   this->insertRow(rowIndex);
 
   this->setVerticalHeaderItem(
-      rowIndex, createTableItem("f" + QString::number(rowIndex) + ".",
-                                Qt::AlignCenter, false, QColor(30, 144, 255)));
+      rowIndex, createTableItem(toFunctionIndex(FitDomainIndex(rowIndex)),
+                                Qt::AlignCenter, false, FUNCTION_INDEX_COLOR));
   this->setItem(rowIndex, ColumnIndex::WorkspaceName,
                 createTableItem(workspaceName, Qt::AlignVCenter, false));
   this->setItem(rowIndex, ColumnIndex::WorkspaceIndex,
@@ -275,10 +280,11 @@ void FitScriptGeneratorDataTable::addDomain(
 }
 
 void FitScriptGeneratorDataTable::updateVerticalHeaders() {
-  for (auto rowIndex = 0; rowIndex < this->rowCount(); ++rowIndex)
-    this->setVerticalHeaderItem(
-        rowIndex, createTableItem("f" + QString::number(rowIndex) + ".",
-                                  Qt::AlignCenter, false, QColor(35, 140, 35)));
+  for (auto i = FitDomainIndex(0); i < FitDomainIndex(this->rowCount()); ++i)
+    this->setVerticalHeaderItem(static_cast<int>(i.value),
+                                createTableItem(toFunctionIndex(i),
+                                                Qt::AlignCenter, false,
+                                                FUNCTION_INDEX_COLOR));
 }
 
 int FitScriptGeneratorDataTable::indexOfDomain(

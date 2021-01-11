@@ -98,8 +98,8 @@ void FitScriptGeneratorPresenter::notifyPresenter(
   throw std::runtime_error("Failed to notify the FitScriptGeneratorPresenter.");
 }
 
-void FitScriptGeneratorPresenter::notifyPresenter(
-    ViewEvent const &event, FittingMode const &fittingMode) {
+void FitScriptGeneratorPresenter::notifyPresenter(ViewEvent const &event,
+                                                  FittingMode fittingMode) {
   switch (event) {
   case ViewEvent::FittingModeChanged:
     handleFittingModeChanged(fittingMode);
@@ -157,7 +157,7 @@ void FitScriptGeneratorPresenter::handleEndXChanged() {
 
 void FitScriptGeneratorPresenter::handleSelectionChanged() {
   m_view->setSimultaneousMode(m_model->getFittingMode() ==
-                              FittingMode::Simultaneous);
+                              FittingMode::SIMULTANEOUS);
 
   auto const selectedRows = m_view->selectedRows();
   if (!selectedRows.empty()) {
@@ -289,7 +289,7 @@ void FitScriptGeneratorPresenter::handleGlobalParametersChanged(
 }
 
 void FitScriptGeneratorPresenter::handleFittingModeChanged(
-    FittingMode const &fittingMode) {
+    FittingMode fittingMode) {
   m_model->setFittingMode(fittingMode);
   handleSelectionChanged();
 }

@@ -48,7 +48,7 @@ std::string getTieRHS(std::string const &tie) {
 
 std::string getLocalTie(std::string const &tie,
                         FittingMode const &fittingMode) {
-  if (!tie.empty() && fittingMode == FittingMode::Simultaneous)
+  if (!tie.empty() && fittingMode == FittingMode::SIMULTANEOUS)
     return removeTopFunctionIndex(getTieRHS(tie));
   return tie;
 }
@@ -74,7 +74,7 @@ namespace MantidWidgets {
 
 FitScriptGeneratorModel::FitScriptGeneratorModel()
     : m_presenter(), m_fitDomains(), m_globalParameters(), m_globalTies(),
-      m_fittingMode(FittingMode::Sequential) {}
+      m_fittingMode(FittingMode::SEQUENTIAL) {}
 
 FitScriptGeneratorModel::~FitScriptGeneratorModel() {
   m_fitDomains.clear();
@@ -108,12 +108,12 @@ void FitScriptGeneratorModel::addWorkspaceDomain(
       std::make_unique<FitDomain>(workspaceName, workspaceIndex, startX, endX));
 }
 
-std::size_t
+FitDomainIndex
 FitScriptGeneratorModel::findDomainIndex(std::string const &workspaceName,
                                          WorkspaceIndex workspaceIndex) const {
   auto const iter = findWorkspaceDomain(workspaceName, workspaceIndex);
   if (iter != m_fitDomains.cend())
-    return std::distance(m_fitDomains.cbegin(), iter);
+    return FitDomainIndex(std::distance(m_fitDomains.cbegin(), iter));
 
   throw std::invalid_argument("The domain '" + workspaceName + " (" +
                               std::to_string(workspaceIndex.value) +
@@ -141,21 +141,21 @@ bool FitScriptGeneratorModel::updateStartX(std::string const &workspaceName,
                                            WorkspaceIndex workspaceIndex,
                                            double startX) {
   auto const domainIndex = findDomainIndex(workspaceName, workspaceIndex);
-  return m_fitDomains[domainIndex]->setStartX(startX);
+  return m_fitDomains[domainIndex.value]->setStartX(startX);
 }
 
 bool FitScriptGeneratorModel::updateEndX(std::string const &workspaceName,
                                          WorkspaceIndex workspaceIndex,
                                          double endX) {
   auto const domainIndex = findDomainIndex(workspaceName, workspaceIndex);
-  return m_fitDomains[domainIndex]->setEndX(endX);
+  return m_fitDomains[domainIndex.value]->setEndX(endX);
 }
 
 void FitScriptGeneratorModel::removeFunction(std::string const &workspaceName,
                                              WorkspaceIndex workspaceIndex,
                                              std::string const &function) {
   auto const domainIndex = findDomainIndex(workspaceName, workspaceIndex);
-  m_fitDomains[domainIndex]->removeFunction(function);
+  m_fitDomains[domainIndex.value]->removeFunction(function);
   checkGlobalTies();
 }
 
@@ -163,7 +163,7 @@ void FitScriptGeneratorModel::addFunction(std::string const &workspaceName,
                                           WorkspaceIndex workspaceIndex,
                                           std::string const &function) {
   auto const domainIndex = findDomainIndex(workspaceName, workspaceIndex);
-  m_fitDomains[domainIndex]->addFunction(createIFunction(function));
+  m_fitDomains[domainIndex.value]->addFunction(createIFunction(function));
   checkGlobalTies();
 }
 
@@ -171,7 +171,7 @@ void FitScriptGeneratorModel::setFunction(std::string const &workspaceName,
                                           WorkspaceIndex workspaceIndex,
                                           std::string const &function) {
   auto const domainIndex = findDomainIndex(workspaceName, workspaceIndex);
-  m_fitDomains[domainIndex]->setFunction(createIFunction(function));
+  m_fitDomains[domainIndex.value]->setFunction(createIFunction(function));
   checkGlobalTies();
 }
 
@@ -179,15 +179,15 @@ IFunction_sptr
 FitScriptGeneratorModel::getFunction(std::string const &workspaceName,
                                      WorkspaceIndex workspaceIndex) {
   auto const domainIndex = findDomainIndex(workspaceName, workspaceIndex);
-  return m_fitDomains[domainIndex]->getFunction();
+  return m_fitDomains[domainIndex.value]->getFunction();
 }
 
 std::string FitScriptGeneratorModel::getEquivalentFunctionIndexForDomain(
     std::string const &workspaceName, WorkspaceIndex workspaceIndex,
     std::string const &functionIndex) const {
-  if (!functionIndex.empty() && m_fittingMode == FittingMode::Simultaneous) {
+  if (!functionIndex.empty() && m_fittingMode == FittingMode::SIMULTANEOUS) {
     auto const domainIndex = findDomainIndex(workspaceName, workspaceIndex);
-    return replaceTopFunctionIndexWith(functionIndex, domainIndex);
+    return replaceTopFunctionIndexWith(functionIndex, domainIndex.value);
   }
   return functionIndex;
 }
@@ -198,7 +198,7 @@ std::string FitScriptGeneratorModel::getEquivalentParameterTieForDomain(
   if (fullTie.empty() || isNumber(fullTie) || !validTie(fullTie))
     return fullTie;
 
-  if (m_fittingMode == FittingMode::Sequential)
+  if (m_fittingMode == FittingMode::SEQUENTIAL)
     return fullTie;
 
   auto const domainIndex = findDomainIndex(workspaceName, workspaceIndex);
@@ -207,12 +207,12 @@ std::string FitScriptGeneratorModel::getEquivalentParameterTieForDomain(
 }
 
 std::string FitScriptGeneratorModel::getEquivalentParameterTieForDomain(
-    std::size_t const &domainIndex, std::string const &fullParameter,
+    FitDomainIndex domainIndex, std::string const &fullParameter,
     std::string const &fullTie) const {
   auto const parameterDomainIndex = getFunctionIndexAt(fullParameter, 0);
   auto const tieDomainIndex = getFunctionIndexAt(fullTie, 0);
   if (parameterDomainIndex == tieDomainIndex)
-    return replaceTopFunctionIndexWith(fullTie, domainIndex);
+    return replaceTopFunctionIndexWith(fullTie, domainIndex.value);
   return fullTie;
 }
 
@@ -221,7 +221,7 @@ std::string FitScriptGeneratorModel::getAdjustedFunctionIndex(
   if (parameter.empty() || isNumber(parameter))
     return parameter;
 
-  if (m_fittingMode == FittingMode::Sequential)
+  if (m_fittingMode == FittingMode::SEQUENTIAL)
     return parameter;
   return removeTopFunctionIndex(parameter);
 }
@@ -232,7 +232,7 @@ void FitScriptGeneratorModel::updateParameterValue(
   auto const domainIndex = findDomainIndex(workspaceName, workspaceIndex);
   if (!hasGlobalTie(fullParameter)) {
     auto const parameter = getAdjustedFunctionIndex(fullParameter);
-    m_fitDomains[domainIndex]->setParameterValue(parameter, newValue);
+    m_fitDomains[domainIndex.value]->setParameterValue(parameter, newValue);
     updateParameterValuesWithGlobalTieTo(fullParameter);
   }
 }
@@ -253,7 +253,7 @@ void FitScriptGeneratorModel::updateAttributeValue(
     std::string const &workspaceName, WorkspaceIndex workspaceIndex,
     std::string const &fullAttribute, IFunction::Attribute const &newValue) {
   auto const domainIndex = findDomainIndex(workspaceName, workspaceIndex);
-  m_fitDomains[domainIndex]->setAttributeValue(
+  m_fitDomains[domainIndex.value]->setAttributeValue(
       getAdjustedFunctionIndex(fullAttribute), newValue);
 }
 
@@ -269,25 +269,25 @@ void FitScriptGeneratorModel::updateParameterTie(
 }
 
 void FitScriptGeneratorModel::updateParameterTie(
-    std::size_t const &domainIndex, std::string const &fullParameter,
+    FitDomainIndex domainIndex, std::string const &fullParameter,
     std::string const &fullTie) {
   checkParameterIsNotGlobal(fullParameter);
 
-  if (m_fittingMode == FittingMode::Sequential ||
-      isSameDomain(domainIndex, fullTie))
+  if (m_fittingMode == FittingMode::SEQUENTIAL ||
+      isSameDomain(domainIndex.value, fullTie))
     updateLocalParameterTie(domainIndex, fullParameter, fullTie);
   else
     updateGlobalParameterTie(domainIndex, fullParameter, fullTie);
 }
 
 void FitScriptGeneratorModel::updateLocalParameterTie(
-    std::size_t const &domainIndex, std::string const &fullParameter,
+    FitDomainIndex domainIndex, std::string const &fullParameter,
     std::string const &fullTie) {
   auto const parameter = getAdjustedFunctionIndex(fullParameter);
   auto const tie = getLocalTie(fullTie, m_fittingMode);
 
   if (parameter != tie && validParameter(fullParameter)) {
-    if (m_fitDomains[domainIndex]->updateParameterTie(parameter, tie))
+    if (m_fitDomains[domainIndex.value]->updateParameterTie(parameter, tie))
       clearGlobalTie(fullParameter);
     else
       g_log.warning("Invalid tie '" + fullTie + "' provided.");
@@ -295,16 +295,16 @@ void FitScriptGeneratorModel::updateLocalParameterTie(
 }
 
 void FitScriptGeneratorModel::updateGlobalParameterTie(
-    std::size_t const &domainIndex, std::string const &fullParameter,
+    FitDomainIndex domainIndex, std::string const &fullParameter,
     std::string const &fullTie) {
   if (validParameter(fullParameter)) {
     if (validGlobalTie(fullTie)) {
       clearGlobalTie(fullParameter);
 
       auto const parameter = getAdjustedFunctionIndex(fullParameter);
-      m_fitDomains[domainIndex]->clearParameterTie(parameter);
-      m_fitDomains[domainIndex]->setParameterValue(parameter,
-                                                   getParameterValue(fullTie));
+      m_fitDomains[domainIndex.value]->clearParameterTie(parameter);
+      m_fitDomains[domainIndex.value]->setParameterValue(
+          parameter, getParameterValue(fullTie));
 
       m_globalTies.emplace_back(GlobalTie(fullParameter, fullTie));
     } else {
@@ -317,7 +317,7 @@ void FitScriptGeneratorModel::removeParameterConstraint(
     std::string const &workspaceName, WorkspaceIndex workspaceIndex,
     std::string const &fullParameter) {
   auto const domainIndex = findDomainIndex(workspaceName, workspaceIndex);
-  m_fitDomains[domainIndex]->removeParameterConstraint(
+  m_fitDomains[domainIndex.value]->removeParameterConstraint(
       getAdjustedFunctionIndex(fullParameter));
 }
 
@@ -328,7 +328,7 @@ void FitScriptGeneratorModel::updateParameterConstraint(
 
   auto const parameterName =
       splitConstraintString(constraint).first.toStdString();
-  m_fitDomains[domainIndex]->updateParameterConstraint(
+  m_fitDomains[domainIndex.value]->updateParameterConstraint(
       getAdjustedFunctionIndex(functionIndex), parameterName, constraint);
 }
 
@@ -357,14 +357,14 @@ bool FitScriptGeneratorModel::validTie(std::string const &tie) const {
 
   auto const subStrings = splitStringBy(tie, ".");
   switch (m_fittingMode) {
-  case FittingMode::Sequential:
+  case FittingMode::SEQUENTIAL:
     return 1 <= subStrings.size() && subStrings.size() <= 2;
-  case FittingMode::Simultaneous:
+  case FittingMode::SIMULTANEOUS:
     return 2 <= subStrings.size() && subStrings.size() <= 3 &&
            isFunctionIndex(subStrings[0]);
   default:
     throw std::invalid_argument(
-        "Fitting mode must be Sequential or Simultaneous.");
+        "Fitting mode must be SEQUENTIAL or SIMULTANEOUS.");
   }
 }
 
@@ -420,10 +420,11 @@ void FitScriptGeneratorModel::setGlobalParameters(
   }
 }
 
-void FitScriptGeneratorModel::setFittingMode(FittingMode const &fittingMode) {
-  if (fittingMode == FittingMode::SimultaneousAndSequential)
+void FitScriptGeneratorModel::setFittingMode(FittingMode fittingMode) {
+  if (fittingMode == FittingMode::SIMULTANEOUS_SEQUENTIAL)
     throw std::invalid_argument(
-        "Fitting mode must be Sequential or Simultaneous.");
+        "Fitting mode must be SEQUENTIAL or SIMULTANEOUS.");
+
   m_fittingMode = fittingMode;
   m_globalTies.clear();
   m_presenter->setGlobalTies(m_globalTies);

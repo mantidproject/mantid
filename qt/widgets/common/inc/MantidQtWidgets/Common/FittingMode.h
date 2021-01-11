@@ -12,9 +12,9 @@ namespace MantidQt {
 namespace MantidWidgets {
 
 enum EXPORT_OPT_MANTIDQT_COMMON FittingMode {
-  Simultaneous,
-  Sequential,
-  SimultaneousAndSequential
+  SIMULTANEOUS = 0,
+  SEQUENTIAL = 1,
+  SIMULTANEOUS_SEQUENTIAL = 2
 };
 
 }

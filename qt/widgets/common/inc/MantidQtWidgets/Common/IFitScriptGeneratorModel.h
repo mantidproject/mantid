@@ -85,7 +85,7 @@ public:
   virtual void
   setGlobalParameters(std::vector<std::string> const &parameters) = 0;
 
-  virtual void setFittingMode(FittingMode const &fittingMode) = 0;
+  virtual void setFittingMode(FittingMode fittingMode) = 0;
   [[nodiscard]] virtual FittingMode getFittingMode() const = 0;
 
   [[nodiscard]] virtual std::vector<GlobalTie> getGlobalTies() const = 0;

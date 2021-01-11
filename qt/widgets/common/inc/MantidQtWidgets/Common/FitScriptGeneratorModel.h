@@ -108,13 +108,13 @@ public:
     return m_globalParameters;
   }
 
-  void setFittingMode(FittingMode const &fittingMode) override;
+  void setFittingMode(FittingMode fittingMode) override;
   [[nodiscard]] inline FittingMode getFittingMode() const noexcept override {
     return m_fittingMode;
   }
 
 private:
-  [[nodiscard]] std::size_t
+  [[nodiscard]] FitDomainIndex
   findDomainIndex(std::string const &workspaceName,
                   WorkspaceIndex workspaceIndex) const;
   [[nodiscard]] std::vector<std::unique_ptr<FitDomain>>::const_iterator
@@ -124,19 +124,19 @@ private:
                                         WorkspaceIndex workspaceIndex) const;
 
   [[nodiscard]] std::string
-  getEquivalentParameterTieForDomain(std::size_t const &domainIndex,
+  getEquivalentParameterTieForDomain(FitDomainIndex domainIndex,
                                      std::string const &fullParameter,
                                      std::string const &fullTie) const;
   [[nodiscard]] std::string
   getAdjustedFunctionIndex(std::string const &parameter) const;
 
-  void updateParameterTie(std::size_t const &domainIndex,
+  void updateParameterTie(FitDomainIndex domainIndex,
                           std::string const &fullParameter,
                           std::string const &fullTie);
-  void updateLocalParameterTie(std::size_t const &domainIndex,
+  void updateLocalParameterTie(FitDomainIndex domainIndex,
                                std::string const &fullParameter,
                                std::string const &fullTie);
-  void updateGlobalParameterTie(std::size_t const &domainIndex,
+  void updateGlobalParameterTie(FitDomainIndex domainIndex,
                                 std::string const &fullParameter,
                                 std::string const &fullTie);
 

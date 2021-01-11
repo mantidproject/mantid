@@ -449,7 +449,7 @@ void IndirectFitAnalysisTab::updateFitBrowserParameterValuesFromAlg() {
     updateFitBrowserParameterValues();
     if (m_fittingAlgorithm) {
       MantidQt::API::SignalBlocker blocker(m_fitPropertyBrowser);
-      if (m_fittingModel->getFittingMode() == FittingMode::Sequential) {
+      if (m_fittingModel->getFittingMode() == FittingMode::SEQUENTIAL) {
         auto const paramWsName =
             m_fittingAlgorithm->getPropertyValue("OutputParameterWorkspace");
         auto paramWs =
@@ -479,7 +479,7 @@ void IndirectFitAnalysisTab::updateFitBrowserParameterValuesFromAlg() {
  */
 void IndirectFitAnalysisTab::updateFitStatus() {
 
-  if (m_fittingModel->getFittingMode() == FittingMode::Simultaneous) {
+  if (m_fittingModel->getFittingMode() == FittingMode::SIMULTANEOUS) {
     std::string fit_status = m_fittingAlgorithm->getProperty("OutputStatus");
     double chi2 = m_fittingAlgorithm->getProperty("OutputChiSquared");
     const std::vector<std::string> status(m_fittingModel->getNumberOfDomains(),
@@ -562,7 +562,7 @@ void IndirectFitAnalysisTab::singleFit(TableDatasetIndex dataIndex,
     m_plotPresenter->setFitSingleSpectrumIsFitting(true);
     enableFitButtons(false);
     enableOutputOptions(false);
-    m_fittingModel->setFittingMode(FittingMode::Simultaneous);
+    m_fittingModel->setFittingMode(FittingMode::SIMULTANEOUS);
     m_currentTableDatasetIndex = dataIndex;
     runSingleFit(m_fittingModel->getSingleFit(dataIndex, spectrum));
   }
@@ -607,9 +607,9 @@ void IndirectFitAnalysisTab::run() {
   enableOutputOptions(false);
   auto const fitType = m_fitPropertyBrowser->selectedFitType();
   if (fitType == "Simultaneous") {
-    m_fittingModel->setFittingMode(FittingMode::Simultaneous);
+    m_fittingModel->setFittingMode(FittingMode::SIMULTANEOUS);
   } else {
-    m_fittingModel->setFittingMode(FittingMode::Sequential);
+    m_fittingModel->setFittingMode(FittingMode::SEQUENTIAL);
   }
   runFitAlgorithm(m_fittingModel->getFittingAlgorithm());
 }
@@ -704,7 +704,7 @@ void IndirectFitAnalysisTab::setAlgorithmProperties(
                               m_fitPropertyBrowser->outputCompositeMembers());
   }
 
-  if (m_fittingModel->getFittingMode() == FittingMode::Sequential) {
+  if (m_fittingModel->getFittingMode() == FittingMode::SEQUENTIAL) {
     fitAlgorithm->setProperty("FitType", m_fitPropertyBrowser->fitType());
   }
   fitAlgorithm->setProperty("OutputFitStatus", true);

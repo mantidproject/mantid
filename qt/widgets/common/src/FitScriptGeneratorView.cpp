@@ -59,19 +59,21 @@ using ColumnIndex = FitScriptGeneratorDataTable::ColumnIndex;
 using ViewEvent = IFitScriptGeneratorView::Event;
 
 FitScriptGeneratorView::FitScriptGeneratorView(
-    QWidget *parent, QMap<QString, QString> const &fitOptions)
+    QWidget *parent, FittingMode fittingMode,
+    QMap<QString, QString> const &fitOptions)
     : IFitScriptGeneratorView(parent), m_presenter(),
       m_dialog(std::make_unique<AddWorkspaceDialog>(this)),
       m_dataTable(std::make_unique<FitScriptGeneratorDataTable>()),
       m_functionTreeView(std::make_unique<FunctionTreeView>(nullptr, true)),
       m_fitOptionsBrowser(std::make_unique<FitOptionsBrowser>(
-          nullptr, FittingMode::SimultaneousAndSequential)) {
+          nullptr, FittingMode::SIMULTANEOUS_SEQUENTIAL)) {
   m_ui.setupUi(this);
 
   m_ui.fDataTable->layout()->addWidget(m_dataTable.get());
   m_ui.splitter->addWidget(m_functionTreeView.get());
   m_ui.splitter->addWidget(m_fitOptionsBrowser.get());
 
+  setFittingMode(fittingMode);
   setFitBrowserOptions(fitOptions);
   connectUiSignals();
 }
@@ -138,25 +140,15 @@ void FitScriptGeneratorView::connectUiSignals() {
 void FitScriptGeneratorView::setFitBrowserOptions(
     QMap<QString, QString> const &fitOptions) {
   for (auto it = fitOptions.constBegin(); it != fitOptions.constEnd(); ++it)
-    setFitBrowserOption(it.key(), it.value());
+    m_fitOptionsBrowser->setProperty(it.key(), it.value());
 }
 
-void FitScriptGeneratorView::setFitBrowserOption(QString const &name,
-                                                 QString const &value) {
-  if (name == "FittingType")
-    setFittingType(value);
-  else
-    m_fitOptionsBrowser->setProperty(name, value);
-}
+void FitScriptGeneratorView::setFittingMode(FittingMode fittingMode) {
+  if (fittingMode == FittingMode::SIMULTANEOUS_SEQUENTIAL)
+    throw std::invalid_argument(
+        "Fitting mode must be SEQUENTIAL or SIMULTANEOUS.");
 
-void FitScriptGeneratorView::setFittingType(QString const &fitType) {
-  if (fitType == "Sequential")
-    m_fitOptionsBrowser->setCurrentFittingType(FittingMode::Sequential);
-  else if (fitType == "Simultaneous")
-    m_fitOptionsBrowser->setCurrentFittingType(FittingMode::Simultaneous);
-  else
-    throw std::invalid_argument("Invalid fitting type '" +
-                                fitType.toStdString() + "' provided.");
+  m_fitOptionsBrowser->setCurrentFittingType(fittingMode);
 }
 
 void FitScriptGeneratorView::subscribePresenter(
@@ -252,12 +244,12 @@ void FitScriptGeneratorView::onFunctionHelpRequested() {
 
 void FitScriptGeneratorView::onChangeToSequentialFitting() {
   m_presenter->notifyPresenter(ViewEvent::FittingModeChanged,
-                               FittingMode::Sequential);
+                               FittingMode::SEQUENTIAL);
 }
 
 void FitScriptGeneratorView::onChangeToSimultaneousFitting() {
   m_presenter->notifyPresenter(ViewEvent::FittingModeChanged,
-                               FittingMode::Simultaneous);
+                               FittingMode::SIMULTANEOUS);
 }
 
 std::string FitScriptGeneratorView::workspaceName(FitDomainIndex index) const {

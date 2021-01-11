@@ -60,14 +60,15 @@ public:
                                  std::string const &constraint);
 
 private:
-  bool setParameterTie(std::string const &parameter, std::string const &tie);
+  [[nodiscard]] bool setParameterTie(std::string const &parameter,
+                                     std::string const &tie);
 
   [[nodiscard]] bool isValidParameterValue(std::string const &parameter,
                                            double value) const;
   [[nodiscard]] bool isValidStartX(double startX) const;
   [[nodiscard]] bool isValidEndX(double endX) const;
-  std::pair<double, double> xLimits() const;
-  std::pair<double, double>
+  [[nodiscard]] std::pair<double, double> xLimits() const;
+  [[nodiscard]] std::pair<double, double>
   xLimits(Mantid::API::MatrixWorkspace_const_sptr const &workspace,
           WorkspaceIndex workspaceIndex) const;
 

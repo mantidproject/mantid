@@ -157,7 +157,7 @@ public:
   [[nodiscard]] std::vector<std::shared_ptr<IFunction>>
   createEquivalentFunctions() const override;
   /// Returns true if the composite has at least one of this function.
-  bool hasFunction(const std::string &functionName) const;
+  [[nodiscard]] bool hasFunction(const std::string &functionName) const;
   /// Returns the pointer to i-th function
   [[nodiscard]] IFunction_sptr getFunction(std::size_t i) const override;
   /// Number of functions

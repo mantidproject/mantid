@@ -118,10 +118,10 @@ void FitOptionsBrowser::initFittingTypeProp() {
   types << "Simultaneous"
         << "Sequential";
   m_enumManager->setEnumNames(m_fittingTypeProp, types);
-  if (m_fittingType == FittingMode::SimultaneousAndSequential) {
+  if (m_fittingType == FittingMode::SIMULTANEOUS_SEQUENTIAL) {
     m_browser->addProperty(m_fittingTypeProp);
-  } else if (m_fittingType == FittingMode::Simultaneous ||
-             m_fittingType == FittingMode::Sequential) {
+  } else if (m_fittingType == FittingMode::SIMULTANEOUS ||
+             m_fittingType == FittingMode::SEQUENTIAL) {
     this->lockCurrentFittingType(m_fittingType);
   }
 }
@@ -132,12 +132,12 @@ void FitOptionsBrowser::initFittingTypeProp() {
 void FitOptionsBrowser::createProperties() {
   initFittingTypeProp();
   createCommonProperties();
-  if (m_fittingType == FittingMode::Simultaneous ||
-      m_fittingType == FittingMode::SimultaneousAndSequential) {
+  if (m_fittingType == FittingMode::SIMULTANEOUS ||
+      m_fittingType == FittingMode::SIMULTANEOUS_SEQUENTIAL) {
     createSimultaneousFitProperties();
   }
-  if (m_fittingType == FittingMode::Sequential ||
-      m_fittingType == FittingMode::SimultaneousAndSequential) {
+  if (m_fittingType == FittingMode::SEQUENTIAL ||
+      m_fittingType == FittingMode::SIMULTANEOUS_SEQUENTIAL) {
     createSequentialFitProperties();
   }
 }

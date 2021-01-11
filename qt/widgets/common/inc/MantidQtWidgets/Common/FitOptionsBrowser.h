@@ -44,7 +44,7 @@ class EXPORT_OPT_MANTIDQT_COMMON FitOptionsBrowser : public QWidget {
   Q_OBJECT
 public:
   FitOptionsBrowser(QWidget *parent = nullptr,
-                    FittingMode fitType = FittingMode::Simultaneous);
+                    FittingMode fitType = FittingMode::SIMULTANEOUS);
   ~FitOptionsBrowser();
   QString getProperty(const QString &name) const;
   void setProperty(const QString &name, const QString &value);

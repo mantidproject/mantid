@@ -13,6 +13,7 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/AddWorkspaceDialog.h"
 #include "MantidQtWidgets/Common/FitOptionsBrowser.h"
+#include "MantidQtWidgets/Common/FittingMode.h"
 #include "MantidQtWidgets/Common/FunctionTreeView.h"
 #include "MantidQtWidgets/Common/IFitScriptGeneratorView.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
@@ -41,6 +42,7 @@ class EXPORT_OPT_MANTIDQT_COMMON FitScriptGeneratorView
 public:
   FitScriptGeneratorView(
       QWidget *parent = nullptr,
+      FittingMode fittingMode = FittingMode::SEQUENTIAL,
       QMap<QString, QString> const &fitOptions = QMap<QString, QString>());
   ~FitScriptGeneratorView() override;
 
@@ -124,8 +126,7 @@ private:
   void connectUiSignals();
 
   void setFitBrowserOptions(QMap<QString, QString> const &fitOptions);
-  void setFitBrowserOption(QString const &name, QString const &value);
-  void setFittingType(QString const &fitType);
+  void setFittingMode(FittingMode fittingMode);
 
   IFitScriptGeneratorPresenter *m_presenter;
   std::unique_ptr<AddWorkspaceDialog> m_dialog;

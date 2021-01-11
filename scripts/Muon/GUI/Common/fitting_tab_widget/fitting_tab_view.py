@@ -49,7 +49,7 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
             self.end_time = DEFAULT_FREQUENCY_FIT_END_X
 
         # Comment out this line to show the 'Fit Generator' button
-        #self.fit_generator_button.hide()
+        self.fit_generator_button.hide()
 
     def update_displayed_data_combo_box(self, data_list):
         self.parameter_display_combo.blockSignals(True)

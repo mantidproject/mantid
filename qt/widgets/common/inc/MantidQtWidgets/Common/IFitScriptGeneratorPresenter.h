@@ -31,7 +31,7 @@ public:
   virtual void notifyPresenter(ViewEvent const &event,
                                std::vector<std::string> const &vec) = 0;
   virtual void notifyPresenter(ViewEvent const &event,
-                               FittingMode const &fittingMode) = 0;
+                               FittingMode fittingMode) = 0;
 
   virtual void openFitScriptGenerator() = 0;
 

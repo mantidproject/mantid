@@ -39,7 +39,7 @@ public:
   void notifyPresenter(ViewEvent const &event,
                        std::vector<std::string> const &vec) override;
   void notifyPresenter(ViewEvent const &event,
-                       FittingMode const &fittingMode) override;
+                       FittingMode fittingMode) override;
 
   void openFitScriptGenerator() override;
 
@@ -65,7 +65,7 @@ private:
                                         std::string const &constraint);
   void handleGlobalParametersChanged(
       std::vector<std::string> const &globalParameters);
-  void handleFittingModeChanged(FittingMode const &fittingMode);
+  void handleFittingModeChanged(FittingMode fittingMode);
 
   void setWorkspaces(QStringList const &workspaceNames, double startX,
                      double endX);
