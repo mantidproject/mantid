@@ -64,7 +64,7 @@ public:
                    std::string const &function) override;
   [[nodiscard]] Mantid::API::IFunction_sptr
   getFunction(std::string const &workspaceName,
-              WorkspaceIndex workspaceIndex) override;
+              WorkspaceIndex workspaceIndex) const override;
 
   [[nodiscard]] std::string getEquivalentFunctionIndexForDomain(
       std::string const &workspaceName, WorkspaceIndex workspaceIndex,

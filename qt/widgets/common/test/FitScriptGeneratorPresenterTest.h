@@ -10,6 +10,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtWidgets/Common/FitScriptGeneratorPresenter.h"
+#include "MantidQtWidgets/Common/FittingGlobals.h"
 #include "MantidQtWidgets/Common/IFitScriptGeneratorModel.h"
 #include "MantidQtWidgets/Common/IFitScriptGeneratorView.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -36,7 +37,12 @@ public:
   MOCK_CONST_METHOD1(startX, double(FitDomainIndex index));
   MOCK_CONST_METHOD1(endX, double(FitDomainIndex index));
 
+  MOCK_CONST_METHOD0(allRows, std::vector<FitDomainIndex>());
   MOCK_CONST_METHOD0(selectedRows, std::vector<FitDomainIndex>());
+
+  MOCK_CONST_METHOD1(parameterValue, double(std::string const &parameter));
+  MOCK_CONST_METHOD1(attributeValue, Mantid::API::IFunction::Attribute(
+                                         std::string const &attribute));
 
   MOCK_METHOD2(removeWorkspaceDomain, void(std::string const &workspaceName,
                                            WorkspaceIndex workspaceIndex));
@@ -51,6 +57,18 @@ public:
 
   MOCK_METHOD0(resetSelection, void());
 
+  MOCK_CONST_METHOD0(isAddRemoveFunctionForAllChecked, bool());
+
+  MOCK_METHOD0(clearFunction, void());
+  MOCK_CONST_METHOD1(setFunction,
+                     void(Mantid::API::IFunction_sptr const &function));
+
+  MOCK_METHOD1(setSimultaneousMode, void(bool simultaneousMode));
+
+  MOCK_METHOD1(setGlobalTies, void(std::vector<GlobalTie> const &globalTies));
+  MOCK_METHOD1(setGlobalParameters,
+               void(std::vector<GlobalParameter> const &globalParameter));
+
   MOCK_METHOD1(displayWarning, void(std::string const &message));
 
   MOCK_CONST_METHOD0(tableWidget, FitScriptGeneratorDataTable *());
@@ -62,24 +80,76 @@ public:
 class MockFitScriptGeneratorModel : public IFitScriptGeneratorModel {
 
 public:
+  MOCK_METHOD1(subscribePresenter,
+               void(IFitScriptGeneratorPresenter *presenter));
+
   MOCK_METHOD2(removeWorkspaceDomain, void(std::string const &workspaceName,
                                            WorkspaceIndex workspaceIndex));
   MOCK_METHOD4(addWorkspaceDomain,
                void(std::string const &workspaceName,
                     WorkspaceIndex workspaceIndex, double startX, double endX));
 
-  MOCK_CONST_METHOD3(isStartXValid,
-                     bool(std::string const &workspaceName,
-                          WorkspaceIndex workspaceIndex, double startX));
-  MOCK_CONST_METHOD3(isEndXValid,
-                     bool(std::string const &workspaceName,
-                          WorkspaceIndex workspaceIndex, double endX));
-
   MOCK_METHOD3(updateStartX,
-               void(std::string const &workspaceName,
+               bool(std::string const &workspaceName,
                     WorkspaceIndex workspaceIndex, double startX));
-  MOCK_METHOD3(updateEndX, void(std::string const &workspaceName,
+  MOCK_METHOD3(updateEndX, bool(std::string const &workspaceName,
                                 WorkspaceIndex workspaceIndex, double endX));
+
+  MOCK_METHOD3(removeFunction, void(std::string const &workspaceName,
+                                    WorkspaceIndex workspaceIndex,
+                                    std::string const &function));
+  MOCK_METHOD3(addFunction, void(std::string const &workspaceName,
+                                 WorkspaceIndex workspaceIndex,
+                                 std::string const &function));
+  MOCK_METHOD3(setFunction, void(std::string const &workspaceName,
+                                 WorkspaceIndex workspaceIndex,
+                                 std::string const &function));
+  MOCK_CONST_METHOD2(
+      getFunction, Mantid::API::IFunction_sptr(std::string const &workspaceName,
+                                               WorkspaceIndex workspaceIndex));
+
+  MOCK_CONST_METHOD3(getEquivalentFunctionIndexForDomain,
+                     std::string(std::string const &workspaceName,
+                                 WorkspaceIndex workspaceIndex,
+                                 std::string const &functionIndex));
+  MOCK_CONST_METHOD4(getEquivalentParameterTieForDomain,
+                     std::string(std::string const &workspaceName,
+                                 WorkspaceIndex workspaceIndex,
+                                 std::string const &fullParameter,
+                                 std::string const &fullTie));
+
+  MOCK_METHOD4(updateParameterValue,
+               void(std::string const &workspaceName,
+                    WorkspaceIndex workspaceIndex,
+                    std::string const &fullParameter, double newValue));
+  MOCK_METHOD4(updateAttributeValue,
+               void(std::string const &workspaceName,
+                    WorkspaceIndex workspaceIndex,
+                    std::string const &fullAttribute,
+                    Mantid::API::IFunction::Attribute const &newValue));
+
+  MOCK_METHOD4(updateParameterTie,
+               void(std::string const &workspaceName,
+                    WorkspaceIndex workspaceIndex,
+                    std::string const &fullParameter, std::string const &tie));
+
+  MOCK_METHOD3(removeParameterConstraint,
+               void(std::string const &workspaceName,
+                    WorkspaceIndex workspaceIndex,
+                    std::string const &fullParameter));
+  MOCK_METHOD4(updateParameterConstraint, void(std::string const &workspaceName,
+                                               WorkspaceIndex workspaceIndex,
+                                               std::string const &functionIndex,
+                                               std::string const &constraint));
+
+  MOCK_METHOD1(setGlobalParameters,
+               void(std::vector<std::string> const &parameters));
+
+  MOCK_METHOD1(setFittingMode, void(FittingMode fittingMode));
+  MOCK_CONST_METHOD0(getFittingMode, FittingMode());
+
+  MOCK_CONST_METHOD0(getGlobalTies, std::vector<GlobalTie>());
+  MOCK_CONST_METHOD0(getGlobalParameters, std::vector<GlobalParameter>());
 };
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE
@@ -190,8 +260,8 @@ public:
     ON_CALL(*m_view, workspaceIndex(selectedRow))
         .WillByDefault(Return(m_wsIndex));
     ON_CALL(*m_view, startX(selectedRow)).WillByDefault(Return(m_startX));
-    ON_CALL(*m_model, isStartXValid(m_wsName, m_wsIndex, m_startX))
-        .WillByDefault(Return(true));
+    // ON_CALL(*m_model, isStartXValid(m_wsName, m_wsIndex, m_startX))
+    //    .WillByDefault(Return(true));
 
     EXPECT_CALL(*m_view, selectedRows())
         .Times(1)
@@ -205,9 +275,9 @@ public:
     EXPECT_CALL(*m_view, startX(selectedRow))
         .Times(1)
         .WillOnce(Return(m_startX));
-    EXPECT_CALL(*m_model, isStartXValid(m_wsName, m_wsIndex, m_startX))
-        .Times(1)
-        .WillOnce(Return(true));
+    // EXPECT_CALL(*m_model, isStartXValid(m_wsName, m_wsIndex, m_startX))
+    //    .Times(1)
+    //    .WillOnce(Return(true));
     EXPECT_CALL(*m_model, updateStartX(m_wsName, m_wsIndex, m_startX)).Times(1);
 
     m_presenter->notifyPresenter(ViewEvent::StartXChanged);
@@ -224,8 +294,8 @@ public:
     ON_CALL(*m_view, workspaceIndex(selectedRow))
         .WillByDefault(Return(m_wsIndex));
     ON_CALL(*m_view, startX(selectedRow)).WillByDefault(Return(m_startX));
-    ON_CALL(*m_model, isStartXValid(m_wsName, m_wsIndex, m_startX))
-        .WillByDefault(Return(false));
+    // ON_CALL(*m_model, isStartXValid(m_wsName, m_wsIndex, m_startX))
+    //    .WillByDefault(Return(false));
 
     EXPECT_CALL(*m_view, selectedRows())
         .Times(1)
@@ -239,9 +309,9 @@ public:
     EXPECT_CALL(*m_view, startX(selectedRow))
         .Times(1)
         .WillOnce(Return(m_startX));
-    EXPECT_CALL(*m_model, isStartXValid(m_wsName, m_wsIndex, m_startX))
-        .Times(1)
-        .WillOnce(Return(false));
+    // EXPECT_CALL(*m_model, isStartXValid(m_wsName, m_wsIndex, m_startX))
+    //    .Times(1)
+    //    .WillOnce(Return(false));
     EXPECT_CALL(*m_view, resetSelection()).Times(1);
     EXPECT_CALL(
         *m_view,
@@ -263,8 +333,8 @@ public:
     ON_CALL(*m_view, workspaceIndex(selectedRow))
         .WillByDefault(Return(m_wsIndex));
     ON_CALL(*m_view, endX(selectedRow)).WillByDefault(Return(m_endX));
-    ON_CALL(*m_model, isEndXValid(m_wsName, m_wsIndex, m_endX))
-        .WillByDefault(Return(true));
+    // ON_CALL(*m_model, isEndXValid(m_wsName, m_wsIndex, m_endX))
+    //    .WillByDefault(Return(true));
 
     EXPECT_CALL(*m_view, selectedRows())
         .Times(1)
@@ -276,9 +346,9 @@ public:
         .Times(1)
         .WillOnce(Return(m_wsIndex));
     EXPECT_CALL(*m_view, endX(selectedRow)).Times(1).WillOnce(Return(m_endX));
-    EXPECT_CALL(*m_model, isEndXValid(m_wsName, m_wsIndex, m_endX))
-        .Times(1)
-        .WillOnce(Return(true));
+    // EXPECT_CALL(*m_model, isEndXValid(m_wsName, m_wsIndex, m_endX))
+    //    .Times(1)
+    //    .WillOnce(Return(true));
     EXPECT_CALL(*m_model, updateEndX(m_wsName, m_wsIndex, m_endX)).Times(1);
 
     m_presenter->notifyPresenter(ViewEvent::EndXChanged);
@@ -295,8 +365,8 @@ public:
     ON_CALL(*m_view, workspaceIndex(selectedRow))
         .WillByDefault(Return(m_wsIndex));
     ON_CALL(*m_view, endX(selectedRow)).WillByDefault(Return(m_endX));
-    ON_CALL(*m_model, isEndXValid(m_wsName, m_wsIndex, m_endX))
-        .WillByDefault(Return(false));
+    // ON_CALL(*m_model, isEndXValid(m_wsName, m_wsIndex, m_endX))
+    //    .WillByDefault(Return(false));
 
     EXPECT_CALL(*m_view, selectedRows())
         .Times(1)
@@ -308,9 +378,9 @@ public:
         .Times(1)
         .WillOnce(Return(m_wsIndex));
     EXPECT_CALL(*m_view, endX(selectedRow)).Times(1).WillOnce(Return(m_endX));
-    EXPECT_CALL(*m_model, isEndXValid(m_wsName, m_wsIndex, m_endX))
-        .Times(1)
-        .WillOnce(Return(false));
+    // EXPECT_CALL(*m_model, isEndXValid(m_wsName, m_wsIndex, m_endX))
+    //    .Times(1)
+    //    .WillOnce(Return(false));
     EXPECT_CALL(*m_view, resetSelection()).Times(1);
     EXPECT_CALL(*m_view, displayWarning(
                              "The EndX provided must be within the x limits of "

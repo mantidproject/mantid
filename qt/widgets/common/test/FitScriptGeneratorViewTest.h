@@ -7,6 +7,10 @@
 #pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/WarningSuppressions.h"
@@ -19,6 +23,8 @@
 #include <gmock/gmock.h>
 
 #include <memory>
+#include <string>
+#include <vector>
 
 #include <QApplication>
 #include <QListView>
@@ -30,6 +36,22 @@ using namespace MantidQt::MantidWidgets;
 using namespace testing;
 using namespace WorkspaceCreationHelper;
 
+namespace {
+
+IFunction_sptr createIFunction(std::string const &functionString) {
+  return FunctionFactory::Instance().createInitialized(functionString);
+}
+
+CompositeFunction_sptr toComposite(IFunction_sptr function) {
+  return std::dynamic_pointer_cast<CompositeFunction>(function);
+}
+
+CompositeFunction_sptr createEmptyComposite() {
+  return toComposite(createIFunction("name=CompositeFunction"));
+}
+
+} // namespace
+
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 class MockFitScriptGeneratorPresenter : public IFitScriptGeneratorPresenter {
@@ -40,8 +62,24 @@ public:
     m_view->subscribePresenter(this);
   }
 
-  MOCK_METHOD1(notifyPresenter, void(ViewEvent const &ev));
+  void notifyPresenter(ViewEvent const &ev, std::string const &arg1 = "",
+                       std::string const &arg2 = "") override {
+    notifyPresenterImpl(ev, arg1, arg2);
+  }
+
+  MOCK_METHOD3(notifyPresenterImpl,
+               void(ViewEvent const &ev, std::string const &arg1,
+                    std::string const &arg2));
+  MOCK_METHOD2(notifyPresenter,
+               void(ViewEvent const &ev, std::vector<std::string> const &vec));
+  MOCK_METHOD2(notifyPresenter,
+               void(ViewEvent const &ev, FittingMode fittingMode));
+
   MOCK_METHOD0(openFitScriptGenerator, void());
+
+  MOCK_METHOD1(setGlobalTies, void(std::vector<GlobalTie> const &globalTies));
+  MOCK_METHOD1(setGlobalParameters,
+               void(std::vector<GlobalParameter> const &globalParameters));
 
 private:
   FitScriptGeneratorView *m_view;
@@ -52,6 +90,8 @@ GNU_DIAG_ON_SUGGEST_OVERRIDE
 class FitScriptGeneratorViewTest : public CxxTest::TestSuite {
 
 public:
+  FitScriptGeneratorViewTest() { FrameworkManager::Instance(); }
+
   static FitScriptGeneratorViewTest *createSuite() {
     return new FitScriptGeneratorViewTest;
   }
@@ -64,6 +104,10 @@ public:
     m_wsIndex = MantidQt::MantidWidgets::WorkspaceIndex(0);
     m_workspace = create2DWorkspace(3, 3);
     m_workspaceGroup = createWorkspaceGroup(3, 3, 3, "GroupName");
+
+    m_function = createEmptyComposite();
+    m_function->addFunction(createIFunction("name=FlatBackground"));
+    m_function->addFunction(createIFunction("name=ExpDecay"));
 
     AnalysisDataService::Instance().addOrReplace(m_wsName, m_workspace);
 
@@ -90,7 +134,8 @@ public:
   void test_that_clicking_the_remove_button_will_notify_the_presenter() {
     openFitScriptGeneratorWidget();
 
-    EXPECT_CALL(*m_presenter, notifyPresenter(ViewEvent::RemoveClicked))
+    EXPECT_CALL(*m_presenter,
+                notifyPresenterImpl(ViewEvent::RemoveClicked, "", ""))
         .Times(1);
 
     QTest::mouseClick(m_view->removeButton(), Qt::LeftButton);
@@ -100,7 +145,9 @@ public:
   void test_that_clicking_the_add_workspace_button_will_notify_the_presenter() {
     openFitScriptGeneratorWidget();
 
-    EXPECT_CALL(*m_presenter, notifyPresenter(ViewEvent::AddClicked)).Times(1);
+    EXPECT_CALL(*m_presenter,
+                notifyPresenterImpl(ViewEvent::AddClicked, "", ""))
+        .Times(1);
 
     QTest::mouseClick(m_view->addWorkspaceButton(), Qt::LeftButton);
     QApplication::sendPostedEvents();
@@ -142,7 +189,8 @@ public:
     openFitScriptGeneratorWidget();
     m_view->addWorkspaceDomain(m_wsName, m_wsIndex, 0.0, 2.0);
 
-    EXPECT_CALL(*m_presenter, notifyPresenter(ViewEvent::StartXChanged))
+    EXPECT_CALL(*m_presenter,
+                notifyPresenterImpl(ViewEvent::StartXChanged, "", ""))
         .Times(1);
 
     changeValueInTableCell(0, ColumnIndex::StartX);
@@ -152,9 +200,22 @@ public:
     openFitScriptGeneratorWidget();
     m_view->addWorkspaceDomain(m_wsName, m_wsIndex, 0.0, 2.0);
 
-    EXPECT_CALL(*m_presenter, notifyPresenter(ViewEvent::EndXChanged)).Times(1);
+    EXPECT_CALL(*m_presenter,
+                notifyPresenterImpl(ViewEvent::EndXChanged, "", ""))
+        .Times(1);
 
     changeValueInTableCell(0, ColumnIndex::EndX);
+  }
+
+  void test_that_allRows_will_return_all_of_the_existing_row_indices() {
+    openFitScriptGeneratorWidget();
+    m_view->addWorkspaceDomain("Name", m_wsIndex, 0.0, 2.0);
+    m_view->addWorkspaceDomain("Name2", m_wsIndex, 0.0, 2.0);
+    m_view->addWorkspaceDomain("Name3", m_wsIndex, 0.0, 2.0);
+
+    auto const allIndices = m_view->allRows();
+    auto const expectedIndices = std::vector<FitDomainIndex>{2, 1, 0};
+    TS_ASSERT_EQUALS(allIndices, expectedIndices);
   }
 
   void test_that_selectedRows_will_return_the_currently_selected_row() {
@@ -172,13 +233,33 @@ public:
     TS_ASSERT_EQUALS(selectedIndices[0].value, rowIndex);
   }
 
-  void
-  test_that_selectedRows_will_return_an_empty_vector_if_there_are_no_currently_selected_rows() {
+  void test_that_selectedRows_will_return_the_first_row_index_by_default() {
     openFitScriptGeneratorWidget();
     m_view->addWorkspaceDomain(m_wsName, m_wsIndex, 0.0, 2.0);
+    m_view->addWorkspaceDomain("Name2", m_wsIndex, 0.0, 2.0);
 
     auto const selectedIndices = m_view->selectedRows();
-    TS_ASSERT_EQUALS(selectedIndices.size(), 0);
+    TS_ASSERT_EQUALS(selectedIndices.size(), 1);
+    TS_ASSERT_EQUALS(selectedIndices[0], FitDomainIndex(0));
+  }
+
+  void
+  test_that_parameterValue_will_return_the_correct_value_of_the_specified_parameter() {
+    openFitScriptGeneratorWidget();
+    m_view->addWorkspaceDomain(m_wsName, m_wsIndex, 0.0, 2.0);
+    m_view->setFunction(m_function);
+
+    TS_ASSERT_EQUALS(m_view->parameterValue("f0.A0"), 0.0);
+    TS_ASSERT_EQUALS(m_view->parameterValue("f1.Height"), 1.0);
+  }
+
+  void
+  test_that_attributeValue_will_return_the_correct_value_of_the_specified_attribute() {
+    openFitScriptGeneratorWidget();
+    m_view->addWorkspaceDomain(m_wsName, m_wsIndex, 0.0, 2.0);
+    m_view->setFunction(m_function);
+
+    TS_ASSERT(!m_view->attributeValue("NumDeriv").asBool());
   }
 
   void
@@ -268,7 +349,11 @@ public:
     m_view->addWorkspaceDomain(m_wsName, m_wsIndex, 0.0, 2.0);
     m_view->addWorkspaceDomain("Name2", m_wsIndex, 0.0, 2.0);
 
-    EXPECT_CALL(*m_presenter, notifyPresenter(ViewEvent::StartXChanged))
+    EXPECT_CALL(*m_presenter,
+                notifyPresenterImpl(ViewEvent::SelectionChanged, "", ""))
+        .Times(1);
+    EXPECT_CALL(*m_presenter,
+                notifyPresenterImpl(ViewEvent::StartXChanged, "", ""))
         .Times(1);
 
     // Change the value of StartX to 5.0
@@ -324,6 +409,7 @@ private:
   MantidQt::MantidWidgets::WorkspaceIndex m_wsIndex;
   Mantid::API::MatrixWorkspace_sptr m_workspace;
   Mantid::API::WorkspaceGroup_sptr m_workspaceGroup;
+  Mantid::API::CompositeFunction_sptr m_function;
   std::unique_ptr<FitScriptGeneratorView> m_view;
   std::unique_ptr<MockFitScriptGeneratorPresenter> m_presenter;
 };

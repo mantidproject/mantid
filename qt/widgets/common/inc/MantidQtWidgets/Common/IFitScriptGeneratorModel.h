@@ -50,7 +50,7 @@ public:
                            std::string const &function) = 0;
   [[nodiscard]] virtual Mantid::API::IFunction_sptr
   getFunction(std::string const &workspaceName,
-              WorkspaceIndex workspaceIndex) = 0;
+              WorkspaceIndex workspaceIndex) const = 0;
 
   [[nodiscard]] virtual std::string getEquivalentFunctionIndexForDomain(
       std::string const &workspaceName, WorkspaceIndex workspaceIndex,

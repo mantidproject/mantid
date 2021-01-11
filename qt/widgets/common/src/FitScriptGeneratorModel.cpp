@@ -177,7 +177,7 @@ void FitScriptGeneratorModel::setFunction(std::string const &workspaceName,
 
 IFunction_sptr
 FitScriptGeneratorModel::getFunction(std::string const &workspaceName,
-                                     WorkspaceIndex workspaceIndex) {
+                                     WorkspaceIndex workspaceIndex) const {
   auto const domainIndex = findDomainIndex(workspaceName, workspaceIndex);
   return m_fitDomains[domainIndex.value]->getFunction();
 }
