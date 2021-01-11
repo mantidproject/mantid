@@ -122,8 +122,7 @@ namespace Crystal {
       std::dynamic_pointer_cast<PeaksWorkspace>(calc_ws);
     Instrument_sptr calc_inst =
       std::const_pointer_cast<Instrument>(calc_pws->getInstrument());
-    OrientedLattice calc_lattice =
-      calc_pws->mutableSample().getOrientedLattice();
+
     for (int i = 0; i < calc_pws->getNumberPeaks(); ++i) {
       const Peak pk = calc_pws->getPeak(i);
 
@@ -147,7 +146,7 @@ namespace Crystal {
       // get the updated/calculated q vector in sample frame and set it to out
       V3D calc_qv = calc_pk.getQSampleFrame();
       for (int j = 0; j < 3; ++j)
-        out[i*3+j] = calc_qv[j];
+        out[i * 3 + j] = calc_qv[j];
     }
   }
 

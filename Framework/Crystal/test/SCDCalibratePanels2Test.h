@@ -32,10 +32,11 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/Logger.h"
 
-#include <cxxtest/TestSuite.h>
-#include <stdexcept>
 #include <boost/filesystem.hpp>
 #include <boost/math/constants/constants.hpp>
+#include <boost/math/special_functions/round.hpp>
+#include <cxxtest/TestSuite.h>
+#include <stdexcept>
 
 using namespace Mantid::API;
 using namespace Mantid::Crystal;
@@ -176,7 +177,7 @@ public:
     g_log.notice() << "test: !T0 Shift!\n";
 
     // prescribed shift
-    const double dT0 = 11;
+    const double dT0 = 11; // micro seconds
 
     // Generate unique temp files
     auto isawFile = boost::filesystem::temp_directory_path();
@@ -191,21 +192,45 @@ public:
     // Trivial case, no component undergoes any affine transformation
     g_log.notice() << "-- generate peaks\n";
     PeaksWorkspace_sptr pws = generateSimulatedPeaksWorkspace(ws);
+    // -- add T0 property
+    pws->mutableRun().addProperty<double>("T0", 0.0, true);
+    // -- make the twin
     PeaksWorkspace_sptr pwsref = pws->clone();
 
     // Adjust T0
     adjustT0(dT0, pws);
 
-    // for (int i = 0; i < pws->getNumberPeaks(); ++i) {
-    //   Peak pk_before = pwsref->getPeak(i);
-    //   Peak pk_after = pws->getPeak(i);
+    // reset Workspace level of T0
+    g_log.notice() << "--Reset workspace T0 \n"
+                   << pws->mutableRun().getPropertyValueAsType<double>("T0")
+                   << "->"
+                   << pwsref->mutableRun().getPropertyValueAsType<double>("T0")
+                   << "\n";
+    pws->mutableRun().addProperty<double>(
+        "T0", pwsref->mutableRun().getPropertyValueAsType<double>("T0"), true);
 
-    //   g_log.notice() << "Peak_" << i << " with dT0=" << dT0 << "\n"
-    //                  << "  wavelength:" << pk_before.getWavelength() << "->"
-    //                  << pk_after.getWavelength() << "\n"
-    //                  << "  q:" << pk_before.getQSampleFrame() << "->"
-    //                  << pk_after.getQSampleFrame() << "\n";
-    // }
+    for (int i = 0; i < pws->getNumberPeaks(); ++i) {
+      Peak pk_before = pwsref->getPeak(i);
+      Peak pk_after = pws->getPeak(i);
+      g_log.notice() << "--Peak_" << i << " with dT0=" << dT0 << "\n"
+                     << "  L1:" << pk_before.getL1() << "->" << pk_after.getL1()
+                     << "\n"
+                     << "  L2:" << pk_before.getL2() << "->" << pk_after.getL2()
+                     << "\n"
+                     << "  2theta:" << pk_before.getScattering() << "->"
+                     << pk_after.getScattering() << "\n"
+                     << "  initialEnergy:" << pk_before.getInitialEnergy()
+                     << "->" << pk_after.getInitialEnergy() << "\n"
+                     << "  TOF:" << pk_before.getTOF() << "->"
+                     << pk_after.getTOF() << "\n"
+                     << "  wavelength:" << pk_before.getWavelength() << "->"
+                     << pk_after.getWavelength() << "\n"
+                     << "  hkl:" << pk_before.getH() << pk_before.getK()
+                     << pk_before.getL() << "->" << pk_after.getH()
+                     << pk_after.getK() << pk_after.getL() << "\n"
+                     << "  q:" << pk_before.getQSampleFrame() << "->"
+                     << pk_after.getQSampleFrame() << "\n";
+    }
 
     // T0 got absorbed into peak wavelength, therefore there is no need to reset
     // the instrument
@@ -608,23 +633,29 @@ private:
    * @param dT0
    * @param pws
    */
-  void adjustT0(double dT0, PeaksWorkspace_sptr &pws) {
+  void adjustT0(double dT0, PeaksWorkspace_sptr pws) {
     // update the T0 record in peakworkspace
-    Mantid::API::Run &run = pws->mutableRun();
-    double T0 = 0.0;
-    if (run.hasProperty("T0")) {
-      T0 = run.getPropertyValueAsType<double>("T0");
-    }
-    T0 += dT0;
-    run.addProperty<double>("T0", T0, true);
+    pws->mutableRun().addProperty<double>(
+        "T0", pws->mutableRun().getPropertyValueAsType<double>("T0") + dT0,
+        true);
 
     // update wavelength of each peak using new T0
     for (int i = 0; i < pws->getNumberPeaks(); ++i) {
       Peak &pk = pws->getPeak(i);
+      V3D hkl =
+          V3D(boost::math::iround(pk.getH()), boost::math::iround(pk.getK()),
+              boost::math::iround(pk.getL()));
+
+      // make a standalone peak to calculate q vectors
+      Peak tmppk(pws->getInstrument(), pk.getDetectorID(), pk.getWavelength(),
+                 hkl, pk.getGoniometerMatrix());
       Units::Wavelength wl;
-      wl.initialize(pk.getL1(), pk.getL2(), pk.getScattering(), 0,
-                    pk.getInitialEnergy(), 0.0);
-      pk.setWavelength(wl.singleFromTOF(pk.getTOF() + dT0));
+      wl.initialize(tmppk.getL1(), tmppk.getL2(), tmppk.getScattering(), 0,
+                    tmppk.getInitialEnergy(), 0.0);
+      tmppk.setWavelength(wl.singleFromTOF(pk.getTOF() + dT0));
+
+      // only passing the q vector, not the energy info that relates T0
+      pk.setQSampleFrame(tmppk.getQSampleFrame());
     }
   }
 

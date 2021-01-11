@@ -246,6 +246,7 @@ namespace Crystal {
     for (int i = 0; i < npks; ++i) {
       const Peak &pk = pws->getPeak(i);
       V3D qv = pk.getQSampleFrame();
+
       for (int j = 0; j < 3; ++j) {
         xv[i * 3 + j] = i * 3 + j;
         yv[i * 3 + j] = qv[j];
