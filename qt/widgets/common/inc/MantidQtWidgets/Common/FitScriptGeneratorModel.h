@@ -15,6 +15,7 @@
 #include "MantidQtWidgets/Common/IFitScriptGeneratorModel.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
 
+#include <memory>
 #include <string>
 #include <utility>
 #include <vector>
@@ -32,6 +33,9 @@ class EXPORT_OPT_MANTIDQT_COMMON FitScriptGeneratorModel
     : public IFitScriptGeneratorModel {
 public:
   FitScriptGeneratorModel();
+  FitScriptGeneratorModel(FitScriptGeneratorModel const &model) = delete;
+  FitScriptGeneratorModel &
+  operator=(FitScriptGeneratorModel const &model) = delete;
   ~FitScriptGeneratorModel();
 
   void subscribePresenter(IFitScriptGeneratorPresenter *presenter) override;
@@ -113,7 +117,7 @@ private:
   [[nodiscard]] std::size_t
   findDomainIndex(std::string const &workspaceName,
                   WorkspaceIndex workspaceIndex) const;
-  [[nodiscard]] std::vector<FitDomain>::const_iterator
+  [[nodiscard]] std::vector<std::unique_ptr<FitDomain>>::const_iterator
   findWorkspaceDomain(std::string const &workspaceName,
                       WorkspaceIndex workspaceIndex) const;
   [[nodiscard]] bool hasWorkspaceDomain(std::string const &workspaceName,
@@ -160,7 +164,7 @@ private:
   void checkParameterIsNotGlobal(std::string const &fullParameter) const;
 
   IFitScriptGeneratorPresenter *m_presenter;
-  std::vector<FitDomain> m_fitDomains;
+  std::vector<std::unique_ptr<FitDomain>> m_fitDomains;
   // A vector of global parameters. E.g. f0.A0
   std::vector<GlobalParameter> m_globalParameters;
   // A vector of global ties. E.g. f0.f0.A0=f1.f0.A0

@@ -1094,6 +1094,9 @@ class FitScriptGeneratorModel {
 %End
 public:
     FitScriptGeneratorModel();
+
+private:
+    FitScriptGeneratorModel(const FitScriptGeneratorModel &model);
 };
 
 // ----------------------------------------------------------------------------

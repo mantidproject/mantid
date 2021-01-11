@@ -5,8 +5,8 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/FitScriptGeneratorPresenter.h"
-#include "MantidQtWidgets/Common/FitScriptGeneratorModel.h"
 #include "MantidQtWidgets/Common/FittingGlobals.h"
+#include "MantidQtWidgets/Common/IFitScriptGeneratorModel.h"
 #include "MantidQtWidgets/Common/IFitScriptGeneratorView.h"
 
 #include "MantidAPI/AnalysisDataService.h"
