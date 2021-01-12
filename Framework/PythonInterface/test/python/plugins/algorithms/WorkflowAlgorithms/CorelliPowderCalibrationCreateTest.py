@@ -69,5 +69,6 @@ class CorelliPowderCalibrationCreateTest(unittest.TestCase):
                         target_orientation, atol=0.03)
         assert_allclose(row['RotationAngle'], target_rotation, atol=2.0)
 
+
 if __name__ == '__main__':
     unittest.main()
