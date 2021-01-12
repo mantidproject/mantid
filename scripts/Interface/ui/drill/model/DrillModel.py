@@ -794,6 +794,7 @@ class DrillModel(QObject):
                         and (self.masterSamples[group] == sample)):
                     del self.masterSamples[group]
                 self.groupsUpdated.emit()
+                return
 
     def getSamples(self):
         """

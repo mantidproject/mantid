@@ -573,7 +573,7 @@ class DrillModelTest(unittest.TestCase):
         s2 = mock.Mock()
         s3 = mock.Mock()
         self.model.samples = [s1, s2, s3]
-        self.model.groups = {'A': {s2, s3}}
+        self.model.groups = {'A': {s2, s3}, 'B':{s1}}
         self.model.masterSamples = {'A': s2}
         self.model.deleteSample(0)
         self.assertEqual(self.model.samples, [s2, s3])
