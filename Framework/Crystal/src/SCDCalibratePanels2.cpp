@@ -418,9 +418,10 @@ namespace Crystal {
       double brb = std::abs(m_bank_rotation_bounds);
       constraint_str << "0.0<theta<3.1415926,0<phi<6.28318530718," << -brb
                      << "<drotang<" << brb << ",";
-      // double btb = std::abs(m_bank_translation_bounds);
-      // constraint_str << -btb << "<dx<" << btb << "," << -btb << "<dy<" << btb
-      //                << "," << -btb << "<dz<" << btb;
+      double btb = std::abs(m_bank_translation_bounds);
+      constraint_str << -btb << "<dx<" << btb << "," << -btb << "<dy<" << btb
+                     << "," << -btb << "<dz<" << btb;
+
       //---- set&go
       fitBank_alg->setPropertyValue("Function", fun_str.str());
       fitBank_alg->setProperty("Ties", tie_str.str());
@@ -458,7 +459,7 @@ namespace Crystal {
         double rvz = cos(theta);
         adjustComponent(dx, dy, dz, rvx, rvy, rvz, rotang, bn, pws);
         g_log.notice() << "-- Fit " << bn << " results using " << nBankPeaks
-                       << " peaks:\n"
+                       << " peaks:\n "
                        << "    d(x,y,z) = (" << dx << "," << dy << "," << dz
                        << ")\n"
                        << "    rotang(rx,ry,rz) =" << rotang << "(" << rvx

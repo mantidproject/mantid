@@ -173,7 +173,7 @@ public:
    * @brief Only adjust T0
    *
    */
-  void test_T0_Shift() {
+  void run_T0_Shift() {
     g_log.notice() << "test: !T0 Shift!\n";
 
     // prescribed shift
@@ -392,7 +392,7 @@ public:
    * NOTE: not enough peaks on the y_panels, so we have to work with only the
    *       x_panels
    */
-  void run_Exec() {
+  void test_Exec() {
     g_log.notice() << "test: !calibrate L1 and two panels at the same time!\n";
 
     g_log.notice() << "Tolerance of Distance (meter) :" << TOLERANCE_L << "\n";
@@ -416,13 +416,13 @@ public:
     //-- xbottom
     double dx2 = 0.5e-2;
     double dy2 = 1.3e-2;
-    double dz2 = -0.9e-2;
+    double dz2 = -1.9e-2;
     double theta2 = PI / 4;
     double phi2 = PI / 3;
     double rvx2 = sin(theta2) * cos(phi2);
     double rvy2 = sin(theta2) * sin(phi2);
     double rvz2 = cos(theta2);
-    double ang2 = 3.3; // degrees
+    double ang2 = 2.13; // degrees
 
     // ----------------------------------- //
     // ----- Generate Synthetic Data ----- //
