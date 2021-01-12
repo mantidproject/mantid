@@ -43,7 +43,7 @@ class CorelliPowderCalibrationCreateTest(unittest.TestCase):
         # ToDO investigate the relatively large tolerance required for some operative systems, atol=0.05
         assert_allclose([row[name] for name in ('Xposition', 'Yposition', 'Zposition')], target_position, atol=0.05)
         assert_allclose([row[name] for name in ('XdirectionCosine', 'YdirectionCosine', 'ZdirectionCosine')],
-                        target_orientation, atol=0.03)
+                        target_orientation, atol=0.05)
         assert_allclose(row['RotationAngle'], target_rotation, atol=2.0)
 
 
