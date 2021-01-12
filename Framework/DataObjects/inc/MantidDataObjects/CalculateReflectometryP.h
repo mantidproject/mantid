@@ -22,25 +22,31 @@ public:
   /**
    * Constructor
    */
-  CalculateReflectometryP() : m_sin_theta_i(0.0), m_sin_theta_f(0.0) {}
+  CalculateReflectometryP(int version) : CalculateReflectometry(version), m_sin_theta_i(0.0), m_sin_theta_f(0.0) {}
 
   /**
    Setter for the incident theta value require for the calculation. Internally
    pre-calculates and caches to cos theta for speed.
    @param thetaIncident: incident theta value in degrees
    */
-  void updateThetaIncident(double thetaIncident) override {
-    m_sin_theta_i = sin(to_radians_factor * thetaIncident);
-  }
+  void updateThetaIncident(double thetaIncident) override { m_sin_theta_i = sin(to_radians_factor * thetaIncident); }
 
   /**
-   Set the final theta value from the detector twoTheta angle. Internally
+   Setter for the final theta value require for the calculation. Internally
    pre-calculates and caches to cos theta for speed.
+   @param thetaFinal: final theta value in degrees
+   */
+  void setThetaFinal(double thetaFinal) override { m_sin_theta_f = sin(to_radians_factor * thetaFinal); }
+
+  /**
+   Set the final theta value from the detector twoTheta angle.
    @param twoTheta: detector twoTheta value in degrees
    */
   void setTwoTheta(double twoTheta) override {
-    const double thetaFinal = twoTheta - m_theta_i;
-    m_sin_theta_f = sin(to_radians_factor * thetaFinal);
+    if (m_version == 1)
+      setThetaFinal(twoTheta);
+    else
+      setThetaFinal(twoTheta - m_theta_i);
   }
 
   /**

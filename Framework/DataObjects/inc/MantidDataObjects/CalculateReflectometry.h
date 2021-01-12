@@ -20,8 +20,10 @@ class CalculateReflectometry {
 protected:
   double m_theta_i{0.0};
   const double to_radians_factor = M_PI / 180.0;
+  int m_version;
 
 public:
+  CalculateReflectometry(int version) : m_version{version} {}
   virtual ~CalculateReflectometry() = default;
 
   /**
@@ -38,6 +40,12 @@ public:
    @param thetaIncident: incident theta value in degrees
    */
   virtual void updateThetaIncident(double thetaIncident) = 0;
+
+  /**
+   Setter for the final theta value require for the calculation.
+   @param thetaFinal: final theta value in degrees
+  */
+  virtual void setThetaFinal(double thetaFinal) = 0;
 
   /**
    Set the final theta value from the detector twoTheta angle.
