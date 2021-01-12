@@ -7,7 +7,6 @@
 #pragma once
 
 #include <cxxtest/TestSuite.h>
-#include <gsl/gsl_version.h>
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
