@@ -6,6 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "DllOption.h"
+
 #include <string>
 
 namespace MantidQt {
@@ -20,7 +22,7 @@ namespace MantidWidgets {
  *
  * This definition was created because it is more explicit.
  */
-struct GlobalParameter {
+struct EXPORT_OPT_MANTIDQT_COMMON GlobalParameter {
 
   GlobalParameter(std::string const &parameter);
 
@@ -32,7 +34,7 @@ struct GlobalParameter {
  * where a parameter of a specific domain is tied to the value of a parameter
  * in a different domain.
  */
-struct GlobalTie {
+struct EXPORT_OPT_MANTIDQT_COMMON GlobalTie {
 
   GlobalTie(std::string const &parameter, std::string const &tie);
 
