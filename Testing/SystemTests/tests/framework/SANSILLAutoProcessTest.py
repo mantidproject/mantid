@@ -198,11 +198,11 @@ class D11_AutoProcess_Multiple_Transmissions_Test(systemtesting.MantidSystemTest
 
     def runTest(self):
         beams = '950,1020,947'
-        containers = '958+1203,1023+1216,973'
-        container_tr = '988,1023+1216,988'
-        beam_tr = '947+1119,1020,947+1119'
-        samples = '960+1191,1024+1025,975'
-        sample_tr = '990,1024+1025,990'
+        containers = '958,1023,973'
+        container_tr = '988,1023,988'
+        beam_tr = '947,1020,947'
+        samples = '960,1024,975'
+        sample_tr = '990,1024,990'
         thick = 0.1
 
         # reduce samples
