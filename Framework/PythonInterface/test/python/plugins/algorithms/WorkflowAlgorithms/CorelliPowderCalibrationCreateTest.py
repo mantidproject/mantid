@@ -40,6 +40,7 @@ class CorelliPowderCalibrationCreateTest(unittest.TestCase):
             TofBinning=[300, 1.0, 16666.7], PeakPositions=spacings_reference, AdjustSource=False, ComponentList='bank1',
             ComponentMaxTranslation=0.2, ComponentMaxRotation=10)
         row = mtd['cal_adjustments'].row(0)
+        # ToDO investigate the relatively large tolerance required for some operative systems, atol=0.05
         assert_allclose([row[name] for name in ('Xposition', 'Yposition', 'Zposition')], target_position, atol=0.05)
         assert_allclose([row[name] for name in ('XdirectionCosine', 'YdirectionCosine', 'ZdirectionCosine')],
                         target_orientation, atol=0.03)
