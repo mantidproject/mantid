@@ -30,6 +30,25 @@ class CorelliPowderCalibrationCreateTest(unittest.TestCase):
                                   RelativeRotation=True)
         MoveInstrumentComponent(Workspace='test_workspace', ComponentName='bank1', X=4.98, y=-0.12, z=0.08,
                                 RelativePosition=False)
+
+        # Both FixSource=True, AdjustSource=True can't be True
+        try:
+            CorelliPowderCalibrationCreate(
+                InputWorkspace='test_workspace', OutputWorkspacesPrefix='cal_', TubeDatabaseDir='/tmp',
+                TofBinning=[300, 1.0, 16666.7], PeakPositions=spacings_reference, FixSource=True, AdjustSource=True,
+                ComponentList='bank1', ComponentMaxTranslation=0.2, ComponentMaxRotation=10)
+        except RuntimeError as error:
+            assert 'Some invalid Properties found' in str(error)
+
+        # Both FixSource=True, AdjustSource=True can't be False
+        try:
+            CorelliPowderCalibrationCreate(
+                InputWorkspace='test_workspace', OutputWorkspacesPrefix='cal_', TubeDatabaseDir='/tmp',
+                TofBinning=[300, 1.0, 16666.7], PeakPositions=spacings_reference, FixSource=False, AdjustSource=False,
+                ComponentList='bank1', ComponentMaxTranslation=0.2, ComponentMaxRotation=10)
+        except RuntimeError as error:
+            assert 'Some invalid Properties found' in str(error)
+
         # The calibration algorithm will attempt to correct the position and orientation of the bank so that peak
         # centers for all detectors in the bank (not just detector-ID 155) approach our reference values. As
         # a result, the final position and orientation is not exactly perpendicular to the X-axis and positioned
@@ -49,7 +68,6 @@ class CorelliPowderCalibrationCreateTest(unittest.TestCase):
         assert_allclose([row[name] for name in ('XdirectionCosine', 'YdirectionCosine', 'ZdirectionCosine')],
                         target_orientation, atol=0.05)
         assert_allclose(row['RotationAngle'], target_rotation, atol=2.0)
-
 
 if __name__ == '__main__':
     unittest.main()
