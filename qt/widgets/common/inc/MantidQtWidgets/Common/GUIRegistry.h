@@ -67,10 +67,13 @@ public:
   void subscribe(IGUILauncher *gui) {
     const auto category = gui->category().toStdString();
     const auto name = gui->name().toStdString();
+<<<<<<< HEAD
     if (category.empty() || name.empty()) {
       throw std::runtime_error(
           "Unable to register a GUI with empty name or category.");
     }
+=======
+>>>>>>> fe954f35687f082524e75861aab8abfc50a4b5de
     if (checkExists(category, name)) {
       throw std::runtime_error("GUI is already registered: " + category +
                                " > " + name);
