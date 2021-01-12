@@ -81,10 +81,10 @@ public:
         dspacing_min(1.0), dspacing_max(10.0),   //
         wavelength_min(0.1), wavelength_max(10), //
         omega_step(3.0),                         //
-        TOLERANCE_L(5e-5),   // this calibration has intrinsic accuracy limit of
+        TOLERANCE_L(1e-3),   // this calibration has intrinsic accuracy limit of
                              // 1mm for translation
-        TOLERANCE_R(5e-3), // this calibration has intrinsic accuracy limit of
-                             // 1e-3 deg for rotation
+        TOLERANCE_R(0.1), // this calibration has intrinsic accuracy limit of
+                             // 0.1 deg for rotation
         LOGCHILDALG(false) {
     // NOTE:
     //  The MAGIC PIECE, basically we need to let AlgorithmFactory
