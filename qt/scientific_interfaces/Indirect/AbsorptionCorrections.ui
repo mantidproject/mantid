@@ -76,19 +76,6 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="0">
-           <widget class="QCheckBox" name="cbUseCan">
-            <property name="maximumSize">
-             <size>
-              <width>16777208</width>
-              <height>16777215</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>Use Container</string>
-            </property>
-           </widget>
-          </item>
          </layout>
         </widget>
        </item>
@@ -287,6 +274,25 @@
              </widget>
             </item>
            </layout>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="cbUseCan">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777208</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>Use Container</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
           </item>
           <item>
            <widget class="QStackedWidget" name="swShapeDetails">
@@ -936,7 +942,7 @@
        <item>
         <widget class="QGroupBox" name="gbContainerDetails">
          <property name="enabled">
-          <bool>false</bool>
+          <bool>true</bool>
          </property>
          <property name="title">
           <string>Container Details</string>
