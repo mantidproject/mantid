@@ -15,7 +15,6 @@
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/Diffraction.h"
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
