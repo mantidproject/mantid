@@ -49,6 +49,7 @@ class SliceViewerCanvas(ScrollZoomMixin, MantidFigureCanvas):
 
 class SliceViewerDataView(QWidget):
     """The view for the data portion of the sliceviewer"""
+
     def __init__(self, presenter, dims_info, can_normalise, parent=None, conf=None):
         super().__init__(parent)
 
