@@ -19,6 +19,8 @@ Improvements
 ############
 - Phasequads are now available for analysis in both GUI's.
 - Ticking co-add now works in the GUI's so you can analyse multiple runs as one run
+- Added some input validation to First and Last good Data in the Phase Table tab
+- When using co-add and creating a phasequad, the deadtime table will be taken from the first file only
 
 Bug fixes
 #########
@@ -32,6 +34,8 @@ Bug fixes
 - Fixed a bug that can sometimes cause the MaxEnt calculation to fail in frequency domain analysis.
 - Fixed a crash when trying to do a simultaneous fit with no data loaded after pressing clear all.
 - Fixed a bug where changing rebin wouldn't update the plot in the GUI
+- Fixed a bug where the plot would update incorrectly when changing plot raw and plot difference
+- Fixed a crash when pressing autoscale y without any data loaded
 
 ALC
 ---

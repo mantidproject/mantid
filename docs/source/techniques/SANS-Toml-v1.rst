@@ -158,6 +158,193 @@ DET/CORR [FRONT][REAR] [X][Y][Z][ROT] a
         rear_x = 0.0
         rear_z = 0.058
 
+DET/[LAB][HAB][MERGED][ALL]
+---------------------------
+
+..  code-block:: none
+
+    [detector.configuration]
+      selected_detector = "LAB"
+
+**Existing Example**
+
+..  code-block:: none
+
+    DET/HAB
+
+
+**Existing Replacement**
+
+..  code-block:: none
+
+    [detector.configuration]
+      selected_detector = "HAB"  # Or "LAB", "All" (with lowercase l's), "Merged" ...etc.
+
+DET/RESCALE[/FIT] x y
+---------------------
+
+..  code-block:: none
+
+  [reduction]
+    [reduction.merged.rescale]
+        min = x
+        max = y
+        use_fit = true  # or false
+
+**Existing Example**
+
+..  code-block:: none
+
+    DET/RESCALE/FIT 0.14 0.24
+
+
+**Existing Replacement**
+
+..  code-block:: none
+
+  [reduction]
+    [reduction.merged.rescale]
+      min = 0.14
+      max = 0.24
+      use_fit = true
+
+DET/SCALE x
+-----------
+
+..  code-block:: none
+
+  [reduction]
+    [reduction.merged.rescale]
+        factor = x
+        use_fit = false  # Must be false for single value
+
+**Existing Example**
+
+..  code-block:: none
+
+    DET/SCALE 0.123
+
+
+**Existing Replacement**
+
+..  code-block:: none
+
+  [reduction]
+    [reduction.merged.rescale]
+        factor = 0.123
+        use_fit = false
+
+DET/SCALE x y /FIT
+------------------
+
+..  code-block:: none
+
+  [reduction]
+    [reduction.merged.rescale]
+        min = x
+        max = y
+        use_fit = true  # Must be true for fitting
+
+**Existing Example**
+
+..  code-block:: none
+
+    DET/SCALE 0.1 0.2 /FIT
+
+
+**Existing Replacement**
+
+..  code-block:: none
+
+  [reduction]
+    [reduction.merged.rescale]
+        min = 0.1
+        max = 0.2
+        use_fit = true  # Must be true for fitting
+
+
+DET/SHIFT x
+-----------
+
+..  code-block:: none
+
+  [reduction]
+    [reduction.merged.shift]
+        distance = x
+        use_fit = false  # Must be false for single value
+
+**Existing Example**
+
+..  code-block:: none
+
+    DET/SHIFT 0.123
+
+
+**Existing Replacement**
+
+..  code-block:: none
+
+  [reduction]
+    [reduction.merged.shift]
+        distance = 0.123
+        use_fit = false
+
+DET/SHIFT x y /FIT
+------------------
+
+..  code-block:: none
+
+  [reduction]
+    [reduction.merged.shift]
+        min = x
+        max = y
+        use_fit = true  # Must be true for fitting
+
+**Existing Example**
+
+..  code-block:: none
+
+    DET/SHIFT 0.1 0.2 /FIT
+
+**Existing Replacement**
+
+..  code-block:: none
+
+  [reduction]
+    [reduction.merged.shift]
+        min = 0.1
+        max = 0.2
+        use_fit = true
+
+
+DET/OVERLAP x y
+---------------
+
+..  code-block:: none
+
+  [reduction]
+    [reduction.merged.merge_range]
+      min = x
+      max = y
+      use_fit = true
+
+**Existing Example**
+
+..  code-block:: none
+
+    DET/OVERLAP 0.14 0.24
+
+
+**Existing Replacement**
+
+..  code-block:: none
+
+  [merged]
+    [reduction.merged.merge_range]
+        min = 0.14
+        max = 0.24
+        use_fit = true
+
 
 FIT/CENTRE x y
 ---------------

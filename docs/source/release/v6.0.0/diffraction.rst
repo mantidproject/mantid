@@ -34,10 +34,11 @@ New features
 - The :ref:`ConvertUnits <algm-ConvertUnits>` algorithm has been extended to use a quadratic relationship between d spacing and TOF when doing conversions between these units. The diffractometer constants DIFA, DIFC and TZERO that determine the form of the quadratic can be loaded into a workspace using a new :ref:`ApplyDiffCal <algm-ApplyDiffCal>` algorithm. This functionality was previously only available in :ref:`AlignDetectors <algm-AlignDetectors>` which only performed the conversion in the direction TOF to d spacing. This change will ensure that the conversion of focussed datasets from d spacing back to TOF at the end of the ISIS powder diffraction data reduction is performed correctly.
 - New algorithm :ref:`CorelliPowderCalibrationDatabase <algm-CorelliPowderCalibrationDatabase>` to save Corelli geometry calibration to database
 - New algorithm :ref:`CorelliPowderCalibrationApply <algm-CorelliPowderCalibrationApply>` to apply a CORELLI calibration table to CORELLI EventWorkspace.
-- New algorithm :ref:`CorelliPowderCalibrationLoad <algm-CorelliPowderCalibrationLoad>` to load a CORELLI calibration table into memory.
 - New algorithm :ref:`CorelliPowderCalibrationCreate <algm-CorelliPowderCalibrationCreate>` adjusts the position and orientation of Corelli banks in order to optimize the comparison of observed peaks to reference data
 - New algorithm :ref:`LeadPressureCalc <algm-LeadPressureCalc>` to calculate the pressure of a sample given the dSpacing of the Lead (111) peak and the sample temperature.
 - Modified creation of absorption input in :ref:`SNSPowderReduction <algm-SNSPowderReduction>` to automatically get information from sample logs.
+- New algorithm :ref:`PolDiffILLReduction <algm-PolDiffILLReduction>` to perform polarised diffraction data reduction for the ILL D7 instrument.
+- New algorithm :ref:`D7AbsoluteCrossSections <algm-D7AbsoluteCrossSections>` to separate magnetic, nuclear coherent, and incoherent cross-sections using spin-flip and non-spin-flip cross-sections, and to normalise D7 data to a given standard.
 
 Improvements
 ############
@@ -71,6 +72,7 @@ Bugfixes
 Improvements
 ############
 - The user is no longer asked to overwrite an automatically generated model that is saved in as a Custom Setup in the fit browser (it is overwritten).
+- Generic Sequential Fit button removed from fit menu (users should use sequential fit button below the table in the fitting tab of the UI).
 
 New features
 ############

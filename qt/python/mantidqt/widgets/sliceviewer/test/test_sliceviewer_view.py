@@ -5,6 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
+import io
+import sys
 import unittest
 
 import matplotlib as mpl
@@ -13,8 +15,8 @@ from mantidqt.widgets.colorbar.colorbar import MIN_LOG_VALUE
 
 mpl.use('Agg')
 from mantid.simpleapi import (  # noqa: E402
-    CreateMDHistoWorkspace, CreateMDWorkspace, CreateSampleWorkspace,
-    SetUB, DeleteWorkspace, ConvertToDistribution, Scale, RenameWorkspace)
+    CreateMDHistoWorkspace, CreateMDWorkspace, CreateSampleWorkspace, DeleteWorkspace,
+    FakeMDEventData, ConvertToDistribution, Scale, SetUB, RenameWorkspace)
 from mantid.api import AnalysisDataService  # noqa: E402
 from mantidqt.utils.qt.testing import start_qapplication  # noqa: E402
 from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder  # noqa: E402
@@ -157,10 +159,37 @@ class SliceViewerViewTest(unittest.TestCase, QtWidgetFinder):
         self.assert_no_toplevel_widgets()
         self.assertEqual(pres.ads_observer, None)
 
-    def test_view_updates_on_replace_when_model_properties_dont_change(self):
+    def test_view_updates_on_replace_when_model_properties_dont_change_matrixws(self):
         ws = CreateSampleWorkspace()
         pres = SliceViewer(ws)
         ws = Scale(ws, 100, "Multiply")
+
+        QApplication.sendPostedEvents()
+
+        self.assertTrue(pres.view in self.find_widgets_of_type(str(type(pres.view))))
+        self.assertNotEqual(pres.ads_observer, None)
+
+        pres.view.close()
+
+    def test_view_updates_on_replace_when_model_properties_dont_change_mdeventws(self):
+        ws = CreateMDWorkspace(Dimensions='3',
+                               EventType='MDEvent',
+                               Extents='-10,10,-5,5,-1,1',
+                               Names='Q_lab_x,Q_lab_y,Q_lab_z',
+                               Units='1\\A,1\\A,1\\A')
+        FakeMDEventData(ws, UniformParams="1000000")
+        pres = SliceViewer(ws)
+        try:
+            # the ads handler catches all exceptions so that the handlers don't
+            # bring down the sliceviewer. Check if anything is writtent to stderr
+            stderr_capture = io.StringIO()
+            stderr_orig = sys.stderr
+            sys.stderr = stderr_capture
+            ws *= 100
+            self.assertTrue('Error occurred in handler' not in stderr_capture.getvalue(),
+                            msg=stderr_capture.getvalue())
+        finally:
+            sys.stderr = stderr_orig
 
         QApplication.sendPostedEvents()
 
@@ -175,6 +204,8 @@ class SliceViewerViewTest(unittest.TestCase, QtWidgetFinder):
         old_title = pres.model.get_title()
 
         renamed = RenameWorkspace(ws)  # noqa F841
+
+        QApplication.sendPostedEvents()
 
         # View didn't close
         self.assertTrue(pres.view in self.find_widgets_of_type(str(type(pres.view))))
@@ -205,6 +236,7 @@ class SliceViewerViewTest(unittest.TestCase, QtWidgetFinder):
 
         self.assert_no_toplevel_widgets()
         self.assertEqual(pres.ads_observer, None)
+
 
 # private helper functions
 

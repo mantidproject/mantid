@@ -15,6 +15,7 @@ New Features
 - Added the ability to load 1d-Plots from MantidPlot project files in workbench.
 - Added QLineEdit to SampleLogs widget to allow filtering its entries
 - Time series sample logs in multiperiod event workspaces can now be filtered by current period.
+- Added more options to the workbench plot settings, including tick customisation and enabling grids by default.
 
 Improvements
 ############
@@ -57,5 +58,6 @@ Bugfixes
 - Fixed a bug in generating plot scripts for figures containing data for a particular bin.
 - Fixed a bug causing an error when double clicking a ragged workspace.
 - Fixed a bug which caused a terminate dialogue to be raised if the user zoomed in far enough while using the SliceViewer on MDE workspaces.
+- Fixed a crash in the plot config when removing the last curve on a plot
 
 :ref:`Release 6.0.0 <v6.0.0>`

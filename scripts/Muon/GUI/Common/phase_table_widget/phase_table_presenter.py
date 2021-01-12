@@ -11,8 +11,9 @@ from Muon.GUI.Common.muon_phasequad import MuonPhasequad
 from mantidqt.utils.observer_pattern import Observable, GenericObserver, GenericObservable
 import re
 from Muon.GUI.Common.ADSHandler.workspace_naming import get_phase_table_workspace_name, \
-    get_phase_table_workspace_group_name, \
-    get_fitting_workspace_name, get_base_data_directory
+    get_fitting_workspace_name, get_base_data_directory, \
+    get_run_number_from_workspace_name, \
+    get_run_numbers_as_string_from_workspace_name
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 from Muon.GUI.Common.utilities.run_string_utils import valid_name_regex
 import mantid
@@ -40,6 +41,9 @@ class PhaseTablePresenter(object):
 
         self.update_view_from_model_observer = GenericObserver(self.update_view_from_model)
         self.update_current_phase_tables()
+
+        self.view.on_first_good_data_changed(self.handle_first_good_data_changed)
+        self.view.on_last_good_data_changed(self.handle_last_good_data_changed)
 
     def update_view_from_model(self):
         self.view.set_input_combo_box(self.context.getGroupedWorkspaceNames())
@@ -180,7 +184,7 @@ class PhaseTablePresenter(object):
         return parameters['DetectorTable']
 
     def add_phase_table_to_ADS(self, base_name):
-        run = re.search('[0-9]+', base_name).group()
+        run = get_run_numbers_as_string_from_workspace_name(base_name, self.context.data_context.instrument)
 
         directory = get_base_data_directory(self.context, run)
         muon_workspace_wrapper = MuonWorkspaceWrapper(directory + base_name)
@@ -192,13 +196,7 @@ class PhaseTablePresenter(object):
         if not self.view.output_fit_information:
             return
 
-        run = re.search('[0-9]+', base_name).group()
-        phase_table_group = get_phase_table_workspace_group_name(base_name,
-                                                                 self.context.data_context.instrument,
-                                                                 self.context.workspace_suffix)
-        directory = get_base_data_directory(self.context, run) + phase_table_group
-
-        muon_workspace_wrapper = MuonWorkspaceWrapper(directory + fit_workspace_name)
+        muon_workspace_wrapper = MuonWorkspaceWrapper(fit_workspace_name)
         muon_workspace_wrapper.show()
 
     def create_parameters_for_cal_muon_phase_algorithm(self):
@@ -237,3 +235,26 @@ class PhaseTablePresenter(object):
     def update_current_phase_tables(self):
         phase_table_list = self.context.phase_context.get_phase_table_list(self.context.data_context.instrument)
         self.view.set_phase_table_combo_box(phase_table_list)
+
+    def handle_first_good_data_changed(self):
+        self._validate_data_changed(self.view.first_good_time, "First Good Data")
+
+    def handle_last_good_data_changed(self):
+        self._validate_data_changed(self.view.last_good_time, "Last Good Data")
+
+    def _validate_data_changed(self, data, string):
+        run = float(get_run_number_from_workspace_name(self.view.input_workspace,
+                                                       self.context.data_context.instrument))
+        last_good_time = self.context.last_good_data([run])
+        first_good_time = self.context.first_good_data([run])
+
+        if self.view.first_good_time > self.view.last_good_time:
+            self.view.first_good_time = first_good_time
+            self.view.last_good_time = last_good_time
+            self.view.warning_popup("First Good Data cannot be greater than Last Good Data")
+        elif data < first_good_time:
+            self.view.first_good_time = first_good_time
+            self.view.warning_popup(f"{string} cannot be smaller than {first_good_time}")
+        elif data > last_good_time:
+            self.view.last_good_time = last_good_time
+            self.view.warning_popup(f"{string} cannot be greater than {last_good_time}")
