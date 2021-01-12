@@ -136,6 +136,8 @@ AbsorptionCorrections::AbsorptionCorrections(QWidget *parent)
   // Change of input
   connect(m_uiForm.dsSampleInput, SIGNAL(dataReady(const QString &)), this,
           SLOT(getParameterDefaults(const QString &)));
+  connect(m_uiForm.cbShape, SIGNAL(currentIndexChanged(int)), this,
+          SLOT(setCanCbState(int)));
   // Handle algorithm completion
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(algorithmComplete(bool)));
@@ -644,6 +646,15 @@ void AbsorptionCorrections::setCanDensity(double value) {
     m_canDensities->setMassDensity(value);
   else
     m_canDensities->setNumberDensity(value);
+}
+
+void AbsorptionCorrections::setCanCbState(int index) {
+  if (index == 0) {
+    m_uiForm.cbUseCan->setChecked(true);
+    m_uiForm.cbUseCan->setEnabled(false);
+  } else {
+    m_uiForm.cbUseCan->setEnabled(true);
+  }
 }
 
 std::vector<std::string>

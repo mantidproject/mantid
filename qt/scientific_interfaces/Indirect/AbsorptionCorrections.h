@@ -41,6 +41,7 @@ private slots:
   void changeCanMaterialOptions(int index);
   void setSampleDensity(double value);
   void setCanDensity(double value);
+  void setCanCbState(int index);
   UserInputValidator doValidation();
 
 private:

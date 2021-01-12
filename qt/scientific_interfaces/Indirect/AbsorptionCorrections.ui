@@ -38,7 +38,14 @@
           <string>Input</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_11">
-          <item row="0" column="1">
+          <item row="1" column="0">
+           <widget class="QLabel" name="lbSampleInput">
+            <property name="text">
+             <string>Input Workspace:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
            <widget class="MantidQt::MantidWidgets::DataSelector" name="dsSampleInput" native="true">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
@@ -69,7 +76,7 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="0">
+          <item row="2" column="0">
            <widget class="QCheckBox" name="cbUseCan">
             <property name="maximumSize">
              <size>
@@ -79,13 +86,6 @@
             </property>
             <property name="text">
              <string>Use Container</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="lbSampleInput">
-            <property name="text">
-             <string>Input Workspace:</string>
             </property>
            </widget>
           </item>
@@ -616,20 +616,6 @@
                 </property>
                </widget>
               </item>
-              <item row="2" column="0">
-               <widget class="QLabel" name="lbCylSampleRadius">
-                <property name="text">
-                 <string>Sample Radius:</string>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="0">
-               <widget class="QLabel" name="lbCylSampleHeight">
-                <property name="text">
-                 <string>Sample Height:</string>
-                </property>
-               </widget>
-              </item>
               <item row="2" column="2">
                <widget class="QLabel" name="lbCylCanOuterRadius">
                 <property name="enabled">
@@ -653,6 +639,20 @@
                 </property>
                 <property name="singleStep">
                  <double>0.100000000000000</double>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="0">
+               <widget class="QLabel" name="lbCylSampleHeight">
+                <property name="text">
+                 <string>Sample Height:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="0">
+               <widget class="QLabel" name="lbCylSampleRadius">
+                <property name="text">
+                 <string>Sample Radius:</string>
                 </property>
                </widget>
               </item>
