@@ -251,12 +251,14 @@ class Dimension(QWidget):
         self.set_state(State.X)
         if self.state != old_state:
             self.stateChanged.emit(self.number)
+            self.valueChanged.emit()
 
     def y_clicked(self):
         old_state = self.state
         self.set_state(State.Y)
         if self.state != old_state:
             self.stateChanged.emit(self.number)
+            self.valueChanged.emit()
 
     def spinbox_changed(self):
         self.value = self.spinbox.value()
