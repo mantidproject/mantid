@@ -447,6 +447,8 @@ void FitPropertyBrowser::initBasicLayout(QWidget *w) {
   QMenu *setupSubMenuManage = new QMenu(this);
   QAction *setupActionSave = new QAction("Save Setup", this);
   m_setupActionRemove = new QAction("Remove Setup", this);
+  QAction *setupActionClear = new QAction("Clear Setups", this);
+  setupActionClear->setObjectName("action_ClearSetups");
   QAction *setupActionCopyToClipboard = new QAction("Copy To Clipboard", this);
   setupActionCopyToClipboard->setObjectName("action_CopyToClipboard");
   QAction *setupActionLoadFromString = new QAction("Load From String", this);
@@ -455,15 +457,19 @@ void FitPropertyBrowser::initBasicLayout(QWidget *w) {
   setupManageMapper->setMapping(setupActionSave, "SaveSetup");
   setupManageMapper->setMapping(setupActionCopyToClipboard, "CopyToClipboard");
   setupManageMapper->setMapping(setupActionLoadFromString, "LoadFromString");
+  setupManageMapper->setMapping(setupActionClear, "ClearSetups");
   connect(setupActionSave, SIGNAL(triggered()), setupManageMapper, SLOT(map()));
   connect(setupActionCopyToClipboard, SIGNAL(triggered()), setupManageMapper,
           SLOT(map()));
   connect(setupActionLoadFromString, SIGNAL(triggered()), setupManageMapper,
           SLOT(map()));
+  connect(setupActionClear, SIGNAL(triggered()), setupManageMapper,
+          SLOT(map()));
   connect(setupManageMapper, SIGNAL(mapped(const QString &)), this,
           SLOT(executeSetupManageMenu(const QString &)));
   setupSubMenuManage->addAction(setupActionSave);
   setupSubMenuManage->addAction(m_setupActionRemove);
+  setupSubMenuManage->addAction(setupActionClear);
   setupSubMenuManage->addAction(setupActionCopyToClipboard);
   setupSubMenuManage->addAction(setupActionLoadFromString);
   setupActionManageSetup->setMenu(setupSubMenuManage);
@@ -667,6 +673,14 @@ void FitPropertyBrowser::executeCustomSetupRemove(const QString &name) {
   updateSetupMenus();
 }
 
+void FitPropertyBrowser::executeClearCustomSetups() {
+  QSettings settings;
+  settings.beginGroup("Mantid/FitBrowser/SavedFunctions");
+
+  settings.clear();
+  updateSetupMenus();
+}
+
 /**
  * Recursively updates structure tooltips for all the functions
  */
@@ -705,6 +719,8 @@ void FitPropertyBrowser::executeSetupMenu(const QString &item) {
 void FitPropertyBrowser::executeSetupManageMenu(const QString &item) {
   if (item == "SaveSetup")
     saveFunction();
+  if (item == "ClearSetups")
+    executeClearCustomSetups();
   if (item == "CopyToClipboard")
     copy();
   if (item == "LoadFromString")

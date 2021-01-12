@@ -9,6 +9,11 @@ Framework Changes
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
 
+Installation
+------------
+
+- The macOS bundle is now suffixed with ``Nightly`` if it comes from a nightly development build and can be installed alongside a full release build.
+
 Concepts
 --------
 
@@ -30,6 +35,7 @@ Fitting
 -------
 
 - Corrected a bug in the calculation of uncertainty bands on the calculated fit curve. This correction has been tested against the python fitting package `kmpfit`, where an agreement between the two was seen.
+- Added button to clear all custom setups in Setup > Manage Setups menu
 
 Data Objects
 ------------
@@ -38,25 +44,6 @@ Python
 ------
 
 - Created a new module :ref:`mantid.utils <mantid.utils>` to allow for code sharing between algorithms.
-
-.. contents:: Table of Contents
-   :local:
-
-.. warning:: **Developers:** Sort changes under appropriate heading
-    putting new features at the top of the section, followed by
-    improvements, followed by bug fixes.
-
-Installation
-------------
-
-
-MantidWorkbench
----------------
-
-See :doc:`mantidworkbench`.
-
-SliceViewer and Vates Simple Interface
---------------------------------------
 
 Improvements
 ############
