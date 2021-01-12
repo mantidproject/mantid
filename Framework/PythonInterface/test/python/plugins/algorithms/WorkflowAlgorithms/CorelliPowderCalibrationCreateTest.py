@@ -18,7 +18,8 @@ class CorelliPowderCalibrationCreateTest(unittest.TestCase):
     def test_exec(self):
         # Single 10x10 rectangular detector, located 5m downstream the sample
         CreateSampleWorkspace(WorkspaceType="Event", Function="Powder Diffraction", XMin=300, XMax=16666.7, BinWidth=1,
-                              NumBanks=1, NumEvents=100000, PixelSpacing=0.02, OutputWorkspace="test_workspace")
+                              NumBanks=1, NumEvents=100000, PixelSpacing=0.02, OutputWorkspace="test_workspace",
+                              SourceDistanceFromSample=10.0, BankDistanceFromSample=5.0)
         # The detector ID at the center of the detector panel is detector-ID = 155, corresponding to workspace index 55.
         # When the detector panel is placed perpendicular to the X axis and five meters away from the sample,
         # detector-ID 155 shows nine peaks with the following peak-centers, in d-spacing (Angstroms) units:
@@ -55,14 +56,14 @@ class CorelliPowderCalibrationCreateTest(unittest.TestCase):
         # five meters away from the sample.
         CorelliPowderCalibrationCreate(
             InputWorkspace='test_workspace', OutputWorkspacesPrefix='cal_', TubeDatabaseDir='/tmp',
-            TofBinning=[300, 1.0, 16666.7], PeakPositions=spacings_reference, SourceToSampleDistance=19.420,
+            TofBinning=[300, 1.0, 16666.7], PeakPositions=spacings_reference, SourceToSampleDistance=10.0,
             ComponentList='bank1', ComponentMaxTranslation=0.2, ComponentMaxRotation=10)
         # Check source position
         row = mtd['cal_adjustments'].row(0)
-        assert_allclose([row[name] for name in ('Xposition', 'Yposition', 'Zposition')], [0., 0., -19.420], atol=0.001)
+        assert_allclose([row[name] for name in ('Xposition', 'Yposition', 'Zposition')], [0., 0., -10.0], atol=0.001)
         # Check position of first bank
         row = mtd['cal_adjustments'].row(1)
-        target_position, target_orientation, target_rotation = [5.18, -0.32, 0.20], [0.001, 0.999, -0.027], 98.0
+        target_position, target_orientation, target_rotation = [5.18, -0.32,  0.20], [0.001, 0.999, -0.027], 98.0
         assert_allclose([row[name] for name in ('Xposition', 'Yposition', 'Zposition')], target_position, atol=0.05)
         assert_allclose([row[name] for name in ('XdirectionCosine', 'YdirectionCosine', 'ZdirectionCosine')],
                         target_orientation, atol=0.03)
