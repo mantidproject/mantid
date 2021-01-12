@@ -40,5 +40,6 @@ Bugfixes
 - Wavelength limits entered with comma ranges larger than 10, e.g. `1,5,10,15` no longer
   throw a Runtime Error.
 - ISIS SANS will print the name of any missing maskfiles instead of an empty name.
+- Fixed a bug in ISIS SANS GUI with the `Save Other` dialog.
 
 :ref:`Release 6.0.0 <v6.0.0>`
