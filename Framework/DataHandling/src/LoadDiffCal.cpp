@@ -249,10 +249,11 @@ void LoadDiffCal::makeMaskWorkspace(const std::vector<int32_t> &detids,
   wksp->mutableRun().addProperty("Filename", m_filename);
 
   for (size_t i = 0; i < numDet; ++i) {
-    bool shouldUse = (use[i] > 0);
+    bool shouldUse = (use[i] > 0); // true if detector is calibrated
     auto detid = static_cast<detid_t>(detids[i]);
     // in maskworkspace 0=use, 1=dontuse
     wksp->setMasked(detid, !shouldUse);
+    // The mask value is 0 if the detector is good for use
     wksp->setValue(detid, (shouldUse ? 0. : 1.));
     progress.report();
   }
@@ -539,7 +540,7 @@ void LoadDiffCal::exec() {
   if (groups.empty())
     groups.assign(detids.size(), 1); // all go to one spectrum
   if (use.empty())
-    use.assign(detids.size(), 1); // use everything
+    use.assign(detids.size(), 1); // all detectors are good, use them
   if (difa.empty())
     difa.assign(detids.size(), 0.); // turn off difa
   if (tzero.empty())

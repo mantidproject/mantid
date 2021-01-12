@@ -416,11 +416,12 @@ std::map<std::string, std::string> IndexPeaks::validateInputs() {
   PeaksWorkspace_sptr ws = this->getProperty(Prop::PEAKSWORKSPACE);
   try {
     ws->sample().getOrientedLattice();
-  } catch (std::runtime_error &exc) {
-    helpMsgs[Prop::PEAKSWORKSPACE] = exc.what();
+  } catch (std::runtime_error &) {
+    helpMsgs[Prop::PEAKSWORKSPACE] = "No UB Matrix defined in the lattice.";
+    return helpMsgs;
   }
 
-  // get all runs which have peaksin the table
+  // get all runs which have peaks in the table
   const bool commonUB = this->getProperty(Prop::COMMONUB);
   if (commonUB) {
     const auto &allPeaks = ws->getPeaks();
@@ -437,6 +438,31 @@ std::map<std::string, std::string> IndexPeaks::validateInputs() {
     };
   };
 
+  const auto args = Prop::IndexPeaksArgs::parse(*this);
+  const bool isSave = this->getProperty(Prop::SAVEMODINFO);
+  const bool isMOZero = (args.satellites.maxOrder == 0);
+  bool isAllVecZero = true;
+  for (size_t vecNo = 0; vecNo < args.satellites.modVectors.size(); vecNo++) {
+    if (args.satellites.modVectors[vecNo] != V3D(0.0, 0.0, 0.0)) {
+      isAllVecZero = false;
+    }
+  }
+  if (isMOZero && !isAllVecZero) {
+    helpMsgs["MaxOrder"] =
+        "Max Order cannot be zero if a Modulation Vector has been supplied.";
+  }
+  if (!isMOZero && isAllVecZero) {
+    helpMsgs["ModVector1"] =
+        "At least one Modulation Vector must be supplied if Max Order set.";
+  }
+  if (isSave && isAllVecZero) {
+    helpMsgs[Prop::SAVEMODINFO] = "Modulation info cannot be saved with no "
+                                  "valid Modulation Vectors supplied.";
+  }
+  if (isSave && isMOZero) {
+    helpMsgs["MaxOrder"] =
+        "Modulation info cannot be saved with Max Order = 0.";
+  }
   return helpMsgs;
 }
 

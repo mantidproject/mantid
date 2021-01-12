@@ -484,8 +484,7 @@ void SampleLogsBehaviour::updateSumProperty(double addeeWSNumericValue,
 
 /**
  * Perform the update for a time series property, adding a new value to the
- *existing time series property. Skipped if the time series log entry is in the
- *addeeWS.
+ *existing time series property.
  *
  * @param addeeWS the workspace being merged
  * @param outWS the workspace the others are merged into
@@ -494,21 +493,21 @@ void SampleLogsBehaviour::updateSumProperty(double addeeWSNumericValue,
 void SampleLogsBehaviour::updateTimeSeriesProperty(MatrixWorkspace &addeeWS,
                                                    MatrixWorkspace &outWS,
                                                    const std::string &name) {
+  auto timeSeriesProp = outWS.run().getTimeSeriesProperty<double>(name);
   try {
-    // If this already exists we do not need to do anything, Time Series Logs
-    // are combined when adding workspaces.
-    addeeWS.run().getTimeSeriesProperty<double>(name);
+    const auto addeeTimeSeries =
+        addeeWS.run().getTimeSeriesProperty<double>(name);
+    timeSeriesProp->merge(addeeTimeSeries);
   } catch (std::invalid_argument &) {
-    auto timeSeriesProp = outWS.run().getTimeSeriesProperty<double>(name);
     Types::Core::DateAndTime startTime = addeeWS.run().startTime();
     double value = addeeWS.run().getLogAsSingleValue(name);
     timeSeriesProp->addValue(startTime, value);
-    // Remove this to supress a warning, we will put it back after adding the
-    // workspaces in MergeRuns
-    const Property *addeeWSProperty = addeeWS.run().getProperty(name);
-    m_addeeLogMap.emplace_back(
-        std::shared_ptr<Property>(addeeWSProperty->clone()));
   }
+  // Remove this to supress a warning, we will put it back after adding the
+  // workspaces in MergeRuns
+  const Property *addeeWSProperty = addeeWS.run().getProperty(name);
+  m_addeeLogMap.emplace_back(
+      std::shared_ptr<Property>(addeeWSProperty->clone()));
 }
 
 /**

@@ -178,6 +178,14 @@ Usage differs depending on whether you are using a single-configuration
 generator with CMake, for example Makefiles/Ninja, or a
 multi-configuration generator such as Visual Studio or Xcode.
 
+Downloading the test data
+-------------------------
+
+The ``systemtest`` script will automatically attempt to download any missing
+data files but will time-out after 2 minutes. The time out limit can be set in two
+variables ``ExternalData_TIMEOUT_INACTIVITY`` and ``ExternalData_TIMEOUT_ABSOLUTE``.
+If using CMake these will need to be added as new string entries (value is in seconds).
+
 Visual Studio/Xcode
 -------------------
 
@@ -204,6 +212,15 @@ fixed when running CMake, e.g.
    cd build
    systemtest
 
+Systems Lacking pyqt4
+---------------------
+
+Recent systems using Qt5 as default should set environment variable ``QT_API``
+while invoking the script
+
+.. code-block:: sh
+
+    > QT_API=pyqt5 systemtest
 
 Selecting Tests to Run From IDE
 -------------------------------

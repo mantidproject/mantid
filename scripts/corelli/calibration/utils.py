@@ -8,13 +8,15 @@
 from os import path
 import numpy as np
 from numpy.polynomial.polynomial import polyval
+from scipy.ndimage import gaussian_filter
 from typing import List, Optional, Union
 
 # imports from Mantid
 from mantid.api import AnalysisDataService, mtd, WorkspaceGroup
 from mantid.dataobjects import TableWorkspace, Workspace2D
-from mantid.simpleapi import (ApplyCalibration, CloneWorkspace, CreateEmptyTableWorkspace, Integration, LoadEventNexus,
-                              LoadNexusProcessed, RenameWorkspace, UnGroupWorkspace)
+from mantid.simpleapi import (ApplyCalibration, CloneWorkspace, CreateEmptyTableWorkspace,
+                              Integration, LoadEventNexus, LoadNexusProcessed, RenameWorkspace,
+                              UnGroupWorkspace)
 try:
     from mantidqt.widgets.instrumentview.presenter import InstrumentViewPresenter
     from mantidqt.utils.qt.qappthreadcall import QAppThreadCall
@@ -23,8 +25,12 @@ except (ImportError, ModuleNotFoundError):
 from Calibration import tube
 from Calibration.tube_calib_fit_params import TubeCalibFitParams
 
+# Functions exposed to the general user (public) API
+__all__ = ['apply_calibration', 'preprocess_banks', 'load_banks', 'calibrate_tube']
+
 # Type aliases
-InputTable = Union[str, TableWorkspace]  # allowed types for the input calibration table to append_bank_number
+InputTable = Union[
+    str, TableWorkspace]  # allowed types for the input calibration table to append_bank_number
 WorkspaceTypes = Union[str, Workspace2D]  # allowed types for the input workspace to calibrate_bank
 WorkspaceGroupTypes = Union[str, WorkspaceGroup]
 
@@ -32,6 +38,7 @@ PIXELS_PER_TUBE = 256
 TUBES_IN_BANK = 16
 TUBE_LENGTH = 0.900466  # in meters
 WIRE_GAP = 52.8 / 1000  # in meters, distance between consecutive wires
+WIRE_GAP_IN_PIXELS = 15  # in pixels, distance between wire shadows along the tube direction (y_lab)
 
 
 def wire_positions(units: str = 'pixels') -> np.ndarray:
@@ -57,7 +64,7 @@ def wire_positions(units: str = 'pixels') -> np.ndarray:
 
 def bank_numbers(bank_selection: str) -> List[str]:
     r"""
-    Expand a bank selection string into a list of bank numbers
+    Expand a bank selection string into a list of bank numbers, from smallest to highest
 
     :param bank_selection: selection string, such as '10,12-15,17-21'
     """
@@ -66,31 +73,123 @@ def bank_numbers(bank_selection: str) -> List[str]:
     for r in ranges:
         if '-' in r:
             start, end = [int(n.strip()) for n in r.split('-')]
-            banks.extend([str(n) for n in range(start, end + 1)])
+            banks.extend(list(range(start, end + 1)))
         else:
-            banks.append(r)
-    return banks
+            banks.append(int(r))
+    return [str(n) for n in sorted(banks)]
 
 
-def load_banks(filename: str, bank_selection: str, output_workspace: str) -> Workspace2D:
+def preprocess_banks(input_workspace: str, output_workspace: str) -> Workspace2D:
+    r"""
+    Clone the input workspace/run and preprocess the histograms for each tube such
+    that the peak finding algorithm can have a better chance of finding the correct
+    wire position.
+    Gaussian filters are used to approximate the background of each bank as well as
+    to assist the selection of regions where wire shadows reside.
+
+    Note: the preprocess step needs to be performed after load_banks, which provided
+    the bank selection.
+    :param input_workspace: input workspace name
+    :param output_workspace: output workspace with pre-processed histograms
+    """
+    CloneWorkspace(InputWorkspace=str(input_workspace), OutputWorkspace=output_workspace)
+
+    # inline function for 1D singal cleaning
+    # NOTE: an inline function here is by choice as it should only be used for data
+    #       pre-processing only
+    def clean_signals(
+        signal1D: np.ndarray,
+        pixels_per_tube: int = PIXELS_PER_TUBE,
+        peak_interval_estimate: int = WIRE_GAP_IN_PIXELS,
+    ) -> np.ndarray:
+        r"""
+        Replace the regions between peaks/dips with flat background to prevent peak finding
+        algorithm got stuck in a local minimum where no shadow of wires reside.
+
+        :param signal1D: 1D histogram from a single tube
+        :param pixels_per_tube: number of pixels per tube, should always be 256
+        :param peak_interval_estimate: a rough estimate of the distance between peaks in pixels
+        """
+        _sig_gaussian = gaussian_filter(signal1D, int(peak_interval_estimate / 2))
+        _sig_tmp = _sig_gaussian - signal1D
+        _sig_tmp[_sig_tmp < 0] = 1
+        _idx = np.where(_sig_tmp == 1)[0]
+        if len(_idx) > 0:
+            # This is mostly bypassing the non-realistic testing workspace
+            # which has zero values in most tubes
+            _sig_tmp[:_idx[0]] = 1
+            _sig_tmp[_idx[-1]:] = 1
+        _base = np.average(gaussian_filter(signal1D, int(pixels_per_tube / 2)))
+        return _base - _sig_tmp
+
+    _ws = mtd[output_workspace]
+    for i in range(0, _ws.getNumberHistograms(), PIXELS_PER_TUBE):
+        _data = np.array([_ws.readY(me) for me in range(i, i + PIXELS_PER_TUBE)])
+        _data = clean_signals(_data)
+        for j in range(PIXELS_PER_TUBE):
+            _ws.setY(i + j, _data[j])  # This apprently is the correct way to update Y
+
+    return _ws
+
+
+def load_banks(run: Union[int, str], bank_selection: str, output_workspace: str) -> Workspace2D:
     r"""
     Load events only for the selected banks, and don't load metadata.
 
     If the file is not an events file, but a Nexus processed file, the bank_selection is ignored.
-    :param filename: Filename to an Event nexus file or a processed nexus file
+    :param run: run-number or filename to an Event nexus file or a processed nexus file
     :param bank_selection: selection string, such as '10,12-15,17-21'
     :param output_workspace: name of the output workspace containing counts per pixel
     :return: workspace containing counts per pixel. Events in each pixel are integrated into neutron counts.
     """
-    assert path.exists(filename), f'File {filename} does not exist'
+    # Resolve the input run
+    if isinstance(run, int):
+        file_descriptor = f'CORELLI_{run}'
+    else:  # a run number given as a string, or the path to a file
+        try:
+            file_descriptor = f'CORELLI_{str(int(run))}'
+        except ValueError:  # run is path to a file
+            filename = run
+            assert path.exists(filename), f'File {filename} does not exist'
+            file_descriptor = filename
+
     bank_names = ','.join(['bank' + b for b in bank_numbers(bank_selection)])
     try:
-        LoadEventNexus(Filename=filename, OutputWorkspace=output_workspace,
-                       BankName=bank_names, LoadMonitors=False, LoadLogs=False)
+        LoadEventNexus(Filename=file_descriptor, OutputWorkspace=output_workspace,
+                       BankName=bank_names, LoadMonitors=False, LoadLogs=True)
     except (RuntimeError, ValueError):
-        LoadNexusProcessed(Filename=filename, OutputWorkspace=output_workspace)
+        LoadNexusProcessed(Filename=file_descriptor, OutputWorkspace=output_workspace)
     Integration(InputWorkspace=output_workspace, OutputWorkspace=output_workspace)
     return mtd[output_workspace]
+
+
+def trim_calibration_table(input_workspace: InputTable, output_workspace: Optional[str] = None) -> TableWorkspace:
+    r"""
+    Discard trim the X and Z pixel coordinates, since we are only interested in the calibrated Y-coordinate
+
+    :param input_workspace:
+    :param output_workspace:
+
+    :return: handle to the trimmed table workspace
+    """
+    if output_workspace is None:
+        output_workspace = str(input_workspace)  # overwrite the input table
+
+    # Extract detector ID's and Y-coordinates from the input table
+    table = mtd[str(input_workspace)]
+    detector_ids = table.column(0)
+    y_coordinates = [v.Y() for v in table.column(1)]
+
+    # create the (empty) trimmed table
+    table_trimmed = CreateEmptyTableWorkspace(OutputWorkspace=output_workspace)
+    table_trimmed.addColumn(type='int', name='Detector ID')
+    table_trimmed.addColumn(type='double', name='Detector Y Coordinate')
+
+    # fill the rows of the trimmed table
+    for detector_id, y_coordinate in zip(detector_ids, y_coordinates):
+        table_trimmed.addRow([detector_id, y_coordinate])
+
+    return table_trimmed
 
 
 def calculate_peak_y_table(peak_table: InputTable,
@@ -181,6 +280,8 @@ def calibrate_tube(workspace: WorkspaceTypes,
     calibration_table, _ = tube.calibrate(workspace, tube_name, wire_positions(units='meters')[1: -1], peaks_form,
                                           fitPar=fit_par, outputPeak=True,
                                           parameters_table_group='ParametersTableGroup')
+    calibration_table = trim_calibration_table(calibration_table)  # discard X and Z coordinates
+
     # Additional workspaces
     # Table with shadow positions along the tube, in pixel units
     if output_peak_table != 'PeakTable':  # 'PeakTable' is output by tube.calibrate

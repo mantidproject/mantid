@@ -82,6 +82,7 @@ if(ENABLE_MANTIDPLOT OR ENABLE_WORKBENCH)
       mantidqt/project/test/test_projectsaver.py
       mantidqt/project/test/test_workspaceloader.py
       mantidqt/project/test/test_workspacesaver.py
+      mantidqt/project/test/test_projectparser_mantidplot.py
       mantidqt/utils/test/test_async.py
       mantidqt/utils/test/test_modal_tester.py
       mantidqt/utils/test/test_qt_utils.py
@@ -138,6 +139,7 @@ if(ENABLE_MANTIDPLOT OR ENABLE_WORKBENCH)
         mantidqt/widgets/sliceviewer/test/test_sliceviewer_zoom.py
         mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_model.py
         mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_presenter.py
+        mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_view.py
         mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_peaksviewercollectionpresenter.py
         mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_peaksworkspaceselectormodel.py
         mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_peaksworkspaceselectorpresenter.py
@@ -149,6 +151,7 @@ if(ENABLE_MANTIDPLOT OR ENABLE_WORKBENCH)
         mantidqt/widgets/sliceviewer/peaksviewer/representation/test/test_peaksviewer_representation_spherical.py
         mantidqt/widgets/test/test_jupyterconsole.py
         mantidqt/widgets/workspacedisplay/test/test_data_copier.py
+        mantidqt/widgets/workspacedisplay/test/test_workspacedisplay_view.py
         mantidqt/widgets/workspacedisplay/test/test_user_notifier.py
         mantidqt/widgets/workspacedisplay/matrix/test/test_matrixworkspacedisplay_model.py
         mantidqt/widgets/workspacedisplay/matrix/test/test_matrixworkspacedisplay_presenter.py

@@ -21,7 +21,8 @@ using Mantid::Algorithms::MuonRemoveExpDecay;
 const std::string outputName = "MuonRemoveExpDecay_Output";
 
 namespace {
-MatrixWorkspace_sptr createWorkspace(size_t nspec, size_t maxt) {
+MatrixWorkspace_sptr createWorkspace(size_t nspec, size_t maxt,
+                                     bool useBinEdges = false) {
 
   // Create a fake muon dataset
   double a = 0.1; // Amplitude of the oscillations
@@ -33,6 +34,9 @@ MatrixWorkspace_sptr createWorkspace(size_t nspec, size_t maxt) {
   MantidVec Y;
   MantidVec E;
   for (size_t s = 0; s < nspec; s++) {
+    if (useBinEdges) {
+      X.emplace_back(0.0);
+    }
     for (size_t t = 0; t < maxt; t++) {
       double x = static_cast<double>(t) / static_cast<double>(maxt);
       double e = exp(-x / tau);
@@ -91,7 +95,7 @@ public:
     MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
   }
 
-  void test_EmptySpectrumList() {
+  void test_EmptySpectrumListPointsWorkspace() {
 
     auto ws = createWorkspace(2, 50);
 
@@ -128,6 +132,49 @@ public:
     TS_ASSERT_DELTA(outWS->y(1)[10], 0.0276, 0.0001);
     TS_ASSERT_DELTA(outWS->y(1)[19], -0.1003, 0.0001);
     TS_ASSERT_DELTA(outWS->y(1)[49], 0.0798, 0.0001);
+    // Test some E values
+    TS_ASSERT_DELTA(outWS->e(1)[10], 0.0054, 0.0001);
+    TS_ASSERT_DELTA(outWS->e(1)[19], 0.0059, 0.0001);
+    TS_ASSERT_DELTA(outWS->e(1)[49], 0.0078, 0.0001);
+  }
+
+  void test_EmptySpectrumListBinEdgesWorkspace() {
+
+    auto ws = createWorkspace(2, 50, true);
+
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("RemoveExpDecay");
+    alg->initialize();
+    alg->setChild(true);
+    alg->setProperty("InputWorkspace", ws);
+    alg->setPropertyValue("OutputWorkspace", outputName);
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    TS_ASSERT(alg->isExecuted());
+
+    MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
+
+    // First spectrum
+    // Test some X values
+    TS_ASSERT_DELTA(outWS->x(0)[10], 0.1800, 0.0001);
+    TS_ASSERT_DELTA(outWS->x(0)[19], 0.3600, 0.0001);
+    TS_ASSERT_DELTA(outWS->x(0)[49], 0.9600, 0.0001);
+    // Test some Y values
+    TS_ASSERT_DELTA(outWS->y(0)[10], -0.0993, 0.0001);
+    TS_ASSERT_DELTA(outWS->y(0)[19], -0.0113, 0.0001);
+    TS_ASSERT_DELTA(outWS->y(0)[49], -0.0627, 0.0001);
+    // Test some E values
+    TS_ASSERT_DELTA(outWS->e(0)[10], 0.0054, 0.0001);
+    TS_ASSERT_DELTA(outWS->e(0)[19], 0.0059, 0.0001);
+    TS_ASSERT_DELTA(outWS->e(0)[49], 0.0077, 0.0001);
+
+    // Second spectrum
+    // Test some X values
+    TS_ASSERT_DELTA(outWS->x(1)[10], 0.1800, 0.0001);
+    TS_ASSERT_DELTA(outWS->x(1)[19], 0.3600, 0.0001);
+    TS_ASSERT_DELTA(outWS->x(1)[49], 0.9600, 0.0001);
+    // Test some Y values
+    TS_ASSERT_DELTA(outWS->y(1)[10], 0.0275, 0.0001);
+    TS_ASSERT_DELTA(outWS->y(1)[19], -0.1005, 0.0001);
+    TS_ASSERT_DELTA(outWS->y(1)[49], 0.0797, 0.0001);
     // Test some E values
     TS_ASSERT_DELTA(outWS->e(1)[10], 0.0054, 0.0001);
     TS_ASSERT_DELTA(outWS->e(1)[19], 0.0059, 0.0001);

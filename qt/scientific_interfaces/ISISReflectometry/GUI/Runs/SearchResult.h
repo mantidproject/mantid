@@ -22,6 +22,10 @@ title.
 class MANTIDQT_ISISREFLECTOMETRY_DLL SearchResult {
 public:
   SearchResult(const std::string &runNumber, const std::string &title);
+  SearchResult(const std::string &runNumber, const std::string &title,
+               const std::string &groupName, const std::string &theta,
+               const std::string &error, const std::string &excludeReason,
+               const std::string &comment);
 
   const std::string &runNumber() const;
   const std::string &title() const;
@@ -29,6 +33,12 @@ public:
   const std::string &theta() const;
   bool hasError() const;
   const std::string &error() const;
+  bool exclude() const;
+  const std::string &excludeReason() const;
+  void addExcludeReason(std::string const &error);
+  bool hasComment() const;
+  const std::string &comment() const;
+  void addComment(std::string const &error);
 
 private:
   std::string m_runNumber;
@@ -36,6 +46,8 @@ private:
   std::string m_groupName;
   std::string m_theta;
   std::string m_error;
+  std::string m_excludeReason;
+  std::string m_comment;
 
   void parseRun(std::string const &runNumber);
   void parseMetadataFromTitle();

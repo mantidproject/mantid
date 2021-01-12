@@ -233,7 +233,7 @@ void IndirectFitDataPresenter::showAddWorkspaceDialog() {
 
 std::unique_ptr<IAddWorkspaceDialog>
 IndirectFitDataPresenter::getAddWorkspaceDialog(QWidget *parent) const {
-  return std::make_unique<AddWorkspaceDialog>(parent);
+  return std::make_unique<IndirectAddWorkspaceDialog>(parent);
 }
 
 void IndirectFitDataPresenter::addData() {
@@ -262,7 +262,7 @@ void IndirectFitDataPresenter::addData(IAddWorkspaceDialog const *dialog) {
 void IndirectFitDataPresenter::addDataToModel(
     IAddWorkspaceDialog const *dialog) {
   if (const auto indirectDialog =
-          dynamic_cast<AddWorkspaceDialog const *>(dialog))
+          dynamic_cast<IndirectAddWorkspaceDialog const *>(dialog))
     m_model->addWorkspace(indirectDialog->workspaceName(),
                           indirectDialog->workspaceIndices());
 }

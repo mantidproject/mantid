@@ -24,7 +24,7 @@ class QtWidgetFinder(object):
     def assert_widget_exists(self, name, expected_count=None):
         all = self.find_qt_widget_by_name(name)
         if not expected_count:
-            self.assertGreaterThan(0, len(all))
+            self.assertGreater(0, len(all))
         else:
             self.assertEqual(expected_count, len(all))
 
@@ -32,8 +32,8 @@ class QtWidgetFinder(object):
         all = self.find_qt_widget_by_name(name)
 
         self.assertEqual(0, len(all),
-                         "Widgets with name '{}' are present in the QApplication. Something has not been deleted: {}".format(
-                             name, all))
+                         "Widgets with name '{}' are present in the QApplication. "
+                         "Something has not been deleted: {}".format(name, all))
 
     def assert_widget_created(self):
         self.assertGreater(len(QApplication.topLevelWidgets()), 0)

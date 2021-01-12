@@ -12,8 +12,10 @@ from matplotlib.patches import Circle, Ellipse, Patch, PathPatch, Wedge
 from matplotlib.transforms import Affine2D, IdentityTransform
 import numpy as np
 
-# constants
+# Pad the zoom view by this extra fraction of the view width
 ZOOM_PAD_FRAC = 0.2
+# Minimum padding in case the view width is very small. This is quite arbitrary.
+MIN_PAD = 0.05
 
 
 class EllipticalShell(Patch):
@@ -210,5 +212,5 @@ class Painted(object):
         # pad by fraction of maximum width so the artist is still in the center
         xl, xr = ll[0], ur[0]
         yb, yt = ll[1], ur[1]
-        padding = max(xr - xl, yt - yb) * ZOOM_PAD_FRAC
+        padding = max(max(xr - xl, yt - yb) * ZOOM_PAD_FRAC, MIN_PAD)
         return ((xl - padding, xr + padding), (yb - padding, yt + padding))

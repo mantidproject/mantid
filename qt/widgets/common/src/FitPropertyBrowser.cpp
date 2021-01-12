@@ -447,6 +447,8 @@ void FitPropertyBrowser::initBasicLayout(QWidget *w) {
   QMenu *setupSubMenuManage = new QMenu(this);
   QAction *setupActionSave = new QAction("Save Setup", this);
   m_setupActionRemove = new QAction("Remove Setup", this);
+  QAction *setupActionClear = new QAction("Clear Setups", this);
+  setupActionClear->setObjectName("action_ClearSetups");
   QAction *setupActionCopyToClipboard = new QAction("Copy To Clipboard", this);
   setupActionCopyToClipboard->setObjectName("action_CopyToClipboard");
   QAction *setupActionLoadFromString = new QAction("Load From String", this);
@@ -455,15 +457,19 @@ void FitPropertyBrowser::initBasicLayout(QWidget *w) {
   setupManageMapper->setMapping(setupActionSave, "SaveSetup");
   setupManageMapper->setMapping(setupActionCopyToClipboard, "CopyToClipboard");
   setupManageMapper->setMapping(setupActionLoadFromString, "LoadFromString");
+  setupManageMapper->setMapping(setupActionClear, "ClearSetups");
   connect(setupActionSave, SIGNAL(triggered()), setupManageMapper, SLOT(map()));
   connect(setupActionCopyToClipboard, SIGNAL(triggered()), setupManageMapper,
           SLOT(map()));
   connect(setupActionLoadFromString, SIGNAL(triggered()), setupManageMapper,
           SLOT(map()));
+  connect(setupActionClear, SIGNAL(triggered()), setupManageMapper,
+          SLOT(map()));
   connect(setupManageMapper, SIGNAL(mapped(const QString &)), this,
           SLOT(executeSetupManageMenu(const QString &)));
   setupSubMenuManage->addAction(setupActionSave);
   setupSubMenuManage->addAction(m_setupActionRemove);
+  setupSubMenuManage->addAction(setupActionClear);
   setupSubMenuManage->addAction(setupActionCopyToClipboard);
   setupSubMenuManage->addAction(setupActionLoadFromString);
   setupActionManageSetup->setMenu(setupSubMenuManage);
@@ -667,6 +673,14 @@ void FitPropertyBrowser::executeCustomSetupRemove(const QString &name) {
   updateSetupMenus();
 }
 
+void FitPropertyBrowser::executeClearCustomSetups() {
+  QSettings settings;
+  settings.beginGroup("Mantid/FitBrowser/SavedFunctions");
+
+  settings.clear();
+  updateSetupMenus();
+}
+
 /**
  * Recursively updates structure tooltips for all the functions
  */
@@ -705,6 +719,8 @@ void FitPropertyBrowser::executeSetupMenu(const QString &item) {
 void FitPropertyBrowser::executeSetupManageMenu(const QString &item) {
   if (item == "SaveSetup")
     saveFunction();
+  if (item == "ClearSetups")
+    executeClearCustomSetups();
   if (item == "CopyToClipboard")
     copy();
   if (item == "LoadFromString")
@@ -1646,8 +1662,7 @@ void FitPropertyBrowser::doFit(int maxIterations) {
     }
     m_fitActionUndoFit->setEnabled(true);
 
-    auto function = getFittingFunction();
-    const std::string funStr = function->asString();
+    const std::string funStr = getFunctionString();
 
     Mantid::API::IAlgorithm_sptr alg =
         Mantid::API::AlgorithmManager::Instance().create("Fit");
@@ -1758,6 +1773,11 @@ void FitPropertyBrowser::finishHandle(const Mantid::API::IAlgorithm *alg) {
   if (m_compositeFunction->name() == "MultiBG") {
     emit multifitFinished();
   }
+}
+
+std::string FitPropertyBrowser::getFunctionString() const {
+  auto function = getFittingFunction();
+  return function->asString();
 }
 
 /// Display the status string returned from Fit
@@ -3581,6 +3601,23 @@ void FitPropertyBrowser::setPeakFwhmOf(const QString &prefix, double value) {
 double FitPropertyBrowser::getPeakFwhmOf(const QString &prefix) {
   auto handler = getPeakHandler(prefix);
   return handler->fwhm();
+}
+
+std::string FitPropertyBrowser::getWidthParameterNameOf(const QString &prefix) {
+  auto handler = getPeakHandler(prefix);
+  return handler->getWidthParameterName();
+}
+
+std::string
+FitPropertyBrowser::getCentreParameterNameOf(const QString &prefix) {
+  auto handler = getPeakHandler(prefix);
+  return handler->getCentreParameterName();
+}
+
+bool FitPropertyBrowser::isParameterExplicitlySetOf(const QString &prefix,
+                                                    const std::string &param) {
+  auto handler = getPeakHandler(prefix);
+  return handler->isParameterExplicitlySet(param);
 }
 
 QStringList FitPropertyBrowser::getPeakPrefixes() const {

@@ -100,7 +100,7 @@ def mask_cylinder(mask_info, workspace):
     return workspace
 
 
-def mask_with_mask_files(mask_info, workspace):
+def mask_with_mask_files(mask_info, inst_info, workspace):
     """
     Apply mask files to the workspace
 
@@ -118,7 +118,7 @@ def mask_with_mask_files(mask_info, workspace):
     """
     mask_files = mask_info.mask_files
     if mask_files:
-        idf_path = mask_info.idf_path
+        idf_path = inst_info.idf_path
 
         # Mask loader
         load_name = "LoadMask"
@@ -127,10 +127,17 @@ def mask_with_mask_files(mask_info, workspace):
         load_alg = create_unmanaged_algorithm(load_name, **load_options)
         mask_alg = create_unmanaged_algorithm("MaskDetectors")
 
-        # Masker
-        for mask_file in mask_files:
-            mask_file = find_full_file_path(mask_file)
+        file_paths = [find_full_file_path(i) for i in mask_files]
+        # Find full file path returns an empty string, so we need to remake it
+        missing_file_paths = [mask_files[i] for i, path in enumerate(file_paths) if not path]
 
+        if missing_file_paths:
+            err_str = "The following mask files are missing:"
+            err_str += "\n".join(missing_file_paths)
+            raise FileNotFoundError(err_str)
+
+        # Masker
+        for mask_file in file_paths:
             # Get the detector ids which need to be masked
             load_alg.setProperty("InputFile", mask_file)
             load_alg.execute()
@@ -361,7 +368,7 @@ class Masker(metaclass=ABCMeta):
         super(Masker, self).__init__()
 
     @abstractmethod
-    def mask_workspace(self, mask_info, workspace_to_mask, detector_type):
+    def mask_workspace(self, mask_info, inst_info, workspace_to_mask, detector_type):
         pass
 
 
@@ -369,7 +376,7 @@ class NullMasker(Masker):
     def __init__(self):
         super(NullMasker, self).__init__()
 
-    def mask_workspace(self, mask_info, workspace_to_mask, detector_type):
+    def mask_workspace(self, mask_info, inst_info, workspace_to_mask, detector_type):
         return workspace_to_mask
 
 
@@ -378,7 +385,7 @@ class MaskerISIS(Masker):
         super(MaskerISIS, self).__init__()
         self._spectra_block = spectra_block
 
-    def mask_workspace(self, mask_info, workspace_to_mask, detector_type):
+    def mask_workspace(self, mask_info, inst_info, workspace_to_mask, detector_type):
         """
         Performs the different types of masks that are currently available for ISIS reductions.
 
@@ -395,7 +402,7 @@ class MaskerISIS(Masker):
         workspace_to_mask = mask_cylinder(mask_info, workspace_to_mask)
 
         # Apply the xml mask files
-        workspace_to_mask = mask_with_mask_files(mask_info, workspace_to_mask)
+        workspace_to_mask = mask_with_mask_files(mask_info, inst_info, workspace_to_mask)
 
         # Mask spectrum list
         workspace_to_mask = mask_spectra(mask_info, workspace_to_mask, self._spectra_block, detector_type)

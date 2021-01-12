@@ -9,6 +9,7 @@
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidAPI/LiveListenerFactory.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -16,6 +17,13 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidQtWidgets/Common/MantidDesktopServices.h"
+#include <QtGlobal>
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+#include "MantidQtWidgets/Common/Python/Object.h"
+#include "MantidQtWidgets/MplCpp/Figure.h"
+#include "MantidQtWidgets/MplCpp/MantidAxes.h"
+#include "boost/python.hpp"
+#endif
 #include <QFileInfo>
 #include <QUrl>
 
@@ -83,8 +91,16 @@ void StepScan::initLayout() {
 
   connect(m_uiForm.helpButton, SIGNAL(clicked()), SLOT(helpClicked()));
   connect(m_uiForm.startButton, SIGNAL(clicked()), SLOT(runStepScanAlg()));
-  connect(m_uiForm.closeButton, SIGNAL(clicked()), this->parent(),
-          SLOT(close()));
+  if (this->parent()) {
+    // note connection to the parent window, otherwise an empty frame window
+    // may remain open and visible after this close.
+    connect(m_uiForm.closeButton, SIGNAL(released()), this->parent(),
+            SLOT(close()));
+  } else {
+    // In MantidWorkbench this->parent() returns NULL. Connecting to
+    // this->close() appears to work.
+    connect(m_uiForm.closeButton, SIGNAL(released()), this, SLOT(close()));
+  }
 }
 
 void StepScan::cleanupWorkspaces() {
@@ -355,12 +371,24 @@ void StepScan::setupOptionControls() {
 
 void StepScan::launchInstrumentWindow() {
   // Gotta do this in python
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   std::string pyCode = "instrument_view = getInstrumentView('" + m_inputWSName +
                        "',2)\n"
                        "instrument_view.show()";
 
   runPythonCode(QString::fromStdString(pyCode));
 
+#else
+  std::string pyCode =
+      "from mantidqt.widgets.instrumentview.api import get_instrumentview\n"
+      "instrument_view = get_instrumentview('" +
+      m_inputWSName +
+      "')\n"
+      "instrument_view.select_tab(2)\n"
+      "instrument_view.show_view()";
+  Mantid::PythonInterface::GlobalInterpreterLock lock;
+  PyRun_SimpleString(pyCode.c_str());
+#endif
   // Attach the observers so that if a mask workspace is generated over in the
   // instrument view,
   // it is automatically selected by the combobox over here
@@ -652,6 +680,39 @@ void StepScan::generateCurve(const QString &var) {
   plotCurve();
 }
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+namespace {
+auto get_fig_ax(boost::optional<int> fignum) {
+  std::string pyCode =
+      "import matplotlib.pyplot as plt\n"
+      "from mantid import plots\n"
+      "from workbench.plotting.globalfiguremanager import GlobalFigureManager\n"
+      "if GlobalFigureManager.has_fignum(fig_num):\n"
+      "    fig = plt.figure(fig_num)\n"
+      "    ax = plt.gca()\n"
+      "    ax.clear()\n"
+      "else:\n"
+      "    fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})";
+  Mantid::PythonInterface::GlobalInterpreterLock lock;
+  using namespace MantidQt::Widgets::Common;
+  using namespace MantidQt::Widgets::MplCpp;
+  Python::Object main_module = boost::python::import("__main__");
+  Python::Object main_namespace = main_module.attr("__dict__");
+  if (fignum) {
+    main_namespace["fig_num"] = fignum.value();
+  } else {
+    main_namespace["fig_num"] = Python::Object();
+  }
+  auto ignored = boost::python::exec(pyCode.c_str(), main_namespace);
+  auto fig =
+      Figure(boost::python::extract<Python::Object>(main_namespace["fig"]));
+  auto ax =
+      MantidAxes(boost::python::extract<Python::Object>(main_namespace["ax"]));
+  return std::make_tuple(fig, ax);
+}
+} // namespace
+#endif
+
 void StepScan::plotCurve() {
   // Get the name of the dataset to produce the plot title
   std::string title = m_inputWSName.substr(2);
@@ -673,6 +734,7 @@ void StepScan::plotCurve() {
   else
     yAxisTitle += " / " + normalization;
 
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   // Has to be done via python
   std::string pyCode = "g = graph('" + title +
                        "')\n"
@@ -695,6 +757,24 @@ void StepScan::plotCurve() {
                        yAxisTitle + "')";
 
   runPythonCode(QString::fromStdString(pyCode));
+#else
+  auto [fig, ax] = get_fig_ax(m_fignum);
+  m_fignum = fig.number();
+  auto ws =
+      AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(
+          m_plotWSName);
+  title += " - Step Scan";
+  fig.setWindowTitle(title.c_str());
+  QHash<QString, QVariant> hash;
+  hash.insert("linestyle", "");
+  hash.insert("marker", ".");
+  auto line = ax.plot(ws, 0, "black", "", hash);
+  ax.setXLabel(xAxisTitle.c_str());
+  ax.setYLabel(yAxisTitle.c_str());
+  fig.show();
+  this->activateWindow();
+  this->raise();
+#endif
 }
 
 void StepScan::handleAddEvent(Mantid::API::WorkspaceAddNotification_ptr pNf) {

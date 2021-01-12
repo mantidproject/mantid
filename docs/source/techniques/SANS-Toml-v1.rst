@@ -15,7 +15,7 @@ Layout
 ------
 
 This section is designed like a reference that users can paste straight into
-existing TOML files. 
+existing TOML files.
 
 *Note: TOML files use SI units rather than a mix of unit prefixes. For example,
 you will need to convert any measurements in millimetres to meters.*
@@ -26,18 +26,18 @@ the existing user file format: ``[`` ``]``.
 Examples are given in a way that they can be merged together where headers
 match, for example these three examples:
 
-..  code-block:: guess 
+..  code-block:: none
 
     [binning]
       wavelength = {start = 2.0, step=0.125, stop=14.0, type = "Lin"}
 
-..  code-block:: guess 
+..  code-block:: none
 
     [binning]
       [binning.1d_reduction]
         binning = "0.02,0.05,0.5,-0.1,10.0"
 
-..  code-block:: guess 
+..  code-block:: none
 
     [binning]
       [binning.2d_reduction]
@@ -47,14 +47,14 @@ match, for example these three examples:
 
 Are combined into the following when writing the TOML file:
 
-..  code-block:: guess 
+..  code-block:: none
 
     [binning]
       wavelength = {start = 2.0, step=0.125, stop=14.0, type = "Lin"}
-      
+
       [binning.1d_reduction]
         binning = "0.02,0.05,0.5,-0.1,10.0"
-    
+
       [binning.2d_reduction]
         step = 0.002
         stop = 0.1
@@ -80,7 +80,7 @@ Unsupported - Monitor ranges must be set directly
 BACK/M[n]/TIMES x y
 -------------------
 
-..  code-block:: guess 
+..  code-block:: none
 
     [normalization]
       [normalisation.monitor.Mn]
@@ -89,7 +89,7 @@ BACK/M[n]/TIMES x y
 
 *OR*
 
-..  code-block:: guess 
+..  code-block:: none
 
     [transmission]
       [transmission.monitor.Mn]
@@ -106,17 +106,24 @@ BACK/M[n]/TIMES x y
 
 **Existing Replacement**
 
-..  code-block:: guess 
+..  code-block:: none
 
     [normalization]
       [normalisation.monitor.M1]
         spectrum_number = 1
         background = [30000.0, 40000.0]
 
+COMPATIBILITY ON
+----------------
+
+**Replacement**
+Unsupported
+
+
 DET/CORR [FRONT][REAR] [X][Y][Z][ROT] a
 ---------------------------------------
 
-..  code-block:: guess 
+..  code-block:: none
 
     [detector]
       [detector.calibration.position]
@@ -140,7 +147,7 @@ DET/CORR [FRONT][REAR] [X][Y][Z][ROT] a
 
 **Existing Replacement**
 
-..  code-block:: guess 
+..  code-block:: none
 
     [detector]
       [detector.calibration.position]
@@ -151,8 +158,195 @@ DET/CORR [FRONT][REAR] [X][Y][Z][ROT] a
         rear_x = 0.0
         rear_z = 0.058
 
+DET/[LAB][HAB][MERGED][ALL]
+---------------------------
 
-FIT/CENTRE x y 
+..  code-block:: none
+
+    [detector.configuration]
+      selected_detector = "LAB"
+
+**Existing Example**
+
+..  code-block:: none
+
+    DET/HAB
+
+
+**Existing Replacement**
+
+..  code-block:: none
+
+    [detector.configuration]
+      selected_detector = "HAB"  # Or "LAB", "All" (with lowercase l's), "Merged" ...etc.
+
+DET/RESCALE[/FIT] x y
+---------------------
+
+..  code-block:: none
+
+  [reduction]
+    [reduction.merged.rescale]
+        min = x
+        max = y
+        use_fit = true  # or false
+
+**Existing Example**
+
+..  code-block:: none
+
+    DET/RESCALE/FIT 0.14 0.24
+
+
+**Existing Replacement**
+
+..  code-block:: none
+
+  [reduction]
+    [reduction.merged.rescale]
+      min = 0.14
+      max = 0.24
+      use_fit = true
+
+DET/SCALE x
+-----------
+
+..  code-block:: none
+
+  [reduction]
+    [reduction.merged.rescale]
+        factor = x
+        use_fit = false  # Must be false for single value
+
+**Existing Example**
+
+..  code-block:: none
+
+    DET/SCALE 0.123
+
+
+**Existing Replacement**
+
+..  code-block:: none
+
+  [reduction]
+    [reduction.merged.rescale]
+        factor = 0.123
+        use_fit = false
+
+DET/SCALE x y /FIT
+------------------
+
+..  code-block:: none
+
+  [reduction]
+    [reduction.merged.rescale]
+        min = x
+        max = y
+        use_fit = true  # Must be true for fitting
+
+**Existing Example**
+
+..  code-block:: none
+
+    DET/SCALE 0.1 0.2 /FIT
+
+
+**Existing Replacement**
+
+..  code-block:: none
+
+  [reduction]
+    [reduction.merged.rescale]
+        min = 0.1
+        max = 0.2
+        use_fit = true  # Must be true for fitting
+
+
+DET/SHIFT x
+-----------
+
+..  code-block:: none
+
+  [reduction]
+    [reduction.merged.shift]
+        distance = x
+        use_fit = false  # Must be false for single value
+
+**Existing Example**
+
+..  code-block:: none
+
+    DET/SHIFT 0.123
+
+
+**Existing Replacement**
+
+..  code-block:: none
+
+  [reduction]
+    [reduction.merged.shift]
+        distance = 0.123
+        use_fit = false
+
+DET/SHIFT x y /FIT
+------------------
+
+..  code-block:: none
+
+  [reduction]
+    [reduction.merged.shift]
+        min = x
+        max = y
+        use_fit = true  # Must be true for fitting
+
+**Existing Example**
+
+..  code-block:: none
+
+    DET/SHIFT 0.1 0.2 /FIT
+
+**Existing Replacement**
+
+..  code-block:: none
+
+  [reduction]
+    [reduction.merged.shift]
+        min = 0.1
+        max = 0.2
+        use_fit = true
+
+
+DET/OVERLAP x y
+---------------
+
+..  code-block:: none
+
+  [reduction]
+    [reduction.merged.merge_range]
+      min = x
+      max = y
+      use_fit = true
+
+**Existing Example**
+
+..  code-block:: none
+
+    DET/OVERLAP 0.14 0.24
+
+
+**Existing Replacement**
+
+..  code-block:: none
+
+  [merged]
+    [reduction.merged.merge_range]
+        min = 0.14
+        max = 0.24
+        use_fit = true
+
+
+FIT/CENTRE x y
 ---------------
 
 **Replacement**
@@ -164,7 +358,7 @@ FIT/MID
 **Replacement**
 Unsupported
 
-FIT/MONITOR x y 
+FIT/MONITOR x y
 ---------------
 
 *Note:* This was only enabled for LOQ in source code, so
@@ -173,7 +367,7 @@ as it will produce different results
 
 **Replacement**
 
-..  code-block:: guess 
+..  code-block:: none
 
   [mask]
     prompt_peak = {start = x, stop = y}
@@ -186,7 +380,7 @@ as it will produce different results
 
 **Existing Replacement**
 
-..  code-block:: guess 
+..  code-block:: none
 
   [mask]
     prompt_peak = {start = 19900.0, stop = 20500.0}
@@ -197,14 +391,14 @@ FIT/TRANS/LIN x y
 
 **Replacement**
 
-..  code-block:: guess 
+..  code-block:: none
 
     [transmission]
       [transmission.fitting]
         enabled = true
         parameters = {lambda_min = x, lambda_max = x}
         # Can be: Linear / Logarithmic / Polynomial
-        function = "Linear"  
+        function = "Linear"
         # Only used when set to Polynomial
         polynomial_order = 2
 
@@ -216,7 +410,7 @@ FIT/TRANS/LIN x y
 
 **Existing Replacement**
 
-..  code-block:: guess 
+..  code-block:: none
 
     [transmission]
       [transmission.fitting]
@@ -224,14 +418,62 @@ FIT/TRANS/LIN x y
         parameters = {lambda_min = 3.0, lambda_max = 11.0}
         function = "Linear"
 
+GRAVITY/ON
+----------
+
+**Replacement**
+
+..  code-block:: none
+
+    [gravity]
+      enabled = true
+
+**Existing Example**
+
+..  code-block:: none
+
+    GRAVITY/ON
+
+**Existing Replacement**
+
+..  code-block:: none
+
+    [gravity]
+      enabled = true
+
+GRAVITY/LEXTRA x
+----------------
+
+**Replacement**
+
+..  code-block:: none
+
+    [instrument.configuration]
+      gravity_extra_length = x
+
+**Existing Example**
+
+..  code-block:: none
+
+    GRAVITY/LEXTRA 2.0
+
+**Existing Replacement**
+
+..  code-block:: none
+
+    [instrument.configuration]
+      gravity_extra_length = 2.0
+
+
+
 L/EVENTSTIME str
 ----------------
 
 **Replacement**
 
-..  code-block:: guess 
+..  code-block:: none
 
-  [reduction.events] 
+  [reduction.events]
     binning = "str"
 
 **Existing Example**
@@ -242,10 +484,10 @@ L/EVENTSTIME str
 
 **Existing Replacement**
 
-..  code-block:: guess 
+..  code-block:: none
 
   [reduction.events]
-    # A negative step indicates Log
+    # A negative step (middle val) indicates Log
     binning = "7000.0,500.0,60000.0"
 
 
@@ -255,7 +497,7 @@ L/PHI [/NOMIRROR] x y
 
 **Replacement**
 
-..  code-block:: guess 
+..  code-block:: none
 
     [mask]
       [mask.phi]
@@ -271,7 +513,7 @@ L/PHI [/NOMIRROR] x y
 
 **Existing Replacement**
 
-..  code-block:: guess 
+..  code-block:: none
 
     [mask]
       [mask.phi]
@@ -285,7 +527,7 @@ L/Q rebin_string
 
 **Replacement**
 
-..  code-block:: guess 
+..  code-block:: none
 
     [binning.1d_reduction]
         # Negative indicates log
@@ -299,7 +541,7 @@ L/Q rebin_string
 
 **Existing Replacement**
 
-..  code-block:: guess 
+..  code-block:: none
 
     [binning]
       [binning.1d_reduction]
@@ -311,7 +553,7 @@ L/Q/RCUT x
 
 **Replacement**
 
-..  code-block:: guess 
+..  code-block:: none
 
     [binning.1d_reduction]
         radius_cut = x
@@ -324,7 +566,7 @@ L/Q/RCUT x
 
 **Existing Replacement**
 
-..  code-block:: guess 
+..  code-block:: none
 
     [binning]
       [binning.1d_reduction]
@@ -336,7 +578,7 @@ L/Q/WCUT x
 
 **Replacement**
 
-..  code-block:: guess 
+..  code-block:: none
 
     [binning.1d_reduction]
         wavelength_cut = x
@@ -349,7 +591,7 @@ L/Q/WCUT x
 
 **Existing Replacement**
 
-..  code-block:: guess 
+..  code-block:: none
 
     [binning]
       [binning.1d_reduction]
@@ -360,7 +602,7 @@ L/QXY start stop step [/LIN]
 
 **Replacement**
 
-..  code-block:: guess 
+..  code-block:: none
 
     [binning]
       [binning.2d_reduction]
@@ -378,7 +620,7 @@ L/QXY start stop step [/LIN]
 
 **Existing Replacement**
 
-..  code-block:: guess 
+..  code-block:: none
 
     [binning]
       [binning.2d_reduction]
@@ -391,7 +633,7 @@ L/R x y [step]
 
 Note step was ignored previously.
 
-..  code-block:: guess 
+..  code-block:: none
 
     [detector]
       radius_limit = {min = 0.038, max = -0.001}
@@ -404,7 +646,7 @@ Note step was ignored previously.
 
 **Existing Replacement**
 
-..  code-block:: guess 
+..  code-block:: none
 
     [detector]
       radius_limit = {min = 0.038, max = -0.001}
@@ -420,9 +662,12 @@ L/WAV min max step [/LIN]
 
 **Replacement**
 
-..  code-block:: guess 
-  
+..  code-block:: none
+
     wavelength = {start = min, step = step, stop = max, type = "Lin"}
+    # Alternative for ranges
+    wavelength = {binning = "min,max", step = step, type = "RangeLin"}
+
 
 **Existing Example**
 
@@ -432,19 +677,21 @@ L/WAV min max step [/LIN]
 
 **Existing Replacement**
 
-..  code-block:: guess 
+..  code-block:: none
 
     [binning]
-      #type can only be "Lin", "Log"
+      # Only for "Lin", "Log"
       wavelength = {start = 2.0, step=0.125, stop=14.0, type = "Lin"}
+      # Only for "RangeLin" or "RangeLog
+      wavelength = {binning="2.0-7.0, 7.0-14.0", type = "RangeLin"}
 
 MASKFILE str
 ------------
 
 **Replacement**
 
-..  code-block:: guess 
-  
+..  code-block:: none
+
     [mask]
     mask_files = ["a", "b", "c"]
 
@@ -456,7 +703,7 @@ MASKFILE str
 
 **Existing Replacement**
 
-..  code-block:: guess 
+..  code-block:: none
 
     [mask]
     mask_files = ["a.xml", "b.xml", "c.xml"]
@@ -467,8 +714,8 @@ MASK h
 
 **Replacement**
 
-..  code-block:: guess 
-  
+..  code-block:: none
+
     [mask]
       [mask.spatial.rear]  # Or front
         detector_rows = [h1, h2, h3, ...hn]
@@ -482,7 +729,7 @@ MASK h
 
 **Existing Replacement**
 
-..  code-block:: guess 
+..  code-block:: none
 
     [mask]
       [mask.spatial.rear]
@@ -494,8 +741,8 @@ MASK hx>hy
 
 **Replacement**
 
-..  code-block:: guess 
-  
+..  code-block:: none
+
     [mask]
       [mask.spatial.rear]  # Or front
         detector_row_ranges = [[x, y]]
@@ -508,7 +755,7 @@ MASK hx>hy
 
 **Existing Replacement**
 
-..  code-block:: guess 
+..  code-block:: none
 
     [mask]
       [mask.spatial.rear]
@@ -522,8 +769,8 @@ MASK v
 
 **Replacement**
 
-..  code-block:: guess 
-  
+..  code-block:: none
+
     [mask]
       [mask.spatial.rear]  # Or front
         detector_rows = [v1, v2, v3, ...vn]
@@ -537,7 +784,7 @@ MASK v
 
 **Existing Replacement**
 
-..  code-block:: guess 
+..  code-block:: none
 
     [mask]
       [mask.spatial.rear]
@@ -549,8 +796,8 @@ MASK vx>vy
 
 **Replacement**
 
-..  code-block:: guess 
-  
+..  code-block:: none
+
     [mask]
       [mask.spatial.rear]  # Or front
         detector_column_ranges = [[x, y]]
@@ -563,7 +810,7 @@ MASK vx>vy
 
 **Existing Replacement**
 
-..  code-block:: guess 
+..  code-block:: none
 
     [mask]
       [mask.spatial.rear]
@@ -576,8 +823,8 @@ MASK Sn
 
 **Replacement**
 
-..  code-block:: guess 
-  
+..  code-block:: none
+
     [mask]
       mask_pixels = [n1, n2, ...n]
 
@@ -590,7 +837,7 @@ MASK Sn
 
 **Existing Replacement**
 
-..  code-block:: guess 
+..  code-block:: none
 
     [mask]
       mask_pixels = [123, 456]
@@ -600,8 +847,8 @@ MASK/T x y
 
 **Replacement**
 
-..  code-block:: guess 
-  
+..  code-block:: none
+
     [mask]
       [mask.time]
         tof = [
@@ -620,7 +867,7 @@ MASK/T x y
 
 **Existing Replacement**
 
-..  code-block:: guess 
+..  code-block:: none
 
     [mask]
       [mask.time]
@@ -641,7 +888,7 @@ MASK/LINE x y
 
 **Replacement**
 
-..  code-block:: guess 
+..  code-block:: none
 
     beamstop_shadow = {width = x, angle = y}
 
@@ -653,7 +900,7 @@ MASK/LINE x y
 
 **Existing Replacement**
 
-..  code-block:: guess 
+..  code-block:: none
 
     [mask]
       beamstop_shadow = {width = 0.03, angle = 170.0}
@@ -663,13 +910,13 @@ MON/DIRECT="filename"
 
 **Replacement**
 
-..  code-block:: guess 
+..  code-block:: none
 
     [detector]
       [detector.calibration.direct]
         rear_file = "filename"
         front_file = "filename"
-  
+
 
 **Existing Example:**
 
@@ -679,7 +926,7 @@ MON/DIRECT="filename"
 
 **Existing Replacement**
 
-..  code-block:: guess 
+..  code-block:: none
 
     [detector]
       [detector.calibration.direct]
@@ -691,12 +938,12 @@ MON/FLAT=str
 
 **Replacement**
 
-..  code-block:: guess 
+..  code-block:: none
 
     [detector]
       [detector.calibration.flat]
         rear_file = "str"
-  
+
 
 **Existing Example:**
 
@@ -706,7 +953,7 @@ MON/FLAT=str
 
 **Existing Replacement**
 
-..  code-block:: guess 
+..  code-block:: none
 
     [detector]
       [detector.calibration.flat]
@@ -722,7 +969,7 @@ Unsupported
 MON [/TRANS] /SPECTRUM=n [/INTERPOLATE]
 ---------------------------------------
 
-..  code-block:: guess 
+..  code-block:: none
 
   [normalisation]
     #Normalisation monitor
@@ -743,7 +990,7 @@ MON [/TRANS] /SPECTRUM=n [/INTERPOLATE]
 
 **Existing Replacement**
 
-..  code-block:: guess 
+..  code-block:: none
 
   [normalisation]
     #Normalisation monitor
@@ -755,11 +1002,57 @@ MON [/TRANS] /SPECTRUM=n [/INTERPOLATE]
     [normalisation.monitor.M1]
       spectrum_number = 1
 
+QRESOL[/ON][/OFF]
+-----------------
+
+**Replacement**
+
+..  code-block:: none
+
+  [q_resolution]
+    enabled = true  # Or false
+
+**Existing Example:**
+
+..  code-block:: none
+
+    QRESOL/ON
+
+**Existing Replacement**
+
+..  code-block:: none
+
+  [q_resolution]
+    enabled = true  # Or false
+
+SAMPLE/OFFSET x
+---------------
+
+**Replacement**
+
+..  code-block:: none
+
+  [instrument.configuration]
+    sample_offset = n
+
+**Existing Example:**
+
+..  code-block:: none
+
+    SAMPLE/OFFSET -60
+
+**Existing Replacement**
+
+..  code-block:: none
+
+  [instrument.configuration]
+    sample_offset = -0.06
+
 
 set centre a b c d
 ------------------
 
-..  code-block:: guess 
+..  code-block:: none
 
     [detector]
       [detector.configuration]
@@ -774,7 +1067,7 @@ set centre a b c d
 
 **Existing Replacement**
 
-..  code-block:: guess 
+..  code-block:: none
 
     [detector]
       [detector.configuration]
@@ -787,7 +1080,7 @@ set centre a b c d
 set scales a b c d
 ------------------
 
-..  code-block:: guess 
+..  code-block:: none
 
     [detector]
       [detector.configuration]
@@ -802,7 +1095,7 @@ set scales a b c d
 
 **Existing Replacement**
 
-..  code-block:: guess 
+..  code-block:: none
 
     [detector]
       [detector.configuration]
@@ -814,12 +1107,12 @@ TRANS/TRANSSPEC=n
 
 **Replacement**
 
-..  code-block:: guess 
+..  code-block:: none
 
     [transmission]
       # Where Mn is arbitrary but must match the section label
       selected_monitor = "Mn"
-    
+
       [transmission.monitor.Mn]
         spectrum_number = n
 
@@ -831,11 +1124,11 @@ TRANS/TRANSSPEC=n
 
 **Existing Replacement**
 
-..  code-block:: guess 
+..  code-block:: none
 
     [transmission]
       selected_monitor = "M3"
-    
+
       [transmission.monitor.M3]
         spectrum_number = 3
 
@@ -844,7 +1137,7 @@ TUBECALIBFILE=str
 
 **Replacement**
 
-..  code-block:: guess 
+..  code-block:: none
 
   [detector]
 
@@ -859,34 +1152,11 @@ TUBECALIBFILE=str
 
 **Existing Replacement**
 
-..  code-block:: guess 
+..  code-block:: none
 
   [detector]
 
   [detector.calibration.tube]
     file = "Tube.nxs"
-
-QRESOL[/ON][/OFF]
------------------
-
-**Replacement**
-
-..  code-block:: guess 
-
-  [q_resolution]
-    enabled = true  # Or false
-
-**Existing Example:**
-
-..  code-block:: none
-
-    QRESOL/ON
-
-**Existing Replacement**
-
-..  code-block:: guess 
-
-  [q_resolution]
-    enabled = true  # Or false
 
 .. categories:: Techniques

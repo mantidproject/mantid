@@ -22,6 +22,8 @@ namespace {
 inline bool isEmpty(const boost::optional<double> &value) {
   return !value || value == Mantid::EMPTY_DBL();
 }
+constexpr auto LARGE_LAMBDA = 100; // Lambda likely to be beyond max lambda in
+                                   // any measured spectra. In Angstroms
 } // namespace
 
 /**
@@ -107,7 +109,8 @@ MaterialBuilder &MaterialBuilder::setMassNumber(int massNumber) {
  * @return A reference to the this object to allow chaining
  */
 MaterialBuilder &MaterialBuilder::setNumberDensity(double rho) {
-  m_numberDensity = rho;
+  if (rho != Mantid::EMPTY_DBL())
+    m_numberDensity = rho;
   return *this;
 }
 
@@ -122,11 +125,25 @@ MaterialBuilder &MaterialBuilder::setNumberDensityUnit(NumberDensityUnit unit) {
 }
 
 /**
+ * Set the effective number density of the sample in atoms or formula units /
+ * Angstrom^3
+ * @param rho_eff effective density of the sample in atoms or formula units /
+ * Angstrom^3
+ * @return A reference to the this object to allow chaining
+ */
+MaterialBuilder &MaterialBuilder::setEffectiveNumberDensity(double rho_eff) {
+  if (rho_eff != Mantid::EMPTY_DBL())
+    m_numberDensityEff = rho_eff;
+  return *this;
+}
+
+/**
  * Set the packing fraction of the material (default is 1). This is used to
  * infer the effective number density
  */
 MaterialBuilder &MaterialBuilder::setPackingFraction(double fraction) {
-  m_packingFraction = fraction;
+  if (fraction != Mantid::EMPTY_DBL())
+    m_packingFraction = fraction;
   return *this;
 }
 
@@ -136,10 +153,6 @@ MaterialBuilder &MaterialBuilder::setPackingFraction(double fraction) {
  * @return A reference to the this object to allow chaining
  */
 MaterialBuilder &MaterialBuilder::setZParameter(double zparam) {
-  if (m_massDensity) {
-    throw std::runtime_error("MaterialBuilder::setZParameter() - Mass density "
-                             "already set, cannot use Z parameter as well.");
-  }
   m_zParam = zparam;
   return *this;
 }
@@ -150,11 +163,6 @@ MaterialBuilder &MaterialBuilder::setZParameter(double zparam) {
  * @return A reference to the this object to allow chaining
  */
 MaterialBuilder &MaterialBuilder::setUnitCellVolume(double cellVolume) {
-  if (m_massDensity) {
-    throw std::runtime_error(
-        "MaterialBuilder::setUnitCellVolume() - Mass density "
-        "already set, cannot use unit cell volume as well.");
-  }
   m_cellVol = cellVolume;
   return *this;
 }
@@ -165,15 +173,6 @@ MaterialBuilder &MaterialBuilder::setUnitCellVolume(double cellVolume) {
  * @return A reference to the this object to allow chaining
  */
 MaterialBuilder &MaterialBuilder::setMassDensity(double massDensity) {
-  if (m_zParam) {
-    throw std::runtime_error("MaterialBuilder::setMassDensity() - Z parameter "
-                             "already set, cannot use mass density as well.");
-  }
-  if (m_cellVol) {
-    throw std::runtime_error(
-        "MaterialBuilder::setMassDensity() - Unit cell "
-        "volume already set, cannot use mass density as well.");
-  }
   m_massDensity = massDensity;
   return *this;
 }
@@ -233,6 +232,19 @@ MaterialBuilder::setAttenuationProfileFilename(std::string filename) {
 }
 
 /**
+ * Set a value for the attenuation profile filename
+ * @param filename Name of the file containing the attenuation profile
+ * @return A reference to the this object to allow chaining
+ */
+MaterialBuilder &
+MaterialBuilder::setXRayAttenuationProfileFilename(std::string filename) {
+  if (!filename.empty()) {
+    m_xRayAttenuationProfileFileName = filename;
+  }
+  return *this;
+}
+
+/**
  * Set a value for the attenuation profile search path
  * @param path Path to search
  */
@@ -274,8 +286,16 @@ Material MaterialBuilder::build() const {
   if (m_attenuationProfileFileName) {
     AttenuationProfile materialAttenuation(m_attenuationProfileFileName.get(),
                                            m_attenuationFileSearchPath,
-                                           material.get());
+                                           material.get(), LARGE_LAMBDA);
     material->setAttenuationProfile(materialAttenuation);
+  }
+  if (m_xRayAttenuationProfileFileName) {
+    // don't supply a material so that extrapolation using the neutron tabulated
+    // attenuation data is turned off
+    AttenuationProfile materialAttenuation(
+        m_xRayAttenuationProfileFileName.get(), m_attenuationFileSearchPath,
+        nullptr, -1);
+    material->setXRayAttenuationProfile(materialAttenuation);
   }
   return *material;
 }
@@ -309,6 +329,10 @@ MaterialBuilder::density_packing MaterialBuilder::getOrCalculateRhoAndPacking(
   // get the packing fraction
   if (m_packingFraction)
     result.packing_fraction = m_packingFraction.get();
+
+  // if effective density has been specified
+  if (m_numberDensityEff)
+    result.effective_number_density = m_numberDensityEff.get();
 
   // total number of atoms is used in both density calculations
   const double totalNumAtoms =

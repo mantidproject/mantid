@@ -113,7 +113,7 @@ void SaveHKL::exec() {
   if (peaksW != m_ws)
     peaksW = m_ws->clone();
   auto inst = peaksW->getInstrument();
-  std::vector<Peak> peaks = peaksW->getPeaks();
+  std::vector<Peak> &peaks = peaksW->getPeaks();
   double scaleFactor = getProperty("ScalePeaks");
   double dMin = getProperty("MinDSpacing");
   double wlMin = getProperty("MinWavelength");
@@ -124,10 +124,10 @@ void SaveHKL::exec() {
   int widthBorder = getProperty("WidthBorder");
   int decimalHKL = getProperty("HKLDecimalPlaces");
   bool cosines = getProperty("DirectionCosines");
-  Kernel::DblMatrix UB(3, 3);
+  OrientedLattice ol;
   if (cosines) {
     if (peaksW->sample().hasOrientedLattice()) {
-      UB = peaksW->sample().getOrientedLattice().getUB();
+      ol = peaksW->sample().getOrientedLattice();
     } else {
       // Find OrientedLattice
       std::string fileUB = getProperty("UBFilename");
@@ -140,6 +140,7 @@ void SaveHKL::exec() {
       double val;
 
       // Read the ISAW UB matrix
+      Kernel::DblMatrix UB;
       for (size_t row = 0; row < 3; row++) {
         for (size_t col = 0; col < 3; col++) {
           s = getWord(in, true);
@@ -151,6 +152,7 @@ void SaveHKL::exec() {
         }
         readToEndOfLine(in, true);
       }
+      ol.setUB(UB);
     }
   }
 
@@ -165,27 +167,7 @@ void SaveHKL::exec() {
     qSign = 1.0;
 
   std::fstream out;
-  bool append = getProperty("AppendFile");
-  if (append && Poco::File(filename.c_str()).exists()) {
-    IAlgorithm_sptr load_alg = createChildAlgorithm("LoadHKL");
-    load_alg->setPropertyValue("Filename", filename);
-    load_alg->setProperty("OutputWorkspace", "peaks");
-    load_alg->executeAsChildAlg();
-    // Get back the result
-    DataObjects::PeaksWorkspace_sptr ws2 =
-        load_alg->getProperty("OutputWorkspace");
-    ws2->setInstrument(inst);
-
-    IAlgorithm_sptr plus_alg = createChildAlgorithm("CombinePeaksWorkspaces");
-    plus_alg->setProperty("LHSWorkspace", peaksW);
-    plus_alg->setProperty("RHSWorkspace", ws2);
-    plus_alg->executeAsChildAlg();
-    // Get back the result
-    peaksW = plus_alg->getProperty("OutputWorkspace");
-    out.open(filename.c_str(), std::ios::out);
-  } else {
-    out.open(filename.c_str(), std::ios::out);
-  }
+  out.open(filename.c_str(), std::ios::out);
 
   // We cannot assume the peaks have bank type detector modules, so we have a
   // string to check this
@@ -236,18 +218,6 @@ void SaveHKL::exec() {
   m_amu = getProperty("LinearAbsorptionCoef"); // in 1/cm
   m_power_th = getProperty("PowerLambda");     // in cm
 
-  // Function to calculate total attenuation for a track
-  auto calculateAttenuation = [](const Track &path, double lambda) {
-    double factor(1.0);
-    for (const auto &segment : path) {
-      const double length = segment.distInsideObject;
-      const auto &segObj = *(segment.object);
-      const auto &segMat = segObj.material();
-      factor *= segMat.attenuation(length, lambda);
-    }
-    return factor;
-  };
-
   API::Run &run = peaksW->mutableRun();
 
   double radius = getProperty("Radius"); // in cm
@@ -257,10 +227,6 @@ void SaveHKL::exec() {
     if (run.hasProperty("Radius"))
       radius = run.getPropertyValueAsType<double>("Radius");
   }
-
-  const auto sourcePos = inst->getSource()->getPos();
-  const auto samplePos = inst->getSample()->getPos();
-  const auto reverseBeamDir = normalize(samplePos - sourcePos);
 
   const Material &sampleMaterial = peaksW->sample().getMaterial();
   const IObject *sampleShape{nullptr};
@@ -282,6 +248,17 @@ void SaveHKL::exec() {
     peaksW->mutableSample().setShape(sphere);
   } else if (peaksW->sample().getShape().hasValidShape()) {
     sampleShape = &(peaksW->sample().getShape());
+    // if AddAbsorptionWeightedPathLengths has already been run on the workspace
+    // then keep those tbar values
+    if (std::all_of(peaks.cbegin(), peaks.cend(), [](auto &p) {
+          return p.getAbsorptionWeightedPathLength() == 0;
+        })) {
+      IAlgorithm_sptr alg =
+          createChildAlgorithm("AddAbsorptionWeightedPathLengths");
+      alg->setProperty("InputWorkspace", peaksW);
+      alg->setProperty("UseSinglePath", true);
+      alg->executeAsChildAlg();
+    }
   }
 
   if (correctPeaks) {
@@ -387,19 +364,10 @@ void SaveHKL::exec() {
           // keep original method if radius is provided
           transmission = absorbSphere(radius, scattering, lambda, tbar);
         } else if (sampleShape) {
-          Track beforeScatter(samplePos, reverseBeamDir);
-          sampleShape->interceptSurface(beforeScatter);
-          const auto detDir = normalize(p.getDetPos() - samplePos);
-          Track afterScatter(samplePos, detDir);
-          sampleShape->interceptSurface(afterScatter);
-
-          transmission = calculateAttenuation(beforeScatter, lambda) *
-                         calculateAttenuation(afterScatter, lambda);
-          const auto &mat = sampleShape->material();
-          const auto mu =
-              (mat.totalScatterXSection() + mat.absorbXSection(lambda)) *
-              mat.numberDensity();
-          tbar = -std::log(transmission) / mu;
+          tbar = p.getAbsorptionWeightedPathLength();
+          transmission =
+              exp(-tbar * 0.01 *
+                  sampleShape->material().attenuationCoefficient(lambda));
         }
 
         // Anvred write from Art Schultz/
@@ -521,43 +489,21 @@ void SaveHKL::exec() {
           out << std::setw(8) << std::fixed << std::setprecision(5) << lambda;
           out << std::setw(8) << std::fixed << std::setprecision(5) << tbar;
           Kernel::DblMatrix oriented = p.getGoniometerMatrix();
-          Kernel::DblMatrix orientedIPNS(3, 3);
-          V3D dir_cos_1, dir_cos_2;
 
-          orientedIPNS[0][0] = oriented[0][0];
-          orientedIPNS[0][1] = oriented[0][2];
-          orientedIPNS[0][2] = oriented[0][1];
-          orientedIPNS[1][0] = oriented[2][0];
-          orientedIPNS[1][1] = oriented[2][2];
-          orientedIPNS[1][2] = oriented[2][1];
-          orientedIPNS[2][0] = oriented[1][0];
-          orientedIPNS[2][1] = oriented[1][2];
-          orientedIPNS[2][2] = oriented[1][1];
-          Kernel::DblMatrix orientedUB = UB * orientedIPNS;
-          double l2 = p.getL2();
-          V3D R_reverse_incident = V3D(-l2, 0., 0.);
-          V3D R_IPNS;
-          double twoth = p.getScattering();
+          auto U = ol.getU();
+          auto RU = oriented * U;
+          RU.Transpose();
+
+          // This is the reverse incident beam
+          V3D reverse_incident =
+              inst->getSource()->getPos() - inst->getSample()->getPos();
+          reverse_incident.normalize();
           // This is the scattered beam direction
           V3D dir = p.getDetPos() - inst->getSample()->getPos();
+          dir.normalize();
 
-          // "Azimuthal" angle: project the scattered beam direction onto the
-          // XY plane, and calculate the angle between that and the +X axis
-          // (right-handed)
-          double az = atan2(dir.Y(), dir.X());
-          R_IPNS[0] = std::cos(twoth) * l2;
-          R_IPNS[1] = std::cos(az) * std::sin(twoth) * l2;
-          R_IPNS[2] = std::sin(az) * std::sin(twoth) * l2;
-
-          for (int k = 0; k < 3; ++k) {
-            V3D q_abc_star =
-                V3D(orientedUB[k][0], orientedUB[k][1], orientedUB[k][2]);
-            double length_q_abc_star = q_abc_star.norm();
-            dir_cos_1[k] = R_reverse_incident.scalar_prod(q_abc_star) /
-                           (l2 * length_q_abc_star);
-            dir_cos_2[k] =
-                R_IPNS.scalar_prod(q_abc_star) / (l2 * length_q_abc_star);
-          }
+          V3D dir_cos_1 = RU * reverse_incident;
+          V3D dir_cos_2 = RU * dir;
 
           for (int k = 0; k < 3; ++k) {
             out << std::setw(9) << std::fixed << std::setprecision(5)
@@ -632,6 +578,26 @@ void SaveHKL::exec() {
     badPeaks.emplace_back(static_cast<int>(*it));
   }
   peaksW->removePeaks(std::move(badPeaks));
+
+  bool append = getProperty("AppendFile");
+  if (append && Poco::File(filename.c_str()).exists()) {
+    IAlgorithm_sptr load_alg = createChildAlgorithm("LoadHKL");
+    load_alg->setPropertyValue("Filename", filename);
+    load_alg->setProperty("OutputWorkspace", "peaks");
+    load_alg->executeAsChildAlg();
+    // Get back the result
+    DataObjects::PeaksWorkspace_sptr ws2 =
+        load_alg->getProperty("OutputWorkspace");
+    ws2->setInstrument(inst);
+
+    IAlgorithm_sptr plus_alg = createChildAlgorithm("CombinePeaksWorkspaces");
+    plus_alg->setProperty("LHSWorkspace", peaksW);
+    plus_alg->setProperty("RHSWorkspace", ws2);
+    plus_alg->executeAsChildAlg();
+    // Get back the result
+    peaksW = plus_alg->getProperty("OutputWorkspace");
+  }
+
   setProperty("OutputWorkspace", peaksW);
 } // namespace Crystal
 

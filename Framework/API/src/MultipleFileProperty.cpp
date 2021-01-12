@@ -309,7 +309,7 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
       // existing) file within a token, but which has unexpected zero padding,
       // or some other anomaly.
       if (VectorHelper::flattenVector(f).empty())
-        f.emplace_back(std::vector<std::string>(1, plusTokenString));
+        f.emplace_back(1, plusTokenString);
 
       if (plusTokenStrings.size() > 1) {
         // See [3] in header documentation.  Basically, for reasons of

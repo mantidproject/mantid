@@ -37,6 +37,10 @@ public:
     int massNumber = 0;
     /// The sample number density to set, defaults to EMPTY_DBL()
     double numberDensity = EMPTY_DBL();
+    /// The sample effective number density
+    double numberDensityEffective = EMPTY_DBL();
+    /// The sample packing fraction
+    double packingFraction = EMPTY_DBL();
     /// The zParameter to set, defaults to EMPTY_DBL()
     double zParameter = EMPTY_DBL();
     /// The unit cell volume to set, defaults to EMPTY_DBL()
@@ -57,6 +61,8 @@ public:
     double scatteringXSection = EMPTY_DBL();
     /// The name or path of a file containing an attenuation profile
     std::string attenuationProfileFileName = "";
+    /// The name or path of a file containing an x ray attenuation profile
+    std::string xRayAttenuationProfileFileName = "";
     /// A flag indicating the unit of sampleNumberDensity
     Kernel::MaterialBuilder::NumberDensityUnit numberDensityUnit =
         Kernel::MaterialBuilder::NumberDensityUnit::Atoms;
@@ -94,12 +100,14 @@ private:
                    const int massNumber);
 
   void
-  setNumberDensity(const double rho_m, const double rho,
+  setNumberDensity(const double rho_m, const double rho, const double rho_eff,
+                   const double pFrac,
                    const Kernel::MaterialBuilder::NumberDensityUnit rhoUnit,
                    const double zParameter, const double unitCellVolume);
   void setScatteringInfo(double coherentXSection, double incoherentXSection,
                          double attenuationXSection, double scatteringXSection,
-                         std::string attenuationProfileFileName);
+                         std::string attenuationProfileFileName,
+                         std::string xRayAttenuationProfileFileName);
 
   static bool isEmpty(const double toCheck);
 };

@@ -33,7 +33,7 @@ from Muon.GUI.Common.results_tab_widget.results_tab_widget import ResultsTabWidg
 from Muon.GUI.Common.fitting_tab_widget.fitting_tab_widget import FittingTabWidget
 from Muon.GUI.Common.plot_widget.plot_widget import PlotWidget
 from Muon.GUI.Common.plotting_dock_widget.plotting_dock_widget import PlottingDockWidget
-from mantidqt.utils.observer_pattern import GenericObserver, GenericObserverWithArgPassing,GenericObservable
+from mantidqt.utils.observer_pattern import GenericObserver, GenericObserverWithArgPassing, GenericObservable
 
 SUPPORTED_FACILITIES = ["ISIS", "SmuS"]
 TAB_ORDER = ["Home", "Grouping", "Phase Table", "Transform", "Fitting", "Sequential Fitting", "Results"]
@@ -114,7 +114,8 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
             FFTWidget,
             MaxEntWidget,
             parent=self)
-        self.results_tab = ResultsTabWidget(self.context.fitting_context, self.context, self)
+        self.results_tab = ResultsTabWidget(
+            self.context.fitting_context, self.context, self)
 
         self.setup_tabs()
         self.help_widget = HelpWidget(self.context.window_title)
@@ -128,7 +129,8 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         central_widget.setLayout(vertical_layout)
 
         self.disable_notifier = GenericObservable()
-        self.disable_observer = GenericObserver(self.disable_notifier.notify_subscribers)
+        self.disable_observer = GenericObserver(
+            self.disable_notifier.notify_subscribers)
         self.enable_notifier = GenericObservable()
         self.enable_observer = GenericObserver(self.enable_notifier.notify_subscribers)
         self.setup_disable_notifier()
@@ -250,16 +252,24 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.load_widget.load_widget.loadNotifier.add_subscriber(
             self.phase_tab.phase_table_presenter.run_change_observer)
 
+        self.load_widget.load_widget.loadNotifier.add_subscriber(
+            self.fitting_tab.fitting_tab_presenter.disable_tab_observer)
+
+        self.load_widget.load_widget.loadNotifier.add_subscriber(
+            self.plot_widget.presenter.new_data_loaded_observer)
+
     def setup_gui_variable_observers(self):
         self.context.gui_context.gui_variables_notifier.add_subscriber(
-            self.grouping_tab_widget.group_tab_presenter.gui_variables_observer
-        )
+            self.grouping_tab_widget.group_tab_presenter.gui_variables_observer)
 
         self.context.gui_context.gui_variables_notifier.add_subscriber(
             self.fitting_tab.fitting_tab_presenter.gui_context_observer)
 
         self.context.gui_context.gui_variable_non_calulation_notifier.add_subscriber(
             self.fitting_tab.fitting_tab_presenter.gui_context_observer)
+
+        self.context.gui_context.gui_variables_notifier.add_subscriber(
+            self.plot_widget.presenter.rebin_options_set_observer)
 
         self.grouping_tab_widget.pairing_table_widget.selected_pair_changed_notifier.add_subscriber(
             self.fitting_tab.fitting_tab_presenter.selected_group_pair_observer)
@@ -284,6 +294,12 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
 
         self.fitting_tab.fitting_tab_presenter.selected_single_fit_notifier.add_subscriber(
             self.plot_widget.presenter.plot_selected_fit_observer)
+
+        self.phase_tab.phase_table_presenter.selected_phasequad_changed_notifier.add_subscriber(
+            self.plot_widget.presenter.added_group_or_pair_observer)
+
+        self.phase_tab.phase_table_presenter.selected_phasequad_changed_notifier.add_subscriber(
+            self.transform.GroupPairObserver)
 
     def setup_grouping_changed_observers(self):
         self.grouping_tab_widget.group_tab_presenter.groupingNotifier.add_subscriber(
@@ -356,11 +372,10 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
             self.fitting_tab.fitting_tab_presenter.input_workspace_observer)
 
         self.grouping_tab_widget.group_tab_presenter.calculation_finished_notifier.add_subscriber(
-            self.update_plot_observer
-        )
+            self.update_plot_observer)
 
     def setup_phase_quad_changed_notifier(self):
-        self.phase_tab.phase_table_presenter.phase_quad_calculation_complete_nofifier.add_subscriber(
+        self.phase_tab.phase_table_presenter.phase_quad_calculation_complete_notifier.add_subscriber(
             self.transform.phase_quad_observer)
 
     def setup_phase_table_changed_notifier(self):

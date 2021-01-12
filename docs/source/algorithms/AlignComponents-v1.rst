@@ -52,7 +52,7 @@ the instrument you don't want to use to align the sample/source
 position (*e.g.* in the *Align sample position in POWGEN* usage
 example below).
 
-The source and sample positions (in that order) are aligned before an
+The source and sample positions (in that order) are aligned before any
 components are aligned.
 
 Usage
@@ -71,12 +71,14 @@ Usage
             WorkspaceName="PG3")
       component="bank26"
       print("Start position is {}".format(ws.getInstrument().getComponentByName(component).getPos()))
+      ws_name = str(ws)
       AlignComponents(CalibrationTable="PG3_cal",
-              Workspace=ws,
-	      MaskWorkspace="PG3_mask",
-	      Yposition=True, ZPosition=True,
-              ComponentList=component)
-      ws=mtd['ws']
+                      InputWorkspace=ws_name,
+                      OutputWorkspace=ws_name,
+                      MaskWorkspace="PG3_mask",
+                      Yposition=True, ZPosition=True,
+                      ComponentList=component)
+      ws=mtd[ws_name]
       final_pos = ws.getInstrument().getComponentByName(component).getPos()
       print("Final position is [{:.2f}.{:.2f},{:.2f}]".format(final_pos[0],final_pos[1],final_pos[2]))
 
@@ -93,23 +95,25 @@ Output:
 
       ws = LoadEmptyInstrument(Filename="POWGEN_Definition_2015-08-01.xml")
       LoadCalFile(InputWorkspace=ws,
-	    CalFilename="PG3_golden.cal",
-	    MakeGroupingWorkspace=False,
-	    MakeOffsetsWorkspace=True,
-	    MakeMaskWorkspace=True,
-	    WorkspaceName="PG3")
+                  CalFilename="PG3_golden.cal",
+                  MakeGroupingWorkspace=False,
+                  MakeOffsetsWorkspace=True,
+                  MakeMaskWorkspace=True,
+                  WorkspaceName="PG3")
       components="bank25,bank46"
       bank25Rot = ws.getInstrument().getComponentByName("bank25").getRotation().getEulerAngles()
       bank46Rot = ws.getInstrument().getComponentByName("bank46").getRotation().getEulerAngles()
       print("Start bank25 rotation is [{:.3f}.{:.3f},{:.3f}]".format(bank25Rot[0], bank25Rot[1], bank25Rot[2]))
       print("Start bank46 rotation is [{:.3f}.{:.3f},{:.3f}]".format(bank46Rot[0], bank46Rot[1], bank46Rot[2]))
+      ws_name = str(ws)
       AlignComponents(CalibrationTable="PG3_cal",
-	      Workspace=ws,
-	      MaskWorkspace="PG3_mask",
-	      EulerConvention="YZX",
-              AlphaRotation=True,
-	      ComponentList=components)
-      ws=mtd['ws']
+                      InputWorkspace=ws_name,
+                      OutputWorkspace=ws_name,
+                      MaskWorkspace="PG3_mask",
+                      EulerConvention="YZX",
+                      AlphaRotation=True,
+                      ComponentList=components)
+      ws=mtd[ws_name]
       bank25Rot = ws.getInstrument().getComponentByName("bank25").getRotation().getEulerAngles()
       bank46Rot = ws.getInstrument().getComponentByName("bank46").getRotation().getEulerAngles()
       print("Final bank25 rotation is [{:.3f}.{:.3f},{:.3f}]".format(bank25Rot[0], bank25Rot[1], bank25Rot[2]))
@@ -130,20 +134,22 @@ Output:
 
       ws = LoadEmptyInstrument(Filename="POWGEN_Definition_2015-08-01.xml")
       LoadCalFile(InputWorkspace=ws,
-	    CalFilename="PG3_golden.cal",
-	    MakeGroupingWorkspace=False,
-	    MakeOffsetsWorkspace=True,
-	    MakeMaskWorkspace=True,
-	    WorkspaceName="PG3")
+                  CalFilename="PG3_golden.cal",
+                  MakeGroupingWorkspace=False,
+                  MakeOffsetsWorkspace=True,
+                  MakeMaskWorkspace=True,
+                  WorkspaceName="PG3")
       # Mask banks that don't have calibration data
       MaskBTP(Workspace='PG3_mask', Instrument='POWGEN',
-	      Bank='22-25,42-45,62-66,82-86,102-105,123,124,143,144,164,184,204')
+              Bank='22-25,42-45,62-66,82-86,102-105,123,124,143,144,164,184,204')
       print("Start sample position is {}".format(ws.getInstrument().getSample().getPos().getZ()))
+      ws_name = str(ws)
       AlignComponents(CalibrationTable="PG3_cal",
-            Workspace=ws,
-            MaskWorkspace="PG3_mask",
-            FitSamplePosition=True,
-	    Zposition=True)
+                      InputWorkspace=ws_name,
+                      OutputWorkspace=ws_name,
+                      MaskWorkspace="PG3_mask",
+                      FitSamplePosition=True,
+                      Zposition=True)
       print("Final sample position is {:.3f}".format(mtd['ws'].getInstrument().getSample().getPos().getZ()))
 
 Output:

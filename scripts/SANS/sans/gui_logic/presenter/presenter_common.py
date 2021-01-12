@@ -51,8 +51,9 @@ class PresenterCommon(metaclass=ABCMeta):
 
     def _set_on_view_to_custom_view(self, attribute_name, view, decimal_places):
         attribute = getattr(self._model, attribute_name)
-        if attribute or isinstance(attribute,
-                                   bool):  # We need to be careful here. We don't want to set empty strings, or None, but we want to set boolean values. # noqa
-            if decimal_places:
-                attribute = round(attribute,decimal_places)
-            setattr(view, attribute_name, attribute)
+        # We need to be careful here. We don't want to set empty strings, or None.
+        if attribute is None or attribute == "":
+            return
+        if decimal_places:
+            attribute = round(attribute,decimal_places)
+        setattr(view, attribute_name, attribute)

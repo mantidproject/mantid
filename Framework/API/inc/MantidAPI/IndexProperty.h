@@ -36,6 +36,7 @@ public:
                     Kernel::IValidator_sptr(new Kernel::NullValidator));
 
   IndexProperty(const IndexProperty &) = default;
+  // Copy assignment is deleted since there are reference type members.
   IndexProperty &operator=(const IndexProperty &) = delete;
 
   IndexProperty *clone() const override;

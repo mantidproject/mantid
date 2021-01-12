@@ -85,6 +85,7 @@ public:
   /// Allow an explicit attenuation profile to be loaded onto the material
   /// that overrides the standard linear absorption coefficient
   void setAttenuationProfile(AttenuationProfile attenuationOverride);
+  void setXRayAttenuationProfile(AttenuationProfile attenuationProfile);
 
   /// Returns the name of the material
   const std::string &name() const;
@@ -117,6 +118,8 @@ public:
   double attenuation(const double distance,
                      const double lambda =
                          PhysicalConstants::NeutronAtom::ReferenceLambda) const;
+  /// Compute the x-ray attenuation at a given energy over the given distance
+  double xRayAttenuation(const double distance, const double energy) const;
 
   /**
    * Returns the linear coefficient of absorption for the material in units of
@@ -196,6 +199,8 @@ public:
   void saveNexus(::NeXus::File *file, const std::string &group) const;
   void loadNexus(::NeXus::File *file, const std::string &group);
 
+  bool hasValidXRayAttenuationProfile();
+
 private:
   /// Update the total atom count
   void countAtoms();
@@ -222,6 +227,7 @@ private:
   double m_totalScatterXSection;
 
   boost::optional<AttenuationProfile> m_attenuationOverride;
+  boost::optional<AttenuationProfile> m_xRayAttenuationProfile;
 };
 
 /// Typedef for a shared pointer

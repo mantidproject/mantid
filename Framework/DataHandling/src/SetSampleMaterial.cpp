@@ -57,6 +57,14 @@ void SetSampleMaterial::init() {
       "This number density of the sample in number of "
       "atoms or formula units per cubic Angstrom will be used instead of "
       "calculated");
+  declareProperty(
+      "SampleEffectiveNumberDensity", EMPTY_DBL(), mustBePositive,
+      "Defines the effective number density of the sample, which is "
+      "related to the number density and packing fraction.");
+  declareProperty(
+      "SamplePackingFraction", EMPTY_DBL(), mustBePositive,
+      "Defines the packing fraction of the sample which can be used "
+      "to calculate the number density and the effective number density");
   declareProperty("ZParameter", EMPTY_DBL(), mustBePositive,
                   "Number of formula units in unit cell");
   declareProperty("UnitCellVolume", EMPTY_DBL(), mustBePositive,
@@ -80,9 +88,15 @@ void SetSampleMaterial::init() {
       std::make_unique<FileProperty>("AttenuationProfile", "",
                                      FileProperty::OptionalLoad, extensions),
       "The path name of the file containing the attenuation profile");
+
+  declareProperty(
+      std::make_unique<FileProperty>("XRayAttenuationProfile", "",
+                                     FileProperty::OptionalLoad, extensions),
+      "The path name of the file containing the Xray attenuation profile");
+
   declareProperty("SampleMassDensity", EMPTY_DBL(), mustBePositive,
                   "Measured mass density in g/cubic cm of the sample "
-                  "to be used to calculate the number density.");
+                  "to be used to calculate the effective number density.");
   declareProperty(
       "SampleMass", EMPTY_DBL(), mustBePositive,
       "Measured mass in g of the sample. This is used with the SampleVolume "
@@ -104,6 +118,8 @@ void SetSampleMaterial::init() {
 
   std::string densityGrp("Sample Density");
   setPropertyGroup("SampleNumberDensity", densityGrp);
+  setPropertyGroup("SampleEffectiveNumberDensity", densityGrp);
+  setPropertyGroup("SamplePackingFraction", densityGrp);
   setPropertyGroup("NumberDensityUnit", densityGrp);
   setPropertyGroup("ZParameter", densityGrp);
   setPropertyGroup("UnitCellVolume", densityGrp);
@@ -117,6 +133,7 @@ void SetSampleMaterial::init() {
   setPropertyGroup("AttenuationXSection", specificValuesGrp);
   setPropertyGroup("ScatteringXSection", specificValuesGrp);
   setPropertyGroup("AttenuationProfile", specificValuesGrp);
+  setPropertyGroup("XRayAttenuationProfile", specificValuesGrp);
 
   // Extra property settings
   setPropertySettings("ChemicalFormula",
@@ -138,6 +155,8 @@ std::map<std::string, std::string> SetSampleMaterial::validateInputs() {
   params.atomicNumber = getProperty("AtomicNumber");
   params.massNumber = getProperty("MassNumber");
   params.numberDensity = getProperty("SampleNumberDensity");
+  params.numberDensityEffective = getProperty("SampleEffectiveNumberDensity");
+  params.packingFraction = getProperty("SamplePackingFraction");
   params.zParameter = getProperty("ZParameter");
   params.unitCellVolume = getProperty("UnitCellVolume");
   params.massDensity = getProperty("SampleMassDensity");
@@ -148,6 +167,8 @@ std::map<std::string, std::string> SetSampleMaterial::validateInputs() {
   params.attenuationXSection = getProperty("AttenuationXSection");
   params.scatteringXSection = getProperty("ScatteringXSection");
   params.attenuationProfileFileName = getPropertyValue("AttenuationProfile");
+  params.xRayAttenuationProfileFileName =
+      getPropertyValue("XRayAttenuationProfile");
   const std::string numberDensityUnit = getProperty("NumberDensityUnit");
   if (numberDensityUnit == "Atoms") {
     params.numberDensityUnit = MaterialBuilder::NumberDensityUnit::Atoms;

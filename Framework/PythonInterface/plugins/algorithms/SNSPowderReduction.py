@@ -5,16 +5,16 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name,no-init,too-many-lines
-import numpy as np
 import os
 
 import mantid.simpleapi as api
 from mantid.api import mtd, AlgorithmFactory, AnalysisDataService, DistributedDataProcessorAlgorithm, \
     FileAction, FileProperty, ITableWorkspaceProperty, MultipleFileProperty, PropertyMode, WorkspaceProperty, \
-    ITableWorkspace, MatrixWorkspace, WorkspaceFactory
+    ITableWorkspace, MatrixWorkspace
 from mantid.kernel import ConfigService, Direction, FloatArrayProperty, FloatBoundedValidator, \
     IntArrayBoundedValidator, IntArrayProperty, Property, PropertyManagerDataService, StringListValidator
 from mantid.dataobjects import SplittersWorkspace  # SplittersWorkspace
+from mantid.utils import absorptioncorrutils
 if AlgorithmFactory.exists('GatherWorkspaces'):
     HAVE_MPI = True
     from mpi4py import MPI
@@ -136,6 +136,10 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
     _charTable = None
     iparmFile = None
     _info = None
+    _absMethod = None
+    _sampleFormula = None
+    _massDensity = None
+    _containerShape = None
 
     def category(self):
         return "Diffraction\\Reduction"
@@ -215,6 +219,24 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         self.copyProperties('AlignAndFocusPowderFromFiles', 'CacheDir')
         self.declareProperty("FinalDataUnits", "dSpacing", StringListValidator(["dSpacing","MomentumTransfer"]))
 
+        # absorption correction
+        self.declareProperty("TypeOfCorrection", "None",
+                             StringListValidator(["None", "SampleOnly", "SampleAndContainer", "FullPaalmanPings"]),
+                             doc="Specifies the Absorption Correction terms to calculate, if any.")
+        self.declareProperty("SampleFormula", "", doc="Chemical formula of the sample")
+        self.declareProperty("MeasuredMassDensity", defaultValue=0.1,
+                             validator=FloatBoundedValidator(lower=0., exclusive=True),
+                             doc="Measured mass density of sample in g/cc")  # in g/cc, way to validate?
+        self.declareProperty("SampleNumberDensity", defaultValue=Property.EMPTY_DBL,
+                             doc="Number density of the sample in number of atoms per cubic Angstrom will be used instead of calculated")
+        self.declareProperty("ContainerShape", defaultValue="PAC06", doc="Defines the container geometry")
+        self.declareProperty("ContainerScaleFactor", defaultValue=1.0,
+                             validator=FloatBoundedValidator(lower=0),
+                             doc="Factor to scale the container data")
+        self.copyProperties("AbsorptionCorrection", "ElementSize")
+        self.declareProperty("NumWavelengthBins", defaultValue=1000,
+                             doc="Number of wavelength bin to calculate the for absorption correction")
+
         workspace_prop = WorkspaceProperty('SplittersWorkspace', '', Direction.Input, PropertyMode.Optional)
         self.declareProperty(workspace_prop, "Splitters workspace for split event workspace.")
         # replaced for matrix workspace, SplittersWorkspace and table workspace
@@ -235,6 +257,16 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         self.copyProperties('AlignAndFocusPowderFromFiles', ['FrequencyLogNames', 'WaveLengthLogNames'])
 
         return
+
+    def validateInputs(self):
+        issues = dict()
+
+        # If doing absorption correction, make sure the sample formula is correct
+        if self.getProperty("TypeOfCorrection").value != "None":
+            if self.getProperty("SampleFormula").value == '':
+                issues['SampleFormula'] = "A sample formula must be provided."
+
+        return issues
 
     #pylint: disable=too-many-locals,too-many-branches,too-many-statements
     def PyExec(self):  # noqa
@@ -269,6 +301,14 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         self._outDir = self.getProperty("OutputDirectory").value
         self._outPrefix = self.getProperty("OutputFilePrefix").value.strip()
         self._outTypes = self.getProperty("SaveAs").value.lower()
+        self._absMethod = self.getProperty("TypeOfCorrection").value
+        self._sampleFormula = self.getProperty("SampleFormula").value
+        self._massDensity = self.getProperty("MeasuredMassDensity").value
+        self._numberDensity = self.getProperty("SampleNumberDensity").value
+        self._containerShape = self.getProperty("ContainerShape").value
+        self._containerScaleFactor = self.getProperty("ContainerScaleFactor").value
+        self._elementSize = self.getProperty("ElementSize").value
+        self._num_wl_bins = self.getProperty("NumWavelengthBins").value
 
         samRuns = self._getLinearizedFilenames("Filename")
         self._determineInstrument(samRuns[0])
@@ -332,13 +372,29 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
                     focuspos['Azimuthal'] = phis
         # ENDIF
 
+        # calculate absorption from first sample run
+        metaws = None
+        if self._absMethod != "None" and self._info is None:
+            absName = '__{}_abs'.format(getBasename(samRuns[0]))
+            api.Load(Filename=samRuns[0], OutputWorkspace=absName, MetaDataOnly=True)
+            self._info = self._getinfo(absName)
+            metaws = absName
+        a_sample, a_container = absorptioncorrutils.calculate_absorption_correction(samRuns[0], self._absMethod,
+                                                                                    self._info, self._sampleFormula,
+                                                                                    self._massDensity,
+                                                                                    self._numberDensity,
+                                                                                    self._containerShape,
+                                                                                    self._num_wl_bins,
+                                                                                    self._elementSize,
+                                                                                    metaws)
+
         if self.getProperty("Sum").value and len(samRuns) > 1:
             self.log().information('Ignoring value of "Sum" property')
             # Sum input sample runs and then do reduction
             if self._splittersWS is not None:
                 raise NotImplementedError("Summing spectra and filtering events are not supported simultaneously.")
 
-            sam_ws_name = self._focusAndSum(samRuns, preserveEvents=preserveEvents)
+            sam_ws_name = self._focusAndSum(samRuns, preserveEvents=preserveEvents, absorptionWksp=a_sample)
             assert isinstance(sam_ws_name, str), 'Returned from _focusAndSum() must be a string but not' \
                                                  '%s. ' % str(type(sam_ws_name))
 
@@ -352,7 +408,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
                 self._info = None
                 if sample_time_filter_wall[0] == 0. and sample_time_filter_wall[-1] == 0. \
                         and self._splittersWS is None:
-                    returned = self._focusAndSum([sam_run_number], preserveEvents=preserveEvents)
+                    returned = self._focusAndSum([sam_run_number], preserveEvents=preserveEvents, absorptionWksp=a_sample)
                 else:
                     returned = self._focusChunks(sam_run_number, sample_time_filter_wall,
                                                  splitwksp=self._splittersWS,
@@ -389,7 +445,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
             # process the container
             can_run_numbers = self._info["container"].value
             can_run_numbers = ['%s_%d' % (self._instrument, value) for value in can_run_numbers]
-            can_run_ws_name = self._process_container_runs(can_run_numbers, samRunIndex, preserveEvents)
+            can_run_ws_name = self._process_container_runs(can_run_numbers, samRunIndex, preserveEvents, absorptionWksp=a_container)
             if can_run_ws_name is not None:
                 workspacelist.append(can_run_ws_name)
 
@@ -414,7 +470,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
             #   return
 
             # the final bit of math to remove container run and vanadium run
-            if can_run_ws_name is not None:
+            if can_run_ws_name is not None and self._containerScaleFactor != 0:
                 # must convert the sample to a matrix workspace if the can run isn't one
                 if not allEventWorkspaces(can_run_ws_name, sam_ws_name):
                     api.ConvertToMatrixWorkspace(InputWorkspace=sam_ws_name,
@@ -424,6 +480,9 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
                 api.RebinToWorkspace(WorkspaceToRebin=can_run_ws_name,
                                      WorkspaceToMatch=sam_ws_name,
                                      OutputWorkspace=can_run_ws_name)
+                api.Scale(InputWorkspace=can_run_ws_name,
+                          OutputWorkspace=can_run_ws_name,
+                          Factor=self._containerScaleFactor)
                 api.Minus(LHSWorkspace=sam_ws_name,
                           RHSWorkspace=can_run_ws_name,
                           OutputWorkspace=sam_ws_name)
@@ -1172,7 +1231,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
 
         return do_split_raw_wksp, num_out_wksp
 
-    def _process_container_runs(self, can_run_numbers, samRunIndex, preserveEvents):
+    def _process_container_runs(self, can_run_numbers, samRunIndex, preserveEvents, absorptionWksp=None):
         """ Process container runs
         :param can_run_numbers:
         :return:
@@ -1204,7 +1263,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
                 fileArg = [can_run_number]
                 if self.getProperty("Sum").value:
                     fileArg = can_run_numbers
-                self._focusAndSum(fileArg, preserveEvents, final_name=can_run_ws_name)
+                self._focusAndSum(fileArg, preserveEvents, final_name=can_run_ws_name, absorptionWksp=absorptionWksp)
 
                 # smooth background
                 smoothParams = self.getProperty("BackgroundSmoothParams").value
@@ -1220,67 +1279,6 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         # END-IF (can run)
 
         return can_run_ws_name
-
-    def _create_absorption_input(self, filename, num_wl_bins):
-        '''
-        Create an input workspace for carpenter or other absorption corrections
-        '''
-        absName = '__{}_abs'.format(getBasename(filename))
-
-        # first attempt to get the wavelength range from the properties file
-        wl_min, wl_max = self._info['wavelength_min'].value, self._info['wavelength_max'].value
-        # override that with what was given as parameters to the algorithm
-        if self._wavelengthMin > 0.:
-            wl_min = self._wavelengthMin
-        if self._wavelengthMax != Property.EMPTY_DBL:
-            wl_max = self._wavelengthMax
-
-        api.LoadEventNexus(Filename=filename, OutputWorkspace=absName, MetaDataOnly=True)
-
-        # if it isn't found by this point, guess it from the time-of-flight range
-        if (wl_min == wl_max == 0.):
-            tof_min = self._info['tof_min'].value
-            tof_max = self._info['tof_max'].value
-            if tof_min >= 0. and tof_max > tof_min:
-                self.log().information('TOF range is {} to {} microseconds'.format(tof_min, tof_max))
-
-                # determine L1
-                instr = mtd[absName].getInstrument()
-                L1 = instr.getSource().getDistance(instr.getSample())
-                # determine L2 range
-                api.PreprocessDetectorsToMD(InputWorkspace=absName, OutputWorkspace=absName+'_dets', GetMaskState=False)
-                L2 = mtd[absName+'_dets'].column('L2')
-                Lmin = np.min(L2) + L1
-                Lmax = np.max(L2) + L1
-                api.DeleteWorkspace(Workspace=absName+'_dets')
-
-                self.log().information('Distance range is {} to {} meters'.format(Lmin, Lmax))
-
-                # wavelength is h*TOF / m_n * L  values copied from Kernel/PhysicalConstants.h
-                usec_to_sec = 1.e-6
-                meter_to_angstrom = 1.e10
-                h_m_n = meter_to_angstrom * usec_to_sec * 6.62606896e-34 / 1.674927211e-27
-                wl_min = h_m_n * tof_min / Lmax
-                wl_max = h_m_n * tof_max / Lmin
-
-        # there isn't a good way to guess it so error out
-        if wl_max <= wl_min:
-            api.DeleteWorkspace(Workspace=absName)   # no longer needed
-            raise RuntimeError('Invalid wavelength range min={}A max={}A'.format(wl_min, wl_max))
-        self.log().information('Using wavelength range min={}A max={}A'.format(wl_min, wl_max))
-
-        api.LoadEventNexus(Filename=filename, OutputWorkspace=absName, MetaDataOnly=True)
-        absorptionWS = WorkspaceFactory.create(mtd[absName], NVectors=mtd[absName].getNumberHistograms(),
-                                               XLength=num_wl_bins + 1, YLength=num_wl_bins)
-        xaxis = np.arange(0., float(num_wl_bins + 1)) * (wl_max - wl_min) / (num_wl_bins) + wl_min
-        for i in range(absorptionWS.getNumberHistograms()):
-            absorptionWS.setX(i, xaxis)
-        absorptionWS.getAxis(0).setUnit('Wavelength')
-
-        # this effectively deletes the metadata only workspace
-        AnalysisDataService.addOrReplace(absName, absorptionWS)
-
-        return absName
 
     def _process_vanadium_runs(self, van_run_number_list, samRunIndex, **dummy_focuspos):
         """
@@ -1313,19 +1311,28 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
             self.log().notice('Processing vanadium {}'.format(van_run_ws_name))
 
             # create the donor workspace for calculating the sample correction
-            absWksp = self._create_absorption_input(van_run_number, num_wl_bins=1000)  # TODO should this be hard coded?
-
-            # set material as Vanadium and correct for multiple scattering
-            api.SetSample(InputWorkspace=absWksp,
-                          Material={'ChemicalFormula': 'V', 'SampleNumberDensity': 0.0721},
-                          Geometry={'Shape': 'Cylinder',
-                                    'Height':7.,  # cm - shouldn't be hard coded
-                                    'Radius':self._vanRadius,
-                                    'Center': [0., 0., 0.]})
+            absWksp = absorptioncorrutils.create_absorption_input(van_run_number, self._info,
+                                                                  self._num_wl_bins,
+                                                                  material={'ChemicalFormula': 'V',
+                                                                            'SampleNumberDensity':
+                                                                                absorptioncorrutils.VAN_SAMPLE_DENSITY},
+                                                                  geometry={'Shape': 'Cylinder',
+                                                                            'Height': 7.,
+                                                                            'Radius': self._vanRadius,
+                                                                            'Center': [0., 0., 0.]},
+                                                                  opt_wl_min=self._wavelengthMin,
+                                                                  opt_wl_max=self._wavelengthMax)
 
             # calculate the correction which is 1/normal carpenter correction - it doesn't look at sample shape
+            api.AbsorptionCorrection(absWksp,
+                                     OutputWorkspace='__V_corr_abs',
+                                     ScatterFrom='Sample',
+                                     ElementSize=self._elementSize)
+
             api.CalculateCarpenterSampleCorrection(InputWorkspace=absWksp, OutputWorkspaceBaseName='__V_corr',
-                                                   CylinderSampleRadius=self._vanRadius)
+                                                   CylinderSampleRadius=self._vanRadius,
+                                                   Absorption=False)
+
             api.DeleteWorkspace(Workspace=absWksp)   # no longer needed
             __V_corr_eff = 1. / ((1. / mtd['__V_corr_abs']) - mtd['__V_corr_ms'])
             __V_corr_eff = str(__V_corr_eff)

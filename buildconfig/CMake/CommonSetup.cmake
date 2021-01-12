@@ -95,6 +95,7 @@ find_package(JsonCPP 0.7.0 REQUIRED)
 
 option(ENABLE_OPENGL "Enable OpenGLbased rendering" ON)
 option(ENABLE_OPENCASCADE "Enable OpenCascade-based 3D visualisation" ON)
+option(USE_PYTHON_DYNAMIC_LIB "Dynamic link python libs" ON)
 
 if(ENABLE_OPENCASCADE)
   find_package(OpenCascade REQUIRED)
@@ -131,6 +132,7 @@ find_package(OpenSSL REQUIRED)
 set(MtdVersion_WC_LAST_CHANGED_DATE Unknown)
 set(MtdVersion_WC_LAST_CHANGED_DATETIME 0)
 set(MtdVersion_WC_LAST_CHANGED_SHA Unknown)
+set(MtdVersion_WC_LAST_CHANGED_BRANCHNAME Unknown)
 set(NOT_GIT_REPO "Not")
 
 if(GIT_FOUND)
@@ -209,6 +211,16 @@ if(GIT_FOUND)
       endif()
 
       set(MtdVersion_WC_LAST_CHANGED_DATETIME "${ISODATE}.${ISOTIME}")
+    endif()
+
+    # conda builds want to know about the branch being used
+    # otherwise the variable is "Unknown"
+    if (ENABLE_CONDA)
+      execute_process(
+        COMMAND ${GIT_EXECUTABLE} branch --show-current
+        OUTPUT_VARIABLE MtdVersion_WC_LAST_CHANGED_BRANCHNAME
+        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+      )
     endif()
 
     # ##########################################################################

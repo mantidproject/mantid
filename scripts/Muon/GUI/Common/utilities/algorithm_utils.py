@@ -4,8 +4,11 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from Muon.GUI.Common.ADSHandler.workspace_naming import PHASEQUAD_IM, PHASEQUAD_RE
 import mantid.simpleapi as mantid
 from mantid.kernel import Logger
+from Muon.GUI.Common.ADSHandler.ADS_calls import remove_ws
+from copy import copy
 
 muon_logger = Logger('Muon-Algs')
 
@@ -82,7 +85,8 @@ def run_CalMuonDetectorPhases(parameter_dict, alg, fitted_workspace_name):
     return alg.getProperty("DetectorTable").valueAsStr, alg.getProperty('DataFitted').valueAsStr
 
 
-def run_PhaseQuad(parameters_dict, alg, phase_quad_workspace_name):
+def run_PhaseQuad(parameters_dict, phase_quad_workspace_name):
+    alg = mantid.AlgorithmManager.create("PhaseQuad")
     alg.initialize()
     alg.setAlwaysStoreInADS(True)
     alg.setRethrows(True)
@@ -151,7 +155,7 @@ def run_simultaneous_Fit(parameters_dict, alg):
     alg.setAlwaysStoreInADS(True)
     alg.setRethrows(True)
     alg.setProperty('CreateOutput', True)
-    pruned_parameter_dict = {key: value for key, value in parameters_dict.items() if
+    pruned_parameter_dict = {key: value for key,value in parameters_dict.items() if
                              key not in ['InputWorkspace', 'StartX', 'EndX']}
     alg.setProperties(pruned_parameter_dict)
 
@@ -247,5 +251,37 @@ def extract_single_spec(ws, spec, output_workspace_name):
     alg.setProperty("InputWorkspace", ws)
     alg.setProperty("OutputWorkspace", output_workspace_name)
     alg.setProperty("WorkspaceIndex", spec)
+    alg.execute()
+    return alg.getProperty("OutputWorkspace").valueAsStr
+
+
+def rebin_ws(ws, params):
+    alg = mantid.AlgorithmManager.create("Rebin")
+    alg.initialize()
+    alg.setAlwaysStoreInADS(True)
+    alg.setProperty("InputWorkspace", ws)
+    alg.setProperty("OutputWorkspace", ws)
+    alg.setProperty("params", params)
+    alg.execute()
+    return alg.getProperty("OutputWorkspace").valueAsStr
+
+
+def split_phasequad(name):
+    Re_name = copy(name).replace(PHASEQUAD_IM, "")
+    Im_name = copy(name).replace(PHASEQUAD_RE, "")
+
+    Re = extract_single_spec(name, 0, Re_name)
+    Im = extract_single_spec(name, 1, Im_name)
+    remove_ws(name)
+    return [Re, Im]
+
+
+def apply_deadtime(ws, output, table):
+    alg = mantid.AlgorithmManager.create("ApplyDeadTimeCorr")
+    alg.initialize()
+    alg.setAlwaysStoreInADS(True)
+    alg.setProperty("InputWorkspace", ws)
+    alg.setProperty("OutputWorkspace", output)
+    alg.setProperty("DeadTimeTable", table)
     alg.execute()
     return alg.getProperty("OutputWorkspace").valueAsStr

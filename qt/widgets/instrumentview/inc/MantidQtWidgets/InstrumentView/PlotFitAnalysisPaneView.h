@@ -27,13 +27,14 @@ public:
   IPlotFitAnalysisPaneView(){};
   virtual ~IPlotFitAnalysisPaneView(){};
   virtual void observeFitButton(Observer *listener) = 0;
+  virtual void observeUpdateEstimateButton(Observer *listener) = 0;
   virtual std::pair<double, double> getRange() = 0;
   virtual Mantid::API::IFunction_sptr getFunction() = 0;
   virtual void addSpectrum(const std::string &wsName) = 0;
   virtual void addFitSpectrum(const std::string &wsName) = 0;
   virtual void addFunction(Mantid::API::IFunction_sptr func) = 0;
   virtual void updateFunction(const Mantid::API::IFunction_sptr func) = 0;
-  virtual void fitWarning(const std::string &message) = 0;
+  virtual void displayWarning(const std::string &message) = 0;
   virtual QWidget *getQWidget() = 0;
   virtual void setupPlotFitSplitter(const double &start, const double &end) = 0;
   virtual QWidget *createFitPane(const double &start, const double &end) = 0;
@@ -52,17 +53,22 @@ public:
     m_fitObservable->attach(listener);
   };
 
+  void observeUpdateEstimateButton(Observer *listener) override {
+    m_updateEstimateObservable->attach(listener);
+  };
+
   std::pair<double, double> getRange() override;
   Mantid::API::IFunction_sptr getFunction() override;
   void addSpectrum(const std::string &wsName) override;
   void addFitSpectrum(const std::string &wsName) override;
   void addFunction(Mantid::API::IFunction_sptr func) override;
   void updateFunction(const Mantid::API::IFunction_sptr func) override;
-  void fitWarning(const std::string &message) override;
+  void displayWarning(const std::string &message) override;
   QWidget *getQWidget() override { return static_cast<QWidget *>(this); };
 
 public slots:
   void doFit();
+  void updateEstimate();
 
 protected:
   void setupPlotFitSplitter(const double &start, const double &end) override;
@@ -74,7 +80,9 @@ private:
   QLineEdit *m_start, *m_end;
   QSplitter *m_fitPlotLayout;
   QPushButton *m_fitButton;
+  QPushButton *m_updateEstimateButton;
   Observable *m_fitObservable;
+  Observable *m_updateEstimateObservable;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt

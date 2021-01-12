@@ -45,6 +45,8 @@ class SpaceGroupBuilder(object):
     For testing purposes, dictionaries with the appropriate data can
     be passed in as well, so the source of the parsed data is replaceable.
     """
+    string_keys = ['_space_group_name_h-m_alt', '_symmetry_space_group_name_h-m']
+    number_keys = ['_space_group_it_number', '_symmetry_int_tables_number']
 
     def __init__(self, cifData=None):
         if cifData is not None:
@@ -66,9 +68,7 @@ class SpaceGroupBuilder(object):
 
     def _getSpaceGroupFromString(self, cifData):
         # Try two possibilities for space group symbol. If neither is present, throw a RuntimeError.
-        rawSpaceGroupSymbol = [str(cifData[x]) for x in
-                               ['_space_group_name_h-m_alt', '_symmetry_space_group_name_h-m'] if
-                               x in cifData.keys()]
+        rawSpaceGroupSymbol = [str(cifData[x]) for x in self.string_keys if x in cifData.keys()]
 
         if len(rawSpaceGroupSymbol) == 0:
             raise RuntimeError('No space group symbol in CIF.')
@@ -87,9 +87,7 @@ class SpaceGroupBuilder(object):
         return rawSpaceGroupSymbol.strip()
 
     def _getSpaceGroupFromNumber(self, cifData):
-        spaceGroupNumber = [int(cifData[x]) for x in
-                            ['_space_group_it_number', '_symmetry_int_tables_number'] if
-                            x in cifData.keys()]
+        spaceGroupNumber = [int(cifData[x]) for x in self.number_keys if x in cifData.keys()]
 
         if len(spaceGroupNumber) == 0:
             raise RuntimeError('No space group symbol in CIF.')
@@ -318,36 +316,32 @@ class CrystalStructureBuilder(object):
     defined above.
     """
 
-    def __init__(self, cifFile=None):
-        if cifFile is not None:
-            cifData = cifFile[list(cifFile.keys())[0]]
+    def __init__(self, cif_data=None):
+        if cif_data is not None:
+            self.spaceGroup = SpaceGroupBuilder(cif_data).spaceGroup
+            self.unitCell = UnitCellBuilder(cif_data).unitCell
 
-            self.spaceGroup = SpaceGroupBuilder(cifData).spaceGroup
-            self.unitCell = UnitCellBuilder(cifData).unitCell
-
-            self.atoms = AtomListBuilder(cifData, UnitCell(*[float(removeErrorEstimateFromNumber(x)) for x in
-                                                             self.unitCell.split()])).atomList
+            self.atoms = AtomListBuilder(cif_data, UnitCell(*[float(removeErrorEstimateFromNumber(x)) for x in
+                                                              self.unitCell.split()])).atomList
 
     def getCrystalStructure(self):
         return CrystalStructure(self.unitCell, self.spaceGroup, self.atoms)
 
 
 class UBMatrixBuilder(object):
-    def __init__(self, cifFile=None):
-        if cifFile is not None:
-            cifData = cifFile[list(cifFile.keys())[0]]
+    ub_matrix_keys = ['_diffrn_orient_matrix_ub_11', '_diffrn_orient_matrix_ub_12', '_diffrn_orient_matrix_ub_13',
+                      '_diffrn_orient_matrix_ub_21', '_diffrn_orient_matrix_ub_22', '_diffrn_orient_matrix_ub_23',
+                      '_diffrn_orient_matrix_ub_31', '_diffrn_orient_matrix_ub_32', '_diffrn_orient_matrix_ub_33']
 
-            self._ubMatrix = self._getUBMatrix(cifData)
+    def __init__(self, cif_data=None):
+        if cif_data is not None:
+            self._ubMatrix = self._getUBMatrix(cif_data)
 
     def getUBMatrix(self):
         return self._ubMatrix
 
     def _getUBMatrix(self, cifData):
-        ubMatrixKeys = ['_diffrn_orient_matrix_ub_11', '_diffrn_orient_matrix_ub_12', '_diffrn_orient_matrix_ub_13',
-                        '_diffrn_orient_matrix_ub_21', '_diffrn_orient_matrix_ub_22', '_diffrn_orient_matrix_ub_23',
-                        '_diffrn_orient_matrix_ub_31', '_diffrn_orient_matrix_ub_32', '_diffrn_orient_matrix_ub_33']
-
-        ubValues = [str(cifData[key]) if key in cifData.keys() else None for key in ubMatrixKeys]
+        ubValues = [str(cifData[key]) if key in cifData.keys() else None for key in self.ub_matrix_keys]
 
         if None in ubValues:
             raise RuntimeError('Can not load UB matrix from CIF, values are missing.')
@@ -398,11 +392,53 @@ class LoadCIF(PythonAlgorithm):
         # Try to parse cif file using PyCifRW
         parsedCifFile = ReadCif(cifFileUrl)
 
-        self._setCrystalStructureFromCifFile(workspace, parsedCifFile)
+        cif_data = self._data_with_space_group_keys(parsedCifFile)
+
+        self._setCrystalStructureFromCifFile(workspace, cif_data)
 
         ubOption = self.getProperty('LoadUBMatrix').value
         if ubOption:
-            self._setUBMatrixFromCifFile(workspace, parsedCifFile)
+            self._check_has_a_ub_matrix_key(cif_data)
+            self._setUBMatrixFromCifFile(workspace, cif_data)
+
+    def _data_with_space_group_keys(self, cif_file):
+        """
+        Returns the cif data which contains at least one of the required SpaceGroupBuilder keys.
+        :param cif_file: The parsed cif file to check for keys.
+        :return: The Data section containing at least one of the required SpaceGroupBuilder keys.
+        """
+        for data_key in cif_file.keys():
+            cif_data = cif_file[data_key]
+            if self._has_a_space_group_key(cif_data):
+                return cif_data
+
+        raise RuntimeError(f"Could not find any Space Group keys. Missing one of the following: "
+                           f"{str(SpaceGroupBuilder.string_keys + SpaceGroupBuilder.number_keys)}")
+
+    def _has_a_space_group_key(self, cif_data):
+        """
+        Returns true if the cif data contains at least one Space Group key.
+        :param cif_data: The cif data to check for a Space Group key.
+        :return: True if the cif data contains at least one Space Group key.
+        """
+        space_group_keys = SpaceGroupBuilder.string_keys + SpaceGroupBuilder.number_keys
+        for key in space_group_keys:
+            if key in cif_data.keys():
+                return True
+        return False
+
+    def _check_has_a_ub_matrix_key(self, cif_data):
+        """
+        Checks to see if the cif data contains at least one UB Matrix key. Raises if it does not.
+        :param cif_data: The cif data to check for a UB Matrix key.
+        :return: None
+        """
+        for key in UBMatrixBuilder.ub_matrix_keys:
+            if key in cif_data.keys():
+                return
+
+        raise RuntimeError(f"Could not find any UB Matrix keys. Missing one of the following: "
+                           f"{UBMatrixBuilder.ub_matrix_keys}")
 
     def _getFileUrl(self):
         # ReadCif requires a URL, windows path specs seem to confuse urllib,
@@ -416,12 +452,12 @@ class LoadCIF(PythonAlgorithm):
         cifFileName = self.getProperty('InputFile').value
         return pathname2url(cifFileName)
 
-    def _setCrystalStructureFromCifFile(self, workspace, cifFile):
-        crystalStructure = self._getCrystalStructureFromCifFile(cifFile)
+    def _setCrystalStructureFromCifFile(self, workspace, cif_data):
+        crystalStructure = self._getCrystalStructureFromCifFile(cif_data)
         workspace.sample().setCrystalStructure(crystalStructure)
 
-    def _getCrystalStructureFromCifFile(self, cifFile):
-        builder = CrystalStructureBuilder(cifFile)
+    def _getCrystalStructureFromCifFile(self, cif_data):
+        builder = CrystalStructureBuilder(cif_data)
         crystalStructure = builder.getCrystalStructure()
 
         self.log().information('''Loaded the following crystal structure:

@@ -155,7 +155,7 @@ if "%BUILDPKG%" == "yes" (
   ) else (
     set PACKAGE_SUFFIX=unstable
   )
-  set PACKAGE_OPTS=-DPACKAGE_DOCS=ON -DCPACK_PACKAGE_SUFFIX=!PACKAGE_SUFFIX! -DDOCS_DOTDIAGRAMS=ON -DDOCS_SCREENSHOTS=ON -DDOCS_MATHEXT=sphinx.ext.imgmath -DDOCS_PLOTDIRECTIVE=ON
+  set PACKAGE_OPTS=-DPACKAGE_DOCS=ON -DCPACK_PACKAGE_SUFFIX=!PACKAGE_SUFFIX! -DDOCS_DOTDIAGRAMS=ON -DDOCS_SCREENSHOTS=ON -DDOCS_MATH_EXT=sphinx.ext.imgmath -DDOCS_PLOTDIRECTIVE=ON
 )
 
 cd %BUILD_DIR%
@@ -165,6 +165,19 @@ cd %BUILD_DIR%
 :: they don't get archived again.
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 del /Q *.exe
+
+:: if the last build had vates enabled then remove a problematic moc artifact
+:: that is not regenerated. Temporary fix while we transition MantidPlot/Vates out
+if EXIST %BUILD_DIR%\CMakeCache.txt (
+  call "%_grep_exe%" -q "MAKE_VATES:BOOL=ON" %BUILD_DIR%\CMakeCache.txt
+  if ERRORLEVEL 0 (
+    set CLEANBUILD=yes
+    echo Previous build used vates. Removing problematic moc file
+    del /q %BUILD_DIR%\qt\widgets\common\qt5\inc\MantidQtWidgets\Common\moc_MantidTreeModel.cpp
+    del /q %BUILD_DIR%\qt\widgets\common\qt4\inc\MantidQtWidgets\Common\moc_MantidTreeModel.cpp
+  )
+)
+
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Check the required build configuration
@@ -190,7 +203,7 @@ if not "%JOB_NAME%"=="%JOB_NAME:debug=%" (
   set VATES_OPT_VAL=ON
 )
 
-call cmake.exe -G "%CM_GENERATOR%" -A %CM_ARCH% -DCMAKE_SYSTEM_VERSION=%SDK_VERS% -DCONSOLE=OFF -DENABLE_CPACK=ON -DMAKE_VATES=%VATES_OPT_VAL% -DParaView_DIR=!PARAVIEW_DIR! -DMANTID_DATA_STORE=!MANTID_DATA_STORE! -DUSE_PRECOMPILED_HEADERS=ON %PACKAGE_OPTS% ..
+call cmake.exe -G "%CM_GENERATOR%" -A %CM_ARCH% -DCMAKE_SYSTEM_VERSION=%SDK_VERS% -DCONSOLE=OFF -DENABLE_CPACK=ON -DENABLE_MANTIDPLOT=OFF -DMAKE_VATES=OFF -DParaView_DIR= -DMANTID_DATA_STORE=!MANTID_DATA_STORE! -DUSE_PRECOMPILED_HEADERS=ON %PACKAGE_OPTS% ..
 
 if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 

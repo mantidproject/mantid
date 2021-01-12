@@ -7,6 +7,7 @@
 """Test suite for the PyChop package
 """
 import unittest
+import warnings
 import numpy as np
 
 from PyChop import PyChop2
@@ -72,6 +73,16 @@ class PyChop2Tests(unittest.TestCase):
             rr, ff = PyChop2.calculate('LET', variant, 200, 18, 0)
             self.assertAlmostEqual(rr[0], res[inc][0], places=7)
             self.assertAlmostEqual(ff, flux[inc], places=7)
+
+    def test_pychop_invalid_ei(self):
+        chopobj = PyChop2('MARI', 'G', 400.)
+        chopobj.setEi(120)
+        with warnings.catch_warnings(record=True) as w:
+            res = chopobj.getResolution(130.)
+            assert len(w) == 1
+            assert issubclass(w[0].category, UserWarning)
+            assert "Cannot calculate for energy transfer greater than Ei" in str(w[0].message)
+            assert np.isnan(res[0])
 
 
 if __name__ == "__main__":

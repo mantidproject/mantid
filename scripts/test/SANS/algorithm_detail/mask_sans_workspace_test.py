@@ -17,6 +17,7 @@ from sans.state.Serializer import Serializer
 from sans.state.StateObjects.StateData import get_data_builder
 from sans.state.StateObjects.StateMaskDetectors import get_mask_builder
 from sans.state.StateObjects.StateMoveDetectors import get_move_builder
+from sans.state.StateObjects.state_instrument_info import StateInstrumentInfo
 from sans.test_helper.test_director import TestDirector
 
 
@@ -275,6 +276,8 @@ class MaskSansWorkspaceTest(unittest.TestCase):
         test_director.set_states(data_state=data_info, mask_state=mask_info)
         state = test_director.construct()
 
+        state.instrument_info = StateInstrumentInfo.build_from_data_info(data_info)
+
         workspace = self._sans_data
 
         # Act
@@ -406,6 +409,8 @@ class MaskSansWorkspaceTest(unittest.TestCase):
         test_director = TestDirector()
         test_director.set_states(data_state=data_info, mask_state=mask_info)
         state = test_director.construct()
+
+        state.instrument_info = StateInstrumentInfo.build_from_data_info(data_info)
 
         returned_data = SANSLoad(SANSState=Serializer.to_json(state), SampleScatterWorkspace="mask_sans_ws",
                                  SampleScatterMonitorWorkspace="dummy")

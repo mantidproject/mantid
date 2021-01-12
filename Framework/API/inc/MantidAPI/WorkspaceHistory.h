@@ -40,7 +40,8 @@ public:
   virtual ~WorkspaceHistory() = default;
   /// Copy constructor
   WorkspaceHistory(const WorkspaceHistory &) = default;
-  /// Deleted copy assignment operator
+  /// Deleted copy assignment operator since m_environment has no copy
+  /// assignment.
   WorkspaceHistory &operator=(const WorkspaceHistory &) = delete;
   /// Retrieve the algorithm history list
   const AlgorithmHistories &getAlgorithmHistories() const;

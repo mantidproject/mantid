@@ -46,6 +46,14 @@ Figure::Figure(bool tightLayout)
     : Python::InstanceHolder(newFigure(tightLayout)) {}
 
 /**
+ * @return The number attribute of the current figure
+ */
+int Figure::number() const {
+  Mantid::PythonInterface::GlobalInterpreterLock lock;
+  return boost::python::extract<int>(pyobj().attr("number"));
+}
+
+/**
  * @return The facecolor of the current figure
  */
 QColor Figure::faceColor() const {
@@ -79,7 +87,25 @@ void Figure::setFaceColor(const char *color) {
  * @param args A hash of parameters to pass to set_tight_layout
  */
 void Figure::setTightLayout(QHash<QString, QVariant> const &args) {
+  GlobalInterpreterLock lock;
   pyobj().attr("set_tight_layout")(Python::qHashToDict(args));
+}
+
+/**
+ * Display the figure window
+ */
+void Figure::show() {
+  Mantid::PythonInterface::GlobalInterpreterLock lock;
+  this->pyobj().attr("show")();
+}
+
+/**
+ * Set window title of a figure
+ * @param title Title displayed in the top bar of the window.
+ */
+void Figure::setWindowTitle(const char *title) {
+  Mantid::PythonInterface::GlobalInterpreterLock lock;
+  this->pyobj().attr("canvas").attr("set_window_title")(title);
 }
 
 /**

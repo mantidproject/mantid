@@ -137,7 +137,7 @@ void Interpolation::addPoint(const double &xx, const double &yy) {
   }
 
   if (xx > m_data[N - 1].first) {
-    m_data.emplace_back(DataXY(xx, yy));
+    m_data.emplace_back(xx, yy);
     return;
   }
 
