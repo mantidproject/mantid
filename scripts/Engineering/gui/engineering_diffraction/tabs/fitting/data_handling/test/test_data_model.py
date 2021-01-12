@@ -38,9 +38,10 @@ class TestFittingDataModel(unittest.TestCase):
         mock_axis.getUnit.return_value = mock_unit
         mock_unit.caption.return_value = 'Time-of-flight'
 
+    @patch(data_model_path + ".FittingDataModel.update_log_workspace_group")
     @patch(data_model_path + '.ConvertUnits')
     @patch(data_model_path + ".Load")
-    def test_loading_single_file_stores_workspace(self, mock_load, mock_convunits):
+    def test_loading_single_file_stores_workspace(self, mock_load, mock_convunits, mock_update_logws_group):
         mock_load.return_value = self.mock_ws
 
         self.model.load_files("/ar/a_filename.whatever", "dSpacing")
@@ -49,13 +50,12 @@ class TestFittingDataModel(unittest.TestCase):
         self.assertEqual(1, len(self.model._loaded_workspaces))
         self.assertEqual(self.mock_ws, self.model._loaded_workspaces["a_filename_dSpacing"])
         mock_load.assert_called_with("/ar/a_filename.whatever", OutputWorkspace="a_filename_dSpacing")
+        mock_update_logws_group.assert_called_once()
 
-    @patch(data_model_path + '.FittingDataModel.write_table_row')
-    @patch(data_model_path + '.FittingDataModel.update_log_group_name')
+    @patch(data_model_path + ".FittingDataModel.update_log_workspace_group")
     @patch(data_model_path + '.ADS')
     @patch(data_model_path + ".Load")
-    def test_loading_single_file_already_loaded_untracked(self, mock_load, mock_ads, mock_update_logname,
-                                                          mock_writerow):
+    def test_loading_single_file_already_loaded_untracked(self, mock_load, mock_ads, mock_update_logws_group):
         mock_ads.doesExist.return_value = True
         mock_ads.retrieve.return_value = self.mock_ws
 
@@ -63,12 +63,11 @@ class TestFittingDataModel(unittest.TestCase):
 
         self.assertEqual(1, len(self.model._loaded_workspaces))
         mock_load.assert_not_called()
-        mock_update_logname.assert_called_once()  # needed to patch this as calls ADS.retrieve
-        self.assertEqual(1, mock_writerow.call_count)  # no logs included
+        mock_update_logws_group.assert_called_once()
 
-    @patch(data_model_path + '.FittingDataModel.update_log_group_name')
+    @patch(data_model_path + '.FittingDataModel.update_log_workspace_group')
     @patch(data_model_path + ".Load")
-    def test_loading_single_file_already_loaded_tracked(self, mock_load, mock_update_logname):
+    def test_loading_single_file_already_loaded_tracked(self, mock_load, mock_update_logws_group):
         fpath = "/ar/a_filename.whatever"
         xunit = "TOF"
         self.model._loaded_workspaces = {self.model._generate_workspace_name(fpath, xunit): self.mock_ws}
@@ -77,7 +76,7 @@ class TestFittingDataModel(unittest.TestCase):
 
         self.assertEqual(1, len(self.model._loaded_workspaces))
         mock_load.assert_not_called()
-        mock_update_logname.assert_called()
+        mock_update_logws_group.assert_called()
 
     @patch(data_model_path + '.get_setting')
     @patch(data_model_path + '.AverageLogData')
@@ -110,8 +109,9 @@ class TestFittingDataModel(unittest.TestCase):
         mock_load.assert_called_with("/ar/a_filename.whatever", OutputWorkspace="a_filename_TOF")
         self.assertEqual(1, mock_logger.error.call_count)
 
+    @patch(data_model_path + ".FittingDataModel.update_log_workspace_group")
     @patch(data_model_path + ".Load")
-    def test_loading_multiple_files(self, mock_load):
+    def test_loading_multiple_files(self, mock_load, mock_update_logws_group):
         mock_load.return_value = self.mock_ws
 
         self.model.load_files("/dir/file1.txt, /dir/file2.nxs", "TOF")
@@ -121,6 +121,7 @@ class TestFittingDataModel(unittest.TestCase):
         self.assertEqual(self.mock_ws, self.model._loaded_workspaces["file2_TOF"])
         mock_load.assert_any_call("/dir/file1.txt", OutputWorkspace="file1_TOF")
         mock_load.assert_any_call("/dir/file2.nxs", OutputWorkspace="file2_TOF")
+        mock_update_logws_group.assert_called_once()
 
     @patch(data_model_path + ".logger")
     @patch(data_model_path + ".Load")
@@ -351,8 +352,8 @@ class TestFittingDataModel(unittest.TestCase):
                                                                                                [33638.0, 10.0]],
                                                                        'Gaussian_Sigma': [[54.0, 2.0],
                                                                                           [51.0, 2.0]]})
-        self.assertEqual(self.model._fit_results['name1']['dpeaks'], {'Gaussian_PeakCentre':
-                                                                      [[2427.3125, 0.625], [2102.375, 0.625]]})
+        self.assertEqual(self.model._fit_results['name1']['dpeaks'],
+                         {'Gaussian_PeakCentre': [[2427.3125, 0.625], [2102.375, 0.625]]})
         mock_create_fit_tables.assert_called_once()
         mock_estimate_difc.assert_called_once()
 

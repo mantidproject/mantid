@@ -196,6 +196,7 @@ set(PYTHON_PLUGINS
     algorithms/WorkflowAlgorithms/CalculateMonteCarloAbsorption.py
     algorithms/WorkflowAlgorithms/ConvertMultipleRunsToSingleCrystalMD.py
     algorithms/WorkflowAlgorithms/CorelliPowderCalibrationCreate.py
+    algorithms/WorkflowAlgorithms/D7AbsoluteCrossSections.py
     algorithms/WorkflowAlgorithms/D7YIGPositionCalibration.py
     algorithms/WorkflowAlgorithms/DetectorFloodWeighting.py
     algorithms/WorkflowAlgorithms/DirectILLApplySelfShielding.py
@@ -248,6 +249,7 @@ set(PYTHON_PLUGINS
     algorithms/WorkflowAlgorithms/OSIRISDiffractionReduction.py
     algorithms/WorkflowAlgorithms/PaalmanPingsMonteCarloAbsorption.py
     algorithms/WorkflowAlgorithms/PoldiDataAnalysis.py
+    algorithms/WorkflowAlgorithms/PolDiffILLReduction.py
     algorithms/WorkflowAlgorithms/PowderILLDetectorScan.py
     algorithms/WorkflowAlgorithms/PowderILLEfficiency.py
     algorithms/WorkflowAlgorithms/PowderILLParameterScan.py
@@ -358,6 +360,7 @@ set(PYTHON_PLUGINS
     functions/ZFprotonDipole.py
     functions/Examples/Example1DFunction.py
     functions/Examples/ExamplePeakFunction.py
+
 )
 
 # Generate an absolute path for each relative one.
