@@ -22,6 +22,7 @@ Algorithms
 
 - The calculation of a distance has been updated in Track to correctly calculate the distance for objects that have multiple intercepting surfaces, e.g. hollow cylinder. This affect algorithms such as :ref:`AbsorptionCorrection <algm-AbsorptionCorrection>` where you may now get slightly different values.
 - Added the ability to specify the packing fraction and effective number density to :ref:`SetSample <algm-SetSample>` and :ref:`SetSampleMaterial <algm-SetSampleMaterial>`.
+- :ref:`AlignComponents <algm-AlignComponents>` now minimizes a set of peak-center deviations in d-spacing, instead of the geometrical DIFC parameters.
 
 Fitting
 -------
