@@ -22,9 +22,9 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
     _shape = None
     _height = None
     _isis_instrument = None
-    _is_override_sample = None
-    _has_can = None
-    _is_override_material_only = None
+    _override_shape = None
+    _has_container = None
+    _override_sample_material_only = None
 
     # Sample variables
     _sample_angle = None
@@ -317,7 +317,7 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
             self._set_sample(input_wave_ws, ['Sample'])
         elif self._is_override_material_only:
             # in this instance, setsample will not be called again so this material change only needs to happen once
-            self._set_sample_material_only(self._input_ws)
+            self._set_sample_material_only(input_wave_ws)
         monte_carlo_alg = self.createChildAlgorithm("MonteCarloAbsorption", enableLogging=True,
                                                     startProgress=0, endProgress=progess_steps)
         self._set_algorithm_properties(monte_carlo_alg, self._monte_carlo_kwargs)
