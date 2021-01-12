@@ -73,6 +73,7 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
         self.plot_selected_fit_observer = GenericObserverWithArgPassing(self.handle_plot_selected_fits)
         self.plot_guess_observer = GenericObserver(self.handle_plot_guess_changed)
         self.rebin_options_set_observer = GenericObserver(self.handle_rebin_options_changed)
+        self.new_data_loaded_observer = GenericObserver(self.handle_data_updated)
         self.plot_type_changed_notifier = GenericObservable()
 
     def _setup_view_connections(self):
@@ -359,6 +360,10 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
         workspace_list, indices = self._model.get_workspace_list_and_indices_to_plot(self._view.is_raw_plot(),
                                                                                      self._view.get_plot_type())
 
+        if workspace_list:
+            self._view.setEnabled(True)
+        else:
+            self._view.setEnabled(False)
         self._figure_presenter.plot_workspaces(workspace_list, indices, hold_on=hold_on, autoscale=autoscale)
 
     def _check_if_counts_and_groups_selected(self):

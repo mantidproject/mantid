@@ -38,7 +38,7 @@ class D7YIGPositionCalibration(PythonAlgorithm):
         return 'Performs D7 position calibration using YIG scan and returns D7 IPF readable by LoadILLPolarizedDiffraction.'
 
     def seeAlso(self):
-        return ['LoadILLPolarizedDiffraction']
+        return ['LoadILLPolarizedDiffraction', 'PolDiffILLReduction', 'D7AbsoluteCrossSections']
 
     def name(self):
         return 'D7YIGPositionCalibration'

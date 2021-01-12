@@ -27,6 +27,7 @@ class FittingPresenter(object):
         self.data_widget.presenter.seq_fit_started_notifier.add_subscriber(self.seq_fit_started_observer)
         self.data_widget.presenter.seq_fit_started_notifier.add_subscriber(self.plot_widget.seq_fit_started_observer)
         self.plot_widget.view.fit_browser.fit_notifier.add_subscriber(self.data_widget.presenter.fit_observer)
+        #
         self.plot_widget.view.fit_browser.fit_enabled_notifier.add_subscriber(
             self.data_widget.presenter.fit_enabled_observer)
         self.plot_widget.seq_fit_done_notifier.add_subscriber(self.data_widget.presenter.seq_fit_done_observer)
