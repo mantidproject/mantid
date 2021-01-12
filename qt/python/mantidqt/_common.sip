@@ -38,11 +38,8 @@ public:
 class GUIRegistryImpl {
 %TypeHeaderCode
 #include "MantidQtWidgets/Common/GUIRegistry.h"
-<<<<<<< HEAD
 #include "MantidPythonInterface/core/PythonObjectInstantiator.h"
 #include <boost/python/extract.hpp>
-=======
->>>>>>> fe954f35687f082524e75861aab8abfc50a4b5de
 #include "MantidQtWidgets/Common/Python/Sip.h"
 #include <QMenu>
 using MantidQt::Widgets::Common::Python::extract;

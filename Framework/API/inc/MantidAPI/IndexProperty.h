@@ -37,12 +37,9 @@ public:
 
   IndexProperty(const IndexProperty &) = default;
 <<<<<<< HEAD
-<<<<<<< HEAD
   // Copy assignment is deleted since there are reference type members.
 =======
 >>>>>>> skeleton of the new interface registry and launcher api
-=======
->>>>>>> fe954f35687f082524e75861aab8abfc50a4b5de
   IndexProperty &operator=(const IndexProperty &) = delete;
 
   IndexProperty *clone() const override;

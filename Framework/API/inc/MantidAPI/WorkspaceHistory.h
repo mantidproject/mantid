@@ -45,10 +45,7 @@ public:
   /// assignment.
 =======
   /// Deleted copy assignment operator
-<<<<<<< HEAD
 >>>>>>> skeleton of the new interface registry and launcher api
-=======
->>>>>>> fe954f35687f082524e75861aab8abfc50a4b5de
   WorkspaceHistory &operator=(const WorkspaceHistory &) = delete;
   /// Retrieve the algorithm history list
   const AlgorithmHistories &getAlgorithmHistories() const;
