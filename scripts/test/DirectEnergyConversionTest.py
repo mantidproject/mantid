@@ -79,7 +79,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         tReducer.prop_man.save_format = ['spe', 'nxspe', 'nxs']
         tReducer.save_results(tws, 'save_formats_test_file.tt')
 
-        files = ['save_formats_test_file.spe', 'save_formats_test_file.nxspe', 'save_formats_test_file_red.nxs']
+        files = ['save_formats_test_file.spe', 'save_formats_test_file.nxspe', 'save_formats_test_file.nxs']
         verify_present_and_delete(files)
 
         tReducer.prop_man.save_format = None
@@ -90,7 +90,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
         # save file with given extension on direct request:
         tReducer.save_results(tws, 'save_formats_test_file.nxs')
-        verify_present_and_delete(['save_formats_test_file_red.nxs'])
+        verify_present_and_delete(['save_formats_test_file.nxs'])
 
         tReducer.prop_man.save_format = []
         # do nothing
@@ -100,7 +100,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
         # save files with extensions on request
         tReducer.save_results(tws, 'save_formats_test_file', ['nxs', '.nxspe'])
-        verify_present_and_delete(['save_formats_test_file.nxspe', 'save_formats_test_file_red.nxs'])
+        verify_present_and_delete(['save_formats_test_file.nxspe', 'save_formats_test_file.nxs'])
 
         # this is strange feature.
         self.assertEqual(len(tReducer.prop_man.save_format), 2)

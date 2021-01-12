@@ -1294,8 +1294,6 @@ class DirectEnergyConversion(object):
                     SaveSPE(InputWorkspace=workspace,Filename= filename)
                     break
                 if case('nxs'):
-                    if save_file[-4:] != '_red':
-                        save_file = save_file+'_red'
                     filename = save_file + '.nxs'
                     SaveNexus(InputWorkspace=workspace,Filename= filename)
                     break
