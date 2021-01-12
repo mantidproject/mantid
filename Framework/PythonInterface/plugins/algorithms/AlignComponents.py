@@ -391,9 +391,9 @@ class AlignComponents(PythonAlgorithm):
                     adjustments_table.addRow(component_adjustments)
 
                 # Need to grab the component again, as things have changed
-                kwargs = dict(X=xmap[0], Y=xmap[1], Z=xmap[2], RelativePosition=False)
-                api.MoveInstrumentComponent(wks_name, componentName, **kwargs) # adjust workspace
-                api.MoveInstrumentComponent(output_workspace, componentName, **kwargs) # adjust workspace
+                kwargs = dict(X=xmap[0], Y=xmap[1], Z=xmap[2], RelativePosition=False, EnableLogging=False)
+                api.MoveInstrumentComponent(wks_name, componentName, **kwargs)  # adjust workspace
+                api.MoveInstrumentComponent(output_workspace, componentName, **kwargs)  # adjust workspace
                 comp = api.mtd[wks_name].getInstrument().getComponentByName(componentName)
                 logger.notice("Finished " + componentName + " Final position is " + str(comp.getPos()))
                 self._move = False
@@ -452,14 +452,14 @@ class AlignComponents(PythonAlgorithm):
             component_adjustments = [0.] * 7  # 3 for translation, 3 for rotation axis, 1 for rotation angle
 
             if self._move:
-                kwargs = dict(X=xmap[0], Y=xmap[1], Z=xmap[2], RelativePosition=False)
+                kwargs = dict(X=xmap[0], Y=xmap[1], Z=xmap[2], RelativePosition=False, EnableLogging=False)
                 api.MoveInstrumentComponent(wks_name, component, **kwargs)  # adjust workspace
                 api.MoveInstrumentComponent(output_workspace, component, **kwargs)  # adjust workspace
                 component_adjustments[:3] = xmap[:3]
 
             if self._rotate:
                 (rotw, rotx, roty, rotz) = self._eulerToAngleAxis(xmap[3], xmap[4], xmap[5], self._eulerConvention)
-                kwargs = dict(X=rotx, Y=roty, Z=rotz, Angle=rotw, RelativeRotation=False)
+                kwargs = dict(X=rotx, Y=roty, Z=rotz, Angle=rotw, RelativeRotation=False, EnableLogging=False)
                 api.RotateInstrumentComponent(wks_name, component, **kwargs)  # adjust workspace
                 api.RotateInstrumentComponent(output_workspace, component, **kwargs)  # adjust workspace
                 component_adjustments[3:] = [rotx, roty, rotz, rotw]
@@ -536,14 +536,15 @@ class AlignComponents(PythonAlgorithm):
         xmap = self._mapOptions(x_0)  # pad null rotations when x_0 contains only translations
 
         if self._move:
-            api.MoveInstrumentComponent(wks_name, component, X=xmap[0], Y=xmap[1], Z=xmap[2], RelativePosition=False)
+            api.MoveInstrumentComponent(wks_name, component, X=xmap[0], Y=xmap[1], Z=xmap[2],
+                                        RelativePosition=False, EnableLogging=False)
 
         if self._rotate:
             (rotw, rotx, roty, rotz) = self._eulerToAngleAxis(xmap[3], xmap[4], xmap[5], self._eulerConvention)  # YZX
             api.RotateInstrumentComponent(wks_name, component, X=rotx, Y=roty, Z=rotz, Angle=rotw,
-                                          RelativeRotation=False)
+                                          RelativeRotation=False, EnableLogging=False)
 
-        api.CalculateDIFC(InputWorkspace=wks_name, OutputWorkspace=wks_name)
+        api.CalculateDIFC(InputWorkspace=wks_name, OutputWorkspace=wks_name, EnableLogging=False)
         difc = api.mtd[wks_name].extractY().flatten()[firstIndex: lastIndex + 1]
         peaks_d = self.peaks_tof[firstIndex: lastIndex + 1] / difc[:, np.newaxis]  # peak centers in d-spacing units
 
