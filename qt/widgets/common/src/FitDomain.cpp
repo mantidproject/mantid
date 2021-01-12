@@ -148,22 +148,29 @@ void FitDomain::setParameterValue(std::string const &parameter,
     m_function->setParameter(parameter, newValue);
 }
 
+double FitDomain::getParameterValue(std::string const &parameter) const {
+  if (hasParameter(parameter))
+    return m_function->getParameter(parameter);
+  throw std::runtime_error("The function does not contain this parameter.");
+}
+
 void FitDomain::setAttributeValue(std::string const &attribute,
                                   IFunction::Attribute newValue) {
   if (m_function && m_function->hasAttribute(attribute))
     m_function->setAttribute(attribute, newValue);
 }
 
+Mantid::API::IFunction::Attribute
+FitDomain::getAttributeValue(std::string const &attribute) const {
+  if (m_function && m_function->hasAttribute(attribute))
+    return m_function->getAttribute(attribute);
+  throw std::runtime_error("The function does not contain this attribute.");
+}
+
 bool FitDomain::hasParameter(std::string const &parameter) const {
   if (m_function)
     return m_function->hasParameter(parameter);
   return false;
-}
-
-double FitDomain::getParameterValue(std::string const &parameter) const {
-  if (hasParameter(parameter))
-    return m_function->getParameter(parameter);
-  throw std::runtime_error("The function does not contain this parameter.");
 }
 
 bool FitDomain::isParameterActive(std::string const &parameter) const {

@@ -1029,6 +1029,7 @@ set(
   test/FileDialogHandlerTest.h
   test/FindFilesThreadPoolManagerTest.h
   test/FindFilesWorkerTest.h
+  test/FitDomainTest.h
   test/FitOptionsBrowserTest.h
   test/FitPropertyBrowserTest.h
   test/FitScriptGeneratorDataTableTest.h

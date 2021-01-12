@@ -29,13 +29,16 @@ public:
   FitDomain(std::string const &workspaceName, WorkspaceIndex workspaceIndex,
             double startX, double endX);
 
-  [[nodiscard]] bool setStartX(double startX);
-  [[nodiscard]] bool setEndX(double startX);
-
   inline std::string workspaceName() const noexcept { return m_workspaceName; }
   inline WorkspaceIndex workspaceIndex() const noexcept {
     return m_workspaceIndex;
   }
+
+  [[nodiscard]] bool setStartX(double startX);
+  [[nodiscard]] bool setEndX(double startX);
+
+  inline double startX() const noexcept { return m_startX; }
+  inline double endX() const noexcept { return m_endX; }
 
   void setFunction(Mantid::API::IFunction_sptr const &function);
   [[nodiscard]] Mantid::API::IFunction_sptr getFunction() const;
@@ -43,11 +46,14 @@ public:
   void addFunction(Mantid::API::IFunction_sptr const &function);
 
   void setParameterValue(std::string const &parameter, double newValue);
+  [[nodiscard]] double getParameterValue(std::string const &parameter) const;
+
   void setAttributeValue(std::string const &attribute,
                          Mantid::API::IFunction::Attribute newValue);
+  [[nodiscard]] Mantid::API::IFunction::Attribute
+  getAttributeValue(std::string const &attribute) const;
 
   [[nodiscard]] bool hasParameter(std::string const &parameter) const;
-  [[nodiscard]] double getParameterValue(std::string const &parameter) const;
   [[nodiscard]] bool isParameterActive(std::string const &parameter) const;
 
   void clearParameterTie(std::string const &parameter);
