@@ -57,41 +57,52 @@ struct SatelliteIndexingArgs {
 };
 
 struct IndexPeaksArgs {
+  /**
+   * @brief parse input arguments about mod vector and max order
+   * @param alg: reference to algorithm instance
+   * @return: SatelliteIndexingArgs
+   */
   static IndexPeaksArgs parse(const API::Algorithm &alg) {
     const PeaksWorkspace_sptr peaksWS = alg.getProperty(PEAKSWORKSPACE);
     const int maxOrderFromAlg = alg.getProperty(ModulationProperties::MaxOrder);
 
+    // Init variables
     int maxOrderToUse{0};
     std::vector<V3D> modVectorsToUse;
     modVectorsToUse.reserve(3);
     bool crossTermToUse{false};
 
-    // default behavior: map everything automatically
-    maxOrderToUse = maxOrderFromAlg;
-    crossTermToUse = alg.getProperty(ModulationProperties::CrossTerms);
+    // Parse mod vectors
     modVectorsToUse =
         addModulationVectors(alg.getProperty(ModulationProperties::ModVector1),
                              alg.getProperty(ModulationProperties::ModVector2),
                              alg.getProperty(ModulationProperties::ModVector3));
+    // check the 3 mod vectors added from properties
+    modVectorsToUse = validModulationVectors(
+        modVectorsToUse[0], modVectorsToUse[1], modVectorsToUse[2]);
 
-    // deal with special cases
-    if (maxOrderFromAlg <= 0) {
+    // deal with case: max order > 0 and no mod vector is specified
+    if (maxOrderFromAlg > 0 && modVectorsToUse.size() == 0) {
+      // Max Order is larger than zero but no modulated vector specified
+      // Assume that the caller method will handle this
+      maxOrderToUse = maxOrderFromAlg;
+    } else if (maxOrderFromAlg == 0 && modVectorsToUse.size() == 0) {
       // Use lattice definitions if they exist
       const auto &lattice = peaksWS->sample().getOrientedLattice();
       crossTermToUse = lattice.getCrossTerm();
       maxOrderToUse = lattice.getMaxOrder(); // the lattice can return a 0 here
+
       // if lattice has maxOrder, we will use the modVec from it, otherwise
       // stick to the input got from previous assignment
-      // NOTE:
-      // The non-zero modVectors check are turned off in the initilization step
-      // as it will lead to unexpected errors for users not relying on this
-      // feature.  For projects/processing that relyies on non-zero modVectors,
-      // it is the application responsibility to ensure that non-zero vectors
-      // are passed to IndexPeaks.
       if (maxOrderToUse > 0) {
-        modVectorsToUse = addModulationVectors(
+        modVectorsToUse = validModulationVectors(
             lattice.getModVec(0), lattice.getModVec(1), lattice.getModVec(2));
       }
+    } else {
+      // Use user specified
+      // default behavior: map everything automatically
+      maxOrderToUse = maxOrderFromAlg;
+      crossTermToUse = alg.getProperty(ModulationProperties::CrossTerms);
     }
 
     return {peaksWS,
@@ -448,9 +459,14 @@ std::map<std::string, std::string> IndexPeaks::validateInputs() {
   const bool isSave = this->getProperty(Prop::SAVEMODINFO);
   const bool isMOZero = (args.satellites.maxOrder == 0);
   bool isAllVecZero = true;
+  // parse() validates all the mod vectors. There should not be any modulated vector
+  // in modVectors is equal to (0, 0, 0)
   for (size_t vecNo = 0; vecNo < args.satellites.modVectors.size(); vecNo++) {
     if (args.satellites.modVectors[vecNo] != V3D(0.0, 0.0, 0.0)) {
       isAllVecZero = false;
+    } else {
+      g_log.warning() << "Mod vector " << vecNo << " is invalid (0, 0, 0)"
+                      << "\n";
     }
   }
   if (isMOZero && !isAllVecZero) {
