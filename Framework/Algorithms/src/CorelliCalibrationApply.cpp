@@ -57,8 +57,7 @@ void CorelliCalibrationApply::init() {
  *
  * @return std::map<std::string, std::string>
  */
-std::map<std::string, std::string>
-CorelliCalibrationApply::validateInputs() {
+std::map<std::string, std::string> CorelliCalibrationApply::validateInputs() {
   std::map<std::string, std::string> issues;
   ws = getProperty("Workspace");
 

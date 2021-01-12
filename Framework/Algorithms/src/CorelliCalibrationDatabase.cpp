@@ -687,8 +687,7 @@ std::string CorelliCalibrationDatabase::corelliCalibrationDatabaseName(
  * @param filepath
  * @return
  */
-bool CorelliCalibrationDatabase::isFileExist(
-    const std::string &filepath) {
+bool CorelliCalibrationDatabase::isFileExist(const std::string &filepath) {
 
   // TODO - replace by std::filesystem::exists(filename) until C++17 is properly
   // supported
@@ -702,9 +701,8 @@ bool CorelliCalibrationDatabase::isFileExist(
  * @param basename
  * @return
  */
-std::string
-CorelliCalibrationDatabase::joinPath(const std::string directory,
-                                           const std::string basename) {
+std::string CorelliCalibrationDatabase::joinPath(const std::string directory,
+                                                 const std::string basename) {
   boost::filesystem::path dir(directory);
   boost::filesystem::path file(basename);
   boost::filesystem::path fullpath = dir / file;
