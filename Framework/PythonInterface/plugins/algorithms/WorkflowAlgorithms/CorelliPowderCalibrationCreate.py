@@ -129,7 +129,7 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
         # "Source Position" properties
         self.declareProperty(name='FixSource', defaultValue=True,
                              doc="Fix source's distance from the sample")
-        self.declareProperty(name='SourceToSampleDistance', default=20.4,
+        self.declareProperty(name='SourceToSampleDistance', defaultValue=20.4,
                              doc='Set this value for a fixed distance from source to sample, in meters')
         self.setPropertySettings('SourceToSampleDistance',
                                  EnabledWhenProperty("FixSource", PropertyCriterion.IsDefault))
