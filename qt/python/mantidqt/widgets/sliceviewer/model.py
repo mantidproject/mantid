@@ -122,8 +122,8 @@ class SliceViewerModel:
         Check if the given workspace can multiple BinMD calls.
         """
         ws_type = self.get_ws_type()
-        return ws_type == WS_TYPE.MDE or (ws_type == WS_TYPE.MDH and self._get_ws().hasOriginalWorkspace(0)
-                               and self._get_ws().getOriginalWorkspace(0).getNumDims() == self._get_ws().getNumDims())
+        return ws_type == WS_TYPE.MDE or (ws_type == WS_TYPE.MDH and self._get_ws().hasOriginalWorkspace(
+            0) and self._get_ws().getOriginalWorkspace(0).getNumDims() == self._get_ws().getNumDims())
 
     def get_ws_name(self) -> str:
         """Return the name of the workspace being viewed"""
