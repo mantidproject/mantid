@@ -66,8 +66,8 @@ public:
    * @brief Test algorithm to convert datetime string to date stamp
    */
   void test_timestamp_conversion() {
-    std::string yyyymmdd = CorelliCalibrationDatabase::convertTimeStamp(
-        "2018-02-20T12:57:17");
+    std::string yyyymmdd =
+        CorelliCalibrationDatabase::convertTimeStamp("2018-02-20T12:57:17");
     TS_ASSERT_EQUALS(yyyymmdd, "20180220");
   }
 
@@ -96,8 +96,7 @@ public:
         createTestCalibrationTableWorkspace(outwsname);
 
     // Create an incorrect calibration workspace
-    std::string wrongwsname{
-        "CorelliCalibrationDatabaseTest_TableWS_Wrong"};
+    std::string wrongwsname{"CorelliCalibrationDatabaseTest_TableWS_Wrong"};
     TableWorkspace_sptr calib_wrong_ws =
         createIncorrectTestCalibrationTableWorkspace(wrongwsname);
 
@@ -193,8 +192,7 @@ public:
     // Create workspaces
     EventWorkspace_sptr input_ws = createTestEventWorkspace();
     // Name of the output calibration workspace
-    std::string outwsname(
-        "CorelliCalibrationDatabaseTest_CombinedTableWS");
+    std::string outwsname("CorelliCalibrationDatabaseTest_CombinedTableWS");
     TableWorkspace_sptr calib_ws =
         createTestCalibrationTableWorkspace(outwsname);
     TS_ASSERT(input_ws);
