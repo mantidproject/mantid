@@ -151,11 +151,28 @@ void LoadILLSANS::exec() {
     initWorkSpaceD11B(firstEntry, instrumentPath);
     progress.report("Loading the instrument " + m_instrumentName);
     runLoadInstrument();
+    double distance =
+        firstEntry.getFloat(instrumentPath + "/detector/det_calc") / 1000.;
+    moveDetectorDistance(distance, "detector_center");
+
+    distance =
+        firstEntry.getFloat(instrumentPath + "/detectorLeft/det_calc") / 1000.;
+    moveDetectorDistance(distance, "detector_left");
+
+    distance =
+        firstEntry.getFloat(instrumentPath + "/detectorRight/det_calc") / 1000.;
+    moveDetectorDistance(distance, "detector_right");
 
   } else if (m_instrumentName == "D22B") {
     initWorkSpaceD22B(firstEntry, instrumentPath);
     progress.report("Loading the instrument " + m_instrumentName);
     runLoadInstrument();
+    double distance =
+        firstEntry.getFloat(instrumentPath + "/Detector/det_calc");
+    moveDetectorDistance(distance, "detector");
+
+    distance = firstEntry.getFloat(instrumentPath + "/RightDetector/det_calc");
+    moveDetectorDistance(distance, "detector_right");
 
   } else {
     initWorkSpace(firstEntry, instrumentPath);
