@@ -46,7 +46,7 @@ template <typename T> T *extract(const Object &obj) {
  * Extract a C++ object of type T from the Python object pointer
  * @param obj A sip-wrapped PyObject pointer
  */
-template <typename T> T *extract(PyObject* obj) {
+template <typename T> T *extract(PyObject *obj) {
   const auto sipapi = Detail::sipAPI();
   if (!PyObject_TypeCheck(obj, sipapi->api_wrapper_type)) {
     throw std::runtime_error("extract() - Object is not a sip-wrapped type.");

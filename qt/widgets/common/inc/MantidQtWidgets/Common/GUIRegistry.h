@@ -12,10 +12,10 @@
 #include "MantidKernel/RegistrationHelper.h"
 #include "MantidKernel/SingletonHolder.h"
 
+#include <QMenu>
 #include <map>
 #include <string>
 #include <vector>
-#include <QMenu>
 
 namespace MantidQt {
 namespace API {
@@ -72,10 +72,10 @@ public:
                                " > " + name);
     }
     if (name.empty()) {
-        throw std::runtime_error("Unable to register a GUI with no name");
+      throw std::runtime_error("Unable to register a GUI with no name");
     }
     if (category.empty()) {
-        throw std::runtime_error("Unable to register a GUI with no category");
+      throw std::runtime_error("Unable to register a GUI with no category");
     }
     // transfer the ownership to the registry
     m_registry[category][name] = std::unique_ptr<IGUILauncher>(gui);
