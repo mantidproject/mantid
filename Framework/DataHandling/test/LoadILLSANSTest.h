@@ -119,25 +119,18 @@ public:
     TS_ASSERT(!outputWS->isDistribution())
     const auto &instrument = outputWS->getInstrument();
 
-    // TODO SET CORRECT COORDINATES
     IComponent_const_sptr component =
-        instrument->getComponentByName("detector");
+        instrument->getComponentByName("detector_center");
     V3D pos = component->getPos();
-    TS_ASSERT_DELTA(pos.X(), 0, 1E-5)
-    TS_ASSERT_DELTA(pos.Y(), 0, 1E-5)
-    TS_ASSERT_DELTA(pos.Z(), 20.007, 1E-3)
+    TS_ASSERT_DELTA(pos.Z(), 8.9274824298, 1E-3)
 
     component = instrument->getComponentByName("detector_left");
     pos = component->getPos();
-    TS_ASSERT_DELTA(pos.X(), 0, 1E-5)
-    TS_ASSERT_DELTA(pos.Y(), 0, 1E-5)
-    TS_ASSERT_DELTA(pos.Z(), 0, 1E-5)
+    TS_ASSERT_DELTA(pos.Z(), 8.82248, 1E-5)
 
     component = instrument->getComponentByName("detector_right");
     pos = component->getPos();
-    TS_ASSERT_DELTA(pos.X(), 0, 1E-5)
-    TS_ASSERT_DELTA(pos.Y(), 0, 1E-5)
-    TS_ASSERT_DELTA(pos.Z(), 0, 1E-5)
+    TS_ASSERT_DELTA(pos.Z(), 8.82248, 1E-5)
 
     const auto &xAxis = outputWS->x(0).rawData();
     const auto &spec = outputWS->y(3630).rawData();
@@ -210,15 +203,11 @@ public:
     // TODO SET CORRECT COORDINATES
     IComponent_const_sptr comp = instrument->getComponentByName("detector");
     V3D pos = comp->getPos();
-    TS_ASSERT_DELTA(pos.X(), -0.35, 0.01)
-    TS_ASSERT_DELTA(pos.Y(), -0.35, 0.01)
-    TS_ASSERT_DELTA(pos.Z(), 8, 0.01)
+    TS_ASSERT_DELTA(pos.Z(), 16.874, 1E-5)
 
     comp = instrument->getComponentByName("detector_right");
     pos = comp->getPos();
-    TS_ASSERT_DELTA(pos.X(), 0, 0.01)
-    TS_ASSERT_DELTA(pos.Y(), -0.35, 0.01)
-    TS_ASSERT_DELTA(pos.Z(), 0, 0.01)
+    TS_ASSERT_DELTA(pos.Z(), 16.874, 1E-5)
 
     const auto &xAxis = outputWS->x(0).rawData();
     const auto &spec = outputWS->y(1280).rawData();
