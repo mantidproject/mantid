@@ -21,13 +21,10 @@ namespace Algorithms {
  * @brief Apply calibration table for Corelli Powder Diffraction
  *
  */
-class MANTID_ALGORITHMS_DLL CorelliCalibrationApply
-    : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CorelliCalibrationApply : public API::Algorithm {
 public:
   /// Algorithm's name for identification
-  const std::string name() const override {
-    return "CorelliCalibrationApply";
-  };
+  const std::string name() const override { return "CorelliCalibrationApply"; };
 
   /// Summary of algorithm's purpose
   const std::string summary() const override {
@@ -44,8 +41,8 @@ public:
 
   /// Extra help info
   const std::vector<std::string> seeAlso() const override {
-    return {"CorelliPowderCalibrationGenerate",
-            "CorelliCalibrationDatabase", "CorelliPowderCalibrationLoad"};
+    return {"CorelliPowderCalibrationGenerate", "CorelliCalibrationDatabase",
+            "CorelliPowderCalibrationLoad"};
   };
 
 private:
