@@ -115,17 +115,11 @@ std::string GitHubApiHelper::getRateLimitDescription() {
   return formatRateLimit(limit, remaining, expires);
 }
 
-int GitHubApiHelper::processAnonymousRequest(
-    const Poco::Net::HTTPResponse &response, Poco::URI &uri,
-    std::ostream &responseStream) {
-  if (!isAuthenticated()) {
-    g_log.debug("Repeating API call anonymously\n");
-    removeHeader("Authorization");
-    return this->sendRequest(uri.toString(), responseStream);
-  } else {
-    g_log.warning("Authentication failed and anonymous access refused\n");
-    return response.getStatus();
-  }
+int GitHubApiHelper::processAnonymousRequest(Poco::URI &uri,
+                                             std::ostream &responseStream) {
+  g_log.debug("Repeating API call anonymously\n");
+  removeHeader("Authorization");
+  return this->sendRequest(uri.toString(), responseStream);
 }
 
 int GitHubApiHelper::sendRequestAndProcess(HTTPClientSession &session,
@@ -153,7 +147,7 @@ int GitHubApiHelper::sendRequestAndProcess(HTTPClientSession &session,
              (retStatus == HTTP_NOT_FOUND)) {
     // If authentication fails you can get HTTP_UNAUTHORIZED or HTTP_NOT_FOUND
     // If the limit runs out you can get HTTP_FORBIDDEN
-    return this->processAnonymousRequest(*m_response, uri, responseStream);
+    return this->processAnonymousRequest(uri, responseStream);
   } else if (isRelocated(retStatus)) {
     return this->processRelocation(*m_response, responseStream);
   } else {
