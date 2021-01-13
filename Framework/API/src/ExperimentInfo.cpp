@@ -1403,17 +1403,21 @@ bool ExperimentInfo::getDetectorValues(const API::SpectrumInfo &specInfo,
 
     std::vector<detid_t> warnDetIds;
     try {
-      auto [difa, difc, tzero] =
-          specInfo.diffractometerConstants(wsIndex, warnDetIds);
-      pmap[UnitParams::difa] = difa;
-      pmap[UnitParams::difc] = difc;
-      pmap[UnitParams::tzero] = tzero;
-      if (warnDetIds.size() > 0) {
-        createDetectorIdLogMessages(warnDetIds, wsIndex);
-      }
-      if ((outputUnit.unitID().find("dSpacing") != std::string::npos) &&
-          (difa == 0) && (difc == 0)) {
-        return false;
+      if (emode == 0) { // elastic
+        auto [difa, difc, tzero] =
+            specInfo.diffractometerConstants(wsIndex, warnDetIds);
+        pmap[UnitParams::difa] = difa;
+        pmap[UnitParams::difc] = difc;
+        pmap[UnitParams::tzero] = tzero;
+        if (warnDetIds.size() > 0) {
+          createDetectorIdLogMessages(warnDetIds, wsIndex);
+        }
+        if ((outputUnit.unitID().find("dSpacing") != std::string::npos) &&
+            (difa == 0) && (difc == 0)) {
+          return false;
+        }
+      } else {
+        pmap[UnitParams::difc] = specInfo.difcUncalibrated(wsIndex);
       }
     } catch (const std::runtime_error &e) {
       g_log.warning(e.what());

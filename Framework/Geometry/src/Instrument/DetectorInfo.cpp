@@ -311,17 +311,17 @@ double DetectorInfo::azimuthal(const std::pair<size_t, size_t> &index) const {
 std::tuple<double, double, double> DetectorInfo::diffractometerConstants(
     const size_t index, std::vector<detid_t> &calibratedDets,
     std::vector<detid_t> &uncalibratedDets) const {
-  auto det = m_instrument->getDetector((*m_detectorIDs)[index]);
+  auto det = getDetectorPtr(index);
   auto pmap = m_instrument->getParameterMap();
-  auto par = pmap->getRecursive(det.get(), "DIFC");
+  auto par = pmap->get(det.get(), "DIFC");
   if (par) {
     double difc = par->value<double>();
     calibratedDets.push_back((*m_detectorIDs)[index]);
     double difa = 0., tzero = 0.;
-    par = pmap->getRecursive(det.get(), "DIFA");
+    par = pmap->get(det.get(), "DIFA");
     if (par)
       difa = par->value<double>();
-    par = pmap->getRecursive(det.get(), "TZERO");
+    par = pmap->get(det.get(), "TZERO");
     if (par)
       tzero = par->value<double>();
     return {difa, difc, tzero};
