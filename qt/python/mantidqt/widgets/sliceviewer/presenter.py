@@ -95,8 +95,9 @@ class SliceViewer(ObservingPresenter):
             # model frame
             if data_view.nonorthogonal_mode:
                 inv_tr = data_view.nonortho_transform.inv_tr
-                xmin_p, ymin_p = inv_tr(xlim[0], ylim[0])
-                xmax_p, ymax_p = inv_tr(xlim[1], ylim[1])
+                # viewing axis y not aligned with plot axis
+                xmin_p, ymax_p = inv_tr(xlim[0], ylim[1])
+                xmax_p, ymin_p = inv_tr(xlim[1], ylim[0])
                 xlim, ylim = (xmin_p, xmax_p), (ymin_p, ymax_p)
             if data_view.dimensions.transpose:
                 limits = ylim, xlim

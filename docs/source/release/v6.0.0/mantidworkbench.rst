@@ -60,5 +60,6 @@ Bugfixes
 - Fixed a bug which caused a terminate dialogue to be raised if the user zoomed in far enough while using the SliceViewer on MDE workspaces.
 - Fixed a crash in the plot config when removing the last curve on a plot
 - Fixed a bug in SliceViewer that caused shown data to not update correctly when changing axis selection.
+- Fixed bug supplying rebin arguments for non-orthogonal data in sliceviewer that meant that not all the availible data within the axes limits were being plotted.
 
 :ref:`Release 6.0.0 <v6.0.0>`
