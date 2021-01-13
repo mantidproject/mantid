@@ -69,7 +69,6 @@ public:
   }
 
   void tearDown() override {
-
     Mantid::API::AnalysisDataService::Instance().clear();
   }
 

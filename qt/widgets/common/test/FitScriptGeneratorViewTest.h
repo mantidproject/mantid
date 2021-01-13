@@ -13,8 +13,8 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtWidgets/Common/FitScriptGeneratorDataTable.h"
+#include "MantidQtWidgets/Common/FitScriptGeneratorMockObjects.h"
 #include "MantidQtWidgets/Common/FitScriptGeneratorView.h"
 #include "MantidQtWidgets/Common/IFitScriptGeneratorPresenter.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -51,41 +51,6 @@ CompositeFunction_sptr createEmptyComposite() {
 }
 
 } // namespace
-
-GNU_DIAG_OFF_SUGGEST_OVERRIDE
-
-class MockFitScriptGeneratorPresenter : public IFitScriptGeneratorPresenter {
-
-public:
-  MockFitScriptGeneratorPresenter(FitScriptGeneratorView *view) {
-    m_view = view;
-    m_view->subscribePresenter(this);
-  }
-
-  void notifyPresenter(ViewEvent const &ev, std::string const &arg1 = "",
-                       std::string const &arg2 = "") override {
-    notifyPresenterImpl(ev, arg1, arg2);
-  }
-
-  MOCK_METHOD3(notifyPresenterImpl,
-               void(ViewEvent const &ev, std::string const &arg1,
-                    std::string const &arg2));
-  MOCK_METHOD2(notifyPresenter,
-               void(ViewEvent const &ev, std::vector<std::string> const &vec));
-  MOCK_METHOD2(notifyPresenter,
-               void(ViewEvent const &ev, FittingMode fittingMode));
-
-  MOCK_METHOD0(openFitScriptGenerator, void());
-
-  MOCK_METHOD1(setGlobalTies, void(std::vector<GlobalTie> const &globalTies));
-  MOCK_METHOD1(setGlobalParameters,
-               void(std::vector<GlobalParameter> const &globalParameters));
-
-private:
-  FitScriptGeneratorView *m_view;
-};
-
-GNU_DIAG_ON_SUGGEST_OVERRIDE
 
 class FitScriptGeneratorViewTest : public CxxTest::TestSuite {
 
