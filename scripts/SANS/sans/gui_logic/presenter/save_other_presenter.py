@@ -9,6 +9,7 @@ from mantid import AnalysisDataService
 from sans.algorithm_detail.batch_execution import save_workspace_to_file
 import os
 from mantid.api import WorkspaceGroup
+from mantid.kernel import logger
 
 
 class SaveOtherPresenter(object):
@@ -38,12 +39,19 @@ class SaveOtherPresenter(object):
             return
         selected_workspaces = self.get_workspaces()
         selected_filenames = self.get_filenames(selected_workspaces, self.filename)
+        additional_run_numbers = {}
 
         self._view.progress_bar_minimum = 0
         self._view.progress_bar_maximum = len(selected_workspaces)
         self._view.progress_bar_value = 0
         for name_to_save, filename in zip(selected_workspaces, selected_filenames):
-            save_workspace_to_file(name_to_save, file_formats, filename)
+            try:
+                save_workspace_to_file(name_to_save, file_formats, filename, additional_run_numbers)
+            except RuntimeError:
+                logger.warning(f"Cannot save {name_to_save} using SANSSave. "
+                               "This workspace needs to be the result of a SANS reduction, "
+                               "i.e. it can only be 1D or 2D if the second axis "
+                               "is numeric.")
             self._view.increment_progress()
 
     def on_item_selection_changed(self):
