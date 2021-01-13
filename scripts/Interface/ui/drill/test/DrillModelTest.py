@@ -469,19 +469,33 @@ class DrillModelTest(unittest.TestCase):
         self.assertDictEqual(master, {'A': 0, 'B': 1})
 
     def test_getProcessingParameters(self):
-        params = dict.fromkeys(self.SETTINGS["a1"], "test")
-        params["OutputWorkspace"] = "sample_1"
         s1 = mock.Mock()
-        s1.getParameters.return_value = {}
-        self.model.samples = [s1]
-        self.assertEqual(self.model.getProcessingParameters(0), params)
-        s1.getParameters.return_value = {"c1": "test2"}
-        params.update({"c1": "test2"})
-        self.assertEqual(self.model.getProcessingParameters(0), params)
-        s1.getParameters.return_value = {"c1": "test2",
-                                         "CustomOptions": {"int": 2}}
-        params["int"] = 2
-        self.assertEqual(self.model.getProcessingParameters(0), params)
+        s2 = mock.Mock()
+        s3 = mock.Mock()
+        s4 = mock.Mock()
+        s1.getParameters.return_value = {"p1": "v1", "p2": "v2"}
+        s2.getParameters.return_value = {}
+        s3.getParameters.return_value = {"p2": "v2'"}
+        s4.getParameters.return_value = {"p2": "DEFAULT"}
+        self.model.samples = [s1, s2, s3, s4]
+        self.model.groups = {"A": {s1, s2, s3, s4}}
+        self.model.masterSamples = {"A": s1}
+        params = dict.fromkeys(self.SETTINGS["a1"], "test")
+        params.update({"p1": "v1", "p2": "v2"})
+        params["OutputWorkspace"] = "sample_1"
+        self.assertDictEqual(self.model.getProcessingParameters(0), params)
+        params = dict.fromkeys(self.SETTINGS["a1"], "test")
+        params.update({"p1": "v1", "p2": "v2"})
+        params["OutputWorkspace"] = "sample_2"
+        self.assertDictEqual(self.model.getProcessingParameters(1), params)
+        params = dict.fromkeys(self.SETTINGS["a1"], "test")
+        params.update({"p1": "v1", "p2": "v2'"})
+        params["OutputWorkspace"] = "sample_3"
+        self.assertDictEqual(self.model.getProcessingParameters(2), params)
+        params = dict.fromkeys(self.SETTINGS["a1"], "test")
+        params.update({"p1": "v1"})
+        params["OutputWorkspace"] = "sample_4"
+        self.assertDictEqual(self.model.getProcessingParameters(3), params)
 
     def test_process(self):
         s1 = mock.Mock()

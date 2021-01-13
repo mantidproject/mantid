@@ -428,7 +428,7 @@ class DrillModel(QObject):
             value (str): new value
         """
         self.samples[sampleIndex].changeParameter(name, value)
-        if not value:
+        if (value == "DEFAULT") or not value:
             self.paramOk.emit(sampleIndex, name)
         else:
             self.checkParameter(name, value, sampleIndex)
@@ -596,7 +596,7 @@ class DrillModel(QObject):
             del params["CustomOptions"]
         # remove empty params
         for (k, v) in list(params.items()):
-            if v is None:
+            if v is None or v == "DEFAULT":
                 del params[k]
         # add the output workspace param
         if "OutputWorkspace" not in params:

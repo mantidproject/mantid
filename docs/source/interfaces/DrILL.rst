@@ -119,6 +119,11 @@ increment fill
     the lowest row and column index) will be incremented and written in the
     following ones.
 
+`DEFAULT` is a special value. During data reduction, it will be replaced with
+the default value of this parameter defined in the algorithm. It acts like an
+empty cell but this allows to override a master sample parameter with the
+default value (see below).
+
 For all algorithms, the last column of the table is always labelled
 *CustomOptions*. It makes it possible to override a global parameter for
 the current row only. It should contain a semicolon separated list of key value
@@ -140,7 +145,9 @@ designated. The values of the parameters of the master sample will be used when
 processing all rows in the group.
 
 Paramaters can still be overriden manually whithin a group by entering a sample
-specific value in the table. The priority for the parameter values is as follow:
+specific value in the table. The special `DEFAULT` value can be use to override
+a master sample parameter with its default value. The priority for the parameter
+values is as follow:
 
 sample > master sample > global settings
 
@@ -152,10 +159,13 @@ Sample     Group  parameter 1  parameter 2
 1(master)  g1     v1           v2
 2          g1
 3          g1                  v2'
+4          g1                  DEFAULT
 =========  =====  ===========  ===========
 
-* For processing sample 2: `parameter1=v1` and `parameter2=v2`
-* For processing sample 3: `parameter1=v1` and `parameter2=v2'`
+* For the processing of sample 2: `parameter1=v1` and `parameter2=v2`
+* For the processing of sample 3: `parameter1=v1` and `parameter2=v2'`
+* For the processing of sample 4: `parameter1=v1` and `parameter2` will use the
+  algorithm default value
 
 To group samples, one has to select them (at least one cell per row) and press
 Ctrl + G or use the context menu. To set a row as master, one has to select it
