@@ -48,6 +48,7 @@ Python
 Improvements
 ############
 - Member function: MDGeometry::getNumNonIntegratedDims() returns the number of non-integrated dimensions present.
+- When Mantid interacts with the GitHub API it tries an initial authenticated call and if that fails for any reason a fallback anonymous call is made. The anonymous call wasn't working properly and this has been fixed. This provides some extra reliability for processes such as the Instrument data download that is performed during startup of Workbench
 
 Bugfixes
 ########
