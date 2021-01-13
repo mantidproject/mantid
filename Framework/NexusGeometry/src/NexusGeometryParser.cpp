@@ -7,11 +7,9 @@
 #include "MantidNexusGeometry/NexusGeometryParser.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Objects/CSGObject.h"
-#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidGeometry/Rendering/ShapeInfo.h"
 #include "MantidKernel/ChecksumHelper.h"
-#include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidNexusGeometry/AbstractLogger.h"
 #include "MantidNexusGeometry/H5ForwardCompatibility.h"
 #include "MantidNexusGeometry/Hdf5Version.h"
@@ -23,8 +21,6 @@
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 #include <H5Cpp.h>
-#include <boost/algorithm/string.hpp>
-#include <boost/optional.hpp>
 #include <boost/regex.hpp>
 #include <numeric>
 #include <sstream>
@@ -37,7 +33,6 @@ using namespace H5;
 
 // Anonymous namespace
 namespace {
-using FaceV = std::vector<Eigen::Vector3d>;
 
 struct Face {
   Eigen::Vector3d v1;
@@ -252,11 +247,11 @@ private:
   }
 
   // Provided to support invalid or null-termination character strings
-  std::string readOrSubsitute(const std::string &dataset, const Group &group,
-                              std::string &substitue) {
+  std::string readOrSubstitute(const std::string &dataset, const Group &group,
+                               const std::string &substitute) {
     auto read = get1DStringDataset(dataset, group);
     if (read.empty())
-      read = substitue;
+      read = substitute;
     return read;
   }
 
@@ -753,7 +748,7 @@ private:
     Group sourceGroup = utilities::findGroupOrThrow(instrumentGroup, NX_SOURCE);
     std::string sourceName = "Unspecfied";
     if (utilities::findDataset(sourceGroup, "name"))
-      sourceName = readOrSubsitute("name", sourceGroup, sourceName);
+      sourceName = readOrSubstitute("name", sourceGroup, sourceName);
     auto sourceTransformations = getTransformations(file, sourceGroup);
     auto defaultPos = Eigen::Vector3d(0.0, 0.0, 0.0);
     builder.addSource(sourceName, sourceTransformations * defaultPos);
@@ -769,7 +764,7 @@ private:
         sampleTransforms * Eigen::Vector3d(0.0, 0.0, 0.0);
     std::string sampleName = "Unspecified";
     if (utilities::findDataset(sampleGroup, "name"))
-      sampleName = readOrSubsitute("name", sampleGroup, sampleName);
+      sampleName = readOrSubstitute("name", sampleGroup, sampleName);
     builder.addSample(sampleName, samplePos);
   }
 
