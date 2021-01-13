@@ -230,7 +230,7 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
         self.load_workspaces_into_model_and_view_from_browse([workspace], [1234], ["C:/dir1/EMU0001234.nxs"])
 
         self.load_utils_patcher.side_effect = self.load_failure
-        self.view.set_file_edit("C:\dir2\EMU000123.nxs")
+        self.view.set_file_edit(r"C:\dir2\EMU000123.nxs")
 
         self.presenter.handle_file_changed_by_user()
         self.wait_for_thread(self.presenter._load_thread)

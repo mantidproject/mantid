@@ -11,6 +11,7 @@ from qtpy.QtCore import QSettings, QCoreApplication
 from shutil import rmtree
 from os.path import dirname
 
+import tempfile
 import unittest
 
 GROUP = "CustomInterfaces"
@@ -32,6 +33,8 @@ class SettingsHelperTest(unittest.TestCase):
         QCoreApplication.setApplicationName("test1")
         QCoreApplication.setOrganizationName("org1")
         QSettings.setDefaultFormat(QSettings.IniFormat)
+        cls.settings_dir = tempfile.TemporaryDirectory()
+        QSettings.setPath(QSettings.IniFormat, QSettings.UserScope, cls.settings_dir.name)
 
     def test_set_setting_with_string(self):
         set_setting(GROUP, PREFIX, "something", "value")

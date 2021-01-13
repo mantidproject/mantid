@@ -185,6 +185,10 @@
           </property>
          </widget>
         </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
         <item>
          <widget class="QLabel" name="label_11">
           <property name="text">
@@ -194,6 +198,20 @@
         </item>
         <item>
          <widget class="QLineEdit" name="backwardBox"/>
+        </item>
+        <item>
+         <widget class="QLabel" name="alphaLabel">
+          <property name="text">
+           <string>Alpha</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="alpha">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+         </widget>
         </item>
        </layout>
       </item>

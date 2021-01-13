@@ -81,9 +81,9 @@ class MuonContextWithFrequencyTest(unittest.TestCase):
 
     def test_call_freq_workspace_names(self):
         self.context.get_names_of_frequency_domain_workspaces_to_fit = mock.Mock()
-        self.context.get_names_of_workspaces_to_fit(runs='19489', group_and_pair='fwd, bwd', phasequad=True, freq="All")
+        self.context.get_names_of_workspaces_to_fit(runs='19489', group_and_pair='fwd, bwd', freq="All")
         self.context.get_names_of_frequency_domain_workspaces_to_fit.assert_called_once_with(runs='19489', group_and_pair='fwd, bwd',
-                                                                                             phasequad=True, frequency_type="All")
+                                                                                             frequency_type="All")
 
 
 if __name__ == '__main__':

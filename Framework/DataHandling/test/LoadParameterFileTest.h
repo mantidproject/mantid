@@ -11,6 +11,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -229,6 +230,50 @@ public:
                                  Mantid::Kernel::OptionalBool(true));
     TS_ASSERT_THROWS_NOTHING(pLoadInstrument->execute());
     TS_ASSERT(pLoadInstrument->isExecuted());
+  }
+
+  void test_load_IPF_time_validity() {
+    auto ws = AnalysisDataService::Instance().retrieve(wsName);
+    Workspace2D_sptr ws2D = std::dynamic_pointer_cast<Workspace2D>(ws);
+
+    // set a date for the experiment
+    std::string start_time = "1900-01-01 00:00:00";
+    ws2D->mutableRun().addProperty("run_start", start_time);
+
+    // load in additional parameters
+    auto pLoaderPF = AlgorithmManager::Instance().create("LoadParameterFile");
+
+    TS_ASSERT_THROWS_NOTHING(pLoaderPF->initialize());
+    pLoaderPF->setPropertyValue(
+        "Filename",
+        "unit_testing/IDF_for_UNIT_TESTING2_paramFile_with_dates.xml");
+    pLoaderPF->setPropertyValue("Workspace", wsName);
+    TS_ASSERT_THROWS_NOTHING(pLoaderPF->execute());
+    TS_ASSERT(pLoaderPF->isExecuted());
+    MatrixWorkspace_sptr output;
+
+    // Get back the saved workspace
+    TS_ASSERT_THROWS_NOTHING(
+        output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            wsName));
+    const auto &paramMap = output->constInstrumentParameters();
+    const auto &detectorInfo = output->detectorInfo();
+    const auto &det = detectorInfo.detector(detectorInfo.indexOf(1008));
+    Parameter_sptr param;
+    param = paramMap.get(&det, "date-most-recent");
+    TS_ASSERT_EQUALS(param->value<double>(), 1);
+    param = paramMap.get(&det, "date-within-bound");
+    TS_ASSERT_EQUALS(param->value<double>(), 1);
+    param = paramMap.get(&det, "date-no-bounds-vs-end");
+    TS_ASSERT_EQUALS(param->value<double>(), 1);
+    param = paramMap.get(&det, "date-same-start-no-end");
+    TS_ASSERT_EQUALS(param->value<double>(), 1);
+    param = paramMap.get(&det, "date-no-bounds-vs-start");
+    TS_ASSERT_EQUALS(param->value<double>(), 1);
+    param = paramMap.get(&det, "date-same-start");
+    TS_ASSERT_EQUALS(param->value<double>(), 1);
+    param = paramMap.get(&det, "date-no-bounds-vs-invalid");
+    TS_ASSERT_EQUALS(param->value<double>(), 1);
   }
 
 private:

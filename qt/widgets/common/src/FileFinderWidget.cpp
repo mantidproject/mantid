@@ -1009,3 +1009,7 @@ FindFilesSearchParameters FileFinderWidget::createFindFilesSearchParameters(
 
   return parameters;
 }
+
+void FileFinderWidget::setTextValidator(const QValidator *validator) {
+  m_uiForm.fileEditor->setValidator(validator);
+}

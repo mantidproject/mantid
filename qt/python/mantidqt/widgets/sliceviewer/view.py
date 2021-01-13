@@ -16,12 +16,12 @@ from mantid.plots.datafunctions import get_normalize_by_bin_width
 from matplotlib.figure import Figure
 from mpl_toolkits.axisartist import Subplot as CurveLinearSubPlot
 from mpl_toolkits.axisartist.grid_helper_curvelinear import GridHelperCurveLinear
-from qtpy.QtCore import Qt
+from qtpy.QtCore import Qt, QTimer, Signal
 from qtpy.QtWidgets import (QCheckBox, QComboBox, QGridLayout, QLabel, QHBoxLayout, QSplitter,
                             QStatusBar, QVBoxLayout, QWidget)
 
 # local imports
-from mantidqt.MPLwidgets import FigureCanvas
+from workbench.plotting.mantidfigurecanvas import MantidFigureCanvas
 from mantidqt.widgets.colorbar.colorbar import ColorbarWidget
 from .dimensionwidget import DimensionWidget
 from .imageinfowidget import ImageInfoWidget, ImageInfoTracker
@@ -35,13 +35,15 @@ from .peaksviewer.representation.painter import MplPainter
 from .zoom import ScrollZoomMixin
 
 # Constants
+from ..observers.observing_view import ObservingView
+
 DBLMAX = sys.float_info.max
 
 SCALENORM = "SliceViewer/scale_norm"
 POWERSCALE = "SliceViewer/scale_norm_power"
 
 
-class SliceViewerCanvas(ScrollZoomMixin, FigureCanvas):
+class SliceViewerCanvas(ScrollZoomMixin, MantidFigureCanvas):
     pass
 
 
@@ -57,7 +59,6 @@ class SliceViewerDataView(QWidget):
         self.line_plots_active = False
         self.can_normalise = can_normalise
         self.nonortho_transform = None
-        self.ws_type = dims_info[0]['type']
         self.conf = conf
 
         self._line_plots = None
@@ -79,7 +80,8 @@ class SliceViewerDataView(QWidget):
         self.track_cursor.setToolTip(
             "Update the image readout table when the cursor is over the plot. "
             "If unticked the table will update only when the plot is clicked")
-        if self.ws_type == 'MDE':
+        md_type = dims_info[0]['type'].startswith('MD')
+        if md_type:
             self.colorbar_layout.addWidget(self.image_info_widget, alignment=Qt.AlignCenter)
             self.colorbar_layout.addWidget(self.track_cursor)
         else:
@@ -115,7 +117,7 @@ class SliceViewerDataView(QWidget):
         self.colorbar.colorbarChanged.connect(self.update_data_clim)
         self.colorbar.scaleNormChanged.connect(self.scale_norm_changed)
         # make width larger to fit image readout table
-        if self.ws_type == 'MDE':
+        if md_type:
             self.colorbar.setMaximumWidth(155)
 
         # MPL toolbar
@@ -194,8 +196,10 @@ class SliceViewerDataView(QWidget):
         """Enable zoom on scroll the mouse wheel for the created axes
         :param redraw: Pass through to redraw option in enable_zoom_on_scroll
         """
-        self.canvas.enable_zoom_on_scroll(
-            self.ax, redraw=redraw, toolbar=self.mpl_toolbar, callback=self.on_data_limits_changed)
+        self.canvas.enable_zoom_on_scroll(self.ax,
+                                          redraw=redraw,
+                                          toolbar=self.mpl_toolbar,
+                                          callback=self.on_data_limits_changed)
 
     def add_line_plots(self, toolcls, exporter):
         """Assuming line plots are currently disabled, enable them on the current figure
@@ -245,13 +249,12 @@ class SliceViewerDataView(QWidget):
         clears the plot and creates a new one using a MDHistoWorkspace
         """
         self.clear_image()
-        self.image = self.ax.imshow(
-            ws,
-            origin='lower',
-            aspect='auto',
-            transpose=self.dimensions.transpose,
-            norm=self.colorbar.get_norm(),
-            **kwargs)
+        self.image = self.ax.imshow(ws,
+                                    origin='lower',
+                                    aspect='auto',
+                                    transpose=self.dimensions.transpose,
+                                    norm=self.colorbar.get_norm(),
+                                    **kwargs)
         self.on_track_cursor_state_change(self.track_cursor.isChecked())
 
         # ensure the axes data limits are updated to match the
@@ -297,15 +300,14 @@ class SliceViewerDataView(QWidget):
                 old_extent = e3, e4, e1, e2
 
         self.clear_image()
-        self.image = self.ax.imshow(
-            ws,
-            origin='lower',
-            aspect='auto',
-            interpolation='none',
-            transpose=self.dimensions.transpose,
-            norm=self.colorbar.get_norm(),
-            extent=old_extent,
-            **kwargs)
+        self.image = self.ax.imshow(ws,
+                                    origin='lower',
+                                    aspect='auto',
+                                    interpolation='none',
+                                    transpose=self.dimensions.transpose,
+                                    norm=self.colorbar.get_norm(),
+                                    extent=old_extent,
+                                    **kwargs)
         self.on_track_cursor_state_change(self.track_cursor.isChecked())
 
         self.draw_plot()
@@ -368,8 +370,9 @@ class SliceViewerDataView(QWidget):
         if self._image_info_tracker is not None:
             self._image_info_tracker.disconnect()
 
-        self._image_info_tracker = ImageInfoTracker(
-            image=self.image, transpose_xy=self.dimensions.transpose, widget=self.image_info_widget)
+        self._image_info_tracker = ImageInfoTracker(image=self.image,
+                                                    transpose_xy=self.dimensions.transpose,
+                                                    widget=self.image_info_widget)
 
         if state:
             self._image_info_tracker.connect()
@@ -523,8 +526,10 @@ class SliceViewerDataView(QWidget):
             self.conf.set(POWERSCALE, exponent)
 
 
-class SliceViewerView(QWidget):
+class SliceViewerView(QWidget, ObservingView):
     """Combines the data view for the slice viewer with the optional peaks viewer."""
+    close_signal = Signal()
+    rename_signal = Signal(str)
 
     def __init__(self, presenter, dims_info, can_normalise, parent=None, conf=None):
         super().__init__(parent)
@@ -547,6 +552,8 @@ class SliceViewerView(QWidget):
 
         # connect up additional peaks signals
         self.data_view.mpl_toolbar.peaksOverlayClicked.connect(self.peaks_overlay_clicked)
+        self.close_signal.connect(self._run_close)
+        self.rename_signal.connect(self._on_rename)
 
     @property
     def data_view(self):
@@ -565,6 +572,14 @@ class SliceViewerView(QWidget):
 
         return self._peaks_view
 
+    def delayed_refresh(self):
+        """Post an event to the event loop that causes the view to
+        update on the next cycle
+
+        A 1 msec delay is added to appease RHEL7 where in some cases
+        it fails"""
+        QTimer.singleShot(1, self.presenter.refresh_view)
+
     def peaks_overlay_clicked(self):
         """Peaks overlay button has been toggled
         """
@@ -575,8 +590,8 @@ class SliceViewerView(QWidget):
         :param current_overlayed_names: A list of names that are currently overlayed
         :returns: A list of workspace names to overlay on the display
         """
-        model = PeaksWorkspaceSelectorModel(
-            mantid.api.AnalysisDataService.Instance(), checked_names=current_overlayed_names)
+        model = PeaksWorkspaceSelectorModel(mantid.api.AnalysisDataService.Instance(),
+                                            checked_names=current_overlayed_names)
         view = PeaksWorkspaceSelectorView(self)
         presenter = PeaksWorkspaceSelectorPresenter(view, model)
         return presenter.select_peaks_workspaces()
@@ -589,7 +604,9 @@ class SliceViewerView(QWidget):
         """
         self.peaks_view.set_visible(on)
 
-    # event handlers
-    def closeEvent(self, event):
-        self.deleteLater()
-        super().closeEvent(event)
+    def _run_close(self):
+        # handles the signal emitted from ObservingView.emit_close
+        self.close()
+
+    def _on_rename(self, new_title):
+        self.setWindowTitle(new_title)

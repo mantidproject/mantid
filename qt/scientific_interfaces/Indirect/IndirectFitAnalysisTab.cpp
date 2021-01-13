@@ -24,6 +24,7 @@
 Mantid::Kernel::Logger g_log("IndirectFitAnalysisTab");
 
 using namespace Mantid::API;
+using namespace MantidQt::MantidWidgets;
 
 namespace {
 bool doesExistInADS(std::string const &workspaceName) {
@@ -184,7 +185,7 @@ void IndirectFitAnalysisTab::loadSettings(const QSettings &settings) {
 }
 
 void IndirectFitAnalysisTab::setFileExtensionsByName(bool filter) {
-  auto const tab = tabName();
+  auto const tab = getTabName();
   setSampleSuffixes(tab, filter);
   if (hasResolution())
     setResolutionSuffixes(tab, filter);
@@ -240,7 +241,7 @@ bool IndirectFitAnalysisTab::isRangeCurrentlySelected(
   return m_plotPresenter->isCurrentlySelected(dataIndex, spectrum);
 }
 
-IndirectFittingModel *IndirectFitAnalysisTab::fittingModel() const {
+IndirectFittingModel *IndirectFitAnalysisTab::getFittingModel() const {
   return m_fittingModel.get();
 }
 
@@ -248,7 +249,7 @@ IndirectFittingModel *IndirectFitAnalysisTab::fittingModel() const {
  * @return  The fit type selected in the custom functions combo box, in the fit
  *          property browser.
  */
-QString IndirectFitAnalysisTab::selectedFitType() const {
+QString IndirectFitAnalysisTab::getSelectedFitType() const {
   return m_fitPropertyBrowser->selectedFitType();
 }
 
@@ -257,7 +258,7 @@ QString IndirectFitAnalysisTab::selectedFitType() const {
  * @return              The number of custom functions, with the specified name,
  *                      included in the selected model.
  */
-size_t IndirectFitAnalysisTab::numberOfCustomFunctions(
+size_t IndirectFitAnalysisTab::getNumberOfCustomFunctions(
     const std::string &functionName) const {
   auto fittingFunction = m_fittingModel->getFittingFunction();
   if (fittingFunction && fittingFunction->nFunctions() > 0)
@@ -415,9 +416,9 @@ void IndirectFitAnalysisTab::updateParameterValues() {
  * @param parameters  The parameter values to update the browser with.
  */
 void IndirectFitAnalysisTab::updateParameterValues(
-    const std::unordered_map<std::string, ParameterValue> &) {
+    const std::unordered_map<std::string, ParameterValue> &params) {
   try {
-    updateFitBrowserParameterValues();
+    updateFitBrowserParameterValues(params);
   } catch (const std::out_of_range &) {
     g_log.warning(
         "Warning issue updating parameter values in fit property browser");
@@ -427,9 +428,13 @@ void IndirectFitAnalysisTab::updateParameterValues(
   }
 }
 
-void IndirectFitAnalysisTab::updateFitBrowserParameterValues() {
+void IndirectFitAnalysisTab::updateFitBrowserParameterValues(
+    std::unordered_map<std::string, ParameterValue> params) {
   IFunction_sptr fun = m_fittingModel->getFittingFunction();
   if (fun) {
+    for (auto pair : params) {
+      fun->setParameter(pair.first, pair.second.value);
+    }
     if (fun->getNumberDomains() > 1) {
       m_fitPropertyBrowser->updateMultiDatasetParameters(*fun);
     } else {
@@ -733,24 +738,22 @@ void IndirectFitAnalysisTab::setupFit(IAlgorithm_sptr fitAlgorithm) {
           SLOT(fitAlgorithmComplete(bool)));
 }
 
-QStringList IndirectFitAnalysisTab::getDatasetNames() const {
-  QStringList datasetNames;
-  auto const numberWorkspaces = m_fittingModel->numberOfWorkspaces();
-  for (size_t i{0}; i < numberWorkspaces.value; ++i) {
+QList<FunctionModelDataset> IndirectFitAnalysisTab::getDatasets() const {
+  QList<FunctionModelDataset> datasets;
+
+  for (auto i = 0u; i < m_fittingModel->numberOfWorkspaces().value; ++i) {
     TableDatasetIndex index{i};
-    auto const name =
-        QString::fromStdString(m_fittingModel->getWorkspace(index)->getName());
-    auto const spectra = m_fittingModel->getSpectra(index);
-    for (auto spectrum : spectra) {
-      datasetNames << name + " (" + QString::number(spectrum.value) + ")";
-    }
+
+    auto const name = m_fittingModel->getWorkspace(index)->getName();
+    datasets.append(FunctionModelDataset(QString::fromStdString(name),
+                                         m_fittingModel->getSpectra(index)));
   }
-  return datasetNames;
+  return datasets;
 }
 
 void IndirectFitAnalysisTab::updateDataReferences() {
   m_fitPropertyBrowser->updateFunctionBrowserData(
-      static_cast<int>(m_fittingModel->getNumberOfDomains()), getDatasetNames(),
+      static_cast<int>(m_fittingModel->getNumberOfDomains()), getDatasets(),
       m_fittingModel->getQValuesForData(),
       m_fittingModel->getResolutionsForFit());
   m_fittingModel->setFitFunction(m_fitPropertyBrowser->getFittingFunction());
@@ -771,12 +774,12 @@ void IndirectFitAnalysisTab::updateResultOptions() {
 }
 
 void IndirectFitAnalysisTab::respondToChangeOfSpectraRange(
-    TableDatasetIndex i) {
+    TableDatasetIndex index) {
   m_plotPresenter->updateSelectedDataName();
   m_plotPresenter->updateAvailableSpectra();
-  m_dataPresenter->updateSpectraInTable(i);
+  m_dataPresenter->updateSpectraInTable(index);
   m_fitPropertyBrowser->updateFunctionBrowserData(
-      static_cast<int>(m_fittingModel->getNumberOfDomains()), getDatasetNames(),
+      static_cast<int>(m_fittingModel->getNumberOfDomains()), getDatasets(),
       m_fittingModel->getQValuesForData(),
       m_fittingModel->getResolutionsForFit());
   setModelFitFunction();
@@ -848,6 +851,8 @@ void IndirectFitAnalysisTab::respondToBackgroundChanged(double value) {
 
 void IndirectFitAnalysisTab::respondToFunctionChanged() {
   setModelFitFunction();
+  m_fittingModel->removeFittingData();
+  m_plotPresenter->updatePlots();
   m_plotPresenter->updateFit();
   emit functionChanged();
 }

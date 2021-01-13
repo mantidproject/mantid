@@ -7,7 +7,8 @@
 import unittest
 from unittest import mock
 
-from sans.common.enums import SANSInstrument, SANSFacility, DetectorType, ReductionMode, RangeStepType, FitModeForMerge, \
+from sans.common.enums import SANSInstrument, SANSFacility, DetectorType, ReductionMode, RangeStepType, \
+    FitModeForMerge, \
     DataType, FitType, RebinType
 from sans.state.StateObjects.StateData import get_data_builder
 from sans.state.StateObjects.StateMaskDetectors import StateMaskDetectors, StateMask
@@ -167,8 +168,8 @@ class TomlV1ParserTest(unittest.TestCase):
                                                        "flat": {},
                                                        "tube": {},
                                                        "position": {}},
-                                       "radius_limit" : {"min" : None,
-                                                         "max" : None}}}
+                                       "radius_limit": {"min": None,
+                                                        "max": None}}}
 
         calibration_dict = top_level_dict["detector"]["calibration"]
 
@@ -392,11 +393,11 @@ class TomlV1ParserTest(unittest.TestCase):
 
     def test_parse_mask(self):
         top_level_dict = {"mask": {"beamstop_shadow": {},
-                                   "prompt_peak" : {},
+                                   "prompt_peak": {},
                                    "mask_pixels": [],
                                    "mask_files": [],
                                    "time": {"tof": []}},
-                                   "phi": {}}
+                          "phi": {}}
 
         top_level_dict["mask"]["beamstop_shadow"] = {"width": 10, "angle": 180}
         top_level_dict["mask"]["prompt_peak"] = {"start": 101, "stop": 102}

@@ -6,11 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from sans.common.enums import (ReductionMode, ReductionDimensionality, FitModeForMerge,
-                               SANSFacility, SANSInstrument)
-from sans.state.StateObjects.StateData import get_data_builder
+from sans.common.enums import (ReductionMode, ReductionDimensionality, FitModeForMerge)
 from sans.state.StateObjects.StateReductionMode import StateReductionMode
-from sans.test_helper.file_information_mock import SANSFileInformationMock
 
 
 # ----------------------------------------------------------------------------------------------------------------------

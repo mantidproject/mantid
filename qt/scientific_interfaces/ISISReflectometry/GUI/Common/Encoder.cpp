@@ -14,6 +14,7 @@
 #include "../Experiment/QtExperimentView.h"
 #include "../Instrument/QtInstrumentView.h"
 #include "../MainWindow/QtMainWindowView.h"
+#include "../Runs/QtCatalogSearcher.h"
 #include "../Runs/QtRunsView.h"
 #include "../Runs/RunsPresenter.h"
 #include "../RunsTable/QtRunsTableView.h"
@@ -69,11 +70,13 @@ QMap<QString, QVariant> Encoder::encodeBatch(const IMainWindowView *mwv,
   auto runsTablePresenter =
       dynamic_cast<RunsTablePresenter *>(runsPresenter->m_tablePresenter.get());
   auto reductionJobs = &runsTablePresenter->m_model.m_reductionJobs;
+  auto searcher =
+      dynamic_cast<QtCatalogSearcher *>(runsPresenter->m_searcher.get());
 
   QMap<QString, QVariant> map;
-  map.insert(
-      QString("runsView"),
-      QVariant(encodeRuns(gui->m_runs.get(), projectSave, reductionJobs)));
+  map.insert(QString("runsView"),
+             QVariant(encodeRuns(gui->m_runs.get(), projectSave, reductionJobs,
+                                 searcher)));
   map.insert(QString("eventView"),
              QVariant(encodeEvent(gui->m_eventHandling.get())));
   map.insert(QString("experimentView"),
@@ -86,14 +89,27 @@ QMap<QString, QVariant> Encoder::encodeBatch(const IMainWindowView *mwv,
 
 QMap<QString, QVariant> Encoder::encodeRuns(const QtRunsView *gui,
                                             bool projectSave,
-                                            const ReductionJobs *redJobs) {
+                                            const ReductionJobs *redJobs,
+                                            QtCatalogSearcher *searcher) {
   QMap<QString, QVariant> map;
   map.insert(QString("runsTable"),
              QVariant(encodeRunsTable(gui->m_tableView, projectSave, redJobs)));
   map.insert(QString("comboSearchInstrument"),
              QVariant(gui->m_ui.comboSearchInstrument->currentIndex()));
-  map.insert(QString("textSearch"), QVariant(gui->m_ui.textSearch->text()));
-  map.insert(QString("textCycle"), QVariant(gui->m_ui.textCycle->text()));
+  // This is not ideal but the search criteria may be changed on the view and
+  // no longer be relevant for the search results. The latter are more
+  // important so use the cached search criteria, i.e. only save the search
+  // criteria if they have been used to perform a search
+  map.insert(QString("textSearch"),
+             QVariant(QString::fromStdString(
+                 searcher->searchCriteria().investigation)));
+  map.insert(QString("textCycle"), QVariant(QString::fromStdString(
+                                       searcher->searchCriteria().cycle)));
+  map.insert(
+      QString("textInstrument"),
+      QVariant(QString::fromStdString(searcher->searchCriteria().instrument)));
+  map.insert(QString("searchResults"),
+             QVariant(encodeSearchModel(gui->searchResults())));
   return map;
 }
 
@@ -162,13 +178,13 @@ QMap<QString, QVariant> Encoder::encodeRangeInQ(const RangeInQ &rangeInQ) {
 QMap<QString, QVariant>
 Encoder::encodeTransmissionRunPair(const TransmissionRunPair &transRunPair) {
   QList<QVariant> firstTransRunNums;
-  for (const auto firstTransRunNum :
+  for (const auto &firstTransRunNum :
        transRunPair.firstTransmissionRunNumbers()) {
     firstTransRunNums.append(
         QVariant(QString::fromStdString(firstTransRunNum)));
   }
   QList<QVariant> secondTransRunNums;
-  for (const auto secondTransRunNum :
+  for (const auto &secondTransRunNum :
        transRunPair.secondTransmissionRunNumbers()) {
     secondTransRunNums.append(
         QVariant(QString::fromStdString(secondTransRunNum)));
@@ -231,6 +247,30 @@ QMap<QString, QVariant> Encoder::encodeRow(
              QVariant(encodeReductionWorkspace(row.m_reducedWorkspaceNames)));
   map.insert(QString("reductionOptions"),
              QVariant(encodeReductionOptions(row.m_reductionOptions)));
+  return map;
+}
+
+QList<QVariant> Encoder::encodeSearchModel(const ISearchModel &searchModel) {
+  QList<QVariant> list;
+  auto const &rows = searchModel.getRows();
+  for (const auto &row : rows)
+    list.append(QVariant(encodeSearchResult(row)));
+  return list;
+}
+
+QMap<QString, QVariant> Encoder::encodeSearchResult(const SearchResult &row) {
+  QMap<QString, QVariant> map;
+  map.insert(QString("runNumber"),
+             QVariant(QString::fromStdString(row.runNumber())));
+  map.insert(QString("title"), QVariant(QString::fromStdString(row.title())));
+  map.insert(QString("groupName"),
+             QVariant(QString::fromStdString(row.groupName())));
+  map.insert(QString("theta"), QVariant(QString::fromStdString(row.theta())));
+  map.insert(QString("error"), QVariant(QString::fromStdString(row.error())));
+  map.insert(QString("excludeReason"),
+             QVariant(QString::fromStdString(row.excludeReason())));
+  map.insert(QString("comment"),
+             QVariant(QString::fromStdString(row.comment())));
   return map;
 }
 

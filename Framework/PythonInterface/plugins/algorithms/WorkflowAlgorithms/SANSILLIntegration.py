@@ -294,8 +294,12 @@ class SANSILLIntegration(PythonAlgorithm):
         wavelength = run.getLogData('wavelength').value
         l1 = run.getLogData('collimation.actual_position').value
         l2 = run.getLogData('L2').value
-        x3 = run.getLogData('pixel_width').value
-        y3 = run.getLogData('pixel_height').value
+        instrument = mtd[self._input_ws].getInstrument()
+        if instrument.hasParameter("x-pixel-size") and instrument.hasParameter("y-pixel-size"):
+            x3 = instrument.getNumberParameter('x-pixel-size')[0] / 1000
+            y3 = instrument.getNumberParameter('y-pixel-size')[0] / 1000
+        else:
+            raise RuntimeError('Unable to calculate resolution, missing pixel size.')
         delta_wavelength = run.getLogData('selector.wavelength_res').value * 0.01
         if run.hasProperty('collimation.sourceAperture'):
             source_aperture = run.getLogData('collimation.sourceAperture').value
@@ -373,8 +377,10 @@ class SANSILLIntegration(PythonAlgorithm):
         q_min = run.getLogData(q_min_name).value
         q_max = run.getLogData(q_max_name).value
         self.log().information('Using qmin={0:.2f}, qmax={1:.2f}'.format(q_min, q_max))
-        pixel_height = run.getLogData('pixel_height').value
-        pixel_width = run.getLogData('pixel_width').value
+        instrument = mtd[self._input_ws].getInstrument()
+        pixel_width = instrument.getNumberParameter('x-pixel-size')[0] / 1000
+        pixel_height = instrument.getNumberParameter('y-pixel-size')[0] / 1000
+
         pixel_size = pixel_height if pixel_height >= pixel_width else pixel_width
         binning_factor = self.getProperty('BinningFactor').value
         wavelength = 0. # for TOF mode there is no wavelength

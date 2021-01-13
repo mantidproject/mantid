@@ -55,32 +55,6 @@ class DrillViewTest(unittest.TestCase):
         c2.close.assert_called_once()
         c3.close.assert_not_called()
 
-    def test_getSelectionShape(self):
-        # no selection
-        selection = []
-        shape = self.view._getSelectionShape(selection)
-        self.assertEqual(shape, (0, 0))
-
-        # valid selection
-        selection = [(0, 0), (0, 1), (0, 2),
-                     (1, 0), (1, 1), (1, 2)]
-        shape = self.view._getSelectionShape(selection)
-        self.assertEqual(shape, (2, 3))
-        selection = [(0, 0), (0, 1),
-                     (1, 0), (1, 1),
-                     (2, 0), (2, 1)]
-        shape = self.view._getSelectionShape(selection)
-        self.assertEqual(shape, (3, 2))
-
-        # invalid selection
-        selection = [(0, 0), (0, 1), (0, 2),
-                     (1, 0), (1, 1)]
-        shape = self.view._getSelectionShape(selection)
-        self.assertEqual(shape, (0, 0))
-        selection = [(0, 0), (0, 1), (10, 10)]
-        shape = self.view._getSelectionShape(selection)
-        self.assertEqual(shape, (0, 0))
-
     def test_copySelectedCells(self):
         # no selection
         self.view.table.getSelectedCells.return_value = []
@@ -91,12 +65,14 @@ class DrillViewTest(unittest.TestCase):
 
         # valid selection
         self.view.table.getSelectedCells.return_value = [(0, 0)]
+        self.view.table.getSelectionShape.return_value = (1, 1)
         self.view.table.getCellContents.return_value = "test"
         self.view.copySelectedCells()
         self.assertEqual(self.view.buffer, ["test"])
         self.assertEqual(self.view.bufferShape, (1, 1))
         self.view.table.getSelectedCells.return_value = [(0, 0), (0, 1),
                                                          (1, 0), (1, 1)]
+        self.view.table.getSelectionShape.return_value = (2, 2)
         self.view.table.getCellContents.return_value = "test"
         self.view.copySelectedCells()
         self.view.table.getCellContents.assert_called()
@@ -106,6 +82,7 @@ class DrillViewTest(unittest.TestCase):
         # invalid selection
         self.view.table.reset_mock()
         self.view.table.getSelectedCells.return_value = [(0, 0), (10, 10)]
+        self.view.table.getSelectionShape.return_value = (0, 0)
         self.view.copySelectedCells()
         self.view.table.getCellContents.assert_not_called()
 
@@ -115,6 +92,7 @@ class DrillViewTest(unittest.TestCase):
         self.view.bufferShape = (1, 1)
         self.view.table.getSelectedCells.return_value = [(0, 0), (0, 1),
                                                          (1, 0), (1, 1)]
+        self.view.table.getSelectionShape.return_value = (1, 1)
         self.view.table.getCellContents.return_value = ""
         self.view.copySelectedCells()
         self.view.table.getCellContents.assert_called()
@@ -124,6 +102,7 @@ class DrillViewTest(unittest.TestCase):
     def test_cutSelectedCells(self):
         # no selection
         self.view.table.getSelectedCells.return_value = []
+        self.view.table.getSelectionShape.return_value = (0, 0)
         self.view.cutSelectedCells()
         self.assertEqual(self.view.buffer, [])
         self.assertEqual(self.view.bufferShape, ())
@@ -131,6 +110,7 @@ class DrillViewTest(unittest.TestCase):
 
         # valid selection
         self.view.table.getSelectedCells.return_value = [(0, 0)]
+        self.view.table.getSelectionShape.return_value = (1, 1)
         self.view.table.getCellContents.return_value = "test"
         self.view.cutSelectedCells()
         self.assertEqual(self.view.buffer, ["test"])
@@ -140,6 +120,7 @@ class DrillViewTest(unittest.TestCase):
         self.view.table.reset_mock()
         self.view.table.getSelectedCells.return_value = [(0, 0), (0, 1),
                                                          (1, 0), (1, 1)]
+        self.view.table.getSelectionShape.return_value = (2, 2)
         self.view.table.getCellContents.return_value = "test"
         self.view.cutSelectedCells()
         self.assertEqual(self.view.buffer, ["test", "test", "test", "test"])
@@ -151,6 +132,7 @@ class DrillViewTest(unittest.TestCase):
         # invalid selection
         self.view.table.reset_mock()
         self.view.table.getSelectedCells.return_value = [(0, 0), (10, 10)]
+        self.view.table.getSelectionShape.return_value = (0, 0)
         self.view.table.getCellContents.assert_not_called()
         self.view.table.eraseCell.assert_not_called()
 
@@ -159,6 +141,7 @@ class DrillViewTest(unittest.TestCase):
         self.view.buffer = ["test"]
         self.view.bufferShape = (1, 1)
         self.view.table.getSelectedCells.return_value = []
+        self.view.table.getSelectionShape.return_value = (0, 0)
         self.view.pasteCells()
         self.view.table.setCellContents.assert_not_called()
 
@@ -174,12 +157,14 @@ class DrillViewTest(unittest.TestCase):
         self.view.bufferShape = (1, 1)
         self.view.table.reset_mock()
         self.view.table.getSelectedCells.return_value = [(1, 1)]
+        self.view.table.getSelectionShape.return_value = (1, 1)
         self.view.pasteCells()
         self.view.table.setCellContents.assert_called_once()
 
         self.view.table.reset_mock()
         self.view.table.getSelectedCells.return_value = [(0, 0), (0, 1),
                                                          (1, 0), (1, 1)]
+        self.view.table.getSelectionShape.return_value = (2, 2)
         self.view.pasteCells()
         calls = [mock.call(0, 0, "test"), mock.call(0, 1, "test"),
                  mock.call(1, 0, "test"), mock.call(1, 1, "test")]
@@ -191,6 +176,7 @@ class DrillViewTest(unittest.TestCase):
         self.view.table.reset_mock()
         self.view.table.getSelectedCells.return_value = [(0, 0), (0, 1),
                                                          (1, 0), (1, 1)]
+        self.view.table.getSelectionShape.return_value = (2, 2)
         self.view.pasteCells()
         calls = [mock.call(0, 0, "test00"), mock.call(0, 1, "test01"),
                  mock.call(1, 0, "test10"), mock.call(1, 1, "test11")]
@@ -301,6 +287,7 @@ class DrillViewTest(unittest.TestCase):
         self.view.table.getSelectedCells.return_value = [(0, 0),
                                                          (0, 1)]
         self.view.table.getCellContents.return_value = "1000,2000,3000"
+        self.view.table.getRowsFromSelectedCells.return_value = [0]
         self.view.increment.value.return_value = 1
         self.view.automatic_filling()
         calls = [mock.call(0, 1, "1001,2001,3001")]
@@ -360,7 +347,7 @@ class DrillViewTest(unittest.TestCase):
 
     def test_setTable(self):
         self.view.set_table(["test", "test"])
-        self.view.table.setColumnCount.assert_called_once_with(2)
+        self.view.table.setColumnCount.assert_called_with(2)
 
     def test_fillTable(self):
         # empty contents
@@ -420,20 +407,29 @@ class DrillViewTest(unittest.TestCase):
     def test_setVisualSettings(self):
         self.view.columns = ["test"]
         self.view.setVisualSettings(dict())
-        self.view.table.setHeaderFoldingState.assert_not_called()
+        self.view.table.setFoldedColumns.assert_not_called()
         self.view.setVisualSettings({"FoldedColumns": {}})
-        self.view.table.setHeaderFoldingState.assert_called_once_with([False])
+        self.view.table.setFoldedColumns.assert_called_once_with([])
         self.view.table.reset_mock()
         self.view.setVisualSettings({"FoldedColumns": {"test": True}})
-        self.view.table.setHeaderFoldingState.assert_called_once_with([True])
+        self.view.table.setFoldedColumns.assert_called_once_with(["test"])
         self.view.table.reset_mock()
         self.view.setVisualSettings({"FoldedColumns": {"test1": True}})
-        self.view.table.setHeaderFoldingState.assert_called_once_with([False])
+        self.view.table.setFoldedColumns.assert_called_once_with(["test1"])
+        self.view.table.reset_mock()
+        self.view.setVisualSettings({"FoldedColumns": ["test"]})
+        self.view.table.setFoldedColumns.assert_called_once_with(["test"])
 
     def test_getVisualSettings(self):
         self.view.columns = ["test1", "test2", "test3"]
-        self.view.table.getHeaderFoldingState.return_value = [True, False, True]
-        d = {"FoldedColumns": {"test1": True, "test3": True}}
+        self.view.table.getFoldedColumns.return_value = ["test1", "test3"]
+        self.view.table.getHiddenColumns.return_value = ["test1", "test2"]
+        self.view.table.getColumnsOrder.return_value  = ["test1",
+                                                         "test2",
+                                                         "test3"]
+        d = {"FoldedColumns": ["test1", "test3"],
+             "HiddenColumns": ["test1", "test2"],
+             "ColumnsOrder": ["test1", "test2", "test3"]}
         self.assertDictEqual(self.view.getVisualSettings(), d)
 
 

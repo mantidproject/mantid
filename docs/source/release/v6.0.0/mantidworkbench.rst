@@ -12,12 +12,17 @@ New Features
 - Added a show legend checkbox to the workbench plot settings. This allows users to choose whether to display the legend on graphs by default.
 - Added a ``Log`` colorbar scale option to the Sliceviewer. This differs from the existing ``Symlog`` option as it prohibits negative values.
 - Added a Dx data tab on the data window when a workspace has Dx data.
+- Added the ability to load 1d-Plots from MantidPlot project files in workbench.
+- Added QLineEdit to SampleLogs widget to allow filtering its entries
+- Time series sample logs in multiperiod event workspaces can now be filtered by current period.
+- Added more options to the workbench plot settings, including tick customisation and enabling grids by default.
 
 Improvements
 ############
 
-- Migrate MantidPlot's Step Scan interface to workbench.
+- Enable workbench to plot 1D spectrum from an IMDHistoWorkspace whose non-integrated dimension is equal to 1 but not to launch slice viewer.
 - Removed dialogs for the Load and Fit algorithms as the dialogs were previously deprecated
+- Migrate MantidPlot's Step Scan interface to workbench.
 - Expose :ref:`Instrument View <instrumentviewer>` control to Python.
 - Enable workbench to plot 1D spectrum (plot, overplot, plot_with_error, overplot_with_error) from an IMDHistoWorkspace whose non-integrated dimension is equal to 1 but not to launch slice viewer.
 - Enabled the plotting of individual functions in the Workbench fit browser. This replicates a feature that was in MantidPlot.
@@ -31,7 +36,11 @@ Improvements
 - Plots containing axvline's and axhline's can be saved and are reproduced when loading a project that contains them.
 - Wireframe plots no longer spill over the axes when their limits are reduced.
 - In the instrument widget, the integration scroll bar can be moved, widened and shrunk using the arrow keys.
+- The matplotlib `zoom` selection box is now more visible on colorfill and sliceviewer plots.
 - Add an autoscale checkbox to plot config dialog.
+- Add a Python function to replace the workspace being shown by an instrument window.
+- Slice Viewer replots the workspace when it is modified outside the Slice Viewer.
+- In the plot config, multiple curves can be selected and removed at once. The delete key was added as a shortcut.
 
 Bugfixes
 ########
@@ -45,5 +54,11 @@ Bugfixes
 - Fixed a bug which would cause unrealistic errorbars on the fit calc curve.
 - Fix sort order of peaks in the peaks overlay on SliceViewer.
 - The colorfill plot on ragged workspaces will have the correct horizontal extent.
+- Fix replot of colorfill image after a workspace is replaced.
+- Fixed a bug in generating plot scripts for figures containing data for a particular bin.
+- Fixed a bug causing an error when double clicking a ragged workspace.
+- Fixed a bug which caused a terminate dialogue to be raised if the user zoomed in far enough while using the SliceViewer on MDE workspaces.
+- Fixed a crash in the plot config when removing the last curve on a plot
+- Fixed a bug in SliceViewer that caused shown data to not update correctly when changing axis selection.
 
 :ref:`Release 6.0.0 <v6.0.0>`

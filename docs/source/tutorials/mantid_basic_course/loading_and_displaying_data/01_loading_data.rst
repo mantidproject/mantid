@@ -48,15 +48,15 @@ Mantid can load many different data formats. A few examples are:
 -  Ascii data, Table data, etc.
 -  Live data streams.
 
-Fortunately, you don't have to learn how to use all of these Load
-algorithms. In fact, you only need to know one: "Load". Whenever you use "Load" Mantid determines the format of the file and uses the correct algorithm to read it.
+Different data formats require different loader algorithms. Fortunately, you don't have to learn how to use all of these
+algorithms, in fact, you only need to know one: ``Load``. Whenever you use ``Load``, Mantid determines the format of the file and uses the correct algorithm to read it.
 
 Loading Lots of Data Files
 ==========================
 
-You can load multiple files into Mantid with a single Load command,
+You can load multiple files into Mantid at the same time,
 either keeping each workspace separate, or summing the data into a
-single workspace:
+single workspace. To do so, use the following symbols in the ``Load Dialog > File`` input box:
 
 +-----------+--------------------------------------------------------+---------------+
 | Usage     | Description                                            | Example       |

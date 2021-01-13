@@ -27,8 +27,8 @@ class TableWorkspace;
 Simple container for porting detector angular information
  */
 struct MANTID_DATAOBJECTS_DLL DetectorAngularCache {
-  std::vector<double> thetaWidths;
-  std::vector<double> thetas;
+  std::vector<double> twoThetaWidths;
+  std::vector<double> twoThetas;
   std::vector<double> detectorHeights;
 };
 
@@ -51,11 +51,6 @@ protected:
   const std::string m_d0ID;
   const std::string m_d1ID;
   std::shared_ptr<CalculateReflectometry> m_calculator;
-
-  /// Two theta angles cache
-  mutable std::vector<double> m_theta;
-  /// Two theta widths cache
-  mutable std::vector<double> m_thetaWidths;
 
   std::shared_ptr<DataObjects::MDEventWorkspace2Lean>
   createMDWorkspace(const Geometry::IMDDimension_sptr &,

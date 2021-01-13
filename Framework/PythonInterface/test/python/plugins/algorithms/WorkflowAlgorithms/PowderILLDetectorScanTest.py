@@ -16,8 +16,7 @@ class PowderILLDetectorScanTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         config.appendDataSearchSubDir('ILL/D2B/')
-
-    def setUp(self):
+        config.appendDataSearchSubDir('ILL/D20/')
         config['default.facility'] = 'ILL'
         config['default.instrument'] = 'D2B'
 
@@ -46,6 +45,26 @@ class PowderILLDetectorScanTest(unittest.TestCase):
         self.assertEqual(spectrumaxis[0],0)
         self.assertTrue(item.getRun())
         self.assertTrue(item.getRun().hasProperty('run_number'))
+
+    def test_default_options_d20(self):
+        red = PowderILLDetectorScan(Run='171414')
+        self.assertTrue(red)
+        self.assertTrue(isinstance(red, WorkspaceGroup))
+        self.assertEqual(red.getNumberOfEntries(), 1)
+        item = red.getItem(0)
+        self.assertTrue(item)
+        self.assertTrue(isinstance(item, MatrixWorkspace))
+        self.assertTrue(item.isHistogramData())
+        self.assertTrue(not item.isDistribution())
+        self.assertEqual(item.getNumberHistograms(),1)
+        self.assertEqual(item.blocksize(),3044)
+        xunit = item.getAxis(0).getUnit().label()
+        self.assertEqual(xunit,'degrees')
+        spectrumaxis = item.getAxis(1).extractValues()
+        self.assertEqual(spectrumaxis[0],0)
+        self.assertTrue(item.getRun())
+        self.assertTrue(item.getRun().hasProperty('run_number'))
+
 
 if __name__ == '__main__':
     unittest.main()
