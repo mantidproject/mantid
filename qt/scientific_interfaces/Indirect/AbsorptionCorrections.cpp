@@ -212,12 +212,11 @@ void AbsorptionCorrections::run() {
 
   QString const sampleShape = m_uiForm.cbShape->currentText().replace(" ", "");
   const bool isPreset = sampleShape == "Preset";
+  monteCarloAbsCor->setProperty("Shape", sampleShape.toStdString());
 
   if (!isPreset) {
 
     // Get correct corrections algorithm
-
-    monteCarloAbsCor->setProperty("Shape", sampleShape.toStdString());
 
     addShapeSpecificSampleOptions(monteCarloAbsCor, sampleShape);
 
