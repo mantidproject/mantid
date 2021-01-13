@@ -43,13 +43,6 @@ class SANSILLReduction(PythonAlgorithm):
         return issues
 
     @staticmethod
-    def _get_solid_angle_method(instrument):
-        if instrument in ['D11', 'D11lr', 'D16']:
-            return 'Rectangle'
-        else:
-            return 'GenericShape'
-
-    @staticmethod
     def _make_solid_angle_name(ws):
         return mtd[ws].getInstrument().getName()+'_'+str(round(mtd[ws].getRun().getLogData('L2').value))+'m_SolidAngle'
 
@@ -649,7 +642,7 @@ class SANSILLReduction(PythonAlgorithm):
                         else:
                             input_solid = ws
                         SolidAngle(InputWorkspace=input_solid, OutputWorkspace=solid_angle,
-                                   Method=self._get_solid_angle_method(self._instrument))
+                                   Method="Rectangle")
                     Divide(LHSWorkspace=ws, RHSWorkspace=solid_angle, OutputWorkspace=ws, WarnOnZeroDivide=False)
                     if not cache:
                         DeleteWorkspace(solid_angle)
