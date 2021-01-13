@@ -16,6 +16,5 @@ enum EXPORT_OPT_MANTIDQT_COMMON FittingMode {
   SEQUENTIAL = 1,
   SIMULTANEOUS_SEQUENTIAL = 2
 };
-
 }
 } // namespace MantidQt
