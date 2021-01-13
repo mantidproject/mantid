@@ -5,14 +5,15 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 
+#include "MantidCrystal/SCDCalibratePanels2ObjFunc.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidCrystal/SCDCalibratePanels2ObjFunc.h"
 
 #include <boost/math/special_functions/round.hpp>
 
@@ -123,6 +124,16 @@ namespace Crystal {
     Instrument_sptr calc_inst =
       std::const_pointer_cast<Instrument>(calc_pws->getInstrument());
 
+    // NOTE: We are not sure if the PeaksWorkspace level T0
+    //       if going go affect the peak.getTOF
+    Mantid::API::Run &run = calc_pws->mutableRun();
+    double T0 = 0.0;
+    if (run.hasProperty("T0")) {
+      T0 = run.getPropertyValueAsType<double>("T0");
+    }
+    T0 += dT0;
+    run.addProperty<double>("T0", T0, true);
+
     for (int i = 0; i < calc_pws->getNumberPeaks(); ++i) {
       const Peak pk = calc_pws->getPeak(i);
 
@@ -132,19 +143,45 @@ namespace Crystal {
       if (hkl == UNSET_HKL)
         throw std::runtime_error("Found unindexed peak in input workspace!");
 
-      Peak calc_pk(calc_inst, pk.getDetectorID(), pk.getWavelength(), hkl, pk.getGoniometerMatrix());
+      // construct the out vector (Qvectors)
       Units::Wavelength wl;
-      wl.initialize(
-        calc_pk.getL1(),
-        calc_pk.getL2(),
-        calc_pk.getScattering(),
-        0,
-        calc_pk.getInitialEnergy(),
-        0.0);
-      // adding the TOF shift here
-      calc_pk.setWavelength(wl.singleFromTOF(pk.getTOF() + dT0));
+      V3D calc_qv;
+      // somehow calibration results works better with direct method
+      // but moderator requires the strange in-and-out way
+      if (m_cmpt != "moderator") {
+        wl.initialize(pk.getL1(), pk.getL2(), pk.getScattering(), 0,
+                      pk.getInitialEnergy(), 0.0);
+        // create a peak with shifted wavelength
+        Peak calc_pk(calc_inst, pk.getDetectorID(),
+                     wl.singleFromTOF(pk.getTOF() + dT0), hkl,
+                     pk.getGoniometerMatrix());
+        calc_qv = calc_pk.getQSampleFrame();
+      } else {
+        Peak calc_pk(calc_inst, pk.getDetectorID(), pk.getWavelength(), hkl,
+                     pk.getGoniometerMatrix());
+        wl.initialize(calc_pk.getL1(), calc_pk.getL2(), calc_pk.getScattering(),
+                      0, calc_pk.getInitialEnergy(), 0.0);
+        // adding the TOF shift here
+        calc_pk.setWavelength(wl.singleFromTOF(pk.getTOF() + dT0));
+        calc_qv = calc_pk.getQSampleFrame();
+      }
+
+      // Peak calc_pk(calc_inst, pk.getDetectorID(), pk.getWavelength(), hkl,
+      // pk.getGoniometerMatrix());
+      // Units::Wavelength wl;
+      // wl.initialize(
+      //   calc_pk.getL1(),
+      //   calc_pk.getL2(),
+      //   calc_pk.getScattering(),
+      //   0,
+      //   calc_pk.getInitialEnergy(),
+      //   0.0);
+      // // adding the TOF shift here
+
+      // calc_pk.setWavelength(wl.singleFromTOF(pk.getTOF() + dT0));
+
       // get the updated/calculated q vector in sample frame and set it to out
-      V3D calc_qv = calc_pk.getQSampleFrame();
+      // V3D calc_qv = calc_pk.getQSampleFrame();
       for (int j = 0; j < 3; ++j)
         out[i * 3 + j] = calc_qv[j];
     }

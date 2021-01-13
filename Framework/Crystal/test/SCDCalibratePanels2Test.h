@@ -81,10 +81,10 @@ public:
         dspacing_min(1.0), dspacing_max(10.0),   //
         wavelength_min(0.1), wavelength_max(10), //
         omega_step(3.0),                         //
-        TOLERANCE_L(1e-3),   // this calibration has intrinsic accuracy limit of
-                             // 1mm for translation
-        TOLERANCE_R(0.1), // this calibration has intrinsic accuracy limit of
-                             // 0.1 deg for rotation
+        TOLERANCE_L(5e-4), // this calibration has intrinsic accuracy limit of
+                           // 1mm for translation
+        TOLERANCE_R(1e-5),  // this calibration has intrinsic accuracy limit of
+                           // 0.1 deg for rotation
         LOGCHILDALG(false) {
     // NOTE:
     //  The MAGIC PIECE, basically we need to let AlgorithmFactory
@@ -209,28 +209,31 @@ public:
     pws->mutableRun().addProperty<double>(
         "T0", pwsref->mutableRun().getPropertyValueAsType<double>("T0"), true);
 
-    for (int i = 0; i < pws->getNumberPeaks(); ++i) {
-      Peak pk_before = pwsref->getPeak(i);
-      Peak pk_after = pws->getPeak(i);
-      g_log.notice() << "--Peak_" << i << " with dT0=" << dT0 << "\n"
-                     << "  L1:" << pk_before.getL1() << "->" << pk_after.getL1()
-                     << "\n"
-                     << "  L2:" << pk_before.getL2() << "->" << pk_after.getL2()
-                     << "\n"
-                     << "  2theta:" << pk_before.getScattering() << "->"
-                     << pk_after.getScattering() << "\n"
-                     << "  initialEnergy:" << pk_before.getInitialEnergy()
-                     << "->" << pk_after.getInitialEnergy() << "\n"
-                     << "  TOF:" << pk_before.getTOF() << "->"
-                     << pk_after.getTOF() << "\n"
-                     << "  wavelength:" << pk_before.getWavelength() << "->"
-                     << pk_after.getWavelength() << "\n"
-                     << "  hkl:" << pk_before.getH() << pk_before.getK()
-                     << pk_before.getL() << "->" << pk_after.getH()
-                     << pk_after.getK() << pk_after.getL() << "\n"
-                     << "  q:" << pk_before.getQSampleFrame() << "->"
-                     << pk_after.getQSampleFrame() << "\n";
-    }
+    // NOTE: Toggle this back to see the per peak based impact due to dT0
+    // for (int i = 0; i < pws->getNumberPeaks(); ++i) {
+    //   Peak pk_before = pwsref->getPeak(i);
+    //   Peak pk_after = pws->getPeak(i);
+    //   g_log.notice() << "--Peak_" << i << " with dT0=" << dT0 << "\n"
+    //                  << "  L1:" << pk_before.getL1() << "->" <<
+    //                  pk_after.getL1()
+    //                  << "\n"
+    //                  << "  L2:" << pk_before.getL2() << "->" <<
+    //                  pk_after.getL2()
+    //                  << "\n"
+    //                  << "  2theta:" << pk_before.getScattering() << "->"
+    //                  << pk_after.getScattering() << "\n"
+    //                  << "  initialEnergy:" << pk_before.getInitialEnergy()
+    //                  << "->" << pk_after.getInitialEnergy() << "\n"
+    //                  << "  TOF:" << pk_before.getTOF() << "->"
+    //                  << pk_after.getTOF() << "\n"
+    //                  << "  wavelength:" << pk_before.getWavelength() << "->"
+    //                  << pk_after.getWavelength() << "\n"
+    //                  << "  hkl:" << pk_before.getH() << pk_before.getK()
+    //                  << pk_before.getL() << "->" << pk_after.getH()
+    //                  << pk_after.getK() << pk_after.getL() << "\n"
+    //                  << "  q:" << pk_before.getQSampleFrame() << "->"
+    //                  << pk_after.getQSampleFrame() << "\n";
+    // }
 
     // T0 got absorbed into peak wavelength, therefore there is no need to reset
     // the instrument
@@ -238,9 +241,6 @@ public:
     g_log.notice() << "-- start calibration\n";
     runCalibration(isawFile.string(), xmlFile.string(), pws, true, false,
                    false);
-
-    // current no easy way to check the T0, we just need to read off the console
-    TS_ASSERT(false);
   }
 
   /**

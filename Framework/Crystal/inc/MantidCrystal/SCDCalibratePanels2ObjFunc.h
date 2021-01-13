@@ -10,6 +10,7 @@
 #include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidCrystal/DllConfig.h"
+#include "MantidKernel/V3D.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -35,8 +36,9 @@ private:
   /// temp workspace holder
   mutable std::shared_ptr<API::Workspace> m_ws;
   mutable std::string m_cmpt;
+
   const bool LOGCHILDALG{false};
-  const Kernel::V3D UNSET_HKL{0, 0, 0};
+  const Mantid::Kernel::V3D UNSET_HKL{0, 0, 0};
   const double PI{3.141592653589793238462643383279502884};
 
   /// helper functions

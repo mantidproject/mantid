@@ -119,13 +119,12 @@ namespace Crystal {
 
     // Add new section for advanced control of the calibration/optimization
     declareProperty(
-        "ToleranceOfTranslation", 5e-5, mustBePositive,
+        "ToleranceOfTranslation", 5e-4, mustBePositive,
         "Translations in meters found below this value will be set "
-        "to 0 as this is the accuracy limit for this calibration algorithm");
-    declareProperty("ToleranceOfReorientation", 5e-3, mustBePositive,
+        "to 0");
+    declareProperty("ToleranceOfReorientation", 5e-2, mustBePositive,
                     "Reorientation (rotation) angles in degress found below "
-                    "this value will be set to 0 as this is the accuracy limit "
-                    "for this calibration algorithm");
+                    "this value will be set to 0");
     declareProperty(
         "TranslationSearchRadius", 5e-2, mustBePositive,
         "This is the search radius when calibrating component translations "
