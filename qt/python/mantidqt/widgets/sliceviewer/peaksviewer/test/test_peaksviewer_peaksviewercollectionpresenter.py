@@ -11,7 +11,10 @@ import unittest
 from unittest.mock import MagicMock, create_autospec, patch
 
 # 3rdparty imports
+from mantid.api import AnalysisDataService as ADS
+from mantid.simpleapi import CreateSampleWorkspace, RenameWorkspace
 from mantid.dataobjects import PeaksWorkspace
+from mantidqt.widgets.sliceviewer.adsobsever import SliceViewerADSObserver
 from mantidqt.widgets.sliceviewer.peaksviewer \
     import PeaksViewerPresenter, PeaksViewerCollectionPresenter, PeaksViewerModel
 
@@ -82,6 +85,65 @@ class PeaksViewerCollectionPresenterTest(unittest.TestCase):
             for child in child_presenters:
                 child.notify.assert_called_once_with(PeaksViewerPresenter.Event.OverlayPeaks)
 
+    def test_ensure_that_the_ads_observer_calls_clear_handle(self, _):
+        presenter = PeaksViewerCollectionPresenter(MagicMock())
+        presenter.clear_handle = MagicMock()
+        self.assertTrue(isinstance(presenter._ads_observer, SliceViewerADSObserver))
+        presenter._ads_observer = SliceViewerADSObserver(presenter.replace_handle, presenter.rename_handle,
+                                                         presenter.clear_handle, presenter.delete_handle)
+
+        CreateSampleWorkspace(OutputWorkspace="ws")
+        ADS.clear()
+
+        presenter.clear_handle.assert_called_once()
+
+    def test_ensure_that_the_ads_observer_calls_remove_handle(self, _):
+        presenter = PeaksViewerCollectionPresenter(MagicMock())
+        presenter.delete_handle = MagicMock()
+        self.assertTrue(isinstance(presenter._ads_observer, SliceViewerADSObserver))
+        presenter._ads_observer = SliceViewerADSObserver(presenter.replace_handle, presenter.rename_handle,
+                                                         presenter.clear_handle, presenter.delete_handle)
+
+        CreateSampleWorkspace(OutputWorkspace="ws")
+        ADS.remove("ws")
+
+        presenter.delete_handle.assert_called_once_with("ws")
+
+    def test_ensure_that_the_ads_observer_calls_replace_handle(self, _):
+        presenter = PeaksViewerCollectionPresenter(MagicMock())
+        presenter.replace_handle = MagicMock()
+        self.assertTrue(isinstance(presenter._ads_observer, SliceViewerADSObserver))
+        presenter._ads_observer = SliceViewerADSObserver(presenter.replace_handle, presenter.rename_handle,
+                                                         presenter.clear_handle, presenter.delete_handle)
+
+        CreateSampleWorkspace(OutputWorkspace="ws")
+        CreateSampleWorkspace(OutputWorkspace="ws")
+
+        presenter.replace_handle.assert_called_once()
+
+    def test_ensure_that_the_ads_observer_calls_rename_handle(self, _):
+        presenter = PeaksViewerCollectionPresenter(MagicMock())
+        presenter.rename_handle = MagicMock()
+        self.assertTrue(isinstance(presenter._ads_observer, SliceViewerADSObserver))
+        presenter._ads_observer = SliceViewerADSObserver(presenter.replace_handle, presenter.rename_handle,
+                                                         presenter.clear_handle, presenter.delete_handle)
+
+        CreateSampleWorkspace(OutputWorkspace="ws")
+        RenameWorkspace(InputWorkspace="ws", OutputWorkspace="ws1")
+
+        presenter.rename_handle.assert_called_once_with("ws", "ws1")
+
+    def test_ensure_replace_handle_removes_and_re_adds_workspaces(self):
+        pass
+
+    def test_ensure_delete_handle_removes_workspace(self):
+        pass
+
+    def test_ensure_clear_handle_removes_all_workspaces(self):
+        pass
+
+    def test_ensure_rename_handle_removes_and_re_adds_the_new_workspace_name(self):
+        pass
 
 if __name__ == '__main__':
     unittest.main()

@@ -13,6 +13,7 @@ from enum import Enum
 from mantidqt.widgets.workspacedisplay.table.presenter \
     import TableWorkspaceDataPresenter, create_table_item
 from .model import create_peaksviewermodel
+from ..adsobsever import SliceViewerADSObserver
 
 
 class PeaksWorkspaceDataPresenter(TableWorkspaceDataPresenter):
@@ -39,7 +40,7 @@ class PeaksWorkspaceDataPresenter(TableWorkspaceDataPresenter):
         return item
 
 
-class PeaksViewerPresenter(object):
+class PeaksViewerPresenter:
     """Controls a PeaksViewerView with a given model to display
     the peaks table and interaction controls for single workspace.
     """
@@ -140,7 +141,7 @@ class PeaksViewerPresenter(object):
             raise ValueError("Expected a PeaksWorkspace. Found {}.".format(type(ws)))
 
 
-class PeaksViewerCollectionPresenter(object):
+class PeaksViewerCollectionPresenter:
     """Controls a widget comprising of multiple PeasViewerViews to display and
     interact with multiple PeaksWorkspaces"""
 
@@ -161,6 +162,10 @@ class PeaksViewerCollectionPresenter(object):
         """
         self._view = view
         self._child_presenters = []
+
+        # Setup ADS observer
+        self._ads_observer = SliceViewerADSObserver(self.replace_handle, self.rename_handle, self.clear_handle,
+                                                    self.delete_handle)
 
     @property
     def view(self):
@@ -254,3 +259,24 @@ class PeaksViewerCollectionPresenter(object):
             fg_color = '#000000'
 
         return create_peaksviewermodel(name, fg_color, self.DEFAULT_BG_COLOR)
+    
+    def _if_workspace_is_present_remove_it(self, ws_name):
+        ws_names = self.workspace_names()
+        if ws_name in ws_names:
+            self.remove_peaksworkspace(ws_name)  
+    
+    def replace_handle(self, ws_name, _):
+        self._if_workspace_is_present_remove_it(ws_name)
+        self.append_peaksworkspace(ws_name)
+
+    def delete_handle(self, ws_name):
+        self._if_workspace_is_present_remove_it(ws_name)
+
+    def clear_handle(self):
+        # This is likely handled at a higher level anyway, because SliceViewer closes given a clear all on the ADS.
+        for ws_name in self.workspace_names():
+            self.remove_peaksworkspace(ws_name)
+
+    def rename_handle(self, ws_name, new_name):
+        self._if_workspace_is_present_remove_it(ws_name)
+        self.append_peaksworkspace(new_name)
