@@ -26,6 +26,7 @@ Improvements
  - With :ref:`SANSILLAutoProcess <algm-SANSILLAutoProcess>`, if sample thickness is set to -1, the algorithm will try to get it
    from the nexus file.
  - With :ref:`SANSILLAutoProcess <algm-SANSILLAutoProcess>`, the output workspace will get its title from the nexus file.
+ - The Rectangle option for :ref:`SolidAngle <algm-SolidAngle>` is now supported for ILL's D22 and D33.
 
 Bugfixes
 ########
@@ -40,5 +41,6 @@ Bugfixes
 - Wavelength limits entered with comma ranges larger than 10, e.g. `1,5,10,15` no longer
   throw a Runtime Error.
 - ISIS SANS will print the name of any missing maskfiles instead of an empty name.
+- Fixed a bug in ISIS SANS GUI with the `Save Other` dialog.
 
 :ref:`Release 6.0.0 <v6.0.0>`

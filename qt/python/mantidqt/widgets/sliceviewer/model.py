@@ -122,8 +122,8 @@ class SliceViewerModel:
         Check if the given workspace can multiple BinMD calls.
         """
         ws_type = self.get_ws_type()
-        return ws_type == WS_TYPE.MDE or (ws_type == WS_TYPE.MDH
-                                          and self._get_ws().hasOriginalWorkspace(0))
+        return ws_type == WS_TYPE.MDE or (ws_type == WS_TYPE.MDH and self._get_ws().hasOriginalWorkspace(
+            0) and self._get_ws().getOriginalWorkspace(0).getNumDims() == self._get_ws().getNumDims())
 
     def get_ws_name(self) -> str:
         """Return the name of the workspace being viewed"""
@@ -196,7 +196,7 @@ class SliceViewerModel:
     def get_dim_info(self, n: int) -> dict:
         """
         returns dict of (minimum :float, maximum :float, number_of_bins :int,
-                         width :float, name :str, units :str, type :str, has_original: bool, qdim: bool) for dimension n
+                         width :float, name :str, units :str, type :str, can_rebin: bool, qdim: bool) for dimension n
         """
         workspace = self._get_ws()
         dim = workspace.getDimension(n)
@@ -208,7 +208,7 @@ class SliceViewerModel:
             'name': dim.name,
             'units': dim.getUnits(),
             'type': self.get_ws_type().name,
-            'has_original': workspace.hasOriginalWorkspace(0),
+            'can_rebin': self.can_support_dynamic_rebinning(),
             'qdim': dim.getMDFrame().isQ()
         }
 

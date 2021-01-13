@@ -93,7 +93,6 @@ private:
   bool m_isD16Omega;     ///< Data come from a D16 omega scan flag
 
   void setFinalProperties(const std::string &filename);
-  void setPixelSize();
   std::vector<double> getVariableTimeBinning(const NeXus::NXEntry &,
                                              const std::string &,
                                              const NeXus::NXInt &,

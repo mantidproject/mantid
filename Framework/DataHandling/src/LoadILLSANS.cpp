@@ -169,7 +169,6 @@ void LoadILLSANS::exec() {
 
   progress.report("Setting sample logs");
   setFinalProperties(filename);
-  setPixelSize();
   setProperty("OutputWorkspace", m_localWorkspace);
 } // namespace DataHandling
 
@@ -823,27 +822,6 @@ void LoadILLSANS::moveSource() {
   mover->setProperty("Z", -m_sourcePos);
   mover->setProperty("RelativePosition", false);
   mover->executeAsChildAlg();
-}
-
-/**
- * Sets the width (x) and height (y) of the pixel
- */
-void LoadILLSANS::setPixelSize() {
-  const auto instrument = m_localWorkspace->getInstrument();
-  const std::string component =
-      (m_instrumentName == "D33") ? "back_detector" : "detector";
-  auto detector = instrument->getComponentByName(component);
-  auto rectangle =
-      std::dynamic_pointer_cast<const Geometry::RectangularDetector>(detector);
-  if (rectangle) {
-    const double dx = rectangle->xstep();
-    const double dy = rectangle->ystep();
-    API::Run &runDetails = m_localWorkspace->mutableRun();
-    runDetails.addProperty<double>("pixel_width", dx);
-    runDetails.addProperty<double>("pixel_height", dy);
-  } else {
-    g_log.debug("No pixel size available");
-  }
 }
 
 /**

@@ -71,4 +71,9 @@ Algorithms
 - LoadPSIMuonBin and LoadMuonNexusV2 can now return a table of time zeros
 - MuonPreProcess has a new input 'TimeZeroTable' which requires a TableWorkspace of time zero values
 
+Fit Functions
+-------------
+
+- :ref:`StandardSC <func-StandardSC>` fixed a conversion factor for field.
+
 :ref:`Release 6.0.0 <v6.0.0>`
