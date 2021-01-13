@@ -5,10 +5,6 @@ MuSR Changes
 .. contents:: Table of Contents
    :local:
 
-.. warning:: **Developers:** Sort changes under appropriate heading
-    putting new features at the top of the section, followed by
-    improvements, followed by bug fixes.
-
 Muon Analysis 2 and Frequency Domain Analysis
 ---------------------------------------------
 
@@ -17,25 +13,28 @@ New Features
 
 Improvements
 ############
-- Phasequads are now available for analysis in both GUI's.
-- Ticking co-add now works in the GUI's so you can analyse multiple runs as one run
-- Added some input validation to First and Last good Data in the Phase Table tab
-- When using co-add and creating a phasequad, the deadtime table will be taken from the first file only
+- Both interfaces are now able to analyse Phasequads.
+- Both interfaces are now able to analise multiple runs as one run by ticking co-add.
+- Input validation has been added to First and Last good Data in the Phase Table tab.
+- When using co-add and creating a phasequad, the deadtime table will now be taken from the first file only.
+- If the start time of a fit is greater than the end time the interface will swap the two.
 
 Bug fixes
 #########
-- Fixed a bug where ties and constraints were not being respected.
-- Fixed a bug to swap start and end time fit properties on the interface if start > end
-- Fixed a bug where editing constraints would result in a crash.
-- Fixed a bug where global parameter values would reset when changing the displayed dataset.
-- Fixed a crash when adding the DynamicKuboToyabe function on the fitting tab of Muon Analysis.
-- Fixed an error caused by switching to Simultaneous fitting when TF Asymmetry mode is ticked.
-- Fixed an error caused by switching between the Run and Group/Pair selection when TF Asymmetry mode is ticked.
-- Fixed a bug that can sometimes cause the MaxEnt calculation to fail in frequency domain analysis.
-- Fixed a crash when trying to do a simultaneous fit with no data loaded after pressing clear all.
-- Fixed a bug where changing rebin wouldn't update the plot in the GUI
-- Fixed a bug where the plot would update incorrectly when changing plot raw and plot difference
-- Fixed a crash when pressing autoscale y without any data loaded
+- A bug has been fixed where ties and constraints were not being respected.
+- A bug has been fixed where editing constraints resulted in a crash.
+- A bug has been fixed where global parameter values would reset when changing the displayed dataset.
+- A bug has been fixed where adding the DynamicKuboToyabe function on the fitting tab of Muon Analysis resulted in a
+  crash.
+- A bug has been fixed where switching to Simultaneous fitting when TF Asymmetry mode is ticked caused an error.
+- A bug has been fixed where switching between the Run and Group/Pair selection when TF Asymmetry mode is ticked caused
+  an error.
+- A bug has been fixed that can sometimes cause the MaxEnt calculation to fail in frequency domain analysis.
+- A bug has been fixed when trying to do a simultaneous fit with no data loaded after pressing clear all would cause a
+  crash.
+- A bug has been fixed where changing rebin wouldn't update the plot in the GUI.
+- A bug has been fixed where the plot would update incorrectly when changing plot raw and plot difference.
+- A bug has been fixed where pressing autoscale y without any data loaded would cause a crash.
 
 ALC
 ---
@@ -43,38 +42,45 @@ ALC
 New Features
 ############
 - The data loading section has been updated for this release. See :ref:`Muon ALC <MuonALC-ref>` for more.
-- Can now set alpha in the ALC interface for single period data
+- The alpha in the ALC interface can now be set for single period data.
 
 Improvements
 ############
-- Added an x label to the plot in data loading
+- An x label has been added to the plot in data loading.
 
 Bug fixes
 ##########
-- Stopped scientific notation when plotting run numbers on x axis
+- Stopped scientific notation when plotting run numbers on x axis.
 
 Elemental Analysis
 ------------------
 
 New Features
 ############
-- Added a new XrayAbsorptionCorrection algorithm. See :ref:`XrayAbsorptionCorrection <algm-XrayAbsorptionCorrection>`
-- Fixed bug in GUI where minor peaks wouldn't be added to a new detector subplot
+
+- A new :ref:`XrayAbsorptionCorrection <algm-XrayAbsorptionCorrection>` algorithm has been added.
+- A bug has been fixed in the Elemental Analysis GUI where minor peaks wouldn't be added to a new detector subplot.
 
 Bug fixes
 #########
 
 Algorithms
 ----------
-- :ref:`algm-LoadElementalAnalysisData` algorithm was introduced for loading runs for the new Elemental Analysis GUI, enabling it to be registered by WorkspaceHistory.
-- :ref:`algm-PlotAsymmetryByLogValue` has a new property Alpha to set the balance parameter, default to 1.0  
-- The functions RemoveExpDecay and EstimateMuonAsymmetryFromCounts were modified to use point data instead of bin edges for removing the exponential.
-- LoadPSIMuonBin and LoadMuonNexusV2 can now return a table of time zeros
-- MuonPreProcess has a new input 'TimeZeroTable' which requires a TableWorkspace of time zero values
+- A new :ref:`LoadElementalAnalysisData <algm-LoadElementalAnalysisData>` algorithm has been added for loading runs for
+  the new Elemental Analysis GUI, enabling it to be registered by WorkspaceHistory.
+- A new Property ``Alpha`` has been added to :ref:`PlotAsymmetryByLogValue <algm-PlotAsymmetryByLogValue>` to set the
+  balance parameter, default to 1.0.
+- The algorithms :ref:`RemoveExpDecay <algm-RemoveExpDecay>` and
+  :ref:`EstimateMuonAsymmetryFromCounts <algm-EstimateMuonAsymmetryFromCounts>` have been modified to use point data
+  instead of bin edges for removing the exponential.
+- :ref:`LoadPSIMuonBin <algm-LoadPSIMuonBin>` and :ref:`LoadMuonNexusV2 <algm-LoadMuonNexusV2>` can now return a table
+  of time zeros.
+- :ref:`MuonPreProcess <algm-MuonPreProcess>` has a new input ``TimeZeroTable`` which requires a TableWorkspace of time
+  zero values.
 
 Fit Functions
 -------------
 
-- :ref:`StandardSC <func-StandardSC>` fixed a conversion factor for field.
+- The conversion factor for field in :ref:`StandardSC <func-StandardSC>` has been fixed.
 
 :ref:`Release 6.0.0 <v6.0.0>`
