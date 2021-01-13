@@ -15,9 +15,10 @@ ISIS Reflectometry Interface
 - You can now exclude or annotate runs in the search results list, e.g. to
   exclude them from autoprocessing. See the
   :ref:`ISIS Reflectometry Interface <interface-isis-refl>` documentation for details.
+- Fixed a bug where the flood workspace drop-down box was being accidentally populated with the first workspace created after clearing the workspaces list.
 
-Bugfixes
-########
+Algorithms
+##########
 
 - Fixed an issue where `import CaChannel` on Linux would cause a hard crash.
 - Fixed spurious error messages about transmission workspaces when running :ref:`algm-ReflectometryReductionOneAuto` on workspace groups
