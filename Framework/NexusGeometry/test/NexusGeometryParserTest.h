@@ -316,6 +316,12 @@ public:
     TS_ASSERT_EQUALS(shape2Cylinder->shapeInfo().height(), 0.3); // 0.3
     TS_ASSERT_EQUALS(shape3Cylinder->shapeInfo().height(), 0.2); // 0.5- 0.3
   }
+
+  void test_detector_shape_with_voxel() {
+    auto instrument = NexusGeometryParser::createInstrument(
+        instrument_path("unit_testing/VOXEL_example.nxs"),
+        std::make_unique<testing::NiceMock<MockLogger>>());
+  }
 };
 
 class NexusGeometryParserTestPerformance : public CxxTest::TestSuite {
