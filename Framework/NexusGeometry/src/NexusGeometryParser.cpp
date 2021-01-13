@@ -671,9 +671,9 @@ private:
     const auto vertices = readNXFloats(shapeGroup, "vertices");
 
     // Sanity check entries
-    if (detFaces.size() != 2 * detectorIds.size())
-      throw std::runtime_error("Expect to have as many detector_face entries "
-                               "as detector_number entries");
+    if (detFaces.size() < 2 * detectorIds.size())
+      throw std::runtime_error("Expect to have at least as many detector_face "
+                               "entries as detector_number entries");
     if (detFaces.size() % 2 != 0)
       throw std::runtime_error("Unequal pairs of face indices to detector "
                                "indices in detector_faces");

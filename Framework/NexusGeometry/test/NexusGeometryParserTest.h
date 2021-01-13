@@ -48,6 +48,7 @@ std::string instrument_path(const std::string &local_name) {
       local_name, true, Poco::Glob::GLOB_DEFAULT);
 }
 } // namespace
+
 class NexusGeometryParserTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -57,13 +58,15 @@ public:
   }
   static void destroySuite(NexusGeometryParserTest *suite) { delete suite; }
 
-  std::unique_ptr<const Mantid::Geometry::Instrument> makeTestInstrument() {
+  static std::unique_ptr<const Mantid::Geometry::Instrument>
+  makeTestInstrument() {
     const auto fullpath =
         instrument_path("unit_testing/SMALLFAKE_example_geometry.hdf5");
 
     return NexusGeometryParser::createInstrument(
         fullpath, std::make_unique<MockLogger>());
   }
+
   void test_basic_instrument_information() {
     auto instrument = makeTestInstrument();
     auto beamline = extractBeamline(*instrument);
@@ -162,7 +165,6 @@ public:
   }
 
   void test_shape_cylinder_shape() {
-
     auto instrument = makeTestInstrument();
     auto beamline = extractBeamline(*instrument);
     auto componentInfo = std::move(beamline.first);
@@ -185,7 +187,6 @@ public:
   }
 
   void test_mesh_shape() {
-
     auto instrument = makeTestInstrument();
     auto beamline = extractBeamline(*instrument);
     auto componentInfo = std::move(beamline.first);
@@ -208,7 +209,6 @@ public:
     TS_ASSERT_DELTA(shapeBB.zMax() - shapeBB.zMin(), 2.0, 1e-9);
   }
   void test_pixel_shape_as_mesh() {
-
     auto instrument = NexusGeometryParser::createInstrument(
         instrument_path("unit_testing/DETGEOM_example_1.nxs"),
         std::make_unique<testing::NiceMock<MockLogger>>());
@@ -229,6 +229,7 @@ public:
     TS_ASSERT_EQUALS(shape1Mesh->numberOfTriangles(), 2);
     TS_ASSERT_EQUALS(shape1Mesh->numberOfVertices(), 4);
   }
+
   void test_pixel_shape_as_cylinders() {
     auto instrument = NexusGeometryParser::createInstrument(
         instrument_path("unit_testing/DETGEOM_example_2.nxs"),
@@ -256,6 +257,7 @@ public:
     TS_ASSERT_EQUALS(shape1Cylinder->shapeInfo().height(),
                      shape2Cylinder->shapeInfo().height());
   }
+
   void test_detector_shape_as_mesh() {
     auto instrument = NexusGeometryParser::createInstrument(
         instrument_path("unit_testing/DETGEOM_example_3.nxs"),
@@ -278,6 +280,7 @@ public:
     TS_ASSERT_EQUALS(shape2Mesh->numberOfTriangles(), 1);
     TS_ASSERT_EQUALS(shape2Mesh->numberOfVertices(), 3);
   }
+
   void test_detector_shape_as_cylinders() {
     auto instrument = NexusGeometryParser::createInstrument(
         instrument_path("unit_testing/DETGEOM_example_4.nxs"),
@@ -317,10 +320,39 @@ public:
     TS_ASSERT_EQUALS(shape3Cylinder->shapeInfo().height(), 0.2); // 0.5- 0.3
   }
 
-  void test_detector_shape_with_voxel() {
+  void test_parse_detector_shape_with_voxel() {
+    // GIVEN a NeXus file describing a detector with a single octahedral voxel
+    // with:
+    //   - a detector number of 8
+    //   - pixel location defined in x_pixel_offset, y_pixel_offset,
+    //     z_pixel_offset datasets as [1.1, 2.2, 3.3] w.r.t. detector origin
+    //   - detector position defined as [2, 0, 2] w.r.t. coord system origin
+    //
+    // "voxel" here means that multiple faces in the mesh are mapped to the
+    // same detector number, thus defining a 3D pixel
+    // Unlike 2D pixel case, pixel offset datasets must be present in the file.
+    // The parser will not try to find the centre of mass of the polyhedron to
+    // use as the pixel position as this is computationally expensive and
+    // possibly not even the correct for some detector types
+    const std::string filename = "unit_testing/VOXEL_example.nxs";
+    const int expectedDetectorNumber = 8;
+    const auto expectedPosition = Eigen::Vector3d{3.1, 2.2, 5.3};
+
+    // WHEN the NeXus geometry is parsed
     auto instrument = NexusGeometryParser::createInstrument(
-        instrument_path("unit_testing/VOXEL_example.nxs"),
+        instrument_path(filename),
         std::make_unique<testing::NiceMock<MockLogger>>());
+
+    // THEN the single voxel is successfully parsed and its location matches
+    // offsets datasets from file
+    auto parsedBeamline = extractBeamline(*instrument);
+    auto &parsedDetInfo = *parsedBeamline.second;
+    TS_ASSERT_EQUALS(parsedDetInfo.size(), 1);
+
+    auto detectorInfo = extractDetectorInfo(*instrument);
+    auto voxelPosition = Kernel::toVector3d(
+        detectorInfo->position(detectorInfo->indexOf(expectedDetectorNumber)));
+    TS_ASSERT(voxelPosition.isApprox(expectedPosition));
   }
 };
 
