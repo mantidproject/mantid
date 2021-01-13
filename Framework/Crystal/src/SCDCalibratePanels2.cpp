@@ -161,6 +161,13 @@ namespace Crystal {
   SCDCalibratePanels2::validateInputs() {
       std::map<std::string, std::string> issues;
 
+      // T0 calibration is not ready for production, raise an error
+      // if requested by user
+      bool calibrateT0 = getProperty("CalibrateT0");
+      if (calibrateT0)
+        issues["CalibrateT0"] = "Caliration of T0 is not ready for production, "
+                                "please set it to False to continue";
+
       return issues;
   }
 

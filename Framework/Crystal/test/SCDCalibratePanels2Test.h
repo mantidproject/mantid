@@ -172,6 +172,8 @@ public:
   /**
    * @brief Only adjust T0
    *
+   * NOTE: calibration of T0 shift always returns 0, therefore this
+   *       test should not be turned on until the issue is resolved.
    */
   void run_T0_Shift() {
     g_log.notice() << "test: !T0 Shift!\n";
