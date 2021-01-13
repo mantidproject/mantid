@@ -12,14 +12,17 @@ Description
 This algorithm will take a table of peak-center positions (TOF units) for every pixel,
 and minimize the following quantity by moving and rotating instrument components.
 
-.. math:: \sum_i^{N_d}\sum_j^{M_i} \frac{|d_{i,j} - d^*_j|}{d^*_j}
+.. math:: \sum_i^{N_d}\sum_j^{M_i} \frac{|DIFC_i * TOF_{i,j} - d^{exp}_j|}{d^{exp}_j}
 
 where the sums is for all :math:`N_d` detector pixels in a given instrument component and all
 :math:`M_i` peak centers observed at detector pixel :math:`i`. The quantity to be summed is
 the absolute value of the fractional difference between the observed peak center in d-spacing units
-for detector pixel :math:`i` and peak :math:`j` and a reference value for the d-spacing of peak :math:`j`.
-As we change the location of the instrument components during the minimization, the
-:math:`d_{i,j}` values are bound to change.
+for detector pixel :math:`i` and peak :math:`j`, :math:`DIFC_i * TOF_{i,j}`, and a reference
+experimental value for the d-spacing of peak :math:`j`, :math:`d^{exp}_j`. The conversion from
+peak center in TOF units (:math:`TOF_{i,j}`) to d-spacing units is carried out via the
+geometrical parameter :math:`DIFC_i` -- see :ref:`algm-AlignDetectors` for more information
+regarding this parameter. As we change the location and orientations of the instrument components
+during the minimization, the geometrical parameter :math:`DIFC_i` is bound to change.
 
 Below's an example of the table of peak-center positions in TOF units for a sample having two peaks
 with reference peak centers of 5.1483 and 5.2070 Angstroms for an instrument consisting of one bank
