@@ -133,6 +133,10 @@ public:
                void(std::string const &workspaceName,
                     MantidQt::MantidWidgets::WorkspaceIndex workspaceIndex,
                     double startX, double endX));
+  MOCK_CONST_METHOD2(
+      hasWorkspaceDomain,
+      bool(std::string const &workspaceName,
+           MantidQt::MantidWidgets::WorkspaceIndex workspaceIndex));
 
   MOCK_METHOD3(updateStartX,
                bool(std::string const &workspaceName,

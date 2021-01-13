@@ -45,6 +45,9 @@ public:
   void addWorkspaceDomain(std::string const &workspaceName,
                           WorkspaceIndex workspaceIndex, double startX,
                           double endX) override;
+  [[nodiscard]] bool
+  hasWorkspaceDomain(std::string const &workspaceName,
+                     WorkspaceIndex workspaceIndex) const override;
 
   [[nodiscard]] bool updateStartX(std::string const &workspaceName,
                                   WorkspaceIndex workspaceIndex,
@@ -120,8 +123,6 @@ private:
   [[nodiscard]] std::vector<std::unique_ptr<FitDomain>>::const_iterator
   findWorkspaceDomain(std::string const &workspaceName,
                       WorkspaceIndex workspaceIndex) const;
-  [[nodiscard]] bool hasWorkspaceDomain(std::string const &workspaceName,
-                                        WorkspaceIndex workspaceIndex) const;
 
   [[nodiscard]] std::string
   getEquivalentParameterTieForDomain(FitDomainIndex domainIndex,
@@ -145,7 +146,8 @@ private:
   [[nodiscard]] double
   getParameterValue(std::string const &fullParameter) const;
 
-  [[nodiscard]] bool validParameter(std::string const &fullParameter) const;
+  [[nodiscard]] bool validParameter(FitDomainIndex domainIndex,
+                                    std::string const &fullParameter) const;
   [[nodiscard]] bool validTie(std::string const &fullTie) const;
   [[nodiscard]] bool validGlobalTie(std::string const &fullTie) const;
 

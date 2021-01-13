@@ -31,6 +31,9 @@ public:
   virtual void addWorkspaceDomain(std::string const &workspaceName,
                                   WorkspaceIndex workspaceIndex, double startX,
                                   double endX) = 0;
+  [[nodiscard]] virtual bool
+  hasWorkspaceDomain(std::string const &workspaceName,
+                     WorkspaceIndex workspaceIndex) const = 0;
 
   [[nodiscard]] virtual bool updateStartX(std::string const &workspaceName,
                                           WorkspaceIndex workspaceIndex,

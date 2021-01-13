@@ -156,8 +156,8 @@ void FitScriptGeneratorPresenter::handleEndXChanged() {
 }
 
 void FitScriptGeneratorPresenter::handleSelectionChanged() {
-  m_view->setSimultaneousMode(m_model->getFittingMode() ==
-                              FittingMode::SIMULTANEOUS);
+  auto const fittingMode = m_model->getFittingMode();
+  m_view->setSimultaneousMode(fittingMode == FittingMode::SIMULTANEOUS);
 
   auto const selectedRows = m_view->selectedRows();
   if (!selectedRows.empty()) {
