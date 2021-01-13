@@ -41,6 +41,10 @@ class PlotsLoader(object):
                     raise KeyboardInterrupt(str(e))
                 logger.warning("A plot was unable to be loaded from the save file. Error: " + str(e))
 
+    def restore_normalise_obj_from_dict(self, norm_dict):
+        norm = matplotlib.colors.Normalize(norm_dict['vmin'], norm_dict['vmax'], norm_dict['clip'])
+        return norm
+
     def make_fig(self, plot_dict, create_plot=True):
         """
         This method currently only considers single matplotlib.axes.Axes based figures as that is the most common case
@@ -55,6 +59,11 @@ class PlotsLoader(object):
                 "A plot could not be loaded from the save file, as it did not have creation_args. "
                 "The original plot title was: {}".format(plot_dict["label"]))
             return
+
+        for sublist in creation_args:
+            for cargs_dict in sublist:
+                if 'norm' in cargs_dict and type(cargs_dict['norm']) is dict:
+                    cargs_dict['norm'] = self.restore_normalise_obj_from_dict(cargs_dict['norm'])
 
         fig, axes_matrix, _, _ = create_subplots(len(creation_args))
         axes_list = axes_matrix.flatten().tolist()

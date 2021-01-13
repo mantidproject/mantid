@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package
 #
+from copy import deepcopy
 import matplotlib.axis
 from matplotlib import ticker
 from matplotlib.image import AxesImage
@@ -14,9 +15,9 @@ from mantid import logger
 from mantid.plots.legend import LegendProperties
 
 try:
-    from matplotlib.colors import to_hex
+    from matplotlib.colors import to_hex, Normalize
 except ImportError:
-    from matplotlib.colors import colorConverter, rgb2hex
+    from matplotlib.colors import colorConverter, rgb2hex, Normalize
 
     def to_hex(color):
         return rgb2hex(colorConverter.to_rgb(color))
@@ -48,13 +49,23 @@ class PlotsSaver(object):
                     logger.debug(error_string)
         return plot_list
 
+    def convert_normalise_obj_to_dict(self, norm):
+        norm_dict = {'clip': norm.clip, 'vmin': norm.vmin, 'vmax': norm.vmax}
+        return norm_dict
+
     def get_dict_from_fig(self, fig):
         axes_list = []
         create_list = []
         for ax in fig.axes:
             try:
-                create_list.append(ax.creation_args)
-                self.figure_creation_args = ax.creation_args
+                creation_args = deepcopy(ax.creation_args)
+                # convert the normalise object (if present) into a dict so that it can be json serialised
+                for args_dict in creation_args:
+                    if 'norm' in args_dict.keys() and type(args_dict['norm']) is Normalize:
+                        norm_dict = self.convert_normalise_obj_to_dict(args_dict['norm'])
+                        args_dict['norm'] = norm_dict
+                create_list.append(creation_args)
+                self.figure_creation_args = creation_args
             except AttributeError:
                 logger.debug("Axis had an axis without creation_args - Common with a Colorfill plot")
                 continue
