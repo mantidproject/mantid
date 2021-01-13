@@ -635,7 +635,7 @@ private:
 
     for (size_t i = 0; i < numDets; ++i) {
       auto &detVerts = detFaceVerts[i];
-      const auto &faceIndices = detFaceIndices[i];
+      const auto &singleFaceIndices = detFaceIndices[i];
       const auto &detWinding = detWindingOrder[i];
       // Calculate polygon centre
       Eigen::Vector3d centre =
@@ -647,8 +647,8 @@ private:
       std::for_each(detVerts.begin(), detVerts.end(),
                     [&centre](Eigen::Vector3d &val) { val -= centre; });
 
-      auto shape = NexusShapeFactory::createFromOFFMesh(faceIndices, detWinding,
-                                                        detVerts);
+      auto shape = NexusShapeFactory::createFromOFFMesh(singleFaceIndices,
+                                                        detWinding, detVerts);
       builder.addDetectorToLastBank(name + "_" + std::to_string(i), detIds[i],
                                     centre, std::move(shape));
     }
