@@ -164,6 +164,7 @@ public:
   void updateSpectrumDefinitionIfNecessary(const size_t index) const;
 
   bool getDetectorValues(const API::SpectrumInfo &spectrumInfo,
+                         const Kernel::Unit &inputUnit,
                          const Kernel::Unit &outputUnit, int emode,
                          const bool signedTheta, int64_t wsIndex, double &l2,
                          double &twoTheta,

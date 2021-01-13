@@ -1352,6 +1352,7 @@ void ExperimentInfo::populateIfNotLoaded() const {
  * @param specInfo :: SpectrumInfo object (should be available from
  * ExperimentInfo::spectrumInfo() but avoiding that for now because of
  * performance issue)
+ * @param inputUnit :: The input unit
  * @param outputUnit :: The output unit
  * @param emode :: The energy mode
  * @param signedTheta :: Return twotheta with sign or without
@@ -1362,6 +1363,7 @@ void ExperimentInfo::populateIfNotLoaded() const {
  * @returns true if lookup successful, false on error
  */
 bool ExperimentInfo::getDetectorValues(const API::SpectrumInfo &specInfo,
+                                       const Kernel::Unit &inputUnit,
                                        const Kernel::Unit &outputUnit,
                                        int emode, const bool signedTheta,
                                        int64_t wsIndex, double &l2,
@@ -1403,17 +1405,21 @@ bool ExperimentInfo::getDetectorValues(const API::SpectrumInfo &specInfo,
 
     std::vector<detid_t> warnDetIds;
     try {
-      auto [difa, difc, tzero] =
-          specInfo.diffractometerConstants(wsIndex, warnDetIds);
-      pmap[UnitParams::difa] = difa;
-      pmap[UnitParams::difc] = difc;
-      pmap[UnitParams::tzero] = tzero;
-      if (warnDetIds.size() > 0) {
-        createDetectorIdLogMessages(warnDetIds, wsIndex);
-      }
-      if ((outputUnit.unitID().find("dSpacing") != std::string::npos) &&
-          (difa == 0) && (difc == 0)) {
-        return false;
+      if ((emode == 0) && ((inputUnit.unitID() == "dSpacing") ||
+                           (outputUnit.unitID() == "dSpacing"))) { // elastic
+        auto [difa, difc, tzero] =
+            specInfo.diffractometerConstants(wsIndex, warnDetIds);
+        pmap[UnitParams::difa] = difa;
+        pmap[UnitParams::difc] = difc;
+        pmap[UnitParams::tzero] = tzero;
+        if (warnDetIds.size() > 0) {
+          createDetectorIdLogMessages(warnDetIds, wsIndex);
+        }
+        if ((outputUnit.unitID() == "dSpacing") && (difa == 0) && (difc == 0)) {
+          return false;
+        }
+      } else {
+        pmap[UnitParams::difc] = specInfo.difcUncalibrated(wsIndex);
       }
     } catch (const std::runtime_error &e) {
       g_log.warning(e.what());

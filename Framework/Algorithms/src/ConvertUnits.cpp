@@ -440,8 +440,8 @@ ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit,
       (!parameters.empty()) &&
       find(parameters.begin(), parameters.end(), "Always") != parameters.end();
 
-  auto localFromUnit = std::unique_ptr<Unit>(fromUnit->clone());
-  auto localOutputUnit = std::unique_ptr<Unit>(outputUnit->clone());
+  auto checkFromUnit = std::unique_ptr<Unit>(fromUnit->clone());
+  auto checkOutputUnit = std::unique_ptr<Unit>(outputUnit->clone());
 
   // Perform Sanity Validation before creating workspace
   double checkl2;
@@ -452,15 +452,16 @@ ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit,
     pmap[UnitParams::efixed] = efixedProp;
   }
   size_t checkIndex = 0;
-  if (inputWS->getDetectorValues(spectrumInfo, *outputUnit, emode, signedTheta,
-                                 checkIndex, checkl2, checktwoTheta, pmap)) {
+  if (inputWS->getDetectorValues(spectrumInfo, *fromUnit, *outputUnit, emode,
+                                 signedTheta, checkIndex, checkl2,
+                                 checktwoTheta, pmap)) {
     // copy the X values for the check
     auto checkXValues = inputWS->readX(checkIndex);
     // Convert the input unit to time-of-flight
-    localFromUnit->toTOF(checkXValues, emptyVec, l1, checkl2, checktwoTheta,
+    checkFromUnit->toTOF(checkXValues, emptyVec, l1, checkl2, checktwoTheta,
                          emode, pmap);
     // Convert from time-of-flight to the desired unit
-    localOutputUnit->fromTOF(checkXValues, emptyVec, l1, checkl2, checktwoTheta,
+    checkOutputUnit->fromTOF(checkXValues, emptyVec, l1, checkl2, checktwoTheta,
                              emode, pmap);
   }
 
@@ -472,7 +473,9 @@ ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit,
 
   auto &outSpectrumInfo = outputWS->mutableSpectrumInfo();
   // Loop over the histograms (detector spectra)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
   for (int64_t i = 0; i < numberOfSpectra_i; ++i) {
+    PARALLEL_START_INTERUPT_REGION
     double efixed = efixedProp;
 
     // Now get the detector object for this histogram
@@ -481,13 +484,17 @@ ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit,
     /// @todo Don't yet consider hold-off (delta)
     const double delta = 0.0;
 
+    auto localFromUnit = std::unique_ptr<Unit>(fromUnit->clone());
+    auto localOutputUnit = std::unique_ptr<Unit>(outputUnit->clone());
+
     // TODO toTOF and fromTOF need to be reimplemented outside of kernel
     ExtraParametersMap pmap = {{UnitParams::delta, delta}};
     if (efixedProp != EMPTY_DBL()) {
       pmap[UnitParams::efixed] = efixed;
     }
-    if (outputWS->getDetectorValues(outSpectrumInfo, *outputUnit, emode,
-                                    signedTheta, i, l2, twoTheta, pmap)) {
+    if (outputWS->getDetectorValues(outSpectrumInfo, *fromUnit, *outputUnit,
+                                    emode, signedTheta, i, l2, twoTheta,
+                                    pmap)) {
       localFromUnit->toTOF(outputWS->dataX(i), emptyVec, l1, l2, twoTheta,
                            emode, pmap);
       // Convert from time-of-flight to the desired unit
@@ -512,7 +519,9 @@ ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit,
     }
 
     prog.report("Convert to " + m_outputUnit->unitID());
+    PARALLEL_END_INTERUPT_REGION
   } // loop over spectra
+  PARALLEL_CHECK_INTERUPT_REGION
 
   if (failedDetectorCount != 0) {
     g_log.information() << "Unable to calculate sample-detector distance for "
