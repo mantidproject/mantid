@@ -46,8 +46,7 @@ class DimensionWidget(QWidget):
         self.dims, self.qflags = [], []
         for n, dim in enumerate(dims_info):
             self.qflags.append(dim['qdim'])
-            dim_type = dim['type']
-            if dim_type == 'MDE' or (dim_type == 'MDH' and dim['has_original']):
+            if dim['can_rebin']:
                 self.dims.append(DimensionNonIntegrated(dim, number=n, parent=self))
             else:
                 self.dims.append(Dimension(dim, number=n, parent=self))
