@@ -413,8 +413,8 @@ MatrixWorkspace_sptr ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUni
   std::vector<std::string> parameters = inputWS->getInstrument()->getStringParameter("show-signed-theta");
   bool signedTheta = (!parameters.empty()) && find(parameters.begin(), parameters.end(), "Always") != parameters.end();
 
-  auto localFromUnit = std::unique_ptr<Unit>(fromUnit->clone());
-  auto localOutputUnit = std::unique_ptr<Unit>(outputUnit->clone());
+  auto checkFromUnit = std::unique_ptr<Unit>(fromUnit->clone());
+  auto checkOutputUnit = std::unique_ptr<Unit>(outputUnit->clone());
 
   // Perform Sanity Validation before creating workspace
   double checkl2;
@@ -430,10 +430,10 @@ MatrixWorkspace_sptr ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUni
     // copy the X values for the check
     auto checkXValues = inputWS->readX(checkIndex);
     // Convert the input unit to time-of-flight
-    localFromUnit->toTOF(checkXValues, emptyVec, l1, checkl2, checktwoTheta,
+    checkFromUnit->toTOF(checkXValues, emptyVec, l1, checkl2, checktwoTheta,
                          emode, pmap);
     // Convert from time-of-flight to the desired unit
-    localOutputUnit->fromTOF(checkXValues, emptyVec, l1, checkl2, checktwoTheta,
+    checkOutputUnit->fromTOF(checkXValues, emptyVec, l1, checkl2, checktwoTheta,
                              emode, pmap);
   }
 
@@ -444,7 +444,9 @@ MatrixWorkspace_sptr ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUni
 
   auto &outSpectrumInfo = outputWS->mutableSpectrumInfo();
   // Loop over the histograms (detector spectra)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
   for (int64_t i = 0; i < numberOfSpectra_i; ++i) {
+    PARALLEL_START_INTERUPT_REGION
     double efixed = efixedProp;
 
     // Now get the detector object for this histogram
@@ -452,6 +454,9 @@ MatrixWorkspace_sptr ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUni
     double twoTheta;
     /// @todo Don't yet consider hold-off (delta)
     const double delta = 0.0;
+
+    auto localFromUnit = std::unique_ptr<Unit>(fromUnit->clone());
+    auto localOutputUnit = std::unique_ptr<Unit>(outputUnit->clone());
 
     // TODO toTOF and fromTOF need to be reimplemented outside of kernel
     ExtraParametersMap pmap = {{UnitParams::delta, delta}};
@@ -483,7 +488,9 @@ MatrixWorkspace_sptr ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUni
     }
 
     prog.report("Convert to " + m_outputUnit->unitID());
+    PARALLEL_END_INTERUPT_REGION
   } // loop over spectra
+  PARALLEL_CHECK_INTERUPT_REGION
 
   if (failedDetectorCount != 0) {
     g_log.information() << "Unable to calculate sample-detector distance for " << failedDetectorCount
