@@ -128,6 +128,70 @@ class ILL_D22_Test(systemtesting.MantidSystemTest):
         # Integration
         SANSILLIntegration(InputWorkspace='sample', OutputWorkspace='iq')
 
+class ILL_D22_Multiple_Sensitivity_Test(systemtesting.MantidSystemTest):
+
+    def __init__(self):
+        super(ILL_D22_Multiple_Sensitivity_Test, self).__init__()
+        self.setUp()
+
+    def setUp(self):
+        config['default.facility'] = 'ILL'
+        config['default.instrument'] = 'D22'
+        config.appendDataSearchSubDir('ILL/D22/')
+
+    def cleanup(self):
+        mtd.clear()
+
+    def validate(self):
+        self.tolerance = 1e-5
+        self.disableChecking = ['Instrument']
+        return ['iq_multi_sens', 'ILL_SANS_D22_IQ_multi_sens.nxs']
+
+    def runTest(self):
+        # Load the mask
+        LoadNexusProcessed(Filename='D22_mask.nxs', OutputWorkspace='mask')
+        LoadNexusProcessed(Filename='D22_mask_central.nxs', OutputWorkspace='mask_central')
+        LoadNexusProcessed(Filename='D22_mask_offset.nxs', OutputWorkspace='mask_offset')
+
+        # Absorber
+        SANSILLReduction(Run='241238', ProcessAs='Absorber', OutputWorkspace='Cd')
+
+        # Beam
+        SANSILLReduction(Run='241226', ProcessAs='Beam', AbsorberInputWorkspace='Cd', OutputWorkspace='Db', FluxOutputWorkspace='fl')
+
+        # Container transmission known
+        CreateSingleValuedWorkspace(DataValue=0.94638, ErrorValue=0.0010425, OutputWorkspace='ctr')
+        AddSampleLog(Workspace='ctr', LogName='ProcessedAs', LogText='Transmission')
+
+        # Container
+        SANSILLReduction(Run='241239', ProcessAs='Container', AbsorberInputWorkspace='Cd', BeamInputWorkspace='Db',
+                         TransmissionInputWorkspace='ctr', OutputWorkspace='can')
+
+        # Sample transmission known
+        CreateSingleValuedWorkspace(DataValue=0.52163, ErrorValue=0.00090538, OutputWorkspace='str')
+        AddSampleLog(Workspace='str', LogName='ProcessedAs', LogText='Transmission')
+
+        # Reference
+        SANSILLReduction(Run='344411', ProcessAs='Sample', MaskedInputWorkspace='mask_central',
+                         AbsorberInputWorkspace='Cd', BeamInputWorkspace='Db', ContainerInputWorkspace='can',
+                         OutputWorkspace='ref1', SensitivityOutputWorkspace='sens1')
+
+        SANSILLReduction(Run='344407', ProcessAs='Sample', MaskedInputWorkspace='mask_offset',
+                         AbsorberInputWorkspace='Cd', BeamInputWorkspace='Db', ContainerInputWorkspace='can',
+                         OutputWorkspace='ref2', SensitivityOutputWorkspace='sens2')
+
+        GroupWorkspaces(InputWorkspaces=['sens1', 'sens2'], OutputWorkspace='sensitivities')
+        CalculateEfficiency(InputWorkspaceGroup='sensitivities', MergeOffsets=True, OutputWorkspace='sens')
+
+        AddSampleLog(Workspace='sens', LogName='ProcessedAs', LogText='Reference')
+
+        # Sample
+        SANSILLReduction(Run='241240', ProcessAs='Sample', AbsorberInputWorkspace='Cd', BeamInputWorkspace='Db',
+                         TransmissionInputWorkspace='str', ContainerInputWorkspace='can', MaskedInputWorkspace='mask',
+                         SensitivityInputWorkspace='sens', OutputWorkspace='sample', FluxInputWorkspace='fl')
+
+        # Integration
+        SANSILLIntegration(InputWorkspace='sample', OutputWorkspace='iq_multi_sens')
 
 class ILL_D33_VTOF_Test(systemtesting.MantidSystemTest):
 
