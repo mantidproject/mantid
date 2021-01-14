@@ -206,7 +206,7 @@ class CurveProperties(dict):
         try:
             barlines = curve[2][0]
             props['errorevery'] = int(barlines.axes.creation_args[0]['errorevery'])
-        except (IndexError, TypeError):
+        except (IndexError, TypeError, KeyError):
             props['errorevery'] = 1
         try:
             caps = curve[1]

@@ -37,6 +37,7 @@ class CurvesTabWidgetPresenterTest(unittest.TestCase):
         cls.curve0 = cls.ax0.errorbar(cls.ws, specNum=1, fmt=':g', marker=1,
                                       label='Workspace')
         cls.ax0.plot([0, 1], [2, 3], '--r', marker='v', lw=1.1, label='noerrors')
+        cls.ax0.creation_args = [{'errorevery': 1}]
 
         ax1 = cls.fig.add_subplot(222)
         ax1.set_title("Image")
@@ -242,6 +243,7 @@ class CurvesTabWidgetPresenterTest(unittest.TestCase):
         ax = fig.add_subplot(111)
         ax.errorbar([0, 1, 2, 4], [0, 1, 2, 4], yerr=[0.1, 0.2, 0.3, 0.4],
                     label='errorbar_plot')
+        ax.containers[0][2][0].axes.creation_args = [{'errorevery': 1}]
         mock_view_props = Mock(get_plot_kwargs=lambda: {'visible': False},
                                hide_errors=False, hide=True,
                                __getitem__=lambda s, x: False)
