@@ -227,6 +227,11 @@ class SANSILLReduction(PythonAlgorithm):
                                                      optional=PropertyMode.Optional),
                              doc='Input workspace containing already loaded raw data, used for parameter scans.')
 
+        self.declareProperty('StoreOnlyEfficiencyInput', False,
+                             doc='Whether or not to only store the input for efficiency calculation algorithm.')
+
+        self.setPropertySettings('StoreOnlyEfficiencyInput', sample)
+
     def _normalise(self, ws):
         """
             Normalizes the workspace by time (SampleLog Timer) or Monitor (ID=100000)
@@ -334,7 +339,10 @@ class SANSILLReduction(PythonAlgorithm):
             @param ws: input workspace
             @param sensitivity_out: sensitivity output map
         """
-        CalculateEfficiency(InputWorkspace=ws, OutputWorkspace=sensitivity_out)
+        if self.getProperty("StoreOnlyEfficiencyInput").value:
+            CloneWorkspace(InputWorkspace=ws, OutputWorkspace=sensitivity_out)
+        else:
+            CalculateEfficiency(InputWorkspace=ws, OutputWorkspace=sensitivity_out)
         mtd[sensitivity_out].getRun().addProperty('ProcessedAs', 'Sensitivity', True)
         self.setProperty('SensitivityOutputWorkspace', mtd[sensitivity_out])
 
