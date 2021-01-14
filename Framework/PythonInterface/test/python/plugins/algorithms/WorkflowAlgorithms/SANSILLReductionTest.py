@@ -70,6 +70,14 @@ class SANSILLReductionTest(unittest.TestCase):
         self._check_process_flag(mtd['water'], 'Sample')
         self._check_process_flag(mtd['sens'], 'Sensitivity')
 
+    def test_reference_only_efficiency_input(self):
+        SANSILLReduction(Run='010453', ProcessAs='Sample', SensitivityOutputWorkspace='sens_input',
+                         OutputWorkspace='water', StoreOnlyEfficiencyInput=True)
+        self._check_output(mtd['water'], True, 1, 128*128+2)
+        self._check_output(mtd['sens_input'], False, 1, 128*128+2)
+        self._check_process_flag(mtd['water'], 'Sample')
+        self._check_process_flag(mtd['sens_input'], 'Sensitivity')
+
     def test_sample(self):
         SANSILLReduction(Run='010569', ProcessAs='Sample',
                          OutputWorkspace='sample')
