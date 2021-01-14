@@ -98,24 +98,33 @@ namespace Crystal {
     setPropertyGroup("CalibrateBanks" ,PARAMETERS);
 
     // Output options group
+    declareProperty(
+        std::make_unique<WorkspaceProperty<TableWorkspace>>(
+            "OutputWorkspace", "CalibrationTable", Direction::Output),
+        "The workspace containing the calibration table.");
     const std::vector<std::string> detcalExts{".DetCal", ".Det_Cal"};
     declareProperty(
         std::make_unique<FileProperty>("DetCalFilename", "SCDCalibrate2.DetCal",
-                                        FileProperty::OptionalSave, detcalExts),
+                                       FileProperty::OptionalSave, detcalExts),
         "Path to an ISAW-style .detcal file to save.");
-
     declareProperty(
         std::make_unique<FileProperty>("XmlFilename", "SCDCalibrate2.xml",
                                         FileProperty::OptionalSave, ".xml"),
         "Path to an Mantid .xml description(for LoadParameterFile) file to "
         "save.");
+    declareProperty(
+        std::make_unique<FileProperty>("CSVFilename", "SCDCalibrate2.csv",
+                                       FileProperty::OptionalSave, ".csv"),
+        "Path to an .csv file which contains the Calibration Table");
     // TODO:
     //  - add option to output a CORELLI calibration table as output workspace
     //  - add option to store intermedia calibration results for additional
     //    analysis if needed
     const std::string OUTPUT("Output");
+    setPropertyGroup("OutputWorkspace", OUTPUT);
     setPropertyGroup("DetCalFilename", OUTPUT);
     setPropertyGroup("XmlFilename", OUTPUT);
+    setPropertyGroup("CSVFilename", OUTPUT);
 
     // Add new section for advanced control of the calibration/optimization
     declareProperty(
@@ -187,6 +196,7 @@ namespace Crystal {
 
     const std::string DetCalFilename = getProperty("DetCalFilename");
     const std::string XmlFilename = getProperty("XmlFilename");
+    const std::string CSVFilename = getProperty("CSVFilename");
 
     // parsing advance control parameters
     m_tolerance_translation = getProperty("ToleranceOfTranslation");
@@ -212,7 +222,16 @@ namespace Crystal {
     if (calibrateBanks)
       optimizeBanks(m_pws);
 
-    // STEP_3: Write to disk if required
+    // STEP_3: generate a matrix workspace to save the calibration results
+    // NOTE:
+    //    This matrix workspace stores a calibration table that was originally
+    //    defined for the CORELLI instrument.
+
+    // TODO: iterate through all components and generate the table
+
+    setProperty("OutputWorkspace", mCaliTable);
+
+    // STEP_4: Write to disk if required
     Instrument_sptr instCalibrated =
         std::const_pointer_cast<Geometry::Instrument>(m_pws->getInstrument());
 
@@ -220,7 +239,10 @@ namespace Crystal {
       saveXmlFile(XmlFilename, m_BankNames, instCalibrated);
 
     if (!DetCalFilename.empty())
-        saveIsawDetCal(DetCalFilename, m_BankNames, instCalibrated, m_T0);
+      saveIsawDetCal(DetCalFilename, m_BankNames, instCalibrated, m_T0);
+
+    if (!CSVFilename.empty())
+      saveCalibrationTable(CSVFilename);
 
     // STEP_4: Cleanup
   }
@@ -777,6 +799,22 @@ namespace Crystal {
     alg->setProperty("Filename", filename);
     alg->setProperty("TimeOffset", T0);
     alg->setProperty("BankNames", banknames);
+    alg->executeAsChildAlg();
+  }
+
+  /**
+   * @brief Save the calibration table into a csv file
+   *
+   * @param FileName
+   */
+  void SCDCalibratePanels2::saveCalibrationTable(const std::string &FileName) {
+    API::IAlgorithm_sptr alg = createChildAlgorithm("SaveAscii");
+    alg->setProperty("InputWorkspace", mCaliTable);
+    alg->setProperty("Filename", FileName);
+    alg->setPropertyValue("CommentIndicator", "#");
+    alg->setPropertyValue("Separator", "CSV");
+    alg->setProperty("ColumnHeader", true);
+    alg->setProperty("AppendToFile", false);
     alg->executeAsChildAlg();
   }
 

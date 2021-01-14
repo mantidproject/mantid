@@ -434,6 +434,8 @@ public:
     isawFile /= boost::filesystem::unique_path("testExec_%%%%%%%%.DetCal");
     auto xmlFile = boost::filesystem::temp_directory_path();
     xmlFile /= boost::filesystem::unique_path("testExec_%%%%%%%%.xml");
+    auto csvFile = boost::filesystem::temp_directory_path();
+    csvFile /= boost::filesystem::unique_path("testExec_%%%%%%%%.csv");
 
     g_log.notice() << "-- generate simulated workspace\n";
     MatrixWorkspace_sptr ws = m_ws->clone();
@@ -469,7 +471,8 @@ public:
 
     // Perform the calibration
     g_log.notice() << "-- start calibration\n";
-    runCalibration(isawFile.string(), xmlFile.string(), pws, false, true, true);
+    runCalibration(isawFile.string(), xmlFile.string(), csvFile.string(), pws,
+                   false, true, true);
 
     // Check if the calibration returns the same instrument as we put in
     g_log.notice() << "-- validate calibration output\n";
@@ -668,7 +671,8 @@ private:
    * @param xmlFilename
    */
   void runCalibration(const std::string &isawFilename,
-                      const std::string &xmlFilename, PeaksWorkspace_sptr pws,
+                      const std::string &xmlFilename,
+                      const std::string &csvFilename, PeaksWorkspace_sptr pws,
                       bool calibrateT0, bool calibrateL1, bool calibrateBanks) {
     SCDCalibratePanels2 alg;
     alg.initialize();
@@ -682,8 +686,10 @@ private:
     alg.setProperty("CalibrateT0", calibrateT0);
     alg.setProperty("CalibrateL1", calibrateL1);
     alg.setProperty("CalibrateBanks", calibrateBanks);
+    alg.setProperty("OutputWorkspace", "caliTableTest");
     alg.setProperty("DetCalFilename", isawFilename);
     alg.setProperty("XmlFilename", xmlFilename);
+    alg.setProperty("CSVFilename", csvFilename);
     alg.execute();
     TS_ASSERT(alg.isExecuted());
   }

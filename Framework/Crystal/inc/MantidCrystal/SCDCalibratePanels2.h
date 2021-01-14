@@ -9,6 +9,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidCrystal/DllConfig.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidDataObjects/TableWorkspace.h"
 
 #include <boost/container/flat_set.hpp>
 
@@ -99,6 +100,9 @@ private:
                       std::shared_ptr<Geometry::Instrument> &instrument,
                       double T0);
 
+  /// Save the calibration table to a CSV file
+  void saveCalibrationTable(const std::string &FileName);
+
   /// unique vars for a given instance of calibration
   double m_a, m_b, m_c, m_alpha, m_beta, m_gamma;
   double m_T0 = 0.0;
@@ -115,6 +119,7 @@ private:
   const double PI{3.141592653589793238462643383279502884};
 
   boost::container::flat_set<std::string> m_BankNames;
+  Mantid::DataObjects::TableWorkspace_sptr mCaliTable;
 };
 
 } // namespace Crystal
