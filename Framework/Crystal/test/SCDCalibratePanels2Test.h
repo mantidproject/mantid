@@ -422,6 +422,7 @@ public:
     // Generate unique temp files
     auto filenamebase = boost::filesystem::temp_directory_path();
     filenamebase /= boost::filesystem::unique_path("testExec_%%%%%%%%");
+    g_log.notice() << "Base name is: " << filenamebase << "\n";
 
     g_log.notice() << "-- generate simulated workspace\n";
     MatrixWorkspace_sptr ws = m_ws->clone();
@@ -704,6 +705,7 @@ private:
     // Test using xml parameter file (default)
     const std::string xmlFileName = fileName + ".xml";
 
+    g_log.notice() << "Using Paramter file: " << xmlFileName << "\n";
     // Adjust components in reference workspace using calibration results
     IAlgorithm_sptr lpf_alg =
         AlgorithmFactory::Instance().create("LoadParameterFile", 1);

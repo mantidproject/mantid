@@ -98,10 +98,9 @@ namespace Crystal {
     setPropertyGroup("CalibrateBanks" ,PARAMETERS);
 
     // Output options group
-    declareProperty(
-        std::make_unique<WorkspaceProperty<TableWorkspace>>(
-            "OutputWorkspace", "CalibrationTable", Direction::Output),
-        "The workspace containing the calibration table.");
+    declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                          Direction::Output),
+                    "The workspace containing the calibration table.");
     const std::vector<std::string> detcalExts{".DetCal", ".Det_Cal"};
     declareProperty(
         std::make_unique<FileProperty>("DetCalFilename", "SCDCalibrate2.DetCal",
@@ -187,6 +186,7 @@ namespace Crystal {
   void SCDCalibratePanels2::exec() {
     // parse all inputs
     PeaksWorkspace_sptr m_pws = getProperty("PeakWorkspace");
+    mCaliTable = getProperty("OutputWorkspace");
 
     parseLatticeConstant(m_pws);
 
