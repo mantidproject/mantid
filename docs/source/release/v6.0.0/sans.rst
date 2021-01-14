@@ -42,5 +42,7 @@ Bugfixes
   throw a Runtime Error.
 - ISIS SANS will print the name of any missing maskfiles instead of an empty name.
 - Fixed a bug in ISIS SANS GUI with the `Save Other` dialog.
+- Fixed a bug in ISIS SANS GUI sum runs tab, where clicking browse and then cancelling the file picker dialog caused
+  a crash.
 
 :ref:`Release 6.0.0 <v6.0.0>`
