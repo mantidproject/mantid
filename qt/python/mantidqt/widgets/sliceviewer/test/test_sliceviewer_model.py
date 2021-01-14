@@ -567,7 +567,7 @@ class SliceViewerModelTest(unittest.TestCase):
         self.assertRaises(RuntimeError, model.create_nonorthogonal_transform, (0, 1, 2))
 
     @patch("mantidqt.widgets.sliceviewer.model.NonOrthogonalTransform")
-    def test_create_non_orthogonal_transform_uses_W_if_avilable(self, mock_nonortho_trans):
+    def test_create_non_orthogonal_transform_uses_W_if_available(self, mock_nonortho_trans):
         ws = _create_mock_workspace(IMDEventWorkspace,
                                     SpecialCoordinateSystem.HKL,
                                     has_oriented_lattice=True)
@@ -584,11 +584,11 @@ class SliceViewerModelTest(unittest.TestCase):
 
         mock_nonortho_trans.from_lattice.assert_called_once_with(
             lattice,
-            x_proj=ArraysEqual(np.array([1, 0, 0])),
+            x_proj=ArraysEqual(np.array([0, 0, 1])),
             y_proj=ArraysEqual(np.array([1, 1, 0])))
 
     @patch("mantidqt.widgets.sliceviewer.model.NonOrthogonalTransform")
-    def test_create_non_orthogonal_transform_uses_identity_if_W_unavilable(
+    def test_create_non_orthogonal_transform_uses_identity_if_W_unavailable(
             self, mock_nonortho_trans):
         ws = _create_mock_workspace(IMDEventWorkspace,
                                     SpecialCoordinateSystem.HKL,
@@ -604,7 +604,7 @@ class SliceViewerModelTest(unittest.TestCase):
 
         mock_nonortho_trans.from_lattice.assert_called_once_with(
             lattice,
-            x_proj=ArraysEqual(np.array([0, 1, 0])),
+            x_proj=ArraysEqual(np.array([1, 0, 0])),
             y_proj=ArraysEqual(np.array([0, 0, 1])))
 
     def test_get_dim_limits_returns_limits_for_display_dimensions_for_matrix(self):
