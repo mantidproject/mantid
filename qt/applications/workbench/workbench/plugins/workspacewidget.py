@@ -76,6 +76,8 @@ class WorkspaceWidget(PluginWidget):
             partial(self._do_plot_3D, plot_type='wireframe'))
         self.workspacewidget.plotContourClicked.connect(
             partial(self._do_plot_3D, plot_type='contour'))
+        self.workspacewidget.contextMenuAboutToShow.connect(
+            self._on_context_menu)
 
         self.workspacewidget.workspaceDoubleClicked.connect(self._action_double_click_workspace)
 
@@ -94,6 +96,13 @@ class WorkspaceWidget(PluginWidget):
         pass
 
     # ----------------- Behaviour --------------------
+
+    def _on_context_menu(self):
+        """
+        Triggered when the context menu is about to be displayed.
+        """
+        ableToOverplot, _ = can_overplot()
+        self.workspacewidget.setOverplotDisabled(not ableToOverplot)
 
     def _do_plot_spectrum(self, names, errors, overplot, advanced=False):
         """
