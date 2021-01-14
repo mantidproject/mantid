@@ -99,7 +99,13 @@ class PeaksViewerModel(TableWorkspaceDisplayModel):
         that slice point has been updated so it contains this peak
         :param index: Index of peak in list
         """
-        return self._representations[index].viewlimits()
+        rep = self._representations[index]
+
+        # Sometimes the integration volume may not intersect the slices of data
+        if rep is None:
+            return ((None, None), (None, None))
+
+        return rep.viewlimits()
 
     def _frame_to_slice_fn(self, frame):
         """
