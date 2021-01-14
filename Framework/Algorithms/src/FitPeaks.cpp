@@ -951,7 +951,7 @@ FitPeaks::fitPeaks() {
     auto iws_end = (ithread == nThreads - 1) ? m_stopWorkspaceIndex + 1
                                              : iws_begin + chunkSize;
 
-    // vector to store fit parmas for last good fit to each peak
+    // vector to store fit params for last good fit to each peak
     std::vector<std::vector<double>> lastGoodPeakParameters(
         m_numPeaksToFit, std::vector<double>(m_peakFunction->nParams(), 0.0));
 
