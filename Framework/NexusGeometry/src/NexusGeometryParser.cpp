@@ -623,7 +623,8 @@ private:
       const std::vector<uint32_t> &windingOrder,
       const std::vector<double> &vertices, const size_t numDets,
       const std::unordered_map<int, uint32_t> &detIdToIndex,
-      const std::string &name, InstrumentBuilder &builder) {
+      const std::string &name, InstrumentBuilder &builder,
+      const Group &detectorGroup) {
     std::vector<std::vector<Eigen::Vector3d>> detFaceVerts(numDets);
     std::vector<std::vector<uint32_t>> detFaceIndices(numDets);
     std::vector<std::vector<uint32_t>> detWindingOrder(numDets);
@@ -633,21 +634,40 @@ private:
                        faceIndices, detFaceVerts, detFaceIndices,
                        detWindingOrder, detIds);
 
+    Pixels detectorPixels;
+    bool calculatePixelCentre = true;
+    if (detFaces.size() != 2 * numDets) {
+      // At least one pixel is 3D (comprises multiple faces)
+      // We need pixel offsets from the NXdetector in this case, as
+      // calculating centre of mass for a general polyhedron is fairly
+      // complex and computationally expensive
+      Pixels pixelOffsets = getPixelOffsets(detectorGroup);
+      // Calculate pixel relative positions
+      detectorPixels = Eigen::Affine3d::Identity() * pixelOffsets;
+      calculatePixelCentre = false;
+    }
+
     for (size_t i = 0; i < numDets; ++i) {
       auto &detVerts = detFaceVerts[i];
-      const auto &singleFaceIndices = detFaceIndices[i];
+      const auto &singleDetIndices = detFaceIndices[i];
       const auto &detWinding = detWindingOrder[i];
-      // Calculate polygon centre
-      Eigen::Vector3d centre =
-          std::accumulate(detVerts.begin() + 1, detVerts.end(),
-                          detVerts.front()) /
-          detVerts.size();
 
-      // translate shape to origin for shape coordinates.
+      Eigen::Vector3d centre;
+      if (calculatePixelCentre) {
+        // Calculate polygon centre
+        centre = std::accumulate(detVerts.begin() + 1, detVerts.end(),
+                                 detVerts.front()) /
+                 detVerts.size();
+      } else {
+        // Use pixel offset which was recorded in the NXdetector
+        centre = detectorPixels.col(i);
+      }
+
+      // translate shape to origin for shape coordinates
       std::for_each(detVerts.begin(), detVerts.end(),
                     [&centre](Eigen::Vector3d &val) { val -= centre; });
 
-      auto shape = NexusShapeFactory::createFromOFFMesh(singleFaceIndices,
+      auto shape = NexusShapeFactory::createFromOFFMesh(singleDetIndices,
                                                         detWinding, detVerts);
       builder.addDetectorToLastBank(name + "_" + std::to_string(i), detIds[i],
                                     centre, std::move(shape));
@@ -657,9 +677,10 @@ private:
   void parseMeshAndAddDetectors(InstrumentBuilder &builder,
                                 const Group &shapeGroup,
                                 const std::vector<Mantid::detid_t> &detectorIds,
-                                const std::string &bankName) {
+                                const std::string &bankName,
+                                const Group &detectorGroup) {
     // Load mapping between detector IDs and faces, winding order of vertices
-    // for faces, and face corner vertices.
+    // for faces, and face corner vertices
     const auto detFaces = readNXUInts32(shapeGroup, "detector_faces");
     const auto faceIndices = readNXUInts32(shapeGroup, "faces");
     const auto windingOrder = readNXUInts32(shapeGroup, "winding_order");
@@ -688,14 +709,16 @@ private:
 
     extractNexusMeshAndAddDetectors(detFaces, faceIndices, windingOrder,
                                     vertices, detectorIds.size(), detIdToIndex,
-                                    bankName, builder);
+                                    bankName, builder, detectorGroup);
   }
 
   void parseAndAddBank(const Group &shapeGroup, InstrumentBuilder &builder,
                        const std::vector<Mantid::detid_t> &detectorIds,
-                       const std::string &bankName) {
+                       const std::string &bankName,
+                       const Group &detectorGroup) {
     if (utilities::hasNXAttribute(shapeGroup, NX_OFF)) {
-      parseMeshAndAddDetectors(builder, shapeGroup, detectorIds, bankName);
+      parseMeshAndAddDetectors(builder, shapeGroup, detectorIds, bankName,
+                               detectorGroup);
     } else if (utilities::hasNXAttribute(shapeGroup, NX_CYLINDER)) {
       parseNexusCylinderDetector(shapeGroup, bankName, builder, detectorIds);
     } else {
@@ -822,11 +845,12 @@ public:
       auto detectorIds = getDetectorIds(detectorGroup);
 
       // We preferentially deal with DETECTOR_SHAPE type shapes. Pixel offsets
-      // not needed for this processing
+      // only needed if pixels are 3D for this processing
       auto detector_shape =
           utilities::findGroupByName(detectorGroup, DETECTOR_SHAPE);
       if (detector_shape) {
-        parseAndAddBank(*detector_shape, builder, detectorIds, bankName);
+        parseAndAddBank(*detector_shape, builder, detectorIds, bankName,
+                        detectorGroup);
         continue;
       }
 
