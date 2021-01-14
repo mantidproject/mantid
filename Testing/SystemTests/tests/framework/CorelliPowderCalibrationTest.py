@@ -26,7 +26,7 @@ class CorelliPowderCalibrationCreateTest(MantidSystemTest):
                                        PeakFunction='Gaussian',
                                        PeakPositions=[1.3143, 1.3854, 1.6967, 1.8587, 2.0781, 2.3995, 2.9388, 4.1561],
                                        SourceMaxTranslation=0.1,
-                                       # ComponentList='',  # comment to calibrate all banks
+                                       ComponentList='bank42/sixteenpack,bank87/sixteenpack',
                                        ComponentMaxTranslation=0.02,
                                        ComponentMaxRotation=3.0)
         table = mtd['LaB6_adjustments']

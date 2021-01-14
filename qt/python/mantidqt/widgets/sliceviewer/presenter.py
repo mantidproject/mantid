@@ -95,8 +95,9 @@ class SliceViewer(ObservingPresenter):
             # model frame
             if data_view.nonorthogonal_mode:
                 inv_tr = data_view.nonortho_transform.inv_tr
-                xmin_p, ymin_p = inv_tr(xlim[0], ylim[0])
-                xmax_p, ymax_p = inv_tr(xlim[1], ylim[1])
+                # viewing axis y not aligned with plot axis
+                xmin_p, ymax_p = inv_tr(xlim[0], ylim[1])
+                xmax_p, ymin_p = inv_tr(xlim[1], ylim[0])
                 xlim, ylim = (xmin_p, xmax_p), (ymin_p, ymax_p)
             if data_view.dimensions.transpose:
                 limits = ylim, xlim
@@ -316,6 +317,7 @@ class SliceViewer(ObservingPresenter):
             data_view.disable_tool_button(ToolItemText.LINEPLOTS)
             data_view.create_axes_nonorthogonal(
                 self.model.create_nonorthogonal_transform(self.get_sliceinfo()))
+            self.show_all_data_requested()
         else:
             data_view.create_axes_orthogonal()
             data_view.enable_tool_button(ToolItemText.LINEPLOTS)
