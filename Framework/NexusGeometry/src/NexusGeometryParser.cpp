@@ -527,9 +527,9 @@ private:
       throw std::runtime_error("numbers of detector with shape cylinder does "
                                "not match number of detectors");
     if (cPoints.size() % 3 != 0)
-      throw std::runtime_error("cylinders not divisble by 3. Bad input.");
+      throw std::runtime_error("cylinders not divisible by 3. Bad input.");
     if (vPoints.size() % 3 != 0)
-      throw std::runtime_error("vertices not divisble by 3. Bad input.");
+      throw std::runtime_error("vertices not divisible by 3. Bad input.");
 
     for (size_t i = 0; i < cylinderIndexToDetId.size(); i += 2) {
       auto cylinderIndex = cylinderIndexToDetId[i];
@@ -711,7 +711,7 @@ private:
    * IObject.
    *
    * Null object return if no shape can be found.
-   * @param detectorGroup : parent group possibily containing sub-group relating
+   * @param detectorGroup : parent group possibly containing sub-group relating
    * to shape
    * @param searchTubes : out parameter, true if tubes can be searched
    * @return shared pointer holding IObject subtype or null shared pointer
@@ -722,16 +722,16 @@ private:
     // that have NX_class attributes of either NX_CYLINDER or NX_OFF. That way
     // we handle groups called any of the allowed - shape, pixel_shape,
     // detector_shape
-    auto cylinderical = utilities::findGroup(detectorGroup, NX_CYLINDER);
+    auto cylindrical = utilities::findGroup(detectorGroup, NX_CYLINDER);
     auto off = utilities::findGroup(detectorGroup, NX_OFF);
     searchTubes = false;
-    if (off && cylinderical) {
+    if (off && cylindrical) {
       throw std::runtime_error("Can either provide cylindrical OR OFF "
                                "geometries as subgroups, not both");
     }
-    if (cylinderical) {
+    if (cylindrical) {
       searchTubes = true;
-      return parseNexusCylinder(*cylinderical);
+      return parseNexusCylinder(*cylindrical);
     } else if (off)
       return parseNexusMesh(*off);
     else {
@@ -746,7 +746,7 @@ private:
     Group instrumentGroup =
         utilities::findGroupOrThrow(entryGroup, NX_INSTRUMENT);
     Group sourceGroup = utilities::findGroupOrThrow(instrumentGroup, NX_SOURCE);
-    std::string sourceName = "Unspecfied";
+    std::string sourceName = "Unspecified";
     if (utilities::findDataset(sourceGroup, "name"))
       sourceName = readOrSubstitute("name", sourceGroup, sourceName);
     auto sourceTransformations = getTransformations(file, sourceGroup);
