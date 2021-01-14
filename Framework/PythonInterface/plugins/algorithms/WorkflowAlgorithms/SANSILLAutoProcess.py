@@ -360,11 +360,15 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         self.declareProperty('ClearCorrected2DWorkspace', True,
                              'Whether to clear the fully corrected 2D workspace.')
 
+        self.declareProperty('SensitivityWithOffsets', False,
+                             'Whether the sensitivity data has been measured with different horizontal offsets.')
+
     def PyExec(self):
 
         self.setUp()
         outputs = []
         panel_output_groups = []
+        sensitivity_outputs = []
 
         container_transmission, sample_transmission = \
             self.processTransmissions()
@@ -379,10 +383,12 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                     beam, flux = self.processBeam(d, absorber)
                 container = self.processContainer(d, beam, absorber,
                                                   container_transmission)
-                sample, panels = self.processSample(d, flux,
-                                                    sample_transmission, beam,
-                                                    absorber, container)
+                sample, panels, sensitivity = self.processSample(d, flux,
+                                                                 sample_transmission, beam,
+                                                                 absorber, container)
                 outputs.append(sample)
+                if sensitivity:
+                    sensitivity_outputs.append(sensitivity)
                 if panels:
                     panel_output_groups.append(panels)
             else:
@@ -441,6 +447,9 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
 
         self.setProperty('OutputWorkspace', mtd[self.output])
         if self.output_sens:
+            if self.getProperty('SensitivityWithOffsets').value:
+                GroupWorkspaces(InputWorkspaces=sensitivity_outputs, OutputWorkspace=self.output_sens)
+                CalculateEfficiency(InputWorkspaceGroup=self.output_sens, MergeOffsets=True, OutputWorkspace=self.output_sens)
             self.setProperty('SensitivityOutputWorkspace', mtd[self.output_sens])
 
         # group panels
@@ -631,6 +640,12 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         output = self.output + '_' + str(i + 1)
         self.progress.report('Processing sample at detector configuration '
                              + str(i + 1))
+
+        if (self.getProperty('SensitivityWithOffsets').value
+                and self.getPropertyValue('SensitivityOutputWorkspace') != ''):
+            output_sens = self.output_sens + '_' + str(i + 1)
+        else:
+            output_sens = self.output_sens
         SANSILLReduction(
                 Run=self.sample[i],
                 ProcessAs='Sample',
@@ -644,7 +659,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                 MaskedInputWorkspace=mask_name,
                 DefaultMaskedInputWorkspace=default_mask_name,
                 SensitivityInputWorkspace=sens_input,
-                SensitivityOutputWorkspace=self.output_sens,
+                SensitivityOutputWorkspace=output_sens,
                 FluxInputWorkspace=flux_name,
                 NormaliseBy=self.normalise,
                 ThetaDependent=self.theta_dependent,
@@ -652,7 +667,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                 self.getProperty('SampleThickness').value,
                 WaterCrossSection=
                 self.getProperty('WaterCrossSection').value,
-                **kwargs
+                StoreOnlyEfficiencyInput=
+                self.getProperty('SensitivityWithOffsets').value
                 )
 
         if self.getProperty('OutputPanels').value:
@@ -707,7 +723,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         if not mtd.doesExist(panel_ws_group):
             panel_ws_group = ""
 
-        return output, panel_ws_group
+        return output, panel_ws_group, output_sens
 
 
 AlgorithmFactory.subscribe(SANSILLAutoProcess)
