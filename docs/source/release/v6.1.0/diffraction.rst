@@ -11,6 +11,7 @@ Diffraction Changes
 
 Powder Diffraction
 ------------------
+- New algorithm :ref:`RebinRagged <algm-RebinRagged>` which can rebin a workspace with different binning parameters for each spectrum
 
 Engineering Diffraction
 -----------------------
