@@ -11,6 +11,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidAlgorithms/DllConfig.h"
 
 namespace {
@@ -83,6 +84,8 @@ private:
 
   void averageAndNormalizePixels(API::MatrixWorkspace &workspace,
                                  const SummedResults &results);
+
+  const std::string mergeMeasurementsWithOffset();
 
   /// Minimum efficiency. Pixels with lower efficiency will be masked
   double m_minThreshold{0.};

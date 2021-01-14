@@ -5,8 +5,10 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CalculateEfficiency2.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/ICompAssembly.h"
@@ -35,9 +37,11 @@ using namespace DataObjects;
 /// A private namespace for property names.
 namespace PropertyNames {
 const static std::string INPUT_WORKSPACE{"InputWorkspace"};
+const static std::string INPUT_WORKSPACE_GROUP{"InputWorkspaceGroup"};
 const static std::string OUTPUT_WORKSPACE{"OutputWorkspace"};
 const static std::string MIN_THRESHOLD{"MinThreshold"};
 const static std::string MAX_THRESHOLD{"MaxThreshold"};
+const static std::string MERGE_OFFSETS{"MergeOffsets"};
 } // namespace PropertyNames
 
 namespace { // anonymous
@@ -77,8 +81,13 @@ static void applyBadPixelThreshold(MatrixWorkspace &outputWS,
  */
 void CalculateEfficiency2::init() {
   declareProperty(std::make_unique<WorkspaceProperty<>>(
-                      PropertyNames::INPUT_WORKSPACE, "", Direction::Input),
+                      PropertyNames::INPUT_WORKSPACE, "", Direction::Input,
+                      PropertyMode::Optional),
                   "The workspace containing the flood data");
+  declareProperty(std::make_unique<WorkspaceProperty<API::WorkspaceGroup>>(
+                      PropertyNames::INPUT_WORKSPACE_GROUP, "",
+                      Direction::Input, PropertyMode::Optional),
+                  "The workspace group containing the flood data");
   declareProperty(
       std::make_unique<WorkspaceProperty<>>(PropertyNames::OUTPUT_WORKSPACE, "",
                                             Direction::Output),
@@ -90,17 +99,43 @@ void CalculateEfficiency2::init() {
                   "Minimum threshold for a pixel to be considered");
   declareProperty(PropertyNames::MAX_THRESHOLD, 2.0, positiveDouble->clone(),
                   "Maximum threshold for a pixel to be considered");
+  declareProperty(
+      PropertyNames::MERGE_OFFSETS, false,
+      "Whether to merge entries in a group to remove the beam stop shadow.",
+      Direction::Input);
 }
 
 std::map<std::string, std::string> CalculateEfficiency2::validateInputs() {
   std::map<std::string, std::string> result;
-  // Files from time-of-flight instruments must be integrated in Lambda before
-  // using this algorithm
-  MatrixWorkspace_const_sptr inputWS =
-      getProperty(PropertyNames::INPUT_WORKSPACE);
-  if (inputWS->blocksize() > 1)
+
+  if (isDefault(PropertyNames::INPUT_WORKSPACE) &&
+      isDefault(PropertyNames::INPUT_WORKSPACE_GROUP)) {
     result[PropertyNames::INPUT_WORKSPACE] =
-        "Input workspace must have only one bin";
+        "Either the InputWorkspace or input workspace group must be defined";
+    result[PropertyNames::INPUT_WORKSPACE_GROUP] =
+        result[PropertyNames::INPUT_WORKSPACE];
+  } else {
+    auto oneBinErrMsg = "Input workspace must have only one bin";
+    if (!isDefault(PropertyNames::INPUT_WORKSPACE)) {
+      // Files from time-of-flight instruments must be integrated in Lambda
+      // before using this algorithm
+      MatrixWorkspace_const_sptr inputWS =
+          getProperty(PropertyNames::INPUT_WORKSPACE);
+      if (inputWS->blocksize() > 1)
+        result[PropertyNames::INPUT_WORKSPACE] = oneBinErrMsg;
+    } else {
+      WorkspaceGroup_sptr inputWSGroup =
+          getProperty(PropertyNames::INPUT_WORKSPACE_GROUP);
+      auto nEntries = inputWSGroup->getNumberOfEntries();
+      for (auto entryNo = 0; entryNo < nEntries; entryNo++) {
+        MatrixWorkspace_sptr workspace =
+            std::static_pointer_cast<API::MatrixWorkspace>(
+                inputWSGroup->getItem(entryNo));
+        if (workspace->blocksize() > 1)
+          result[PropertyNames::INPUT_WORKSPACE_GROUP] = oneBinErrMsg;
+      }
+    }
+  }
 
   // get the thresholds once to error check and use in the main function
   m_minThreshold = getProperty("MinThreshold");
@@ -118,12 +153,21 @@ std::map<std::string, std::string> CalculateEfficiency2::validateInputs() {
  *
  */
 void CalculateEfficiency2::exec() {
+  // in case the provided workspace is a group of workspaces measured with
+  // different offsets, it can be merged to remove the beam stop
+
+  std::string inputWorkspaceName =
+      getPropertyValue(PropertyNames::INPUT_WORKSPACE);
+  if (!isDefault(PropertyNames::INPUT_WORKSPACE_GROUP)) {
+    inputWorkspaceName = getPropertyValue(PropertyNames::INPUT_WORKSPACE_GROUP);
+    if (getProperty(PropertyNames::MERGE_OFFSETS)) {
+      inputWorkspaceName = mergeMeasurementsWithOffset();
+    }
+  }
   // create the output workspace from the input
   auto childAlg = createChildAlgorithm("RebinToWorkspace", 0.0, 0.1);
-  childAlg->setPropertyValue("WorkspaceToRebin",
-                             getPropertyValue(PropertyNames::INPUT_WORKSPACE));
-  childAlg->setPropertyValue("WorkspaceToMatch",
-                             getPropertyValue(PropertyNames::INPUT_WORKSPACE));
+  childAlg->setPropertyValue("WorkspaceToRebin", inputWorkspaceName);
+  childAlg->setPropertyValue("WorkspaceToMatch", inputWorkspaceName);
   childAlg->setPropertyValue("OutputWorkspace",
                              getPropertyValue(PropertyNames::OUTPUT_WORKSPACE));
   childAlg->setProperty("PreserveEvents", false);
@@ -154,6 +198,12 @@ void CalculateEfficiency2::exec() {
 
   progress(0.9, "Normalising the detectors.");
   averageAndNormalizePixels(*outputWS, counts);
+
+  // clean-up
+  if (!isDefault(PropertyNames::INPUT_WORKSPACE_GROUP) &&
+      getProperty(PropertyNames::MERGE_OFFSETS)) {
+    API::AnalysisDataService::Instance().remove(inputWorkspaceName);
+  }
 
   setProperty(PropertyNames::OUTPUT_WORKSPACE, outputWS);
   progress(1.0, "Done!");
@@ -229,6 +279,73 @@ void CalculateEfficiency2::averageAndNormalizePixels(
 
   g_log.debug() << "Averages :: counts = " << averageY
                 << "; error = " << averageE << "\n";
+}
+
+/*
+ *  Merges the input workspace group and tries to remove the shadow coming from
+ *  masking of the beam stop by checking the counts from measurements collected
+ *  at different offsets.
+ */
+const std::string CalculateEfficiency2::mergeMeasurementsWithOffset() {
+  std::string inputWorkspaceName =
+      getPropertyValue(PropertyNames::INPUT_WORKSPACE_GROUP);
+  WorkspaceGroup_sptr input = getProperty(PropertyNames::INPUT_WORKSPACE_GROUP);
+  auto nEntries = input->getNumberOfEntries();
+  std::string tmpName = inputWorkspaceName + "_tmp";
+  auto mergeRuns = createChildAlgorithm("MergeRuns");
+  mergeRuns->setPropertyValue("InputWorkspaces", inputWorkspaceName);
+  mergeRuns->setPropertyValue("OutputWorkspace", tmpName);
+  mergeRuns->executeAsChildAlg();
+  Workspace_sptr mergedWs = mergeRuns->getProperty("OutputWorkspace");
+
+  auto normWsName = tmpName + "_normalisation";
+  auto createSingleAlg = createChildAlgorithm("CreateSingleValuedWorkspace");
+  createSingleAlg->setProperty("DataValue", static_cast<double>(nEntries));
+  createSingleAlg->setPropertyValue("OutputWorkspace", normWsName);
+  createSingleAlg->executeAsChildAlg();
+  MatrixWorkspace_sptr normWs = createSingleAlg->getProperty("OutputWorkspace");
+
+  auto mergedNormalisedWsName = "mergedNormalisedWs";
+  auto divideAlg = createChildAlgorithm("Divide");
+  divideAlg->setProperty("LHSWorkspace", mergedWs);
+  divideAlg->setProperty("RHSWorkspace", normWs);
+  divideAlg->executeAsChildAlg();
+  MatrixWorkspace_sptr mergedNormalisedWs =
+      divideAlg->getProperty("OutputWorkspace");
+  API::AnalysisDataService::Instance().addOrReplace(mergedNormalisedWsName,
+                                                    mergedNormalisedWs);
+  auto spectrumInfo = mergedNormalisedWs->spectrumInfo();
+  for (std::size_t spectrumNo = 0;
+       spectrumNo < mergedNormalisedWs->getNumberHistograms(); spectrumNo++) {
+    if (spectrumInfo.isMasked(spectrumNo)) {
+      auto &detDataY = mergedNormalisedWs->mutableY(spectrumNo);
+      auto &detDataErr = mergedNormalisedWs->mutableE(spectrumNo);
+      auto dataY = 0.0;
+      auto dataE = 0.0;
+      for (auto entryNo = 0; entryNo < nEntries; entryNo++) {
+        MatrixWorkspace_sptr entry =
+            std::static_pointer_cast<API::MatrixWorkspace>(
+                input->getItem(entryNo));
+        dataY = entry->readY(spectrumNo)[0];
+        if (dataY != 0) {
+          dataE = entry->readE(spectrumNo)[0];
+          break;
+        }
+      }
+      if (dataE != 0) {
+        detDataY.front() = dataY;
+        detDataErr.front() = dataE;
+      }
+    }
+  }
+
+  // masks need to be removed for the efficiency to be calculated,
+  // the default mask for the instrument edges will need to be re-applied
+  auto clearMaskAlg = createChildAlgorithm("ClearMaskFlag");
+  clearMaskAlg->setProperty("Workspace", mergedNormalisedWs);
+  clearMaskAlg->executeAsChildAlg();
+  mergedNormalisedWs = API::AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(mergedNormalisedWsName);
+  return mergedNormalisedWs->getName();
 }
 
 } // namespace Algorithms
