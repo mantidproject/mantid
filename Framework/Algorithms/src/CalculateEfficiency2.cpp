@@ -344,7 +344,9 @@ const std::string CalculateEfficiency2::mergeMeasurementsWithOffset() {
   auto clearMaskAlg = createChildAlgorithm("ClearMaskFlag");
   clearMaskAlg->setProperty("Workspace", mergedNormalisedWs);
   clearMaskAlg->executeAsChildAlg();
-  mergedNormalisedWs = API::AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(mergedNormalisedWsName);
+  mergedNormalisedWs =
+      API::AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+          mergedNormalisedWsName);
   return mergedNormalisedWs->getName();
 }
 
