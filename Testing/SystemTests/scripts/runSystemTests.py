@@ -24,6 +24,7 @@ DEFAULT_QT_API = "pyqt5"
 THIS_MODULE_DIR = os.path.dirname(os.path.realpath(__file__))
 DEFAULT_FRAMEWORK_LOC = os.path.realpath(os.path.join(THIS_MODULE_DIR, "..", "lib", "systemtests"))
 DATA_DIRS_LIST_PATH = os.path.join(THIS_MODULE_DIR, "datasearch-directories.txt")
+REF_DIRS_LIST_PATH = os.path.join(THIS_MODULE_DIR, "reference-directories.txt")
 SAVE_DIR_LIST_PATH = os.path.join(THIS_MODULE_DIR, "defaultsave-directory.txt")
 
 
@@ -170,6 +171,10 @@ def main():
     if save_dir is None or save_dir == "":
         with open(SAVE_DIR_LIST_PATH, 'r') as f_handle:
             save_dir = f_handle.read().strip()
+
+    reference_paths = ''
+    with open(REF_DIRS_LIST_PATH, 'r') as f_handle:
+        reference_paths = f_handle.read().strip()
 
     # Configure properties file
     mtdconf = systemtesting.MantidFrameworkConfig(loglevel=options.loglevel,
@@ -332,7 +337,7 @@ def main():
             print("\nFAILED:")
             for key in status_dict.keys():
                 if status_dict[key]['status'] == 'failed':
-                    print(key, status_dict[key]['mismatches'])
+                    print(key, status_dict[key].get('mismatches', 'Unknown'))
 
         # Report global statistics on tests
         print()
@@ -347,11 +352,48 @@ def main():
         print('All tests passed? ' + str(success))
         print(banner)
 
-        mismatch_list = [status['mismatches'] for key, status in status_dict.items() if status['status'] == 'failed']
-        print("\nGENERATED MISMATCHES:")
-        print(mismatch_list)
+        test_mismatches = {key: status['mismatches'] for key, status in status_dict.items() if
+                           status['status'] == 'failed'}
+        get_mismatch_reference(test_mismatches, save_dir, data_paths, reference_paths)
+
         if not success:
             sys.exit(1)
+
+
+def get_mismatch_reference(test_mismatch_dict, mismatch_dir, external_data_dirs, ref_dirs):
+    import json
+    failed_test_information = {}
+    failed_test_information['FailedTests'] = []
+    data_dirs = external_data_dirs.split(';')
+    ref_dirs = ref_dirs.split(';')
+    for test_name, mismatch_filename in test_mismatch_dict.items():
+        reference_name = mismatch_filename.replace("-mismatch", "").strip()
+        mismatch_path = os.path.join(mismatch_dir, mismatch_filename.strip())
+        reference_hash_name = reference_name + '.md5'
+        data_file_path = ''
+        for directory in data_dirs:
+            files = os.listdir(directory)
+            if next((True for x in files if x == reference_name), False):
+                data_file_path = os.path.join(directory, reference_name)
+        if not data_file_path:
+            continue
+        ref_file_path = ''
+        for directory in ref_dirs:
+            files = os.listdir(directory)
+            if next((True for x in files if x == reference_hash_name), False):
+                ref_file_path = os.path.join(directory, reference_hash_name)
+        print("data_file_path", data_file_path)
+        print("reference_file_path", ref_file_path)
+        print("mismatch_file_path", os.path.join(mismatch_dir, mismatch_filename))
+        failed_test_information['FailedTests'].append({
+            'TestName': test_name,
+            'MismatchFile': mismatch_path,
+            'ReferenceFile': data_file_path,
+            'ReferenceHashFile': ref_file_path,
+        })
+    # so if we are confident, we would replace the reference_hash_file with the hash of our mismatch file
+    with open(os.path.join(mismatch_dir, 'FAILED-systemtests.json'), 'w') as outfile:
+        json.dump(failed_test_information, outfile)
 
 
 if __name__ == "__main__":
