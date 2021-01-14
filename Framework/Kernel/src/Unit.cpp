@@ -122,13 +122,12 @@ void Unit::initialize(const double &_l1, const double &_l2,
   twoTheta = _twoTheta;
   validateExtraParams(_emode, params);
   emode = _emode;
-  m_params = std::move(params);
+  m_params = &params;
   initialized = true;
   this->init();
 }
 
-void Unit::validateExtraParams(const int,
-                               const std::map<UnitParams, double> &) {}
+void Unit::validateExtraParams(const int, const ExtraParametersMap &) {}
 
 //---------------------------------------------------------------------------------------
 /** Perform the conversion to TOF on a vector of data
@@ -163,7 +162,7 @@ void Unit::toTOF(std::vector<double> &xdata, std::vector<double> &ydata,
 double Unit::convertSingleToTOF(const double xvalue, const double &l1,
                                 const double &l2, const double &twoTheta,
                                 const int &emode,
-                                const std::map<UnitParams, double> &params) {
+                                const ExtraParametersMap &params) {
   this->initialize(l1, l2, twoTheta, emode, params);
   return this->singleToTOF(xvalue);
 }
@@ -201,7 +200,7 @@ void Unit::fromTOF(std::vector<double> &xdata, std::vector<double> &ydata,
 double Unit::convertSingleFromTOF(const double xvalue, const double &l1,
                                   const double &l2, const double &twoTheta,
                                   const int &emode,
-                                  const std::map<UnitParams, double> &params) {
+                                  const ExtraParametersMap &params) {
   this->initialize(l1, l2, twoTheta, emode, params);
   return this->singleFromTOF(xvalue);
 }
@@ -331,8 +330,8 @@ Wavelength::Wavelength()
 
 const UnitLabel Wavelength::label() const { return Symbol::Angstrom; }
 
-void Wavelength::validateExtraParams(
-    const int emode, const std::map<UnitParams, double> &params) {
+void Wavelength::validateExtraParams(const int emode,
+                                     const ExtraParametersMap &params) {
   auto it = params.find(UnitParams::efixed);
   if ((emode != 0) && (it == params.end())) {
     throw std::runtime_error(
@@ -348,8 +347,8 @@ void Wavelength::init() {
   double toAngstroms = 1e10;
   sfpTo = 0.0;
 
-  auto it = m_params.find(UnitParams::efixed);
-  if (it != m_params.end()) {
+  auto it = m_params->find(UnitParams::efixed);
+  if (it != m_params->end()) {
     efixed = it->second;
   }
 
@@ -582,7 +581,7 @@ dSpacing::dSpacing() : Unit(), difa(0), difc(DBL_MIN), tzero(0) {
 }
 
 void dSpacing::validateExtraParams(const int,
-                                   const std::map<UnitParams, double> &params) {
+                                   const ExtraParametersMap &params) {
   auto it = params.find(UnitParams::difc);
   if (it == params.end()) {
     throw std::runtime_error(
@@ -601,16 +600,16 @@ void dSpacing::init() {
   difa = 0.;
   difc = 0.;
   tzero = 0.;
-  auto it = m_params.find(UnitParams::difc);
-  if (it != m_params.end()) {
+  auto it = m_params->find(UnitParams::difc);
+  if (it != m_params->end()) {
     difc = it->second;
   }
-  it = m_params.find(UnitParams::difa);
-  if (it != m_params.end()) {
+  it = m_params->find(UnitParams::difa);
+  if (it != m_params->end()) {
     difa = it->second;
   }
-  it = m_params.find(UnitParams::tzero);
-  if (it != m_params.end()) {
+  it = m_params->find(UnitParams::tzero);
+  if (it != m_params->end()) {
     tzero = it->second;
   }
 }
@@ -893,8 +892,8 @@ DeltaE::DeltaE()
 }
 
 void DeltaE::init() {
-  auto it = m_params.find(UnitParams::efixed);
-  if (it != m_params.end()) {
+  auto it = m_params->find(UnitParams::efixed);
+  if (it != m_params->end()) {
     efixed = it->second;
   }
   // Efixed must be set to something
@@ -1097,7 +1096,7 @@ Momentum::Momentum()
 }
 
 void Momentum::validateExtraParams(const int emode,
-                                   const std::map<UnitParams, double> &params) {
+                                   const ExtraParametersMap &params) {
   auto it = params.find(UnitParams::efixed);
   if ((emode != 0) && (it == params.end())) {
     throw std::runtime_error(
@@ -1113,8 +1112,8 @@ void Momentum::init() {
   double toAngstroms = 1e10;
   sfpTo = 0.0;
 
-  auto it = m_params.find(UnitParams::efixed);
-  if (it != m_params.end()) {
+  auto it = m_params->find(UnitParams::efixed);
+  if (it != m_params->end()) {
     efixed = it->second;
   }
 
@@ -1212,8 +1211,8 @@ const UnitLabel SpinEchoLength::label() const { return Symbol::Nanometre; }
 SpinEchoLength::SpinEchoLength() : Wavelength() {}
 
 void SpinEchoLength::init() {
-  auto it = m_params.find(UnitParams::efixed);
-  if (it != m_params.end()) {
+  auto it = m_params->find(UnitParams::efixed);
+  if (it != m_params->end()) {
     efixed = it->second;
   }
   // Efixed must be set to something
@@ -1267,8 +1266,8 @@ const UnitLabel SpinEchoTime::label() const { return Symbol::Nanosecond; }
 SpinEchoTime::SpinEchoTime() : Wavelength(), efixed(0.) {}
 
 void SpinEchoTime::init() {
-  auto it = m_params.find(UnitParams::efixed);
-  if (it != m_params.end()) {
+  auto it = m_params->find(UnitParams::efixed);
+  if (it != m_params->end()) {
     efixed = it->second;
   }
   // Efixed must be set to something
