@@ -9,6 +9,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidQtWidgets/Common/AlgorithmDialog.h"
 #include "MantidQtWidgets/Common/InterfaceManager.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
@@ -622,9 +623,14 @@ void ISISEnergyTransfer::includeExtraGroupingOption(bool includeOption,
 void ISISEnergyTransfer::handleSaveCustomGroupingClicked() {
   createCustomGroupingWorkspace();
   if (doesExistInADS(GROUPING_WS_NAME)) {
+    auto const saveDirectory =
+        Mantid::Kernel::ConfigService::Instance().getString(
+            "defaultsave.directory");
+
     QHash<QString, QString> props;
     props["InputWorkspace"] = QString::fromStdString(GROUPING_WS_NAME);
-    props["OutputFile"] = QString::fromStdString(DEFAULT_GROUPING_FILENAME);
+    props["OutputFile"] =
+        QString::fromStdString(saveDirectory + DEFAULT_GROUPING_FILENAME);
 
     InterfaceManager interfaceManager;
     auto *dialog = interfaceManager.createDialogFromName(

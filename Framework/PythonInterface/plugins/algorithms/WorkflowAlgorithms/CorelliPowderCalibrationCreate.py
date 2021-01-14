@@ -10,7 +10,7 @@ import string
 from typing import List, Optional, Union
 
 from mantid.api import (
-    AlgorithmFactory, AnalysisDataService, DataProcessorAlgorithm, IEventWorkspaceProperty, mtd, Progress, TextAxis,
+    AlgorithmFactory, AnalysisDataService, DataProcessorAlgorithm, WorkspaceProperty, mtd, Progress, TextAxis,
     Workspace, WorkspaceGroup, WorkspaceUnitValidator)
 from mantid.dataobjects import TableWorkspace, Workspace2D
 from mantid.simpleapi import (
@@ -106,15 +106,16 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
 
     def PyInit(self):
         self.declareProperty(
-            IEventWorkspaceProperty('InputWorkspace', '',
-                                    direction=Direction.Input,
-                                    validator=WorkspaceUnitValidator('TOF')),
+            WorkspaceProperty('InputWorkspace', '',
+                              direction=Direction.Input,
+                              validator=WorkspaceUnitValidator('TOF')),
             doc='Powder event data, ideally from a highly symmetric space group',
         )
         self.declareProperty(name='OutputWorkspacesPrefix', defaultValue='pdcal_', direction=Direction.Input,
                              doc="Prefix to be added to output workspaces")
         # Tube Calibration properties
-        self.declareProperty(name='TubeDatabaseDir', defaultValue='', direction=Direction.Input,
+        self.declareProperty(name='TubeDatabaseDir',
+                             defaultValue='/SNS/CORELLI/shared/calibration/tube', direction=Direction.Input,
                              doc='path to database containing detector heights')
         # PDCalibration properties exposed, grouped
         property_names = ['TofBinning', 'PeakFunction', 'PeakPositions']
@@ -210,7 +211,8 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
             dz = self.getProperty('SourceMaxTranslation').value
             kwargs = dict(InputWorkspace=input_workspace,
                           OutputWorkspace=input_workspace,
-                          CalibrationTable=difc_table,
+                          PeakCentersTofTable=peak_centers_in_tof,
+                          PeakPositions=self.getProperty('PeakPositions').value,
                           MaskWorkspace=f'{difc_table}_mask',
                           AdjustmentsTable=adjustments_table_name,
                           FitSourcePosition=True,
@@ -224,7 +226,8 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
         dr = self.getProperty('ComponentMaxRotation').value  # maximum rotation along either axis
         kwargs = dict(InputWorkspace=input_workspace,
                       OutputWorkspace=input_workspace,
-                      CalibrationTable=difc_table,
+                      PeakCentersTofTable=peak_centers_in_tof,
+                      PeakPositions=self.getProperty('PeakPositions').value,
                       MaskWorkspace=f'{difc_table}_mask',
                       AdjustmentsTable=adjustments_table_name + '_banks',
                       FitSourcePosition=False,

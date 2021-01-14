@@ -76,7 +76,7 @@ class TomlSchemaV1Validator(object):
                         "2d_reduction": {"step", "stop", "type", "interpolate"}}
 
         reduction_keys = {"merged": {"rescale": {"min", "max", "use_fit"},
-                                     "shift": {"min", "max", "use_fit"},
+                                     "shift": {"min", "max", "use_fit", "factor", "distance"},
                                      "merge_range": {"min", "max", "use_fit"}},
                           "events": {"binning", "type"}}
 

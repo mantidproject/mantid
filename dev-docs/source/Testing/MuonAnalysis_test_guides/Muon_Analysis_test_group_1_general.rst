@@ -1,5 +1,6 @@
 .. _Muon_Analysis_TestGuide_1_General-ref:
 
+===================================================
 Muon Analysis Unscripted Testing: Group 1 (General)
 ===================================================
 
@@ -7,65 +8,88 @@ Muon Analysis Unscripted Testing: Group 1 (General)
     :local:
 
 Introduction
-^^^^^^^^^^^^
+------------
 
 These are unscripted tests for the :program:`Muon Analysis` interface.
-The tests here in group 1 are concerned with general data loading and processing, as well as with switching between the old and new fitting interfaces and fitting raw or binned data.
-The master testing guide is located at :ref:`Muon_Analysis_TestGuide-ref`.
+The tests here in group 1 are concerned with general data loading and 
+processing, as well as with switching between the old and new fitting 
+interfaces and fitting raw or binned data. The master testing guide is 
+located at :ref:`Muon_Analysis_TestGuide-ref`.
 
-Tests
-^^^^^
-
-Test 1: Load current run
 ------------------------
 
-.. note:: This test will only work if you are using Windows and are connected to the ISIS network. If this is not the case, go to test 2.
+Test 1: Load Current Run
+------------------------
 
-- On the *Home* tab, in the *Instrument* section, select each ISIS muon instrument in turn.
-- For each instrument, click the *Load current run* button in the *Data Files* section.
-- A datafile should be successfully loaded, and a plot produced, for every instrument except MUT.
-- For MUT, a dialog should explain that current run loading is not supported for that instrument.
-- When the current run is loaded, check that the left and right arrow buttons on the interface cycle through recent runs.
+**Time required 5 minutes**
 
-Test 2: Data loading and rebinning
+.. note:: This test will only work if you are using Windows and are connected 
+		to the ISIS network. You should also enable search of the archive in your 
+		:ref:`manage user directories <ManageUserDirectories>`. If this is not the 
+		case, go to :ref:`test_2`.
+
+- Open **Muon Analysis** (*Interfaces* > *Muon* > *Muon Analysis*)
+- On the **Home** tab, in the *Instrument* section, select each ISIS muon 
+  instrument in turn
+- For each instrument, click the **Load Current Run** button in the *Loading* 
+  section
+- A datafile should be successfully loaded, and a plot produced, for every 
+  instrument except **PSI**
+- When the current run is loaded, check that the **<** and **>** buttons 
+  on the interface cycle through recent runs. You shouldn't be able to 
+  use the **>** button after loading the most recent run as there should be no 
+  runs that exist after the current run
+
+-----------
+  
+.. _test_2:
+  
+Test 2: Data Loading and Rebinning
 ----------------------------------
 
-- On the *Home* tab, in the *Instrument* section, set the instrument to EMU.
-- Type *20918* in the runs box and hit Enter.
-- After data is loaded, the *Grouping Options* and *Data Analysis* tabs should be enabled.
+**Time required 5 minutes**
+
+- Open **Muon Analysis** (*Interfaces* > *Muon* > *Muon Analysis*)
+- On the **Home** tab, in the *Instrument* section, set the instrument to 
+  **EMU**
+- Load run ``20918``
 - The data should look like this:
 
 .. image:: /images/MuonAnalysisTests/emu20918.png
   :align: center
+  :alt: emu20918.png
 
-(settings used on *Settings* tab are: finish 10 us, autoscale on, line plot, no rebinning).
-
-- Go to *Settings* tab and, under "Rebin data", select "Fixed" with steps of 5. Should now look like this:
+- On the **Home** tab, under the *Rebin* section, change **Rebin** to 
+  **Fixed** with steps of ``5``. Then on the Plotting Window make sure 
+  **Plot Raw** is unchecked. The data should now look like this:
 
 .. image:: /images/MuonAnalysisTests/emu20918_rebin.png
   :align: center
+  :alt: emu20918_rebin.png
 
-Test 3: Old style data analysis GUI
------------------------------------
+--------------------------------
+  
+Test 3: Basic Fitting In The GUI
+--------------------------------
 
-- Still on the *Settings* tab from test 2, leave rebinning on and make sure that "Enable multiple fitting" is turned **off**. (It should be off by default).
-- Go to the *Data Analysis* tab. The interface should contain a fit property browser. The ``TF Asymmetry Mode`` should be unticked. 
-- Set up an ``Abragam`` function with ``Omega=8.5``, ``Tau=0.5`` and fit the data. The fit should be done to the rebinned data.
+**Time required 5-10 minutes**
 
-Test 4: Fit to raw data
------------------------
+- Start with the same data loaded and rebin settings from :ref:`test_2`
+- Go to the **Fitting** tab
+	- Right click the empty table area; Select **Add Function**
+	- Add **Abragam** (*Muon* > *MuonSpecific* > *Abragam*)
+	- Set ``Omega = 8.5`` and ``Tau = 0.5``
+	- In the bottom table, check **Fit To Raw Data** to be ``false``
+	- Click **Fit**
+- The fit should be applied to the rebinned data
 
-- Now tick the ``Fit to raw data`` box in the bottom section and fit again. This time it will fit to the raw data, but the rebinned data will still be shown in the plot.
+.. image:: /images/MuonAnalysisTests/emu20918_rebin_fitted.png
+	:align: center
+	:alt: emu20918_rebin_fitted.png
 
-Test 5: New style data analysis GUI
------------------------------------
+- Now set **Fit To Raw Data** to be ``true`` and click **Fit** again. This time 
+  it will fit to the raw data, but the rebinned data will still be shown in the 
+  plot
+- There should now be two new workspaces in the workspace toolbox; One for 
+  fitted raw data and one for fitted rebinned data
 
-- On the *Settings* tab, turn "Enable multiple fitting" **on**.
-- Go back to *Data Analysis*. The new UI should be there, and the fit function should have been cleared (so the Fit option is disabled until a new function is set up).
-- Set up the Abragam function as in test 3 and fit.
-- Try this with and without "Fit to raw data" as in test 4.
-
-Teardown
---------
-
-Before moving to group 2, go to the *Settings* tab and set rebinning back to "None". Leave the "Enable multiple fitting" option turned on.

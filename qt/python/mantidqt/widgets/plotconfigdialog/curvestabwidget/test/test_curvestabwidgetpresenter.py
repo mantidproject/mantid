@@ -11,17 +11,18 @@ import unittest
 from matplotlib import use as mpl_use
 
 mpl_use('Agg')  # noqa
-from matplotlib.pyplot import figure
+from matplotlib.pyplot import figure, subplots
 from numpy import array_equal
 
 from mantid.simpleapi import CreateWorkspace
 from mantid.plots import datafunctions
 from mantid.plots.utility import MantidAxType
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, patch, call
 from mantidqt.widgets.plotconfigdialog.colorselector import convert_color_to_hex
 from mantidqt.widgets.plotconfigdialog.curvestabwidget import CurveProperties
 from mantidqt.widgets.plotconfigdialog.curvestabwidget.presenter import (
     CurvesTabWidgetPresenter, remove_curve_from_ax, curve_has_errors)
+from mantidqt.widgets.plotconfigdialog.legendtabwidget.presenter import LegendTabWidgetPresenter
 
 
 class CurvesTabWidgetPresenterTest(unittest.TestCase):
@@ -160,6 +161,29 @@ class CurvesTabWidgetPresenterTest(unittest.TestCase):
             presenter.remove_selected_curves()
         self.assertNotIn('First Axes', presenter.axes_names_dict)
         self.assertNotIn("ax0 curve", presenter.curve_names_dict)
+
+    def test_curves_and_legend_tabs_close_when_all_curves_removed(self):
+        fig, ax = subplots()
+        ax.plot([[0], [0]], label='line1')
+        ax.legend()
+
+        mock_view = Mock(get_selected_ax_name=lambda: "(0, 0)",
+                         get_current_curve_name=lambda: "line1",
+                         get_selected_curves_names=lambda: ["line1"])
+        mock_view.select_curve_list.count = Mock(return_value=0)
+        mock_view.select_axes_combo_box.count = Mock(return_value=0)
+
+        parent_presenter_mock = Mock()
+
+        legend_presenter = LegendTabWidgetPresenter(fig=fig, view=mock_view, parent_presenter=parent_presenter_mock)
+        curves_presenter =CurvesTabWidgetPresenter(
+            fig=fig, view=mock_view, parent_presenter=parent_presenter_mock, legend_tab=legend_presenter)
+
+        curves_presenter.remove_selected_curves()
+
+        curves_presenter.parent_presenter.forget_tab_from_presenter.assert_has_calls(
+            [call(curves_presenter), call(legend_presenter)])
+        mock_view.close.assert_called()
 
     def test_curve_has_errors_on_workspace_with_no_errors(self):
         try:

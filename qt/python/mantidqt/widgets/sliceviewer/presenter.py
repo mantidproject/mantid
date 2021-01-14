@@ -61,14 +61,13 @@ class SliceViewer(ObservingPresenter):
         if not self.model.can_support_nonorthogonal_axes():
             self.view.data_view.disable_tool_button(ToolItemText.NONORTHOGONAL_AXES)
 
-        self._update_view()
+        self.refresh_view()
 
         # Start the GUI with zoom selected.
         self.view.data_view.activate_tool(ToolItemText.ZOOM)
 
-        self.ads_observer = SliceViewerADSObserver(
-            self.replace_workspace, self.rename_workspace, self.ADS_cleared, self.delete_workspace
-        )
+        self.ads_observer = SliceViewerADSObserver(self.replace_workspace, self.rename_workspace,
+                                                   self.ADS_cleared, self.delete_workspace)
 
     def new_plot_MDH(self):
         """
@@ -96,8 +95,9 @@ class SliceViewer(ObservingPresenter):
             # model frame
             if data_view.nonorthogonal_mode:
                 inv_tr = data_view.nonortho_transform.inv_tr
-                xmin_p, ymin_p = inv_tr(xlim[0], ylim[0])
-                xmax_p, ymax_p = inv_tr(xlim[1], ylim[1])
+                # viewing axis y not aligned with plot axis
+                xmin_p, ymax_p = inv_tr(xlim[0], ylim[1])
+                xmax_p, ymin_p = inv_tr(xlim[1], ylim[0])
                 xlim, ylim = (xmin_p, xmax_p), (ymin_p, ymax_p)
             if data_view.dimensions.transpose:
                 limits = ylim, xlim
@@ -317,6 +317,7 @@ class SliceViewer(ObservingPresenter):
             data_view.disable_tool_button(ToolItemText.LINEPLOTS)
             data_view.create_axes_nonorthogonal(
                 self.model.create_nonorthogonal_transform(self.get_sliceinfo()))
+            self.show_all_data_requested()
         else:
             data_view.create_axes_orthogonal()
             data_view.enable_tool_button(ToolItemText.LINEPLOTS)
@@ -367,12 +368,20 @@ class SliceViewer(ObservingPresenter):
             # New model is OK, proceed with updating Slice Viewer
             self.model = candidate_model
             self.new_plot, self.update_plot_data = self._decide_plot_update_methods()
-            self._update_view()
+            self.view.delayed_refresh()
         except ValueError as err:
             self._close_view_with_message(
-                f"Closing Sliceviewer as the underlying workspace was changed: {str(err)}"
-            )
+                f"Closing Sliceviewer as the underlying workspace was changed: {str(err)}")
             return
+
+    def refresh_view(self):
+        """
+        Updates the view to enable/disable certain options depending on the model.
+        """
+        # we don't want to use model.get_ws for the image info widget as this needs
+        # extra arguments depending on workspace type.
+        self.view.data_view.image_info_widget.setWorkspace(self.model._get_ws())
+        self.new_plot()
 
     def rename_workspace(self, old_name, new_name):
         if str(self.model._get_ws()) == old_name:
@@ -434,15 +443,6 @@ class SliceViewer(ObservingPresenter):
             return self.new_plot_MDE, self.update_plot_data_MDE
         else:
             return self.new_plot_matrix, self.update_plot_data_matrix
-
-    def _update_view(self):
-        """
-        Updates the view to enable/disable certain options depending on the model.
-        """
-        # we don't want to use model.get_ws for the image info widget as this needs
-        # extra arguments depending on workspace type.
-        self.view.data_view.image_info_widget.setWorkspace(self.model._get_ws())
-        self.new_plot()
 
     def _close_view_with_message(self, message: str):
         self.view.emit_close()  # inherited from ObservingView
