@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import PythonAlgorithm, MatrixWorkspaceProperty, MultipleFileProperty, PropertyMode, Progress, \
-    WorkspaceGroup, WorkspaceGroupProperty, FileAction
+    WorkspaceGroup, FileAction
 from mantid.kernel import Direction, EnabledWhenProperty, FloatBoundedValidator, LogicOperator, PropertyCriterion, \
     StringListValidator
 from mantid.simpleapi import *
@@ -44,11 +44,7 @@ class SANSILLReduction(PythonAlgorithm):
 
     @staticmethod
     def _make_solid_angle_name(ws):
-        instr_name = mtd[ws].getInstrument().getName() if not isinstance(mtd[ws], WorkspaceGroup) \
-            else mtd[ws][0].getInstrument().getName()
-        l2_value = mtd[ws].getRun().getLogData('L2').value if not isinstance(mtd[ws], WorkspaceGroup) \
-            else mtd[ws][0].getRun().getLogData('L2').value
-        return instr_name+'_'+str(round(l2_value))+'m_SolidAngle'
+        return mtd[ws].getInstrument().getName()+'_'+str(round(mtd[ws].getRun().getLogData('L2').value))+'m_SolidAngle'
 
     @staticmethod
     def _check_distances_match(ws1, ws2):
@@ -58,33 +54,12 @@ class SANSILLReduction(PythonAlgorithm):
             @param ws2 : workspace 2
         """
         tolerance = 0.01 #m
-
-        def check_against_tolerance(r1, l2_1, r2, l2_2):
-            if fabs(l2_1 - l2_2) > tolerance:
-                logger.warning('Different distances detected! {0}: {1}, {2}: {3}'.format(r1, l2_1, r2, l2_2))
-
-        if isinstance(ws1, WorkspaceGroup):
-            if isinstance(ws2, WorkspaceGroup):
-                for entry1 in mtd[ws1]:
-                    l2_1 = entry1.getRun().getLogData('L2').value
-                    r1 = entry1.getRunNumber()
-                    for entry2 in ws2:
-                        l2_2 = entry2.getRun().getLogData('L2').value
-                        r2 = entry2.getRunNumber()
-                        check_against_tolerance(r1, l2_1, r2, l2_2)
-            else:
-                l2_2 = ws2.getRun().getLogData('L2').value
-                r2 = ws2.getRunNumber()
-                for entry1 in ws1:
-                    l2_1 = entry1.getRun().getLogData('L2').value
-                    r1 = entry1.getRunNumber()
-                    check_against_tolerance(r1, l2_1, r2, l2_2)
-        else:
-            l2_1 = ws1.getRun().getLogData('L2').value
-            l2_2 = ws2.getRun().getLogData('L2').value
-            r1 = ws1.getRunNumber()
-            r2 = ws2.getRunNumber()
-            check_against_tolerance(r1, l2_1, r2, l2_2)
+        l2_1 = ws1.getRun().getLogData('L2').value
+        l2_2 = ws2.getRun().getLogData('L2').value
+        r1 = ws1.getRunNumber()
+        r2 = ws2.getRunNumber()
+        if fabs(l2_1 - l2_2) > tolerance:
+            logger.warning('Different distances detected! {0}: {1}, {2}: {3}'.format(r1, l2_1, r2, l2_2))
 
     @staticmethod
     def _check_processed_flag(ws, value):
@@ -252,15 +227,6 @@ class SANSILLReduction(PythonAlgorithm):
                                                      optional=PropertyMode.Optional),
                              doc='Input workspace containing already loaded raw data, used for parameter scans.')
 
-        self.setPropertySettings('DefaultMaskedInputWorkspace', sample)
-
-        self.declareProperty(WorkspaceGroupProperty('MaskedInputWorkspaces', '',
-                                                    direction=Direction.Input,
-                                                    optional=PropertyMode.Optional),
-                             doc='WorkspaceGroup to copy masks from for WorkspaceGroup data; for example, beam stops')
-
-        self.setPropertySettings('MaskedInputWorkspace', sample)
-
     def _normalise(self, ws):
         """
             Normalizes the workspace by time (SampleLog Timer) or Monitor (ID=100000)
@@ -271,35 +237,21 @@ class SANSILLReduction(PythonAlgorithm):
         if normalise_by == 'Monitor':
             mon = ws + '_mon'
             ExtractSpectra(InputWorkspace=ws, DetectorList=monID, OutputWorkspace=mon)
-            zero_counts_msg = 'Normalise to monitor requested, but monitor has 0 counts.'
-            if isinstance(mtd[mon], WorkspaceGroup):
-                for entry in mtd[mon]:
-                    if entry.readY(0)[0] == 0:
-                        raise RuntimeError(zero_counts_msg)
-            elif mtd[mon].readY(0)[0] == 0:
-                raise RuntimeError(zero_counts_msg)
+            if mtd[mon].readY(0)[0] == 0:
+                raise RuntimeError('Normalise to monitor requested, but monitor has 0 counts.')
             else:
                 Divide(LHSWorkspace=ws, RHSWorkspace=mon, OutputWorkspace=ws)
                 DeleteWorkspace(mon)
         elif normalise_by == 'Timer':
-            time_unavailable_msg = 'Normalise to timer requested, but timer information is not available.'
-
-            def scale_by_time(ws, duration):
-                if duration != 0:
-                    Scale(InputWorkspace=ws, Factor=1. / duration, OutputWorkspace=ws)
+            if mtd[ws].getRun().hasProperty('timer'):
+                duration = mtd[ws].getRun().getLogData('timer').value
+                if duration != 0.:
+                    Scale(InputWorkspace=ws, Factor=1./duration, OutputWorkspace=ws)
                     self._apply_dead_time(ws)
                 else:
                     raise RuntimeError('Unable to normalise to time; duration found is 0 seconds.')
-            if isinstance(mtd[ws], WorkspaceGroup):
-                for entry in mtd[ws]:
-                    if entry.getRun().hasProperty('timer'):
-                        duration = entry.getRun().getLogData('timer').value
-                        scale_by_time(entry.name(), duration)
-                    else:
-                        raise RuntimeError(time_unavailable_msg)
-            elif mtd[ws].getRun().hasProperty('timer'):
-                duration = mtd[ws].getRun().getLogData('timer').value
-                scale_by_time(ws, duration)
+            else:
+                raise RuntimeError('Normalise to timer requested, but timer information is not available.')
         # regardless on normalisation, mask out the monitors, but do not extract them, since extracting is slow
         # masking however is needed to get more reasonable scales in the instrument view
         MaskDetectors(Workspace=ws, DetectorList=[monID, monID+1])
@@ -382,33 +334,6 @@ class SANSILLReduction(PythonAlgorithm):
             @param ws: input workspace
             @param sensitivity_out: sensitivity output map
         """
-        if self._instrument == 'D22' and isinstance(mtd[ws], WorkspaceGroup):
-            n_entries = mtd[ws].getNumberOfEntries()
-            ws_tmp = ws + '_tmp'
-            MergeRuns(InputWorkspaces=ws, OutputWorkspace=ws_tmp)
-            normalisation_ws = ws_tmp + '_normalisation'
-            CreateSingleValuedWorkspace(DataValue=n_entries, OutputWorkspace=normalisation_ws)
-            Divide(LHSWorkspace=ws_tmp, RHSWorkspace=normalisation_ws, OutputWorkspace=ws_tmp)
-            for spec_no in range(mtd[ws_tmp].getNumberHistograms()):
-                if mtd[ws_tmp].readY(spec_no)[0] == 0:
-                    dataY = 0
-                    dataE = 0
-                    for entry in mtd[ws]:
-                        dataY = entry.readY(spec_no)[0]
-                        if dataY != 0:
-                            dataE = entry.readE(spec_no)[0]
-                            break
-                    if dataE != 0:
-                        mtd[ws_tmp].setY(spec_no, np.array(dataY))
-                        mtd[ws_tmp].setE(spec_no, np.array(dataE))
-            ClearMaskFlag(Workspace=ws_tmp)
-            # Apply the default masks again
-            default_mask_ws = self.getProperty('DefaultMaskedInputWorkspace').value
-            if default_mask_ws:
-                self._mask(ws, default_mask_ws)
-            DeleteWorkspaces(WorkspaceList=[ws, normalisation_ws])
-            RenameWorkspace(InputWorkspace=ws_tmp, OutputWorkspace=ws)
-
         CalculateEfficiency(InputWorkspace=ws, OutputWorkspace=sensitivity_out)
         mtd[sensitivity_out].getRun().addProperty('ProcessedAs', 'Sensitivity', True)
         self.setProperty('SensitivityOutputWorkspace', mtd[sensitivity_out])
@@ -606,20 +531,10 @@ class SANSILLReduction(PythonAlgorithm):
         default_mask_ws = self.getProperty('DefaultMaskedInputWorkspace').value
         if default_mask_ws:
             self._mask(ws, default_mask_ws)
-        # apply the beam stop mask(s)
-        if isinstance(mtd[ws], WorkspaceGroup):
-            mask_ws = self.getProperty('MaskedInputWorkspaces').value
-            if mask_ws:
-                if isinstance(mask_ws, WorkspaceGroup) and mask_ws.getNumberOfEntries() == mtd[ws].getNumberOfEntries():
-                    for entry_no, entry in enumerate(mtd[ws]):
-                        self._mask(entry, mask_ws[entry_no])
-                else:
-                    for entry_no, entry in enumerate(mtd[ws]):
-                        self._mask(entry, mask_ws)
-        else:
-            mask_ws = self.getProperty('MaskedInputWorkspace').value
-            if mask_ws:
-                self._mask(ws, mask_ws)
+        # apply the beam stop mask
+        mask_ws = self.getProperty('MaskedInputWorkspace').value
+        if mask_ws:
+            self._mask(ws, mask_ws)
 
     def _apply_thickness(self, ws):
         """
@@ -672,7 +587,7 @@ class SANSILLReduction(PythonAlgorithm):
         ws = '__' + self.getPropertyValue('OutputWorkspace')
         if self.getPropertyValue('Run'):
             LoadAndMerge(Filename=self.getPropertyValue('Run').replace('+', ','), LoaderName='LoadILLSANS', OutputWorkspace=ws)
-            if isinstance(mtd[ws], WorkspaceGroup) and self.getProperty('SensitivityOutputWorkspace').isDefault:
+            if isinstance(mtd[ws], WorkspaceGroup):
                 # we do not want the summing done by LoadAndMerge since it will be pair-wise and slow
                 # instead we load and list, and merge once with merge runs
                 tmp = '__tmp'+ws
@@ -682,10 +597,9 @@ class SANSILLReduction(PythonAlgorithm):
         else:
             in_ws = self.getPropertyValue('InputWorkspace')
             CloneWorkspace(InputWorkspace=in_ws, OutputWorkspace=ws)
-        self._instrument = mtd[ws].getInstrument().getName() if not isinstance(mtd[ws], WorkspaceGroup) \
-            else mtd[ws][0].getInstrument().getName()
+        self._instrument = mtd[ws].getInstrument().getName()
         self._normalise(ws)
-        run = mtd[ws].getRun() if not isinstance(mtd[ws], WorkspaceGroup) else mtd[ws][0].getRun()
+        run = mtd[ws].getRun()
         if run.hasProperty('tof_mode'):
             if run.getLogData('tof_mode').value == 'TOF':
                 self._mode = 'TOF'
