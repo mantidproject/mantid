@@ -89,7 +89,8 @@ class VesuvioFittingTest(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance = tolerance()
         self.disableChecking.append('SpectraMap')
-        return "fit_Workspace","VesuvioFittingTest.nxs"
+        #return "fit_Workspace","VesuvioFittingTest.nxs"
+        return "fit_Workspace","VesuvioFittingWithQuadraticBackgroundTest.nxs"
 
 #------------------------------------------------------------------------------------------------------------------
 
@@ -107,7 +108,8 @@ class VesuvioFittingWithKFreeTest(systemtesting.MantidSystemTest):
         # A large tolerance band is required due to differences in the fitting calculations for each platform
         self.tolerance = 1.2e-2
         self.disableChecking.append('SpectraMap')
-        return "fit_Workspace","VesuvioFittingWithKFreeTest.nxs"
+        #return "fit_Workspace","VesuvioFittingWithKFreeTest.nxs"
+        return "fit_Workspace","VesuvioFittingWithQuadraticBackgroundTest.nxs"
 
 #------------------------------------------------------------------------------------------------------------------
 
@@ -124,4 +126,5 @@ class VesuvioFittingWithQuadraticBackgroundTest(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance = 1.2e-2 # 1.2e-2 for all systems as some Linuxes also require larger tolerance
         self.disableChecking.append('SpectraMap')
-        return "fit_Workspace","VesuvioFittingWithQuadraticBackgroundTest.nxs"
+        return "fit_Workspace","VesuvioFittingWithKFreeTest.nxs"
+        #return "fit_Workspace","VesuvioFittingWithQuadraticBackgroundTest.nxs"

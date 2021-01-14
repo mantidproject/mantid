@@ -58,14 +58,14 @@ def main():
                         help="Arguments passed to executable for each test Default=[]")
     parser.add_argument("--frameworkLoc",
                         help="location of the system test framework (default=%s)" %
-                        DEFAULT_FRAMEWORK_LOC)
+                             DEFAULT_FRAMEWORK_LOC)
     parser.add_argument("--qt_api",
                         help="The qt version to use for the system test (default={0}).".format(DEFAULT_QT_API))
     parser.add_argument("--disablepropmake",
                         action="store_false",
                         dest="makeprop",
                         help="By default this will move your properties file out of the " +
-                        "way and create a new one. This option turns off this behavior.")
+                             "way and create a new one. This option turns off this behavior.")
     parser.add_argument(
         "-R",
         "--tests-regex",
@@ -82,7 +82,7 @@ def main():
                         dest="loglevel",
                         choices=loglevelChoices,
                         help="Set the log level for test running: [" + ', '.join(loglevelChoices) +
-                        "]")
+                             "]")
     parser.add_argument(
         "-j",
         "--parallel",
@@ -326,13 +326,13 @@ def main():
         if (skipped_tests > 0) and options.showskipped:
             print("\nSKIPPED:")
             for key in status_dict.keys():
-                if status_dict[key] == 'skipped':
+                if status_dict[key]['status'] == 'skipped':
                     print(key)
         if failed_tests > 0:
             print("\nFAILED:")
             for key in status_dict.keys():
-                if status_dict[key] == 'failed':
-                    print(key)
+                if status_dict[key]['status'] == 'failed':
+                    print(key, status_dict[key]['mismatches'])
 
         # Report global statistics on tests
         print()
@@ -346,6 +346,10 @@ def main():
                   (percent, '%', failed_tests, (total_tests - skipped_tests), skipped_tests))
         print('All tests passed? ' + str(success))
         print(banner)
+
+        mismatch_list = [status['mismatches'] for key, status in status_dict.items() if status['status'] == 'failed']
+        print("\nGENERATED MISMATCHES:")
+        print(mismatch_list)
         if not success:
             sys.exit(1)
 

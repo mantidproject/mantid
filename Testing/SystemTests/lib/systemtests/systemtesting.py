@@ -24,9 +24,10 @@ try:
 except ModuleNotFoundError:
     import setuptools
     from packaging import version
+
     if version.parse(setuptools.__version__) >= version.parse("49.0.0"):
         raise EnvironmentError("Setup tools is v49 or greater. This is likely causing the Mantid import to fail. See \n"
-                                "https://github.com/mantidproject/mantid/issues/29010")
+                               "https://github.com/mantidproject/mantid/issues/29010")
 
 import datetime
 import difflib
@@ -59,7 +60,7 @@ def linux_distro_description():
     try:
         lsb_descr = subprocess.check_output('lsb_release --description', shell=True,
                                             stderr=subprocess.STDOUT).decode('utf-8')
-        return lsb_descr.strip()[len('Description:')+1:].strip()
+        return lsb_descr.strip()[len('Description:') + 1:].strip()
     except subprocess.CalledProcessError as exc:
         return f'Unknown distribution: lsb_release -d failed {exc}'
 
@@ -105,6 +106,7 @@ class MantidSystemTest(unittest.TestCase):
         # Store the resident memory of the system (in MB) before starting the test
         FrameworkManager.clear()
         self.memory = MemoryStats().residentMem() / 1024
+        self.mismatches = []
 
     def runTest(self):
         raise NotImplementedError('"runTest(self)" should be overridden in a derived class')
@@ -306,12 +308,11 @@ class MantidSystemTest(unittest.TestCase):
         for valname, refname in zip(valNames[::2], valNames[1::2]):
             if refname.endswith('.nxs'):
                 Load(Filename=refname, OutputWorkspace="RefFile")
-                refname = "RefFile"
+                refname = refname.split('.nxs')[0]
             else:
                 raise RuntimeError("Should supply a NeXus file: %s" % refname)
             valPair = (valname, "RefFile")
-            if numRezToCheck > 2:
-                mismatchName = valname
+            mismatchName = refname
 
             if not (self.validateWorkspaces(valPair, mismatchName)):
                 validationResult = False
@@ -350,12 +351,10 @@ class MantidSystemTest(unittest.TestCase):
         checker.execute()
         if not checker.getProperty("Result").value:
             print(self.__class__.__name__)
-            if mismatchName:
-                SaveNexus(InputWorkspace=valNames[0],
-                          Filename=self.__class__.__name__ + mismatchName + '-mismatch.nxs')
-            else:
-                SaveNexus(InputWorkspace=valNames[0],
-                          Filename=self.__class__.__name__ + '-mismatch.nxs')
+            filename = mismatchName + '-mismatch.nxs' if mismatchName else \
+                self.__class__.__name__ + '-mismatch.nxs'
+            SaveNexus(InputWorkspace=valNames[0], Filename=filename)
+            self.mismatches.append(filename)
             return False
 
         return True
@@ -411,6 +410,7 @@ class MantidSystemTest(unittest.TestCase):
         # Get the resident memory again and work out how much it's gone up by (in MB)
         memorySwallowed = MemoryStats().residentMem() / 1024 - self.memory
         # Store the result
+        self.reportResult('generated_mismatches', ';'.join(list(set(self.mismatches))))
         self.reportResult('memory footprint increase', memorySwallowed)
         return retcode
 
@@ -427,6 +427,9 @@ class MantidSystemTest(unittest.TestCase):
         clean up, i.e. remove workspaces etc
         '''
         pass
+
+    def mismatch_names(self):
+        return self.mismatches
 
     def assertDelta(self, value, expected, delta, msg=""):
         """Check that a value is within +- delta of the expected value"""
@@ -490,6 +493,7 @@ class MantidSystemTest(unittest.TestCase):
         name = reference_filename.split('.')[0]
         return name + '-mismatch.nxs'
 
+
 #########################################################################
 # A class to store the results of a test
 #########################################################################
@@ -497,6 +501,7 @@ class TestResult(object):
     '''
     Stores the results of each test so that they can be reported later.
     '''
+
     def __init__(self):
         self._results = []
         self.name = ''
@@ -507,6 +512,7 @@ class TestResult(object):
         self.total_time = ''
         self.output = ''
         self.err = ''
+        self.generated_mismatches = ''
 
     def __eq__(self, other):
         return self.name == other.name
@@ -536,6 +542,7 @@ class ResultReporter(object):
     appropriate form, subclass this class and implement the dispatchResults
     method.
     '''
+
     def __init__(self, total_number_of_tests=0, maximum_name_length=0):
         '''Initialize a class instance, e.g. connect to a database'''
         self._total_number_of_tests = total_number_of_tests
@@ -599,6 +606,7 @@ class TextResultReporter(ResultReporter):
     '''
     Report the results of a test using standard out
     '''
+
     def dispatchResults(self, result, number_of_completed_tests):
         '''
         The default text reporter prints to standard out
@@ -705,6 +713,7 @@ class TestSuite(object):
     '''
     Tie together a test and its results.
     '''
+
     def __init__(self, test_dir, modname, testname, filename=None):
         self._test_dir = test_dir
         self._modname = modname
@@ -777,7 +786,10 @@ class TestSuite(object):
         for line in all_lines:
             entries = line.split(MantidSystemTest.DELIMITER)
             if len(entries) == 3 and entries[0] == MantidSystemTest.PREFIX:
-                self._result.addItem([entries[1], entries[2]])
+                if entries[1] == "generated_mismatches":
+                    self._result.generated_mismatches = entries[2]
+                else:
+                    self._result.addItem([entries[1], entries[2]])
 
     def setOutputMsg(self, msg=None):
         if msg is not None:
@@ -795,6 +807,7 @@ class TestManager(object):
     '''A manager class that is responsible for overseeing the testing process.
     This is the main interaction point for the framework.
     '''
+
     def __init__(self,
                  mantid_config,
                  runner=None,
@@ -1007,7 +1020,7 @@ class TestManager(object):
                     print(s)
 
         return modcounts, modtests, mod_sub_directories, test_stats, files_required_by_test_module, \
-            data_file_lock_status
+               data_file_lock_status
 
     def __shouldTest(self, suite):
         if self._testsInclude is not None:
