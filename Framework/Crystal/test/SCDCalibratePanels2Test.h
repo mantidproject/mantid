@@ -161,7 +161,7 @@ public:
 
     // Check if the calibration returns the same instrument as we put in
     g_log.notice() << "-- validate calibration output\n";
-    TS_ASSERT(validateCalibrationResults(pwsref, wsraw, xmlFile.string()));
+    TS_ASSERT(validateCalibrationResults(pwsref, wsraw, filenamebase.string()));
 
     // Cleanup
     doCleanup();
@@ -180,10 +180,8 @@ public:
     const double dT0 = 11; // micro seconds
 
     // Generate unique temp files
-    auto isawFile = boost::filesystem::temp_directory_path();
-    isawFile /= boost::filesystem::unique_path("changeT0_%%%%%%%%.DetCal");
-    auto xmlFile = boost::filesystem::temp_directory_path();
-    xmlFile /= boost::filesystem::unique_path("changeT0_%%%%%%%%.xml");
+    auto filenamebase = boost::filesystem::temp_directory_path();
+    filenamebase /= boost::filesystem::unique_path("changeT0_%%%%%%%%");
 
     g_log.notice() << "-- generate simulated workspace\n";
     MatrixWorkspace_sptr ws = m_ws->clone();
@@ -239,8 +237,7 @@ public:
     // the instrument
     // Perform the calibration
     g_log.notice() << "-- start calibration\n";
-    runCalibration(isawFile.string(), xmlFile.string(), pws, true, false,
-                   false);
+    runCalibration(filenamebase.string(), pws, true, false, false);
   }
 
   /**
@@ -263,10 +260,9 @@ public:
     const double dL1 = boost::math::constants::e<double>() / 100;
 
     // Generate unique temp files
-    auto isawFile = boost::filesystem::temp_directory_path();
-    isawFile /= boost::filesystem::unique_path("changeL1_%%%%%%%%.DetCal");
-    auto xmlFile = boost::filesystem::temp_directory_path();
-    xmlFile /= boost::filesystem::unique_path("changeL1_%%%%%%%%.xml");
+    // Generate unique temp files
+    auto filenamebase = boost::filesystem::temp_directory_path();
+    filenamebase /= boost::filesystem::unique_path("changeL1_%%%%%%%%");
 
     g_log.notice() << "-- generate simulated workspace\n";
     MatrixWorkspace_sptr ws = m_ws->clone();
@@ -290,12 +286,11 @@ public:
 
     // Perform the calibration
     g_log.notice() << "-- start calibration\n";
-    runCalibration(isawFile.string(), xmlFile.string(), pws, false, true,
-                   false);
+    runCalibration(filenamebase.string(), pws, false, true, false);
 
     // Check if the calibration returns the same instrument as we put in
     g_log.notice() << "-- validate calibration output\n";
-    TS_ASSERT(validateCalibrationResults(pwsref, wsraw, xmlFile.string()));
+    TS_ASSERT(validateCalibrationResults(pwsref, wsraw, filenamebase.string()));
 
     // this is just for documentation purpose, the validation func above
     // is better for robust testing
@@ -334,10 +329,8 @@ public:
     double ang = 1.414; // degrees
 
     // Generate unique temp files
-    auto isawFile = boost::filesystem::temp_directory_path();
-    isawFile /= boost::filesystem::unique_path("panelMove_%%%%%%%%.DetCal");
-    auto xmlFile = boost::filesystem::temp_directory_path();
-    xmlFile /= boost::filesystem::unique_path("panelMove_%%%%%%%%.xml");
+    auto filenamebase = boost::filesystem::temp_directory_path();
+    filenamebase /= boost::filesystem::unique_path("panelMove_%%%%%%%%");
 
     g_log.notice() << "-- generate simulated workspace\n";
     MatrixWorkspace_sptr ws = m_ws->clone();
@@ -375,12 +368,11 @@ public:
 
     // Perform the calibration
     g_log.notice() << "-- start calibration\n";
-    runCalibration(isawFile.string(), xmlFile.string(), pws, false, false,
-                   true);
+    runCalibration(filenamebase.string(), pws, false, false, true);
 
     // Check if the calibration returns the same instrument as we put in
     g_log.notice() << "-- validate calibration output\n";
-    TS_ASSERT(validateCalibrationResults(pwsref, wsraw, xmlFile.string()));
+    TS_ASSERT(validateCalibrationResults(pwsref, wsraw, filenamebase.string()));
 
     // Cleanup
     doCleanup();
@@ -428,12 +420,8 @@ public:
     // ----- Generate Synthetic Data ----- //
     // ----------------------------------- //
     // Generate unique temp files
-    auto isawFile = boost::filesystem::temp_directory_path();
-    isawFile /= boost::filesystem::unique_path("testExec_%%%%%%%%.DetCal");
-    auto xmlFile = boost::filesystem::temp_directory_path();
-    xmlFile /= boost::filesystem::unique_path("testExec_%%%%%%%%.xml");
-    auto csvFile = boost::filesystem::temp_directory_path();
-    csvFile /= boost::filesystem::unique_path("testExec_%%%%%%%%.csv");
+    auto filenamebase = boost::filesystem::temp_directory_path();
+    filenamebase /= boost::filesystem::unique_path("testExec_%%%%%%%%");
 
     g_log.notice() << "-- generate simulated workspace\n";
     MatrixWorkspace_sptr ws = m_ws->clone();
@@ -469,12 +457,11 @@ public:
 
     // Perform the calibration
     g_log.notice() << "-- start calibration\n";
-    runCalibration(isawFile.string(), xmlFile.string(), csvFile.string(), pws,
-                   false, true, true);
+    runCalibration(filenamebase.string(), pws, false, true, true);
 
     // Check if the calibration returns the same instrument as we put in
     g_log.notice() << "-- validate calibration output\n";
-    TS_ASSERT(validateCalibrationResults(pwsref, wsraw, xmlFile.string()));
+    TS_ASSERT(validateCalibrationResults(pwsref, wsraw, filenamebase.string()));
 
     // Cleanup
     doCleanup();
@@ -714,15 +701,20 @@ private:
   bool validateCalibrationResults(PeaksWorkspace_sptr refpws,
                                   MatrixWorkspace_sptr refws,
                                   const std::string &fileName) {
+    // Test using xml parameter file (default)
+    const std::string xmlFileName = fileName + ".xml";
+
     // Adjust components in reference workspace using calibration results
     IAlgorithm_sptr lpf_alg =
         AlgorithmFactory::Instance().create("LoadParameterFile", 1);
     lpf_alg->initialize();
     lpf_alg->setLogging(LOGCHILDALG);
     lpf_alg->setProperty("Workspace", refws);
-    lpf_alg->setProperty("Filename", fileName);
+    lpf_alg->setProperty("Filename", xmlFileName);
     lpf_alg->execute();
 
+    // Test using DetCal paramter file (debug)
+    // const std::string isawFileName = fileName + ".DetCal";
     // IAlgorithm_sptr lpf_alg =
     //     AlgorithmFactory::Instance().create("LoadIsawDetCal", 1);
     // lpf_alg->initialize();
