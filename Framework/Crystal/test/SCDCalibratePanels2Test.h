@@ -137,10 +137,8 @@ public:
     g_log.notice() << "test: !Null case!\n";
 
     // Generate unique temp files
-    auto isawFile = boost::filesystem::temp_directory_path();
-    isawFile /= boost::filesystem::unique_path("nullcase_%%%%%%%%.DetCal");
-    auto xmlFile = boost::filesystem::temp_directory_path();
-    xmlFile /= boost::filesystem::unique_path("nullcase_%%%%%%%%.xml");
+    auto filenamebase = boost::filesystem::temp_directory_path();
+    filenamebase /= boost::filesystem::unique_path("nullcase_%%%%%%%%");
 
     g_log.notice() << "-- generate simulated workspace\n";
     MatrixWorkspace_sptr ws = m_ws->clone();
@@ -159,7 +157,7 @@ public:
 
     // Perform the calibration
     g_log.notice() << "-- start calibration\n";
-    runCalibration(isawFile.string(), xmlFile.string(), pws, false, true, true);
+    runCalibration(filenamebase.string(), pws, false, true, true);
 
     // Check if the calibration returns the same instrument as we put in
     g_log.notice() << "-- validate calibration output\n";
@@ -664,16 +662,24 @@ private:
     }
   }
 
+
   /**
    * @brief Run the calibration algorithm
    *
-   * @param isawFilename
-   * @param xmlFilename
+   * @param filenameBase
+   * @param pws
+   * @param calibrateT0
+   * @param calibrateL1
+   * @param calibrateBanks
    */
-  void runCalibration(const std::string &isawFilename,
-                      const std::string &xmlFilename,
-                      const std::string &csvFilename, PeaksWorkspace_sptr pws,
+  void runCalibration(const std::string filenameBase, PeaksWorkspace_sptr pws,
                       bool calibrateT0, bool calibrateL1, bool calibrateBanks) {
+    // generate isaw, xml, and csv filename
+    const std::string isawFilename = filenameBase + ".DetCal";
+    const std::string xmlFilename = filenameBase + ".xml";
+    const std::string csvFilename = filenameBase + ".csv";
+
+    // execute the calibration
     SCDCalibratePanels2 alg;
     alg.initialize();
     alg.setProperty("PeakWorkspace", pws);
