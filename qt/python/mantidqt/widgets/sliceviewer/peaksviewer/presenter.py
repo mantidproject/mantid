@@ -259,7 +259,7 @@ class PeaksViewerCollectionPresenter:
             fg_color = '#000000'
 
         return create_peaksviewermodel(name, fg_color, self.DEFAULT_BG_COLOR)
-    
+
     def replace_handle(self, ws_name, _):
         if ws_name in self.workspace_names():
             self.remove_peaksworkspace(ws_name)
