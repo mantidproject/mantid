@@ -87,7 +87,7 @@ void CalculateEfficiency2::init() {
   declareProperty(std::make_unique<WorkspaceProperty<API::WorkspaceGroup>>(
                       PropertyNames::INPUT_WORKSPACE_GROUP, "",
                       Direction::Input, PropertyMode::Optional),
-                  "The workspace group containing the flood data");
+                  "The workspace group containing the flood data that will be merged");
   declareProperty(
       std::make_unique<WorkspaceProperty<>>(PropertyNames::OUTPUT_WORKSPACE, "",
                                             Direction::Output),
@@ -99,10 +99,6 @@ void CalculateEfficiency2::init() {
                   "Minimum threshold for a pixel to be considered");
   declareProperty(PropertyNames::MAX_THRESHOLD, 2.0, positiveDouble->clone(),
                   "Maximum threshold for a pixel to be considered");
-  declareProperty(
-      PropertyNames::MERGE_OFFSETS, false,
-      "Whether to merge entries in a group to remove the beam stop shadow.",
-      Direction::Input);
 }
 
 std::map<std::string, std::string> CalculateEfficiency2::validateInputs() {
@@ -159,10 +155,7 @@ void CalculateEfficiency2::exec() {
   std::string inputWorkspaceName =
       getPropertyValue(PropertyNames::INPUT_WORKSPACE);
   if (!isDefault(PropertyNames::INPUT_WORKSPACE_GROUP)) {
-    inputWorkspaceName = getPropertyValue(PropertyNames::INPUT_WORKSPACE_GROUP);
-    if (getProperty(PropertyNames::MERGE_OFFSETS)) {
       inputWorkspaceName = mergeMeasurementsWithOffset();
-    }
   }
   // create the output workspace from the input
   auto childAlg = createChildAlgorithm("RebinToWorkspace", 0.0, 0.1);
@@ -200,8 +193,7 @@ void CalculateEfficiency2::exec() {
   averageAndNormalizePixels(*outputWS, counts);
 
   // clean-up
-  if (!isDefault(PropertyNames::INPUT_WORKSPACE_GROUP) &&
-      getProperty(PropertyNames::MERGE_OFFSETS)) {
+  if (!isDefault(PropertyNames::INPUT_WORKSPACE_GROUP)) {
     API::AnalysisDataService::Instance().remove(inputWorkspaceName);
   }
 

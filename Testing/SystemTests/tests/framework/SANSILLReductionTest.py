@@ -182,7 +182,7 @@ class ILL_D22_Multiple_Sensitivity_Test(systemtesting.MantidSystemTest):
                          OutputWorkspace='ref2', SensitivityOutputWorkspace='sens2')
 
         GroupWorkspaces(InputWorkspaces=['sens1', 'sens2'], OutputWorkspace='sensitivities')
-        CalculateEfficiency(InputWorkspaceGroup='sensitivities', MergeOffsets=True, OutputWorkspace='sens')
+        CalculateEfficiency(InputWorkspaceGroup='sensitivities', OutputWorkspace='sens')
 
         AddSampleLog(Workspace='sens', LogName='ProcessedAs', LogText='Reference')
 

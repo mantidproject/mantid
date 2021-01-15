@@ -450,7 +450,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
             if self.getProperty('SensitivityWithOffsets').value:
                 tmp_group_name = self.output_sens + '_group'
                 GroupWorkspaces(InputWorkspaces=sensitivity_outputs, OutputWorkspace=tmp_group_name)
-                CalculateEfficiency(InputWorkspaceGroup=tmp_group_name, MergeOffsets=True, OutputWorkspace=self.output_sens)
+                CalculateEfficiency(InputWorkspaceGroup=tmp_group_name, OutputWorkspace=self.output_sens)
                 DeleteWorkspace(Workspace=tmp_group_name)
             self.setProperty('SensitivityOutputWorkspace', mtd[self.output_sens])
 
