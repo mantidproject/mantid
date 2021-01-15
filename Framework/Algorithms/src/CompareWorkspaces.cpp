@@ -20,6 +20,7 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidKernel/Unit.h"
 #include "MantidParallel/Communicator.h"
 
@@ -860,16 +861,16 @@ bool CompareWorkspaces::checkInstrument(
     return false;
   }
 
-  if (!ws1->componentInfo().hasEquilvalentSource(ws2->componentInfo()) {
+  if (!ws1->componentInfo().hasEquivalentSource(ws2->componentInfo())) {
     recordMismatch("Source mismatch: either one workspace has a source and the "
                    "other does not, or the sources are at different positions");
-    return false
+    return false;
   }
 
-  if (!ws1->componentInfo().hasEquilvalentSample(ws2->componentInfo()) {
+  if (!ws1->componentInfo().hasEquivalentSample(ws2->componentInfo())) {
     recordMismatch("Sample mismatch: either one workspace has a sample and the "
                    "other does not, or the samples are at different positions");
-    return false
+    return false;
   }
 
   const Geometry::ParameterMap &ws1_parmap = ws1->constInstrumentParameters();
