@@ -54,6 +54,7 @@ Bugfixes
 - Show spectrum numbers instead of workspace index in plotBin
 - Fixed a bug which would cause unrealistic errorbars on the fit calc curve.
 - Fix sort order of peaks in the peaks overlay on SliceViewer.
+- Fixed a number of issues with displaying ellipsoid peak shapes.
 - The colorfill plot on ragged workspaces will have the correct horizontal extent.
 - Fix replot of colorfill image after a workspace is replaced.
 - Fixed a bug in generating plot scripts for figures containing data for a particular bin.
