@@ -41,12 +41,14 @@ set(TEST_PY_FILES
     ISISIndirectEnergyTransferTest.py
     ISISIndirectEnergyTransferWrapperTest.py
     D7YIGPositionCalibrationTest.py
+    D7AbsoluteCrossSectionsTest.py
     LoadWANDTest.py
     MDNormSCDPreprocessIncoherentTest.py
     MolDynTest.py
     MSDFitTest.py
     OSIRISDiffractionReductionTest.py
     PaalmanPingsMonteCarloAbsorptionTest.py
+    PolDiffILLReductionTest.py
     PowderILLDetectorScanTest.py
     PowderILLParameterScanTest.py
     ReflectometryILLAutoProcessTest.py

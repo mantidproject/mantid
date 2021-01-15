@@ -19,7 +19,6 @@ class SANSLOQCentreNoGrav(systemtesting.MantidSystemTest):
         self.tolerance = 1e-6
 
     def runTest(self):
-
         LOQ()
         Set1D()
         Detector("rear-detector")

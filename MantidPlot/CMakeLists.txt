@@ -1018,7 +1018,7 @@ install(FILES ${CONFIG_RESET_SCRIPT} DESTINATION ${BIN_DIR})
 # fail of the installation with macports therefore MACPORTS option is introduced
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   if(MACPORTS)
-    install(FILES package_python_macports.py DESTINATION MantidPlot.app/)
+    install(FILES package_python_macports.py DESTINATION ${MANTIDPLOT_APP}/)
     configure_file(
       ${CMAKE_CURRENT_SOURCE_DIR}/FixMacportsBundle.cmake.in
       ${CMAKE_CURRENT_BINARY_DIR}/FixMacportsBundle.cmake @ONLY
@@ -1028,7 +1028,7 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     install(
       CODE "
       execute_process(COMMAND ${CMAKE_SOURCE_DIR}/installers/MacInstaller/make_package.rb
-                              \${CMAKE_INSTALL_PREFIX}/MantidPlot.app ${Python_EXECUTABLE} ${ParaView_DIR}
+                              \${CMAKE_INSTALL_PREFIX}/${MANTIDPLOT_APP} ${Python_EXECUTABLE} ${ParaView_DIR}
                       RESULT_VARIABLE install_name_tool_result OUTPUT_VARIABLE _out ERROR_VARIABLE _out COMMAND_ECHO STDOUT)
       if(NOT install_name_tool_result EQUAL 0)
         message(\"\${_out}\")

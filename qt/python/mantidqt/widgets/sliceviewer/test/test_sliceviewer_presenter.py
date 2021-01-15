@@ -14,6 +14,7 @@ from unittest.mock import patch
 from mantid.api import MultipleExperimentInfos
 
 import matplotlib
+
 matplotlib.use('Agg')
 # Mock out simpleapi to import expensive import of something we don't use anyway
 sys.modules['mantid.simpleapi'] = mock.MagicMock()
@@ -28,12 +29,14 @@ from mantidqt.widgets.sliceviewer.view import SliceViewerView, SliceViewerDataVi
 
 def _create_presenter(model, view, mock_sliceinfo_cls, enable_nonortho_axes, supports_nonortho):
     model.get_ws_type = mock.Mock(return_value=WS_TYPE.MDH)
+    model.get_dim_limits.return_value = ((-1, 1), (-2, 2))
     data_view_mock = view.data_view
     data_view_mock.plot_MDH = mock.Mock()
     presenter = SliceViewer(None, model=model, view=view)
     if enable_nonortho_axes:
         data_view_mock.nonorthogonal_mode = True
         data_view_mock.nonortho_transform = mock.MagicMock(NonOrthogonalTransform)
+        data_view_mock.nonortho_transform.tr.return_value = (0, 1)
         presenter.nonorthogonal_axes(True)
     else:
         data_view_mock.nonorthogonal_mode = False
@@ -196,6 +199,7 @@ class SliceViewerTest(unittest.TestCase):
 
     def test_non_orthogonal_axes_toggled_on(self):
         self.model.get_ws_type = mock.Mock(return_value=WS_TYPE.MDE)
+        self.model.get_dim_limits.return_value = ((-1, 1), (-2, 2))
         data_view_mock = self.view.data_view
         data_view_mock.plot_MDH = mock.Mock()
 
@@ -209,7 +213,7 @@ class SliceViewerTest(unittest.TestCase):
             ToolItemText.REGIONSELECTION)
         data_view_mock.create_axes_nonorthogonal.assert_called_once()
         data_view_mock.create_axes_orthogonal.assert_not_called()
-        data_view_mock.plot_MDH.assert_called_once()
+        self.assertEqual(data_view_mock.plot_MDH.call_count, 2)
         data_view_mock.disable_tool_button.assert_has_calls([mock.call(ToolItemText.LINEPLOTS)])
 
     @mock.patch("mantidqt.widgets.sliceviewer.presenter.SliceInfo")
@@ -346,7 +350,9 @@ class SliceViewerTest(unittest.TestCase):
 
     def test_replace_workspace_returns_when_the_workspace_is_not_the_model_workspace(self):
         self.model.workspace_equals.return_value = False
-        presenter, _ = _create_presenter(self.model, self.view, mock.MagicMock(),
+        presenter, _ = _create_presenter(self.model,
+                                         self.view,
+                                         mock.MagicMock(),
                                          enable_nonortho_axes=False,
                                          supports_nonortho=False)
         presenter.update_view = mock.Mock()
@@ -359,12 +365,13 @@ class SliceViewerTest(unittest.TestCase):
         presenter.update_view.assert_not_called()
 
     def test_replace_workspace_closes_view_when_model_properties_change(self):
-
         self.model.workspace_equals.return_value = True
-        presenter, _ = _create_presenter(self.model, self.view, mock.MagicMock(),
+        presenter, _ = _create_presenter(self.model,
+                                         self.view,
+                                         mock.MagicMock(),
                                          enable_nonortho_axes=False,
                                          supports_nonortho=False)
-        presenter._update_view = mock.Mock()
+        presenter.refresh_view = mock.Mock()
         presenter._decide_plot_update_methods = mock.Mock()
 
         workspace = create_workspace_mock()
@@ -383,16 +390,17 @@ class SliceViewerTest(unittest.TestCase):
 
             self.view.emit_close.assert_called_once()
             presenter._decide_plot_update_methods.assert_not_called()
-            presenter._update_view.assert_not_called()
+            presenter.refresh_view.assert_not_called()
 
     def test_replace_workspace_updates_view(self):
-        presenter, _ = _create_presenter(self.model, self.view, mock.MagicMock(),
+        presenter, _ = _create_presenter(self.model,
+                                         self.view,
+                                         mock.MagicMock(),
                                          enable_nonortho_axes=False,
                                          supports_nonortho=False)
-        presenter._update_view = mock.Mock()
+        self.view.delayed_refresh = mock.Mock()
         presenter._decide_plot_update_methods = mock.Mock(
-            return_value=(presenter.new_plot_matrix(), presenter.update_plot_data_matrix())
-        )
+            return_value=(presenter.new_plot_matrix(), presenter.update_plot_data_matrix()))
         workspace = create_workspace_mock()
         new_model_properties = self.model.get_properties()
 
@@ -402,15 +410,17 @@ class SliceViewerTest(unittest.TestCase):
 
             self.view.emit_close.assert_not_called()
             presenter._decide_plot_update_methods.assert_called_once()
-            presenter._update_view.assert_called_once()
+            self.view.delayed_refresh.assert_called_once()
 
-    def test_update_view(self):
-        presenter, _ = _create_presenter(self.model, self.view, mock.MagicMock(),
+    def test_refresh_view(self):
+        presenter, _ = _create_presenter(self.model,
+                                         self.view,
+                                         mock.MagicMock(),
                                          enable_nonortho_axes=False,
                                          supports_nonortho=False)
         presenter.new_plot = mock.Mock()
 
-        presenter._update_view()
+        presenter.refresh_view()
 
         self.view.data_view.image_info_widget.setWorkspace.assert_called()
         self.view.setWindowTitle.assert_called_with(self.model.get_title())

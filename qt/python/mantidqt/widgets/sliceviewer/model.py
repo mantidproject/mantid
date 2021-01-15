@@ -21,6 +21,8 @@ from .transform import NonOrthogonalTransform
 # Constants
 PROJ_MATRIX_LOG_NAME = "W_MATRIX"
 LOG_GET_WS_MDE_ALGORITHM_CALLS = False
+# min width between data limits (data_min, data_max)
+MIN_WIDTH = 1e-5
 
 
 class WS_TYPE(Enum):
@@ -31,6 +33,7 @@ class WS_TYPE(Enum):
 
 class SliceViewerModel:
     """Store the workspace to be plotted. Can be MatrixWorkspace, MDEventWorkspace or MDHistoWorkspace"""
+
     def __init__(self, ws):
         # reference to the workspace requested to be viewed
         self._ws = ws
@@ -119,8 +122,8 @@ class SliceViewerModel:
         Check if the given workspace can multiple BinMD calls.
         """
         ws_type = self.get_ws_type()
-        return ws_type == WS_TYPE.MDE or (ws_type == WS_TYPE.MDH
-                                          and self._get_ws().hasOriginalWorkspace(0))
+        return ws_type == WS_TYPE.MDE or (ws_type == WS_TYPE.MDH and self._get_ws().hasOriginalWorkspace(
+            0) and self._get_ws().getOriginalWorkspace(0).getNumDims() == self._get_ws().getNumDims())
 
     def get_ws_name(self) -> str:
         """Return the name of the workspace being viewed"""
@@ -193,7 +196,7 @@ class SliceViewerModel:
     def get_dim_info(self, n: int) -> dict:
         """
         returns dict of (minimum :float, maximum :float, number_of_bins :int,
-                         width :float, name :str, units :str, type :str, has_original: bool, qdim: bool) for dimension n
+                         width :float, name :str, units :str, type :str, can_rebin: bool, qdim: bool) for dimension n
         """
         workspace = self._get_ws()
         dim = workspace.getDimension(n)
@@ -205,7 +208,7 @@ class SliceViewerModel:
             'name': dim.name,
             'units': dim.getUnits(),
             'type': self.get_ws_type().name,
-            'has_original': workspace.hasOriginalWorkspace(0),
+            'can_rebin': self.can_support_dynamic_rebinning(),
             'qdim': dim.getMDFrame().isQ()
         }
 
@@ -346,14 +349,14 @@ class SliceViewerModel:
             limits = limits[1], limits[0]
         xindex, yindex = _display_indices(slicepoint)
         dim_limits = _dimension_limits(workspace, slicepoint, limits)
-        # Construct paramters to integrate everything first and overrid per cut
-        params = {f'P{n+1}Bin': [*dim_limits[n]] for n in range(workspace.getNumDims())}
+        # Construct parameters to integrate everything first and override per cut
+        params = {f'P{n + 1}Bin': [*dim_limits[n]] for n in range(workspace.getNumDims())}
 
         xdim_min, xdim_max = dim_limits[xindex]
         ydim_min, ydim_max = dim_limits[yindex]
         params['OutputWorkspace'] = self._roi_name
-        params[f'P{xindex+1}Bin'] = [xdim_min, 0, xdim_max]
-        params[f'P{yindex+1}Bin'] = [ydim_min, 0, ydim_max]
+        params[f'P{xindex + 1}Bin'] = [xdim_min, 0, xdim_max]
+        params[f'P{yindex + 1}Bin'] = [ydim_min, 0, ydim_max]
         IntegrateMDHistoWorkspace(InputWorkspace=workspace, **params)
         if transpose:
             _inplace_transposemd(self._roi_name, axes=[yindex, xindex])
@@ -379,7 +382,7 @@ class SliceViewerModel:
             limits = limits[1], limits[0]
         dim_limits = _dimension_limits(workspace, slicepoint, limits)
         # Construct paramters to integrate everything first and overrid per cut
-        params = {f'P{n+1}Bin': [*dim_limits[n]] for n in range(workspace.getNumDims())}
+        params = {f'P{n + 1}Bin': [*dim_limits[n]] for n in range(workspace.getNumDims())}
         xindex, yindex = _display_indices(slicepoint, transpose)
 
         xcut_name, ycut_name, help_msg = self._cut_names(cut)
@@ -387,13 +390,13 @@ class SliceViewerModel:
         ydim_min, ydim_max = dim_limits[yindex]
         if xcut_name:
             params['OutputWorkspace'] = xcut_name
-            params[f'P{xindex+1}Bin'] = [xdim_min, 0, xdim_max]
+            params[f'P{xindex + 1}Bin'] = [xdim_min, 0, xdim_max]
             IntegrateMDHistoWorkspace(InputWorkspace=workspace, **params)
             _keep_dimensions(xcut_name, xindex)
         if ycut_name:
             params['OutputWorkspace'] = ycut_name
-            params[f'P{xindex+1}Bin'] = [xdim_min, xdim_max]
-            params[f'P{yindex+1}Bin'] = [ydim_min, 0, ydim_max]
+            params[f'P{xindex + 1}Bin'] = [xdim_min, xdim_max]
+            params[f'P{yindex + 1}Bin'] = [ydim_min, 0, ydim_max]
             IntegrateMDHistoWorkspace(InputWorkspace=workspace, **params)
             _keep_dimensions(ycut_name, yindex)
 
@@ -544,6 +547,8 @@ def _roi_binmd_parameters(workspace, slicepoint: Sequence[Optional[float]],
         else:
             dim_min, dim_max = slice_pt - nbins / 2, slice_pt + nbins / 2
             nbins = 1
+        if dim_max - dim_min < MIN_WIDTH:
+            dim_max = dim_min + MIN_WIDTH
         params[f'BasisVector{n}'] = f'{dimension.name},{dimension.getUnits()},{basis_vec_n}'
         output_extents.append(dim_min)
         output_extents.append(dim_max)

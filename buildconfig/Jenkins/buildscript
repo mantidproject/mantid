@@ -265,25 +265,23 @@ fi
 ###############################################################################
 if [[ ${DO_BUILD_PKG} == true ]]; then
     PACKAGINGVARS="-DPACKAGE_DOCS=ON -DDOCS_DOTDIAGRAMS=ON -DDOCS_SCREENSHOTS=ON -DDOCS_MATH_EXT=sphinx.ext.imgmath -DDOCS_PLOTDIRECTIVE=ON"
-    # Set some variables relating to the linux packages
-    if [[ "${ON_MACOS}" == true ]]; then
-        PACKAGINGVARS="${PACKAGINGVARS} -DCPACK_PACKAGE_SUFFIX="
+    # Use different suffix if parameter is not defined
+    if [[ -n "${PACKAGE_SUFFIX}" ]]; then
+        echo "Using PACKAGE_SUFFIX=${PACKAGE_SUFFIX} from job parameter"
+    elif [[ ${JOB_NAME} == release* ]]; then  # starts with "release"
+        PACKAGE_SUFFIX=""
+    elif [[ ${JOB_NAME} == ornl-stable ]]; then
+        PACKAGE_SUFFIX=""
+    elif [[ ${JOB_NAME} == ornl-qa ]]; then
+        PACKAGE_SUFFIX="qa"
+    elif [[ ${JOB_NAME} == master* ]]; then
+        PACKAGE_SUFFIX="nightly"
     else
-        # Use different suffix for linux builds if parameter is not defined
-        if [[ -n "${PACKAGE_SUFFIX}" ]]; then
-            echo "Using PACKAGE_SUFFIX=${PACKAGE_SUFFIX} from job parameter"
-        elif [[ ${JOB_NAME} == release* ]]; then  # starts with "release"
-            PACKAGE_SUFFIX=""
-        elif [[ ${JOB_NAME} == ornl-stable ]]; then
-            PACKAGE_SUFFIX=""
-        elif [[ ${JOB_NAME} == ornl-qa ]]; then
-            PACKAGE_SUFFIX="qa"
-        elif [[ ${JOB_NAME} == master* ]]; then
-            PACKAGE_SUFFIX="nightly"
-        else
-            PACKAGE_SUFFIX="unstable"
-        fi
-
+        PACKAGE_SUFFIX="unstable"
+    fi
+    if [[ "${ON_MACOS}" == true ]]; then
+        PACKAGINGVARS="${PACKAGINGVARS} -DCPACK_PACKAGE_SUFFIX=${PACKAGE_SUFFIX}"
+    else
         if [[ ${JOB_NAME} == release* ]] && [[ -z "${PACKAGE_SUFFIX}" ]]; then
             # Traditional install path for release build
             PACKAGINGVARS="${PACKAGINGVARS} -DCMAKE_INSTALL_PREFIX=/opt/Mantid -DCPACK_PACKAGE_SUFFIX="

@@ -33,6 +33,7 @@ class PlotWidgetPresenterCommonTest(unittest.TestCase):
         self.model = mock.Mock(spec=PlotWidgetModel)
         self.view = mock.Mock(spec=PlotWidgetViewInterface)
         self.view.warning_popup = mock.MagicMock()
+        self.view.setEnabled = mock.MagicMock()
         self.external_plotting_model = mock.Mock(spec=ExternalPlottingModel)
         self.external_plotting_view = mock.Mock(spec=ExternalPlottingView)
         self.figure_presenter = mock.Mock(spec=PlottingCanvasPresenterInterface)
@@ -312,6 +313,15 @@ class PlotWidgetPresenterCommonTest(unittest.TestCase):
         self.context.fitting_context.fit_raw = False
         ws_rebin_names = ['MUSR62260; Group; bottom; Asymmetry; Rebin; MA']
         self.assertEqual(self.presenter.match_raw_selection(ws_rebin_names, False), ws_rebin_names)
+
+    def test_tab_enabled_with_data_loaded(self):
+        self.presenter.plot_all_selected_data(False, False)
+        self.view.setEnabled.assert_called_once_with(True)
+
+    def test_tab_disbaled_with_no_data_loaded(self):
+        self.model.get_workspace_list_and_indices_to_plot.return_value = [[], indices]
+        self.presenter.plot_all_selected_data(False, False)
+        self.view.setEnabled.assert_called_once_with(False)
 
 
 if __name__ == '__main__':

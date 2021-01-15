@@ -1008,7 +1008,8 @@ DataObjects::MDHistoWorkspace_sptr MDNorm::binInputWS(
         m_dEIntegrated = false;
       }
       if (!basisVector.str().empty()) {
-        for (auto const &proji : projection) {
+        for (auto proji : projection) {
+          proji = std::abs(proji) > 1e-10 ? proji : 0.0;
           basisVector << "," << proji;
         }
         value = basisVector.str();

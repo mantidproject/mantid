@@ -141,7 +141,7 @@ void LoadParameterFile::exec() {
   // pRootElem
   InstrumentDefinitionParser loadInstr;
   loadInstr.setComponentLinks(instrument, pRootElem, &prog,
-                              localWorkspace->getAvailableWorkspaceStartDate());
+                              localWorkspace->getWorkspaceStartDate());
 
   // populate parameter map of workspace
   localWorkspace->populateInstrumentParameters();
