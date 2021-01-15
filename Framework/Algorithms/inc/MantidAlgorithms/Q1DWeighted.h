@@ -77,6 +77,11 @@ private:
   void calculate(const API::MatrixWorkspace_const_sptr &);
   void finalize(const API::MatrixWorkspace_const_sptr &);
 
+  void getTableShapes();
+  void getViewportParams(std::string &,
+                         std::map<std::string, std::vector<double>> &);
+  void getSectorParams(std::vector<std::string> &,
+                       std::map<std::string, std::vector<double>> &);
   std::vector<std::vector<std::vector<double>>> m_intensities;
   std::vector<std::vector<std::vector<double>>> m_errors;
   std::vector<std::vector<std::vector<double>>> m_normalisation;
@@ -84,11 +89,10 @@ private:
   size_t m_nQ;
   size_t m_nLambda;
   size_t m_nWedges;
+
+  std::map<std::string, std::vector<double>> m_wedgesParameters;
   size_t m_nSpec;
   int m_nSubPixels;
-  double m_wedgeFullAngle;
-  double m_wedgeOffset;
-  double m_wedgeAngle;
   double m_pixelSizeY;
   double m_pixelSizeX;
   bool m_asymmWedges;
