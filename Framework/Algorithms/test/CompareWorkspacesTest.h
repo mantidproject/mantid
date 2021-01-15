@@ -27,6 +27,8 @@
 #include "MantidKernel/V3D.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidTestHelpers/InstrumentCreationHelper.h"
+
 
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
@@ -827,15 +829,12 @@ public:
   void testDifferentInstruments() {
     if (!checker.isInitialized())
       checker.initialize();
-
-    Mantid::API::MatrixWorkspace_sptr ws2 =
-        WorkspaceCreationHelper::create2DWorkspace123(2, 2);
-    Mantid::Geometry::Instrument_sptr instrument(
-        new Mantid::Geometry::Instrument("different"));
-    ws2->setInstrument(instrument);
-
-    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", ws1));
-
+    Workspace2D_sptr ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1, 2, false, false, true, "original", false);
+    AnalysisDataService::Instance().addOrReplace("original", ws);
+    // test different names
+    Workspace2D_sptr ws2 = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1, 2, false, false, true,"distorted", false);
+    AnalysisDataService::Instance().addOrReplace("distorted", ws2);
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", ws));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", ws2));
 
     TS_ASSERT(checker.execute());
@@ -850,8 +849,8 @@ public:
     // Same, using the !Mantid::API::equals() function
     TS_ASSERT((!Mantid::API::equals(ws1, ws2)));
 
-    // Compare different source position
-    MatrixWorkspace_sptr ws3 = ws1->clone(); // shared to unique ptr conversion
+    // test different source position
+    Workspace2D_sptr ws3 = ws->clone(); // shared to unique ptr conversion
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", ws3));
     auto &info3 = ws3->mutableComponentInfo();
     info3.setPosition(info3.source(), info3.sourcePosition() + V3D(0, 0, 1e-6));
@@ -863,7 +862,7 @@ public:
               std::string::npos);
 
     // Compare different sample position
-    MatrixWorkspace_sptr ws4 = ws1->clone(); // shared to unique ptr conversion
+    Workspace2D_sptr ws4 = ws->clone(); // shared to unique ptr conversion
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", ws4));
     auto &info4 = ws4->mutableComponentInfo();
     info4.setPosition(info4.sample(), info4.samplePosition() + V3D(0, 0, 1e-6));

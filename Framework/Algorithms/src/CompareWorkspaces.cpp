@@ -830,7 +830,7 @@ bool CompareWorkspaces::checkSpectraMap(const MatrixWorkspace_const_sptr &ws1,
 //------------------------------------------------------------------------------------------------
 /* @brief Checks that the instruments match
  *
- * @details the following cheks are performed:
+ * @details the following checks are performed:
  * - instrument name
  * - positions and rotations of detectors
  * - mask of detectors
