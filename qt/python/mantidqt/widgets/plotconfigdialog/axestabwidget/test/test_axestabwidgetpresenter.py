@@ -302,5 +302,6 @@ class AxesTabWidgetPresenterTest(unittest.TestCase):
 
         self.assertEqual(presenter.current_view_props["xlim"], (-1.0, 10.0))
 
+
 if __name__ == '__main__':
     unittest.main()
