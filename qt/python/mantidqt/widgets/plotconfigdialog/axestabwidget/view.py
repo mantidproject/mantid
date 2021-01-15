@@ -13,7 +13,6 @@ from qtpy.QtWidgets import QWidget, QTabBar
 from mantidqt.utils.qt import load_ui
 from mantidqt.widgets.plotconfigdialog.axestabwidget import AxProperties
 from mantidqt.widgets.plotconfigdialog.colorselector import ColorSelector
-from mantid import logger
 
 
 class AxesTabWidgetView(QWidget):
