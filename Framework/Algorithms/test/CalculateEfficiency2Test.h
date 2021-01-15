@@ -11,6 +11,7 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAlgorithms/CalculateEfficiency2.h"
+#include "MantidDataHandling/Load.h"
 #include "MantidDataHandling/LoadSpice2D.h"
 #include "MantidDataHandling/MoveInstrumentComponent.h"
 #include "MantidKernel/EmptyValues.h"
@@ -219,6 +220,71 @@ public:
     const auto &oSpecInfo2 = ws2d_out->spectrumInfo();
     TS_ASSERT(
         !oSpecInfo2.isMasked(1 + SANSInstrumentCreationHelper::nMonitors));
+
+    Mantid::API::AnalysisDataService::Instance().remove(inputWS);
+    Mantid::API::AnalysisDataService::Instance().remove(outputWS);
+  }
+
+  void testExecInputWorkspaceGroup() {
+    // Tests merging input and calculating efficiencies based on workspace
+    // without beam mask shadow using ILL D22 data.
+
+    Mantid::DataHandling::Load loader;
+    loader.initialize();
+    TS_ASSERT_THROWS_NOTHING(
+        loader.setPropertyValue("Filename", "D22_mask_central.nxs,D22_mask_offset.nxs"));
+    TS_ASSERT_THROWS_NOTHING(
+        loader.setPropertyValue("OutputWorkspace", inputWS));
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+    TS_ASSERT(loader.isExecuted());
+
+    if (!correction.isInitialized())
+      correction.initialize();
+
+    const std::string outputWS("result");
+    TS_ASSERT_THROWS_NOTHING(correction.setPropertyValue("InputWorkspace", ""));
+    TS_ASSERT_THROWS_NOTHING(
+        correction.setPropertyValue("InputWorkspaceGroup", inputWS));
+    TS_ASSERT_THROWS_NOTHING(
+        correction.setPropertyValue("OutputWorkspace", outputWS))
+    TS_ASSERT_THROWS_NOTHING(correction.execute())
+    TS_ASSERT(correction.isExecuted())
+
+    Mantid::API::Workspace_sptr ws_out;
+    TS_ASSERT_THROWS_NOTHING(
+        ws_out =
+            Mantid::API::AnalysisDataService::Instance().retrieve(outputWS));
+    Mantid::DataObjects::Workspace2D_sptr ws2d_out =
+        std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(ws_out);
+    std::cout << ws2d_out->getName() << std::endl;
+
+    double tolerance(1e-02);
+    // monitors
+    TS_ASSERT_DELTA(ws2d_out->x(32768)[0], 5.7, tolerance);
+    TS_ASSERT_DELTA(ws2d_out->x(32768)[1], 6.3, tolerance);
+    TS_ASSERT_DELTA(ws2d_out->y(32768)[0], 1.0, tolerance);
+    TS_ASSERT_DELTA(ws2d_out->y(32768)[0], 1.0, tolerance);
+
+    const auto &oSpecInfo2 = ws2d_out->spectrumInfo();
+    // spectrum masked by beam stop in the central input
+    TS_ASSERT_DELTA(ws2d_out->y(16000)[0], 1.01, tolerance);
+    TS_ASSERT_DELTA(ws2d_out->e(16000)[0], 0.02, tolerance);
+    TS_ASSERT(!oSpecInfo2.isMasked(16000));
+    TS_ASSERT_DELTA(ws2d_out->y(16005)[0], 1.0, tolerance);
+    TS_ASSERT_DELTA(ws2d_out->e(16005)[0], 0.02, tolerance);
+    TS_ASSERT(!oSpecInfo2.isMasked(16005));
+
+    // spectrum masked by beam stop in the input with horizontal offset
+    TS_ASSERT_DELTA(ws2d_out->y(5000)[0], 1.0, tolerance);
+    TS_ASSERT_DELTA(ws2d_out->e(5000)[0], 0.02, tolerance);
+    TS_ASSERT(!oSpecInfo2.isMasked(5000));
+    TS_ASSERT_DELTA(ws2d_out->y(5005)[0], 1.0, tolerance);
+    TS_ASSERT_DELTA(ws2d_out->e(5005)[0], 0.02, tolerance);
+    TS_ASSERT(!oSpecInfo2.isMasked(5005));
+
+    // the detector edge should stay masked
+    TS_ASSERT(oSpecInfo2.isMasked(0));
+    TS_ASSERT(oSpecInfo2.isMasked(32767));
 
     Mantid::API::AnalysisDataService::Instance().remove(inputWS);
     Mantid::API::AnalysisDataService::Instance().remove(outputWS);
