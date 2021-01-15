@@ -193,7 +193,8 @@ void CalculateEfficiency2::exec() {
   averageAndNormalizePixels(*outputWS, counts);
 
   // clean-up
-  if (!isDefault(PropertyNames::INPUT_WORKSPACE_GROUP)) {
+  if (!isDefault(PropertyNames::INPUT_WORKSPACE_GROUP) &&
+          API::AnalysisDataService::Instance().doesExist(inputWorkspaceName)) {
     API::AnalysisDataService::Instance().remove(inputWorkspaceName);
   }
 
