@@ -22,7 +22,7 @@ class IO(object):
     """
     Class for Abins I/O HDF file operations.
     """
-    def __init__(self, input_filename=None, group_name=None):
+    def __init__(self, input_filename=None, group_name=None, setting=''):
 
         if isinstance(input_filename, str):
 
@@ -48,6 +48,8 @@ class IO(object):
         else:
             raise ValueError("Invalid name of the group. String was expected.")
 
+        self._setting = setting
+
         if filename.split('.')[-1] in AB_INITIO_FILE_EXTENSIONS:
             core_name = filename[0:filename.rfind(".")]  # e.g. NaCl.phonon -> NaCl (core_name) -> NaCl.hdf5
         else:
@@ -72,6 +74,14 @@ class IO(object):
         """
         saved_hash = self.load(list_of_attributes=["hash"])
         return self._hash_input_filename == saved_hash["attributes"]["hash"]
+
+    def _valid_setting(self):
+        """
+        Checks if setting matches content of HDF file.
+        :returns: True if consistent, otherwise False.
+        """
+        saved_hash = self.load(list_of_attributes=["setting"])
+        return self._hash_input_filename == saved_hash["attributes"]["setting"]
 
     def _valid_advanced_parameters(self):
         """
@@ -133,6 +143,9 @@ class IO(object):
         if not self._valid_advanced_parameters():
             raise ValueError("Different advanced parameters were used in the previous calculations.")
 
+        if not self._valid_setting():
+            raise ValueError("Different instrument setting was used in the previous calculations")
+
     def erase_hdf_file(self):
         """
         Erases content of hdf file.
@@ -154,6 +167,7 @@ class IO(object):
         Add attributes for input data filename, hash of file, advanced parameters to data for HDF5 file
         """
         self.add_attribute("hash", self._hash_input_filename)
+        self.add_attribute("setting", self._setting)
         self.add_attribute("filename", self._input_filename)
         self.add_attribute("advanced_parameters",
                            json.dumps(abins.parameters.non_performance_parameters))
