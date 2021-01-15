@@ -25,10 +25,9 @@
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/V3D.h"
+#include "MantidTestHelpers/InstrumentCreationHelper.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidTestHelpers/InstrumentCreationHelper.h"
-
 
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
@@ -829,10 +828,14 @@ public:
   void testDifferentInstruments() {
     if (!checker.isInitialized())
       checker.initialize();
-    Workspace2D_sptr ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1, 2, false, false, true, "original", false);
+    Workspace2D_sptr ws =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
+            1, 2, false, false, true, "original", false);
     AnalysisDataService::Instance().addOrReplace("original", ws);
     // test different names
-    Workspace2D_sptr ws2 = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1, 2, false, false, true,"distorted", false);
+    Workspace2D_sptr ws2 =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
+            1, 2, false, false, true, "distorted", false);
     AnalysisDataService::Instance().addOrReplace("distorted", ws2);
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", ws));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", ws2));
