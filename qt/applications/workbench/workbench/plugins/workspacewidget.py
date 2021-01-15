@@ -7,7 +7,7 @@
 #
 #
 from functools import partial
-from qtpy.QtWidgets import QApplication, QMessageBox, QVBoxLayout
+from qtpy.QtWidgets import QApplication, QVBoxLayout
 
 from mantid.api import AnalysisDataService, WorkspaceGroup
 from mantid.kernel import logger
@@ -101,7 +101,7 @@ class WorkspaceWidget(PluginWidget):
         """
         Triggered when the context menu is about to be displayed.
         """
-        ableToOverplot, _ = can_overplot()
+        ableToOverplot = can_overplot()
         self.workspacewidget.setOverplotDisabled(not ableToOverplot)
 
     def _do_plot_spectrum(self, names, errors, overplot, advanced=False):
@@ -115,11 +115,6 @@ class WorkspaceWidget(PluginWidget):
         :param advanced: If true then the advanced options will be shown in
                          the spectra selector dialog.
         """
-        if overplot:
-            compatible, error_msg = can_overplot()
-            if not compatible:
-                QMessageBox.warning(self, "", error_msg)
-                return
         try:
             plot_from_names(names, errors, overplot, advanced=advanced)
         except RuntimeError as re:
@@ -135,11 +130,6 @@ class WorkspaceWidget(PluginWidget):
                                    and it is a compatible figure
         :return:
         """
-        if overplot:
-            compatible, error_msg = can_overplot()
-            if not compatible:
-                QMessageBox.warning(self, "", error_msg)
-                return
         try:
             plot_md_ws_from_names(names, errors, overplot)
         except RuntimeError as re:
@@ -154,11 +144,6 @@ class WorkspaceWidget(PluginWidget):
         :param overplot: If true then the add to the current figure if one
                          exists and it is a compatible figure
         """
-        if overplot:
-            compatible, error_msg = can_overplot()
-            if not compatible:
-                QMessageBox.warning(self, "", error_msg)
-                return
         plot_kwargs = {"axis": MantidAxType.BIN}
         plot(self._ads.retrieveWorkspaces(names, unrollGroups=True),
              errors=errors,
