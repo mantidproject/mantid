@@ -90,7 +90,13 @@ private:
   size_t m_nLambda;
   size_t m_nWedges;
 
-  std::map<std::string, std::vector<double>> m_wedgesParameters;
+  std::vector<double> m_wedgesInnerRadius;
+  std::vector<double> m_wedgesOuterRadius;
+  std::vector<double> m_wedgesCenterX;
+  std::vector<double> m_wedgesCenterY;
+  std::vector<double> m_wedgesCenterAngle;
+  std::vector<double> m_wedgesAngleRange;
+
   size_t m_nSpec;
   int m_nSubPixels;
   double m_pixelSizeY;

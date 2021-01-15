@@ -143,12 +143,12 @@ void Q1DWeighted::bootstrap(const MatrixWorkspace_const_sptr &inputWS) {
   // histogram
   m_nLambda = inputWS->readY(0).size();
 
-  m_wedgesParameters["innerRadius"] = std::vector<double>();
-  m_wedgesParameters["outerRadius"] = std::vector<double>();
-  m_wedgesParameters["centerX"] = std::vector<double>();
-  m_wedgesParameters["centerY"] = std::vector<double>();
-  m_wedgesParameters["centerAngle"] = std::vector<double>();
-  m_wedgesParameters["angleRange"] = std::vector<double>();
+  m_wedgesInnerRadius = std::vector<double>();
+  m_wedgesOuterRadius = std::vector<double>();
+  m_wedgesCenterX = std::vector<double>();
+  m_wedgesCenterY = std::vector<double>();
+  m_wedgesCenterAngle = std::vector<double>();
+  m_wedgesAngleRange = std::vector<double>();
 
   if (getPropertyValue("TableShape").empty()) {
     const int wedges = getProperty("NumberOfWedges");
@@ -161,18 +161,18 @@ void Q1DWeighted::bootstrap(const MatrixWorkspace_const_sptr &inputWS) {
 
     // Define wedges parameters in a general way
     for (size_t iw = 0; iw < m_nWedges; ++iw) {
-      m_wedgesParameters["innerRadius"].push_back(0);
+      m_wedgesInnerRadius.push_back(0);
       // Negative outer radius is taken as a convention for infinity
-      m_wedgesParameters["outerRadius"].push_back(-1);
-      m_wedgesParameters["centerX"].push_back(0);
-      m_wedgesParameters["centerY"].push_back(0);
-      m_wedgesParameters["centerAngle"].push_back(
-          wedgeOffset + static_cast<double>(iw) * wedgeAngle / 2);
-      m_wedgesParameters["angleRange"].push_back(wedgeAngle);
+      m_wedgesOuterRadius.push_back(-1);
+      m_wedgesCenterX.push_back(0);
+      m_wedgesCenterY.push_back(0);
+      m_wedgesCenterAngle.push_back(wedgeOffset +
+                                    static_cast<double>(iw) * wedgeAngle / 2);
+      m_wedgesAngleRange.push_back(wedgeAngle);
     }
   } else {
     getTableShapes();
-    m_nWedges = m_wedgesParameters["innerRadius"].size();
+    m_nWedges = m_wedgesInnerRadius.size();
   }
 
   // we store everything in 3D arrays
@@ -216,7 +216,7 @@ void Q1DWeighted::getTableShapes() {
       boost::algorithm::split(params, val, boost::algorithm::is_any_of("\t"));
 
       // NB : the first value of the vector also is the key, and is not a
-      // meaningfull value
+      // meaningful value
       paramMap[params[0]] = params;
     }
     if (paramMap["Type"][1] == "sector")
@@ -239,20 +239,20 @@ void Q1DWeighted::getViewportParams(
                           boost::algorithm::is_any_of("\t, \n"));
 
   // Translation
-  viewportParams[params[0]] = std::vector<double>();
-  viewportParams[params[0]].push_back(std::stod(params[1]));
-  viewportParams[params[0]].push_back(std::stod(params[2]));
+  viewportParams[params[0]] = std::vector<double>(2);
+  viewportParams[params[0]][0] = std::stod(params[1]);
+  viewportParams[params[0]][1] = std::stod(params[2]);
 
   // Zoom
-  viewportParams[params[3]] = std::vector<double>();
-  viewportParams[params[3]].push_back(std::stod(params[4]));
+  viewportParams[params[3]] = std::vector<double>(1);
+  viewportParams[params[3]][0] = std::stod(params[4]);
 
   // Rotation quaternion
-  viewportParams[params[5]] = std::vector<double>();
-  viewportParams[params[5]].push_back(std::stod(params[6]));
-  viewportParams[params[5]].push_back(std::stod(params[7]));
-  viewportParams[params[5]].push_back(std::stod(params[8]));
-  viewportParams[params[5]].push_back(std::stod(params[9]));
+  viewportParams[params[5]] = std::vector<double>(4);
+  viewportParams[params[5]][0] = std::stod(params[6]);
+  viewportParams[params[5]][1] = std::stod(params[7]);
+  viewportParams[params[5]][2] = std::stod(params[8]);
+  viewportParams[params[5]][3] = std::stod(params[9]);
 }
 
 /**
@@ -265,24 +265,22 @@ void Q1DWeighted::getSectorParams(
     std::map<std::string, std::vector<double>> &viewport) {
   double zoom = viewport["Zoom"][0];
 
-  m_wedgesParameters["innerRadius"].push_back(std::stod(params[1]) * zoom);
-  m_wedgesParameters["outerRadius"].push_back(std::stod(params[2]) * zoom);
+  m_wedgesInnerRadius.push_back(std::stod(params[1]) * zoom);
+  m_wedgesOuterRadius.push_back(std::stod(params[2]) * zoom);
 
   double centerAngle = (std::stod(params[3]) + std::stod(params[4])) / 2;
   double angleRange =
       std::fmod(std::stod(params[4]) - std::stod(params[3]), 2 * M_PI);
   angleRange = angleRange >= 0 ? angleRange : angleRange + 2 * M_PI;
 
-  m_wedgesParameters["centerAngle"].push_back(centerAngle);
-  m_wedgesParameters["angleRange"].push_back(angleRange);
+  m_wedgesCenterAngle.push_back(centerAngle);
+  m_wedgesAngleRange.push_back(angleRange);
 
   double xOffset = viewport["Translation"][0];
   double yOffset = viewport["Translation"][1];
 
-  m_wedgesParameters["centerX"].push_back(std::stod(params[5]) * zoom +
-                                          xOffset);
-  m_wedgesParameters["centerY"].push_back(std::stod(params[6]) * zoom +
-                                          yOffset);
+  m_wedgesCenterX.push_back(std::stod(params[5]) * zoom + xOffset);
+  m_wedgesCenterY.push_back(std::stod(params[6]) * zoom + yOffset);
 }
 
 /**
@@ -397,13 +395,12 @@ void Q1DWeighted::calculate(const MatrixWorkspace_const_sptr &inputWS) {
           m_normalisation[0][j][k] += w;
         }
 
-        size_t wedgesCount = m_wedgesParameters["innerRadius"].size();
+        size_t wedgesCount = m_wedgesInnerRadius.size();
 
         for (size_t iw = 0; iw < wedgesCount; ++iw) {
-          double centerAngle = m_wedgesParameters["centerAngle"][iw];
+          double centerAngle = m_wedgesCenterAngle[iw];
           const V3D subPix = V3D(position.X(), position.Y(), 0.0);
-          const V3D center = V3D(m_wedgesParameters["centerX"][iw],
-                                 m_wedgesParameters["centerY"][iw], 0);
+          const V3D center = V3D(m_wedgesCenterX[iw], m_wedgesCenterY[iw], 0);
           double angle =
               fabs(subPix.angle(V3D(cos(centerAngle), sin(centerAngle), 0.0)));
 
@@ -411,49 +408,16 @@ void Q1DWeighted::calculate(const MatrixWorkspace_const_sptr &inputWS) {
             angle = fmod(angle, M_PI);
           }
 
-          if (angle < m_wedgesParameters["angleRange"][iw] &&
-              subPix.distance(center) > m_wedgesParameters["innerRadius"][iw] &&
-              (m_wedgesParameters["outerRadius"][iw] <= 0 ||
-               subPix.distance(center) <=
-                   m_wedgesParameters["outerRadius"][iw])) {
+          if (angle < m_wedgesAngleRange[iw] &&
+              subPix.distance(center) > m_wedgesInnerRadius[iw] &&
+              (m_wedgesOuterRadius[iw] <= 0 ||
+               subPix.distance(center) <= m_wedgesOuterRadius[iw])) {
             PARALLEL_CRITICAL(iqnorm_wedges) {
               // first index 0 is the full azimuth, need to offset+1
               m_intensities[iw + 1][j][k] += YIn[j] * w;
               m_errors[iw + 1][j][k] += w * w * EIn[j] * EIn[j];
               m_normalisation[iw + 1][j][k] += w;
             }
-
-            //        if (!getPropertyValue("MaskTable").empty()) {
-            //          getTableShapes();
-
-            //        } else if (m_nWedges != 0) {
-            //          // we do need to loop over all the wedges, since there
-            //          is no
-            //          // restriction for those; they can also overlap
-            //          // that is the same pixel can simultaneously be in many
-            //          wedges for (size_t iw = 0; iw < m_nWedges; ++iw) {
-            //            double centerAngle =
-            //                static_cast<double>(iw) * M_PI /
-            //                static_cast<double>(m_nWedges);
-            //            if (m_asymmWedges) {
-            //              centerAngle *= 2;
-            //            }
-            //            centerAngle += deg2rad * m_wedgeOffset;
-            //            const V3D subPix = V3D(position.X(), position.Y(),
-            //            0.0); const double angle = fabs(
-            //                subPix.angle(V3D(cos(centerAngle),
-            //                sin(centerAngle), 0.0)));
-            //            if (angle < deg2rad * m_wedgeAngle * 0.5 ||
-            //                (!m_asymmWedges &&
-            //                 fabs(M_PI - angle) < deg2rad * m_wedgeAngle *
-            //                 0.5)) {
-            //              PARALLEL_CRITICAL(iqnorm_wedges) {
-            //                // first index 0 is the full azimuth, need to
-            //                offset +1 m_intensities[iw + 1][j][k] += YIn[j] *
-            //                w; m_errors[iw + 1][j][k] += w * w * EIn[j] *
-            //                EIn[j]; m_normalisation[iw + 1][j][k] += w;
-            //              }
-            //            }
           }
         }
       }
@@ -482,8 +446,7 @@ void Q1DWeighted::finalize(const MatrixWorkspace_const_sptr &inputWS) {
       MatrixWorkspace_sptr wedgeWs =
           createOutputWorkspace(inputWS, m_nQ, m_qBinEdges);
       wedgeWs->mutableRun().addProperty(
-          "wedge_angle", m_wedgesParameters["centerAngle"][iw] / deg2rad,
-          "degrees", true);
+          "wedge_angle", m_wedgesCenterAngle[iw] / deg2rad, "degrees", true);
       wsgroup->addWorkspace(wedgeWs);
     }
     // set the output property
