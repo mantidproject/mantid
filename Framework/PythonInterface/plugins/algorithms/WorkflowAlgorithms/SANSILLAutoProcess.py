@@ -448,8 +448,10 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         self.setProperty('OutputWorkspace', mtd[self.output])
         if self.output_sens:
             if self.getProperty('SensitivityWithOffsets').value:
-                GroupWorkspaces(InputWorkspaces=sensitivity_outputs, OutputWorkspace=self.output_sens)
-                CalculateEfficiency(InputWorkspaceGroup=self.output_sens, MergeOffsets=True, OutputWorkspace=self.output_sens)
+                tmp_group_name = self.output_sens + '_group'
+                GroupWorkspaces(InputWorkspaces=sensitivity_outputs, OutputWorkspace=tmp_group_name)
+                CalculateEfficiency(InputWorkspaceGroup=tmp_group_name, MergeOffsets=True, OutputWorkspace=self.output_sens)
+                DeleteWorkspace(Workspace=tmp_group_name)
             self.setProperty('SensitivityOutputWorkspace', mtd[self.output_sens])
 
         # group panels
