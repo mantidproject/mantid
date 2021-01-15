@@ -326,20 +326,12 @@ const std::string CalculateEfficiency2::mergeMeasurementsWithOffset() {
         }
       }
       if (dataE != 0) {
+        spectrumInfo.setMasked(spectrumNo, false);
         detDataY.front() = dataY;
         detDataErr.front() = dataE;
       }
     }
   }
-
-  // masks need to be removed for the efficiency to be calculated,
-  // the default mask for the instrument edges will need to be re-applied
-  auto clearMaskAlg = createChildAlgorithm("ClearMaskFlag");
-  clearMaskAlg->setProperty("Workspace", mergedNormalisedWs);
-  clearMaskAlg->executeAsChildAlg();
-  mergedNormalisedWs =
-      API::AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-          mergedNormalisedWsName);
   return mergedNormalisedWs->getName();
 }
 
