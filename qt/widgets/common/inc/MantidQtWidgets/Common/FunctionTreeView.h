@@ -175,7 +175,7 @@ protected:
       const Mantid::API::CompositeFunction_sptr &parentComposite = nullptr,
       const std::size_t &parentIndex = 0);
   /// Add tie to a parameter property stored within a composite function.
-  bool FunctionTreeView::addParameterTieInComposite(
+  bool addParameterTieInComposite(
       QtProperty *property, const std::string &parameterName,
       const Mantid::API::CompositeFunction_sptr &composite,
       const std::size_t &index);

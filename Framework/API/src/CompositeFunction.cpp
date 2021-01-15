@@ -685,7 +685,7 @@ IFunction_sptr CompositeFunction::getFunction(std::size_t i) const {
 
 /**
  * Gets the index of the first function with a matching function string.
- * @param functionStr :: The function string to search for.
+ * @param functionName :: The name of the function to search for.
  * @returns function index of the first function with a matching function
  * string.
  */

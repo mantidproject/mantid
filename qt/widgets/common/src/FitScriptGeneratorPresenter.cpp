@@ -82,9 +82,10 @@ void FitScriptGeneratorPresenter::notifyPresenter(ViewEvent const &event,
   case ViewEvent::ParameterConstraintChanged:
     handleParameterConstraintChanged(arg1, arg2);
     return;
+  default:
+    throw std::runtime_error(
+        "Failed to notify the FitScriptGeneratorPresenter.");
   }
-
-  throw std::runtime_error("Failed to notify the FitScriptGeneratorPresenter.");
 }
 
 void FitScriptGeneratorPresenter::notifyPresenter(
@@ -93,9 +94,10 @@ void FitScriptGeneratorPresenter::notifyPresenter(
   case ViewEvent::GlobalParametersChanged:
     handleGlobalParametersChanged(vec);
     return;
+  default:
+    throw std::runtime_error(
+        "Failed to notify the FitScriptGeneratorPresenter.");
   }
-
-  throw std::runtime_error("Failed to notify the FitScriptGeneratorPresenter.");
 }
 
 void FitScriptGeneratorPresenter::notifyPresenter(ViewEvent const &event,
@@ -104,9 +106,10 @@ void FitScriptGeneratorPresenter::notifyPresenter(ViewEvent const &event,
   case ViewEvent::FittingModeChanged:
     handleFittingModeChanged(fittingMode);
     return;
+  default:
+    throw std::runtime_error(
+        "Failed to notify the FitScriptGeneratorPresenter.");
   }
-
-  throw std::runtime_error("Failed to notify the FitScriptGeneratorPresenter.");
 }
 
 void FitScriptGeneratorPresenter::openFitScriptGenerator() { m_view->show(); }

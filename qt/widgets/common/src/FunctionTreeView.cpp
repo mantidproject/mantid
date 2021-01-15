@@ -797,7 +797,9 @@ bool FunctionTreeView::addParameterTieInComposite(
  * parameter.
  * @param property :: A function property.
  * @param parameterName :: The name of the parameter to check for a global tie.
- * @param parameterIndex :: The index of the parameter within its function.
+ * @param parentComposite :: The composite function the parameter is in. This is
+ * a nullptr if the parameter is not in a composite function.
+ * @param parentIndex :: The index of the parameter within its composite.
  */
 void FunctionTreeView::addGlobalParameterTie(
     QtProperty *property, const std::string &parameterName,
@@ -1067,6 +1069,7 @@ QtProperty *FunctionTreeView::getFunctionProperty(const QString &index) const {
  * Add a tie property
  * @param prop :: Parent parameter property
  * @param tie :: A tie string
+ * @param globalTie :: true if the tie is a global tie.
  */
 void FunctionTreeView::addTieProperty(QtProperty *prop, const QString &tie,
                                       bool globalTie) {
@@ -1112,6 +1115,8 @@ QString FunctionTreeView::getFullTie(const QString &tie) const {
  * m_multiDomainFunctionPrefix to the start if we are using multiple datasets,
  * and will add the composite index if it is within a composite.
  * @param parameter :: The original parameter.
+ * @param compositeIndex :: The index of the function within the composite that
+ * the parameter is in.
  * @returns The full parameter name.
  */
 std::string FunctionTreeView::getFullParameterName(const std::string &parameter,

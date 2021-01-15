@@ -17,7 +17,7 @@
 #include <iterator>
 
 #include <QApplication>
-#include <QClipBoard>
+#include <QClipboard>
 #include <QMessageBox>
 
 namespace {
