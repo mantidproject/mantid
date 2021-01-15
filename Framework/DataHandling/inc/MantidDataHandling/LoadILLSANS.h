@@ -65,11 +65,9 @@ private:
   void initWorkSpaceD16(NeXus::NXEntry &, const std::string &);
   void createEmptyWorkspace(const size_t, const size_t);
 
-  size_t loadDataIntoWorkspaceFromMonitors(NeXus::NXEntry &firstEntry,
-                                           size_t firstIndex = 0);
-  size_t loadDataIntoWorkspaceFromVerticalTubes(NeXus::NXInt &,
-                                                const std::vector<double> &,
-                                                size_t);
+  size_t loadDataFromMonitors(NeXus::NXEntry &firstEntry,
+                              size_t firstIndex = 0);
+  size_t loadDataFromTubes(NeXus::NXInt &, const std::vector<double> &, size_t);
   void runLoadInstrument();
   void moveDetectorsD33(const DetectorPosition &);
   void moveDetectorDistance(double, const std::string &);

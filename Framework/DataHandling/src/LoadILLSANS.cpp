@@ -291,8 +291,8 @@ void LoadILLSANS::initWorkSpace(NeXus::NXEntry &firstEntry,
   loadMetaData(firstEntry, instrumentPath);
 
   size_t nextIndex;
-  nextIndex = loadDataIntoWorkspaceFromVerticalTubes(data, m_defaultBinning, 0);
-  nextIndex = loadDataIntoWorkspaceFromMonitors(firstEntry, nextIndex);
+  nextIndex = loadDataFromTubes(data, m_defaultBinning, 0);
+  nextIndex = loadDataFromMonitors(firstEntry, nextIndex);
   if (data.dim1() == 128) {
     m_resMode = "low";
   }
@@ -327,13 +327,10 @@ void LoadILLSANS::initWorkSpaceD11B(NeXus::NXEntry &firstEntry,
   loadMetaData(firstEntry, instrumentPath);
 
   size_t nextIndex;
-  nextIndex =
-      loadDataIntoWorkspaceFromVerticalTubes(dataCenter, m_defaultBinning, 0);
-  nextIndex = loadDataIntoWorkspaceFromVerticalTubes(dataLeft, m_defaultBinning,
-                                                     nextIndex);
-  nextIndex = loadDataIntoWorkspaceFromVerticalTubes(
-      dataRight, m_defaultBinning, nextIndex);
-  nextIndex = loadDataIntoWorkspaceFromMonitors(firstEntry, nextIndex);
+  nextIndex = loadDataFromTubes(dataCenter, m_defaultBinning, 0);
+  nextIndex = loadDataFromTubes(dataLeft, m_defaultBinning, nextIndex);
+  nextIndex = loadDataFromTubes(dataRight, m_defaultBinning, nextIndex);
+  nextIndex = loadDataFromMonitors(firstEntry, nextIndex);
 }
 
 /**
@@ -361,11 +358,9 @@ void LoadILLSANS::initWorkSpaceD22B(NeXus::NXEntry &firstEntry,
   loadMetaData(firstEntry, instrumentPath);
 
   size_t nextIndex;
-  nextIndex =
-      loadDataIntoWorkspaceFromVerticalTubes(dataCenter, m_defaultBinning, 0);
-  nextIndex = loadDataIntoWorkspaceFromVerticalTubes(dataSide, m_defaultBinning,
-                                                     nextIndex);
-  nextIndex = loadDataIntoWorkspaceFromMonitors(firstEntry, nextIndex);
+  nextIndex = loadDataFromTubes(dataCenter, m_defaultBinning, 0);
+  nextIndex = loadDataFromTubes(dataSide, m_defaultBinning, nextIndex);
+  nextIndex = loadDataFromMonitors(firstEntry, nextIndex);
 }
 
 /**
@@ -490,22 +485,16 @@ void LoadILLSANS::initWorkSpaceD33(NeXus::NXEntry &firstEntry,
 
   g_log.debug("Loading the data into the workspace...");
 
-  size_t nextIndex =
-      loadDataIntoWorkspaceFromVerticalTubes(dataRear, binningRear, 0);
-  nextIndex = loadDataIntoWorkspaceFromVerticalTubes(dataRight, binningRight,
-                                                     nextIndex);
-  nextIndex =
-      loadDataIntoWorkspaceFromVerticalTubes(dataLeft, binningLeft, nextIndex);
-  nextIndex =
-      loadDataIntoWorkspaceFromVerticalTubes(dataDown, binningDown, nextIndex);
-  nextIndex =
-      loadDataIntoWorkspaceFromVerticalTubes(dataUp, binningUp, nextIndex);
-  nextIndex = loadDataIntoWorkspaceFromMonitors(firstEntry, nextIndex);
+  size_t nextIndex = loadDataFromTubes(dataRear, binningRear, 0);
+  nextIndex = loadDataFromTubes(dataRight, binningRight, nextIndex);
+  nextIndex = loadDataFromTubes(dataLeft, binningLeft, nextIndex);
+  nextIndex = loadDataFromTubes(dataDown, binningDown, nextIndex);
+  nextIndex = loadDataFromTubes(dataUp, binningUp, nextIndex);
+  nextIndex = loadDataFromMonitors(firstEntry, nextIndex);
 }
 
-size_t
-LoadILLSANS::loadDataIntoWorkspaceFromMonitors(NeXus::NXEntry &firstEntry,
-                                               size_t firstIndex) {
+size_t LoadILLSANS::loadDataFromMonitors(NeXus::NXEntry &firstEntry,
+                                         size_t firstIndex) {
 
   // let's find the monitors; should be monitor1 and monitor2
   for (std::vector<NXClassInfo>::const_iterator it =
@@ -545,9 +534,9 @@ LoadILLSANS::loadDataIntoWorkspaceFromMonitors(NeXus::NXEntry &firstEntry,
   return firstIndex;
 }
 
-size_t LoadILLSANS::loadDataIntoWorkspaceFromVerticalTubes(
-    NeXus::NXInt &data, const std::vector<double> &timeBinning,
-    size_t firstIndex = 0) {
+size_t LoadILLSANS::loadDataFromTubes(NeXus::NXInt &data,
+                                      const std::vector<double> &timeBinning,
+                                      size_t firstIndex = 0) {
 
   // Workaround to get the number of tubes / pixels
   int numberOfTubes;
