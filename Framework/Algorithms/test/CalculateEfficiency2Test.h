@@ -234,7 +234,7 @@ public:
     Mantid::DataHandling::Load loader;
     loader.initialize();
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue(
-        "Filename", "Data/SystemTest/ILL/D22/D22_mask_central.nxs,Data/"
+        "Filename", "Testing/Data/SystemTest/ILL/D22/D22_mask_central.nxs,Testing/Data/"
                     "SystemTest/ILL/D22/D22_mask_offset.nxs"));
     TS_ASSERT_THROWS_NOTHING(
         loader.setPropertyValue("OutputWorkspace", inputWS));
