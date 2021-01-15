@@ -84,10 +84,11 @@ void CalculateEfficiency2::init() {
                       PropertyNames::INPUT_WORKSPACE, "", Direction::Input,
                       PropertyMode::Optional),
                   "The workspace containing the flood data");
-  declareProperty(std::make_unique<WorkspaceProperty<API::WorkspaceGroup>>(
-                      PropertyNames::INPUT_WORKSPACE_GROUP, "",
-                      Direction::Input, PropertyMode::Optional),
-                  "The workspace group containing the flood data that will be merged");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<API::WorkspaceGroup>>(
+          PropertyNames::INPUT_WORKSPACE_GROUP, "", Direction::Input,
+          PropertyMode::Optional),
+      "The workspace group containing the flood data that will be merged");
   declareProperty(
       std::make_unique<WorkspaceProperty<>>(PropertyNames::OUTPUT_WORKSPACE, "",
                                             Direction::Output),
@@ -155,7 +156,7 @@ void CalculateEfficiency2::exec() {
   std::string inputWorkspaceName =
       getPropertyValue(PropertyNames::INPUT_WORKSPACE);
   if (!isDefault(PropertyNames::INPUT_WORKSPACE_GROUP)) {
-      inputWorkspaceName = mergeMeasurementsWithOffset();
+    inputWorkspaceName = mergeMeasurementsWithOffset();
   }
   // create the output workspace from the input
   auto childAlg = createChildAlgorithm("RebinToWorkspace", 0.0, 0.1);
@@ -194,7 +195,7 @@ void CalculateEfficiency2::exec() {
 
   // clean-up
   if (!isDefault(PropertyNames::INPUT_WORKSPACE_GROUP) &&
-          API::AnalysisDataService::Instance().doesExist(inputWorkspaceName)) {
+      API::AnalysisDataService::Instance().doesExist(inputWorkspaceName)) {
     API::AnalysisDataService::Instance().remove(inputWorkspaceName);
   }
 
