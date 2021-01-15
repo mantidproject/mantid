@@ -14,6 +14,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/Sample.h"
+#include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidCrystal/SCDCalibratePanels2ObjFunc.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
@@ -98,7 +99,7 @@ namespace Crystal {
     setPropertyGroup("CalibrateBanks" ,PARAMETERS);
 
     // Output options group
-    declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+    declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>("OutputWorkspace", "",
                                                           Direction::Output),
                     "The workspace containing the calibration table.");
     const std::vector<std::string> detcalExts{".DetCal", ".Det_Cal"};
@@ -186,7 +187,7 @@ namespace Crystal {
   void SCDCalibratePanels2::exec() {
     // parse all inputs
     PeaksWorkspace_sptr m_pws = getProperty("PeakWorkspace");
-    mCaliTable = getProperty("OutputWorkspace");
+    std::string outwsname = getProperty("OutputWorkspace");
 
     parseLatticeConstant(m_pws);
 
@@ -222,18 +223,67 @@ namespace Crystal {
     if (calibrateBanks)
       optimizeBanks(m_pws);
 
+    Instrument_sptr instCalibrated =
+        std::const_pointer_cast<Geometry::Instrument>(m_pws->getInstrument());
+
     // STEP_3: generate a matrix workspace to save the calibration results
     // NOTE:
     //    This matrix workspace stores a calibration table that was originally
     //    defined for the CORELLI instrument.
 
     // TODO: iterate through all components and generate the table
+    
+    // Create table workspace
+    ITableWorkspace_sptr itablews = WorkspaceFactory::Instance().createTable();
+    
+    TableWorkspace_sptr tablews =
+          std::dynamic_pointer_cast<TableWorkspace>(itablews);
 
-    setProperty("OutputWorkspace", mCaliTable);
+    // Set up columns
+    tablews->addColumn("str", "ComponentName"); // first column as component name
+
+    for (size_t i = 1; i < calibrationTableColumnNames.size();
+         ++i) {
+      std::string colname = calibrationTableColumnNames[i];
+      std::string type = calibrationTableColumnTypes[i];
+      tablews->addColumn(type, colname);
+    }
+
+    IComponent_const_sptr source = instCalibrated->getSource();
+    V3D sourceRelPos = source->getRelativePos();
+    Mantid::API::TableRow sourceRow = tablews->appendRow();
+    sourceRow << sourceRelPos.X() << sourceRelPos.Y() << sourceRelPos.Z()
+    		  << 1 << 0 << 0 << 0;
+
+    // Loop through banks and set row values
+    for (auto bankName : m_BankNames) {
+
+      std::shared_ptr<const IComponent> bank =
+    		  instCalibrated->getComponentByName(bankName);
+
+      Quat relRot = bank->getRelativeRot();
+      V3D pos1 = bank->getRelativePos();
+
+      // Calculate cosines using relRot
+      double deg, xAxis, yAxis, zAxis;
+      relRot.getAngleAxis(deg, xAxis, yAxis, zAxis);
+      double xCosine = cos(xAxis), yCosine = cos(yAxis), zCosine = cos(zAxis);
+
+      // TODO: SET rotAngle TO CORRECT VALUE
+      double rotAngle = 0;
+
+      // Append a new row
+      Mantid::API::TableRow bankRow = tablews->appendRow();
+      // Row and positions
+      bankRow << pos1.X() << pos1.Y() << pos1.Z() << xCosine
+              << yCosine << zCosine << rotAngle;
+    }
+
+    //AnalysisDataService::Instance().addOrReplace(outwsname, tablews);
+    setProperty("OutputWorkspace", tablews);
 
     // STEP_4: Write to disk if required
-    Instrument_sptr instCalibrated =
-        std::const_pointer_cast<Geometry::Instrument>(m_pws->getInstrument());
+
 
     if (!XmlFilename.empty())
       saveXmlFile(XmlFilename, m_BankNames, instCalibrated);
@@ -658,7 +708,7 @@ namespace Crystal {
     parafile.put("<xmlattr>.valid-from",
                  instrument->getValidFromDate().toISO8601String());
 
-    // cnofigure and add each bank
+    // configure and add each bank
     for (auto bankName : AllBankNames) {
       // Prepare data for node
       if (instrument->getName().compare("CORELLI") == 0)

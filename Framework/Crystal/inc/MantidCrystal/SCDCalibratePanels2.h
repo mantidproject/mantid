@@ -118,6 +118,15 @@ private:
   const int MINIMUM_PEAKS_PER_BANK{6};
   const double PI{3.141592653589793238462643383279502884};
 
+  // Column names and types
+  const std::vector<std::string> calibrationTableColumnNames{
+      "ComponentName",    "Xposition",        "Yposition",
+      "Zposition",        "XdirectionCosine", "YdirectionCosine",
+      "ZdirectionCosine", "RotationAngle"};
+  const std::vector<std::string> calibrationTableColumnTypes{
+      "str",    "double", "double", "double",
+      "double", "double", "double", "double"};
+  
   boost::container::flat_set<std::string> m_BankNames;
   Mantid::DataObjects::TableWorkspace_sptr mCaliTable;
 };
