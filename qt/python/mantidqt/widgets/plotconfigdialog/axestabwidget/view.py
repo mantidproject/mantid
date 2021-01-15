@@ -13,6 +13,7 @@ from qtpy.QtWidgets import QWidget, QTabBar
 from mantidqt.utils.qt import load_ui
 from mantidqt.widgets.plotconfigdialog.axestabwidget import AxProperties
 from mantidqt.widgets.plotconfigdialog.colorselector import ColorSelector
+from mantid import logger
 
 
 class AxesTabWidgetView(QWidget):
@@ -82,10 +83,20 @@ class AxesTabWidgetView(QWidget):
         self.show_minor_gridlines_check_box.setEnabled(eneabled)
 
     def get_lower_limit(self):
-        return float(self.lower_limit_line_edit.text())
+        try:
+            return float(self.lower_limit_line_edit.text())
+        except ValueError:
+            logger.warning(f"Could not set axis limit to {self.lower_limit_line_edit.text()}. Using 0 instead" )
+            self.set_lower_limit(0)
+            return 0
 
     def get_upper_limit(self):
-        return float(self.upper_limit_line_edit.text())
+        try:
+            return float(self.upper_limit_line_edit.text())
+        except ValueError:
+            logger.warning(f"Could not set axis limit to {self.lower_limit_line_edit.text()}. Using 1 instead")
+            self.set_upper_limit(1)
+            return 0
 
     def get_label(self):
         return self.label_line_edit.text()
