@@ -229,6 +229,10 @@ public:
     // Tests merging input and calculating efficiencies based on workspace
     // without beam mask shadow using ILL D22 data.
 
+    ConfigService::Instance().appendDataSearchSubDir("ILL/D22/");
+    ConfigService::Instance().setFacility("ILL");
+    ConfigService::Instance().setString("default.instrument", "D22");
+
     Mantid::DataHandling::Load loader;
     loader.initialize();
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue(
