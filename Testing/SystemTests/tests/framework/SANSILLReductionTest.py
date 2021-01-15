@@ -128,6 +128,7 @@ class ILL_D22_Test(systemtesting.MantidSystemTest):
         # Integration
         SANSILLIntegration(InputWorkspace='sample', OutputWorkspace='iq')
 
+
 class ILL_D22_Multiple_Sensitivity_Test(systemtesting.MantidSystemTest):
 
     def __init__(self):
@@ -192,6 +193,7 @@ class ILL_D22_Multiple_Sensitivity_Test(systemtesting.MantidSystemTest):
 
         # Integration
         SANSILLIntegration(InputWorkspace='sample', OutputWorkspace='iq_multi_sens')
+
 
 class ILL_D33_VTOF_Test(systemtesting.MantidSystemTest):
 
