@@ -277,4 +277,4 @@ class PeaksViewerCollectionPresenter:
     def rename_handle(self, ws_name, new_name):
         if ws_name in self.workspace_names():
             self.remove_peaksworkspace(ws_name)
-            self.append_peaksworkspace(ws_name)
+            self.append_peaksworkspace(new_name)
