@@ -62,5 +62,7 @@ Bugfixes
 - Fixed a crash in the plot config when removing the last curve on a plot
 - Fixed a bug in SliceViewer that caused shown data to not update correctly when changing axis selection.
 - Fixed a bug in SliceViewer where peaks workspaces would still be present even though they had been changed, removed or cleared in workbench.
+- Fixed bug supplying rebin arguments for non-orthogonal data in sliceviewer that meant that not all the availible data within the axes limits were being plotted.
+- Fixed a crash in SliceViewer when hovering the cursor over Direct or Indirect data.
 
 :ref:`Release 6.0.0 <v6.0.0>`
