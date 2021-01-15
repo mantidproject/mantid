@@ -40,6 +40,7 @@ New features
 - Added refined back to back exponential coeficients (from standard sample) to WISH Parameters.xml so A, B and S are guessed automatically.
 - New algorithm :ref:`PolDiffILLReduction <algm-PolDiffILLReduction>` to perform polarised diffraction data reduction for the ILL D7 instrument.
 - New algorithm :ref:`D7AbsoluteCrossSections <algm-D7AbsoluteCrossSections>` to separate magnetic, nuclear coherent, and incoherent cross-sections using spin-flip and non-spin-flip cross-sections, and to normalise D7 data to a given standard.
+- New version of algorithm :ref:`SCDCalibratePanels <algm-SCDCalibratePanels-v2>` provides more accurate calibration results for CORELLI instrument.
 
 Improvements
 ############
