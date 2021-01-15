@@ -41,7 +41,7 @@ PreviewPlot::PreviewPlot(QWidget *parent, bool init)
       m_zoomTool(nullptr), m_contextMenu(new QMenu(this)),
       m_showLegendAction(nullptr), m_showErrorsMenuAction(nullptr),
       m_showErrorsMenu(nullptr), m_errorBarOptionCache(), m_curveStyle(),
-      m_curveSymbol() {
+      m_curveSymbol(), m_axis("both"), m_style("sci"), m_useOffset(true) {
   m_uiForm.setupUi(this);
   m_uiForm.loLegend->addStretch();
   watchADS(init);
@@ -1020,4 +1020,17 @@ void PreviewPlot::disableContextMenu() {
   // communicate so it can be reactivated.
   disconnect(m_uiForm.plot, SIGNAL(customContextMenuRequested(QPoint)), this,
              SLOT(showContextMenu(QPoint)));
+}
+
+// Needed for mpl, but can also be used for qwt
+void PreviewPlot::setOverrideAxisLabel(AxisID const &axisID,
+                                       char const *const label) {
+  m_uiForm.plot->setAxisTitle(static_cast<int>(axisID), label);
+}
+
+// This is a mpl thing so not used here
+void PreviewPlot::tickLabelFormat(char *axis, char *style, bool useOffset) {
+  Q_UNUSED(axis);
+  Q_UNUSED(style);
+  Q_UNUSED(useOffset);
 }

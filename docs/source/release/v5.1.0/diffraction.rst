@@ -65,6 +65,7 @@ Bugfixes
 ########
 - The Engineering diffraction gui no longer goes behind the workbench window when a plot is clicked on.
 - A focused run cannot be loaded with the same x unit more than once
+- Calling IndexPeaks with default modulation vectors `(0,0,0)` and `SaveModulationInfo=True` will no longer result in segmentation fault.
 
 Single Crystal Diffraction
 --------------------------

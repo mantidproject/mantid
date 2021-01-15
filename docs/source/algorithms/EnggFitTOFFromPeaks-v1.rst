@@ -52,13 +52,14 @@ Usage
 .. testcode:: ExTwoPeaks
 
     # Three Back2Back exponential peaks
-    peak1 = "name=BackToBackExponential,I=6000,A=1,B=0.5,X0=15000,S=250"
-    peak2 = "name=BackToBackExponential,I=6000,A=1,B=0.5,X0=27500,S=250"
-    peak3 = "name=BackToBackExponential,I=5000,A=1,B=0.7,X0=35000,S=300"
+    peak1 = "name=BackToBackExponential,I=6000,A=0.05,B=0.025,X0=15000,S=100"
+    peak2 = "name=BackToBackExponential,I=6000,A=0.05,B=0.025,X0=27500,S=100"
+    peak3 = "name=BackToBackExponential,I=5000,A=0.05,B=0.025,X0=35000,S=100"
+    bg = "name=FlatBackground,A0=20"
 
     # Create workpsace with the above peaks and a single detector pixel
     ws = CreateSampleWorkspace(Function="User Defined",
-                              UserDefinedFunction=peak1 + ";" + peak2 + ";" + peak3,
+                              UserDefinedFunction=";".join([peak1, peak2, peak3, bg]),
                               NumBanks=1,
                               BankPixelWidth=1,
                               XMin=6000,

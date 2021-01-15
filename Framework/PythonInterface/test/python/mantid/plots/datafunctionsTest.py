@@ -147,6 +147,10 @@ class DataFunctionsTest(unittest.TestCase):
                                                 DataY=[1, 2, 3],
                                                 NSpec=1,
                                                 OutputWorkspace='ws2d_point_uneven')
+        cls.ws2d_high_counting_detector = CreateWorkspace(DataX=[1, 2, 3, 4] * 1000,
+                                                          DataY=[2] * 4 * 12 + [200] * 4 + [2] * 987 * 4,
+                                                          NSpec=1000,
+                                                          OutputWorkspace='ws2d_high_counting_detector')
         wp = CreateWorkspace(DataX=[15, 25, 35, 45], DataY=[1, 2, 3, 4], NSpec=1)
         ConjoinWorkspaces(cls.ws2d_point_uneven, wp, CheckOverlapping=False)
         cls.ws2d_point_uneven = mantid.mtd['ws2d_point_uneven']
@@ -475,6 +479,20 @@ class DataFunctionsTest(unittest.TestCase):
                                              ybins=5, transpose=False)
         np.testing.assert_allclose(z_transposed, z.T)
 
+    def test_get_matrix2d_ragged_with_maxpooling(self):
+        x, y, z = funcs.get_matrix_2d_ragged(self.ws2d_high_counting_detector, False, histogram2D=True,
+                                             extent=[1, 4, 1, 1000], xbins=4, ybins=20, maxpooling=True)
+
+        # 12th spectra is high counting and will be the first entry in the data when we are using maxpooling
+        np.testing.assert_allclose(z[0], self.ws2d_high_counting_detector.readY(12))
+
+    def test_get_matrix2d_ragged_without_maxpooling(self):
+        x, y, z = funcs.get_matrix_2d_ragged(self.ws2d_high_counting_detector, False, histogram2D=True,
+                                             extent=[1, 4, 1, 1000], xbins=4, ybins=20, maxpooling=False)
+
+        # 12th spectra is high counting but will skipped if we don't use maxpooling
+        np.testing.assert_allclose(z[0], self.ws2d_high_counting_detector.readY(0))
+
     def test_get_uneven_data(self):
         # even points
         x, y, z = funcs.get_uneven_data(self.ws2d_point_rag, True)
@@ -769,6 +787,13 @@ class DataFunctionsTest(unittest.TestCase):
         self.assertTrue(np.array_equal([0, 1, 2, 3], x))
         self.assertTrue(np.array_equal([2.0, 5.0, 8.0, 11.0], y))
         self.assertTrue(np.array_equal([2.0, 5.0, 8.0, 11.0], dy))
+
+    def test_get_bins_with_a_ragged_workspace(self):
+        x, y, dy, dx = funcs.get_bins(self.ws2d_point_uneven, 3, withDy=True)
+
+        self.assertTrue(np.array_equal([1], x))
+        self.assertTrue(np.array_equal([4.0], y))
+        self.assertTrue(np.array_equal([0.0], dy))
 
     @add_md_workspace_with_data(dimensions=3)
     def test_get_md_data2d_bin_bounds_raises_AssertionException_too_many_dims(self, mdws):

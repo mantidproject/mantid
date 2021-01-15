@@ -9,7 +9,7 @@ import sys
 import math
 from testhelpers import create_algorithm, run_algorithm, can_be_instantiated, WorkspaceCreationHelper
 from mantid.api import (MatrixWorkspace, MatrixWorkspaceProperty, WorkspaceProperty, Workspace,
-                        ExperimentInfo, AnalysisDataService, WorkspaceFactory)
+                        ExperimentInfo, AnalysisDataService, WorkspaceFactory, NumericAxis)
 from mantid.geometry import Detector
 from mantid.kernel import Direction, V3D
 from mantid.simpleapi import CreateSampleWorkspace, Rebin
@@ -68,6 +68,18 @@ class MatrixWorkspaceTest(unittest.TestCase):
         self.assertEqual(yunit.caption(), "Spectrum")
         self.assertEqual(str(yunit.symbol()), "")
         self.assertEqual(yunit.unitID(), "Label")
+
+    def test_replace_axis(self):
+        x_axis = NumericAxis.create(1)
+        x_axis.setValue(0, 0)
+        ws1 = WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(2, 1, False)
+        ws1.replaceAxis(0, x_axis)
+        ws2 = WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(2, 1, False)
+        ws2.replaceAxis(0, x_axis)
+        try:
+            del ws1, ws2
+        except:
+            self.fail("Segmentation violation when deleting the same axis twice")
 
     def test_detector_retrieval(self):
         det = self._test_ws.getDetector(0)

@@ -9,6 +9,8 @@ import os
 import Muon.GUI.Common.utilities.xml_utils as xml_utils
 from Muon.GUI.Common.muon_group import MuonGroup
 from Muon.GUI.Common.muon_pair import MuonPair
+from Muon.GUI.Common.muon_phasequad import MuonPhasequad
+from Muon.GUI.Common.muon_base_pair import MuonBasePair
 
 from mantid.api import WorkspaceGroup
 from mantid.kernel import ConfigServiceImpl
@@ -110,6 +112,7 @@ class MuonGroupPairContext(object):
     def __init__(self, check_group_contains_valid_detectors=lambda x: True):
         self._groups = []
         self._pairs = []
+        self._phasequad = []
         self._selected = ''
         self._selected_type = ''
         self._selected_pairs = []
@@ -132,6 +135,10 @@ class MuonGroupPairContext(object):
     @property
     def pairs(self):
         return self._pairs
+
+    @property
+    def phasequads(self):
+        return self._phasequad
 
     @property
     def selected_pairs(self):
@@ -206,11 +213,34 @@ class MuonGroupPairContext(object):
                 return
 
     def add_pair(self, pair):
-        assert isinstance(pair, MuonPair)
-        if self._check_name_unique(pair.name):
+        if isinstance(pair, MuonPair) and self._check_name_unique(pair.name):
+            self._pairs.append(pair)
+        elif isinstance(pair, MuonBasePair) and self._check_name_unique(pair.name):
             self._pairs.append(pair)
         else:
             raise ValueError('Groups and pairs must have unique names')
+
+    def add_phasequad(self, phasequad):
+        if isinstance(
+            phasequad, MuonPhasequad) and self._check_name_unique(
+            phasequad.Re.name) and self._check_name_unique(
+                phasequad.Im.name):
+            self._phasequad.append(phasequad)
+            self.add_pair(phasequad.Re)
+            self.add_pair(phasequad.Im)
+        else:
+            raise ValueError('Groups and pairs must have unique names')
+
+    def remove_phasequad(self, phasequad_obj):
+        for phasequad in self._phasequad:
+            if phasequad.name == phasequad_obj.name:
+                if phasequad_obj.Re in self._pairs:
+                    self._pairs.remove(phasequad_obj.Re)
+                if phasequad_obj.Im in self._pairs:
+                    self._pairs.remove(phasequad_obj.Im)
+                if phasequad_obj in self._phasequad:
+                    self._phasequad.remove(phasequad_obj)
+                return
 
     def reset_group_and_pairs_to_default(self, workspace, instrument, main_field_direction, num_periods):
         default_groups, default_pairs, default_selected = get_default_grouping(workspace, instrument, main_field_direction)

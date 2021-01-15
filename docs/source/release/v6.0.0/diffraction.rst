@@ -33,11 +33,13 @@ New features
 - Files from ILL's instrument D1B can now be loaded.
 - New algorithm :ref:`CorelliPowderCalibrationDatabase <algm-CorelliPowderCalibrationDatabase>` to save Corelli geometry calibration to database
 - New algorithm :ref:`CorelliPowderCalibrationApply <algm-CorelliPowderCalibrationApply>` to apply a CORELLI calibration table to CORELLI EventWorkspace.
-- New algorithm :ref:`CorelliPowderCalibrationLoad <algm-CorelliPowderCalibrationLoad>` to load a CORELLI calibration table into memory.
 - New algorithm :ref:`CorelliPowderCalibrationCreate <algm-CorelliPowderCalibrationCreate>` adjusts the position and orientation of Corelli banks in order to optimize the comparison of observed peaks to reference data
-- New algorithm :ref:`CorelliPowderCalibrationApply <algm-CorelliPowderCalibrationApply>` to apply a CORELLI calibration table to CORELLI EventWorkspace.
-- New algorithm :ref:`CorelliPowderCalibrationLoad <algm-CorelliPowderCalibrationLoad>` to load a CORELLI calibration table into memory.
+- New algorithm :ref:`LeadPressureCalc <algm-LeadPressureCalc>` to calculate the pressure of a sample given the dSpacing of the Lead (111) peak and the sample temperature.
 - Modified creation of absorption input in :ref:`SNSPowderReduction <algm-SNSPowderReduction>` to automatically get information from sample logs.
+- :ref:`PDCalibration <algm-PDCalibration>` now supports workspaces with grouped detectors (i.e. more than one detector per spectrum)
+- Added refined back to back exponential coeficients (from standard sample) to WISH Parameters.xml so A, B and S are guessed automatically.
+- New algorithm :ref:`PolDiffILLReduction <algm-PolDiffILLReduction>` to perform polarised diffraction data reduction for the ILL D7 instrument.
+- New algorithm :ref:`D7AbsoluteCrossSections <algm-D7AbsoluteCrossSections>` to separate magnetic, nuclear coherent, and incoherent cross-sections using spin-flip and non-spin-flip cross-sections, and to normalise D7 data to a given standard.
 
 Improvements
 ############
@@ -47,13 +49,16 @@ Improvements
 - :ref:`PowderILLDetectorScan <algm-PowderILLDetectorScan>` is corrected when treating multiple scans merged.
 - The default loadpath in the fitting tab of the Engineering Diffraction UI is now set to the most recently focused files.
 - The :ref:`HB2AReduce <algm-HB2AReduce>` now can save reduced data to GSAS or XYE file.
-
+- The :ref:`D7YIGPositionCalibration <algm-D7YIGPositionCalibration>` now can do the YIG Bragg peak fitting individually or simultaneously, or not at all and provide feedback on the initial guess quality
+- :ref:`PDCalibration <algm-PDCalibration>` now intitialises A,B and S of BackToBackExponential if correpsonding coeficients are in the instrument parameter.xml file.
 
 Bugfixes
 ########
 
 - Dummy detectors in polaris workspaces no longer prevent unit conversion.
 - Focus in PEARL powder diffraction scripts no longer fails if previous run has left Van splines workspace group in ADS
+- Fix out-of-range bug in :ref:`FitPeaks <algm-FitPeaks>` for histogram data.
+- Fix bug to actually implement intended sequential fit of DIFC, DIFA, TZERO in :ref:`PDCalibration <algm-PDCalibration>`.
 
 
 Bugfixes
@@ -71,9 +76,11 @@ Bugfixes
 Improvements
 ############
 - The user is no longer asked to overwrite an automatically generated model that is saved in as a Custom Setup in the fit browser (it is overwritten).
+- Generic Sequential Fit button removed from fit menu (users should use sequential fit button below the table in the fitting tab of the UI).
 
 New features
 ############
+- Added refined back to back exponential coeficients (from standard ceria run)to ENGIN-X Parameters.xml so A, B and S are guessed automatically.
 - When a fit is successful the model will be stored as a Custom Setup in the fit property browser under the name of the workspace fitted.
 - The fitting tab now creates a group of workspaces that store the model string and the fit value and error of parameters of the model for each loaded workspace.
 - Sequential fitting of workspaces now provided in fitting tab by average value of a log set in settings.

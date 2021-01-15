@@ -10,7 +10,7 @@ from unittest import mock
 
 from sans.common.configurations import Configurations
 from sans.common.enums import DetectorType, SANSInstrument, ReductionMode, RangeStepType, RebinType, DataType, FitType
-from sans.test_helper.user_file_test_helper import base_user_file, create_user_file, sample_user_file
+from sans.test_helper.user_file_test_helper import create_user_file, sample_user_file
 from sans.user_file.txt_parsers.UserFileReaderAdapter import UserFileReaderAdapter
 
 

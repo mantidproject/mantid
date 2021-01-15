@@ -27,10 +27,10 @@ class XMLParsingTest(unittest.TestCase):
         results = get_named_elements_from_ipf_file(ipf, to_search, str)
 
         # Assert
-        self.assertEqual(len(results),  2)
+        self.assertEqual(len(results), 2)
 
-        self.assertEqual(results["low-angle-detector-name"],  "DetectorBench")
-        self.assertEqual(results["high-angle-detector-short-name"],  "front")
+        self.assertEqual(results["low-angle-detector-name"], "DetectorBench")
+        self.assertEqual(results["high-angle-detector-short-name"], "front")
 
     def test_that_monitors_can_be_found(self):
         # Arrange
@@ -45,9 +45,9 @@ class XMLParsingTest(unittest.TestCase):
         results = get_monitor_names_from_idf_file(idf)
 
         # Assert
-        self.assertEqual(len(results),  10)
+        self.assertEqual(len(results), 10)
         for key, value in list(results.items()):
-            self.assertEqual(value,  ("monitor"+str(key)))
+            self.assertEqual(value, ("monitor" + str(key)))
 
     def test_that_monitors_can_be_found_v2(self):
         # Arrange
@@ -62,9 +62,9 @@ class XMLParsingTest(unittest.TestCase):
         results = get_monitor_names_from_idf_file(idf)
 
         # Assert
-        self.assertEqual(len(results),  2)
+        self.assertEqual(len(results), 2)
         for key, value in list(results.items()):
-            self.assertEqual(value,  ("monitor"+str(key)))
+            self.assertEqual(value, ("monitor" + str(key)))
 
     def test_that_get_valid_to_date_from_idf_string(self):
         # Arrange
@@ -73,7 +73,8 @@ class XMLParsingTest(unittest.TestCase):
                      'see http://www.mantidproject.org/IDF -->' \
                      '<instrument xmlns="http://www.mantidproject.org/IDF/1.0" ' \
                      '            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ' \
-                     '            xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd" ' \
+                     '            xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 ' \
+                     'http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd" ' \
                      '            name="PEARL" valid-from   ="1900-01-31 23:59:59" ' \
                      '            valid-to     ="2011-05-01 23:59:50" ' \
                      '            last-modified="2008-09-17 05:00:00">' \
@@ -82,7 +83,7 @@ class XMLParsingTest(unittest.TestCase):
         # Act
         extracted_time = get_valid_to_time_from_idf_string(idf_string)
         # Assert
-        self.assertEqual(extracted_time,  DateAndTime("2011-05-01 23:59:50"))
+        self.assertEqual(extracted_time, DateAndTime("2011-05-01 23:59:50"))
 
 
 if __name__ == '__main__':

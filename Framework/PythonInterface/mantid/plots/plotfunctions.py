@@ -177,8 +177,13 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
         ax.axis('on')
         _do_single_plot(ax, workspaces, errors, show_title, nums, kw, plot_kwargs, log_name, log_values)
 
+    show_legend = "on" == ConfigService.getString("plots.ShowLegend").lower()
+    for ax in axes:
+        if ax.get_legend() is not None:
+            ax.get_legend().set_visible(show_legend)
+
     # Can't have a waterfall plot with only one line.
-    if len(nums)*len(workspaces) == 1 and waterfall:
+    if len(nums) * len(workspaces) == 1 and waterfall:
         waterfall = False
 
     # The plot's initial xlim and ylim are used to offset each curve in a waterfall plot.
@@ -333,18 +338,65 @@ def get_plot_fig(overplot=None, ax_properties=None, window_title=None, axes_num=
         fig.canvas.set_window_title(window_title)
 
     if not overplot:
+        for ax in fig.axes:
+            ax.tick_params(
+                which='both',
+                left="on" == ConfigService.getString("plots.showTicksLeft").lower(),
+                bottom="on" == ConfigService.getString("plots.showTicksBottom").lower(),
+                right="on" == ConfigService.getString("plots.showTicksRight").lower(),
+                top="on" == ConfigService.getString("plots.showTicksTop").lower(),
+                labelleft="on" == ConfigService.getString("plots.showLabelsLeft").lower(),
+                labelbottom="on" == ConfigService.getString("plots.showLabelsBottom").lower(),
+                labelright="on" == ConfigService.getString("plots.showLabelsRight").lower(),
+                labeltop="on" == ConfigService.getString("plots.showLabelsTop").lower(),
+            )
+            ax.xaxis.set_tick_params(
+                which='major',
+                width=int(ConfigService.getString("plots.ticks.major.width")),
+                length=int(ConfigService.getString("plots.ticks.major.length")),
+                direction=ConfigService.getString("plots.ticks.major.direction").lower()
+            )
+            ax.yaxis.set_tick_params(
+                which='major',
+                width=int(ConfigService.getString("plots.ticks.major.width")),
+                length=int(ConfigService.getString("plots.ticks.major.length")),
+                direction=ConfigService.getString("plots.ticks.major.direction").lower()
+            )
+
         if ConfigService.getString("plots.ShowMinorTicks").lower() == "on":
             for ax in fig.axes:
                 ax.minorticks_on()
 
+                ax.xaxis.set_tick_params(
+                    which='minor',
+                    width=int(ConfigService.getString("plots.ticks.minor.width")),
+                    length=int(ConfigService.getString("plots.ticks.minor.length")),
+                    direction=ConfigService.getString("plots.ticks.minor.direction").lower()
+                )
+                ax.yaxis.set_tick_params(
+                    which='minor',
+                    width=int(ConfigService.getString("plots.ticks.minor.width")),
+                    length=int(ConfigService.getString("plots.ticks.minor.length")),
+                    direction=ConfigService.getString("plots.ticks.minor.direction").lower()
+                )
+
         for ax in fig.axes:
             ax.show_minor_gridlines = ConfigService.getString("plots.ShowMinorGridlines").lower() == "on"
+            for spine in ['top', 'bottom', 'left', 'right']:
+                ax.spines[spine].set_linewidth(float(ConfigService.getString("plots.axesLineWidth")))
+
+        if ConfigService.getString("plots.enableGrid").lower() == "on":
+            try:
+                fig.canvas.manager.toolbar.toggle_grid(enable=True)
+            except AttributeError:
+                # The canvas has no manager, or the manager has no toolbar
+                pass
 
     return fig, fig.axes
 
 
 # -----------------------------------------------------------------------------
-# Pricate Methods
+# Private Methods
 # -----------------------------------------------------------------------------
 def _validate_plot_inputs(workspaces, spectrum_nums, wksp_indices, tiled=False, overplot=False):
     """Raises a ValueError if any arguments have the incorrect types"""

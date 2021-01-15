@@ -125,7 +125,7 @@ class DrillTest(unittest.TestCase):
             for c in range(self.view.table.columnCount()):
                 self.setCellContents(n, c, text + str(n) + str(c))
             data.append(dict())
-            data[-1].update(self.model.samples[n])
+            data[-1].update(self.model.samples[n].getParameters())
             n += 1
         self.view.table.selectionModel().clear()
         return data
@@ -136,10 +136,15 @@ class DrillTest(unittest.TestCase):
 
     def setUp(self):
         self.facility = config['default.facility']
+        self.instrument = config['default.instrument']
         config['default.facility'] = "ILL"
+        config['default.instrument'] = "D11"
         # avoid popup messages
         patch = mock.patch('Interface.ui.drill.view.DrillView.QMessageBox')
         self.mMessageBox = patch.start()
+        self.addCleanup(patch.stop)
+        patch = mock.patch('Interface.ui.drill.presenter.DrillPresenter.QMessageBox')
+        self.mMessageBoxP = patch.start()
         self.addCleanup(patch.stop)
         # mock the controller
         patch = mock.patch(
@@ -157,7 +162,7 @@ class DrillTest(unittest.TestCase):
         self.model = self.presenter.model
 
         # mock popup
-        self.view._saveDataQuestion = mock.Mock()
+        self.presenter._saveDataQuestion = mock.Mock()
 
         # shown window
         self.view.isHidden = mock.Mock()
@@ -165,6 +170,7 @@ class DrillTest(unittest.TestCase):
 
     def tearDown(self):
         config['default.facility'] = self.facility
+        config['default.instrument'] = self.instrument
 
     def test_changeInstrument(self):
         for i in range(self.view.instrumentselector.count()):
@@ -183,8 +189,8 @@ class DrillTest(unittest.TestCase):
                                  RundexSettings.COLUMNS[mAcquisitionMode])
                 self.assertEqual(mAlgorithm,
                                  RundexSettings.ALGORITHM[mAcquisitionMode])
-                self.assertDictEqual(mSettings,
-                                     RundexSettings.SETTINGS[mAcquisitionMode])
+                for s in RundexSettings.SETTINGS[mAcquisitionMode]:
+                    self.assertIn(s, mSettings)
             else:
                 self.mLogger.reset_mock()
 
@@ -207,8 +213,8 @@ class DrillTest(unittest.TestCase):
                              RundexSettings.ALGORITHM[mAcquisitionMode])
             self.assertEqual(mColumns,
                              RundexSettings.COLUMNS[mAcquisitionMode])
-            self.assertDictEqual(mSettings,
-                                 RundexSettings.SETTINGS[mAcquisitionMode])
+            for s in RundexSettings.SETTINGS[mAcquisitionMode]:
+                self.assertIn(s, mSettings)
 
     def test_changeCycleAndExperiment(self):
         # only 1 value is set
@@ -252,9 +258,9 @@ class DrillTest(unittest.TestCase):
         self.view.actionSettings.trigger()
         mSettings.assert_called_once()
 
-    @mock.patch('Interface.ui.drill.view.DrillView.QFileDialog')
-    @mock.patch('Interface.ui.drill.model.DrillModel.json')
-    @mock.patch('Interface.ui.drill.model.DrillModel.open')
+    @mock.patch('Interface.ui.drill.presenter.DrillPresenter.QFileDialog')
+    @mock.patch('Interface.ui.drill.model.DrillRundexIO.json')
+    @mock.patch('Interface.ui.drill.model.DrillRundexIO.open')
     def test_loadRundex(self, mOpen, mJson, mFileDialog):
         mFileDialog.getOpenFileName.return_value = ["test", "test"]
         mJson.load.return_value = {
@@ -270,13 +276,13 @@ class DrillTest(unittest.TestCase):
         self.assertEqual(self.view.modeSelector.currentText(), "SANS")
         self.assertEqual(self.model.algorithm, RundexSettings.ALGORITHM['SANS'])
         self.assertEqual(self.model.columns, RundexSettings.COLUMNS['SANS'])
-        self.assertDictEqual(self.model.settings, RundexSettings.SETTINGS['SANS'])
-        self.assertEqual(self.model.samples, [{}])
+        for s in RundexSettings.SETTINGS['SANS']:
+            self.assertIn(s, self.model.settings)
         self.assertEqual(self.view.table.columnCount(), len(self.model.columns))
 
-    @mock.patch('Interface.ui.drill.view.DrillView.QFileDialog')
-    @mock.patch('Interface.ui.drill.model.DrillModel.json')
-    @mock.patch('Interface.ui.drill.model.DrillModel.open')
+    @mock.patch('Interface.ui.drill.presenter.DrillPresenter.QFileDialog')
+    @mock.patch('Interface.ui.drill.model.DrillRundexIO.json')
+    @mock.patch('Interface.ui.drill.model.DrillRundexIO.open')
     def test_saveRundex(self, mOpen, mJson, mFileDialog):
         self.model.setInstrument("D11")
         mFileDialog.getSaveFileName.return_value = ["test", "test"]
@@ -285,10 +291,11 @@ class DrillTest(unittest.TestCase):
                 'Instrument': 'D11',
                 'AcquisitionMode': 'SANS',
                 'VisualSettings': {
-                    'FoldedColumns': {}
+                    'FoldedColumns': [],
+                    'HiddenColumns': [],
+                    'ColumnsOrder': RundexSettings.COLUMNS['SANS']
                     },
-                'GlobalSettings': RundexSettings.SETTINGS['SANS'],
-                'Samples': []
+                'GlobalSettings': self.model.settings,
                 }
         self.assertDictEqual(json, mJson.dump.call_args[0][0])
 
@@ -298,34 +305,39 @@ class DrillTest(unittest.TestCase):
         # 1 row at the end
         QTest.mouseClick(self.view.addrow, Qt.LeftButton)
         data.append(dict())
-        self.assertEqual(self.model.samples, data)
+        for i in range(len(self.model.samples)):
+            self.assertEqual(self.model.samples[i].getParameters(), data[i])
 
         # 2 rows at the end
         self.view.nrows.setValue(2)
         QTest.mouseClick(self.view.addrow, Qt.LeftButton)
         data.append(dict())
         data.append(dict())
-        self.assertEqual(self.model.samples, data)
+        for i in range(len(self.model.samples)):
+            self.assertEqual(self.model.samples[i].getParameters(), data[i])
 
         # 1 row after the first
         self.view.nrows.setValue(1)
         self.selectRow(0, Qt.NoModifier)
         QTest.mouseClick(self.view.addrow, Qt.LeftButton)
         data.insert(1, dict())
-        self.assertEqual(self.model.samples, data)
+        for i in range(len(self.model.samples)):
+            self.assertEqual(self.model.samples[i].getParameters(), data[i])
 
     def test_deleteRows(self):
         data = self.fillTable(10)
 
         # no selection
         QTest.mouseClick(self.view.deleterow, Qt.LeftButton)
-        self.assertEqual(self.model.samples, data)
+        for i in range(len(self.model.samples)):
+            self.assertEqual(self.model.samples[i].getParameters(), data[i])
 
         # 1 row
         self.selectRow(0, Qt.NoModifier)
         QTest.mouseClick(self.view.deleterow, Qt.LeftButton)
         del data[0]
-        self.assertEqual(self.model.samples, data)
+        for i in range(len(self.model.samples)):
+            self.assertEqual(self.model.samples[i].getParameters(), data[i])
 
         # several rows
         self.selectRow(0, Qt.NoModifier)
@@ -333,27 +345,31 @@ class DrillTest(unittest.TestCase):
         QTest.mouseClick(self.view.deleterow, Qt.LeftButton)
         del data[2]
         del data[0]
-        self.assertEqual(self.model.samples, data)
+        for i in range(len(self.model.samples)):
+            self.assertEqual(self.model.samples[i].getParameters(), data[i])
         self.selectRow(0, Qt.NoModifier)
         self.selectRow(2, Qt.ShiftModifier)
         QTest.mouseClick(self.view.deleterow, Qt.LeftButton)
         del data[2]
         del data[1]
         del data[0]
-        self.assertEqual(self.model.samples, data)
+        for i in range(len(self.model.samples)):
+            self.assertEqual(self.model.samples[i].getParameters(), data[i])
 
     def test_cut(self):
         data = self.fillTable(10)
 
         # no selection
         QTest.mouseClick(self.view.cut, Qt.LeftButton)
-        self.assertEqual(self.model.samples, data)
+        for i in range(len(self.model.samples)):
+            self.assertEqual(self.model.samples[i].getParameters(), data[i])
 
         # 1 row
         self.selectRow(0, Qt.NoModifier)
         QTest.mouseClick(self.view.cut, Qt.LeftButton)
         data[0] = {}
-        self.assertEqual(self.model.samples, data)
+        for i in range(len(self.model.samples)):
+            self.assertEqual(self.model.samples[i].getParameters(), data[i])
 
         # several rows
         self.selectRow(0, Qt.NoModifier)
@@ -361,14 +377,16 @@ class DrillTest(unittest.TestCase):
         QTest.mouseClick(self.view.cut, Qt.LeftButton)
         data[0] = {}
         data[2] = {}
-        self.assertEqual(self.model.samples, data)
+        for i in range(len(self.model.samples)):
+            self.assertEqual(self.model.samples[i].getParameters(), data[i])
         self.selectRow(3, Qt.NoModifier)
         self.selectRow(5, Qt.ShiftModifier)
         QTest.mouseClick(self.view.cut, Qt.LeftButton)
         data[3] = {}
         data[4] = {}
         data[5] = {}
-        self.assertEqual(self.model.samples, data)
+        for i in range(len(self.model.samples)):
+            self.assertEqual(self.model.samples[i].getParameters(), data[i])
 
         # cells
         self.selectCell(6, 0, Qt.NoModifier)
@@ -376,51 +394,58 @@ class DrillTest(unittest.TestCase):
         QTest.mouseClick(self.view.cut, Qt.LeftButton)
         del data[6][self.view.columns[0]]
         del data[6][self.view.columns[1]]
-        self.assertEqual(self.model.samples, data)
+        for i in range(len(self.model.samples)):
+            self.assertEqual(self.model.samples[i].getParameters(), data[i])
 
     def test_copy(self):
         data = self.fillTable(10)
 
         # no selection
         QTest.mouseClick(self.view.copy, Qt.LeftButton)
-        self.assertEqual(self.model.samples, data)
+        for i in range(len(self.model.samples)):
+            self.assertEqual(self.model.samples[i].getParameters(), data[i])
 
         # row(s)
         self.selectRow(0, Qt.NoModifier)
         QTest.mouseClick(self.view.copy, Qt.LeftButton)
-        self.assertEqual(self.model.samples, data)
+        for i in range(len(self.model.samples)):
+            self.assertEqual(self.model.samples[i].getParameters(), data[i])
         self.selectRow(0, Qt.NoModifier)
         self.selectRow(5, Qt.ControlModifier)
         QTest.mouseClick(self.view.copy, Qt.LeftButton)
-        self.assertEqual(self.model.samples, data)
+        for i in range(len(self.model.samples)):
+            self.assertEqual(self.model.samples[i].getParameters(), data[i])
 
         # cells
         self.selectCell(0, 0, Qt.NoModifier)
         QTest.mouseClick(self.view.copy, Qt.LeftButton)
-        self.assertEqual(self.model.samples, data)
+        for i in range(len(self.model.samples)):
+            self.assertEqual(self.model.samples[i].getParameters(), data[i])
         self.selectCell(0, 0, Qt.NoModifier)
         self.selectCell(5, 0, Qt.ShiftModifier)
         QTest.mouseClick(self.view.copy, Qt.LeftButton)
-        self.assertEqual(self.model.samples, data)
+        for i in range(len(self.model.samples)):
+            self.assertEqual(self.model.samples[i].getParameters(), data[i])
 
     def test_paste(self):
         data = self.fillTable(8)
 
         # no selection
         QTest.mouseClick(self.view.paste, Qt.LeftButton)
-        self.assertEqual(self.model.samples, data)
+        for i in range(len(self.model.samples)):
+            self.assertEqual(self.model.samples[i].getParameters(), data[i])
 
         # copy paste
         self.selectRow(0, Qt.NoModifier)
         QTest.mouseClick(self.view.copy, Qt.LeftButton)
         self.selectRow(1, Qt.NoModifier)
         QTest.mouseClick(self.view.paste, Qt.LeftButton)
-        self.assertDictEqual(self.model.samples[1], data[0])
+        self.assertDictEqual(self.model.samples[1].getParameters(), data[0])
         self.selectCell(2, 0, Qt.NoModifier)
         QTest.mouseClick(self.view.copy, Qt.LeftButton)
         self.selectRow(3, Qt.NoModifier)
         QTest.mouseClick(self.view.paste, Qt.LeftButton)
-        for (k, v) in self.model.samples[3].items():
+        for (k, v) in self.model.samples[3].getParameters().items():
             self.assertEqual(v, data[2][self.view.columns[0]])
 
         # cut paste
@@ -428,12 +453,12 @@ class DrillTest(unittest.TestCase):
         QTest.mouseClick(self.view.cut, Qt.LeftButton)
         self.selectRow(5, Qt.NoModifier)
         QTest.mouseClick(self.view.paste, Qt.LeftButton)
-        self.assertDictEqual(self.model.samples[1], data[0])
+        self.assertDictEqual(self.model.samples[1].getParameters(), data[0])
         self.selectCell(6, 0, Qt.NoModifier)
         QTest.mouseClick(self.view.cut, Qt.LeftButton)
         self.selectRow(7, Qt.NoModifier)
         QTest.mouseClick(self.view.paste, Qt.LeftButton)
-        for (k, v) in self.model.samples[7].items():
+        for (k, v) in self.model.samples[7].getParameters().items():
             self.assertEqual(v, data[6][self.view.columns[0]])
 
     def test_erase(self):
@@ -441,30 +466,34 @@ class DrillTest(unittest.TestCase):
 
         # no selection
         QTest.mouseClick(self.view.erase, Qt.LeftButton)
-        self.assertEqual(self.model.samples, data)
+        for i in range(len(self.model.samples)):
+            self.assertEqual(self.model.samples[i].getParameters(), data[i])
 
-        # 1 row
+        ## 1 row
         self.selectRow(0, Qt.NoModifier)
         QTest.mouseClick(self.view.erase, Qt.LeftButton)
         data[0] = {}
-        self.assertEqual(self.model.samples, data)
+        for i in range(len(self.model.samples)):
+            self.assertEqual(self.model.samples[i].getParameters(), data[i])
 
         # several rows
         self.selectRow(0, Qt.NoModifier)
         self.selectRow(2, Qt.ControlModifier)
         QTest.mouseClick(self.view.erase, Qt.LeftButton)
         data[2] = {}
-        self.assertEqual(self.model.samples, data)
+        for i in range(len(self.model.samples)):
+            self.assertEqual(self.model.samples[i].getParameters(), data[i])
         self.selectRow(1, Qt.NoModifier)
         self.selectRow(4, Qt.ShiftModifier)
         QTest.mouseClick(self.view.erase, Qt.LeftButton)
         data = [{}] * 5
-        self.assertEqual(self.model.samples, data)
+        for i in range(len(self.model.samples)):
+            self.assertEqual(self.model.samples[i].getParameters(), data[i])
 
     def test_increment(self):
         self.view.nrows.setValue(9)
         QTest.mouseClick(self.view.addrow, Qt.LeftButton)
-        self.assertEqual(self.model.samples, [{}] * 10)
+        self.assertEqual(len(self.model.samples), 10)
 
         # 0 increment
         self.view.increment.setValue(0)
@@ -473,7 +502,7 @@ class DrillTest(unittest.TestCase):
         QTest.mouseClick(self.view.fill, Qt.LeftButton)
         column = self.model.columns[0]
         for i in range(10):
-            self.assertEqual(self.model.samples[i][column], "0")
+            self.assertEqual(self.model.samples[i]._parameters[column], "0")
 
         # increment
         self.view.increment.setValue(7)
@@ -483,7 +512,8 @@ class DrillTest(unittest.TestCase):
         column = self.model.columns[1]
         value = 0
         for i in range(10):
-            self.assertEqual(self.model.samples[i][column], str(value))
+            self.assertEqual(self.model.samples[i]._parameters[column],
+                             str(value))
             value += 7
 
 

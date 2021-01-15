@@ -20,8 +20,9 @@ Opening the Instrument View
 
 To see the Instrument View
 
-#. Load a data set, such as MUSR00015189 (as this is a WorkspaceGroup, reveal the Workspaces by clicking on the small triangle)
-#. Right-click on the workspace in the Workspaces Toolbox and select "Show Instrument"
+#. Load a data set, such as MUSR00015189 
+#. As this is a WorkspaceGroup, reveal the contained workspaces by clicking on the small triangle
+#. Right-click on the workspace named MUSR0001589_1 in the Workspaces Toolbox and select "Show Instrument"
 
 
 Different projections

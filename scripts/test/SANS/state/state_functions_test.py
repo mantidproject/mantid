@@ -20,7 +20,7 @@ class StateFunctionsTest(unittest.TestCase):
         state = test_director.construct()
 
         state.data.sample_scatter_run_number = 12345
-        state.data.sample_scatter_period = StateData.ALL_PERIODS 
+        state.data.sample_scatter_period = StateData.ALL_PERIODS
 
         state.reduction.dimensionality = ReductionDimensionality.ONE_DIM
 
@@ -62,8 +62,8 @@ class StateFunctionsTest(unittest.TestCase):
         expected_text = "var1: 12\n" \
                         "var2: test\n" \
                         "" + instruction
-        self.assertEqual(list(val_message.keys())[0],  error_message)
-        self.assertEqual(val_message[error_message],  expected_text)
+        self.assertEqual(list(val_message.keys())[0], error_message)
+        self.assertEqual(val_message[error_message], expected_text)
 
 
 if __name__ == '__main__':

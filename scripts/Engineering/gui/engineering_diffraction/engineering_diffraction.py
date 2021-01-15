@@ -41,7 +41,7 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
         else:
             super(EngineeringDiffractionGui, self).__init__(parent)
 
-    # Main Window
+        # Main Window
         self.setupUi(self)
         self.doc = "Engineering Diffraction"
         self.tabs = self.tab_main
@@ -66,7 +66,7 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
         # Setup status bar
         self.status_label = QtWidgets.QLabel()
         self.savedir_label = QtWidgets.QLabel()
-        self.savedir_label.setMaximumWidth(self.status_savdirMaxwidth )
+        self.savedir_label.setMaximumWidth(self.status_savdirMaxwidth)
         self.setup_statusbar()
 
         # Setup notifiers
@@ -82,6 +82,10 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
                                                      "Engineering Diffraction", False)
         except ImportError:
             pass
+
+    def closeEvent(self, event):
+        self.fitting_presenter.data_widget.ads_observer.unsubscribe()
+        self.fitting_presenter.plot_widget.view.ensure_fit_dock_closed()
 
     def setup_settings(self):
         model = SettingsModel()
@@ -108,6 +112,7 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
     def setup_fitting(self):
         fitting_view = FittingView()
         self.fitting_presenter = FittingPresenter(fitting_view)
+        self.focus_presenter.add_focus_subscriber(self.fitting_presenter.data_widget.presenter.focus_run_observer)
         self.tabs.addTab(fitting_view, "Fitting")
 
     def setup_calibration_notifier(self):
@@ -140,7 +145,6 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
         InterfaceManager().showCustomInterfaceHelp(self.doc)
 
     def open_settings(self):
-        self.settings_presenter.load_existing_settings()
         self.settings_presenter.show()
 
     def get_rb_no(self):

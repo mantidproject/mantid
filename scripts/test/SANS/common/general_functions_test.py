@@ -583,8 +583,14 @@ class SANSEventSliceParsing(unittest.TestCase):
         self.assertEqual(returned, expected)
 
     def test_comma_separated_steps(self):
-        input_range = "1,2, 3, 5, 7"
-        expected = [[1.0, 2.0], [2.0, 3.0], [3.0, 5.0], [5.0, 7.0]]
+        input_range = "1,2, 3, 5, 11"
+        expected = [[1.0, 2.0], [2.0, 3.0], [3.0, 5.0], [5.0, 11.0]]
+        returned = parse_event_slice_setting(input_range)
+        self.assertEqual(returned, expected)
+
+    def test_comma_separated_float(self):
+        input_range = "1.2, 2.4, 4"
+        expected = [[1.2, 2.4], [2.4, 4.0]]
         returned = parse_event_slice_setting(input_range)
         self.assertEqual(returned, expected)
 

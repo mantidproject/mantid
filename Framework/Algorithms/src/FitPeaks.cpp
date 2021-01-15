@@ -11,6 +11,7 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/CostFunctionFactory.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FunctionProperty.h"
@@ -938,37 +939,46 @@ FitPeaks::fitPeaks() {
   std::vector<std::shared_ptr<FitPeaksAlgorithm::PeakFitResult>>
       fit_result_vector(num_fit_result);
 
+  const int nThreads = FrameworkManager::Instance().getNumOMPThreads();
+  size_t chunkSize = num_fit_result / nThreads;
+
   // cppcheck-suppress syntaxError
   PRAGMA_OMP(parallel for schedule(dynamic, 1) )
-  for (auto wi = static_cast<int>(m_startWorkspaceIndex);
-       wi <= static_cast<int>(m_stopWorkspaceIndex); ++wi) {
-
+  for (int ithread = 0; ithread < nThreads; ithread++) {
     PARALLEL_START_INTERUPT_REGION
+    auto iws_begin =
+        m_startWorkspaceIndex + chunkSize * static_cast<size_t>(ithread);
+    auto iws_end = (ithread == nThreads - 1) ? m_stopWorkspaceIndex + 1
+                                             : iws_begin + chunkSize;
 
-    // peaks to fit
-    std::vector<double> expected_peak_centers =
-        getExpectedPeakPositions(static_cast<size_t>(wi));
+    // vector to store fit params for last good fit to each peak
+    std::vector<std::vector<double>> lastGoodPeakParameters(
+        m_numPeaksToFit, std::vector<double>(m_peakFunction->nParams(), 0.0));
 
-    // initialize output for this
-    size_t numfuncparams =
-        m_peakFunction->nParams() + m_bkgdFunction->nParams();
-    std::shared_ptr<FitPeaksAlgorithm::PeakFitResult> fit_result =
-        std::make_shared<FitPeaksAlgorithm::PeakFitResult>(m_numPeaksToFit,
-                                                           numfuncparams);
+    for (auto wi = iws_begin; wi < iws_end; ++wi) {
+      // peaks to fit
+      std::vector<double> expected_peak_centers =
+          getExpectedPeakPositions(static_cast<size_t>(wi));
 
-    fitSpectrumPeaks(static_cast<size_t>(wi), expected_peak_centers,
-                     fit_result);
+      // initialize output for this
+      size_t numfuncparams =
+          m_peakFunction->nParams() + m_bkgdFunction->nParams();
+      std::shared_ptr<FitPeaksAlgorithm::PeakFitResult> fit_result =
+          std::make_shared<FitPeaksAlgorithm::PeakFitResult>(m_numPeaksToFit,
+                                                             numfuncparams);
 
-    PARALLEL_CRITICAL(FindPeaks_WriteOutput) {
-      writeFitResult(static_cast<size_t>(wi), expected_peak_centers,
-                     fit_result);
-      fit_result_vector[wi - m_startWorkspaceIndex] = fit_result;
+      fitSpectrumPeaks(static_cast<size_t>(wi), expected_peak_centers,
+                       fit_result, lastGoodPeakParameters);
+
+      PARALLEL_CRITICAL(FindPeaks_WriteOutput) {
+        writeFitResult(static_cast<size_t>(wi), expected_peak_centers,
+                       fit_result);
+        fit_result_vector[wi - m_startWorkspaceIndex] = fit_result;
+      }
+      prog.report();
     }
-    prog.report();
-
     PARALLEL_END_INTERUPT_REGION
   }
-
   PARALLEL_CHECK_INTERUPT_REGION
 
   return fit_result_vector;
@@ -976,8 +986,8 @@ FitPeaks::fitPeaks() {
 
 namespace {
 /// Supported peak profiles for observation
-std::vector<std::string> supported_peak_profiles{"Gaussian", "Lorentzian",
-                                                 "PseudoVoigt", "Voigt"};
+std::vector<std::string> supported_peak_profiles{
+    "Gaussian", "Lorentzian", "PseudoVoigt", "Voigt", "BackToBackExponential"};
 
 double numberCounts(const Histogram &histogram) {
   double total = 0.;
@@ -1025,13 +1035,13 @@ double numberCounts(const Histogram &histogram, const double xmin,
  */
 void FitPeaks::fitSpectrumPeaks(
     size_t wi, const std::vector<double> &expected_peak_centers,
-    const std::shared_ptr<FitPeaksAlgorithm::PeakFitResult> &fit_result) {
+    const std::shared_ptr<FitPeaksAlgorithm::PeakFitResult> &fit_result,
+    std::vector<std::vector<double>> &lastGoodPeakParameters) {
   if (numberCounts(m_inputMatrixWS->histogram(wi)) <= m_minPeakHeight) {
     for (size_t i = 0; i < fit_result->getNumberPeaks(); ++i)
       fit_result->setBadRecord(i, -1.);
     return; // don't do anything
   }
-
   // Set up sub algorithm Fit for peak and background
   IAlgorithm_sptr peak_fitter; // both peak and background (combo)
   try {
@@ -1055,10 +1065,6 @@ void FitPeaks::fitSpectrumPeaks(
   peak_fitter->setProperty("CostFunction", m_costFunction);
   peak_fitter->setProperty("CalcErrors", true);
 
-  // store the peak fit parameters once one works
-  bool foundAnyPeak = false;
-  std::vector<double> lastGoodPeakParameters(peakfunction->nParams(), 0.);
-
   const double x0 = m_inputMatrixWS->histogram(wi).x().front();
   const double xf = m_inputMatrixWS->histogram(wi).x().back();
   for (size_t fit_index = 0; fit_index < m_numPeaksToFit; ++fit_index) {
@@ -1071,11 +1077,27 @@ void FitPeaks::fitSpectrumPeaks(
     for (size_t i = 0; i < bkgdfunction->nParams(); ++i)
       bkgdfunction->setParameter(0, 0.);
 
-    // set the peak parameters from last good fit - override peak center
-    for (size_t i = 0; i < lastGoodPeakParameters.size(); ++i)
-      peakfunction->setParameter(i, lastGoodPeakParameters[i]);
     double expected_peak_pos = expected_peak_centers[peak_index];
-    peakfunction->setCentre(expected_peak_pos);
+
+    bool foundAnyPeak = (lastGoodPeakParameters[fit_index].size() >
+                         static_cast<size_t>(std::count_if(
+                             lastGoodPeakParameters[fit_index].begin(),
+                             lastGoodPeakParameters[fit_index].end(),
+                             [&](auto const &val) { return val <= 1e-10; })));
+    if (foundAnyPeak) {
+      // set the peak parameters from last good fit to that peak
+      for (size_t i = 0; i < lastGoodPeakParameters[fit_index].size(); ++i) {
+        peakfunction->setParameter(i, lastGoodPeakParameters[fit_index][i]);
+      }
+      // reset center though - don't know before hand which element this is
+      peakfunction->setCentre(expected_peak_pos);
+    } else {
+      // set matrix workspace so reads necessary params from .xml file after
+      // need to set center first
+      peakfunction->setCentre(expected_peak_pos);
+      peakfunction->setMatrixWorkspace(m_inputMatrixWS, wi, 0.0, 0.0);
+      peakfunction->clearTies(); // let S,A,B of B2B exp be refined
+    }
 
     double cost(DBL_MAX);
     if (expected_peak_pos <= x0 || expected_peak_pos >= xf) {
@@ -1101,12 +1123,10 @@ void FitPeaks::fitSpectrumPeaks(
           fitIndividualPeak(wi, peak_fitter, expected_peak_pos, peak_window_i,
                             observe_peak_params, peakfunction, bkgdfunction);
       if (cost < 1e7) { // assume it worked and save out the result
-        foundAnyPeak = true;
-        for (size_t i = 0; i < lastGoodPeakParameters.size(); ++i)
-          lastGoodPeakParameters[i] = peakfunction->getParameter(i);
+        for (size_t i = 0; i < lastGoodPeakParameters[fit_index].size(); ++i)
+          lastGoodPeakParameters[fit_index][i] = peakfunction->getParameter(i);
       }
     }
-    foundAnyPeak = true;
 
     // process fitting result
     FitPeaksAlgorithm::FitFunction fit_function;
@@ -1292,7 +1312,6 @@ void FitPeaks::calculateFittedPeaks(
   for (auto iws = static_cast<int64_t>(m_startWorkspaceIndex);
        iws <= static_cast<int64_t>(m_stopWorkspaceIndex); ++iws) {
     PARALLEL_START_INTERUPT_REGION
-
     // get a copy of peak function and background function
     IPeakFunction_sptr peak_function =
         std::dynamic_pointer_cast<IPeakFunction>(m_peakFunction->clone());
@@ -1318,10 +1337,9 @@ void FitPeaks::calculateFittedPeaks(
         bkgd_function->setParameter(iparam,
                                     fit_result_i->getParameterValue(
                                         ipeak, num_peakfunc_params + iparam));
-
       // use domain and function to calcualte
       // get the range of start and stop to construct a function domain
-      const auto &vec_x = m_fittedPeakWS->x(static_cast<size_t>(iws));
+      const auto &vec_x = m_fittedPeakWS->points(static_cast<size_t>(iws));
       std::pair<double, double> peakwindow =
           getPeakFitWindow(static_cast<size_t>(iws), ipeak);
       auto start_x_iter =
@@ -1343,9 +1361,10 @@ void FitPeaks::calculateFittedPeaks(
       // copy over the values
       size_t istart = static_cast<size_t>(start_x_iter - vec_x.begin());
       size_t istop = static_cast<size_t>(stop_x_iter - vec_x.begin());
-      for (size_t yindex = istart; yindex < istop; ++yindex)
+      for (size_t yindex = istart; yindex < istop; ++yindex) {
         m_fittedPeakWS->dataY(static_cast<size_t>(iws))[yindex] =
             values.getCalculated(yindex - istart);
+      }
     } // END-FOR (ipeak)
     PARALLEL_END_INTERUPT_REGION
   } // END-FOR (iws)
@@ -1353,49 +1372,6 @@ void FitPeaks::calculateFittedPeaks(
 
   return;
 }
-
-namespace {
-// calculate the moments about the mean
-vector<double> calculateMomentsAboutMean(const Histogram &histogram,
-                                         const double mean,
-                                         FunctionValues &bkgd_values,
-                                         size_t start_index,
-                                         size_t stop_index) {
-  // Calculate second moment about the mean should be the variance. Assume that
-  // the peak center is correct
-  const auto &x_vec = histogram.points();
-  const auto &y_vec = histogram.y();
-
-  const size_t numPoints =
-      min(start_index - stop_index, bkgd_values.size()) - 1;
-
-  double zeroth = 0.; // total counts
-  double first = 0.;  // peak center
-  double second = 0.; // variance = sigma * sigma
-
-  // zeroth and first don't require the mean
-  for (size_t i = 0; i < numPoints; ++i) {
-    // integrate using Newton's method
-    const double y_adj =
-        .5 * (y_vec[start_index + i] + y_vec[start_index + i + 1]) -
-        .5 * (bkgd_values.getCalculated(i) + bkgd_values.getCalculated(i + 1));
-    if (y_adj <= 0.)
-      continue; // just skip to the next
-    const double dx = x_vec[start_index + i + 1] - x_vec[start_index + i];
-    const double x_adj = x_vec[start_index + i] - mean;
-
-    zeroth += y_adj * dx;
-    first += x_adj * y_adj * dx;
-    second += x_adj * x_adj * y_adj * dx;
-  }
-  // need to normalize by the total to get the right position because
-  // method of moments assumes a distribution normalized to one
-  first = first / zeroth;
-  second = second / zeroth;
-
-  return vector<double>{zeroth, first, second};
-}
-} // namespace
 
 //----------------------------------------------------------------------------------------------
 /**  Estimate background: There are two methods that will be tried.
@@ -1482,13 +1458,10 @@ int FitPeaks::estimatePeakParameters(
   // Estimate FHWM (peak width)
   if (observe_peak_width &&
       m_peakWidthEstimateApproach != EstimatePeakWidth::NoEstimation) {
-    double peak_width = observePeakWidth(
+    double peak_fwhm = observePeakFwhm(
         histogram, bkgd_values, peak_center_index, start_index, stop_index);
-
-    // proper factor for gaussian
-    const double CONVERSION = 1.; // 2. * std::sqrt(2.);
-    if (peak_width > 0.) {        // TODO promote to property?
-      peakfunction->setFwhm(CONVERSION * peak_width);
+    if (peak_fwhm > 0.0) {
+      peakfunction->setFwhm(peak_fwhm);
     }
   }
 
@@ -1574,32 +1547,40 @@ int FitPeaks::observePeakCenter(const Histogram &histogram,
  * @param istop :: array index for the right boundary of the peak
  * @return peak width as double
  */
-double FitPeaks::observePeakWidth(const Histogram &histogram,
-                                  FunctionValues &bkgd_values, size_t ipeak,
-                                  size_t istart, size_t istop) {
-  double peak_width(-0.);
+double FitPeaks::observePeakFwhm(const Histogram &histogram,
+                                 FunctionValues &bkgd_values, size_t ipeak,
+                                 size_t istart, size_t istop) {
+  double peak_fwhm(-0.);
 
   if (m_peakWidthEstimateApproach == EstimatePeakWidth::InstrumentResolution) {
     // width from guessing from delta(D)/D
     const double peak_center = histogram.points()[ipeak];
-    peak_width = peak_center * m_peakWidthPercentage;
+    peak_fwhm = peak_center * m_peakWidthPercentage;
   } else if (m_peakWidthEstimateApproach == EstimatePeakWidth::Observation) {
-    const auto moments = calculateMomentsAboutMean(
-        histogram, histogram.points()[ipeak], bkgd_values, istart, istop);
+    // estimate fwhm from area assuming Gaussian (more robust than using
+    // moments which overestimates variance by factor ~5 depending on background
+    // estimation over window much wider than peak)
+    const auto &x_vec = histogram.points();
+    const auto &y_vec = histogram.y();
+    const size_t numPoints = std::min(istart - istop, bkgd_values.size()) - 1;
 
-    // not enough total weight in range
-    if (moments[0] < m_minPeakHeight)
-      peak_width = -1.; // set to bad value
-    else
-      peak_width = std::sqrt(moments[2]);
-
+    double area = 0.0;
+    // integrate using Newton's method
+    for (size_t i = 0; i < numPoints; ++i) {
+      const auto yavg =
+          0.5 * (y_vec[istart + i] - bkgd_values.getCalculated(i) +
+                 y_vec[istart + i + 1] - bkgd_values.getCalculated(i + 1));
+      const auto dx = x_vec[istart + i + 1] - x_vec[istart + i];
+      area += yavg * dx;
+    }
+    peak_fwhm = 2 * std::sqrt(M_LN2 / M_PI) * area / y_vec[ipeak];
   } else {
     // get from last peak or from input!
     throw std::runtime_error(
         "This case for observing peak width is not supported.");
   }
 
-  return peak_width;
+  return peak_fwhm;
 }
 
 //----------------------------------------------------------------------------------------------

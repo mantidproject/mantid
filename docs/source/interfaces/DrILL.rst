@@ -16,6 +16,8 @@ currently supported instruments:
     * D22: SANS
     * D33: SANS
     * FIGARO: Reflectometry
+    * D2B: Powder diffraction
+    * D20: Powder diffraction
 
 The interface is accessible through the Workbench menu bar: *Interfaces* ->
 *ILL* -> *DrILL*.
@@ -38,6 +40,8 @@ spreadsheet like table (1)
     measured at one or more distances (SANS) or angles (Reflectometry). There is no limit
     on the number of the different configurations.
     It is used to provide filenames and options to the reduction algorithm.
+    The state of the table is reset when the instrument and/or the acquisition
+    mode is changed.
 
 tool buttons (2)
     In two different places. At the top of the table, these buttons facilitate
@@ -65,6 +69,8 @@ To get further information on the currently supported algorithms:
 
     * SANS: :ref:`SANSILLAutoProcess <algm-SANSILLAutoProcess>`
     * Reflectometry: :ref:`ReflectometryILLAutoProcess <algm-ReflectometryILLAutoProcess>`
+    * Powder diffraction: :ref:`PowderILLDetectorScan <algm-PowderILLDetectorScan>` and
+      :ref:`PowderILLParameterScan <algm-PowderILLParameterScan>`
 
 
 Global settings
@@ -92,7 +98,9 @@ Table filling
 
 When selecting the instrument and the acquisition mode, the table is updated
 with the needed column headers. To obtain information about a column, a tooltip
-is displayed when moving the mouse over the corresponding header.
+is displayed when moving the mouse over the corresponding header. To facilitate
+filling, columns can be collapsed (button in the header), hidden (right click or
+menu bar) and their order can be changed by drag-and-drop.
 
 Each cell can be edited manually or filled programmatically by using some of the
 tool buttons.
@@ -111,6 +119,11 @@ increment fill
     the lowest row and column index) will be incremented and written in the
     following ones.
 
+`DEFAULT` is a special value. During data reduction, it will be replaced with
+the default value of this parameter defined in the algorithm. It acts like an
+empty cell but this allows to override a master sample parameter with the
+default value (see below).
+
 For all algorithms, the last column of the table is always labelled
 *CustomOptions*. It makes it possible to override a global parameter for
 the current row only. It should contain a semicolon separated list of key value
@@ -121,6 +134,48 @@ When filling the table, all parameters (including the custom options) are
 checked for validity. When a value is not valid, the cell turns red and a
 tooltip (visible when the mouse moves over the cell) explains the error. A
 single red cell prevent the processing of the concerned row.
+
+
+Groups
+------
+
+To avoid entering exactly the same value several times in the table, it is also
+possible to create groups of samples. Within a group, a master sample can be
+designated. The values of the parameters of the master sample will be used when
+processing all rows in the group.
+
+Paramaters can still be overriden manually whithin a group by entering a sample
+specific value in the table. The special `DEFAULT` value can be use to override
+a master sample parameter with its default value. The priority for the parameter
+values is as follow:
+
+sample > master sample > global settings
+
+Example:
+
+=========  =====  ===========  ===========
+Sample     Group  parameter 1  parameter 2
+=========  =====  ===========  ===========
+1(master)  g1     v1           v2
+2          g1
+3          g1                  v2'
+4          g1                  DEFAULT
+=========  =====  ===========  ===========
+
+* For the processing of sample 2: `parameter1=v1` and `parameter2=v2`
+* For the processing of sample 3: `parameter1=v1` and `parameter2=v2'`
+* For the processing of sample 4: `parameter1=v1` and `parameter2` will use the
+  algorithm default value
+
+To group samples, one has to select them (at least one cell per row) and press
+Ctrl + G or use the context menu. To set a row as master, one has to select it
+(again, one cell is sufficient) and press Ctrl + M or use the context menu.
+Grouped samples will appear with a specific label in the table. The master
+of a group will have a bold label. There can be only one master row per group,
+if a second row is selected as the master row, it will replace the previous one.
+One can also add a sample to an existing group (using the context menu) or
+ungroup samples by selecting them and pressing Ctrl + Alt + G or using the
+context menu.
 
 
 Processing
@@ -147,7 +202,9 @@ the interface in JSON format. By using the appropriate tool button or the menu
 bar (*File* -> *Save...* or *Load...*) one can export or import a Rundex file.
 
 When saving, the global settings, all the samples and some of the visual setup
-are exported in the rundex file. Symmetrically, the load action imports all
-these data in the current DrILL session.
+are exported in the rundex file (i.e. the collapsed columns, the hidden
+columns...). Symmetrically, the load action imports all these data in the
+current DrILL session and one will recover the interface in the same state as
+it was previously saved.
 
 .. categories:: Interfaces

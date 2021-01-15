@@ -6,9 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import os
 import mantid.simpleapi as mantid
-from mantid.api import WorkspaceGroup, AnalysisDataService
-from mantid.api import ITableWorkspace
-from mantid.simpleapi import mtd, UnGroupWorkspace, Plus, DeleteWorkspace, CloneWorkspace
+from mantid.api import AnalysisDataService, ITableWorkspace, WorkspaceGroup
+from mantid.simpleapi import CloneWorkspace, DeleteWorkspace, mtd, Plus, UnGroupWorkspace
 from mantid import api
 from mantid.kernel import ConfigServiceImpl
 import Muon.GUI.Common.utilities.muon_file_utils as file_utils

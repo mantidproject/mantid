@@ -113,6 +113,13 @@ BACK/M[n]/TIMES x y
         spectrum_number = 1
         background = [30000.0, 40000.0]
 
+COMPATIBILITY ON
+----------------
+
+**Replacement**
+Unsupported
+
+
 DET/CORR [FRONT][REAR] [X][Y][Z][ROT] a
 ---------------------------------------
 
@@ -150,6 +157,193 @@ DET/CORR [FRONT][REAR] [X][Y][Z][ROT] a
         front_rot = 0.0
         rear_x = 0.0
         rear_z = 0.058
+
+DET/[LAB][HAB][MERGED][ALL]
+---------------------------
+
+..  code-block:: none
+
+    [detector.configuration]
+      selected_detector = "LAB"
+
+**Existing Example**
+
+..  code-block:: none
+
+    DET/HAB
+
+
+**Existing Replacement**
+
+..  code-block:: none
+
+    [detector.configuration]
+      selected_detector = "HAB"  # Or "LAB", "All" (with lowercase l's), "Merged" ...etc.
+
+DET/RESCALE[/FIT] x y
+---------------------
+
+..  code-block:: none
+
+  [reduction]
+    [reduction.merged.rescale]
+        min = x
+        max = y
+        use_fit = true  # or false
+
+**Existing Example**
+
+..  code-block:: none
+
+    DET/RESCALE/FIT 0.14 0.24
+
+
+**Existing Replacement**
+
+..  code-block:: none
+
+  [reduction]
+    [reduction.merged.rescale]
+      min = 0.14
+      max = 0.24
+      use_fit = true
+
+DET/SCALE x
+-----------
+
+..  code-block:: none
+
+  [reduction]
+    [reduction.merged.rescale]
+        factor = x
+        use_fit = false  # Must be false for single value
+
+**Existing Example**
+
+..  code-block:: none
+
+    DET/SCALE 0.123
+
+
+**Existing Replacement**
+
+..  code-block:: none
+
+  [reduction]
+    [reduction.merged.rescale]
+        factor = 0.123
+        use_fit = false
+
+DET/SCALE x y /FIT
+------------------
+
+..  code-block:: none
+
+  [reduction]
+    [reduction.merged.rescale]
+        min = x
+        max = y
+        use_fit = true  # Must be true for fitting
+
+**Existing Example**
+
+..  code-block:: none
+
+    DET/SCALE 0.1 0.2 /FIT
+
+
+**Existing Replacement**
+
+..  code-block:: none
+
+  [reduction]
+    [reduction.merged.rescale]
+        min = 0.1
+        max = 0.2
+        use_fit = true  # Must be true for fitting
+
+
+DET/SHIFT x
+-----------
+
+..  code-block:: none
+
+  [reduction]
+    [reduction.merged.shift]
+        distance = x
+        use_fit = false  # Must be false for single value
+
+**Existing Example**
+
+..  code-block:: none
+
+    DET/SHIFT 0.123
+
+
+**Existing Replacement**
+
+..  code-block:: none
+
+  [reduction]
+    [reduction.merged.shift]
+        distance = 0.123
+        use_fit = false
+
+DET/SHIFT x y /FIT
+------------------
+
+..  code-block:: none
+
+  [reduction]
+    [reduction.merged.shift]
+        min = x
+        max = y
+        use_fit = true  # Must be true for fitting
+
+**Existing Example**
+
+..  code-block:: none
+
+    DET/SHIFT 0.1 0.2 /FIT
+
+**Existing Replacement**
+
+..  code-block:: none
+
+  [reduction]
+    [reduction.merged.shift]
+        min = 0.1
+        max = 0.2
+        use_fit = true
+
+
+DET/OVERLAP x y
+---------------
+
+..  code-block:: none
+
+  [reduction]
+    [reduction.merged.merge_range]
+      min = x
+      max = y
+      use_fit = true
+
+**Existing Example**
+
+..  code-block:: none
+
+    DET/OVERLAP 0.14 0.24
+
+
+**Existing Replacement**
+
+..  code-block:: none
+
+  [merged]
+    [reduction.merged.merge_range]
+        min = 0.14
+        max = 0.24
+        use_fit = true
 
 
 FIT/CENTRE x y
@@ -224,6 +418,54 @@ FIT/TRANS/LIN x y
         parameters = {lambda_min = 3.0, lambda_max = 11.0}
         function = "Linear"
 
+GRAVITY/ON
+----------
+
+**Replacement**
+
+..  code-block:: none
+
+    [gravity]
+      enabled = true
+
+**Existing Example**
+
+..  code-block:: none
+
+    GRAVITY/ON
+
+**Existing Replacement**
+
+..  code-block:: none
+
+    [gravity]
+      enabled = true
+
+GRAVITY/LEXTRA x
+----------------
+
+**Replacement**
+
+..  code-block:: none
+
+    [instrument.configuration]
+      gravity_extra_length = x
+
+**Existing Example**
+
+..  code-block:: none
+
+    GRAVITY/LEXTRA 2.0
+
+**Existing Replacement**
+
+..  code-block:: none
+
+    [instrument.configuration]
+      gravity_extra_length = 2.0
+
+
+
 L/EVENTSTIME str
 ----------------
 
@@ -245,7 +487,7 @@ L/EVENTSTIME str
 ..  code-block:: none
 
   [reduction.events]
-    # A negative step indicates Log
+    # A negative step (middle val) indicates Log
     binning = "7000.0,500.0,60000.0"
 
 
@@ -423,6 +665,9 @@ L/WAV min max step [/LIN]
 ..  code-block:: none
 
     wavelength = {start = min, step = step, stop = max, type = "Lin"}
+    # Alternative for ranges
+    wavelength = {binning = "min,max", step = step, type = "RangeLin"}
+
 
 **Existing Example**
 
@@ -435,8 +680,10 @@ L/WAV min max step [/LIN]
 ..  code-block:: none
 
     [binning]
-      #type can only be "Lin", "Log"
+      # Only for "Lin", "Log"
       wavelength = {start = 2.0, step=0.125, stop=14.0, type = "Lin"}
+      # Only for "RangeLin" or "RangeLog
+      wavelength = {binning="2.0-7.0, 7.0-14.0", type = "RangeLin"}
 
 MASKFILE str
 ------------
@@ -755,6 +1002,52 @@ MON [/TRANS] /SPECTRUM=n [/INTERPOLATE]
     [normalisation.monitor.M1]
       spectrum_number = 1
 
+QRESOL[/ON][/OFF]
+-----------------
+
+**Replacement**
+
+..  code-block:: none
+
+  [q_resolution]
+    enabled = true  # Or false
+
+**Existing Example:**
+
+..  code-block:: none
+
+    QRESOL/ON
+
+**Existing Replacement**
+
+..  code-block:: none
+
+  [q_resolution]
+    enabled = true  # Or false
+
+SAMPLE/OFFSET x
+---------------
+
+**Replacement**
+
+..  code-block:: none
+
+  [instrument.configuration]
+    sample_offset = n
+
+**Existing Example:**
+
+..  code-block:: none
+
+    SAMPLE/OFFSET -60
+
+**Existing Replacement**
+
+..  code-block:: none
+
+  [instrument.configuration]
+    sample_offset = -0.06
+
 
 set centre a b c d
 ------------------
@@ -865,28 +1158,5 @@ TUBECALIBFILE=str
 
   [detector.calibration.tube]
     file = "Tube.nxs"
-
-QRESOL[/ON][/OFF]
------------------
-
-**Replacement**
-
-..  code-block:: none
-
-  [q_resolution]
-    enabled = true  # Or false
-
-**Existing Example:**
-
-..  code-block:: none
-
-    QRESOL/ON
-
-**Existing Replacement**
-
-..  code-block:: none
-
-  [q_resolution]
-    enabled = true  # Or false
 
 .. categories:: Techniques

@@ -8,27 +8,30 @@
 #include <string>
 
 #include "DllConfig.h"
-#include "IIndirectFitData.h"
-#include "IndexTypes.h"
+#include "IIndirectFitDataModel.h"
 #include "IndirectFitData.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidQtWidgets/Common/FunctionModelSpectra.h"
+#include "MantidQtWidgets/Common/IndexTypes.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
+using namespace MantidWidgets;
 
 /*
-    IIndirectFitData - Specifies an interface for updating, querying and
+    IIndirectFitDataModel - Specifies an interface for updating, querying and
    accessing the raw data in IndirectFitAnalysisTabs
 */
-class MANTIDQT_INDIRECT_DLL IndirectFitDataModel : public IIndirectFitData {
+class MANTIDQT_INDIRECT_DLL IndirectFitDataModel
+    : public IIndirectFitDataModel {
 public:
   IndirectFitDataModel();
   virtual ~IndirectFitDataModel() = default;
   bool hasWorkspace(std::string const &workspaceName) const override;
   Mantid::API::MatrixWorkspace_sptr
   getWorkspace(TableDatasetIndex index) const override;
-  Spectra getSpectra(TableDatasetIndex index) const override;
+  FunctionModelSpectra getSpectra(TableDatasetIndex index) const override;
   bool isMultiFit() const override;
   TableDatasetIndex numberOfWorkspaces() const override;
   size_t getNumberOfSpectra(TableDatasetIndex index) const override;
@@ -42,15 +45,17 @@ public:
 
   void setSpectra(const std::string &spectra,
                   TableDatasetIndex dataIndex) override;
-  void setSpectra(Spectra &&spectra, TableDatasetIndex dataIndex) override;
-  void setSpectra(const Spectra &spectra, TableDatasetIndex dataIndex) override;
+  void setSpectra(FunctionModelSpectra &&spectra,
+                  TableDatasetIndex dataIndex) override;
+  void setSpectra(const FunctionModelSpectra &spectra,
+                  TableDatasetIndex dataIndex) override;
   void addWorkspace(const std::string &workspaceName) override;
   void addWorkspace(const std::string &workspaceName,
                     const std::string &spectra) override;
   void addWorkspace(const std::string &workspaceName,
-                    const Spectra &spectra) override;
+                    const FunctionModelSpectra &spectra) override;
   void addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
-                    const Spectra &spectra) override;
+                    const FunctionModelSpectra &spectra) override;
   void removeWorkspace(TableDatasetIndex index) override;
   void removeDataByIndex(FitDomainIndex fitDomainIndex) override;
 
@@ -83,6 +88,8 @@ public:
   std::vector<double>
   getExcludeRegionVector(FitDomainIndex index) const override;
   std::string getExcludeRegion(FitDomainIndex index) const override;
+  void setExcludeRegion(const std::string &exclude,
+                        FitDomainIndex index) override;
   std::pair<TableDatasetIndex, WorkspaceIndex>
       getSubIndices(FitDomainIndex) const override;
 
@@ -91,7 +98,7 @@ public:
 
 private:
   void addNewWorkspace(const Mantid::API::MatrixWorkspace_sptr &workspace,
-                       const Spectra &spectra);
+                       const FunctionModelSpectra &spectra);
 
   std::vector<IndirectFitData> *m_fittingData;
   std::vector<std::weak_ptr<Mantid::API::MatrixWorkspace>> *m_resolutions;

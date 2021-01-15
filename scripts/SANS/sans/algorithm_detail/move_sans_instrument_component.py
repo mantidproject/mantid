@@ -8,6 +8,8 @@ from enum import Enum
 
 from sans.algorithm_detail.move_workspaces import create_mover
 from sans.common.enums import DetectorType
+from sans.state.AllStates import AllStates
+from sans.state.StateObjects.state_instrument_info import StateInstrumentInfo
 
 
 class MoveTypes(Enum):
@@ -21,34 +23,35 @@ class MoveTypes(Enum):
     RESET_POSITION = 3
 
 
-def move_component(component_name, move_info, move_type,
+def move_component(component_name, state: AllStates, move_type,
                    workspace, is_transmission_workspace=False, beam_coordinates=None):
-    mover = create_mover(workspace)
+    mover = create_mover(workspace, state)
+    inst_info = state.instrument_info
 
     # Ensure we handle a None type
-    parsed_component_name = _get_full_component_name(user_comp_name=component_name, move_info=move_info)
+    parsed_component_name = _get_full_component_name(user_comp_name=component_name, inst_info=inst_info)
     # Get the selected component and the beam coordinates
     if not beam_coordinates:
-        beam_coordinates = _get_coordinates(component_name=parsed_component_name, move_info=move_info)
+        beam_coordinates = _get_coordinates(component_name=parsed_component_name, state=state)
 
     if move_type is MoveTypes.ELEMENTARY_DISPLACEMENT:
         if not beam_coordinates or len(beam_coordinates) == 0:
             raise ValueError("Beam coordinates were not specified. An elementary displacement "
                              "requires beam coordinates.")
-        mover.move_with_elementary_displacement(move_info, workspace, beam_coordinates, parsed_component_name)
+        mover.move_with_elementary_displacement(workspace, beam_coordinates, parsed_component_name)
 
     elif move_type is MoveTypes.INITIAL_MOVE:
-        mover.move_initial(move_info, workspace, beam_coordinates, parsed_component_name, is_transmission_workspace)
+        mover.move_initial(workspace, beam_coordinates, parsed_component_name, is_transmission_workspace)
 
     elif move_type is MoveTypes.RESET_POSITION:
-        mover.set_to_zero(move_info, workspace, parsed_component_name)
+        mover.set_to_zero(workspace, parsed_component_name)
 
     else:
         raise ValueError("move_sans_instrument_component: The selection {0} for the  move type "
                          "is unknown".format(str(move_type)))
 
 
-def _get_coordinates(move_info, component_name):
+def _get_coordinates(component_name, state):
     """
     Gets the coordinates for a particular component.
 
@@ -61,50 +64,58 @@ def _get_coordinates(move_info, component_name):
     :return:
     """
     # Get the selected detector
-    detectors = move_info.detectors
-    selected_detector = _get_detector_for_component(move_info, component_name)
+    detectors = state.move.detectors
+    detector_type = _get_detector_for_component(inst_info=state.instrument_info, component=component_name)
 
     # If the detector is unknown take the position from the LAB
-    if selected_detector is None:
+    if detector_type:
+        selected_detector = state.move.detectors[detector_type.value]
+    else:
         selected_detector = detectors[DetectorType.LAB.value]
+
     pos1 = selected_detector.sample_centre_pos1
     pos2 = selected_detector.sample_centre_pos2
     coordinates = [pos1, pos2]
     return coordinates
 
 
-def _get_full_component_name(user_comp_name, move_info):
+def _get_full_component_name(user_comp_name, inst_info):
     """
     Select the detector name for the input component.
     The component can be either:
     1. An actual component name for LAB or HAB
     2. Or the word HAB, LAB which will then select the actual component name, e.g. main-detector-bank
-    :param move_info: a SANSStateMove object
+    :param move_info: a SANSInstInfo object
     :param user_comp_name: the name of the component as a string
     :return: the full name of the component or an empty string if it is not found.
     """
-    selected_detector = _get_detector_for_component(move_info, user_comp_name)
-    return selected_detector.detector_name if selected_detector is not None else ""
+    selected_detector = _get_detector_for_component(inst_info=inst_info, component=user_comp_name)
+    if selected_detector:
+        return inst_info.detector_names[selected_detector.value].detector_name
+    else:
+        return ""
 
 
-def _get_detector_for_component(move_info, component):
+def _get_detector_for_component(inst_info: StateInstrumentInfo, component):
     """
     Get the detector for the selected component.
 
     The detector can be either an actual component name or a HAB, LAB abbreviation
-    :param move_info: a SANSStateMove object
+    :param inst_info: a stateInstrumentInfo
     :param component: the selected component
-    :return: an equivalent detector to teh selected component or None
+    :return: Enum of the detector type
     """
-    detectors = move_info.detectors
-    selected_detector = None
-    if component == "HAB":
-        selected_detector = detectors[DetectorType.HAB.value]
-    elif component == "LAB":
-        selected_detector = detectors[DetectorType.LAB.value]
+    detectors = inst_info.detector_names
+    hab_values = detectors[DetectorType.HAB.value]
+    lab_values = detectors[DetectorType.LAB.value]
+
+    has_hab = True
+    if not hab_values.detector_name and not hab_values.detector_name_short:
+        has_hab = False
+
+    if component in ("LAB", lab_values.detector_name, lab_values.detector_name_short):
+        return DetectorType.LAB
+    elif has_hab and component in ("HAB", hab_values.detector_name, hab_values.detector_name_short):
+        return DetectorType.HAB
     else:
-        # Check if the component is part of the detector names
-        for _, detector in list(detectors.items()):
-            if detector.detector_name == component or detector.detector_name_short == component:
-                selected_detector = detector
-    return selected_detector
+        return None

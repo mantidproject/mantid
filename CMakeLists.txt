@@ -30,7 +30,7 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/buildconfig/CMake")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 
-option(ENABLE_MANTIDPLOT "Enable Qt4-based gui & components" ON)
+option(ENABLE_MANTIDPLOT "Enable Qt4-based gui & components" OFF)
 option(ENABLE_WORKBENCH "Enable Qt5-based gui & components" ON)
 
 set(CPACK_INSTALL_CMAKE_PROJECTS "${CMAKE_BINARY_DIR}" "Mantid" "ALL" "/")
@@ -158,6 +158,7 @@ if(ENABLE_WORKBENCH)
                           Gui
                           Widgets
                           OpenGL
+                          Test
                REQUIRED)
   if(Qt5_FOUND)
     message(STATUS "Found Qt ${Qt5_VERSION}: ${Qt5_DIR}")
@@ -294,8 +295,10 @@ endif()
 
 # Installation settings
 
-# N.B. INBUNDLE variable is empty except on Mac (set in DarwinSetup.cmake)
-install(DIRECTORY installers/colormaps/ DESTINATION ${INBUNDLE}colormaps)
+if(ENABLE_MANTIDPLOT)
+  # N.B. INBUNDLE variable is empty except on Mac (set in DarwinSetup.cmake)
+  install(DIRECTORY installers/colormaps/ DESTINATION ${INBUNDLE}colormaps)
+endif()
 
 # Install the files (.desktop and icon) to create a menu items
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")

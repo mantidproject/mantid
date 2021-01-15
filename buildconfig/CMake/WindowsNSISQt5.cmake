@@ -15,13 +15,14 @@ set ( QT5_DIST_DLLS
     Qt5Quick.dll
     Qt5QuickWidgets.dll
     Qt5Sql.dll
+    Qt5Test.dll
     Qt5Xml.dll
     Qt5WebChannel.dll
     Qt5WebEngine.dll
     Qt5WebEngineCore.dll
     Qt5WebEngineWidgets.dll
     libEGL.dll
-	libGLESv2.dll
+    libGLESv2.dll
 )
 
 set ( QT5_INSTALL_PREFIX ${THIRD_PARTY_DIR}/lib/qt5 )

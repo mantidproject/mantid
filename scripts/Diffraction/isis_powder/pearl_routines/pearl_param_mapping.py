@@ -10,7 +10,8 @@ from isis_powder.pearl_routines.pearl_enums import PEARL_FOCUS_MODES, PEARL_TT_M
 
 #                 Maps friendly user name (ext_name) -> script name (int_name)
 attr_mapping = [
-    ParamMapEntry(ext_name="attenuation_file_path", int_name="attenuation_file_path"),
+    ParamMapEntry(ext_name="attenuation_files", int_name="attenuation_files"),
+    ParamMapEntry(ext_name="attenuation_file", int_name="attenuation_file"),
     ParamMapEntry(ext_name="config_file", int_name="config_file_name"),
     ParamMapEntry(ext_name="calibration_mapping_file", int_name="cal_mapping_path"),
     ParamMapEntry(ext_name="calibration_directory", int_name="calibration_dir"),
@@ -42,6 +43,8 @@ attr_mapping = [
     ParamMapEntry(ext_name="raw_data_tof_cropping", int_name="raw_data_crop_vals"),
     ParamMapEntry(ext_name="run_in_cycle", int_name="run_in_range"),
     ParamMapEntry(ext_name="run_number", int_name="run_number"),
+    ParamMapEntry(ext_name="sample_empty", int_name="sample_empty", optional=True),
+    ParamMapEntry(ext_name="sample_empty_scale", int_name="sample_empty_scale"),
     ParamMapEntry(ext_name="spline_coefficient", int_name="spline_coefficient"),
     ParamMapEntry(ext_name="subtract_empty_instrument", int_name="subtract_empty_inst"),
     ParamMapEntry(ext_name="suffix", int_name="suffix", optional=True),

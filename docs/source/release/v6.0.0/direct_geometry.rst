@@ -55,6 +55,7 @@ New
 BugFixes
 ########
 - Fixed a bug in the :ref:`Crystal Field Python Interface` where ties were not being applied properly for cubic crystal structures.
+- Fixed a bug in the :ref:`CrystalFieldFunction <func-CrystalFieldFunction>` which prevented it working with the Trust Region minimizer.
 - Fixed a bug in the :ref:`LoadCIF <algm-LoadCIF>` algorithm caused when a **.cif** file has 2 sections, with the first not having
   the required data keys.
 

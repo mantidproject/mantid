@@ -61,8 +61,12 @@ public:
   bool isExplicitlySet(size_t i) const override;
   /// Get the fitting error for a parameter
   double getError(size_t i) const override;
+  /// Get the fitting error for a parameter by name
+  double getError(const std::string &name) const override;
   /// Set the fitting error for a parameter
   void setError(size_t i, double err) override;
+  /// Set the fitting error for a parameter by name
+  void setError(const std::string &name, double err) override;
 
   /// Return parameter index from a parameter reference.
   size_t getParameterIndex(const API::ParameterReference &ref) const override;
@@ -201,7 +205,6 @@ private:
   size_t makeMapsForFunction(const IFunction &fun, size_t iFirst,
                              const std::string &prefix) const;
   void cacheSourceParameters() const;
-
   /// Function that creates the source function.
   mutable CrystalFieldControl m_control;
   /// Function that calculates parameters of the target function.
