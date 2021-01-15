@@ -72,11 +72,10 @@ void TextAxis::setValue(const std::size_t &index, const double &value) {
  * Returns the value that has been passed to it as a size_t
  */
 size_t TextAxis::indexOfValue(const double value) const {
-  auto spec_num = length();
   std::vector<double> spectraNumbers;
   spectraNumbers.reserve(length());
   for (size_t i = 0; i < length(); i++) {
-    spectraNumbers.push_back(static_cast<double>(i));
+    spectraNumbers.emplace_back(static_cast<double>(i));
   }
   return Mantid::Kernel::VectorHelper::indexOfValueFromCenters(spectraNumbers,
                                                                value);
