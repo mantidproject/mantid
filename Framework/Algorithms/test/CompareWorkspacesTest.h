@@ -841,7 +841,9 @@ public:
     TS_ASSERT(checker.execute());
     TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
 
-    ITableWorkspace_sptr table = AnalysisDataService::Instance().retrieveWS<TableWorkspace>("compare_msgs");
+    ITableWorkspace_sptr table =
+        AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
+            "compare_msgs");
     TS_ASSERT_EQUALS(table->cell<std::string>(0, 0),
                      "Instrument name mismatch");
 
@@ -849,14 +851,14 @@ public:
     TS_ASSERT((!Mantid::API::equals(ws1, ws2)));
 
     // Compare different source position
-    MatrixWorkspace_sptr  ws3 = ws1->clone(); // shared to unique ptr conversion
+    MatrixWorkspace_sptr ws3 = ws1->clone(); // shared to unique ptr conversion
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", ws3));
     auto &info3 = ws3->mutableComponentInfo();
-    info3.setPosition(info3.source(),
-                     info3.sourcePosition() + V3D(0, 0, 1e-6));
+    info3.setPosition(info3.source(), info3.sourcePosition() + V3D(0, 0, 1e-6));
     TS_ASSERT(checker.execute());
     TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
-    table = AnalysisDataService::Instance().retrieveWS<TableWorkspace>("compare_msgs");
+    table = AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
+        "compare_msgs");
     TS_ASSERT(table->cell<std::string>(0, 0).find("Source mismatch") !=
               std::string::npos);
 
@@ -864,13 +866,11 @@ public:
     MatrixWorkspace_sptr ws4 = ws1->clone(); // shared to unique ptr conversion
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", ws4));
     auto &info4 = ws4->mutableComponentInfo();
-    info4.setPosition(info4.sample(),
-                      info4.samplePosition() + V3D(0, 0, 1e-6));
+    info4.setPosition(info4.sample(), info4.samplePosition() + V3D(0, 0, 1e-6));
     TS_ASSERT(checker.execute());
     TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
-    table =
-        AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
-            "compare_msgs");
+    table = AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
+        "compare_msgs");
     TS_ASSERT(table->cell<std::string>(0, 0).find("Sample mismatch") !=
               std::string::npos);
   }
