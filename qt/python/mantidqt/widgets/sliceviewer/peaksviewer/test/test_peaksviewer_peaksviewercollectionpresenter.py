@@ -172,7 +172,7 @@ class PeaksViewerCollectionPresenterTest(unittest.TestCase):
         presenter.append_peaksworkspace = MagicMock()
 
         presenter.rename_handle("ws", "ws1")
-        
+
         presenter.remove_peaksworkspace.assert_called_once_with("ws")
         presenter.append_peaksworkspace.assert_called_once_with("ws1")
 
