@@ -10,6 +10,7 @@
 #include "MantidAPI/TextAxis.h"
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/VectorHelper.h"
 
 namespace Mantid {
 namespace API {
@@ -71,7 +72,14 @@ void TextAxis::setValue(const std::size_t &index, const double &value) {
  * Returns the value that has been passed to it as a size_t
  */
 size_t TextAxis::indexOfValue(const double value) const {
-  return static_cast<size_t>(value);
+  auto spec_num = length();
+  std::vector<double> spectraNumbers;
+  spectraNumbers.reserve(length());
+  for (size_t i = 0; i < length(); i++) {
+    spectraNumbers.push_back(static_cast<double>(i));
+  }
+  return Mantid::Kernel::VectorHelper::indexOfValueFromCenters(spectraNumbers,
+                                                               value);
 }
 
 /** Check if two axis defined as spectra or numeric axis are equivalent
