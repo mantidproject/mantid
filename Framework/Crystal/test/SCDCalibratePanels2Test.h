@@ -29,8 +29,8 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Crystal/CrystalStructure.h"
-#include "MantidKernel/Unit.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/Unit.h"
 
 #include <boost/filesystem.hpp>
 #include <boost/math/constants/constants.hpp>
@@ -46,15 +46,17 @@ using namespace Mantid::Kernel;
 
 namespace {
 /// static logger
-  Logger g_log("SCDCalibratePanels2Test");
+Logger g_log("SCDCalibratePanels2Test");
 } // namespace
 
 class SCDCalibratePanels2Test : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static SCDCalibratePanels2Test *createSuite() { return new SCDCalibratePanels2Test(); }
-  static void destroySuite( SCDCalibratePanels2Test *suite ) { delete suite; }
+  static SCDCalibratePanels2Test *createSuite() {
+    return new SCDCalibratePanels2Test();
+  }
+  static void destroySuite(SCDCalibratePanels2Test *suite) { delete suite; }
 
   // ----------------- //
   // ----- Setup ----- //
@@ -83,7 +85,7 @@ public:
         omega_step(3.0),                         //
         TOLERANCE_L(5e-4), // this calibration has intrinsic accuracy limit of
                            // 1mm for translation
-        TOLERANCE_R(1e-5),  // this calibration has intrinsic accuracy limit of
+        TOLERANCE_R(1e-5), // this calibration has intrinsic accuracy limit of
                            // 0.1 deg for rotation
         LOGCHILDALG(false) {
     // NOTE:
@@ -93,14 +95,13 @@ public:
     std::shared_ptr<Algorithm> darkmagic =
         AlgorithmFactory::Instance().create("LoadIsawPeaks", 1);
     darkmagic->initialize();
-    darkmagic->setLogging(false);  // don't really care its output
+    darkmagic->setLogging(false); // don't really care its output
     darkmagic->setPropertyValue("Filename", "Peaks5637.integrate");
     darkmagic->setPropertyValue("OutputWorkspace", "TOPAZ_5637");
     TS_ASSERT(darkmagic->execute());
 
     m_ws = generateSimulatedWorkspace();
   }
-
 
   // ---------------------- //
   // ----- Unit Tests ----- //
@@ -519,8 +520,8 @@ private:
 
   /**
    * @brief populate peaks for the post adjustment simulated workspace
-   * 
-   * @return PeaksWorkspace_sptr 
+   *
+   * @return PeaksWorkspace_sptr
    */
   PeaksWorkspace_sptr generateSimulatedPeaksWorkspace(MatrixWorkspace_sptr ws) {
     // prepare the algs pointer
@@ -650,7 +651,6 @@ private:
     }
   }
 
-
   /**
    * @brief Run the calibration algorithm
    *
@@ -690,14 +690,14 @@ private:
 
   /**
    * @brief validate the calibration results by comparing component
-   *        positions from reference Peakworkspace and workspace adjusted 
+   *        positions from reference Peakworkspace and workspace adjusted
    *        using calibration output (xml)
-   * 
-   * @param refpws 
-   * @param refws 
-   * @param xmlFileName 
-   * @return true 
-   * @return false 
+   *
+   * @param refpws
+   * @param refws
+   * @param xmlFileName
+   * @return true
+   * @return false
    */
   bool validateCalibrationResults(PeaksWorkspace_sptr refpws,
                                   MatrixWorkspace_sptr refws,
@@ -730,7 +730,7 @@ private:
     boost::container::flat_set<std::string> BankNames;
     for (int i = 0; i < refpws->getNumberPeaks(); ++i) {
       std::string bname = refpws->getPeak(i).getBankName();
-      if (bname != "None"){
+      if (bname != "None") {
         BankNames.insert(bname);
       }
     }
@@ -744,7 +744,7 @@ private:
     for (auto bankname : BankNames) {
       // update bankname for CORELLI
       if (refpws->getInstrument()->getName().compare("CORELLI") == 0)
-          bankname.append("/sixteenpack");
+        bankname.append("/sixteenpack");
 
       if (!compareComponent(inst1, inst2, bankname)) {
         g_log.error() << "--" << bankname << " mismatch\n";
@@ -754,16 +754,15 @@ private:
 
     // all banks are the same, now the source check will make the call
     if (!compareComponent(inst1, inst2, inst1->getSource()->getName())) {
-        g_log.error() << "-- " << inst1->getSource()->getName()
-                      << " mismatch\n";
-        sameInstrument = false;
-      }
+      g_log.error() << "-- " << inst1->getSource()->getName() << " mismatch\n";
+      sameInstrument = false;
+    }
 
     return sameInstrument;
   }
 
   /**
-   * @brief compare if two components to see if they have similar 
+   * @brief compare if two components to see if they have similar
    *        translation and rotation
    *
    * @param instr1
@@ -772,8 +771,8 @@ private:
    * @return true
    * @return false
    */
-  bool compareComponent(std::shared_ptr<Instrument> & instr1,
-                        std::shared_ptr<Instrument> & instr2,
+  bool compareComponent(std::shared_ptr<Instrument> &instr1,
+                        std::shared_ptr<Instrument> &instr2,
                         std::string componentName) {
 
     std::shared_ptr<const IComponent> cmpt1 =
@@ -789,8 +788,8 @@ private:
 
     q2.inverse();
     Quat dq = q1 * q2;
-    double dang = (2*acos(dq.real())/PI*180);
-    dang = dang>180 ? 360-dang : dang;
+    double dang = (2 * acos(dq.real()) / PI * 180);
+    dang = dang > 180 ? 360 - dang : dang;
 
     double dx = std::abs(p1.X() - p2.X());
     double dy = std::abs(p1.Y() - p2.Y());
@@ -805,8 +804,8 @@ private:
     }
 
     if (!sameComponent)
-      g_log.notice() << std::setprecision(8)
-                     << "--Component " << componentName << "\n"
+      g_log.notice() << std::setprecision(8) << "--Component " << componentName
+                     << "\n"
                      << "  cali: " << p1 << "\n"
                      << "  ref: " << p2 << "\n"
                      << "    dx = " << dx << "\n"
@@ -873,6 +872,6 @@ private:
   // check praramerter
   const double TOLERANCE_L; // distance
   const double TOLERANCE_R; // rotation angle
-  const bool LOGCHILDALG; // whether to show individual alg log
+  const bool LOGCHILDALG;   // whether to show individual alg log
   const double PI{3.141592653589793238462643383279502884};
 };

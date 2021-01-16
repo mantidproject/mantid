@@ -21,17 +21,17 @@ namespace Crystal {
  * individual panels.
  * The target calibration properties include:
  * - T0: sec?
- *       time for proton to travel from reactor to target to generate neutron 
+ *       time for proton to travel from reactor to target to generate neutron
  * - L1: meters
  *       distance between target and sample
  * - L2: meters (also known as z_shift)
  *       distance between sample and the center of each panel
  * - Rot: degrees
  *       Euler angles (xyz )
- * 
+ *
  * Spirit successor of ISAW and its reincarnation: SCDCalibratePanels
-*/
-class MANTID_CRYSTAL_DLL SCDCalibratePanels2 : public Mantid::API::Algorithm{
+ */
+class MANTID_CRYSTAL_DLL SCDCalibratePanels2 : public Mantid::API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "SCDCalibratePanels"; }
@@ -47,9 +47,7 @@ public:
   int version() const override { return 2; }
 
   /// Algorithm's category, overriding a virtual method
-  const std::string category() const override {
-    return "Crystal\\Corrections";
-  }
+  const std::string category() const override { return "Crystal\\Corrections"; }
 
   /// Extra help info
   const std::vector<std::string> seeAlso() const override {
@@ -67,7 +65,8 @@ private:
   std::map<std::string, std::string> validateInputs() override;
 
   /// Private function dedicated for parsing lattice constant
-  void parseLatticeConstant(std::shared_ptr<Mantid::DataObjects::PeaksWorkspace> pws);
+  void parseLatticeConstant(
+      std::shared_ptr<Mantid::DataObjects::PeaksWorkspace> pws);
 
   /// Private function for getting names of banks to be calibrated
   void getBankNames(std::shared_ptr<Mantid::DataObjects::PeaksWorkspace> pws);
