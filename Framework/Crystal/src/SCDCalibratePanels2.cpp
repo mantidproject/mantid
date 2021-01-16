@@ -117,7 +117,6 @@ namespace Crystal {
                                        FileProperty::OptionalSave, ".csv"),
         "Path to an .csv file which contains the Calibration Table");
     // TODO:
-    //  - add option to output a CORELLI calibration table as output workspace
     //  - add option to store intermedia calibration results for additional
     //    analysis if needed
     const std::string OUTPUT("Output");
@@ -676,7 +675,6 @@ namespace Crystal {
     }
 
     g_log.notice() << "finished generating tables\n";
-    // AnalysisDataService::Instance().addOrReplace(outwsname, tablews);
     setProperty("OutputWorkspace", tablews);
 
     return tablews;
