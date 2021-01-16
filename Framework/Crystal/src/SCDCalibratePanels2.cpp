@@ -223,61 +223,10 @@ namespace Crystal {
     if (calibrateBanks)
       optimizeBanks(m_pws);
 
-    // STEP_3: generate a matrix workspace to save the calibration results
-    // NOTE:
-    //    This table workspace stores a calibration table that was originally
-    //    defined for the CORELLI instrument.
-
+    // STEP_3: generate a table workspace to save the calibration results
     Instrument_sptr instCalibrated =
         std::const_pointer_cast<Geometry::Instrument>(m_pws->getInstrument());
-
-    // Create table workspace
-    ITableWorkspace_sptr itablews = WorkspaceFactory::Instance().createTable();
-    
-    TableWorkspace_sptr tablews =
-          std::dynamic_pointer_cast<TableWorkspace>(itablews);
-
-    for (int i = 0; i < 8; ++i)
-      tablews->addColumn(calibrationTableColumnTypes[i],
-                         calibrationTableColumnNames[i]);
-
-    // The first row is always the source
-    IComponent_const_sptr source = instCalibrated->getSource();
-    V3D sourceRelPos = source->getRelativePos();
-    Mantid::API::TableRow sourceRow = tablews->appendRow();
-    // NOTE: source should not have any rotation, so we pass a zero
-    //       rotation with a fixed axis
-    sourceRow << instCalibrated->getSource()->getName() << sourceRelPos.X()
-              << sourceRelPos.Y() << sourceRelPos.Z() << 1.0 << 0.0 << 0.0
-              << 0.0;
-
-    // Loop through banks and set row values
-    for (auto bankName : m_BankNames) {
-      // CORELLLI instrument has one extra layer that pack tubes into
-      // banks, which is what we need here
-      if (instCalibrated->getName().compare("CORELLI") == 0)
-        bankName.append("/sixteenpack");
-
-      std::shared_ptr<const IComponent> bank =
-          instCalibrated->getComponentByName(bankName);
-
-      Quat relRot = bank->getRelativeRot();
-      V3D pos1 = bank->getRelativePos();
-
-      // Calculate cosines using relRot
-      double deg, xAxis, yAxis, zAxis;
-      relRot.getAngleAxis(deg, xAxis, yAxis, zAxis);
-
-      // Append a new row
-      Mantid::API::TableRow bankRow = tablews->appendRow();
-      // Row and positions
-      bankRow << bankName << pos1.X() << pos1.Y() << pos1.Z() << xAxis << yAxis
-              << zAxis << deg;
-    }
-
-    g_log.notice() << "finished generating tables\n";
-    // AnalysisDataService::Instance().addOrReplace(outwsname, tablews);
-    setProperty("OutputWorkspace", tablews);
+    TableWorkspace_sptr tablews = generateCalibrationTable(instCalibrated);
 
     // STEP_4: Write to disk if required
     if (!XmlFilename.empty())
@@ -669,6 +618,68 @@ namespace Crystal {
     mv_alg->setProperty("Z", dz);
     mv_alg->setProperty("RelativePosition", true);
     mv_alg->executeAsChildAlg();
+  }
+
+  /**
+   * @brief Generate a tableworkspace to store the calibration results
+   *
+   * @param instrument  :: calibrated instrument
+   * @return DataObjects::TableWorkspace_sptr
+   */
+  DataObjects::TableWorkspace_sptr
+  SCDCalibratePanels2::generateCalibrationTable(
+      std::shared_ptr<Geometry::Instrument> &instrument) {
+    g_log.notice()
+        << "Generate a TableWorkspace to store calibration results.\n";
+
+    // Create table workspace
+    ITableWorkspace_sptr itablews = WorkspaceFactory::Instance().createTable();
+    TableWorkspace_sptr tablews =
+        std::dynamic_pointer_cast<TableWorkspace>(itablews);
+
+    for (int i = 0; i < 8; ++i)
+      tablews->addColumn(calibrationTableColumnTypes[i],
+                         calibrationTableColumnNames[i]);
+
+    // The first row is always the source
+    IComponent_const_sptr source = instrument->getSource();
+    V3D sourceRelPos = source->getRelativePos();
+    Mantid::API::TableRow sourceRow = tablews->appendRow();
+    // NOTE: source should not have any rotation, so we pass a zero
+    //       rotation with a fixed axis
+    sourceRow << instrument->getSource()->getName() << sourceRelPos.X()
+              << sourceRelPos.Y() << sourceRelPos.Z() << 1.0 << 0.0 << 0.0
+              << 0.0;
+
+    // Loop through banks and set row values
+    for (auto bankName : m_BankNames) {
+      // CORELLLI instrument has one extra layer that pack tubes into
+      // banks, which is what we need here
+      if (instrument->getName().compare("CORELLI") == 0)
+        bankName.append("/sixteenpack");
+
+      std::shared_ptr<const IComponent> bank =
+          instrument->getComponentByName(bankName);
+
+      Quat relRot = bank->getRelativeRot();
+      V3D pos1 = bank->getRelativePos();
+
+      // Calculate cosines using relRot
+      double deg, xAxis, yAxis, zAxis;
+      relRot.getAngleAxis(deg, xAxis, yAxis, zAxis);
+
+      // Append a new row
+      Mantid::API::TableRow bankRow = tablews->appendRow();
+      // Row and positions
+      bankRow << bankName << pos1.X() << pos1.Y() << pos1.Z() << xAxis << yAxis
+              << zAxis << deg;
+    }
+
+    g_log.notice() << "finished generating tables\n";
+    // AnalysisDataService::Instance().addOrReplace(outwsname, tablews);
+    setProperty("OutputWorkspace", tablews);
+
+    return tablews;
   }
 
   /**

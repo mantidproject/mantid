@@ -89,6 +89,10 @@ private:
                        double rvz, double rang, std::string cmptName,
                        DataObjects::PeaksWorkspace_sptr &pws);
 
+  /// Generate a Table workspace to store the calibration results
+  DataObjects::TableWorkspace_sptr
+  generateCalibrationTable(std::shared_ptr<Geometry::Instrument> &instrument);
+
   /// Save to xml file for Mantid to load
   void saveXmlFile(const std::string &FileName,
                    boost::container::flat_set<std::string> &AllBankNames,
