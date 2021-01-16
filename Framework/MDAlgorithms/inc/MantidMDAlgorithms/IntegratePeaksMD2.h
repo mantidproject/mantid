@@ -66,8 +66,8 @@ private:
                      const Mantid::Kernel::V3D &pos,
                      const coord_t &radiusSquared, const bool &qAxisBool,
                      const double &bgDensity,
-                     std::vector<Mantid::Kernel::V3D> &eigenvects,
-                     std::vector<double> &eigenvals);
+                     std::array<Mantid::Kernel::V3D, 3> &eigenvects,
+                     std::array<double, 3> &eigenvals);
 
   // get matrix to transform from Qlab to plane perp to Q
   void getPinv(const Mantid::Kernel::V3D &q,

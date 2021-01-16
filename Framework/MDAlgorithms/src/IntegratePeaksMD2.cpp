@@ -413,8 +413,8 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
         // flat bg to subtract
         const auto bgDensity =
             bgSignal / (4 * M_PI * pow(PeakRadiusVector[i], 3) / 3);
-        std::vector<V3D> eigenvects;
-        std::vector<double> eigenvals;
+        std::array<V3D, 3> eigenvects;
+        std::array<double, 3> eigenvals;
         findEllipsoid<MDE, nd>(
             ws, getRadiusSq, pos,
             static_cast<coord_t>(pow(PeakRadiusVector[i], 2)), qAxisIsFixed,
@@ -445,9 +445,9 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
           // get radii in same proprtion as eigenvalues
           auto max_stdev =
               pow(*std::max_element(eigenvals.begin(), eigenvals.end()), 0.5);
-          std::vector<double> peakRadii(3, 0.0);
-          std::vector<double> backgroundInnerRadii(3, 0.0);
-          std::vector<double> backgroundOuterRadii(3, 0.0);
+          std::array<double, 3> peakRadii{{0., 0., 0.}};
+          std::array<double, 3> backgroundInnerRadii{{0., 0., 0.}};
+          std::array<double, 3> backgroundOuterRadii{{0., 0., 0.}};
           for (size_t irad = 0; irad < peakRadii.size(); irad++) {
             auto scale = pow(eigenvals[irad], 0.5) / max_stdev;
             peakRadii[irad] = PeakRadiusVector[i] * scale;
@@ -732,8 +732,8 @@ void IntegratePeaksMD2::findEllipsoid(
     typename MDEventWorkspace<MDE, nd>::sptr ws,
     const CoordTransform &getRadiusSq, const V3D &pos,
     const coord_t &radiusSquared, const bool &qAxisIsFixed,
-    const double &bgDensity, std::vector<V3D> &eigenvects,
-    std::vector<double> &eigenvals) {
+    const double &bgDensity, std::array<V3D, 3> &eigenvects,
+    std::array<double, 3> &eigenvals) {
   double w_sum = 0.0;  // sum of weights
   Matrix<double> Evec; // hold eigenvectors
   Matrix<double> Eval; // hold eigenvals in diag
@@ -825,11 +825,11 @@ void IntegratePeaksMD2::findEllipsoid(
   // normalise the covariance matrix
   cov_mat /= w_sum;                // normalise by sum of weights
   cov_mat.Diagonalise(Evec, Eval); // 3 x 3 matrices
-  eigenvals = Eval.Diagonal();
+  std::copy_n(Eval.Diagonal().begin(), 3, eigenvals.begin());
   if (qAxisIsFixed) {
     // insert variance along Q (first eigenvector)
-    eigenvals.insert(eigenvals.begin(), var_Qhat / w_sum);
-    eigenvects.push_back(pos / pos.norm());
+    eigenvals[0] = var_Qhat / w_sum;
+    eigenvects[0] = pos / pos.norm();
   }
   // set min eigenval to be small but non-zero (1e-6)
   // when no discernible peak above background
@@ -838,10 +838,11 @@ void IntegratePeaksMD2::findEllipsoid(
   // populate rest of eigenvect/vals
   for (size_t ivect = 0; ivect < cov_mat.numRows(); ++ivect) {
     if (!qAxisIsFixed) {
-      eigenvects.push_back(V3D(Evec[0][ivect], Evec[1][ivect], Evec[2][ivect]));
+      eigenvects[1 + ivect] =
+          V3D(Evec[0][ivect], Evec[1][ivect], Evec[2][ivect]);
     } else {
       // transform back to Qlab basis
-      eigenvects.push_back(V3D(0.0, 0.0, 0.0));
+      eigenvects[1 + ivect] = V3D(0.0, 0.0, 0.0);
       for (size_t ibasis = 0; ibasis < Evec.numRows(); ++ibasis) {
         eigenvects.back() +=
             V3D(Pinv[ibasis + 1][0], Pinv[ibasis + 1][1], Pinv[ibasis + 1][2]) *

@@ -14,29 +14,35 @@ namespace Mantid {
 namespace DataObjects {
 
 PeakShapeEllipsoid::PeakShapeEllipsoid(
-    const std::vector<Kernel::V3D> &directions,
-    const std::vector<double> &abcRadii,
-    const std::vector<double> &abcRadiiBackgroundInner,
-    const std::vector<double> &abcRadiiBackgroundOuter,
+    const std::array<Kernel::V3D, 3> &directions,
+    const std::array<double, 3> &abcRadii,
+    const std::array<double, 3> &abcRadiiBackgroundInner,
+    const std::array<double, 3> &abcRadiiBackgroundOuter,
     Kernel::SpecialCoordinateSystem frame, std::string algorithmName,
     int algorithmVersion)
-    : PeakShapeBase(frame, std::move(algorithmName), algorithmVersion),
-      m_directions(directions), m_abc_radii(abcRadii),
-      m_abc_radiiBackgroundInner(abcRadiiBackgroundInner),
-      m_abc_radiiBackgroundOuter(abcRadiiBackgroundOuter) {
+    : PeakShapeBase(frame, std::move(algorithmName), algorithmVersion) {
 
   if (directions.size() != 3) {
     throw std::invalid_argument("directions must be of size 3");
   }
+  std::copy_n(directions.begin(), 3, m_directions.begin());
+
   if (abcRadii.size() != 3) {
     throw std::invalid_argument("radii must be of size 3");
   }
+  std::copy_n(abcRadii.begin(), 3, m_abc_radii.begin());
+
   if (abcRadiiBackgroundInner.size() != 3) {
     throw std::invalid_argument("radii inner must be of size 3");
   }
+  std::copy_n(abcRadiiBackgroundInner.begin(), 3,
+              m_abc_radiiBackgroundInner.begin());
+
   if (abcRadiiBackgroundOuter.size() != 3) {
     throw std::invalid_argument("radii outer must be of size 3");
   }
+  std::copy_n(abcRadiiBackgroundOuter.begin(), 3,
+              m_abc_radiiBackgroundOuter.begin());
 }
 
 bool PeakShapeEllipsoid::operator==(const PeakShapeEllipsoid &other) const {
@@ -47,19 +53,21 @@ bool PeakShapeEllipsoid::operator==(const PeakShapeEllipsoid &other) const {
          other.abcRadiiBackgroundOuter() == this->abcRadiiBackgroundOuter();
 }
 
-const std::vector<double> &PeakShapeEllipsoid::abcRadii() const {
+const std::array<double, 3> &PeakShapeEllipsoid::abcRadii() const {
   return m_abc_radii;
 }
 
-const std::vector<double> &PeakShapeEllipsoid::abcRadiiBackgroundInner() const {
+const std::array<double, 3> &
+PeakShapeEllipsoid::abcRadiiBackgroundInner() const {
   return m_abc_radiiBackgroundInner;
 }
 
-const std::vector<double> &PeakShapeEllipsoid::abcRadiiBackgroundOuter() const {
+const std::array<double, 3> &
+PeakShapeEllipsoid::abcRadiiBackgroundOuter() const {
   return m_abc_radiiBackgroundOuter;
 }
 
-const std::vector<Kernel::V3D> &PeakShapeEllipsoid::directions() const {
+const std::array<Kernel::V3D, 3> &PeakShapeEllipsoid::directions() const {
   return m_directions;
 }
 
@@ -114,21 +122,21 @@ std::string PeakShapeEllipsoid::shapeName() const {
 }
 
 boost::optional<double> PeakShapeEllipsoid::radius(RadiusType type) const {
-  std::vector<double>::const_iterator it;
+  boost::optional<double> radius;
   switch (type) {
   case (RadiusType::Radius):
-    it = std::max_element(m_abc_radii.cbegin(), m_abc_radii.cend());
+    radius = *std::max_element(m_abc_radii.cbegin(), m_abc_radii.cend());
     break;
   case (RadiusType::OuterRadius):
-    it = std::max_element(m_abc_radiiBackgroundOuter.cbegin(),
-                          m_abc_radiiBackgroundOuter.cend());
+    radius = *std::max_element(m_abc_radiiBackgroundOuter.cbegin(),
+                               m_abc_radiiBackgroundOuter.cend());
     break;
   case (RadiusType::InnerRadius):
-    it = std::max_element(m_abc_radiiBackgroundInner.cbegin(),
-                          m_abc_radiiBackgroundInner.cend());
+    radius = *std::max_element(m_abc_radiiBackgroundInner.cbegin(),
+                               m_abc_radiiBackgroundInner.cend());
     break;
   }
-  return boost::optional<double>{*it};
+  return radius;
 }
 
 const std::string PeakShapeEllipsoid::ellipsoidShapeName() {
