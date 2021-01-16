@@ -253,6 +253,10 @@ namespace Crystal {
 
     // Loop through banks and set row values
     for (auto bankName : m_BankNames) {
+      // CORELLLI instrument has one extra layer that pack tubes into
+      // banks, which is what we need here
+      if (instCalibrated->getName().compare("CORELLI") == 0)
+        bankName.append("/sixteenpack");
 
       std::shared_ptr<const IComponent> bank =
           instCalibrated->getComponentByName(bankName);
@@ -276,8 +280,6 @@ namespace Crystal {
     setProperty("OutputWorkspace", tablews);
 
     // STEP_4: Write to disk if required
-
-
     if (!XmlFilename.empty())
       saveXmlFile(XmlFilename, m_BankNames, instCalibrated);
 
