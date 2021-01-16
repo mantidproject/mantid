@@ -101,7 +101,8 @@ private:
                       double T0);
 
   /// Save the calibration table to a CSV file
-  void saveCalibrationTable(const std::string &FileName);
+  void saveCalibrationTable(const std::string &FileName,
+                            DataObjects::TableWorkspace_sptr &tws);
 
   /// unique vars for a given instance of calibration
   double m_a, m_b, m_c, m_alpha, m_beta, m_gamma;
@@ -119,14 +120,14 @@ private:
   const double PI{3.141592653589793238462643383279502884};
 
   // Column names and types
-  const std::vector<std::string> calibrationTableColumnNames{
+  const std::string calibrationTableColumnNames[8] = {
       "ComponentName",    "Xposition",        "Yposition",
       "Zposition",        "XdirectionCosine", "YdirectionCosine",
       "ZdirectionCosine", "RotationAngle"};
-  const std::vector<std::string> calibrationTableColumnTypes{
+  const std::string calibrationTableColumnTypes[8] = {
       "str",    "double", "double", "double",
       "double", "double", "double", "double"};
-  
+
   boost::container::flat_set<std::string> m_BankNames;
   Mantid::DataObjects::TableWorkspace_sptr mCaliTable;
 };

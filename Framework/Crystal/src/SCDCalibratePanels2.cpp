@@ -223,43 +223,39 @@ namespace Crystal {
     if (calibrateBanks)
       optimizeBanks(m_pws);
 
+    // STEP_3: generate a matrix workspace to save the calibration results
+    // NOTE:
+    //    This table workspace stores a calibration table that was originally
+    //    defined for the CORELLI instrument.
+
     Instrument_sptr instCalibrated =
         std::const_pointer_cast<Geometry::Instrument>(m_pws->getInstrument());
 
-    // STEP_3: generate a matrix workspace to save the calibration results
-    // NOTE:
-    //    This matrix workspace stores a calibration table that was originally
-    //    defined for the CORELLI instrument.
-
-    // TODO: iterate through all components and generate the table
-    
     // Create table workspace
     ITableWorkspace_sptr itablews = WorkspaceFactory::Instance().createTable();
     
     TableWorkspace_sptr tablews =
           std::dynamic_pointer_cast<TableWorkspace>(itablews);
 
-    // Set up columns
-    tablews->addColumn("str", "ComponentName"); // first column as component name
+    for (int i = 0; i < 8; ++i)
+      tablews->addColumn(calibrationTableColumnTypes[i],
+                         calibrationTableColumnNames[i]);
 
-    for (size_t i = 1; i < calibrationTableColumnNames.size();
-         ++i) {
-      std::string colname = calibrationTableColumnNames[i];
-      std::string type = calibrationTableColumnTypes[i];
-      tablews->addColumn(type, colname);
-    }
-
+    // The first row is always the source
     IComponent_const_sptr source = instCalibrated->getSource();
     V3D sourceRelPos = source->getRelativePos();
     Mantid::API::TableRow sourceRow = tablews->appendRow();
-    sourceRow << sourceRelPos.X() << sourceRelPos.Y() << sourceRelPos.Z()
-    		  << 1 << 0 << 0 << 0;
+    // NOTE: source should not have any rotation, so we pass a zero
+    //       rotation with a fixed axis
+    sourceRow << instCalibrated->getSource()->getName() << sourceRelPos.X()
+              << sourceRelPos.Y() << sourceRelPos.Z() << 1.0 << 0.0 << 0.0
+              << 0.0;
 
     // Loop through banks and set row values
     for (auto bankName : m_BankNames) {
 
       std::shared_ptr<const IComponent> bank =
-    		  instCalibrated->getComponentByName(bankName);
+          instCalibrated->getComponentByName(bankName);
 
       Quat relRot = bank->getRelativeRot();
       V3D pos1 = bank->getRelativePos();
@@ -267,19 +263,16 @@ namespace Crystal {
       // Calculate cosines using relRot
       double deg, xAxis, yAxis, zAxis;
       relRot.getAngleAxis(deg, xAxis, yAxis, zAxis);
-      double xCosine = cos(xAxis), yCosine = cos(yAxis), zCosine = cos(zAxis);
-
-      // TODO: SET rotAngle TO CORRECT VALUE
-      double rotAngle = 0;
 
       // Append a new row
       Mantid::API::TableRow bankRow = tablews->appendRow();
       // Row and positions
-      bankRow << pos1.X() << pos1.Y() << pos1.Z() << xCosine
-              << yCosine << zCosine << rotAngle;
+      bankRow << bankName << pos1.X() << pos1.Y() << pos1.Z() << xAxis << yAxis
+              << zAxis << deg;
     }
 
-    //AnalysisDataService::Instance().addOrReplace(outwsname, tablews);
+    g_log.notice() << "finished generating tables\n";
+    // AnalysisDataService::Instance().addOrReplace(outwsname, tablews);
     setProperty("OutputWorkspace", tablews);
 
     // STEP_4: Write to disk if required
@@ -292,7 +285,7 @@ namespace Crystal {
       saveIsawDetCal(DetCalFilename, m_BankNames, instCalibrated, m_T0);
 
     if (!CSVFilename.empty())
-      saveCalibrationTable(CSVFilename);
+      saveCalibrationTable(CSVFilename, tablews);
 
     // STEP_4: Cleanup
   }
@@ -853,13 +846,15 @@ namespace Crystal {
   }
 
   /**
-   * @brief Save the calibration table into a csv file
-   *
-   * @param FileName
+   * @brief Save the CORELLI calibration table into a CSV file
+   * 
+   * @param FileName 
+   * @param tws 
    */
-  void SCDCalibratePanels2::saveCalibrationTable(const std::string &FileName) {
+  void SCDCalibratePanels2::saveCalibrationTable(
+      const std::string &FileName, DataObjects::TableWorkspace_sptr &tws) {
     API::IAlgorithm_sptr alg = createChildAlgorithm("SaveAscii");
-    alg->setProperty("InputWorkspace", mCaliTable);
+    alg->setProperty("InputWorkspace", tws);
     alg->setProperty("Filename", FileName);
     alg->setPropertyValue("CommentIndicator", "#");
     alg->setPropertyValue("Separator", "CSV");
