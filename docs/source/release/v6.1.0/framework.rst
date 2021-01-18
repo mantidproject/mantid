@@ -20,7 +20,7 @@ Concepts
 Algorithms
 ----------
 
-- :ref:`CalculateEfficiency2 <algm-CalculateEfficiency2>` has a new property, InputWorkspaceGroup,
+- :ref:`CalculateEfficiency <algm-CalculateEfficiency>` has a new property, InputWorkspaceGroup,
   that is used to accept more than one flood map, which is subsequently merged, averaged, and masked
   spectra are filled with data (if available) from other entries of the input group.
 
@@ -33,6 +33,19 @@ Data Objects
 
 Python
 ------
+
+
+Installation
+------------
+
+
+MantidWorkbench
+---------------
+
+See :doc:`mantidworkbench`.
+
+SliceViewer
+-----------
 
 
 Improvements
