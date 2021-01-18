@@ -671,12 +671,12 @@ private:
     SCDCalibratePanels2 alg;
     alg.initialize();
     alg.setProperty("PeakWorkspace", pws);
-    alg.setProperty("a", silicon_a);
-    alg.setProperty("b", silicon_b);
-    alg.setProperty("c", silicon_c);
-    alg.setProperty("alpha", silicon_alpha);
-    alg.setProperty("beta", silicon_beta);
-    alg.setProperty("gamma", silicon_gamma);
+    alg.setProperty("LatticeA", silicon_a);
+    alg.setProperty("LatticeB", silicon_b);
+    alg.setProperty("LatticeC", silicon_c);
+    alg.setProperty("Alpha", silicon_alpha);
+    alg.setProperty("Beta", silicon_beta);
+    alg.setProperty("Gamma", silicon_gamma);
     alg.setProperty("CalibrateT0", calibrateT0);
     alg.setProperty("CalibrateL1", calibrateL1);
     alg.setProperty("CalibrateBanks", calibrateBanks);
