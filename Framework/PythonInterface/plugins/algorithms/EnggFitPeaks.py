@@ -387,6 +387,7 @@ class EnggFitPeaks(PythonAlgorithm):
         create_alg.execute()
 
         ws_from = create_alg.getProperty("OutputWorkspace").value
+        
         # finally convert units, like: sapi.ConvertUnits(InputWorkspace=ws_from, Target=target_units)
         conv_alg = self.createChildAlgorithm("ConvertUnits")
         conv_alg.setProperty("InputWorkspace", ws_from)
