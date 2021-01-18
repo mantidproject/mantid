@@ -110,7 +110,6 @@ private:
   /// unique vars for a given instance of calibration
   double m_a, m_b, m_c, m_alpha, m_beta, m_gamma;
   double m_T0 = 0.0;
-  double m_L1 = 2000.0;
   double m_tolerance_translation = 1e-4; // meters
   double m_tolerance_rotation = 1e-3;    // degree
   // The following bounds are set based on information provided by the
@@ -120,7 +119,6 @@ private:
   double m_source_translation_bounds = 0.1; // meter
   bool LOGCHILDALG{false};
   const int MINIMUM_PEAKS_PER_BANK{6};
-  const double PI{3.141592653589793238462643383279502884};
 
   // Column names and types
   const std::string calibrationTableColumnNames[8] = {
