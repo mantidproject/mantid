@@ -40,7 +40,9 @@ public:
 
   LoadILLSANSTest() {
     ConfigService::Instance().appendDataSearchSubDir("ILL/D11/");
+    ConfigService::Instance().appendDataSearchSubDir("ILL/D11B/");
     ConfigService::Instance().appendDataSearchSubDir("ILL/D22/");
+    ConfigService::Instance().appendDataSearchSubDir("ILL/D22B/");
     ConfigService::Instance().appendDataSearchSubDir("ILL/D33/");
     ConfigService::Instance().appendDataSearchSubDir("ILL/D16/");
     ConfigService::Instance().setFacility("ILL");
