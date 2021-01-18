@@ -195,16 +195,22 @@ def imshow_sampling(axes,
             # for MatrixWorkspace the x extent obtained from dimension 0 corresponds to the first spectrum
             # this is not correct in case of ragged workspaces, where we need to obtain the global xmin and xmax
             # moreover the axis might be in ascending or descending order, so x[0] is not necessarily the minimum
+            xmax, xmin = None, None  # don't initialise with values from first spectrum as could be a monitor
+            si = workspace.spectrumInfo()
             for i in range(workspace.getNumberHistograms()):
-                x_axis = workspace.readX(i)
-                x_i_first = x_axis[0]
-                x_i_last = x_axis[-1]
-                x_i_min = min(x_i_first, x_i_last)
-                x_i_max = max(x_i_first, x_i_last)
-                if x_i_min < x0:
-                    x0 = x_i_min
-                if x_i_max > x1:
-                    x1 = x_i_max 
+                if si.hasDetectors(i) and not si.isMonitor(i):
+                    x_axis = workspace.readX(i)
+                    x_i_first = x_axis[0]
+                    x_i_last = x_axis[-1]
+                    x_i_min = min([x_i_first, x_i_last])
+                    x_i_max = max([x_i_first, x_i_last])
+                    # effectively ignore spectra with nan or inf values
+                    if np.isfinite(x_i_min):
+                        xmin = min([x_i_min, xmin]) if xmin else x_i_min
+                    if np.isfinite(x_i_max):
+                        xmax = max([x_i_max, xmax]) if xmax else x_i_max
+            x0 = xmin if xmin else x0
+            x1 = xmax if xmax else x1
 
         if workspace.getDimension(1).getNBins() == workspace.getAxis(1).length():
             width = workspace.getDimension(1).getBinWidth()
