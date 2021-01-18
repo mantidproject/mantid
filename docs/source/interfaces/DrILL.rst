@@ -11,7 +11,7 @@ the reduction of data measured on different ILL instruments. Here are the
 currently supported instruments:
 
     * D11: SANS
-    * D16: SANS
+    * D16: SANS, SANS Sample scan
     * D17: Reflectometry
     * D22: SANS
     * D33: SANS
@@ -67,7 +67,8 @@ acquisition mode.
 
 To get further information on the currently supported algorithms:
 
-    * SANS: :ref:`SANSILLAutoProcess <algm-SANSILLAutoProcess>`
+    * SANS: :ref:`SANSILLAutoProcess <algm-SANSILLAutoProcess>` and
+      :ref:`SANSILLParameterScan <algm-SANSILLParameterScan>`
     * Reflectometry: :ref:`ReflectometryILLAutoProcess <algm-ReflectometryILLAutoProcess>`
     * Powder diffraction: :ref:`PowderILLDetectorScan <algm-PowderILLDetectorScan>` and
       :ref:`PowderILLParameterScan <algm-PowderILLParameterScan>`

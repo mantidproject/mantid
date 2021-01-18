@@ -42,6 +42,7 @@ Improvements
 - Slice Viewer replots the workspace when it is modified outside the Slice Viewer.
 - A system to group samples and avoid repetition in DrILL has been added. See the :ref:`DrILL documentation <DrILL-ref>` for more information.
 - In the plot config, multiple curves can be selected and removed at once. The delete key was added as a shortcut.
+- Support for D16 sample scan mode in DrILL.
 
 Bugfixes
 ########
