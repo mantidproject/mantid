@@ -20,6 +20,7 @@ Algorithms and instruments
 Improvements
 ############
 
+ - Added instrument definitions for the two new PSD based multi-panel SANS instruments D11B and D22B at the ILL.
  - In :ref:`SANSILLAutoProcess <algm-SANSILLAutoProcess>`, the beam radius can be different for each distance.
    A new parameter, TransmissionBeamRadius, has been added to set the beam radius for transmission experiments.
    The default value of all beam radii is now 0.1m.
@@ -42,5 +43,7 @@ Bugfixes
   throw a Runtime Error.
 - ISIS SANS will print the name of any missing maskfiles instead of an empty name.
 - Fixed a bug in ISIS SANS GUI with the `Save Other` dialog.
+- Fixed a bug in ISIS SANS GUI sum runs tab, where clicking browse and then cancelling the file picker dialog caused
+  a crash.
 
 :ref:`Release 6.0.0 <v6.0.0>`

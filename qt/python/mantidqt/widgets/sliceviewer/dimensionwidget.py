@@ -187,6 +187,7 @@ class Dimension(QWidget):
         self.slider = QSlider(Qt.Horizontal)
         self.slider.setRange(0, self.nbins - 1)
         self.slider.valueChanged.connect(self.slider_changed)
+        self.update_value_from_slider = True
 
         self.spinbox = QDoubleSpinBox()
         self.spinbox.setDecimals(3)
@@ -264,7 +265,8 @@ class Dimension(QWidget):
         self.update_slider()
 
     def slider_changed(self):
-        self.value = self.get_bin_center(self.slider.value())
+        if self.update_value_from_slider:
+            self.value = self.get_bin_center(self.slider.value())
         self.update_spinbox()
         self.valueChanged.emit()
 
@@ -281,7 +283,6 @@ class Dimension(QWidget):
     def set_value(self, value):
         self.value = value
         self.update_slider()
-        self.update_spinbox()
 
     def get_value(self):
         return self.value
@@ -354,3 +355,17 @@ class DimensionNonIntegrated(Dimension):
             self.spinBins.hide()
             self.spinThick.hide()
             self.rebinLabel.hide()
+
+    def set_value(self, value):
+        """Override the set_value for MDE, this allows the exact value to be
+        set instead of limiting to the value of the slider. This
+        allows when selecting a peak to go to the exact layer where
+        the peak is.
+
+        """
+        self.value = value
+        # temporary disable updating value from slider change
+        self.update_value_from_slider = False
+        self.update_slider()
+        self.update_value_from_slider = True
+        self.update_spinbox()

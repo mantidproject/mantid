@@ -67,6 +67,7 @@ public:
   void notifyAutoreductionPaused() override;
   void notifyAutoreductionResumed() override;
   void notifyInstrumentChanged(std::string const &instrumentName) override;
+  void notifyAllWorkspacesDeleted() override;
   void restoreDefaults() override;
 
 protected:
