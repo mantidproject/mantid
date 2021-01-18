@@ -645,6 +645,8 @@ void LoadILLSANS::moveDetectorsD33(const DetectorPosition &detPos) {
  * Move detectors in Z axis (X,Y are kept constant)
  * @param distance : the distance to move along Z axis [meters]
  * @param componentName : name of the component to move
+ * @param relative : whether the distance given is relative to the current
+ * position or absolute
  */
 void LoadILLSANS::moveDetectorDistance(double distance,
                                        const std::string &componentName,
