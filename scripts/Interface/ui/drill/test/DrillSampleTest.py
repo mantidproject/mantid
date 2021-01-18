@@ -19,22 +19,7 @@ class DrillSampleTest(unittest.TestCase):
         self.assertDictEqual(self.sample._parameters, {})
 
     def test_setParameters(self):
-        oldRundex = {
-                "SampleRuns": "7909+7925,7893,7877",
-                "SampleTransmissionRuns": "7860",
-                "AbsorberRuns": "7847+8209,7837+8187,7827+8165",
-                "BeamRuns": "7846,7836,7826",
-                "ContainerRuns": "8367,8349,8331",
-                "TransmissionBeamRuns": "7815+7825+7872+7944-7953",
-                "OutputWorkspace": "GM110",
-                "CustomOptions": {
-                    "SampleThickness": "0.2"
-                    },
-                "MaskFiles": "maskBeamLowQ,maskBeamMiddleQ,maskBeamHighQ",
-                "ContainerTransmissionRuns": "8313",
-                "ReferenceFiles": "007845_Sample,007845_Sample,007835_Sample"
-                }
-        newRundex = {
+        params = {
                 "SampleRuns": "7909+7925,7893,7877",
                 "SampleTransmissionRuns": "7860",
                 "AbsorberRuns": "7847+8209,7837+8187,7827+8165",
@@ -47,10 +32,8 @@ class DrillSampleTest(unittest.TestCase):
                 "ReferenceFiles": "007845_Sample,007845_Sample,007835_Sample",
                 "SampleThickness": "0.2"
                 }
-        self.sample.setParameters(newRundex)
-        self.assertDictEqual(self.sample._parameters, newRundex)
-        self.sample.setParameters(oldRundex)
-        self.assertDictEqual(self.sample._parameters, newRundex)
+        self.sample.setParameters(params)
+        self.assertDictEqual(self.sample._parameters, params)
 
     def test_getParameters(self):
         self.sample._parameters = {"p1": "v1", "p2": "v2"}

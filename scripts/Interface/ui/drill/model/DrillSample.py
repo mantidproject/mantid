@@ -27,10 +27,6 @@ class DrillSample:
             parameters (dict(str:str)): parameter key:value pairs
         """
         self._parameters = {k:v for k,v in parameters.items()}
-        # for backward compatibility
-        if "CustomOptions" in self._parameters:
-            self._parameters.update(self._parameters["CustomOptions"])
-            del self._parameters["CustomOptions"]
 
     def getParameters(self):
         """
