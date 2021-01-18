@@ -87,6 +87,7 @@ void SCDCalibratePanels2ObjFunc::function1D(double *out, const double *xValues,
   //         one vector, there is no need to construct a
   //         xValues
   UNUSED_ARG(xValues);
+  UNUSED_ARG(order);
 
   // Get workspace and component name (string type)
   m_ws = std::move(AnalysisDataService::Instance().retrieveWS<Workspace>(
