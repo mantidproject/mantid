@@ -7,9 +7,9 @@
 #pragma once
 
 #include "DllConfig.h"
-#include "IndexTypes.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidQtWidgets/Common/IndexTypes.h"
 
 #include "MantidAPI/ITableWorkspace.h"
 
@@ -18,6 +18,8 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
+using namespace MantidWidgets;
+
 struct ParameterValue {
   ParameterValue() : value(0) {}
   explicit ParameterValue(double val) : value(val) {}

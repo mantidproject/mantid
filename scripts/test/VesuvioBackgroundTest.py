@@ -6,8 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from mantid.simpleapi import *
 from vesuvio.backgrounds import (create_from_str, PolynomialBackground)
+
 
 # --------------------------------------------------------------------------------
 # Polynomial
@@ -34,6 +34,7 @@ class PolynomialBackgroundTest(unittest.TestCase):
 
         expected = "name=Polynomial,n=2,A0=2.000000,A1=3.000000,A2=4.000000"
         self.assertEqual(expected, background.create_fit_function_str(param_values, param_prefix="f1."))
+
 
 if __name__ == '__main__':
     unittest.main()

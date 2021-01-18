@@ -186,7 +186,7 @@ void MuonAnalysisFitFunctionPresenter::updateNumberOfDatasets(int nDatasets) {
   for (const auto &name : m_fitBrowser->getWorkspaceNamesToFit()) {
     wsNames.append(QString::fromStdString(name));
   }
-  m_funcBrowser->setDatasetNames(wsNames);
+  m_funcBrowser->setDatasets(wsNames);
 }
 
 /**

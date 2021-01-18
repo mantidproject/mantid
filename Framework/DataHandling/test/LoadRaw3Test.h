@@ -1020,7 +1020,7 @@ public:
     AnalysisDataService::Instance().remove(outputSpace);
   }
 
-  void test_withAlternativeDatastream() {
+  void testLoadFromCombinedLogFile() {
     LoadRaw3 loader13;
     if (!loader13.isInitialized())
       loader13.initialize();

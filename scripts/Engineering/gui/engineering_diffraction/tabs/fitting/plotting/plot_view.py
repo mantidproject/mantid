@@ -7,7 +7,7 @@
 from qtpy import QtWidgets
 from qtpy.QtCore import Qt
 from qtpy.QtGui import QCursor
-from qtpy.QtWidgets import QMenu
+from qtpy.QtWidgets import QDockWidget, QMainWindow, QMenu
 from mantidqt.utils.qt import load_ui
 from matplotlib.figure import Figure
 from matplotlib.backends.qt_compat import is_pyqt5
@@ -32,6 +32,8 @@ class FittingPlotView(QtWidgets.QWidget, Ui_plot):
         self.toolbar = None
         self.fitprop_toolbar = None
         self.fit_browser = None
+        self.plot_dock = None
+        self.dock_window = None
 
         self.setup_figure()
         self.setup_toolbar()
@@ -43,10 +45,26 @@ class FittingPlotView(QtWidgets.QWidget, Ui_plot):
         self.figure.add_subplot(111, projection="mantid")
         self.figure.tight_layout()
         self.toolbar = FittingPlotToolbar(self.figure.canvas, self, False)
-        self.vLayout_plot.addWidget(self.toolbar)
-        self.vLayout_plot.addWidget(self.figure.canvas)
+        self.toolbar.setMovable(False)
+
+        self.dock_window = QMainWindow(self.group_plot)
+        self.dock_window.setWindowFlags(Qt.Widget)
+        self.dock_window.setDockOptions(QMainWindow.AnimatedDocks)
+        self.dock_window.setCentralWidget(self.toolbar)
+        self.plot_dock = QDockWidget()
+        self.plot_dock.setWidget(self.figure.canvas)
+        self.plot_dock.setFeatures(QDockWidget.DockWidgetFloatable | QDockWidget.DockWidgetMovable)
+        self.plot_dock.setAllowedAreas(Qt.BottomDockWidgetArea)
+        self.plot_dock.setWindowTitle("Fit Plot")
+        self.dock_window.addDockWidget(Qt.BottomDockWidgetArea, self.plot_dock)
+        self.vLayout_plot.addWidget(self.dock_window)
+
         self.fit_browser = EngDiffFitPropertyBrowser(self.figure.canvas,
                                                      ToolbarStateManager(self.toolbar))
+        # remove SequentialFit from fit menu (implemented a different way)
+        qmenu = self.fit_browser.getFitMenu()
+        qmenu.removeAction([qact for qact in qmenu.actions() if qact.text() == "Sequential Fit"][0])
+        # hide unnecessary properties of browser
         hide_props = ['StartX', 'EndX', 'Minimizer', 'Cost function', 'Max Iterations', 'Output',
                       'Ignore invalid data', 'Peak Radius', 'Plot Composite Members',
                       'Convolve Composite Members', 'Show Parameter Errors', 'Evaluate Function As']
@@ -64,6 +82,10 @@ class FittingPlotView(QtWidgets.QWidget, Ui_plot):
 
     def resizeEvent(self, QResizeEvent):
         self.figure.tight_layout()
+
+    def ensure_fit_dock_closed(self):
+        if self.plot_dock.isFloating():
+            self.plot_dock.close()
 
     def setup_toolbar(self):
         self.toolbar.sig_home_clicked.connect(self.display_all)
@@ -119,6 +141,14 @@ class FittingPlotView(QtWidgets.QWidget, Ui_plot):
                 ax.relim()
             ax.autoscale()
         self.update_figure()
+
+    def read_fitprop_from_browser(self):
+        return self.fit_browser.read_current_fitprop()
+
+    def update_browser_setup(self, func_str, setup_name):
+        # update browser with output function and save setup
+        self.fit_browser.loadFunction(func_str)
+        self.fit_browser.save_current_setup(setup_name)
 
     # =================
     # Component Getters

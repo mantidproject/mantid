@@ -54,7 +54,9 @@ public:
   std::string parameterDescription(std::size_t) const override { return ""; }
   bool isExplicitlySet(std::size_t) const override { return true; }
   double getError(std::size_t) const override { return 0.0; }
+  double getError(const std::string &) const override { return 0.0; }
   void setError(std::size_t, double) override {}
+  void setError(const std::string &, double) override {}
   size_t
   getParameterIndex(const Mantid::API::ParameterReference &ref) const override {
     if (ref.getLocalFunction() == this && ref.getLocalIndex() < nParams()) {

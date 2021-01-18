@@ -80,6 +80,48 @@ public:
     }
   }
 
+  void
+  test_that_isRaggedWorkspace_returns_false_for_a_non_ragged_Workspace2D() {
+    TS_ASSERT(!ws->isRaggedWorkspace());
+    TS_ASSERT_EQUALS(ws->blocksize(), 5);
+  }
+
+  void test_that_isRaggedWorkspace_returns_true_for_a_ragged_Workspace2D() {
+    Workspace2D_sptr cloned(ws->clone());
+    cloned->setHistogram(0, Points(0), Counts(0));
+
+    TS_ASSERT(cloned->isRaggedWorkspace());
+    TS_ASSERT_THROWS(cloned->blocksize(), const std::logic_error &);
+  }
+
+  void
+  test_that_getNumberBins_returns_the_correct_number_of_bins_for_different_histograms_in_a_ragged_Workspace2D() {
+    Workspace2D_sptr cloned(ws->clone());
+    cloned->setHistogram(0, Points(0), Counts(0));
+
+    TS_ASSERT(cloned->isRaggedWorkspace());
+    TS_ASSERT_EQUALS(cloned->getNumberBins(0), 0);
+    TS_ASSERT_EQUALS(cloned->getNumberBins(1), 5);
+  }
+
+  void
+  test_that_getNumberBins_throws_when_provided_an_index_which_is_too_large() {
+    const auto numberOfHistograms = ws->getNumberHistograms();
+
+    TS_ASSERT_THROWS_NOTHING(ws->getNumberBins(numberOfHistograms - 1));
+    TS_ASSERT_THROWS(ws->getNumberBins(numberOfHistograms),
+                     const std::invalid_argument &);
+  }
+
+  void
+  test_that_getMaxNumberBins_returns_the_correct_number_for_a_ragged_Workspace2D() {
+    Workspace2D_sptr cloned(ws->clone());
+    cloned->setHistogram(0, Points(0), Counts(0));
+
+    TS_ASSERT(cloned->isRaggedWorkspace());
+    TS_ASSERT_EQUALS(cloned->getMaxNumberBins(), 5);
+  }
+
   void testUnequalBins() {
     // try normal kind first
     TS_ASSERT_EQUALS(ws->blocksize(), 5);

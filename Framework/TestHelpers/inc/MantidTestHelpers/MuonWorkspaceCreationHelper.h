@@ -116,6 +116,12 @@ createMultiPeriodAsymmetryData(const int &nPeriods, size_t nspec, size_t maxt,
 Mantid::API::ITableWorkspace_sptr
 createDeadTimeTable(const size_t &nspec, std::vector<double> &deadTimes);
 
+/**
+ * Create a simple time zero TableWorkspace with one column (time zero)
+ */
+Mantid::API::ITableWorkspace_sptr
+createTimeZeroTable(const size_t &numSpec, std::vector<double> &timeZeros);
+
 // Creates a single - point workspace with instrument and runNumber set.
 Mantid::API::MatrixWorkspace_sptr
 createWorkspaceWithInstrumentandRun(const std::string &instrName, int runNumber,

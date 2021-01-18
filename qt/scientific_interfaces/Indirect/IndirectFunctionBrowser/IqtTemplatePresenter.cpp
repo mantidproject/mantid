@@ -181,8 +181,9 @@ int IqtTemplatePresenter::getCurrentDataset() {
   return m_model.currentDomainIndex();
 }
 
-void IqtTemplatePresenter::setDatasetNames(const QStringList &names) {
-  m_model.setDatasetNames(names);
+void IqtTemplatePresenter::setDatasets(
+    const QList<FunctionModelDataset> &datasets) {
+  m_model.setDatasets(datasets);
 }
 
 void IqtTemplatePresenter::setViewParameterDescriptions() {
@@ -245,6 +246,10 @@ QStringList IqtTemplatePresenter::getDatasetNames() const {
   return m_model.getDatasetNames();
 }
 
+QStringList IqtTemplatePresenter::getDatasetDomainNames() const {
+  return m_model.getDatasetDomainNames();
+}
+
 double IqtTemplatePresenter::getLocalParameterValue(const QString &parName,
                                                     int i) const {
   return m_model.getLocalParameterValue(parName, i);
@@ -292,12 +297,13 @@ void IqtTemplatePresenter::setLocalParameterFixed(const QString &parName, int i,
 }
 
 void IqtTemplatePresenter::editLocalParameter(const QString &parName) {
-  auto const wsNames = getDatasetNames();
+  auto const datasetNames = getDatasetNames();
+  auto const domainNames = getDatasetDomainNames();
   QList<double> values;
   QList<bool> fixes;
   QStringList ties;
   QStringList constraints;
-  const int n = wsNames.size();
+  const int n = domainNames.size();
   for (int i = 0; i < n; ++i) {
     const double value = getLocalParameterValue(parName, i);
     values.push_back(value);
@@ -309,8 +315,9 @@ void IqtTemplatePresenter::editLocalParameter(const QString &parName) {
     constraints.push_back(constraint);
   }
 
-  m_editLocalParameterDialog = new EditLocalParameterDialog(
-      m_view, parName, wsNames, values, fixes, ties, constraints);
+  m_editLocalParameterDialog =
+      new EditLocalParameterDialog(m_view, parName, datasetNames, domainNames,
+                                   values, fixes, ties, constraints);
   connect(m_editLocalParameterDialog, SIGNAL(finished(int)), this,
           SLOT(editLocalParameterFinish(int)));
   m_editLocalParameterDialog->open();

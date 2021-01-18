@@ -19,7 +19,9 @@ class MANTID_CRYSTAL_DLL IndexPeaks : public API::Algorithm {
 public:
   const std::string name() const override { return "IndexPeaks"; }
   const std::string summary() const override {
-    return "Index the peaks using the UB from the sample.";
+    return "Index the peaks using the UB from the sample. Leave MaxOrder at "
+           "default value 0 to get this value, and ModVectors (unless "
+           "overridden) from the sample.";
   }
   int version() const override { return 1; }
   const std::vector<std::string> seeAlso() const override {

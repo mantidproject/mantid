@@ -5,7 +5,11 @@ if ( CPPCHECK_EXECUTABLE )
   # We must export the compile commands for cppcheck to be able to check
   # everything correctly
   set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
+  if(ENABLE_MANTIDPLOT)
+    set(MANTIDPLOT_CPPCHECK_SUPPRESSIONS "*:${CMAKE_SOURCE_DIR}/MantidPlot/src/zlib123/*
+*:${CMAKE_SOURCE_DIR}/MantidPlot/src/origin/tree.hh
+*:${CMAKE_SOURCE_DIR}/MantidPlot/src/nrutil.cpp")
+  endif()
   configure_file(${CMAKE_SOURCE_DIR}/buildconfig/CMake/CppCheck_Suppressions.txt.in ${CMAKE_BINARY_DIR}/CppCheck_Suppressions.txt)
 
   # setup the standard arguments
@@ -15,6 +19,9 @@ if ( CPPCHECK_EXECUTABLE )
   # Force cppcheck to check when we use project-wide macros
   -DDLLExport=
   -DMANTID_ALGORITHMS_DLL=
+  # Undefine problematic macros:
+  #   Causes errors such as there was an internal error: bad macro syntax"
+  -UQT_TESTCASE_BUILDDIR
   )
 
   set (_cppcheck_args "${CPPCHECK_ARGS}")
@@ -31,7 +38,7 @@ if ( CPPCHECK_EXECUTABLE )
     list( APPEND _cppcheck_xml_args  ${_cppcheck_source_dirs} )
   endif (CPPCHECK_GENERATE_XML)
 
-  
+
 
   # generate the target
   if (NOT TARGET cppcheck)

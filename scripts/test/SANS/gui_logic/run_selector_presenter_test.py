@@ -124,4 +124,6 @@ class RunSelectorPresenterTest(unittest.TestCase):
         self.view.browse.emit()
         assert_called(self.view.show_file_picker)
 
-if __name__ == '__main__': unittest.main()
+
+if __name__ == '__main__':
+    unittest.main()

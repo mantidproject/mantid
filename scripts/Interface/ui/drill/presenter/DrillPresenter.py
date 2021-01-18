@@ -5,11 +5,25 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 
+from qtpy.QtWidgets import QFileDialog, QMessageBox
+
 from ..view.DrillSettingsDialog import DrillSettingsDialog
 from ..model.DrillModel import DrillModel
+from .DrillContextMenuPresenter import DrillContextMenuPresenter
 
 
 class DrillPresenter:
+
+    """
+    Set of invalid cells. This is used to avoid the submission of invalid
+    parameters for processing.
+    """
+    _invalidCells = set()
+
+    """
+    Set of rows for which processing failed. This is used to display a report.
+    """
+    _processError = set()
 
     def __init__(self, view):
         """
@@ -22,6 +36,8 @@ class DrillPresenter:
         """
         self.model = DrillModel()
         self.view = view
+        self._invalidCells = set()
+        self._processError = set()
 
         # view signals connection
         self.view.instrumentChanged.connect(self.instrumentChanged)
@@ -30,34 +46,187 @@ class DrillPresenter:
                 self.model.setCycleAndExperiment)
         self.view.rowAdded.connect(self.model.addSample)
         self.view.rowDeleted.connect(self.model.deleteSample)
-        self.view.dataChanged.connect(self.model.changeParameter)
-        self.view.process.connect(self.process)
+        self.view.dataChanged.connect(self.onDataChanged)
+        self.view.groupSelectedRows.connect(self.onGroupSelectedRows)
+        self.view.ungroupSelectedRows.connect(self.onUngroupSelectedRows)
+        self.view.setMasterRow.connect(self.onSetMasterRow)
+        self.view.process.connect(self.onProcess)
+        self.view.processGroup.connect(self.onProcessGroup)
+        self.view.processAll.connect(self.onProcessAll)
         self.view.processStopped.connect(self.stopProcessing)
-        self.view.rundexLoaded.connect(self.rundexLoaded)
-        self.view.rundexSaved.connect(self.rundexSaved)
+        self.view.newTable.connect(self.onNew)
+        self.view.loadRundex.connect(self.onLoad)
+        self.view.saveRundex.connect(self.onSave)
+        self.view.saveRundexAs.connect(self.onSaveAs)
         self.view.showSettings.connect(self.settingsWindow)
 
         # model signals connection
-        self.model.processStarted.connect(self.view.set_row_processing)
-        self.model.processSuccess.connect(self.view.set_row_done)
-        self.model.processError.connect(self.view.set_row_error)
+        self.model.processStarted.connect(self.onProcessBegin)
+        self.model.processSuccess.connect(self.onProcessSuccess)
+        self.model.processError.connect(self.onProcessError)
         self.model.progressUpdate.connect(
                 lambda progress: self.view.set_progress(progress, 100)
                 )
-        self.model.processingDone.connect(self.processingDone)
-        self.model.paramOk.connect(self.view.set_cell_ok)
-        self.model.paramError.connect(self.view.set_cell_error)
+        self.model.processingDone.connect(self.onProcessingDone)
+        self.model.paramOk.connect(self.onParamOk)
+        self.model.paramError.connect(self.onParamError)
+        self.model.groupsUpdated.connect(self.onGroupsUpdated)
 
-        self.updateViewFromModel()
+        self._syncViewHeader()
+        self._syncViewTable()
 
-    def process(self, rows):
+    def onDataChanged(self, row, column):
         """
-        Handles the row processing asked by the view. It forwards it to the
-        model, takes care of the progress and the potential exceptions.
+        Triggered when the view notifies a change in the table.
 
         Args:
-            rows (list(int)): list of rows to be processed
+            row (int): row index
+            column (int): column index
         """
+        contents = self.view.getCellContents(row, column)
+        if row in self._processError:
+            self.view.unsetRowBackground(row)
+            self._processError.remove(row)
+        self.view.setWindowModified(True)
+        if column == "CustomOptions":
+            params = {}
+            if not contents:
+                self.onParamOk(row, column)
+                return
+            for option in contents.split(';'):
+                if option and '=' not in option:
+                    self.onParamError(row, column, "Please provide semicolon "
+                                      "separated key=value pairs.")
+                    return
+                try:
+                    name = option.split("=")[0]
+                    value = option.split("=")[1]
+                except:
+                    self.onParamError(row, column, "Please provide semicolon "
+                                      "separated key=value pairs.")
+                    return
+                if name in self.view.columns:
+                    self.onParamError(row, column, "Please use the table to "
+                                      "set a parameter for which a column "
+                                      "exists.")
+                    return
+                if value in ['true', 'True', 'TRUE']:
+                    value = True
+                if value in ['false', 'False', 'FALSE']:
+                    value = False
+                params[name] = value
+            for name,value in params.items():
+                self.model.changeParameter(row, name, value)
+        else:
+            self.model.changeParameter(row, column, contents)
+
+    def onGroupSelectedRows(self):
+        """
+        Triggered when the view request the creation of a group.
+        """
+        rows = self.view.table.getRowsFromSelectedCells()
+        self.model.groupSamples(rows)
+
+    def onUngroupSelectedRows(self):
+        """
+        Triggered when the view request the removing of row from their group(s).
+        """
+        rows = self.view.table.getRowsFromSelectedCells()
+        self.model.ungroupSamples(rows)
+
+    def onSetMasterRow(self):
+        """
+        Triggered when a master row is set for a group.
+        """
+        rows = self.view.table.getRowsFromSelectedCells()
+        if len(rows) != 1:
+            return
+        row = rows[0]
+        self.model.setGroupMaster(row)
+
+    def onGroupsUpdated(self):
+        """
+        Triggered when the groups are updated in the model. This method update
+        the row labels in the table.
+
+        Args:
+            group (str): name of the updated group
+        """
+        groups = self.model.getSamplesGroups()
+        masters = self.model.getMasterSamples()
+        self.view.updateLabelsFromGroups(groups, masters)
+
+    def onParamOk(self, row, columnName):
+        """
+        Triggered when a parameter is valid.
+
+        Args:
+            row (int): row index
+            columnName (str): parameter name
+        """
+        if columnName not in self.view.columns:
+            columnName = "CustomOptions"
+        self._invalidCells.discard((row, columnName))
+        self.view.setCellOk(row, columnName)
+
+    def onParamError(self, row, columnName, msg):
+        """
+        Triggered when a parameter is invalid.
+
+        Args:
+            row (int): row index
+            columnName (str): parameter name
+            msg (str): error message
+        """
+        if columnName not in self.view.columns:
+            columnName = "CustomOptions"
+        self._invalidCells.add((row, columnName))
+        self.view.setCellError(row, columnName, msg)
+
+    def onProcess(self):
+        """
+        Handles the processing of selected rows.
+        """
+        rows = self.view.getSelectedRows()
+        if not rows:
+            rows = self.view.getAllRows()
+        self._process(rows)
+
+    def onProcessGroup(self):
+        """
+        Handles the processing of selected groups.
+        """
+        groups = self.model.getSamplesGroups()
+        selectedRows = self.view.getSelectedRows()
+        rows = set()
+        for row in selectedRows:
+            for group in groups:
+                if row in groups[group]:
+                    rows.update(groups[group])
+        self._process(rows)
+
+    def onProcessAll(self):
+        """
+        Handles the processing of all rows.
+        """
+        rows = self.view.getAllRows()
+        self._process(rows)
+
+    def _process(self, rows):
+        """
+        Submit the processing.
+
+        Args:
+            rows (set(int)): row indexes
+        """
+        if not rows:
+            return
+        for cell in self._invalidCells:
+            if cell[0] in rows:
+                QMessageBox.warning(self.view, "Error", "Please check the "
+                                    "parameters value before processing.")
+                return
+        self._processError = set()
         self.view.set_disabled(True)
         self.view.set_progress(0, 100)
         self.model.process(rows)
@@ -70,13 +239,50 @@ class DrillPresenter:
         self.view.set_disabled(False)
         self.view.set_progress(0, 100)
 
-    def processingDone(self):
+    def onProcessBegin(self, sample):
+        """
+        Triggered when the model signals that the processing of a specific
+        sample started.
+
+        Args:
+            sample (int): sample index
+        """
+        self.view.setRowProcessing(sample)
+
+    def onProcessError(self, sample):
+        """
+        Triggered when the model signals that the processing of a specific
+        sample finished with an error.
+
+        Args:
+            sample (int): sample index
+        """
+        self._processError.add(sample)
+        self.view.setRowError(sample)
+
+    def onProcessSuccess(self, sample):
+        """
+        Triggered when the model signals that the processing of a specific
+        sample finished with success.
+
+        Args:
+            sample (int): sample index
+        """
+        self.view.setRowDone(sample)
+
+    def onProcessingDone(self):
         """
         Forward the processing done signal to the view.
         """
         self.view.set_disabled(False)
         self.view.set_progress(0, 100)
-        self.view.displayProcessingReport()
+        if self._processError:
+            labels = [self.view.getRowLabel(row) for row in self._processError]
+            w = QMessageBox(QMessageBox.Critical, "Processing error(s)",
+                            "Unable to process the row(s) {}. Please check the "
+                            "logs.".format(str(labels)[1:-1]),
+                            QMessageBox.Ok, self.view)
+            w.exec()
 
     def instrumentChanged(self, instrument):
         """
@@ -85,8 +291,13 @@ class DrillPresenter:
         Args:
             instrument (str): instrument name
         """
+        if self.view.isWindowModified():
+            self._saveDataQuestion()
+
         self.model.setInstrument(instrument)
-        self.updateViewFromModel()
+        self.model.resetIOFile()
+        self._syncViewHeader()
+        self._syncViewTable()
 
     def acquisitionModeChanged(self, mode):
         """
@@ -95,34 +306,55 @@ class DrillPresenter:
         Args:
             mode (str): acquisition mode name
         """
+        if self.view.isWindowModified():
+            self._saveDataQuestion()
+
         self.model.setAcquisitionMode(mode)
-        self.updateViewFromModel()
+        self.model.resetIOFile()
+        self._syncViewHeader()
+        self._syncViewTable()
 
-    def rundexLoaded(self, filename):
+    def onLoad(self):
         """
-        Forward the rundex file loading to the model and update the view.
+        Triggered when the user want to load a file. This methods start a
+        QDialog to get the file path from the user.
+        """
+        filename = QFileDialog.getOpenFileName(self.view, 'Load rundex', '.',
+                                               "Rundex (*.mrd);;All (*.*)")
+        if not filename[0]:
+            return
+        self.model.setIOFile(filename[0])
+        self.model.importRundexData()
+        self._syncViewHeader()
+        self._syncViewTable()
+        self.view.setWindowModified(False)
 
-        Args:
-            filename (str): rundex file path
+    def onSave(self):
         """
-        try:
-            self.model.importRundexData(filename)
-            self.updateViewFromModel()
-        except Exception as ex:
-            self.view.errorPopup("Import error",
-                                 "Unable to open {0}".format(filename),
-                                 str(ex))
+        Triggered when the user wants to save its data. This method starts a
+        QDialog only if no file was previously used to load or save.
+        """
+        if self.model.getIOFile():
+            self.model.exportRundexData()
+            self.view.setWindowModified(False)
+        else:
+            self.onSaveAs()
 
-    def rundexSaved(self, filename):
+    def onSaveAs(self):
         """
-        Forward the rundex file saving to the model. This method transmit also
-        some potential visual settings that the view wants to save.
-
-        Args:
-            filename (str): rundex file path
+        Triggered when the user selects the "save as" function. This methods
+        will open a dialog to select the file even if one has previously been
+        used.
         """
-        vs = self.view.getVisualSettings()
-        self.model.exportRundexData(filename, vs)
+        filename = QFileDialog.getSaveFileName(self.view, 'Save rundex',
+                                               './*.mrd',
+                                               "Rundex (*.mrd);;All (*.*)")
+        if not filename[0]:
+            return
+        self.model.setIOFile(filename[0])
+        self.model.setVisualSettings(self.view.getVisualSettings())
+        self.model.exportRundexData()
+        self.view.setWindowModified(False)
 
     def settingsWindow(self):
         """
@@ -149,22 +381,83 @@ class DrillPresenter:
                 )
         sw.show()
 
-    def updateViewFromModel(self):
+    def onShowContextMenu(self, menu):
         """
-        Update the view (header and table) from the model.
+        Triggered when the user ask the context menu (right click).
+
+        Args:
+            menu (DrillContextMenu): view of the context menu
         """
-        self.view.setRundexFile(self.model.rundexFile)
-        # update the header
-        self.view.set_available_modes(
-                self.model.getAvailableAcquisitionModes())
-        self.view.set_acquisition_mode(self.model.getAcquisitionMode())
+        DrillContextMenuPresenter(self.view, self.model, menu)
+
+    def onClose(self):
+        """
+        Triggered when the view is closed.
+        """
+        if self.view.isWindowModified():
+            self._saveDataQuestion()
+
+    def onNew(self):
+        """
+        Triggered when the user wants an empty table.
+        """
+        if self.view.isWindowModified():
+            self._saveDataQuestion()
+        self.model.clear()
+        self.model.resetIOFile()
+        self._syncViewHeader()
+        self._syncViewTable()
+
+    def _saveDataQuestion(self):
+        """
+        Open a dialog to ask the user if he wants to save the rundex file.
+        """
+        if self.view.isHidden():
+            return
+        q = QMessageBox.question(self.view, "DrILL: Unsaved data", "You have "
+                                 "unsaved modifications, do you want to save "
+                                 "them before?",
+                                 QMessageBox.Yes | QMessageBox.No)
+        if (q == QMessageBox.Yes):
+            self.onSaveAs()
+
+    def _syncViewHeader(self):
+        availableModes = self.model.getAvailableAcquisitionModes()
+        acquisitionMode = self.model.getAcquisitionMode()
         cycle, exp = self.model.getCycleAndExperiment()
+
+        self.view.set_available_modes(availableModes)
+        self.view.set_acquisition_mode(acquisitionMode)
         self.view.setCycleAndExperiment(cycle, exp)
-        # update the table
+
+    def _syncViewTable(self):
         columns, tooltips = self.model.getColumnHeaderData()
+        samples = self.model.getSamples()
+        groups = self.model.getSamplesGroups()
+        masters = self.model.getMasterSamples()
+
+        self.view.blockSignals(True)
         self.view.set_table(columns, tooltips)
-        self.view.fill_table(self.model.getRowsContents())
+        if not samples:
+            self.view.add_row_after()
+            self.model.addSample(-1)
+        else:
+            for i in range(len(samples)):
+                self.view.add_row_after()
+                params = samples[i].getParameters()
+                for k,v in params.items():
+                    if k not in self.view.columns:
+                        co = self.view.getCellContents(i, "CustomOptions")
+                        if co:
+                            co = co + ';' + str(k) + '=' + str(v)
+                        else:
+                            co = str(k) + '=' + str(v)
+                        self.view.setCellContents(i, "CustomOptions", co)
+                    else:
+                        self.view.setCellContents(i, k, v)
+        self.view.updateLabelsFromGroups(groups, masters)
         # set the visual settings if they exist
         vs = self.model.getVisualSettings()
         if vs:
             self.view.setVisualSettings(vs)
+        self.view.blockSignals(False)

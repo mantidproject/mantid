@@ -22,6 +22,7 @@ creation is outlined in :ref:`issue_tracking`.
 
    MuonAnalysis_test_guides/index
    MuonInterface/MuonTesting
+   ElementalAnalysis/ElementalAnalysisGUITests
    IndirectInelastic/IndirectInelasticAcceptanceTests
    EngineeringDiffraction/EngineeringDiffractionTestGuide
    ErrorReporter-ProjectRecovery/ErrorReporterTesting

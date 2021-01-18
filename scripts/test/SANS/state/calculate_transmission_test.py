@@ -7,7 +7,8 @@
 import unittest
 
 from sans.common.enums import (RebinType, RangeStepType, FitType, DataType, SANSFacility, SANSInstrument)
-from sans.state.StateObjects.StateCalculateTransmission import (StateCalculateTransmission, StateCalculateTransmissionLOQ,
+from sans.state.StateObjects.StateCalculateTransmission import (StateCalculateTransmission,
+                                                                StateCalculateTransmissionLOQ,
                                                                 get_calculate_transmission)
 from sans.state.StateObjects.StateData import get_data_builder
 from sans.test_helper.file_information_mock import SANSFileInformationMock
@@ -36,7 +37,7 @@ class StateCalculateTransmissionTest(unittest.TestCase):
                           "transmission_monitor": 4, "default_incident_monitor": 1, "incident_monitor": 2,
                           "prompt_peak_correction_min": 123., "prompt_peak_correction_max": 1234.,
                           "rebin_type": RebinType.REBIN, "wavelength_low": [1.], "wavelength_high": [2.7],
-                          "wavelength_step": 0.5,  "wavelength_step_type": RangeStepType.LIN,
+                          "wavelength_step": 0.5, "wavelength_step_type": RangeStepType.LIN,
                           "use_full_wavelength_range": True, "wavelength_full_range_low": 12.,
                           "wavelength_full_range_high": 434., "background_TOF_general_start": 1.4,
                           "background_TOF_general_stop": 24.5, "background_TOF_monitor_start": {"1": 123, "2": 123},
@@ -112,7 +113,7 @@ class StateCalculateTransmissionTest(unittest.TestCase):
 
     def test_that_raises_for_lower_bound_larger_than_upper_bound_for_wavelength(self):
         self.check_bad_and_good_values(bad_trans={"wavelength_low": [2.], "wavelength_high": [1.],
-                                                  "wavelength_step": 0.5, "wavelength_step_type":  RangeStepType.LIN},
+                                                  "wavelength_step": 0.5, "wavelength_step_type": RangeStepType.LIN},
                                        good_trans={"wavelength_low": [1.], "wavelength_high": [2.],
                                                    "wavelength_step": 0.5, "wavelength_step_type": RangeStepType.LIN})
 
@@ -181,38 +182,38 @@ class StateCalculateTransmissionTest(unittest.TestCase):
                                        good_fit={"fit_type": FitType.POLYNOMIAL, "polynomial_order": 4})
 
     def test_that_raises_for_inconsistent_wavelength_in_fit(self):
-        self.check_bad_and_good_values(bad_trans={"wavelength_low": None,  "wavelength_high": [2.]},
-                                       good_trans={"wavelength_low": [1.],  "wavelength_high": [2.]})
+        self.check_bad_and_good_values(bad_trans={"wavelength_low": None, "wavelength_high": [2.]},
+                                       good_trans={"wavelength_low": [1.], "wavelength_high": [2.]})
 
     def test_that_raises_for_lower_bound_larger_than_upper_bound_for_wavelength_in_fit(self):
-        self.check_bad_and_good_values(bad_trans={"wavelength_low": [2.],  "wavelength_high": [1.]},
-                                       good_trans={"wavelength_low": [1.],  "wavelength_high": [2.]})
-
+        self.check_bad_and_good_values(bad_trans={"wavelength_low": [2.], "wavelength_high": [1.]},
+                                       good_trans={"wavelength_low": [1.], "wavelength_high": [2.]})
 
     def test_convert_step_type_from_RANGE_LIN_to_LIN(self):
         state = StateCalculateTransmission()
         state.wavelength_step_type = RangeStepType.RANGE_LIN
-        self.assertEqual(state.wavelength_step_type_lin_log,  RangeStepType.LIN)
+        self.assertEqual(state.wavelength_step_type_lin_log, RangeStepType.LIN)
 
     def test_convert_step_type_from_RANGE_LOG_to_LOG(self):
         state = StateCalculateTransmission()
         state.wavelength_step_type = RangeStepType.RANGE_LOG
-        self.assertEqual(state.wavelength_step_type_lin_log,  RangeStepType.LOG)
+        self.assertEqual(state.wavelength_step_type_lin_log, RangeStepType.LOG)
 
     def test_convert_step_type_does_not_change_LIN(self):
         state = StateCalculateTransmission()
         state.wavelength_step_type = RangeStepType.LIN
-        self.assertEqual(state.wavelength_step_type_lin_log,  RangeStepType.LIN)
+        self.assertEqual(state.wavelength_step_type_lin_log, RangeStepType.LIN)
 
     def test_convert_step_type_does_not_change_LOG(self):
         state = StateCalculateTransmission()
         state.wavelength_step_type = RangeStepType.LOG
-        self.assertEqual(state.wavelength_step_type_lin_log,  RangeStepType.LOG)
+        self.assertEqual(state.wavelength_step_type_lin_log, RangeStepType.LOG)
 
     def test_convert_step_type_does_not_change_NOT_SET(self):
         state = StateCalculateTransmission()
         state.wavelength_step_type = RangeStepType.NOT_SET
-        self.assertEqual(state.wavelength_step_type_lin_log,  RangeStepType.NOT_SET)
+        self.assertEqual(state.wavelength_step_type_lin_log, RangeStepType.NOT_SET)
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Builder
@@ -267,32 +268,34 @@ class StateCalculateTransmissionBuilderTest(unittest.TestCase):
         state_transmission.set_can_wavelength_high(20.0)
 
         # Assert
-        self.assertEqual(state_transmission.prompt_peak_correction_min,  12.0)
-        self.assertEqual(state_transmission.prompt_peak_correction_max,  17.0)
+        self.assertEqual(state_transmission.prompt_peak_correction_min, 12.0)
+        self.assertEqual(state_transmission.prompt_peak_correction_max, 17.0)
 
-        self.assertEqual(state_transmission.incident_monitor,  1)
-        self.assertEqual(state_transmission.default_incident_monitor,  2)
-        self.assertEqual(state_transmission.transmission_monitor,  3)
-        self.assertEqual(state_transmission.default_transmission_monitor,  4)
-        self.assertEqual(state_transmission.transmission_radius_on_detector,  1.)
-        self.assertEqual(state_transmission.transmission_roi_files,  ["sdfs", "sddfsdf"])
-        self.assertEqual(state_transmission.transmission_mask_files,  ["sdfs", "bbbbbb"])
+        self.assertEqual(state_transmission.incident_monitor, 1)
+        self.assertEqual(state_transmission.default_incident_monitor, 2)
+        self.assertEqual(state_transmission.transmission_monitor, 3)
+        self.assertEqual(state_transmission.default_transmission_monitor, 4)
+        self.assertEqual(state_transmission.transmission_radius_on_detector, 1.)
+        self.assertEqual(state_transmission.transmission_roi_files, ["sdfs", "sddfsdf"])
+        self.assertEqual(state_transmission.transmission_mask_files, ["sdfs", "bbbbbb"])
 
         self.assertEqual(state_transmission.rebin_type, RebinType.REBIN)
-        self.assertEqual(state_transmission.wavelength_low,  [1.5])
-        self.assertEqual(state_transmission.wavelength_high,  [2.7])
-        self.assertEqual(state_transmission.wavelength_step,  0.5)
+        self.assertEqual(state_transmission.wavelength_low, [1.5])
+        self.assertEqual(state_transmission.wavelength_high, [2.7])
+        self.assertEqual(state_transmission.wavelength_step, 0.5)
         self.assertEqual(state_transmission.wavelength_step_type, RangeStepType.LIN)
         self.assertEqual(state_transmission.use_full_wavelength_range, True)
-        self.assertEqual(state_transmission.wavelength_full_range_low,  12.)
-        self.assertEqual(state_transmission.wavelength_full_range_high,  24.)
+        self.assertEqual(state_transmission.wavelength_full_range_low, 12.)
+        self.assertEqual(state_transmission.wavelength_full_range_high, 24.)
 
-        self.assertEqual(state_transmission.background_TOF_general_start,  1.4)
-        self.assertEqual(state_transmission.background_TOF_general_stop,  34.4)
-        self.assertEqual(len(set(state_transmission.background_TOF_monitor_start.items()) & set({"1": 123, "2": 123}.items())), 2)
-        self.assertEqual(len(set(state_transmission.background_TOF_monitor_stop.items()) & set({"1": 234, "2": 2323}.items())), 2)
-        self.assertEqual(state_transmission.background_TOF_roi_start,  1.4)
-        self.assertEqual(state_transmission.background_TOF_roi_stop,  34.4)
+        self.assertEqual(state_transmission.background_TOF_general_start, 1.4)
+        self.assertEqual(state_transmission.background_TOF_general_stop, 34.4)
+        self.assertEqual(
+            len(set(state_transmission.background_TOF_monitor_start.items()) & set({"1": 123, "2": 123}.items())), 2)
+        self.assertEqual(
+            len(set(state_transmission.background_TOF_monitor_stop.items()) & set({"1": 234, "2": 2323}.items())), 2)
+        self.assertEqual(state_transmission.background_TOF_roi_start, 1.4)
+        self.assertEqual(state_transmission.background_TOF_roi_stop, 34.4)
 
         self.assertEqual(state_transmission.fit[DataType.SAMPLE.value].fit_type, FitType.LINEAR)
         self.assertEqual(state_transmission.fit[DataType.SAMPLE.value].polynomial_order, 0)

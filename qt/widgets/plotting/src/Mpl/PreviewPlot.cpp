@@ -59,12 +59,12 @@ PreviewPlot::PreviewPlot(QWidget *parent, bool observeADS)
                                                    parent)},
       m_panZoomTool(m_canvas),
       m_wsRemovedObserver(*this, &PreviewPlot::onWorkspaceRemoved),
-      m_wsReplacedObserver(*this, &PreviewPlot::onWorkspaceReplaced) {
+      m_wsReplacedObserver(*this, &PreviewPlot::onWorkspaceReplaced),
+      m_axis("both"), m_style("sci"), m_useOffset(true) {
   createLayout();
   createActions();
 
   m_selectorActive = false;
-  m_context_enabled = true;
 
   m_canvas->installEventFilterToMplCanvas(this);
   watchADS(observeADS);
@@ -144,7 +144,6 @@ void PreviewPlot::addSpectrum(const QString &lineName,
       QSharedPointer<PlotCurveConfiguration>(new PlotCurveConfiguration(
           ws, lineName, wsIndex, lineColour, plotKwargs));
   m_plottedLines.insert(lineName, plotCurveConfig);
-
   if (auto const xLabel = overrideAxisLabel(AxisID::XBottom))
     setAxisLabel(AxisID::XBottom, xLabel.get());
   if (auto const yLabel = overrideAxisLabel(AxisID::YLeft))
@@ -480,9 +479,7 @@ bool PreviewPlot::handleMouseReleaseEvent(QMouseEvent *evt) {
   bool stopEvent(false);
   if (evt->button() == Qt::RightButton) {
     stopEvent = true;
-    if (m_context_enabled) {
-      showContextMenu(evt);
-    }
+    showContextMenu(evt);
   } else if (evt->button() == Qt::LeftButton) {
     const auto position = evt->pos();
     if (!position.isNull())
@@ -761,6 +758,11 @@ void PreviewPlot::setScaleType(AxisID id, const QString &actionName) {
   default:
     break;
   }
+
+  // If linear scale need to reset tick labels
+  if (strcmp(scaleType.constData(), "linear") == 0)
+    tickLabelFormat(m_axis, m_style, m_useOffset);
+
   this->replot();
 }
 
@@ -780,13 +782,21 @@ void PreviewPlot::toggleLegend(const bool checked) {
   this->replot();
 }
 
-void PreviewPlot::disableContextMenu() {
-  // Disable the context menu signal
-  // TODO Currently when changes are made to the plot through the context menu
-  // it is not communicated through to the parent GUI which can cause issues,
-  // for now we are disabling the context menu but is should be made to
-  // communicate so it can be reactivated.
-  m_context_enabled = false;
+/**
+ * Format tick labels for linear scale
+ * @param char* axis :: [ 'x' | 'y' | 'both' ]
+ * @param char* style :: [ 'sci' (or 'scientific') | 'plain' ] plain turns off
+ * scientific notation
+ * @param bool useOffset :: True, the offset will be
+ * calculated as needed, False no offset will be used
+ */
+void PreviewPlot::tickLabelFormat(char *axis, char *style, bool useOffset) {
+  m_canvas->gca().tickLabelFormat(axis, style, useOffset);
+
+  // Need to save parameters to re-format on scale change
+  m_axis = axis;
+  m_style = style;
+  m_useOffset = useOffset;
 }
 
 } // namespace MantidWidgets

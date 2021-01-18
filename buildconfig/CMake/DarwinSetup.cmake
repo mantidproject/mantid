@@ -1,4 +1,17 @@
-# ##############################################################################
+###########################################################################
+# Set installation variables
+###########################################################################
+set ( BIN_DIR bin )
+set ( ETC_DIR etc )
+set ( LIB_DIR lib )
+set ( SITE_PACKAGES ${LIB_DIR} )
+set ( PLUGINS_DIR plugins )
+
+set ( WORKBENCH_BIN_DIR ${BIN_DIR} )
+set ( WORKBENCH_LIB_DIR ${LIB_DIR} )
+set ( WORKBENCH_SITE_PACKAGES ${LIB_DIR} )
+set ( WORKBENCH_PLUGINS_DIR ${PLUGINS_DIR} )
+
 # Determine the version of macOS that we are running
 # ##############################################################################
 
@@ -122,29 +135,29 @@ if(NOT OPENSSL_ROOT_DIR)
 endif(NOT OPENSSL_ROOT_DIR)
 
 if(NOT HDF5_ROOT)
-  set(HDF5_ROOT /usr/local/opt/hdf5)
+    set(HDF5_ROOT /usr/local/opt/hdf5) # Only for homebrew! 
 endif()
 
 if(ENABLE_MANTIDPLOT OR ENABLE_WORKBENCH)
   set(CPACK_GENERATOR DragNDrop)
   set(CMAKE_INSTALL_PREFIX "")
-  set(CPACK_PACKAGE_EXECUTABLES MantidPlot)
+  # Replace hdiutil command to retry on detach failure
+  set(CPACK_COMMAND_HDIUTIL ${CMAKE_SOURCE_DIR}/installers/MacInstaller/hdiutilwrap)
   set(CMAKE_MACOSX_RPATH 1)
   set(CPACK_DMG_BACKGROUND_IMAGE
       ${CMAKE_SOURCE_DIR}/images/osx-bundle-background.png
   )
-  set(CPACK_DMG_DS_STORE_SETUP_SCRIPT
-      ${CMAKE_SOURCE_DIR}/installers/MacInstaller/CMakeDMGSetup.scpt
-  )
-  set(MACOSX_BUNDLE_ICON_FILE MantidPlot.icns)
   string(REPLACE " " "" CPACK_SYSTEM_NAME ${MACOS_CODENAME})
 
-  if(ENABLE_MANTIDPLOT)
+  if(ENABLE_MANTIDPLOT AND NOT ENABLE_WORKBENCH)
     set(INBUNDLE MantidPlot.app/Contents/)
+    set(CPACK_PACKAGE_EXECUTABLES MantidPlot)
+    set(MANTIDPLOT_APP MantidPlot${CPACK_PACKAGE_SUFFIX_CAMELCASE}.app)
+    set(INBUNDLE ${MANTIDPLOT_APP}/Contents/)
     # Copy the launcher script to the correct location
     configure_file(
       ${CMAKE_MODULE_PATH}/Packaging/osx/Mantid_osx_launcher.in
-      ${CMAKE_BINARY_DIR}/bin/MantidPlot.app/Contents/MacOS/Mantid_osx_launcher
+      ${CMAKE_BINARY_DIR}/bin/${INBUNDLE}MacOS/Mantid_osx_launcher
       @ONLY
     )
 
@@ -170,18 +183,20 @@ if(ENABLE_MANTIDPLOT OR ENABLE_WORKBENCH)
     set(PVPLUGINS_SUBDIR paraview)
 
     install(FILES ${CMAKE_SOURCE_DIR}/images/MantidPlot.icns
-            DESTINATION MantidPlot.app/Contents/Resources/
+            DESTINATION ${INBUNDLE}Resources/
     )
     # Add launcher script for mantid python
     install(
       PROGRAMS ${CMAKE_BINARY_DIR}/mantidpython_osx_install
-      DESTINATION MantidPlot.app/Contents/MacOS/
+      DESTINATION ${INBUNDLE}MacOS/
       RENAME mantidpython
     )
   endif()
 
-  if(ENABLE_WORKBENCH)
+  if(ENABLE_WORKBENCH AND NOT ENABLE_MANTIDPLOT)
     set(WORKBENCH_BUNDLE MantidWorkbench.app/Contents/)
+    set(WORKBENCH_APP MantidWorkbench${CPACK_PACKAGE_SUFFIX_CAMELCASE}.app)
+    set(WORKBENCH_BUNDLE ${WORKBENCH_APP}/Contents/)
     set(WORKBENCH_BIN_DIR ${WORKBENCH_BUNDLE}MacOS)
     set(WORKBENCH_LIB_DIR ${WORKBENCH_BUNDLE}MacOS)
     set(WORKBENCH_SITE_PACKAGES ${WORKBENCH_BUNDLE}MacOS)
@@ -189,14 +204,18 @@ if(ENABLE_MANTIDPLOT OR ENABLE_WORKBENCH)
 
     install(
       PROGRAMS ${CMAKE_BINARY_DIR}/mantidpython_osx_install
-      DESTINATION MantidWorkbench.app/Contents/MacOS/
+      DESTINATION ${WORKBENCH_BUNDLE}/MacOS/
       RENAME mantidpython
     )
     install(
-      FILES ${CMAKE_SOURCE_DIR}/images/MantidWorkbench.icns
-      DESTINATION MantidWorkbench.app/Contents/Resources/
-      RENAME MantidWorkbench.icns
+      FILES ${CMAKE_SOURCE_DIR}/images/mantid_workbench${CPACK_PACKAGE_SUFFIX}.icns
+      DESTINATION ${WORKBENCH_BUNDLE}Resources/
     )
   endif()
   set(BUNDLES ${INBUNDLE} ${WORKBENCH_BUNDLE})
+
+  # Produce script to move icons in finder window to the correct locations
+  configure_file(${CMAKE_SOURCE_DIR}/installers/MacInstaller/CMakeDMGSetup.scpt.in
+                 ${CMAKE_BINARY_DIR}/DMGSetup.scpt @ONLY)
+  set(CPACK_DMG_DS_STORE_SETUP_SCRIPT ${CMAKE_BINARY_DIR}/DMGSetup.scpt)
 endif()

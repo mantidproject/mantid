@@ -5,7 +5,8 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from qtpy.QtWidgets import QTableWidget, QTableWidgetItem, QHeaderView, QStyle, QAbstractItemView
+from qtpy.QtWidgets import QTableWidget, QTableWidgetItem, QHeaderView, \
+                           QStyle, QAbstractItemView, QMessageBox
 from qtpy.QtGui import QBrush, QColor
 from qtpy.QtCore import *
 
@@ -24,7 +25,6 @@ class DrillTableWidget(QTableWidget):
         self._disabled = False
         header = DrillHeaderView(self)
         header.setSectionsClickable(True)
-        header.setHighlightSections(True)
         header.setSectionResizeMode(QHeaderView.Interactive)
         self.setHorizontalHeader(header)
 
@@ -36,6 +36,20 @@ class DrillTableWidget(QTableWidget):
                                           None, self)
         minSize = self.fontMetrics().height() + 2 * margin
         self.verticalHeader().setDefaultSectionSize(minSize)
+
+        self.horizontalHeader().setHighlightSections(False)
+        self.verticalHeader().setHighlightSections(False)
+
+    def setHorizontalHeaderLabels(self, labels):
+        """
+        Overrides QTableWidget::setHorizontalHeaderLabels. This methods calls
+        the base class method and keeps a list of columns label for later use.
+
+        Args:
+            labels (list(str)): columns labels
+        """
+        super(DrillTableWidget, self).setHorizontalHeaderLabels(labels)
+        self.columns = labels
 
     def addRow(self, position):
         """
@@ -144,14 +158,59 @@ class DrillTableWidget(QTableWidget):
 
     def getSelectedCells(self):
         """
-        Get the coordinates of the selected cells.
+        Get the coordinates of the selected cells. These coordinates are sorted
+        by visual index to be able to copy(cut) paste in the same order.
 
         Returns:
             list(tuple(int, int)): the coordinates (row, column) of the
                 selected cells
         """
         selected_indexes = self.selectionModel().selectedIndexes()
-        return [(i.row(), i.column()) for i in selected_indexes]
+        header = self.horizontalHeader()
+        cellsLi = []
+        cellsVi = []
+        for i in selected_indexes:
+            if (header.isSectionHidden(i.column())):
+                continue
+            cellsLi.append((i.row(), i.column()))
+            cellsVi.append((self.visualRow(i.row()),
+                          self.visualColumn(i.column())))
+        return sorted(cellsLi, key=lambda i : cellsVi[cellsLi.index(i)][1])
+
+    def getSelectionShape(self):
+        """
+        Get the shape of the selection, the number of rows and the number of
+        columns.
+
+        Returns:
+        tuple(int, int): selection shape (n_rows, n_col), (0, 0) if the
+                         selection is empty or discontinuous
+        """
+        header = self.horizontalHeader()
+        selection = self.getSelectedCells()
+        if not selection:
+            return (0, 0)
+        for i in range(len(selection)):
+            row = self.visualRow(selection[i][0])
+            col = self.visualColumn(selection[i][1])
+            for j in range(col):
+                if header.isSectionHidden(header.logicalIndex(j)):
+                    col -= 1
+            selection[i] = (row, col)
+        rmin = selection[0][0]
+        rmax = rmin
+        cmin = selection[0][1]
+        cmax = cmin
+        for item in selection:
+            if item[0] > rmax:
+                rmax = item[0]
+            if item[1] > cmax:
+                cmax = item[1]
+        shape = (rmax - rmin + 1, cmax - cmin + 1)
+        if shape[0] * shape[1] != len(selection):
+            return (0, 0)
+        else:
+            return shape
 
     def getRowsFromSelectedCells(self):
         """
@@ -338,31 +397,166 @@ class DrillTableWidget(QTableWidget):
             if item and c < len(tooltips):
                 item.setToolTip(tooltips[c])
 
-    def setHeaderFoldingState(self, columns):
+    def setRowLabel(self, row, label, bold=False, tooltip=None):
         """
-        Give a folding state for each column.
+        Set the label of a specific row.
 
         Args:
-            columns(list(bool)): column indexes
+            row (int): row index
+            label (str): row label
         """
-        if (len(columns) != self.columnCount()):
-            return
-        for i in range(len(columns)):
-            if columns[i]:
-                self.horizontalHeader().foldSection(i)
+        item = self.verticalHeaderItem(row)
+        if item:
+            item.setText(label)
+        else:
+            self.setVerticalHeaderItem(row, QTableWidgetItem(label))
 
-    def getHeaderFoldingState(self):
+        font = self.verticalHeaderItem(row).font()
+        font.setBold(bold)
+        self.verticalHeaderItem(row).setFont(font)
+        if tooltip:
+            self.verticalHeaderItem(row).setToolTip(tooltip)
+
+    def getRowLabel(self, row):
         """
-        Get the folding state of each column.
+        Get the label of a specific row.
+
+        Args:
+            row (int): row index
 
         Returns:
-            list(bool): True if the column is folded
+            str: row label
+        """
+        item = self.verticalHeaderItem(row)
+        if item:
+            return item.text()
+        else:
+            return str(row + 1)
+
+    def delRowLabel(self, row):
+        """
+        Delete the row label.
+
+        Args:
+            ros (int): row index
+        """
+        self.setVerticalHeaderItem(row, None)
+        self.verticalHeader().headerDataChanged(Qt.Vertical, row, row)
+
+    def setFoldedColumns(self, columns):
+        """
+        Fold specific columns.
+
+        Args:
+            columns (list(str)): list of column labels
         """
         header = self.horizontalHeader()
-        fold = list()
-        for i in range(self.columnCount()):
-            fold.append(header.isSectionFolded(i))
-        return fold
+        for i in range(len(self.columns)):
+            name = self.columns[i]
+            if name in columns:
+                header.foldSection(i)
+
+    def getFoldedColumns(self):
+        """
+        Get the list of folded columns.
+
+        Returns:
+            list(str): list of columns labels
+        """
+        header = self.horizontalHeader()
+        folded = list()
+        for i in range(len(self.columns)):
+            if header.isSectionFolded(i):
+                folded.append(self.columns[i])
+        return folded
+
+    def setHiddenColumns(self, columns):
+        """
+        Hide specific columns.
+
+        Args:
+            columns(list(str)): list of column labels
+        """
+        header = self.horizontalHeader()
+        for i in range(len(self.columns)):
+            name = self.columns[i]
+            if name in columns:
+                header.hideSection(i)
+
+    def toggleColumnVisibility(self, column):
+        """
+        Change the visibility state of a column by giving its name. If the
+        column is not empty it is emptied before being hidden. In that case, the
+        user is asked for confirmation.
+
+        Args:
+            column (str): column name
+        """
+        if column not in self.columns:
+            return
+        header = self.horizontalHeader()
+        i = self.columns.index(column)
+        if header.isSectionHidden(i):
+            header.showSection(i)
+        else:
+            empty = True
+            for j in range(self.rowCount()):
+                if self.getCellContents(j, i):
+                    empty = False
+            if not empty:
+                q = QMessageBox.question(self, "Column is not empty", "Hiding "
+                                         "the column will erase its content. "
+                                         "Do you want to continue?")
+                if q == QMessageBox.Yes:
+                    for j in range(self.rowCount()):
+                        self.setCellContents(j, i, "")
+                    header.hideSection(i)
+            else:
+                header.hideSection(i)
+
+    def getHiddenColumns(self):
+        """
+        Get the list of hidden columns.
+
+        Returns:
+            list(str): list of column labels
+        """
+        header = self.horizontalHeader()
+        hidden = list()
+        for i in range(len(self.columns)):
+            if header.isSectionHidden(i):
+                hidden.append(self.columns[i])
+        return hidden
+
+    def setColumnsOrder(self, columns):
+        """
+        Set the columns order by giving a list of labels.
+
+        Args:
+            columns (list(str)): list of labels whose table should follow the
+                                 order
+        """
+        header = self.horizontalHeader()
+        for c in columns:
+            if c not in self.columns:
+                continue
+            indexFrom = header.visualIndex(self.columns.index(c))
+            indexTo = columns.index(c)
+            header.moveSection(indexFrom, indexTo)
+
+    def getColumnsOrder(self):
+        """
+        Get the columns order as a list of labels.
+
+        Returns:
+            list(str): list of columns labels
+        """
+        columns = [""] * len(self.columns)
+        header = self.horizontalHeader()
+        for i in range(len(self.columns)):
+            index = header.visualIndex(i)
+            columns[index] = self.columns[i]
+        return columns
 
     def setDisabled(self, state):
         """

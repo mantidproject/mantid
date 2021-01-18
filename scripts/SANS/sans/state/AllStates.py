@@ -23,6 +23,7 @@ from sans.state.StateObjects.StateSave import StateSave
 from sans.state.StateObjects.StateScale import StateScale
 from sans.state.StateObjects.StateSliceEvent import StateSliceEvent
 from sans.state.StateObjects.StateWavelength import StateWavelength
+from sans.state.StateObjects.state_instrument_info import StateInstrumentInfo
 from sans.state.automatic_setters import automatic_setters
 
 
@@ -37,6 +38,7 @@ class AllStates(metaclass=JsonSerializable):
         super(AllStates, self).__init__()
         self.data : StateData = StateData()
         self.move: StateMove = StateMove()
+        self.instrument_info: StateInstrumentInfo = StateInstrumentInfo()
         self.reduction: StateReductionMode = StateReductionMode()
         self.slice: StateSliceEvent = StateSliceEvent()
         self.mask: StateMask = StateMask()

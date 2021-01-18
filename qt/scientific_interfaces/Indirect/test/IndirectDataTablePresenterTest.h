@@ -55,12 +55,12 @@ private:
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 /// Mock object to mock the model
-class MockIndirectDataTableModel : public IIndirectFitData {
+class MockIndirectDataTableModel : public IIndirectFitDataModel {
 public:
   MOCK_CONST_METHOD1(hasWorkspace, bool(std::string const &workspaceName));
   MOCK_CONST_METHOD1(
       getWorkspace, Mantid::API::MatrixWorkspace_sptr(TableDatasetIndex index));
-  MOCK_CONST_METHOD1(getSpectra, Spectra(TableDatasetIndex index));
+  MOCK_CONST_METHOD1(getSpectra, FunctionModelSpectra(TableDatasetIndex index));
   MOCK_CONST_METHOD0(isMultiFit, bool());
   MOCK_CONST_METHOD0(numberOfWorkspaces, TableDatasetIndex());
   MOCK_CONST_METHOD1(getNumberOfSpectra, size_t(TableDatasetIndex index));
@@ -75,17 +75,17 @@ public:
 
   MOCK_METHOD2(setSpectra,
                void(const std::string &spectra, TableDatasetIndex dataIndex));
-  MOCK_METHOD2(setSpectra,
-               void(Spectra &&spectra, TableDatasetIndex dataIndex));
-  MOCK_METHOD2(setSpectra,
-               void(const Spectra &spectra, TableDatasetIndex dataIndex));
+  MOCK_METHOD2(setSpectra, void(FunctionModelSpectra &&spectra,
+                                TableDatasetIndex dataIndex));
+  MOCK_METHOD2(setSpectra, void(const FunctionModelSpectra &spectra,
+                                TableDatasetIndex dataIndex));
   MOCK_METHOD1(addWorkspace, void(const std::string &workspaceName));
   MOCK_METHOD2(addWorkspace, void(const std::string &workspaceName,
                                   const std::string &spectra));
-  MOCK_METHOD2(addWorkspace,
-               void(const std::string &workspaceName, const Spectra &spectra));
+  MOCK_METHOD2(addWorkspace, void(const std::string &workspaceName,
+                                  const FunctionModelSpectra &spectra));
   MOCK_METHOD2(addWorkspace, void(Mantid::API::MatrixWorkspace_sptr workspace,
-                                  const Spectra &spectra));
+                                  const FunctionModelSpectra &spectra));
   MOCK_METHOD1(removeWorkspace, void(TableDatasetIndex index));
   MOCK_METHOD1(removeDataByIndex, void(FitDomainIndex fitDomainIndex));
   MOCK_METHOD0(clear, void());

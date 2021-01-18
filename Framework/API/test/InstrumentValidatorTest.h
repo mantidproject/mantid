@@ -40,11 +40,25 @@ public:
     TS_ASSERT_EQUALS(validator.checkValidity(ws), "");
   }
 
-  void test_fail() {
-    auto ws = std::make_shared<WorkspaceTester>();
-    InstrumentValidator validator;
+  void
+  test_that_the_expected_error_message_is_returned_when_the_instrument_is_missing_a_sample_component() {
+    auto const workspace = std::make_shared<WorkspaceTester>();
+
+    InstrumentValidator validator(InstrumentValidator::SamplePosition);
+
     TS_ASSERT_EQUALS(
-        validator.checkValidity(ws),
+        validator.checkValidity(workspace),
         "The instrument is missing the following components: sample holder");
+  }
+
+  void
+  test_that_the_expected_error_message_is_returned_when_the_instrument_is_missing_a_source_component() {
+    auto const workspace = std::make_shared<WorkspaceTester>();
+
+    InstrumentValidator validator(InstrumentValidator::SourcePosition);
+
+    TS_ASSERT_EQUALS(
+        validator.checkValidity(workspace),
+        "The instrument is missing the following components: source");
   }
 };

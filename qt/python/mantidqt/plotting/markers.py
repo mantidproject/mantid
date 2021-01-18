@@ -87,6 +87,15 @@ class HorizontalMarker(QObject):
         vertices[0] = x0, self.y
         vertices[1] = x1, self.y
         self.axis.draw_artist(self.patch)
+        self.redraw_legend()
+
+    def redraw_legend(self):
+        """
+        After we redraw the marker, the marker will appear above the legend
+        hence we'll have to redraw the legend to place it back ontop
+        """
+        if self.axis.get_legend():
+            self.axis.draw_artist(self.axis.get_legend())
 
     def set_visible(self, visible):
         self.patch.set_visible(visible)
@@ -261,6 +270,15 @@ class VerticalMarker(QObject):
         vertices[0] = self.x, y0
         vertices[1] = self.x, y1
         self.axis.draw_artist(self.patch)
+        self.redraw_legend()
+
+    def redraw_legend(self):
+        """
+        After we redraw the marker, the marker will appear above the legend
+        hence we'll have to redraw the legend to place it back ontop
+        """
+        if self.axis.get_legend():
+            self.axis.draw_artist(self.axis.get_legend())
 
     def set_visible(self, visible):
         self.patch.set_visible(visible)

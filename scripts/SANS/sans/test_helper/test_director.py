@@ -23,6 +23,7 @@ from sans.state.StateObjects.StateConvertToQ import get_convert_to_q_builder
 from sans.common.enums import (SANSFacility, ReductionMode, ReductionDimensionality,
                                FitModeForMerge, RebinType, RangeStepType, SaveType, FitType, SampleShape,
                                SANSInstrument)
+from sans.state.StateObjects.state_instrument_info import StateInstrumentInfo
 from sans.test_helper.file_information_mock import SANSFileInformationMock
 
 
@@ -41,6 +42,7 @@ class TestDirector(object):
         self.scale_state = None
         self.adjustment_state = None
         self.convert_to_q_state = None
+        self.inst_info_state = None
 
     def set_states(self, data_state=None, move_state=None, reduction_state=None, slice_state=None,
                    mask_state=None, wavelength_state=None, save_state=None, scale_state=None, adjustment_state=None,
@@ -75,6 +77,9 @@ class TestDirector(object):
                 move_builder.set_HAB_x_translation_correction(21.2)
             move_builder.set_LAB_x_translation_correction(12.1)
             self.move_state = move_builder.build()
+
+        if self.inst_info_state is None:
+            self.inst_info_state = StateInstrumentInfo.build_from_data_info(self.data_state)
 
         # Build the SANSStateReduction
         if self.reduction_state is None:
@@ -204,4 +209,5 @@ class TestDirector(object):
         state_builder.set_scale(self.scale_state)
         state_builder.set_adjustment(self.adjustment_state)
         state_builder.set_convert_to_q(self.convert_to_q_state)
+        state_builder.state.instrument_info = self.inst_info_state
         return state_builder.build()

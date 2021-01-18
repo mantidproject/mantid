@@ -22,6 +22,8 @@ namespace {
 inline bool isEmpty(const boost::optional<double> &value) {
   return !value || value == Mantid::EMPTY_DBL();
 }
+constexpr auto LARGE_LAMBDA = 100; // Lambda likely to be beyond max lambda in
+                                   // any measured spectra. In Angstroms
 } // namespace
 
 /**
@@ -230,6 +232,19 @@ MaterialBuilder::setAttenuationProfileFilename(std::string filename) {
 }
 
 /**
+ * Set a value for the attenuation profile filename
+ * @param filename Name of the file containing the attenuation profile
+ * @return A reference to the this object to allow chaining
+ */
+MaterialBuilder &
+MaterialBuilder::setXRayAttenuationProfileFilename(std::string filename) {
+  if (!filename.empty()) {
+    m_xRayAttenuationProfileFileName = filename;
+  }
+  return *this;
+}
+
+/**
  * Set a value for the attenuation profile search path
  * @param path Path to search
  */
@@ -271,8 +286,16 @@ Material MaterialBuilder::build() const {
   if (m_attenuationProfileFileName) {
     AttenuationProfile materialAttenuation(m_attenuationProfileFileName.get(),
                                            m_attenuationFileSearchPath,
-                                           material.get());
+                                           material.get(), LARGE_LAMBDA);
     material->setAttenuationProfile(materialAttenuation);
+  }
+  if (m_xRayAttenuationProfileFileName) {
+    // don't supply a material so that extrapolation using the neutron tabulated
+    // attenuation data is turned off
+    AttenuationProfile materialAttenuation(
+        m_xRayAttenuationProfileFileName.get(), m_attenuationFileSearchPath,
+        nullptr, -1);
+    material->setXRayAttenuationProfile(materialAttenuation);
   }
   return *material;
 }
