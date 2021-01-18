@@ -176,7 +176,17 @@ class PeaksViewerCollectionPresenterTest(unittest.TestCase):
         presenter.remove_peaksworkspace.assert_called_once_with("ws")
         presenter.append_peaksworkspace.assert_called_once_with("ws1")
 
-    def test_ensure_close_called
+    def test_ensure_close_called(self, _):
+        presenter = PeaksViewerCollectionPresenter(MagicMock())
+        presenter._view = MagicMock()
+        presenter._child_presenters = MagicMock()
+        presenter._ads_observer = MagicMock()
+
+        presenter.close_called()
+
+        self.assertEqual(presenter._view, None)
+        self.assertEqual(presenter._child_presenters, [])
+        self.assertEqual(presenter._ads_observer, None)
 
 
 if __name__ == '__main__':
