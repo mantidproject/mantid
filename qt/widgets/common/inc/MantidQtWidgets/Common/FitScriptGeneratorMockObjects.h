@@ -6,10 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidKernel/WarningSuppressions.h"
-
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtWidgets/Common/FitScriptGeneratorModel.h"
 #include "MantidQtWidgets/Common/FitScriptGeneratorView.h"
 #include "MantidQtWidgets/Common/FittingGlobals.h"

@@ -12,6 +12,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtWidgets/Common/FitDomain.h"
 #include "MantidQtWidgets/Common/FitScriptGeneratorMockObjects.h"
 #include "MantidQtWidgets/Common/FitScriptGeneratorModel.h"
@@ -44,7 +45,11 @@ Mantid::API::CompositeFunction_sptr createEmptyComposite() {
 
 } // namespace
 
+GNU_DIAG_OFF_SUGGEST_OVERRIDE
+
 MATCHER_P(VectorSize, expectedSize, "") { return arg.size() == expectedSize; }
+
+GNU_DIAG_ON_SUGGEST_OVERRIDE
 
 class FitScriptGeneratorModelTest : public CxxTest::TestSuite {
 
@@ -618,12 +623,12 @@ public:
   test_that_setFittingMode_will_clear_the_global_ties_and_tell_the_presenter() {
     setup_simultaneous_fit_with_global_tie();
 
-    EXPECT_CALL(*m_presenter, setGlobalTies(VectorSize(0))).Times(1);
+    EXPECT_CALL(*m_presenter, setGlobalTies(VectorSize(0u))).Times(1);
     m_model->setFittingMode(FittingMode::SEQUENTIAL);
 
     m_model->updateParameterTie(m_wsName, m_wsIndex, "f0.A0", "f1.A0");
 
-    EXPECT_CALL(*m_presenter, setGlobalTies(VectorSize(0))).Times(1);
+    EXPECT_CALL(*m_presenter, setGlobalTies(VectorSize(0u))).Times(1);
     m_model->setFittingMode(FittingMode::SIMULTANEOUS);
   }
 
@@ -631,12 +636,12 @@ public:
   test_that_setFittingMode_will_clear_the_global_parameters_and_tell_the_presenter() {
     setup_simultaneous_fit_with_global_parameter();
 
-    EXPECT_CALL(*m_presenter, setGlobalParameters(VectorSize(0))).Times(1);
+    EXPECT_CALL(*m_presenter, setGlobalParameters(VectorSize(0u))).Times(1);
     m_model->setFittingMode(FittingMode::SEQUENTIAL);
 
     m_model->setGlobalParameters(std::vector<std::string>{"A0"});
 
-    EXPECT_CALL(*m_presenter, setGlobalParameters(VectorSize(0))).Times(1);
+    EXPECT_CALL(*m_presenter, setGlobalParameters(VectorSize(0u))).Times(1);
     m_model->setFittingMode(FittingMode::SIMULTANEOUS);
   }
 

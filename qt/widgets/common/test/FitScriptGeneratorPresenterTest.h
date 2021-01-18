@@ -12,6 +12,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtWidgets/Common/FitScriptGeneratorMockObjects.h"
 #include "MantidQtWidgets/Common/FitScriptGeneratorPresenter.h"
 #include "MantidQtWidgets/Common/FittingGlobals.h"
@@ -38,8 +39,12 @@ Mantid::API::IFunction_sptr createIFunction(std::string const &functionString) {
 
 } // namespace
 
-MATCHER_P(VectorSize, expectedSize, "") { return arg.size() == expectedSize; }
+GNU_DIAG_OFF_SUGGEST_OVERRIDE
+
 MATCHER_P(BoolAttributeValue, value, "") { return arg.asBool() == value; }
+MATCHER_P(VectorSize, expectedSize, "") { return arg.size() == expectedSize; }
+
+GNU_DIAG_ON_SUGGEST_OVERRIDE
 
 class FitScriptGeneratorPresenterTest : public CxxTest::TestSuite {
 
@@ -125,7 +130,7 @@ public:
     EXPECT_CALL(*m_view, setFunction(m_function)).Times(1);
 
     EXPECT_CALL(*m_model, getGlobalParameters()).Times(1);
-    EXPECT_CALL(*m_view, setGlobalParameters(VectorSize(0))).Times(1);
+    EXPECT_CALL(*m_view, setGlobalParameters(VectorSize(0u))).Times(1);
 
     m_presenter->notifyPresenter(ViewEvent::RemoveClicked);
   }
@@ -558,7 +563,7 @@ public:
         .Times(1);
 
     EXPECT_CALL(*m_model, getGlobalTies()).Times(1);
-    EXPECT_CALL(*m_view, setGlobalTies(VectorSize(0))).Times(1);
+    EXPECT_CALL(*m_view, setGlobalTies(VectorSize(0u))).Times(1);
 
     EXPECT_CALL(*m_view, selectedRows()).Times(1);
 

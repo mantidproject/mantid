@@ -778,7 +778,7 @@ void FunctionTreeView::addParameterTie(
 bool FunctionTreeView::addParameterTieInComposite(
     QtProperty *property, const std::string &parameterName,
     const CompositeFunction_sptr &composite, const std::size_t &index) {
-  for (auto i = 0; i < composite->nParams(); ++i) {
+  for (auto i = 0u; i < composite->nParams(); ++i) {
     const auto fullName = "f" + std::to_string(index) + "." + parameterName;
     if (fullName == composite->parameterName(i)) {
       if (const auto tie = composite->getTie(i)) {
