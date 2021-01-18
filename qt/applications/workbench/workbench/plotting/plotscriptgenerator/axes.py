@@ -59,7 +59,7 @@ def generate_tick_params_kwargs(axis, tick_type="major"):
 
 def generate_tick_commands(ax):
     commands = []
-    
+
     for tick_type in ["minor", "major"]:
         if not isinstance(getattr(ax.xaxis, tick_type).locator, NullLocator):
             if tick_type == "minor":
