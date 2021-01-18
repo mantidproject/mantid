@@ -521,13 +521,15 @@ void PDCalibration::exec() {
   PRAGMA_OMP(parallel for schedule(dynamic, 1) )
   for (int wkspIndex = 0; wkspIndex < NUMHIST; ++wkspIndex) {
     PARALLEL_START_INTERUPT_REGION
-    if (isEvent && uncalibratedEWS->getSpectrum(wkspIndex).empty()) {
+    if ((isEvent && uncalibratedEWS->getSpectrum(wkspIndex).empty()) ||
+        !spectrumInfo.hasDetectors(wkspIndex) ||
+        spectrumInfo.isMonitor(wkspIndex)) {
       prog.report();
       continue;
     }
 
-    // object to hold the information about the peak positions, detid, and wksp
-    // index
+    // object to hold the information about the peak positions, detid, and
+    // wksp index
     PDCalibration::FittedPeaks peaks(m_uncalibratedWS, wkspIndex);
     auto [difc, difa, tzero] = getDSpacingToTof(
         peaks.detid); // doesn't matter which one - all have same difc etc.
@@ -622,45 +624,49 @@ void PDCalibration::exec() {
     if (d_vec.size() < 2) { // not enough peaks were found
       continue;
     } else {
-      // obtain difc, difa, and t0 by fitting the nominal peak center positions,
-      // in d-spacing against the fitted peak center positions, in TOF units.
+      // obtain difc, difa, and t0 by fitting the nominal peak center
+      // positions, in d-spacing against the fitted peak center positions, in
+      // TOF units.
       double difc = 0., t0 = 0., difa = 0.;
       fitDIFCtZeroDIFA_LM(d_vec, tof_vec, height2, difc, t0, difa);
-      const auto rowIndexOutputPeaks = m_detidToRow[peaks.detid];
-      // chisq represent the deviations between the nominal peak positions and
-      // the peak positions using the GSAS formula with optimized difc, difa,
-      // and tzero
-      double chisq = 0.;
-      Mantid::Kernel::Units::dSpacing dSpacingUnit;
-      dSpacingUnit.initialize(
-          -1., -1., -1., 0,
-          Kernel::ExtraParametersMap{{Kernel::UnitParams::difa, difa},
-                                     {Kernel::UnitParams::difc, difc},
-                                     {Kernel::UnitParams::tzero, t0}});
-      for (std::size_t i = 0; i < numPeaks; ++i) {
-        if (std::isnan(tof_vec_full[i]))
-          continue;
-        // Find d-spacing using the GSAS formula with optimized difc, difa, t0
-        // for the TOF of the current peak's center.
-        const double dspacing = dSpacingUnit.singleFromTOF(tof_vec_full[i]);
-        // `temp` is residual between the nominal position in d-spacing for the
-        // current peak, and the fitted position in d-spacing
-        const double temp = m_peaksInDspacing[i] - dspacing;
-        chisq += (temp * temp);
-        m_peakPositionTable->cell<double>(rowIndexOutputPeaks, i + 1) =
-            dspacing;
-        m_peakWidthTable->cell<double>(rowIndexOutputPeaks, i + 1) =
-            WIDTH_TO_FWHM * dSpacingUnit.singleFromTOF(width_vec_full[i]);
-        m_peakHeightTable->cell<double>(rowIndexOutputPeaks, i + 1) =
-            height_vec_full[i];
-      }
-      m_peakPositionTable->cell<double>(rowIndexOutputPeaks,
-                                        m_peaksInDspacing.size() + 1) = chisq;
-      m_peakPositionTable->cell<double>(rowIndexOutputPeaks,
-                                        m_peaksInDspacing.size() + 2) =
-          chisq / static_cast<double>(numPeaks - 1);
+      for (auto iter = peaks.detid.begin(); iter != peaks.detid.end(); ++iter) {
+        auto det = *iter;
+        const auto rowIndexOutputPeaks = m_detidToRow[det];
+        // chisq represent the deviations between the nominal peak positions
+        // and the peak positions using the GSAS formula with optimized difc,
+        // difa, and tzero
+        double chisq = 0.;
+        Mantid::Kernel::Units::dSpacing dSpacingUnit;
+        dSpacingUnit.initialize(
+            -1., -1., -1., 0,
+            Kernel::ExtraParametersMap{{Kernel::UnitParams::difa, difa},
+                                       {Kernel::UnitParams::difc, difc},
+                                       {Kernel::UnitParams::tzero, t0}});
+        for (std::size_t i = 0; i < numPeaks; ++i) {
+          if (std::isnan(tof_vec_full[i]))
+            continue;
+          // Find d-spacing using the GSAS formula with optimized difc, difa,
+          // t0 for the TOF of the current peak's center.
+          const double dspacing = dSpacingUnit.singleFromTOF(tof_vec_full[i]);
+          // `temp` is residual between the nominal position in d-spacing for
+          // the current peak, and the fitted position in d-spacing
+          const double temp = m_peaksInDspacing[i] - dspacing;
+          chisq += (temp * temp);
+          m_peakPositionTable->cell<double>(rowIndexOutputPeaks, i + 1) =
+              dspacing;
+          m_peakWidthTable->cell<double>(rowIndexOutputPeaks, i + 1) =
+              WIDTH_TO_FWHM * dSpacingUnit.singleFromTOF(width_vec_full[i]);
+          m_peakHeightTable->cell<double>(rowIndexOutputPeaks, i + 1) =
+              height_vec_full[i];
+        }
+        m_peakPositionTable->cell<double>(rowIndexOutputPeaks,
+                                          m_peaksInDspacing.size() + 1) = chisq;
+        m_peakPositionTable->cell<double>(rowIndexOutputPeaks,
+                                          m_peaksInDspacing.size() + 2) =
+            chisq / static_cast<double>(numPeaks - 1);
 
-      setCalibrationValues(peaks.detid, difc, difa, t0);
+        setCalibrationValues(det, difc, difa, t0);
+      }
     }
     prog.report();
 
@@ -895,11 +901,11 @@ void PDCalibration::fitDIFCtZeroDIFA_LM(const std::vector<double> &d, const std:
   double best_t0 = 0.;
   double best_difa = 0.;
 
-  // loop over possible number of parameters, doing up to three sequential fits.
-  // We first start with equation TOF = DIFC * d and obtain
-  // optimized DIFC which serves as initial guess for next fit with equation
-  // TOF = DIFC * d + TZERO, obtaining optimized DIFC and TZERO which serve as
-  // initial guess for final fit TOF = DIFC * d + DIFA * d^2 + TZERO.
+  // loop over possible number of parameters, doing up to three sequential
+  // fits. We first start with equation TOF = DIFC * d and obtain optimized
+  // DIFC which serves as initial guess for next fit with equation TOF = DIFC
+  // * d + TZERO, obtaining optimized DIFC and TZERO which serve as initial
+  // guess for final fit TOF = DIFC * d + DIFA * d^2 + TZERO.
   for (size_t numParams = 1; numParams <= maxParams; ++numParams) {
     peaks[1] = static_cast<double>(numParams);
     double difc_local = best_difc;
@@ -941,8 +947,8 @@ void PDCalibration::fitDIFCtZeroDIFA_LM(const std::vector<double> &d, const std:
  *
  * @param centres :: peak centers, in d-spacing
  * @param widthMax :: maximum allowable fit range
- * @return array containing left and right ranges for first peak, left and right
- * for second peak, and so on.
+ * @return array containing left and right ranges for first peak, left and
+ * right for second peak, and so on.
  */
 vector<double> PDCalibration::dSpacingWindows(const std::vector<double> &centres, const double widthMax) {
   if (widthMax <= 0. || isEmpty(widthMax)) {
@@ -980,16 +986,14 @@ vector<double> PDCalibration::dSpacingWindows(const std::vector<double> &centres
 }
 
 /**
- * Return a function that converts from d-spacing to TOF units for a particular
- * pixel, evaulating the GSAS conversion formula:
- *                  TOF = DIFC∗d + DIFA∗d^2 + TZERO
+ * Return a function that converts from d-spacing to TOF units for a
+ * particular pixel, evaulating the GSAS conversion formula: TOF = DIFC∗d +
+ * DIFA∗d^2 + TZERO
  *
  * @param detIds :: set of detector IDs
  */
 std::tuple<double, double, double>
-PDCalibration::getDSpacingToTof(const detid_t detid) {
-  auto rowNum = m_detidToRow[detid];
-
+PDCalibration::getDSpacingToTof(const std::set<detid_t> &detIds) {
   // to start this is the old calibration values
   double difc = 0.;
   double difa = 0.;
@@ -1065,7 +1069,8 @@ MatrixWorkspace_sptr PDCalibration::load(const std::string &filename) {
   return std::dynamic_pointer_cast<MatrixWorkspace>(workspace);
 }
 
-/// load input workspace and rebin with parameters "TofBinning" provided by User
+/// load input workspace and rebin with parameters "TofBinning" provided by
+/// User
 MatrixWorkspace_sptr PDCalibration::loadAndBin() {
   m_uncalibratedWS = getProperty("InputWorkspace");
   return rebin(m_uncalibratedWS);
@@ -1096,7 +1101,8 @@ API::MatrixWorkspace_sptr PDCalibration::rebin(API::MatrixWorkspace_sptr wksp) {
  * to TofMin and TofMax.
  *
  * The output calibration has columns "detid", "difc", "difa", "tzero",
- * "tofmin", and "tofmax", and possible additional columns "dasid" and "offset"
+ * "tofmin", and "tofmax", and possible additional columns "dasid" and
+ * "offset"
  */
 void PDCalibration::createCalTableFromExisting() {
   API::ITableWorkspace_sptr calibrationTableOld = getProperty("PreviousCalibrationTable");
@@ -1159,8 +1165,8 @@ void PDCalibration::createCalTableFromExisting() {
 /**
  * Initialize the calibration table workspace. The output calibration
  * has columns "detid", "difc", "difa", "tzero", "tofmin", and "tofmax".
- * "difc" from the instrument geometry: m_n * (L1 + L2)  * 2 * sin(theta) / h
- * "difa", "tzero", and "tofmin" set to zero, "tofmax" to DBL_MAX
+ * "difc" from the instrument geometry: m_n * (L1 + L2)  * 2 * sin(theta) /
+ * h "difa", "tzero", and "tofmin" set to zero, "tofmax" to DBL_MAX
  */
 void PDCalibration::createCalTableNew() {
   // create new calibraion table for when an old one isn't loaded
@@ -1259,10 +1265,9 @@ API::MatrixWorkspace_sptr PDCalibration::calculateResolutionTable() {
       std::make_shared<DataObjects::SpecialWorkspace2D>(m_uncalibratedWS->getInstrument());
   resolutionWksp->setTitle("average width/height");
 
-  // assume both tables have the same number of rows b/c the algorithm created
-  // both
-  // they are also in the same order
-  // accessing cells is done by (row, col)
+  // assume both tables have the same number of rows b/c the algorithm
+  // created both they are also in the same order accessing cells is done by
+  // (row, col)
   const size_t numRows = m_peakPositionTable->rowCount();
   const size_t numPeaks = m_peaksInDspacing.size();
   std::vector<double> resolution; // vector of non-nan resolutions
@@ -1308,9 +1313,9 @@ API::ITableWorkspace_sptr PDCalibration::sortTableWorkspace(API::ITableWorkspace
 }
 
 /**
- *  A pair of workspaces, one containing the nominal peak centers in TOF units,
- *  the other containing the left and right fitting ranges around each nominal
- *  peak center, also in TOF units
+ *  A pair of workspaces, one containing the nominal peak centers in TOF
+ * units, the other containing the left and right fitting ranges around each
+ * nominal peak center, also in TOF units
  *
  *  Because each pixel has a different set of difc, difa, and tzero values,
  *  the position of the nominal peak centers (and the fitting ranges)

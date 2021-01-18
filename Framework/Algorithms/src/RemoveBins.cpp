@@ -281,8 +281,8 @@ void RemoveBins::transformRangeUnit(const int index, double &startX, double &end
     endX = temp;
   }
 
-  g_log.debug() << "For index " << index << ", X range given corresponds to " << startX << "-" << endX
-                << " in workspace's unit\n";
+  g_log.debug() << "For index " << index << ", X range given corresponds to "
+                << startX << "-" << endX << " in workspace's unit\n";
 }
 
 /** Finds the index in an ordered vector which follows the given value
