@@ -1061,11 +1061,15 @@ void IFunction::setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace> w
               // if unit specified convert centre value to unit required by
               // formula or look-up-table
               if (centreUnit) {
+                g_log.debug()
+                    << "For FitParameter " << parameterName(i)
+                    << " centre of peak before any unit conversion is "
+                    << centreValue << '\n';
+                centreValue =
+                    convertValue(centreValue, centreUnit, workspace, wi);
                 g_log.debug() << "For FitParameter " << parameterName(i)
-                              << " centre of peak before any unit convertion is " << centreValue << '\n';
-                centreValue = convertValue(centreValue, centreUnit, workspace, wi);
-                g_log.debug() << "For FitParameter " << parameterName(i)
-                              << " centre of peak after any unit convertion is " << centreValue << '\n';
+                              << " centre of peak after any unit conversion is "
+                              << centreValue << '\n';
               }
 
               double paramValue = fitParam.getValue(centreValue);
@@ -1077,12 +1081,15 @@ void IFunction::setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace> w
               // www.mantidproject.org/IDF
               if (fitParam.getFormula().empty()) {
                 // so from look up table
-                Kernel::Unit_sptr resultUnit = fitParam.getLookUpTable().getYUnit(); // from table
-                g_log.debug() << "The FitParameter " << parameterName(i) << " = " << paramValue
-                              << " before y-unit convertion\n";
+                Kernel::Unit_sptr resultUnit =
+                    fitParam.getLookUpTable().getYUnit(); // from table
+                g_log.debug()
+                    << "The FitParameter " << parameterName(i) << " = "
+                    << paramValue << " before y-unit conversion\n";
                 paramValue /= convertValue(1.0, resultUnit, workspace, wi);
-                g_log.debug() << "The FitParameter " << parameterName(i) << " = " << paramValue
-                              << " after y-unit convertion\n";
+                g_log.debug()
+                    << "The FitParameter " << parameterName(i) << " = "
+                    << paramValue << " after y-unit conversion\n";
               } else {
                 // so from formula
 
@@ -1104,11 +1111,14 @@ void IFunction::setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace> w
                   try {
                     mu::Parser p;
                     p.SetExpr(resultUnitStr);
-                    g_log.debug() << "The FitParameter " << parameterName(i) << " = " << paramValue
-                                  << " before result-unit convertion (using " << resultUnitStr << ")\n";
+                    g_log.debug() << "The FitParameter " << parameterName(i)
+                                  << " = " << paramValue
+                                  << " before result-unit conversion (using "
+                                  << resultUnitStr << ")\n";
                     paramValue *= p.Eval();
-                    g_log.debug() << "The FitParameter " << parameterName(i) << " = " << paramValue
-                                  << " after result-unit convertion\n";
+                    g_log.debug()
+                        << "The FitParameter " << parameterName(i) << " = "
+                        << paramValue << " after result-unit conversion\n";
                   } catch (mu::Parser::exception_type &e) {
                     g_log.error() << "Cannot convert formula unit to workspace unit"
                                   << " Formula unit which cannot be passed is " << resultUnitStr
@@ -1204,36 +1214,27 @@ void IFunction::convertValue(std::vector<double> &values, Kernel::Unit_sptr &out
     Instrument_const_sptr instrument = ws->getInstrument();
     Geometry::IComponent_const_sptr sample = instrument->getSample();
     if (sample == nullptr) {
-      g_log.error() << "No sample defined instrument. Cannot convert units for function\n"
-                    << "Ignore convertion.";
+      g_log.error()
+          << "No sample defined instrument. Cannot convert units for function\n"
+          << "Ignore conversion.";
       return;
     }
     const auto &spectrumInfo = ws->spectrumInfo();
     double l1 = spectrumInfo.l1();
     // If this is a monitor then l1+l2 = source-detector distance and twoTheta=0
-    double l2 = spectrumInfo.l2(wsIndex);
-    double twoTheta(0.0);
-    if (!spectrumInfo.isMonitor(wsIndex))
-      twoTheta = spectrumInfo.twoTheta(wsIndex);
-    auto emode = static_cast<int>(ws->getEMode());
-    double efixed(0.0);
-    try {
-      std::shared_ptr<const Geometry::IDetector> det(&spectrumInfo.detector(wsIndex), NoDeleting());
-      efixed = ws->getEFixed(det);
-    } catch (std::exception &) {
-      // assume elastic
-      efixed = 0.0;
-      emode = 0;
-    }
-    auto [difa, difc, tzero] = spectrumInfo.diffractometerConstants(wsIndex);
+    double l2, twoTheta;
+    auto emode = ws->getEMode();
 
-    std::vector<double> emptyVec;
-    Kernel::ExtraParametersMap pmap{{Kernel::UnitParams::efixed, efixed},
-                                    {Kernel::UnitParams::difa, difa},
-                                    {Kernel::UnitParams::difc, difc},
-                                    {Kernel::UnitParams::tzero, tzero}};
-    wsUnit->toTOF(values, emptyVec, l1, l2, twoTheta, emode, pmap);
-    outUnit->fromTOF(values, emptyVec, l1, l2, twoTheta, emode, pmap);
+    Kernel::ExtraParametersMap pmap{};
+    if (ws->getDetectorValues(spectrumInfo, *wsUnit, *outUnit, emode, false,
+                              wsIndex, l2, twoTheta, pmap)) {
+      std::vector<double> emptyVec;
+      wsUnit->toTOF(values, emptyVec, l1, l2, twoTheta, emode, pmap);
+      outUnit->fromTOF(values, emptyVec, l1, l2, twoTheta, emode, pmap);
+    } else {
+      throw std::runtime_error("Unable to retrieve detector properties "
+                               "required for unit conversion");
+    }
   }
 }
 

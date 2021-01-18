@@ -66,9 +66,6 @@ private:
 
   void crop(const double &start, const double &end);
   void transformRangeUnit(const int index, double &startX, double &endX);
-  void calculateDetectorPosition(const int index, double &l1, double &l2,
-                                 double &twoTheta, double &difa, double &difc,
-                                 double &tzero);
   int findIndex(const double &value, const HistogramData::HistogramX &vec);
   void RemoveFromEnds(int start, int end, HistogramData::HistogramY &Y, HistogramData::HistogramE &E);
   void RemoveFromMiddle(const int &start, const int &end, const double &startFrac, const double &endFrac,
