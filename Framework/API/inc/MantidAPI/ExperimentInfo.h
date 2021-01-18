@@ -166,9 +166,8 @@ public:
   bool getDetectorValues(const API::SpectrumInfo &spectrumInfo,
                          const Kernel::Unit &inputUnit,
                          const Kernel::Unit &outputUnit,
-                         Kernel::DeltaEMode::Type emode,
-                         const bool signedTheta, int64_t wsIndex, double &l2,
-                         double &twoTheta,
+                         Kernel::DeltaEMode::Type emode, const bool signedTheta,
+                         int64_t wsIndex, double &l2, double &twoTheta,
                          Kernel::ExtraParametersMap &pmap) const;
   void createDetectorIdLogMessages(const std::vector<detid_t> &detids,
                                    int64_t wsIndex) const;
