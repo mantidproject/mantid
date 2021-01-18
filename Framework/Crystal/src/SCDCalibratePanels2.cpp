@@ -184,7 +184,6 @@ std::map<std::string, std::string> SCDCalibratePanels2::validateInputs() {
 void SCDCalibratePanels2::exec() {
   // parse all inputs
   PeaksWorkspace_sptr m_pws = getProperty("PeakWorkspace");
-  std::string outwsname = getProperty("OutputWorkspace");
 
   parseLatticeConstant(m_pws);
 
@@ -290,7 +289,6 @@ void SCDCalibratePanels2::optimizeT0(std::shared_ptr<PeaksWorkspace> pws) {
   fitT0_alg->setProperty("Output", "fit");
   fitT0_alg->executeAsChildAlg();
   //-- parse output
-  std::string status = fitT0_alg->getProperty("OutputStatus");
   double chi2OverDOF = fitT0_alg->getProperty("OutputChi2overDoF");
   ITableWorkspace_sptr rst = fitT0_alg->getProperty("OutputParameters");
   double dT0_optimized = rst->getRef<double>("Value", 6);
@@ -351,7 +349,6 @@ void SCDCalibratePanels2::optimizeL1(std::shared_ptr<PeaksWorkspace> pws) {
   fitL1_alg->setProperty("Output", "fit");
   fitL1_alg->executeAsChildAlg();
   //-- parse output
-  std::string status = fitL1_alg->getProperty("OutputStatus");
   double chi2OverDOF = fitL1_alg->getProperty("OutputChi2overDoF");
   ITableWorkspace_sptr rst = fitL1_alg->getProperty("OutputParameters");
   double dL1_optimized = rst->getRef<double>("Value", 2);
