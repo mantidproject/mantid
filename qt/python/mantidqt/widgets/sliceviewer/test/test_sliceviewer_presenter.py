@@ -450,6 +450,5 @@ class SliceViewerTest(unittest.TestCase):
         presenter.close_called()
 
 
-
 if __name__ == '__main__':
     unittest.main()
