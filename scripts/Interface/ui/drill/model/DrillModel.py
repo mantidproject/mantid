@@ -654,10 +654,10 @@ class DrillModel(QObject):
         logger.information("Processing of sample {0} finished with sucess"
                            .format(name))
         self.processSuccess.emit(ref)
-        if "OutputWorkspace" in self.samples[ref]:
-            self.exportModel.run(self.samples[ref]["OutputWorkspace"])
-        else:
-            self.exportModel.run("sample_" + str(ref + 1))
+        name = self.samples[ref].getParameter("OutputWorkspace")
+        if name is None:
+            name = "sample_" + str(ref + 1)
+        self.exportModel.run(name)
 
     def _onTaskError(self, ref, msg):
         """

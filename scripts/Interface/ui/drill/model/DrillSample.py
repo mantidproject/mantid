@@ -37,6 +37,21 @@ class DrillSample:
         """
         return {k:v for k,v in self._parameters.items()}
 
+    def getParameter(self, name):
+        """
+        Get the value of a parameter.
+
+        Args:
+            name (str): name of the parameter
+
+        Returns:
+            value of the parameter, None if it does not exist
+        """
+        if name in self._parameters:
+            return self._parameters[name]
+        else:
+            return None
+
     def changeParameter(self, name, value):
         """
         Change a parameter value. If this parameter is not already present, it
