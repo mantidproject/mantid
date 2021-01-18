@@ -70,7 +70,8 @@ private:
   size_t loadDataFromTubes(NeXus::NXInt &, const std::vector<double> &, size_t);
   void runLoadInstrument();
   void moveDetectorsD33(const DetectorPosition &);
-  void moveDetectorDistance(double, const std::string &);
+  void moveDetectorDistance(double distance, const std::string &componentName,
+                            const bool relative = false);
   void moveDetectorHorizontal(double, const std::string &);
   void moveDetectorVertical(double, const std::string &);
   Kernel::V3D getComponentPosition(const std::string &componentName);
