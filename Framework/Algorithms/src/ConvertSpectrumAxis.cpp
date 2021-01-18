@@ -100,6 +100,13 @@ void ConvertSpectrumAxis::exec() {
       double twoTheta, l1val, l2;
       ExtraParametersMap pmap{};
 
+      /*double efixedProp = getProperty("Efixed");
+      if (efixedProp != EMPTY_DBL()) {
+        pmap[UnitParams::efixed] = efixedProp;
+        g_log.debug() << "Detector: " << spectrumInfo.detector(i).getID()
+                      << " Efixed: " << efixedProp << "\n";
+      }*/
+
       if (inputWS->getDetectorValues(spectrumInfo, *fromUnit, *toUnit, emode,
                                      false, i, l2, twoTheta, pmap)) {
         fromUnit->toTOF(xval, emptyVector, l1val, l2, twoTheta, emode, pmap);
