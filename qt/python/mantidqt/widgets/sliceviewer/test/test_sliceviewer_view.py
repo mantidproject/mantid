@@ -8,6 +8,7 @@
 import io
 import sys
 import unittest
+from unittest import mock
 
 import matplotlib as mpl
 
@@ -236,6 +237,15 @@ class SliceViewerViewTest(unittest.TestCase, QtWidgetFinder):
 
         self.assert_no_toplevel_widgets()
         self.assertEqual(pres.ads_observer, None)
+
+    def test_close_event(self):
+        pres = SliceViewer(self.histo_ws)
+        self.assert_widget_created()
+        pres.close_called = mock.MagicMock()
+
+        pres.view.closeEvent()
+
+        pres.close_called.assert_called_once()
 
 
 # private helper functions

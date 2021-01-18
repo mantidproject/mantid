@@ -176,6 +176,8 @@ class PeaksViewerCollectionPresenterTest(unittest.TestCase):
         presenter.remove_peaksworkspace.assert_called_once_with("ws")
         presenter.append_peaksworkspace.assert_called_once_with("ws1")
 
+    def test_ensure_close_called
+
 
 if __name__ == '__main__':
     unittest.main()

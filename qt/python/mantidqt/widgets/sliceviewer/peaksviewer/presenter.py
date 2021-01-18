@@ -167,6 +167,11 @@ class PeaksViewerCollectionPresenter:
         self._ads_observer = SliceViewerADSObserver(self.replace_handle, self.rename_handle, self.clear_handle,
                                                     self.delete_handle)
 
+    def close_called(self):
+        self._view = None
+        self._child_presenters = []
+        self._ads_observer = None
+
     @property
     def view(self):
         return self._view
