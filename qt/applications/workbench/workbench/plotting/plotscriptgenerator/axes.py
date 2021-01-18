@@ -53,26 +53,23 @@ def generate_axis_scale_commands(ax):
     return commands
 
 
+def generate_tick_params_kwargs(axis, tick_type="major"):
+    return getattr(axis, f"_{tick_type}_tick_kw")
+
+
 def generate_tick_commands(ax):
     commands = []
-    if not isinstance(ax.xaxis.minor.locator, NullLocator):
-        commands.append("axes.minorticks_on()")
+    
+    for tick_type in ["minor", "major"]:
+        if not isinstance(getattr(ax.xaxis, tick_type).locator, NullLocator):
+            if tick_type == "minor":
+                commands.append("axes.minorticks_on()")
 
-        if hasattr(ax, 'show_minor_gridlines'):
-            commands.append(f"axes.show_minor_gridlines = {ax.show_minor_gridlines}")
+            if isinstance(getattr(ax.xaxis, f"{tick_type}Ticks"), list) and \
+                    len(getattr(ax.xaxis, f"{tick_type}Ticks")) > 0:
+                commands.append(f"axes.tick_params(axis='x', which='{tick_type}', **"
+                                f"{generate_tick_params_kwargs(ax.xaxis, tick_type)})")
+                commands.append(f"axes.tick_params(axis='y', which='{tick_type}', **"
+                                f"{generate_tick_params_kwargs(ax.yaxis, tick_type)})")
 
     return commands
-
-
-def generate_grid_commands(ax):
-    if ax.xaxis._gridOnMajor and ax.yaxis._gridOnMajor:
-        axis = 'both'
-    elif ax.xaxis._gridOnMajor:
-        axis = 'x'
-    elif ax.yaxis._gridOnMajor:
-        axis = 'y'
-    else:
-        return []
-
-    which = 'both' if hasattr(ax, 'show_minor_gridlines') and ax.show_minor_gridlines else 'major'
-    return [f"axes.grid(True, axis='{axis}', which='{which}')"]
