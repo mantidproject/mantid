@@ -1365,9 +1365,9 @@ void ExperimentInfo::populateIfNotLoaded() const {
 bool ExperimentInfo::getDetectorValues(const API::SpectrumInfo &specInfo,
                                        const Kernel::Unit &inputUnit,
                                        const Kernel::Unit &outputUnit,
-                                       int emode, const bool signedTheta,
-                                       int64_t wsIndex, double &l2,
-                                       double &twoTheta,
+                                       Kernel::DeltaEMode::Type emode,
+                                       const bool signedTheta, int64_t wsIndex,
+                                       double &l2, double &twoTheta,
                                        ExtraParametersMap &pmap) const {
   if (!specInfo.hasDetectors(wsIndex))
     return false;
@@ -1385,15 +1385,13 @@ bool ExperimentInfo::getDetectorValues(const API::SpectrumInfo &specInfo,
       g_log.warning(e.what());
       twoTheta = std::numeric_limits<double>::quiet_NaN();
     }
-    // If an indirect instrument, try getting Efixed from the geometry
-    if (emode == 2 && pmap.find(UnitParams::efixed) == pmap.end()) // indirect
-    {
+    if (emode != Kernel::DeltaEMode::Elastic &&
+        pmap.find(UnitParams::efixed) == pmap.end()) {
       if (specInfo.hasUniqueDetector(wsIndex)) {
         std::shared_ptr<const IDetector> det(&specInfo.detector(wsIndex),
                                              Mantid::NoDeleting());
         try {
-          pmap[UnitParams::efixed] =
-              getEFixedGivenEMode(det, DeltaEMode::Type::Indirect);
+          pmap[UnitParams::efixed] = getEFixedGivenEMode(det, emode);
           g_log.debug() << "Detector: " << det->getID()
                         << " EFixed: " << pmap[UnitParams::efixed] << "\n";
         } catch (std::runtime_error) {

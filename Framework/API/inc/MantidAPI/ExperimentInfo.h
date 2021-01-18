@@ -165,7 +165,8 @@ public:
 
   bool getDetectorValues(const API::SpectrumInfo &spectrumInfo,
                          const Kernel::Unit &inputUnit,
-                         const Kernel::Unit &outputUnit, int emode,
+                         const Kernel::Unit &outputUnit,
+                         Kernel::DeltaEMode::Type emode,
                          const bool signedTheta, int64_t wsIndex, double &l2,
                          double &twoTheta,
                          Kernel::ExtraParametersMap &pmap) const;

@@ -415,21 +415,16 @@ ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit,
   /// properties
   const std::string emodeStr = getProperty("EMode");
   // Convert back to an integer representation
-  int emode = 0;
-  if (emodeStr == "Direct")
-    emode = 1;
-  else if (emodeStr == "Indirect")
-    emode = 2;
+  DeltaEMode::Type emode = DeltaEMode::fromString(emodeStr);
 
   // Not doing anything with the Y vector in to/fromTOF yet, so just pass
   // empty
   // vector
   std::vector<double> emptyVec;
   double efixedProp = getProperty("Efixed");
-  if (efixedProp == EMPTY_DBL() && emode == 1) {
+  if (efixedProp == EMPTY_DBL() && emode == DeltaEMode::Type::Direct) {
     try {
-      efixedProp =
-          inputWS->getEFixedGivenEMode(nullptr, DeltaEMode::Type::Direct);
+      efixedProp = inputWS->getEFixedGivenEMode(nullptr, emode);
     } catch (std::runtime_error &) {
     }
   }

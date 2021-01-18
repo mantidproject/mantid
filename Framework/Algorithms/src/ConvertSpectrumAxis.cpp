@@ -94,37 +94,22 @@ void ConvertSpectrumAxis::exec() {
     std::vector<double> emptyVector;
     const double l1 = spectrumInfo.l1();
     const std::string emodeStr = getProperty("EMode");
-    int emode = 0;
-    if (emodeStr == "Direct")
-      emode = 1;
-    else if (emodeStr == "Indirect")
-      emode = 2;
-    double efixed;
+    auto emode = Kernel::DeltaEMode::fromString(emodeStr);
     for (size_t i = 0; i < nHist; i++) {
       std::vector<double> xval{inputWS->x(i).front(), inputWS->x(i).back()};
       double twoTheta, l1val, l2;
       ExtraParametersMap pmap{};
-      if (!spectrumInfo.isMonitor(i)) {
-        twoTheta = spectrumInfo.twoTheta(i);
-        l2 = spectrumInfo.l2(i);
-        l1val = l1;
-        efixed =
-            getEfixed(spectrumInfo.detector(i), inputWS, emode); // get efixed
-        auto [difa, difc, tzero] = spectrumInfo.diffractometerConstants(i);
-        pmap = {{UnitParams::efixed, efixed},
-                {UnitParams::difa, difa},
-                {UnitParams::difc, difc},
-                {UnitParams::tzero, tzero}};
+
+      if (inputWS->getDetectorValues(spectrumInfo, *fromUnit, *toUnit, emode,
+                                     false, i, l2, twoTheta, pmap)) {
+        fromUnit->toTOF(xval, emptyVector, l1val, l2, twoTheta, emode, pmap);
+        toUnit->fromTOF(xval, emptyVector, l1val, l2, twoTheta, emode, pmap);
+        double value = (xval.front() + xval.back()) / 2;
+        indexMap.emplace(value, i);
       } else {
-        twoTheta = 0.0;
-        l2 = l1;
-        l1val = 0.0;
-        efixed = DBL_MIN;
+        throw std::runtime_error("Unable to retrieve detector properties "
+                                 "required for unit conversion");
       }
-      fromUnit->toTOF(xval, emptyVector, l1val, l2, twoTheta, emode, pmap);
-      toUnit->fromTOF(xval, emptyVector, l1val, l2, twoTheta, emode, pmap);
-      double value = (xval.front() + xval.back()) / 2;
-      indexMap.emplace(value, i);
     }
   } else {
     // Set up binding to memeber funtion. Avoids condition as part of loop over

@@ -268,20 +268,29 @@ void RemoveBins::transformRangeUnit(const int index, double &startX,
     startX = factor * std::pow(m_startX, power);
     endX = factor * std::pow(m_endX, power);
   } else {
-    double l1, l2, theta, difa, difc, tzero;
-    this->calculateDetectorPosition(index, l1, l2, theta, difa, difc, tzero);
-    std::vector<double> endPoints;
-    endPoints.emplace_back(startX);
-    endPoints.emplace_back(endX);
-    ExtraParametersMap pmap = {{UnitParams::difa, difa},
-                               {UnitParams::difc, difc},
-                               {UnitParams::tzero, tzero}};
-    std::vector<double> emptyVec;
-    // assume elastic
-    m_rangeUnit->toTOF(endPoints, emptyVec, l1, l2, theta, 0, pmap);
-    inputUnit->fromTOF(endPoints, emptyVec, l1, l2, theta, 0, pmap);
-    startX = endPoints.front();
-    endX = endPoints.back();
+    double l1, l2, theta;
+    l1 = m_spectrumInfo->l1();
+
+    Kernel::ExtraParametersMap pmap{};
+    if (m_inputWorkspace->getDetectorValues(
+            *m_spectrumInfo, *m_rangeUnit, *inputUnit,
+            Kernel::DeltaEMode::Elastic, false, index, l2, theta, pmap)) {
+      g_log.debug() << "Detector for index " << index
+                    << " has L1+L2=" << l1 + l2 << " & 2theta= " << theta
+                    << '\n';
+      std::vector<double> endPoints;
+      endPoints.emplace_back(startX);
+      endPoints.emplace_back(endX);
+      std::vector<double> emptyVec;
+      // assume elastic
+      m_rangeUnit->toTOF(endPoints, emptyVec, l1, l2, theta, 0, pmap);
+      inputUnit->fromTOF(endPoints, emptyVec, l1, l2, theta, 0, pmap);
+      startX = endPoints.front();
+      endX = endPoints.back();
+    } else {
+      throw std::runtime_error("Unable to retrieve detector properties "
+                               "required for unit conversion");
+    }
   }
 
   if (startX > endX) {
@@ -292,31 +301,6 @@ void RemoveBins::transformRangeUnit(const int index, double &startX,
 
   g_log.debug() << "For index " << index << ", X range given corresponds to "
                 << startX << "-" << endX << " in workspace's unit\n";
-}
-
-/** Retrieves the detector postion for a given spectrum
- *  @param index ::    The workspace index of the spectrum
- *  @param l1 ::       Returns the source-sample distance
- *  @param l2 ::       Returns the sample-detector distance
- *  @param twoTheta :: Returns the detector's scattering angle
- *  @param difa :: Returns the detector's difa parameter (diffraction)
- *  @param difc :: Returns the detector's difc parameter (diffraction)
- *  @param tzero :: Returns the detector's tzero parameter (diffraction)
- */
-void RemoveBins::calculateDetectorPosition(const int index, double &l1,
-                                           double &l2, double &twoTheta,
-                                           double &difa, double &difc,
-                                           double &tzero) {
-  l1 = m_spectrumInfo->l1();
-  l2 = m_spectrumInfo->l2(index);
-  if (m_spectrumInfo->isMonitor(index))
-    twoTheta = 0.0;
-  else
-    twoTheta = m_spectrumInfo->twoTheta(index);
-  std::tie(difa, difc, tzero) = m_spectrumInfo->diffractometerConstants(index);
-
-  g_log.debug() << "Detector for index " << index << " has L1+L2=" << l1 + l2
-                << " & 2theta= " << twoTheta << '\n';
 }
 
 /** Finds the index in an ordered vector which follows the given value

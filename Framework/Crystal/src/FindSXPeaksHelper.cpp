@@ -374,9 +374,9 @@ double PeakFindingStrategy::convertToTOF(const double xValue,
     return xValue;
   } else {
     const auto unit = UnitFactory::Instance().create("dSpacing");
-    std::vector<int> warningDets;
+
     const auto [difa, difc, tzero] =
-        m_spectrumInfo.diffractometerConstants(workspaceIndex, warningDets);
+        m_spectrumInfo.diffractometerConstants(workspaceIndex);
     // we're using d-spacing, convert the point to TOF
     unit->initialize(m_spectrumInfo.l1(), m_spectrumInfo.l2(workspaceIndex),
                      m_spectrumInfo.twoTheta(workspaceIndex), 0,
