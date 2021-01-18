@@ -38,7 +38,7 @@ class D7YIGPositionCalibration(PythonAlgorithm):
         return 'Performs D7 position calibration using YIG scan and returns D7 IPF readable by LoadILLPolarizedDiffraction.'
 
     def seeAlso(self):
-        return ['LoadILLPolarizedDiffraction']
+        return ['LoadILLPolarizedDiffraction', 'PolDiffILLReduction', 'D7AbsoluteCrossSections']
 
     def name(self):
         return 'D7YIGPositionCalibration'
@@ -83,7 +83,7 @@ class D7YIGPositionCalibration(PythonAlgorithm):
                              doc="The minimal allowable distance between two YIG peaks (in degrees 2theta).")
 
         self.declareProperty(name="BankOffsets",
-                             defaultValue=[0.0, 0.0, 0.0],
+                             defaultValue=[3.0, 3.0, 0.0],
                              direction=Direction.Input,
                              doc="List of values of offset for each bank (in degrees).")
 
@@ -143,7 +143,7 @@ class D7YIGPositionCalibration(PythonAlgorithm):
         if not self.getProperty("BankOffsets").isDefault:
             offsets = self.getProperty("BankOffsets").value
             for bank_no in range(int(self._D7NumberPixels / self._D7NumberPixelsBank)):
-                ChangeBinOffset(InputWorkspace=conjoined_scan, Offset=offsets[bank_no],
+                ChangeBinOffset(InputWorkspace=conjoined_scan, Offset=-offsets[bank_no],
                                 WorkspaceIndexList='{0}-{1}'.format(bank_no*self._D7NumberPixelsBank,
                                                                     (bank_no+1)*self._D7NumberPixelsBank-1),
                                 OutputWorkspace=conjoined_scan)

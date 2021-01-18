@@ -85,7 +85,7 @@ class ILL_D22_Test(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance = 1e-5
         self.disableChecking = ['Instrument']
-        return ['iq', 'ILL_SANS_D22_IQ.nxs']
+        return ['iq', 'ILL_SANS_D22_IQ_v2.nxs']
 
     def runTest(self):
         # Load the mask

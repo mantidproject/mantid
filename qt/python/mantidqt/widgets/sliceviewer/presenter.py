@@ -16,10 +16,12 @@ from .model import SliceViewerModel, WS_TYPE
 from .sliceinfo import SliceInfo
 from .toolbar import ToolItemText
 from .view import SliceViewerView
+from .adsobsever import SliceViewerADSObserver
 from .peaksviewer import PeaksViewerPresenter, PeaksViewerCollectionPresenter
+from ..observers.observing_presenter import ObservingPresenter
 
 
-class SliceViewer(object):
+class SliceViewer(ObservingPresenter):
     TEMPORARY_STATUS_TIMEOUT = 2000
 
     def __init__(self, ws, parent=None, model=None, view=None, conf=None):
@@ -33,25 +35,23 @@ class SliceViewer(object):
         self._logger = mantid.kernel.Logger("SliceViewer")
         self._peaks_presenter = None
         self.model = model if model else SliceViewerModel(ws)
+        self.parent = parent
+        self.conf = conf
 
-        if self.model.get_ws_type() == WS_TYPE.MDH:
-            self.new_plot = self.new_plot_MDH
-            self.update_plot_data = self.update_plot_data_MDH
-        elif self.model.get_ws_type() == WS_TYPE.MDE:
-            self.new_plot = self.new_plot_MDE
-            self.update_plot_data = self.update_plot_data_MDE
-        else:
-            self.new_plot = self.new_plot_matrix
-            self.update_plot_data = self.update_plot_data_matrix
+        # Acts as a 'time capsule' to the properties of the model at this
+        # point in the execution. By the time the ADS observer calls self.replace_workspace,
+        # the workspace associated with self.model has already been changed.
+        self.initial_model_properties = self.model.get_properties()
 
+        self.new_plot, self.update_plot_data = self._decide_plot_update_methods()
         self.normalization = False
 
         self.view = view if view else SliceViewerView(self, self.model.get_dimensions_info(),
                                                       self.model.can_normalize_workspace(), parent,
                                                       conf)
+        self.view.setWindowTitle(self.model.get_title())
         self.view.data_view.create_axes_orthogonal(
             redraw_on_zoom=not self.model.can_support_dynamic_rebinning())
-        self.view.data_view.image_info_widget.setWorkspace(ws)
 
         if self.model.can_normalize_workspace():
             self.view.data_view.set_normalization(ws)
@@ -61,11 +61,13 @@ class SliceViewer(object):
         if not self.model.can_support_nonorthogonal_axes():
             self.view.data_view.disable_tool_button(ToolItemText.NONORTHOGONAL_AXES)
 
-        self.view.setWindowTitle(self.model.get_title())
-        self.new_plot()
+        self.refresh_view()
 
         # Start the GUI with zoom selected.
         self.view.data_view.activate_tool(ToolItemText.ZOOM)
+
+        self.ads_observer = SliceViewerADSObserver(self.replace_workspace, self.rename_workspace,
+                                                   self.ADS_cleared, self.delete_workspace)
 
     def new_plot_MDH(self):
         """
@@ -93,8 +95,9 @@ class SliceViewer(object):
             # model frame
             if data_view.nonorthogonal_mode:
                 inv_tr = data_view.nonortho_transform.inv_tr
-                xmin_p, ymin_p = inv_tr(xlim[0], ylim[0])
-                xmax_p, ymax_p = inv_tr(xlim[1], ylim[1])
+                # viewing axis y not aligned with plot axis
+                xmin_p, ymax_p = inv_tr(xlim[0], ylim[1])
+                xmax_p, ymin_p = inv_tr(xlim[1], ylim[0])
                 xlim, ylim = (xmin_p, xmax_p), (ymin_p, ymax_p)
             if data_view.dimensions.transpose:
                 limits = ylim, xlim
@@ -314,6 +317,7 @@ class SliceViewer(object):
             data_view.disable_tool_button(ToolItemText.LINEPLOTS)
             data_view.create_axes_nonorthogonal(
                 self.model.create_nonorthogonal_transform(self.get_sliceinfo()))
+            self.show_all_data_requested()
         else:
             data_view.create_axes_orthogonal()
             data_view.enable_tool_button(ToolItemText.LINEPLOTS)
@@ -345,6 +349,53 @@ class SliceViewer(object):
             self._create_peaks_presenter_if_necessary().overlay_peaksworkspaces(names_to_overlay)
         else:
             self.view.peaks_view.hide()
+
+    def replace_workspace(self, workspace_name, workspace):
+        """
+        Called when the SliceViewerADSObserver has detected that a workspace has changed
+        @param workspace_name: the name of the workspace that has changed
+        @param workspace: the workspace that has changed
+        """
+        if not self.model.workspace_equals(workspace_name):
+            return
+        try:
+            candidate_model = SliceViewerModel(workspace)
+            candidate_model_properties = candidate_model.get_properties()
+            for (property, value) in candidate_model_properties.items():
+                if self.initial_model_properties[property] != value:
+                    raise ValueError(f"The property {property} is different on the new workspace.")
+
+            # New model is OK, proceed with updating Slice Viewer
+            self.model = candidate_model
+            self.new_plot, self.update_plot_data = self._decide_plot_update_methods()
+            self.view.delayed_refresh()
+        except ValueError as err:
+            self._close_view_with_message(
+                f"Closing Sliceviewer as the underlying workspace was changed: {str(err)}")
+            return
+
+    def refresh_view(self):
+        """
+        Updates the view to enable/disable certain options depending on the model.
+        """
+        # we don't want to use model.get_ws for the image info widget as this needs
+        # extra arguments depending on workspace type.
+        self.view.data_view.image_info_widget.setWorkspace(self.model._get_ws())
+        self.new_plot()
+
+    def rename_workspace(self, old_name, new_name):
+        if str(self.model._get_ws()) == old_name:
+            self.view.emit_rename(self.model.get_title(new_name))
+
+    def delete_workspace(self, ws_name):
+        if ws_name == str(self.model._ws):
+            self.view.emit_close()
+
+    def ADS_cleared(self):
+        self.view.emit_close()
+
+    def clear_observer(self):
+        self.ads_observer = None
 
     # private api
     def _create_peaks_presenter_if_necessary(self):
@@ -379,3 +430,20 @@ class SliceViewer(object):
             current_workspaces = self._peaks_presenter.workspace_names()
 
         return current_workspaces
+
+    def _decide_plot_update_methods(self):
+        """
+        Checks the type of workspace in self.model and decides which of the
+        new_plot and update_plot_data methods to use
+        :return: the new_plot method to use
+        """
+        if self.model.get_ws_type() == WS_TYPE.MDH:
+            return self.new_plot_MDH, self.update_plot_data_MDH
+        elif self.model.get_ws_type() == WS_TYPE.MDE:
+            return self.new_plot_MDE, self.update_plot_data_MDE
+        else:
+            return self.new_plot_matrix, self.update_plot_data_matrix
+
+    def _close_view_with_message(self, message: str):
+        self.view.emit_close()  # inherited from ObservingView
+        self._logger.warning(message)

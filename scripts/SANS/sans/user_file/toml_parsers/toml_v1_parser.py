@@ -250,7 +250,11 @@ class _TomlV1ParserImpl(TomlParserImplBase):
     def _parse_reduction(self):
         reduction_dict = self.get_val(["reduction"])
 
-        self.compatibility.time_rebin_string = self.get_val(["events", "binning"], reduction_dict, default="")
+        events_binning = self.get_val(["events", "binning"], reduction_dict, default="")
+        if (events_binning and len(events_binning.split(',')) != 3) or \
+                self.instrument is SANSInstrument.ZOOM and not events_binning:
+            raise ValueError("Events.binning: Three comma separated values are required")
+        self.compatibility.time_rebin_string = events_binning
 
         merge_range_dict = self.get_val(["merged", "merge_range"], reduction_dict)
         self.reduction_mode.merge_min = self.get_val("min", merge_range_dict)
@@ -262,14 +266,20 @@ class _TomlV1ParserImpl(TomlParserImplBase):
         max_q = []
 
         rescale_dict = self.get_val(["merged", "rescale"], reduction_dict)
-        min_q.append(self.get_val("min", rescale_dict))
-        max_q.append(self.get_val("max", rescale_dict))
         rescale_fit = self.get_val("use_fit", rescale_dict)
+        if rescale_fit:
+            min_q.append(self.get_val("min", rescale_dict))
+            max_q.append(self.get_val("max", rescale_dict))
+        else:
+            self.reduction_mode.merge_scale = self.get_val("factor", rescale_dict, default=1.0)
 
         shift_dict = self.get_val(["merged", "shift"], reduction_dict)
-        min_q.append(self.get_val("min", shift_dict))
-        max_q.append(self.get_val("max", shift_dict))
         shift_fit = self.get_val("use_fit", shift_dict)
+        if shift_fit:
+            min_q.append(self.get_val("min", shift_dict))
+            max_q.append(self.get_val("max", shift_dict))
+        else:
+            self.reduction_mode.merge_shift = self.get_val("distance", shift_dict, default=0.0)
 
         self.reduction_mode.merge_range_min = min(q for q in min_q if q is not None) if any(min_q) else None
         self.reduction_mode.merge_range_max = max(q for q in max_q if q is not None) if any(max_q) else None
@@ -323,9 +333,6 @@ class _TomlV1ParserImpl(TomlParserImplBase):
 
     def _parse_transmission_fitting(self):
         fit_dict = self.get_val(["transmission", "fitting"])
-        if not self.get_val("enabled", fit_dict):
-            return
-
         can_fitting = self.calculate_transmission.fit[DataType.CAN.value]
         sample_fitting = self.calculate_transmission.fit[DataType.SAMPLE.value]
 
@@ -333,6 +340,10 @@ class _TomlV1ParserImpl(TomlParserImplBase):
             assert hasattr(can_fitting, attr_name)
             setattr(can_fitting, attr_name, attr_val)
             setattr(sample_fitting, attr_name, attr_val)
+
+        if not self.get_val("enabled", fit_dict):
+            set_val_on_both("fit_type", FitType.NO_FIT)
+            return
 
         function = str(self.get_val("function", fit_dict))
         fit_type = None
@@ -361,14 +372,17 @@ class _TomlV1ParserImpl(TomlParserImplBase):
 
         # Mandatory as its subtle if missing
         monitor_spec_num = monitor_dict["spectrum_number"]
-        background = monitor_dict["background"]
-        if len(background) != 2:
-            raise ValueError("Two background values required")
-        self.calculate_transmission.background_TOF_monitor_start.update({str(monitor_spec_num): background[0]})
-        self.calculate_transmission.background_TOF_monitor_stop.update({str(monitor_spec_num): background[1]})
-        self.normalize_to_monitor.background_TOF_monitor_start.update({str(monitor_spec_num): background[0]})
-        self.normalize_to_monitor.background_TOF_monitor_stop.update({str(monitor_spec_num): background[1]})
+        background = self.get_val("background", monitor_dict, )
+
         self.normalize_to_monitor.incident_monitor = monitor_spec_num
+
+        if background:
+            if len(background) != 2:
+                raise ValueError("Two background values required")
+            self.calculate_transmission.background_TOF_monitor_start.update({str(monitor_spec_num): background[0]})
+            self.calculate_transmission.background_TOF_monitor_stop.update({str(monitor_spec_num): background[1]})
+            self.normalize_to_monitor.background_TOF_monitor_start.update({str(monitor_spec_num): background[0]})
+            self.normalize_to_monitor.background_TOF_monitor_stop.update({str(monitor_spec_num): background[1]})
 
     def _parse_spatial_masks(self):
         mask_dict = self.get_val("mask")

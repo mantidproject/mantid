@@ -65,6 +65,7 @@ class WavelengthTomlParser(TomlParserImplBase):
         if step_type in (RangeStepType.RANGE_LIN, RangeStepType.RANGE_LOG):
             self._parse_range_wavelength(state_objs)
         else:
+            assert step_type in (RangeStepType.LIN, RangeStepType.LOG)
             self._parse_linear_wavelength(state_objs)
 
     def _parse_range_wavelength(self, state_objs):

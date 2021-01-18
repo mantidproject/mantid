@@ -11,17 +11,18 @@ import unittest
 from matplotlib import use as mpl_use
 
 mpl_use('Agg')  # noqa
-from matplotlib.pyplot import figure
+from matplotlib.pyplot import figure, subplots
 from numpy import array_equal
 
 from mantid.simpleapi import CreateWorkspace
 from mantid.plots import datafunctions
 from mantid.plots.utility import MantidAxType
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, patch, call
 from mantidqt.widgets.plotconfigdialog.colorselector import convert_color_to_hex
 from mantidqt.widgets.plotconfigdialog.curvestabwidget import CurveProperties
 from mantidqt.widgets.plotconfigdialog.curvestabwidget.presenter import (
     CurvesTabWidgetPresenter, remove_curve_from_ax, curve_has_errors)
+from mantidqt.widgets.plotconfigdialog.legendtabwidget.presenter import LegendTabWidgetPresenter
 
 
 class CurvesTabWidgetPresenterTest(unittest.TestCase):
@@ -56,7 +57,7 @@ class CurvesTabWidgetPresenterTest(unittest.TestCase):
     def _generate_presenter(self, mock_view=None, fig=None):
         if not mock_view:
             mock_view = Mock(get_selected_ax_name=lambda: "Axes 0: (0, 0)",
-                             get_selected_curve_name=lambda: "Workspace")
+                             get_current_curve_name=lambda: "Workspace")
         if not fig:
             fig = self.fig
         return CurvesTabWidgetPresenter(fig=fig, view=mock_view)
@@ -71,9 +72,9 @@ class CurvesTabWidgetPresenterTest(unittest.TestCase):
         presenter.view.populate_select_axes_combo_box.assert_called_once_with(
             ["Axes 0: (0, 0)", "(1, 0)"])
 
-    def test_populate_select_curve_combo_box_called_on_init(self):
+    def test_populate_select_curve_list_called_on_init(self):
         presenter = self._generate_presenter()
-        presenter.view.populate_select_curve_combo_box.assert_called_once_with(
+        presenter.view.populate_select_curve_list.assert_called_once_with(
             ["Workspace", "noerrors"])
 
     def test_update_view_called_on_init(self):
@@ -100,7 +101,7 @@ class CurvesTabWidgetPresenterTest(unittest.TestCase):
         presenter = self._generate_presenter()
         line = self._get_no_errors_line()
         err_bars = self.fig.get_axes()[0].containers[0]
-        presenter.set_new_curve_name_in_dict_and_combo_box(err_bars, 'new_label')
+        presenter.set_new_curve_name_in_dict_and_list(err_bars, 'new_label')
         self.assertEqual({'new_label': err_bars, 'noerrors': line},
                          presenter.curve_names_dict)
 
@@ -133,15 +134,16 @@ class CurvesTabWidgetPresenterTest(unittest.TestCase):
         self.assertNotIn(err_cont[0], ax.lines)
         self.assertNotIn(err_cont, ax.containers)
 
-    def test_remove_selected_curve_removes_curve_from_curves_names_and_combo_box(self):
+    def test_remove_current_curve_removes_curve_from_curves_names_and_list(self):
         self.ax2.plot([0], [0], label='new_line')
         mock_view = Mock(get_selected_ax_name=lambda: "(1, 0)",
-                         get_selected_curve_name=lambda: "new_line")
+                         get_current_curve_name=lambda: "new_line",
+                         get_selected_curves_names=lambda: ["new_line"])
         presenter = self._generate_presenter(mock_view=mock_view)
         with patch.object(presenter, 'update_view', lambda: None):
-            presenter.remove_selected_curve()
+            presenter.remove_selected_curves()
         self.assertNotIn('new_line', presenter.curve_names_dict)
-        presenter.view.remove_select_curve_combo_box_selected_item.assert_called_once_with()
+        presenter.view.remove_select_curve_list_selected_items.assert_called_once_with()
 
     def test_axes_removed_from_axes_names_dict_when_all_curves_removed(self):
         fig = figure()
@@ -152,12 +154,36 @@ class CurvesTabWidgetPresenterTest(unittest.TestCase):
         ax0.plot([0, 1], [0, 1], label='ax0 curve')
         ax1.plot([0], [0], label='ax1 curve')
         mock_view = Mock(get_selected_ax_name=lambda: "First Axes: (0, 0)",
-                         get_selected_curve_name=lambda: "ax0 curve")
+                         get_current_curve_name=lambda: "ax0 curve",
+                         get_selected_curves_names=lambda: ["ax0 curve"])
         presenter = self._generate_presenter(fig=fig, mock_view=mock_view)
         with patch.object(presenter, 'update_view', lambda: None):
-            presenter.remove_selected_curve()
+            presenter.remove_selected_curves()
         self.assertNotIn('First Axes', presenter.axes_names_dict)
         self.assertNotIn("ax0 curve", presenter.curve_names_dict)
+
+    def test_curves_and_legend_tabs_close_when_all_curves_removed(self):
+        fig, ax = subplots()
+        ax.plot([[0], [0]], label='line1')
+        ax.legend()
+
+        mock_view = Mock(get_selected_ax_name=lambda: "(0, 0)",
+                         get_current_curve_name=lambda: "line1",
+                         get_selected_curves_names=lambda: ["line1"])
+        mock_view.select_curve_list.count = Mock(return_value=0)
+        mock_view.select_axes_combo_box.count = Mock(return_value=0)
+
+        parent_presenter_mock = Mock()
+
+        legend_presenter = LegendTabWidgetPresenter(fig=fig, view=mock_view, parent_presenter=parent_presenter_mock)
+        curves_presenter =CurvesTabWidgetPresenter(
+            fig=fig, view=mock_view, parent_presenter=parent_presenter_mock, legend_tab=legend_presenter)
+
+        curves_presenter.remove_selected_curves()
+
+        curves_presenter.parent_presenter.forget_tab_from_presenter.assert_has_calls(
+            [call(curves_presenter), call(legend_presenter)])
+        mock_view.close.assert_called()
 
     def test_curve_has_errors_on_workspace_with_no_errors(self):
         try:
@@ -200,11 +226,11 @@ class CurvesTabWidgetPresenterTest(unittest.TestCase):
         ax.set_title('Axes 0')
         ax.plot(self.ws, specNum=1, label='Workspace')
         presenter = self._generate_presenter(fig=fig)
-        presenter.view.select_curve_combo_box.currentIndex.return_value = 0
+        presenter.view.select_curve_list.currentIndex.return_value = 0
         new_plot_kwargs = {'errorevery': 2, 'linestyle': '-.', 'color': 'r',
                            'marker': 'v'}
-        presenter._replot_selected_curve(new_plot_kwargs)
-        new_err_container = presenter.get_selected_curve()
+        presenter._replot_current_curve(new_plot_kwargs)
+        new_err_container = presenter.get_current_curve()
         self.assertEqual(new_err_container[0].get_linestyle(), '-.')
         self.assertEqual(new_err_container[0].get_color(), 'r')
         self.assertEqual(new_err_container[0].get_marker(), 'v')
@@ -220,9 +246,9 @@ class CurvesTabWidgetPresenterTest(unittest.TestCase):
                                hide_errors=False, hide=True,
                                __getitem__=lambda s, x: False)
         mock_view = Mock(get_selected_ax_name=lambda: "(0, 0)",
-                         get_selected_curve_name=lambda: "errorbar_plot",
+                         get_current_curve_name=lambda: "errorbar_plot",
                          get_properties=lambda: mock_view_props)
-        mock_view.select_curve_combo_box.currentIndex.return_value = 0
+        mock_view.select_curve_list.currentIndex.return_value = 0
         presenter = self._generate_presenter(fig=fig, mock_view=mock_view)
         presenter.apply_properties()
         self.assertFalse(ax.containers[0][2][0].get_visible())
@@ -265,7 +291,7 @@ class CurvesTabWidgetPresenterTest(unittest.TestCase):
         fig = self.make_figure_with_multiple_curves()
 
         mock_view = Mock(get_selected_ax_name=lambda: "Axes 0: (0, 0)",
-                         get_selected_curve_name=lambda: "Workspace")
+                         get_current_curve_name=lambda: "Workspace")
 
         mock_view.errorbars.get_hide.return_value = False
 
@@ -285,7 +311,7 @@ class CurvesTabWidgetPresenterTest(unittest.TestCase):
         fig = self.make_figure_with_multiple_curves()
 
         mock_view = Mock(get_selected_ax_name=lambda: "Axes 0: (0, 0)",
-                         get_selected_curve_name=lambda: "Workspace")
+                         get_current_curve_name=lambda: "Workspace")
 
         mock_view.errorbars.get_hide.return_value = True
 
@@ -303,7 +329,7 @@ class CurvesTabWidgetPresenterTest(unittest.TestCase):
         fig = self.make_figure_with_multiple_curves()
 
         mock_view = Mock(get_selected_ax_name=lambda: "Axes 0: (0, 0)",
-                         get_selected_curve_name=lambda: "Workspace")
+                         get_current_curve_name=lambda: "Workspace")
 
         ax = fig.get_axes()[0]
         ax.set_waterfall(True)
@@ -312,7 +338,7 @@ class CurvesTabWidgetPresenterTest(unittest.TestCase):
         presenter = self._generate_presenter(fig=fig, mock_view=mock_view)
 
         new_plot_kwargs = {'visible': False}
-        presenter._replot_selected_curve(new_plot_kwargs)
+        presenter._replot_current_curve(new_plot_kwargs)
 
         self.assertEqual(datafunctions.get_waterfall_fill_for_curve(ax, 0).get_visible(), False)
 
@@ -320,7 +346,7 @@ class CurvesTabWidgetPresenterTest(unittest.TestCase):
         fig = self.make_figure_with_multiple_curves()
 
         mock_view = Mock(get_selected_ax_name=lambda: "Axes 0: (0, 0)",
-                         get_selected_curve_name=lambda: "Workspace")
+                         get_current_curve_name=lambda: "Workspace")
 
         ax = fig.get_axes()[0]
         ax.lines[0].set_color('#ff9900')
@@ -334,7 +360,7 @@ class CurvesTabWidgetPresenterTest(unittest.TestCase):
         presenter = self._generate_presenter(fig=fig, mock_view=mock_view)
         # Change the colour of one of the lines.
         new_plot_kwargs = {'color': '#ffff00'}
-        presenter._replot_selected_curve(new_plot_kwargs)
+        presenter._replot_current_curve(new_plot_kwargs)
 
         # The fill for that line should be the new colour.
         self.assertEqual(convert_color_to_hex(ax.collections[0].get_facecolor()[0]), ax.lines[0].get_color())
@@ -343,7 +369,7 @@ class CurvesTabWidgetPresenterTest(unittest.TestCase):
         fig = self.make_figure_with_multiple_curves()
 
         mock_view = Mock(get_selected_ax_name=lambda: "Axes 0: (0, 0)",
-                         get_selected_curve_name=lambda: "Workspace")
+                         get_current_curve_name=lambda: "Workspace")
 
         ax = fig.get_axes()[0]
         # Create waterfall plot
@@ -353,14 +379,34 @@ class CurvesTabWidgetPresenterTest(unittest.TestCase):
         # Add errobars to the first two lines
         for i in range(2):
             if i == 1:
-                presenter.view.get_selected_curve_name = lambda: "Workspace 2"
+                presenter.view.get_current_curve_name = lambda: "Workspace 2"
             new_plot_kwargs = {'capsize': 2}
-            presenter._replot_selected_curve(new_plot_kwargs)
+            presenter._replot_current_curve(new_plot_kwargs)
 
         # Check the errorbar lines and the errorbar cap lines are different.
         # (They would be the same if it was a non-waterfall plot)
         self.assertFalse(array_equal(ax.containers[0][2][0].get_segments(), ax.containers[1][2][0].get_segments()))
         self.assertFalse(array_equal(ax.containers[0][1][0].get_data(), ax.containers[1][1][0].get_data()))
+
+    def test_selecting_many_curves_disables_curve_config(self):
+        mock_view = Mock(get_selected_ax_name=lambda: "Axes 0: (0, 0)",
+                         get_current_curve_name=lambda: "Workspace")
+        mock_view.select_curve_list.selectedItems = lambda: ["item1", "item2"]
+
+        presenter = self._generate_presenter(fig=None, mock_view=mock_view)
+        presenter.on_curves_selection_changed()
+
+        mock_view.enable_curve_config.assert_called_with(False)
+
+    def test_selection_one_curve_enables_curve_config(self):
+        mock_view = Mock(get_selected_ax_name=lambda: "Axes 0: (0, 0)",
+                         get_current_curve_name=lambda: "Workspace")
+        mock_view.select_curve_list.selectedItems = lambda: ["item1"]
+
+        presenter = self._generate_presenter(fig=None, mock_view=mock_view)
+        presenter.on_curves_selection_changed()
+
+        mock_view.enable_curve_config.assert_called_with(True)
 
 
 if __name__ == '__main__':

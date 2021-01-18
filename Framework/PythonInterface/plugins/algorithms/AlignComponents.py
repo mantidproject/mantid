@@ -5,17 +5,18 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init, no-name-in-module
+import enum
 import math
 import numpy as np
-from scipy.stats import chisquare
 from typing import List
 
 from mantid.api import (
     AlgorithmFactory, FileAction, FileProperty, InstrumentValidator, ITableWorkspaceProperty,
     MatrixWorkspaceProperty, Progress, PropertyMode, PythonAlgorithm, WorkspaceProperty)
 from mantid.dataobjects import MaskWorkspace, TableWorkspace
-from mantid.kernel import (Direction, EnabledWhenProperty, FloatBoundedValidator, logger, PropertyCriterion,
-                           Quat, StringArrayProperty, StringListValidator, V3D)
+from mantid.kernel import (
+    Direction, EnabledWhenProperty, FloatArrayProperty, FloatBoundedValidator, logger, PropertyCriterion, Quat,
+    StringArrayProperty, StringListValidator, V3D)
 import mantid.simpleapi as api
 
 
@@ -25,13 +26,12 @@ class AlignComponents(PythonAlgorithm):
     """
 
     _optionsList = ["Xposition", "Yposition", "Zposition", "AlphaRotation", "BetaRotation", "GammaRotation"]
-    adjustment_items = ['Component', 'Xposition', 'Yposition', 'Zposition',
+    adjustment_items = ['ComponentName', 'Xposition', 'Yposition', 'Zposition',
                         'XdirectionCosine', 'YdirectionCosine', 'ZdirectionCosine', 'RotationAngle']
     _optionsDict = {}
     _initialPos = None
     _move = False
     _rotate = False
-    _masking = False
     _eulerConvention = None
 
     def category(self):
@@ -57,53 +57,67 @@ class AlignComponents(PythonAlgorithm):
 
     #pylint: disable=too-many-locals
     def PyInit(self):
-        self.declareProperty(ITableWorkspaceProperty("CalibrationTable", "",
-                                                     optional=PropertyMode.Mandatory,
-                                                     direction=Direction.Input),
-                             doc="Calibration table, currently only uses difc")
 
-        self.declareProperty(MatrixWorkspaceProperty("MaskWorkspace", "",
-                                                     optional=PropertyMode.Optional,
-                                                     direction=Direction.Input),
-                             doc="Mask workspace")
+        #
+        # Reference and input data
+        self.declareProperty(ITableWorkspaceProperty(
+            "PeakCentersTofTable", "", optional=PropertyMode.Mandatory, direction=Direction.Input),
+            doc="Table of found peak centers, in TOF units")
 
-        self.declareProperty(FileProperty(name="InstrumentFilename",
-                                          defaultValue="",
-                                          action=FileAction.OptionalLoad,
-                                          extensions=[".xml"]),
-                             doc="Instrument filename")
+        self.declareProperty(FloatArrayProperty(
+            "PeakPositions", values=[], direction=Direction.Input),
+            doc="Comma separated list of reference peak center d-spacings, sorted by increasing value.")
 
-        self.declareProperty(WorkspaceProperty("InputWorkspace", "",
-                                               validator=InstrumentValidator(),
-                                               optional=PropertyMode.Optional,
-                                               direction=Direction.Input),
-                             doc="Workspace containing the instrument to be calibrated")
+        properties = ["PeakCentersTofTable", "PeakPositions"]
+        [self.setPropertyGroup(name, 'Reference and Input Data') for name in properties]
 
-        self.declareProperty(WorkspaceProperty("OutputWorkspace", "",
-                                               optional=PropertyMode.Mandatory,
-                                               direction=Direction.Output),
-                             doc='Workspace containing the calibrated instrument')
+        #
+        # Selection of the instrument and mask
+        self.declareProperty(
+            MatrixWorkspaceProperty("MaskWorkspace", "", optional=PropertyMode.Optional, direction=Direction.Input),
+            doc="Mask workspace")
 
-        self.declareProperty("AdjustmentsTable", "", direction=Direction.Input,
-                             doc="Name of output table containing optimized translations and"
-                                 " rotations for each requested component")
+        self.declareProperty(FileProperty(
+            name="InstrumentFilename", defaultValue="", action=FileAction.OptionalLoad, extensions=[".xml"]),
+            doc="Instrument filename")
 
-        # Source
-        self.declareProperty(name="FitSourcePosition", defaultValue=False,
-                             doc="Fit the source position, changes L1 (source to sample) distance."
-                             "Uses entire instrument. Occurs before Components are Aligned.")
+        self.declareProperty(
+            WorkspaceProperty("InputWorkspace", "", validator=InstrumentValidator(), optional=PropertyMode.Optional,
+                              direction=Direction.Input),
+            doc="Workspace containing the instrument to be calibrated")
 
-        # Sample
-        self.declareProperty(name="FitSamplePosition", defaultValue=False,
-                             doc="Fit the sample position, changes L1 (source to sample) and "
-                                 "L2 (sample to detector) distance."
-                             "Uses entire instrument. Occurs before Components are Aligned.")
+        self.declareProperty(
+            WorkspaceProperty("OutputWorkspace", "", optional=PropertyMode.Mandatory, direction=Direction.Output),
+            doc='Workspace containing the calibrated instrument')
 
-        # List of components
-        self.declareProperty(StringArrayProperty("ComponentList",
-                                                 direction=Direction.Input),
-                             doc="Comma separated list on instrument components to refine.")
+        properties = ['MaskWorkspace', "InstrumentFilename", "InputWorkspace", "OutputWorkspace"]
+        [self.setPropertyGroup(name, 'Instrument Options') for name in properties]
 
+        #
+        # Components
+        self.declareProperty(
+            "AdjustmentsTable", "", direction=Direction.Input,
+            doc="Name of output table containing optimized locations and orientations for each component")
+
+        self.declareProperty(
+            name="FitSourcePosition", defaultValue=False,
+            doc="Fit the source position, changes L1 (source to sample) distance. "
+                "Uses entire instrument. Occurs before Components are Aligned.")
+
+        self.declareProperty(
+            name="FitSamplePosition", defaultValue=False,
+            doc="Fit the sample position, changes L1 (source to sample) and L2 (sample to detector) distance."
+                "Uses entire instrument. Occurs before Components are Aligned.")
+
+        self.declareProperty(
+            StringArrayProperty("ComponentList", direction=Direction.Input),
+            doc="Comma separated list on instrument components to refine.")
+
+        properties = ["AdjustmentsTable", "FitSourcePosition", "FitSamplePosition", "ComponentList"]
+        [self.setPropertyGroup(name, 'Declaration of Components') for name in properties]
+
+        #
+        # Translation Properties
         # X position
         self.declareProperty(name="Xposition", defaultValue=False,
                              doc="Refine Xposition of source and/or sample and/or components")
@@ -117,7 +131,7 @@ class AlignComponents(PythonAlgorithm):
                              doc="Maximum relative X bound (m)")
         self.setPropertySettings("MaxXposition", condition)
 
-        # Y position
+
         self.declareProperty(name="Yposition", defaultValue=False,
                              doc="Refine Yposition of source and/or sample and/or components")
         condition = EnabledWhenProperty("Yposition", PropertyCriterion.IsNotDefault)
@@ -143,12 +157,18 @@ class AlignComponents(PythonAlgorithm):
                              doc="Maximum relative Z bound (m)")
         self.setPropertySettings("MaxZposition", condition)
 
-        # euler angles convention
+        properties = ["Xposition", "MinXposition", "MaxXposition", "Yposition", "MinYposition", "MaxYposition",
+                      "Zposition", "MinZposition", "MaxZposition"]
+        [self.setPropertyGroup(name, "Translation") for name in properties]
+
+
+        #
+        # Rotation Properties
         eulerConventions = ["ZXZ", "XYX", "YZY", "ZYZ", "XZX", "YXY", "XYZ", "YZX", "ZXY", "XZY", "ZYX", "YXZ"]
-        self.declareProperty(name="EulerConvention", defaultValue="YZX",
-                             validator=StringListValidator(eulerConventions),
-                             doc="Euler angles convention used when calculating and displaying angles,"
-                             "eg XYZ corresponding to alpha beta gamma.")
+        self.declareProperty(
+            name="EulerConvention", defaultValue="YZX", validator=StringListValidator(eulerConventions),
+            doc="Euler angles convention used when calculating and displaying angles,"
+                "eg XYZ corresponding to alpha beta gamma.")
 
         # alpha rotation
         self.declareProperty(name="AlphaRotation", defaultValue=False,
@@ -189,28 +209,10 @@ class AlignComponents(PythonAlgorithm):
                              doc="Maximum relative gamma rotation (deg)")
         self.setPropertySettings("MaxGammaRotation", condition)
 
-        # Translation
-        self.setPropertyGroup("Xposition", "Translation")
-        self.setPropertyGroup("MinXposition", "Translation")
-        self.setPropertyGroup("MaxXposition", "Translation")
-        self.setPropertyGroup("Yposition", "Translation")
-        self.setPropertyGroup("MinYposition", "Translation")
-        self.setPropertyGroup("MaxYposition", "Translation")
-        self.setPropertyGroup("Zposition", "Translation")
-        self.setPropertyGroup("MinZposition", "Translation")
-        self.setPropertyGroup("MaxZposition", "Translation")
-
-        # Rotation
-        self.setPropertyGroup("EulerConvention", "Rotation")
-        self.setPropertyGroup("AlphaRotation", "Rotation")
-        self.setPropertyGroup("MinAlphaRotation", "Rotation")
-        self.setPropertyGroup("MaxAlphaRotation", "Rotation")
-        self.setPropertyGroup("BetaRotation", "Rotation")
-        self.setPropertyGroup("MinBetaRotation", "Rotation")
-        self.setPropertyGroup("MaxBetaRotation", "Rotation")
-        self.setPropertyGroup("GammaRotation", "Rotation")
-        self.setPropertyGroup("MinGammaRotation", "Rotation")
-        self.setPropertyGroup("MaxGammaRotation", "Rotation")
+        properties = ["EulerConvention", "AlphaRotation", "MinAlphaRotation", "MaxAlphaRotation",
+                      "BetaRotation", "MinBetaRotation", "MaxBetaRotation",
+                      "GammaRotation", "MinGammaRotation", "MaxGammaRotation"]
+        [self.setPropertyGroup(name, "Rotation") for name in properties]
 
     def validateInputs(self):
         """
@@ -218,18 +220,38 @@ class AlignComponents(PythonAlgorithm):
         """
         issues = dict()
 
-        calWS: TableWorkspace = self.getProperty('CalibrationTable').value
+        peak_positions = self.getProperty('PeakPositions').value
 
-        if 'difc' not in calWS.getColumnNames() or 'detid' not in calWS.getColumnNames():
-            issues['CalibrationTable'] = "Calibration table requires detid and difc"
+        table_tof: TableWorkspace = self.getProperty('PeakCentersTofTable').value
+
+        if 'detid' not in table_tof.getColumnNames():
+            issues['PeakCentersTofTable'] = 'PeakCentersTofTable is missing column "detid"'
+
+        # The titles for table columns storing the TOF peak-center positions start with '@'
+        column_names = [name for name in table_tof.getColumnNames() if name[0] == '@']
+        peak_count = len(peak_positions)  # number of reference peak-center values
+        if len(column_names) != peak_count:
+            error_message = f'The number of table columns containing the peak center positions' \
+                            f' {len(column_names)} is different than the number of peak positions {peak_count}'
+            issues['PeakCentersTofTable'] = error_message
+
+        # The titles for table columns storing the TOF peak-center positions do contain the values
+        # of the reference peak-center positions in d-spacing units, up to a precision of 5
+        def with_precision(the_number, precision):
+            r"""Analog of C++'s std::setprecision"""
+            return round(the_number, precision - len(str(int(the_number))))
+
+        for column_name, peak_position in zip(column_names, sorted(peak_positions)):
+            if (float(column_name[1:]) - with_precision(peak_position, 5)) > 1.e-5:
+                issues['PeakCentersTofTable'] = f'{column_name} and {peak_position} differ up to precision 5'
 
         maskWS: MaskWorkspace = self.getProperty("MaskWorkspace").value
         if maskWS is not None:
             if maskWS.id() != 'MaskWorkspace':
                 issues['MaskWorkspace'] = "MaskWorkspace must be empty or of type \"MaskWorkspace\""
-            # The mask workspace should contain as many spectra as rows in the calibration table
-            if maskWS.getNumberHistograms() != calWS.rowCount():
-                error_message = 'The mask workspace must contain as many spectra as rows in the calibration table'
+            # The mask workspace should contain as many spectra as rows in the TOFS table
+            if maskWS.getNumberHistograms() != table_tof.rowCount():
+                error_message = 'The mask workspace must contain as many spectra as rows in the TOFS table'
                 issues['MaskWorkspace'] = error_message
 
         # Need to get instrument in order to check if components are valid
@@ -247,7 +269,8 @@ class AlignComponents(PythonAlgorithm):
 
         # Check if each component listed is defined in the instrument
         components = self.getProperty("ComponentList").value
-        if len(components) <= 0 and not self.getProperty("FitSourcePosition").value and not self.getProperty("FitSamplePosition").value:
+        source_or_sample = self.getProperty("FitSourcePosition").value or self.getProperty("FitSamplePosition").value
+        if len(components) <= 0 and not source_or_sample:
             issues['ComponentList'] = "Must supply components"
         else:
             get_component = api.mtd[wks_name].getInstrument().getComponentByName
@@ -279,11 +302,27 @@ class AlignComponents(PythonAlgorithm):
 
     # flake8: noqa: C901
     def PyExec(self):
-        self._eulerConvention=self.getProperty('EulerConvention').value
-        calWS = self.getProperty('CalibrationTable').value
-        calWS = api.SortTableWorkspace(calWS, Columns='detid')
+        table_tof = self.getProperty('PeakCentersTofTable').value
+        self.peaks_tof = self._extract_tofs(table_tof)
+        detector_count, peak_count = self.peaks_tof.shape
+        table_tof = api.SortTableWorkspace(table_tof, Columns='detid')
+        detID = table_tof.column('detid')
+        peaks_ref = np.sort(self.getProperty('PeakPositions').value)  # sort by increasing value
+        self.peaks_ref = peaks_ref[np.newaxis, :]  # shape = (1, peak_count)
+
+        # Process input mask
         maskWS = self.getProperty("MaskWorkspace").value
+        if maskWS is not None:
+            mask = maskWS.extractY().flatten()  # shape=(detector_count,)
+            peaks_mask = np.tile(mask[:, np.newaxis], peak_count)  # shape=(detector_count, peak_count)
+        else:
+            peaks_mask = np.zeros((detector_count, peak_count))  # no detectors are masked
+        peaks_mask[np.isnan(self.peaks_tof)] = True
+        # mask the defective detectors and missing peaks
+        self.peaks_tof = np.ma.masked_array(self.peaks_tof, peaks_mask)
+
         input_workspace = self.getProperty('InputWorkspace').value
+
         adjustments_table_name = self.getProperty('AdjustmentsTable').value
         if len(adjustments_table_name) > 0:
             adjustments_table = self._initialize_adjustments_table(adjustments_table_name)
@@ -291,17 +330,14 @@ class AlignComponents(PythonAlgorithm):
         else:
             saving_adjustments = False
 
-        difc = calWS.column('difc')
-        if maskWS is not None:
-            self._masking = True
-            mask = maskWS.extractY().flatten()
-            difc = np.ma.masked_array(difc, mask)
+        self._eulerConvention = self.getProperty('EulerConvention').value
 
-        detID = calWS.column('detid')
-
-        wks_name = self.getPropertyValue("OutputWorkspace")  # workspace whose counts will be DIFC values
+        output_workspace = self.getPropertyValue("OutputWorkspace")
+        wks_name = '__alignedworkspace'  # workspace whose counts will be DIFC values
         if bool(input_workspace) is True:
             api.CloneWorkspace(InputWorkspace=input_workspace, OutputWorkspace=wks_name)
+            if output_workspace != str(input_workspace):
+                api.CloneWorkspace(InputWorkspace=input_workspace, OutputWorkspace=output_workspace)
         else:
             api.LoadEmptyInstrument(Filename=self.getProperty("InstrumentFilename").value, OutputWorkspace=wks_name)
 
@@ -322,15 +358,9 @@ class AlignComponents(PythonAlgorithm):
                 componentName = comp.getFullName()
                 logger.notice("Working on " + componentName + " Starting position is " + str(comp.getPos()))
                 firstIndex = 0
-                lastIndex = len(difc)
-                if self._masking:
-                    mask_out = mask[firstIndex:lastIndex + 1]
-                else:
-                    mask_out = None
+                lastIndex = detector_count - 1
 
-                self._initialPos = [comp.getPos().getX(),
-                                    comp.getPos().getY(),
-                                    comp.getPos().getZ(),
+                self._initialPos = [comp.getPos().getX(), comp.getPos().getY(), comp.getPos().getZ(),
                                     0, 0, 0]  # no rotation
 
                 # Set up x0 and bounds lists
@@ -346,12 +376,7 @@ class AlignComponents(PythonAlgorithm):
                 # scipy.opimize.minimize with the L-BFGS-B algorithm
                 results: OptimizeResult = minimize(self._minimisation_func, x0=x0List,
                                                    method='L-BFGS-B',
-                                                   args=(wks_name,
-                                                         componentName,
-                                                         firstIndex,
-                                                         lastIndex,
-                                                         difc[firstIndex:lastIndex + 1],
-                                                         mask_out),
+                                                   args=(wks_name, componentName, firstIndex, lastIndex),
                                                    bounds=boundsList)
 
                 # Apply the results to the output workspace
@@ -359,15 +384,16 @@ class AlignComponents(PythonAlgorithm):
 
                 # Save translation and rotations, if requested
                 if saving_adjustments:
-                    instrument = input_workspace.getInstrument()
+                    instrument = api.mtd[wks_name].getInstrument()
                     name_finder = {'Source': instrument.getSource().getName(),
                                    'Sample': instrument.getSample().getName()}
                     component_adjustments = [name_finder[component]] + xmap[:3] + [0.0] * 4 # no rotations
                     adjustments_table.addRow(component_adjustments)
 
                 # Need to grab the component again, as things have changed
-                kwargs = dict(X=xmap[0], Y=xmap[1], Z=xmap[2], RelativePosition=False)
-                api.MoveInstrumentComponent(wks_name, componentName, **kwargs) # adjust workspace
+                kwargs = dict(X=xmap[0], Y=xmap[1], Z=xmap[2], RelativePosition=False, EnableLogging=False)
+                api.MoveInstrumentComponent(wks_name, componentName, **kwargs)  # adjust workspace
+                api.MoveInstrumentComponent(output_workspace, componentName, **kwargs)  # adjust workspace
                 comp = api.mtd[wks_name].getInstrument().getComponentByName(componentName)
                 logger.notice("Finished " + componentName + " Final position is " + str(comp.getPos()))
                 self._move = False
@@ -387,11 +413,11 @@ class AlignComponents(PythonAlgorithm):
         for component in components:
             comp = get_component(component)
             firstDetID = self._getFirstDetID(comp)
-            firstIndex = detID.index(firstDetID)  # a row index in the input calibration table
+            firstIndex = detID.index(firstDetID)  # a row index in the input TOFS table
             lastDetID = self._getLastDetID(comp)
-            lastIndex = detID.index(lastDetID)  # a row index in the input calibration table
+            lastIndex = detID.index(lastDetID)  # a row index in the input TOFS table
             if lastDetID - firstDetID != lastIndex - firstIndex:
-                raise RuntimeError("Calibration detid doesn't match instrument")
+                raise RuntimeError("TOFS detid doesn't match instrument")
 
             eulerAngles: List[float] = comp.getRotation().getEulerAngles(self._eulerConvention)
 
@@ -404,13 +430,9 @@ class AlignComponents(PythonAlgorithm):
 
             boundsList = []
 
-            if self._masking:
-                mask_out = mask[firstIndex:lastIndex + 1]
-                if mask_out.sum() == mask_out.size:
-                    self.log().warning("All pixels in '%s' are masked. Skipping calibration." % component)
-                    continue
-            else:
-                mask_out = None
+            if np.all(peaks_mask[firstIndex:lastIndex + 1].astype(bool)):
+                self.log().warning("All pixels in '%s' are masked. Skipping calibration." % component)
+                continue
 
             for iopt, opt in enumerate(self._optionsList):
                 if self._optionsDict[opt]:
@@ -421,12 +443,7 @@ class AlignComponents(PythonAlgorithm):
             # scipy.opimize.minimize with the L-BFGS-B algorithm
             results: OptimizeResult = minimize(self._minimisation_func, x0=x0List,
                                                method='L-BFGS-B',
-                                               args=(wks_name,
-                                                     component,
-                                                     firstIndex,
-                                                     lastIndex,
-                                                     difc[firstIndex:lastIndex + 1],
-                                                     mask_out),
+                                               args=(wks_name, component, firstIndex, lastIndex),
                                                bounds=boundsList)
 
             # Apply the results to the output workspace
@@ -435,14 +452,16 @@ class AlignComponents(PythonAlgorithm):
             component_adjustments = [0.] * 7  # 3 for translation, 3 for rotation axis, 1 for rotation angle
 
             if self._move:
-                kwargs = dict(X=xmap[0], Y=xmap[1], Z=xmap[2], RelativePosition=False)
+                kwargs = dict(X=xmap[0], Y=xmap[1], Z=xmap[2], RelativePosition=False, EnableLogging=False)
                 api.MoveInstrumentComponent(wks_name, component, **kwargs)  # adjust workspace
+                api.MoveInstrumentComponent(output_workspace, component, **kwargs)  # adjust workspace
                 component_adjustments[:3] = xmap[:3]
 
             if self._rotate:
                 (rotw, rotx, roty, rotz) = self._eulerToAngleAxis(xmap[3], xmap[4], xmap[5], self._eulerConvention)
-                kwargs = dict(X=rotx, Y=roty, Z=rotz, Angle=rotw, RelativeRotation=False)
+                kwargs = dict(X=rotx, Y=roty, Z=rotz, Angle=rotw, RelativeRotation=False, EnableLogging=False)
                 api.RotateInstrumentComponent(wks_name, component, **kwargs)  # adjust workspace
+                api.RotateInstrumentComponent(output_workspace, component, **kwargs)  # adjust workspace
                 component_adjustments[3:] = [rotx, roty, rotz, rotw]
 
             if saving_adjustments and (self._move or self._rotate):
@@ -454,7 +473,8 @@ class AlignComponents(PythonAlgorithm):
                           + " Final rotation is " + str(comp.getRotation().getEulerAngles(self._eulerConvention)))
 
             prog.report()
-        self.setProperty("OutputWorkspace", wks_name)
+        api.DeleteWorkspace(wks_name)
+        self.setProperty("OutputWorkspace", output_workspace)
         logger.notice("Results applied to workspace "+wks_name)
 
     def _initialize_adjustments_table(self, table_name):
@@ -467,14 +487,39 @@ class AlignComponents(PythonAlgorithm):
             table.addColumn(name=column_name, type=column_type)
         return table
 
-    #pylint: disable=too-many-arguments
-    def _minimisation_func(self, x_0, wks_name, component, firstIndex, lastIndex, difc, mask):
+    def _extract_tofs(self, table_tofs: TableWorkspace) -> np.ndarray:
+        r"""
+        Extract the columns of the input table containing the peak centers, sorted by increasing value
+        of the peak center in d-spacing units
+
+        :param table_tofs: table of peak centers, in TOF units
+        :return array of shape (detector_count, peak_count)
         """
-        Basic minimization function used. Returns the chisquared difference between the expected
-        difc and the new difc after the component has been moved or rotated.
+        # the title for the columns containing the peak centers begin with '@'
+        indexes_and_titles = [(index, title) for index, title in enumerate(table_tofs.getColumnNames()) if '@' in title]
+        column_indexes, titles = list(zip(*indexes_and_titles))
+        peak_tofs = np.array([table_tofs.column(i) for i in column_indexes])  # shape = (peak_count, detector_count)
+        # sort by increasing peak centers (d-spacing units)
+        peak_centers = np.array([float(title.replace('@', '')) for title in titles])
+        permutation = np.argsort(peak_centers)  # reorder of indices guarantee increase in d-spacing
+        peak_tofs = peak_tofs[permutation]  # sort by increasing d-spacing
+        return np.transpose(peak_tofs)  # shape = (detector_count, peak_count)
+
+    def _minimisation_func(self, x_0, wks_name, component, firstIndex, lastIndex):
+        """
+        Basic minimization function used. Returns the sum of the absolute values for the fractional peak
+        deviations:
+
+        .. math::
+
+            \sum_i^{N_d}\sum_j^{N_p} (1 - m_{i,j}) \frac{|d_{i,j} - d_j^*|}{d_j^*}
+
+        where :math:`N_d` is the number of detectors in the bank, :math:`N_p` is the number of reference peaks, and
+        :math:`m_{i,j}` is the mask for peak :math:`j` and detector :math:`i`. The mask evaluates to 1 if the
+        detector is defective or the peak is missing in the detector, otherwise the mask evaluates to zero.
 
         There's an implicit one-to-correspondence between array index of `difc` and workspace index of `wks_name`,
-        that is, between row index of the input calibration table and workspace index of `wks_name`.
+        that is, between row index of the input TOFS table and workspace index of `wks_name`.
 
         @param x_0 :: list of length 3 (new XYZ coordinates of the component) or length 6 (XYZ and rotation coords)
         @param wks_name :: name of a workspace with an embedded instrument. The instrument will be adjusted according to
@@ -484,29 +529,26 @@ class AlignComponents(PythonAlgorithm):
             and new DIFC values. When fitting the source or sample, this is the first spectrum index.
         @param lastIndex ::  workspace index of last index of `difc` array to be considered when comparing old
             and new DIFC values. When fitting the source or sample, this is the last row number of the input
-            calibration table.
-        @param mask :: mask array indicating which spectra should be considered when calculating the Chi-square value
+            TOFS table.
 
         @return Chi-square value between old and new DIFC values for the unmasked spectra
         """
         xmap = self._mapOptions(x_0)  # pad null rotations when x_0 contains only translations
 
         if self._move:
-            api.MoveInstrumentComponent(wks_name, component, X=xmap[0], Y=xmap[1], Z=xmap[2], RelativePosition=False)
+            api.MoveInstrumentComponent(wks_name, component, X=xmap[0], Y=xmap[1], Z=xmap[2], RelativePosition=False, EnableLogging=False)
 
         if self._rotate:
             (rotw, rotx, roty, rotz) = self._eulerToAngleAxis(xmap[3], xmap[4], xmap[5], self._eulerConvention)  # YZX
             api.RotateInstrumentComponent(wks_name, component, X=rotx, Y=roty, Z=rotz, Angle=rotw,
-                                          RelativeRotation=False)
+                                          RelativeRotation=False, EnableLogging=False)
 
-        api.CalculateDIFC(InputWorkspace=wks_name, OutputWorkspace=wks_name)
+        api.CalculateDIFC(InputWorkspace=wks_name, OutputWorkspace=wks_name, EnableLogging=False)
+        difc = api.mtd[wks_name].extractY().flatten()[firstIndex: lastIndex + 1]
+        peaks_d = self.peaks_tof[firstIndex: lastIndex + 1] / difc[:, np.newaxis]  # peak centers in d-spacing units
 
-        difc_new = api.mtd[wks_name].extractY().flatten()[firstIndex:lastIndex + 1]
-
-        if self._masking:
-            difc_new = np.ma.masked_array(difc_new, mask)
-
-        return chisquare(f_obs=difc, f_exp=difc_new)[0]
+        # calculate the fractional peak center deviations, then sum their absolute values
+        return np.sum(np.abs((peaks_d - self.peaks_ref) / self.peaks_ref))
 
     def _getFirstDetID(self, component):
         """

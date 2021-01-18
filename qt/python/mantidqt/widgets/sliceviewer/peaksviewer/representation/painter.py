@@ -77,7 +77,7 @@ class EllipticalShell(Patch):
         return self._path
 
 
-class MplPainter(object):
+class MplPainter():
     """
     Implementation of a PeakPainter that uses matplotlib to draw
     """
@@ -174,7 +174,7 @@ class MplPainter(object):
             to_data_coords.transform(artist_bbox.max)
 
 
-class Painted(object):
+class Painted():
     """Combine a collection of artists with the painter that created them"""
     def __init__(self, painter, artists, effective_bbox=None):
         """

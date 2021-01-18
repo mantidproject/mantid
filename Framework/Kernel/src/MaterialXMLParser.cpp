@@ -55,6 +55,7 @@ const char *COHSC_ATT = "cohscatterxsec";
 const char *INCOHSC_ATT = "incohscatterxsec";
 const char *ABSORB_ATT = "absorptionxsec";
 const char *ATTENPROF_ATT = "attenuationprofile";
+const char *ATTENPROFX_ATT = "xrayattenuationprofile";
 
 // Base type to put in a hash
 struct BuilderHandle {
@@ -119,6 +120,8 @@ const BuilderHandle &findHandle(const std::string &name) {
     insertHandle(&handles, ABSORB_ATT, &MaterialBuilder::setAbsorptionXSection);
     insertHandle(&handles, ATTENPROF_ATT,
                  &MaterialBuilder::setAttenuationProfileFilename);
+    insertHandle(&handles, ATTENPROFX_ATT,
+                 &MaterialBuilder::setXRayAttenuationProfileFilename);
   }
   auto iter = handles.find(name);
   if (iter != handles.end())

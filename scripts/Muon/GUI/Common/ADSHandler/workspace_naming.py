@@ -181,6 +181,37 @@ def get_run_number_from_workspace_name(workspace_name, instrument):
         return run[0]
 
 
+def get_run_numbers_as_string_from_workspace_name(workspace_name, instrument):
+    # workspace_name of format "INST999; abc; def;" or "INST999_abc_def MA"
+    # or for multiple runs "INST1-3,5; abc; def;" etc.
+    # need to strip all parts except run numbers part
+    name = workspace_name.split(' ')[0]
+    name = name.split('_')[0]
+    name = name.split(';')[0]
+    runs = name.replace(instrument, '')
+    return runs
+
+
+def get_first_run_from_run_string(run_string):
+    """
+    run_string will only be in the format 1-2,5,7,9-11
+    Return the first number only
+    """
+    return_string = run_string
+    index = -1
+    index_1 = run_string.find('-')
+    index_2 = run_string.find(',')
+    if index_1 != -1 and index_2 != -1:
+        index = min(index_1, index_2)
+    elif index_1 != -1:
+        index = index_1
+    elif index_2 != -1:
+        index = index_2
+    if index != -1:
+        return_string = return_string[:index]
+    return return_string
+
+
 def get_maxent_workspace_group_name(insertion_workspace_name, instrument, workspace_suffix):
     run = re.search('[0-9]+', insertion_workspace_name).group()
     group = get_base_run_name(run, instrument) + "".join([' ', MAXENT_STR]) + workspace_suffix + '/'

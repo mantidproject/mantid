@@ -98,6 +98,15 @@ class PeaksViewerModelTest(unittest.TestCase):
         assert_allclose((-0.13, 1.13), xlim)
         assert_allclose((-0.43, 0.83), ylim)
 
+        # Force case where no representation are able to be draw
+        # This can happen when the peak integration volume doesn't intersect any planes of data
+        model._representations = [None]
+
+        xlim, ylim = model.viewlimits(0)
+
+        self.assertEqual((None, None), xlim)
+        self.assertEqual((None, None), ylim)
+
     # -------------------------- Failure Tests --------------------------------
     def test_model_accepts_only_peaks_workspaces(self):
         self.assertRaises(ValueError, PeaksViewerModel, create_autospec(MatrixWorkspace), 'w',

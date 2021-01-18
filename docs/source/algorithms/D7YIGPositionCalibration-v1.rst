@@ -22,12 +22,11 @@ The property `MaskedBinsRange` allows to mask multiple :math:`2\theta` ranges of
 Calibration method
 ##################
 
-A YIG scan data is loaded into a single 2D Workspace where the X axis contains detector positions during each step of the scan, and the Y axis the measured intensities normalized to monitor. The Y axis data is also 2D with each row representing full scan for a single detector. Scan points between -35 and 15 degrees are masked to remove the impact of the direct neutron beam.
+A YIG scan data is loaded into a single 2D Workspace where the X axis contains detector positions during each step of the scan, and the Y axis the measured intensities normalized to monitor. The Y axis data is also 2D with each row representing full scan for a single detector. It is recommended to mask scan points located between -25 and 15 to remove the impact of the direct neutron beam.
 
-The provided YIG d-spacing values are loaded from an XML list. The default d-spacing is coming from Ref. [2]. The peak positions are converted into 2theta positions using the initial assumption of the neutron wavelength. All peaks that would require the 2theta to be above 180 degrees are removed.
+The provided YIG d-spacing values are loaded from an XML list. The default d-spacing is coming from Ref. [2]. The peak positions are converted into 2theta positions using the initial assumption of the neutron wavelength. All peaks that would require the :math:`2\theta` to be above 180 degrees are removed.
 
-YIG peaks in the detector's scan are fitted separately using a Gaussian distribution. The fitting results are stored in a new workspace, where the Y axis contains the fitted peak centres and the X axis the calculated peak positions.
-
+YIG peaks in the detector's scan are fitted using a Gaussian distribution. The Bragg peaks are fitted either separately, when the `FittingMethod` property is set to `Individual`, or all peaks measured by a detector are fitted together, when the `FittingMethod` property is set to `Global`. The fitting results are stored in a new workspace, where the Y axis contains the fitted peak centres and the X axis the calculated peak positions.
 
 The workspace containing the peak fitting results is then fitted using a `Multidomain` function of the form:
 
@@ -47,7 +46,7 @@ Usage
    approximate_wavelength = '3.1' # Angstrom
    D7YIGPositionCalibration(Filenames='402652:403041', ApproximateWavelength=approximate_wavelength,
 			    YIGPeaksFile='D7_YIG_peaks.xml', CalibrationOutputFile='test_shortWavelength.xml',
-			    MinimalDistanceBetweenPeaks=1.5, BankOffsets="-3,-3,1", ClearCache=True,
+			    MinimalDistanceBetweenPeaks=1.5, BankOffsets=[3, 3, 1], ClearCache=True,
 			    FittingMethod='Individual', FitOutputWorkspace='shortWavelength')
 		       
    print('The calibrated wavelength is: {0:.2f}'.format(float(approximate_wavelength)*mtd['shortWavelength'].column(1)[1]))
@@ -63,7 +62,7 @@ Usage
    approximate_wavelength = '4.8' # Angstrom
    D7YIGPositionCalibration(InputWorkspace='intermediateWavelengthScan', ApproximateWavelength=approximate_wavelength,
 			    YIGPeaksFile='D7_YIG_peaks.xml', CalibrationOutputFile='test_intermediateWavelength.xml',
-			    MinimalDistanceBetweenPeaks=1.5, BankOffsets=[-4,-4,0],
+			    MinimalDistanceBetweenPeaks=1.5, BankOffsets=[3, 3, -1],
 			    MaskedBinsRange=[-50, -25, 15],
 			    FittingMethod='Individual', FitOutputWorkspace='intermediateWavelength')
 
@@ -76,7 +75,7 @@ Output:
 
 .. testoutput:: D7YIGCalibrationIntermediateExample
 
-   The calibrated wavelength is: 4.9
+   The calibrated wavelength is: 4.8
    The bank2 gradient is: 1.0
    The bank3 gradient is: 1.0
    The bank4 gradient is: 1.0
@@ -87,7 +86,7 @@ Output:
    `doi: 10.1016/j.nima.2017.03.024 <https://doi.org/10.1016/j.nima.2017.03.024>`_
 
 #. A. Nakatsuka, A. Yoshiasa, and S. Takeno.
-   *Site preference of cations and structural variation in Y3Fe5O12 solid solutions with garnet structure*
+   *Site preference of cations and structural variation in Y3Fe5O12 solid solutions with garnet structure*,
    Acta Crystallographica Section B **51** (1995) 737–745
    `doi: 10.1107/S0108768194014813 <https://doi.org/10.1107/S0108768194014813>`_
 

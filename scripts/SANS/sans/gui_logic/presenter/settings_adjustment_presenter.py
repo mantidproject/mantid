@@ -5,8 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """ The settings diagnostic tab which visualizes the SANS state object. """
-import copy
-
 from sans.common.enums import FitType
 from sans.gui_logic.presenter.presenter_common import PresenterCommon
 
@@ -19,7 +17,6 @@ class SettingsAdjustmentPresenter(PresenterCommon):
         :param model: The SettingsAdjustmentModel to use
         """
         super(SettingsAdjustmentPresenter, self).__init__(view=view, model=model)
-        self._user_file = None
 
     def default_gui_setup(self):
         # Set the fit options
@@ -59,7 +56,7 @@ class SettingsAdjustmentPresenter(PresenterCommon):
         self._set_on_view("wavelength_adjustment_det_2")
 
     def update_model_from_view(self):
-        state_model = copy.deepcopy(self._model)
+        state_model = self._model
 
         if state_model is None:
             return state_model
