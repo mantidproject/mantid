@@ -90,8 +90,8 @@ void SCDCalibratePanels2ObjFunc::function1D(double *out, const double *xValues,
   UNUSED_ARG(order);
 
   // Get workspace and component name (string type)
-  m_ws = std::move(AnalysisDataService::Instance().retrieveWS<Workspace>(
-      getAttribute("Workspace").asString()));
+  m_ws = AnalysisDataService::Instance().retrieveWS<Workspace>(
+      getAttribute("Workspace").asString());
   m_cmpt = getAttribute("ComponentName").asString();
 
   // Special adjustment for CORELLI
