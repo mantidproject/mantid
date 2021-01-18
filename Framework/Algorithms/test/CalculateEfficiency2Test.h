@@ -235,8 +235,7 @@ public:
     loader.initialize();
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue(
         "Filename",
-        "Testing/Data/SystemTest/ILL/D22/D22_mask_central.nxs,Testing/Data/"
-        "SystemTest/ILL/D22/D22_mask_offset.nxs"));
+        "ILL/D22/D22_mask_central.nxs,ILL/D22/D22_mask_offset.nxs"));
     TS_ASSERT_THROWS_NOTHING(
         loader.setPropertyValue("OutputWorkspace", inputWS));
     TS_ASSERT_THROWS_NOTHING(loader.execute());
