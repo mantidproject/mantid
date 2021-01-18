@@ -97,20 +97,20 @@ void ConvertSpectrumAxis::exec() {
     auto emode = Kernel::DeltaEMode::fromString(emodeStr);
     for (size_t i = 0; i < nHist; i++) {
       std::vector<double> xval{inputWS->x(i).front(), inputWS->x(i).back()};
-      double twoTheta, l1val, l2;
+      double twoTheta, l2;
       ExtraParametersMap pmap{};
 
-      /*double efixedProp = getProperty("Efixed");
+      double efixedProp = getProperty("Efixed");
       if (efixedProp != EMPTY_DBL()) {
         pmap[UnitParams::efixed] = efixedProp;
         g_log.debug() << "Detector: " << spectrumInfo.detector(i).getID()
                       << " Efixed: " << efixedProp << "\n";
-      }*/
+      }
 
       if (inputWS->getDetectorValues(spectrumInfo, *fromUnit, *toUnit, emode,
                                      false, i, l2, twoTheta, pmap)) {
-        fromUnit->toTOF(xval, emptyVector, l1val, l2, twoTheta, emode, pmap);
-        toUnit->fromTOF(xval, emptyVector, l1val, l2, twoTheta, emode, pmap);
+        fromUnit->toTOF(xval, emptyVector, l1, l2, twoTheta, emode, pmap);
+        toUnit->fromTOF(xval, emptyVector, l1, l2, twoTheta, emode, pmap);
         double value = (xval.front() + xval.back()) / 2;
         indexMap.emplace(value, i);
       } else {

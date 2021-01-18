@@ -755,20 +755,25 @@ public:
    * sorting flips the direction
    */
   void do_testExecEvent_RemainsSorted(EventSortType sortType,
-                                      const std::string &targetUnit,
-                                      const size_t neventsExpectedBefore,
-                                      const size_t neventsExpectedAfter) {
+                                      const std::string &targetUnit) {
     EventWorkspace_sptr ws =
         WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(1, 10,
                                                                         false);
     ws->getAxis(0)->setUnit("TOF");
     ws->sortAll(sortType, nullptr);
 
+    // 0th detector unfortunately has difc=0 which doesn't support conversion to
+    // d spacing so give it a more helpful difc value
+    auto instrument = ws->getInstrument();
+    auto det = instrument->getDetector(100);
+    auto &paramMap = ws->instrumentParameters();
+    paramMap.addDouble(det->getComponentID(), "DIFC", 1000);
+
     if (sortType == TOF_SORT) {
       // Only threadsafe if all the event lists are sorted
       TS_ASSERT(ws->threadSafe());
     }
-    TS_ASSERT_EQUALS(ws->getNumberEvents(), neventsExpectedBefore);
+    TS_ASSERT_EQUALS(ws->getNumberEvents(), 100 * 200);
 
     ConvertUnits conv;
     conv.initialize();
@@ -784,7 +789,7 @@ public:
     TS_ASSERT(out);
     if (!out)
       return;
-    TS_ASSERT_EQUALS(out->getNumberEvents(), neventsExpectedAfter);
+    TS_ASSERT_EQUALS(out->getNumberEvents(), 100 * 200);
 
     EventList &el = out->getSpectrum(0);
     TS_ASSERT(el.getSortType() == sortType);
@@ -812,21 +817,19 @@ public:
   }
 
   void testExecEvent_RemainsSorted_TOF() {
-    do_testExecEvent_RemainsSorted(TOF_SORT, "dSpacing", 100 * 200, 99 * 200);
+    do_testExecEvent_RemainsSorted(TOF_SORT, "dSpacing");
   }
 
   void testExecEvent_RemainsSorted_Pulsetime() {
-    do_testExecEvent_RemainsSorted(PULSETIME_SORT, "dSpacing", 100 * 200,
-                                   99 * 200);
+    do_testExecEvent_RemainsSorted(PULSETIME_SORT, "dSpacing");
   }
 
   void testExecEvent_RemainsSorted_TOF_to_Energy() {
-    do_testExecEvent_RemainsSorted(TOF_SORT, "Energy", 100 * 200, 100 * 200);
+    do_testExecEvent_RemainsSorted(TOF_SORT, "Energy");
   }
 
   void testExecEvent_RemainsSorted_Pulsetime_to_Energy() {
-    do_testExecEvent_RemainsSorted(PULSETIME_SORT, "Energy", 100 * 200,
-                                   100 * 200);
+    do_testExecEvent_RemainsSorted(PULSETIME_SORT, "Energy");
   }
 
   void testDeltaEFailDoesNotAlterInPlaceWorkspace() {

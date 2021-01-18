@@ -12,7 +12,7 @@
 #include "MantidKernel/UnitLabel.h"
 #include <utility>
 
-#include <map>
+#include <unordered_map>
 #include <vector>
 #ifndef Q_MOC_RUN
 #include <memory>
@@ -206,6 +206,9 @@ protected:
   void addConversion(std::string to, const double &factor,
                      const double &power = 1.0) const;
 
+  // validate the contents of the extra parameters map. Throw
+  // std::invalid_argument if it's a global error or std::runtime_error if it's
+  // a detector specific error
   virtual void validateExtraParams(const int emode,
                                    const ExtraParametersMap &params);
 
@@ -512,6 +515,8 @@ public:
   DeltaE();
 
 protected:
+  void validateExtraParams(const int emode,
+                           const ExtraParametersMap &params) override;
   double efixed;
   double factorTo;    ///< Constant factor for to conversion
   double factorFrom;  ///< Constant factor for from conversion

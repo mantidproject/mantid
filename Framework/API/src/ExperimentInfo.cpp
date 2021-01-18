@@ -1395,7 +1395,7 @@ bool ExperimentInfo::getDetectorValues(const API::SpectrumInfo &specInfo,
           g_log.debug() << "Detector: " << det->getID()
                         << " EFixed: " << pmap[UnitParams::efixed] << "\n";
         } catch (std::runtime_error) {
-          return false;
+          // let the unit classes work out if this is a problem
         }
       }
       // Non-unique detector (i.e., DetectorGroup): use single provided value
@@ -1413,9 +1413,10 @@ bool ExperimentInfo::getDetectorValues(const API::SpectrumInfo &specInfo,
         if (warnDetIds.size() > 0) {
           createDetectorIdLogMessages(warnDetIds, wsIndex);
         }
-        if ((outputUnit.unitID() == "dSpacing") && (difa == 0) && (difc == 0)) {
-          return false;
-        }
+        // if ((outputUnit.unitID() == "dSpacing") && (difa == 0) && (difc ==
+        // 0)) {
+        //  return false;
+        //}
       } else {
         pmap[UnitParams::difc] = specInfo.difcUncalibrated(wsIndex);
       }
@@ -1431,9 +1432,9 @@ bool ExperimentInfo::getDetectorValues(const API::SpectrumInfo &specInfo,
     }
     pmap[UnitParams::difc] = 0;
     // can't do a conversion to d spacing with theta=0
-    if (outputUnit.unitID().find("dSpacing") != std::string::npos) {
-      return false;
-    }
+    // if (outputUnit.unitID().find("dSpacing") != std::string::npos) {
+    //  return false;
+    //}
   }
   return true;
 }

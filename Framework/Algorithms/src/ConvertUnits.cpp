@@ -452,12 +452,15 @@ ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit,
                                  checktwoTheta, pmap)) {
     // copy the X values for the check
     auto checkXValues = inputWS->readX(checkIndex);
-    // Convert the input unit to time-of-flight
-    checkFromUnit->toTOF(checkXValues, emptyVec, l1, checkl2, checktwoTheta,
-                         emode, pmap);
-    // Convert from time-of-flight to the desired unit
-    checkOutputUnit->fromTOF(checkXValues, emptyVec, l1, checkl2, checktwoTheta,
-                             emode, pmap);
+    try {
+      // Convert the input unit to time-of-flight
+      checkFromUnit->toTOF(checkXValues, emptyVec, l1, checkl2, checktwoTheta,
+                           emode, pmap);
+      // Convert from time-of-flight to the desired unit
+      checkOutputUnit->fromTOF(checkXValues, emptyVec, l1, checkl2,
+                               checktwoTheta, emode, pmap);
+    } catch (std::runtime_error) {
+    }
   }
 
   // create the output workspace
@@ -487,21 +490,27 @@ ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit,
     if (efixedProp != EMPTY_DBL()) {
       pmap[UnitParams::efixed] = efixed;
     }
+    bool conversionSucceeded = false;
     if (outputWS->getDetectorValues(outSpectrumInfo, *fromUnit, *outputUnit,
                                     emode, signedTheta, i, l2, twoTheta,
                                     pmap)) {
-      localFromUnit->toTOF(outputWS->dataX(i), emptyVec, l1, l2, twoTheta,
-                           emode, pmap);
-      // Convert from time-of-flight to the desired unit
-      localOutputUnit->fromTOF(outputWS->dataX(i), emptyVec, l1, l2, twoTheta,
-                               emode, pmap);
+      try {
+        localFromUnit->toTOF(outputWS->dataX(i), emptyVec, l1, l2, twoTheta,
+                             emode, pmap);
+        // Convert from time-of-flight to the desired unit
+        localOutputUnit->fromTOF(outputWS->dataX(i), emptyVec, l1, l2, twoTheta,
+                                 emode, pmap);
 
-      // EventWorkspace part, modifying the EventLists.
-      if (m_inputEvents) {
-        eventWS->getSpectrum(i).convertUnitsViaTof(localFromUnit.get(),
-                                                   localOutputUnit.get());
+        // EventWorkspace part, modifying the EventLists.
+        if (m_inputEvents) {
+          eventWS->getSpectrum(i).convertUnitsViaTof(localFromUnit.get(),
+                                                     localOutputUnit.get());
+        }
+        conversionSucceeded = true;
+      } catch (std::runtime_error) {
       }
-    } else {
+    }
+    if (!conversionSucceeded) {
       // Get to here if exception thrown when calculating distance to detector
       failedDetectorCount++;
       // Since you usually (always?) get to here when there's no attached

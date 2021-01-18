@@ -334,9 +334,9 @@ void Wavelength::validateExtraParams(const int emode,
                                      const ExtraParametersMap &params) {
   auto it = params.find(UnitParams::efixed);
   if ((emode != 0) && (it == params.end())) {
-    throw std::runtime_error(
-        "An efixed value must be supplied in the extra parameters when "
-        "initialising wavelength for conversion via TOF");
+    throw std::runtime_error("An efixed value must be supplied in the extra "
+                             "parameters when initialising " +
+                             this->unitID() + " for conversion via TOF");
   }
 }
 
@@ -891,15 +891,28 @@ DeltaE::DeltaE()
   addConversion("DeltaE_inFrequency", PhysicalConstants::meVtoFrequency, 1.);
 }
 
+void DeltaE::validateExtraParams(const int emode,
+                                 const ExtraParametersMap &params) {
+  if (emode != 1 && emode != 2) {
+    throw std::invalid_argument(
+        "emode must be equal to 1 or 2 for energy transfer calculation");
+  }
+  auto it = params.find(UnitParams::efixed);
+  // Efixed must be set to something
+  if (it == params.end()) {
+    throw std::runtime_error(
+        "efixed must be set for energy transfer calculation");
+  }
+  if (it->second <= 0) {
+    throw std::runtime_error("efixed must be greater than zero");
+  }
+}
+
 void DeltaE::init() {
   auto it = m_params->find(UnitParams::efixed);
   if (it != m_params->end()) {
     efixed = it->second;
   }
-  // Efixed must be set to something
-  if (efixed == 0.0)
-    throw std::invalid_argument(
-        "efixed must be set for energy transfer calculation");
   const double TOFinMicroseconds = 1e6;
   factorTo =
       sqrt(PhysicalConstants::NeutronMass / (2.0 * PhysicalConstants::meV)) *
@@ -912,9 +925,6 @@ void DeltaE::init() {
     // t_other is t2
     t_other = (factorTo * l2) / sqrt(efixed);
     factorTo *= l1;
-  } else {
-    throw std::invalid_argument(
-        "emode must be equal to 1 or 2 for energy transfer calculation");
   }
 
   //------------ from conversion ------------------

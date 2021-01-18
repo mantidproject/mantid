@@ -359,6 +359,7 @@ public:
   // Crop workspace so that final peak is evaluated over a range that includes
   // the last bin (stop regression out of range bug for histo workspaces)
   void test_exec_difc_histo() {
+    using Mantid::Kernel::UnitParams;
     // convert to histo
     ConvertToMatrixWorkspace convMatWS;
     convMatWS.initialize();
@@ -376,10 +377,13 @@ public:
     cropWS.execute();
 
     // setup the peak postions based on transformation from detID=155
-    std::vector<double> dValues(PEAK_TOFS.size());
-    std::transform(
-        PEAK_TOFS.begin(), PEAK_TOFS.end(), dValues.begin(),
-        Mantid::Kernel::Diffraction::getTofToDConversionFunc(DIFC_155, 0., 0.));
+    std::vector<double> dValues(PEAK_TOFS);
+
+    Mantid::Kernel::Units::dSpacing dSpacingUnit;
+    std::vector<double> unusedy;
+    dSpacingUnit.fromTOF(
+        dValues, unusedy, -1., -1., -1., 0,
+        Mantid::Kernel::ExtraParametersMap{{UnitParams::difc, DIFC_155}});
 
     const std::string prefix{"PDCalibration_difc"};
 
@@ -425,6 +429,7 @@ public:
   }
 
   void test_exec_grouped_detectors() {
+    using Mantid::Kernel::UnitParams;
     // group detectors
     GroupDetectors2 groupDet;
     groupDet.initialize();
@@ -434,10 +439,12 @@ public:
     groupDet.execute();
 
     // setup the peak postions based on transformation from detID=155
-    std::vector<double> dValues(PEAK_TOFS.size());
-    std::transform(
-        PEAK_TOFS.begin(), PEAK_TOFS.end(), dValues.begin(),
-        Mantid::Kernel::Diffraction::getTofToDConversionFunc(DIFC_155, 0., 0.));
+    std::vector<double> dValues(PEAK_TOFS);
+    Mantid::Kernel::Units::dSpacing dSpacingUnit;
+    std::vector<double> unusedy;
+    dSpacingUnit.fromTOF(
+        dValues, unusedy, -1., -1., -1., 0,
+        Mantid::Kernel::ExtraParametersMap{{UnitParams::difc, DIFC_155}});
 
     const std::string prefix{"PDCalibration_difc"};
 
