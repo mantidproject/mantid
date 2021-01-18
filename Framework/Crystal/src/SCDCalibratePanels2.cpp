@@ -54,31 +54,60 @@ void SCDCalibratePanels2::init() {
   // Lattice constant group
   auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
-  declareProperty("a", EMPTY_DBL(), mustBePositive,
+  // NOTE:
+  // Build serve does not allow a,b,c,alpha,beta,gamma as names, hence
+  // the awkward naming here.
+  //
+  // Stacktrace
+  // ConfigService-[Information] Unable to locate directory at:
+  // /etc/mantid/instrument ConfigService-[Information] This is Mantid
+  // version 5.1.1-2-rc.1 revision ge9b2c62 ConfigService-[Information] running
+  // on ndw1457 starting 2021-01-18T01:51Z ConfigService-[Information]
+  // Properties file(s) loaded: /opt/mantidunstable/bin/Mantid.properties,
+  // /home/abc/.mantid/Mantid.user.properties ConfigService-[Information] Unable
+  // to locate directory at: /etc/mantid/instrument FrameworkManager-[Notice]
+  // Welcome to Mantid 5.1.1-2-rc.1 FrameworkManager-[Notice] Please cite:
+  // http://dx.doi.org/10.1016/j.nima.2014.07.029 and this release:
+  // http://dx.doi.org/10.5286/Software/Mantid5.1.1
+  // FrameworkManager-[Information] Instrument updates disabled - cannot update
+  // instrument definitions. FrameworkManager-[Information] Version check
+  // disabled. SCDCalibratePanels(v2) property (a) violates conventions
+  // SCDCalibratePanels(v2) property (b) violates conventions
+  // SCDCalibratePanels(v2) property (c) violates conventions
+  // SCDCalibratePanels(v2) property (alpha) violates conventions
+  // SCDCalibratePanels(v2) property (beta) violates conventions
+  // SCDCalibratePanels(v2) property (gamma) violates conventions
+  // RESULT|iteration time_taken|1 0.15
+  // RESULT|time_taken|0.15
+  // Found 6 errors. Coding conventions found at
+  // http://www.mantidproject.org/Mantid_Standards RESULT|memory footprint
+  // increase|8.5703125
+  //
+  declareProperty("LatticeA", EMPTY_DBL(), mustBePositive,
                   "Lattice Parameter a (Leave empty to use lattice constants "
                   "in peaks workspace)");
-  declareProperty("b", EMPTY_DBL(), mustBePositive,
+  declareProperty("LatticeB", EMPTY_DBL(), mustBePositive,
                   "Lattice Parameter b (Leave empty to use lattice constants "
                   "in peaks workspace)");
-  declareProperty("c", EMPTY_DBL(), mustBePositive,
+  declareProperty("LatticeC", EMPTY_DBL(), mustBePositive,
                   "Lattice Parameter c (Leave empty to use lattice constants "
                   "in peaks workspace)");
-  declareProperty("alpha", EMPTY_DBL(), mustBePositive,
+  declareProperty("Alpha", EMPTY_DBL(), mustBePositive,
                   "Lattice Parameter alpha in degrees (Leave empty to use "
                   "lattice constants in peaks workspace)");
-  declareProperty("beta", EMPTY_DBL(), mustBePositive,
+  declareProperty("Beta", EMPTY_DBL(), mustBePositive,
                   "Lattice Parameter beta in degrees (Leave empty to use "
                   "lattice constants in peaks workspace)");
-  declareProperty("gamma", EMPTY_DBL(), mustBePositive,
+  declareProperty("Gamma", EMPTY_DBL(), mustBePositive,
                   "Lattice Parameter gamma in degrees (Leave empty to use "
                   "lattice constants in peaks workspace)");
   const std::string LATTICE("Lattice Constants");
-  setPropertyGroup("a", LATTICE);
-  setPropertyGroup("b", LATTICE);
-  setPropertyGroup("c", LATTICE);
-  setPropertyGroup("alpha", LATTICE);
-  setPropertyGroup("beta", LATTICE);
-  setPropertyGroup("gamma", LATTICE);
+  setPropertyGroup("LatticeA", LATTICE);
+  setPropertyGroup("LatticeB", LATTICE);
+  setPropertyGroup("LatticeC", LATTICE);
+  setPropertyGroup("Alpha", LATTICE);
+  setPropertyGroup("Beta", LATTICE);
+  setPropertyGroup("Gamma", LATTICE);
 
   // Calibration options group
   declareProperty("CalibrateT0", false, "Calibrate the T0 (initial TOF)");
@@ -280,7 +309,8 @@ void SCDCalibratePanels2::optimizeT0(std::shared_ptr<PeaksWorkspace> pws) {
           << ",ComponentName=none";
   //-- bounds&constraints def
   std::ostringstream tie_str;
-  tie_str << "dx=0.0,dy=0.0,dz=0.0,theta=1.0,phi=0.0,drotang=0.0";
+  tie_str << "DeltaX=0.0,DeltaY=0.0,DeltaZ=0.0,Theta=1.0,Phi=0.0,"
+             "DeltaRotationAngle=0.0";
   //-- set&go
   fitT0_alg->setPropertyValue("Function", fun_str.str());
   fitT0_alg->setProperty("Ties", tie_str.str());
@@ -340,7 +370,9 @@ void SCDCalibratePanels2::optimizeL1(std::shared_ptr<PeaksWorkspace> pws) {
           << ",ComponentName=moderator";
   //-- bounds&constraints def
   std::ostringstream tie_str;
-  tie_str << "dx=0.0,dy=0.0,theta=1.0,phi=0.0,drotang=0.0,dT0=" << m_T0;
+  tie_str << "DeltaX=0.0,DeltaY=0.0,Theta=1.0,Phi=0.0,DeltaRotationAngle=0.0,"
+             "DeltaT0="
+          << m_T0;
   //-- set and go
   fitL1_alg->setPropertyValue("Function", fun_str.str());
   fitL1_alg->setProperty("Ties", tie_str.str());
@@ -429,14 +461,14 @@ void SCDCalibratePanels2::optimizeBanks(std::shared_ptr<PeaksWorkspace> pws) {
             << ",ComponentName=" << bankname;
     //---- bounds&constraints def
     std::ostringstream tie_str;
-    tie_str << "dT0=" << m_T0;
+    tie_str << "DeltaT0=" << m_T0;
     std::ostringstream constraint_str;
     double brb = std::abs(m_bank_rotation_bounds);
-    constraint_str << "0.0<theta<3.1415926,0<phi<6.28318530718," << -brb
-                   << "<drotang<" << brb << ",";
+    constraint_str << "0.0<Theta<3.1415926,0<Phi<6.28318530718," << -brb
+                   << "<DeltaRotationAngle<" << brb << ",";
     double btb = std::abs(m_bank_translation_bounds);
-    constraint_str << -btb << "<dx<" << btb << "," << -btb << "<dy<" << btb
-                   << "," << -btb << "<dz<" << btb;
+    constraint_str << -btb << "<DeltaX<" << btb << "," << -btb << "<DeltaY<"
+                   << btb << "," << -btb << "<DeltaZ<" << btb;
 
     //---- set&go
     fitBank_alg->setPropertyValue("Function", fun_str.str());
@@ -501,12 +533,12 @@ void SCDCalibratePanels2::optimizeBanks(std::shared_ptr<PeaksWorkspace> pws) {
  */
 void SCDCalibratePanels2::parseLatticeConstant(
     std::shared_ptr<PeaksWorkspace> pws) {
-  m_a = getProperty("a");
-  m_b = getProperty("b");
-  m_c = getProperty("c");
-  m_alpha = getProperty("alpha");
-  m_beta = getProperty("beta");
-  m_gamma = getProperty("gamma");
+  m_a = getProperty("LatticeA");
+  m_b = getProperty("LatticeB");
+  m_c = getProperty("LatticeC");
+  m_alpha = getProperty("Alpha");
+  m_beta = getProperty("Beta");
+  m_gamma = getProperty("Gamma");
   // if any one of the six lattice constants is missing, try to get
   // one from the workspace
   if ((m_a == EMPTY_DBL() || m_b == EMPTY_DBL() || m_c == EMPTY_DBL() ||

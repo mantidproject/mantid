@@ -38,16 +38,17 @@ DECLARE_FUNCTION(SCDCalibratePanels2ObjFunc)
 /// ---------------///
 SCDCalibratePanels2ObjFunc::SCDCalibratePanels2ObjFunc() {
   // parameters
-  declareParameter("dx", 0.0, "relative shift along X");
-  declareParameter("dy", 0.0, "relative shift along Y");
-  declareParameter("dz", 0.0, "relative shift along Z");
+  declareParameter("DeltaX", 0.0, "relative shift along X");
+  declareParameter("DeltaY", 0.0, "relative shift along Y");
+  declareParameter("DeltaZ", 0.0, "relative shift along Z");
   // rotation axis is defined as (1, theta, phi)
   // https://en.wikipedia.org/wiki/Spherical_coordinate_system
-  declareParameter("theta", PI / 4, "Polar coorindates theta in radians");
-  declareParameter("phi", PI / 4, "Polar coorindates phi in radians");
+  declareParameter("Theta", PI / 4, "Polar coorindates theta in radians");
+  declareParameter("Phi", PI / 4, "Polar coorindates phi in radians");
   // rotation angle
-  declareParameter("drotang", 0.0, "angle of relative rotation in degree");
-  declareParameter("dT0", 0.0, "delta of TOF");
+  declareParameter("DeltaRotationAngle", 0.0,
+                   "angle of relative rotation in degree");
+  declareParameter("DeltaT0", 0.0, "delta of TOF");
 
   // attributes
   declareAttribute("Workspace", Attribute(""));
@@ -66,23 +67,23 @@ void SCDCalibratePanels2ObjFunc::function1D(double *out, const double *xValues,
                                             const size_t order) const {
   // Get the feature vector component (numeric type)
   //-- delta in translation
-  const double dx = getParameter("dx");
-  const double dy = getParameter("dy");
-  const double dz = getParameter("dz");
+  const double dx = getParameter("DeltaX");
+  const double dy = getParameter("DeltaY");
+  const double dz = getParameter("DeltaZ");
   //-- delta in rotation/orientation as angle axis pair
   //   using polar coordinates to ensure a unit vector
   //   (r, theta, phi) where r=1
-  const double theta = getParameter("theta");
-  const double phi = getParameter("phi");
+  const double theta = getParameter("Theta");
+  const double phi = getParameter("Phi");
   // compute the rotation axis
   double vx = sin(theta) * cos(phi);
   double vy = sin(theta) * sin(phi);
   double vz = cos(theta);
   //
-  const double drotang = getParameter("drotang");
+  const double drotang = getParameter("DeltaRotationAngle");
 
   //-- delta in TOF
-  const double dT0 = getParameter("dT0");
+  const double dT0 = getParameter("DeltaT0");
   //-- NOTE: given that these components are never used as
   //         one vector, there is no need to construct a
   //         xValues
@@ -166,20 +167,6 @@ void SCDCalibratePanels2ObjFunc::function1D(double *out, const double *xValues,
       calc_pk.setWavelength(wl.singleFromTOF(pk.getTOF() + dT0));
       calc_qv = calc_pk.getQSampleFrame();
     }
-
-    // Peak calc_pk(calc_inst, pk.getDetectorID(), pk.getWavelength(), hkl,
-    // pk.getGoniometerMatrix());
-    // Units::Wavelength wl;
-    // wl.initialize(
-    //   calc_pk.getL1(),
-    //   calc_pk.getL2(),
-    //   calc_pk.getScattering(),
-    //   0,
-    //   calc_pk.getInitialEnergy(),
-    //   0.0);
-    // // adding the TOF shift here
-
-    // calc_pk.setWavelength(wl.singleFromTOF(pk.getTOF() + dT0));
 
     // get the updated/calculated q vector in sample frame and set it to out
     // V3D calc_qv = calc_pk.getQSampleFrame();
