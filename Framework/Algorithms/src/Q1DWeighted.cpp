@@ -238,6 +238,11 @@ void Q1DWeighted::getViewportParams(
   boost::algorithm::split(params, viewport,
                           boost::algorithm::is_any_of("\t, \n"));
 
+  if (params[0] != "Translation") {
+    g_log.error("No viewport found in the shape table. Please provide a table "
+                "using shapes drawn in the Full3D projection.");
+  }
+
   // Translation
   viewportParams[params[0]] = std::vector<double>(2);
   viewportParams[params[0]][0] = std::stod(params[1]);
@@ -407,10 +412,22 @@ void Q1DWeighted::calculate(const MatrixWorkspace_const_sptr &inputWS) {
 
         for (size_t iw = 0; iw < wedgesCount; ++iw) {
           double centerAngle = m_wedgesCenterAngle[iw];
-          const V3D subPix = V3D(position.X(), position.Y(), 0.0);
+          const V3D subPix = V3D(-position.X(), position.Y(), 0.0);
           const V3D center = V3D(m_wedgesCenterX[iw], m_wedgesCenterY[iw], 0);
           double angle =
-              fabs(subPix.angle(V3D(cos(centerAngle), sin(centerAngle), 0.0)));
+              fabs((subPix - center)
+                       .angle(V3D(cos(centerAngle), sin(centerAngle), 0.0)));
+          //          if (i == 13994) {
+          //            std::cout << "pixel " << subPix << std::endl;
+          //            std::cout << "d " << subPix.distance(center) <<
+          //            std::endl; std::cout << "Pixel index : " << i <<
+          //            std::endl; std::cout << "angle " << angle / deg2rad <<
+          //            std::endl; std::cout << "center Angle " << centerAngle
+          //            << std::endl; std::cout << "new pix " << subPix - center
+          //            << std::endl; std::cout << "cos " << cos(centerAngle) <<
+          //            std::endl; std::cout << "center " << center << std::endl
+          //            << std::endl;
+          //          }
 
           if (m_asymmWedges) {
             angle = fmod(angle, M_PI);
