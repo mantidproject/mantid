@@ -9,10 +9,11 @@
 # std imports
 import unittest
 from unittest.mock import MagicMock, patch
+import numpy as np
 
 # local imports
 from mantidqt.widgets.sliceviewer.peaksviewer.representation.ellipsoid \
-    import EllipsoidalIntergratedPeakRepresentation
+    import EllipsoidalIntergratedPeakRepresentation, slice_ellipsoid
 
 from mantidqt.widgets.sliceviewer.peaksviewer.representation.test.shapetesthelpers \
     import FuzzyMatch, create_ellipsoid_info, draw_representation
@@ -141,6 +142,76 @@ class EllipsoidalIntergratedPeakRepresentationTest(unittest.TestCase):
                 edgecolor="none",
                 facecolor=bg_color,
                 linestyle='--')
+
+
+class EllipsoidalIntergratedPeakRepresentationSliceEllipsoidTest(unittest.TestCase):
+    def test_slice_ellipsoid_zp(self):
+        origin = (0, 0, 0)
+        axis_a = (1, 0, 0)
+        axis_b = (0, 1, 0)
+        axis_c = (0, 0, 1)
+        a = 1
+        b = 1
+        c = 1
+        zp = 0
+
+        expected_slice_origin = (0, 0, 0)
+        expected_major_radius = 1
+        expected_minar_radius = 1
+        expected_angle = 90
+
+        self._run_slice_ellipsoid_and_compare((origin, axis_a, axis_b, axis_c, a, b, c, zp),
+                                              (*expected_slice_origin,
+                                               expected_major_radius,
+                                               expected_minar_radius,
+                                               expected_angle))
+
+        zp = np.sin(np.pi/3)
+        expected_slice_origin = (0, 0, zp)
+        expected_major_radius = 0.5  # cos(pi/3)
+        expected_minar_radius = 0.5  # cos(pi/3)
+
+        self._run_slice_ellipsoid_and_compare((origin, axis_a, axis_b, axis_c, a, b, c, zp),
+                                              (*expected_slice_origin,
+                                               expected_major_radius,
+                                               expected_minar_radius,
+                                               expected_angle))
+
+        # This causes negative eignevalues there np.sqrt(eignevalues) gives NaN radius
+        zp = 2
+        expected_slice_origin = (0, 0, zp)
+        expected_major_radius = np.nan
+        expected_minar_radius = np.nan
+
+        self._run_slice_ellipsoid_and_compare((origin, axis_a, axis_b, axis_c, a, b, c, zp),
+                                              (*expected_slice_origin,
+                                               expected_major_radius,
+                                               expected_minar_radius,
+                                               expected_angle))
+
+        # This causes `eigvalues, eigvectors = linalg.eig(MM)` to throw np.linalg.LinAlgError
+        zp = 1
+        expected_slice_origin = (0, 0, 0)
+        expected_major_radius = np.nan
+        expected_minar_radius = np.nan
+        expected_angle = 0
+        self._run_slice_ellipsoid_and_compare((origin, axis_a, axis_b, axis_c, a, b, c, zp),
+                                              (*expected_slice_origin,
+                                               expected_major_radius,
+                                               expected_minar_radius,
+                                               expected_angle))
+
+    def _run_slice_ellipsoid_and_compare(self, input_values, expectecd):
+        slice_origin, major_radius, minor_radius, angle = slice_ellipsoid(*input_values)
+        print(slice_origin, major_radius, minor_radius, angle)
+
+        self.assertAlmostEqual(slice_origin[0], expectecd[0])
+        self.assertAlmostEqual(slice_origin[1], expectecd[1])
+        self.assertAlmostEqual(slice_origin[2], expectecd[2])
+        # numpy correctly handles NaN
+        np.testing.assert_almost_equal(major_radius, expectecd[3])
+        np.testing.assert_almost_equal(minor_radius, expectecd[4])
+        self.assertAlmostEqual(angle, expectecd[5])
 
 
 if __name__ == "__main__":
