@@ -44,7 +44,8 @@ private:
   void createCalTableFromExisting();
   void createCalTableNew();
   void createInformationWorkspaces();
-  std::tuple<double, double, double> getDSpacingToTof(const detid_t detid);
+  std::tuple<double, double, double>
+  getDSpacingToTof(const std::set<detid_t> &detIds);
   std::vector<double> dSpacingWindows(const std::vector<double> &centres,
                                       const double widthMax);
   std::vector<double> getTOFminmax(const double difc, const double difa,
