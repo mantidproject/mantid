@@ -253,6 +253,14 @@ void Q1DWeighted::getViewportParams(
   viewportParams[params[5]][1] = std::stod(params[7]);
   viewportParams[params[5]][2] = std::stod(params[8]);
   viewportParams[params[5]][3] = std::stod(params[9]);
+
+  if (fabs(viewportParams["Rotation"][0]) > 1e-10 ||
+      fabs(viewportParams["Rotation"][1]) > 1e-10 ||
+      fabs(viewportParams["Rotation"][3]) > 1e-10 ||
+      viewportParams["Rotation"][2] != 1.) {
+    g_log.warning("The shapes were created using a rotated viewport, which is "
+                  "not supported. Results are likely to be erroneous.");
+  }
 }
 
 /**
