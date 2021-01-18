@@ -36,7 +36,7 @@ Test 2: Advanced FFT
 - The plot will show a large peak at 0 and then lots of noise
 - Set the "Apodization Function" to `Gaussian` and press calculate
 - There will be a clear peak near to 100 Gauss
-- The "padding" adds zeros to the end of the time domain data set, to improve the sampling of hte FFT
+- The "padding" adds zeros to the end of the time domain data set, to improve the sampling of the FFT
 - Set the xrange for the plot to be from `50` to `150`
 - Set the "padding" to zero and press calculate
 - The plots should be a nice peak, but it will have lots of straight lines
@@ -67,10 +67,10 @@ Test 4: MaxEnt
 - Click the Calculate MaxEnt button 
 - The calculate button will be disabled and cancel enabled
 - Click the cancel button
-- Click Calculate
+- Click Calculate MaxEnt
 - The plot should update to a mostly flat line with a peak
 - Make sure everything in the top table is ticked
-- Click calculate 
+- Click calculate MaxEnt
 - In the ADS expand the `MUSR62260 MaxEnt FD` group
 - It will contain several workspaces
 - The phase convergence will show a plot that tends to a single y value as x gets larger (just check a spectrum or two)
