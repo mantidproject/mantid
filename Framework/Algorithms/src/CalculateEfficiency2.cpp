@@ -316,20 +316,22 @@ const std::string CalculateEfficiency2::mergeMeasurementsWithOffset() {
       auto &detDataErr = mergedNormalisedWs->mutableE(spectrumNo);
       auto dataY = 0.0;
       auto dataE = 0.0;
+      auto nonMaskedEntries = 0;
       for (auto entryNo = 0; entryNo < nEntries; entryNo++) {
         MatrixWorkspace_sptr entry =
             std::static_pointer_cast<API::MatrixWorkspace>(
                 input->getItem(entryNo));
-        dataY = entry->readY(spectrumNo)[0];
-        if (dataY != 0) {
-          dataE = entry->readE(spectrumNo)[0];
-          break;
+        auto spectrumInfoEntry = entry->spectrumInfo();
+        if (!spectrumInfoEntry.isMasked(spectrumNo)) {
+          dataY += entry->readY(spectrumNo)[0];
+          dataE += pow(entry->readE(spectrumNo)[0], 2); // propagate errors
+          nonMaskedEntries++;
         }
       }
-      if (dataE != 0) {
+      if (nonMaskedEntries != 0) {
         spectrumInfo.setMasked(spectrumNo, false);
-        detDataY.front() = dataY;
-        detDataErr.front() = dataE;
+        detDataY.front() = dataY / nonMaskedEntries;
+        detDataErr.front() = sqrt(dataE) / nonMaskedEntries;
       }
     }
   }
