@@ -447,28 +447,28 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         beam_transmission_names = []
         container_transmission_names = []
         sample_transmission_names = []
-        for transmission in self.atransmission.split(','):
+        for absorber in self.atransmission.split(','):
             [process_transmission_absorber, transmission_absorber_name] = \
-                needs_processing(transmission, 'Absorber')
+                needs_processing(absorber, 'Absorber')
             absorber_transmission_names.append(transmission_absorber_name)
             self.progress.report('Processing transmission absorber')
             if process_transmission_absorber:
-                SANSILLReduction(Run=transmission,
+                SANSILLReduction(Run=absorber,
                                  ProcessAs='Absorber',
                                  NormaliseBy=self.normalise,
                                  OutputWorkspace=transmission_absorber_name)
-        for transmission_no, transmission in enumerate(self.btransmission.split(',')):
+        for beam_no, beam in enumerate(self.btransmission.split(',')):
             [process_transmission_beam, transmission_beam_name] = \
-                needs_processing(transmission, 'Beam')
+                needs_processing(beam, 'Beam')
             beam_transmission_names.append(transmission_beam_name)
             flux_name = transmission_beam_name + '_Flux'
             if len(absorber_transmission_names) > 1:
-                transmission_absorber_name = absorber_transmission_names[transmission_no]
+                transmission_absorber_name = absorber_transmission_names[beam_no]
             else:
                 transmission_absorber_name = absorber_transmission_names[0]
             self.progress.report('Processing transmission beam')
             if process_transmission_beam:
-                SANSILLReduction(Run=transmission,
+                SANSILLReduction(Run=beam,
                                  ProcessAs='Beam',
                                  NormaliseBy=self.normalise,
                                  OutputWorkspace=transmission_beam_name,
