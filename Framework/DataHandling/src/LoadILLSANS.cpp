@@ -151,12 +151,20 @@ void LoadILLSANS::exec() {
     initWorkSpaceD11B(firstEntry, instrumentPath);
     progress.report("Loading the instrument " + m_instrumentName);
     runLoadInstrument();
+
+    // we move the parent "detector" component, but since it is at (0,0,0), we
+    // need to find the distance it has to move and move it to this position
     double finalDistance =
         firstEntry.getFloat(instrumentPath + "/detector/det_calc") / 1000.;
     V3D pos = getComponentPosition("detector_center");
     double currentDistance = pos.Z();
 
-    moveDetectorDistance(finalDistance - currentDistance, "detector", true);
+    moveDetectorDistance(finalDistance - currentDistance, "detector");
+
+    // L2 was put at "finalDistance - currentDistance", so we update it to the
+    // correct value
+    API::Run &runDetails = m_localWorkspace->mutableRun();
+    runDetails.addProperty<double>("L2", finalDistance, true);
 
   } else if (m_instrumentName == "D22B") {
     initWorkSpaceD22B(firstEntry, instrumentPath);
@@ -649,33 +657,23 @@ void LoadILLSANS::moveDetectorsD33(const DetectorPosition &detPos) {
  * position or absolute
  */
 void LoadILLSANS::moveDetectorDistance(double distance,
-                                       const std::string &componentName,
-                                       const bool relative) {
+                                       const std::string &componentName) {
 
   API::IAlgorithm_sptr mover = createChildAlgorithm("MoveInstrumentComponent");
   V3D pos = getComponentPosition(componentName);
   mover->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
   mover->setProperty("ComponentName", componentName);
-  if (relative) {
-    mover->setProperty("X", 0.);
-    mover->setProperty("Y", 0.);
-  } else {
-    mover->setProperty("X", pos.X());
-    mover->setProperty("Y", pos.Y());
-  }
+
+  mover->setProperty("X", pos.X());
+  mover->setProperty("Y", pos.Y());
   mover->setProperty("Z", distance);
-  mover->setProperty("RelativePosition", relative);
+  mover->setProperty("RelativePosition", false);
   mover->executeAsChildAlg();
 
-  if (!relative) {
-    g_log.debug() << "Moving component '" << componentName
-                  << "' to Z = " << distance << '\n';
-    API::Run &runDetails = m_localWorkspace->mutableRun();
-    runDetails.addProperty<double>("L2", distance, true);
-  } else {
-    g_log.debug() << "Moving component '" << componentName
-                  << "' by Z = " << distance << '\n';
-  }
+  g_log.debug() << "Moving component '" << componentName
+                << "' to Z = " << distance << '\n';
+  API::Run &runDetails = m_localWorkspace->mutableRun();
+  runDetails.addProperty<double>("L2", distance, true);
 }
 
 /**
