@@ -447,9 +447,10 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
 
         self.setProperty('OutputWorkspace', mtd[self.output])
         if self.output_sens:
+            GroupWorkspaces(InputWorkspaces=sensitivity_outputs, OutputWorkspace=self.output_sens)
             if self.getProperty('SensitivityWithOffsets').value:
                 tmp_group_name = self.output_sens + '_group'
-                GroupWorkspaces(InputWorkspaces=sensitivity_outputs, OutputWorkspace=tmp_group_name)
+                RenameWorkspace(InputWorkspace=self.output_sens, OutputWorkspace=tmp_group_name)
                 CalculateEfficiency(InputWorkspaceGroup=tmp_group_name, OutputWorkspace=self.output_sens)
                 DeleteWorkspace(Workspace=tmp_group_name)
             self.setProperty('SensitivityOutputWorkspace', mtd[self.output_sens])
@@ -643,8 +644,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         self.progress.report('Processing sample at detector configuration '
                              + str(i + 1))
 
-        if (self.getProperty('SensitivityWithOffsets').value
-                and self.getPropertyValue('SensitivityOutputWorkspace') != ''):
+        if (self.getPropertyValue('SensitivityOutputWorkspace') != ''
+                and self.dimensionality > 1):
             output_sens = self.output_sens + '_' + str(i + 1)
         else:
             output_sens = self.output_sens
@@ -680,6 +681,9 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
             output_wedges = self.output + "_wedge_d" + str(i + 1)
         else:
             output_wedges = ""
+
+        if self.getProperty('SensitivityWithOffsets').value:
+            CloneWorkspace(InputWorkspace=sample_name, OutputWorkspace=output_sens)
 
         SANSILLIntegration(
                 InputWorkspace=sample_name,
