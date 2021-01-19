@@ -175,10 +175,10 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
             result['SampleTransmissionRuns'] = message.format('SampleTransmission', str_dim, sample_dim)
         if ctr_dim != can_dim and ctr_dim != 1:
             result['ContainerTransmissionRuns'] = message.format('ContainerTransmission', ctr_dim, can_dim)
-        if btr_dim != beam_dim and btr_dim != 1:
-            result['TransmissionBeamRuns'] = message.format('TransmissionBeam', btr_dim, beam_dim)
-        if atr_dim != abs_dim and atr_dim != 1:
-            result['TransmissionAbsorberRuns'] = message.format('TransmissionAbsorber', atr_dim, abs_dim)
+        if (btr_dim != sample_dim or btr_dim != can_dim) and btr_dim != 1:
+            result['TransmissionBeamRuns'] = message.format('TransmissionBeam', btr_dim, sample_dim)
+        if (atr_dim != sample_dim or atr_dim != can_dim) and atr_dim != 1:
+            result['TransmissionAbsorberRuns'] = message.format('TransmissionAbsorber', atr_dim, sample_dim)
 
         # other checks
         if self.output_type == 'I(Phi,Q)' and self.n_wedges == 0:
