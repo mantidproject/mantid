@@ -64,14 +64,14 @@ Usage
 
 The original instrument view
 
-.. image:: ../images/CorelliCalibrationApply_original.png
+.. image:: ../images/CorelliPowderCalibrationApply_original.png
     :align: center
     :width: 635
     :alt: original layout of CORELLI instrument
 
 and the calibrated instrument view (notice one panel is moved to the center and rotate to (0,1,0)@180 degree)
 
-.. image:: ../images/CorelliCalibrationApply_calibrated.png
+.. image:: ../images/CorelliPowderCalibrationApply_calibrated.png
     :align: center
     :width: 635
     :alt: calirated layout of CORELLI instrument
