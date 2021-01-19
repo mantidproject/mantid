@@ -18,6 +18,7 @@ from .painter import Painted
 class EllipsoidalIntergratedPeakRepresentation():
     """Provide methods to display a representation of a slice through an
     Ellipsoidally intgerated region around a Peak"""
+
     @classmethod
     def draw(cls, peak_origin, peak_shape, slice_info, painter, fg_color, bg_color):
         """
@@ -98,6 +99,7 @@ def _signal_ellipsoid_info(shape_info, transform):
     :param shape_info: A dictionary of ellipsoid properties
     :param transform: Transform function to move to the slice frame
     """
+
     def to_ndarray(axis_field):
         s = shape_info[axis_field]
         return np.array([float(x) for x in s.split()], dtype=float)
@@ -121,7 +123,7 @@ def _bkgd_ellipsoid_info(shape_info, transform):
         shape_info["background_inner_radius1"]), float(shape_info["background_inner_radius2"])
     a, b, c = transform((a, b, c))
     inner_a, inner_b, inner_c = transform((inner_a, inner_b, inner_c))
-    width = max((a, b, c)) - max((inner_a, inner_b, inner_c))
+    width = (max((a, b, c)) - max((inner_a, inner_b, inner_c))) / max((a, b, c))  # fractional
 
     return (a, b, c, width)
 
@@ -184,7 +186,7 @@ def calculate_ellipsoid_matrix(axis_a, axis_b, axis_c, a, b, c):
     """
     # Create matrix whose eigenvalues are squares of semi-axes lengths
     # and eigen vectors define principle axis vectors
-    axes_lengths = np.diag((1 / a**2, 1 / b**2, 1 / c**2))
+    axes_lengths = np.diag((1 / a ** 2, 1 / b ** 2, 1 / c ** 2))
     # yapf: disable
     axes_dir = np.array((
         (axis_a[0], axis_b[0], axis_c[0]),
@@ -205,9 +207,9 @@ def slice_ellipsoid_matrix(origin, zp, ellipMatrix):
     z = zp - origin[2]
 
     A = ellipMatrix[:2, :2]
-    A[1, 0] = ellipMatrix[0, 1]
+    A[1, 0] = ellipMatrix[0, 1]  # should be this already...
     B = 2 * z * ellipMatrix[:2, 2]
-    c = ellipMatrix[2][2] * z**2
+    c = ellipMatrix[2][2] * z ** 2
 
     #  Using quadratic completion we can get rid of ( or rather refactor) the linear
     #  term:
