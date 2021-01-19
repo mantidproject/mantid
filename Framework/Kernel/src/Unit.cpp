@@ -900,8 +900,13 @@ void DeltaE::validateExtraParams(const int emode,
   auto it = params.find(UnitParams::efixed);
   // Efixed must be set to something
   if (it == params.end()) {
-    throw std::runtime_error(
-        "efixed must be set for energy transfer calculation");
+    if (emode == 1) { // direct, efixed=ei
+      throw std::invalid_argument(
+          "efixed must be set for energy transfer calculation");
+    } else {
+      throw std::runtime_error(
+          "efixed must be set for energy transfer calculation");
+    }
   }
   if (it->second <= 0) {
     throw std::runtime_error("efixed must be greater than zero");

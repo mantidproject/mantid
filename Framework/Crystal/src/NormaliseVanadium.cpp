@@ -86,17 +86,17 @@ void NormaliseVanadium::exec() {
     if (!spectrumInfo.hasDetectors(i))
       continue;
 
-    // This is the scattered beam direction
-    double L2 = spectrumInfo.l2(i);
-    // Two-theta = polar angle = scattering angle = between +Z vector and the
-    // scattered beam
-    double scattering = spectrumInfo.twoTheta(i);
-
     Mantid::Kernel::Units::Wavelength wl;
+    Mantid::Kernel::Units::TOF tof;
+    double L2, scattering;
+    ExtraParametersMap pmap{};
+    m_inputWS->getDetectorValues(spectrumInfo, tof, wl,
+                                 Kernel::DeltaEMode::Elastic, false, i, L2,
+                                 scattering, pmap);
     auto timeflight = inSpec.points();
     if (unitStr == "TOF")
       wl.fromTOF(timeflight.mutableRawData(), timeflight.mutableRawData(), L1,
-                 L2, scattering, 0);
+                 L2, scattering, 0, pmap);
 
     // Loop through the bins in the current spectrum
     double lambp = 0;

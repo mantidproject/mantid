@@ -266,7 +266,7 @@ double RemoveLowResTOF::calcTofMin(const std::size_t workspaceIndex,
     // unfortunately there isn't a good way to convert a single value
     std::vector<double> X(1), temp(1);
     X[0] = m_wavelengthMin;
-    wavelength->toTOF(X, temp, l1, l2, 0., 0);
+    wavelength->toTOF(X, temp, l1, l2, 0., 0, {});
     tmin = X[0];
   }
 

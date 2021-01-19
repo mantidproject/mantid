@@ -300,7 +300,7 @@ void AlignDetectors::align(const ConversionFactors &converter,
 
       if (eventW) {
         Kernel::Units::TOF tofUnit;
-        tofUnit.initialize(0, 0, 0, 0);
+        tofUnit.initialize(0, 0, 0, 0, {});
         // EventWorkspace part, modifying the EventLists.
         eventW->getSpectrum(i).convertUnitsViaTof(&tofUnit, &dSpacingUnit);
       }

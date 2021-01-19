@@ -311,7 +311,7 @@ double DetectorInfo::azimuthal(const std::pair<size_t, size_t> &index) const {
 std::tuple<double, double, double> DetectorInfo::diffractometerConstants(
     const size_t index, std::vector<detid_t> &calibratedDets,
     std::vector<detid_t> &uncalibratedDets) const {
-  auto det = getDetectorPtr(index);
+  auto det = m_instrument->getDetector((*m_detectorIDs)[index]);
   auto pmap = m_instrument->getParameterMap();
   auto par = pmap->get(det.get(), "DIFC");
   if (par) {

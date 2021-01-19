@@ -163,12 +163,17 @@ void CalculatePlaczekSelfScattering::exec() {
     auto &y = outputWS->mutableY(specIndex);
     auto &x = outputWS->mutableX(specIndex);
     if (!specInfo.isMonitor(specIndex) && !(specInfo.l2(specIndex) == 0.0)) {
-      const double pathLength = specInfo.l1() + specInfo.l2(specIndex);
-      const double f = specInfo.l1() / pathLength;
-      const double sinThetaBy2 = sin(specInfo.twoTheta(specIndex) / 2.0);
       Kernel::Units::Wavelength wavelength;
-      wavelength.initialize(specInfo.l1(), specInfo.l2(specIndex),
-                            specInfo.twoTheta(specIndex), 0);
+      Kernel::Units::TOF tof;
+      Kernel::ExtraParametersMap pmap{};
+      double l1 = specInfo.l1();
+      double l2, twoTheta;
+      inWS->getDetectorValues(specInfo, wavelength, tof,
+                              Kernel::DeltaEMode::Elastic, false, specIndex, l2,
+                              twoTheta, pmap);
+      const double sinThetaBy2 = sin(twoTheta / 2.0);
+      const double f = l1 / (l1 + l2);
+      wavelength.initialize(specInfo.l1(), l2, twoTheta, 0, pmap);
       for (size_t xIndex = 0; xIndex < xLambda.size() - 1; xIndex++) {
         const double term1 = (f - 1.0) * phi1[xIndex];
         const double term2 = f * (1.0 - eps1[xIndex]);

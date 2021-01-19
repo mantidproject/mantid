@@ -267,7 +267,7 @@ void GetAllEi::exec() {
         boost::lexical_cast<std::string>(TOF_range.second));
   } else {
     destUnit->initialize(mon1Distance, 0., 0.,
-                         static_cast<int>(Kernel::DeltaEMode::Elastic));
+                         static_cast<int>(Kernel::DeltaEMode::Elastic), {});
     printDebugModeInfo(guess_opening, TOF_range, destUnit);
   }
   std::pair<double, double> Mon1_Erange =
@@ -285,7 +285,7 @@ void GetAllEi::exec() {
   std::vector<double> guess_ei;
   guess_ei.reserve(guess_opening.size());
   destUnit->initialize(mon1Distance, 0., 0.,
-                       static_cast<int>(Kernel::DeltaEMode::Elastic));
+                       static_cast<int>(Kernel::DeltaEMode::Elastic), {});
   for (double time : guess_opening) {
     double eGuess = destUnit->singleFromTOF(time);
     if (eGuess > eMin && eGuess < eMax) {

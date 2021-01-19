@@ -88,11 +88,10 @@ public:
    *                    Fixed energy: EI (emode=1) or EF (emode=2)(in meV)
    *                    Delta (not currently used)
    */
-  void
-  toTOF(std::vector<double> &xdata, std::vector<double> &ydata,
-        const double &_l1, const double &_l2, const double &_twoTheta,
-        const int &_emode,
-        std::initializer_list<std::pair<const UnitParams, double>> params = {});
+  void toTOF(std::vector<double> &xdata, std::vector<double> &ydata,
+             const double &_l1, const double &_l2, const double &_twoTheta,
+             const int &_emode,
+             std::initializer_list<std::pair<const UnitParams, double>> params);
   void toTOF(std::vector<double> &xdata, std::vector<double> &ydata,
              const double &_l1, const double &_l2, const double &_twoTheta,
              const int &_emode, const ExtraParametersMap &params);
@@ -126,10 +125,11 @@ public:
    *                    Fixed energy: EI (emode=1) or EF (emode=2)(in meV)
    *                    Delta (not currently used)
    */
-  void fromTOF(
-      std::vector<double> &xdata, std::vector<double> &ydata, const double &_l1,
-      const double &_l2, const double &_twoTheta, const int &_emode,
-      std::initializer_list<std::pair<const UnitParams, double>> params = {});
+  void
+  fromTOF(std::vector<double> &xdata, std::vector<double> &ydata,
+          const double &_l1, const double &_l2, const double &_twoTheta,
+          const int &_emode,
+          std::initializer_list<std::pair<const UnitParams, double>> params);
 
   void fromTOF(std::vector<double> &xdata, std::vector<double> &ydata,
                const double &_l1, const double &_l2, const double &_twoTheta,
@@ -151,7 +151,7 @@ public:
   double convertSingleFromTOF(const double xvalue, const double &l1,
                               const double &l2, const double &twoTheta,
                               const int &emode,
-                              const ExtraParametersMap &params = {});
+                              const ExtraParametersMap &params);
 
   /** Initialize the unit to perform conversion using singleToTof() and
    *singleFromTof()
@@ -167,7 +167,7 @@ public:
    *                      Delta: unused
    */
   void initialize(const double &_l1, const double &_l2, const double &_twoTheta,
-                  const int &_emode, const ExtraParametersMap &params = {});
+                  const int &_emode, const ExtraParametersMap &params);
 
   /** Finalize the initialization. This will be overridden by subclasses as
    * needed. */
