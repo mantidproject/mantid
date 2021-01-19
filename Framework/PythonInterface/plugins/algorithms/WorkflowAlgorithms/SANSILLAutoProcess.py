@@ -669,8 +669,6 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                 self.getProperty('SampleThickness').value,
                 WaterCrossSection=
                 self.getProperty('WaterCrossSection').value,
-                StoreOnlyEfficiencyInput=
-                self.getProperty('SensitivityWithOffsets').value
                 )
 
         if self.getProperty('OutputPanels').value:

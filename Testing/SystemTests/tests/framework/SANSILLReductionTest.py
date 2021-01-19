@@ -181,8 +181,8 @@ class ILL_D22_Multiple_Sensitivity_Test(systemtesting.MantidSystemTest):
                          AbsorberInputWorkspace='Cd', BeamInputWorkspace='Db', ContainerInputWorkspace='can',
                          OutputWorkspace='ref2', SensitivityOutputWorkspace='sens2')
 
-        GroupWorkspaces(InputWorkspaces=['sens1', 'sens2'], OutputWorkspace='sensitivities')
-        CalculateEfficiency(InputWorkspaceGroup='sensitivities', OutputWorkspace='sens')
+        GroupWorkspaces(InputWorkspaces=['ref1', 'ref2'], OutputWorkspace='sensitivity_input')
+        CalculateEfficiency(InputWorkspaceGroup='sensitivity_input', OutputWorkspace='sens')
 
         AddSampleLog(Workspace='sens', LogName='ProcessedAs', LogText='Reference')
 
