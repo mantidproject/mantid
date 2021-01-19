@@ -119,8 +119,6 @@ void ImageInfoModelMatrixWS::setUnitsInfo(ImageInfoModel::ImageInfo *info,
     try {
       tof =
           m_xunit->convertSingleToTOF(x, l1, l2, twoTheta, emode, efixed, 0.0);
-      info->setValue(infoIndex, defaultFormat(tof));
-      ++infoIndex;
     } catch (std::exception &exc) {
       // without TOF we can't get to the other units
       if (g_log.is(Logger::Priority::PRIO_DEBUG))

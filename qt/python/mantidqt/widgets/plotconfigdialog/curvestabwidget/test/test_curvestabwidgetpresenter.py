@@ -242,6 +242,7 @@ class CurvesTabWidgetPresenterTest(unittest.TestCase):
         ax = fig.add_subplot(111)
         ax.errorbar([0, 1, 2, 4], [0, 1, 2, 4], yerr=[0.1, 0.2, 0.3, 0.4],
                     label='errorbar_plot')
+        ax.containers[0][2][0].axes.creation_args = [{'errorevery': 1}]
         mock_view_props = Mock(get_plot_kwargs=lambda: {'visible': False},
                                hide_errors=False, hide=True,
                                __getitem__=lambda s, x: False)
@@ -407,6 +408,33 @@ class CurvesTabWidgetPresenterTest(unittest.TestCase):
         presenter.on_curves_selection_changed()
 
         mock_view.enable_curve_config.assert_called_with(True)
+
+    def make_figure_with_error_bars(self):
+        fig = figure()
+        ax = fig.add_subplot(111, projection='mantid')
+        ax.errorbar([0, 1, 2, 4], [0, 1, 2, 4], yerr=[0.1, 0.2, 0.3, 0.4],
+                    label='errorbar_plot', errorevery=7)
+        ax.set_title('Axes 0')
+        ax.plot(self.ws, specNum=1, label='Workspace')
+        ax.plot(self.ws, specNum=1, label='Workspace 2')
+        ax.plot(self.ws, specNum=1, label='Workspace 3')
+        return fig
+
+    def test_errorevery_applied_correctly(self):
+        fig = self.make_figure_with_error_bars()
+        new_props = CurveProperties({'capsize': 1, 'errorevery': 7,
+                                     'hide': False, 'marker': None,
+                                     'label': "Workspace",
+                                     'hide_errors': False})
+        mock_view = Mock(get_selected_ax_name=lambda: "Axes 0: (0, 0)",
+                         get_current_curve_name=lambda: "Workspace",
+                         get_properties=lambda: new_props)
+        presenter = self._generate_presenter(fig=fig, mock_view=mock_view)
+        presenter.apply_properties()
+        presenter.update_view()
+        with patch.object(presenter.view, 'udpate_fields'):
+            args, kwargs = presenter.view.update_fields.call_args
+            self.assertEqual(args[0].errorevery, 7)
 
 
 if __name__ == '__main__':

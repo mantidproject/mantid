@@ -14,7 +14,7 @@ from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QDialog, QDialogButtonBox, QTableWidget, QTableWidgetItem, QVBoxLayout
 
 
-class PeaksWorkspaceSelectorModel(object):
+class PeaksWorkspaceSelectorModel():
     """Data model for selecting PeaksWorkspaces from an object capable of providing
     a access to the available list of workspaces.
     """
@@ -47,7 +47,7 @@ class PeaksWorkspaceSelectorModel(object):
         return name_status
 
 
-class PeaksWorkspaceSelectorPresenter(object):
+class PeaksWorkspaceSelectorPresenter():
     """Present the list of available PeaksWorkspaces to the user and allow them
     to select them.
     """
