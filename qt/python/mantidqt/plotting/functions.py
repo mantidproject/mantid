@@ -209,12 +209,14 @@ def use_imshow(ws):
 
 
 @manage_workspace_names
-def pcolormesh(workspaces, fig=None):
+def pcolormesh(workspaces, fig=None, normalize_by_bin_width=None):
     """
     Create a figure containing pcolor subplots
 
     :param workspaces: A list of workspace handles
     :param fig: An optional figure to contain the new plots. Its current contents will be cleared
+    :param normalize_by_bin_width: Optional and only to be used in the event that the function is being called as part
+    of a plot restore
     :returns: The figure containing the plots
     """
     # check inputs
@@ -232,7 +234,7 @@ def pcolormesh(workspaces, fig=None):
         ax = axes[row_idx][col_idx]
         if subplot_idx < workspaces_len:
             ws = workspaces[subplot_idx]
-            pcm = pcolormesh_on_axis(ax, ws)
+            pcm = pcolormesh_on_axis(ax, ws, normalize_by_bin_width)
             plots.append(pcm)
             if col_idx < ncols - 1:
                 col_idx += 1
@@ -271,11 +273,12 @@ def pcolormesh(workspaces, fig=None):
     return fig
 
 
-def pcolormesh_on_axis(ax, ws):
+def pcolormesh_on_axis(ax, ws, normalize_by_bin_width=None):
     """
     Plot a pcolormesh plot of the given workspace on the given axis
     :param ax: A matplotlib axes instance
     :param ws: A mantid workspace instance
+    :param normalize_by_bin_width: Optional keyword argument to pass to imshow in the event of a plot restoration
     :return:
     """
     ax.clear()
@@ -283,7 +286,10 @@ def pcolormesh_on_axis(ax, ws):
     scale = _get_colorbar_scale()
     if use_imshow(ws):
         pcm = ax.imshow(ws, cmap=ConfigService.getString("plots.images.Colormap"), aspect='auto', origin='lower',
-                        norm=scale())
+                        norm=scale(), normalize_by_bin_width=normalize_by_bin_width)
+        # remove normalize_by_bin_width from cargs if present so that this can be toggled in future
+        for cargs in pcm.axes.creation_args:
+            _ = cargs.pop('normalize_by_bin_width')
     else:
         pcm = ax.pcolormesh(ws, cmap=ConfigService.getString("plots.images.Colormap"), norm=scale())
 

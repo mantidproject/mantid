@@ -31,7 +31,6 @@ class PlotsLoader(object):
     def load_plots(self, plots_list):
         if plots_list is None:
             return
-
         for plot_ in plots_list:
             try:
                 self.make_fig(plot_)
@@ -64,7 +63,6 @@ class PlotsLoader(object):
             for cargs_dict in sublist:
                 if 'norm' in cargs_dict and type(cargs_dict['norm']) is dict:
                     cargs_dict['norm'] = self.restore_normalise_obj_from_dict(cargs_dict['norm'])
-
         fig, axes_matrix, _, _ = create_subplots(len(creation_args))
         axes_list = axes_matrix.flatten().tolist()
         for ax, cargs_list in zip(axes_list, creation_args):
@@ -124,7 +122,11 @@ class PlotsLoader(object):
         func = function_dict[function_to_call]
         # Plotting is done via an Axes object unless a colorbar needs to be added
         if function_to_call in ["imshow", "pcolormesh"]:
-            func([workspace], fig)
+            if creation_arg['normalize_by_bin_width']:
+                is_norm = creation_arg.pop('normalize_by_bin_width')
+                func([workspace], fig, normalize_by_bin_width=is_norm)
+            else:
+                func([workspace], fig)
             self.color_bar_remade = True
         else:
             func(workspace, **creation_arg)
