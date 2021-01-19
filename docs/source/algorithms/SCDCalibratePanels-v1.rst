@@ -76,7 +76,7 @@ to, the OutputWorkspace.
 Usage
 -----
 
-.. testcode:: SCDCalibratePanels
+.. code-block:: python
 
     #Calibrate peaks file and load to workspace
     LoadIsawPeaks(Filename='MANDI_801.peaks', OutputWorkspace='peaks')
@@ -91,7 +91,7 @@ Usage
     if det1.getPos() == det2.getPos():
         print("matches")
     
-.. testcleanup:: SCDCalibratePanels
+.. code-block:: python
 
    DeleteWorkspace('peaks')
    DeleteWorkspace('MANDI_801_event_xml')
