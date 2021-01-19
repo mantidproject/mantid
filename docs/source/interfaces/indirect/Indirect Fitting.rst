@@ -6,7 +6,7 @@ QENS Fitting
 .. contents:: Table of Contents
   :local:
 
-.. figure::  ../images/ConvFitFull.png
+.. figure::  ../../images/ConvFitFull.png
    :height: 400px
    :align: center
 
@@ -22,7 +22,7 @@ These fitting interfaces share common features, with a few unique options in eac
 Single & Multiple Input
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-.. figure::  ../images/ConvFitDataSelection.png
+.. figure::  ../../images/ConvFitDataSelection.png
    :height: 200px
    :align: center
 
@@ -52,7 +52,7 @@ fitted with better statistics and hence reduced errors.
 Fit Function
 ~~~~~~~~~~~~
 
-.. figure::  ../images/ConvFitFunctionSelection.png
+.. figure::  ../../images/ConvFitFunctionSelection.png
    :height: 300px
    :align: left
 
@@ -96,7 +96,7 @@ Fit Type
 Preview Plots
 ~~~~~~~~~~~~~
 
-.. figure::  ../images/ConvFitPlotPreview.png
+.. figure::  ../../images/ConvFitPlotPreview.png
    :height: 300px
    :align: left
 

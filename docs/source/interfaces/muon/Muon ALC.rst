@@ -153,7 +153,7 @@ asymmetry, displayed on the right panel.
 Once data has been loaded, **Auto add** can be checked. This will watch for new files 
 to be added to the path and try to load them automatically.
 
-.. figure:: ../images/MuonALCDataLoading.png
+.. figure:: ../../images/MuonALCDataLoading.png
    :align: center
    :width: 800
 
@@ -222,7 +222,7 @@ many times as sections to use. Sections are also displayed on the **Baseline mod
 graph and can be easily modified by clicking and dragging the corresponding
 vertical lines.
 
-.. figure:: ../images/ALCBaselineModelling.png
+.. figure:: ../../images/ALCBaselineModelling.png
    :align: center
    :width: 800
 
@@ -268,7 +268,7 @@ the appropriate point in the graph while holding Shift. Repeat the same steps
 with the rest of the functions in the browser and hit **Fit** to fit the peaks.
 
 
-.. figure:: ../images/ALCPeakFitting.png
+.. figure:: ../../images/ALCPeakFitting.png
    :align: center
    :width: 800
 

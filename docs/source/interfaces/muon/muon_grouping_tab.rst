@@ -3,7 +3,7 @@
 Grouping Tab
 ------------
 
-.. image::  ../images/muon_interface_tab_grouping.png
+.. image::  ../../images/muon_interface_tab_grouping.png
    :align: right
    :height: 400px
 

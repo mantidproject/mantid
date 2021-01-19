@@ -3,7 +3,7 @@
 Plotting Window
 -----------------
 
-.. image::  ../images/muon_plotting_window.png
+.. image::  ../../images/muon_plotting_window.png
    :align: right
    :width: 350px
 
@@ -30,13 +30,13 @@ The plotting can be controlled through serveral options:
 
 **Plot raw** Plot raw controls whether the raw or rebinned workspaces are plotted. 
 
-.. image::  ../images/muon_plotting_window_tiled.png
+.. image::  ../../images/muon_plotting_window_tiled.png
    :width: 350px
    :align: right
 
 Plotting Options
 ^^^^^^^^^^^^^^^^^
-.. image::  ../images/muon_plotting_window_options.png
+.. image::  ../../images/muon_plotting_window_options.png
    :height: 40px
 
 **Subplot Selector** Which axis to change the options for. 

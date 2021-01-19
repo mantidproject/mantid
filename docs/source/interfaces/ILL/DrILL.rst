@@ -32,7 +32,7 @@ Interface overview
 
 The DrILL main window is composed of different parts:
 
-.. image:: ../images/drill-numbers.png
+.. image:: ../../images/drill-numbers.png
    :align: center
 
 spreadsheet like table (1)
@@ -54,7 +54,7 @@ menu bar (3)
 A global settings dialog is also accessible through the menu or its dedicated
 tool button. This dialog contains more options for the reduction algorithm.
 
-.. image:: ../images/drill-settings.png
+.. image:: ../../images/drill-settings.png
    :align: center
 
 

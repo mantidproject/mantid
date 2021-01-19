@@ -3,7 +3,7 @@
 Phase Table Tab
 ---------------
 
-.. image::  ../images/muon_interface_tab_phase_table.png
+.. image::  ../../images/muon_interface_tab_phase_table.png
    :align: right
    :height: 400px
 

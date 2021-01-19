@@ -3,7 +3,7 @@
 Sequential Fitting Tab
 ------------------------
 
-.. image::  ../images/muon_interface_tab_sequential_fitting.png
+.. image::  ../../images/muon_interface_tab_sequential_fitting.png
    :align: right
    :height: 400px
 
