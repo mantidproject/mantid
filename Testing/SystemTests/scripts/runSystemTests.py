@@ -9,7 +9,10 @@ import argparse
 import os
 import sys
 import time
+import json
 from multiprocessing import Process, Array, Manager, Value, Lock
+
+from addTestData import TestDataCreator
 
 # Prevents errors in systemtests that use matplotlib directly
 os.environ['MPLBACKEND'] = 'Agg'
@@ -26,6 +29,7 @@ DEFAULT_FRAMEWORK_LOC = os.path.realpath(os.path.join(THIS_MODULE_DIR, "..", "li
 DATA_DIRS_LIST_PATH = os.path.join(THIS_MODULE_DIR, "datasearch-directories.txt")
 REF_DIRS_LIST_PATH = os.path.join(THIS_MODULE_DIR, "reference-directories.txt")
 SAVE_DIR_LIST_PATH = os.path.join(THIS_MODULE_DIR, "defaultsave-directory.txt")
+OUTPUT_TEST_FAILURE_FILE = 'FAILED-systemtests.json'
 
 
 def kill_children(processes):
@@ -216,10 +220,12 @@ def main():
     if options.clean:
         print("Performing cleanup run")
 
-    # Cleanup any pre-existing XML reporter files
+    # Cleanup any pre-existing XML reporter and json test failure files
     entries = os.listdir(mtdconf.saveDir)
     for file in entries:
         if file.startswith('TEST-systemtests-') and file.endswith('.xml'):
+            os.remove(os.path.join(mtdconf.saveDir, file))
+        if file == OUTPUT_TEST_FAILURE_FILE:
             os.remove(os.path.join(mtdconf.saveDir, file))
 
     if not options.dry_run:
@@ -354,46 +360,55 @@ def main():
 
         test_mismatches = {key: status['mismatches'] for key, status in status_dict.items() if
                            status['status'] == 'failed'}
-        get_mismatch_reference(test_mismatches, save_dir, data_paths, reference_paths)
+        output_file = output_failed_tests_information(test_mismatches, save_dir, data_paths, reference_paths)
 
         if not success:
             sys.exit(1)
 
 
-def get_mismatch_reference(test_mismatch_dict, mismatch_dir, external_data_dirs, ref_dirs):
-    import json
-    failed_test_information = {}
-    failed_test_information['FailedTests'] = []
+def output_failed_tests_information(test_mismatch_dict, mismatch_dir, external_data_dirs, ref_dirs):
+    failed_test_information = {'FailedTests': []}
     data_dirs = external_data_dirs.split(';')
     ref_dirs = ref_dirs.split(';')
-    for test_name, mismatch_filename in test_mismatch_dict.items():
-        reference_name = mismatch_filename.replace("-mismatch", "").strip()
-        mismatch_path = os.path.join(mismatch_dir, mismatch_filename.strip())
-        reference_hash_name = reference_name + '.md5'
-        data_file_path = ''
-        for directory in data_dirs:
-            files = os.listdir(directory)
-            if next((True for x in files if x == reference_name), False):
-                data_file_path = os.path.join(directory, reference_name)
-        if not data_file_path:
-            continue
-        ref_file_path = ''
-        for directory in ref_dirs:
-            files = os.listdir(directory)
-            if next((True for x in files if x == reference_hash_name), False):
-                ref_file_path = os.path.join(directory, reference_hash_name)
-        print("data_file_path", data_file_path)
-        print("reference_file_path", ref_file_path)
-        print("mismatch_file_path", os.path.join(mismatch_dir, mismatch_filename))
+    for test_name, mismatch_files in test_mismatch_dict.items():
+        mismatch_paths = []
+        data_paths = []
+        ref_paths = []
+        for mismatch_filename in mismatch_files.split(';'):
+            reference_name = mismatch_filename.replace("-mismatch", "").strip()
+            mismatch_path = os.path.join(mismatch_dir, mismatch_filename.strip())
+            reference_content_link_name = reference_name + '.md5'
+            data_file_path = ''
+            for directory in data_dirs:
+                files = os.listdir(directory)
+                if next((True for x in files if x == reference_name), False):
+                    data_file_path = os.path.join(directory, reference_name)
+            ref_file_path = ''
+            for directory in ref_dirs:
+                files = os.listdir(directory)
+                if next((True for x in files if x == reference_content_link_name), False):
+                    ref_file_path = os.path.join(directory, reference_content_link_name)
+            mismatch_paths.append(mismatch_path)
+            data_paths.append(data_file_path)
+            ref_paths.append(ref_file_path)
         failed_test_information['FailedTests'].append({
             'TestName': test_name,
-            'MismatchFile': mismatch_path,
-            'ReferenceFile': data_file_path,
-            'ReferenceHashFile': ref_file_path,
-        })
-    # so if we are confident, we would replace the reference_hash_file with the hash of our mismatch file
-    with open(os.path.join(mismatch_dir, 'FAILED-systemtests.json'), 'w') as outfile:
+            'MismatchFiles': mismatch_paths,
+            'ReferenceFiles': data_paths,
+            'ReferenceContentLinkFiles': ref_paths,
+            })
+    output_name = os.path.join(mismatch_dir, OUTPUT_TEST_FAILURE_FILE)
+    with open(output_name, 'w') as outfile:
         json.dump(failed_test_information, outfile)
+    return output_name
+
+
+def create_content_files_from_failed_tests(output_file):
+    data_creator = TestDataCreator()
+    with open(output_file, 'r') as file:
+        json_data = json.load(file)
+        data_creator.process_test_failures(json_data)
+        data_creator.print_summary()
 
 
 if __name__ == "__main__":
