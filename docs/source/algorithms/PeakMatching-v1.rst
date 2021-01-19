@@ -61,7 +61,7 @@ Usage
 	secondary_matches = mtd['secondary_matches'] 
 	all_matches = mtd['all_matches'] 
 	sorted_by_energy = mtd['all_matches_sorted_by_energy'] 
-	element_count = mtd[ 'element_count'] 
+	element_likelyhood = mtd[ 'element_likelyhood'] 
 
 	print("--"*25)
 	print(primary_matches.row(0))
@@ -72,7 +72,7 @@ Usage
 	print("--"*25)
 	print(sorted_by_energy.row(0))
 	print("--"*25)
-	print(element_count.row(0))
+	print(element_likelyhood.row(0))
 		
 Output:
 
@@ -87,7 +87,7 @@ Output:
 	--------------------------------------------------
 	{'Peak centre': 3.0, 'Database Energy': 3.4, 'Element': 'Li', 'Transition': 'L(3d->2p)', 'Error': 0.8, 'Difference': 0.3999999999999999}
 	--------------------------------------------------
-	{'Element': 'Ag', 'Counts': 5}
+	{'Element': 'Ag', 'Likelyhood(au)': 13}
 	
 *Example: Renaming tables**
 
@@ -106,13 +106,13 @@ Output:
 	for row in rows:
 		table.addRow(row)
     
-	PeakMatching(table,PrimaryPeaks="primary",SecondaryPeaks="secondary",AllPeaks="all",SortedByEnergy="sort",ElementCount="count")
+	PeakMatching(table,PrimaryPeaks="primary",SecondaryPeaks="secondary",AllPeaks="all",SortedByEnergy="sort",ElementLikelyhood="count")
 
 	primary_matches = mtd['primary'] 
 	secondary_matches = mtd['secondary'] 
 	all_matches = mtd['all_matches'] 
 	sorted_by_energy = mtd['sort'] 
-	element_count = mtd[ 'count'] 
+	element_likelyhood = mtd[ 'count'] 
 
 	print("--"*25)
 	print(primary_matches.row(1))
@@ -123,7 +123,7 @@ Output:
 	print("--"*25)
 	print(sorted_by_energy.row(1))
 	print("--"*25)
-	print(element_count.row(1))
+	print(element_likelyhood.row(1))
 		
 Output:
 
@@ -138,7 +138,7 @@ Output:
 	--------------------------------------------------
 	{'Peak centre': 306.0, 'Database Energy': 304.1, 'Element': 'W', 'Transition': 'O(7i->5g)', 'Error': 2.4000000000000004, 'Difference': 1.8999999999999773}
 	--------------------------------------------------
-	{'Element': 'W', 'Counts': 4}
+	{'Element': 'I', 'Likelyhood(au)': 6}
 
 
 	*Example: Using non default column names**
@@ -164,7 +164,7 @@ Output:
 	secondary_matches = mtd['secondary_matches'] 
 	all_matches = mtd['all_matches'] 
 	sorted_by_energy = mtd['all_matches_sorted_by_energy'] 
-	element_count = mtd[ 'element_count'] 
+	element_likelyhood = mtd[ 'element_likelyhood'] 
 
 	print("--"*25)
 	print(primary_matches.row(2))
@@ -175,7 +175,7 @@ Output:
 	print("--"*25)
 	print(sorted_by_energy.row(2))
 	print("--"*25)
-	print(element_count.row(2))
+	print(element_likelyhood.row(2))
 		
 Output:
 
@@ -190,7 +190,7 @@ Output:
 	--------------------------------------------------
 	{'Peak centre': 306.0, 'Database Energy': 304.1, 'Element': 'W', 'Transition': 'O(7i->5g)', 'Error': 2.4000000000000004, 'Difference': 1.8999999999999773}
 	--------------------------------------------------
-	{'Element': 'Ni', 'Counts': 4}
+	{'Element': 'Li', 'Likelyhood(au)': 6}
 
 
 .. categories::

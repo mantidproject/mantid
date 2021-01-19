@@ -47,7 +47,7 @@ class PeakMatchingTest(unittest.TestCase):
         self.delete_if_present("secondary_matches")
         self.delete_if_present("all_matches")
         self.delete_if_present("all_matches_sorted_by_energy")
-        self.delete_if_present("element_count")
+        self.delete_if_present("element_likelyhood")
         self.delete_if_present("Test")
         self.algo = None
 
@@ -103,22 +103,22 @@ class PeakMatchingTest(unittest.TestCase):
         all_data = self.algo.get_matches(self.peak_data, self.input_peaks)
 
         primary_matches = [{'energy': 900.7, 'peak_centre': 900, 'error': 0.8,
-                            'element': 'Ag', 'diff': 0.7, 'transition': 'L(4->2)'},
+                            'element': 'Ag', 'diff': 0.7, 'transition': 'L(4->2)','Rating' : 3},
 
                            {'energy': 304.7, 'peak_centre': 306, 'error': 1.6,
-                            'element': 'Ag', 'diff': 1.3, 'transition': 'M(4->3)'}]
+                            'element': 'Ag', 'diff': 1.3, 'transition': 'M(4->3)', 'Rating' : 2}]
 
         all_matches = [{'energy': 567, 'peak_centre': 567, 'error': 0,
-                        'element': 'Ag', 'diff': 0, 'transition': 'M(10->3)'},
+                        'element': 'Ag', 'diff': 0, 'transition': 'M(10->3)', 'Rating' : 4},
 
                        {'energy': 900.7, 'peak_centre': 900, 'error': 0.8,
-                        'element': 'Ag', 'diff': 0.7, 'transition': 'L(4->2)'},
+                        'element': 'Ag', 'diff': 0.7, 'transition': 'L(4->2)', 'Rating' : 3},
 
                        {'energy': 304.7, 'peak_centre': 306, 'error': 1.6,
-                        'element': 'Ag', 'diff': 1.3, 'transition': 'M(4->3)'}]
+                        'element': 'Ag', 'diff': 1.3, 'transition': 'M(4->3)', 'Rating' : 2}]
 
         secondary_matches = [{'energy': 567, 'peak_centre': 567, 'error': 0,
-                              'element': 'Ag', 'diff': 0, 'transition': 'M(10->3)'}]
+                              'element': 'Ag', 'diff': 0, 'transition': 'M(10->3)','Rating' : 4}]
 
         all_matches = [primary_matches, secondary_matches, all_matches]
         for j in range(len(all_data)):
@@ -188,7 +188,7 @@ class PeakMatchingTest(unittest.TestCase):
         secon = mtd['secondary_matches']
         all = mtd['all_matches']
         sort = mtd['all_matches_sorted_by_energy']
-        count = mtd['element_count']
+        count = mtd['element_likelyhood']
 
         correct_prim = {'Peak centre': [900.0, 306.0], 'Database Energy': [900.7, 304.7], 'Element': ['Ag', 'Ag'],
                       'Transition': ['L(4->2)', 'M(4->3)'], 'Error': [0.8, 1.6],
@@ -205,13 +205,19 @@ class PeakMatchingTest(unittest.TestCase):
                           'Element': ['Ag', 'Ag', 'Ag'], 'Transition': ['M(4->3)', 'M(10->3)', 'L(4->2)'],
                           'Error': [1.6, 0.0, 0.8], 'Difference': [1.3, 0.0, 0.7]}
 
-        correct_count = {'Element': ['Ag'], 'Counts': [4]}
+        correct_count = {'Element': ['Ag'], 'Likelyhood(au)': [13]}
 
         self.assertPeaksMatch(prim,correct_prim)
         self.assertPeaksMatch(secon, correct_secon)
         self.assertPeaksMatch(all, correct_all)
         self.assertPeaksMatch(sort, correct_sort)
         self.assertPeaksMatch(count, correct_count)
+
+        self.delete_if_present('primary-matches')
+        self.delete_if_present('secondary_matches')
+        self.delete_if_present('all_matches')
+        self.delete_if_present('all_matches_sorted_by_energy')
+        self.delete_if_present('element_likelyhood')
 
     def test_algorithm_with_invalid_arguments(self):
         testWorkspace = CreateWorkspace(DataX = [1] , DataY = [1], OutputWorkspace = "Test")
@@ -259,7 +265,7 @@ class PeakMatchingTest(unittest.TestCase):
                      PrimaryPeaks= "rename_prim",
                      SecondaryPeaks="rename_secon",
                      SortedByEnergy="rename_sort",
-                     ElementCount="rename_count")
+                     ElementLikelyhood="rename_count")
         prim = mtd['rename_prim']
         secon = mtd['rename_secon']
         all = mtd['rename_all']
@@ -281,7 +287,7 @@ class PeakMatchingTest(unittest.TestCase):
                         'Element': ['Ag', 'Ag', 'Ag'], 'Transition': ['M(4->3)', 'M(10->3)', 'L(4->2)'],
                         'Error': [1.6, 0.0, 0.8], 'Difference': [1.3, 0.0, 0.7]}
 
-        correct_count = {'Element': ['Ag'], 'Counts': [4]}
+        correct_count = {'Element': ['Ag'], 'Likelyhood(au)': [13]}
 
         self.assertPeaksMatch(prim, correct_prim)
         self.assertPeaksMatch(secon, correct_secon)

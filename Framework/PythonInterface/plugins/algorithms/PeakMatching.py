@@ -72,8 +72,8 @@ class PeakMatching(PythonAlgorithm):
         doc='Name of the table containing all of the peak matches sorted by energy')
 
         self.declareProperty(
-            ITableWorkspaceProperty(name='ElementCount',
-                                    defaultValue='element_count',
+            ITableWorkspaceProperty(name='ElementLikelyhood',
+                                    defaultValue='element_likelyhood',
                                     direction=Direction.Output),
             doc='Name of the table containing the count of elements in all matches')
 
@@ -97,7 +97,7 @@ class PeakMatching(PythonAlgorithm):
                  self.getPropertyValue("SecondaryPeaks"),
                  self.getPropertyValue("AllPeaks"),
                  self.getPropertyValue("SortedByEnergy"),
-                 self.getPropertyValue("ElementCount")]
+                 self.getPropertyValue("ElementLikelyhood")]
         self.output_data(primary_data, secondary_data, all_data,names)
 
     def process_peak_data(self,path):
@@ -160,14 +160,14 @@ class PeakMatching(PythonAlgorithm):
         table = CreateEmptyTableWorkspace(OutputWorkspace=name)
 
         table.addColumn("str", "Element")
-        table.addColumn("int", "Counts")
+        table.addColumn("int", "Likelyhood(au)")
 
         counts = {}
 
         for entry in data:
             if not(entry['element'] in counts):
-                counts[entry['element']] = 1
-            counts[entry['element']] += 1
+                counts[entry['element']] = entry['Rating']
+            counts[entry['element']] += entry['Rating']
 
         sorted_data_by_count = sorted(counts.items(),key=lambda x: x[1], reverse=True)
 
@@ -220,6 +220,7 @@ class PeakMatching(PythonAlgorithm):
                             data['peak_centre'] = peak
                             data['transition'] = transition
                             data['diff'] = 0
+                            data['Rating'] = 4
                             matches.append(data)
 
                         elif peak >= (energy - sigma) and peak <= (energy + sigma):
@@ -230,6 +231,7 @@ class PeakMatching(PythonAlgorithm):
                             data['peak_centre'] = peak
                             data['transition'] = transition
                             data['diff'] = abs(peak - energy)
+                            data['Rating'] = 3
                             matches.append(data)
 
                         elif peak >= (energy - (2 * sigma)) and peak <= (energy + (2 * sigma)):
@@ -240,6 +242,7 @@ class PeakMatching(PythonAlgorithm):
                             data['peak_centre'] = peak
                             data['transition'] = transition
                             data['diff'] = abs(peak - energy)
+                            data['Rating'] = 2
                             matches.append(data)
 
                         elif peak >= (energy - (3 * sigma)) and peak <= (energy + (3 * sigma)):
@@ -249,6 +252,7 @@ class PeakMatching(PythonAlgorithm):
                             data['peak_centre'] = peak
                             data['transition'] = transition
                             data['diff'] = abs(peak - energy)
+                            data['Rating'] = 1
                             matches.append(data)
             matches = sorted(matches, key=lambda x: x['diff'])
             all_matches.append(matches)
@@ -272,8 +276,8 @@ class PeakMatching(PythonAlgorithm):
         self.setProperty('SortedByEnergy', sorted_table)
 
         count_table = self.make_count_table(names[4],all_data)
-        self.setPropertyValue('ElementCount', names[4])
-        self.setProperty('ElementCount', count_table)
+        self.setPropertyValue('ElementLikelyhood', names[4])
+        self.setProperty('ElementLikelyhood', count_table)
 
 
     def make_peak_table(self,name, data,sortBy = False,valueToSortBy = "energy"):
