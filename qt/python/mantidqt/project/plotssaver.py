@@ -78,7 +78,8 @@ class PlotsSaver(object):
                 continue
             axes_list.append(self.get_dict_for_axes(ax))
 
-        self._add_normalisation_kwargs(create_list, axes_list)
+        if create_list and axes_list:
+            self._add_normalisation_kwargs(create_list, axes_list)
         fig_dict = {"creationArguments": create_list,
                     "axes": axes_list,
                     "label": fig._label,
