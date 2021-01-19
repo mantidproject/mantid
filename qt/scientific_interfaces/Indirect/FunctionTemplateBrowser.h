@@ -44,7 +44,7 @@ class MANTIDQT_INDIRECT_DLL FunctionTemplateBrowser : public QWidget {
   Q_OBJECT
 public:
   FunctionTemplateBrowser(QWidget *parent);
-  virtual ~FunctionTemplateBrowser();
+  virtual ~FunctionTemplateBrowser() = default;
   void init();
 
   virtual void setFunction(const QString &funStr) = 0;

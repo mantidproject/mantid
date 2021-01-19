@@ -370,10 +370,6 @@ InstrumentWidgetMaskTab::InstrumentWidgetMaskTab(InstrumentWidget *instrWidget)
           SLOT(enableApplyButtons()));
 }
 
-InstrumentWidgetMaskTab::~InstrumentWidgetMaskTab() {
-  m_browser->unsetFactoryForManager(m_doubleManager);
-}
-
 /**
  * Initialize the tab when new projection surface is created.
  */

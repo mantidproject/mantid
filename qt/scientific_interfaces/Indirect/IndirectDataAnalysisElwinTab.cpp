@@ -105,11 +105,6 @@ IndirectDataAnalysisElwinTab::IndirectDataAnalysisElwinTab(QWidget *parent)
       m_uiForm.ipoPlotOptions, this, PlotWidget::Spectra));
 }
 
-IndirectDataAnalysisElwinTab::~IndirectDataAnalysisElwinTab() {
-  m_elwTree->unsetFactoryForManager(m_dblManager);
-  m_elwTree->unsetFactoryForManager(m_blnManager);
-}
-
 void IndirectDataAnalysisElwinTab::setup() {
   // Create QtTreePropertyBrowser object
   m_elwTree = new QtTreePropertyBrowser();
