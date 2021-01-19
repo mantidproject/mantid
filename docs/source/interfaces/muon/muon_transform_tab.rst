@@ -9,7 +9,7 @@ methods available, which the user can switch between by using the drop-down menu
 Fast Fourier Transforms (FFT)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. image::  ../images/muon_interface_tab_transform.png
+.. image::  ../../images/muon_interface_tab_transform.png
    :align: right
    :height: 500px
 
@@ -47,7 +47,7 @@ The ``Calculate`` button will execute the :ref:`Padding and Apodization <algm-Pa
 Maximum Entropy Method (MaxEnt)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. image::  ../images/muon_interface_tab_transform_maxent.png
+.. image::  ../../images/muon_interface_tab_transform_maxent.png
    :align: right
    :height: 500px
 

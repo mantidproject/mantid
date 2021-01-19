@@ -3,7 +3,7 @@
 ALF View
 ========
 
-.. image::  ../images/ALF_view.png
+.. image::  ../../images/ALF_view.png
    :align: right
    :height: 400px
 

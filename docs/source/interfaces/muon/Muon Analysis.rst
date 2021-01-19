@@ -3,7 +3,7 @@
 Muon Analysis (old)
 ===================
 
-.. image::  ../images/MuonAnalysisHome3.6.jpg
+.. image::  ../../images/MuonAnalysisHome3.6.jpg
    :align: right
 
 .. contents:: Table of Contents
@@ -37,7 +37,7 @@ Instrument
 
 .. _HomeInstrument:
 
-.. image::  ../images/MuonAnalysisHomeInstrument.png
+.. image::  ../../images/MuonAnalysisHomeInstrument.png
    :align: center
 
 +-------+--------------------------+-----------------------------------------------------------------------------------------+
@@ -72,7 +72,7 @@ Instrument
 Data Files
 ^^^^^^^^^^
 
-.. image::  ../images/MuonAnalysisHomeDataFiles.png
+.. image::  ../../images/MuonAnalysisHomeDataFiles.png
    :align: center
 
 +-------+--------------------------+-----------------------------------------------------------------------------------------+
@@ -98,7 +98,7 @@ Data Files
 Detector Grouping
 ^^^^^^^^^^^^^^^^^
 
-.. image::  ../images/MuonAnalysisHomeDetectorGrouping.png
+.. image::  ../../images/MuonAnalysisHomeDetectorGrouping.png
    :align: center
 
 +-------+--------------------------+-----------------------------------------------------------------------------------------+
@@ -124,7 +124,7 @@ Detector Grouping
 Plot Data
 ^^^^^^^^^
 
-.. image::  ../images/MuonAnalysisHomePlotData.png
+.. image::  ../../images/MuonAnalysisHomePlotData.png
    :align: center
 
 +-------+--------------------------+-----------------------------------------------------------------------------------------+
@@ -147,7 +147,7 @@ Plot Data
 Run Information etc.
 ^^^^^^^^^^^^^^^^^^^^
 
-.. image::  ../images/MuonAnalysisHomeRunInfoEtc.png
+.. image::  ../../images/MuonAnalysisHomeRunInfoEtc.png
    :align: center
 
 +-------+--------------------------+-----------------------------------------------------------------------------------------+
@@ -164,7 +164,7 @@ Run Information etc.
 Grouping Options
 ----------------
 
-.. image::  ../images/MuonAnalysisGrouping.png
+.. image::  ../../images/MuonAnalysisGrouping.png
    :align: right
 
 .. _GroupingOptions:
@@ -204,7 +204,7 @@ Controls and description
 Group table
 ^^^^^^^^^^^
 
-.. image::  ../images/MuonAnalysisGroupingGroupTable.png
+.. image::  ../../images/MuonAnalysisGroupingGroupTable.png
    :align: center
 
 +-------+--------------------------+-----------------------------------------------------------------------------------------+
@@ -231,7 +231,7 @@ Group table
 Pair table
 ^^^^^^^^^^
 
-.. image::  ../images/MuonAnalysisGroupingPairTable.png
+.. image::  ../../images/MuonAnalysisGroupingPairTable.png
    :align: center
 
 +-------+---------------------------+-----------------------------------------------------------------------------------------+
@@ -274,7 +274,7 @@ multiple fitting mode.
 Default: multiple fitting disabled
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. image::  ../images/MuonAnalysisDataAnalysis.png
+.. image::  ../../images/MuonAnalysisDataAnalysis.png
    :align: right
 
 By default, multiple dataset fitting is not enabled and the interface will look just as it did pre-Mantid 3.8.
@@ -298,7 +298,7 @@ It is advised that when using this feature to have no binning.
 
 When the user deactivates the  "TF Asymmetry" checkbox the user function is returned with updated values.
 
-.. image::  ../images/MuonAnalysisTFAsymm.png
+.. image::  ../../images/MuonAnalysisTFAsymm.png
    :align: right
 
 
@@ -308,7 +308,7 @@ Multiple fitting enabled
 The multiple fitting functionality can be enabled by checking the "Enable multiple fitting" checkbox on the Settings_ tab.
 When this is activated, the tab is divided into multiple sections vertically.
 
-.. image::  ../images/MuonAnalysisDataAnalysis3.10.png
+.. image::  ../../images/MuonAnalysisDataAnalysis3.10.png
    :align: right
 
 Fit Function
@@ -409,7 +409,7 @@ The "Combine Periods" button is only enabled if multiple periods are available. 
 (as a comma separated list or with "+") and the bottom box is for subtraction (as a comma sepearted list). Everything in the top and bottom boxes are summed seperatley
 and the results are then used in the subtraction.
 
-.. image::  ../images/MuonAnalysisCombinePeriods.png
+.. image::  ../../images/MuonAnalysisCombinePeriods.png
    :align: right
 
 Sequential fitting
@@ -420,7 +420,7 @@ Sequential fitting
 In MantidPlot 3.1 a specialized sequential fitting dialog for MuonAnalysis was introduced.
 It allows users to fit various data sets to the chosen fit model, applying all of the interface settings.
 
-.. image:: ../images/MuonAnalysis_SequentialFit.png
+.. image:: ../../images/MuonAnalysis_SequentialFit.png
   :align: center
 
 The dialog can be opened from the Fit menu in *Fit* → *Sequential Fit*.
@@ -474,7 +474,7 @@ Results Table
 
 .. _ResultsTable:
 
-.. image::  ../images/MuonAnalysisResultsTable.png
+.. image::  ../../images/MuonAnalysisResultsTable.png
    :align: right
 
 This tab allows users to export the fitting results alongside log values as a table.
@@ -490,7 +490,7 @@ to write these either as text or number. The text option gives an ISO- formatted
 (eg. 2016-07-06T10:10:34) and the numeric option gives the time as a number of seconds.
 Zero seconds is taken as the start time of the first run in the selected set.
 
-.. image:: ../images/MuonAnalysis_ValuesTable.png
+.. image:: ../../images/MuonAnalysis_ValuesTable.png
   :align: center
 
 Fitting Results
@@ -501,14 +501,14 @@ individual fits only, or a specific sequential (see SequentialFitting_ ) or simu
 
 Fitted parameters of the selected workspaces will be added to the results table.
 
-.. image:: ../images/MuonAnalysis_FittingResultsTable.png
+.. image:: ../../images/MuonAnalysis_FittingResultsTable.png
   :align: center
 
 Workspaces might be coloured differently. Workspaces of different colours have
 different fitting models and therefore couldn't be included in the same Results table.
 (If looking at simultaneous fits, different colours could also indicate that the fits had different numbers of datasets).
 
-.. image:: ../images/MuonAnalysis_FittingResultsColors.png
+.. image:: ../../images/MuonAnalysis_FittingResultsColors.png
   :align: center
 
 As well as selecting workspaces, the fourth radio button - "Multiple" - can be used to create a table of multiple simultaneous fits, one row per label.
@@ -531,7 +531,7 @@ This tab allows users to specify various plotting style options, loaded data bin
 Data Plot Style
 ^^^^^^^^^^^^^^^
 
-.. image:: ../images/MuonAnalysisSettingsPlotStyle.png
+.. image:: ../../images/MuonAnalysisSettingsPlotStyle.png
   :align: center
 
 These options control the style of the plot. They will be applied to all new plots.
@@ -582,7 +582,7 @@ Data Binning
 
 .. _DataBinning:
 
-.. image:: ../images/MuonAnalysisSettingsBinning.png
+.. image:: ../../images/MuonAnalysisSettingsBinning.png
   :align: center
 
 +-------+------------------------+---------------------------------------------------------------+
@@ -613,7 +613,7 @@ Data Binning
 General
 ^^^^^^^
 
-.. image:: ../images/MuonAnalysisSettingsGeneral.png
+.. image:: ../../images/MuonAnalysisSettingsGeneral.png
   :align: center
 
 +-------+-----------------------------+---------------------------------------------------------------------+

@@ -1,7 +1,7 @@
 Save Other
 ==========
 
-.. image::  ../images/save_other.png
+.. image::  ../../images/save_other.png
    :align: right
    :width: 400px
 

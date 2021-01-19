@@ -60,7 +60,7 @@ The interface allows users to analyse one period at a time, or a sum/difference 
     Let's look at a group first - the *fwd* group of ``MUSR00022725.nxs``.
     For a group, you get the asymmetry simply by removing the exponential decay:
 
-    .. image:: ../images/MuonAnalysisDevDocs/MUSR22725-fwd.png
+    .. image:: ../../images/MuonAnalysisDevDocs/MUSR22725-fwd.png
       :align: center
 
     Now let's look at a group pair - the *long* pair (*fwd - bwd*) of ``MUSR00060625.nxs``.
@@ -71,7 +71,7 @@ The interface allows users to analyse one period at a time, or a sum/difference 
     where :math:`F` is the front spectra, :math:`B` is the back spectra
     and :math:`\alpha` is the balance parameter - see :ref:`algm-AlphaCalc`.
 
-    .. image:: ../images/MuonAnalysisDevDocs/MUSR60625-long.png
+    .. image:: ../../images/MuonAnalysisDevDocs/MUSR60625-long.png
       :align: center
 
 
@@ -169,7 +169,7 @@ Its features are described in the user documentation; this section concentrates 
 
 Prior to Mantid 3.8, this tab contained one thing: a ``FitPropertyBrowser`` (actually a ``MuonFitPropertyBrowser``).
 
-.. image::  ../images/MuonAnalysisDataAnalysis.png
+.. image::  ../../images/MuonAnalysisDataAnalysis.png
    :align: center
 
 This is still there, but only the bottom section ("Settings") and the three buttons at the top are visible.
@@ -184,7 +184,7 @@ Of course, it's not *properly* MVP, as that would have required a rewrite - the 
 
 .. topic:: "MVP-like" design
 
-    .. image:: ../images/MuonAnalysisDevDocs/mvp_muon.png
+    .. image:: ../../images/MuonAnalysisDevDocs/mvp_muon.png
        :align: center
 
     **Model:** the ``MuonFitPropertyBrowser``. Still performs the actual fit, keeps track of the workspace(s) fitted, and raises events (Qt signals) to notify the presenters.
@@ -343,7 +343,7 @@ Miscellaneous notable points
 For a long time, using the Muon Analysis interface has produced a mysterious black box in the toolbars of MantidPlot:
 
 
-.. image:: ../images/MuonAnalysisDevDocs/blackbox.png
+.. image:: ../../images/MuonAnalysisDevDocs/blackbox.png
    :align: center
 
 This is caused by using the "Hide Toolbars" option on the Settings tab.

@@ -12,7 +12,7 @@ Background remover
 Overview
 ~~~~~~~~
 
-.. image:: ../images/DPDFBackgroundRemover_01.png
+.. image:: ../../images/DPDFBackgroundRemover_01.png
   :align: center
   :width: 700
 
@@ -43,7 +43,7 @@ Slice Selector
 Overview
 ~~~~~~~~
 
-.. image:: ../images/DPDFBackgroundRemover_02.png
+.. image:: ../../images/DPDFBackgroundRemover_02.png
   :align: center
   :width: 450
 
@@ -62,7 +62,7 @@ The slice is shown in the *Single Spectrum View*. In the picture below, user
 has loaded file *slices_QE.nxs* and is currently viewing the 15meV slice,
 which corresponds to workspace index 49 of workspace *slices_QE*.
 
-.. image:: ../images/DPDFBackgroundRemover_03.png
+.. image:: ../../images/DPDFBackgroundRemover_03.png
   :align: center
   :width: 450
 

@@ -11,7 +11,7 @@ Interface overview
 The interface is used to compare data from the Muon detector with the emission spectra of given elements. The interface
 can be accessed from the main menu in MantidPlot and workbench: *Interfaces → Muon → Elemental Analysis*.
 
-.. image:: ../images/MuonElementalAnalysis.png
+.. image:: ../../images/MuonElementalAnalysis.png
   :align: center
 
 Loading
@@ -24,7 +24,7 @@ Plotting
 Tick the boxes corresponding to the detector you want to display. For each detector, a separate plot will appear in
 the same window. Each plot contains 3 lines: *Prompt*, *Delayed* and *Total*.
 
-.. image:: ../images/MuonElementalAnalysisPlot.png
+.. image:: ../../images/MuonElementalAnalysisPlot.png
   :align: center
 
 To remove one or more lines on the top right corner of the plot press *Remove line*, a table will appear. Select the

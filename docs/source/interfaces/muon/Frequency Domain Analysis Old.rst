@@ -3,7 +3,7 @@
 Frequency Domain Analysis
 ==========================
 
-.. image::  ../images/FDAGHome.png
+.. image::  ../../images/FDAGHome.png
    :align: right
    :height: 400px
 
@@ -34,7 +34,7 @@ This tab is designed for the user to transform pre-loaded data into the frequenc
 Default: Fast Fourier Transforms
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. image::  ../images/FDAG_FFT.png
+.. image::  ../../images/FDAG_FFT.png
    :align: center
    :height: 500px
 
@@ -64,7 +64,7 @@ like more control overt the calculation.
 
 For large calculations this interface can be slow, therefore the Calculate button is disabled until the current calculation is complete. 
 
-.. image::  ../images/FDAG_MaxEnt.png
+.. image::  ../../images/FDAG_MaxEnt.png
    :align: center
    :height: 500px
 
