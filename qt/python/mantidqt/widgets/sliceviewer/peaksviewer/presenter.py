@@ -39,7 +39,7 @@ class PeaksWorkspaceDataPresenter(TableWorkspaceDataPresenter):
         return item
 
 
-class PeaksViewerPresenter(object):
+class PeaksViewerPresenter():
     """Controls a PeaksViewerView with a given model to display
     the peaks table and interaction controls for single workspace.
     """
@@ -140,7 +140,7 @@ class PeaksViewerPresenter(object):
             raise ValueError("Expected a PeaksWorkspace. Found {}.".format(type(ws)))
 
 
-class PeaksViewerCollectionPresenter(object):
+class PeaksViewerCollectionPresenter():
     """Controls a widget comprising of multiple PeasViewerViews to display and
     interact with multiple PeaksWorkspaces"""
 
