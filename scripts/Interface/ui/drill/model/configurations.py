@@ -322,3 +322,4 @@ class RundexSettings(object):
     SAMPLES_JSON_KEY = "Samples"
     CUSTOM_OPT_JSON_KEY = "CustomOptions"
     VISUAL_SETTINGS_JSON_KEY = "VisualSettings"
+    EXPORT_JSON_KEY = "ExportAlgorithms"

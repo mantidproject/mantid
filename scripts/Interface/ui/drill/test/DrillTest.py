@@ -296,6 +296,11 @@ class DrillTest(unittest.TestCase):
                     'ColumnsOrder': RundexSettings.COLUMNS['SANS']
                     },
                 'GlobalSettings': self.model.settings,
+                'ExportAlgorithms' : [
+                    algo
+                    for algo in RundexSettings.EXPORT_ALGORITHMS['SANS'].keys()
+                    if RundexSettings.EXPORT_ALGORITHMS['SANS'][algo]
+                    ]
                 }
         self.assertDictEqual(json, mJson.dump.call_args[0][0])
 
