@@ -166,8 +166,13 @@ void Q1DWeighted::bootstrap(const MatrixWorkspace_const_sptr &inputWS) {
       m_wedgesOuterRadius.push_back(-1);
       m_wedgesCenterX.push_back(0);
       m_wedgesCenterY.push_back(0);
-      m_wedgesCenterAngle.push_back(wedgeOffset +
-                                    static_cast<double>(iw) * wedgeAngle / 2);
+
+      double centerAngle =
+          M_PI * static_cast<double>(iw) / static_cast<double>(m_nWedges);
+      if (m_asymmWedges)
+        centerAngle *= 2;
+      centerAngle += wedgeOffset;
+      m_wedgesCenterAngle.push_back(centerAngle);
       m_wedgesAngleRange.push_back(wedgeAngle);
     }
   } else {
@@ -263,8 +268,9 @@ void Q1DWeighted::getViewportParams(
       fabs(viewportParams["Rotation"][1]) > 1e-10 ||
       fabs(viewportParams["Rotation"][3]) > 1e-10 ||
       viewportParams["Rotation"][2] != 1.) {
-    g_log.warning("The shapes were created using a rotated viewport, which is "
-                  "not supported. Results are likely to be erroneous.");
+    g_log.warning("The shapes were created using a rotated viewport not using "
+                  "Z- projection, which is not supported. Results are likely "
+                  "to be erroneous.");
   }
 }
 
@@ -286,10 +292,14 @@ void Q1DWeighted::getSectorParams(
       std::fmod(std::stod(params[4]) - std::stod(params[3]), 2 * M_PI);
   angleRange = angleRange >= 0 ? angleRange : angleRange + 2 * M_PI;
 
+  // since the viewport was in Z-, the axis are inverted so we have to take the
+  // symmetry
+  angleRange = fmod(3 * M_PI - angleRange, 2 * M_PI);
+
   double xOffset = viewport["Translation"][0];
   double yOffset = viewport["Translation"][1];
 
-  double centerX = std::stod(params[5]) * zoom + xOffset;
+  double centerX = -(std::stod(params[5]) * zoom + xOffset);
   double centerY = std::stod(params[6]) * zoom + yOffset;
 
   if (m_asymmWedges ||
@@ -448,11 +458,9 @@ void Q1DWeighted::calculate(const MatrixWorkspace_const_sptr &inputWS) {
           m_normalisation[0][j][k] += w;
         }
 
-        size_t wedgesCount = m_wedgesInnerRadius.size();
-
-        for (size_t iw = 0; iw < wedgesCount; ++iw) {
+        for (size_t iw = 0; iw < m_nWedges; ++iw) {
           double centerAngle = m_wedgesCenterAngle[iw];
-          const V3D subPix = V3D(-position.X(), position.Y(), 0.0);
+          const V3D subPix = V3D(position.X(), position.Y(), 0.0);
           const V3D center = V3D(m_wedgesCenterX[iw], m_wedgesCenterY[iw], 0);
           double angle =
               fabs((subPix - center)
@@ -469,7 +477,7 @@ void Q1DWeighted::calculate(const MatrixWorkspace_const_sptr &inputWS) {
           //            << std::endl;
           //          }
 
-          if (m_asymmWedges) {
+          if (!m_asymmWedges) {
             angle = fmod(angle, M_PI);
           }
 
