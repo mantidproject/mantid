@@ -123,7 +123,7 @@ def _bkgd_ellipsoid_info(shape_info, transform):
         shape_info["background_inner_radius1"]), float(shape_info["background_inner_radius2"])
     a, b, c = transform((a, b, c))
     inner_a, inner_b, inner_c = transform((inner_a, inner_b, inner_c))
-    width = (max((a, b, c)) - max((inner_a, inner_b, inner_c))) / max((a, b, c))  # fractional
+    width = (max((a, b, c)) - max((inner_a, inner_b, inner_c))) / max((a, b, c))  # fractional width of shell
 
     return (a, b, c, width)
 
@@ -207,7 +207,7 @@ def slice_ellipsoid_matrix(origin, zp, ellipMatrix):
     z = zp - origin[2]
 
     A = ellipMatrix[:2, :2]
-    A[1, 0] = ellipMatrix[0, 1]  # should be this already...
+    A[1, 0] = ellipMatrix[0, 1]
     B = 2 * z * ellipMatrix[:2, 2]
     c = ellipMatrix[2][2] * z ** 2
 
