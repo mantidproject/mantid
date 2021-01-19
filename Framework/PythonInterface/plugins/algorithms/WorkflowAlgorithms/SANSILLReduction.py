@@ -457,7 +457,7 @@ class SANSILLReduction(PythonAlgorithm):
                                         TransmissionError=transmission_err, ThetaDependent=theta_dependent,
                                         OutputWorkspace=ws)
         else:
-            # wavelenght dependent transmission, need to rebin
+            # wavelength dependent transmission, need to rebin
             transmission_rebinned = ws + '_tr_rebinned'
             RebinToWorkspace(WorkspaceToRebin=transmission_ws, WorkspaceToMatch=ws,
                              OutputWorkspace=transmission_rebinned)
