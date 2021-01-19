@@ -163,7 +163,7 @@ class SANSILLIntegration(PythonAlgorithm):
         lambda_range_validator = CompositeValidator()
         lambda_range_validator.add(FloatArrayOrderedPairsValidator())
         lambda_range_validator.add(FloatArrayLengthValidator(2))
-        self.declareProperty(FloatArrayProperty(name='WavelengthRange', defaultValue=[1., 10.], validator=lambda_range_validator),
+        self.declareProperty(FloatArrayProperty('WavelengthRange', [1., 10.], validator=lambda_range_validator),
                              doc='Wavelength range [Angstrom] to be used in integration (TOF only).')
 
     def PyExec(self):
