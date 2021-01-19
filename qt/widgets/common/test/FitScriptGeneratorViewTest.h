@@ -281,6 +281,57 @@ public:
     TS_ASSERT_EQUALS(startX, 0.0);
   }
 
+  void test_1() {}
+  void test_2() {}
+  void test_3() {}
+  void test_4() {}
+  void test_5() {}
+  void test_6() {}
+  void test_7() {}
+  void test_8() {}
+  void test_9() {}
+  void test_10() {}
+  void test_11() {}
+  void test_12() {}
+  void test_13() {}
+  void test_14() {}
+  void test_15() {}
+  void test_16() {}
+  void test_17() {}
+  void test_18() {}
+  void test_19() {}
+  void test_20() {}
+  void test_21() {}
+  void test_22() {}
+  void test_23() {}
+  void test_24() {}
+  void test_25() {}
+  void test_26() {}
+  void test_27() {}
+  void test_28() {}
+  void test_29() {}
+  void test_30() {}
+  void test_31() {}
+  void test_32() {}
+  void test_33() {}
+  void test_34() {}
+  void test_35() {}
+  void test_36() {}
+  void test_37() {}
+  void test_38() {}
+  void test_39() {}
+  void test_40() {}
+  void test_41() {}
+  void test_42() {}
+  void test_43() {}
+  void test_44() {}
+  void test_45() {}
+  void test_46() {}
+  void test_47() {}
+  void test_48() {}
+  void test_49() {}
+  void test_50() {}
+
 private:
   void openFitScriptGeneratorWidget() {
     EXPECT_CALL(*m_presenter, openFitScriptGenerator()).Times(1);

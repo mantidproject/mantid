@@ -60,6 +60,14 @@ FitOptionsBrowser::FitOptionsBrowser(QWidget *parent, FittingType fitType)
   layout->setContentsMargins(0, 0, 0, 0);
 }
 
+FitOptionsBrowser::~FitOptionsBrowser() {
+  m_browser->unsetFactoryForManager(m_stringManager);
+  m_browser->unsetFactoryForManager(m_doubleManager);
+  m_browser->unsetFactoryForManager(m_intManager);
+  m_browser->unsetFactoryForManager(m_boolManager);
+  m_browser->unsetFactoryForManager(m_enumManager);
+}
+
 /**
  * Create the Qt property browser and set up property managers.
  */

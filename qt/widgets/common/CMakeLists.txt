@@ -1062,7 +1062,7 @@ set(
   test/FitPropertyBrowserTest.h
   test/FitScriptGeneratorDataTableTest.h
   test/FitScriptGeneratorPresenterTest.h
-  # test/FitScriptGeneratorViewTest.h
+  test/FitScriptGeneratorViewTest.h
   test/ImageInfoModelMatrixWSTest.h
   test/ImageInfoModelMDTest.h
   test/ImageInfoPresenterTest.h
