@@ -205,7 +205,7 @@ class CurveProperties(dict):
         # So to get this property take from errorbar lines curve
         try:
             barlines = curve[2][0]
-            props['errorevery'] = int(barlines.axes.creation_args[barlines.axes.creation_args.__len__()-1]['errorevery'])
+            props['errorevery'] = int(barlines.axes.creation_args[len(barlines.axes.creation_args)-1]['errorevery'])
         except (IndexError, TypeError, KeyError):
             props['errorevery'] = 1
         try:
