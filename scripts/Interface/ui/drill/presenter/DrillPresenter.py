@@ -5,6 +5,8 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 
+import re
+
 from qtpy.QtWidgets import QFileDialog, QMessageBox
 
 from ..view.DrillSettingsDialog import DrillSettingsDialog
@@ -124,62 +126,55 @@ class DrillPresenter:
     def onAutomaticFilling(self):
         """
         Copy (and increment) the contents of the first selected cell in the
-        other ones. If a numors string is detected in the first cell, the
-        numors values are incremented by the number found in the ui spinbox
-        associated with this action. If a single row is selected, the increment
-        will be propagated along that row. Otherwise, the increment is
-        propagated along columns.
+        other ones. The incremente value is found in the ui spinbox associated
+        with this action. If a single row is selected, the increment will be
+        propagated along that row. Otherwise, the increment is propagated along
+        columns.
         """
-        def inc(numors, i):
+        def inc(value, i):
             """
-            Increment a numors string by i.
-            For example, for increment by 1:
-            "1000,2000,3000"  ->  "1001,2001,3001"
-            "1000+2000,3000"  ->  "1001+2001,3001"
-            "1000:2000,3000"  ->  "2001-3001,3001"
-            "1000-2000,3000"  ->  "2001-3001,3001"
+            Increment the value depending on its content. This function can
+            increment numbers, numors (sum, range), names that end with a number
+            and comma seprarated list of all these types.
+            Some examples:
+            ("1000", 1)               -> "1001"
+            ("10,100,1000", 1)        -> "11,101,1001"
+            ("10+20,100", 2)          -> "12+22,102"
+            ("Sample_1,Sample10", 2)  -> "Sample_3,Sample12"
+            ("Sample,sample10", 1)    -> "Sample,sample11"
 
             Args:
-                numors (str): a numors string
-                i (int): increment value
+                value (str): a string to increment
+                i (int): value of the increment
 
             Returns:
-                str: A string that represents the incremented numors
+                str: A string that represents the incremented input value
             """
-            try:
-                return str(int(numors) + i)
-            except:
-                if ((',' in numors) or ('+' in numors)):
-                    c = ',' if ',' in numors else '+'
-                    splitted = numors.split(c)
-                    out = list()
-                    for e in splitted:
-                        out.append(inc(e, i))
-                        if out[-1] == e:
-                            return numors
-                    return c.join(out)
-                elif ((':' in numors) or ('-' in numors)):
-                    c = ':' if ':' in numors else '-'
-                    splitted = numors.split(c)
-                    try:
-                        mini = min(int(splitted[0]), int(splitted[1]))
-                        maxi = max(int(splitted[0]), int(splitted[1]))
-                        if (i > 0):
-                            r0 = maxi + i
-                            r1 = 2 * maxi + i - mini
-                            r0 = 0 if r0 < 0 else r0
-                            r1 = 0 if r1 < 0 else r1
-                            return str(r0) + c + str(r1)
-                        else:
-                            r0 = 2 * mini + i - maxi
-                            r1 = mini + i
-                            r0 = 0 if r0 < 0 else r0
-                            r1 = 0 if r1 < 0 else r1
-                            return str(r0) + c + str(r1)
-                    except:
-                        return numors
+            if ',' in value:
+                return ','.join([inc(e, i) for e in value.split(',')])
+            if '+' in value:
+                return '+'.join([inc(e, i) for e in value.split('+')])
+            if ':' in value:
+                l = value.split(':')
+                try:
+                    l = [int(e) for e in l]
+                except:
+                    return value
+                if len(l) == 2:
+                    return str(l[1] + i) + ':' + str(l[1] + (l[1] - l[0]) + i)
+                if len(l) == 3:
+                    return inc(str(l[0]) + ':' + str(l[1])) + l[2]
                 else:
-                    return numors
+                    return value
+
+            if re.match("^\d+$", value):
+                return str(int(value) + i)
+            suffix = re.search("\d+$", value)
+            if suffix:
+                n = suffix.group(0)
+                return value[0:-len(n)] + str(int(n) + i)
+
+            return value
 
         increment = self.view.increment.value()
         cells = self.view.table.getSelectedCells()
