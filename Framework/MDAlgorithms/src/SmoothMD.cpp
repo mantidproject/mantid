@@ -57,7 +57,9 @@ namespace {
  * @return function map
  */
 SmoothFunctionMap makeFunctionMap(Mantid::MDAlgorithms::SmoothMD *instance) {
-  using namespace std::placeholders;
+  using std::placeholders::_1;
+  using std::placeholders::_2;
+  using std::placeholders::_3;
   return {
       {"Hat", std::bind(&Mantid::MDAlgorithms::SmoothMD::hatSmooth, instance,
                         _1, _2, _3)},

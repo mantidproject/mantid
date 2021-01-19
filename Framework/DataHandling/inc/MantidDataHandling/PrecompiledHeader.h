@@ -6,8 +6,15 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-// Algorithm
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataHandling/DllConfig.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidKernel/FileDescriptor.h"
+#include "MantidKernel/System.h"
+
+// STL
 
 // NeXus
 // clang-format off

@@ -8,13 +8,30 @@
 
 // Mantid
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidKernel/System.h"
+#include "MantidQtWidgets/Common/UserInputValidator.h"
 
 // Qt
 #include <QDialog>
+#include <QFileInfo>
+#include <QMap>
+#include <QObject>
 #include <QString>
 #include <QWidget>
+
+// Qt headers included from ui_xxx.h
+#include <QtCore/QVariant>
+#include <QtWidgets/QAction>
+#include <QtWidgets/QApplication>
+#include <QtWidgets/QButtonGroup>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QPushButton>
+
+// Qt headers included from moc_xxx.cpp
+#include <QtCore/qbytearray.h>
+#include <QtCore/qmetatype.h>
 
 // STL
 #include <map>

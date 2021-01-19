@@ -68,7 +68,7 @@ public:
 
   void test_create() {
     const double radius = 2;
-    const SpecialCoordinateSystem frame = HKL;
+    const SpecialCoordinateSystem frame = SpecialCoordinateSystem::HKL;
     const std::string algorithmName = "foo";
     const int algorithmVersion = 3;
 
@@ -92,7 +92,7 @@ public:
     const double radius = 2;
     const double backgroundInnerRadius = 3;
     const double backgroundOuterRadius = 4;
-    const SpecialCoordinateSystem frame = HKL;
+    const SpecialCoordinateSystem frame = SpecialCoordinateSystem::HKL;
     const std::string algorithmName = "foo";
     const int algorithmVersion = 3;
 

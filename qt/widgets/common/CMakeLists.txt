@@ -273,6 +273,7 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/ImageInfoModelMatrixWS.h
     inc/MantidQtWidgets/Common/ImageInfoModelMD.h
     inc/MantidQtWidgets/Common/ImageInfoPresenter.h
+    inc/MantidQtWidgets/Common/IndexTypes.h
     inc/MantidQtWidgets/Common/InterfaceManager.h
     inc/MantidQtWidgets/Common/LogValueFinder.h
     inc/MantidQtWidgets/Common/MantidDesktopServices.h
@@ -917,6 +918,7 @@ mtd_add_qt_library(
     QSCINTILLA_DLL
     QT4_DEFS
     USE_QTWEBKIT
+  PRECOMPILED inc/MantidQtWidgets/Common/PrecompiledHeader.h
   INCLUDE_DIRS
     inc
   SYSTEM_INCLUDE_DIRS
@@ -950,6 +952,7 @@ mtd_add_qt_library(
     QSCINTILLA_DLL
     QT5_DEFS
     ${_webengine_def}
+  PRECOMPILED inc/MantidQtWidgets/Common/PrecompiledHeader.h
   INCLUDE_DIRS
     inc
   SYSTEM_INCLUDE_DIRS

@@ -11,8 +11,10 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/System.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 // STL
-#include <set>
-#include <string>
-#include <vector>
+
+// Poco
+#include <Poco/File.h>
+#include <Poco/Path.h>
