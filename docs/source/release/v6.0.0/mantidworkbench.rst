@@ -43,6 +43,7 @@ Improvements
 - A system to group samples and avoid repetition in DrILL has been added. See the :ref:`DrILL documentation <DrILL-ref>` for more information.
 - In the plot config, multiple curves can be selected and removed at once. The delete key was added as a shortcut.
 - A bug has been fixed in SliceViewer where attempting to plot a workspace with a text axis would cause a crash when zoomed out.
+- Improved plot generated scripts to better support major and minor tick settings at time of generation.
 
 Bugfixes
 ########
