@@ -51,7 +51,12 @@ FourierTransform::FourierTransform(QWidget *parent)
 /**
  * @brief Destructor
  */
-FourierTransform::~FourierTransform() { delete m_propertyTree; }
+FourierTransform::~FourierTransform() {
+  m_propertyTree->unsetFactoryForManager(m_doubleManager);
+  m_propertyTree->unsetFactoryForManager(m_boolManager);
+  m_propertyTree->unsetFactoryForManager(m_enumManager);
+  delete m_propertyTree;
+}
 
 /*                *********************
  *                **  Private Slots  **

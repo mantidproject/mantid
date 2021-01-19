@@ -165,7 +165,9 @@ IndirectSymmetrise::IndirectSymmetrise(IndirectDataReduction *idrUI,
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-IndirectSymmetrise::~IndirectSymmetrise() {}
+IndirectSymmetrise::~IndirectSymmetrise() {
+  m_propTrees["SymmPropTree"]->unsetFactoryForManager(m_dblManager);
+}
 
 void IndirectSymmetrise::setup() {}
 
