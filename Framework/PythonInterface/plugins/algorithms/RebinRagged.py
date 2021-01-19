@@ -134,7 +134,7 @@ class RebinRagged(PythonAlgorithm):
             names = ["__{}_spec_{}".format(outputWS, i) for i in range(len(xmins))]
 
             # how much the progress bar moves forward for each spectrum
-            progStep = float(1) / float(3 * numSpec)  # TODO FIXME
+            progStep = float(1) / float(3 * numSpec)
 
             # crop out each spectra and conjoin to a temporary workspace
             accumulationWS = None
@@ -148,29 +148,33 @@ class RebinRagged(PythonAlgorithm):
 
                 progStart = 3 * i * progStep
 
-                # extract the range of the spectrum requested
-                ExtractSpectra(InputWorkspace=inputWS,
-                               OutputWorkspace=name,
-                               StartWorkspaceIndex=i,
-                               EndWorkspaceIndex=i,
-                               XMin=xmin,
-                               XMax=xmax,
-                               startProgress=progStart,
-                               endProgress=(progStart + progStep),
-                               EnableLogging=False)
+                try:
+                    # extract the range of the spectrum requested
+                    ExtractSpectra(InputWorkspace=inputWS,
+                                   OutputWorkspace=name,
+                                   StartWorkspaceIndex=i,
+                                   EndWorkspaceIndex=i,
+                                   XMin=xmin,
+                                   XMax=xmax,
+                                   startProgress=progStart,
+                                   endProgress=(progStart + progStep),
+                                   EnableLogging=False)
 
-                # rebin the data
-                Rebin(InputWorkspace=name,
-                      OutputWorkspace=name,
-                      Params=(xmin, delta, xmax),
-                      startProgress=progStart,
-                      endProgress=(progStart + progStep),
-                      EnableLogging=False)
+                    # rebin the data
+                    Rebin(InputWorkspace=name,
+                          OutputWorkspace=name,
+                          Params=(xmin, delta, xmax),
+                          startProgress=progStart,
+                          endProgress=(progStart + progStep),
+                          EnableLogging=False)
+                except Exception as e:
+                    raise RuntimeError('for index={}'.format(i)) from e
 
                 # accumulate
                 if accumulationWS is None:
                     accumulationWS = name  # messes up progress during very first step
                 else:
+                    # this deletes both input workspaces
                     ConjoinWorkspaces(InputWorkspace1=accumulationWS,
                                       InputWorkspace2=name,
                                       startProgress=(progStart + 2 * progStep),
