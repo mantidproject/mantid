@@ -149,6 +149,7 @@ void Q1DWeighted::bootstrap(const MatrixWorkspace_const_sptr &inputWS) {
   m_wedgesCenterY = std::vector<double>();
   m_wedgesCenterAngle = std::vector<double>();
   m_wedgesAngleRange = std::vector<double>();
+  m_asymmWedges = getProperty("AsymmetricWedges");
 
   if (getPropertyValue("TableShape").empty()) {
     const int wedges = getProperty("NumberOfWedges");
@@ -157,7 +158,6 @@ void Q1DWeighted::bootstrap(const MatrixWorkspace_const_sptr &inputWS) {
     // Get wedge properties
     const double wedgeOffset = getProperty("WedgeOffset");
     const double wedgeAngle = getProperty("WedgeAngle");
-    m_asymmWedges = getProperty("AsymmetricWedges");
 
     // Define wedges parameters in a general way
     for (size_t iw = 0; iw < m_nWedges; ++iw) {
@@ -278,22 +278,62 @@ void Q1DWeighted::getSectorParams(
     std::map<std::string, std::vector<double>> &viewport) {
   double zoom = viewport["Zoom"][0];
 
-  m_wedgesInnerRadius.push_back(std::stod(params[1]) * zoom);
-  m_wedgesOuterRadius.push_back(std::stod(params[2]) * zoom);
+  double innerRadius = std::stod(params[1]) * zoom;
+  double outerRadius = std::stod(params[2]) * zoom;
 
   double centerAngle = (std::stod(params[3]) + std::stod(params[4])) / 2;
   double angleRange =
       std::fmod(std::stod(params[4]) - std::stod(params[3]), 2 * M_PI);
   angleRange = angleRange >= 0 ? angleRange : angleRange + 2 * M_PI;
 
-  m_wedgesCenterAngle.push_back(centerAngle);
-  m_wedgesAngleRange.push_back(angleRange);
-
   double xOffset = viewport["Translation"][0];
   double yOffset = viewport["Translation"][1];
 
-  m_wedgesCenterX.push_back(std::stod(params[5]) * zoom + xOffset);
-  m_wedgesCenterY.push_back(std::stod(params[6]) * zoom + yOffset);
+  double centerX = std::stod(params[5]) * zoom + xOffset;
+  double centerY = std::stod(params[6]) * zoom + yOffset;
+
+  if (m_asymmWedges ||
+      !checkIfSymetricalWedge(innerRadius, outerRadius, centerX, centerY,
+                              centerAngle, angleRange)) {
+
+    m_wedgesInnerRadius.push_back(innerRadius);
+    m_wedgesOuterRadius.push_back(outerRadius);
+    m_wedgesCenterAngle.push_back(centerAngle);
+    m_wedgesAngleRange.push_back(angleRange);
+    m_wedgesCenterX.push_back(centerX);
+    m_wedgesCenterY.push_back(centerY);
+  }
+}
+
+/**
+ * @brief Q1DWeighted::checkIfSymetricalWedge
+ * Check if the symetrical wedge to the one defined by the parameters is already
+ * registered in the parameter list
+ * @param innerRadius the inner radius
+ * @param outerRadius the outer radius
+ * @param centerX the x position of the center
+ * @param centerY the y position of the center
+ * @param centerAngle the center of the wedge
+ * @param angleRange the angular range of the wedge
+ * @return true if a symetrical wedge already exists
+ */
+bool Q1DWeighted::checkIfSymetricalWedge(double innerRadius, double outerRadius,
+                                         double centerX, double centerY,
+                                         double centerAngle,
+                                         double angleRange) {
+
+  for (size_t i = 0; i < m_wedgesInnerRadius.size(); ++i) {
+    double diffAngle = fabs(fmod(centerAngle - m_wedgesCenterAngle[i], M_PI));
+
+    if (innerRadius == m_wedgesInnerRadius[i] &&
+        outerRadius == m_wedgesOuterRadius[i] &&
+        centerX == m_wedgesCenterX[i] && centerY == m_wedgesCenterY[i] &&
+        fabs(angleRange - m_wedgesAngleRange[i]) < 1e-3 &&
+        (diffAngle < 1e-3 || fabs(diffAngle - M_PI) < 1e-3)) {
+      return true;
+    }
+  }
+  return false;
 }
 
 /**

@@ -82,6 +82,9 @@ private:
                          std::map<std::string, std::vector<double>> &);
   void getSectorParams(std::vector<std::string> &,
                        std::map<std::string, std::vector<double>> &);
+  bool checkIfSymetricalWedge(double innerRadius, double outerRadius,
+                              double centerX, double centerY,
+                              double centerAngle, double angleRange);
   std::vector<std::vector<std::vector<double>>> m_intensities;
   std::vector<std::vector<std::vector<double>>> m_errors;
   std::vector<std::vector<std::vector<double>>> m_normalisation;
