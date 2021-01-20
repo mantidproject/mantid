@@ -52,22 +52,28 @@ public:
 
   //-------------------------------------------------------------------------------
   /** Run the IntegratePeaksMD2 with the given peak radius integration param */
-  static void doRun(std::vector<double> PeakRadius, double BackgroundRadius,
+  static void doRun(std::vector<double> PeakRadius,
+                    std::vector<double> BackgroundRadius,
                     std::string OutputWorkspace = "IntegratePeaksMD2Test_peaks",
-                    double BackgroundStartRadius = 0.0, bool edge = true,
-                    bool cyl = false, std::string fnct = "NoFit",
-                    double adaptive = 0.0, bool ellip = false,
-                    bool fixQAxis = false) {
+                    std::vector<double> BackgroundStartRadius = {},
+                    bool edge = true, bool cyl = false,
+                    std::string fnct = "NoFit", double adaptive = 0.0,
+                    bool ellip = false, bool fixQAxis = false) {
     IntegratePeaksMD2 alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("InputWorkspace", "IntegratePeaksMD2Test_MDEWS"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakRadius", PeakRadius));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("BackgroundOuterRadius", BackgroundRadius));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("BackgroundInnerRadius", BackgroundStartRadius));
+    if (!BackgroundRadius.empty()) {
+      TS_ASSERT_THROWS_NOTHING(
+          alg.setProperty("BackgroundOuterRadius", BackgroundRadius));
+    }
+
+    if (!BackgroundStartRadius.empty()) {
+      TS_ASSERT_THROWS_NOTHING(
+          alg.setProperty("BackgroundInnerRadius", BackgroundStartRadius));
+    }
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("IntegrateIfOnEdge", edge));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("PeaksWorkspace", "IntegratePeaksMD2Test_peaks"));
@@ -219,7 +225,7 @@ public:
     AnalysisDataService::Instance().add("IntegratePeaksMD2Test_peaks", peakWS0);
 
     // ------------- Integrating with cylinder ------------------------
-    doRun({0.1}, 0.0, "IntegratePeaksMD2Test_peaks", 0.0, true, true);
+    doRun({0.1}, {0.0}, "IntegratePeaksMD2Test_peaks", {0.0}, true, true);
 
     TS_ASSERT_DELTA(peakWS0->getPeak(0).getIntensity(), 2.0, 1e-2);
 
@@ -228,7 +234,7 @@ public:
 
     // Test profile Gaussian
     std::string fnct = "Gaussian";
-    doRun({0.1}, 0.0, "IntegratePeaksMD2Test_peaks", 0.0, true, true, fnct);
+    doRun({0.1}, {0.0}, "IntegratePeaksMD2Test_peaks", {0.0}, true, true, fnct);
     // More accurate integration changed values
     TS_ASSERT_DELTA(peakWS0->getPeak(0).getIntensity(), 2.0, 1e-2);
     // Error is also calculated
@@ -240,7 +246,7 @@ public:
 
     // Test profile back to back exponential
     fnct = "BackToBackExponential";
-    doRun({0.1}, 0.0, "IntegratePeaksMD2Test_peaks", 0.0, true, true, fnct);
+    doRun({0.1}, {0.0}, "IntegratePeaksMD2Test_peaks", {0.0}, true, true, fnct);
 
     // TS_ASSERT_DELTA( peakWS0->getPeak(0).getIntensity(), 2.0, 0.2);
     // Error is also calculated
@@ -262,8 +268,8 @@ public:
     // ------------- Adaptive Integration r=MQ+b where b is PeakRadius and m is
     // 0.01 ------------------------
     peakWS0->addPeak(Peak(inst, 15050, 1.0, V3D(2., 3., 4.)));
-    doRun({0.1}, 0.0, "IntegratePeaksMD2Test_peaks", 0.0, true, false, "NoFit",
-          0.01);
+    doRun({0.1}, {0.0}, "IntegratePeaksMD2Test_peaks", {0.0}, true, false,
+          "NoFit", 0.01);
     TS_ASSERT_DELTA(peakWS0->getPeak(1).getIntensity(), 29.0, 1e-2);
 
     // Error is also calculated
@@ -271,7 +277,7 @@ public:
 
     // ------------- Integrate with 0.1 radius but IntegrateIfOnEdge
     // false------------------------
-    doRun({0.1}, 0.0, "IntegratePeaksMD2Test_peaks", 0.0, false);
+    doRun({0.1}, {0.0}, "IntegratePeaksMD2Test_peaks", {0.0}, false);
 
     TS_ASSERT_DELTA(peakWS0->getPeak(0).getIntensity(), 2.0, 1e-2);
 
@@ -290,7 +296,7 @@ public:
     AnalysisDataService::Instance().add("IntegratePeaksMD2Test_peaks", peakWS);
 
     // ------------- Integrate with 1.0 radius ------------------------
-    doRun({1.0}, 0.0);
+    doRun({1.0}, {0.0});
 
     TS_ASSERT_DELTA(peakWS->getPeak(0).getIntensity(), 1000.0, 1e-2);
     TS_ASSERT_DELTA(peakWS->getPeak(1).getIntensity(), 1000.0, 1e-2);
@@ -304,7 +310,7 @@ public:
                     sqrt(peakWS->getPeak(2).getIntensity()), 1e-2);
 
     // ------------- Let's do it again with 2.0 radius ------------------------
-    doRun({2.0}, 0.0);
+    doRun({2.0}, {0.0});
 
     // All peaks are fully contained
     TS_ASSERT_DELTA(peakWS->getPeak(0).getIntensity(), 1000.0, 1e-2);
@@ -312,7 +318,7 @@ public:
     TS_ASSERT_DELTA(peakWS->getPeak(2).getIntensity(), 1000.0, 1e-2);
 
     // ------------- Let's do it again with 0.5 radius ------------------------
-    doRun({0.5}, 0.0);
+    doRun({0.5}, {0.0});
 
     TS_ASSERT_DELTA(peakWS->getPeak(0).getIntensity(), 125.0, 10.0);
     TS_ASSERT_DELTA(peakWS->getPeak(1).getIntensity(), 1000.0, 1e-2);
@@ -324,7 +330,7 @@ public:
 
     // ------------- Integrate with 1.0 radius and 2.0
     // background------------------------
-    doRun({1.0}, 2.0);
+    doRun({1.0}, {2.0});
     // Same 1000 since the background (~125) was subtracted, with some random
     // variation of the BG around
     //    TS_ASSERT_DELTA( peakWS->getPeak(0).getIntensity(), 1000.0, 10.0);
@@ -346,7 +352,7 @@ public:
 
     // ------------- Integrating without the background gives higher counts
     // ------------------------
-    doRun({1.0}, 0.0);
+    doRun({1.0}, {0.0});
 
     // +125 counts due to background
     TS_ASSERT_DELTA(peakWS->getPeak(0).getIntensity(), 1125.0, 10.0);
@@ -374,7 +380,7 @@ public:
     AnalysisDataService::Instance().add("IntegratePeaksMD2Test_peaks", peakWS);
 
     // Integrate and copy to a new peaks workspace
-    doRun({1.0}, 0.0, "IntegratePeaksMD2Test_peaks_out");
+    doRun({1.0}, {0.0}, "IntegratePeaksMD2Test_peaks_out");
 
     // Old workspace is unchanged
     TS_ASSERT_EQUALS(peakWS->getPeak(0).getIntensity(), 0.0);
@@ -412,7 +418,7 @@ public:
                                                  peakWS);
 
     // First, a check with no background
-    doRun({1.0}, 0.0, "IntegratePeaksMD2Test_peaks", 0.0);
+    doRun({1.0}, {0.0}, "IntegratePeaksMD2Test_peaks", {0.0});
     // approx. + 500 + 333 counts due to 2 backgrounds
     TS_ASSERT_DELTA(peakWS->getPeak(0).getIntensity(), 1000 + 500 + 333, 30.0);
     TSM_ASSERT_DELTA("Simple sqrt() error",
@@ -421,7 +427,7 @@ public:
     // Set background from 2.0 to 3.0.
     // So the 1/2 density background remains, we subtract the 1/3 density =
     // about 1500 counts
-    doRun({1.0}, 3.0, "IntegratePeaksMD2Test_peaks", 2.0);
+    doRun({1.0}, {3.0}, "IntegratePeaksMD2Test_peaks", {2.0});
     TS_ASSERT_DELTA(peakWS->getPeak(0).getIntensity(), 1000 + 500, 80.0);
     // Error is larger, since it is error of peak + error of background
     TSM_ASSERT_DELTA("Error has increased",
@@ -429,7 +435,7 @@ public:
 
     // Now do the same without the background start radius
     // So we subtract both densities = a lower count
-    doRun({1.0}, 3.0);
+    doRun({1.0}, {3.0});
     TSM_ASSERT_LESS_THAN("Peak intensity is lower if you do not include the "
                          "spacer shell (higher background)",
                          peakWS->getPeak(0).getIntensity(), 1500);
@@ -454,9 +460,107 @@ public:
     EllipsoidTestHelper(-1.0, false, true);
   }
 
-  void EllipsoidTestHelper(double doCounts, bool fixQAxis, bool doBkgrd) {
+  void test_exec_EllipsoidRadii_NoBackground_SingleCount() {
+    std::vector<double> radii = {0.05, 0.03, 0.02};
+    std::for_each(radii.begin(), radii.end(),
+                  [](double &r) { r = 4.0 * sqrt(r); });
+    EllipsoidTestHelper(-1.0, false, false, {0.05, 0.03, 0.02}, radii);
+  }
+
+  void test_exec_EllipsoidRadii_NoBackground_NonSingleCount() {
+    std::vector<double> radii = {0.05, 0.03, 0.02};
+    std::for_each(radii.begin(), radii.end(),
+                  [](double &r) { r = 4.0 * sqrt(r); });
+    EllipsoidTestHelper(1.0, false, false, {0.05, 0.03, 0.02}, radii);
+  }
+
+  void test_exec_EllipsoidRadii_WithBackground_SingleCount() {
+    std::vector<double> radii = {0.05, 0.03, 0.02};
+    std::for_each(radii.begin(), radii.end(),
+                  [](double &r) { r = 4.0 * sqrt(r); });
+    std::vector<double> outer;
+    std::transform(radii.begin(), radii.end(), std::back_inserter(outer),
+                   [](double &r) { return r * pow(2.0, (1.0 / 3.0)); });
+    EllipsoidTestHelper(-1.0, false, true, {0.05, 0.03, 0.02}, radii, radii,
+                        outer);
+  }
+
+  void test_exec_EllipsoidRadii_WithBackground_NonSingleCount() {
+    std::vector<double> radii = {0.05, 0.03, 0.02};
+    std::for_each(radii.begin(), radii.end(),
+                  [](double &r) { return 4.0 * sqrt(r); });
+    std::vector<double> outer;
+    std::transform(radii.begin(), radii.end(), std::back_inserter(outer),
+                   [](double &r) { return r * pow(2.0, (1.0 / 3.0)); });
+    EllipsoidTestHelper(1.0, false, true, {0.05, 0.03, 0.02}, radii, radii,
+                        outer);
+  }
+
+  void test_exec_EllipsoidRadii_NoBackground_SingleCount_ScaledSphere() {
+    // Test if elipsoid of volume 0.5*V gives half the intensity as a sphere of
+    // volume V
+    size_t numEvents = 20000;
+    V3D pos(1.0, 0.0, 0.0); // peak position
+    double peakRad = 1.0;
+
+    createMDEW();
+
+    Instrument_sptr inst =
+        ComponentCreationHelper::createTestInstrumentCylindrical(5);
+    PeaksWorkspace_sptr peakWS(new PeaksWorkspace());
+    addPeak(numEvents, pos[0], pos[1], pos[2], peakRad);
+    peakWS->addPeak(Peak(inst, 1, 1.0, pos));
+    AnalysisDataService::Instance().addOrReplace("IntegratePeaksMD2Test_peaks",
+                                                 peakWS);
+
+    doRun({1.0}, {0.0}, "IntegratePeaksMD2Test_peaks_out", {}, false);
+
+    PeaksWorkspace_sptr peakResult = std::dynamic_pointer_cast<PeaksWorkspace>(
+        AnalysisDataService::Instance().retrieve(
+            "IntegratePeaksMD2Test_peaks_out"));
+    TS_ASSERT(peakResult);
+
+    double sphereInten = peakResult->getPeak(0).getIntensity();
+
+    // Semi axis lengths corresponding to a sphere of 0.5*V
+    std::vector<double> radii(3, peakRad * pow(0.5, 1.0 / 3.0));
+
+    // Perform ellipsoidal integration of sphere
+    doRun(radii, {0.0}, "IntegratePeaksMD2Test_peaks_out", {0.0}, false, false,
+          "NoFit", 0.0, true, false);
+
+    peakResult = std::dynamic_pointer_cast<PeaksWorkspace>(
+        AnalysisDataService::Instance().retrieve(
+            "IntegratePeaksMD2Test_peaks_out"));
+    TS_ASSERT(peakResult);
+
+    double ellipInten = peakResult->getPeak(0).getIntensity();
+
+    TS_ASSERT_DELTA(ellipInten, 0.5 * sphereInten,
+                    ceil(0.002 * static_cast<double>(sphereInten)));
+  }
+
+  void EllipsoidTestHelper(
+      double doCounts, bool fixQAxis, bool doBkgrd,
+      std::vector<double> peakEigenvals = std::vector<double>(),
+      std::vector<double> ellipsoidRadii = std::vector<double>(),
+      std::vector<double> ellipsoidBgInnerRad = std::vector<double>(),
+      std::vector<double> ellipsoidBgOuterRad = std::vector<double>(),
+      double expected = 1.0) {
     // doCounts < 0 -> all events have a count of 1
     // doCounts > 0 -> counts follow multivariate normal dist
+
+    if (!ellipsoidRadii.empty()) {
+      TS_ASSERT(ellipsoidRadii.size() == 3);
+    }
+
+    if (!ellipsoidBgInnerRad.empty()) {
+      TS_ASSERT(ellipsoidBgInnerRad.size() == 3);
+    }
+
+    if (!ellipsoidBgOuterRad.empty()) {
+      TS_ASSERT(ellipsoidBgOuterRad.size() == 3);
+    }
 
     createMDEW();
 
@@ -466,29 +570,49 @@ public:
     std::vector<std::vector<double>> eigenvects;
     std::vector<double> eigenvals;
     eigenvects.push_back(std::vector<double>{Q[0], Q[1], Q[2]}); // para Q
-    eigenvals.push_back(0.05);
     // other orthogonal axes
     eigenvects.push_back(std::vector<double>{0.0, 1.0, 0.0});
-    eigenvals.push_back(0.03);
     eigenvects.push_back(std::vector<double>{0.0, 0.0, 1.0});
-    eigenvals.push_back(0.02);
+
+    if (ellipsoidRadii.empty()) {
+      // Use default eigenvals for ellipsoid peaks
+      eigenvals.push_back(0.05);
+      eigenvals.push_back(0.03);
+      eigenvals.push_back(0.02);
+    } else {
+      eigenvals = peakEigenvals;
+    }
+
     size_t numEvents = 20000;
     addEllipsoid(numEvents, Q[0], Q[1], Q[2], eigenvects, eigenvals, doCounts);
 
     // radius for integration (4 stdevs of principal axis)
     auto peakRadius = 4 * sqrt(eigenvals[0]);
-    double bgInnerRadius = 0.0;
-    double bgOuterRadius = 0.0;
+    std::vector<double> bgInnerRadius = {};
+    std::vector<double> bgOuterRadius = {};
 
     // background w
     if (doBkgrd == true) {
       // add random uniform
-      bgInnerRadius = peakRadius;
-      bgOuterRadius =
-          peakRadius * pow(2.0, 1.0 / 3.0); // twice vol of peak sphere
       std::vector<std::pair<double, double>> range;
+      bool useAll = false;
+      if (ellipsoidBgInnerRad.empty() && ellipsoidBgOuterRad.empty()) {
+        bgInnerRadius.push_back(peakRadius);
+        bgOuterRadius.push_back(
+            peakRadius * pow(2.0, 1.0 / 3.0)); // twice vol of peak sphere
+      } else {
+        useAll = true;
+        bgInnerRadius = ellipsoidBgInnerRad;
+        bgOuterRadius = ellipsoidBgOuterRad;
+      }
       for (size_t d = 0; d < eigenvals.size(); d++) {
-        range.push_back(std::pair(Q[d] - bgOuterRadius, Q[d] + bgOuterRadius));
+        if (!useAll) {
+          range.push_back(
+              std::pair(Q[d] - bgOuterRadius[0], Q[d] + bgOuterRadius[0]));
+        } else {
+          range.push_back(
+              std::pair(Q[d] - bgOuterRadius[d], Q[d] + bgOuterRadius[d]));
+        }
       }
       addUniform(static_cast<size_t>(numEvents), range);
     }
@@ -503,7 +627,14 @@ public:
                                                  peakWS);
 
     // Integrate and copy to a new peaks workspace
-    doRun({peakRadius}, bgOuterRadius, "IntegratePeaksMD2Test_peaks_out",
+    std::vector<double> radiiVec;
+    if (ellipsoidRadii.empty()) {
+      radiiVec.push_back(peakRadius);
+    } else {
+      radiiVec = ellipsoidRadii;
+    }
+
+    doRun(radiiVec, bgOuterRadius, "IntegratePeaksMD2Test_peaks_out",
           bgInnerRadius, false, /* edge correction */
           false,                /* cylinder*/
           "NoFit", 0.0,         /* adaptive*/
@@ -523,17 +654,17 @@ public:
       if (doBkgrd == true) {
         // use slightly more lenient tolerance
         TS_ASSERT_DELTA(newPW->getPeak(0).getIntensity(),
-                        static_cast<double>(numEvents),
+                        expected * static_cast<double>(numEvents),
                         ceil(0.005 * static_cast<double>(numEvents)));
       } else {
         TS_ASSERT_DELTA(newPW->getPeak(0).getIntensity(),
-                        static_cast<double>(numEvents),
+                        expected * static_cast<double>(numEvents),
                         ceil(0.002 * static_cast<double>(numEvents)));
       }
     } else {
       // sum = 0.2175*Npts (for 3D from simulation regardless of covar etc.)
       TS_ASSERT_DELTA(newPW->getPeak(0).getIntensity(),
-                      static_cast<double>(numEvents) * 0.2175,
+                      expected * static_cast<double>(numEvents) * 0.2175,
                       static_cast<double>(numEvents) * 0.0015);
     }
 
@@ -562,7 +693,13 @@ public:
 
     // loop over eigen vectors
     for (size_t ivect = 0; ivect < eigenvals.size(); ivect++) {
-      auto rad = peakRadius * sqrt(eigenvals[ivect] / eigenvals[0]);
+      auto rad = sqrt(eigenvals[ivect] / eigenvals[0]);
+      if (ellipsoidRadii.empty()) {
+        rad *= peakRadius;
+      } else {
+        rad *= ellipsoidRadii[0];
+      }
+
       double angle = axes[isort[ivect]].angle(V3D(
           eigenvects[ivect][0], eigenvects[ivect][1], eigenvects[ivect][2]));
       if (angle > M_PI / 2) {
@@ -593,7 +730,8 @@ public:
     const double backgroundOuterRadius = 3;
     const double backgroundInnerRadius = 2.5;
 
-    doRun({peakRadius}, backgroundOuterRadius, "OutWS", backgroundInnerRadius);
+    doRun({peakRadius}, {backgroundOuterRadius}, "OutWS",
+          {backgroundInnerRadius});
 
     auto outWS =
         AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>("OutWS");
@@ -631,7 +769,8 @@ public:
     const double backgroundOuterRadius = 3;
     const double backgroundInnerRadius = 2.5;
 
-    doRun({peakRadius}, backgroundOuterRadius, "OutWS", backgroundInnerRadius);
+    doRun({peakRadius}, {backgroundOuterRadius}, "OutWS",
+          {backgroundInnerRadius});
 
     PeaksWorkspace_sptr outWS =
         AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>("OutWS");
@@ -731,7 +870,7 @@ public:
 
   void test_performance_NoBackground() {
     for (size_t i = 0; i < 10; i++) {
-      IntegratePeaksMD2Test::doRun({0.02}, 0.0);
+      IntegratePeaksMD2Test::doRun({0.02}, {0.0});
     }
     // All peaks should be at least 1000 counts (some might be more if they
     // overla)
@@ -745,7 +884,7 @@ public:
 
   void test_performance_WithBackground() {
     for (size_t i = 0; i < 10; i++) {
-      IntegratePeaksMD2Test::doRun({0.02}, 0.03);
+      IntegratePeaksMD2Test::doRun({0.02}, {0.03});
     }
   }
 };
