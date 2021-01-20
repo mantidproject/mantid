@@ -235,7 +235,6 @@ class Abins(PythonAlgorithm, AbinsAlgorithm):
         self._check_common_advanced_parameters(message)
 
         self._check_tosca_parameters(message)
-        self._check_2d_parameters(message)
 
     def _check_tosca_parameters(self, message_end=None):
         """
@@ -266,14 +265,6 @@ class Abins(PythonAlgorithm, AbinsAlgorithm):
         resolution_const_c = tosca_parameters['c']
         if not isinstance(resolution_const_c, float):
             raise RuntimeError("Invalid value of constant C for TOSCA (used by the resolution TOSCA function)"
-                               + message_end)
-
-    def _check_2d_parameters(self, message_end=None):
-        # check 2D resolution
-        resolution_2d = abins.parameters.instruments['TwoDMap']['resolution']
-        if not (isinstance(resolution_2d, float) and resolution_2d > 0):
-            raise RuntimeError("Invalid value of AbinsParameters"
-                               ".instruments['TwoDMap']['resolution']"
                                + message_end)
 
     def _get_properties(self):
