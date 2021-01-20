@@ -163,7 +163,7 @@ class DrillPresenter:
                 if len(l) == 2:
                     return str(l[1] + i) + ':' + str(l[1] + (l[1] - l[0]) + i)
                 if len(l) == 3:
-                    return inc(str(l[0]) + ':' + str(l[1])) + l[2]
+                    return inc(str(l[0]) + ':' + str(l[1]), i) + ':' + str(l[2])
                 else:
                     return value
 
