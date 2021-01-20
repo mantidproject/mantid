@@ -28,6 +28,9 @@ Improvements
    from the nexus file.
  - With :ref:`SANSILLAutoProcess <algm-SANSILLAutoProcess>`, the output workspace will get its title from the nexus file.
  - The Rectangle option for :ref:`SolidAngle <algm-SolidAngle>` is now supported for ILL's D22 and D33.
+ - In :ref:`SANSILLAutoProcess <algm-SANSILLAutoProcess>`, there can be multiple inputs for sensitivity calculation.
+   A new parameter, SensitivityWithOffsets, has been added to mark that these multiple sensitivities should be processed
+   separately and specially merged before calculation of the efficiency to remove gaps caused by beam stop mask.
 
 Bugfixes
 ########
