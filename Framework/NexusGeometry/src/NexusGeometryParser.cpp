@@ -645,11 +645,6 @@ private:
       const auto &singleDetIndices = detFaceIndices[i];
       const auto &detWinding = detWindingOrder[i];
 
-      // TODO
-      //  if we had detFaceVertsIndices into full list of vertices
-      //  at this point, then we could avoid duplicating vertices
-      //  for the same voxel
-
       Eigen::Vector3d centre;
       if (calculatePixelCentre) {
         // Our detector is 2D (described by a single face in the mesh)
@@ -667,10 +662,6 @@ private:
       std::for_each(detVerts.begin(), detVerts.end(),
                     [&centre](Eigen::Vector3d &val) { val -= centre; });
 
-      // TODO problem is that detWinding contains indices into the full list
-      //  of vertices, not into detVerts which only has the vertices for this detector
-      //  This is causing createTriangularFaces to create an increasing number of
-      //  wrong triangles as the indices in detWinding get further from 0
       auto shape = NexusShapeFactory::createFromOFFMesh(singleDetIndices,
                                                         detWinding, detVerts);
       builder.addDetectorToLastBank(name + "_" + std::to_string(i), detIds[i],
