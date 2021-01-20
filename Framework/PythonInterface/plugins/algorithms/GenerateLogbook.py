@@ -8,7 +8,6 @@
 from mantid import config
 from mantid.api import AlgorithmFactory, FileAction, FileProperty, \
     ITableWorkspaceProperty, PythonAlgorithm
-from mantid.dataobjects import TableWorkspace
 from mantid.kernel import Direction, IntArrayOrderedPairsValidator, \
     StringListValidator
 from mantid.simpleapi import *
@@ -17,6 +16,7 @@ import fnmatch
 import h5py
 import os
 import numpy
+
 
 class GenerateLogbook(PythonAlgorithm):
 
@@ -38,13 +38,16 @@ class GenerateLogbook(PythonAlgorithm):
 
     def validateInputs(self):
         issues = dict()
-        
+
         if self.getProperty('Instrument').isDefault:
             issues['Instrument'] = 'The instrument has to be defined.'
         else:
             facility = self.getPropertyValue('Facility')
-            
-            
+            instruments = config.getFacility(facility).instruments()
+            instrument = self.getPropertyValue('Instrument')
+            if instrument not in instruments:
+                issues['Instrument'] = 'The instrument {} does not belong to {} facility.'.format(instrument, facility)
+
         return issues
 
     def PyInit(self):
