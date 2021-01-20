@@ -21,7 +21,6 @@ from .DrillTask import DrillTask
 from .DrillParameterController import DrillParameter, DrillParameterController
 from .DrillExportModel import DrillExportModel
 from .DrillRundexIO import DrillRundexIO
-from .DrillSample import DrillSample
 
 
 class DrillModel(QObject):
@@ -777,16 +776,14 @@ class DrillModel(QObject):
 
         return self.columns, tooltips
 
-    def addSample(self, index, params=None):
+    def addSample(self, index, sample):
         """
-        Add an empty sample.
+        Add a sample to the model.
 
         Args:
             index (int): sample index; if -1 the sample is added to the end
+            sample (DrillSample): sample
         """
-        sample = DrillSample()
-        if params:
-            sample.setParameters(params)
         if (index == -1):
             self.samples.append(sample)
         else:

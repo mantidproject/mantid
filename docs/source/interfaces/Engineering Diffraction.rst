@@ -164,8 +164,6 @@ Custom Spectra
 Fitting
 -------
 
-**This tab is currently a work in progress!**
-
 This tab will allow for single peak fitting of focused run files.
 
 Focused run files can be loaded from the file system into mantid from the interface and converted to units TOF or d-sapcing. The interface will keep track of all the
