@@ -122,13 +122,17 @@ class FittingDataModel(object):
             if log in self._log_values[ws_name]:
                 avg, stdev = self._log_values[ws_name][log]
             else:
-                try:
-                    avg, stdev = AverageLogData(ws_name, LogName=log, FixZero=False)
-                    self._log_values[ws_name][log] = [avg, stdev]
-                except RuntimeError:
-                    avg, stdev = full(2, nan)
-                    logger.error(
-                        f"File {ws.name()} does not contain log {log}")
+                avg, stdev = full(2, nan)  # default unless value can be calculated
+                if log in [l.name for l in run.getLogData()]:
+                    try:
+                        avg, stdev = AverageLogData(ws_name, LogName=log, FixZero=False)
+                    except RuntimeError:
+                        # sometimes happens in old data if proton_charge log called something different
+                        logger.warning(
+                            f"Average value of log {log} could not be calculated for file {ws.name()}")
+                else:
+                    logger.warning(f"File {ws.name()} does not contain log {log}")
+                self._log_values[ws_name][log] = [avg, stdev]
             self.write_table_row(ADS.retrieve(log), [avg, stdev], irow)
         self.update_log_group_name()
 
@@ -172,7 +176,7 @@ class FittingDataModel(object):
         return ws_list_tof
 
     def update_fit(self, args):
-        fit_props, peak_centre_params = ([], ) * 2
+        fit_props, peak_centre_params = ([],) * 2
         for arg in args:
             if isinstance(arg, dict):
                 fit_props.append(arg)
@@ -232,7 +236,7 @@ class FittingDataModel(object):
         sample_pos = sample.getPos()
         source_pos = source.getPos()
         l_tot = source.getDistance(sample) + sample.getDistance(detector)
-        theta = detector.getTwoTheta(sample_pos, (sample_pos-source_pos)) / 2
+        theta = detector.getTwoTheta(sample_pos, (sample_pos - source_pos)) / 2
 
         difc = 2 * m_over_h * l_tot * sin(theta)
         return difc
