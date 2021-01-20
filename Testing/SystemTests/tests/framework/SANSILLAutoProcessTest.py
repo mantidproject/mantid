@@ -197,12 +197,12 @@ class D11_AutoProcess_Multiple_Transmissions_Test(systemtesting.MantidSystemTest
         return ['iq_mult_wavelengths', 'D11_AutoProcess_Multiple_Tr_Reference.nxs']
 
     def runTest(self):
-        beams = '950,1020,947'
-        containers = '958,1023,973'
-        container_tr = '988,1023,988'
-        beam_tr = '947,1020,947'
-        samples = '960,1024,975'
-        sample_tr = '990,1024,990'
+        beams = '1020,947,1088'
+        containers = '1023,973,1003'
+        container_tr = '988'
+        beam_tr = '1020,1119,1119'
+        samples = '1025,975,1005'
+        sample_tr = '1204,990,990'
         thick = 0.1
 
         # reduce samples
