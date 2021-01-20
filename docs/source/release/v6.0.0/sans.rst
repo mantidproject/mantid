@@ -30,9 +30,6 @@ Improvements
  - In :ref:`SANSILLAutoProcess <algm-SANSILLAutoProcess>`, more than one transmission per processing, consistent with number
    of sample runs, are now accepted.
  - The Rectangle option for :ref:`SolidAngle <algm-SolidAngle>` is now supported for ILL's D22 and D33.
- - In :ref:`SANSILLAutoProcess <algm-SANSILLAutoProcess>`, more than one transmission per processing, consistent with number
-   of sample runs, are now accepted.
-
 
 Bugfixes
 ########
