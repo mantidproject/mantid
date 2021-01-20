@@ -7,7 +7,7 @@ import os
 
 def mtd_convert_units(ws_name: str,
                       target_unit: str,
-                      out_ws_name: Union[str, None]):
+                      out_ws_name: Union[str, None] = None):
     """
     Convert the unit of a workspace.
     Guarantees: if the original workspace is point data, then the output must be point data

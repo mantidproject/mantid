@@ -194,6 +194,7 @@ def cc_calibrate(ws_name, peak_position, peak_min, peak_max, ws_index_range,
     det_pos = diamond_event_ws.getDetector(reference_ws_index).getPos()
     twotheta = calculate_detector_2theta(diamond_event_ws, reference_ws_index)
     print('[INFO] Reference spectra = {0}  @ {1}   2-theta = {2}'.format(reference_ws_index, det_pos, twotheta))
+    print(f'Workspace Index range: {ws_index_range[0]}, {ws_index_range[1]}; Binning = {binning}')
 
     # TODO - NIGHT - shall change from bank to bank
     Rebin(InputWorkspace=ws_name, OutputWorkspace=ws_name, Params='0.5, -{}, 3.'.format(abs(binning)))
@@ -228,14 +229,16 @@ def cc_calibrate(ws_name, peak_position, peak_min, peak_max, ws_index_range,
                            XMin=-cc_number,
                            XMax=cc_number,
                            MaxOffset=max_offset,
-                           FitEachPeakTwice=fit_twice,
                            PeakFunction='Gaussian',  # 'PseudoVoigt', # Gaussian
-                           MinimumPeakHeight=min_peak_height,  # any peak is lower than 1 shall be masked!
-                           PeakFitResultTableWorkspace=cc_ws_name + '_fit'
+                           # FIXME - Following are new features belonged to an in-progress enhancement
+                           # MinimumPeakHeight=min_peak_height,  # any peak is lower than 1 shall be masked!
+                           # FitEachPeakTwice=fit_twice,
+                           # PeakFitResultTableWorkspace=cc_ws_name + '_fit'
                            )
     except RuntimeError as run_err:
         # failed to do cross correlation
-        return None, run_err
+        raise run_err
+        # return None, run_err
 
     # Do analysis to the calibration result
     # TODO - NIGHT - Make it better
@@ -288,15 +291,15 @@ def correct_difc_to_default(idf_difc_vec, cal_difc_vec, cal_table, row_shift, di
 
 
 # TODO - FUTURE - Convert this method to a more general form
-def cross_correlate_vulcan_data(diamond_ws_name, group_ws_name, calib_flag, fit_time=1, flag='1fit'):
+def cross_correlate_vulcan_data(diamond_ws_name, calib_flag, fit_time=1, flag='1fit'):
     """
     main entrance cross-correlation (for VULCAN west/east/high angle).
 
     renamed from cross_correlate_vulcan_data_3banks
+    removed param: group_ws_name
 
     Note: it only works for VULCAN dated from 2017.06.01 to 2019.10.01
     :param diamond_ws_name:
-    :param group_ws_name:
     :param calib_flag: a 3-element dict of boolean as the flag whether there is need to calibrate this bank
     :param fit_time:
     :param flag:
@@ -499,8 +502,10 @@ def instrument_wide_cross_correlation(focused_ws_name, reference_ws_index, min_d
                    WorkspaceIndexMax=2, XMin=1.0649999999999999, XMax=1.083)
     GetDetectorOffsets(InputWorkspace='cc_vulcan_diamond_3bank', Step=0.00029999999999999997,
                        DReference=1.0757699999999999, XMin=-20, XMax=20, OutputWorkspace='zz_test_3bank',
-                       FitEachPeakTwice=True, PeakFitResultTableWorkspace='ddd', OutputFitResult=True,
-                       MinimumPeakHeight=1)
+                       # FIXME - the followings are new features of an in-progress enhancing version
+                       # FitEachPeakTwice=True, PeakFitResultTableWorkspace='ddd', OutputFitResult=True,
+                       # MinimumPeakHeight=1
+                      )
 
     return shift_dict
 

@@ -29,7 +29,8 @@ def load_data(nexus_path, test_mode):
     return diamond_ws_name
 
 
-def load_detector_grouping(group_ws_name,
+def load_detector_grouping(ref_ws_name,
+                           group_ws_name,
                            grouping_file: str = None,
                            ref_cal_h5: str = None):
     if mtd.doesExist(group_ws_name):
@@ -48,7 +49,7 @@ def load_detector_grouping(group_ws_name,
         group_ws_name = group_ws.name()
     else:
         # not specified
-        CreateGroupingWorkspace(InputWorkspace='vulcan_diamond', OutputWorkspace=group_ws_name)
+        CreateGroupingWorkspace(InputWorkspace=ref_ws_name, OutputWorkspace=group_ws_name)
 
     return group_ws_name
 
@@ -60,13 +61,12 @@ def calibrate_vulcan(diamond_nexus, test_mode, difc_file_name):
     # Load data
     diamond_ws_name = load_data(diamond_nexus, test_mode)
 
-    # load grouping workspace
-    grouping_ws_name = load_detector_grouping()
-
     # do cross correlation:
     if True:
-        calib_flag = 'west'
-        cross_correlate_vulcan_data(diamond_ws_name, grouping_ws_name, calib_flag, fit_time=1, flag='1fit')
+        calib_flag = {'west': True, 'east': True, 'high angle': True}
+        r = cross_correlate_vulcan_data(diamond_ws_name, calib_flag, fit_time=1, flag='1fit')
+        print(f'Type of returned value from cross_correlate_vulcan_data: {type(r)}')
+        offset_ws_dict, mask_ws_dict = r
     else:
         # This optiona may not work in the current Mantid master/ornl-next yet
         cross_correlate_vulcan_data(diamond_ws_name, group_ws_name, fit_time=2, flag='2fit')
@@ -75,16 +75,22 @@ def calibrate_vulcan(diamond_nexus, test_mode, difc_file_name):
     calib_offset_ws_name = 'vulcan_diamond_2fit_offset'
 
     # Export cross correlated result, DIFC and etc for analysis
-    # check the difference between DIFCs
-    check_correct_difcs(ws_name='vulcan_diamond')
+    # load grouping workspace
+    grouping_ws_name = load_detector_grouping(diamond_ws_name, 'vulcan_grouping')
+    # FIXME - haven't found out how grouping workspace is used for 3 bank case
+    # grouping_ws_name = None
 
-    # save calibration file
-    save_calibration(offset_ws_name=calib_offset_ws_name,
-                     mask_ws='vulcan_diamond_2fit_mask',
-                     group_ws_name=None,
+    # merge calibration result from bank-based cross correlation and  save calibration file
+    num_banks = 3
+    save_calibration(offset_ws_name=offset_ws_dict,
+                     mask_ws=mask_ws_dict,
+                     group_ws_name=grouping_ws_name,
                      calib_ws_name='vulcan_diamond',
                      num_groups=num_banks,
                      calib_file_prefix='blabla')
+
+    # check the difference between DIFCs
+    check_correct_difcs(ws_name='vulcan_diamond')
 
     # save difc file
     if difc_file_name:
@@ -92,7 +98,7 @@ def calibrate_vulcan(diamond_nexus, test_mode, difc_file_name):
 
 
 def test_main():
-    pass
+    calibrate_vulcan(diamond_nexus='/SNS/VULCAN/IPTS-21356/nexus/VULCAN_164960.nxs.h5', test_mode=True, difc_file_name='testout.h5') 
 
 
 if __name__ == '__main__':
