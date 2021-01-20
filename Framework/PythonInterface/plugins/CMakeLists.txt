@@ -73,6 +73,7 @@ set(PYTHON_PLUGINS
     algorithms/FitIncidentSpectrum.py
     algorithms/GSASIIRefineFitPeaks.py
     algorithms/GenerateGroupingSNSInelastic.py
+    algorithms/GenerateLogbook.py
     algorithms/GetEiT0atSNS.py
     algorithms/GetIPTS.py
     algorithms/GetLiveInstrumentValue.py
