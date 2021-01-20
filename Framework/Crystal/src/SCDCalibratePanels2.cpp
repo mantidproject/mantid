@@ -83,31 +83,31 @@ void SCDCalibratePanels2::init() {
   // http://www.mantidproject.org/Mantid_Standards RESULT|memory footprint
   // increase|8.5703125
   //
-  declareProperty("LatticeA", EMPTY_DBL(), mustBePositive,
+  declareProperty("a", EMPTY_DBL(), mustBePositive,
                   "Lattice Parameter a (Leave empty to use lattice constants "
                   "in peaks workspace)");
-  declareProperty("LatticeB", EMPTY_DBL(), mustBePositive,
+  declareProperty("b", EMPTY_DBL(), mustBePositive,
                   "Lattice Parameter b (Leave empty to use lattice constants "
                   "in peaks workspace)");
-  declareProperty("LatticeC", EMPTY_DBL(), mustBePositive,
+  declareProperty("c", EMPTY_DBL(), mustBePositive,
                   "Lattice Parameter c (Leave empty to use lattice constants "
                   "in peaks workspace)");
-  declareProperty("Alpha", EMPTY_DBL(), mustBePositive,
+  declareProperty("alpha", EMPTY_DBL(), mustBePositive,
                   "Lattice Parameter alpha in degrees (Leave empty to use "
                   "lattice constants in peaks workspace)");
-  declareProperty("Beta", EMPTY_DBL(), mustBePositive,
+  declareProperty("beta", EMPTY_DBL(), mustBePositive,
                   "Lattice Parameter beta in degrees (Leave empty to use "
                   "lattice constants in peaks workspace)");
-  declareProperty("Gamma", EMPTY_DBL(), mustBePositive,
+  declareProperty("gamma", EMPTY_DBL(), mustBePositive,
                   "Lattice Parameter gamma in degrees (Leave empty to use "
                   "lattice constants in peaks workspace)");
   const std::string LATTICE("Lattice Constants");
-  setPropertyGroup("LatticeA", LATTICE);
-  setPropertyGroup("LatticeB", LATTICE);
-  setPropertyGroup("LatticeC", LATTICE);
-  setPropertyGroup("Alpha", LATTICE);
-  setPropertyGroup("Beta", LATTICE);
-  setPropertyGroup("Gamma", LATTICE);
+  setPropertyGroup("a", LATTICE);
+  setPropertyGroup("b", LATTICE);
+  setPropertyGroup("c", LATTICE);
+  setPropertyGroup("alpha", LATTICE);
+  setPropertyGroup("beta", LATTICE);
+  setPropertyGroup("gamma", LATTICE);
 
   // Calibration options group
   declareProperty("CalibrateT0", false, "Calibrate the T0 (initial TOF)");
