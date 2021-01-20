@@ -173,7 +173,7 @@ void Q1DWeighted::bootstrap(const MatrixWorkspace_const_sptr &inputWS) {
         centerAngle *= 2;
       centerAngle += wedgeOffset;
       m_wedgesCenterAngle.push_back(centerAngle);
-      m_wedgesAngleRange.push_back(wedgeAngle);
+      m_wedgesAngleRange.push_back(wedgeAngle * deg2rad);
     }
   } else {
     getTableShapes();
@@ -287,14 +287,19 @@ void Q1DWeighted::getSectorParams(
   double innerRadius = std::stod(params[1]) * zoom;
   double outerRadius = std::stod(params[2]) * zoom;
 
-  double centerAngle = (std::stod(params[3]) + std::stod(params[4])) / 2;
-  double angleRange =
-      std::fmod(std::stod(params[4]) - std::stod(params[3]), 2 * M_PI);
+  double startAngle = std::stod(params[3]);
+  double endAngle = std::stod(params[4]);
+
+  double centerAngle = (startAngle + endAngle) / 2;
+  if (endAngle < startAngle)
+    centerAngle = fmod(centerAngle + M_PI, 2 * M_PI);
+
+  double angleRange = std::fmod(endAngle - startAngle, 2 * M_PI);
   angleRange = angleRange >= 0 ? angleRange : angleRange + 2 * M_PI;
 
   // since the viewport was in Z-, the axis are inverted so we have to take the
-  // symmetry
-  angleRange = fmod(3 * M_PI - angleRange, 2 * M_PI);
+  // symmetry of the angle
+  centerAngle = fmod(3 * M_PI - centerAngle, 2 * M_PI);
 
   double xOffset = viewport["Translation"][0];
   double yOffset = viewport["Translation"][1];
@@ -465,23 +470,10 @@ void Q1DWeighted::calculate(const MatrixWorkspace_const_sptr &inputWS) {
           double angle =
               fabs((subPix - center)
                        .angle(V3D(cos(centerAngle), sin(centerAngle), 0.0)));
-          //          if (i == 13994) {
-          //            std::cout << "pixel " << subPix << std::endl;
-          //            std::cout << "d " << subPix.distance(center) <<
-          //            std::endl; std::cout << "Pixel index : " << i <<
-          //            std::endl; std::cout << "angle " << angle / deg2rad <<
-          //            std::endl; std::cout << "center Angle " << centerAngle
-          //            << std::endl; std::cout << "new pix " << subPix - center
-          //            << std::endl; std::cout << "cos " << cos(centerAngle) <<
-          //            std::endl; std::cout << "center " << center << std::endl
-          //            << std::endl;
-          //          }
 
-          if (!m_asymmWedges) {
-            angle = fmod(angle, M_PI);
-          }
-
-          if (angle < m_wedgesAngleRange[iw] &&
+          if ((angle < m_wedgesAngleRange[iw] * 0.5 ||
+               (!m_asymmWedges &&
+                fabs(M_PI - angle) < m_wedgesAngleRange[iw] * 0.5)) &&
               subPix.distance(center) > m_wedgesInnerRadius[iw] &&
               (m_wedgesOuterRadius[iw] <= 0 ||
                subPix.distance(center) <= m_wedgesOuterRadius[iw])) {
