@@ -20,7 +20,7 @@ namespace Crystal {
  * Using input peakworkspace with indexation results to calibrate each
  * individual panels.
  * The target calibration properties include:
- * - T0: sec?
+ * - T0: micro seconds
  *       time for proton to travel from reactor to target to generate neutron
  * - L1: meters
  *       distance between target and sample

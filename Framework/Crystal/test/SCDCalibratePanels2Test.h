@@ -300,7 +300,6 @@ public:
     double dl = std::abs(L1_prescribed - L1_calibrated);
     g_log.notice() << "-- |L1_prescribed-L1_calibrated| = " << dl << "\n";
 
-    TS_ASSERT(false);
     // Cleanup
     doCleanup();
   }
@@ -671,12 +670,12 @@ private:
     SCDCalibratePanels2 alg;
     alg.initialize();
     alg.setProperty("PeakWorkspace", pws);
-    alg.setProperty("LatticeA", silicon_a);
-    alg.setProperty("LatticeB", silicon_b);
-    alg.setProperty("LatticeC", silicon_c);
-    alg.setProperty("Alpha", silicon_alpha);
-    alg.setProperty("Beta", silicon_beta);
-    alg.setProperty("Gamma", silicon_gamma);
+    alg.setProperty("a", silicon_a);
+    alg.setProperty("b", silicon_b);
+    alg.setProperty("c", silicon_c);
+    alg.setProperty("alpha", silicon_alpha);
+    alg.setProperty("beta", silicon_beta);
+    alg.setProperty("gamma", silicon_gamma);
     alg.setProperty("CalibrateT0", calibrateT0);
     alg.setProperty("CalibrateL1", calibrateL1);
     alg.setProperty("CalibrateBanks", calibrateBanks);
@@ -873,5 +872,5 @@ private:
   const double TOLERANCE_L; // distance
   const double TOLERANCE_R; // rotation angle
   const bool LOGCHILDALG;   // whether to show individual alg log
-  const double PI{3.141592653589793238462643383279502884};
+  const double PI{3.1415926535897932384626433832795028841971693993751058209};
 };

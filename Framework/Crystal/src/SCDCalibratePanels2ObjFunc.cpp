@@ -16,6 +16,7 @@
 #include "MantidGeometry/Instrument.h"
 
 #include <boost/math/special_functions/round.hpp>
+#include <cmath>
 
 namespace Mantid {
 namespace Crystal {
@@ -43,8 +44,8 @@ SCDCalibratePanels2ObjFunc::SCDCalibratePanels2ObjFunc() {
   declareParameter("DeltaZ", 0.0, "relative shift along Z");
   // rotation axis is defined as (1, theta, phi)
   // https://en.wikipedia.org/wiki/Spherical_coordinate_system
-  declareParameter("Theta", PI / 4, "Polar coorindates theta in radians");
-  declareParameter("Phi", PI / 4, "Polar coorindates phi in radians");
+  declareParameter("Theta", PI / 4, "Polar coordinates theta in radians");
+  declareParameter("Phi", PI / 4, "Polar coordinates phi in radians");
   // rotation angle
   declareParameter("DeltaRotationAngle", 0.0,
                    "angle of relative rotation in degree");
