@@ -140,24 +140,7 @@ class SPowderSemiEmpiricalCalculator:
         return s_data
 
     def _calculate_s_powder_2d(self) -> SData:
-        """
-        Calculates 2D S for the powder case.
-        :return:  object of type SData with 2D dynamical structure factors for the powder case
-        """
-        e_init = abins.parameters.instruments[self._instrument.get_name()]['e_init']
-        self._instrument.set_incident_energy(e_init)
-
-        indent = INCIDENT_ENERGY_MESSAGE_INDENTATION
-        if self.progress_reporter:
-            self.progress_reporter.setNumSteps(self._num_k * self._num_atoms + 1)
-        self._report_progress(msg=indent + "Calculation for incident energy %s [cm^-1]" % e_init)
-
-        angle_resolved_data = self._calculate_s_powder_over_k()
-        self._instrument.save_nxspe(angle_resolved_data)
-
-        s_data = angle_resolved_data.sum_over_angles(average=True)
-
-        return s_data
+        raise NotImplementedError('2D instruments not supported in this version.')
 
     def _calculate_s_over_threshold(self, s=None, freq=None, coeff=None):
         """
@@ -206,18 +189,6 @@ class SPowderSemiEmpiricalCalculator:
             _ = self._calculate_s_powder_over_atoms(q_indx=q_index,
                                                     existing_data=angle_resolved_data)
         return angle_resolved_data
-
-    # def _sum_s(self, current_val=None, addition=None):
-    #     """
-    #     Helper functions which sums S for all atoms and all quantum events taken into account.
-    #     :param current_val: S accumulated so far
-    #     :param addition: S to be added
-    #     """
-
-    #     for atom_key in current_val:
-    #         for order in range(FUNDAMENTALS, self._quantum_order_num + S_LAST_INDEX):
-    #             temp = addition[atom_key]["s"]["order_%s" % order]
-    #             current_val[atom_key]["s"]["order_%s" % order] += temp
 
     def _calculate_s_powder_over_atoms(self, *, q_indx: int,
                                        existing_data: Optional[SDataByAngle] = None
@@ -477,24 +448,6 @@ class SPowderSemiEmpiricalCalculator:
                                                                                         bins=self._bins,
                                                                                         s_dft=value_dft,
                                                                                         scheme=broadening_scheme)
-
-        # # in case of 2D instrument rebin over q
-        # # TODO: THIS NEEDS CLOSER EXAMINATION
-        # if self._instrument.get_name() in TWO_DIMENSIONAL_INSTRUMENTS:
-        #     q_size = abins.parameters.instruments[self._instrument.get_name()]['q_size']
-        #     temp_full_s = np.zeros(shape=(q_size + 1, rebinned_broad_spectrum.size),
-        #                            dtype=FLOAT_TYPE)
-
-        #     all_q2 = self._instrument.calculate_q_powder(input_data=self._frequencies, angle=angle)
-        #     all_q = np.sqrt(all_q2)
-
-        #     _q_bins = np.linspace(start=Q_BEGIN, stop=Q_END, num=q_size)
-        #     bins_q = np.digitize(all_q, _q_bins) - PYTHON_INDEX_SHIFT
-
-        #     small_q_indx = all_q < Q_END
-        #     temp_full_s[bins_q[small_q_indx], small_q_indx] = rebinned_broad_spectrum[small_q_indx]
-        #     # the last q-bin stores data outside the range requested by a user so should be neglected
-        #     rebinned_broad_spectrum = temp_full_s[:-1]
 
         # calculate transition energies for construction of higher order quantum event
         local_freq, local_coeff = self._calculate_s_over_threshold(s=value_dft, freq=local_freq, coeff=local_coeff)

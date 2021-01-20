@@ -28,11 +28,6 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
         # before each test set abins.parameters to default values
         abins.parameters.instruments = {
             "fwhm": 3.0,
-            "TwoDMap": {
-                'resolution': 0.1,
-                'q_size': 200,
-                'e_init': [4100.0],
-                'angles': np.arange(3.0, 140.0, 1).tolist()},
             "TOSCA": {
                 "final_neutron_energy": 32.0,
                 "cos_scattering_angle": -0.7069,
@@ -76,22 +71,6 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
 
         # fwhm should be smaller than 10
         abins.parameters.instruments["fwhm"] = 10.0
-        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon",
-                          OutputWorkspace=self._wrk_name)
-
-    def test_2d_resolution(self):
-        # resolution should be a number
-        abins.parameters.instruments["TwoDMap"]["resolution"] = "fd"
-        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon",
-                          OutputWorkspace=self._wrk_name)
-
-        # resolution is positive so it cannot be negative
-        abins.parameters.instruments["TwoDMap"]["resolution"] = -0.01
-        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon",
-                          OutputWorkspace=self._wrk_name)
-
-        # resolution should have non-zero value
-        abins.parameters.instruments["TwoDMap"]["resolution"] = 0.
         self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._Si2 + ".phonon",
                           OutputWorkspace=self._wrk_name)
 
