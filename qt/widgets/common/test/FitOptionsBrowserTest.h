@@ -47,7 +47,7 @@ public:
   void tearDown() override { m_fitOptionsBrowser.reset(); }
 
   void
-  test_that_the_FunctionTreeView_can_be_instantiated_many_times_without_instability() {
+  test_that_the_FitOptionsBrowser_can_be_instantiated_many_times_without_instability() {
     for (auto i = 0u; i < m_numberOfTries; ++i)
       m_fitOptionsBrowser = std::make_unique<FitOptionsBrowser>(nullptr);
   }
