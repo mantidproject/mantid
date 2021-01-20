@@ -109,7 +109,7 @@ class ComponentInfoTest(unittest.TestCase):
         ws_other = CloneWorkspace(self._ws)
         info_other = ws_other.componentInfo()
         self.assertEqual(info.hasEquivalentSource(info_other), True)
-        info_other.setPosition(info.source(), V3D(info.sourcePosition()) + V3D(1.-6, 0, 0))
+        info_other.setPosition(info.source(), info.sourcePosition() + V3D(1.-6, 0, 0))
         self.assertEqual(info.hasEquivalentSource(info_other), False)
 
     def test_hasSample(self):
@@ -123,7 +123,7 @@ class ComponentInfoTest(unittest.TestCase):
         ws_other = CloneWorkspace(self._ws)
         info_other = ws_other.componentInfo()
         self.assertEqual(info.hasEquivalentSample(info_other), True)
-        info_other.setPosition(info.sample(), V3D(info.samplePosition()) + V3D(1.-6, 0, 0))
+        info_other.setPosition(info.sample(), info.samplePosition() + V3D(1.-6, 0, 0))
         self.assertEqual(info.hasEquivalentSample(info_other), False)
 
     def test_source(self):
