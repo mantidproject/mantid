@@ -70,5 +70,7 @@ Bugfixes
 - Fixed a crash in SliceViewer when hovering the cursor over Direct or Indirect data.
 - Fixed a crash when using broken e notation for axis limits in plot settings
 - Fixed bug in plotting elliptical shell of integrated peaks in sliceviewer - the inner background radius is now correct.
+- Fixed a bug in error bars tab in plot settings where the Error Every property was not being shown correctly
+
 
 :ref:`Release 6.0.0 <v6.0.0>`
