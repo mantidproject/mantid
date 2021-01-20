@@ -162,14 +162,15 @@ class PeaksViewerCollectionPresenter:
         """
         self._view = view
         self._child_presenters = []
+        self._ads_observer = None
+        self.setup_ads_observer()
 
-        # Setup ADS observer
-        self._ads_observer = SliceViewerADSObserver(self.replace_handle, self.rename_handle, self.clear_handle,
-                                                    self.delete_handle)
+    def setup_ads_observer(self):
+        if self._ads_observer is None:
+            self._ads_observer = SliceViewerADSObserver(self.replace_handle, self.rename_handle, self.clear_handle,
+                                                        self.delete_handle)
 
-    def close_called(self):
-        self._view = None
-        self._child_presenters = []
+    def clear_observer(self):
         self._ads_observer = None
 
     @property
@@ -182,6 +183,7 @@ class PeaksViewerCollectionPresenter:
         :param name: The name of a PeaksWorkspace.
         :returns: The child presenter
         """
+        self.setup_ads_observer()
         presenter = PeaksViewerPresenter(self._create_peaksviewer_model(name),
                                          self._view.append_peaksviewer())
         self._child_presenters.append(presenter)
@@ -219,6 +221,7 @@ class PeaksViewerCollectionPresenter:
         Remove the named workspace from display. No op if no workspace can be found with that name
         :param name: The name of a workspace
         """
+        self.setup_ads_observer()
         child_presenters = self._child_presenters
         presenter_to_remove = None
         for child in child_presenters:
@@ -241,6 +244,7 @@ class PeaksViewerCollectionPresenter:
 
     def notify(self, event):
         """Dispatch notification to all subpresenters"""
+        self.setup_ads_observer()
         for presenter in self._child_presenters:
             presenter.notify(event)
 

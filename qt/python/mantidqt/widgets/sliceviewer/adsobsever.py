@@ -44,10 +44,7 @@ class SliceViewerADSObserver(AnalysisDataServiceObserver):
         self.observeRename(True)
 
     def __del__(self):
-        self.observeClear(False)
-        self.observeDelete(False)
-        self.observeReplace(False)
-        self.observeRename(False)
+        self.observeAll(False)
 
     @_catch_exceptions
     def clearHandle(self):

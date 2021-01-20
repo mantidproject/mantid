@@ -611,5 +611,6 @@ class SliceViewerView(QWidget, ObservingView):
     def _on_rename(self, new_title):
         self.setWindowTitle(new_title)
 
-    def closeEvent(self, _):
-        self.presenter.close_called()
+    def closeEvent(self, event):
+        super().closeEvent(event)
+        self.presenter.clear_observer()

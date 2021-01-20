@@ -396,6 +396,8 @@ class SliceViewer(ObservingPresenter):
 
     def clear_observer(self):
         self.ads_observer = None
+        if self._peaks_presenter is not None:
+            self._peaks_presenter.clear_observer()
 
     # private api
     def _create_peaks_presenter_if_necessary(self):
@@ -447,7 +449,3 @@ class SliceViewer(ObservingPresenter):
     def _close_view_with_message(self, message: str):
         self.view.emit_close()  # inherited from ObservingView
         self._logger.warning(message)
-
-    def close_called(self):
-        if self._peaks_presenter is not None:
-            self._peaks_presenter.close_called()
