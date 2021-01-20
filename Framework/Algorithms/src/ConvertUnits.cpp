@@ -439,28 +439,23 @@ ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit,
   auto checkOutputUnit = std::unique_ptr<Unit>(outputUnit->clone());
 
   // Perform Sanity Validation before creating workspace
-  double checkl2;
-  double checktwoTheta;
   const double checkdelta = 0.0;
-  ExtraParametersMap pmap = {{UnitParams::delta, checkdelta}};
+  UnitParametersMap pmap = {{UnitParams::delta, checkdelta}};
   if (efixedProp != EMPTY_DBL()) {
     pmap[UnitParams::efixed] = efixedProp;
   }
   size_t checkIndex = 0;
-  if (inputWS->getDetectorValues(spectrumInfo, *fromUnit, *outputUnit, emode,
-                                 signedTheta, checkIndex, checkl2,
-                                 checktwoTheta, pmap)) {
-    // copy the X values for the check
-    auto checkXValues = inputWS->readX(checkIndex);
-    try {
-      // Convert the input unit to time-of-flight
-      checkFromUnit->toTOF(checkXValues, emptyVec, l1, checkl2, checktwoTheta,
-                           emode, pmap);
-      // Convert from time-of-flight to the desired unit
-      checkOutputUnit->fromTOF(checkXValues, emptyVec, l1, checkl2,
-                               checktwoTheta, emode, pmap);
-    } catch (std::runtime_error) {
-    }
+  inputWS->getDetectorValues(spectrumInfo, *fromUnit, *outputUnit, emode,
+                             signedTheta, checkIndex, pmap);
+  // copy the X values for the check
+  auto checkXValues = inputWS->readX(checkIndex);
+  try {
+    // Convert the input unit to time-of-flight
+    checkFromUnit->toTOF(checkXValues, emptyVec, l1, emode, pmap);
+    // Convert from time-of-flight to the desired unit
+    checkOutputUnit->fromTOF(checkXValues, emptyVec, l1, emode, pmap);
+  } catch (
+      std::runtime_error) { // if it's a detector specific problem then ignore
   }
 
   // create the output workspace
@@ -477,8 +472,6 @@ ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit,
     double efixed = efixedProp;
 
     // Now get the detector object for this histogram
-    double l2;
-    double twoTheta;
     /// @todo Don't yet consider hold-off (delta)
     const double delta = 0.0;
 
@@ -486,32 +479,25 @@ ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit,
     auto localOutputUnit = std::unique_ptr<Unit>(outputUnit->clone());
 
     // TODO toTOF and fromTOF need to be reimplemented outside of kernel
-    ExtraParametersMap pmap = {{UnitParams::delta, delta}};
+    UnitParametersMap pmap = {{UnitParams::delta, delta}};
     if (efixedProp != EMPTY_DBL()) {
       pmap[UnitParams::efixed] = efixed;
     }
-    bool conversionSucceeded = false;
-    if (outputWS->getDetectorValues(outSpectrumInfo, *fromUnit, *outputUnit,
-                                    emode, signedTheta, i, l2, twoTheta,
-                                    pmap)) {
-      try {
-        localFromUnit->toTOF(outputWS->dataX(i), emptyVec, l1, l2, twoTheta,
-                             emode, pmap);
-        // Convert from time-of-flight to the desired unit
-        localOutputUnit->fromTOF(outputWS->dataX(i), emptyVec, l1, l2, twoTheta,
-                                 emode, pmap);
+    outputWS->getDetectorValues(outSpectrumInfo, *fromUnit, *outputUnit, emode,
+                                signedTheta, i, pmap);
+    try {
+      localFromUnit->toTOF(outputWS->dataX(i), emptyVec, l1, emode, pmap);
+      // Convert from time-of-flight to the desired unit
+      localOutputUnit->fromTOF(outputWS->dataX(i), emptyVec, l1, emode, pmap);
 
-        // EventWorkspace part, modifying the EventLists.
-        if (m_inputEvents) {
-          eventWS->getSpectrum(i).convertUnitsViaTof(localFromUnit.get(),
-                                                     localOutputUnit.get());
-        }
-        conversionSucceeded = true;
-      } catch (std::runtime_error) {
+      // EventWorkspace part, modifying the EventLists.
+      if (m_inputEvents) {
+        eventWS->getSpectrum(i).convertUnitsViaTof(localFromUnit.get(),
+                                                   localOutputUnit.get());
       }
-    }
-    if (!conversionSucceeded) {
-      // Get to here if exception thrown when calculating distance to detector
+    } catch (std::runtime_error) {
+      // Get to here if exception thrown in unit conversion eg when calculating
+      // distance to detector
       failedDetectorCount++;
       // Since you usually (always?) get to here when there's no attached
       // detectors, this call is

@@ -97,8 +97,7 @@ void ConvertSpectrumAxis::exec() {
     auto emode = Kernel::DeltaEMode::fromString(emodeStr);
     for (size_t i = 0; i < nHist; i++) {
       std::vector<double> xval{inputWS->x(i).front(), inputWS->x(i).back()};
-      double twoTheta, l2;
-      ExtraParametersMap pmap{};
+      UnitParametersMap pmap{};
 
       double efixedProp = getProperty("Efixed");
       if (efixedProp != EMPTY_DBL()) {
@@ -107,16 +106,17 @@ void ConvertSpectrumAxis::exec() {
                       << " Efixed: " << efixedProp << "\n";
       }
 
-      if (inputWS->getDetectorValues(spectrumInfo, *fromUnit, *toUnit, emode,
-                                     false, i, l2, twoTheta, pmap)) {
-        fromUnit->toTOF(xval, emptyVector, l1, l2, twoTheta, emode, pmap);
-        toUnit->fromTOF(xval, emptyVector, l1, l2, twoTheta, emode, pmap);
-        double value = (xval.front() + xval.back()) / 2;
-        indexMap.emplace(value, i);
-      } else {
+      inputWS->getDetectorValues(spectrumInfo, *fromUnit, *toUnit, emode, false,
+                                 i, pmap);
+      try {
+        fromUnit->toTOF(xval, emptyVector, l1, emode, pmap);
+        toUnit->fromTOF(xval, emptyVector, l1, emode, pmap);
+      } catch (std::exception &) {
         throw std::runtime_error("Unable to retrieve detector properties "
                                  "required for unit conversion");
       }
+      double value = (xval.front() + xval.back()) / 2;
+      indexMap.emplace(value, i);
     }
   } else {
     // Set up binding to memeber funtion. Avoids condition as part of loop over

@@ -43,8 +43,6 @@ public:
 private:
   void setUnitsInfo(ImageInfoModel::ImageInfo *info, int infoIndex,
                     const size_t wsIndex, const double x) const;
-  std::tuple<Mantid::Kernel::DeltaEMode::Type, double>
-  efixedAt(const size_t wsIndex) const;
   void cacheWorkspaceInfo();
   void createItemNames();
 

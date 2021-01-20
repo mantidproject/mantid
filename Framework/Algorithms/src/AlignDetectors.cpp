@@ -293,14 +293,14 @@ void AlignDetectors::align(const ConversionFactors &converter,
       Kernel::Units::dSpacing dSpacingUnit;
       std::vector<double> yunused;
       dSpacingUnit.fromTOF(
-          x, yunused, -1., -1., -1., 0,
-          ExtraParametersMap{{Kernel::UnitParams::difa, difa},
-                             {Kernel::UnitParams::difc, difc},
-                             {Kernel::UnitParams::tzero, tzero}});
+          x, yunused, -1., 0,
+          UnitParametersMap{{Kernel::UnitParams::difa, difa},
+                            {Kernel::UnitParams::difc, difc},
+                            {Kernel::UnitParams::tzero, tzero}});
 
       if (eventW) {
         Kernel::Units::TOF tofUnit;
-        tofUnit.initialize(0, 0, 0, 0, {});
+        tofUnit.initialize(0, 0, {});
         // EventWorkspace part, modifying the EventLists.
         eventW->getSpectrum(i).convertUnitsViaTof(&tofUnit, &dSpacingUnit);
       }

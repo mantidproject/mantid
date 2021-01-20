@@ -88,15 +88,13 @@ void NormaliseVanadium::exec() {
 
     Mantid::Kernel::Units::Wavelength wl;
     Mantid::Kernel::Units::TOF tof;
-    double L2, scattering;
-    ExtraParametersMap pmap{};
+    UnitParametersMap pmap{};
     m_inputWS->getDetectorValues(spectrumInfo, tof, wl,
-                                 Kernel::DeltaEMode::Elastic, false, i, L2,
-                                 scattering, pmap);
+                                 Kernel::DeltaEMode::Elastic, false, i, pmap);
     auto timeflight = inSpec.points();
     if (unitStr == "TOF")
       wl.fromTOF(timeflight.mutableRawData(), timeflight.mutableRawData(), L1,
-                 L2, scattering, 0, pmap);
+                 0, pmap);
 
     // Loop through the bins in the current spectrum
     double lambp = 0;

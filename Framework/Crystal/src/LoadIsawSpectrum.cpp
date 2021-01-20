@@ -160,7 +160,11 @@ void LoadIsawSpectrum::exec() {
 
     Mantid::Kernel::Unit_sptr unit =
         UnitFactory::Instance().create("Wavelength");
-    unit->toTOF(xdata, ydata, l1, l2, theta2, 0, {});
+    unit->toTOF(xdata, ydata, l1, 0,
+                {
+                    {UnitParams::l2, l2},
+                    {UnitParams::twoTheta, theta2},
+                });
     double one = xdata[0];
     double spect1 = spectrumCalc(one, iSpec, time, spectra, i);
 

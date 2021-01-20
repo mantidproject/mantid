@@ -97,8 +97,10 @@ SXPeak::SXPeak(double t, double phi, double intensity,
   m_nPixels = 1;
 
   const auto unit = Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
-  unit->initialize(l1, l2, m_twoTheta, 0,
-                   {{Kernel::UnitParams::difa, difa},
+  unit->initialize(l1, 0,
+                   {{Kernel::UnitParams::l2, l2},
+                    {Kernel::UnitParams::twoTheta, m_twoTheta},
+                    {Kernel::UnitParams::difa, difa},
                     {Kernel::UnitParams::difc, difc},
                     {Kernel::UnitParams::tzero, tzero}});
   try {
@@ -378,11 +380,14 @@ double PeakFindingStrategy::convertToTOF(const double xValue,
     const auto [difa, difc, tzero] =
         m_spectrumInfo.diffractometerConstants(workspaceIndex);
     // we're using d-spacing, convert the point to TOF
-    unit->initialize(m_spectrumInfo.l1(), m_spectrumInfo.l2(workspaceIndex),
-                     m_spectrumInfo.twoTheta(workspaceIndex), 0,
-                     {{Kernel::UnitParams::difa, difa},
-                      {Kernel::UnitParams::difc, difc},
-                      {Kernel::UnitParams::tzero, tzero}});
+    unit->initialize(
+        m_spectrumInfo.l1(), 0,
+        {{Kernel::UnitParams::l2, m_spectrumInfo.l2(workspaceIndex)},
+         {Kernel::UnitParams::twoTheta,
+          m_spectrumInfo.twoTheta(workspaceIndex)},
+         {Kernel::UnitParams::difa, difa},
+         {Kernel::UnitParams::difc, difc},
+         {Kernel::UnitParams::tzero, tzero}});
     return unit->singleToTOF(xValue);
   }
 }

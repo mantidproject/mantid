@@ -162,13 +162,13 @@ MatrixWorkspace_sptr ConvertUnitsUsingDetectorTable::convertViaTOF(
     // Convert the input unit to time-of-flight
     auto checkFromUnit = std::unique_ptr<Unit>(fromUnit->clone());
     auto checkOutputUnit = std::unique_ptr<Unit>(outputUnit->clone());
-    ExtraParametersMap pmap{{UnitParams::efixed, efixedColumn[detectorRow]}};
+    UnitParametersMap pmap{{UnitParams::l2, l2Column[detectorRow]},
+                           {UnitParams::twoTheta, twoThetaColumn[detectorRow]},
+                           {UnitParams::efixed, efixedColumn[detectorRow]}};
     checkFromUnit->toTOF(checkXValues, emptyVec, l1Column[detectorRow],
-                         l2Column[detectorRow], twoThetaColumn[detectorRow],
                          emodeColumn[detectorRow], pmap);
     // Convert from time-of-flight to the desired unit
     checkOutputUnit->fromTOF(checkXValues, emptyVec, l1Column[detectorRow],
-                             l2Column[detectorRow], twoThetaColumn[detectorRow],
                              emodeColumn[detectorRow], pmap);
   }
 
@@ -230,12 +230,13 @@ MatrixWorkspace_sptr ConvertUnitsUsingDetectorTable::convertViaTOF(
         std::vector<double> values(outputWS->x(wsid).begin(),
                                    outputWS->x(wsid).end());
 
-        ExtraParametersMap pmap{{UnitParams::efixed, efixed}};
+        UnitParametersMap pmap{{UnitParams::l2, l2},
+                               {UnitParams::twoTheta, twoTheta},
+                               {UnitParams::efixed, efixed}};
         // Convert the input unit to time-of-flight
-        localFromUnit->toTOF(values, emptyVec, l1, l2, twoTheta, emode, pmap);
+        localFromUnit->toTOF(values, emptyVec, l1, emode, pmap);
         // Convert from time-of-flight to the desired unit
-        localOutputUnit->fromTOF(values, emptyVec, l1, l2, twoTheta, emode,
-                                 pmap);
+        localOutputUnit->fromTOF(values, emptyVec, l1, emode, pmap);
 
         outputWS->mutableX(wsid) = std::move(values);
 

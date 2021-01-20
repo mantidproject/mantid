@@ -180,13 +180,13 @@ void AnvredCorrection::exec() {
       continue;
 
     Instrument_const_sptr inst = m_inputWS->getInstrument();
-    ExtraParametersMap pmap{};
+    UnitParametersMap pmap{};
     Mantid::Kernel::Units::Wavelength wl;
     Mantid::Kernel::Units::TOF tof;
-    double L2, scattering;
     m_inputWS->getDetectorValues(spectrumInfo, tof, wl,
-                                 Kernel::DeltaEMode::Elastic, false, i, L2,
-                                 scattering, pmap);
+                                 Kernel::DeltaEMode::Elastic, false, i, pmap);
+    double L2 = pmap.at(UnitParams::l2);
+    double scattering = pmap.at(UnitParams::twoTheta);
 
     double depth = 0.2;
 
@@ -214,10 +214,9 @@ void AnvredCorrection::exec() {
     // Loop through the bins in the current spectrum
     for (int64_t j = 0; j < specSize; j++) {
 
-      double lambda =
-          (unitStr == "TOF")
-              ? wl.convertSingleFromTOF(points[j], L1, L2, scattering, 0, pmap)
-              : points[j];
+      double lambda = (unitStr == "TOF")
+                          ? wl.convertSingleFromTOF(points[j], L1, 0, pmap)
+                          : points[j];
 
       if (m_returnTransmissionOnly) {
         Y[j] = 1.0 / this->getEventWeight(lambda, scattering);
@@ -281,13 +280,13 @@ void AnvredCorrection::execEvent() {
     if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i))
       continue;
 
-    ExtraParametersMap pmap{};
+    UnitParametersMap pmap{};
     Mantid::Kernel::Units::Wavelength wl;
     Mantid::Kernel::Units::TOF tof;
-    double L2, scattering;
     eventW->getDetectorValues(spectrumInfo, tof, wl,
-                              Kernel::DeltaEMode::Elastic, false, i, L2,
-                              scattering, pmap);
+                              Kernel::DeltaEMode::Elastic, false, i, pmap);
+    double L2 = pmap.at(UnitParams::l2);
+    double scattering = pmap.at(UnitParams::twoTheta);
 
     EventList el = eventW->getSpectrum(i);
     el.switchTo(WEIGHTED_NOTIME);
@@ -307,7 +306,7 @@ void AnvredCorrection::execEvent() {
       double lambda = ev.tof();
 
       if ("TOF" == unitStr)
-        lambda = wl.convertSingleFromTOF(lambda, L1, L2, scattering, 0, pmap);
+        lambda = wl.convertSingleFromTOF(lambda, L1, 0, pmap);
 
       double value = this->getEventWeight(lambda, scattering);
 

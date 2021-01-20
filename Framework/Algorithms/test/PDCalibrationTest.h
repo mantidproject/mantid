@@ -166,8 +166,8 @@ public:
     Mantid::Kernel::Units::dSpacing dSpacingUnit;
     std::vector<double> unusedy;
     dSpacingUnit.fromTOF(
-        dValues, unusedy, -1., -1., -1., 0,
-        Mantid::Kernel::ExtraParametersMap{{UnitParams::difc, DIFC_155}});
+        dValues, unusedy, -1., 0,
+        Mantid::Kernel::UnitParametersMap{{UnitParams::difc, DIFC_155}});
 
     const std::string prefix{"PDCalibration_difc"};
 
@@ -229,9 +229,9 @@ public:
     Mantid::Kernel::Units::dSpacing dSpacingUnit;
     std::vector<double> unusedy;
     dSpacingUnit.fromTOF(
-        dValues, unusedy, -1., -1., -1., 0,
-        Mantid::Kernel::ExtraParametersMap{{UnitParams::difc, DIFC_155},
-                                           {UnitParams::tzero, TZERO}});
+        dValues, unusedy, -1., 0,
+        Mantid::Kernel::UnitParametersMap{{UnitParams::difc, DIFC_155},
+                                          {UnitParams::tzero, TZERO}});
 
     const std::string prefix{"PDCalibration_difc_tzero"};
 
@@ -297,9 +297,9 @@ public:
     Mantid::Kernel::Units::dSpacing dSpacingUnit;
     std::vector<double> unusedy;
     dSpacingUnit.fromTOF(
-        dValues, unusedy, -1., -1., -1., 0,
-        Mantid::Kernel::ExtraParametersMap{{UnitParams::difc, DIFC_155},
-                                           {UnitParams::tzero, TZERO}});
+        dValues, unusedy, -1., 0,
+        Mantid::Kernel::UnitParametersMap{{UnitParams::difc, DIFC_155},
+                                          {UnitParams::tzero, TZERO}});
 
     const std::string prefix{"PDCalibration_difc_tzero_difa"};
 
@@ -382,8 +382,8 @@ public:
     Mantid::Kernel::Units::dSpacing dSpacingUnit;
     std::vector<double> unusedy;
     dSpacingUnit.fromTOF(
-        dValues, unusedy, -1., -1., -1., 0,
-        Mantid::Kernel::ExtraParametersMap{{UnitParams::difc, DIFC_155}});
+        dValues, unusedy, -1., 0,
+        Mantid::Kernel::UnitParametersMap{{UnitParams::difc, DIFC_155}});
 
     const std::string prefix{"PDCalibration_difc"};
 
@@ -443,8 +443,8 @@ public:
     Mantid::Kernel::Units::dSpacing dSpacingUnit;
     std::vector<double> unusedy;
     dSpacingUnit.fromTOF(
-        dValues, unusedy, -1., -1., -1., 0,
-        Mantid::Kernel::ExtraParametersMap{{UnitParams::difc, DIFC_155}});
+        dValues, unusedy, -1., 0,
+        Mantid::Kernel::UnitParametersMap{{UnitParams::difc, DIFC_155}});
 
     const std::string prefix{"PDCalibration_difc"};
 
@@ -502,8 +502,8 @@ public:
     Mantid::Kernel::Units::dSpacing dSpacingUnit;
     std::vector<double> unusedy;
     dSpacingUnit.fromTOF(
-        dValues, unusedy, -1., -1., -1., 0,
-        Mantid::Kernel::ExtraParametersMap{{UnitParams::difc, DIFC_155}});
+        dValues, unusedy, -1., 0,
+        Mantid::Kernel::UnitParametersMap{{UnitParams::difc, DIFC_155}});
     createSampleWS();
     pdc.initialize();
     pdc.setProperty("InputWorkspace", "PDCalibrationTest_WS");

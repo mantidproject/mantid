@@ -138,11 +138,11 @@ public:
     // convert the bits that matter to TOF
     Kernel::Units::dSpacing dSpacingUnit;
     std::vector<double> yunused;
-    dSpacingUnit.toTOF(inTofPos, yunused, -1, -1, -1, 0,
+    dSpacingUnit.toTOF(inTofPos, yunused, -1, 0,
                        {{Kernel::UnitParams::difa, difa},
                         {Kernel::UnitParams::difc, difc},
                         {Kernel::UnitParams::tzero, tzero}});
-    dSpacingUnit.toTOF(inTofWindows, yunused, -1, -1, -1, 0,
+    dSpacingUnit.toTOF(inTofWindows, yunused, -1, 0,
                        {{Kernel::UnitParams::difa, difa},
                         {Kernel::UnitParams::difc, difc},
                         {Kernel::UnitParams::tzero, tzero}});
@@ -680,10 +680,10 @@ void PDCalibration::exec() {
          double chisq = 0.;
          Mantid::Kernel::Units::dSpacing dSpacingUnit;
          dSpacingUnit.initialize(
-             -1., -1., -1., 0,
-             Kernel::ExtraParametersMap{{Kernel::UnitParams::difa, difa},
-                                        {Kernel::UnitParams::difc, difc},
-                                        {Kernel::UnitParams::tzero, t0}});
+             -1., 0,
+             Kernel::UnitParametersMap{{Kernel::UnitParams::difa, difa},
+                                       {Kernel::UnitParams::difc, difc},
+                                       {Kernel::UnitParams::tzero, t0}});
          for (std::size_t i = 0; i < numPeaks; ++i) {
            if (std::isnan(tof_vec_full[i]))
              continue;
@@ -792,10 +792,10 @@ double gsl_costFunction(const gsl_vector *v, void *peaks) {
   }
   Mantid::Kernel::Units::dSpacing dSpacingUnit;
   dSpacingUnit.initialize(
-      -1., -1., -1., 0,
-      Kernel::ExtraParametersMap{{Kernel::UnitParams::difa, difa},
-                                 {Kernel::UnitParams::difc, difc},
-                                 {Kernel::UnitParams::tzero, tzero}});
+      -1., 0,
+      Kernel::UnitParametersMap{{Kernel::UnitParams::difa, difa},
+                                {Kernel::UnitParams::difc, difc},
+                                {Kernel::UnitParams::tzero, tzero}});
 
   // calculate the sum of the residuals from observed peaks
   double errsum = 0.0;

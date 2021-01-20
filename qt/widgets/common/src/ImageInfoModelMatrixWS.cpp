@@ -105,13 +105,17 @@ void ImageInfoModelMatrixWS::setUnitsInfo(ImageInfoModel::ImageInfo *info,
                                           int infoIndex, const size_t wsIndex,
                                           const double x) const {
   const auto l1 = m_spectrumInfo->l1();
-  const auto l2 = m_spectrumInfo->l2(wsIndex);
-  const auto twoTheta = m_spectrumInfo->twoTheta(wsIndex);
-  const auto [emode, efixed] = efixedAt(wsIndex);
-  std::vector<int> warnDets;
-  const auto [difa, difc, tzero] =
-      m_spectrumInfo->diffractometerConstants(wsIndex, warnDets);
-
+  auto emode = m_workspace->getEMode();
+  UnitParametersMap pmap{};
+  m_workspace->getDetectorValues(*m_spectrumInfo, Units::Empty(),
+                                 Units::Empty(), emode, false, wsIndex, pmap);
+  double efixed = 0.;
+  if (pmap.find(UnitParams::efixed) != pmap.end()) {
+    efixed = pmap[UnitParams::efixed];
+  }
+  // if it's not possible to find an efixed we are forced to treat is as elastic
+  if (efixed == 0.0)
+    emode = DeltaEMode::Elastic;
   double tof(0.0);
   const auto &unitFactory = UnitFactory::Instance();
   const auto tofUnit = unitFactory.create("TOF");
@@ -120,13 +124,7 @@ void ImageInfoModelMatrixWS::setUnitsInfo(ImageInfoModel::ImageInfo *info,
     tof = x;
   } else {
     try {
-      tof = m_xunit->convertSingleToTOF(x, l1, l2, twoTheta, emode,
-                                        {{UnitParams::efixed, efixed},
-                                         {UnitParams::difa, difa},
-                                         {UnitParams::difc, difc},
-                                         {UnitParams::tzero, tzero}});
-      info->setValue(infoIndex, defaultFormat(tof));
-      ++infoIndex;
+      tof = m_xunit->convertSingleToTOF(x, l1, emode, pmap);
     } catch (std::exception &exc) {
       // without TOF we can't get to the other units
       if (g_log.is(Logger::Priority::PRIO_DEBUG))
@@ -141,12 +139,7 @@ void ImageInfoModelMatrixWS::setUnitsInfo(ImageInfoModel::ImageInfo *info,
     if (!requiresEFixed || efixed > 0.0) {
       try {
         // the final parameter is unused and a relic
-        const auto unitValue =
-            unit->convertSingleFromTOF(tof, l1, l2, twoTheta, emode,
-                                       {{UnitParams::efixed, efixed},
-                                        {UnitParams::difa, difa},
-                                        {UnitParams::difc, difc},
-                                        {UnitParams::tzero, tzero}});
+        const auto unitValue = unit->convertSingleFromTOF(tof, l1, emode, pmap);
         info->setValue(infoIndex, defaultFormat(unitValue));
       } catch (std::exception &exc) {
         if (g_log.is(Logger::Priority::PRIO_DEBUG))
@@ -238,57 +231,6 @@ void ImageInfoModelMatrixWS::createItemNames() {
   for (const auto &unitInfo : displayUnits()) {
     appendUnitIfNotX(*std::get<0>(unitInfo));
   }
-}
-
-/**
- * Return tuple(emode, efixed) for the pixel at the given workspace index
- * @param wsIndex Indeox of spectrum to query
- */
-std::tuple<Mantid::Kernel::DeltaEMode::Type, double>
-ImageInfoModelMatrixWS::efixedAt(const size_t wsIndex) const {
-  DeltaEMode::Type emode = m_workspace->getEMode();
-  double efixed(0.0);
-  if (m_spectrumInfo->isMonitor(wsIndex))
-    return std::make_tuple(emode, efixed);
-
-  if (emode == DeltaEMode::Direct) {
-    const auto &run = m_workspace->run();
-    for (const auto &logName : {"Ei", "EnergyRequested", "EnergyEstimate"}) {
-      if (run.hasProperty(logName)) {
-        efixed = run.getPropertyValueAsType<double>(logName);
-        break;
-      }
-    }
-  } else if (emode == DeltaEMode::Indirect) {
-    const auto &detector = m_spectrumInfo->detector(wsIndex);
-    const ParameterMap &pmap = m_workspace->constInstrumentParameters();
-    try {
-      for (const auto &paramName : {"Efixed", "Efixed-val"}) {
-        auto parameter = pmap.getRecursive(&detector, paramName);
-        if (parameter) {
-          efixed = parameter->value<double>();
-          break;
-        }
-        // check the instrument as if the detector is a group the above
-        // recursion doesn't work
-        parameter = pmap.getRecursive(m_instrument.get(), paramName);
-        if (parameter) {
-          efixed = parameter->value<double>();
-          break;
-        }
-      }
-    } catch (std::runtime_error &exc) {
-      g_log.debug() << "Failed to get efixed from spectrum at index " << wsIndex
-                    << ": " << exc.what() << "\n";
-      efixed = 0.0;
-    }
-  }
-
-  // if it's not possible to find an efixed we are forced to treat is as elastic
-  if (efixed == 0.0)
-    emode = DeltaEMode::Elastic;
-
-  return std::make_tuple(emode, efixed);
 }
 
 } // namespace MantidWidgets

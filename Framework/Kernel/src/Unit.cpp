@@ -20,7 +20,7 @@ namespace Kernel {
  * Default constructor
  * Gives the unit an empty UnitLabel
  */
-Unit::Unit() : initialized(false), l1(0), l2(0), twoTheta(0), emode(0) {}
+Unit::Unit() : initialized(false), l1(0), l2(0), emode(0) {}
 
 bool Unit::operator==(const Unit &u) const { return unitID() == u.unitID(); }
 
@@ -114,20 +114,17 @@ void Unit::addConversion(std::string to, const double &factor,
  *                    Fixed energy: EI (emode=1) or EF (emode=2)(in meV)
  *                    Delta (not currently used)
  */
-void Unit::initialize(const double &_l1, const double &_l2,
-                      const double &_twoTheta, const int &_emode,
-                      const ExtraParametersMap &params) {
+void Unit::initialize(const double &_l1, const int &_emode,
+                      const UnitParametersMap &params) {
   l1 = _l1;
-  l2 = _l2;
-  twoTheta = _twoTheta;
-  validateExtraParams(_emode, params);
+  validateUnitParams(_emode, params);
   emode = _emode;
   m_params = &params;
   initialized = true;
   this->init();
 }
 
-void Unit::validateExtraParams(const int, const ExtraParametersMap &) {}
+void Unit::validateUnitParams(const int, const UnitParametersMap &) {}
 
 //---------------------------------------------------------------------------------------
 /** Perform the conversion to TOF on a vector of data
@@ -135,17 +132,17 @@ void Unit::validateExtraParams(const int, const ExtraParametersMap &) {}
 
 void Unit::toTOF(
     std::vector<double> &xdata, std::vector<double> &ydata, const double &_l1,
-    const double &_l2, const double &_twoTheta, const int &_emode,
+    const int &_emode,
     std::initializer_list<std::pair<const UnitParams, double>> params) {
-  ExtraParametersMap paramsMap(params);
-  toTOF(xdata, ydata, _l1, _l2, _twoTheta, _emode, paramsMap);
+  UnitParametersMap paramsMap(params);
+  toTOF(xdata, ydata, _l1, _emode, paramsMap);
 }
 
 void Unit::toTOF(std::vector<double> &xdata, std::vector<double> &ydata,
-                 const double &_l1, const double &_l2, const double &_twoTheta,
-                 const int &_emode, const ExtraParametersMap &params) {
+                 const double &_l1, const int &_emode,
+                 const UnitParametersMap &params) {
   UNUSED_ARG(ydata);
-  this->initialize(_l1, _l2, _twoTheta, _emode, params);
+  this->initialize(_l1, _emode, params);
   size_t numX = xdata.size();
   for (size_t i = 0; i < numX; i++)
     xdata[i] = this->singleToTOF(xdata[i]);
@@ -154,16 +151,13 @@ void Unit::toTOF(std::vector<double> &xdata, std::vector<double> &ydata,
 /** Convert a single value to TOF
 @param xvalue
 @param l1
-@param l2
-@param twoTheta
 @param emode
 @param params (eg efixed or delta)
 */
 double Unit::convertSingleToTOF(const double xvalue, const double &l1,
-                                const double &l2, const double &twoTheta,
                                 const int &emode,
-                                const ExtraParametersMap &params) {
-  this->initialize(l1, l2, twoTheta, emode, params);
+                                const UnitParametersMap &params) {
+  this->initialize(l1, emode, params);
   return this->singleToTOF(xvalue);
 }
 
@@ -172,18 +166,17 @@ double Unit::convertSingleToTOF(const double xvalue, const double &l1,
  */
 void Unit::fromTOF(
     std::vector<double> &xdata, std::vector<double> &ydata, const double &_l1,
-    const double &_l2, const double &_twoTheta, const int &_emode,
+    const int &_emode,
     std::initializer_list<std::pair<const UnitParams, double>> params) {
-  ExtraParametersMap paramsMap(params);
-  fromTOF(xdata, ydata, _l1, _l2, _twoTheta, _emode, paramsMap);
+  UnitParametersMap paramsMap(params);
+  fromTOF(xdata, ydata, _l1, _emode, paramsMap);
 }
 
 void Unit::fromTOF(std::vector<double> &xdata, std::vector<double> &ydata,
-                   const double &_l1, const double &_l2,
-                   const double &_twoTheta, const int &_emode,
-                   const ExtraParametersMap &params) {
+                   const double &_l1, const int &_emode,
+                   const UnitParametersMap &params) {
   UNUSED_ARG(ydata);
-  this->initialize(_l1, _l2, _twoTheta, _emode, params);
+  this->initialize(_l1, _emode, params);
   size_t numX = xdata.size();
   for (size_t i = 0; i < numX; i++)
     xdata[i] = this->singleFromTOF(xdata[i]);
@@ -192,16 +185,13 @@ void Unit::fromTOF(std::vector<double> &xdata, std::vector<double> &ydata,
 /** Convert a single value from TOF
 @param xvalue
 @param l1
-@param l2
-@param twoTheta
 @param emode
 @param params (eg efixed or delta)
 */
 double Unit::convertSingleFromTOF(const double xvalue, const double &l1,
-                                  const double &l2, const double &twoTheta,
                                   const int &emode,
-                                  const ExtraParametersMap &params) {
-  this->initialize(l1, l2, twoTheta, emode, params);
+                                  const UnitParametersMap &params) {
+  this->initialize(l1, emode, params);
   return this->singleFromTOF(xvalue);
 }
 
@@ -330,9 +320,15 @@ Wavelength::Wavelength()
 
 const UnitLabel Wavelength::label() const { return Symbol::Angstrom; }
 
-void Wavelength::validateExtraParams(const int emode,
-                                     const ExtraParametersMap &params) {
-  auto it = params.find(UnitParams::efixed);
+void Wavelength::validateUnitParams(const int emode,
+                                    const UnitParametersMap &params) {
+  auto it = params.find(UnitParams::l2);
+  if (it == params.end()) {
+    throw std::runtime_error("An l2 value must be supplied in the extra "
+                             "parameters when initialising " +
+                             this->unitID() + " for conversion via TOF");
+  }
+  it = params.find(UnitParams::efixed);
   if ((emode != 0) && (it == params.end())) {
     throw std::runtime_error("An efixed value must be supplied in the extra "
                              "parameters when initialising " +
@@ -350,6 +346,10 @@ void Wavelength::init() {
   auto it = m_params->find(UnitParams::efixed);
   if (it != m_params->end()) {
     efixed = it->second;
+  }
+  it = m_params->find(UnitParams::l2);
+  if (it != m_params->end()) {
+    l2 = it->second;
   }
 
   if (emode == 1) {
@@ -460,7 +460,21 @@ Energy::Energy() : Unit(), factorTo(DBL_MIN), factorFrom(DBL_MIN) {
   addConversion("Momentum", 2 * M_PI / factor, 0.5);
 }
 
+void Energy::validateUnitParams(const int emode,
+                                const UnitParametersMap &params) {
+  auto it = params.find(UnitParams::l2);
+  if (it == params.end()) {
+    throw std::runtime_error("An l2 value must be supplied in the extra "
+                             "parameters when initialising " +
+                             this->unitID() + " for conversion via TOF");
+  }
+}
+
 void Energy::init() {
+  auto it = m_params->find(UnitParams::l2);
+  if (it != m_params->end()) {
+    l2 = it->second;
+  }
   {
     const double TOFinMicroseconds = 1e6;
     factorTo =
@@ -519,7 +533,21 @@ Energy_inWavenumber::Energy_inWavenumber()
   addConversion("Momentum", 2 * M_PI / factor, 0.5);
 }
 
+void Energy_inWavenumber::validateUnitParams(const int emode,
+                                             const UnitParametersMap &params) {
+  auto it = params.find(UnitParams::l2);
+  if (it == params.end()) {
+    throw std::runtime_error("An l2 value must be supplied in the extra "
+                             "parameters when initialising " +
+                             this->unitID() + " for conversion via TOF");
+  }
+}
+
 void Energy_inWavenumber::init() {
+  auto it = m_params->find(UnitParams::l2);
+  if (it != m_params->end()) {
+    l2 = it->second;
+  }
   {
     const double TOFinMicroseconds = 1e6;
     factorTo = sqrt(PhysicalConstants::NeutronMass *
@@ -580,18 +608,19 @@ dSpacing::dSpacing() : Unit(), difa(0), difc(DBL_MIN), tzero(0) {
   addConversion("QSquared", (factor * factor), -2.0);
 }
 
-void dSpacing::validateExtraParams(const int,
-                                   const ExtraParametersMap &params) {
+void dSpacing::validateUnitParams(const int, const UnitParametersMap &params) {
   auto it = params.find(UnitParams::difc);
   if (it == params.end()) {
     throw std::runtime_error(
         "A difc value must be supplied in the extra parameters when "
-        "initialising dSpacing for conversion via TOF");
+        "initialising " +
+        this->unitID() + " for conversion via TOF");
   }
   if (it->second < 0.) {
     throw std::runtime_error(
         "A positive difc value must be supplied in the extra parameters when "
-        "initialising dSpacing for conversion via TOF");
+        "initialising " +
+        this->unitID() + " for conversion via TOF");
   }
 }
 
@@ -684,19 +713,19 @@ double dSpacing::conversionTOFMax() const {
 
 double dSpacing::calcTofMin(const double difc, const double difa,
                             const double tzero, const double tofmin) {
-  Kernel::ExtraParametersMap params{{Kernel::UnitParams::difa, difa},
-                                    {Kernel::UnitParams::difc, difc},
-                                    {Kernel::UnitParams::tzero, tzero}};
-  initialize(-1., -1., -1., 0, params);
+  Kernel::UnitParametersMap params{{Kernel::UnitParams::difa, difa},
+                                   {Kernel::UnitParams::difc, difc},
+                                   {Kernel::UnitParams::tzero, tzero}};
+  initialize(-1., 0, params);
   return std::max(conversionTOFMin(), tofmin);
 }
 
 double dSpacing::calcTofMax(const double difc, const double difa,
                             const double tzero, const double tofmax) {
-  Kernel::ExtraParametersMap params{{Kernel::UnitParams::difa, difa},
-                                    {Kernel::UnitParams::difc, difc},
-                                    {Kernel::UnitParams::tzero, tzero}};
-  initialize(-1, -1, -1, 0, params);
+  Kernel::UnitParametersMap params{{Kernel::UnitParams::difa, difa},
+                                   {Kernel::UnitParams::difc, difc},
+                                   {Kernel::UnitParams::tzero, tzero}};
+  initialize(-1, 0, params);
   return std::min(conversionTOFMax(), tofmax);
 }
 
@@ -717,7 +746,33 @@ const UnitLabel dSpacingPerpendicular::label() const {
 dSpacingPerpendicular::dSpacingPerpendicular()
     : Unit(), factorTo(DBL_MIN), factorFrom(DBL_MIN) {}
 
+void dSpacingPerpendicular::validateUnitParams(
+    const int, const UnitParametersMap &params) {
+  auto it = params.find(UnitParams::l2);
+  if (it == params.end()) {
+    throw std::runtime_error(
+        "A l2 value must be supplied in the extra parameters when "
+        "initialising " +
+        this->unitID() + " for conversion via TOF");
+  }
+  it = params.find(UnitParams::twoTheta);
+  if (it == params.end()) {
+    throw std::runtime_error(
+        "A two theta value must be supplied in the extra parameters when "
+        "initialising " +
+        this->unitID() + " for conversion via TOF");
+  }
+}
+
 void dSpacingPerpendicular::init() {
+  auto it = m_params->find(UnitParams::l2);
+  if (it != m_params->end()) {
+    l2 = it->second;
+  }
+  it = m_params->find(UnitParams::twoTheta);
+  if (it != m_params->end()) {
+    twoTheta = it->second;
+  }
   factorTo =
       (PhysicalConstants::NeutronMass * (l1 + l2)) / PhysicalConstants::h;
 
@@ -776,7 +831,33 @@ MomentumTransfer::MomentumTransfer()
   addConversion("dSpacing", factor, -1.0);
 }
 
+void MomentumTransfer::validateUnitParams(const int,
+                                          const UnitParametersMap &params) {
+  auto it = params.find(UnitParams::l2);
+  if (it == params.end()) {
+    throw std::runtime_error(
+        "A l2 value must be supplied in the extra parameters when "
+        "initialising " +
+        this->unitID() + " for conversion via TOF");
+  }
+  it = params.find(UnitParams::twoTheta);
+  if (it == params.end()) {
+    throw std::runtime_error(
+        "A two theta value must be supplied in the extra parameters when "
+        "initialising " +
+        this->unitID() + " for conversion via TOF");
+  }
+}
+
 void MomentumTransfer::init() {
+  auto it = m_params->find(UnitParams::l2);
+  if (it != m_params->end()) {
+    l2 = it->second;
+  }
+  it = m_params->find(UnitParams::twoTheta);
+  if (it != m_params->end()) {
+    twoTheta = it->second;
+  }
   // First the crux of the conversion
   factorTo = (4.0 * M_PI * PhysicalConstants::NeutronMass * (l1 + l2) *
               sin(twoTheta / 2.0)) /
@@ -829,7 +910,32 @@ QSquared::QSquared() : Unit(), factorTo(DBL_MIN), factorFrom(DBL_MIN) {
   addConversion("dSpacing", factor, -0.5);
 }
 
+void QSquared::validateUnitParams(const int, const UnitParametersMap &params) {
+  auto it = params.find(UnitParams::l2);
+  if (it == params.end()) {
+    throw std::runtime_error(
+        "A l2 value must be supplied in the extra parameters when "
+        "initialising " +
+        this->unitID() + " for conversion via TOF");
+  }
+  it = params.find(UnitParams::twoTheta);
+  if (it == params.end()) {
+    throw std::runtime_error(
+        "A two theta value must be supplied in the extra parameters when "
+        "initialising " +
+        this->unitID() + " for conversion via TOF");
+  }
+}
+
 void QSquared::init() {
+  auto it = m_params->find(UnitParams::l2);
+  if (it != m_params->end()) {
+    l2 = it->second;
+  }
+  it = m_params->find(UnitParams::twoTheta);
+  if (it != m_params->end()) {
+    twoTheta = it->second;
+  }
   // First the crux of the conversion
   factorTo = (4.0 * M_PI * PhysicalConstants::NeutronMass * (l1 + l2) *
               sin(twoTheta / 2.0)) /
@@ -891,8 +997,8 @@ DeltaE::DeltaE()
   addConversion("DeltaE_inFrequency", PhysicalConstants::meVtoFrequency, 1.);
 }
 
-void DeltaE::validateExtraParams(const int emode,
-                                 const ExtraParametersMap &params) {
+void DeltaE::validateUnitParams(const int emode,
+                                const UnitParametersMap &params) {
   if (emode != 1 && emode != 2) {
     throw std::invalid_argument(
         "emode must be equal to 1 or 2 for energy transfer calculation");
@@ -911,10 +1017,21 @@ void DeltaE::validateExtraParams(const int emode,
   if (it->second <= 0) {
     throw std::runtime_error("efixed must be greater than zero");
   }
+  it = params.find(UnitParams::l2);
+  if (it == params.end()) {
+    throw std::runtime_error(
+        "A l2 value must be supplied in the extra parameters when "
+        "initialising " +
+        this->unitID() + " for conversion via TOF");
+  }
 }
 
 void DeltaE::init() {
-  auto it = m_params->find(UnitParams::efixed);
+  auto it = m_params->find(UnitParams::l2);
+  if (it != m_params->end()) {
+    l2 = it->second;
+  }
+  it = m_params->find(UnitParams::efixed);
   if (it != m_params->end()) {
     efixed = it->second;
   }
@@ -1110,9 +1227,15 @@ Momentum::Momentum()
   //
 }
 
-void Momentum::validateExtraParams(const int emode,
-                                   const ExtraParametersMap &params) {
-  auto it = params.find(UnitParams::efixed);
+void Momentum::validateUnitParams(const int emode,
+                                  const UnitParametersMap &params) {
+  auto it = params.find(UnitParams::l2);
+  if (it == params.end()) {
+    throw std::runtime_error(
+        "An l2 value must be supplied in the extra parameters when "
+        "initialising momentum for conversion via TOF");
+  }
+  it = params.find(UnitParams::efixed);
   if ((emode != 0) && (it == params.end())) {
     throw std::runtime_error(
         "An efixed value must be supplied in the extra parameters when "
@@ -1127,7 +1250,12 @@ void Momentum::init() {
   double toAngstroms = 1e10;
   sfpTo = 0.0;
 
-  auto it = m_params->find(UnitParams::efixed);
+  auto it = m_params->find(UnitParams::l2);
+  if (it != m_params->end()) {
+    l2 = it->second;
+  }
+
+  it = m_params->find(UnitParams::efixed);
   if (it != m_params->end()) {
     efixed = it->second;
   }

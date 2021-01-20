@@ -282,21 +282,25 @@ void UnitsConversionHelper::initialize(
   m_DIFC = (*m_pDIFCs)[0];
   m_TZERO = (*m_pTZEROs)[0];
 
-  m_TargetUnit->initialize(m_L1, m_L2, m_TwoTheta, m_Emode,
-                           {{UnitParams::efixed, Efix},
+  m_TargetUnit->initialize(m_L1, m_Emode,
+                           {{UnitParams::l2, m_L2},
+                            {UnitParams::twoTheta, m_TwoTheta},
+                            {UnitParams::efixed, Efix},
                             {UnitParams::difa, m_DIFA},
                             {UnitParams::difc, m_DIFC},
                             {UnitParams::tzero, m_TZERO}});
   if (m_SourceWSUnit) {
-    m_SourceWSUnit->initialize(m_L1, m_L2, m_TwoTheta, m_Emode,
-                               {{UnitParams::efixed, Efix},
+    m_SourceWSUnit->initialize(m_L1, m_Emode,
+                               {{UnitParams::l2, m_L2},
+                                {UnitParams::twoTheta, m_TwoTheta},
+                                {UnitParams::efixed, Efix},
                                 {UnitParams::difa, m_DIFA},
                                 {UnitParams::difc, m_DIFC},
                                 {UnitParams::tzero, m_TZERO}});
   }
 }
-/** Method updates unit conversion given the index of detector parameters in the
- * array of detectors */
+/** Method updates unit conversion given the index of detector parameters in
+ * the array of detectors */
 void UnitsConversionHelper::updateConversion(size_t i) {
   switch (m_UnitCnvrsn) {
   case (CnvrtToMD::ConvertNo):
@@ -313,8 +317,10 @@ void UnitsConversionHelper::updateConversion(size_t i) {
     m_DIFC = (*m_pDIFCs)[i];
     m_TZERO = (*m_pTZEROs)[i];
 
-    m_TargetUnit->initialize(m_L1, m_L2, m_TwoTheta, m_Emode,
-                             {{UnitParams::efixed, Efix},
+    m_TargetUnit->initialize(m_L1, m_Emode,
+                             {{UnitParams::l2, m_L2},
+                              {UnitParams::twoTheta, m_TwoTheta},
+                              {UnitParams::efixed, Efix},
                               {UnitParams::difa, m_DIFA},
                               {UnitParams::difc, m_DIFC},
                               {UnitParams::tzero, m_TZERO}});
@@ -330,23 +336,19 @@ void UnitsConversionHelper::updateConversion(size_t i) {
     m_DIFC = (*m_pDIFCs)[i];
     m_TZERO = (*m_pTZEROs)[i];
 
-    m_TargetUnit->initialize(m_L1, m_L2, m_TwoTheta, m_Emode,
-                             {{UnitParams::efixed, Efix},
-                              {UnitParams::difa, m_DIFA},
-                              {UnitParams::difc, m_DIFC},
-                              {UnitParams::tzero, m_TZERO}});
-    m_SourceWSUnit->initialize(m_L1, m_L2, m_TwoTheta, m_Emode,
-                               {{UnitParams::efixed, Efix},
-                                {UnitParams::difa, m_DIFA},
-                                {UnitParams::difc, m_DIFC},
-                                {UnitParams::tzero, m_TZERO}});
+    Kernel::UnitParametersMap pmap = {
+        {UnitParams::l2, m_L2},     {UnitParams::twoTheta, m_TwoTheta},
+        {UnitParams::efixed, Efix}, {UnitParams::difa, m_DIFA},
+        {UnitParams::difc, m_DIFC}, {UnitParams::tzero, m_TZERO}};
+    m_TargetUnit->initialize(m_L1, m_Emode, pmap);
+    m_SourceWSUnit->initialize(m_L1, m_Emode, pmap);
     return;
   }
   default:
     throw std::runtime_error(
         "updateConversion: unknown type of conversion requested");
   }
-}
+} // namespace MDAlgorithms
 /** do actual unit conversion from  input to oputput data
 @param   val  -- the input value which has to be converted
 @return          the input value converted into the units requested.

@@ -268,26 +268,33 @@ void RemoveBins::transformRangeUnit(const int index, double &startX,
     startX = factor * std::pow(m_startX, power);
     endX = factor * std::pow(m_endX, power);
   } else {
-    double l1, l2, theta;
-    l1 = m_spectrumInfo->l1();
+    double l1 = m_spectrumInfo->l1();
 
-    Kernel::ExtraParametersMap pmap{};
-    if (m_inputWorkspace->getDetectorValues(
-            *m_spectrumInfo, *m_rangeUnit, *inputUnit,
-            Kernel::DeltaEMode::Elastic, false, index, l2, theta, pmap)) {
-      g_log.debug() << "Detector for index " << index
-                    << " has L1+L2=" << l1 + l2 << " & 2theta= " << theta
-                    << '\n';
-      std::vector<double> endPoints;
-      endPoints.emplace_back(startX);
-      endPoints.emplace_back(endX);
+    Kernel::UnitParametersMap pmap{};
+    m_inputWorkspace->getDetectorValues(*m_spectrumInfo, *m_rangeUnit,
+                                        *inputUnit, Kernel::DeltaEMode::Elastic,
+                                        false, index, pmap);
+    double l2 = 0.;
+    if (pmap.find(UnitParams::l2) != pmap.end()) {
+      l2 = pmap[UnitParams::l2];
+    }
+    double theta = 0.;
+    if (pmap.find(UnitParams::twoTheta) != pmap.end()) {
+      l2 = pmap[UnitParams::twoTheta];
+    }
+    g_log.debug() << "Detector for index " << index << " has L1+L2=" << l1 + l2
+                  << " & 2theta= " << theta << '\n';
+    std::vector<double> endPoints;
+    endPoints.emplace_back(startX);
+    endPoints.emplace_back(endX);
+    try {
       std::vector<double> emptyVec;
       // assume elastic
-      m_rangeUnit->toTOF(endPoints, emptyVec, l1, l2, theta, 0, pmap);
-      inputUnit->fromTOF(endPoints, emptyVec, l1, l2, theta, 0, pmap);
+      m_rangeUnit->toTOF(endPoints, emptyVec, l1, 0, pmap);
+      inputUnit->fromTOF(endPoints, emptyVec, l1, 0, pmap);
       startX = endPoints.front();
       endX = endPoints.back();
-    } else {
+    } catch (std::exception &) {
       throw std::runtime_error("Unable to retrieve detector properties "
                                "required for unit conversion");
     }

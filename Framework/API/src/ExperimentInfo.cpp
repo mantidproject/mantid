@@ -1352,38 +1352,38 @@ void ExperimentInfo::populateIfNotLoaded() const {
  * @param specInfo :: SpectrumInfo object (should be available from
  * ExperimentInfo::spectrumInfo() but avoiding that for now because of
  * performance issue)
- * @param inputUnit :: The input unit
- * @param outputUnit :: The output unit
+ * @param inputUnit :: The input unit (Empty implies "all")
+ * @param outputUnit :: The output unit (Empty implies "all")
  * @param emode :: The energy mode
  * @param signedTheta :: Return twotheta with sign or without
  * @param wsIndex :: The workspace index
  * @param l2 :: The returned sample - detector distance
  * @param twoTheta :: the returned two theta angle
- * @param pmap :: a map containing optional unit conversion parameters eg efixed
- * @returns true if lookup successful, false on error
+ * @param pmap :: a map containing values for conversion parameters that are not
+required by all unit classes to perform their conversions eg efixed. It can
+contain values on the way in if a look up isn't desired here eg if value
+supplied in parameters to the calling algorithm
  */
-bool ExperimentInfo::getDetectorValues(const API::SpectrumInfo &specInfo,
+void ExperimentInfo::getDetectorValues(const API::SpectrumInfo &specInfo,
                                        const Kernel::Unit &inputUnit,
                                        const Kernel::Unit &outputUnit,
                                        Kernel::DeltaEMode::Type emode,
                                        const bool signedTheta, int64_t wsIndex,
-                                       double &l2, double &twoTheta,
-                                       ExtraParametersMap &pmap) const {
+                                       UnitParametersMap &pmap) const {
   if (!specInfo.hasDetectors(wsIndex))
-    return false;
-
-  l2 = specInfo.l2(wsIndex);
+    return;
+  pmap[UnitParams::l2] = specInfo.l2(wsIndex);
 
   if (!specInfo.isMonitor(wsIndex)) {
     // The scattering angle for this detector (in radians).
     try {
       if (signedTheta)
-        twoTheta = specInfo.signedTwoTheta(wsIndex);
+        pmap[UnitParams::twoTheta] = specInfo.signedTwoTheta(wsIndex);
       else
-        twoTheta = specInfo.twoTheta(wsIndex);
+        pmap[UnitParams::twoTheta] = specInfo.twoTheta(wsIndex);
     } catch (const std::runtime_error &e) {
       g_log.warning(e.what());
-      twoTheta = std::numeric_limits<double>::quiet_NaN();
+      pmap[UnitParams::twoTheta] = std::numeric_limits<double>::quiet_NaN();
     }
     if (emode != Kernel::DeltaEMode::Elastic &&
         pmap.find(UnitParams::efixed) == pmap.end()) {
@@ -1403,8 +1403,11 @@ bool ExperimentInfo::getDetectorValues(const API::SpectrumInfo &specInfo,
 
     std::vector<detid_t> warnDetIds;
     try {
-      if ((emode == 0) && ((inputUnit.unitID() == "dSpacing") ||
-                           (outputUnit.unitID() == "dSpacing"))) { // elastic
+      if ((emode == Kernel::DeltaEMode::Elastic) &&
+          ((inputUnit.unitID() == "dSpacing") ||
+           (inputUnit.unitID() == "Empty") ||
+           (outputUnit.unitID() == "dSpacing") ||
+           (outputUnit.unitID() == "Empty"))) {
         auto [difa, difc, tzero] =
             specInfo.diffractometerConstants(wsIndex, warnDetIds);
         pmap[UnitParams::difa] = difa;
@@ -1413,10 +1416,6 @@ bool ExperimentInfo::getDetectorValues(const API::SpectrumInfo &specInfo,
         if (warnDetIds.size() > 0) {
           createDetectorIdLogMessages(warnDetIds, wsIndex);
         }
-        // if ((outputUnit.unitID() == "dSpacing") && (difa == 0) && (difc ==
-        // 0)) {
-        //  return false;
-        //}
       } else {
         pmap[UnitParams::difc] = specInfo.difcUncalibrated(wsIndex);
       }
@@ -1424,19 +1423,14 @@ bool ExperimentInfo::getDetectorValues(const API::SpectrumInfo &specInfo,
       g_log.warning(e.what());
     }
   } else {
-    twoTheta = 0.0;
+    pmap[UnitParams::twoTheta] = 0.0;
     pmap[UnitParams::efixed] = DBL_MIN;
     // Energy transfer is meaningless for a monitor, so set l2 to 0.
     if (outputUnit.unitID().find("DeltaE") != std::string::npos) {
-      l2 = 0.0;
+      pmap[UnitParams::l2] = 0.0;
     }
     pmap[UnitParams::difc] = 0;
-    // can't do a conversion to d spacing with theta=0
-    // if (outputUnit.unitID().find("dSpacing") != std::string::npos) {
-    //  return false;
-    //}
   }
-  return true;
 }
 
 void ExperimentInfo::createDetectorIdLogMessages(

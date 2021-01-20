@@ -1292,16 +1292,16 @@ void IFunction::convertValue(std::vector<double> &values,
     const auto &spectrumInfo = ws->spectrumInfo();
     double l1 = spectrumInfo.l1();
     // If this is a monitor then l1+l2 = source-detector distance and twoTheta=0
-    double l2, twoTheta;
     auto emode = ws->getEMode();
 
-    Kernel::ExtraParametersMap pmap{};
-    if (ws->getDetectorValues(spectrumInfo, *wsUnit, *outUnit, emode, false,
-                              wsIndex, l2, twoTheta, pmap)) {
-      std::vector<double> emptyVec;
-      wsUnit->toTOF(values, emptyVec, l1, l2, twoTheta, emode, pmap);
-      outUnit->fromTOF(values, emptyVec, l1, l2, twoTheta, emode, pmap);
-    } else {
+    Kernel::UnitParametersMap pmap{};
+    ws->getDetectorValues(spectrumInfo, *wsUnit, *outUnit, emode, false,
+                          wsIndex, pmap);
+    std::vector<double> emptyVec;
+    try {
+      wsUnit->toTOF(values, emptyVec, l1, emode, pmap);
+      outUnit->fromTOF(values, emptyVec, l1, emode, pmap);
+    } catch (std::exception &) {
       throw std::runtime_error("Unable to retrieve detector properties "
                                "required for unit conversion");
     }
