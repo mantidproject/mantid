@@ -12,7 +12,6 @@ We also deal with importing the mantidplot module outside of MantidPlot here.
 """
 from contextlib import contextmanager
 import numpy.core.setup_common as numpy_cfg
-import os
 import platform
 import sys
 from mantid import logger
@@ -117,12 +116,7 @@ def import_f2py(lib_base_name):
     # information and Python can import this without issue but it will take an untagged
     # filename in preference so we cannot keep the Python2/Python3 ones in the same
     # directory. We manipulate the sys.path temporarily to get the correct library.
-    version = sys.version_info
-    if version.major >= 3:
-        return __import__(lib_name)
-    else:
-        with in_syspath(os.path.join(os.path.dirname(__file__), 'cp27')):
-            return __import__(lib_name)
+    return __import__(lib_name)
 
 
 def run_f2py_compatibility_test():
