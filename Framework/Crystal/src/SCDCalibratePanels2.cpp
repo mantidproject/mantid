@@ -271,12 +271,22 @@ void SCDCalibratePanels2::exec() {
 /// ------------------------------------------- ///
 
 /**
- * @brief
+ * @brief adjusting the deltaT0 to match the qSample_calculated and
+ *        qSameple_measured
+ *
+ * @note this function currently only returns dT0=0, and the reason
+ *       is still unkown.
  *
  * @param pws
  */
 void SCDCalibratePanels2::optimizeT0(std::shared_ptr<PeaksWorkspace> pws) {
-  // mocking a matrix workspace to store the target Qvectors
+  // tl;dr; mocking a matrix workspace to store the target Qvectors
+  // details
+  //    The optimizer we are going to use is the Fit algorithm, which is
+  //    designed to match one histogram with another target one.
+  //    So what we are doing here is creating a fake histogram out of the
+  //    qSamples so that Fit algorithm can take it in and start optimizing.
+  //    The same goes for optimizeL1 and optimizeBanks.
   int npks = pws->getNumberPeaks();
   MatrixWorkspace_sptr t0ws = std::dynamic_pointer_cast<MatrixWorkspace>(
       WorkspaceFactory::Instance().create(
@@ -304,6 +314,16 @@ void SCDCalibratePanels2::optimizeT0(std::shared_ptr<PeaksWorkspace> pws) {
   // create child Fit alg to optimize T0
   IAlgorithm_sptr fitT0_alg = createChildAlgorithm("Fit", -1, -1, false);
   //-- obj func def
+  //  dl;dr;
+  //    Fit algorithm requires a IFunction1D to fit
+  //  details
+  //    Fit algorithm requires a class derived from IFunction1D as its
+  //    input, so we have to implement the objective function as a separate
+  //    class just to get Fit serving as an optimizer.
+  //    For this particular case, we are constructing an objective function
+  //    based on IFunction1D that outputs a fake histogram consist of
+  //    qSample calucated based on perturbed instrument positions and
+  //    orientations.
   std::ostringstream fun_str;
   fun_str << "name=SCDCalibratePanels2ObjFunc,Workspace=" << pws->getName()
           << ",ComponentName=none";
@@ -533,12 +553,12 @@ void SCDCalibratePanels2::optimizeBanks(std::shared_ptr<PeaksWorkspace> pws) {
  */
 void SCDCalibratePanels2::parseLatticeConstant(
     std::shared_ptr<PeaksWorkspace> pws) {
-  m_a = getProperty("LatticeA");
-  m_b = getProperty("LatticeB");
-  m_c = getProperty("LatticeC");
-  m_alpha = getProperty("Alpha");
-  m_beta = getProperty("Beta");
-  m_gamma = getProperty("Gamma");
+  m_a = getProperty("a");
+  m_b = getProperty("b");
+  m_c = getProperty("c");
+  m_alpha = getProperty("alpha");
+  m_beta = getProperty("beta");
+  m_gamma = getProperty("gamma");
   // if any one of the six lattice constants is missing, try to get
   // one from the workspace
   if ((m_a == EMPTY_DBL() || m_b == EMPTY_DBL() || m_c == EMPTY_DBL() ||
