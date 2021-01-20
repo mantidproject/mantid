@@ -147,6 +147,47 @@ void LoadILLSANS::exec() {
     const double angle = firstEntry.getFloat(instrumentPath + "/Gamma/value");
     placeD16(-angle, distance, "detector");
 
+  } else if (m_instrumentName == "D11B") {
+    initWorkSpaceD11B(firstEntry, instrumentPath);
+    progress.report("Loading the instrument " + m_instrumentName);
+    runLoadInstrument();
+
+    // we move the parent "detector" component, but since it is at (0,0,0), we
+    // need to find the distance it has to move and move it to this position
+    double finalDistance =
+        firstEntry.getFloat(instrumentPath + "/detector/det_calc") / 1000.;
+    V3D pos = getComponentPosition("detector_center");
+    double currentDistance = pos.Z();
+
+    moveDetectorDistance(finalDistance - currentDistance, "detector");
+
+    // L2 was put at "finalDistance - currentDistance", so we update it to the
+    // correct value
+    API::Run &runDetails = m_localWorkspace->mutableRun();
+    runDetails.addProperty<double>("L2", finalDistance, true);
+
+  } else if (m_instrumentName == "D22B") {
+    initWorkSpaceD22B(firstEntry, instrumentPath);
+    progress.report("Loading the instrument " + m_instrumentName);
+    runLoadInstrument();
+
+    // first we move the central detector
+    double distance =
+        firstEntry.getFloat(instrumentPath + "/Detector/det_calc");
+    moveDetectorDistance(distance, "detector");
+
+    double offset =
+        firstEntry.getFloat(instrumentPath + "/Detector/dtr_actual");
+    // TODO : check sign on actual data
+    moveDetectorHorizontal(-offset / 1000, "detector"); // mm to meter
+
+    // then the right one
+    distance = firstEntry.getFloat(instrumentPath + "/RightDetector/det_calc");
+    moveDetectorDistance(distance, "detector_right");
+
+    offset = firstEntry.getFloat(instrumentPath + "/RightDetector/dtr_actual");
+    moveDetectorHorizontal(-offset / 1000, "detector"); // mm to meter
+
   } else {
     initWorkSpace(firstEntry, instrumentPath);
     progress.report("Loading the instrument " + m_instrumentName);
@@ -186,6 +227,12 @@ void LoadILLSANS::setInstrumentName(const NeXus::NXEntry &firstEntry,
       firstEntry, instrumentNamePath + "/name");
   const auto inst = std::find(m_supportedInstruments.begin(),
                               m_supportedInstruments.end(), m_instrumentName);
+
+  if ((m_instrumentName == "D11" || m_instrumentName == "D22") &&
+      firstEntry.containsGroup("data1")) {
+    m_instrumentName += "B";
+  }
+
   if (inst == m_supportedInstruments.end()) {
     throw std::runtime_error(
         "Instrument " + m_instrumentName +
@@ -258,11 +305,76 @@ void LoadILLSANS::initWorkSpace(NeXus::NXEntry &firstEntry,
   loadMetaData(firstEntry, instrumentPath);
 
   size_t nextIndex;
-  nextIndex = loadDataIntoWorkspaceFromVerticalTubes(data, m_defaultBinning, 0);
-  nextIndex = loadDataIntoWorkspaceFromMonitors(firstEntry, nextIndex);
+  nextIndex = loadDataFromTubes(data, m_defaultBinning, 0);
+  nextIndex = loadDataFromMonitors(firstEntry, nextIndex);
   if (data.dim1() == 128) {
     m_resMode = "low";
   }
+}
+
+/**
+ * @brief LoadILLSANS::initWorkSpaceD11B Load D11B data
+ * @param firstEntry
+ * @param instrumentPath
+ */
+void LoadILLSANS::initWorkSpaceD11B(NeXus::NXEntry &firstEntry,
+                                    const std::string &instrumentPath) {
+  g_log.debug("Fetching data...");
+
+  NXData data1 = firstEntry.openNXData("data1");
+  NXInt dataCenter = data1.openIntData();
+  dataCenter.load();
+  NXData data2 = firstEntry.openNXData("data2");
+  NXInt dataRight = data2.openIntData();
+  dataRight.load();
+  NXData data3 = firstEntry.openNXData("data3");
+  NXInt dataLeft = data3.openIntData();
+  dataLeft.load();
+
+  size_t numberOfHistograms =
+      static_cast<size_t>(dataCenter.dim0() * dataCenter.dim1() +
+                          dataRight.dim0() * dataRight.dim1() +
+                          dataLeft.dim0() * dataLeft.dim1()) +
+      N_MONITORS;
+
+  createEmptyWorkspace(numberOfHistograms, 1);
+  loadMetaData(firstEntry, instrumentPath);
+
+  size_t nextIndex;
+  nextIndex = loadDataFromTubes(dataCenter, m_defaultBinning, 0);
+  nextIndex = loadDataFromTubes(dataLeft, m_defaultBinning, nextIndex);
+  nextIndex = loadDataFromTubes(dataRight, m_defaultBinning, nextIndex);
+  nextIndex = loadDataFromMonitors(firstEntry, nextIndex);
+}
+
+/**
+ * @brief LoadILLSANS::initWorkSpaceD22B Load D22B data
+ * @param firstEntry
+ * @param instrumentPath
+ */
+void LoadILLSANS::initWorkSpaceD22B(NeXus::NXEntry &firstEntry,
+                                    const std::string &instrumentPath) {
+  g_log.debug("Fetching data...");
+
+  NXData data1 = firstEntry.openNXData("data1");
+  NXInt dataCenter = data1.openIntData();
+  dataCenter.load();
+  NXData data2 = firstEntry.openNXData("data2");
+  NXInt dataSide = data2.openIntData();
+  dataSide.load();
+
+  size_t numberOfHistograms =
+      static_cast<size_t>(dataCenter.dim0() * dataCenter.dim1() +
+                          dataSide.dim0() * dataSide.dim1()) +
+      N_MONITORS;
+
+  createEmptyWorkspace(numberOfHistograms, 1);
+  loadMetaData(firstEntry, instrumentPath);
+
+  size_t nextIndex;
+  nextIndex = loadDataFromTubes(dataCenter, m_defaultBinning, 0);
+  nextIndex = loadDataFromTubes(dataSide, m_defaultBinning, nextIndex);
+  nextIndex = loadDataFromMonitors(firstEntry, nextIndex);
 }
 
 /**
@@ -387,22 +499,16 @@ void LoadILLSANS::initWorkSpaceD33(NeXus::NXEntry &firstEntry,
 
   g_log.debug("Loading the data into the workspace...");
 
-  size_t nextIndex =
-      loadDataIntoWorkspaceFromVerticalTubes(dataRear, binningRear, 0);
-  nextIndex = loadDataIntoWorkspaceFromVerticalTubes(dataRight, binningRight,
-                                                     nextIndex);
-  nextIndex =
-      loadDataIntoWorkspaceFromVerticalTubes(dataLeft, binningLeft, nextIndex);
-  nextIndex =
-      loadDataIntoWorkspaceFromVerticalTubes(dataDown, binningDown, nextIndex);
-  nextIndex =
-      loadDataIntoWorkspaceFromVerticalTubes(dataUp, binningUp, nextIndex);
-  nextIndex = loadDataIntoWorkspaceFromMonitors(firstEntry, nextIndex);
+  size_t nextIndex = loadDataFromTubes(dataRear, binningRear, 0);
+  nextIndex = loadDataFromTubes(dataRight, binningRight, nextIndex);
+  nextIndex = loadDataFromTubes(dataLeft, binningLeft, nextIndex);
+  nextIndex = loadDataFromTubes(dataDown, binningDown, nextIndex);
+  nextIndex = loadDataFromTubes(dataUp, binningUp, nextIndex);
+  nextIndex = loadDataFromMonitors(firstEntry, nextIndex);
 }
 
-size_t
-LoadILLSANS::loadDataIntoWorkspaceFromMonitors(NeXus::NXEntry &firstEntry,
-                                               size_t firstIndex) {
+size_t LoadILLSANS::loadDataFromMonitors(NeXus::NXEntry &firstEntry,
+                                         size_t firstIndex) {
 
   // let's find the monitors; should be monitor1 and monitor2
   for (std::vector<NXClassInfo>::const_iterator it =
@@ -442,9 +548,9 @@ LoadILLSANS::loadDataIntoWorkspaceFromMonitors(NeXus::NXEntry &firstEntry,
   return firstIndex;
 }
 
-size_t LoadILLSANS::loadDataIntoWorkspaceFromVerticalTubes(
-    NeXus::NXInt &data, const std::vector<double> &timeBinning,
-    size_t firstIndex = 0) {
+size_t LoadILLSANS::loadDataFromTubes(NeXus::NXInt &data,
+                                      const std::vector<double> &timeBinning,
+                                      size_t firstIndex = 0) {
 
   // Workaround to get the number of tubes / pixels
   int numberOfTubes;
@@ -458,6 +564,7 @@ size_t LoadILLSANS::loadDataIntoWorkspaceFromVerticalTubes(
     numberOfTubes = data.dim0();
     histogramWidth = data.dim2();
   }
+
   const int numberOfPixelsPerTube = data.dim1();
   const HistogramData::BinEdges binEdges(timeBinning);
 
@@ -565,11 +672,13 @@ void LoadILLSANS::moveDetectorDistance(double distance,
   V3D pos = getComponentPosition(componentName);
   mover->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
   mover->setProperty("ComponentName", componentName);
+
   mover->setProperty("X", pos.X());
   mover->setProperty("Y", pos.Y());
   mover->setProperty("Z", distance);
   mover->setProperty("RelativePosition", false);
   mover->executeAsChildAlg();
+
   g_log.debug() << "Moving component '" << componentName
                 << "' to Z = " << distance << '\n';
   API::Run &runDetails = m_localWorkspace->mutableRun();
