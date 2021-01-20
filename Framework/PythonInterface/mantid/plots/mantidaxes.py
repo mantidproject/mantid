@@ -657,7 +657,7 @@ class MantidAxes(Axes):
 
             with autoscale_on_update(self, autoscale_on):
                 artist = self.track_workspace_artist(workspace,
-                                                     axesfunctions.plot(self, normalize_by_bin_width = is_normalized,
+                                                     axesfunctions.plot(self, normalize_by_bin_width=is_normalized,
                                                                         *args, **kwargs),
                                                      _data_update, spec_num, is_normalized,
                                                      MantidAxes.is_axis_of_type(MantidAxType.SPECTRUM, kwargs),

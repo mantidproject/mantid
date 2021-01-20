@@ -74,7 +74,8 @@ class PlotsLoader(object):
                     self.workspace_plot_func(workspace, ax, ax.figure, cargs)
                 elif "function" in cargs:
                     self.plot_func(ax, cargs)
-
+            for cargs in creation_args_copy:
+                cargs.pop('normalize_by_bin_width', None)
             ax.creation_args = creation_args_copy
 
         # Update the fig
@@ -122,11 +123,7 @@ class PlotsLoader(object):
         func = function_dict[function_to_call]
         # Plotting is done via an Axes object unless a colorbar needs to be added
         if function_to_call in ["imshow", "pcolormesh"]:
-            if creation_arg['normalize_by_bin_width']:
-                is_norm = creation_arg.pop('normalize_by_bin_width')
-                func([workspace], fig, normalize_by_bin_width=is_norm)
-            else:
-                func([workspace], fig)
+            func([workspace], fig, normalize_by_bin_width=creation_arg['normalize_by_bin_width'])
             self.color_bar_remade = True
         else:
             func(workspace, **creation_arg)
