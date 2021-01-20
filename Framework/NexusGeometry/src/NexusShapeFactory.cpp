@@ -48,7 +48,7 @@ std::unique_ptr<const Geometry::IObject> createCylinderShape(
 
 void createTrianglesFromPolygon(const std::vector<uint32_t> &windingOrder,
                                 std::vector<uint32_t> &triangularFaces,
-                                int &startOfFace, int &endOfFace) {
+                                int &startOfFace, const int &endOfFace) {
   int polygonOrder = endOfFace - startOfFace;
   auto first = windingOrder.begin() + startOfFace;
 
@@ -76,7 +76,7 @@ createTriangularFaces(const std::vector<uint32_t> &faceIndices,
   int startOfFace = 0;
   int endOfFace = 0;
   for (auto it = faceIndices.begin() + 1; it != faceIndices.end(); ++it) {
-    endOfFace = *it;
+    endOfFace = static_cast<int>(*it);
     createTrianglesFromPolygon(windingOrder, triangularFaces, startOfFace,
                                endOfFace);
   }
