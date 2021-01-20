@@ -82,12 +82,12 @@ def calibrate_vulcan(diamond_nexus, test_mode, difc_file_name):
     # grouping_ws_name = None
 
     #
-    rt = merge_detector_calibration(ref_calib_ws=output.CalibrationWorkspace,
-                                    ref_mask_ws=outputs.OutputMaskWorkspace,
+    rt = merge_detector_calibration(ref_calib_ws=None,
+                                    ref_mask_ws=None,
                                     offset_ws_dict=offset_ws_dict,
                                     mask_ws_dict=mask_ws_dict,
                                     num_banks=3,
-                                    output_ws_name='VULCAN_2fit')
+                                    output_ws_name='VULCAN_1fit_test')
     calib_ws_name, offset_ws, mask_ws = rt
 
     # Correct obviously erroneous DIFC

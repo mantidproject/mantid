@@ -311,7 +311,7 @@ def correct_difc_to_default(idf_difc_vec, cal_difc_vec, cal_table, row_shift, di
 def cross_correlate_vulcan_data(diamond_ws_name: str,
                                 calib_flag: Dict,
                                 cc_fit_time: int = 1,
-                                prefix: str = '1fit') -> Tuple[Dict[Any], Dict[Any]]:
+                                prefix: str = '1fit') -> Tuple[Dict[str, Any], Dict[str, Any]]:
     """Calibrate VULCAN runs with cross correlation algorithm
 
     Main entrance cross-correlation (for VULCAN west/east/high angle).
@@ -406,7 +406,7 @@ def merge_detector_calibration(offset_ws_dict: Dict,
                                num_banks: int,
                                output_ws_name: str,
                                ref_calib_ws: Union[None, str],
-                               ref_mask_ws: Union[Union, str]) -> Tuple[str, Any, Any]:
+                               ref_mask_ws: Union[None, str]) -> Tuple[str, Any, Any]:
     """Merge calibrated (per bank) detector offsets and masks
 
     Parameters
@@ -432,25 +432,26 @@ def merge_detector_calibration(offset_ws_dict: Dict,
     print(f'[DEBUG] Bank names: {bank_names}')
 
     # Merge offsets and masks
-    out_offset_ws = out_mask_ws = None
+    out_offset_ws_name = f'{output_ws_name}_offset'
+    out_mask_ws_name = f'{output_ws_name}_mask'
 
-    for bank_name in bank_names:
-        if out_offset_ws is None:
+    for ib, bank_name in enumerate(bank_names):
+        if ib == 0:
             # Clone first bank's mask and offsets for output
-            out_offset_ws = CloneWorkspace(InputWorkspace=offset_ws_dict[bank_name],
-                                           OutputWorkspace=output_ws_name + '_offset')
-            out_mask_ws = CloneWorkspace(InputWorkspace=mask_ws_dict[bank_name],
-                                         OutputWorkspace=output_ws_name + '_mask')
+            CloneWorkspace(InputWorkspace=offset_ws_dict[bank_name], OutputWorkspace=out_offset_ws_name)
+            CloneWorkspace(InputWorkspace=mask_ws_dict[bank_name], OutputWorkspace=out_mask_ws_name)
             print('Offsets and Mask of {} is cloned for output'.format(bank_name))
         else:
             # merge
-            _merge_partial_offset_mask_workspaces(out_offset_ws, offset_ws_dict[bank_name],
-                                                  out_mask_ws, mask_ws_dict[bank_name])
+            # print(f'Target output offset: {out_offset_ws}, output mask: {out_mask_ws}')
+            # print(f'Merging bank {bank_name}: {out_mask_ws} <--  {mask_ws_dict[bank_name]}')
+            _merge_partial_offset_mask_workspaces(out_offset_ws_name, offset_ws_dict[bank_name],
+                                                  out_mask_ws_name, mask_ws_dict[bank_name])
     # END-FOR
 
     # Convert to diff calibratin table:  convert the offsets workspace to difc calibration workspace
     calib_ws_name = f'{output_ws_name}_cal'
-    ConvertDiffCal(OffsetsWorkspace=out_offset_ws,
+    ConvertDiffCal(OffsetsWorkspace=out_offset_ws_name,
                    OutputWorkspace=calib_ws_name)
 
     # Copy value over reference mask and DIFC calibration workspace if
@@ -467,16 +468,15 @@ def merge_detector_calibration(offset_ws_dict: Dict,
         if ref_calib_ws:
             copy_bank_wise_offset_values(calib_ws_name, ref_calib_ws, bank_name)
         if ref_mask_ws:
-            copy_bank_wise_masks(out_mask_ws, ref_mask_ws, bank_name)
+            copy_bank_wise_masks(out_mask_ws_name, ref_mask_ws, bank_name)
+            # Apply masks from mask bit to instrument (this is a pure Mantid issue)
+            apply_masks(out_mask_ws_name)
     # END-FOR
-
-    # Apply masks from mask bit to instrument (this is a pure Mantid issue)
-    out_mask_ws = apply_masks(out_mask_ws)
 
     if len(offset_ws_dict.keys()) < num_banks:
         out_offset_ws = None
 
-    return calib_ws_name, out_offset_ws, out_mask_ws
+    return calib_ws_name, out_offset_ws_name, out_mask_ws_name
 
 
 def instrument_wide_cross_correlation(focused_ws_name, reference_ws_index, min_d, max_d):
@@ -703,7 +703,7 @@ def merge_2_masks(lhs_mask_name, rhs_mask_name, output_mask_name):
     :param output_mask_name:
     :return:
     """
-    print ('[INFO] MaskWorkspace operation: {} + {} ---> {}'.format(lhs_mask_name, rhs_mask_name, output_mask_name))
+    print('[INFO] MaskWorkspace operation: {} + {} ---> {}'.format(lhs_mask_name, rhs_mask_name, output_mask_name))
 
     # Plus 2 workspaces
     Plus(LHSWorkspace=lhs_mask_name, RHSWorkspace=rhs_mask_name,
@@ -731,39 +731,6 @@ def merge_2_masks(lhs_mask_name, rhs_mask_name, output_mask_name):
     return
 
 
-# TODO - NIGHT - better coding quality
-def merge_calibration_all(diamond_ws_name, offset_mask_ws_list):
-    """
-    merge cross-correlated calibration and offset workspaces, which are on partial workspaces
-    :param diamond_ws_name:
-    :param offset_mask_ws_list:
-    :return:
-    """
-    raise RuntimeError('Not used any more.  Kept as a  reference')
-    offset_ws_name0, mask_ws_name0 = offset_mask_ws_list[0]
-    offset_ws_name = diamond_ws_name + '_offset'
-    mask_ws_name = diamond_ws_name + '_mask'
-    if offset_ws_name != offset_ws_name0:
-        RenameWorkspace(InputWorkspace=offset_ws_name0, OutputWorkspace=offset_ws_name)
-    if mask_ws_name != mask_ws_name0:
-        RenameWorkspace(InputWorkspace=mask_ws_name0, OutputWorkspace=mask_ws_name)
-
-    print ('Number of masked spectra = {0} in {1}'.format(mtd[mask_ws_name].getNumberMasked(), mask_ws_name))
-    for ituple in range(1, len(offset_mask_ws_list)):
-        offset_ws_name_i, mask_ws_name_i = offset_mask_ws_list[ituple]
-        # use Plus to combine 2 offsets workspace
-        Plus(LHSWorkspace=offset_ws_name, RHSWorkspace=offset_ws_name_i,
-             OutputWorkspace=offset_ws_name)
-        # merge masks workspace
-        merge_2_masks(mask_ws_name, mask_ws_name_i, mask_ws_name + '_temp')
-        # delete previous combined mask workspace and rename merged mask workspace to target MaskWorkspace
-        DeleteWorkspace(Workspace=mask_ws_name)
-        RenameWorkspace(InputWorkspace=mask_ws_name+'_temp', OutputWorkspace=mask_ws_name)
-        print ('Number of masked spectra = {0} in {1}'.format(mtd[mask_ws_name].getNumberMasked(), mask_ws_name))
-
-    return offset_ws_name, mask_ws_name
-
-
 def _merge_partial_offset_mask_workspaces(offset_ws_name, partial_offset_ws_name,
                                           mask_ws_name, partial_mask_ws_name) -> Tuple[str, str]:
     """Merge partially calibrated offsets and masks to the final offsets and masks workspace
@@ -783,17 +750,24 @@ def _merge_partial_offset_mask_workspaces(offset_ws_name, partial_offset_ws_name
         final offset workspace name, final mask workspace name
 
     """
-    # use Plus to combine 2 offsets workspace
+    # Use Plus to combine 2 offsets workspace
     Plus(LHSWorkspace=offset_ws_name, RHSWorkspace=partial_offset_ws_name,
          OutputWorkspace=offset_ws_name)
 
-    # mask:
+    # Mask:
+    # Make sure mask_ws_name is a string for workspace name
+    mask_ws_name = str(mask_ws_name)
+
     # merge masks workspace
-    merge_2_masks(mask_ws_name, partial_mask_ws_name, mask_ws_name + '_temp')
-    # delete previous combined mask workspace and rename merged mask workspace to target MaskWorkspace
+    temp_mask_ws_name =f'{mask_ws_name}_temp'
+    merge_2_masks(mask_ws_name, partial_mask_ws_name, temp_mask_ws_name)
+
+    # Replace input (target) mask workspace by new mask workspace
+    # - deelete previous combined mask workspace
+    # - rename merged mask workspace to target MaskWorkspace
     DeleteWorkspace(Workspace=mask_ws_name)
-    RenameWorkspace(InputWorkspace=mask_ws_name + '_temp', OutputWorkspace=mask_ws_name)
-    print ('Number of masked spectra = {0} in {1}'.format(mtd[mask_ws_name].getNumberMasked(), mask_ws_name))
+    RenameWorkspace(InputWorkspace=temp_mask_ws_name, OutputWorkspace=mask_ws_name)
+    print('Number of masked spectra = {0} in {1}'.format(mtd[mask_ws_name].getNumberMasked(), mask_ws_name))
 
     return offset_ws_name, mask_ws_name
 
