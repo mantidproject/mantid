@@ -50,8 +50,8 @@ namespace MantidWidgets {
  * @param fitType :: The type of the underlying fitting algorithm.
  */
 FitOptionsBrowser::FitOptionsBrowser(QWidget *parent, FittingType fitType)
-    : QWidget(parent), m_decimals(6), m_fittingType(fitType),
-      m_minimizer(nullptr), m_fittingTypeProp(nullptr) {
+    : QWidget(parent), m_fittingTypeProp(nullptr), m_minimizer(nullptr),
+      m_decimals(6), m_fittingType(fitType) {
   // create m_browser
   createBrowser();
   createProperties();
