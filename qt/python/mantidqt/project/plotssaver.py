@@ -14,13 +14,7 @@ from matplotlib.image import AxesImage
 from mantid import logger
 from mantid.plots.legend import LegendProperties
 
-try:
-    from matplotlib.colors import to_hex, Normalize
-except ImportError:
-    from matplotlib.colors import colorConverter, rgb2hex, Normalize
-
-    def to_hex(color):
-        return rgb2hex(colorConverter.to_rgb(color))
+from matplotlib.colors import to_hex, Normalize
 
 
 class PlotsSaver(object):
