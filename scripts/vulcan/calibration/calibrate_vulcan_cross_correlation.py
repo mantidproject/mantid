@@ -1,7 +1,7 @@
 from mantid_helper import mtd_convert_units, load_nexus, load_grouping_file, load_calibration_file
 from lib_cross_correlation import (cross_correlate_vulcan_data,
-                                   save_calibration, export_difc)
-from lib_analysis import check_correct_difcs
+                                   save_calibration, export_difc, merge_detector_calibration)
+from lib_analysis import check_and_correct_difc
 import os
 from mantid.api import AnalysisDataService as mtd
 from mantid.simpleapi import CreateGroupingWorkspace
@@ -64,15 +64,16 @@ def calibrate_vulcan(diamond_nexus, test_mode, difc_file_name):
     # do cross correlation:
     if True:
         calib_flag = {'west': True, 'east': True, 'high angle': True}
-        r = cross_correlate_vulcan_data(diamond_ws_name, calib_flag, fit_time=1, flag='1fit')
+        r = cross_correlate_vulcan_data(diamond_ws_name, calib_flag, cc_fit_time=1, prefix='1fit')
         print(f'Type of returned value from cross_correlate_vulcan_data: {type(r)}')
         offset_ws_dict, mask_ws_dict = r
     else:
         # This optiona may not work in the current Mantid master/ornl-next yet
-        cross_correlate_vulcan_data(diamond_ws_name, group_ws_name, fit_time=2, flag='2fit')
+        cross_correlate_vulcan_data(diamond_ws_name, group_ws_name, cc_fit_time=2, prefix='2fit')
 
     # About output
-    calib_offset_ws_name = 'vulcan_diamond_2fit_offset'
+    # TODO - this can be more flexible
+    output_offset_ws_name = 'vulcan_diamond_2fit_offset'
 
     # Export cross correlated result, DIFC and etc for analysis
     # load grouping workspace
@@ -80,21 +81,27 @@ def calibrate_vulcan(diamond_nexus, test_mode, difc_file_name):
     # FIXME - haven't found out how grouping workspace is used for 3 bank case
     # grouping_ws_name = None
 
-    # merge calibration result from bank-based cross correlation and  save calibration file
-    num_banks = 3
-    save_calibration(offset_ws_name=offset_ws_dict,
-                     mask_ws=mask_ws_dict,
-                     group_ws_name=grouping_ws_name,
-                     calib_ws_name='vulcan_diamond',
-                     num_groups=num_banks,
-                     calib_file_prefix='blabla')
+    #
+    rt = merge_detector_calibration(ref_calib_ws=output.CalibrationWorkspace,
+                                    ref_mask_ws=outputs.OutputMaskWorkspace,
+                                    offset_ws_dict=offset_ws_dict,
+                                    mask_ws_dict=mask_ws_dict,
+                                    num_banks=3,
+                                    output_ws_name='VULCAN_2fit')
+    calib_ws_name, offset_ws, mask_ws = rt
 
+    # Correct obviously erroneous DIFC
     # check the difference between DIFCs
-    check_correct_difcs(ws_name='vulcan_diamond')
+    if False:
+        check_and_correct_difc(ws_name=diamond_ws_name,
+                               cal_table_name=calib_ws_name,
+                               mask_ws_name=str(mask_ws))
 
-    # save difc file
-    if difc_file_name:
-        export_difc(offset_ws=calib_offset_ws_name, file_name=difc_file_name)
+    # merge calibration result from bank-based cross correlation and  save calibration file
+    save_calibration(calib_ws_name=calib_ws_name,
+                     mask_ws_name=str(mask_ws),
+                     group_ws_name=grouping_ws_name,
+                     calib_file_prefix='test_pre_x')
 
 
 def test_main():

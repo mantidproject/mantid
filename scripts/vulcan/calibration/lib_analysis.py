@@ -51,7 +51,7 @@ def calculate_difc(ws, ws_index):
     return difc
 
 
-def check_correct_difcs(ws_name, cal_table_name, mask_ws_name):
+def check_and_correct_difc(ws_name, cal_table_name, mask_ws_name):
     """
     check and correct DIFCs if necessary: it is for 3 banks
 
