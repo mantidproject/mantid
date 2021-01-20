@@ -4,7 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from copy import deepcopy
 import unittest
 import argparse
 import numpy as np
@@ -22,7 +21,7 @@ class ComponentInfoTest(unittest.TestCase):
 
     def setUp(self):
         if self.__class__._ws is None:
-            self.__class__._ws = WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(2, 1, False) # no monitors
+            self.__class__._ws = WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(2, 1, False)  # no monitors
             self.__class__._ws.getSpectrum(0).clearDetectorIDs()
 
     """
@@ -107,7 +106,8 @@ class ComponentInfoTest(unittest.TestCase):
     def test_hasEquivalentSource(self):
         """ Check if the sources are equivalent"""
         info = self._ws.componentInfo()
-        info_other = deepcopy(info)
+        ws_other = CloneWorkspace(self._ws)
+        info_other = ws_other.componentInfo()
         self.assertEqual(info.hasEquivalentSource(info_other))
         info_other.setPosition(info.source(), V3D(info.sourcePosition()) + V3D(1.-6, 0, 0))
         self.assertNotEqual(info.hasEquivalentSource(info_other))
@@ -120,7 +120,8 @@ class ComponentInfoTest(unittest.TestCase):
     def test_hasEquivalentSample(self):
         """ Check if the samples are equivalent"""
         info = self._ws.componentInfo()
-        info_other = deepcopy(info)
+        ws_other = CloneWorkspace(self._ws)
+        info_other = ws_other.componentInfo()
         self.assertEqual(info.hasEquivalentSample(info_other))
         info_other.setPosition(info.sample(), V3D(info.samplePosition()) + V3D(1.-6, 0, 0))
         self.assertNotEqual(info.hasEquivalentSample(info_other))
