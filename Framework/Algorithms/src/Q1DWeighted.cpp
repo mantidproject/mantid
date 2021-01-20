@@ -226,6 +226,8 @@ void Q1DWeighted::getTableShapes() {
     }
     if (paramMap["Type"][1] == "sector")
       getSectorParams(paramMap["Parameters"], viewportParams);
+    else
+      g_log.information("Non-supported shape found in the table. Ignored.");
   }
 }
 
