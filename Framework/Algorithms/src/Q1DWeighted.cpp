@@ -306,8 +306,8 @@ void Q1DWeighted::getSectorParams(
   double xOffset = viewport["Translation"][0];
   double yOffset = viewport["Translation"][1];
 
-  double centerX = -(std::stod(params[5]) * zoom + xOffset);
-  double centerY = std::stod(params[6]) * zoom + yOffset;
+  double centerX = -(std::stod(params[5]) * zoom - xOffset);
+  double centerY = std::stod(params[6]) * zoom - yOffset;
 
   if (m_asymmWedges ||
       !checkIfSymetricalWedge(innerRadius, outerRadius, centerX, centerY,
