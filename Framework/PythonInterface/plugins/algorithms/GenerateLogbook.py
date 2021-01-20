@@ -98,11 +98,14 @@ class GenerateLogbook(PythonAlgorithm):
             logbook_entries = parameters.getStringParameter('logbook_default_entries')[0]
             # logbook_optional_entries = parameters.getStringParameter('logbook_default_entries')[0]
             logbook_headers = parameters.getStringParameter('logbook_default_headers')[0]
-            self._metadata_entries += logbook_entries.split(',')
-            self._metadata_headlines += logbook_headers.split(',')
-        except IndexError as e:
+            self._metadata_entries = logbook_entries.split(',')
+            self._metadata_headlines = logbook_headers.split(',')
+        except IndexError:
             raise RuntimeError("The logbook entries and headers are not defined for {}".format(self._instrument))
-
+        if not self.getProperty('MetadataEntries').isDefault:
+            self._metadata_entries.append(self.getProperty('MetadataEntries'))
+        if not self.getProperty('MetadataHeaders').isDefault:
+            self._metadata_entries.append(self.getProperty('MetadataHeaders'))
         DeleteWorkspace(Workspace=tmp_instr)
 
     def _verify_contains_metadata(self, data_array):
@@ -147,10 +150,6 @@ class GenerateLogbook(PythonAlgorithm):
             self._numor_range = [0, float('inf')]
         else:
             self._numor_range = self.getProperty('NumorRange').value
-        if not self.getProperty('MetadataEntries').isDefault:
-            self._metadata_entries.append(self.getProperty('MetadataEntries'))
-        if not self.getProperty('MetadataHeaders').isDefault:
-            self._metadata_entries.append(self.getProperty('MetadataHeaders'))
         data_array = self._prepare_file_array()
         self._instrument = self.getPropertyValue('Instrument')
         self._verify_contains_metadata(data_array)
