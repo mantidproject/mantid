@@ -170,12 +170,23 @@ void LoadILLSANS::exec() {
     initWorkSpaceD22B(firstEntry, instrumentPath);
     progress.report("Loading the instrument " + m_instrumentName);
     runLoadInstrument();
+
+    // first we move the central detector
     double distance =
         firstEntry.getFloat(instrumentPath + "/Detector/det_calc");
     moveDetectorDistance(distance, "detector");
 
+    double offset =
+        firstEntry.getFloat(instrumentPath + "/Detector/dtr_actual");
+    // TODO : check sign on actual data
+    moveDetectorHorizontal(-offset / 1000, "detector"); // mm to meter
+
+    // then the right one
     distance = firstEntry.getFloat(instrumentPath + "/RightDetector/det_calc");
     moveDetectorDistance(distance, "detector_right");
+
+    offset = firstEntry.getFloat(instrumentPath + "/RightDetector/dtr_actual");
+    moveDetectorHorizontal(-offset / 1000, "detector"); // mm to meter
 
   } else {
     initWorkSpace(firstEntry, instrumentPath);
