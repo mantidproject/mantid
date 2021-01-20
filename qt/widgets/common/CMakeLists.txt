@@ -1059,10 +1059,12 @@ set(
   test/FileDialogHandlerTest.h
   test/FindFilesThreadPoolManagerTest.h
   test/FindFilesWorkerTest.h
+  test/FitOptionsBrowserTest.h
   test/FitPropertyBrowserTest.h
   test/FitScriptGeneratorDataTableTest.h
   test/FitScriptGeneratorPresenterTest.h
-  # test/FitScriptGeneratorViewTest.h
+  test/FitScriptGeneratorViewTest.h
+  test/FunctionTreeViewTest.h
   test/ImageInfoModelMatrixWSTest.h
   test/ImageInfoModelMDTest.h
   test/ImageInfoPresenterTest.h
