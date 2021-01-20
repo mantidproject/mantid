@@ -108,9 +108,9 @@ class ComponentInfoTest(unittest.TestCase):
         info = self._ws.componentInfo()
         ws_other = CloneWorkspace(self._ws)
         info_other = ws_other.componentInfo()
-        self.assertEqual(info.hasEquivalentSource(info_other))
+        self.assertEqual(info.hasEquivalentSource(info_other), True)
         info_other.setPosition(info.source(), V3D(info.sourcePosition()) + V3D(1.-6, 0, 0))
-        self.assertNotEqual(info.hasEquivalentSource(info_other))
+        self.assertEqual(info.hasEquivalentSource(info_other), False)
 
     def test_hasSample(self):
         """ Check if there is a sample """
@@ -122,14 +122,14 @@ class ComponentInfoTest(unittest.TestCase):
         info = self._ws.componentInfo()
         ws_other = CloneWorkspace(self._ws)
         info_other = ws_other.componentInfo()
-        self.assertEqual(info.hasEquivalentSample(info_other))
+        self.assertEqual(info.hasEquivalentSample(info_other), True)
         info_other.setPosition(info.sample(), V3D(info.samplePosition()) + V3D(1.-6, 0, 0))
-        self.assertNotEqual(info.hasEquivalentSample(info_other))
+        self.assertEqual(info.hasEquivalentSample(info_other), False)
 
     def test_source(self):
         """ Check if a source component is returned """
         info = self._ws.componentInfo()
-        self.assertEqual(type(info.source()) , int)
+        self.assertEqual(type(info.source()), int)
 
     def test_sample(self):
         """ Check if a sample component is returned """
