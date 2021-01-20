@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from Muon.GUI.Common.contexts.muon_data_context import construct_empty_group, construct_empty_pair
-from Muon.GUI.Common.muon_group import MuonGroup
+from Muon.GUI.Common.muon_group import MuonGroup, MuonDiff
 from Muon.GUI.Common.muon_pair import MuonPair
 from Muon.GUI.Common.muon_group import MuonRun
 from enum import Enum
@@ -52,6 +52,10 @@ class GroupingTabModel(object):
         return self._groups_and_pairs.pairs
 
     @property
+    def diffs(self):
+        return self._groups_and_pairs.diffs
+
+    @property
     def group_names(self):
         return self._groups_and_pairs.group_names
 
@@ -61,7 +65,7 @@ class GroupingTabModel(object):
 
     @property
     def group_and_pair_names(self):
-        return self._groups_and_pairs.group_names + self._groups_and_pairs.pair_names
+        return self._groups_and_pairs.group_names + self._groups_and_pairs.pair_names + self._groups_and_pairs.diff_names
 
     @property
     def selected_groups(self):
@@ -70,6 +74,10 @@ class GroupingTabModel(object):
     @property
     def selected_pairs(self):
         return self._groups_and_pairs.selected_pairs
+
+    @property
+    def selected_diffs(self):
+        return self._groups_and_pairs.selected_diffs
 
     def show_all_groups_and_pairs(self):
         self._context.show_all_groups()
@@ -80,6 +88,9 @@ class GroupingTabModel(object):
 
     def clear_pairs(self):
         self._groups_and_pairs.clear_pairs()
+
+    def clear_diffs(self):
+        self._groups_and_pairs.clear_diffs()
 
     def clear_selected_pairs(self):
         self._groups_and_pairs.clear_selected_pairs()
@@ -108,6 +119,12 @@ class GroupingTabModel(object):
     def add_pair_to_analysis(self, pair):
         self._groups_and_pairs.add_pair_to_selected_pairs(pair)
 
+    def remove_diff_from_analysis(self, diff):
+        self._groups_and_pairs.remove_diff_from_selected_diffs(diff)
+
+    def add_diff_to_analysis(self, diff):
+        self._groups_and_pairs.add_diff_to_selected_diffs(diff)
+
     def add_group(self, group):
         assert isinstance(group, MuonGroup)
         self._groups_and_pairs.add_group(group)
@@ -115,6 +132,10 @@ class GroupingTabModel(object):
     def add_pair(self, pair):
         assert isinstance(pair, MuonPair)
         self._groups_and_pairs.add_pair(pair)
+
+    def add_diff(self, diff):
+        assert isinstance(diff, MuonDiff)
+        self._groups_and_pairs.add_diff(diff)
 
     def remove_groups_by_name(self, name_list):
         for name in name_list:
@@ -129,6 +150,10 @@ class GroupingTabModel(object):
     def remove_pairs_by_name(self, name_list):
         for name in name_list:
             self._groups_and_pairs.remove_pair(name)
+
+    def remove_diffs_by_name(self, name_list):
+        for name in name_list:
+            self._groups_and_pairs.remove_diff(name)
 
     def construct_empty_group(self, _group_index):
         return construct_empty_group(self.group_names, _group_index)

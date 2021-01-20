@@ -13,7 +13,7 @@ import os
 
 class GroupingTabView(QtWidgets.QWidget):
 
-    def __init__(self, grouping_table, pairing_table, parent=None):
+    def __init__(self, grouping_table, pairing_table, diff_table, parent=None):
         super(GroupingTabView, self).__init__(parent)
         # declare all the interface items in the __init__ method
         self.horizontal_layout = None
@@ -34,6 +34,7 @@ class GroupingTabView(QtWidgets.QWidget):
 
         self._grouping_table = grouping_table
         self._pairing_table = pairing_table
+        self._diff_table = diff_table
 
         self.setup_interface_layout()
 
@@ -77,6 +78,7 @@ class GroupingTabView(QtWidgets.QWidget):
         self.vertical_layout.addItem(self.horizontal_layout)
         self.vertical_layout.addItem(self.horizontal_layout_description)
         self.vertical_layout.addWidget(self._grouping_table)
+        self.vertical_layout.addWidget(self._diff_table)
         self.vertical_layout.addWidget(self._pairing_table)
         self.vertical_layout.addItem(self.horizontal_layout_base)
 
@@ -120,6 +122,7 @@ class GroupingTabView(QtWidgets.QWidget):
     def update_tables(self):
         self._grouping_table.update_view_from_model()
         self._pairing_table.update_view_from_model()
+        self._diff_table.update_view_from_model()
 
     def set_description_text(self, text):
         self.description_edit.setText(text)

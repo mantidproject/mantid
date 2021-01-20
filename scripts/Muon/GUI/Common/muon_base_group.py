@@ -10,25 +10,6 @@ from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
 from typing import List
 import itertools
 
-class MuonDiff(object):
-    def __init__(self,diff_name,backward_group_name,forward_group_name):
-        self._name = diff_name
-        self._first = backward_group_name
-        self._second = forward_group_name
-
-    @property
-    def forward_group(self):
-        return self._second
-
-    @property
-    def backward_group(self):
-        return self._first
-
-    @property
-    def name(self):
-        return self._name
-
-
 
 class MuonRun(object):
     """
