@@ -16,6 +16,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/WarningSuppressions.h"
+#include "MantidQtWidgets/MplCpp/BackendQt.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::API;
@@ -60,6 +61,7 @@ GNU_DIAG_ON_SUGGEST_OVERRIDE
 class IndirectPlotterTest : public CxxTest::TestSuite {
 public:
   IndirectPlotterTest() : m_ads(AnalysisDataService::Instance()) {
+    MantidQt::Widgets::MplCpp::backendModule();
     m_ads.clear();
   }
 
@@ -86,22 +88,18 @@ public:
     TS_ASSERT(m_plotter);
   }
 
-  void
-  test_that_plotSpectra_will_attempt_to_run_python_code_using_the_IPyRunner() {
+  void test_that_plotSpectra_will_not_throw() {
     m_ads.addOrReplace(WORKSPACE_NAME, createMatrixWorkspace(5, 5));
 
-    EXPECT_CALL(*m_pyRunner, runPythonCode(_)).Times(1);
-
-    m_plotter->plotSpectra(WORKSPACE_NAME, WORKSPACE_INDICES);
+    TS_ASSERT_THROWS_NOTHING(
+        m_plotter->plotSpectra(WORKSPACE_NAME, WORKSPACE_INDICES));
   }
 
-  void
-  test_that_plotBins_will_attempt_to_run_python_code_using_the_IPyRunner() {
+  void test_that_plotBins_will_not_throw() {
     m_ads.addOrReplace(WORKSPACE_NAME, createMatrixWorkspace(5, 5));
 
-    EXPECT_CALL(*m_pyRunner, runPythonCode(_)).Times(1);
-
-    m_plotter->plotBins(WORKSPACE_NAME, WORKSPACE_INDICES);
+    TS_ASSERT_THROWS_NOTHING(
+        m_plotter->plotBins(WORKSPACE_NAME, WORKSPACE_INDICES));
   }
 
   void
