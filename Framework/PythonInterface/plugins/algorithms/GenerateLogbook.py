@@ -43,7 +43,7 @@ class GenerateLogbook(PythonAlgorithm):
             issues['Instrument'] = 'The instrument has to be defined.'
         else:
             facility = self.getPropertyValue('Facility')
-            instruments = config.getFacility(facility).instruments()
+            instruments = str(config.getFacility(facility).instruments())
             instrument = self.getPropertyValue('Instrument')
             if instrument not in instruments:
                 issues['Instrument'] = 'The instrument {} does not belong to {} facility.'.format(instrument, facility)
