@@ -22,4 +22,8 @@ Single Crystal Diffraction
 --------------------------
 - New version of algorithm :ref:`SCDCalibratePanels <algm-SCDCalibratePanels-v2>` provides more accurate calibration results for CORELLI instrument.
 
+Improvements
+############
+- :ref:`IntegratePeaksMD <algm-IntegratePeaksMD>` now allows ellipsoidal shapes to be manually defined for the PeakRadius and Background radii options.
+
 :ref:`Release 6.1.0 <v6.1.0>`
