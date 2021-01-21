@@ -1,8 +1,8 @@
 .. _func-MultiDomainFunction:
 
-=======================
-Multi Domain Function
-=======================
+====================
+MultiDomain Function
+====================
 
 .. index:: MultiDomainFunction
 
@@ -52,7 +52,36 @@ a workspace,
 As $domains=1 is set for the Quadratic function, it will be used to fit the second domain of the input workspace,
 corresponding to WorkspaceIndex=1. Similarly, the LinearBackground will be used to fit the first domain of the workspace,
 WorkspaceIndex=0. If instead we had specified domains=i, the function would have been fit based on the order of creation,
-i.e. the quadratic function would fit to the first domain and the LinearBackground to the second domain.
+i.e. the quadratic function would fit to the first domain and the LinearBackground to the second domain. If
+the same function is to be applied to each domain the $domains=All$ option may be specified, for instance if we want to
+fit a flat background across multiple domains,
+
+.. code-block:: python
+
+    from scipy import stats
+    background = 2
+    num_points = 200
+    # generate random data from exponential distribution
+    rv1 = stats.expon(loc=0, scale=2)
+    x1 = rv1.rvs(size=num_points)
+    x1.sort()
+    y1 = rv1.pdf(x1) + background + 0.02*np.random.normal(0,1,num_points)
+
+    rv2= stats.expon(loc=1, scale=2)
+    x2 = rv2.rvs(size=num_points)
+    x2.sort()
+    y2 = rv2.pdf(x2) + background + 0.02*np.random.normal(0,1,num_points)
+
+    ws = CreateWorkspace(DataX=np.concatenate((x1, x2)), DataY=np.concatenate((y1, y2)), NSpec=2)
+
+    background=';name=FlatBackground,$domains=All'
+    func=';name=ExpDecay,$domains=i'
+    multiFunc='composite=MultiDomainFunction,NumDeriv=1' + func + func + background
+
+    fit_output = Fit(Function=multiFunc,
+                     InputWorkspace=ws, WorkspaceIndex=0,
+                     InputWorkspace_1=ws, WorkspaceIndex_1=1,
+                     Output='fit')
 
 Each function of the multidomain function may itself be a composite function.
 If a member function is a composite function the same principle applies, where 'f[domain_index].'
