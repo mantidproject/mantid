@@ -16,7 +16,7 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAlgorithms/CorelliPowderCalibrationApply.h"
+#include "MantidAlgorithms/CorelliCalibrationApply.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Objects/IObject.h"
@@ -32,15 +32,15 @@ using namespace Mantid::DataObjects;
 ///
 /// The base class CxxTest doc is available at
 /// http://cxxtest.com/guide.html
-class CorelliPowderCalibrationApplyTest : public CxxTest::TestSuite {
+class CorelliCalibrationApplyTest : public CxxTest::TestSuite {
 public:
   void testName() {
-    CorelliPowderCalibrationApply corelliPCA;
-    TS_ASSERT_EQUALS(corelliPCA.name(), "CorelliPowderCalibrationApply");
+    CorelliCalibrationApply corelliPCA;
+    TS_ASSERT_EQUALS(corelliPCA.name(), "CorelliCalibrationApply");
   }
 
   void testInit() {
-    CorelliPowderCalibrationApply crlCalApp;
+    CorelliCalibrationApply crlCalApp;
     crlCalApp.initialize();
     TS_ASSERT(crlCalApp.isInitialized());
   }
@@ -62,7 +62,7 @@ public:
     auto calTable = createTestCalibrationTableWorkspace(calTableName);
 
     // setup alg
-    CorelliPowderCalibrationApply alg;
+    CorelliCalibrationApply alg;
     alg.initialize();
     alg.setPropertyValue("Workspace", "wrongTypeWs");
     alg.setPropertyValue("CalibrationTable", calTableName);
@@ -81,7 +81,7 @@ public:
     calTable->removeColumn("Xposition");
 
     // setup alg
-    CorelliPowderCalibrationApply alg;
+    CorelliCalibrationApply alg;
     alg.initialize();
     alg.setPropertyValue("Workspace", "correctWs");
     alg.setPropertyValue("CalibrationTable", calTableName);
@@ -99,7 +99,7 @@ public:
     auto calTable = createTestCalibrationTableWorkspace(calTableName);
 
     // setup alg
-    CorelliPowderCalibrationApply alg;
+    CorelliCalibrationApply alg;
     alg.initialize();
     alg.setPropertyValue("Workspace", "correctWs");
     alg.setPropertyValue("CalibrationTable", calTableName);
