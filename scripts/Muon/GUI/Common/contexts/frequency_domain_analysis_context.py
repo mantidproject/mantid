@@ -26,7 +26,8 @@ class FrequencyDomainAnalysisContext(MuonContext):
 
     def get_workspace_names_for_FFT_analysis(self, use_raw=True):
         groups_and_pairs = ','.join(self.group_pair_context.selected_groups
-                                    + self.group_pair_context.selected_pairs)
+                                    + self.group_pair_context.selected_pairs
+                                    + self.group_pair_context.selected_diffs)
         workspace_options = self.get_names_of_time_domain_workspaces_to_fit(
             runs='All', group_and_pair=groups_and_pairs, rebin=not use_raw)
         return workspace_options
