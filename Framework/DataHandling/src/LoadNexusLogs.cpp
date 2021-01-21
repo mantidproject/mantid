@@ -9,7 +9,6 @@
 #include "MantidAPI/LogManager.h"
 #include "MantidAPI/Run.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/Exception.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include <locale>
 #include <nexus/NeXusException.hpp>
@@ -457,7 +456,7 @@ void LoadNexusLogs::execLoader() {
   std::string entry_name = getPropertyValue("NXentryName");
 
   std::string allow_list = getPropertyValue("AllowList");
-  const std::string block_list = getPropertyValue("BlockList");
+  std::string block_list = getPropertyValue("BlockList");
 
   // Find the entry name to use (normally "entry" for SNS, "raw_data_1" for
   // ISIS) if entry name is empty
