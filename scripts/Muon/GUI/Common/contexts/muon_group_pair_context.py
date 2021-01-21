@@ -297,7 +297,7 @@ class MuonGroupPairContext(object):
             else:
                 for period in range(1, len(periods)):
                     for group in default_groups:
-                        self._diffs.append(MuonDiff(group.name+" "+str(period)+" minus "+str(period+1),group.name + str(period), group.name + str(period+1)))
+                        self._diffs.append(MuonDiff(group.name+"_"+str(period)+"_minus_"+str(period+1),group.name + str(period), group.name + str(period+1)))
 
             for period in periods:
                 for pair in default_pairs:

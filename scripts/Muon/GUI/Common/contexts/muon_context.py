@@ -109,7 +109,6 @@ class MuonContext(object):
 
     def calculate_diff(self, diff: MuonDiff, run: List[int], rebin: bool=False):
         try:
-            print("hi", diff.forward_group, diff.backward_group, run)
             forward_group_workspace_name = self._group_pair_context[diff.forward_group].get_asymmetry_workspace_for_run(run, rebin)
             backward_group_workspace_name = self._group_pair_context[diff.backward_group].get_asymmetry_workspace_for_run(run, rebin)
         except KeyError:
@@ -486,6 +485,9 @@ class MuonContext(object):
             group_pair_list = group_and_pair.replace(' ', '').split(',')
             group = [
                 group for group in group_pair_list if group in self.group_pair_context.group_names]
+            # add group diffs
+            group += [diff for diff in group_pair_list if diff in self.group_pair_context.diff_names]
+
             pair = [
                 pair for pair in group_pair_list if pair in self.group_pair_context.pair_names]
         return group, pair

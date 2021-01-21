@@ -33,7 +33,7 @@ class GroupingTabPresenter(object):
 
         self.grouping_table_widget = grouping_table_widget
         self.pairing_table_widget = pairing_table_widget
-        self._diff_table = diff_table
+        self.diff_table = diff_table
 
         self._view.set_description_text('')
         self._view.on_add_pair_requested(self.add_pair_from_grouping_table)
@@ -49,7 +49,7 @@ class GroupingTabPresenter(object):
         # notifiers
         self.groupingNotifier = GroupingTabPresenter.GroupingNotifier(self)
         self.grouping_table_widget.on_data_changed(self.group_table_changed)
-        self._diff_table.on_data_changed(self.diff_table_changed)
+        self.diff_table.on_data_changed(self.diff_table_changed)
         self.pairing_table_widget.on_data_changed(self.pair_table_changed)
         self.enable_editing_notifier = GroupingTabPresenter.EnableEditingNotifier(self)
         self.disable_editing_notifier = GroupingTabPresenter.DisableEditingNotifier(self)
@@ -69,7 +69,7 @@ class GroupingTabPresenter(object):
 
     def update_view_from_model(self):
         self.grouping_table_widget.update_view_from_model()
-        self._diff_table.update_view_from_model()
+        self.diff_table.update_view_from_model()
         self.pairing_table_widget.update_view_from_model()
 
     def show(self):
@@ -173,7 +173,7 @@ class GroupingTabPresenter(object):
                 self._model.add_pair_to_analysis(default)
 
         self.grouping_table_widget.update_view_from_model()
-        self._diff_table.update_view_from_model()
+        self.diff_table.update_view_from_model()
         self.pairing_table_widget.update_view_from_model()
         self.update_description_text(description)
         self._model._context.group_pair_context.selected = default
@@ -185,27 +185,27 @@ class GroupingTabPresenter(object):
     def disable_editing(self):
         self._view.set_buttons_enabled(False)
         self.grouping_table_widget.disable_editing()
-        self._diff_table.disable_editing()
+        self.diff_table.disable_editing()
         self.pairing_table_widget.disable_editing()
         self.disable_editing_notifier.notify_subscribers()
 
     def enable_editing(self, result=None):
         self._view.set_buttons_enabled(True)
         self.grouping_table_widget.enable_editing()
-        self._diff_table.enable_editing()
+        self.diff_table.enable_editing()
         self.pairing_table_widget.enable_editing()
         self.enable_editing_notifier.notify_subscribers()
 
     def disable_editing_without_notifying_subscribers(self):
         self._view.set_buttons_enabled(False)
         self.grouping_table_widget.disable_editing()
-        self._diff_table.disable_editing()
+        self.diff_table.disable_editing()
         self.pairing_table_widget.disable_editing()
 
     def enable_editing_without_notifying_subscribers(self):
         self._view.set_buttons_enabled(True)
         self.grouping_table_widget.enable_editing()
-        self._diff_table.enable_editing()
+        self.diff_table.enable_editing()
         self.pairing_table_widget.enable_editing()
 
     def calculate_all_data(self):
@@ -234,7 +234,7 @@ class GroupingTabPresenter(object):
             return
         self._model.reset_selected_groups_and_pairs()
         self.grouping_table_widget.update_view_from_model()
-        self._diff_table.update_view_from_model()
+        self.diff_table.update_view_from_model()
         self.pairing_table_widget.update_view_from_model()
         self.update_description_text()
         self.groupingNotifier.notify_subscribers()
@@ -244,7 +244,7 @@ class GroupingTabPresenter(object):
     def on_clear_requested(self):
         self._model.clear()
         self.grouping_table_widget.update_view_from_model()
-        self._diff_table.update_view_from_model()
+        self.diff_table.update_view_from_model()
         self.pairing_table_widget.update_view_from_model()
         self.update_description_text_to_empty()
 
@@ -282,12 +282,12 @@ class GroupingTabPresenter(object):
 
     def group_table_changed(self):
         self.pairing_table_widget.update_view_from_model()
-        self._diff_table.update_view_from_model()
+        self.diff_table.update_view_from_model()
         self.handle_update_all_clicked()
 
     def pair_table_changed(self):
         self.grouping_table_widget.update_view_from_model()
-        self._diff_table.update_view_from_model()
+        self.diff_table.update_view_from_model()
         self.handle_update_all_clicked()
 
     def diff_table_changed(self):
