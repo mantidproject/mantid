@@ -51,7 +51,7 @@ OUTPUT workspaces and files:
       * XRotate, YRotate, and ZRotate are in degrees. 
 
    b. Fit_Residuals: workspaces beginning with 'fit' contain the differences in the calculated and theoretical Q vectors for each peak.
-      
+
 3) There are three output files that show the goodness of the calibration.
 
    a. ColFilename contains the calculated and theoretical column for each peak. Each spectra is labeled by the bank. To plot use python script, scripts/SCD_Reduction/SCDCalibratePanelsResults.py
@@ -76,7 +76,7 @@ to, the OutputWorkspace.
 Usage
 -----
 
-.. testcode:: SCDCalibratePanels
+.. code-block:: python
 
     #Calibrate peaks file and load to workspace
     LoadIsawPeaks(Filename='MANDI_801.peaks', OutputWorkspace='peaks')
@@ -90,8 +90,8 @@ Usage
     det2 = mtd['MANDI_801_event_xml'].getInstrument().getDetector(327680)
     if det1.getPos() == det2.getPos():
         print("matches")
-    
-.. testcleanup:: SCDCalibratePanels
+
+.. code-block:: python
 
    DeleteWorkspace('peaks')
    DeleteWorkspace('MANDI_801_event_xml')
@@ -104,7 +104,7 @@ Usage
 
 Output:
 
-.. testoutput:: SCDCalibratePanels
+.. code-block:: python
 
     matches
       
