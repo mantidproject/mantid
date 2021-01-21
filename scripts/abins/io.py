@@ -111,6 +111,9 @@ class IO(object):
                 print(f"Differences in Abins {section} parameters:")
                 new_group, old_group = diff[section]
                 for key in new_group:
+                    if key not in old_group:
+                        old_group[key] = '<key not present>'
+
                     if new_group[key] != old_group[key]:
                         print(key)
                         print("New values:")
