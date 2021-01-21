@@ -320,39 +320,45 @@ public:
     TS_ASSERT_EQUALS(shape3Cylinder->shapeInfo().height(), 0.2); // 0.5- 0.3
   }
 
-  void test_parse_detector_shape_with_voxel() {
-    // GIVEN a NeXus file describing a detector with a single octahedral voxel
+  void test_parse_detector_shape_with_3d_pixels() {
+    // GIVEN a NeXus file describing a detector with two octahedral voxels
     // with:
-    //   - a detector number of 8
+    //   - detector numbers of 0 and 1
     //   - pixel location defined in x_pixel_offset, y_pixel_offset,
-    //     z_pixel_offset datasets as [1.1, 2.2, 3.3] w.r.t. detector origin
+    //     z_pixel_offset datasets as [1.1, 2.2, -2.0] and [1.1, 2.2, 0.0]
+    //     w.r.t. detector origin
     //   - detector position defined as [2, 0, 2] w.r.t. coord system origin
     //
-    // "voxel" here means that multiple faces in the mesh are mapped to the
-    // same detector number, thus defining a 3D pixel
+    // Multiple faces in the mesh are mapped to the same detector number,
+    // thus defining a 3D pixel
     // Unlike 2D pixel case, pixel offset datasets must be present in the file.
-    // The parser will not try to find the centre of mass of the polyhedron to
-    // use as the pixel position as this is computationally expensive and
-    // possibly not even the correct for some detector types
+    // The parser will not try to calculate the centre of mass of the polyhedron
+    // to use as the pixel position as this is computationally expensive and
+    // possibly not even the "correct" pixel position for some detector types
     const std::string filename = "unit_testing/VOXEL_example.nxs";
-    const int expectedDetectorNumber = 8;
-    const auto expectedPosition = Eigen::Vector3d{3.1, 2.2, 5.3};
+    const int expectedDetectorNumber1 = 0;
+    const int expectedDetectorNumber2 = 1;
+    const auto expectedPosition1 = Eigen::Vector3d{3.1, 2.2, 0.0};
+    const auto expectedPosition2 = Eigen::Vector3d{3.1, 2.2, 2.0};
 
     // WHEN the NeXus geometry is parsed
     auto instrument = NexusGeometryParser::createInstrument(
         instrument_path(filename),
         std::make_unique<testing::NiceMock<MockLogger>>());
 
-    // THEN the single voxel is successfully parsed and its location matches
+    // THEN the voxels are successfully parsed and locations matches
     // offsets datasets from file
     auto parsedBeamline = extractBeamline(*instrument);
     auto &parsedDetInfo = *parsedBeamline.second;
-    TS_ASSERT_EQUALS(parsedDetInfo.size(), 1);
+    TS_ASSERT_EQUALS(parsedDetInfo.size(), 2);
 
     auto detectorInfo = extractDetectorInfo(*instrument);
-    auto voxelPosition = Kernel::toVector3d(
-        detectorInfo->position(detectorInfo->indexOf(expectedDetectorNumber)));
-    TS_ASSERT(voxelPosition.isApprox(expectedPosition));
+    auto voxelPosition1 = Kernel::toVector3d(
+        detectorInfo->position(detectorInfo->indexOf(expectedDetectorNumber1)));
+    TS_ASSERT(voxelPosition1.isApprox(expectedPosition1));
+    auto voxelPosition2 = Kernel::toVector3d(
+        detectorInfo->position(detectorInfo->indexOf(expectedDetectorNumber2)));
+    TS_ASSERT(voxelPosition2.isApprox(expectedPosition2));
   }
 };
 

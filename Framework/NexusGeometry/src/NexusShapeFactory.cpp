@@ -85,7 +85,8 @@ createTriangularFaces(const std::vector<uint32_t> &faceIndices,
   }
 
   // and the last face
-  endOfFace += (static_cast<int>(windingOrder.size()) - windingOrderReached);
+  endOfFace =
+      startOfFace + static_cast<int>(windingOrder.size()) - windingOrderReached;
   createTrianglesFromPolygon(windingOrder, triangularFaces, startOfFace,
                              endOfFace, windingOrderReached);
 
