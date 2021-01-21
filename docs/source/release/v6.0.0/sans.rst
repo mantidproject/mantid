@@ -28,6 +28,7 @@ Improvements
     - The output workspace will get its title from the nexus file.
     - WavelengthRange is exposed to the algorithm, which is crucial for TOF reduction.
 - The Rectangle option for :ref:`SolidAngle <algm-SolidAngle>` is now supported for ILL's D22 and D33.
+- Added loader and MaskBTP support for D11B and D22B.
 
 Bugfixes
 ########

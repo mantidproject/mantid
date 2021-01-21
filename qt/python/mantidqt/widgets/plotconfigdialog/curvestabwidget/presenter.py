@@ -420,3 +420,4 @@ class CurvesTabWidgetPresenter:
             self.view.enable_curve_config(False)
         else:
             self.view.enable_curve_config(True)
+            self.set_errorbars_tab_enabled()
