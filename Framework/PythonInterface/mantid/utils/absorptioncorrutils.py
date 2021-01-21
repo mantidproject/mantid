@@ -6,15 +6,20 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import AnalysisDataService, WorkspaceFactory
 from mantid.kernel import Logger, Property, PropertyManager
-from mantid.simpleapi import AbsorptionCorrection, DeleteWorkspace, Divide, Load, Multiply, \
-    PaalmanPingsAbsorptionCorrection, PreprocessDetectorsToMD, SetSample, mtd
+from mantid.simpleapi import (AbsorptionCorrection, CreateCacheFilename, DeleteWorkspace, Divide,
+                              Load, Multiply, PaalmanPingsAbsorptionCorrection,
+                              PreprocessDetectorsToMD, SetSample, mtd)
 import numpy as np
 import os
+import tempfile
 
 VAN_SAMPLE_DENSITY = 0.0721
 _EXTENSIONS_NXS = ["_event.nxs", ".nxs.h5"]
 
 
+# ---------------------------- #
+# ----- Helper functions ----- #
+# ---------------------------- #
 def _getBasename(filename):
     """
     Helper function to get the filename without the path or extension
@@ -27,7 +32,49 @@ def _getBasename(filename):
     return name
 
 
-def calculate_absorption_correction(filename, abs_method, props, sample_formula, mass_density,
+def _getCacheName(wkspname, property_dict, cache_dir=None):
+    """
+    Generate a MDF5 string based on given key properties.
+
+    :param wkspname: donor workspace containing absorption correction info
+    :param property_dict: a dictionary containing at least the required entries
+    :param cache_dir: location to store the cached absorption correction
+    
+    return fileName
+    """
+    cache_dir = tempfile.gettempdir() if cache_dir is None else cache_dir
+
+    # fix up the workspace name
+    prefix = wkspname.replace('__', '')
+
+    # key property to generate the HASH
+    propman_properties = {
+        'wavelength_min',
+        'wavelength_max',
+        "num_wl_bins",  # number wavelength bins (int)
+        "sample_formula",  # material chemical formula
+        "mass_density",  # material effective density
+        "height",  # geometry overrides - only height is needed
+        "sample_environment",  #
+        "sample_container",  # sample container in environment
+    }
+    if propman_properties.issubset(set(property_dict.keys())):
+        args = [f"{name}={property_dict[name]}" for name in propman_properties]
+    else:
+        raise ValueError(f"Missing key property in provided dictionary")
+
+    return CreateCacheFilename(Prefix=prefix, Properties=propman_properties,
+                               CacheDir=cache_dir).OutputFilename
+
+
+# ----------------------------- #
+# ---- Core functionality ----- #
+# ------------------------------#
+def calculate_absorption_correction(filename,
+                                    abs_method,
+                                    props,
+                                    sample_formula,
+                                    mass_density,
                                     number_density=Property.EMPTY_DBL,
                                     container_shape="PAC06",
                                     num_wl_bins=1000,
@@ -73,16 +120,20 @@ def calculate_absorption_correction(filename, abs_method, props, sample_formula,
     if abs_method == "None":
         return None, None
 
-    material = {"ChemicalFormula": sample_formula,
-                "SampleMassDensity": mass_density}
+    material = {"ChemicalFormula": sample_formula, "SampleMassDensity": mass_density}
 
     if number_density != Property.EMPTY_DBL:
         material["SampleNumberDensity"] = number_density
 
     environment = {'Name': 'InAir', 'Container': container_shape}
 
-    donorWS = create_absorption_input(filename, props, num_wl_bins, material=material,
-                                      environment=environment, metaws=metaws)
+    #DEVNOTE: PD124 something needs to be done here for smart caching
+    donorWS = create_absorption_input(filename,
+                                      props,
+                                      num_wl_bins,
+                                      material=material,
+                                      environment=environment,
+                                      metaws=metaws)
 
     absName = '__{}_abs_correction'.format(_getBasename(filename))
 
@@ -144,9 +195,14 @@ def calc_absorption_corr_using_wksp(donor_wksp, abs_method, element_size=1, pref
         raise RuntimeWarning("Unrecognized absorption correction method '{}'".format(abs_method))
 
 
-def create_absorption_input(filename, props, num_wl_bins=1000,
-                            material=None, geometry=None, environment=None,
-                            opt_wl_min=0, opt_wl_max=Property.EMPTY_DBL,
+def create_absorption_input(filename,
+                            props,
+                            num_wl_bins=1000,
+                            material=None,
+                            geometry=None,
+                            environment=None,
+                            opt_wl_min=0,
+                            opt_wl_max=Property.EMPTY_DBL,
                             metaws=None):
     """
     Create an input workspace for carpenter or other absorption corrections
@@ -195,7 +251,9 @@ def create_absorption_input(filename, props, num_wl_bins=1000,
             instr = mtd[absName].getInstrument()
             L1 = instr.getSource().getDistance(instr.getSample())
             # determine L2 range
-            PreprocessDetectorsToMD(InputWorkspace=absName, OutputWorkspace=absName + '_dets', GetMaskState=False)
+            PreprocessDetectorsToMD(InputWorkspace=absName,
+                                    OutputWorkspace=absName + '_dets',
+                                    GetMaskState=False)
             L2 = mtd[absName + '_dets'].column('L2')
             Lmin = np.min(L2) + L1
             Lmax = np.max(L2) + L1
@@ -216,8 +274,10 @@ def create_absorption_input(filename, props, num_wl_bins=1000,
         raise RuntimeError('Invalid wavelength range min={}A max={}A'.format(wl_min, wl_max))
     log.information('Using wavelength range min={}A max={}A'.format(wl_min, wl_max))
 
-    absorptionWS = WorkspaceFactory.create(mtd[absName], NVectors=mtd[absName].getNumberHistograms(),
-                                           XLength=num_wl_bins + 1, YLength=num_wl_bins)
+    absorptionWS = WorkspaceFactory.create(mtd[absName],
+                                           NVectors=mtd[absName].getNumberHistograms(),
+                                           XLength=num_wl_bins + 1,
+                                           YLength=num_wl_bins)
     xaxis = np.arange(0., float(num_wl_bins + 1)) * (wl_max - wl_min) / (num_wl_bins) + wl_min
     for i in range(absorptionWS.getNumberHistograms()):
         absorptionWS.setX(i, xaxis)
@@ -230,10 +290,10 @@ def create_absorption_input(filename, props, num_wl_bins=1000,
     if material is not None:
         if (not material['ChemicalFormula']) and ("SampleFormula" in absorptionWS.run()):
             material['ChemicalFormula'] = absorptionWS.run()['SampleFormula'].lastValue().strip()
-        if ("SampleMassDensity" not in material or not material['SampleMassDensity']) and (
-                "SampleDensity" in absorptionWS.run()):
-            if (absorptionWS.run()['SampleDensity'].lastValue() != 1.0) and (
-                    absorptionWS.run()['SampleDensity'].lastValue() != 0.0):
+        if ("SampleMassDensity" not in material
+                or not material['SampleMassDensity']) and ("SampleDensity" in absorptionWS.run()):
+            if (absorptionWS.run()['SampleDensity'].lastValue() !=
+                    1.0) and (absorptionWS.run()['SampleDensity'].lastValue() != 0.0):
                 material['SampleMassDensity'] = absorptionWS.run()['SampleDensity'].lastValue()
             else:
                 material['Mass'] = absorptionWS.run()['SampleMass'].lastValue()
@@ -250,15 +310,18 @@ def create_absorption_input(filename, props, num_wl_bins=1000,
             elif absorptionWS.run()['BL11A:CS:ITEMS:HeightInContainerUnits'].lastValue() == "cm":
                 conversion = 1.0
             else:
-                raise ValueError("HeightInContainerUnits expects cm or mm; specified units not recognized: ",
-                                 absorptionWS.run()['BL11A:CS:ITEMS:HeightInContainerUnits'].lastValue())
+                raise ValueError(
+                    "HeightInContainerUnits expects cm or mm; specified units not recognized: ",
+                    absorptionWS.run()['BL11A:CS:ITEMS:HeightInContainerUnits'].lastValue())
 
-            geometry['Height'] = absorptionWS.run()['BL11A:CS:ITEMS:HeightInContainer'].lastValue() * conversion
+            geometry['Height'] = absorptionWS.run()['BL11A:CS:ITEMS:HeightInContainer'].lastValue(
+            ) * conversion
 
     # Set container if not set
     if environment is not None:
         if environment['Container'] == "":
-            environment['Container'] = absorptionWS.run()['SampleContainer'].lastValue().replace(" ", "")
+            environment['Container'] = absorptionWS.run()['SampleContainer'].lastValue().replace(
+                " ", "")
 
     # Make sure one is set before calling SetSample
     if material or geometry or environment is not None:
