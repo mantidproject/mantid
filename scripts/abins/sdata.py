@@ -235,7 +235,7 @@ class SDataByAngle(collections.abc.Sequence):
 
                 where array rows correspond to angles and columns correspond to
                 frequencies.
-                
+
             angles:
                 scattering angles in degrees, corresponding to data
 
@@ -281,8 +281,6 @@ class SDataByAngle(collections.abc.Sequence):
         ...
 
     def __getitem__(self, item):  # noqa F811
-        n_items = len(self)
-
         if isinstance(item, (int, slice)):
             data = {atom_index: {'s': {order_index:
                                        self._data[atom_index]['s'][order_index][item, :]
@@ -341,7 +339,6 @@ class SDataByAngle(collections.abc.Sequence):
 
         return cls(data=data, angles=angles, frequencies=frequencies, **kwargs)
 
-
     def set_angle_data(self, angle_index: int, sdata: SData,
                        add_to_existing: bool = False) -> None:
         """Set data for one angle from SData object
@@ -362,10 +359,9 @@ class SDataByAngle(collections.abc.Sequence):
 
         if 'frequencies' in data:
             del data['frequencies']
-        
+
         self.set_angle_data_from_dict(angle_index, data,
                                       add_to_existing=add_to_existing)
-
 
     def set_angle_data_from_dict(self, angle_index: int,
                                  data: Dict[str, OneAtomSData],

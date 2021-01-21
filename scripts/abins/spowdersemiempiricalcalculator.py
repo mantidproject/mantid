@@ -11,7 +11,7 @@ from typing import List, Optional, Tuple, Union
 import abins
 from abins.constants import (ANGLE_MESSAGE_INDENTATION,
                              CM1_2_HARTREE, INT_TYPE, K_2_HARTREE, FLOAT_TYPE, FUNDAMENTALS,
-                             HIGHER_ORDER_QUANTUM_EVENTS, INCIDENT_ENERGY_MESSAGE_INDENTATION,
+                             HIGHER_ORDER_QUANTUM_EVENTS,
                              MAX_ORDER, MIN_SIZE,
                              ONE_DIMENSIONAL_INSTRUMENTS, TWO_DIMENSIONAL_INSTRUMENTS,
                              QUANTUM_ORDER_ONE, QUANTUM_ORDER_TWO, QUANTUM_ORDER_THREE, QUANTUM_ORDER_FOUR,
