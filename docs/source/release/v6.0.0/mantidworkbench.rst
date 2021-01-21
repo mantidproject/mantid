@@ -44,6 +44,7 @@ Improvements
 - In the plot config, multiple curves can be selected and removed at once. The delete key was added as a shortcut.
 - A bug has been fixed in SliceViewer where attempting to plot a workspace with a text axis would cause a crash when zoomed out.
 - Improved plot generated scripts to better support major and minor tick settings at time of generation.
+- Automatic data export in DrILL. See the :ref:`DrILL documentation <DrILL-ref>` for more information.
 
 Bugfixes
 ########
