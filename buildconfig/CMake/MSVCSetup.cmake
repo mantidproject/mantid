@@ -132,13 +132,7 @@ set(MANTIDPYTHON_PREAMBLE
     "set PYTHONHOME=${MSVC_PYTHON_EXECUTABLE_DIR}\nset PATH=%_BIN_DIR%;%_BIN_DIR%\\PVPlugins\\PVPlugins;%PATH%"
 )
 
-if(MAKE_VATES)
-  set(PARAVIEW_PYTHON_PATHS
-      ";${ParaView_DIR}/bin/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>;${ParaView_DIR}/lib/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>;${ParaView_DIR}/lib/site-packages;${ParaView_DIR}/lib/site-packages/vtk"
-  )
-else()
-  set(PARAVIEW_PYTHON_PATHS "")
-endif()
+set(PARAVIEW_PYTHON_PATHS "")
 
 configure_file(
   ${PACKAGING_DIR}/mantidpython.bat.in
@@ -155,16 +149,7 @@ set(MANTIDPYTHON_PREAMBLE
     "set PYTHONHOME=%_BIN_DIR%\nset PATH=%_BIN_DIR%;%_BIN_DIR%\\..\\plugins;%_BIN_DIR%\\..\\PVPlugins;%PATH%"
 )
 
-if(MAKE_VATES)
-  set(PV_LIBS
-      "%_BIN_DIR%\\..\\lib\\paraview-${PARAVIEW_VERSION_MAJOR}.${PARAVIEW_VERSION_MINOR}"
-  )
-  set(PARAVIEW_PYTHON_PATHS
-      ";${PV_LIBS}\\site-packages;${PV_LIBS}\\site-packages\\vtk"
-  )
-else()
-  set(PARAVIEW_PYTHON_PATHS "")
-endif()
+set(PARAVIEW_PYTHON_PATHS "")
 
 configure_file(
   ${PACKAGING_DIR}/mantidpython.bat.in
