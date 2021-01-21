@@ -286,8 +286,8 @@ void Q1DWeighted::getSectorParams(
     std::map<std::string, std::vector<double>> &viewport) {
   double zoom = viewport["Zoom"][0];
 
-  double innerRadius = std::stod(params[1]) * zoom;
-  double outerRadius = std::stod(params[2]) * zoom;
+  double innerRadius = std::stod(params[1]) / zoom;
+  double outerRadius = std::stod(params[2]) / zoom;
 
   double startAngle = std::stod(params[3]);
   double endAngle = std::stod(params[4]);
@@ -306,8 +306,8 @@ void Q1DWeighted::getSectorParams(
   double xOffset = viewport["Translation"][0];
   double yOffset = viewport["Translation"][1];
 
-  double centerX = -(std::stod(params[5]) * zoom - xOffset);
-  double centerY = std::stod(params[6]) * zoom - yOffset;
+  double centerX = -(std::stod(params[5]) - xOffset) / zoom;
+  double centerY = (std::stod(params[6]) - yOffset) / zoom;
 
   if (m_asymmWedges ||
       !checkIfSymetricalWedge(innerRadius, outerRadius, centerX, centerY,
