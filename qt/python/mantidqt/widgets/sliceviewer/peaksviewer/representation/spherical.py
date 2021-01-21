@@ -120,8 +120,8 @@ def slice_sphere(peak_origin, radius, zp):
     :param zp: Slice point in slice dimension
     """
     # Sphere is just a special case of an ellipse
-    slice_origin, circle_radius, _, __ = slice_ellipsoid_matrix(peak_origin, zp,
-                                                                calculate_spherical_matrix(radius))
+    slice_origin, circle_radius, _, __, _ = slice_ellipsoid_matrix(peak_origin, zp,
+                                                                   calculate_spherical_matrix(radius))
     return slice_origin, circle_radius
 
 
