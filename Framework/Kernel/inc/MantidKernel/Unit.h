@@ -216,6 +216,12 @@ protected:
   virtual void validateUnitParams(const int emode,
                                   const UnitParametersMap &params);
 
+  // validate the contents of the unit parameters map. Throw
+  // std::invalid_argument if it's a global error or std::runtime_error if it's
+  // a detector specific error
+  virtual void validateUnitParams(const int emode,
+                                  const UnitParametersMap &params);
+
   /// The unit values have been initialized
   bool initialized;
   /// l1 ::       The source-sample distance (in metres)
