@@ -100,6 +100,10 @@ private:
   std::vector<double> m_wedgesCenterAngle;
   std::vector<double> m_wedgesAngleRange;
 
+  // for each wedge, false if the integration should also take its symmetric
+  // into account
+  std::vector<bool> m_wedgesIsAsymmetric;
+
   size_t m_nSpec;
   int m_nSubPixels;
   double m_pixelSizeY;

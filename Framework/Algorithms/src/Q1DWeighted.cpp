@@ -149,6 +149,7 @@ void Q1DWeighted::bootstrap(const MatrixWorkspace_const_sptr &inputWS) {
   m_wedgesCenterY = std::vector<double>();
   m_wedgesCenterAngle = std::vector<double>();
   m_wedgesAngleRange = std::vector<double>();
+  m_wedgesIsAsymmetric = std::vector<bool>();
   m_asymmWedges = getProperty("AsymmetricWedges");
 
   if (getPropertyValue("TableShape").empty()) {
@@ -174,10 +175,22 @@ void Q1DWeighted::bootstrap(const MatrixWorkspace_const_sptr &inputWS) {
       centerAngle += wedgeOffset * deg2rad;
       m_wedgesCenterAngle.push_back(centerAngle);
       m_wedgesAngleRange.push_back(wedgeAngle * deg2rad);
+
+      m_wedgesIsAsymmetric.push_back(m_asymmWedges);
     }
   } else {
     getTableShapes();
     m_nWedges = m_wedgesInnerRadius.size();
+
+    for (size_t i = 0; i < m_nWedges; ++i) {
+      if (!m_asymmWedges && m_wedgesIsAsymmetric[i]) {
+        std::stringstream ss;
+        ss << "No symmetric counterpart provided for a shape. Wedge " << i + 1
+           << " will have results asymmetricaly computed (i.e. only on the "
+              "provided sector).";
+        g_log.warning(ss.str());
+      }
+    }
   }
 
   // we store everything in 3D arrays
@@ -319,6 +332,7 @@ void Q1DWeighted::getSectorParams(
     m_wedgesAngleRange.push_back(angleRange);
     m_wedgesCenterX.push_back(centerX);
     m_wedgesCenterY.push_back(centerY);
+    m_wedgesIsAsymmetric.push_back(true);
   }
 }
 
@@ -347,6 +361,7 @@ bool Q1DWeighted::checkIfSymetricalWedge(double innerRadius, double outerRadius,
         centerX == m_wedgesCenterX[i] && centerY == m_wedgesCenterY[i] &&
         fabs(angleRange - m_wedgesAngleRange[i]) < 1e-3 &&
         (diffAngle < 1e-3 || fabs(diffAngle - M_PI) < 1e-3)) {
+      m_wedgesIsAsymmetric[i] = false;
       return true;
     }
   }
@@ -474,7 +489,7 @@ void Q1DWeighted::calculate(const MatrixWorkspace_const_sptr &inputWS) {
                        .angle(V3D(cos(centerAngle), sin(centerAngle), 0.0)));
 
           if ((angle < m_wedgesAngleRange[iw] * 0.5 ||
-               (!m_asymmWedges &&
+               (!m_wedgesIsAsymmetric[iw] &&
                 fabs(M_PI - angle) < m_wedgesAngleRange[iw] * 0.5)) &&
               subPix.distance(center) > m_wedgesInnerRadius[iw] &&
               (m_wedgesOuterRadius[iw] <= 0 ||
