@@ -124,7 +124,9 @@ public:
   bool hasDetectorInfo() const;
   void setDetectorInfo(DetectorInfo *detectorInfo);
   bool hasSource() const;
+  bool hasEquivalentSource(const ComponentInfo &other) const;
   bool hasSample() const;
+  bool hasEquivalentSample(const ComponentInfo &other) const;
   const Eigen::Vector3d &sourcePosition() const;
   const Eigen::Vector3d &samplePosition() const;
   size_t source() const;
