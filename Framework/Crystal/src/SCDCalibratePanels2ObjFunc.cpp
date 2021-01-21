@@ -152,8 +152,10 @@ void SCDCalibratePanels2ObjFunc::function1D(double *out, const double *xValues,
     // somehow calibration results works better with direct method
     // but moderator requires the strange in-and-out way
     if (m_cmpt != "moderator") {
-      wl.initialize(pk.getL1(), pk.getL2(), pk.getScattering(), 0,
-                    pk.getInitialEnergy(), 0.0);
+      wl.initialize(pk.getL1(), 0,
+                    {{UnitParams::l2, pk.getL2()},
+                     {UnitParams::twoTheta, pk.getScattering()},
+                     {UnitParams::efixed, pk.getInitialEnergy()}});
       // create a peak with shifted wavelength
       Peak calc_pk(calc_inst, pk.getDetectorID(),
                    wl.singleFromTOF(pk.getTOF() + dT0), hkl,
@@ -162,8 +164,10 @@ void SCDCalibratePanels2ObjFunc::function1D(double *out, const double *xValues,
     } else {
       Peak calc_pk(calc_inst, pk.getDetectorID(), pk.getWavelength(), hkl,
                    pk.getGoniometerMatrix());
-      wl.initialize(calc_pk.getL1(), calc_pk.getL2(), calc_pk.getScattering(),
-                    0, calc_pk.getInitialEnergy(), 0.0);
+      wl.initialize(calc_pk.getL1(), 0,
+                    {{UnitParams::l2, calc_pk.getL2()},
+                     {UnitParams::twoTheta, calc_pk.getScattering()},
+                     {UnitParams::efixed, calc_pk.getInitialEnergy()}});
       // adding the TOF shift here
       calc_pk.setWavelength(wl.singleFromTOF(pk.getTOF() + dT0));
       calc_qv = calc_pk.getQSampleFrame();

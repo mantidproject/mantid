@@ -85,8 +85,6 @@ SXPeak::SXPeak(double t, double phi, double intensity,
 
   const auto l1 = spectrumInfo.l1();
   const auto l2 = spectrumInfo.l2(m_wsIndex);
-  const auto [difa, difc, tzero] =
-      spectrumInfo.diffractometerConstants(m_wsIndex);
 
   m_twoTheta = spectrumInfo.twoTheta(m_wsIndex);
   m_LTotal = l1 + l2;
@@ -96,13 +94,12 @@ SXPeak::SXPeak(double t, double phi, double intensity,
   m_detId = spectrumInfo.detector(m_wsIndex).getID();
   m_nPixels = 1;
 
+  Mantid::Kernel::Units::TOF tof;
   const auto unit = Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
-  unit->initialize(l1, 0,
-                   {{Kernel::UnitParams::l2, l2},
-                    {Kernel::UnitParams::twoTheta, m_twoTheta},
-                    {Kernel::UnitParams::difa, difa},
-                    {Kernel::UnitParams::difc, difc},
-                    {Kernel::UnitParams::tzero, tzero}});
+  Kernel::UnitParametersMap pmap{};
+  spectrumInfo.getDetectorValues(tof, *unit, Kernel::DeltaEMode::Elastic, false,
+                                 m_wsIndex, pmap);
+  unit->initialize(l1, 0, pmap);
   try {
     m_dSpacing = unit->singleFromTOF(m_tof);
   } catch (std::exception &) {
@@ -376,18 +373,12 @@ double PeakFindingStrategy::convertToTOF(const double xValue,
     return xValue;
   } else {
     const auto unit = UnitFactory::Instance().create("dSpacing");
-
-    const auto [difa, difc, tzero] =
-        m_spectrumInfo.diffractometerConstants(workspaceIndex);
+    Mantid::Kernel::Units::TOF tof;
+    Kernel::UnitParametersMap pmap{};
+    m_spectrumInfo.getDetectorValues(*unit, tof, Kernel::DeltaEMode::Elastic,
+                                     false, workspaceIndex, pmap);
     // we're using d-spacing, convert the point to TOF
-    unit->initialize(
-        m_spectrumInfo.l1(), 0,
-        {{Kernel::UnitParams::l2, m_spectrumInfo.l2(workspaceIndex)},
-         {Kernel::UnitParams::twoTheta,
-          m_spectrumInfo.twoTheta(workspaceIndex)},
-         {Kernel::UnitParams::difa, difa},
-         {Kernel::UnitParams::difc, difc},
-         {Kernel::UnitParams::tzero, tzero}});
+    unit->initialize(m_spectrumInfo.l1(), 0, pmap);
     return unit->singleToTOF(xValue);
   }
 }

@@ -641,8 +641,10 @@ private:
       Peak tmppk(pws->getInstrument(), pk.getDetectorID(), pk.getWavelength(),
                  hkl, pk.getGoniometerMatrix());
       Units::Wavelength wl;
-      wl.initialize(tmppk.getL1(), tmppk.getL2(), tmppk.getScattering(), 0,
-                    tmppk.getInitialEnergy(), 0.0);
+      wl.initialize(tmppk.getL1(), 0,
+                    {{UnitParams::l2, tmppk.getL2()},
+                     {UnitParams::twoTheta, tmppk.getScattering()},
+                     {UnitParams::efixed, tmppk.getInitialEnergy()}});
       tmppk.setWavelength(wl.singleFromTOF(pk.getTOF() + dT0));
 
       // only passing the q vector, not the energy info that relates T0

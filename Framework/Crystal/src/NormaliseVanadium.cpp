@@ -89,8 +89,8 @@ void NormaliseVanadium::exec() {
     Mantid::Kernel::Units::Wavelength wl;
     Mantid::Kernel::Units::TOF tof;
     UnitParametersMap pmap{};
-    m_inputWS->getDetectorValues(spectrumInfo, tof, wl,
-                                 Kernel::DeltaEMode::Elastic, false, i, pmap);
+    spectrumInfo.getDetectorValues(tof, wl, Kernel::DeltaEMode::Elastic, false,
+                                   i, pmap);
     auto timeflight = inSpec.points();
     if (unitStr == "TOF")
       wl.fromTOF(timeflight.mutableRawData(), timeflight.mutableRawData(), L1,

@@ -271,9 +271,9 @@ void RemoveBins::transformRangeUnit(const int index, double &startX,
     double l1 = m_spectrumInfo->l1();
 
     Kernel::UnitParametersMap pmap{};
-    m_inputWorkspace->getDetectorValues(*m_spectrumInfo, *m_rangeUnit,
-                                        *inputUnit, Kernel::DeltaEMode::Elastic,
-                                        false, index, pmap);
+    m_spectrumInfo->getDetectorValues(*m_rangeUnit, *inputUnit,
+                                      Kernel::DeltaEMode::Elastic, false, index,
+                                      pmap);
     double l2 = 0.;
     if (pmap.find(UnitParams::l2) != pmap.end()) {
       l2 = pmap[UnitParams::l2];

@@ -11,14 +11,19 @@
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
 #include <algorithm>
 #include <memory>
 
+using namespace Mantid::Kernel;
+
 namespace Mantid {
 namespace API {
+/// static logger object
+Kernel::Logger g_log("ExperimentInfo");
 
 SpectrumInfo::SpectrumInfo(const Beamline::SpectrumInfo &spectrumInfo,
                            const ExperimentInfo &experimentInfo,
@@ -212,6 +217,101 @@ double SpectrumInfo::difcUncalibrated(const size_t index) const {
   for (const auto &detIndex : detectorIndicesOnly)
     difc += m_detectorInfo.difcUncalibrated(detIndex);
   return difc / static_cast<double>(spectrumDefinition(index).size());
+}
+
+/** Get the detector values relevant to unit conversion for a workspace index
+ * @param inputUnit :: The input unit (Empty implies "all")
+ * @param outputUnit :: The output unit (Empty implies "all")
+ * @param emode :: The energy mode
+ * @param signedTheta :: Return twotheta with sign or without
+ * @param wsIndex :: The workspace index
+ * @param pmap :: a map containing values for conversion parameters that are
+required by unit classes to perform their conversions eg efixed. It can contain
+values on the way in if a look up isn't desired here eg if value supplied in
+parameters to the calling algorithm
+ */
+void SpectrumInfo::getDetectorValues(const Kernel::Unit &inputUnit,
+                                     const Kernel::Unit &outputUnit,
+                                     const Kernel::DeltaEMode::Type emode,
+                                     const bool signedTheta, int64_t wsIndex,
+                                     UnitParametersMap &pmap) const {
+  if (!hasDetectors(wsIndex))
+    return;
+  pmap[UnitParams::l2] = l2(wsIndex);
+
+  if (!isMonitor(wsIndex)) {
+    // The scattering angle for this detector (in radians).
+    try {
+      if (signedTheta)
+        pmap[UnitParams::twoTheta] = signedTwoTheta(wsIndex);
+      else
+        pmap[UnitParams::twoTheta] = twoTheta(wsIndex);
+    } catch (const std::runtime_error &e) {
+      g_log.warning(e.what());
+      pmap[UnitParams::twoTheta] = std::numeric_limits<double>::quiet_NaN();
+    }
+    if (emode != Kernel::DeltaEMode::Elastic &&
+        pmap.find(UnitParams::efixed) == pmap.end()) {
+      std::shared_ptr<const Geometry::IDetector> det(&detector(wsIndex),
+                                                     Mantid::NoDeleting());
+      try {
+        pmap[UnitParams::efixed] =
+            m_experimentInfo.getEFixedGivenEMode(det, emode);
+        g_log.debug() << "Detector: " << det->getID()
+                      << " EFixed: " << pmap[UnitParams::efixed] << "\n";
+      } catch (std::runtime_error) {
+        // let the unit classes work out if this is a problem
+      }
+    }
+
+    std::vector<detid_t> warnDetIds;
+    try {
+      if ((emode == Kernel::DeltaEMode::Elastic) &&
+          ((inputUnit.unitID() == "dSpacing") ||
+           (inputUnit.unitID() == "Empty") ||
+           (outputUnit.unitID() == "dSpacing") ||
+           (outputUnit.unitID() == "Empty"))) {
+        auto [difa, difc, tzero] = diffractometerConstants(wsIndex, warnDetIds);
+        pmap[UnitParams::difa] = difa;
+        pmap[UnitParams::difc] = difc;
+        pmap[UnitParams::tzero] = tzero;
+        if (warnDetIds.size() > 0) {
+          createDetectorIdLogMessages(warnDetIds, wsIndex);
+        }
+      } else {
+        pmap[UnitParams::difc] = difcUncalibrated(wsIndex);
+      }
+    } catch (const std::runtime_error &e) {
+      g_log.warning(e.what());
+    }
+  } else {
+    pmap[UnitParams::twoTheta] = 0.0;
+    pmap[UnitParams::efixed] = DBL_MIN;
+    // Energy transfer is meaningless for a monitor, so set l2 to 0.
+    if (outputUnit.unitID().find("DeltaE") != std::string::npos) {
+      pmap[UnitParams::l2] = 0.0;
+    }
+    pmap[UnitParams::difc] = 0;
+  }
+}
+
+void SpectrumInfo::createDetectorIdLogMessages(
+    const std::vector<detid_t> &detids, int64_t wsIndex) const {
+  std::string detIDstring;
+  auto iter = detids.begin();
+  auto itEnd = detids.end();
+  for (; iter != itEnd; ++iter) {
+    detIDstring += std::to_string(*iter) + ",";
+  }
+
+  if (!detIDstring.empty()) {
+    detIDstring.pop_back(); // Drop last comma
+  }
+  g_log.warning(
+      "Incomplete set of calibrated diffractometer constants found for "
+      "workspace index" +
+      std::to_string(wsIndex) + ". Using uncalibrated values for detectors " +
+      detIDstring);
 }
 
 /// Returns true if the spectrum is associated with detectors in the instrument.

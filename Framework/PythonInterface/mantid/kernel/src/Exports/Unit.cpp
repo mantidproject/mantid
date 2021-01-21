@@ -58,7 +58,7 @@ void export_Unit() {
 
   register_ptr_to_python<std::shared_ptr<Unit>>();
 
-    enum_<Mantid::Kernel::UnitParams>("UnitParams")
+  enum_<Mantid::Kernel::UnitParams>("UnitParams")
       .value("l2", Mantid::Kernel::UnitParams::l2)
       .value("twoTheta", Mantid::Kernel::UnitParams::twoTheta)
       .value("delta", Mantid::Kernel::UnitParams::delta)

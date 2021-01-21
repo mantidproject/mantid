@@ -25,16 +25,14 @@ double deprecatedSignature(const std::string &src, const std::string &dest,
 
 void export_UnitConversion() {
   // Function pointer typedef
-  using StringVersion = double (*)(
-      const std::string &, const std::string &, const double, const double,
-      const double, const double, const DeltaEMode::Type, const double);
   using newStringVersion = double (*)(
       const std::string &, const std::string &, const double, const double,
       const DeltaEMode::Type, const Mantid::Kernel::UnitParametersMap &);
 
-  class_<std::unordered_map<Mantid::Kernel::UnitParams, double>>("UnitParametersMap").def(
-      map_indexing_suite<
-          std::unordered_map<Mantid::Kernel::UnitParams, double>>());
+  class_<std::unordered_map<Mantid::Kernel::UnitParams, double>>(
+      "UnitParametersMap")
+      .def(map_indexing_suite<
+           std::unordered_map<Mantid::Kernel::UnitParams, double>>());
 
   class_<UnitConversion, boost::noncopyable>("UnitConversion", no_init)
       .def("run", &deprecatedSignature,

@@ -183,8 +183,8 @@ void AnvredCorrection::exec() {
     UnitParametersMap pmap{};
     Mantid::Kernel::Units::Wavelength wl;
     Mantid::Kernel::Units::TOF tof;
-    m_inputWS->getDetectorValues(spectrumInfo, tof, wl,
-                                 Kernel::DeltaEMode::Elastic, false, i, pmap);
+    spectrumInfo.getDetectorValues(tof, wl, Kernel::DeltaEMode::Elastic, false,
+                                   i, pmap);
     double L2 = pmap.at(UnitParams::l2);
     double scattering = pmap.at(UnitParams::twoTheta);
 
@@ -283,8 +283,8 @@ void AnvredCorrection::execEvent() {
     UnitParametersMap pmap{};
     Mantid::Kernel::Units::Wavelength wl;
     Mantid::Kernel::Units::TOF tof;
-    eventW->getDetectorValues(spectrumInfo, tof, wl,
-                              Kernel::DeltaEMode::Elastic, false, i, pmap);
+    spectrumInfo.getDetectorValues(tof, wl, Kernel::DeltaEMode::Elastic, false,
+                                   i, pmap);
     double L2 = pmap.at(UnitParams::l2);
     double scattering = pmap.at(UnitParams::twoTheta);
 
