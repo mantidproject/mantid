@@ -87,8 +87,12 @@ class GenerateLogbook(PythonAlgorithm):
                              doc='Names of those additional entries.')
 
     def _prepare_file_array(self):
-        return [os.path.splitext(f)[0] for f in fnmatch.filter(os.listdir(self._data_directory), '*.nxs')
-                if self._numor_range[0] <= int(os.path.splitext(f)[0]) < self._numor_range[1]]
+        facility_name_len = 0
+        if self._facility != 'ILL':
+            facility_name_len = len(self._facility)
+
+        return = [os.path.splitext(f)[0] for f in fnmatch.filter(os.listdir(self._data_directory), '*.nxs')
+            if self._numor_range[0] <= int(os.path.splitext(f[facility_name_len:])[0]) < self._numor_range[1]]
 
     def _get_default_entries(self):
         tmp_instr = self._instrument + '_tmp'
