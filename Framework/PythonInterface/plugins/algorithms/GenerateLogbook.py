@@ -134,15 +134,17 @@ class GenerateLogbook(PythonAlgorithm):
 
     def _fill_logbook(self, logbook_ws, data_array):
         """Fills out the logbook with the requested meta-data."""
+        n_entries = len(self._metadata_headlines)
         for file_name in data_array:
             file_path = os.path.join(self._data_directory, file_name + '.nxs')
             with h5py.File(file_path, 'r') as f:
-                rowData = []
-                for entry in self._metadata_entries:
+                rowData = numpy.empty(n_entries, dtype=object)
+                for entry_no, entry in enumerate(self._metadata_entries):
                     data = f.get(entry)[0]
                     if isinstance(data, numpy.bytes_):
                         data = data.decode('utf-8')
-                    rowData.append(str(data))
+                        data = data.replace(',', ';') # needed for CSV output
+                    rowData[entry_no] = str(data)
                 mtd[logbook_ws].addRow(rowData)
 
     def _store_logbook_as_csv(self, logbook_ws):
