@@ -321,6 +321,10 @@ public:
   double getPeakHeightOf(const QString &prefix);
   void setPeakFwhmOf(const QString &prefix, double value);
   double getPeakFwhmOf(const QString &prefix);
+  std::string getWidthParameterNameOf(const QString &prefix);
+  std::string getCentreParameterNameOf(const QString &prefix);
+  bool isParameterExplicitlySetOf(const QString &prefix,
+                                  const std::string &param);
   QStringList getPeakPrefixes() const;
 
   // Emits a signal for when the sequential fit has finished
@@ -345,6 +349,7 @@ public slots:
   void executeSetupManageMenu(const QString & /*item*/);
   void workspaceDoubleClicked(QListWidgetItem *item);
   void executeCustomSetupRemove(const QString &name);
+  void executeClearCustomSetups();
 
 signals:
   void currentChanged() const;

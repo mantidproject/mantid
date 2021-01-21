@@ -15,8 +15,7 @@ from workbench.plotting.plotscriptgenerator.axes import (generate_axis_limit_com
                                                          generate_axis_label_commands,
                                                          generate_set_title_command,
                                                          generate_axis_scale_commands,
-                                                         generate_tick_commands,
-                                                         generate_grid_commands)
+                                                         generate_tick_commands)
 from workbench.plotting.plotscriptgenerator.figure import generate_subplots_command
 from workbench.plotting.plotscriptgenerator.lines import generate_plot_command
 from workbench.plotting.plotscriptgenerator.colorfills import generate_plot_2d_command
@@ -57,7 +56,8 @@ def generate_script(fig, exclude_headers=False):
     :return: A String. A script to recreate the given figure
     """
     plot_commands = []
-    plot_headers = ['import matplotlib.pyplot as plt']
+    plot_headers = ['import matplotlib.pyplot as plt', "from mantid.plots.utility import MantidAxType"]
+
     for ax in fig.get_axes():
         if not isinstance(ax, MantidAxes):
             continue
@@ -72,7 +72,6 @@ def generate_script(fig, exclude_headers=False):
             plot_commands.extend(get_plot_cmds(ax, ax_object_var))  # ax.plot
 
         plot_commands.extend(generate_tick_commands(ax))
-        plot_commands.extend(generate_grid_commands(ax))
         plot_commands.extend(get_title_cmds(ax, ax_object_var))  # ax.set_title
         plot_commands.extend(get_axis_label_cmds(ax, ax_object_var))  # ax.set_label
         plot_commands.extend(get_axis_limit_cmds(ax, ax_object_var))  # ax.set_lim

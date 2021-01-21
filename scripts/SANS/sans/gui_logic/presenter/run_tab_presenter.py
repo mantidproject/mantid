@@ -9,8 +9,6 @@
 This presenter is essentially the brain of the reduction gui. It controls other presenters and is mainly responsible
 for presenting and generating the reduction settings.
 """
-
-import copy
 import os
 import time
 import traceback
@@ -222,7 +220,7 @@ class RunTabPresenter(PresenterCommon):
         self.progress = 0
 
         # Models that are being used by the presenter
-        self._model = model if model else StateGuiModel(user_file_items=AllStates())
+        self._model = model if model else StateGuiModel(all_states=AllStates())
         self._table_model = table_model if table_model else TableModel()
         self._table_model.subscribe_to_model_changes(self)
 
@@ -415,7 +413,7 @@ class RunTabPresenter(PresenterCommon):
             self._model = StateGuiModel(user_file_items)
             self._model.user_file = user_file_path
             self._settings_adjustment_presenter.set_model(
-                SettingsAdjustmentModel(user_file_items=user_file_items))
+                SettingsAdjustmentModel(all_states=user_file_items))
             # 5. Update the views.
             self.update_view_from_model()
             self._beam_centre_presenter.update_centre_positions(self._model)
@@ -1108,7 +1106,7 @@ class RunTabPresenter(PresenterCommon):
         in the view and the model. This can be easily changed, but it also provides a good cohesion.
         """
         self.sans_logger.debug("Updating SANS Model from View")
-        state_model = copy.deepcopy(self._model)
+        state_model = self._model
 
         # If we don't have a state model then return None
         if state_model is None:

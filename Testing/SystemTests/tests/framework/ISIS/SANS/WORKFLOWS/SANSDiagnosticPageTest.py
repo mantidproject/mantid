@@ -1,6 +1,6 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
@@ -11,9 +11,10 @@ import os
 import systemtesting
 
 import mantid
+from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 
 from sans.state.StateObjects.StateData import get_data_builder
-from sans.common.enums import (DetectorType, SANSFacility, IntegralEnum)
+from sans.common.enums import (DetectorType, SANSFacility, IntegralEnum, SANSInstrument)
 
 from sans.common.constants import EMPTY_NAME
 from sans.common.general_functions import create_unmanaged_algorithm
@@ -130,6 +131,7 @@ class SANSDiagnosticPageTest(unittest.TestCase):
         self._compare_workspace(output_workspaces[0], reference_file_name)
 
 
+@ISISSansSystemTest(SANSInstrument.LARMOR, SANSInstrument.SANS2D)
 class SANSDiagnosticPageRunnerTest(systemtesting.MantidSystemTest):
     def __init__(self):
         systemtesting.MantidSystemTest.__init__(self)

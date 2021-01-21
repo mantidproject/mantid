@@ -4,9 +4,11 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from Muon.GUI.Common.ADSHandler.workspace_naming import get_run_numbers_as_string_from_workspace_name
 from Muon.GUI.Common.fitting_tab_widget.fitting_tab_model import FitPlotInformation
-from Muon.GUI.Common.fitting_tab_widget.workspace_selector_view import WorkspaceSelectorView
 from mantidqt.utils.observer_pattern import GenericObserver, GenericObserverWithArgPassing, GenericObservable
+from mantidqt.widgets.fitscriptgenerator import (FitScriptGeneratorModel, FitScriptGeneratorPresenter,
+                                                 FitScriptGeneratorView)
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapperWithOutput
 from Muon.GUI.Common.contexts.frequency_domain_analysis_context import FrequencyDomainAnalysisContext
 from Muon.GUI.Common import thread_model
@@ -69,8 +71,14 @@ class FittingTabPresenter(object):
         self.enable_editing_notifier = GenericObservable()
         self.disable_editing_notifier = GenericObservable()
 
+        self.fsg_model = None
+        self.fsg_view = None
+        self.fsg_presenter = None
+
     def disable_view(self):
-        self.view.setEnabled(False)
+        self.update_selected_workspace_list_for_fit()
+        if not self.selected_data:
+            self.view.setEnabled(False)
 
     def enable_view(self):
         if self.selected_data:
@@ -96,16 +104,17 @@ class FittingTabPresenter(object):
     def end_x(self):
         return self._end_x
 
-    # Respond to changes on view
-    def handle_select_fit_data_clicked(self):
-        selected_data, dialog_return = WorkspaceSelectorView.get_selected_data(
-            self.context.data_context.current_runs,
-            self.context.data_context.instrument, self.selected_data,
-            self.view.fit_to_raw, self._plot_type, self.context, self.view)
+    def handle_fit_generator_clicked(self):
+        fit_options = {"FittingType": "Simultaneous" if self.view.is_simul_fit else "Sequential",
+                       "Minimizer": self.view.minimizer,
+                       "EvaluationType": self.view.evaluation_type}
 
-        if dialog_return:
-            self.selected_data = selected_data
-            self.manual_selection_made = True
+        self.fsg_model = FitScriptGeneratorModel()
+        self.fsg_view = FitScriptGeneratorView(None, fit_options)
+        self.fsg_presenter = FitScriptGeneratorPresenter(self.fsg_view, self.fsg_model, self.view.loaded_workspaces,
+                                                         self.view.start_time, self.view.end_time)
+
+        self.fsg_presenter.openFitScriptGenerator()
 
     def handle_new_data_loaded(self):
         self.manual_selection_made = False
@@ -153,8 +162,13 @@ class FittingTabPresenter(object):
         self.update_model_from_view(fit_to_raw=self.view.fit_to_raw)
 
     def handle_fit_type_changed(self):
+        if self.view.tf_asymmetry_mode:
+            self.view.warning_popup("Cannot change Fitting Mode while TF Asymmetry Mode is checked.")
+            self.view.is_simul_fit = not self.view.is_simul_fit
+            return
+
         self.view.undo_fit_button.setEnabled(False)
-        if self.view.is_simul_fit():
+        if self.view.is_simul_fit:
             self.view.workspace_combo_box_label.setText(
                 'Display parameters for')
             self.view.enable_simul_fit_options()
@@ -199,7 +213,7 @@ class FittingTabPresenter(object):
         fit_function, fit_status, fit_chi_squared = self.fitting_calculation_model.result
         if any([not fit_function, not fit_status, not fit_chi_squared]):
             return
-        if self.view.is_simul_fit():
+        if self.view.is_simul_fit:
             self._fit_function[0] = fit_function
             self._fit_status = [fit_status] * len(self.start_x)
             self._fit_chi_squared = [fit_chi_squared] * len(self.start_x)
@@ -271,7 +285,7 @@ class FittingTabPresenter(object):
             self.view.function_browser.blockSignals(False)
             return
         if not self.view.fit_object:
-            if self.view.is_simul_fit():
+            if self.view.is_simul_fit:
                 self._fit_function = [None]
             else:
                 self._fit_function = [None] * len(self.selected_data)\
@@ -324,7 +338,6 @@ class FittingTabPresenter(object):
         self._tf_asymmetry_mode = self.view.tf_asymmetry_mode
         global_parameters = self.view.get_global_parameters()
         if self._tf_asymmetry_mode:
-            self.view.select_workspaces_to_fit_button.setEnabled(False)
             new_global_parameters = [str('f0.f1.f1.' + item) for item in global_parameters]
             if self.automatically_update_fit_name:
                 self.view.function_name += ',TFAsymmetry'
@@ -335,7 +348,7 @@ class FittingTabPresenter(object):
                 self.view.function_name = self.view.function_name.replace(',TFAsymmetry', '')
                 self.model.function_name = self.view.function_name
 
-        if not self.view.is_simul_fit():
+        if not self.view.is_simul_fit:
             for index, fit_function in enumerate(self._fit_function):
                 fit_function = fit_function if fit_function else self.view.fit_object.clone()
                 new_function = calculate_tf_fit_function(fit_function)
@@ -362,15 +375,14 @@ class FittingTabPresenter(object):
 
     def get_parameters_for_tf_function_calculation(self, fit_function):
         mode = 'Construct' if self.view.tf_asymmetry_mode else 'Extract'
-        workspace_list = self.selected_data if self.view.is_simul_fit() else [
-            self.view.display_workspace]
+        workspace_list = self.selected_data if self.view.is_simul_fit else [self.view.display_workspace]
         return {'InputFunction': fit_function,
                 'WorkspaceList': workspace_list,
                 'Mode': mode,
                 'CopyTies': False}
 
     def handle_function_parameter_changed(self):
-        if not self.view.is_simul_fit():
+        if not self.view.is_simul_fit:
             index = self.view.get_index_for_start_end_times()
             fit_function = self._get_fit_function()[index]
             self._fit_function[index] = self._get_fit_function()[index]
@@ -394,10 +406,14 @@ class FittingTabPresenter(object):
         self.selected_single_fit_notifier.notify_subscribers(self.get_selected_fit_workspaces())
 
     def handle_fit_by_changed(self):
+        if self.view.tf_asymmetry_mode:
+            self.view.warning_popup("Cannot change Run - Group/Pair selection while TF Asymmetry Mode is checked.")
+            self.view.simultaneous_fit_by = "Run" if self.view.simultaneous_fit_by == "Group/Pair" else "Group/Pair"
+            return
+
         self.manual_selection_made = False  # reset manual selection flag
         self.update_selected_workspace_list_for_fit()
         self.view.simul_fit_by_specifier.setEnabled(True)
-        self.view.select_workspaces_to_fit_button.setEnabled(False)
         self.update_model_from_view(fit_function=self._fit_function[0], fit_by=self.view.simultaneous_fit_by)
         self.fit_type_changed_notifier.notify_subscribers()
         self.fit_function_changed_notifier.notify_subscribers()
@@ -413,7 +429,6 @@ class FittingTabPresenter(object):
     def perform_fit(self):
         if not self.view.fit_object:
             return
-
         self._fit_function_cache = [func.clone() for func in self._fit_function]
         try:
             workspaces = self.get_fit_input_workspaces()
@@ -447,7 +462,8 @@ class FittingTabPresenter(object):
 
         self.reset_start_time_to_first_good_data_value()
         self.view.update_displayed_data_combo_box(self.selected_data)
-        self.update_model_from_view(fit_function=self._fit_function[0])
+        fitting_options = {"fit_function": self._fit_function[0], "startX": self.start_x[0], "endX": self.end_x[0]}
+        self.update_model_from_view(**fitting_options)
         self.update_fit_status_information_in_view()
 
     def clear_fit_information(self):
@@ -459,7 +475,7 @@ class FittingTabPresenter(object):
         self.view.undo_fit_button.setEnabled(False)
 
     def update_selected_workspace_list_for_fit(self):
-        if self.view.is_simul_fit():
+        if self.view.is_simul_fit:
             if self.manual_selection_made:
                 return  # if it is a manual selection then the data should not change
             self.update_fit_specifier_list()
@@ -482,7 +498,6 @@ class FittingTabPresenter(object):
             selected_workspaces += self.context.get_names_of_workspaces_to_fit(
                 runs=selected_runs,
                 group_and_pair=grp_and_pair,
-                phasequad=False,
                 rebin=not self.view.fit_to_raw, freq=freq)
 
         selected_workspaces = list(set(self._check_data_exists(selected_workspaces)))
@@ -494,9 +509,16 @@ class FittingTabPresenter(object):
     def update_fit_specifier_list(self):
         if self.view.simultaneous_fit_by == "Run":
             # extract runs from run list of lists, which is in the format [ [run,...,runs],[runs],...,[runs] ]
-            flattened_run_list = [str(item) for sublist in self.context.data_context.current_runs for item in sublist]
-            flattened_run_list.sort()
-            simul_choices = flattened_run_list
+            current_runs = self.context.data_context.current_runs
+            if len(current_runs) > 1:
+                run_numbers = [str(item) for sub_list in current_runs for item in sub_list]
+            else:
+                # extract runs from workspace
+                ws_list = self.context.data_context.current_data["OutputWorkspace"]
+                run_numbers = [str(get_run_numbers_as_string_from_workspace_name(
+                    ws.workspace_name, self.context.data_context.instrument)) for ws in ws_list]
+            run_numbers.sort()
+            simul_choices = run_numbers
         elif self.view.simultaneous_fit_by == "Group/Pair":
             simul_choices = self._get_selected_groups_and_pairs()
         else:
@@ -505,7 +527,7 @@ class FittingTabPresenter(object):
         self.view.setup_fit_by_specifier(simul_choices)
 
     def _update_stored_fit_functions(self):
-        if self.view.is_simul_fit():
+        if self.view.is_simul_fit:
             if self.view.fit_object:
                 self._fit_function = [self.view.fit_object.clone()]
             else:
@@ -522,7 +544,7 @@ class FittingTabPresenter(object):
                 self._fit_function = [None] * len(self._start_x)
 
     def _get_fit_function(self):
-        if self.view.is_simul_fit():
+        if self.view.is_simul_fit:
             return [self.view.fit_object]  # return the fit function stored in the browser
         else:  # we need to convert stored function into equiv
             if self.view.fit_object:  # make sure thers a fit function in the browser
@@ -539,7 +561,7 @@ class FittingTabPresenter(object):
         return self._fit_function[self._fit_function_index()]
 
     def _fit_function_index(self):
-        if self.view.is_simul_fit():
+        if self.view.is_simul_fit:
             return 0  # if we are doing a single simultaneous fit return 0
         else:  # else fitting on one of the display workspaces
             return self.view.get_index_for_start_end_times()
@@ -598,14 +620,14 @@ class FittingTabPresenter(object):
         self.model.update_model_fit_options(**fitting_options)
 
     def _get_fit_type(self):
-        if self.view.is_simul_fit():
+        if self.view.is_simul_fit:
             fit_type = "Simul"
         else:
             fit_type = "Single"
         return fit_type
 
     def get_fit_input_workspaces(self):
-        if self.view.is_simul_fit():
+        if self.view.is_simul_fit:
             return self.selected_data
         else:
             return [self.view.display_workspace]
@@ -632,7 +654,7 @@ class FittingTabPresenter(object):
     def _get_selected_runs_and_groups_for_fitting(self):
         runs = 'All'
         groups_and_pairs = self._get_selected_groups_and_pairs()
-        if self.view.is_simul_fit():
+        if self.view.is_simul_fit:
             if self.view.simultaneous_fit_by == "Run":
                 runs = self.view.simultaneous_fit_by_specifier
             elif self.view.simultaneous_fit_by == "Group/Pair":

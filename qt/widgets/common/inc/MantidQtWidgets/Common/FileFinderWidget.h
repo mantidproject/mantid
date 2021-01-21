@@ -282,3 +282,6 @@ private:
 };
 } // namespace API
 } // namespace MantidQt
+
+Q_DECLARE_METATYPE(MantidQt::API::FileFinderWidget::ButtonOpts)
+Q_DECLARE_METATYPE(MantidQt::API::FileFinderWidget::LiveButtonOpts)

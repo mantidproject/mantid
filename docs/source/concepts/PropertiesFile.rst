@@ -136,7 +136,13 @@ you may want to alter and those properties are detailed below.
 |                                                 |The default is information, but                    | ``error``, ``critical``     |
 |                                                 |this can be lowered to debug for more detailed     | or ``fatal``                |
 |                                                 |feedback.                                          |                             |
-|                                                 |                                                   |                             |
++-------------------------------------------------+---------------------------------------------------+-----------------------------+
+| ``logging.channels.consoleChannel.class``       | Select where log messages appear.                 | ``ConsoleChannel``,         |
+|                                                 | ``ConsoleChannel`` writes to stdlog.              | ``StdoutChannel``, or       |
+|                                                 | ``StdoutChannel`` writes to stdout and can be     | ``PythonStdoutChannel``     |
+|                                                 | redirected using pipes.                           |                             |
+|                                                 | ``PythonStdoutChannel`` writes to stdout through  |                             |
+|                                                 | python and is visible in jupyter notebooks.       |                             |
 +-------------------------------------------------+---------------------------------------------------+-----------------------------+
 
 The logging priority levels for the file logging and console logging can also be adjusted in python using the command:
@@ -258,10 +264,6 @@ Plotting Settings
 +=================================+==================================================================+=====================+
 |``plots.ShowTitle``              |Whether to show titles on plots                                   | ``On``, ``Off``     |
 +---------------------------------+------------------------------------------------------------------+---------------------+
-|``plots.ShowMinorTicks``         |Whether to show minor ticks on plots                              | ``On``, ``Off``     |
-+---------------------------------+------------------------------------------------------------------+---------------------+
-|``plots.ShowMinorGridlines``     |Whether to show minor gridlines on plots                          | ``On``, ``Off``     |
-+---------------------------------+------------------------------------------------------------------+---------------------+
 |``plots.ShowLegend``             |Whether to show legend on plots                                   | ``On``, ``Off``     |
 +---------------------------------+------------------------------------------------------------------+---------------------+
 |``plots.font``                   |The default font for labels and titles on plots.                  |``Helvetica``        |
@@ -269,6 +271,44 @@ Plotting Settings
 |``plots.xAxesScale``             |The default x scale on 1d plots                                   |``Linear``, ``Log``  |
 +---------------------------------+------------------------------------------------------------------+---------------------+
 |``plots.yAxesScale``             |The default y scale on 1d plots                                   |``Linear``, ``Log``  |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.axesLineWidth``          |The default width of the lines that make the axes                 |``1``                |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.enableGrid``             |The default y scale on 1d plots                                   |``Linear``, ``Log``  |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.ShowMinorTicks``         |Whether to show minor ticks on plots                              | ``On``, ``Off``     |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.ShowMinorGridlines``     |Whether to show minor gridlines on plots                          | ``On``, ``Off``     |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.showTicksLeft``          |Whether to show ticks on the left side of the plot                | ``On``, ``Off``     |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.showTicksBottom``        |Whether to show ticks on the bottom of the plot                   | ``On``, ``Off``     |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.showTicksRight``         |Whether to show ticks on the right side of the plot               | ``On``, ``Off``     |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.showTicksTop``           |Whether to show ticks on the top side of the plot                 | ``On``, ``Off``     |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.showLabelsLeft``         |Whether to show labels on the left side of the plot               | ``On``, ``Off``     |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.showLabelsBottom``       |Whether to show labels on the bottom of the plot                  | ``On``, ``Off``     |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.showLabelsRight``        |Whether to show labels on the right side of the plot              | ``On``, ``Off``     |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.showLabelsTop``          |Whether to show labels on the top side of the plot                | ``On``, ``Off``     |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.ticks.major.length``     |The default length of the major ticks                             |``6``                |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.ticks.major.width``      |The default width of the major ticks                              |``1``                |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.ticks.major.direction``  |The default direction of the major ticks                          |``In``, ``Out``,     |
+|                                 |                                                                  |``InOut``            |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.ticks.minor.length``     |The default length of the minor ticks                             |``3``                |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.ticks.minor.width``      |The default width of the minor ticks                              |``1``                |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.ticks.minor.direction``  |The default direction of the minor ticks                          |``In``, ``Out``,     |
+|                                 |                                                                  |``InOut``            |
 +---------------------------------+------------------------------------------------------------------+---------------------+
 |``plots.line.Style``             |Default Line style on 1d plots                                    |``solid``, ``dashed``|
 +---------------------------------+------------------------------------------------------------------+---------------------+

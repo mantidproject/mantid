@@ -110,20 +110,21 @@ class PairingTablePresenter(object):
 
         self._view.clear()
         for pair in self._model.pairs:
-            to_analyse = True if pair.name in self._model.selected_pairs else False
-            forward_group_periods = self._model._context.group_pair_context[pair.forward_group].periods
-            backward_group_periods = self._model._context.group_pair_context[pair.backward_group].periods
-            forward_period_warning = self._model.validate_periods_list(forward_group_periods)
-            backward_period_warning = self._model.validate_periods_list(backward_group_periods)
-            if forward_period_warning==RowValid.invalid_for_all_runs or backward_period_warning == RowValid.invalid_for_all_runs:
-                display_period_warning = RowValid.invalid_for_all_runs
-            elif forward_period_warning==RowValid.valid_for_some_runs or backward_period_warning == RowValid.valid_for_some_runs:
-                display_period_warning = RowValid.valid_for_some_runs
-            else:
-                display_period_warning = RowValid.valid_for_all_runs
-            color = row_colors[display_period_warning]
-            tool_tip = row_tooltips[display_period_warning]
-            self.add_pair_to_view(pair, to_analyse, color, tool_tip)
+            if isinstance(pair, MuonPair):
+                to_analyse = True if pair.name in self._model.selected_pairs else False
+                forward_group_periods = self._model._context.group_pair_context[pair.forward_group].periods
+                backward_group_periods = self._model._context.group_pair_context[pair.backward_group].periods
+                forward_period_warning = self._model.validate_periods_list(forward_group_periods)
+                backward_period_warning = self._model.validate_periods_list(backward_group_periods)
+                if forward_period_warning==RowValid.invalid_for_all_runs or backward_period_warning == RowValid.invalid_for_all_runs:
+                    display_period_warning = RowValid.invalid_for_all_runs
+                elif forward_period_warning==RowValid.valid_for_some_runs or backward_period_warning == RowValid.valid_for_some_runs:
+                    display_period_warning = RowValid.valid_for_some_runs
+                else:
+                    display_period_warning = RowValid.valid_for_all_runs
+                color = row_colors[display_period_warning]
+                tool_tip = row_tooltips[display_period_warning]
+                self.add_pair_to_view(pair, to_analyse, color, tool_tip)
 
         self._view.enable_updates()
 
@@ -137,7 +138,6 @@ class PairingTablePresenter(object):
             self._model.add_pair_to_analysis(pair_name)
         else:
             self._model.remove_pair_from_analysis(pair_name)
-
         pair_info = {'is_added': pair_added, 'name': pair_name}
         self.selected_pair_changed_notifier.notify_subscribers(pair_info)
 

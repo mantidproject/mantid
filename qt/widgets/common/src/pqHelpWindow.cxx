@@ -33,14 +33,17 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "MantidQtWidgets/Common/MantidDesktopServices.h"
 #include "ui_pqHelpWindow.h"
 
+#include <QBuffer>
 #include <QFileInfo>
+#include <QHash>
 #include <QHelpContentWidget>
 #include <QHelpEngine>
 #include <QHelpIndexWidget>
 #include <QHelpSearchQueryWidget>
 #include <QHelpSearchResultWidget>
+#include <QMimeDatabase>
+#include <QMimeType>
 #include <QNetworkProxy>
-#include <QNetworkReply>
 #include <QPointer>
 #include <QPrintDialog>
 #include <QPrinter>
@@ -53,9 +56,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QUrl>
 
 namespace {
-  /// Prefix for qthelp scheme
-  constexpr auto QTHELP_SCHEME = "qthelp";
-}
+/// Prefix for qthelp scheme
+constexpr auto QTHELP_SCHEME = "qthelp";
+} // namespace
+
+#if defined(USE_QTWEBKIT)
+#include <QNetworkReply>
+#include <QWebHistory>
+#include <QWebView>
 
 // ****************************************************************************
 //            CLASS pqHelpWindowNetworkReply
@@ -135,10 +143,6 @@ qint64 pqHelpWindowNetworkReply::readData(char *data, qint64 maxSize) {
   return -1;
 }
 
-#if defined(USE_QTWEBKIT)
-#include <QWebHistory>
-#include <QWebView>
-
 // ****************************************************************************
 //    CLASS pqHelpWindow::pqNetworkAccessManager
 // ****************************************************************************
@@ -185,13 +189,13 @@ private:
 #if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
 #include <QWebEngineUrlScheme>
 
-/// Register on the scheme on library load as it must be done before QApplication
-/// is created
+/// Register on the scheme on library load as it must be done before
+/// QApplication is created
 struct QtHelpSchemeRegistration {
   QtHelpSchemeRegistration() {
     auto scheme = QWebEngineUrlScheme(QTHELP_SCHEME);
     scheme.setFlags(QWebEngineUrlScheme::LocalScheme |
-		    QWebEngineUrlScheme::LocalAccessAllowed);
+                    QWebEngineUrlScheme::LocalAccessAllowed);
     QWebEngineUrlScheme::registerScheme(scheme);
   }
 };
@@ -203,17 +207,33 @@ const QtHelpSchemeRegistration QTHELP_REGISTRATION;
 class QtHelpUrlHandler : public QWebEngineUrlSchemeHandler {
 public:
   QtHelpUrlHandler(QHelpEngineCore *helpEngine, QObject *parent = nullptr)
-      : QWebEngineUrlSchemeHandler(parent), Engine(helpEngine) {}
+      : QWebEngineUrlSchemeHandler(parent), m_helpEngine(helpEngine) {}
 
 protected:
   void requestStarted(QWebEngineUrlRequestJob *request) override {
-    request->reply("text/html",
-                   new pqHelpWindowNetworkReply(request->requestUrl(),
-                                                this->Engine, request));
+    const auto url = request->requestUrl();
+    const auto resourceType = contentType(url);
+    const auto array = m_helpEngine->fileData(url);
+    QBuffer *buffer = new QBuffer;
+    buffer->setData(array);
+    buffer->open(QIODevice::ReadOnly);
+    connect(buffer, &QIODevice::aboutToClose, buffer, &QObject::deleteLater);
+    request->reply(resourceType.toLocal8Bit(), buffer);
   }
 
 private:
-  QHelpEngineCore *Engine;
+  /**
+   * Given a url return the content type of the resource based on the extension
+   * @param url A url pointing to a resource
+   */
+  QString contentType(const QUrl &url) {
+    QMimeDatabase mimeTypes;
+    return mimeTypes.mimeTypeForFile(url.path(), QMimeDatabase::MatchExtension)
+        .name();
+  }
+
+private:
+  QHelpEngineCore *m_helpEngine;
 };
 
 #endif
@@ -224,7 +244,7 @@ private:
 
 //-----------------------------------------------------------------------------
 pqHelpWindow::pqHelpWindow(QHelpEngine *engine, QWidget *parentObject,
-                           const Qt::WindowFlags& parentFlags)
+                           const Qt::WindowFlags &parentFlags)
     : Superclass(parentObject, parentFlags), m_helpEngine(engine) {
   Q_ASSERT(engine != nullptr);
   // Take ownership of the engine
@@ -429,6 +449,6 @@ void pqHelpWindow::showHomePage(const QString &namespace_name) {
 }
 
 //-----------------------------------------------------------------------------
-bool pqHelpWindow::isExistingPage(const QUrl& url) {
+bool pqHelpWindow::isExistingPage(const QUrl &url) {
   return this->m_helpEngine->findFile(url).isValid();
 }

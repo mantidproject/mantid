@@ -48,13 +48,14 @@ public:
   RunsPresenterTest()
       : m_thetaTolerance(0.01), m_instruments{"INTER", "SURF", "CRISP",
                                               "POLREF", "OFFSPEC"},
-        m_view(), m_runsTableView(), m_progressView(), m_messageHandler(),
-        m_searcher(nullptr), m_pythonRunner(), m_runNotifier(nullptr),
         m_runsTable(m_instruments, m_thetaTolerance, ReductionJobs()),
         m_searchString("test search string"), m_searchResult("", ""),
-        m_instrument("INTER"), m_cycle("19_4") {
+        m_instrument("INTER"), m_cycle("19_4"), m_searcher(nullptr),
+        m_runNotifier(nullptr) {
     Mantid::API::FrameworkManager::Instance();
     ON_CALL(m_view, table()).WillByDefault(Return(&m_runsTableView));
+    ON_CALL(m_view, getSearchInstrument()).WillByDefault(Return(m_instrument));
+    ON_CALL(m_view, getSearchCycle()).WillByDefault(Return(m_cycle));
     ON_CALL(m_runsTableView, jobs()).WillByDefault(ReturnRef(m_jobs));
   }
 
@@ -90,9 +91,28 @@ public:
     verifyAndClear();
   }
 
-  void testStartingSearchClearsPreviousResults() {
+  void testStartingSearchDoesNotClearPreviousResults() {
     auto presenter = makePresenter();
+    EXPECT_CALL(*m_searcher, reset()).Times(0);
+    presenter.notifySearch();
+    verifyAndClear();
+  }
+
+  void testStartingSearchClearsPreviousResultsIfSettingsChanged() {
+    auto presenter = makePresenter();
+    expectSearchString(m_searchString);
+    expectSearchSettingsChanged();
     EXPECT_CALL(*m_searcher, reset()).Times(AtLeast(1));
+    presenter.notifySearch();
+    verifyAndClear();
+  }
+
+  void testStartingSearchDoesNotClearPreviousResultsIfOverwritePrevented() {
+    auto presenter = makePresenter();
+    expectSearchString(m_searchString);
+    expectSearchSettingsChanged();
+    expectOverwriteSearchResultsPrevented();
+    EXPECT_CALL(*m_searcher, reset()).Times(0);
     presenter.notifySearch();
     verifyAndClear();
   }
@@ -104,6 +124,7 @@ public:
         .WillRepeatedly(Return(true));
     EXPECT_CALL(m_view, setSearchTextEntryEnabled(false)).Times(1);
     EXPECT_CALL(m_view, setSearchButtonEnabled(false)).Times(1);
+    EXPECT_CALL(m_view, setSearchResultsEnabled(false)).Times(1);
     EXPECT_CALL(m_view, setAutoreduceButtonEnabled(false)).Times(1);
     presenter.notifySearch();
     verifyAndClear();
@@ -116,6 +137,7 @@ public:
         .WillRepeatedly(Return(false));
     EXPECT_CALL(m_view, setSearchTextEntryEnabled(true)).Times(1);
     EXPECT_CALL(m_view, setSearchButtonEnabled(true)).Times(1);
+    EXPECT_CALL(m_view, setSearchResultsEnabled(true)).Times(1);
     EXPECT_CALL(m_view, setAutoreduceButtonEnabled(true)).Times(1);
     presenter.notifySearchComplete();
     verifyAndClear();
@@ -129,8 +151,8 @@ public:
     expectSearchString(searchString);
     expectSearchInstrument(instrument);
     expectSearchCycle(cycle);
-    EXPECT_CALL(*m_searcher, startSearchAsync(searchString, instrument, cycle,
-                                              ISearcher::SearchType::MANUAL))
+    EXPECT_CALL(*m_searcher, startSearchAsync(SearchCriteria{instrument, cycle,
+                                                             searchString}))
         .Times(1);
     presenter.notifySearch();
     verifyAndClear();
@@ -140,7 +162,7 @@ public:
     auto presenter = makePresenter();
     auto searchString = std::string("");
     expectSearchString(searchString);
-    EXPECT_CALL(*m_searcher, startSearchAsync(_, _, _, _)).Times(0);
+    EXPECT_CALL(*m_searcher, startSearchAsync(_)).Times(0);
     presenter.notifySearch();
     verifyAndClear();
   }
@@ -148,7 +170,8 @@ public:
   void testStartingSearchFails() {
     auto presenter = makePresenter();
     expectSearchString(m_searchString);
-    EXPECT_CALL(*m_searcher, startSearchAsync(m_searchString, _, _, _))
+    EXPECT_CALL(*m_searcher, startSearchAsync(SearchCriteria{
+                                 m_instrument, m_cycle, m_searchString}))
         .Times(1)
         .WillOnce(Return(false));
     EXPECT_CALL(m_messageHandler,
@@ -161,7 +184,8 @@ public:
   void testStartingSearchSucceeds() {
     auto presenter = makePresenter();
     expectSearchString(m_searchString);
-    EXPECT_CALL(*m_searcher, startSearchAsync(m_searchString, _, _, _))
+    EXPECT_CALL(*m_searcher, startSearchAsync(SearchCriteria{
+                                 m_instrument, m_cycle, m_searchString}))
         .Times(1)
         .WillOnce(Return(true));
     EXPECT_CALL(m_messageHandler, giveUserCritical(_, _)).Times(0);
@@ -199,114 +223,120 @@ public:
     verifyAndClear();
   }
 
-  void testWarningGivenIfUnsavedBatchAutoreductionResumedOptionChecked() {
+  void testNoCheckOnOverwritingBatchOnAutoreductionResumed() {
     auto presenter = makePresenter();
-    ON_CALL(m_view, getSearchString())
-        .WillByDefault(Return(autoReductionSearch));
-    ON_CALL(m_mainPresenter, isBatchUnsaved()).WillByDefault(Return(true));
-    ON_CALL(m_mainPresenter, isWarnDiscardChangesChecked())
-        .WillByDefault(Return(true));
-    expectAutoreductionSettingsChanged();
-    expectUserRespondsYes();
+    expectSearchString(m_searchString);
+    EXPECT_CALL(m_mainPresenter, isOverwriteBatchPrevented()).Times(0);
     presenter.resumeAutoreduction();
     verifyAndClear();
   }
 
-  void testNoWarningGivenIfUnsavedBatchAutoreductionResumedOptionChecked() {
+  void testNoCheckOnDiscardChangesOnAutoreductionResumed() {
     auto presenter = makePresenter();
-    ON_CALL(m_view, getSearchString())
-        .WillByDefault(Return(autoReductionSearch));
-    ON_CALL(m_mainPresenter, isBatchUnsaved()).WillByDefault(Return(true));
-    ON_CALL(m_mainPresenter, isWarnDiscardChangesChecked())
-        .WillByDefault(Return(false));
-    expectAutoreductionSettingsChanged();
+    expectSearchString(m_searchString);
+    EXPECT_CALL(m_mainPresenter, discardChanges(_)).Times(0);
     presenter.resumeAutoreduction();
     verifyAndClear();
   }
 
-  void testWarningNotGivenIfSavedBatchAutoreductionResumedOptionUnchecked() {
+  void testCheckDiscardChangesOnAutoreductionResumedIfUnsavedSearchResults() {
     auto presenter = makePresenter();
-    ON_CALL(m_view, getSearchString())
-        .WillByDefault(Return(autoReductionSearch));
-    ON_CALL(m_mainPresenter, isBatchUnsaved()).WillByDefault(Return(false));
-    ON_CALL(m_mainPresenter, isWarnDiscardChangesChecked())
-        .WillByDefault(Return(true));
-    expectAutoreductionSettingsChanged();
-    expectUserNotPrompted();
+    expectSearchString(m_searchString);
+    expectSearchSettingsChanged();
+    expectUnsavedSearchResults();
+    EXPECT_CALL(
+        m_mainPresenter,
+        discardChanges("This will cause unsaved changes in the search results "
+                       "to be lost. Continue?"))
+        .Times(AtLeast(1));
     presenter.resumeAutoreduction();
     verifyAndClear();
   }
 
-  const std::string autoReductionSearch = "1120015";
-
-  void testResumeAutoreductionWithNewSettings() {
+  void testCheckDiscardChangesOnAutoreductionResumedIfUnsavedTable() {
     auto presenter = makePresenter();
-    expectAutoreductionSettingsChanged();
-    expectClearExistingTable();
-    expectCheckForNewRuns();
+    presenter.notifyTableChanged();
+    expectSearchString(m_searchString);
+    expectSearchSettingsChanged();
+    EXPECT_CALL(m_mainPresenter,
+                discardChanges("This will cause unsaved changes in the table "
+                               "to be lost. Continue?"))
+        .Times(AtLeast(1));
     presenter.resumeAutoreduction();
     verifyAndClear();
   }
 
-  void testResumeAutoreductionWithSameSettings() {
+  void
+  testCheckDiscardChangesOnAutoreductionResumedIfUnsavedTableAndSearchResults() {
     auto presenter = makePresenter();
-    ON_CALL(m_view, getSearchString())
-        .WillByDefault(Return(autoReductionSearch));
-    expectAutoreductionSettingsUnchanged();
-    expectDoNotClearExistingTable();
-    expectCheckForNewRuns();
+    presenter.notifyTableChanged();
+    expectSearchString(m_searchString);
+    expectSearchSettingsChanged();
+    expectUnsavedSearchResults();
+    EXPECT_CALL(
+        m_mainPresenter,
+        discardChanges("This will cause unsaved changes in the search results "
+                       "and main table to be lost. Continue?"))
+        .Times(AtLeast(1));
     presenter.resumeAutoreduction();
     verifyAndClear();
   }
 
-  void testResumeAutoreductionWarnsUserIfTableChanged() {
+  void
+  testDoNotStartAutoreductionWhenOverwritePreventedOnResumeAutoreductionWithNewSettings() {
     auto presenter = makePresenter();
-    auto runsTable = makeRunsTableWithContent();
-    ON_CALL(m_view, getSearchString())
-        .WillByDefault(Return(autoReductionSearch));
-    ON_CALL(m_mainPresenter, isBatchUnsaved()).WillByDefault(Return(true));
-    ON_CALL(m_mainPresenter, isWarnDiscardChangesChecked())
-        .WillByDefault(Return(true));
-    expectAutoreductionSettingsChanged();
-    expectUserRespondsYes();
-    expectCheckForNewRuns();
-    presenter.resumeAutoreduction();
-    verifyAndClear();
-  }
-
-  void testResumeAutoreductionDoesNotWarnUserIfTableEmpty() {
-    auto presenter = makePresenter();
-    ON_CALL(m_view, getSearchString())
-        .WillByDefault(Return(autoReductionSearch));
-    ON_CALL(m_mainPresenter, isBatchUnsaved()).WillByDefault(Return(false));
-    ON_CALL(m_mainPresenter, isWarnDiscardChangesChecked())
-        .WillByDefault(Return(true));
-    expectAutoreductionSettingsChanged();
-    expectUserNotPrompted();
-    expectCheckForNewRuns();
-    presenter.resumeAutoreduction();
-    verifyAndClear();
-  }
-
-  void testResumeAutoreductionCancelledByUserIfTableChanged() {
-    auto presenter = makePresenter();
-    ON_CALL(m_view, getSearchString())
-        .WillByDefault(Return(autoReductionSearch));
-    ON_CALL(m_mainPresenter, isBatchUnsaved()).WillByDefault(Return(true));
-    ON_CALL(m_mainPresenter, isWarnDiscardChangesChecked())
-        .WillByDefault(Return(true));
-    auto runsTable = makeRunsTableWithContent();
-    expectAutoreductionSettingsChanged();
-    expectUserRespondsNo();
+    expectSearchString(m_searchString);
+    expectSearchSettingsChanged();
+    expectOverwriteSearchResultsPrevented();
     expectDoNotStartAutoreduction();
+    presenter.resumeAutoreduction();
+    verifyAndClear();
+  }
+
+  void testTableClearedWhenStartAutoreductionForFirstTime() {
+    auto presenter = makePresenter();
+    expectSearchString(m_searchString);
+    expectClearExistingTable();
+    presenter.resumeAutoreduction();
+    verifyAndClear();
+  }
+
+  void testTableNotClearedWhenRestartAutoreduction() {
+    auto presenter = makePresenter();
+    // Set up first search and run autoreduction
+    expectSearchString(m_searchString);
+    presenter.resumeAutoreduction();
+    verifyAndClear();
+    // Resume autoreduction with same settings
+    expectSearchString(m_searchString);
+    expectSearchSettingsDefault();
+    expectDoNotClearExistingTable();
+    presenter.resumeAutoreduction();
+    verifyAndClear();
+  }
+
+  void testTableClearedWhenResumeAutoreductionWithNewSettings() {
+    auto presenter = makePresenter();
+    expectSearchString(m_searchString);
+    expectSearchSettingsChanged();
+    expectClearExistingTable();
+    presenter.resumeAutoreduction();
+    verifyAndClear();
+  }
+
+  void testTableNotClearedWhenOverwritePreventedOnResumeAutoreduction() {
+    auto presenter = makePresenter();
+    expectSearchString(m_searchString);
+    expectSearchSettingsChanged();
+    expectOverwriteSearchResultsPrevented();
+    expectDoNotClearExistingTable();
     presenter.resumeAutoreduction();
     verifyAndClear();
   }
 
   void testResumeAutoreductionCancelledIfSearchStringIsEmpty() {
     auto presenter = makePresenter();
-    ON_CALL(m_view, getSearchString()).WillByDefault(Return(""));
-    auto runsTable = makeRunsTableWithContent();
+    expectSearchString("");
     expectDoNotStartAutoreduction();
     presenter.resumeAutoreduction();
     verifyAndClear();
@@ -502,22 +532,102 @@ public:
     verifyAndClear();
   }
 
-  void testChangeInstrumentRequestedGetsInstrumentAndNotifiesMainPresenter() {
+  void testChangeInstrumentOnViewNotifiesMainPresenter() {
     auto presenter = makePresenter();
     auto const instrument = std::string("TEST-instrumnet");
+    expectPreviousInstrument("INTER");
     expectSearchInstrument(instrument);
     EXPECT_CALL(m_mainPresenter, notifyChangeInstrumentRequested(instrument))
+        .Times(AtLeast(1));
+    presenter.notifyChangeInstrumentRequested();
+    verifyAndClear();
+  }
+
+  void testChangeInstrumentOnViewPromptsToDiscardChangesIfUnsaved() {
+    auto presenter = makePresenter();
+    auto const instrument = std::string("TEST-instrumnet");
+    expectPreviousInstrument("INTER");
+    expectSearchInstrument(instrument);
+    expectUnsavedSearchResults();
+    EXPECT_CALL(
+        m_mainPresenter,
+        discardChanges(
+            "This will cause unsaved changes in the search results to be "
+            "lost. Continue?"))
         .Times(1);
     presenter.notifyChangeInstrumentRequested();
     verifyAndClear();
   }
 
-  void testChangeInstrumentRequestedWithGivenNameNotifiesMainPresenter() {
+  void testChangeInstrumentOnViewDoesNotPromptToDiscardChangesIfSaved() {
     auto presenter = makePresenter();
     auto const instrument = std::string("TEST-instrumnet");
+    expectPreviousInstrument("INTER");
+    expectSearchInstrument(instrument);
+    expectNoUnsavedSearchResults();
+    EXPECT_CALL(m_mainPresenter, discardChanges(_)).Times(0);
+    presenter.notifyChangeInstrumentRequested();
+    verifyAndClear();
+  }
+
+  void testChangeInstrumentOnViewDoesNotNotifyMainPresenterIfPrevented() {
+    auto presenter = makePresenter();
+    auto const instrument = std::string("TEST-instrumnet");
+    expectPreviousInstrument("INTER");
+    expectSearchInstrument(instrument);
+    expectChangeInstrumentPrevented();
+    EXPECT_CALL(m_mainPresenter, notifyChangeInstrumentRequested(_)).Times(0);
+    presenter.notifyChangeInstrumentRequested();
+    verifyAndClear();
+  }
+
+  void testChangeInstrumentOnViewRevertsChangeIfPrevented() {
+    auto presenter = makePresenter();
+    auto const instrument = std::string("TEST-instrumnet");
+    expectPreviousInstrument("INTER");
+    expectSearchInstrument(instrument);
+    expectChangeInstrumentPrevented();
+    EXPECT_CALL(m_view, setSearchInstrument("INTER")).Times(1);
+    presenter.notifyChangeInstrumentRequested();
+    verifyAndClear();
+  }
+
+  void testChangeInstrumentOnChildNotifiesMainPresenter() {
+    auto presenter = makePresenter();
+    auto const instrument = std::string("TEST-instrumnet");
+    expectPreviousInstrument("INTER");
     EXPECT_CALL(m_mainPresenter, notifyChangeInstrumentRequested(instrument))
-        .Times(1);
+        .Times(AtLeast(1));
     presenter.notifyChangeInstrumentRequested(instrument);
+    verifyAndClear();
+  }
+
+  void testChangeInstrumentOnChildDoesNotNotifyMainPresenterIfPrevented() {
+    auto presenter = makePresenter();
+    auto const instrument = std::string("TEST-instrumnet");
+    expectPreviousInstrument("INTER");
+    expectChangeInstrumentPrevented();
+    EXPECT_CALL(m_mainPresenter, notifyChangeInstrumentRequested(_)).Times(0);
+    presenter.notifyChangeInstrumentRequested(instrument);
+    verifyAndClear();
+  }
+
+  void testChangeInstrumentOnChildReturnsTrueIfSuccess() {
+    auto presenter = makePresenter();
+    auto const instrument = std::string("TEST-instrumnet");
+    expectPreviousInstrument("INTER");
+    auto success = presenter.notifyChangeInstrumentRequested(instrument);
+    TS_ASSERT_EQUALS(success, true);
+    verifyAndClear();
+  }
+
+  void testChangeInstrumentOnChildReturnsFalseIfPrevented() {
+    auto presenter = makePresenter();
+    auto const instrument = std::string("TEST-instrumnet");
+    expectPreviousInstrument("INTER");
+    expectChangeInstrumentPrevented();
+    auto success = presenter.notifyChangeInstrumentRequested(instrument);
+    TS_ASSERT_EQUALS(success, false);
     verifyAndClear();
   }
 
@@ -538,7 +648,7 @@ public:
     verifyAndClear();
   }
 
-  void testInstrumentChangedClearsPreviousSearchResults() {
+  void testInstrumentChangedClearsPreviousSearchResultsModel() {
     auto presenter = makePresenter();
     auto const instrument = std::string("TEST-instrumnet");
     EXPECT_CALL(*m_searcher, reset()).Times(1);
@@ -663,6 +773,28 @@ public:
     verifyAndClear();
   }
 
+  void testNotifyTableChangedSetsUnsavedFlag() {
+    auto presenter = makePresenter();
+    presenter.notifyTableChanged();
+    TS_ASSERT_EQUALS(presenter.hasUnsavedChanges(), true);
+    verifyAndClear();
+  }
+
+  void testNotifyChangsSavedClearsUnsavedFlag() {
+    auto presenter = makePresenter();
+    presenter.notifyTableChanged();
+    presenter.notifyChangesSaved();
+    TS_ASSERT_EQUALS(presenter.hasUnsavedChanges(), false);
+    verifyAndClear();
+  }
+
+  void testNotifyChangsSavedUpdatesSearcher() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(*m_searcher, setSaved()).Times(1);
+    presenter.notifyChangesSaved();
+    verifyAndClear();
+  }
+
 private:
   class RunsPresenterFriend : public RunsPresenter {
     friend class RunsPresenterTest;
@@ -704,19 +836,18 @@ private:
     // Return an empty table by default
     ON_CALL(*m_runsTablePresenter, runsTable())
         .WillByDefault(ReturnRef(m_runsTable));
-    return presenter;
-  }
 
-  RunsTable makeRunsTableWithContent() {
-    auto reductionJobs = oneGroupWithARowModel();
-    return RunsTable(m_instruments, m_thetaTolerance, reductionJobs);
+    return presenter;
   }
 
   void verifyAndClear() {
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_view));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_runsTableView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_runsTablePresenter));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_mainPresenter));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_progressView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_messageHandler));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_searcher));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_pythonRunner));
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_runNotifier));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_jobs));
@@ -773,16 +904,19 @@ private:
     EXPECT_CALL(*m_runNotifier, stopPolling()).Times(1);
   }
 
-  void expectAutoreductionSettingsChanged() {
-    EXPECT_CALL(*m_searcher,
-                searchSettingsChanged(_, _, _, ISearcher::SearchType::AUTO))
-        .WillOnce(Return(true));
+  void expectSearchSettingsChanged() {
+    auto const newCriteria =
+        SearchCriteria{"new_instrument", "new cycle", "new search string"};
+    EXPECT_CALL(*m_searcher, searchCriteria())
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(newCriteria));
   }
 
-  void expectAutoreductionSettingsUnchanged() {
-    EXPECT_CALL(*m_searcher,
-                searchSettingsChanged(_, _, _, ISearcher::SearchType::AUTO))
-        .WillOnce(Return(false));
+  void expectSearchSettingsDefault() {
+    auto const criteria = SearchCriteria{m_instrument, m_cycle, m_searchString};
+    EXPECT_CALL(*m_searcher, searchCriteria())
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(criteria));
   }
 
   void expectClearExistingTable() {
@@ -797,30 +931,13 @@ private:
         .Times(0);
   }
 
-  void expectUserRespondsYes() {
-    EXPECT_CALL(m_messageHandler, askUserDiscardChanges())
-        .Times(1)
-        .WillOnce(Return(true));
-  }
-
-  void expectUserRespondsNo() {
-    EXPECT_CALL(m_messageHandler, askUserDiscardChanges())
-        .Times(1)
-        .WillOnce(Return(false));
-  }
-
-  void expectUserNotPrompted() {
-    EXPECT_CALL(m_messageHandler, askUserDiscardChanges()).Times(0);
-  }
-
   void expectCheckForNewRuns() {
     EXPECT_CALL(*m_runNotifier, stopPolling()).Times(1);
     expectSearchInstrument(m_instrument);
     expectSearchString(m_searchString);
     expectSearchCycle(m_cycle);
-    EXPECT_CALL(*m_searcher,
-                startSearchAsync(m_searchString, m_instrument, m_cycle,
-                                 ISearcher::SearchType::AUTO))
+    EXPECT_CALL(*m_searcher, startSearchAsync(SearchCriteria{
+                                 m_instrument, m_cycle, m_searchString}))
         .Times(1)
         .WillOnce(Return(true));
     EXPECT_CALL(m_messageHandler, giveUserCritical(_, _)).Times(0);
@@ -828,7 +945,7 @@ private:
 
   void expectDoNotStartAutoreduction() {
     EXPECT_CALL(*m_runNotifier, stopPolling()).Times(0);
-    EXPECT_CALL(*m_searcher, startSearchAsync(_, _, _, _)).Times(0);
+    EXPECT_CALL(*m_searcher, startSearchAsync(_)).Times(0);
   }
 
   void expectGetValidSearchRowSelection() {
@@ -891,6 +1008,7 @@ private:
     EXPECT_CALL(m_view, setInstrumentComboEnabled(false));
     EXPECT_CALL(m_view, setSearchTextEntryEnabled(false));
     EXPECT_CALL(m_view, setSearchButtonEnabled(false));
+    EXPECT_CALL(m_view, setSearchResultsEnabled(false));
     EXPECT_CALL(m_view, setAutoreduceButtonEnabled(false));
     EXPECT_CALL(m_view, setAutoreducePauseButtonEnabled(true));
     EXPECT_CALL(m_view, setTransferButtonEnabled(false));
@@ -903,6 +1021,7 @@ private:
     EXPECT_CALL(m_view, setInstrumentComboEnabled(false));
     EXPECT_CALL(m_view, setSearchTextEntryEnabled(false));
     EXPECT_CALL(m_view, setSearchButtonEnabled(false));
+    EXPECT_CALL(m_view, setSearchResultsEnabled(false));
     EXPECT_CALL(m_view, setAutoreduceButtonEnabled(false));
     EXPECT_CALL(m_view, setAutoreducePauseButtonEnabled(false));
     EXPECT_CALL(m_view, setTransferButtonEnabled(false));
@@ -927,6 +1046,7 @@ private:
     EXPECT_CALL(m_view, setInstrumentComboEnabled(true));
     EXPECT_CALL(m_view, setSearchTextEntryEnabled(true));
     EXPECT_CALL(m_view, setSearchButtonEnabled(true));
+    EXPECT_CALL(m_view, setSearchResultsEnabled(true));
     EXPECT_CALL(m_view, setAutoreduceButtonEnabled(true));
     EXPECT_CALL(m_view, setAutoreducePauseButtonEnabled(false));
     EXPECT_CALL(m_view, setTransferButtonEnabled(true));
@@ -1020,10 +1140,37 @@ private:
         .WillByDefault(Return(false));
   }
 
+  // current search instrument on the view
   void expectSearchInstrument(std::string const &instrument) {
     EXPECT_CALL(m_view, getSearchInstrument())
         .Times(AtLeast(1))
         .WillRepeatedly(Return(instrument));
+  }
+
+  // previously saved instrument
+  void expectPreviousInstrument(std::string const &instrument) {
+    EXPECT_CALL(m_mainPresenter, instrumentName())
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(instrument));
+  }
+
+  void expectUnsavedSearchResults() {
+    EXPECT_CALL(*m_searcher, hasUnsavedChanges())
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(true));
+  }
+
+  void expectNoUnsavedSearchResults() {
+    EXPECT_CALL(*m_searcher, hasUnsavedChanges())
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(false));
+  }
+
+  void expectChangeInstrumentPrevented() {
+    expectUnsavedSearchResults();
+    EXPECT_CALL(m_mainPresenter, discardChanges(_))
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(false));
   }
 
   void expectSearchString(std::string const &searchString) {
@@ -1076,6 +1223,13 @@ private:
     expectGetAlgorithmRunner();
   }
 
+  void expectOverwriteSearchResultsPrevented() {
+    expectUnsavedSearchResults();
+    EXPECT_CALL(m_mainPresenter, discardChanges(_))
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(false));
+  }
+
   void assertAlgorithmPropertiesContainOptions(
       AlgorithmRuntimeProps const &expected,
       std::shared_ptr<NiceMock<MockAlgorithmRunner>> &algRunner) {
@@ -1099,19 +1253,20 @@ private:
 
   double m_thetaTolerance;
   std::vector<std::string> m_instruments;
+  RunsTable m_runsTable;
+  std::string m_searchString;
+  SearchResult m_searchResult;
+  std::string m_instrument;
+  std::string m_cycle;
+
   NiceMock<MockRunsView> m_view;
   NiceMock<MockRunsTableView> m_runsTableView;
   NiceMock<MockRunsTablePresenter> *m_runsTablePresenter;
   NiceMock<MockBatchPresenter> m_mainPresenter;
   NiceMock<MockProgressableView> m_progressView;
   NiceMock<MockMessageHandler> m_messageHandler;
+  NiceMock<MantidQt::MantidWidgets::Batch::MockJobTreeView> m_jobs;
   NiceMock<MockSearcher> *m_searcher;
   MockPythonRunner *m_pythonRunner;
   MockRunNotifier *m_runNotifier;
-  NiceMock<MantidQt::MantidWidgets::Batch::MockJobTreeView> m_jobs;
-  RunsTable m_runsTable;
-  std::string m_searchString;
-  SearchResult m_searchResult;
-  std::string m_instrument;
-  std::string m_cycle;
 };

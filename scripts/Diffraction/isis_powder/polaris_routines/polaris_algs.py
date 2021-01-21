@@ -130,13 +130,17 @@ def generate_ts_pdf(run_number, focus_file_path, merge_banks=False, q_lims=None,
     if 'merged_ws' in locals():
         mantid.RenameWorkspace(InputWorkspace='merged_ws', OutputWorkspace=run_number + '_merged_Q')
     mantid.RenameWorkspace(InputWorkspace='focused_ws', OutputWorkspace=run_number+'_focused_Q')
+    target_focus_ws_name = run_number + '_focused_Q_'
+    target_pdf_ws_name = run_number + '_pdf_R_'
     if isinstance(focused_ws, WorkspaceGroup):
         for i in range(len(focused_ws)):
-            mantid.RenameWorkspace(InputWorkspace=focused_ws[i], OutputWorkspace=run_number+'_focused_Q_'+str(i+1))
+            if str(focused_ws[i]) != (target_focus_ws_name + str(i+1)):
+                mantid.RenameWorkspace(InputWorkspace=focused_ws[i], OutputWorkspace=target_focus_ws_name + str(i+1))
     mantid.RenameWorkspace(InputWorkspace='pdf_output', OutputWorkspace=run_number+'_pdf_R')
     if isinstance(pdf_output, WorkspaceGroup):
         for i in range(len(pdf_output)):
-            mantid.RenameWorkspace(InputWorkspace=pdf_output[i], OutputWorkspace=run_number+'_pdf_R_'+str(i+1))
+            if str(pdf_output[i]) != (target_pdf_ws_name + str(i+1)):
+                mantid.RenameWorkspace(InputWorkspace=pdf_output[i], OutputWorkspace=target_pdf_ws_name + str(i+1))
     return pdf_output
 
 
@@ -150,10 +154,10 @@ def _obtain_focused_run(run_number, focus_file_path):
     :return: The focused workspace.
     """
     # Try the ADS first to avoid undesired loading
-    if mantid.mtd.doesExist('%s-Results-TOF-Grp' % run_number):
-        focused_ws = mantid.mtd['%s-Results-TOF-Grp' % run_number]
-    elif mantid.mtd.doesExist('%s-Results-D-Grp' % run_number):
-        focused_ws = mantid.mtd['%s-Results-D-Grp' % run_number]
+    if mantid.mtd.doesExist('%s-ResultTOF' % run_number):
+        focused_ws = mantid.mtd['%s-ResultTOF' % run_number]
+    elif mantid.mtd.doesExist('%s-ResultD' % run_number):
+        focused_ws = mantid.mtd['%s-ResultD' % run_number]
     else:
         # Check output directory
         print('No loaded focused files found. Searching in output directory...')

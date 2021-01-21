@@ -15,6 +15,7 @@ set(TEST_PY_FILES
     CalculateSampleTransmissionTest.py
     CheckForSampleLogsTest.py
     ConjoinSpectraTest.py
+    ConvertQtoHKLMDHistoTest.py
     ConvertWANDSCDtoQTest.py
     CompareSampleLogsTest.py
     ComputeCalibrationCoefVanTest.py
@@ -24,7 +25,6 @@ set(TEST_PY_FILES
     CorrectTOFTest.py
     CreateWorkspaceTest.py
     CropWorkspaceForMDNormTest.py
-    CropWorkspaceRaggedTest.py
     CylinderPaalmanPingsCorrection2Test.py
     DakotaChiSquaredTest.py
     DeltaPDF3DTest.py
@@ -48,9 +48,14 @@ set(TEST_PY_FILES
     FractionalIndexingTest.py
     GetEiT0atSNSTest.py
     HB2AReduceTest.py
+    HB3AAdjustSampleNormTest.py
+    HB3AFindPeaksTest.py
+    HB3AIntegratePeaksTest.py
+    HB3APredictPeaksTest.py
     HFIRSANS2WavelengthTest.py
     IndirectTransmissionTest.py
     IndexSatellitePeaksTest.py
+    LeadPressureCalcTest.py
     LoadAndMergeTest.py
     LoadDNSLegacyTest.py
     LoadElementalAnalysisRunTest.py
@@ -89,6 +94,7 @@ set(TEST_PY_FILES
     SaveGEMMAUDParamFileTest.py
     SaveNexusPDTest.py
     SaveGSSCWTest.py
+    SaveHKLCWTest.py
     SavePlot1DAsJsonTest.py
     SaveReflectionsTest.py
     ExtractMonitorsTest.py

@@ -84,6 +84,11 @@ void QtRunsView::initLayout() {
   // Connect signal for when search algorithm completes
   connect(m_algoRunner.get(), SIGNAL(algorithmComplete(bool)), this,
           SLOT(onSearchComplete()), Qt::UniqueConnection);
+  // Connect signal for when user edits the search results table
+  connect(
+      &m_searchModel,
+      SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)), this,
+      SLOT(onSearchResultsChanged(const QModelIndex &, const QModelIndex &)));
 }
 
 /**
@@ -148,6 +153,18 @@ void QtRunsView::setSearchTextEntryEnabled(bool enabled) {
 void QtRunsView::setSearchButtonEnabled(bool enabled) {
 
   m_ui.buttonSearch->setEnabled(enabled);
+}
+
+/**
+ * Sets editing the search results table enabled or disabled
+ * @param enabled : Whether to enable or disable the button
+ */
+void QtRunsView::setSearchResultsEnabled(bool enabled) {
+  static const auto editTriggers = m_ui.tableSearchResults->editTriggers();
+  if (enabled)
+    m_ui.tableSearchResults->setEditTriggers(editTriggers);
+  else
+    m_ui.tableSearchResults->setEditTriggers(QAbstractItemView::NoEditTriggers);
 }
 
 /**
@@ -219,12 +236,39 @@ void QtRunsView::resizeSearchResultsColumnsToContents() {
   m_ui.tableSearchResults->resizeColumnsToContents();
 }
 
+/** Get the width of the search results table
+ */
+int QtRunsView::getSearchResultsTableWidth() const {
+  return m_ui.tableSearchResults->width();
+}
+
+/** Get the width of a particular column in the search results table
+ */
+int QtRunsView::getSearchResultsColumnWidth(int column) const {
+  return m_ui.tableSearchResults->columnWidth(column);
+}
+
+/** Set the width of column in the search results table
+ */
+void QtRunsView::setSearchResultsColumnWidth(int column, int width) {
+  m_ui.tableSearchResults->setColumnWidth(column, width);
+}
+
 /**
  * Get the model containing the search results
  */
-ISearchModel const &QtRunsView::searchResults() { return m_searchModel; }
+ISearchModel const &QtRunsView::searchResults() const { return m_searchModel; }
 
 ISearchModel &QtRunsView::mutableSearchResults() { return m_searchModel; }
+
+/**
+This slot notifies the presenter that the user has modified some values in the
+search results table
+*/
+void QtRunsView::onSearchResultsChanged(const QModelIndex &,
+                                        const QModelIndex &) {
+  m_searchNotifyee->notifySearchResultsChanged();
+}
 
 /**
 This slot notifies the presenter that the search was completed
@@ -301,7 +345,6 @@ void QtRunsView::onInstrumentChanged(int index) {
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
       Mantid::Kernel::FeatureType::Feature,
       {"ISIS Reflectometry", "RunsTab", "InstrumentChanged"}, false);
-  m_ui.textSearch->clear();
   m_notifyee->notifyChangeInstrumentRequested();
 }
 
@@ -325,8 +368,8 @@ std::set<int> QtRunsView::getSelectedSearchRows() const {
   std::set<int> rows;
   auto selectionModel = m_ui.tableSearchResults->selectionModel();
   if (selectionModel) {
-    auto selectedRows = selectionModel->selectedRows();
-    for (auto it = selectedRows.begin(); it != selectedRows.end(); ++it)
+    auto selectedIndexes = selectionModel->selectedIndexes();
+    for (auto it = selectedIndexes.begin(); it != selectedIndexes.end(); ++it)
       rows.insert(it->row());
   }
   return rows;

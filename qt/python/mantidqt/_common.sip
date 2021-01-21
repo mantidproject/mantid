@@ -470,6 +470,7 @@ public:
     auto function = boost::python::extract<const Mantid::API::IFunction_sptr &>(a0)();
     sipRes = sipCpp->findHandler(function);
     %End
+    QString functionName() const;
 };
 
 // ---------------------------------
@@ -545,12 +546,16 @@ SIP_PYOBJECT defaultBackgroundType();
     QStringList registeredOthers() const;
     QStringList getPeakPrefixes() const;
     QString addFunction(QString);
+    PropertyHandler *getPeakHandler(const QString &prefix);
     double getPeakCentreOf(QString);
     void setPeakCentreOf(QString, double);
     double getPeakHeightOf(QString);
     void setPeakHeightOf(QString, double);
     double getPeakFwhmOf(QString);
     void setPeakFwhmOf(QString, double);
+    std::string getWidthParameterNameOf(QString);
+    std::string getCentreParameterNameOf(QString);
+    bool isParameterExplicitlySetOf(QString, std::string);
     void normaliseData(bool on);
     QMenu *getFitMenu() const;
     QListWidget* getWorkspaceList() const;
@@ -1062,4 +1067,47 @@ class WorkspaceSelector : QComboBox
 public:
     WorkspaceSelector(QWidget *parent = nullptr, bool init = true) /KeywordArgs="All"/;
     void setOptional(bool optional);
+};
+
+// ----------------------------------------------------------------------------
+// FitScriptGeneratorView
+// ----------------------------------------------------------------------------
+
+class FitScriptGeneratorView : QWidget {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/FitScriptGeneratorView.h"
+%End
+public:
+    FitScriptGeneratorView(
+        QWidget *parent = nullptr,
+        const QMap<QString, QString> &fitOptions = QMap<QString, QString>()) /KeywordArgs="All"/;
+};
+
+// ----------------------------------------------------------------------------
+// FitScriptGeneratorModel
+// ----------------------------------------------------------------------------
+
+class FitScriptGeneratorModel {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/FitScriptGeneratorModel.h"
+%End
+public:
+    FitScriptGeneratorModel();
+};
+
+// ----------------------------------------------------------------------------
+// FitScriptGeneratorPresenter
+// ----------------------------------------------------------------------------
+
+class FitScriptGeneratorPresenter {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/FitScriptGeneratorPresenter.h"
+%End
+public:
+    FitScriptGeneratorPresenter(
+	    FitScriptGeneratorView *view, FitScriptGeneratorModel *model,
+        const QStringList &workspaceNames = QStringList(),
+        double startX = 0.0, double endX = 0.0) /KeywordArgs="All"/;
+
+    void openFitScriptGenerator();
 };

@@ -68,11 +68,15 @@ public:
 
   // Get the blocksize, aka the number of bins in the histogram
   std::size_t blocksize() const override;
-
-  size_t getMemorySize() const override;
+  /// Returns the number of bins for a given histogram index.
+  std::size_t getNumberBins(const std::size_t &index) const override;
+  /// Returns the maximum number of bins in a workspace (works on ragged data).
+  std::size_t getMaxNumberBins() const override;
 
   // Get the number of histograms. aka the number of pixels or detectors.
   std::size_t getNumberHistograms() const override;
+
+  size_t getMemorySize() const override;
 
   EventList &getSpectrum(const size_t index) override {
     invalidateCommonBinsFlag();

@@ -22,6 +22,7 @@ from sans.state.StateObjects.StateScale import StateScale
 from sans.state.StateObjects.StateSliceEvent import StateSliceEvent
 from sans.state.StateObjects.StateWavelength import StateWavelength
 from sans.state.StateObjects.StateWavelengthAndPixelAdjustment import StateWavelengthAndPixelAdjustment
+from sans.state.StateObjects.state_instrument_info import StateInstrumentInfo
 
 
 class IStateParser(metaclass=ABCMeta):
@@ -38,6 +39,7 @@ class IStateParser(metaclass=ABCMeta):
         all_states.convert_to_q = self.get_state_convert_to_q()
         all_states.compatibility = self.get_state_compatibility()
         all_states.data = self.get_state_data(file_information)
+        all_states.instrument_info = StateInstrumentInfo.build_from_data_info(all_states.data)
 
         return all_states
 

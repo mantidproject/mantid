@@ -12,6 +12,7 @@
 #include "IIndirectFitOutputOptionsModel.h"
 #include "IIndirectFitOutputOptionsView.h"
 #include "IndirectFitOutputOptionsPresenter.h"
+#include "IndirectFitOutputOptionsView.h"
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/WarningSuppressions.h"

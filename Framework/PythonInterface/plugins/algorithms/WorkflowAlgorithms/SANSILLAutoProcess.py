@@ -78,7 +78,7 @@ def needs_loading(property_value, loading_reduction_type):
 
 class SANSILLAutoProcess(DataProcessorAlgorithm):
     """
-    Performs complete treatment of ILL SANS data; instruments D11, D16, D22, D33.
+    Performs complete treatment of ILL SANS data; instruments D11, D11B, D16, D22, D22B, D33.
     """
     progress = None
     reduction_type = None

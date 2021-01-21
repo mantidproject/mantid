@@ -9,6 +9,7 @@ import copy
 from Muon.GUI.Common import thread_model
 import Muon.GUI.Common.utilities.muon_file_utils as file_utils
 import Muon.GUI.Common.utilities.load_utils as load_utils
+from mantidqt.utils.observer_pattern import GenericObserverWithArgPassing
 
 
 class BrowseFileWidgetPresenter(object):
@@ -28,6 +29,9 @@ class BrowseFileWidgetPresenter(object):
 
         self._view.on_browse_clicked(self.on_browse_button_clicked)
         self._view.on_file_edit_changed(self.handle_file_changed_by_user)
+
+        self.updated_file_path = GenericObserverWithArgPassing(
+             self.set_file_edit_directory)
 
     def show(self):
         self._view.show()
@@ -185,3 +189,6 @@ class BrowseFileWidgetPresenter(object):
 
     def set_current_instrument(self, instrument):
         pass
+
+    def set_file_edit_directory(self, directory):
+        self._view.set_file_edit(directory, False)

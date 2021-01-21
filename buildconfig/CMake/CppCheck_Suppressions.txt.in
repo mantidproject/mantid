@@ -45,8 +45,6 @@ syntaxError:${CMAKE_SOURCE_DIR}/Framework/API/src/MatrixWorkspace.cpp
 
 // Mantid Plot specific ones we probably won't fix before removal
 
-*:${CMAKE_SOURCE_DIR}/MantidPlot/src/origin/tree.hh
-*:${CMAKE_SOURCE_DIR}/MantidPlot/src/nrutil.cpp
 
 pureVirtualCall:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/IndirectBayesTab.cpp
 pureVirtualCall:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/IndirectBayesTab.h
@@ -88,9 +86,6 @@ noCopyConstructor:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Rend
 
 // ----------------- Upstream libs ---------------
 
-// Always ignore bin dir
-*:*${CMAKE_BINARY_DIR}/*
-
 // All ANN files as they are upstream anyway
 *:*${CMAKE_SOURCE_DIR}/Framework/Kernel/src/ANN/*
 
@@ -98,4 +93,4 @@ noCopyConstructor:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Rend
 *:${CMAKE_SOURCE_DIR}/Framework/ICat/src/GSoap/*
 *:${CMAKE_SOURCE_DIR}/Framework/ICat/src/ICat3/GSoapGenerated/*
 *:${CMAKE_SOURCE_DIR}/Framework/ICat/src/ICat4/GSoapGenerated/*
-*:${CMAKE_SOURCE_DIR}/MantidPlot/src/zlib123/*
+${MANTIDPLOT_CPPCHECK_SUPPRESSIONS}

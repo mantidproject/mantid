@@ -55,6 +55,7 @@ New
 BugFixes
 ########
 - Fixed a bug in the :ref:`Crystal Field Python Interface` where ties were not being applied properly for cubic crystal structures.
+- Fixed a bug in the :ref:`CrystalFieldFunction <func-CrystalFieldFunction>` which prevented it working with the Trust Region minimizer.
 - Fixed a bug in the :ref:`LoadCIF <algm-LoadCIF>` algorithm caused when a **.cif** file has 2 sections, with the first not having
   the required data keys.
 
@@ -66,5 +67,15 @@ Improvements
 ############
 
 - Widgets were rearranged into groups of items based on their logical function
+
+
+MSlice
+------
+
+BugFixes
+########
+- Fixed a bug that prevented the selection of more than one workspace for workspace addition.
+- Fixed a bug that caused MSlice crashes by ignoring the workspace selected by default for subtracting workspaces.
+- Fixed a bug that caused MSlice crashes when entering unexpected values into the width box for cuts.
 
 :ref:`Release 6.0.0 <v6.0.0>`

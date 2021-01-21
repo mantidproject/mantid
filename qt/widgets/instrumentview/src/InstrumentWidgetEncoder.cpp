@@ -49,14 +49,10 @@ InstrumentWidgetEncoder::encode(const InstrumentWidget &obj,
     map.insert(QString("currentTab"), QVariant(obj.getCurrentTab()));
 
     QList<QVariant> energyTransferList;
-    if (obj.isIntegrable()) {
-      energyTransferList.append(QVariant(obj.m_xIntegration->getMinimum()));
-      energyTransferList.append(QVariant(obj.m_xIntegration->getMaximum()));
-    } else {
-      energyTransferList.append(QVariant(0));
-      energyTransferList.append(QVariant(1));
-    }
-    energyTransferList.append(QVariant(obj.isIntegrable()));
+
+    energyTransferList.append(QVariant(obj.m_xIntegration->getMinimum()));
+    energyTransferList.append(QVariant(obj.m_xIntegration->getMaximum()));
+
     map.insert(QString("energyTransfer"), QVariant(energyTransferList));
 
     map.insert(QString("surface"),

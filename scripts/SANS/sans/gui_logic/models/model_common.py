@@ -11,15 +11,13 @@ from sans.state.AllStates import AllStates
 
 
 class ModelCommon(metaclass=ABCMeta):
-    def __init__(self, user_file_items : AllStates):
-        # Workaround to avoid refactoring becoming impossibly large
-        if user_file_items is None:
-            # Cannot iterate a None type when doing lookups
-            self._user_file_items = AllStates()
+    def __init__(self, all_states : AllStates):
+        if all_states is None:
+            self._all_states = AllStates()
             self._instrument = SANSInstrument.NO_INSTRUMENT
         else:
-            self._user_file_items = user_file_items
-            self._instrument = user_file_items.data.instrument
+            self._all_states = all_states
+            self._instrument = all_states.data.instrument
 
     @property
     def instrument(self):
@@ -29,3 +27,12 @@ class ModelCommon(metaclass=ABCMeta):
     def instrument(self, value):
         assert isinstance(value, SANSInstrument)
         self._instrument = value
+
+    @staticmethod
+    def _get_val_or_default(val, default_val=""):
+        # These are Falsey in Python but are acceptable
+        good_vals = [0., 0, False, [0]]
+
+        if not val and val not in good_vals:
+            return default_val
+        return val
