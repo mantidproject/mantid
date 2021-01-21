@@ -35,6 +35,7 @@ New features
 - New algorithm :ref:`CorelliCalibrationApply <algm-CorelliCalibrationApply>` to apply a CORELLI calibration table to CORELLI EventWorkspace.
 - New algorithm :ref:`CorelliCalibrationCreate <algm-CorelliPowderCalibrationCreate>` adjusts the position and orientation of Corelli banks in order to optimize the comparison of observed peaks to reference data
 - Modified creation of absorption input in :ref:`SNSPowderReduction <algm-SNSPowderReduction>` to automatically get information from sample logs.
+- :ref:`PDCalibration <algm-PDCalibration>` now supports workspaces with grouped detectors (i.e. more than one detector per spectrum)
 
 Improvements
 ############
@@ -44,14 +45,15 @@ Improvements
 - :ref:`PowderILLDetectorScan <algm-PowderILLDetectorScan>` is corrected when treating multiple scans merged.
 - The default loadpath in the fitting tab of the Engineering Diffraction UI is now set to the most recently focused files.
 - The :ref:`HB2AReduce <algm-HB2AReduce>` now can save reduced data to GSAS or XYE file.
-
+- :ref:`PDCalibration <algm-PDCalibration>` now intitialises A,B and S of BackToBackExponential if correpsonding coeficients are in the instrument parameter.xml file.
 
 Bugfixes
 ########
 
 - Dummy detectors in polaris workspaces no longer prevent unit conversion.
 - Focus in PEARL powder diffraction scripts no longer fails if previous run has left Van splines workspace group in ADS
-
+- Fix out-of-range bug in :ref:`FitPeaks <algm-FitPeaks>` for histogram data.
+- Fix bug to actually implement intended sequential fit of DIFC, DIFA, TZERO in :ref:`PDCalibration <algm-PDCalibration>`.
 
 Bugfixes
 ########
