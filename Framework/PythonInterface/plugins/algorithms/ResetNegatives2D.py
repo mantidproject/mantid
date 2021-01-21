@@ -12,6 +12,7 @@ from mantid.simpleapi import Scale
 
 import numpy as np
 
+
 class ResetNegatives2D(PythonAlgorithm):
     def category(self):
         return 'Diffraction\\DataHandling'
