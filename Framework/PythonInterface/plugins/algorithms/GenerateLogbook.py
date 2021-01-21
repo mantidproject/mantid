@@ -153,12 +153,13 @@ class GenerateLogbook(PythonAlgorithm):
 
     def PyExec(self):
         self._data_directory = self.getPropertyValue('Directory')
+        self._facility = self.getPropertyValue('Facility')
+        self._instrument = self.getPropertyValue('Instrument')
         if self.getProperty('NumorRange').isDefault:
             self._numor_range = [0, float('inf')]
         else:
             self._numor_range = self.getProperty('NumorRange').value
         data_array = self._prepare_file_array()
-        self._instrument = self.getPropertyValue('Instrument')
         self._verify_contains_metadata(data_array)
         logbook_ws = self._prepare_logbook_ws()
         self._fill_logbook(logbook_ws, data_array)
