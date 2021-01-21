@@ -4,7 +4,6 @@
 
 # List of python algorithms and fit functions
 set(PYTHON_PLUGINS
-<<<<<<< HEAD
     algorithms/Abins.py
     algorithms/AlignAndFocusPowderFromFiles.py
     algorithms/AlignComponents.py

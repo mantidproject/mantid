@@ -258,11 +258,6 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
         self.setPropertyGroup('StartWorkspaceIndex', grp7)
         self.setPropertyGroup('EndWorkspaceIndex', grp7)
         self.setPropertyGroup('ComponentList', grp7)
-        # Input for AlignDetectors
-        #self.copyProperties('AlignDetectors', ['CalibrationWorkspace', 'OffsetsWorkspace'])
-        #grp8 = 'AlignDetectors'
-        #self.setPropertyGroup('CalibrationWorkspace', grp8)
-        #self.setPropertyGroup('OffsetsWorkspace', grp8)
         # Input for CylinderAbsorption
         self.declareProperty(
             'AttenuationXSection',
@@ -444,13 +439,13 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
         self._dpMin = self.getProperty('DpMin').value
         self._dpMax = self.getProperty('DpMax').value
         self._calcDMin = self._lambdaMin / (
-            2. * math.sin(self._tthMax / 2. / 180. * math.pi))
+            2. * math.sin(math.radians(self._tthMax / 2.))
         self._calcDMax = self._lambdaMax / (
-            2. * math.sin(self._tthMin / 2. / 180. * math.pi))
+            2. * math.sin(math.radians(self._tthMin / 2.))
         self._calcDpMin = math.sqrt(
-            self._lambdaMin**2 - 2. * math.log(math.cos(self._tthMin / 2. / 180. * math.pi)))
+            self._lambdaMin**2 - 2. * math.log(math.cos(math.radians(self._tthMin / 2.)))
         self._calcDpMax = math.sqrt(
-            self._lambdaMax**2 - 2. * math.log(math.cos(self._tthMax / 2. / 180. * math.pi)))
+            self._lambdaMax**2 - 2. * math.log(math.cos(math.radians(self._tthMax / 2.)))
         if self._calcDMin > self._dMin:
             self._dMin = self._calcDMin
         if self._calcDMax < self._dMax:

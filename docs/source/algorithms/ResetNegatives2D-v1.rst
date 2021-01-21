@@ -45,11 +45,14 @@ Usage
     CreateWorkspace(OutputWorkspace = 'Usage_Example', DataX = xDataTotal, DataY = zDataTotal, DataE = eDataTotal, WorkspaceTitle = 'test', NSpec = nSpec, UnitX = 'dSpacing', VerticalAxisUnit = 'dSpacingPerpendicular', VerticalAxisValues = yData)
     # Reset the negative values
     ResetNegatives2D(Workspace = "Usage_Example")
+    ws = mtd['Usage_Example']
+    print(ws.readY(0)[1], ws.readY(0)[6])
 
 Output:
 
 .. testoutput:: ResetNegatives2D
   :options: +ELLIPSIS, +NORMALIZE_WHITESPACE
+    1.0 0.0
 
 .. categories::
 
