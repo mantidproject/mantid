@@ -7,8 +7,12 @@
 
 import os
 
-from qtpy.QtWidgets import QDialog, QCheckBox
+from qtpy.QtWidgets import QDialog, QCheckBox, QToolButton
+from qtpy.QtCore import *
 from qtpy import uic
+
+from mantidqt import icons
+from mantidqt.interfacemanager import InterfaceManager
 
 
 class DrillExportDialog(QDialog):
@@ -62,7 +66,15 @@ class DrillExportDialog(QDialog):
         for i in range(len(algorithms)):
             widget = QCheckBox(algorithms[i], self)
             self._widgets[algorithms[i]] = widget
-            self.algoList.insertWidget(i, widget)
+            self.algoList.addWidget(widget, i, 0, Qt.AlignLeft)
+            helpButton = QToolButton(self)
+            helpButton.setText('...')
+            helpButton.setIcon(icons.get_icon("mdi.help"))
+            helpButton.clicked.connect(
+                    lambda _, a=algorithms[i]: InterfaceManager().showHelpPage(
+                        "qthelp://org.mantidproject/doc/algorithms/{}.html"
+                        .format(a)))
+            self.algoList.addWidget(helpButton, i, 1, Qt.AlignRight)
 
     def setAlgorithmCheckStates(self, states):
         """
