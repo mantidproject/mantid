@@ -60,7 +60,7 @@ Usage
     ws_calibrated = ConvertToEventWorkspace(ws_original)
 
     # apply the calibration to ws
-    CorelliPowderCalibrationApply(ws_calibrated, calitable)  # in-place operation
+    CorelliCalibrationApply(ws_calibrated, calitable)  # in-place operation
 
 The original instrument view
 

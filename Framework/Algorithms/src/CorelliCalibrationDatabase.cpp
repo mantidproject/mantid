@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidAlgorithms/CorelliPowderCalibrationDatabase.h"
+#include "MantidAlgorithms/CorelliCalibrationDatabase.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -379,11 +379,11 @@ ComponentPosition CalibrationTableHandler::getCalibratedPosition(
 } // namespace CorelliCalibration
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(CorelliPowderCalibrationDatabase)
+DECLARE_ALGORITHM(CorelliCalibrationDatabase)
 
 /** Initialize the algorithm's properties.
  */
-void CorelliPowderCalibrationDatabase::init() {
+void CorelliCalibrationDatabase::init() {
   auto wsValidator = std::make_shared<CompositeValidator>();
   wsValidator->add<InstrumentValidator>();
 
@@ -412,7 +412,7 @@ void CorelliPowderCalibrationDatabase::init() {
 
 // Validate inputs workspace first.
 std::map<std::string, std::string>
-CorelliPowderCalibrationDatabase::validateInputs() {
+CorelliCalibrationDatabase::validateInputs() {
   std::map<std::string, std::string> errors;
 
   mInputWS = getProperty("InputWorkspace");
@@ -454,7 +454,7 @@ CorelliPowderCalibrationDatabase::validateInputs() {
 //-----------------------------------------------------------------------------
 /** Execute the algorithm.
  */
-void CorelliPowderCalibrationDatabase::exec() {
+void CorelliCalibrationDatabase::exec() {
   // parse input
   if (!mInputWS)
     throw std::runtime_error("input workspace not specified");
@@ -501,7 +501,7 @@ void CorelliPowderCalibrationDatabase::exec() {
  * @param calibdbdir: directory where dababase files are stored
  * @param calibwsmap: in/out map for bank and calibration tableworkspace in ADS
  */
-void CorelliPowderCalibrationDatabase::updateComponentDatabaseFiles(
+void CorelliCalibrationDatabase::updateComponentDatabaseFiles(
     const std::string &calibdbdir,
     std::map<std::string, TableWorkspace_sptr> &calibwsmap) {
   // Date stamp
@@ -547,7 +547,7 @@ void CorelliPowderCalibrationDatabase::updateComponentDatabaseFiles(
  * @param calibdbdir: calibration database directory
  * @param calibwsmap: map from component name to calibration table workspace
  */
-void CorelliPowderCalibrationDatabase::loadNonCalibratedComponentDatabase(
+void CorelliCalibrationDatabase::loadNonCalibratedComponentDatabase(
     const std::string &calibdbdir,
     std::map<std::string, TableWorkspace_sptr> &calibwsmap) {
   // go through all the components
@@ -581,7 +581,7 @@ void CorelliPowderCalibrationDatabase::loadNonCalibratedComponentDatabase(
 
 // Create summary calibration workspace: input: component_caibws_map output:
 // new calibration workspace
-void CorelliPowderCalibrationDatabase::createOutputCalibrationTable(
+void CorelliCalibrationDatabase::createOutputCalibrationTable(
     std::map<std::string, TableWorkspace_sptr> &calibwsmap,
     std::vector<std::string> orderedcomponents) {
   // Create an empty calibration table without setting to analysis data service
@@ -604,7 +604,7 @@ void CorelliPowderCalibrationDatabase::createOutputCalibrationTable(
 
 // Create the summary CSV file
 // File name exampe: corelli_instrument_20202015.csv
-void CorelliPowderCalibrationDatabase::saveCalibrationTable(
+void CorelliCalibrationDatabase::saveCalibrationTable(
     const std::string &calibdbdir) {
   // file name
   std::string filename = "corelli_instrument_" + mDateStamp + ".csv";
@@ -624,7 +624,7 @@ void CorelliPowderCalibrationDatabase::saveCalibrationTable(
  * @return
  */
 std::string
-CorelliPowderCalibrationDatabase::convertTimeStamp(std::string run_start_time) {
+CorelliCalibrationDatabase::convertTimeStamp(std::string run_start_time) {
   // Get the first sub string by
   std::string date_str = run_start_time.substr(0, run_start_time.find("T"));
 
@@ -651,7 +651,7 @@ CorelliPowderCalibrationDatabase::convertTimeStamp(std::string run_start_time) {
  * @param directory
  * @return
  */
-std::string CorelliPowderCalibrationDatabase::corelliComponentDatabaseName(
+std::string CorelliCalibrationDatabase::corelliComponentDatabaseName(
     const std::string &componentname, const std::string &directory) {
 
   // drop the suffix "/sixteenpack" if found in the component name
@@ -674,7 +674,7 @@ std::string CorelliPowderCalibrationDatabase::corelliComponentDatabaseName(
  * @param directory
  * @return
  */
-std::string CorelliPowderCalibrationDatabase::corelliCalibrationDatabaseName(
+std::string CorelliCalibrationDatabase::corelliCalibrationDatabaseName(
     const std::string &datestamp, const std::string &directory) {
   std::string basename = datestamp + ".csv";
   std::string filename = joinPath(directory, basename);
@@ -687,8 +687,7 @@ std::string CorelliPowderCalibrationDatabase::corelliCalibrationDatabaseName(
  * @param filepath
  * @return
  */
-bool CorelliPowderCalibrationDatabase::isFileExist(
-    const std::string &filepath) {
+bool CorelliCalibrationDatabase::isFileExist(const std::string &filepath) {
 
   // TODO - replace by std::filesystem::exists(filename) until C++17 is properly
   // supported
@@ -702,9 +701,8 @@ bool CorelliPowderCalibrationDatabase::isFileExist(
  * @param basename
  * @return
  */
-std::string
-CorelliPowderCalibrationDatabase::joinPath(const std::string directory,
-                                           const std::string basename) {
+std::string CorelliCalibrationDatabase::joinPath(const std::string directory,
+                                                 const std::string basename) {
   boost::filesystem::path dir(directory);
   boost::filesystem::path file(basename);
   boost::filesystem::path fullpath = dir / file;
@@ -720,7 +718,7 @@ CorelliPowderCalibrationDatabase::joinPath(const std::string directory,
  * @param componentnames
  * @param compmap
  */
-void CorelliPowderCalibrationDatabase::setComponentMap(
+void CorelliCalibrationDatabase::setComponentMap(
     std::vector<std::string> componentnames,
     std::map<std::string, DataObjects::TableWorkspace_sptr> &compmap) {
   // Add entries
@@ -739,7 +737,7 @@ void CorelliPowderCalibrationDatabase::setComponentMap(
  * moderator, sample-position, bank1, bank2, ...
  */
 std::vector<std::string>
-CorelliPowderCalibrationDatabase::retrieveInstrumentComponents(
+CorelliCalibrationDatabase::retrieveInstrumentComponents(
     MatrixWorkspace_sptr ws) {
   // Get access to instrument information
   const auto &component_info = ws->componentInfo();

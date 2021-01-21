@@ -114,13 +114,12 @@ private:
 
 } // namespace CorelliCalibration
 
-/** CorelliPowderCalibrationDatabase: blablabla TODO
+/** CorelliCalibrationDatabase: blablabla TODO
  */
-class MANTID_ALGORITHMS_DLL CorelliPowderCalibrationDatabase
-    : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CorelliCalibrationDatabase : public API::Algorithm {
 public:
   const std::string name() const override {
-    return "CorelliPowderCalibrationDatabase";
+    return "CorelliCalibrationDatabase";
   };
   int version() const override { return 1; };
   const std::string category() const override {
@@ -130,7 +129,7 @@ public:
   /// Extra help info
   const std::vector<std::string> seeAlso() const override {
     return {"CorelliPowderCalibrationCreate", "CorelliPowderCalibrationLoad",
-            "CorelliPowderCalibrationApply"};
+            "CorelliCalibrationApply"};
   };
 
   const std::string summary() const override {
