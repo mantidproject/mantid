@@ -6,6 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/MaskBinsIf.h"
 #include "MantidAlgorithms/Q1DWeighted.h"
@@ -300,6 +303,27 @@ public:
     TS_ASSERT_DELTA(result->y(0)[6], 251.052, 0.001);
   }
 
+  void testTableShape() {
+    createShapeTable();
+
+    std::string outputWS = "q1d_shapes";
+    TS_ASSERT_THROWS_NOTHING(
+        radial_average.setPropertyValue("InputWorkspace", m_inputWS))
+    TS_ASSERT_THROWS_NOTHING(
+        radial_average.setPropertyValue("OutputWorkspace", outputWS))
+    TS_ASSERT_THROWS_NOTHING(
+        radial_average.setPropertyValue("OutputBinning", "0.001,0.001,0.08"))
+    TS_ASSERT_THROWS_NOTHING(
+        radial_average.setPropertyValue("TableShape", "MaskShapes"))
+    TS_ASSERT_THROWS_NOTHING(radial_average.execute())
+
+    MatrixWorkspace_sptr result;
+    TS_ASSERT_THROWS_NOTHING(
+        result = std::dynamic_pointer_cast<MatrixWorkspace>(
+            AnalysisDataService::Instance().retrieve(outputWS)))
+    //    TS_ASSERT_EQUALS(result->getNumberHistograms(), 1)
+  }
+
 private:
   void loadAndMove() {
     // This generates an appropriate real life workspace for testing.
@@ -328,6 +352,53 @@ private:
     mover.setPropertyValue("Z", "-0.8114");
 
     mover.execute();
+  }
+
+  void createShapeTable() {
+    // since the instrument viewer mostly lacks an API, we create a dummy
+    // MaskShapes table
+
+    using namespace Mantid::API;
+    auto table = WorkspaceFactory::Instance().createTable();
+    table->addColumn("str", "Index");
+    table->addColumn("str", "Parameters");
+
+    std::string sector = createDummySector(0.1, 0.5, 230, 10, 0.2, -0.1);
+    TableRow row = table->appendRow();
+    row << std::to_string(1) << sector;
+
+    sector = createDummySector(0, 10, 0, 15, -0.2, 0);
+    row = table->appendRow();
+    row << std::to_string(2) << sector;
+
+    std::string viewport = createDummyViewport(0.2, 0.1, 1.2, 0, 0, 1, 0);
+    row = table->appendRow();
+    row << std::to_string(-1) << viewport;
+
+    AnalysisDataService::Instance().addOrReplace("MaskShapes", table);
+  }
+
+  std::string createDummySector(double innerRadius, double outerRadius,
+                                double startAngle, double endAngle,
+                                double centerX, double centerY) {
+    std::stringstream ss;
+    ss << "Type"
+       << "sector\n";
+    ss << "Parameters" << innerRadius << outerRadius << startAngle << endAngle
+       << centerX << centerY;
+    // the other parameters are omitted, since they are not useful for us
+    return ss.str();
+  }
+
+  std::string createDummyViewport(double transX, double transY, double zoom,
+                                  double rotation0, double rotation1,
+                                  double rotation2, double rotation3) {
+    std::stringstream ss;
+    ss << "Translation" << transX << " " << transY << std::endl;
+    ss << "Zoom" << zoom << std::endl;
+    ss << "Rotation" << rotation0 << rotation1 << rotation2 << rotation3;
+
+    return ss.str();
   }
 
   Q1DWeighted radial_average;
