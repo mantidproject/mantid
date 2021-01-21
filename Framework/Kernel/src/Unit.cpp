@@ -106,11 +106,11 @@ void Unit::addConversion(std::string to, const double &factor,
  *singleFromTof()
  *
  *  @param _l1 ::       The source-sample distance (in metres)
- *  @param _l2 ::       The sample-detector distance (in metres)
- *  @param _twoTheta :: The scattering angle (in radians)
  *  @param _emode ::    The energy mode (0=elastic, 1=direct geometry,
  *2=indirect geometry)
  *  @param params ::  Map containing optional parameters eg
+ *                    The sample-detector distance (in metres)
+ *                    The scattering angle (in radians)
  *                    Fixed energy: EI (emode=1) or EF (emode=2)(in meV)
  *                    Delta (not currently used)
  */

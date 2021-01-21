@@ -1357,8 +1357,6 @@ void ExperimentInfo::populateIfNotLoaded() const {
  * @param emode :: The energy mode
  * @param signedTheta :: Return twotheta with sign or without
  * @param wsIndex :: The workspace index
- * @param l2 :: The returned sample - detector distance
- * @param twoTheta :: the returned two theta angle
  * @param pmap :: a map containing values for conversion parameters that are not
 required by all unit classes to perform their conversions eg efixed. It can
 contain values on the way in if a look up isn't desired here eg if value

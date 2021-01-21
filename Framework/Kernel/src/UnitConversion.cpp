@@ -94,10 +94,10 @@ double UnitConversion::convertQuickly(const double srcValue,
  * @param destUnit :: The destination unit
  * @param srcValue :: The value to convert
  * @param l1 ::       The source-sample distance (in metres)
- * @param l2 ::       The sample-detector distance (in metres)
- * @param theta :: The scattering angle (in radians)
  * @param emode ::    The energy mode enumeration
  * @param params ::  Map containing optional parameters eg
+ *                   The sample-detector distance (in metres)
+ *                   The scattering angle (in radians)
  *                   Fixed energy: EI (emode=1) or EF (emode=2)(in meV)
  *                   Delta (not currently used)
  * @return The value converted to the destination unit
