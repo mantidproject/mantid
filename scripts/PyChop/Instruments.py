@@ -905,7 +905,7 @@ class Instrument(object):
         obj.ei = argdict['ei']
         if argdict['variant']:
             obj.variant = argdict['variant']
-        return obj.getResolution(argdict['etrans'] if (argdict['etrans'] is not None) else 0.), obj.getFlux()
+        return obj.getResolution(argdict['etrans'] if argdict['etrans'] else 0.), obj.getFlux()
 
     def __repr__(self):
         return self.name if self.name else 'Undefined instrument'
