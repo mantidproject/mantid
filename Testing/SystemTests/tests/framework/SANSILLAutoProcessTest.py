@@ -5,7 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.simpleapi import SANSILLAutoProcess, GroupWorkspaces, \
-                             SaveNexusProcessed, LoadNexusProcessed, config, mtd
+    SaveNexusProcessed, LoadNexusProcessed, config, mtd, MaskBTP, \
+    RenameWorkspace
 import systemtesting
 from tempfile import gettempdir
 import os
@@ -188,6 +189,10 @@ class D11_AutoProcess_Multiple_Transmissions_Test(systemtesting.MantidSystemTest
         config['logging.loggers.root.level'] = 'Warning'
         config.appendDataSearchSubDir('ILL/D11/')
 
+        # prepares mask for the 39m, 10A case that is not properly masked
+        MaskBTP(Instrument='D11', Tube='116-139', Pixel='90-116')
+        RenameWorkspace(InputWorkspace='D11MaskBTP', OutputWorkspace='mask_39m_10A')
+
     def cleanup(self):
         mtd.clear()
 
@@ -199,7 +204,7 @@ class D11_AutoProcess_Multiple_Transmissions_Test(systemtesting.MantidSystemTest
     def runTest(self):
         beams = '1020,947,1088'
         containers = '1023,973,1003'
-        container_tr = '988'
+        container_tr = '1023,988,988'
         beam_tr = '1020,1119,1119'
         samples = '1025,975,1005'
         sample_tr = '1204,990,990'
@@ -212,7 +217,7 @@ class D11_AutoProcess_Multiple_Transmissions_Test(systemtesting.MantidSystemTest
             SampleRuns=samples,
             BeamRuns=beams,
             ContainerRuns=containers,
-            MaskFiles='mask1.nxs,mask1.nxs,mask2.nxs',
+            MaskFiles='mask_39m_10A,mask1.nxs,mask2.nxs',
             SensitivityMaps='sens-lamp',
             SampleTransmissionRuns=sample_tr,
             ContainerTransmissionRuns=container_tr,
