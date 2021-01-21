@@ -165,47 +165,60 @@
            </layout>
           </item>
           <item>
-           <widget class="MantidQt::MantidWidgets::LogValueSelector" name="logValueSelector" native="true"/>
-          </item>
-          <item>
            <layout class="QHBoxLayout" name="loadLayout">
             <property name="leftMargin">
-             <number>0</number>
+             <number>9</number>
             </property>
             <property name="topMargin">
              <number>0</number>
             </property>
+            <property name="rightMargin">
+             <number>9</number>
+            </property>
             <item>
              <widget class="QLabel" name="loadStatusLabel">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+                <horstretch>0</horstretch>
+                <verstretch>2</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>6</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="toolTip">
+               <string>Status of the interface. Green: Success; Yellow: Processing; Red: Error</string>
+              </property>
               <property name="styleSheet">
                <string notr="true"/>
               </property>
               <property name="text">
-               <string>Default Textt</string>
+               <string>Default Text</string>
               </property>
-             </widget>
-            </item>
-            <item>
-             <spacer name="horizontalSpacer">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
+              <property name="wordWrap">
+               <bool>true</bool>
               </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-            <item>
-             <widget class="QPushButton" name="load">
-              <property name="text">
-               <string>Load</string>
+              <property name="margin">
+               <number>1</number>
               </property>
              </widget>
             </item>
            </layout>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="plotByLogGroup">
+         <property name="title">
+          <string>Plot By Log</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_6">
+          <item>
+           <widget class="MantidQt::MantidWidgets::LogValueSelector" name="logValueSelector" native="true"/>
           </item>
          </layout>
         </widget>
@@ -645,7 +658,7 @@
         </spacer>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_6">
+        <layout class="QHBoxLayout" name="horizontalLayout_6" stretch="0,0,4,2">
          <property name="topMargin">
           <number>0</number>
          </property>
@@ -682,6 +695,13 @@
            </property>
           </spacer>
          </item>
+         <item>
+          <widget class="QPushButton" name="load">
+           <property name="text">
+            <string>Load</string>
+           </property>
+          </widget>
+         </item>
         </layout>
        </item>
        <item>
@@ -693,6 +713,7 @@
       <zorder>periodsGroup</zorder>
       <zorder>calculationGroup</zorder>
       <zorder>dataGroup</zorder>
+      <zorder>plotByLogGroup</zorder>
      </widget>
      <widget class="QGroupBox" name="groupBox">
       <property name="styleSheet">
@@ -709,6 +730,12 @@
            <width>300</width>
            <height>0</height>
           </size>
+         </property>
+         <property name="toolTip">
+          <string>Use right-click for plot options</string>
+         </property>
+         <property name="toolTipDuration">
+          <number>2000</number>
          </property>
         </widget>
        </item>
@@ -843,8 +870,8 @@
   </connection>
  </connections>
  <buttongroups>
-  <buttongroup name="deadTimeCorrType"/>
   <buttongroup name="detectorGroupingType"/>
   <buttongroup name="calculationType"/>
+  <buttongroup name="deadTimeCorrType"/>
  </buttongroups>
 </ui>

@@ -67,9 +67,8 @@ void ALCDataLoadingPresenter::handleRunsChanged() {
       m_view->getInstrument() + m_view->getRunsFirstRunText())
     m_view->setAvailableInfoToEmpty();
 
-  m_view->setLoadStatus("Finding " + m_view->getInstrument() + " -\n" +
-                            m_view->getRunsText(),
-                        "orange");
+  m_view->setLoadStatus(
+      "Finding " + m_view->getInstrument() + m_view->getRunsText(), "orange");
   m_view->enableAlpha(false);
   m_view->setAlphaValue("");
   m_view->showAlphaMessage(false);
@@ -94,7 +93,7 @@ void ALCDataLoadingPresenter::handleRunsFound() {
     updateAvailableInfo();
     m_view->enableLoad(true);
     m_view->setLoadStatus("Successfully found " + m_view->getInstrument() +
-                              " -\n" + m_view->getRunsText(),
+                              m_view->getRunsText(),
                           "green");
     m_previousFirstRun =
         m_view->getInstrument() + m_view->getRunsFirstRunText();
@@ -129,14 +128,13 @@ void ALCDataLoadingPresenter::handleLoadRequested() {
       return;
   }
 
-  m_view->setLoadStatus("Loading " + m_view->getInstrument() + " -\n" +
-                            m_view->getRunsText(),
-                        "orange");
+  m_view->setLoadStatus(
+      "Loading " + m_view->getInstrument() + m_view->getRunsText(), "orange");
   try {
     load(files);
     m_filesLoaded = files;
     m_view->setLoadStatus("Successfully loaded " + m_view->getInstrument() +
-                              " -\n" + m_view->getRunsText(),
+                              m_view->getRunsText(),
                           "green");
     m_view->enableRunsAutoAdd(true);
 

@@ -376,6 +376,7 @@ void ALCDataLoadingView::setLoadStatus(const std::string &status,
   m_ui.loadStatusLabel->setText(QString::fromStdString("Status: " + status));
   m_ui.loadStatusLabel->setStyleSheet(
       QString::fromStdString("color: " + colour));
+  m_ui.loadStatusLabel->adjustSize();
 }
 
 void ALCDataLoadingView::runsAutoAddToggled(bool on) {
