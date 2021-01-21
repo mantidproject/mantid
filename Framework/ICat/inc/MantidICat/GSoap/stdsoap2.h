@@ -1405,15 +1405,16 @@ using soap_mode = int32_t;
 #define SOAP_SSL_NO_AUTHENTICATION 0x00             /* for testing purposes */
 #define SOAP_SSL_REQUIRE_SERVER_AUTHENTICATION 0x01 /* client requires server to authenticate */
 #define SOAP_SSL_REQUIRE_CLIENT_AUTHENTICATION 0x02 /* server requires client to authenticate */
-#define SOAP_SSL_SKIP_HOST_CHECK 0x04           /* client does not check the common name of the host in certificate */
-#define SOAP_SSL_ALLOW_EXPIRED_CERTIFICATE 0x08 /* client does not check the expiration date of the host certificate   \
-                                                 */
-#define SOAP_SSL_NO_DEFAULT_CA_PATH 0x10        /* don't use default_verify_paths */
-#define SOAP_SSL_RSA 0x20                       /* use RSA */
-#define SOAP_SSLv3 0x40                         /* SSL v3 only */
-#define SOAP_TLSv1 0x80                         /* TLS v1 only */
-#define SOAP_SSLv3_TLSv1 0x00                   /* SSL v3 and TLS v1 support by default (no SSL v1/v2) */
-#define SOAP_SSL_CLIENT 0x100                   /* client context */
+#define SOAP_SSL_SKIP_HOST_CHECK 0x04 /* client does not check the common name of the host in certificate */
+#define SOAP_SSL_ALLOW_EXPIRED_CERTIFICATE                                                                             \
+  0x08                                   /* client does not check the expiration date of the host certificate          \
+                                          */
+#define SOAP_SSL_NO_DEFAULT_CA_PATH 0x10 /* don't use default_verify_paths */
+#define SOAP_SSL_RSA 0x20                /* use RSA */
+#define SOAP_SSLv3 0x40                  /* SSL v3 only */
+#define SOAP_TLSv1 0x80                  /* TLS v1 only */
+#define SOAP_SSLv3_TLSv1 0x00            /* SSL v3 and TLS v1 support by default (no SSL v1/v2) */
+#define SOAP_SSL_CLIENT 0x100            /* client context */
 
 #define SOAP_SSL_DEFAULT (SOAP_SSL_REQUIRE_SERVER_AUTHENTICATION | SOAP_SSLv3_TLSv1)
 

@@ -45,8 +45,10 @@ public:
   void setNonOrthogonal(bool nonOrthogonalEnabled) override;
   bool isLabelOfFreeAxis(const std::string &label) const override;
   SetPeaksWorkspaces presentedWorkspaces() const override;
-  virtual void setForegroundColor(const PeakViewColor /*unused*/) override { /*Do nothing*/ }
-  virtual void setBackgroundColor(const PeakViewColor /*unused*/) override { /*Do nothing*/ }
+  virtual void setForegroundColor(const PeakViewColor /*unused*/) override { /*Do nothing*/
+  }
+  virtual void setBackgroundColor(const PeakViewColor /*unused*/) override { /*Do nothing*/
+  }
   /// Get the foreground colour. This should never be used on the composite
   PeakViewColor getForegroundPeakViewColor() const override {
     std::runtime_error("Error: Trying to access getForegroundPeaViewColor on a"
