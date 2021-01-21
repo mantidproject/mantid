@@ -68,9 +68,12 @@ Bugfixes
 - Fixed a bug with editing legends in-situ on Linux platforms.
 - Fixed a bug in SliceViewer that caused shown data to not update correctly when changing axis selection.
 - Fixed bug supplying rebin arguments for non-orthogonal data in sliceviewer that meant that not all the availible data within the axes limits were being plotted.
+- Fixed bug in supplying display indices when viewinng axes changed in non-orthog view.
 - Fixed a crash in SliceViewer when hovering the cursor over Direct or Indirect data.
 - Fixed a crash when using broken e notation for axis limits in plot settings
+- Fixed bug in plotting elliptical shell of integrated peaks in sliceviewer - the inner background radius is now correct.
 - Fixed a bug in error bars tab in plot settings where the Error Every property was not being shown correctly
 - Fixed a bug where the fit action (Fit > Fit) in the fit browser wasn't disabled if all the functions were individually removed.
+
 
 :ref:`Release 6.0.0 <v6.0.0>`

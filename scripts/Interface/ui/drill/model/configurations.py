@@ -175,7 +175,8 @@ class RundexSettings(object):
                 "MaxQxy",
                 "DeltaQ",
                 "IQxQyLogBinning",
-                "OutputPanels"
+                "OutputPanels",
+                "WavelengthRange"
                 ],
             SANS_PSCAN : [
                 "SensitivityMap",
