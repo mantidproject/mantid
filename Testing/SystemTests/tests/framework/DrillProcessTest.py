@@ -24,7 +24,7 @@ from Interface.ui.drill.view.DrillSettingsDialog import *
 app = QApplication(sys.argv)
 
 
-class DrillProcessTest(systemtesting.MantidSystemTest):
+class DrillProcessSANSTest(systemtesting.MantidSystemTest):
 
     def __init__(self):
         super().__init__()
