@@ -81,7 +81,7 @@ Usage
     autotestdata\UsageData and the following tag unindented
     .. include:: ../usagedata-note.txt
 
-**Example - CorelliPowderCalibrateDatabase**
+**Example - CorelliCalibrateDatabase**
 
 .. testcode:: CorelliPowderCalibrationExample
     
@@ -125,7 +125,7 @@ Usage
     calib_table.addRow(["bank1/sixteenpack" , 0.9678 , 0.0056 , 0.0003 , 0.4563 , -0.9999, 0.3424, 0.321])
     
     # save for powder calibration database
-    CorelliPowderCalibrationDatabase(InputWorkspace='input', InputCalibrationPatchWorkspace='calib_table',
+    CorelliCalibrationDatabase(InputWorkspace='input', InputCalibrationPatchWorkspace='calib_table',
                                      DatabaseDirectory='sim_corelli_cal',
                                      OutputWorkspace='mergedcalibrationtable')
     

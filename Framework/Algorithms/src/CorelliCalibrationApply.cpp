@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#include "MantidAlgorithms/CorelliPowderCalibrationApply.h"
+#include "MantidAlgorithms/CorelliCalibrationApply.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/InstrumentValidator.h"
@@ -23,16 +23,16 @@ using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
 namespace {
-Logger logger("CorelliPowderCalibrationApply");
+Logger logger("CorelliCalibrationApply");
 }
 
-DECLARE_ALGORITHM(CorelliPowderCalibrationApply)
+DECLARE_ALGORITHM(CorelliCalibrationApply)
 
 /**
  * @brief Initialization
  *
  */
-void CorelliPowderCalibrationApply::init() {
+void CorelliCalibrationApply::init() {
 
   // InputWorkspace
   // [Input, Required, MatrixWorkspace or EventsWorkspace]
@@ -57,8 +57,7 @@ void CorelliPowderCalibrationApply::init() {
  *
  * @return std::map<std::string, std::string>
  */
-std::map<std::string, std::string>
-CorelliPowderCalibrationApply::validateInputs() {
+std::map<std::string, std::string> CorelliCalibrationApply::validateInputs() {
   std::map<std::string, std::string> issues;
   ws = getProperty("Workspace");
 
@@ -89,7 +88,7 @@ CorelliPowderCalibrationApply::validateInputs() {
  * @brief Executes the algorithm.
  *
  */
-void CorelliPowderCalibrationApply::exec() {
+void CorelliCalibrationApply::exec() {
   g_log.notice() << "Start applying CORELLI calibration\n";
 
   // Parse input arguments

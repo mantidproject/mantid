@@ -40,7 +40,9 @@ public:
 
   LoadILLSANSTest() {
     ConfigService::Instance().appendDataSearchSubDir("ILL/D11/");
+    ConfigService::Instance().appendDataSearchSubDir("ILL/D11B/");
     ConfigService::Instance().appendDataSearchSubDir("ILL/D22/");
+    ConfigService::Instance().appendDataSearchSubDir("ILL/D22B/");
     ConfigService::Instance().appendDataSearchSubDir("ILL/D33/");
     ConfigService::Instance().appendDataSearchSubDir("ILL/D16/");
     ConfigService::Instance().setFacility("ILL");
@@ -99,6 +101,52 @@ public:
     checkTimeFormat(outputWS);
   }
 
+  void test_D11B() {
+    LoadILLSANS alg;
+    alg.setChild(true);
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "027194.nxs"))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", "__unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
+    MatrixWorkspace_const_sptr outputWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outputWS)
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(),
+                     192 * 256 + 2 * 32 * 256 + 2)
+    TS_ASSERT_EQUALS(outputWS->blocksize(), 1)
+    TS_ASSERT(outputWS->detectorInfo().isMonitor(192 * 256 + 2 * 32 * 256))
+    TS_ASSERT(outputWS->detectorInfo().isMonitor(192 * 256 + 2 * 32 * 256 + 1))
+    TS_ASSERT(outputWS->isHistogramData())
+    TS_ASSERT(!outputWS->isDistribution())
+    const auto &instrument = outputWS->getInstrument();
+
+    IComponent_const_sptr component =
+        instrument->getComponentByName("detector_center");
+    V3D pos = component->getPos();
+    TS_ASSERT_DELTA(pos.Z(), 8.9274824298, 1E-3)
+
+    component = instrument->getComponentByName("detector_left");
+    pos = component->getPos();
+    TS_ASSERT_DELTA(pos.Z(), 8.82248, 1E-5)
+
+    component = instrument->getComponentByName("detector_right");
+    pos = component->getPos();
+    TS_ASSERT_DELTA(pos.Z(), 8.82248, 1E-5)
+
+    const auto &xAxis = outputWS->x(0).rawData();
+    const auto &spec = outputWS->y(3630).rawData();
+    const auto &err = outputWS->e(3630).rawData();
+    TS_ASSERT_EQUALS(xAxis.size(), 2)
+    TS_ASSERT_DELTA(xAxis[0], 6.685, 1E-5)
+    TS_ASSERT_DELTA(xAxis[1], 7.315, 1E-5)
+    TS_ASSERT_EQUALS(spec[0], 246)
+    TS_ASSERT_DELTA(err[0], sqrt(246), 1E-5)
+    const auto unit = outputWS->getAxis(0)->unit()->unitID();
+    TS_ASSERT_EQUALS(unit, "Wavelength");
+    checkTimeFormat(outputWS);
+  }
+
   void test_D22() {
     LoadILLSANS alg;
     alg.setChild(true);
@@ -130,6 +178,47 @@ public:
     TS_ASSERT_DELTA(xAxis[1], 5.25, 1E-5)
     TS_ASSERT_EQUALS(spec6[0], 45)
     TS_ASSERT_DELTA(err6[0], sqrt(45), 1E-5)
+    const auto unit = outputWS->getAxis(0)->unit()->unitID();
+    TS_ASSERT_EQUALS(unit, "Wavelength");
+    checkTimeFormat(outputWS);
+  }
+
+  void test_d22B() {
+    LoadILLSANS alg;
+    alg.setChild(true);
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "375508.nxs"))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", "__unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
+    MatrixWorkspace_const_sptr outputWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outputWS)
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 128 * 256 + 96 * 256 + 2)
+    TS_ASSERT_EQUALS(outputWS->blocksize(), 1)
+    TS_ASSERT(outputWS->detectorInfo().isMonitor(128 * 256 + 96 * 256))
+    TS_ASSERT(outputWS->detectorInfo().isMonitor(128 * 256 + 96 * 256 + 1))
+    TS_ASSERT(outputWS->isHistogramData())
+    TS_ASSERT(!outputWS->isDistribution())
+    const auto &instrument = outputWS->getInstrument();
+
+    // TODO SET CORRECT COORDINATES
+    IComponent_const_sptr comp = instrument->getComponentByName("detector");
+    V3D pos = comp->getPos();
+    TS_ASSERT_DELTA(pos.Z(), 16.874, 1E-5)
+
+    comp = instrument->getComponentByName("detector_right");
+    pos = comp->getPos();
+    TS_ASSERT_DELTA(pos.Z(), 16.874, 1E-5)
+
+    const auto &xAxis = outputWS->x(0).rawData();
+    const auto &spec = outputWS->y(1280).rawData();
+    const auto &err = outputWS->e(1280).rawData();
+    TS_ASSERT_EQUALS(xAxis.size(), 2)
+    TS_ASSERT_DELTA(xAxis[0], 6.65, 1E-5)
+    TS_ASSERT_DELTA(xAxis[1], 7.35, 1E-5)
+    TS_ASSERT_EQUALS(spec[0], 10)
+    TS_ASSERT_DELTA(err[0], sqrt(10), 1E-5)
     const auto unit = outputWS->getAxis(0)->unit()->unitID();
     TS_ASSERT_EQUALS(unit, "Wavelength");
     checkTimeFormat(outputWS);

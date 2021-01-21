@@ -42,6 +42,7 @@ ALG_BAD_PARAMS = {
                               "usePanelHeight", "usePanelPosition",
                               "usePanelOrientation", "tolerance",
                               "MaxPositionChange_meters"),
+    "SCDCalibratePanels(v2)":("a", "b", "c", "alpha", "beta", "gamma"),
     "SetSampleMaterial(v1)":("bAverage", "bSquaredAverage"),
     "SetUB(v1)":("a", "b", "c", "alpha", "beta", "gamma", "u", "v"),
     "LinkedUBs(v1)":("a", "b", "c", "alpha", "beta", "gamma"),

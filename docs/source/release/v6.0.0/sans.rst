@@ -28,6 +28,7 @@ Improvements
    from the nexus file.
  - With :ref:`SANSILLAutoProcess <algm-SANSILLAutoProcess>`, the output workspace will get its title from the nexus file.
  - The Rectangle option for :ref:`SolidAngle <algm-SolidAngle>` is now supported for ILL's D22 and D33.
+ - Add loader and MaskBTP support for D11B and D22B.
 
 Bugfixes
 ########
