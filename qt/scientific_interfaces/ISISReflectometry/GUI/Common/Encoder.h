@@ -37,7 +37,10 @@ class QtRunsTableView;
 class QtSaveView;
 class IBatchPresenter;
 class IMainWindowView;
+class ISearchModel;
 class RangeInQ;
+class QtCatalogSearcher;
+class SearchResult;
 class TransmissionRunPair;
 class QtEventView;
 
@@ -63,7 +66,8 @@ private:
                                              int rowsNum, int columnsNum);
   QMap<QString, QVariant> encodeInstrument(const QtInstrumentView *gui);
   QMap<QString, QVariant> encodeRuns(const QtRunsView *gui, bool projectSave,
-                                     const ReductionJobs *redJobs);
+                                     const ReductionJobs *redJobs,
+                                     QtCatalogSearcher *searcher);
   QMap<QString, QVariant> encodeRunsTable(const QtRunsTableView *gui,
                                           bool projectSave,
                                           const ReductionJobs *redJobs);
@@ -81,6 +85,11 @@ private:
   encodeReductionOptions(const ReductionOptionsMap &rom);
   QMap<QString, QVariant>
   encodeRow(const MantidQt::CustomInterfaces::ISISReflectometry::Row &row);
+  QList<QVariant> encodeSearchModel(
+      const MantidQt::CustomInterfaces::ISISReflectometry::ISearchModel
+          &searchModel);
+  QMap<QString, QVariant> encodeSearchResult(
+      const MantidQt::CustomInterfaces::ISISReflectometry::SearchResult &row);
   QMap<QString, QVariant> encodeSave(const QtSaveView *gui);
   QMap<QString, QVariant> encodeEvent(const QtEventView *gui);
 };

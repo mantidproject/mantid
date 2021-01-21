@@ -11,6 +11,7 @@
 
 #include "IIndirectFitPlotView.h"
 #include "IndirectFitPlotPresenter.h"
+#include "IndirectFitPlotView.h"
 #include "IndirectFittingModel.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionFactory.h"

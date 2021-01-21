@@ -19,20 +19,27 @@ class PeaksWorkspaceDataPresenter(TableWorkspaceDataPresenter):
     """Override create_item method to format table columns more
     appropriately
     """
+    # Format specifier for floats in the table
     FLOAT_FORMAT_STR = '{:.5f}'
+    # Qt model classes can store data against different roles.
+    # Defines a custom role to be used for sorting with QSortFilterProxy.
+    # See https://doc.qt.io/qt-5/qsortfilterproxymodel.html#sortRole-prop
+    DATA_SORT_ROLE = 2001
 
     def create_item(self, data, _):
         """Create a table item to display the data. The data is always readonly
         here.
         """
         if type(data) == float:
-            data = self.FLOAT_FORMAT_STR.format(data)
+            display_data = self.FLOAT_FORMAT_STR.format(data)
         else:
-            data = str(data)
-        return create_table_item(data, editable=False)
+            display_data = str(data)
+        item = create_table_item(display_data, editable=False)
+        item.setData(data, self.DATA_SORT_ROLE)
+        return item
 
 
-class PeaksViewerPresenter(object):
+class PeaksViewerPresenter():
     """Controls a PeaksViewerView with a given model to display
     the peaks table and interaction controls for single workspace.
     """
@@ -121,7 +128,7 @@ class PeaksViewerPresenter(object):
         Respond to a change in the peaks list in the model
         """
         self._peaks_table_presenter.refresh()
-        self.view.table_view.enable_sorting()
+        self.view.table_view.enable_sorting(PeaksWorkspaceDataPresenter.DATA_SORT_ROLE)
 
     # private api
     @staticmethod
@@ -133,7 +140,7 @@ class PeaksViewerPresenter(object):
             raise ValueError("Expected a PeaksWorkspace. Found {}.".format(type(ws)))
 
 
-class PeaksViewerCollectionPresenter(object):
+class PeaksViewerCollectionPresenter():
     """Controls a widget comprising of multiple PeasViewerViews to display and
     interact with multiple PeaksWorkspaces"""
 

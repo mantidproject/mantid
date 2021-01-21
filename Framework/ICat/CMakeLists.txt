@@ -116,4 +116,9 @@ target_include_directories(ICat PUBLIC ${CMAKE_BINARY_DIR}/Framework/ICat)
 generate_mantid_export_header(ICat TRUE)
 
 # Installation settings
-install(TARGETS ICat ${SYSTEM_PACKAGE_TARGET} DESTINATION ${PLUGINS_DIR})
+mtd_install_targets(TARGETS
+                    ICat
+                    INSTALL_DIRS
+                    ${PLUGINS_DIR}
+                    ${WORKBENCH_PLUGINS_DIR})
+

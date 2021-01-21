@@ -348,7 +348,7 @@ InstrumentWidgetDecoder::decodeFree(const QMap<QString, QVariant> &map) {
   QPolygonF polygon;
 
   const auto parameters = map[QString("paramaters")].toList();
-  for (const auto param : parameters) {
+  for (const auto &param : parameters) {
     const auto paramList = param.toList();
     const double x = paramList[0].toDouble();
     const double y = paramList[1].toDouble();
@@ -371,7 +371,7 @@ void InstrumentWidgetDecoder::decodeAlignmentInfo(
                                qLabMap[QString("y")].toDouble(),
                                qLabMap[QString("z")].toDouble());
 
-    alignmentPlane.emplace_back(std::make_pair(qValue, marker));
+    alignmentPlane.emplace_back(qValue, marker);
   }
   obj->m_selectedAlignmentPlane = alignmentPlane;
 }

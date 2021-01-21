@@ -149,6 +149,7 @@ public:
     EXPECT_CALL(*m_model, extractSingleTube()).Times(1);
     EXPECT_CALL(*m_model, WSName()).Times(1).WillOnce(Return("test"));
     EXPECT_CALL(*m_pane, addSpectrum("test")).Times(1);
+    EXPECT_CALL(*m_pane, updateEstimateAfterExtraction()).Times(1);
     m_presenter->extractSingleTube();
   }
 

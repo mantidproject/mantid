@@ -61,17 +61,18 @@ public:
 private:
   // Overridden Algorithm methods
   void init() override;
+  std::map<std::string, std::string> validateInputs() override;
   void exec() override;
 
   /// Set any WorkspaceIndex attributes in the fitting function
   void setWorkspaceIndexAttribute(const API::IFunction_sptr &fun,
                                   int wsIndex) const;
 
-  std::shared_ptr<Algorithm> runSingleFit(bool createFitOutput,
-                                          bool outputCompositeMembers,
-                                          bool outputConvolvedMembers,
-                                          const API::IFunction_sptr &ifun,
-                                          const InputSpectraToFit &data);
+  std::shared_ptr<Algorithm>
+  runSingleFit(bool createFitOutput, bool outputCompositeMembers,
+               bool outputConvolvedMembers, const API::IFunction_sptr &ifun,
+               const InputSpectraToFit &data, double startX, double endX,
+               const std::string &exclude);
 
   double calculateLogValue(const std::string &logName,
                            const InputSpectraToFit &data);
@@ -100,6 +101,9 @@ private:
   /// Create a minimizer string based on template string provided
   std::string getMinimizerString(const std::string &wsName,
                                  const std::string &wsIndex);
+
+  /// Create a vector of linked exclude starts and ends
+  std::vector<std::string> getExclude(const size_t numSpectra);
 
   /// Base name of output workspace
   std::string m_baseName;

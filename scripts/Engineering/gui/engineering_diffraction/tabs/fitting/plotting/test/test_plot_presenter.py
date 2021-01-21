@@ -10,7 +10,7 @@ from unittest import mock
 
 from Engineering.gui.engineering_diffraction.tabs.fitting.plotting import plot_model, plot_view, plot_presenter
 
-dir_path = "Engineering.gui.engineering_diffraction.tabs.fitting.plotting"
+dir_path = "Engineering.gui.engineering_diffraction.tabs.fitting.plotting.plot_presenter"
 
 
 class FittingPlotPresenterTest(unittest.TestCase):
@@ -50,6 +50,33 @@ class FittingPlotPresenterTest(unittest.TestCase):
         self.assertEqual(2, self.model.remove_all_workspaces_from_plot.call_count)
         self.model.remove_all_workspaces_from_plot.assert_any_call("axis1")
         self.model.remove_all_workspaces_from_plot.assert_any_call("axis2")
+
+    @mock.patch(dir_path + '.Fit')
+    def test_do_sequential_fit(self, mock_fit):
+        ws_list = ['ws1', 'ws2']
+        fun_str_list = ['name=Gaussian,Height=11,PeakCentre=30000,Sigma=40',  # initial
+                        'name=Gaussian,Height=10,PeakCentre=35000,Sigma=50',  # fit result of ws1
+                        'name=Gaussian,Height=9,PeakCentre=40000,Sigma=60']  # fit result of ws2
+        in_fun_str = iter(fun_str_list[0:-1])
+        self.view.read_fitprop_from_browser.return_value = {'properties': {'Function': next(in_fun_str)}}
+        mock_fit_output = [mock.MagicMock(), mock.MagicMock()]
+        mock_fit_output[0].Function.fun = fun_str_list[1]
+        mock_fit_output[1].Function.fun = fun_str_list[2]
+        mock_fit.side_effect = mock_fit_output
+        mock_notifier = mock.MagicMock()
+        self.presenter.seq_fit_done_notifier = mock_notifier
+
+        self.presenter.do_sequential_fit(ws_list)
+
+        self.assertEqual(mock_fit.call_count, len(ws_list))
+        for iws, ws in enumerate(ws_list):
+            print(iws)
+            # check calls to fit
+            _, _, kwargs = mock_fit.mock_calls[iws]
+            self.assertEquals(kwargs, {'Function': fun_str_list[iws], 'InputWorkspace': ws, 'Output': ws})
+            # check update browser with fit results
+            _, args, _ = self.view.update_browser_setup.mock_calls[iws]
+            self.assertEquals(args, (fun_str_list[iws + 1], ws))
 
 
 if __name__ == '__main__':

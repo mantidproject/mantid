@@ -50,6 +50,7 @@ BUNDLED_PY_MODULES_WORKBENCH = [
   'PyQt5/QtPrintSupport.so',
   'PyQt5/QtSql.so',
   'PyQt5/QtSvg.so',
+  'PyQt5/QtTest.so',
   'PyQt5/QtWidgets.so',
   'PyQt5/QtXml.so',
   'PyQt5/sip.so',
@@ -584,13 +585,13 @@ so_suffix = ''
 bundled_packages = BUNDLED_PY_MODULES_COMMON.map { |s| s % "cpython-%d%d%s-darwin" % [python_version_major, python_version_minor, so_suffix] }
 requirements_files = [REQUIREMENTS_FILE]
 # check we have a known bundle
-if bundle_path.to_s.end_with?('MantidWorkbench.app')
+if bundle_path.to_s.include?('MantidWorkbench')
   bundled_packages += BUNDLED_PY_MODULES_WORKBENCH
   requirements_files << REQUIREMENTS_WORKBENCH_FILE
   bundled_qt_plugins = QT_PLUGINS_COMMON + ['platforms', 'printsupport', 'styles']
   host_qt_plugins_dir = QT5_PLUGINS_DIR
   executables << "#{contents_macos}/MantidWorkbench"
-elsif bundle_path.to_s.end_with?('MantidPlot.app')
+elsif bundle_path.to_s.include?('MantidPlot')
   bundled_packages += BUNDLED_PY_MODULES_MANTIDPLOT
   bundled_qt_plugins = QT_PLUGINS_COMMON
   host_qt_plugins_dir = QT4_PLUGINS_DIR

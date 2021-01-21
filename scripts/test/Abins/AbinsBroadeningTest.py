@@ -39,7 +39,7 @@ class BroadeningTest(unittest.TestCase):
                          (0,))
 
         zero_result = broadening.mesh_gaussian(sigma=np.array([[5]]),
-                                               points=np.array([0,]),
+                                               points=np.array([0, ]),
                                                center=np.array([[3]]))
         self.assertEqual(zero_result.shape, (1, 1))
         self.assertFalse(zero_result.any())
@@ -141,22 +141,21 @@ class BroadeningTest(unittest.TestCase):
             freq_points, spectrum = broadening.broaden_spectrum(
                 frequencies, bins, s_dft, sigma, scheme=scheme)
             self.assertAlmostEqual(sum(spectrum),
-                                   pre_broadening_total,)
+                                   pre_broadening_total, )
 
         # Normal scheme reproduces area as well as total;
         freq_points, full_spectrum = broadening.broaden_spectrum(
             frequencies, bins, s_dft, sigma, scheme='normal')
         self.assertAlmostEqual(np.trapz(spectrum, x=freq_points),
-                               pre_broadening_total * (bins[1] - bins[0]),)
+                               pre_broadening_total * (bins[1] - bins[0]), )
         self.assertAlmostEqual(sum(spectrum), pre_broadening_total)
 
         # truncated forms will be a little off but shouldn't be _too_ off
         for scheme in ('gaussian_truncated', 'normal_truncated'):
-
             freq_points, trunc_spectrum = broadening.broaden_spectrum(
                 frequencies, bins, s_dft, sigma, scheme)
             self.assertLess(abs(sum(full_spectrum) - sum(trunc_spectrum)) / sum(full_spectrum),
-                                0.03)
+                            0.03)
 
         # Interpolated methods need histogram input and smooth sigma
         hist_spec, _ = np.histogram(frequencies, bins, weights=s_dft)
@@ -164,7 +163,7 @@ class BroadeningTest(unittest.TestCase):
         freq_points, interp_spectrum = broadening.broaden_spectrum(
             freq_points, bins, hist_spec, hist_sigma, scheme='interpolate')
         self.assertLess(abs(sum(interp_spectrum) - pre_broadening_total) / pre_broadening_total,
-                            0.05)
+                        0.05)
 
 
 if __name__ == '__main__':

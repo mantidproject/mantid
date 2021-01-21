@@ -35,15 +35,15 @@ class DrillModelTest(unittest.TestCase):
             }
 
     SETTINGS = {
-            "a1": {
-                "str": "test",
-                "int": 1,
-                "float": "0.9",
-                "bool": False
-                },
-            "a2": {
-                "test": "test"
-                }
+            "a1": [
+                "str",
+                "int",
+                "float",
+                "bool"
+                ],
+            "a2": [
+                "test"
+                ]
             }
 
     def setUp(self):
@@ -52,15 +52,9 @@ class DrillModelTest(unittest.TestCase):
         self.mSapi = patch.start()
         self.addCleanup(patch.stop)
 
-        # mock open
-        patch = mock.patch('Interface.ui.drill.model.DrillModel.open')
-        self.mOpen = patch.start()
-        self.addCleanup(patch.stop)
-
-        # mock json
-        patch = mock.patch('Interface.ui.drill.model.DrillModel.json')
-        self.mJson = patch.start()
-        self.addCleanup(patch.stop)
+        # mock properties
+        self.mSapi.AlgorithmManager.createUnmanaged.return_value.getProperty \
+            .return_value.value = "test"
 
         # mock parameter controller
         patch = mock.patch(
@@ -179,7 +173,8 @@ class DrillModelTest(unittest.TestCase):
         self.assertNotEqual(self.model.columns, co)
         self.assertEqual(self.model.columns, self.COLUMNS["a2"])
         self.assertNotEqual(self.model.settings, se)
-        self.assertEqual(self.model.settings, self.SETTINGS["a2"])
+        self.assertEqual(self.model.settings,
+                         dict.fromkeys(self.SETTINGS["a2"], "test"))
         self.mController.assert_called_once()
 
     def test_getAcquisitionMode(self):
@@ -215,20 +210,23 @@ class DrillModelTest(unittest.TestCase):
         self.mController.assert_called_once_with("a1")
 
     def test_setSettings(self):
-        self.assertEqual(self.model.settings, self.SETTINGS["a1"])
+        params_a1 = dict.fromkeys(self.SETTINGS["a1"], "test")
+        self.assertEqual(self.model.settings, params_a1)
         self.model.setSettings({"str": "test2"})
-        self.assertNotEqual(self.model.settings, self.SETTINGS["a1"])
+        self.assertNotEqual(self.model.settings, params_a1)
         self.model.setSettings({"str": "test"})
-        self.assertEqual(self.model.settings, self.SETTINGS["a1"])
+        self.assertEqual(self.model.settings, params_a1)
         self.model.setSettings({"str2": "test"})
-        self.assertEqual(self.model.settings, self.SETTINGS["a1"])
+        self.assertEqual(self.model.settings, params_a1)
 
     def test_getSettings(self):
-        self.assertEqual(self.model.getSettings(), self.SETTINGS["a1"])
+        self.assertEqual(self.model.getSettings(),
+                         dict.fromkeys(self.SETTINGS["a1"], "test"))
         self.assertEqual(self.model.getSettings(), self.model.settings)
 
     def test_getSettingsTypes(self):
         alg = self.mSapi.AlgorithmManager.createUnmanaged.return_value
+        self.mSapi.reset_mock()
         self.model.getSettingsTypes()
         self.mSapi.AlgorithmManager.createUnmanaged.assert_called_once_with(
                 self.model.algorithm)
@@ -332,6 +330,26 @@ class DrillModelTest(unittest.TestCase):
                                     "float": "test doc",
                                     "bool": "test doc"})
 
+        # array property
+        self.mSapi.reset_mock()
+        prop = mock.Mock(spec=FloatArrayProperty)
+        prop.allowedValues = ["test", "test"]
+        prop.documentation = "test doc"
+        alg.getProperty.return_value = prop
+        types, values, docs = self.model.getSettingsTypes()
+        self.assertDictEqual(types, {"str": "floatArray",
+                                     "int": "floatArray",
+                                     "float": "floatArray",
+                                     "bool": "floatArray"})
+        self.assertDictEqual(values, {"str": ["test", "test"],
+                                      "int": ["test", "test"],
+                                      "float": ["test", "test"],
+                                      "bool": ["test", "test"]})
+        self.assertDictEqual(docs, {"str": "test doc",
+                                    "int": "test doc",
+                                    "float": "test doc",
+                                    "bool": "test doc"})
+
         # other property
         self.mSapi.reset_mock()
         prop = mock.Mock()
@@ -352,64 +370,144 @@ class DrillModelTest(unittest.TestCase):
                                     "float": "test doc",
                                     "bool": "test doc"})
 
+    def test_setDefaultSettings(self):
+        alg = self.mSapi.AlgorithmManager.createUnmanaged.return_value
+        self.mSapi.reset_mock()
+        alg.getProperty.return_value.value = "defaultValue"
+
+        self.model._setDefaultSettings()
+        self.mSapi.AlgorithmManager.createUnmanaged.assert_called_once_with(
+                self.model.algorithm)
+        alg.initialize.assert_called_once()
+        self.assertDictEqual(self.model.settings,  {"str": "defaultValue",
+                                                    "int": "defaultValue",
+                                                    "float": "defaultValue",
+                                                    "bool": "defaultValue"})
+
     def test_changeParameter(self):
-        self.model.samples = [{}, {}]
-        self.model.changeParameter(0, 0, "v1")
-        self.assertEqual(self.model.samples[0]["c1"], "v1")
+        s1 = mock.Mock()
+        s2 = mock.Mock()
+        s1.getParameters.return_value = {"c1": "v0"}
+        s2.getParameters.return_value = {}
+        self.model.samples = [s1, s2]
+        self.model.changeParameter(0, "c1", "v1")
+        s1.changeParameter.assert_called_once_with("c1", "v1")
         self.mController.return_value.addParameter.assert_called_once()
 
         self.mController.reset_mock()
-        self.model.changeParameter(0, 0, "")
-        self.assertEqual(self.model.samples, [{}, {}])
+        self.model.changeParameter(0, "c1", "")
         self.mController.return_value.addParameter.assert_not_called()
 
-        # invalid custom option
-        self.mController.reset_mock()
-        samples = [{"c1": "test2", "CustomOptions": {"int": 2}}]
-        self.model.samples = [{"c1": "test2", "CustomOptions": {"int": 2}}]
-        self.model.changeParameter(0,
-                                   self.model.columns.index("CustomOptions"),
-                                   'invalid')
-        self.assertEqual(self.model.samples, samples)
-        self.mController.return_value.addParameter.assert_not_called()
+    def test_groupSamples(self):
+        s0 = mock.Mock()
+        s1 = mock.Mock()
+        s2 = mock.Mock()
+        s3 = mock.Mock()
+        self.model.samples = [s0, s1, s2, s3]
+        self.model.groupSamples([0, 1, 3])
+        self.assertDictEqual(self.model.groups, {'A': {s0, s1, s3}})
+        self.model.masterSamples['A'] = s3
+        self.model.groupSamples([0, 2, 3])
+        self.assertDictEqual(self.model.groups, {'A': {s1},
+                                                 'B': {s0, s2, s3}})
+        self.assertDictEqual(self.model.masterSamples, {})
+        self.model.groupSamples([1, 3])
+        self.assertDictEqual(self.model.groups, {'A': {s1, s3},
+                                                 'B': {s0, s2}})
 
-        # valid custom options
-        self.model.changeParameter(0,
-                                   self.model.columns.index("CustomOptions"),
-                                   "int=4")
-        samples[0]["CustomOptions"].update({"int": "4"})
-        self.assertEqual(self.model.samples, samples)
-        self.mController.return_value.addParameter.assert_called_once()
-        self.mController.reset_mock()
-        self.model.changeParameter(0,
-                                   self.model.columns.index("CustomOptions"),
-                                   "str=test1,test2;bool=True")
-        samples[0]["CustomOptions"] = {"str": "test1,test2", "bool": True}
-        self.assertEqual(self.model.samples, samples)
-        self.mController.return_value.addParameter.assert_called()
+    def test_ungroupSamples(self):
+        s1 = mock.Mock()
+        s2 = mock.Mock()
+        s3 = mock.Mock()
+        s4 = mock.Mock()
+        s5 = mock.Mock()
+        self.model.samples = [s1, s2, s3, s4, s5]
+        self.model.groups = {'A': {s1, s5}, 'B': {s2, s3, s4}}
+        self.model.ungroupSamples([1])
+        self.assertDictEqual(self.model.groups, {'A': {s1, s5},
+                                                 'B': {s3, s4}})
+        self.model.masterSamples['A'] = s5
+        self.model.masterSamples['B'] = s2
+        self.model.ungroupSamples([4])
+        self.assertDictEqual(self.model.groups, {'A': {s1},
+                                                 'B': {s3, s4}})
+        self.assertDictEqual(self.model.masterSamples, {'B': s2})
+
+    def test_getSamplesGroups(self):
+        s0 = mock.Mock()
+        s1 = mock.Mock()
+        s2 = mock.Mock()
+        s3 = mock.Mock()
+        s4 = mock.Mock()
+        self.model.samples = [s0, s1, s2, s3, s4]
+        self.model.groups = {'A': {s0, s2}, 'B': {s1, s3, s4}}
+        groups = self.model.getSamplesGroups()
+        self.assertDictEqual(groups, {'A': {0, 2}, 'B': {1, 3, 4}})
+
+    def test_setGroupMaster(self):
+        name = self.model.setGroupMaster(1)
+        self.assertIsNone(name)
+        self.assertEqual(self.model.groups, {})
+        self.assertEqual(self.model.masterSamples, {})
+        s0 = mock.Mock()
+        s1 = mock.Mock()
+        s2 = mock.Mock()
+        s3 = mock.Mock()
+        s4 = mock.Mock()
+        self.model.samples = [s0, s1, s2, s3, s4]
+        self.model.groups = {'A': {s0, s2}, 'B': {s1, s3, s4}}
+        self.model.masterSamples['A'] = s2
+        self.model.setGroupMaster(0)
+        self.assertDictEqual(self.model.masterSamples, {'A': s0})
+
+    def test_geMasterSamples(self):
+        s0 = mock.Mock()
+        s1 = mock.Mock()
+        self.model.samples = [s0, s1]
+        self.model.masterSamples = {'A': s0, 'B': s1}
+        master = self.model.getMasterSamples()
+        self.assertDictEqual(master, {'A': 0, 'B': 1})
 
     def test_getProcessingParameters(self):
-        params = dict()
-        params.update(self.SETTINGS["a1"])
+        s1 = mock.Mock()
+        s2 = mock.Mock()
+        s3 = mock.Mock()
+        s4 = mock.Mock()
+        s1.getParameters.return_value = {"p1": "v1", "p2": "v2"}
+        s2.getParameters.return_value = {}
+        s3.getParameters.return_value = {"p2": "v2'"}
+        s4.getParameters.return_value = {"p2": "DEFAULT"}
+        self.model.samples = [s1, s2, s3, s4]
+        self.model.groups = {"A": {s1, s2, s3, s4}}
+        self.model.masterSamples = {"A": s1}
+        params = dict.fromkeys(self.SETTINGS["a1"], "test")
+        params.update({"p1": "v1", "p2": "v2"})
         params["OutputWorkspace"] = "sample_1"
-        self.model.samples = [{}]
-        self.assertEqual(self.model.getProcessingParameters(0), params)
-        self.model.samples = [{"c1": "test2"}]
-        params.update({"c1": "test2"})
-        self.assertEqual(self.model.getProcessingParameters(0), params)
-        self.model.samples = [{"c1": "test2", "CustomOptions": {"int": 2}}]
-        params["int"] = 2
-        self.assertEqual(self.model.getProcessingParameters(0), params)
+        self.assertDictEqual(self.model.getProcessingParameters(0), params)
+        params = dict.fromkeys(self.SETTINGS["a1"], "test")
+        params.update({"p1": "v1", "p2": "v2"})
+        params["OutputWorkspace"] = "sample_2"
+        self.assertDictEqual(self.model.getProcessingParameters(1), params)
+        params = dict.fromkeys(self.SETTINGS["a1"], "test")
+        params.update({"p1": "v1", "p2": "v2'"})
+        params["OutputWorkspace"] = "sample_3"
+        self.assertDictEqual(self.model.getProcessingParameters(2), params)
+        params = dict.fromkeys(self.SETTINGS["a1"], "test")
+        params.update({"p1": "v1"})
+        params["OutputWorkspace"] = "sample_4"
+        self.assertDictEqual(self.model.getProcessingParameters(3), params)
 
     def test_process(self):
-        self.model.samples = [{"c1": "v1"}]
+        s1 = mock.Mock()
+        s1.getParameters.return_value = {"c1": "v1"}
+        self.model.samples = [s1]
         self.model.process([0])
         self.mDrillTask.assert_called()
         self.model.tasksPool.addProcesses.assert_called_once()
         self.mDrillTask.reset_mock()
         self.model.tasksPool.reset_mock()
 
-        self.model.samples = [{"c1": "v1"}, {"c1": "v1"}]
+        self.model.samples = [s1, s1]
         self.model.process([0, 1])
         self.mDrillTask.assert_called()
         self.model.tasksPool.addProcesses.assert_called()
@@ -448,40 +546,24 @@ class DrillModelTest(unittest.TestCase):
         self.model.stopProcess()
         self.model.tasksPool.abortProcessing.assert_called_once()
 
-    def test_importRundexData(self):
-        self.mJson.load.return_value = {
-                "Instrument": "i1",
-                "AcquisitionMode": "a1",
-                "GlobalSettings": {},
-                "Samples": []
-                }
-        self.model.importRundexData("test")
-        self.mOpen.assert_called_once_with("test")
-        self.mJson.load.assert_called_once()
-        self.assertDictEqual(self.model.settings, self.SETTINGS["a1"])
-        self.assertEqual(self.model.samples, list())
-        self.assertEqual(self.model.instrument, "i1")
-        self.assertEqual(self.model.acquisitionMode, "a1")
+    @mock.patch("Interface.ui.drill.model.DrillModel.DrillRundexIO")
+    def test_setIOFile(self, mRundexIO):
+        self.model.setIOFile("test")
+        mRundexIO.assert_called_once_with("test", self.model)
 
-    def test_exportRundexData(self):
-        self.model.exportRundexData("test")
-        self.mOpen.assert_called_once_with("test", 'w')
-        self.mJson.dump.assert_called_once()
-        written = self.mJson.dump.call_args[0][0]
-        self.assertEquals(written, {
-            "Instrument": "i1",
-            "AcquisitionMode": "a1",
-            "GlobalSettings": self.SETTINGS["a1"],
-            "Samples": []
-            })
+    def test_resetIOFile(self):
+        self.model.rundexIO = "test"
+        self.model.resetIOFile()
+        self.assertIsNone(self.model.rundexIO)
 
-    def test_getRundexFile(self):
-        self.model.rundexFile = "test"
-        self.assertEqual(self.model.getRundexFile(), "test")
+    def test_getIOFile(self):
+        self.model.rundexIO = mock.Mock()
+        self.model.rundexIO.getFilename.return_value = "test"
+        self.assertEqual(self.model.getIOFile(), "test")
 
     def test_getVisualSettings(self):
-        self.model.visualSettings = "test"
-        self.assertEqual(self.model.getVisualSettings(), "test")
+        self.model.visualSettings = {"test": "test"}
+        self.assertEqual(self.model.getVisualSettings(), {"test": "test"})
 
     def test_getColumnHeaderData(self):
         mAlg = mock.Mock()
@@ -495,26 +577,35 @@ class DrillModelTest(unittest.TestCase):
 
     def test_addSample(self):
         self.assertEqual(self.model.samples, [])
-        self.model.addSample(0)
-        self.assertEqual(self.model.samples, [{}])
-        self.model.samples[0] = {"a": "b"}
-        self.model.addSample(0)
-        self.assertEqual(self.model.samples, [{}, {"a": "b"}])
-        self.model.addSample(2)
-        self.assertEqual(self.model.samples, [{}, {"a": "b"}, {}])
+        self.model.addSample(0, mock.Mock())
+        self.assertEqual(len(self.model.samples), 1)
+        self.model.addSample(0, mock.Mock())
+        self.assertEqual(len(self.model.samples), 2)
 
     def test_deleteSample(self):
-        self.model.samples = [{"n": 1}, {"n": 2}, {"n": 3}]
+        s1 = mock.Mock()
+        s2 = mock.Mock()
+        s3 = mock.Mock()
+        self.model.samples = [s1, s2, s3]
+        self.model.groups = {'A': {s2, s3}, 'B':{s1}}
+        self.model.masterSamples = {'A': s2}
         self.model.deleteSample(0)
-        self.assertEqual(self.model.samples, [{"n": 2}, {"n": 3}])
-        self.model.deleteSample(1)
-        self.assertEqual(self.model.samples, [{"n": 2}])
+        self.assertEqual(self.model.samples, [s2, s3])
+        self.assertDictEqual(self.model.groups, {'A': {s2, s3}})
+        self.assertDictEqual(self.model.masterSamples, {'A': s2})
+        self.model.deleteSample(0)
+        self.assertEqual(self.model.samples, [s3])
+        self.assertDictEqual(self.model.groups, {'A': {s3}})
+        self.assertDictEqual(self.model.masterSamples, {})
 
     def test_getRowsContents(self):
         table = self.model.getRowsContents()
         self.assertEqual(table, [])
-        self.model.samples = [{"c1": "test1", "c2": "test2"},
-                              {"c2": "test3"}]
+        s0 = mock.Mock()
+        s0.getParameters.return_value = {"c1": "test1", "c2": "test2"}
+        s1 = mock.Mock()
+        s1.getParameters.return_value = {"c2": "test3"}
+        self.model.samples = [s0, s1]
         table = self.model.getRowsContents()
         self.assertEqual(table, [["test1", "test2"], ["", "test3"]])
 

@@ -20,18 +20,31 @@ Algorithms and instruments
 Improvements
 ############
 
+ - Added instrument definitions for the two new PSD based multi-panel SANS instruments D11B and D22B at the ILL.
  - In :ref:`SANSILLAutoProcess <algm-SANSILLAutoProcess>`, the beam radius can be different for each distance.
    A new parameter, TransmissionBeamRadius, has been added to set the beam radius for transmission experiments.
    The default value of all beam radii is now 0.1m.
  - With :ref:`SANSILLAutoProcess <algm-SANSILLAutoProcess>`, if sample thickness is set to -1, the algorithm will try to get it
    from the nexus file.
  - With :ref:`SANSILLAutoProcess <algm-SANSILLAutoProcess>`, the output workspace will get its title from the nexus file.
+ - The Rectangle option for :ref:`SolidAngle <algm-SolidAngle>` is now supported for ILL's D22 and D33.
+ - Add loader and MaskBTP support for D11B and D22B.
 
 Bugfixes
 ########
 
+- Fixed a bug in ISIS SANS GUI where all changes to settings on the adjustment page would be ignored, so that
+  it only used parameters from the user file instead.
+- Fixed "Falsey" values such as 0.0 or False getting replaced with a default value in the ISIS SANS settings.
+  For example, a Phi limit of 0.0 remains at 0.0 rather than defaulting back to -90
 - Detector IDs are no longer copied during a 2D reduction. This also resolves
   a bug where the first two spectra were marked as monitors and would not appear
   in a colour fill plot on Workbench.
+- Wavelength limits entered with comma ranges larger than 10, e.g. `1,5,10,15` no longer
+  throw a Runtime Error.
+- ISIS SANS will print the name of any missing maskfiles instead of an empty name.
+- Fixed a bug in ISIS SANS GUI with the `Save Other` dialog.
+- Fixed a bug in ISIS SANS GUI sum runs tab, where clicking browse and then cancelling the file picker dialog caused
+  a crash.
 
 :ref:`Release 6.0.0 <v6.0.0>`

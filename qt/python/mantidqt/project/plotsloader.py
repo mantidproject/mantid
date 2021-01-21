@@ -7,6 +7,7 @@
 #  This file is part of the mantidqt package
 #
 import copy
+
 import matplotlib.axes
 import matplotlib.cm as cm
 import matplotlib.colors
@@ -63,7 +64,10 @@ class PlotsLoader(object):
                 if "workspaces" in cargs:
                     workspace_name = cargs.pop("workspaces")
                     workspace = ADS.retrieve(workspace_name)
-                    self.plot_func(workspace, ax, ax.figure, cargs)
+                    self.workspace_plot_func(workspace, ax, ax.figure, cargs)
+                elif "function" in cargs:
+                    self.plot_func(ax, cargs)
+
             ax.creation_args = creation_args_copy
 
         # Update the fig
@@ -77,7 +81,7 @@ class PlotsLoader(object):
         else:
             return fig
 
-    def plot_func(self, workspace, axes, fig, creation_arg):
+    def workspace_plot_func(self, workspace, axes, fig, creation_arg):
         """
         Plot's the graph from the given workspace, axes and creation_args. then returns the function used to create it.
         :param workspace: mantid.Workspace; Workspace to create the graph from
@@ -116,6 +120,21 @@ class PlotsLoader(object):
         else:
             func(workspace, **creation_arg)
 
+    def plot_func(self, axes, creation_arg):
+        """
+        Calls plotting functions that aren't associated with workspaces, such as axhline and axvline.
+        :param axes: matplotlib.Axes; Axes to call the function on
+        :param creation_arg: The functions' arguments when it was originally called.
+        """
+        function_to_call = creation_arg.pop('function')
+        function_dict = {
+            "axhline": axes.axhline,
+            "axvline": axes.axvline
+        }
+
+        func = function_dict[function_to_call]
+        func(*creation_arg['args'], **creation_arg['kwargs'])
+
     def restore_figure_data(self, fig, dic):
         self.restore_fig_properties(fig, dic["properties"])
         axes_list = dic["axes"]
@@ -153,13 +172,14 @@ class PlotsLoader(object):
             self.update_lines(ax, line)
 
         # Update/set text
-        text_list = dic["texts"]
-        for text_ in text_list:
-            self.create_text_from_dict(ax, text_)
+        if "texts" in dic:
+            for text_ in dic["texts"]:
+                self.create_text_from_dict(ax, text_)
 
         # Update artists that are text
-        for artist in dic["textFromArtists"]:
-            self.create_text_from_dict(ax, artist)
+        if "textFromArtists" in dic:
+            for artist in dic["textFromArtists"]:
+                self.create_text_from_dict(ax, artist)
 
         # Update Legend
         self.update_legend(ax, dic["legend"])
@@ -193,57 +213,70 @@ class PlotsLoader(object):
                 })
 
     @staticmethod
-    def update_lines(ax, line):
-        # Find the line based on label
-        current_line = ax.lines[line["lineIndex"]]
+    def update_lines(ax, line_settings):
+        # update current line setting with settings from file
+        def update_line_setting(line_update_method, settings, setting):
+            if setting in settings:
+                line_update_method(settings[setting])
 
-        current_line.set_label(line["label"])
-        current_line.set_alpha(line["alpha"])
-        current_line.set_color(line["color"])
-        current_line.set_linestyle(line["lineStyle"])
-        current_line.set_linewidth(line["lineWidth"])
+        # get current line and update settings
+        current_line = ax.lines[line_settings["lineIndex"]]
 
-        marker_style = line["markerStyle"]
-        current_line.set_markerfacecolor(marker_style["faceColor"])
-        current_line.set_markeredgecolor(marker_style["edgeColor"])
-        current_line.set_markeredgewidth(marker_style["edgeWidth"])
-        current_line.set_marker(marker_style["markerType"])
-        current_line.set_markersize(marker_style["markerSize"])
-        current_line.set_zorder(marker_style["zOrder"])
+        update_line_setting(current_line.set_label, line_settings, "label")
+        update_line_setting(current_line.set_alpha, line_settings, "alpha")
+        update_line_setting(current_line.set_color, line_settings, "color")
+        update_line_setting(current_line.set_linestyle, line_settings, "lineStyle")
+        update_line_setting(current_line.set_linewidth, line_settings, "lineWidth")
 
-        errorbar_style = line["errorbars"]
+        marker_style = line_settings["markerStyle"]
+        update_line_setting(current_line.set_markerfacecolor, marker_style, "faceColor")
+        update_line_setting(current_line.set_markeredgecolor, marker_style, "edgeColor")
+        update_line_setting(current_line.set_markeredgewidth, marker_style, "edgeWidth")
+        update_line_setting(current_line.set_marker, marker_style, "markerType")
+        update_line_setting(current_line.set_markersize, marker_style, "markerSize")
+        update_line_setting(current_line.set_zorder, marker_style, "zOrder")
+
+        errorbar_style = line_settings["errorbars"]
         if errorbar_style["exists"]:
-            current_line.set_dash_capstyle(errorbar_style["dashCapStyle"])
-            current_line.set_dash_joinstyle(errorbar_style["dashJoinStyle"])
-            current_line.set_solid_capstyle(errorbar_style["solidCapStyle"])
-            current_line.set_solid_joinstyle(errorbar_style["solidJoinStyle"])
+            update_line_setting(current_line.set_dash_capstyle, errorbar_style, "dashCapStyle")
+            update_line_setting(current_line.set_dash_joinstyle, errorbar_style, "dashJoinStyle")
+            update_line_setting(current_line.set_solid_capstyle, errorbar_style, "solidCapStyle")
+            update_line_setting(current_line.set_solid_joinstyle, errorbar_style, "solidJoinStyle")
 
     @staticmethod
     def update_legend(ax, legend):
         if not legend["exists"] and ax.get_legend():
             ax.get_legend().remove()
             return
-
         if legend["exists"]:
             LegendProperties.create_legend(legend, ax)
 
     def update_properties(self, ax, properties):
-        ax.set_position(properties["bounds"])
+        if properties["bounds"]:
+            ax.set_position(properties["bounds"])
         ax.set_navigate(properties["dynamic"])
         ax.axison = properties["axisOn"]
         ax.set_frame_on(properties["frameOn"])
         ax.set_visible(properties["visible"])
 
         # Update X Axis
-        self.update_axis(ax.xaxis, properties["xAxisProperties"])
+        if "xAxisProperties" in properties:
+            self.update_axis(ax.xaxis, properties["xAxisProperties"])
 
         # Update Y Axis
-        self.update_axis(ax.yaxis, properties["yAxisProperties"])
+        if "yAxisProperties" in properties:
+            self.update_axis(ax.yaxis, properties["yAxisProperties"])
 
         ax.set_xscale(properties["xAxisScale"])
         ax.set_yscale(properties["yAxisScale"])
-        ax.set_xlim(properties["xLim"])
-        ax.set_ylim(properties["yLim"])
+        if "xAutoScale" in properties and properties["xAutoScale"]:
+            ax.autoscale(True, axis="x")
+        else:
+            ax.set_xlim(properties["xLim"])
+        if "yAutoScale" in properties and properties["yAutoScale"]:
+            ax.autoscale(True, axis="y")
+        else:
+            ax.set_ylim(properties["yLim"])
         ax.show_minor_gridlines = properties["showMinorGrid"]
 
     def update_axis(self, axis_, properties):

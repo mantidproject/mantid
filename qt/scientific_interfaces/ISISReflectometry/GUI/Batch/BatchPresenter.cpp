@@ -287,7 +287,10 @@ std::string BatchPresenter::instrumentName() const {
   return m_mainPresenter->instrumentName();
 }
 
-void BatchPresenter::settingsChanged() { m_runsPresenter->settingsChanged(); }
+void BatchPresenter::settingsChanged() {
+  setBatchUnsaved();
+  m_runsPresenter->settingsChanged();
+}
 
 /**
    Checks whether or not data is currently being processed in this batch
@@ -324,21 +327,24 @@ bool BatchPresenter::isAnyBatchAutoreducing() const {
   return m_mainPresenter->isAnyBatchAutoreducing();
 }
 
-/**
-    Checks whether the requested operation is prevented by unsaved
-    * changes and user input to avoid losing them
-    * @return : Bool on whether the calling function should continue
-    */
-bool BatchPresenter::isWarnDiscardChangesChecked() const {
-  return m_mainPresenter->isWarnDiscardChangesChecked();
+bool BatchPresenter::isOverwriteBatchPrevented() const {
+  return m_mainPresenter->isOverwriteBatchPrevented(this);
+}
+
+bool BatchPresenter::discardChanges(std::string const &message) const {
+  return m_mainPresenter->discardChanges(message);
 }
 
 /** Returns whether there are any unsaved changes in the current batch */
-bool BatchPresenter::isBatchUnsaved() const { return m_unsavedBatchFlag; }
+bool BatchPresenter::isBatchUnsaved() const {
+  return m_unsavedBatchFlag || m_runsPresenter->hasUnsavedChanges();
+}
 
-/** Set the state of unsaved changes in the current batch */
-void BatchPresenter::setBatchUnsaved(bool isUnsaved) {
-  m_unsavedBatchFlag = isUnsaved;
+void BatchPresenter::setBatchUnsaved() { m_unsavedBatchFlag = true; }
+
+void BatchPresenter::notifyChangesSaved() {
+  m_unsavedBatchFlag = false;
+  m_runsPresenter->notifyChangesSaved();
 }
 
 void BatchPresenter::notifySetRoundPrecision(int &precision) {
@@ -374,6 +380,7 @@ void BatchPresenter::renameHandle(const std::string &oldName,
 }
 
 void BatchPresenter::clearADSHandle() {
+  m_experimentPresenter->notifyAllWorkspacesDeleted();
   m_jobRunner->notifyAllWorkspacesDeleted();
   m_runsPresenter->notifyRowOutputsChanged();
   m_runsPresenter->notifyRowStateChanged();

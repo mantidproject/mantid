@@ -105,6 +105,20 @@ public:
   }
 
   void
+  test_that_plotCorrespondingSpectra_will_not_cause_an_exception_when_the_workspaces_names_are_empty() {
+    std::vector<std::string> workspaceNames;
+    std::vector<int> workspaceIndices{0};
+    m_plotter->plotCorrespondingSpectra(workspaceNames, workspaceIndices);
+  }
+
+  void
+  test_that_plotCorrespondingSpectra_will_not_cause_an_exception_when_the_workspaces_indices_are_empty() {
+    std::vector<std::string> workspaceNames{WORKSPACE_NAME};
+    std::vector<int> workspaceIndices;
+    m_plotter->plotCorrespondingSpectra(workspaceNames, workspaceIndices);
+  }
+
+  void
   test_that_validate_will_return_true_if_the_matrix_workspace_and_workspace_indices_exist() {
     m_ads.addOrReplace(WORKSPACE_NAME, createMatrixWorkspace(5, 5));
 

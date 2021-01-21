@@ -17,10 +17,14 @@ class Material;
 
 class MANTID_KERNEL_DLL AttenuationProfile {
 public:
+  AttenuationProfile(){};
   AttenuationProfile(const std::string &inputFileName,
                      const std::string &searchPath,
-                     Material *extrapolationMaterial = nullptr);
-  double getAttenuationCoefficient(const double lambda) const;
+                     Material *extrapolationMaterial = nullptr,
+                     double extrapolationMaxX = 100);
+  double getAttenuationCoefficient(const double x) const;
+
+  void setAttenuationCoefficient(const double x, const double atten);
 
 private:
   Kernel::Interpolation m_Interpolator;

@@ -59,18 +59,18 @@ private:
                                           const std::string &);
 
   void initWorkSpace(NeXus::NXEntry &, const std::string &);
+  void initWorkSpaceD11B(NeXus::NXEntry &, const std::string &);
+  void initWorkSpaceD22B(NeXus::NXEntry &, const std::string &);
   void initWorkSpaceD33(NeXus::NXEntry &, const std::string &);
   void initWorkSpaceD16(NeXus::NXEntry &, const std::string &);
   void createEmptyWorkspace(const size_t, const size_t);
 
-  size_t loadDataIntoWorkspaceFromMonitors(NeXus::NXEntry &firstEntry,
-                                           size_t firstIndex = 0);
-  size_t loadDataIntoWorkspaceFromVerticalTubes(NeXus::NXInt &,
-                                                const std::vector<double> &,
-                                                size_t);
+  size_t loadDataFromMonitors(NeXus::NXEntry &firstEntry,
+                              size_t firstIndex = 0);
+  size_t loadDataFromTubes(NeXus::NXInt &, const std::vector<double> &, size_t);
   void runLoadInstrument();
   void moveDetectorsD33(const DetectorPosition &);
-  void moveDetectorDistance(double, const std::string &);
+  void moveDetectorDistance(double distance, const std::string &componentName);
   void moveDetectorHorizontal(double, const std::string &);
   void moveDetectorVertical(double, const std::string &);
   Kernel::V3D getComponentPosition(const std::string &componentName);
@@ -81,7 +81,7 @@ private:
   void adjustTOF();
   void moveSource();
 
-  LoadHelper m_loader;          ///< Load helper for metadata
+  LoadHelper m_loadHelper;      ///< Load helper for metadata
   std::string m_instrumentName; ///< Name of the instrument
   std::vector<std::string>
       m_supportedInstruments;                 ///< List of supported instruments
@@ -90,10 +90,9 @@ private:
   std::string m_resMode; ///< Resolution mode for D11 and D22
   bool m_isTOF;          ///< TOF or monochromatic flag
   double m_sourcePos;    ///< Source Z (for D33 TOF)
-  bool m_isD16Omega;
+  bool m_isD16Omega;     ///< Data come from a D16 omega scan flag
 
   void setFinalProperties(const std::string &filename);
-  void setPixelSize();
   std::vector<double> getVariableTimeBinning(const NeXus::NXEntry &,
                                              const std::string &,
                                              const NeXus::NXInt &,

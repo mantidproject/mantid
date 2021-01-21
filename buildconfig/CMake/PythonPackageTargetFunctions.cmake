@@ -164,8 +164,8 @@ CustomInstallLib = patch_setuptools_command('install_lib')
     endforeach()
   endif()
 
-  if(APPLE AND "${pkg_name}" STREQUAL "mantidqt")
-    # Horrible hack to get mantidqt into the MantidPlot.app bundle too. Remove
+  if(APPLE AND ENABLE_MANTIDPLOT)
+    # Horrible hack to get mantid & mantidqt into the MantidPlot.app bundle too. Remove
     # this when MantidPlot is removed!! Registers the "installed" components
     # with CMake so it will carry them over
     install(

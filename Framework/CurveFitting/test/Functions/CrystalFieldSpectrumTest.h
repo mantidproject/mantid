@@ -752,8 +752,8 @@ public:
     TS_ASSERT_DELTA(fun->getParameter(46), 0, 1e-2);
     TS_ASSERT_DELTA(fun->getParameter(48), 1.1, 1e-2);
     TS_ASSERT(fun->isActive(36));
-    TS_ASSERT(!fun->isActive(39));
-    TS_ASSERT(!fun->isActive(42));
+    TS_ASSERT(fun->isActive(39));
+    TS_ASSERT(fun->isActive(42));
     TS_ASSERT(!fun->isActive(45));
     TS_ASSERT(!fun->isActive(48));
   }
@@ -787,7 +787,7 @@ public:
 
     TS_ASSERT(fun->isActive(36));
     TS_ASSERT(!fun->isActive(39));
-    TS_ASSERT(!fun->isActive(42));
+    TS_ASSERT(fun->isActive(42));
     TS_ASSERT(!fun->isActive(45));
     TS_ASSERT(!fun->isActive(48));
 
@@ -832,7 +832,7 @@ public:
 
     TS_ASSERT(fun->isActive(36));
     TS_ASSERT(!fun->isActive(39));
-    TS_ASSERT(!fun->isActive(42));
+    TS_ASSERT(fun->isActive(42));
     TS_ASSERT(!fun->isActive(45));
     TS_ASSERT(!fun->isActive(48));
 

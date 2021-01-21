@@ -40,12 +40,15 @@ set(TEST_PY_FILES
     ISISIndirectDiffractionReductionTest.py
     ISISIndirectEnergyTransferTest.py
     ISISIndirectEnergyTransferWrapperTest.py
+    D7YIGPositionCalibrationTest.py
+    D7AbsoluteCrossSectionsTest.py
     LoadWANDTest.py
     MDNormSCDPreprocessIncoherentTest.py
     MolDynTest.py
     MSDFitTest.py
     OSIRISDiffractionReductionTest.py
     PaalmanPingsMonteCarloAbsorptionTest.py
+    PolDiffILLReductionTest.py
     PowderILLDetectorScanTest.py
     PowderILLParameterScanTest.py
     ReflectometryILLAutoProcessTest.py
@@ -58,6 +61,7 @@ set(TEST_PY_FILES
     ResNorm2Test.py
     SANSDarkRunBackgroundCorrectionTest.py
     SANSFitShiftScaleTest.py
+    SANSILLAutoProcessTest.py
     SANSILLIntegrationTest.py
     SANSILLReductionTest.py
     SANSILLParameterScanTest.py

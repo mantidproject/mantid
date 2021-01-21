@@ -82,7 +82,7 @@ protected:
                                         Mantid::Kernel::V3D normal) const;
   // Add a detector from an assembly
   void addDetector(size_t detIndex, const Mantid::Kernel::V3D &refPos,
-                   int index, const Mantid::Kernel::Quat &rotation);
+                   int bankIndex, const Mantid::Kernel::Quat &rotation);
   // Spread the banks over the projection plane
   void spreadBanks();
   // Find index of the largest bank

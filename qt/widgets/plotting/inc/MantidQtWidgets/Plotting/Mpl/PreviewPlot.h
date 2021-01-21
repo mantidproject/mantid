@@ -84,11 +84,10 @@ public:
   bool hasCurve(const QString &lineName) const;
 
   void setOverrideAxisLabel(AxisID const &axisID, char const *const label);
-
+  void tickLabelFormat(char *axis, char *style, bool useOffset);
   void setAxisRange(const QPair<double, double> &range,
                     AxisID axisID = AxisID::XBottom);
   std::tuple<double, double> getAxisRange(AxisID axisID = AxisID::XBottom);
-  void disableContextMenu();
 
   void allowRedraws(bool state);
   void replotData();
@@ -191,13 +190,17 @@ private:
   Poco::NObserver<PreviewPlot, Mantid::API::WorkspaceBeforeReplaceNotification>
       m_wsReplacedObserver;
 
+  // Tick label style
+  char *m_axis;
+  char *m_style;
+  bool m_useOffset;
+
   // Context menu actions
   QActionGroup *m_contextPlotTools;
   QAction *m_contextResetView;
   QActionGroup *m_contextXScale, *m_contextYScale;
   QAction *m_contextLegend;
   QActionGroup *m_contextErrorBars;
-  bool m_context_enabled;
 };
 
 } // namespace MantidWidgets

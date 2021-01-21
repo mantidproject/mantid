@@ -15,7 +15,7 @@ from .alpha import compute_alpha
 from .painter import Painted
 
 
-class EllipsoidalIntergratedPeakRepresentation(object):
+class EllipsoidalIntergratedPeakRepresentation():
     """Provide methods to display a representation of a slice through an
     Ellipsoidally intgerated region around a Peak"""
     @classmethod
@@ -45,14 +45,8 @@ class EllipsoidalIntergratedPeakRepresentation(object):
             return None
 
         signal_width, signal_height = 2 * major_radius, 2 * minor_radius
-        # add background shell
-        a, b, c, shell_thick = _bkgd_ellipsoid_info(shape_info, slice_info.transform)
-        _, major_radius, minor_radius, angle = slice_ellipsoid(peak_origin, *axes, a, b, c,
-                                                               slice_info.z_value)
-        bkgd_width, bkgd_height = 2 * major_radius, 2 * minor_radius
 
-        # yapf: disable
-        artists = (
+        artists = [
             painter.cross(
                 slice_origin[0],
                 slice_origin[1],
@@ -70,21 +64,31 @@ class EllipsoidalIntergratedPeakRepresentation(object):
                 linestyle="--",
                 edgecolor=fg_color,
                 facecolor="none"
-            ),
-            painter.elliptical_shell(
-                slice_origin[0],
-                slice_origin[1],
-                bkgd_width,
-                bkgd_height,
-                shell_thick,
-                angle,
-                alpha=alpha,
-                linestyle="--",
-                edgecolor="none",
-                facecolor=bg_color,
             )
-        )
-        # yapf: enable
+        ]
+
+        # add background shell
+        a, b, c, shell_thick = _bkgd_ellipsoid_info(shape_info, slice_info.transform)
+        # only add background shell if it is greater than 0
+        if shell_thick > 0:
+            _, major_radius, minor_radius, angle = slice_ellipsoid(peak_origin, *axes, a, b, c,
+                                                                   slice_info.z_value)
+            bkgd_width, bkgd_height = 2 * major_radius, 2 * minor_radius
+
+            artists.append(
+                painter.elliptical_shell(
+                    slice_origin[0],
+                    slice_origin[1],
+                    bkgd_width,
+                    bkgd_height,
+                    shell_thick,
+                    angle,
+                    alpha=alpha,
+                    linestyle="--",
+                    edgecolor="none",
+                    facecolor=bg_color,
+                )
+            )
         return Painted(painter, artists)
 
 
@@ -227,7 +231,11 @@ def slice_ellipsoid_matrix(origin, zp, ellipMatrix):
     #  The ellipse origin is
     #  -A^(-1)*B/2
     MM = A / (0.25 * np.transpose(B) @ linalg.inv(A) @ B - (c - 1))
-    eigvalues, eigvectors = linalg.eig(MM)
+    try:
+        eigvalues, eigvectors = linalg.eig(MM)
+    except np.linalg.LinAlgError:
+        # Sometimes the integration volume may not intersect the slices of data
+        return origin, np.nan, np.nan, 0
     minor_radius, major_radius = 1 / np.sqrt(eigvalues[0]), 1 / np.sqrt(eigvalues[1])
     major_axis = eigvectors[:, 1]
     angle = np.rad2deg(np.arctan2(major_axis[1], major_axis[0]))

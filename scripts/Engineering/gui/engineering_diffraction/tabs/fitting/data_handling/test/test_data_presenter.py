@@ -165,7 +165,7 @@ class FittingDataPresenterTest(unittest.TestCase):
         self.assertTrue("new" in self.presenter.row_numbers)
         self.assertFalse("name1" == self.presenter.row_numbers)
         self.assertEqual(1, self.presenter.all_plots_removed_notifier.notify_subscribers.call_count)
-        self.model.repopulate_logs.assert_called_once()
+        self.model.update_log_workspace_group.assert_called_once()
 
     def test_rename_workspace_not_tracked(self):
         model_dict = {"name1": self.ws1, "name2": self.ws2}
@@ -181,7 +181,7 @@ class FittingDataPresenterTest(unittest.TestCase):
         self.assertEqual({"name1": self.ws1, "name2": self.ws2}, model_dict)
         self.assertEqual({"name1": 0, "name2": 1}, self.presenter.row_numbers)
         self.assertEqual(0, self.presenter.all_plots_removed_notifier.notify_subscribers.call_count)
-        self.model.repopulate_logs.assert_not_called()
+        self.model.update_log_workspace_group.assert_not_called()
 
     def test_remove_all_tracked_workspaces(self):
         model_dict = {"name1": self.ws1, "name2": self.ws2}

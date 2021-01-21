@@ -9,7 +9,6 @@ import tempfile
 import unittest
 import uuid
 
-
 from unittest import mock
 from sans.command_interface.ISISCommandInterface import MaskFile
 
@@ -51,8 +50,6 @@ class ISISCommandInterfaceTest(unittest.TestCase):
         with mock.patch('sans.command_interface.ISISCommandInterface.find_full_file_path') as mocked_finder:
             mocked_finder.return_value = tmp_file.name
             self.assertIsNone(MaskFile(file_name))
-
-
 
 
 if __name__ == '__main__':

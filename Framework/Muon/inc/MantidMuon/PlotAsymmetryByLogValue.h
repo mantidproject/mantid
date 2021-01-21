@@ -139,6 +139,8 @@ private:
   double m_minTime;
   /// Maximum time for the analysis
   double m_maxTime;
+  /// Balance parameter
+  double m_alpha;
 
   /// Properties needed to get the log value
   // LogValue name
