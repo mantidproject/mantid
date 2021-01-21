@@ -76,22 +76,10 @@ include(Eigen)
 include(Span)
 
 # Set ParaView information since later items depend on it
-
 # VATES flag. Requires ParaView
-option(MAKE_VATES "Switch for compiling the Vates project")
+option(MAKE_VATES "Switch for compiling the Vates project" Off)
 if(ENABLE_MANTIDPLOT AND MAKE_VATES)
-  find_package(ParaView)
-  if(ParaView_FOUND)
-    add_definitions(-DMAKE_VATES)
-    # Poco::File throws an exception when a backslash is used.
-    string(REPLACE "\\"
-                   "/"
-                   ParaView_DIR
-                   ${ParaView_DIR})
-  endif()
-endif()
-if(ENABLE_MANTIDPLOT)
-  include(ParaViewSetup)
+  message( STATUS "ParaView is no longer used")
 endif()
 
 if( MSVC )
@@ -194,33 +182,6 @@ include_directories(Framework/NexusGeometry/inc)
 
 set(CORE_MANTIDLIBS Kernel HistogramData Indexing Beamline Geometry API Types)
 
-if(ENABLE_MANTIDPLOT AND MAKE_VATES)
-
-  if(NOT APPLE)
-    list(APPEND CPACK_INSTALL_CMAKE_PROJECTS
-                "${ParaView_DIR}"
-                "ParaView Runtime Libs"
-                "Runtime"
-                "${INBUNDLE}/")
-    list(APPEND CPACK_INSTALL_CMAKE_PROJECTS
-                "${ParaView_DIR}"
-                "VTK Runtime Libs"
-                "RuntimeLibraries"
-                "${INBUNDLE}/")
-    list(APPEND CPACK_INSTALL_CMAKE_PROJECTS
-                "${ParaView_DIR}"
-                "HDF5 Core Library"
-                "libraries"
-                "${INBUNDLE}/")
-    list(APPEND CPACK_INSTALL_CMAKE_PROJECTS
-                "${ParaView_DIR}"
-                "HDF5 HL Library"
-                "hllibraries"
-                "${INBUNDLE}/")
-  endif()
-
-endif(ENABLE_MANTIDPLOT AND MAKE_VATES)
-
 if(UNIX)
   # Experimental feature. Unix only at this point.
   option(UNITY_BUILD
@@ -243,7 +204,7 @@ if(ENABLE_MANTIDPLOT OR ENABLE_WORKBENCH)
 endif()
 
 if(ENABLE_MANTIDPLOT)
-  message( ERROR "MantidPlot has been removed from the source code")
+  message( FATAL_ERROR "MantidPlot has been removed from the source code")
 endif()
 
 add_subdirectory(scripts)

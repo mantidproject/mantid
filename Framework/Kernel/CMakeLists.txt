@@ -80,7 +80,6 @@ set(SRC_FILES
     src/NexusHDF5Descriptor.cpp
     src/NullValidator.cpp
     src/OptionalBool.cpp
-    src/ParaViewVersion.cpp
     src/ProgressBase.cpp
     src/Property.cpp
     src/PropertyHistory.cpp
@@ -247,7 +246,6 @@ set(INC_FILES
     inc/MantidKernel/NexusHDF5Descriptor.h
     inc/MantidKernel/NullValidator.h
     inc/MantidKernel/OptionalBool.h
-    inc/MantidKernel/ParaViewVersion.h
     inc/MantidKernel/PhysicalConstants.h
     inc/MantidKernel/PocoVersion.h
     inc/MantidKernel/ProgressBase.h
@@ -546,9 +544,6 @@ endif()
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidKernel/PocoVersion.h.in
                ${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidKernel/PocoVersion.h)
 
-# This section deals with creating the ParaViewVersion implementation
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/ParaViewVersion.cpp.in
-               ${CMAKE_CURRENT_SOURCE_DIR}/src/ParaViewVersion.cpp)
 # This section deals with creating the GithubApiHelper implementation
 
 if(WIN32)
