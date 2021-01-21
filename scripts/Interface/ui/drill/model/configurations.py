@@ -154,7 +154,8 @@ class RundexSettings(object):
                 "MaxQxy",
                 "DeltaQ",
                 "IQxQyLogBinning",
-                "OutputPanels"
+                "OutputPanels",
+                "ShapeTable"
                 ],
             REFL_POL : [
                 "PolarizationEfficiencyFile",

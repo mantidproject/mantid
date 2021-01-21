@@ -359,6 +359,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         self.setPropertyGroup('CalculateResolution', 'Integration Options')
         self.declareProperty('ClearCorrected2DWorkspace', True,
                              'Whether to clear the fully corrected 2D workspace.')
+        self.copyProperties('SANSILLIntegration', ['ShapeTable'])
 
     def PyExec(self):
 

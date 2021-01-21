@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import PythonAlgorithm, MatrixWorkspaceProperty, WorkspaceUnitValidator, WorkspaceGroupProperty, \
-    PropertyMode, MatrixWorkspace, NumericAxis
+    PropertyMode, MatrixWorkspace, NumericAxis, ITableWorkspaceProperty
 from mantid.kernel import EnabledWhenProperty, FloatArrayProperty, Direction, StringListValidator, \
     IntBoundedValidator, FloatBoundedValidator, PropertyCriterion, LogicOperator
 from mantid.simpleapi import *
@@ -162,7 +162,13 @@ class SANSILLIntegration(PythonAlgorithm):
                                                     direction=Direction.Output,
                                                     optional=PropertyMode.Optional),
                              doc='The name of the output workspace group for detector panels (D33).')
+        self.declareProperty(ITableWorkspaceProperty('ShapeTable', '', direction=Direction.Input,
+                                                    optional=PropertyMode.Optional),
+                             doc='The name opf the table workspace containing drawn shapes on which to integrate. '
+                                 'If provided, NumberOfWedges, WedgeOffset and WedgeAngle arguments are ignored. ')
+
         self.setPropertyGroup('PanelOutputWorkspaces', 'I(Q) Options')
+        self.setPropertyGroup('ShapeTable', 'I(Q) Options')
 
     def PyExec(self):
         self._input_ws = self.getPropertyValue('InputWorkspace')
@@ -203,7 +209,6 @@ class SANSILLIntegration(PythonAlgorithm):
         if q_min < 0. or q_min >= q_max:
             raise ValueError('qmin must be positive and smaller than qmax. '
                              'Given qmin={0:.2f}, qmax={0:.2f}.'.format(q_min, q_max))
-        q_binning = []
         binning = self.getProperty('OutputBinning').value
         strategy = self.getPropertyValue('DefaultQBinning')
         if len(binning) == 0:
@@ -260,7 +265,7 @@ class SANSILLIntegration(PythonAlgorithm):
         bins = []
         q = 0.
         pixels = 1
-        while (q < q_max):
+        while q < q_max:
             two_theta = np.arctan((pixel_size * pixels + offset) / l2)
             q = 4 * np.pi * np.sin(two_theta / 2) / wavelength
             bins.append(q)
@@ -317,7 +322,7 @@ class SANSILLIntegration(PythonAlgorithm):
             pos2 = source_aperture.find('x')
             pos3 = source_aperture.find(')')
             x1 = float(source_aperture[pos1:pos2]) * to_meter
-            y1 = float(source_aperture[pos2 + 1:pos3]) *to_meter
+            y1 = float(source_aperture[pos2 + 1:pos3]) * to_meter
             x2 = run.getLogData('Beam.sample_ap_x_or_diam').value * to_meter
             y2 = run.getLogData('Beam.sample_ap_y').value * to_meter
             if is_tof:
@@ -388,6 +393,7 @@ class SANSILLIntegration(PythonAlgorithm):
         n_wedges = self.getProperty('NumberOfWedges').value
         pixel_division = self.getProperty('NPixelDivision').value
         gravity = wavelength == 0.
+        shape_table = self.getProperty('ShapeTable').value
         if self._output_type == 'I(Q)':
             if panel:
                 # do not process wedges for panels
@@ -401,7 +407,7 @@ class SANSILLIntegration(PythonAlgorithm):
                         AccountForGravity=gravity, WedgeWorkspace=wedge_ws,
                         WedgeAngle=wedge_angle, WedgeOffset=wedge_offset,
                         AsymmetricWedges=asymm_wedges,
-                        NPixelDivision=pixel_division)
+                        NPixelDivision=pixel_division, ShapeTable=shape_table)
             if self._resolution == 'MildnerCarpenter':
                 x = mtd[ws_out].readX(0)
                 mid_x = (x[1:] + x[:-1]) / 2
