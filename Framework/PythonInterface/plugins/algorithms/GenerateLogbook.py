@@ -23,9 +23,9 @@ class GenerateLogbook(PythonAlgorithm):
     _data_directory = None
     _facility = None
     _instrument = None
-    _numor_range = []
-    _metadata_headlines = []
-    _metadata_entries = []
+    _numor_range = None
+    _metadata_headlines = None
+    _metadata_entries = None
 
     def category(self):
         return 'Utility'
@@ -95,6 +95,8 @@ class GenerateLogbook(PythonAlgorithm):
                 if self._numor_range[0] <= int(os.path.splitext(f[facility_name_len:])[0]) < self._numor_range[1]]
 
     def _get_default_entries(self):
+        self._metadata_entries = []
+        self._metadata_headlines = ['run_number']
         tmp_instr = self._instrument + '_tmp'
         LoadEmptyInstrument(InstrumentName=self._instrument, OutputWorkspace=tmp_instr)
         parameters = mtd[tmp_instr].getInstrument()
@@ -102,8 +104,8 @@ class GenerateLogbook(PythonAlgorithm):
             logbook_entries = parameters.getStringParameter('logbook_default_entries')[0]
             # logbook_optional_entries = parameters.getStringParameter('logbook_default_entries')[0]
             logbook_headers = parameters.getStringParameter('logbook_default_headers')[0]
-            self._metadata_entries = logbook_entries.split(',')
-            self._metadata_headlines = logbook_headers.split(',')
+            self._metadata_entries += logbook_entries.split(',')
+            self._metadata_headlines += logbook_headers.split(',')
         except IndexError:
             raise RuntimeError("The logbook entries and headers are not defined for {}".format(self._instrument))
         if not self.getProperty('MetadataEntries').isDefault:
@@ -139,7 +141,8 @@ class GenerateLogbook(PythonAlgorithm):
             file_path = os.path.join(self._data_directory, file_name + '.nxs')
             with h5py.File(file_path, 'r') as f:
                 rowData = numpy.empty(n_entries, dtype=object)
-                for entry_no, entry in enumerate(self._metadata_entries):
+                rowData[0] = str(file_name)
+                for entry_no, entry in enumerate(self._metadata_entries, 1):
                     data = f.get(entry)[0]
                     if isinstance(data, numpy.bytes_):
                         data = data.decode('utf-8')
@@ -149,7 +152,7 @@ class GenerateLogbook(PythonAlgorithm):
 
     def _store_logbook_as_csv(self, logbook_ws):
         SaveAscii(InputWorkspace=logbook_ws, Filename=self.getProperty('OutputFile'),
-                  Separator='CSV', )
+                  Separator='CSV')
 
     def PyExec(self):
         self._data_directory = self.getPropertyValue('Directory')

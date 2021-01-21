@@ -21,10 +21,10 @@
     </parameter>
 
     <parameter name="logbook_default_headers" type="string">
-      <value val="run_number,wavelength,experiment_identifier" />
+      <value val="wavelength,experiment_identifier" />
     </parameter>
     <parameter name="logbook_default_entries" type="string">
-      <value val="/entry0/run_number,/entry0/D7/monochromator/wavelength,/entry0/experiment_identifier" />
+      <value val="/entry0/D7/monochromator/wavelength,/entry0/experiment_identifier" />
     </parameter>
 
   </component-link>
