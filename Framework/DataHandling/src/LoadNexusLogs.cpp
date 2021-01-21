@@ -9,6 +9,7 @@
 #include "MantidAPI/LogManager.h"
 #include "MantidAPI/Run.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include <locale>
 #include <nexus/NeXusException.hpp>
@@ -433,6 +434,13 @@ void LoadNexusLogs::init() {
   declareProperty(std::make_unique<PropertyWithValue<std::string>>(
                       "NXentryName", "", Direction::Input),
                   "Entry in the nexus file from which to read the logs");
+  declareProperty(
+      std::make_unique<PropertyWithValue<std::string>>("AllowList", "",
+                                                       Direction::Input),
+      "If specified, only these logs will be loaded from the file.");
+  declareProperty(std::make_unique<PropertyWithValue<std::string>>(
+                      "BlockList", "", Direction::Input),
+                  "If specified, these logs will NOT be loaded from the file.");
 }
 
 /** Executes the algorithm. Reading in the file and creating and populating
@@ -447,6 +455,10 @@ void LoadNexusLogs::execLoader() {
   MatrixWorkspace_sptr workspace = getProperty("Workspace");
 
   std::string entry_name = getPropertyValue("NXentryName");
+
+  std::string allow_list = getPropertyValue("AllowList");
+  const std::string block_list = getPropertyValue("BlockList");
+
   // Find the entry name to use (normally "entry" for SNS, "raw_data_1" for
   // ISIS) if entry name is empty
   if (entry_name.empty()) {
@@ -500,6 +512,12 @@ void LoadNexusLogs::execLoader() {
 
   readStartAndEndTime(file, workspace->mutableRun());
 
+  if (!allow_list.empty() && !block_list.empty()) {
+    throw std::runtime_error(
+        "BlockList and AllowList are mutually exclusive! "
+        "Please only enter values for one of these fields.");
+  }
+
   const std::map<std::string, std::set<std::string>> &allEntries =
       getFileInfo()->getAllEntries();
 
@@ -512,6 +530,14 @@ void LoadNexusLogs::execLoader() {
     const std::set<std::string> &entries = itGroupClass->second;
     // still a linear search
     for (const std::string &entry : entries) {
+      // skip loading unneccessary logs
+      if (!allow_list.empty() &&
+          !(allow_list.find(entry) != std::string::npos)) {
+        break;
+      }
+      if (!block_list.empty() && block_list.find(entry) != std::string::npos) {
+        break;
+      }
       // match for 2nd level entry /a/b
       if (std::count(entry.begin(), entry.end(), '/') == 2) {
         if (isLog) {
@@ -538,6 +564,16 @@ void LoadNexusLogs::execLoader() {
       if (itGroupName == entries.end()) {
         continue;
       }
+      // skip loading unneccessary logs
+      if (!allow_list.empty() &&
+          !(allow_list.find(group_name) != std::string::npos)) {
+        break;
+      }
+      if (!block_list.empty() &&
+          (block_list.find(group_name) != std::string::npos)) {
+        break;
+      }
+
       // here we must search only in NxLogs and NXpositioner sets
       loadLogs(file, absoluteGroupName, group_class, workspace);
     }
