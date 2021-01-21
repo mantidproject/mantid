@@ -518,6 +518,8 @@ void LoadNexusLogs::execLoader() {
         "Please only enter values for one of these fields.");
   }
 
+  // TODO: Handle logs specified for AllowList and BlockList.
+
   const std::map<std::string, std::set<std::string>> &allEntries =
       getFileInfo()->getAllEntries();
 
@@ -530,14 +532,6 @@ void LoadNexusLogs::execLoader() {
     const std::set<std::string> &entries = itGroupClass->second;
     // still a linear search
     for (const std::string &entry : entries) {
-      // skip loading unneccessary logs
-      if (!allow_list.empty() &&
-          !(allow_list.find(entry) != std::string::npos)) {
-        break;
-      }
-      if (!block_list.empty() && block_list.find(entry) != std::string::npos) {
-        break;
-      }
       // match for 2nd level entry /a/b
       if (std::count(entry.begin(), entry.end(), '/') == 2) {
         if (isLog) {
@@ -564,16 +558,6 @@ void LoadNexusLogs::execLoader() {
       if (itGroupName == entries.end()) {
         continue;
       }
-      // skip loading unneccessary logs
-      if (!allow_list.empty() &&
-          !(allow_list.find(group_name) != std::string::npos)) {
-        break;
-      }
-      if (!block_list.empty() &&
-          (block_list.find(group_name) != std::string::npos)) {
-        break;
-      }
-
       // here we must search only in NxLogs and NXpositioner sets
       loadLogs(file, absoluteGroupName, group_class, workspace);
     }

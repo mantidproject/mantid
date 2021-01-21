@@ -268,7 +268,7 @@ public:
     loader.initialize();
     loader.setProperty("Workspace", testWS);
     loader.setPropertyValue("Filename", "larmor_array_time_series_mock.nxs");
-    TS_ASSERT_THROWS_NOTHING(loader.execute())
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
   }
 
   void test_last_time_series_log_entry_equals_end_time() {
@@ -349,6 +349,53 @@ public:
     TS_ASSERT_DELTA(pclogFiltered2->nthValue(0), 3, 1e-5);
     TS_ASSERT_DELTA(pclogFiltered2->nthValue(1), 5, 1e-5);
     TS_ASSERT_DELTA(pclogFiltered2->nthValue(2), 7, 1e-5);
+  }
+
+  // TODO: Check whether the correct logs are in the final workspace
+  void test_allow_list() {
+    auto testWS = createTestWorkspace();
+    auto run = testWS->run();
+
+    LoadNexusLogs loader;
+    loader.setChild(true);
+    loader.initialize();
+    loader.setProperty("Workspace", testWS);
+    loader.setPropertyValue("Filename", "LARMOR00003368.nxs");
+    loader.setPropertyValues("AllowList", ""); // Specify logs to allow here
+    loader.setPropertyValues("BlockList", "");
+    loader.execute();
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+  }
+
+  void test_block_list() {
+    auto testWS = createTestWorkspace();
+    auto run = testWS->run();
+
+    LoadNexusLogs loader;
+    loader.setChild(true);
+    loader.initialize();
+    loader.setProperty("Workspace", testWS);
+    loader.setPropertyValue("Filename", "LARMOR00003368.nxs");
+    loader.setPropertyValue("AllowList", "");
+    loader.setPropertyValue("BlockList", ""); // Specify logs to block here
+    loader.execute();
+    run = testWS->run();
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+  }
+
+  void test_allow_and_block_list() {
+    auto testWS = createTestWorkspace();
+    auto run = testWS->run();
+
+    LoadNexusLogs loader;
+    loader.setChild(true);
+    loader.initialize();
+    loader.setProperty("Workspace", testWS);
+    loader.setPropertyValue("Filename", "LARMOR00003368.nxs");
+    loader.setPropertyValue("AllowList", ""); // Specify nothing for either
+    loader.setPropertyValue("BlockList", ""); // To ensure logs load as expected
+    loader.execute();
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
   }
 
 private:
