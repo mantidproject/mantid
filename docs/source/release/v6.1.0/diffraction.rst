@@ -17,5 +17,6 @@ Engineering Diffraction
 
 Single Crystal Diffraction
 --------------------------
+- New version of algorithm :ref:`SCDCalibratePanels <algm-SCDCalibratePanels-v2>` provides more accurate calibration results for CORELLI instrument.
 
 :ref:`Release 6.1.0 <v6.1.0>`

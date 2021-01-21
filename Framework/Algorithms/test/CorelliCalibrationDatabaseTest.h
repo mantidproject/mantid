@@ -14,14 +14,14 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAlgorithms/CorelliPowderCalibrationDatabase.h"
+#include "MantidAlgorithms/CorelliCalibrationDatabase.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include <boost/filesystem.hpp>
 #include <fstream>
 
-using Mantid::Algorithms::CorelliPowderCalibrationDatabase;
+using Mantid::Algorithms::CorelliCalibrationDatabase;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
@@ -29,20 +29,20 @@ using Mantid::Types::Core::DateAndTime;
 using Mantid::Types::Event::TofEvent;
 using namespace Mantid::Algorithms;
 
-class CorelliPowderCalibrationDatabaseTest : public CxxTest::TestSuite {
+class CorelliCalibrationDatabaseTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static CorelliPowderCalibrationDatabaseTest *createSuite() {
-    return new CorelliPowderCalibrationDatabaseTest();
+  static CorelliCalibrationDatabaseTest *createSuite() {
+    return new CorelliCalibrationDatabaseTest();
   }
-  static void destroySuite(CorelliPowderCalibrationDatabaseTest *suite) {
+  static void destroySuite(CorelliCalibrationDatabaseTest *suite) {
     delete suite;
   }
 
   //-----------------------------------------------------------------------------
   void test_Init() {
-    CorelliPowderCalibrationDatabase alg;
+    CorelliCalibrationDatabase alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
   }
@@ -53,7 +53,7 @@ public:
    */
   void test_file_io() {
     // create directory
-    std::string test_dir{"TestCorelliPowderCalibrationX"};
+    std::string test_dir{"TestCorelliCalibrationX"};
     boost::filesystem::create_directory(test_dir);
     TS_ASSERT(boost::filesystem::is_directory(test_dir));
 
@@ -66,8 +66,8 @@ public:
    * @brief Test algorithm to convert datetime string to date stamp
    */
   void test_timestamp_conversion() {
-    std::string yyyymmdd = CorelliPowderCalibrationDatabase::convertTimeStamp(
-        "2018-02-20T12:57:17");
+    std::string yyyymmdd =
+        CorelliCalibrationDatabase::convertTimeStamp("2018-02-20T12:57:17");
     TS_ASSERT_EQUALS(yyyymmdd, "20180220");
   }
 
@@ -91,13 +91,12 @@ public:
    */
   void test_calibration_workspace_handler() {
     // Create a correct calibration worksapce
-    std::string outwsname("CorelliPowderCalibrationDatabaseTest_TableWS2");
+    std::string outwsname("CorelliCalibrationDatabaseTest_TableWS2");
     TableWorkspace_sptr calib_ws =
         createTestCalibrationTableWorkspace(outwsname);
 
     // Create an incorrect calibration workspace
-    std::string wrongwsname{
-        "CorelliPowderCalibrationDatabaseTest_TableWS_Wrong"};
+    std::string wrongwsname{"CorelliCalibrationDatabaseTest_TableWS_Wrong"};
     TableWorkspace_sptr calib_wrong_ws =
         createIncorrectTestCalibrationTableWorkspace(wrongwsname);
 
@@ -172,13 +171,13 @@ public:
   //-----------------------------------------------------------------------------
   /**
    * @brief Test main features required by the algorithm
-   * CorelliPowderCalibrationDatabase
+   * CorelliCalibrationDatabase
    */
   void test_exec() {
 
     // Create the test environment
     // create directory database
-    std::string calibdir{"/tmp/TestCorelliPowderCalibration1117"};
+    std::string calibdir{"/tmp/TestCorelliCalibration1117"};
     // clean previous
     boost::filesystem::remove_all(calibdir);
     // create data base
@@ -193,15 +192,14 @@ public:
     // Create workspaces
     EventWorkspace_sptr input_ws = createTestEventWorkspace();
     // Name of the output calibration workspace
-    std::string outwsname(
-        "CorelliPowderCalibrationDatabaseTest_CombinedTableWS");
+    std::string outwsname("CorelliCalibrationDatabaseTest_CombinedTableWS");
     TableWorkspace_sptr calib_ws =
         createTestCalibrationTableWorkspace(outwsname);
     TS_ASSERT(input_ws);
     TS_ASSERT(calib_ws);
 
     // Init algorithm
-    CorelliPowderCalibrationDatabase alg;
+    CorelliCalibrationDatabase alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
     // Set up
@@ -262,20 +260,20 @@ private:
    */
   EventWorkspace_sptr createTestEventWorkspace() {
     // Name of the output workspace.
-    std::string outWSName("CorelliPowderCalibrationDatabaseTest_matrixWS");
+    std::string outWSName("CorelliCalibrationDatabaseTest_matrixWS");
 
     IAlgorithm_sptr lei =
         AlgorithmFactory::Instance().create("LoadEmptyInstrument", 1);
     lei->initialize();
     lei->setPropertyValue("Filename", "CORELLI_Definition.xml");
     lei->setPropertyValue("OutputWorkspace",
-                          "CorelliPowderCalibrationDatabaseTest_OutputWS");
+                          "CorelliCalibrationDatabaseTest_OutputWS");
     lei->setPropertyValue("MakeEventWorkspace", "1");
     lei->execute();
 
     EventWorkspace_sptr ws;
     ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(
-        "CorelliPowderCalibrationDatabaseTest_OutputWS");
+        "CorelliCalibrationDatabaseTest_OutputWS");
 
     // Add property start_time
     ws->mutableRun().addProperty<std::string>("start_time",
