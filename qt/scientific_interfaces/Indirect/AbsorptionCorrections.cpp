@@ -396,7 +396,6 @@ bool AbsorptionCorrections::validate() {
 void AbsorptionCorrections::validateSampleGeometryInputs(
     UserInputValidator &uiv, const QString &shape) {
   bool hasZero = false;
-  std::vector<double> inputs;
   if (shape == "FlatPlate") {
     double const sampleHeight = m_uiForm.spFlatSampleHeight->value();
     hasZero = hasZero || isValueZero(sampleHeight);
@@ -441,7 +440,6 @@ void AbsorptionCorrections::validateSampleGeometryInputs(
 void AbsorptionCorrections::validateContainerGeometryInputs(
     UserInputValidator &uiv, const QString &shape) {
   bool hasZero = false;
-  std::vector<double> inputs;
   if (shape == "FlatPlate") {
     double const canFrontThickness = m_uiForm.spFlatCanFrontThickness->value();
     hasZero = hasZero || isValueZero(canFrontThickness);
