@@ -18,6 +18,7 @@ class DLLExport IndirectDataAnalysisElwinTab : public IndirectDataAnalysisTab {
 
 public:
   IndirectDataAnalysisElwinTab(QWidget *parent = nullptr);
+  ~IndirectDataAnalysisElwinTab();
 
 private:
   void run() override;
