@@ -39,9 +39,8 @@ StorageMode fromString(const std::string &mode) {
     return StorageMode::Distributed;
   if (mode == "Parallel::StorageMode::MasterOnly")
     return StorageMode::MasterOnly;
-  throw std::invalid_argument(
-      "Parallel::fromString could not convert provided input into a "
-      "Parallel::StorageMode.");
+  throw std::invalid_argument("Parallel::fromString could not convert provided input into a "
+                              "Parallel::StorageMode.");
 }
 
 } // namespace Parallel

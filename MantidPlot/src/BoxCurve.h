@@ -81,14 +81,11 @@ public:
 private:
   using DataCurve::draw; // Unhide base class method (avoids Intel compiler
                          // warning)
-  void draw(QPainter *painter, const QwtScaleMap &xMap, const QwtScaleMap &yMap,
-            int from, int to) const override;
-  void drawBox(QPainter *painter, const QwtScaleMap &xMap,
-               const QwtScaleMap &yMap, double *dat, int size) const;
+  void draw(QPainter *painter, const QwtScaleMap &xMap, const QwtScaleMap &yMap, int from, int to) const override;
+  void drawBox(QPainter *painter, const QwtScaleMap &xMap, const QwtScaleMap &yMap, double *dat, int size) const;
   using DataCurve::drawSymbols; // Unhide base class method (avoids Intel
                                 // compiler warning)
-  void drawSymbols(QPainter *painter, const QwtScaleMap &xMap,
-                   const QwtScaleMap &yMap, double *dat, int size) const;
+  void drawSymbols(QPainter *painter, const QwtScaleMap &xMap, const QwtScaleMap &yMap, double *dat, int size) const;
 
   QwtSymbol::Style min_style, max_style, mean_style, p99_style, p1_style;
   double b_coeff, w_coeff;
@@ -103,9 +100,7 @@ public:
     d_x = x;
   };
 
-  QwtData *copy() const override {
-    return new QwtSingleArrayData(d_x, d_y, size());
-  };
+  QwtData *copy() const override { return new QwtSingleArrayData(d_x, d_y, size()); };
 
   size_t size() const override { return d_y.size(); };
   double x(size_t) const override { return d_x; };

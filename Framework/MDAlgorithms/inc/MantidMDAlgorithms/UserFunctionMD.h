@@ -22,8 +22,7 @@ A user defined function.
 @date 15/01/2010
 */
 
-class DLLExport UserFunctionMD : virtual public API::IFunctionMD,
-                                 virtual public API::ParamFunction {
+class DLLExport UserFunctionMD : virtual public API::IFunctionMD, virtual public API::ParamFunction {
 public:
   UserFunctionMD();
   std::string name() const override { return "UserFunctionMD"; }

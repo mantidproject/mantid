@@ -35,13 +35,13 @@ namespace MantidWidgets {
  * @param ties :: [input] Parameter ties.
  * @param constraints :: [input] Parameter constraints.
  */
-EditLocalParameterDialog::EditLocalParameterDialog(
-    QWidget *parent, const QString &parName, const QStringList &datasetNames,
-    const QStringList &datasetDomainNames, const QList<double> &values,
-    const QList<bool> &fixes, const QStringList &ties,
-    const QStringList &constraints)
-    : MantidDialog(parent), m_parName(parName), m_values(values),
-      m_fixes(fixes), m_ties(ties), m_constraints(constraints) {
+EditLocalParameterDialog::EditLocalParameterDialog(QWidget *parent, const QString &parName,
+                                                   const QStringList &datasetNames,
+                                                   const QStringList &datasetDomainNames, const QList<double> &values,
+                                                   const QList<bool> &fixes, const QStringList &ties,
+                                                   const QStringList &constraints)
+    : MantidDialog(parent), m_parName(parName), m_values(values), m_fixes(fixes), m_ties(ties),
+      m_constraints(constraints) {
   assert(values.size() == datasetDomainNames.size());
   assert(fixes.size() == datasetDomainNames.size());
   assert(ties.size() == datasetDomainNames.size());
@@ -59,8 +59,7 @@ EditLocalParameterDialog::EditLocalParameterDialog(
  * @param datasetNames :: [input] Names of workspaces being fitted.
  * @param datasetDomainNames :: [input] Names given to the domains being fitted.
  */
-void EditLocalParameterDialog::doSetup(const QString &parName,
-                                       const QStringList &datasetNames,
+void EditLocalParameterDialog::doSetup(const QString &parName, const QStringList &datasetNames,
                                        const QStringList &datasetDomainNames) {
   m_logFinder = std::make_unique<LogValueFinder>(datasetNames);
   // Populate list of logs
@@ -70,16 +69,14 @@ void EditLocalParameterDialog::doSetup(const QString &parName,
   }
 
   m_uiForm.logValueSelector->setCheckboxShown(true);
-  connect(m_uiForm.logValueSelector, SIGNAL(logOptionsEnabled(bool)), this,
-          SIGNAL(logOptionsChecked(bool)));
+  connect(m_uiForm.logValueSelector, SIGNAL(logOptionsEnabled(bool)), this, SIGNAL(logOptionsChecked(bool)));
   QHeaderView *header = m_uiForm.tableWidget->horizontalHeader();
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   header->setResizeMode(0, QHeaderView::Stretch);
 #else
   header->setSectionResizeMode(QHeaderView::Stretch);
 #endif
-  connect(m_uiForm.tableWidget, SIGNAL(cellChanged(int, int)), this,
-          SLOT(valueChanged(int, int)));
+  connect(m_uiForm.tableWidget, SIGNAL(cellChanged(int, int)), this, SLOT(valueChanged(int, int)));
   m_uiForm.lblParameterName->setText("Parameter: " + parName);
 
   for (int i = 0; i < datasetDomainNames.size(); i++) {
@@ -99,18 +96,13 @@ void EditLocalParameterDialog::doSetup(const QString &parName,
   }
   auto deleg = new LocalParameterItemDelegate(this);
   m_uiForm.tableWidget->setItemDelegateForColumn(valueColumn, deleg);
-  connect(deleg, SIGNAL(setAllValues(double)), this,
-          SLOT(setAllValues(double)));
-  connect(deleg, SIGNAL(fixParameter(int, bool)), this,
-          SLOT(fixParameter(int, bool)));
+  connect(deleg, SIGNAL(setAllValues(double)), this, SLOT(setAllValues(double)));
+  connect(deleg, SIGNAL(fixParameter(int, bool)), this, SLOT(fixParameter(int, bool)));
   connect(deleg, SIGNAL(setAllFixed(bool)), this, SLOT(setAllFixed(bool)));
-  connect(deleg, SIGNAL(setTie(int, QString)), this,
-          SLOT(setTie(int, QString)));
+  connect(deleg, SIGNAL(setTie(int, QString)), this, SLOT(setTie(int, QString)));
   connect(deleg, SIGNAL(setTieAll(QString)), this, SLOT(setTieAll(QString)));
-  connect(deleg, SIGNAL(setConstraint(int, QString)), this,
-          SLOT(setConstraint(int, QString)));
-  connect(deleg, SIGNAL(setConstraintAll(QString)), this,
-          SLOT(setConstraintAll(QString)));
+  connect(deleg, SIGNAL(setConstraint(int, QString)), this, SLOT(setConstraint(int, QString)));
+  connect(deleg, SIGNAL(setConstraintAll(QString)), this, SLOT(setConstraintAll(QString)));
   connect(deleg, SIGNAL(setValueToLog(int)), this, SLOT(setValueToLog(int)));
   connect(deleg, SIGNAL(setAllValuesToLog()), this, SLOT(setAllValuesToLog()));
 
@@ -159,9 +151,7 @@ QList<bool> EditLocalParameterDialog::getFixes() const { return m_fixes; }
 QStringList EditLocalParameterDialog::getTies() const { return m_ties; }
 
 /// Get a list of the constraints
-QStringList EditLocalParameterDialog::getConstraints() const {
-  return m_constraints;
-}
+QStringList EditLocalParameterDialog::getConstraints() const { return m_constraints; }
 
 /// Fix/unfix a single parameter.
 /// @param index :: Index of a paramter to fix or unfix.
@@ -276,8 +266,7 @@ void EditLocalParameterDialog::paste() {
   auto vec = text.split(QRegExp("\\s|,"), QString::SkipEmptyParts);
   auto n = qMin(vec.size(), m_uiForm.tableWidget->rowCount());
   // prepare for pasting data
-  auto deleg = static_cast<LocalParameterItemDelegate *>(
-      m_uiForm.tableWidget->itemDelegateForColumn(valueColumn));
+  auto deleg = static_cast<LocalParameterItemDelegate *>(m_uiForm.tableWidget->itemDelegateForColumn(valueColumn));
   deleg->prepareForPastedData();
   // insert data into table
   for (int i = 0; i < n; ++i) {
@@ -359,8 +348,7 @@ void EditLocalParameterDialog::setValueToLog(int i) {
   try {
     value = m_logFinder->getLogValue(logName, function, i);
   } catch (const std::invalid_argument &err) {
-    const auto &message =
-        QString("Failed to get log value:\n\n %1").arg(err.what());
+    const auto &message = QString("Failed to get log value:\n\n %1").arg(err.what());
     QMessageBox::critical(this, "Mantid - Error", message);
   }
   m_values[i] = value;
@@ -378,9 +366,7 @@ void EditLocalParameterDialog::setAllValuesToLog() {
 
 /// Returns whether log checkbox is ticked or not
 /// @returns True if log options are enabled
-bool EditLocalParameterDialog::isLogCheckboxTicked() const {
-  return m_uiForm.logValueSelector->isCheckboxTicked();
-}
+bool EditLocalParameterDialog::isLogCheckboxTicked() const { return m_uiForm.logValueSelector->isCheckboxTicked(); }
 
 } // namespace MantidWidgets
 } // namespace MantidQt

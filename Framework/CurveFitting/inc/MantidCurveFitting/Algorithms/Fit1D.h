@@ -53,11 +53,9 @@ public:
   const std::string category() const override { return "Optimization"; }
 
   /// Function you want to fit to.
-  virtual void function(const double *in, double *out, const double *xValues,
-                        const size_t nData) = 0;
+  virtual void function(const double *in, double *out, const double *xValues, const size_t nData) = 0;
   /// Derivatives of function with respect to parameters you are trying to fit
-  virtual void functionDeriv(const double *in, API::Jacobian *out,
-                             const double *xValues, const size_t nData);
+  virtual void functionDeriv(const double *in, API::Jacobian *out, const double *xValues, const size_t nData);
 
 protected:
   // Overridden Algorithm methods
@@ -99,15 +97,13 @@ protected:
 
   /// Overload this function if the actual fitted parameters are different from
   /// those the user specifies.
-  virtual void
-  modifyInitialFittedParameters(std::vector<double> &fittedParameter);
+  virtual void modifyInitialFittedParameters(std::vector<double> &fittedParameter);
 
   /// If modifyInitialFittedParameters is overloaded this method must also be
   /// overloaded
   /// to reverse the effect of modifyInitialFittedParameters before outputting
   /// the results back to the user
-  virtual void
-  modifyFinalFittedParameters(std::vector<double> &fittedParameter);
+  virtual void modifyFinalFittedParameters(std::vector<double> &fittedParameter);
 
   /// Holds a copy of the value of the parameters that are actually
   /// least-squared fitted.

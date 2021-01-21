@@ -22,9 +22,7 @@ class BatchAlgorithmRunnerTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static BatchAlgorithmRunnerTest *createSuite() {
-    return new BatchAlgorithmRunnerTest;
-  }
+  static BatchAlgorithmRunnerTest *createSuite() { return new BatchAlgorithmRunnerTest; }
   static void destroySuite(BatchAlgorithmRunnerTest *suite) { delete suite; }
 
   BatchAlgorithmRunnerTest() {
@@ -39,11 +37,9 @@ public:
   void setUp() override {
     // Create some algorithms
     // Each algorithm depends on the output workspace of the previous
-    createWsAlg =
-        AlgorithmManager::Instance().create("CreateSampleWorkspace", -1);
+    createWsAlg = AlgorithmManager::Instance().create("CreateSampleWorkspace", -1);
     createWsAlg->initialize();
-    createWsAlg->setProperty("OutputWorkspace",
-                             "BatchAlgorithmRunnerTest_Create");
+    createWsAlg->setProperty("OutputWorkspace", "BatchAlgorithmRunnerTest_Create");
     createWsAlg->setProperty("Function", "Exp Decay");
     createWsAlg->setProperty("XMax", 20.0);
     createWsAlg->setProperty("BinWidth", 1.0);
@@ -58,8 +54,7 @@ public:
 
     scaleWsAlg = AlgorithmManager::Instance().create("Scale", -1);
     scaleWsAlg->initialize();
-    scaleWsAlg->setProperty("OutputWorkspace",
-                            "BatchAlgorithmRunnerTest_Scale");
+    scaleWsAlg->setProperty("OutputWorkspace", "BatchAlgorithmRunnerTest_Scale");
     scaleWsAlg->setProperty("Factor", 5.0);
     scaleWsAlg->setProperty("Operation", "Add");
     inputFromScaleProps["InputWorkspace"] = "BatchAlgorithmRunnerTest_Scale";
@@ -84,14 +79,11 @@ public:
 
     // Get workspace history
     std::string wsName = "BatchAlgorithmRunnerTest_Scale";
-    auto history = AnalysisDataService::Instance()
-                       .retrieveWS<MatrixWorkspace>(wsName)
-                       ->getHistory();
+    auto history = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName)->getHistory();
 
     // Check the algorithm history of the workspace matches what should have
     // been done to it
-    TS_ASSERT_EQUALS("CreateSampleWorkspace",
-                     history.getAlgorithmHistory(0)->name())
+    TS_ASSERT_EQUALS("CreateSampleWorkspace", history.getAlgorithmHistory(0)->name())
     TS_ASSERT_EQUALS("CropWorkspace", history.getAlgorithmHistory(1)->name())
     TS_ASSERT_EQUALS("Scale", history.getAlgorithmHistory(2)->name())
   }
@@ -108,27 +100,19 @@ public:
     runner.addAlgorithm(cropWsAlg, inputFromCreateProps);
     TS_ASSERT(runner.executeBatch());
 
-    auto historyRun1 = AnalysisDataService::Instance()
-                           .retrieveWS<MatrixWorkspace>(wsName)
-                           ->getHistory();
-    TS_ASSERT_EQUALS("CreateSampleWorkspace",
-                     historyRun1.getAlgorithmHistory(0)->name())
-    TS_ASSERT_EQUALS("CropWorkspace",
-                     historyRun1.getAlgorithmHistory(1)->name())
+    auto historyRun1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName)->getHistory();
+    TS_ASSERT_EQUALS("CreateSampleWorkspace", historyRun1.getAlgorithmHistory(0)->name())
+    TS_ASSERT_EQUALS("CropWorkspace", historyRun1.getAlgorithmHistory(1)->name())
 
     // Run 2
     runner.addAlgorithm(scaleWsAlg, inputFromCreateProps);
     runner.addAlgorithm(cropWsAlg, inputFromScaleProps);
     TS_ASSERT(runner.executeBatch());
 
-    auto historyRun2 = AnalysisDataService::Instance()
-                           .retrieveWS<MatrixWorkspace>(wsName)
-                           ->getHistory();
-    TS_ASSERT_EQUALS("CreateSampleWorkspace",
-                     historyRun1.getAlgorithmHistory(0)->name())
+    auto historyRun2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName)->getHistory();
+    TS_ASSERT_EQUALS("CreateSampleWorkspace", historyRun1.getAlgorithmHistory(0)->name())
     TS_ASSERT_EQUALS("Scale", historyRun2.getAlgorithmHistory(1)->name())
-    TS_ASSERT_EQUALS("CropWorkspace",
-                     historyRun2.getAlgorithmHistory(2)->name())
+    TS_ASSERT_EQUALS("CropWorkspace", historyRun2.getAlgorithmHistory(2)->name())
   }
 
   /**

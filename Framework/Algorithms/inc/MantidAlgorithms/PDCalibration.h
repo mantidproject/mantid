@@ -26,9 +26,7 @@ public:
 
   const std::string name() const override;
   int version() const override;
-  const std::vector<std::string> seeAlso() const override {
-    return {"CalibrateRectangularDetectors"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"CalibrateRectangularDetectors"}; }
   const std::string category() const override;
   const std::string summary() const override;
 
@@ -44,28 +42,19 @@ private:
   void createCalTableFromExisting();
   void createCalTableNew();
   void createInformationWorkspaces();
-  std::function<double(double)>
-  getDSpacingToTof(const std::set<detid_t> &detIds);
-  std::vector<double> dSpacingWindows(const std::vector<double> &centres,
-                                      const double widthMax);
-  std::vector<double> getTOFminmax(const double difc, const double difa,
-                                   const double tzero);
-  void setCalibrationValues(const detid_t detid, const double difc,
-                            const double difa, const double tzero);
-  void fitDIFCtZeroDIFA_LM(const std::vector<double> &d,
-                           const std::vector<double> &tof,
-                           const std::vector<double> &height2, double &difc,
-                           double &t0, double &difa);
+  std::function<double(double)> getDSpacingToTof(const std::set<detid_t> &detIds);
+  std::vector<double> dSpacingWindows(const std::vector<double> &centres, const double widthMax);
+  std::vector<double> getTOFminmax(const double difc, const double difa, const double tzero);
+  void setCalibrationValues(const detid_t detid, const double difc, const double difa, const double tzero);
+  void fitDIFCtZeroDIFA_LM(const std::vector<double> &d, const std::vector<double> &tof,
+                           const std::vector<double> &height2, double &difc, double &t0, double &difa);
   API::MatrixWorkspace_sptr calculateResolutionTable();
 
   /// NEW: convert peak positions in dSpacing to peak centers workspace
   std::pair<API::MatrixWorkspace_sptr, API::MatrixWorkspace_sptr>
-  createTOFPeakCenterFitWindowWorkspaces(
-      const API::MatrixWorkspace_sptr &dataws,
-      const double peakWindowMaxInDSpacing);
+  createTOFPeakCenterFitWindowWorkspaces(const API::MatrixWorkspace_sptr &dataws, const double peakWindowMaxInDSpacing);
 
-  API::ITableWorkspace_sptr
-  sortTableWorkspace(API::ITableWorkspace_sptr &table);
+  API::ITableWorkspace_sptr sortTableWorkspace(API::ITableWorkspace_sptr &table);
 
   API::MatrixWorkspace_sptr m_uncalibratedWS{nullptr};
   API::ITableWorkspace_sptr m_calibrationTable{nullptr};

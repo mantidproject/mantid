@@ -21,9 +21,7 @@ class FindSubtreeRootsTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static FindSubtreeRootsTest *createSuite() {
-    return new FindSubtreeRootsTest();
-  }
+  static FindSubtreeRootsTest *createSuite() { return new FindSubtreeRootsTest(); }
   static void destroySuite(FindSubtreeRootsTest *suite) { delete suite; }
 
   void testForSingleLocation() {
@@ -40,8 +38,7 @@ public:
 
   void testTwoSiblingsResultsInTwoRoots() {
     auto findSubtreeRoots = FindSubtreeRoots();
-    auto region =
-        std::vector<RowLocation>({RowLocation({1}), RowLocation({2})});
+    auto region = std::vector<RowLocation>({RowLocation({1}), RowLocation({2})});
 
     // clang-format off
     auto expectedRoots = std::vector<RowLocation>({
@@ -57,8 +54,7 @@ public:
 
   void testParentAndChildResultsInParent() {
     auto findSubtreeRoots = FindSubtreeRoots();
-    auto region =
-        std::vector<RowLocation>({RowLocation({1}), RowLocation({1, 2})});
+    auto region = std::vector<RowLocation>({RowLocation({1}), RowLocation({1, 2})});
 
     auto expectedRoots = std::vector<RowLocation>({RowLocation({1})});
 
@@ -77,8 +73,7 @@ public:
     });
     // clang-format on
 
-    auto expectedRoots =
-        std::vector<RowLocation>({RowLocation({1}), RowLocation({2})});
+    auto expectedRoots = std::vector<RowLocation>({RowLocation({1}), RowLocation({2})});
 
     auto roots = findSubtreeRoots(region);
     TS_ASSERT(roots.is_initialized());

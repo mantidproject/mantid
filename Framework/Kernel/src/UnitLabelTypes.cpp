@@ -21,11 +21,9 @@ const UnitLabel Symbol::Nanosecond("ns");
 // Angstrom
 const UnitLabel Symbol::Angstrom("Angstrom", L"\u212b", "\\AA");
 // InverseAngstrom
-const UnitLabel Symbol::InverseAngstrom("Angstrom^-1", L"\u212b\u207b\u00b9",
-                                        "\\AA^{-1}");
+const UnitLabel Symbol::InverseAngstrom("Angstrom^-1", L"\u212b\u207b\u00b9", "\\AA^{-1}");
 // InverseAngstromSq
-const UnitLabel Symbol::InverseAngstromSq("Angstrom^-2", L"\u212b\u207b\u00b2",
-                                          "\\AA^{-2}");
+const UnitLabel Symbol::InverseAngstromSq("Angstrom^-2", L"\u212b\u207b\u00b2", "\\AA^{-2}");
 /// MilliElectronVolts
 const UnitLabel Symbol::MilliElectronVolts("meV");
 /// GHz

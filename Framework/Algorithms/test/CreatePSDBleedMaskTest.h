@@ -24,13 +24,9 @@ using Mantid::Geometry::Instrument_sptr;
 class CreatePSDBleedMaskTest : public CxxTest::TestSuite {
 
 public:
-  void test_Name() {
-    TS_ASSERT_EQUALS(diagnostic.name(), "CreatePSDBleedMask");
-  }
+  void test_Name() { TS_ASSERT_EQUALS(diagnostic.name(), "CreatePSDBleedMask"); }
 
-  void test_Category() {
-    TS_ASSERT_EQUALS(diagnostic.category(), "Diagnostics");
-  }
+  void test_Category() { TS_ASSERT_EQUALS(diagnostic.category(), "Diagnostics"); }
 
   void test_That_Tube_Based_Detector_Gives_Expected_Masking() {
     using Mantid::API::MatrixWorkspace_sptr;
@@ -44,8 +40,7 @@ public:
 
     TS_ASSERT(diagnostic.isInitialized());
 
-    diagnostic.setProperty<Mantid::API::MatrixWorkspace_sptr>("InputWorkspace",
-                                                              testWS);
+    diagnostic.setProperty<Mantid::API::MatrixWorkspace_sptr>("InputWorkspace", testWS);
     const std::string outputName("PSDBleedMask-Test");
     diagnostic.setPropertyValue("OutputWorkspace", outputName);
     // Based on test setup: Passing tubes should have a framerate 9.2 and the
@@ -64,15 +59,13 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(diagnostic.execute());
 
-    Mantid::API::AnalysisDataServiceImpl &dataStore =
-        Mantid::API::AnalysisDataService::Instance();
+    Mantid::API::AnalysisDataServiceImpl &dataStore = Mantid::API::AnalysisDataService::Instance();
     bool ws_found = dataStore.doesExist(outputName);
     TS_ASSERT(ws_found);
     if (!ws_found)
       return;
     MatrixWorkspace_sptr outputWS =
-        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            dataStore.retrieve(outputName));
+        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(dataStore.retrieve(outputName));
     TS_ASSERT(outputWS);
     if (!outputWS) {
       TS_FAIL("Cannot find output workspace");
@@ -107,12 +100,9 @@ private:
     const int nBins(5);
     // YLength = nTubes * nPixelsPerTube
     const int nSpectra(nTubes * nPixelsPerTube);
-    auto testWS = create<Workspace2D>(
-        ComponentCreationHelper::createInstrumentWithPSDTubes(nTubes,
-                                                              nPixelsPerTube),
-        IndexInfo(nSpectra),
-        Histogram(BinEdges(nBins + 1, LinearGenerator(0.0, 1.0)),
-                  Counts(nBins, 2.0)));
+    auto testWS = create<Workspace2D>(ComponentCreationHelper::createInstrumentWithPSDTubes(nTubes, nPixelsPerTube),
+                                      IndexInfo(nSpectra),
+                                      Histogram(BinEdges(nBins + 1, LinearGenerator(0.0, 1.0)), Counts(nBins, 2.0)));
     // Set a spectra to have high count such that the fail the test
     const int failedTube(1);
     // Set a high value to tip that tube over the max count rate

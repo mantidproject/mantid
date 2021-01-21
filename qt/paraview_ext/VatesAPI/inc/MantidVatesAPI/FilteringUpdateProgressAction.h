@@ -21,17 +21,13 @@ namespace VATES {
 
 /// Template argument is the exact filter/source/reader providing the public
 /// UpdateAlgorithmProgress method.
-template <typename Filter>
-class DLLExport FilterUpdateProgressAction : public ProgressAction {
+template <typename Filter> class DLLExport FilterUpdateProgressAction : public ProgressAction {
 
 public:
-  FilterUpdateProgressAction(Filter *filter, const std::string &message)
-      : m_filter(filter), m_message(message) {}
+  FilterUpdateProgressAction(Filter *filter, const std::string &message) : m_filter(filter), m_message(message) {}
   FilterUpdateProgressAction &operator=(FilterUpdateProgressAction &) = delete;
   FilterUpdateProgressAction(FilterUpdateProgressAction &) = delete;
-  void eventRaised(double progress) override {
-    m_filter->updateAlgorithmProgress(progress, m_message);
-  }
+  void eventRaised(double progress) override { m_filter->updateAlgorithmProgress(progress, m_message); }
 
   ~FilterUpdateProgressAction() {}
 

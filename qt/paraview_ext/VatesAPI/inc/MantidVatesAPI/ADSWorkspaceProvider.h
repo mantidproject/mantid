@@ -18,8 +18,7 @@ Service Instance under-the-hood.
 @author Owen Arnold, Tessella plc
 @date 22/08/2011
 */
-template <typename Workspace_Type>
-class DLLExport ADSWorkspaceProvider : public WorkspaceProvider {
+template <typename Workspace_Type> class DLLExport ADSWorkspaceProvider : public WorkspaceProvider {
 public:
   ADSWorkspaceProvider() = default;
   ADSWorkspaceProvider &operator=(const ADSWorkspaceProvider &) = delete;

@@ -37,18 +37,15 @@
 namespace Mantid {
 namespace Vates {
 namespace SimpleGui {
-VatesParaViewApplication::VatesParaViewApplication()
-    : m_logger("VatesParaViewApplication"), m_behaviorsSetup(false) {
+VatesParaViewApplication::VatesParaViewApplication() : m_logger("VatesParaViewApplication"), m_behaviorsSetup(false) {
   // Get the plugin path that we set in the ConfigService.
   const auto &configSvc = Kernel::ConfigService::Instance();
-  const auto pvPluginsPath =
-      MantidQt::API::qtPluginPathFromCfg("pvplugins.directory");
+  const auto pvPluginsPath = MantidQt::API::qtPluginPathFromCfg("pvplugins.directory");
   if (pvPluginsPath.empty()) {
-    throw std::runtime_error(
-        "pvplugins.directory key not setup.\nVates plugins will not be "
-        "available.\n"
-        "Further use will cause the program to crash.\nPlease exit and "
-        "set this variable.");
+    throw std::runtime_error("pvplugins.directory key not setup.\nVates plugins will not be "
+                             "available.\n"
+                             "Further use will cause the program to crash.\nPlease exit and "
+                             "set this variable.");
   }
 
   Q_ASSERT(pqApplicationCore::instance() == nullptr);

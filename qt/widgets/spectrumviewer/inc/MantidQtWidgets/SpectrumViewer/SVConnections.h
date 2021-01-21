@@ -39,25 +39,19 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SVConnections : public QWidget {
 public:
   /// Construct the object that links the GUI components to the other specifed
   /// higher level objects.
-  SVConnections(Ui_SpectrumViewer *ui, SpectrumView *spectrumView,
-                SpectrumDisplay *spectrumDisplay, GraphDisplay *hGraphDisplay,
-                GraphDisplay *vGraphDisplay);
+  SVConnections(Ui_SpectrumViewer *ui, SpectrumView *spectrumView, SpectrumDisplay *spectrumDisplay,
+                GraphDisplay *hGraphDisplay, GraphDisplay *vGraphDisplay);
 
   ~SVConnections() override;
 
   /// Set the pix map that shows the color scale from the specified color maps
-  void showColorScale(std::vector<QRgb> &positiveColorTable,
-                      std::vector<QRgb> &negativeColorTable);
+  void showColorScale(std::vector<QRgb> &positiveColorTable, std::vector<QRgb> &negativeColorTable);
 
   /// Get the applied color scales
-  std::pair<ColorMaps::ColorScale, ColorMaps::ColorScale>
-  getColorScales() const {
-    return m_colorScales;
-  }
+  std::pair<ColorMaps::ColorScale, ColorMaps::ColorScale> getColorScales() const { return m_colorScales; }
   /// Get the color map file name
   QString getColorMapFileName() const { return m_colorMapFileName; }
-  void setColorScale(ColorMaps::ColorScale positive,
-                     ColorMaps::ColorScale negative);
+  void setColorScale(ColorMaps::ColorScale positive, ColorMaps::ColorScale negative);
 
 public slots:
   void closeViewer();

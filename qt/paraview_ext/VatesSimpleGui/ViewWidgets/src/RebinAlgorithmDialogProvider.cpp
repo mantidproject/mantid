@@ -45,8 +45,7 @@ Mantid::Kernel::Logger g_log("RebinAlgorithmDialogProvider");
 const size_t RebinAlgorithmDialogProvider::BinCutOffValue = 50;
 
 RebinAlgorithmDialogProvider::RebinAlgorithmDialogProvider(QWidget *parent)
-    : m_lblInputWorkspace("InputWorkspace"),
-      m_lblOutputWorkspace("OutputWorkspace"), m_parent(parent) {}
+    : m_lblInputWorkspace("InputWorkspace"), m_lblOutputWorkspace("OutputWorkspace"), m_parent(parent) {}
 
 RebinAlgorithmDialogProvider::~RebinAlgorithmDialogProvider() {}
 
@@ -56,9 +55,8 @@ RebinAlgorithmDialogProvider::~RebinAlgorithmDialogProvider() {}
  * @param outputWorkspace The name of the output workspace.
  * @param algorithmType The type of algorithm which is to be used for rebinning.
  */
-void RebinAlgorithmDialogProvider::showDialog(
-    const std::string &inputWorkspace, const std::string &outputWorkspace,
-    const std::string &algorithmType) {
+void RebinAlgorithmDialogProvider::showDialog(const std::string &inputWorkspace, const std::string &outputWorkspace,
+                                              const std::string &algorithmType) {
   if (inputWorkspace.empty() || outputWorkspace.empty()) {
     return;
   }
@@ -83,20 +81,17 @@ void RebinAlgorithmDialogProvider::showDialog(
  * @param workspaceName The name of the input workspace.
  * @returns A pointer to the current event workspace
  */
-Mantid::API::IMDEventWorkspace_sptr
-RebinAlgorithmDialogProvider::getWorkspace(const std::string &workspaceName) {
+Mantid::API::IMDEventWorkspace_sptr RebinAlgorithmDialogProvider::getWorkspace(const std::string &workspaceName) {
   Mantid::API::IMDEventWorkspace_sptr eventWorkspace;
 
   if (!m_adsWorkspaceProvider.canProvideWorkspace(workspaceName)) {
     return eventWorkspace;
   }
 
-  Mantid::API::Workspace_sptr workspace =
-      m_adsWorkspaceProvider.fetchWorkspace(workspaceName);
+  Mantid::API::Workspace_sptr workspace = m_adsWorkspaceProvider.fetchWorkspace(workspaceName);
 
   // Make sure it is a and MDEvent
-  eventWorkspace =
-      std::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(workspace);
+  eventWorkspace = std::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(workspace);
 
   return eventWorkspace;
 }
@@ -107,16 +102,13 @@ RebinAlgorithmDialogProvider::getWorkspace(const std::string &workspaceName) {
  * @param version The version of the algorithm
  * @returns A pointer to the newly created algorithm.
  */
-Mantid::API::IAlgorithm_sptr
-RebinAlgorithmDialogProvider::createAlgorithm(const std::string &algorithmName,
-                                              int version) {
+Mantid::API::IAlgorithm_sptr RebinAlgorithmDialogProvider::createAlgorithm(const std::string &algorithmName,
+                                                                           int version) {
   Mantid::API::IAlgorithm_sptr alg;
   try {
-    alg = Mantid::API::AlgorithmManager::Instance().create(algorithmName,
-                                                           version);
+    alg = Mantid::API::AlgorithmManager::Instance().create(algorithmName, version);
   } catch (...) {
-    g_log.warning() << "Error: " << algorithmName
-                    << " was not created. Version number is " << version;
+    g_log.warning() << "Error: " << algorithmName << " was not created. Version number is " << version;
   }
   return alg;
 }
@@ -129,9 +121,10 @@ RebinAlgorithmDialogProvider::createAlgorithm(const std::string &algorithmName,
  * @param algorithmType The algorithm type.
  * @returns The algorithm dialog
  */
-MantidQt::API::AlgorithmDialog *RebinAlgorithmDialogProvider::createDialog(
-    const Mantid::API::IAlgorithm &algorithm, const std::string &inputWorkspace,
-    const std::string &outputWorkspace, const std::string &algorithmType) {
+MantidQt::API::AlgorithmDialog *RebinAlgorithmDialogProvider::createDialog(const Mantid::API::IAlgorithm &algorithm,
+                                                                           const std::string &inputWorkspace,
+                                                                           const std::string &outputWorkspace,
+                                                                           const std::string &algorithmType) {
   QHash<QString, QString> presets;
   // Check if a workspace is selected in the dock and set this as a preference
   // for the input workspace
@@ -142,8 +135,8 @@ MantidQt::API::AlgorithmDialog *RebinAlgorithmDialogProvider::createDialog(
   presets.insert(m_lblInputWorkspace, QString::fromStdString(inputWorkspace));
   presets.insert(m_lblOutputWorkspace, QString::fromStdString(outputWorkspace));
 
-  auto dialog = interfaceManager.createDialogFromName(
-      QString::fromStdString(algorithmType), -1, m_parent, false, presets);
+  auto dialog =
+      interfaceManager.createDialogFromName(QString::fromStdString(algorithmType), -1, m_parent, false, presets);
 
   // The parent so that the dialog appears on top of it
   dialog->setParent(m_parent);
@@ -155,8 +148,7 @@ MantidQt::API::AlgorithmDialog *RebinAlgorithmDialogProvider::createDialog(
   flags |= Qt::WindowContextHelpButtonHint;
   dialog->setWindowFlags(flags);
 
-  if (SlicingAlgorithmDialog *slicingDialog =
-          dynamic_cast<SlicingAlgorithmDialog *>(dialog)) {
+  if (SlicingAlgorithmDialog *slicingDialog = dynamic_cast<SlicingAlgorithmDialog *>(dialog)) {
 
     slicingDialog->customiseLayoutForVsi(inputWorkspace);
 
@@ -172,17 +164,14 @@ MantidQt::API::AlgorithmDialog *RebinAlgorithmDialogProvider::createDialog(
  * @param dialog A pointer to the SliceMDDialog
  * @param inputWorkspace The name of the input workspace.
  */
-void RebinAlgorithmDialogProvider::setAxisDimensions(
-    MantidQt::MantidWidgets::SlicingAlgorithmDialog *dialog,
-    const std::string &inputWorkspace) {
-  Mantid::API::IMDEventWorkspace_sptr eventWorkspace =
-      getWorkspace(inputWorkspace);
+void RebinAlgorithmDialogProvider::setAxisDimensions(MantidQt::MantidWidgets::SlicingAlgorithmDialog *dialog,
+                                                     const std::string &inputWorkspace) {
+  Mantid::API::IMDEventWorkspace_sptr eventWorkspace = getWorkspace(inputWorkspace);
 
   size_t nDimensions = eventWorkspace->getNumDims();
 
   for (size_t index = 0; index < nDimensions; ++index) {
-    Mantid::Geometry::IMDDimension_const_sptr dim =
-        eventWorkspace->getDimension(index);
+    Mantid::Geometry::IMDDimension_const_sptr dim = eventWorkspace->getDimension(index);
 
     std::string name = dim->getName();
     std::string dimensionId = dim->getDimensionId();
@@ -196,15 +185,12 @@ void RebinAlgorithmDialogProvider::setAxisDimensions(
       // Only do this for BinMD, it is too costly for SliceMD to have very large
       // cuts
       if (dynamic_cast<MantidQt::MantidWidgets::BinMDDialog *>(dialog)) {
-        newNumberOfBins =
-            QString::number(static_cast<unsigned long long>(BinCutOffValue));
+        newNumberOfBins = QString::number(static_cast<unsigned long long>(BinCutOffValue));
       } else {
-        newNumberOfBins =
-            QString::number(static_cast<unsigned long long>(numberOfBins));
+        newNumberOfBins = QString::number(static_cast<unsigned long long>(numberOfBins));
       }
     } else {
-      newNumberOfBins =
-          QString::number(static_cast<unsigned long long>(numberOfBins));
+      newNumberOfBins = QString::number(static_cast<unsigned long long>(numberOfBins));
     }
 
     // Set the name
@@ -216,10 +202,8 @@ void RebinAlgorithmDialogProvider::setAxisDimensions(
     }
 
     // Check here if the set bins are OK
-    QString propertyValue = QString::fromStdString(identifier) + "," +
-                            QString::number(static_cast<float>(minimum)) + "," +
-                            QString::number(static_cast<float>(maximum)) + "," +
-                            newNumberOfBins;
+    QString propertyValue = QString::fromStdString(identifier) + "," + QString::number(static_cast<float>(minimum)) +
+                            "," + QString::number(static_cast<float>(maximum)) + "," + newNumberOfBins;
 
     dialog->resestAlignedDimProperty(index, propertyValue);
   }

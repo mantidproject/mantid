@@ -21,11 +21,9 @@ namespace Reflectometry {
   @param numberOfBinsQx: Number of bins in the qx axis
   @param numberOfBinsQz: Number of bins in the qz axis
 */
-ReflectometryTransformKiKf::ReflectometryTransformKiKf(
-    double kiMin, double kiMax, double kfMin, double kfMax,
-    double incidentTheta, int numberOfBinsQx, int numberOfBinsQz)
-    : ReflectometryTransform("Ki", "ki", kiMin, kiMax, "Kf", "kf", kfMin, kfMax,
-                             numberOfBinsQx, numberOfBinsQz,
+ReflectometryTransformKiKf::ReflectometryTransformKiKf(double kiMin, double kiMax, double kfMin, double kfMax,
+                                                       double incidentTheta, int numberOfBinsQx, int numberOfBinsQz)
+    : ReflectometryTransform("Ki", "ki", kiMin, kiMax, "Kf", "kf", kfMin, kfMax, numberOfBinsQx, numberOfBinsQz,
                              new CalculateReflectometryKiKf()) {
   if (incidentTheta < 0 || incidentTheta > 90) {
     throw std::out_of_range("incident theta angle must be > 0 and < 90");

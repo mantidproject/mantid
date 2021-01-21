@@ -13,16 +13,13 @@
 using namespace MantidQt::SliceViewer;
 using namespace testing;
 
-class PeakRepresentationSphereExposeProtectedWrapper
-    : public PeakRepresentationSphere {
+class PeakRepresentationSphereExposeProtectedWrapper : public PeakRepresentationSphere {
 public:
-  PeakRepresentationSphereExposeProtectedWrapper(
-      const Mantid::Kernel::V3D &origin, const double &peakRadius,
-      const double &backgroundInnerRadius, const double &backgroundOuterRadius)
-      : PeakRepresentationSphere(origin, peakRadius, backgroundInnerRadius,
-                                 backgroundOuterRadius) {}
-  std::shared_ptr<PeakPrimitives> getDrawingInformationWrapper(
-      PeakRepresentationViewInformation viewInformation) {
+  PeakRepresentationSphereExposeProtectedWrapper(const Mantid::Kernel::V3D &origin, const double &peakRadius,
+                                                 const double &backgroundInnerRadius,
+                                                 const double &backgroundOuterRadius)
+      : PeakRepresentationSphere(origin, peakRadius, backgroundInnerRadius, backgroundOuterRadius) {}
+  std::shared_ptr<PeakPrimitives> getDrawingInformationWrapper(PeakRepresentationViewInformation viewInformation) {
     return getDrawingInformation(viewInformation);
   }
 };
@@ -35,8 +32,7 @@ public:
     const double radius = 1;
     const double innerBackgroundRadius = 2;
     const double outerBackgroundRadius = 3;
-    PeakRepresentationSphere peak(origin, radius, innerBackgroundRadius,
-                                  outerBackgroundRadius);
+    PeakRepresentationSphere peak(origin, radius, innerBackgroundRadius, outerBackgroundRadius);
 
     // Act + Assert
     TS_ASSERT_EQUALS(radius, peak.getEffectiveRadius());
@@ -48,8 +44,7 @@ public:
     const double radius = 1;
     const double innerBackgroundRadius = 2;
     const double outerBackgroundRadius = 3;
-    PeakRepresentationSphere peak(origin, radius, innerBackgroundRadius,
-                                  outerBackgroundRadius);
+    PeakRepresentationSphere peak(origin, radius, innerBackgroundRadius, outerBackgroundRadius);
 
     peak.showBackgroundRadius(true);
 
@@ -62,10 +57,8 @@ public:
     const Mantid::Kernel::V3D origin(0, 0, 0);
     const double radius = 1;
     const double innerBackgroundRadius = 2;
-    const double outerBackgroundRadius =
-        0; // This can happen using IntegratePeaksMD.
-    PeakRepresentationSphereExposeProtectedWrapper peak(
-        origin, radius, innerBackgroundRadius, outerBackgroundRadius);
+    const double outerBackgroundRadius = 0; // This can happen using IntegratePeaksMD.
+    PeakRepresentationSphereExposeProtectedWrapper peak(origin, radius, innerBackgroundRadius, outerBackgroundRadius);
 
     peak.showBackgroundRadius(true);
 
@@ -82,12 +75,10 @@ public:
     viewInformation.yOriginWindow = 1;
 
     // Act
-    auto drawingInformation =
-        peak.getDrawingInformationWrapper(viewInformation);
+    auto drawingInformation = peak.getDrawingInformationWrapper(viewInformation);
 
     // Assert
-    auto drawingInformationSphere =
-        std::static_pointer_cast<PeakPrimitiveCircle>(drawingInformation);
+    auto drawingInformationSphere = std::static_pointer_cast<PeakPrimitiveCircle>(drawingInformation);
     // The Return object should be initialized to zero in every field.
     TS_ASSERT_EQUALS(drawingInformationSphere->backgroundOuterRadiusX,
                      drawingInformationSphere->backgroundInnerRadiusX);
@@ -95,18 +86,15 @@ public:
                      drawingInformationSphere->backgroundInnerRadiusY);
   }
 
-  void
-  test_that_setting_slice_point_to_intersect_produces_valid_drawing_information() {
+  void test_that_setting_slice_point_to_intersect_produces_valid_drawing_information() {
     // Arrange
     const Mantid::Kernel::V3D origin(0, 0, 0);
     const double radius = 1;
     const double innerBackgroundRadius = 2;
     const double outerBackgroundRadius = 3;
-    PeakRepresentationSphereExposeProtectedWrapper peak(
-        origin, radius, innerBackgroundRadius, outerBackgroundRadius);
+    PeakRepresentationSphereExposeProtectedWrapper peak(origin, radius, innerBackgroundRadius, outerBackgroundRadius);
 
-    const double slicePoint =
-        radius / 2; // set to be half way through the radius.
+    const double slicePoint = radius / 2; // set to be half way through the radius.
     peak.setSlicePoint(slicePoint);
 
     // View Settings Scale 1:1 on both x and y for simplicity.
@@ -119,12 +107,10 @@ public:
     viewInformation.yOriginWindow = 1;
 
     // Act
-    auto drawingInformation =
-        peak.getDrawingInformationWrapper(viewInformation);
+    auto drawingInformation = peak.getDrawingInformationWrapper(viewInformation);
 
     // Assert
-    auto drawingInformationSphere =
-        std::static_pointer_cast<PeakPrimitiveCircle>(drawingInformation);
+    auto drawingInformationSphere = std::static_pointer_cast<PeakPrimitiveCircle>(drawingInformation);
 
     // Quick white-box calculations of the outputs to expect.
     const double expectedOpacityAtDistance = (0.8 - 0) / 2;
@@ -132,28 +118,22 @@ public:
     auto planeDistanceSQ = std::pow((slicePoint - origin.Z()), 2);
     const double expectedRadius = std::sqrt(peakRadSQ - planeDistanceSQ);
 
-    TS_ASSERT_EQUALS(expectedOpacityAtDistance,
-                     drawingInformationSphere->peakOpacityAtDistance);
-    TS_ASSERT_EQUALS(expectedRadius,
-                     drawingInformationSphere->peakInnerRadiusX);
-    TS_ASSERT_EQUALS(expectedRadius,
-                     drawingInformationSphere->peakInnerRadiusY);
+    TS_ASSERT_EQUALS(expectedOpacityAtDistance, drawingInformationSphere->peakOpacityAtDistance);
+    TS_ASSERT_EQUALS(expectedRadius, drawingInformationSphere->peakInnerRadiusX);
+    TS_ASSERT_EQUALS(expectedRadius, drawingInformationSphere->peakInnerRadiusY);
   }
 
   void test_move_position_produces_correct_position() {
     // Arrange
     auto *pMockTransform = new MockPeakTransform;
-    EXPECT_CALL(*pMockTransform, transform(_))
-        .Times(1)
-        .WillOnce(Return(Mantid::Kernel::V3D(0, 0, 0)));
+    EXPECT_CALL(*pMockTransform, transform(_)).Times(1).WillOnce(Return(Mantid::Kernel::V3D(0, 0, 0)));
     PeakTransform_sptr transform(pMockTransform);
 
     const Mantid::Kernel::V3D origin(0, 0, 0);
     const double radius = 1;
     const double innerBackgroundRadius = 2;
     const double outerBackgroundRadius = 3;
-    PeakRepresentationSphere peak(origin, radius, innerBackgroundRadius,
-                                  outerBackgroundRadius);
+    PeakRepresentationSphere peak(origin, radius, innerBackgroundRadius, outerBackgroundRadius);
 
     // Act
     peak.movePosition(transform);
@@ -179,24 +159,18 @@ public:
     const Mantid::Kernel::V3D origin(0, 0, 0);
     const double radius = 1;                // Not important
     const double innerBackgroundRadius = 2; // Not important
-    const double outerBackgroundRadius =
-        3; // This should be used to control the bounding box.
-    PeakRepresentationSphere peak(origin, radius, innerBackgroundRadius,
-                                  outerBackgroundRadius);
+    const double outerBackgroundRadius = 3; // This should be used to control the bounding box.
+    PeakRepresentationSphere peak(origin, radius, innerBackgroundRadius, outerBackgroundRadius);
 
     // Act
     const auto boundingBox = peak.getBoundingBox();
 
     // Assert
     auto zoomOutFactor = peak.getZoomOutFactor();
-    const double expectedLeft(origin.X() -
-                              zoomOutFactor * outerBackgroundRadius);
-    const double expectedBottom(origin.Y() -
-                                zoomOutFactor * outerBackgroundRadius);
-    const double expectedRight(origin.X() +
-                               zoomOutFactor * outerBackgroundRadius);
-    const double expectedTop(origin.Y() +
-                             zoomOutFactor * outerBackgroundRadius);
+    const double expectedLeft(origin.X() - zoomOutFactor * outerBackgroundRadius);
+    const double expectedBottom(origin.Y() - zoomOutFactor * outerBackgroundRadius);
+    const double expectedRight(origin.X() + zoomOutFactor * outerBackgroundRadius);
+    const double expectedTop(origin.Y() + zoomOutFactor * outerBackgroundRadius);
 
     TS_ASSERT_EQUALS(expectedLeft, boundingBox.left());
     TS_ASSERT_EQUALS(expectedRight, boundingBox.right());
@@ -221,24 +195,18 @@ public:
     const Mantid::Kernel::V3D origin(-1, 1, 0); // Offset origin from (0, 0, 0)
     const double radius = 1;                    // Not important
     const double innerBackgroundRadius = 2;     // Not important
-    const double outerBackgroundRadius =
-        3; // This should be used to control the bounding box.
-    PeakRepresentationSphere peak(origin, radius, innerBackgroundRadius,
-                                  outerBackgroundRadius);
+    const double outerBackgroundRadius = 3;     // This should be used to control the bounding box.
+    PeakRepresentationSphere peak(origin, radius, innerBackgroundRadius, outerBackgroundRadius);
 
     // Act
     auto boundingBox = peak.getBoundingBox();
 
     // Assert
     auto zoomOutFactor = peak.getZoomOutFactor();
-    const double expectedLeft(origin.X() -
-                              zoomOutFactor * outerBackgroundRadius);
-    const double expectedBottom(origin.Y() -
-                                zoomOutFactor * outerBackgroundRadius);
-    const double expectedRight(origin.X() +
-                               zoomOutFactor * outerBackgroundRadius);
-    const double expectedTop(origin.Y() +
-                             zoomOutFactor * outerBackgroundRadius);
+    const double expectedLeft(origin.X() - zoomOutFactor * outerBackgroundRadius);
+    const double expectedBottom(origin.Y() - zoomOutFactor * outerBackgroundRadius);
+    const double expectedRight(origin.X() + zoomOutFactor * outerBackgroundRadius);
+    const double expectedTop(origin.Y() + zoomOutFactor * outerBackgroundRadius);
 
     TS_ASSERT_EQUALS(expectedLeft, boundingBox.left());
     TS_ASSERT_EQUALS(expectedRight, boundingBox.right());
@@ -263,10 +231,8 @@ public:
       for (int y = 0; y < sizeInAxis; ++y) {
         for (int z = 0; z < sizeInAxis; ++z) {
           Mantid::Kernel::V3D peakOrigin(x, y, z);
-          m_peaks.emplace_back(
-              std::make_shared<PeakRepresentationSphereExposeProtectedWrapper>(
-                  peakOrigin, radius, innerBackgroundRadius,
-                  outerBackgroundRadius));
+          m_peaks.emplace_back(std::make_shared<PeakRepresentationSphereExposeProtectedWrapper>(
+              peakOrigin, radius, innerBackgroundRadius, outerBackgroundRadius));
         }
       }
     }
@@ -321,10 +287,8 @@ public:
   }
 
 private:
-  using PeaksRepresentationSphere_sptr =
-      std::shared_ptr<PeakRepresentationSphereExposeProtectedWrapper>;
-  using VecPeaksRepresentationSphere =
-      std::vector<PeaksRepresentationSphere_sptr>;
+  using PeaksRepresentationSphere_sptr = std::shared_ptr<PeakRepresentationSphereExposeProtectedWrapper>;
+  using VecPeaksRepresentationSphere = std::vector<PeaksRepresentationSphere_sptr>;
 
   /// Collection to store a large number of physicalPeaks.
   VecPeaksRepresentationSphere m_peaks;

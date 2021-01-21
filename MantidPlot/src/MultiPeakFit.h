@@ -37,11 +37,9 @@ class MultiPeakFit : public Fit {
 
 public:
   enum PeakProfile { Gauss, Lorentz };
-  MultiPeakFit(ApplicationWindow *parent, Graph *g = nullptr,
-               PeakProfile profile = Gauss, int peaks = 1);
-  MultiPeakFit(ApplicationWindow *parent, Table *t, const QString &xCol,
-               const QString &yCol, int startRow = 0, int endRow = -1,
-               PeakProfile profile = Gauss, int peaks = 1);
+  MultiPeakFit(ApplicationWindow *parent, Graph *g = nullptr, PeakProfile profile = Gauss, int peaks = 1);
+  MultiPeakFit(ApplicationWindow *parent, Table *t, const QString &xCol, const QString &yCol, int startRow = 0,
+               int endRow = -1, PeakProfile profile = Gauss, int peaks = 1);
 
   int peaks() { return d_peaks; };
   void setNumPeaks(int n);
@@ -90,10 +88,9 @@ class LorentzFit : public MultiPeakFit {
 public:
   LorentzFit(ApplicationWindow *parent, Graph *g);
   LorentzFit(ApplicationWindow *parent, Graph *g, const QString &curveTitle);
-  LorentzFit(ApplicationWindow *parent, Graph *g, const QString &curveTitle,
-             double start, double end);
-  LorentzFit(ApplicationWindow *parent, Table *t, const QString &xCol,
-             const QString &yCol, int startRow = 0, int endRow = -1);
+  LorentzFit(ApplicationWindow *parent, Graph *g, const QString &curveTitle, double start, double end);
+  LorentzFit(ApplicationWindow *parent, Table *t, const QString &xCol, const QString &yCol, int startRow = 0,
+             int endRow = -1);
 
 private:
   void init();
@@ -105,10 +102,9 @@ class GaussFit : public MultiPeakFit {
 public:
   GaussFit(ApplicationWindow *parent, Graph *g);
   GaussFit(ApplicationWindow *parent, Graph *g, const QString &curveTitle);
-  GaussFit(ApplicationWindow *parent, Graph *g, const QString &curveTitle,
-           double start, double end);
-  GaussFit(ApplicationWindow *parent, Table *t, const QString &xCol,
-           const QString &yCol, int startRow = 0, int endRow = -1);
+  GaussFit(ApplicationWindow *parent, Graph *g, const QString &curveTitle, double start, double end);
+  GaussFit(ApplicationWindow *parent, Table *t, const QString &xCol, const QString &yCol, int startRow = 0,
+           int endRow = -1);
 
 private:
   void init();
@@ -120,10 +116,9 @@ class GaussAmpFit : public Fit {
 public:
   GaussAmpFit(ApplicationWindow *parent, Graph *g);
   GaussAmpFit(ApplicationWindow *parent, Graph *g, const QString &curveTitle);
-  GaussAmpFit(ApplicationWindow *parent, Graph *g, const QString &curveTitle,
-              double start, double end);
-  GaussAmpFit(ApplicationWindow *parent, Table *t, const QString &xCol,
-              const QString &yCol, int startRow = 0, int endRow = -1);
+  GaussAmpFit(ApplicationWindow *parent, Graph *g, const QString &curveTitle, double start, double end);
+  GaussAmpFit(ApplicationWindow *parent, Table *t, const QString &xCol, const QString &yCol, int startRow = 0,
+              int endRow = -1);
 
   void guessInitialValues() override;
   double eval(double *par, double x) override;

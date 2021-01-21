@@ -34,8 +34,7 @@ public:
   void test_add_element() {
     PreprocessMap preprocessMap;
     preprocessMap.addElement("Runs", "Plus", "", "+");
-    preprocessMap.addElement("Transmission Runs",
-                             "CreateTransmissionWorkspaceAuto", "TRANS_", "_",
+    preprocessMap.addElement("Transmission Runs", "CreateTransmissionWorkspaceAuto", "TRANS_", "_",
                              "FirstTransmissionRun,SecondTransmissionRun");
 
     auto preprocessingInstructions = preprocessMap.asMap();
@@ -46,13 +45,11 @@ public:
     TS_ASSERT_EQUALS(algPlus.separator(), "+");
     TS_ASSERT_EQUALS(algPlus.blacklist(), std::set<QString>());
 
-    PreprocessingAlgorithm algTrans =
-        preprocessingInstructions["Transmission Runs"];
+    PreprocessingAlgorithm algTrans = preprocessingInstructions["Transmission Runs"];
     TS_ASSERT_EQUALS(algTrans.name(), "CreateTransmissionWorkspaceAuto");
     TS_ASSERT_EQUALS(algTrans.prefix(), "TRANS_");
     TS_ASSERT_EQUALS(algTrans.separator(), "_");
-    std::set<QString> blacklist = {"FirstTransmissionRun",
-                                   "SecondTransmissionRun"};
+    std::set<QString> blacklist = {"FirstTransmissionRun", "SecondTransmissionRun"};
     TS_ASSERT_EQUALS(algTrans.blacklist(), blacklist);
   }
 };

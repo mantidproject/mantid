@@ -41,24 +41,17 @@ public:
     const std::string maskedWorkspaceName("forCopyingMasks");
     const std::string resultWorkspaceName("masked");
     AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
-    ads.add(workspaceName,
-            WorkspaceCreationHelper::create2DWorkspaceBinned(5, 25, 0.0));
-    ads.add(maskedWorkspaceName,
-            WorkspaceCreationHelper::create2DWorkspaceBinned(5, 25, 0.0));
+    ads.add(workspaceName, WorkspaceCreationHelper::create2DWorkspaceBinned(5, 25, 0.0));
+    ads.add(maskedWorkspaceName, WorkspaceCreationHelper::create2DWorkspaceBinned(5, 25, 0.0));
 
-    TS_ASSERT_THROWS_NOTHING(
-        masker.setPropertyValue("InputWorkspace", workspaceName));
-    TS_ASSERT_THROWS_NOTHING(
-        masker.setPropertyValue("MaskedWorkspace", maskedWorkspaceName));
-    TS_ASSERT_THROWS_NOTHING(
-        masker.setPropertyValue("OutputWorkspace", resultWorkspaceName));
+    TS_ASSERT_THROWS_NOTHING(masker.setPropertyValue("InputWorkspace", workspaceName));
+    TS_ASSERT_THROWS_NOTHING(masker.setPropertyValue("MaskedWorkspace", maskedWorkspaceName));
+    TS_ASSERT_THROWS_NOTHING(masker.setPropertyValue("OutputWorkspace", resultWorkspaceName));
 
     masker.execute();
     TS_ASSERT(masker.isExecuted());
 
-    MatrixWorkspace_const_sptr outputWS =
-        std::dynamic_pointer_cast<MatrixWorkspace>(
-            ads.retrieve(resultWorkspaceName));
+    MatrixWorkspace_const_sptr outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(ads.retrieve(resultWorkspaceName));
 
     for (size_t i = 0; i < outputWS->getNumberHistograms(); ++i) {
       TS_ASSERT(!outputWS->hasMaskedBins(i));
@@ -79,25 +72,20 @@ public:
 
     // Create the input workspace
     const std::string workspaceName("forMasking");
-    MatrixWorkspace_sptr WS =
-        WorkspaceCreationHelper::create2DWorkspaceBinned(3, 10, 0.0);
+    MatrixWorkspace_sptr WS = WorkspaceCreationHelper::create2DWorkspaceBinned(3, 10, 0.0);
     ads.add(workspaceName, WS);
 
     // Create a masked workspace
     const std::string maskedWorkspaceName("forCopyingMasks");
-    MatrixWorkspace_sptr maskedWS =
-        WorkspaceCreationHelper::create2DWorkspaceBinned(1, 10, 0.0);
+    MatrixWorkspace_sptr maskedWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 10, 0.0);
     maskedWS->flagMasked(0, 0);
     maskedWS->flagMasked(0, 1);
     maskedWS->flagMasked(0, 2);
     ads.add(maskedWorkspaceName, maskedWS);
 
-    TS_ASSERT_THROWS_NOTHING(
-        masker.setPropertyValue("InputWorkspace", workspaceName));
-    TS_ASSERT_THROWS_NOTHING(
-        masker.setPropertyValue("MaskedWorkspace", maskedWorkspaceName));
-    TS_ASSERT_THROWS_NOTHING(
-        masker.setPropertyValue("OutputWorkspace", workspaceName));
+    TS_ASSERT_THROWS_NOTHING(masker.setPropertyValue("InputWorkspace", workspaceName));
+    TS_ASSERT_THROWS_NOTHING(masker.setPropertyValue("MaskedWorkspace", maskedWorkspaceName));
+    TS_ASSERT_THROWS_NOTHING(masker.setPropertyValue("OutputWorkspace", workspaceName));
 
     TS_ASSERT_THROWS_NOTHING(masker.execute());
     TS_ASSERT(masker.isExecuted());

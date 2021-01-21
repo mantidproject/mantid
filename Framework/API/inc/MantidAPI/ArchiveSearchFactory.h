@@ -24,12 +24,10 @@ Creates instances of IArchiveSearch
 @author Roman Tolchenov, Tessella plc
 @date 27/07/2010
 */
-class MANTID_API_DLL ArchiveSearchFactoryImpl
-    : public Kernel::DynamicFactory<IArchiveSearch> {
+class MANTID_API_DLL ArchiveSearchFactoryImpl : public Kernel::DynamicFactory<IArchiveSearch> {
 public:
   ArchiveSearchFactoryImpl(const ArchiveSearchFactoryImpl &) = delete;
-  ArchiveSearchFactoryImpl &
-  operator=(const ArchiveSearchFactoryImpl &) = delete;
+  ArchiveSearchFactoryImpl &operator=(const ArchiveSearchFactoryImpl &) = delete;
 
 private:
   friend struct Mantid::Kernel::CreateUsingNew<ArchiveSearchFactoryImpl>;
@@ -40,14 +38,12 @@ private:
   ~ArchiveSearchFactoryImpl() override = default;
 };
 
-using ArchiveSearchFactory =
-    Mantid::Kernel::SingletonHolder<ArchiveSearchFactoryImpl>;
+using ArchiveSearchFactory = Mantid::Kernel::SingletonHolder<ArchiveSearchFactoryImpl>;
 } // namespace API
 } // namespace Mantid
 
 namespace Mantid {
 namespace Kernel {
-EXTERN_MANTID_API template class MANTID_API_DLL
-    Mantid::Kernel::SingletonHolder<Mantid::API::ArchiveSearchFactoryImpl>;
+EXTERN_MANTID_API template class MANTID_API_DLL Mantid::Kernel::SingletonHolder<Mantid::API::ArchiveSearchFactoryImpl>;
 }
 } // namespace Mantid

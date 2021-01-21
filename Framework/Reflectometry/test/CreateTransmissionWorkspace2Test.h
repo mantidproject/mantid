@@ -30,21 +30,15 @@ private:
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static CreateTransmissionWorkspace2Test *createSuite() {
-    return new CreateTransmissionWorkspace2Test();
-  }
-  static void destroySuite(CreateTransmissionWorkspace2Test *suite) {
-    delete suite;
-  }
+  static CreateTransmissionWorkspace2Test *createSuite() { return new CreateTransmissionWorkspace2Test(); }
+  static void destroySuite(CreateTransmissionWorkspace2Test *suite) { delete suite; }
 
   CreateTransmissionWorkspace2Test() {
     FrameworkManager::Instance();
     // A multi detector ws
-    m_multiDetectorWS =
-        create2DWorkspaceWithReflectometryInstrumentMultiDetector();
+    m_multiDetectorWS = create2DWorkspaceWithReflectometryInstrumentMultiDetector();
     // A workspace in wavelength
-    m_wavelengthWS =
-        create2DWorkspaceWithReflectometryInstrumentMultiDetector();
+    m_wavelengthWS = create2DWorkspaceWithReflectometryInstrumentMultiDetector();
     m_wavelengthWS->getAxis(0)->setUnit("Wavelength");
   }
 
@@ -65,10 +59,8 @@ public:
     CreateTransmissionWorkspace2 alg;
     alg.setChild(true);
     alg.initialize();
-    TS_ASSERT_THROWS_ANYTHING(
-        alg.setProperty("FirstTransmissionRun", m_wavelengthWS));
-    TS_ASSERT_THROWS_ANYTHING(
-        alg.setProperty("SecondTransmissionRun", m_wavelengthWS));
+    TS_ASSERT_THROWS_ANYTHING(alg.setProperty("FirstTransmissionRun", m_wavelengthWS));
+    TS_ASSERT_THROWS_ANYTHING(alg.setProperty("SecondTransmissionRun", m_wavelengthWS));
   }
 
   void test_wavelength_min_is_mandatory() {
@@ -404,8 +396,7 @@ public:
     alg.setPropertyValue("OutputWorkspace", "outWS");
     alg.execute();
     check_stored_lambda_workspace("outWS");
-    check_output_not_set(alg, "OutputWorkspaceFirstTransmission",
-                         "TRANS_LAM_1234");
+    check_output_not_set(alg, "OutputWorkspaceFirstTransmission", "TRANS_LAM_1234");
   }
 
   void test_one_run_sets_output_workspace_when_child() {
@@ -415,8 +406,7 @@ public:
     alg.setChild(true);
     alg.execute();
     check_output_lambda_workspace(alg, "OutputWorkspace", "outWS");
-    check_output_not_set(alg, "OutputWorkspaceFirstTransmission",
-                         "TRANS_LAM_1234");
+    check_output_not_set(alg, "OutputWorkspaceFirstTransmission", "TRANS_LAM_1234");
   }
 
   void test_one_run_stores_output_workspace_with_default_name() {
@@ -440,10 +430,8 @@ public:
     alg.setPropertyValue("OutputWorkspace", "outWS");
     alg.execute();
     check_stored_lambda_workspace("outWS");
-    check_output_not_set(alg, "OutputWorkspaceFirstTransmission",
-                         "TRANS_LAM_1234");
-    check_output_not_set(alg, "OutputWorkspaceSecondTransmission",
-                         "TRANS_LAM_4321");
+    check_output_not_set(alg, "OutputWorkspaceFirstTransmission", "TRANS_LAM_1234");
+    check_output_not_set(alg, "OutputWorkspaceSecondTransmission", "TRANS_LAM_4321");
   }
 
   void test_two_runs_does_not_set_interim_output_workspaces_when_child() {
@@ -453,10 +441,8 @@ public:
     alg.setChild(true);
     alg.execute();
     check_output_lambda_workspace(alg, "OutputWorkspace", "outWS");
-    check_output_not_set(alg, "OutputWorkspaceFirstTransmission",
-                         "TRANS_LAM_1234");
-    check_output_not_set(alg, "OutputWorkspaceSecondTransmission",
-                         "TRANS_LAM_4321");
+    check_output_not_set(alg, "OutputWorkspaceFirstTransmission", "TRANS_LAM_1234");
+    check_output_not_set(alg, "OutputWorkspaceSecondTransmission", "TRANS_LAM_4321");
   }
 
   void test_two_runs_sets_all_output_workspaces_when_child_with_debug() {
@@ -467,10 +453,8 @@ public:
     alg.setProperty("Debug", true);
     alg.execute();
     check_output_lambda_workspace(alg, "OutputWorkspace", "outWS");
-    check_output_lambda_workspace(alg, "OutputWorkspaceFirstTransmission",
-                                  "TRANS_LAM_1234");
-    check_output_lambda_workspace(alg, "OutputWorkspaceSecondTransmission",
-                                  "TRANS_LAM_4321");
+    check_output_lambda_workspace(alg, "OutputWorkspaceFirstTransmission", "TRANS_LAM_1234");
+    check_output_lambda_workspace(alg, "OutputWorkspaceSecondTransmission", "TRANS_LAM_4321");
   }
 
   void test_two_runs_stores_stitched_output_workspace_with_default_name() {
@@ -478,20 +462,16 @@ public:
     setup_test_to_check_output_workspaces_with_2_inputs(alg);
     alg.execute();
     check_stored_lambda_workspace("TRANS_LAM_1234_4321");
-    check_output_not_set(alg, "OutputWorkspaceFirstTransmission",
-                         "TRANS_LAM_1234");
-    check_output_not_set(alg, "OutputWorkspaceSecondTransmission",
-                         "TRANS_LAM_4321");
+    check_output_not_set(alg, "OutputWorkspaceFirstTransmission", "TRANS_LAM_1234");
+    check_output_not_set(alg, "OutputWorkspaceSecondTransmission", "TRANS_LAM_4321");
   }
 
-  void
-  test_two_runs_sets_stitched_output_workspace_with_default_name_when_child() {
+  void test_two_runs_sets_stitched_output_workspace_with_default_name_when_child() {
     CreateTransmissionWorkspace2 alg;
     setup_test_to_check_output_workspaces_with_2_inputs(alg);
     alg.setChild(true);
     alg.execute();
-    check_output_lambda_workspace(alg, "OutputWorkspace",
-                                  "TRANS_LAM_1234_4321");
+    check_output_lambda_workspace(alg, "OutputWorkspace", "TRANS_LAM_1234_4321");
   }
 
   void test_two_runs_sets_all_output_workspaces_when_debug_enabled() {
@@ -513,12 +493,10 @@ public:
     check_lambda_workspace(outWS);
     TS_ASSERT(!AnalysisDataService::Instance().doesExist("TRANS_LAM_1234"));
     TS_ASSERT(!AnalysisDataService::Instance().doesExist("TRANS_LAM_4321"));
-    TS_ASSERT(
-        !AnalysisDataService::Instance().doesExist("TRANS_LAM_1234_4321"));
+    TS_ASSERT(!AnalysisDataService::Instance().doesExist("TRANS_LAM_1234_4321"));
   }
 
-  void
-  test_two_runs_stores_no_lambda_workspaces_in_ADS_when_child_with_debug() {
+  void test_two_runs_stores_no_lambda_workspaces_in_ADS_when_child_with_debug() {
     CreateTransmissionWorkspace2 alg;
     setup_test_to_check_output_workspaces_with_2_inputs(alg);
     alg.setChild(true);
@@ -528,8 +506,7 @@ public:
     check_lambda_workspace(outWS);
     TS_ASSERT(!AnalysisDataService::Instance().doesExist("TRANS_LAM_1234"));
     TS_ASSERT(!AnalysisDataService::Instance().doesExist("TRANS_LAM_4321"));
-    TS_ASSERT(
-        !AnalysisDataService::Instance().doesExist("TRANS_LAM_1234_4321"));
+    TS_ASSERT(!AnalysisDataService::Instance().doesExist("TRANS_LAM_1234_4321"));
   }
 
   void test_two_runs_sets_interim_lambda_output_workspaces_when_debug() {
@@ -575,8 +552,7 @@ public:
   }
 
 private:
-  void setup_test_to_check_output_workspaces(CreateTransmissionWorkspace2 &alg,
-                                             bool hasRunNumber = true) {
+  void setup_test_to_check_output_workspaces(CreateTransmissionWorkspace2 &alg, bool hasRunNumber = true) {
     AnalysisDataService::Instance().clear();
     auto inputWS = MatrixWorkspace_sptr(m_multiDetectorWS->clone());
     if (hasRunNumber)
@@ -589,9 +565,9 @@ private:
     alg.setPropertyValue("ProcessingInstructions", "2");
   }
 
-  void setup_test_to_check_output_workspaces_with_2_inputs(
-      CreateTransmissionWorkspace2 &alg, bool firstHasRunNumber = true,
-      bool secondHasRunNumber = true) {
+  void setup_test_to_check_output_workspaces_with_2_inputs(CreateTransmissionWorkspace2 &alg,
+                                                           bool firstHasRunNumber = true,
+                                                           bool secondHasRunNumber = true) {
     setup_test_to_check_output_workspaces(alg, firstHasRunNumber);
     auto inputWS2 = MatrixWorkspace_sptr(m_multiDetectorWS->clone());
     if (secondHasRunNumber)
@@ -599,8 +575,7 @@ private:
     alg.setProperty("SecondTransmissionRun", inputWS2);
   }
 
-  void check_output_lambda_workspace(CreateTransmissionWorkspace2 const &alg,
-                                     std::string const &propertyName,
+  void check_output_lambda_workspace(CreateTransmissionWorkspace2 const &alg, std::string const &propertyName,
                                      std::string const &name) {
     TS_ASSERT_EQUALS(alg.getPropertyValue(propertyName), name);
     MatrixWorkspace_sptr outWS = alg.getProperty(propertyName);
@@ -611,8 +586,7 @@ private:
     auto exists = AnalysisDataService::Instance().doesExist(name);
     TS_ASSERT(exists);
     if (exists) {
-      auto ws =
-          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name);
+      auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name);
       check_lambda_workspace(ws);
     }
   }
@@ -626,8 +600,7 @@ private:
     TS_ASSERT(ws->x(0).back() <= 12.0);
   }
 
-  void check_output_not_set(CreateTransmissionWorkspace2 const &alg,
-                            std::string const &propertyName,
+  void check_output_not_set(CreateTransmissionWorkspace2 const &alg, std::string const &propertyName,
                             std::string const &name) {
     TS_ASSERT(alg.isDefault(propertyName));
     TS_ASSERT(!AnalysisDataService::Instance().doesExist(name));

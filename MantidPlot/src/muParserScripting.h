@@ -46,21 +46,14 @@ class muParserScripting : public ScriptingEnv {
 
 public:
   static const char *langName;
-  explicit muParserScripting(ApplicationWindow *parent)
-      : ScriptingEnv(parent, langName) {
-    d_initialized = true;
-  }
-  static ScriptingEnv *constructor(ApplicationWindow *parent) {
-    return new muParserScripting(parent);
-  }
+  explicit muParserScripting(ApplicationWindow *parent) : ScriptingEnv(parent, langName) { d_initialized = true; }
+  static ScriptingEnv *constructor(ApplicationWindow *parent) { return new muParserScripting(parent); }
 
   /// Set the system arguments. Throws an exception as it is not supported
   void setSysArgs(const QStringList &args) override;
 
-  Script *newScript(const QString &name, QObject *context,
-                    const Script::InteractionType) const override {
-    return new muParserScript(const_cast<muParserScripting *>(this), name,
-                              context);
+  Script *newScript(const QString &name, QObject *context, const Script::InteractionType) const override {
+    return new muParserScript(const_cast<muParserScripting *>(this), name, context);
   }
 
   bool supportsEvaluation() override { return true; }
@@ -88,15 +81,9 @@ private:
   static double mypow(double x, double y) { return pow(x, y); }
   static double bessel_J0(double x) { return gsl_sf_bessel_J0(x); }
   static double bessel_J1(double x) { return gsl_sf_bessel_J1(x); }
-  static double bessel_Jn(double x, double n) {
-    return gsl_sf_bessel_Jn((int)n, x);
-  }
-  static double bessel_Yn(double x, double n) {
-    return gsl_sf_bessel_Yn((int)n, x);
-  }
-  static double bessel_Jn_zero(double n, double s) {
-    return gsl_sf_bessel_zero_Jnu(n, (unsigned int)s);
-  }
+  static double bessel_Jn(double x, double n) { return gsl_sf_bessel_Jn((int)n, x); }
+  static double bessel_Yn(double x, double n) { return gsl_sf_bessel_Yn((int)n, x); }
+  static double bessel_Jn_zero(double n, double s) { return gsl_sf_bessel_zero_Jnu(n, (unsigned int)s); }
   static double bessel_Y0(double x) { return gsl_sf_bessel_Y0(x); }
   static double bessel_Y1(double x) { return gsl_sf_bessel_Y1(x); }
   static double beta(double a, double b) { return gsl_sf_beta(a, b); }

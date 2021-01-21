@@ -39,8 +39,7 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 
-DataSetDialog::DataSetDialog(const QString &text, ApplicationWindow *app,
-                             Graph *g, const Qt::WFlags &fl)
+DataSetDialog::DataSetDialog(const QString &text, ApplicationWindow *app, Graph *g, const Qt::WFlags &fl)
     : QDialog(g, fl), d_app(app), d_graph(g) {
   setAttribute(Qt::WA_DeleteOnClose);
   setWindowTitle(tr("MantidPlot - Select data set"));
@@ -87,9 +86,7 @@ void DataSetDialog::accept() {
   close();
 }
 
-void DataSetDialog::setCurveNames(const QStringList &names) {
-  boxName->addItems(names);
-}
+void DataSetDialog::setCurveNames(const QStringList &names) { boxName->addItems(names); }
 
 void DataSetDialog::setCurentDataSet(const QString &s) {
   int row = boxName->findText(s);

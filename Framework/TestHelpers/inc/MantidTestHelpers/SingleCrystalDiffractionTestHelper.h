@@ -22,26 +22,17 @@ namespace SingleCrystalDiffractionTestHelper {
 class WorkspaceBuilder {
 
 public:
-  WorkspaceBuilder()
-      : m_numPixels(0), m_totalNPixels(0), m_outputAsHistogram(false),
-        m_generator(std::mt19937()()){};
+  WorkspaceBuilder() : m_numPixels(0), m_totalNPixels(0), m_outputAsHistogram(false), m_generator(std::mt19937()()){};
 
   /// Set the total number of peaks to use
   void setNumPixels(const int numPixels);
   /// Set whether to create an event workspace or a histogram workspace
-  void outputAsHistogram(const bool outputAsHistogram) {
-    m_outputAsHistogram = outputAsHistogram;
-  };
+  void outputAsHistogram(const bool outputAsHistogram) { m_outputAsHistogram = outputAsHistogram; };
   /// Set the rebin parameters to use
-  void setRebinParameters(const std::vector<double> &rebinParams) {
-    m_rebinParams = rebinParams;
-  }
-  void addBackground(const bool useBackground) {
-    m_useBackground = useBackground;
-  }
+  void setRebinParameters(const std::vector<double> &rebinParams) { m_rebinParams = rebinParams; }
+  void addBackground(const bool useBackground) { m_useBackground = useBackground; }
   /// Set the parameters for the uniform background
-  void setBackgroundParameters(const int nEvents, const double detRange,
-                               const double tofRange) {
+  void setBackgroundParameters(const int nEvents, const double detRange, const double tofRange) {
     m_backgroundParameters = std::make_tuple(nEvents, detRange, tofRange);
   }
   /// Set the random seed for generating events
@@ -50,13 +41,10 @@ public:
   void addPeakByHKL(const Mantid::Kernel::V3D &hkl, const int numEvents,
                     const std::tuple<double, double, double> &sigmas);
   /// Make a tuple of event workspace and peaks workspace
-  std::tuple<Mantid::API::MatrixWorkspace_sptr,
-             Mantid::DataObjects::PeaksWorkspace_sptr>
-  build();
+  std::tuple<Mantid::API::MatrixWorkspace_sptr, Mantid::DataObjects::PeaksWorkspace_sptr> build();
 
 private:
-  using HKLPeakDescriptor =
-      std::tuple<Mantid::Kernel::V3D, int, std::tuple<double, double, double>>;
+  using HKLPeakDescriptor = std::tuple<Mantid::Kernel::V3D, int, std::tuple<double, double, double>>;
 
   /// Create a dummy instrument
   void createInstrument();

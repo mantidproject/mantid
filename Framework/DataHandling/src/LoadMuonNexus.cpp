@@ -43,29 +43,24 @@ using namespace Mantid::NeXus;
 
 /// Empty default constructor
 LoadMuonNexus::LoadMuonNexus()
-    : m_filename(), m_entrynumber(0), m_numberOfSpectra(0),
-      m_numberOfPeriods(0), m_list(false), m_interval(false), m_spec_list(),
-      m_spec_min(0), m_spec_max(EMPTY_INT()) {}
+    : m_filename(), m_entrynumber(0), m_numberOfSpectra(0), m_numberOfPeriods(0), m_list(false), m_interval(false),
+      m_spec_list(), m_spec_min(0), m_spec_max(EMPTY_INT()) {}
 
 /// Initialisation method.
 void LoadMuonNexus::init() {
-  declareProperty(std::make_unique<FileProperty>("Filename", "",
-                                                 FileProperty::Load, ".nxs"),
+  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Load, ".nxs"),
                   "The name of the Nexus file to load");
 
-  declareProperty(
-      std::make_unique<WorkspaceProperty<Workspace>>("OutputWorkspace", "",
-                                                     Direction::Output),
-      "The name of the workspace to be created as the output of the\n"
-      "algorithm. For multiperiod files, one workspace will be\n"
-      "generated for each period");
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("OutputWorkspace", "", Direction::Output),
+                  "The name of the workspace to be created as the output of the\n"
+                  "algorithm. For multiperiod files, one workspace will be\n"
+                  "generated for each period");
 
   auto mustBePositive = std::make_shared<BoundedValidator<specnum_t>>();
   mustBePositive->setLower(0);
   declareProperty("SpectrumMin", static_cast<specnum_t>(0), mustBePositive,
                   "Index number of the first spectrum to read\n");
-  declareProperty("SpectrumMax", static_cast<specnum_t>(EMPTY_INT()),
-                  mustBePositive,
+  declareProperty("SpectrumMax", static_cast<specnum_t>(EMPTY_INT()), mustBePositive,
                   "Index of last spectrum to read\n"
                   "(default the last spectrum)");
 
@@ -87,32 +82,25 @@ void LoadMuonNexus::init() {
                   "one workspace");
 
   std::vector<std::string> FieldOptions{"Transverse", "Longitudinal"};
-  declareProperty("MainFieldDirection", "Transverse",
-                  std::make_shared<StringListValidator>(FieldOptions),
+  declareProperty("MainFieldDirection", "Transverse", std::make_shared<StringListValidator>(FieldOptions),
                   "Output the main field direction if specified in Nexus file "
                   "(run/instrument/detector/orientation, default "
                   "longitudinal). Version 1 only.",
                   Direction::Output);
 
-  declareProperty("TimeZero", 0.0,
-                  "Time zero in units of micro-seconds (default to 0.0)",
-                  Direction::Output);
-  declareProperty("FirstGoodData", 0.0,
-                  "First good data in units of micro-seconds (default to 0.0)",
+  declareProperty("TimeZero", 0.0, "Time zero in units of micro-seconds (default to 0.0)", Direction::Output);
+  declareProperty("FirstGoodData", 0.0, "First good data in units of micro-seconds (default to 0.0)",
                   Direction::Output);
 
   declareProperty(
-      std::make_unique<WorkspaceProperty<Workspace>>(
-          "DeadTimeTable", "", Direction::Output, PropertyMode::Optional),
+      std::make_unique<WorkspaceProperty<Workspace>>("DeadTimeTable", "", Direction::Output, PropertyMode::Optional),
       "Table or a group of tables containing detector dead times. Version 1 "
       "only.");
 
-  declareProperty(
-      std::make_unique<WorkspaceProperty<Workspace>>("DetectorGroupingTable",
-                                                     "", Direction::Output,
-                                                     PropertyMode::Optional),
-      "Table or a group of tables with information about the "
-      "detector grouping stored in the file (if any). Version 1 only.");
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("DetectorGroupingTable", "", Direction::Output,
+                                                                 PropertyMode::Optional),
+                  "Table or a group of tables with information about the "
+                  "detector grouping stored in the file (if any). Version 1 only.");
 }
 
 /// Validates the optional 'spectra to read' properties, if they have been set
@@ -128,10 +116,8 @@ void LoadMuonNexus::checkOptionalProperties() {
 
   // Check validity of spectra list property, if set
   if (m_list) {
-    const specnum_t minlist =
-        *min_element(m_spec_list.begin(), m_spec_list.end());
-    const specnum_t maxlist =
-        *max_element(m_spec_list.begin(), m_spec_list.end());
+    const specnum_t minlist = *min_element(m_spec_list.begin(), m_spec_list.end());
+    const specnum_t maxlist = *max_element(m_spec_list.begin(), m_spec_list.end());
     if (maxlist > m_numberOfSpectra || minlist == 0) {
       g_log.error("Invalid list of spectra");
       throw std::invalid_argument("Inconsistent properties defined");
@@ -149,8 +135,7 @@ void LoadMuonNexus::checkOptionalProperties() {
 }
 
 /// Run the Child Algorithm LoadInstrument
-void LoadMuonNexus::runLoadInstrument(
-    const DataObjects::Workspace2D_sptr &localWorkspace) {
+void LoadMuonNexus::runLoadInstrument(const DataObjects::Workspace2D_sptr &localWorkspace) {
 
   IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
 
@@ -158,14 +143,12 @@ void LoadMuonNexus::runLoadInstrument(
   try {
     loadInst->setPropertyValue("InstrumentName", m_instrument_name);
     loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", localWorkspace);
-    loadInst->setProperty("RewriteSpectraMap",
-                          Mantid::Kernel::OptionalBool(false));
+    loadInst->setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(false));
     loadInst->execute();
   } catch (std::invalid_argument &) {
     g_log.information("Invalid argument to LoadInstrument Child Algorithm");
   } catch (std::runtime_error &) {
-    g_log.information(
-        "Unable to successfully run LoadInstrument Child Algorithm");
+    g_log.information("Unable to successfully run LoadInstrument Child Algorithm");
   }
 
   // If loading instrument definition file fails,

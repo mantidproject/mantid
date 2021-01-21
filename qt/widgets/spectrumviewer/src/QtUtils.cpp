@@ -19,8 +19,7 @@ namespace SpectrumView {
  * @param string  The string that will be placed in the table.
  * @param table   Pointer to the table
  */
-void QtUtils::SetTableEntry(int row, int col, const std::string &string,
-                            QTableWidget *table) {
+void QtUtils::SetTableEntry(int row, int col, const std::string &string, QTableWidget *table) {
   QString qString = QString::fromStdString(string).simplified();
   auto *item = new QTableWidgetItem(qString);
   table->setItem(row, col, item);
@@ -38,8 +37,7 @@ void QtUtils::SetTableEntry(int row, int col, const std::string &string,
  * @param value     The number to be formatted and placed in the table.
  * @param table     Pointer to the table
  */
-void QtUtils::SetTableEntry(int row, int col, int width, int precision,
-                            double value, QTableWidget *table) {
+void QtUtils::SetTableEntry(int row, int col, int width, int precision, double value, QTableWidget *table) {
   std::string str;
   SVUtils::Format(width, precision, value, str);
   SetTableEntry(row, col, str, table);
@@ -66,8 +64,7 @@ void QtUtils::SetText(const std::string &string, QLineEdit *lineEdit) {
  * @param value      The number to be formatted and placed in the table.
  * @param lineEdit   Pointer to the QLineEdit widget.
  */
-void QtUtils::SetText(int width, int precision, double value,
-                      QLineEdit *lineEdit) {
+void QtUtils::SetText(int width, int precision, double value, QLineEdit *lineEdit) {
   std::string str;
   SVUtils::Format(width, precision, value, str);
   SetText(str, lineEdit);

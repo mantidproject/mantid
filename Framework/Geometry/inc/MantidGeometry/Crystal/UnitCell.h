@@ -48,9 +48,8 @@ public:
   // a,b,c constructor
   UnitCell(const double _a, const double _b, const double _c);
   // a,b,c,alpha,beta,gamma constructor
-  UnitCell(const double _a, const double _b, const double _c,
-           const double _alpha, const double _beta, const double _gamma,
-           const int angleunit = angDegrees);
+  UnitCell(const double _a, const double _b, const double _c, const double _alpha, const double _beta,
+           const double _gamma, const int angleunit = angDegrees);
   // Destructor
   virtual ~UnitCell() = default;
 
@@ -85,13 +84,11 @@ public:
   double betastar() const;
   double gammastar() const;
   // Set lattice
-  void setModHKL(double _dh1, double _dk1, double _dl1, double _dh2,
-                 double _dk2, double _dl2, double _dh3, double _dk3,
+  void setModHKL(double _dh1, double _dk1, double _dl1, double _dh2, double _dk2, double _dl2, double _dh3, double _dk3,
                  double _dl3);
   void setModHKL(const Kernel::DblMatrix &newModHKL);
   void setErrorModHKL(const Kernel::DblMatrix &newErrorModHKL);
-  void setErrorModHKL(double _dh1err, double _dk1err, double _dl1err,
-                      double _dh2err, double _dk2err, double _dl2err,
+  void setErrorModHKL(double _dh1err, double _dk1err, double _dl1err, double _dh2err, double _dk2err, double _dl2err,
                       double _dh3err, double _dk3err, double _dl3err);
   void setModVec1(double _dh1, double _dk1, double _dl1);
   void setModVec2(double _dh2, double _dk2, double _dl2);
@@ -119,8 +116,8 @@ public:
   int getMaxOrder() const;
   bool getCrossTerm() const;
 
-  void set(double _a, double _b, double _c, double _alpha, double _beta,
-           double _gamma, const int angleunit = angDegrees);
+  void set(double _a, double _b, double _c, double _alpha, double _beta, double _gamma,
+           const int angleunit = angDegrees);
   void seta(double _a);
   void setb(double _b);
   void setc(double _c);
@@ -128,8 +125,7 @@ public:
   void setbeta(double _beta, const int angleunit = angDegrees);
   void setgamma(double _gamma, const int angleunit = angDegrees);
   // Set errors
-  void setError(double _aerr, double _berr, double _cerr, double _alphaerr,
-                double _betaerr, double _gammaerr,
+  void setError(double _aerr, double _berr, double _cerr, double _alphaerr, double _betaerr, double _gammaerr,
                 const int angleunit = angDegrees);
   void setErrora(double _aerr);
   void setErrorb(double _berr);
@@ -156,8 +152,8 @@ public:
   double dstar(double h, double k, double l) const;
   double d(const Kernel::V3D &hkl) const;
   double dstar(const Kernel::V3D &hkl) const;
-  double recAngle(double h1, double k1, double l1, double h2, double k2,
-                  double l2, const int angleunit = angDegrees) const;
+  double recAngle(double h1, double k1, double l1, double h2, double k2, double l2,
+                  const int angleunit = angDegrees) const;
   double volume() const;
   double recVolume() const;
   virtual void recalculateFromGstar(const Kernel::Matrix<double> &NewGstar);
@@ -216,8 +212,7 @@ protected:
   virtual void recalculate();
 };
 
-MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &out,
-                                             const UnitCell &unitCell);
+MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &out, const UnitCell &unitCell);
 
 MANTID_GEOMETRY_DLL UnitCell strToUnitCell(const std::string &unitCellString);
 MANTID_GEOMETRY_DLL std::string unitCellToStr(const UnitCell &unitCell);

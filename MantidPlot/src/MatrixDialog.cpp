@@ -26,8 +26,7 @@
 #include <QPushButton>
 #include <QSpinBox>
 
-MatrixDialog::MatrixDialog(QWidget *parent, const Qt::WFlags &fl)
-    : QDialog(parent, fl), d_matrix(nullptr) {
+MatrixDialog::MatrixDialog(QWidget *parent, const Qt::WFlags &fl) : QDialog(parent, fl), d_matrix(nullptr) {
   setWindowTitle(tr("MantidPlot - Matrix Properties"));
 
   QGridLayout *topLayout = new QGridLayout();
@@ -78,8 +77,7 @@ MatrixDialog::MatrixDialog(QWidget *parent, const Qt::WFlags &fl)
   connect(buttonApply, SIGNAL(clicked()), this, SLOT(apply()));
   connect(buttonOk, SIGNAL(clicked()), this, SLOT(accept()));
   connect(buttonCancel, SIGNAL(clicked()), this, SLOT(close()));
-  connect(boxNumericDisplay, SIGNAL(activated(int)), this,
-          SLOT(showPrecisionBox(int)));
+  connect(boxNumericDisplay, SIGNAL(activated(int)), this, SLOT(showPrecisionBox(int)));
 }
 
 void MatrixDialog::showPrecisionBox(int item) {
@@ -94,9 +92,8 @@ void MatrixDialog::showPrecisionBox(int item) {
 void MatrixDialog::apply() {
   int width = boxColWidth->value();
   if (d_matrix->columnsWidth() != width) {
-    d_matrix->undoStack()->push(new MatrixSetColWidthCommand(
-        d_matrix, d_matrix->columnsWidth(), width,
-        tr("Set Columns Width") + " " + QString::number(width)));
+    d_matrix->undoStack()->push(new MatrixSetColWidthCommand(d_matrix, d_matrix->columnsWidth(), width,
+                                                             tr("Set Columns Width") + " " + QString::number(width)));
     d_matrix->setColumnsWidth(width);
   }
 
@@ -111,10 +108,9 @@ void MatrixDialog::apply() {
   QChar oldFormat = d_matrix->textFormat();
   int oldPrec = d_matrix->precision();
   if (oldFormat != format || oldPrec != prec) {
-    d_matrix->undoStack()->push(new MatrixSetPrecisionCommand(
-        d_matrix, oldFormat, format, oldPrec, prec,
-        tr("Set Data Format %1").arg(fmtName) + " - " +
-            tr("Precision %1 digits").arg(prec)));
+    d_matrix->undoStack()->push(new MatrixSetPrecisionCommand(d_matrix, oldFormat, format, oldPrec, prec,
+                                                              tr("Set Data Format %1").arg(fmtName) + " - " +
+                                                                  tr("Precision %1 digits").arg(prec)));
     d_matrix->setNumericFormat(format, prec);
   }
 }

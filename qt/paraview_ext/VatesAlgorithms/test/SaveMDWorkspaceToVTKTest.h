@@ -29,18 +29,14 @@ public:
     alg.setProperty("CompressorType", "NONE");
 
     // Act + Assert
-    TSM_ASSERT_THROWS_ANYTHING(
-        "Wrong workspace type should cause the algorithm to throw",
-        alg.execute());
+    TSM_ASSERT_THROWS_ANYTHING("Wrong workspace type should cause the algorithm to throw", alg.execute());
   }
 
   void test_that_non_3D_workspace_throws() {
     // Arrange
     const size_t numDims = 4;
     const size_t numBins = 5;
-    auto workspace =
-        Mantid::DataObjects::MDEventsTestHelper::makeFakeMDHistoWorkspace(
-            1.0, numDims, numBins);
+    auto workspace = Mantid::DataObjects::MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, numDims, numBins);
 
     Mantid::VATES::SaveMDWorkspaceToVTK alg;
     alg.setChild(true);
@@ -53,8 +49,7 @@ public:
     alg.setProperty("CompressorType", "NONE");
 
     // Act + Assert
-    TSM_ASSERT_THROWS_ANYTHING(
-        "Four dimensional workspace should not be accepted", alg.execute());
+    TSM_ASSERT_THROWS_ANYTHING("Four dimensional workspace should not be accepted", alg.execute());
   }
 
   void test_that_saves_MDHisto_without_issues_under_normal_conditions() {
@@ -63,9 +58,7 @@ public:
     // Arrange
     const size_t numDims = 3;
     const size_t numBins = 5;
-    auto workspace =
-        Mantid::DataObjects::MDEventsTestHelper::makeFakeMDHistoWorkspace(
-            1.0, numDims, numBins);
+    auto workspace = Mantid::DataObjects::MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, numDims, numBins);
 
     std::string filename = "SaveMDWorkspaceToVTK_test_file.vts";
     auto fullFilename = getTemporaryFilename(filename);
@@ -101,9 +94,7 @@ private:
   }
 
   std::string getTemporaryFilename(std::string filenameWithoutPath) const {
-    auto default_save_directory =
-        Mantid::Kernel::ConfigService::Instance().getString(
-            "defaultsave.directory");
+    auto default_save_directory = Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory");
     std::string filenameWithPath(default_save_directory + filenameWithoutPath);
     return filenameWithPath;
   }
@@ -114,7 +105,5 @@ private:
     }
   }
 
-  bool doesFileExist(std::string filename) {
-    return Poco::File(filename).exists();
-  }
+  bool doesFileExist(std::string filename) { return Poco::File(filename).exists(); }
 };

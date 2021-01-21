@@ -34,22 +34,18 @@
 #include <gsl/gsl_histogram.h>
 #include <gsl/gsl_vector.h>
 
-QwtHistogram::QwtHistogram(Table *t, const QString &xColName,
-                           const QString &name, int startRow, int endRow)
-    : QwtBarCurve(QwtBarCurve::Vertical, t, xColName, name, startRow, endRow),
-      d_autoBin(false), d_bin_size(0.0), d_begin(0.0), d_end(0.0), d_mean(0.0),
-      d_standard_deviation(0.0), d_min(0.0), d_max(0.0) {
+QwtHistogram::QwtHistogram(Table *t, const QString &xColName, const QString &name, int startRow, int endRow)
+    : QwtBarCurve(QwtBarCurve::Vertical, t, xColName, name, startRow, endRow), d_autoBin(false), d_bin_size(0.0),
+      d_begin(0.0), d_end(0.0), d_mean(0.0), d_standard_deviation(0.0), d_min(0.0), d_max(0.0) {
   d_matrix = nullptr;
   setType(GraphOptions::Histogram);
   setStyle(QwtPlotCurve::UserCurve);
 }
 
 QwtHistogram::QwtHistogram(Matrix *m)
-    : QwtBarCurve(QwtBarCurve::Vertical, nullptr, "matrix",
-                  (m != nullptr ? m->objectName() : QString()), 0, 0),
-      d_matrix(nullptr), d_autoBin(false), d_bin_size(0.0), d_begin(0.0),
-      d_end(0.0), d_mean(0.0), d_standard_deviation(0.0), d_min(0.0),
-      d_max(0.0) {
+    : QwtBarCurve(QwtBarCurve::Vertical, nullptr, "matrix", (m != nullptr ? m->objectName() : QString()), 0, 0),
+      d_matrix(nullptr), d_autoBin(false), d_bin_size(0.0), d_begin(0.0), d_end(0.0), d_mean(0.0),
+      d_standard_deviation(0.0), d_min(0.0), d_max(0.0) {
   if (m) {
     d_autoBin = true;
     d_matrix = m;
@@ -67,8 +63,7 @@ void QwtHistogram::copy(const QwtHistogram *h) {
   d_end = h->d_end;
 }
 
-void QwtHistogram::draw(QPainter *painter, const QwtScaleMap &xMap,
-                        const QwtScaleMap &yMap, int from, int to) const {
+void QwtHistogram::draw(QPainter *painter, const QwtScaleMap &xMap, const QwtScaleMap &yMap, int from, int to) const {
   if (!painter || dataSize() <= 0)
     return;
 
@@ -88,8 +83,7 @@ void QwtHistogram::draw(QPainter *painter, const QwtScaleMap &xMap,
   for (int i = from; i <= to; i++) {
     const int px1 = xMap.transform(x(i));
     const int py1 = yMap.transform(y(i));
-    painter->drawRect(px1 + half_width + xOffset, py1, bar_width + 1,
-                      (ref - py1 + 1));
+    painter->drawRect(px1 + half_width + xOffset, py1, bar_width + 1, (ref - py1 + 1));
   }
 
   painter->restore();
@@ -104,8 +98,7 @@ QwtDoubleRect QwtHistogram::boundingRect() const {
   return rect;
 }
 
-void QwtHistogram::setBinning(bool autoBin, double size, double begin,
-                              double end) {
+void QwtHistogram::setBinning(bool autoBin, double size, double begin, double end) {
   d_autoBin = autoBin;
   d_bin_size = size;
   d_begin = begin;

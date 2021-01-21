@@ -65,9 +65,7 @@ public:
     }
 
     // Input workspace
-    MatrixWorkspace_const_sptr inputWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "transpose_irs_r");
+    MatrixWorkspace_const_sptr inputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("transpose_irs_r");
 
     const size_t nHist = inputWS->getNumberHistograms();
     const size_t nBins = inputWS->blocksize();
@@ -75,18 +73,14 @@ public:
     TS_ASSERT_THROWS(transpose->execute(), const std::runtime_error &);
     TS_ASSERT(!transpose->isExecuted());
 
-    TS_ASSERT_THROWS_NOTHING(
-        transpose->setPropertyValue("InputWorkspace", "transpose_irs_r"));
-    TS_ASSERT_THROWS_NOTHING(
-        transpose->setPropertyValue("OutputWorkspace", "transpose_irs_t"));
+    TS_ASSERT_THROWS_NOTHING(transpose->setPropertyValue("InputWorkspace", "transpose_irs_r"));
+    TS_ASSERT_THROWS_NOTHING(transpose->setPropertyValue("OutputWorkspace", "transpose_irs_t"));
     TS_ASSERT_THROWS_NOTHING(transpose->execute());
     TS_ASSERT(transpose->isExecuted());
 
     // Get output workspace
     MatrixWorkspace_const_sptr outputWS;
-    TS_ASSERT_THROWS_NOTHING(
-        outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "transpose_irs_t"));
+    TS_ASSERT_THROWS_NOTHING(outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("transpose_irs_t"));
 
     // Dimensions
     TS_ASSERT_EQUALS(inputWS->getNumberHistograms(), outputWS->blocksize());
@@ -98,15 +92,13 @@ public:
 
     // Values
     TS_ASSERT_EQUALS(inputWS->y(0)[0], outputWS->y(0)[0]);
-    TS_ASSERT_EQUALS(inputWS->y(nHist - 1)[nBins - 1],
-                     outputWS->y(nBins - 1)[nHist - 1]);
+    TS_ASSERT_EQUALS(inputWS->y(nHist - 1)[nBins - 1], outputWS->y(nBins - 1)[nHist - 1]);
 
     delete transpose;
   }
 
   void testRebinnedOutput() {
-    RebinnedOutput_sptr inputWS =
-        WorkspaceCreationHelper::createRebinnedOutputWorkspace();
+    RebinnedOutput_sptr inputWS = WorkspaceCreationHelper::createRebinnedOutputWorkspace();
     std::string inName = inputWS->getName();
     AnalysisDataService::Instance().addOrReplace(inName, inputWS);
     std::string outName = "rebinTrans";
@@ -120,8 +112,7 @@ public:
     TS_ASSERT(transpose->isExecuted());
 
     RebinnedOutput_sptr outputWS;
-    outputWS =
-        AnalysisDataService::Instance().retrieveWS<RebinnedOutput>(outName);
+    outputWS = AnalysisDataService::Instance().retrieveWS<RebinnedOutput>(outName);
     TS_ASSERT(outputWS);
     // Dimensions
     TS_ASSERT_EQUALS(inputWS->getNumberHistograms(), outputWS->blocksize());
@@ -148,9 +139,7 @@ class TransposeTestPerformance : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static TransposeTestPerformance *createSuite() {
-    return new TransposeTestPerformance();
-  }
+  static TransposeTestPerformance *createSuite() { return new TransposeTestPerformance(); }
   static void destroySuite(TransposeTestPerformance *suite) {
     AnalysisDataService::Instance().clear();
     delete suite;
@@ -173,8 +162,7 @@ public:
     delete loader;
 
     // set up testRebinnedOutputPerformance
-    RebinnedOutput_sptr inputWS =
-        WorkspaceCreationHelper::createRebinnedOutputWorkspace();
+    RebinnedOutput_sptr inputWS = WorkspaceCreationHelper::createRebinnedOutputWorkspace();
     std::string inName = rebinned_inputWS;
     AnalysisDataService::Instance().addOrReplace(inName, inputWS);
   }
@@ -182,9 +170,7 @@ public:
   void testExecPerformance() {
     // Input workspace
     Transpose transpose;
-    MatrixWorkspace_const_sptr inputWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "transpose_irs_r");
+    MatrixWorkspace_const_sptr inputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("transpose_irs_r");
     transpose.initialize();
 
     transpose.setPropertyValue("InputWorkspace", "transpose_irs_r");

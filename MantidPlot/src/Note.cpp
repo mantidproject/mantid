@@ -49,8 +49,7 @@ DECLARE_WINDOW(Note)
 
 using namespace Mantid;
 
-Note::Note(const QString &label, QWidget *parent, const QString &name,
-           const Qt::WFlags &f)
+Note::Note(const QString &label, QWidget *parent, const QString &name, const Qt::WFlags &f)
     : MdiSubWindow(parent, label, name, f) {
   te = new QTextEdit(this);
   te->setObjectName(name);
@@ -95,11 +94,8 @@ QString Note::exportASCII(const QString &filename) {
   QString selectedFilter;
   QString fn;
   if (filename.isEmpty()) {
-    QString dir(Mantid::Kernel::ConfigService::Instance()
-                    .getString("defaultsave.directory")
-                    .c_str());
-    fn = QFileDialog::getSaveFileName(this, tr("Save Text to File"), dir,
-                                      filter, &selectedFilter);
+    QString dir(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory").c_str());
+    fn = QFileDialog::getSaveFileName(this, tr("Save Text to File"), dir, filter, &selectedFilter);
   } else
     fn = filename;
 
@@ -116,11 +112,10 @@ QString Note::exportASCII(const QString &filename) {
 
     QFile f(fn);
     if (!f.open(QIODevice::WriteOnly)) {
-      QMessageBox::critical(
-          nullptr, tr("MantidPlot - File Save Error"),
-          tr("Could not write to file: <br><h4> %1 </h4><p>Please verify that "
-             "you have the right to write to this location!")
-              .arg(fn));
+      QMessageBox::critical(nullptr, tr("MantidPlot - File Save Error"),
+                            tr("Could not write to file: <br><h4> %1 </h4><p>Please verify that "
+                               "you have the right to write to this location!")
+                                .arg(fn));
       return QString::null;
     }
 
@@ -132,9 +127,8 @@ QString Note::exportASCII(const QString &filename) {
   return fn;
 }
 
-MantidQt::API::IProjectSerialisable *
-Note::loadFromProject(const std::string &lines, ApplicationWindow *app,
-                      const int fileVersion) {
+MantidQt::API::IProjectSerialisable *Note::loadFromProject(const std::string &lines, ApplicationWindow *app,
+                                                           const int fileVersion) {
   Q_UNUSED(fileVersion);
 
   std::vector<std::string> lineVec;
@@ -158,8 +152,7 @@ Note::loadFromProject(const std::string &lines, ApplicationWindow *app,
   MantidQt::API::TSVSerialiser tsv(lines);
 
   if (tsv.hasLine("geometry")) {
-    const QString geometry =
-        QString::fromUtf8(tsv.lineAsString("geometry").c_str());
+    const QString geometry = QString::fromUtf8(tsv.lineAsString("geometry").c_str());
     app->restoreWindowGeometry(app, note, geometry);
   }
 

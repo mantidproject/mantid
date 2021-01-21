@@ -23,8 +23,7 @@ namespace Algorithms {
     </UL>
 
 */
-class MANTID_ALGORITHMS_DLL CropWorkspaceRagged
-    : public API::DistributedAlgorithm {
+class MANTID_ALGORITHMS_DLL CropWorkspaceRagged : public API::DistributedAlgorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "CropWorkspaceRagged"; }
@@ -36,13 +35,9 @@ public:
 
   /// Algorithm's version
   int version() const override { return (1); }
-  const std::vector<std::string> seeAlso() const override {
-    return {"CropWorkspace"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"CropWorkspace"}; }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "Transforms\\Splitting";
-  }
+  const std::string category() const override { return "Transforms\\Splitting"; }
 
 private:
   /// Initialisation code

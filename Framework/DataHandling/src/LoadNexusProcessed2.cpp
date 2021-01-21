@@ -27,8 +27,7 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadNexusProcessed2)
 //----------------------------------------------------------------------------------------------
 
 namespace {
-template <typename T>
-int countEntriesOfType(const T &entry, const std::string &nxClass) {
+template <typename T> int countEntriesOfType(const T &entry, const std::string &nxClass) {
   int count = 0;
   for (const auto &group : entry.groups()) {
     if (group.nxclass == nxClass)
@@ -38,8 +37,7 @@ int countEntriesOfType(const T &entry, const std::string &nxClass) {
 }
 
 template <typename T>
-std::vector<Mantid::NeXus::NXClassInfo>
-findEntriesOfType(const T &entry, const std::string &nxClass) {
+std::vector<Mantid::NeXus::NXClassInfo> findEntriesOfType(const T &entry, const std::string &nxClass) {
   std::vector<Mantid::NeXus::NXClassInfo> result;
   for (const auto &group : entry.groups()) {
     if (group.nxclass == nxClass)
@@ -64,8 +62,7 @@ InstrumentLayout instrumentFormat(Mantid::NeXus::NXEntry &entry) {
     if (entry.containsGroup("instrument")) {
       auto instr = entry.openNXInstrument("instrument");
       if (instr.containsGroup("detector") ||
-          (instr.containsGroup("physical_detectors") &&
-           instr.containsGroup("physical_monitors"))) {
+          (instr.containsGroup("physical_detectors") && instr.containsGroup("physical_monitors"))) {
         result = InstrumentLayout::Mantid; // 1 nxinstrument called instrument,
       }
       instr.close();
@@ -78,15 +75,13 @@ InstrumentLayout instrumentFormat(Mantid::NeXus::NXEntry &entry) {
 } // namespace
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string LoadNexusProcessed2::name() const {
-  return "LoadNexusProcessed";
-}
+const std::string LoadNexusProcessed2::name() const { return "LoadNexusProcessed"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int LoadNexusProcessed2::version() const { return 2; }
 
-void LoadNexusProcessed2::readSpectraToDetectorMapping(
-    Mantid::NeXus::NXEntry &mtd_entry, Mantid::API::MatrixWorkspace &ws) {
+void LoadNexusProcessed2::readSpectraToDetectorMapping(Mantid::NeXus::NXEntry &mtd_entry,
+                                                       Mantid::API::MatrixWorkspace &ws) {
 
   m_instrumentLayout = instrumentFormat(mtd_entry);
   if (m_instrumentLayout == InstrumentLayout::Mantid) {
@@ -95,12 +90,10 @@ void LoadNexusProcessed2::readSpectraToDetectorMapping(
   } else if (m_instrumentLayout == InstrumentLayout::NexusFormat) {
     extractMappingInfoNew(mtd_entry);
   } else {
-    g_log.information()
-        << "Instrument layout not recognised. Spectra mappings not loaded.";
+    g_log.information() << "Instrument layout not recognised. Spectra mappings not loaded.";
   }
 }
-void LoadNexusProcessed2::extractMappingInfoNew(
-    Mantid::NeXus::NXEntry &mtd_entry) {
+void LoadNexusProcessed2::extractMappingInfoNew(Mantid::NeXus::NXEntry &mtd_entry) {
   using namespace Mantid::NeXus;
   auto result = findEntriesOfType(mtd_entry, "NXinstrument");
   if (result.size() != 1) {
@@ -188,19 +181,15 @@ void LoadNexusProcessed2::extractMappingInfoNew(
  * @param filename : filename to load from.
  * @return true if successful
  */
-bool LoadNexusProcessed2::loadNexusGeometry(API::Workspace &ws,
-                                            const int nWorkspaceEntries,
-                                            Kernel::Logger &logger,
+bool LoadNexusProcessed2::loadNexusGeometry(API::Workspace &ws, const int nWorkspaceEntries, Kernel::Logger &logger,
                                             const std::string &filename) {
-  if (m_instrumentLayout == InstrumentLayout::NexusFormat &&
-      nWorkspaceEntries == 1) {
+  if (m_instrumentLayout == InstrumentLayout::NexusFormat && nWorkspaceEntries == 1) {
     if (auto *matrixWs = dynamic_cast<API::MatrixWorkspace *>(&ws)) {
       try {
         using namespace Mantid::NexusGeometry;
-        auto instrument = NexusGeometry::NexusGeometryParser::createInstrument(
-            filename, NexusGeometry::makeLogger(&logger));
-        matrixWs->setInstrument(
-            Geometry::Instrument_const_sptr(std::move(instrument)));
+        auto instrument =
+            NexusGeometry::NexusGeometryParser::createInstrument(filename, NexusGeometry::makeLogger(&logger));
+        matrixWs->setInstrument(Geometry::Instrument_const_sptr(std::move(instrument)));
 
         auto &detInfo = matrixWs->detectorInfo();
         Indexing::IndexInfo info(m_spectrumNumbers);
@@ -233,8 +222,7 @@ bool LoadNexusProcessed2::loadNexusGeometry(API::Workspace &ws,
 
 int LoadNexusProcessed2::confidence(Kernel::NexusDescriptor &descriptor) const {
   if (descriptor.pathExists("/mantid_workspace_1"))
-    return LoadNexusProcessed::confidence(descriptor) +
-           1; // incrementally better than v1.
+    return LoadNexusProcessed::confidence(descriptor) + 1; // incrementally better than v1.
   else
     return 0;
 }

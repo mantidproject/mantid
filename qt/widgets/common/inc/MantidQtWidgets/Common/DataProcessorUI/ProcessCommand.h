@@ -18,14 +18,11 @@ ProcessCommand defines the action "Process"
 */
 class ProcessCommand : public CommandBase {
 public:
-  ProcessCommand(DataProcessorPresenter *tablePresenter)
-      : CommandBase(tablePresenter){};
+  ProcessCommand(DataProcessorPresenter *tablePresenter) : CommandBase(tablePresenter){};
   ProcessCommand(const QDataProcessorWidget &widget) : CommandBase(widget){};
   virtual ~ProcessCommand(){};
 
-  void execute() override {
-    m_presenter->notify(DataProcessorPresenter::ProcessFlag);
-  };
+  void execute() override { m_presenter->notify(DataProcessorPresenter::ProcessFlag); };
   QString name() override { return QString("Process"); }
   QString icon() override { return QString("://stat_rows.png"); }
   QString tooltip() override { return QString("Processes selected runs"); }

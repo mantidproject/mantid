@@ -32,8 +32,7 @@ std::vector<double> m_pixelDimension;
 
 void generateTestInputs() {
   // Create data table
-  DataObjects::TableWorkspace_sptr datatable =
-      std::make_shared<DataObjects::TableWorkspace>();
+  DataObjects::TableWorkspace_sptr datatable = std::make_shared<DataObjects::TableWorkspace>();
   datatable->addColumn("int", "Scan No");
   datatable->addColumn("int", "Pt. No");
   datatable->addColumn("str", "File Name");
@@ -41,14 +40,12 @@ void generateTestInputs() {
   datatable->addColumn("int", "Monitor");
   datatable->addColumn("double", "Time");
   TableRow row0 = datatable->appendRow();
-  row0 << 1 << 522 << "HB3A_exp355_scan0001_0522.xml" << 256 * 256 << 1000
-       << 1.1;
+  row0 << 1 << 522 << "HB3A_exp355_scan0001_0522.xml" << 256 * 256 << 1000 << 1.1;
   m_dataTableWS = std::dynamic_pointer_cast<ITableWorkspace>(datatable);
   TS_ASSERT(m_dataTableWS);
 
   // Create detector table
-  DataObjects::TableWorkspace_sptr dettable =
-      std::make_shared<DataObjects::TableWorkspace>();
+  DataObjects::TableWorkspace_sptr dettable = std::make_shared<DataObjects::TableWorkspace>();
   dettable->addColumn("int", "DetID");
   dettable->addColumn("double", "X");
   dettable->addColumn("double", "Y");
@@ -67,8 +64,7 @@ void generateTestInputs() {
   TS_ASSERT(m_detectorTableWS);
 
   AnalysisDataService::Instance().addOrReplace("DataFileTable", m_dataTableWS);
-  AnalysisDataService::Instance().addOrReplace("DetectorTable",
-                                               m_detectorTableWS);
+  AnalysisDataService::Instance().addOrReplace("DetectorTable", m_detectorTableWS);
 
   // Source and sample position
   m_sourcePos.resize(3, 0.0);
@@ -84,12 +80,8 @@ class ConvertCWSDExpToMomentumTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ConvertCWSDExpToMomentumTest *createSuite() {
-    return new ConvertCWSDExpToMomentumTest();
-  }
-  static void destroySuite(ConvertCWSDExpToMomentumTest *suite) {
-    delete suite;
-  }
+  static ConvertCWSDExpToMomentumTest *createSuite() { return new ConvertCWSDExpToMomentumTest(); }
+  static void destroySuite(ConvertCWSDExpToMomentumTest *suite) { delete suite; }
 
   void test_Init() {
     // Create tableworkspaces as inputs
@@ -119,8 +111,7 @@ public:
     TS_ASSERT(testalg.isExecuted());
 
     API::IMDEventWorkspace_sptr outws =
-        std::dynamic_pointer_cast<IMDEventWorkspace>(
-            AnalysisDataService::Instance().retrieve("QSampleMDEvents"));
+        std::dynamic_pointer_cast<IMDEventWorkspace>(AnalysisDataService::Instance().retrieve("QSampleMDEvents"));
     TS_ASSERT(outws);
 
     auto mditer = outws->createIterator();
@@ -136,8 +127,8 @@ public:
     // Test the frame type
     for (size_t dim = 0; dim < outws->getNumDims(); ++dim) {
       const auto &frame = outws->getDimension(dim)->getMDFrame();
-      TSM_ASSERT_EQUALS("Should be convertible to a QSample frame",
-                        Mantid::Geometry::QSample::QSampleName, frame.name());
+      TSM_ASSERT_EQUALS("Should be convertible to a QSample frame", Mantid::Geometry::QSample::QSampleName,
+                        frame.name());
     }
 
     return;
@@ -158,8 +149,7 @@ public:
     TS_ASSERT(testalg.isExecuted());
 
     API::IMDEventWorkspace_sptr outws =
-        std::dynamic_pointer_cast<IMDEventWorkspace>(
-            AnalysisDataService::Instance().retrieve("QSampleMDEvents"));
+        std::dynamic_pointer_cast<IMDEventWorkspace>(AnalysisDataService::Instance().retrieve("QSampleMDEvents"));
     TS_ASSERT(outws);
 
     auto mditer = outws->createIterator();
@@ -194,8 +184,7 @@ private:
     }
 
     Geometry::Instrument_sptr virtualInstrument =
-        Geometry::ComponentHelper::createVirtualInstrument(
-            sourcePos, samplePos, vec_detpos, vec_detid);
+        Geometry::ComponentHelper::createVirtualInstrument(sourcePos, samplePos, vec_detpos, vec_detid);
     TS_ASSERT(virtualInstrument);
 
     return virtualInstrument;
@@ -207,9 +196,7 @@ public:
   static ConvertCWSDExpToMomentumTestPerformance *createSuite() {
     return new ConvertCWSDExpToMomentumTestPerformance();
   }
-  static void destroySuite(ConvertCWSDExpToMomentumTestPerformance *suite) {
-    delete suite;
-  }
+  static void destroySuite(ConvertCWSDExpToMomentumTestPerformance *suite) { delete suite; }
 
   void setUp() override {
     generateTestInputs();
@@ -227,9 +214,7 @@ public:
 
   void tearDown() override { AnalysisDataService::Instance().clear(); }
 
-  void testConvertCWSDExpToMomentumPerformance() {
-    TS_ASSERT_THROWS_NOTHING(alg.execute());
-  }
+  void testConvertCWSDExpToMomentumPerformance() { TS_ASSERT_THROWS_NOTHING(alg.execute()); }
 
 private:
   ConvertCWSDExpToMomentum alg;

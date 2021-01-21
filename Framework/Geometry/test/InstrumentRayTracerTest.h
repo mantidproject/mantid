@@ -23,9 +23,7 @@ class InstrumentRayTracerTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static InstrumentRayTracerTest *createSuite() {
-    return new InstrumentRayTracerTest();
-  }
+  static InstrumentRayTracerTest *createSuite() { return new InstrumentRayTracerTest(); }
   static void destroySuite(InstrumentRayTracerTest *suite) { delete suite; }
 
   InstrumentRayTracerTest() : m_testInst() {
@@ -34,8 +32,7 @@ public:
   }
 
   void test_That_Constructor_Does_Not_Throw_On_Giving_A_Valid_Instrument() {
-    std::shared_ptr<Instrument> testInst =
-        std::make_shared<Instrument>("empty");
+    std::shared_ptr<Instrument> testInst = std::make_shared<Instrument>("empty");
     ObjComponent *source = new ObjComponent("moderator", nullptr);
     testInst->add(source);
     testInst->markAsSource(source);
@@ -44,31 +41,24 @@ public:
     delete rayTracker;
   }
 
-  void
-  test_That_Constructor_Throws_Invalid_Argument_On_Giving_A_Null_Instrument() {
-    TS_ASSERT_THROWS(new InstrumentRayTracer(std::shared_ptr<Instrument>()),
-                     const std::invalid_argument &);
+  void test_That_Constructor_Throws_Invalid_Argument_On_Giving_A_Null_Instrument() {
+    TS_ASSERT_THROWS(new InstrumentRayTracer(std::shared_ptr<Instrument>()), const std::invalid_argument &);
   }
 
-  void
-  test_That_Constructor_Throws_Invalid_Argument_On_Giving_An_Instrument_With_No_Source() {
+  void test_That_Constructor_Throws_Invalid_Argument_On_Giving_An_Instrument_With_No_Source() {
     Instrument_sptr testInst(new Instrument("empty"));
-    TS_ASSERT_THROWS(new InstrumentRayTracer(testInst),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(new InstrumentRayTracer(testInst), const std::invalid_argument &);
   }
 
-  void
-  test_That_A_Trace_For_A_Ray_That_Intersects_Many_Components_Gives_These_Components_As_A_Result() {
+  void test_That_A_Trace_For_A_Ray_That_Intersects_Many_Components_Gives_These_Components_As_A_Result() {
     Instrument_sptr testInst = setupInstrument();
     InstrumentRayTracer tracker(testInst);
     tracker.trace(V3D(0., 0., 1));
     Links results = tracker.getResults();
     TS_ASSERT_EQUALS(results.size(), 2);
     // Check they are actually what we expect: 1 with the central detector
-    IComponent_const_sptr centralPixelBank1 =
-        testInst->getComponentByName("bank1/pixel-(0;0)");
-    IComponent_const_sptr centralPixelBank2 =
-        testInst->getComponentByName("bank2/pixel-(0;0)");
+    IComponent_const_sptr centralPixelBank1 = testInst->getComponentByName("bank1/pixel-(0;0)");
+    IComponent_const_sptr centralPixelBank2 = testInst->getComponentByName("bank2/pixel-(0;0)");
 
     if ((!centralPixelBank1) || (!centralPixelBank2)) {
       TS_FAIL("Test instrument has been changed, the instrument config has "
@@ -86,8 +76,7 @@ public:
     TS_ASSERT_DELTA(firstIntersect.exitPoint.X(), 0.0, 1e-6);
     TS_ASSERT_DELTA(firstIntersect.exitPoint.Y(), 0.0, 1e-6);
     TS_ASSERT_DELTA(firstIntersect.exitPoint.Z(), 5.004, 1e-6);
-    TS_ASSERT_EQUALS(firstIntersect.componentID,
-                     centralPixelBank1->getComponentID());
+    TS_ASSERT_EQUALS(firstIntersect.componentID, centralPixelBank1->getComponentID());
 
     ++resultItr;
     Link secondIntersect = *resultItr;
@@ -99,8 +88,7 @@ public:
     TS_ASSERT_DELTA(secondIntersect.exitPoint.X(), 0.0, 1e-6);
     TS_ASSERT_DELTA(secondIntersect.exitPoint.Y(), 0.0, 1e-6);
     TS_ASSERT_DELTA(secondIntersect.exitPoint.Z(), 10.004, 1e-6);
-    TS_ASSERT_EQUALS(secondIntersect.componentID,
-                     centralPixelBank2->getComponentID());
+    TS_ASSERT_EQUALS(secondIntersect.componentID, centralPixelBank2->getComponentID());
 
     // Results vector should be empty after first getResults call
     results = tracker.getResults();
@@ -111,8 +99,7 @@ public:
     TS_ASSERT_EQUALS(results.size(), 0);
   }
 
-  void
-  test_That_A_Ray_Which_Just_Intersects_One_Component_Gives_This_Component_Only() {
+  void test_That_A_Ray_Which_Just_Intersects_One_Component_Gives_This_Component_Only() {
     Instrument_sptr testInst = setupInstrument();
     InstrumentRayTracer tracker(testInst);
     V3D testDir(0.010, 0.0, 15.004);
@@ -121,8 +108,7 @@ public:
     Links results = tracker.getResults();
     TS_ASSERT_EQUALS(results.size(), 1);
 
-    const IComponent *interceptedPixel =
-        testInst->getComponentByName("pixel-(1;0)").get();
+    const IComponent *interceptedPixel = testInst->getComponentByName("pixel-(1;0)").get();
 
     Link intersect = results.front();
     TS_ASSERT_DELTA(intersect.distFromStart, 15.003468, 1e-6);
@@ -145,8 +131,7 @@ public:
   }
 
   void test_That_traceFromSample_throws_for_zero_dir() {
-    Instrument_sptr inst =
-        ComponentCreationHelper::createTestInstrumentRectangular(1, 100);
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular(1, 100);
     InstrumentRayTracer tracker(inst);
     constexpr V3D testDir(0., 0., 0.);
     TS_ASSERT_THROWS_ANYTHING(tracker.traceFromSample(testDir));
@@ -159,9 +144,8 @@ public:
    * @param expectX :: expected x index, -1 if off
    * @param expectY :: expected y index, -1 if off
    */
-  void doTestRectangularDetector(const std::string &message,
-                                 const Instrument_sptr &inst, V3D testDir,
-                                 int expectX, int expectY) {
+  void doTestRectangularDetector(const std::string &message, const Instrument_sptr &inst, V3D testDir, int expectX,
+                                 int expectY) {
     InstrumentRayTracer tracker(inst);
     testDir.normalize();
     tracker.traceFromSample(testDir);
@@ -178,12 +162,10 @@ public:
 
     // Get the first result
     Link res = *results.begin();
-    IDetector_const_sptr det = std::dynamic_pointer_cast<const IDetector>(
-        inst->getComponentByID(res.componentID));
+    IDetector_const_sptr det = std::dynamic_pointer_cast<const IDetector>(inst->getComponentByID(res.componentID));
     // Parent bank
     RectangularDetector_const_sptr rect =
-        std::dynamic_pointer_cast<const RectangularDetector>(
-            det->getParent()->getParent());
+        std::dynamic_pointer_cast<const RectangularDetector>(det->getParent()->getParent());
     // Find the xy index from the detector ID
     std::pair<int, int> xy = rect->getXYForDetectorID(det->getID());
     TSM_ASSERT_EQUALS(message, xy.first, expectX);
@@ -198,27 +180,19 @@ public:
     double w = 0.008;
     doTestRectangularDetector("Pixel (0,0)", inst, V3D(0.0, 0.0, 5.0), 0, 0);
     // Move over some pixels
-    doTestRectangularDetector("Pixel (1,0)", inst, V3D(w * 1, w * 0, 5.0), 1,
-                              0);
-    doTestRectangularDetector("Pixel (1,2)", inst, V3D(w * 1, w * 2, 5.0), 1,
-                              2);
-    doTestRectangularDetector("Pixel (0.95, 0.95)", inst,
-                              V3D(w * 0.45, w * 0.45, 5.0), 0, 0);
-    doTestRectangularDetector("Pixel (1.05, 2.05)", inst,
-                              V3D(w * 0.55, w * 1.55, 5.0), 1, 2);
-    doTestRectangularDetector("Pixel (99,99)", inst, V3D(w * 99, w * 99, 5.0),
-                              99, 99);
+    doTestRectangularDetector("Pixel (1,0)", inst, V3D(w * 1, w * 0, 5.0), 1, 0);
+    doTestRectangularDetector("Pixel (1,2)", inst, V3D(w * 1, w * 2, 5.0), 1, 2);
+    doTestRectangularDetector("Pixel (0.95, 0.95)", inst, V3D(w * 0.45, w * 0.45, 5.0), 0, 0);
+    doTestRectangularDetector("Pixel (1.05, 2.05)", inst, V3D(w * 0.55, w * 1.55, 5.0), 1, 2);
+    doTestRectangularDetector("Pixel (99,99)", inst, V3D(w * 99, w * 99, 5.0), 99, 99);
 
     doTestRectangularDetector("Off to left", inst, V3D(-w, 0, 5.0), -1, -1);
     doTestRectangularDetector("Off to bottom", inst, V3D(0, -w, 5.0), -1, -1);
     doTestRectangularDetector("Off to top", inst, V3D(0, w * 100, 5.0), -1, -1);
-    doTestRectangularDetector("Off to right", inst, V3D(w * 100, w, 5.0), -1,
-                              -1);
+    doTestRectangularDetector("Off to right", inst, V3D(w * 100, w, 5.0), -1, -1);
 
-    doTestRectangularDetector("Beam parallel to panel", inst,
-                              V3D(1.0, 0.0, 0.0), -1, -1);
-    doTestRectangularDetector("Beam parallel to panel", inst,
-                              V3D(0.0, 1.0, 0.0), -1, -1);
+    doTestRectangularDetector("Beam parallel to panel", inst, V3D(1.0, 0.0, 0.0), -1, -1);
+    doTestRectangularDetector("Beam parallel to panel", inst, V3D(0.0, 1.0, 0.0), -1, -1);
   }
 
 private:

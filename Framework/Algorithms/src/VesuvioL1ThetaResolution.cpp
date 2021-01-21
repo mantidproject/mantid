@@ -41,22 +41,16 @@ Mantid::Kernel::Logger g_log("VesuvioL1ThetaResolution");
 DECLARE_ALGORITHM(VesuvioL1ThetaResolution)
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string VesuvioL1ThetaResolution::name() const {
-  return "VesuvioL1ThetaResolution";
-}
+const std::string VesuvioL1ThetaResolution::name() const { return "VesuvioL1ThetaResolution"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int VesuvioL1ThetaResolution::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string VesuvioL1ThetaResolution::category() const {
-  return "CorrectionFunctions\\SpecialCorrections";
-}
+const std::string VesuvioL1ThetaResolution::category() const { return "CorrectionFunctions\\SpecialCorrections"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-const std::string VesuvioL1ThetaResolution::summary() const {
-  return "Calculates resolution of l1 and theta";
-}
+const std::string VesuvioL1ThetaResolution::summary() const { return "Calculates resolution of l1 and theta"; }
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
@@ -68,41 +62,32 @@ void VesuvioL1ThetaResolution::init() {
   positiveDouble->setLower(DBL_EPSILON);
 
   const std::vector<std::string> exts{".par", ".dat"};
-  declareProperty(std::make_unique<FileProperty>(
-                      "PARFile", "", FileProperty::FileAction::OptionalLoad,
-                      exts, Direction::Input),
-                  "PAR file containing calibrated detector positions.");
+  declareProperty(
+      std::make_unique<FileProperty>("PARFile", "", FileProperty::FileAction::OptionalLoad, exts, Direction::Input),
+      "PAR file containing calibrated detector positions.");
 
   declareProperty("SampleWidth", 3.0, positiveDouble, "With of sample in cm.");
 
   declareProperty("SpectrumMin", 3, "Index of minimum spectrum");
   declareProperty("SpectrumMax", 198, "Index of maximum spectrum");
 
-  declareProperty("NumEvents", 1000000, positiveInt,
-                  "Number of scattering events");
-  declareProperty("Seed", 123456789, positiveInt,
-                  "Seed for random number generator");
+  declareProperty("NumEvents", 1000000, positiveInt, "Number of scattering events");
+  declareProperty("Seed", 123456789, positiveInt, "Seed for random number generator");
 
-  declareProperty("L1BinWidth", 0.05, positiveDouble,
-                  "Bin width for L1 distribution.");
-  declareProperty("ThetaBinWidth", 0.05, positiveDouble,
-                  "Bin width for theta distribution.");
+  declareProperty("L1BinWidth", 0.05, positiveDouble, "Bin width for L1 distribution.");
+  declareProperty("ThetaBinWidth", 0.05, positiveDouble, "Bin width for theta distribution.");
+
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
+                  "Output workspace containing mean and standard deviation of resolution "
+                  "per detector.");
 
   declareProperty(
-      std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                            Direction::Output),
-      "Output workspace containing mean and standard deviation of resolution "
-      "per detector.");
+      std::make_unique<WorkspaceProperty<>>("L1Distribution", "", Direction::Output, PropertyMode::Optional),
+      "Distribution of lengths of the final flight path.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<>>("L1Distribution", "",
-                                                        Direction::Output,
-                                                        PropertyMode::Optional),
-                  "Distribution of lengths of the final flight path.");
-
-  declareProperty(std::make_unique<WorkspaceProperty<>>("ThetaDistribution", "",
-                                                        Direction::Output,
-                                                        PropertyMode::Optional),
-                  "Distribution of scattering angles.");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<>>("ThetaDistribution", "", Direction::Output, PropertyMode::Optional),
+      "Distribution of scattering angles.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -113,14 +98,12 @@ void VesuvioL1ThetaResolution::exec() {
   loadInstrument();
 
   const std::string l1DistributionWsName = getPropertyValue("L1Distribution");
-  const std::string thetaDistributionWsName =
-      getPropertyValue("ThetaDistribution");
+  const std::string thetaDistributionWsName = getPropertyValue("ThetaDistribution");
   const size_t numHist = m_instWorkspace->getNumberHistograms();
   const int numEvents = getProperty("NumEvents");
 
   // Create output workspace of resolution
-  m_outputWorkspace =
-      WorkspaceFactory::Instance().create("Workspace2D", 4, numHist, numHist);
+  m_outputWorkspace = WorkspaceFactory::Instance().create("Workspace2D", 4, numHist, numHist);
 
   // Set vertical axis to statistic labels
   auto specAxis = std::make_unique<TextAxis>(4);
@@ -132,15 +115,13 @@ void VesuvioL1ThetaResolution::exec() {
 
   // Set X axis to spectrum numbers
   m_outputWorkspace->getAxis(0)->setUnit("Label");
-  auto xAxis = std::dynamic_pointer_cast<Units::Label>(
-      m_outputWorkspace->getAxis(0)->unit());
+  auto xAxis = std::dynamic_pointer_cast<Units::Label>(m_outputWorkspace->getAxis(0)->unit());
   if (xAxis)
     xAxis->setLabel("Spectrum Number");
 
   // Create output workspaces for distributions if required
   if (!l1DistributionWsName.empty()) {
-    m_l1DistributionWs = WorkspaceFactory::Instance().create(
-        m_instWorkspace, numHist, numEvents, numEvents);
+    m_l1DistributionWs = WorkspaceFactory::Instance().create(m_instWorkspace, numHist, numEvents, numEvents);
 
     // Set Y axis
     m_l1DistributionWs->setYUnitLabel("Events");
@@ -148,15 +129,13 @@ void VesuvioL1ThetaResolution::exec() {
     // Set X axis
     auto distributionXAxis = m_l1DistributionWs->getAxis(0);
     distributionXAxis->setUnit("Label");
-    auto labelUnit =
-        std::dynamic_pointer_cast<Units::Label>(distributionXAxis->unit());
+    auto labelUnit = std::dynamic_pointer_cast<Units::Label>(distributionXAxis->unit());
     if (labelUnit)
       labelUnit->setLabel("l1");
   }
 
   if (!thetaDistributionWsName.empty()) {
-    m_thetaDistributionWs = WorkspaceFactory::Instance().create(
-        m_instWorkspace, numHist, numEvents, numEvents);
+    m_thetaDistributionWs = WorkspaceFactory::Instance().create(m_instWorkspace, numHist, numEvents, numEvents);
 
     // Set Y axis
     m_thetaDistributionWs->setYUnitLabel("Events");
@@ -164,8 +143,7 @@ void VesuvioL1ThetaResolution::exec() {
     // Set X axis
     auto distributionXAxis = m_thetaDistributionWs->getAxis(0);
     distributionXAxis->setUnit("Label");
-    auto labelUnit =
-        std::dynamic_pointer_cast<Units::Label>(distributionXAxis->unit());
+    auto labelUnit = std::dynamic_pointer_cast<Units::Label>(distributionXAxis->unit());
     if (labelUnit)
       labelUnit->setLabel("theta");
   }
@@ -175,8 +153,7 @@ void VesuvioL1ThetaResolution::exec() {
   const int seed(getProperty("Seed"));
   std::mt19937 randEngine(static_cast<std::mt19937::result_type>(seed));
   std::uniform_real_distribution<> flatDistrib(0.0, 1.0);
-  std::function<double()> flatVariateGen(
-      [&randEngine, &flatDistrib]() { return flatDistrib(randEngine); });
+  std::function<double()> flatVariateGen([&randEngine, &flatDistrib]() { return flatDistrib(randEngine); });
 
   const auto &spectrumInfo = m_instWorkspace->spectrumInfo();
   // Loop for all detectors
@@ -198,10 +175,8 @@ void VesuvioL1ThetaResolution::exec() {
     Statistics l1Stats = getStatistics(l1);
     Statistics thetaStats = getStatistics(theta);
 
-    g_log.information() << "l0: mean=" << l1Stats.mean
-                        << ", std.dev.=" << l1Stats.standard_deviation
-                        << "\ntheta: mean=" << thetaStats.mean
-                        << ", std.dev.=" << thetaStats.standard_deviation
+    g_log.information() << "l0: mean=" << l1Stats.mean << ", std.dev.=" << l1Stats.standard_deviation
+                        << "\ntheta: mean=" << thetaStats.mean << ", std.dev.=" << thetaStats.standard_deviation
                         << '\n';
 
     // Set values in output workspace
@@ -247,15 +222,13 @@ void VesuvioL1ThetaResolution::exec() {
   // Process the L1 distribution workspace
   if (m_l1DistributionWs) {
     const double binWidth = getProperty("L1BinWidth");
-    setProperty("L1Distribution",
-                processDistribution(m_l1DistributionWs, binWidth));
+    setProperty("L1Distribution", processDistribution(m_l1DistributionWs, binWidth));
   }
 
   // Process the theta distribution workspace
   if (m_thetaDistributionWs) {
     const double binWidth = getProperty("ThetaBinWidth");
-    setProperty("ThetaDistribution",
-                processDistribution(m_thetaDistributionWs, binWidth));
+    setProperty("ThetaDistribution", processDistribution(m_thetaDistributionWs, binWidth));
   }
 
   setProperty("OutputWorkspace", m_outputWorkspace);
@@ -266,14 +239,11 @@ void VesuvioL1ThetaResolution::exec() {
  */
 void VesuvioL1ThetaResolution::loadInstrument() {
   // Get the filename for the VESUVIO IDF
-  MatrixWorkspace_sptr tempWS =
-      WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
-  const std::string vesuvioIPF =
-      InstrumentFileFinder::getInstrumentFilename("VESUVIO");
+  MatrixWorkspace_sptr tempWS = WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
+  const std::string vesuvioIPF = InstrumentFileFinder::getInstrumentFilename("VESUVIO");
 
   // Load an empty VESUVIO instrument workspace
-  IAlgorithm_sptr loadInst =
-      AlgorithmManager::Instance().create("LoadEmptyInstrument");
+  IAlgorithm_sptr loadInst = AlgorithmManager::Instance().create("LoadEmptyInstrument");
   loadInst->initialize();
   loadInst->setChild(true);
   loadInst->setLogging(false);
@@ -301,23 +271,20 @@ void VesuvioL1ThetaResolution::loadInstrument() {
     g_log.debug() << "PAR file header: " << header << '\n';
     boost::trim(header);
     std::vector<std::string> headers;
-    boost::split(headers, header, boost::is_any_of("\t "),
-                 boost::token_compress_on);
+    boost::split(headers, header, boost::is_any_of("\t "), boost::token_compress_on);
     size_t numCols = headers.size();
     g_log.debug() << "PAR file columns: " << numCols << '\n';
 
     std::string headerFormat = headerFormats[numCols];
     if (headerFormat.empty()) {
       std::stringstream error;
-      error << "Unrecognised PAR file header. Number of colums: " << numCols
-            << " (expected either 5 or 6.";
+      error << "Unrecognised PAR file header. Number of colums: " << numCols << " (expected either 5 or 6.";
       throw std::runtime_error(error.str());
     }
     g_log.debug() << "PAR file header format: " << headerFormat << '\n';
 
     // Update instrument
-    IAlgorithm_sptr updateInst =
-        AlgorithmManager::Instance().create("UpdateInstrumentFromFile");
+    IAlgorithm_sptr updateInst = AlgorithmManager::Instance().create("UpdateInstrumentFromFile");
     updateInst->initialize();
     updateInst->setChild(true);
     updateInst->setLogging(false);
@@ -330,10 +297,8 @@ void VesuvioL1ThetaResolution::loadInstrument() {
     m_instWorkspace = updateInst->getProperty("Workspace");
   }
 
-  const int specIdxMin = static_cast<int>(
-      m_instWorkspace->getIndexFromSpectrumNumber(getProperty("SpectrumMin")));
-  const int specIdxMax = static_cast<int>(
-      m_instWorkspace->getIndexFromSpectrumNumber(getProperty("SpectrumMax")));
+  const int specIdxMin = static_cast<int>(m_instWorkspace->getIndexFromSpectrumNumber(getProperty("SpectrumMin")));
+  const int specIdxMax = static_cast<int>(m_instWorkspace->getIndexFromSpectrumNumber(getProperty("SpectrumMax")));
 
   // Crop the workspace to just the detectors we are interested in
   IAlgorithm_sptr crop = AlgorithmManager::Instance().create("CropWorkspace");
@@ -353,9 +318,9 @@ void VesuvioL1ThetaResolution::loadInstrument() {
 //----------------------------------------------------------------------------------------------
 /** Loads the instrument into a workspace.
  */
-void VesuvioL1ThetaResolution::calculateDetector(
-    const IDetector &detector, std::function<double()> &flatRandomVariateGen,
-    std::vector<double> &l1Values, std::vector<double> &thetaValues) {
+void VesuvioL1ThetaResolution::calculateDetector(const IDetector &detector,
+                                                 std::function<double()> &flatRandomVariateGen,
+                                                 std::vector<double> &l1Values, std::vector<double> &thetaValues) {
   const int numEvents = getProperty("NumEvents");
   l1Values.reserve(numEvents);
   thetaValues.reserve(numEvents);
@@ -375,8 +340,7 @@ void VesuvioL1ThetaResolution::calculateDetector(
   const double detWidth = detBoxWidth.X() * 100;
   const double detHeight = detBoxWidth.Y() * 100;
 
-  g_log.debug() << "detWidth=" << detWidth << "\ndetHeight=" << detHeight
-                << '\n';
+  g_log.debug() << "detWidth=" << detWidth << "\ndetHeight=" << detHeight << '\n';
 
   // Scattering angle in rad
   const double theta = m_instWorkspace->detectorTwoTheta(detector);
@@ -404,8 +368,7 @@ void VesuvioL1ThetaResolution::calculateDetector(
       const double yd = y0 + a * sin(theta);
       const double zd = -detHeight / 2 + detHeight * flatRandomVariateGen();
 
-      const double l1 =
-          sqrt(pow(xd - xs, 2) + pow(yd - ys, 2) + pow(zd - zs, 2));
+      const double l1 = sqrt(pow(xd - xs, 2) + pow(yd - ys, 2) + pow(zd - zs, 2));
       double angle = acos(yd / l1);
 
       if (xd < 0.0)
@@ -425,9 +388,7 @@ void VesuvioL1ThetaResolution::calculateDetector(
 //----------------------------------------------------------------------------------------------
 /** Rebins the distributions and sets error values.
  */
-MatrixWorkspace_sptr
-VesuvioL1ThetaResolution::processDistribution(MatrixWorkspace_sptr ws,
-                                              const double binWidth) {
+MatrixWorkspace_sptr VesuvioL1ThetaResolution::processDistribution(MatrixWorkspace_sptr ws, const double binWidth) {
   const size_t numHist = ws->getNumberHistograms();
 
   double xMin(DBL_MAX);
@@ -454,8 +415,7 @@ VesuvioL1ThetaResolution::processDistribution(MatrixWorkspace_sptr ws,
   for (size_t i = 0; i < numHist; i++) {
     auto &y = ws->y(i);
     auto &e = ws->mutableE(i);
-    std::transform(y.begin(), y.end(), e.begin(),
-                   [](double x) { return sqrt(x); });
+    std::transform(y.begin(), y.end(), e.begin(), [](double x) { return sqrt(x); });
   }
 
   return ws;

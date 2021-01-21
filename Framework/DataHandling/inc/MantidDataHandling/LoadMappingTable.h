@@ -52,9 +52,7 @@ public:
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; };
   /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override {
-    return "DataHandling\\Instrument;DataHandling\\Raw";
-  }
+  const std::string category() const override { return "DataHandling\\Instrument;DataHandling\\Raw"; }
 
 private:
   /// The name and path of the input file

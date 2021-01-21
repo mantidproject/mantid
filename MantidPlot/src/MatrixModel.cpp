@@ -36,8 +36,7 @@
 #include <cstdlib>
 #include <qwt_color_map.h>
 
-MatrixModel::MatrixModel(QObject *parent)
-    : QAbstractTableModel(parent), d_matrix(dynamic_cast<Matrix *>(parent)) {
+MatrixModel::MatrixModel(QObject *parent) : QAbstractTableModel(parent), d_matrix(dynamic_cast<Matrix *>(parent)) {
   init();
 
   if (d_matrix) {
@@ -110,13 +109,9 @@ Qt::ItemFlags MatrixModel::flags(const QModelIndex &index) const {
     return Qt::ItemIsEnabled;
 }
 
-int MatrixModel::rowCount(const QModelIndex & /* parent */) const {
-  return d_rows;
-}
+int MatrixModel::rowCount(const QModelIndex & /* parent */) const { return d_rows; }
 
-int MatrixModel::columnCount(const QModelIndex & /* parent */) const {
-  return d_cols;
-}
+int MatrixModel::columnCount(const QModelIndex & /* parent */) const { return d_cols; }
 
 void MatrixModel::setRowCount(int rows) {
   if (d_rows == rows)
@@ -183,8 +178,7 @@ QString MatrixModel::text(int row, int col) {
 
   if (d_matrix) {
     QLocale locale = d_matrix->locale();
-    return locale.toString(val, d_matrix->textFormat().toAscii(),
-                           d_matrix->precision());
+    return locale.toString(val, d_matrix->textFormat().toAscii(), d_matrix->precision());
   }
   return d_locale.toString(val, d_txt_format, d_num_precision);
 }
@@ -238,8 +232,7 @@ double MatrixModel::y(int row) const {
     return start - row * d_matrix->dy();
 }
 
-QVariant MatrixModel::headerData(int section, Qt::Orientation orientation,
-                                 int role) const {
+QVariant MatrixModel::headerData(int section, Qt::Orientation orientation, int role) const {
   if (!d_matrix || d_matrix->headerViewType() == Matrix::ColumnRow)
     return QAbstractItemModel::headerData(section, orientation, role);
 
@@ -285,16 +278,14 @@ QVariant MatrixModel::data(const QModelIndex &index, int role) const {
 
   if (role == Qt::DisplayRole || role == Qt::EditRole) {
     if (d_matrix)
-      return QVariant(d_matrix->locale().toString(
-          val, d_matrix->textFormat().toAscii(), d_matrix->precision()));
+      return QVariant(d_matrix->locale().toString(val, d_matrix->textFormat().toAscii(), d_matrix->precision()));
     else
       return QVariant(d_locale.toString(val, d_txt_format, d_num_precision));
   } else
     return QVariant();
 }
 
-bool MatrixModel::setData(const QModelIndex &index, const QVariant &value,
-                          int role) {
+bool MatrixModel::setData(const QModelIndex &index, const QVariant &value, int role) {
   if (!index.isValid())
     return false;
 
@@ -312,25 +303,22 @@ bool MatrixModel::setData(const QModelIndex &index, const QVariant &value,
     d_matrix->resetView();
   }
 
-  d_matrix->undoStack()->push(new MatrixEditCellCommand(
-      this, index, valBefore, d_data[i],
-      tr("Edited cell") + " (" + QString::number(index.row() + 1) + "," +
-          QString::number(index.column() + 1) + ")"));
+  d_matrix->undoStack()->push(new MatrixEditCellCommand(this, index, valBefore, d_data[i],
+                                                        tr("Edited cell") + " (" + QString::number(index.row() + 1) +
+                                                            "," + QString::number(index.column() + 1) + ")"));
   d_matrix->notifyChanges();
   d_matrix->moveCell(index);
   return false;
 }
 
 bool MatrixModel::canResize(int rows, int cols) {
-  if (rows <= 0 || cols <= 0 ||
-      INT_MAX / rows < cols) { // avoid integer overflow
+  if (rows <= 0 || cols <= 0 || INT_MAX / rows < cols) { // avoid integer overflow
     QApplication::restoreOverrideCursor();
-    QMessageBox::critical(
-        d_matrix, tr("MantidPlot") + " - " + tr("Input Size Error"),
-        tr("The dimensions you have specified are not acceptable!") + "\n" +
-            tr("Please enter positive values for which the product "
-               "rows*columns does not exceed the maximum integer value "
-               "available on your system!"));
+    QMessageBox::critical(d_matrix, tr("MantidPlot") + " - " + tr("Input Size Error"),
+                          tr("The dimensions you have specified are not acceptable!") + "\n" +
+                              tr("Please enter positive values for which the product "
+                                 "rows*columns does not exceed the maximum integer value "
+                                 "available on your system!"));
     return false;
   }
 
@@ -345,14 +333,12 @@ bool MatrixModel::canResize(int rows, int cols) {
   }
 
   QApplication::restoreOverrideCursor();
-  QMessageBox::critical(
-      d_matrix, tr("MantidPlot") + " - " + tr("Memory Allocation Error"),
-      tr("Not enough memory, operation aborted!"));
+  QMessageBox::critical(d_matrix, tr("MantidPlot") + " - " + tr("Memory Allocation Error"),
+                        tr("Not enough memory, operation aborted!"));
   return false;
 }
 
-bool MatrixModel::removeColumns(int column, int count,
-                                const QModelIndex &parent) {
+bool MatrixModel::removeColumns(int column, int count, const QModelIndex &parent) {
   beginRemoveColumns(parent, column, column + count - 1);
 
   d_cols -= count;
@@ -367,9 +353,8 @@ bool MatrixModel::removeColumns(int column, int count,
   double *new_data = (double *)realloc(d_data, size * sizeof(double));
   if (new_data == nullptr) {
     // could not realloc, but orig still valid
-    QMessageBox::critical(
-        d_matrix, tr("MantidPlot") + " - " + tr("Memory Allocation Error"),
-        tr("Not enough memory, operation aborted!"));
+    QMessageBox::critical(d_matrix, tr("MantidPlot") + " - " + tr("Memory Allocation Error"),
+                          tr("Not enough memory, operation aborted!"));
   } else {
     d_data = new_data;
   }
@@ -378,8 +363,7 @@ bool MatrixModel::removeColumns(int column, int count,
   return true;
 }
 
-bool MatrixModel::insertColumns(int column, int count,
-                                const QModelIndex &parent) {
+bool MatrixModel::insertColumns(int column, int count, const QModelIndex &parent) {
   if (!canResize(d_rows, d_cols + count))
     return false;
 
@@ -438,9 +422,8 @@ bool MatrixModel::removeRows(int row, int count, const QModelIndex &parent) {
   double *new_data = (double *)realloc(d_data, size * sizeof(double));
   if (new_data == nullptr) {
     // could not realloc, but orig still valid
-    QMessageBox::critical(
-        d_matrix, tr("MantidPlot") + " - " + tr("Memory Allocation Error"),
-        tr("Not enough memory, operation aborted!"));
+    QMessageBox::critical(d_matrix, tr("MantidPlot") + " - " + tr("Memory Allocation Error"),
+                          tr("Not enough memory, operation aborted!"));
   } else {
     d_data = new_data;
   }
@@ -457,8 +440,7 @@ QImage MatrixModel::renderImage() {
 
   double minValue = 0.0, maxValue = 0.0;
   d_matrix->range(&minValue, &maxValue);
-  const QwtDoubleInterval intensityRange =
-      QwtDoubleInterval(minValue, maxValue);
+  const QwtDoubleInterval intensityRange = QwtDoubleInterval(minValue, maxValue);
   for (int i = 0; i < d_rows; i++) {
     QRgb *line = reinterpret_cast<QRgb *>(image.scanLine(i));
     for (int j = 0; j < d_cols; j++) {
@@ -473,14 +455,11 @@ QImage MatrixModel::renderImage() {
   return image;
 }
 
-bool MatrixModel::importASCII(const QString &fname, const QString &sep,
-                              int ignoredLines, bool stripSpaces,
-                              bool simplifySpaces, const QString &commentString,
-                              int importAs, const QLocale &locale,
+bool MatrixModel::importASCII(const QString &fname, const QString &sep, int ignoredLines, bool stripSpaces,
+                              bool simplifySpaces, const QString &commentString, int importAs, const QLocale &locale,
                               int endLineChar, int maxRows) {
   int rows = 0;
-  QString name = MdiSubWindow::parseAsciiFile(fname, commentString, endLineChar,
-                                              ignoredLines, maxRows, rows);
+  QString name = MdiSubWindow::parseAsciiFile(fname, commentString, endLineChar, ignoredLines, maxRows, rows);
   if (name.isEmpty())
     return false;
   QFile f(name);
@@ -680,9 +659,8 @@ bool MatrixModel::initWorkspace() {
     d_inv_perm = gsl_permutation_alloc(d_cols);
   if (!d_direct_matrix || !d_inv_matrix || !d_inv_perm) {
     QApplication::restoreOverrideCursor();
-    QMessageBox::critical(
-        d_matrix, tr("MantidPlot") + " - " + tr("Memory Allocation Error"),
-        tr("Not enough memory, operation aborted!"));
+    QMessageBox::critical(d_matrix, tr("MantidPlot") + " - " + tr("Memory Allocation Error"),
+                          tr("Not enough memory, operation aborted!"));
     return false;
   }
   return true;
@@ -735,15 +713,13 @@ void MatrixModel::clear(int startRow, int endRow, int startCol, int endCol) {
   QApplication::restoreOverrideCursor();
 }
 
-double *MatrixModel::dataCopy(int startRow, int endRow, int startCol,
-                              int endCol) {
+double *MatrixModel::dataCopy(int startRow, int endRow, int startCol, int endCol) {
   if (endRow < 0)
     endRow = d_rows - 1;
   if (endCol < 0)
     endCol = d_cols - 1;
 
-  double *buffer = (double *)malloc((endRow - startRow + 1) *
-                                    (endCol - startCol + 1) * sizeof(double));
+  double *buffer = (double *)malloc((endRow - startRow + 1) * (endCol - startCol + 1) * sizeof(double));
   if (!buffer)
     return nullptr;
 
@@ -761,15 +737,12 @@ double *MatrixModel::dataCopy(int startRow, int endRow, int startCol,
   return buffer;
 }
 
-bool MatrixModel::muParserCalculate(int startRow, int endRow, int startCol,
-                                    int endCol) {
+bool MatrixModel::muParserCalculate(int startRow, int endRow, int startCol, int endCol) {
   ScriptingEnv *scriptEnv = d_matrix->scriptingEnv();
-  muParserScript *mup = new muParserScript(
-      scriptEnv, QString("<%1>").arg(d_matrix->objectName()), d_matrix);
+  muParserScript *mup = new muParserScript(scriptEnv, QString("<%1>").arg(d_matrix->objectName()), d_matrix);
   connect(mup, SIGNAL(error(const QString &, const QString &, int)), scriptEnv,
           SIGNAL(error(const QString &, const QString &, int)));
-  connect(mup, SIGNAL(print(const QString &)), scriptEnv,
-          SIGNAL(print(const QString &)));
+  connect(mup, SIGNAL(print(const QString &)), scriptEnv, SIGNAL(print(const QString &)));
 
   if (endRow < 0)
     endRow = d_rows - 1;
@@ -843,8 +816,7 @@ bool MatrixModel::muParserCalculate(int startRow, int endRow, int startCol,
   return true;
 }
 
-bool MatrixModel::calculate(int startRow, int endRow, int startCol,
-                            int endCol) {
+bool MatrixModel::calculate(int startRow, int endRow, int startCol, int endCol) {
   QString formula = d_matrix->formula();
   if (formula.isEmpty())
     return false;
@@ -852,12 +824,10 @@ bool MatrixModel::calculate(int startRow, int endRow, int startCol,
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
   ScriptingEnv *scriptEnv = d_matrix->scriptingEnv();
-  Script *script = scriptEnv->newScript(QString("<%1>").arg(objectName()), this,
-                                        Script::NonInteractive);
-  connect(script, SIGNAL(error(const QString &, const QString &, int)),
-          scriptEnv, SIGNAL(error(const QString &, const QString &, int)));
-  connect(script, SIGNAL(print(const QString &)), scriptEnv,
-          SIGNAL(print(const QString &)));
+  Script *script = scriptEnv->newScript(QString("<%1>").arg(objectName()), this, Script::NonInteractive);
+  connect(script, SIGNAL(error(const QString &, const QString &, int)), scriptEnv,
+          SIGNAL(error(const QString &, const QString &, int)));
+  connect(script, SIGNAL(print(const QString &)), scriptEnv, SIGNAL(print(const QString &)));
 
   if (endRow < 0)
     endRow = d_rows - 1;
@@ -904,13 +874,11 @@ void MatrixModel::fft(bool inverse) {
   int width = d_cols;
   int height = d_rows;
 
-  double **x_int_re =
-      Matrix::allocateMatrixData(height, width); /* real coeff matrix */
+  double **x_int_re = Matrix::allocateMatrixData(height, width); /* real coeff matrix */
   if (!x_int_re)
     return;
 
-  double **x_int_im =
-      Matrix::allocateMatrixData(height, width); /* imaginary coeff  matrix*/
+  double **x_int_im = Matrix::allocateMatrixData(height, width); /* imaginary coeff  matrix*/
   if (!x_int_im) {
     Matrix::freeMatrixData(x_int_re, height);
     return;
@@ -927,9 +895,8 @@ void MatrixModel::fft(bool inverse) {
         Matrix::freeMatrixData(x_int_re, height);
         Matrix::freeMatrixData(x_int_im, height);
         QApplication::restoreOverrideCursor();
-        QMessageBox::critical(
-            d_matrix, tr("MantidPlot") + " - " + tr("FFT Error"),
-            tr("Matrix must not contain any NaN values when performing FFT."));
+        QMessageBox::critical(d_matrix, tr("MantidPlot") + " - " + tr("FFT Error"),
+                              tr("Matrix must not contain any NaN values when performing FFT."));
         return;
       }
 
@@ -980,8 +947,7 @@ void MatrixModel::fft(bool inverse) {
   QApplication::restoreOverrideCursor();
 }
 
-void MatrixModel::pasteData(double *clipboardBuffer, int topRow, int leftCol,
-                            int rows, int cols) {
+void MatrixModel::pasteData(double *clipboardBuffer, int topRow, int leftCol, int rows, int cols) {
   int newCols = leftCol + cols;
   if (newCols > d_cols)
     insertColumns(d_cols, newCols - d_cols);

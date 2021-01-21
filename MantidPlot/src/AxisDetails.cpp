@@ -47,9 +47,7 @@
  *  @param parent :: the QWidget that acts as this widget's parent in the
  * hierarchy
  */
-AxisDetails::AxisDetails(ApplicationWindow *app, Graph *graph, int mappedaxis,
-                         QWidget *parent)
-    : QWidget(parent) {
+AxisDetails::AxisDetails(ApplicationWindow *app, Graph *graph, int mappedaxis, QWidget *parent) : QWidget(parent) {
   m_app = app;
   m_graph = graph;
   m_tablesList = m_app->tableNames();
@@ -77,13 +75,11 @@ AxisDetails::AxisDetails(ApplicationWindow *app, Graph *graph, int mappedaxis,
   m_btnLabelFont = new QPushButton(tr("&Font"));
   hl->addWidget(m_btnLabelFont);
 
-  m_formatButtons =
-      new TextFormatButtons(m_txtTitle, TextFormatButtons::AxisLabel);
+  m_formatButtons = new TextFormatButtons(m_txtTitle, TextFormatButtons::AxisLabel);
   hl->addWidget(m_formatButtons);
   hl->addStretch();
 
-  m_txtTitle->setMaximumWidth(m_btnLabelFont->width() +
-                              m_formatButtons->width());
+  m_txtTitle->setMaximumWidth(m_btnLabelFont->width() + m_formatButtons->width());
   titleBoxLayout->addLayout(hl);
 
   QHBoxLayout *bottomLayout = new QHBoxLayout();
@@ -196,8 +192,7 @@ AxisDetails::AxisDetails(ApplicationWindow *app, Graph *graph, int mappedaxis,
   rightLayout->addStretch(1);
 
   connect(m_chkShowFormula, SIGNAL(clicked()), this, SLOT(enableFormulaBox()));
-  connect(m_cmbAxisType, SIGNAL(activated(int)), this,
-          SLOT(setAxisFormatOptions(int)));
+  connect(m_cmbAxisType, SIGNAL(activated(int)), this, SLOT(setAxisFormatOptions(int)));
 
   connect(m_grpShowLabels, SIGNAL(clicked(bool)), this, SLOT(showAxis()));
   connect(m_chkShowAxis, SIGNAL(clicked()), this, SLOT(showAxis()));
@@ -246,8 +241,7 @@ void AxisDetails::initWidgets() {
     m_cmbMajorTicksType->setCurrentIndex(majTicks[m_mappedaxis]);
     m_cmbMinorTicksType->setCurrentIndex(minTicks[m_mappedaxis]);
 
-    QwtScaleWidget *scale =
-        dynamic_cast<QwtScaleWidget *>(p->axisWidget(m_mappedaxis));
+    QwtScaleWidget *scale = dynamic_cast<QwtScaleWidget *>(p->axisWidget(m_mappedaxis));
     if (scale) {
       m_spnBaseline->setValue(scale->margin());
     } else {
@@ -263,8 +257,7 @@ void AxisDetails::initWidgets() {
     if (m_cmbAxisType->currentIndex() == ScaleDraw::Numeric) {
       m_spnPrecision->setValue(p->axisLabelPrecision(m_mappedaxis));
     } else if (m_cmbAxisType->currentIndex() == ScaleDraw::Text) {
-      m_cmbColName->setItemText(m_cmbColName->currentIndex(),
-                                m_graph->axisFormatInfo(m_mappedaxis));
+      m_cmbColName->setItemText(m_cmbColName->currentIndex(), m_graph->axisFormatInfo(m_mappedaxis));
     }
 
     m_spnPrecision->setEnabled(format != 0);
@@ -292,50 +285,32 @@ void AxisDetails::initWidgets() {
     }
     showAxis();
 
-    connect(m_chkShowFormula, SIGNAL(stateChanged(int)), this,
-            SLOT(setModified()));
-    connect(m_chkShowAxis, SIGNAL(stateChanged(int)), this,
-            SLOT(setModified()));
+    connect(m_chkShowFormula, SIGNAL(stateChanged(int)), this, SLOT(setModified()));
+    connect(m_chkShowAxis, SIGNAL(stateChanged(int)), this, SLOT(setModified()));
 
-    connect(m_cmbAxisType, SIGNAL(currentIndexChanged(int)), this,
-            SLOT(setModified()));
-    connect(m_cmbAxisType, SIGNAL(editTextChanged(QString)), this,
-            SLOT(setModified()));
-    connect(m_cmbMajorTicksType, SIGNAL(currentIndexChanged(int)), this,
-            SLOT(setModified()));
-    connect(m_cmbMajorTicksType, SIGNAL(editTextChanged(QString)), this,
-            SLOT(setModified()));
-    connect(m_cmbTableName, SIGNAL(currentIndexChanged(int)), this,
-            SLOT(setModified()));
-    connect(m_cmbTableName, SIGNAL(editTextChanged(QString)), this,
-            SLOT(setModified()));
-    connect(m_cmbMinorTicksType, SIGNAL(currentIndexChanged(int)), this,
-            SLOT(setModified()));
-    connect(m_cmbMinorTicksType, SIGNAL(editTextChanged(QString)), this,
-            SLOT(setModified()));
-    connect(m_cmbColName, SIGNAL(currentIndexChanged(int)), this,
-            SLOT(setModified()));
-    connect(m_cmbColName, SIGNAL(editTextChanged(QString)), this,
-            SLOT(setModified()));
-    connect(m_cmbFormat, SIGNAL(currentIndexChanged(int)), this,
-            SLOT(setModified()));
-    connect(m_cmbFormat, SIGNAL(editTextChanged(QString)), this,
-            SLOT(setModified()));
+    connect(m_cmbAxisType, SIGNAL(currentIndexChanged(int)), this, SLOT(setModified()));
+    connect(m_cmbAxisType, SIGNAL(editTextChanged(QString)), this, SLOT(setModified()));
+    connect(m_cmbMajorTicksType, SIGNAL(currentIndexChanged(int)), this, SLOT(setModified()));
+    connect(m_cmbMajorTicksType, SIGNAL(editTextChanged(QString)), this, SLOT(setModified()));
+    connect(m_cmbTableName, SIGNAL(currentIndexChanged(int)), this, SLOT(setModified()));
+    connect(m_cmbTableName, SIGNAL(editTextChanged(QString)), this, SLOT(setModified()));
+    connect(m_cmbMinorTicksType, SIGNAL(currentIndexChanged(int)), this, SLOT(setModified()));
+    connect(m_cmbMinorTicksType, SIGNAL(editTextChanged(QString)), this, SLOT(setModified()));
+    connect(m_cmbColName, SIGNAL(currentIndexChanged(int)), this, SLOT(setModified()));
+    connect(m_cmbColName, SIGNAL(editTextChanged(QString)), this, SLOT(setModified()));
+    connect(m_cmbFormat, SIGNAL(currentIndexChanged(int)), this, SLOT(setModified()));
+    connect(m_cmbFormat, SIGNAL(editTextChanged(QString)), this, SLOT(setModified()));
     connect(m_grpShowLabels, SIGNAL(clicked(bool)), this, SLOT(setModified()));
     connect(m_btnAxesFont, SIGNAL(clicked()), this, SLOT(setModified()));
     connect(m_btnLabelFont, SIGNAL(clicked()), this, SLOT(setModified()));
     connect(m_txtFormula, SIGNAL(textChanged()), this, SLOT(setModified()));
     connect(m_txtTitle, SIGNAL(textChanged()), this, SLOT(setModified()));
-    connect(m_formatButtons, SIGNAL(formattingModified()), this,
-            SLOT(setModified()));
-    connect(m_spnPrecision, SIGNAL(valueChanged(int)), this,
-            SLOT(setModified()));
+    connect(m_formatButtons, SIGNAL(formattingModified()), this, SLOT(setModified()));
+    connect(m_spnPrecision, SIGNAL(valueChanged(int)), this, SLOT(setModified()));
     connect(m_spnAngle, SIGNAL(valueChanged(int)), this, SLOT(setModified()));
-    connect(m_spnBaseline, SIGNAL(valueChanged(int)), this,
-            SLOT(setModified()));
+    connect(m_spnBaseline, SIGNAL(valueChanged(int)), this, SLOT(setModified()));
     connect(m_cbtnAxisColor, SIGNAL(colorChanged()), this, SLOT(setModified()));
-    connect(m_cbtnAxisNumColor, SIGNAL(colorChanged()), this,
-            SLOT(setModified()));
+    connect(m_cbtnAxisNumColor, SIGNAL(colorChanged()), this, SLOT(setModified()));
 
     m_modified = false;
     m_initialised = true;
@@ -396,8 +371,7 @@ void AxisDetails::apply() {
     if (type == ScaleDraw::Day || type == ScaleDraw::Month) {
       formatInfo = QString::number(m_cmbFormat->currentIndex());
     } else if (type == ScaleDraw::Time || type == ScaleDraw::Date) {
-      QStringList lst = (m_graph->axisFormatInfo(m_mappedaxis))
-                            .split(";", QString::SkipEmptyParts);
+      QStringList lst = (m_graph->axisFormatInfo(m_mappedaxis)).split(";", QString::SkipEmptyParts);
       if ((int)lst.count() >= 2) {
         lst[1] = m_cmbFormat->currentText();
       }
@@ -405,13 +379,11 @@ void AxisDetails::apply() {
     } else if (type == ScaleDraw::ColHeader) {
       formatInfo = m_cmbTableName->currentText();
     }
-    m_graph->showAxis(
-        m_mappedaxis, m_cmbAxisType->currentIndex(), formatInfo, w,
-        m_chkShowAxis->isChecked(), m_cmbMajorTicksType->currentIndex(),
-        m_cmbMinorTicksType->currentIndex(), m_grpShowLabels->isChecked(),
-        m_cbtnAxisColor->color(), m_cmbFormat->currentIndex(),
-        m_spnPrecision->value(), m_spnAngle->value(), m_spnBaseline->value(),
-        formula, m_cbtnAxisNumColor->color());
+    m_graph->showAxis(m_mappedaxis, m_cmbAxisType->currentIndex(), formatInfo, w, m_chkShowAxis->isChecked(),
+                      m_cmbMajorTicksType->currentIndex(), m_cmbMinorTicksType->currentIndex(),
+                      m_grpShowLabels->isChecked(), m_cbtnAxisColor->color(), m_cmbFormat->currentIndex(),
+                      m_spnPrecision->value(), m_spnAngle->value(), m_spnBaseline->value(), formula,
+                      m_cbtnAxisNumColor->color());
     m_graph->setAxisTitle(m_mappedaxis, m_txtTitle->toPlainText());
     m_graph->setAxisFont(m_mappedaxis, m_scaleFont);
     m_graph->setAxisTitleFont(m_mappedaxis, m_labelFont);
@@ -438,12 +410,9 @@ void AxisDetails::showAxis() {
 
     // this should so the work of the below IF but on one line and slightly more
     // efficiently as i assume setDisabled negates that given to it
-    m_spnAngle->setEnabled(
-        (m_mappedaxis == QwtPlot::xBottom || m_mappedaxis == QwtPlot::xTop) &&
-        labels);
-    m_spnPrecision->setEnabled(
-        labels && (m_cmbAxisType->currentIndex() == ScaleDraw::Numeric) &&
-        (m_cmbFormat->currentIndex() != 0));
+    m_spnAngle->setEnabled((m_mappedaxis == QwtPlot::xBottom || m_mappedaxis == QwtPlot::xTop) && labels);
+    m_spnPrecision->setEnabled(labels && (m_cmbAxisType->currentIndex() == ScaleDraw::Numeric) &&
+                               (m_cmbFormat->currentIndex() != 0));
 
     enableFormulaBox();
   }
@@ -477,8 +446,7 @@ void AxisDetails::setAxisFormatOptions(int type) {
     m_cmbFormat->insertItem(m_cmbFormat->count(), tr("Decimal: 100.0"));
     m_cmbFormat->insertItem(m_cmbFormat->count(), tr("Scientific: 1e2"));
     m_cmbFormat->insertItem(m_cmbFormat->count(), tr("Scientific: 10^2"));
-    m_cmbFormat->setCurrentIndex(
-        m_graph->plotWidget()->axisLabelFormat(m_mappedaxis));
+    m_cmbFormat->setCurrentIndex(m_graph->plotWidget()->axisLabelFormat(m_mappedaxis));
 
     m_lblPrecision->show();
     m_spnPrecision->show();
@@ -500,10 +468,8 @@ void AxisDetails::setAxisFormatOptions(int type) {
     m_cmbFormat->show();
     m_cmbFormat->insertItem(m_cmbFormat->count(), QDate::shortDayName(day));
     m_cmbFormat->insertItem(m_cmbFormat->count(), QDate::longDayName(day));
-    m_cmbFormat->insertItem(m_cmbFormat->count(),
-                            (QDate::shortDayName(day)).left(1));
-    m_cmbFormat->setCurrentIndex(
-        (m_graph->axisFormatInfo(m_mappedaxis)).toInt());
+    m_cmbFormat->insertItem(m_cmbFormat->count(), (QDate::shortDayName(day)).left(1));
+    m_cmbFormat->setCurrentIndex((m_graph->axisFormatInfo(m_mappedaxis)).toInt());
     break;
   }
   case 3: {
@@ -512,10 +478,8 @@ void AxisDetails::setAxisFormatOptions(int type) {
     m_cmbFormat->show();
     m_cmbFormat->insertItem(m_cmbFormat->count(), QDate::shortMonthName(month));
     m_cmbFormat->insertItem(m_cmbFormat->count(), QDate::longMonthName(month));
-    m_cmbFormat->insertItem(m_cmbFormat->count(),
-                            (QDate::shortMonthName(month)).left(1));
-    m_cmbFormat->setCurrentIndex(
-        (m_graph->axisFormatInfo(m_mappedaxis)).toInt());
+    m_cmbFormat->insertItem(m_cmbFormat->count(), (QDate::shortMonthName(month)).left(1));
+    m_cmbFormat->setCurrentIndex((m_graph->axisFormatInfo(m_mappedaxis)).toInt());
   } break;
 
   case 4: {
@@ -523,8 +487,7 @@ void AxisDetails::setAxisFormatOptions(int type) {
     m_cmbFormat->show();
     m_cmbFormat->setEditable(true);
 
-    QStringList lst = (m_graph->axisFormatInfo(m_mappedaxis))
-                          .split(";", QString::KeepEmptyParts);
+    QStringList lst = (m_graph->axisFormatInfo(m_mappedaxis)).split(";", QString::KeepEmptyParts);
     if (lst.count() == 2) {
       m_cmbFormat->insertItem(m_cmbFormat->count(), lst[1]);
       m_cmbFormat->setItemText(m_cmbFormat->currentIndex(), lst[1]);
@@ -550,8 +513,7 @@ void AxisDetails::setAxisFormatOptions(int type) {
     m_cmbFormat->show();
     m_cmbFormat->setEditable(true);
 
-    QStringList lst = (m_graph->axisFormatInfo(m_mappedaxis))
-                          .split(";", QString::KeepEmptyParts);
+    QStringList lst = (m_graph->axisFormatInfo(m_mappedaxis)).split(";", QString::KeepEmptyParts);
     if (lst.count() == 2) {
       m_cmbFormat->insertItem(m_cmbFormat->count(), lst[1]);
       m_cmbFormat->setItemText(m_cmbFormat->currentIndex(), lst[1]);

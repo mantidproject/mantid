@@ -25,13 +25,9 @@ public:
   virtual void updateViewFrustum(ViewFrustum_const_sptr frustum) = 0;
   virtual std::string getFrame() const = 0;
   virtual std::string getPeaksWorkspaceName() const = 0;
-  virtual void
-  getPeaksInfo(Mantid::API::IPeaksWorkspace_sptr peaksWorkspace, int row,
-               Mantid::Kernel::V3D &position, double &radius,
-               Mantid::Kernel::SpecialCoordinateSystem specialCoordinateSystem)
-      const = 0;
-  virtual void sortPeaksWorkspace(const std::string &byColumnName,
-                                  const bool ascending) = 0;
+  virtual void getPeaksInfo(Mantid::API::IPeaksWorkspace_sptr peaksWorkspace, int row, Mantid::Kernel::V3D &position,
+                            double &radius, Mantid::Kernel::SpecialCoordinateSystem specialCoordinateSystem) const = 0;
+  virtual void sortPeaksWorkspace(const std::string &byColumnName, const bool ascending) = 0;
 };
 
 using PeaksPresenterVsi_sptr = std::shared_ptr<PeaksPresenterVsi>;

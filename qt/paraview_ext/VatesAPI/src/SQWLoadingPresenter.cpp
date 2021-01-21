@@ -27,10 +27,8 @@ namespace VATES {
     @throw invalid_arument if view is null
     @throw logic_error if cannot use the reader-presenter for this filetype.
     */
-SQWLoadingPresenter::SQWLoadingPresenter(std::unique_ptr<MDLoadingView> view,
-                                         const std::string &filename)
-    : MDEWLoadingPresenter(std::move(view)), m_filename(filename),
-      m_wsTypeName("") {
+SQWLoadingPresenter::SQWLoadingPresenter(std::unique_ptr<MDLoadingView> view, const std::string &filename)
+    : MDEWLoadingPresenter(std::move(view)), m_filename(filename), m_wsTypeName("") {
   if (this->m_filename.empty()) {
     throw std::invalid_argument("File name is an empty string.");
   }
@@ -45,9 +43,8 @@ is attempted to be loaded.
 @return false if the file cannot be read.
 */
 bool SQWLoadingPresenter::canReadFile() const {
-  boost::regex expression(
-      ".*sqw$",
-      boost::regex_constants::icase); // check that the file ends with sqw.
+  boost::regex expression(".*sqw$",
+                          boost::regex_constants::icase); // check that the file ends with sqw.
   return boost::regex_match(this->m_filename, expression);
 }
 
@@ -59,17 +56,15 @@ progresses.
 @param drawingProgressUpdate : Handler for GUI updates while
 vtkDataSetFactory::create occurs.
 */
-vtkSmartPointer<vtkDataSet>
-SQWLoadingPresenter::execute(vtkDataSetFactory *factory,
-                             ProgressAction &loadingProgressUpdate,
-                             ProgressAction &drawingProgressUpdate) {
+vtkSmartPointer<vtkDataSet> SQWLoadingPresenter::execute(vtkDataSetFactory *factory,
+                                                         ProgressAction &loadingProgressUpdate,
+                                                         ProgressAction &drawingProgressUpdate) {
   using namespace Mantid::API;
   using namespace Mantid::Geometry;
 
   if (this->shouldLoad()) {
-    Poco::NObserver<ProgressAction,
-                    Mantid::API::Algorithm::ProgressNotification>
-        observer(loadingProgressUpdate, &ProgressAction::handler);
+    Poco::NObserver<ProgressAction, Mantid::API::Algorithm::ProgressNotification> observer(loadingProgressUpdate,
+                                                                                           &ProgressAction::handler);
     AnalysisDataService::Instance().remove("MD_EVENT_WS_ID");
 
     IAlgorithm_sptr alg = AlgorithmManager::Instance().create("LoadSQW");
@@ -89,10 +84,8 @@ SQWLoadingPresenter::execute(vtkDataSetFactory *factory,
     alg->removeObserver(observer);
   }
 
-  Workspace_sptr result =
-      AnalysisDataService::Instance().retrieve("MD_EVENT_WS_ID");
-  Mantid::API::IMDEventWorkspace_sptr eventWs =
-      std::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(result);
+  Workspace_sptr result = AnalysisDataService::Instance().retrieve("MD_EVENT_WS_ID");
+  Mantid::API::IMDEventWorkspace_sptr eventWs = std::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(result);
 
   factory->setRecursionDepth(this->m_view->getRecursionDepth());
 
@@ -114,8 +107,7 @@ extracted.
 
 @param eventWs : event workspace to get the information from.
 */
-void SQWLoadingPresenter::extractMetadata(
-    const Mantid::API::IMDEventWorkspace &eventWs) {
+void SQWLoadingPresenter::extractMetadata(const Mantid::API::IMDEventWorkspace &eventWs) {
   using namespace Mantid::Geometry;
   MDGeometryBuilderXML<NoDimensionPolicy> refresh;
   this->xmlBuilder = refresh; // Reassign.
@@ -126,9 +118,8 @@ void SQWLoadingPresenter::extractMetadata(
     axisLabels.push_back(makeAxisTitle(*inDim));
     // Copy the dimension, but set the ID and name to be the same. This is an
     // assumption in bintohistoworkspace.
-    dimensions.push_back(std::make_shared<MDHistoDimension>(
-        inDim->getName(), inDim->getName(), inDim->getMDFrame(),
-        inDim->getMinimum(), inDim->getMaximum(), size_t{10}));
+    dimensions.push_back(std::make_shared<MDHistoDimension>(inDim->getName(), inDim->getName(), inDim->getMDFrame(),
+                                                            inDim->getMinimum(), inDim->getMaximum(), size_t{10}));
   }
 
   // Configuring the geometry xml builder allows the object panel associated
@@ -166,10 +157,8 @@ void SQWLoadingPresenter::executeLoadMetadata() {
   alg->setPropertyValue("OutputWorkspace", "MD_EVENT_WS_ID");
   alg->execute();
 
-  Workspace_sptr result =
-      AnalysisDataService::Instance().retrieve("MD_EVENT_WS_ID");
-  Mantid::API::IMDEventWorkspace_sptr eventWs =
-      std::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(result);
+  Workspace_sptr result = AnalysisDataService::Instance().retrieve("MD_EVENT_WS_ID");
+  Mantid::API::IMDEventWorkspace_sptr eventWs = std::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(result);
   m_wsTypeName = eventWs->id();
   // Call base-class extraction method.
   extractMetadata(*eventWs);

@@ -38,9 +38,7 @@ using MantidQt::CustomInterfaces::WSParameterList;
 /// destruction
 class RAII_ADS {
 public:
-  void add(const std::string &name, const Workspace_sptr &ws) {
-    AnalysisDataService::Instance().add(name, ws);
-  }
+  void add(const std::string &name, const Workspace_sptr &ws) { AnalysisDataService::Instance().add(name, ws); }
   void addToGroup(const std::string &group, const std::string &name) {
     AnalysisDataService::Instance().addToGroup(group, name);
   }
@@ -50,15 +48,12 @@ public:
 /// Derived class to test protected methods
 class TestCreator : public MuonAnalysisResultTableCreator {
 public:
-  TestCreator(const QStringList &items, const QStringList &logs,
-              LogValuesMap *logValues)
+  TestCreator(const QStringList &items, const QStringList &logs, LogValuesMap *logValues)
       : MuonAnalysisResultTableCreator(items, logs, logValues, false) {}
-  bool haveSameParameters(
-      const std::vector<Mantid::API::ITableWorkspace_sptr> &tables) const {
+  bool haveSameParameters(const std::vector<Mantid::API::ITableWorkspace_sptr> &tables) const {
     return MuonAnalysisResultTableCreator::haveSameParameters(tables);
   }
-  void removeFixedParameterErrors(
-      const Mantid::API::ITableWorkspace_sptr &table) const {
+  void removeFixedParameterErrors(const Mantid::API::ITableWorkspace_sptr &table) const {
     MuonAnalysisResultTableCreator::removeFixedParameterErrors(table);
   }
 };
@@ -67,12 +62,8 @@ class MuonAnalysisResultTableCreatorTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static MuonAnalysisResultTableCreatorTest *createSuite() {
-    return new MuonAnalysisResultTableCreatorTest();
-  }
-  static void destroySuite(MuonAnalysisResultTableCreatorTest *suite) {
-    delete suite;
-  }
+  static MuonAnalysisResultTableCreatorTest *createSuite() { return new MuonAnalysisResultTableCreatorTest(); }
+  static void destroySuite(MuonAnalysisResultTableCreatorTest *suite) { delete suite; }
 
   /// Constructor - set up log values
   MuonAnalysisResultTableCreatorTest() {
@@ -85,52 +76,38 @@ public:
 
   void test_createTable_throws_noWorkspaces() {
     const QStringList workspaces;
-    this->setUpLogs(QStringList{"EMU00020918; Pair; long; Asym; #1",
-                                "EMU00020919; Pair; long; Asym; #1"});
-    MuonAnalysisResultTableCreator creator(workspaces, m_logs, &m_logValues,
-                                           false);
+    this->setUpLogs(QStringList{"EMU00020918; Pair; long; Asym; #1", "EMU00020919; Pair; long; Asym; #1"});
+    MuonAnalysisResultTableCreator creator(workspaces, m_logs, &m_logValues, false);
     TS_ASSERT_THROWS(creator.createTable(), const std::runtime_error &);
   }
 
   void test_createTable_throws_noLogs() {
-    const QStringList workspaces{"EMU00020918; Pair; long; Asym; #1",
-                                 "EMU00020919; Pair; long; Asym; #1"};
+    const QStringList workspaces{"EMU00020918; Pair; long; Asym; #1", "EMU00020919; Pair; long; Asym; #1"};
 
     this->setUpLogs(workspaces);
-    MuonAnalysisResultTableCreator creator(workspaces, QStringList(),
-                                           &m_logValues, false);
+    MuonAnalysisResultTableCreator creator(workspaces, QStringList(), &m_logValues, false);
     TS_ASSERT_THROWS(creator.createTable(), const std::runtime_error &);
   }
 
   /// Two separate fits of one run each
   void test_createTable_singleFits() {
     // Set up
-    const QStringList workspaces{"EMU00020918; Pair; long; Asym; #1",
-                                 "EMU00020919; Pair; long; Asym; #1"};
+    const QStringList workspaces{"EMU00020918; Pair; long; Asym; #1", "EMU00020919; Pair; long; Asym; #1"};
     this->setUpLogs(workspaces);
     RAII_ADS ads;
-    ads.add("EMU00020918; Pair; long; Asym; #1_Workspace",
-            getWorkspace(m_firstRun));
-    ads.add("EMU00020919; Pair; long; Asym; #1_Workspace",
-            getWorkspace(m_firstRun + 1));
-    ads.add("EMU00020918; Pair; long; Asym; #1_Parameters",
-            getParamTable(m_firstRun));
-    ads.add("EMU00020919; Pair; long; Asym; #1_Parameters",
-            getParamTable(m_firstRun + 1));
+    ads.add("EMU00020918; Pair; long; Asym; #1_Workspace", getWorkspace(m_firstRun));
+    ads.add("EMU00020919; Pair; long; Asym; #1_Workspace", getWorkspace(m_firstRun + 1));
+    ads.add("EMU00020918; Pair; long; Asym; #1_Parameters", getParamTable(m_firstRun));
+    ads.add("EMU00020919; Pair; long; Asym; #1_Parameters", getParamTable(m_firstRun + 1));
     ads.add("EMU00020918", std::make_shared<WorkspaceGroup>());
     ads.add("EMU00020919", std::make_shared<WorkspaceGroup>());
-    ads.addToGroup("EMU00020918",
-                   "EMU00020918; Pair; long; Asym; #1_Workspace");
-    ads.addToGroup("EMU00020918",
-                   "EMU00020918; Pair; long; Asym; #1_Parameters");
-    ads.addToGroup("EMU00020919",
-                   "EMU00020919; Pair; long; Asym; #1_Workspace");
-    ads.addToGroup("EMU00020919",
-                   "EMU00020919; Pair; long; Asym; #1_Parameters");
+    ads.addToGroup("EMU00020918", "EMU00020918; Pair; long; Asym; #1_Workspace");
+    ads.addToGroup("EMU00020918", "EMU00020918; Pair; long; Asym; #1_Parameters");
+    ads.addToGroup("EMU00020919", "EMU00020919; Pair; long; Asym; #1_Workspace");
+    ads.addToGroup("EMU00020919", "EMU00020919; Pair; long; Asym; #1_Parameters");
 
     // Test
-    MuonAnalysisResultTableCreator creator(workspaces, m_logs, &m_logValues,
-                                           false);
+    MuonAnalysisResultTableCreator creator(workspaces, m_logs, &m_logValues, false);
     ITableWorkspace_sptr resultTable;
     TS_ASSERT_THROWS_NOTHING(resultTable = creator.createTable());
     TS_ASSERT(resultTable);
@@ -141,48 +118,35 @@ public:
 
   void test_createTable_singleFits_differentModels_throws() {
     // Set up
-    const QStringList workspaces{"EMU00020918; Pair; long; Asym; #1",
-                                 "EMU00020919; Pair; long; Asym; #1"};
+    const QStringList workspaces{"EMU00020918; Pair; long; Asym; #1", "EMU00020919; Pair; long; Asym; #1"};
     this->setUpLogs(workspaces);
     RAII_ADS ads;
-    ads.add("EMU00020918; Pair; long; Asym; #1_Workspace",
-            getWorkspace(m_firstRun));
-    ads.add("EMU00020919; Pair; long; Asym; #1_Workspace",
-            getWorkspace(m_firstRun + 1));
-    ads.add("EMU00020918; Pair; long; Asym; #1_Parameters",
-            getParamTable(m_firstRun));
-    ads.add("EMU00020919; Pair; long; Asym; #1_Parameters",
-            getAlternateParamTable());
+    ads.add("EMU00020918; Pair; long; Asym; #1_Workspace", getWorkspace(m_firstRun));
+    ads.add("EMU00020919; Pair; long; Asym; #1_Workspace", getWorkspace(m_firstRun + 1));
+    ads.add("EMU00020918; Pair; long; Asym; #1_Parameters", getParamTable(m_firstRun));
+    ads.add("EMU00020919; Pair; long; Asym; #1_Parameters", getAlternateParamTable());
     ads.add("EMU00020918", std::make_shared<WorkspaceGroup>());
     ads.add("EMU00020919", std::make_shared<WorkspaceGroup>());
-    ads.addToGroup("EMU00020918",
-                   "EMU00020918; Pair; long; Asym; #1_Workspace");
-    ads.addToGroup("EMU00020918",
-                   "EMU00020918; Pair; long; Asym; #1_Parameters");
-    ads.addToGroup("EMU00020919",
-                   "EMU00020919; Pair; long; Asym; #1_Workspace");
-    ads.addToGroup("EMU00020919",
-                   "EMU00020919; Pair; long; Asym; #1_Parameters");
+    ads.addToGroup("EMU00020918", "EMU00020918; Pair; long; Asym; #1_Workspace");
+    ads.addToGroup("EMU00020918", "EMU00020918; Pair; long; Asym; #1_Parameters");
+    ads.addToGroup("EMU00020919", "EMU00020919; Pair; long; Asym; #1_Workspace");
+    ads.addToGroup("EMU00020919", "EMU00020919; Pair; long; Asym; #1_Parameters");
 
     // Test
-    MuonAnalysisResultTableCreator creator(workspaces, m_logs, &m_logValues,
-                                           false);
+    MuonAnalysisResultTableCreator creator(workspaces, m_logs, &m_logValues, false);
     TS_ASSERT_THROWS(creator.createTable(), const std::runtime_error &);
   }
 
   /// Sequential fit of two runs
   void test_createTable_sequentialFit() {
     // Set up
-    const QStringList workspaces{"MuonSeqFit_Label_EMU20918",
-                                 "MuonSeqFit_Label_EMU20919"};
+    const QStringList workspaces{"MuonSeqFit_Label_EMU20918", "MuonSeqFit_Label_EMU20919"};
     this->setUpLogs(workspaces);
     RAII_ADS ads;
     ads.add("MuonSeqFit_Label_EMU20918_Parameters", getParamTable(m_firstRun));
     ads.add("MuonSeqFit_Label_EMU20918_Workspace", getWorkspace(m_firstRun));
-    ads.add("MuonSeqFit_Label_EMU20919_Parameters",
-            getParamTable(m_firstRun + 1));
-    ads.add("MuonSeqFit_Label_EMU20919_Workspace",
-            getWorkspace(m_firstRun + 1));
+    ads.add("MuonSeqFit_Label_EMU20919_Parameters", getParamTable(m_firstRun + 1));
+    ads.add("MuonSeqFit_Label_EMU20919_Workspace", getWorkspace(m_firstRun + 1));
     ads.add("MuonSeqFit_Label", std::make_shared<WorkspaceGroup>());
     ads.addToGroup("MuonSeqFit_Label", "MuonSeqFit_Label_EMU20918_Parameters");
     ads.addToGroup("MuonSeqFit_Label", "MuonSeqFit_Label_EMU20918_Workspace");
@@ -190,8 +154,7 @@ public:
     ads.addToGroup("MuonSeqFit_Label", "MuonSeqFit_Label_EMU20919_Workspace");
 
     // Test
-    MuonAnalysisResultTableCreator creator(workspaces, m_logs, &m_logValues,
-                                           false);
+    MuonAnalysisResultTableCreator creator(workspaces, m_logs, &m_logValues, false);
     ITableWorkspace_sptr resultTable;
     TS_ASSERT_THROWS_NOTHING(resultTable = creator.createTable());
     TS_ASSERT(resultTable);
@@ -203,31 +166,21 @@ public:
   /// Simultaneous fit of two runs
   void test_createTable_simultaneousFit() {
     // Set up
-    const QStringList workspaces{"MuonSimulFit_Label_EMU20918_long",
-                                 "MuonSimulFit_Label_EMU20919_long"};
+    const QStringList workspaces{"MuonSimulFit_Label_EMU20918_long", "MuonSimulFit_Label_EMU20919_long"};
     this->setUpLogs(workspaces);
     RAII_ADS ads;
-    ads.add("MuonSimulFit_Label_EMU20918_long_Parameters",
-            getParamTable(m_firstRun));
-    ads.add("MuonSimulFit_Label_EMU20918_long_Workspace",
-            getWorkspace(m_firstRun));
-    ads.add("MuonSimulFit_Label_EMU20919_long_Parameters",
-            getParamTable(m_firstRun + 1));
-    ads.add("MuonSimulFit_Label_EMU20919_long_Workspace",
-            getWorkspace(m_firstRun + 1));
+    ads.add("MuonSimulFit_Label_EMU20918_long_Parameters", getParamTable(m_firstRun));
+    ads.add("MuonSimulFit_Label_EMU20918_long_Workspace", getWorkspace(m_firstRun));
+    ads.add("MuonSimulFit_Label_EMU20919_long_Parameters", getParamTable(m_firstRun + 1));
+    ads.add("MuonSimulFit_Label_EMU20919_long_Workspace", getWorkspace(m_firstRun + 1));
     ads.add("MuonSimulFit_Label", std::make_shared<WorkspaceGroup>());
-    ads.addToGroup("MuonSimulFit_Label",
-                   "MuonSimulFit_Label_EMU20918_long_Parameters");
-    ads.addToGroup("MuonSimulFit_Label",
-                   "MuonSimulFit_Label_EMU20918_long_Workspace");
-    ads.addToGroup("MuonSimulFit_Label",
-                   "MuonSimulFit_Label_EMU20919_long_Parameters");
-    ads.addToGroup("MuonSimulFit_Label",
-                   "MuonSimulFit_Label_EMU20919_long_Workspace");
+    ads.addToGroup("MuonSimulFit_Label", "MuonSimulFit_Label_EMU20918_long_Parameters");
+    ads.addToGroup("MuonSimulFit_Label", "MuonSimulFit_Label_EMU20918_long_Workspace");
+    ads.addToGroup("MuonSimulFit_Label", "MuonSimulFit_Label_EMU20919_long_Parameters");
+    ads.addToGroup("MuonSimulFit_Label", "MuonSimulFit_Label_EMU20919_long_Workspace");
 
     // Test
-    MuonAnalysisResultTableCreator creator(workspaces, m_logs, &m_logValues,
-                                           false);
+    MuonAnalysisResultTableCreator creator(workspaces, m_logs, &m_logValues, false);
     ITableWorkspace_sptr resultTable;
     TS_ASSERT_THROWS_NOTHING(resultTable = creator.createTable());
     TS_ASSERT(resultTable);
@@ -240,24 +193,17 @@ public:
   void test_createTable_multiple() {
     // Set up
     const QStringList labels{"Label", "Label#2"};
-    const std::vector<std::vector<std::string>> runs = {
-        {"_EMU20918", "_EMU20919"}, {"_EMU20920", "_EMU20921"}};
-    const QStringList workspaces{"MuonSimulFit_Label_EMU20918_long",
-                                 "MuonSimulFit_Label_EMU20919_long",
-                                 "MuonSimulFit_Label#2_EMU20920_long",
-                                 "MuonSimulFit_Label#2_EMU20921_long"};
+    const std::vector<std::vector<std::string>> runs = {{"_EMU20918", "_EMU20919"}, {"_EMU20920", "_EMU20921"}};
+    const QStringList workspaces{"MuonSimulFit_Label_EMU20918_long", "MuonSimulFit_Label_EMU20919_long",
+                                 "MuonSimulFit_Label#2_EMU20920_long", "MuonSimulFit_Label#2_EMU20921_long"};
     this->setUpLogs(workspaces);
     RAII_ADS ads;
     for (int i = 0; i < labels.size(); ++i) {
       const std::string &prefix = "MuonSimulFit_" + labels[i].toStdString();
-      ads.add(prefix + runs[i][0] + "_long_Parameters",
-              getParamTable(m_firstRun));
-      ads.add(prefix + runs[i][0] + "_long_Workspace",
-              getWorkspace(m_firstRun));
-      ads.add(prefix + runs[i][1] + "_long_Parameters",
-              getParamTable(m_firstRun + 1, true));
-      ads.add(prefix + runs[i][1] + "_long_Workspace",
-              getWorkspace(m_firstRun + 1));
+      ads.add(prefix + runs[i][0] + "_long_Parameters", getParamTable(m_firstRun));
+      ads.add(prefix + runs[i][0] + "_long_Workspace", getWorkspace(m_firstRun));
+      ads.add(prefix + runs[i][1] + "_long_Parameters", getParamTable(m_firstRun + 1, true));
+      ads.add(prefix + runs[i][1] + "_long_Workspace", getWorkspace(m_firstRun + 1));
       ads.add(prefix, std::make_shared<WorkspaceGroup>());
       ads.addToGroup(prefix, prefix + runs[i][0] + "_long_Parameters");
       ads.addToGroup(prefix, prefix + runs[i][0] + "_long_Workspace");
@@ -278,12 +224,10 @@ public:
   void test_createTable_multiple_throws_differentNumberDatasets() {
     // Set up
     const QStringList labels{"Label", "Label#2"};
-    const std::vector<std::vector<std::string>> runs = {
-        {"_EMU20918", "_EMU20919"}, {"_EMU20920", "_EMU20921", "_EMU20923"}};
-    const QStringList workspaces{"MuonSimulFit_Label_EMU20918_long",
-                                 "MuonSimulFit_Label_EMU20919_long",
-                                 "MuonSimulFit_Label#2_EMU20920_long",
-                                 "MuonSimulFit_Label#2_EMU20921_long",
+    const std::vector<std::vector<std::string>> runs = {{"_EMU20918", "_EMU20919"},
+                                                        {"_EMU20920", "_EMU20921", "_EMU20923"}};
+    const QStringList workspaces{"MuonSimulFit_Label_EMU20918_long", "MuonSimulFit_Label_EMU20919_long",
+                                 "MuonSimulFit_Label#2_EMU20920_long", "MuonSimulFit_Label#2_EMU20921_long",
                                  "MuonSimulFit_Label#2_EMU20923_long"};
     this->setUpLogs(workspaces);
     RAII_ADS ads;
@@ -292,8 +236,7 @@ public:
       ads.add(prefix, std::make_shared<WorkspaceGroup>());
       for (size_t j = 0; j < runs[i].size(); ++j) {
         const int run = m_firstRun + static_cast<int>(j);
-        ads.add(prefix + runs[i][j] + "_long_Parameters",
-                getParamTable(run, j > 0));
+        ads.add(prefix + runs[i][j] + "_long_Parameters", getParamTable(run, j > 0));
         ads.add(prefix + runs[i][j] + "_long_Workspace", getWorkspace(run));
         ads.addToGroup(prefix, prefix + runs[i][j] + "_long_Parameters");
         ads.addToGroup(prefix, prefix + runs[i][j] + "_long_Workspace");
@@ -306,8 +249,7 @@ public:
   }
 
   void test_haveSameParameters_Yes() {
-    const QStringList workspaces{"EMU00020918; Pair; long; Asym; #1",
-                                 "EMU00020919; Pair; long; Asym; #1"};
+    const QStringList workspaces{"EMU00020918; Pair; long; Asym; #1", "EMU00020919; Pair; long; Asym; #1"};
     this->setUpLogs(workspaces);
     TestCreator creator(workspaces, m_logs, &m_logValues);
 
@@ -315,14 +257,12 @@ public:
     const auto &tableTwo = getParamTable(m_firstRun + 1);
     const auto &tableThree = getParamTable(m_firstRun + 2);
     bool sameParams;
-    TS_ASSERT_THROWS_NOTHING(sameParams = creator.haveSameParameters(
-                                 {tableOne, tableTwo, tableThree}));
+    TS_ASSERT_THROWS_NOTHING(sameParams = creator.haveSameParameters({tableOne, tableTwo, tableThree}));
     TS_ASSERT_EQUALS(true, sameParams);
   }
 
   void test_haveSameParameters_No() {
-    const QStringList workspaces{"EMU00020918; Pair; long; Asym; #1",
-                                 "EMU00020919; Pair; long; Asym; #1"};
+    const QStringList workspaces{"EMU00020918; Pair; long; Asym; #1", "EMU00020919; Pair; long; Asym; #1"};
     this->setUpLogs(workspaces);
     TestCreator creator(workspaces, m_logs, &m_logValues);
 
@@ -330,14 +270,12 @@ public:
     const auto &tableTwo = getParamTable(m_firstRun + 1);
     const auto &tableThree = getAlternateParamTable();
     bool sameParams;
-    TS_ASSERT_THROWS_NOTHING(sameParams = creator.haveSameParameters(
-                                 {tableOne, tableTwo, tableThree}));
+    TS_ASSERT_THROWS_NOTHING(sameParams = creator.haveSameParameters({tableOne, tableTwo, tableThree}));
     TS_ASSERT_EQUALS(false, sameParams);
   }
 
   void test_removeFixedParameterErrors() {
-    const QStringList workspaces{"EMU00020918; Pair; long; Asym; #1",
-                                 "EMU00020919; Pair; long; Asym; #1"};
+    const QStringList workspaces{"EMU00020918; Pair; long; Asym; #1", "EMU00020919; Pair; long; Asym; #1"};
     this->setUpLogs(workspaces);
     TestCreator creator(workspaces, m_logs, &m_logValues);
 
@@ -367,8 +305,7 @@ public:
 
     TS_ASSERT_EQUALS(5, table->columnCount());
     const auto names = table->getColumnNames();
-    const std::vector<std::string> expectedNames{"Run", "A0", "A0Error", "A1",
-                                                 "Cost function"};
+    const std::vector<std::string> expectedNames{"Run", "A0", "A0Error", "A1", "Cost function"};
     TS_ASSERT_EQUALS(names, expectedNames);
   }
 
@@ -420,8 +357,7 @@ private:
     TableRow cfrow = table->appendRow();
 
     // Fill table with data
-    constexpr double zero(0.0), error(0.1), a0(0.1), a(0.2), omega(0.3),
-        phi(0.4), sigma(0.5), tau(0.6);
+    constexpr double zero(0.0), error(0.1), a0(0.1), a(0.2), omega(0.3), phi(0.4), sigma(0.5), tau(0.6);
     a0row << "f0.A0" << base + a0 << error;
     taurow << "f1.Tau" << base + tau << error;
     cfrow << "Cost function value" << 0.03 << 0.0;
@@ -470,19 +406,10 @@ private:
   ITableWorkspace_sptr getExpectedOutputSingle(const QStringList &workspaces) {
     auto table = WorkspaceFactory::Instance().createTable();
     table->addColumn("str", "workspace_Name");
-    const std::vector<std::string> titles = {
-        "f0.A0",
-        "f0.A0Error",
-        "f1.A",
-        "f1.AError",
-        "f1.Omega", // no omega error as param is fixed
-        "f1.Phi",
-        "f1.PhiError",
-        "f1.Sigma",
-        "f1.SigmaError",
-        "f1.Tau",
-        "f1.TauError",
-        "Cost function value"};
+    const std::vector<std::string> titles = {"f0.A0",       "f0.A0Error",         "f1.A",     "f1.AError",
+                                             "f1.Omega", // no omega error as param is fixed
+                                             "f1.Phi",      "f1.PhiError",        "f1.Sigma", "f1.SigmaError", "f1.Tau",
+                                             "f1.TauError", "Cost function value"};
     for (const auto &log : m_logs) {
       table->addColumn("double", log.toStdString());
     }
@@ -494,14 +421,11 @@ private:
     TableRow firstRow = table->appendRow();
     TableRow secondRow = table->appendRow();
 
-    firstRow << workspaces[0].toStdString() << std::stod("20918")
-             << std::stod("0") << std::stod("100") << std::stod("200") << 0.1
-             << err << 0.2 << err << 0.3 << 0.4 << err << 0.5 << err << 0.6
-             << err << 0.03;
-    secondRow << workspaces[1].toStdString() << std::stod("20919")
-              << std::stod(std::to_string(m_startDiff_sec)) << std::stod("100")
-              << std::stod("190") << 1.1 << err << 1.2 << err << 1.3 << 1.4
-              << err << 1.5 << err << 1.6 << err << 0.03;
+    firstRow << workspaces[0].toStdString() << std::stod("20918") << std::stod("0") << std::stod("100")
+             << std::stod("200") << 0.1 << err << 0.2 << err << 0.3 << 0.4 << err << 0.5 << err << 0.6 << err << 0.03;
+    secondRow << workspaces[1].toStdString() << std::stod("20919") << std::stod(std::to_string(m_startDiff_sec))
+              << std::stod("100") << std::stod("190") << 1.1 << err << 1.2 << err << 1.3 << 1.4 << err << 1.5 << err
+              << 1.6 << err << 0.03;
     return table;
   }
 
@@ -510,12 +434,10 @@ private:
     auto table = WorkspaceFactory::Instance().createTable();
 
     const std::vector<std::string> titles = {
-        "f0.f0.A0",      "f0.f0.A0Error",  "f1.f0.A0",
-        "f1.f0.A0Error", "f1.A",           "f1.AError",
+        "f0.f0.A0",  "f0.f0.A0Error",  "f1.f0.A0",           "f1.f0.A0Error", "f1.A",      "f1.AError",
         "f1.Omega", // no omega error as param was fixed
-        "f1.Phi",        "f1.PhiError",    "f1.Sigma",
-        "f1.SigmaError", "f0.f1.Tau",      "f0.f1.TauError",
-        "f1.f1.Tau",     "f1.f1.TauError", "Cost function value"};
+        "f1.Phi",    "f1.PhiError",    "f1.Sigma",           "f1.SigmaError", "f0.f1.Tau", "f0.f1.TauError",
+        "f1.f1.Tau", "f1.f1.TauError", "Cost function value"};
     table->addColumn("str", "Label");
     int k = 0;
     for (const auto &log : m_logs) {
@@ -536,20 +458,17 @@ private:
 
     firstRow << "Label"
              << "20918-20919"
-             << "0-1310" << 100.0 << "190-200" << 0.1 << err << 1.1 << err
-             << 0.2 << err << 0.3 << 0.4 << err << 0.5 << err << 0.6 << err
-             << 1.6 << err << 0.03;
+             << "0-1310" << 100.0 << "190-200" << 0.1 << err << 1.1 << err << 0.2 << err << 0.3 << 0.4 << err << 0.5
+             << err << 0.6 << err << 1.6 << err << 0.03;
     secondRow << "Label#2"
               << "20920-20921"
-              << "2620-3930" << 100.0 << "170-180" << 0.1 << err << 1.1 << err
-              << 0.2 << err << 0.3 << 0.4 << err << 0.5 << err << 0.6 << err
-              << 1.6 << err << 0.03;
+              << "2620-3930" << 100.0 << "170-180" << 0.1 << err << 1.1 << err << 0.2 << err << 0.3 << 0.4 << err << 0.5
+              << err << 0.6 << err << 1.6 << err << 0.03;
 
     return table;
   }
 
-  bool compareTables(const ITableWorkspace_sptr &lhs,
-                     const ITableWorkspace_sptr &rhs) {
+  bool compareTables(const ITableWorkspace_sptr &lhs, const ITableWorkspace_sptr &rhs) {
     auto alg = AlgorithmManager::Instance().create("CompareWorkspaces");
     alg->initialize();
     alg->setChild(true);
@@ -562,12 +481,10 @@ private:
 
   MatrixWorkspace_sptr getWorkspace(int runNumber) {
     const int base = runNumber - m_firstRun;
-    const double start =
-        static_cast<double>(m_firstStart_sec + base * m_startDiff_sec) * 1.e9;
+    const double start = static_cast<double>(m_firstStart_sec + base * m_startDiff_sec) * 1.e9;
     const double end = start + 1.e10;
     const auto ws = WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
-    ws->mutableRun().setStartAndEndTime(static_cast<int64_t>(start),
-                                        static_cast<int64_t>(end));
+    ws->mutableRun().setStartAndEndTime(static_cast<int64_t>(start), static_cast<int64_t>(end));
     return ws;
   }
 

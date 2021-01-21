@@ -25,14 +25,11 @@ class SigmoidalFit : public Fit {
 public:
   SigmoidalFit(ApplicationWindow *parent, Graph *g);
   SigmoidalFit(ApplicationWindow *parent, Graph *g, const QString &curveTitle);
-  SigmoidalFit(ApplicationWindow *parent, Graph *g, const QString &curveTitle,
-               double start, double end);
-  SigmoidalFit(ApplicationWindow *parent, Table *t, const QString &xCol,
-               const QString &yCol, int startRow = 1, int endRow = -1);
+  SigmoidalFit(ApplicationWindow *parent, Graph *g, const QString &curveTitle, double start, double end);
+  SigmoidalFit(ApplicationWindow *parent, Table *t, const QString &xCol, const QString &yCol, int startRow = 1,
+               int endRow = -1);
 
-  double eval(double *par, double x) override {
-    return (par[0] - par[1]) / (1 + exp((x - par[2]) / par[3])) + par[1];
-  };
+  double eval(double *par, double x) override { return (par[0] - par[1]) / (1 + exp((x - par[2]) / par[3])) + par[1]; };
 
   void guessInitialValues() override;
   void setLogistic(bool on = true);

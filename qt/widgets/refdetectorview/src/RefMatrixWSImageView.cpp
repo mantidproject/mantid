@@ -21,9 +21,7 @@ using namespace Mantid::API;
 /**
  * Construct an ImageView for the specified matrix workspace
  */
-RefMatrixWSImageView::RefMatrixWSImageView(
-    const MatrixWorkspace_sptr & /*mat_ws*/)
-    : m_imageView(nullptr) {
+RefMatrixWSImageView::RefMatrixWSImageView(const MatrixWorkspace_sptr & /*mat_ws*/) : m_imageView(nullptr) {
   return;
   //  RefMatrixWSDataSource* source = new RefMatrixWSDataSource( mat_ws );
   //  image_view = new RefImageView( source );  // this is the QMainWindow
@@ -32,13 +30,10 @@ RefMatrixWSImageView::RefMatrixWSImageView(
   //                                         // is closed
 }
 
-RefMatrixWSImageView::RefMatrixWSImageView(const QString &wpsName, int peakMin,
-                                           int peakMax, int backMin,
-                                           int backMax, int tofMin,
-                                           int tofMax) {
+RefMatrixWSImageView::RefMatrixWSImageView(const QString &wpsName, int peakMin, int peakMax, int backMin, int backMax,
+                                           int tofMin, int tofMax) {
   IEventWorkspace_sptr ws;
-  ws = AnalysisDataService::Instance().retrieveWS<IEventWorkspace>(
-      wpsName.toStdString());
+  ws = AnalysisDataService::Instance().retrieveWS<IEventWorkspace>(wpsName.toStdString());
 
   const double totalYMin = 0.0;
   const size_t totalYMax = 255; // 303
@@ -61,16 +56,12 @@ RefMatrixWSImageView::RefMatrixWSImageView(const QString &wpsName, int peakMin,
   }
 
   auto source = std::make_shared<SpectrumView::ArrayDataSource>(
-      totalXMin, totalXMax, totalYMin, static_cast<double>(totalYMax),
-      totalRows, totalCols, data);
+      totalXMin, totalXMax, totalYMin, static_cast<double>(totalYMax), totalRows, totalCols, data);
 
-  m_imageView = new RefImageView(source, peakMin, peakMax, backMin, backMax,
-                                 tofMin, tofMax);
+  m_imageView = new RefImageView(source, peakMin, peakMax, backMin, backMax, tofMin, tofMax);
 }
 
-RefIVConnections *RefMatrixWSImageView::getConnections() {
-  return m_imageView->getIVConnections();
-}
+RefIVConnections *RefMatrixWSImageView::getConnections() { return m_imageView->getIVConnections(); }
 
 RefMatrixWSImageView::~RefMatrixWSImageView() {
   // nothing to do here, since m_imageView is deleted when the window closes

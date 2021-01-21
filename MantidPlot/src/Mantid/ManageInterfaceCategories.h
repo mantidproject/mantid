@@ -30,22 +30,18 @@ class InterfaceCategoryModel : public QAbstractListModel {
 
 public:
   /// Constructor.
-  explicit InterfaceCategoryModel(
-      const QSet<QString> &allCategories = QSet<QString>());
+  explicit InterfaceCategoryModel(const QSet<QString> &allCategories = QSet<QString>());
 
   /// Required overloaded methods for an editable Qt data model:
 
   /// The total number of categories.
   int rowCount(const QModelIndex &parent) const override;
   /// Returns the information to be displayed in the column header.
-  QVariant headerData(int section, Qt::Orientation orientation,
-                      int role = Qt::DisplayRole) const override;
+  QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
   /// Returns the data used to fill each item in the model.
-  QVariant data(const QModelIndex &index,
-                int role = Qt::DisplayRole) const override;
+  QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
   /// Used to set the data for each item in the model.
-  bool setData(const QModelIndex &index, const QVariant &value,
-               int role) override;
+  bool setData(const QModelIndex &index, const QVariant &value, int role) override;
   /// Flagging up the fact that this model contains checkable items.
   Qt::ItemFlags flags(const QModelIndex &index) const override;
 

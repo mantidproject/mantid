@@ -54,11 +54,9 @@ private:
   void exec() override;
   using fptr = double (*)(const double, const double);
   fptr getApodizationFunction(const std::string &method);
-  HistogramData::Histogram
-  applyApodizationFunction(const HistogramData::Histogram &histogram,
-                           const double decayConstant, fptr function);
-  HistogramData::Histogram addPadding(const HistogramData::Histogram &histogram,
-                                      const int padding);
+  HistogramData::Histogram applyApodizationFunction(const HistogramData::Histogram &histogram,
+                                                    const double decayConstant, fptr function);
+  HistogramData::Histogram addPadding(const HistogramData::Histogram &histogram, const int padding);
 };
 
 } // namespace Algorithms

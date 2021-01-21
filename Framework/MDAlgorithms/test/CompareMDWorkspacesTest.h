@@ -31,8 +31,7 @@ public:
     TS_ASSERT(alg.isInitialized())
   }
 
-  void doTest(const std::string &ws1, const std::string &ws2,
-              const std::string &resultExpected = "Success!",
+  void doTest(const std::string &ws1, const std::string &ws2, const std::string &resultExpected = "Success!",
               bool CheckEvents = true, bool IgnoreDifferentID = false) {
 
     CompareMDWorkspaces alg;
@@ -52,10 +51,8 @@ public:
   }
 
   void test_histo() {
-    MDHistoWorkspace_sptr A =
-        makeFakeMDHistoWorkspace(1.56, 3, 10, 10.0, 1.57, "A");
-    MDHistoWorkspace_sptr B =
-        makeFakeMDHistoWorkspace(1.56, 3, 10, 10.0, 1.57, "B");
+    MDHistoWorkspace_sptr A = makeFakeMDHistoWorkspace(1.56, 3, 10, 10.0, 1.57, "A");
+    MDHistoWorkspace_sptr B = makeFakeMDHistoWorkspace(1.56, 3, 10, 10.0, 1.57, "B");
     doTest("A", "B");
     B->setSignalAt(123, 2.34);
     doTest("A", "B", "MDHistoWorkspaces have a different signal at index 123");
@@ -63,15 +60,12 @@ public:
     B->setErrorSquaredAt(123, 2.34);
     doTest("A", "B", "MDHistoWorkspaces have a different error at index 123");
 
-    MDHistoWorkspace_sptr C =
-        makeFakeMDHistoWorkspace(1.56, 3, 9, 10.0, 1.57, "C");
+    MDHistoWorkspace_sptr C = makeFakeMDHistoWorkspace(1.56, 3, 9, 10.0, 1.57, "C");
     doTest("A", "C", "Dimension #0 has a different number of bins");
-    MDHistoWorkspace_sptr C2 =
-        makeFakeMDHistoWorkspace(1.56, 3, 10, 20.0, 1.57, "C2");
+    MDHistoWorkspace_sptr C2 = makeFakeMDHistoWorkspace(1.56, 3, 10, 20.0, 1.57, "C2");
     doTest("A", "C2", "Dimension #0 has a different maximum");
 
-    MDHistoWorkspace_sptr D =
-        makeFakeMDHistoWorkspace(1.56, 2, 10, 10.0, 1.57, "D");
+    MDHistoWorkspace_sptr D = makeFakeMDHistoWorkspace(1.56, 2, 10, 10.0, 1.57, "D");
     doTest("A", "D", "Workspaces have a different number of dimensions");
   }
 
@@ -96,10 +90,8 @@ public:
 
     doTest("A", "A1");
 
-    auto mdWorkspace = dynamic_cast<IMDEventWorkspace *>(
-        FrameworkManager::Instance().getWorkspace("A1"));
-    TSM_ASSERT("Can not retrieve MD workspace A1 from analysis data service",
-               mdWorkspace);
+    auto mdWorkspace = dynamic_cast<IMDEventWorkspace *>(FrameworkManager::Instance().getWorkspace("A1"));
+    TSM_ASSERT("Can not retrieve MD workspace A1 from analysis data service", mdWorkspace);
 
     std::vector<IMDNode *> boxes;
     mdWorkspace->getBoxes(boxes, 1000, false);

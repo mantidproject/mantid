@@ -33,12 +33,10 @@
 #include <qwt_double_rect.h>
 #include <qwt_painter.h>
 
-VectorCurve::VectorCurve(VectorStyle style, Table *t, const QString &xColName,
-                         const char *name, const QString &endCol1,
+VectorCurve::VectorCurve(VectorStyle style, Table *t, const QString &xColName, const char *name, const QString &endCol1,
                          const QString &endCol2, int startRow, int endRow)
-    : DataCurve(t, xColName, name, startRow, endRow), vectorEnd(nullptr),
-      pen(QPen(Qt::black, 1, Qt::SolidLine)), filledArrow(true), d_style(style),
-      d_headLength(4), d_headAngle(45), d_position(Tail), d_end_x_a(endCol1),
+    : DataCurve(t, xColName, name, startRow, endRow), vectorEnd(nullptr), pen(QPen(Qt::black, 1, Qt::SolidLine)),
+      filledArrow(true), d_style(style), d_headLength(4), d_headAngle(45), d_position(Tail), d_end_x_a(endCol1),
       d_end_y_m(endCol2) {
   if (style == XYXY)
     setType(GraphOptions::VectXYXY);
@@ -56,8 +54,7 @@ void VectorCurve::copy(const VectorCurve *vc) {
   vectorEnd = (QwtArrayData *)vc->vectorEnd->copy();
 }
 
-void VectorCurve::draw(QPainter *painter, const QwtScaleMap &xMap,
-                       const QwtScaleMap &yMap, int from, int to) const {
+void VectorCurve::draw(QPainter *painter, const QwtScaleMap &xMap, const QwtScaleMap &yMap, int from, int to) const {
   if (!painter || dataSize() <= 0)
     return;
 
@@ -72,8 +69,8 @@ void VectorCurve::draw(QPainter *painter, const QwtScaleMap &xMap,
   painter->restore();
 }
 
-void VectorCurve::drawVector(QPainter *painter, const QwtScaleMap &xMap,
-                             const QwtScaleMap &yMap, int from, int to) const {
+void VectorCurve::drawVector(QPainter *painter, const QwtScaleMap &xMap, const QwtScaleMap &yMap, int from,
+                             int to) const {
   if (d_style == XYAM) {
     for (int i = from; i <= to; i++) {
       const double x0 = x(i);
@@ -121,8 +118,7 @@ void VectorCurve::drawVector(QPainter *painter, const QwtScaleMap &xMap,
   }
 }
 
-void VectorCurve::drawArrowHead(QPainter *p, int xs, int ys, int xe,
-                                int ye) const {
+void VectorCurve::drawArrowHead(QPainter *p, int xs, int ys, int xe, int ye) const {
   p->save();
   p->translate(xe, ye);
   double t = theta(xs, ys, xe, ye);
@@ -158,8 +154,7 @@ double VectorCurve::theta(int x0, int y0, int x1, int y1) const {
   return t;
 }
 
-void VectorCurve::setVectorEnd(const QString &xColName,
-                               const QString &yColName) {
+void VectorCurve::setVectorEnd(const QString &xColName, const QString &yColName) {
   if (d_end_x_a == xColName && d_end_y_m == yColName)
     return;
 
@@ -169,8 +164,7 @@ void VectorCurve::setVectorEnd(const QString &xColName,
   loadData();
 }
 
-void VectorCurve::setVectorEnd(const QwtArray<double> &x,
-                               const QwtArray<double> &y) {
+void VectorCurve::setVectorEnd(const QwtArray<double> &x, const QwtArray<double> &y) {
   vectorEnd = new QwtArrayData(x, y);
 }
 
@@ -214,46 +208,32 @@ QwtDoubleRect VectorCurve::boundingRect() const {
     double mag = vectorEnd->y(0);
     switch (d_position) {
     case Tail:
-      rect.setTop(
-          qMin((double)rect.top(), (double)(rect.top() + mag * sin(angle))));
-      rect.setBottom(qMax((double)rect.bottom(),
-                          (double)(rect.bottom() + mag * sin(angle))));
-      rect.setLeft(
-          qMin((double)rect.left(), (double)(rect.left() + mag * cos(angle))));
-      rect.setRight(qMax((double)rect.right(),
-                         (double)(rect.right() + mag * cos(angle))));
+      rect.setTop(qMin((double)rect.top(), (double)(rect.top() + mag * sin(angle))));
+      rect.setBottom(qMax((double)rect.bottom(), (double)(rect.bottom() + mag * sin(angle))));
+      rect.setLeft(qMin((double)rect.left(), (double)(rect.left() + mag * cos(angle))));
+      rect.setRight(qMax((double)rect.right(), (double)(rect.right() + mag * cos(angle))));
       break;
 
     case Middle: {
       mag *= 0.5;
-      rect.setTop(qMin((double)rect.top(),
-                       (double)(rect.top() - fabs(mag * sin(angle)))));
-      rect.setBottom(qMax((double)rect.bottom(),
-                          (double)(rect.bottom() + fabs(mag * sin(angle)))));
-      rect.setLeft(qMin((double)rect.left(),
-                        (double)(rect.left() - fabs(mag * cos(angle)))));
-      rect.setRight(qMax((double)rect.right(),
-                         (double)(rect.right() + fabs(mag * cos(angle)))));
+      rect.setTop(qMin((double)rect.top(), (double)(rect.top() - fabs(mag * sin(angle)))));
+      rect.setBottom(qMax((double)rect.bottom(), (double)(rect.bottom() + fabs(mag * sin(angle)))));
+      rect.setLeft(qMin((double)rect.left(), (double)(rect.left() - fabs(mag * cos(angle)))));
+      rect.setRight(qMax((double)rect.right(), (double)(rect.right() + fabs(mag * cos(angle)))));
     } break;
 
     case Head:
-      rect.setTop(
-          qMin((double)rect.top(), (double)(rect.top() - mag * sin(angle))));
-      rect.setBottom(qMax((double)rect.bottom(),
-                          (double)(rect.bottom() - mag * sin(angle))));
-      rect.setLeft(
-          qMin((double)rect.left(), (double)(rect.left() - mag * cos(angle))));
-      rect.setRight(qMax((double)rect.right(),
-                         (double)(rect.right() - mag * cos(angle))));
+      rect.setTop(qMin((double)rect.top(), (double)(rect.top() - mag * sin(angle))));
+      rect.setBottom(qMax((double)rect.bottom(), (double)(rect.bottom() - mag * sin(angle))));
+      rect.setLeft(qMin((double)rect.left(), (double)(rect.left() - mag * cos(angle))));
+      rect.setRight(qMax((double)rect.right(), (double)(rect.right() - mag * cos(angle))));
       break;
     }
   }
   return rect;
 }
 
-void VectorCurve::updateColumnNames(const QString &oldName,
-                                    const QString &newName,
-                                    bool updateTableName) {
+void VectorCurve::updateColumnNames(const QString &oldName, const QString &newName, bool updateTableName) {
   if (updateTableName) {
     QString s = title().text();
     QStringList lst = s.split("_", QString::SkipEmptyParts);
@@ -297,8 +277,8 @@ QString VectorCurve::plotAssociation() const {
 }
 
 bool VectorCurve::updateData(Table *t, const QString &colName) {
-  if (d_table != t || (colName != title().text() && d_x_column != colName &&
-                       d_end_x_a != colName && d_end_y_m != colName))
+  if (d_table != t ||
+      (colName != title().text() && d_x_column != colName && d_end_x_a != colName && d_end_y_m != colName))
     return false;
 
   loadData();
@@ -323,8 +303,7 @@ void VectorCurve::loadData() {
     QString yval = d_table->text(i, ycol);
     QString xend = d_table->text(i, endXCol);
     QString yend = d_table->text(i, endYCol);
-    if (!xval.isEmpty() && !yval.isEmpty() && !xend.isEmpty() &&
-        !yend.isEmpty()) {
+    if (!xval.isEmpty() && !yval.isEmpty() && !xend.isEmpty() && !yend.isEmpty()) {
       bool valid_data = true;
       X[size] = locale.toDouble(xval, &valid_data);
       if (!valid_data)

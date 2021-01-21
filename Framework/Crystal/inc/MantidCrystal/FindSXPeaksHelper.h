@@ -37,8 +37,7 @@ enum class XAxisUnit { TOF, DSPACING };
  */
 struct MANTID_CRYSTAL_DLL SXPeak {
 public:
-  SXPeak(double t, double phi, double intensity,
-         const std::vector<int> &spectral, const size_t wsIndex,
+  SXPeak(double t, double phi, double intensity, const std::vector<int> &spectral, const size_t wsIndex,
          const Mantid::API::SpectrumInfo &spectrumInfo);
 
   /// Object comparison. Note that the tolerance is relative and used for all
@@ -47,8 +46,7 @@ public:
 
   /// Object comparison. Note that the tolerances are absolute and there is one
   /// per trait.
-  bool compare(const SXPeak &rhs, const double xTolerance,
-               const double phiTolerance, const double thetaTolerance,
+  bool compare(const SXPeak &rhs, const double xTolerance, const double phiTolerance, const double thetaTolerance,
                const XAxisUnit tofUnits = XAxisUnit::TOF) const;
 
   /// Getter for LabQ
@@ -61,11 +59,9 @@ public:
   void reduce();
 
   friend std::ostream &operator<<(std::ostream &os, const SXPeak &rhs) {
-    os << rhs.m_tof << "," << rhs.m_twoTheta << "," << rhs.m_phi << ","
-       << rhs.m_intensity << "\n";
+    os << rhs.m_tof << "," << rhs.m_twoTheta << "," << rhs.m_phi << "," << rhs.m_intensity << "\n";
     os << " Spectra";
-    std::copy(rhs.m_spectra.begin(), rhs.m_spectra.end(),
-              std::ostream_iterator<int>(os, ","));
+    std::copy(rhs.m_spectra.begin(), rhs.m_spectra.end(), std::ostream_iterator<int>(os, ","));
     return os;
   }
 
@@ -128,25 +124,20 @@ private:
  */
 struct MANTID_CRYSTAL_DLL BackgroundStrategy {
   virtual ~BackgroundStrategy() = default;
-  virtual bool isBelowBackground(const double intensity,
-                                 const HistogramData::HistogramY &y) const = 0;
+  virtual bool isBelowBackground(const double intensity, const HistogramData::HistogramY &y) const = 0;
 };
 
-struct MANTID_CRYSTAL_DLL AbsoluteBackgroundStrategy
-    : public BackgroundStrategy {
+struct MANTID_CRYSTAL_DLL AbsoluteBackgroundStrategy : public BackgroundStrategy {
   AbsoluteBackgroundStrategy(const double background);
-  bool isBelowBackground(const double intensity,
-                         const HistogramData::HistogramY &) const override;
+  bool isBelowBackground(const double intensity, const HistogramData::HistogramY &) const override;
 
 private:
   double m_background = 0.;
 };
 
-struct MANTID_CRYSTAL_DLL PerSpectrumBackgroundStrategy
-    : public BackgroundStrategy {
+struct MANTID_CRYSTAL_DLL PerSpectrumBackgroundStrategy : public BackgroundStrategy {
   PerSpectrumBackgroundStrategy(const double backgroundMultiplier);
-  bool isBelowBackground(const double intensity,
-                         const HistogramData::HistogramY &y) const override;
+  bool isBelowBackground(const double intensity, const HistogramData::HistogramY &y) const override;
 
 private:
   double m_backgroundMultiplier = 1.;
@@ -158,26 +149,20 @@ private:
  */
 class MANTID_CRYSTAL_DLL PeakFindingStrategy {
 public:
-  PeakFindingStrategy(const BackgroundStrategy *backgroundStrategy,
-                      const API::SpectrumInfo &spectrumInfo,
-                      const double minValue = EMPTY_DBL(),
-                      const double maxValue = EMPTY_DBL(),
+  PeakFindingStrategy(const BackgroundStrategy *backgroundStrategy, const API::SpectrumInfo &spectrumInfo,
+                      const double minValue = EMPTY_DBL(), const double maxValue = EMPTY_DBL(),
                       const XAxisUnit units = XAxisUnit::TOF);
   virtual ~PeakFindingStrategy() = default;
-  PeakList findSXPeaks(const HistogramData::HistogramX &x,
-                       const HistogramData::HistogramY &y,
+  PeakList findSXPeaks(const HistogramData::HistogramX &x, const HistogramData::HistogramY &y,
                        const int workspaceIndex) const;
 
 protected:
   BoundsIterator getBounds(const HistogramData::HistogramX &x) const;
   double calculatePhi(size_t workspaceIndex) const;
-  double getXValue(const HistogramData::HistogramX &x,
-                   const size_t peakLocation) const;
+  double getXValue(const HistogramData::HistogramX &x, const size_t peakLocation) const;
   double convertToTOF(const double xValue, const size_t workspaceIndex) const;
-  virtual PeakList dofindSXPeaks(const HistogramData::HistogramX &x,
-                                 const HistogramData::HistogramY &y, Bound low,
-                                 Bound high,
-                                 const int workspaceIndex) const = 0;
+  virtual PeakList dofindSXPeaks(const HistogramData::HistogramX &x, const HistogramData::HistogramY &y, Bound low,
+                                 Bound high, const int workspaceIndex) const = 0;
 
   const BackgroundStrategy *m_backgroundStrategy;
   const double m_minValue = EMPTY_DBL();
@@ -188,38 +173,27 @@ protected:
 
 class MANTID_CRYSTAL_DLL StrongestPeaksStrategy : public PeakFindingStrategy {
 public:
-  StrongestPeaksStrategy(const BackgroundStrategy *backgroundStrategy,
-                         const API::SpectrumInfo &spectrumInfo,
-                         const double minValue = EMPTY_DBL(),
-                         const double maxValue = EMPTY_DBL(),
+  StrongestPeaksStrategy(const BackgroundStrategy *backgroundStrategy, const API::SpectrumInfo &spectrumInfo,
+                         const double minValue = EMPTY_DBL(), const double maxValue = EMPTY_DBL(),
                          const XAxisUnit units = XAxisUnit::TOF);
-  PeakList dofindSXPeaks(const HistogramData::HistogramX &x,
-                         const HistogramData::HistogramY &y, Bound low,
-                         Bound high, const int workspaceIndex) const override;
+  PeakList dofindSXPeaks(const HistogramData::HistogramX &x, const HistogramData::HistogramY &y, Bound low, Bound high,
+                         const int workspaceIndex) const override;
 };
 
 class MANTID_CRYSTAL_DLL AllPeaksStrategy : public PeakFindingStrategy {
 public:
-  AllPeaksStrategy(const BackgroundStrategy *backgroundStrategy,
-                   const API::SpectrumInfo &spectrumInfo,
-                   const double minValue = EMPTY_DBL(),
-                   const double maxValue = EMPTY_DBL(),
+  AllPeaksStrategy(const BackgroundStrategy *backgroundStrategy, const API::SpectrumInfo &spectrumInfo,
+                   const double minValue = EMPTY_DBL(), const double maxValue = EMPTY_DBL(),
                    const XAxisUnit units = XAxisUnit::TOF);
-  PeakList dofindSXPeaks(const HistogramData::HistogramX &x,
-                         const HistogramData::HistogramY &y, Bound low,
-                         Bound high, const int workspaceIndex) const override;
+  PeakList dofindSXPeaks(const HistogramData::HistogramX &x, const HistogramData::HistogramY &y, Bound low, Bound high,
+                         const int workspaceIndex) const override;
 
 private:
   std::vector<std::unique_ptr<PeakContainer>>
-  getAllPeaks(const HistogramData::HistogramX &x,
-              const HistogramData::HistogramY &y, Bound low, Bound high,
-              const Mantid::Crystal::FindSXPeaksHelper::BackgroundStrategy
-                  *backgroundStrategy) const;
-  PeakList
-  convertToSXPeaks(const HistogramData::HistogramX &x,
-                   const HistogramData::HistogramY &y,
-                   const std::vector<std::unique_ptr<PeakContainer>> &peaks,
-                   const int workspaceIndex) const;
+  getAllPeaks(const HistogramData::HistogramX &x, const HistogramData::HistogramY &y, Bound low, Bound high,
+              const Mantid::Crystal::FindSXPeaksHelper::BackgroundStrategy *backgroundStrategy) const;
+  PeakList convertToSXPeaks(const HistogramData::HistogramX &x, const HistogramData::HistogramY &y,
+                            const std::vector<std::unique_ptr<PeakContainer>> &peaks, const int workspaceIndex) const;
 };
 
 /* ------------------------------------------------------------------------------------------
@@ -243,9 +217,7 @@ private:
 
 class MANTID_CRYSTAL_DLL AbsoluteCompareStrategy : public CompareStrategy {
 public:
-  AbsoluteCompareStrategy(const double tofResolution,
-                          const double phiResolution,
-                          const double twoThetaResolution,
+  AbsoluteCompareStrategy(const double tofResolution, const double phiResolution, const double twoThetaResolution,
                           const XAxisUnit units = XAxisUnit::TOF);
   bool compare(const SXPeak &lhs, const SXPeak &rhs) const override;
 
@@ -264,9 +236,8 @@ class MANTID_CRYSTAL_DLL ReducePeakListStrategy {
 public:
   ReducePeakListStrategy(const CompareStrategy *compareStrategy);
   virtual ~ReducePeakListStrategy() = default;
-  virtual std::vector<SXPeak>
-  reduce(const std::vector<SXPeak> &peaks,
-         Mantid::Kernel::ProgressBase &progress) const = 0;
+  virtual std::vector<SXPeak> reduce(const std::vector<SXPeak> &peaks,
+                                     Mantid::Kernel::ProgressBase &progress) const = 0;
 
 protected:
   const CompareStrategy *m_compareStrategy;
@@ -275,24 +246,18 @@ protected:
 class MANTID_CRYSTAL_DLL SimpleReduceStrategy : public ReducePeakListStrategy {
 public:
   SimpleReduceStrategy(const CompareStrategy *compareStrategy);
-  std::vector<SXPeak>
-  reduce(const std::vector<SXPeak> &peaks,
-         Mantid::Kernel::ProgressBase &progress) const override;
+  std::vector<SXPeak> reduce(const std::vector<SXPeak> &peaks, Mantid::Kernel::ProgressBase &progress) const override;
 };
 
 class MANTID_CRYSTAL_DLL FindMaxReduceStrategy : public ReducePeakListStrategy {
 public:
   FindMaxReduceStrategy(const CompareStrategy *compareStrategy);
-  std::vector<SXPeak>
-  reduce(const std::vector<SXPeak> &peaks,
-         Mantid::Kernel::ProgressBase &progress) const override;
+  std::vector<SXPeak> reduce(const std::vector<SXPeak> &peaks, Mantid::Kernel::ProgressBase &progress) const override;
 
 private:
-  std::vector<std::vector<SXPeak *>>
-  getPeakGroups(const std::vector<SXPeak> &peakList,
-                Mantid::Kernel::ProgressBase &progress) const;
-  std::vector<SXPeak>
-  getFinalPeaks(const std::vector<std::vector<SXPeak *>> &peakGroups) const;
+  std::vector<std::vector<SXPeak *>> getPeakGroups(const std::vector<SXPeak> &peakList,
+                                                   Mantid::Kernel::ProgressBase &progress) const;
+  std::vector<SXPeak> getFinalPeaks(const std::vector<std::vector<SXPeak *>> &peakGroups) const;
 };
 
 } // namespace FindSXPeaksHelper

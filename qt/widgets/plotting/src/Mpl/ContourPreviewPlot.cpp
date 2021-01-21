@@ -23,8 +23,7 @@ namespace MantidQt {
 namespace MantidWidgets {
 
 ContourPreviewPlot::ContourPreviewPlot(QWidget *parent, bool observeADS)
-    : QWidget(parent),
-      m_canvas(new FigureCanvasQt(111, MANTID_PROJECTION, parent)),
+    : QWidget(parent), m_canvas(new FigureCanvasQt(111, MANTID_PROJECTION, parent)),
       m_wsRemovedObserver(*this, &ContourPreviewPlot::onWorkspaceRemoved),
       m_wsReplacedObserver(*this, &ContourPreviewPlot::onWorkspaceReplaced) {
   createLayout();
@@ -63,15 +62,12 @@ void ContourPreviewPlot::watchADS(bool on) {
  * Observer method called when a workspace is removed from the ADS
  * @param nf A pointer to the notification object
  */
-void ContourPreviewPlot::onWorkspaceRemoved(
-    Mantid::API::WorkspacePreDeleteNotification_ptr nf) {
-  if (auto workspace =
-          std::dynamic_pointer_cast<MatrixWorkspace>(nf->object())) {
+void ContourPreviewPlot::onWorkspaceRemoved(Mantid::API::WorkspacePreDeleteNotification_ptr nf) {
+  if (auto workspace = std::dynamic_pointer_cast<MatrixWorkspace>(nf->object())) {
     // If the artist has already been removed, ignore.
     bool workspaceRemoved = false;
     try {
-      workspaceRemoved =
-          m_canvas->gca<MantidAxes>().removeWorkspaceArtists(workspace);
+      workspaceRemoved = m_canvas->gca<MantidAxes>().removeWorkspaceArtists(workspace);
     } catch (Mantid::PythonInterface::PythonException &) {
     }
     if (workspaceRemoved) {
@@ -84,12 +80,9 @@ void ContourPreviewPlot::onWorkspaceRemoved(
  * Observer method called when a workspace is replaced in the ADS
  * @param nf A pointer to the notification object
  */
-void ContourPreviewPlot::onWorkspaceReplaced(
-    Mantid::API::WorkspaceBeforeReplaceNotification_ptr nf) {
-  if (auto oldWorkspace =
-          std::dynamic_pointer_cast<MatrixWorkspace>(nf->oldObject())) {
-    if (auto newWorkspace =
-            std::dynamic_pointer_cast<MatrixWorkspace>(nf->newObject())) {
+void ContourPreviewPlot::onWorkspaceReplaced(Mantid::API::WorkspaceBeforeReplaceNotification_ptr nf) {
+  if (auto oldWorkspace = std::dynamic_pointer_cast<MatrixWorkspace>(nf->oldObject())) {
+    if (auto newWorkspace = std::dynamic_pointer_cast<MatrixWorkspace>(nf->newObject())) {
       if (m_canvas->gca<MantidAxes>().replaceWorkspaceArtists(newWorkspace)) {
         m_canvas->draw();
       }
@@ -101,9 +94,7 @@ void ContourPreviewPlot::onWorkspaceReplaced(
  * Set the face colour for the canvas
  * @param colour A new colour for the figure facecolor
  */
-void ContourPreviewPlot::setCanvasColour(QColor const &colour) {
-  m_canvas->gcf().setFaceColor(colour);
-}
+void ContourPreviewPlot::setCanvasColour(QColor const &colour) { m_canvas->gcf().setFaceColor(colour); }
 
 /**
  * Sets the workspace for the contour plot
@@ -126,16 +117,14 @@ void ContourPreviewPlot::setWorkspace(const MatrixWorkspace_sptr &workspace) {
  * @param axisID The axis to get the range for
  * @return The axis range
  */
-std::tuple<double, double>
-ContourPreviewPlot::getAxisRange(AxisID axisID) const {
+std::tuple<double, double> ContourPreviewPlot::getAxisRange(AxisID axisID) const {
   switch (axisID) {
   case AxisID::XBottom:
     return m_canvas->gca().getXLim();
   case AxisID::YLeft:
     return m_canvas->gca().getYLim();
   }
-  throw std::runtime_error(
-      "Incorrect AxisID provided. Axis types are XBottom and YLeft");
+  throw std::runtime_error("Incorrect AxisID provided. Axis types are XBottom and YLeft");
 }
 
 } // namespace MantidWidgets

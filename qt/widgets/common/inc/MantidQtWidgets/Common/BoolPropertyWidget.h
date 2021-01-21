@@ -23,9 +23,8 @@ class DLLExport BoolPropertyWidget : public PropertyWidget {
   Q_OBJECT
 
 public:
-  BoolPropertyWidget(Mantid::Kernel::PropertyWithValue<bool> *prop,
-                     QWidget *parent = nullptr, QGridLayout *layout = nullptr,
-                     int row = -1);
+  BoolPropertyWidget(Mantid::Kernel::PropertyWithValue<bool> *prop, QWidget *parent = nullptr,
+                     QGridLayout *layout = nullptr, int row = -1);
   ~BoolPropertyWidget() override;
   QString getValue() const override;
   void setValueImpl(const QString &value) override;

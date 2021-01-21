@@ -23,12 +23,10 @@ namespace VATES {
 class DLLExport MetadataToFieldData {
 public:
   /// Act as Functor.
-  void operator()(vtkFieldData *fieldData, const std::string &metaData,
-                  const std::string &id) const;
+  void operator()(vtkFieldData *fieldData, const std::string &metaData, const std::string &id) const;
 
   /// Explicit call to Functor execution.
-  void execute(vtkFieldData *fieldData, const std::string &metaData,
-               const std::string &id) const;
+  void execute(vtkFieldData *fieldData, const std::string &metaData, const std::string &id) const;
 };
 } // namespace VATES
 } // namespace Mantid

@@ -24,37 +24,30 @@ namespace CurveFitting {
     @author Michael Wedel, Paul Scherrer Institut - SINQ
     @date 15/04/2015
 */
-class MANTID_CURVEFITTING_DLL LatticeDomainCreator
-    : public API::IDomainCreator {
+class MANTID_CURVEFITTING_DLL LatticeDomainCreator : public API::IDomainCreator {
 public:
-  LatticeDomainCreator(Kernel::IPropertyManager *manager,
-                       const std::string &workspacePropertyName,
+  LatticeDomainCreator(Kernel::IPropertyManager *manager, const std::string &workspacePropertyName,
                        DomainType domainType = Simple);
 
-  void createDomain(std::shared_ptr<API::FunctionDomain> &domain,
-                    std::shared_ptr<API::FunctionValues> &values,
+  void createDomain(std::shared_ptr<API::FunctionDomain> &domain, std::shared_ptr<API::FunctionValues> &values,
                     size_t i0) override;
 
-  API::Workspace_sptr createOutputWorkspace(
-      const std::string &baseName, API::IFunction_sptr function,
-      std::shared_ptr<API::FunctionDomain> domain,
-      std::shared_ptr<API::FunctionValues> values,
-      const std::string &outputWorkspacePropertyName) override;
+  API::Workspace_sptr createOutputWorkspace(const std::string &baseName, API::IFunction_sptr function,
+                                            std::shared_ptr<API::FunctionDomain> domain,
+                                            std::shared_ptr<API::FunctionValues> values,
+                                            const std::string &outputWorkspacePropertyName) override;
 
   size_t getDomainSize() const override;
 
 protected:
   void setWorkspaceFromPropertyManager();
-  void
-  createDomainFromPeaksWorkspace(const API::IPeaksWorkspace_sptr &workspace,
-                                 std::shared_ptr<API::FunctionDomain> &domain,
-                                 std::shared_ptr<API::FunctionValues> &values,
-                                 size_t i0);
+  void createDomainFromPeaksWorkspace(const API::IPeaksWorkspace_sptr &workspace,
+                                      std::shared_ptr<API::FunctionDomain> &domain,
+                                      std::shared_ptr<API::FunctionValues> &values, size_t i0);
 
   void createDomainFromPeakTable(const API::ITableWorkspace_sptr &workspace,
                                  std::shared_ptr<API::FunctionDomain> &domain,
-                                 std::shared_ptr<API::FunctionValues> &values,
-                                 size_t i0);
+                                 std::shared_ptr<API::FunctionValues> &values, size_t i0);
 
   std::string m_workspacePropertyName;
   API::Workspace_sptr m_workspace;

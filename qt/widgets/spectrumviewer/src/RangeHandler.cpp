@@ -23,8 +23,7 @@ namespace SpectrumView {
  *  in the specified UI
  */
 RangeHandler::RangeHandler(Ui_SpectrumViewer *svUI)
-    : IRangeHandler(), m_svUI(svUI), m_totalMinX(0.0), m_totalMaxX(0.0),
-      m_totalNSteps(0) {}
+    : IRangeHandler(), m_svUI(svUI), m_totalMinX(0.0), m_totalMaxX(0.0), m_totalNSteps(0) {}
 
 /**
  * Configure the min, max and step controls for the specified data source.
@@ -107,16 +106,14 @@ void RangeHandler::getRange(double &min, double &max, double &step) {
 
   if (step > 0) {
     if (!SVUtils::FindValidInterval(min, max)) {
-      g_log.information(
-          "In GetRange: [Min,Max] interval invalid, values adjusted");
+      g_log.information("In GetRange: [Min,Max] interval invalid, values adjusted");
       min = originalMin;
       max = originalMax;
       step = originalStep;
     }
   } else {
     if (!SVUtils::FindValidLogInterval(min, max)) {
-      g_log.information(
-          "In GetRange: [Min,Max] log interval invalid, values adjusted");
+      g_log.information("In GetRange: [Min,Max] log interval invalid, values adjusted");
       min = originalMin;
       max = originalMax;
       step = originalStep;
@@ -137,8 +134,7 @@ void RangeHandler::getRange(double &min, double &max, double &step) {
  */
 void RangeHandler::setRange(double min, double max, double step) {
   if (!SVUtils::FindValidInterval(min, max))
-    g_log.information(
-        "In SetRange: [Min,Max] interval invalid, values adjusted");
+    g_log.information("In SetRange: [Min,Max] interval invalid, values adjusted");
 
   if (min < m_totalMinX || min > m_totalMaxX) {
     g_log.information("X Min out of range, resetting to range min.");

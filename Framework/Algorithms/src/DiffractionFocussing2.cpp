@@ -44,22 +44,18 @@ DECLARE_ALGORITHM(DiffractionFocussing2)
 void DiffractionFocussing2::init() {
 
   auto wsValidator = std::make_shared<API::RawCountValidator>();
-  declareProperty(std::make_unique<API::WorkspaceProperty<MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input, wsValidator),
-                  "A 2D workspace with X values of d-spacing/Q-spacing");
-  declareProperty(std::make_unique<API::WorkspaceProperty<>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(
+      std::make_unique<API::WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input, wsValidator),
+      "A 2D workspace with X values of d-spacing/Q-spacing");
+  declareProperty(std::make_unique<API::WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "The result of diffraction focussing of InputWorkspace");
 
-  declareProperty(std::make_unique<FileProperty>("GroupingFileName", "",
-                                                 FileProperty::OptionalLoad,
-                                                 ".cal"),
+  declareProperty(std::make_unique<FileProperty>("GroupingFileName", "", FileProperty::OptionalLoad, ".cal"),
                   "Optional: The name of the CalFile with grouping data.");
 
-  declareProperty(
-      std::make_unique<WorkspaceProperty<GroupingWorkspace>>(
-          "GroupingWorkspace", "", Direction::Input, PropertyMode::Optional),
-      "Optional: GroupingWorkspace to use instead of a grouping file.");
+  declareProperty(std::make_unique<WorkspaceProperty<GroupingWorkspace>>("GroupingWorkspace", "", Direction::Input,
+                                                                         PropertyMode::Optional),
+                  "Optional: GroupingWorkspace to use instead of a grouping file.");
 
   declareProperty("PreserveEvents", true,
                   "Keep the output workspace as an EventWorkspace, if the "
@@ -96,12 +92,10 @@ void DiffractionFocussing2::exec() {
   groupWS = getProperty("GroupingWorkspace");
 
   if (!groupingFileName.empty() && groupWS)
-    throw std::invalid_argument(
-        "You must enter a GroupingFileName or a GroupingWorkspace, not both!");
+    throw std::invalid_argument("You must enter a GroupingFileName or a GroupingWorkspace, not both!");
 
   if (groupingFileName.empty() && !groupWS)
-    throw std::invalid_argument(
-        "You must enter a GroupingFileName or a GroupingWorkspace!");
+    throw std::invalid_argument("You must enter a GroupingFileName or a GroupingWorkspace!");
 
   // Get the input workspace
   m_matrixInputW = getProperty("InputWorkspace");
@@ -119,9 +113,7 @@ void DiffractionFocussing2::exec() {
   if (!groupingFileName.empty()) {
     progress(0.01, "Reading grouping file");
     IAlgorithm_sptr childAlg = createChildAlgorithm("CreateGroupingWorkspace");
-    childAlg->setProperty(
-        "InputWorkspace",
-        std::const_pointer_cast<MatrixWorkspace>(m_matrixInputW));
+    childAlg->setProperty("InputWorkspace", std::const_pointer_cast<MatrixWorkspace>(m_matrixInputW));
     childAlg->setProperty("OldCalFilename", groupingFileName);
     childAlg->executeAsChildAlg();
     groupWS = childAlg->getProperty("OutputWorkspace");
@@ -170,8 +162,8 @@ void DiffractionFocussing2::exec() {
   if (nPoints <= 0) {
     throw std::runtime_error("No points found in the data range.");
   }
-  API::MatrixWorkspace_sptr out = API::WorkspaceFactory::Instance().create(
-      m_matrixInputW, m_validGroups.size(), nPoints + 1, nPoints);
+  API::MatrixWorkspace_sptr out =
+      API::WorkspaceFactory::Instance().create(m_matrixInputW, m_validGroups.size(), nPoints + 1, nPoints);
   // Caching containers that are either only read from or unused. Initialize
   // them once.
   // Helgrind will show a race-condition but the data is completely unused so it
@@ -181,9 +173,7 @@ void DiffractionFocussing2::exec() {
   Progress prog(this, 0.2, 1.0, static_cast<int>(totalHistProcess) + nGroups);
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_matrixInputW, *out))
-  for (int outWorkspaceIndex = 0;
-       outWorkspaceIndex < static_cast<int>(m_validGroups.size());
-       outWorkspaceIndex++) {
+  for (int outWorkspaceIndex = 0; outWorkspaceIndex < static_cast<int>(m_validGroups.size()); outWorkspaceIndex++) {
     PARALLEL_START_INTERUPT_REGION
     auto group = static_cast<int>(m_validGroups[outWorkspaceIndex]);
 
@@ -222,9 +212,8 @@ void DiffractionFocussing2::exec() {
 
       try {
         // TODO This should be implemented in Histogram as rebin
-        Mantid::Kernel::VectorHelper::rebinHistogram(
-            Xin.rawData(), Yin.rawData(), Ein.rawData(), Xout.rawData(), Yout,
-            Eout, true);
+        Mantid::Kernel::VectorHelper::rebinHistogram(Xin.rawData(), Yin.rawData(), Ein.rawData(), Xout.rawData(), Yout,
+                                                     Eout, true);
       } catch (...) {
         // Should never happen because Xout is constructed to envelop all of the
         // Xin vectors
@@ -238,8 +227,7 @@ void DiffractionFocussing2::exec() {
         MantidVec weight_bins, weights;
         weight_bins.emplace_back(Xin.front());
         // If there are masked bins, get a reference to the list of them
-        const API::MatrixWorkspace::MaskList &mask =
-            m_matrixInputW->maskedBins(i);
+        const API::MatrixWorkspace::MaskList &mask = m_matrixInputW->maskedBins(i);
         // Now iterate over the list, adjusting the weights for the affected
         // bins
         for (const auto &bin : mask) {
@@ -266,8 +254,7 @@ void DiffractionFocussing2::exec() {
         // here
         const MantidVec zeroes(weights.size(), 0.0);
         // Rebin the weights - note that this is a distribution
-        VectorHelper::rebin(weight_bins, weights, zeroes, Xout.rawData(),
-                            groupWgt, EOutDummy, true, true);
+        VectorHelper::rebin(weight_bins, weights, zeroes, Xout.rawData(), groupWgt, EOutDummy, true, true);
       } else // If no masked bins we want to add 1 to the weight of the output
              // bins that this input covers
       {
@@ -284,8 +271,7 @@ void DiffractionFocussing2::exec() {
         }
 
         // Rebin the weights - note that this is a distribution
-        VectorHelper::rebin(limits, weights_default, emptyVec, Xout.rawData(),
-                            groupWgt, EOutDummy, true, true);
+        VectorHelper::rebin(limits, weights_default, emptyVec, Xout.rawData(), groupWgt, EOutDummy, true, true);
       }
       prog.report();
     } // end of loop for input spectra
@@ -295,29 +281,20 @@ void DiffractionFocussing2::exec() {
     std::adjacent_difference(Xout.begin(), Xout.end(), widths.begin());
 
     // Take the square root of the errors
-    std::transform(Eout.begin(), Eout.end(), Eout.begin(),
-                   static_cast<double (*)(double)>(sqrt));
+    std::transform(Eout.begin(), Eout.end(), Eout.begin(), static_cast<double (*)(double)>(sqrt));
 
     // Multiply the data and errors by the bin widths because the rebin
     // function, when used
     // in the fashion above for the weights, doesn't put it back in
-    std::transform(Yout.begin(), Yout.end(), widths.begin() + 1, Yout.begin(),
-                   std::multiplies<double>());
-    std::transform(Eout.begin(), Eout.end(), widths.begin() + 1, Eout.begin(),
-                   std::multiplies<double>());
+    std::transform(Yout.begin(), Yout.end(), widths.begin() + 1, Yout.begin(), std::multiplies<double>());
+    std::transform(Eout.begin(), Eout.end(), widths.begin() + 1, Eout.begin(), std::multiplies<double>());
 
     // Now need to normalise the data (and errors) by the weights
-    std::transform(Yout.begin(), Yout.end(), groupWgt.begin(), Yout.begin(),
-                   std::divides<double>());
-    std::transform(Eout.begin(), Eout.end(), groupWgt.begin(), Eout.begin(),
-                   std::divides<double>());
+    std::transform(Yout.begin(), Yout.end(), groupWgt.begin(), Yout.begin(), std::divides<double>());
+    std::transform(Eout.begin(), Eout.end(), groupWgt.begin(), Eout.begin(), std::divides<double>());
     // Now multiply by the number of spectra in the group
-    std::for_each(Yout.begin(), Yout.end(), [groupSize](double &val) {
-      val *= static_cast<double>(groupSize);
-    });
-    std::for_each(Eout.begin(), Eout.end(), [groupSize](double &val) {
-      val *= static_cast<double>(groupSize);
-    });
+    std::for_each(Yout.begin(), Yout.end(), [groupSize](double &val) { val *= static_cast<double>(groupSize); });
+    std::for_each(Eout.begin(), Eout.end(), [groupSize](double &val) { val *= static_cast<double>(groupSize); });
 
     prog.report();
     PARALLEL_END_INTERUPT_REGION
@@ -338,20 +315,17 @@ void DiffractionFocussing2::exec() {
  */
 void DiffractionFocussing2::execEvent() {
   // Create a new outputworkspace with not much in it
-  auto out = create<EventWorkspace>(*m_matrixInputW, m_validGroups.size(),
-                                    m_matrixInputW->binEdges(0));
+  auto out = create<EventWorkspace>(*m_matrixInputW, m_validGroups.size(), m_matrixInputW->binEdges(0));
 
   MatrixWorkspace_const_sptr outputWS = getProperty("OutputWorkspace");
   bool inPlace = (m_matrixInputW == outputWS);
   if (inPlace)
     g_log.debug("Focussing EventWorkspace in-place.");
-  g_log.debug() << nGroups
-                << " groups found in .cal file (counting group 0).\n";
+  g_log.debug() << nGroups << " groups found in .cal file (counting group 0).\n";
 
   EventType eventWtype = m_eventW->getEventType();
 
-  std::unique_ptr<Progress> prog =
-      std::make_unique<Progress>(this, 0.2, 0.25, nGroups);
+  std::unique_ptr<Progress> prog = std::make_unique<Progress>(this, 0.2, 0.25, nGroups);
 
   // determine precount size
   vector<size_t> size_required(this->m_validGroups.size(), 0);
@@ -417,9 +391,7 @@ void DiffractionFocussing2::execEvent() {
       }
 
       // Rejoin the chunk with the rest.
-      PARALLEL_CRITICAL(DiffractionFocussing2_JoinChunks) {
-        groupEL += chunkEL;
-      }
+      PARALLEL_CRITICAL(DiffractionFocussing2_JoinChunks) { groupEL += chunkEL; }
 
       PARALLEL_END_INTERUPT_REGION
     }
@@ -441,9 +413,7 @@ void DiffractionFocussing2::execEvent() {
         // When focussing in place, you can clear out old memory from the input
         // one!
         if (inPlace) {
-          std::const_pointer_cast<EventWorkspace>(m_eventW)
-              ->getSpectrum(wi)
-              .clear();
+          std::const_pointer_cast<EventWorkspace>(m_eventW)->getSpectrum(wi).clear();
         }
       }
       PARALLEL_END_INTERUPT_REGION
@@ -455,15 +425,14 @@ void DiffractionFocussing2::execEvent() {
   // input workspace we first talked about.
   prog.reset();
   prog = std::make_unique<Progress>(this, 0.9, 1.0, nGroups);
-  for (size_t workspaceIndex = 0; workspaceIndex < this->m_validGroups.size();
-       workspaceIndex++) {
+  for (size_t workspaceIndex = 0; workspaceIndex < this->m_validGroups.size(); workspaceIndex++) {
     const auto group = static_cast<int>(m_validGroups[workspaceIndex]);
     // Now this is the workspace index of that group; simply 1 offset
     prog->reportIncrement(1, "Setting X");
 
     if (workspaceIndex >= out->getNumberHistograms()) {
-      g_log.warning() << "Warning! Invalid workspace index found for group # "
-                      << group << ". Histogram will be empty.\n";
+      g_log.warning() << "Warning! Invalid workspace index found for group # " << group
+                      << ". Histogram will be empty.\n";
       continue;
     }
 
@@ -476,8 +445,7 @@ void DiffractionFocussing2::execEvent() {
       else
         // Just use the 1st X vector it found, instead of nothin.
         // Reset Histogram instead of BinEdges, the latter forbids size change.
-        out->setHistogram(workspaceIndex,
-                          BinEdges(group2xvector.begin()->second.cowData()));
+        out->setHistogram(workspaceIndex, BinEdges(group2xvector.begin()->second.cowData()));
     } else
       g_log.warning() << "Warning! No X histogram bins were found for any "
                          "groups. Histogram will be empty.\n";
@@ -550,14 +518,12 @@ void DiffractionFocussing2::determineRebinParameters() {
   bool checkForMask = false;
   Geometry::Instrument_const_sptr instrument = m_matrixInputW->getInstrument();
   if (instrument != nullptr) {
-    checkForMask = ((instrument->getSource() != nullptr) &&
-                    (instrument->getSample() != nullptr));
+    checkForMask = ((instrument->getSource() != nullptr) && (instrument->getSample() != nullptr));
   }
   const auto &spectrumInfo = m_matrixInputW->spectrumInfo();
 
   groupAtWorkspaceIndex.resize(nHist);
-  for (int wi = 0; wi < nHist;
-       wi++) //  Iterate over all histograms to find X boundaries for each group
+  for (int wi = 0; wi < nHist; wi++) //  Iterate over all histograms to find X boundaries for each group
   {
     const int group = validateSpectrumInGroup(static_cast<size_t>(wi));
     groupAtWorkspaceIndex[wi] = group;
@@ -574,8 +540,7 @@ void DiffractionFocussing2::determineRebinParameters() {
 
     // Create the group range in the map if it isn't already there
     if (gpit == group2minmax.end()) {
-      gpit = group2minmax.emplace(group, std::make_pair(BIGGEST, -1. * BIGGEST))
-                 .first;
+      gpit = group2minmax.emplace(group, std::make_pair(BIGGEST, -1. * BIGGEST)).first;
     }
     const double min = (gpit->second).first;
     const double max = (gpit->second).second;
@@ -608,21 +573,18 @@ void DiffractionFocussing2::determineRebinParameters() {
 
     if (Xmax < Xmin) // Should never happen
     {
-      mess << "Fail to determine X boundaries for group:" << gpit->first
-           << "\n";
+      mess << "Fail to determine X boundaries for group:" << gpit->first << "\n";
       mess << "The boundaries are (Xmin,Xmax):" << Xmin << " " << Xmax;
       throw std::runtime_error(mess.str());
     }
     // This log step size will give the right # of points
     step = (log(Xmax) - log(Xmin)) / nPoints;
-    mess << "Found Group:" << gpit->first
-         << "(Xmin,Xmax,log step):" << (gpit->second).first << ","
+    mess << "Found Group:" << gpit->first << "(Xmin,Xmax,log step):" << (gpit->second).first << ","
          << (gpit->second).second << "," << step;
     // g_log.information(mess.str());
     mess.str("");
 
-    HistogramData::BinEdges xnew(
-        xPoints, HistogramData::LogarithmicGenerator(Xmin, step));
+    HistogramData::BinEdges xnew(xPoints, HistogramData::LogarithmicGenerator(Xmin, step));
     group2xvector[gpit->first] = xnew; // Register this vector in the map
   }
   // Not needed anymore

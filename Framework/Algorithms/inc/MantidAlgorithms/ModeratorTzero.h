@@ -71,13 +71,9 @@ public:
 
   /// Algorithm's version
   int version() const override { return (1); }
-  const std::vector<std::string> seeAlso() const override {
-    return {"ModeratorTzeroLinear"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"ModeratorTzeroLinear"}; }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "CorrectionFunctions\\InstrumentCorrections";
-  }
+  const std::string category() const override { return "CorrectionFunctions\\InstrumentCorrections"; }
   /// set attribute m_formula
   void setFormula(const std::string &formula);
   /// output m_t1min
@@ -92,12 +88,10 @@ private:
   void execEvent(const std::string &emode);
   /// Calculate emission time from the moderator for a given
   /// detector (L1, t2) and TOF when Emode==Inelastic
-  double CalculateT0indirect(const double &tof, const double &L1,
-                             const double &t2, double &E1, mu::Parser &parser);
+  double CalculateT0indirect(const double &tof, const double &L1, const double &t2, double &E1, mu::Parser &parser);
   /// Calculate emission time from the moderator for a given
   /// detector (L1, t2) and TOF when Emode==Elastic
-  double CalculateT0elastic(const double &tof, const double &L12, double &E1,
-                            mu::Parser &parser);
+  double CalculateT0elastic(const double &tof, const double &L12, double &E1, mu::Parser &parser);
   const double m_convfactor;
   /// Maximum number of iterations when calculating the emission time from the
   /// moderator

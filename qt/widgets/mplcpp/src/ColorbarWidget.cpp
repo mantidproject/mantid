@@ -49,8 +49,7 @@ QStringList NORM_OPTS = {"Linear", "SymmetricLog10", "Power"};
  * @param parent A pointer to the parent widget
  */
 ColorbarWidget::ColorbarWidget(QWidget *parent)
-    : QWidget(parent), m_ui(),
-      m_mappable(Normalize(0, 1), getCMap(defaultCMapName())) {
+    : QWidget(parent), m_ui(), m_mappable(Normalize(0, 1), getCMap(defaultCMapName())) {
   initLayout();
   connectSignals();
 }
@@ -72,8 +71,7 @@ void ColorbarWidget::setNorm(const NormalizeBase &norm) {
  * @param vmin An optional new minimum of the scale
  * @param vmax An optional new maximum of the scale
  */
-void ColorbarWidget::setClim(boost::optional<double> vmin,
-                             boost::optional<double> vmax) {
+void ColorbarWidget::setClim(boost::optional<double> vmin, boost::optional<double> vmax) {
   m_mappable.setClim(vmin, vmax);
   m_canvas->draw();
 
@@ -91,8 +89,7 @@ void ColorbarWidget::setClim(boost::optional<double> vmin,
  * @return A tuple giving the current colorbar scale limits
  */
 std::tuple<double, double> ColorbarWidget::clim() const {
-  return std::make_tuple<double, double>(m_ui.scaleMinEdit->text().toDouble(),
-                                         m_ui.scaleMaxEdit->text().toDouble());
+  return std::make_tuple<double, double>(m_ui.scaleMinEdit->text().toDouble(), m_ui.scaleMaxEdit->text().toDouble());
 }
 
 /**
@@ -126,16 +123,12 @@ void ColorbarWidget::setMaxValue(double vmax) { setClim(boost::none, vmax); }
 /**
  * @return The minimum color scale value as a string
  */
-QString ColorbarWidget::getMinValue() const {
-  return QString::number(std::get<0>(clim()));
-}
+QString ColorbarWidget::getMinValue() const { return QString::number(std::get<0>(clim())); }
 
 /**
  * @return The maximum color scale value as a string
  */
-QString ColorbarWidget::getMaxValue() const {
-  return QString::number(std::get<1>(clim()));
-}
+QString ColorbarWidget::getMaxValue() const { return QString::number(std::get<1>(clim())); }
 
 /**
  * @return The power value as a string
@@ -145,9 +138,7 @@ QString ColorbarWidget::getNthPower() const { return m_ui.powerEdit->text(); }
 /**
  * @return The scale type choice as an integer.
  */
-int ColorbarWidget::getScaleType() const {
-  return m_ui.normTypeOpt->currentIndex();
-}
+int ColorbarWidget::getScaleType() const { return m_ui.normTypeOpt->currentIndex(); }
 
 /**
  * @brief Set the scale type from an integer representation
@@ -173,8 +164,7 @@ void ColorbarWidget::setScaleType(int index) {
     validRange = autoscaleAndSetNorm(Normalize());
     break;
   case 1:
-    validRange = autoscaleAndSetNorm(SymLogNorm(
-        SymLogNorm::DefaultLinearThreshold, SymLogNorm::DefaultLinearScale));
+    validRange = autoscaleAndSetNorm(SymLogNorm(SymLogNorm::DefaultLinearThreshold, SymLogNorm::DefaultLinearScale));
     break;
   case 2:
     validRange = autoscaleAndSetNorm(PowerNorm(getNthPower().toDouble()));
@@ -278,8 +268,7 @@ void ColorbarWidget::initLayout() {
  * @param format An optional matplotlib.ticker.*Format object. Default=None to
  * autoselect the most appropriate
  */
-void ColorbarWidget::createColorbar(const Python::Object &ticks,
-                                    const Python::Object &format) {
+void ColorbarWidget::createColorbar(const Python::Object &ticks, const Python::Object &format) {
   assert(m_canvas);
   GlobalInterpreterLock lock;
   auto cb = Python::Object(m_mappable.pyobj().attr("colorbar"));
@@ -296,15 +285,11 @@ void ColorbarWidget::createColorbar(const Python::Object &ticks,
  * Wire up the signals for the child widgets
  */
 void ColorbarWidget::connectSignals() {
-  connect(m_ui.scaleMinEdit, SIGNAL(editingFinished()), this,
-          SLOT(scaleMinimumEdited()));
-  connect(m_ui.scaleMaxEdit, SIGNAL(editingFinished()), this,
-          SLOT(scaleMaximumEdited()));
+  connect(m_ui.scaleMinEdit, SIGNAL(editingFinished()), this, SLOT(scaleMinimumEdited()));
+  connect(m_ui.scaleMaxEdit, SIGNAL(editingFinished()), this, SLOT(scaleMaximumEdited()));
 
-  connect(m_ui.normTypeOpt, SIGNAL(currentIndexChanged(int)), this,
-          SLOT(scaleTypeSelectionChanged(int)));
-  connect(m_ui.powerEdit, SIGNAL(editingFinished()), this,
-          SLOT(powerExponentEdited()));
+  connect(m_ui.normTypeOpt, SIGNAL(currentIndexChanged(int)), this, SLOT(scaleTypeSelectionChanged(int)));
+  connect(m_ui.powerEdit, SIGNAL(editingFinished()), this, SLOT(powerExponentEdited()));
 }
 
 } // namespace MplCpp

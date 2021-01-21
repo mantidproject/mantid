@@ -67,8 +67,7 @@ void BoxCurve::copy(const BoxCurve *b) {
   b_width = b->b_width;
 }
 
-void BoxCurve::draw(QPainter *painter, const QwtScaleMap &xMap,
-                    const QwtScaleMap &yMap, int from, int to) const {
+void BoxCurve::draw(QPainter *painter, const QwtScaleMap &xMap, const QwtScaleMap &yMap, int from, int to) const {
   if (!painter || dataSize() <= 0)
     return;
 
@@ -90,15 +89,14 @@ void BoxCurve::draw(QPainter *painter, const QwtScaleMap &xMap,
   delete[] dat;
 }
 
-void BoxCurve::drawBox(QPainter *painter, const QwtScaleMap &xMap,
-                       const QwtScaleMap &yMap, double *dat, int size) const {
+void BoxCurve::drawBox(QPainter *painter, const QwtScaleMap &xMap, const QwtScaleMap &yMap, double *dat,
+                       int size) const {
   const int px = xMap.transform(x(0));
   const int px_min = xMap.transform(x(0) - 0.5);
   const int px_max = xMap.transform(x(0) + 0.5);
   const int box_width = 1 + (px_max - px_min) * b_width / 100;
   const int hbw = box_width / 2;
-  const int median =
-      yMap.transform(gsl_stats_median_from_sorted_data(dat, 1, size));
+  const int median = yMap.transform(gsl_stats_median_from_sorted_data(dat, 1, size));
   int b_lowerq, b_upperq;
   double sd = 0, se = 0, mean = 0;
   if (w_range == SD || w_range == SE || b_range == SD || b_range == SE) {
@@ -114,16 +112,13 @@ void BoxCurve::drawBox(QPainter *painter, const QwtScaleMap &xMap,
     b_lowerq = yMap.transform(mean - se * b_coeff);
     b_upperq = yMap.transform(mean + se * b_coeff);
   } else {
-    b_lowerq = yMap.transform(
-        gsl_stats_quantile_from_sorted_data(dat, 1, size, 1 - 0.01 * b_coeff));
-    b_upperq = yMap.transform(
-        gsl_stats_quantile_from_sorted_data(dat, 1, size, 0.01 * b_coeff));
+    b_lowerq = yMap.transform(gsl_stats_quantile_from_sorted_data(dat, 1, size, 1 - 0.01 * b_coeff));
+    b_upperq = yMap.transform(gsl_stats_quantile_from_sorted_data(dat, 1, size, 0.01 * b_coeff));
   }
 
   // draw box
   if (b_style == Rect) {
-    const QRect r =
-        QRect(px - hbw, b_upperq, box_width, b_lowerq - b_upperq + 1);
+    const QRect r = QRect(px - hbw, b_upperq, box_width, b_lowerq - b_upperq + 1);
     painter->fillRect(r, QwtPlotCurve::brush());
     painter->drawRect(r);
   } else if (b_style == Diamond) {
@@ -136,10 +131,8 @@ void BoxCurve::drawBox(QPainter *painter, const QwtScaleMap &xMap,
     painter->setBrush(QwtPlotCurve::brush());
     painter->drawPolygon(pa);
   } else if (b_style == WindBox) {
-    const int lowerq =
-        yMap.transform(gsl_stats_quantile_from_sorted_data(dat, 1, size, 0.25));
-    const int upperq =
-        yMap.transform(gsl_stats_quantile_from_sorted_data(dat, 1, size, 0.75));
+    const int lowerq = yMap.transform(gsl_stats_quantile_from_sorted_data(dat, 1, size, 0.25));
+    const int upperq = yMap.transform(gsl_stats_quantile_from_sorted_data(dat, 1, size, 0.75));
     QPolygon pa(8);
     pa[0] = QPoint(px + hbw, b_upperq);
     pa[1] = QPoint(static_cast<int>(px + 0.4 * box_width), upperq);
@@ -184,10 +177,8 @@ void BoxCurve::drawBox(QPainter *painter, const QwtScaleMap &xMap,
       w_lowerq = yMap.transform(mean - se * w_coeff);
       w_upperq = yMap.transform(mean + se * w_coeff);
     } else {
-      w_lowerq = yMap.transform(gsl_stats_quantile_from_sorted_data(
-          dat, 1, size, 1 - 0.01 * w_coeff));
-      w_upperq = yMap.transform(
-          gsl_stats_quantile_from_sorted_data(dat, 1, size, 0.01 * w_coeff));
+      w_lowerq = yMap.transform(gsl_stats_quantile_from_sorted_data(dat, 1, size, 1 - 0.01 * w_coeff));
+      w_upperq = yMap.transform(gsl_stats_quantile_from_sorted_data(dat, 1, size, 0.01 * w_coeff));
     }
 
     painter->drawLine(px - l, w_lowerq, px + l, w_lowerq);
@@ -206,14 +197,12 @@ void BoxCurve::drawBox(QPainter *painter, const QwtScaleMap &xMap,
   if (b_style == Notch || b_style == NoBox)
     return;
   if (b_style == WindBox)
-    painter->drawLine(static_cast<int>(px - 0.4 * box_width), median,
-                      static_cast<int>(px + 0.4 * box_width), median);
+    painter->drawLine(static_cast<int>(px - 0.4 * box_width), median, static_cast<int>(px + 0.4 * box_width), median);
   else
     painter->drawLine(px - hbw, median, px + hbw, median);
 }
 
-void BoxCurve::drawSymbols(QPainter *painter, const QwtScaleMap &xMap,
-                           const QwtScaleMap &yMap, double *dat,
+void BoxCurve::drawSymbols(QPainter *painter, const QwtScaleMap &xMap, const QwtScaleMap &yMap, double *dat,
                            int size) const {
   const int px = xMap.transform(x(0));
 
@@ -229,14 +218,12 @@ void BoxCurve::drawSymbols(QPainter *painter, const QwtScaleMap &xMap,
     s.draw(painter, px, py_max);
   }
   if (p1_style != QwtSymbol::NoSymbol) {
-    const int p1 =
-        yMap.transform(gsl_stats_quantile_from_sorted_data(dat, 1, size, 0.01));
+    const int p1 = yMap.transform(gsl_stats_quantile_from_sorted_data(dat, 1, size, 0.01));
     s.setStyle(p1_style);
     s.draw(painter, px, p1);
   }
   if (p99_style != QwtSymbol::NoSymbol) {
-    const int p99 =
-        yMap.transform(gsl_stats_quantile_from_sorted_data(dat, 1, size, 0.99));
+    const int p99 = yMap.transform(gsl_stats_quantile_from_sorted_data(dat, 1, size, 0.99));
     s.setStyle(p99_style);
     s.draw(painter, px, p99);
   }
@@ -313,8 +300,7 @@ void BoxCurve::loadData() {
     QString s = d_table->text(i, ycol);
     if (!s.isEmpty()) {
       bool valid_data = true;
-      Y[size] =
-          (dynamic_cast<Plot *>(plot()))->locale().toDouble(s, &valid_data);
+      Y[size] = (dynamic_cast<Plot *>(plot()))->locale().toDouble(s, &valid_data);
       if (valid_data)
         size++;
     }

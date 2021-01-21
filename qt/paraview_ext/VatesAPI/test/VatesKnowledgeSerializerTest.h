@@ -40,54 +40,46 @@ private:
 public:
   void testNoWorkspaceThrows() {
     VatesKnowledgeSerializer generator;
-    Mantid::Geometry::MDImplicitFunction_sptr impFunction(
-        new MockImplicitFunction);
+    Mantid::Geometry::MDImplicitFunction_sptr impFunction(new MockImplicitFunction);
     generator.setImplicitFunction(impFunction);
-    TSM_ASSERT_THROWS("Cannot generate the xml without the workspace",
-                      generator.createXMLString(), const std::runtime_error &);
+    TSM_ASSERT_THROWS("Cannot generate the xml without the workspace", generator.createXMLString(),
+                      const std::runtime_error &);
   }
 
   void testNoLocationDoesNotThrow() {
     MockIMDWorkspace *pWorkspace = new MockIMDWorkspace;
     Mantid::API::IMDWorkspace_sptr workspace(pWorkspace);
-    Mantid::API::AnalysisDataService::Instance().addOrReplace("someName",
-                                                              workspace);
+    Mantid::API::AnalysisDataService::Instance().addOrReplace("someName", workspace);
 
     MockImplicitFunction *pImpFunction = new MockImplicitFunction;
-    EXPECT_CALL(*pImpFunction, toXMLString())
-        .Times(1)
-        .WillRepeatedly(testing::Return("<ImplicitFunction/>"));
+    EXPECT_CALL(*pImpFunction, toXMLString()).Times(1).WillRepeatedly(testing::Return("<ImplicitFunction/>"));
     Mantid::Geometry::MDImplicitFunction_sptr impFunction(pImpFunction);
 
     VatesKnowledgeSerializer generator; // Location is not required.
     generator.setImplicitFunction(impFunction);
     generator.setWorkspace(*workspace);
 
-    TSM_ASSERT_THROWS_NOTHING("The location is not mandatory, should not throw",
-                              generator.createXMLString());
+    TSM_ASSERT_THROWS_NOTHING("The location is not mandatory, should not throw", generator.createXMLString());
     Mantid::API::AnalysisDataService::Instance().clear();
   }
 
   void testNoNameThrows() {
-    Mantid::Geometry::MDImplicitFunction_sptr impFunction(
-        new MockImplicitFunction);
+    Mantid::Geometry::MDImplicitFunction_sptr impFunction(new MockImplicitFunction);
     MockIMDWorkspace *pWorkspace = new MockIMDWorkspace;
     std::shared_ptr<const Mantid::API::IMDWorkspace> workspace(pWorkspace);
     VatesKnowledgeSerializer generator;
     generator.setImplicitFunction(impFunction);
     generator.setWorkspace(*workspace);
 
-    TSM_ASSERT_THROWS("Cannot create the xml without the workspace name",
-                      generator.createXMLString(), const std::runtime_error &);
+    TSM_ASSERT_THROWS("Cannot create the xml without the workspace name", generator.createXMLString(),
+                      const std::runtime_error &);
   }
 
   void testCreateXMLWithComponents() // Uses individual setters for geometry,
                                      // location and name.
   {
     MockImplicitFunction *pImpFunction = new MockImplicitFunction;
-    EXPECT_CALL(*pImpFunction, toXMLString())
-        .Times(1)
-        .WillRepeatedly(testing::Return("<ImplicitFunction/>"));
+    EXPECT_CALL(*pImpFunction, toXMLString()).Times(1).WillRepeatedly(testing::Return("<ImplicitFunction/>"));
     Mantid::Geometry::MDImplicitFunction_sptr impFunction(pImpFunction);
 
     VatesKnowledgeSerializer generator;
@@ -125,41 +117,36 @@ public:
     generator.setGeometryXML(dimensionXMLString);
 
     std::string xml = generator.getWorkspaceGeometry();
-    TSM_ASSERT_EQUALS(
-        "The geometry xml fetched is not the same as that provided",
-        dimensionXMLString, generator.getWorkspaceGeometry());
+    TSM_ASSERT_EQUALS("The geometry xml fetched is not the same as that provided", dimensionXMLString,
+                      generator.getWorkspaceGeometry());
   }
 
   void testHasFunction() {
     VatesKnowledgeSerializer withoutFunction;
     VatesKnowledgeSerializer withFunction;
-    Mantid::Geometry::MDImplicitFunction_sptr impFunction(
-        new MockImplicitFunction);
+    Mantid::Geometry::MDImplicitFunction_sptr impFunction(new MockImplicitFunction);
     withFunction.setImplicitFunction(impFunction);
 
     TSM_ASSERT_EQUALS("A function has not been provided. ::hasFunctionInfo() "
                       "should return false.",
                       false, withoutFunction.hasFunctionInfo());
-    TSM_ASSERT_EQUALS(
-        "A function has been provided. ::hasFunctionInfo() should return true.",
-        true, withFunction.hasFunctionInfo());
+    TSM_ASSERT_EQUALS("A function has been provided. ::hasFunctionInfo() should return true.", true,
+                      withFunction.hasFunctionInfo());
   }
 
   void testHasGeometryInfoWithoutGeometry() {
     // Note that functions do not apply to this test set.
     VatesKnowledgeSerializer withoutGeometry;
     withoutGeometry.setWorkspaceName("-");
-    TSM_ASSERT_EQUALS(
-        "No Geometry provided. ::hasGeometryInfo() should return false.", false,
-        withoutGeometry.hasGeometryInfo());
+    TSM_ASSERT_EQUALS("No Geometry provided. ::hasGeometryInfo() should return false.", false,
+                      withoutGeometry.hasGeometryInfo());
   }
 
   void testHasGeometryInfoWithoutWSName() {
     VatesKnowledgeSerializer withoutWSName;
     withoutWSName.setGeometryXML("-");
-    TSM_ASSERT_EQUALS(
-        "No WS name provided. ::hasGeometryInfo() should return false.", false,
-        withoutWSName.hasGeometryInfo());
+    TSM_ASSERT_EQUALS("No WS name provided. ::hasGeometryInfo() should return false.", false,
+                      withoutWSName.hasGeometryInfo());
   }
 
   void testHasGeometryAndWSInfo() {

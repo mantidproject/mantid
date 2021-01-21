@@ -54,8 +54,7 @@ void ANNbd_shrink::print( // print shrinking node
       for (int i = 0; i < level + 2; i++)
         out << "  ";
     }
-    out << "  ([" << bnds[j].cd << "]" << (bnds[j].sd > 0 ? ">=" : "< ")
-        << bnds[j].cv << ")";
+    out << "  ([" << bnds[j].cd << "]" << (bnds[j].sd > 0 ? ">=" : "< ") << bnds[j].cv << ")";
   }
   out << "\n";
 

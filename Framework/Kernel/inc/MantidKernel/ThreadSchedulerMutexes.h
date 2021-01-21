@@ -65,8 +65,7 @@ public:
       for (auto &mutexedMap : m_supermap) {
         // The key is the mutex associated with the inner map
         std::shared_ptr<std::mutex> mapMutex = mutexedMap.first;
-        if ((!mapMutex) || (m_mutexes.empty()) ||
-            (m_mutexes.find(mapMutex) == m_mutexes.end())) {
+        if ((!mapMutex) || (m_mutexes.empty()) || (m_mutexes.find(mapMutex) == m_mutexes.end())) {
           // The mutex of this map is free!
           InnerMap &map = mutexedMap.second;
 
@@ -131,8 +130,7 @@ public:
     // Add up the sizes of all contained maps.
     return std::accumulate(
         m_supermap.cbegin(), m_supermap.cend(), size_t{0},
-        [](size_t total, const std::pair<const std::shared_ptr<std::mutex> &,
-                                         const InnerMap &> &mutexedMap) {
+        [](size_t total, const std::pair<const std::shared_ptr<std::mutex> &, const InnerMap &> &mutexedMap) {
           return total + mutexedMap.second.size();
         });
   }
@@ -141,10 +139,11 @@ public:
   /// @return true if the queue is empty
   bool empty() override {
     std::lock_guard<std::mutex> lock(m_queueLock);
-    auto mapWithTasks = std::find_if_not(
-        m_supermap.cbegin(), m_supermap.cend(),
-        [](const std::pair<const std::shared_ptr<std::mutex>, const InnerMap &>
-               &mutexedMap) { return mutexedMap.second.empty(); });
+    auto mapWithTasks =
+        std::find_if_not(m_supermap.cbegin(), m_supermap.cend(),
+                         [](const std::pair<const std::shared_ptr<std::mutex>, const InnerMap &> &mutexedMap) {
+                           return mutexedMap.second.empty();
+                         });
     return mapWithTasks == m_supermap.cend();
   }
 

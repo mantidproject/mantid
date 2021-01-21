@@ -23,22 +23,17 @@ namespace MantidWidgets {
 class AlgorithmProgressModel;
 class IAlgorithmProgressDialogWidget;
 
-class EXPORT_OPT_MANTIDQT_COMMON AlgorithmProgressDialogPresenter
-    : public AlgorithmProgressPresenterBase {
+class EXPORT_OPT_MANTIDQT_COMMON AlgorithmProgressDialogPresenter : public AlgorithmProgressPresenterBase {
   Q_OBJECT
-  using RunningAlgorithms =
-      std::unordered_map<Mantid::API::AlgorithmID,
-                         std::pair<QTreeWidgetItem *, QProgressBar *>>;
+  using RunningAlgorithms = std::unordered_map<Mantid::API::AlgorithmID, std::pair<QTreeWidgetItem *, QProgressBar *>>;
 
 public:
-  AlgorithmProgressDialogPresenter(QWidget *parent,
-                                   IAlgorithmProgressDialogWidget *view,
+  AlgorithmProgressDialogPresenter(QWidget *parent, IAlgorithmProgressDialogWidget *view,
                                    AlgorithmProgressModel &model);
 
   void algorithmStartedSlot(Mantid::API::AlgorithmID) override;
-  void updateProgressBarSlot(Mantid::API::AlgorithmID, const double progress,
-                             const QString message, const double estimatedTime,
-                             const int progressPrecision) override;
+  void updateProgressBarSlot(Mantid::API::AlgorithmID, const double progress, const QString message,
+                             const double estimatedTime, const int progressPrecision) override;
   void algorithmEndedSlot(Mantid::API::AlgorithmID) override;
   size_t getNumberTrackedAlgorithms();
 

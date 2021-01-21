@@ -50,8 +50,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <array>
 
 namespace {
-static vtkSMSourceProxy *
-FindVisibleProducerWithChangeOfBasisMatrix(pqView *view) {
+static vtkSMSourceProxy *FindVisibleProducerWithChangeOfBasisMatrix(pqView *view) {
   foreach (pqRepresentation *repr, view->getRepresentations()) {
     pqDataRepresentation *drepr = qobject_cast<pqDataRepresentation *>(repr);
     if (!drepr || !drepr->isVisible()) {
@@ -59,12 +58,9 @@ FindVisibleProducerWithChangeOfBasisMatrix(pqView *view) {
     }
 
     vtkPVDataInformation *info = drepr->getInputDataInformation();
-    vtkPVArrayInformation *cobm =
-        info->GetArrayInformation("ChangeOfBasisMatrix", vtkDataObject::FIELD);
+    vtkPVArrayInformation *cobm = info->GetArrayInformation("ChangeOfBasisMatrix", vtkDataObject::FIELD);
     vtkPVArrayInformation *bbimc =
-        cobm ? info->GetArrayInformation("BoundingBoxInModelCoordinates",
-                                         vtkDataObject::FIELD)
-             : nullptr;
+        cobm ? info->GetArrayInformation("BoundingBoxInModelCoordinates", vtkDataObject::FIELD) : nullptr;
     if (cobm && bbimc) {
       return vtkSMSourceProxy::SafeDownCast(drepr->getInput()->getProxy());
     }
@@ -74,12 +70,12 @@ FindVisibleProducerWithChangeOfBasisMatrix(pqView *view) {
 } // namespace
 
 //-----------------------------------------------------------------------------
-pqCameraReactionNonOrthogonalAxes::pqCameraReactionNonOrthogonalAxes(
-    QAction *parentObject, pqCameraReactionNonOrthogonalAxes::Mode mode)
+pqCameraReactionNonOrthogonalAxes::pqCameraReactionNonOrthogonalAxes(QAction *parentObject,
+                                                                     pqCameraReactionNonOrthogonalAxes::Mode mode)
     : Superclass(parentObject) {
   this->ReactionMode = mode;
-  QObject::connect(&pqActiveObjects::instance(), SIGNAL(viewChanged(pqView *)),
-                   this, SLOT(updateEnableState()), Qt::QueuedConnection);
+  QObject::connect(&pqActiveObjects::instance(), SIGNAL(viewChanged(pqView *)), this, SLOT(updateEnableState()),
+                   Qt::QueuedConnection);
   this->updateEnableState();
 }
 
@@ -98,9 +94,7 @@ void pqCameraReactionNonOrthogonalAxes::updateEnableState() {
       bool cameraResetButtonsEnabled = true;
       vtkPVXMLElement *hints = rview->getHints();
       if (hints) {
-        cameraResetButtonsEnabled =
-            hints->FindNestedElementByName("DisableCameraToolbarButtons") ==
-            nullptr;
+        cameraResetButtonsEnabled = hints->FindNestedElementByName("DisableCameraToolbarButtons") == nullptr;
       }
 
       this->parentAction()->setEnabled(cameraResetButtonsEnabled);
@@ -164,17 +158,12 @@ void pqCameraReactionNonOrthogonalAxes::resetCamera() {
 }
 
 //-----------------------------------------------------------------------------
-void pqCameraReactionNonOrthogonalAxes::resetDirection(
-    double sign, std::array<int, 2> axes) {
-  pqRenderView *ren =
-      qobject_cast<pqRenderView *>(pqActiveObjects::instance().activeView());
+void pqCameraReactionNonOrthogonalAxes::resetDirection(double sign, std::array<int, 2> axes) {
+  pqRenderView *ren = qobject_cast<pqRenderView *>(pqActiveObjects::instance().activeView());
   if (ren) {
-    vtkSMSourceProxy *nonOrthogonalSource =
-        FindVisibleProducerWithChangeOfBasisMatrix(ren);
+    vtkSMSourceProxy *nonOrthogonalSource = FindVisibleProducerWithChangeOfBasisMatrix(ren);
     if (nonOrthogonalSource) {
-      vtkTuple<double, 16> cobm =
-          pqModelTransformSupportBehavior::getChangeOfBasisMatrix(
-              nonOrthogonalSource);
+      vtkTuple<double, 16> cobm = pqModelTransformSupportBehavior::getChangeOfBasisMatrix(nonOrthogonalSource);
       vtkNew<vtkMatrix4x4> mat;
       mat->DeepCopy(cobm.GetData());
       double a[3], up[3], look[3];
@@ -223,10 +212,9 @@ void pqCameraReactionNonOrthogonalAxes::resetNegativeW() {
 
 //-----------------------------------------------------------------------------
 void pqCameraReactionNonOrthogonalAxes::zoomToData() {
-  pqRenderView *renModule =
-      qobject_cast<pqRenderView *>(pqActiveObjects::instance().activeView());
-  pqPipelineRepresentation *repr = qobject_cast<pqPipelineRepresentation *>(
-      pqActiveObjects::instance().activeRepresentation());
+  pqRenderView *renModule = qobject_cast<pqRenderView *>(pqActiveObjects::instance().activeView());
+  pqPipelineRepresentation *repr =
+      qobject_cast<pqPipelineRepresentation *>(pqActiveObjects::instance().activeRepresentation());
   if (renModule && repr) {
     vtkSMRenderViewProxy *rm = renModule->getRenderViewProxy();
     rm->ZoomTo(repr->getProxy());
@@ -236,8 +224,7 @@ void pqCameraReactionNonOrthogonalAxes::zoomToData() {
 
 //-----------------------------------------------------------------------------
 void pqCameraReactionNonOrthogonalAxes::rotateCamera(double angle) {
-  pqRenderView *renModule =
-      qobject_cast<pqRenderView *>(pqActiveObjects::instance().activeView());
+  pqRenderView *renModule = qobject_cast<pqRenderView *>(pqActiveObjects::instance().activeView());
   if (renModule) {
     renModule->getRenderViewProxy()->GetActiveCamera()->Roll(angle);
     renModule->render();

@@ -42,9 +42,7 @@ public:
 
   void test_works_for_Counts() { TS_ASSERT(isValid(Counts{1.0, 2.0})); }
 
-  void test_works_for_Frequencies() {
-    TS_ASSERT(isValid(Frequencies{1.0, 2.0}));
-  }
+  void test_works_for_Frequencies() { TS_ASSERT(isValid(Frequencies{1.0, 2.0})); }
 
   void test_length_zero() { TS_ASSERT(isValid(HistogramY(0))); }
 

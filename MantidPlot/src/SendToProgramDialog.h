@@ -28,10 +28,8 @@ class SendToProgramDialog : public QDialog {
 public:
   SendToProgramDialog(QWidget *parent, const Qt::WFlags &fl = nullptr);
   SendToProgramDialog(QWidget *parent, const QString &programName,
-                      std::map<std::string, std::string> programKeysAndDetails,
-                      const Qt::WFlags &fl = nullptr);
-  std::pair<std::string, std::map<std::string, std::string>>
-  getSettings() const;
+                      std::map<std::string, std::string> programKeysAndDetails, const Qt::WFlags &fl = nullptr);
+  std::pair<std::string, std::map<std::string, std::string>> getSettings() const;
 
 private slots:
   /// Open up a new file browsing window.

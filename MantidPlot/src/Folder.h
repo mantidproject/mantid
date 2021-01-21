@@ -62,12 +62,10 @@ public:
   QList<Folder *> folders();
 
   //! Pointer to the subfolder called s
-  Folder *findSubfolder(const QString &s, bool caseSensitive = true,
-                        bool partialMatch = false);
+  Folder *findSubfolder(const QString &s, bool caseSensitive = true, bool partialMatch = false);
 
   //! Pointer to the first window matching the search criteria
-  MdiSubWindow *findWindow(const QString &s, bool windowNames, bool labels,
-                           bool caseSensitive, bool partialMatch);
+  MdiSubWindow *findWindow(const QString &s, bool windowNames, bool labels, bool caseSensitive, bool partialMatch);
 
   //! get a window by name
   /**
@@ -75,8 +73,7 @@ public:
    * NULL on failure. If recursive is true, do a depth-first recursive
    * search.
    */
-  MdiSubWindow *window(const QString &name, const char *cls = "MdiSubWindow",
-                       bool recursive = false);
+  MdiSubWindow *window(const QString &name, const char *cls = "MdiSubWindow", bool recursive = false);
   //! Return table named name or NULL
   Table *table(const QString &name, bool recursive = false) {
     return reinterpret_cast<Table *>(window(name, "Table", recursive));
@@ -87,8 +84,7 @@ public:
   }
   //! Return graph named name or NULL
   MultiLayer *graph(const QString &name, bool recursive = false) {
-    return reinterpret_cast<MultiLayer *>(
-        window(name, "MultiLayer", recursive));
+    return reinterpret_cast<MultiLayer *>(window(name, "MultiLayer", recursive));
   }
   //! Return note named name or NULL
   Note *note(const QString &name, bool recursive = false) {
@@ -131,8 +127,7 @@ private:
   /// Save header information about the folder
   QString saveFolderHeader(bool isCurrentFolder);
   /// Recursively save subwindows and subfolders
-  QString saveFolderSubWindows(ApplicationWindow *app, Folder *,
-                               int &windowCount);
+  QString saveFolderSubWindows(ApplicationWindow *app, Folder *, int &windowCount);
   /// Save footer information about the folder
   QString saveFolderFooter();
 

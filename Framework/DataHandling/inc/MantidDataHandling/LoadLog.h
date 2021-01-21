@@ -62,15 +62,11 @@ public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "LoadLog"; };
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Load ISIS log file(s) into a workspace.";
-  }
+  const std::string summary() const override { return "Load ISIS log file(s) into a workspace."; }
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; };
-  const std::vector<std::string> seeAlso() const override {
-    return {"AddSampleLog", "LoadNexusLogs"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"AddSampleLog", "LoadNexusLogs"}; }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "DataHandling\\Logs"; }
 
@@ -109,20 +105,16 @@ private:
   std::string extractLogName(const std::vector<std::string> &logName);
 
   /// Check for SNS-style text file
-  bool SNSTextFormatColumns(const std::string &str,
-                            std::vector<double> &out) const;
+  bool SNSTextFormatColumns(const std::string &str, std::vector<double> &out) const;
 
   /// Create timeseries property from .log file and adds that to sample object
-  void loadThreeColumnLogFile(std::ifstream &logFileStream,
-                              const std::string &logFileName, API::Run &run);
+  void loadThreeColumnLogFile(std::ifstream &logFileStream, const std::string &logFileName, API::Run &run);
 
   /// Loads two column log file data into local workspace
-  void loadTwoColumnLogFile(std::ifstream &logFileStream,
-                            std::string logFileName, API::Run &run);
+  void loadTwoColumnLogFile(std::ifstream &logFileStream, std::string logFileName, API::Run &run);
 
   /// Returns the number of columns in the log file.
-  int countNumberColumns(std::ifstream &logFileStream,
-                         const std::string &logFileName);
+  int countNumberColumns(std::ifstream &logFileStream, const std::string &logFileName);
 
   /// TimeSeriesProperty<int> containing data periods. Created by LogParser
   std::shared_ptr<Kernel::Property> m_periods;

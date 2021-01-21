@@ -27,9 +27,7 @@ public:
   /// Virtual destructor
   ~ApplyMuonDetectorGroupPairing() {}
   /// Algorithm's name
-  const std::string name() const override {
-    return "ApplyMuonDetectorGroupPairing";
-  }
+  const std::string name() const override { return "ApplyMuonDetectorGroupPairing"; }
   /// Algorithm's version
   int version() const override { return (1); }
   /// Algorithm's category for identification
@@ -39,56 +37,42 @@ public:
     return "Perform an asymmetry analysis on two groupings of muon detectors.";
   }
   /// See also
-  const std::vector<std::string> seeAlso() const override {
-    return {"MuonProcess", "ApplyMuonDetectorGrouping"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"MuonProcess", "ApplyMuonDetectorGrouping"}; }
   /// Perform validation of inputs to the algorithm
   std::map<std::string, std::string> validateInputs() override;
 
   /// Get the names of the two workspaces in the ADS to pair manually.
-  const std::string
-  getGroupWorkspaceNamesManually(const std::string &groupName,
-                                 const std::string &groupWSName);
+  const std::string getGroupWorkspaceNamesManually(const std::string &groupName, const std::string &groupWSName);
 
   /// Get the name of the workspace to be saved.
-  const std::string getPairWorkspaceName(const std::string &pairName,
-                                         const std::string &groupWSName);
+  const std::string getPairWorkspaceName(const std::string &pairName, const std::string &groupWSName);
 
   /// return a workspace for a pair of detector groups, specified in options.
-  API::MatrixWorkspace_sptr
-  createPairWorkspaceManually(const API::Workspace_sptr &inputWS,
-                              const bool noRebin);
+  API::MatrixWorkspace_sptr createPairWorkspaceManually(const API::Workspace_sptr &inputWS, const bool noRebin);
 
   /// Store the input properties in options.
   Muon::AnalysisOptions getUserInput();
 
   /// Set MuonProcess properties (input workspace and period properties).
-  void
-  setMuonProcessPeriodProperties(IAlgorithm &alg,
-                                 const API::Workspace_sptr &inputWS,
-                                 const Muon::AnalysisOptions &options) const;
+  void setMuonProcessPeriodProperties(IAlgorithm &alg, const API::Workspace_sptr &inputWS,
+                                      const Muon::AnalysisOptions &options) const;
 
   /// Set MuonProcess properties according to the given options.
-  void
-  setMuonProcessAlgorithmProperties(IAlgorithm &alg,
-                                    const Muon::AnalysisOptions &options) const;
+  void setMuonProcessAlgorithmProperties(IAlgorithm &alg, const Muon::AnalysisOptions &options) const;
 
   /// Apply the asymmetry calculation to two workspaces.
-  API::MatrixWorkspace_sptr createPairWorkspaceFromGroupWorkspaces(
-      const API::MatrixWorkspace_sptr &inputWS1,
-      const API::MatrixWorkspace_sptr &inputWS2, const double &alpha);
+  API::MatrixWorkspace_sptr createPairWorkspaceFromGroupWorkspaces(const API::MatrixWorkspace_sptr &inputWS1,
+                                                                   const API::MatrixWorkspace_sptr &inputWS2,
+                                                                   const double &alpha);
 
   /// Set grouping properties of MuonProcess
-  void setMuonProcessAlgorithmGroupingProperties(
-      IAlgorithm &alg, const Muon::AnalysisOptions &options) const;
+  void setMuonProcessAlgorithmGroupingProperties(IAlgorithm &alg, const Muon::AnalysisOptions &options) const;
 
   /// Set time properties of MuonProcess according to the given options.
-  void setMuonProcessAlgorithmTimeProperties(
-      IAlgorithm &alg, const Muon::AnalysisOptions &options) const;
+  void setMuonProcessAlgorithmTimeProperties(IAlgorithm &alg, const Muon::AnalysisOptions &options) const;
 
   /// Checks that the detector IDs in grouping are in the workspace
-  void checkDetectorIDsInWorkspace(API::Grouping &grouping,
-                                   API::Workspace_sptr workspace);
+  void checkDetectorIDsInWorkspace(API::Grouping &grouping, API::Workspace_sptr workspace);
 
   /// Allow WorkspaceGroup property to function correctly.
   bool checkGroups() override;

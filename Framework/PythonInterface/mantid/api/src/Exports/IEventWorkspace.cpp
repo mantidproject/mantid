@@ -25,8 +25,7 @@ namespace {
  * @param index Workspace index
  */
 IEventList &deprecatedGetEventList(IEventWorkspace &self, const size_t index) {
-  PyErr_Warn(PyExc_DeprecationWarning,
-             "'getEventList' is deprecated, use 'getSpectrum' instead.");
+  PyErr_Warn(PyExc_DeprecationWarning, "'getEventList' is deprecated, use 'getSpectrum' instead.");
   return self.getSpectrum(index);
 }
 } // namespace
@@ -35,8 +34,7 @@ IEventList &deprecatedGetEventList(IEventWorkspace &self, const size_t index) {
  * Python exports of the Mantid::API::IEventWorkspace class.
  */
 void export_IEventWorkspace() {
-  class_<IEventWorkspace, bases<Mantid::API::MatrixWorkspace>,
-         boost::noncopyable>("IEventWorkspace", no_init)
+  class_<IEventWorkspace, bases<Mantid::API::MatrixWorkspace>, boost::noncopyable>("IEventWorkspace", no_init)
       .def("getNumberEvents", &IEventWorkspace::getNumberEvents, args("self"),
            "Returns the number of events in the :class:`~mantid.api.Workspace`")
       .def("getTofMin", &IEventWorkspace::getTofMin, args("self"),
@@ -51,13 +49,11 @@ void export_IEventWorkspace() {
       .def("getPulseTimeMax", &IEventWorkspace::getPulseTimeMax, args("self"),
            "Returns the maximum pulse time held by the "
            ":class:`~mantid.api.Workspace`")
-      .def("getEventList", &deprecatedGetEventList,
-           return_internal_reference<>(), args("self", "workspace_index"),
+      .def("getEventList", &deprecatedGetEventList, return_internal_reference<>(), args("self", "workspace_index"),
            "Return the :class:`~mantid.api.IEventList` managing the events at "
            "the given :class:`~mantid.api.Workspace` "
            "index")
-      .def("clearMRU", &IEventWorkspace::clearMRU, args("self"),
-           "Clear the most-recently-used lists");
+      .def("clearMRU", &IEventWorkspace::clearMRU, args("self"), "Clear the most-recently-used lists");
 
   RegisterWorkspacePtrToPython<IEventWorkspace>();
 }

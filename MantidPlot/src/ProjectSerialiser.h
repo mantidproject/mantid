@@ -36,8 +36,7 @@ class Folder;
 namespace MantidQt {
 namespace API {
 
-using groupNameToWsNamesT =
-    std::unordered_map<std::string, std::vector<std::string>>;
+using groupNameToWsNamesT = std::unordered_map<std::string, std::vector<std::string>>;
 
 class ProjectSerialiser : public QObject {
   Q_OBJECT
@@ -49,18 +48,15 @@ public:
   explicit ProjectSerialiser(ApplicationWindow *window, Folder *folder);
 
   explicit ProjectSerialiser(ApplicationWindow *window, bool isRecovery);
-  explicit ProjectSerialiser(ApplicationWindow *window, Folder *folder,
-                             bool isRecovery);
+  explicit ProjectSerialiser(ApplicationWindow *window, Folder *folder, bool isRecovery);
 
   /// Save the current state of the project to disk
   bool save(const QString &projectName, const std::vector<std::string> &wsNames,
-            const std::vector<std::string> &windowNames,
-            const std::vector<std::string> &interfaces, bool compress = false);
-  bool save(const QString &projectName, bool compress = false,
-            bool saveAll = true);
+            const std::vector<std::string> &windowNames, const std::vector<std::string> &interfaces,
+            bool compress = false);
+  bool save(const QString &projectName, bool compress = false, bool saveAll = true);
   /// Load a project file from disk
-  bool load(const std::string &filepath, const int fileVersion,
-            const bool isTopLevel = true);
+  bool load(const std::string &filepath, const int fileVersion, const bool isTopLevel = true);
   /// Open the script window and load scripts from string
   void openScriptWindow(const QStringList &files);
 
@@ -101,8 +97,7 @@ private:
   /// Convert the current state of the application to a project file
   QString serialiseProjectState(Folder *folder);
   /// Save the project file to disk
-  void saveProjectFile(QFile *fileHandle, const QString &projectName,
-                       QString &text, bool compress);
+  void saveProjectFile(QFile *fileHandle, const QString &projectName, QString &text, bool compress);
   /// Save the state of a folder
   QString saveFolderState(Folder *folder, const bool isTopLevel = false);
   /// Save the header information about a folder
@@ -123,8 +118,7 @@ private:
   // Loading Functions
 
   /// Load sections of the folder
-  void loadProjectSections(const std::string &lines, const int fileVersion,
-                           const bool isTopLevel);
+  void loadProjectSections(const std::string &lines, const int fileVersion, const bool isTopLevel);
   /// Load workspaces from the project file
   void loadWorkspaces(const TSVSerialiser &tsv);
   /// Load project windows from the project file
@@ -148,8 +142,7 @@ private:
   /// Load any PythonInterfaces in the project
   void loadPythonInterfaces(const std::string &lines);
   /// Load a single Python interface
-  void loadPythonInterface(const std::string &launcherModuleName,
-                           const std::string &pySection);
+  void loadPythonInterface(const std::string &launcherModuleName, const std::string &pySection);
 
   // Misc functions
 

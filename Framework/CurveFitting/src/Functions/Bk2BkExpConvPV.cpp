@@ -102,9 +102,8 @@ void Bk2BkExpConvPV::setCentre(const double c) { setParameter("X0", c); }
  */
 double Bk2BkExpConvPV::centre() const { return getParameter("X0"); }
 
-void Bk2BkExpConvPV::setMatrixWorkspace(
-    std::shared_ptr<const API::MatrixWorkspace> workspace, size_t wi,
-    double startX, double endX) {
+void Bk2BkExpConvPV::setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace> workspace, size_t wi, double startX,
+                                        double endX) {
   if (workspace) {
     // convert alpha and beta to correct units so inital guess is resonable
     auto tof = Mantid::Kernel::UnitFactory::Instance().create("TOF");
@@ -122,8 +121,7 @@ void Bk2BkExpConvPV::setMatrixWorkspace(
 
 /** Implement the peak calculating formula
  */
-void Bk2BkExpConvPV::functionLocal(double *out, const double *xValues,
-                                   const size_t nData) const {
+void Bk2BkExpConvPV::functionLocal(double *out, const double *xValues, const size_t nData) const {
   // 1. Prepare constants
   const double alpha = this->getParameter("Alpha");
   const double beta = this->getParameter("Beta");
@@ -138,41 +136,34 @@ void Bk2BkExpConvPV::functionLocal(double *out, const double *xValues,
   double H, eta;
   calHandEta(sigma2, gamma, H, eta);
 
-  g_log.debug() << "DB1143:  nData = " << nData << " From " << xValues[0]
-                << " To " << xValues[nData - 1] << " X0 = " << x0
-                << " Intensity = " << intensity << " alpha = " << alpha
-                << " beta = " << beta << " H = " << H << " eta = " << eta
-                << '\n';
+  g_log.debug() << "DB1143:  nData = " << nData << " From " << xValues[0] << " To " << xValues[nData - 1]
+                << " X0 = " << x0 << " Intensity = " << intensity << " alpha = " << alpha << " beta = " << beta
+                << " H = " << H << " eta = " << eta << '\n';
 
   // 2. Do calculation for each data point
   for (size_t id = 0; id < nData; ++id) {
     double dT = xValues[id] - x0;
-    double omega =
-        calOmega(dT, eta, N, alpha, beta, H, sigma2, invert_sqrt2sigma);
+    double omega = calOmega(dT, eta, N, alpha, beta, H, sigma2, invert_sqrt2sigma);
     out[id] = intensity * omega;
   }
 }
 
 /** Local derivative
  */
-void Bk2BkExpConvPV::functionDerivLocal(API::Jacobian * /*jacobian*/,
-                                        const double * /*xValues*/,
+void Bk2BkExpConvPV::functionDerivLocal(API::Jacobian * /*jacobian*/, const double * /*xValues*/,
                                         const size_t /*nData*/) {
-  throw Mantid::Kernel::Exception::NotImplementedError(
-      "functionDerivLocal is not implemented for Bk2BkExpConvPV.");
+  throw Mantid::Kernel::Exception::NotImplementedError("functionDerivLocal is not implemented for Bk2BkExpConvPV.");
 }
 
 /** Numerical derivative
  */
-void Bk2BkExpConvPV::functionDeriv(const API::FunctionDomain &domain,
-                                   API::Jacobian &jacobian) {
+void Bk2BkExpConvPV::functionDeriv(const API::FunctionDomain &domain, API::Jacobian &jacobian) {
   calNumericalDeriv(domain, jacobian);
 }
 
 /** Calculate Omega(x) = ... ...
  */
-double Bk2BkExpConvPV::calOmega(double x, double eta, double N, double alpha,
-                                double beta, double H, double sigma2,
+double Bk2BkExpConvPV::calOmega(double x, double eta, double N, double alpha, double beta, double H, double sigma2,
                                 double invert_sqrt2sigma) const {
   // 1. Prepare
   std::complex<double> p(alpha * x, alpha * H * 0.5);
@@ -185,8 +176,7 @@ double Bk2BkExpConvPV::calOmega(double x, double eta, double N, double alpha,
   double z = (beta * sigma2 - x) * invert_sqrt2sigma;
 
   // 2. Calculate
-  double omega1 = (1 - eta) * N *
-                  (exp(u + gsl_sf_log_erfc(y)) + exp(v + gsl_sf_log_erfc(z)));
+  double omega1 = (1 - eta) * N * (exp(u + gsl_sf_log_erfc(y)) + exp(v + gsl_sf_log_erfc(z)));
   double omega2;
   if (eta < 1.0E-8) {
     omega2 = 0.0;
@@ -245,21 +235,17 @@ std::complex<double> Bk2BkExpConvPV::E1(std::complex<double> z) const {
   return e1;
 }
 
-void Bk2BkExpConvPV::geneatePeak(double *out, const double *xValues,
-                                 const size_t nData) {
+void Bk2BkExpConvPV::geneatePeak(double *out, const double *xValues, const size_t nData) {
   this->functionLocal(out, xValues, nData);
 }
 
-void Bk2BkExpConvPV::calHandEta(double sigma2, double gamma, double &H,
-                                double &eta) const {
+void Bk2BkExpConvPV::calHandEta(double sigma2, double gamma, double &H, double &eta) const {
   // 1. Calculate H
   double H_G = sqrt(8.0 * sigma2 * M_LN2);
   double H_L = gamma;
 
-  double temp1 = std::pow(H_L, 5) + 0.07842 * H_G * std::pow(H_L, 4) +
-                 4.47163 * std::pow(H_G, 2) * std::pow(H_L, 3) +
-                 2.42843 * std::pow(H_G, 3) * std::pow(H_L, 2) +
-                 2.69269 * std::pow(H_G, 4) * H_L + std::pow(H_G, 5);
+  double temp1 = std::pow(H_L, 5) + 0.07842 * H_G * std::pow(H_L, 4) + 4.47163 * std::pow(H_G, 2) * std::pow(H_L, 3) +
+                 2.42843 * std::pow(H_G, 3) * std::pow(H_L, 2) + 2.69269 * std::pow(H_G, 4) * H_L + std::pow(H_G, 5);
 
   H = std::pow(temp1, 0.2);
 
@@ -267,12 +253,10 @@ void Bk2BkExpConvPV::calHandEta(double sigma2, double gamma, double &H,
 
   // 2. Calculate eta
   double gam_pv = H_L / H;
-  eta = 1.36603 * gam_pv - 0.47719 * std::pow(gam_pv, 2) +
-        0.11116 * std::pow(gam_pv, 3);
+  eta = 1.36603 * gam_pv - 0.47719 * std::pow(gam_pv, 2) + 0.11116 * std::pow(gam_pv, 3);
 
   if (eta > 1 || eta < 0) {
-    g_log.error() << "Bk2BkExpConvPV: Calculated eta = " << eta
-                  << " is out of range [0, 1].\n";
+    g_log.error() << "Bk2BkExpConvPV: Calculated eta = " << eta << " is out of range [0, 1].\n";
   }
 }
 

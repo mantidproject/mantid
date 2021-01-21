@@ -53,16 +53,12 @@ class CompositeFunction;
     @author Roman Tolchenov, Tessella plc
     @date 10/08/2009
 */
-class PeakPickerTool : public QwtPlotPicker,
-                       public PlotToolInterface,
-                       public QwtPlotItem {
+class PeakPickerTool : public QwtPlotPicker, public PlotToolInterface, public QwtPlotItem {
   Q_OBJECT
 public:
   /// Constructor
-  PeakPickerTool(
-      Graph *graph,
-      MantidQt::MantidWidgets::FitPropertyBrowser *fitPropertyBrowser,
-      MantidUI *mantidUI, bool showFitPropertyBrowser = true);
+  PeakPickerTool(Graph *graph, MantidQt::MantidWidgets::FitPropertyBrowser *fitPropertyBrowser, MantidUI *mantidUI,
+                 bool showFitPropertyBrowser = true);
   /// Destructor
   ~PeakPickerTool() override;
   /// Runtime type identifier
@@ -81,8 +77,7 @@ public:
   bool isInitialized() const { return m_init; }
 
 public slots:
-  void windowStateChanged(const Qt::WindowStates &oldState,
-                          const Qt::WindowStates &newState);
+  void windowStateChanged(const Qt::WindowStates &oldState, const Qt::WindowStates &newState);
 
 signals:
   void peakChanged();
@@ -125,8 +120,7 @@ private:
   void plotFitFunction(MantidQt::MantidWidgets::PropertyHandler *h);
   void replot(MantidQt::MantidWidgets::PropertyHandler *h) const;
 
-  void draw(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap,
-            const QRect &) const override;
+  void draw(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap, const QRect &) const override;
   // Add a new peak with centre c and height h.
   void addPeak(double c, double h);
   void addPeakAt(int x, int y);
@@ -151,8 +145,7 @@ private:
   // Check if x is near a width marker (+-dx)
   bool clickedOnWidthMarker(double x, double dx);
   // Return valid handler if x is within +- dx around peak's centre
-  MantidQt::MantidWidgets::PropertyHandler *
-  clickedOnCentreMarker(double x, double dx) const;
+  MantidQt::MantidWidgets::PropertyHandler *clickedOnCentreMarker(double x, double dx) const;
 
   // Give new centre and height to the current peak
   void setPeak(double c, double h);
@@ -196,15 +189,15 @@ private:
   /// Workspace index
   int m_spec;
 
-  bool m_init;         // Is the tool initialized?
-  bool m_width_set;    // The width set flag
-  double m_width;      // The default width
-  bool m_addingPeak;   // The adding peak state flag
-  bool m_resetting;    // The resetting state flag
-  double m_xMin;       // Lower fit boundary
-  double m_xMax;       // Upper fit boundary
-  bool m_changingXMin; // Flag indicating that changing of xMin is in progress
-  bool m_changingXMax; // Flag indicating that changing of xMax is in progress
+  bool m_init;               // Is the tool initialized?
+  bool m_width_set;          // The width set flag
+  double m_width;            // The default width
+  bool m_addingPeak;         // The adding peak state flag
+  bool m_resetting;          // The resetting state flag
+  double m_xMin;             // Lower fit boundary
+  double m_xMax;             // Upper fit boundary
+  bool m_changingXMin;       // Flag indicating that changing of xMin is in progress
+  bool m_changingXMax;       // Flag indicating that changing of xMax is in progress
   bool m_shouldBeNormalised; // Should the data be normalised before fitting?
 
   QStringList m_curveNames; // Names of all curves added to graph()

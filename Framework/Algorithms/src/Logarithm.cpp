@@ -16,9 +16,7 @@ namespace Algorithms {
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(Logarithm)
 
-Logarithm::Logarithm() : UnaryOperation(), log_Min(0), is_natural(true) {
-  this->useHistogram = true;
-}
+Logarithm::Logarithm() : UnaryOperation(), log_Min(0), is_natural(true) { this->useHistogram = true; }
 
 void Logarithm::defineProperties() {
   declareProperty("Filler", 0.0,
@@ -36,8 +34,7 @@ void Logarithm::retrieveProperties() {
   this->is_natural = getProperty("Natural");
 }
 
-void Logarithm::performUnaryOperation(const double XIn, const double YIn,
-                                      const double EIn, double &YOut,
+void Logarithm::performUnaryOperation(const double XIn, const double YIn, const double EIn, double &YOut,
                                       double &EOut) {
   (void)XIn; // Avoid compiler warning
   if (YIn <= 0) {

@@ -29,21 +29,17 @@ public:
 
     // Set some properties
     std::string outputSpace("NoError");
-    TS_ASSERT_THROWS_NOTHING(
-        algNoErr.setPropertyValue("OutputWorkspace", outputSpace));
+    TS_ASSERT_THROWS_NOTHING(algNoErr.setPropertyValue("OutputWorkspace", outputSpace));
     TS_ASSERT_THROWS_NOTHING(algNoErr.setPropertyValue("DataValue", "3.0"));
 
     // Run the algorithm
     TS_ASSERT_THROWS_NOTHING(algNoErr.execute());
 
     Mantid::API::Workspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws =
-            Mantid::API::AnalysisDataService::Instance().retrieve(outputSpace));
+    TS_ASSERT_THROWS_NOTHING(ws = Mantid::API::AnalysisDataService::Instance().retrieve(outputSpace));
 
     Mantid::DataObjects::WorkspaceSingleValue_sptr single =
-        std::dynamic_pointer_cast<Mantid::DataObjects::WorkspaceSingleValue>(
-            ws);
+        std::dynamic_pointer_cast<Mantid::DataObjects::WorkspaceSingleValue>(ws);
 
     TS_ASSERT(ws.get() != nullptr);
 
@@ -69,8 +65,7 @@ public:
 
     // Set some properties
     std::string outputSpace("WithError");
-    TS_ASSERT_THROWS_NOTHING(
-        algWithErr.setPropertyValue("OutputWorkspace", outputSpace));
+    TS_ASSERT_THROWS_NOTHING(algWithErr.setPropertyValue("OutputWorkspace", outputSpace));
     TS_ASSERT_THROWS_NOTHING(algWithErr.setPropertyValue("DataValue", "5.0"));
     TS_ASSERT_THROWS_NOTHING(algWithErr.setPropertyValue("ErrorValue", "2.0"));
 
@@ -79,13 +74,10 @@ public:
 
     // Get the workspace out
     Mantid::API::Workspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws =
-            Mantid::API::AnalysisDataService::Instance().retrieve(outputSpace));
+    TS_ASSERT_THROWS_NOTHING(ws = Mantid::API::AnalysisDataService::Instance().retrieve(outputSpace));
 
     Mantid::DataObjects::WorkspaceSingleValue_sptr single =
-        std::dynamic_pointer_cast<Mantid::DataObjects::WorkspaceSingleValue>(
-            ws);
+        std::dynamic_pointer_cast<Mantid::DataObjects::WorkspaceSingleValue>(ws);
 
     TS_ASSERT(ws.get() != nullptr);
 

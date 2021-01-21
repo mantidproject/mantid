@@ -38,9 +38,7 @@
 #include <QSizePolicy>
 #include <QTextCodec>
 
-SymbolDialog::SymbolDialog(CharSet charSet, QWidget *parent,
-                           const Qt::WFlags &fl)
-    : QDialog(parent, fl) {
+SymbolDialog::SymbolDialog(CharSet charSet, QWidget *parent, const Qt::WFlags &fl) : QDialog(parent, fl) {
   setAttribute(Qt::WA_DeleteOnClose);
   setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
   setSizeGripEnabled(false);
@@ -635,9 +633,7 @@ void SymbolDialog::getChar(int btnIndex) {
     emit addLetter(btn->text().replace("<", "&lt;"));
 }
 
-void SymbolDialog::languageChange() {
-  setWindowTitle(tr("MantidPlot - Choose Symbol"));
-}
+void SymbolDialog::languageChange() { setWindowTitle(tr("MantidPlot - Choose Symbol")); }
 
 void SymbolDialog::focusInEvent(QFocusEvent *event) {
   Q_UNUSED(event)

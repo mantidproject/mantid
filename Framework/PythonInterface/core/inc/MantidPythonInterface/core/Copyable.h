@@ -28,13 +28,11 @@ template <typename T> inline PyObject *managingPyObject(T *p) {
  * Create a shallow copy of type Copyable providing Copyable is newable and has
  * a public copy constructor
  */
-template <typename Copyable>
-boost::python::object generic__copy__(const bp::object &copyable) {
+template <typename Copyable> boost::python::object generic__copy__(const bp::object &copyable) {
   Copyable *newCopyable(new Copyable(bp::extract<const Copyable &>(copyable)));
   bp::object result(bp::detail::new_reference(managingPyObject(newCopyable)));
 
-  bp::extract<bp::dict>(result.attr("__dict__"))().update(
-      copyable.attr("__dict__"));
+  bp::extract<bp::dict>(result.attr("__dict__"))().update(copyable.attr("__dict__"));
 
   return result;
 }
@@ -43,8 +41,7 @@ boost::python::object generic__copy__(const bp::object &copyable) {
  * Create a deep copy of type Copyable providing Copyable is newable and has a
  * public copy constructor
  */
-template <typename Copyable>
-bp::object generic__deepcopy__(const bp::object &copyable, bp::dict &memo) {
+template <typename Copyable> bp::object generic__deepcopy__(const bp::object &copyable, bp::dict &memo) {
   bp::object copyMod = bp::import("copy");
   bp::object deepcopy = copyMod.attr("deepcopy");
 

@@ -43,15 +43,12 @@ const int SANSInstrumentCreationHelper::nMonitors = 2;
  *
  * @param workspace: name of the workspace to be created.
  */
-Workspace2D_sptr SANSInstrumentCreationHelper::createSANSInstrumentWorkspace(
-    const std::string &workspace) {
+Workspace2D_sptr SANSInstrumentCreationHelper::createSANSInstrumentWorkspace(const std::string &workspace) {
   // Create a test workspace with test data with a well defined peak
   // The test instrument has two monitor channels
-  Workspace2D_sptr ws = WorkspaceCreationHelper::create2DWorkspace123(
-      nBins * nBins + nMonitors, 1, true);
+  Workspace2D_sptr ws = WorkspaceCreationHelper::create2DWorkspace123(nBins * nBins + nMonitors, 1, true);
   AnalysisDataService::Instance().addOrReplace(workspace, ws);
-  ws->getAxis(0)->unit() =
-      Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
+  ws->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
   ws->setYUnit("");
 
   // Load instrument geometry
@@ -65,9 +62,8 @@ Workspace2D_sptr SANSInstrumentCreationHelper::createSANSInstrumentWorkspace(
  * @param inst_name :: The name written in the Nexus file
  * @param workspace :: The workspace to insert the instrument into
  */
-void SANSInstrumentCreationHelper::runLoadInstrument(
-    const std::string &inst_name,
-    const Mantid::DataObjects::Workspace2D_sptr &workspace) {
+void SANSInstrumentCreationHelper::runLoadInstrument(const std::string &inst_name,
+                                                     const Mantid::DataObjects::Workspace2D_sptr &workspace) {
   // Determine the search directory for XML instrument definition files (IDFs)
   // std::string directoryName =
   // Mantid::Kernel::ConfigService::Instance().getInstrumentDirectory();
@@ -75,17 +71,14 @@ void SANSInstrumentCreationHelper::runLoadInstrument(
   // For Nexus Mantid processed, Instrument XML file name is read from nexus
   std::string instrumentID = inst_name;
   // force ID to upper case
-  std::transform(instrumentID.begin(), instrumentID.end(), instrumentID.begin(),
-                 toupper);
+  std::transform(instrumentID.begin(), instrumentID.end(), instrumentID.begin(), toupper);
 
   Mantid::DataHandling::LoadInstrument loadInst;
   loadInst.initialize();
   // Now execute the Child Algorithm. Catch and log any error, but don't stop.
-  loadInst.setPropertyValue("Filename",
-                            "unit_testing/" + instrumentID + "_Definition.xml");
+  loadInst.setPropertyValue("Filename", "unit_testing/" + instrumentID + "_Definition.xml");
   loadInst.setProperty<MatrixWorkspace_sptr>("Workspace", workspace);
-  loadInst.setProperty("RewriteSpectraMap",
-                       Mantid::Kernel::OptionalBool(false));
+  loadInst.setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(false));
   loadInst.execute();
 }
 
@@ -96,9 +89,8 @@ void SANSInstrumentCreationHelper::runLoadInstrument(
  * @param nxbins: number of bins in X
  * @param nybins: number of bins in Y
  */
-void SANSInstrumentCreationHelper::runLoadMappingTable(
-    const Mantid::DataObjects::Workspace2D_sptr &workspace, int nxbins,
-    int nybins) {
+void SANSInstrumentCreationHelper::runLoadMappingTable(const Mantid::DataObjects::Workspace2D_sptr &workspace,
+                                                       int nxbins, int nybins) {
   // Get the number of monitor channels
   size_t nMonitors(0);
   size_t nXbins, nYbins;
@@ -109,8 +101,7 @@ void SANSInstrumentCreationHelper::runLoadMappingTable(
   // Number of monitors should be consistent with data file format
   if (nMonitors != 2) {
     std::stringstream error;
-    error << "Geometry error for " << instrument->getName()
-          << ": Spice data format defines 2 monitors, " << nMonitors
+    error << "Geometry error for " << instrument->getName() << ": Spice data format defines 2 monitors, " << nMonitors
           << " were/was found";
     throw std::runtime_error(error.str());
   }
@@ -142,8 +133,7 @@ void SANSInstrumentCreationHelper::runLoadMappingTable(
   for (size_t ix = 0; ix < nXbins; ix++) {
     for (size_t iy = 0; iy < nYbins; iy++) {
       workspace->getSpectrum(wi).setSpectrumNo(specnum_t(wi));
-      workspace->getSpectrum(wi).setDetectorID(
-          detid_t(1000000 + iy * 1000 + ix));
+      workspace->getSpectrum(wi).setDetectorID(detid_t(1000000 + iy * 1000 + ix));
       wi++;
     }
   }

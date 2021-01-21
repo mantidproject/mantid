@@ -31,8 +31,7 @@
 #include <QImageReader>
 #include <QPainter>
 
-ImageMarker::ImageMarker(const QString &fn)
-    : d_pos(QPoint(0, 0)), d_x_right(0), d_y_bottom(0) {
+ImageMarker::ImageMarker(const QString &fn) : d_pos(QPoint(0, 0)), d_x_right(0), d_y_bottom(0) {
   QList<QByteArray> lst = QImageReader::supportedImageFormats();
   for (int i = 0; i < (int)lst.count(); i++) {
     if (fn.contains("." + lst[i])) {
@@ -45,8 +44,7 @@ ImageMarker::ImageMarker(const QString &fn)
   }
 }
 
-void ImageMarker::draw(QPainter *p, const QwtScaleMap &xMap,
-                       const QwtScaleMap &yMap, const QRect &) const {
+void ImageMarker::draw(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap, const QRect &) const {
   const int x0 = xMap.transform(xValue());
   const int y0 = yMap.transform(yValue());
   const int x1 = xMap.transform(d_x_right);
@@ -82,10 +80,8 @@ void ImageMarker::setRect(int x, int y, int w, int h) {
   updateBoundingRect();
 }
 
-void ImageMarker::setBoundingRect(double left, double top, double right,
-                                  double bottom) {
-  if (xValue() == left && yValue() == top && d_x_right == right &&
-      d_y_bottom == bottom)
+void ImageMarker::setBoundingRect(double left, double top, double right, double bottom) {
+  if (xValue() == left && yValue() == top && d_x_right == right && d_y_bottom == bottom)
     return;
 
   setXValue(left);
@@ -115,8 +111,7 @@ void ImageMarker::updateBoundingRect() {
 }
 
 QwtDoubleRect ImageMarker::boundingRect() const {
-  return QwtDoubleRect(xValue(), yValue(), qAbs(d_x_right - xValue()),
-                       qAbs(d_y_bottom - yValue()));
+  return QwtDoubleRect(xValue(), yValue(), qAbs(d_x_right - xValue()), qAbs(d_y_bottom - yValue()));
 }
 
 QRect ImageMarker::rect() const {

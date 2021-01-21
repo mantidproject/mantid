@@ -33,12 +33,11 @@ std::vector<QColor> GraphDisplay::g_curveColors;
  *  @param isVertical  Flag indicating whether this graph displays the
  *                     vertical or horizontal cut through the image.
  */
-GraphDisplay::GraphDisplay(QwtPlot *graphPlot, QTableWidget *graphTable,
-                           bool isVertical)
+GraphDisplay::GraphDisplay(QwtPlot *graphPlot, QTableWidget *graphTable, bool isVertical)
     : m_graphPlot(graphPlot), m_graphTable(graphTable),
 
-      m_isVertical(isVertical), m_isLogX(false), m_imageX(0.0), m_imageY(0.0),
-      m_rangeScale(1.0), m_minX(0.0), m_maxX(0.0), m_minY(0.0), m_maxY(0.0) {
+      m_isVertical(isVertical), m_isLogX(false), m_imageX(0.0), m_imageY(0.0), m_rangeScale(1.0), m_minX(0.0),
+      m_maxX(0.0), m_minY(0.0), m_maxY(0.0) {
   if (isVertical)
     graphPlot->setAxisMaxMajor(QwtPlot::xBottom, 3);
 
@@ -57,9 +56,7 @@ GraphDisplay::~GraphDisplay() { clearCurves(); }
  * @param dataSource The SpectrumDataSource that provides information for
  *                   the table.
  */
-void GraphDisplay::setDataSource(SpectrumDataSource_sptr dataSource) {
-  m_dataSource = std::move(dataSource);
-}
+void GraphDisplay::setDataSource(SpectrumDataSource_sptr dataSource) { m_dataSource = std::move(dataSource); }
 
 /**
  * Set flag indicating whether or not to use a log scale on the x-axis
@@ -81,9 +78,7 @@ void GraphDisplay::setLogX(bool isLogX) { m_isLogX = isLogX; }
  * @param cutValue  the cut value
  * @param isFront   Is it a front curve?
  */
-void GraphDisplay::setData(const QVector<double> &xData,
-                           const QVector<double> &yData, double cutValue,
-                           bool isFront) {
+void GraphDisplay::setData(const QVector<double> &xData, const QVector<double> &yData, double cutValue, bool isFront) {
   if (xData.size() == 0 || // ignore invalid data vectors
       yData.size() == 0 || xData.size() != yData.size()) {
     return;

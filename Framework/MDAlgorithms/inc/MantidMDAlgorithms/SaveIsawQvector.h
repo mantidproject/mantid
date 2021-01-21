@@ -19,9 +19,7 @@ class DLLExport SaveIsawQvector : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Save an event workspace as an ISAW Q-vector file";
-  }
+  const std::string summary() const override { return "Save an event workspace as an ISAW Q-vector file"; }
 
   int version() const override;
   const std::string category() const override;

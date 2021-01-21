@@ -50,8 +50,7 @@ CostFuncPoisson::CostFuncPoisson() : CostFuncFitting() {}
  * @param domain :: A domain
  * @param values :: Values
  */
-void CostFuncPoisson::addVal(API::FunctionDomain_sptr domain,
-                             API::FunctionValues_sptr values) const {
+void CostFuncPoisson::addVal(API::FunctionDomain_sptr domain, API::FunctionValues_sptr values) const {
   m_function->function(*domain, *values);
   size_t ny = values->size();
 
@@ -89,11 +88,8 @@ void CostFuncPoisson::addVal(API::FunctionDomain_sptr domain,
  * @param evalDeriv :: Flag to evaluate the derivatives
  * @param evalHessian :: Flag to evaluate the Hessian
  */
-void CostFuncPoisson::addValDerivHessian(API::IFunction_sptr function,
-                                         API::FunctionDomain_sptr domain,
-                                         API::FunctionValues_sptr values,
-                                         bool evalDeriv,
-                                         bool evalHessian) const {
+void CostFuncPoisson::addValDerivHessian(API::IFunction_sptr function, API::FunctionDomain_sptr domain,
+                                         API::FunctionValues_sptr values, bool evalDeriv, bool evalHessian) const {
   const size_t numParams = nParams();
 
   if (evalDeriv) {
@@ -109,8 +105,7 @@ void CostFuncPoisson::addValDerivHessian(API::IFunction_sptr function,
   }
 }
 
-void CostFuncPoisson::calculateDerivative(API::IFunction &function,
-                                          FunctionDomain &domain,
+void CostFuncPoisson::calculateDerivative(API::IFunction &function, FunctionDomain &domain,
                                           FunctionValues &values) const {
   const size_t numParams = function.nParams();
   const size_t numDataPoints = domain.size();
@@ -144,8 +139,7 @@ void CostFuncPoisson::calculateDerivative(API::IFunction &function,
           costVal += (effectiveCutOff - calc) / (calc - absoluteCutOff);
         }
         double tmp = calc - absoluteCutOff;
-        determinant += jacobian.get(i, paramIndex) *
-                       (absoluteCutOff - effectiveCutOff) / (tmp * tmp);
+        determinant += jacobian.get(i, paramIndex) * (absoluteCutOff - effectiveCutOff) / (tmp * tmp);
 
       } else if (obs == 0.0) {
         if (activeParamIndex == 0) {
@@ -171,8 +165,7 @@ void CostFuncPoisson::calculateDerivative(API::IFunction &function,
   m_value += 2.0 * costVal;
 }
 
-void CostFuncPoisson::calculateHessian(API::IFunction &function,
-                                       API::FunctionDomain &domain,
+void CostFuncPoisson::calculateHessian(API::IFunction &function, API::FunctionDomain &domain,
                                        API::FunctionValues &values) const {
   size_t numParams = function.nParams(); // number of parameters
   size_t numDataPoints = domain.size();  // number of data points
@@ -180,8 +173,7 @@ void CostFuncPoisson::calculateHessian(API::IFunction &function,
   Jacobian jacobian(numDataPoints, numParams);
   function.functionDeriv(domain, jacobian);
 
-  size_t activeParamFirstIndex =
-      0; // The params are split into two halves and iterated through
+  size_t activeParamFirstIndex = 0; // The params are split into two halves and iterated through
   for (size_t paramIndex = 0; paramIndex < numParams; ++paramIndex) {
 
     if (!function.isActive(paramIndex))
@@ -215,23 +207,19 @@ void CostFuncPoisson::calculateHessian(API::IFunction &function,
         } else {
           if (calc <= effectiveCutOff) {
             double constrainedCalc = calc - absoluteCutOff;
-            d += d2 * (absoluteCutOff - effectiveCutOff) /
-                 (constrainedCalc * constrainedCalc);
-            d += jacobian.get(k, paramIndex) * jacobian.get(k, j) *
-                 (effectiveCutOff - absoluteCutOff) * 2 /
+            d += d2 * (absoluteCutOff - effectiveCutOff) / (constrainedCalc * constrainedCalc);
+            d += jacobian.get(k, paramIndex) * jacobian.get(k, j) * (effectiveCutOff - absoluteCutOff) * 2 /
                  (constrainedCalc * constrainedCalc * constrainedCalc);
           } else if (obs == 0.0) {
             d += d2;
           } else {
             d += d2 * (1.0 - obs / calc);
-            d += jacobian.get(k, paramIndex) * jacobian.get(k, j) * obs /
-                 (calc * calc);
+            d += jacobian.get(k, paramIndex) * jacobian.get(k, j) * obs / (calc * calc);
           }
         }
       }
       PARALLEL_CRITICAL(hessian_set) {
-        double h =
-            m_hessian.get(activeParamFirstIndex, activeParamSecondIndex) + d;
+        double h = m_hessian.get(activeParamFirstIndex, activeParamSecondIndex) + d;
         m_hessian.set(activeParamFirstIndex, activeParamSecondIndex, h);
         if (activeParamFirstIndex != activeParamSecondIndex) {
           m_hessian.set(activeParamSecondIndex, activeParamFirstIndex, h);

@@ -18,8 +18,7 @@ namespace Mantid {
 namespace Algorithms {
 
 // Key for the "normalize data to bin width" plot option
-const std::string CreateUserDefinedBackground::AUTODISTRIBUTIONKEY =
-    "graph1d.autodistribution";
+const std::string CreateUserDefinedBackground::AUTODISTRIBUTIONKEY = "graph1d.autodistribution";
 
 using Mantid::API::WorkspaceProperty;
 using Mantid::HistogramData::Frequencies;
@@ -33,17 +32,13 @@ DECLARE_ALGORITHM(CreateUserDefinedBackground)
 //----------------------------------------------------------------------------------------------
 
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string CreateUserDefinedBackground::name() const {
-  return "CreateUserDefinedBackground";
-}
+const std::string CreateUserDefinedBackground::name() const { return "CreateUserDefinedBackground"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int CreateUserDefinedBackground::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string CreateUserDefinedBackground::category() const {
-  return "CorrectionFunctions\\BackgroundCorrections";
-}
+const std::string CreateUserDefinedBackground::category() const { return "CorrectionFunctions\\BackgroundCorrections"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string CreateUserDefinedBackground::summary() const {
@@ -57,15 +52,13 @@ const std::string CreateUserDefinedBackground::summary() const {
  * Initialize the algorithm's properties.
  */
 void CreateUserDefinedBackground::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>("InputWorkspace", "", Direction::Input),
                   "Input workspace containing data and background");
-  declareProperty(std::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
-                      "BackgroundPoints", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<API::ITableWorkspace>>("BackgroundPoints", "", Direction::Input),
                   "Table containing user-defined background points");
-  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
-                      "OutputBackgroundWorkspace", "", Direction::Output),
-                  "Workspace containing background to be subtracted");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>("OutputBackgroundWorkspace", "", Direction::Output),
+      "Workspace containing background to be subtracted");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -83,8 +76,7 @@ void CreateUserDefinedBackground::exec() {
   // Generate output workspace with background data
   const auto outputWS = createBackgroundWorkspace(pointsTable, inputWS);
 
-  setProperty("OutputBackgroundWorkspace",
-              API::MatrixWorkspace_sptr(std::move(outputWS)));
+  setProperty("OutputBackgroundWorkspace", API::MatrixWorkspace_sptr(std::move(outputWS)));
 }
 
 /**
@@ -93,13 +85,10 @@ void CreateUserDefinedBackground::exec() {
  * (Only delete (0, 0) from the end as other (0, 0) are real points.)
  * @param table :: [input, output] Table of points to work on
  */
-void CreateUserDefinedBackground::cleanUpTable(
-    API::ITableWorkspace_sptr &table) const {
+void CreateUserDefinedBackground::cleanUpTable(API::ITableWorkspace_sptr &table) const {
   // Delete blank (zero) rows at the end of the table
   std::vector<size_t> blankRows;
-  const auto isZero = [](const double n) {
-    return !(fabs(n) > std::numeric_limits<double>::epsilon());
-  };
+  const auto isZero = [](const double n) { return !(fabs(n) > std::numeric_limits<double>::epsilon()); };
   for (size_t i = table->rowCount() - 1; i > 0; i--) {
     double x, y;
     API::TableRow row = table->getRow(i);
@@ -126,9 +115,8 @@ void CreateUserDefinedBackground::cleanUpTable(
  * @param background :: [input, output] Table of background points to work on
  * @param data :: [input] Input workspace with data
  */
-void CreateUserDefinedBackground::extendBackgroundToData(
-    API::ITableWorkspace_sptr &background,
-    const API::MatrixWorkspace_const_sptr &data) const {
+void CreateUserDefinedBackground::extendBackgroundToData(API::ITableWorkspace_sptr &background,
+                                                         const API::MatrixWorkspace_const_sptr &data) const {
   const auto &xPoints = data->points(0);
 
   // If first point > data minimum, insert a new first point
@@ -154,9 +142,8 @@ void CreateUserDefinedBackground::extendBackgroundToData(
  * @returns :: Workspace containing background to be subtracted
  */
 API::MatrixWorkspace_sptr
-CreateUserDefinedBackground::createBackgroundWorkspace(
-    const API::ITableWorkspace_const_sptr &background,
-    const API::MatrixWorkspace_const_sptr &data) const {
+CreateUserDefinedBackground::createBackgroundWorkspace(const API::ITableWorkspace_const_sptr &background,
+                                                       const API::MatrixWorkspace_const_sptr &data) const {
   auto outputWS = data->clone();
 
   const auto &xPoints = outputWS->points(0);
@@ -176,14 +163,12 @@ CreateUserDefinedBackground::createBackgroundWorkspace(
     histogram.setFrequencies(yBackground);
     histogram.setFrequencyStandardDeviations(eBackground);
   } else {
-    if (data->isHistogramData() && Kernel::ConfigService::Instance()
-                                       .getValue<bool>(AUTODISTRIBUTIONKEY)
-                                       .get_value_or(false)) {
+    if (data->isHistogramData() &&
+        Kernel::ConfigService::Instance().getValue<bool>(AUTODISTRIBUTIONKEY).get_value_or(false)) {
       // Background data is actually frequencies, we put it into temporary to
       // benefit from automatic conversion in setCounts(), etc.
       histogram.setCounts(Frequencies(yBackground), xBinEdges);
-      histogram.setCountStandardDeviations(
-          FrequencyStandardDeviations(eBackground), xBinEdges);
+      histogram.setCountStandardDeviations(FrequencyStandardDeviations(eBackground), xBinEdges);
     } else {
       histogram.setCounts(yBackground);
       histogram.setCountStandardDeviations(eBackground);
@@ -205,9 +190,9 @@ CreateUserDefinedBackground::createBackgroundWorkspace(
  * @param workspace :: [input] Workspace to use for units
  * @returns :: Interpolation object ready for use
  */
-Kernel::Interpolation CreateUserDefinedBackground::getInterpolator(
-    const API::ITableWorkspace_const_sptr &background,
-    const API::MatrixWorkspace_const_sptr &workspace) const {
+Kernel::Interpolation
+CreateUserDefinedBackground::getInterpolator(const API::ITableWorkspace_const_sptr &background,
+                                             const API::MatrixWorkspace_const_sptr &workspace) const {
   Kernel::Interpolation lerp;
   lerp.setMethod("linear");
   lerp.setXUnit(workspace->getAxis(0)->unit()->unitID());
@@ -232,12 +217,10 @@ Kernel::Interpolation CreateUserDefinedBackground::getInterpolator(
  * - Input workspace must have common bins in all spectra
  * @returns :: map of property names to errors (empty if no errors)
  */
-std::map<std::string, std::string>
-CreateUserDefinedBackground::validateInputs() {
+std::map<std::string, std::string> CreateUserDefinedBackground::validateInputs() {
   std::map<std::string, std::string> errors;
 
-  const static std::string pointsProp = "BackgroundPoints",
-                           inputProp = "InputWorkspace";
+  const static std::string pointsProp = "BackgroundPoints", inputProp = "InputWorkspace";
   const API::ITableWorkspace_const_sptr pointsTable = getProperty(pointsProp);
   if (pointsTable) {
     if (pointsTable->columnCount() != 2) {

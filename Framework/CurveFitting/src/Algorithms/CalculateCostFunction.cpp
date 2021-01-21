@@ -23,9 +23,7 @@ DECLARE_ALGORITHM(CalculateCostFunction)
 //----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string CalculateCostFunction::name() const {
-  return "CalculateCostFunction";
-}
+const std::string CalculateCostFunction::name() const { return "CalculateCostFunction"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int CalculateCostFunction::version() const { return 1; }
@@ -40,8 +38,7 @@ const std::string CalculateCostFunction::summary() const {
 /// Initialize the algorithm's properties.
 void CalculateCostFunction::initConcrete() {
   declareCostFunctionProperty();
-  declareProperty("Value", 0.0, "Output value of the cost function.",
-                  Direction::Output);
+  declareProperty("Value", 0.0, "Output value of the cost function.", Direction::Output);
 }
 
 //----------------------------------------------------------------------------------------------

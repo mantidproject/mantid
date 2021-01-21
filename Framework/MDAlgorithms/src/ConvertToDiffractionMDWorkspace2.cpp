@@ -42,11 +42,10 @@ void ConvertToDiffractionMDWorkspace2::init() {
   BaseConvertToDiffractionMDWorkspace::init();
 
   std::vector<double> extents = {-50.0, 50.0};
-  declareProperty(
-      std::make_unique<ArrayProperty<double>>("Extents", std::move(extents)),
-      "A comma separated list of min, max for each dimension,\n"
-      "specifying the extents of each dimension. Optional, default "
-      "+- 50 in each dimension.");
+  declareProperty(std::make_unique<ArrayProperty<double>>("Extents", std::move(extents)),
+                  "A comma separated list of min, max for each dimension,\n"
+                  "specifying the extents of each dimension. Optional, default "
+                  "+- 50 in each dimension.");
   setPropertyGroup("Extents", getBoxSettingsGroupName());
 }
 
@@ -60,9 +59,8 @@ void ConvertToDiffractionMDWorkspace2::init() {
  * @return minVal and maxVal -- two vectors with minimal and maximal values of
  *the momentums in the target workspace.
  */
-void ConvertToDiffractionMDWorkspace2::convertExtents(
-    const std::vector<double> &Extents, std::vector<double> &minVal,
-    std::vector<double> &maxVal) {
+void ConvertToDiffractionMDWorkspace2::convertExtents(const std::vector<double> &Extents, std::vector<double> &minVal,
+                                                      std::vector<double> &maxVal) {
   minVal.resize(3);
   maxVal.resize(3);
   if (Extents.size() == 2) {
@@ -76,8 +74,7 @@ void ConvertToDiffractionMDWorkspace2::convertExtents(
       maxVal[d] = Extents[2 * d + 1];
     }
   } else
-    throw std::invalid_argument(
-        "You must specify either 2 or 6 extents (min,max).");
+    throw std::invalid_argument("You must specify either 2 or 6 extents (min,max).");
 }
 
 } // namespace MDAlgorithms

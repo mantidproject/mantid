@@ -24,15 +24,13 @@ using namespace Mantid::Crystal;
 using namespace Mantid::DataObjects;
 
 // Helper method to overwrite spectra.
-void overWriteSpectraY(size_t histo, const Workspace2D_sptr &workspace,
-                       const std::vector<double> &Yvalues) {
+void overWriteSpectraY(size_t histo, const Workspace2D_sptr &workspace, const std::vector<double> &Yvalues) {
 
   workspace->dataY(histo) = Yvalues;
 }
 
 // Helper method to make what will be recognised as a single peak.
-void makeOnePeak(size_t histo, double peak_intensity, size_t at_bin,
-                 const Workspace2D_sptr &workspace) {
+void makeOnePeak(size_t histo, double peak_intensity, size_t at_bin, const Workspace2D_sptr &workspace) {
   size_t nBins = workspace->y(0).size();
   std::vector<double> peaksInY(nBins);
 
@@ -53,8 +51,7 @@ void makeOnePeak(size_t histo, double peak_intensity, size_t at_bin,
  * @param startIndex :: the workspace index to start searching from
  * @param endIndex :: the workspace index to stop searching from
  */
-std::unique_ptr<FindSXPeaks>
-createFindSXPeaks(const Workspace2D_sptr &workspace) {
+std::unique_ptr<FindSXPeaks> createFindSXPeaks(const Workspace2D_sptr &workspace) {
   auto alg = std::make_unique<FindSXPeaks>();
   alg->setRethrows(true);
   alg->initialize();
@@ -71,20 +68,17 @@ class FindSXPeaksTest : public CxxTest::TestSuite {
 
 public:
   void testInvalidIndexRanges() {
-    Workspace2D_sptr workspace =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
+    Workspace2D_sptr workspace = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
 
     auto alg = createFindSXPeaks(workspace);
     alg->setProperty("StartWorkspaceIndex", 3);
     alg->setProperty("EndWorkspaceIndex", 2);
-    TSM_ASSERT_THROWS("Cannot have start index > end index", alg->execute(),
-                      const std::invalid_argument &);
+    TSM_ASSERT_THROWS("Cannot have start index > end index", alg->execute(), const std::invalid_argument &);
   }
 
   void testFindNoPeaks() {
     // creates a workspace where all y-values are 2
-    Workspace2D_sptr workspace =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
+    Workspace2D_sptr workspace = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
 
     auto alg = createFindSXPeaks(workspace);
     alg->execute();
@@ -99,8 +93,7 @@ public:
 
   void testFindSinglePeak() {
     // creates a workspace where all y-values are 2
-    Workspace2D_sptr workspace =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
+    Workspace2D_sptr workspace = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
     // Stick a peak in histoIndex = 1.
     makeOnePeak(1, 40, 5, workspace);
 
@@ -111,14 +104,12 @@ public:
     IPeaksWorkspace_sptr result = std::dynamic_pointer_cast<IPeaksWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve("found_peaks"));
     TSM_ASSERT_EQUALS("Should have found one peak!", 1, result->rowCount());
-    TSM_ASSERT_EQUALS("Wrong peak intensity matched on found peak", 40,
-                      result->getPeak(0).getIntensity());
+    TSM_ASSERT_EQUALS("Wrong peak intensity matched on found peak", 40, result->getPeak(0).getIntensity());
   }
 
   void testFindZeroPeaksWithBoostedBackground() {
     // creates a workspace where all y-values are 2
-    Workspace2D_sptr workspace =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
+    Workspace2D_sptr workspace = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
     // Stick a peak in histoIndex = 1.
     makeOnePeak(1, 40, 5, workspace);
 
@@ -133,15 +124,12 @@ public:
 
     IPeaksWorkspace_sptr result = std::dynamic_pointer_cast<IPeaksWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve("found_peaks"));
-    TSM_ASSERT_EQUALS(
-        "Background has been set to 40, should have found no peaks!", 0,
-        result->rowCount());
+    TSM_ASSERT_EQUALS("Background has been set to 40, should have found no peaks!", 0, result->rowCount());
   }
 
   void testFindBiggestPeakInSpectra() {
     // creates a workspace where all y-values are 2
-    Workspace2D_sptr workspace =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
+    Workspace2D_sptr workspace = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
     // Stick three peaks in histoIndex = 1.
     makeOnePeak(1, 30, 2, workspace);
     makeOnePeak(1, 40, 4, workspace);
@@ -154,14 +142,12 @@ public:
     IPeaksWorkspace_sptr result = std::dynamic_pointer_cast<IPeaksWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve("found_peaks"));
     TSM_ASSERT_EQUALS("Should have found one peak!", 1, result->rowCount());
-    TSM_ASSERT_EQUALS("Wrong peak intensity matched on found peak", 60,
-                      result->getPeak(0).getIntensity());
+    TSM_ASSERT_EQUALS("Wrong peak intensity matched on found peak", 60, result->getPeak(0).getIntensity());
   }
 
   void testFindManyPeaksInSpectra() {
     // creates a workspace where all y-values are 2
-    Workspace2D_sptr workspace =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
+    Workspace2D_sptr workspace = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
     // Stick three peaks in different histograms.
     makeOnePeak(1, 40, 2, workspace);
     makeOnePeak(2, 60, 2, workspace);
@@ -181,18 +167,14 @@ public:
     results[2] = result->getPeak(2).getIntensity();
     std::sort(results.begin(), results.end(), std::less<double>());
 
-    TSM_ASSERT_EQUALS("Wrong peak intensity matched on found peak", 40,
-                      results[0]);
-    TSM_ASSERT_EQUALS("Wrong peak intensity matched on found peak", 45,
-                      results[1]);
-    TSM_ASSERT_EQUALS("Wrong peak intensity matched on found peak", 60,
-                      results[2]);
+    TSM_ASSERT_EQUALS("Wrong peak intensity matched on found peak", 40, results[0]);
+    TSM_ASSERT_EQUALS("Wrong peak intensity matched on found peak", 45, results[1]);
+    TSM_ASSERT_EQUALS("Wrong peak intensity matched on found peak", 60, results[2]);
   }
 
   void testSpectrumWithoutUniqueDetectorsDoesNotThrow() {
     const int nHist = 10;
-    Workspace2D_sptr workspace =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(nHist, 10);
+    Workspace2D_sptr workspace = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(nHist, 10);
     makeOnePeak(2, 400, 5, workspace);
     Mantid::DataHandling::GroupDetectors2 grouping;
     grouping.setChild(true);
@@ -210,8 +192,7 @@ public:
 
   void testUseWorkspaceRangeCropping() {
     // creates a workspace where all y-values are 2
-    Workspace2D_sptr workspace =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
+    Workspace2D_sptr workspace = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
     // One peak at an early part (bin) in range.
     makeOnePeak(1, 40, 1, workspace);
     // One peak at a late part (bin) in range
@@ -228,14 +209,12 @@ public:
 
     IPeaksWorkspace_sptr result = std::dynamic_pointer_cast<IPeaksWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve("found_peaks"));
-    TSM_ASSERT_EQUALS("Should have found zero peaks after cropping", 0,
-                      result->rowCount());
+    TSM_ASSERT_EQUALS("Should have found zero peaks after cropping", 0, result->rowCount());
   }
 
   void testUseWorkspaceIndexCropping() {
     // creates a workspace where all y-values are 2
-    Workspace2D_sptr workspace =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
+    Workspace2D_sptr workspace = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
 
     // Make two peaks with none in the middle of the workspace (by nhistos).
     makeOnePeak(1, 40, 5, workspace);
@@ -254,14 +233,12 @@ public:
 
     IPeaksWorkspace_sptr result = std::dynamic_pointer_cast<IPeaksWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve("found_peaks"));
-    TSM_ASSERT_EQUALS("Should have found zero peaks after cropping", 0,
-                      result->rowCount());
+    TSM_ASSERT_EQUALS("Should have found zero peaks after cropping", 0, result->rowCount());
   }
 
   void testSetGoniometer() {
     // creates a workspace where all y-values are 2
-    Workspace2D_sptr workspace =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
+    Workspace2D_sptr workspace = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
     // Stick a peak in histoIndex = 1.
     makeOnePeak(1, 40, 5, workspace);
 
@@ -297,15 +274,13 @@ public:
     // Use ASSERT_DELTA to account for minor error introduced by deg/rad
     // conversion
     TSM_ASSERT_DELTA("Q_x should be unchanged!", qNoRot.X(), qRot.X(), 10e-10);
-    TSM_ASSERT_DELTA("Q_y should be inverted!", qNoRot.Y(), qRot.Y() * (-1),
-                     10e-10);
+    TSM_ASSERT_DELTA("Q_y should be inverted!", qNoRot.Y(), qRot.Y() * (-1), 10e-10);
     TSM_ASSERT_DELTA("Q_z should be unchanged!", qNoRot.Z(), qRot.Z(), 10e-10);
   }
 
   void testFindBiggestPeakInSpectraWithDSpacing() {
     // creates a workspace where all y-values are 2
-    Workspace2D_sptr workspace =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
+    Workspace2D_sptr workspace = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
 
     // Change units of workspace
     const auto xAxis = workspace->getAxis(0);
@@ -323,16 +298,13 @@ public:
     IPeaksWorkspace_sptr result = std::dynamic_pointer_cast<IPeaksWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve("found_peaks"));
     TSM_ASSERT_EQUALS("Should have found one peak!", 1, result->rowCount());
-    TSM_ASSERT_EQUALS("Wrong peak intensity matched on found peak", 60,
-                      result->getPeak(0).getIntensity());
-    TSM_ASSERT_DELTA("Wrong peak TOF matched on found peak", 821.43,
-                     result->getPeak(0).getTOF(), 1e-2);
+    TSM_ASSERT_EQUALS("Wrong peak intensity matched on found peak", 60, result->getPeak(0).getIntensity());
+    TSM_ASSERT_DELTA("Wrong peak TOF matched on found peak", 821.43, result->getPeak(0).getTOF(), 1e-2);
   }
 
   void testFindManyPeaksInSpectraWithDSpacing() {
     // creates a workspace where all y-values are 2
-    Workspace2D_sptr workspace =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
+    Workspace2D_sptr workspace = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
 
     const auto xAxis = workspace->getAxis(0);
     xAxis->setUnit("dSpacing");
@@ -356,12 +328,9 @@ public:
     results[2] = result->getPeak(2).getIntensity();
     std::sort(results.begin(), results.end(), std::less<double>());
 
-    TSM_ASSERT_EQUALS("Wrong peak intensity matched on found peak", 40,
-                      results[0]);
-    TSM_ASSERT_EQUALS("Wrong peak intensity matched on found peak", 45,
-                      results[1]);
-    TSM_ASSERT_EQUALS("Wrong peak intensity matched on found peak", 60,
-                      results[2]);
+    TSM_ASSERT_EQUALS("Wrong peak intensity matched on found peak", 40, results[0]);
+    TSM_ASSERT_EQUALS("Wrong peak intensity matched on found peak", 45, results[1]);
+    TSM_ASSERT_EQUALS("Wrong peak intensity matched on found peak", 60, results[2]);
 
     std::array<double, 3> tof;
     tof[0] = result->getPeak(0).getTOF();
@@ -369,12 +338,9 @@ public:
     tof[2] = result->getPeak(2).getTOF();
     std::sort(tof.begin(), tof.end(), std::less<double>());
 
-    TSM_ASSERT_DELTA("Wrong peak TOF matched on found peak", 315.938, tof[0],
-                     1e-1);
-    TSM_ASSERT_DELTA("Wrong peak TOF matched on found peak", 2775.689, tof[1],
-                     1e-1);
-    TSM_ASSERT_DELTA("Wrong peak TOF matched on found peak", 8534.953, tof[2],
-                     1e-1);
+    TSM_ASSERT_DELTA("Wrong peak TOF matched on found peak", 315.938, tof[0], 1e-1);
+    TSM_ASSERT_DELTA("Wrong peak TOF matched on found peak", 2775.689, tof[1], 1e-1);
+    TSM_ASSERT_DELTA("Wrong peak TOF matched on found peak", 8534.953, tof[2], 1e-1);
   }
 };
 
@@ -387,17 +353,13 @@ private:
   Workspace2D_sptr m_workspace2D;
 
 public:
-  static FindSXPeaksTestPerformance *createSuite() {
-    return new FindSXPeaksTestPerformance();
-  }
+  static FindSXPeaksTestPerformance *createSuite() { return new FindSXPeaksTestPerformance(); }
   static void destroySuite(FindSXPeaksTestPerformance *suite) { delete suite; }
 
   FindSXPeaksTestPerformance() : m_nHistograms(5000) {}
 
   void setUp() override {
-    m_workspace2D =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
-            m_nHistograms, 10);
+    m_workspace2D = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(m_nHistograms, 10);
     // Make 99 well separated peaks
     for (int i = 1; i < m_nHistograms; i += 5) {
       makeOnePeak(i, 40, 5, m_workspace2D);

@@ -24,8 +24,7 @@ namespace Geometry {
  *dimension
  * @param max :: nd-sized vector of the maximum edge of the box
  */
-MDBoxImplicitFunction::MDBoxImplicitFunction(const std::vector<coord_t> &min,
-                                             const std::vector<coord_t> &max)
+MDBoxImplicitFunction::MDBoxImplicitFunction(const std::vector<coord_t> &min, const std::vector<coord_t> &max)
     : m_max(max), m_min(min) {
   construct(VMD(min), VMD(max));
 }
@@ -40,8 +39,7 @@ MDBoxImplicitFunction::MDBoxImplicitFunction(const std::vector<coord_t> &min,
  *dimension
  * @param max :: nd-sized vector of the maximum edge of the box
  */
-MDBoxImplicitFunction::MDBoxImplicitFunction(const Mantid::Kernel::VMD &min,
-                                             const Mantid::Kernel::VMD &max)
+MDBoxImplicitFunction::MDBoxImplicitFunction(const Mantid::Kernel::VMD &min, const Mantid::Kernel::VMD &max)
     : m_max(max), m_min(min) {
   construct(min, max);
 }
@@ -52,15 +50,12 @@ MDBoxImplicitFunction::MDBoxImplicitFunction(const Mantid::Kernel::VMD &min,
  * dimension
  * @param max :: nd-sized vector of the maximum edge of the box
  * */
-void MDBoxImplicitFunction::construct(const Mantid::Kernel::VMD &min,
-                                      const Mantid::Kernel::VMD &max) {
+void MDBoxImplicitFunction::construct(const Mantid::Kernel::VMD &min, const Mantid::Kernel::VMD &max) {
   size_t nd = min.size();
   if (max.size() != nd)
-    throw std::invalid_argument(
-        "MDBoxImplicitFunction::ctor(): Min and max vector sizes must match!");
+    throw std::invalid_argument("MDBoxImplicitFunction::ctor(): Min and max vector sizes must match!");
   if (nd == 0 || nd > 100)
-    throw std::invalid_argument(
-        "MDBoxImplicitFunction::ctor(): Invalid number of dimensions!");
+    throw std::invalid_argument("MDBoxImplicitFunction::ctor(): Invalid number of dimensions!");
 
   double volume = 1;
   for (size_t d = 0; d < nd; d++) {
@@ -104,9 +99,8 @@ double MDBoxImplicitFunction::volume() const { return m_volume; }
  * @param boxExtents to get fraction for
  * @return fraction 0 to 1
  */
-double MDBoxImplicitFunction::fraction(
-    const std::vector<boost::tuple<Mantid::coord_t, Mantid::coord_t>>
-        &boxExtents) const {
+double
+MDBoxImplicitFunction::fraction(const std::vector<boost::tuple<Mantid::coord_t, Mantid::coord_t>> &boxExtents) const {
 
   size_t nd = m_min.size();
   coord_t frac = 1;

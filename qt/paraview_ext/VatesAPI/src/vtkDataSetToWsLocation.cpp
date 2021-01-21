@@ -30,11 +30,9 @@ std::string vtkDataSetToWsLocation::exec(vtkDataSet *dataset) {
 Constructor
 @param dataSet : input dataset containing field data.
 */
-vtkDataSetToWsLocation::vtkDataSetToWsLocation(vtkDataSet *dataSet)
-    : m_dataset(dataSet) {
+vtkDataSetToWsLocation::vtkDataSetToWsLocation(vtkDataSet *dataSet) : m_dataset(dataSet) {
   if (!m_dataset) {
-    throw std::runtime_error(
-        "Tried to construct vtkDataSetToWsLocation with NULL vtkDataSet");
+    throw std::runtime_error("Tried to construct vtkDataSetToWsLocation with NULL vtkDataSet");
   }
 }
 
@@ -45,17 +43,15 @@ Execution method to run the extraction.
 std::string vtkDataSetToWsLocation::execute() {
   using Mantid::Geometry::MDGeometryXMLDefinitions;
   FieldDataToMetadata convert;
-  std::string xmlString =
-      convert(m_dataset->GetFieldData(), XMLDefinitions::metaDataId());
+  std::string xmlString = convert(m_dataset->GetFieldData(), XMLDefinitions::metaDataId());
 
   Poco::XML::DOMParser pParser;
   Poco::AutoPtr<Poco::XML::Document> pDoc = pParser.parseString(xmlString);
   Poco::XML::Element *pRootElem = pDoc->documentElement();
-  Poco::XML::Element *wsLocationElem = pRootElem->getChildElement(
-      MDGeometryXMLDefinitions::workspaceLocationElementName());
+  Poco::XML::Element *wsLocationElem =
+      pRootElem->getChildElement(MDGeometryXMLDefinitions::workspaceLocationElementName());
   if (!wsLocationElem) {
-    throw std::runtime_error(
-        "The element containing the workspace location must be present.");
+    throw std::runtime_error("The element containing the workspace location must be present.");
   }
   return wsLocationElem->innerText();
 }

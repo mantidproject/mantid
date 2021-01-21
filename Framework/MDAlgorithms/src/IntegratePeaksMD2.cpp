@@ -54,51 +54,40 @@ using namespace Mantid::Geometry;
 /** Initialize the algorithm's properties.
  */
 void IntegratePeaksMD2::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>("InputWorkspace", "", Direction::Input),
                   "An input MDEventWorkspace.");
 
-  declareProperty(
-      std::make_unique<PropertyWithValue<double>>("PeakRadius", 1.0,
-                                                  Direction::Input),
-      "Fixed radius around each peak position in which to integrate (in the "
-      "same units as the workspace).");
+  declareProperty(std::make_unique<PropertyWithValue<double>>("PeakRadius", 1.0, Direction::Input),
+                  "Fixed radius around each peak position in which to integrate (in the "
+                  "same units as the workspace).");
 
-  declareProperty(
-      std::make_unique<PropertyWithValue<double>>("BackgroundInnerRadius", 0.0,
-                                                  Direction::Input),
-      "Inner radius to use to evaluate the background of the peak.\n"
-      "If smaller than PeakRadius, then we assume BackgroundInnerRadius = "
-      "PeakRadius.");
+  declareProperty(std::make_unique<PropertyWithValue<double>>("BackgroundInnerRadius", 0.0, Direction::Input),
+                  "Inner radius to use to evaluate the background of the peak.\n"
+                  "If smaller than PeakRadius, then we assume BackgroundInnerRadius = "
+                  "PeakRadius.");
 
-  declareProperty(
-      std::make_unique<PropertyWithValue<double>>("BackgroundOuterRadius", 0.0,
-                                                  Direction::Input),
-      "Outer radius to use to evaluate the background of the peak.\n"
-      "The signal density around the peak (BackgroundInnerRadius < r < "
-      "BackgroundOuterRadius) is used to estimate the background under the "
-      "peak.\n"
-      "If smaller than PeakRadius, no background measurement is done.");
+  declareProperty(std::make_unique<PropertyWithValue<double>>("BackgroundOuterRadius", 0.0, Direction::Input),
+                  "Outer radius to use to evaluate the background of the peak.\n"
+                  "The signal density around the peak (BackgroundInnerRadius < r < "
+                  "BackgroundOuterRadius) is used to estimate the background under the "
+                  "peak.\n"
+                  "If smaller than PeakRadius, no background measurement is done.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
-                      "PeaksWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>("PeaksWorkspace", "", Direction::Input),
                   "A PeaksWorkspace containing the peaks to integrate.");
 
-  declareProperty(
-      std::make_unique<WorkspaceProperty<PeaksWorkspace>>("OutputWorkspace", "",
-                                                          Direction::Output),
-      "The output PeaksWorkspace will be a copy of the input PeaksWorkspace "
-      "with the peaks' integrated intensities.");
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>("OutputWorkspace", "", Direction::Output),
+                  "The output PeaksWorkspace will be a copy of the input PeaksWorkspace "
+                  "with the peaks' integrated intensities.");
 
   declareProperty("ReplaceIntensity", true,
                   "Always replace intensity in PeaksWorkspacem (default).\n"
                   "If false, then do not replace intensity if calculated value "
                   "is 0 (used for SNSSingleCrystalReduction)");
 
-  declareProperty(
-      "IntegrateIfOnEdge", true,
-      "Only warning if all of peak outer radius is not on detector (default).\n"
-      "If false, do not integrate if the outer radius is not on a detector.");
+  declareProperty("IntegrateIfOnEdge", true,
+                  "Only warning if all of peak outer radius is not on detector (default).\n"
+                  "If false, do not integrate if the outer radius is not on a detector.");
 
   declareProperty("AdaptiveQBackground", false,
                   "Default is false.   If true, "
@@ -108,53 +97,42 @@ void IntegratePeaksMD2::init() {
   declareProperty("Ellipsoid", false, "Default is sphere.");
   declareProperty("FixQAxis", false, "Default is sphere.");
 
-  declareProperty("Cylinder", false,
-                  "Default is sphere.  Use next five parameters for cylinder.");
+  declareProperty("Cylinder", false, "Default is sphere.  Use next five parameters for cylinder.");
 
-  declareProperty(
-      std::make_unique<PropertyWithValue<double>>("CylinderLength", 0.0,
-                                                  Direction::Input),
-      "Length of cylinder in which to integrate (in the same units as the "
-      "workspace).");
+  declareProperty(std::make_unique<PropertyWithValue<double>>("CylinderLength", 0.0, Direction::Input),
+                  "Length of cylinder in which to integrate (in the same units as the "
+                  "workspace).");
 
-  declareProperty(std::make_unique<PropertyWithValue<double>>(
-                      "PercentBackground", 0.0, Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<double>>("PercentBackground", 0.0, Direction::Input),
                   "Percent of CylinderLength that is background (20 is 20%)");
 
-  std::vector<std::string> peakNames =
-      FunctionFactory::Instance().getFunctionNames<IPeakFunction>();
+  std::vector<std::string> peakNames = FunctionFactory::Instance().getFunctionNames<IPeakFunction>();
   peakNames.emplace_back("NoFit");
-  declareProperty("ProfileFunction", "Gaussian",
-                  std::make_shared<StringListValidator>(peakNames),
+  declareProperty("ProfileFunction", "Gaussian", std::make_shared<StringListValidator>(peakNames),
                   "Fitting function for profile that is used only with "
                   "Cylinder integration.");
 
   std::vector<std::string> integrationOptions(2);
   integrationOptions[0] = "Sum";
   integrationOptions[1] = "GaussianQuadrature";
-  auto integrationvalidator =
-      std::make_shared<StringListValidator>(integrationOptions);
-  declareProperty("IntegrationOption", "GaussianQuadrature",
-                  integrationvalidator,
+  auto integrationvalidator = std::make_shared<StringListValidator>(integrationOptions);
+  declareProperty("IntegrationOption", "GaussianQuadrature", integrationvalidator,
                   "Integration method for calculating intensity "
                   "used only with Cylinder integration.");
 
-  declareProperty(
-      std::make_unique<FileProperty>("ProfilesFile", "",
-                                     FileProperty::OptionalSave,
-                                     std::vector<std::string>(1, "profiles")),
-      "Save (Optionally) as Isaw peaks file with profiles included");
+  declareProperty(std::make_unique<FileProperty>("ProfilesFile", "", FileProperty::OptionalSave,
+                                                 std::vector<std::string>(1, "profiles")),
+                  "Save (Optionally) as Isaw peaks file with profiles included");
 
   declareProperty("AdaptiveQMultiplier", 0.0,
                   "PeakRadius + AdaptiveQMultiplier * **|Q|** "
                   "so each peak has a "
                   "different integration radius.  Q includes the 2*pi factor.");
 
-  declareProperty(
-      "CorrectIfOnEdge", false,
-      "Only warning if all of peak outer radius is not on detector (default).\n"
-      "If false, correct for volume off edge for both background and "
-      "intensity.");
+  declareProperty("CorrectIfOnEdge", false,
+                  "Only warning if all of peak outer radius is not on detector (default).\n"
+                  "If false, correct for volume off edge for both background and "
+                  "intensity.");
 
   declareProperty("UseOnePercentBackgroundCorrection", true,
                   "If this options is enabled, then the the top 1% of the "
@@ -167,19 +145,16 @@ void IntegratePeaksMD2::init() {
  * class
  * @param ws ::  MDEventWorkspace to integrate
  */
-template <typename MDE, size_t nd>
-void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
+template <typename MDE, size_t nd> void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   if (nd != 3)
     throw std::invalid_argument("For now, we expect the input MDEventWorkspace "
                                 "to have 3 dimensions only.");
 
   /// Peak workspace to integrate
-  Mantid::DataObjects::PeaksWorkspace_sptr inPeakWS =
-      getProperty("PeaksWorkspace");
+  Mantid::DataObjects::PeaksWorkspace_sptr inPeakWS = getProperty("PeaksWorkspace");
 
   /// Output peaks workspace, create if needed
-  Mantid::DataObjects::PeaksWorkspace_sptr peakWS =
-      getProperty("OutputWorkspace");
+  Mantid::DataObjects::PeaksWorkspace_sptr peakWS = getProperty("OutputWorkspace");
   if (peakWS != inPeakWS)
     peakWS = inPeakWS->clone();
   // This only fails in the unit tests which say that MaskBTP is not registered
@@ -192,8 +167,7 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   }
 
   calculateE1(inPeakWS->detectorInfo()); // fill E1Vec for use in detectorQ
-  Mantid::Kernel::SpecialCoordinateSystem CoordinatesToUse =
-      ws->getSpecialCoordinateSystem();
+  Mantid::Kernel::SpecialCoordinateSystem CoordinatesToUse = ws->getSpecialCoordinateSystem();
 
   /// Radius to use around peaks
   double PeakRadius = getProperty("PeakRadius");
@@ -202,8 +176,7 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   /// Start radius of the background
   double BackgroundInnerRadius = getProperty("BackgroundInnerRadius");
   /// One percent background correction
-  bool useOnePercentBackgroundCorrection =
-      getProperty("UseOnePercentBackgroundCorrection");
+  bool useOnePercentBackgroundCorrection = getProperty("UseOnePercentBackgroundCorrection");
 
   if (BackgroundInnerRadius < PeakRadius)
     BackgroundInnerRadius = PeakRadius;
@@ -221,23 +194,18 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   if (adaptiveQBackground)
     adaptiveQBackgroundMultiplier = adaptiveQMultiplier;
   std::vector<double> PeakRadiusVector(peakWS->getNumberPeaks(), PeakRadius);
-  std::vector<double> BackgroundInnerRadiusVector(peakWS->getNumberPeaks(),
-                                                  BackgroundInnerRadius);
-  std::vector<double> BackgroundOuterRadiusVector(peakWS->getNumberPeaks(),
-                                                  BackgroundOuterRadius);
+  std::vector<double> BackgroundInnerRadiusVector(peakWS->getNumberPeaks(), BackgroundInnerRadius);
+  std::vector<double> BackgroundOuterRadiusVector(peakWS->getNumberPeaks(), BackgroundOuterRadius);
   if (cylinderBool) {
     numSteps = 100;
     size_t histogramNumber = peakWS->getNumberPeaks();
-    Workspace_sptr wsProfile = WorkspaceFactory::Instance().create(
-        "Workspace2D", histogramNumber, numSteps, numSteps);
+    Workspace_sptr wsProfile = WorkspaceFactory::Instance().create("Workspace2D", histogramNumber, numSteps, numSteps);
     wsProfile2D = std::dynamic_pointer_cast<Workspace2D>(wsProfile);
     AnalysisDataService::Instance().addOrReplace("ProfilesData", wsProfile2D);
-    Workspace_sptr wsFit = WorkspaceFactory::Instance().create(
-        "Workspace2D", histogramNumber, numSteps, numSteps);
+    Workspace_sptr wsFit = WorkspaceFactory::Instance().create("Workspace2D", histogramNumber, numSteps, numSteps);
     wsFit2D = std::dynamic_pointer_cast<Workspace2D>(wsFit);
     AnalysisDataService::Instance().addOrReplace("ProfilesFit", wsFit2D);
-    Workspace_sptr wsDiff = WorkspaceFactory::Instance().create(
-        "Workspace2D", histogramNumber, numSteps, numSteps);
+    Workspace_sptr wsDiff = WorkspaceFactory::Instance().create("Workspace2D", histogramNumber, numSteps, numSteps);
     wsDiff2D = std::dynamic_pointer_cast<Workspace2D>(wsDiff);
     AnalysisDataService::Instance().addOrReplace("ProfilesFitDiff", wsDiff2D);
     auto newAxis1 = std::make_unique<TextAxis>(peakWS->getNumberPeaks());
@@ -253,8 +221,8 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
       // Get a direct ref to that peak.
       IPeak &p = peakWS->getPeak(i);
       std::ostringstream label;
-      label << Utils::round(p.getH()) << "_" << Utils::round(p.getK()) << "_"
-            << Utils::round(p.getL()) << "_" << p.getRunNumber();
+      label << Utils::round(p.getH()) << "_" << Utils::round(p.getK()) << "_" << Utils::round(p.getL()) << "_"
+            << p.getRunNumber();
       newAxis1Raw->setLabel(i, label.str());
       newAxis2Raw->setLabel(i, label.str());
       newAxis3Raw->setLabel(i, label.str());
@@ -265,8 +233,7 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   size_t peakMax = numSteps;
   double ratio = 0.0;
   if (cylinderBool) {
-    peakMin = static_cast<size_t>(static_cast<double>(numSteps) *
-                                  percentBackground / 100.);
+    peakMin = static_cast<size_t>(static_cast<double>(numSteps) * percentBackground / 100.);
     peakMax = numSteps - peakMin - 1;
     size_t numPeakCh = peakMax - peakMin + 1; // number of peak channels
     size_t numBkgCh = numSteps - numPeakCh;   // number of background channels
@@ -284,15 +251,12 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     std::string outFile = getProperty("InputWorkspace");
     outFile.append(profileFunction);
     outFile.append(".dat");
-    std::string save_path =
-        ConfigService::Instance().getString("defaultsave.directory");
+    std::string save_path = ConfigService::Instance().getString("defaultsave.directory");
     outFile = save_path + outFile;
     out.open(outFile.c_str(), std::ofstream::out);
   }
   // volume of Background sphere with inner volume subtracted
-  double volumeBkg =
-      4.0 / 3.0 * M_PI *
-      (std::pow(BackgroundOuterRadius, 3) - std::pow(BackgroundOuterRadius, 3));
+  double volumeBkg = 4.0 / 3.0 * M_PI * (std::pow(BackgroundOuterRadius, 3) - std::pow(BackgroundOuterRadius, 3));
   // volume of PeakRadius sphere
   double volumeRadius = 4.0 / 3.0 * M_PI * std::pow(PeakRadius, 3);
   //
@@ -327,8 +291,7 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
 
     // Do not integrate if sphere is off edge of detector
 
-    double edge = detectorQ(p.getQLabFrame(),
-                            std::max(BackgroundOuterRadius, PeakRadius));
+    double edge = detectorQ(p.getQLabFrame(), std::max(BackgroundOuterRadius, PeakRadius));
     if (edge < std::max(BackgroundOuterRadius, PeakRadius)) {
       g_log.warning() << "Warning: sphere/cylinder for integration is off edge "
                          "of detector for peak "
@@ -366,8 +329,8 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
       }
       double adaptiveRadius = adaptiveQMultiplier * lenQpeak + PeakRadius;
       if (adaptiveRadius <= 0.0) {
-        g_log.error() << "Error: Radius for integration sphere of peak " << i
-                      << " is negative =  " << adaptiveRadius << '\n';
+        g_log.error() << "Error: Radius for integration sphere of peak " << i << " is negative =  " << adaptiveRadius
+                      << '\n';
         adaptiveRadius = 0.;
         p.setIntensity(0.0);
         p.setSigmaIntensity(0.0);
@@ -377,32 +340,25 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
         continue;
       }
       PeakRadiusVector[i] = adaptiveRadius;
-      BackgroundInnerRadiusVector[i] =
-          adaptiveQBackgroundMultiplier * lenQpeak + BackgroundInnerRadius;
-      BackgroundOuterRadiusVector[i] =
-          adaptiveQBackgroundMultiplier * lenQpeak + BackgroundOuterRadius;
+      BackgroundInnerRadiusVector[i] = adaptiveQBackgroundMultiplier * lenQpeak + BackgroundInnerRadius;
+      BackgroundOuterRadiusVector[i] = adaptiveQBackgroundMultiplier * lenQpeak + BackgroundOuterRadius;
       // define the radius squared for a sphere intially
       CoordTransformDistance getRadiusSq(nd, center, dimensionsUsed);
       // set spherical shape
       if (auto *shapeablePeak = dynamic_cast<Peak *>(&p)) {
-        PeakShape *sphereShape = new PeakShapeSpherical(
-            PeakRadiusVector[i], BackgroundInnerRadiusVector[i],
-            BackgroundOuterRadiusVector[i], CoordinatesToUse, this->name(),
-            this->version());
+        PeakShape *sphereShape =
+            new PeakShapeSpherical(PeakRadiusVector[i], BackgroundInnerRadiusVector[i], BackgroundOuterRadiusVector[i],
+                                   CoordinatesToUse, this->name(), this->version());
         shapeablePeak->setPeakShape(sphereShape);
       }
       const double scaleFactor = pow(PeakRadiusVector[i], 3) /
-                                 (pow(BackgroundOuterRadiusVector[i], 3) -
-                                  pow(BackgroundInnerRadiusVector[i], 3));
+                                 (pow(BackgroundOuterRadiusVector[i], 3) - pow(BackgroundInnerRadiusVector[i], 3));
       // Integrate spherical background shell if specified
       if (BackgroundOuterRadius > PeakRadius) {
         // Get the total signal inside background shell
         ws->getBox()->integrateSphere(
-            getRadiusSq,
-            static_cast<coord_t>(pow(BackgroundOuterRadiusVector[i], 2)),
-            bgSignal, bgErrorSquared,
-            static_cast<coord_t>(pow(BackgroundInnerRadiusVector[i], 2)),
-            useOnePercentBackgroundCorrection);
+            getRadiusSq, static_cast<coord_t>(pow(BackgroundOuterRadiusVector[i], 2)), bgSignal, bgErrorSquared,
+            static_cast<coord_t>(pow(BackgroundInnerRadiusVector[i], 2)), useOnePercentBackgroundCorrection);
         // correct bg signal by Vpeak/Vshell (same for sphere and ellipse)
         bgSignal *= scaleFactor;
         bgErrorSquared *= scaleFactor * scaleFactor;
@@ -411,30 +367,23 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
       // using one-pass algorithm from https://doi.org/10.1145/359146.359153
       if (isEllipse) {
         // flat bg to subtract
-        const auto bgDensity =
-            bgSignal / (4 * M_PI * pow(PeakRadiusVector[i], 3) / 3);
+        const auto bgDensity = bgSignal / (4 * M_PI * pow(PeakRadiusVector[i], 3) / 3);
         std::vector<V3D> eigenvects;
         std::vector<double> eigenvals;
-        findEllipsoid<MDE, nd>(
-            ws, getRadiusSq, pos,
-            static_cast<coord_t>(pow(PeakRadiusVector[i], 2)), qAxisIsFixed,
-            bgDensity, eigenvects, eigenvals);
+        findEllipsoid<MDE, nd>(ws, getRadiusSq, pos, static_cast<coord_t>(pow(PeakRadiusVector[i], 2)), qAxisIsFixed,
+                               bgDensity, eigenvects, eigenvals);
 
         // transform ellispoid onto sphere of radius = R
-        getRadiusSq =
-            CoordTransformDistance(nd, center, dimensionsUsed, 1, /* outD */
-                                   eigenvects, eigenvals);
+        getRadiusSq = CoordTransformDistance(nd, center, dimensionsUsed, 1, /* outD */
+                                             eigenvects, eigenvals);
         // Integrate ellipsoid background shell if specified
         if (BackgroundOuterRadius > PeakRadius) {
           // Get the total signal inside "BackgroundOuterRadius"
           bgSignal = 0;
           bgErrorSquared = 0;
           ws->getBox()->integrateSphere(
-              getRadiusSq,
-              static_cast<coord_t>(pow(BackgroundOuterRadiusVector[i], 2)),
-              bgSignal, bgErrorSquared,
-              static_cast<coord_t>(pow(BackgroundInnerRadiusVector[i], 2)),
-              useOnePercentBackgroundCorrection);
+              getRadiusSq, static_cast<coord_t>(pow(BackgroundOuterRadiusVector[i], 2)), bgSignal, bgErrorSquared,
+              static_cast<coord_t>(pow(BackgroundInnerRadiusVector[i], 2)), useOnePercentBackgroundCorrection);
           // correct bg signal by Vpeak/Vshell (same as previously
           // calculated for sphere)
           bgSignal *= scaleFactor;
@@ -443,8 +392,7 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
         // set peak shape
         if (auto *shapeablePeak = dynamic_cast<Peak *>(&p)) {
           // get radii in same proprtion as eigenvalues
-          auto max_stdev =
-              pow(*std::max_element(eigenvals.begin(), eigenvals.end()), 0.5);
+          auto max_stdev = pow(*std::max_element(eigenvals.begin(), eigenvals.end()), 0.5);
           std::vector<double> peakRadii(3, 0.0);
           std::vector<double> backgroundInnerRadii(3, 0.0);
           std::vector<double> backgroundOuterRadii(3, 0.0);
@@ -454,17 +402,15 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
             backgroundInnerRadii[irad] = BackgroundInnerRadiusVector[i] * scale;
             backgroundOuterRadii[irad] = BackgroundOuterRadiusVector[i] * scale;
           }
-          PeakShape *ellipsoidShape = new PeakShapeEllipsoid(
-              eigenvects, peakRadii, backgroundInnerRadii, backgroundOuterRadii,
-              CoordinatesToUse, this->name(), this->version());
+          PeakShape *ellipsoidShape =
+              new PeakShapeEllipsoid(eigenvects, peakRadii, backgroundInnerRadii, backgroundOuterRadii,
+                                     CoordinatesToUse, this->name(), this->version());
           shapeablePeak->setPeakShape(ellipsoidShape);
         }
       }
       // spherical integration of signal
-      ws->getBox()->integrateSphere(
-          getRadiusSq, static_cast<coord_t>(adaptiveRadius * adaptiveRadius),
-          signal, errorSquared, 0.0 /* innerRadiusSquared */,
-          useOnePercentBackgroundCorrection);
+      ws->getBox()->integrateSphere(getRadiusSq, static_cast<coord_t>(adaptiveRadius * adaptiveRadius), signal,
+                                    errorSquared, 0.0 /* innerRadiusSquared */, useOnePercentBackgroundCorrection);
     } else {
       CoordTransformDistance cylinder(nd, center, dimensionsUsed, 2);
 
@@ -472,20 +418,17 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
       Counts signal_fit(numSteps);
       signal_fit = 0;
 
-      ws->getBox()->integrateCylinder(
-          cylinder, static_cast<coord_t>(PeakRadius),
-          static_cast<coord_t>(cylinderLength), signal, errorSquared,
-          signal_fit.mutableRawData());
+      ws->getBox()->integrateCylinder(cylinder, static_cast<coord_t>(PeakRadius), static_cast<coord_t>(cylinderLength),
+                                      signal, errorSquared, signal_fit.mutableRawData());
 
       // Integrate around the background radius
       if (BackgroundOuterRadius > PeakRadius) {
         // Get the total signal inside "BackgroundOuterRadius"
         signal_fit = 0;
 
-        ws->getBox()->integrateCylinder(
-            cylinder, static_cast<coord_t>(BackgroundOuterRadius),
-            static_cast<coord_t>(cylinderLength), bgSignal, bgErrorSquared,
-            signal_fit.mutableRawData());
+        ws->getBox()->integrateCylinder(cylinder, static_cast<coord_t>(BackgroundOuterRadius),
+                                        static_cast<coord_t>(cylinderLength), bgSignal, bgErrorSquared,
+                                        signal_fit.mutableRawData());
 
         Points points(signal_fit.size(), LinearGenerator(0, 1));
         wsProfile2D->setHistogram(i, points, signal_fit);
@@ -496,10 +439,9 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
 
         // Integrate this 3rd radius, if needed
         if (BackgroundInnerRadius != PeakRadius) {
-          ws->getBox()->integrateCylinder(
-              cylinder, static_cast<coord_t>(BackgroundInnerRadius),
-              static_cast<coord_t>(cylinderLength), interiorSignal,
-              interiorErrorSquared, signal_fit.mutableRawData());
+          ws->getBox()->integrateCylinder(cylinder, static_cast<coord_t>(BackgroundInnerRadius),
+                                          static_cast<coord_t>(cylinderLength), interiorSignal, interiorErrorSquared,
+                                          signal_fit.mutableRawData());
         } else {
           // PeakRadius == BackgroundInnerRadius, so use the previous
           // value
@@ -519,12 +461,10 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
 
         // Relative volume of the interior of the shell vs overall
         // background
-        const double interiorRatio =
-            (BackgroundInnerRadius / BackgroundOuterRadius);
+        const double interiorRatio = (BackgroundInnerRadius / BackgroundOuterRadius);
         // Volume of the bg shell, relative to the volume of the
         // BackgroundOuterRadius cylinder
-        const double bgVolume =
-            1.0 - interiorRatio * interiorRatio * cylinderLength;
+        const double bgVolume = 1.0 - interiorRatio * interiorRatio * cylinderLength;
 
         // Finally, you will multiply the bg intensity by this to get the
         // estimated background under the peak volume
@@ -547,12 +487,10 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
         errorSquared = std::fabs(signal);
       } else {
 
-        IAlgorithm_sptr fitAlgorithm =
-            createChildAlgorithm("Fit", -1, -1, false);
+        IAlgorithm_sptr fitAlgorithm = createChildAlgorithm("Fit", -1, -1, false);
         // fitAlgorithm->setProperty("CreateOutput", true);
         // fitAlgorithm->setProperty("Output", "FitPeaks1D");
-        std::string myFunc =
-            std::string("name=LinearBackground;name=") + profileFunction;
+        std::string myFunc = std::string("name=LinearBackground;name=") + profileFunction;
         auto maxPeak = std::max_element(signal_fit.begin(), signal_fit.end());
 
         std::ostringstream strs;
@@ -561,8 +499,7 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
         if (profileFunction == "Gaussian") {
           myFunc += ", PeakCentre=50, Height=" + strMax;
           fitAlgorithm->setProperty("Constraints", "40<f1.PeakCentre<60");
-        } else if (profileFunction == "BackToBackExponential" ||
-                   profileFunction == "IkedaCarpenterPV") {
+        } else if (profileFunction == "BackToBackExponential" || profileFunction == "IkedaCarpenterPV") {
           myFunc += ", X0=50, I=" + strMax;
           fitAlgorithm->setProperty("Constraints", "40<f1.X0<60");
         }
@@ -589,15 +526,12 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
         }
         out << std::setw(20) << i << " ";
         for (size_t j = 0; j < ifun->nParams(); ++j) {
-          out << std::setw(20) << std::fixed << std::setprecision(10)
-              << ifun->getParameter(j) << " ";
+          out << std::setw(20) << std::fixed << std::setprecision(10) << ifun->getParameter(j) << " ";
         }
         double chi2 = fitAlgorithm->getProperty("OutputChi2overDoF");
-        out << std::setw(20) << std::fixed << std::setprecision(10) << chi2
-            << "\n";
+        out << std::setw(20) << std::fixed << std::setprecision(10) << chi2 << "\n";
 
-        std::shared_ptr<const CompositeFunction> fun =
-            std::dynamic_pointer_cast<const CompositeFunction>(ifun);
+        std::shared_ptr<const CompositeFunction> fun = std::dynamic_pointer_cast<const CompositeFunction>(ifun);
 
         const auto &x = wsProfile2D->x(i);
         wsFit2D->setSharedX(i, wsProfile2D->sharedX(i));
@@ -627,24 +561,20 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
           F.function = &Mantid::MDAlgorithms::f_eval2;
           F.params = &fun;
 
-          gsl_integration_qags(&F, x[peakMin], x[peakMax], 0, 1e-7, 1000, w,
-                               &signal, &error);
+          gsl_integration_qags(&F, x[peakMin], x[peakMax], 0, 1e-7, 1000, w, &signal, &error);
 
           gsl_integration_workspace_free(w);
         }
         errorSquared = std::fabs(signal);
         // Get background counts
         for (size_t j = 0; j < numSteps; j++) {
-          double background =
-              ifun->getParameter(0) + ifun->getParameter(1) * x[j];
+          double background = ifun->getParameter(0) + ifun->getParameter(1) * x[j];
           if (j < peakMin || j > peakMax)
             background_total = background_total + background;
         }
       }
     }
-    checkOverlap(
-        i, peakWS, CoordinatesToUse,
-        2.0 * std::max(PeakRadiusVector[i], BackgroundOuterRadiusVector[i]));
+    checkOverlap(i, peakWS, CoordinatesToUse, 2.0 * std::max(PeakRadiusVector[i], BackgroundOuterRadiusVector[i]));
     // Save it back in the peak object.
     if (signal != 0. || replaceIntensity) {
       double edgeMultiplier = 1.0;
@@ -653,46 +583,35 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
         if (edge < BackgroundOuterRadius) {
           double e1 = BackgroundOuterRadius - edge;
           // volume of cap of sphere with h = edge
-          double f1 =
-              M_PI * std::pow(e1, 2) / 3 * (3 * BackgroundOuterRadius - e1);
+          double f1 = M_PI * std::pow(e1, 2) / 3 * (3 * BackgroundOuterRadius - e1);
           edgeMultiplier = volumeBkg / (volumeBkg - f1);
         }
         if (edge < PeakRadius) {
           double sigma = PeakRadius / 3.0;
           // assume gaussian peak
-          double e1 =
-              std::exp(-std::pow(edge, 2) / (2 * sigma * sigma)) * PeakRadius;
+          double e1 = std::exp(-std::pow(edge, 2) / (2 * sigma * sigma)) * PeakRadius;
           // volume of cap of sphere with h = edge
           double f1 = M_PI * std::pow(e1, 2) / 3 * (3 * PeakRadius - e1);
           peakMultiplier = volumeRadius / (volumeRadius - f1);
         }
       }
 
-      p.setIntensity(peakMultiplier * signal -
-                     edgeMultiplier * (ratio * background_total + bgSignal));
-      p.setSigmaIntensity(
-          sqrt(peakMultiplier * errorSquared +
-               edgeMultiplier * (ratio * ratio * std::fabs(background_total) +
-                                 bgErrorSquared)));
+      p.setIntensity(peakMultiplier * signal - edgeMultiplier * (ratio * background_total + bgSignal));
+      p.setSigmaIntensity(sqrt(peakMultiplier * errorSquared +
+                               edgeMultiplier * (ratio * ratio * std::fabs(background_total) + bgErrorSquared)));
     }
 
-    g_log.information() << "Peak " << i << " at " << pos << ": signal "
-                        << signal << " (sig^2 " << errorSquared
-                        << "), with background "
-                        << bgSignal + ratio * background_total << " (sig^2 "
-                        << bgErrorSquared +
-                               ratio * ratio * std::fabs(background_total)
-                        << ") subtracted.\n";
+    g_log.information() << "Peak " << i << " at " << pos << ": signal " << signal << " (sig^2 " << errorSquared
+                        << "), with background " << bgSignal + ratio * background_total << " (sig^2 "
+                        << bgErrorSquared + ratio * ratio * std::fabs(background_total) << ") subtracted.\n";
   }
   // This flag is used by the PeaksWorkspace to evaluate whether it has
   // been integrated.
   peakWS->mutableRun().addProperty("PeaksIntegrated", 1, true);
   // These flags are specific to the algorithm.
   peakWS->mutableRun().addProperty("PeakRadius", PeakRadiusVector, true);
-  peakWS->mutableRun().addProperty("BackgroundInnerRadius",
-                                   BackgroundInnerRadiusVector, true);
-  peakWS->mutableRun().addProperty("BackgroundOuterRadius",
-                                   BackgroundOuterRadiusVector, true);
+  peakWS->mutableRun().addProperty("BackgroundInnerRadius", BackgroundInnerRadiusVector, true);
+  peakWS->mutableRun().addProperty("BackgroundOuterRadius", BackgroundOuterRadiusVector, true);
 
   // save profiles in peaks file
   const std::string outfile = getProperty("ProfilesFile");
@@ -728,18 +647,15 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
  *  @param eigenvals      eigenvectors of covariance matrix of spherical region
  */
 template <typename MDE, size_t nd>
-void IntegratePeaksMD2::findEllipsoid(
-    typename MDEventWorkspace<MDE, nd>::sptr ws,
-    const CoordTransform &getRadiusSq, const V3D &pos,
-    const coord_t &radiusSquared, const bool &qAxisIsFixed,
-    const double &bgDensity, std::vector<V3D> &eigenvects,
-    std::vector<double> &eigenvals) {
+void IntegratePeaksMD2::findEllipsoid(typename MDEventWorkspace<MDE, nd>::sptr ws, const CoordTransform &getRadiusSq,
+                                      const V3D &pos, const coord_t &radiusSquared, const bool &qAxisIsFixed,
+                                      const double &bgDensity, std::vector<V3D> &eigenvects,
+                                      std::vector<double> &eigenvals) {
   double w_sum = 0.0;  // sum of weights
   Matrix<double> Evec; // hold eigenvectors
   Matrix<double> Eval; // hold eigenvals in diag
   // get leaf-only iterators over all boxes in ws
-  auto function = std::make_unique<Geometry::MDAlgorithms::MDBoxMaskFunction>(
-      pos, radiusSquared);
+  auto function = std::make_unique<Geometry::MDAlgorithms::MDBoxMaskFunction>(pos, radiusSquared);
   MDBoxBase<MDE, nd> *baseBox = ws->getBox();
   MDBoxIterator<MDE, nd> MDiter(baseBox, 1000, true, function.get());
 
@@ -761,8 +677,7 @@ void IntegratePeaksMD2::findEllipsoid(
     auto *box = dynamic_cast<MDBox<MDE, nd> *>(MDiter.getBox());
     if (box && !box->getIsMasked()) {
       const std::vector<MDE> &events = box->getConstEvents();
-      auto bg = bgDensity / (static_cast<double>(events.size()) *
-                             (box->getInverseVolume()));
+      auto bg = bgDensity / (static_cast<double>(events.size()) * (box->getInverseVolume()));
       // For each event
       for (const auto &evnt : events) {
         std::vector<coord_t> center(nd);
@@ -779,8 +694,7 @@ void IntegratePeaksMD2::findEllipsoid(
           if (qAxisIsFixed) {
             // transform coords to Q, uhat, vhat basis
             // use V3D for matrix algebra
-            auto tmp = Pinv * V3D(static_cast<double>(center[0]),
-                                  static_cast<double>(center[1]),
+            auto tmp = Pinv * V3D(static_cast<double>(center[0]), static_cast<double>(center[1]),
                                   static_cast<double>(center[2]));
             for (size_t d = 0; d < center.size(); ++d) {
               center[d] = static_cast<coord_t>(tmp[d]);
@@ -802,11 +716,9 @@ void IntegratePeaksMD2::findEllipsoid(
               if (row <= col) {
                 double cov = 0.0;
                 if (!qAxisIsFixed) {
-                  cov = signal * (center[row] - mean[row]) *
-                        (center[col] - mean[col]);
+                  cov = signal * (center[row] - mean[row]) * (center[col] - mean[col]);
                 } else {
-                  cov = signal * (center[row + 1] - mean[row + 1]) *
-                        (center[col + 1] - mean[col + 1]);
+                  cov = signal * (center[row + 1] - mean[row + 1]) * (center[col + 1] - mean[col + 1]);
                 }
                 if (row == col) {
                   cov_mat[row][col] += cov;
@@ -833,8 +745,7 @@ void IntegratePeaksMD2::findEllipsoid(
   }
   // set min eigenval to be small but non-zero (1e-6)
   // when no discernible peak above background
-  std::replace_if(eigenvals.begin(), eigenvals.end(),
-                  [&](auto x) { return x < 1e-6; }, 1e-6);
+  std::replace_if(eigenvals.begin(), eigenvals.end(), [&](auto x) { return x < 1e-6; }, 1e-6);
   // populate rest of eigenvect/vals
   for (size_t ivect = 0; ivect < cov_mat.numRows(); ++ivect) {
     if (!qAxisIsFixed) {
@@ -843,9 +754,7 @@ void IntegratePeaksMD2::findEllipsoid(
       // transform back to Qlab basis
       eigenvects.push_back(V3D(0.0, 0.0, 0.0));
       for (size_t ibasis = 0; ibasis < Evec.numRows(); ++ibasis) {
-        eigenvects.back() +=
-            V3D(Pinv[ibasis + 1][0], Pinv[ibasis + 1][1], Pinv[ibasis + 1][2]) *
-            Evec[ibasis][ivect];
+        eigenvects.back() += V3D(Pinv[ibasis + 1][0], Pinv[ibasis + 1][1], Pinv[ibasis + 1][2]) * Evec[ibasis][ivect];
       }
     }
   }
@@ -892,8 +801,7 @@ void IntegratePeaksMD2::getPinv(const V3D &q, Kernel::Matrix<double> &Pinv) {
  *
  * @param inst: instrument
  */
-void IntegratePeaksMD2::calculateE1(
-    const Geometry::DetectorInfo &detectorInfo) {
+void IntegratePeaksMD2::calculateE1(const Geometry::DetectorInfo &detectorInfo) {
   for (size_t i = 0; i < detectorInfo.size(); ++i) {
     if (detectorInfo.isMonitor(i))
       continue; // skip monitor
@@ -932,9 +840,8 @@ double IntegratePeaksMD2::detectorQ(Mantid::Kernel::V3D QLabFrame, double r) {
   return edge;
 }
 
-void IntegratePeaksMD2::runMaskDetectors(
-    const Mantid::DataObjects::PeaksWorkspace_sptr &peakWS,
-    const std::string &property, const std::string &values) {
+void IntegratePeaksMD2::runMaskDetectors(const Mantid::DataObjects::PeaksWorkspace_sptr &peakWS,
+                                         const std::string &property, const std::string &values) {
   // For CORELLI do not count as edge if next to another detector bank
   if (property == "Tube" && peakWS->getInstrument()->getName() == "CORELLI") {
     IAlgorithm_sptr alg = createChildAlgorithm("MaskBTP");
@@ -942,28 +849,24 @@ void IntegratePeaksMD2::runMaskDetectors(
     alg->setProperty("Bank", "1,7,12,17,22,27,30,59,63,69,74,79,84,89");
     alg->setProperty(property, "1");
     if (!alg->execute())
-      throw std::runtime_error(
-          "MaskDetectors Child Algorithm has not executed successfully");
+      throw std::runtime_error("MaskDetectors Child Algorithm has not executed successfully");
     IAlgorithm_sptr alg2 = createChildAlgorithm("MaskBTP");
     alg2->setProperty<Workspace_sptr>("Workspace", peakWS);
     alg2->setProperty("Bank", "6,11,16,21,26,29,58,62,68,73,78,83,88,91");
     alg2->setProperty(property, "16");
     if (!alg2->execute())
-      throw std::runtime_error(
-          "MaskDetectors Child Algorithm has not executed successfully");
+      throw std::runtime_error("MaskDetectors Child Algorithm has not executed successfully");
   } else {
     IAlgorithm_sptr alg = createChildAlgorithm("MaskBTP");
     alg->setProperty<Workspace_sptr>("Workspace", peakWS);
     alg->setProperty(property, values);
     if (!alg->execute())
-      throw std::runtime_error(
-          "MaskDetectors Child Algorithm has not executed successfully");
+      throw std::runtime_error("MaskDetectors Child Algorithm has not executed successfully");
   }
 }
 
-void IntegratePeaksMD2::checkOverlap(
-    int i, const Mantid::DataObjects::PeaksWorkspace_sptr &peakWS,
-    Mantid::Kernel::SpecialCoordinateSystem CoordinatesToUse, double radius) {
+void IntegratePeaksMD2::checkOverlap(int i, const Mantid::DataObjects::PeaksWorkspace_sptr &peakWS,
+                                     Mantid::Kernel::SpecialCoordinateSystem CoordinatesToUse, double radius) {
   // Get a direct ref to that peak.
   IPeak &p1 = peakWS->getPeak(i);
   V3D pos1;
@@ -984,9 +887,8 @@ void IntegratePeaksMD2::checkOverlap(
     else if (CoordinatesToUse == Kernel::HKL) //"HKL"
       pos2 = p2.getHKL();
     if (pos1.distance(pos2) < radius) {
-      g_log.warning() << " Warning:  Peak integration spheres for peaks " << i
-                      << " and " << j << " overlap.  Distance between peaks is "
-                      << pos1.distance(pos2) << '\n';
+      g_log.warning() << " Warning:  Peak integration spheres for peaks " << i << " and " << j
+                      << " overlap.  Distance between peaks is " << pos1.distance(pos2) << '\n';
     }
   }
 }
@@ -1002,8 +904,7 @@ void IntegratePeaksMD2::exec() {
 
 double f_eval2(double x, void *params) {
   std::shared_ptr<const API::CompositeFunction> fun =
-      *reinterpret_cast<std::shared_ptr<const API::CompositeFunction> *>(
-          params);
+      *reinterpret_cast<std::shared_ptr<const API::CompositeFunction> *>(params);
   FunctionDomain1DVector domain(x);
   FunctionValues yval(domain);
   fun->function(domain, yval);

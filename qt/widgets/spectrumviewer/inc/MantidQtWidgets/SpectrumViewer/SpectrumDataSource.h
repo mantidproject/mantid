@@ -30,13 +30,12 @@ namespace SpectrumView {
 class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SpectrumDataSource {
 public:
   /// Construct data source with specified total range and data size
-  SpectrumDataSource(double totalXmin, double totalXmax, double totalYmin,
-                     double totalYmax, size_t totalRows, size_t totalCols);
+  SpectrumDataSource(double totalXmin, double totalXmax, double totalYmin, double totalYmax, size_t totalRows,
+                     size_t totalCols);
 
   virtual ~SpectrumDataSource();
 
-  virtual bool hasData(const std::string &wsName,
-                       const std::shared_ptr<Mantid::API::Workspace> &ws) = 0;
+  virtual bool hasData(const std::string &wsName, const std::shared_ptr<Mantid::API::Workspace> &ws) = 0;
 
   /// Get the smallest 'x' value covered by the data
   virtual double getXMin();
@@ -71,10 +70,8 @@ public:
   /// Get a DataArray roughly spaning the specified rectangle.  NOTE: The
   /// actual size and number of steps returned in the DataArray will be
   /// adjusted to match the underlying data.
-  virtual DataArray_const_sptr getDataArray(double xMin, double xMax,
-                                            double yMin, double yMax,
-                                            size_t nRows, size_t nCols,
-                                            bool isLogX) = 0;
+  virtual DataArray_const_sptr getDataArray(double xMin, double xMax, double yMin, double yMax, size_t nRows,
+                                            size_t nCols, bool isLogX) = 0;
 
   /// Convenience method to get data covering the full range at max resolution
   virtual DataArray_const_sptr getDataArray(bool is_log_x);

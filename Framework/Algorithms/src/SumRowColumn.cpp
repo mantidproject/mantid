@@ -26,28 +26,20 @@ using namespace Mantid::API;
 
 void SumRowColumn::init() {
   // Assume input workspace has correct spectra in it - no more and no less
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                            Direction::Input),
-      "The input workspace, which must contain all the spectra from the bank "
-      "of interest - no more and no less (so 128x128 or 192x192).");
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
+                  "The input workspace, which must contain all the spectra from the bank "
+                  "of interest - no more and no less (so 128x128 or 192x192).");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "The name of the workspace in which to store the result.");
 
   // Need to select whether to sum rows or columns
   std::vector<std::string> orientation{"D_H", "D_V"};
-  declareProperty("Orientation", "",
-                  std::make_shared<StringListValidator>(orientation),
+  declareProperty("Orientation", "", std::make_shared<StringListValidator>(orientation),
                   "Whether to sum rows (D_H) or columns (D_V).");
 
   // This is the range to select - the whole lot by default
-  declareProperty(
-      "XMin", EMPTY_DBL(),
-      "The starting X value for each spectrum to include in the summation.");
-  declareProperty(
-      "XMax", EMPTY_DBL(),
-      "The ending X value for each spectrum to include in the summation.");
+  declareProperty("XMin", EMPTY_DBL(), "The starting X value for each spectrum to include in the summation.");
+  declareProperty("XMax", EMPTY_DBL(), "The ending X value for each spectrum to include in the summation.");
 
   // For selecting a column range - the whole lot by default
   auto mustBePositive = std::make_shared<BoundedValidator<int>>();
@@ -67,9 +59,8 @@ void SumRowColumn::exec() {
   const size_t numSpec = integratedWS->getNumberHistograms();
   // Check number of spectra is 128*128 or 192*192. Print warning if not.
   if (numSpec != 16384 && numSpec != 36864) {
-    g_log.warning()
-        << "The input workspace has " << numSpec << " spectra."
-        << "This is not 128*128 or 192*192 - did you make a mistake?\n";
+    g_log.warning() << "The input workspace has " << numSpec << " spectra."
+                    << "This is not 128*128 or 192*192 - did you make a mistake?\n";
   }
 
   // This is the dimension if all rows/columns are included
@@ -87,8 +78,7 @@ void SumRowColumn::exec() {
     throw std::out_of_range("H/V_Min must be less than H/V_Max");
   }
 
-  MatrixWorkspace_sptr outputWS =
-      WorkspaceFactory::Instance().create(integratedWS, 1, dim, dim);
+  MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(integratedWS, 1, dim, dim);
   // Remove the unit
   outputWS->getAxis(0)->unit().reset(new Mantid::Kernel::Units::Empty);
 
@@ -124,8 +114,7 @@ MatrixWorkspace_sptr SumRowColumn::integrateWorkspace() {
   IAlgorithm_sptr childAlg = createChildAlgorithm("Integration");
   // pass inputed values straight to this Child Algorithm, checking must be done
   // there
-  childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace",
-                                              getProperty("InputWorkspace"));
+  childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", getProperty("InputWorkspace"));
   childAlg->setProperty<double>("RangeLower", getProperty("XMin"));
   childAlg->setProperty<double>("RangeUpper", getProperty("XMax"));
   childAlg->executeAsChildAlg();

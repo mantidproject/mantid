@@ -19,12 +19,8 @@ class ValidatePerThetaDefaultsTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ValidatePerThetaDefaultsTest *createSuite() {
-    return new ValidatePerThetaDefaultsTest();
-  }
-  static void destroySuite(ValidatePerThetaDefaultsTest *suite) {
-    delete suite;
-  }
+  static ValidatePerThetaDefaultsTest *createSuite() { return new ValidatePerThetaDefaultsTest(); }
+  static void destroySuite(ValidatePerThetaDefaultsTest *suite) { delete suite; }
 
   void testParseTheta() {
     PerThetaDefaultsValidator validator;
@@ -54,8 +50,7 @@ public:
     auto result = validator({"", "13463", "13464"});
     auto expected = TransmissionRunPair("13463", "13464");
     TS_ASSERT(result.isValid());
-    TS_ASSERT_EQUALS(result.assertValid().transmissionWorkspaceNames(),
-                     expected);
+    TS_ASSERT_EQUALS(result.assertValid().transmissionWorkspaceNames(), expected);
   }
 
   void testParseTransmissionRunsWithWorkspaceNames() {
@@ -63,19 +58,15 @@ public:
     auto result = validator({"", "some workspace", "another_workspace"});
     auto expected = TransmissionRunPair("some workspace", "another_workspace");
     TS_ASSERT(result.isValid());
-    TS_ASSERT_EQUALS(result.assertValid().transmissionWorkspaceNames(),
-                     expected);
+    TS_ASSERT_EQUALS(result.assertValid().transmissionWorkspaceNames(), expected);
   }
 
   void testParseTransmissionProcessingInstructions() {
     PerThetaDefaultsValidator validator;
     auto result = validator({"", "", "", "4-7"});
     TS_ASSERT(result.isValid());
-    TS_ASSERT(result.assertValid()
-                  .transmissionProcessingInstructions()
-                  .is_initialized());
-    TS_ASSERT_EQUALS(
-        result.assertValid().transmissionProcessingInstructions().get(), "4-7");
+    TS_ASSERT(result.assertValid().transmissionProcessingInstructions().is_initialized());
+    TS_ASSERT_EQUALS(result.assertValid().transmissionProcessingInstructions().get(), "4-7");
   }
 
   void testParseTransmissionProcessingInstructionsError() {
@@ -121,8 +112,7 @@ public:
     auto result = validator({"", "", "", "", "", "", "", "", "1-3"});
     TS_ASSERT(result.isValid());
     TS_ASSERT(result.assertValid().processingInstructions().is_initialized());
-    TS_ASSERT_EQUALS(result.assertValid().processingInstructions().get(),
-                     "1-3");
+    TS_ASSERT_EQUALS(result.assertValid().processingInstructions().get(), "1-3");
   }
 
   void testParseProcessingInstructionsError() {
@@ -137,11 +127,8 @@ public:
     PerThetaDefaultsValidator validator;
     auto result = validator({"", "", "", "", "", "", "", "", "", "4-7"});
     TS_ASSERT(result.isValid());
-    TS_ASSERT(result.assertValid()
-                  .backgroundProcessingInstructions()
-                  .is_initialized());
-    TS_ASSERT_EQUALS(
-        result.assertValid().backgroundProcessingInstructions().get(), "4-7");
+    TS_ASSERT(result.assertValid().backgroundProcessingInstructions().is_initialized());
+    TS_ASSERT_EQUALS(result.assertValid().backgroundProcessingInstructions().get(), "4-7");
   }
 
   void testParseBackgroundProcessingInstructionsError() {

@@ -37,15 +37,12 @@ std::unique_ptr<QTableWidget> createEmptyTableWidget(int columns, int rows) {
 
 struct TableItem {
   TableItem(std::string const &value) : m_str(value), m_dbl(0.0) {}
-  TableItem(double const &value)
-      : m_str(QString::number(value, 'g', 16).toStdString()), m_dbl(value) {}
+  TableItem(double const &value) : m_str(QString::number(value, 'g', 16).toStdString()), m_dbl(value) {}
 
   std::string const &asString() const { return m_str; }
   double const &asDouble() const { return m_dbl; }
 
-  bool operator==(std::string const &value) const {
-    return this->asString() == value;
-  }
+  bool operator==(std::string const &value) const { return this->asString() == value; }
 
 private:
   std::string m_str;
@@ -86,8 +83,7 @@ public:
   MOCK_METHOD1(setEndX, void(double endX));
 
   MOCK_CONST_METHOD0(isSampleWorkspaceSelectorVisible, bool());
-  MOCK_METHOD1(setSampleWorkspaceSelectorIndex,
-               void(QString const &workspaceName));
+  MOCK_METHOD1(setSampleWorkspaceSelectorIndex, void(QString const &workspaceName));
 
   MOCK_METHOD1(readSettings, void(QSettings const &settings));
   MOCK_METHOD1(validate, UserInputValidator &(UserInputValidator &validator));
@@ -108,14 +104,12 @@ public:
   MOCK_CONST_METHOD0(numberOfWorkspaces, TableDatasetIndex());
 
   MOCK_METHOD1(addWorkspace, void(std::string const &workspaceName));
-  MOCK_METHOD2(addWorkspace, void(std::string const &workspaceName,
-                                  std::string const &spectra));
+  MOCK_METHOD2(addWorkspace, void(std::string const &workspaceName, std::string const &spectra));
 
 private:
   std::string sequentialFitOutputName() const override { return ""; };
   std::string simultaneousFitOutputName() const override { return ""; };
-  std::string singleFitOutputName(TableDatasetIndex index,
-                                  IDA::WorkspaceIndex spectrum) const override {
+  std::string singleFitOutputName(TableDatasetIndex index, IDA::WorkspaceIndex spectrum) const override {
     UNUSED_ARG(index);
     UNUSED_ARG(spectrum);
     return "";
@@ -129,21 +123,16 @@ public:
   /// Needed to make sure everything is initialized
   IndirectFitDataPresenterTest() { FrameworkManager::Instance(); }
 
-  static IndirectFitDataPresenterTest *createSuite() {
-    return new IndirectFitDataPresenterTest();
-  }
+  static IndirectFitDataPresenterTest *createSuite() { return new IndirectFitDataPresenterTest(); }
 
-  static void destroySuite(IndirectFitDataPresenterTest *suite) {
-    delete suite;
-  }
+  static void destroySuite(IndirectFitDataPresenterTest *suite) { delete suite; }
 
   void setUp() override {
     m_view = std::make_unique<NiceMock<MockIIndirectFitDataView>>();
     m_model = std::make_unique<NiceMock<MockIndirectFitDataModel>>();
     m_table = createEmptyTableWidget(5, 5);
     ON_CALL(*m_view, getDataTable()).WillByDefault(Return(m_table.get()));
-    m_presenter = std::make_unique<IndirectFitDataPresenter>(
-        std::move(m_model.get()), std::move(m_view.get()));
+    m_presenter = std::make_unique<IndirectFitDataPresenter>(std::move(m_model.get()), std::move(m_view.get()));
 
     SetUpADSWithWorkspace m_ads("WorkspaceName", createWorkspace(5));
     m_model->addWorkspace("WorkspaceName");
@@ -174,9 +163,7 @@ public:
     std::string const sampleName("SampleName_red");
     ON_CALL(*m_view, getSelectedSample()).WillByDefault(Return(sampleName));
 
-    EXPECT_CALL(*m_view, getSelectedSample())
-        .Times(1)
-        .WillOnce(Return(sampleName));
+    EXPECT_CALL(*m_view, getSelectedSample()).Times(1).WillOnce(Return(sampleName));
 
     m_view->getSelectedSample();
   }
@@ -185,8 +172,7 @@ public:
   /// Unit Tests that test the signals, methods and slots of the presenter
   ///----------------------------------------------------------------------
 
-  void
-  test_that_the_sampleLoaded_signal_will_add_the_loaded_workspace_to_the_model() {
+  void test_that_the_sampleLoaded_signal_will_add_the_loaded_workspace_to_the_model() {
     std::string const workspaceName("WorkspaceName2");
     m_ads->addOrReplace(workspaceName, createWorkspace(5));
 
@@ -195,8 +181,7 @@ public:
     m_view->emitSampleLoaded(QString::fromStdString(workspaceName));
   }
 
-  void
-  test_that_setSampleWSSuffices_will_set_the_sample_workspace_suffices_in_the_view() {
+  void test_that_setSampleWSSuffices_will_set_the_sample_workspace_suffices_in_the_view() {
     QStringList const suffices{"suffix1", "suffix2"};
 
     EXPECT_CALL(*m_view, setSampleWSSuffices(suffices)).Times(Exactly(1));
@@ -204,8 +189,7 @@ public:
     m_presenter->setSampleWSSuffices(suffices);
   }
 
-  void
-  test_that_setSampleFBSuffices_will_set_the_sample_file_browser_suffices_in_the_view() {
+  void test_that_setSampleFBSuffices_will_set_the_sample_file_browser_suffices_in_the_view() {
     QStringList const suffices{"suffix1", "suffix2"};
 
     EXPECT_CALL(*m_view, setSampleFBSuffices(suffices)).Times(Exactly(1));
@@ -213,8 +197,7 @@ public:
     m_presenter->setSampleFBSuffices(suffices);
   }
 
-  void
-  test_that_setResolutionWSSuffices_will_set_the_resolution_workspace_suffices_in_the_view() {
+  void test_that_setResolutionWSSuffices_will_set_the_resolution_workspace_suffices_in_the_view() {
     QStringList const suffices{"suffix1", "suffix2"};
 
     EXPECT_CALL(*m_view, setResolutionWSSuffices(suffices)).Times(Exactly(1));
@@ -222,8 +205,7 @@ public:
     m_presenter->setResolutionWSSuffices(suffices);
   }
 
-  void
-  test_that_setResolutionFBSuffices_will_set_the_resolution_file_browser_suffices_in_the_view() {
+  void test_that_setResolutionFBSuffices_will_set_the_resolution_file_browser_suffices_in_the_view() {
     QStringList const suffices{"suffix1", "suffix2"};
 
     EXPECT_CALL(*m_view, setResolutionFBSuffices(suffices)).Times(Exactly(1));
@@ -231,12 +213,10 @@ public:
     m_presenter->setResolutionFBSuffices(suffices);
   }
 
-  void
-  test_that_the_setExcludeRegion_slot_will_alter_the_relevant_excludeRegion_column_in_the_table() {
+  void test_that_the_setExcludeRegion_slot_will_alter_the_relevant_excludeRegion_column_in_the_table() {
     TableItem const excludeRegion("2-3");
 
-    m_presenter->setExclude(excludeRegion.asString(), TableDatasetIndex{0},
-                            IDA::WorkspaceIndex{0});
+    m_presenter->setExclude(excludeRegion.asString(), TableDatasetIndex{0}, IDA::WorkspaceIndex{0});
 
     assertValueIsGlobal(EXCLUDE_REGION_COLUMN, excludeRegion);
   }
@@ -272,9 +252,7 @@ private:
       TS_ASSERT_EQUALS(value.asString(), getTableItem(row, column));
   }
 
-  std::string getTableItem(int row, int column) const {
-    return m_table->item(row, column)->text().toStdString();
-  }
+  std::string getTableItem(int row, int column) const { return m_table->item(row, column)->text().toStdString(); }
 
   std::unique_ptr<QTableWidget> m_table;
 

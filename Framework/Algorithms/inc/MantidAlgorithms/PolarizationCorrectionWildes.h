@@ -22,8 +22,7 @@ namespace Algorithms {
   [A. R. Wildes (2006) Neutron News, 17:2, 17-25,
   DOI: 10.1080/10448630600668738]
 */
-class MANTID_ALGORITHMS_DLL PolarizationCorrectionWildes
-    : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL PolarizationCorrectionWildes : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;
@@ -52,28 +51,18 @@ private:
   void exec() override;
   std::map<std::string, std::string> validateInputs() override;
   void checkConsistentNumberHistograms(const WorkspaceMap &inputs);
-  void checkConsistentX(const WorkspaceMap &inputs,
-                        const EfficiencyMap &efficiencies);
+  void checkConsistentX(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies);
   EfficiencyMap efficiencyFactors();
-  WorkspaceMap directBeamCorrections(const WorkspaceMap &inputs,
-                                     const EfficiencyMap &efficiencies);
-  WorkspaceMap analyzerlessCorrections(const WorkspaceMap &inputs,
-                                       const EfficiencyMap &efficiencies);
-  WorkspaceMap twoInputCorrections(const WorkspaceMap &inputs,
-                                   const EfficiencyMap &efficiencies);
-  WorkspaceMap threeInputCorrections(const WorkspaceMap &inputs,
-                                     const EfficiencyMap &efficiencies);
-  WorkspaceMap fullCorrections(const WorkspaceMap &inputs,
-                               const EfficiencyMap &efficiencies);
+  WorkspaceMap directBeamCorrections(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies);
+  WorkspaceMap analyzerlessCorrections(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies);
+  WorkspaceMap twoInputCorrections(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies);
+  WorkspaceMap threeInputCorrections(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies);
+  WorkspaceMap fullCorrections(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies);
   API::WorkspaceGroup_sptr groupOutput(const WorkspaceMap &outputs);
   WorkspaceMap mapInputsToDirections(const std::vector<std::string> &flippers);
-  void threeInputsSolve01(WorkspaceMap &inputs,
-                          const EfficiencyMap &efficiencies);
-  void threeInputsSolve10(WorkspaceMap &inputs,
-                          const EfficiencyMap &efficiencies);
-  void twoInputsSolve01And10(WorkspaceMap &fullInputs,
-                             const WorkspaceMap &inputs,
-                             const EfficiencyMap &efficiencies);
+  void threeInputsSolve01(WorkspaceMap &inputs, const EfficiencyMap &efficiencies);
+  void threeInputsSolve10(WorkspaceMap &inputs, const EfficiencyMap &efficiencies);
+  void twoInputsSolve01And10(WorkspaceMap &fullInputs, const WorkspaceMap &inputs, const EfficiencyMap &efficiencies);
 };
 } // namespace Algorithms
 } // namespace Mantid

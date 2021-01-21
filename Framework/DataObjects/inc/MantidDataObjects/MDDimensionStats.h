@@ -29,9 +29,7 @@ public:
 
   /** Returns the approximate standard deviation of the position of events in
    * this dimension */
-  coord_t getApproxVariance() const {
-    return totalApproxVariance / static_cast<coord_t>(numPoints);
-  }
+  coord_t getApproxVariance() const { return totalApproxVariance / static_cast<coord_t>(numPoints); }
 
   //---------------------------------------------------------------------------------------
   /** Add a point with the given coordinate; track the mean and variance

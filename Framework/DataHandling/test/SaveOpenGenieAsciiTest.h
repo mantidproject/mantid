@@ -26,8 +26,7 @@ public:
     // If number of spectra is > 1 we cannot save it as it is unfocused
     const int numBins(10);
     const int numHist(2);
-    const auto ws =
-        WorkspaceCreationHelper::create2DWorkspace(numHist, numBins);
+    const auto ws = WorkspaceCreationHelper::create2DWorkspace(numHist, numBins);
     const auto fileHandle = Poco::TemporaryFile();
     auto alg = createAlg(ws, fileHandle.path());
 
@@ -38,8 +37,7 @@ public:
     const int numBins(1);
     const int numHist(1);
     const bool isHist = false;
-    const auto ws =
-        WorkspaceCreationHelper::create2DWorkspace123(numHist, numBins, isHist);
+    const auto ws = WorkspaceCreationHelper::create2DWorkspace123(numHist, numBins, isHist);
     const auto fileHandle = Poco::TemporaryFile();
     auto alg = createAlg(ws, fileHandle.path());
 
@@ -68,21 +66,18 @@ public:
 
     AnalysisDataService::Instance().remove(wsName);
 
-    const bool wasEqual = FileComparisonHelper::isEqualToReferenceFile(
-        m_referenceFileName, fileHandle.path());
+    const bool wasEqual = FileComparisonHelper::isEqualToReferenceFile(m_referenceFileName, fileHandle.path());
     // Delete output file then do the assertion so we always delete
     fileHandle.remove();
     TS_ASSERT(wasEqual);
   }
 
 private:
-  const std::string m_referenceFileName{
-      "SaveOpenGenieAsciiEnginXReference.his"};
+  const std::string m_referenceFileName{"SaveOpenGenieAsciiEnginXReference.his"};
   const std::string m_outputFileName{"SaveOpenGenieAscii_output.his"};
   const std::string m_inputNexusFile{"SaveOpenGenieAsciiInput.nxs"};
 
-  std::unique_ptr<SaveOpenGenieAscii>
-  createAlg(const MatrixWorkspace_sptr &ws, const std::string &tempFilePath) {
+  std::unique_ptr<SaveOpenGenieAscii> createAlg(const MatrixWorkspace_sptr &ws, const std::string &tempFilePath) {
     auto alg = std::make_unique<SaveOpenGenieAscii>();
     alg->initialize();
 

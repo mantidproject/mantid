@@ -30,39 +30,32 @@ public:
     MDTransfModQ ModQTransformer;
     TS_ASSERT_EQUALS("|Q|", ModQTransformer.transfID());
 
-    TS_ASSERT_EQUALS(
-        2, ModQTransformer.getNMatrixDimensions(Kernel::DeltaEMode::Direct));
-    TS_ASSERT_EQUALS(
-        1, ModQTransformer.getNMatrixDimensions(Kernel::DeltaEMode::Elastic));
-    TS_ASSERT_EQUALS(
-        2, ModQTransformer.getNMatrixDimensions(Kernel::DeltaEMode::Indirect));
+    TS_ASSERT_EQUALS(2, ModQTransformer.getNMatrixDimensions(Kernel::DeltaEMode::Direct));
+    TS_ASSERT_EQUALS(1, ModQTransformer.getNMatrixDimensions(Kernel::DeltaEMode::Elastic));
+    TS_ASSERT_EQUALS(2, ModQTransformer.getNMatrixDimensions(Kernel::DeltaEMode::Indirect));
   }
   void testWSDescrUnitsPart() {
     MDTransfModQ ModQTransformer;
     std::vector<std::string> outputDimUnits;
 
-    TS_ASSERT_THROWS_NOTHING(outputDimUnits = ModQTransformer.outputUnitID(
-                                 Kernel::DeltaEMode::Direct));
+    TS_ASSERT_THROWS_NOTHING(outputDimUnits = ModQTransformer.outputUnitID(Kernel::DeltaEMode::Direct));
     TS_ASSERT_EQUALS(2, outputDimUnits.size());
     TS_ASSERT_EQUALS("MomentumTransfer", outputDimUnits[0]);
     TS_ASSERT_EQUALS("DeltaE", outputDimUnits[1]);
 
-    TS_ASSERT_THROWS_NOTHING(outputDimUnits = ModQTransformer.outputUnitID(
-                                 Kernel::DeltaEMode::Elastic));
+    TS_ASSERT_THROWS_NOTHING(outputDimUnits = ModQTransformer.outputUnitID(Kernel::DeltaEMode::Elastic));
     TS_ASSERT_EQUALS(1, outputDimUnits.size());
   }
   void testWSDescrIDPart() {
     MDTransfModQ ModQTransformer;
     std::vector<std::string> outputDimID;
 
-    TS_ASSERT_THROWS_NOTHING(outputDimID = ModQTransformer.getDefaultDimID(
-                                 Kernel::DeltaEMode::Direct));
+    TS_ASSERT_THROWS_NOTHING(outputDimID = ModQTransformer.getDefaultDimID(Kernel::DeltaEMode::Direct));
     TS_ASSERT_EQUALS(2, outputDimID.size());
     TS_ASSERT_EQUALS("|Q|", outputDimID[0]);
     TS_ASSERT_EQUALS("DeltaE", outputDimID[1]);
 
-    TS_ASSERT_THROWS_NOTHING(outputDimID = ModQTransformer.getDefaultDimID(
-                                 Kernel::DeltaEMode::Elastic));
+    TS_ASSERT_THROWS_NOTHING(outputDimID = ModQTransformer.getDefaultDimID(Kernel::DeltaEMode::Elastic));
     TS_ASSERT_EQUALS(1, outputDimID.size());
     TS_ASSERT_EQUALS("|Q|", outputDimID[0]);
   }
@@ -70,21 +63,17 @@ public:
     MDTransfModQ ModQTransformer;
     std::string inputUnitID;
 
-    TS_ASSERT_THROWS_NOTHING(
-        inputUnitID = ModQTransformer.inputUnitID(Kernel::DeltaEMode::Direct));
+    TS_ASSERT_THROWS_NOTHING(inputUnitID = ModQTransformer.inputUnitID(Kernel::DeltaEMode::Direct));
     TS_ASSERT_EQUALS("DeltaE", inputUnitID);
 
-    TS_ASSERT_THROWS_NOTHING(inputUnitID = ModQTransformer.inputUnitID(
-                                 Kernel::DeltaEMode::Indirect));
+    TS_ASSERT_THROWS_NOTHING(inputUnitID = ModQTransformer.inputUnitID(Kernel::DeltaEMode::Indirect));
     TS_ASSERT_EQUALS("DeltaE", inputUnitID);
 
-    TS_ASSERT_THROWS_NOTHING(
-        inputUnitID = ModQTransformer.inputUnitID(Kernel::DeltaEMode::Elastic));
+    TS_ASSERT_THROWS_NOTHING(inputUnitID = ModQTransformer.inputUnitID(Kernel::DeltaEMode::Elastic));
     TS_ASSERT_EQUALS("Momentum", inputUnitID);
   }
 
-  std::string checkMinMaxRangesCorrect(MDWSDescription &WSDescr,
-                                       Mantid::API::MatrixWorkspace_sptr &ws2D,
+  std::string checkMinMaxRangesCorrect(MDWSDescription &WSDescr, Mantid::API::MatrixWorkspace_sptr &ws2D,
                                        MDTransfInterface &MDTransf) {
 
     std::string result("");
@@ -128,15 +117,13 @@ public:
         MDTransf.calcMatrixCoordinates(X, i, j, locCoord, signal, errorSq);
         for (size_t j = 0; j < nDims; j++) {
           if (locCoord[j] < minCoord[j]) {
-            result = "Local transformed coordinate in direction " +
-                     boost::lexical_cast<std::string>(j) +
+            result = "Local transformed coordinate in direction " + boost::lexical_cast<std::string>(j) +
                      " at bin N: " + boost::lexical_cast<std::string>(i) +
                      " is smaller then identified conversion range";
             return result;
           }
           if (locCoord[j] > maxCoord[j]) {
-            result = "Local transformed coordinate in direction " +
-                     boost::lexical_cast<std::string>(j) +
+            result = "Local transformed coordinate in direction " + boost::lexical_cast<std::string>(j) +
                      " at bin N: " + boost::lexical_cast<std::string>(i) +
                      " is bigger then identified conversion range";
             return result;
@@ -156,13 +143,11 @@ public:
 
     MDWSDescription WSDescr(static_cast<unsigned int>(nDims));
     std::string QMode = ModQTransf.transfID();
-    std::string dEMode =
-        Kernel::DeltaEMode::asString(Kernel::DeltaEMode::Direct);
+    std::string dEMode = Kernel::DeltaEMode::asString(Kernel::DeltaEMode::Direct);
     std::vector<std::string> dimPropNames(2, "T");
     dimPropNames[1] = "Ei";
 
-    auto ws2Dbig = WorkspaceCreationHelper::createProcessedInelasticWS(
-        L2, polar, azimuthal, 100, -11, 9.9, 10);
+    auto ws2Dbig = WorkspaceCreationHelper::createProcessedInelasticWS(L2, polar, azimuthal, 100, -11, 9.9, 10);
 
     ws2Dbig->mutableRun().mutableGoniometer().setRotationAngle(0, 20);
     // add workspace energy
@@ -174,47 +159,36 @@ public:
     std::vector<double> minVal(nDims, -FLT_MAX), maxVal(nDims, FLT_MAX);
     WSDescr.setMinMax(minVal, maxVal);
 
-    TSM_ASSERT_THROWS(
-        "No detectors yet defined, so should thow run time error: ",
-        ModQTransf.initialize(WSDescr), const std::runtime_error &);
+    TSM_ASSERT_THROWS("No detectors yet defined, so should thow run time error: ", ModQTransf.initialize(WSDescr),
+                      const std::runtime_error &);
 
     // let's preprocess detectors positions to go any further
-    WSDescr.m_PreprDetTable =
-        WorkspaceCreationHelper::buildPreprocessedDetectorsWorkspace(ws2Dbig);
-    TSM_ASSERT_THROWS_NOTHING("should initialize properly: ",
-                              ModQTransf.initialize(WSDescr));
+    WSDescr.m_PreprDetTable = WorkspaceCreationHelper::buildPreprocessedDetectorsWorkspace(ws2Dbig);
+    TSM_ASSERT_THROWS_NOTHING("should initialize properly: ", ModQTransf.initialize(WSDescr));
     std::vector<coord_t> coord(4);
-    TSM_ASSERT("Generic coordinates should be in range, so should be true ",
-               ModQTransf.calcGenericVariables(coord, 4));
-    TSM_ASSERT_DELTA("3th Generic coordinates should be temperature ", 70,
-                     coord[2], 2.e-8);
-    TSM_ASSERT_DELTA("4th Generic coordinates should be Ei ", 13, coord[3],
-                     2.e-8);
+    TSM_ASSERT("Generic coordinates should be in range, so should be true ", ModQTransf.calcGenericVariables(coord, 4));
+    TSM_ASSERT_DELTA("3th Generic coordinates should be temperature ", 70, coord[2], 2.e-8);
+    TSM_ASSERT_DELTA("4th Generic coordinates should be Ei ", 13, coord[3], 2.e-8);
 
-    TSM_ASSERT(
-        " Y-dependent coordinates should be in range so it should be true: ",
-        ModQTransf.calcYDepCoordinates(coord, 0));
+    TSM_ASSERT(" Y-dependent coordinates should be in range so it should be true: ",
+               ModQTransf.calcYDepCoordinates(coord, 0));
 
     auto convResult = checkMinMaxRangesCorrect(WSDescr, ws2Dbig, ModQTransf);
 
     TSM_ASSERT_EQUALS(convResult, 0, convResult.size());
 
     // Check if the correct display normalization is set
-    auto mdEventWorkspace =
-        Mantid::DataObjects::MDEventsTestHelper::makeMDEW<3>(4, 0.0, 4.0, 1);
+    auto mdEventWorkspace = Mantid::DataObjects::MDEventsTestHelper::makeMDEW<3>(4, 0.0, 4.0, 1);
     ModQTransf.setDisplayNormalization(mdEventWorkspace, ws2Dbig);
-    TSM_ASSERT_EQUALS("Should be set to number events normalization",
-                      mdEventWorkspace->displayNormalization(),
+    TSM_ASSERT_EQUALS("Should be set to number events normalization", mdEventWorkspace->displayNormalization(),
                       Mantid::API::VolumeNormalization);
-    TSM_ASSERT_EQUALS("Should be set to number events normalization",
-                      mdEventWorkspace->displayNormalizationHisto(),
+    TSM_ASSERT_EQUALS("Should be set to number events normalization", mdEventWorkspace->displayNormalizationHisto(),
                       Mantid::API::NumEventsNormalization);
   }
 
   MDTransfModQTest() {
 
-    ws2D = WorkspaceCreationHelper::
-        createProcessedWorkspaceWithCylComplexInstrument(4, 10, true);
+    ws2D = WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(4, 10, true);
     // rotate the crystal by twenty degrees back;
     ws2D->mutableRun().mutableGoniometer().setRotationAngle(0, 20);
     // add workspace energy

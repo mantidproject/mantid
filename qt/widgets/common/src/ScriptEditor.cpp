@@ -54,9 +54,8 @@ QsciLexer *createLexerFromName(const QString &lexerName, const QFont &font) {
   } else if (lexerName == "AlternateCSPython") {
     return new AlternateCSPythonLexer(font);
   } else {
-    throw std::invalid_argument(
-        "createLexerFromLanguage: Unsupported "
-        "name. Supported names=Python, AlternateCSPython");
+    throw std::invalid_argument("createLexerFromLanguage: Unsupported "
+                                "name. Supported names=Python, AlternateCSPython");
   }
 }
 } // namespace
@@ -76,8 +75,7 @@ QColor ScriptEditor::g_error_colour = QColor("red");
  * @param font A reference to the initial font to be used in the editor
  * @param parent Parent widget
  */
-ScriptEditor::ScriptEditor(const QString &lexerName, const QFont &font,
-                           QWidget *parent)
+ScriptEditor::ScriptEditor(const QString &lexerName, const QFont &font, QWidget *parent)
     : ScriptEditor(parent, createLexerFromName(lexerName, font)) {}
 
 /**
@@ -86,12 +84,9 @@ ScriptEditor::ScriptEditor(const QString &lexerName, const QFont &font,
  * @param codelexer define the syntax highlighting and code completion.
  * @param settingsGroup Used when saving settings to persistent store
  */
-ScriptEditor::ScriptEditor(QWidget *parent, QsciLexer *codelexer,
-                           const QString &settingsGroup)
-    : QsciScintilla(parent), m_filename(""),
-      m_progressArrowKey(markerDefine(QsciScintilla::RightArrow)),
-      m_currentExecLine(0), m_completer(nullptr), m_previousKey(0),
-      m_findDialog(new FindReplaceDialog(this)),
+ScriptEditor::ScriptEditor(QWidget *parent, QsciLexer *codelexer, const QString &settingsGroup)
+    : QsciScintilla(parent), m_filename(""), m_progressArrowKey(markerDefine(QsciScintilla::RightArrow)),
+      m_currentExecLine(0), m_completer(nullptr), m_previousKey(0), m_findDialog(new FindReplaceDialog(this)),
       m_settingsGroup(settingsGroup) {
 // Older versions of QScintilla still use just CR as the line ending, which is
 // pre-OSX.
@@ -134,9 +129,7 @@ ScriptEditor::~ScriptEditor() {
 /**
  * @param name The name of the group
  */
-void ScriptEditor::setSettingsGroup(const QString &name) {
-  m_settingsGroup = name;
-}
+void ScriptEditor::setSettingsGroup(const QString &name) { m_settingsGroup = name; }
 
 /// Settings group
 /**
@@ -185,9 +178,7 @@ void ScriptEditor::setLexer(QsciLexer *codelexer) {
 /**
  * Make the object resize to margin to fit the contents with padding
  */
-void ScriptEditor::setAutoMarginResize() {
-  connect(this, SIGNAL(linesChanged()), this, SLOT(padMargin()));
-}
+void ScriptEditor::setAutoMarginResize() { connect(this, SIGNAL(linesChanged()), this, SLOT(padMargin())); }
 
 /**
  * Enable the auto complete
@@ -219,8 +210,7 @@ QSize ScriptEditor::sizeHint() const { return QSize(600, 500); }
 void ScriptEditor::saveAs() {
   QString selectedFilter;
   QString filter = "Scripts (*.py *.PY);;All Files (*)";
-  QString filename = QFileDialog::getSaveFileName(nullptr, "Save file...", "",
-                                                  filter, &selectedFilter);
+  QString filename = QFileDialog::getSaveFileName(nullptr, "Save file...", "", filter, &selectedFilter);
 
   if (filename.isEmpty()) {
     throw SaveCancelledException();
@@ -253,8 +243,7 @@ void ScriptEditor::saveToCurrentFile() {
 void ScriptEditor::saveScript(const QString &filename) {
   QFile file(filename);
   if (!file.open(QIODevice::WriteOnly)) {
-    QString msg =
-        QString("Could not open file \"%1\" for writing.").arg(filename);
+    QString msg = QString("Could not open file \"%1\" for writing.").arg(filename);
     throw std::runtime_error(qPrintable(msg));
   }
 
@@ -275,8 +264,7 @@ void ScriptEditor::saveScript(const QString &filename) {
 void ScriptEditor::setText(int lineno, const QString &txt, int index) {
   int line_length = txt.length();
   // Index is max of the length of current/new text
-  setSelection(lineno, index, lineno,
-               qMax(line_length, this->text(lineno).length()));
+  setSelection(lineno, index, lineno, qMax(line_length, this->text(lineno).length()));
   removeSelectedText();
   insertAt(txt, lineno, index);
   setCursorPosition(lineno, line_length);
@@ -304,8 +292,7 @@ void ScriptEditor::keyPressEvent(QKeyEvent *event) {
 
   // There is a built in Ctrl+- shortcut for zooming out, but a signal is
   // emitted here to tell the other editor tabs to also zoom out
-  if (QApplication::keyboardModifiers() & Qt::ControlModifier &&
-      (event->key() == Qt::Key_Minus)) {
+  if (QApplication::keyboardModifiers() & Qt::ControlModifier && (event->key() == Qt::Key_Minus)) {
     emit textZoomedOut();
   }
 }
@@ -389,8 +376,7 @@ void ScriptEditor::setMarkerState(bool enabled) {
  */
 void ScriptEditor::updateProgressMarkerFromThread(int lineno, bool error) {
   if (QThread::currentThread() != QApplication::instance()->thread()) {
-    QMetaObject::invokeMethod(this, "updateProgressMarker", Qt::AutoConnection,
-                              Q_ARG(int, lineno), Q_ARG(bool, error));
+    QMetaObject::invokeMethod(this, "updateProgressMarker", Qt::AutoConnection, Q_ARG(int, lineno), Q_ARG(bool, error));
   } else {
     updateProgressMarker(lineno, error);
   }
@@ -422,9 +408,7 @@ void ScriptEditor::updateProgressMarker(int lineno, bool error) {
 }
 
 /// Mark the progress arrow as an error
-void ScriptEditor::markExecutingLineAsError() {
-  updateProgressMarker(m_currentExecLine, true);
-}
+void ScriptEditor::markExecutingLineAsError() { updateProgressMarker(m_currentExecLine, true); }
 
 /**
  * Update the completion API with a new list of keywords. Note that the old is
@@ -492,8 +476,7 @@ void ScriptEditor::dragEnterEvent(QDragEnterEvent *de) {
  * a rectangular selection.
  * @return The text
  */
-QByteArray ScriptEditor::fromMimeData(const QMimeData *source,
-                                      bool &rectangular) const {
+QByteArray ScriptEditor::fromMimeData(const QMimeData *source, bool &rectangular) const {
   return QsciScintilla::fromMimeData(source, rectangular);
 }
 
@@ -544,9 +527,7 @@ void ScriptEditor::zoomTo(int level) {
 /**
  * Write to the given device
  */
-void ScriptEditor::writeToDevice(QIODevice &device) const {
-  this->write(&device);
-}
+void ScriptEditor::writeToDevice(QIODevice &device) const { this->write(&device); }
 
 //------------------------------------------------
 // Private member functions
@@ -565,8 +546,7 @@ void ScriptEditor::forwardKeyPressToBase(QKeyEvent *event) {
   // not appear, you have to delete the ( and type it again
   // This does that for you!
   if (event->text() == "(") {
-    auto *backspEvent =
-        new QKeyEvent(QEvent::KeyPress, Qt::Key_Backspace, Qt::NoModifier);
+    auto *backspEvent = new QKeyEvent(QEvent::KeyPress, Qt::Key_Backspace, Qt::NoModifier);
     auto *bracketEvent = new QKeyEvent(*event);
     QsciScintilla::keyPressEvent(bracketEvent);
     QsciScintilla::keyPressEvent(backspEvent);
@@ -603,20 +583,16 @@ void ScriptEditor::forwardKeyPressToBase(QKeyEvent *event) {
 #endif
 }
 
-void ScriptEditor::replaceAll(const QString &searchString,
-                              const QString &replaceString, bool regex,
-                              bool caseSensitive, bool matchWords, bool wrap,
-                              bool forward) {
+void ScriptEditor::replaceAll(const QString &searchString, const QString &replaceString, bool regex, bool caseSensitive,
+                              bool matchWords, bool wrap, bool forward) {
   int line(-1), index(-1), prevLine(-1), prevIndex(-1);
 
   // Mark this as a set of actions that can be undone as one
   this->beginUndoAction();
-  bool found = this->findFirst(searchString, regex, caseSensitive, matchWords,
-                               wrap, forward, 0, 0);
+  bool found = this->findFirst(searchString, regex, caseSensitive, matchWords, wrap, forward, 0, 0);
   // If find first fails then there is nothing to replace
   if (!found) {
-    QMessageBox::information(this, "Mantid - Find and Replace",
-                             "No matches found in current document.");
+    QMessageBox::information(this, "Mantid - Find and Replace", "No matches found in current document.");
   }
 
   while (found) {
@@ -634,6 +610,4 @@ void ScriptEditor::replaceAll(const QString &searchString,
   this->endUndoAction();
 }
 
-int ScriptEditor::getZoom() const {
-  return static_cast<int>(SendScintilla(SCI_GETZOOM));
-}
+int ScriptEditor::getZoom() const { return static_cast<int>(SendScintilla(SCI_GETZOOM)); }

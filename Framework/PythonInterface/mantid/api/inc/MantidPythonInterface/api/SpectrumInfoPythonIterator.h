@@ -42,8 +42,7 @@ without the need for indexes.
 class SpectrumInfoPythonIterator {
 public:
   explicit SpectrumInfoPythonIterator(SpectrumInfo &spectrumInfo)
-      : m_begin(spectrumInfo.begin()), m_end(spectrumInfo.end()),
-        m_firstOrDone(true) {}
+      : m_begin(spectrumInfo.begin()), m_end(spectrumInfo.end()), m_firstOrDone(true) {}
 
   const SpectrumInfoItem<SpectrumInfo> &next() {
     if (!m_firstOrDone)

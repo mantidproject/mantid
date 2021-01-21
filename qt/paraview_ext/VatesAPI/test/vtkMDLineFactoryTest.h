@@ -35,28 +35,24 @@ public:
 
   void testInitializeDelegatesToSuccessor() {
     auto mockSuccessor = new MockvtkDataSetFactory();
-    auto uniqueSuccessor =
-        std::unique_ptr<MockvtkDataSetFactory>(mockSuccessor);
+    auto uniqueSuccessor = std::unique_ptr<MockvtkDataSetFactory>(mockSuccessor);
     EXPECT_CALL(*mockSuccessor, initialize(_)).Times(1);
     EXPECT_CALL(*mockSuccessor, getFactoryTypeName()).Times(1);
 
     vtkMDLineFactory factory(Mantid::VATES::VolumeNormalization);
     factory.setSuccessor(std::move(uniqueSuccessor));
 
-    ITableWorkspace_sptr ws =
-        std::make_shared<Mantid::DataObjects::TableWorkspace>();
+    ITableWorkspace_sptr ws = std::make_shared<Mantid::DataObjects::TableWorkspace>();
     TS_ASSERT_THROWS_NOTHING(factory.initialize(ws));
 
-    TSM_ASSERT("Successor has not been used properly.",
-               Mock::VerifyAndClearExpectations(mockSuccessor));
+    TSM_ASSERT("Successor has not been used properly.", Mock::VerifyAndClearExpectations(mockSuccessor));
   }
 
   void testCreateDelegatesToSuccessor() {
     FakeProgressAction progressUpdate;
 
     auto mockSuccessor = new MockvtkDataSetFactory();
-    auto uniqueSuccessor =
-        std::unique_ptr<MockvtkDataSetFactory>(mockSuccessor);
+    auto uniqueSuccessor = std::unique_ptr<MockvtkDataSetFactory>(mockSuccessor);
     EXPECT_CALL(*mockSuccessor, initialize(_)).Times(1);
     EXPECT_CALL(*mockSuccessor, create(Ref(progressUpdate)))
         .Times(1)
@@ -70,14 +66,12 @@ public:
     TS_ASSERT_THROWS_NOTHING(factory.initialize(ws));
     TS_ASSERT_THROWS_NOTHING(factory.create(progressUpdate));
 
-    TSM_ASSERT("Successor has not been used properly.",
-               Mock::VerifyAndClearExpectations(mockSuccessor));
+    TSM_ASSERT("Successor has not been used properly.", Mock::VerifyAndClearExpectations(mockSuccessor));
   }
 
   void testOnInitaliseCannotDelegateToSuccessor() {
     vtkMDLineFactory factory(Mantid::VATES::VolumeNormalization);
-    ITableWorkspace_sptr ws =
-        std::make_shared<Mantid::DataObjects::TableWorkspace>();
+    ITableWorkspace_sptr ws = std::make_shared<Mantid::DataObjects::TableWorkspace>();
     TS_ASSERT_THROWS(factory.initialize(ws), const std::runtime_error &);
   }
 
@@ -86,48 +80,41 @@ public:
 
     vtkMDLineFactory factory(Mantid::VATES::VolumeNormalization);
     // initialize not called!
-    TS_ASSERT_THROWS(factory.create(progressUpdate),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(factory.create(progressUpdate), const std::runtime_error &);
   }
 
   void testCreation() {
     MockProgressAction mockProgressAction;
     // Expectation checks that progress should be >= 0 and <= 100 and called at
     // least once!
-    EXPECT_CALL(mockProgressAction, eventRaised(AllOf(Le(100), Ge(0))))
-        .Times(AtLeast(1));
+    EXPECT_CALL(mockProgressAction, eventRaised(AllOf(Le(100), Ge(0)))).Times(AtLeast(1));
 
-    std::shared_ptr<Mantid::DataObjects::MDEventWorkspace<
-        Mantid::DataObjects::MDEvent<1>, 1>>
-        ws = MDEventsTestHelper::makeMDEWFull<1>(10, 10, 10, 10);
+    std::shared_ptr<Mantid::DataObjects::MDEventWorkspace<Mantid::DataObjects::MDEvent<1>, 1>> ws =
+        MDEventsTestHelper::makeMDEWFull<1>(10, 10, 10, 10);
 
     // Rebin it to make it possible to compare cells to bins.
     using namespace Mantid::API;
-    IAlgorithm_sptr slice =
-        AlgorithmManager::Instance().createUnmanaged("SliceMD");
+    IAlgorithm_sptr slice = AlgorithmManager::Instance().createUnmanaged("SliceMD");
     slice->initialize();
     slice->setProperty("InputWorkspace", ws);
     slice->setPropertyValue("AlignedDim0", "Axis0, -10, 10, 100");
     slice->setPropertyValue("OutputWorkspace", "binned");
     slice->execute();
 
-    Workspace_sptr binned =
-        Mantid::API::AnalysisDataService::Instance().retrieve("binned");
+    Workspace_sptr binned = Mantid::API::AnalysisDataService::Instance().retrieve("binned");
 
     vtkMDLineFactory factory(Mantid::VATES::VolumeNormalization);
     factory.initialize(binned);
 
     auto product = factory.create(mockProgressAction);
 
-    TS_ASSERT(dynamic_cast<vtkUnstructuredGrid *>(product.GetPointer()) !=
-              NULL);
+    TS_ASSERT(dynamic_cast<vtkUnstructuredGrid *>(product.GetPointer()) != NULL);
     TS_ASSERT_EQUALS(100, product->GetNumberOfCells());
     TS_ASSERT_EQUALS(200, product->GetNumberOfPoints());
     TS_ASSERT_EQUALS(VTK_LINE, product->GetCellType(0));
 
     AnalysisDataService::Instance().remove("binned");
-    TSM_ASSERT("Progress Updates not used as expected.",
-               Mock::VerifyAndClearExpectations(&mockProgressAction));
+    TSM_ASSERT("Progress Updates not used as expected.", Mock::VerifyAndClearExpectations(&mockProgressAction));
   }
 };
 
@@ -138,13 +125,11 @@ class vtkMDLineFactoryTestPerformance : public CxxTest::TestSuite {
 
 public:
   void setUp() override {
-    std::shared_ptr<Mantid::DataObjects::MDEventWorkspace<
-        Mantid::DataObjects::MDEvent<1>, 1>>
-        input = MDEventsTestHelper::makeMDEWFull<1>(2, 10, 10, 4000);
+    std::shared_ptr<Mantid::DataObjects::MDEventWorkspace<Mantid::DataObjects::MDEvent<1>, 1>> input =
+        MDEventsTestHelper::makeMDEWFull<1>(2, 10, 10, 4000);
     // Rebin it to make it possible to compare cells to bins.
     using namespace Mantid::API;
-    IAlgorithm_sptr slice =
-        AlgorithmManager::Instance().createUnmanaged("SliceMD");
+    IAlgorithm_sptr slice = AlgorithmManager::Instance().createUnmanaged("SliceMD");
     slice->initialize();
     slice->setProperty("InputWorkspace", input);
     slice->setPropertyValue("AlignedDim0", "Axis0, -10, 10, 200000");
@@ -157,16 +142,14 @@ public:
   void testCreationOnLargeWorkspace() {
     FakeProgressAction progressAction;
 
-    Workspace_sptr binned =
-        Mantid::API::AnalysisDataService::Instance().retrieve("binned");
+    Workspace_sptr binned = Mantid::API::AnalysisDataService::Instance().retrieve("binned");
 
     vtkMDLineFactory factory(Mantid::VATES::VolumeNormalization);
     factory.initialize(binned);
 
     auto product = factory.create(progressAction);
 
-    TS_ASSERT(dynamic_cast<vtkUnstructuredGrid *>(product.GetPointer()) !=
-              nullptr);
+    TS_ASSERT(dynamic_cast<vtkUnstructuredGrid *>(product.GetPointer()) != nullptr);
     TS_ASSERT_EQUALS(200000, product->GetNumberOfCells());
     TS_ASSERT_EQUALS(400000, product->GetNumberOfPoints());
   }

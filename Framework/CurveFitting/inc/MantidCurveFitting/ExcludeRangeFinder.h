@@ -22,8 +22,7 @@ keeps the index of the region (its left boundary) for efficient search.
 class MANTID_CURVEFITTING_DLL ExcludeRangeFinder {
 public:
   /// Constructor
-  ExcludeRangeFinder(const std::vector<double> &exclude, double startX,
-                     double endX);
+  ExcludeRangeFinder(const std::vector<double> &exclude, double startX, double endX);
 
   /// Check if an x-value lies in an exclusion range
   bool isExcluded(double value);

@@ -28,8 +28,7 @@ namespace {
  *  @param detIDs A vector containing detector ids.
  *  @return True, if all EFixed values match, false otherwise.
  */
-bool constantIndirectEFixed(const Mantid::API::ExperimentInfo &info,
-                            const std::vector<Mantid::detid_t> &detIDs) {
+bool constantIndirectEFixed(const Mantid::API::ExperimentInfo &info, const std::vector<Mantid::detid_t> &detIDs) {
   const auto e = info.getEFixed(detIDs[0]);
   for (size_t i = 1; i < detIDs.size(); ++i) {
     if (e != info.getEFixed(detIDs[i])) {
@@ -48,14 +47,12 @@ Mantid::Kernel::Logger g_log("SparseWorkspace");
 namespace Mantid {
 namespace Algorithms {
 
-SparseWorkspace::SparseWorkspace(const API::MatrixWorkspace &modelWS,
-                                 const size_t wavelengthPoints,
-                                 const size_t rows, const size_t columns)
+SparseWorkspace::SparseWorkspace(const API::MatrixWorkspace &modelWS, const size_t wavelengthPoints, const size_t rows,
+                                 const size_t columns)
     : Workspace2D() {
   double minLat, maxLat, minLong, maxLong;
   std::tie(minLat, maxLat, minLong, maxLong) = extremeAngles(modelWS);
-  m_gridDef = std::make_unique<Algorithms::DetectorGridDefinition>(
-      minLat, maxLat, rows, minLong, maxLong, columns);
+  m_gridDef = std::make_unique<Algorithms::DetectorGridDefinition>(minLat, maxLat, rows, minLong, maxLong, columns);
   if ((rows < 3) || (columns < 3)) {
     g_log.warning("Can't calculate errors on a sparse workspace with lat or "
                   "long dimension < 3");
@@ -65,16 +62,13 @@ SparseWorkspace::SparseWorkspace(const API::MatrixWorkspace &modelWS,
   initialize(numSpectra, h);
 
   // Build a quite standard and somewhat complete instrument.
-  auto instrument =
-      std::make_shared<Geometry::Instrument>("MC_simulation_instrument");
+  auto instrument = std::make_shared<Geometry::Instrument>("MC_simulation_instrument");
   const auto refFrame = modelWS.getInstrument()->getReferenceFrame();
 
-  instrument->setReferenceFrame(
-      std::make_shared<Geometry::ReferenceFrame>(*refFrame));
+  instrument->setReferenceFrame(std::make_shared<Geometry::ReferenceFrame>(*refFrame));
   // The sparse instrument is build around origin.
   constexpr Kernel::V3D samplePos{0.0, 0.0, 0.0};
-  auto sample =
-      std::make_unique<Geometry::Component>("sample", instrument.get());
+  auto sample = std::make_unique<Geometry::Component>("sample", instrument.get());
   sample->setPos(samplePos);
   instrument->add(sample.get());
   instrument->markAsSamplePos(sample.release());
@@ -84,8 +78,7 @@ SparseWorkspace::SparseWorkspace(const API::MatrixWorkspace &modelWS,
     p[refFrame->pointingAlongBeam()] = -2.0 * R;
     return p;
   }();
-  auto source = std::make_unique<Geometry::ObjComponent>("source", nullptr,
-                                                         instrument.get());
+  auto source = std::make_unique<Geometry::ObjComponent>("source", nullptr, instrument.get());
   source->setPos(sourcePos);
   instrument->add(source.get());
   instrument->markAsSource(source.release());
@@ -99,8 +92,7 @@ SparseWorkspace::SparseWorkspace(const API::MatrixWorkspace &modelWS,
       const auto detID = static_cast<int>(index);
       std::ostringstream detName;
       detName << "det-" << detID;
-      auto det = std::make_unique<Geometry::Detector>(
-          detName.str(), detID, detShape, instrument.get());
+      auto det = std::make_unique<Geometry::Detector>(detName.str(), detID, detShape, instrument.get());
       const Kernel::V3D pos = [&]() {
         Kernel::V3D p;
         p[refFrame->pointingHorizontal()] = R * std::sin(lon) * std::cos(lat);
@@ -125,10 +117,8 @@ SparseWorkspace::SparseWorkspace(const API::MatrixWorkspace &modelWS,
   const auto beamHeightParam = modelSource->getNumberParameter("beam-height");
   if (beamWidthParam.size() == 1 && beamHeightParam.size() == 1) {
     auto parametrizedSource = parametrizedInstrument->getSource();
-    paramMap.add("double", parametrizedSource.get(), "beam-width",
-                 beamWidthParam[0]);
-    paramMap.add("double", parametrizedSource.get(), "beam-height",
-                 beamHeightParam[0]);
+    paramMap.add("double", parametrizedSource.get(), "beam-width", beamWidthParam[0]);
+    paramMap.add("double", parametrizedSource.get(), "beam-height", beamHeightParam[0]);
   }
   // Add information about EFixed in a proper place.
   const auto eMode = modelWS.getEMode();
@@ -138,8 +128,7 @@ SparseWorkspace::SparseWorkspace(const API::MatrixWorkspace &modelWS,
   } else if (eMode == Kernel::DeltaEMode::Indirect) {
     const auto &detIDs = modelWS.detectorInfo().detectorIDs();
     if (!constantIndirectEFixed(modelWS, detIDs)) {
-      throw std::runtime_error(
-          "Sparse instrument with variable EFixed not supported.");
+      throw std::runtime_error("Sparse instrument with variable EFixed not supported.");
     }
     const auto e = modelWS.getEFixed(detIDs[0]);
     const auto &sparseDetIDs = detectorInfo().detectorIDs();
@@ -155,8 +144,7 @@ SparseWorkspace::SparseWorkspace(const API::MatrixWorkspace &modelWS,
  *  @param ws A workspace.
  *  @return A tuple containing the latitude and longitude ranges.
  */
-std::tuple<double, double, double, double>
-SparseWorkspace::extremeAngles(const API::MatrixWorkspace &ws) {
+std::tuple<double, double, double, double> SparseWorkspace::extremeAngles(const API::MatrixWorkspace &ws) {
   const auto &spectrumInfo = ws.spectrumInfo();
   const auto refFrame = ws.getInstrument()->getReferenceFrame();
   double minLat = std::numeric_limits<double>::max();
@@ -186,8 +174,7 @@ SparseWorkspace::extremeAngles(const API::MatrixWorkspace &ws) {
  *  @param ws A workspace to investigate.
  *  @return A tuple containing the wavelength range.
  */
-std::tuple<double, double>
-SparseWorkspace::extremeWavelengths(const API::MatrixWorkspace &ws) {
+std::tuple<double, double> SparseWorkspace::extremeWavelengths(const API::MatrixWorkspace &ws) {
   double currentMin = std::numeric_limits<double>::max();
   double currentMax = std::numeric_limits<double>::lowest();
   for (size_t i = 0; i < ws.getNumberHistograms(); ++i) {
@@ -205,9 +192,8 @@ SparseWorkspace::extremeWavelengths(const API::MatrixWorkspace &ws) {
  *  @param wavelengthPoints Number of points in the output histogram.
  *  @return A template histogram.
  */
-Mantid::HistogramData::Histogram
-SparseWorkspace::modelHistogram(const API::MatrixWorkspace &modelWS,
-                                const size_t wavelengthPoints) {
+Mantid::HistogramData::Histogram SparseWorkspace::modelHistogram(const API::MatrixWorkspace &modelWS,
+                                                                 const size_t wavelengthPoints) {
   double minWavelength, maxWavelength;
   std::tie(minWavelength, maxWavelength) = extremeWavelengths(modelWS);
   HistogramData::Frequencies ys(wavelengthPoints, 0.0);
@@ -216,8 +202,7 @@ SparseWorkspace::modelHistogram(const API::MatrixWorkspace &modelWS,
   HistogramData::Histogram h(ps, ys, es);
   auto &xs = h.mutableX();
   if (wavelengthPoints > 1) {
-    const double step = (maxWavelength - minWavelength) /
-                        static_cast<double>(wavelengthPoints - 1);
+    const double step = (maxWavelength - minWavelength) / static_cast<double>(wavelengthPoints - 1);
     for (size_t i = 0; i < xs.size() - 1; ++i) {
       xs[i] = minWavelength + step * static_cast<double>(i);
     }
@@ -243,8 +228,7 @@ Geometry::IObject_sptr SparseWorkspace::makeCubeShape() {
   shapeElement->setAttribute("id", "cube");
   const std::string posCoord = std::to_string(dimension / 2);
   const std::string negCoord = std::to_string(-dimension / 2);
-  AutoPtr<Element> element =
-      shapeDescription->createElement("left-front-bottom-point");
+  AutoPtr<Element> element = shapeDescription->createElement("left-front-bottom-point");
   element->setAttribute("x", negCoord);
   element->setAttribute("y", negCoord);
   element->setAttribute("z", posCoord);
@@ -279,14 +263,11 @@ Geometry::IObject_sptr SparseWorkspace::makeCubeShape() {
  *  @param long2 Longitude of the second point.
  *  @return The distance between the points.
  */
-double SparseWorkspace::greatCircleDistance(const double lat1,
-                                            const double long1,
-                                            const double lat2,
+double SparseWorkspace::greatCircleDistance(const double lat1, const double long1, const double lat2,
                                             const double long2) {
   const double latD = std::sin((lat2 - lat1) / 2.0);
   const double longD = std::sin((long2 - long1) / 2.0);
-  const double S =
-      latD * latD + std::cos(lat1) * std::cos(lat2) * longD * longD;
+  const double S = latD * latD + std::cos(lat1) * std::cos(lat2) * longD * longD;
   return 2.0 * std::asin(std::sqrt(S));
 }
 
@@ -294,8 +275,7 @@ double SparseWorkspace::greatCircleDistance(const double lat1,
  *  @param distances The distances.
  *  @return An array of inverse distance weights.
  */
-std::array<double, 4> SparseWorkspace::inverseDistanceWeights(
-    const std::array<double, 4> &distances) {
+std::array<double, 4> SparseWorkspace::inverseDistanceWeights(const std::array<double, 4> &distances) {
   std::array<double, 4> weights;
   for (size_t i = 0; i < weights.size(); ++i) {
     if (distances[i] == 0.0) {
@@ -313,9 +293,8 @@ std::array<double, 4> SparseWorkspace::inverseDistanceWeights(
  *  @param distanceStep The distance between detector indices
  *  @return An interpolated histogram.
  */
-HistogramData::HistogramY
-SparseWorkspace::secondDerivative(const std::array<size_t, 3> indices,
-                                  const double distanceStep) const {
+HistogramData::HistogramY SparseWorkspace::secondDerivative(const std::array<size_t, 3> indices,
+                                                            const double distanceStep) const {
   HistogramData::HistogramY avgSecondDeriv(blocksize());
 
   HistogramData::HistogramY sumSecondDeriv(blocksize());
@@ -331,9 +310,7 @@ SparseWorkspace::secondDerivative(const std::array<size_t, 3> indices,
  *  @param lon Longitude of the interpolated detector.
  *  @return An interpolated histogram.
  */
-HistogramData::Histogram
-SparseWorkspace::interpolateFromDetectorGrid(const double lat,
-                                             const double lon) const {
+HistogramData::Histogram SparseWorkspace::interpolateFromDetectorGrid(const double lat, const double lon) const {
   const auto indices = m_gridDef->nearestNeighbourIndices(lat, lon);
 
   auto h = histogram(0);
@@ -360,20 +337,15 @@ SparseWorkspace::interpolateFromDetectorGrid(const double lat,
  *  @param e A HistgramE object
  *  @return A HistogramE object containing the squared values
  */
-HistogramData::HistogramE
-SparseWorkspace::esq(HistogramData::HistogramE e) const {
-  return e * e;
-}
+HistogramData::HistogramE SparseWorkspace::esq(HistogramData::HistogramE e) const { return e * e; }
 
 /** Square the error values in a histogram
  *  @param e A HistgramE object
  *  @return A HistogramE object containing the square root values
  */
-HistogramData::HistogramE
-SparseWorkspace::esqrt(HistogramData::HistogramE e) const {
+HistogramData::HistogramE SparseWorkspace::esqrt(HistogramData::HistogramE e) const {
   auto &derived = e;
-  std::transform(e.cbegin(), e.cend(), e.begin(),
-                 [](double f) -> double { return sqrt(f); });
+  std::transform(e.cbegin(), e.cend(), e.begin(), [](double f) -> double { return sqrt(f); });
   return derived;
 }
 
@@ -386,49 +358,35 @@ SparseWorkspace::esqrt(HistogramData::HistogramE e) const {
  *  @param lon Longitude of the interpolated detector.
  *  @return An interpolated histogram.
  */
-HistogramData::Histogram
-SparseWorkspace::bilinearInterpolateFromDetectorGrid(const double lat,
-                                                     const double lon) const {
+HistogramData::Histogram SparseWorkspace::bilinearInterpolateFromDetectorGrid(const double lat,
+                                                                              const double lon) const {
 
   size_t nearestLatIndex, nearestLonIndex;
-  std::tie(nearestLatIndex, nearestLonIndex) =
-      m_gridDef->getNearestVertex(lat, lon);
+  std::tie(nearestLatIndex, nearestLonIndex) = m_gridDef->getNearestVertex(lat, lon);
 
   std::array<std::array<size_t, 2>, 2> detIndices;
   for (size_t i = 0; i < 2; i++) {
     for (size_t j = 0; j < 2; j++) {
-      detIndices[i][j] =
-          m_gridDef->getDetectorIndex(nearestLatIndex + j, nearestLonIndex + i);
+      detIndices[i][j] = m_gridDef->getDetectorIndex(nearestLatIndex + j, nearestLonIndex + i);
     }
   }
 
   double latLow, longLow, latHigh, longHigh;
-  std::tie(latLow, longLow) =
-      spectrumInfo().geographicalAngles(detIndices[0][0]);
-  std::tie(latHigh, longHigh) =
-      spectrumInfo().geographicalAngles(detIndices[1][1]);
+  std::tie(latLow, longLow) = spectrumInfo().geographicalAngles(detIndices[0][0]);
+  std::tie(latHigh, longHigh) = spectrumInfo().geographicalAngles(detIndices[1][1]);
 
   // interpolate across different longitudes
-  auto ylat1 = ((longHigh - lon) * y(detIndices[0][0]) +
-                (lon - longLow) * y(detIndices[1][0])) /
-               (longHigh - longLow);
-  auto errLat1 = esqrt(esq((longHigh - lon) * e(detIndices[0][0])) +
-                       esq((lon - longLow) * e(detIndices[1][0]))) /
+  auto ylat1 = ((longHigh - lon) * y(detIndices[0][0]) + (lon - longLow) * y(detIndices[1][0])) / (longHigh - longLow);
+  auto errLat1 = esqrt(esq((longHigh - lon) * e(detIndices[0][0])) + esq((lon - longLow) * e(detIndices[1][0]))) /
                  (longHigh - longLow);
 
-  auto ylat2 = ((longHigh - lon) * y(detIndices[0][1]) +
-                (lon - longLow) * y(detIndices[1][1])) /
-               (longHigh - longLow);
-  auto errLat2 = esqrt(esq((longHigh - lon) * e(detIndices[0][1])) +
-                       esq((lon - longLow) * e(detIndices[1][1]))) /
+  auto ylat2 = ((longHigh - lon) * y(detIndices[0][1]) + (lon - longLow) * y(detIndices[1][1])) / (longHigh - longLow);
+  auto errLat2 = esqrt(esq((longHigh - lon) * e(detIndices[0][1])) + esq((lon - longLow) * e(detIndices[1][1]))) /
                  (longHigh - longLow);
 
   // interpolate across different latitudes
-  auto interpY =
-      ((latHigh - lat) * ylat1 + (lat - latLow) * ylat2) / (latHigh - latLow);
-  auto errFromSourcePoints =
-      esqrt(esq((latHigh - lat) * errLat1) + esq((lat - latLow) * errLat2)) /
-      (latHigh - latLow);
+  auto interpY = ((latHigh - lat) * ylat1 + (lat - latLow) * ylat2) / (latHigh - latLow);
+  auto errFromSourcePoints = esqrt(esq((latHigh - lat) * errLat1) + esq((lat - latLow) * errLat2)) / (latHigh - latLow);
 
   // calculate interpolation errors if possible
   HistogramData::HistogramE interpolationError(e(0).size(), 0);
@@ -441,16 +399,13 @@ SparseWorkspace::bilinearInterpolateFromDetectorGrid(const double lat,
 
     // 2nd derivative in longitude
     for (int i = 0; i < 3; i++) {
-      threeIndices[i] =
-          m_gridDef->getDetectorIndex(nearestLatIndex, nearestLonIndexSec + i);
+      threeIndices[i] = m_gridDef->getDetectorIndex(nearestLatIndex, nearestLonIndexSec + i);
     }
-    auto avgSecondDerivLong =
-        secondDerivative(threeIndices, longHigh - longLow);
+    auto avgSecondDerivLong = secondDerivative(threeIndices, longHigh - longLow);
 
     // 2nd derivative in latitude
     for (int i = 0; i < 3; i++) {
-      threeIndices[i] =
-          m_gridDef->getDetectorIndex(nearestLatIndexSec + i, nearestLonIndex);
+      threeIndices[i] = m_gridDef->getDetectorIndex(nearestLatIndexSec + i, nearestLonIndex);
     }
     auto avgSecondDerivLat = secondDerivative(threeIndices, latHigh - latLow);
 

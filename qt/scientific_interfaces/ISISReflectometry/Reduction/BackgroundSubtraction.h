@@ -13,15 +13,10 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
-enum class BackgroundSubtractionType {
-  PerDetectorAverage,
-  Polynomial,
-  AveragePixelFit
-};
+enum class BackgroundSubtractionType { PerDetectorAverage, Polynomial, AveragePixelFit };
 enum class CostFunctionType { LeastSquares, UnweightedLeastSquares };
 
-inline BackgroundSubtractionType
-backgroundSubtractionTypeFromString(std::string const &subtractionType) {
+inline BackgroundSubtractionType backgroundSubtractionTypeFromString(std::string const &subtractionType) {
   if (subtractionType.empty() || subtractionType == "PerDetectorAverage")
     return BackgroundSubtractionType::PerDetectorAverage;
   else if (subtractionType == "Polynomial")
@@ -32,8 +27,7 @@ backgroundSubtractionTypeFromString(std::string const &subtractionType) {
     throw std::invalid_argument("Unexpected background subtraction type.");
 }
 
-inline std::string
-backgroundSubtractionTypeToString(BackgroundSubtractionType subtractionType) {
+inline std::string backgroundSubtractionTypeToString(BackgroundSubtractionType subtractionType) {
   switch (subtractionType) {
   case BackgroundSubtractionType::PerDetectorAverage:
     return "PerDetectorAverage";
@@ -45,8 +39,7 @@ backgroundSubtractionTypeToString(BackgroundSubtractionType subtractionType) {
   throw std::invalid_argument("Unexpected background subtraction type.");
 }
 
-inline CostFunctionType
-costFunctionTypeFromString(std::string const &costFunction) {
+inline CostFunctionType costFunctionTypeFromString(std::string const &costFunction) {
   if (costFunction.empty() || costFunction == "Least squares")
     return CostFunctionType::LeastSquares;
   else if (costFunction == "Unweighted least squares")
@@ -73,9 +66,8 @@ inline std::string costFunctionTypeToString(CostFunctionType costFunctionType) {
 class MANTIDQT_ISISREFLECTOMETRY_DLL BackgroundSubtraction {
 public:
   BackgroundSubtraction();
-  BackgroundSubtraction(bool subtractBackground,
-                        BackgroundSubtractionType subtractionType,
-                        int degreeOfPolynomial, CostFunctionType costFunction);
+  BackgroundSubtraction(bool subtractBackground, BackgroundSubtractionType subtractionType, int degreeOfPolynomial,
+                        CostFunctionType costFunction);
 
   bool subtractBackground() const;
   BackgroundSubtractionType subtractionType() const;
@@ -89,10 +81,8 @@ private:
   CostFunctionType m_costFunction;
 };
 
-MANTIDQT_ISISREFLECTOMETRY_DLL bool
-operator==(BackgroundSubtraction const &lhs, BackgroundSubtraction const &rhs);
-MANTIDQT_ISISREFLECTOMETRY_DLL bool
-operator!=(BackgroundSubtraction const &lhs, BackgroundSubtraction const &rhs);
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(BackgroundSubtraction const &lhs, BackgroundSubtraction const &rhs);
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(BackgroundSubtraction const &lhs, BackgroundSubtraction const &rhs);
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

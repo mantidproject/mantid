@@ -73,11 +73,9 @@ class CustomActionHandler : public QXmlDefaultHandler {
 public:
   explicit CustomActionHandler(QAction *action);
 
-  bool startElement(const QString &namespaceURI, const QString &localName,
-                    const QString &qName,
+  bool startElement(const QString &namespaceURI, const QString &localName, const QString &qName,
                     const QXmlAttributes &attributes) override;
-  bool endElement(const QString &namespaceURI, const QString &localName,
-                  const QString &qName) override;
+  bool endElement(const QString &namespaceURI, const QString &localName, const QString &qName) override;
   bool characters(const QString &str) override {
     currentText += str;
     return true;

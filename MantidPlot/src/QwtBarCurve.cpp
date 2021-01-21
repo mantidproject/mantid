@@ -30,10 +30,9 @@
 #include "QwtBarCurve.h"
 #include <QPainter>
 
-QwtBarCurve::QwtBarCurve(BarStyle style, Table *t, const QString &xColName,
-                         const QString &name, int startRow, int endRow)
-    : DataCurve(t, xColName, name, startRow, endRow), bar_gap{0},
-      bar_offset{0}, bar_style{style} {
+QwtBarCurve::QwtBarCurve(BarStyle style, Table *t, const QString &xColName, const QString &name, int startRow,
+                         int endRow)
+    : DataCurve(t, xColName, name, startRow, endRow), bar_gap{0}, bar_offset{0}, bar_style{style} {
 
   setPen(QPen(Qt::black, 1, Qt::SolidLine));
   setBrush(QBrush(Qt::red));
@@ -51,8 +50,7 @@ void QwtBarCurve::copy(const QwtBarCurve *b) {
   bar_style = b->bar_style;
 }
 
-void QwtBarCurve::draw(QPainter *painter, const QwtScaleMap &xMap,
-                       const QwtScaleMap &yMap, int from, int to) const {
+void QwtBarCurve::draw(QPainter *painter, const QwtScaleMap &xMap, const QwtScaleMap &yMap, int from, int to) const {
   if (!painter || dataSize() <= 0)
     return;
 
@@ -89,8 +87,7 @@ void QwtBarCurve::draw(QPainter *painter, const QwtScaleMap &xMap,
     bar_width = dy * (1 - bar_gap * 0.01);
   }
 
-  const int half_width =
-      static_cast<int>((0.5 - bar_offset * 0.01) * bar_width);
+  const int half_width = static_cast<int>((0.5 - bar_offset * 0.01) * bar_width);
   int bw1 = static_cast<int>(bar_width) + 1;
   for (int i = from; i <= to; i++) {
     const int px = xMap.transform(x(i));
@@ -153,8 +150,7 @@ double QwtBarCurve::dataOffset() {
         if (min <= dx)
           dx = min;
       }
-      int x1 = xMap.transform(minXValue()) +
-               static_cast<int>(bar_offset * 0.01 * bar_width);
+      int x1 = xMap.transform(minXValue()) + static_cast<int>(bar_offset * 0.01 * bar_width);
       return xMap.invTransform(x1) - minXValue();
     } else
       return 0.5 * bar_offset * 0.01 * bar_width;
@@ -168,8 +164,7 @@ double QwtBarCurve::dataOffset() {
         if (min <= dy)
           dy = min;
       }
-      int y1 = yMap.transform(minYValue()) +
-               static_cast<int>(bar_offset * 0.01 * bar_width);
+      int y1 = yMap.transform(minYValue()) + static_cast<int>(bar_offset * 0.01 * bar_width);
       return yMap.invTransform(y1) - minYValue();
     } else
       return 0.5 * bar_offset * 0.01 * bar_width;

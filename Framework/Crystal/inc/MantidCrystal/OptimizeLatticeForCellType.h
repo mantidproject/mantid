@@ -29,26 +29,19 @@ namespace Crystal {
 class MANTID_CRYSTAL_DLL OptimizeLatticeForCellType : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
-  const std::string name() const override {
-    return "OptimizeLatticeForCellType";
-  }
+  const std::string name() const override { return "OptimizeLatticeForCellType"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Optimize lattice parameters for cell type.";
-  }
+  const std::string summary() const override { return "Optimize lattice parameters for cell type."; }
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
   const std::vector<std::string> seeAlso() const override {
-    return {"FindUBUsingFFT", "FindUBUsingIndexedPeaks",
-            "FindUBUsingLatticeParameters"};
+    return {"FindUBUsingFFT", "FindUBUsingIndexedPeaks", "FindUBUsingLatticeParameters"};
   }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Crystal\\Cell"; }
 
-  API::ILatticeFunction_sptr
-  getLatticeFunction(const std::string &cellType,
-                     const Geometry::UnitCell &cell) const;
+  API::ILatticeFunction_sptr getLatticeFunction(const std::string &cellType, const Geometry::UnitCell &cell) const;
 
 private:
   // Overridden Algorithm methods

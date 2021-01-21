@@ -55,8 +55,7 @@ class ProjectData;
  * @param miny :: Variable to receive the minimum value.
  * @param maxy :: Variable to receive the maximum value.
  */
-void findYRange(const Mantid::API::MatrixWorkspace_const_sptr &ws, double &miny,
-                double &maxy);
+void findYRange(const Mantid::API::MatrixWorkspace_const_sptr &ws, double &miny, double &maxy);
 
 /** MantidMatrix is the class that represents a Qtiplot window for displaying
 workspaces.
@@ -69,8 +68,7 @@ class MantidMatrix : public MdiSubWindow, MantidQt::API::WorkspaceObserver {
   Q_OBJECT
 
 public:
-  MantidMatrix(const Mantid::API::MatrixWorkspace_const_sptr &ws,
-               QWidget *parent, const QString &label,
+  MantidMatrix(const Mantid::API::MatrixWorkspace_const_sptr &ws, QWidget *parent, const QString &label,
                const QString &name = QString(), int start = -1, int end = -1);
 
   void connectTableView(QTableView *, MantidMatrixModel *);
@@ -78,18 +76,10 @@ public:
   MantidMatrixModel *modelY() { return m_modelY; }
   MantidMatrixModel *modelX() { return m_modelX; }
   MantidMatrixModel *modelE() { return m_modelE; }
-  QItemSelectionModel *selectionModel() {
-    return m_table_viewY->selectionModel();
-  }
-  QItemSelectionModel *selectionModelY() {
-    return m_table_viewY->selectionModel();
-  }
-  QItemSelectionModel *selectionModelX() {
-    return m_table_viewX->selectionModel();
-  }
-  QItemSelectionModel *selectionModelE() {
-    return m_table_viewE->selectionModel();
-  }
+  QItemSelectionModel *selectionModel() { return m_table_viewY->selectionModel(); }
+  QItemSelectionModel *selectionModelY() { return m_table_viewY->selectionModel(); }
+  QItemSelectionModel *selectionModelX() { return m_table_viewX->selectionModel(); }
+  QItemSelectionModel *selectionModelE() { return m_table_viewE->selectionModel(); }
 
   /// Get the window type as a string
   std::string getWindowType() override { return "Workspace"; }
@@ -139,9 +129,8 @@ public:
   int precision();
 
   // Loading and saving projects
-  static MantidQt::API::IProjectSerialisable *
-  loadFromProject(const std::string &lines, ApplicationWindow *app,
-                  const int fileVersion);
+  static MantidQt::API::IProjectSerialisable *loadFromProject(const std::string &lines, ApplicationWindow *app,
+                                                              const int fileVersion);
   std::string saveToProject(ApplicationWindow *app) override;
   /// Returns a list of workspace names that are used by this window
   std::vector<std::string> getWorkspaceNames() override;
@@ -149,20 +138,15 @@ public:
   /// returns the workspace name
   const std::string &getWorkspaceName();
 
-  Spectrogram *plotSpectrogram(Graph *plot, ApplicationWindow *app,
-                               GraphOptions::CurveType type, bool project,
+  Spectrogram *plotSpectrogram(Graph *plot, ApplicationWindow *app, GraphOptions::CurveType type, bool project,
                                const ProjectData *const prjdata);
   /// Add a multilayer as a dependent mdi sub-window. This method is addeed to
   /// fix a crash (ticket #5732).
   /// A better solution is needed
   void attachMultilayer(MultiLayer *);
 
-  void afterReplaceHandle(
-      const std::string &wsName,
-      const std::shared_ptr<Mantid::API::Workspace> &ws) override;
-  void
-  preDeleteHandle(const std::string &wsName,
-                  const std::shared_ptr<Mantid::API::Workspace> &ws) override;
+  void afterReplaceHandle(const std::string &wsName, const std::shared_ptr<Mantid::API::Workspace> &ws) override;
+  void preDeleteHandle(const std::string &wsName, const std::shared_ptr<Mantid::API::Workspace> &ws) override;
   void clearADSHandle() override;
 
 signals:
@@ -244,8 +228,7 @@ public slots:
   void setMatrixProperties();
 
 protected:
-  void setup(const Mantid::API::MatrixWorkspace_const_sptr &ws, int start = -1,
-             int end = -1);
+  void setup(const Mantid::API::MatrixWorkspace_const_sptr &ws, int start = -1, int end = -1);
 
   ApplicationWindow *m_appWindow;
   Mantid::API::MatrixWorkspace_const_sptr m_workspace;
@@ -267,16 +250,16 @@ protected:
   int m_endRow;
   int m_workspaceTotalHist;
   bool m_histogram;
-  double m_min;           // Saved minimum Y-value
-  double m_max;           // Saved maximum Y-value
-  bool m_are_min_max_set; // If true ::range does not iterate over WS to find
-                          // min and max but uses m_min and m_max instead
+  double m_min;                 // Saved minimum Y-value
+  double m_max;                 // Saved maximum Y-value
+  bool m_are_min_max_set;       // If true ::range does not iterate over WS to find
+                                // min and max but uses m_min and m_max instead
   QwtDoubleRect m_boundingRect; // The bounding box in x and y coordinates used
                                 // in spectrogram drawing
-  int m_spectrogramRows; // Number of rows in the spectrogram created from this
-                         // matris
-  int m_spectrogramCols; // Number of columns in the spectrogram created from
-                         // this matris
+  int m_spectrogramRows;        // Number of rows in the spectrogram created from this
+                                // matris
+  int m_spectrogramCols;        // Number of columns in the spectrogram created from
+                                // this matris
 
   // MDI windows created by this MantidMatrix
   QVector<MultiLayer *> m_plots2D;
@@ -321,8 +304,7 @@ using MantidMatrix_sptr = QSharedPointer<MantidMatrix>;
 class ProjectData {
 public:
   ProjectData()
-      : m_grayScale(0), m_intensityChanged(0), m_contourMode(0),
-        m_contourLevels(0), m_customPen(0), m_contourLabels(0),
+      : m_grayScale(0), m_intensityChanged(0), m_contourMode(0), m_contourLevels(0), m_customPen(0), m_contourLabels(0),
         m_colormapPen(0), m_ContourLinesEditor(nullptr) {}
   ~ProjectData() {}
   bool getGrayScale() const { return m_grayScale; }
@@ -335,24 +317,16 @@ public:
   void setContourMode(bool contourmode) { m_contourMode = contourmode; }
   void setContourLevels(int levels) { m_contourLevels = levels; }
   int getContourLevels() const { return m_contourLevels; }
-  void setDefaultContourPen(const QPen &defaultpen) {
-    m_defaultPen = defaultpen;
-  }
+  void setDefaultContourPen(const QPen &defaultpen) { m_defaultPen = defaultpen; }
   QPen getDefaultContourPen() const { return m_defaultPen; }
   void setColorMapPen(bool colormappen) { m_colormapPen = colormappen; }
   bool getColorMapPen() const { return m_colormapPen; }
   void setCustomPen(bool custompen) { m_customPen = custompen; }
   bool getcustomPen() const { return m_customPen; }
-  void setContourLineLabels(bool contourlabels) {
-    m_contourLabels = contourlabels;
-  }
+  void setContourLineLabels(bool contourlabels) { m_contourLabels = contourlabels; }
   bool getContourLineLabels() const { return m_contourLabels; }
-  void setCotntourLinesEditor(ContourLinesEditor *ceditor) {
-    m_ContourLinesEditor = ceditor;
-  }
-  ContourLinesEditor *getContourLinesEditor() const {
-    return m_ContourLinesEditor;
-  }
+  void setCotntourLinesEditor(ContourLinesEditor *ceditor) { m_ContourLinesEditor = ceditor; }
+  ContourLinesEditor *getContourLinesEditor() const { return m_ContourLinesEditor; }
 
 private:
   bool m_grayScale;

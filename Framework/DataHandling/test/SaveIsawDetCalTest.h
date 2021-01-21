@@ -34,16 +34,13 @@ public:
   }
 
   void test_exec() {
-    EventWorkspace_sptr ws =
-        WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(2, 50);
+    EventWorkspace_sptr ws = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(2, 50);
 
     SaveIsawDetCal alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("Filename", "SaveIsawDetCalTest.DetCal"));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty(
-        "InputWorkspace", std::dynamic_pointer_cast<MatrixWorkspace>(ws)));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "SaveIsawDetCalTest.DetCal"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", std::dynamic_pointer_cast<MatrixWorkspace>(ws)));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 

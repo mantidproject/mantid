@@ -23,8 +23,7 @@ RefSliderHandler::RefSliderHandler(Ui_RefImageViewer *ivUI) : m_ivUI(ivUI) {}
  *                    be drawn
  * @param dataSource  SpectrumDataSource that provides the data to be drawn
  */
-void RefSliderHandler::configureSliders(
-    QRect drawArea, SpectrumView::SpectrumDataSource_sptr dataSource) {
+void RefSliderHandler::configureSliders(QRect drawArea, SpectrumView::SpectrumDataSource_sptr dataSource) {
   QScrollBar *v_scroll = m_ivUI->imageVerticalScrollBar;
   int n_rows = (int)dataSource->getNRows();
   configureSlider(v_scroll, n_rows, drawArea.height(), n_rows);
@@ -57,8 +56,7 @@ void RefSliderHandler::configureHSlider(int nDataSteps, int nPixels) {
  *  @param val         The initial position of the scrollbar, between 0 and
  *                     nDataSteps.
  */
-void RefSliderHandler::configureSlider(QScrollBar *scrollBar, int nDataSteps,
-                                       int nPixels, int val) {
+void RefSliderHandler::configureSlider(QScrollBar *scrollBar, int nDataSteps, int nPixels, int val) {
   int step = nPixels;
   if (step > nDataSteps)
     step = nDataSteps;
@@ -85,16 +83,12 @@ void RefSliderHandler::configureSlider(QScrollBar *scrollBar, int nDataSteps,
 /**
  * Return true if the image horizontal scrollbar is enabled.
  */
-bool RefSliderHandler::hSliderOn() {
-  return m_ivUI->imageHorizontalScrollBar->isEnabled();
-}
+bool RefSliderHandler::hSliderOn() { return m_ivUI->imageHorizontalScrollBar->isEnabled(); }
 
 /**
  * Return true if the image vertical scrollbar is enabled.
  */
-bool RefSliderHandler::vSliderOn() {
-  return m_ivUI->imageVerticalScrollBar->isEnabled();
-}
+bool RefSliderHandler::vSliderOn() { return m_ivUI->imageVerticalScrollBar->isEnabled(); }
 
 /**
  * Get the range of columns to display in the image.  NOTE: xMin will be

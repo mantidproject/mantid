@@ -34,8 +34,7 @@ Mantid::Kernel::Logger g_log("vtkMDHistoQuadFactory");
 namespace Mantid {
 
 namespace VATES {
-vtkMDHistoQuadFactory::vtkMDHistoQuadFactory(
-    const VisualNormalization normalizationOption)
+vtkMDHistoQuadFactory::vtkMDHistoQuadFactory(const VisualNormalization normalizationOption)
     : m_normalizationOption(normalizationOption) {}
 
 /**
@@ -43,8 +42,7 @@ Assigment operator
 @param other : vtkMDHistoQuadFactory to assign to this instance from.
 @return ref to assigned current instance.
 */
-vtkMDHistoQuadFactory &vtkMDHistoQuadFactory::
-operator=(const vtkMDHistoQuadFactory &other) {
+vtkMDHistoQuadFactory &vtkMDHistoQuadFactory::operator=(const vtkMDHistoQuadFactory &other) {
   if (this != &other) {
     this->m_normalizationOption = other.m_normalizationOption;
     this->m_workspace = other.m_workspace;
@@ -56,8 +54,7 @@ operator=(const vtkMDHistoQuadFactory &other) {
 Copy Constructor
 @param other : instance to copy from.
 */
-vtkMDHistoQuadFactory::vtkMDHistoQuadFactory(
-    const vtkMDHistoQuadFactory &other) {
+vtkMDHistoQuadFactory::vtkMDHistoQuadFactory(const vtkMDHistoQuadFactory &other) {
   this->m_normalizationOption = other.m_normalizationOption;
   this->m_workspace = other.m_workspace;
 }
@@ -68,10 +65,8 @@ Create the vtkStructuredGrid from the provided workspace
 stack.
 @return fully constructed vtkDataSet.
 */
-vtkSmartPointer<vtkDataSet>
-vtkMDHistoQuadFactory::create(ProgressAction &progressUpdating) const {
-  auto product =
-      tryDelegatingCreation<MDHistoWorkspace, 2>(m_workspace, progressUpdating);
+vtkSmartPointer<vtkDataSet> vtkMDHistoQuadFactory::create(ProgressAction &progressUpdating) const {
+  auto product = tryDelegatingCreation<MDHistoWorkspace, 2>(m_workspace, progressUpdating);
   if (product != nullptr) {
     return product;
   } else {
@@ -81,10 +76,8 @@ vtkMDHistoQuadFactory::create(ProgressAction &progressUpdating) const {
 
     Mantid::Kernel::ReadLock lock(*m_workspace);
     CPUTimer tim;
-    const int nBinsX =
-        static_cast<int>(m_workspace->getXDimension()->getNBins());
-    const int nBinsY =
-        static_cast<int>(m_workspace->getYDimension()->getNBins());
+    const int nBinsX = static_cast<int>(m_workspace->getXDimension()->getNBins());
+    const int nBinsY = static_cast<int>(m_workspace->getYDimension()->getNBins());
 
     const coord_t maxX = m_workspace->getXDimension()->getMaximum();
     const coord_t minX = m_workspace->getXDimension()->getMinimum();
@@ -94,12 +87,10 @@ vtkMDHistoQuadFactory::create(ProgressAction &progressUpdating) const {
     coord_t incrementX = (maxX - minX) / static_cast<coord_t>(nBinsX);
     coord_t incrementY = (maxY - minY) / static_cast<coord_t>(nBinsY);
 
-    auto it = createIteratorWithNormalization(m_normalizationOption,
-                                              m_workspace.get());
+    auto it = createIteratorWithNormalization(m_normalizationOption, m_workspace.get());
     auto iterator = dynamic_cast<MDHistoWorkspaceIterator *>(it.get());
     if (!iterator) {
-      throw std::runtime_error(
-          "Could not convert IMDIterator to a MDHistoWorkspaceIterator");
+      throw std::runtime_error("Could not convert IMDIterator to a MDHistoWorkspaceIterator");
     }
 
     const int imageSize = (nBinsX) * (nBinsY);
@@ -114,10 +105,8 @@ vtkMDHistoQuadFactory::create(ProgressAction &progressUpdating) const {
     // The following represent actual calculated positions.
 
     float signalScalar;
-    const int nPointsX =
-        static_cast<int>(m_workspace->getXDimension()->getNBoundaries());
-    const int nPointsY =
-        static_cast<int>(m_workspace->getYDimension()->getNBoundaries());
+    const int nPointsX = static_cast<int>(m_workspace->getXDimension()->getNBoundaries());
+    const int nPointsY = static_cast<int>(m_workspace->getYDimension()->getNBoundaries());
 
     /* The idea of the next chunk of code is that you should only
     create the points that will be needed; so an array of pointNeeded
@@ -139,9 +128,8 @@ vtkMDHistoQuadFactory::create(ProgressAction &progressUpdating) const {
       for (int j = 0; j < nBinsY; j++) {
         index = j + nBinsY * i;
         iterator->jumpTo(index);
-        signalScalar = static_cast<float>(
-            iterator->getNormalizedSignal()); // Get signal normalized as per
-                                              // m_normalizationOption
+        signalScalar = static_cast<float>(iterator->getNormalizedSignal()); // Get signal normalized as per
+                                                                            // m_normalizationOption
 
         if (!std::isfinite(signalScalar)) {
           // out of range
@@ -179,15 +167,12 @@ vtkMDHistoQuadFactory::create(ProgressAction &progressUpdating) const {
     std::vector<vtkIdType> pointIDs(nPointsX * nPointsY, 0);
     index = 0;
     for (int i = 0; i < nPointsX; i++) {
-      progressUpdating.eventRaised((progressFactor * double(i)) +
-                                   progressOffset);
-      in[0] = minX + (static_cast<coord_t>(i) *
-                      incrementX); // Calculate increment in x;
+      progressUpdating.eventRaised((progressFactor * double(i)) + progressOffset);
+      in[0] = minX + (static_cast<coord_t>(i) * incrementX); // Calculate increment in x;
       for (int j = 0; j < nPointsY; j++) {
         // Create the point only when needed
         if (pointNeeded[index]) {
-          in[1] = minY + (static_cast<coord_t>(j) *
-                          incrementY); // Calculate increment in y;
+          in[1] = minY + (static_cast<coord_t>(j) * incrementY); // Calculate increment in y;
           if (transform) {
             transform->apply(in, out);
             pointIDs[index] = points->InsertNextPoint(out);
@@ -239,8 +224,7 @@ vtkMDHistoQuadFactory::create(ProgressAction &progressUpdating) const {
   }
 }
 
-void vtkMDHistoQuadFactory::initialize(
-    const Mantid::API::Workspace_sptr &wspace_sptr) {
+void vtkMDHistoQuadFactory::initialize(const Mantid::API::Workspace_sptr &wspace_sptr) {
   m_workspace = doInitialize<MDHistoWorkspace, 2>(wspace_sptr);
 }
 

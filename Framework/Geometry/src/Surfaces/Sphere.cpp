@@ -44,10 +44,7 @@ Sphere::Sphere() : Sphere({0, 0, 0}, 0.0) {}
  * @param centre
  * @param radius
  */
-Sphere::Sphere(Kernel::V3D centre, double radius)
-    : Quadratic(), m_centre{centre}, m_radius{radius} {
-  setBaseEqn();
-}
+Sphere::Sphere(Kernel::V3D centre, double radius) : Quadratic(), m_centre{centre}, m_radius{radius} { setBaseEqn(); }
 
 /**
  * Makes a clone (implicit virtual copy constructor)
@@ -59,9 +56,7 @@ Sphere *Sphere::doClone() const { return new Sphere(*this); }
  * Makes a clone (implicit virtual copy constructor)
  * @return new (*this)
  */
-std::unique_ptr<Sphere> Sphere::clone() const {
-  return std::unique_ptr<Sphere>(doClone());
-}
+std::unique_ptr<Sphere> Sphere::clone() const { return std::unique_ptr<Sphere>(doClone()); }
 
 /**
  * Processes a standard MCNPX cone string
@@ -75,8 +70,7 @@ std::unique_ptr<Sphere> Sphere::clone() const {
 int Sphere::setSurface(const std::string &Pstr) {
   std::string Line = Pstr;
   std::string item;
-  if (!Mantid::Kernel::Strings::section(Line, item) ||
-      tolower(item[0]) != 's' || item.length() > 2)
+  if (!Mantid::Kernel::Strings::section(Line, item) || tolower(item[0]) != 's' || item.length() > 2)
     return -1;
 
   std::vector<double> cent(3, 0.0);
@@ -92,9 +86,7 @@ int Sphere::setSurface(const std::string &Pstr) {
     }
   } else if (item.length() == 1) {
     std::size_t index;
-    for (index = 0;
-         index < 3 && Mantid::Kernel::Strings::section(Line, cent[index]);
-         index++)
+    for (index = 0; index < 3 && Mantid::Kernel::Strings::section(Line, cent[index]); index++)
       ;
     if (index != 3)
       return -5;
@@ -123,10 +115,8 @@ int Sphere::side(const Kernel::V3D &Pt) const
   // MG:  Surface test  - This does not use onSurface since it would double the
   // amount of
   // computation if the object is not on the surface which is most likely
-  const double xdiff(Pt.X() - m_centre.X()), ydiff(Pt.Y() - m_centre.Y()),
-      zdiff(Pt.Z() - m_centre.Z());
-  const double displace =
-      sqrt(xdiff * xdiff + ydiff * ydiff + zdiff * zdiff) - m_radius;
+  const double xdiff(Pt.X() - m_centre.X()), ydiff(Pt.Y() - m_centre.Y()), zdiff(Pt.Z() - m_centre.Z());
+  const double displace = sqrt(xdiff * xdiff + ydiff * ydiff + zdiff * zdiff) - m_radius;
   if (fabs(displace) < Tolerance) {
     return 0;
   }
@@ -237,8 +227,7 @@ void Sphere::write(std::ostream &OX) const {
  * @param ymin :: input and output for the bounding box Y axis min value
  * @param zmin :: input and output for the bounding box Z axis min value
  */
-void Sphere::getBoundingBox(double &xmax, double &ymax, double &zmax,
-                            double &xmin, double &ymin, double &zmin) {
+void Sphere::getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin) {
   xmax = m_centre[0] + m_radius;
   ymax = m_centre[1] + m_radius;
   zmax = m_centre[2] + m_radius;
@@ -249,9 +238,7 @@ void Sphere::getBoundingBox(double &xmax, double &ymax, double &zmax,
 
 #ifdef ENABLE_OPENCASCADE
 TopoDS_Shape Sphere::createShape() {
-  return BRepPrimAPI_MakeSphere(gp_Pnt(m_centre[0], m_centre[1], m_centre[2]),
-                                m_radius)
-      .Shape();
+  return BRepPrimAPI_MakeSphere(gp_Pnt(m_centre[0], m_centre[1], m_centre[2]), m_radius).Shape();
 }
 #endif
 

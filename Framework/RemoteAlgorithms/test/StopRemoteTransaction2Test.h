@@ -19,14 +19,11 @@ class StopRemoteTransaction2Test : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static StopRemoteTransaction2Test *createSuite() {
-    return new StopRemoteTransaction2Test();
-  }
+  static StopRemoteTransaction2Test *createSuite() { return new StopRemoteTransaction2Test(); }
   static void destroySuite(StopRemoteTransaction2Test *suite) { delete suite; }
 
   void test_algorithm() {
-    testAlg = Mantid::API::AlgorithmManager::Instance().create(
-        "StopRemoteTransaction" /*, 2*/);
+    testAlg = Mantid::API::AlgorithmManager::Instance().create("StopRemoteTransaction" /*, 2*/);
     TS_ASSERT(testAlg);
     TS_ASSERT_EQUALS(testAlg->name(), "StopRemoteTransaction");
     TS_ASSERT_EQUALS(testAlg->version(), 2);
@@ -38,8 +35,7 @@ public:
     TS_ASSERT(a = std::make_shared<StopRemoteTransaction2>());
 
     // can cast to inherited interfaces and base classes
-    TS_ASSERT(dynamic_cast<Mantid::RemoteAlgorithms::StopRemoteTransaction2 *>(
-        a.get()));
+    TS_ASSERT(dynamic_cast<Mantid::RemoteAlgorithms::StopRemoteTransaction2 *>(a.get()));
     TS_ASSERT(dynamic_cast<Mantid::API::Algorithm *>(a.get()));
     TS_ASSERT(dynamic_cast<Mantid::Kernel::PropertyManagerOwner *>(a.get()));
     TS_ASSERT(dynamic_cast<Mantid::API::IAlgorithm *>(a.get()));
@@ -63,8 +59,7 @@ public:
     StopRemoteTransaction2 alg1;
     TS_ASSERT_THROWS_NOTHING(alg1.initialize());
     // transaction id missing
-    TS_ASSERT_THROWS(alg1.setPropertyValue("ComputeResource", "missing!"),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg1.setPropertyValue("ComputeResource", "missing!"), const std::invalid_argument &);
 
     TS_ASSERT_THROWS(alg1.execute(), const std::runtime_error &);
     TS_ASSERT(!alg1.isExecuted());
@@ -72,8 +67,7 @@ public:
     StopRemoteTransaction2 alg2;
     TS_ASSERT_THROWS_NOTHING(alg2.initialize());
     // compute resource missing
-    TS_ASSERT_THROWS_NOTHING(
-        alg2.setPropertyValue("TransactionID", "john_missing"));
+    TS_ASSERT_THROWS_NOTHING(alg2.setPropertyValue("TransactionID", "john_missing"));
 
     TS_ASSERT_THROWS(alg2.execute(), const std::runtime_error &);
     TS_ASSERT(!alg2.isExecuted());
@@ -82,21 +76,16 @@ public:
   void test_wrongProperty() {
     StopRemoteTransaction2 stop;
     TS_ASSERT_THROWS_NOTHING(stop.initialize();)
-    TS_ASSERT_THROWS(stop.setPropertyValue("Compute", "anything"),
-                     const std::runtime_error &);
-    TS_ASSERT_THROWS(stop.setPropertyValue("Transaction", "whatever"),
-                     const std::runtime_error &);
-    TS_ASSERT_THROWS(stop.setPropertyValue("JobID", "whichever"),
-                     const std::runtime_error &);
-    TS_ASSERT_THROWS(stop.setPropertyValue("ID", "whichever"),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(stop.setPropertyValue("Compute", "anything"), const std::runtime_error &);
+    TS_ASSERT_THROWS(stop.setPropertyValue("Transaction", "whatever"), const std::runtime_error &);
+    TS_ASSERT_THROWS(stop.setPropertyValue("JobID", "whichever"), const std::runtime_error &);
+    TS_ASSERT_THROWS(stop.setPropertyValue("ID", "whichever"), const std::runtime_error &);
   }
 
   void test_propertiesOK() {
     testFacilities.emplace_back("SNS", "Fermi");
 
-    const Mantid::Kernel::FacilityInfo &prevFac =
-        Mantid::Kernel::ConfigService::Instance().getFacility();
+    const Mantid::Kernel::FacilityInfo &prevFac = Mantid::Kernel::ConfigService::Instance().getFacility();
     for (auto &testFacility : testFacilities) {
       const std::string facName = testFacility.first;
       const std::string compName = testFacility.second;
@@ -104,10 +93,8 @@ public:
       Mantid::Kernel::ConfigService::Instance().setFacility(facName);
       StopRemoteTransaction2 stop;
       TS_ASSERT_THROWS_NOTHING(stop.initialize());
-      TS_ASSERT_THROWS_NOTHING(
-          stop.setPropertyValue("ComputeResource", compName));
-      TS_ASSERT_THROWS_NOTHING(
-          stop.setPropertyValue("TransactionID", "000001"));
+      TS_ASSERT_THROWS_NOTHING(stop.setPropertyValue("ComputeResource", compName));
+      TS_ASSERT_THROWS_NOTHING(stop.setPropertyValue("TransactionID", "000001"));
       // TODO: this would run the algorithm and do a remote
       // connection. uncomment only when/if we have a mock up for this
       // TS_ASSERT_THROWS(stop.execute(), std::exception);

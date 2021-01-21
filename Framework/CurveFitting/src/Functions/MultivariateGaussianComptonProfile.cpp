@@ -26,15 +26,12 @@ const char *MultivariateGaussianComptonProfile::SIGMA_Z_PARAM = "SigmaZ";
 const char *MultivariateGaussianComptonProfile::STEPS_ATTR = "IntegrationSteps";
 
 MultivariateGaussianComptonProfile::MultivariateGaussianComptonProfile()
-    : ComptonProfile(), m_integrationSteps(256), m_thetaStep(0.0),
-      m_phiStep(0.0) {}
+    : ComptonProfile(), m_integrationSteps(256), m_thetaStep(0.0), m_phiStep(0.0) {}
 
 /**
  * @returns A string containing the name of the function
  */
-std::string MultivariateGaussianComptonProfile::name() const {
-  return "MultivariateGaussianComptonProfile";
-}
+std::string MultivariateGaussianComptonProfile::name() const { return "MultivariateGaussianComptonProfile"; }
 
 void MultivariateGaussianComptonProfile::declareParameters() {
   ComptonProfile::declareParameters();
@@ -53,19 +50,16 @@ void MultivariateGaussianComptonProfile::declareAttributes() {
  * @param name The name of the attribute
  * @param value The attribute's value
  */
-void MultivariateGaussianComptonProfile::setAttribute(const std::string &name,
-                                                      const Attribute &value) {
+void MultivariateGaussianComptonProfile::setAttribute(const std::string &name, const Attribute &value) {
   ComptonProfile::setAttribute(name, value);
   if (name == STEPS_ATTR) {
     int steps = value.asInt();
 
     if (steps < 1)
-      throw std::runtime_error(std::string(STEPS_ATTR) +
-                               " attribute must be positive and non-zero");
+      throw std::runtime_error(std::string(STEPS_ATTR) + " attribute must be positive and non-zero");
 
     if (steps % 2 == 1)
-      throw std::runtime_error(std::string(STEPS_ATTR) +
-                               " attribute must be an even number");
+      throw std::runtime_error(std::string(STEPS_ATTR) + " attribute must be an even number");
 
     m_integrationSteps = steps;
     m_thetaStep = M_PI / steps;
@@ -73,8 +67,7 @@ void MultivariateGaussianComptonProfile::setAttribute(const std::string &name,
   }
 }
 
-std::vector<size_t>
-MultivariateGaussianComptonProfile::intensityParameterIndices() const {
+std::vector<size_t> MultivariateGaussianComptonProfile::intensityParameterIndices() const {
   return std::vector<size_t>(1, this->parameterIndex(AMP_PARAM));
 }
 
@@ -87,13 +80,11 @@ MultivariateGaussianComptonProfile::intensityParameterIndices() const {
  * @param errors The data errors
  * @returns The number of columns filled
  */
-size_t MultivariateGaussianComptonProfile::fillConstraintMatrix(
-    Kernel::DblMatrix &cmatrix, const size_t start,
-    const HistogramData::HistogramE &errors) const {
+size_t MultivariateGaussianComptonProfile::fillConstraintMatrix(Kernel::DblMatrix &cmatrix, const size_t start,
+                                                                const HistogramData::HistogramE &errors) const {
   std::vector<double> result(ySpace().size());
   this->massProfile(result.data(), ySpace().size());
-  std::transform(result.begin(), result.end(), errors.begin(), result.begin(),
-                 std::divides<double>());
+  std::transform(result.begin(), result.end(), errors.begin(), result.begin(), std::divides<double>());
   cmatrix.setColumn(start, result);
   return 1;
 }
@@ -103,14 +94,12 @@ size_t MultivariateGaussianComptonProfile::fillConstraintMatrix(
  *               results
  * @param nData The size of the array
  */
-void MultivariateGaussianComptonProfile::massProfile(double *result,
-                                                     const size_t nData) const {
+void MultivariateGaussianComptonProfile::massProfile(double *result, const size_t nData) const {
   const double amplitude(getParameter(AMP_PARAM));
   this->massProfile(result, nData, amplitude);
 }
 
-void MultivariateGaussianComptonProfile::massProfile(
-    double *result, const size_t nData, const double amplitude) const {
+void MultivariateGaussianComptonProfile::massProfile(double *result, const size_t nData, const double amplitude) const {
   std::vector<double> s2Cache;
   buildS2Cache(s2Cache);
 
@@ -118,11 +107,9 @@ void MultivariateGaussianComptonProfile::massProfile(
   const double sigmaY(getParameter(SIGMA_Y_PARAM));
   const double sigmaZ(getParameter(SIGMA_Z_PARAM));
 
-  const double prefactorJ =
-      (1.0 / (sqrt(2.0 * M_PI) * sigmaX * sigmaY * sigmaZ)) * (2.0 / M_PI);
+  const double prefactorJ = (1.0 / (sqrt(2.0 * M_PI) * sigmaX * sigmaY * sigmaZ)) * (2.0 / M_PI);
   const double prefactorFSE =
-      (pow(sigmaX, 4) + pow(sigmaY, 4) + pow(sigmaZ, 4)) /
-      (9.0 * sqrt(2.0 * M_PI) * sigmaX * sigmaY * sigmaZ);
+      (pow(sigmaX, 4) + pow(sigmaY, 4) + pow(sigmaZ, 4)) / (9.0 * sqrt(2.0 * M_PI) * sigmaX * sigmaY * sigmaZ);
 
   const auto &yspace = ySpace();
   const auto &modq = modQ();
@@ -147,9 +134,7 @@ void MultivariateGaussianComptonProfile::massProfile(
  * @param y Y value
  * @return Mass profile
  */
-double
-MultivariateGaussianComptonProfile::calculateJ(std::vector<double> s2Cache,
-                                               double y) const {
+double MultivariateGaussianComptonProfile::calculateJ(std::vector<double> s2Cache, double y) const {
   double sum(0.0);
 
   for (int i = 0; i < m_integrationSteps; i++) {
@@ -170,9 +155,7 @@ MultivariateGaussianComptonProfile::calculateJ(std::vector<double> s2Cache,
  * @param y Y value
  * @return Additive FSE correction
  */
-double
-MultivariateGaussianComptonProfile::calculateFSE(std::vector<double> s2Cache,
-                                                 double y) const {
+double MultivariateGaussianComptonProfile::calculateFSE(std::vector<double> s2Cache, double y) const {
   double sum(0.0);
 
   for (int i = 0; i < m_integrationSteps; i++) {
@@ -217,8 +200,7 @@ double MultivariateGaussianComptonProfile::intervalCoeff(int i, int j) const {
  * @brief Caches values of S2 for all theta and phi in integration range.
  * @param s2Cache Reference to vector to cache S2 values in
  */
-void MultivariateGaussianComptonProfile::buildS2Cache(
-    std::vector<double> &s2Cache) const {
+void MultivariateGaussianComptonProfile::buildS2Cache(std::vector<double> &s2Cache) const {
   s2Cache.clear();
 
   double sigmaX2(getParameter(SIGMA_X_PARAM));

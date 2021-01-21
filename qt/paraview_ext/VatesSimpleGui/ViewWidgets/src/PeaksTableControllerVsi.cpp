@@ -75,23 +75,16 @@ Mantid::Kernel::Logger g_log("PeakViewerVsi");
  * @param cameraManager A cameraManager pointer.
  * @param parent A pointer to a QWidget parent.
  */
-PeaksTableControllerVsi::PeaksTableControllerVsi(
-    std::shared_ptr<CameraManager> cameraManager, QWidget *parent)
-    : QWidget(parent), m_cameraManager(cameraManager),
-      m_presenter(new Mantid::VATES::CompositePeaksPresenterVsi()),
+PeaksTableControllerVsi::PeaksTableControllerVsi(std::shared_ptr<CameraManager> cameraManager, QWidget *parent)
+    : QWidget(parent), m_cameraManager(cameraManager), m_presenter(new Mantid::VATES::CompositePeaksPresenterVsi()),
       m_peaksTabWidget(nullptr), m_peakMarker(nullptr),
       m_coordinateSystem(Mantid::Kernel::SpecialCoordinateSystem::QLab) {
-  m_peakTransformSelector.registerCandidate(
-      std::make_shared<Mantid::Geometry::PeakTransformHKLFactory>());
-  m_peakTransformSelector.registerCandidate(
-      std::make_shared<Mantid::Geometry::PeakTransformQSampleFactory>());
-  m_peakTransformSelector.registerCandidate(
-      std::make_shared<Mantid::Geometry::PeakTransformQLabFactory>());
+  m_peakTransformSelector.registerCandidate(std::make_shared<Mantid::Geometry::PeakTransformHKLFactory>());
+  m_peakTransformSelector.registerCandidate(std::make_shared<Mantid::Geometry::PeakTransformQSampleFactory>());
+  m_peakTransformSelector.registerCandidate(std::make_shared<Mantid::Geometry::PeakTransformQLabFactory>());
 }
 
-PeaksTableControllerVsi::~PeaksTableControllerVsi() {
-  destroySinglePeakSource();
-}
+PeaksTableControllerVsi::~PeaksTableControllerVsi() { destroySinglePeakSource(); }
 
 /**
  * Check for viewable peaks.
@@ -119,59 +112,45 @@ std::vector<bool> PeaksTableControllerVsi::getViewablePeaks() {
  * @param source A new peaks source
  * @param splatSource A pointer to the splatter source
  */
-void PeaksTableControllerVsi::addWorkspace(pqPipelineSource *source,
-                                           pqPipelineSource *splatSource) {
+void PeaksTableControllerVsi::addWorkspace(pqPipelineSource *source, pqPipelineSource *splatSource) {
   try {
     if (!source || !splatSource) {
-      throw std::invalid_argument(
-          "The pqPipelineSource of the peaks workspace does not exist.");
+      throw std::invalid_argument("The pqPipelineSource of the peaks workspace does not exist.");
     }
 
     // Get the pointer to the peaks workspace
-    std::string wsName(
-        vtkSMPropertyHelper(source->getProxy(), "WorkspaceName", true)
-            .GetAsString());
-    std::string peaksFrame(
-        vtkSMPropertyHelper(source->getProxy(), "Peak Dimensions", true)
-            .GetAsString());
+    std::string wsName(vtkSMPropertyHelper(source->getProxy(), "WorkspaceName", true).GetAsString());
+    std::string peaksFrame(vtkSMPropertyHelper(source->getProxy(), "Peak Dimensions", true).GetAsString());
 
     // Get dimensions from splattersource
     std::vector<std::string> dimInfo = extractFrameFromSource(splatSource);
     if (dimInfo.size() < 2) {
-      throw std::invalid_argument(
-          "The workspace needs to have at least two dimensions");
+      throw std::invalid_argument("The workspace needs to have at least two dimensions");
     }
 
     std::string dimCompare = dimInfo[0];
-    std::transform(dimCompare.begin(), dimCompare.end(), dimCompare.begin(),
-                   ::toupper);
-    std::transform(peaksFrame.begin(), peaksFrame.end(), peaksFrame.begin(),
-                   ::toupper);
+    std::transform(dimCompare.begin(), dimCompare.end(), dimCompare.begin(), ::toupper);
+    std::transform(peaksFrame.begin(), peaksFrame.end(), peaksFrame.begin(), ::toupper);
     // Check if frames match
     if (dimCompare.find(peaksFrame) == std::string::npos) {
       throw std::runtime_error("The workspaces do not match.");
     }
 
     Mantid::API::IPeaksWorkspace_sptr peaksWorkspace =
-        Mantid::API::AnalysisDataService::Instance()
-            .retrieveWS<Mantid::API::IPeaksWorkspace>(wsName);
+        Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::IPeaksWorkspace>(wsName);
 
     Mantid::Geometry::PeakTransformFactory_sptr transformFactory =
         m_peakTransformSelector.makeChoice(dimInfo[0], dimInfo[1]);
-    Mantid::Geometry::PeakTransform_sptr transform =
-        transformFactory->createTransform(dimInfo[0], dimInfo[1]);
+    Mantid::Geometry::PeakTransform_sptr transform = transformFactory->createTransform(dimInfo[0], dimInfo[1]);
     std::string frame = transform->getFriendlyName();
 
-    m_presenter->addPresenter(
-        std::make_shared<Mantid::VATES::ConcretePeaksPresenterVsi>(
-            peaksWorkspace, m_cameraManager->getCurrentViewFrustum(), frame));
+    m_presenter->addPresenter(std::make_shared<Mantid::VATES::ConcretePeaksPresenterVsi>(
+        peaksWorkspace, m_cameraManager->getCurrentViewFrustum(), frame));
 
     // If the tab widget is visible, then update it
     if (m_peaksTabWidget) {
-      std::map<std::string, std::vector<bool>> viewablePeaks =
-          m_presenter->getInitializedViewablePeaks();
-      m_peaksTabWidget->addNewPeaksWorkspace(
-          peaksWorkspace, viewablePeaks[peaksWorkspace->getName()]);
+      std::map<std::string, std::vector<bool>> viewablePeaks = m_presenter->getInitializedViewablePeaks();
+      m_peaksTabWidget->addNewPeaksWorkspace(peaksWorkspace, viewablePeaks[peaksWorkspace->getName()]);
       auto colors = this->getColors();
       m_peaksTabWidget->updateTabs(viewablePeaks, colors);
       updatePeakWorkspaceColor();
@@ -196,8 +175,7 @@ std::map<std::string, QColor> PeaksTableControllerVsi::getColors() {
 
   std::map<std::string, QColor> colors;
 
-  std::vector<Mantid::API::IPeaksWorkspace_sptr> peakWs =
-      m_presenter->getPeaksWorkspaces();
+  std::vector<Mantid::API::IPeaksWorkspace_sptr> peakWs = m_presenter->getPeaksWorkspaces();
   for (auto it = peakWs.begin(); it != peakWs.end(); ++it) {
     const int pos = static_cast<int>(std::distance(peakWs.begin(), it));
     QColor color = m_peakPalette.foregroundIndexToColour(pos);
@@ -212,8 +190,7 @@ std::map<std::string, QColor> PeaksTableControllerVsi::getColors() {
  * Update the color of the peak workspace representation.
  */
 void PeaksTableControllerVsi::updatePeakWorkspaceColor() {
-  std::vector<Mantid::API::IPeaksWorkspace_sptr> peakWs =
-      m_presenter->getPeaksWorkspaces();
+  std::vector<Mantid::API::IPeaksWorkspace_sptr> peakWs = m_presenter->getPeaksWorkspaces();
   for (auto it = peakWs.begin(); it != peakWs.end(); ++it) {
     const int pos = static_cast<int>(std::distance(peakWs.begin(), it));
     QColor color = m_peakPalette.foregroundIndexToColour(pos);
@@ -222,17 +199,13 @@ void PeaksTableControllerVsi::updatePeakWorkspaceColor() {
     // Find the source whcih is associated with the peak workspace and change
     // its representation
     pqServer *server = pqActiveObjects::instance().activeServer();
-    pqServerManagerModel *smModel =
-        pqApplicationCore::instance()->getServerManagerModel();
-    const QList<pqPipelineSource *> sources =
-        smModel->findItems<pqPipelineSource *>(server);
+    pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
+    const QList<pqPipelineSource *> sources = smModel->findItems<pqPipelineSource *>(server);
     foreach (pqPipelineSource *src, sources) {
       // Make sure that the source is a peak workspace
       std::string xmlName(src->getProxy()->GetXMLName());
       if ((xmlName.find("Peaks Source") != std::string::npos)) {
-        std::string workspaceName(
-            vtkSMPropertyHelper(src->getProxy(), "WorkspaceName")
-                .GetAsString());
+        std::string workspaceName(vtkSMPropertyHelper(src->getProxy(), "WorkspaceName").GetAsString());
         if (workspaceName == name) {
           int r = color.red();
           int g = color.green();
@@ -242,16 +215,12 @@ void PeaksTableControllerVsi::updatePeakWorkspaceColor() {
           double green = static_cast<double>(g) / 255.0;
           double blue = static_cast<double>(b) / 255.0;
 
-          pqDataRepresentation *rep =
-              src->getRepresentation(pqActiveObjects::instance().activeView());
-          pqPipelineRepresentation *pipelineRepresentation =
-              qobject_cast<pqPipelineRepresentation *>(rep);
+          pqDataRepresentation *rep = src->getRepresentation(pqActiveObjects::instance().activeView());
+          pqPipelineRepresentation *pipelineRepresentation = qobject_cast<pqPipelineRepresentation *>(rep);
           pipelineRepresentation->getProxy()->UpdatePropertyInformation();
 
           vtkSMDoubleVectorProperty *prop =
-              vtkSMDoubleVectorProperty::SafeDownCast(
-                  pipelineRepresentation->getProxy()->GetProperty(
-                      "AmbientColor"));
+              vtkSMDoubleVectorProperty::SafeDownCast(pipelineRepresentation->getProxy()->GetProperty("AmbientColor"));
           prop->SetElement(0, red);
           prop->SetElement(1, green);
           prop->SetElement(2, blue);
@@ -276,8 +245,7 @@ void PeaksTableControllerVsi::updateViewableArea() {
  * Extract the frame from the source
  * @param splatSource A pointer to a splatter plot source.
  */
-std::vector<std::string>
-PeaksTableControllerVsi::extractFrameFromSource(pqPipelineSource *splatSource) {
+std::vector<std::string> PeaksTableControllerVsi::extractFrameFromSource(pqPipelineSource *splatSource) {
   pqPipelineFilter *filter = qobject_cast<pqPipelineFilter *>(splatSource);
 
   if (!filter) {
@@ -295,19 +263,13 @@ PeaksTableControllerVsi::extractFrameFromSource(pqPipelineSource *splatSource) {
     throw std::invalid_argument("The original source cannot be found.");
   }
 
-  std::string wsName(
-      vtkSMPropertyHelper(originalSource->getProxy(), "WorkspaceName", true)
-          .GetAsString());
+  std::string wsName(vtkSMPropertyHelper(originalSource->getProxy(), "WorkspaceName", true).GetAsString());
   Mantid::API::IMDEventWorkspace_sptr eventWorkspace =
-      Mantid::API::AnalysisDataService::Instance()
-          .retrieveWS<Mantid::API::IMDEventWorkspace>(wsName);
+      Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::IMDEventWorkspace>(wsName);
 
   std::vector<std::string> dimensionInfo;
   for (size_t i = 0; i < eventWorkspace->getNumDims(); i++) {
-    dimensionInfo.push_back(
-        MantidQt::API::PlotAxis(*(eventWorkspace->getDimension(i)))
-            .title()
-            .toStdString());
+    dimensionInfo.push_back(MantidQt::API::PlotAxis(*(eventWorkspace->getDimension(i))).title().toStdString());
   }
 
   // Update the current coordiate system
@@ -348,20 +310,13 @@ void PeaksTableControllerVsi::createTable() {
       // Set the layout of the table
       this->setLayout(new QVBoxLayout);
 
-      PeaksTabWidget *widget = new PeaksTabWidget(
-          m_presenter->getPeaksWorkspaces(), m_presenter->getFrame(), this);
-      QObject::connect(
-          widget, SIGNAL(zoomToPeak(Mantid::API::IPeaksWorkspace_sptr, int)),
-          this, SLOT(onZoomToPeak(Mantid::API::IPeaksWorkspace_sptr, int)));
-      QObject::connect(widget,
-                       SIGNAL(sortPeaks(const std::string &, const bool,
-                                        Mantid::API::IPeaksWorkspace_sptr)),
-                       this,
-                       SLOT(onPeaksSorted(const std::string &, const bool,
-                                          Mantid::API::IPeaksWorkspace_sptr)));
+      PeaksTabWidget *widget = new PeaksTabWidget(m_presenter->getPeaksWorkspaces(), m_presenter->getFrame(), this);
+      QObject::connect(widget, SIGNAL(zoomToPeak(Mantid::API::IPeaksWorkspace_sptr, int)), this,
+                       SLOT(onZoomToPeak(Mantid::API::IPeaksWorkspace_sptr, int)));
+      QObject::connect(widget, SIGNAL(sortPeaks(const std::string &, const bool, Mantid::API::IPeaksWorkspace_sptr)),
+                       this, SLOT(onPeaksSorted(const std::string &, const bool, Mantid::API::IPeaksWorkspace_sptr)));
       // Initialize the viewablePeaks to be true
-      std::map<std::string, std::vector<bool>> viewablePeaks =
-          m_presenter->getInitializedViewablePeaks();
+      std::map<std::string, std::vector<bool>> viewablePeaks = m_presenter->getInitializedViewablePeaks();
 
       widget->setupMvc(viewablePeaks);
       layout()->addWidget(widget);
@@ -371,12 +326,9 @@ void PeaksTableControllerVsi::createTable() {
       m_peaksTabWidget->updateTabs(viewablePeaks, colors);
       updatePeakWorkspaceColor();
     } catch (std::runtime_error &ex) {
-      g_log.warning()
-          << "Could not setup the the peaks widget for the splatterplot: "
-          << ex.what() << "\n";
+      g_log.warning() << "Could not setup the the peaks widget for the splatterplot: " << ex.what() << "\n";
     } catch (...) {
-      g_log.warning()
-          << "Could not setup the the peaks widget for the splatterplot.\n";
+      g_log.warning() << "Could not setup the the peaks widget for the splatterplot.\n";
     }
   }
 }
@@ -416,18 +368,15 @@ void PeaksTableControllerVsi::removeTable() {
  * @param peaksWorkspace The peaksworkspace which is currently being displayed.
  * @param row The selected row.
  */
-void PeaksTableControllerVsi::onZoomToPeak(
-    Mantid::API::IPeaksWorkspace_sptr peaksWorkspace, int row) {
+void PeaksTableControllerVsi::onZoomToPeak(Mantid::API::IPeaksWorkspace_sptr peaksWorkspace, int row) {
   try {
     double radius;
     Mantid::Kernel::V3D position;
 
-    m_presenter->getPeaksInfo(std::move(peaksWorkspace), row, position, radius,
-                              m_coordinateSystem);
+    m_presenter->getPeaksInfo(std::move(peaksWorkspace), row, position, radius, m_coordinateSystem);
 
     // Reset camera
-    m_cameraManager->setCameraToPeak(position[0], position[1], position[2],
-                                     radius);
+    m_cameraManager->setCameraToPeak(position[0], position[1], position[2], radius);
 
     // Place a marker glyph at the position
     if (!m_peakMarker) {
@@ -450,15 +399,12 @@ void PeaksTableControllerVsi::onZoomToPeak(
  * @param position3 Position 3 of the glyph.
  * @param radius The radius of the peak.
  */
-void PeaksTableControllerVsi::generateSinglePeaksSource(double position1,
-                                                        double position2,
-                                                        double position3,
+void PeaksTableControllerVsi::generateSinglePeaksSource(double position1, double position2, double position3,
                                                         double radius) {
   // Create the source from the plugin
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
   pqServer *server = pqActiveObjects::instance().activeServer();
-  pqPipelineSource *src =
-      builder->createSource("sources", "SinglePeakMarkerSource", server);
+  pqPipelineSource *src = builder->createSource("sources", "SinglePeakMarkerSource", server);
   vtkSMPropertyHelper(src->getProxy(), "Position1").Set(position1);
   vtkSMPropertyHelper(src->getProxy(), "Position2").Set(position2);
   vtkSMPropertyHelper(src->getProxy(), "Position3").Set(position3);
@@ -470,8 +416,8 @@ void PeaksTableControllerVsi::generateSinglePeaksSource(double position1,
   srcProxy->UpdatePipelineInformation();
   src->updatePipeline();
 
-  pqDataRepresentation *drep = builder->createDataRepresentation(
-      src->getOutputPort(0), pqActiveObjects::instance().activeView());
+  pqDataRepresentation *drep =
+      builder->createDataRepresentation(src->getOutputPort(0), pqActiveObjects::instance().activeView());
   vtkSMPropertyHelper(drep->getProxy(), "Representation").Set("Surface");
   srcProxy->UpdateVTKObjects();
   srcProxy->Modified();
@@ -484,8 +430,7 @@ void PeaksTableControllerVsi::generateSinglePeaksSource(double position1,
 
   // We need to make sure we detect when the source is destroyed, as the user
   // can delete it in the pipeline browser
-  QObject::connect(m_peakMarker, SIGNAL(destroyed()), this,
-                   SLOT(onPeakMarkerDestroyed()));
+  QObject::connect(m_peakMarker, SIGNAL(destroyed()), this, SLOT(onPeakMarkerDestroyed()));
 }
 
 /**
@@ -493,8 +438,7 @@ void PeaksTableControllerVsi::generateSinglePeaksSource(double position1,
  */
 void PeaksTableControllerVsi::destroySinglePeakSource() {
   if (m_peakMarker) {
-    pqObjectBuilder *builder =
-        pqApplicationCore::instance()->getObjectBuilder();
+    pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
     builder->destroy(m_peakMarker);
 
     m_peakMarker = nullptr;
@@ -504,9 +448,7 @@ void PeaksTableControllerVsi::destroySinglePeakSource() {
 /**
  * On Single Peak Marker destroyed
  */
-void PeaksTableControllerVsi::onPeakMarkerDestroyed() {
-  m_peakMarker = nullptr;
-}
+void PeaksTableControllerVsi::onPeakMarkerDestroyed() { m_peakMarker = nullptr; }
 
 /**
  * Reset the single peak source
@@ -515,17 +457,14 @@ void PeaksTableControllerVsi::onPeakMarkerDestroyed() {
  * @param position3 Position 3 of the glyph.
  * @param radius The radius of the peak.
  */
-void PeaksTableControllerVsi::resetSinglePeaksSource(double position1,
-                                                     double position2,
-                                                     double position3,
+void PeaksTableControllerVsi::resetSinglePeaksSource(double position1, double position2, double position3,
                                                      double radius) {
   vtkSMPropertyHelper(m_peakMarker->getProxy(), "Position1").Set(position1);
   vtkSMPropertyHelper(m_peakMarker->getProxy(), "Position2").Set(position2);
   vtkSMPropertyHelper(m_peakMarker->getProxy(), "Position3").Set(position3);
   vtkSMPropertyHelper(m_peakMarker->getProxy(), "RadiusMarker").Set(radius);
 
-  vtkSMSourceProxy *srcProxy =
-      vtkSMSourceProxy::SafeDownCast(m_peakMarker->getProxy());
+  vtkSMSourceProxy *srcProxy = vtkSMSourceProxy::SafeDownCast(m_peakMarker->getProxy());
   srcProxy->UpdateVTKObjects();
   srcProxy->Modified();
   srcProxy->UpdatePipelineInformation();
@@ -539,10 +478,8 @@ void PeaksTableControllerVsi::resetSinglePeaksSource(double position1,
  * @param delimiter The delimiter to concatenate workspace names.
  * @returns The concatenated workspace names.
  */
-std::string PeaksTableControllerVsi::getConcatenatedWorkspaceNames(
-    const std::string &delimiter) {
-  std::vector<std::string> peaksWorkspaceNames =
-      m_presenter->getPeaksWorkspaceNames();
+std::string PeaksTableControllerVsi::getConcatenatedWorkspaceNames(const std::string &delimiter) {
+  std::vector<std::string> peaksWorkspaceNames = m_presenter->getPeaksWorkspaceNames();
   std::stringstream stream;
   for (size_t i = 0; i < peaksWorkspaceNames.size(); i++) {
     stream << peaksWorkspaceNames[i];
@@ -559,23 +496,19 @@ std::string PeaksTableControllerVsi::getConcatenatedWorkspaceNames(
  * @param peakSources A list with available peak sources
  * @param splatSource The splatterplot source
  */
-void PeaksTableControllerVsi::updatePeaksWorkspaces(
-    const QList<QPointer<pqPipelineSource>> &peakSources,
-    pqPipelineSource *splatSource) {
+void PeaksTableControllerVsi::updatePeaksWorkspaces(const QList<QPointer<pqPipelineSource>> &peakSources,
+                                                    pqPipelineSource *splatSource) {
   // Check if the presenters exist and which need to be added
   std::vector<std::string> peaksWorkspaceNames;
 
   std::vector<pqPipelineSource *> nonTrackedWorkspaces;
-  std::vector<std::string> trackedWorkspaceNames =
-      m_presenter->getPeaksWorkspaceNames();
+  std::vector<std::string> trackedWorkspaceNames = m_presenter->getPeaksWorkspaceNames();
   foreach (QPointer<pqPipelineSource> source, peakSources) {
-    std::string workspaceName(
-        vtkSMPropertyHelper(source->getProxy(), "WorkspaceName").GetAsString());
+    std::string workspaceName(vtkSMPropertyHelper(source->getProxy(), "WorkspaceName").GetAsString());
 
     peaksWorkspaceNames.push_back(workspaceName);
 
-    auto count = std::count(trackedWorkspaceNames.begin(),
-                            trackedWorkspaceNames.end(), workspaceName);
+    auto count = std::count(trackedWorkspaceNames.begin(), trackedWorkspaceNames.end(), workspaceName);
 
     if (count == 0) {
       nonTrackedWorkspaces.push_back(source);
@@ -610,9 +543,8 @@ void PeaksTableControllerVsi::updatePeaksWorkspaces(
  * @param sortAscending If sort ascending or descending.
  * @param ws The workspace which requires sorting.
  */
-void PeaksTableControllerVsi::onPeaksSorted(
-    const std::string &columnToSortBy, const bool sortAscending,
-    const Mantid::API::IPeaksWorkspace_sptr ws) {
+void PeaksTableControllerVsi::onPeaksSorted(const std::string &columnToSortBy, const bool sortAscending,
+                                            const Mantid::API::IPeaksWorkspace_sptr ws) {
   // Invoke the ording command on the presenters
   m_presenter->sortPeaksWorkspace(columnToSortBy, sortAscending, ws);
   // Update the tabs
@@ -623,10 +555,8 @@ void PeaksTableControllerVsi::onPeaksSorted(
  */
 void PeaksTableControllerVsi::setPeakSourceColorToDefault() {
   pqServer *server = pqActiveObjects::instance().activeServer();
-  pqServerManagerModel *smModel =
-      pqApplicationCore::instance()->getServerManagerModel();
-  QList<pqPipelineSource *> sources =
-      smModel->findItems<pqPipelineSource *>(server);
+  pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
+  QList<pqPipelineSource *> sources = smModel->findItems<pqPipelineSource *>(server);
   for (auto src = sources.begin(); src != sources.end(); ++src) {
 
     std::string xmlName((*src)->getProxy()->GetXMLName());
@@ -635,20 +565,18 @@ void PeaksTableControllerVsi::setPeakSourceColorToDefault() {
       double green = 1.0;
       double blue = 1.0;
 
-      pqDataRepresentation *rep =
-          (*src)->getRepresentation(pqActiveObjects::instance().activeView());
+      pqDataRepresentation *rep = (*src)->getRepresentation(pqActiveObjects::instance().activeView());
       if (!rep) {
         continue;
       }
-      pqPipelineRepresentation *pipelineRepresentation =
-          qobject_cast<pqPipelineRepresentation *>(rep);
+      pqPipelineRepresentation *pipelineRepresentation = qobject_cast<pqPipelineRepresentation *>(rep);
       if (!pipelineRepresentation) {
         continue;
       }
       pipelineRepresentation->getProxy()->UpdatePropertyInformation();
 
-      vtkSMDoubleVectorProperty *prop = vtkSMDoubleVectorProperty::SafeDownCast(
-          pipelineRepresentation->getProxy()->GetProperty("AmbientColor"));
+      vtkSMDoubleVectorProperty *prop =
+          vtkSMDoubleVectorProperty::SafeDownCast(pipelineRepresentation->getProxy()->GetProperty("AmbientColor"));
       prop->SetElement(0, red);
       prop->SetElement(1, green);
       prop->SetElement(2, blue);

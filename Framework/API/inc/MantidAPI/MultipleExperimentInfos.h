@@ -48,8 +48,7 @@ private:
 };
 
 using MultipleExperimentInfos_sptr = std::shared_ptr<MultipleExperimentInfos>;
-using MultipleExperimentInfos_const_sptr =
-    std::shared_ptr<const MultipleExperimentInfos>;
+using MultipleExperimentInfos_const_sptr = std::shared_ptr<const MultipleExperimentInfos>;
 
 } // namespace API
 } // namespace Mantid

@@ -24,8 +24,7 @@ namespace Geometry {
 */
 class MANTID_GEOMETRY_DLL HKLFilterWavelength final : public HKLFilter {
 public:
-  HKLFilterWavelength(const Kernel::DblMatrix &ub, double lambdaMin,
-                      double lambdaMax);
+  HKLFilterWavelength(const Kernel::DblMatrix &ub, double lambdaMin, double lambdaMax);
 
   std::string getDescription() const noexcept override;
   bool isAllowed(const Kernel::V3D &hkl) const noexcept override;

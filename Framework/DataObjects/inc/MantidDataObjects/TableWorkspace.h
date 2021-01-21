@@ -71,28 +71,21 @@ public:
   TableWorkspace &operator=(const TableWorkspace &other) = delete;
 
   /// Returns a clone of the workspace
-  std::unique_ptr<TableWorkspace> clone() const {
-    return std::unique_ptr<TableWorkspace>(doClone());
-  }
+  std::unique_ptr<TableWorkspace> clone() const { return std::unique_ptr<TableWorkspace>(doClone()); }
 
   /// Returns a default-initialized clone of the workspace
-  std::unique_ptr<TableWorkspace> cloneEmpty() const {
-    return std::unique_ptr<TableWorkspace>(doCloneEmpty());
-  }
+  std::unique_ptr<TableWorkspace> cloneEmpty() const { return std::unique_ptr<TableWorkspace>(doCloneEmpty()); }
 
   /// Return the workspace typeID
   const std::string id() const override { return "TableWorkspace"; }
   /// Get the footprint in memory in KB.
   size_t getMemorySize() const override;
   /// Creates a new column.
-  API::Column_sptr addColumn(const std::string &type,
-                             const std::string &name) override;
+  API::Column_sptr addColumn(const std::string &type, const std::string &name) override;
   /// Removes a column.
   void removeColumn(const std::string &name) override;
   /// Number of columns in the workspace.
-  size_t columnCount() const override {
-    return static_cast<int>(m_columns.size());
-  }
+  size_t columnCount() const override { return static_cast<int>(m_columns.size()); }
   /// Gets the shared pointer to a column.
   API::Column_sptr getColumn(const std::string &name) override;
   API::Column_const_sptr getColumn(const std::string &name) const override;
@@ -146,8 +139,7 @@ public:
   template <class T> std::vector<T> &getColVector(const std::string &name) {
     auto ci = std::find_if(m_columns.begin(), m_columns.end(), FindName(name));
     if (ci == m_columns.end())
-      throw(
-          std::runtime_error("column with name: " + name + " does not exist"));
+      throw(std::runtime_error("column with name: " + name + " does not exist"));
     auto pTableCol = dynamic_cast<TableColumn<T> *>(ci->get());
     if (pTableCol)
       return pTableCol->data();
@@ -157,12 +149,10 @@ public:
     }
   }
   /** get access to column vector for column with given name  */
-  template <class T>
-  const std::vector<T> &getColVector(const std::string &name) const {
+  template <class T> const std::vector<T> &getColVector(const std::string &name) const {
     auto ci = std::find_if(m_columns.begin(), m_columns.end(), FindName(name));
     if (ci == m_columns.end())
-      throw(
-          std::runtime_error("column with name: " + name + " does not exist"));
+      throw(std::runtime_error("column with name: " + name + " does not exist"));
     auto pTableCol = dynamic_cast<TableColumn<T> *>(ci->get());
     if (pTableCol)
       return pTableCol->data();
@@ -219,55 +209,42 @@ public:
    * @param  row  row number of the value  searched
    * @param  col  column number of the value searched
    */
-  void find(size_t value, size_t &row, const size_t &col) override {
-    findValue(value, row, col);
-  }
+  void find(size_t value, size_t &row, const size_t &col) override { findValue(value, row, col); }
   /** This method finds the row and column index of an string cell value in a
    * table workspace
    * @param value :: -value to search
    * @param  row  row number of the value  searched
    * @param  col  column number of the value searched
    */
-  void find(std::string value, size_t &row, const size_t &col) override {
-    findValue(value, row, col);
-  }
+  void find(std::string value, size_t &row, const size_t &col) override { findValue(value, row, col); }
   /** This method finds the row and column index of an float value in a table
    * workspace
    * @param value :: -value to search
    * @param  row  row number of the value  searched
    * @param  col  column number of the value searched
    */
-  void find(float value, size_t &row, const size_t &col) override {
-    findValue(value, row, col);
-  }
+  void find(float value, size_t &row, const size_t &col) override { findValue(value, row, col); }
   /** This method finds the row and column index of an API::Bollean value in a
    * table workspace
    * @param value :: -value to search
    * @param  row  row number of the value  searched
    * @param  col  column number of the value searched
    */
-  void find(API::Boolean value, size_t &row, const size_t &col) override {
-    findValue(value, row, col);
-  }
+  void find(API::Boolean value, size_t &row, const size_t &col) override { findValue(value, row, col); }
   /** This method finds the row and column index of an double cell value in a
    * table workspace
    * @param value :: -value to search
    * @param  row  row number of the value  searched
    * @param  col  column number of the value searched
    */
-  void find(double value, size_t &row, const size_t &col) override {
-    findValue(value, row, col);
-  }
+  void find(double value, size_t &row, const size_t &col) override { findValue(value, row, col); }
   /** This method finds the row and column index of an Mantid::Kernel::V3D cell
    * value in a table workspace
    * @param value :: -value to search
    * @param  row  row number of the value  searched
    * @param  col  column number of the value searched
    */
-  void find(Mantid::Kernel::V3D value, size_t &row,
-            const size_t &col) override {
-    findValue(value, row, col);
-  }
+  void find(Mantid::Kernel::V3D value, size_t &row, const size_t &col) override { findValue(value, row, col); }
   /** Casts cells through converting their values to/from double without type
    * checking;
    * Can produce stuped results in case if the type is in any way not related to
@@ -276,8 +253,7 @@ public:
     API::Column_sptr spCol = this->m_columns[nCol];
     return static_cast<U>(spCol->operator[](nRow));
   }
-  template <class U>
-  U cell_cast(size_t nRow, const std::string &col_name) const {
+  template <class U> U cell_cast(size_t nRow, const std::string &col_name) const {
     API::Column_const_sptr spCol = this->getColumn(col_name);
     return static_cast<U>(spCol->operator[](nRow));
   }
@@ -290,18 +266,14 @@ protected:
   TableWorkspace(const TableWorkspace &other);
 
 private:
-  TableWorkspace *doClone() const override {
-    return doCloneColumns(std::vector<std::string>());
-  }
+  TableWorkspace *doClone() const override { return doCloneColumns(std::vector<std::string>()); }
 
   TableWorkspace *doCloneEmpty() const override { return new TableWorkspace(); }
 
-  TableWorkspace *
-  doCloneColumns(const std::vector<std::string> &colNames) const override;
+  TableWorkspace *doCloneColumns(const std::vector<std::string> &colNames) const override;
 
   /// template method to find a given value in a table.
-  template <typename Type>
-  void findValue(const Type value, size_t &row, const size_t &colIndex) {
+  template <typename Type> void findValue(const Type value, size_t &row, const size_t &colIndex) {
 
     try {
       TableColumn_ptr<Type> tc_sptr = getColumn(colIndex);
@@ -332,9 +304,7 @@ private:
    * @param  row  row number of the value  searched
    * @param  col  column number of the value searched
    */
-  virtual void find(size_t value, size_t &row, size_t &col) {
-    findValue(value, row, col);
-  }
+  virtual void find(size_t value, size_t &row, size_t &col) { findValue(value, row, col); }
   /** This method finds the row and column index of an string cell value in a
    * table workspace
    * @param value :: -value to search
@@ -342,9 +312,7 @@ private:
    * @param  col  column number of the value searched
    */
   virtual void find(std::string value, size_t &row, size_t &col) {
-    findValue(std::move(std::move(std::move(std::move(
-                  std::move(std::move(std::move(std::move(value)))))))),
-              row, col);
+    findValue(std::move(std::move(std::move(std::move(std::move(std::move(std::move(std::move(value)))))))), row, col);
   }
   /** This method finds the row and column index of an float value in a table
    * workspace
@@ -352,36 +320,28 @@ private:
    * @param  row  row number of the value  searched
    * @param  col  column number of the value searched
    */
-  virtual void find(float value, size_t &row, size_t &col) {
-    findValue(value, row, col);
-  }
+  virtual void find(float value, size_t &row, size_t &col) { findValue(value, row, col); }
   /** This method finds the row and column index of an API::Bollean value in a
    * table workspace
    * @param value :: -value to search
    * @param  row  row number of the value  searched
    * @param  col  column number of the value searched
    */
-  virtual void find(API::Boolean value, size_t &row, size_t &col) {
-    findValue(value, row, col);
-  }
+  virtual void find(API::Boolean value, size_t &row, size_t &col) { findValue(value, row, col); }
   /** This method finds the row and column index of an double cell value in a
    * table workspace
    * @param value :: -value to search
    * @param  row  row number of the value  searched
    * @param  col  column number of the value searched
    */
-  virtual void find(double value, size_t &row, size_t &col) {
-    findValue(value, row, col);
-  }
+  virtual void find(double value, size_t &row, size_t &col) { findValue(value, row, col); }
   /** This method finds the row and column index of an Mantid::Kernel::V3D cell
    * value in a table workspace
    * @param value :: -value to search
    * @param  row  row number of the value  searched
    * @param  col  column number of the value searched
    */
-  void find(Mantid::Kernel::V3D value, size_t &row, size_t &col) {
-    findValue(value, row, col);
-  }
+  void find(Mantid::Kernel::V3D value, size_t &row, size_t &col) { findValue(value, row, col); }
 
 private:
   /// Used in std::find_if algorithm to find a Column with name \a name.
@@ -391,21 +351,15 @@ private:
     /// Constructor
     FindName(const std::string &name) : m_name(name) {}
     /// Comparison operator
-    bool operator()(std::shared_ptr<API::Column> &cp) const {
-      return cp->name() == m_name;
-    }
-    bool operator()(const std::shared_ptr<const API::Column> &cp) const {
-      return cp->name() == m_name;
-    }
+    bool operator()(std::shared_ptr<API::Column> &cp) const { return cp->name() == m_name; }
+    bool operator()(const std::shared_ptr<const API::Column> &cp) const { return cp->name() == m_name; }
   };
 
-  using column_it =
-      std::vector<std::shared_ptr<API::Column>>::iterator; ///< Column
-                                                           ///< iterator
+  using column_it = std::vector<std::shared_ptr<API::Column>>::iterator; ///< Column
+                                                                         ///< iterator
 
   ///< Column const iterator
-  using column_const_it =
-      std::vector<std::shared_ptr<API::Column>>::const_iterator;
+  using column_const_it = std::vector<std::shared_ptr<API::Column>>::const_iterator;
 
   /// Shared pointers to the columns.
   std::vector<std::shared_ptr<API::Column>> m_columns;

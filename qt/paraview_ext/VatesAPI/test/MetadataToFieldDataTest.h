@@ -44,12 +44,10 @@ public:
     function(fieldData.GetPointer(), testData, id);
 
     // convert vtkchararray back into a string.
-    vtkCharArray *carry =
-        dynamic_cast<vtkCharArray *>(fieldData->GetArray(id.c_str()));
+    vtkCharArray *carry = dynamic_cast<vtkCharArray *>(fieldData->GetArray(id.c_str()));
 
-    TSM_ASSERT_EQUALS(
-        "The result does not match the input. Metadata not properly converted.",
-        testData, convertCharArrayToString(carry));
+    TSM_ASSERT_EQUALS("The result does not match the input. Metadata not properly converted.", testData,
+                      convertCharArrayToString(carry));
   }
 
   void testMetaDataToFieldDataWithEmptyFieldData() {
@@ -61,11 +59,9 @@ public:
     function(emptyFieldData.GetPointer(), testData.c_str(), id.c_str());
 
     // convert vtkchararray back into a string.
-    vtkCharArray *carry =
-        dynamic_cast<vtkCharArray *>(emptyFieldData->GetArray(id.c_str()));
+    vtkCharArray *carry = dynamic_cast<vtkCharArray *>(emptyFieldData->GetArray(id.c_str()));
 
-    TSM_ASSERT_EQUALS(
-        "The result does not match the input. Metadata not properly converted.",
-        testData, convertCharArrayToString(carry));
+    TSM_ASSERT_EQUALS("The result does not match the input. Metadata not properly converted.", testData,
+                      convertCharArrayToString(carry));
   }
 };

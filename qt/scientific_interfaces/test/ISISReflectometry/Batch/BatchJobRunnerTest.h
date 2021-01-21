@@ -17,8 +17,7 @@
 #include <gtest/gtest.h>
 
 using namespace MantidQt::CustomInterfaces::ISISReflectometry;
-using namespace MantidQt::CustomInterfaces::ISISReflectometry::
-    ModelCreationHelper;
+using namespace MantidQt::CustomInterfaces::ISISReflectometry::ModelCreationHelper;
 using Mantid::API::Workspace_sptr;
 using Mantid::DataObjects::Workspace2D_sptr;
 using MantidQt::API::IConfiguredAlgorithm;
@@ -37,9 +36,8 @@ public:
   // class
 
   BatchJobRunnerTest()
-      : m_instruments{"INTER", "OFFSPEC", "POLREF", "SURF", "CRISP"},
-        m_tolerance(0.1), m_experiment(makeEmptyExperiment()),
-        m_instrument(makeEmptyInstrument()),
+      : m_instruments{"INTER", "OFFSPEC", "POLREF", "SURF", "CRISP"}, m_tolerance(0.1),
+        m_experiment(makeEmptyExperiment()), m_instrument(makeEmptyInstrument()),
         m_runsTable(m_instruments, m_tolerance, ReductionJobs()), m_slicing() {
     m_jobAlgorithm = std::make_shared<MockBatchJobAlgorithm>();
   }
@@ -63,22 +61,18 @@ protected:
     BatchJobRunnerFriend(Batch batch) : BatchJobRunner(batch) {}
   };
 
-  void verifyAndClear() {
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_jobAlgorithm));
-  }
+  void verifyAndClear() { TS_ASSERT(Mock::VerifyAndClearExpectations(&m_jobAlgorithm)); }
 
   RunsTable makeRunsTable(ReductionJobs reductionJobs) {
     return RunsTable(m_instruments, m_tolerance, std::move(reductionJobs));
   }
 
-  BatchJobRunnerFriend
-  makeJobRunner(ReductionJobs reductionJobs = ReductionJobs()) {
+  BatchJobRunnerFriend makeJobRunner(ReductionJobs reductionJobs = ReductionJobs()) {
     m_experiment = makeEmptyExperiment();
     m_instrument = makeEmptyInstrument();
     m_runsTable = makeRunsTable(std::move(reductionJobs));
     m_slicing = Slicing();
-    return BatchJobRunnerFriend(
-        Batch(m_experiment, m_instrument, m_runsTable, m_slicing));
+    return BatchJobRunnerFriend(Batch(m_experiment, m_instrument, m_runsTable, m_slicing));
   }
 
   Workspace2D_sptr createWorkspace() {
@@ -87,37 +81,26 @@ protected:
   }
 
   Row *getRow(BatchJobRunnerFriend &jobRunner, int groupIndex, int rowIndex) {
-    auto &reductionJobs =
-        jobRunner.m_batch.mutableRunsTable().mutableReductionJobs();
-    auto *row = &reductionJobs.mutableGroups()[groupIndex]
-                     .mutableRows()[rowIndex]
-                     .get();
+    auto &reductionJobs = jobRunner.m_batch.mutableRunsTable().mutableReductionJobs();
+    auto *row = &reductionJobs.mutableGroups()[groupIndex].mutableRows()[rowIndex].get();
     return row;
   }
 
   Group &getGroup(BatchJobRunnerFriend &jobRunner, int groupIndex) {
-    auto &reductionJobs =
-        jobRunner.m_batch.mutableRunsTable().mutableReductionJobs();
+    auto &reductionJobs = jobRunner.m_batch.mutableRunsTable().mutableReductionJobs();
     auto &group = reductionJobs.mutableGroups()[groupIndex];
     return group;
   }
 
   void selectGroup(BatchJobRunnerFriend &jobRunner, int groupIndex) {
-    jobRunner.m_rowLocationsToProcess.push_back(
-        MantidQt::MantidWidgets::Batch::RowPath{groupIndex});
-    auto selectedRowLocation =
-        MantidQt::MantidWidgets::Batch::RowPath{groupIndex};
-    jobRunner.m_batch.mutableRunsTable().appendSelectedRowLocations(
-        std::move(selectedRowLocation));
+    jobRunner.m_rowLocationsToProcess.push_back(MantidQt::MantidWidgets::Batch::RowPath{groupIndex});
+    auto selectedRowLocation = MantidQt::MantidWidgets::Batch::RowPath{groupIndex};
+    jobRunner.m_batch.mutableRunsTable().appendSelectedRowLocations(std::move(selectedRowLocation));
   }
 
-  void selectRow(BatchJobRunnerFriend &jobRunner, int groupIndex,
-                 int rowIndex) {
-    jobRunner.m_rowLocationsToProcess.push_back(
-        MantidQt::MantidWidgets::Batch::RowPath{groupIndex, rowIndex});
-    auto selectedPath =
-        MantidQt::MantidWidgets::Batch::RowPath{groupIndex, rowIndex};
-    jobRunner.m_batch.mutableRunsTable().appendSelectedRowLocations(
-        {std::move(selectedPath)});
+  void selectRow(BatchJobRunnerFriend &jobRunner, int groupIndex, int rowIndex) {
+    jobRunner.m_rowLocationsToProcess.push_back(MantidQt::MantidWidgets::Batch::RowPath{groupIndex, rowIndex});
+    auto selectedPath = MantidQt::MantidWidgets::Batch::RowPath{groupIndex, rowIndex};
+    jobRunner.m_batch.mutableRunsTable().appendSelectedRowLocations({std::move(selectedPath)});
   }
 };

@@ -15,8 +15,7 @@ namespace DataObjects {
  * @param outD the number of output dimensions
  * @param inD the nubmer of input dimensions
  */
-AffineMatrixParameter::AffineMatrixParameter(size_t outD, size_t inD)
-    : m_affineMatrix(outD + 1, inD + 1) {
+AffineMatrixParameter::AffineMatrixParameter(size_t outD, size_t inD) : m_affineMatrix(outD + 1, inD + 1) {
   m_isValid = false;
   m_affineMatrix.identityMatrix();
   size_t nx = m_affineMatrix.numRows();
@@ -56,9 +55,7 @@ void AffineMatrixParameter::copyRawMatrix() {
  *
  * @return A copy of the underlying affine matrix.
  */
-AffineMatrixType AffineMatrixParameter::getAffineMatrix() const {
-  return m_affineMatrix;
-}
+AffineMatrixType AffineMatrixParameter::getAffineMatrix() const { return m_affineMatrix; }
 
 //----------------------------------------------------------------------------------------------
 /** Get the matrix in its raw array form.
@@ -72,9 +69,7 @@ coord_t **AffineMatrixParameter::getRawMatrix() { return m_rawMatrix; }
  *
  * @return Parameter name.
  */
-std::string AffineMatrixParameter::getName() const {
-  return AffineMatrixParameter::parameterName();
-}
+std::string AffineMatrixParameter::getName() const { return AffineMatrixParameter::parameterName(); }
 
 //----------------------------------------------------------------------------------------------
 /** Serialize the Affine Matrix Parameter
@@ -109,8 +104,7 @@ std::string AffineMatrixParameter::toXMLString() const {
  * @return Cloned parameter.
  */
 AffineMatrixParameter *AffineMatrixParameter::clone() const {
-  return new AffineMatrixParameter(m_affineMatrix.numRows() - 1,
-                                   m_affineMatrix.numCols() - 1);
+  return new AffineMatrixParameter(m_affineMatrix.numRows() - 1, m_affineMatrix.numCols() - 1);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -125,8 +119,7 @@ bool AffineMatrixParameter::isValid() const { return m_isValid; }
  * @param other : another affine matrix to assign from.
  * @return ref to assigned object
  */
-AffineMatrixParameter &AffineMatrixParameter::
-operator=(const AffineMatrixParameter &other) {
+AffineMatrixParameter &AffineMatrixParameter::operator=(const AffineMatrixParameter &other) {
   if ((other.m_affineMatrix.numCols() != this->m_affineMatrix.numCols()) ||
       (other.m_affineMatrix.numRows() != this->m_affineMatrix.numRows())) {
     throw std::runtime_error("Cannot make assignemnts between "

@@ -19,8 +19,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class MANTIDQT_INDIRECT_DLL IndirectSettingsView
-    : public IIndirectSettingsView {
+class MANTIDQT_INDIRECT_DLL IndirectSettingsView : public IIndirectSettingsView {
   Q_OBJECT
 
 public:

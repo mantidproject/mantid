@@ -36,8 +36,7 @@
 #include <qwt_symbol.h>
 
 LegendWidget::LegendWidget(Plot *plot)
-    : QWidget(plot), d_plot(plot), d_frame(0), d_angle(0), d_x(0.), d_y(0.),
-      d_fixed_coordinates(false) {
+    : QWidget(plot), d_plot(plot), d_frame(0), d_angle(0), d_x(0.), d_y(0.), d_fixed_coordinates(false) {
   setAttribute(Qt::WA_DeleteOnClose);
 
   d_text = new QwtText(QString::null, QwtText::RichText);
@@ -60,10 +59,8 @@ LegendWidget::LegendWidget(Plot *plot)
   d_selector = nullptr;
 
   connect(this, SIGNAL(showDialog()), plot->parent(), SIGNAL(viewTextDialog()));
-  connect(this, SIGNAL(showMenu()), plot->parent(),
-          SIGNAL(showMarkerPopupMenu()));
-  connect(this, SIGNAL(enableEditor()), plot->parent(),
-          SLOT(enableTextEditor()));
+  connect(this, SIGNAL(showMenu()), plot->parent(), SIGNAL(showMarkerPopupMenu()));
+  connect(this, SIGNAL(enableEditor()), plot->parent(), SLOT(enableTextEditor()));
 
   setMouseTracking(true);
   show();
@@ -91,8 +88,7 @@ void LegendWidget::paintEvent(QPaintEvent *e) {
   e->accept();
 }
 
-void LegendWidget::print(QPainter *painter,
-                         const QwtScaleMap map[QwtPlot::axisCnt]) {
+void LegendWidget::print(QPainter *painter, const QwtScaleMap map[QwtPlot::axisCnt]) {
   int x = map[QwtPlot::xBottom].transform(xValue());
   int y = map[QwtPlot::yLeft].transform(yValue());
 
@@ -129,8 +125,7 @@ void LegendWidget::setTextColor(const QColor &c) {
 }
 
 void LegendWidget::setOriginCoord(double x, double y) {
-  QPoint pos(d_plot->transform(QwtPlot::xBottom, x),
-             d_plot->transform(QwtPlot::yLeft, y));
+  QPoint pos(d_plot->transform(QwtPlot::xBottom, x), d_plot->transform(QwtPlot::yLeft, y));
   pos = d_plot->canvas()->mapToParent(pos);
   move(pos);
 }
@@ -162,10 +157,8 @@ void LegendWidget::drawFrame(QPainter *p, const QRect &rect) {
     p->setBrush(d_text->backgroundBrush());
     QwtPainter::drawRect(p, rect);
   } else if (d_frame == Shadow) {
-    QRect shadow_right =
-        QRect(rect.right() + 1, rect.y() + 5, 5, rect.height());
-    QRect shadow_bottom =
-        QRect(rect.x() + 5, rect.bottom() + 1, rect.width(), 5);
+    QRect shadow_right = QRect(rect.right() + 1, rect.y() + 5, 5, rect.height());
+    QRect shadow_bottom = QRect(rect.x() + 5, rect.bottom() + 1, rect.width(), 5);
     p->setBrush(QBrush(Qt::black));
     p->drawRect(shadow_right);
     p->drawRect(shadow_bottom);
@@ -215,13 +208,11 @@ void LegendWidget::drawVector(PlotCurve *c, QPainter *p, int x, int y, int l) {
   p->restore();
 }
 
-void LegendWidget::drawSymbol(PlotCurve *c, int point, QPainter *p, int x,
-                              int y, int l) {
+void LegendWidget::drawSymbol(PlotCurve *c, int point, QPainter *p, int x, int y, int l) {
   if (!c || c->rtti() == QwtPlotItem::Rtti_PlotSpectrogram)
     return;
 
-  if (c->type() == GraphOptions::VectXYXY ||
-      c->type() == GraphOptions::VectXYAM) {
+  if (c->type() == GraphOptions::VectXYXY || c->type() == GraphOptions::VectXYAM) {
     drawVector(c, p, x, y, l);
     return;
   }
@@ -264,8 +255,7 @@ void LegendWidget::drawSymbol(PlotCurve *c, int point, QPainter *p, int x,
   p->restore();
 }
 
-void LegendWidget::drawText(QPainter *p, const QRect &rect,
-                            QwtArray<int> height, int symbolLineLength) {
+void LegendWidget::drawText(QPainter *p, const QRect &rect, QwtArray<int> height, int symbolLineLength) {
   p->save();
   if (auto g = dynamic_cast<Graph *>(d_plot->parent())) {
     if (g->antialiasing())
@@ -279,13 +269,10 @@ void LegendWidget::drawText(QPainter *p, const QRect &rect,
   QStringList titles = text.split("\n", QString::KeepEmptyParts);
 
   for (int i = 0; i < (int)titles.count(); i++) {
-    int w =
-        left_margin +
-        rect.x(); // QtiPlot Rev 1373 has this as 2nd arg: d_frame_pen.width();
+    int w = left_margin + rect.x(); // QtiPlot Rev 1373 has this as 2nd arg: d_frame_pen.width();
     bool curveSymbol = false;
     QString s = titles[i];
-    while (s.contains("\\l(", Qt::CaseInsensitive) ||
-           s.contains("\\p{", Qt::CaseInsensitive)) {
+    while (s.contains("\\l(", Qt::CaseInsensitive) || s.contains("\\p{", Qt::CaseInsensitive)) {
       curveSymbol = true;
       int pos = s.indexOf("\\l(", 0, Qt::CaseInsensitive);
       int pos2 = s.indexOf(",", pos); // two arguments in case if pie chart
@@ -337,8 +324,7 @@ void LegendWidget::drawText(QPainter *p, const QRect &rect,
             continue;
           }
           int point = s.mid(pos1 + 1, pos2 - pos1 - 1).toInt() - 1;
-          drawSymbol(dynamic_cast<PlotCurve *>(d_plot->curve(0)), point, p, w,
-                     height[i], l);
+          drawSymbol(dynamic_cast<PlotCurve *>(d_plot->curve(0)), point, p, w, height[i], l);
           w += l;
           s = s.right(s.length() - pos2 - 1);
         } else {
@@ -349,8 +335,7 @@ void LegendWidget::drawText(QPainter *p, const QRect &rect,
             aux.setColor(d_text->color());
             aux.setRenderFlags(Qt::AlignLeft | Qt::AlignVCenter);
 
-            QSize size =
-                aux.textSize(); // In QtiPlot rev 1373: textSize(p, aux);
+            QSize size = aux.textSize(); // In QtiPlot rev 1373: textSize(p, aux);
             QRect tr = QRect(QPoint(w, height[i] - size.height() / 2), size);
             aux.draw(p, tr);
             w += size.width();
@@ -362,8 +347,7 @@ void LegendWidget::drawText(QPainter *p, const QRect &rect,
               continue;
             }
             int point = s.mid(pos1 + 1, pos3 - pos1 - 1).toInt() - 1;
-            drawSymbol(dynamic_cast<PlotCurve *>(d_plot->curve(0)), point, p, w,
-                       height[i], l);
+            drawSymbol(dynamic_cast<PlotCurve *>(d_plot->curve(0)), point, p, w, height[i], l);
             w += l;
             s = s.right(s.length() - pos3 - 1);
           }
@@ -387,8 +371,7 @@ void LegendWidget::drawText(QPainter *p, const QRect &rect,
   p->restore();
 }
 
-QwtArray<int> LegendWidget::itemsHeight(int y, int symbolLineLength, int &width,
-                                        int &height) {
+QwtArray<int> LegendWidget::itemsHeight(int y, int symbolLineLength, int &width, int &height) {
   // RJT (22/09/09): For most of method, copied in code from current
   // QtiPlot (rev. 1373) to fix infinite loop if closing bracket missing
   QString text = d_text->text();
@@ -404,8 +387,7 @@ QwtArray<int> LegendWidget::itemsHeight(int y, int symbolLineLength, int &width,
     QString s = titles[i];
     int textL = 0;
     // bool curveSymbol = false;
-    while (s.contains("\\l(", Qt::CaseInsensitive) ||
-           s.contains("\\p{", Qt::CaseInsensitive)) {
+    while (s.contains("\\l(", Qt::CaseInsensitive) || s.contains("\\p{", Qt::CaseInsensitive)) {
       int pos = s.indexOf("\\l(", 0, Qt::CaseInsensitive);
       int pos2 = s.indexOf(",", pos); // two arguments in case if pie chart
       int pos3 = s.indexOf(")", pos);
@@ -448,8 +430,7 @@ QwtArray<int> LegendWidget::itemsHeight(int y, int symbolLineLength, int &width,
           if (pos >= 0) {
             QwtText aux(parse(s.left(pos)));
             aux.setFont(d_text->font());
-            QSize size =
-                aux.textSize(); // In QtiPlot rev 1373: textSize(p, aux);
+            QSize size = aux.textSize(); // In QtiPlot rev 1373: textSize(p, aux);
             textL += size.width();
             textL += symbolLineLength;
             int pos2 = s.indexOf(")", pos);
@@ -518,10 +499,8 @@ int LegendWidget::symbolsMaxWidth() {
       }
 
       if (c && c->rtti() != QwtPlotItem::Rtti_PlotSpectrogram) {
-        if (c->type() == GraphOptions::Pie ||
-            c->type() == GraphOptions::VerticalBars ||
-            c->type() == GraphOptions::HorizontalBars ||
-            c->type() == GraphOptions::Histogram ||
+        if (c->type() == GraphOptions::Pie || c->type() == GraphOptions::VerticalBars ||
+            c->type() == GraphOptions::HorizontalBars || c->type() == GraphOptions::Histogram ||
             c->type() == GraphOptions::Box) {
           maxL = 2 * d_text->font().pointSize(); // 10;
           line_length = 0;
@@ -626,8 +605,7 @@ void LegendWidget::mousePressEvent(QMouseEvent * /*e*/) {
   // Alternative way of guessing the widget being clicked (we have QMouseEvent*
   // e here):
   // qApp->widgetAt(e->globalX(),e->globalY()))
-  if (LegendWidget *clickedWidget =
-          dynamic_cast<LegendWidget *>(qApp->widgetAt(QCursor::pos()))) {
+  if (LegendWidget *clickedWidget = dynamic_cast<LegendWidget *>(qApp->widgetAt(QCursor::pos()))) {
     d_selector = new SelectionMoveResizer(clickedWidget);
     connect(d_selector, SIGNAL(targetsChanged()), g, SIGNAL(modifiedGraph()));
     g->setSelectedText(clickedWidget);
@@ -639,8 +617,7 @@ void LegendWidget::setSelected(bool on) {
     if (d_selector) {
       return;
     } else {
-      LegendWidget *clickedWidget =
-          dynamic_cast<LegendWidget *>(qApp->widgetAt(QCursor::pos()));
+      LegendWidget *clickedWidget = dynamic_cast<LegendWidget *>(qApp->widgetAt(QCursor::pos()));
       if (!clickedWidget)
         return;
       d_selector = new SelectionMoveResizer(clickedWidget);

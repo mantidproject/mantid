@@ -46,8 +46,7 @@ class FunctionDialog : public QDialog {
   Q_OBJECT
 
 public:
-  FunctionDialog(ApplicationWindow *app, Graph *g = nullptr,
-                 const Qt::WFlags &fl = nullptr);
+  FunctionDialog(ApplicationWindow *app, Graph *g = nullptr, const Qt::WFlags &fl = nullptr);
 
 protected:
   QComboBox *boxXFunction;
@@ -84,10 +83,8 @@ public slots:
   void acceptParametric();
   void acceptPolar();
   void setCurveToModify(Graph *g, int curve);
-  void insertParamFunctionsList(const QStringList &xList,
-                                const QStringList &yList);
-  void insertPolarFunctionsList(const QStringList &rList,
-                                const QStringList &thetaList);
+  void insertParamFunctionsList(const QStringList &xList, const QStringList &yList);
+  void insertPolarFunctionsList(const QStringList &rList, const QStringList &thetaList);
   void clearList();
 
 signals:

@@ -22,15 +22,13 @@ ILatticeFunction::ILatticeFunction() : FunctionParameterDecorator() {}
  * @param domain :: A FunctionDomain of type LatticeDomain
  * @param values :: Function values.
  */
-void ILatticeFunction::function(const FunctionDomain &domain,
-                                FunctionValues &values) const {
+void ILatticeFunction::function(const FunctionDomain &domain, FunctionValues &values) const {
   try {
     const auto &latticeDomain = dynamic_cast<const LatticeDomain &>(domain);
 
     functionLattice(latticeDomain, values);
   } catch (const std::bad_cast &) {
-    throw std::invalid_argument(
-        "ILatticeFunction expects domain of type LatticeDomain.");
+    throw std::invalid_argument("ILatticeFunction expects domain of type LatticeDomain.");
   }
 }
 
@@ -44,28 +42,24 @@ void ILatticeFunction::function(const FunctionDomain &domain,
  * @param domain :: A FunctionDomain of type LatticeDomain
  * @param jacobian :: Jacobian matrix
  */
-void ILatticeFunction::functionDeriv(const FunctionDomain &domain,
-                                     Jacobian &jacobian) {
+void ILatticeFunction::functionDeriv(const FunctionDomain &domain, Jacobian &jacobian) {
   try {
     const auto &latticeDomain = dynamic_cast<const LatticeDomain &>(domain);
 
     functionDerivLattice(latticeDomain, jacobian);
   } catch (const std::bad_cast &) {
-    throw std::invalid_argument(
-        "ILatticeFunction expects domain of type LatticeDomain.");
+    throw std::invalid_argument("ILatticeFunction expects domain of type LatticeDomain.");
   } catch (const Kernel::Exception::NotImplementedError &) {
     calNumericalDeriv(domain, jacobian);
   }
 }
 
 /// Default implementation, throws NotImplementedError.
-void ILatticeFunction::functionDerivLattice(const LatticeDomain &latticeDomain,
-                                            Jacobian &jacobian) {
+void ILatticeFunction::functionDerivLattice(const LatticeDomain &latticeDomain, Jacobian &jacobian) {
   UNUSED_ARG(latticeDomain);
   UNUSED_ARG(jacobian);
 
-  throw Kernel::Exception::NotImplementedError(
-      "FunctionLatticeDeriv is not implemented for this function.");
+  throw Kernel::Exception::NotImplementedError("FunctionLatticeDeriv is not implemented for this function.");
 }
 
 } // namespace API

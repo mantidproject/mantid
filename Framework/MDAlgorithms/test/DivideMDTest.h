@@ -35,37 +35,28 @@ public:
 
   void test_histo_histo() {
     MDHistoWorkspace_sptr out;
-    out = BinaryOperationMDTestHelper::doTest("DivideMD", "histo_A", "histo_B",
-                                              "out");
+    out = BinaryOperationMDTestHelper::doTest("DivideMD", "histo_A", "histo_B", "out");
     TS_ASSERT_DELTA(out->getSignalAt(0), 2. / 3., 1e-5);
   }
 
   void test_histo_scalar() {
     MDHistoWorkspace_sptr out;
-    out = BinaryOperationMDTestHelper::doTest("DivideMD", "histo_A", "scalar",
-                                              "out");
+    out = BinaryOperationMDTestHelper::doTest("DivideMD", "histo_A", "scalar", "out");
     TS_ASSERT_DELTA(out->getSignalAt(0), 2. / 3., 1e-5);
-    BinaryOperationMDTestHelper::doTest("DivideMD", "scalar", "histo_A", "out",
-                                        false /*fails*/);
+    BinaryOperationMDTestHelper::doTest("DivideMD", "scalar", "histo_A", "out", false /*fails*/);
   }
 
   void test_event_event_or_histo_fails() {
-    BinaryOperationMDTestHelper::doTest("DivideMD", "event_A", "histo_A", "out",
-                                        false /*fails*/);
-    BinaryOperationMDTestHelper::doTest("DivideMD", "histo_A", "event_A", "out",
-                                        false /*fails*/);
-    BinaryOperationMDTestHelper::doTest("DivideMD", "event_A", "event_A", "out",
-                                        false /*fails*/);
-    BinaryOperationMDTestHelper::doTest("DivideMD", "scalar", "event_A", "out",
-                                        false /*fails*/);
+    BinaryOperationMDTestHelper::doTest("DivideMD", "event_A", "histo_A", "out", false /*fails*/);
+    BinaryOperationMDTestHelper::doTest("DivideMD", "histo_A", "event_A", "out", false /*fails*/);
+    BinaryOperationMDTestHelper::doTest("DivideMD", "event_A", "event_A", "out", false /*fails*/);
+    BinaryOperationMDTestHelper::doTest("DivideMD", "scalar", "event_A", "out", false /*fails*/);
   }
 
   /** Get a MDEventWorkspace and check that all events have the given
    * signal/error */
-  void checkMDEWSignal(const std::string &wsName, signal_t expectedSignal,
-                       signal_t expectedError) {
-    IMDEventWorkspace_sptr ws =
-        AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(wsName);
+  void checkMDEWSignal(const std::string &wsName, signal_t expectedSignal, signal_t expectedError) {
+    IMDEventWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(wsName);
     TS_ASSERT(ws);
     if (!ws)
       return;

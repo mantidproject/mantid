@@ -17,9 +17,7 @@ class VesuvioResolutionTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static VesuvioResolutionTest *createSuite() {
-    return new VesuvioResolutionTest();
-  }
+  static VesuvioResolutionTest *createSuite() { return new VesuvioResolutionTest(); }
   static void destroySuite(VesuvioResolutionTest *suite) { delete suite; }
 
   void test_Name_Is_As_Expected() {
@@ -39,13 +37,12 @@ public:
     auto func = createFunction();
     double x0(165.0), x1(166.0),
         dx(0.5); // chosen to give put us near the peak for this mass & spectrum
-    auto testWS = ComptonProfileTestHelpers::createTestWorkspace(
-        1, x0, x1, dx, ComptonProfileTestHelpers::NoiseType::None);
+    auto testWS =
+        ComptonProfileTestHelpers::createTestWorkspace(1, x0, x1, dx, ComptonProfileTestHelpers::NoiseType::None);
     auto &dataX = testWS->dataX(0);
     using std::placeholders::_1;
-    std::transform(
-        dataX.begin(), dataX.end(), dataX.begin(),
-        std::bind(std::multiplies<double>(), _1, 1e-06)); // to seconds
+    std::transform(dataX.begin(), dataX.end(), dataX.begin(),
+                   std::bind(std::multiplies<double>(), _1, 1e-06)); // to seconds
     func->setMatrixWorkspace(testWS, 0, dataX.front(), dataX.back());
     FunctionDomain1DView domain(dataX.data(), dataX.size());
     FunctionValues values(domain);
@@ -74,15 +71,13 @@ private:
     // Test names as they are used in scripts
     if (nattrs <= func.nAttributes()) {
       const char *attrAarr[nattrs] = {"Mass"};
-      std::unordered_set<std::string> expectedAttrs(attrAarr,
-                                                    attrAarr + nattrs);
+      std::unordered_set<std::string> expectedAttrs(attrAarr, attrAarr + nattrs);
       std::vector<std::string> actualNames = func.getAttributeNames();
 
       for (size_t i = 0; i < nattrs; ++i) {
         const std::string &name = actualNames[i];
         size_t keyCount = expectedAttrs.count(name);
-        TSM_ASSERT_EQUALS("Attribute" + name + " was found but not expected.",
-                          1, keyCount);
+        TSM_ASSERT_EQUALS("Attribute" + name + " was found but not expected.", 1, keyCount);
       }
     }
   }

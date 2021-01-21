@@ -19,15 +19,12 @@ class FakeEventDataListenerTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static FakeEventDataListenerTest *createSuite() {
-    return new FakeEventDataListenerTest();
-  }
+  static FakeEventDataListenerTest *createSuite() { return new FakeEventDataListenerTest(); }
   static void destroySuite(FakeEventDataListenerTest *suite) { delete suite; }
 
   FakeEventDataListenerTest() {
     // Create the listener. Remember: this will call connect()
-    fakel =
-        LiveListenerFactory::Instance().create("FakeEventDataListener", true);
+    fakel = LiveListenerFactory::Instance().create("FakeEventDataListener", true);
   }
 
   void testProperties() {
@@ -43,9 +40,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(fakel->start(0))
   }
 
-  void testRunStatus() {
-    TS_ASSERT_EQUALS(fakel->runStatus(), ILiveListener::Running)
-  }
+  void testRunStatus() { TS_ASSERT_EQUALS(fakel->runStatus(), ILiveListener::Running) }
 
   void testExtractData() {
     using namespace Mantid::DataObjects;
@@ -55,8 +50,7 @@ public:
     // Check this is the only surviving reference to it
     TS_ASSERT_EQUALS(buffer.use_count(), 1)
     // Check it's an event workspace
-    EventWorkspace_const_sptr evbuf =
-        std::dynamic_pointer_cast<const EventWorkspace>(buffer);
+    EventWorkspace_const_sptr evbuf = std::dynamic_pointer_cast<const EventWorkspace>(buffer);
     TS_ASSERT(evbuf)
     // Check the workspace has the correct dimension
     TS_ASSERT_EQUALS(evbuf->getNumberHistograms(), 2)

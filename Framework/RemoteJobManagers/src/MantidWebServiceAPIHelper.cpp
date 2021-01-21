@@ -27,8 +27,7 @@ namespace RemoteJobManagers {
 std::vector<Poco::Net::HTTPCookie> MantidWebServiceAPIHelper::g_cookies;
 
 MantidWebServiceAPIHelper::MantidWebServiceAPIHelper()
-    : m_session(
-          nullptr) // Make sure this is always either NULL or a valid pointer.
+    : m_session(nullptr) // Make sure this is always either NULL or a valid pointer.
 {
   // TODO: the job manager factory or someone else should set this, and then
   // this class would be usable with any other compute resource that implements
@@ -42,9 +41,8 @@ MantidWebServiceAPIHelper::MantidWebServiceAPIHelper()
 
 MantidWebServiceAPIHelper::~MantidWebServiceAPIHelper() = default;
 
-std::istream &MantidWebServiceAPIHelper::httpGet(
-    const std::string &path, const std::string &query_str,
-    const std::string &username, const std::string &password) const {
+std::istream &MantidWebServiceAPIHelper::httpGet(const std::string &path, const std::string &query_str,
+                                                 const std::string &username, const std::string &password) const {
   Poco::Net::HTTPRequest req;
   initGetRequest(req, path, query_str);
 
@@ -59,8 +57,7 @@ std::istream &MantidWebServiceAPIHelper::httpGet(
 
   m_session->sendRequest(req);
 
-  std::istream &respStream = m_session->receiveResponse(
-      const_cast<Poco::Net::HTTPResponse &>(m_response));
+  std::istream &respStream = m_session->receiveResponse(const_cast<Poco::Net::HTTPResponse &>(m_response));
 
   // For as yet unknown reasons, we don't always get a session cookie back from
   // the
@@ -77,10 +74,9 @@ std::istream &MantidWebServiceAPIHelper::httpGet(
   return respStream;
 }
 
-std::istream &MantidWebServiceAPIHelper::httpPost(
-    const std::string &path, const PostDataMap &postData,
-    const PostDataMap &fileData, const std::string &username,
-    const std::string &password) const {
+std::istream &MantidWebServiceAPIHelper::httpPost(const std::string &path, const PostDataMap &postData,
+                                                  const PostDataMap &fileData, const std::string &username,
+                                                  const std::string &password) const {
   Poco::Net::HTTPRequest req;
   initPostRequest(req, path);
 
@@ -97,8 +93,7 @@ std::istream &MantidWebServiceAPIHelper::httpPost(
   // about
   // how the parts are delimited. See RFC 2045 & 2046 for details.
 
-  char httpLineEnd[3] = {0x0d, 0x0a,
-                         0x00}; // HTTP uses CRLF for its line endings
+  char httpLineEnd[3] = {0x0d, 0x0a, 0x00}; // HTTP uses CRLF for its line endings
 
   // boundary can be almost anything (again, see RFC 2046). The important part
   // is that it
@@ -115,8 +110,7 @@ std::istream &MantidWebServiceAPIHelper::httpPost(
   auto it = postData.cbegin();
   while (it != postData.cend()) {
     postBody << boundaryLine;
-    postBody << "Content-Disposition: form-data; name=\"" << (*it).first
-             << "\"";
+    postBody << "Content-Disposition: form-data; name=\"" << (*it).first << "\"";
     postBody << httpLineEnd << httpLineEnd;
     postBody << (*it).second;
     postBody << httpLineEnd;
@@ -129,8 +123,7 @@ std::istream &MantidWebServiceAPIHelper::httpPost(
   it = fileData.begin();
   while (it != fileData.end()) {
     postBody << boundaryLine;
-    postBody << "Content-Disposition: form-data; name=\"" << (*it).first
-             << "\"; filename=\"" << (*it).first << "\"";
+    postBody << "Content-Disposition: form-data; name=\"" << (*it).first << "\"; filename=\"" << (*it).first << "\"";
     postBody << httpLineEnd;
     postBody << "Content-Type: application/octet-stream";
     postBody << httpLineEnd << httpLineEnd;
@@ -148,8 +141,7 @@ std::istream &MantidWebServiceAPIHelper::httpPost(
   // upload the actual HTTP body
   postStream << postBody.str() << std::flush;
 
-  std::istream &respStream = m_session->receiveResponse(
-      const_cast<Poco::Net::HTTPResponse &>(m_response));
+  std::istream &respStream = m_session->receiveResponse(const_cast<Poco::Net::HTTPResponse &>(m_response));
 
   // For as yet unknown reasons, we don't always get a session cookie back from
   // the
@@ -170,22 +162,17 @@ void MantidWebServiceAPIHelper::clearSessionCookies() { g_cookies.clear(); }
 
 // Wrappers for a lot of the boilerplate code needed to perform an HTTPS GET or
 // POST
-void MantidWebServiceAPIHelper::initGetRequest(
-    Poco::Net::HTTPRequest &req, const std::string &extraPath,
-    const std::string &queryString) const {
-  return initHTTPRequest(req, Poco::Net::HTTPRequest::HTTP_GET,
-                         std::move(extraPath), std::move(queryString));
+void MantidWebServiceAPIHelper::initGetRequest(Poco::Net::HTTPRequest &req, const std::string &extraPath,
+                                               const std::string &queryString) const {
+  return initHTTPRequest(req, Poco::Net::HTTPRequest::HTTP_GET, std::move(extraPath), std::move(queryString));
 }
 
-void MantidWebServiceAPIHelper::initPostRequest(
-    Poco::Net::HTTPRequest &req, const std::string &extraPath) const {
-  return initHTTPRequest(req, Poco::Net::HTTPRequest::HTTP_POST,
-                         std::move(extraPath));
+void MantidWebServiceAPIHelper::initPostRequest(Poco::Net::HTTPRequest &req, const std::string &extraPath) const {
+  return initHTTPRequest(req, Poco::Net::HTTPRequest::HTTP_POST, std::move(extraPath));
 }
 
-void MantidWebServiceAPIHelper::initHTTPRequest(
-    Poco::Net::HTTPRequest &req, const std::string &method,
-    const std::string &extraPath, const std::string &queryString) const {
+void MantidWebServiceAPIHelper::initHTTPRequest(Poco::Net::HTTPRequest &req, const std::string &method,
+                                                const std::string &extraPath, const std::string &queryString) const {
   // Set up the session object
   m_session.reset();
 
@@ -195,18 +182,15 @@ void MantidWebServiceAPIHelper::initHTTPRequest(
     // means we're not checking the SSL certificate that the server
     // sends to us. That's BAD!!
     Poco::Net::Context::Ptr context =
-        new Poco::Net::Context(Poco::Net::Context::CLIENT_USE, "", "", "",
-                               Poco::Net::Context::VERIFY_NONE, 9, false,
+        new Poco::Net::Context(Poco::Net::Context::CLIENT_USE, "", "", "", Poco::Net::Context::VERIFY_NONE, 9, false,
                                "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");
-    m_session = std::make_unique<Poco::Net::HTTPSClientSession>(
-        Poco::URI(m_serviceBaseUrl).getHost(),
-        Poco::URI(m_serviceBaseUrl).getPort(), context);
+    m_session = std::make_unique<Poco::Net::HTTPSClientSession>(Poco::URI(m_serviceBaseUrl).getHost(),
+                                                                Poco::URI(m_serviceBaseUrl).getPort(), context);
   } else {
     // Create a regular HTTP client session.  (NOTE: Using unencrypted HTTP is a
     // really bad idea! We'll be sending passwords in the clear!)
-    m_session = std::make_unique<Poco::Net::HTTPClientSession>(
-        Poco::URI(m_serviceBaseUrl).getHost(),
-        Poco::URI(m_serviceBaseUrl).getPort());
+    m_session = std::make_unique<Poco::Net::HTTPClientSession>(Poco::URI(m_serviceBaseUrl).getHost(),
+                                                               Poco::URI(m_serviceBaseUrl).getPort());
   }
 
   Poco::URI uri(m_serviceBaseUrl);

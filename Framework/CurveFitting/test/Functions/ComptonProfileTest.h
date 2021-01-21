@@ -36,16 +36,13 @@ public:
     // Test names as they are used in scripts
     if (profile->nParams() > 0) {
       const char *expectedParams[nparams] = {"Mass"};
-      std::unordered_set<std::string> expectedParamStr(
-          expectedParams, expectedParams + nparams);
+      std::unordered_set<std::string> expectedParamStr(expectedParams, expectedParams + nparams);
       std::vector<std::string> actualNames = profile->getParameterNames();
 
       for (size_t i = 0; i < nparams; ++i) {
         const std::string &name = actualNames[i];
         size_t keyCount = expectedParamStr.count(name);
-        TSM_ASSERT_EQUALS("Expected " + name +
-                              " to be found as parameter but it was not.",
-                          1, keyCount);
+        TSM_ASSERT_EQUALS("Expected " + name + " to be found as parameter but it was not.", 1, keyCount);
       }
     }
   }
@@ -53,12 +50,9 @@ public:
 private:
   struct FakeComptonProfile : ComptonProfile {
     std::string name() const override { return "FakeComptonProfile"; }
-    std::vector<size_t> intensityParameterIndices() const override {
-      return std::vector<size_t>();
-    }
-    size_t fillConstraintMatrix(
-        Mantid::Kernel::DblMatrix &, const size_t,
-        const Mantid::HistogramData::HistogramE &) const override {
+    std::vector<size_t> intensityParameterIndices() const override { return std::vector<size_t>(); }
+    size_t fillConstraintMatrix(Mantid::Kernel::DblMatrix &, const size_t,
+                                const Mantid::HistogramData::HistogramE &) const override {
       return 0;
     }
 

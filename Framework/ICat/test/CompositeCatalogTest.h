@@ -23,9 +23,7 @@ using namespace Mantid::ICat;
 class CompositeCatalogTest : public CxxTest::TestSuite {
 public:
   // This means the constructor isn't called when running other tests
-  static CompositeCatalogTest *createSuite() {
-    return new CompositeCatalogTest();
-  }
+  static CompositeCatalogTest *createSuite() { return new CompositeCatalogTest(); }
   static void destroySuite(CompositeCatalogTest *suite) { delete suite; }
 
   CompositeCatalogTest() : m_fakeCatalog(std::make_unique<FakeCatalog>()) {}
@@ -33,8 +31,7 @@ public:
   /// Verifies that multiple catalogs are being logged in to.
   void testLogin() {
     std::string temp = "";
-    TS_ASSERT_THROWS(createCompositeCatalog()->login(temp, temp, temp, temp),
-                     std::runtime_error &);
+    TS_ASSERT_THROWS(createCompositeCatalog()->login(temp, temp, temp, temp), std::runtime_error &);
   }
 
   void testLogout() {
@@ -55,8 +52,7 @@ public:
     CatalogSearchParam params;
     // The number of results returned by getNumberOfSearchResults is hard-coded
     // to 5
-    int64_t numberOfResults =
-        createCompositeCatalog()->getNumberOfSearchResults(params);
+    int64_t numberOfResults = createCompositeCatalog()->getNumberOfSearchResults(params);
     // As two catalogs are created in createCompositeCatalog we verify that
     // getNumberOfSearchResults functions correctly.
     TS_ASSERT_EQUALS(numberOfResults, 10);
@@ -111,8 +107,7 @@ private:
    * @return A shared pointer to a CompositeCatalog.
    */
   const std::shared_ptr<CompositeCatalog> createCompositeCatalog() {
-    const std::shared_ptr<CompositeCatalog> compositeCatalog(
-        new CompositeCatalog());
+    const std::shared_ptr<CompositeCatalog> compositeCatalog(new CompositeCatalog());
     m_fakeCatalog->setCount(0);
 
     compositeCatalog->add(std::make_shared<FakeCatalog>());

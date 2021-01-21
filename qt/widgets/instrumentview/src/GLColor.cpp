@@ -94,8 +94,7 @@ void GLColor::getUB3(unsigned char *c) const {
 void GLColor::paint() const { glColor4ubv(m_rgba); }
 
 std::ostream &operator<<(std::ostream &ostr, const GLColor &c) {
-  ostr << '[' << c.red() << ',' << c.green() << ',' << c.blue() << ','
-       << c.alpha() << ']';
+  ostr << '[' << c.red() << ',' << c.green() << ',' << c.blue() << ',' << c.alpha() << ']';
   return ostr;
 }
 } // namespace MantidWidgets

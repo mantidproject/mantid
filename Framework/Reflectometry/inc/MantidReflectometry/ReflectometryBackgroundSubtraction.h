@@ -17,8 +17,7 @@ namespace Reflectometry {
 /** ReflectometryBackgroundSubtraction : This is an algorithm that computes the
  * background of a given workspace and removes it from the input workspace.
  */
-class MANTID_REFLECTOMETRY_DLL ReflectometryBackgroundSubtraction
-    : public API::DataProcessorAlgorithm {
+class MANTID_REFLECTOMETRY_DLL ReflectometryBackgroundSubtraction : public API::DataProcessorAlgorithm {
 public:
   const std::string name() const override;
   int version() const override;
@@ -26,15 +25,11 @@ public:
   const std::string summary() const override;
 
 private:
-  void
-  calculateAverageSpectrumBackground(const API::MatrixWorkspace_sptr &inputWS,
-                                     const std::vector<specnum_t> &spectraList);
-  void calculatePolynomialBackground(API::MatrixWorkspace_sptr inputWS,
-                                     const std::vector<double> &spectrumRanges);
-  std::vector<double>
-  findSpectrumRanges(const std::vector<specnum_t> &spectraList);
-  void calculatePixelBackground(const API::MatrixWorkspace_sptr &inputWS,
-                                const std::vector<double> &indexRanges);
+  void calculateAverageSpectrumBackground(const API::MatrixWorkspace_sptr &inputWS,
+                                          const std::vector<specnum_t> &spectraList);
+  void calculatePolynomialBackground(API::MatrixWorkspace_sptr inputWS, const std::vector<double> &spectrumRanges);
+  std::vector<double> findSpectrumRanges(const std::vector<specnum_t> &spectraList);
+  void calculatePixelBackground(const API::MatrixWorkspace_sptr &inputWS, const std::vector<double> &indexRanges);
 
   /** Overridden Algorithm methods **/
 

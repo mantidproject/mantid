@@ -32,27 +32,21 @@
 #include <QLibrary>
 #include <QMessageBox>
 
-PluginFit::PluginFit(ApplicationWindow *parent, Graph *g)
-    : Fit(parent, g), f_eval(nullptr) {
-  init();
-}
+PluginFit::PluginFit(ApplicationWindow *parent, Graph *g) : Fit(parent, g), f_eval(nullptr) { init(); }
 
-PluginFit::PluginFit(ApplicationWindow *parent, Graph *g,
-                     const QString &curveTitle)
-    : Fit(parent, g), f_eval(nullptr) {
+PluginFit::PluginFit(ApplicationWindow *parent, Graph *g, const QString &curveTitle) : Fit(parent, g), f_eval(nullptr) {
   init();
   setDataFromCurve(curveTitle);
 }
 
-PluginFit::PluginFit(ApplicationWindow *parent, Graph *g,
-                     const QString &curveTitle, double start, double end)
+PluginFit::PluginFit(ApplicationWindow *parent, Graph *g, const QString &curveTitle, double start, double end)
     : Fit(parent, g), f_eval(nullptr) {
   init();
   setDataFromCurve(curveTitle, start, end);
 }
 
-PluginFit::PluginFit(ApplicationWindow *parent, Table *t, const QString &xCol,
-                     const QString &yCol, int startRow, int endRow)
+PluginFit::PluginFit(ApplicationWindow *parent, Table *t, const QString &xCol, const QString &yCol, int startRow,
+                     int endRow)
     : Fit(parent, t), f_eval(nullptr) {
   init();
   setDataFromTable(t, xCol, yCol, startRow, endRow);
@@ -97,11 +91,8 @@ typedef union {
 
 bool PluginFit::load(const QString &pluginName) {
   if (!QFile::exists(pluginName)) {
-    QMessageBox::critical(
-        static_cast<ApplicationWindow *>(parent()),
-        tr("MantidPlot - File not found"),
-        tr("Plugin file: <p><b> %1 </b> <p>not found. Operation aborted!")
-            .arg(pluginName));
+    QMessageBox::critical(static_cast<ApplicationWindow *>(parent()), tr("MantidPlot - File not found"),
+                          tr("Plugin file: <p><b> %1 </b> <p>not found. Operation aborted!").arg(pluginName));
     return false;
   }
 
@@ -111,12 +102,10 @@ bool PluginFit::load(const QString &pluginName) {
   simplex.ptr = lib.resolve("function_d");
   d_fsimplex = simplex.func;
   if (!d_fsimplex) {
-    QMessageBox::critical(
-        static_cast<ApplicationWindow *>(parent()),
-        tr("MantidPlot - Plugin Error"),
-        tr("The plugin does not implement a %1 method necessary for simplex "
-           "fitting.")
-            .arg("function_d"));
+    QMessageBox::critical(static_cast<ApplicationWindow *>(parent()), tr("MantidPlot - Plugin Error"),
+                          tr("The plugin does not implement a %1 method necessary for simplex "
+                             "fitting.")
+                              .arg("function_d"));
     return false;
   }
 
@@ -124,12 +113,10 @@ bool PluginFit::load(const QString &pluginName) {
   f.ptr = lib.resolve("function_f");
   d_f = f.func;
   if (!d_f) {
-    QMessageBox::critical(
-        static_cast<ApplicationWindow *>(parent()),
-        tr("MantidPlot - Plugin Error"),
-        tr("The plugin does not implement a %1 method necessary for "
-           "Levenberg-Marquardt fitting.")
-            .arg("function_f"));
+    QMessageBox::critical(static_cast<ApplicationWindow *>(parent()), tr("MantidPlot - Plugin Error"),
+                          tr("The plugin does not implement a %1 method necessary for "
+                             "Levenberg-Marquardt fitting.")
+                              .arg("function_f"));
     return false;
   }
 
@@ -137,12 +124,10 @@ bool PluginFit::load(const QString &pluginName) {
   df.ptr = lib.resolve("function_df");
   d_df = df.func;
   if (!(df.ptr)) {
-    QMessageBox::critical(
-        static_cast<ApplicationWindow *>(parent()),
-        tr("MantidPlot - Plugin Error"),
-        tr("The plugin does not implement a %1 method necessary for "
-           "Levenberg-Marquardt fitting.")
-            .arg("function_df"));
+    QMessageBox::critical(static_cast<ApplicationWindow *>(parent()), tr("MantidPlot - Plugin Error"),
+                          tr("The plugin does not implement a %1 method necessary for "
+                             "Levenberg-Marquardt fitting.")
+                              .arg("function_df"));
     return false;
   }
 
@@ -150,12 +135,10 @@ bool PluginFit::load(const QString &pluginName) {
   fdf.ptr = lib.resolve("function_fdf");
   d_fdf = fdf.func;
   if (!d_fdf) {
-    QMessageBox::critical(
-        static_cast<ApplicationWindow *>(parent()),
-        tr("MantidPlot - Plugin Error"),
-        tr("The plugin does not implement a %1 method necessary for "
-           "Levenberg-Marquardt fitting.")
-            .arg("function_fdf"));
+    QMessageBox::critical(static_cast<ApplicationWindow *>(parent()), tr("MantidPlot - Plugin Error"),
+                          tr("The plugin does not implement a %1 method necessary for "
+                             "Levenberg-Marquardt fitting.")
+                              .arg("function_fdf"));
     return false;
   }
 

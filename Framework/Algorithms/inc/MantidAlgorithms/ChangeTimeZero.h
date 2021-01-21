@@ -21,9 +21,7 @@ public:
   /// Algorithm's name for identification
   const std::string name() const override { return "ChangeTimeZero"; };
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "The algorithm adjusts the zero time of a workspace.";
-  }
+  const std::string summary() const override { return "The algorithm adjusts the zero time of a workspace."; }
   /// Check the inputs
   std::map<std::string, std::string> validateInputs() override;
 
@@ -38,34 +36,28 @@ private:
   /// Run the algorithm
   void exec() override;
   /// Create the output workspace
-  Mantid::API::MatrixWorkspace_sptr
-  createOutputWS(const Mantid::API::MatrixWorkspace_sptr &input,
-                 double startProgress, double stopProgress);
+  Mantid::API::MatrixWorkspace_sptr createOutputWS(const Mantid::API::MatrixWorkspace_sptr &input, double startProgress,
+                                                   double stopProgress);
   /// Get the time shift
   double getTimeShift(const API::MatrixWorkspace_sptr &ws) const;
   /// Shift the time of the logs
-  void shiftTimeOfLogs(const Mantid::API::MatrixWorkspace_sptr &ws,
-                       double timeShift, double startProgress,
+  void shiftTimeOfLogs(const Mantid::API::MatrixWorkspace_sptr &ws, double timeShift, double startProgress,
                        double stopProgress);
   /// Get the date and time of the first good frame of a workspace
-  Mantid::Types::Core::DateAndTime
-  getStartTimeFromWorkspace(const Mantid::API::MatrixWorkspace_sptr &ws) const;
+  Mantid::Types::Core::DateAndTime getStartTimeFromWorkspace(const Mantid::API::MatrixWorkspace_sptr &ws) const;
   /// Can the string be transformed to double
   bool checkForDouble(const std::string &val) const;
   /// Can the string be transformed to a DateTime
   bool checkForDateTime(const std::string &val) const;
 
   /// Time shift the log of a double series property
-  void shiftTimeInLogForTimeSeries(const Mantid::API::MatrixWorkspace_sptr &ws,
-                                   Mantid::Kernel::Property *prop,
+  void shiftTimeInLogForTimeSeries(const Mantid::API::MatrixWorkspace_sptr &ws, Mantid::Kernel::Property *prop,
                                    double timeShift) const;
   /// Time shift the log of a string property
-  void shiftTimeOfLogForStringProperty(
-      Mantid::Kernel::PropertyWithValue<std::string> *logEntry,
-      double timeShift) const;
+  void shiftTimeOfLogForStringProperty(Mantid::Kernel::PropertyWithValue<std::string> *logEntry,
+                                       double timeShift) const;
   // Shift the time of the neutrons
-  void shiftTimeOfNeutrons(const Mantid::API::MatrixWorkspace_sptr &ws,
-                           double timeShift, double startProgress,
+  void shiftTimeOfNeutrons(const Mantid::API::MatrixWorkspace_sptr &ws, double timeShift, double startProgress,
                            double stopProgress);
 
   bool isRelativeTimeShift(double offset) const;

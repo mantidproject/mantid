@@ -24,13 +24,10 @@ namespace DataHandling {
  * @param timeZeros :: Vector containing time zero values for each spectra
  * @return TableWorkspace of time zeros
  */
-DataObjects::TableWorkspace_sptr
-createTimeZeroTable(const size_t numSpec,
-                    const std::vector<double> &timeZeros) {
+DataObjects::TableWorkspace_sptr createTimeZeroTable(const size_t numSpec, const std::vector<double> &timeZeros) {
   Mantid::DataObjects::TableWorkspace_sptr timeZeroTable =
       std::dynamic_pointer_cast<Mantid::DataObjects::TableWorkspace>(
-          Mantid::API::WorkspaceFactory::Instance().createTable(
-              "TableWorkspace"));
+          Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace"));
   timeZeroTable->addColumn("double", "time zero");
 
   for (size_t specNum = 0; specNum < numSpec; ++specNum) {
@@ -42,23 +39,20 @@ createTimeZeroTable(const size_t numSpec,
 }
 
 // Constructor
-LoadMuonStrategy::LoadMuonStrategy(Kernel::Logger &g_log, std::string filename,
-                                   LoadMuonNexusV2NexusHelper &nexusLoader)
-    : m_logger(g_log), m_filename(std::move(filename)),
-      m_nexusLoader(nexusLoader) {}
+LoadMuonStrategy::LoadMuonStrategy(Kernel::Logger &g_log, std::string filename, LoadMuonNexusV2NexusHelper &nexusLoader)
+    : m_logger(g_log), m_filename(std::move(filename)), m_nexusLoader(nexusLoader) {}
 
 /**
  * Loads default detector grouping, if this isn't present
  * return dummy grouping
  * @returns :: Grouping table
  */
-API::Workspace_sptr LoadMuonStrategy::loadDefaultDetectorGrouping(
-    const DataObjects::Workspace2D &localWorkspace) const {
+API::Workspace_sptr
+LoadMuonStrategy::loadDefaultDetectorGrouping(const DataObjects::Workspace2D &localWorkspace) const {
 
   auto instrument = localWorkspace.getInstrument();
   auto &run = localWorkspace.run();
-  std::string mainFieldDirection =
-      run.getLogData("main_field_direction")->value();
+  std::string mainFieldDirection = run.getLogData("main_field_direction")->value();
   API::GroupingLoader groupLoader(instrument, mainFieldDirection);
   try {
     const auto idfGrouping = groupLoader.getGroupingFromIDF();
@@ -69,8 +63,7 @@ API::Workspace_sptr LoadMuonStrategy::loadDefaultDetectorGrouping(
       dummyGrouping = groupLoader.getDummyGrouping();
     } else {
       // Make sure it uses the right number of detectors
-      std::string numDetectors =
-          "1-" + std::to_string(localWorkspace.getNumberHistograms());
+      std::string numDetectors = "1-" + std::to_string(localWorkspace.getNumberHistograms());
       dummyGrouping->groups.emplace_back(std::move(numDetectors));
       dummyGrouping->groupNames.emplace_back("all");
     }
@@ -81,15 +74,13 @@ API::Workspace_sptr LoadMuonStrategy::loadDefaultDetectorGrouping(
  * Determines the detectors loaded in the input workspace.
  * @returns :: Vector containing loaded detectors
  */
-std::vector<detid_t> LoadMuonStrategy::getLoadedDetectorsFromWorkspace(
-    const DataObjects::Workspace2D &localWorkspace) const {
+std::vector<detid_t>
+LoadMuonStrategy::getLoadedDetectorsFromWorkspace(const DataObjects::Workspace2D &localWorkspace) const {
   size_t numberOfSpectra = localWorkspace.getNumberHistograms();
   std::vector<detid_t> loadedDetectors;
   loadedDetectors.reserve(numberOfSpectra);
-  for (size_t spectraIndex = 0; spectraIndex < numberOfSpectra;
-       spectraIndex++) {
-    const auto detIdSet =
-        localWorkspace.getSpectrum(spectraIndex).getDetectorIDs();
+  for (size_t spectraIndex = 0; spectraIndex < numberOfSpectra; spectraIndex++) {
+    const auto detIdSet = localWorkspace.getSpectrum(spectraIndex).getDetectorIDs();
     // each spectrum should only point to one detector in the Muon file
     loadedDetectors.emplace_back(*detIdSet.begin());
   }
@@ -102,12 +93,11 @@ std::vector<detid_t> LoadMuonStrategy::getLoadedDetectorsFromWorkspace(
  * @param grouping :: Vector containing corresponding grouping
  * @return Detector Grouping Table create using the data
  */
-DataObjects::TableWorkspace_sptr LoadMuonStrategy::createDetectorGroupingTable(
-    const std::vector<detid_t> &detectorsLoaded,
-    const std::vector<detid_t> &grouping) const {
-  auto detectorGroupingTable =
-      std::dynamic_pointer_cast<DataObjects::TableWorkspace>(
-          API::WorkspaceFactory::Instance().createTable("TableWorkspace"));
+DataObjects::TableWorkspace_sptr
+LoadMuonStrategy::createDetectorGroupingTable(const std::vector<detid_t> &detectorsLoaded,
+                                              const std::vector<detid_t> &grouping) const {
+  auto detectorGroupingTable = std::dynamic_pointer_cast<DataObjects::TableWorkspace>(
+      API::WorkspaceFactory::Instance().createTable("TableWorkspace"));
   detectorGroupingTable->addColumn("vector_int", "Detectors");
 
   std::map<detid_t, std::vector<detid_t>> groupingMap;
@@ -130,9 +120,8 @@ DataObjects::TableWorkspace_sptr LoadMuonStrategy::createDetectorGroupingTable(
  * @param deadTimes :: Vector containing corresponding deadtime
  * @return Deadtime table created using the input data
  */
-DataObjects::TableWorkspace_sptr LoadMuonStrategy::createDeadTimeTable(
-    const std::vector<detid_t> &detectorsLoaded,
-    const std::vector<double> &deadTimes) const {
+DataObjects::TableWorkspace_sptr LoadMuonStrategy::createDeadTimeTable(const std::vector<detid_t> &detectorsLoaded,
+                                                                       const std::vector<double> &deadTimes) const {
   auto deadTimesTable = std::dynamic_pointer_cast<DataObjects::TableWorkspace>(
       API::WorkspaceFactory::Instance().createTable("TableWorkspace"));
 

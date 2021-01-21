@@ -37,16 +37,13 @@ public:
   int version() const override { return 1; }
   const std::vector<std::string> seeAlso() const override { return {"Divide"}; }
   /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override {
-    return "CorrectionFunctions\\InstrumentCorrections";
-  }
+  const std::string category() const override { return "CorrectionFunctions\\InstrumentCorrections"; }
 
 private:
   // Overridden Algorithm methods
   void init() override;
   void exec() override;
-  void initSpectrum(const API::MatrixWorkspace &input,
-                    API::MatrixWorkspace &output, const size_t j);
+  void initSpectrum(const API::MatrixWorkspace &input, API::MatrixWorkspace &output, const size_t j);
 };
 
 } // namespace Algorithms

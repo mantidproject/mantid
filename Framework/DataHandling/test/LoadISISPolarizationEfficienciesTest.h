@@ -34,12 +34,8 @@ class LoadISISPolarizationEfficienciesTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static LoadISISPolarizationEfficienciesTest *createSuite() {
-    return new LoadISISPolarizationEfficienciesTest();
-  }
-  static void destroySuite(LoadISISPolarizationEfficienciesTest *suite) {
-    delete suite;
-  }
+  static LoadISISPolarizationEfficienciesTest *createSuite() { return new LoadISISPolarizationEfficienciesTest(); }
+  static void destroySuite(LoadISISPolarizationEfficienciesTest *suite) { delete suite; }
 
   LoadISISPolarizationEfficienciesTest() {
     // To make sure API is initialized properly

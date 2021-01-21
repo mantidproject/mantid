@@ -52,8 +52,7 @@ public:
   /**
    * \param parent parent widget (only affects placement of the widget)
    */
-  ColorMapEditor(const QLocale &locale = QLocale::system(), int precision = 6,
-                 QWidget *parent = nullptr);
+  ColorMapEditor(const QLocale &locale = QLocale::system(), int precision = 6, QWidget *parent = nullptr);
   //! Returns the customized color map.
   QwtLinearColorMap colorMap() { return color_map; };
   //! Use this function to initialize the color map to be edited.

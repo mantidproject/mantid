@@ -33,19 +33,14 @@ namespace SpectrumView {
  * @param data         The list of floats holding the data to be displayed,
  *                     stored in row major order.
  */
-ArrayDataSource::ArrayDataSource(double m_totalXMin, double m_totalXMax,
-                                 double m_totalYMin, double m_totalYMax,
-                                 size_t m_totalRows, size_t m_totalCols,
-                                 std::vector<float> data)
-    : SpectrumDataSource(m_totalXMin, m_totalXMax, m_totalYMin, m_totalYMax,
-                         m_totalRows, m_totalCols),
+ArrayDataSource::ArrayDataSource(double m_totalXMin, double m_totalXMax, double m_totalYMin, double m_totalYMax,
+                                 size_t m_totalRows, size_t m_totalCols, std::vector<float> data)
+    : SpectrumDataSource(m_totalXMin, m_totalXMax, m_totalYMin, m_totalYMax, m_totalRows, m_totalCols),
       m_data(std::move(data)) {}
 
 ArrayDataSource::~ArrayDataSource() {}
 
-bool ArrayDataSource::hasData(
-    const std::string &wsName,
-    const std::shared_ptr<Mantid::API::Workspace> &ws) {
+bool ArrayDataSource::hasData(const std::string &wsName, const std::shared_ptr<Mantid::API::Workspace> &ws) {
   UNUSED_ARG(wsName);
   UNUSED_ARG(ws);
   return false;
@@ -71,17 +66,13 @@ bool ArrayDataSource::hasData(
  *                  DataSource does not support rebinning to a log axis, so
  *                  the DataArray is always returned with isLogX = false.
  */
-DataArray_const_sptr ArrayDataSource::getDataArray(double xMin, double xMax,
-                                                   double yMin, double yMax,
-                                                   size_t nRows, size_t nCols,
-                                                   bool isLogX) {
+DataArray_const_sptr ArrayDataSource::getDataArray(double xMin, double xMax, double yMin, double yMax, size_t nRows,
+                                                   size_t nCols, bool isLogX) {
   size_t firstCol;
-  SVUtils::CalculateInterval(m_totalXMin, m_totalXMax, m_totalCols, firstCol,
-                             xMin, xMax, nCols);
+  SVUtils::CalculateInterval(m_totalXMin, m_totalXMax, m_totalCols, firstCol, xMin, xMax, nCols);
 
   size_t firstRow;
-  SVUtils::CalculateInterval(m_totalYMin, m_totalYMax, m_totalRows, firstRow,
-                             yMin, yMax, nRows);
+  SVUtils::CalculateInterval(m_totalYMin, m_totalYMax, m_totalRows, firstRow, yMin, yMax, nRows);
 
   std::vector<float> newData(nRows * nCols);
 
@@ -96,14 +87,12 @@ DataArray_const_sptr ArrayDataSource::getDataArray(double xMin, double xMax,
   /* each destination position */
   for (size_t row = 0; row < nRows; row++) {
     double midY = yMin + ((double)row + 0.5) * yStep;
-    SVUtils::Interpolate(m_totalYMin, m_totalYMax, midY, 0.0,
-                         (double)m_totalRows, yIndex);
+    SVUtils::Interpolate(m_totalYMin, m_totalYMax, midY, 0.0, (double)m_totalRows, yIndex);
 
     auto sourceRow = (size_t)yIndex;
     for (size_t col = 0; col < nCols; col++) {
       double midX = xMin + ((double)col + 0.5) * xStep;
-      SVUtils::Interpolate(m_totalXMin, m_totalXMax, midX, 0.0,
-                           (double)m_totalCols, xIndex);
+      SVUtils::Interpolate(m_totalXMin, m_totalXMax, midX, 0.0, (double)m_totalCols, xIndex);
 
       auto sourceCol = (size_t)xIndex;
 
@@ -114,8 +103,7 @@ DataArray_const_sptr ArrayDataSource::getDataArray(double xMin, double xMax,
 
   // The calling code is responsible for deleting the DataArray
   isLogX = false;
-  DataArray_const_sptr newDataArray(
-      new DataArray(xMin, xMax, yMin, yMax, isLogX, nRows, nCols, newData));
+  DataArray_const_sptr newDataArray(new DataArray(xMin, xMax, yMin, yMax, isLogX, nRows, nCols, newData));
   return newDataArray;
 }
 
@@ -131,8 +119,7 @@ DataArray_const_sptr ArrayDataSource::getDataArray(double xMin, double xMax,
  */
 DataArray_const_sptr ArrayDataSource::getDataArray(bool isLogX) {
   isLogX = false;
-  return getDataArray(m_totalXMin, m_totalXMax, m_totalYMin, m_totalYMax,
-                      m_totalRows, m_totalCols, isLogX);
+  return getDataArray(m_totalXMin, m_totalXMax, m_totalYMin, m_totalYMax, m_totalRows, m_totalCols, isLogX);
 }
 
 /**

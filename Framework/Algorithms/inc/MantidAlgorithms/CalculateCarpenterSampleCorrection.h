@@ -18,8 +18,7 @@ namespace Algorithms {
     out by Jack Carpenter and Asfia Huq and implmented in Java by
     Alok Chatterjee.  Translated to C++ by Dennis Mikkelson.
  */
-class MANTID_ALGORITHMS_DLL CalculateCarpenterSampleCorrection
-    : public API::DistributedDataProcessorAlgorithm {
+class MANTID_ALGORITHMS_DLL CalculateCarpenterSampleCorrection : public API::DistributedDataProcessorAlgorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override;
@@ -27,9 +26,8 @@ public:
   /// Algorithm's version for identification overriding a virtual method
   int version() const override;
   const std::vector<std::string> seeAlso() const override {
-    return {"CarpenterSampleCorrection", "CylinderAbsorption",
-            "MonteCarloAbsorption",      "MayersSampleCorrection",
-            "PearlMCAbsorption",         "VesuvioCalculateMS"};
+    return {"CarpenterSampleCorrection", "CylinderAbsorption", "MonteCarloAbsorption",
+            "MayersSampleCorrection",    "PearlMCAbsorption",  "VesuvioCalculateMS"};
   }
 
   /// Algorithm's category for identification overriding a virtual method
@@ -47,24 +45,17 @@ private:
   void exec() override;
 
   /// CalculateCarpenterSampleCorrection correction calculation.
-  void calculate_abs_correction(const double angle_deg, const double radius,
-                                const double coeff1, const double coeff2,
-                                const double coeff3,
-                                const HistogramData::Points &wavelength,
+  void calculate_abs_correction(const double angle_deg, const double radius, const double coeff1, const double coeff2,
+                                const double coeff3, const HistogramData::Points &wavelength,
                                 HistogramData::HistogramY &y_val);
 
-  void calculate_ms_correction(const double angle_deg, const double radius,
-                               const double coeff1, const double coeff2,
-                               const double coeff3,
-                               const HistogramData::Points &wavelength,
+  void calculate_ms_correction(const double angle_deg, const double radius, const double coeff1, const double coeff2,
+                               const double coeff3, const HistogramData::Points &wavelength,
                                HistogramData::HistogramY &y_val);
 
-  API::MatrixWorkspace_sptr
-  createOutputWorkspace(const API::MatrixWorkspace_sptr &inputWS,
-                        const std::string &) const;
+  API::MatrixWorkspace_sptr createOutputWorkspace(const API::MatrixWorkspace_sptr &inputWS, const std::string &) const;
   void deleteWorkspace(const API::MatrixWorkspace_sptr &workspace);
-  API::MatrixWorkspace_sptr
-  setUncertainties(const API::MatrixWorkspace_sptr &workspace);
+  API::MatrixWorkspace_sptr setUncertainties(const API::MatrixWorkspace_sptr &workspace);
 };
 
 } // namespace Algorithms

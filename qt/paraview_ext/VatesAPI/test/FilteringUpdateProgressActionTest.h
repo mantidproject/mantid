@@ -23,8 +23,7 @@ private:
     }
   };
 
-  using ProgressActionType =
-      Mantid::VATES::FilterUpdateProgressAction<MockFilter>;
+  using ProgressActionType = Mantid::VATES::FilterUpdateProgressAction<MockFilter>;
 
 public:
   void testCallsView() {
@@ -32,12 +31,8 @@ public:
     MockFilter view;
     ProgressActionType model(&view, "message");
     model.eventRaised(10);
-    TSM_ASSERT_EQUALS(
-        "View and model are not wired up correctly for progress updating.", 10,
-        view.Progress);
-    TSM_ASSERT_EQUALS(
-        "View and model are not wired up correctly for progress updating.",
-        "message", view.Message);
+    TSM_ASSERT_EQUALS("View and model are not wired up correctly for progress updating.", 10, view.Progress);
+    TSM_ASSERT_EQUALS("View and model are not wired up correctly for progress updating.", "message", view.Message);
   }
 
   void testIsProgressAction() {
@@ -46,11 +41,7 @@ public:
     ProgressActionType model(&view, "message");
     Mantid::VATES::ProgressAction &imodel = model;
     imodel.eventRaised(10);
-    TSM_ASSERT_EQUALS(
-        "View and model are not wired up correctly for progress updating.", 10,
-        view.Progress);
-    TSM_ASSERT_EQUALS(
-        "View and model are not wired up correctly for progress updating.",
-        "message", view.Message);
+    TSM_ASSERT_EQUALS("View and model are not wired up correctly for progress updating.", 10, view.Progress);
+    TSM_ASSERT_EQUALS("View and model are not wired up correctly for progress updating.", "message", view.Message);
   }
 };

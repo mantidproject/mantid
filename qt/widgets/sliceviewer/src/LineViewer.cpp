@@ -39,8 +39,7 @@ namespace {
  * data service
  * @return name of the line cut.
  */
-std::string proposeIntegratedWSName(const std::string &wsName,
-                                    const bool overwrite) {
+std::string proposeIntegratedWSName(const std::string &wsName, const bool overwrite) {
   const auto baseName = wsName + "_line";
   std::string resultName = baseName;
   if (!overwrite) {
@@ -75,8 +74,7 @@ Mantid::Kernel::Logger g_log("LineViewer");
  * @param width : Default thickness (for non integrated dimensions)
  * @param thicknesses : Thickness vector to write to
  */
-void setThicknessUsingDimensionInfo(const IMDWorkspace_sptr &ws,
-                                    size_t dimIndex, double width,
+void setThicknessUsingDimensionInfo(const IMDWorkspace_sptr &ws, size_t dimIndex, double width,
                                     Mantid::Kernel::VMD &thicknesses) {
   auto currentDim = ws->getDimension(dimIndex);
   if (currentDim->getIsIntegrated()) {
@@ -91,9 +89,8 @@ void setThicknessUsingDimensionInfo(const IMDWorkspace_sptr &ws,
 } // namespace
 
 LineViewer::LineViewer(QWidget *parent)
-    : QWidget(parent), m_planeWidth(0), m_numBins(100), m_allDimsFree(false),
-      m_freeDimX(0), m_freeDimY(1), m_initFreeDimX(-1), m_initFreeDimY(-1),
-      m_fixedBinWidthMode(false), m_fixedBinWidth(0.1), m_binWidth(0.1) {
+    : QWidget(parent), m_planeWidth(0), m_numBins(100), m_allDimsFree(false), m_freeDimX(0), m_freeDimY(1),
+      m_initFreeDimX(-1), m_initFreeDimY(-1), m_fixedBinWidthMode(false), m_fixedBinWidth(0.1), m_binWidth(0.1) {
   ui.setupUi(this);
 
   // Other setup
@@ -123,8 +120,7 @@ LineViewer::LineViewer(QWidget *parent)
 
   // To run BinMD in the background
   m_algoRunner = new AlgorithmRunner(this);
-  QObject::connect(m_algoRunner, SIGNAL(algorithmComplete(bool)), this,
-                   SLOT(lineIntegrationComplete(bool)));
+  QObject::connect(m_algoRunner, SIGNAL(algorithmComplete(bool)), this, SLOT(lineIntegrationComplete(bool)));
 
   // Make the splitter use the minimum size for the controls and not stretch out
   ui.splitter->setStretchFactor(0, 0);
@@ -132,26 +128,18 @@ LineViewer::LineViewer(QWidget *parent)
 
   //----------- Connect signals -------------
   QObject::connect(ui.btnApply, SIGNAL(clicked()), this, SLOT(apply()));
-  QObject::connect(ui.chkAdaptiveBins, SIGNAL(stateChanged(int)), this,
-                   SLOT(adaptiveBinsChanged()));
-  QObject::connect(ui.spinNumBins, SIGNAL(valueChanged(int)), this,
-                   SLOT(numBinsChanged()));
-  QObject::connect(ui.textPlaneWidth, SIGNAL(textEdited(QString)), this,
-                   SLOT(thicknessTextEdited()));
-  QObject::connect(ui.radNumBins, SIGNAL(toggled(bool)), this,
-                   SLOT(on_radNumBins_toggled()));
-  QObject::connect(ui.textBinWidth, SIGNAL(editingFinished()), this,
-                   SLOT(textBinWidth_changed()));
+  QObject::connect(ui.chkAdaptiveBins, SIGNAL(stateChanged(int)), this, SLOT(adaptiveBinsChanged()));
+  QObject::connect(ui.spinNumBins, SIGNAL(valueChanged(int)), this, SLOT(numBinsChanged()));
+  QObject::connect(ui.textPlaneWidth, SIGNAL(textEdited(QString)), this, SLOT(thicknessTextEdited()));
+  QObject::connect(ui.radNumBins, SIGNAL(toggled(bool)), this, SLOT(on_radNumBins_toggled()));
+  QObject::connect(ui.textBinWidth, SIGNAL(editingFinished()), this, SLOT(textBinWidth_changed()));
 
-  QObject::connect(m_lineOptions, SIGNAL(changedPlotAxis()), this,
-                   SLOT(refreshPlot()));
-  QObject::connect(m_lineOptions, SIGNAL(changedNormalization()), this,
-                   SLOT(refreshPlot()));
-  QObject::connect(m_lineOptions, SIGNAL(changedYLogScaling()), this,
-                   SLOT(onToggleLogYAxis()));
+  QObject::connect(m_lineOptions, SIGNAL(changedPlotAxis()), this, SLOT(refreshPlot()));
+  QObject::connect(m_lineOptions, SIGNAL(changedNormalization()), this, SLOT(refreshPlot()));
+  QObject::connect(m_lineOptions, SIGNAL(changedYLogScaling()), this, SLOT(onToggleLogYAxis()));
 
-  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      FeatureType::Feature, {"SliceViewer", "LineViewer"}, false);
+  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(FeatureType::Feature, {"SliceViewer", "LineViewer"},
+                                                                false);
 }
 
 LineViewer::~LineViewer() {}
@@ -188,15 +176,13 @@ void LineViewer::createDimensionWidgets() {
       m_endText.push_back(endText);
       m_thicknessText.push_back(thicknessText);
       // Signals that don't change
-      QObject::connect(thicknessText, SIGNAL(textEdited(QString)), this,
-                       SLOT(thicknessTextEdited()));
+      QObject::connect(thicknessText, SIGNAL(textEdited(QString)), this, SLOT(thicknessTextEdited()));
     }
   }
 
   // ------ Update the widgets -------------------------
   for (int d = 0; d < int(m_ws->getNumDims()); d++) {
-    m_dimensionLabel[d]->setText(
-        QString::fromStdString(m_ws->getDimension(size_t(d))->getName()));
+    m_dimensionLabel[d]->setText(QString::fromStdString(m_ws->getDimension(size_t(d))->getName()));
   }
 }
 
@@ -226,14 +212,11 @@ void LineViewer::updateFreeDimensions() {
 
     if (d == m_freeDimX || d == m_freeDimY) {
       // Free dimension - update the preview
-      QObject::connect(m_startText[d], SIGNAL(textEdited(QString)), this,
-                       SLOT(startEndTextEdited()));
-      QObject::connect(m_endText[d], SIGNAL(textEdited(QString)), this,
-                       SLOT(startEndTextEdited()));
+      QObject::connect(m_startText[d], SIGNAL(textEdited(QString)), this, SLOT(startEndTextEdited()));
+      QObject::connect(m_endText[d], SIGNAL(textEdited(QString)), this, SLOT(startEndTextEdited()));
     } else {
       // Non-Free dimension - link start to end
-      QObject::connect(m_startText[d], SIGNAL(textEdited(QString)), this,
-                       SLOT(startLinkedToEndText()));
+      QObject::connect(m_startText[d], SIGNAL(textEdited(QString)), this, SLOT(startLinkedToEndText()));
     }
   }
   if (!m_allDimsFree) {
@@ -327,8 +310,7 @@ void LineViewer::readTextboxes() {
  *
  * @param ws :: MatrixWorkspace to integrate
  */
-IAlgorithm_sptr
-LineViewer::applyMatrixWorkspace(const Mantid::API::MatrixWorkspace_sptr &ws) {
+IAlgorithm_sptr LineViewer::applyMatrixWorkspace(const Mantid::API::MatrixWorkspace_sptr &ws) {
   // (half-width in the plane)
   const double planeWidth = getPlanarWidth();
 
@@ -342,8 +324,7 @@ LineViewer::applyMatrixWorkspace(const Mantid::API::MatrixWorkspace_sptr &ws) {
   const double lengthX = m_end[m_freeDimX] - m_start[m_freeDimX];
   const double lengthY = m_end[m_freeDimY] - m_start[m_freeDimY];
   const bool lineIsHorizontal = fabs(lengthX) > fabs(lengthY);
-  const bool axesAreFlipped =
-      m_freeDimX == m_initFreeDimY && m_freeDimY == m_initFreeDimX;
+  const bool axesAreFlipped = m_freeDimX == m_initFreeDimY && m_freeDimY == m_initFreeDimX;
   // True when (NOT lineIsHorizontal) XOR axesAreFlipped
   // The truth table simplifies down to lineIsHorizontal == axesAreFlipped
   const bool shouldTranspose = lineIsHorizontal == axesAreFlipped;
@@ -379,8 +360,7 @@ LineViewer::applyMatrixWorkspace(const Mantid::API::MatrixWorkspace_sptr &ws) {
       return IAlgorithm_sptr();
 
     axis1Binning << start << "," << binWidth << "," << end;
-    axis2Binning << (vertical - planeWidth) << "," << (planeWidth * 2) << ","
-                 << (vertical + planeWidth);
+    axis2Binning << (vertical - planeWidth) << "," << (planeWidth * 2) << "," << (vertical + planeWidth);
 
     // If the line is vertical we swap the axes binning order
     if (!shouldTranspose) {
@@ -408,8 +388,7 @@ LineViewer::applyMatrixWorkspace(const Mantid::API::MatrixWorkspace_sptr &ws) {
  * @param ws :: MDHisto or MDEventWorkspace to integrate
  * @return the algorithm to run
  */
-IAlgorithm_sptr
-LineViewer::applyMDWorkspace(const Mantid::API::IMDWorkspace_sptr &ws) {
+IAlgorithm_sptr LineViewer::applyMDWorkspace(const Mantid::API::IMDWorkspace_sptr &ws) {
   bool adaptive = ui.chkAdaptiveBins->isChecked();
 
   // (half-width in the plane)
@@ -521,8 +500,7 @@ LineViewer::applyMDWorkspace(const Mantid::API::IMDWorkspace_sptr &ws) {
       VMD basis = m_start * 0;
       basis[d] = 1.0;
       // Set the basis vector with the width *2 and 1 bin
-      alg->setPropertyValue("BasisVector" + dim,
-                            dim + ",units," + basis.toString(","));
+      alg->setPropertyValue("BasisVector" + dim, dim + ",units," + basis.toString(","));
       OutputExtents.emplace_back(-0.5 * m_thickness[d]);
       OutputExtents.emplace_back(+0.5 * m_thickness[d]);
       OutputBins.emplace_back(1);
@@ -553,18 +531,15 @@ LineViewer::applyMDWorkspace(const Mantid::API::IMDWorkspace_sptr &ws) {
 void LineViewer::apply() {
 
   if (m_allDimsFree) {
-    throw std::runtime_error(
-        "Not currently supported with all dimensions free!");
+    throw std::runtime_error("Not currently supported with all dimensions free!");
   }
   m_algoRunner->cancelRunningAlgorithm();
 
   // Make a name for the line-cut
-  m_integratedWSName =
-      proposeIntegratedWSName(m_ws->getName(), ui.ckOverWrite->isChecked());
+  m_integratedWSName = proposeIntegratedWSName(m_ws->getName(), ui.ckOverWrite->isChecked());
 
   // Different call for
-  MatrixWorkspace_sptr matrixWs =
-      std::dynamic_pointer_cast<MatrixWorkspace>(m_ws);
+  MatrixWorkspace_sptr matrixWs = std::dynamic_pointer_cast<MatrixWorkspace>(m_ws);
 
   IAlgorithm_sptr alg;
   if (matrixWs)
@@ -594,8 +569,7 @@ void LineViewer::apply() {
  */
 void LineViewer::lineIntegrationComplete(bool error) {
   if (!error) {
-    m_sliceWS = AnalysisDataService::Instance().retrieveWS<IMDWorkspace>(
-        m_integratedWSName);
+    m_sliceWS = AnalysisDataService::Instance().retrieveWS<IMDWorkspace>(m_integratedWSName);
     this->showFull();
   } else {
     // Unspecified error in algorithm
@@ -655,9 +629,7 @@ void LineViewer::adaptiveBinsChanged() {
 }
 
 /** Slot called when the num bins/bin width radio choice changes */
-void LineViewer::on_radNumBins_toggled() {
-  setFixedBinWidthMode(ui.radNumBins->isChecked(), m_fixedBinWidth);
-}
+void LineViewer::on_radNumBins_toggled() { setFixedBinWidthMode(ui.radNumBins->isChecked(), m_fixedBinWidth); }
 
 /** Slot called when the desired fixed bin width text box
  * is edited and the user pressed Return or lost focus.
@@ -844,18 +816,15 @@ void LineViewer::setFreeDimensions(size_t dimX, size_t dimY) {
  */
 void LineViewer::setFixedBinWidthMode(bool fixedWidth, double binWidth) {
   if (binWidth <= 0)
-    throw std::invalid_argument(
-        "LineViewer::setFixedBinWidthMode(): binWidth must be > 0");
+    throw std::invalid_argument("LineViewer::setFixedBinWidthMode(): binWidth must be > 0");
 
   m_fixedBinWidthMode = fixedWidth;
   if (m_fixedBinWidthMode) {
     m_fixedBinWidth = binWidth;
     ui.textBinWidth->setReadOnly(false);
-    ui.textBinWidth->setToolTip(
-        "Desired bin width (will adjust the number of bins).");
+    ui.textBinWidth->setToolTip("Desired bin width (will adjust the number of bins).");
     ui.spinNumBins->setReadOnly(true);
-    ui.spinNumBins->setToolTip(
-        "Current number of bins (calculated from the fixed bin width)");
+    ui.spinNumBins->setToolTip("Current number of bins (calculated from the fixed bin width)");
   } else {
     ui.textBinWidth->setReadOnly(true);
     ui.textBinWidth->setToolTip("Current bin width, given the number of bins.");
@@ -891,8 +860,7 @@ void LineViewer::setFixedBinWidthMode(bool fixedWidth, double binWidth) {
  */
 void LineViewer::setStartXY(double x, double y) {
   if (m_allDimsFree)
-    throw std::runtime_error(
-        "LineViewer::setStartXY(): cannot use with all dimensions free.");
+    throw std::runtime_error("LineViewer::setStartXY(): cannot use with all dimensions free.");
   m_start[m_freeDimX] = VMD_t(x);
   m_start[m_freeDimY] = VMD_t(y);
   updateStartEnd();
@@ -909,8 +877,7 @@ void LineViewer::setStartXY(double x, double y) {
  */
 void LineViewer::setEndXY(double x, double y) {
   if (m_allDimsFree)
-    throw std::runtime_error(
-        "LineViewer::setEndXY(): cannot use with all dimensions free.");
+    throw std::runtime_error("LineViewer::setEndXY(): cannot use with all dimensions free.");
   m_end[m_freeDimX] = VMD_t(x);
   m_end[m_freeDimY] = VMD_t(y);
   updateStartEnd();
@@ -925,8 +892,7 @@ void LineViewer::setEndXY(double x, double y) {
  */
 QPointF LineViewer::getStartXY() const {
   if (m_allDimsFree)
-    throw std::runtime_error(
-        "LineViewer::getStartXY(): cannot use with all dimensions free.");
+    throw std::runtime_error("LineViewer::getStartXY(): cannot use with all dimensions free.");
   return QPointF(m_start[m_freeDimX], m_start[m_freeDimY]);
 }
 
@@ -936,8 +902,7 @@ QPointF LineViewer::getStartXY() const {
  */
 QPointF LineViewer::getEndXY() const {
   if (m_allDimsFree)
-    throw std::runtime_error(
-        "LineViewer::getEndXY(): cannot use with all dimensions free.");
+    throw std::runtime_error("LineViewer::getEndXY(): cannot use with all dimensions free.");
   return QPointF(m_end[m_freeDimX], m_end[m_freeDimY]);
 }
 
@@ -972,8 +937,7 @@ void LineViewer::setThickness(int dim, double width) {
   if (!m_ws)
     return;
   if (dim >= int(m_ws->getNumDims()) || dim < 0)
-    throw std::invalid_argument("There is no dimension # " +
-                                Strings::toString(dim) + " in the workspace.");
+    throw std::invalid_argument("There is no dimension # " + Strings::toString(dim) + " in the workspace.");
   m_thickness[dim] = VMD_t(width);
   updateStartEnd();
 }
@@ -1065,8 +1029,7 @@ void LineViewer::setSliceWorkspace(const std::string &name) {
 /** Calculate and show the preview (non-integrated) line,
  * using the current parameters. */
 void LineViewer::showPreview() {
-  MantidQwtIMDWorkspaceData curveData(m_ws, isLogScaledY(), m_start, m_end,
-                                      m_lineOptions->getNormalization());
+  MantidQwtIMDWorkspaceData curveData(m_ws, isLogScaledY(), m_start, m_end, m_lineOptions->getNormalization());
   curveData.setPreviewMode(true);
   curveData.setPlotAxisChoice(m_lineOptions->getPlotAxis());
   m_previewCurve->setData(curveData);
@@ -1092,8 +1055,7 @@ Gets the dimension index corresponding to the lineviewers preview plot x axis.
 @return the index.
 */
 int LineViewer::getXAxisDimensionIndex() const {
-  MantidQwtIMDWorkspaceData curveData(m_ws, isLogScaledY(), m_start, m_end,
-                                      m_lineOptions->getNormalization());
+  MantidQwtIMDWorkspaceData curveData(m_ws, isLogScaledY(), m_start, m_end, m_lineOptions->getNormalization());
   curveData.setPreviewMode(true);
   curveData.setPlotAxisChoice(m_lineOptions->getPlotAxis());
   return curveData.currentPlotXAxis();
@@ -1107,8 +1069,7 @@ void LineViewer::loadFromProject(const std::string &lines) {
   double planeWidth, binWidth;
   int xDim, yDim;
   int numBins;
-  bool adaptiveBins, overwriteLines, numBinsChecked, binWidthChecked,
-      allFreeDims;
+  bool adaptiveBins, overwriteLines, numBinsChecked, binWidthChecked, allFreeDims;
 
   if (!tsv.hasLine("SliceWorkspace"))
     return;
@@ -1203,19 +1164,16 @@ bool LineViewer::isLogScaledY() const { return m_lineOptions->isLogScaledY(); }
 void LineViewer::showFull() {
   if (!m_sliceWS)
     return;
-  MatrixWorkspace_sptr sliceMatrix =
-      std::dynamic_pointer_cast<MatrixWorkspace>(m_sliceWS);
+  MatrixWorkspace_sptr sliceMatrix = std::dynamic_pointer_cast<MatrixWorkspace>(m_sliceWS);
   if (sliceMatrix) {
     const bool distribution(false);
-    QwtWorkspaceSpectrumData curveData(*sliceMatrix, 0, isLogScaledY(),
-                                       distribution);
+    QwtWorkspaceSpectrumData curveData(*sliceMatrix, 0, isLogScaledY(), distribution);
     m_fullCurve->setData(curveData);
     setupScaleEngine(curveData);
     m_plot->setAxisTitle(QwtPlot::xBottom, curveData.getXAxisLabel());
     m_plot->setAxisTitle(QwtPlot::yLeft, curveData.getYAxisLabel());
   } else {
-    MantidQwtIMDWorkspaceData curveData(m_sliceWS, isLogScaledY(), VMD(), VMD(),
-                                        m_lineOptions->getNormalization());
+    MantidQwtIMDWorkspaceData curveData(m_sliceWS, isLogScaledY(), VMD(), VMD(), m_lineOptions->getNormalization());
     curveData.setPreviewMode(false);
     curveData.setPlotAxisChoice(m_lineOptions->getPlotAxis());
     m_fullCurve->setData(curveData);

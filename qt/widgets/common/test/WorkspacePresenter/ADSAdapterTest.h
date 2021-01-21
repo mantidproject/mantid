@@ -25,8 +25,7 @@ public:
 
   void setUp() override {
     mockPresenter.reset();
-    mockPresenter =
-        std::make_shared<NiceMock<MockWorkspaceProviderNotifiable>>();
+    mockPresenter = std::make_shared<NiceMock<MockWorkspaceProviderNotifiable>>();
     adapter.registerPresenter(mockPresenter);
     AnalysisDataService::Instance().clear();
   }
@@ -34,9 +33,7 @@ public:
   void testLoadWorkspaceIntoADS() {
     auto wksp = WorkspaceCreationHelper::create2DWorkspace(10, 10);
 
-    EXPECT_CALL(*mockPresenter.get(),
-                notifyFromWorkspaceProvider(NotifyFlag::WorkspaceLoaded))
-        .Times(Exactly(1));
+    EXPECT_CALL(*mockPresenter.get(), notifyFromWorkspaceProvider(NotifyFlag::WorkspaceLoaded)).Times(Exactly(1));
 
     AnalysisDataService::Instance().add("wksp", wksp);
 
@@ -48,9 +45,7 @@ public:
 
     AnalysisDataService::Instance().add("wksp", wksp);
 
-    EXPECT_CALL(*mockPresenter.get(),
-                notifyFromWorkspaceProvider(NotifyFlag::WorkspaceDeleted))
-        .Times(Exactly(1));
+    EXPECT_CALL(*mockPresenter.get(), notifyFromWorkspaceProvider(NotifyFlag::WorkspaceDeleted)).Times(Exactly(1));
 
     AnalysisDataService::Instance().remove("wksp");
 
@@ -64,9 +59,7 @@ public:
     AnalysisDataService::Instance().add("wksp1", wksp1);
     AnalysisDataService::Instance().add("wksp2", wksp2);
 
-    EXPECT_CALL(*mockPresenter.get(),
-                notifyFromWorkspaceProvider(NotifyFlag::WorkspacesCleared))
-        .Times(Exactly(1));
+    EXPECT_CALL(*mockPresenter.get(), notifyFromWorkspaceProvider(NotifyFlag::WorkspacesCleared)).Times(Exactly(1));
 
     AnalysisDataService::Instance().clear();
 
@@ -76,9 +69,7 @@ public:
   void testRenameWorkspace() {
     auto wksp = WorkspaceCreationHelper::create2DWorkspace(10, 10);
     AnalysisDataService::Instance().add("wksp", wksp);
-    EXPECT_CALL(*mockPresenter.get(),
-                notifyFromWorkspaceProvider(NotifyFlag::WorkspaceRenamed))
-        .Times(Exactly(1));
+    EXPECT_CALL(*mockPresenter.get(), notifyFromWorkspaceProvider(NotifyFlag::WorkspaceRenamed)).Times(Exactly(1));
 
     AnalysisDataService::Instance().rename("wksp", "myWorkspace");
 
@@ -86,9 +77,7 @@ public:
   }
 
   void testGroupWorkspaces() {
-    EXPECT_CALL(*mockPresenter.get(),
-                notifyFromWorkspaceProvider(NotifyFlag::WorkspacesGrouped))
-        .Times(Exactly(1));
+    EXPECT_CALL(*mockPresenter.get(), notifyFromWorkspaceProvider(NotifyFlag::WorkspacesGrouped)).Times(Exactly(1));
 
     AnalysisDataService::Instance().notificationCenter.postNotification(
         new WorkspacesGroupedNotification(std::vector<std::string>()));
@@ -97,9 +86,7 @@ public:
   }
 
   void testUngroupWorkspaces() {
-    EXPECT_CALL(*mockPresenter.get(),
-                notifyFromWorkspaceProvider(NotifyFlag::WorkspacesUngrouped))
-        .Times(Exactly(1));
+    EXPECT_CALL(*mockPresenter.get(), notifyFromWorkspaceProvider(NotifyFlag::WorkspacesUngrouped)).Times(Exactly(1));
 
     AnalysisDataService::Instance().notificationCenter.postNotification(
         new Mantid::API::WorkspaceUnGroupingNotification("", nullptr));
@@ -112,8 +99,7 @@ public:
     auto wksp2 = WorkspaceCreationHelper::create2DWorkspace(10, 10);
     auto wksp3 = WorkspaceCreationHelper::create2DWorkspace(10, 10);
 
-    auto group =
-        WorkspaceCreationHelper::createWorkspaceGroup(0, 10, 10, "group");
+    auto group = WorkspaceCreationHelper::createWorkspaceGroup(0, 10, 10, "group");
 
     AnalysisDataService::Instance().add("wksp1", wksp1);
     AnalysisDataService::Instance().add("wksp2", wksp2);
@@ -121,9 +107,7 @@ public:
     AnalysisDataService::Instance().addToGroup("group", "wksp1");
     AnalysisDataService::Instance().addToGroup("group", "wksp2");
 
-    EXPECT_CALL(*mockPresenter.get(),
-                notifyFromWorkspaceProvider(NotifyFlag::WorkspaceGroupUpdated))
-        .Times(Exactly(1));
+    EXPECT_CALL(*mockPresenter.get(), notifyFromWorkspaceProvider(NotifyFlag::WorkspaceGroupUpdated)).Times(Exactly(1));
 
     AnalysisDataService::Instance().addToGroup("group", "wksp3");
 

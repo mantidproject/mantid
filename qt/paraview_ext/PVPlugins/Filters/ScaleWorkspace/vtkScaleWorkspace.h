@@ -29,10 +29,8 @@ public:
 protected:
   vtkScaleWorkspace();
   ~vtkScaleWorkspace() override;
-  int RequestInformation(vtkInformation *, vtkInformationVector **,
-                         vtkInformationVector *);
-  int RequestData(vtkInformation *, vtkInformationVector **,
-                  vtkInformationVector *) override;
+  int RequestInformation(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
+  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *) override;
   int FillInputPortInformation(int port, vtkInformation *info) override;
 
 private:

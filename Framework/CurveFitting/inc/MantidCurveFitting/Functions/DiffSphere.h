@@ -24,8 +24,7 @@ namespace Functions {
 @date 11/14/2011
 */
 
-class MANTID_CURVEFITTING_DLL DiffSphere
-    : public API::ImmutableCompositeFunction {
+class MANTID_CURVEFITTING_DLL DiffSphere : public API::ImmutableCompositeFunction {
 
 public:
   /// overwrite IFunction base class methods
@@ -41,12 +40,10 @@ public:
   virtual void trickleDownAttribute(const std::string &name);
 
   /// Override parent definition
-  virtual void declareAttribute(const std::string &name,
-                                const API::IFunction::Attribute &defaultValue);
+  virtual void declareAttribute(const std::string &name, const API::IFunction::Attribute &defaultValue);
 
   /// Override parent definition
-  void setAttribute(const std::string &name,
-                    const API::IFunction::Attribute &att) override;
+  void setAttribute(const std::string &name, const API::IFunction::Attribute &att) override;
 
   /// overwrite IFunction base class method, which declare function parameters
   void init() override;

@@ -36,16 +36,14 @@
 #include <QMessageBox>
 #include <gsl/gsl_fft_halfcomplex.h>
 
-Convolution::Convolution(ApplicationWindow *parent, Table *t,
-                         const QString &signalColName,
+Convolution::Convolution(ApplicationWindow *parent, Table *t, const QString &signalColName,
                          const QString &responseColName)
     : Filter(parent, t), d_n_signal(0.0), d_n_response(0.0) {
   setObjectName(tr("Convolution"));
   setDataFromTable(t, signalColName, responseColName);
 }
 
-bool Convolution::setDataFromTable(Table *t, const QString &signalColName,
-                                   const QString &responseColName, int, int) {
+bool Convolution::setDataFromTable(Table *t, const QString &signalColName, const QString &responseColName, int, int) {
   if (t && d_table != t)
     d_table = t;
 
@@ -53,17 +51,13 @@ bool Convolution::setDataFromTable(Table *t, const QString &signalColName,
   int response_col = d_table->colIndex(responseColName);
 
   if (signal_col < 0) {
-    QMessageBox::warning(
-        dynamic_cast<ApplicationWindow *>(parent()),
-        tr("MantidPlot") + " - " + tr("Error"),
-        tr("The signal data set %1 does not exist!").arg(signalColName));
+    QMessageBox::warning(dynamic_cast<ApplicationWindow *>(parent()), tr("MantidPlot") + " - " + tr("Error"),
+                         tr("The signal data set %1 does not exist!").arg(signalColName));
     d_init_err = true;
     return false;
   } else if (response_col < 0) {
-    QMessageBox::warning(
-        dynamic_cast<ApplicationWindow *>(parent()),
-        tr("MantidPlot") + " - " + tr("Error"),
-        tr("The response data set %1 does not exist!").arg(responseColName));
+    QMessageBox::warning(dynamic_cast<ApplicationWindow *>(parent()), tr("MantidPlot") + " - " + tr("Error"),
+                         tr("The response data set %1 does not exist!").arg(responseColName));
     d_init_err = true;
     return false;
   }
@@ -80,8 +74,7 @@ bool Convolution::setDataFromTable(Table *t, const QString &signalColName,
       d_n_response++;
   }
   if (d_n_response >= rows / 2) {
-    QMessageBox::warning(dynamic_cast<ApplicationWindow *>(parent()),
-                         tr("MantidPlot") + " - " + tr("Error"),
+    QMessageBox::warning(dynamic_cast<ApplicationWindow *>(parent()), tr("MantidPlot") + " - " + tr("Error"),
                          tr("The response dataset '%1' must be less then half "
                             "the size of the signal dataset '%2'!")
                              .arg(responseColName)
@@ -89,11 +82,8 @@ bool Convolution::setDataFromTable(Table *t, const QString &signalColName,
     d_init_err = true;
     return false;
   } else if (d_n_response % 2 == 0) {
-    QMessageBox::warning(
-        dynamic_cast<ApplicationWindow *>(parent()),
-        tr("MantidPlot") + " - " + tr("Error"),
-        tr("The response dataset '%1' must contain an odd number of points!")
-            .arg(responseColName));
+    QMessageBox::warning(dynamic_cast<ApplicationWindow *>(parent()), tr("MantidPlot") + " - " + tr("Error"),
+                         tr("The response dataset '%1' must contain an odd number of points!").arg(responseColName));
     d_init_err = true;
     return false;
   }
@@ -114,8 +104,7 @@ bool Convolution::setDataFromTable(Table *t, const QString &signalColName,
     for (int i = 0; i < d_n_response; i++)
       d_y[i] = d_table->cell(i, response_col);
   } else {
-    QMessageBox::critical(dynamic_cast<ApplicationWindow *>(parent()),
-                          tr("MantidPlot") + " - " + tr("Error"),
+    QMessageBox::critical(dynamic_cast<ApplicationWindow *>(parent()), tr("MantidPlot") + " - " + tr("Error"),
                           tr("Could not allocate memory, operation aborted!"));
     d_init_err = true;
     d_n = 0;
@@ -148,8 +137,7 @@ void Convolution::addResultCurve() {
     x_temp[i] = x;
 
     d_table->setText(i, cols, QString::number(x));
-    d_table->setText(i, cols2,
-                     locale.toString(d_x[i], 'g', app->d_decimal_digits));
+    d_table->setText(i, cols2, locale.toString(d_x[i], 'g', app->d_decimal_digits));
   }
 
   QStringList l = d_table->colNames().filter(tr("Index"));
@@ -165,8 +153,7 @@ void Convolution::addResultCurve() {
     if (!d_output_graph)
       d_output_graph = createOutputGraph()->activeGraph();
 
-    DataCurve *c =
-        new DataCurve(d_table, d_table->colName(cols), d_table->colName(cols2));
+    DataCurve *c = new DataCurve(d_table, d_table->colName(cols), d_table->colName(cols2));
     c->setData(x_temp.data(), d_x, d_n); // c->setData(x_temp, d_x, d_n);
     c->setPen(QPen(ColorBox::color(d_curveColorIndex), 1));
     d_output_graph->insertPlotItem(c, GraphOptions::Line);
@@ -222,8 +209,7 @@ void Convolution::convlv(double *sig, int n, double *dres, int m, int sign) {
  *             Class Deconvolution                                         *
  ***************************************************************************/
 
-Deconvolution::Deconvolution(ApplicationWindow *parent, Table *t,
-                             const QString &signalColName,
+Deconvolution::Deconvolution(ApplicationWindow *parent, Table *t, const QString &signalColName,
                              const QString &responseColName)
     : Convolution(parent, t, signalColName, responseColName) {
   setObjectName(tr("Deconvolution"));

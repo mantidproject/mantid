@@ -33,11 +33,8 @@ void QueryAllRemoteJobs::init() {
   auto nullValidator = std::make_shared<NullValidator>();
 
   // Compute Resources
-  std::vector<std::string> computes = Mantid::Kernel::ConfigService::Instance()
-                                          .getFacility()
-                                          .computeResources();
-  declareProperty("ComputeResource", "",
-                  std::make_shared<StringListValidator>(computes),
+  std::vector<std::string> computes = Mantid::Kernel::ConfigService::Instance().getFacility().computeResources();
+  declareProperty("ComputeResource", "", std::make_shared<StringListValidator>(computes),
                   "The name of the remote computer to query", Direction::Input);
 
   // Mantid can't store arbitrary structs in its properties, so we're going to
@@ -45,49 +42,38 @@ void QueryAllRemoteJobs::init() {
   // array properties for different pieces of data.  Values from the same array
   // index are for
   // the same job.
-  declareProperty(std::make_unique<ArrayProperty<std::string>>(
-                      "JobId", nullValidator, Direction::Output),
+  declareProperty(std::make_unique<ArrayProperty<std::string>>("JobId", nullValidator, Direction::Output),
                   "ID string for the job");
-  declareProperty(std::make_unique<ArrayProperty<std::string>>(
-                      "JobStatusString", nullValidator, Direction::Output),
+  declareProperty(std::make_unique<ArrayProperty<std::string>>("JobStatusString", nullValidator, Direction::Output),
                   "Description of the job's current status (Queued, Running, "
                   "Complete, etc..)");
-  declareProperty(std::make_unique<ArrayProperty<std::string>>(
-                      "JobName", nullValidator, Direction::Output),
+  declareProperty(std::make_unique<ArrayProperty<std::string>>("JobName", nullValidator, Direction::Output),
                   "Name of the job (specified when the job was submitted)");
-  declareProperty(std::make_unique<ArrayProperty<std::string>>(
-                      "ScriptName", nullValidator, Direction::Output),
+  declareProperty(std::make_unique<ArrayProperty<std::string>>("ScriptName", nullValidator, Direction::Output),
                   "The name of the python script that was executed");
-  declareProperty(std::make_unique<ArrayProperty<std::string>>(
-                      "TransID", nullValidator, Direction::Output),
+  declareProperty(std::make_unique<ArrayProperty<std::string>>("TransID", nullValidator, Direction::Output),
                   "The ID of the transaction that owns the job");
 
   // Times for job submit, job start and job complete (may be empty depending
   // on the server-side implementation)
-  declareProperty(std::make_unique<ArrayProperty<std::string>>(
-                      "SubmitDate", nullValidator, Direction::Output),
+  declareProperty(std::make_unique<ArrayProperty<std::string>>("SubmitDate", nullValidator, Direction::Output),
                   "The date & time the job was submitted");
-  declareProperty(std::make_unique<ArrayProperty<std::string>>(
-                      "StartDate", nullValidator, Direction::Output),
+  declareProperty(std::make_unique<ArrayProperty<std::string>>("StartDate", nullValidator, Direction::Output),
                   "The date & time the job actually started executing");
-  declareProperty(std::make_unique<ArrayProperty<std::string>>(
-                      "CompletionDate", nullValidator, Direction::Output),
+  declareProperty(std::make_unique<ArrayProperty<std::string>>("CompletionDate", nullValidator, Direction::Output),
                   "The date & time the job finished");
 }
 
 void QueryAllRemoteJobs::exec() {
   std::shared_ptr<RemoteJobManager> jobManager =
-      Mantid::Kernel::ConfigService::Instance()
-          .getFacility()
-          .getRemoteJobManager(getPropertyValue("ComputeResource"));
+      Mantid::Kernel::ConfigService::Instance().getFacility().getRemoteJobManager(getPropertyValue("ComputeResource"));
 
   // jobManager is a std::shared_ptr...
   if (!jobManager) {
     // Requested compute resource doesn't exist
     // TODO: should we create our own exception class for this??
     throw(std::runtime_error(
-        std::string("Unable to create a compute resource named " +
-                    getPropertyValue("ComputeResource"))));
+        std::string("Unable to create a compute resource named " + getPropertyValue("ComputeResource"))));
   }
 
   std::istream &respStream = jobManager->httpGet("/query");

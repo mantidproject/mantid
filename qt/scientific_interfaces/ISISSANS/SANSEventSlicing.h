@@ -34,8 +34,7 @@ private:
   void initLayout() override;
 
   ChargeAndTime getFullChargeAndTime(const QString &name_ws);
-  QString createSliceEventCode(const QString &name_ws, const QString &start,
-                               const QString &stop);
+  QString createSliceEventCode(const QString &name_ws, const QString &start, const QString &stop);
   ChargeAndTime runSliceEvent(const QString &code2run);
   void checkPythonOutput(const QString &result);
   ChargeAndTime values2ChargeAndTime(const QString &input);

@@ -41,8 +41,7 @@ const std::string TOF_SCD("SingleCrystalTOF");
 const std::string TOF_PD("PowderTOF");
 
 inline double sinTheta(const API::SpectrumInfo &spectrumInfo, int64_t index) {
-  const double twoTheta =
-      spectrumInfo.isMonitor(index) ? 0.0 : spectrumInfo.twoTheta(index);
+  const double twoTheta = spectrumInfo.isMonitor(index) ? 0.0 : spectrumInfo.twoTheta(index);
   return std::sin(0.5 * twoTheta);
 }
 } // namespace
@@ -51,33 +50,25 @@ inline double sinTheta(const API::SpectrumInfo &spectrumInfo, int64_t index) {
 int LorentzCorrection::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string LorentzCorrection::category() const {
-  return "Crystal\\Corrections";
-}
+const std::string LorentzCorrection::category() const { return "Crystal\\Corrections"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-const std::string LorentzCorrection::summary() const {
-  return "Performs a white beam Lorentz Correction";
-}
+const std::string LorentzCorrection::summary() const { return "Performs a white beam Lorentz Correction"; }
 
-const std::string LorentzCorrection::name() const {
-  return "LorentzCorrection";
-}
+const std::string LorentzCorrection::name() const { return "LorentzCorrection"; }
 
 /** Initialize the algorithm's properties.
  */
 void LorentzCorrection::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      PropertyNames::INPUT_WKSP, "", Direction::Input,
-                      PropertyMode::Mandatory),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(PropertyNames::INPUT_WKSP, "", Direction::Input,
+                                                                       PropertyMode::Mandatory),
                   // std::make_shared<WorkspaceUnitValidator>("Wavelength")),
                   "Input workspace to correct in Wavelength.");
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      PropertyNames::OUTPUT_WKSP, "", Direction::Output),
-                  "An output workspace.");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(PropertyNames::OUTPUT_WKSP, "", Direction::Output),
+      "An output workspace.");
   const std::vector<std::string> correction_types{TOF_SCD, TOF_PD};
-  declareProperty(PropertyNames::TYPE, correction_types[0],
-                  std::make_shared<StringListValidator>(correction_types),
+  declareProperty(PropertyNames::TYPE, correction_types[0], std::make_shared<StringListValidator>(correction_types),
                   "Type of Lorentz correction to do");
 }
 
@@ -87,13 +78,11 @@ std::map<std::string, std::string> LorentzCorrection::validateInputs() {
   const auto processingType = this->getPropertyValue(PropertyNames::TYPE);
   // check units if the SCD option is selected
   if (processingType == TOF_SCD) {
-    MatrixWorkspace_const_sptr wksp =
-        this->getProperty(PropertyNames::INPUT_WKSP);
+    MatrixWorkspace_const_sptr wksp = this->getProperty(PropertyNames::INPUT_WKSP);
     // code is a variant of private method from WorkspaceUnitValidator
     const auto unit = wksp->getAxis(0)->unit();
     if ((!unit) || (unit->unitID().compare("Wavelength"))) {
-      result[PropertyNames::INPUT_WKSP] =
-          "The workspace must have units of Wavelength";
+      result[PropertyNames::INPUT_WKSP] = "The workspace must have units of Wavelength";
     }
   }
 
@@ -109,8 +98,7 @@ void LorentzCorrection::exec() {
   auto cloneAlg = this->createChildAlgorithm("CloneWorkspace", 0, 0.1);
   cloneAlg->initialize();
   cloneAlg->setProperty("InputWorkspace", inWS);
-  cloneAlg->setPropertyValue(
-      "OutputWorkspace", this->getPropertyValue(PropertyNames::OUTPUT_WKSP));
+  cloneAlg->setPropertyValue("OutputWorkspace", this->getPropertyValue(PropertyNames::OUTPUT_WKSP));
   cloneAlg->execute();
   Workspace_sptr temp = cloneAlg->getProperty("OutputWorkspace");
   MatrixWorkspace_sptr outWS = std::dynamic_pointer_cast<MatrixWorkspace>(temp);
@@ -132,8 +120,7 @@ void LorentzCorrection::exec() {
   this->setProperty(PropertyNames::OUTPUT_WKSP, outWS);
 }
 
-void LorentzCorrection::processTOF_SCD(MatrixWorkspace_sptr &wksp,
-                                       Progress &prog) {
+void LorentzCorrection::processTOF_SCD(MatrixWorkspace_sptr &wksp, Progress &prog) {
   const int64_t numHistos = static_cast<int64_t>(wksp->getNumberHistograms());
   const auto &spectrumInfo = wksp->spectrumInfo();
 
@@ -154,13 +141,11 @@ void LorentzCorrection::processTOF_SCD(MatrixWorkspace_sptr &wksp,
     const auto pos = std::find(cbegin(points), cend(points), 0.0);
     if (pos != cend(points)) {
       std::stringstream buffer;
-      buffer << "Cannot have zero values Wavelength. At workspace index: "
-             << pos - cbegin(points);
+      buffer << "Cannot have zero values Wavelength. At workspace index: " << pos - cbegin(points);
       throw std::runtime_error(buffer.str());
     }
     for (size_t j = 0; j < num_points; ++j) {
-      double weight =
-          sinThetaSq / (points[j] * points[j] * points[j] * points[j]);
+      double weight = sinThetaSq / (points[j] * points[j] * points[j] * points[j]);
       outY[j] *= weight;
       outE[j] *= weight;
     }
@@ -172,13 +157,11 @@ void LorentzCorrection::processTOF_SCD(MatrixWorkspace_sptr &wksp,
   PARALLEL_CHECK_INTERUPT_REGION
 }
 
-void LorentzCorrection::processTOF_PD(MatrixWorkspace_sptr &wksp,
-                                      Progress &prog) {
+void LorentzCorrection::processTOF_PD(MatrixWorkspace_sptr &wksp, Progress &prog) {
   const int64_t numHistos = static_cast<int64_t>(wksp->getNumberHistograms());
   const auto &spectrumInfo = wksp->spectrumInfo();
 
-  EventWorkspace_sptr wkspEvent =
-      std::dynamic_pointer_cast<EventWorkspace>(wksp);
+  EventWorkspace_sptr wkspEvent = std::dynamic_pointer_cast<EventWorkspace>(wksp);
   bool isEvent = bool(wkspEvent);
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*wksp))
@@ -194,8 +177,7 @@ void LorentzCorrection::processTOF_PD(MatrixWorkspace_sptr &wksp,
     const auto pos = std::find(cbegin(points), cend(points), 0.0);
     if (pos != cend(points)) {
       std::stringstream buffer;
-      buffer << "Cannot have zero values Wavelength. At workspace index: "
-             << pos - cbegin(points);
+      buffer << "Cannot have zero values Wavelength. At workspace index: " << pos - cbegin(points);
       throw std::runtime_error(buffer.str());
     }
 

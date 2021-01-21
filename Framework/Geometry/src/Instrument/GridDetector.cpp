@@ -36,8 +36,7 @@ using Kernel::V3D;
  * @param map: pointer to the ParameterMap
  * */
 GridDetector::GridDetector(const GridDetector *base, const ParameterMap *map)
-    : CompAssembly(base, map), IObjComponent(nullptr), m_gridBase(base),
-      m_minDetId(0), m_maxDetId(0) {
+    : CompAssembly(base, map), IObjComponent(nullptr), m_gridBase(base), m_minDetId(0), m_maxDetId(0) {
   init();
   setGeometryHandler(new GeometryHandler(this));
 }
@@ -52,8 +51,7 @@ GridDetector::GridDetector(const GridDetector *base, const ParameterMap *map)
  *  this is registered as a children of reference.
  */
 GridDetector::GridDetector(const std::string &n, IComponent *reference)
-    : CompAssembly(n, reference), IObjComponent(nullptr), m_gridBase(nullptr),
-      m_minDetId(0), m_maxDetId(0) {
+    : CompAssembly(n, reference), IObjComponent(nullptr), m_gridBase(nullptr), m_minDetId(0), m_maxDetId(0) {
   init();
   this->setName(n);
   setGeometryHandler(new GeometryHandler(this));
@@ -94,21 +92,17 @@ GridDetector *GridDetector::clone() const { return new GridDetector(*this); }
  * @throw runtime_error if the x/y/z pixel width is not set, or x/y/z are out of
  *range
  */
-std::shared_ptr<Detector> GridDetector::getAtXYZ(const int x, const int y,
-                                                 const int z) const {
+std::shared_ptr<Detector> GridDetector::getAtXYZ(const int x, const int y, const int z) const {
   if ((xpixels() <= 0) || (ypixels() <= 0))
     throw std::runtime_error("GridDetector::getAtXY: invalid X or Y "
                              "width set in the object.");
   if ((x < 0) || (x >= xpixels()))
-    throw std::runtime_error(
-        "GridDetector::getAtXYZ: x specified is out of range.");
+    throw std::runtime_error("GridDetector::getAtXYZ: x specified is out of range.");
   if ((y < 0) || (y >= ypixels()))
-    throw std::runtime_error(
-        "GridDetector::getAtXYZ: y specified is out of range.");
+    throw std::runtime_error("GridDetector::getAtXYZ: y specified is out of range.");
   if (zpixels() > 0) {
     if ((z < 0) || (z >= zpixels()))
-      throw std::runtime_error(
-          "GridDetector::getAtXYZ: z specified is out of range.");
+      throw std::runtime_error("GridDetector::getAtXYZ: z specified is out of range.");
   }
 
   // Find the index and return that.
@@ -117,44 +111,36 @@ std::shared_ptr<Detector> GridDetector::getAtXYZ(const int x, const int y,
   if (this->zpixels() > 0) {
     auto zLayer = std::dynamic_pointer_cast<ICompAssembly>(this->getChild(z));
     if (!zLayer)
-      throw std::runtime_error(
-          "GridDetector::getAtXYZ: z specified is out of range.");
+      throw std::runtime_error("GridDetector::getAtXYZ: z specified is out of range.");
 
     xCol = std::dynamic_pointer_cast<ICompAssembly>(zLayer->getChild(x));
   } else
     xCol = std::dynamic_pointer_cast<ICompAssembly>(this->getChild(x));
 
   if (!xCol)
-    throw std::runtime_error(
-        "GridDetector::getAtXYZ: x specified is out of range.");
+    throw std::runtime_error("GridDetector::getAtXYZ: x specified is out of range.");
   return std::dynamic_pointer_cast<Detector>(xCol->getChild(y));
 }
 
 detid_t getFillFirstZ(const GridDetector *me, int x, int y, int z) {
   if (me->idFillOrder()[1] == 'y')
-    return me->idstart() + z * me->idstep() + y * me->idstepbyrow() +
-           x * (me->ypixels() * me->idstepbyrow());
+    return me->idstart() + z * me->idstep() + y * me->idstepbyrow() + x * (me->ypixels() * me->idstepbyrow());
   else
-    return me->idstart() + z * me->idstep() + x * me->idstepbyrow() +
-           y * (me->xpixels() * me->idstepbyrow());
+    return me->idstart() + z * me->idstep() + x * me->idstepbyrow() + y * (me->xpixels() * me->idstepbyrow());
 }
 
 detid_t getFillFirstY(const GridDetector *me, int x, int y, int z) {
   if (me->idFillOrder()[1] == 'x')
-    return me->idstart() + y * me->idstep() + x * me->idstepbyrow() +
-           z * (me->xpixels() * me->idstepbyrow());
+    return me->idstart() + y * me->idstep() + x * me->idstepbyrow() + z * (me->xpixels() * me->idstepbyrow());
   else
-    return me->idstart() + y * me->idstep() + z * me->idstepbyrow() +
-           x * (me->zpixels() * me->idstepbyrow());
+    return me->idstart() + y * me->idstep() + z * me->idstepbyrow() + x * (me->zpixels() * me->idstepbyrow());
 }
 
 detid_t getFillFirstX(const GridDetector *me, int x, int y, int z) {
   if (me->idFillOrder()[1] == 'y')
-    return me->idstart() + x * me->idstep() + y * me->idstepbyrow() +
-           z * (me->ypixels() * me->idstepbyrow());
+    return me->idstart() + x * me->idstep() + y * me->idstepbyrow() + z * (me->ypixels() * me->idstepbyrow());
   else
-    return me->idstart() + x * me->idstep() + z * me->idstepbyrow() +
-           y * (me->zpixels() * me->idstepbyrow());
+    return me->idstart() + x * me->idstep() + z * me->idstepbyrow() + y * (me->zpixels() * me->idstepbyrow());
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -168,8 +154,7 @@ detid_t getFillFirstX(const GridDetector *me, int x, int y, int z) {
  * @throw runtime_error if the x/y/z pixel width is not set, or X/Y are out of
  *range
  */
-detid_t GridDetector::getDetectorIDAtXYZ(const int x, const int y,
-                                         const int z) const {
+detid_t GridDetector::getDetectorIDAtXYZ(const int x, const int y, const int z) const {
   const GridDetector *me = this;
   if (m_map)
     me = this->m_gridBase;
@@ -182,8 +167,7 @@ detid_t GridDetector::getDetectorIDAtXYZ(const int x, const int y,
     return getFillFirstX(me, x, y, z);
 }
 
-std::tuple<int, int, int> getXYZFillFirstZ(const GridDetector *me, int col,
-                                           int id) {
+std::tuple<int, int, int> getXYZFillFirstZ(const GridDetector *me, int col, int id) {
   if (me->idFillOrder()[1] == 'y') {
     int row = (id / me->idstepbyrow()) % me->ypixels();
     auto layer = (id / me->idstepbyrow()) / me->ypixels();
@@ -195,8 +179,7 @@ std::tuple<int, int, int> getXYZFillFirstZ(const GridDetector *me, int col,
   }
 }
 
-std::tuple<int, int, int> getXYZFillFirstY(const GridDetector *me, int col,
-                                           int id) {
+std::tuple<int, int, int> getXYZFillFirstY(const GridDetector *me, int col, int id) {
   if (me->idFillOrder()[1] == 'z') {
     int row = (id / me->idstepbyrow()) % me->zpixels();
     auto layer = (id / me->idstepbyrow()) / me->zpixels();
@@ -208,8 +191,7 @@ std::tuple<int, int, int> getXYZFillFirstY(const GridDetector *me, int col,
   }
 }
 
-std::tuple<int, int, int> getXYZFillFirstX(const GridDetector *me, int col,
-                                           int id) {
+std::tuple<int, int, int> getXYZFillFirstX(const GridDetector *me, int col, int id) {
   if (me->idFillOrder()[1] == 'y') {
     int row = (id / me->idstepbyrow()) % me->ypixels();
     auto layer = (id / me->idstepbyrow()) / me->ypixels();
@@ -227,8 +209,7 @@ std::tuple<int, int, int> getXYZFillFirstX(const GridDetector *me, int col,
  * @param detectorID :: detectorID
  * @return tuple of (x,y,z)
  */
-std::tuple<int, int, int>
-GridDetector::getXYZForDetectorID(const detid_t detectorID) const {
+std::tuple<int, int, int> GridDetector::getXYZForDetectorID(const detid_t detectorID) const {
   const GridDetector *me = this;
   if (m_map)
     me = this->m_gridBase;
@@ -449,15 +430,12 @@ V3D GridDetector::getRelativePosAtXYZ(int x, int y, int z) const {
     double scalez = 1.0;
     if (m_map->contains(m_gridBase, "scalez"))
       scalez = m_map->get(m_gridBase, "scalez")->value<double>();
-    return m_gridBase->getRelativePosAtXYZ(x, y, z) *
-           V3D(scalex, scaley, scalez);
+    return m_gridBase->getRelativePosAtXYZ(x, y, z) * V3D(scalex, scaley, scalez);
   } else
-    return V3D(m_xstart + m_xstep * x, m_ystart + m_ystep * y,
-               m_zstart + m_zstep * z);
+    return V3D(m_xstart + m_xstep * x, m_ystart + m_ystep * y, m_zstart + m_zstep * z);
 }
 
-void GridDetector::createLayer(const std::string &name, CompAssembly *parent,
-                               int iz, int &minDetID, int &maxDetID) {
+void GridDetector::createLayer(const std::string &name, CompAssembly *parent, int iz, int &minDetID, int &maxDetID) {
   // Loop and create all detectors in this layer.
   for (int ix = 0; ix < m_xpixels; ++ix) {
     // Create an ICompAssembly for each x-column
@@ -491,9 +469,7 @@ void GridDetector::createLayer(const std::string &name, CompAssembly *parent,
       }
       // Create the detector from the given id & shape and with xColumn as the
       // parent.
-      auto *detector =
-          new GridDetectorPixel(oss.str(), id, m_shape, xColumn, this,
-                                size_t(ix), size_t(iy), size_t(iz));
+      auto *detector = new GridDetectorPixel(oss.str(), id, m_shape, xColumn, this, size_t(ix), size_t(iy), size_t(iz));
 
       // Calculate the x,y,z position
       double x = m_xstart + ix * m_xstep;
@@ -523,19 +499,14 @@ void GridDetector::validateInput() const {
                                 "should only comprise exactly 3 letters x, y, "
                                 "and z in any order.");
   if (m_xpixels <= 0)
-    throw std::invalid_argument(
-        "GridDetector::initialize(): xpixels should be > 0");
+    throw std::invalid_argument("GridDetector::initialize(): xpixels should be > 0");
   if (m_ypixels <= 0)
-    throw std::invalid_argument(
-        "GridDetector::initialize(): ypixels should be > 0");
+    throw std::invalid_argument("GridDetector::initialize(): ypixels should be > 0");
 }
 
-void GridDetector::initializeValues(std::shared_ptr<IObject> shape, int xpixels,
-                                    double xstart, double xstep, int ypixels,
-                                    double ystart, double ystep, int zpixels,
-                                    double zstart, double zstep, int idstart,
-                                    const std::string &idFillOrder,
-                                    int idstepbyrow, int idstep) {
+void GridDetector::initializeValues(std::shared_ptr<IObject> shape, int xpixels, double xstart, double xstep,
+                                    int ypixels, double ystart, double ystep, int zpixels, double zstart, double zstep,
+                                    int idstart, const std::string &idFillOrder, int idstepbyrow, int idstep) {
 
   m_xpixels = xpixels;
   m_ypixels = ypixels;
@@ -599,20 +570,16 @@ void GridDetector::initializeValues(std::shared_ptr<IObject> shape, int xpixels,
  *            and idstep=100 and idstart=1 then (0,0)=1; (0,1)=101; and so on
  *
  */
-void GridDetector::initialize(std::shared_ptr<IObject> shape, int xpixels,
-                              double xstart, double xstep, int ypixels,
-                              double ystart, double ystep, int zpixels,
-                              double zstart, double zstep, int idstart,
-                              const std::string &idFillOrder, int idstepbyrow,
-                              int idstep) {
+void GridDetector::initialize(std::shared_ptr<IObject> shape, int xpixels, double xstart, double xstep, int ypixels,
+                              double ystart, double ystep, int zpixels, double zstart, double zstep, int idstart,
+                              const std::string &idFillOrder, int idstepbyrow, int idstep) {
 
   if (m_map)
     throw std::runtime_error("GridDetector::initialize() called for a "
                              "parametrized GridDetector");
 
-  initializeValues(std::move(shape), xpixels, xstart, xstep, ypixels, ystart,
-                   ystep, zpixels, zstart, zstep, idstart, idFillOrder,
-                   idstepbyrow, idstep);
+  initializeValues(std::move(shape), xpixels, xstart, xstep, ypixels, ystart, ystep, zpixels, zstart, zstep, idstart,
+                   idFillOrder, idstepbyrow, idstep);
 
   std::string name = this->getName();
   int minDetId = idstart, maxDetId = idstart;
@@ -622,8 +589,7 @@ void GridDetector::initialize(std::shared_ptr<IObject> shape, int xpixels,
       // Create an ICompAssembly for each z-layer
       std::ostringstream oss_layer;
       oss_layer << name << "(z=" << iz << ")";
-      createLayer(name, new CompAssembly(oss_layer.str(), this), iz, minDetId,
-                  maxDetId);
+      createLayer(name, new CompAssembly(oss_layer.str(), this), iz, minDetId, maxDetId);
     }
   } else
     createLayer(name, this, 0, minDetId, maxDetId);
@@ -654,8 +620,7 @@ detid_t GridDetector::maxDetectorID() {
 
 //-------------------------------------------------------------------------------------------------
 /// @copydoc Mantid::Geometry::CompAssembly::getComponentByName
-std::shared_ptr<const IComponent>
-GridDetector::getComponentByName(const std::string &cname, int nlevels) const {
+std::shared_ptr<const IComponent> GridDetector::getComponentByName(const std::string &cname, int nlevels) const {
   // exact matches
   if (cname == this->getName())
     return std::shared_ptr<const IComponent>(this);
@@ -684,8 +649,8 @@ GridDetector::getComponentByName(const std::string &cname, int nlevels) const {
  * @param searchQueue :: If a child is a sub-assembly then it is appended for
  *later searching. Unused.
  */
-void GridDetector::testIntersectionWithChildren(
-    Track &testRay, std::deque<IComponent_const_sptr> & /*searchQueue*/) const {
+void GridDetector::testIntersectionWithChildren(Track &testRay,
+                                                std::deque<IComponent_const_sptr> & /*searchQueue*/) const {
   /// Base point (x,y,z) = position of pixel 0,0
   V3D basePoint;
 
@@ -744,8 +709,7 @@ void GridDetector::testIntersectionWithChildren(
 
   // TODO: Do I need to put something smart here for the first 3 parameters?
   auto comp = getAtXYZ(xIndex, yIndex, 0);
-  testRay.addLink(intersec, intersec, 0.0, *(comp->shape()),
-                  comp->getComponentID());
+  testRay.addLink(intersec, intersec, 0.0, *(comp->shape()), comp->getComponentID());
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -757,37 +721,32 @@ void GridDetector::testIntersectionWithChildren(
 //-------------------------------------------------------------------------------------------------
 /// Does the point given lie within this object component?
 bool GridDetector::isValid(const V3D & /*point*/) const {
-  throw Kernel::Exception::NotImplementedError(
-      "GridDetector::isValid() is not implemented.");
+  throw Kernel::Exception::NotImplementedError("GridDetector::isValid() is not implemented.");
 }
 
 //-------------------------------------------------------------------------------------------------
 /// Does the point given lie on the surface of this object component?
 bool GridDetector::isOnSide(const V3D & /*point*/) const {
-  throw Kernel::Exception::NotImplementedError(
-      "GridDetector::isOnSide() is not implemented.");
+  throw Kernel::Exception::NotImplementedError("GridDetector::isOnSide() is not implemented.");
 }
 
 //-------------------------------------------------------------------------------------------------
 /// Checks whether the track given will pass through this Component.
 int GridDetector::interceptSurface(Track & /*track*/) const {
-  throw Kernel::Exception::NotImplementedError(
-      "GridDetector::interceptSurface() is not implemented.");
+  throw Kernel::Exception::NotImplementedError("GridDetector::interceptSurface() is not implemented.");
 }
 
 //-------------------------------------------------------------------------------------------------
 /// Finds the approximate solid angle covered by the component when viewed from
 /// the point given
 double GridDetector::solidAngle(const V3D & /*observer*/) const {
-  throw Kernel::Exception::NotImplementedError(
-      "GridDetector::solidAngle() is not implemented.");
+  throw Kernel::Exception::NotImplementedError("GridDetector::solidAngle() is not implemented.");
 }
 
 //-------------------------------------------------------------------------------------------------
 /// Try to find a point that lies within (or on) the object
 int GridDetector::getPointInObject(V3D & /*point*/) const {
-  throw Kernel::Exception::NotImplementedError(
-      "GridDetector::getPointInObject() is not implemented.");
+  throw Kernel::Exception::NotImplementedError("GridDetector::getPointInObject() is not implemented.");
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -809,21 +768,17 @@ void GridDetector::getBoundingBox(BoundingBox &assemblyBox) const {
   bb.grow(compBox);
   getAtXYZ(this->xpixels() - 1, 0, 0)->getBoundingBox(compBox);
   bb.grow(compBox);
-  getAtXYZ(this->xpixels() - 1, this->ypixels() - 1, 0)
-      ->getBoundingBox(compBox);
+  getAtXYZ(this->xpixels() - 1, this->ypixels() - 1, 0)->getBoundingBox(compBox);
   bb.grow(compBox);
   getAtXYZ(0, this->ypixels() - 1, 0)->getBoundingBox(compBox);
   bb.grow(compBox);
   getAtXYZ(0, 0, this->zpixels() - 1)->getBoundingBox(compBox);
   bb.grow(compBox);
-  getAtXYZ(this->xpixels() - 1, 0, this->zpixels() - 1)
-      ->getBoundingBox(compBox);
+  getAtXYZ(this->xpixels() - 1, 0, this->zpixels() - 1)->getBoundingBox(compBox);
   bb.grow(compBox);
-  getAtXYZ(this->xpixels() - 1, this->ypixels() - 1, this->zpixels() - 1)
-      ->getBoundingBox(compBox);
+  getAtXYZ(this->xpixels() - 1, this->ypixels() - 1, this->zpixels() - 1)->getBoundingBox(compBox);
   bb.grow(compBox);
-  getAtXYZ(0, this->ypixels() - 1, this->zpixels() - 1)
-      ->getBoundingBox(compBox);
+  getAtXYZ(0, this->ypixels() - 1, this->zpixels() - 1)->getBoundingBox(compBox);
   bb.grow(compBox);
 
   assemblyBox = bb;
@@ -863,30 +818,22 @@ const std::shared_ptr<const IObject> GridDetector::shape() const {
   double szZ = m_zpixels == 0 ? 0.5 : m_zpixels;
   std::ostringstream xmlShapeStream;
   xmlShapeStream << " <cuboid id=\"detector-shape\"> "
-                 << "<left-front-bottom-point x=\"" << szX << "\" y=\"" << -szY
-                 << "\" z=\"" << -szZ << "\"  /> "
-                 << "<left-front-top-point  x=\"" << szX << "\" y=\"" << -szY
-                 << "\" z=\"" << szZ << "\"  /> "
-                 << "<left-back-bottom-point  x=\"" << -szX << "\" y=\"" << -szY
-                 << "\" z=\"" << -szZ << "\"  /> "
-                 << "<right-front-bottom-point  x=\"" << szX << "\" y=\"" << szY
-                 << "\" z=\"" << -szZ << "\"  /> "
+                 << "<left-front-bottom-point x=\"" << szX << "\" y=\"" << -szY << "\" z=\"" << -szZ << "\"  /> "
+                 << "<left-front-top-point  x=\"" << szX << "\" y=\"" << -szY << "\" z=\"" << szZ << "\"  /> "
+                 << "<left-back-bottom-point  x=\"" << -szX << "\" y=\"" << -szY << "\" z=\"" << -szZ << "\"  /> "
+                 << "<right-front-bottom-point  x=\"" << szX << "\" y=\"" << szY << "\" z=\"" << -szZ << "\"  /> "
                  << "</cuboid>";
 
   std::string xmlCuboidShape(xmlShapeStream.str());
   Geometry::ShapeFactory shapeCreator;
-  std::shared_ptr<Geometry::IObject> cuboidShape =
-      shapeCreator.createShape(xmlCuboidShape);
+  std::shared_ptr<Geometry::IObject> cuboidShape = shapeCreator.createShape(xmlCuboidShape);
 
   return cuboidShape;
 }
 
-const Kernel::Material GridDetector::material() const {
-  return Kernel::Material();
-}
+const Kernel::Material GridDetector::material() const { return Kernel::Material(); }
 
-size_t
-GridDetector::registerContents(ComponentVisitor &componentVisitor) const {
+size_t GridDetector::registerContents(ComponentVisitor &componentVisitor) const {
   return componentVisitor.registerGridBank(*this);
 }
 

@@ -41,16 +41,14 @@
 #include <QPainter>
 #include <qwt_plot_canvas.h>
 
-LineProfileTool::LineProfileTool(Graph *graph, ApplicationWindow *app,
-                                 int average_pixels)
-    : QWidget(graph->plotWidget()->canvas()), PlotToolInterface(graph),
-      d_app(app), d_op_start(QPoint(0, 0)), d_op_dp(QPoint(0, 0)) {
+LineProfileTool::LineProfileTool(Graph *graph, ApplicationWindow *app, int average_pixels)
+    : QWidget(graph->plotWidget()->canvas()), PlotToolInterface(graph), d_app(app), d_op_start(QPoint(0, 0)),
+      d_op_dp(QPoint(0, 0)) {
   // make sure we average over an odd number of pixels
   d_average_pixels = (average_pixels % 2) ? average_pixels : average_pixels + 1;
   d_target = dynamic_cast<ImageMarker *>(d_graph->selectedMarkerPtr());
   if (!d_target)
-    QMessageBox::critical(d_graph->window(),
-                          tr("MantidPlot - Pixel selection warning"),
+    QMessageBox::critical(d_graph->window(), tr("MantidPlot - Pixel selection warning"),
                           tr("Please select an image marker first."));
   d_graph->deselectMarker();
   setGeometry(0, 0, parentWidget()->width(), parentWidget()->height());
@@ -58,13 +56,11 @@ LineProfileTool::LineProfileTool(Graph *graph, ApplicationWindow *app,
   setFocus();
 }
 
-void LineProfileTool::calculateLineProfile(const QPoint &start,
-                                           const QPoint &end) {
+void LineProfileTool::calculateLineProfile(const QPoint &start, const QPoint &end) {
   QRect rect = d_target->rect();
   if (!rect.contains(start) || !rect.contains(end)) {
-    QMessageBox::warning(
-        d_graph, tr("MantidPlot - Pixel selection warning"),
-        tr("Please select the end line point inside the image rectangle!"));
+    QMessageBox::warning(d_graph, tr("MantidPlot - Pixel selection warning"),
+                         tr("Please select the end line point inside the image rectangle!"));
     return;
   }
 
@@ -139,8 +135,7 @@ void LineProfileTool::calculateLineProfile(const QPoint &start,
   }
 
   Table *t = d_app->newTable(tr("Table") + "1", n, 4, text);
-  MultiLayer *plot = d_app->multilayerPlot(
-      t, QStringList(QString(t->objectName()) + "_intensity"), 0);
+  MultiLayer *plot = d_app->multilayerPlot(t, QStringList(QString(t->objectName()) + "_intensity"), 0);
   Graph *g = dynamic_cast<Graph *>(plot->activeGraph());
   if (g) {
     g->setTitle("");
@@ -149,8 +144,7 @@ void LineProfileTool::calculateLineProfile(const QPoint &start,
   }
 }
 
-int LineProfileTool::averageImagePixel(const QImage &image, int px, int py,
-                                       bool moreHorizontal) {
+int LineProfileTool::averageImagePixel(const QImage &image, int px, int py, bool moreHorizontal) {
   QRgb pixel;
   int sum = 0, start, i;
   int middle = static_cast<int>(0.5 * (d_average_pixels - 1));

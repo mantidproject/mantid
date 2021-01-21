@@ -51,26 +51,22 @@ const std::string LoadMcStas::category() const { return "DataHandling\\Nexus"; }
  */
 void LoadMcStas::init() {
   const std::vector<std::string> exts{".h5", ".nxs"};
-  declareProperty(
-      std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
-      "The name of the Nexus file to load");
+  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
+                  "The name of the Nexus file to load");
 
-  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 
-  declareProperty(
-      "ErrorBarsSetTo1", false,
-      "When this property is set to false errors are set equal to data values, "
-      "and when set to true all errors are set equal to one. This property "
-      "defaults to false");
+  declareProperty("ErrorBarsSetTo1", false,
+                  "When this property is set to false errors are set equal to data values, "
+                  "and when set to true all errors are set equal to one. This property "
+                  "defaults to false");
 
-  declareProperty(
-      "OutputOnlySummedEventWorkspace", true,
-      "When true the algorithm only outputs the sum of all event data into "
-      "one eventworkspace EventData + _ + name of the OutputWorkspace. "
-      "If false eventworkspaces are also returned for each individual "
-      "McStas components storing event data");
+  declareProperty("OutputOnlySummedEventWorkspace", true,
+                  "When true the algorithm only outputs the sum of all event data into "
+                  "one eventworkspace EventData + _ + name of the OutputWorkspace. "
+                  "If false eventworkspaces are also returned for each individual "
+                  "McStas components storing event data");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -145,8 +141,7 @@ void LoadMcStas::exec() {
   histoWSNames = readHistogramData(histogramEntries, nxFile);
 
   // join two vectors together
-  scatteringWSNames.insert(scatteringWSNames.end(), histoWSNames.begin(),
-                           histoWSNames.end());
+  scatteringWSNames.insert(scatteringWSNames.end(), histoWSNames.begin(), histoWSNames.end());
 
   // close top entry
   nxFile.closeGroup(); // corresponds to nxFile.openGroup("data", "NXdetector");
@@ -160,10 +155,8 @@ void LoadMcStas::exec() {
  * @param workspaces workspace names to group
  * @return Workspace group
  */
-API::WorkspaceGroup_sptr
-LoadMcStas::groupWorkspaces(const std::vector<std::string> &workspaces) const {
-  API::IAlgorithm_sptr groupAlgorithm =
-      API::AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
+API::WorkspaceGroup_sptr LoadMcStas::groupWorkspaces(const std::vector<std::string> &workspaces) const {
+  API::IAlgorithm_sptr groupAlgorithm = API::AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
   groupAlgorithm->setChild(true);
   groupAlgorithm->setLogging(false);
   groupAlgorithm->initialize();
@@ -179,9 +172,8 @@ LoadMcStas::groupWorkspaces(const std::vector<std::string> &workspaces) const {
  * @param nxFile Reads data from inside first top entry
  * @return Names of workspaces to include in the output group
  */
-std::vector<std::string> LoadMcStas::readEventData(
-    const std::map<std::string, std::string> &eventEntries,
-    ::NeXus::File &nxFile) {
+std::vector<std::string> LoadMcStas::readEventData(const std::map<std::string, std::string> &eventEntries,
+                                                   ::NeXus::File &nxFile) {
 
   // vector to store output workspaces
   std::vector<std::string> scatteringWSNames;
@@ -216,24 +208,21 @@ std::vector<std::string> LoadMcStas::readEventData(
     nxFile.closeGroup();
     nxFile.closeGroup();
   } catch (...) {
-    g_log.warning()
-        << "\nCould not find the instrument description in the Nexus file:"
-        << filename << " Ignore eventdata from the Nexus file\n";
+    g_log.warning() << "\nCould not find the instrument description in the Nexus file:" << filename
+                    << " Ignore eventdata from the Nexus file\n";
     return scatteringWSNames;
     ;
   }
 
   try {
     std::string instrumentName = "McStas";
-    Geometry::InstrumentDefinitionParser parser(filename, instrumentName,
-                                                instrumentXML);
+    Geometry::InstrumentDefinitionParser parser(filename, instrumentName, instrumentXML);
     std::string instrumentNameMangled = parser.getMangledName();
 
     // Check whether the instrument is already in the InstrumentDataService
     if (InstrumentDataService::Instance().doesExist(instrumentNameMangled)) {
       // If it does, just use the one from the one stored there
-      instrument =
-          InstrumentDataService::Instance().retrieve(instrumentNameMangled);
+      instrument = InstrumentDataService::Instance().retrieve(instrumentNameMangled);
     } else {
       // Really create the instrument
       instrument = parser.parseXML(nullptr);
@@ -241,16 +230,13 @@ std::vector<std::string> LoadMcStas::readEventData(
       InstrumentDataService::Instance().add(instrumentNameMangled, instrument);
     }
   } catch (Exception::InstrumentDefinitionError &e) {
-    g_log.warning()
-        << "When trying to read the instrument description in the Nexus file: "
-        << filename << " the following error is reported: " << e.what()
-        << " Ignore eventdata from the Nexus file\n";
+    g_log.warning() << "When trying to read the instrument description in the Nexus file: " << filename
+                    << " the following error is reported: " << e.what() << " Ignore eventdata from the Nexus file\n";
     return scatteringWSNames;
     ;
   } catch (...) {
-    g_log.warning()
-        << "Could not parse instrument description in the Nexus file: "
-        << filename << " Ignore eventdata from the Nexus file\n";
+    g_log.warning() << "Could not parse instrument description in the Nexus file: " << filename
+                    << " Ignore eventdata from the Nexus file\n";
     return scatteringWSNames;
     ;
   }
@@ -289,11 +275,9 @@ std::vector<std::string> LoadMcStas::readEventData(
   const size_t numEventEntries = eventEntries.size();
   std::string nameOfGroupWS = getProperty("OutputWorkspace");
   const auto eventDataTotalName = "EventData_" + nameOfGroupWS;
-  std::vector<std::pair<EventWorkspace_sptr, std::string>> allEventWS = {
-      {eventWS, eventDataTotalName}};
+  std::vector<std::pair<EventWorkspace_sptr, std::string>> allEventWS = {{eventWS, eventDataTotalName}};
   // if numEventEntries > 1 also create separate event workspaces
-  const bool onlySummedEventWorkspace =
-      getProperty("OutputOnlySummedEventWorkspace");
+  const bool onlySummedEventWorkspace = getProperty("OutputOnlySummedEventWorkspace");
   if (!onlySummedEventWorkspace && numEventEntries > 1) {
     for (const auto &eventEntry : eventEntries) {
       const std::string &dataName = eventEntry.first;
@@ -373,29 +357,24 @@ std::vector<std::string> LoadMcStas::readEventData(
         step[0] = nNeutronsInBlock;
         step[1] = numberOfDataColumn;
       }
-      const int64_t nNeutronsForthisBlock =
-          step[0]; // number of neutrons read for this block
+      const int64_t nNeutronsForthisBlock = step[0]; // number of neutrons read for this block
       data.resize(nNeutronsForthisBlock * numberOfDataColumn);
 
       // Check that the type is what it is supposed to be
       if (id_info.type == ::NeXus::FLOAT64) {
         nxFile.getSlab(&data[0], start, step);
       } else {
-        g_log.warning()
-            << "Entry event field is not FLOAT64! It will be skipped.\n";
+        g_log.warning() << "Entry event field is not FLOAT64! It will be skipped.\n";
         continue;
       }
 
       // populate workspace with McStas events
-      const detid2index_map detIDtoWSindex_map =
-          allEventWS[0].first->getDetectorIDToWorkspaceIndexMap(true);
+      const detid2index_map detIDtoWSindex_map = allEventWS[0].first->getDetectorIDToWorkspaceIndexMap(true);
 
       progEntries.report("read event data into workspace");
       for (int64_t in = 0; in < nNeutronsForthisBlock; in++) {
-        const auto detectorID =
-            static_cast<int>(data[4 + numberOfDataColumn * in]);
-        const double detector_time = data[5 + numberOfDataColumn * in] *
-                                     1.0e6; // convert to microseconds
+        const auto detectorID = static_cast<int>(data[4 + numberOfDataColumn * in]);
+        const double detector_time = data[5 + numberOfDataColumn * in] * 1.0e6; // convert to microseconds
         if (in == 0 && iBlock == 0) {
           shortestTOF = detector_time;
           longestTOF = detector_time;
@@ -406,23 +385,19 @@ std::vector<std::string> LoadMcStas::readEventData(
             longestTOF = detector_time;
         }
 
-        const size_t workspaceIndex =
-            detIDtoWSindex_map.find(detectorID)->second;
+        const size_t workspaceIndex = detIDtoWSindex_map.find(detectorID)->second;
 
         int64_t pulse_time = 0;
         WeightedEvent weightedEvent;
         if (errorBarsSetTo1) {
-          weightedEvent = WeightedEvent(detector_time, pulse_time,
-                                        data[numberOfDataColumn * in], 1.0);
+          weightedEvent = WeightedEvent(detector_time, pulse_time, data[numberOfDataColumn * in], 1.0);
         } else {
-          weightedEvent = WeightedEvent(
-              detector_time, pulse_time, data[numberOfDataColumn * in],
-              data[numberOfDataColumn * in] * data[numberOfDataColumn * in]);
+          weightedEvent = WeightedEvent(detector_time, pulse_time, data[numberOfDataColumn * in],
+                                        data[numberOfDataColumn * in] * data[numberOfDataColumn * in]);
         }
         allEventWS[0].first->getSpectrum(workspaceIndex) += weightedEvent;
         if (!onlySummedEventWorkspace && numEventEntries > 1) {
-          allEventWS[eventWSIndex].first->getSpectrum(workspaceIndex) +=
-              weightedEvent;
+          allEventWS[eventWSIndex].first->getSpectrum(workspaceIndex) += weightedEvent;
         }
       }
       eventWSIndex++;
@@ -457,9 +432,8 @@ std::vector<std::string> LoadMcStas::readEventData(
  * @param nxFile Reads data from inside first first top entry
  * @return Names of workspaces to include in output group
  */
-std::vector<std::string> LoadMcStas::readHistogramData(
-    const std::map<std::string, std::string> &histogramEntries,
-    ::NeXus::File &nxFile) {
+std::vector<std::string> LoadMcStas::readHistogramData(const std::map<std::string, std::string> &histogramEntries,
+                                                       ::NeXus::File &nxFile) {
 
   std::string nameAttrValueYLABEL;
   std::vector<std::string> histoWSNames;
@@ -514,8 +488,7 @@ std::vector<std::string> LoadMcStas::readHistogramData(
 
     const size_t axis1Length = axis1Values.size();
     const size_t axis2Length = axis2Values.size();
-    g_log.debug() << "Axis lengths=" << axis1Length << " " << axis2Length
-                  << '\n';
+    g_log.debug() << "Axis lengths=" << axis1Length << " " << axis2Length << '\n';
 
     // Require "data" field
     std::vector<double> data;
@@ -526,15 +499,13 @@ std::vector<std::string> LoadMcStas::readHistogramData(
     try {
       nxFile.readData<double>("errors", errors);
     } catch (::NeXus::Exception &) {
-      g_log.information() << "Field " << dataName
-                          << " contains no error information.\n";
+      g_log.information() << "Field " << dataName << " contains no error information.\n";
     }
 
     // close second level entry
     nxFile.closeGroup();
 
-    MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create(
-        "Workspace2D", axis2Length, axis1Length, axis1Length);
+    MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D", axis2Length, axis1Length, axis1Length);
     Axis *axis1 = ws->getAxis(0);
     axis1->title() = axis1Name;
     // Set caption
@@ -575,8 +546,7 @@ std::vector<std::string> LoadMcStas::readHistogramData(
     ws->setTitle(nameAttrValueTITLE);
 
     // use the workspace title to create the workspace name
-    std::replace(nameAttrValueTITLE.begin(), nameAttrValueTITLE.end(), ' ',
-                 '_');
+    std::replace(nameAttrValueTITLE.begin(), nameAttrValueTITLE.end(), ' ', '_');
 
     // ensure that specified name is given to workspace (eventWS) when added to
     // outputGroup
@@ -606,8 +576,7 @@ int LoadMcStas::confidence(Kernel::NexusDescriptor &descriptor) const {
     try {
       // need to look inside file to check value of entry1/simulation/name
       ::NeXus::File file = ::NeXus::File(descriptor.filename());
-      file.openGroup(descriptor.firstEntryNameType().first,
-                     descriptor.firstEntryNameType().second);
+      file.openGroup(descriptor.firstEntryNameType().first, descriptor.firstEntryNameType().second);
       file.openGroup("simulation", "NXnote");
       std::string value;
       // check if entry1/simulation/name equals mccode

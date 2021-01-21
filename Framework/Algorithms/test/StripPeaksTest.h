@@ -25,10 +25,8 @@ public:
 
   StripPeaksTest() {
     FrameworkManager::Instance();
-    MatrixWorkspace_sptr WS =
-        WorkspaceCreationHelper::create2DWorkspaceBinned(2, 200, 0.5, 0.02);
-    WS->getAxis(0)->unit() =
-        Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
+    MatrixWorkspace_sptr WS = WorkspaceCreationHelper::create2DWorkspaceBinned(2, 200, 0.5, 0.02);
+    WS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
 
     auto &X = WS->x(1);
     auto &Y1 = WS->mutableY(1);
@@ -63,11 +61,9 @@ public:
     if (!strip.isInitialized())
       strip.initialize();
 
-    TS_ASSERT_THROWS_NOTHING(
-        strip.setPropertyValue("InputWorkspace", "toStrip"));
+    TS_ASSERT_THROWS_NOTHING(strip.setPropertyValue("InputWorkspace", "toStrip"));
     std::string outputWS("stripped");
-    TS_ASSERT_THROWS_NOTHING(
-        strip.setPropertyValue("OutputWorkspace", outputWS));
+    TS_ASSERT_THROWS_NOTHING(strip.setPropertyValue("OutputWorkspace", outputWS));
     TS_ASSERT_THROWS_NOTHING(strip.setProperty("HighBackground", false));
     TS_ASSERT_THROWS_NOTHING(strip.setProperty("FWHM", 7));
 
@@ -75,12 +71,9 @@ public:
     TS_ASSERT(strip.isExecuted());
 
     MatrixWorkspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING(
-        output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            outputWS));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWS));
 
-    MatrixWorkspace_const_sptr input =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("toStrip");
+    MatrixWorkspace_const_sptr input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("toStrip");
 
     const size_t nhist = output->getNumberHistograms();
     const size_t nbins = output->blocksize();
@@ -97,8 +90,7 @@ public:
         TS_ASSERT_EQUALS(outX[j], inX[j]);
         TS_ASSERT_DELTA(outY[j], 5000.0, 0.5);
         if (fabs(outY[j] - 5000.) > 0.5)
-          std::cout << "Spectrum " << i << " at X = " << inX[j]
-                    << " indexed of " << j << "\n";
+          std::cout << "Spectrum " << i << " at X = " << inX[j] << " indexed of " << j << "\n";
         TS_ASSERT_EQUALS(outE[j], inE[j]);
       }
     }
@@ -115,10 +107,8 @@ class StripPeaksTestPerformance : public CxxTest::TestSuite {
 public:
   void setUp() override {
     FrameworkManager::Instance();
-    MatrixWorkspace_sptr WS =
-        WorkspaceCreationHelper::create2DWorkspaceBinned(2, 200, 0.5, 0.02);
-    WS->getAxis(0)->unit() =
-        Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
+    MatrixWorkspace_sptr WS = WorkspaceCreationHelper::create2DWorkspaceBinned(2, 200, 0.5, 0.02);
+    WS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
 
     auto X = WS->points(1);
     auto &Y1 = WS->mutableY(1);

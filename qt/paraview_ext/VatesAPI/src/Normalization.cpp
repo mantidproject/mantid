@@ -20,17 +20,15 @@ This is used for visualisation of IMDEventWorkspaces.
 @param ws : workspace to fetch defaults from if needed
 @return member function to use on IMDNodes
 */
-NormFuncIMDNodePtr makeMDEventNormalizationFunction(
-    VisualNormalization normalizationOption,
-    Mantid::API::IMDEventWorkspace const *const ws) {
+NormFuncIMDNodePtr makeMDEventNormalizationFunction(VisualNormalization normalizationOption,
+                                                    Mantid::API::IMDEventWorkspace const *const ws) {
 
   using namespace Mantid::API;
 
   // Fetch the default and continue
   if (normalizationOption == AutoSelect) {
     // enum to enum.
-    normalizationOption =
-        static_cast<VisualNormalization>(ws->displayNormalization());
+    normalizationOption = static_cast<VisualNormalization>(ws->displayNormalization());
   }
 
   NormFuncIMDNodePtr normalizationFunction;
@@ -62,8 +60,7 @@ createIteratorWithNormalization(const VisualNormalization normalizationOption,
   // Fetch the default and continue
   if (normalizationOption == AutoSelect) {
     // enum to enum.
-    targetNormalization =
-        static_cast<MDNormalization>(ws->displayNormalization());
+    targetNormalization = static_cast<MDNormalization>(ws->displayNormalization());
   } else {
     targetNormalization = static_cast<MDNormalization>(normalizationOption);
   }

@@ -16,8 +16,7 @@
 namespace Mantid {
 namespace MDAlgorithms {
 
-std::vector<std::string>
-    MANTID_MDALGORITHMS_DLL parseNames(const std::string &names_string);
+std::vector<std::string> MANTID_MDALGORITHMS_DLL parseNames(const std::string &names_string);
 
 /** CreateMDWorkspace :
  *
@@ -41,25 +40,19 @@ public:
   /// Algorithm's version for identification
   int version() const override { return 1; }
   const std::vector<std::string> seeAlso() const override {
-    return {"ConvertToMD", "CreateMDHistoWorkspace", "FakeMDEventData",
-            "CreateMD"};
+    return {"ConvertToMD", "CreateMDHistoWorkspace", "FakeMDEventData", "CreateMD"};
   }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "MDAlgorithms\\Creation";
-  }
+  const std::string category() const override { return "MDAlgorithms\\Creation"; }
   std::map<std::string, std::string> validateInputs() override;
 
 private:
   void init() override;
   void exec() override;
 
-  template <typename MDE, size_t nd>
-  void finish(typename DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
-  Mantid::Geometry::MDFrame_uptr createMDFrame(const std::string &frame,
-                                               const std::string &unit);
-  bool checkIfFrameValid(const std::string &frame,
-                         const std::vector<std::string> &targetFrames);
+  template <typename MDE, size_t nd> void finish(typename DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
+  Mantid::Geometry::MDFrame_uptr createMDFrame(const std::string &frame, const std::string &unit);
+  bool checkIfFrameValid(const std::string &frame, const std::vector<std::string> &targetFrames);
 };
 
 } // namespace MDAlgorithms

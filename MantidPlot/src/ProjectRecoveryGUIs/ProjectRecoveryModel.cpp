@@ -41,20 +41,15 @@ void sortByLastModified(std::vector<Poco::Path> &paths) {
 }
 } // namespace
 
-ProjectRecoveryModel::ProjectRecoveryModel(
-    MantidQt::ProjectRecovery *projectRecovery,
-    ProjectRecoveryPresenter *presenter)
-    : m_projRec(projectRecovery), m_presenter(presenter), m_failedRun(true),
-      m_recoveryRunning(false) {
+ProjectRecoveryModel::ProjectRecoveryModel(MantidQt::ProjectRecovery *projectRecovery,
+                                           ProjectRecoveryPresenter *presenter)
+    : m_projRec(projectRecovery), m_presenter(presenter), m_failedRun(true), m_recoveryRunning(false) {
   fillFirstRow();
 }
 
-const std::vector<std::string> &ProjectRecoveryModel::getRow(const int i) {
-  return m_rows.at(i);
-}
+const std::vector<std::string> &ProjectRecoveryModel::getRow(const int i) { return m_rows.at(i); }
 
-std::vector<std::string>
-ProjectRecoveryModel::getRow(std::string checkpointName) {
+std::vector<std::string> ProjectRecoveryModel::getRow(std::string checkpointName) {
   replaceSpaceWithT(checkpointName);
   for (auto c : m_rows) {
     if (c[0] == checkpointName) {
@@ -129,18 +124,15 @@ void ProjectRecoveryModel::openSelectedInEditor(std::string &selected) {
   m_presenter->closeView();
 }
 
-void ProjectRecoveryModel::fillRow(const Poco::Path &path,
-                                   const std::string &checkpointName) {
+void ProjectRecoveryModel::fillRow(const Poco::Path &path, const std::string &checkpointName) {
   std::string lengthOfFile = findNumberOfWorkspacesInDirectory(path);
   std::string checked = "No";
-  std::vector<std::string> nextVector = {
-      std::move(checkpointName), std::move(lengthOfFile), std::move(checked)};
+  std::vector<std::string> nextVector = {std::move(checkpointName), std::move(lengthOfFile), std::move(checked)};
   m_rows.emplace_back(std::move(nextVector));
 }
 
 void ProjectRecoveryModel::fillFirstRow() {
-  auto paths = m_projRec->getListOfFoldersInDirectoryPR(
-      m_projRec->getRecoveryFolderLoadPR());
+  auto paths = m_projRec->getListOfFoldersInDirectoryPR(m_projRec->getRecoveryFolderLoadPR());
   sortByLastModified(paths);
 
   // Grab the first path as that is the one that should be loaded
@@ -151,8 +143,7 @@ void ProjectRecoveryModel::fillFirstRow() {
 }
 
 void ProjectRecoveryModel::fillRows() {
-  auto paths = m_projRec->getListOfFoldersInDirectoryPR(
-      m_projRec->getRecoveryFolderLoadPR());
+  auto paths = m_projRec->getListOfFoldersInDirectoryPR(m_projRec->getRecoveryFolderLoadPR());
   sortByLastModified(paths);
 
   // Sort the rows first string of the vector lists
@@ -168,29 +159,23 @@ void ProjectRecoveryModel::fillRows() {
 
   // Get the number of checkpoints from ConfigService
   int numberOfCheckpoints = getNumberOfCheckpoints();
-  for (auto i = paths.size();
-       i < static_cast<unsigned int>(numberOfCheckpoints); ++i) {
+  for (auto i = paths.size(); i < static_cast<unsigned int>(numberOfCheckpoints); ++i) {
     std::vector<std::string> newVector = {"", "", ""};
     m_rows.emplace_back(std::move(newVector));
   }
 
   // order the vector based on save date and time Most recent first
-  std::sort(m_rows.begin(), m_rows.end(),
-            [](const auto &a, const auto &b) -> bool {
-              return a.front() > b.front();
-            });
+  std::sort(m_rows.begin(), m_rows.end(), [](const auto &a, const auto &b) -> bool { return a.front() > b.front(); });
 }
 
-void ProjectRecoveryModel::updateCheckpointTried(
-    const std::string &checkpointName) {
+void ProjectRecoveryModel::updateCheckpointTried(const std::string &checkpointName) {
   for (auto &c : m_rows) {
     if (c[0] == checkpointName) {
       c[2] = "Yes";
       return;
     }
   }
-  throw std::runtime_error("Passed checkpoint name for update was incorrect: " +
-                           checkpointName);
+  throw std::runtime_error("Passed checkpoint name for update was incorrect: " + checkpointName);
 }
 
 bool ProjectRecoveryModel::getFailedRun() const { return m_failedRun; }
@@ -211,19 +196,16 @@ void ProjectRecoveryModel::createThreadAndManage(const Poco::Path &checkpoint) {
 }
 
 std::string ProjectRecoveryModel::decideLastCheckpoint() {
-  auto mostRecentCheckpoints = m_projRec->getRecoveryFolderCheckpointsPR(
-      m_projRec->getRecoveryFolderLoadPR());
+  auto mostRecentCheckpoints = m_projRec->getRecoveryFolderCheckpointsPR(m_projRec->getRecoveryFolderLoadPR());
   auto mostRecentCheckpointPath = mostRecentCheckpoints.back();
-  return mostRecentCheckpointPath.directory(mostRecentCheckpointPath.depth() -
-                                            1);
+  return mostRecentCheckpointPath.directory(mostRecentCheckpointPath.depth() - 1);
 }
 
 int ProjectRecoveryModel::getNumberOfCheckpoints() {
   int numberOfCheckpoints;
   try {
     numberOfCheckpoints =
-        std::stoi(Mantid::Kernel::ConfigService::Instance().getString(
-            "projectRecovery.numberOfCheckpoints"));
+        std::stoi(Mantid::Kernel::ConfigService::Instance().getString("projectRecovery.numberOfCheckpoints"));
   } catch (...) {
     // Fail silently and set to 5
     numberOfCheckpoints = 5;

@@ -21,9 +21,7 @@
 
 class BoxControllerNeXusIOTest : public CxxTest::TestSuite {
 public:
-  static BoxControllerNeXusIOTest *createSuite() {
-    return new BoxControllerNeXusIOTest();
-  }
+  static BoxControllerNeXusIOTest *createSuite() { return new BoxControllerNeXusIOTest(); }
   static void destroySuite(BoxControllerNeXusIOTest *suite) { delete suite; }
 
   Mantid::API::BoxController_sptr sc;
@@ -35,8 +33,7 @@ public:
   }
 
   void setUp() override {
-    std::string FullPathFile =
-        Mantid::API::FileFinder::Instance().getFullPath(this->xxfFileName);
+    std::string FullPathFile = Mantid::API::FileFinder::Instance().getFullPath(this->xxfFileName);
     if (!FullPathFile.empty())
       Poco::File(FullPathFile).remove();
   }
@@ -55,16 +52,14 @@ public:
     TS_ASSERT_EQUALS("MDEvent", typeName);
 
     // set size
-    TS_ASSERT_THROWS(pSaver->setDataType(9, typeName),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(pSaver->setDataType(9, typeName), const std::invalid_argument &);
     TS_ASSERT_THROWS_NOTHING(pSaver->setDataType(8, typeName));
     TS_ASSERT_THROWS_NOTHING(pSaver->getDataType(CoordSize, typeName));
     TS_ASSERT_EQUALS(8, CoordSize);
     TS_ASSERT_EQUALS("MDEvent", typeName);
 
     // set type
-    TS_ASSERT_THROWS(pSaver->setDataType(4, "UnknownEvent"),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(pSaver->setDataType(4, "UnknownEvent"), const std::invalid_argument &);
     TS_ASSERT_THROWS_NOTHING(pSaver->setDataType(4, "MDLeanEvent"));
     TS_ASSERT_THROWS_NOTHING(pSaver->getDataType(CoordSize, typeName));
     TS_ASSERT_EQUALS(4, CoordSize);
@@ -84,8 +79,7 @@ public:
     pSaver->setDataType(sizeof(coord_t), "MDLeanEvent");
     std::string FullPathFile;
 
-    TSM_ASSERT_THROWS("new file does not open in read mode",
-                      pSaver->openFile(this->xxfFileName, "r"),
+    TSM_ASSERT_THROWS("new file does not open in read mode", pSaver->openFile(this->xxfFileName, "r"),
                       const FileError &);
 
     TS_ASSERT_THROWS_NOTHING(pSaver->openFile(this->xxfFileName, "w"));
@@ -94,8 +88,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(pSaver->closeFile());
     TS_ASSERT(!pSaver->isOpened());
 
-    TSM_ASSERT("file created ",
-               !FileFinder::Instance().getFullPath(FullPathFile).empty());
+    TSM_ASSERT("file created ", !FileFinder::Instance().getFullPath(FullPathFile).empty());
 
     // now I can open this file for reading
     TS_ASSERT_THROWS_NOTHING(pSaver->openFile(FullPathFile, "r"));
@@ -157,8 +150,7 @@ public:
             // format from it
   {
   public:
-    static void compareReadTheSame(Mantid::API::IBoxControllerIO *pSaver,
-                                   const std::vector<FROM> & /*inputData*/,
+    static void compareReadTheSame(Mantid::API::IBoxControllerIO *pSaver, const std::vector<FROM> & /*inputData*/,
                                    size_t /*nEvents*/, size_t /*nColumns*/) {
       TS_ASSERT(pSaver->isOpened());
       TS_ASSERT_THROWS_NOTHING(pSaver->closeFile());
@@ -170,8 +162,7 @@ public:
                         // written earlier
   {
   public:
-    static void compareReadTheSame(Mantid::API::IBoxControllerIO *pSaver,
-                                   const std::vector<FROM> &inputData,
+    static void compareReadTheSame(Mantid::API::IBoxControllerIO *pSaver, const std::vector<FROM> &inputData,
                                    size_t nEvents, size_t nColumns) {
       std::vector<FROM> toRead;
       TS_ASSERT_THROWS_NOTHING(pSaver->loadBlock(toRead, 100, nEvents));
@@ -214,8 +205,7 @@ public:
     pSaver->setDataType(sizeof(TO), "MDEvent");
     TS_ASSERT_THROWS_NOTHING(pSaver->openFile(FullPathFile, "r"));
     std::vector<TO> toRead2;
-    TS_ASSERT_THROWS_NOTHING(
-        pSaver->loadBlock(toRead2, 100 + (nEvents - 1), 1));
+    TS_ASSERT_THROWS_NOTHING(pSaver->loadBlock(toRead2, 100 + (nEvents - 1), 1));
     for (size_t i = 0; i < nColumns; i++) {
       TS_ASSERT_DELTA(toWrite[(nEvents - 1) * nColumns + i], toRead2[i], 1.e-6);
     }
@@ -226,9 +216,7 @@ public:
   }
 
   void test_WriteFloatReadReadFloat() { this->WriteReadRead<float, float>(); }
-  void test_WriteFloatReadReadDouble() {
-    this->WriteReadRead<double, double>();
-  }
+  void test_WriteFloatReadReadDouble() { this->WriteReadRead<double, double>(); }
   void test_WriteDoubleReadFloat() { this->WriteReadRead<double, float>(); }
 
   void test_WriteFloatReadDouble() { this->WriteReadRead<float, double>(); }

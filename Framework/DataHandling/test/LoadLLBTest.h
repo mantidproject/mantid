@@ -51,10 +51,8 @@ public:
     //  test workspace, copied from LoadMuonNexusTest.h
     MatrixWorkspace_sptr output;
 
-    (output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-         outputSpace));
-    MatrixWorkspace_sptr output2D =
-        std::dynamic_pointer_cast<MatrixWorkspace>(output);
+    (output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace));
+    MatrixWorkspace_sptr output2D = std::dynamic_pointer_cast<MatrixWorkspace>(output);
 
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 84);
 

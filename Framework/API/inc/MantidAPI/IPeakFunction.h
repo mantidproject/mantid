@@ -24,8 +24,7 @@ public:
   /// Constructor
   IPeakFunction();
 
-  void function(const FunctionDomain &domain,
-                FunctionValues &values) const override;
+  void function(const FunctionDomain &domain, FunctionValues &values) const override;
 
   /// Returns the peak FWHM
   virtual double fwhm() const = 0;
@@ -40,23 +39,18 @@ public:
   virtual void setIntensity(const double newIntensity);
 
   /// General implementation of the method for all peaks.
-  void function1D(double *out, const double *xValues,
-                  const size_t nData) const override;
+  void function1D(double *out, const double *xValues, const size_t nData) const override;
   /// General implementation of the method for all peaks.
-  void functionDeriv1D(Jacobian *out, const double *xValues,
-                       const size_t nData) override;
+  void functionDeriv1D(Jacobian *out, const double *xValues, const size_t nData) override;
 
   /// Get the interval on which the peak has all its values above a certain
   /// level
-  virtual std::pair<double, double>
-  getDomainInterval(double level = DEFAULT_SEARCH_LEVEL) const;
+  virtual std::pair<double, double> getDomainInterval(double level = DEFAULT_SEARCH_LEVEL) const;
 
   /// Function evaluation method to be implemented in the inherited classes
-  virtual void functionLocal(double *out, const double *xValues,
-                             const size_t nData) const = 0;
+  virtual void functionLocal(double *out, const double *xValues, const size_t nData) const = 0;
   /// Derivative evaluation method. Default is to calculate numerically
-  virtual void functionDerivLocal(Jacobian *jacobian, const double *xValues,
-                                  const size_t nData);
+  virtual void functionDerivLocal(Jacobian *jacobian, const double *xValues, const size_t nData);
 
   /// Get name of parameter that is associated to centre.
   std::string getCentreParameterName() const;
@@ -76,14 +70,12 @@ public:
   ///    don't show it in ties
   virtual void fixIntensity(bool isDefault = false) {
     UNUSED_ARG(isDefault);
-    throw std::runtime_error(
-        "Generic intensity fixing isn't implemented for this function.");
+    throw std::runtime_error("Generic intensity fixing isn't implemented for this function.");
   }
 
   /// Free the intensity parameter.
   virtual void unfixIntensity() {
-    throw std::runtime_error(
-        "Generic intensity fixing isn't implemented for this function.");
+    throw std::runtime_error("Generic intensity fixing isn't implemented for this function.");
   }
 
 private:

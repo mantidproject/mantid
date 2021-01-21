@@ -68,9 +68,7 @@ Cone *Cone::doClone() const
   return new Cone(*this);
 }
 
-std::unique_ptr<Cone> Cone::clone() const {
-  return std::unique_ptr<Cone>(doClone());
-}
+std::unique_ptr<Cone> Cone::clone() const { return std::unique_ptr<Cone>(doClone()); }
 
 int Cone::setSurface(const std::string &Pstr)
 /**
@@ -84,8 +82,8 @@ int Cone::setSurface(const std::string &Pstr)
 {
   std::string Line = Pstr;
   std::string item;
-  if (!Mantid::Kernel::Strings::section(Line, item) ||
-      tolower(item[0]) != 'k' || item.length() < 2 || item.length() > 3)
+  if (!Mantid::Kernel::Strings::section(Line, item) || tolower(item[0]) != 'k' || item.length() < 2 ||
+      item.length() > 3)
     return -1;
 
   // Cones on X/Y/Z axis
@@ -103,9 +101,7 @@ int Cone::setSurface(const std::string &Pstr)
       return -3;
   } else {
     std::size_t index;
-    for (index = 0;
-         index < 3 && Mantid::Kernel::Strings::section(Line, cent[index]);
-         index++)
+    for (index = 0; index < 3 && Mantid::Kernel::Strings::section(Line, cent[index]); index++)
       ;
     if (index != 3)
       return -4;
@@ -320,8 +316,7 @@ void Cone::write(std::ostream &OX) const
   if (Cdir || Centre.nullVector(Tolerance)) {
     cx << " k";
     cx << Tailends[Ndir + 3] << " "; // set x,y,z based on Ndir
-    cx << ((Cdir > 0) ? Centre[static_cast<std::size_t>(Cdir - 1)]
-                      : Centre[static_cast<std::size_t>(-Cdir - 1)]);
+    cx << ((Cdir > 0) ? Centre[static_cast<std::size_t>(Cdir - 1)] : Centre[static_cast<std::size_t>(-Cdir - 1)]);
     cx << " ";
   } else {
     cx << " k/";
@@ -334,8 +329,7 @@ void Cone::write(std::ostream &OX) const
   Mantid::Kernel::Strings::writeMCNPX(cx.str(), OX);
 }
 
-void Cone::getBoundingBox(double &xmax, double &ymax, double &zmax,
-                          double &xmin, double &ymin, double &zmin) {
+void Cone::getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin) {
   /**
    Cone bounding box
    Intended to improve bounding box for a general quadratic surface
@@ -389,12 +383,8 @@ void Cone::getBoundingBox(double &xmax, double &ymax, double &zmax,
 
 #ifdef ENABLE_OPENCASCADE
 TopoDS_Shape Cone::createShape() {
-  gp_Ax2 gpA(gp_Pnt(Centre[0], Centre[1], Centre[2]),
-             gp_Dir(Normal[0], Normal[1], Normal[2]));
-  return BRepPrimAPI_MakeCone(gpA, 0.0,
-                              1000.0 / tan(acos(cangle * M_PI / 180.0)), 1000.0,
-                              2.0 * M_PI)
-      .Shape();
+  gp_Ax2 gpA(gp_Pnt(Centre[0], Centre[1], Centre[2]), gp_Dir(Normal[0], Normal[1], Normal[2]));
+  return BRepPrimAPI_MakeCone(gpA, 0.0, 1000.0 / tan(acos(cangle * M_PI / 180.0)), 1000.0, 2.0 * M_PI).Shape();
 }
 #endif
 } // NAMESPACE Geometry

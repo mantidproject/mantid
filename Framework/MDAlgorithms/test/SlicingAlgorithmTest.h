@@ -44,9 +44,7 @@ class SlicingAlgorithmTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static SlicingAlgorithmTest *createSuite() {
-    return new SlicingAlgorithmTest();
-  }
+  static SlicingAlgorithmTest *createSuite() { return new SlicingAlgorithmTest(); }
   static void destroySuite(SlicingAlgorithmTest *suite) { delete suite; }
 
   IMDEventWorkspace_sptr ws;
@@ -68,20 +66,17 @@ public:
     ws5 = MDEventsTestHelper::makeMDEW<5>(5, 0.0, 10.0, 1);
     // Workspace with QSample frames
     Mantid::Geometry::QSample qSampleFrame;
-    wsQSample = MDEventsTestHelper::makeMDEWWithFrames<3>(5, 0.0, 10.0,
-                                                          qSampleFrame, 1);
+    wsQSample = MDEventsTestHelper::makeMDEWWithFrames<3>(5, 0.0, 10.0, qSampleFrame, 1);
     // Workspace with mixed frames
     std::vector<Mantid::Geometry::MDFrame_sptr> frames;
     frames.emplace_back(std::make_shared<Mantid::Geometry::QSample>());
     frames.emplace_back(std::make_shared<Mantid::Geometry::QSample>());
     frames.emplace_back(std::make_shared<Mantid::Geometry::QSample>());
-    frames.emplace_back(std::make_shared<Mantid::Geometry::GeneralFrame>(
-        Mantid::Geometry::GeneralFrame::GeneralFrameDistance, "m"));
-    wsMixedFrames = MDEventsTestHelper::makeMDEWWithIndividualFrames<4>(
-        5, 0.0, 10.0, frames, 1);
+    frames.emplace_back(
+        std::make_shared<Mantid::Geometry::GeneralFrame>(Mantid::Geometry::GeneralFrame::GeneralFrameDistance, "m"));
+    wsMixedFrames = MDEventsTestHelper::makeMDEWWithIndividualFrames<4>(5, 0.0, 10.0, frames, 1);
     /// Workspace with custom names
-    ws_names = MDEventsTestHelper::makeAnyMDEW<MDEvent<3>, 3>(
-        3, 0.0, 10.0, 1, "", "[%dh,k,l]", "Q%d");
+    ws_names = MDEventsTestHelper::makeAnyMDEW<MDEvent<3>, 3>(3, 0.0, 10.0, 1, "", "[%dh,k,l]", "Q%d");
   }
 
   void test_initSlicingProps() {
@@ -97,31 +92,22 @@ public:
   void test_makeAlignedDimensionFromString_failures() {
     SlicingAlgorithmImpl alg;
     alg.m_inWS = ws;
-    TSM_ASSERT_THROWS_ANYTHING("Blank string",
-                               alg.makeAlignedDimensionFromString(""));
-    TSM_ASSERT_THROWS_ANYTHING(
-        "Blank name", alg.makeAlignedDimensionFromString(", 1.0, 9.0, 10"));
-    TSM_ASSERT_THROWS_ANYTHING("Min > max", alg.makeAlignedDimensionFromString(
-                                                "Axis0, 11.0, 9.0, 10"));
-    TSM_ASSERT_THROWS_ANYTHING(
-        "Name not found in input WS",
-        alg.makeAlignedDimensionFromString("SillyName, 1.0, 9.0, 10"));
-    TSM_ASSERT_THROWS_ANYTHING(
-        "Name not found in input WS",
-        alg.makeAlignedDimensionFromString("SillyName, 1.0, 9.0, 10"));
-    TSM_ASSERT_THROWS_ANYTHING(
-        "One entry too many means looking for name 'Axis0, 1.0'",
-        alg.makeAlignedDimensionFromString("Axis0, 1.0, 9.0, 10, 222"));
-    TSM_ASSERT_THROWS_ANYTHING(
-        "One entry too few",
-        alg.makeAlignedDimensionFromString("Axis0, 11.0, 9.0"));
+    TSM_ASSERT_THROWS_ANYTHING("Blank string", alg.makeAlignedDimensionFromString(""));
+    TSM_ASSERT_THROWS_ANYTHING("Blank name", alg.makeAlignedDimensionFromString(", 1.0, 9.0, 10"));
+    TSM_ASSERT_THROWS_ANYTHING("Min > max", alg.makeAlignedDimensionFromString("Axis0, 11.0, 9.0, 10"));
+    TSM_ASSERT_THROWS_ANYTHING("Name not found in input WS",
+                               alg.makeAlignedDimensionFromString("SillyName, 1.0, 9.0, 10"));
+    TSM_ASSERT_THROWS_ANYTHING("Name not found in input WS",
+                               alg.makeAlignedDimensionFromString("SillyName, 1.0, 9.0, 10"));
+    TSM_ASSERT_THROWS_ANYTHING("One entry too many means looking for name 'Axis0, 1.0'",
+                               alg.makeAlignedDimensionFromString("Axis0, 1.0, 9.0, 10, 222"));
+    TSM_ASSERT_THROWS_ANYTHING("One entry too few", alg.makeAlignedDimensionFromString("Axis0, 11.0, 9.0"));
   }
 
   void test_makeAlignedDimensionFromString() {
     SlicingAlgorithmImpl alg;
     alg.m_inWS = ws;
-    TSM_ASSERT_THROWS_NOTHING(
-        "", alg.makeAlignedDimensionFromString("Axis2, 1.0, 9.0, 10"));
+    TSM_ASSERT_THROWS_NOTHING("", alg.makeAlignedDimensionFromString("Axis2, 1.0, 9.0, 10"));
     TS_ASSERT_EQUALS(alg.m_dimensionToBinFrom.size(), 1);
     TS_ASSERT_EQUALS(alg.m_binDimensions.size(), 1);
 
@@ -137,8 +123,7 @@ public:
   void test_makeAlignedDimensionFromStringWithMDFrameSetToQSample() {
     SlicingAlgorithmImpl alg;
     alg.m_inWS = wsQSample;
-    TSM_ASSERT_THROWS_NOTHING(
-        "", alg.makeAlignedDimensionFromString("Axis2, 1.0, 9.0, 10"));
+    TSM_ASSERT_THROWS_NOTHING("", alg.makeAlignedDimensionFromString("Axis2, 1.0, 9.0, 10"));
     TS_ASSERT_EQUALS(alg.m_dimensionToBinFrom.size(), 1);
     TS_ASSERT_EQUALS(alg.m_binDimensions.size(), 1);
 
@@ -146,12 +131,8 @@ public:
 
     IMDDimension_sptr dim = alg.m_binDimensions[0];
     TS_ASSERT_EQUALS(dim->getName(), "Axis2");
-    TS_ASSERT_EQUALS(
-        dim->getUnits(),
-        Mantid::Kernel::InverseAngstromsUnit().getUnitLabel().ascii());
-    TSM_ASSERT_EQUALS("Should be a QSample",
-                      Mantid::Geometry::QSample::QSampleName,
-                      dim->getMDFrame().name());
+    TS_ASSERT_EQUALS(dim->getUnits(), Mantid::Kernel::InverseAngstromsUnit().getUnitLabel().ascii());
+    TSM_ASSERT_EQUALS("Should be a QSample", Mantid::Geometry::QSample::QSampleName, dim->getMDFrame().name());
     TS_ASSERT_EQUALS(dim->getNBins(), 10);
     TS_ASSERT_EQUALS(dim->getX(10), 9.0);
   }
@@ -160,8 +141,7 @@ public:
   void test_makeAlignedDimensionFromString_NameWithCommas() {
     SlicingAlgorithmImpl alg;
     alg.m_inWS = ws_names;
-    TSM_ASSERT_THROWS_NOTHING(
-        "", alg.makeAlignedDimensionFromString("[2h,k,l], 1.0, 9.0, 10"));
+    TSM_ASSERT_THROWS_NOTHING("", alg.makeAlignedDimensionFromString("[2h,k,l], 1.0, 9.0, 10"));
     TS_ASSERT_EQUALS(alg.m_dimensionToBinFrom.size(), 1);
     TS_ASSERT_EQUALS(alg.m_binDimensions.size(), 1);
     if (alg.m_binDimensions.size() < 1)
@@ -179,8 +159,7 @@ public:
   void test_makeAlignedDimensionFromString_SpecifyDimensionID() {
     SlicingAlgorithmImpl alg;
     alg.m_inWS = ws_names;
-    TSM_ASSERT_THROWS_NOTHING(
-        "", alg.makeAlignedDimensionFromString("Q2 , 1.0, 9.0, 10"));
+    TSM_ASSERT_THROWS_NOTHING("", alg.makeAlignedDimensionFromString("Q2 , 1.0, 9.0, 10"));
     TS_ASSERT_EQUALS(alg.m_dimensionToBinFrom.size(), 1);
     TS_ASSERT_EQUALS(alg.m_binDimensions.size(), 1);
     if (alg.m_binDimensions.size() < 1)
@@ -194,10 +173,8 @@ public:
     TS_ASSERT_EQUALS(dim->getX(10), 9.0);
   }
 
-  std::unique_ptr<SlicingAlgorithmImpl>
-  do_createAlignedTransform(const std::string &name1, const std::string &name2,
-                            const std::string &name3,
-                            const std::string &name4) {
+  std::unique_ptr<SlicingAlgorithmImpl> do_createAlignedTransform(const std::string &name1, const std::string &name2,
+                                                                  const std::string &name3, const std::string &name4) {
     auto alg = std::make_unique<SlicingAlgorithmImpl>();
     alg->m_inWS = ws;
     alg->initSlicingProps();
@@ -211,27 +188,19 @@ public:
   }
 
   void test_createAlignedTransform_failures() {
+    TSM_ASSERT_THROWS_ANYTHING("3D to 4D fails", do_createAlignedTransform("Axis0,2.0,8.0, 3", "Axis1,2.0,8.0, 3",
+                                                                           "Axis2,2.0,8.0, 3", "Axis3,2.0,6.0, 1"));
     TSM_ASSERT_THROWS_ANYTHING(
-        "3D to 4D fails",
-        do_createAlignedTransform("Axis0,2.0,8.0, 3", "Axis1,2.0,8.0, 3",
-                                  "Axis2,2.0,8.0, 3", "Axis3,2.0,6.0, 1"));
-    TSM_ASSERT_THROWS_ANYTHING("Don't skip entries in the dimensions",
-                               do_createAlignedTransform("Axis0,2.0,8.0, 3",
-                                                         "Axis1,2.0,8.0, 3", "",
-                                                         "Axis3,2.0,6.0, 1"));
-    TSM_ASSERT_THROWS_ANYTHING("3D to 0D fails",
-                               do_createAlignedTransform("", "", "", ""));
-    TSM_ASSERT_THROWS_ANYTHING(
-        "Dimension name not found",
-        do_createAlignedTransform("NotAnAxis, 2.0,8.0, 3", "", "", ""));
-    TSM_ASSERT_THROWS_ANYTHING(
-        "0 bins is bad",
-        do_createAlignedTransform("Axis0, 2.0,8.0, 0", "", "", ""));
+        "Don't skip entries in the dimensions",
+        do_createAlignedTransform("Axis0,2.0,8.0, 3", "Axis1,2.0,8.0, 3", "", "Axis3,2.0,6.0, 1"));
+    TSM_ASSERT_THROWS_ANYTHING("3D to 0D fails", do_createAlignedTransform("", "", "", ""));
+    TSM_ASSERT_THROWS_ANYTHING("Dimension name not found",
+                               do_createAlignedTransform("NotAnAxis, 2.0,8.0, 3", "", "", ""));
+    TSM_ASSERT_THROWS_ANYTHING("0 bins is bad", do_createAlignedTransform("Axis0, 2.0,8.0, 0", "", "", ""));
   }
 
   void test_createAlignedTransform() {
-    auto alg = do_createAlignedTransform(
-        "Axis0, 2.0,8.0, 6", "Axis1, 2.0,8.0, 3", "Axis2, 2.0,8.0, 3", "");
+    auto alg = do_createAlignedTransform("Axis0, 2.0,8.0, 6", "Axis1, 2.0,8.0, 3", "Axis2, 2.0,8.0, 3", "");
 
     TS_ASSERT_EQUALS(alg->m_bases.size(), 3);
     TS_ASSERT_EQUALS(alg->m_binDimensions.size(), 3);
@@ -268,8 +237,7 @@ public:
   }
 
   void test_createAlignedTransform_scrambled() {
-    auto alg = do_createAlignedTransform(
-        "Axis2, 2.0,8.0, 3", "Axis0, 2.0,8.0, 6", "Axis1, 2.0,8.0, 3", "");
+    auto alg = do_createAlignedTransform("Axis2, 2.0,8.0, 3", "Axis0, 2.0,8.0, 6", "Axis1, 2.0,8.0, 3", "");
 
     TS_ASSERT_EQUALS(alg->m_bases.size(), 3);
     TS_ASSERT_EQUALS(alg->m_binDimensions.size(), 3);
@@ -334,8 +302,7 @@ public:
   }
 
   void test_aligned_ImplicitFunction() {
-    auto alg = do_createAlignedTransform(
-        "Axis0, 2.0,8.0, 6", "Axis1, 2.0,8.0, 3", "Axis2, 2.0,8.0, 3", "");
+    auto alg = do_createAlignedTransform("Axis0, 2.0,8.0, 6", "Axis1, 2.0,8.0, 3", "Axis2, 2.0,8.0, 3", "");
     auto func = alg->getImplicitFunctionForChunk(nullptr, nullptr);
     TS_ASSERT(func);
     TS_ASSERT_EQUALS(func->getNumPlanes(), 6);
@@ -345,8 +312,7 @@ public:
   }
 
   void test_aligned_ImplicitFunction_chunk() {
-    auto alg = do_createAlignedTransform(
-        "Axis0, 2.0,8.0, 6", "Axis1, 2.0,8.0, 6", "Axis2, 2.0,8.0, 6", "");
+    auto alg = do_createAlignedTransform("Axis0, 2.0,8.0, 6", "Axis1, 2.0,8.0, 6", "Axis2, 2.0,8.0, 6", "");
     /* This defines a chunk implicit function between 3-4 in each axis */
     size_t chunkMin[3] = {1, 1, 1};
     size_t chunkMax[3] = {2, 2, 2};
@@ -372,20 +338,14 @@ public:
     alg.m_maxExtents.emplace_back(+5.0);
     alg.m_numBins.emplace_back(20);
 
-    TSM_ASSERT_THROWS_ANYTHING("Blank name",
-                               alg.makeBasisVectorFromString(",units,1,2,3"));
-    TSM_ASSERT_THROWS_ANYTHING(
-        "Too many dims", alg.makeBasisVectorFromString("name,units,1,2,3,4"));
-    TSM_ASSERT_THROWS_ANYTHING("Too few dims",
-                               alg.makeBasisVectorFromString("name,units,1,2"));
+    TSM_ASSERT_THROWS_ANYTHING("Blank name", alg.makeBasisVectorFromString(",units,1,2,3"));
+    TSM_ASSERT_THROWS_ANYTHING("Too many dims", alg.makeBasisVectorFromString("name,units,1,2,3,4"));
+    TSM_ASSERT_THROWS_ANYTHING("Too few dims", alg.makeBasisVectorFromString("name,units,1,2"));
 
     alg.m_numBins[0] = -10;
-    TSM_ASSERT_THROWS_ANYTHING("Invalid # of bins",
-                               alg.makeBasisVectorFromString("name,units,1,2"));
-    TSM_ASSERT_THROWS_NOTHING("Empty string is OK",
-                              alg.makeBasisVectorFromString(""));
-    TSM_ASSERT_THROWS_NOTHING("Empty string is OK",
-                              alg.makeBasisVectorFromString("   "));
+    TSM_ASSERT_THROWS_ANYTHING("Invalid # of bins", alg.makeBasisVectorFromString("name,units,1,2"));
+    TSM_ASSERT_THROWS_NOTHING("Empty string is OK", alg.makeBasisVectorFromString(""));
+    TSM_ASSERT_THROWS_NOTHING("Empty string is OK", alg.makeBasisVectorFromString("   "));
     TS_ASSERT_EQUALS(alg.m_bases.size(), 0);
   }
 
@@ -401,8 +361,7 @@ public:
       alg.m_NormalizeBasisVectors = (normalize > 0);
 
       TS_ASSERT_EQUALS(alg.m_bases.size(), 0);
-      TSM_ASSERT_THROWS_NOTHING(
-          "", alg.makeBasisVectorFromString(" name, units  , 1,2,3"));
+      TSM_ASSERT_THROWS_NOTHING("", alg.makeBasisVectorFromString(" name, units  , 1,2,3"));
       TS_ASSERT_EQUALS(alg.m_bases.size(), 1);
       TS_ASSERT_EQUALS(alg.m_binDimensions.size(), 1);
       TS_ASSERT_EQUALS(alg.m_binningScaling.size(), 1);
@@ -423,15 +382,13 @@ public:
       TS_ASSERT_DELTA(dim->getX(5), -2.5, 1e-5);
 
       if (alg.m_NormalizeBasisVectors) {
-        TSM_ASSERT_DELTA("Unit transformation scaling if normalizing",
-                         alg.m_transformScaling[0], 1.0, 1e-5);
+        TSM_ASSERT_DELTA("Unit transformation scaling if normalizing", alg.m_transformScaling[0], 1.0, 1e-5);
         TSM_ASSERT_DELTA("A bin ranges from 0-0.5 in OUTPUT, which is 0.5 long "
                          "in the INPUT, "
                          "so the binningScaling is 2.",
                          alg.m_binningScaling[0], 2., 1e-5);
       } else {
-        TSM_ASSERT_DELTA("Length sqrt(14) in INPUT = 1.0 in output",
-                         alg.m_transformScaling[0], sqrt(1.0 / 14.0), 1e-5);
+        TSM_ASSERT_DELTA("Length sqrt(14) in INPUT = 1.0 in output", alg.m_transformScaling[0], sqrt(1.0 / 14.0), 1e-5);
         TSM_ASSERT_DELTA("A bin ranges from 0-0.5 in OUTPUT, which is "
                          "0.5/sqrt(14) long in the INPUT, "
                          "so the binningScaling is 2/sqrt(14)",
@@ -452,8 +409,7 @@ public:
       alg.m_NormalizeBasisVectors = (normalize > 0);
 
       TS_ASSERT_EQUALS(alg.m_bases.size(), 0);
-      TSM_ASSERT_THROWS_NOTHING(
-          "", alg.makeBasisVectorFromString(" name, units  , 1,2,3"));
+      TSM_ASSERT_THROWS_NOTHING("", alg.makeBasisVectorFromString(" name, units  , 1,2,3"));
       TS_ASSERT_EQUALS(alg.m_bases.size(), 1);
       TS_ASSERT_EQUALS(alg.m_binDimensions.size(), 1);
       TS_ASSERT_EQUALS(alg.m_binningScaling.size(), 1);
@@ -467,12 +423,8 @@ public:
       IMDDimension_sptr dim = alg.m_binDimensions[0];
       TS_ASSERT_EQUALS(dim->getName(), "name");
       TSM_ASSERT("The units selection is ignored", dim->getUnits() != "units");
-      TS_ASSERT_EQUALS(
-          dim->getUnits(),
-          Mantid::Kernel::InverseAngstromsUnit().getUnitLabel().ascii());
-      TSM_ASSERT_EQUALS("Should be a QSample",
-                        Mantid::Geometry::QSample::QSampleName,
-                        dim->getMDFrame().name());
+      TS_ASSERT_EQUALS(dim->getUnits(), Mantid::Kernel::InverseAngstromsUnit().getUnitLabel().ascii());
+      TSM_ASSERT_EQUALS("Should be a QSample", Mantid::Geometry::QSample::QSampleName, dim->getMDFrame().name());
 
       TS_ASSERT_EQUALS(dim->getNBins(), 20);
       TS_ASSERT_EQUALS(dim->getMinimum(), -5);
@@ -480,15 +432,13 @@ public:
       TS_ASSERT_DELTA(dim->getX(5), -2.5, 1e-5);
 
       if (alg.m_NormalizeBasisVectors) {
-        TSM_ASSERT_DELTA("Unit transformation scaling if normalizing",
-                         alg.m_transformScaling[0], 1.0, 1e-5);
+        TSM_ASSERT_DELTA("Unit transformation scaling if normalizing", alg.m_transformScaling[0], 1.0, 1e-5);
         TSM_ASSERT_DELTA("A bin ranges from 0-0.5 in OUTPUT, which is 0.5 long "
                          "in the INPUT, "
                          "so the binningScaling is 2.",
                          alg.m_binningScaling[0], 2., 1e-5);
       } else {
-        TSM_ASSERT_DELTA("Length sqrt(14) in INPUT = 1.0 in output",
-                         alg.m_transformScaling[0], sqrt(1.0 / 14.0), 1e-5);
+        TSM_ASSERT_DELTA("Length sqrt(14) in INPUT = 1.0 in output", alg.m_transformScaling[0], sqrt(1.0 / 14.0), 1e-5);
         TSM_ASSERT_DELTA("A bin ranges from 0-0.5 in OUTPUT, which is "
                          "0.5/sqrt(14) long in the INPUT, "
                          "so the binningScaling is 2/sqrt(14)",
@@ -497,8 +447,7 @@ public:
     }
   }
 
-  void
-  test_makeBasisVectorFromString_WithMixedMDFrames_AndBasisVectorNotMixed() {
+  void test_makeBasisVectorFromString_WithMixedMDFrames_AndBasisVectorNotMixed() {
     // Test WITH and WITHOUT basis vector normalization
     for (int normalize = 0; normalize < 2; normalize++) {
       SlicingAlgorithmImpl alg;
@@ -511,10 +460,8 @@ public:
       alg.m_NormalizeBasisVectors = (normalize > 0);
 
       TS_ASSERT_EQUALS(alg.m_bases.size(), 0);
-      TSM_ASSERT_THROWS_NOTHING(
-          "", alg.makeBasisVectorFromString(
-                  " name, units  , 1,2,3,0")); // Basis vector is in QSample
-                                               // sub-space
+      TSM_ASSERT_THROWS_NOTHING("", alg.makeBasisVectorFromString(" name, units  , 1,2,3,0")); // Basis vector is in
+                                                                                               // QSample sub-space
       TS_ASSERT_EQUALS(alg.m_bases.size(), 1);
       TS_ASSERT_EQUALS(alg.m_binDimensions.size(), 1);
       TS_ASSERT_EQUALS(alg.m_binningScaling.size(), 1);
@@ -528,12 +475,8 @@ public:
       IMDDimension_sptr dim = alg.m_binDimensions[0];
       TS_ASSERT_EQUALS(dim->getName(), "name");
       TSM_ASSERT("The units selection is ignored", dim->getUnits() != "units");
-      TS_ASSERT_EQUALS(
-          dim->getUnits(),
-          Mantid::Kernel::InverseAngstromsUnit().getUnitLabel().ascii());
-      TSM_ASSERT_EQUALS("Should be a QSample",
-                        Mantid::Geometry::QSample::QSampleName,
-                        dim->getMDFrame().name());
+      TS_ASSERT_EQUALS(dim->getUnits(), Mantid::Kernel::InverseAngstromsUnit().getUnitLabel().ascii());
+      TSM_ASSERT_EQUALS("Should be a QSample", Mantid::Geometry::QSample::QSampleName, dim->getMDFrame().name());
 
       TS_ASSERT_EQUALS(dim->getNBins(), 20);
       TS_ASSERT_EQUALS(dim->getMinimum(), -5);
@@ -541,15 +484,13 @@ public:
       TS_ASSERT_DELTA(dim->getX(5), -2.5, 1e-5);
 
       if (alg.m_NormalizeBasisVectors) {
-        TSM_ASSERT_DELTA("Unit transformation scaling if normalizing",
-                         alg.m_transformScaling[0], 1.0, 1e-5);
+        TSM_ASSERT_DELTA("Unit transformation scaling if normalizing", alg.m_transformScaling[0], 1.0, 1e-5);
         TSM_ASSERT_DELTA("A bin ranges from 0-0.5 in OUTPUT, which is 0.5 long "
                          "in the INPUT, "
                          "so the binningScaling is 2.",
                          alg.m_binningScaling[0], 2., 1e-5);
       } else {
-        TSM_ASSERT_DELTA("Length sqrt(14) in INPUT = 1.0 in output",
-                         alg.m_transformScaling[0], sqrt(1.0 / 14.0), 1e-5);
+        TSM_ASSERT_DELTA("Length sqrt(14) in INPUT = 1.0 in output", alg.m_transformScaling[0], sqrt(1.0 / 14.0), 1e-5);
         TSM_ASSERT_DELTA("A bin ranges from 0-0.5 in OUTPUT, which is "
                          "0.5/sqrt(14) long in the INPUT, "
                          "so the binningScaling is 2/sqrt(14)",
@@ -569,8 +510,7 @@ public:
     alg.m_NormalizeBasisVectors = true;
 
     TS_ASSERT_EQUALS(alg.m_bases.size(), 0);
-    TSM_ASSERT_THROWS_NOTHING(
-        "", alg.makeBasisVectorFromString("[Dumb,Name], units  , 1,2,3"));
+    TSM_ASSERT_THROWS_NOTHING("", alg.makeBasisVectorFromString("[Dumb,Name], units  , 1,2,3"));
     TS_ASSERT_EQUALS(alg.m_bases.size(), 1);
     TS_ASSERT_EQUALS(alg.m_binDimensions.size(), 1);
     TS_ASSERT_EQUALS(alg.m_binningScaling.size(), 1);
@@ -593,12 +533,11 @@ public:
   }
 
   //----------------------------------------------------------------------------
-  std::unique_ptr<SlicingAlgorithmImpl> do_createGeneralTransform(
-      const IMDEventWorkspace_sptr &inWS, const std::string &name1,
-      const std::string &name2, const std::string &name3,
-      const std::string &name4, const VMD &translation,
-      const std::string &extents, const std::string &numBins,
-      bool ForceOrthogonal = false, bool NormalizeBasisVectors = true) {
+  std::unique_ptr<SlicingAlgorithmImpl>
+  do_createGeneralTransform(const IMDEventWorkspace_sptr &inWS, const std::string &name1, const std::string &name2,
+                            const std::string &name3, const std::string &name4, const VMD &translation,
+                            const std::string &extents, const std::string &numBins, bool ForceOrthogonal = false,
+                            bool NormalizeBasisVectors = true) {
     auto alg = std::make_unique<SlicingAlgorithmImpl>();
     alg->m_inWS = inWS;
     alg->initSlicingProps();
@@ -609,38 +548,29 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("BasisVector3", name4));
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("OutputExtents", extents));
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("OutputBins", numBins));
-    TS_ASSERT_THROWS_NOTHING(
-        alg->setPropertyValue("Translation", translation.toString(",")));
-    TS_ASSERT_THROWS_NOTHING(
-        alg->setProperty("NormalizeBasisVectors", NormalizeBasisVectors));
-    TS_ASSERT_THROWS_NOTHING(
-        alg->setProperty("ForceOrthogonal", ForceOrthogonal));
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("Translation", translation.toString(",")));
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("NormalizeBasisVectors", NormalizeBasisVectors));
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("ForceOrthogonal", ForceOrthogonal));
     alg->createTransform();
     return alg;
   }
 
   void test_createGeneralTransform_failures() {
-    TSM_ASSERT_THROWS_ANYTHING(
-        "No dimensions given",
-        do_createGeneralTransform(ws, "", "", "", "", VMD(1, 2, 3), "", ""));
+    TSM_ASSERT_THROWS_ANYTHING("No dimensions given",
+                               do_createGeneralTransform(ws, "", "", "", "", VMD(1, 2, 3), "", ""));
     TSM_ASSERT_THROWS_ANYTHING(
         "Bad # of dimensions in translation param",
-        do_createGeneralTransform(ws, "x,m,1,0,0, 10.0, 10", "", "", "",
-                                  VMD(1, 2, 3, 4), "0,10", "5"));
-    TSM_ASSERT_THROWS_ANYTHING(
-        "Too many output dims",
-        do_createGeneralTransform(ws, "x,m,1,0,0, 10.0, 10",
-                                  "x,m,1,0,0, 10.0, 10", "x,m,1,0,0, 10.0, 10",
-                                  "x,m,1,0,0, 10.0, 10", VMD(1, 2, 3, 4),
-                                  "0,10,0,10,0,10", "5,5,5"));
+        do_createGeneralTransform(ws, "x,m,1,0,0, 10.0, 10", "", "", "", VMD(1, 2, 3, 4), "0,10", "5"));
+    TSM_ASSERT_THROWS_ANYTHING("Too many output dims",
+                               do_createGeneralTransform(ws, "x,m,1,0,0, 10.0, 10", "x,m,1,0,0, 10.0, 10",
+                                                         "x,m,1,0,0, 10.0, 10", "x,m,1,0,0, 10.0, 10", VMD(1, 2, 3, 4),
+                                                         "0,10,0,10,0,10", "5,5,5"));
     TSM_ASSERT_THROWS_ANYTHING(
         "Bad # of dimensions in the OutputExtents",
-        do_createGeneralTransform(ws, "x,m,1,0,0, 10.0, 10", "", "", "",
-                                  VMD(1, 2, 3), "0,10,0,10", "5"));
+        do_createGeneralTransform(ws, "x,m,1,0,0, 10.0, 10", "", "", "", VMD(1, 2, 3), "0,10,0,10", "5"));
     TSM_ASSERT_THROWS_ANYTHING(
         "Bad # of dimensions in the OutputBins",
-        do_createGeneralTransform(ws, "x,m,1,0,0, 10.0, 10", "", "", "",
-                                  VMD(1, 2, 3), "0,10", "5,5"));
+        do_createGeneralTransform(ws, "x,m,1,0,0, 10.0, 10", "", "", "", VMD(1, 2, 3), "0,10", "5,5"));
   }
 
   void test_createGeneralTransform_3D_to_3D() {
@@ -650,10 +580,8 @@ public:
     VMD baseY(-sin(angle), cos(angle), 0.0);
     VMD baseZ(0.0, 0.0, 1.0);
 
-    auto alg = do_createGeneralTransform(
-        ws3, "OutX,m," + baseX.toString(","), "OutY,m," + baseY.toString(","),
-        "OutZ,m," + baseZ.toString(","), "", VMD(1, 1, 0), "0,10,0,10,0,10",
-        "5,5,5");
+    auto alg = do_createGeneralTransform(ws3, "OutX,m," + baseX.toString(","), "OutY,m," + baseY.toString(","),
+                                         "OutZ,m," + baseZ.toString(","), "", VMD(1, 1, 0), "0,10,0,10,0,10", "5,5,5");
 
     TS_ASSERT_EQUALS(alg->m_bases.size(), 3);
     TS_ASSERT_EQUALS(alg->m_translation, VMD(1, 1, 0));
@@ -707,10 +635,8 @@ public:
     VMD baseY(0.0, -1., 0.0);
     VMD baseZ(0.0, 0.0, 1.0);
 
-    auto alg = do_createGeneralTransform(
-        ws3, "OutX,m," + baseX.toString(","), "OutY,m," + baseY.toString(","),
-        "OutZ,m," + baseZ.toString(","), "", VMD(0, 0, 0), "0,10,0,10,0,10",
-        "5,5,5");
+    auto alg = do_createGeneralTransform(ws3, "OutX,m," + baseX.toString(","), "OutY,m," + baseY.toString(","),
+                                         "OutZ,m," + baseZ.toString(","), "", VMD(0, 0, 0), "0,10,0,10,0,10", "5,5,5");
 
     TS_ASSERT_EQUALS(alg->m_bases.size(), 3);
     TS_ASSERT_EQUALS(alg->m_translation, VMD(0, 0, 0));
@@ -753,15 +679,13 @@ public:
   }
 
   void test_createGeneralTransform_4D_to_3D() {
-    auto alg = do_createGeneralTransform(
-        ws4, "OutX,m, 1,0,0,0", "OutY,m, 0,1,0,0", "OutZ,m, 0,0,1,0", "",
-        VMD(1, 1, 1, 0), "0,10,0,10,0,10", "5,5,5");
+    auto alg = do_createGeneralTransform(ws4, "OutX,m, 1,0,0,0", "OutY,m, 0,1,0,0", "OutZ,m, 0,0,1,0", "",
+                                         VMD(1, 1, 1, 0), "0,10,0,10,0,10", "5,5,5");
     TS_ASSERT_EQUALS(alg->m_bases.size(), 3);
 
     // The implicit function
     std::unique_ptr<MDImplicitFunction> func;
-    TS_ASSERT_THROWS_NOTHING(
-        func = alg->getImplicitFunctionForChunk(nullptr, nullptr));
+    TS_ASSERT_THROWS_NOTHING(func = alg->getImplicitFunctionForChunk(nullptr, nullptr));
     TS_ASSERT(func);
     TS_ASSERT_EQUALS(func->getNumPlanes(), 6);
     TS_ASSERT(func->isPointContained(VMD(1.5, 1.5, 2, 234)));
@@ -774,15 +698,13 @@ public:
   }
 
   void test_createGeneralTransform_4D_to_4D() {
-    auto alg = do_createGeneralTransform(
-        ws4, "OutX,m, 1,0,0,0", "OutY,m, 0,1,0,0", "OutZ,m, 0,0,1,0",
-        "OutE,m, 0,0,0,1", VMD(1, 1, 1, 1), "0,10,0,10,0,10,0,10", "5,5,5,5");
+    auto alg = do_createGeneralTransform(ws4, "OutX,m, 1,0,0,0", "OutY,m, 0,1,0,0", "OutZ,m, 0,0,1,0",
+                                         "OutE,m, 0,0,0,1", VMD(1, 1, 1, 1), "0,10,0,10,0,10,0,10", "5,5,5,5");
     TS_ASSERT_EQUALS(alg->m_bases.size(), 4);
 
     // The implicit function
     std::unique_ptr<MDImplicitFunction> func;
-    TS_ASSERT_THROWS_NOTHING(
-        func = alg->getImplicitFunctionForChunk(nullptr, nullptr));
+    TS_ASSERT_THROWS_NOTHING(func = alg->getImplicitFunctionForChunk(nullptr, nullptr));
     TS_ASSERT(func);
     TS_ASSERT_EQUALS(func->getNumPlanes(), 8);
     TS_ASSERT(func->isPointContained(VMD(1.5, 1.5, 1.5, 1.5)));
@@ -793,15 +715,13 @@ public:
   /** 4D "left-handed" coordinate system
    * obtained by flipping the Y basis vector.  */
   void test_createGeneralTransform_4D_to_4D_LeftHanded() {
-    auto alg = do_createGeneralTransform(
-        ws4, "OutX,m, 1,0,0,0", "OutY,m, 0,-1,0,0", "OutZ,m, 0,0,1,0",
-        "OutE,m, 0,0,0,1", VMD(1, 1, 1, 1), "0,10,0,10,0,10,0,10", "5,5,5,5");
+    auto alg = do_createGeneralTransform(ws4, "OutX,m, 1,0,0,0", "OutY,m, 0,-1,0,0", "OutZ,m, 0,0,1,0",
+                                         "OutE,m, 0,0,0,1", VMD(1, 1, 1, 1), "0,10,0,10,0,10,0,10", "5,5,5,5");
     TS_ASSERT_EQUALS(alg->m_bases.size(), 4);
 
     // The implicit function
     std::unique_ptr<MDImplicitFunction> func;
-    TS_ASSERT_THROWS_NOTHING(
-        func = alg->getImplicitFunctionForChunk(nullptr, nullptr));
+    TS_ASSERT_THROWS_NOTHING(func = alg->getImplicitFunctionForChunk(nullptr, nullptr));
     TS_ASSERT(func);
     TS_ASSERT_EQUALS(func->getNumPlanes(), 8);
     TS_ASSERT(func->isPointContained(VMD(1.5, -1.5, 1.5, 1.5)));
@@ -811,15 +731,13 @@ public:
   }
 
   void test_createGeneralTransform_5D_to_3D() {
-    auto alg = do_createGeneralTransform(
-        ws5, "OutX,m, 1,0,0,0,0", "OutY,m, 0,1,0,0,0", "OutZ,m, 0,0,1,0,0", "",
-        VMD(1, 1, 1, 0, 0), "0,10,0,10,0,10", "5,5,5");
+    auto alg = do_createGeneralTransform(ws5, "OutX,m, 1,0,0,0,0", "OutY,m, 0,1,0,0,0", "OutZ,m, 0,0,1,0,0", "",
+                                         VMD(1, 1, 1, 0, 0), "0,10,0,10,0,10", "5,5,5");
     TS_ASSERT_EQUALS(alg->m_bases.size(), 3);
 
     // The implicit function
     std::unique_ptr<MDImplicitFunction> func;
-    TS_ASSERT_THROWS_NOTHING(
-        func = alg->getImplicitFunctionForChunk(nullptr, nullptr));
+    TS_ASSERT_THROWS_NOTHING(func = alg->getImplicitFunctionForChunk(nullptr, nullptr));
     TS_ASSERT(func);
     TS_ASSERT_EQUALS(func->getNumPlanes(), 6);
     TS_ASSERT(func->isPointContained(VMD(1.5, 1.5, 2, 234, 456)));
@@ -832,15 +750,13 @@ public:
   }
 
   void test_createGeneralTransform_4D_to_2D() {
-    auto alg =
-        do_createGeneralTransform(ws4, "OutX,m, 1,0,0,0", "OutY,m, 0,1,0,0", "",
-                                  "", VMD(1, 1, 0, 0), "0,10,0,10", "5,5");
+    auto alg = do_createGeneralTransform(ws4, "OutX,m, 1,0,0,0", "OutY,m, 0,1,0,0", "", "", VMD(1, 1, 0, 0),
+                                         "0,10,0,10", "5,5");
     TS_ASSERT_EQUALS(alg->m_bases.size(), 2);
 
     // The implicit function
     std::unique_ptr<MDImplicitFunction> func;
-    TS_ASSERT_THROWS_NOTHING(
-        func = alg->getImplicitFunctionForChunk(nullptr, nullptr));
+    TS_ASSERT_THROWS_NOTHING(func = alg->getImplicitFunctionForChunk(nullptr, nullptr));
     TS_ASSERT(func);
     TS_ASSERT_EQUALS(func->getNumPlanes(), 4);
     TS_ASSERT(func->isPointContained(VMD(1.5, 1.5, 2, 234)));
@@ -852,14 +768,12 @@ public:
 
   void test_createGeneralTransform_3D_to_2D() {
     auto alg =
-        do_createGeneralTransform(ws3, "OutX,m, 1,0,0", "OutY,m, 0,1,0", "", "",
-                                  VMD(1, 1, 0), "0,10,0,10", "5,5");
+        do_createGeneralTransform(ws3, "OutX,m, 1,0,0", "OutY,m, 0,1,0", "", "", VMD(1, 1, 0), "0,10,0,10", "5,5");
     TS_ASSERT_EQUALS(alg->m_bases.size(), 2);
 
     // The implicit function
     std::unique_ptr<MDImplicitFunction> func;
-    TS_ASSERT_THROWS_NOTHING(
-        func = alg->getImplicitFunctionForChunk(nullptr, nullptr));
+    TS_ASSERT_THROWS_NOTHING(func = alg->getImplicitFunctionForChunk(nullptr, nullptr));
     TS_ASSERT(func);
     TS_ASSERT_EQUALS(func->getNumPlanes(), 4);
     TS_ASSERT(func->isPointContained(VMD(1.5, 1.5, 2)));
@@ -870,14 +784,12 @@ public:
   }
 
   void test_createGeneralTransform_2D_to_2D() {
-    auto alg = do_createGeneralTransform(ws2, "OutX,m, 1,0", "OutY,m, 0,1", "",
-                                         "", VMD(1, 1), "0,10,0,10", "5,5");
+    auto alg = do_createGeneralTransform(ws2, "OutX,m, 1,0", "OutY,m, 0,1", "", "", VMD(1, 1), "0,10,0,10", "5,5");
     TS_ASSERT_EQUALS(alg->m_bases.size(), 2);
 
     // The implicit function
     std::unique_ptr<MDImplicitFunction> func;
-    TS_ASSERT_THROWS_NOTHING(
-        func = alg->getImplicitFunctionForChunk(nullptr, nullptr));
+    TS_ASSERT_THROWS_NOTHING(func = alg->getImplicitFunctionForChunk(nullptr, nullptr));
     TS_ASSERT(func);
     TS_ASSERT_EQUALS(func->getNumPlanes(), 4);
     TS_ASSERT(func->isPointContained(VMD(1.5, 1.5)));
@@ -895,21 +807,15 @@ public:
    * Maximum edge in the output = (+11, +21) in the input
    */
   void test_createGeneralTransform_2D_to_2D_withNonZeroOrigin() {
-    auto alg =
-        do_createGeneralTransform(ws2, "OutX,m, 2,0", "OutY,m, 0,3", "", "",
-                                  VMD(1, 1), "-10,10, -20,20", "5,5");
+    auto alg = do_createGeneralTransform(ws2, "OutX,m, 2,0", "OutY,m, 0,3", "", "", VMD(1, 1), "-10,10, -20,20", "5,5");
 
-    TSM_ASSERT_DELTA("Bins are sized 4 in X", alg->m_binningScaling[0], 0.25,
-                     1e-5);
-    TSM_ASSERT_DELTA("Bins are sized 8 in Y", alg->m_binningScaling[1], 0.125,
-                     1e-5);
+    TSM_ASSERT_DELTA("Bins are sized 4 in X", alg->m_binningScaling[0], 0.25, 1e-5);
+    TSM_ASSERT_DELTA("Bins are sized 8 in Y", alg->m_binningScaling[1], 0.125, 1e-5);
 
-    TSM_ASSERT_DELTA(
-        "Basis vectors were normalized so that output length=input length",
-        alg->m_transformScaling[0], 1.0, 1e-5);
-    TSM_ASSERT_DELTA(
-        "Basis vectors were normalized so that output length=input length",
-        alg->m_transformScaling[1], 1.0, 1e-5);
+    TSM_ASSERT_DELTA("Basis vectors were normalized so that output length=input length", alg->m_transformScaling[0],
+                     1.0, 1e-5);
+    TSM_ASSERT_DELTA("Basis vectors were normalized so that output length=input length", alg->m_transformScaling[1],
+                     1.0, 1e-5);
 
     // This input coordinate translates to (+2,-12) as seen in the output
     coord_t in[2] = {3, -11.0};
@@ -957,19 +863,14 @@ public:
    * Maximum edge in the output (+10,+20) = (+21, +101) in the input
    */
   void test_createGeneralTransform_2D_to_2D_withNonZeroOrigin_withScaling() {
-    auto alg = do_createGeneralTransform(
-        ws2, "OutX,m, 2,0", "OutY,m, 0,5", "", "", VMD(1, 1), "-10,10, -20,20",
-        "5,5", false /*force orthogonal*/, false /*normalize basis vectors */);
+    auto alg = do_createGeneralTransform(ws2, "OutX,m, 2,0", "OutY,m, 0,5", "", "", VMD(1, 1), "-10,10, -20,20", "5,5",
+                                         false /*force orthogonal*/, false /*normalize basis vectors */);
 
-    TSM_ASSERT_DELTA("Bins along X are sized 8 in the INPUT dimension",
-                     alg->m_binningScaling[0], 0.125, 1e-5);
-    TSM_ASSERT_DELTA("Bins along Y are sized 40 in the INPUT dimension)",
-                     alg->m_binningScaling[1], 1. / 40., 1e-5);
+    TSM_ASSERT_DELTA("Bins along X are sized 8 in the INPUT dimension", alg->m_binningScaling[0], 0.125, 1e-5);
+    TSM_ASSERT_DELTA("Bins along Y are sized 40 in the INPUT dimension)", alg->m_binningScaling[1], 1. / 40., 1e-5);
 
-    TSM_ASSERT_DELTA("Basis vectors were NOT normalized",
-                     alg->m_transformScaling[0], 0.5, 1e-5);
-    TSM_ASSERT_DELTA("Basis vectors were NOT normalized",
-                     alg->m_transformScaling[1], 0.2, 1e-5);
+    TSM_ASSERT_DELTA("Basis vectors were NOT normalized", alg->m_transformScaling[0], 0.5, 1e-5);
+    TSM_ASSERT_DELTA("Basis vectors were NOT normalized", alg->m_transformScaling[1], 0.2, 1e-5);
 
     // This input coordinate translates to (+2,-12)
     // and then scales to (+1,-2.4) in OUTPUT coords
@@ -1022,60 +923,49 @@ public:
    *
    */
   void test_createGeneralTransform_2D_to_2D_nonOrthogonal() {
-    auto alg = do_createGeneralTransform(ws2, "OutX,m, 1,0", "OutY,m, 1,1", "",
-                                         "", VMD(0., 0.), "0,10,0,10", "5,5");
+    auto alg = do_createGeneralTransform(ws2, "OutX,m, 1,0", "OutY,m, 1,1", "", "", VMD(0., 0.), "0,10,0,10", "5,5");
     TS_ASSERT_EQUALS(alg->m_bases.size(), 2);
 
     // The implicit function
     std::unique_ptr<MDImplicitFunction> func;
-    TS_ASSERT_THROWS_NOTHING(
-        func = alg->getImplicitFunctionForChunk(nullptr, nullptr));
+    TS_ASSERT_THROWS_NOTHING(func = alg->getImplicitFunctionForChunk(nullptr, nullptr));
     TS_ASSERT(func);
     TS_ASSERT_EQUALS(func->getNumPlanes(), 4);
     TS_ASSERT(func->isPointContained(VMD(2., 1.)));
     TS_ASSERT(!func->isPointContained(VMD(8., 7.5)));
     TS_ASSERT(!func->isPointContained(VMD(0., 1.)));
-    TS_ASSERT(!func->isPointContained(VMD(
-        5., 6.))); // This point would be contained if using orthogonal bases
-    TS_ASSERT(func->isPointContained(VMD(
-        12.,
-        3.))); // This point would NOT be contained if using orthogonal bases
+    TS_ASSERT(!func->isPointContained(VMD(5., 6.))); // This point would be contained if using orthogonal bases
+    TS_ASSERT(func->isPointContained(VMD(12.,
+                                         3.))); // This point would NOT be contained if using orthogonal bases
   }
 
   void test_createGeneralTransform_3D_to_2D_nonOrthogonal() {
     auto alg =
-        do_createGeneralTransform(ws3, "OutX,m, 1,0,0", "OutY,m, 1,1,0", "", "",
-                                  VMD(0., 0., 0.), "0,10,0,10", "5,5");
+        do_createGeneralTransform(ws3, "OutX,m, 1,0,0", "OutY,m, 1,1,0", "", "", VMD(0., 0., 0.), "0,10,0,10", "5,5");
     TS_ASSERT_EQUALS(alg->m_bases.size(), 2);
 
     // The implicit function
     std::unique_ptr<MDImplicitFunction> func;
-    TS_ASSERT_THROWS_NOTHING(
-        func = alg->getImplicitFunctionForChunk(nullptr, nullptr));
+    TS_ASSERT_THROWS_NOTHING(func = alg->getImplicitFunctionForChunk(nullptr, nullptr));
     TS_ASSERT(func);
     TS_ASSERT_EQUALS(func->getNumPlanes(), 4);
     TS_ASSERT(func->isPointContained(VMD(2., 1., 0.)));
     TS_ASSERT(!func->isPointContained(VMD(8., 7.5, 0.)));
     TS_ASSERT(!func->isPointContained(VMD(0., 1., 0.)));
-    TS_ASSERT(!func->isPointContained(
-        VMD(5., 6.,
-            0.))); // This point would be contained if using orthogonal bases
-    TS_ASSERT(func->isPointContained(VMD(
-        12., 3.,
-        0.))); // This point would NOT be contained if using orthogonal bases
+    TS_ASSERT(!func->isPointContained(VMD(5., 6.,
+                                          0.))); // This point would be contained if using orthogonal bases
+    TS_ASSERT(func->isPointContained(VMD(12., 3.,
+                                         0.))); // This point would NOT be contained if using orthogonal bases
   }
 
   void test_createGeneralTransform_4D_to_4D_nonOrthogonal() {
-    auto alg = do_createGeneralTransform(ws4, "OutX,m, 1,0,0,0",
-                                         "OutY,m, 1,1,0,0", "OutZ,m, 0,0,1,0",
-                                         "OutE,m, 0,0,0,1", VMD(0., 0., 0., 0.),
-                                         "0,10,0,10,0,10,0,10", "5,5,5,5");
+    auto alg = do_createGeneralTransform(ws4, "OutX,m, 1,0,0,0", "OutY,m, 1,1,0,0", "OutZ,m, 0,0,1,0",
+                                         "OutE,m, 0,0,0,1", VMD(0., 0., 0., 0.), "0,10,0,10,0,10,0,10", "5,5,5,5");
     TS_ASSERT_EQUALS(alg->m_bases.size(), 4);
 
     // The implicit function
     std::unique_ptr<MDImplicitFunction> func;
-    TS_ASSERT_THROWS_NOTHING(
-        func = alg->getImplicitFunctionForChunk(nullptr, nullptr));
+    TS_ASSERT_THROWS_NOTHING(func = alg->getImplicitFunctionForChunk(nullptr, nullptr));
     TS_ASSERT(func);
     TS_ASSERT_EQUALS(func->getNumPlanes(), 8);
     TS_ASSERT(func->isPointContained(VMD(2., 1., 0., 0.)));
@@ -1088,15 +978,13 @@ public:
   }
 
   void test_createGeneralTransform_4D_to_3D_nonOrthogonal() {
-    auto alg = do_createGeneralTransform(
-        ws4, "OutX,m, 1,0,0,0", "OutY,m, 1,1,0,0", "OutZ,m, 0,0,1,0", "",
-        VMD(0., 0., 0., 0.), "0,10,0,10,0,10", "5,5,5");
+    auto alg = do_createGeneralTransform(ws4, "OutX,m, 1,0,0,0", "OutY,m, 1,1,0,0", "OutZ,m, 0,0,1,0", "",
+                                         VMD(0., 0., 0., 0.), "0,10,0,10,0,10", "5,5,5");
     TS_ASSERT_EQUALS(alg->m_bases.size(), 3);
 
     // The implicit function
     std::unique_ptr<MDImplicitFunction> func;
-    TS_ASSERT_THROWS_NOTHING(
-        func = alg->getImplicitFunctionForChunk(nullptr, nullptr));
+    TS_ASSERT_THROWS_NOTHING(func = alg->getImplicitFunctionForChunk(nullptr, nullptr));
     TS_ASSERT(func);
     TS_ASSERT_EQUALS(func->getNumPlanes(), 6);
     TS_ASSERT(func->isPointContained(VMD(2., 1., 0., 0.)));
@@ -1109,8 +997,7 @@ public:
   }
 
   void test_createGeneralTransform_4D_to_1D() {
-    auto alg = do_createGeneralTransform(ws4, "OutX,m, 1,0,0,0", "", "", "",
-                                         VMD(1, 1, 0, 0), "0,10", "5");
+    auto alg = do_createGeneralTransform(ws4, "OutX,m, 1,0,0,0", "", "", "", VMD(1, 1, 0, 0), "0,10", "5");
     TS_ASSERT_EQUALS(alg->m_bases.size(), 1);
 
     // The implicit function
@@ -1124,8 +1011,7 @@ public:
   }
 
   void test_createGeneralTransform_3D_to_1D() {
-    auto alg = do_createGeneralTransform(ws3, "OutX,m, 1,0,0", "", "", "",
-                                         VMD(1, 1, 0), "0,10", "5");
+    auto alg = do_createGeneralTransform(ws3, "OutX,m, 1,0,0", "", "", "", VMD(1, 1, 0), "0,10", "5");
     TS_ASSERT_EQUALS(alg->m_bases.size(), 1);
 
     // The implicit function
@@ -1139,8 +1025,7 @@ public:
   }
 
   void test_createGeneralTransform_2D_to_1D() {
-    auto alg = do_createGeneralTransform(ws2, "OutX,m, 1,0", "", "", "",
-                                         VMD(1, 1), "0,10", "5");
+    auto alg = do_createGeneralTransform(ws2, "OutX,m, 1,0", "", "", "", VMD(1, 1), "0,10", "5");
     TS_ASSERT_EQUALS(alg->m_bases.size(), 1);
 
     // The implicit function
@@ -1156,8 +1041,7 @@ public:
   void test_createGeneralTransform_1D_to_1D() {
     VMD translation(1);
     translation[0] = 1.0;
-    auto alg = do_createGeneralTransform(ws1, "OutX,m, 1", "", "", "",
-                                         translation, "0,10", "5");
+    auto alg = do_createGeneralTransform(ws1, "OutX,m, 1", "", "", "", translation, "0,10", "5");
     TS_ASSERT_EQUALS(alg->m_bases.size(), 1);
 
     // The implicit function

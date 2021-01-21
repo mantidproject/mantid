@@ -27,17 +27,14 @@ namespace {
 // algorithm (a MatrixWorkspace).
 class setUpADSWithWorkspace {
 public:
-  setUpADSWithWorkspace(const Workspace_sptr &ws) {
-    AnalysisDataService::Instance().addOrReplace(inputWSName, ws);
-  };
+  setUpADSWithWorkspace(const Workspace_sptr &ws) { AnalysisDataService::Instance().addOrReplace(inputWSName, ws); };
   ~setUpADSWithWorkspace() { AnalysisDataService::Instance().clear(); };
 
   const std::string inputWSName = "inputData";
 };
 
 // Set only mandatory fields; input and output workspace
-IAlgorithm_sptr
-algorithmWithWorkspacePropertiesSet(const std::string &inputWSName) {
+IAlgorithm_sptr algorithmWithWorkspacePropertiesSet(const std::string &inputWSName) {
 
   auto alg = std::make_shared<MuonGroupingAsymmetry>();
   alg->initialize();
@@ -50,10 +47,8 @@ algorithmWithWorkspacePropertiesSet(const std::string &inputWSName) {
 
 // Set up algorithm without any optional properties
 // i.e. just the input workspace and group name.
-IAlgorithm_sptr
-setUpAlgorithmWithoutOptionalProperties(const WorkspaceGroup_sptr &ws,
-                                        const std::string &name,
-                                        const std::vector<int> &grouping) {
+IAlgorithm_sptr setUpAlgorithmWithoutOptionalProperties(const WorkspaceGroup_sptr &ws, const std::string &name,
+                                                        const std::vector<int> &grouping) {
   setUpADSWithWorkspace setup(ws);
   IAlgorithm_sptr alg = algorithmWithWorkspacePropertiesSet(setup.inputWSName);
   alg->setProperty("GroupName", name);
@@ -71,9 +66,7 @@ MatrixWorkspace_sptr getOutputWorkspace(const IAlgorithm_sptr &alg) {
 
 class MuonGroupingAsymmetryTest : public CxxTest::TestSuite {
 public:
-  static MuonGroupingAsymmetryTest *createSuite() {
-    return new MuonGroupingAsymmetryTest();
-  }
+  static MuonGroupingAsymmetryTest *createSuite() { return new MuonGroupingAsymmetryTest(); }
   static void destroySuite(MuonGroupingAsymmetryTest *suite) { delete suite; }
 
   // --------------------------------------------------------------------------
@@ -107,8 +100,7 @@ public:
     auto alg = std::make_shared<MuonGroupingAsymmetry>();
     alg->initialize();
 
-    TS_ASSERT_THROWS_ANYTHING(
-        alg->setProperty("InputWorkspace", setup.inputWSName));
+    TS_ASSERT_THROWS_ANYTHING(alg->setProperty("InputWorkspace", setup.inputWSName));
   }
 
   void test_that_input_workspace_can_be_a_WorkspaceGroup() {
@@ -118,22 +110,19 @@ public:
     auto alg = std::make_shared<MuonGroupingAsymmetry>();
     alg->initialize();
 
-    TS_ASSERT_THROWS_NOTHING(
-        alg->setProperty("InputWorkspace", setup.inputWSName))
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", setup.inputWSName))
   }
 
   void test_that_group_name_must_be_supplied() {
 
     auto ws = createMultiPeriodWorkspaceGroup(2, 1, 10, "group1");
     setUpADSWithWorkspace setup(ws);
-    IAlgorithm_sptr alg =
-        algorithmWithWorkspacePropertiesSet(setup.inputWSName);
+    IAlgorithm_sptr alg = algorithmWithWorkspacePropertiesSet(setup.inputWSName);
 
     TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
   }
 
-  void
-  test_that_group_names_with_alphanumeric_characters_or_underscores_are_allowed() {
+  void test_that_group_names_with_alphanumeric_characters_or_underscores_are_allowed() {
     const std::vector<int> group = {1};
     auto ws = createMultiPeriodWorkspaceGroup(1, 1, 10, "group1");
 
@@ -144,16 +133,13 @@ public:
     }
   }
 
-  void
-  test_that_exec_throws_if_group_name_is_not_alphanumeric_or_underscored() {
+  void test_that_exec_throws_if_group_name_is_not_alphanumeric_or_underscored() {
     const std::vector<int> group = {1};
     auto ws = createMultiPeriodWorkspaceGroup(1, 1, 10, "group1");
 
-    const std::vector<std::string> invalidNames = {"@", "fwd!", "#1", "fwd @",
-                                                   "   "};
+    const std::vector<std::string> invalidNames = {"@", "fwd!", "#1", "fwd @", "   "};
     for (auto &&invalidName : invalidNames) {
-      auto alg =
-          setUpAlgorithmWithoutOptionalProperties(ws, invalidName, group);
+      auto alg = setUpAlgorithmWithoutOptionalProperties(ws, invalidName, group);
       TS_ASSERT_THROWS_ANYTHING(alg->execute());
     }
   }
@@ -162,8 +148,7 @@ public:
   // Validation : Grouping
   // --------------------------------------------------------------------------
 
-  void
-  test_that_cannot_add_spectra_to_group_which_exceed_those_in_the_workspace() {
+  void test_that_cannot_add_spectra_to_group_which_exceed_those_in_the_workspace() {
     auto ws = createMultiPeriodWorkspaceGroup(1, 5, 10, "asym");
 
     const std::vector<int> detectors = {6, 7, 8, 9, 10};
@@ -190,8 +175,7 @@ public:
     TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
   }
 
-  void
-  test_that_supplying_too_many_periods_to_SummedPeriods_throws_on_execute() {
+  void test_that_supplying_too_many_periods_to_SummedPeriods_throws_on_execute() {
     auto ws = createMultiPeriodWorkspaceGroup(2, 3, 10, "group");
     const std::vector<int> detectors = {1, 2, 3};
     auto alg = setUpAlgorithmWithoutOptionalProperties(ws, "group", detectors);
@@ -202,8 +186,7 @@ public:
     TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
   }
 
-  void
-  test_that_supplying_too_many_periods_to_SubtractedPeriods_throws_on_execute() {
+  void test_that_supplying_too_many_periods_to_SubtractedPeriods_throws_on_execute() {
     auto ws = createMultiPeriodWorkspaceGroup(2, 3, 10, "group");
     const std::vector<int> detectors = {1, 2, 3};
     auto alg = setUpAlgorithmWithoutOptionalProperties(ws, "group", detectors);
@@ -240,13 +223,11 @@ public:
   // Correct output
   // --------------------------------------------------------------------------
 
-  void
-  test_grouping_with_single_detector_and_asymmetry_analysis_gives_correct_values() {
+  void test_grouping_with_single_detector_and_asymmetry_analysis_gives_correct_values() {
 
     auto ws = createMultiPeriodAsymmetryData(1, 3, 10, "group_asym");
     const std::vector<int> detectors = {1};
-    auto alg =
-        setUpAlgorithmWithoutOptionalProperties(ws, "group_asym", detectors);
+    auto alg = setUpAlgorithmWithoutOptionalProperties(ws, "group_asym", detectors);
     alg->execute();
 
     auto wsOut = getOutputWorkspace(alg);
@@ -262,13 +243,11 @@ public:
     TS_ASSERT_DELTA(wsOut->readE(0)[1], 0.0003041, 0.00001);
   }
 
-  void
-  test_grouping_with_multiple_detectors_and_asymmetry_analysis_gives_correct_values() {
+  void test_grouping_with_multiple_detectors_and_asymmetry_analysis_gives_correct_values() {
 
     auto ws = createMultiPeriodAsymmetryData(1, 2, 10, "group_asym");
     const std::vector<int> detectors = {1, 2};
-    auto alg =
-        setUpAlgorithmWithoutOptionalProperties(ws, "group_asym", detectors);
+    auto alg = setUpAlgorithmWithoutOptionalProperties(ws, "group_asym", detectors);
     alg->execute();
 
     auto wsOut = getOutputWorkspace(alg);
@@ -284,13 +263,11 @@ public:
     TS_ASSERT_DELTA(wsOut->readE(0)[1], 0.0001518, 0.00001);
   }
 
-  void
-  test_grouping_asymmetry_with_subtracted_multiple_periods_gives_correct_values() {
+  void test_grouping_asymmetry_with_subtracted_multiple_periods_gives_correct_values() {
 
     auto ws = createMultiPeriodAsymmetryData(3, 2, 10, "group_asym");
     std::vector<int> detectors = {1, 2};
-    auto alg =
-        setUpAlgorithmWithoutOptionalProperties(ws, "group_asym", detectors);
+    auto alg = setUpAlgorithmWithoutOptionalProperties(ws, "group_asym", detectors);
 
     const std::vector<int> summedPeriods = {1};
     const std::vector<int> subtractedPeriods = {2, 3};
@@ -311,12 +288,10 @@ public:
     TS_ASSERT_DELTA(wsOut->readE(0)[1], 0.0001567, 0.00001);
   }
 
-  void
-  test_grouping_asymmetry_with_summed_multiple_periods_gives_correct_values() {
+  void test_grouping_asymmetry_with_summed_multiple_periods_gives_correct_values() {
     auto ws = createMultiPeriodAsymmetryData(3, 2, 10, "group_asym");
     std::vector<int> detectors = {1, 2};
-    auto alg =
-        setUpAlgorithmWithoutOptionalProperties(ws, "group_asym", detectors);
+    auto alg = setUpAlgorithmWithoutOptionalProperties(ws, "group_asym", detectors);
 
     const std::vector<int> summedPeriods = {3, 2};
     const std::vector<int> subtractedPeriods = {1};
@@ -337,12 +312,10 @@ public:
     TS_ASSERT_DELTA(wsOut->readE(0)[1], 0.0001567, 0.00001);
   }
 
-  void
-  test_grouping_asymmetry_with_specified_normalization_gives_correct_values() {
+  void test_grouping_asymmetry_with_specified_normalization_gives_correct_values() {
     auto ws = createMultiPeriodAsymmetryData(3, 2, 10, "group_asym");
     std::vector<int> detectors = {1, 2};
-    auto alg =
-        setUpAlgorithmWithoutOptionalProperties(ws, "group_asym", detectors);
+    auto alg = setUpAlgorithmWithoutOptionalProperties(ws, "group_asym", detectors);
 
     const std::vector<int> summedPeriods = {3, 2};
     const std::vector<int> subtractedPeriods = {1};

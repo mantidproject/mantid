@@ -172,8 +172,7 @@ QString MyParser::explainFunction(int index) {
     blabla = "erfz(x):\n The Gaussian probability density function Z(x).";
     break;
   case 20:
-    blabla =
-        "erfq(x):\n The upper tail of the Gaussian probability function Q(x).";
+    blabla = "erfq(x):\n The upper tail of the Gaussian probability function Q(x).";
     break;
   case 21:
     blabla = "exp(x):\n Exponential function: e raised to the power of x.";

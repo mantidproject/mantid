@@ -36,18 +36,14 @@ namespace HistogramData {
  * @param out_bg2 quadratic term
  * @param out_chisq_red reduced chisq (chisq normalized by degrees of freedom)
  */
-MANTID_HISTOGRAMDATA_DLL void
-estimateBackground(const size_t order,
-                   const Mantid::HistogramData::Histogram &histo,
-                   const size_t i_min, const size_t i_max, const size_t p_min,
-                   const size_t p_max, double &out_bg0, double &out_bg1,
-                   double &out_bg2, double &out_chisq_red);
+MANTID_HISTOGRAMDATA_DLL void estimateBackground(const size_t order, const Mantid::HistogramData::Histogram &histo,
+                                                 const size_t i_min, const size_t i_max, const size_t p_min,
+                                                 const size_t p_max, double &out_bg0, double &out_bg1, double &out_bg2,
+                                                 double &out_chisq_red);
 
-MANTID_HISTOGRAMDATA_DLL void
-estimatePolynomial(const size_t order,
-                   const Mantid::HistogramData::Histogram &histo,
-                   const size_t i_min, const size_t i_max, double &out_bg0,
-                   double &out_bg1, double &out_bg2, double &out_chisq_red);
+MANTID_HISTOGRAMDATA_DLL void estimatePolynomial(const size_t order, const Mantid::HistogramData::Histogram &histo,
+                                                 const size_t i_min, const size_t i_max, double &out_bg0,
+                                                 double &out_bg1, double &out_bg2, double &out_chisq_red);
 
 } // namespace HistogramData
 } // namespace Mantid

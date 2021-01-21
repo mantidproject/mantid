@@ -14,8 +14,7 @@ namespace SpectrumView {
  *
  *  @param canvas  Pointer to the QwtPlotCanvas this picker will work with
  */
-TrackingPicker::TrackingPicker(QwtPlotCanvas *canvas)
-    : QwtPlotPicker(canvas), m_hideReadout(true) {}
+TrackingPicker::TrackingPicker(QwtPlotCanvas *canvas) : QwtPlotPicker(canvas), m_hideReadout(true) {}
 
 /**
  * Enable or disable the position readout at the mouse location for this

@@ -31,14 +31,11 @@ public:
 class DLLExport SpecialWorkspace2D : public Workspace2D {
 public:
   SpecialWorkspace2D() = default;
-  SpecialWorkspace2D(const Geometry::Instrument_const_sptr &inst,
-                     const bool includeMonitors = false);
+  SpecialWorkspace2D(const Geometry::Instrument_const_sptr &inst, const bool includeMonitors = false);
   SpecialWorkspace2D(const API::MatrixWorkspace_const_sptr &parent);
 
   /// Returns a clone of the workspace
-  std::unique_ptr<SpecialWorkspace2D> clone() const {
-    return std::unique_ptr<SpecialWorkspace2D>(doClone());
-  }
+  std::unique_ptr<SpecialWorkspace2D> clone() const { return std::unique_ptr<SpecialWorkspace2D>(doClone()); }
   /// Returns a default-initialized clone of the workspace
   std::unique_ptr<SpecialWorkspace2D> cloneEmpty() const {
     auto workspace = std::unique_ptr<SpecialWorkspace2D>(doCloneEmpty());
@@ -53,34 +50,26 @@ public:
   double getValue(const detid_t detectorID) const;
   double getValue(const detid_t detectorID, const double defaultValue) const;
 
-  void setValue(const detid_t detectorID, const double value,
-                const double error = 0.);
-  void setValue(const std::set<detid_t> &detectorIDs, const double value,
-                const double error = 0.);
+  void setValue(const detid_t detectorID, const double value, const double error = 0.);
+  void setValue(const std::set<detid_t> &detectorIDs, const double value, const double error = 0.);
 
   std::set<detid_t> getDetectorIDs(const std::size_t workspaceIndex) const;
 
-  void binaryOperation(std::shared_ptr<const SpecialWorkspace2D> &ws,
-                       const unsigned int operatortype);
+  void binaryOperation(std::shared_ptr<const SpecialWorkspace2D> &ws, const unsigned int operatortype);
   void binaryOperation(const unsigned int operatortype);
 
   virtual void copyFrom(std::shared_ptr<const SpecialWorkspace2D> sourcews);
 
 private:
-  SpecialWorkspace2D *doClone() const override {
-    return new SpecialWorkspace2D(*this);
-  }
-  SpecialWorkspace2D *doCloneEmpty() const override {
-    return new SpecialWorkspace2D();
-  }
+  SpecialWorkspace2D *doClone() const override { return new SpecialWorkspace2D(*this); }
+  SpecialWorkspace2D *doCloneEmpty() const override { return new SpecialWorkspace2D(); }
   bool isCompatible(const std::shared_ptr<const SpecialWorkspace2D> &ws);
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
   SpecialWorkspace2D(const SpecialWorkspace2D &) = default;
 
-  void init(const size_t &NVectors, const size_t &XLength,
-            const size_t &YLength) override;
+  void init(const size_t &NVectors, const size_t &XLength, const size_t &YLength) override;
   void init(const HistogramData::Histogram &histogram) override;
 
   /// Return human-readable string

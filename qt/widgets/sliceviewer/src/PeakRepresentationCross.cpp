@@ -16,14 +16,12 @@
 namespace MantidQt {
 namespace SliceViewer {
 
-PeakRepresentationCross::PeakRepresentationCross(
-    const Mantid::Kernel::V3D &origin, const double &maxZ, const double &minZ)
-    : m_intoViewFraction(0.015), m_crossViewFraction(0.015),
-      m_originalOrigin(origin), m_origin(origin),
-      m_effectiveRadius((maxZ - minZ) * m_intoViewFraction), m_opacityMax(0.8),
-      m_opacityMin(0.0),
-      m_opacityGradient((m_opacityMin - m_opacityMax) / m_effectiveRadius),
-      m_opacityAtDistance(0.0), m_slicePoint(0.0) {}
+PeakRepresentationCross::PeakRepresentationCross(const Mantid::Kernel::V3D &origin, const double &maxZ,
+                                                 const double &minZ)
+    : m_intoViewFraction(0.015), m_crossViewFraction(0.015), m_originalOrigin(origin), m_origin(origin),
+      m_effectiveRadius((maxZ - minZ) * m_intoViewFraction), m_opacityMax(0.8), m_opacityMin(0.0),
+      m_opacityGradient((m_opacityMin - m_opacityMax) / m_effectiveRadius), m_opacityAtDistance(0.0),
+      m_slicePoint(0.0) {}
 
 /**
  *Set the distance between the plane and the center of the peak in md
@@ -43,21 +41,18 @@ void PeakRepresentationCross::setSlicePoint(const double &z) {
  * Move the peak position according the the transform.
  * @param peakTransform : Tranform to use.
  */
-void PeakRepresentationCross::movePosition(
-    Mantid::Geometry::PeakTransform_sptr peakTransform) {
+void PeakRepresentationCross::movePosition(Mantid::Geometry::PeakTransform_sptr peakTransform) {
   m_origin = peakTransform->transform(m_originalOrigin);
 }
 
-void PeakRepresentationCross::movePositionNonOrthogonal(
-    Mantid::Geometry::PeakTransform_sptr peakTransform,
-    NonOrthogonalAxis &info) {
+void PeakRepresentationCross::movePositionNonOrthogonal(Mantid::Geometry::PeakTransform_sptr peakTransform,
+                                                        NonOrthogonalAxis &info) {
 
   m_origin = m_originalOrigin; // reset to original peak point, then transform
                                // to skewed original peak point, then use
                                // peakTransform to take into account current
                                // dimensions
-  API::transformLookpointToWorkspaceCoord(
-      m_origin, info.fromHklToXyz, info.dimX, info.dimY, info.dimMissing);
+  API::transformLookpointToWorkspaceCoord(m_origin, info.fromHklToXyz, info.dimX, info.dimY, info.dimMissing);
   m_origin = peakTransform->transform(m_origin);
 }
 /**
@@ -92,20 +87,16 @@ void PeakRepresentationCross::setOccupancyIntoView(const double fraction) {
  * Gets the effective peak radius of the cross representation
  * @return the effective radis
  */
-double PeakRepresentationCross::getEffectiveRadius() const {
-  return m_effectiveRadius;
-}
+double PeakRepresentationCross::getEffectiveRadius() const { return m_effectiveRadius; }
 
-std::shared_ptr<PeakPrimitives> PeakRepresentationCross::getDrawingInformation(
-    PeakRepresentationViewInformation viewInformation) {
-  auto drawingInformation = std::make_shared<PeakPrimitivesCross>(
-      Mantid::Kernel::V3D() /*Peak Origin*/, 0.0 /*peakOpacityAtDistance*/,
-      0 /*peakHalfCrossWidth*/, 0 /*peakHalfCrossHeight*/, 0 /*peakLineWidth*/);
+std::shared_ptr<PeakPrimitives>
+PeakRepresentationCross::getDrawingInformation(PeakRepresentationViewInformation viewInformation) {
+  auto drawingInformation =
+      std::make_shared<PeakPrimitivesCross>(Mantid::Kernel::V3D() /*Peak Origin*/, 0.0 /*peakOpacityAtDistance*/,
+                                            0 /*peakHalfCrossWidth*/, 0 /*peakHalfCrossHeight*/, 0 /*peakLineWidth*/);
 
-  const auto halfCrossHeight =
-      static_cast<int>(viewInformation.windowHeight * m_crossViewFraction);
-  const auto halfCrossWidth =
-      static_cast<int>(viewInformation.windowWidth * m_crossViewFraction);
+  const auto halfCrossHeight = static_cast<int>(viewInformation.windowHeight * m_crossViewFraction);
+  const auto halfCrossWidth = static_cast<int>(viewInformation.windowWidth * m_crossViewFraction);
 
   drawingInformation->peakHalfCrossHeight = halfCrossHeight;
   drawingInformation->peakHalfCrossWidth = halfCrossWidth;
@@ -116,13 +107,11 @@ std::shared_ptr<PeakPrimitives> PeakRepresentationCross::getDrawingInformation(
   return drawingInformation;
 }
 
-void PeakRepresentationCross::doDraw(
-    QPainter &painter, PeakViewColor &foregroundColor,
-    PeakViewColor & /*backgroundColor*/,
-    std::shared_ptr<PeakPrimitives> drawingInformation,
-    PeakRepresentationViewInformation viewInformation) {
-  auto drawingInformationCross =
-      std::static_pointer_cast<PeakPrimitivesCross>(drawingInformation);
+void PeakRepresentationCross::doDraw(QPainter &painter, PeakViewColor &foregroundColor,
+                                     PeakViewColor & /*backgroundColor*/,
+                                     std::shared_ptr<PeakPrimitives> drawingInformation,
+                                     PeakRepresentationViewInformation viewInformation) {
+  auto drawingInformationCross = std::static_pointer_cast<PeakPrimitivesCross>(drawingInformation);
 
   // Setup the QPainter
   painter.setRenderHint(QPainter::Antialiasing);
@@ -144,10 +133,8 @@ void PeakRepresentationCross::doDraw(
   const auto xOriginWindow = viewInformation.xOriginWindow;
   const auto yOriginWindow = viewInformation.yOriginWindow;
 
-  QPoint bottomL(xOriginWindow - halfCrossWidth,
-                 yOriginWindow - halfCrossHeight);
-  QPoint bottomR(xOriginWindow + halfCrossWidth,
-                 yOriginWindow - halfCrossHeight);
+  QPoint bottomL(xOriginWindow - halfCrossWidth, yOriginWindow - halfCrossHeight);
+  QPoint bottomR(xOriginWindow + halfCrossWidth, yOriginWindow - halfCrossHeight);
   QPoint topL(xOriginWindow - halfCrossWidth, yOriginWindow + halfCrossHeight);
   QPoint topR(xOriginWindow + halfCrossWidth, yOriginWindow + halfCrossHeight);
 
@@ -156,9 +143,7 @@ void PeakRepresentationCross::doDraw(
   painter.end();
 }
 
-const Mantid::Kernel::V3D &PeakRepresentationCross::getOrigin() const {
-  return m_origin;
-}
+const Mantid::Kernel::V3D &PeakRepresentationCross::getOrigin() const { return m_origin; }
 
 void PeakRepresentationCross::showBackgroundRadius(const bool /*show*/) {
   // Do nothing

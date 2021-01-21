@@ -24,22 +24,18 @@ public:
   /// Constructor
   vtkDataSetToScaledDataSet();
   vtkDataSetToScaledDataSet(const vtkDataSetToScaledDataSet &) = delete;
-  vtkDataSetToScaledDataSet &
-  operator=(const vtkDataSetToScaledDataSet &) = delete;
+  vtkDataSetToScaledDataSet &operator=(const vtkDataSetToScaledDataSet &) = delete;
   /// Destructor
   virtual ~vtkDataSetToScaledDataSet();
   /// Apply the scaling and add metadata
-  vtkPointSet *execute(double xScale, double yScale, double zScale,
-                       vtkPointSet *inputData, vtkInformation *info);
+  vtkPointSet *execute(double xScale, double yScale, double zScale, vtkPointSet *inputData, vtkInformation *info);
   /// Apply the scaling and add metadata
-  vtkPointSet *execute(double xScale, double yScale, double zScale,
-                       vtkPointSet *inputData,
+  vtkPointSet *execute(double xScale, double yScale, double zScale, vtkPointSet *inputData,
                        vtkPointSet *outputData = nullptr);
 
 private:
   /// Set metadata on the dataset to handle scaling
-  void updateMetaData(double xScale, double yScale, double zScale,
-                      vtkPointSet *inputData, vtkPointSet *outputData);
+  void updateMetaData(double xScale, double yScale, double zScale, vtkPointSet *inputData, vtkPointSet *outputData);
 };
 
 } // namespace VATES

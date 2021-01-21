@@ -21,10 +21,8 @@ class PeaksViewer;
 class EXPORT_OPT_MANTIDQT_SLICEVIEWER PeaksWorkspaceWidget : public QWidget {
   Q_OBJECT
 public:
-  PeaksWorkspaceWidget(Mantid::API::IPeaksWorkspace_const_sptr ws,
-                       const std::string &coordinateSystem,
-                       PeakViewColor defaultForegroundPeakViewColor,
-                       PeakViewColor defaultBackgroundPeakViewColor,
+  PeaksWorkspaceWidget(Mantid::API::IPeaksWorkspace_const_sptr ws, const std::string &coordinateSystem,
+                       PeakViewColor defaultForegroundPeakViewColor, PeakViewColor defaultBackgroundPeakViewColor,
                        PeaksViewer *parent);
 
   std::set<QString> getShownColumns();
@@ -37,24 +35,17 @@ public:
   void setHidden(bool isHidden);
   void setSelectedPeak(int index);
   std::string getWSName() const;
-  void workspaceUpdate(const Mantid::API::IPeaksWorkspace_const_sptr &ws =
-                           Mantid::API::IPeaksWorkspace_const_sptr());
+  void workspaceUpdate(const Mantid::API::IPeaksWorkspace_const_sptr &ws = Mantid::API::IPeaksWorkspace_const_sptr());
   void exitClearPeaksMode();
   void exitAddPeaksMode();
 signals:
-  void peakColourChanged(Mantid::API::IPeaksWorkspace_const_sptr /*_t1*/,
-                         QColor /*_t2*/);
-  void peakColorchanged(Mantid::API::IPeaksWorkspace_const_sptr /*_t1*/,
-                        PeakViewColor /*_t2*/);
-  void backgroundColourChanged(Mantid::API::IPeaksWorkspace_const_sptr /*_t1*/,
-                               QColor /*_t2*/);
-  void backgroundColorChanged(Mantid::API::IPeaksWorkspace_const_sptr /*_t1*/,
-                              PeakViewColor /*_t2*/);
-  void backgroundRadiusShown(Mantid::API::IPeaksWorkspace_const_sptr /*_t1*/,
-                             bool /*_t2*/);
+  void peakColourChanged(Mantid::API::IPeaksWorkspace_const_sptr /*_t1*/, QColor /*_t2*/);
+  void peakColorchanged(Mantid::API::IPeaksWorkspace_const_sptr /*_t1*/, PeakViewColor /*_t2*/);
+  void backgroundColourChanged(Mantid::API::IPeaksWorkspace_const_sptr /*_t1*/, QColor /*_t2*/);
+  void backgroundColorChanged(Mantid::API::IPeaksWorkspace_const_sptr /*_t1*/, PeakViewColor /*_t2*/);
+  void backgroundRadiusShown(Mantid::API::IPeaksWorkspace_const_sptr /*_t1*/, bool /*_t2*/);
   void removeWorkspace(Mantid::API::IPeaksWorkspace_const_sptr /*_t1*/);
-  void hideInPlot(Mantid::API::IPeaksWorkspace_const_sptr /*_t1*/,
-                  bool /*_t2*/);
+  void hideInPlot(Mantid::API::IPeaksWorkspace_const_sptr /*_t1*/, bool /*_t2*/);
   void zoomToPeak(Mantid::API::IPeaksWorkspace_const_sptr /*_t1*/, int /*_t2*/);
 
 private:

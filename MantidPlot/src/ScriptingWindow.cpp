@@ -60,8 +60,7 @@ Mantid::Kernel::Logger g_log("ScriptingWindow");
  * @param parent :: The parent widget
  * @param flags :: Window flags passed to the base class
  */
-ScriptingWindow::ScriptingWindow(ScriptingEnv *env, bool capturePrint,
-                                 QWidget *parent, Qt::WindowFlags flags)
+ScriptingWindow::ScriptingWindow(ScriptingEnv *env, bool capturePrint, QWidget *parent, Qt::WindowFlags flags)
     : QMainWindow(parent, flags), m_acceptClose(false) {
   Q_UNUSED(capturePrint);
   setObjectName("MantidScriptWindow");
@@ -134,9 +133,7 @@ void ScriptingWindow::readSettings() {
   // If nothing, set the last directory to the Mantid scripts directory (if
   // present)
   if (lastdir.isEmpty()) {
-    lastdir = QString::fromStdString(
-        Mantid::Kernel::ConfigService::Instance().getString(
-            "pythonscripts.directory"));
+    lastdir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("pythonscripts.directory"));
   }
   m_manager->m_last_dir = lastdir;
   m_toggleProgress->setChecked(settings.value("ProgressArrow", true).toBool());
@@ -144,13 +141,11 @@ void ScriptingWindow::readSettings() {
   m_manager->m_globalZoomLevel = settings.value("ZoomLevel", 0).toInt();
   m_toggleFolding->setChecked(settings.value("CodeFolding", false).toBool());
   m_toggleWrapping->setChecked(settings.value("LineWrapping", false).toBool());
-  m_toggleWhitespace->setChecked(
-      settings.value("ShowWhitespace", false).toBool());
+  m_toggleWhitespace->setChecked(settings.value("ShowWhitespace", false).toBool());
 
   m_manager->m_showWhitespace = m_toggleWhitespace->isChecked();
   m_manager->m_replaceTabs = settings.value("ReplaceTabs", true).toBool();
-  m_manager->m_tabWhitespaceCount =
-      settings.value("TabWhitespaceCount", 4).toInt();
+  m_manager->m_tabWhitespaceCount = settings.value("TabWhitespaceCount", 4).toInt();
   m_manager->m_fontFamily = settings.value("ScriptFontFamily", "").toString();
   openPreviousTabs(settings.value("/PreviousFiles", "").toStringList());
 
@@ -195,9 +190,7 @@ void ScriptingWindow::showEvent(QShowEvent *event) {
  * @param filename :: The file name
  * @param newtab :: Do we want a new tab
  */
-void ScriptingWindow::open(const QString &filename, bool newtab) {
-  m_manager->open(newtab, filename);
-}
+void ScriptingWindow::open(const QString &filename, bool newtab) { m_manager->open(newtab, filename); }
 
 /**
  * Executes whatever is in the current tab. Primarily useful for automatically
@@ -402,41 +395,33 @@ void ScriptingWindow::openRecentScript(QAction *item) {
 /**
  * Ask the manager to execute all code based on the currently selected mode
  */
-void ScriptingWindow::executeAll() {
-  m_manager->executeAll(this->getExecutionMode());
-}
+void ScriptingWindow::executeAll() { m_manager->executeAll(this->getExecutionMode()); }
 
 /**
  * Ask the manager to execute the current selection based on the currently
  * selected mode
  */
-void ScriptingWindow::executeSelection() {
-  m_manager->executeSelection(this->getExecutionMode());
-}
+void ScriptingWindow::executeSelection() { m_manager->executeSelection(this->getExecutionMode()); }
 
 /**
  * Ask the manager to abort the script execution for the current script.
  */
 void ScriptingWindow::abortCurrent() { m_manager->abortCurrentScript(); }
 
-void ScriptingWindow::clearScriptVariables() {
-  m_manager->clearScriptVariables();
-}
+void ScriptingWindow::clearScriptVariables() { m_manager->clearScriptVariables(); }
 
 /**
  * Opens the Qt help windows for the scripting window.
  */
 void ScriptingWindow::showHelp() {
-  MantidQt::API::HelpWindow::showCustomInterface(nullptr,
-                                                 QString("Scripting Window"));
+  MantidQt::API::HelpWindow::showCustomInterface(nullptr, QString("Scripting Window"));
 }
 
 /**
  * Opens the Qt help windows for the Python API.
  */
 void ScriptingWindow::showPythonHelp() {
-  MantidQt::API::HelpWindow::showPage(
-      nullptr, QString("qthelp://org.mantidproject/doc/api/python/index.html"));
+  MantidQt::API::HelpWindow::showPage(nullptr, QString("qthelp://org.mantidproject/doc/api/python/index.html"));
 }
 
 /**
@@ -458,16 +443,13 @@ std::string ScriptingWindow::saveToProject(ApplicationWindow *app) {
  * @param app :: the current application window instance
  * @param fileVersion :: the file version used when saved
  */
-void ScriptingWindow::loadFromProject(const std::string &lines,
-                                      ApplicationWindow *app,
-                                      const int fileVersion) {
+void ScriptingWindow::loadFromProject(const std::string &lines, ApplicationWindow *app, const int fileVersion) {
   Q_UNUSED(fileVersion);
 
   MantidQt::API::TSVSerialiser sTSV(lines);
   QStringList files;
 
-  setWindowTitle("MantidPlot: " + app->scriptingEnv()->languageName() +
-                 " Window");
+  setWindowTitle("MantidPlot: " + app->scriptingEnv()->languageName() + " Window");
 
   auto scriptNames = sTSV.values("ScriptNames");
 
@@ -495,9 +477,7 @@ void ScriptingWindow::loadFromFileList(const QStringList &files) {
  * @param value If true a future close event will be accepted otherwise it will
  * be ignored
  */
-void ScriptingWindow::acceptCloseEvent(const bool value) {
-  m_acceptClose = value;
-}
+void ScriptingWindow::acceptCloseEvent(const bool value) { m_acceptClose = value; }
 
 //-------------------------------------------
 // Protected non-slot member functions
@@ -509,8 +489,7 @@ void ScriptingWindow::acceptCloseEvent(const bool value) {
 void ScriptingWindow::customEvent(QEvent *event) {
   if (!m_manager->isExecuting() && event->type() == SCRIPTING_CHANGE_EVENT) {
     ScriptingChangeEvent *sce = static_cast<ScriptingChangeEvent *>(event);
-    setWindowTitle("MantidPlot: " + sce->scriptingEnv()->languageName() +
-                   " Window");
+    setWindowTitle("MantidPlot: " + sce->scriptingEnv()->languageName() + " Window");
   }
 }
 
@@ -571,31 +550,26 @@ void ScriptingWindow::initMenus() {
   m_fileMenu = menuBar()->addMenu(tr("&File"));
 #ifdef SCRIPTING_DIALOG
   m_scripting_lang = new QAction(tr("Scripting &language"), this);
-  connect(m_scripting_lang, SIGNAL(triggered()), this,
-          SIGNAL(chooseScriptingLanguage()));
+  connect(m_scripting_lang, SIGNAL(triggered()), this, SIGNAL(chooseScriptingLanguage()));
 #endif
   connect(m_fileMenu, SIGNAL(aboutToShow()), this, SLOT(populateFileMenu()));
 
   m_editMenu = menuBar()->addMenu(tr("&Edit"));
   connect(m_editMenu, SIGNAL(aboutToShow()), this, SLOT(populateEditMenu()));
-  connect(m_manager, SIGNAL(executionStateChanged(bool)), this,
-          SLOT(setEditActionsDisabled(bool)));
+  connect(m_manager, SIGNAL(executionStateChanged(bool)), this, SLOT(setEditActionsDisabled(bool)));
 
   m_runMenu = menuBar()->addMenu(tr("E&xecute"));
   connect(m_runMenu, SIGNAL(aboutToShow()), this, SLOT(populateExecMenu()));
-  connect(m_manager, SIGNAL(executionStateChanged(bool)), this,
-          SLOT(setExecutionActionsDisabled(bool)));
+  connect(m_manager, SIGNAL(executionStateChanged(bool)), this, SLOT(setExecutionActionsDisabled(bool)));
   m_execModeMenu = new QMenu("Mode", this);
 
   m_windowMenu = menuBar()->addMenu(tr("&Window"));
-  connect(m_windowMenu, SIGNAL(aboutToShow()), this,
-          SLOT(populateWindowMenu()));
+  connect(m_windowMenu, SIGNAL(aboutToShow()), this, SLOT(populateWindowMenu()));
 
   m_helpMenu = menuBar()->addMenu(tr("&Help"));
   connect(m_windowMenu, SIGNAL(aboutToShow()), this, SLOT(populateHelpMenu()));
 
-  connect(m_manager, SIGNAL(tabCountChanged(int)), this,
-          SLOT(setMenuStates(int)));
+  connect(m_manager, SIGNAL(tabCountChanged(int)), this, SLOT(setMenuStates(int)));
 
   // The menu items must be populated for the shortcuts to work
   populateFileMenu();
@@ -603,16 +577,11 @@ void ScriptingWindow::initMenus() {
   populateExecMenu();
   populateWindowMenu();
   populateHelpMenu();
-  connect(m_manager, SIGNAL(tabCountChanged(int)), this,
-          SLOT(populateFileMenu()));
-  connect(m_manager, SIGNAL(tabCountChanged(int)), this,
-          SLOT(populateEditMenu()));
-  connect(m_manager, SIGNAL(tabCountChanged(int)), this,
-          SLOT(populateExecMenu()));
-  connect(m_manager, SIGNAL(tabCountChanged(int)), this,
-          SLOT(populateWindowMenu()));
-  connect(m_manager, SIGNAL(tabCountChanged(int)), this,
-          SLOT(populateHelpMenu()));
+  connect(m_manager, SIGNAL(tabCountChanged(int)), this, SLOT(populateFileMenu()));
+  connect(m_manager, SIGNAL(tabCountChanged(int)), this, SLOT(populateEditMenu()));
+  connect(m_manager, SIGNAL(tabCountChanged(int)), this, SLOT(populateExecMenu()));
+  connect(m_manager, SIGNAL(tabCountChanged(int)), this, SLOT(populateWindowMenu()));
+  connect(m_manager, SIGNAL(tabCountChanged(int)), this, SLOT(populateHelpMenu()));
 }
 
 /**
@@ -635,8 +604,7 @@ void ScriptingWindow::initFileMenuActions() {
   m_newTab->setShortcut(tr("Ctrl+N"));
 
   m_openInCurTab = new QAction(tr("&Open"), this);
-  connect(m_openInCurTab, SIGNAL(triggered()), m_manager,
-          SLOT(openInCurrentTab()));
+  connect(m_openInCurTab, SIGNAL(triggered()), m_manager, SLOT(openInCurrentTab()));
   m_openInCurTab->setShortcut(tr("Ctrl+O"));
 
   m_openInNewTab = new QAction(tr("&Open in New Tab"), this);
@@ -660,10 +628,8 @@ void ScriptingWindow::initFileMenuActions() {
   m_closeTab->setShortcut(tr("Ctrl+W"));
 
   m_recentScripts = new QMenu(tr("&Recent Scripts"), this);
-  connect(m_recentScripts, SIGNAL(aboutToShow()), this,
-          SLOT(populateRecentScriptsMenu()));
-  connect(m_recentScripts, SIGNAL(triggered(QAction *)), this,
-          SLOT(openRecentScript(QAction *)));
+  connect(m_recentScripts, SIGNAL(aboutToShow()), this, SLOT(populateRecentScriptsMenu()));
+  connect(m_recentScripts, SIGNAL(triggered(QAction *)), this, SLOT(openRecentScript(QAction *)));
 }
 
 /**
@@ -671,14 +637,12 @@ void ScriptingWindow::initFileMenuActions() {
 void ScriptingWindow::initEditMenuActions() {
   m_undo = new QAction(tr("&Undo"), this);
   connect(m_undo, SIGNAL(triggered()), m_manager, SLOT(undo()));
-  connect(m_manager, SIGNAL(undoAvailable(bool)), m_undo,
-          SLOT(setEnabled(bool)));
+  connect(m_manager, SIGNAL(undoAvailable(bool)), m_undo, SLOT(setEnabled(bool)));
   m_undo->setShortcut(QKeySequence::Undo);
 
   m_redo = new QAction(tr("&Redo"), this);
   connect(m_redo, SIGNAL(triggered()), m_manager, SLOT(redo()));
-  connect(m_manager, SIGNAL(redoAvailable(bool)), m_redo,
-          SLOT(setEnabled(bool)));
+  connect(m_manager, SIGNAL(redoAvailable(bool)), m_redo, SLOT(setEnabled(bool)));
   m_redo->setShortcut(QKeySequence::Redo);
 
   m_cut = new QAction(tr("C&ut"), this);
@@ -708,8 +672,7 @@ void ScriptingWindow::initEditMenuActions() {
   connect(m_spacesToTabs, SIGNAL(triggered()), m_manager, SLOT(spacesToTabs()));
 
   m_find = new QAction(tr("&Find/Replace"), this);
-  connect(m_find, SIGNAL(triggered()), m_manager,
-          SLOT(showFindReplaceDialog()));
+  connect(m_find, SIGNAL(triggered()), m_manager, SLOT(showFindReplaceDialog()));
   m_find->setShortcut(QKeySequence::Find);
 }
 
@@ -727,8 +690,7 @@ void ScriptingWindow::initExecMenuActions() {
   m_execAll = new QAction(tr("Execute &All"), this);
   connect(m_execAll, SIGNAL(triggered()), this, SLOT(executeAll()));
   shortcuts.clear();
-  shortcuts << Qt::CTRL + Qt::SHIFT + Qt::Key_Return
-            << Qt::CTRL + Qt::SHIFT + Qt::Key_Enter;
+  shortcuts << Qt::CTRL + Qt::SHIFT + Qt::Key_Return << Qt::CTRL + Qt::SHIFT + Qt::Key_Enter;
   m_execAll->setShortcuts(shortcuts);
 
   m_abortCurrent = new QAction(tr("A&bort"), this);
@@ -739,10 +701,8 @@ void ScriptingWindow::initExecMenuActions() {
   setAbortActionsDisabled(false);
 
   m_clearScriptVars = new QAction(tr("&Clear Variables"), this);
-  connect(m_clearScriptVars, SIGNAL(triggered()), this,
-          SLOT(clearScriptVariables()));
-  m_clearScriptVars->setToolTip(
-      "Clear all variable definitions in this script");
+  connect(m_clearScriptVars, SIGNAL(triggered()), this, SLOT(clearScriptVariables()));
+  m_clearScriptVars->setToolTip("Clear all variable definitions in this script");
 
   m_execParallel = new QAction("Asynchronous", this);
   m_execParallel->setCheckable(true);
@@ -761,8 +721,7 @@ void ScriptingWindow::initExecMenuActions() {
 void ScriptingWindow::initWindowMenuActions() {
   m_alwaysOnTop = new QAction(tr("Always on &Top"), this);
   m_alwaysOnTop->setCheckable(true);
-  connect(m_alwaysOnTop, SIGNAL(toggled(bool)), this,
-          SLOT(updateWindowFlags()));
+  connect(m_alwaysOnTop, SIGNAL(toggled(bool)), this, SLOT(updateWindowFlags()));
 
   m_hide = new QAction(tr("&Hide"), this);
 #ifdef __APPLE__
@@ -794,30 +753,25 @@ void ScriptingWindow::initWindowMenuActions() {
   // Toggle the progress arrow
   m_toggleProgress = new QAction(tr("&Progress Reporting"), this);
   m_toggleProgress->setCheckable(true);
-  connect(m_toggleProgress, SIGNAL(toggled(bool)), m_manager,
-          SLOT(toggleProgressReporting(bool)));
+  connect(m_toggleProgress, SIGNAL(toggled(bool)), m_manager, SLOT(toggleProgressReporting(bool)));
 
   // Toggle code folding
   m_toggleFolding = new QAction(tr("Code &Folding"), this);
   m_toggleFolding->setCheckable(true);
-  connect(m_toggleFolding, SIGNAL(toggled(bool)), m_manager,
-          SLOT(toggleCodeFolding(bool)));
+  connect(m_toggleFolding, SIGNAL(toggled(bool)), m_manager, SLOT(toggleCodeFolding(bool)));
 
   m_toggleWrapping = new QAction(tr("Line &Wrapping"), this);
   m_toggleWrapping->setCheckable(true);
-  connect(m_toggleWrapping, SIGNAL(toggled(bool)), m_manager,
-          SLOT(toggleLineWrapping(bool)));
+  connect(m_toggleWrapping, SIGNAL(toggled(bool)), m_manager, SLOT(toggleLineWrapping(bool)));
 
   // Toggle the whitespace arrow
   m_toggleWhitespace = new QAction(tr("&Show Whitespace"), this);
   m_toggleWhitespace->setCheckable(true);
-  connect(m_toggleWhitespace, SIGNAL(toggled(bool)), m_manager,
-          SLOT(toggleWhitespace(bool)));
+  connect(m_toggleWhitespace, SIGNAL(toggled(bool)), m_manager, SLOT(toggleWhitespace(bool)));
 
   // Open Config Tabs dialog
   m_openConfigTabs = new QAction(tr("Configure Tabs"), this);
-  connect(m_openConfigTabs, SIGNAL(triggered()), m_manager,
-          SLOT(openConfigTabs()));
+  connect(m_openConfigTabs, SIGNAL(triggered()), m_manager, SLOT(openConfigTabs()));
 }
 
 /**
@@ -834,9 +788,7 @@ void ScriptingWindow::initHelpMenuActions() {
 }
 
 /// Should we enable abort functionality
-bool ScriptingWindow::shouldEnableAbort() const {
-  return m_manager->scriptingEnv()->supportsAbortRequests();
-}
+bool ScriptingWindow::shouldEnableAbort() const { return m_manager->scriptingEnv()->supportsAbortRequests(); }
 
 /**
  * Opens a script providing a copy is not already open. On exit the
@@ -896,6 +848,4 @@ Script::ExecutionMode ScriptingWindow::getExecutionMode() const {
     return Script::Serialised;
 }
 
-const Script &ScriptingWindow::getCurrentScriptRunner() {
-  return m_manager->currentInterpreter()->getRunner();
-}
+const Script &ScriptingWindow::getCurrentScriptRunner() { return m_manager->currentInterpreter()->getRunner(); }

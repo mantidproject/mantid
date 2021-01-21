@@ -18,12 +18,10 @@ class QLineEdit;
  * method which creates a specific editor. The underlying type of the edited
  * property must be string.
  */
-class StringDialogEditorFactory
-    : public QtAbstractEditorFactory<QtStringPropertyManager> {
+class StringDialogEditorFactory : public QtAbstractEditorFactory<QtStringPropertyManager> {
   Q_OBJECT
 public:
-  StringDialogEditorFactory(QObject *parent = nullptr)
-      : QtAbstractEditorFactory<QtStringPropertyManager>(parent) {}
+  StringDialogEditorFactory(QObject *parent = nullptr) : QtAbstractEditorFactory<QtStringPropertyManager>(parent) {}
 
 protected:
   void connectPropertyManager(QtStringPropertyManager *manager) override;

@@ -37,8 +37,8 @@ class RefIVConnections;
 class EXPORT_OPT_MANTIDQT_REFDETECTORVIEWER RefImageView : public QMainWindow {
 public:
   /// Construct an RefImageView to display data from the specified data source
-  RefImageView(SpectrumView::SpectrumDataSource_sptr dataSource, int peakMin,
-               int peakMax, int backMin, int backMax, int tofMin, int tofMax);
+  RefImageView(SpectrumView::SpectrumDataSource_sptr dataSource, int peakMin, int peakMax, int backMin, int backMax,
+               int tofMin, int tofMax);
 
   ~RefImageView() override;
 

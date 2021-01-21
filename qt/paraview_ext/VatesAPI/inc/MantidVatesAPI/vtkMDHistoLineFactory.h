@@ -38,16 +38,13 @@ public:
   ~vtkMDHistoLineFactory() override;
 
   /// Factory Method.
-  vtkSmartPointer<vtkDataSet>
-  create(ProgressAction &progressUpdating) const override;
+  vtkSmartPointer<vtkDataSet> create(ProgressAction &progressUpdating) const override;
 
   void initialize(const Mantid::API::Workspace_sptr &workspace) override;
 
   using Column = std::vector<UnstructuredPoint>;
 
-  std::string getFactoryTypeName() const override {
-    return "vtkMDHistoLineFactory";
-  }
+  std::string getFactoryTypeName() const override { return "vtkMDHistoLineFactory"; }
 
 protected:
   void validate() const override;

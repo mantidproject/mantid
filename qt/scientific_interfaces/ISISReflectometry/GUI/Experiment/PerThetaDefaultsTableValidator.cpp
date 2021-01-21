@@ -13,39 +13,34 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
-auto PerThetaDefaultsTableValidator::
-operator()(ContentType const &perThetaDefaultsContent,
-           double thetaTolerance) const -> ResultType {
+auto PerThetaDefaultsTableValidator::operator()(ContentType const &perThetaDefaultsContent, double thetaTolerance) const
+    -> ResultType {
 
   auto defaults = std::vector<PerThetaDefaults>();
   auto validationErrors = std::vector<InvalidDefaultsError>();
-  validateAllPerThetaDefaultRows(perThetaDefaultsContent, defaults,
-                                 validationErrors);
+  validateAllPerThetaDefaultRows(perThetaDefaultsContent, defaults, validationErrors);
   auto thetaValidationResult = validateThetaValues(defaults, thetaTolerance);
   if (thetaValidationResult.isValid()) {
     if (validationErrors.empty())
       return ResultType(std::move(defaults));
     else
-      return ResultType(PerThetaDefaultsTableValidationError(
-          std::move(validationErrors), boost::none));
+      return ResultType(PerThetaDefaultsTableValidationError(std::move(validationErrors), boost::none));
   } else {
-    appendThetaErrorForAllRows(validationErrors,
-                               perThetaDefaultsContent.size());
-    return ResultType(PerThetaDefaultsTableValidationError(
-        std::move(validationErrors), thetaValidationResult.assertError()));
+    appendThetaErrorForAllRows(validationErrors, perThetaDefaultsContent.size());
+    return ResultType(
+        PerThetaDefaultsTableValidationError(std::move(validationErrors), thetaValidationResult.assertError()));
   }
 }
 
 ValidationResult<boost::blank, ThetaValuesValidationError>
-PerThetaDefaultsTableValidator::validateThetaValues(
-    std::vector<PerThetaDefaults> perThetaDefaults, double tolerance) const {
+PerThetaDefaultsTableValidator::validateThetaValues(std::vector<PerThetaDefaults> perThetaDefaults,
+                                                    double tolerance) const {
   using Result = ValidationResult<boost::blank, ThetaValuesValidationError>;
   auto ok = Result(boost::blank());
   if (!perThetaDefaults.empty()) {
     auto const wildcardCount = countWildcards(perThetaDefaults);
     if (wildcardCount <= 1) {
-      if (hasUniqueThetas(std::move(perThetaDefaults), wildcardCount,
-                          tolerance))
+      if (hasUniqueThetas(std::move(perThetaDefaults), wildcardCount, tolerance))
         return ok;
       else
         return Result(ThetaValuesValidationError::NonUniqueTheta);
@@ -58,8 +53,7 @@ PerThetaDefaultsTableValidator::validateThetaValues(
 }
 
 void PerThetaDefaultsTableValidator::validateAllPerThetaDefaultRows(
-    ContentType const &perThetaDefaultsContent,
-    std::vector<PerThetaDefaults> &perThetaDefaults,
+    ContentType const &perThetaDefaultsContent, std::vector<PerThetaDefaults> &perThetaDefaults,
     std::vector<InvalidDefaultsError> &validationErrors) const {
   auto row = 0;
   for (auto const &rowTemplateContent : perThetaDefaultsContent) {
@@ -72,43 +66,35 @@ void PerThetaDefaultsTableValidator::validateAllPerThetaDefaultRows(
   }
 }
 
-bool PerThetaDefaultsTableValidator::hasUniqueThetas(
-    std::vector<PerThetaDefaults> perThetaDefaults, int wildcardCount,
-    double tolerance) const {
+bool PerThetaDefaultsTableValidator::hasUniqueThetas(std::vector<PerThetaDefaults> perThetaDefaults, int wildcardCount,
+                                                     double tolerance) const {
   if (perThetaDefaults.size() < 2)
     return true;
 
   sortInPlaceWildcardsFirstThenByTheta(perThetaDefaults);
-  auto thetasWithinTolerance =
-      [tolerance](PerThetaDefaults const &lhs,
-                  PerThetaDefaults const &rhs) -> bool {
-    double const difference =
-        lhs.thetaOrWildcard().get() - rhs.thetaOrWildcard().get();
+  auto thetasWithinTolerance = [tolerance](PerThetaDefaults const &lhs, PerThetaDefaults const &rhs) -> bool {
+    double const difference = lhs.thetaOrWildcard().get() - rhs.thetaOrWildcard().get();
     return std::abs(difference) < tolerance;
   };
 
   bool foundDuplicate = false;
-  for (auto iter = perThetaDefaults.cbegin() + wildcardCount + 1;
-       !foundDuplicate && iter != perThetaDefaults.cend(); ++iter) {
+  for (auto iter = perThetaDefaults.cbegin() + wildcardCount + 1; !foundDuplicate && iter != perThetaDefaults.cend();
+       ++iter) {
     foundDuplicate = thetasWithinTolerance(*iter, *prev(iter));
   }
 
   return !foundDuplicate;
 }
 
-int PerThetaDefaultsTableValidator::countWildcards(
-    std::vector<PerThetaDefaults> const &perThetaDefaults) const {
+int PerThetaDefaultsTableValidator::countWildcards(std::vector<PerThetaDefaults> const &perThetaDefaults) const {
   return static_cast<int>(
       std::count_if(perThetaDefaults.cbegin(), perThetaDefaults.cend(),
-                    [](PerThetaDefaults const &defaults) -> bool {
-                      return defaults.isWildcard();
-                    }));
+                    [](PerThetaDefaults const &defaults) -> bool { return defaults.isWildcard(); }));
 }
 
 void PerThetaDefaultsTableValidator::sortInPlaceWildcardsFirstThenByTheta(
     std::vector<PerThetaDefaults> &perThetaDefaults) const {
-  auto thetaLessThan = [](PerThetaDefaults const &lhs,
-                          PerThetaDefaults const &rhs) -> bool {
+  auto thetaLessThan = [](PerThetaDefaults const &lhs, PerThetaDefaults const &rhs) -> bool {
     if (lhs.isWildcard())
       return true;
     else if (rhs.isWildcard())
@@ -119,9 +105,8 @@ void PerThetaDefaultsTableValidator::sortInPlaceWildcardsFirstThenByTheta(
   std::sort(perThetaDefaults.begin(), perThetaDefaults.end(), thetaLessThan);
 }
 
-void PerThetaDefaultsTableValidator::appendThetaErrorForAllRows(
-    std::vector<InvalidDefaultsError> &validationErrors,
-    std::size_t rowCount) const {
+void PerThetaDefaultsTableValidator::appendThetaErrorForAllRows(std::vector<InvalidDefaultsError> &validationErrors,
+                                                                std::size_t rowCount) const {
   for (auto row = 0u; row < rowCount; ++row)
     validationErrors.emplace_back(row, std::vector<int>({0}));
 }

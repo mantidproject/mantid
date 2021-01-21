@@ -29,8 +29,7 @@ const std::string pointDetectorAnalysis = "PointDetectorAnalysis";
  * @param currentComponent : Some component in the tree
  * @return : Parent component.
  */
-IComponent_const_sptr
-getParentComponent(IComponent_const_sptr &currentComponent) {
+IComponent_const_sptr getParentComponent(IComponent_const_sptr &currentComponent) {
   if (IComponent_const_sptr parent = currentComponent->getParent()) {
     if (!dynamic_cast<Instrument *>(const_cast<IComponent *>(parent.get()))) {
       currentComponent = parent;
@@ -63,17 +62,13 @@ DECLARE_ALGORITHM(SpecularReflectionPositionCorrect)
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string SpecularReflectionPositionCorrect::name() const {
-  return "SpecularReflectionPositionCorrect";
-}
+const std::string SpecularReflectionPositionCorrect::name() const { return "SpecularReflectionPositionCorrect"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int SpecularReflectionPositionCorrect::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string SpecularReflectionPositionCorrect::category() const {
-  return "Reflectometry";
-}
+const std::string SpecularReflectionPositionCorrect::category() const { return "Reflectometry"; }
 
 //----------------------------------------------------------------------------------------------
 
@@ -84,19 +79,16 @@ void SpecularReflectionPositionCorrect::init() {
   auto thetaValidator = std::make_shared<CompositeValidator>();
   thetaValidator->add(std::make_shared<MandatoryValidator<double>>());
   thetaValidator->add(std::make_shared<BoundedValidator<double>>(0, 90, true));
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input),
                   "An input workspace to correct.");
 
   declareProperty(
-      std::make_unique<PropertyWithValue<double>>(
-          "TwoThetaIn", Mantid::EMPTY_DBL(), thetaValidator, Direction::Input),
+      std::make_unique<PropertyWithValue<double>>("TwoThetaIn", Mantid::EMPTY_DBL(), thetaValidator, Direction::Input),
       "Input two theta angle in degrees.");
 
   this->initCommonProperties();
 
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }
 
@@ -117,8 +109,7 @@ void SpecularReflectionPositionCorrect::exec() {
   const double twoThetaIn = this->getProperty("TwoThetaIn");
 
   auto instrument = outWS->getInstrument();
-  IComponent_const_sptr detector =
-      this->getDetectorComponent(outWS, analysisMode == pointDetectorAnalysis);
+  IComponent_const_sptr detector = this->getDetectorComponent(outWS, analysisMode == pointDetectorAnalysis);
   IComponent_const_sptr sample = this->getSurfaceSampleComponent(instrument);
 
   correctPosition(outWS, twoThetaIn, sample, detector);
@@ -135,18 +126,16 @@ void SpecularReflectionPositionCorrect::exec() {
  * @param acrossOffset : Across offset to apply
  * @param detectorPosition: Actual detector or detector group position.
  */
-void SpecularReflectionPositionCorrect::moveDetectors(
-    const API::MatrixWorkspace_sptr &toCorrect, IComponent_const_sptr detector,
-    const IComponent_const_sptr &sample, const double &upOffset,
-    const double &acrossOffset, const V3D &detectorPosition) {
+void SpecularReflectionPositionCorrect::moveDetectors(const API::MatrixWorkspace_sptr &toCorrect,
+                                                      IComponent_const_sptr detector,
+                                                      const IComponent_const_sptr &sample, const double &upOffset,
+                                                      const double &acrossOffset, const V3D &detectorPosition) {
   auto instrument = toCorrect->getInstrument();
   const V3D samplePosition = sample->getPos();
   auto referenceFrame = instrument->getReferenceFrame();
-  if (auto groupDetector = std::dynamic_pointer_cast<const DetectorGroup>(
-          detector)) // Do we have a group of detectors
+  if (auto groupDetector = std::dynamic_pointer_cast<const DetectorGroup>(detector)) // Do we have a group of detectors
   {
-    const std::vector<IDetector_const_sptr> detectors =
-        groupDetector->getDetectors();
+    const std::vector<IDetector_const_sptr> detectors = groupDetector->getDetectors();
     const bool commonParent = hasCommonParent(detectors);
     if (commonParent) {
       /*
@@ -164,8 +153,7 @@ void SpecularReflectionPositionCorrect::moveDetectors(
       }
     }
   } else {
-    auto moveComponentAlg =
-        this->createChildAlgorithm("MoveInstrumentComponent");
+    auto moveComponentAlg = this->createChildAlgorithm("MoveInstrumentComponent");
     moveComponentAlg->initialize();
     moveComponentAlg->setProperty("Workspace", toCorrect);
     IComponent_const_sptr root = getParentComponent(detector);
@@ -173,21 +161,15 @@ void SpecularReflectionPositionCorrect::moveDetectors(
     moveComponentAlg->setProperty("ComponentName", componentName);
     moveComponentAlg->setProperty("RelativePosition", false);
     // Movements
-    moveComponentAlg->setProperty(
-        referenceFrame->pointingAlongBeamAxis(),
-        detectorPosition.scalar_prod(referenceFrame->vecPointingAlongBeam()));
-    moveComponentAlg->setProperty(referenceFrame->pointingHorizontalAxis(),
-                                  acrossOffset);
-    const double detectorVerticalPosition =
-        detectorPosition.scalar_prod(referenceFrame->vecPointingUp());
-    const double rootVerticalPosition =
-        root->getPos().scalar_prod(referenceFrame->vecPointingUp());
+    moveComponentAlg->setProperty(referenceFrame->pointingAlongBeamAxis(),
+                                  detectorPosition.scalar_prod(referenceFrame->vecPointingAlongBeam()));
+    moveComponentAlg->setProperty(referenceFrame->pointingHorizontalAxis(), acrossOffset);
+    const double detectorVerticalPosition = detectorPosition.scalar_prod(referenceFrame->vecPointingUp());
+    const double rootVerticalPosition = root->getPos().scalar_prod(referenceFrame->vecPointingUp());
 
     const double dm = rootVerticalPosition - detectorVerticalPosition;
-    moveComponentAlg->setProperty(
-        referenceFrame->pointingUpAxis(),
-        samplePosition.scalar_prod(referenceFrame->vecPointingUp()) + upOffset +
-            dm);
+    moveComponentAlg->setProperty(referenceFrame->pointingUpAxis(),
+                                  samplePosition.scalar_prod(referenceFrame->vecPointingUp()) + upOffset + dm);
     // Execute the movement.
     moveComponentAlg->execute();
   }
@@ -200,10 +182,10 @@ void SpecularReflectionPositionCorrect::moveDetectors(
  * @param sample : Pointer to the sample
  * @param detector : Pointer to a given detector
  */
-void SpecularReflectionPositionCorrect::correctPosition(
-    const API::MatrixWorkspace_sptr &toCorrect, const double &twoThetaInDeg,
-    const IComponent_const_sptr &sample,
-    const IComponent_const_sptr &detector) {
+void SpecularReflectionPositionCorrect::correctPosition(const API::MatrixWorkspace_sptr &toCorrect,
+                                                        const double &twoThetaInDeg,
+                                                        const IComponent_const_sptr &sample,
+                                                        const IComponent_const_sptr &detector) {
 
   auto instrument = toCorrect->getInstrument();
 
@@ -219,17 +201,13 @@ void SpecularReflectionPositionCorrect::correctPosition(
 
   double acrossOffset = 0;
 
-  double beamOffset = sampleToDetector.scalar_prod(
-      referenceFrame
-          ->vecPointingAlongBeam()); // We just recalculate beam offset.
+  double beamOffset =
+      sampleToDetector.scalar_prod(referenceFrame->vecPointingAlongBeam()); // We just recalculate beam offset.
 
-  double upOffset =
-      (beamOffset *
-       std::tan(0.5 * twoThetaInRad)); // We only correct vertical position
+  double upOffset = (beamOffset * std::tan(0.5 * twoThetaInRad)); // We only correct vertical position
 
   // Apply the movements.
-  moveDetectors(toCorrect, detector, sample, upOffset, acrossOffset,
-                detector->getPos());
+  moveDetectors(toCorrect, detector, sample, upOffset, acrossOffset, detector->getPos());
 }
 
 } // namespace Reflectometry

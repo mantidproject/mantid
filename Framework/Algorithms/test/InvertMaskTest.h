@@ -31,15 +31,12 @@ public:
     alg.initialize();
 
     // 1. Create Mask Workspaces
-    Mantid::Geometry::Instrument_sptr inst1 =
-        ComponentCreationHelper::createTestInstrumentCylindrical(5);
-    Mantid::DataObjects::MaskWorkspace_sptr ws1(
-        new Mantid::DataObjects::MaskWorkspace(inst1));
+    Mantid::Geometry::Instrument_sptr inst1 = ComponentCreationHelper::createTestInstrumentCylindrical(5);
+    Mantid::DataObjects::MaskWorkspace_sptr ws1(new Mantid::DataObjects::MaskWorkspace(inst1));
     // ws1->setName("OriginalMask");
     AnalysisDataService::Instance().addOrReplace("OriginalMask", ws1);
 
-    std::cout << "Input MaskWorkspace Size = " << ws1->getNumberHistograms()
-              << '\n';
+    std::cout << "Input MaskWorkspace Size = " << ws1->getNumberHistograms() << '\n';
 
     ws1->setValue(1, 0);
     ws1->setValue(3, 1);
@@ -57,9 +54,7 @@ public:
 
     // 3. Get result
     DataObjects::MaskWorkspace_sptr ws4;
-    ws4 =
-        AnalysisDataService::Instance().retrieveWS<DataObjects::MaskWorkspace>(
-            ws4name);
+    ws4 = AnalysisDataService::Instance().retrieveWS<DataObjects::MaskWorkspace>(ws4name);
     TS_ASSERT(ws4);
     if (!ws4)
       return;

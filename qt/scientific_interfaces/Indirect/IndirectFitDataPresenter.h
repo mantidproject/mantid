@@ -24,13 +24,10 @@ namespace CustomInterfaces {
 namespace IDA {
 using namespace MantidWidgets;
 
-class MANTIDQT_INDIRECT_DLL IndirectFitDataPresenter
-    : public QObject,
-      public AnalysisDataServiceObserver {
+class MANTIDQT_INDIRECT_DLL IndirectFitDataPresenter : public QObject, public AnalysisDataServiceObserver {
   Q_OBJECT
 public:
-  IndirectFitDataPresenter(IndirectFittingModel *model,
-                           IIndirectFitDataView *view);
+  IndirectFitDataPresenter(IndirectFittingModel *model, IIndirectFitDataView *view);
   ~IndirectFitDataPresenter();
 
   void setSampleWSSuffices(const QStringList &suffices);
@@ -42,22 +39,17 @@ public:
   void setMultiInputResolutionWSSuffixes();
   void setMultiInputResolutionFBSuffixes();
 
-  void setStartX(double startX, TableDatasetIndex dataIndex,
-                 WorkspaceIndex spectrumIndex);
+  void setStartX(double startX, TableDatasetIndex dataIndex, WorkspaceIndex spectrumIndex);
   void setStartX(double startX, TableDatasetIndex dataIndex);
-  void setEndX(double endX, TableDatasetIndex dataIndex,
-               WorkspaceIndex spectrumIndex);
+  void setEndX(double endX, TableDatasetIndex dataIndex, WorkspaceIndex spectrumIndex);
   void setEndX(double endX, TableDatasetIndex dataIndex);
-  void setExclude(const std::string &exclude, TableDatasetIndex dataIndex,
-                  WorkspaceIndex spectrumIndex);
+  void setExclude(const std::string &exclude, TableDatasetIndex dataIndex, WorkspaceIndex spectrumIndex);
 
   void loadSettings(const QSettings &settings);
   UserInputValidator &validate(UserInputValidator &validator);
 
-  void replaceHandle(const std::string &workspaceName,
-                     const Workspace_sptr &workspace) override;
-  DataForParameterEstimationCollection
-  getDataForParameterEstimation(const EstimationDataSelector &selector) const;
+  void replaceHandle(const std::string &workspaceName, const Workspace_sptr &workspace) override;
+  DataForParameterEstimationCollection getDataForParameterEstimation(const EstimationDataSelector &selector) const;
 
 public slots:
   void updateSpectraInTable(TableDatasetIndex dataIndex);
@@ -80,17 +72,15 @@ signals:
   void startXChanged(double);
   void endXChanged(double, TableDatasetIndex, WorkspaceIndex);
   void endXChanged(double);
-  void excludeRegionChanged(const std::string &, TableDatasetIndex,
-                            WorkspaceIndex);
+  void excludeRegionChanged(const std::string &, TableDatasetIndex, WorkspaceIndex);
   void multipleDataViewSelected();
   void singleDataViewSelected();
   void requestedAddWorkspaceDialog();
   void updateAvailableFitTypes();
 
 protected:
-  IndirectFitDataPresenter(
-      IndirectFittingModel *model, IIndirectFitDataView *view,
-      std::unique_ptr<IndirectDataTablePresenter> tablePresenter);
+  IndirectFitDataPresenter(IndirectFittingModel *model, IIndirectFitDataView *view,
+                           std::unique_ptr<IndirectDataTablePresenter> tablePresenter);
   IIndirectFitDataView const *getView() const;
   void addData(IAddWorkspaceDialog const *dialog);
   virtual void addDataToModel(IAddWorkspaceDialog const *dialog);
@@ -104,8 +94,7 @@ private slots:
   void addData();
 
 private:
-  virtual std::unique_ptr<IAddWorkspaceDialog>
-  getAddWorkspaceDialog(QWidget *parent) const;
+  virtual std::unique_ptr<IAddWorkspaceDialog> getAddWorkspaceDialog(QWidget *parent) const;
   void updateDataInTable(TableDatasetIndex dataIndex);
   void selectReplacedWorkspace(const QString &workspaceName);
 

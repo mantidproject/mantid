@@ -40,10 +40,8 @@ namespace VATES {
   done.
   @param maxDepth : Maximum depth to search to
   */
-vtkMDHexFactory::vtkMDHexFactory(const VisualNormalization normalizationOption,
-                                 const size_t maxDepth)
-    : m_normalizationOption(normalizationOption), m_maxDepth(maxDepth),
-      slice(false), m_time(0) {}
+vtkMDHexFactory::vtkMDHexFactory(const VisualNormalization normalizationOption, const size_t maxDepth)
+    : m_normalizationOption(normalizationOption), m_maxDepth(maxDepth), slice(false), m_time(0) {}
 
 /// Destructor
 vtkMDHexFactory::~vtkMDHexFactory() {}
@@ -56,9 +54,7 @@ vtkMDHexFactory::~vtkMDHexFactory() {}
  * @return a fully constructed vtkUnstructuredGrid containing geometric and
  *scalar data.
  */
-template <typename MDE, size_t nd>
-void vtkMDHexFactory::doCreate(
-    typename MDEventWorkspace<MDE, nd>::sptr ws) const {
+template <typename MDE, size_t nd> void vtkMDHexFactory::doCreate(typename MDEventWorkspace<MDE, nd>::sptr ws) const {
   bool VERBOSE = true;
   CPUTimer tim;
   // Acquire a scoped read-only lock to the workspace (prevent segfault from
@@ -69,8 +65,7 @@ void vtkMDHexFactory::doCreate(
   // function
   std::vector<API::IMDNode *> boxes;
   if (this->slice)
-    ws->getBox()->getBoxes(boxes, m_maxDepth, true,
-                           this->sliceImplicitFunction.get());
+    ws->getBox()->getBoxes(boxes, m_maxDepth, true, this->sliceImplicitFunction.get());
   else
     ws->getBox()->getBoxes(boxes, m_maxDepth, true);
 
@@ -78,8 +73,7 @@ void vtkMDHexFactory::doCreate(
   vtkIdType imageSizeActual = 0;
 
   if (VERBOSE)
-    std::cout << tim << " to retrieve the " << numBoxes
-              << " boxes down to depth " << m_maxDepth << '\n';
+    std::cout << tim << " to retrieve the " << numBoxes << " boxes down to depth " << m_maxDepth << '\n';
 
   // Create 8 points per box.
   vtkNew<vtkPoints> points;
@@ -110,8 +104,7 @@ void vtkMDHexFactory::doCreate(
   hexPointList->SetNumberOfIds(8);
   auto hexPointList_ptr = hexPointList->WritePointer(0, 8);
 
-  NormFuncIMDNodePtr normFunction =
-      makeMDEventNormalizationFunction(m_normalizationOption, ws.get());
+  NormFuncIMDNodePtr normFunction = makeMDEventNormalizationFunction(m_normalizationOption, ws.get());
 
   // This can be parallelized
   // cppcheck-suppress syntaxError
@@ -161,13 +154,11 @@ void vtkMDHexFactory::doCreate(
 
         const std::array<vtkIdType, 8> idList{{0, 1, 3, 2, 4, 5, 7, 6}};
 
-        std::transform(
-            idList.begin(), idList.end(), hexPointList_ptr,
-            std::bind(std::plus<vtkIdType>(), std::placeholders::_1, pointId));
+        std::transform(idList.begin(), idList.end(), hexPointList_ptr,
+                       std::bind(std::plus<vtkIdType>(), std::placeholders::_1, pointId));
 
         // Add cells
-        visualDataSet->InsertNextCell(VTK_HEXAHEDRON,
-                                      hexPointList.GetPointer());
+        visualDataSet->InsertNextCell(VTK_HEXAHEDRON, hexPointList.GetPointer());
 
         imageSizeActual++;
       }
@@ -200,15 +191,12 @@ stack.
 @Return a fully constructed vtkUnstructuredGrid containing geometric and scalar
 data.
 */
-vtkSmartPointer<vtkDataSet>
-vtkMDHexFactory::create(ProgressAction &progressUpdating) const {
-  this->dataSet = tryDelegatingCreation<IMDEventWorkspace, 3>(
-      m_workspace, progressUpdating, false);
+vtkSmartPointer<vtkDataSet> vtkMDHexFactory::create(ProgressAction &progressUpdating) const {
+  this->dataSet = tryDelegatingCreation<IMDEventWorkspace, 3>(m_workspace, progressUpdating, false);
   if (this->dataSet) {
     return this->dataSet;
   } else {
-    IMDEventWorkspace_sptr imdws =
-        this->castAndCheck<IMDEventWorkspace, 3>(m_workspace, false);
+    IMDEventWorkspace_sptr imdws = this->castAndCheck<IMDEventWorkspace, 3>(m_workspace, false);
 
     size_t nd = imdws->getNumDims();
     if (nd > 3) {
@@ -256,8 +244,7 @@ vtkMDHexFactory::create(ProgressAction &progressUpdating) const {
 /*
  * Get the next highest bin boundary
  */
-coord_t
-vtkMDHexFactory::getNextBinBoundary(const IMDEventWorkspace_sptr &imdws) const {
+coord_t vtkMDHexFactory::getNextBinBoundary(const IMDEventWorkspace_sptr &imdws) const {
   auto t_dim = imdws->getTDimension();
   coord_t bin_width = t_dim->getBinWidth();
   coord_t dim_min = t_dim->getMinimum();
@@ -267,8 +254,7 @@ vtkMDHexFactory::getNextBinBoundary(const IMDEventWorkspace_sptr &imdws) const {
 /*
  * Get the previous bin boundary, or the current one if m_time is on a boundary
  */
-coord_t vtkMDHexFactory::getPreviousBinBoundary(
-    const IMDEventWorkspace_sptr &imdws) const {
+coord_t vtkMDHexFactory::getPreviousBinBoundary(const IMDEventWorkspace_sptr &imdws) const {
   auto t_dim = imdws->getTDimension();
   coord_t bin_width = t_dim->getBinWidth();
   coord_t dim_min = t_dim->getMinimum();

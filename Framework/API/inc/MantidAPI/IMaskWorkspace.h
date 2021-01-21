@@ -34,12 +34,9 @@ public:
   /// Set / remove mask of a detector
   virtual void setMasked(const detid_t detectorID, const bool mask = true) = 0;
   /// Set / remove masks of all detectors in a set
-  virtual void setMasked(const std::set<detid_t> &detectorIDs,
-                         const bool mask = true) = 0;
+  virtual void setMasked(const std::set<detid_t> &detectorIDs, const bool mask = true) = 0;
   /// Returns a clone of the workspace
-  std::unique_ptr<IMaskWorkspace> clone() const {
-    return std::unique_ptr<IMaskWorkspace>(doInterfaceClone());
-  }
+  std::unique_ptr<IMaskWorkspace> clone() const { return std::unique_ptr<IMaskWorkspace>(doInterfaceClone()); }
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.

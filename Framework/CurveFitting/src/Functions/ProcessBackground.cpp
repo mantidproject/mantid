@@ -50,60 +50,47 @@ DECLARE_ALGORITHM(ProcessBackground)
 /** Constructor
  */
 ProcessBackground::ProcessBackground()
-    : m_dataWS(), m_outputWS(), m_wsIndex(-1), m_lowerBound(DBL_MAX),
-      m_upperBound(DBL_MIN), m_bkgdType(), m_numFWHM(-1.) {}
+    : m_dataWS(), m_outputWS(), m_wsIndex(-1), m_lowerBound(DBL_MAX), m_upperBound(DBL_MIN), m_bkgdType(),
+      m_numFWHM(-1.) {}
 
 //----------------------------------------------------------------------------------------------
 /** Define parameters
  */
 void ProcessBackground::init() {
   // Input and output Workspace
-  declareProperty(
-      std::make_unique<WorkspaceProperty<Workspace2D>>(
-          "InputWorkspace", "Anonymous", Direction::Input),
-      "Name of the output workspace containing the processed background.");
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace2D>>("InputWorkspace", "Anonymous", Direction::Input),
+                  "Name of the output workspace containing the processed background.");
 
   // Workspace index
-  declareProperty("WorkspaceIndex", 0,
-                  "Workspace index for the input workspaces.");
+  declareProperty("WorkspaceIndex", 0, "Workspace index for the input workspaces.");
 
   // Output workspace
-  declareProperty(std::make_unique<WorkspaceProperty<Workspace2D>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace2D>>("OutputWorkspace", "", Direction::Output),
                   "Output workspace containing processed background");
 
   // Function Options
-  std::vector<std::string> options{"SelectBackgroundPoints", "RemovePeaks",
-                                   "DeleteRegion", "AddRegion"};
+  std::vector<std::string> options{"SelectBackgroundPoints", "RemovePeaks", "DeleteRegion", "AddRegion"};
 
   auto validator = std::make_shared<Kernel::StringListValidator>(options);
-  declareProperty("Options", "RemovePeaks", validator,
-                  "Name of the functionality realized by this algorithm.");
+  declareProperty("Options", "RemovePeaks", validator, "Name of the functionality realized by this algorithm.");
 
   // Boundary
-  declareProperty("LowerBound", Mantid::EMPTY_DBL(),
-                  "Lower boundary of the data to have background processed.");
-  declareProperty("UpperBound", Mantid::EMPTY_DBL(),
-                  "Upper boundary of the data to have background processed.");
+  declareProperty("LowerBound", Mantid::EMPTY_DBL(), "Lower boundary of the data to have background processed.");
+  declareProperty("UpperBound", Mantid::EMPTY_DBL(), "Upper boundary of the data to have background processed.");
 
-  auto refwsprop = std::make_unique<WorkspaceProperty<Workspace2D>>(
-      "ReferenceWorkspace", "", Direction::Input, PropertyMode::Optional);
-  declareProperty(std::move(refwsprop),
-                  "Name of the workspace containing the data "
-                  "required by function AddRegion.");
-  setPropertySettings("ReferenceWorkspace",
-                      std::make_unique<VisibleWhenProperty>(
-                          "Options", IS_EQUAL_TO, "AddRegion"));
+  auto refwsprop = std::make_unique<WorkspaceProperty<Workspace2D>>("ReferenceWorkspace", "", Direction::Input,
+                                                                    PropertyMode::Optional);
+  declareProperty(std::move(refwsprop), "Name of the workspace containing the data "
+                                        "required by function AddRegion.");
+  setPropertySettings("ReferenceWorkspace", std::make_unique<VisibleWhenProperty>("Options", IS_EQUAL_TO, "AddRegion"));
 
   // Optional Function Type
   std::vector<std::string> bkgdtype{"Polynomial", "Chebyshev"};
   auto bkgdvalidator = std::make_shared<Kernel::StringListValidator>(bkgdtype);
-  declareProperty(
-      "BackgroundType", "Polynomial", bkgdvalidator,
-      "Type of the background. Options include Polynomial and Chebyshev.");
+  declareProperty("BackgroundType", "Polynomial", bkgdvalidator,
+                  "Type of the background. Options include Polynomial and Chebyshev.");
   setPropertySettings("BackgroundType",
-                      std::make_unique<VisibleWhenProperty>(
-                          "Options", IS_EQUAL_TO, "SelectBackgroundPoints"));
+                      std::make_unique<VisibleWhenProperty>("Options", IS_EQUAL_TO, "SelectBackgroundPoints"));
 
   vector<string> funcoptions{"N/A", "FitGivenDataPoints", "UserFunction"};
   auto fovalidator = std::make_shared<StringListValidator>(funcoptions);
@@ -113,123 +100,92 @@ void ProcessBackground::init() {
                   "function.  Otherwise, background function will be fitted "
                   "from user's input data points.");
   setPropertySettings("SelectionMode",
-                      std::make_unique<VisibleWhenProperty>(
-                          "Options", IS_EQUAL_TO, "SelectBackgroundPoints"));
+                      std::make_unique<VisibleWhenProperty>("Options", IS_EQUAL_TO, "SelectBackgroundPoints"));
 
-  declareProperty("BackgroundOrder", 0,
-                  "Order of polynomial or chebyshev background. ");
+  declareProperty("BackgroundOrder", 0, "Order of polynomial or chebyshev background. ");
   setPropertySettings("BackgroundOrder",
-                      std::make_unique<VisibleWhenProperty>(
-                          "Options", IS_EQUAL_TO, "SelectBackgroundPoints"));
+                      std::make_unique<VisibleWhenProperty>("Options", IS_EQUAL_TO, "SelectBackgroundPoints"));
   setPropertySettings("BackgroundOrder",
-                      std::make_unique<VisibleWhenProperty>(
-                          "SelectionMode", IS_EQUAL_TO, "FitGivenDataPoints"));
+                      std::make_unique<VisibleWhenProperty>("SelectionMode", IS_EQUAL_TO, "FitGivenDataPoints"));
 
   // User input background points for "SelectBackground"
-  auto arrayproperty =
-      std::make_unique<Kernel::ArrayProperty<double>>("BackgroundPoints");
-  declareProperty(std::move(arrayproperty),
-                  "Vector of doubles, each of which is the "
-                  "X-axis value of the background point "
-                  "selected by user.");
+  auto arrayproperty = std::make_unique<Kernel::ArrayProperty<double>>("BackgroundPoints");
+  declareProperty(std::move(arrayproperty), "Vector of doubles, each of which is the "
+                                            "X-axis value of the background point "
+                                            "selected by user.");
   setPropertySettings("BackgroundPoints",
-                      std::make_unique<VisibleWhenProperty>(
-                          "Options", IS_EQUAL_TO, "SelectBackgroundPoints"));
+                      std::make_unique<VisibleWhenProperty>("Options", IS_EQUAL_TO, "SelectBackgroundPoints"));
   setPropertySettings("BackgroundPoints",
-                      std::make_unique<VisibleWhenProperty>(
-                          "SelectionMode", IS_EQUAL_TO, "FitGivenDataPoints"));
+                      std::make_unique<VisibleWhenProperty>("SelectionMode", IS_EQUAL_TO, "FitGivenDataPoints"));
 
-  declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>(
-                      "BackgroundTableWorkspace", "", Direction::Input,
-                      PropertyMode::Optional),
+  declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>("BackgroundTableWorkspace", "", Direction::Input,
+                                                                      PropertyMode::Optional),
                   "Name of the table workspace containing background "
                   "parameters for mode SelectBackgroundPoints.");
   setPropertySettings("BackgroundTableWorkspace",
-                      std::make_unique<VisibleWhenProperty>(
-                          "Options", IS_EQUAL_TO, "SelectBackgroundPoints"));
+                      std::make_unique<VisibleWhenProperty>("Options", IS_EQUAL_TO, "SelectBackgroundPoints"));
   setPropertySettings("BackgroundTableWorkspace",
-                      std::make_unique<VisibleWhenProperty>(
-                          "SelectionMode", IS_EQUAL_TO, "UserFunction"));
+                      std::make_unique<VisibleWhenProperty>("SelectionMode", IS_EQUAL_TO, "UserFunction"));
 
   // Mode to select background
-  vector<string> pointsselectmode{"All Background Points",
-                                  "Input Background Points Only"};
+  vector<string> pointsselectmode{"All Background Points", "Input Background Points Only"};
   auto modevalidator = std::make_shared<StringListValidator>(pointsselectmode);
-  declareProperty("BackgroundPointSelectMode", "All Background Points",
-                  modevalidator, "Mode to select background points. ");
+  declareProperty("BackgroundPointSelectMode", "All Background Points", modevalidator,
+                  "Mode to select background points. ");
   setPropertySettings("BackgroundPointSelectMode",
-                      std::make_unique<VisibleWhenProperty>(
-                          "Options", IS_EQUAL_TO, "SelectBackgroundPoints"));
+                      std::make_unique<VisibleWhenProperty>("Options", IS_EQUAL_TO, "SelectBackgroundPoints"));
   setPropertySettings("BackgroundPointSelectMode",
-                      std::make_unique<VisibleWhenProperty>(
-                          "SelectionMode", IS_EQUAL_TO, "FitGivenDataPoints"));
+                      std::make_unique<VisibleWhenProperty>("SelectionMode", IS_EQUAL_TO, "FitGivenDataPoints"));
 
   // Background tolerance
   declareProperty("NoiseTolerance", 1.0, "Tolerance of noise range. ");
   setPropertySettings("NoiseTolerance",
-                      std::make_unique<VisibleWhenProperty>(
-                          "Options", IS_EQUAL_TO, "SelectBackgroundPoints"));
+                      std::make_unique<VisibleWhenProperty>("Options", IS_EQUAL_TO, "SelectBackgroundPoints"));
 
   // Background tolerance
-  declareProperty("NegativeNoiseTolerance", EMPTY_DBL(),
-                  "Tolerance of noise range for negative number. ");
+  declareProperty("NegativeNoiseTolerance", EMPTY_DBL(), "Tolerance of noise range for negative number. ");
   setPropertySettings("NegativeNoiseTolerance",
-                      std::make_unique<VisibleWhenProperty>(
-                          "Options", IS_EQUAL_TO, "SelectBackgroundPoints"));
-
-  // Optional output workspace
-  declareProperty(std::make_unique<WorkspaceProperty<Workspace2D>>(
-                      "UserBackgroundWorkspace", "_dummy01", Direction::Output),
-                  "Output workspace containing fitted background from points "
-                  "specified by users.");
-  setPropertySettings("UserBackgroundWorkspace",
-                      std::make_unique<VisibleWhenProperty>(
-                          "Options", IS_EQUAL_TO, "SelectBackgroundPoints"));
+                      std::make_unique<VisibleWhenProperty>("Options", IS_EQUAL_TO, "SelectBackgroundPoints"));
 
   // Optional output workspace
   declareProperty(
-      std::make_unique<WorkspaceProperty<TableWorkspace>>(
-          "OutputBackgroundParameterWorkspace", "_dummy02", Direction::Output),
-      "Output parameter table workspace containing the background fitting "
-      "result. ");
+      std::make_unique<WorkspaceProperty<Workspace2D>>("UserBackgroundWorkspace", "_dummy01", Direction::Output),
+      "Output workspace containing fitted background from points "
+      "specified by users.");
+  setPropertySettings("UserBackgroundWorkspace",
+                      std::make_unique<VisibleWhenProperty>("Options", IS_EQUAL_TO, "SelectBackgroundPoints"));
+
+  // Optional output workspace
+  declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>("OutputBackgroundParameterWorkspace", "_dummy02",
+                                                                      Direction::Output),
+                  "Output parameter table workspace containing the background fitting "
+                  "result. ");
   setPropertySettings("OutputBackgroundParameterWorkspace",
-                      std::make_unique<VisibleWhenProperty>(
-                          "Options", IS_EQUAL_TO, "SelectBackgroundPoints"));
+                      std::make_unique<VisibleWhenProperty>("Options", IS_EQUAL_TO, "SelectBackgroundPoints"));
 
   // Output background type.
   std::vector<std::string> outbkgdtype{"Polynomial", "Chebyshev"};
-  auto outbkgdvalidator =
-      std::make_shared<Kernel::StringListValidator>(outbkgdtype);
+  auto outbkgdvalidator = std::make_shared<Kernel::StringListValidator>(outbkgdtype);
   declareProperty("OutputBackgroundType", "Polynomial", outbkgdvalidator,
                   "Type of background to fit with selected background points.");
   setPropertySettings("OutputBackgroundType",
-                      std::make_unique<VisibleWhenProperty>(
-                          "Options", IS_EQUAL_TO, "SelectBackgroundPoints"));
+                      std::make_unique<VisibleWhenProperty>("Options", IS_EQUAL_TO, "SelectBackgroundPoints"));
 
   // Output background type.
-  declareProperty(
-      "OutputBackgroundOrder", 6,
-      "Order of background to fit with selected background points.");
+  declareProperty("OutputBackgroundOrder", 6, "Order of background to fit with selected background points.");
   setPropertySettings("OutputBackgroundOrder",
-                      std::make_unique<VisibleWhenProperty>(
-                          "Options", IS_EQUAL_TO, "SelectBackgroundPoints"));
+                      std::make_unique<VisibleWhenProperty>("Options", IS_EQUAL_TO, "SelectBackgroundPoints"));
 
   // Peak table workspac for "RemovePeaks"
-  declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>(
-                      "BraggPeakTableWorkspace", "", Direction::Input,
-                      PropertyMode::Optional),
+  declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>("BraggPeakTableWorkspace", "", Direction::Input,
+                                                                      PropertyMode::Optional),
                   "Name of table workspace containing peaks' parameters. ");
   setPropertySettings("BraggPeakTableWorkspace",
-                      std::make_unique<VisibleWhenProperty>(
-                          "Options", IS_EQUAL_TO, "RemovePeaks"));
+                      std::make_unique<VisibleWhenProperty>("Options", IS_EQUAL_TO, "RemovePeaks"));
 
   // Number of FWHM to have peak removed
-  declareProperty(
-      "NumberOfFWHM", 1.0,
-      "Number of FWHM to as the peak region to have peak removed. ");
-  setPropertySettings("NumberOfFWHM",
-                      std::make_unique<VisibleWhenProperty>(
-                          "Options", IS_EQUAL_TO, "RemovePeaks"));
+  declareProperty("NumberOfFWHM", 1.0, "Number of FWHM to as the peak region to have peak removed. ");
+  setPropertySettings("NumberOfFWHM", std::make_unique<VisibleWhenProperty>("Options", IS_EQUAL_TO, "RemovePeaks"));
 }
 
 //----------------------------------------------------------------------------------------------
@@ -247,8 +203,7 @@ void ProcessBackground::exec() {
 
   int intemp = getProperty("WorkspaceIndex");
   if (intemp < 0)
-    throw std::invalid_argument(
-        "WorkspaceIndex is not allowed to be less than 0. ");
+    throw std::invalid_argument("WorkspaceIndex is not allowed to be less than 0. ");
   m_wsIndex = intemp;
   if (m_wsIndex >= static_cast<int>(m_dataWS->getNumberHistograms()))
     throw runtime_error("Workspace index is out of boundary.");
@@ -286,8 +241,8 @@ void ProcessBackground::exec() {
 void ProcessBackground::setupDummyOutputWSes() {
   // Dummy outputs to make it work with python script
   setPropertyValue("UserBackgroundWorkspace", "dummy0");
-  Workspace2D_sptr dummyws = std::dynamic_pointer_cast<Workspace2D>(
-      WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1));
+  Workspace2D_sptr dummyws =
+      std::dynamic_pointer_cast<Workspace2D>(WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1));
   setProperty("UserBackgroundWorkspace", dummyws);
 
   setPropertyValue("OutputBackgroundParameterWorkspace", "dummy1");
@@ -300,14 +255,12 @@ void ProcessBackground::setupDummyOutputWSes() {
  */
 void ProcessBackground::deleteRegion() {
   // Check boundary
-  if (m_lowerBound == Mantid::EMPTY_DBL() ||
-      m_upperBound == Mantid::EMPTY_DBL()) {
+  if (m_lowerBound == Mantid::EMPTY_DBL() || m_upperBound == Mantid::EMPTY_DBL()) {
     throw std::invalid_argument("Using DeleteRegion.  Both LowerBound and "
                                 "UpperBound must be specified.");
   }
   if (m_lowerBound >= m_upperBound) {
-    throw std::invalid_argument(
-        "Lower boundary cannot be equal or larger than upper boundary.");
+    throw std::invalid_argument("Lower boundary cannot be equal or larger than upper boundary.");
   }
 
   const auto &dataX = m_dataWS->x(0);
@@ -329,8 +282,7 @@ void ProcessBackground::deleteRegion() {
 
   // Create a new workspace with these dimensions and copy data from the defined
   // region
-  API::MatrixWorkspace_sptr mws =
-      API::WorkspaceFactory::Instance().create("Workspace2D", 1, sizex, sizey);
+  API::MatrixWorkspace_sptr mws = API::WorkspaceFactory::Instance().create("Workspace2D", 1, sizex, sizey);
   m_outputWS = std::dynamic_pointer_cast<DataObjects::Workspace2D>(mws);
   m_outputWS->getAxis(0)->setUnit(m_dataWS->getAxis(0)->unit()->unitID());
 
@@ -353,14 +305,11 @@ void ProcessBackground::deleteRegion() {
  */
 void ProcessBackground::addRegion() {
   // Check boundary, which are required
-  if (m_lowerBound == Mantid::EMPTY_DBL() ||
-      m_upperBound == Mantid::EMPTY_DBL()) {
-    throw std::invalid_argument(
-        "Using AddRegion.  Both LowerBound and UpperBound must be specified.");
+  if (m_lowerBound == Mantid::EMPTY_DBL() || m_upperBound == Mantid::EMPTY_DBL()) {
+    throw std::invalid_argument("Using AddRegion.  Both LowerBound and UpperBound must be specified.");
   }
   if (m_lowerBound >= m_upperBound) {
-    throw std::invalid_argument(
-        "Lower boundary cannot be equal or larger than upper boundary.");
+    throw std::invalid_argument("Lower boundary cannot be equal or larger than upper boundary.");
   }
 
   // Copy data to a set of vectors
@@ -421,19 +370,16 @@ void ProcessBackground::addRegion() {
   // Check
   for (auto it = vx.begin() + 1; it != vx.end(); ++it) {
     if (*it <= *it - 1) {
-      g_log.error()
-          << "The vector X with value inserted is not ordered incrementally\n";
+      g_log.error() << "The vector X with value inserted is not ordered incrementally\n";
       throw std::runtime_error("Build new vector error!");
     }
   }
 
   // Construct the new Workspace
   m_outputWS = std::dynamic_pointer_cast<DataObjects::Workspace2D>(
-      API::WorkspaceFactory::Instance().create("Workspace2D", 1, vx.size(),
-                                               vy.size()));
+      API::WorkspaceFactory::Instance().create("Workspace2D", 1, vx.size(), vy.size()));
   m_outputWS->getAxis(0)->setUnit(m_dataWS->getAxis(0)->unit()->unitID());
-  m_outputWS->setHistogram(
-      0, Histogram(Points(vx), Counts(vy), CountStandardDeviations(ve)));
+  m_outputWS->setHistogram(0, Histogram(Points(vx), Counts(vy), CountStandardDeviations(ve)));
 
   // Write out dummy output workspaces
   setupDummyOutputWSes();
@@ -459,8 +405,7 @@ void ProcessBackground::selectBkgdPoints() {
 
   // Fit the background points if output backgrond parameter workspace is given
   // explicitly
-  string outbkgdparwsname =
-      getPropertyValue("OutputBackgroundParameterWorkspace");
+  string outbkgdparwsname = getPropertyValue("OutputBackgroundParameterWorkspace");
   if (!outbkgdparwsname.empty() && outbkgdparwsname != "_dummy02") {
     // Will fit the selected background
     string bkgdfunctype = getPropertyValue("OutputBackgroundType");
@@ -489,15 +434,13 @@ void ProcessBackground::selectFromGivenXValues() {
     // Data range validation
     double bkgdpoint = bkgdpoints[i];
     if (bkgdpoint < vecX.front()) {
-      g_log.warning() << "Input background point " << bkgdpoint
-                      << " is out of lower boundary.  "
+      g_log.warning() << "Input background point " << bkgdpoint << " is out of lower boundary.  "
                       << "Use X[0] = " << vecX.front() << " instead."
                       << "\n";
       bkgdpoint = vecX.front();
     } else if (bkgdpoint > vecX.back()) {
       g_log.warning() << "Input background point " << bkgdpoint
-                      << " is out of upper boundary.  Use X[-1] = "
-                      << vecX.back() << " instead."
+                      << " is out of upper boundary.  Use X[-1] = " << vecX.back() << " instead."
                       << "\n";
       bkgdpoint = vecX.back();
     }
@@ -507,9 +450,8 @@ void ProcessBackground::selectFromGivenXValues() {
     it = std::lower_bound(vecX.begin(), vecX.end(), bkgdpoint);
     size_t index = size_t(it - vecX.begin());
 
-    g_log.debug() << "DBx502 Background Points " << i << " Index = " << index
-                  << " For TOF = " << bkgdpoints[i] << " in [" << vecX[0]
-                  << ", " << vecX.back() << "] "
+    g_log.debug() << "DBx502 Background Points " << i << " Index = " << index << " For TOF = " << bkgdpoints[i]
+                  << " in [" << vecX[0] << ", " << vecX.back() << "] "
                   << "\n";
 
     // Add index to list
@@ -518,10 +460,8 @@ void ProcessBackground::selectFromGivenXValues() {
   } // ENDFOR (i)
 
   size_t wsSize = realIndexes.size();
-  DataObjects::Workspace2D_sptr bkgdWS =
-      std::dynamic_pointer_cast<DataObjects::Workspace2D>(
-          API::WorkspaceFactory::Instance().create("Workspace2D", 1, wsSize,
-                                                   wsSize));
+  DataObjects::Workspace2D_sptr bkgdWS = std::dynamic_pointer_cast<DataObjects::Workspace2D>(
+      API::WorkspaceFactory::Instance().create("Workspace2D", 1, wsSize, wsSize));
   for (size_t i = 0; i < wsSize; ++i) {
     size_t index = realIndexes[i];
     bkgdWS->mutableX(0)[i] = vecX[index];
@@ -538,8 +478,7 @@ void ProcessBackground::selectFromGivenXValues() {
     m_outputWS = bkgdWS;
   } else {
     stringstream errss;
-    errss << "Background select mode " << mode
-          << " is not supported by ProcessBackground.";
+    errss << "Background select mode " << mode << " is not supported by ProcessBackground.";
     g_log.error(errss.str());
     throw runtime_error(errss.str());
   }
@@ -565,8 +504,7 @@ void ProcessBackground::selectFromGivenFunction() {
       parmap.emplace(parname, parvalue);
   }
 
-  auto bkgdorder =
-      static_cast<int>(parmap.size() - 1); // A0 - A(n) total n+1 parameters
+  auto bkgdorder = static_cast<int>(parmap.size() - 1); // A0 - A(n) total n+1 parameters
   bkgdfunc->setAttributeValue("n", bkgdorder);
   for (auto &mit : parmap) {
     string parname = mit.first;
@@ -581,8 +519,7 @@ void ProcessBackground::selectFromGivenFunction() {
 //----------------------------------------------------------------------------------------------
 /** Select background automatically
  */
-DataObjects::Workspace2D_sptr
-ProcessBackground::autoBackgroundSelection(const Workspace2D_sptr &bkgdWS) {
+DataObjects::Workspace2D_sptr ProcessBackground::autoBackgroundSelection(const Workspace2D_sptr &bkgdWS) {
   // Get background type and create bakground function
   BackgroundFunction_sptr bkgdfunction = createBackgroundFunction(m_bkgdType);
 
@@ -594,10 +531,9 @@ ProcessBackground::autoBackgroundSelection(const Workspace2D_sptr &bkgdWS) {
   bkgdfunction->setAttributeValue("n", bkgdorder);
   bkgdfunction->initialize();
 
-  g_log.information() << "Input background points has " << bkgdWS->x(0).size()
-                      << " data points for fit " << bkgdorder << "-th order "
-                      << bkgdfunction->name() << " (background) function"
-                      << bkgdfunction->asString() << "\n";
+  g_log.information() << "Input background points has " << bkgdWS->x(0).size() << " data points for fit " << bkgdorder
+                      << "-th order " << bkgdfunction->name() << " (background) function" << bkgdfunction->asString()
+                      << "\n";
 
   // Fit input (a few) background pionts to get initial guess
   API::IAlgorithm_sptr fit;
@@ -610,8 +546,7 @@ ProcessBackground::autoBackgroundSelection(const Workspace2D_sptr &bkgdWS) {
 
   double startx = m_lowerBound;
   double endx = m_upperBound;
-  fit->setProperty("Function",
-                   std::dynamic_pointer_cast<API::IFunction>(bkgdfunction));
+  fit->setProperty("Function", std::dynamic_pointer_cast<API::IFunction>(bkgdfunction));
   fit->setProperty("InputWorkspace", bkgdWS);
   fit->setProperty("WorkspaceIndex", 0);
   fit->setProperty("MaxIterations", 500);
@@ -625,18 +560,15 @@ ProcessBackground::autoBackgroundSelection(const Workspace2D_sptr &bkgdWS) {
   // Get fit result
   // a) Status
   std::string fitStatus = fit->getProperty("OutputStatus");
-  bool allowedfailure = (fitStatus.find("Changes") < fitStatus.size()) &&
-                        (fitStatus.find("small") < fitStatus.size());
+  bool allowedfailure = (fitStatus.find("Changes") < fitStatus.size()) && (fitStatus.find("small") < fitStatus.size());
   if (fitStatus != "success" && !allowedfailure) {
-    g_log.error() << "ProcessBackground: Fit Status = " << fitStatus
-                  << ".  Not to update fit result\n";
+    g_log.error() << "ProcessBackground: Fit Status = " << fitStatus << ".  Not to update fit result\n";
     throw std::runtime_error("Bad Fit " + fitStatus);
   }
 
   // b) check that chi2 got better
   const double chi2 = fit->getProperty("OutputChi2overDoF");
-  g_log.information() << "Fit background: Fit Status = " << fitStatus
-                      << ", chi2 = " << chi2 << "\n";
+  g_log.information() << "Fit background: Fit Status = " << fitStatus << ", chi2 = " << chi2 << "\n";
 
   // Filter and construct for the output workspace
   Workspace2D_sptr outws = filterForBackground(bkgdfunction);
@@ -647,22 +579,18 @@ ProcessBackground::autoBackgroundSelection(const Workspace2D_sptr &bkgdWS) {
 //----------------------------------------------------------------------------------------------
 /** Create a background function from input properties
  */
-BackgroundFunction_sptr
-ProcessBackground::createBackgroundFunction(const string &backgroundtype) {
+BackgroundFunction_sptr ProcessBackground::createBackgroundFunction(const string &backgroundtype) {
   Functions::BackgroundFunction_sptr bkgdfunction;
 
   if (backgroundtype == "Polynomial") {
-    bkgdfunction = std::dynamic_pointer_cast<Functions::BackgroundFunction>(
-        std::make_shared<Functions::Polynomial>());
+    bkgdfunction = std::dynamic_pointer_cast<Functions::BackgroundFunction>(std::make_shared<Functions::Polynomial>());
     bkgdfunction->initialize();
   } else if (backgroundtype == "Chebyshev") {
     Chebyshev_sptr cheby = std::make_shared<Functions::Chebyshev>();
-    bkgdfunction =
-        std::dynamic_pointer_cast<Functions::BackgroundFunction>(cheby);
+    bkgdfunction = std::dynamic_pointer_cast<Functions::BackgroundFunction>(cheby);
     bkgdfunction->initialize();
 
-    g_log.debug() << "[D] Chebyshev is set to range " << m_lowerBound << ", "
-                  << m_upperBound << "\n";
+    g_log.debug() << "[D] Chebyshev is set to range " << m_lowerBound << ", " << m_upperBound << "\n";
     bkgdfunction->setAttributeValue("StartX", m_lowerBound);
     bkgdfunction->setAttributeValue("EndX", m_upperBound);
   } else {
@@ -678,8 +606,7 @@ ProcessBackground::createBackgroundFunction(const string &backgroundtype) {
 //----------------------------------------------------------------------------------------------
 /** Filter non-background data points out and create a background workspace
  */
-Workspace2D_sptr ProcessBackground::filterForBackground(
-    const BackgroundFunction_sptr &bkgdfunction) {
+Workspace2D_sptr ProcessBackground::filterForBackground(const BackgroundFunction_sptr &bkgdfunction) {
   double posnoisetolerance = getProperty("NoiseTolerance");
   double negnoisetolerance = getProperty("NegativeNoiseTolerance");
   if (isEmpty(negnoisetolerance))
@@ -691,8 +618,7 @@ Workspace2D_sptr ProcessBackground::filterForBackground(
   API::FunctionValues values(domain);
   bkgdfunction->function(domain, values);
 
-  g_log.information() << "Function used to select background points : "
-                      << bkgdfunction->asString() << "\n";
+  g_log.information() << "Function used to select background points : " << bkgdfunction->asString() << "\n";
 
   // Optional output
   string userbkgdwsname = getPropertyValue("UserBackgroundWorkspace");
@@ -702,8 +628,8 @@ Workspace2D_sptr ProcessBackground::filterForBackground(
 
   size_t sizex = domain.size();
   size_t sizey = values.size();
-  MatrixWorkspace_sptr visualws = std::dynamic_pointer_cast<MatrixWorkspace>(
-      WorkspaceFactory::Instance().create("Workspace2D", 4, sizex, sizey));
+  MatrixWorkspace_sptr visualws =
+      std::dynamic_pointer_cast<MatrixWorkspace>(WorkspaceFactory::Instance().create("Workspace2D", 4, sizex, sizey));
   for (size_t i = 0; i < sizex; ++i) {
     for (size_t j = 0; j < 4; ++j) {
       visualws->mutableX(j)[i] = domain[i];
@@ -726,15 +652,14 @@ Workspace2D_sptr ProcessBackground::filterForBackground(
     }
   }
   size_t wsSize = selectedIndexes.size();
-  g_log.information() << "Found " << wsSize << " background points out of "
-                      << m_dataWS->x(m_wsIndex).size() << " total data points. "
+  g_log.information() << "Found " << wsSize << " background points out of " << m_dataWS->x(m_wsIndex).size()
+                      << " total data points. "
                       << "\n";
 
   // Build new workspace for OutputWorkspace
   size_t nspec = 3;
   Workspace2D_sptr outws = std::dynamic_pointer_cast<DataObjects::Workspace2D>(
-      API::WorkspaceFactory::Instance().create("Workspace2D", nspec, wsSize,
-                                               wsSize));
+      API::WorkspaceFactory::Instance().create("Workspace2D", nspec, wsSize, wsSize));
   for (size_t i = 0; i < wsSize; ++i) {
     size_t index = selectedIndexes[i];
     for (size_t j = 0; j < nspec; ++j)
@@ -749,11 +674,9 @@ Workspace2D_sptr ProcessBackground::filterForBackground(
 //----------------------------------------------------------------------------------------------
 /** Fit background function
  */
-void ProcessBackground::fitBackgroundFunction(
-    const std::string &bkgdfunctiontype) {
+void ProcessBackground::fitBackgroundFunction(const std::string &bkgdfunctiontype) {
   // Get background type and create bakground function
-  BackgroundFunction_sptr bkgdfunction =
-      createBackgroundFunction(bkgdfunctiontype);
+  BackgroundFunction_sptr bkgdfunction = createBackgroundFunction(bkgdfunctiontype);
 
   int bkgdorder = getProperty("OutputBackgroundOrder");
   bkgdfunction->setAttributeValue("n", bkgdorder);
@@ -761,14 +684,12 @@ void ProcessBackground::fitBackgroundFunction(
   if (bkgdfunctiontype == "Chebyshev") {
     double xmin = m_outputWS->x(0).front();
     double xmax = m_outputWS->x(0).back();
-    g_log.information() << "Chebyshev Fit range: " << xmin << ", " << xmax
-                        << "\n";
+    g_log.information() << "Chebyshev Fit range: " << xmin << ", " << xmax << "\n";
     bkgdfunction->setAttributeValue("StartX", xmin);
     bkgdfunction->setAttributeValue("EndX", xmax);
   }
 
-  g_log.information() << "Fit selected background " << bkgdfunctiontype
-                      << " to data workspace with "
+  g_log.information() << "Fit selected background " << bkgdfunctiontype << " to data workspace with "
                       << m_outputWS->getNumberHistograms() << " spectra."
                       << "\n";
 
@@ -781,13 +702,11 @@ void ProcessBackground::fitBackgroundFunction(
     throw;
   }
 
-  g_log.information() << "Fitting background function: "
-                      << bkgdfunction->asString() << "\n";
+  g_log.information() << "Fitting background function: " << bkgdfunction->asString() << "\n";
 
   double startx = m_lowerBound;
   double endx = m_upperBound;
-  fit->setProperty("Function",
-                   std::dynamic_pointer_cast<API::IFunction>(bkgdfunction));
+  fit->setProperty("Function", std::dynamic_pointer_cast<API::IFunction>(bkgdfunction));
   fit->setProperty("InputWorkspace", m_outputWS);
   fit->setProperty("WorkspaceIndex", 0);
   fit->setProperty("MaxIterations", 500);
@@ -800,17 +719,14 @@ void ProcessBackground::fitBackgroundFunction(
 
   // Get fit status and chi^2
   std::string fitStatus = fit->getProperty("OutputStatus");
-  bool allowedfailure = (fitStatus.find("Changes") < fitStatus.size()) &&
-                        (fitStatus.find("small") < fitStatus.size());
+  bool allowedfailure = (fitStatus.find("Changes") < fitStatus.size()) && (fitStatus.find("small") < fitStatus.size());
   if (fitStatus != "success" && !allowedfailure) {
-    g_log.error() << "ProcessBackground: Fit Status = " << fitStatus
-                  << ".  Not to update fit result\n";
+    g_log.error() << "ProcessBackground: Fit Status = " << fitStatus << ".  Not to update fit result\n";
     throw std::runtime_error("Bad Fit " + fitStatus);
   }
 
   const double chi2 = fit->getProperty("OutputChi2overDoF");
-  g_log.information() << "Fit background: Fit Status = " << fitStatus
-                      << ", chi2 = " << chi2 << "\n";
+  g_log.information() << "Fit background: Fit Status = " << fitStatus << ", chi2 = " << chi2 << "\n";
 
   // Get out the parameter names
   API::IFunction_sptr funcout = fit->getProperty("Function");
@@ -831,8 +747,7 @@ void ProcessBackground::fitBackgroundFunction(
   TableRow chi2row = outbkgdparws->appendRow();
   chi2row << "Chi-square" << chi2;
 
-  g_log.information() << "Set table workspace (#row = "
-                      << outbkgdparws->rowCount()
+  g_log.information() << "Set table workspace (#row = " << outbkgdparws->rowCount()
                       << ") to OutputBackgroundParameterTable. "
                       << "\n";
   setProperty("OutputBackgroundParameterWorkspace", outbkgdparws);
@@ -864,8 +779,7 @@ void ProcessBackground::removePeaks() {
   // Get input
   TableWorkspace_sptr peaktablews = getProperty("BraggPeakTableWorkspace");
   if (!peaktablews)
-    throw runtime_error(
-        "Option RemovePeaks requires input to BgraggPeaTablekWorkspace.");
+    throw runtime_error("Option RemovePeaks requires input to BgraggPeaTablekWorkspace.");
 
   m_numFWHM = getProperty("NumberOfFWHM");
   if (m_numFWHM <= 0.)
@@ -885,23 +799,19 @@ void ProcessBackground::removePeaks() {
  */
 void RemovePeaks::setup(const TableWorkspace_sptr &peaktablews) {
   // Parse table workspace
-  parsePeakTableWorkspace(std::move(peaktablews), m_vecPeakCentre,
-                          m_vecPeakFWHM);
+  parsePeakTableWorkspace(std::move(peaktablews), m_vecPeakCentre, m_vecPeakFWHM);
 
   // Check
   if (m_vecPeakCentre.size() != m_vecPeakFWHM.size())
     throw runtime_error("Number of peak centres and FWHMs are different!");
   else if (m_vecPeakCentre.empty())
-    throw runtime_error(
-        "There is not any peak entry in input table workspace.");
+    throw runtime_error("There is not any peak entry in input table workspace.");
 }
 
 //----------------------------------------------------------------------------------------------
 /** Remove peaks from a input workspace
  */
-Workspace2D_sptr
-RemovePeaks::removePeaks(const API::MatrixWorkspace_const_sptr &dataws,
-                         int wsindex, double numfwhm) {
+Workspace2D_sptr RemovePeaks::removePeaks(const API::MatrixWorkspace_const_sptr &dataws, int wsindex, double numfwhm) {
   // Check
   if (m_vecPeakCentre.empty())
     throw runtime_error("RemovePeaks has not been setup yet. ");
@@ -915,8 +825,7 @@ RemovePeaks::removePeaks(const API::MatrixWorkspace_const_sptr &dataws,
   vector<bool> vec_useX(sizex, true);
 
   // Exclude regions
-  size_t numbkgdpoints = excludePeaks(vecX.rawData(), vec_useX, m_vecPeakCentre,
-                                      m_vecPeakFWHM, numfwhm);
+  size_t numbkgdpoints = excludePeaks(vecX.rawData(), vec_useX, m_vecPeakCentre, m_vecPeakFWHM, numfwhm);
   size_t numbkgdpointsy = numbkgdpoints;
   size_t sizey = vecY.size();
   if (sizex > sizey)
@@ -924,8 +833,7 @@ RemovePeaks::removePeaks(const API::MatrixWorkspace_const_sptr &dataws,
 
   // Construct output workspace
   Workspace2D_sptr outws = std::dynamic_pointer_cast<Workspace2D>(
-      WorkspaceFactory::Instance().create("Workspace2D", 1, numbkgdpoints,
-                                          numbkgdpointsy));
+      WorkspaceFactory::Instance().create("Workspace2D", 1, numbkgdpoints, numbkgdpointsy));
   outws->getAxis(0)->setUnit(dataws->getAxis(0)->unit()->unitID());
   auto &outX = outws->mutableX(0);
   auto &outY = outws->mutableY(0);
@@ -956,9 +864,8 @@ RemovePeaks::removePeaks(const API::MatrixWorkspace_const_sptr &dataws,
 //----------------------------------------------------------------------------------------------
 /** Parse table workspace
  */
-void RemovePeaks::parsePeakTableWorkspace(
-    const TableWorkspace_sptr &peaktablews, vector<double> &vec_peakcentre,
-    vector<double> &vec_peakfwhm) {
+void RemovePeaks::parsePeakTableWorkspace(const TableWorkspace_sptr &peaktablews, vector<double> &vec_peakcentre,
+                                          vector<double> &vec_peakfwhm) {
   // Get peak table workspace information
   vector<string> colnames = peaktablews->getColumnNames();
   int index_centre = -1;
@@ -972,8 +879,7 @@ void RemovePeaks::parsePeakTableWorkspace(
   }
 
   if (index_centre < 0 || index_fwhm < 0) {
-    throw runtime_error(
-        "Input Bragg peak table workspace does not have TOF_h and/or FWHM");
+    throw runtime_error("Input Bragg peak table workspace does not have TOF_h and/or FWHM");
   }
 
   // Get values
@@ -992,9 +898,8 @@ void RemovePeaks::parsePeakTableWorkspace(
 //----------------------------------------------------------------------------------------------
 /** Exclude peaks from
  */
-size_t RemovePeaks::excludePeaks(vector<double> v_inX, vector<bool> &v_useX,
-                                 vector<double> v_centre, vector<double> v_fwhm,
-                                 double num_fwhm) {
+size_t RemovePeaks::excludePeaks(vector<double> v_inX, vector<bool> &v_useX, vector<double> v_centre,
+                                 vector<double> v_fwhm, double num_fwhm) {
   // Validate
   if (v_centre.size() != v_fwhm.size())
     throw runtime_error("Input different number of peak centres and fwhm.");

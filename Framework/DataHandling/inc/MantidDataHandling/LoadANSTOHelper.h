@@ -44,8 +44,7 @@ private:
 
 public:
   // construction
-  ProgressTracker(API::Progress &progBar, const char *msg, int64_t target,
-                  size_t count);
+  ProgressTracker(API::Progress &progBar, const char *msg, int64_t target, size_t count);
   ~ProgressTracker();
 
   // methods
@@ -77,11 +76,9 @@ protected:
 
 public:
   // construction
-  EventProcessor(const std::vector<bool> &roi, size_t stride,
-                 const double period, const double phase,
-                 const int64_t startTime, const double tofMinBoundary,
-                 const double tofMaxBoundary, const double timeMinBoundary,
-                 const double timeMaxBoundary);
+  EventProcessor(const std::vector<bool> &roi, size_t stride, const double period, const double phase,
+                 const int64_t startTime, const double tofMinBoundary, const double tofMaxBoundary,
+                 const double timeMinBoundary, const double timeMaxBoundary);
 
   // methods
   void newFrame();
@@ -101,11 +98,9 @@ protected:
 
 public:
   // construction
-  EventCounter(const std::vector<bool> &roi, const size_t stride,
-               const double period, const double phase, const int64_t startTime,
-               const double tofMinBoundary, const double tofMaxBoundary,
-               const double timeMinBoundary, const double timeMaxBoundary,
-               std::vector<size_t> &eventCounts);
+  EventCounter(const std::vector<bool> &roi, const size_t stride, const double period, const double phase,
+               const int64_t startTime, const double tofMinBoundary, const double tofMaxBoundary,
+               const double timeMinBoundary, const double timeMaxBoundary, std::vector<size_t> &eventCounts);
 
   // properties
   size_t numFrames() const;
@@ -123,11 +118,9 @@ protected:
 
 public:
   // construction
-  EventAssigner(const std::vector<bool> &roi, const size_t stride,
-                const double period, const double phase, int64_t startTime,
-                const double tofMinBoundary, const double tofMaxBoundary,
-                const double timeMinBoundary, const double timeMaxBoundary,
-                std::vector<EventVector_pt> &eventVectors);
+  EventAssigner(const std::vector<bool> &roi, const size_t stride, const double period, const double phase,
+                int64_t startTime, const double tofMinBoundary, const double tofMaxBoundary,
+                const double timeMinBoundary, const double timeMaxBoundary, std::vector<EventVector_pt> &eventVectors);
 };
 
 class EventAssignerFixedWavelength : public EventAssigner {
@@ -140,12 +133,10 @@ protected:
 
 public:
   // construction
-  EventAssignerFixedWavelength(
-      const std::vector<bool> &roi, const size_t stride,
-      const double wavelength, const double period, const double phase,
-      const int64_t startTime, const double tofMinBoundary,
-      const double tofMaxBoundary, const double timeMinBoundary,
-      const double timeMaxBoundary, std::vector<EventVector_pt> &eventVectors);
+  EventAssignerFixedWavelength(const std::vector<bool> &roi, const size_t stride, const double wavelength,
+                               const double period, const double phase, const int64_t startTime,
+                               const double tofMinBoundary, const double tofMaxBoundary, const double timeMinBoundary,
+                               const double timeMaxBoundary, std::vector<EventVector_pt> &eventVectors);
 };
 
 class FastReadOnlyFile {
@@ -257,8 +248,7 @@ public:
   int read_byte();
 
   // helpers
-  static bool append(const std::string &path, const std::string &name,
-                     const void *buffer, size_t size);
+  static bool append(const std::string &path, const std::string &name, const void *buffer, size_t size);
 };
 
 } // namespace Tar

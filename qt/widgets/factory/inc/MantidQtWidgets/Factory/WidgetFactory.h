@@ -34,10 +34,8 @@ public:
   static WidgetFactory *Instance();
   ~WidgetFactory() override;
 
-  MantidQt::SliceViewer::SliceViewerWindow *
-  createSliceViewerWindow(const QString &wsName, const QString &label);
-  MantidQt::SliceViewer::SliceViewerWindow *
-  getSliceViewerWindow(const QString &wsName, const QString &label);
+  MantidQt::SliceViewer::SliceViewerWindow *createSliceViewerWindow(const QString &wsName, const QString &label);
+  MantidQt::SliceViewer::SliceViewerWindow *getSliceViewerWindow(const QString &wsName, const QString &label);
   void closeAllSliceViewerWindows();
   void closeSliceViewerWindow(SliceViewer::SliceViewerWindow *w);
 

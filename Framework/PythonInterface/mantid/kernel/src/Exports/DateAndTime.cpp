@@ -30,41 +30,30 @@ std::string ISO8601StringPlusSpace(DateAndTime &self) {
 }
 
 int64_t total_nanoseconds(DateAndTime &self) {
-  PyErr_Warn(
-      PyExc_DeprecationWarning,
-      ".total_nanoseconds() is deprecated. Use .totalNanoseconds() instead.");
+  PyErr_Warn(PyExc_DeprecationWarning, ".total_nanoseconds() is deprecated. Use .totalNanoseconds() instead.");
   return self.totalNanoseconds();
 }
 
 void export_DateAndTime() {
   class_<DateAndTime>("DateAndTime", no_init)
       // Constructors
-      .def(init<const std::string>((arg("self"), arg("ISO8601 string")),
-                                   "Construct from an ISO8601 string"))
-      .def(init<double, double>(
-          (arg("self"), arg("seconds"), arg("nanoseconds")),
-          "Construct using a number of seconds and nanoseconds (floats)since "
-          "1990-01-01T00:00"))
-      .def(init<int64_t, int64_t>(
-          (arg("self"), arg("seconds"), arg("nanoseconds")),
-          "Construct using a number of seconds and nanoseconds (integers) "
-          "since 1990-01-01T00:00"))
-      .def(init<int64_t>(
-          (arg("self"), arg("total_nanoseconds")),
-          "Construct a total number of nanoseconds since 1990-01-01T00:00"))
-      .def("__init__",
-           make_constructor(Converters::to_dateandtime, default_call_policies(),
-                            (arg("other"))),
+      .def(init<const std::string>((arg("self"), arg("ISO8601 string")), "Construct from an ISO8601 string"))
+      .def(init<double, double>((arg("self"), arg("seconds"), arg("nanoseconds")),
+                                "Construct using a number of seconds and nanoseconds (floats)since "
+                                "1990-01-01T00:00"))
+      .def(init<int64_t, int64_t>((arg("self"), arg("seconds"), arg("nanoseconds")),
+                                  "Construct using a number of seconds and nanoseconds (integers) "
+                                  "since 1990-01-01T00:00"))
+      .def(init<int64_t>((arg("self"), arg("total_nanoseconds")),
+                         "Construct a total number of nanoseconds since 1990-01-01T00:00"))
+      .def("__init__", make_constructor(Converters::to_dateandtime, default_call_policies(), (arg("other"))),
            "Construct from numpy.datetime64")
-      .def("total_nanoseconds", &total_nanoseconds, arg("self"),
-           "Since 1990-01-01T00:00")
-      .def("totalNanoseconds", &DateAndTime::totalNanoseconds, arg("self"),
-           "Since 1990-01-01T00:00")
+      .def("total_nanoseconds", &total_nanoseconds, arg("self"), "Since 1990-01-01T00:00")
+      .def("totalNanoseconds", &DateAndTime::totalNanoseconds, arg("self"), "Since 1990-01-01T00:00")
       .def("toISO8601String", &DateAndTime::toISO8601String, arg("self"),
            "Converts the time into ISO8601Standard and returns the string")
       .def("setToMinimum", &DateAndTime::setToMinimum, arg("self"))
-      .def("to_datetime64", &Mantid::PythonInterface::Converters::to_datetime64,
-           arg("self"),
+      .def("to_datetime64", &Mantid::PythonInterface::Converters::to_datetime64, arg("self"),
            "Convert to numpy.datetime64") // this is panda's name for the
                                           // function
       .def("__str__", &ISO8601StringPlusSpace, arg("self"))
@@ -82,28 +71,21 @@ void export_DateAndTime() {
 }
 
 long time_duration_total_nanoseconds(time_duration &self) {
-  PyErr_Warn(
-      PyExc_DeprecationWarning,
-      ".total_nanoseconds() is deprecated. Use .totalNanoseconds() instead.");
+  PyErr_Warn(PyExc_DeprecationWarning, ".total_nanoseconds() is deprecated. Use .totalNanoseconds() instead.");
   return self.total_nanoseconds();
 }
 
 void export_time_duration() {
   class_<time_duration>("time_duration", no_init)
-      .def("hours", &time_duration::hours, arg("self"),
-           "Returns the normalized number of hours")
-      .def("minutes", &time_duration::minutes, arg("self"),
-           "Returns the normalized number of minutes +/-(0..59)")
-      .def("seconds", &time_duration::seconds, arg("self"),
-           "Returns the normalized number of seconds +/-(0..59)")
+      .def("hours", &time_duration::hours, arg("self"), "Returns the normalized number of hours")
+      .def("minutes", &time_duration::minutes, arg("self"), "Returns the normalized number of minutes +/-(0..59)")
+      .def("seconds", &time_duration::seconds, arg("self"), "Returns the normalized number of seconds +/-(0..59)")
       .def("total_seconds", &time_duration::total_seconds, arg("self"),
            "Get the total number of seconds truncating any fractional seconds")
-      .def("total_milliseconds", &time_duration::total_milliseconds,
-           arg("self"),
+      .def("total_milliseconds", &time_duration::total_milliseconds, arg("self"),
            "Get the total number of milliseconds truncating any remaining "
            "digits")
-      .def("total_microseconds", &time_duration::total_microseconds,
-           arg("self"),
+      .def("total_microseconds", &time_duration::total_microseconds, arg("self"),
            "Get the total number of microseconds truncating any remaining "
            "digits")
       .def("total_nanoseconds", &time_duration_total_nanoseconds, arg("self"),

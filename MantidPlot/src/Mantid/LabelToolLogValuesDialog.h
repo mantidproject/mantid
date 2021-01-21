@@ -37,8 +37,7 @@ class LabelToolLogValuesDialog : public SampleLogDialogBase {
   Q_OBJECT
 public:
   /// Constructor
-  LabelToolLogValuesDialog(const QString &wsname, QWidget *parentContainer,
-                           const Qt::WFlags &flags = nullptr,
+  LabelToolLogValuesDialog(const QString &wsname, QWidget *parentContainer, const Qt::WFlags &flags = nullptr,
                            size_t experimentInfoIndex = 0);
 
   virtual ~LabelToolLogValuesDialog() override;

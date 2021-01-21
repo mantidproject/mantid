@@ -41,21 +41,15 @@ class EXPORT_OPT_MANTIDQT_COMMON FileFinderWidget : public API::MantidWidget {
   Q_PROPERTY(bool findRunFiles READ isForRunFiles WRITE isForRunFiles)
   Q_PROPERTY(bool findDirectory READ isForDirectory WRITE isForDirectory)
   Q_PROPERTY(QString label READ getLabelText WRITE setLabelText)
-  Q_PROPERTY(
-      bool multipleFiles READ allowMultipleFiles WRITE allowMultipleFiles)
+  Q_PROPERTY(bool multipleFiles READ allowMultipleFiles WRITE allowMultipleFiles)
   Q_PROPERTY(bool optional READ isOptional WRITE isOptional)
   Q_PROPERTY(bool multiEntry READ doMultiEntry WRITE doMultiEntry)
   Q_PROPERTY(ButtonOpts buttonOpt READ doButtonOpt WRITE doButtonOpt)
-  Q_PROPERTY(QString algorithmAndProperty READ getAlgorithmProperty WRITE
-                 setAlgorithmProperty)
-  Q_PROPERTY(
-      QStringList fileExtensions READ getFileExtensions WRITE setFileExtensions)
-  Q_PROPERTY(
-      bool extsAsSingleOption READ extsAsSingleOption WRITE extsAsSingleOption)
-  Q_PROPERTY(
-      LiveButtonOpts liveButton READ liveButtonState WRITE liveButtonState)
-  Q_PROPERTY(QString instrumentOverride READ getInstrumentOverride WRITE
-                 setInstrumentOverride)
+  Q_PROPERTY(QString algorithmAndProperty READ getAlgorithmProperty WRITE setAlgorithmProperty)
+  Q_PROPERTY(QStringList fileExtensions READ getFileExtensions WRITE setFileExtensions)
+  Q_PROPERTY(bool extsAsSingleOption READ extsAsSingleOption WRITE extsAsSingleOption)
+  Q_PROPERTY(LiveButtonOpts liveButton READ liveButtonState WRITE liveButtonState)
+  Q_PROPERTY(QString instrumentOverride READ getInstrumentOverride WRITE setInstrumentOverride)
   Q_ENUMS(ButtonOpts)
   Q_ENUMS(LiveButtonOpts)
 
@@ -140,8 +134,7 @@ public:
   void setNumberOfEntries(int number);
   /// Inform the widget of a running instance of MonitorLiveData to be used in
   /// stopLiveListener()
-  void setLiveAlgorithm(
-      const std::shared_ptr<Mantid::API::IAlgorithm> &monitorLiveData);
+  void setLiveAlgorithm(const std::shared_ptr<Mantid::API::IAlgorithm> &monitorLiveData);
   /// Gets the instrument currently fixed to
   QString getInstrumentOverride();
   /// Overrides the value of default instrument
@@ -198,12 +191,9 @@ private:
   /// Create a file filter from a list of extensions
   QString createFileFilter();
   /// Create an extension list from the name algorithm and property
-  QStringList getFileExtensionsFromAlgorithm(const QString &algName,
-                                             const QString &propName);
+  QStringList getFileExtensionsFromAlgorithm(const QString &algName, const QString &propName);
   /// Create an extension list from the name algorithm and property
-  QStringList getFilesFromAlgorithm(const QString &algName,
-                                    const QString &propName,
-                                    const QString &filename);
+  QStringList getFilesFromAlgorithm(const QString &algName, const QString &propName, const QString &filename);
   /// Open a file dialog
   QString openFileDialog();
   /// flag a problem with the supplied entry number, an empty string means no
@@ -219,8 +209,7 @@ private:
   /// handles findFiles background thread
   void runFindFiles(const QString &searchText);
   /// Helper method to create a FindFilesSearchParameters object
-  FindFilesSearchParameters
-  createFindFilesSearchParameters(const std::string &text) const;
+  FindFilesSearchParameters createFindFilesSearchParameters(const std::string &text) const;
 
 private slots:
   /// Browse clicked slot
@@ -228,8 +217,7 @@ private slots:
   /// currently checks only if the entry number is any integer > 0
   void checkEntry();
   /// Slot called when file finding thread has finished.
-  void inspectThreadResult(
-      const FindFilesSearchResults &results = FindFilesSearchResults());
+  void inspectThreadResult(const FindFilesSearchResults &results = FindFilesSearchResults());
 
 private:
   /// Is the widget for run files or standard files

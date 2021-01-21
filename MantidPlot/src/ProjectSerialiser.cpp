@@ -70,8 +70,7 @@ std::vector<std::string> splitByDelim(const std::string &s, const char delim) {
  * @return A new reference PyObject that results from the call
  * @throws std::runtime_error if any Python operation fails
  */
-PyObject *callPythonModuleAttr(const char *moduleName, const char *attrName,
-                               PyObject *arg) {
+PyObject *callPythonModuleAttr(const char *moduleName, const char *attrName, PyObject *arg) {
   auto throwIfPythonError = [](auto result) {
     if (!PyErr_Occurred())
       return result;
@@ -83,8 +82,7 @@ PyObject *callPythonModuleAttr(const char *moduleName, const char *attrName,
     msg << TO_CSTRING(pyMsg);
     Py_DecRef(pyMsg);
     if (traceback) {
-      const auto lineno(
-          reinterpret_cast<PyTracebackObject *>(traceback)->tb_lineno);
+      const auto lineno(reinterpret_cast<PyTracebackObject *>(traceback)->tb_lineno);
       msg << " at line " + std::to_string(lineno);
       Py_DECREF(traceback);
     }
@@ -94,10 +92,8 @@ PyObject *callPythonModuleAttr(const char *moduleName, const char *attrName,
   };
   PyObject *launcher(nullptr), *moduleAttr(nullptr), *callResult(nullptr);
   try {
-    launcher = throwIfPythonError(
-        PyImport_ImportModule(const_cast<char *>(moduleName)));
-    moduleAttr = throwIfPythonError(
-        PyObject_GetAttrString(launcher, const_cast<char *>(attrName)));
+    launcher = throwIfPythonError(PyImport_ImportModule(const_cast<char *>(moduleName)));
+    moduleAttr = throwIfPythonError(PyObject_GetAttrString(launcher, const_cast<char *>(attrName)));
     callResult = throwIfPythonError(PyObject_CallObject(moduleAttr, arg));
     Py_XDECREF(moduleAttr);
     Py_XDECREF(launcher);
@@ -144,31 +140,23 @@ void file_compress(const char *file, const char *mode);
  * @return A list of python interfaces that are known to be serisable. This
  * returns the names of the startup file
  */
-QStringList ProjectSerialiser::serialisablePythonInterfaces() {
-  return SERIALISABLE_PY_INTERFACES;
-}
+QStringList ProjectSerialiser::serialisablePythonInterfaces() { return SERIALISABLE_PY_INTERFACES; }
 
 // We assume any caller which do not explicitly mention the recovery flag
 // do not want it, so set it to false
-ProjectSerialiser::ProjectSerialiser(ApplicationWindow *window)
-    : ProjectSerialiser(window, false) {}
+ProjectSerialiser::ProjectSerialiser(ApplicationWindow *window) : ProjectSerialiser(window, false) {}
 
 ProjectSerialiser::ProjectSerialiser(ApplicationWindow *window, Folder *folder)
     : ProjectSerialiser(window, folder, false) {}
 
 ProjectSerialiser::ProjectSerialiser(ApplicationWindow *window, bool isRecovery)
-    : window(window), m_currentFolder(nullptr), m_windowCount(0),
-      m_saveAll(true), m_projectRecovery(isRecovery) {}
+    : window(window), m_currentFolder(nullptr), m_windowCount(0), m_saveAll(true), m_projectRecovery(isRecovery) {}
 
-ProjectSerialiser::ProjectSerialiser(ApplicationWindow *window, Folder *folder,
-                                     bool isRecovery)
-    : window(window), m_currentFolder(folder), m_windowCount(0),
-      m_saveAll(true), m_projectRecovery(isRecovery) {}
+ProjectSerialiser::ProjectSerialiser(ApplicationWindow *window, Folder *folder, bool isRecovery)
+    : window(window), m_currentFolder(folder), m_windowCount(0), m_saveAll(true), m_projectRecovery(isRecovery) {}
 
-bool ProjectSerialiser::save(const QString &projectName,
-                             const std::vector<std::string> &wsNames,
-                             const std::vector<std::string> &windowNames,
-                             const std::vector<std::string> &interfaces,
+bool ProjectSerialiser::save(const QString &projectName, const std::vector<std::string> &wsNames,
+                             const std::vector<std::string> &windowNames, const std::vector<std::string> &interfaces,
                              bool compress) {
   m_windowNames = windowNames;
   m_workspaceNames = wsNames;
@@ -186,16 +174,14 @@ bool ProjectSerialiser::save(const QString &projectName,
  * @param projectName :: the name of the project to write to
  * @param compress :: whether to compress the project (default false)
  */
-bool ProjectSerialiser::save(const QString &projectName, bool compress,
-                             bool saveAll) {
+bool ProjectSerialiser::save(const QString &projectName, bool compress, bool saveAll) {
   m_windowCount = 0;
   m_saveAll = saveAll;
   auto name = projectName.toStdString();
   QFile fileHandle(projectName);
 
   // attempt to backup project files and check we can write
-  if (!canBackupProjectFiles(&fileHandle, projectName) ||
-      !canWriteToProject(&fileHandle, projectName)) {
+  if (!canBackupProjectFiles(&fileHandle, projectName) || !canWriteToProject(&fileHandle, projectName)) {
     return false;
   }
 
@@ -220,8 +206,7 @@ bool ProjectSerialiser::save(const QString &projectName, bool compress,
  * 		folder. (Default True)
  * @return True is loading was successful, otherwise false
  */
-bool ProjectSerialiser::load(const std::string &filepath, const int fileVersion,
-                             const bool isTopLevel) {
+bool ProjectSerialiser::load(const std::string &filepath, const int fileVersion, const bool isTopLevel) {
   // We have to accept std::string to maintain Python compatibility
   auto qfilePath = QString::fromStdString(filepath);
   QFile file(qfilePath);
@@ -249,8 +234,7 @@ bool ProjectSerialiser::load(const std::string &filepath, const int fileVersion,
   // folder
   // This is a legacy edgecase because folders are written
   // <folder>\tsettings\tgo\there
-  g_log.notice() << "Reading Mantid Project: "
-                 << window->projectname.toStdString() << "\n";
+  g_log.notice() << "Reading Mantid Project: " << window->projectname.toStdString() << "\n";
 
   if (!isTopLevel && lines.size() > 0) {
     std::vector<std::string> lineVec;
@@ -261,16 +245,14 @@ bool ProjectSerialiser::load(const std::string &filepath, const int fileVersion,
     std::vector<std::string> values;
     boost::split(values, firstLine, boost::is_any_of("\t"));
 
-    auto newFolder =
-        new Folder(window->currentFolder(), QString::fromStdString(values[1]));
+    auto newFolder = new Folder(window->currentFolder(), QString::fromStdString(values[1]));
     newFolder->setBirthDate(QString::fromStdString(values[2]));
     newFolder->setModificationDate(QString::fromStdString(values[3]));
 
     if (values.size() > 4 && values[4] == "current")
       window->d_loaded_current = newFolder;
 
-    auto fli = new FolderListItem(window->currentFolder()->folderListItem(),
-                                  newFolder);
+    auto fli = new FolderListItem(window->currentFolder()->folderListItem(), newFolder);
     newFolder->setFolderListItem(fli);
 
     window->d_current_folder = newFolder;
@@ -289,8 +271,7 @@ bool ProjectSerialiser::load(const std::string &filepath, const int fileVersion,
   else
     window->d_current_folder = parent;
 
-  g_log.notice() << "Finished Loading Project: "
-                 << window->projectname.toStdString() << "\n";
+  g_log.notice() << "Finished Loading Project: " << window->projectname.toStdString() << "\n";
 
   return true;
 }
@@ -305,9 +286,7 @@ bool ProjectSerialiser::load(const std::string &filepath, const int fileVersion,
  * @param fileVersion :: version of the project file loaded
  * @param isTopLevel :: whether this is being called on a top level folder.
  */
-void ProjectSerialiser::loadProjectSections(const std::string &lines,
-                                            const int fileVersion,
-                                            const bool isTopLevel) {
+void ProjectSerialiser::loadProjectSections(const std::string &lines, const int fileVersion, const bool isTopLevel) {
   // This now ought to be the regular contents of a folder. Parse as normal.
   TSVSerialiser tsv(lines);
 
@@ -358,20 +337,17 @@ void ProjectSerialiser::loadWorkspaces(const TSVSerialiser &tsv) {
     QMessageBox::critical(window, "MantidPlot - Algorithm error",
                           " The workspaces associated with this project "
                           "could not be loaded. Aborting project loading.");
-    throw std::runtime_error(
-        "Failed to load all required workspaces. Aborting project loading.");
+    throw std::runtime_error("Failed to load all required workspaces. Aborting project loading.");
   }
 
   // Check there aren't any unexpected workspaces in project recovery mode
   if (m_projectRecovery) {
     // Convert to set for fast lookup
-    std::unordered_set<std::string> allWsNames(parsedNames.at(ALL_WS).begin(),
-                                               parsedNames.at(ALL_WS).end());
+    std::unordered_set<std::string> allWsNames(parsedNames.at(ALL_WS).begin(), parsedNames.at(ALL_WS).end());
 
     if (parsedNames.find(ALL_GROUP_NAMES) != parsedNames.cend()) {
       // Add group names to the list of accepted names
-      allWsNames.insert(parsedNames.at(ALL_GROUP_NAMES).begin(),
-                        parsedNames.at(ALL_GROUP_NAMES).end());
+      allWsNames.insert(parsedNames.at(ALL_GROUP_NAMES).begin(), parsedNames.at(ALL_GROUP_NAMES).end());
     }
 
     const auto loadedWs = adsInstance.getObjectNames();
@@ -392,8 +368,7 @@ void ProjectSerialiser::loadWorkspaces(const TSVSerialiser &tsv) {
  * @param lines :: string of characters from a Mantid project file
  * @param fileVersion :: version of the project file loaded
  */
-void ProjectSerialiser::loadWindows(const TSVSerialiser &tsv,
-                                    const int fileVersion) {
+void ProjectSerialiser::loadWindows(const TSVSerialiser &tsv, const int fileVersion) {
   auto keys = WindowFactory::Instance().getKeys();
   // Work around for graph-table dependence. Graph3D's currently rely on
   // looking up tables. These must be loaded before the graphs, so work around
@@ -402,8 +377,7 @@ void ProjectSerialiser::loadWindows(const TSVSerialiser &tsv,
   for (auto &classname : keys) {
     if (tsv.hasSection(classname)) {
       for (auto &section : tsv.sections(classname)) {
-        WindowFactory::Instance().loadFromProject(classname, section, window,
-                                                  fileVersion);
+        WindowFactory::Instance().loadFromProject(classname, section, window, fileVersion);
       }
     }
   }
@@ -415,8 +389,7 @@ void ProjectSerialiser::loadWindows(const TSVSerialiser &tsv,
  * @param tsv :: the TSVserialiser object for the project file
  * @param fileVersion :: the version of the project file
  */
-void ProjectSerialiser::loadSubFolders(const TSVSerialiser &tsv,
-                                       const int fileVersion) {
+void ProjectSerialiser::loadSubFolders(const TSVSerialiser &tsv, const int fileVersion) {
   if (tsv.hasSection("folder")) {
     auto folders = tsv.sections("folder");
     for (auto &it : folders) {
@@ -431,8 +404,7 @@ void ProjectSerialiser::loadSubFolders(const TSVSerialiser &tsv,
  * @param tsv :: the TSVserialiser object for the project file
  * @param fileVersion :: the version of the project file
  */
-void ProjectSerialiser::loadScriptWindow(const TSVSerialiser &tsv,
-                                         const int fileVersion) {
+void ProjectSerialiser::loadScriptWindow(const TSVSerialiser &tsv, const int fileVersion) {
   if (tsv.hasSection("scriptwindow")) {
     auto scriptSections = tsv.sections("scriptwindow");
     for (auto &it : scriptSections) {
@@ -475,13 +447,11 @@ void ProjectSerialiser::loadCurrentFolder(const TSVSerialiser &tsv) {
  * @param projectName :: the name of the project
  * @return true if the file handle is writable
  */
-bool ProjectSerialiser::canWriteToProject(QFile *fileHandle,
-                                          const QString &projectName) {
+bool ProjectSerialiser::canWriteToProject(QFile *fileHandle, const QString &projectName) {
   // check if we can write
   if (!fileHandle->open(QIODevice::WriteOnly)) {
     if (m_projectRecovery) {
-      g_log.error("Failed to open file at the following path:\n" +
-                  projectName.toStdString());
+      g_log.error("Failed to open file at the following path:\n" + projectName.toStdString());
     } else {
       QMessageBox::about(window, window->tr("MantidPlot - File save error"),
                          window
@@ -537,8 +507,7 @@ QString ProjectSerialiser::serialiseProjectState(Folder *folder) {
  * @param app :: the current application window instance
  * @return string represnetation of the folder's data
  */
-QString ProjectSerialiser::saveFolderState(Folder *folder,
-                                           const bool isTopLevel) {
+QString ProjectSerialiser::saveFolderState(Folder *folder, const bool isTopLevel) {
   QString text;
   bool isCurrentFolder = window->currentFolder() == folder;
 
@@ -562,13 +531,11 @@ QString ProjectSerialiser::saveFolderState(Folder *folder,
  * @param isCurrentFolder :: whether this folder is the current one.
  * @return string representation of the folder's header data
  */
-QString ProjectSerialiser::saveFolderHeader(Folder *folder,
-                                            bool isCurrentFolder) {
+QString ProjectSerialiser::saveFolderHeader(Folder *folder, bool isCurrentFolder) {
   QString text;
 
   // Write the folder opening tag
-  text += "<folder>\t" + QString(folder->objectName()) + "\t" +
-          folder->birthDate() + "\t" + folder->modificationDate();
+  text += "<folder>\t" + QString(folder->objectName()) + "\t" + folder->birthDate() + "\t" + folder->modificationDate();
 
   // label it as current if necessary
   if (isCurrentFolder) {
@@ -576,8 +543,7 @@ QString ProjectSerialiser::saveFolderHeader(Folder *folder,
   }
 
   text += "\n";
-  text += "<open>" + QString::number(folder->folderListItem()->isExpanded()) +
-          "</open>\n";
+  text += "<open>" + QString::number(folder->folderListItem()->isExpanded()) + "</open>\n";
   return text;
 }
 
@@ -597,8 +563,7 @@ QString ProjectSerialiser::saveFolderSubWindows(Folder *folder) {
   // Write windows
   QList<MdiSubWindow *> windows = folder->windowsList();
   for (auto &w : windows) {
-    MantidQt::API::IProjectSerialisable *ips =
-        dynamic_cast<MantidQt::API::IProjectSerialisable *>(w);
+    MantidQt::API::IProjectSerialisable *ips = dynamic_cast<MantidQt::API::IProjectSerialisable *>(w);
     if (!m_saveAll && !contains(m_windowNames, w->getWindowName()))
       continue;
 
@@ -648,8 +613,7 @@ QString ProjectSerialiser::saveWorkspaces() {
   for (auto &itemIter : workspaceItems) {
     QString wsName = QString::fromStdString(itemIter);
 
-    auto ws = AnalysisDataService::Instance().retrieveWS<Workspace>(
-        wsName.toStdString());
+    auto ws = AnalysisDataService::Instance().retrieveWS<Workspace>(wsName.toStdString());
     auto group = std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(ws);
 
     // We don't split up multiperiod workspaces for performance reasons.
@@ -670,10 +634,8 @@ QString ProjectSerialiser::saveWorkspaces() {
 
         // Do not save out grouped workspaces in project recovery mode
         if (!m_projectRecovery) {
-          const std::string fileName(workingDir + "//" + secondLevelItems[j] +
-                                     ".nxs");
-          window->mantidUI->savedatainNexusFormat(fileName,
-                                                  secondLevelItems[j]);
+          const std::string fileName(workingDir + "//" + secondLevelItems[j] + ".nxs");
+          window->mantidUI->savedatainNexusFormat(fileName, secondLevelItems[j]);
         }
       }
     } else {
@@ -686,8 +648,7 @@ QString ProjectSerialiser::saveWorkspaces() {
 
       // Skip saving in project recovery mode
       if (!m_projectRecovery) {
-        const std::string fileName(workingDir + "//" + wsName.toStdString() +
-                                   ".nxs");
+        const std::string fileName(workingDir + "//" + wsName.toStdString() + ".nxs");
         window->mantidUI->savedatainNexusFormat(fileName, wsName.toStdString());
       }
     }
@@ -711,9 +672,7 @@ QString ProjectSerialiser::saveAdditionalWindows() {
   QString output;
   for (auto win : window->getSerialisableWindows()) {
     auto serialisableWindow = dynamic_cast<IProjectSerialisable *>(win);
-    if (!serialisableWindow ||
-        (!m_saveAll &&
-         !contains(m_windowNames, serialisableWindow->getWindowName())))
+    if (!serialisableWindow || (!m_saveAll && !contains(m_windowNames, serialisableWindow->getWindowName())))
       continue;
 
     auto lines = serialisableWindow->saveToProject(window);
@@ -732,11 +691,9 @@ QString ProjectSerialiser::savePythonInterfaces() {
   QString pythonInterfacesState;
   for (const auto &interfaceLauncher : m_interfacesNames) {
     try {
-      pythonInterfacesState +=
-          savePythonInterface(QString::fromStdString(interfaceLauncher));
+      pythonInterfacesState += savePythonInterface(QString::fromStdString(interfaceLauncher));
     } catch (std::runtime_error &exc) {
-      g_log.warning() << "Error saving " << interfaceLauncher
-                      << " to project: " << exc.what() << "\n";
+      g_log.warning() << "Error saving " << interfaceLauncher << " to project: " << exc.what() << "\n";
     }
   }
   return pythonInterfacesState;
@@ -754,12 +711,10 @@ QString ProjectSerialiser::savePythonInterfaces() {
  * the window. The string should not be empty
  * @return A string representing the state
  */
-QString
-ProjectSerialiser::savePythonInterface(const QString &launcherModuleName) {
+QString ProjectSerialiser::savePythonInterface(const QString &launcherModuleName) {
   assert(!launcherModuleName.isEmpty());
   Python::GlobalInterpreterLock gil;
-  auto state = callPythonModuleAttr(launcherModuleName.toLatin1().data(),
-                                    "saveToProject", nullptr);
+  auto state = callPythonModuleAttr(launcherModuleName.toLatin1().data(), "saveToProject", nullptr);
   if (!STR_CHECK(state)) {
     Py_XDECREF(state);
     throw std::runtime_error("saveToProject() did not return a string.");
@@ -790,26 +745,23 @@ ProjectSerialiser::savePythonInterface(const QString &launcherModuleName) {
  * @param projectName :: the name of the project
  * @return true if the project can be backed up or the user does not care
  */
-bool ProjectSerialiser::canBackupProjectFiles(QFile *fileHandle,
-                                              const QString &projectName) {
+bool ProjectSerialiser::canBackupProjectFiles(QFile *fileHandle, const QString &projectName) {
 
-  if (window->d_backup_files &&
-      fileHandle->exists()) { // make byte-copy of current file so that
-                              // there's always a copy of the data on
-                              // disk
+  if (window->d_backup_files && fileHandle->exists()) { // make byte-copy of current file so that
+                                                        // there's always a copy of the data on
+                                                        // disk
     while (!fileHandle->open(QIODevice::ReadOnly)) {
       if (fileHandle->isOpen())
         fileHandle->close();
-      int choice = QMessageBox::warning(
-          window, window->tr("MantidPlot - File backup error"), // Mantid
-          window
-              ->tr("Cannot make a backup copy of <b>%1</b> (to %2).<br>If "
-                   "you ignore "
-                   "this, you run the risk of <b>data loss</b>.")
-              .arg(projectName)
-              .arg(projectName + "~"),
-          QMessageBox::Retry | QMessageBox::Default,
-          QMessageBox::Abort | QMessageBox::Escape, QMessageBox::Ignore);
+      int choice = QMessageBox::warning(window, window->tr("MantidPlot - File backup error"), // Mantid
+                                        window
+                                            ->tr("Cannot make a backup copy of <b>%1</b> (to %2).<br>If "
+                                                 "you ignore "
+                                                 "this, you run the risk of <b>data loss</b>.")
+                                            .arg(projectName)
+                                            .arg(projectName + "~"),
+                                        QMessageBox::Retry | QMessageBox::Default,
+                                        QMessageBox::Abort | QMessageBox::Escape, QMessageBox::Ignore);
       if (choice == QMessageBox::Abort)
         return false;
       if (choice == QMessageBox::Ignore)
@@ -833,9 +785,7 @@ bool ProjectSerialiser::canBackupProjectFiles(QFile *fileHandle,
  * @param text :: the string representation of the current state
  * @param compress :: whether to compress the project
  */
-void ProjectSerialiser::saveProjectFile(QFile *fileHandle,
-                                        const QString &projectName,
-                                        QString &text, bool compress) {
+void ProjectSerialiser::saveProjectFile(QFile *fileHandle, const QString &projectName, QString &text, bool compress) {
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
   // add number of MdiSubWindows saved to file
@@ -872,8 +822,7 @@ void ProjectSerialiser::saveProjectFile(QFile *fileHandle,
  * @param lines :: the string of characters from a Mantid project file
  * @param fileVersion :: the version of the project file
  */
-void ProjectSerialiser::openScriptWindow(const std::string &lines,
-                                         const int fileVersion) {
+void ProjectSerialiser::openScriptWindow(const std::string &lines, const int fileVersion) {
   window->showScriptWindow();
   auto scriptingWindow = window->getScriptWindowHandle();
 
@@ -894,8 +843,7 @@ void ProjectSerialiser::openScriptWindow(const QStringList &files) {
   if (!scriptingWindow)
     return;
 
-  scriptingWindow->setWindowTitle(
-      "MantidPlot: " + window->scriptingEnv()->languageName() + " Window");
+  scriptingWindow->setWindowTitle("MantidPlot: " + window->scriptingEnv()->languageName() + " Window");
 
   scriptingWindow->loadFromFileList(files);
 }
@@ -905,16 +853,14 @@ void ProjectSerialiser::openScriptWindow(const QStringList &files) {
  *
  * @param s :: the string of characters loaded from a Mantid project file
  */
-void ProjectSerialiser::loadWorkspacesIntoMantid(
-    const groupNameToWsNamesT &workspaces) {
+void ProjectSerialiser::loadWorkspacesIntoMantid(const groupNameToWsNamesT &workspaces) {
   for (auto &allWsNames : workspaces.at(ALL_WS)) {
     loadWsToMantidTree(allWsNames);
   }
 
   // Next group up the workspaces
   for (auto &groupNameAndWorkspaces : workspaces) {
-    if (groupNameAndWorkspaces.first == ALL_WS ||
-        groupNameAndWorkspaces.first == ALL_GROUP_NAMES) {
+    if (groupNameAndWorkspaces.first == ALL_WS || groupNameAndWorkspaces.first == ALL_GROUP_NAMES) {
       // Skip this special key holding all workspaces
       continue;
     }
@@ -932,14 +878,10 @@ void ProjectSerialiser::loadWorkspacesIntoMantid(
       {
         // ...create a new workspace and then delete it later on (group
         // workspace requires two workspaces in order to run the alg)
-        Mantid::API::IAlgorithm_sptr alg =
-            Mantid::API::AlgorithmManager::Instance().create("CreateWorkspace",
-                                                             1);
+        Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("CreateWorkspace", 1);
         alg->setProperty("OutputWorkspace", "boevsMoreBoevs");
-        alg->setProperty<std::vector<double>>("DataX",
-                                              std::vector<double>(2, 0.0));
-        alg->setProperty<std::vector<double>>("DataY",
-                                              std::vector<double>(2, 0.0));
+        alg->setProperty<std::vector<double>>("DataX", std::vector<double>(2, 0.0));
+        alg->setProperty<std::vector<double>>("DataY", std::vector<double>(2, 0.0));
         // execute the algorithm
         alg->execute();
 
@@ -948,13 +890,11 @@ void ProjectSerialiser::loadWorkspacesIntoMantid(
 
       // Group the workspaces as they were when the project was saved
       std::string algName("GroupWorkspaces");
-      Mantid::API::IAlgorithm_sptr groupingAlg =
-          Mantid::API::AlgorithmManager::Instance().create(algName, 1);
+      Mantid::API::IAlgorithm_sptr groupingAlg = Mantid::API::AlgorithmManager::Instance().create(algName, 1);
       groupingAlg->initialize();
       // This is the workspace list, but we cannot pass in a reference
       groupingAlg->setProperty("InputWorkspaces", workspaceList);
-      groupingAlg->setPropertyValue("OutputWorkspace",
-                                    groupNameAndWorkspaces.first);
+      groupingAlg->setPropertyValue("OutputWorkspace", groupNameAndWorkspaces.first);
       // execute the algorithm
       groupingAlg->execute();
 
@@ -967,17 +907,13 @@ void ProjectSerialiser::loadWorkspacesIntoMantid(
     }
     // Error catching for algorithms
     catch (std::invalid_argument &) {
-      QMessageBox::critical(window, "MantidPlot - Algorithm error",
-                            " Error in Grouping Workspaces");
+      QMessageBox::critical(window, "MantidPlot - Algorithm error", " Error in Grouping Workspaces");
     } catch (Mantid::Kernel::Exception::NotFoundError &) {
-      QMessageBox::critical(window, "MantidPlot - Algorithm error",
-                            " Error in Grouping Workspaces");
+      QMessageBox::critical(window, "MantidPlot - Algorithm error", " Error in Grouping Workspaces");
     } catch (std::runtime_error &) {
-      QMessageBox::critical(window, "MantidPlot - Algorithm error",
-                            " Error in Grouping Workspaces");
+      QMessageBox::critical(window, "MantidPlot - Algorithm error", " Error in Grouping Workspaces");
     } catch (std::exception &) {
-      QMessageBox::critical(window, "MantidPlot - Algorithm error",
-                            " Error in Grouping Workspaces");
+      QMessageBox::critical(window, "MantidPlot - Algorithm error", " Error in Grouping Workspaces");
     }
   }
 }
@@ -1006,22 +942,19 @@ void ProjectSerialiser::loadWsToMantidTree(const std::string &wsName) {
  * @param tsv :: the TSVSerialiser object for the project file
  * @param fileVersion :: the version of the project file
  */
-void ProjectSerialiser::loadAdditionalWindows(const std::string &lines,
-                                              const int fileVersion) {
+void ProjectSerialiser::loadAdditionalWindows(const std::string &lines, const int fileVersion) {
   TSVSerialiser tsv(lines);
 
   if (tsv.hasSection("SliceViewer")) {
     for (auto &section : tsv.sections("SliceViewer")) {
-      auto win = SliceViewer::SliceViewerWindow::loadFromProject(
-          section, window, fileVersion);
+      auto win = SliceViewer::SliceViewerWindow::loadFromProject(section, window, fileVersion);
       window->addSerialisableWindow(dynamic_cast<QObject *>(win));
     }
   }
 
   if (tsv.hasSection("spectrumviewer")) {
     for (const auto &section : tsv.sections("spectrumviewer")) {
-      auto win = SpectrumView::SpectrumView::loadFromProject(section, window,
-                                                             fileVersion);
+      auto win = SpectrumView::SpectrumView::loadFromProject(section, window, fileVersion);
       window->addSerialisableWindow(dynamic_cast<QObject *>(win));
     }
   }
@@ -1030,8 +963,8 @@ void ProjectSerialiser::loadAdditionalWindows(const std::string &lines,
     std::string vatesLines;
     tsv >> vatesLines;
 
-    auto win = dynamic_cast<VatesViewerInterface *>(
-        VatesViewerInterface::loadFromProject(vatesLines, window, fileVersion));
+    auto win =
+        dynamic_cast<VatesViewerInterface *>(VatesViewerInterface::loadFromProject(vatesLines, window, fileVersion));
     auto subWindow = setupQMdiSubWindow();
     subWindow->setWidget(win);
 
@@ -1065,8 +998,8 @@ void ProjectSerialiser::loadPythonInterfaces(const std::string &lines) {
     try {
       loadPythonInterface(launcherModuleName, section);
     } catch (std::runtime_error &exc) {
-      g_log.warning() << "Error loading Python interface " << launcherModuleName
-                      << " from project: " << exc.what() << "\n";
+      g_log.warning() << "Error loading Python interface " << launcherModuleName << " from project: " << exc.what()
+                      << "\n";
     }
   }
 }
@@ -1078,11 +1011,9 @@ void ProjectSerialiser::loadPythonInterfaces(const std::string &lines) {
  * @param pySection The serialised state from the project file
  * @throws std::runtime_error if loading fails for some reason
  */
-void ProjectSerialiser::loadPythonInterface(
-    const std::string &launcherModuleName, const std::string &pySection) {
+void ProjectSerialiser::loadPythonInterface(const std::string &launcherModuleName, const std::string &pySection) {
   // sanity check that this an interface we know how to save
-  if (!SERIALISABLE_PY_INTERFACES.contains(
-          QString::fromStdString(launcherModuleName))) {
+  if (!SERIALISABLE_PY_INTERFACES.contains(QString::fromStdString(launcherModuleName))) {
     throw std::runtime_error("Interface not whitelisted as saveable.");
   }
 
@@ -1090,8 +1021,7 @@ void ProjectSerialiser::loadPythonInterface(
   PyObject *fnArg = Py_BuildValue("(s)", pySection.c_str());
   PyObject *result(nullptr);
   try {
-    result = callPythonModuleAttr(launcherModuleName.c_str(), "loadFromProject",
-                                  fnArg);
+    result = callPythonModuleAttr(launcherModuleName.c_str(), "loadFromProject", fnArg);
   } catch (std::runtime_error &) {
     Py_DECREF(fnArg);
     Py_XDECREF(result);
@@ -1111,8 +1041,7 @@ QMdiSubWindow *ProjectSerialiser::setupQMdiSubWindow() const {
   auto subWindow = new QMdiSubWindow();
 
   QIcon icon;
-  auto iconName =
-      QString::fromUtf8(":/VatesSimpleGuiViewWidgets/icons/pvIcon.png");
+  auto iconName = QString::fromUtf8(":/VatesSimpleGuiViewWidgets/icons/pvIcon.png");
   icon.addFile(iconName, QSize(), QIcon::Normal, QIcon::Off);
 
   subWindow->setAttribute(Qt::WA_DeleteOnClose, false);
@@ -1122,13 +1051,11 @@ QMdiSubWindow *ProjectSerialiser::setupQMdiSubWindow() const {
   return subWindow;
 }
 
-bool ProjectSerialiser::contains(const std::vector<std::string> &vec,
-                                 const std::string &value) {
+bool ProjectSerialiser::contains(const std::vector<std::string> &vec, const std::string &value) {
   return std::find(vec.cbegin(), vec.cend(), value) != vec.cend();
 }
 
-groupNameToWsNamesT
-MantidQt::API::ProjectSerialiser::parseWsNames(const std::string &wsNames) {
+groupNameToWsNamesT MantidQt::API::ProjectSerialiser::parseWsNames(const std::string &wsNames) {
   groupNameToWsNamesT allWsNames;
   auto unparsedWorkspaces = splitByDelim(wsNames, '\t');
 
@@ -1145,15 +1072,13 @@ MantidQt::API::ProjectSerialiser::parseWsNames(const std::string &wsNames) {
     }
 
     // Group workspace
-    auto groupWorkspaceElements =
-        splitByDelim(workspaceName, groupWorkspaceChar);
+    auto groupWorkspaceElements = splitByDelim(workspaceName, groupWorkspaceChar);
 
     // First element is the group name
     auto groupName = groupWorkspaceElements.begin();
     auto groupMember = groupName + 1;
 
-    for (auto end = groupWorkspaceElements.end(); groupMember != end;
-         ++groupMember) {
+    for (auto end = groupWorkspaceElements.end(); groupMember != end; ++groupMember) {
       allWsNames[*groupName].emplace_back(*groupMember);
       allWsNames[ALL_GROUP_NAMES].emplace_back(*groupName);
     }

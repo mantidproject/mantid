@@ -52,15 +52,13 @@ size_t NumericAxis::indexOfValue(const double value) const {
 /** Constructor
  * @param length size of the numeric axis
  */
-NumericAxis::NumericAxis(const std::size_t &length)
-    : Axis(), m_values(length) {}
+NumericAxis::NumericAxis(const std::size_t &length) : Axis(), m_values(length) {}
 
 /**
  * Constructor taking a set of centre point values
  * @param centres A vector of values to assign to the axis
  */
-NumericAxis::NumericAxis(const std::vector<double> &centres)
-    : Axis(), m_values(centres) {}
+NumericAxis::NumericAxis(const std::vector<double> &centres) : Axis(), m_values(centres) {}
 
 /** Virtual constructor
  *  @param parentWorkspace :: The workspace is not used in this implementation
@@ -72,8 +70,7 @@ Axis *NumericAxis::clone(const MatrixWorkspace *const parentWorkspace) {
   return new NumericAxis(*this);
 }
 
-Axis *NumericAxis::clone(const std::size_t length,
-                         const MatrixWorkspace *const parentWorkspace) {
+Axis *NumericAxis::clone(const std::size_t length, const MatrixWorkspace *const parentWorkspace) {
   UNUSED_ARG(parentWorkspace)
   auto newAxis = new NumericAxis(*this);
   newAxis->m_values.clear();
@@ -88,12 +85,10 @@ Axis *NumericAxis::clone(const std::size_t length,
  *  @return The value of the axis as a double
  *  @throw  IndexError If the index requested is not in the range of this axis
  */
-double NumericAxis::operator()(const std::size_t &index,
-                               const std::size_t &verticalIndex) const {
+double NumericAxis::operator()(const std::size_t &index, const std::size_t &verticalIndex) const {
   UNUSED_ARG(verticalIndex)
   if (index >= length()) {
-    throw Kernel::Exception::IndexError(index, length() - 1,
-                                        "NumericAxis: Index out of range.");
+    throw Kernel::Exception::IndexError(index, length() - 1, "NumericAxis: Index out of range.");
   }
 
   return m_values[index];
@@ -106,8 +101,7 @@ double NumericAxis::operator()(const std::size_t &index,
  */
 void NumericAxis::setValue(const std::size_t &index, const double &value) {
   if (index >= length()) {
-    throw Kernel::Exception::IndexError(index, length() - 1,
-                                        "NumericAxis: Index out of range.");
+    throw Kernel::Exception::IndexError(index, length() - 1, "NumericAxis: Index out of range.");
   }
 
   m_values[index] = value;
@@ -117,17 +111,14 @@ void NumericAxis::setValue(const std::size_t &index, const double &value) {
  *  @param axis2 :: Reference to the axis to compare to
  *  @return true if self and second axis are equal
  */
-bool NumericAxis::operator==(const Axis &axis2) const {
-  return equalWithinTolerance(axis2, 1e-15);
-}
+bool NumericAxis::operator==(const Axis &axis2) const { return equalWithinTolerance(axis2, 1e-15); }
 
 /** Check if two numeric axis are equivalent to a given tolerance
  *  @param axis2 :: Reference to the axis to compare to
  *  @param tolerance :: Tolerance to compare to
  *  @return true if self and second axis are equal
  */
-bool NumericAxis::equalWithinTolerance(const Axis &axis2,
-                                       const double tolerance) const {
+bool NumericAxis::equalWithinTolerance(const Axis &axis2, const double tolerance) const {
   if (length() != axis2.length()) {
     return false;
   }
@@ -137,8 +128,7 @@ bool NumericAxis::equalWithinTolerance(const Axis &axis2,
   }
   // Check each value is within tolerance
   EqualWithinTolerance comparison(tolerance);
-  return std::equal(m_values.begin(), m_values.end(), spec2->m_values.begin(),
-                    comparison);
+  return std::equal(m_values.begin(), m_values.end(), spec2->m_values.begin(), comparison);
 }
 
 /** Returns a text label which shows the value at index and identifies the

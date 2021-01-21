@@ -35,17 +35,14 @@ using HistogramData::Counts;
 using HistogramData::CountStandardDeviations;
 
 LoadTOFRawNexus::LoadTOFRawNexus()
-    : m_numPixels(0), m_signalNo(0), pulseTimes(0), m_numBins(0), m_spec_min(0),
-      m_spec_max(0), m_dataField(""), m_axisField(""), m_xUnits(""),
-      m_fileMutex(), m_assumeOldFile(false) {}
+    : m_numPixels(0), m_signalNo(0), pulseTimes(0), m_numBins(0), m_spec_min(0), m_spec_max(0), m_dataField(""),
+      m_axisField(""), m_xUnits(""), m_fileMutex(), m_assumeOldFile(false) {}
 
 /// Initialisation method.
 void LoadTOFRawNexus::init() {
-  declareProperty(std::make_unique<FileProperty>("Filename", "",
-                                                 FileProperty::Load, ".nxs"),
+  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Load, ".nxs"),
                   "The name of the NeXus file to load");
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "The name of the Workspace2D to create.");
   declareProperty("Signal", 1,
                   "Number of the signal to load from the file. Default is 1 = "
@@ -55,16 +52,12 @@ void LoadTOFRawNexus::init() {
                   "Enter the right signal number for your desired field.");
   auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(1);
-  declareProperty(
-      std::make_unique<PropertyWithValue<specnum_t>>("SpectrumMin", 1,
-                                                     mustBePositive),
-      "The index number of the first spectrum to read.  Only used if\n"
-      "spectrum_max is set.");
-  declareProperty(
-      std::make_unique<PropertyWithValue<specnum_t>>(
-          "SpectrumMax", Mantid::EMPTY_INT(), mustBePositive),
-      "The number of the last spectrum to read. Only used if explicitly\n"
-      "set.");
+  declareProperty(std::make_unique<PropertyWithValue<specnum_t>>("SpectrumMin", 1, mustBePositive),
+                  "The index number of the first spectrum to read.  Only used if\n"
+                  "spectrum_max is set.");
+  declareProperty(std::make_unique<PropertyWithValue<specnum_t>>("SpectrumMax", Mantid::EMPTY_INT(), mustBePositive),
+                  "The number of the last spectrum to read. Only used if explicitly\n"
+                  "set.");
 }
 
 /**
@@ -75,8 +68,7 @@ void LoadTOFRawNexus::init() {
  */
 int LoadTOFRawNexus::confidence(Kernel::NexusDescriptor &descriptor) const {
   int confidence(0);
-  if (descriptor.pathOfTypeExists("/entry", "NXentry") ||
-      descriptor.pathOfTypeExists("/entry-state0", "NXentry")) {
+  if (descriptor.pathOfTypeExists("/entry", "NXentry") || descriptor.pathOfTypeExists("/entry-state0", "NXentry")) {
     const bool hasEventData = descriptor.classTypeExists("NXevent_data");
     const bool hasData = descriptor.classTypeExists("NXdata");
     if (hasData && hasEventData)
@@ -99,8 +91,7 @@ int LoadTOFRawNexus::confidence(Kernel::NexusDescriptor &descriptor) const {
  * @param entry_name :: name of the entry
  * @param bankNames :: returns the list of bank names
  */
-void LoadTOFRawNexus::countPixels(const std::string &nexusfilename,
-                                  const std::string &entry_name,
+void LoadTOFRawNexus::countPixels(const std::string &nexusfilename, const std::string &entry_name,
                                   std::vector<std::string> &bankNames) {
   m_numPixels = 0;
   m_numBins = 0;
@@ -129,8 +120,7 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename,
         // -------------- Find the data field name ----------------------------
         if (m_dataField.empty()) {
           std::map<std::string, std::string> dataEntries = file.getEntries();
-          for (auto dataEntryIt = dataEntries.begin();
-               dataEntryIt != dataEntries.end(); ++dataEntryIt) {
+          for (auto dataEntryIt = dataEntries.begin(); dataEntryIt != dataEntries.end(); ++dataEntryIt) {
             if (dataEntryIt->second == "SDS") {
               file.openData(dataEntryIt->first);
               if (file.hasAttr("signal")) {
@@ -144,11 +134,9 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename,
                   m_assumeOldFile = false;
                   if (!file.hasAttr("axes")) {
                     if (1 != m_signalNo) {
-                      throw std::runtime_error(
-                          "Your chosen signal number, " +
-                          Strings::toString(m_signalNo) +
-                          ", corresponds to the data field '" + m_dataField +
-                          "' has no 'axes' attribute specifying.");
+                      throw std::runtime_error("Your chosen signal number, " + Strings::toString(m_signalNo) +
+                                               ", corresponds to the data field '" + m_dataField +
+                                               "' has no 'axes' attribute specifying.");
                     } else {
                       m_assumeOldFile = true;
                       axes = "x_pixel_offset,y_pixel_offset,time_of_flight";
@@ -160,21 +148,15 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename,
                   }
 
                   std::vector<std::string> allAxes;
-                  boost::split(allAxes, axes,
-                               boost::algorithm::detail::is_any_ofF<char>(","));
+                  boost::split(allAxes, axes, boost::algorithm::detail::is_any_ofF<char>(","));
                   if (allAxes.size() != 3)
-                    throw std::runtime_error(
-                        "Your chosen signal number, " +
-                        Strings::toString(m_signalNo) +
-                        ", corresponds to the data field '" + m_dataField +
-                        "' which has only " +
-                        Strings::toString(allAxes.size()) +
-                        " dimension. Expected 3 dimensions.");
+                    throw std::runtime_error("Your chosen signal number, " + Strings::toString(m_signalNo) +
+                                             ", corresponds to the data field '" + m_dataField + "' which has only " +
+                                             Strings::toString(allAxes.size()) + " dimension. Expected 3 dimensions.");
 
                   m_axisField = allAxes.back();
-                  g_log.information()
-                      << "Loading signal " << m_signalNo << ", " << m_dataField
-                      << " with axis " << m_axisField << '\n';
+                  g_log.information() << "Loading signal " << m_signalNo << ", " << m_dataField << " with axis "
+                                      << m_axisField << '\n';
                   file.closeData();
                   break;
                 } // Data has a 'signal' attribute
@@ -189,8 +171,7 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename,
   } // each entry
 
   if (m_dataField.empty())
-    throw std::runtime_error("Your chosen signal number, " +
-                             Strings::toString(m_signalNo) +
+    throw std::runtime_error("Your chosen signal number, " + Strings::toString(m_signalNo) +
                              ", was not found in any of the data fields of any "
                              "'bankX' group. Cannot load file.");
 
@@ -211,9 +192,8 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename,
           file.closeData();
 
           if (!dims.empty()) {
-            const size_t newPixels = std::accumulate(
-                dims.cbegin(), dims.cend(), static_cast<size_t>(1),
-                [](size_t product, auto dim) { return product * dim; });
+            const size_t newPixels = std::accumulate(dims.cbegin(), dims.cend(), static_cast<size_t>(1),
+                                                     [](size_t product, auto dim) { return product * dim; });
             m_numPixels += newPixels;
           }
         } else {
@@ -290,10 +270,8 @@ private:
  * @param WS :: workspace to modify
  * @param id_to_wi :: det ID to workspace index mapping
  */
-void LoadTOFRawNexus::loadBank(const std::string &nexusfilename,
-                               const std::string &entry_name,
-                               const std::string &bankName,
-                               const API::MatrixWorkspace_sptr &WS,
+void LoadTOFRawNexus::loadBank(const std::string &nexusfilename, const std::string &entry_name,
+                               const std::string &bankName, const API::MatrixWorkspace_sptr &WS,
                                const detid2index_map &id_to_wi) {
   g_log.debug() << "Loading bank " << bankName << '\n';
   // To avoid segfaults on RHEL5/6 and Fedora
@@ -352,8 +330,7 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename,
 
     for (size_t i = 0; i < numX; i++) {
       for (size_t j = 0; j < numY; j++) {
-        pixel_id.emplace_back(
-            static_cast<uint32_t>(j + numY * (i + numX * bankNum)));
+        pixel_id.emplace_back(static_cast<uint32_t>(j + numY * (i + numX * bankNum)));
       }
     }
   }
@@ -382,8 +359,7 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename,
   if (tof.size() <= 1) {
     file.close();
     m_fileMutex.unlock();
-    g_log.warning() << "Invalid " << m_axisField << " data in " << bankName
-                    << '\n';
+    g_log.warning() << "Invalid " << m_axisField << " data in " << bankName << '\n';
     return;
   }
 
@@ -407,8 +383,7 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename,
       file.getDataCoerce(errors);
       file.closeData();
     } catch (...) {
-      g_log.information() << "Error loading the errors field, '" << errorsField
-                          << "' for bank " << bankName
+      g_log.information() << "Error loading the errors field, '" << errorsField << "' for bank " << bankName
                           << ". Will use sqrt(counts). \n";
       hasErrors = false;
     }
@@ -433,8 +408,7 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename,
     if (hasErrors) {
       auto eFrom = errors.begin() + i * m_numBins;
       auto eTo = eFrom + m_numBins;
-      spec.setHistogram(X, Counts(from, to),
-                        CountStandardDeviations(eFrom, eTo));
+      spec.setHistogram(X, Counts(from, to), CountStandardDeviations(eFrom, eTo));
     } else {
       spec.setHistogram(X, Counts(from, to));
     }
@@ -490,31 +464,26 @@ void LoadTOFRawNexus::exec() {
   prog->doReport("Counting pixels");
   std::vector<std::string> bankNames;
   countPixels(filename, entry_name, bankNames);
-  g_log.debug() << "Workspace found to have " << m_numPixels << " pixels and "
-                << m_numBins << " bins\n";
+  g_log.debug() << "Workspace found to have " << m_numPixels << " pixels and " << m_numBins << " bins\n";
 
   prog->setNumSteps(bankNames.size() + 5);
 
   prog->doReport("Creating workspace");
   // Start with a dummy WS just to hold the logs and load the instrument
-  MatrixWorkspace_sptr WS = WorkspaceFactory::Instance().create(
-      "Workspace2D", m_numPixels, m_numBins + 1, m_numBins);
+  MatrixWorkspace_sptr WS = WorkspaceFactory::Instance().create("Workspace2D", m_numPixels, m_numBins + 1, m_numBins);
 
   // Load the logs
   prog->doReport("Loading DAS logs");
   g_log.debug() << "Loading DAS logs\n";
 
-  int nPeriods = 1; // Unused
-  auto periodLog =
-      std::make_unique<const TimeSeriesProperty<int>>("period_log"); // Unused
-  LoadEventNexus::runLoadNexusLogs<MatrixWorkspace_sptr>(
-      filename, WS, *this, false, nPeriods, periodLog);
+  int nPeriods = 1;                                                               // Unused
+  auto periodLog = std::make_unique<const TimeSeriesProperty<int>>("period_log"); // Unused
+  LoadEventNexus::runLoadNexusLogs<MatrixWorkspace_sptr>(filename, WS, *this, false, nPeriods, periodLog);
 
   // Load the instrument
   prog->report("Loading instrument");
   g_log.debug() << "Loading instrument\n";
-  LoadEventNexus::runLoadInstrument<MatrixWorkspace_sptr>(filename, WS,
-                                                          entry_name, this);
+  LoadEventNexus::runLoadInstrument<MatrixWorkspace_sptr>(filename, WS, entry_name, this);
 
   // Load the meta data, but don't stop on errors
   prog->report("Loading metadata");

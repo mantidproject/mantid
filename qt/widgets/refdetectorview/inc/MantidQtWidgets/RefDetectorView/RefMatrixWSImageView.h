@@ -31,8 +31,8 @@ public:
   /// Construct an image viewer for the specifed MatrixWorkspace
   RefMatrixWSImageView(const Mantid::API::MatrixWorkspace_sptr & /*mat_ws*/);
 
-  RefMatrixWSImageView(const QString &wpsName, int peakMin, int peakMax,
-                       int backMin, int backMax, int tofMin, int tofMax);
+  RefMatrixWSImageView(const QString &wpsName, int peakMin, int peakMax, int backMin, int backMax, int tofMin,
+                       int tofMax);
 
   RefIVConnections *getConnections();
 

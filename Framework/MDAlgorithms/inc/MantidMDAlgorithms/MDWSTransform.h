@@ -63,19 +63,14 @@ public:
    * their values are correct when present.
    * sets default values u and v to [1,0,0] and [0,1,0] if not present or any
    * error. */
-  void setUVvectors(const std::vector<double> &ut,
-                    const std::vector<double> &vt,
-                    const std::vector<double> &wt);
+  void setUVvectors(const std::vector<double> &ut, const std::vector<double> &vt, const std::vector<double> &wt);
 
-  std::vector<double>
-  getTransfMatrix(MDAlgorithms::MDWSDescription &TargWSDescription,
-                  const std::string &FrameRequested,
-                  const std::string &QScaleRequested) const;
+  std::vector<double> getTransfMatrix(MDAlgorithms::MDWSDescription &TargWSDescription,
+                                      const std::string &FrameRequested, const std::string &QScaleRequested) const;
 
   /// construct meaningful dimension names for Q3D case and different
   /// transformation types defined by the class
-  void setQ3DDimensionsNames(MDAlgorithms::MDWSDescription &TargWSDescription,
-                             CnvrtToMD::TargetFrame FrameID,
+  void setQ3DDimensionsNames(MDAlgorithms::MDWSDescription &TargWSDescription, CnvrtToMD::TargetFrame FrameID,
                              CnvrtToMD::CoordScaling ScaleID) const;
   /// construct meaningful dimension names for ModQ case and different
   /// transformation types defined by the class;
@@ -104,27 +99,22 @@ private:
   std::vector<std::string> m_QScalingID;
   /// string representation of Target frames, which would be exposed to user;
   std::vector<std::string> m_TargFramesID;
-  bool v3DIsDefault(const std::vector<double> &vect,
-                    const std::string &message) const;
+  bool v3DIsDefault(const std::vector<double> &vect, const std::string &message) const;
 
 protected: // for testing
   /// function generates "Kind of" W transformation matrix for different
   /// Q-conversion modes;
-  Kernel::DblMatrix
-  buildQTrahsf(MDAlgorithms::MDWSDescription &TargWSDescription,
-               CnvrtToMD::CoordScaling ScaleID, bool UnitUB = false) const;
+  Kernel::DblMatrix buildQTrahsf(MDAlgorithms::MDWSDescription &TargWSDescription, CnvrtToMD::CoordScaling ScaleID,
+                                 bool UnitUB = false) const;
   /// build orthogonal coordinate around two input vecotors u and v expressed in
   /// rlu;
   // std::vector<Kernel::V3D> buildOrtho3D(const Kernel::DblMatrix &BM,const
   // Kernel::V3D &u, const Kernel::V3D &v)const;
 
-  std::vector<double>
-  getTransfMatrix(MDAlgorithms::MDWSDescription &TargWSDescription,
-                  CnvrtToMD::TargetFrame FrameID,
-                  CnvrtToMD::CoordScaling &ScaleID) const;
+  std::vector<double> getTransfMatrix(MDAlgorithms::MDWSDescription &TargWSDescription, CnvrtToMD::TargetFrame FrameID,
+                                      CnvrtToMD::CoordScaling &ScaleID) const;
 
-  CnvrtToMD::TargetFrame
-  findTargetFrame(MDAlgorithms::MDWSDescription &TargWSDescription) const;
+  CnvrtToMD::TargetFrame findTargetFrame(MDAlgorithms::MDWSDescription &TargWSDescription) const;
   // helper function which verifies, if the input information availble on the
   // workspace consistent with the frame requiested
   void checkTargetFrame(const MDAlgorithms::MDWSDescription &TargWSDescription,

@@ -30,9 +30,7 @@ public:
       return (boost::format("%f") % uncertainValue.value()).str();
     }
 
-    return (boost::format("%f +/- %f") % uncertainValue.value() %
-            uncertainValue.error())
-        .str();
+    return (boost::format("%f +/- %f") % uncertainValue.value() % uncertainValue.error()).str();
   }
 
   static UncertainValue fromString(const std::string &uncertainValueString) {
@@ -41,12 +39,10 @@ public:
     }
 
     std::vector<std::string> substrings;
-    boost::iter_split(substrings, uncertainValueString,
-                      boost::first_finder("+/-"));
+    boost::iter_split(substrings, uncertainValueString, boost::first_finder("+/-"));
 
     if (substrings.size() > 2) {
-      throw std::runtime_error(
-          "UncertainValue cannot be constructed from more than 2 values.");
+      throw std::runtime_error("UncertainValue cannot be constructed from more than 2 values.");
     }
 
     std::vector<double> components(substrings.size());

@@ -35,8 +35,7 @@ XmlHandler::XmlHandler(const std::string &filename) {
  * Composed tags: / replaced by _
  *
  */
-std::map<std::string, std::string>
-XmlHandler::get_metadata(const std::vector<std::string> &tags_to_ignore) {
+std::map<std::string, std::string> XmlHandler::get_metadata(const std::vector<std::string> &tags_to_ignore) {
   std::map<std::string, std::string> metadata;
 
   Poco::XML::NodeIterator it(pDoc, Poco::XML::NodeFilter::SHOW_ELEMENT);
@@ -44,11 +43,9 @@ XmlHandler::get_metadata(const std::vector<std::string> &tags_to_ignore) {
 
   while (pNode) {
     Poco::AutoPtr<Poco::XML::NodeList> children = pNode->childNodes();
-    if (children->length() == 1 &&
-        std::find(std::begin(tags_to_ignore), std::end(tags_to_ignore),
-                  pNode->nodeName()) == std::end(tags_to_ignore)) {
-      std::string key =
-          pNode->parentNode()->nodeName() + "/" + pNode->nodeName();
+    if (children->length() == 1 && std::find(std::begin(tags_to_ignore), std::end(tags_to_ignore), pNode->nodeName()) ==
+                                       std::end(tags_to_ignore)) {
+      std::string key = pNode->parentNode()->nodeName() + "/" + pNode->nodeName();
       std::string value = pNode->innerText();
       boost::algorithm::trim(value);
       metadata.emplace(key, value);
@@ -68,15 +65,13 @@ std::string XmlHandler::get_text_from_tag(const std::string &xpath) {
   return value;
 }
 
-std::map<std::string, std::string>
-XmlHandler::get_attributes_from_tag(const std::string &xpath) {
+std::map<std::string, std::string> XmlHandler::get_attributes_from_tag(const std::string &xpath) {
   std::map<std::string, std::string> attributes_map;
   Poco::XML::NodeIterator it(pDoc, Poco::XML::NodeFilter::SHOW_ELEMENT);
   Poco::XML::Node *pNode = it.nextNode();
   Poco::XML::Node *detectorNode = pNode->getNodeByPath(xpath);
   if (detectorNode) {
-    Poco::AutoPtr<Poco::XML::NamedNodeMap> attributes =
-        detectorNode->attributes();
+    Poco::AutoPtr<Poco::XML::NamedNodeMap> attributes = detectorNode->attributes();
     for (unsigned int i = 0; i < attributes->length(); i++) {
       Poco::XML::Node *attribute = attributes->item(i);
       attributes_map.emplace(attribute->nodeName(), attribute->nodeValue());

@@ -39,9 +39,8 @@ only one that will be implemented in a foreseeable horizon. The
 interface of this class is given by IEnggDiffractionView so that it
 fits in the MVP (Model-View-Presenter) design of this GUI.
 */
-class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffractionViewQtGUI
-    : public MantidQt::API::UserSubWindow,
-      public IEnggDiffractionView {
+class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffractionViewQtGUI : public MantidQt::API::UserSubWindow,
+                                                              public IEnggDiffractionView {
   Q_OBJECT
 
 public:
@@ -52,19 +51,15 @@ public:
   /// This interface's categories.
   static QString categoryInfo() { return "Diffraction"; }
 
-  void splashMessage(bool visible, const std::string &shortMsg,
-                     const std::string &description) override;
+  void splashMessage(bool visible, const std::string &shortMsg, const std::string &description) override;
 
   void showStatus(const std::string &sts) override;
 
-  void userWarning(const std::string &warn,
-                   const std::string &description) override;
+  void userWarning(const std::string &warn, const std::string &description) override;
 
-  void userError(const std::string &err,
-                 const std::string &description) override;
+  void userError(const std::string &err, const std::string &description) override;
 
-  std::string
-  askNewCalibrationFilename(const std::string &suggestedFname) override;
+  std::string askNewCalibrationFilename(const std::string &suggestedFname) override;
 
   std::string askExistingCalibFilename() override;
 
@@ -72,9 +67,7 @@ public:
 
   std::string getRBNumber() const override;
 
-  EnggDiffCalibSettings currentCalibSettings() const override {
-    return m_calibSettings;
-  }
+  EnggDiffCalibSettings currentCalibSettings() const override { return m_calibSettings; }
 
   std::string currentInstrument() const override { return m_currentInst; }
 
@@ -88,16 +81,13 @@ public:
 
   std::vector<std::string> newCeriaNo() const override;
 
-  int currentCropCalibBankName() const override {
-    return g_currentCropCalibBankName;
-  }
+  int currentCropCalibBankName() const override { return g_currentCropCalibBankName; }
 
   std::string currentCalibSpecNos() const override;
 
   std::string currentCalibCustomisedBankName() const override;
 
-  void newCalibLoaded(const std::string &vanadiumNo, const std::string &ceriaNo,
-                      const std::string &fname) override;
+  void newCalibLoaded(const std::string &vanadiumNo, const std::string &ceriaNo, const std::string &fname) override;
 
   std::string enggRunPythonCode(const std::string &pyCode) override;
 
@@ -135,9 +125,7 @@ public:
 
   void plotWaterfallSpectrum(const std::string &wsName) override;
 
-  void plotReplacingWindow(const std::string &wsName,
-                           const std::string &spectrum,
-                           const std::string &type) override;
+  void plotReplacingWindow(const std::string &wsName, const std::string &spectrum, const std::string &type) override;
 
   void plotCalibOutput(const std::string &pyCode) override;
 
@@ -247,8 +235,7 @@ private:
   Ui::EnggDiffractionQtTabSettings m_uiTabSettings;
 
   /// converts QList to a vector
-  std::vector<std::string> qListToVector(const QStringList &list,
-                                         bool validator) const;
+  std::vector<std::string> qListToVector(const QStringList &list, bool validator) const;
 
   /// instrument selected (ENGIN-X, etc.)
   std::string m_currentInst;

@@ -13,22 +13,16 @@ namespace SliceViewer {
 
 /** PeakRepresentationSphere : Draws a circle for spherical peaks.
  */
-class EXPORT_OPT_MANTIDQT_SLICEVIEWER PeakRepresentationSphere
-    : public PeakRepresentation {
+class EXPORT_OPT_MANTIDQT_SLICEVIEWER PeakRepresentationSphere : public PeakRepresentation {
 public:
-  PeakRepresentationSphere(const Mantid::Kernel::V3D &origin,
-                           const double &peakRadius,
-                           const double &backgroundInnerRadius,
-                           const double &backgroundOuterRadius);
+  PeakRepresentationSphere(const Mantid::Kernel::V3D &origin, const double &peakRadius,
+                           const double &backgroundInnerRadius, const double &backgroundOuterRadius);
 
   /// Setter for the slice point
   void setSlicePoint(const double & /*z*/) override;
   /// Transform the coordinates.
-  void
-  movePosition(Mantid::Geometry::PeakTransform_sptr peakTransform) override;
-  void
-  movePositionNonOrthogonal(Mantid::Geometry::PeakTransform_sptr peakTransform,
-                            NonOrthogonalAxis &info) override {
+  void movePosition(Mantid::Geometry::PeakTransform_sptr peakTransform) override;
+  void movePositionNonOrthogonal(Mantid::Geometry::PeakTransform_sptr peakTransform, NonOrthogonalAxis &info) override {
     (void)info;
     movePosition(peakTransform);
   }
@@ -52,10 +46,8 @@ public:
   double getZoomOutFactor() const;
 
 protected:
-  std::shared_ptr<PeakPrimitives> getDrawingInformation(
-      PeakRepresentationViewInformation viewInformation) override;
-  void doDraw(QPainter &painter, PeakViewColor &foregroundColor,
-              PeakViewColor &backgroundColor,
+  std::shared_ptr<PeakPrimitives> getDrawingInformation(PeakRepresentationViewInformation viewInformation) override;
+  void doDraw(QPainter &painter, PeakViewColor &foregroundColor, PeakViewColor &backgroundColor,
               std::shared_ptr<PeakPrimitives> drawingInformation,
               PeakRepresentationViewInformation viewInformation) override;
 

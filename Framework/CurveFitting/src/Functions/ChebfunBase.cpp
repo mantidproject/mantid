@@ -50,8 +50,7 @@ double AbsValue(double x) { return fabs(x); }
  * approximation.
  */
 ChebfunBase::ChebfunBase(size_t n, double start, double end, double tolerance)
-    : m_tolerance(std::max(tolerance, g_tolerance)), m_n(n), m_start(start),
-      m_end(end) {
+    : m_tolerance(std::max(tolerance, g_tolerance)), m_n(n), m_start(start), m_end(end) {
   if (n == 0) {
     throw std::invalid_argument("Chebfun order must be greater than 0.");
   }
@@ -85,15 +84,13 @@ const std::vector<double> &ChebfunBase::integrationWeights() const {
  */
 double ChebfunBase::integrate(const std::vector<double> &p) const {
   if (p.size() != m_x.size()) {
-    throw std::invalid_argument(
-        "Function values have a wrong size in integration.");
+    throw std::invalid_argument("Function values have a wrong size in integration.");
   }
   if (m_integrationWeights.empty()) {
     calcIntegrationWeights();
   }
   std::vector<double> tmp(p.size());
-  std::transform(p.begin(), p.end(), m_integrationWeights.begin(), tmp.begin(),
-                 std::multiplies<double>());
+  std::transform(p.begin(), p.end(), m_integrationWeights.begin(), tmp.begin(), std::multiplies<double>());
   // NB. for some reason the commented out expression gives more accurate result
   // (when weights
   // are not multiplied by the same factor) than the uncommented one. But moving
@@ -108,8 +105,7 @@ double ChebfunBase::integrate(const std::vector<double> &p) const {
  */
 void ChebfunBase::calcX() {
   if (m_n == 0) {
-    throw std::logic_error(
-        "Cannot calculate x points of ChebfunBase: base is empty.");
+    throw std::logic_error("Cannot calculate x points of ChebfunBase: base is empty.");
   }
   if (m_x.size() != m_n + 1) {
     throw std::logic_error("X array has a wrong size.");
@@ -163,8 +159,7 @@ void ChebfunBase::calcIntegrationWeights() const {
  *    from which the coefficients are considered for testing.
  * @return :: True if converged or false otherwise.
  */
-bool ChebfunBase::hasConverged(const std::vector<double> &a, double maxA,
-                               double tolerance, size_t shift) {
+bool ChebfunBase::hasConverged(const std::vector<double> &a, double maxA, double tolerance, size_t shift) {
   if (a.empty())
     return true;
   if (maxA == 0.0) {
@@ -225,8 +220,7 @@ double ChebfunBase::eval(double x, const std::vector<double> &p) const {
  * @param p :: The y-points of a function.
  * @param res :: Output result. res.size() == x.size()
  */
-void ChebfunBase::evalVector(const std::vector<double> &x,
-                             const std::vector<double> &p,
+void ChebfunBase::evalVector(const std::vector<double> &x, const std::vector<double> &p,
                              std::vector<double> &res) const {
   if (x.empty()) {
     throw std::invalid_argument("Vector of x-values cannot be empty.");
@@ -280,9 +274,7 @@ void ChebfunBase::evalVector(const std::vector<double> &x,
  * @param p :: The y-points of a function.
  * @return :: Output result. res.size() == x.size()
  */
-std::vector<double>
-ChebfunBase::evalVector(const std::vector<double> &x,
-                        const std::vector<double> &p) const {
+std::vector<double> ChebfunBase::evalVector(const std::vector<double> &x, const std::vector<double> &p) const {
   std::vector<double> res;
   evalVector(x, p, res);
   return res;
@@ -293,13 +285,11 @@ ChebfunBase::evalVector(const std::vector<double> &x,
  * @param a :: Chebyshev coefficients of the diffientiated function.
  * @param aout :: Output coeffs of the derivative.
  */
-void ChebfunBase::derivative(const std::vector<double> &a,
-                             std::vector<double> &aout) const {
+void ChebfunBase::derivative(const std::vector<double> &a, std::vector<double> &aout) const {
 
   using namespace std::placeholders;
   if (a.size() != m_x.size()) {
-    throw std::invalid_argument(
-        "Cannot calculate derivative: coeffs vector has wrong size.");
+    throw std::invalid_argument("Cannot calculate derivative: coeffs vector has wrong size.");
   }
   if (m_n == 0) {
     aout.resize(2, 0.0);
@@ -318,9 +308,8 @@ void ChebfunBase::derivative(const std::vector<double> &a,
     aout.front() = a[1];
   }
   using std::placeholders::_1;
-  std::transform(
-      aout.begin(), aout.end(), aout.begin(),
-      std::bind(std::divides<double>(), _1, 0.5 * (m_end - m_start)));
+  std::transform(aout.begin(), aout.end(), aout.begin(),
+                 std::bind(std::divides<double>(), _1, 0.5 * (m_end - m_start)));
 }
 
 /**
@@ -329,13 +318,11 @@ void ChebfunBase::derivative(const std::vector<double> &a,
  * @param aout :: Output coeffs of the integral.
  * @return :: A base for the integral.
  */
-ChebfunBase_sptr ChebfunBase::integral(const std::vector<double> &a,
-                                       std::vector<double> &aout) const {
+ChebfunBase_sptr ChebfunBase::integral(const std::vector<double> &a, std::vector<double> &aout) const {
 
   using namespace std::placeholders;
   if (a.size() != m_x.size()) {
-    throw std::invalid_argument(
-        "Cannot calculate integral: coeffs vector has wrong size.");
+    throw std::invalid_argument("Cannot calculate integral: coeffs vector has wrong size.");
   }
   aout.resize(m_n + 2);
   aout.front() = 0.0;
@@ -345,8 +332,7 @@ ChebfunBase_sptr ChebfunBase::integral(const std::vector<double> &a,
   aout[m_n] = a[m_n - 1] / double(2 * m_n);
   aout[m_n + 1] = a[m_n] / double(2 * (m_n + 1));
   double d = (m_end - m_start) / 2;
-  std::transform(aout.begin(), aout.end(), aout.begin(),
-                 std::bind(std::multiplies<double>(), _1, d));
+  std::transform(aout.begin(), aout.end(), aout.begin(), std::bind(std::multiplies<double>(), _1, d));
   return ChebfunBase_sptr(new ChebfunBase(m_n + 1, m_start, m_end));
 }
 
@@ -370,10 +356,8 @@ ChebfunBase_sptr ChebfunBase::integral(const std::vector<double> &a,
  * failed.
  */
 template <class FunctionType>
-ChebfunBase_sptr
-ChebfunBase::bestFitTempl(double start, double end, FunctionType f,
-                          std::vector<double> &p, std::vector<double> &a,
-                          double maxA, double tolerance, size_t maxSize) {
+ChebfunBase_sptr ChebfunBase::bestFitTempl(double start, double end, FunctionType f, std::vector<double> &p,
+                                           std::vector<double> &a, double maxA, double tolerance, size_t maxSize) {
 
   std::vector<double> p1, p2;
   const size_t n0 = 8;
@@ -422,8 +406,7 @@ ChebfunBase::bestFitTempl(double start, double end, FunctionType f,
       }
 
       if (m != n + 1) {
-        auto newBase =
-            ChebfunBase_sptr(new ChebfunBase(m - 1, start, end, tolerance));
+        auto newBase = ChebfunBase_sptr(new ChebfunBase(m - 1, start, end, tolerance));
         a.resize(m);
         p = newBase->calcP(a);
         return newBase;
@@ -444,8 +427,7 @@ ChebfunBase::bestFitTempl(double start, double end, FunctionType f,
       // it is a polynomial
       if (countNonZero < 2)
         countNonZero = 2;
-      auto newBase =
-          ChebfunBase_sptr(new ChebfunBase(countNonZero - 1, start, end));
+      auto newBase = ChebfunBase_sptr(new ChebfunBase(countNonZero - 1, start, end));
       a.resize(countNonZero);
       p = newBase->calcP(a);
       return newBase;
@@ -461,22 +443,15 @@ ChebfunBase::bestFitTempl(double start, double end, FunctionType f,
 }
 
 /// Template specialization for a generic function type.
-ChebfunBase_sptr ChebfunBase::bestFit(double start, double end,
-                                      ChebfunFunctionType f,
-                                      std::vector<double> &p,
-                                      std::vector<double> &a, double maxA,
-                                      double tolerance, size_t maxSize) {
+ChebfunBase_sptr ChebfunBase::bestFit(double start, double end, ChebfunFunctionType f, std::vector<double> &p,
+                                      std::vector<double> &a, double maxA, double tolerance, size_t maxSize) {
   return bestFitTempl(start, end, std::move(f), p, a, maxA, tolerance, maxSize);
 }
 
 /// Template specialization for IFunction
-ChebfunBase_sptr ChebfunBase::bestFit(double start, double end,
-                                      const API::IFunction &f,
-                                      std::vector<double> &p,
-                                      std::vector<double> &a, double maxA,
-                                      double tolerance, size_t maxSize) {
-  return bestFitTempl<const API::IFunction &>(start, end, f, p, a, maxA,
-                                              tolerance, maxSize);
+ChebfunBase_sptr ChebfunBase::bestFit(double start, double end, const API::IFunction &f, std::vector<double> &p,
+                                      std::vector<double> &a, double maxA, double tolerance, size_t maxSize) {
+  return bestFitTempl<const API::IFunction &>(start, end, f, p, a, maxA, tolerance, maxSize);
 }
 
 /**
@@ -505,8 +480,7 @@ std::vector<double> ChebfunBase::calcA(const std::vector<double> &p) const {
   const size_t nn = m_n + 1;
 
   if (p.size() != nn) {
-    throw std::invalid_argument(
-        "ChebfunBase: function vector must have same size as the base.");
+    throw std::invalid_argument("ChebfunBase: function vector must have same size as the base.");
   }
 
   std::vector<double> a(nn);
@@ -565,8 +539,7 @@ std::vector<double> ChebfunBase::calcA(const std::vector<double> &p) const {
 std::vector<double> ChebfunBase::calcP(const std::vector<double> &a) const {
   if (m_n + 1 != a.size()) {
     std::stringstream mess;
-    mess << "chebfun: cannot calculate P from A - different sizes: " << m_n + 1
-         << " != " << a.size();
+    mess << "chebfun: cannot calculate P from A - different sizes: " << m_n + 1 << " != " << a.size();
     throw std::invalid_argument(mess.str());
   }
   std::vector<double> p(m_n + 1);
@@ -582,8 +555,7 @@ std::vector<double> ChebfunBase::calcP(const std::vector<double> &a) const {
       fc.set(i, d, 0.0);
     }
     gsl_fft_real_workspace *workspace = gsl_fft_real_workspace_alloc(2 * m_n);
-    gsl_fft_halfcomplex_wavetable *wavetable =
-        gsl_fft_halfcomplex_wavetable_alloc(2 * m_n);
+    gsl_fft_halfcomplex_wavetable *wavetable = gsl_fft_halfcomplex_wavetable_alloc(2 * m_n);
 
     gsl_fft_halfcomplex_transform(tmp.data(), 1, 2 * m_n, wavetable, workspace);
 
@@ -627,8 +599,7 @@ std::vector<double> ChebfunBase::fit(const API::IFunction &f) const {
  * @param f :: Function to calculate.
  * @param p :: Values of function f at the even-valued indices of m_x.
  */
-std::vector<double> ChebfunBase::fitOdd(const ChebfunFunctionType &f,
-                                        std::vector<double> &p) const {
+std::vector<double> ChebfunBase::fitOdd(const ChebfunFunctionType &f, std::vector<double> &p) const {
   assert(size() == p.size() * 2 - 1);
   assert(size() % 2 == 1);
   auto &xp = xPoints();
@@ -652,8 +623,7 @@ std::vector<double> ChebfunBase::fitOdd(const ChebfunFunctionType &f,
  * @param f :: Function to calculate.
  * @param pEven :: Values of function f at the even-valued indices of m_x.
  */
-std::vector<double> ChebfunBase::fitOdd(const API::IFunction &f,
-                                        std::vector<double> &pEven) const {
+std::vector<double> ChebfunBase::fitOdd(const API::IFunction &f, std::vector<double> &pEven) const {
   assert(size() == pEven.size() * 2 - 1);
   assert(size() % 2 == 1);
   std::vector<double> pOdd(size() - pEven.size());
@@ -755,12 +725,9 @@ std::vector<double> ChebfunBase::roots(const std::vector<double> &a) const {
  * yvalues.size()
  * @return :: Vector of y-points in this base.
  */
-std::vector<double>
-ChebfunBase::smooth(const std::vector<double> &xvalues,
-                    const std::vector<double> &yvalues) const {
+std::vector<double> ChebfunBase::smooth(const std::vector<double> &xvalues, const std::vector<double> &yvalues) const {
   if (xvalues.size() != yvalues.size())
-    throw std::invalid_argument(
-        "Cannot smooth: input vectors have different sizes.");
+    throw std::invalid_argument("Cannot smooth: input vectors have different sizes.");
   const size_t n = size();
   std::vector<double> y(n);
 
@@ -778,9 +745,7 @@ ChebfunBase::smooth(const std::vector<double> &xvalues,
       continue;
     auto j = std::distance(xbegin, ix0);
     if (j > 0) {
-      y[i] = yvalues[j - 1] + (x - xvalues[j - 1]) /
-                                  (xvalues[j] - xvalues[j - 1]) *
-                                  (yvalues[j] - yvalues[j - 1]);
+      y[i] = yvalues[j - 1] + (x - xvalues[j - 1]) / (xvalues[j] - xvalues[j - 1]) * (yvalues[j] - yvalues[j - 1]);
       ix = ix0;
     } else {
       y[i] = yvalues[0];
@@ -797,13 +762,12 @@ ChebfunBase::smooth(const std::vector<double> &xvalues,
   std::transform(a.begin(), a.end(), powerSpec.begin(), AbsValue);
 
   // estimate power spectrum's noise as the average of its high frequency half
-  double noise =
-      std::accumulate(powerSpec.begin() + n / 2, powerSpec.end(), 0.0);
+  double noise = std::accumulate(powerSpec.begin() + n / 2, powerSpec.end(), 0.0);
   noise /= static_cast<double>(n / 2);
 
   // index of the maximum element in powerSpec
-  const size_t imax = static_cast<size_t>(std::distance(
-      powerSpec.begin(), std::max_element(powerSpec.begin(), powerSpec.end())));
+  const size_t imax =
+      static_cast<size_t>(std::distance(powerSpec.begin(), std::max_element(powerSpec.begin(), powerSpec.end())));
 
   if (noise == 0.0) {
     noise = powerSpec[imax] / guessSignalToNoiseRatio;
@@ -827,8 +791,7 @@ ChebfunBase::smooth(const std::vector<double> &xvalues,
   // noise starting index
   size_t i0 = 0;
   for (size_t i = 0; i < n / 3; ++i) {
-    double av =
-        (powerSpec[3 * i] + powerSpec[3 * i + 1] + powerSpec[3 * i + 2]) / 3;
+    double av = (powerSpec[3 * i] + powerSpec[3 * i + 1] + powerSpec[3 * i + 2]) / 3;
     if (av < noise) {
       i0 = 3 * i;
       break;
@@ -881,8 +844,7 @@ ChebfunBase::smooth(const std::vector<double> &xvalues,
       double m0 = a1 * x0 + b1;
       if (a1 < 0.0) {
         c3 = 0.0;
-        c2 = (m1 - m0 - a1 * (x1 - x0)) /
-             ((x1 * x1 - x0 * x0) - 2 * x0 * (x1 - x0));
+        c2 = (m1 - m0 - a1 * (x1 - x0)) / ((x1 * x1 - x0 * x0) - 2 * x0 * (x1 - x0));
         c1 = a1 - 2 * c2 * x0;
         c0 = m0 - c2 * x0 * x0 - c1 * x0;
       } else {
@@ -895,8 +857,7 @@ ChebfunBase::smooth(const std::vector<double> &xvalues,
         if (tmp > 0.1) {
           m0 = 0.0;
           double d0 = log(0.1 / 0.9);
-          c3 = (d0 * (x0 - x1) - 2 * (m0 - m1)) /
-               (pow(x0, 3) - pow(x1, 3) - 3 * x0 * x1 * (x0 - x1));
+          c3 = (d0 * (x0 - x1) - 2 * (m0 - m1)) / (pow(x0, 3) - pow(x1, 3) - 3 * x0 * x1 * (x0 - x1));
           c2 = (3 * c3 * (x0 * x0 - x1 * x1) - d0) / (2 * (x1 - x0));
           c1 = -x1 * (3 * c3 * x1 + 2 * c2);
           c0 = x1 * x1 * (2 * c3 * x1 + c2) + m1;
@@ -920,8 +881,7 @@ ChebfunBase::smooth(const std::vector<double> &xvalues,
     }
   }
 
-  std::transform(a.begin(), a.end(), wf.begin(), a.begin(),
-                 std::multiplies<double>());
+  std::transform(a.begin(), a.end(), wf.begin(), a.begin(), std::multiplies<double>());
   y = calcP(a);
 
   return y;

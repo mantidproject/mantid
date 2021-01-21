@@ -64,15 +64,13 @@ protected:
   -------------------------------------------------------------------------------------*/
 
   /// Apply the style choice
-  void applyStyleChoice(GraphOptions::CurveType style, MultiLayer *ml,
-                        int &lineWidth);
+  void applyStyleChoice(GraphOptions::CurveType style, MultiLayer *ml, int &lineWidth);
 
   /// Make a name for a copied curve
   static QString createCopyName(const QString &curveName);
 
   /// Draw the curve.
-  void doDraw(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap,
-              const QRect &rect,
+  void doDraw(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap, const QRect &rect,
               MantidQwtWorkspaceData const *const data) const;
 
   /*-------------------------------------------------------------------------------------
@@ -90,6 +88,5 @@ private:
   mutable QwtDoubleRect m_boundingRect;
 
   // To ensure that all MantidCurves can work with Mantid Workspaces.
-  virtual void init(Graph *g, bool distr, GraphOptions::CurveType style,
-                    bool multileSpectra = false) = 0;
+  virtual void init(Graph *g, bool distr, GraphOptions::CurveType style, bool multileSpectra = false) = 0;
 };

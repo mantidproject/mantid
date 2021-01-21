@@ -25,9 +25,7 @@ class MantidMatrixFunction;
  * and QObject.
  *
  */
-class MantidMatrixFunctionWorkspaceObserver
-    : public QObject,
-      public MantidQt::API::WorkspaceObserver {
+class MantidMatrixFunctionWorkspaceObserver : public QObject, public MantidQt::API::WorkspaceObserver {
   Q_OBJECT
 public:
   explicit MantidMatrixFunctionWorkspaceObserver(MantidMatrixFunction *);
@@ -39,12 +37,8 @@ signals:
 private:
   /* Base class virtual methods */
 
-  void afterReplaceHandle(
-      const std::string &wsName,
-      const std::shared_ptr<Mantid::API::Workspace> &ws) override;
-  void
-  preDeleteHandle(const std::string &wsName,
-                  const std::shared_ptr<Mantid::API::Workspace> &) override;
+  void afterReplaceHandle(const std::string &wsName, const std::shared_ptr<Mantid::API::Workspace> &ws) override;
+  void preDeleteHandle(const std::string &wsName, const std::shared_ptr<Mantid::API::Workspace> &) override;
   void clearADSHandle() override;
 
   MantidMatrixFunction *m_function;

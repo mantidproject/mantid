@@ -46,8 +46,8 @@ Kernel::Logger g_log("ISISLiveEventDataListener");
  * The constructor
  */
 ISISLiveEventDataListener::ISISLiveEventDataListener()
-    : LiveListener(), m_isConnected(false), m_stopThread(false), m_runNumber(0),
-      m_daeHandle(), m_numberOfPeriods(0), m_numberOfSpectra(0) {
+    : LiveListener(), m_isConnected(false), m_stopThread(false), m_runNumber(0), m_daeHandle(), m_numberOfPeriods(0),
+      m_numberOfSpectra(0) {
   m_warnings["period"] = "Period number is outside the range. Changed to 0.";
 }
 
@@ -61,8 +61,7 @@ ISISLiveEventDataListener::~ISISLiveEventDataListener() {
     // seem to have an equivalent to pthread_cancel
     m_stopThread = true;
     try {
-      m_thread.join(RECV_TIMEOUT * 2 *
-                    1000); // *1000 because join() wants time in milliseconds
+      m_thread.join(RECV_TIMEOUT * 2 * 1000); // *1000 because join() wants time in milliseconds
     } catch (Poco::TimeoutException &) {
       // And just what do we do here?!?
       // Log a message, sure, but other than that we can either hang the
@@ -80,8 +79,7 @@ ISISLiveEventDataListener::~ISISLiveEventDataListener() {
 }
 
 // connect the listener to DAE
-bool ISISLiveEventDataListener::connect(
-    const Poco::Net::SocketAddress &address) {
+bool ISISLiveEventDataListener::connect(const Poco::Net::SocketAddress &address) {
   // If we don't have an address, force a connection to the test server running
   // on
   // localhost on the default port
@@ -90,8 +88,7 @@ bool ISISLiveEventDataListener::connect(
     try {
       m_socket.connect(tempAddress); // BLOCKING connect
     } catch (...) {
-      g_log.error() << "Connection to " << tempAddress.toString()
-                    << " failed.\n";
+      g_log.error() << "Connection to " << tempAddress.toString() << " failed.\n";
       return false;
     }
   } else {
@@ -103,8 +100,7 @@ bool ISISLiveEventDataListener::connect(
     }
   }
 
-  m_socket.setReceiveTimeout(Poco::Timespan(
-      RECV_TIMEOUT, 0)); // POCO timespan is seconds, microseconds
+  m_socket.setReceiveTimeout(Poco::Timespan(RECV_TIMEOUT, 0)); // POCO timespan is seconds, microseconds
   g_log.debug() << "Connected to " << m_socket.address().toString() << '\n';
 
   std::string daeName = address.toString();
@@ -125,8 +121,7 @@ bool ISISLiveEventDataListener::connect(
   int retVal = 0;
   if (address.port() > 10000) {
     // we are using a custom port, set the DAE port as one higher
-    retVal = IDCopen(daeName.c_str(), 0, 0, &m_daeHandle,
-                     static_cast<uint16_t>(address.port() + 1));
+    retVal = IDCopen(daeName.c_str(), 0, 0, &m_daeHandle, static_cast<uint16_t>(address.port() + 1));
   } else {
     // we are using the default port, take the default DAE port
     retVal = IDCopen(daeName.c_str(), 0, 0, &m_daeHandle);
@@ -163,8 +158,7 @@ void ISISLiveEventDataListener::start(Types::Core::DateAndTime startTime) {
 std::shared_ptr<API::Workspace> ISISLiveEventDataListener::extractData() {
   if (m_eventBuffer.empty() || !m_eventBuffer[0]) {
     // extractData() is called too early
-    throw LiveData::Exception::NotYet(
-        "The workspace has not yet been initialized.");
+    throw LiveData::Exception::NotYet("The workspace has not yet been initialized.");
   }
 
   if (!m_isConnected) {
@@ -175,20 +169,15 @@ std::shared_ptr<API::Workspace> ISISLiveEventDataListener::extractData() {
 
   std::lock_guard<std::mutex> scopedLock(m_mutex);
 
-  std::vector<DataObjects::EventWorkspace_sptr> outWorkspaces(
-      m_numberOfPeriods);
+  std::vector<DataObjects::EventWorkspace_sptr> outWorkspaces(m_numberOfPeriods);
   for (size_t i = 0; i < static_cast<size_t>(m_numberOfPeriods); ++i) {
 
     // Make a brand new EventWorkspace
-    DataObjects::EventWorkspace_sptr temp =
-        std::dynamic_pointer_cast<DataObjects::EventWorkspace>(
-            API::WorkspaceFactory::Instance().create(
-                "EventWorkspace", m_eventBuffer[i]->getNumberHistograms(), 2,
-                1));
+    DataObjects::EventWorkspace_sptr temp = std::dynamic_pointer_cast<DataObjects::EventWorkspace>(
+        API::WorkspaceFactory::Instance().create("EventWorkspace", m_eventBuffer[i]->getNumberHistograms(), 2, 1));
 
     // Copy geometry over.
-    API::WorkspaceFactory::Instance().initializeFromParent(*m_eventBuffer[i],
-                                                           *temp, false);
+    API::WorkspaceFactory::Instance().initializeFromParent(*m_eventBuffer[i], *temp, false);
 
     // Clear out the old logs
     temp->mutableRun().clearTimeSeriesLogs();
@@ -213,9 +202,7 @@ std::shared_ptr<API::Workspace> ISISLiveEventDataListener::extractData() {
 
 bool ISISLiveEventDataListener::isConnected() { return m_isConnected; }
 
-API::ILiveListener::RunStatus ISISLiveEventDataListener::runStatus() {
-  return Running;
-}
+API::ILiveListener::RunStatus ISISLiveEventDataListener::runStatus() { return Running; }
 
 int ISISLiveEventDataListener::runNumber() const { return m_runNumber; }
 
@@ -237,8 +224,7 @@ void ISISLiveEventDataListener::run() {
     TCPStreamEventDataNeutron events;
     while (!m_stopThread) {
       // get the header with the type of the packet
-      Receive(events.head, "Events header",
-              "Corrupt stream - you should reconnect.");
+      Receive(events.head, "Events header", "Corrupt stream - you should reconnect.");
       if (m_stopThread)
         break;
       if (!(events.head.type == TCPStreamEventHeader::Neutron)) {
@@ -248,15 +234,13 @@ void ISISLiveEventDataListener::run() {
       CollectJunk(events.head);
 
       // get the header with the sream size
-      Receive(events.head_n, "Neutrons header",
-              "Corrupt stream - you should reconnect.");
+      Receive(events.head_n, "Neutrons header", "Corrupt stream - you should reconnect.");
       if (m_stopThread)
         break;
       CollectJunk(events.head_n);
 
       // absolute pulse (frame) time
-      Mantid::Types::Core::DateAndTime pulseTime =
-          m_startTime + static_cast<double>(events.head_n.frame_time_zero);
+      Mantid::Types::Core::DateAndTime pulseTime = m_startTime + static_cast<double>(events.head_n.frame_time_zero);
       // Save the pulse charge in the logs
       auto protons = static_cast<double>(events.head_n.protons);
       m_eventBuffer[0]
@@ -268,15 +252,12 @@ void ISISLiveEventDataListener::run() {
       uint32_t nread = 0;
       // receive the events
       while (nread < events.head_n.nevents) {
-        int ntoread = m_socket.available() /
-                      static_cast<int>(sizeof(TCPStreamEventNeutron));
+        int ntoread = m_socket.available() / static_cast<int>(sizeof(TCPStreamEventNeutron));
         if (ntoread > static_cast<int>(events.head_n.nevents - nread)) {
           ntoread = static_cast<int>(events.head_n.nevents - nread);
         }
         if (ntoread > 0) {
-          m_socket.receiveBytes(
-              &(events.data[nread]),
-              ntoread * static_cast<int>(sizeof(TCPStreamEventNeutron)));
+          m_socket.receiveBytes(&(events.data[nread]), ntoread * static_cast<int>(sizeof(TCPStreamEventNeutron)));
           nread += ntoread;
         } else {
           Poco::Thread::sleep(RECV_WAIT);
@@ -292,8 +273,7 @@ void ISISLiveEventDataListener::run() {
 
   } catch (std::runtime_error &e) {
 
-    g_log.error() << "Caught a runtime exception.\nException message: "
-                  << e.what() << '\n';
+    g_log.error() << "Caught a runtime exception.\nException message: " << e.what() << '\n';
     m_isConnected = false;
 
     m_backgroundException = std::make_shared<std::runtime_error>(e);
@@ -301,9 +281,7 @@ void ISISLiveEventDataListener::run() {
   } catch (std::invalid_argument &e) {
     // TimeSeriesProperty (and possibly some other things) can
     // can throw these errors
-    g_log.error()
-        << "Caught an invalid argument exception.\nException message: "
-        << e.what() << '\n';
+    g_log.error() << "Caught an invalid argument exception.\nException message: " << e.what() << '\n';
     m_isConnected = false;
     std::string newMsg("Invalid argument exception thrown from "
                        "the background thread: ");
@@ -314,8 +292,8 @@ void ISISLiveEventDataListener::run() {
     g_log.error() << "Uncaught exception in ISISLiveEventDataListener network "
                      "read thread.\n";
     m_isConnected = false;
-    m_backgroundException = std::shared_ptr<std::runtime_error>(
-        new std::runtime_error("Unknown error in backgound thread"));
+    m_backgroundException =
+        std::shared_ptr<std::runtime_error>(new std::runtime_error("Unknown error in backgound thread"));
   }
 }
 
@@ -323,23 +301,19 @@ void ISISLiveEventDataListener::run() {
  * Initialize the buffer event workspace.
  * @param setup :: Information on the data to be sent.
  */
-void ISISLiveEventDataListener::initEventBuffer(
-    const TCPStreamEventDataSetup &setup) {
+void ISISLiveEventDataListener::initEventBuffer(const TCPStreamEventDataSetup &setup) {
   // Create an event workspace for the output
-  auto workspace = API::WorkspaceFactory::Instance().create(
-      "EventWorkspace", m_numberOfSpectra, 2, 1);
+  auto workspace = API::WorkspaceFactory::Instance().create("EventWorkspace", m_numberOfSpectra, 2, 1);
 
   m_eventBuffer.resize(m_numberOfPeriods);
 
   // save this workspace as the event buffer
-  m_eventBuffer[0] =
-      std::dynamic_pointer_cast<DataObjects::EventWorkspace>(workspace);
+  m_eventBuffer[0] = std::dynamic_pointer_cast<DataObjects::EventWorkspace>(workspace);
   if (!m_eventBuffer[0]) {
     throw std::runtime_error("Failed to create an event workspace");
   }
   // Set the units
-  m_eventBuffer[0]->getAxis(0)->unit() =
-      Kernel::UnitFactory::Instance().create("TOF");
+  m_eventBuffer[0]->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("TOF");
   m_eventBuffer[0]->setYUnit("Counts");
 
   // Set the spectra-detector maping
@@ -353,23 +327,19 @@ void ISISLiveEventDataListener::initEventBuffer(
   m_runNumber = setup.head_setup.run_number;
   std::string run_num = std::to_string(m_runNumber);
   m_eventBuffer[0]->mutableRun().addLogData(
-      new Mantid::Kernel::PropertyWithValue<std::string>(RUN_NUMBER_PROPERTY,
-                                                         run_num));
+      new Mantid::Kernel::PropertyWithValue<std::string>(RUN_NUMBER_PROPERTY, run_num));
 
   // Add the proton charge property
-  m_eventBuffer[0]->mutableRun().addLogData(
-      new Mantid::Kernel::TimeSeriesProperty<double>(PROTON_CHARGE_PROPERTY));
+  m_eventBuffer[0]->mutableRun().addLogData(new Mantid::Kernel::TimeSeriesProperty<double>(PROTON_CHARGE_PROPERTY));
 
   if (m_numberOfPeriods > 1) {
     for (size_t i = 1; i < static_cast<size_t>(m_numberOfPeriods); ++i) {
       // create an event workspace for each period
       m_eventBuffer[i] = std::dynamic_pointer_cast<DataObjects::EventWorkspace>(
-          API::WorkspaceFactory::Instance().create(
-              "EventWorkspace", m_eventBuffer[0]->getNumberHistograms(), 2, 1));
+          API::WorkspaceFactory::Instance().create("EventWorkspace", m_eventBuffer[0]->getNumberHistograms(), 2, 1));
 
       // Copy geometry over.
-      API::WorkspaceFactory::Instance().initializeFromParent(
-          *m_eventBuffer[0], *m_eventBuffer[i], false);
+      API::WorkspaceFactory::Instance().initializeFromParent(*m_eventBuffer[0], *m_eventBuffer[i], false);
     }
   }
 }
@@ -378,9 +348,8 @@ void ISISLiveEventDataListener::initEventBuffer(
  * Save received event data in the buffer workspace.
  * @param data :: A vector with events.
  */
-void ISISLiveEventDataListener::saveEvents(
-    const std::vector<TCPStreamEventNeutron> &data,
-    const Types::Core::DateAndTime &pulseTime, size_t period) {
+void ISISLiveEventDataListener::saveEvents(const std::vector<TCPStreamEventNeutron> &data,
+                                           const Types::Core::DateAndTime &pulseTime, size_t period) {
   std::lock_guard<std::mutex> scopedLock(m_mutex);
 
   if (period >= static_cast<size_t>(m_numberOfPeriods)) {
@@ -394,9 +363,7 @@ void ISISLiveEventDataListener::saveEvents(
 
   for (const auto &streamEvent : data) {
     Types::Event::TofEvent event(streamEvent.time_of_flight, pulseTime);
-    m_eventBuffer[period]
-        ->getSpectrum(streamEvent.spectrum)
-        .addEventQuickly(event);
+    m_eventBuffer[period]->getSpectrum(streamEvent.spectrum).addEventQuickly(event);
   }
 }
 
@@ -412,8 +379,7 @@ void ISISLiveEventDataListener::loadSpectraMap() {
   getIntArray("UDET", udet, ndet);
   getIntArray("SPEC", spec, ndet);
   // set up the mapping
-  m_eventBuffer[0]->updateSpectraUsing(
-      API::SpectrumDetectorMapping(spec, udet));
+  m_eventBuffer[0]->updateSpectraUsing(API::SpectrumDetectorMapping(spec, udet));
 }
 
 /**
@@ -429,8 +395,7 @@ void ISISLiveEventDataListener::loadInstrument(const std::string &instrName) {
   const char *warningMessage = "Failed to load instrument ";
   try {
     g_log.notice() << "Loading instrument " << instrName << " ... \n";
-    API::Algorithm_sptr alg =
-        API::AlgorithmFactory::Instance().create("LoadInstrument", -1);
+    API::Algorithm_sptr alg = API::AlgorithmFactory::Instance().create("LoadInstrument", -1);
     alg->initialize();
     alg->setPropertyValue("InstrumentName", instrName);
     alg->setProperty("Workspace", m_eventBuffer[0]);
@@ -450,17 +415,14 @@ void ISISLiveEventDataListener::loadInstrument(const std::string &instrName) {
 
 int ISISLiveEventDataListener::getInt(const std::string &par) const {
   int sv_dims_array[1] = {1}, sv_ndims = 1, buffer;
-  int stat =
-      IDCgetpari(m_daeHandle, par.c_str(), &buffer, sv_dims_array, &sv_ndims);
+  int stat = IDCgetpari(m_daeHandle, par.c_str(), &buffer, sv_dims_array, &sv_ndims);
   if (stat != 0) {
     throw std::runtime_error("Unable to read " + par + " from DAE");
   }
   return buffer;
 }
 
-void ISISLiveEventDataListener::getIntArray(const std::string &par,
-                                            std::vector<int> &arr,
-                                            const size_t dim) {
+void ISISLiveEventDataListener::getIntArray(const std::string &par, std::vector<int> &arr, const size_t dim) {
   int dims = static_cast<int>(dim), ndims = 1;
   arr.resize(dim);
   if (IDCgetpari(m_daeHandle, par.c_str(), arr.data(), &dims, &ndims) != 0) {
@@ -474,8 +436,7 @@ void ISISLiveEventDataListener::getIntArray(const std::string &par,
  * @param code ::    The error code (disregarded)
  * @param message :: The error message - passed to the logger at error level
  */
-void ISISLiveEventDataListener::IDCReporter(int status, int code,
-                                            const char *message) {
+void ISISLiveEventDataListener::IDCReporter(int status, int code, const char *message) {
   (void)status;
   (void)code; // Avoid compiler warning
   g_log.error(message);

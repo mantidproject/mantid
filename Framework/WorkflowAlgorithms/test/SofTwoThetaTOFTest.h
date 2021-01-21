@@ -41,31 +41,26 @@ public:
     constexpr int numBins{13};
     constexpr double angleStep{0.1};
     API::MatrixWorkspace_sptr inputWS =
-        WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(
-            numBanks, bankSize, numBins);
+        WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(numBanks, bankSize, numBins);
     inputWS->getAxis(0)->setUnit("TOF");
     inputWS->mutableRun().addProperty("wavelength", 1.0);
     auto &paramMap = inputWS->instrumentParameters();
-    paramMap.addString(inputWS->getInstrument().get(), "l2",
-                       std::to_string(5.));
+    paramMap.addString(inputWS->getInstrument().get(), "l2", std::to_string(5.));
     WorkflowAlgorithms::SofTwoThetaTOF alg;
     alg.setChild(true);
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("OutputWorkspace", "_unused_for_child"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "_unused_for_child"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("AngleStep", angleStep))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
-    API::MatrixWorkspace_const_sptr outputWS =
-        alg.getProperty("OutputWorkspace");
+    API::MatrixWorkspace_const_sptr outputWS = alg.getProperty("OutputWorkspace");
     TS_ASSERT(outputWS)
     auto const &spectrumInfo = outputWS->spectrumInfo();
     auto const nHist = spectrumInfo.size();
     TS_ASSERT_LESS_THAN(1, nHist)
-    auto angleBinEdge =
-        std::floor(spectrumInfo.twoTheta(0) / (angleStep * deg2rad));
+    auto angleBinEdge = std::floor(spectrumInfo.twoTheta(0) / (angleStep * deg2rad));
     for (size_t i = 0; i < nHist; ++i) {
       auto const twoTheta = spectrumInfo.twoTheta(i);
       TS_ASSERT_LESS_THAN(angleBinEdge, twoTheta)
@@ -80,20 +75,17 @@ public:
     constexpr int numBins{13};
     constexpr double angleStep{0.1};
     API::MatrixWorkspace_sptr inputWS =
-        WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(
-            numBanks, bankSize, numBins);
+        WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(numBanks, bankSize, numBins);
     inputWS->getAxis(0)->setUnit("TOF");
     inputWS->mutableRun().addProperty("wavelength", 1.0);
     auto &paramMap = inputWS->instrumentParameters();
-    paramMap.addString(inputWS->getInstrument().get(), "l2",
-                       std::to_string(5.));
+    paramMap.addString(inputWS->getInstrument().get(), "l2", std::to_string(5.));
     WorkflowAlgorithms::SofTwoThetaTOF alg;
     alg.setChild(true);
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("OutputWorkspace", "_unused_for_child"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "_unused_for_child"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("AngleStep", angleStep))
     auto tempXml = boost::filesystem::temp_directory_path();
     tempXml /= boost::filesystem::unique_path("SofTwoThetaTest-%%%%%%%%.xml");
@@ -121,25 +113,21 @@ public:
     constexpr int numBins{13};
     constexpr double angleStep{0.1};
     API::MatrixWorkspace_sptr inputWS =
-        WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(
-            numBanks, bankSize, numBins);
+        WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(numBanks, bankSize, numBins);
     inputWS->getAxis(0)->setUnit("TOF");
     inputWS->mutableRun().addProperty("wavelength", 1.0);
     auto &paramMap = inputWS->instrumentParameters();
-    paramMap.addString(inputWS->getInstrument().get(), "l2",
-                       std::to_string(5.));
+    paramMap.addString(inputWS->getInstrument().get(), "l2", std::to_string(5.));
     WorkflowAlgorithms::SofTwoThetaTOF alg;
     alg.setChild(true);
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("OutputWorkspace", "_unused_for_child"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "_unused_for_child"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("AngleStep", angleStep))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
-    API::MatrixWorkspace_const_sptr outputWS =
-        alg.getProperty("OutputWorkspace");
+    API::MatrixWorkspace_const_sptr outputWS = alg.getProperty("OutputWorkspace");
     TS_ASSERT(outputWS)
     for (size_t i = 0; i < outputWS->getNumberHistograms(); ++i) {
       auto const &Ys = outputWS->y(i);

@@ -47,13 +47,11 @@ class SpectrumInfo;
  */
 class MANTID_API_DLL WorkspaceNearestNeighbours {
 public:
-  WorkspaceNearestNeighbours(int nNeighbours, const SpectrumInfo &spectrumInfo,
-                             std::vector<specnum_t> spectrumNumbers,
+  WorkspaceNearestNeighbours(int nNeighbours, const SpectrumInfo &spectrumInfo, std::vector<specnum_t> spectrumNumbers,
                              bool ignoreMaskedDetectors = false);
 
   // Neighbouring spectra by radius
-  std::map<specnum_t, Mantid::Kernel::V3D>
-  neighboursInRadius(specnum_t spectrum, double radius = 0.0) const;
+  std::map<specnum_t, Mantid::Kernel::V3D> neighboursInRadius(specnum_t spectrum, double radius = 0.0) const;
 
   // Neighbouring spectra by
   std::map<specnum_t, Mantid::Kernel::V3D> neighbours(specnum_t spectrum) const;
@@ -68,10 +66,9 @@ private:
   const std::vector<specnum_t> m_spectrumNumbers;
 
   /// typedef for Graph object used to hold the calculated information
-  using Graph = boost::adjacency_list<
-      boost::vecS, boost::vecS, boost::directedS,
-      boost::property<boost::vertex_name_t, int64_t>,
-      boost::property<boost::edge_name_t, Mantid::Kernel::V3D>>;
+  using Graph =
+      boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS, boost::property<boost::vertex_name_t, int64_t>,
+                            boost::property<boost::edge_name_t, Mantid::Kernel::V3D>>;
   /// Vertex descriptor object for Graph
   using Vertex = boost::graph_traits<Graph>::vertex_descriptor;
   /// map object of int to Graph Vertex descriptor
@@ -82,8 +79,7 @@ private:
   void build(const int noNeighbours);
   /// Query the graph for the default number of nearest neighbours to specified
   /// detector
-  std::map<specnum_t, Mantid::Kernel::V3D>
-  defaultNeighbours(const specnum_t spectrum) const;
+  std::map<specnum_t, Mantid::Kernel::V3D> defaultNeighbours(const specnum_t spectrum) const;
   /// The current number of nearest neighbours
   int m_noNeighbours;
   /// The largest value of the distance to a nearest neighbour

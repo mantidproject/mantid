@@ -17,28 +17,24 @@
 #include <QPalette>
 #include <utility>
 
-QwtScaleDrawNonOrthogonal::QwtScaleDrawNonOrthogonal(
-    QwtPlot *plot, ScreenDimension screenDimension,
-    const Mantid::API::IMDWorkspace_sptr &workspace, size_t dimX, size_t dimY,
-    Mantid::Kernel::VMD slicePoint,
-    MantidQt::SliceViewer::NonOrthogonalOverlay *gridPlot)
+QwtScaleDrawNonOrthogonal::QwtScaleDrawNonOrthogonal(QwtPlot *plot, ScreenDimension screenDimension,
+                                                     const Mantid::API::IMDWorkspace_sptr &workspace, size_t dimX,
+                                                     size_t dimY, Mantid::Kernel::VMD slicePoint,
+                                                     MantidQt::SliceViewer::NonOrthogonalOverlay *gridPlot)
     : m_fromHklToXyz({{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}}),
-      m_fromXyzToHkl({{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}}),
-      m_plot(plot), m_screenDimension(screenDimension), m_dimX(dimX),
-      m_dimY(dimY), m_slicePoint(std::move(slicePoint)), m_gridPlot(gridPlot) {
+      m_fromXyzToHkl({{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}}), m_plot(plot), m_screenDimension(screenDimension),
+      m_dimX(dimX), m_dimY(dimY), m_slicePoint(std::move(slicePoint)), m_gridPlot(gridPlot) {
   // Set up the transformation matrix
   setTransformationMatrices(std::move(workspace));
 
   // Set up the angles
   // set the angles for the two dimensions
-  auto angles =
-      MantidQt::API::getGridLineAnglesInRadian(m_fromHklToXyz, m_dimX, m_dimY);
+  auto angles = MantidQt::API::getGridLineAnglesInRadian(m_fromHklToXyz, m_dimX, m_dimY);
   m_angleX = static_cast<double>(angles.first);
   m_angleY = static_cast<double>(angles.second);
 }
 
-void QwtScaleDrawNonOrthogonal::draw(QPainter *painter,
-                                     const QPalette &palette) const {
+void QwtScaleDrawNonOrthogonal::draw(QPainter *painter, const QPalette &palette) const {
   // Get the ScaleDiv element information, such as min_xyz and max_xyz
   const auto &scaleDivEntries = scaleDiv();
   const auto minXyz = scaleDivEntries.lowerBound();
@@ -58,21 +54,17 @@ void QwtScaleDrawNonOrthogonal::draw(QPainter *painter,
     minHkl = fromMixedCoordinatesToHkl(leftInXyz, minXyz).y();
     maxHkl = fromMixedCoordinatesToHkl(leftInXyz, maxXyz).y();
   } else {
-    throw std::runtime_error(
-        "QwtScaleDrawNonOrthogonal: The provided screen "
-        "dimension is not valid. It has to be either X or Y.");
+    throw std::runtime_error("QwtScaleDrawNonOrthogonal: The provided screen "
+                             "dimension is not valid. It has to be either X or Y.");
   }
 
   // Calculate appropriate tick mark locations and values in hkl coordinates.
-  const auto selectedAxis = m_screenDimension == ScreenDimension::X
-                                ? QwtPlot::xBottom
-                                : QwtPlot::yLeft;
+  const auto selectedAxis = m_screenDimension == ScreenDimension::X ? QwtPlot::xBottom : QwtPlot::yLeft;
   const auto maxMajorSteps = m_plot->axisMaxMajor(selectedAxis);
   const auto maxMinorSteps = m_plot->axisMaxMinor(selectedAxis);
   const auto stepSize = m_plot->axisStepSize(selectedAxis);
   const auto *axisScaleEngine = m_plot->axisScaleEngine(selectedAxis);
-  const auto scaleDivHkl = axisScaleEngine->divideScale(
-      minHkl, maxHkl, maxMajorSteps, maxMinorSteps, stepSize);
+  const auto scaleDivHkl = axisScaleEngine->divideScale(minHkl, maxHkl, maxMajorSteps, maxMinorSteps, stepSize);
 
   // Transform the scale for tick marks back to xyz. We need to pass the point
   // where to draw in xyz.
@@ -160,9 +152,7 @@ void QwtScaleDrawNonOrthogonal::draw(QPainter *painter,
   };
 }
 
-void QwtScaleDrawNonOrthogonal::drawLabelNonOrthogonal(QPainter *painter,
-                                                       double labelValue,
-                                                       double labelPos) const {
+void QwtScaleDrawNonOrthogonal::drawLabelNonOrthogonal(QPainter *painter, double labelValue, double labelPos) const {
   QwtText lbl = tickLabel(painter->font(), labelValue);
   if (lbl.isEmpty())
     return;
@@ -188,8 +178,7 @@ void QwtScaleDrawNonOrthogonal::drawLabelNonOrthogonal(QPainter *painter,
   painter->restore();
 }
 
-void QwtScaleDrawNonOrthogonal::applyGridLinesX(
-    const QwtValueList &majorTicksXyz) const {
+void QwtScaleDrawNonOrthogonal::applyGridLinesX(const QwtValueList &majorTicksXyz) const {
   auto angle = m_angleY;
   m_gridPlot->updateXGridlines(majorTicksXyz, angle);
   // We need the -1 since we the angle is defined in the mathematical positive
@@ -197,8 +186,7 @@ void QwtScaleDrawNonOrthogonal::applyGridLinesX(
   // negative sense.
 }
 
-void QwtScaleDrawNonOrthogonal::applyGridLinesY(
-    const QwtValueList &majorTicksXyz) const {
+void QwtScaleDrawNonOrthogonal::applyGridLinesY(const QwtValueList &majorTicksXyz) const {
   auto angle = m_angleX;
   m_gridPlot->updateYGridlines(majorTicksXyz, angle);
 }
@@ -223,13 +211,11 @@ QPointF QwtScaleDrawNonOrthogonal::fromScreenToXyz(QPoint screen) const {
   return QPointF(x, y);
 }
 
-QPointF QwtScaleDrawNonOrthogonal::fromMixedCoordinatesToHkl(double x,
-                                                             double y) const {
+QPointF QwtScaleDrawNonOrthogonal::fromMixedCoordinatesToHkl(double x, double y) const {
   Mantid::Kernel::VMD coords = m_slicePoint;
   coords[m_dimX] = static_cast<Mantid::Kernel::VMD_t>(x);
   coords[m_dimY] = static_cast<Mantid::Kernel::VMD_t>(y);
-  MantidQt::API::transformLookpointToWorkspaceCoord(
-      coords, m_fromXyzToHkl, m_dimX, m_dimY, m_missingDimension);
+  MantidQt::API::transformLookpointToWorkspaceCoord(coords, m_fromXyzToHkl, m_dimX, m_dimY, m_missingDimension);
   auto coord1 = coords[m_dimX];
   auto coord2 = coords[m_dimY];
   return QPointF(coord1, coord2);
@@ -240,16 +226,12 @@ double QwtScaleDrawNonOrthogonal::fromXtickInHklToXyz(double tick) const {
   // is in xyz, so we need to bring it to hkl
   auto tickPointHkl = m_slicePoint;
   tickPointHkl[m_dimX] = static_cast<float>(tick);
-  auto heightScreenInXyz =
-      m_plot->invTransform(QwtPlot::yLeft, m_plot->canvas()->height());
+  auto heightScreenInXyz = m_plot->invTransform(QwtPlot::yLeft, m_plot->canvas()->height());
   tickPointHkl[m_dimY] = static_cast<float>(heightScreenInXyz);
 
-  tickPointHkl[m_dimY] =
-      (tickPointHkl[m_dimY] -
-       m_fromHklToXyz[3 * m_dimY + m_dimX] * tickPointHkl[m_dimX] -
-       m_fromHklToXyz[3 * m_dimY + m_missingDimension] *
-           tickPointHkl[m_missingDimension]) /
-      m_fromHklToXyz[3 * m_dimY + m_dimY];
+  tickPointHkl[m_dimY] = (tickPointHkl[m_dimY] - m_fromHklToXyz[3 * m_dimY + m_dimX] * tickPointHkl[m_dimX] -
+                          m_fromHklToXyz[3 * m_dimY + m_missingDimension] * tickPointHkl[m_missingDimension]) /
+                         m_fromHklToXyz[3 * m_dimY + m_dimY];
 
   // convert from hkl to xyz
   auto tickPointXyz = fromHklToXyz(tickPointHkl);
@@ -265,20 +247,16 @@ double QwtScaleDrawNonOrthogonal::fromYtickInHklToXyz(double tick) const {
   auto widthScreenInXyz = m_plot->invTransform(QwtPlot::xBottom, 0);
   tickPointHkl[m_dimX] = static_cast<float>(widthScreenInXyz);
 
-  tickPointHkl[m_dimX] =
-      (tickPointHkl[m_dimX] -
-       m_fromHklToXyz[3 * m_dimX + m_dimY] * tickPointHkl[m_dimY] -
-       m_fromHklToXyz[3 * m_dimX + m_missingDimension] *
-           tickPointHkl[m_missingDimension]) /
-      m_fromHklToXyz[3 * m_dimX + m_dimX];
+  tickPointHkl[m_dimX] = (tickPointHkl[m_dimX] - m_fromHklToXyz[3 * m_dimX + m_dimY] * tickPointHkl[m_dimY] -
+                          m_fromHklToXyz[3 * m_dimX + m_missingDimension] * tickPointHkl[m_missingDimension]) /
+                         m_fromHklToXyz[3 * m_dimX + m_dimX];
 
   // convert from hkl to xyz
   auto tickPointXyz = fromHklToXyz(tickPointHkl);
   return tickPointXyz[m_dimY];
 }
 
-Mantid::Kernel::VMD
-QwtScaleDrawNonOrthogonal::fromHklToXyz(const Mantid::Kernel::VMD &hkl) const {
+Mantid::Kernel::VMD QwtScaleDrawNonOrthogonal::fromHklToXyz(const Mantid::Kernel::VMD &hkl) const {
   Mantid::Kernel::VMD xyz(hkl);
   for (int i = 0; i < 3; ++i) {
     xyz[i] = 0;
@@ -289,10 +267,8 @@ QwtScaleDrawNonOrthogonal::fromHklToXyz(const Mantid::Kernel::VMD &hkl) const {
   return xyz;
 }
 
-void QwtScaleDrawNonOrthogonal::setTransformationMatrices(
-    const Mantid::API::IMDWorkspace_sptr &workspace) {
-  m_missingDimension =
-      MantidQt::API::getMissingHKLDimensionIndex(workspace, m_dimX, m_dimY);
+void QwtScaleDrawNonOrthogonal::setTransformationMatrices(const Mantid::API::IMDWorkspace_sptr &workspace) {
+  m_missingDimension = MantidQt::API::getMissingHKLDimensionIndex(workspace, m_dimX, m_dimY);
 
   if (MantidQt::API::isHKLDimensions(*workspace, m_dimX, m_dimY)) {
     Mantid::Kernel::DblMatrix skewMatrix(3, 3, true);
@@ -314,7 +290,6 @@ qreal QwtScaleDrawNonOrthogonal::getScreenLeftInXyz() const {
   return fromScreenToXyz(screenLeft).x();
 }
 
-void QwtScaleDrawNonOrthogonal::updateSlicePoint(
-    Mantid::Kernel::VMD newSlicepoint) {
+void QwtScaleDrawNonOrthogonal::updateSlicePoint(Mantid::Kernel::VMD newSlicepoint) {
   m_slicePoint = std::move(newSlicepoint);
 }

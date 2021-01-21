@@ -41,30 +41,24 @@
 #include <limits>
 #include <qwt_plot_curve.h>
 
-TranslateCurveTool::TranslateCurveTool(Graph *graph, ApplicationWindow *app,
-                                       Direction dir,
-                                       const QObject *status_target,
-                                       const char *status_slot)
-    : PlotToolInterface(graph), d_dir(dir), d_sub_tool(nullptr),
-      d_selected_curve(nullptr), d_curve_point(), d_app(app) {
+TranslateCurveTool::TranslateCurveTool(Graph *graph, ApplicationWindow *app, Direction dir,
+                                       const QObject *status_target, const char *status_slot)
+    : PlotToolInterface(graph), d_dir(dir), d_sub_tool(nullptr), d_selected_curve(nullptr), d_curve_point(),
+      d_app(app) {
   if (status_target)
-    connect(this, SIGNAL(statusText(const QString &)), status_target,
-            status_slot);
+    connect(this, SIGNAL(statusText(const QString &)), status_target, status_slot);
   // d_graph->plotWidget()->canvas()->setCursor(QCursor(getQPixmap("vizor_xpm"),
   // -1, -1));
   // emit statusText(tr("Double-click on plot to select a data point!"));
 
   // Phase 1: select curve point
-  d_sub_tool = new DataPickerTool(d_graph, app, DataPickerTool::Display, this,
-                                  SIGNAL(statusText(const QString &)));
-  connect(dynamic_cast<DataPickerTool *>(d_sub_tool),
-          SIGNAL(selected(QwtPlotCurve *, int)), this,
+  d_sub_tool = new DataPickerTool(d_graph, app, DataPickerTool::Display, this, SIGNAL(statusText(const QString &)));
+  connect(dynamic_cast<DataPickerTool *>(d_sub_tool), SIGNAL(selected(QwtPlotCurve *, int)), this,
           SLOT(selectCurvePoint(QwtPlotCurve *, int)));
   // d_sub_tool = NULL;
 }
 
-void TranslateCurveTool::selectCurvePoint(QwtPlotCurve *curve,
-                                          int point_index) {
+void TranslateCurveTool::selectCurvePoint(QwtPlotCurve *curve, int point_index) {
   if (!d_sub_tool)
     return;
   DataCurve *c = dynamic_cast<DataCurve *>(curve);
@@ -74,21 +68,15 @@ void TranslateCurveTool::selectCurvePoint(QwtPlotCurve *curve,
     if (!t)
       return;
 
-    if (d_dir == Horizontal &&
-        t->isReadOnlyColumn(t->colIndex(c->xColumnName()))) {
-      QMessageBox::warning(
-          d_app, tr("MantidPlot - Warning"),
-          tr("The column '%1' is read-only! Operation aborted!")
-              .arg(c->xColumnName()));
+    if (d_dir == Horizontal && t->isReadOnlyColumn(t->colIndex(c->xColumnName()))) {
+      QMessageBox::warning(d_app, tr("MantidPlot - Warning"),
+                           tr("The column '%1' is read-only! Operation aborted!").arg(c->xColumnName()));
       delete d_sub_tool;
       d_graph->setActiveTool(nullptr);
       return;
-    } else if (d_dir == Vertical &&
-               t->isReadOnlyColumn(t->colIndex(c->title().text()))) {
-      QMessageBox::warning(
-          d_app, tr("MantidPlot - Warning"),
-          tr("The column '%1' is read-only! Operation aborted!")
-              .arg(c->title().text()));
+    } else if (d_dir == Vertical && t->isReadOnlyColumn(t->colIndex(c->title().text()))) {
+      QMessageBox::warning(d_app, tr("MantidPlot - Warning"),
+                           tr("The column '%1' is read-only! Operation aborted!").arg(c->title().text()));
       delete d_sub_tool;
       d_graph->setActiveTool(nullptr);
       return;
@@ -100,10 +88,8 @@ void TranslateCurveTool::selectCurvePoint(QwtPlotCurve *curve,
   delete d_sub_tool;
 
   // Phase 2: select destination
-  d_sub_tool =
-      new ScreenPickerTool(d_graph, this, SIGNAL(statusText(const QString &)));
-  connect(dynamic_cast<ScreenPickerTool *>(d_sub_tool),
-          SIGNAL(selected(const QwtDoublePoint &)), this,
+  d_sub_tool = new ScreenPickerTool(d_graph, this, SIGNAL(statusText(const QString &)));
+  connect(dynamic_cast<ScreenPickerTool *>(d_sub_tool), SIGNAL(selected(const QwtDoublePoint &)), this,
           SLOT(selectDestination(const QwtDoublePoint &)));
   emit statusText(tr("Curve selected! Move cursor and click to choose a point "
                      "and double-click/press 'Enter' to finish!"));
@@ -121,11 +107,9 @@ void TranslateCurveTool::selectDestination(const QwtDoublePoint &point) {
   if (auto c = dynamic_cast<PlotCurve *>(d_selected_curve)) {
     if (c->type() == GraphOptions::Function) {
       if (d_dir == Horizontal) {
-        QMessageBox::warning(
-            d_app, tr("MantidPlot - Warning"),
-            tr("This operation cannot be performed on function curves."));
-      } else if (FunctionCurve *func =
-                     dynamic_cast<FunctionCurve *>(d_selected_curve)) {
+        QMessageBox::warning(d_app, tr("MantidPlot - Warning"),
+                             tr("This operation cannot be performed on function curves."));
+      } else if (FunctionCurve *func = dynamic_cast<FunctionCurve *>(d_selected_curve)) {
         if (func->functionType() == FunctionCurve::Normal) {
           QString formula = func->formulas().first();
           double d = point.y() - d_curve_point.y();
@@ -163,10 +147,9 @@ void TranslateCurveTool::selectDestination(const QwtDoublePoint &point) {
       return;
     int col = tab->colIndex(col_name);
     if (tab->columnType(col) != Table::Numeric) {
-      QMessageBox::warning(
-          d_app, tr("MantidPlot - Warning"),
-          tr("This operation cannot be performed on curves plotted from "
-             "columns having a non-numerical format."));
+      QMessageBox::warning(d_app, tr("MantidPlot - Warning"),
+                           tr("This operation cannot be performed on curves plotted from "
+                              "columns having a non-numerical format."));
       return;
     }
 
@@ -181,10 +164,7 @@ void TranslateCurveTool::selectDestination(const QwtDoublePoint &point) {
       if (!tab->text(i, col).isEmpty())
         tab->setText(
             i, col,
-            locale.toString((d_dir == Horizontal ? d_selected_curve->x(i)
-                                                 : d_selected_curve->y(i)) +
-                                d,
-                            f, prec));
+            locale.toString((d_dir == Horizontal ? d_selected_curve->x(i) : d_selected_curve->y(i)) + d, f, prec));
     }
     d_app->updateCurves(tab, col_name);
     d_app->modifiedProject();

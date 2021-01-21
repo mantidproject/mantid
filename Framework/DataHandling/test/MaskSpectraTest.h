@@ -51,12 +51,9 @@ MatrixWorkspace_sptr runMaskSpectra(const MatrixWorkspace_sptr &inputWS) {
   MaskSpectra alg;
   alg.setChild(true);
   alg.initialize();
-  alg.setWorkspaceInputProperties("InputWorkspace", inputWS,
-                                  IndexType::WorkspaceIndex,
-                                  std::vector<int64_t>{1, 3});
+  alg.setWorkspaceInputProperties("InputWorkspace", inputWS, IndexType::WorkspaceIndex, std::vector<int64_t>{1, 3});
 
-  TS_ASSERT_THROWS_NOTHING(
-      alg.setPropertyValue("OutputWorkspace", "_unused_for_child"));
+  TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused_for_child"));
   TS_ASSERT_THROWS_NOTHING(alg.execute(););
   TS_ASSERT(alg.isExecuted());
 
@@ -83,8 +80,7 @@ public:
     auto outputWS = runMaskSpectra(inputWS);
 
     TS_ASSERT(outputWS);
-    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(),
-                     inputWS->getNumberHistograms());
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), inputWS->getNumberHistograms());
     checkWorkspace(*outputWS);
   }
 
@@ -93,12 +89,9 @@ public:
     MaskSpectra alg;
     alg.setChild(true);
     alg.initialize();
-    alg.setWorkspaceInputProperties("InputWorkspace", inputWS,
-                                    IndexType::WorkspaceIndex,
-                                    std::vector<int64_t>{1, 3});
+    alg.setWorkspaceInputProperties("InputWorkspace", inputWS, IndexType::WorkspaceIndex, std::vector<int64_t>{1, 3});
 
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "_unused_for_child"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused_for_child"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", inputWS));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
@@ -111,13 +104,11 @@ public:
 
   void test_exec_with_instrument() {
     MatrixWorkspace_sptr inputWS = makeWorkspace();
-    InstrumentCreationHelper::addFullInstrumentToWorkspace(*inputWS, false,
-                                                           false, "");
+    InstrumentCreationHelper::addFullInstrumentToWorkspace(*inputWS, false, false, "");
     auto outputWS = runMaskSpectra(inputWS);
 
     TS_ASSERT(outputWS);
-    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(),
-                     inputWS->getNumberHistograms());
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), inputWS->getNumberHistograms());
     checkWorkspace(*outputWS);
     const auto &spectrumInfo = outputWS->spectrumInfo();
     TS_ASSERT_EQUALS(spectrumInfo.isMasked(0), false);

@@ -19,11 +19,9 @@ namespace Algorithms {
 /** TimeAtSampleStrategyDirect : Determine the Time at Sample corrections for a
   Direct Geometry instrument
 */
-class MANTID_ALGORITHMS_DLL TimeAtSampleStrategyDirect
-    : public TimeAtSampleStrategy {
+class MANTID_ALGORITHMS_DLL TimeAtSampleStrategyDirect : public TimeAtSampleStrategy {
 public:
-  TimeAtSampleStrategyDirect(
-      const std::shared_ptr<const Mantid::API::MatrixWorkspace> &ws, double ei);
+  TimeAtSampleStrategyDirect(const std::shared_ptr<const Mantid::API::MatrixWorkspace> &ws, double ei);
   Correction calculate(const size_t &workspace_index) const override;
 
 private:

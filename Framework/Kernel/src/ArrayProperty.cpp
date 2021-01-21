@@ -20,11 +20,9 @@ namespace Kernel {
  *  @param direction :: The direction (Input/Output/InOut) of this property
  */
 template <typename T>
-ArrayProperty<T>::ArrayProperty(const std::string &name, std::vector<T> vec,
-                                const IValidator_sptr &validator,
+ArrayProperty<T>::ArrayProperty(const std::string &name, std::vector<T> vec, const IValidator_sptr &validator,
                                 const unsigned int direction)
-    : PropertyWithValue<std::vector<T>>(std::move(name), std::move(vec),
-                                        std::move(validator), direction) {}
+    : PropertyWithValue<std::vector<T>>(std::move(name), std::move(vec), std::move(validator), direction) {}
 
 /** Constructor
  *  Will lead to the property having a default-constructed (i.e. empty) vector
@@ -35,11 +33,8 @@ ArrayProperty<T>::ArrayProperty(const std::string &name, std::vector<T> vec,
  */
 
 template <typename T>
-ArrayProperty<T>::ArrayProperty(const std::string &name,
-                                const IValidator_sptr &validator,
-                                const unsigned int direction)
-    : PropertyWithValue<std::vector<T>>(std::move(name), std::vector<T>(),
-                                        std::move(validator), direction) {}
+ArrayProperty<T>::ArrayProperty(const std::string &name, const IValidator_sptr &validator, const unsigned int direction)
+    : PropertyWithValue<std::vector<T>>(std::move(name), std::vector<T>(), std::move(validator), direction) {}
 
 /** Constructor that's useful for output properties or inputs with an empty
  * default and no validator.
@@ -49,10 +44,8 @@ ArrayProperty<T>::ArrayProperty(const std::string &name,
  *  @param direction :: The direction (Input/Output/InOut) of this property
  */
 template <typename T>
-ArrayProperty<T>::ArrayProperty(const std::string &name,
-                                const unsigned int direction)
-    : PropertyWithValue<std::vector<T>>(std::move(name), std::vector<T>(),
-                                        IValidator_sptr(new NullValidator),
+ArrayProperty<T>::ArrayProperty(const std::string &name, const unsigned int direction)
+    : PropertyWithValue<std::vector<T>>(std::move(name), std::vector<T>(), IValidator_sptr(new NullValidator),
                                         direction) {}
 
 /** Constructor from which you can set the property's values through a string:
@@ -71,22 +64,15 @@ ArrayProperty<T>::ArrayProperty(const std::string &name,
  * the array type
  */
 template <typename T>
-ArrayProperty<T>::ArrayProperty(const std::string &name,
-                                const std::string &values,
-                                const IValidator_sptr &validator,
+ArrayProperty<T>::ArrayProperty(const std::string &name, const std::string &values, const IValidator_sptr &validator,
                                 const unsigned int direction)
-    : PropertyWithValue<std::vector<T>>(std::move(name), std::vector<T>(),
-                                        values, std::move(validator),
-                                        direction) {}
+    : PropertyWithValue<std::vector<T>>(std::move(name), std::vector<T>(), values, std::move(validator), direction) {}
 
 template <typename T>
-ArrayProperty<T>::ArrayProperty(const ArrayProperty<T> &other)
-    : PropertyWithValue<std::vector<T>>(other) {}
+ArrayProperty<T>::ArrayProperty(const ArrayProperty<T> &other) : PropertyWithValue<std::vector<T>>(other) {}
 
 /// 'Virtual copy constructor'
-template <typename T> ArrayProperty<T> *ArrayProperty<T>::clone() const {
-  return new ArrayProperty<T>(*this);
-}
+template <typename T> ArrayProperty<T> *ArrayProperty<T>::clone() const { return new ArrayProperty<T>(*this); }
 
 /** Returns the values stored in the ArrayProperty
  *  @return The stored values as a comma-separated list
@@ -102,8 +88,7 @@ template <typename T> std::string ArrayProperty<T>::value() const {
  * comma-separated list
  *  @return True if the assignment was successful
  */
-template <typename T>
-std::string ArrayProperty<T>::setValue(const std::string &value) {
+template <typename T> std::string ArrayProperty<T>::setValue(const std::string &value) {
   // Implemented this method for documentation reasons. Just calls base class
   // method.
   return PropertyWithValue<std::vector<T>>::setValue(value);
@@ -140,8 +125,7 @@ template class DLLExport ArrayProperty<std::vector<unsigned long>>;
 
 /// @endcond
 
-template <>
-MANTID_KERNEL_DLL void ArrayProperty<int>::visualStudioC4661Workaround() {}
+template <> MANTID_KERNEL_DLL void ArrayProperty<int>::visualStudioC4661Workaround() {}
 
 } // namespace Kernel
 } // namespace Mantid

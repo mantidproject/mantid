@@ -43,15 +43,11 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return (1); }
-  const std::vector<std::string> seeAlso() const override {
-    return {"Power", "Logarithm"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"Power", "Logarithm"}; }
 
 private:
   // Overridden UnaryOperation methods
-  void performUnaryOperation(const double XIn, const double YIn,
-                             const double EIn, double &YOut,
-                             double &EOut) override;
+  void performUnaryOperation(const double XIn, const double YIn, const double EIn, double &YOut, double &EOut) override;
 
   /*
   void performBinaryOperation(const MantidVec& lhsX, const MantidVec& lhsY,

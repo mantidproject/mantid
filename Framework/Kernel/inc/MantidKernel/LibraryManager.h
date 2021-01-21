@@ -51,13 +51,11 @@ private:
   int openLibraries(const Poco::File &libpath, LoadLibraries loadingBehaviour,
                     const std::vector<std::string> &excludes);
   /// Check if the library should be loaded
-  bool shouldBeLoaded(const std::string &filename,
-                      const std::vector<std::string> &excludes) const;
+  bool shouldBeLoaded(const std::string &filename, const std::vector<std::string> &excludes) const;
   /// Check if the library has already been loaded
   bool isLoaded(const std::string &filename) const;
   /// Returns true if the library has been requested to be excluded
-  bool isExcluded(const std::string &filename,
-                  const std::vector<std::string> &excludes) const;
+  bool isExcluded(const std::string &filename, const std::vector<std::string> &excludes) const;
   /// Load a given library
   int openLibrary(const Poco::File &filepath, const std::string &cacheKey);
 
@@ -65,8 +63,7 @@ private:
   std::unordered_map<std::string, LibraryWrapper> m_openedLibs;
 };
 
-EXTERN_MANTID_KERNEL template class MANTID_KERNEL_DLL
-    Mantid::Kernel::SingletonHolder<LibraryManagerImpl>;
+EXTERN_MANTID_KERNEL template class MANTID_KERNEL_DLL Mantid::Kernel::SingletonHolder<LibraryManagerImpl>;
 using LibraryManager = Mantid::Kernel::SingletonHolder<LibraryManagerImpl>;
 
 } // namespace Kernel

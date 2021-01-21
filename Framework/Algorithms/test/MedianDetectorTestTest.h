@@ -39,9 +39,7 @@ const double GOOD_VAL(0.);
 
 class MedianDetectorTestTest : public CxxTest::TestSuite {
 public:
-  static MedianDetectorTestTest *createSuite() {
-    return new MedianDetectorTestTest();
-  }
+  static MedianDetectorTestTest *createSuite() { return new MedianDetectorTestTest(); }
   static void destroySuite(MedianDetectorTestTest *suite) { delete suite; }
 
   void testWorkspaceAndArray() {
@@ -61,16 +59,13 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     Workspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(
-                                 "MedianDetectorTestOutput"));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve("MedianDetectorTestOutput"));
 
     MatrixWorkspace_const_sptr input;
-    input =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_IWSName);
+    input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_IWSName);
     TS_ASSERT(input);
 
-    MatrixWorkspace_sptr outputMat =
-        std::dynamic_pointer_cast<MatrixWorkspace>(output);
+    MatrixWorkspace_sptr outputMat = std::dynamic_pointer_cast<MatrixWorkspace>(output);
     ;
     TS_ASSERT(outputMat);
     TS_ASSERT_EQUALS(outputMat->YUnit(), "");
@@ -102,8 +97,7 @@ public:
 
   void testSolidAngle() {
     Mantid::DataObjects::Workspace2D_sptr ws =
-        WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(
-            5, 10, 1);
+        WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(5, 10, 1);
 
     const auto &spectrumInfo = ws->spectrumInfo();
 
@@ -137,14 +131,12 @@ public:
 
   void testLevelsUp() {
     Mantid::DataObjects::Workspace2D_sptr ws =
-        WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(
-            5, 10, 1);
+        WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(5, 10, 1);
 
     const auto &spectrumInfo = ws->spectrumInfo();
 
     for (size_t i = 0; i < ws->getNumberHistograms(); i++) {
-      ws->dataY(i)[0] =
-          std::floor(1e9 * spectrumInfo.detector(i).solidAngle(V3D(0, 0, 0)));
+      ws->dataY(i)[0] = std::floor(1e9 * spectrumInfo.detector(i).solidAngle(V3D(0, 0, 0)));
     }
     AnalysisDataService::Instance().addOrReplace("MDTLevelsUp", ws);
 
@@ -176,22 +168,18 @@ public:
     using namespace Mantid;
     // Set up a small workspace for testing
     const short specLength = 22;
-    Workspace_sptr space = WorkspaceFactory::Instance().create(
-        "Workspace2D", Nhist, specLength, specLength - 1);
+    Workspace_sptr space = WorkspaceFactory::Instance().create("Workspace2D", Nhist, specLength, specLength - 1);
     m_2DWS = std::dynamic_pointer_cast<Workspace2D>(space);
     BinEdges x(specLength, HistogramData::LinearGenerator(0.0, 1000.0));
     // the data will be 21 random numbers
-    double yArray[specLength - 1] = {0.2, 4, 50, 0.001, 0, 0,     0,
-                                     1,   0, 15, 4,     0, 0.001, 2e-10,
-                                     0,   8, 0,  1e-4,  1, 7,     11};
+    double yArray[specLength - 1] = {0.2, 4, 50, 0.001, 0, 0, 0, 1, 0, 15, 4, 0, 0.001, 2e-10, 0, 8, 0, 1e-4, 1, 7, 11};
     m_YSum = 0;
     for (double i : yArray) {
       m_YSum += i;
     }
 
     // most error values will be small so that they wont affect the tests
-    CountStandardDeviations smallErrors(specLength - 1,
-                                        0.01 * m_YSum / specLength);
+    CountStandardDeviations smallErrors(specLength - 1, 0.01 * m_YSum / specLength);
     // if the SignificanceTest property is set to one, knowing what happens in
     // the loop below, these errors will just make or break the tests
     CountStandardDeviations almostBigEnough(specLength - 1, 0);

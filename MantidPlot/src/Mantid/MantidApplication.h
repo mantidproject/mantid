@@ -20,6 +20,5 @@ public:
 signals:
   bool runAsPythonScript(const QString &code);
 public slots:
-  void errorHandling(bool continueWork, int sharing, const QString &name,
-                     const QString &email, const QString &textbox);
+  void errorHandling(bool continueWork, int sharing, const QString &name, const QString &email, const QString &textbox);
 };

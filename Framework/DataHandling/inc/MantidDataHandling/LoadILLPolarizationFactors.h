@@ -15,8 +15,7 @@ namespace DataHandling {
 /** LoadILLPolarizationFactors : Load reflectometry polarization efficiency
   correction factors from disk.
 */
-class MANTID_DATAHANDLING_DLL LoadILLPolarizationFactors
-    : public API::Algorithm {
+class MANTID_DATAHANDLING_DLL LoadILLPolarizationFactors : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

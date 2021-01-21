@@ -40,15 +40,12 @@ void LoadSampleShape::init() {
   ;
 
   // input workspace
-  declareProperty(
-      std::make_unique<WorkspaceProperty<Workspace>>(
-          "InputWorkspace", "", Direction::Input, wsValidator),
-      "The name of the workspace containing the instrument to add the shape");
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("InputWorkspace", "", Direction::Input, wsValidator),
+                  "The name of the workspace containing the instrument to add the shape");
 
   // shape file
   const std::vector<std::string> extensions{".stl", ".off"};
-  declareProperty(std::make_unique<FileProperty>(
-                      "Filename", "", FileProperty::Load, extensions),
+  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Load, extensions),
                   "The path name of the file containing the shape");
 
   // scale to use for stl
@@ -60,13 +57,11 @@ void LoadSampleShape::init() {
   declareProperty("ZDegrees", 0.0, "The degrees to rotate on the z axis by");
 
   // Vector to translate mesh
-  declareProperty(
-      std::make_unique<ArrayProperty<double>>("TranslationVector", "0,0,0"),
-      "Vector by which to translate the loaded sample shape");
+  declareProperty(std::make_unique<ArrayProperty<double>>("TranslationVector", "0,0,0"),
+                  "Vector by which to translate the loaded sample shape");
 
   // Output workspace
-  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("OutputWorkspace", "", Direction::Output),
                   "The name of the workspace that will contain the loaded "
                   "shape of the sample");
 }
@@ -106,8 +101,7 @@ void LoadSampleShape::exec() {
   const double zRotation = DegreesToRadians(getProperty("zDegrees"));
   shape = reader->rotate(shape, xRotation, yRotation, zRotation);
 
-  const std::vector<double> translationVector =
-      getProperty("TranslationVector");
+  const std::vector<double> translationVector = getProperty("TranslationVector");
   shape = reader->translate(shape, translationVector);
 
   // rotate shape according to goniometer

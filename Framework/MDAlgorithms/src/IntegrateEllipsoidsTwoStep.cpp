@@ -42,17 +42,13 @@ DECLARE_ALGORITHM(IntegrateEllipsoidsTwoStep)
 
 //---------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string IntegrateEllipsoidsTwoStep::name() const {
-  return "IntegrateEllipsoidsTwoStep";
-}
+const std::string IntegrateEllipsoidsTwoStep::name() const { return "IntegrateEllipsoidsTwoStep"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int IntegrateEllipsoidsTwoStep::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string IntegrateEllipsoidsTwoStep::category() const {
-  return "Crystal\\Integration";
-}
+const std::string IntegrateEllipsoidsTwoStep::category() const { return "Crystal\\Integration"; }
 
 void IntegrateEllipsoidsTwoStep::init() {
   auto ws_valid = std::make_shared<CompositeValidator>();
@@ -61,25 +57,21 @@ void IntegrateEllipsoidsTwoStep::init() {
   auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
 
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input, ws_valid),
-                  "An input MatrixWorkspace with time-of-flight units along "
-                  "X-axis and defined instrument with defined sample");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input, ws_valid),
+      "An input MatrixWorkspace with time-of-flight units along "
+      "X-axis and defined instrument with defined sample");
 
-  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
-                      "PeaksWorkspace", "", Direction::InOut),
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>("PeaksWorkspace", "", Direction::InOut),
                   "Workspace with peaks to be integrated");
 
   declareProperty("RegionRadius", .35, mustBePositive,
                   "Only events at most this distance from a peak will be "
                   "considered when integrating");
 
-  declareProperty(
-      "SpecifySize", false,
-      "If true, use the following for the major axis sizes, else use 3-sigma");
+  declareProperty("SpecifySize", false, "If true, use the following for the major axis sizes, else use 3-sigma");
 
-  declareProperty("PeakSize", .18, mustBePositive,
-                  "Half-length of major axis for peak ellipsoid");
+  declareProperty("PeakSize", .18, mustBePositive, "Half-length of major axis for peak ellipsoid");
 
   declareProperty("BackgroundInnerSize", .18, mustBePositive,
                   "Half-length of major axis for inner ellipsoidal surface of "
@@ -89,12 +81,10 @@ void IntegrateEllipsoidsTwoStep::init() {
                   "Half-length of major axis for outer ellipsoidal surface of "
                   "background region");
 
-  declareProperty("IntegrateInHKL", false,
-                  "If true, integrate in HKL space not Q space.");
-  declareProperty(
-      "IntegrateIfOnEdge", true,
-      "Set to false to not integrate if peak radius is off edge of detector."
-      "Background will be scaled if background radius is off edge.");
+  declareProperty("IntegrateInHKL", false, "If true, integrate in HKL space not Q space.");
+  declareProperty("IntegrateIfOnEdge", true,
+                  "Set to false to not integrate if peak radius is off edge of detector."
+                  "Background will be scaled if background radius is off edge.");
 
   declareProperty("AdaptiveQBackground", false,
                   "Default is false.   If true, "
@@ -106,26 +96,22 @@ void IntegrateEllipsoidsTwoStep::init() {
                   "so each peak has a "
                   "different integration radius.  Q includes the 2*pi factor.");
 
-  declareProperty("WeakPeakThreshold", 1.0, mustBePositive,
-                  "Intensity threshold use to classify a peak as weak.");
+  declareProperty("WeakPeakThreshold", 1.0, mustBePositive, "Intensity threshold use to classify a peak as weak.");
 
   declareProperty("UseOnePercentBackgroundCorrection", true,
                   "If this options is enabled, then the the top 1% of the "
                   "background will be removed"
                   "before the background subtraction.");
 
-  declareProperty(
-      std::make_unique<WorkspaceProperty<PeaksWorkspace>>("OutputWorkspace", "",
-                                                          Direction::Output),
-      "The output PeaksWorkspace will be a copy of the input PeaksWorkspace "
-      "with the peaks' integrated intensities.");
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>("OutputWorkspace", "", Direction::Output),
+                  "The output PeaksWorkspace will be a copy of the input PeaksWorkspace "
+                  "with the peaks' integrated intensities.");
 }
 
 void IntegrateEllipsoidsTwoStep::exec() {
   PeaksWorkspace_sptr input_peak_ws = getProperty("PeaksWorkspace");
   MatrixWorkspace_sptr input_ws = getProperty("InputWorkspace");
-  EventWorkspace_sptr eventWS =
-      std::dynamic_pointer_cast<EventWorkspace>(input_ws);
+  EventWorkspace_sptr eventWS = std::dynamic_pointer_cast<EventWorkspace>(input_ws);
 
   Workspace2D_sptr histoWS = std::dynamic_pointer_cast<Workspace2D>(input_ws);
   if (!eventWS && !histoWS) {
@@ -172,8 +158,7 @@ void IntegrateEllipsoidsTwoStep::exec() {
   }
 
   if (indexed_count < 3) {
-    throw std::runtime_error(
-        "At least three linearly independent indexed peaks are needed.");
+    throw std::runtime_error("At least three linearly independent indexed peaks are needed.");
   }
   // Get UB using indexed peaks and
   // lab-Q vectors
@@ -185,8 +170,7 @@ void IntegrateEllipsoidsTwoStep::exec() {
 
   std::vector<std::pair<std::pair<double, double>, V3D>> qList;
   for (size_t i = 0; i < n_peaks; i++) {
-    qList.emplace_back(std::pair<double, double>(1.0, 1.0),
-                       V3D(peaks[i].getQLabFrame()));
+    qList.emplace_back(std::pair<double, double>(1.0, 1.0), V3D(peaks[i].getQLabFrame()));
   }
 
   const bool integrateEdge = getProperty("IntegrateIfOnEdge");
@@ -200,15 +184,12 @@ void IntegrateEllipsoidsTwoStep::exec() {
       g_log.error("Can't execute MaskBTP algorithm for this instrument to set "
                   "edge for IntegrateIfOnEdge option");
     }
-    calculateE1(
-        input_peak_ws->detectorInfo()); // fill E1Vec for use in detectorQ
+    calculateE1(input_peak_ws->detectorInfo()); // fill E1Vec for use in detectorQ
   }
 
   const bool integrateInHKL = getProperty("IntegrateInHKL");
-  bool useOnePercentBackgroundCorrection =
-      getProperty("UseOnePercentBackgroundCorrection");
-  Integrate3DEvents integrator(qList, UBinv, getProperty("RegionRadius"),
-                               useOnePercentBackgroundCorrection);
+  bool useOnePercentBackgroundCorrection = getProperty("UseOnePercentBackgroundCorrection");
+  Integrate3DEvents integrator(qList, UBinv, getProperty("RegionRadius"), useOnePercentBackgroundCorrection);
 
   if (eventWS) {
     // process as EventWorkspace
@@ -233,21 +214,17 @@ void IntegrateEllipsoidsTwoStep::exec() {
 
     const auto result = std::make_pair(index, center);
     if (sig2noise < weakPeakThreshold) {
-      g_log.notice() << "Peak " << peak.getHKL() << " with Q = " << center
-                     << " is a weak peak with signal to noise " << sig2noise
-                     << "\n";
+      g_log.notice() << "Peak " << peak.getHKL() << " with Q = " << center << " is a weak peak with signal to noise "
+                     << sig2noise << "\n";
       weakPeaks.emplace_back(result);
     } else {
-      g_log.notice() << "Peak " << peak.getHKL() << " with Q = " << center
-                     << " is a strong peak with signal to noise " << sig2noise
-                     << "\n";
+      g_log.notice() << "Peak " << peak.getHKL() << " with Q = " << center << " is a strong peak with signal to noise "
+                     << sig2noise << "\n";
       strongPeaks.emplace_back(result);
     }
   }
 
-  std::vector<std::pair<std::shared_ptr<const Geometry::PeakShape>,
-                        std::tuple<double, double, double>>>
-      shapeLibrary;
+  std::vector<std::pair<std::shared_ptr<const Geometry::PeakShape>, std::tuple<double, double, double>>> shapeLibrary;
 
   // Integrate strong peaks
   for (const auto &item : strongPeaks) {
@@ -266,8 +243,7 @@ void IntegrateEllipsoidsTwoStep::exec() {
   }
 
   std::vector<Eigen::Vector3d> points;
-  std::transform(strongPeaks.begin(), strongPeaks.end(),
-                 std::back_inserter(points),
+  std::transform(strongPeaks.begin(), strongPeaks.end(), std::back_inserter(points),
                  [&](const std::pair<int, V3D> &item) {
                    const auto q = item.second;
                    return Eigen::Vector3d(q[0], q[1], q[2]);
@@ -291,19 +267,15 @@ void IntegrateEllipsoidsTwoStep::exec() {
     auto &peak = peak_ws->getPeak(index);
     auto &strongPeak = peak_ws->getPeak(strongIndex);
 
-    g_log.notice() << "Integrating weak peak " << peak.getHKL()
-                   << " using strong peak " << strongPeak.getHKL() << "\n";
+    g_log.notice() << "Integrating weak peak " << peak.getHKL() << " using strong peak " << strongPeak.getHKL() << "\n";
 
     const auto libShape = shapeLibrary[static_cast<int>(strongIndex)];
-    const auto shape =
-        std::dynamic_pointer_cast<const PeakShapeEllipsoid>(libShape.first);
+    const auto shape = std::dynamic_pointer_cast<const PeakShapeEllipsoid>(libShape.first);
     const auto frac = std::get<0>(libShape.second);
 
     g_log.notice() << "Weak peak will be adjusted by " << frac << "\n";
-    IntegrationParameters params =
-        makeIntegrationParameters(strongPeak.getQLabFrame());
-    const auto weakShape = integrator.integrateWeakPeak(
-        params, shape, libShape.second, q, inti, sigi);
+    IntegrationParameters params = makeIntegrationParameters(strongPeak.getQLabFrame());
+    const auto weakShape = integrator.integrateWeakPeak(params, shape, libShape.second, q, inti, sigi);
 
     peak.setIntensity(inti);
     peak.setSigmaIntensity(sigi);
@@ -316,8 +288,7 @@ void IntegrateEllipsoidsTwoStep::exec() {
   setProperty("OutputWorkspace", peak_ws);
 }
 
-IntegrationParameters
-IntegrateEllipsoidsTwoStep::makeIntegrationParameters(const V3D &peak_q) const {
+IntegrationParameters IntegrateEllipsoidsTwoStep::makeIntegrationParameters(const V3D &peak_q) const {
   IntegrationParameters params;
   params.peakRadius = getProperty("PeakSize");
   params.backgroundInnerRadius = getProperty("BackgroundInnerSize");
@@ -328,25 +299,19 @@ IntegrateEllipsoidsTwoStep::makeIntegrationParameters(const V3D &peak_q) const {
 
   const bool adaptiveQBackground = getProperty("AdaptiveQBackground");
   const double adaptiveQMultiplier = getProperty("AdaptiveQMultiplier");
-  const double adaptiveQBackgroundMultiplier =
-      (adaptiveQBackground) ? adaptiveQMultiplier : 0.0;
+  const double adaptiveQBackgroundMultiplier = (adaptiveQBackground) ? adaptiveQMultiplier : 0.0;
 
   // modulus of Q
   const double lenQpeak = peak_q.norm();
   // change params to support adaptive Q
   params.peakRadius = adaptiveQMultiplier * lenQpeak + params.peakRadius;
-  params.backgroundInnerRadius =
-      adaptiveQBackgroundMultiplier * lenQpeak + params.backgroundInnerRadius;
-  params.backgroundOuterRadius =
-      adaptiveQBackgroundMultiplier * lenQpeak + params.backgroundOuterRadius;
+  params.backgroundInnerRadius = adaptiveQBackgroundMultiplier * lenQpeak + params.backgroundInnerRadius;
+  params.backgroundOuterRadius = adaptiveQBackgroundMultiplier * lenQpeak + params.backgroundOuterRadius;
   return params;
 }
 
-void IntegrateEllipsoidsTwoStep::qListFromEventWS(Integrate3DEvents &integrator,
-                                                  Progress &prog,
-                                                  EventWorkspace_sptr &wksp,
-                                                  DblMatrix const &UBinv,
-                                                  bool hkl_integ) {
+void IntegrateEllipsoidsTwoStep::qListFromEventWS(Integrate3DEvents &integrator, Progress &prog,
+                                                  EventWorkspace_sptr &wksp, DblMatrix const &UBinv, bool hkl_integ) {
   // loop through the eventlists
 
   const std::string ELASTIC("Elastic");
@@ -355,23 +320,19 @@ void IntegrateEllipsoidsTwoStep::qListFromEventWS(Integrate3DEvents &integrator,
   const std::size_t DIMS(3);
 
   MDWSDescription m_targWSDescr;
-  m_targWSDescr.setMinMax(std::vector<double>(3, -2000.),
-                          std::vector<double>(3, 2000.));
+  m_targWSDescr.setMinMax(std::vector<double>(3, -2000.), std::vector<double>(3, 2000.));
   m_targWSDescr.buildFromMatrixWS(wksp, Q3D, ELASTIC);
   m_targWSDescr.setLorentsCorr(false);
 
   // generate the detectors table
-  Mantid::API::Algorithm_sptr childAlg = createChildAlgorithm(
-      "PreprocessDetectorsToMD", 0.,
-      .5); // HACK. soft dependency on non-dependent package.
+  Mantid::API::Algorithm_sptr childAlg = createChildAlgorithm("PreprocessDetectorsToMD", 0.,
+                                                              .5); // HACK. soft dependency on non-dependent package.
   childAlg->setProperty("InputWorkspace", wksp);
   childAlg->executeAsChildAlg();
 
-  DataObjects::TableWorkspace_sptr table =
-      childAlg->getProperty("OutputWorkspace");
+  DataObjects::TableWorkspace_sptr table = childAlg->getProperty("OutputWorkspace");
   if (!table)
-    throw(std::runtime_error(
-        "Can not retrieve results of \"PreprocessDetectorsToMD\""));
+    throw(std::runtime_error("Can not retrieve results of \"PreprocessDetectorsToMD\""));
 
   m_targWSDescr.m_PreprDetTable = table;
 
@@ -409,8 +370,7 @@ void IntegrateEllipsoidsTwoStep::qListFromEventWS(Integrate3DEvents &integrator,
     // loop over the events
     double signal(1.);  // ignorable garbage
     double errorSq(1.); // ignorable garbage
-    const std::vector<WeightedEventNoTime> &raw_events =
-        events.getWeightedEventsNoTime();
+    const std::vector<WeightedEventNoTime> &raw_events = events.getWeightedEventsNoTime();
     std::vector<std::pair<std::pair<double, double>, V3D>> qList;
     for (const auto &raw_event : raw_events) {
       double val = unitConverter.convertUnits(raw_event.tof());
@@ -421,9 +381,7 @@ void IntegrateEllipsoidsTwoStep::qListFromEventWS(Integrate3DEvents &integrator,
       V3D qVec(buffer[0], buffer[1], buffer[2]);
       if (hkl_integ)
         qVec = UBinv * qVec;
-      qList.emplace_back(std::pair<double, double>(raw_event.m_weight,
-                                                   raw_event.m_errorSquared),
-                         qVec);
+      qList.emplace_back(std::pair<double, double>(raw_event.m_weight, raw_event.m_errorSquared), qVec);
     } // end of loop over events in list
     PARALLEL_CRITICAL(addEvents) { integrator.addEvents(qList, hkl_integ); }
 
@@ -442,11 +400,8 @@ void IntegrateEllipsoidsTwoStep::qListFromEventWS(Integrate3DEvents &integrator,
  * @param UBinv : inverse of UB matrix
  * @param hkl_integ ; boolean for integrating in HKL space
  */
-void IntegrateEllipsoidsTwoStep::qListFromHistoWS(Integrate3DEvents &integrator,
-                                                  Progress &prog,
-                                                  Workspace2D_sptr &wksp,
-                                                  DblMatrix const &UBinv,
-                                                  bool hkl_integ) {
+void IntegrateEllipsoidsTwoStep::qListFromHistoWS(Integrate3DEvents &integrator, Progress &prog, Workspace2D_sptr &wksp,
+                                                  DblMatrix const &UBinv, bool hkl_integ) {
 
   // loop through the eventlists
   const std::string ELASTIC("Elastic");
@@ -455,23 +410,19 @@ void IntegrateEllipsoidsTwoStep::qListFromHistoWS(Integrate3DEvents &integrator,
   const std::size_t DIMS(3);
 
   MDWSDescription m_targWSDescr;
-  m_targWSDescr.setMinMax(std::vector<double>(3, -2000.),
-                          std::vector<double>(3, 2000.));
+  m_targWSDescr.setMinMax(std::vector<double>(3, -2000.), std::vector<double>(3, 2000.));
   m_targWSDescr.buildFromMatrixWS(wksp, Q3D, ELASTIC);
   m_targWSDescr.setLorentsCorr(false);
 
   // generate the detectors table
-  Mantid::API::Algorithm_sptr childAlg = createChildAlgorithm(
-      "PreprocessDetectorsToMD", 0.,
-      .5); // HACK. soft dependency on non-dependent package.
+  Mantid::API::Algorithm_sptr childAlg = createChildAlgorithm("PreprocessDetectorsToMD", 0.,
+                                                              .5); // HACK. soft dependency on non-dependent package.
   childAlg->setProperty("InputWorkspace", wksp);
   childAlg->executeAsChildAlg();
 
-  DataObjects::TableWorkspace_sptr table =
-      childAlg->getProperty("OutputWorkspace");
+  DataObjects::TableWorkspace_sptr table = childAlg->getProperty("OutputWorkspace");
   if (!table)
-    throw(std::runtime_error(
-        "Can not retrieve results of \"PreprocessDetectorsToMD\""));
+    throw(std::runtime_error("Can not retrieve results of \"PreprocessDetectorsToMD\""));
   else
     m_targWSDescr.m_PreprDetTable = table;
 
@@ -507,7 +458,7 @@ void IntegrateEllipsoidsTwoStep::qListFromHistoWS(Integrate3DEvents &integrator,
     for (size_t j = 0; j < yVals.size(); ++j) {
       const double &yVal = yVals[j];
       const double &esqVal = eVals[j] * eVals[j]; // error squared (variance)
-      if (yVal > 0) // TODO, is this condition right?
+      if (yVal > 0)                               // TODO, is this condition right?
       {
         double val = unitConverter.convertUnits(xVals[j]);
         qConverter.calcMatrixCoord(val, locCoord, signal, errorSq);
@@ -541,8 +492,7 @@ void IntegrateEllipsoidsTwoStep::qListFromHistoWS(Integrate3DEvents &integrator,
  *
  * @param inst: instrument
  */
-void IntegrateEllipsoidsTwoStep::calculateE1(
-    const Geometry::DetectorInfo &detectorInfo) {
+void IntegrateEllipsoidsTwoStep::calculateE1(const Geometry::DetectorInfo &detectorInfo) {
   for (size_t i = 0; i < detectorInfo.size(); ++i) {
     if (detectorInfo.isMonitor(i))
       continue; // skip monitor
@@ -558,15 +508,13 @@ void IntegrateEllipsoidsTwoStep::calculateE1(
   }
 }
 
-void IntegrateEllipsoidsTwoStep::runMaskDetectors(
-    const Mantid::DataObjects::PeaksWorkspace_sptr &peakWS,
-    const std::string &property, const std::string &values) {
+void IntegrateEllipsoidsTwoStep::runMaskDetectors(const Mantid::DataObjects::PeaksWorkspace_sptr &peakWS,
+                                                  const std::string &property, const std::string &values) {
   IAlgorithm_sptr alg = createChildAlgorithm("MaskBTP");
   alg->setProperty<Workspace_sptr>("Workspace", peakWS);
   alg->setProperty(property, values);
   if (!alg->execute())
-    throw std::runtime_error(
-        "MaskDetectors Child Algorithm has not executed successfully");
+    throw std::runtime_error("MaskDetectors Child Algorithm has not executed successfully");
 }
 } // namespace MDAlgorithms
 } // namespace Mantid

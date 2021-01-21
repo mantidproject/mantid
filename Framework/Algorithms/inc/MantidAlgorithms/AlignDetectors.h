@@ -50,31 +50,25 @@ public:
 
   /// Algorithm's version for identification. @see Algorithm::version
   int version() const override;
-  const std::vector<std::string> seeAlso() const override {
-    return {"DiffractionFocussing", "AlignAndFocusPowder"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"DiffractionFocussing", "AlignAndFocusPowder"}; }
   /// Algorithm's category for identification. @see Algorithm::category
   const std::string category() const override;
   /// Cross-check properties with each other @see IAlgorithm::validateInputs
   std::map<std::string, std::string> validateInputs() override;
 
 protected:
-  Parallel::ExecutionMode getParallelExecutionMode(
-      const std::map<std::string, Parallel::StorageMode> &storageModes)
-      const override;
+  Parallel::ExecutionMode
+  getParallelExecutionMode(const std::map<std::string, Parallel::StorageMode> &storageModes) const override;
 
 private:
   // Implement abstract Algorithm methods
   void init() override;
   void exec() override;
 
-  void align(const ConversionFactors &converter, API::Progress &progress,
-             API::MatrixWorkspace &outputWS);
-  void align(const ConversionFactors &converter, API::Progress &progress,
-             DataObjects::EventWorkspace &outputWS);
+  void align(const ConversionFactors &converter, API::Progress &progress, API::MatrixWorkspace &outputWS);
+  void align(const ConversionFactors &converter, API::Progress &progress, DataObjects::EventWorkspace &outputWS);
 
-  void loadCalFile(const API::MatrixWorkspace_sptr &inputWS,
-                   const std::string &filename);
+  void loadCalFile(const API::MatrixWorkspace_sptr &inputWS, const std::string &filename);
   void getCalibrationWS(const API::MatrixWorkspace_sptr &inputWS);
 
   Mantid::API::ITableWorkspace_sptr m_calibrationWS;

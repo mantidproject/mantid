@@ -27,13 +27,11 @@ public:
     TS_ASSERT(alg.isInitialized())
   }
 
-  std::string do_test(const std::string &InputWorkspace,
-                      const std::string &Filename, bool expectSuccess = true) {
+  std::string do_test(const std::string &InputWorkspace, const std::string &Filename, bool expectSuccess = true) {
     SaveZODS alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputWorkspace", InputWorkspace));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", InputWorkspace));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", Filename));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     if (expectSuccess) {
@@ -50,13 +48,11 @@ public:
     coord_t min[3] = {0, 10, 0};
     coord_t max[3] = {10, 34, 10};
     MDHistoWorkspace_sptr ws =
-        MDEventsTestHelper::makeFakeMDHistoWorkspaceGeneral(
-            3, 1.0, 2.0, numBins, min, max, "mdhisto3");
+        MDEventsTestHelper::makeFakeMDHistoWorkspaceGeneral(3, 1.0, 2.0, numBins, min, max, "mdhisto3");
     for (size_t x = 0; x < 10; x++)
       for (size_t y = 0; y < 8; y++)
         for (size_t z = 0; z < 2; z++)
-          ws->setSignalAt(ws->getLinearIndex(x, y, z),
-                          double(x + 10 * y + 100 * z));
+          ws->setSignalAt(ws->getLinearIndex(x, y, z), double(x + 10 * y + 100 * z));
     // Actually do the test
     std::string Filename = do_test("mdhisto3", "SaveZODS_test.h5");
 

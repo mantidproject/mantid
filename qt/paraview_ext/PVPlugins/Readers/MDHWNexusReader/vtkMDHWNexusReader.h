@@ -18,10 +18,8 @@ public:
   static vtkMDHWNexusReader *New();
   vtkMDHWNexusReader(const vtkMDHWNexusReader &) = delete;
   void operator=(const vtkMDHWNexusReader &) = delete;
-  vtkTypeMacro(vtkMDHWNexusReader, vtkStructuredGridAlgorithm) void PrintSelf(
-      ostream &os, vtkIndent indent) override;
-  vtkSetStringMacro(FileName)
-      vtkGetStringMacro(FileName) int CanReadFile(const char *fname);
+  vtkTypeMacro(vtkMDHWNexusReader, vtkStructuredGridAlgorithm) void PrintSelf(ostream &os, vtkIndent indent) override;
+  vtkSetStringMacro(FileName) vtkGetStringMacro(FileName) int CanReadFile(const char *fname);
   void SetInMemory(bool inMemory);
   void SetDepth(int depth);
 
@@ -44,10 +42,8 @@ public:
 protected:
   vtkMDHWNexusReader();
   ~vtkMDHWNexusReader() override;
-  int RequestInformation(vtkInformation *, vtkInformationVector **,
-                         vtkInformationVector *) override;
-  int RequestData(vtkInformation *, vtkInformationVector **,
-                  vtkInformationVector *) override;
+  int RequestInformation(vtkInformation *, vtkInformationVector **, vtkInformationVector *) override;
+  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *) override;
   /// Handle time variation.
   vtkMTimeType GetMTime() override;
 

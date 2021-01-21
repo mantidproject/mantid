@@ -37,8 +37,7 @@
 /**
  * Constructor taking a script reference
  */
-Script::ScriptTask::ScriptTask(Script &script)
-    : QFutureInterface<bool>(), QRunnable(), m_script(script) {}
+Script::ScriptTask::ScriptTask(Script &script) : QFutureInterface<bool>(), QRunnable(), m_script(script) {}
 
 /// Starts a thread/or uses the current thread
 /// by using the script thread pool to start this job
@@ -75,11 +74,9 @@ Script::ScriptThreadPool::ScriptThreadPool() : QThreadPool() {
 
 #include <QtConcurrentRun>
 
-Script::Script(ScriptingEnv *env, const QString &name,
-               const InteractionType interact, QObject *context)
-    : QObject(), m_env(env), m_name(name.toStdString()), m_context(context),
-      m_redirectOutput(true), m_reportProgress(false), m_interactMode(interact),
-      m_execMode(NotExecuting), m_thread(new ScriptThreadPool) {
+Script::Script(ScriptingEnv *env, const QString &name, const InteractionType interact, QObject *context)
+    : QObject(), m_env(env), m_name(name.toStdString()), m_context(context), m_redirectOutput(true),
+      m_reportProgress(false), m_interactMode(interact), m_execMode(NotExecuting), m_thread(new ScriptThreadPool) {
   m_env->incref();
 
   connect(this, SIGNAL(started(const QString &)), this, SLOT(setIsRunning()));
@@ -91,10 +88,8 @@ Script::Script(ScriptingEnv *env, const QString &name,
    * This can be very confusing to users so force a call to release
    * the memory.
    */
-  connect(this, SIGNAL(finished(const QString &)), this,
-          SLOT(setNotExecuting()));
-  connect(this, SIGNAL(error(const QString &, const QString &, int)), this,
-          SLOT(setNotExecuting()));
+  connect(this, SIGNAL(finished(const QString &)), this, SLOT(setNotExecuting()));
+  connect(this, SIGNAL(error(const QString &, const QString &, int)), this, SLOT(setNotExecuting()));
 }
 
 Script::~Script() {

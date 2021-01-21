@@ -33,8 +33,7 @@ Mantid::Kernel::Logger g_log("MiniPlotQwt");
 namespace MantidQt {
 namespace MantidWidgets {
 
-MiniPlotQwt::MiniPlotQwt(QWidget *parent)
-    : QwtPlot(parent), m_curve(nullptr), m_xUnits("") {
+MiniPlotQwt::MiniPlotQwt(QWidget *parent) : QwtPlot(parent), m_curve(nullptr), m_xUnits("") {
   const QFont &font = parent->font();
   setAxisFont(QwtPlot::xBottom, font);
   setAxisFont(QwtPlot::yLeft, font);
@@ -44,16 +43,13 @@ MiniPlotQwt::MiniPlotQwt(QWidget *parent)
   setAxisTitle(xBottom, dummyText);
   canvas()->setCursor(Qt::ArrowCursor);
   setContextMenuPolicy(Qt::DefaultContextMenu);
-  m_zoomer =
-      new QwtPlotZoomer(QwtPlot::xBottom, QwtPlot::yLeft,
-                        QwtPicker::DragSelection | QwtPicker::CornerToCorner,
-                        QwtPicker::AlwaysOff, canvas());
+  m_zoomer = new QwtPlotZoomer(QwtPlot::xBottom, QwtPlot::yLeft, QwtPicker::DragSelection | QwtPicker::CornerToCorner,
+                               QwtPicker::AlwaysOff, canvas());
   m_zoomer->setRubberBandPen(QPen(Qt::black));
   QList<QColor> colors;
-  m_colors << Qt::red << Qt::green << Qt::blue << Qt::cyan << Qt::magenta
-           << Qt::yellow << Qt::gray;
-  m_colors << Qt::darkRed << Qt::darkGreen << Qt::darkBlue << Qt::darkCyan
-           << Qt::darkMagenta << Qt::darkYellow << Qt::darkGray;
+  m_colors << Qt::red << Qt::green << Qt::blue << Qt::cyan << Qt::magenta << Qt::yellow << Qt::gray;
+  m_colors << Qt::darkRed << Qt::darkGreen << Qt::darkBlue << Qt::darkCyan << Qt::darkMagenta << Qt::darkYellow
+           << Qt::darkGray;
   m_colorIndex = 0;
   m_x0 = 0;
   m_y0 = 0;
@@ -96,8 +92,7 @@ void MiniPlotQwt::setXScale(double from, double to) {
   if (nMajorTicks > 6)
     nMajorTicks = 6;
   // try creating a scale
-  const QwtScaleDiv div = axisScaleEngine(QwtPlot::xBottom)
-                              ->divideScale(from, to, nMajorTicks, nMajorTicks);
+  const QwtScaleDiv div = axisScaleEngine(QwtPlot::xBottom)->divideScale(from, to, nMajorTicks, nMajorTicks);
   // Major ticks are placed at round numbers so the first or last tick could be
   // missing making
   // scale look ugly. Trying to fix it if possible
@@ -135,8 +130,7 @@ void MiniPlotQwt::setXScale(double from, double to) {
       if (fabs(shift / range) < 0.1) {
         from += shift;
         const QwtScaleDiv updatedDiv =
-            axisScaleEngine(QwtPlot::xBottom)
-                ->divideScale(from, to, nMajorTicks, nMajorTicks);
+            axisScaleEngine(QwtPlot::xBottom)->divideScale(from, to, nMajorTicks, nMajorTicks);
         setAxisScaleDiv(xBottom, updatedDiv);
         rescaled = true;
       }
@@ -160,8 +154,7 @@ void MiniPlotQwt::setXScale(double from, double to) {
       if (fabs(shift / range) < 0.1) {
         to += shift;
         const QwtScaleDiv updatedDiv =
-            axisScaleEngine(QwtPlot::xBottom)
-                ->divideScale(from, to, nMajorTicks, nMajorTicks);
+            axisScaleEngine(QwtPlot::xBottom)->divideScale(from, to, nMajorTicks, nMajorTicks);
         setAxisScaleDiv(xBottom, updatedDiv);
         rescaled = true;
       }
@@ -222,8 +215,7 @@ void MiniPlotQwt::setYScale(double from, double to) {
  * @param xUnits :: Units for the data
  * @param curveLabel :: A label for hthe die
  */
-void MiniPlotQwt::setData(std::vector<double> x, std::vector<double> y,
-                          QString xunit, QString curveLabel) {
+void MiniPlotQwt::setData(std::vector<double> x, std::vector<double> y, QString xunit, QString curveLabel) {
   if (x.empty()) {
     g_log.warning("setData(): X array is empty!");
     return;
@@ -233,9 +225,8 @@ void MiniPlotQwt::setData(std::vector<double> x, std::vector<double> y,
     return;
   }
   if (x.size() != y.size()) {
-    g_log.warning(std::string(
-        "setData(): X/Y size mismatch! X=" + std::to_string(x.size()) +
-        ", Y=" + std::to_string(y.size())));
+    g_log.warning(
+        std::string("setData(): X/Y size mismatch! X=" + std::to_string(x.size()) + ", Y=" + std::to_string(y.size())));
     return;
   }
 
@@ -352,15 +343,12 @@ void MiniPlotQwt::mousePressEvent(QMouseEvent *e) {
 void MiniPlotQwt::mouseReleaseEvent(QMouseEvent *e) {
   if (e->button() == Qt::LeftButton) {
     if (m_x0 == e->x() && m_y0 == e->y()) { // there were no dragging
-      emit clickedAt(invTransform(xBottom, e->x() - canvas()->x()),
-                     invTransform(yLeft, e->y() - canvas()->y()));
+      emit clickedAt(invTransform(xBottom, e->x() - canvas()->x()), invTransform(yLeft, e->y() - canvas()->y()));
     }
   }
 }
 
-void MiniPlotQwt::setYAxisLabelRotation(double degrees) {
-  axisScaleDraw(yLeft)->setLabelRotation(degrees);
-}
+void MiniPlotQwt::setYAxisLabelRotation(double degrees) { axisScaleDraw(yLeft)->setLabelRotation(degrees); }
 
 /**
  * Set the log scale on the y axis
@@ -492,8 +480,8 @@ void MiniPlotQwt::clearAll() {
 /**
  * Draw PeakLabel on a plot
  */
-void PeakLabel::draw(QPainter *painter, const QwtScaleMap &xMap,
-                     const QwtScaleMap &yMap, const QRect &canvasRect) const {
+void PeakLabel::draw(QPainter *painter, const QwtScaleMap &xMap, const QwtScaleMap &yMap,
+                     const QRect &canvasRect) const {
   (void)yMap;
   double peakX;
   if (m_plot->getXUnits().isEmpty())
@@ -506,8 +494,7 @@ void PeakLabel::draw(QPainter *painter, const QwtScaleMap &xMap,
     peakX = m_marker->getPeak().getTOF();
   }
   int x = xMap.transform(peakX);
-  int y =
-      static_cast<int>(canvasRect.top() + m_marker->getLabelRect().height());
+  int y = static_cast<int>(canvasRect.top() + m_marker->getLabelRect().height());
   painter->drawText(x, y, m_marker->getLabel());
   // std::cerr << x << ' ' << y << ' ' << m_marker->getLabel().toStdString() <<
   // '\n';

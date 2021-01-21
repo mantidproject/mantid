@@ -51,20 +51,16 @@ int DownloadFile::version() const { return 1; }
 const std::string DownloadFile::category() const { return "DataHandling"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-const std::string DownloadFile::summary() const {
-  return "Downloads a file from a url to the file system";
-}
+const std::string DownloadFile::summary() const { return "Downloads a file from a url to the file system"; }
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void DownloadFile::init() {
-  declareProperty(
-      "Address", "", std::make_shared<MandatoryValidator<std::string>>(),
-      "The address of the network resource to download.", Direction::InOut);
-  declareProperty(
-      std::make_unique<FileProperty>("Filename", "", FileProperty::Save),
-      "The filename to save the download to.");
+  declareProperty("Address", "", std::make_shared<MandatoryValidator<std::string>>(),
+                  "The address of the network resource to download.", Direction::InOut);
+  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Save),
+                  "The filename to save the download to.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -72,8 +68,7 @@ void DownloadFile::init() {
  */
 void DownloadFile::exec() {
   std::string address = getProperty("Address");
-  if ((!boost::starts_with(address, "http://")) &&
-      (!boost::starts_with(address, "https://"))) {
+  if ((!boost::starts_with(address, "http://")) && (!boost::starts_with(address, "https://"))) {
     address = "http://" + address;
     g_log.information("Address must start http:// or https://, http has been "
                       "assumed to continue: " +

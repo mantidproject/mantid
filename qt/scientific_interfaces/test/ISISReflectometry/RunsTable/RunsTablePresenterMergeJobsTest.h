@@ -15,22 +15,16 @@
 #include <gtest/gtest.h>
 
 using namespace MantidQt::CustomInterfaces::ISISReflectometry;
-using namespace MantidQt::CustomInterfaces::ISISReflectometry::
-    ModelCreationHelper;
+using namespace MantidQt::CustomInterfaces::ISISReflectometry::ModelCreationHelper;
 using testing::Mock;
 using testing::NiceMock;
 using testing::Return;
 
-class RunsTablePresenterMergeJobsTest : public CxxTest::TestSuite,
-                                        RunsTablePresenterTest {
+class RunsTablePresenterMergeJobsTest : public CxxTest::TestSuite, RunsTablePresenterTest {
 public:
-  static RunsTablePresenterMergeJobsTest *createSuite() {
-    return new RunsTablePresenterMergeJobsTest();
-  }
+  static RunsTablePresenterMergeJobsTest *createSuite() { return new RunsTablePresenterMergeJobsTest(); }
 
-  static void destroySuite(RunsTablePresenterMergeJobsTest *suite) {
-    delete suite;
-  }
+  static void destroySuite(RunsTablePresenterMergeJobsTest *suite) { delete suite; }
 
   void testMergeEmptyTableDoesNothing() {
     auto presenter = makePresenter(m_view, oneGroupWithARowModel());
@@ -89,8 +83,7 @@ public:
   }
 
   void testMergeNewRunIntoExistingRowIsSortedByRunNumber() {
-    auto presenter =
-        makePresenter(m_view, oneGroupWithAnotherRunWithSameAngleModel());
+    auto presenter = makePresenter(m_view, oneGroupWithAnotherRunWithSameAngleModel());
     presenter.mergeAdditionalJobs(oneGroupWithARowModel());
     auto &result = jobsFromPresenter(presenter);
     TS_ASSERT_EQUALS(result, oneGroupWithTwoRunsInARowModel());

@@ -24,12 +24,8 @@ class ResizeRectangularDetectorHelperTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ResizeRectangularDetectorHelperTest *createSuite() {
-    return new ResizeRectangularDetectorHelperTest();
-  }
-  static void destroySuite(ResizeRectangularDetectorHelperTest *suite) {
-    delete suite;
-  }
+  static ResizeRectangularDetectorHelperTest *createSuite() { return new ResizeRectangularDetectorHelperTest(); }
+  static void destroySuite(ResizeRectangularDetectorHelperTest *suite) { delete suite; }
 
   void test_applyRectangularDetectorScaleToComponentInfo() {
     WorkspaceTester ws;
@@ -37,8 +33,7 @@ public:
     double pitch = 0.1;
     double distanceFromSample = 4.2;
     ws.initialize(pixels * pixels, 1, 1);
-    ws.setInstrument(ComponentCreationHelper::createTestInstrumentRectangular(
-        1, pixels, pitch, distanceFromSample));
+    ws.setInstrument(ComponentCreationHelper::createTestInstrumentRectangular(1, pixels, pitch, distanceFromSample));
     auto &componentInfo = ws.mutableComponentInfo();
     const auto bank = ws.getInstrument()->getComponentByName("bank1");
     const auto bankIndex = componentInfo.indexOf(bank->getComponentID());
@@ -53,8 +48,7 @@ public:
 
     double scaleX = 7.3;
     double scaleY = 1.3;
-    applyRectangularDetectorScaleToComponentInfo(
-        componentInfo, bank->getComponentID(), scaleX, scaleY);
+    applyRectangularDetectorScaleToComponentInfo(componentInfo, bank->getComponentID(), scaleX, scaleY);
 
     // Shift/rotate back for easy test of updated pixel positions
     componentInfo.setRotation(bankIndex, oldRot);
@@ -66,8 +60,7 @@ public:
     TS_ASSERT_DELTA(componentInfo.position(1)[1], pitch * scaleY, 1e-14);
     TS_ASSERT_DELTA(componentInfo.position(1)[2], distanceFromSample, 1e-14);
     TS_ASSERT_DELTA(componentInfo.position(2)[0], 0.0, 1e-14);
-    TS_ASSERT_DELTA(componentInfo.position(2)[1], (2.0 * pitch) * scaleY,
-                    1e-14);
+    TS_ASSERT_DELTA(componentInfo.position(2)[1], (2.0 * pitch) * scaleY, 1e-14);
     TS_ASSERT_DELTA(componentInfo.position(2)[2], distanceFromSample, 1e-14);
     TS_ASSERT_DELTA(componentInfo.position(3)[0], pitch * scaleX, 1e-14);
     TS_ASSERT_DELTA(componentInfo.position(3)[1], 0.0, 1e-14);

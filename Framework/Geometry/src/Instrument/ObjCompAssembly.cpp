@@ -39,9 +39,7 @@ public:
  * @param base: the base (un-parametrized) IComponent
  * @param map: pointer to the ParameterMap
  */
-ObjCompAssembly::ObjCompAssembly(const IComponent *base,
-                                 const ParameterMap *map)
-    : ObjComponent(base, map) {}
+ObjCompAssembly::ObjCompAssembly(const IComponent *base, const ParameterMap *map) : ObjComponent(base, map) {}
 
 /** Valued constructor
  *  @param n :: name of the assembly
@@ -52,8 +50,7 @@ ObjCompAssembly::ObjCompAssembly(const IComponent *base,
  *  an assembly itself, then in addition to parenting
  *  this is registered as a children of reference.
  */
-ObjCompAssembly::ObjCompAssembly(const std::string &n, IComponent *reference)
-    : ObjComponent(n, reference) {
+ObjCompAssembly::ObjCompAssembly(const std::string &n, IComponent *reference) : ObjComponent(n, reference) {
   if (reference) {
     auto *test = dynamic_cast<ICompAssembly *>(reference);
     if (test)
@@ -96,9 +93,7 @@ ObjCompAssembly::~ObjCompAssembly() {
  *  Make a copy of the component assembly
  *  @return new(*this)
  */
-IComponent *ObjCompAssembly::clone() const {
-  return new ObjCompAssembly(*this);
-}
+IComponent *ObjCompAssembly::clone() const { return new ObjCompAssembly(*this); }
 
 /** Add method
  * @param comp :: component to add
@@ -108,8 +103,7 @@ IComponent *ObjCompAssembly::clone() const {
  */
 int ObjCompAssembly::add(IComponent *comp) {
   if (m_map)
-    throw std::runtime_error(
-        "ObjCompAssembly::add() called on a Parametrized object.");
+    throw std::runtime_error("ObjCompAssembly::add() called on a Parametrized object.");
 
   if (comp) {
     auto *c = dynamic_cast<ObjComponent *>(comp);
@@ -133,8 +127,7 @@ int ObjCompAssembly::add(IComponent *comp) {
  */
 int ObjCompAssembly::addCopy(IComponent *comp) {
   if (m_map)
-    throw std::runtime_error(
-        "ObjCompAssembly::addCopy() called on a Parametrized object.");
+    throw std::runtime_error("ObjCompAssembly::addCopy() called on a Parametrized object.");
 
   if (comp) {
     IComponent *newcomp = comp->clone();
@@ -160,8 +153,7 @@ int ObjCompAssembly::addCopy(IComponent *comp) {
  */
 int ObjCompAssembly::addCopy(IComponent *comp, const std::string &n) {
   if (m_map)
-    throw std::runtime_error(
-        "ObjCompAssembly::addCopy() called on a Parametrized object.");
+    throw std::runtime_error("ObjCompAssembly::addCopy() called on a Parametrized object.");
 
   if (comp) {
     IComponent *newcomp = comp->clone();
@@ -184,8 +176,7 @@ int ObjCompAssembly::nelements() const {
   if (m_map) {
     auto objCompAss = dynamic_cast<const ObjCompAssembly *>(m_base);
     if (!objCompAss) {
-      throw std::logic_error(
-          "Failed to cast base component to ObjCompAssembly");
+      throw std::logic_error("Failed to cast base component to ObjCompAssembly");
     }
     return objCompAss->nelements();
   } else
@@ -209,8 +200,7 @@ std::shared_ptr<IComponent> ObjCompAssembly::operator[](int i) const {
   if (m_map) {
     auto child_base = dynamic_cast<const ObjCompAssembly *>(m_base);
     if (!child_base) {
-      throw std::logic_error(
-          "Failed to cast base component to ObjCompAssembly");
+      throw std::logic_error("Failed to cast base component to ObjCompAssembly");
     }
     return ParComponentFactory::create(child_base->operator[](i), m_map);
   } else {
@@ -226,16 +216,14 @@ std::shared_ptr<IComponent> ObjCompAssembly::operator[](int i) const {
  * @param recursive :: if a child is a CompAssembly, returns its children
  *recursively
  */
-void ObjCompAssembly::getChildren(std::vector<IComponent_const_sptr> &outVector,
-                                  bool recursive) const {
+void ObjCompAssembly::getChildren(std::vector<IComponent_const_sptr> &outVector, bool recursive) const {
   for (int i = 0; i < this->nelements(); i++) {
     std::shared_ptr<IComponent> comp = this->getChild(i);
     if (comp) {
       outVector.emplace_back(comp);
       // Look deeper, on option.
       if (recursive) {
-        std::shared_ptr<ICompAssembly> assemb =
-            std::dynamic_pointer_cast<ICompAssembly>(comp);
+        std::shared_ptr<ICompAssembly> assemb = std::dynamic_pointer_cast<ICompAssembly>(comp);
         if (assemb)
           assemb->getChildren(outVector, recursive);
       }
@@ -250,9 +238,7 @@ void ObjCompAssembly::getChildren(std::vector<IComponent_const_sptr> &outVector,
  * @param nlevels :: Optional argument to limit number of levels searched.
  * @returns A shared pointer to the component
  */
-std::shared_ptr<const IComponent>
-ObjCompAssembly::getComponentByName(const std::string &cname,
-                                    int nlevels) const {
+std::shared_ptr<const IComponent> ObjCompAssembly::getComponentByName(const std::string &cname, int nlevels) const {
   int nchildren = this->nelements();
   if (nlevels > 1)
     g_log.debug() << "only implemented for children\n";
@@ -289,8 +275,7 @@ void ObjCompAssembly::printTree(std::ostream &os) const {
   // std::vector<IComponent*>::const_iterator it;
   int i = 0;
   for (i = 0; i < this->nelements(); i++) {
-    std::shared_ptr<const ObjCompAssembly> test =
-        std::dynamic_pointer_cast<const ObjCompAssembly>(this->operator[](i));
+    std::shared_ptr<const ObjCompAssembly> test = std::dynamic_pointer_cast<const ObjCompAssembly>(this->operator[](i));
     os << "Element " << i << " in the assembly : ";
     if (test) {
       os << test->getName() << '\n';
@@ -343,13 +328,12 @@ Quat ObjCompAssembly::getRotation() const {
  * @param searchQueue :: If a child is a sub-assembly then it is appended for
  *later searching
  */
-void ObjCompAssembly::testIntersectionWithChildren(
-    Track &testRay, std::deque<IComponent_const_sptr> &searchQueue) const {
+void ObjCompAssembly::testIntersectionWithChildren(Track &testRay,
+                                                   std::deque<IComponent_const_sptr> &searchQueue) const {
   int nchildren = this->nelements();
   for (int i = 0; i < nchildren; ++i) {
     std::shared_ptr<Geometry::IComponent> comp = this->getChild(i);
-    if (ICompAssembly_sptr childAssembly =
-            std::dynamic_pointer_cast<ICompAssembly>(comp)) {
+    if (ICompAssembly_sptr childAssembly = std::dynamic_pointer_cast<ICompAssembly>(comp)) {
       searchQueue.emplace_back(comp);
     }
     // Check the physical object intersection
@@ -360,8 +344,7 @@ void ObjCompAssembly::testIntersectionWithChildren(
   }
 }
 
-size_t ObjCompAssembly::registerContents(
-    Mantid::Geometry::ComponentVisitor &visitor) const {
+size_t ObjCompAssembly::registerContents(Mantid::Geometry::ComponentVisitor &visitor) const {
   // Generic Assembly registration call.
   return visitor.registerObjComponentAssembly(*this);
 }
@@ -390,8 +373,7 @@ std::shared_ptr<IObject> ObjCompAssembly::createOutline() {
   double radius, height, innerRadius;
   std::shared_ptr<const IObject> obj = group.front()->shape();
   if (!obj) {
-    throw Kernel::Exception::InstrumentDefinitionError(
-        "Found ObjComponent without shape");
+    throw Kernel::Exception::InstrumentDefinitionError("Found ObjComponent without shape");
   }
   obj->GetObjectGeom(otype, vectors, innerRadius, radius, height);
   if (otype == detail::ShapeInfo::GeometryShape::CUBOID) {
@@ -399,9 +381,8 @@ std::shared_ptr<IObject> ObjCompAssembly::createOutline() {
   } else if (otype == detail::ShapeInfo::GeometryShape::CYLINDER) {
     type = "cylinder";
   } else {
-    throw std::runtime_error(
-        "IDF \"outline\" option is only allowed for assemblies containing "
-        "components of types \"box\" or \"cylinder\".");
+    throw std::runtime_error("IDF \"outline\" option is only allowed for assemblies containing "
+                             "components of types \"box\" or \"cylinder\".");
   }
 
   // Calculate the dimensions of the outline object
@@ -506,16 +487,14 @@ std::shared_ptr<IObject> ObjCompAssembly::createOutline() {
   // hx and hy must be practically zero
   if (hx > 1e-3 || hy > 1e-3) // arbitrary numbers
   {
-    throw Kernel::Exception::InstrumentDefinitionError(
-        "Detectors of a ObjCompAssembly do not lie on a staraight line");
+    throw Kernel::Exception::InstrumentDefinitionError("Detectors of a ObjCompAssembly do not lie on a staraight line");
   }
 
   // determine the order of the detectors to make sure that the texture
   // coordinates are correct
   bool firstAtBottom; // first detector is at the bottom of the outline shape
   // the bottom end is the one with the negative displacement from the centre
-  firstAtBottom =
-      ((**group.begin()).getRelativePos() - Cmass).scalar_prod(vz) < 0;
+  firstAtBottom = ((**group.begin()).getRelativePos() - Cmass).scalar_prod(vz) < 0;
 
   // form the input string for the ShapeFactory
   std::ostringstream obj_str;
@@ -590,8 +569,7 @@ std::shared_ptr<IObject> ObjCompAssembly::createOutline() {
     obj_str << "\" y=\"" << Cmass.Y();
     obj_str << "\" z=\"" << Cmass.Z();
     obj_str << "\" />";
-    obj_str << "<axis x=\"" << vz.X() << "\" y=\"" << vz.Y() << "\" z=\""
-            << vz.Z() << "\" /> ";
+    obj_str << "<axis x=\"" << vz.X() << "\" y=\"" << vz.Y() << "\" z=\"" << vz.Z() << "\" /> ";
     obj_str << "<radius val=\"" << radius << "\" />";
     obj_str << "<height val=\"" << hz << "\" />";
     obj_str << "</cylinder>";
@@ -609,9 +587,7 @@ std::shared_ptr<IObject> ObjCompAssembly::createOutline() {
  * Sets the outline shape for this assembly
  * @param obj :: The outline shape created previously fith createOutline()
  */
-void ObjCompAssembly::setOutline(std::shared_ptr<const IObject> obj) {
-  m_shape = std::move(obj);
-}
+void ObjCompAssembly::setOutline(std::shared_ptr<const IObject> obj) { m_shape = std::move(obj); }
 
 /** Print information about elements in the assembly to a stream
  *  Overload the operator <<

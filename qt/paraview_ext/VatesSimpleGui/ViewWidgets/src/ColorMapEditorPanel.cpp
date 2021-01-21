@@ -24,14 +24,11 @@ void ColorMapEditorPanel::setUpPanel() {
   this->setWindowTitle("Color Editor Panel");
   this->hide();
   this->ui.dockWidget->installEventFilter(this);
-  pqApplicationCore::instance()->registerManager("COLOR_EDITOR_PANEL",
-                                                 this->ui.dockWidget);
+  pqApplicationCore::instance()->registerManager("COLOR_EDITOR_PANEL", this->ui.dockWidget);
 
-  QObject::connect(this, SIGNAL(showPopUpWindow()), this,
-                   SLOT(onShowPopUpWindow()), Qt::QueuedConnection);
+  QObject::connect(this, SIGNAL(showPopUpWindow()), this, SLOT(onShowPopUpWindow()), Qt::QueuedConnection);
 
-  QObject::connect(this, SIGNAL(hidePopUpWindow()), this,
-                   SLOT(onHidePopUpWindow()), Qt::QueuedConnection);
+  QObject::connect(this, SIGNAL(hidePopUpWindow()), this, SLOT(onHidePopUpWindow()), Qt::QueuedConnection);
 
 #ifdef __APPLE__
   // On macOS the dialogs appear behind everything by default. Need to find

@@ -34,32 +34,22 @@ public:
   void test_Properties() {
     LoadVTK loadVTK;
     loadVTK.initialize();
-    TS_ASSERT_THROWS_NOTHING(
-        loadVTK.setPropertyValue("Filename", "iron_protein.vtk"));
-    TS_ASSERT_THROWS_NOTHING(
-        loadVTK.setPropertyValue("OutputWorkspace", "OutWS"));
-    TS_ASSERT_THROWS_NOTHING(
-        loadVTK.setPropertyValue("SignalArrayName", "scalars"));
+    TS_ASSERT_THROWS_NOTHING(loadVTK.setPropertyValue("Filename", "iron_protein.vtk"));
+    TS_ASSERT_THROWS_NOTHING(loadVTK.setPropertyValue("OutputWorkspace", "OutWS"));
+    TS_ASSERT_THROWS_NOTHING(loadVTK.setPropertyValue("SignalArrayName", "scalars"));
     TS_ASSERT(loadVTK.isInitialized())
   }
 
-  void do_check_dimension(IMDDimension_const_sptr dimension,
-                          const std::string &expectedName,
-                          const double expectedMin, const double expectedMax,
-                          const int expectedNBins) {
+  void do_check_dimension(IMDDimension_const_sptr dimension, const std::string &expectedName, const double expectedMin,
+                          const double expectedMax, const int expectedNBins) {
     TSM_ASSERT_EQUALS("Name is wrong.", dimension->getName(), expectedName);
-    TSM_ASSERT_EQUALS("Id is wrong.", dimension->getDimensionId(),
-                      expectedName);
-    TSM_ASSERT_DELTA("Minimum is wrong.", dimension->getMinimum(), expectedMin,
-                     0.01);
-    TSM_ASSERT_DELTA("Maximum is wrong.", dimension->getMaximum(), expectedMax,
-                     0.01);
-    TSM_ASSERT_EQUALS("Number of bins is wrong.", dimension->getNBins(),
-                      expectedNBins);
+    TSM_ASSERT_EQUALS("Id is wrong.", dimension->getDimensionId(), expectedName);
+    TSM_ASSERT_DELTA("Minimum is wrong.", dimension->getMinimum(), expectedMin, 0.01);
+    TSM_ASSERT_DELTA("Maximum is wrong.", dimension->getMaximum(), expectedMax, 0.01);
+    TSM_ASSERT_EQUALS("Number of bins is wrong.", dimension->getNBins(), expectedNBins);
   }
 
-  void do_test_bad_arrays(const std::string &signalArrayName,
-                          const std::string &errorSQArrayName = "") {
+  void do_test_bad_arrays(const std::string &signalArrayName, const std::string &errorSQArrayName = "") {
     LoadVTK loadVTK;
     loadVTK.setRethrows(true);
     loadVTK.initialize();
@@ -94,9 +84,7 @@ public:
     loadVTK.setProperty("AdaptiveBinned", false);
     loadVTK.execute();
 
-    IMDHistoWorkspace_sptr outWS =
-        AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(
-            outWSName);
+    IMDHistoWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(outWSName);
 
     TS_ASSERT_EQUALS(3, outWS->getNumDims());
     do_check_dimension(outWS->getDimension(0), "X", 0, 67,
@@ -121,12 +109,9 @@ public:
     loadVTK.initialize();
     loadVTK.setRethrows(true);
 
-    TSM_ASSERT_THROWS_NOTHING("Within bounds",
-                              loadVTK.setProperty("KeepTopPercent", 1.0));
-    TSM_ASSERT_THROWS("Too low", loadVTK.setProperty("KeepTopPercent", -0.01),
-                      std::invalid_argument &);
-    TSM_ASSERT_THROWS("Too high", loadVTK.setProperty("KeepTopPercent", 100.01),
-                      std::invalid_argument &);
+    TSM_ASSERT_THROWS_NOTHING("Within bounds", loadVTK.setProperty("KeepTopPercent", 1.0));
+    TSM_ASSERT_THROWS("Too low", loadVTK.setProperty("KeepTopPercent", -0.01), std::invalid_argument &);
+    TSM_ASSERT_THROWS("Too high", loadVTK.setProperty("KeepTopPercent", 100.01), std::invalid_argument &);
   }
 
   void test_load_vtk_file_as_mdevent() {
@@ -142,9 +127,7 @@ public:
     loadVTK.setPropertyValue("ErrorSQArrayName", "scalar_array");
     loadVTK.execute();
 
-    IMDEventWorkspace_sptr outWS =
-        AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(
-            outWSName);
+    IMDEventWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(outWSName);
 
     TS_ASSERT_EQUALS(3, outWS->getNumDims());
     do_check_dimension(outWS->getDimension(0), "X", 0, 67,
@@ -156,14 +139,11 @@ public:
     do_check_dimension(outWS->getDimension(2), "Z", 0, 67,
                        68); // These numbers are expected min, max, and nbins
                             // known from the input file for dim z.
-    TSM_ASSERT_EQUALS("Should be an UnknownFrame",
-                      Mantid::Geometry::UnknownFrame::UnknownFrameName,
+    TSM_ASSERT_EQUALS("Should be an UnknownFrame", Mantid::Geometry::UnknownFrame::UnknownFrameName,
                       outWS->getDimension(0)->getMDFrame().name());
-    TSM_ASSERT_EQUALS("Should be an UnknownFrame",
-                      Mantid::Geometry::UnknownFrame::UnknownFrameName,
+    TSM_ASSERT_EQUALS("Should be an UnknownFrame", Mantid::Geometry::UnknownFrame::UnknownFrameName,
                       outWS->getDimension(1)->getMDFrame().name());
-    TSM_ASSERT_EQUALS("Should be an UnknownFrame",
-                      Mantid::Geometry::UnknownFrame::UnknownFrameName,
+    TSM_ASSERT_EQUALS("Should be an UnknownFrame", Mantid::Geometry::UnknownFrame::UnknownFrameName,
                       outWS->getDimension(2)->getMDFrame().name());
 
     double topPercent = loadVTK.getProperty("KeepTopPercent");
@@ -172,8 +152,7 @@ public:
     const int expectedSignalMax = 9999; // Known from file
     const int expectedSignalMin = 0;    // Known from file
     const int expectedSignalThreshold =
-        static_cast<int>((1 - 0.25) * (expectedSignalMax - expectedSignalMin) +
-                         expectedSignalMin);
+        static_cast<int>((1 - 0.25) * (expectedSignalMax - expectedSignalMin) + expectedSignalMin);
     const int actualSignalMin = loadVTK.getProperty("SignalMinimum");
     const int actualSignalMax = loadVTK.getProperty("SignalMaximum");
     const int actualSignalThreshold = loadVTK.getProperty("SignalThreshold");
@@ -196,8 +175,6 @@ public:
     alg->setProperty("AdaptiveBinned", false);
     TS_ASSERT_THROWS_NOTHING(alg->execute());
 
-    TS_ASSERT_THROWS_NOTHING(
-        AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(
-            outWSName));
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(outWSName));
   }
 };

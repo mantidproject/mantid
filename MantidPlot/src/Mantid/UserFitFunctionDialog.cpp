@@ -19,8 +19,7 @@
 //---------------------------------------
 
 /// Constructor
-UserFitFunctionDialog::UserFitFunctionDialog(QWidget *parent)
-    : QDialog(parent) {
+UserFitFunctionDialog::UserFitFunctionDialog(QWidget *parent) : QDialog(parent) {
   ui.setupUi(this);
 
   ui.btnAdd->setEnabled(false);
@@ -28,8 +27,7 @@ UserFitFunctionDialog::UserFitFunctionDialog(QWidget *parent)
   connect(ui.btnAdd, SIGNAL(clicked()), this, SLOT(addFunction()));
   connect(ui.btnMultiply, SIGNAL(clicked()), this, SLOT(multiplyFunction()));
   connect(ui.btnInsert, SIGNAL(clicked()), this, SLOT(insertFunction()));
-  connect(ui.treeFunctions, SIGNAL(itemSelectionChanged()), this,
-          SLOT(functionSelectionChanged()));
+  connect(ui.treeFunctions, SIGNAL(itemSelectionChanged()), this, SLOT(functionSelectionChanged()));
 }
 
 void UserFitFunctionDialog::addFunction() { addFunction("+", false); }

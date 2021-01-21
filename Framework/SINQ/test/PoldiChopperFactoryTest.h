@@ -19,20 +19,16 @@ class PoldiChopperFactoryTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static PoldiChopperFactoryTest *createSuite() {
-    return new PoldiChopperFactoryTest();
-  }
+  static PoldiChopperFactoryTest *createSuite() { return new PoldiChopperFactoryTest(); }
   static void destroySuite(PoldiChopperFactoryTest *suite) { delete suite; }
 
   void testDetectorByType() {
     PoldiChopperFactory chopperFactory;
 
-    PoldiAbstractChopper *chopper =
-        chopperFactory.createChopper(std::string("any"));
+    PoldiAbstractChopper *chopper = chopperFactory.createChopper(std::string("any"));
     TS_ASSERT(chopper);
 
-    PoldiBasicChopper *basicChopper =
-        dynamic_cast<PoldiBasicChopper *>(chopper);
+    PoldiBasicChopper *basicChopper = dynamic_cast<PoldiBasicChopper *>(chopper);
     TS_ASSERT(basicChopper);
 
     delete chopper;

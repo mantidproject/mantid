@@ -37,8 +37,7 @@ DECLARE_FUNCTION(InelasticDiffRotDiscreteCircle)
 /**
  * @brief Constructor. Declare fitting parameters and attributes
  */
-InelasticDiffRotDiscreteCircle::InelasticDiffRotDiscreteCircle()
-    : m_hbar(0.658211626) {
+InelasticDiffRotDiscreteCircle::InelasticDiffRotDiscreteCircle() : m_hbar(0.658211626) {
   this->declareParameter("Intensity", 1.0, "scaling factor [no units]");
   this->declareParameter("Radius", 1.0, "Circle radius [Angstroms]");
   this->declareParameter("Decay", 1.0,
@@ -56,16 +55,14 @@ InelasticDiffRotDiscreteCircle::InelasticDiffRotDiscreteCircle()
  */
 void InelasticDiffRotDiscreteCircle::init() {
   // Ensure positive values for Intensity, Radius, and decay
-  auto IntensityConstraint = std::make_unique<BConstraint>(
-      this, "Intensity", std::numeric_limits<double>::epsilon(), true);
+  auto IntensityConstraint =
+      std::make_unique<BConstraint>(this, "Intensity", std::numeric_limits<double>::epsilon(), true);
   this->addConstraint(std::move(IntensityConstraint));
 
-  auto RadiusConstraint = std::make_unique<BConstraint>(
-      this, "Radius", std::numeric_limits<double>::epsilon(), true);
+  auto RadiusConstraint = std::make_unique<BConstraint>(this, "Radius", std::numeric_limits<double>::epsilon(), true);
   this->addConstraint(std::move(RadiusConstraint));
 
-  auto DecayConstraint = std::make_unique<BConstraint>(
-      this, "Decay", std::numeric_limits<double>::epsilon(), true);
+  auto DecayConstraint = std::make_unique<BConstraint>(this, "Decay", std::numeric_limits<double>::epsilon(), true);
   this->addConstraint(std::move(DecayConstraint));
 }
 
@@ -76,9 +73,7 @@ void InelasticDiffRotDiscreteCircle::init() {
  * @param nData size of the energy domain
  * @exception No Q values can be found in associated attributes
  */
-void InelasticDiffRotDiscreteCircle::function1D(double *out,
-                                                const double *xValues,
-                                                const size_t nData) const {
+void InelasticDiffRotDiscreteCircle::function1D(double *out, const double *xValues, const size_t nData) const {
 
   auto I = this->getParameter("Intensity");
   auto R = this->getParameter("Radius");
@@ -89,14 +84,12 @@ void InelasticDiffRotDiscreteCircle::function1D(double *out,
   double Q;
   if (this->getAttribute("Q").asDouble() == EMPTY_DBL()) {
     if (m_qValueCache.empty()) {
-      throw std::runtime_error(
-          "No Q attribute provided and cannot retrieve from workspace.");
+      throw std::runtime_error("No Q attribute provided and cannot retrieve from workspace.");
     }
     const int specIdx = this->getAttribute("WorkspaceIndex").asInt();
     Q = m_qValueCache[specIdx];
 
-    g_log.debug() << "Get Q value for workspace index " << specIdx << ": " << Q
-                  << '\n';
+    g_log.debug() << "Get Q value for workspace index " << specIdx << ": " << Q << '\n';
   } else {
     Q = getAttribute("Q").asDouble();
 
@@ -140,8 +133,7 @@ void InelasticDiffRotDiscreteCircle::function1D(double *out,
  * to be used with WorkspaceIndex attribute.
  * @param ws Pointer to workspace
  */
-void InelasticDiffRotDiscreteCircle::setWorkspace(
-    std::shared_ptr<const API::Workspace> ws) {
+void InelasticDiffRotDiscreteCircle::setWorkspace(std::shared_ptr<const API::Workspace> ws) {
   m_qValueCache.clear();
 
   auto workspace = std::dynamic_pointer_cast<const API::MatrixWorkspace>(ws);
@@ -153,8 +145,7 @@ void InelasticDiffRotDiscreteCircle::setWorkspace(
   for (size_t idx = 0; idx < spectrumInfo.size(); idx++) {
     if (!spectrumInfo.hasDetectors(idx)) {
       m_qValueCache.clear();
-      g_log.information(
-          "Cannot populate Q values from workspace - no detectors set.");
+      g_log.information("Cannot populate Q values from workspace - no detectors set.");
       break;
     }
 
@@ -164,8 +155,7 @@ void InelasticDiffRotDiscreteCircle::setWorkspace(
       double efixed = workspace->getEFixed(detectorIDs[detectorIndex]);
       double usingTheta = 0.5 * spectrumInfo.twoTheta(idx);
 
-      double q =
-          Mantid::Kernel::UnitConversion::convertToElasticQ(usingTheta, efixed);
+      double q = Mantid::Kernel::UnitConversion::convertToElasticQ(usingTheta, efixed);
 
       m_qValueCache.emplace_back(q);
     } catch (std::runtime_error &) {

@@ -46,8 +46,7 @@ class SampleLogDialogBase : public QDialog {
   Q_OBJECT
 public:
   /// Constructor
-  SampleLogDialogBase(const QString &wsname, QWidget *parentContainer,
-                      const Qt::WFlags &flags = nullptr,
+  SampleLogDialogBase(const QString &wsname, QWidget *parentContainer, const Qt::WFlags &flags = nullptr,
                       size_t experimentInfoIndex = 0);
 
   /// Virtual Destructor for derived classes
@@ -59,10 +58,8 @@ protected slots:
 
   /// Show the stats of the selected log
   virtual void showLogStatistics();
-  virtual void showLogStatisticsOfItem(
-      QTreeWidgetItem *item,
-      const Mantid::API::LogFilterGenerator::FilterType filter =
-          Mantid::API::LogFilterGenerator::FilterType::None);
+  virtual void showLogStatisticsOfItem(QTreeWidgetItem *item, const Mantid::API::LogFilterGenerator::FilterType filter =
+                                                                  Mantid::API::LogFilterGenerator::FilterType::None);
 
   /// Context menu popup
   virtual void popupMenu(const QPoint &pos);
@@ -141,8 +138,7 @@ protected:
 /// When scope ends, filter is cleared.
 template <typename T> class ScopedFilter {
 public:
-  ScopedFilter(Mantid::Kernel::TimeSeriesProperty<T> *prop,
-               const std::unique_ptr<Mantid::Kernel::LogFilter> &logFilter)
+  ScopedFilter(Mantid::Kernel::TimeSeriesProperty<T> *prop, const std::unique_ptr<Mantid::Kernel::LogFilter> &logFilter)
       : m_prop(prop) {
     if (logFilter && logFilter->filter()) {
       m_prop->filterWith(logFilter->filter());

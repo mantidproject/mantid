@@ -24,19 +24,13 @@ public:
   /// Algorithm's name
   const std::string name() const override { return "InvertMDDim"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Inverts dimensions of a MDHistoWorkspace";
-  }
+  const std::string summary() const override { return "Inverts dimensions of a MDHistoWorkspace"; }
 
   /// Algorithm's version
   int version() const override { return (1); }
-  const std::vector<std::string> seeAlso() const override {
-    return {"TransformMD"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"TransformMD"}; }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "MDAlgorithms\\Transforms";
-  }
+  const std::string category() const override { return "MDAlgorithms\\Transforms"; }
 
 private:
   /// Initialisation code
@@ -44,14 +38,10 @@ private:
   /// Execution code
   void exec() override;
 
-  void copyMetaData(const Mantid::API::IMDHistoWorkspace_sptr &inws,
-                    const Mantid::API::IMDHistoWorkspace_sptr &outws);
-  void recurseDim(const Mantid::API::IMDHistoWorkspace_sptr &inWS,
-                  const Mantid::API::IMDHistoWorkspace_sptr &outWS,
+  void copyMetaData(const Mantid::API::IMDHistoWorkspace_sptr &inws, const Mantid::API::IMDHistoWorkspace_sptr &outws);
+  void recurseDim(const Mantid::API::IMDHistoWorkspace_sptr &inWS, const Mantid::API::IMDHistoWorkspace_sptr &outWS,
                   int currentDim, int *idx, int rank);
 
-  unsigned int calcIndex(const Mantid::API::IMDHistoWorkspace_sptr &ws,
-                         int *dim);
-  unsigned int calcInvertedIndex(const Mantid::API::IMDHistoWorkspace_sptr &ws,
-                                 int *dim);
+  unsigned int calcIndex(const Mantid::API::IMDHistoWorkspace_sptr &ws, int *dim);
+  unsigned int calcInvertedIndex(const Mantid::API::IMDHistoWorkspace_sptr &ws, int *dim);
 };

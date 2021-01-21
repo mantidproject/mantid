@@ -29,8 +29,7 @@ RefImagePlotItem::~RefImagePlotItem() { delete m_limitsHandler; }
  *                      parameter is NOT USED by the SpectrumPlotItem, but is
  *                      passed in when QWT calls this method.
  */
-void RefImagePlotItem::draw(QPainter *painter, const QwtScaleMap &xMap,
-                            const QwtScaleMap &yMap,
+void RefImagePlotItem::draw(QPainter *painter, const QwtScaleMap &xMap, const QwtScaleMap &yMap,
                             const QRect &canvasRect) const {
   SpectrumPlotItem::draw(painter, xMap, yMap, canvasRect);
 
@@ -57,8 +56,7 @@ void RefImagePlotItem::draw(QPainter *painter, const QwtScaleMap &xMap,
   // End duplicated code
   //////////////////////////////////////////////////////////////////////////////////
 
-  float coeff_left =
-      (float(y_max) - float(y_min)) / (float(pix_y_min) - float(pix_y_max));
+  float coeff_left = (float(y_max) - float(y_min)) / (float(pix_y_min) - float(pix_y_max));
   float coeff_top_right;
   int pixel_value;
 
@@ -71,8 +69,7 @@ void RefImagePlotItem::draw(QPainter *painter, const QwtScaleMap &xMap,
   if (peakLeft != 0) {
     coeff_top_right = float(y_max) - float(peakLeft);
     pixel_value = int((coeff_top_right / coeff_left) + float(pix_y_max));
-    painter->drawLine(QPoint(pix_x_min, pixel_value),
-                      QPoint(pix_x_max, pixel_value));
+    painter->drawLine(QPoint(pix_x_min, pixel_value), QPoint(pix_x_max, pixel_value));
   }
 
   // peak2
@@ -80,8 +77,7 @@ void RefImagePlotItem::draw(QPainter *painter, const QwtScaleMap &xMap,
   if (peakRight != 0) {
     coeff_top_right = float(y_max) - float(peakRight);
     pixel_value = int((coeff_top_right / coeff_left) + float(pix_y_max));
-    painter->drawLine(QPoint(pix_x_min, pixel_value),
-                      QPoint(pix_x_max, pixel_value));
+    painter->drawLine(QPoint(pix_x_min, pixel_value), QPoint(pix_x_max, pixel_value));
   }
 
   // for the background selection
@@ -92,8 +88,7 @@ void RefImagePlotItem::draw(QPainter *painter, const QwtScaleMap &xMap,
   if (backLeft != 0) {
     coeff_top_right = float(y_max) - float(backLeft);
     pixel_value = int((coeff_top_right / coeff_left) + float(pix_y_max));
-    painter->drawLine(QPoint(pix_x_min, pixel_value),
-                      QPoint(pix_x_max, pixel_value));
+    painter->drawLine(QPoint(pix_x_min, pixel_value), QPoint(pix_x_max, pixel_value));
   }
 
   // back2
@@ -101,15 +96,13 @@ void RefImagePlotItem::draw(QPainter *painter, const QwtScaleMap &xMap,
   if (backRight != 0) {
     coeff_top_right = float(y_max) - float(backRight);
     pixel_value = int((coeff_top_right / coeff_left) + float(pix_y_max));
-    painter->drawLine(QPoint(pix_x_min, pixel_value),
-                      QPoint(pix_x_max, pixel_value));
+    painter->drawLine(QPoint(pix_x_min, pixel_value), QPoint(pix_x_max, pixel_value));
   }
 
   // tof selection
   painter->setPen(Qt::green);
 
-  coeff_left =
-      (float(pix_x_max) - float(pix_x_min)) / (float(x_max) - float(x_min));
+  coeff_left = (float(pix_x_max) - float(pix_x_min)) / (float(x_max) - float(x_min));
   int tof_value;
   float coeff_bottom_right;
 
@@ -117,10 +110,8 @@ void RefImagePlotItem::draw(QPainter *painter, const QwtScaleMap &xMap,
   auto TOFmin = float(m_limitsHandler->getTOFmin());
   if (TOFmin != 0) {
     coeff_bottom_right = float(TOFmin) - float(x_min);
-    tof_value =
-        int(coeff_left * coeff_bottom_right + static_cast<float>(pix_x_min));
-    painter->drawLine(QPoint(tof_value, pix_y_min),
-                      QPoint(tof_value, pix_y_max));
+    tof_value = int(coeff_left * coeff_bottom_right + static_cast<float>(pix_x_min));
+    painter->drawLine(QPoint(tof_value, pix_y_min), QPoint(tof_value, pix_y_max));
   }
 
   // tof max
@@ -128,8 +119,7 @@ void RefImagePlotItem::draw(QPainter *painter, const QwtScaleMap &xMap,
   if (TOFmax != 0) {
     coeff_bottom_right = float(TOFmax) - float(x_min);
     tof_value = int(coeff_left * coeff_bottom_right + float(pix_x_min));
-    painter->drawLine(QPoint(tof_value, pix_y_min),
-                      QPoint(tof_value, pix_y_max));
+    painter->drawLine(QPoint(tof_value, pix_y_min), QPoint(tof_value, pix_y_max));
   }
 }
 

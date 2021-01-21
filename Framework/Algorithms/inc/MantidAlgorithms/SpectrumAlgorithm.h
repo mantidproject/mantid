@@ -57,8 +57,7 @@ private:
   template <typename Tp, typename... List> struct contains : std::true_type {};
   template <typename Tp, typename Head, typename... Rest>
   struct contains<Tp, Head, Rest...>
-      : std::conditional<std::is_same<Tp, Head>::value, std::true_type,
-                         contains<Tp, Rest...>>::type {};
+      : std::conditional<std::is_same<Tp, Head>::value, std::true_type, contains<Tp, Rest...>>::type {};
   template <typename Tp> struct contains<Tp> : std::false_type {};
 
   /// Internal implementation of for_each().
@@ -88,9 +87,7 @@ private:
 
   /// Templated function used as 'compile-time conditional', together with
   /// specialization. See there for details.
-  template <class WS> void ifEventWorkspaceClearMRU(const WS &workspace) {
-    UNUSED_ARG(workspace);
-  }
+  template <class WS> void ifEventWorkspaceClearMRU(const WS &workspace) { UNUSED_ARG(workspace); }
 
   std::string m_indexMinPropertyName;
   std::string m_indexMaxPropertyName;
@@ -120,8 +117,7 @@ protected:
    * @param operation Callable that is executed for all spectra (etc.). Results
    *     from getters are passed as arguments. */
   template <class... Flags, class WS, class... Args, class OP>
-  void for_each(WS &workspace, std::tuple<Args...> getters,
-                const OP &operation) {
+  void for_each(WS &workspace, std::tuple<Args...> getters, const OP &operation) {
     // This comment explains some of the rationale and mechanism for the way
     // templates are used in this and other variants of for_each().
     // For several variants of for_each() we require a variable number of
@@ -136,21 +132,16 @@ protected:
     // indices which are gen used with std::get<>.
     // The Flags template parameter is used for passing in flags known at
     // compile time.
-    for_each<Flags...>(workspace, getters,
-                       typename gens<sizeof...(Args)>::type(), operation);
+    for_each<Flags...>(workspace, getters, typename gens<sizeof...(Args)>::type(), operation);
   }
 
-  void declareWorkspaceIndexSetProperties(
-      const std::string &indexMinPropertyName = "IndexMin",
-      const std::string &indexMaxPropertyName = "IndexMax",
-      const std::string &indexRangePropertyName = "WorkspaceIndexList");
-  Kernel::IndexSet
-  getWorkspaceIndexSet(const API::MatrixWorkspace &workspace) const;
+  void declareWorkspaceIndexSetProperties(const std::string &indexMinPropertyName = "IndexMin",
+                                          const std::string &indexMaxPropertyName = "IndexMax",
+                                          const std::string &indexRangePropertyName = "WorkspaceIndexList");
+  Kernel::IndexSet getWorkspaceIndexSet(const API::MatrixWorkspace &workspace) const;
 };
 
-template <>
-void SpectrumAlgorithm::ifEventWorkspaceClearMRU(
-    const DataObjects::EventWorkspace &workspace);
+template <> void SpectrumAlgorithm::ifEventWorkspaceClearMRU(const DataObjects::EventWorkspace &workspace);
 
 /// Typedef for a shared pointer to a SpectrumAlgorithm
 using SpectrumAlgorithm_sptr = std::shared_ptr<SpectrumAlgorithm>;

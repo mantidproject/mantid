@@ -21,13 +21,7 @@ using namespace Mantid::Algorithms;
 using namespace Mantid::API;
 
 namespace {
-enum WorkspaceType : size_t {
-  NegativeMaximum = 0,
-  NarrowPeak = 1,
-  FitFailed = 2,
-  Success = 3,
-  Performance = 4
-};
+enum WorkspaceType : size_t { NegativeMaximum = 0, NarrowPeak = 1, FitFailed = 2, Success = 3, Performance = 4 };
 
 MatrixWorkspace_sptr _create_test_workspace(WorkspaceType type) {
 
@@ -45,8 +39,7 @@ MatrixWorkspace_sptr _create_test_workspace(WorkspaceType type) {
 
   case NegativeMaximum: {
     size_t nBins = 5;
-    MatrixWorkspace_sptr result =
-        WorkspaceFactory::Instance().create("Workspace2D", 1, nBins, nBins);
+    MatrixWorkspace_sptr result = WorkspaceFactory::Instance().create("Workspace2D", 1, nBins, nBins);
     for (size_t bin = 0; bin < nBins; ++bin) {
       result->mutableY(0)[bin] = -1.;
       result->mutableX(0)[bin] = double(bin);
@@ -56,9 +49,7 @@ MatrixWorkspace_sptr _create_test_workspace(WorkspaceType type) {
 
   case NarrowPeak: {
     createAlg.setPropertyValue("Function", "User Defined");
-    createAlg.setPropertyValue(
-        "UserDefinedFunction",
-        "name=Gaussian, PeakCentre=5, Height=1, Sigma=0.05");
+    createAlg.setPropertyValue("UserDefinedFunction", "name=Gaussian, PeakCentre=5, Height=1, Sigma=0.05");
     createAlg.setProperty("XMin", 0.);
     createAlg.setProperty("XMax", 10.);
     createAlg.setProperty("BinWidth", 0.1);
@@ -77,10 +68,9 @@ MatrixWorkspace_sptr _create_test_workspace(WorkspaceType type) {
 
   case Success: {
     createAlg.setPropertyValue("Function", "User Defined");
-    createAlg.setPropertyValue("UserDefinedFunction",
-                               "name=LinearBackground,A0=0.3;"
-                               "name=Gaussian,"
-                               "PeakCentre=6000, Height=5, Sigma=75");
+    createAlg.setPropertyValue("UserDefinedFunction", "name=LinearBackground,A0=0.3;"
+                                                      "name=Gaussian,"
+                                                      "PeakCentre=6000, Height=5, Sigma=75");
     createAlg.setProperty("XMin", 4005.75);
     createAlg.setProperty("XMax", 7995.75);
     createAlg.setProperty("BinWidth", 10.5);
@@ -90,10 +80,9 @@ MatrixWorkspace_sptr _create_test_workspace(WorkspaceType type) {
 
   case Performance: {
     createAlg.setPropertyValue("Function", "User Defined");
-    createAlg.setPropertyValue("UserDefinedFunction",
-                               "name=LinearBackground,A0=0.3,A1=0.001;"
-                               "name=Gaussian,"
-                               "PeakCentre=6000, Height=5, Sigma=75");
+    createAlg.setPropertyValue("UserDefinedFunction", "name=LinearBackground,A0=0.3,A1=0.001;"
+                                                      "name=Gaussian,"
+                                                      "PeakCentre=6000, Height=5, Sigma=75");
     createAlg.setProperty("XMin", 4005.75);
     createAlg.setProperty("XMax", 7995.75);
     createAlg.setProperty("BinWidth", 5.01);
@@ -117,9 +106,8 @@ public:
   static void destroySuite(FindEPPTest *suite) { delete suite; }
 
   FindEPPTest()
-      : m_columnNames({"WorkspaceIndex", "PeakCentre", "PeakCentreError",
-                       "Sigma", "SigmaError", "Height", "HeightError", "chiSq",
-                       "FitStatus"}),
+      : m_columnNames({"WorkspaceIndex", "PeakCentre", "PeakCentreError", "Sigma", "SigmaError", "Height",
+                       "HeightError", "chiSq", "FitStatus"}),
         m_delta(1E-4) {
     FrameworkManager::Instance();
   }
@@ -139,8 +127,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "__unused_for_child"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "__unused_for_child"));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
@@ -168,8 +155,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "__unused_for_child"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "__unused_for_child"));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
@@ -189,8 +175,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "__unused_for_child"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "__unused_for_child"));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
@@ -210,8 +195,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "__unused_for_child"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "__unused_for_child"));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
@@ -234,9 +218,7 @@ private:
 
 class FindEPPTestPerformance : public CxxTest::TestSuite {
 public:
-  static FindEPPTestPerformance *createSuite() {
-    return new FindEPPTestPerformance();
-  }
+  static FindEPPTestPerformance *createSuite() { return new FindEPPTestPerformance(); }
   static void destroySuite(FindEPPTestPerformance *suite) { delete suite; }
 
   FindEPPTestPerformance() {}
@@ -249,9 +231,7 @@ public:
     m_alg.setProperty("OutputWorkspace", "__out_ws");
   }
 
-  void tearDown() override {
-    AnalysisDataService::Instance().remove("__out_ws");
-  }
+  void tearDown() override { AnalysisDataService::Instance().remove("__out_ws"); }
 
   void test_performance() { m_alg.execute(); }
 

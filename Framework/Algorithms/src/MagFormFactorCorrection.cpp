@@ -32,21 +32,18 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::HistogramData;
 
 void MagFormFactorCorrection::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                                        Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
                   "Workspace must have one axis with units of Q");
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "Output workspace name.");
   std::vector<std::string> keys = getMagneticIonList();
   declareProperty("IonName", "Cu2", std::make_shared<StringListValidator>(keys),
                   "The name of the ion: an element symbol with a number "
                   "indicating the valence, e.g. Fe2 for Fe2+ / Fe(II)");
-  declareProperty(std::make_unique<WorkspaceProperty<>>("FormFactorWorkspace",
-                                                        "", Direction::Output,
-                                                        PropertyMode::Optional),
-                  "If specified the algorithm will create a 1D workspace with "
-                  "the form factor vs Q with a name given by this field.");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<>>("FormFactorWorkspace", "", Direction::Output, PropertyMode::Optional),
+      "If specified the algorithm will create a 1D workspace with "
+      "the form factor vs Q with a name given by this field.");
 }
 
 void MagFormFactorCorrection::exec() {
@@ -72,8 +69,7 @@ void MagFormFactorCorrection::exec() {
         int64_t nQ = QAxis->length() - 1;
         for (int64_t iQ = 0; iQ < nQ; iQ++) {
           Qvals.emplace_back(0.5 *
-                             (QAxis->getValue(static_cast<size_t>(iQ)) +
-                              QAxis->getValue(static_cast<size_t>(iQ + 1))));
+                             (QAxis->getValue(static_cast<size_t>(iQ)) + QAxis->getValue(static_cast<size_t>(iQ + 1))));
         }
       } else {
         int64_t nQ = QAxis->length();
@@ -96,9 +92,8 @@ void MagFormFactorCorrection::exec() {
   std::vector<double> FF;
   FF.reserve(Qvals.size());
 
-  std::transform(
-      Qvals.begin(), Qvals.end(), std::back_inserter(FF),
-      [&ion](double qval) { return ion.analyticalFormFactor(qval * qval); });
+  std::transform(Qvals.begin(), Qvals.end(), std::back_inserter(FF),
+                 [&ion](double qval) { return ion.analyticalFormFactor(qval * qval); });
 
   if (!ffwsStr.empty()) {
     HistogramBuilder builder;
@@ -107,8 +102,7 @@ void MagFormFactorCorrection::exec() {
     MatrixWorkspace_sptr ffws = create<Workspace2D>(1, builder.build());
     ffws->mutableX(0).assign(Qvals.begin(), Qvals.end());
     ffws->mutableY(0).assign(FF.begin(), FF.end());
-    ffws->getAxis(0)->unit() =
-        UnitFactory::Instance().create("MomentumTransfer");
+    ffws->getAxis(0)->unit() = UnitFactory::Instance().create("MomentumTransfer");
     ffws->setYUnitLabel("F(Q)");
     setProperty("FormFactorWorkspace", ffws);
   }

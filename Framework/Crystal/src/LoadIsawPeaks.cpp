@@ -60,8 +60,7 @@ int LoadIsawPeaks::confidence(Kernel::FileDescriptor &descriptor) const {
       throw std::logic_error(std::string("No first line of Peaks file"));
 
     if (r != "Version:")
-      throw std::logic_error(
-          std::string("No Version: on first line of Peaks file"));
+      throw std::logic_error(std::string("No Version: on first line of Peaks file"));
 
     std::string C_version = getWord(in, false);
     if (C_version.length() < 1)
@@ -94,11 +93,9 @@ int LoadIsawPeaks::confidence(Kernel::FileDescriptor &descriptor) const {
  */
 void LoadIsawPeaks::init() {
   const std::vector<std::string> exts{".peaks", ".integrate"};
-  declareProperty(
-      std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
-      "Path to an ISAW-style .peaks filename.");
-  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
+                  "Path to an ISAW-style .peaks filename.");
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace.");
 }
 
@@ -125,8 +122,7 @@ void LoadIsawPeaks::exec() {
  * @param T0 :: Time offset
  * @return the first word on the next line
  */
-std::string LoadIsawPeaks::readHeader(const PeaksWorkspace_sptr &outWS,
-                                      std::ifstream &in, double &T0) {
+std::string LoadIsawPeaks::readHeader(const PeaksWorkspace_sptr &outWS, std::ifstream &in, double &T0) {
   std::string tag;
   std::string r = getWord(in, false);
 
@@ -134,8 +130,7 @@ std::string LoadIsawPeaks::readHeader(const PeaksWorkspace_sptr &outWS,
     throw std::logic_error(std::string("No first line of Peaks file"));
 
   if (r != "Version:")
-    throw std::logic_error(
-        std::string("No Version: on first line of Peaks file"));
+    throw std::logic_error(std::string("No Version: on first line of Peaks file"));
 
   std::string C_version = getWord(in, false);
   if (C_version.length() < 1)
@@ -163,14 +158,12 @@ std::string LoadIsawPeaks::readHeader(const PeaksWorkspace_sptr &outWS,
   readToEndOfLine(in, true);
 
   // Now we load the instrument using the name and date
-  MatrixWorkspace_sptr tempWS =
-      WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
+  MatrixWorkspace_sptr tempWS = WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
   tempWS->mutableRun().addProperty<std::string>("run_start", date);
 
   IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
   loadInst->setPropertyValue("InstrumentName", C_Instrument);
-  loadInst->setProperty("RewriteSpectraMap",
-                        Mantid::Kernel::OptionalBool(true));
+  loadInst->setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(true));
   loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", tempWS);
   loadInst->executeAsChildAlg();
 
@@ -203,8 +196,7 @@ std::string LoadIsawPeaks::readHeader(const PeaksWorkspace_sptr &outWS,
   // Find bank numbers in instument that are not in header lines
   std::string maskBanks;
   if (!instr)
-    throw std::runtime_error(
-        "No instrument in the Workspace. Cannot save DetCal file.");
+    throw std::runtime_error("No instrument in the Workspace. Cannot save DetCal file.");
   // We cannot assume the peaks have bank type detector modules, so we have a
   // string to check this
   std::string bankPart = "bank";
@@ -241,8 +233,7 @@ std::string LoadIsawPeaks::readHeader(const PeaksWorkspace_sptr &outWS,
       alg->setProperty("Bank", maskBanks);
       alg->setProperty("Instrument", instr->getName());
       if (!alg->execute())
-        throw std::runtime_error(
-            "MaskDetectors Child Algorithm has not executed successfully");
+        throw std::runtime_error("MaskDetectors Child Algorithm has not executed successfully");
     } catch (...) {
       g_log.error("Can't execute MaskBTP algorithm");
     }
@@ -261,10 +252,8 @@ std::string LoadIsawPeaks::readHeader(const PeaksWorkspace_sptr &outWS,
  * @param qSign :: For inelastic this is 1; for crystallography this is -1
  * @return the Peak the Peak object created
  */
-DataObjects::Peak LoadIsawPeaks::readPeak(const PeaksWorkspace_sptr &outWS,
-                                          std::string &lastStr,
-                                          std::ifstream &in, int &seqNum,
-                                          std::string bankName, double qSign) {
+DataObjects::Peak LoadIsawPeaks::readPeak(const PeaksWorkspace_sptr &outWS, std::string &lastStr, std::ifstream &in,
+                                          int &seqNum, std::string bankName, double qSign) {
   double h;
   double k;
   double l;
@@ -288,8 +277,7 @@ DataObjects::Peak LoadIsawPeaks::readPeak(const PeaksWorkspace_sptr &outWS,
 
   if (s == "2") {
     readToEndOfLine(in, true);
-    for (s = getWord(in, false); s.length() < 1 && in.good();
-         s = getWord(in, true)) {
+    for (s = getWord(in, false); s.length() < 1 && in.good(); s = getWord(in, true)) {
       s = getWord(in, false);
     }
   }
@@ -340,8 +328,7 @@ DataObjects::Peak LoadIsawPeaks::readPeak(const PeaksWorkspace_sptr &outWS,
   if (!inst)
     throw std::runtime_error("No instrument in PeaksWorkspace!");
 
-  int pixelID = findPixelID(inst, std::move(bankName), static_cast<int>(col),
-                            static_cast<int>(row));
+  int pixelID = findPixelID(inst, std::move(bankName), static_cast<int>(col), static_cast<int>(row));
 
   // Create the peak object
   Peak peak(outWS->getInstrument(), pixelID, wl);
@@ -357,17 +344,14 @@ DataObjects::Peak LoadIsawPeaks::readPeak(const PeaksWorkspace_sptr &outWS,
 }
 
 //----------------------------------------------------------------------------------------------
-int LoadIsawPeaks::findPixelID(const Instrument_const_sptr &inst,
-                               const std::string &bankName, int col, int row) {
-  std::shared_ptr<const IComponent> parent =
-      getCachedBankByName(std::move(bankName), inst);
+int LoadIsawPeaks::findPixelID(const Instrument_const_sptr &inst, const std::string &bankName, int col, int row) {
+  std::shared_ptr<const IComponent> parent = getCachedBankByName(std::move(bankName), inst);
 
   if (!parent)
     return -1; // peak not in any detector.
 
   if (parent->type() == "RectangularDetector") {
-    std::shared_ptr<const RectangularDetector> RDet =
-        std::dynamic_pointer_cast<const RectangularDetector>(parent);
+    std::shared_ptr<const RectangularDetector> RDet = std::dynamic_pointer_cast<const RectangularDetector>(parent);
 
     std::shared_ptr<Detector> pixel = RDet->getAtXY(col, row);
     return pixel->getID();
@@ -377,8 +361,7 @@ int LoadIsawPeaks::findPixelID(const Instrument_const_sptr &inst,
         std::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
     asmb->getChildren(children, false);
     if (children[0]->getName() == "sixteenpack") {
-      asmb =
-          std::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
+      asmb = std::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
       children.clear();
       asmb->getChildren(children, false);
     }
@@ -387,24 +370,19 @@ int LoadIsawPeaks::findPixelID(const Instrument_const_sptr &inst,
     if (inst->getName() == "WISH")
       col0 = (col % 2 == 0 ? col / 2 + 75 : (col - 1) / 2);
     std::shared_ptr<const Geometry::ICompAssembly> asmb2 =
-        std::dynamic_pointer_cast<const Geometry::ICompAssembly>(
-            children[col0]);
+        std::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[col0]);
     std::vector<Geometry::IComponent_const_sptr> grandchildren;
     asmb2->getChildren(grandchildren, false);
     Geometry::IComponent_const_sptr first = grandchildren[row - 1];
-    Geometry::IDetector_const_sptr det =
-        std::dynamic_pointer_cast<const Geometry::IDetector>(first);
+    Geometry::IDetector_const_sptr det = std::dynamic_pointer_cast<const Geometry::IDetector>(first);
     return det->getID();
   }
 }
 
 //-----------------------------------------------------------------------------------------------
 /** Read the header of each peak block section */
-std::string LoadIsawPeaks::readPeakBlockHeader(std::string lastStr,
-                                               std::ifstream &in, int &run,
-                                               int &detName, double &chi,
-                                               double &phi, double &omega,
-                                               double &monCount) {
+std::string LoadIsawPeaks::readPeakBlockHeader(std::string lastStr, std::ifstream &in, int &run, int &detName,
+                                               double &chi, double &phi, double &omega, double &monCount) {
   std::string s = std::move(lastStr);
 
   if (s.length() < 1 && in.good()) // blank line
@@ -446,8 +424,7 @@ std::string LoadIsawPeaks::readPeakBlockHeader(std::string lastStr,
  * @param outWS :: the workspace in which to place the information
  * @param filename :: path to the .peaks file
  */
-void LoadIsawPeaks::appendFile(const PeaksWorkspace_sptr &outWS,
-                               const std::string &filename) {
+void LoadIsawPeaks::appendFile(const PeaksWorkspace_sptr &outWS, const std::string &filename) {
   // HKL's are flipped by -1 because of the internal Q convention
   // unless Crystallography convention
   double qSign = -1.0;
@@ -525,15 +502,13 @@ void LoadIsawPeaks::appendFile(const PeaksWorkspace_sptr &outWS,
       double tof = peak.getTOF();
       Kernel::Units::Wavelength wl;
 
-      wl.initialize(peak.getL1(), peak.getL2(), peak.getScattering(), 0,
-                    peak.getInitialEnergy(), 0.0);
+      wl.initialize(peak.getL1(), peak.getL2(), peak.getScattering(), 0, peak.getInitialEnergy(), 0.0);
 
       peak.setWavelength(wl.singleFromTOF(tof));
       // Add the peak to workspace
       outWS->addPeak(peak);
     } catch (std::runtime_error &e) {
-      g_log.error() << "Error reading peak SEQN " << seqNum << " : " << e.what()
-                    << '\n';
+      g_log.error() << "Error reading peak SEQN " << seqNum << " : " << e.what() << '\n';
       throw std::runtime_error("Corrupted input file. ");
     }
 
@@ -565,8 +540,7 @@ void LoadIsawPeaks::appendFile(const PeaksWorkspace_sptr &outWS,
  * @param outWS :: the workspace in which to place the information
  * @param filename :: path to the .peaks file
  */
-void LoadIsawPeaks::checkNumberPeaks(const PeaksWorkspace_sptr &outWS,
-                                     const std::string &filename) {
+void LoadIsawPeaks::checkNumberPeaks(const PeaksWorkspace_sptr &outWS, const std::string &filename) {
 
   // Open the file
   std::ifstream in(filename.c_str());
@@ -577,8 +551,8 @@ void LoadIsawPeaks::checkNumberPeaks(const PeaksWorkspace_sptr &outWS,
       NumberPeaks++;
   }
   if (NumberPeaks != outWS->getNumberPeaks()) {
-    g_log.error() << "Number of peaks in file is " << NumberPeaks
-                  << " but only read " << outWS->getNumberPeaks() << '\n';
+    g_log.error() << "Number of peaks in file is " << NumberPeaks << " but only read " << outWS->getNumberPeaks()
+                  << '\n';
     throw std::length_error("Wrong number of peaks read");
   }
 }
@@ -601,9 +575,9 @@ void LoadIsawPeaks::checkNumberPeaks(const PeaksWorkspace_sptr &outWS,
  * @return A shared pointer to the request bank (empty shared pointer if not
  *found)
  */
-std::shared_ptr<const IComponent> LoadIsawPeaks::getCachedBankByName(
-    const std::string &bankname,
-    const std::shared_ptr<const Geometry::Instrument> &inst) {
+std::shared_ptr<const IComponent>
+LoadIsawPeaks::getCachedBankByName(const std::string &bankname,
+                                   const std::shared_ptr<const Geometry::Instrument> &inst) {
   if (m_banks.count(bankname) == 0)
     m_banks[bankname] = inst->getComponentByName(bankname);
   return m_banks[bankname];

@@ -11,12 +11,10 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
-FunctionModelDataset::FunctionModelDataset(const QString &workspaceName,
-                                           const FunctionModelSpectra &spectra)
+FunctionModelDataset::FunctionModelDataset(const QString &workspaceName, const FunctionModelSpectra &spectra)
     : m_workspaceName(workspaceName), m_spectra(spectra) {}
 
-FunctionModelDataset::FunctionModelDataset(QString workspaceName,
-                                           FunctionModelSpectra &&spectra)
+FunctionModelDataset::FunctionModelDataset(QString workspaceName, FunctionModelSpectra &&spectra)
     : m_workspaceName(workspaceName), m_spectra(std::move(spectra)) {}
 
 /**
@@ -34,8 +32,7 @@ QStringList FunctionModelDataset::domainNames() const {
   else {
     QStringList domainNames;
     for (const auto &spectrum : m_spectra)
-      domainNames << m_workspaceName + " (" + QString::number(spectrum.value) +
-                         ")";
+      domainNames << m_workspaceName + " (" + QString::number(spectrum.value) + ")";
     return domainNames;
   }
 }

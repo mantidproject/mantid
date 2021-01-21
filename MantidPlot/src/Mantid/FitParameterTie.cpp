@@ -11,8 +11,7 @@
 #include <utility>
 
 /// Constructor
-FitParameterTie::FitParameterTie(
-    const std::shared_ptr<Mantid::API::CompositeFunction> &cf)
+FitParameterTie::FitParameterTie(const std::shared_ptr<Mantid::API::CompositeFunction> &cf)
     : m_compositeFunction(cf), m_prop(nullptr) {}
 
 /// Destructor
@@ -29,9 +28,8 @@ FitParameterTie::~FitParameterTie() {
 void FitParameterTie::set(const QString &estr) {
   int ieq = estr.indexOf('=');
   if (ieq < 0) {
-    throw std::invalid_argument(
-        "The tie expression doesn't contain the tied parameter.\n"
-        "Syntax: <tied_name> = <tying_expression>");
+    throw std::invalid_argument("The tie expression doesn't contain the tied parameter.\n"
+                                "Syntax: <tied_name> = <tying_expression>");
   }
 
   if (ieq == estr.size()) {
@@ -52,9 +50,8 @@ void FitParameterTie::set(const QString &estr) {
   QRegExp rx(R"(\bf(\d+)\.)");
 
   if (rx.indexIn(parName) < 0) {
-    throw std::invalid_argument(
-        "Parameter names must contain function identifiers:\n"
-        "e.g. f0.Sigma, f5.FWHM");
+    throw std::invalid_argument("Parameter names must contain function identifiers:\n"
+                                "e.g. f0.Sigma, f5.FWHM");
   }
 
   m_expr = estr;

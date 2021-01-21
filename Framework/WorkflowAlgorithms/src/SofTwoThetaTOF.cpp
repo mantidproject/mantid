@@ -99,9 +99,7 @@ const std::string SofTwoThetaTOF::name() const { return "SofTwoThetaTOF"; }
 int SofTwoThetaTOF::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string SofTwoThetaTOF::category() const {
-  return "Inelastic;ILL\\Direct";
-}
+const std::string SofTwoThetaTOF::category() const { return "Inelastic;ILL\\Direct"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string SofTwoThetaTOF::summary() const {
@@ -117,19 +115,15 @@ void SofTwoThetaTOF::init() {
   histogrammedTOF->add(std::make_shared<API::HistogramValidator>());
   histogrammedTOF->add(std::make_shared<API::InstrumentValidator>());
   declareProperty(
-      std::make_unique<API::WorkspaceProperty<>>(
-          Prop::INPUT_WS, "", Kernel::Direction::Input, histogrammedTOF),
+      std::make_unique<API::WorkspaceProperty<>>(Prop::INPUT_WS, "", Kernel::Direction::Input, histogrammedTOF),
       "A workspace to be converted.");
-  declareProperty(std::make_unique<API::WorkspaceProperty<>>(
-                      Prop::OUTPUT_WS, "", Kernel::Direction::Output),
+  declareProperty(std::make_unique<API::WorkspaceProperty<>>(Prop::OUTPUT_WS, "", Kernel::Direction::Output),
                   "A workspace with (2theta, TOF) units.");
   auto positiveDouble = std::make_shared<Kernel::BoundedValidator<double>>();
   positiveDouble->setLowerExclusive(0.);
-  declareProperty(Prop::ANGLE_STEP, EMPTY_DBL(), positiveDouble,
-                  "The angle step for detector grouping, in degrees.");
-  declareProperty(std::make_unique<API::FileProperty>(
-                      Prop::FILENAME, "", API::FileProperty::OptionalSave,
-                      std::vector<std::string>{".xml"}),
+  declareProperty(Prop::ANGLE_STEP, EMPTY_DBL(), positiveDouble, "The angle step for detector grouping, in degrees.");
+  declareProperty(std::make_unique<API::FileProperty>(Prop::FILENAME, "", API::FileProperty::OptionalSave,
+                                                      std::vector<std::string>{".xml"}),
                   "A grouping file that will be created; a corresponding .par "
                   "file wille be created as well.");
 }
@@ -155,8 +149,7 @@ double SofTwoThetaTOF::clarifyAngleStep(API::MatrixWorkspace const &ws) {
       throw std::invalid_argument("Missing " + Prop::ANGLE_STEP);
     }
     auto const &paramMap = ws.constInstrumentParameters();
-    auto const paramValues =
-        paramMap.getDouble(instrument->getName(), "natural-angle-step");
+    auto const paramValues = paramMap.getDouble(instrument->getName(), "natural-angle-step");
     if (paramValues.empty()) {
       throw std::invalid_argument("Missing " + Prop::ANGLE_STEP +
                                   " or 'natural-angle-step' not defined in "
@@ -166,8 +159,7 @@ double SofTwoThetaTOF::clarifyAngleStep(API::MatrixWorkspace const &ws) {
   }
 }
 
-API::MatrixWorkspace_sptr
-SofTwoThetaTOF::convertToConstantL2(API::MatrixWorkspace_sptr &ws) {
+API::MatrixWorkspace_sptr SofTwoThetaTOF::convertToConstantL2(API::MatrixWorkspace_sptr &ws) {
   auto toConstantL2 = createChildAlgorithm("ConvertToConstantL2", 0., 0.2);
   toConstantL2->setProperty("InputWorkspace", ws);
   toConstantL2->setPropertyValue("OutputWorkspace", "out");
@@ -175,8 +167,7 @@ SofTwoThetaTOF::convertToConstantL2(API::MatrixWorkspace_sptr &ws) {
   return toConstantL2->getProperty("OutputWorkspace");
 }
 
-API::MatrixWorkspace_sptr
-SofTwoThetaTOF::convertToTwoTheta(API::MatrixWorkspace_sptr &ws) {
+API::MatrixWorkspace_sptr SofTwoThetaTOF::convertToTwoTheta(API::MatrixWorkspace_sptr &ws) {
   auto convertAxis = createChildAlgorithm("ConvertSpectrumAxis", 0.9, 1.0);
   convertAxis->setProperty("InputWorkspace", ws);
   convertAxis->setProperty("OutputWorkspace", "out");
@@ -185,19 +176,15 @@ SofTwoThetaTOF::convertToTwoTheta(API::MatrixWorkspace_sptr &ws) {
   return convertAxis->getProperty("OutputWorkspace");
 }
 
-API::MatrixWorkspace_sptr
-SofTwoThetaTOF::groupByTwoTheta(API::MatrixWorkspace_sptr &ws,
-                                double const twoThetaStep) {
-  auto generateGrouping =
-      createChildAlgorithm("GenerateGroupingPowder", 0.2, 0.5);
+API::MatrixWorkspace_sptr SofTwoThetaTOF::groupByTwoTheta(API::MatrixWorkspace_sptr &ws, double const twoThetaStep) {
+  auto generateGrouping = createChildAlgorithm("GenerateGroupingPowder", 0.2, 0.5);
   generateGrouping->setProperty("InputWorkspace", ws);
   generateGrouping->setProperty("AngleStep", twoThetaStep);
   std::string filename;
   RemoveFileAtScopeExit deleteThisLater;
   if (isDefault(Prop::FILENAME)) {
     auto tempPath = boost::filesystem::temp_directory_path();
-    tempPath /= boost::filesystem::unique_path(
-        "detector-grouping-%%%%-%%%%-%%%%-%%%%.xml");
+    tempPath /= boost::filesystem::unique_path("detector-grouping-%%%%-%%%%-%%%%-%%%%.xml");
     filename = tempPath.string();
     generateGrouping->setProperty("GenerateParFile", false);
     // Make sure the file gets deleted at scope exit.
@@ -218,11 +205,9 @@ SofTwoThetaTOF::groupByTwoTheta(API::MatrixWorkspace_sptr &ws,
   return groupDetectors->getProperty("OutputWorkspace");
 }
 
-API::MatrixWorkspace_sptr
-SofTwoThetaTOF::maskEmptyBins(API::MatrixWorkspace_sptr &maskable,
-                              API::MatrixWorkspace_sptr &comparison) {
-  auto maskNonOverlapping =
-      createChildAlgorithm("MaskNonOverlappingBins", 0.6, 0.7);
+API::MatrixWorkspace_sptr SofTwoThetaTOF::maskEmptyBins(API::MatrixWorkspace_sptr &maskable,
+                                                        API::MatrixWorkspace_sptr &comparison) {
+  auto maskNonOverlapping = createChildAlgorithm("MaskNonOverlappingBins", 0.6, 0.7);
   maskNonOverlapping->setProperty("InputWorkspace", maskable);
   maskNonOverlapping->setProperty("OutputWorkspace", "out");
   maskNonOverlapping->setProperty("ComparisonWorkspace", comparison);
@@ -233,8 +218,7 @@ SofTwoThetaTOF::maskEmptyBins(API::MatrixWorkspace_sptr &maskable,
   return maskNonOverlapping->getProperty("OutputWorkspace");
 }
 
-API::MatrixWorkspace_sptr
-SofTwoThetaTOF::rebinToNonRagged(API::MatrixWorkspace_sptr &ws) {
+API::MatrixWorkspace_sptr SofTwoThetaTOF::rebinToNonRagged(API::MatrixWorkspace_sptr &ws) {
   auto const xRange = minMaxX(*ws);
   std::vector<double> const rebinParams{xRange.min, binWidth(*ws), xRange.max};
   auto rebin = createChildAlgorithm("Rebin", 0.5, 0.6);

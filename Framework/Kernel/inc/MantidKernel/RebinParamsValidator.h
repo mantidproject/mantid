@@ -16,8 +16,7 @@ namespace Kernel {
 
     @author Russell Taylor, Tessella plc
 */
-class MANTID_KERNEL_DLL RebinParamsValidator
-    : public TypedValidator<std::vector<double>> {
+class MANTID_KERNEL_DLL RebinParamsValidator : public TypedValidator<std::vector<double>> {
 public:
   RebinParamsValidator(bool allowEmpty = false, bool allowRange = false);
   IValidator_sptr clone() const override;

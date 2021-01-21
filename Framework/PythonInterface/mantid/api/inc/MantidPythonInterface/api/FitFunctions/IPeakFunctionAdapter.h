@@ -24,8 +24,7 @@ namespace PythonInterface {
  * This is essentially a transparent layer that handles the function calls up
  *into Python.
  */
-class IPeakFunctionAdapter : public API::IPeakFunction,
-                             public IFunctionAdapter {
+class IPeakFunctionAdapter : public API::IPeakFunction, public IFunctionAdapter {
 public:
   // Convenience typedef
   using Base = API::IPeakFunction;
@@ -56,28 +55,23 @@ public:
 
   /// Required to solve compiler ambiguity between IPeakFunction &
   /// IFunction1DAdapter
-  void function1D(double *out, const double *xValues,
-                  const size_t nData) const override {
+  void function1D(double *out, const double *xValues, const size_t nData) const override {
     IPeakFunction::function1D(out, xValues, nData);
   }
   /// Required to solve compiler ambiguity between IPeakFunction &
   /// IFunction1DAdapter
-  void functionDeriv1D(API::Jacobian *out, const double *xValues,
-                       const size_t nData) override {
+  void functionDeriv1D(API::Jacobian *out, const double *xValues, const size_t nData) override {
     IPeakFunction::functionDeriv1D(out, xValues, nData);
   }
 
   /// Implemented Base-class method
-  void functionLocal(double *out, const double *xValues,
-                     const size_t nData) const override;
+  void functionLocal(double *out, const double *xValues, const size_t nData) const override;
   /// Python-type signature for above method
   boost::python::object functionLocal(const boost::python::object &xvals) const;
   /// Implemented base-class method
-  void functionDerivLocal(API::Jacobian *jacobian, const double *xValues,
-                          const size_t nData) override;
+  void functionDerivLocal(API::Jacobian *jacobian, const double *xValues, const size_t nData) override;
   /// Python signature
-  void functionDerivLocal(const boost::python::object &xvals,
-                          boost::python::object &jacobian);
+  void functionDerivLocal(const boost::python::object &xvals, boost::python::object &jacobian);
 
 private:
 };

@@ -28,8 +28,7 @@ using DataPositionType = IndexCollectionType<TableDatasetIndex, FitDomainIndex>;
 class MANTIDQT_INDIRECT_DLL IndirectDataTablePresenter : public QObject {
   Q_OBJECT
 public:
-  IndirectDataTablePresenter(IIndirectFitDataModel *model,
-                             QTableWidget *dataTable);
+  IndirectDataTablePresenter(IIndirectFitDataModel *model, QTableWidget *dataTable);
 
   bool isTableEmpty() const;
 
@@ -40,26 +39,20 @@ public slots:
   void removeSelectedData();
 
 signals:
-  void startXChanged(double /*_t1*/, TableDatasetIndex /*_t2*/,
-                     WorkspaceIndex /*_t3*/);
-  void endXChanged(double /*_t1*/, TableDatasetIndex /*_t2*/,
-                   WorkspaceIndex /*_t3*/);
-  void excludeRegionChanged(const std::string & /*_t1*/,
-                            TableDatasetIndex /*_t2*/, WorkspaceIndex /*_t3*/);
+  void startXChanged(double /*_t1*/, TableDatasetIndex /*_t2*/, WorkspaceIndex /*_t3*/);
+  void endXChanged(double /*_t1*/, TableDatasetIndex /*_t2*/, WorkspaceIndex /*_t3*/);
+  void excludeRegionChanged(const std::string & /*_t1*/, TableDatasetIndex /*_t2*/, WorkspaceIndex /*_t3*/);
 
 private slots:
   void handleCellChanged(int row, int column);
   // void updateAllFittingRangeFrom(int row, int column);
 
 protected:
-  IndirectDataTablePresenter(IIndirectFitDataModel *model,
-                             QTableWidget *dataTable,
-                             const QStringList &headers);
+  IndirectDataTablePresenter(IIndirectFitDataModel *model, QTableWidget *dataTable, const QStringList &headers);
   std::string getString(FitDomainIndex row, int column) const;
 
   virtual void addTableEntry(FitDomainIndex row);
-  void setCell(std::unique_ptr<QTableWidgetItem> cell, FitDomainIndex row,
-               int column);
+  void setCell(std::unique_ptr<QTableWidgetItem> cell, FitDomainIndex row, int column);
   void setCellText(const QString &text, FitDomainIndex row, int column);
   IIndirectFitDataModel *m_model;
 

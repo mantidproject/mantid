@@ -94,8 +94,8 @@ public:
 
   void test_JSONObjectWrongSeparator() {
     const std::string wrongSep = ",";
-    const std::string jsonStr = "{\"" + errName + "\":\"" + errVal + wrongSep +
-                                "\"" + errName + "\":\"" + errVal + "\"}";
+    const std::string jsonStr =
+        "{\"" + errName + "\":\"" + errVal + wrongSep + "\"" + errName + "\":\"" + errVal + "\"}";
     std::istringstream input(jsonStr);
     std::string res;
 
@@ -112,8 +112,7 @@ public:
     const std::string name2 = "variable2";
     const std::string val2 = "[0,1,2,3]";
     const std::string sep = ",";
-    std::string jsonStr = "{\"" + name1 + "\": \"" + val1 + "\"" + sep + " \"" +
-                          name2 + "\": \"" + val2 + "\"}";
+    std::string jsonStr = "{\"" + name1 + "\": \"" + val1 + "\"" + sep + " \"" + name2 + "\": \"" + val2 + "\"}";
     std::istringstream input(jsonStr);
 
     JSONObject jo;
@@ -158,8 +157,7 @@ public:
     TS_ASSERT_EQUALS(true, ol[errName].getValue(res));
     TS_ASSERT_EQUALS(res, errVal);
 
-    const std::string l2JsonStr = R"({"v1": "[1, a, 3]",")" + errName +
-                                  "\":\"" + errVal + "\", \"" + versName +
+    const std::string l2JsonStr = R"({"v1": "[1, a, 3]",")" + errName + "\":\"" + errVal + "\", \"" + versName +
                                   "\": \"" + versVal +
                                   "\" }"
                                   "\"}";
@@ -176,8 +174,7 @@ public:
     TS_ASSERT_EQUALS(res, versVal);
 
     const std::string l3JsonStr = "{ \"" + impName + "\": \"" + impVal +
-                                  R"(", "v1": "[1, a, longer str, a4]",")" +
-                                  errName + "\":\"" + errVal + "\", \"" +
+                                  R"(", "v1": "[1, a, longer str, a4]",")" + errName + "\":\"" + errVal + "\", \"" +
                                   versName + "\": \"" + versVal +
                                   "\" }"
                                   "\"}";
@@ -228,6 +225,5 @@ const std::string SimpleJSONTest::errName = "Err_Msg";
 const std::string SimpleJSONTest::errVal = "fake msg";
 const std::string SimpleJSONTest::versName = "API_Version";
 const std::string SimpleJSONTest::versVal = "1";
-const std::string SimpleJSONTest::impName =
-    "Implementation_Specific_Post_Variables";
+const std::string SimpleJSONTest::impName = "Implementation_Specific_Post_Variables";
 const std::string SimpleJSONTest::impVal = "example_POST_var1";

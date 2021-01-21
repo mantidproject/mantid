@@ -42,8 +42,7 @@ void CheckboxHeader::setChecked(bool checked) {
  * @param rect    :: The area to paint.
  * @param logicalIndex :: The column in the table.
  */
-void CheckboxHeader::paintSection(QPainter *painter, const QRect &rect,
-                                  int logicalIndex) const {
+void CheckboxHeader::paintSection(QPainter *painter, const QRect &rect, int logicalIndex) const {
   painter->save();
   QHeaderView::paintSection(painter, rect, logicalIndex);
   painter->restore();
@@ -82,12 +81,9 @@ void CheckboxHeader::mousePressEvent(QMouseEvent *event) {
 QRect CheckboxHeader::checkBoxRect(const QRect &sourceRect) const {
   QStyleOptionButton checkBoxStyleOption;
 
-  QRect checkBoxRect = style()->subElementRect(QStyle::SE_CheckBoxIndicator,
-                                               &checkBoxStyleOption);
+  QRect checkBoxRect = style()->subElementRect(QStyle::SE_CheckBoxIndicator, &checkBoxStyleOption);
 
-  QPoint checkBoxPoint(sourceRect.x() + 3, sourceRect.y() +
-                                               sourceRect.height() / 2 -
-                                               checkBoxRect.height() / 2);
+  QPoint checkBoxPoint(sourceRect.x() + 3, sourceRect.y() + sourceRect.height() / 2 - checkBoxRect.height() / 2);
 
   return QRect(checkBoxPoint, checkBoxRect.size());
 }

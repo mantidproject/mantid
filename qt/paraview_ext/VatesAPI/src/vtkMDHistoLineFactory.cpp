@@ -30,8 +30,7 @@ namespace Mantid {
 
 namespace VATES {
 
-vtkMDHistoLineFactory::vtkMDHistoLineFactory(
-    const VisualNormalization normaliztionOption)
+vtkMDHistoLineFactory::vtkMDHistoLineFactory(const VisualNormalization normaliztionOption)
     : m_normalizationOption(normaliztionOption) {}
 
 /**
@@ -39,8 +38,7 @@ Assigment operator
 @param other : vtkMDHistoLineFactory to assign to this instance from.
 @return ref to assigned current instance.
 */
-vtkMDHistoLineFactory &vtkMDHistoLineFactory::
-operator=(const vtkMDHistoLineFactory &other) {
+vtkMDHistoLineFactory &vtkMDHistoLineFactory::operator=(const vtkMDHistoLineFactory &other) {
   if (this != &other) {
     this->m_normalizationOption = other.m_normalizationOption;
     this->m_workspace = other.m_workspace;
@@ -52,8 +50,7 @@ operator=(const vtkMDHistoLineFactory &other) {
 Copy Constructor
 @param other : instance to copy from.
 */
-vtkMDHistoLineFactory::vtkMDHistoLineFactory(
-    const vtkMDHistoLineFactory &other) {
+vtkMDHistoLineFactory::vtkMDHistoLineFactory(const vtkMDHistoLineFactory &other) {
   this->m_normalizationOption = other.m_normalizationOption;
   this->m_workspace = other.m_workspace;
 }
@@ -64,10 +61,8 @@ Create the vtkStructuredGrid from the provided workspace
 stack.
 @return fully constructed vtkDataSet.
 */
-vtkSmartPointer<vtkDataSet>
-vtkMDHistoLineFactory::create(ProgressAction &progressUpdating) const {
-  auto product =
-      tryDelegatingCreation<MDHistoWorkspace, 1>(m_workspace, progressUpdating);
+vtkSmartPointer<vtkDataSet> vtkMDHistoLineFactory::create(ProgressAction &progressUpdating) const {
+  auto product = tryDelegatingCreation<MDHistoWorkspace, 1>(m_workspace, progressUpdating);
   if (product != nullptr) {
     return product;
   } else {
@@ -76,8 +71,7 @@ vtkMDHistoLineFactory::create(ProgressAction &progressUpdating) const {
                        "three dimensions in the VSI. \n";
 
     Mantid::Kernel::ReadLock lock(*m_workspace);
-    const int nBinsX =
-        static_cast<int>(m_workspace->getXDimension()->getNBins());
+    const int nBinsX = static_cast<int>(m_workspace->getXDimension()->getNBins());
 
     const coord_t minX = m_workspace->getXDimension()->getMinimum();
 
@@ -108,11 +102,9 @@ vtkMDHistoLineFactory::create(ProgressAction &progressUpdating) const {
     // Loop through dimensions
     for (int i = 0; i < nPointsX; i++) {
       progressUpdating.eventRaised(progressFactor * double(i));
-      in[0] = minX +
-              static_cast<coord_t>(i) * incrementX; // Calculate increment in x;
+      in[0] = minX + static_cast<coord_t>(i) * incrementX; // Calculate increment in x;
 
-      float signalScalar =
-          static_cast<float>(m_workspace->getSignalNormalizedAt(i));
+      float signalScalar = static_cast<float>(m_workspace->getSignalNormalizedAt(i));
 
       if (!std::isfinite(signalScalar)) {
         // Flagged so that topological and scalar data is not applied.
@@ -139,8 +131,7 @@ vtkMDHistoLineFactory::create(ProgressAction &progressUpdating) const {
     visualDataSet->GetCellData()->SetScalars(signal.GetPointer());
 
     for (int i = 0; i < nBinsX - 1; i++) {
-      progressUpdating.eventRaised((progressFactor * double(i)) +
-                                   progressOffset);
+      progressUpdating.eventRaised((progressFactor * double(i)) + progressOffset);
       // Only create topologies for those cells which are not sparse.
       if (!column[i].isSparse) {
         vtkLine *line = vtkLine::New();
@@ -163,8 +154,7 @@ vtkMDHistoLineFactory::create(ProgressAction &progressUpdating) const {
   }
 }
 
-void vtkMDHistoLineFactory::initialize(
-    const Mantid::API::Workspace_sptr &wspace_sptr) {
+void vtkMDHistoLineFactory::initialize(const Mantid::API::Workspace_sptr &wspace_sptr) {
   m_workspace = this->doInitialize<MDHistoWorkspace, 1>(wspace_sptr);
 }
 

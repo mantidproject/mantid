@@ -18,9 +18,7 @@ public:
   /// Algorithm's name
   const std::string name() const override { return "UploadRemoteFile"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Transfers/uploads a file to the specified compute resource.";
-  }
+  const std::string summary() const override { return "Transfers/uploads a file to the specified compute resource."; }
 
   /// Algorithm's version
   int version() const override { return (2); }

@@ -50,8 +50,7 @@ public:
   virtual int currentDomainIndex() const = 0;
   virtual void setCurrentDomainIndex(int) = 0;
   virtual void changeTie(const QString &paramName, const QString &tie) = 0;
-  virtual void addConstraint(const QString &functionIndex,
-                             const QString &constraint) = 0;
+  virtual void addConstraint(const QString &functionIndex, const QString &constraint) = 0;
   virtual void removeConstraint(const QString &paramName) = 0;
   virtual QStringList getGlobalParameters() const = 0;
   virtual void setGlobalParameters(const QStringList &globals) = 0;
@@ -59,29 +58,20 @@ public:
   virtual QStringList getLocalParameters() const = 0;
   virtual void updateMultiDatasetParameters(const IFunction &fun) = 0;
   virtual void updateParameters(const IFunction &fun) = 0;
-  virtual double getLocalParameterValue(const QString &parName,
-                                        int i) const = 0;
+  virtual double getLocalParameterValue(const QString &parName, int i) const = 0;
   virtual bool isLocalParameterFixed(const QString &parName, int i) const = 0;
   virtual QString getLocalParameterTie(const QString &parName, int i) const = 0;
-  virtual QString getLocalParameterConstraint(const QString &parName,
-                                              int i) const = 0;
-  virtual void setLocalParameterValue(const QString &parName, int i,
-                                      double value) = 0;
-  virtual void setLocalParameterValue(const QString &parName, int i,
-                                      double value, double error) = 0;
-  virtual void setLocalParameterFixed(const QString &parName, int i,
-                                      bool fixed) = 0;
-  virtual void setLocalParameterTie(const QString &parName, int i,
-                                    const QString &tie) = 0;
-  virtual void setLocalParameterConstraint(const QString &parName, int i,
-                                           const QString &constraint) = 0;
-  virtual void setGlobalParameterValue(const QString &paramName,
-                                       double value) = 0;
+  virtual QString getLocalParameterConstraint(const QString &parName, int i) const = 0;
+  virtual void setLocalParameterValue(const QString &parName, int i, double value) = 0;
+  virtual void setLocalParameterValue(const QString &parName, int i, double value, double error) = 0;
+  virtual void setLocalParameterFixed(const QString &parName, int i, bool fixed) = 0;
+  virtual void setLocalParameterTie(const QString &parName, int i, const QString &tie) = 0;
+  virtual void setLocalParameterConstraint(const QString &parName, int i, const QString &constraint) = 0;
+  virtual void setGlobalParameterValue(const QString &paramName, double value) = 0;
   virtual QString setBackgroundA0(double value) = 0;
 
 protected:
-  static void copyParametersAndErrors(const IFunction &funFrom,
-                                      IFunction &funTo);
+  static void copyParametersAndErrors(const IFunction &funFrom, IFunction &funTo);
   void copyParametersAndErrorsToAllLocalFunctions(const IFunction &fun);
 };
 

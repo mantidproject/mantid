@@ -19,14 +19,11 @@ on subclasses of AnalysisDataServiceObserver.
 This allows the virtual methods to be overriden by python subclasses.
  */
 
-class DLLExport AlgorithmFactoryObserverAdapter
-    : public API::AlgorithmFactoryObserver {
+class DLLExport AlgorithmFactoryObserverAdapter : public API::AlgorithmFactoryObserver {
 public:
   explicit AlgorithmFactoryObserverAdapter(PyObject *self);
-  AlgorithmFactoryObserverAdapter(const AlgorithmFactoryObserverAdapter &) =
-      delete;
-  AlgorithmFactoryObserverAdapter &
-  operator=(const AlgorithmFactoryObserverAdapter &) = delete;
+  AlgorithmFactoryObserverAdapter(const AlgorithmFactoryObserverAdapter &) = delete;
+  AlgorithmFactoryObserverAdapter &operator=(const AlgorithmFactoryObserverAdapter &) = delete;
 
   void updateHandle() override;
 

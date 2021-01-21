@@ -50,8 +50,7 @@ private:
     if (constantMap.find("_pi") != constantMap.end()) {
       ++extraConstants;
     }
-    if (constantMap.size() - extraConstants !=
-        MuParserUtils::MUPARSER_CONSTANTS.size()) {
+    if (constantMap.size() - extraConstants != MuParserUtils::MUPARSER_CONSTANTS.size()) {
       return false;
     }
     // Note: the keys in constantMap are values in MUPARSER_CONSTANTS and
@@ -69,7 +68,5 @@ private:
     return true;
   }
 
-  static bool noVariablesDefined(const mu::Parser &parser) {
-    return parser.GetVar().size() == 0;
-  }
+  static bool noVariablesDefined(const mu::Parser &parser) { return parser.GetVar().size() == 0; }
 };

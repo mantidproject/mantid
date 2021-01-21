@@ -43,17 +43,12 @@ public:
   MantidWidgets::Batch::RowPath getPath(Group const &group) const;
   MantidWidgets::Batch::RowPath getPath(Row const &row) const;
   Group const &getParentGroup(Row const &row) const;
-  boost::optional<Item &>
-  getItemWithOutputWorkspaceOrNone(std::string const &wsName);
+  boost::optional<Item &> getItemWithOutputWorkspaceOrNone(std::string const &wsName);
 
-  bool
-  validItemAtPath(const MantidWidgets::Batch::RowLocation &rowLocation) const;
-  Group const &
-  getGroupFromPath(const MantidWidgets::Batch::RowLocation &path) const;
-  boost::optional<Row> const &
-  getRowFromPath(const MantidWidgets::Batch::RowLocation &path) const;
-  Item const &
-  getItemFromPath(const MantidWidgets::Batch::RowLocation &path) const;
+  bool validItemAtPath(const MantidWidgets::Batch::RowLocation &rowLocation) const;
+  Group const &getGroupFromPath(const MantidWidgets::Batch::RowLocation &path) const;
+  boost::optional<Row> const &getRowFromPath(const MantidWidgets::Batch::RowLocation &path) const;
+  Item const &getItemFromPath(const MantidWidgets::Batch::RowLocation &path) const;
 
 private:
   std::vector<Group> m_groups;
@@ -62,16 +57,13 @@ private:
   friend class Encoder;
 };
 
-MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(ReductionJobs const &lhs,
-                                               ReductionJobs const &rhs);
-MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(ReductionJobs const &lhs,
-                                               ReductionJobs const &rhs);
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(ReductionJobs const &lhs, ReductionJobs const &rhs);
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(ReductionJobs const &lhs, ReductionJobs const &rhs);
 
 void appendEmptyRow(ReductionJobs &jobs, int groupIndex);
 void insertEmptyRow(ReductionJobs &jobs, int groupIndex, int beforeRow);
 void removeRow(ReductionJobs &jobs, int groupIndex, int rowIndex);
-void updateRow(ReductionJobs &jobs, int groupIndex, int rowIndex,
-               boost::optional<Row> const &newValue);
+void updateRow(ReductionJobs &jobs, int groupIndex, int rowIndex, boost::optional<Row> const &newValue);
 
 void appendEmptyGroup(ReductionJobs &jobs);
 void insertEmptyGroup(ReductionJobs &jobs, int beforeGroup);
@@ -80,19 +72,17 @@ void ensureAtLeastOneGroupExists(ReductionJobs &jobs);
 void removeGroup(ReductionJobs &jobs, int groupIndex);
 void removeAllRowsAndGroups(ReductionJobs &jobs);
 
-bool setGroupName(ReductionJobs &jobs, int groupIndex,
-                  std::string const &newValue);
+bool setGroupName(ReductionJobs &jobs, int groupIndex, std::string const &newValue);
 std::string groupName(ReductionJobs const &jobs, int groupIndex);
 
 int percentComplete(ReductionJobs const &jobs);
 
-MANTIDQT_ISISREFLECTOMETRY_DLL void
-mergeRowIntoGroup(ReductionJobs &jobs, Row const &row, double thetaTolerance,
-                  std::string const &groupName);
+MANTIDQT_ISISREFLECTOMETRY_DLL void mergeRowIntoGroup(ReductionJobs &jobs, Row const &row, double thetaTolerance,
+                                                      std::string const &groupName);
 
 template <typename ModificationListener>
-void mergeJobsInto(ReductionJobs &intoHere, ReductionJobs const &fromHere,
-                   double thetaTolerance, ModificationListener &listener) {
+void mergeJobsInto(ReductionJobs &intoHere, ReductionJobs const &fromHere, double thetaTolerance,
+                   ModificationListener &listener) {
   // If there's a "fake" empty group, then we want to remove it
   auto removeFirstGroup = intoHere.containsSingleEmptyGroup();
   for (auto const &group : fromHere.groups()) {
@@ -100,12 +90,10 @@ void mergeJobsInto(ReductionJobs &intoHere, ReductionJobs const &fromHere,
     if (maybeGroupIndex.is_initialized()) {
       auto indexToUpdateAt = maybeGroupIndex.get();
       auto &intoGroup = intoHere.mutableGroups()[indexToUpdateAt];
-      mergeRowsInto(intoGroup, group, indexToUpdateAt, thetaTolerance,
-                    listener);
+      mergeRowsInto(intoGroup, group, indexToUpdateAt, thetaTolerance, listener);
     } else {
       intoHere.appendGroup(group);
-      listener.groupAppended(static_cast<int>(intoHere.groups().size()) - 1,
-                             group);
+      listener.groupAppended(static_cast<int>(intoHere.groups().size()) - 1, group);
     }
   }
   // Remove the fake group after we have added the content, otherwise the

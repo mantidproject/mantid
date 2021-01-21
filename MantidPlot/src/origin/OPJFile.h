@@ -49,8 +49,7 @@ struct rect {
   int height() const { return bottom - top; };
   int width() const { return right - left; };
   rect() : left(0), top(0), right(0), bottom(0) {}
-  rect(short width, short height)
-      : left(0), top(0), right(width), bottom(height) {}
+  rect(short width, short height) : left(0), top(0), right(width), bottom(height) {}
 };
 
 struct originWindow {
@@ -67,11 +66,9 @@ struct originWindow {
   double creation_date;     // Julian date/time
   double modification_date; // Julian date/time
 
-  originWindow(std::string _name = "", std::string _label = "",
-               bool _bHidden = false)
-      : name(std::move(_name)), label(std::move(_label)), objectID(0),
-        bHidden(_bHidden), state(Normal), title(Both), creation_date(0.0),
-        modification_date(0.0){};
+  originWindow(std::string _name = "", std::string _label = "", bool _bHidden = false)
+      : name(std::move(_name)), label(std::move(_label)), objectID(0), bHidden(_bHidden), state(Normal), title(Both),
+        creation_date(0.0), modification_date(0.0){};
 };
 struct originData {
   int type; // 0 - double, 1 - string
@@ -86,8 +83,8 @@ enum ColumnType { X, Y, Z, XErr, YErr, Label, NONE };
 struct spreadColumn {
   std::string name;
   ColumnType type;
-  int value_type; // Numeric = 0, Text = 1, Date = 2, Time = 3, Month = 4, Day =
-                  // 5, Text&Numeric = 6
+  int value_type;               // Numeric = 0, Text = 1, Date = 2, Time = 3, Month = 4, Day =
+                                // 5, Text&Numeric = 6
   int value_type_specification; // see above
   int significant_digits;
   int decimal_places;
@@ -99,10 +96,8 @@ struct spreadColumn {
   int index;
   std::vector<originData> odata;
   spreadColumn(std::string _name = "", int _index = 0)
-      : name(std::move(_name)), type(NONE), value_type(0),
-        value_type_specification(0), significant_digits(6), decimal_places(6),
-        numeric_display_type(0), command(""), comment(""), width(8),
-        index(_index){};
+      : name(std::move(_name)), type(NONE), value_type(0), value_type_specification(0), significant_digits(6),
+        decimal_places(6), numeric_display_type(0), command(""), comment(""), width(8), index(_index){};
 };
 
 struct spreadSheet : public originWindow {
@@ -111,18 +106,15 @@ struct spreadSheet : public originWindow {
   bool bMultisheet;
   std::vector<spreadColumn> column;
   spreadSheet(std::string _name = "")
-      : originWindow(std::move(_name)), maxRows(0), bLoose(true),
-        bMultisheet(false), column(){};
+      : originWindow(std::move(_name)), maxRows(0), bLoose(true), bMultisheet(false), column(){};
 };
 
 struct excel : public originWindow {
   int maxRows;
   bool bLoose;
   std::vector<spreadSheet> sheet;
-  excel(std::string _name = "", std::string _label = "", int _maxRows = 0,
-        bool _bHidden = false, bool _bLoose = true)
-      : originWindow(std::move(_name), std::move(_label), _bHidden),
-        maxRows(_maxRows), bLoose(_bLoose){};
+  excel(std::string _name = "", std::string _label = "", int _maxRows = 0, bool _bHidden = false, bool _bLoose = true)
+      : originWindow(std::move(_name), std::move(_label), _bHidden), maxRows(_maxRows), bLoose(_bLoose){};
 };
 
 struct matrix : public originWindow {
@@ -142,10 +134,9 @@ struct matrix : public originWindow {
   HeaderViewType header;
   std::vector<double> data;
   matrix(std::string _name = "", int _index = 0)
-      : originWindow(std::move(_name)), nr_rows(0), nr_cols(0),
-        value_type_specification(0), significant_digits(6), decimal_places(6),
-        numeric_display_type(0), command(""), width(8), index(_index),
-        view(DataView), header(ColumnRow){};
+      : originWindow(std::move(_name)), nr_rows(0), nr_cols(0), value_type_specification(0), significant_digits(6),
+        decimal_places(6), numeric_display_type(0), command(""), width(8), index(_index), view(DataView),
+        header(ColumnRow){};
 };
 
 struct function {
@@ -157,8 +148,7 @@ struct function {
   int points;
   int index;
   function(std::string _name = "", int _index = 0)
-      : name(std::move(_name)), type(0), formula(""), begin(0.0), end(0.0),
-        points(0), index(_index){};
+      : name(std::move(_name)), type(0), formula(""), begin(0.0), end(0.0), points(0), index(_index){};
 };
 
 struct text {
@@ -172,14 +162,12 @@ struct text {
   int attach;
 
   text(const std::string &_txt = "")
-      : txt(_txt), clientRect(), color(0), fontsize(0), rotation(0), tab(0),
-        border_type(0), attach(0){};
+      : txt(_txt), clientRect(), color(0), fontsize(0), rotation(0), tab(0), border_type(0), attach(0){};
 
-  text(const std::string &_txt, const rect &_clientRect, int _color,
-       int _fontsize, int _rotation, int _tab, int _border_type, int _attach)
-      : txt(_txt), clientRect(_clientRect), color(_color), fontsize(_fontsize),
-        rotation(_rotation), tab(_tab), border_type(_border_type),
-        attach(_attach){};
+  text(const std::string &_txt, const rect &_clientRect, int _color, int _fontsize, int _rotation, int _tab,
+       int _border_type, int _attach)
+      : txt(_txt), clientRect(_clientRect), color(_color), fontsize(_fontsize), rotation(_rotation), tab(_tab),
+        border_type(_border_type), attach(_attach){};
 };
 
 struct pieProperties {
@@ -201,11 +189,9 @@ struct pieProperties {
   unsigned short distance;
 
   pieProperties()
-      : view_angle(0), thickness(0), clockwise_rotation(false), rotation(0),
-        radius(0), horizontal_offset(0), displaced_sections(0), displacement(0),
-        format_automatic(false), format_values(false),
-        format_percentages(false), format_categories(false),
-        position_associate(false), distance(0){};
+      : view_angle(0), thickness(0), clockwise_rotation(false), rotation(0), radius(0), horizontal_offset(0),
+        displaced_sections(0), displacement(0), format_automatic(false), format_values(false),
+        format_percentages(false), format_categories(false), position_associate(false), distance(0){};
 };
 
 struct vectorProperties {
@@ -225,10 +211,8 @@ struct vectorProperties {
   int const_magnitude;
 
   vectorProperties()
-      : color(0), width(0.0), arrow_lenght(0), arrow_angle(0),
-        arrow_closed(false), endXColName(), endYColName(), position(0),
-        angleColName(), magnitudeColName(nullptr), multiplier(1.0),
-        const_angle(0), const_magnitude(0){};
+      : color(0), width(0.0), arrow_lenght(0), arrow_angle(0), arrow_closed(false), endXColName(), endYColName(),
+        position(0), angleColName(), magnitudeColName(nullptr), multiplier(1.0), const_angle(0), const_magnitude(0){};
 };
 
 struct graphCurve {
@@ -283,8 +267,7 @@ struct graphAxisBreak {
   unsigned char minor_ticks_after;
 
   graphAxisBreak()
-      : show(false), log10(false), from(0.0), to(0.0), position(0),
-        scale_increment_before(0), scale_increment_after(0),
+      : show(false), log10(false), from(0.0), to(0.0), position(0), scale_increment_before(0), scale_increment_after(0),
         minor_ticks_before(0), minor_ticks_after(0) {}
 };
 
@@ -351,8 +334,7 @@ struct lineVertex {
   double shape_length;
   double x;
   double y;
-  lineVertex()
-      : shape_type(0), shape_width(0.0), shape_length(0.0), x(0.0), y(0.0) {}
+  lineVertex() : shape_type(0), shape_width(0.0), shape_length(0.0), x(0.0), y(0.0) {}
 };
 
 struct line {
@@ -417,8 +399,7 @@ struct graph : public originWindow {
   unsigned short width;
   unsigned short height;
 
-  graph(std::string _name = "")
-      : originWindow(std::move(_name)), width(0), height(0){};
+  graph(std::string _name = "") : originWindow(std::move(_name)), width(0), height(0){};
 };
 
 struct note : public originWindow {
@@ -432,10 +413,8 @@ struct projectNode {
   double creation_date;     // Julian date/time
   double modification_date; // Julian date/time
 
-  projectNode(std::string _name = "", int _type = 0,
-              double _creation_date = 0.0, double _modification_date = 0.0)
-      : type(_type), name(std::move(_name)), creation_date(_creation_date),
-        modification_date(_modification_date){};
+  projectNode(std::string _name = "", int _type = 0, double _creation_date = 0.0, double _modification_date = 0.0)
+      : type(_type), name(std::move(_name)), creation_date(_creation_date), modification_date(_modification_date){};
 };
 
 class OPJFile {
@@ -449,51 +428,31 @@ public:
             delete GRAPH[g].layer[l].bitmaps[b].data;
   }
   int Parse();
-  double Version() const {
-    return version / 100.0;
-  } //!< get version of project file
+  double Version() const { return version / 100.0; } //!< get version of project file
 
   const tree<projectNode> *project() const { return &projectTree; }
   // spreadsheet properties
-  int numSpreads() const {
-    return static_cast<int>(SPREADSHEET.size());
-  } //!< get number of spreadsheets
-  const char *spreadName(int s) const {
-    return SPREADSHEET[s].name.c_str();
-  } //!< get name of spreadsheet s
-  bool spreadHidden(int s) const {
-    return SPREADSHEET[s].bHidden;
-  } //!< is spreadsheet s hidden
-  bool spreadLoose(int s) const {
-    return SPREADSHEET[s].bLoose;
-  } //!< is spreadsheet s loose
-  rect spreadWindowRect(int s) const {
-    return SPREADSHEET[s].clientRect;
-  } //!< get window rectangle of spreadsheet s
-  const char *spreadLabel(int s) const {
-    return SPREADSHEET[s].label.c_str();
-  } //!< get label of spreadsheet s
+  int numSpreads() const { return static_cast<int>(SPREADSHEET.size()); }     //!< get number of spreadsheets
+  const char *spreadName(int s) const { return SPREADSHEET[s].name.c_str(); } //!< get name of spreadsheet s
+  bool spreadHidden(int s) const { return SPREADSHEET[s].bHidden; }           //!< is spreadsheet s hidden
+  bool spreadLoose(int s) const { return SPREADSHEET[s].bLoose; }             //!< is spreadsheet s loose
+  rect spreadWindowRect(int s) const { return SPREADSHEET[s].clientRect; }    //!< get window rectangle of spreadsheet s
+  const char *spreadLabel(int s) const { return SPREADSHEET[s].label.c_str(); } //!< get label of spreadsheet s
   double spreadCreationDate(int s) const {
     return SPREADSHEET[s].creation_date;
   } //!< get creation date of spreadsheet s
   double spreadModificationDate(int s) const {
     return SPREADSHEET[s].modification_date;
   } //!< get modification date of spreadsheet s
-  originWindow::State spreadState(int s) const {
-    return SPREADSHEET[s].state;
-  } //!< get window state of spreadsheet s
-  originWindow::Title spreadTitle(int s) const {
-    return SPREADSHEET[s].title;
-  } //!< get window state of spreadsheet s
+  originWindow::State spreadState(int s) const { return SPREADSHEET[s].state; } //!< get window state of spreadsheet s
+  originWindow::Title spreadTitle(int s) const { return SPREADSHEET[s].title; } //!< get window state of spreadsheet s
   int numCols(int s) const {
     return static_cast<int>(SPREADSHEET[s].column.size());
   } //!< get number of columns of spreadsheet s
   int numRows(int s, int c) const {
     return static_cast<int>(SPREADSHEET[s].column[c].odata.size());
-  } //!< get number of rows of column c of spreadsheet s
-  int maxRows(int s) const {
-    return SPREADSHEET[s].maxRows;
-  } //!< get maximum number of rows of spreadsheet s
+  }                                                           //!< get number of rows of column c of spreadsheet s
+  int maxRows(int s) const { return SPREADSHEET[s].maxRows; } //!< get maximum number of rows of spreadsheet s
 
   // spreadsheet's column properties
   const char *colName(int s, int c) const {
@@ -532,100 +491,53 @@ public:
     if (SPREADSHEET[s].column[c].odata[r].type == 0)
       return (void *)const_cast<double *>(&SPREADSHEET[s].column[c].odata[r].d);
     else
-      return (void *)const_cast<char *>(
-          SPREADSHEET[s].column[c].odata[r].s.c_str());
+      return (void *)const_cast<char *>(SPREADSHEET[s].column[c].odata[r].s.c_str());
   } //!< get data of column c/row r of spreadsheet s
 
   // matrix properties
-  int numMatrices() const {
-    return static_cast<int>(MATRIX.size());
-  } //!< get number of matrices
-  const char *matrixName(int m) const {
-    return MATRIX[m].name.c_str();
-  } //!< get name of matrix m
-  bool matrixHidden(int m) const {
-    return MATRIX[m].bHidden;
-  } //!< is matrix m hidden
-  rect matrixWindowRect(int m) const {
-    return MATRIX[m].clientRect;
-  } //!< get window rectangle of matrix m
-  const char *matrixLabel(int m) const {
-    return MATRIX[m].label.c_str();
-  } //!< get label of matrix m
-  double matrixCreationDate(int m) const {
-    return MATRIX[m].creation_date;
-  } //!< get creation date of matrix m
+  int numMatrices() const { return static_cast<int>(MATRIX.size()); }        //!< get number of matrices
+  const char *matrixName(int m) const { return MATRIX[m].name.c_str(); }     //!< get name of matrix m
+  bool matrixHidden(int m) const { return MATRIX[m].bHidden; }               //!< is matrix m hidden
+  rect matrixWindowRect(int m) const { return MATRIX[m].clientRect; }        //!< get window rectangle of matrix m
+  const char *matrixLabel(int m) const { return MATRIX[m].label.c_str(); }   //!< get label of matrix m
+  double matrixCreationDate(int m) const { return MATRIX[m].creation_date; } //!< get creation date of matrix m
   double matrixModificationDate(int m) const {
     return MATRIX[m].modification_date;
-  } //!< get modification date of matrix m
-  originWindow::State matrixState(int m) const {
-    return MATRIX[m].state;
-  } //!< get window state of matrix m
-  originWindow::Title matrixTitle(int m) const {
-    return MATRIX[m].title;
-  } //!< get window state of matrix m
-  int numMatrixCols(int m) const {
-    return MATRIX[m].nr_cols;
-  } //!< get number of columns of matrix m
-  int numMatrixRows(int m) const {
-    return MATRIX[m].nr_rows;
-  } //!< get number of rows of matrix m
-  const char *matrixFormula(int m) const {
-    return MATRIX[m].command.c_str();
-  } //!< get formula of matrix m
+  }                                                                            //!< get modification date of matrix m
+  originWindow::State matrixState(int m) const { return MATRIX[m].state; }     //!< get window state of matrix m
+  originWindow::Title matrixTitle(int m) const { return MATRIX[m].title; }     //!< get window state of matrix m
+  int numMatrixCols(int m) const { return MATRIX[m].nr_cols; }                 //!< get number of columns of matrix m
+  int numMatrixRows(int m) const { return MATRIX[m].nr_rows; }                 //!< get number of rows of matrix m
+  const char *matrixFormula(int m) const { return MATRIX[m].command.c_str(); } //!< get formula of matrix m
   int matrixValueTypeSpec(int m) const {
     return MATRIX[m].value_type_specification;
   } //!< get value type specification of matrix m
   int matrixSignificantDigits(int m) const {
     return MATRIX[m].significant_digits;
-  } //!< get significant digits of matrix m
-  int matrixDecPlaces(int m) const {
-    return MATRIX[m].decimal_places;
-  } //!< get decimal places of matrix m
+  }                                                                     //!< get significant digits of matrix m
+  int matrixDecPlaces(int m) const { return MATRIX[m].decimal_places; } //!< get decimal places of matrix m
   int matrixNumDisplayType(int m) const {
     return MATRIX[m].numeric_display_type;
-  } //!< get numeric display type of matrix m
-  int matrixWidth(int m) const {
-    return MATRIX[m].width;
-  } //!< get width of matrix m
-  matrix::ViewType matrixViewType(int m) const {
-    return MATRIX[m].view;
-  } //!< get view type of matrix m
+  }                                                                       //!< get numeric display type of matrix m
+  int matrixWidth(int m) const { return MATRIX[m].width; }                //!< get width of matrix m
+  matrix::ViewType matrixViewType(int m) const { return MATRIX[m].view; } //!< get view type of matrix m
   matrix::HeaderViewType matrixHeaderViewType(int m) const {
     return MATRIX[m].header;
   } //!< get header view type of matrix m
   double matrixData(int m, int c, int r) const {
     return MATRIX[m].data[r * MATRIX[m].nr_cols + c];
-  } //!< get data of row r of column c of matrix m
-  std::vector<double> matrixData(int m) const {
-    return MATRIX[m].data;
-  } //!< get data of matrix m
+  }                                                                      //!< get data of row r of column c of matrix m
+  std::vector<double> matrixData(int m) const { return MATRIX[m].data; } //!< get data of matrix m
 
   // function properties
-  int numFunctions() const {
-    return static_cast<int>(FUNCTION.size());
-  } //!< get number of functions
-  int functionIndex(const char *s) const {
-    return compareFunctionnames(s);
-  } //!< get name of function s
-  const char *functionName(int s) const {
-    return FUNCTION[s].name.c_str();
-  } //!< get name of function s
-  int functionType(int s) const {
-    return FUNCTION[s].type;
-  } //!< get type of function s
-  double functionBegin(int s) const {
-    return FUNCTION[s].begin;
-  } //!< get begin of interval of function s
-  double functionEnd(int s) const {
-    return FUNCTION[s].end;
-  } //!< get end of interval of function s
-  int functionPoints(int s) const {
-    return FUNCTION[s].points;
-  } //!< get number of points in interval of function s
-  const char *functionFormula(int s) const {
-    return FUNCTION[s].formula.c_str();
-  } //!< get formula of function s
+  int numFunctions() const { return static_cast<int>(FUNCTION.size()); }     //!< get number of functions
+  int functionIndex(const char *s) const { return compareFunctionnames(s); } //!< get name of function s
+  const char *functionName(int s) const { return FUNCTION[s].name.c_str(); } //!< get name of function s
+  int functionType(int s) const { return FUNCTION[s].type; }                 //!< get type of function s
+  double functionBegin(int s) const { return FUNCTION[s].begin; }            //!< get begin of interval of function s
+  double functionEnd(int s) const { return FUNCTION[s].end; }                //!< get end of interval of function s
+  int functionPoints(int s) const { return FUNCTION[s].points; } //!< get number of points in interval of function s
+  const char *functionFormula(int s) const { return FUNCTION[s].formula.c_str(); } //!< get formula of function s
 
   // graph properties
   enum Color {
@@ -751,64 +663,31 @@ public:
     Categorical = 10
   };
 
-  enum BorderType {
-    BlackLine = 0,
-    Shadow = 1,
-    DarkMarble = 2,
-    WhiteOut = 3,
-    BlackOut = 4,
-    None = -1
-  };
+  enum BorderType { BlackLine = 0, Shadow = 1, DarkMarble = 2, WhiteOut = 3, BlackOut = 4, None = -1 };
 
   enum Attach { Frame = 0, Page = 1, Scale = 2 };
 
   enum VectorPosition { Tail, Midpoint, Head };
 
-  int numGraphs() const {
-    return static_cast<int>(GRAPH.size());
-  } //!< get number of graphs
-  const char *graphName(int s) const {
-    return GRAPH[s].name.c_str();
-  } //!< get name of graph s
-  const char *graphLabel(int s) const {
-    return GRAPH[s].label.c_str();
-  } //!< get name of graph s
-  double graphCreationDate(int s) const {
-    return GRAPH[s].creation_date;
-  } //!< get creation date of graph s
-  double graphModificationDate(int s) const {
-    return GRAPH[s].modification_date;
-  } //!< get modification date of graph s
-  originWindow::State graphState(int s) const {
-    return GRAPH[s].state;
-  } //!< get window state of graph s
-  originWindow::Title graphTitle(int s) const {
-    return GRAPH[s].title;
-  } //!< get window state of graph s
-  bool graphHidden(int s) const {
-    return GRAPH[s].bHidden;
-  } //!< is graph s hidden
-  rect graphRect(int s) const {
-    return rect(GRAPH[s].width, GRAPH[s].height);
-  } //!< get rectangle of graph s
-  rect graphWindowRect(int s) const {
-    return GRAPH[s].clientRect;
-  } //!< get window rectangle of graph s
-  int numLayers(int s) const {
-    return static_cast<int>(GRAPH[s].layer.size());
-  } //!< get number of layers of graph s
-  rect layerRect(int s, int l) const {
-    return GRAPH[s].layer[l].clientRect;
-  } //!< get rectangle of layer l of graph s
+  int numGraphs() const { return static_cast<int>(GRAPH.size()); }                 //!< get number of graphs
+  const char *graphName(int s) const { return GRAPH[s].name.c_str(); }             //!< get name of graph s
+  const char *graphLabel(int s) const { return GRAPH[s].label.c_str(); }           //!< get name of graph s
+  double graphCreationDate(int s) const { return GRAPH[s].creation_date; }         //!< get creation date of graph s
+  double graphModificationDate(int s) const { return GRAPH[s].modification_date; } //!< get modification date of graph s
+  originWindow::State graphState(int s) const { return GRAPH[s].state; }           //!< get window state of graph s
+  originWindow::Title graphTitle(int s) const { return GRAPH[s].title; }           //!< get window state of graph s
+  bool graphHidden(int s) const { return GRAPH[s].bHidden; }                       //!< is graph s hidden
+  rect graphRect(int s) const { return rect(GRAPH[s].width, GRAPH[s].height); }    //!< get rectangle of graph s
+  rect graphWindowRect(int s) const { return GRAPH[s].clientRect; }                //!< get window rectangle of graph s
+  int numLayers(int s) const { return static_cast<int>(GRAPH[s].layer.size()); }   //!< get number of layers of graph s
+  rect layerRect(int s, int l) const { return GRAPH[s].layer[l].clientRect; } //!< get rectangle of layer l of graph s
   text layerXAxisTitle(int s, int l) const {
     return GRAPH[s].layer[l].xAxis.label;
   } //!< get label of X-axis of layer l of graph s
   text layerYAxisTitle(int s, int l) const {
     return GRAPH[s].layer[l].yAxis.label;
   } //!< get label of Y-axis of layer l of graph s
-  text layerLegend(int s, int l) const {
-    return GRAPH[s].layer[l].legend;
-  } //!< get legend of layer l of graph s
+  text layerLegend(int s, int l) const { return GRAPH[s].layer[l].legend; } //!< get legend of layer l of graph s
   std::vector<text> layerTexts(int s, int l) const {
     return GRAPH[s].layer[l].texts;
   } //!< get texts of layer l of graph s
@@ -825,14 +704,10 @@ public:
     return GRAPH[s].layer[l].yAxisBreak;
   } //!< get break of vertical axis of layer l of graph s
   graphLayerRange layerXRange(int s, int l) const {
-    return graphLayerRange(GRAPH[s].layer[l].xAxis.min,
-                           GRAPH[s].layer[l].xAxis.max,
-                           GRAPH[s].layer[l].xAxis.step);
+    return graphLayerRange(GRAPH[s].layer[l].xAxis.min, GRAPH[s].layer[l].xAxis.max, GRAPH[s].layer[l].xAxis.step);
   } //!< get X-range of layer l of graph s
   graphLayerRange layerYRange(int s, int l) const {
-    return graphLayerRange(GRAPH[s].layer[l].yAxis.min,
-                           GRAPH[s].layer[l].yAxis.max,
-                           GRAPH[s].layer[l].yAxis.step);
+    return graphLayerRange(GRAPH[s].layer[l].yAxis.min, GRAPH[s].layer[l].yAxis.max, GRAPH[s].layer[l].yAxis.step);
   } //!< get Y-range of layer l of graph s
   std::vector<int> layerXTicks(int s, int l) const {
     std::vector<int> tick;
@@ -962,34 +837,16 @@ public:
     return GRAPH[s].layer[l].curve[c].vector;
   } //!< get vector properties of curve c of layer l of graph s
 
-  int numNotes() const {
-    return static_cast<int>(NOTE.size());
-  } //!< get number of notes
-  const char *noteName(int n) const {
-    return NOTE[n].name.c_str();
-  } //!< get name of note n
-  const char *noteLabel(int n) const {
-    return NOTE[n].label.c_str();
-  } //!< get label of note n
-  const char *noteText(int n) const {
-    return NOTE[n].text.c_str();
-  } //!< get text of note n
-  double noteCreationDate(int n) const {
-    return NOTE[n].creation_date;
-  } //!< get creation date of note n
-  double noteModificationDate(int n) const {
-    return NOTE[n].modification_date;
-  } //!< get modification date of note n
-  originWindow::State noteState(int n) const {
-    return NOTE[n].state;
-  } //!< get window state of note n
-  originWindow::Title noteTitle(int n) const {
-    return NOTE[n].title;
-  } //!< get window state of note n
+  int numNotes() const { return static_cast<int>(NOTE.size()); }                 //!< get number of notes
+  const char *noteName(int n) const { return NOTE[n].name.c_str(); }             //!< get name of note n
+  const char *noteLabel(int n) const { return NOTE[n].label.c_str(); }           //!< get label of note n
+  const char *noteText(int n) const { return NOTE[n].text.c_str(); }             //!< get text of note n
+  double noteCreationDate(int n) const { return NOTE[n].creation_date; }         //!< get creation date of note n
+  double noteModificationDate(int n) const { return NOTE[n].modification_date; } //!< get modification date of note n
+  originWindow::State noteState(int n) const { return NOTE[n].state; }           //!< get window state of note n
+  originWindow::Title noteTitle(int n) const { return NOTE[n].title; }           //!< get window state of note n
 
-  const char *resultsLogString() const {
-    return resultsLog.c_str();
-  } //!< get Results Log
+  const char *resultsLogString() const { return resultsLog.c_str(); } //!< get Results Log
 
 private:
   bool IsBigEndian();
@@ -999,12 +856,10 @@ private:
   int compareSpreadnames(char *sname) const; //!< returns matching spread index
   int compareExcelnames(char *sname) const;  //!< returns matching excel index
   int compareColumnnames(int spread,
-                         char *sname) const; //!< returns matching column index
-  int compareExcelColumnnames(int excel, int sheet, char *sname)
-      const;                                 //!< returns matching column index
-  int compareMatrixnames(char *sname) const; //!< returns matching matrix index
-  int compareFunctionnames(
-      const char *sname) const; //!< returns matching function index
+                         char *sname) const;                            //!< returns matching column index
+  int compareExcelColumnnames(int excel, int sheet, char *sname) const; //!< returns matching column index
+  int compareMatrixnames(char *sname) const;                            //!< returns matching matrix index
+  int compareFunctionnames(const char *sname) const;                    //!< returns matching function index
   std::vector<std::string> findDataByIndex(int index) const;
   std::string findObjectByIndex(int index);
   void readSpreadInfo(FILE *fopj, int file_size, FILE *fdebug);
@@ -1012,20 +867,14 @@ private:
   void readMatrixInfo(FILE *fopj, int file_size, FILE *fdebug);
   void readGraphInfo(FILE *fopj, int file_size, FILE *fdebug);
   void readGraphGridInfo(graphGrid &grid, FILE *fopj, FILE *debug, int pos);
-  void readGraphAxisBreakInfo(graphAxisBreak &axis_break, FILE *fopj,
-                              FILE *debug, int pos);
-  void readGraphAxisFormatInfo(graphAxisFormat &format, FILE *fopj, FILE *debug,
-                               int pos);
-  void readGraphAxisTickLabelsInfo(graphAxisTick &tick, FILE *fopj, FILE *debug,
-                                   int pos);
+  void readGraphAxisBreakInfo(graphAxisBreak &axis_break, FILE *fopj, FILE *debug, int pos);
+  void readGraphAxisFormatInfo(graphAxisFormat &format, FILE *fopj, FILE *debug, int pos);
+  void readGraphAxisTickLabelsInfo(graphAxisTick &tick, FILE *fopj, FILE *debug, int pos);
   void readProjectTree(FILE *f, FILE *debug);
-  void readProjectTreeFolder(FILE *f, FILE *debug,
-                             tree<projectNode>::iterator parent);
-  void readWindowProperties(originWindow &window, FILE *f, FILE *debug, int POS,
-                            int headersize);
+  void readProjectTreeFolder(FILE *f, FILE *debug, tree<projectNode>::iterator parent);
+  void readWindowProperties(originWindow &window, FILE *f, FILE *debug, int POS, int headersize);
   void skipObjectInfo(FILE *fopj, FILE *fdebug);
-  void setColName(
-      int spread); //!< set default column name starting from spreadsheet spread
+  void setColName(int spread); //!< set default column name starting from spreadsheet spread
   void convertSpreadToExcel(int spread);
   const char *filename; //!< project file name
   int version;          //!< project version

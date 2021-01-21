@@ -85,9 +85,7 @@ public:
   ExecutionState executionState() const override {
     return isRunningFlag ? ExecutionState::Running : ExecutionState::Finished;
   }
-  ResultState resultState() const override {
-    return isRunningFlag ? ResultState::NotFinished : ResultState::Failed;
-  }
+  ResultState resultState() const override { return isRunningFlag ? ResultState::NotFinished : ResultState::Failed; }
   void setIsRunningTo(bool runningFlag) { isRunningFlag = runningFlag; }
   void cancel() override { isRunningFlag = false; }
 };
@@ -100,37 +98,28 @@ class AlgorithmManagerTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static AlgorithmManagerTest *createSuite() {
-    return new AlgorithmManagerTest();
-  }
+  static AlgorithmManagerTest *createSuite() { return new AlgorithmManagerTest(); }
   static void destroySuite(AlgorithmManagerTest *suite) { delete suite; }
 
   void testVersionFail() {
     const size_t nalgs = AlgorithmFactory::Instance().getKeys().size();
-    TS_ASSERT_THROWS(AlgorithmFactory::Instance().subscribe<AlgTestFail>(),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(AlgorithmFactory::Instance().subscribe<AlgTestFail>(), const std::runtime_error &);
     // Size should be the same
     TS_ASSERT_EQUALS(AlgorithmFactory::Instance().getKeys().size(), nalgs);
   }
 
-  void testVersionPass() {
-    TS_ASSERT_THROWS_NOTHING(
-        AlgorithmFactory::Instance().subscribe<AlgTestPass>());
-  }
+  void testVersionPass() { TS_ASSERT_THROWS_NOTHING(AlgorithmFactory::Instance().subscribe<AlgTestPass>()); }
 
   void testInstance() {
     TS_ASSERT_THROWS_NOTHING(AlgorithmManager::Instance().create("AlgTest"));
-    TS_ASSERT_THROWS(AlgorithmManager::Instance().create("AlgTest", 3),
-                     const std::runtime_error &);
-    TS_ASSERT_THROWS(AlgorithmManager::Instance().create("aaaaaa"),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(AlgorithmManager::Instance().create("AlgTest", 3), const std::runtime_error &);
+    TS_ASSERT_THROWS(AlgorithmManager::Instance().create("aaaaaa"), const std::runtime_error &);
   }
 
   void testClear() {
     AlgorithmManager::Instance().clear();
     TS_ASSERT_THROWS_NOTHING(AlgorithmManager::Instance().create("AlgTest"));
-    TS_ASSERT_THROWS_NOTHING(
-        AlgorithmManager::Instance().create("AlgTestSecond"));
+    TS_ASSERT_THROWS_NOTHING(AlgorithmManager::Instance().create("AlgTestSecond"));
     TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(), 2);
     AlgorithmManager::Instance().clear();
     TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(), 0);
@@ -139,16 +128,11 @@ public:
   void testReturnType() {
     AlgorithmManager::Instance().clear();
     IAlgorithm_sptr alg;
-    TS_ASSERT_THROWS_NOTHING(
-        alg = AlgorithmManager::Instance().create("AlgTest", 1));
-    TS_ASSERT_DIFFERS(dynamic_cast<Algorithm *>(alg.get()),
-                      static_cast<Algorithm *>(nullptr));
-    TS_ASSERT_THROWS_NOTHING(
-        alg = AlgorithmManager::Instance().create("AlgTestSecond", 1));
-    TS_ASSERT_DIFFERS(dynamic_cast<Algorithm *>(alg.get()),
-                      static_cast<Algorithm *>(nullptr));
-    TS_ASSERT_DIFFERS(dynamic_cast<IAlgorithm *>(alg.get()),
-                      static_cast<IAlgorithm *>(nullptr));
+    TS_ASSERT_THROWS_NOTHING(alg = AlgorithmManager::Instance().create("AlgTest", 1));
+    TS_ASSERT_DIFFERS(dynamic_cast<Algorithm *>(alg.get()), static_cast<Algorithm *>(nullptr));
+    TS_ASSERT_THROWS_NOTHING(alg = AlgorithmManager::Instance().create("AlgTestSecond", 1));
+    TS_ASSERT_DIFFERS(dynamic_cast<Algorithm *>(alg.get()), static_cast<Algorithm *>(nullptr));
+    TS_ASSERT_DIFFERS(dynamic_cast<IAlgorithm *>(alg.get()), static_cast<IAlgorithm *>(nullptr));
     TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(),
                      2); // To check that crea is called on local objects
   }
@@ -165,8 +149,7 @@ public:
   }
 
   // This will be called back when an algo starts
-  void handleAlgorithmStartingNotification(
-      const Poco::AutoPtr<AlgorithmStartingNotification> & /*pNf*/) {
+  void handleAlgorithmStartingNotification(const Poco::AutoPtr<AlgorithmStartingNotification> & /*pNf*/) {
     m_notificationValue = 12345;
   }
 
@@ -175,10 +158,8 @@ public:
    */
   void testStartingNotification() {
     AlgorithmManager::Instance().clear();
-    Poco::NObserver<AlgorithmManagerTest,
-                    Mantid::API::AlgorithmStartingNotification>
-        my_observer(*this,
-                    &AlgorithmManagerTest::handleAlgorithmStartingNotification);
+    Poco::NObserver<AlgorithmManagerTest, Mantid::API::AlgorithmStartingNotification> my_observer(
+        *this, &AlgorithmManagerTest::handleAlgorithmStartingNotification);
     AlgorithmManager::Instance().notificationCenter.addObserver(my_observer);
 
     IAlgorithm_sptr Aptr, Bptr;
@@ -217,38 +198,25 @@ public:
   void test_runningInstancesOf() {
     AlgorithmManager::Instance().clear();
     // Had better return empty at this point
-    TS_ASSERT(
-        AlgorithmManager::Instance().runningInstancesOf("AlgTest").empty())
+    TS_ASSERT(AlgorithmManager::Instance().runningInstancesOf("AlgTest").empty())
     // Create an algorithm, but don't start it
     AlgorithmManager::Instance().create("AlgTest");
     // Still empty
-    TS_ASSERT(
-        AlgorithmManager::Instance().runningInstancesOf("AlgTest").empty())
+    TS_ASSERT(AlgorithmManager::Instance().runningInstancesOf("AlgTest").empty())
     // Create the 'runs forever' algorithm
     AlgorithmManager::Instance().create("AlgRunsForever");
-    auto runningAlgorithms =
-        AlgorithmManager::Instance().runningInstancesOf("AlgRunsForever");
+    auto runningAlgorithms = AlgorithmManager::Instance().runningInstancesOf("AlgRunsForever");
     TS_ASSERT_EQUALS(runningAlgorithms.size(), 1);
     TS_ASSERT_EQUALS(runningAlgorithms.at(0)->name(), "AlgRunsForever");
     // Create another 'runs forever' algorithm (without proxy) and another
     // 'normal' one
-    auto aRunningAlgorithm =
-        AlgorithmManager::Instance().create("AlgRunsForever", 1);
-    TS_ASSERT(
-        AlgorithmManager::Instance().runningInstancesOf("AlgTest").empty())
-    TS_ASSERT_EQUALS(AlgorithmManager::Instance()
-                         .runningInstancesOf("AlgRunsForever")
-                         .size(),
-                     2);
+    auto aRunningAlgorithm = AlgorithmManager::Instance().create("AlgRunsForever", 1);
+    TS_ASSERT(AlgorithmManager::Instance().runningInstancesOf("AlgTest").empty())
+    TS_ASSERT_EQUALS(AlgorithmManager::Instance().runningInstancesOf("AlgRunsForever").size(), 2);
     // 'Stop' one of the running algorithms and check the count drops
-    dynamic_cast<AlgRunsForever *>(aRunningAlgorithm.get())
-        ->setIsRunningTo(false);
-    TS_ASSERT_EQUALS(AlgorithmManager::Instance()
-                         .runningInstancesOf("AlgRunsForever")
-                         .size(),
-                     1);
-    TS_ASSERT(
-        AlgorithmManager::Instance().runningInstancesOf("AlgTest").empty())
+    dynamic_cast<AlgRunsForever *>(aRunningAlgorithm.get())->setIsRunningTo(false);
+    TS_ASSERT_EQUALS(AlgorithmManager::Instance().runningInstancesOf("AlgRunsForever").size(), 1);
+    TS_ASSERT(AlgorithmManager::Instance().runningInstancesOf("AlgTest").empty())
     TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(), 3);
     AlgorithmManager::Instance().cancelAll();
   }
@@ -259,16 +227,12 @@ public:
     for (size_t i = 0; i < 5; i++) {
       // Create without proxy so that I can cast it to an Algorithm and get at
       // getCancel()
-      algs[i] = std::dynamic_pointer_cast<Algorithm>(
-          AlgorithmManager::Instance().create("AlgRunsForever", 1));
+      algs[i] = std::dynamic_pointer_cast<Algorithm>(AlgorithmManager::Instance().create("AlgRunsForever", 1));
       TS_ASSERT(!algs[i]->getCancel());
     }
 
     AlgorithmManager::Instance().cancelAll();
-    TS_ASSERT_EQUALS(AlgorithmManager::Instance()
-                         .runningInstancesOf("AlgRunsForever")
-                         .size(),
-                     0);
+    TS_ASSERT_EQUALS(AlgorithmManager::Instance().runningInstancesOf("AlgRunsForever").size(), 0);
     AlgorithmManager::Instance().clear();
   }
 

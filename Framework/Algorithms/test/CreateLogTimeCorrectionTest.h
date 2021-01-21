@@ -33,9 +33,7 @@ class CreateLogTimeCorrectionTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static CreateLogTimeCorrectionTest *createSuite() {
-    return new CreateLogTimeCorrectionTest();
-  }
+  static CreateLogTimeCorrectionTest *createSuite() { return new CreateLogTimeCorrectionTest(); }
   static void destroySuite(CreateLogTimeCorrectionTest *suite) { delete suite; }
 
   CreateLogTimeCorrectionTest() {
@@ -43,9 +41,7 @@ public:
     AnalysisDataService::Instance().add("Vulcan", m_inpws);
   }
 
-  ~CreateLogTimeCorrectionTest() override {
-    AnalysisDataService::Instance().clear();
-  }
+  ~CreateLogTimeCorrectionTest() override { AnalysisDataService::Instance().clear(); }
 
   /** Test against a Vulcan run
    */
@@ -61,8 +57,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    TableWorkspace_sptr outws = std::dynamic_pointer_cast<TableWorkspace>(
-        AnalysisDataService::Instance().retrieve("CorrectionTable"));
+    TableWorkspace_sptr outws =
+        std::dynamic_pointer_cast<TableWorkspace>(AnalysisDataService::Instance().retrieve("CorrectionTable"));
     TS_ASSERT(outws);
 
     int numrows = static_cast<int>(outws->rowCount());
@@ -101,8 +97,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    TableWorkspace_sptr outws = std::dynamic_pointer_cast<TableWorkspace>(
-        AnalysisDataService::Instance().retrieve("CorrectionTable"));
+    TableWorkspace_sptr outws =
+        std::dynamic_pointer_cast<TableWorkspace>(AnalysisDataService::Instance().retrieve("CorrectionTable"));
     TS_ASSERT(outws);
 
     int numrows = static_cast<int>(outws->rowCount());
@@ -153,8 +149,7 @@ public:
     alg.initialize();
     TS_ASSERT(alg.isInitialized());
 
-    TS_ASSERT_THROWS(alg.setProperty("InputWorkspace", inpws),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg.setProperty("InputWorkspace", inpws), const std::invalid_argument &);
   }
 
   void test_not_allowed_output_workspace_same_as_input() {
@@ -170,8 +165,8 @@ private:
   /** Generate an empty Vulcan workspace
    */
   API::MatrixWorkspace_sptr createEmptyWorkspace(const string &instrument) {
-    MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(
-        WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1));
+    MatrixWorkspace_sptr ws =
+        std::dynamic_pointer_cast<MatrixWorkspace>(WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1));
 
     if (!instrument.empty()) {
       DataHandling::LoadInstrument load;

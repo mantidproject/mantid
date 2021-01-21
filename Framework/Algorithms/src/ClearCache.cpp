@@ -34,35 +34,23 @@ int ClearCache::version() const { return 1; }
 const std::string ClearCache::category() const { return "Utility"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-const std::string ClearCache::summary() const {
-  return "Clears out selected cached information held by Mantidplot.";
-}
+const std::string ClearCache::summary() const { return "Clears out selected cached information held by Mantidplot."; }
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void ClearCache::init() {
-  declareProperty(
-      "AlgorithmCache", false,
-      "Clears the memory cache of the last used algorithm parameters.");
-  declareProperty(
-      "InstrumentCache", false,
-      "Clears the memory cache of the loaded instrument definitions.");
+  declareProperty("AlgorithmCache", false, "Clears the memory cache of the last used algorithm parameters.");
+  declareProperty("InstrumentCache", false, "Clears the memory cache of the loaded instrument definitions.");
   declareProperty("DownloadedInstrumentFileCache", false,
                   "Clears the file cache of the downloaded instrument "
                   "definitions.  This can be repopulated using "
                   "DownloadInstrument.");
-  declareProperty(
-      "GeometryFileCache", false,
-      "Clears the file cache of the triangulated detector geometries.");
-  declareProperty("WorkspaceCache", false,
-                  "Clears the memory cache of any workspaces.");
-  declareProperty("UsageServiceCache", false,
-                  "Clears the memory cache of usage data.");
-  declareProperty(
-      "FilesRemoved", 0,
-      "The number of files removed. Memory clearance do not add to this.",
-      Direction::Output);
+  declareProperty("GeometryFileCache", false, "Clears the file cache of the triangulated detector geometries.");
+  declareProperty("WorkspaceCache", false, "Clears the memory cache of any workspaces.");
+  declareProperty("UsageServiceCache", false, "Clears the memory cache of usage data.");
+  declareProperty("FilesRemoved", 0, "The number of files removed. Memory clearance do not add to this.",
+                  Direction::Output);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -77,8 +65,7 @@ void ClearCache::exec() {
   bool clearUsageService = getProperty("UsageServiceCache");
   bool clearAnalysisService = getProperty("WorkspaceCache");
 
-  bool isAnythingSelected = clearAlgCache || clearInstService ||
-                            clearInstFileCache || clearGeometryFileCache ||
+  bool isAnythingSelected = clearAlgCache || clearInstService || clearInstFileCache || clearGeometryFileCache ||
                             clearUsageService || clearAnalysisService;
   if (!isAnythingSelected) {
     g_log.warning("Nothing caches to clear.  Nothing done.");
@@ -86,8 +73,7 @@ void ClearCache::exec() {
   }
 
   // get the instrument directories
-  auto instrumentDirs =
-      Mantid::Kernel::ConfigService::Instance().getInstrumentDirectories();
+  auto instrumentDirs = Mantid::Kernel::ConfigService::Instance().getInstrumentDirectories();
   Poco::Path localPath(instrumentDirs[0]);
   localPath.makeDirectory();
 
@@ -132,8 +118,7 @@ void ClearCache::exec() {
  *  @param pattern The pattern to match filenames * and ? are wildcards
  *  @returns The number of files deleted
  */
-int ClearCache::deleteFiles(const std::string &path,
-                            const std::string &pattern) const {
+int ClearCache::deleteFiles(const std::string &path, const std::string &pattern) const {
   int filesDeleted = 0;
 
   Poco::Path pathPattern(path);

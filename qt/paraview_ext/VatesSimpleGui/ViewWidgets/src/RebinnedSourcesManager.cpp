@@ -53,8 +53,8 @@ Mantid::Kernel::Logger g_log("RebinnedSourcesManager");
 }
 
 RebinnedSourcesManager::RebinnedSourcesManager(QWidget *parent)
-    : QWidget(parent), m_tempPostfix("_rebinned_vsi"), m_tempPrefix(""),
-      m_inputSource(nullptr), m_rebinnedSource(nullptr) {
+    : QWidget(parent), m_tempPostfix("_rebinned_vsi"), m_tempPrefix(""), m_inputSource(nullptr),
+      m_rebinnedSource(nullptr) {
   observeAdd();
   observeAfterReplace();
   observePreDelete();
@@ -68,9 +68,8 @@ RebinnedSourcesManager::~RebinnedSourcesManager() {}
  * @param workspaceName Name of the workspace.
  * @param workspace A pointer to the added workspace.
  */
-void RebinnedSourcesManager::addHandle(
-    const std::string &workspaceName,
-    const std::shared_ptr<Mantid::API::Workspace> &workspace) {
+void RebinnedSourcesManager::addHandle(const std::string &workspaceName,
+                                       const std::shared_ptr<Mantid::API::Workspace> &workspace) {
   // Check if the workspace which has experienced a change is being tracked in
   // our buffer
   if (m_newWorkspacePairBuffer.empty()) {
@@ -102,16 +101,13 @@ void RebinnedSourcesManager::addHandle(
  * Catch the deletion of either the rebinned or the original workspace.
  * @param wsName The name of the workspace.
  */
-void RebinnedSourcesManager::preDeleteHandle(
-    const std::string &wsName,
-    const std::shared_ptr<Mantid::API::Workspace> &) {
+void RebinnedSourcesManager::preDeleteHandle(const std::string &wsName,
+                                             const std::shared_ptr<Mantid::API::Workspace> &) {
   // Check if the workspace which is to be deleted is a tracked rebinned
   // workspace
-  std::vector<pqPipelineSource *> sources =
-      findAllRebinnedSourcesForWorkspace(wsName);
+  std::vector<pqPipelineSource *> sources = findAllRebinnedSourcesForWorkspace(wsName);
 
-  for (std::vector<pqPipelineSource *>::const_iterator it = sources.begin();
-       it != sources.end(); ++it) {
+  for (std::vector<pqPipelineSource *>::const_iterator it = sources.begin(); it != sources.end(); ++it) {
     // Untrack the source
     untrackWorkspaces(createKeyPairForSource(*it));
 
@@ -125,9 +121,8 @@ void RebinnedSourcesManager::preDeleteHandle(
  * @param workspaceName Name of the workspace.
  * @param workspace A pointer to the added workspace.
  */
-void RebinnedSourcesManager::afterReplaceHandle(
-    const std::string &workspaceName,
-    const std::shared_ptr<Mantid::API::Workspace> &workspace) {
+void RebinnedSourcesManager::afterReplaceHandle(const std::string &workspaceName,
+                                                const std::shared_ptr<Mantid::API::Workspace> &workspace) {
   addHandle(workspaceName, workspace);
 }
 
@@ -139,10 +134,8 @@ void RebinnedSourcesManager::afterReplaceHandle(
  * @param algorithmType The type of the algorithm which will be used to create
  * the rebinned source.
  */
-void RebinnedSourcesManager::checkSource(pqPipelineSource *src,
-                                         std::string &inputWorkspace,
-                                         std::string &outputWorkspace,
-                                         std::string algorithmType) {
+void RebinnedSourcesManager::checkSource(pqPipelineSource *src, std::string &inputWorkspace,
+                                         std::string &outputWorkspace, std::string algorithmType) {
   pqPipelineSource *source = goToPipelineBeginning(src);
 
   std::string workspaceName;
@@ -150,16 +143,13 @@ void RebinnedSourcesManager::checkSource(pqPipelineSource *src,
 
   getWorkspaceInfo(source, workspaceName, workspaceType);
 
-  bool isHistoWorkspace =
-      workspaceType.find("MDHistoWorkspace") != std::string::npos;
-  bool isEventWorkspace =
-      workspaceType.find("MDEventWorkspace") != std::string::npos;
+  bool isHistoWorkspace = workspaceType.find("MDHistoWorkspace") != std::string::npos;
+  bool isEventWorkspace = workspaceType.find("MDEventWorkspace") != std::string::npos;
 
   // Check if it is a Histo or Event workspace, if it is neither, then don't do
   // anything
   if (isHistoWorkspace || isEventWorkspace) {
-    processWorkspaceNames(inputWorkspace, outputWorkspace, source,
-                          workspaceName, std::move(algorithmType));
+    processWorkspaceNames(inputWorkspace, outputWorkspace, source, workspaceName, std::move(algorithmType));
   }
 }
 
@@ -169,8 +159,7 @@ void RebinnedSourcesManager::checkSource(pqPipelineSource *src,
  * @param workspaceName Reference to workspace name.
  * @param workspaceType Reference to workspace type.
  */
-void RebinnedSourcesManager::getWorkspaceInfo(pqPipelineSource *source,
-                                              std::string &workspaceName,
+void RebinnedSourcesManager::getWorkspaceInfo(pqPipelineSource *source, std::string &workspaceName,
                                               std::string &workspaceType) {
   // Make sure that the input source exists. Note that this can happen when
   // there is no active view
@@ -194,18 +183,14 @@ void RebinnedSourcesManager::getWorkspaceInfo(pqPipelineSource *source,
 
   // Ensure that the source is either an MDEvent source or an MDHisto source
   std::string sourceName(source->getProxy()->GetXMLName());
-  if (sourceName.find("MDEW Source") == std::string::npos &&
-      sourceName.find("MDHW Source") == std::string::npos) {
+  if (sourceName.find("MDEW Source") == std::string::npos && sourceName.find("MDHW Source") == std::string::npos) {
     return;
   }
 
   // Check if the source has an underlying event workspace or histo workspace
-  workspaceName = vtkSMPropertyHelper(source->getProxy(), "WorkspaceName", true)
-                      .GetAsString();
+  workspaceName = vtkSMPropertyHelper(source->getProxy(), "WorkspaceName", true).GetAsString();
 
-  workspaceType =
-      vtkSMPropertyHelper(source->getProxy(), "WorkspaceTypeName", true)
-          .GetAsString();
+  workspaceType = vtkSMPropertyHelper(source->getProxy(), "WorkspaceTypeName", true).GetAsString();
 }
 
 /**
@@ -234,8 +219,7 @@ void RebinnedSourcesManager::repipeRebinnedSource() {
  * @param rebinnedSource The name of the rebinned source.
  * @param originalSource The name of the original source.
  */
-void RebinnedSourcesManager::repipeOriginalSource(
-    pqPipelineSource *rebinnedSource, pqPipelineSource *originalSource) {
+void RebinnedSourcesManager::repipeOriginalSource(pqPipelineSource *rebinnedSource, pqPipelineSource *originalSource) {
   // Advance the rebinnedSource to the start of the pipeline
   pqPipelineSource *rebSource = goToPipelineBeginning(rebinnedSource);
 
@@ -253,8 +237,7 @@ void RebinnedSourcesManager::repipeOriginalSource(
  * @param src1 First source.
  * @param src2 Second source.
  */
-void RebinnedSourcesManager::swapSources(pqPipelineSource *src1,
-                                         pqPipelineSource *src2) {
+void RebinnedSourcesManager::swapSources(pqPipelineSource *src1, pqPipelineSource *src2) {
   if (!src1 || !src2) {
     throw std::runtime_error("VSI error: Either the original or rebinned "
                              "source don't seem to exist.");
@@ -283,9 +266,8 @@ void RebinnedSourcesManager::swapSources(pqPipelineSource *src1,
  * @param originalWorkspaceName The name of the original workspace.
  * @param rebinnedWorkspaceName The name of the rebinned workspace.
  */
-void RebinnedSourcesManager::getStoredWorkspaceNames(
-    pqPipelineSource *src, std::string &originalWorkspaceName,
-    std::string &rebinnedWorkspaceName) {
+void RebinnedSourcesManager::getStoredWorkspaceNames(pqPipelineSource *src, std::string &originalWorkspaceName,
+                                                     std::string &rebinnedWorkspaceName) {
   if (!src) {
     return;
   }
@@ -298,8 +280,7 @@ void RebinnedSourcesManager::getStoredWorkspaceNames(
   rebinnedWorkspaceName = key.first;
 
   if (m_rebinnedWorkspaceAndSourceToOriginalWorkspace.count(key) > 0) {
-    originalWorkspaceName =
-        m_rebinnedWorkspaceAndSourceToOriginalWorkspace[key];
+    originalWorkspaceName = m_rebinnedWorkspaceAndSourceToOriginalWorkspace[key];
   } else {
     originalWorkspaceName = "";
   }
@@ -314,20 +295,17 @@ void RebinnedSourcesManager::getStoredWorkspaceNames(
  * workspace
  */
 std::vector<pqPipelineSource *>
-RebinnedSourcesManager::findAllRebinnedSourcesForWorkspace(
-    const std::string &workspaceName) {
+RebinnedSourcesManager::findAllRebinnedSourcesForWorkspace(const std::string &workspaceName) {
   std::vector<std::string> linkedSources;
   // We need to iterate over the map
-  for (std::map<std::pair<std::string, std::string>,
-                std::string>::const_iterator it =
+  for (std::map<std::pair<std::string, std::string>, std::string>::const_iterator it =
            m_rebinnedWorkspaceAndSourceToOriginalWorkspace.begin();
        it != m_rebinnedWorkspaceAndSourceToOriginalWorkspace.begin(); ++it) {
     // Check the first part of the key and the value ofthe map
     std::string rebinnedWorkspaceName = it->first.first;
     std::string originalWorkspaceName = it->second;
 
-    if (workspaceName == rebinnedWorkspaceName ||
-        workspaceName == originalWorkspaceName) {
+    if (workspaceName == rebinnedWorkspaceName || workspaceName == originalWorkspaceName) {
       linkedSources.push_back(it->first.second);
     }
   }
@@ -337,10 +315,8 @@ RebinnedSourcesManager::findAllRebinnedSourcesForWorkspace(
   std::vector<pqPipelineSource *> sourcesToBeDeleted;
 
   pqServer *server = pqActiveObjects::instance().activeServer();
-  pqServerManagerModel *smModel =
-      pqApplicationCore::instance()->getServerManagerModel();
-  const QList<pqPipelineSource *> sources =
-      smModel->findItems<pqPipelineSource *>(server);
+  pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
+  const QList<pqPipelineSource *> sources = smModel->findItems<pqPipelineSource *>(server);
 
   foreach (pqPipelineSource *source, sources) {
     pqPipelineFilter *filter = qobject_cast<pqPipelineFilter *>(source);
@@ -361,14 +337,12 @@ RebinnedSourcesManager::findAllRebinnedSourcesForWorkspace(
  * @param sourceName the name of the source which we want to check
  * @param trackedSources a list of tracked sources which need to be deleted
  */
-bool RebinnedSourcesManager::doesSourceNeedToBeDeleted(
-    const std::string &sourceName,
-    const std::vector<std::string> &trackedSources) {
+bool RebinnedSourcesManager::doesSourceNeedToBeDeleted(const std::string &sourceName,
+                                                       const std::vector<std::string> &trackedSources) {
   if (sourceName.empty())
     return false;
 
-  return std::find(trackedSources.cbegin(), trackedSources.cend(),
-                   sourceName) != trackedSources.cend();
+  return std::find(trackedSources.cbegin(), trackedSources.cend(), sourceName) != trackedSources.cend();
 }
 
 /**
@@ -379,10 +353,9 @@ bool RebinnedSourcesManager::doesSourceNeedToBeDeleted(
  * @param workspaceName The name of the workspace of the current source.
  * @param algorithmType The algorithm which creates the rebinned source.
  */
-void RebinnedSourcesManager::processWorkspaceNames(
-    std::string &inputWorkspace, std::string &outputWorkspace,
-    pqPipelineSource *source, std::string workspaceName,
-    const std::string &algorithmType) {
+void RebinnedSourcesManager::processWorkspaceNames(std::string &inputWorkspace, std::string &outputWorkspace,
+                                                   pqPipelineSource *source, std::string workspaceName,
+                                                   const std::string &algorithmType) {
   // Reset the temporary tracking elements, which are needed only for the
   // duration of the rebinning itself
   m_newWorkspacePairBuffer.clear();
@@ -392,37 +365,30 @@ void RebinnedSourcesManager::processWorkspaceNames(
 
   // If the workspace is the original workspace or it is a freshly loaded, i.e.
   // it is not being tracked
-  if (workspaceName.find(m_tempPostfix) == std::string::npos ||
-      !isRebinnedSourceBeingTracked(source)) {
+  if (workspaceName.find(m_tempPostfix) == std::string::npos || !isRebinnedSourceBeingTracked(source)) {
     inputWorkspace = workspaceName;
-    outputWorkspace =
-        m_tempPrefix + workspaceName + algorithmType + m_tempPostfix;
+    outputWorkspace = m_tempPrefix + workspaceName + algorithmType + m_tempPostfix;
   } // If the workspace is rebinned and was created with the same algorithm as
   // the currently selected one.
   else if (workspaceName.find(algorithmType) != std::string::npos &&
            workspaceName.find(m_tempPostfix) != std::string::npos) {
     // Check if the source and the workspace name are being tracked already
     if (isRebinnedSourceBeingTracked(source)) {
-      inputWorkspace = m_rebinnedWorkspaceAndSourceToOriginalWorkspace
-          [createKeyPairForSource(source)];
+      inputWorkspace = m_rebinnedWorkspaceAndSourceToOriginalWorkspace[createKeyPairForSource(source)];
       outputWorkspace = workspaceName;
     }
   } else // If the workspace is rebinned but was not created with the same
          // algorithm as the currently selected one.
   {
     if (isRebinnedSourceBeingTracked(source)) {
-      inputWorkspace = m_rebinnedWorkspaceAndSourceToOriginalWorkspace
-          [createKeyPairForSource(source)];
-      outputWorkspace =
-          m_tempPrefix + inputWorkspace + algorithmType + m_tempPostfix;
+      inputWorkspace = m_rebinnedWorkspaceAndSourceToOriginalWorkspace[createKeyPairForSource(source)];
+      outputWorkspace = m_tempPrefix + inputWorkspace + algorithmType + m_tempPostfix;
       // Keep track of the old rebinned workspace and source
-      m_newRebinnedWorkspacePairBuffer.emplace(
-          workspaceName, std::make_pair(outputWorkspace, source));
+      m_newRebinnedWorkspacePairBuffer.emplace(workspaceName, std::make_pair(outputWorkspace, source));
     }
   }
   // Record the workspaces
-  m_newWorkspacePairBuffer.emplace(inputWorkspace,
-                                   std::make_pair(outputWorkspace, source));
+  m_newWorkspacePairBuffer.emplace(inputWorkspace, std::make_pair(outputWorkspace, source));
   m_inputSource = source;
 }
 
@@ -430,8 +396,7 @@ void RebinnedSourcesManager::processWorkspaceNames(
  * Stop keeping tabs on the specific workspace pair
  * @param key a key to the tracking map
  */
-void RebinnedSourcesManager::untrackWorkspaces(
-    const std::pair<std::string, std::string> &key) {
+void RebinnedSourcesManager::untrackWorkspaces(const std::pair<std::string, std::string> &key) {
   if (m_rebinnedWorkspaceAndSourceToOriginalWorkspace.count(key) > 0) {
     m_rebinnedWorkspaceAndSourceToOriginalWorkspace.erase(key);
   }
@@ -442,12 +407,10 @@ void RebinnedSourcesManager::untrackWorkspaces(
  * @param source1 The old source.
  * @param source2 The new source.
  */
-void RebinnedSourcesManager::rebuildPipeline(pqPipelineSource *source1,
-                                             pqPipelineSource *source2) {
+void RebinnedSourcesManager::rebuildPipeline(pqPipelineSource *source1, pqPipelineSource *source2) {
   // Step through all the filters in old pipeline and reproduce them
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
-  pqPipelineFilter *filter1 =
-      qobject_cast<pqPipelineFilter *>(source1->getConsumer(0));
+  pqPipelineFilter *filter1 = qobject_cast<pqPipelineFilter *>(source1->getConsumer(0));
 
   pqPipelineSource *endOfSource2Pipeline = source2;
 
@@ -462,14 +425,11 @@ void RebinnedSourcesManager::rebuildPipeline(pqPipelineSource *source1,
 
     if (QString(proxy1->GetXMLName()).contains("ScaleWorkspace")) {
       // Build the source
-      newPipelineElement = builder->createFilter(
-          "filters", "MantidParaViewScaleWorkspace", endOfSource2Pipeline);
+      newPipelineElement = builder->createFilter("filters", "MantidParaViewScaleWorkspace", endOfSource2Pipeline);
     } else if (QString(proxy1->GetXMLName()).contains("Cut")) {
-      newPipelineElement =
-          builder->createFilter("filters", "Cut", endOfSource2Pipeline);
+      newPipelineElement = builder->createFilter("filters", "Cut", endOfSource2Pipeline);
     } else if (QString(proxy1->GetXMLName()).contains("Threshold")) {
-      newPipelineElement =
-          builder->createFilter("filters", "Threshold", endOfSource2Pipeline);
+      newPipelineElement = builder->createFilter("filters", "Threshold", endOfSource2Pipeline);
     } else {
       QString message = QString("The filter ") + QString(proxy1->GetXMLName()) +
                         QString(" is not known. You need to add it to the list "
@@ -496,8 +456,7 @@ void RebinnedSourcesManager::rebuildPipeline(pqPipelineSource *source1,
  * @param filter1 The old filter.
  * @param filter2 The new filter.
  */
-void RebinnedSourcesManager::copyProperties(pqPipelineFilter *filter1,
-                                            pqPipelineFilter *filter2) {
+void RebinnedSourcesManager::copyProperties(pqPipelineFilter *filter1, pqPipelineFilter *filter2) {
   vtkSMProxy *proxy1 = filter1->getProxy();
   vtkSMProxy *proxy2 = filter2->getProxy();
 
@@ -518,28 +477,23 @@ void RebinnedSourcesManager::copySafe(vtkSMProxy *dest, vtkSMProxy *source) {
     dest->Copy(source, "vtkSMProxyProperty");
 
     // handle proxy properties.
-    auto destIter = vtkSmartPointer<vtkSMPropertyIterator>::Take(
-        dest->NewPropertyIterator());
+    auto destIter = vtkSmartPointer<vtkSMPropertyIterator>::Take(dest->NewPropertyIterator());
     for (destIter->Begin(); !destIter->IsAtEnd(); destIter->Next()) {
       if (vtkSMInputProperty::SafeDownCast(destIter->GetProperty())) {
         // skip input properties.
         continue;
       }
 
-      vtkSMProxyProperty *destPP =
-          vtkSMProxyProperty::SafeDownCast(destIter->GetProperty());
-      vtkSMProxyProperty *srcPP = vtkSMProxyProperty::SafeDownCast(
-          source->GetProperty(destIter->GetKey()));
+      vtkSMProxyProperty *destPP = vtkSMProxyProperty::SafeDownCast(destIter->GetProperty());
+      vtkSMProxyProperty *srcPP = vtkSMProxyProperty::SafeDownCast(source->GetProperty(destIter->GetKey()));
 
       if (!destPP || !srcPP || srcPP->GetNumberOfProxies() > 1) {
         // skip non-proxy properties since those were already copied.
         continue;
       }
 
-      vtkSMProxyListDomain *destPLD = vtkSMProxyListDomain::SafeDownCast(
-          destPP->FindDomain("vtkSMProxyListDomain"));
-      vtkSMProxyListDomain *srcPLD = vtkSMProxyListDomain::SafeDownCast(
-          srcPP->FindDomain("vtkSMProxyListDomain"));
+      vtkSMProxyListDomain *destPLD = vtkSMProxyListDomain::SafeDownCast(destPP->FindDomain("vtkSMProxyListDomain"));
+      vtkSMProxyListDomain *srcPLD = vtkSMProxyListDomain::SafeDownCast(srcPP->FindDomain("vtkSMProxyListDomain"));
 
       if (!destPLD || !srcPLD) {
         // we copy proxy properties that have proxy list domains.
@@ -555,12 +509,10 @@ void RebinnedSourcesManager::copySafe(vtkSMProxy *dest, vtkSMProxy *source) {
       vtkSMProxy *destValue = nullptr;
 
       // find srcValue type in destPLD and that's the proxy to use as destValue.
-      for (unsigned int cc = 0;
-           srcValue != nullptr && cc < destPLD->GetNumberOfProxyTypes(); cc++) {
+      for (unsigned int cc = 0; srcValue != nullptr && cc < destPLD->GetNumberOfProxyTypes(); cc++) {
         if (srcValue->GetXMLName() && destPLD->GetProxyName(cc) &&
-            strcmp(srcValue->GetXMLName(), destPLD->GetProxyName(cc)) == 0 &&
-            srcValue->GetXMLGroup() && destPLD->GetProxyGroup(cc) &&
-            strcmp(srcValue->GetXMLGroup(), destPLD->GetProxyGroup(cc)) == 0) {
+            strcmp(srcValue->GetXMLName(), destPLD->GetProxyName(cc)) == 0 && srcValue->GetXMLGroup() &&
+            destPLD->GetProxyGroup(cc) && strcmp(srcValue->GetXMLGroup(), destPLD->GetProxyGroup(cc)) == 0) {
           destValue = destPLD->GetProxy(cc);
           break;
         }
@@ -594,19 +546,14 @@ void RebinnedSourcesManager::registerRebinnedSource(pqPipelineSource *source) {
     // Add entry to map from (rebinnedWsName, rebinnedSourceName) ->
     // (originalWsName)
     if (m_newWorkspacePairBuffer.size() != 1) {
-      throw std::runtime_error(
-          "Original source for rebinned source could not be found.");
+      throw std::runtime_error("Original source for rebinned source could not be found.");
     }
 
-    const std::string &originalWorkspaceName =
-        m_newWorkspacePairBuffer.begin()->first;
-    const std::string &rebinnedWorkspaceName =
-        m_newWorkspacePairBuffer.begin()->second.first;
+    const std::string &originalWorkspaceName = m_newWorkspacePairBuffer.begin()->first;
+    const std::string &rebinnedWorkspaceName = m_newWorkspacePairBuffer.begin()->second.first;
 
-    std::pair<std::string, std::string> key(rebinnedWorkspaceName,
-                                            getSourceName(source));
-    m_rebinnedWorkspaceAndSourceToOriginalWorkspace.emplace(
-        key, originalWorkspaceName);
+    std::pair<std::string, std::string> key(rebinnedWorkspaceName, getSourceName(source));
+    m_rebinnedWorkspaceAndSourceToOriginalWorkspace.emplace(key, originalWorkspaceName);
 
     // Record the rebinned source
     m_rebinnedSource = source;
@@ -614,8 +561,7 @@ void RebinnedSourcesManager::registerRebinnedSource(pqPipelineSource *source) {
     g_log.warning() << ex.what();
   }
 
-  QObject::connect(source, SIGNAL(destroyed()), this,
-                   SLOT(onRebinnedSourceDestroyed()));
+  QObject::connect(source, SIGNAL(destroyed()), this, SLOT(onRebinnedSourceDestroyed()));
 }
 
 /**
@@ -624,10 +570,8 @@ void RebinnedSourcesManager::registerRebinnedSource(pqPipelineSource *source) {
  */
 void RebinnedSourcesManager::onRebinnedSourceDestroyed() {
   pqServer *server = pqActiveObjects::instance().activeServer();
-  pqServerManagerModel *smModel =
-      pqApplicationCore::instance()->getServerManagerModel();
-  QList<pqPipelineSource *> sources =
-      smModel->findItems<pqPipelineSource *>(server);
+  pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
+  QList<pqPipelineSource *> sources = smModel->findItems<pqPipelineSource *>(server);
 
   std::vector<std::pair<std::string, std::string>> toBeUntracked;
 
@@ -635,11 +579,9 @@ void RebinnedSourcesManager::onRebinnedSourceDestroyed() {
   for (const auto &wsPair : m_rebinnedWorkspaceAndSourceToOriginalWorkspace) {
     const std::string &registeredSourceName = wsPair.first.second;
 
-    auto source =
-        std::find_if(sources.begin(), sources.end(),
-                     [this, &registeredSourceName](pqPipelineSource *src) {
-                       return registeredSourceName == getSourceName(src);
-                     });
+    auto source = std::find_if(sources.begin(), sources.end(), [this, &registeredSourceName](pqPipelineSource *src) {
+      return registeredSourceName == getSourceName(src);
+    });
 
     // If there was no matching source then mark it to be untracked
     if (source == sources.end()) {
@@ -689,8 +631,7 @@ std::string RebinnedSourcesManager::getSourceName(pqPipelineSource *source) {
  * @param src A pointer to a source
  * @returns if it is being tracked or not
  */
-bool RebinnedSourcesManager::isRebinnedSourceBeingTracked(
-    pqPipelineSource *src) {
+bool RebinnedSourcesManager::isRebinnedSourceBeingTracked(pqPipelineSource *src) {
   pqPipelineSource *source = goToPipelineBeginning(src);
 
   std::pair<std::string, std::string> key = createKeyPairForSource(source);
@@ -715,8 +656,7 @@ std::string RebinnedSourcesManager::saveToProject() {
   getStoredWorkspaceNames(source, origName, rebinName);
 
   tsv.writeLine("RebinnedWorkspaceName") << rebinName;
-  tsv.writeLine("RebinnedProxyName")
-      << proxyManager->GetProxyName("sources", m_rebinnedSource->getProxy());
+  tsv.writeLine("RebinnedProxyName") << proxyManager->GetProxyName("sources", m_rebinnedSource->getProxy());
   tsv.writeLine("OriginalWorkspaceName") << origName;
 
   return tsv.outputLines();
@@ -733,16 +673,13 @@ void RebinnedSourcesManager::loadFromProject(const std::string &lines) {
   tsv.selectLine("RebinnedProxyName");
   tsv >> rebinProxyName;
 
-  auto proxyManager =
-      pqActiveObjects::instance().activeServer()->proxyManager();
+  auto proxyManager = pqActiveObjects::instance().activeServer()->proxyManager();
   auto model = pqApplicationCore::instance()->getServerManagerModel();
-  auto rebinSourceProxy =
-      proxyManager->GetProxy("sources", rebinProxyName.c_str());
+  auto rebinSourceProxy = proxyManager->GetProxy("sources", rebinProxyName.c_str());
   auto rebinSource = model->findItem<pqPipelineSource *>(rebinSourceProxy);
 
   m_rebinnedSource = rebinSource;
-  m_newWorkspacePairBuffer.emplace(
-      originalWorkspaceName, std::make_pair(rebinWorkspaceName, rebinSource));
+  m_newWorkspacePairBuffer.emplace(originalWorkspaceName, std::make_pair(rebinWorkspaceName, rebinSource));
   registerRebinnedSource(rebinSource);
 }
 
@@ -751,17 +688,13 @@ void RebinnedSourcesManager::loadFromProject(const std::string &lines) {
  * @param source A pointer to a source
  * @returns a key which can be used with the tracking map
  */
-std::pair<std::string, std::string>
-RebinnedSourcesManager::createKeyPairForSource(pqPipelineSource *source) {
+std::pair<std::string, std::string> RebinnedSourcesManager::createKeyPairForSource(pqPipelineSource *source) {
   if (!source) {
     return std::pair<std::string, std::string>("", "");
   }
 
-  std::string workspaceName =
-      vtkSMPropertyHelper(source->getProxy(), "WorkspaceName", true)
-          .GetAsString();
-  return std::pair<std::string, std::string>(workspaceName,
-                                             getSourceName(source));
+  std::string workspaceName = vtkSMPropertyHelper(source->getProxy(), "WorkspaceName", true).GetAsString();
+  return std::pair<std::string, std::string>(workspaceName, getSourceName(source));
 }
 
 /**
@@ -779,8 +712,7 @@ void RebinnedSourcesManager::deleteSpecificSource(pqPipelineSource *source) {
     }
 
     // Now delete all filters and the source
-    pqObjectBuilder *builder =
-        pqApplicationCore::instance()->getObjectBuilder();
+    pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
 
     // Crawl up to the source level
     pqPipelineFilter *filter = qobject_cast<pqPipelineFilter *>(tempSource);
@@ -800,8 +732,7 @@ void RebinnedSourcesManager::deleteSpecificSource(pqPipelineSource *source) {
  * @param source A pointer to a source
  * @returns a pointer to the beginning of the pipeline
  */
-pqPipelineSource *
-RebinnedSourcesManager::goToPipelineBeginning(pqPipelineSource *source) {
+pqPipelineSource *RebinnedSourcesManager::goToPipelineBeginning(pqPipelineSource *source) {
   // Crawl up to the beginnign of the pipeline
   pqPipelineSource *tempSource = source;
   pqPipelineFilter *filter = qobject_cast<pqPipelineFilter *>(tempSource);

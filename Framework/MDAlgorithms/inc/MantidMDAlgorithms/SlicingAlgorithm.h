@@ -50,12 +50,10 @@ protected:
   void makeAlignedDimensionFromString(const std::string &str);
   void makeBasisVectorFromString(const std::string &str);
 
-  std::unique_ptr<Mantid::Geometry::MDImplicitFunction>
-  getImplicitFunctionForChunk(const size_t *const chunkMin,
-                              const size_t *const chunkMax);
-  std::unique_ptr<Mantid::Geometry::MDImplicitFunction>
-  getGeneralImplicitFunction(const size_t *const chunkMin,
-                             const size_t *const chunkMax);
+  std::unique_ptr<Mantid::Geometry::MDImplicitFunction> getImplicitFunctionForChunk(const size_t *const chunkMin,
+                                                                                    const size_t *const chunkMax);
+  std::unique_ptr<Mantid::Geometry::MDImplicitFunction> getGeneralImplicitFunction(const size_t *const chunkMin,
+                                                                                   const size_t *const chunkMax);
 
   /// Input workspace
   Mantid::API::IMDWorkspace_sptr m_inWS;
@@ -89,8 +87,7 @@ protected:
   Mantid::API::IMDWorkspace_sptr m_intermediateWS;
   /// Coordinate transformation to save in the output WS, from the intermediate
   /// WS
-  std::unique_ptr<DataObjects::CoordTransformAffine>
-      m_transformFromIntermediate;
+  std::unique_ptr<DataObjects::CoordTransformAffine> m_transformFromIntermediate;
   /// Coordinate transformation to save in the intermediate WS
   std::unique_ptr<DataObjects::CoordTransformAffine> m_transformToIntermediate;
 
@@ -135,20 +132,15 @@ protected:
   bool m_NormalizeBasisVectors;
 
 private:
-  Mantid::Geometry::MDFrame_uptr
-  createMDFrameForNonAxisAligned(const std::string &units,
-                                 const Mantid::Kernel::VMD &basisVector) const;
+  Mantid::Geometry::MDFrame_uptr createMDFrameForNonAxisAligned(const std::string &units,
+                                                                const Mantid::Kernel::VMD &basisVector) const;
   std::vector<Mantid::Kernel::VMD> getOldBasis(size_t dimension) const;
-  bool isProjectingOnFrame(const Mantid::Kernel::VMD &oldVector,
-                           const Mantid::Kernel::VMD &basisVector) const;
-  std::vector<size_t> getIndicesWithProjection(
-      const Mantid::Kernel::VMD &basisVector,
-      const std::vector<Mantid::Kernel::VMD> &oldBasis) const;
-  Mantid::Geometry::MDFrame_uptr
-  extractMDFrameForNonAxisAligned(std::vector<size_t> indicesWithProjection,
-                                  const std::string &units) const;
-  void setTargetUnits(Mantid::Geometry::MDFrame_uptr &frame,
-                      const std::string &units) const;
+  bool isProjectingOnFrame(const Mantid::Kernel::VMD &oldVector, const Mantid::Kernel::VMD &basisVector) const;
+  std::vector<size_t> getIndicesWithProjection(const Mantid::Kernel::VMD &basisVector,
+                                               const std::vector<Mantid::Kernel::VMD> &oldBasis) const;
+  Mantid::Geometry::MDFrame_uptr extractMDFrameForNonAxisAligned(std::vector<size_t> indicesWithProjection,
+                                                                 const std::string &units) const;
+  void setTargetUnits(Mantid::Geometry::MDFrame_uptr &frame, const std::string &units) const;
 };
 
 } // namespace MDAlgorithms

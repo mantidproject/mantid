@@ -47,11 +47,10 @@ Histogram rebinCounts(const Histogram &input, const BinEdges &binEdges) {
 
     if (owidth <= 0.0 || nwidth <= 0.0) {
       if (xo_high == -DBL_MAX && xo_low == -DBL_MAX) {
-        throw InvalidBinEdgesError(
-            "One or more x-values was unusually low "
-            "(below -1e100). This usually occurs when a "
-            "monitor spectrum has not been masked after "
-            "ConvertUnits has been run on the workspace");
+        throw InvalidBinEdgesError("One or more x-values was unusually low "
+                                   "(below -1e100). This usually occurs when a "
+                                   "monitor spectrum has not been masked after "
+                                   "ConvertUnits has been run on the workspace");
       } else {
         throw InvalidBinEdgesError("Negative or zero bin widths not allowed.");
       }
@@ -77,8 +76,7 @@ Histogram rebinCounts(const Histogram &input, const BinEdges &binEdges) {
     }
   }
 
-  return Histogram(binEdges, newCounts,
-                   CountStandardDeviations(std::move(newCountVariances)));
+  return Histogram(binEdges, newCounts, CountStandardDeviations(std::move(newCountVariances)));
 }
 
 Histogram rebinFrequencies(const Histogram &input, const BinEdges &binEdges) {
@@ -152,8 +150,7 @@ namespace HistogramData {
  */
 Histogram rebin(const Histogram &input, const BinEdges &binEdges) {
   if (input.xMode() != Histogram::XMode::BinEdges)
-    throw std::runtime_error(
-        "XMode must be Histogram::XMode::BinEdges for input histogram");
+    throw std::runtime_error("XMode must be Histogram::XMode::BinEdges for input histogram");
   if (input.yMode() == Histogram::YMode::Counts)
     return rebinCounts(input, binEdges);
   else if (input.yMode() == Histogram::YMode::Frequencies)

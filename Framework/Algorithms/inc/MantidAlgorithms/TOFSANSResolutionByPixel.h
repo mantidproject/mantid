@@ -30,15 +30,11 @@ public:
   /// Algorithm's name
   const std::string name() const override { return "TOFSANSResolutionByPixel"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Calculate the Q resolution for TOF SANS data for each pixel.";
-  }
+  const std::string summary() const override { return "Calculate the Q resolution for TOF SANS data for each pixel."; }
 
   /// Algorithm's version
   int version() const override { return (1); }
-  const std::vector<std::string> seeAlso() const override {
-    return {"TOFSANSResolution"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"TOFSANSResolution"}; }
   /// Algorithm's category for identification
   const std::string category() const override { return "SANS"; }
 
@@ -50,21 +46,16 @@ private:
   /// Return the TOF resolution for a particular wavelength
   virtual double getTOFResolution(double wl);
   /// Get the collimation length when we evaluate it using 5 Guards
-  double
-  getCollimationLengthWithGuard(Mantid::API::MatrixWorkspace_sptr inWS,
-                                const double L1,
-                                const double collimationLengthCorrection) const;
+  double getCollimationLengthWithGuard(Mantid::API::MatrixWorkspace_sptr inWS, const double L1,
+                                       const double collimationLengthCorrection) const;
   /// Return the default collimation length
-  double provideDefaultLCollimationLength(
-      Mantid::API::MatrixWorkspace_sptr inWS) const;
+  double provideDefaultLCollimationLength(Mantid::API::MatrixWorkspace_sptr inWS) const;
   /// Check input
   void checkInput(const Mantid::API::MatrixWorkspace_sptr &inWS);
   /// Get the moderator workspace
-  Mantid::API::MatrixWorkspace_sptr getModeratorWorkspace(
-      const Mantid::API::MatrixWorkspace_sptr &inputWorkspace);
+  Mantid::API::MatrixWorkspace_sptr getModeratorWorkspace(const Mantid::API::MatrixWorkspace_sptr &inputWorkspace);
   /// Create an output workspace
-  Mantid::API::MatrixWorkspace_sptr
-  setupOutputWorkspace(const Mantid::API::MatrixWorkspace_sptr &inputWorkspace);
+  Mantid::API::MatrixWorkspace_sptr setupOutputWorkspace(const Mantid::API::MatrixWorkspace_sptr &inputWorkspace);
   /// Wavelength resolution (constant for all wavelengths)
   double m_wl_resolution;
 };

@@ -27,31 +27,18 @@ namespace SpectrumView {
 class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER ColorMaps {
 
 public:
-  enum ColorScale {
-    HEAT,
-    GRAY,
-    NEGATIVE_GRAY,
-    GREEN_YELLOW,
-    RAINBOW,
-    OPTIMAL,
-    MULTI,
-    SPECTRUM
-  };
+  enum ColorScale { HEAT, GRAY, NEGATIVE_GRAY, GREEN_YELLOW, RAINBOW, OPTIMAL, MULTI, SPECTRUM };
 
   /// Get the specified color scale
   static std::vector<QRgb> GetColorMap(ColorScale name, size_t n_colors);
 
   /// Get look up table to brighten image
-  static std::vector<double> GetIntensityMap(double control_s,
-                                             size_t n_entries);
+  static std::vector<double> GetIntensityMap(double control_s, size_t n_entries);
 
 private:
   /// Fill out a color table by interpolating the given base RGB components
-  static std::vector<QRgb> InterpolateColorScale(double base_red[],
-                                                 double base_green[],
-                                                 double base_blue[],
-                                                 size_t n_base_colors,
-                                                 size_t n_colors);
+  static std::vector<QRgb> InterpolateColorScale(double base_red[], double base_green[], double base_blue[],
+                                                 size_t n_base_colors, size_t n_colors);
 };
 
 } // namespace SpectrumView

@@ -47,9 +47,7 @@ std::vector<std::string> getTextAxisLabels() {
   return {"f0.Width", "f1.Width", "f2.Width", "f0.EISF", "f1.EISF", "f2.EISF"};
 }
 
-std::unique_ptr<QLabel> createLabel(QString const &text) {
-  return std::make_unique<QLabel>(text);
-}
+std::unique_ptr<QLabel> createLabel(QString const &text) { return std::make_unique<QLabel>(text); }
 
 std::unique_ptr<QComboBox> createComboBox(QStringList const &items) {
   auto combBox = std::make_unique<QComboBox>();
@@ -96,8 +94,7 @@ public:
   MOCK_METHOD1(setResolutionFBSuffices, void(QStringList const &suffices));
 
   MOCK_CONST_METHOD0(isSampleWorkspaceSelectorVisible, bool());
-  MOCK_METHOD1(setSampleWorkspaceSelectorIndex,
-               void(QString const &workspaceName));
+  MOCK_METHOD1(setSampleWorkspaceSelectorIndex, void(QString const &workspaceName));
 
   MOCK_METHOD1(readSettings, void(QSettings const &settings));
   MOCK_METHOD1(validate, UserInputValidator &(UserInputValidator &validator));
@@ -107,9 +104,7 @@ public:
 };
 
 class SingleFunctionTemplateBrowserMock : public IFQFitObserver {
-  MOCK_METHOD1(updateAvailableFunctions,
-               void(const std::map<std::string, std::string>
-                        &functionInitialisationStrings));
+  MOCK_METHOD1(updateAvailableFunctions, void(const std::map<std::string, std::string> &functionInitialisationStrings));
 };
 
 /// Mock object to mock the model
@@ -122,9 +117,7 @@ public:
   /// Needed to make sure everything is initialized
   FqFitDataPresenterTest() { FrameworkManager::Instance(); }
 
-  static FqFitDataPresenterTest *createSuite() {
-    return new FqFitDataPresenterTest();
-  }
+  static FqFitDataPresenterTest *createSuite() { return new FqFitDataPresenterTest(); }
 
   static void destroySuite(FqFitDataPresenterTest *suite) { delete suite; }
 
@@ -137,21 +130,16 @@ public:
     m_ParameterCombo = createComboBox(getFqFitParameters());
     m_ParameterTypeLabel = createLabel(PARAMETER_TYPE_LABEL);
     m_ParameterLabel = createLabel(PARAMETER_LABEL);
-    m_SingleFunctionTemplateBrowser =
-        std::make_unique<SingleFunctionTemplateBrowserMock>();
+    m_SingleFunctionTemplateBrowser = std::make_unique<SingleFunctionTemplateBrowserMock>();
 
     ON_CALL(*m_view, getDataTable()).WillByDefault(Return(m_dataTable.get()));
 
     m_presenter = std::make_unique<FqFitDataPresenter>(
-        std::move(m_model.get()), std::move(m_view.get()),
-        std::move(m_ParameterTypeCombo.get()),
-        std::move(m_ParameterCombo.get()),
-        std::move(m_ParameterTypeLabel.get()),
-        std::move(m_ParameterLabel.get()),
+        std::move(m_model.get()), std::move(m_view.get()), std::move(m_ParameterTypeCombo.get()),
+        std::move(m_ParameterCombo.get()), std::move(m_ParameterTypeLabel.get()), std::move(m_ParameterLabel.get()),
         m_SingleFunctionTemplateBrowser.get());
 
-    SetUpADSWithWorkspace m_ads(
-        "WorkspaceName", createWorkspaceWithTextAxis(6, getTextAxisLabels()));
+    SetUpADSWithWorkspace m_ads("WorkspaceName", createWorkspaceWithTextAxis(6, getTextAxisLabels()));
     m_model->addWorkspace("WorkspaceName");
   }
 
@@ -197,8 +185,7 @@ public:
     TS_ASSERT_EQUALS(m_ParameterLabel->text(), PARAMETER_LABEL);
   }
 
-  void
-  test_that_the_model_contains_the_correct_number_of_workspace_after_instantiation() {
+  void test_that_the_model_contains_the_correct_number_of_workspace_after_instantiation() {
     TS_ASSERT_EQUALS(m_model->numberOfWorkspaces(), TableDatasetIndex{1});
   }
 
@@ -215,8 +202,7 @@ private:
   std::unique_ptr<QComboBox> m_ParameterCombo;
   std::unique_ptr<QLabel> m_ParameterTypeLabel;
   std::unique_ptr<QLabel> m_ParameterLabel;
-  std::unique_ptr<SingleFunctionTemplateBrowserMock>
-      m_SingleFunctionTemplateBrowser;
+  std::unique_ptr<SingleFunctionTemplateBrowserMock> m_SingleFunctionTemplateBrowser;
 
   std::unique_ptr<MockFqFitDataView> m_view;
   std::unique_ptr<MockFqFitModel> m_model;

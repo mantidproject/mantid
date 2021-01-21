@@ -28,13 +28,11 @@ and allows it to be modified.
 @date 22/10/2014
 */
 
-class MantidSampleMaterialDialog : public QDialog,
-                                   Mantid::API::AlgorithmObserver {
+class MantidSampleMaterialDialog : public QDialog, Mantid::API::AlgorithmObserver {
   Q_OBJECT
 
 public:
-  MantidSampleMaterialDialog(const QString &wsName, MantidUI *mtdUI,
-                             const Qt::WFlags &flags = nullptr);
+  MantidSampleMaterialDialog(const QString &wsName, MantidUI *mtdUI, const Qt::WFlags &flags = nullptr);
 
 public slots:
   void updateMaterial();

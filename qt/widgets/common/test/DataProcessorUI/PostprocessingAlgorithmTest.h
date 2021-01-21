@@ -27,22 +27,17 @@ private:
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static PostprocessingAlgorithmTest *createSuite() {
-    return new PostprocessingAlgorithmTest();
-  }
+  static PostprocessingAlgorithmTest *createSuite() { return new PostprocessingAlgorithmTest(); }
   static void destroySuite(PostprocessingAlgorithmTest *suite) { delete suite; }
   PostprocessingAlgorithmTest() { FrameworkManager::Instance(); };
 
   void test_invalid_algorithms() {
     // Algorithms with no 'str list' property
-    TS_ASSERT_THROWS(PostprocessingAlgorithm("StepScan"),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(PostprocessingAlgorithm("StepScan"), const std::invalid_argument &);
     // Algorithms with more than one 'str list' property
-    TS_ASSERT_THROWS(PostprocessingAlgorithm("PDDetermineCharacterizations"),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(PostprocessingAlgorithm("PDDetermineCharacterizations"), const std::invalid_argument &);
     // Algorithms with invalid output ws properties
-    TS_ASSERT_THROWS(PostprocessingAlgorithm("GroupWorkspaces"),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(PostprocessingAlgorithm("GroupWorkspaces"), const std::invalid_argument &);
   }
 
   void test_valid_algorithms() {
@@ -52,9 +47,8 @@ public:
 
   void test_Stitch1DMany() {
 
-    auto stitch = PostprocessingAlgorithm(
-        "Stitch1DMany", "IvsQ_",
-        std::set<QString>{"InputWorkspaces", "OutputWorkspace"});
+    auto stitch =
+        PostprocessingAlgorithm("Stitch1DMany", "IvsQ_", std::set<QString>{"InputWorkspaces", "OutputWorkspace"});
     TS_ASSERT_EQUALS(stitch.name(), "Stitch1DMany");
     TS_ASSERT_EQUALS(stitch.inputProperty(), "InputWorkspaces");
     TS_ASSERT_EQUALS(stitch.outputProperty(), "OutputWorkspace");

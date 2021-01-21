@@ -22,32 +22,24 @@ namespace Poldi {
         @author Michael Wedel, Paul Scherrer Institut - SINQ
         @date 07/01/2015
   */
-class MANTID_SINQ_DLL PoldiSpectrumConstantBackground
-    : public API::ParamFunction,
-      public API::IFunction1D,
-      public IPoldiFunction1D {
+class MANTID_SINQ_DLL PoldiSpectrumConstantBackground : public API::ParamFunction,
+                                                        public API::IFunction1D,
+                                                        public IPoldiFunction1D {
 public:
   PoldiSpectrumConstantBackground();
-  std::string name() const override {
-    return "PoldiSpectrumConstantBackground";
-  }
+  std::string name() const override { return "PoldiSpectrumConstantBackground"; }
 
-  void function1D(double *out, const double *xValues,
-                  const size_t nData) const override;
-  void functionDeriv1D(API::Jacobian *out, const double *xValues,
-                       const size_t nData) override;
+  void function1D(double *out, const double *xValues, const size_t nData) const override;
+  void functionDeriv1D(API::Jacobian *out, const double *xValues, const size_t nData) override;
 
   void setWorkspace(std::shared_ptr<const API::Workspace> ws) override;
   size_t getTimeBinCount() const;
 
-  void poldiFunction1D(const std::vector<int> &indices,
-                       const API::FunctionDomain1D &domain,
+  void poldiFunction1D(const std::vector<int> &indices, const API::FunctionDomain1D &domain,
                        API::FunctionValues &values) const override;
 
-  void setParameter(const std::string &name, const double &value,
-                    bool explicitlySet = true) override;
-  void setParameter(size_t i, const double &value,
-                    bool explicitlySet = true) override;
+  void setParameter(const std::string &name, const double &value, bool explicitlySet = true) override;
+  void setParameter(size_t i, const double &value, bool explicitlySet = true) override;
 
   double getParameter(const std::string &name) const override;
   double getParameter(size_t i) const override;

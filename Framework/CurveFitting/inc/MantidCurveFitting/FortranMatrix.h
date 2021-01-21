@@ -25,8 +25,7 @@ template <class MatrixClass> class FortranMatrix : public MatrixClass {
   int m_base2;
   /// Typedef the types returned by the base class's operators []. They aren't
   /// necessarily the same as the stored type (double or complex).
-  using ElementConstType =
-      decltype(std::declval<const MatrixClass>().operator()(0, 0));
+  using ElementConstType = decltype(std::declval<const MatrixClass>().operator()(0, 0));
   using ElementRefType = decltype(std::declval<MatrixClass>().operator()(0, 0));
 
 public:
@@ -58,8 +57,7 @@ private:
 //-----------------  Method implementations -------------------------//
 
 /// Calculate the size (1D) of a matrix First
-template <class MatrixClass>
-size_t FortranMatrix<MatrixClass>::makeSize(int firstIndex, int lastIndex) {
+template <class MatrixClass> size_t FortranMatrix<MatrixClass>::makeSize(int firstIndex, int lastIndex) {
   if (lastIndex < firstIndex) {
     throw std::invalid_argument("Matrix defined with invalid index range.");
   }
@@ -69,14 +67,12 @@ size_t FortranMatrix<MatrixClass>::makeSize(int firstIndex, int lastIndex) {
 /// Constructor
 template <class MatrixClass>
 FortranMatrix<MatrixClass>::FortranMatrix()
-    : MatrixClass(this->makeSize(1, 1), this->makeSize(1, 1)), m_base1(1),
-      m_base2(1) {}
+    : MatrixClass(this->makeSize(1, 1), this->makeSize(1, 1)), m_base1(1), m_base2(1) {}
 
 /// Constructor
 template <class MatrixClass>
 FortranMatrix<MatrixClass>::FortranMatrix(const int nx, const int ny)
-    : MatrixClass(this->makeSize(1, nx), this->makeSize(1, ny)), m_base1(1),
-      m_base2(1) {}
+    : MatrixClass(this->makeSize(1, nx), this->makeSize(1, ny)), m_base1(1), m_base2(1) {}
 
 /// Construct a FortranMatrix that has arbitrary index bases.
 /// For example FortranMatrix(1,5, -2,2) creates a 5 x 5 matrix.
@@ -90,10 +86,8 @@ FortranMatrix<MatrixClass>::FortranMatrix(const int nx, const int ny)
 /// @param jFirst :: Lowest value for the second index
 /// @param jLast :: Highest value for the second index
 template <class MatrixClass>
-FortranMatrix<MatrixClass>::FortranMatrix(const int iFirst, const int iLast,
-                                          const int jFirst, const int jLast)
-    : MatrixClass(this->makeSize(iFirst, iLast), this->makeSize(jFirst, jLast)),
-      m_base1(iFirst), m_base2(jFirst) {}
+FortranMatrix<MatrixClass>::FortranMatrix(const int iFirst, const int iLast, const int jFirst, const int jLast)
+    : MatrixClass(this->makeSize(iFirst, iLast), this->makeSize(jFirst, jLast)), m_base1(iFirst), m_base2(jFirst) {}
 
 /// Resize the matrix.
 /// @param iFirst :: Lowest value for the first index
@@ -101,8 +95,7 @@ FortranMatrix<MatrixClass>::FortranMatrix(const int iFirst, const int iLast,
 /// @param jFirst :: Lowest value for the second index
 /// @param jLast :: Highest value for the second index
 template <class MatrixClass>
-void FortranMatrix<MatrixClass>::allocate(const int iFirst, const int iLast,
-                                          const int jFirst, const int jLast) {
+void FortranMatrix<MatrixClass>::allocate(const int iFirst, const int iLast, const int jFirst, const int jLast) {
   m_base1 = iFirst;
   m_base2 = jFirst;
   this->resize(this->makeSize(iFirst, iLast), this->makeSize(jFirst, jLast));
@@ -111,8 +104,7 @@ void FortranMatrix<MatrixClass>::allocate(const int iFirst, const int iLast,
 /// Resize the matrix. The index bases are 1.
 /// @param nx :: New size along the first index.
 /// @param ny :: New size along the second index.
-template <class MatrixClass>
-void FortranMatrix<MatrixClass>::allocate(const int nx, const int ny) {
+template <class MatrixClass> void FortranMatrix<MatrixClass>::allocate(const int nx, const int ny) {
   m_base1 = 1;
   m_base2 = 1;
   this->resize(this->makeSize(1, nx), this->makeSize(1, ny));
@@ -120,35 +112,24 @@ void FortranMatrix<MatrixClass>::allocate(const int nx, const int ny) {
 
 /// The "index" operator
 template <class MatrixClass>
-typename FortranMatrix<MatrixClass>::ElementConstType
-FortranMatrix<MatrixClass>::operator()(int i, int j) const {
-  return this->MatrixClass::operator()(static_cast<size_t>(i - m_base1),
-                                       static_cast<size_t>(j - m_base2));
+typename FortranMatrix<MatrixClass>::ElementConstType FortranMatrix<MatrixClass>::operator()(int i, int j) const {
+  return this->MatrixClass::operator()(static_cast<size_t>(i - m_base1), static_cast<size_t>(j - m_base2));
 }
 
 /// Get the reference to the data element
 template <class MatrixClass>
-typename FortranMatrix<MatrixClass>::ElementRefType FortranMatrix<MatrixClass>::
-operator()(int i, int j) {
-  return this->MatrixClass::operator()(static_cast<size_t>(i - m_base1),
-                                       static_cast<size_t>(j - m_base2));
+typename FortranMatrix<MatrixClass>::ElementRefType FortranMatrix<MatrixClass>::operator()(int i, int j) {
+  return this->MatrixClass::operator()(static_cast<size_t>(i - m_base1), static_cast<size_t>(j - m_base2));
 }
 
 /// Move the data to a new matrix of MatrixClass
-template <class MatrixClass>
-MatrixClass FortranMatrix<MatrixClass>::moveToBaseMatrix() {
-  return this->move();
-}
+template <class MatrixClass> MatrixClass FortranMatrix<MatrixClass>::moveToBaseMatrix() { return this->move(); }
 
 /// Get the size along the first dimension as an int.
-template <class MatrixClass> int FortranMatrix<MatrixClass>::len1() const {
-  return static_cast<int>(this->size1());
-}
+template <class MatrixClass> int FortranMatrix<MatrixClass>::len1() const { return static_cast<int>(this->size1()); }
 
 /// Get the size along the second dimension as an int.
-template <class MatrixClass> int FortranMatrix<MatrixClass>::len2() const {
-  return static_cast<int>(this->size2());
-}
+template <class MatrixClass> int FortranMatrix<MatrixClass>::len2() const { return static_cast<int>(this->size2()); }
 
 } // namespace CurveFitting
 } // namespace Mantid

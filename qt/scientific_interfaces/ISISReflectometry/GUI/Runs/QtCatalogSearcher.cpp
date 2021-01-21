@@ -23,14 +23,12 @@ namespace CustomInterfaces {
 namespace ISISReflectometry {
 
 namespace { // unnamed
-bool runHasCorrectInstrument(std::string const &run,
-                             std::string const &instrument) {
+bool runHasCorrectInstrument(std::string const &run, std::string const &instrument) {
   // Return false if the run appears to be from another instruement
   return (run.substr(0, instrument.size()) == instrument);
 }
 
-std::string trimRunName(std::string const &runFile,
-                        std::string const &instrument) {
+std::string trimRunName(std::string const &runFile, std::string const &instrument) {
   // Trim the instrument prefix and ".raw" suffix
   auto run = runFile;
   run = run.substr(instrument.size(), run.size() - (instrument.size() + 4));
@@ -57,14 +55,11 @@ bool knownFileType(std::string const &filename) {
 } // unnamed namespace
 
 QtCatalogSearcher::QtCatalogSearcher(IRunsView *view)
-    : m_view(view), m_notifyee(nullptr), m_searchCriteria(),
-      m_searchInProgress(false) {
+    : m_view(view), m_notifyee(nullptr), m_searchCriteria(), m_searchInProgress(false) {
   m_view->subscribeSearch(this);
 }
 
-void QtCatalogSearcher::subscribe(SearcherSubscriber *notifyee) {
-  m_notifyee = notifyee;
-}
+void QtCatalogSearcher::subscribe(SearcherSubscriber *notifyee) { m_notifyee = notifyee; }
 
 SearchResults QtCatalogSearcher::search(SearchCriteria searchCriteria) {
   m_searchCriteria = std::move(searchCriteria);
@@ -75,22 +70,19 @@ SearchResults QtCatalogSearcher::search(SearchCriteria searchCriteria) {
   return searchResults;
 }
 
-ITableWorkspace_sptr
-QtCatalogSearcher::getSearchAlgorithmResultsTable(IAlgorithm_sptr algSearch) {
+ITableWorkspace_sptr QtCatalogSearcher::getSearchAlgorithmResultsTable(IAlgorithm_sptr algSearch) {
   ITableWorkspace_sptr resultsTable = algSearch->getProperty("OutputWorkspace");
   return resultsTable;
 }
 
-SearchResults QtCatalogSearcher::convertResultsTableToSearchResults(
-    ITableWorkspace_sptr resultsTable) {
+SearchResults QtCatalogSearcher::convertResultsTableToSearchResults(ITableWorkspace_sptr resultsTable) {
   if (requiresICat())
     return convertICatResultsTableToSearchResults(resultsTable);
   else
     return convertJournalResultsTableToSearchResults(resultsTable);
 }
 
-SearchResults QtCatalogSearcher::convertICatResultsTableToSearchResults(
-    ITableWorkspace_sptr tableWorkspace) {
+SearchResults QtCatalogSearcher::convertICatResultsTableToSearchResults(ITableWorkspace_sptr tableWorkspace) {
   auto searchResults = SearchResults();
   searchResults.reserve(tableWorkspace->rowCount());
 
@@ -113,8 +105,7 @@ SearchResults QtCatalogSearcher::convertICatResultsTableToSearchResults(
   return searchResults;
 }
 
-SearchResults QtCatalogSearcher::convertJournalResultsTableToSearchResults(
-    ITableWorkspace_sptr tableWorkspace) {
+SearchResults QtCatalogSearcher::convertJournalResultsTableToSearchResults(ITableWorkspace_sptr tableWorkspace) {
   auto searchResults = SearchResults();
   searchResults.reserve(tableWorkspace->rowCount());
 
@@ -160,8 +151,7 @@ void QtCatalogSearcher::finishHandle(const Mantid::API::IAlgorithm *alg) {
   }
 }
 
-void QtCatalogSearcher::errorHandle(const Mantid::API::IAlgorithm *alg,
-                                    const std::string &what) {
+void QtCatalogSearcher::errorHandle(const Mantid::API::IAlgorithm *alg, const std::string &what) {
   UNUSED_ARG(what)
   stopObserving(alg);
   if (!hasActiveCatalogSession()) {
@@ -187,24 +177,18 @@ void QtCatalogSearcher::notifySearchResultsChanged() { results().setUnsaved(); }
 
 bool QtCatalogSearcher::searchInProgress() const { return m_searchInProgress; }
 
-SearchResult const &QtCatalogSearcher::getSearchResult(int index) const {
-  return results().getRowData(index);
-}
+SearchResult const &QtCatalogSearcher::getSearchResult(int index) const { return results().getRowData(index); }
 
 void QtCatalogSearcher::reset() {
   results().clear();
   setSaved();
 }
 
-bool QtCatalogSearcher::hasUnsavedChanges() const {
-  return results().hasUnsavedChanges();
-}
+bool QtCatalogSearcher::hasUnsavedChanges() const { return results().hasUnsavedChanges(); }
 
 void QtCatalogSearcher::setSaved() { results().setSaved(); }
 
-SearchCriteria QtCatalogSearcher::searchCriteria() const {
-  return m_searchCriteria;
-}
+SearchCriteria QtCatalogSearcher::searchCriteria() const { return m_searchCriteria; }
 
 bool QtCatalogSearcher::hasActiveCatalogSession() const {
   auto sessions = CatalogManager::Instance().getActiveSessions();
@@ -213,8 +197,7 @@ bool QtCatalogSearcher::hasActiveCatalogSession() const {
 
 void QtCatalogSearcher::execLoginDialog(const IAlgorithm_sptr &alg) {
   API::InterfaceManager interfaceMgr;
-  auto dlg = dynamic_cast<MantidQt::API::AlgorithmDialog *>(
-      interfaceMgr.createDialog(alg));
+  auto dlg = dynamic_cast<MantidQt::API::AlgorithmDialog *>(interfaceMgr.createDialog(alg));
   QObject::connect(dlg, SIGNAL(closeEventCalled()), this, SLOT(dialogClosed()));
   dlg->setModal(true);
   dlg->show();
@@ -258,8 +241,7 @@ IAlgorithm_sptr QtCatalogSearcher::createSearchAlgorithm() {
     algSearch->setProperty("Session", sessionId);
   } else {
     // Use journal search
-    algSearch =
-        AlgorithmManager::Instance().create("ISISJournalGetExperimentRuns");
+    algSearch = AlgorithmManager::Instance().create("ISISJournalGetExperimentRuns");
     algSearch->setProperty("Instrument", searchCriteria().instrument);
     algSearch->setProperty("Cycle", searchCriteria().cycle);
   }
@@ -273,16 +255,12 @@ IAlgorithm_sptr QtCatalogSearcher::createSearchAlgorithm() {
   return algSearch;
 }
 
-ISearchModel &QtCatalogSearcher::results() const {
-  return m_view->mutableSearchResults();
-}
+ISearchModel &QtCatalogSearcher::results() const { return m_view->mutableSearchResults(); }
 
 /** Returns true if the search requires ICat, false otherwise. If the cycle is
  * given then we use the journal file search instead so ICat is not required.
  */
-bool QtCatalogSearcher::requiresICat() const {
-  return searchCriteria().cycle.empty();
-}
+bool QtCatalogSearcher::requiresICat() const { return searchCriteria().cycle.empty(); }
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

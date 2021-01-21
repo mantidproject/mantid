@@ -26,16 +26,13 @@
 namespace Mantid {
 namespace VATES {
 
-template <typename TimeMapper>
-class DLLExport vtkMDHistoHex4DFactory : public vtkMDHistoHexFactory {
+template <typename TimeMapper> class DLLExport vtkMDHistoHex4DFactory : public vtkMDHistoHexFactory {
 public:
   /// Constructor
-  vtkMDHistoHex4DFactory(const VisualNormalization normalizationOption,
-                         const double timestep);
+  vtkMDHistoHex4DFactory(const VisualNormalization normalizationOption, const double timestep);
 
   /// Assignment operator
-  vtkMDHistoHex4DFactory &
-  operator=(const vtkMDHistoHex4DFactory<TimeMapper> &other);
+  vtkMDHistoHex4DFactory &operator=(const vtkMDHistoHex4DFactory<TimeMapper> &other);
 
   /// Copy constructor.
   vtkMDHistoHex4DFactory(const vtkMDHistoHex4DFactory<TimeMapper> &other);
@@ -47,12 +44,9 @@ public:
   void initialize(const Mantid::API::Workspace_sptr &workspace) override;
 
   /// Factory method
-  vtkSmartPointer<vtkDataSet>
-  create(ProgressAction &progressUpdating) const override;
+  vtkSmartPointer<vtkDataSet> create(ProgressAction &progressUpdating) const override;
 
-  std::string getFactoryTypeName() const override {
-    return "vtkMDHistoHex4DFactory";
-  }
+  std::string getFactoryTypeName() const override { return "vtkMDHistoHex4DFactory"; }
 
 protected:
   void validate() const override;

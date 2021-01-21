@@ -53,8 +53,7 @@ public:
 private:
   class TestableIsoRotDiff : public IsoRotDiff {
   public:
-    void function(const FunctionDomain &domain,
-                  FunctionValues &values) const override {
+    void function(const FunctionDomain &domain, FunctionValues &values) const override {
       IsoRotDiff::function(domain, values);
     }
   };

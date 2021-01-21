@@ -35,8 +35,8 @@ class ThreadPoolRunnable;
 
 class MANTID_KERNEL_DLL ThreadPool final {
 public:
-  ThreadPool(ThreadScheduler *scheduler = new ThreadSchedulerFIFO(),
-             size_t numThreads = 0, ProgressBase *prog = nullptr);
+  ThreadPool(ThreadScheduler *scheduler = new ThreadSchedulerFIFO(), size_t numThreads = 0,
+             ProgressBase *prog = nullptr);
 
   ~ThreadPool();
 

@@ -51,12 +51,10 @@ public:
   @param detectno : detector number
   @param coords : pointer to coordinates array
   */
-  void insertMDEvent(float signal, float errorSQ, uint16_t runindex,
-                     int32_t detectno, Mantid::coord_t *coords) {
+  void insertMDEvent(float signal, float errorSQ, uint16_t runindex, int32_t detectno, Mantid::coord_t *coords) {
     // compile-time overload selection based on nested type information on the
     // MDEventType.
-    insertMDEvent(signal, errorSQ, runindex, detectno, coords,
-                  IntToType<MDEventType::is_full_mdevent>());
+    insertMDEvent(signal, errorSQ, runindex, detectno, coords, IntToType<MDEventType::is_full_mdevent>());
   }
 
 private:
@@ -69,8 +67,7 @@ private:
   @param errorSQ : squared value of the error
   @param coords : pointer to coordinates array
  */
-  void insertMDEvent(float signal, float errorSQ, uint16_t, int32_t,
-                     Mantid::coord_t *coords, IntToType<false>) {
+  void insertMDEvent(float signal, float errorSQ, uint16_t, int32_t, Mantid::coord_t *coords, IntToType<false>) {
     m_ws->addEvent(MDEventType(signal, errorSQ, coords));
   }
 
@@ -82,8 +79,7 @@ private:
   @param detectno : detector number
   @param coords : pointer to coordinates array
   */
-  void insertMDEvent(float signal, float errorSQ, uint16_t runindex,
-                     int32_t detectno, Mantid::coord_t *coords,
+  void insertMDEvent(float signal, float errorSQ, uint16_t runindex, int32_t detectno, Mantid::coord_t *coords,
                      IntToType<true>) {
     m_ws->addEvent(MDEventType(signal, errorSQ, runindex, detectno, coords));
   }

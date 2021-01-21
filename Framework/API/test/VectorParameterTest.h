@@ -26,8 +26,7 @@ public:
   void testAddValues() {
     ConcreteVectorDblParam param(1);
     param.addValue(0, 1);
-    TSM_ASSERT("Should be valid now that a value has been added.",
-               param.isValid());
+    TSM_ASSERT("Should be valid now that a value has been added.", param.isValid());
     TS_ASSERT_EQUALS(1, param.getSize());
   }
 
@@ -62,9 +61,7 @@ public:
     ConcreteVectorDblParam original(1);
     original.addValue(0, 1);
     ConcreteVectorDblParam copy(original);
-    TS_ASSERT(
-        original ==
-        copy); // NB. This assumes that the equality test above has passed!
+    TS_ASSERT(original == copy); // NB. This assumes that the equality test above has passed!
   }
 
   void testAssignement() {
@@ -87,8 +84,8 @@ public:
 
   void testToXMLStringThrows() {
     ConcreteVectorDblParam param;
-    TSM_ASSERT_THROWS("Should throw if trying to serialize and invalid object",
-                      param.toXMLString(), const std::runtime_error &);
+    TSM_ASSERT_THROWS("Should throw if trying to serialize and invalid object", param.toXMLString(),
+                      const std::runtime_error &);
   }
 
   void testToXMLString() {

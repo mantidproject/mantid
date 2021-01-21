@@ -37,10 +37,8 @@ ICat4Catalog::ICat4Catalog() : m_session() {}
  * @param endpoint :: The endpoint url of the catalog to log in to.
  * @param facility :: The facility of the catalog to log in to.
  */
-API::CatalogSession_sptr ICat4Catalog::login(const std::string &username,
-                                             const std::string &password,
-                                             const std::string &endpoint,
-                                             const std::string &facility) {
+API::CatalogSession_sptr ICat4Catalog::login(const std::string &username, const std::string &password,
+                                             const std::string &endpoint, const std::string &facility) {
   // Created the session object here in order to set the endpoint, which is used
   // in setICATProxySettings.
   // We can then manually set the sessionID later if it exists.
@@ -132,11 +130,8 @@ std::string ICat4Catalog::buildSearchQuery(const CatalogSearchParam &inputs) {
   std::vector<std::string> whereClause, joinClause;
 
   // Format the timestamps in order to compare them.
-  std::string startDate =
-      formatDateTime(inputs.getStartDate(), "%Y-%m-%d %H:%M:%S");
-  std::string endDate =
-      formatDateTime(inputs.getEndDate() + ((23 * 60 * 60) + (59 * 60) + 59),
-                     "%Y-%m-%d %H:%M:%S");
+  std::string startDate = formatDateTime(inputs.getStartDate(), "%Y-%m-%d %H:%M:%S");
+  std::string endDate = formatDateTime(inputs.getEndDate() + ((23 * 60 * 60) + (59 * 60) + 59), "%Y-%m-%d %H:%M:%S");
 
   // Investigation startDate if endDate is not selected
   if (inputs.getStartDate() != 0 && inputs.getEndDate() == 0) {
@@ -150,49 +145,42 @@ std::string ICat4Catalog::buildSearchQuery(const CatalogSearchParam &inputs) {
 
   // Investigation Start and end date if both selected
   if (inputs.getStartDate() != 0 && inputs.getEndDate() != 0) {
-    whereClause.emplace_back("inves.startDate BETWEEN '" + startDate +
-                             "' AND '" + endDate + "'");
+    whereClause.emplace_back("inves.startDate BETWEEN '" + startDate + "' AND '" + endDate + "'");
   }
 
   // Investigation name (title)
   if (!inputs.getInvestigationName().empty()) {
-    whereClause.emplace_back("inves.title LIKE '%" +
-                             inputs.getInvestigationName() + "%'");
+    whereClause.emplace_back("inves.title LIKE '%" + inputs.getInvestigationName() + "%'");
   }
 
   // Investigation id
   if (!inputs.getInvestigationId().empty()) {
-    whereClause.emplace_back("inves.name = '" + inputs.getInvestigationId() +
-                             "'");
+    whereClause.emplace_back("inves.name = '" + inputs.getInvestigationId() + "'");
   }
 
   // Investigation type
   if (!inputs.getInvestigationType().empty()) {
     joinClause.emplace_back("JOIN inves.type itype");
-    whereClause.emplace_back("itype.name = '" + inputs.getInvestigationType() +
-                             "'");
+    whereClause.emplace_back("itype.name = '" + inputs.getInvestigationType() + "'");
   }
 
   // Instrument name
   if (!inputs.getInstrument().empty()) {
     joinClause.emplace_back("JOIN inves.investigationInstruments invInst");
     joinClause.emplace_back("JOIN invInst.instrument inst");
-    whereClause.emplace_back("inst.fullName = '" + inputs.getInstrument() +
-                             "'");
+    whereClause.emplace_back("inst.fullName = '" + inputs.getInstrument() + "'");
   }
 
   // Keywords
   if (!inputs.getKeywords().empty()) {
     joinClause.emplace_back("JOIN inves.keywords keywords");
-    whereClause.emplace_back("keywords.name IN ('" + inputs.getKeywords() +
-                             "')");
+    whereClause.emplace_back("keywords.name IN ('" + inputs.getKeywords() + "')");
   }
 
   // Sample name
   if (!inputs.getSampleName().empty()) {
     joinClause.emplace_back("JOIN inves.samples sample");
-    whereClause.emplace_back("sample.name LIKE '%" + inputs.getSampleName() +
-                             "%'");
+    whereClause.emplace_back("sample.name LIKE '%" + inputs.getSampleName() + "%'");
   }
 
   // If the user has selected the "My data only" button.
@@ -209,20 +197,17 @@ std::string ICat4Catalog::buildSearchQuery(const CatalogSearchParam &inputs) {
     // We join another investigationUsers & user tables as we need two aliases.
     joinClause.emplace_back("JOIN inves.investigationUsers usrs");
     joinClause.emplace_back("JOIN usrs.user usr");
-    whereClause.emplace_back("usr.fullName LIKE '%" +
-                             inputs.getInvestigatorSurName() + "%'");
+    whereClause.emplace_back("usr.fullName LIKE '%" + inputs.getInvestigatorSurName() + "%'");
   }
 
   // Similar to above. We check if either has been input,
   // join the related table and add the specific WHERE clause.
-  if (!inputs.getDatafileName().empty() ||
-      (inputs.getRunStart() > 0 && inputs.getRunEnd() > 0)) {
+  if (!inputs.getDatafileName().empty() || (inputs.getRunStart() > 0 && inputs.getRunEnd() > 0)) {
     joinClause.emplace_back("JOIN inves.datasets dataset");
     joinClause.emplace_back("JOIN dataset.datafiles datafile");
 
     if (!inputs.getDatafileName().empty()) {
-      whereClause.emplace_back("datafile.name LIKE '%" +
-                               inputs.getDatafileName() + "%'");
+      whereClause.emplace_back("datafile.name LIKE '%" + inputs.getDatafileName() + "%'");
     }
 
     if (inputs.getRunStart() > 0 && inputs.getRunEnd() > 0) {
@@ -230,9 +215,8 @@ std::string ICat4Catalog::buildSearchQuery(const CatalogSearchParam &inputs) {
       joinClause.emplace_back("JOIN datafileparameters.type dtype");
       whereClause.emplace_back("dtype.name='run_number' AND "
                                "datafileparameters.numericValue BETWEEN " +
-                               Strings::toString(inputs.getRunStart()) +
-                               " AND " + Strings::toString(inputs.getRunEnd()) +
-                               "");
+                               Strings::toString(inputs.getRunStart()) + " AND " +
+                               Strings::toString(inputs.getRunEnd()) + "");
     }
   }
 
@@ -268,8 +252,7 @@ std::string ICat4Catalog::buildSearchQuery(const CatalogSearchParam &inputs) {
  * point.
  * @param limit    :: limit the number of rows returned by the query.
  */
-void ICat4Catalog::search(const CatalogSearchParam &inputs,
-                          Mantid::API::ITableWorkspace_sptr &outputws,
+void ICat4Catalog::search(const CatalogSearchParam &inputs, Mantid::API::ITableWorkspace_sptr &outputws,
                           const int &offset, const int &limit) {
   std::string query = buildSearchQuery(inputs);
 
@@ -279,8 +262,7 @@ void ICat4Catalog::search(const CatalogSearchParam &inputs,
 
   // Modify the query to include correct SELECT and LIMIT clauses.
   query.insert(0, "SELECT DISTINCT inves");
-  query.append(" LIMIT " + std::to_string(offset) + "," +
-               std::to_string(limit));
+  query.append(" LIMIT " + std::to_string(offset) + "," + std::to_string(limit));
 
   ICATPortBindingProxy icat;
   setICATProxySettings(icat);
@@ -293,8 +275,7 @@ void ICat4Catalog::search(const CatalogSearchParam &inputs,
  * Obtain the number of investigations to be returned by the catalog.
  * @return The number of investigations returned by the search performed.
  */
-int64_t
-ICat4Catalog::getNumberOfSearchResults(const CatalogSearchParam &inputs) {
+int64_t ICat4Catalog::getNumberOfSearchResults(const CatalogSearchParam &inputs) {
   ICATPortBindingProxy icat;
   setICATProxySettings(icat);
 
@@ -323,15 +304,14 @@ void ICat4Catalog::myData(Mantid::API::ITableWorkspace_sptr &outputws) {
   ICATPortBindingProxy icat;
   setICATProxySettings(icat);
 
-  std::string query =
-      "SELECT DISTINCT inves "
-      "FROM Investigation inves "
-      "JOIN inves.investigationUsers users "
-      "JOIN users.user user "
-      "WHERE user.name = :user "
-      "ORDER BY inves.id DESC "
-      "INCLUDE inves.facility, inves.investigationInstruments.instrument, "
-      "inves.parameters";
+  std::string query = "SELECT DISTINCT inves "
+                      "FROM Investigation inves "
+                      "JOIN inves.investigationUsers users "
+                      "JOIN users.user user "
+                      "WHERE user.name = :user "
+                      "ORDER BY inves.id DESC "
+                      "INCLUDE inves.facility, inves.investigationInstruments.instrument, "
+                      "inves.parameters";
 
   auto searchResults = performSearch(icat, query);
   saveInvestigations(searchResults, outputws);
@@ -342,8 +322,7 @@ void ICat4Catalog::myData(Mantid::API::ITableWorkspace_sptr &outputws) {
  * @param response :: A vector containing the results of the search query.
  * @param outputws :: Shared pointer to output workspace.
  */
-void ICat4Catalog::saveInvestigations(std::vector<xsd__anyType *> response,
-                                      API::ITableWorkspace_sptr &outputws) {
+void ICat4Catalog::saveInvestigations(std::vector<xsd__anyType *> response, API::ITableWorkspace_sptr &outputws) {
   if (outputws->getColumnNames().empty()) {
     // Add rows headers to the output workspace.
     outputws->addColumn("long64", "DatabaseID");
@@ -373,9 +352,7 @@ void ICat4Catalog::saveInvestigations(std::vector<xsd__anyType *> response,
       savetoTableWorkspace(investigation->name, table);
       savetoTableWorkspace(investigation->facility->name, table);
       savetoTableWorkspace(investigation->title, table);
-      savetoTableWorkspace(
-          investigation->investigationInstruments.at(0)->instrument->name,
-          table);
+      savetoTableWorkspace(investigation->investigationInstruments.at(0)->instrument->name, table);
 
       // Verify that the run parameters vector exist prior to doing anything.
       // Since some investigations may not have run parameters.
@@ -388,16 +365,14 @@ void ICat4Catalog::saveInvestigations(std::vector<xsd__anyType *> response,
       // Again, we need to check first if start and end date exist prior to
       // insertion.
       if (investigation->startDate) {
-        std::string startDate =
-            formatDateTime(*investigation->startDate, "%Y-%m-%d");
+        std::string startDate = formatDateTime(*investigation->startDate, "%Y-%m-%d");
         savetoTableWorkspace(&startDate, table);
       } else {
         savetoTableWorkspace(&emptyCell, table);
       }
 
       if (investigation->endDate) {
-        std::string endDate =
-            formatDateTime(*investigation->endDate, "%Y-%m-%d");
+        std::string endDate = formatDateTime(*investigation->endDate, "%Y-%m-%d");
         savetoTableWorkspace(&endDate, table);
       } else {
         savetoTableWorkspace(&emptyCell, table);
@@ -417,15 +392,13 @@ void ICat4Catalog::saveInvestigations(std::vector<xsd__anyType *> response,
  * @param investigationId :: unique identifier of the investigation
  * @param outputws        :: shared pointer to datasets
  */
-void ICat4Catalog::getDataSets(const std::string &investigationId,
-                               Mantid::API::ITableWorkspace_sptr &outputws) {
+void ICat4Catalog::getDataSets(const std::string &investigationId, Mantid::API::ITableWorkspace_sptr &outputws) {
   ICATPortBindingProxy icat;
   setICATProxySettings(icat);
 
-  auto searchResults =
-      performSearch(icat, "Dataset INCLUDE DatasetType, Datafile, "
-                          "Investigation <-> Investigation[name = '" +
-                              investigationId + "']");
+  auto searchResults = performSearch(icat, "Dataset INCLUDE DatasetType, Datafile, "
+                                           "Investigation <-> Investigation[name = '" +
+                                               investigationId + "']");
   saveDataSets(searchResults, outputws);
 }
 
@@ -435,8 +408,7 @@ void ICat4Catalog::getDataSets(const std::string &investigationId,
  * @param response :: A vector containing the results of the search query.
  * @param outputws :: Shared pointer to output workspace.
  */
-void ICat4Catalog::saveDataSets(std::vector<xsd__anyType *> response,
-                                API::ITableWorkspace_sptr &outputws) {
+void ICat4Catalog::saveDataSets(std::vector<xsd__anyType *> response, API::ITableWorkspace_sptr &outputws) {
   if (outputws->getColumnNames().empty()) {
     // Add rows headers to the output workspace.
     outputws->addColumn("long64", "ID");
@@ -485,14 +457,11 @@ void ICat4Catalog::saveDataSets(std::vector<xsd__anyType *> response,
  * @param investigationId  :: unique identifier of the investigation
  * @param outputws         :: shared pointer to datasets
  */
-void ICat4Catalog::getDataFiles(const std::string &investigationId,
-                                Mantid::API::ITableWorkspace_sptr &outputws) {
+void ICat4Catalog::getDataFiles(const std::string &investigationId, Mantid::API::ITableWorkspace_sptr &outputws) {
   ICATPortBindingProxy icat;
   setICATProxySettings(icat);
 
-  auto searchResults =
-      performSearch(icat, "Datafile <-> Dataset <-> Investigation[name = '" +
-                              investigationId + "']");
+  auto searchResults = performSearch(icat, "Datafile <-> Dataset <-> Investigation[name = '" + investigationId + "']");
   saveDataFiles(searchResults, outputws);
 }
 
@@ -501,8 +470,7 @@ void ICat4Catalog::getDataFiles(const std::string &investigationId,
  * @param response :: result response from the catalog.
  * @param outputws :: shared pointer to datasets
  */
-void ICat4Catalog::saveDataFiles(std::vector<xsd__anyType *> response,
-                                 API::ITableWorkspace_sptr &outputws) {
+void ICat4Catalog::saveDataFiles(std::vector<xsd__anyType *> response, API::ITableWorkspace_sptr &outputws) {
   if (outputws->getColumnNames().empty()) {
     // Add rows headers to the output workspace.
     outputws->addColumn("str", "Name");
@@ -523,8 +491,7 @@ void ICat4Catalog::saveDataFiles(std::vector<xsd__anyType *> response,
       savetoTableWorkspace(datafile->name, table);
       savetoTableWorkspace(datafile->location, table);
 
-      std::string createDate =
-          formatDateTime(*datafile->createTime, "%Y-%m-%d %H:%M:%S");
+      std::string createDate = formatDateTime(*datafile->createTime, "%Y-%m-%d %H:%M:%S");
       savetoTableWorkspace(&createDate, table);
 
       savetoTableWorkspace(datafile->id, table);
@@ -551,8 +518,7 @@ void ICat4Catalog::listInstruments(std::vector<std::string> &instruments) {
   ICATPortBindingProxy icat;
   setICATProxySettings(icat);
 
-  auto searchResults =
-      performSearch(icat, "Instrument.fullName ORDER BY fullName");
+  auto searchResults = performSearch(icat, "Instrument.fullName ORDER BY fullName");
 
   for (auto &searchResult : searchResults) {
     auto instrument = dynamic_cast<xsd__string *>(searchResult);
@@ -565,13 +531,11 @@ void ICat4Catalog::listInstruments(std::vector<std::string> &instruments) {
  * Returns the list of investigation types.
  * @param invstTypes :: investigation types list
  */
-void ICat4Catalog::listInvestigationTypes(
-    std::vector<std::string> &invstTypes) {
+void ICat4Catalog::listInvestigationTypes(std::vector<std::string> &invstTypes) {
   ICATPortBindingProxy icat;
   setICATProxySettings(icat);
 
-  auto searchResults =
-      performSearch(icat, "InvestigationType.name ORDER BY name");
+  auto searchResults = performSearch(icat, "InvestigationType.name ORDER BY name");
 
   for (auto &searchResult : searchResults) {
     auto investigationType = dynamic_cast<xsd__string *>(searchResult);
@@ -589,8 +553,7 @@ const std::string ICat4Catalog::getFileLocation(const long long &fileID) {
   ICATPortBindingProxy icat;
   setICATProxySettings(icat);
 
-  auto searchResults =
-      performSearch(icat, "Datafile[id = '" + std::to_string(fileID) + "']");
+  auto searchResults = performSearch(icat, "Datafile[id = '" + std::to_string(fileID) + "']");
   auto datafile = dynamic_cast<ns1__datafile *>(searchResults.at(0));
 
   if (datafile && datafile->location)
@@ -606,10 +569,7 @@ const std::string ICat4Catalog::getFileLocation(const long long &fileID) {
  */
 const std::string ICat4Catalog::getDownloadURL(const long long &fileID) {
   // Obtain the URL from the Facilities.xml file.
-  std::string url = ConfigService::Instance()
-                        .getFacility(m_session->getFacility())
-                        .catalogInfo()
-                        .externalDownloadURL();
+  std::string url = ConfigService::Instance().getFacility(m_session->getFacility()).catalogInfo().externalDownloadURL();
 
   // Set the REST features of the URL.
   std::string session = "sessionId=" + m_session->getSessionId();
@@ -618,8 +578,7 @@ const std::string ICat4Catalog::getDownloadURL(const long long &fileID) {
 
   // Add all the REST pieces to the URL.
   url += ("getData?" + session + datafile + outname + "&zip=false");
-  g_log.debug() << "The download URL in ICat4Catalog::getDownloadURL is: "
-                << url << '\n';
+  g_log.debug() << "The download URL in ICat4Catalog::getDownloadURL is: " << url << '\n';
   return url;
 }
 
@@ -631,28 +590,20 @@ const std::string ICat4Catalog::getDownloadURL(const long long &fileID) {
  * @param dataFileDescription :: The description of the data file being saved.
  * @return URL to PUT datafiles to.
  */
-const std::string
-ICat4Catalog::getUploadURL(const std::string &investigationID,
-                           const std::string &createFileName,
-                           const std::string &dataFileDescription) {
+const std::string ICat4Catalog::getUploadURL(const std::string &investigationID, const std::string &createFileName,
+                                             const std::string &dataFileDescription) {
   // Obtain the URL from the Facilities.xml file.
-  std::string url = ConfigService::Instance()
-                        .getFacility(m_session->getFacility())
-                        .catalogInfo()
-                        .externalDownloadURL();
+  std::string url = ConfigService::Instance().getFacility(m_session->getFacility()).catalogInfo().externalDownloadURL();
 
   // Set the elements of the URL.
   std::string session = "sessionId=" + m_session->getSessionId();
   std::string name = "&name=" + createFileName;
-  std::string datasetId =
-      "&datasetId=" + std::to_string(getMantidDatasetId(investigationID));
+  std::string datasetId = "&datasetId=" + std::to_string(getMantidDatasetId(investigationID));
   std::string description = "&description=" + dataFileDescription;
 
   // Add pieces of URL together.
-  url += ("put?" + session + name + datasetId + description +
-          "&datafileFormatId=1");
-  g_log.debug() << "The upload URL in ICat4Catalog::getUploadURL is: " << url
-                << '\n';
+  url += ("put?" + session + name + datasetId + description + "&datafileFormatId=1");
+  g_log.debug() << "The upload URL in ICat4Catalog::getUploadURL is: " << url << '\n';
   return url;
 }
 
@@ -678,8 +629,7 @@ API::ITableWorkspace_sptr ICat4Catalog::getPublishInvestigations() {
     ns1__datafile datafile;
 
     // Verify if the user can CREATE datafiles in the "mantid" specific dataset.
-    int64_t datasetID =
-        getMantidDatasetId(ws->getRef<std::string>("InvestigationID", row));
+    int64_t datasetID = getMantidDatasetId(ws->getRef<std::string>("InvestigationID", row));
     std::string datafileName = "tempName.nxs";
 
     dataset.id = &datasetID;
@@ -717,16 +667,15 @@ void ICat4Catalog::keepAlive() {
  * @param icat :: ICATPortBindingProxy object.
  */
 void ICat4Catalog::setSSLContext(ICATPortBindingProxy &icat) {
-  if (soap_ssl_client_context(
-          &icat, SOAP_SSL_CLIENT, /* use SOAP_SSL_DEFAULT in production code */
-          nullptr, /* keyfile: required only when client must authenticate to
-        server (see SSL docs on how to obtain this file) */
-          nullptr, /* password to read the keyfile */
-          nullptr, /* optional cacert file to store trusted certificates */
-          nullptr, /* optional capath to directory with trusted certificates */
-          nullptr  /* if randfile!=NULL: use a file with random data to seed
-                   randomness */
-          )) {
+  if (soap_ssl_client_context(&icat, SOAP_SSL_CLIENT, /* use SOAP_SSL_DEFAULT in production code */
+                              nullptr,                /* keyfile: required only when client must authenticate to
+                                           server (see SSL docs on how to obtain this file) */
+                              nullptr,                /* password to read the keyfile */
+                              nullptr,                /* optional cacert file to store trusted certificates */
+                              nullptr,                /* optional capath to directory with trusted certificates */
+                              nullptr                 /* if randfile!=NULL: use a file with random data to seed
+                                                      randomness */
+                              )) {
     throwErrorMessage(icat);
   }
 }
@@ -748,8 +697,7 @@ void ICat4Catalog::throwErrorMessage(ICATPortBindingProxy &icat) {
   std::string exception;
 
   if (start != std::string::npos && end != std::string::npos) {
-    exception =
-        error.substr(start + begmsg.length(), end - (start + begmsg.length()));
+    exception = error.substr(start + begmsg.length(), end - (start + begmsg.length()));
   }
   // If no error is returned by ICAT then there is a connection problem.
   if (exception.empty())
@@ -783,8 +731,7 @@ std::string ICat4Catalog::bytesToString(int64_t &fileSize) {
  * @param format    :: The desired format to output.
  * @return string   :: Formatted Unix timestamp.
  */
-std::string ICat4Catalog::formatDateTime(const time_t &timestamp,
-                                         const std::string &format) {
+std::string ICat4Catalog::formatDateTime(const time_t &timestamp, const std::string &format) {
   auto dateTime = DateAndTime(boost::posix_time::from_time_t(timestamp));
   return (dateTime.toFormattedString(format));
 }
@@ -800,8 +747,7 @@ int64_t ICat4Catalog::getMantidDatasetId(const std::string &investigationID) {
   ICATPortBindingProxy icat;
   setICATProxySettings(icat);
 
-  auto searchResults = performSearch(
-      icat, "Dataset <-> Investigation[name = '" + investigationID + "']");
+  auto searchResults = performSearch(icat, "Dataset <-> Investigation[name = '" + investigationID + "']");
 
   int64_t datasetID = -1;
   for (auto &searchResult : searchResults) {
@@ -812,8 +758,7 @@ int64_t ICat4Catalog::getMantidDatasetId(const std::string &investigationID) {
 
   if (datasetID == -1)
     datasetID = createMantidDataset(investigationID);
-  g_log.debug() << "The dataset ID of the mantid dataset was: " << datasetID
-                << "\n";
+  g_log.debug() << "The dataset ID of the mantid dataset was: " << datasetID << "\n";
 
   return datasetID;
 }
@@ -833,10 +778,8 @@ int64_t ICat4Catalog::createMantidDataset(const std::string &investigationID) {
   auto datasetTypeSearch = performSearch(icat, "DatasetType[name ='analyzed']");
   auto datasetType = dynamic_cast<ns1__datasetType *>(datasetTypeSearch.at(0));
 
-  auto investigationSearch =
-      performSearch(icat, "Investigation[name = '" + investigationID + "']");
-  auto investigation =
-      dynamic_cast<ns1__investigation *>(investigationSearch.at(0));
+  auto investigationSearch = performSearch(icat, "Investigation[name = '" + investigationID + "']");
+  auto investigation = dynamic_cast<ns1__investigation *>(investigationSearch.at(0));
 
   ns1__dataset dataset;
   std::string datasetName = "mantidTempNotDuplicate";
@@ -862,17 +805,15 @@ int64_t ICat4Catalog::createMantidDataset(const std::string &investigationID) {
     createRequest.bean = &dataset;
 
     if (icat.create(&createRequest, &createResponse) == SOAP_OK) {
-      g_log.debug() << "Creating a new dataset named: " << *(dataset.name)
-                    << " with investigationID " << investigationID << "\n";
+      g_log.debug() << "Creating a new dataset named: " << *(dataset.name) << " with investigationID "
+                    << investigationID << "\n";
       datasetID = createResponse.return_;
     }
     // Do not throw error from ICAT as we want to continue on GUI. Instead,
     // return -1 below.
   }
 
-  g_log.debug()
-      << "The dataset ID returned from ICat4Catalog::createMantidDataset was: "
-      << datasetID << "\n";
+  g_log.debug() << "The dataset ID returned from ICat4Catalog::createMantidDataset was: " << datasetID << "\n";
   return datasetID; // Since we did not have access or could not create the file
                     // the default value (-1).
 }
@@ -887,8 +828,7 @@ void ICat4Catalog::setICATProxySettings(ICATPortBindingProxy &icat) {
   if (m_session->getSoapEndpoint().empty())
     return;
   // Stop receiving packets from ICAT server after period of time.
-  icat.recv_timeout = boost::lexical_cast<int>(
-      ConfigService::Instance().getString("catalog.timeout.value"));
+  icat.recv_timeout = boost::lexical_cast<int>(ConfigService::Instance().getString("catalog.timeout.value"));
   // Set the soap-endpoint of the catalog we want to use.
   icat.soap_endpoint = m_session->getSoapEndpoint().c_str();
   // Sets SSL authentication scheme
@@ -901,8 +841,7 @@ void ICat4Catalog::setICATProxySettings(ICATPortBindingProxy &icat) {
  * @param icat  :: The proxy object used to interact with gSOAP.
  * @param query :: The query to send to ICAT.
  */
-std::vector<xsd__anyType *>
-ICat4Catalog::performSearch(ICATPortBindingProxy &icat, std::string query) {
+std::vector<xsd__anyType *> ICat4Catalog::performSearch(ICATPortBindingProxy &icat, std::string query) {
   ns1__search request;
   ns1__searchResponse response;
 
@@ -930,8 +869,7 @@ ICat4Catalog::performSearch(ICATPortBindingProxy &icat, std::string query) {
  *CREATE,READ,UPDATE,DELETE.
  * @return True if access is allowed, otherwise false.
  **/
-template <class T>
-bool ICat4Catalog::isAccessAllowed(ns1__accessType accessType, T &bean) {
+template <class T> bool ICat4Catalog::isAccessAllowed(ns1__accessType accessType, T &bean) {
   ICATPortBindingProxy icat;
   setICATProxySettings(icat);
 

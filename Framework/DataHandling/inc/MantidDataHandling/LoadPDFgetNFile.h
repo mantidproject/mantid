@@ -16,26 +16,19 @@ namespace DataHandling {
 
 /** LoadPDFgetNFile : TODO: DESCRIPTION
  */
-class DLLExport LoadPDFgetNFile
-    : public API::IFileLoader<Kernel::FileDescriptor> {
+class DLLExport LoadPDFgetNFile : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "LoadPDFgetNFile"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Types of PDFgetN data files include .sqa, .sq, .gr, and etc.";
-  }
+  const std::string summary() const override { return "Types of PDFgetN data files include .sqa, .sq, .gr, and etc."; }
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
-  const std::vector<std::string> seeAlso() const override {
-    return {"LoadAscii"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"LoadAscii"}; }
 
   /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override {
-    return "Diffraction\\DataHandling;DataHandling\\Text";
-  }
+  const std::string category() const override { return "Diffraction\\DataHandling;DataHandling\\Text"; }
 
 private:
   /// Implement abstract Algorithm methods

@@ -29,9 +29,7 @@ using namespace Mantid::DataObjects;
 class SaveReflectometryAsciiTest : public CxxTest::TestSuite {
 
 public:
-  static SaveReflectometryAsciiTest *createSuite() {
-    return new SaveReflectometryAsciiTest();
-  }
+  static SaveReflectometryAsciiTest *createSuite() { return new SaveReflectometryAsciiTest(); }
   static void destroySuite(SaveReflectometryAsciiTest *suite) { delete suite; }
 
   SaveReflectometryAsciiTest() {}
@@ -48,8 +46,7 @@ public:
     alg.initialize();
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", "ws"))
-    TS_ASSERT_THROWS(alg.setProperty("InputWorkspace", "abc"),
-                     const std::invalid_argument &)
+    TS_ASSERT_THROWS(alg.setProperty("InputWorkspace", "abc"), const std::invalid_argument &)
     TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &)
     TS_ASSERT(!alg.isExecuted())
   }
@@ -167,9 +164,7 @@ public:
     std::ifstream in(filename);
     // Total number of lines
     TS_ASSERT(not_empty(in))
-    TS_ASSERT_EQUALS(std::count(std::istreambuf_iterator<char>(in),
-                                std::istreambuf_iterator<char>(),
-                                in.widen('\n')),
+    TS_ASSERT_EQUALS(std::count(std::istreambuf_iterator<char>(in), std::istreambuf_iterator<char>(), in.widen('\n')),
                      25)
     in.close();
     Poco::File(filename).remove();
@@ -315,8 +310,7 @@ public:
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", file))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("LogList", std::vector<std::string>{"a", "b"}))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("LogList", std::vector<std::string>{"a", "b"}))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
     std::string filename = alg.getPropertyValue("Filename");
@@ -366,11 +360,9 @@ public:
     Mantid::HistogramData::Histogram histogram(x1, y1);
     auto ws = std::make_shared<Mantid::DataObjects::Workspace2D>();
     ws->initialize(1, histogram);
-    Mantid::Kernel::PropertyWithValue<int> *a =
-        new Mantid::Kernel::PropertyWithValue<int>("a", 5);
+    Mantid::Kernel::PropertyWithValue<int> *a = new Mantid::Kernel::PropertyWithValue<int>("a", 5);
     ws->mutableRun().addLogData(a);
-    Mantid::Kernel::PropertyWithValue<double> *b =
-        new Mantid::Kernel::PropertyWithValue<double>("b", 3.4382);
+    Mantid::Kernel::PropertyWithValue<double> *b = new Mantid::Kernel::PropertyWithValue<double>("b", 3.4382);
     ws->mutableRun().addLogData(b);
     ws->mutableRun().getProperty("b")->setUnits("MyUnit");
     auto outputFileHandle = Poco::TemporaryFile();
@@ -436,8 +428,7 @@ public:
     ws->mutableRun().addLogData(a);
     // The workspace has an entry already for the instrument name
     Mantid::Kernel::PropertyWithValue<std::string> *b =
-        new Mantid::Kernel::PropertyWithValue<std::string>("instrument.name",
-                                                           "DEF");
+        new Mantid::Kernel::PropertyWithValue<std::string>("instrument.name", "DEF");
     ws->mutableRun().addLogData(b);
     auto outputFileHandle = Poco::TemporaryFile();
     const std::string file = outputFileHandle.path();
@@ -446,8 +437,7 @@ public:
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", file))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("LogList", "Instrument, instrument.name"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("LogList", "Instrument, instrument.name"))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
     std::string filename = alg.getPropertyValue("Filename");
@@ -497,8 +487,7 @@ public:
     ws->initialize(1, histogram);
     // Should use this instrument name
     Mantid::Kernel::PropertyWithValue<std::string> *a =
-        new Mantid::Kernel::PropertyWithValue<std::string>("instrument.name",
-                                                           "DEF");
+        new Mantid::Kernel::PropertyWithValue<std::string>("instrument.name", "DEF");
     ws->mutableRun().addLogData(a);
     auto outputFileHandle = Poco::TemporaryFile();
     const std::string file = outputFileHandle.path();
@@ -814,7 +803,5 @@ public:
   }
 
 private:
-  bool not_empty(std::ifstream &in) {
-    return in.peek() != std::ifstream::traits_type::eof();
-  }
+  bool not_empty(std::ifstream &in) { return in.peek() != std::ifstream::traits_type::eof(); }
 };

@@ -164,11 +164,10 @@ int main(int argc, char **argv) {
   if (argc == 2) {
     QString str(argv[1]);
     if (str == "-v" || str == "--version") {
-      std::cout << Mantid::Kernel::MantidVersion::version() << " ("
-                << Mantid::Kernel::MantidVersion::releaseDate() << ")\n";
+      std::cout << Mantid::Kernel::MantidVersion::version() << " (" << Mantid::Kernel::MantidVersion::releaseDate()
+                << ")\n";
       exit(0);
-    } else if (str == "-r" ||
-               str == "--revision") // Print abbreviated git SHA-1
+    } else if (str == "-r" || str == "--revision") // Print abbreviated git SHA-1
     {
       QString revision(Mantid::Kernel::MantidVersion::revision());
       std::cout << revision.toStdString() << '\n';
@@ -212,8 +211,7 @@ int main(int argc, char **argv) {
     QSplashScreen splash(pixmap);
     const QString releaseDateTime(Mantid::Kernel::MantidVersion::releaseDate());
     const QString versionInfo(Mantid::Kernel::MantidVersion::version());
-    splash.showMessage("Release: " + releaseDateTime + " (Version " +
-                           versionInfo + ")",
+    splash.showMessage("Release: " + releaseDateTime + " (Version " + versionInfo + ")",
                        Qt::AlignLeft | Qt::AlignBottom);
     splash.setMask(pixmap.createMaskFromColor(QColor(Qt::transparent)));
     splash.show();
@@ -224,33 +222,28 @@ int main(int argc, char **argv) {
     splash.repaint();
     app.processEvents();
 
-    const bool factorySettings =
-        (args.contains("-d") || args.contains("--default-settings"));
+    const bool factorySettings = (args.contains("-d") || args.contains("--default-settings"));
     ApplicationWindow *mw = new ApplicationWindow(factorySettings, args);
     mw->restoreApplicationGeometry();
     mw->parseCommandLineArguments(args);
-    QObject::connect(&app, SIGNAL(runAsPythonScript(const QString &)), mw,
-                     SLOT(runPythonScript(const QString &)),
+    QObject::connect(&app, SIGNAL(runAsPythonScript(const QString &)), mw, SLOT(runPythonScript(const QString &)),
                      Qt::DirectConnection);
     app.processEvents();
 
     // register a couple of fonts
-    QFontDatabase::addApplicationFont(
-        ":/fonts/MontserratAlternates-Regular.ttf");
+    QFontDatabase::addApplicationFont(":/fonts/MontserratAlternates-Regular.ttf");
     QFontDatabase::addApplicationFont(":/fonts/OpenSans-Regular.ttf");
 
     splash.finish(mw);
 
-    app.connect(&app, SIGNAL(lastWindowClosed()), mw,
-                SLOT(exitWithPresetCode()));
+    app.connect(&app, SIGNAL(lastWindowClosed()), mw, SLOT(exitWithPresetCode()));
     QTimer::singleShot(0, mw, SLOT(onAboutToStart()));
     return app.exec();
   } catch (std::exception &e) {
-    QMessageBox::critical(
-        nullptr, "Mantid - Error",
-        QString("An unhandled exception has been caught. MantidPlot will have "
-                "to close. Details:\n\n") +
-            e.what());
+    QMessageBox::critical(nullptr, "Mantid - Error",
+                          QString("An unhandled exception has been caught. MantidPlot will have "
+                                  "to close. Details:\n\n") +
+                              e.what());
   } catch (...) {
     QMessageBox::critical(nullptr, "Mantid - Error",
                           "An unhandled exception has "

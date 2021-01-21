@@ -11,8 +11,8 @@
 #ifdef QSPINBOX_QSBDEBUG
 #define QSBDEBUG qDebug
 #else
-#define QSBDEBUG                                                               \
-  if (false)                                                                   \
+#define QSBDEBUG                                                                                                       \
+  if (false)                                                                                                           \
   qDebug
 #endif
 
@@ -20,8 +20,7 @@ namespace MantidQt {
 namespace API {
 
 // reimplemented function, copied from qspinbox.cpp
-bool isIntermediateValueHelper(qint64 num, qint64 min, qint64 max,
-                               qint64 *match = nullptr) {
+bool isIntermediateValueHelper(qint64 num, qint64 min, qint64 max, qint64 *match = nullptr) {
   QSBDEBUG("%lld %lld %lld", num, min, max);
 
   if (num >= min && num <= max) {
@@ -71,8 +70,7 @@ bool isIntermediateValueHelper(qint64 num, qint64 min, qint64 max,
   return false;
 }
 
-QScienceSpinBox::QScienceSpinBox(QWidget *parent)
-    : QDoubleSpinBox(parent), m_logSteps(true) {
+QScienceSpinBox::QScienceSpinBox(QWidget *parent) : QDoubleSpinBox(parent), m_logSteps(true) {
   initLocalValues(parent);
   setDecimals(8);
   QDoubleSpinBox::setDecimals(1000);
@@ -186,13 +184,11 @@ bool QScienceSpinBox::isIntermediateValue(const QString &str) const {
    * determine minimum possible values on left and right of Decimal-char
    */
   // I know QString::number() uses CLocale so I use dot
-  const QString minstr =
-      QString::number(minimum(), 'f', QDoubleSpinBox::decimals());
+  const QString minstr = QString::number(minimum(), 'f', QDoubleSpinBox::decimals());
   qint64 min_left = minstr.left(minstr.indexOf(dot)).toLongLong();
   qint64 min_right = minstr.mid(minstr.indexOf(dot) + 1).toLongLong();
 
-  const QString maxstr =
-      QString::number(maximum(), 'f', QDoubleSpinBox::decimals());
+  const QString maxstr = QString::number(maximum(), 'f', QDoubleSpinBox::decimals());
   qint64 max_left = maxstr.left(maxstr.indexOf(dot)).toLongLong();
   qint64 max_right = maxstr.mid(maxstr.indexOf(dot) + 1).toLongLong();
 
@@ -250,20 +246,16 @@ bool QScienceSpinBox::isIntermediateValue(const QString &str) const {
     return false;
   }
   if (doright) {
-    QSBDEBUG("match %lld min_left %lld max_left %lld", match, min_left,
-             max_left);
+    QSBDEBUG("match %lld min_left %lld max_left %lld", match, min_left, max_left);
     if (!doleft) {
       if (min_left == max_left) {
-        const bool ret = isIntermediateValueHelper(
-            qAbs(left), negative ? max_right : min_right,
-            negative ? min_right : max_right);
+        const bool ret =
+            isIntermediateValueHelper(qAbs(left), negative ? max_right : min_right, negative ? min_right : max_right);
         QSBDEBUG() << __FILE__ << __LINE__ << "returns" << ret;
         return ret;
       } else if (qAbs(max_left - min_left) == 1) {
-        const bool ret = isIntermediateValueHelper(qAbs(left), min_right,
-                                                   negative ? 0 : dec) ||
-                         isIntermediateValueHelper(
-                             qAbs(left), negative ? dec : 0, max_right);
+        const bool ret = isIntermediateValueHelper(qAbs(left), min_right, negative ? 0 : dec) ||
+                         isIntermediateValueHelper(qAbs(left), negative ? dec : 0, max_right);
         QSBDEBUG() << __FILE__ << __LINE__ << "returns" << ret;
         return ret;
       } else {
@@ -295,8 +287,7 @@ bool QScienceSpinBox::isIntermediateValue(const QString &str) const {
  */
 // reimplemented function, copied from
 // QDoubleSpinBoxPrivate::validateAndInterpret
-QVariant QScienceSpinBox::validateAndInterpret(QString &input, int &pos,
-                                               QValidator::State &state) const {
+QVariant QScienceSpinBox::validateAndInterpret(QString &input, int &pos, QValidator::State &state) const {
   /*! return 'cachedText' if
    *   input = cachedText, or input Empty
    */
@@ -345,8 +336,7 @@ QVariant QScienceSpinBox::validateAndInterpret(QString &input, int &pos,
   case 2:
     // if only chars are '+' or '-' followed by Comma seperator (delimiter)
     if (copy.at(1) == delimiter &&
-        ((plus && copy.at(0) == QLatin1Char('+')) ||
-         (minus && copy.at(0) == QLatin1Char('-')))) {
+        ((plus && copy.at(0) == QLatin1Char('+')) || (minus && copy.at(0) == QLatin1Char('-')))) {
       state = QValidator::Intermediate;
       goto end;
     }
@@ -367,8 +357,7 @@ QVariant QScienceSpinBox::validateAndInterpret(QString &input, int &pos,
     // if decimal separator (delimiter) exists
     if (dec != -1) {
       // not two delimiters after one other (meaning something like ',,')
-      if (dec + 1 < copy.size() && copy.at(dec + 1) == delimiter &&
-          pos == dec + 1) {
+      if (dec + 1 < copy.size() && copy.at(dec + 1) == delimiter && pos == dec + 1) {
         copy.remove(dec + 1,
                     1); // typing a delimiter when you are on the delimiter
       }                 // should be treated as typing right arrow
@@ -391,15 +380,13 @@ QVariant QScienceSpinBox::validateAndInterpret(QString &input, int &pos,
       const QChar &last = copy.at(len - 1);
       const QChar &secondLast = copy.at(len - 2);
       // group of two thousand or space chars is invalid
-      if ((last == thousand || last.isSpace()) &&
-          (secondLast == thousand || secondLast.isSpace())) {
+      if ((last == thousand || last.isSpace()) && (secondLast == thousand || secondLast.isSpace())) {
         state = QValidator::Invalid;
         QSBDEBUG() << __FILE__ << __LINE__ << "state is set to Invalid";
         goto end;
       }
       // two space chars is invalid
-      else if (last.isSpace() &&
-               (!thousand.isSpace() || secondLast.isSpace())) {
+      else if (last.isSpace() && (!thousand.isSpace() || secondLast.isSpace())) {
         state = QValidator::Invalid;
         QSBDEBUG() << __FILE__ << __LINE__ << "state is set to Invalid";
         goto end;
@@ -470,8 +457,7 @@ QVariant QScienceSpinBox::validateAndInterpret(QString &input, int &pos,
         state = QValidator::Acceptable;
       }
       QSBDEBUG() << __FILE__ << __LINE__ << "state is set to "
-                 << (state == QValidator::Intermediate ? "Intermediate"
-                                                       : "Acceptable");
+                 << (state == QValidator::Intermediate ? "Intermediate" : "Acceptable");
     }
     // when max and min is the same the only non-Invalid input is max (or min)
     else if (max == min) {
@@ -490,8 +476,7 @@ QVariant QScienceSpinBox::validateAndInterpret(QString &input, int &pos,
           state = QValidator::Invalid;
         }
         QSBDEBUG() << __FILE__ << __LINE__ << "state is set to "
-                   << (state == QValidator::Intermediate ? "Intermediate"
-                                                         : "Acceptable");
+                   << (state == QValidator::Intermediate ? "Intermediate" : "Acceptable");
       }
     }
   }

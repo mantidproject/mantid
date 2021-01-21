@@ -36,9 +36,7 @@ namespace DataHandling {
 DECLARE_ALGORITHM(GenerateGroupingPowder)
 
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string GenerateGroupingPowder::name() const {
-  return "GenerateGroupingPowder";
-}
+const std::string GenerateGroupingPowder::name() const { return "GenerateGroupingPowder"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int GenerateGroupingPowder::version() const { return 1; }
@@ -51,15 +49,12 @@ const std::string GenerateGroupingPowder::category() const {
 /** Initialize the algorithm's properties.
  */
 void GenerateGroupingPowder::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                                        Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
                   "A workspace from which to generate the grouping.");
   auto positiveDouble = std::make_shared<BoundedValidator<double>>();
   positiveDouble->setLower(0.0);
-  declareProperty("AngleStep", -1.0, positiveDouble,
-                  "The angle step for grouping, in degrees.");
-  declareProperty(std::make_unique<FileProperty>("GroupingFilename", "",
-                                                 FileProperty::Save, ".xml"),
+  declareProperty("AngleStep", -1.0, positiveDouble, "The angle step for grouping, in degrees.");
+  declareProperty(std::make_unique<FileProperty>("GroupingFilename", "", FileProperty::Save, ".xml"),
                   "A grouping file that will be created.");
   declareProperty("GenerateParFile", true,
                   "If true, a par file with a corresponding name to the "
@@ -84,8 +79,7 @@ void GenerateGroupingPowder::exec() {
   std::vector<double> rAverage(numSteps, 0.);
 
   for (size_t i = 0; i < spectrumInfo.size(); ++i) {
-    if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMasked(i) ||
-        spectrumInfo.isMonitor(i)) {
+    if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMasked(i) || spectrumInfo.isMonitor(i)) {
       continue;
     }
     const auto &det = spectrumInfo.detector(i);
@@ -122,8 +116,7 @@ void GenerateGroupingPowder::exec() {
       pChildGroup->setAttribute("ID", spID.str());
       pRoot->appendChild(pChildGroup);
 
-      std::copy(groups.at(i).begin(), groups.at(i).end(),
-                std::ostream_iterator<size_t>(textvalue, ","));
+      std::copy(groups.at(i).begin(), groups.at(i).end(), std::ostream_iterator<size_t>(textvalue, ","));
       std::string text = textvalue.str();
       const size_t found = text.rfind(',');
       if (found != std::string::npos) {
@@ -137,8 +130,7 @@ void GenerateGroupingPowder::exec() {
     }
   }
   if (goodGroups == 0) {
-    throw Exception::InstrumentDefinitionError(
-        "No detectors found in scattering angles between 0 and 180 degrees");
+    throw Exception::InstrumentDefinitionError("No detectors found in scattering angles between 0 and 180 degrees");
   }
 
   DOMWriter writer;
@@ -179,8 +171,7 @@ void GenerateGroupingPowder::exec() {
         outPAR_file.width(10);
         outPAR_file << 0.;
         outPAR_file.width(10);
-        outPAR_file << step * Geometry::deg2rad * rAverage.at(i) /
-                           static_cast<double>(gSize);
+        outPAR_file << step * Geometry::deg2rad * rAverage.at(i) / static_cast<double>(gSize);
         outPAR_file.width(10);
         outPAR_file << 0.01;
         outPAR_file.width(10);

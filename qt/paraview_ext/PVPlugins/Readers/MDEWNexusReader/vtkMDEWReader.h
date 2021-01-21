@@ -44,10 +44,8 @@ public:
 protected:
   vtkMDEWNexusReader();
   ~vtkMDEWNexusReader();
-  int RequestInformation(vtkInformation *, vtkInformationVector **,
-                         vtkInformationVector *);
-  int RequestData(vtkInformation *, vtkInformationVector **,
-                  vtkInformationVector *);
+  int RequestInformation(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
+  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
   int Canreadfile(const char *fname);
   /// Handle time variation.
   vtkMTimeType GetMTime() override;
@@ -57,8 +55,7 @@ private:
 
   void operator=(const vtkMDEWNexusReader &);
 
-  std::string extractFormattedPropertyFromDimension(
-      Mantid::Geometry::IMDDimension_sptr dimension) const;
+  std::string extractFormattedPropertyFromDimension(Mantid::Geometry::IMDDimension_sptr dimension) const;
 
   void doRebinning();
 
@@ -137,9 +134,7 @@ private:
 
   /// Converts dimension objects into well-formed xml describing the overall
   /// geometry
-  Mantid::Geometry::MDGeometryBuilderXML<
-      Mantid::Geometry::StrictDimensionPolicy>
-      m_geometryXmlBuilder;
+  Mantid::Geometry::MDGeometryBuilderXML<Mantid::Geometry::StrictDimensionPolicy> m_geometryXmlBuilder;
 
   /// Sets the rebinning action to rebin if the number of bins has changed on a
   /// dimension.

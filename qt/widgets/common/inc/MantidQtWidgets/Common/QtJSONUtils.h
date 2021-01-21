@@ -16,14 +16,11 @@
 namespace MantidQt {
 namespace API {
 
-void EXPORT_OPT_MANTIDQT_COMMON
-saveJSONToFile(QString &filename, const QMap<QString, QVariant> &map);
+void EXPORT_OPT_MANTIDQT_COMMON saveJSONToFile(QString &filename, const QMap<QString, QVariant> &map);
 
-QMap<QString, QVariant>
-    EXPORT_OPT_MANTIDQT_COMMON loadJSONFromFile(const QString &filename);
+QMap<QString, QVariant> EXPORT_OPT_MANTIDQT_COMMON loadJSONFromFile(const QString &filename);
 
-QMap<QString, QVariant>
-    EXPORT_OPT_MANTIDQT_COMMON loadJSONFromString(const QString &jsonString);
+QMap<QString, QVariant> EXPORT_OPT_MANTIDQT_COMMON loadJSONFromString(const QString &jsonString);
 
 } // namespace API
 } // namespace MantidQt

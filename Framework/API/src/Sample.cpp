@@ -29,26 +29,22 @@ using Geometry::ShapeFactory;
  * Default constructor. Required for cow_ptr.
  */
 Sample::Sample()
-    : m_name(), m_shape(ShapeFactory().createShape("")), m_environment(),
-      m_lattice(nullptr), m_crystalStructure(), m_samples(), m_geom_id(0),
-      m_thick(0.0), m_height(0.0), m_width(0.0) {}
+    : m_name(), m_shape(ShapeFactory().createShape("")), m_environment(), m_lattice(nullptr), m_crystalStructure(),
+      m_samples(), m_geom_id(0), m_thick(0.0), m_height(0.0), m_width(0.0) {}
 
 /**
  * Copy constructor
  *  @param copy :: const reference to the sample object
  */
 Sample::Sample(const Sample &copy)
-    : m_name(copy.m_name), m_shape(copy.m_shape),
-      m_environment(copy.m_environment), m_lattice(nullptr),
-      m_crystalStructure(), m_samples(copy.m_samples),
-      m_geom_id(copy.m_geom_id), m_thick(copy.m_thick), m_height(copy.m_height),
-      m_width(copy.m_width) {
+    : m_name(copy.m_name), m_shape(copy.m_shape), m_environment(copy.m_environment), m_lattice(nullptr),
+      m_crystalStructure(), m_samples(copy.m_samples), m_geom_id(copy.m_geom_id), m_thick(copy.m_thick),
+      m_height(copy.m_height), m_width(copy.m_width) {
   if (copy.m_lattice)
     m_lattice = std::make_unique<OrientedLattice>(copy.getOrientedLattice());
 
   if (copy.hasCrystalStructure()) {
-    m_crystalStructure = std::make_unique<Geometry::CrystalStructure>(
-        copy.getCrystalStructure());
+    m_crystalStructure = std::make_unique<Geometry::CrystalStructure>(copy.getCrystalStructure());
   }
 }
 
@@ -78,8 +74,7 @@ Sample &Sample::operator=(const Sample &rhs) {
 
   m_crystalStructure.reset();
   if (rhs.hasCrystalStructure()) {
-    m_crystalStructure.reset(
-        new Geometry::CrystalStructure(rhs.getCrystalStructure()));
+    m_crystalStructure.reset(new Geometry::CrystalStructure(rhs.getCrystalStructure()));
   }
 
   return *this;
@@ -131,8 +126,7 @@ bool Sample::hasEnvironment() const { return (m_environment != nullptr); }
  */
 const SampleEnvironment &Sample::getEnvironment() const {
   if (!m_environment) {
-    throw std::runtime_error(
-        "Sample::getEnvironment - No sample enviroment has been defined.");
+    throw std::runtime_error("Sample::getEnvironment - No sample enviroment has been defined.");
   }
   return *m_environment;
 }
@@ -152,8 +146,7 @@ void Sample::setEnvironment(std::unique_ptr<SampleEnvironment> env) {
  */
 const OrientedLattice &Sample::getOrientedLattice() const {
   if (!m_lattice) {
-    throw std::runtime_error(
-        "Sample::getOrientedLattice - No OrientedLattice has been defined.");
+    throw std::runtime_error("Sample::getOrientedLattice - No OrientedLattice has been defined.");
   }
   return *m_lattice;
 }
@@ -164,8 +157,7 @@ const OrientedLattice &Sample::getOrientedLattice() const {
  */
 OrientedLattice &Sample::getOrientedLattice() {
   if (!m_lattice) {
-    throw std::runtime_error(
-        "Sample::getOrientedLattice - No OrientedLattice has been defined.");
+    throw std::runtime_error("Sample::getOrientedLattice - No OrientedLattice has been defined.");
   }
   return *m_lattice;
 }
@@ -174,26 +166,21 @@ OrientedLattice &Sample::getOrientedLattice() {
  *
  * @param lattice :: A pointer to a OrientedLattice.
  */
-void Sample::setOrientedLattice(
-    std::unique_ptr<Geometry::OrientedLattice> lattice) {
-  m_lattice = std::move(lattice);
-}
+void Sample::setOrientedLattice(std::unique_ptr<Geometry::OrientedLattice> lattice) { m_lattice = std::move(lattice); }
 
 /** @return true if the sample has an OrientedLattice  */
 bool Sample::hasOrientedLattice() const { return (m_lattice != nullptr); }
 
 const Geometry::CrystalStructure &Sample::getCrystalStructure() const {
   if (!hasCrystalStructure()) {
-    throw std::runtime_error(
-        "Sample::getCrystalStructure - No CrystalStructure has been defined.");
+    throw std::runtime_error("Sample::getCrystalStructure - No CrystalStructure has been defined.");
   }
 
   return *m_crystalStructure;
 }
 
 /// Resets the internal pointer to the new CrystalStructure (it's copied).
-void Sample::setCrystalStructure(
-    const Geometry::CrystalStructure &newCrystalStructure) {
+void Sample::setCrystalStructure(const Geometry::CrystalStructure &newCrystalStructure) {
   m_crystalStructure.reset(new Geometry::CrystalStructure(newCrystalStructure));
 }
 
@@ -265,8 +252,7 @@ double Sample::getWidth() const { return m_width; }
 Sample &Sample::operator[](const int index) {
   if (index == 0) {
     return *this;
-  } else if ((static_cast<std::size_t>(index) > m_samples.size()) ||
-             (index < 0)) {
+  } else if ((static_cast<std::size_t>(index) > m_samples.size()) || (index < 0)) {
     throw std::out_of_range("The index value provided was out of range");
   } else {
     return *m_samples[index - 1];
@@ -283,9 +269,7 @@ std::size_t Sample::size() const { return m_samples.size() + 1; }
  * Adds a sample to the sample collection
  * @param childSample The child sample to be added
  */
-void Sample::addSample(const std::shared_ptr<Sample> &childSample) {
-  m_samples.emplace_back(childSample);
-}
+void Sample::addSample(const std::shared_ptr<Sample> &childSample) { m_samples.emplace_back(childSample); }
 
 //--------------------------------------------------------------------------------------------
 /** Save the object to an open NeXus file.
@@ -300,8 +284,7 @@ void Sample::saveNexus(::NeXus::File *file, const std::string &group) const {
   }
   file->putAttr("version", 1);
   std::string shapeXML("");
-  if (auto csgObject =
-          std::dynamic_pointer_cast<Mantid::Geometry::CSGObject>(m_shape)) {
+  if (auto csgObject = std::dynamic_pointer_cast<Mantid::Geometry::CSGObject>(m_shape)) {
     shapeXML = csgObject->getShapeXML();
   }
   file->putAttr("shape_xml", shapeXML);
@@ -371,8 +354,7 @@ int Sample::loadNexus(::NeXus::File *file, const std::string &group) {
     shape_xml = Strings::strip(shape_xml);
     if (!shape_xml.empty()) {
       ShapeFactory shapeMaker;
-      m_shape = shapeMaker.createShape(shape_xml,
-                                       false /*Don't wrap with <type> tag*/);
+      m_shape = shapeMaker.createShape(shape_xml, false /*Don't wrap with <type> tag*/);
     }
     Kernel::Material material;
     material.loadNexus(file, "material");
@@ -438,19 +420,13 @@ bool Sample::operator==(const Sample &other) const {
     else
       return true;
   };
-  return *m_lattice == *other.m_lattice && this->m_name == other.m_name &&
-         this->m_height == other.m_height && this->m_width == other.m_width &&
-         this->m_thick == other.m_thick && m_geom_id == other.m_geom_id &&
-         compare(m_environment, other.m_environment,
-                 [](const auto &x) { return x->name(); }) &&
-         compare(m_shape, other.m_shape,
-                 [](const auto &x) { return x->shape(); }) &&
-         compare(m_crystalStructure, other.m_crystalStructure,
-                 [](const auto &x) { return *(x->spaceGroup()); });
+  return *m_lattice == *other.m_lattice && this->m_name == other.m_name && this->m_height == other.m_height &&
+         this->m_width == other.m_width && this->m_thick == other.m_thick && m_geom_id == other.m_geom_id &&
+         compare(m_environment, other.m_environment, [](const auto &x) { return x->name(); }) &&
+         compare(m_shape, other.m_shape, [](const auto &x) { return x->shape(); }) &&
+         compare(m_crystalStructure, other.m_crystalStructure, [](const auto &x) { return *(x->spaceGroup()); });
 }
 
-bool Sample::operator!=(const Sample &other) const {
-  return !this->operator==(other);
-}
+bool Sample::operator!=(const Sample &other) const { return !this->operator==(other); }
 } // namespace API
 } // namespace Mantid

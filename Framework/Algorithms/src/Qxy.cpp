@@ -41,45 +41,34 @@ void Qxy::init() {
   wsValidator->add<HistogramValidator>();
   wsValidator->add<InstrumentValidator>();
 
-  declareProperty(std::make_unique<WorkspaceProperty<>>(
-                      "InputWorkspace", "", Direction::Input, wsValidator),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input, wsValidator),
                   "The corrected data in units of wavelength.");
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "The name to use for the corrected workspace.");
 
   auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(1.0e-12);
 
-  declareProperty(
-      "MaxQxy", -1.0, mustBePositive,
-      "The upper limit of the Qx-Qy grid (goes from -MaxQxy to +MaxQxy).");
-  declareProperty("DeltaQ", -1.0, mustBePositive,
-                  "The dimension of a Qx-Qy cell.");
-  declareProperty("IQxQyLogBinning", false,
-                  "I(qx,qy) log binning when binning is not specified.",
+  declareProperty("MaxQxy", -1.0, mustBePositive, "The upper limit of the Qx-Qy grid (goes from -MaxQxy to +MaxQxy).");
+  declareProperty("DeltaQ", -1.0, mustBePositive, "The dimension of a Qx-Qy cell.");
+  declareProperty("IQxQyLogBinning", false, "I(qx,qy) log binning when binning is not specified.",
                   Kernel::Direction::Input);
-  declareProperty(std::make_unique<WorkspaceProperty<>>(
-                      "PixelAdj", "", Direction::Input, PropertyMode::Optional),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("PixelAdj", "", Direction::Input, PropertyMode::Optional),
                   "The scaling to apply to each spectrum e.g. for detector "
                   "efficiency, must have just one bin per spectrum and the "
                   "same number of spectra as DetBankWorkspace.");
   auto wavVal = std::make_shared<CompositeValidator>();
   wavVal->add<WorkspaceUnitValidator>("Wavelength");
   wavVal->add<HistogramValidator>();
-  declareProperty(std::make_unique<WorkspaceProperty<>>(
-                      "WavelengthAdj", "", Direction::Input,
-                      PropertyMode::Optional, wavVal),
-                  "The scaling to apply to each bin to account for monitor "
-                  "counts, transmission fraction, etc. Must be one spectrum "
-                  "with the same binning as the InputWorkspace, the same units "
-                  "(counts) and the same [[ConvertToDistribution|distribution "
-                  "status]].");
-  declareProperty("AccountForGravity", false,
-                  "Whether to correct for the effects of gravity.",
-                  Direction::Input);
-  declareProperty("SolidAngleWeighting", true,
-                  "If true, pixels will be weighted by their solid angle.",
+  declareProperty(
+      std::make_unique<WorkspaceProperty<>>("WavelengthAdj", "", Direction::Input, PropertyMode::Optional, wavVal),
+      "The scaling to apply to each bin to account for monitor "
+      "counts, transmission fraction, etc. Must be one spectrum "
+      "with the same binning as the InputWorkspace, the same units "
+      "(counts) and the same [[ConvertToDistribution|distribution "
+      "status]].");
+  declareProperty("AccountForGravity", false, "Whether to correct for the effects of gravity.", Direction::Input);
+  declareProperty("SolidAngleWeighting", true, "If true, pixels will be weighted by their solid angle.",
                   Direction::Input);
   auto mustBePositive2 = std::make_shared<BoundedValidator<double>>();
   mustBePositive2->setLower(0.0);
@@ -97,8 +86,7 @@ void Qxy::init() {
                   "OutputWorkspace_sumOfNormFactors. The division of "
                   "_sumOfCounts and _sumOfNormFactors equals the workspace "
                   "returned by the property OutputWorkspace");
-  declareProperty("ExtraLength", 0.0, mustBePositive2,
-                  "Additional length for gravity correction.");
+  declareProperty("ExtraLength", 0.0, mustBePositive2, "Additional length for gravity correction.");
 }
 
 void Qxy::exec() {
@@ -114,13 +102,11 @@ void Qxy::exec() {
   g_log.debug() << "All input workspaces were found to be valid\n";
 
   // Create the output Qx-Qy grid
-  MatrixWorkspace_sptr outputWorkspace =
-      this->setUpOutputWorkspace(inputWorkspace);
+  MatrixWorkspace_sptr outputWorkspace = this->setUpOutputWorkspace(inputWorkspace);
 
   // Will also need an identically-sized workspace to hold the solid angle/time
   // bin masked weight
-  MatrixWorkspace_sptr weights =
-      WorkspaceFactory::Instance().create(outputWorkspace);
+  MatrixWorkspace_sptr weights = WorkspaceFactory::Instance().create(outputWorkspace);
   // Copy the X values from the output workspace to the solidAngles one
   for (size_t i = 0; i < weights->getNumberHistograms(); ++i)
     weights->setSharedX(i, outputWorkspace->sharedX(0));
@@ -140,8 +126,7 @@ void Qxy::exec() {
 
   for (int64_t i = 0; i < int64_t(numSpec); ++i) {
     if (!spectrumInfo.hasDetectors(i)) {
-      g_log.warning() << "Workspace index " << i
-                      << " has no detector assigned to it - discarding\n";
+      g_log.warning() << "Workspace index " << i << " has no detector assigned to it - discarding\n";
       continue;
     }
     // If no detector found or if it's masked or a monitor, skip onto the next
@@ -151,9 +136,8 @@ void Qxy::exec() {
 
     // get the bins that are included inside the RadiusCut/WaveCutcut off, those
     // to calculate for
-    const size_t wavStart = helper.waveLengthCutOff(
-        inputWorkspace, spectrumInfo, getProperty("RadiusCut"),
-        getProperty("WaveCut"), i);
+    const size_t wavStart =
+        helper.waveLengthCutOff(inputWorkspace, spectrumInfo, getProperty("RadiusCut"), getProperty("WaveCut"), i);
     if (wavStart >= inputWorkspace->y(i).size()) {
       // all the spectra in this detector are out of range
       continue;
@@ -207,8 +191,7 @@ void Qxy::exec() {
       grav = GravitySANSHelper(spectrumInfo, i, getProperty("ExtraLength"));
     }
 
-    for (int j = static_cast<int>(numBins) - 1; j >= static_cast<int>(wavStart);
-         --j) {
+    for (int j = static_cast<int>(numBins) - 1; j >= static_cast<int>(wavStart); --j) {
       if (j < 0)
         break; // Be careful with counting down. Need a better fix but this will
                // work for now
@@ -235,10 +218,8 @@ void Qxy::exec() {
         break;
       // Find the indices pointing to the place in the 2D array where this bin's
       // contents should go
-      const auto xIndex =
-          std::upper_bound(axis.begin(), axis.end(), Qx) - axis.begin() - 1;
-      const int yIndex = static_cast<int>(
-          std::upper_bound(axis.begin(), axis.end(), Qy) - axis.begin() - 1);
+      const auto xIndex = std::upper_bound(axis.begin(), axis.end(), Qx) - axis.begin() - 1;
+      const int yIndex = static_cast<int>(std::upper_bound(axis.begin(), axis.end(), Qy) - axis.begin() - 1);
       //      PARALLEL_CRITICAL(qxy)    /* Write to shared memory - must protect
       //      */
       {
@@ -288,8 +269,7 @@ void Qxy::exec() {
           const double waveESq = waveE * waveE;
           // add product of errors from pixelAdj and waveAdj (note no error on
           // weight is assumed)
-          outWeightsE[xIndex] +=
-              weight * weight * (waveESq * pixelYSq + pixelESq * waveYSq);
+          outWeightsE[xIndex] += weight * weight * (waveESq * pixelYSq + pixelESq * waveYSq);
         } else if (pixelAdj) {
           auto pixelY = pixelAdj->y(i)[0];
           auto pixelE = pixelAdj->e(i)[0];
@@ -320,15 +300,13 @@ void Qxy::exec() {
   size_t numHist = weights->getNumberHistograms();
   for (size_t i = 0; i < numHist; i++) {
     auto &weightsE = weights->mutableE(i);
-    std::transform(weightsE.cbegin(), weightsE.cend(), weightsE.begin(),
-                   [&](double val) { return sqrt(val); });
+    std::transform(weightsE.cbegin(), weightsE.cend(), weightsE.begin(), [&](double val) { return sqrt(val); });
   }
 
   bool doOutputParts = getProperty("OutputParts");
   if (doOutputParts) {
     // copy outputworkspace before it gets further modified
-    MatrixWorkspace_sptr ws_sumOfCounts =
-        WorkspaceFactory::Instance().create(outputWorkspace);
+    MatrixWorkspace_sptr ws_sumOfCounts = WorkspaceFactory::Instance().create(outputWorkspace);
     for (size_t i = 0; i < ws_sumOfCounts->getNumberHistograms(); i++) {
       ws_sumOfCounts->setHistogram(i, outputWorkspace->histogram(i));
     }
@@ -353,8 +331,7 @@ void Qxy::exec() {
   }
 
   // Log the number of empty bins
-  g_log.notice() << "There are a total of " << emptyBins << " ("
-                 << (100 * emptyBins) / (outputWorkspace->size())
+  g_log.notice() << "There are a total of " << emptyBins << " (" << (100 * emptyBins) / (outputWorkspace->size())
                  << "%) empty Q bins.\n";
 }
 
@@ -402,8 +379,7 @@ double Qxy::getQminFromWs(const API::MatrixWorkspace &inputWorkspace) {
  * Qx.
  *  @return A pointer to the newly-created workspace
  */
-API::MatrixWorkspace_sptr Qxy::setUpOutputWorkspace(
-    const API::MatrixWorkspace_const_sptr &inputWorkspace) {
+API::MatrixWorkspace_sptr Qxy::setUpOutputWorkspace(const API::MatrixWorkspace_const_sptr &inputWorkspace) {
   const double max = getProperty("MaxQxy");
   const double delta = getProperty("DeltaQ");
   const bool log_binning = getProperty("IQxQyLogBinning");
@@ -418,12 +394,10 @@ API::MatrixWorkspace_sptr Qxy::setUpOutputWorkspace(
     std::vector<double> positiveBinning = logBinning(qmin, max, nBins);
     std::reverse(std::begin(positiveBinning), std::end(positiveBinning));
     std::vector<double> totalBinning = positiveBinning;
-    std::for_each(std::begin(totalBinning), std::end(totalBinning),
-                  [](double &n) { n = -1 * n; });
+    std::for_each(std::begin(totalBinning), std::end(totalBinning), [](double &n) { n = -1 * n; });
     totalBinning.emplace_back(0.0);
     std::reverse(std::begin(positiveBinning), std::end(positiveBinning));
-    totalBinning.insert(std::end(totalBinning), std::begin(positiveBinning),
-                        std::end(positiveBinning));
+    totalBinning.insert(std::end(totalBinning), std::begin(positiveBinning), std::end(positiveBinning));
     nBins = nBins * 2 + 1;
     axis = totalBinning;
 
@@ -436,14 +410,13 @@ API::MatrixWorkspace_sptr Qxy::setUpOutputWorkspace(
     nBins += 1; // Add 1 - this is a histogram
 
     // Build up the X values
-    HistogramData::BinEdges linearAxis(
-        nBins, HistogramData::LinearGenerator(startVal, delta));
+    HistogramData::BinEdges linearAxis(nBins, HistogramData::LinearGenerator(startVal, delta));
     axis = linearAxis;
   }
 
   // Create an output workspace with the same meta-data as the input
-  MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(
-      inputWorkspace, nBins - 1, nBins, nBins - 1);
+  MatrixWorkspace_sptr outputWorkspace =
+      WorkspaceFactory::Instance().create(inputWorkspace, nBins - 1, nBins, nBins - 1);
 
   // Create a numeric axis to replace the vertical one
   auto verticalAxis = std::make_unique<BinEdgeAxis>(nBins);

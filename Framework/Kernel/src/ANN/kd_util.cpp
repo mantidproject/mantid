@@ -235,11 +235,11 @@ int annMaxSpread(     // compute dimension of max spread
 //----------------------------------------------------------------------
 
 // swap two points in pa array
-#define PASWAP(a, b)                                                           \
-  {                                                                            \
-    int tmp = pidx[a];                                                         \
-    pidx[a] = pidx[b];                                                         \
-    pidx[b] = tmp;                                                             \
+#define PASWAP(a, b)                                                                                                   \
+  {                                                                                                                    \
+    int tmp = pidx[a];                                                                                                 \
+    pidx[a] = pidx[b];                                                                                                 \
+    pidx[b] = tmp;                                                                                                     \
   }
 
 void annMedianSplit(ANNpointArray pa, // points to split

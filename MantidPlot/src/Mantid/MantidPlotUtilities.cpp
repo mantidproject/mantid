@@ -42,15 +42,13 @@ bool byLogValue(const CurveSpec &lhs, const CurveSpec &rhs) {
  * @returns log value as a double, or workspace index
  * @throws invalid_argument if log is wrong type or not present
  */
-double getSingleWorkspaceLogValue(
-    size_t wsIndex, const Mantid::API::MatrixWorkspace_const_sptr &matrixWS,
-    const QString &logName) {
+double getSingleWorkspaceLogValue(size_t wsIndex, const Mantid::API::MatrixWorkspace_const_sptr &matrixWS,
+                                  const QString &logName) {
   if (logName == MantidWSIndexWidget::WORKSPACE_INDEX || logName == "")
     return static_cast<double>(wsIndex); // cast for plotting
 
   // MatrixWorkspace is an ExperimentInfo
-  return matrixWS->run().getLogAsSingleValue(
-      logName.toStdString(), Mantid::Kernel::Math::TimeAveragedMean);
+  return matrixWS->run().getLogAsSingleValue(logName.toStdString(), Mantid::Kernel::Math::TimeAveragedMean);
 }
 
 /**
@@ -61,8 +59,7 @@ double getSingleWorkspaceLogValue(
  * @param logValues :: [input] User-provided set of log values
  * @returns Numeric log value
  */
-double getSingleWorkspaceLogValue(size_t wsIndex,
-                                  const std::set<double> &logValues) {
+double getSingleWorkspaceLogValue(size_t wsIndex, const std::set<double> &logValues) {
   if (wsIndex >= logValues.size())
     return 0;
 

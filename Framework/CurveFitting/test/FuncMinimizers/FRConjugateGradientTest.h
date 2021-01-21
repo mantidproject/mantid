@@ -23,9 +23,7 @@ class FRConjugateGradientTestCostFunction : public ICostFunction {
 
 public:
   FRConjugateGradientTestCostFunction() : a(1), b(1) {}
-  std::string name() const override {
-    return "FRConjugateGradientTestCostFunction";
-  }
+  std::string name() const override { return "FRConjugateGradientTestCostFunction"; }
   double getParameter(size_t i) const override {
     if (i == 0)
       return a;
@@ -63,9 +61,7 @@ class FRConjugateGradientTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static FRConjugateGradientTest *createSuite() {
-    return new FRConjugateGradientTest();
-  }
+  static FRConjugateGradientTest *createSuite() { return new FRConjugateGradientTest(); }
   static void destroySuite(FRConjugateGradientTest *suite) { delete suite; }
 
   void testMinimize() {

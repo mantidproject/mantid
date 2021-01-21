@@ -18,8 +18,8 @@ algorithm, visibility status, prefix and description.
 
 class EXPORT_OPT_MANTIDQT_COMMON Column {
 public:
-  Column(QString const &name, QString const &algorithmProperty, bool isShown,
-         QString const &prefix, QString const &description, bool isKey);
+  Column(QString const &name, QString const &algorithmProperty, bool isShown, QString const &prefix,
+         QString const &description, bool isKey);
   QString const &name() const;
   QString const &algorithmProperty() const;
   bool isShown() const;

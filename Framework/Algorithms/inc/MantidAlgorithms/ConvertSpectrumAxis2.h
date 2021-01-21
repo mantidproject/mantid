@@ -48,13 +48,9 @@ public:
 
   /// Algorithm's version
   int version() const override { return (2); }
-  const std::vector<std::string> seeAlso() const override {
-    return {"ConvertAxesToRealSpace", "ConvertUnits"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"ConvertAxesToRealSpace", "ConvertUnits"}; }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "Transforms\\Units;Transforms\\Axes";
-  }
+  const std::string category() const override { return "Transforms\\Units;Transforms\\Axes"; }
 
 private:
   /// Initialisation code
@@ -62,21 +58,16 @@ private:
   /// Execution code
   void exec() override;
   /// Converting to theta.
-  void createThetaMap(API::Progress &progress, const std::string &targetUnit,
-                      API::MatrixWorkspace_sptr &inputWS);
+  void createThetaMap(API::Progress &progress, const std::string &targetUnit, API::MatrixWorkspace_sptr &inputWS);
   /// Compute inPlaneTwoTheta
-  double inPlaneTwoTheta(const size_t index,
-                         const API::MatrixWorkspace_sptr &inputWS) const;
+  double inPlaneTwoTheta(const size_t index, const API::MatrixWorkspace_sptr &inputWS) const;
   /// Compute signed in plane two theta
-  double signedInPlaneTwoTheta(const size_t index,
-                               const API::MatrixWorkspace_sptr &inputWS) const;
+  double signedInPlaneTwoTheta(const size_t index, const API::MatrixWorkspace_sptr &inputWS) const;
   /// Converting to Q and QSquared
-  void createElasticQMap(API::Progress &progress, const std::string &targetUnit,
-                         API::MatrixWorkspace_sptr &inputWS);
+  void createElasticQMap(API::Progress &progress, const std::string &targetUnit, API::MatrixWorkspace_sptr &inputWS);
   /// Creates an output workspace.
-  API::MatrixWorkspace_sptr
-  createOutputWorkspace(API::Progress &progress, const std::string &targetUnit,
-                        API::MatrixWorkspace_sptr &inputWS);
+  API::MatrixWorkspace_sptr createOutputWorkspace(API::Progress &progress, const std::string &targetUnit,
+                                                  API::MatrixWorkspace_sptr &inputWS);
 
   /// Map to which the conversion to the unit is stored.
   std::multimap<double, size_t> m_indexMap;
@@ -91,8 +82,7 @@ private:
   void emplaceIndexMap(double value, size_t wsIndex);
 
   /// Getting Efixed
-  double getEfixed(const size_t detectorIndex,
-                   const Mantid::Geometry::DetectorInfo &detectorInfo,
+  double getEfixed(const size_t detectorIndex, const Mantid::Geometry::DetectorInfo &detectorInfo,
                    const API::MatrixWorkspace &inputWS, const int emode) const;
 };
 

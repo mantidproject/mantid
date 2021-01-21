@@ -27,14 +27,11 @@ public:
   static constexpr uint32_t TRIANGLE_DATA_SIZE = 50;
   static constexpr uint32_t TRIANGLE_COUNT_DATA_SIZE = 4;
   static constexpr uint32_t VECTOR_DATA_SIZE = 12;
-  static constexpr std::ios_base::openmode openMode =
-      std::ios::in | std::ios::binary;
+  static constexpr std::ios_base::openmode openMode = std::ios::in | std::ios::binary;
   LoadBinaryStl(std::string filename, ScaleUnits scaleType)
       : LoadStl(std::move(std::move(filename)), openMode, scaleType) {}
-  LoadBinaryStl(std::string filename, ScaleUnits scaleType,
-                ReadMaterial::MaterialParameters params)
-      : LoadStl(std::move(std::move(filename)), openMode, scaleType,
-                std::move(std::move(params))) {}
+  LoadBinaryStl(std::string filename, ScaleUnits scaleType, ReadMaterial::MaterialParameters params)
+      : LoadStl(std::move(std::move(filename)), openMode, scaleType, std::move(std::move(params))) {}
   std::unique_ptr<Geometry::MeshObject> readShape() override;
   static bool isBinarySTL(const std::string &filename);
 

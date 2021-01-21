@@ -33,10 +33,8 @@ namespace VATES {
  @throw invalid_arument if view is null
  @throw logic_error if cannot use the reader-presenter for this filetype.
  */
-EventNexusLoadingPresenter::EventNexusLoadingPresenter(
-    std::unique_ptr<MDLoadingView> view, const std::string &filename)
-    : MDEWLoadingPresenter(std::move(view)), m_filename(filename),
-      m_wsTypeName("") {
+EventNexusLoadingPresenter::EventNexusLoadingPresenter(std::unique_ptr<MDLoadingView> view, const std::string &filename)
+    : MDEWLoadingPresenter(std::move(view)), m_filename(filename), m_wsTypeName("") {
   if (this->m_filename.empty()) {
     throw std::invalid_argument("File name is an empty string.");
   }
@@ -67,16 +65,13 @@ bool EventNexusLoadingPresenter::canReadFile() const {
     }
     // But only eventNexus files have bank123_events as a group name
     std::map<std::string, std::string> entries = file->getEntries();
-    auto hasEvents =
-        std::find_if(entries.begin(), entries.end(),
-                     [](const std::pair<std::string, std::string> &entry) {
-                       return entry.first.find("_events") != std::string::npos;
-                     });
+    auto hasEvents = std::find_if(entries.begin(), entries.end(), [](const std::pair<std::string, std::string> &entry) {
+      return entry.first.find("_events") != std::string::npos;
+    });
     file->close();
     return hasEvents != entries.end();
   } catch (std::exception &e) {
-    std::cerr << "Could not open " << this->m_filename
-              << " as an EventNexus file because of exception: " << e.what()
+    std::cerr << "Could not open " << this->m_filename << " as an EventNexus file because of exception: " << e.what()
               << '\n';
     // Clean up, if possible
     if (file)
@@ -93,10 +88,9 @@ bool EventNexusLoadingPresenter::canReadFile() const {
  @param drawingProgressUpdate : Handler for GUI updates while
  vtkDataSetFactory::create occurs.
  */
-vtkSmartPointer<vtkDataSet>
-EventNexusLoadingPresenter::execute(vtkDataSetFactory *factory,
-                                    ProgressAction &loadingProgressUpdate,
-                                    ProgressAction &drawingProgressUpdate) {
+vtkSmartPointer<vtkDataSet> EventNexusLoadingPresenter::execute(vtkDataSetFactory *factory,
+                                                                ProgressAction &loadingProgressUpdate,
+                                                                ProgressAction &drawingProgressUpdate) {
   using namespace Mantid::API;
   using namespace Mantid::Geometry;
 
@@ -104,13 +98,11 @@ EventNexusLoadingPresenter::execute(vtkDataSetFactory *factory,
                                    // no use of this.
 
   if (this->shouldLoad()) {
-    Poco::NObserver<ProgressAction,
-                    Mantid::API::Algorithm::ProgressNotification>
-        observer(loadingProgressUpdate, &ProgressAction::handler);
+    Poco::NObserver<ProgressAction, Mantid::API::Algorithm::ProgressNotification> observer(loadingProgressUpdate,
+                                                                                           &ProgressAction::handler);
     AnalysisDataService::Instance().remove("MD_EVENT_WS_ID");
 
-    Algorithm_sptr loadAlg =
-        AlgorithmManager::Instance().createUnmanaged("LoadEventNexus");
+    Algorithm_sptr loadAlg = AlgorithmManager::Instance().createUnmanaged("LoadEventNexus");
     loadAlg->initialize();
     loadAlg->setChild(true);
     loadAlg->setPropertyValue("Filename", this->m_filename);
@@ -120,11 +112,9 @@ EventNexusLoadingPresenter::execute(vtkDataSetFactory *factory,
     loadAlg->removeObserver(observer);
 
     Workspace_sptr temp = loadAlg->getProperty("OutputWorkspace");
-    IEventWorkspace_sptr tempWS =
-        std::dynamic_pointer_cast<IEventWorkspace>(temp);
+    IEventWorkspace_sptr tempWS = std::dynamic_pointer_cast<IEventWorkspace>(temp);
 
-    Algorithm_sptr convertAlg = AlgorithmManager::Instance().createUnmanaged(
-        "ConvertToDiffractionMDWorkspace", 1);
+    Algorithm_sptr convertAlg = AlgorithmManager::Instance().createUnmanaged("ConvertToDiffractionMDWorkspace", 1);
     convertAlg->initialize();
     convertAlg->setChild(true);
     convertAlg->setProperty("InputWorkspace", tempWS);
@@ -139,16 +129,13 @@ EventNexusLoadingPresenter::execute(vtkDataSetFactory *factory,
     AnalysisDataService::Instance().addOrReplace("MD_EVENT_WS_ID", outWS);
   }
 
-  Workspace_sptr result =
-      AnalysisDataService::Instance().retrieve("MD_EVENT_WS_ID");
-  Mantid::API::IMDEventWorkspace_sptr eventWs =
-      std::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(result);
+  Workspace_sptr result = AnalysisDataService::Instance().retrieve("MD_EVENT_WS_ID");
+  Mantid::API::IMDEventWorkspace_sptr eventWs = std::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(result);
   m_wsTypeName = eventWs->id();
 
   factory->setRecursionDepth(this->m_view->getRecursionDepth());
-  auto visualDataSet = factory->oneStepCreate(
-      eventWs, drawingProgressUpdate); // HACK: progressUpdate should be
-                                       // argument for drawing!
+  auto visualDataSet = factory->oneStepCreate(eventWs, drawingProgressUpdate); // HACK: progressUpdate should be
+                                                                               // argument for drawing!
 
   this->extractMetadata(*eventWs);
   this->appendMetadata(visualDataSet, eventWs->getName());
@@ -170,8 +157,7 @@ bool EventNexusLoadingPresenter::hasTDimensionAvailable() const {
  @throw runtime_error if execute has not been run first.
  */
 std::vector<double> EventNexusLoadingPresenter::getTimeStepValues() const {
-  throw std::runtime_error(
-      "Does not have a 4th Dimension, so can be no T-axis");
+  throw std::runtime_error("Does not have a 4th Dimension, so can be no T-axis");
 }
 
 /// Destructor
@@ -196,8 +182,6 @@ void EventNexusLoadingPresenter::executeLoadMetadata() {
  Getter for the workspace type name.
  @return Workspace Type Name
  */
-std::string EventNexusLoadingPresenter::getWorkspaceTypeName() {
-  return m_wsTypeName;
-}
+std::string EventNexusLoadingPresenter::getWorkspaceTypeName() { return m_wsTypeName; }
 } // namespace VATES
 } // namespace Mantid

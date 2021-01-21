@@ -30,17 +30,13 @@ DECLARE_ALGORITHM(FlippingRatioCorrectionMD)
 //----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string FlippingRatioCorrectionMD::name() const {
-  return "FlippingRatioCorrectionMD";
-}
+const std::string FlippingRatioCorrectionMD::name() const { return "FlippingRatioCorrectionMD"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int FlippingRatioCorrectionMD::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string FlippingRatioCorrectionMD::category() const {
-  return "MDAlgorithms\\Transforms";
-}
+const std::string FlippingRatioCorrectionMD::category() const { return "MDAlgorithms\\Transforms"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string FlippingRatioCorrectionMD::summary() const {
@@ -53,30 +49,22 @@ const std::string FlippingRatioCorrectionMD::summary() const {
 /** Initialize the algorithm's properties.
  */
 void FlippingRatioCorrectionMD::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<API::IMDEventWorkspace>>(
-                      "InputWorkspace", "", Kernel::Direction::Input),
-                  "An input MDEventWorkspace.");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<API::IMDEventWorkspace>>("InputWorkspace", "", Kernel::Direction::Input),
+      "An input MDEventWorkspace.");
   declareProperty(
       std::make_unique<Mantid::Kernel::PropertyWithValue<std::string>>(
-          "FlippingRatio", "",
-          std::make_shared<Mantid::Kernel::MandatoryValidator<std::string>>(),
-          Direction::Input),
+          "FlippingRatio", "", std::make_shared<Mantid::Kernel::MandatoryValidator<std::string>>(), Direction::Input),
       "Formula to define the flipping ratio. It can depend on the variables in "
       "the list "
       "of sample logs defined below");
-  declareProperty(
-      std::make_unique<Mantid::Kernel::ArrayProperty<std::string>>(
-          "SampleLogs", Direction::Input),
-      "Comma separated list of sample logs that can appear in the formula for "
-      "flipping ratio");
-  declareProperty(
-      std::make_unique<WorkspaceProperty<API::Workspace>>(
-          "OutputWorkspace1", "", Direction::Output),
-      "Output workspace 1. Equal to Input workspace multiplied by FR/(FR-1).");
-  declareProperty(
-      std::make_unique<WorkspaceProperty<API::Workspace>>(
-          "OutputWorkspace2", "", Direction::Output),
-      "Output workspace 2. Equal to Input workspace multiplied by 1/(FR-1).");
+  declareProperty(std::make_unique<Mantid::Kernel::ArrayProperty<std::string>>("SampleLogs", Direction::Input),
+                  "Comma separated list of sample logs that can appear in the formula for "
+                  "flipping ratio");
+  declareProperty(std::make_unique<WorkspaceProperty<API::Workspace>>("OutputWorkspace1", "", Direction::Output),
+                  "Output workspace 1. Equal to Input workspace multiplied by FR/(FR-1).");
+  declareProperty(std::make_unique<WorkspaceProperty<API::Workspace>>("OutputWorkspace2", "", Direction::Output),
+                  "Output workspace 2. Equal to Input workspace multiplied by 1/(FR-1).");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -84,10 +72,8 @@ void FlippingRatioCorrectionMD::init() {
  */
 std::map<std::string, std::string> FlippingRatioCorrectionMD::validateInputs() {
   std::map<std::string, std::string> errors;
-  if (getPropertyValue("OutputWorkspace1") ==
-      getPropertyValue("OutputWorkspace2")) {
-    const std::string message(
-        "The two output workspace names must be different");
+  if (getPropertyValue("OutputWorkspace1") == getPropertyValue("OutputWorkspace2")) {
+    const std::string message("The two output workspace names must be different");
     errors.emplace("OutputWorkspace1", message);
     errors.emplace("OutputWorkspace2", message);
   }
@@ -111,8 +97,7 @@ void FlippingRatioCorrectionMD::exec() {
     mu::Parser muParser;
     for (size_t j = 0; j < sampleLogStrings.size(); j++) {
       std::string s = sampleLogStrings[j];
-      double val =
-          currentRun.getLogAsSingleValue(s, Kernel::Math::TimeAveragedMean);
+      double val = currentRun.getLogAsSingleValue(s, Kernel::Math::TimeAveragedMean);
       sampleLogs[j] = val;
       muParser.DefineVar(s, &sampleLogs[j]);
     }
@@ -133,22 +118,19 @@ void FlippingRatioCorrectionMD::exec() {
   }
   // Create workspaces by cloning
   API::IMDWorkspace_sptr outputWS1, outputWS2;
-  API::IAlgorithm_sptr cloneMD =
-      createChildAlgorithm("CloneMDWorkspace", 0, 0.25, true);
+  API::IAlgorithm_sptr cloneMD = createChildAlgorithm("CloneMDWorkspace", 0, 0.25, true);
   cloneMD->setRethrows(true);
   cloneMD->setProperty("InputWorkspace", inWS);
   cloneMD->setProperty("OutputWorkspace", getPropertyValue("OutputWorkspace1"));
   cloneMD->executeAsChildAlg();
   outputWS1 = cloneMD->getProperty("OutputWorkspace");
-  API::IMDEventWorkspace_sptr event1 =
-      std::dynamic_pointer_cast<API::IMDEventWorkspace>(outputWS1);
+  API::IMDEventWorkspace_sptr event1 = std::dynamic_pointer_cast<API::IMDEventWorkspace>(outputWS1);
   cloneMD->setProperty("OutputWorkspace", getPropertyValue("OutputWorkspace2"));
   cloneMD->setChildStartProgress(0.25);
   cloneMD->setChildEndProgress(0.5);
   cloneMD->executeAsChildAlg();
   outputWS2 = cloneMD->getProperty("OutputWorkspace");
-  API::IMDEventWorkspace_sptr event2 =
-      std::dynamic_pointer_cast<API::IMDEventWorkspace>(outputWS2);
+  API::IMDEventWorkspace_sptr event2 = std::dynamic_pointer_cast<API::IMDEventWorkspace>(outputWS2);
 
   if (event1) {
     m_factor = C1;
@@ -169,8 +151,7 @@ void FlippingRatioCorrectionMD::exec() {
 }
 
 template <typename MDE, size_t nd>
-void FlippingRatioCorrectionMD::executeTemplatedMDE(
-    typename Mantid::DataObjects::MDEventWorkspace<MDE, nd>::sptr ws) {
+void FlippingRatioCorrectionMD::executeTemplatedMDE(typename Mantid::DataObjects::MDEventWorkspace<MDE, nd>::sptr ws) {
   // Get all the MDBoxes contained
   DataObjects::MDBoxBase<MDE, nd> *parentBox = ws->getBox();
   std::vector<API::IMDNode *> boxes;
@@ -190,8 +171,7 @@ void FlippingRatioCorrectionMD::executeTemplatedMDE(
       for (auto &event : events) {
         const auto ind = static_cast<size_t>(event.getRunIndex());
         const auto scalar = static_cast<float>(m_factor[ind]);
-        const auto scalarSquared =
-            static_cast<float>(m_factor[ind] * m_factor[ind]);
+        const auto scalarSquared = static_cast<float>(m_factor[ind] * m_factor[ind]);
         // Multiply weight by a scalar, propagating error
         const float oldSignal = event.getSignal();
         const float signal = oldSignal * scalar;

@@ -45,25 +45,19 @@ private:
   Kernel::V3D m_origin;    ///< Orign point (on plane)
   Kernel::V3D m_direction; ///< Direction of outer surface (Unit Vector)
 
-  int lambdaPair(
-      const int ix,
-      const std::pair<std::complex<double>, std::complex<double>> &SQ,
-      std::vector<Kernel::V3D> &PntOut) const;
+  int lambdaPair(const int ix, const std::pair<std::complex<double>, std::complex<double>> &SQ,
+                 std::vector<Kernel::V3D> &PntOut) const;
 
 public:
   Line();
   Line(const Kernel::V3D &, const Kernel::V3D &);
   Line *clone() const;
 
-  Kernel::V3D getPoint(const double lambda) const; ///< gets the point O+lam*N
-  const Kernel::V3D &getOrigin() const {
-    return m_origin;
-  } ///< returns the origin
-  const Kernel::V3D &getDirect() const {
-    return m_direction;
-  }                                           ///< returns the direction
-  double distance(const Kernel::V3D &) const; ///< distance from line
-  int isValid(const Kernel::V3D &) const;     ///< Is the point on the line
+  Kernel::V3D getPoint(const double lambda) const;             ///< gets the point O+lam*N
+  const Kernel::V3D &getOrigin() const { return m_origin; }    ///< returns the origin
+  const Kernel::V3D &getDirect() const { return m_direction; } ///< returns the direction
+  double distance(const Kernel::V3D &) const;                  ///< distance from line
+  int isValid(const Kernel::V3D &) const;                      ///< Is the point on the line
   void print() const;
 
   void rotate(const Kernel::Matrix<double> &);

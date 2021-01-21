@@ -20,8 +20,7 @@ public:
 
   void test_is_peaks_presenter() {
     NullPeaksPresenter presenter;
-    PeaksPresenter &base =
-        presenter; // compile-time test for the is-a relationship
+    PeaksPresenter &base = presenter; // compile-time test for the is-a relationship
     UNUSED_ARG(base);
   }
 

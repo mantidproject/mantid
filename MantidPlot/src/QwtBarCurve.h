@@ -36,8 +36,7 @@
 class QwtBarCurve : public DataCurve {
 public:
   enum BarStyle { Vertical = 0, Horizontal = 1 };
-  QwtBarCurve(BarStyle style, Table *t, const QString &xColName,
-              const QString &name, int startRow, int endRow);
+  QwtBarCurve(BarStyle style, Table *t, const QString &xColName, const QString &name, int startRow, int endRow);
 
   void copy(const QwtBarCurve *b);
 
@@ -56,8 +55,7 @@ public:
 private:
   using DataCurve::draw; // Unhide base class method (avoids Intel compiler
                          // warning)
-  void draw(QPainter *painter, const QwtScaleMap &xMap, const QwtScaleMap &yMap,
-            int from, int to) const override;
+  void draw(QPainter *painter, const QwtScaleMap &xMap, const QwtScaleMap &yMap, int from, int to) const override;
 
   int bar_gap, bar_offset;
   BarStyle bar_style;

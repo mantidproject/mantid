@@ -19,16 +19,13 @@ namespace DataProcessor {
 DataPostprocessorAlgorithm defines a post-processor algorithm responsible for
 post-processing rows belonging to the same group in a Data Processor UI.
 */
-class EXPORT_OPT_MANTIDQT_COMMON PostprocessingAlgorithm
-    : public ProcessingAlgorithmBase {
+class EXPORT_OPT_MANTIDQT_COMMON PostprocessingAlgorithm : public ProcessingAlgorithmBase {
 public:
   // Constructor
-  PostprocessingAlgorithm(
-      const QString &name, const QString &prefix = "",
-      const std::set<QString> &blacklist = std::set<QString>());
+  PostprocessingAlgorithm(const QString &name, const QString &prefix = "",
+                          const std::set<QString> &blacklist = std::set<QString>());
   // Delegating constructor
-  PostprocessingAlgorithm(const QString &name, const QString &prefix,
-                          const QString &blacklist);
+  PostprocessingAlgorithm(const QString &name, const QString &prefix, const QString &blacklist);
   // Default constructor
   PostprocessingAlgorithm();
   // Destructor

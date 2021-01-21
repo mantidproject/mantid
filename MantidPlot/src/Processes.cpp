@@ -29,8 +29,7 @@ bool isOtherInstance(int64_t otherPID, const QString &otherExeName) {
   if (otherPID == ourPID)
     return false;
 
-  static const QString ourExeName(
-      QFileInfo(QCoreApplication::applicationFilePath()).fileName());
+  static const QString ourExeName(QFileInfo(QCoreApplication::applicationFilePath()).fileName());
   if (ourExeName == otherExeName)
     return true;
   else
@@ -85,8 +84,7 @@ unsigned int numberOfMantids() {
   DWORD enumReturnSz{0};
   do {
     processes.resize(processes.size() + 1024);
-    const DWORD procArrayByteSz =
-        static_cast<DWORD>(processes.size()) * sizeof(DWORD);
+    const DWORD procArrayByteSz = static_cast<DWORD>(processes.size()) * sizeof(DWORD);
     if (!EnumProcesses(processes.data(), procArrayByteSz, &enumReturnSz)) {
       throw std::runtime_error("Unable to determine running process list");
     }
@@ -105,8 +103,7 @@ unsigned int numberOfMantids() {
       continue;
     DWORD exeSz = GetProcessImageFileNameW(procHandle, exe, MAX_PATH);
     CloseHandle(procHandle);
-    if (exeSz > 0 &&
-        isOtherInstance(pid, QFileInfo(toQStringInternal(exe)).fileName())) {
+    if (exeSz > 0 && isOtherInstance(pid, QFileInfo(toQStringInternal(exe)).fileName())) {
       ++counter;
     }
   }
@@ -136,8 +133,7 @@ unsigned int numberOfMantids() {
     if (sysctl((int *)sysctlQuery, 3, nullptr, &size, nullptr, 0) == -1) {
       throw std::runtime_error("Unable to retrieve process list");
     }
-    const size_t size2 =
-        size + (size >> 3); // add some to cover more popping in
+    const size_t size2 = size + (size >> 3); // add some to cover more popping in
     if (size2 > size) {
       memory = malloc(size2);
       if (memory == nullptr)
@@ -148,8 +144,7 @@ unsigned int numberOfMantids() {
       memory = malloc(size);
     }
     if (memory == nullptr)
-      throw std::runtime_error(
-          "Unable to allocate memory to retrieve process list");
+      throw std::runtime_error("Unable to allocate memory to retrieve process list");
     if (sysctl((int *)sysctlQuery, 3, memory, &size, nullptr, 0) == -1) {
       free(memory);
       throw std::runtime_error("Unable to retrieve process list");
@@ -170,8 +165,7 @@ unsigned int numberOfMantids() {
       // assume process is dead...
       continue;
     }
-    if (isOtherInstance(pid,
-                        QFileInfo(QString::fromAscii(exePath)).fileName())) {
+    if (isOtherInstance(pid, QFileInfo(QString::fromAscii(exePath)).fileName())) {
       ++counter;
     }
     ++processIter;

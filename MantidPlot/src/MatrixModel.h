@@ -53,15 +53,11 @@ public:
   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
   virtual void setColumnCount(int cols);
 
-  bool removeRows(int row, int count,
-                  const QModelIndex &parent = QModelIndex()) override;
-  bool insertRows(int row, int count,
-                  const QModelIndex &parent = QModelIndex()) override;
+  bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
+  bool insertRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
 
-  bool removeColumns(int column, int count,
-                     const QModelIndex &parent = QModelIndex()) override;
-  bool insertColumns(int column, int count,
-                     const QModelIndex &parent = QModelIndex()) override;
+  bool removeColumns(int column, int count, const QModelIndex &parent = QModelIndex()) override;
+  bool insertColumns(int column, int count, const QModelIndex &parent = QModelIndex()) override;
 
   virtual double x(int col) const;
   virtual double y(int row) const;
@@ -76,21 +72,16 @@ public:
   virtual QImage renderImage();
 
   virtual double data(int row, int col) const;
-  QVariant data(const QModelIndex &index,
-                int role = Qt::DisplayRole) const override;
-  bool setData(const QModelIndex &index, const QVariant &value,
-               int role) override;
+  QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+  bool setData(const QModelIndex &index, const QVariant &value, int role) override;
 
   virtual double *dataVector() { return d_data; };
-  QVariant headerData(int section, Qt::Orientation orientation,
-                      int role = Qt::DisplayRole) const override;
+  QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
   virtual void setImage(const QImage &image);
 
-  virtual bool importASCII(const QString &fname, const QString &sep,
-                           int ignoredLines, bool stripSpaces,
-                           bool simplifySpaces, const QString &commentString,
-                           int importAs, const QLocale &locale,
+  virtual bool importASCII(const QString &fname, const QString &sep, int ignoredLines, bool stripSpaces,
+                           bool simplifySpaces, const QString &commentString, int importAs, const QLocale &locale,
                            int endLineChar = 0, int maxRows = -1);
 
   void setLocale(const QLocale &locale) { d_locale = locale; };
@@ -103,16 +94,11 @@ public:
   virtual void flipHorizontally();
   virtual void rotate90(bool clockwise);
   virtual void fft(bool inverse);
-  virtual void clear(int startRow = 0, int endRow = -1, int startCol = 0,
-                     int endCol = -1);
-  virtual bool calculate(int startRow = 0, int endRow = -1, int startCol = 0,
-                         int endCol = -1);
-  virtual bool muParserCalculate(int startRow = 0, int endRow = -1,
-                                 int startCol = 0, int endCol = -1);
-  virtual double *dataCopy(int startRow = 0, int endRow = -1, int startCol = 0,
-                           int endCol = -1);
-  virtual void pasteData(double *clipboardBuffer, int topRow, int leftCol,
-                         int rows, int cols);
+  virtual void clear(int startRow = 0, int endRow = -1, int startCol = 0, int endCol = -1);
+  virtual bool calculate(int startRow = 0, int endRow = -1, int startCol = 0, int endCol = -1);
+  virtual bool muParserCalculate(int startRow = 0, int endRow = -1, int startCol = 0, int endCol = -1);
+  virtual double *dataCopy(int startRow = 0, int endRow = -1, int startCol = 0, int endCol = -1);
+  virtual void pasteData(double *clipboardBuffer, int topRow, int leftCol, int rows, int cols);
 
 protected:
   Matrix *d_matrix;

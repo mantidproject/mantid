@@ -25,8 +25,7 @@ DECLARE_DIALOG(CatalogPublishDialog)
  * Default constructor.
  * @param parent :: Parent dialog.
  */
-CatalogPublishDialog::CatalogPublishDialog(QWidget *parent)
-    : API::AlgorithmDialog(parent), m_uiForm() {}
+CatalogPublishDialog::CatalogPublishDialog(QWidget *parent) : API::AlgorithmDialog(parent), m_uiForm() {}
 
 /// Initialise the layout
 void CatalogPublishDialog::initLayout() {
@@ -41,14 +40,11 @@ void CatalogPublishDialog::initLayout() {
   connect(m_uiForm.runBtn, SIGNAL(clicked()), this, SLOT(accept()));
   connect(m_uiForm.cancelBtn, SIGNAL(clicked()), this, SLOT(reject()));
   connect(m_uiForm.helpBtn, SIGNAL(clicked()), this, SLOT(helpClicked()));
-  connect(m_uiForm.investigationNumberCb, SIGNAL(currentIndexChanged(int)),
-          this, SLOT(setSessionProperty(int)));
-  connect(m_uiForm.dataSelector, SIGNAL(dataReady(const QString &)), this,
-          SLOT(workspaceSelected(const QString &)));
+  connect(m_uiForm.investigationNumberCb, SIGNAL(currentIndexChanged(int)), this, SLOT(setSessionProperty(int)));
+  connect(m_uiForm.dataSelector, SIGNAL(dataReady(const QString &)), this, SLOT(workspaceSelected(const QString &)));
   // When a file is chosen to be published, set the related "FileName" property
   // of the algorithm.
-  connect(m_uiForm.dataSelector, SIGNAL(filesFound()), this,
-          SLOT(fileSelected()));
+  connect(m_uiForm.dataSelector, SIGNAL(filesFound()), this, SLOT(fileSelected()));
 
   // Populate "investigationNumberCb" with the investigation IDs that the user
   // can publish to.
@@ -58,9 +54,7 @@ void CatalogPublishDialog::initLayout() {
   // publish to.
   m_uiForm.instructions->setText(getOptionalMessage());
   // This is required as we use the currentIndexChanged SLOT.
-  storePropertyValue(
-      "Session",
-      m_uiForm.investigationNumberCb->itemData(0, Qt::UserRole).toString());
+  storePropertyValue("Session", m_uiForm.investigationNumberCb->itemData(0, Qt::UserRole).toString());
 }
 
 /**
@@ -76,14 +70,11 @@ void CatalogPublishDialog::populateUserInvestigations() {
     if (!session.empty()) {
       // Cast a catalog to a catalogInfoService to access downloading
       // functionality.
-      auto catalogInfoService =
-          std::dynamic_pointer_cast<Mantid::API::ICatalogInfoService>(
-              Mantid::API::CatalogManager::Instance().getCatalog(
-                  session.front()->getSessionId()));
+      auto catalogInfoService = std::dynamic_pointer_cast<Mantid::API::ICatalogInfoService>(
+          Mantid::API::CatalogManager::Instance().getCatalog(session.front()->getSessionId()));
       // Check if the catalog created supports publishing functionality.
       if (!catalogInfoService)
-        throw std::runtime_error(
-            "The catalog that you are using does not support publishing.");
+        throw std::runtime_error("The catalog that you are using does not support publishing.");
       // Populate the workspace with investigations that the user has CREATE
       // access to.
       workspace = catalogInfoService->getPublishInvestigations();
@@ -95,23 +86,19 @@ void CatalogPublishDialog::populateUserInvestigations() {
   if (workspace->rowCount() > 0) {
     // Populate the form with investigations that the user can publish to.
     for (size_t row = 0; row < workspace->rowCount(); row++) {
-      m_uiForm.investigationNumberCb->addItem(QString::fromStdString(
-          workspace->getRef<std::string>("InvestigationID", row)));
+      m_uiForm.investigationNumberCb->addItem(
+          QString::fromStdString(workspace->getRef<std::string>("InvestigationID", row)));
       // Added tooltips to improve usability.
       m_uiForm.investigationNumberCb->setItemData(
           static_cast<int>(row),
           QString::fromStdString(
-              "The title of the investigation is: \"" +
-              workspace->getRef<std::string>("Title", row) +
-              "\".\nThe instrument of the investigation is: \"" +
-              workspace->getRef<std::string>("Instrument", row)) +
+              "The title of the investigation is: \"" + workspace->getRef<std::string>("Title", row) +
+              "\".\nThe instrument of the investigation is: \"" + workspace->getRef<std::string>("Instrument", row)) +
               "\".",
           Qt::ToolTipRole);
       // Set the user role to the sessionID.
       m_uiForm.investigationNumberCb->setItemData(
-          static_cast<int>(row),
-          QString::fromStdString(
-              workspace->getRef<std::string>("SessionID", row)),
+          static_cast<int>(row), QString::fromStdString(workspace->getRef<std::string>("SessionID", row)),
           Qt::UserRole);
     }
   } else {
@@ -160,9 +147,7 @@ void CatalogPublishDialog::disableDialog() {
  * the user selects an investigation from the combo-box.
  */
 void CatalogPublishDialog::setSessionProperty(int index) {
-  storePropertyValue(
-      "Session",
-      m_uiForm.investigationNumberCb->itemData(index, Qt::UserRole).toString());
+  storePropertyValue("Session", m_uiForm.investigationNumberCb->itemData(index, Qt::UserRole).toString());
 }
 
 /**
@@ -171,11 +156,9 @@ void CatalogPublishDialog::setSessionProperty(int index) {
 void CatalogPublishDialog::accept() {
   if (!m_uiForm.dataSelector->isValid()) {
     if (m_uiForm.dataSelector->getFullFilePath().isEmpty()) {
-      QMessageBox::critical(this, "Error in catalog publishing.",
-                            "No file specified.");
+      QMessageBox::critical(this, "Error in catalog publishing.", "No file specified.");
     } else {
-      QMessageBox::critical(this, "Error in catalog publishing.",
-                            m_uiForm.dataSelector->getProblem());
+      QMessageBox::critical(this, "Error in catalog publishing.", m_uiForm.dataSelector->getProblem());
     }
   } else {
     AlgorithmDialog::accept();

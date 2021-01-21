@@ -31,16 +31,12 @@ public:
     return "Crops an MDHistoWorkspace based on the first non-zero signals "
            "giving a more focussed area of interest.";
   }
-  const std::string category() const override {
-    return "MDAlgorithms\\Utility\\Workspaces";
-  }
+  const std::string category() const override { return "MDAlgorithms\\Utility\\Workspaces"; }
   /// Algorithm's version for identification
   int version() const override { return 1; }
   /// Finding the extents of the first non-zero signals.
-  void findFirstNonZeroMinMaxExtents(
-      const Mantid::API::IMDHistoWorkspace_sptr &inputWs,
-      std::vector<Mantid::coord_t> &minVec,
-      std::vector<Mantid::coord_t> &maxVec);
+  void findFirstNonZeroMinMaxExtents(const Mantid::API::IMDHistoWorkspace_sptr &inputWs,
+                                     std::vector<Mantid::coord_t> &minVec, std::vector<Mantid::coord_t> &maxVec);
 };
 } // namespace MDAlgorithms
 } // namespace Mantid

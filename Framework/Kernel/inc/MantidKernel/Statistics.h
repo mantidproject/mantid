@@ -15,15 +15,7 @@ namespace Math {
 /**
  * Maps a "statistic" to a number
  */
-enum StatisticType {
-  FirstValue,
-  LastValue,
-  Minimum,
-  Maximum,
-  Mean,
-  TimeAveragedMean,
-  Median
-};
+enum StatisticType { FirstValue, LastValue, Minimum, Maximum, Mean, TimeAveragedMean, Median };
 } // namespace Math
 
 /**
@@ -72,32 +64,25 @@ struct Rfactor {
 
 /// Return a statistics object for the given data set
 template <typename TYPE>
-Statistics getStatistics(const std::vector<TYPE> &data,
-                         const unsigned int flags = StatOptions::AllStats);
+Statistics getStatistics(const std::vector<TYPE> &data, const unsigned int flags = StatOptions::AllStats);
 /// Return the Z score values for a dataset
+template <typename TYPE> std::vector<double> getZscore(const std::vector<TYPE> &data);
 template <typename TYPE>
-std::vector<double> getZscore(const std::vector<TYPE> &data);
-template <typename TYPE>
-std::vector<double> getWeightedZscore(const std::vector<TYPE> &data,
-                                      const std::vector<TYPE> &weights);
+std::vector<double> getWeightedZscore(const std::vector<TYPE> &data, const std::vector<TYPE> &weights);
 /// Return the modified Z score values for a dataset
 template <typename TYPE>
-std::vector<double> getModifiedZscore(const std::vector<TYPE> &data,
-                                      const bool sorted = false);
+std::vector<double> getModifiedZscore(const std::vector<TYPE> &data, const bool sorted = false);
 /// Return the R-factors (Rwp) of a diffraction pattern data
-Rfactor MANTID_KERNEL_DLL getRFactor(const std::vector<double> &obsI,
-                                     const std::vector<double> &calI,
+Rfactor MANTID_KERNEL_DLL getRFactor(const std::vector<double> &obsI, const std::vector<double> &calI,
                                      const std::vector<double> &obsE);
 
 /// Return the first n-moments of the supplied data.
 template <typename TYPE>
-std::vector<double> getMomentsAboutOrigin(const std::vector<TYPE> &x,
-                                          const std::vector<TYPE> &y,
+std::vector<double> getMomentsAboutOrigin(const std::vector<TYPE> &x, const std::vector<TYPE> &y,
                                           const int maxMoment = 3);
 /// Return the first n-moments of the supplied data.
 template <typename TYPE>
-std::vector<double> getMomentsAboutMean(const std::vector<TYPE> &x,
-                                        const std::vector<TYPE> &y,
+std::vector<double> getMomentsAboutMean(const std::vector<TYPE> &x, const std::vector<TYPE> &y,
                                         const int maxMoment = 3);
 } // namespace Kernel
 } // namespace Mantid

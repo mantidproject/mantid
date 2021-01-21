@@ -121,8 +121,7 @@ static int gsl_f(const gsl_vector *x, void *params, gsl_vector *f) {
     if (fitParams->active[i])
       fitParams->parameters[i] = x->data[j++];
 
-  fitParams->fit1D->function(fitParams->parameters, f->data, fitParams->X,
-                             fitParams->n);
+  fitParams->fit1D->function(fitParams->parameters, f->data, fitParams->X, fitParams->n);
 
   // function() return calculated data values. Need to convert this values into
   // calculated-observed devided by error values used by GSL
@@ -148,8 +147,7 @@ static int gsl_df(const gsl_vector *x, void *params, gsl_matrix *J) {
 
   fitParams->J.setJ(J);
 
-  fitParams->fit1D->functionDeriv(fitParams->parameters, &fitParams->J,
-                                  fitParams->X, fitParams->n);
+  fitParams->fit1D->functionDeriv(fitParams->parameters, &fitParams->J, fitParams->X, fitParams->n);
 
   // functionDeriv() return derivatives of calculated data values. Need to
   // convert this values into derivatives of calculated-observed devided
@@ -169,8 +167,7 @@ static int gsl_df(const gsl_vector *x, void *params, gsl_matrix *J) {
  * @param J :: Output derivatives
  * @return A GSL status information
  */
-static int gsl_fdf(const gsl_vector *x, void *params, gsl_vector *f,
-                   gsl_matrix *J) {
+static int gsl_fdf(const gsl_vector *x, void *params, gsl_vector *f, gsl_matrix *J) {
   gsl_f(x, params, f);
   gsl_df(x, params, J);
   return GSL_SUCCESS;
@@ -191,14 +188,12 @@ static double gsl_costFunction(const gsl_vector *x, void *params) {
     if (fitParams->active[i])
       fitParams->parameters[i] = x->data[j++];
 
-  fitParams->fit1D->function(fitParams->parameters, l_forSimplexLSwrap,
-                             fitParams->X, fitParams->n);
+  fitParams->fit1D->function(fitParams->parameters, l_forSimplexLSwrap, fitParams->X, fitParams->n);
 
   // function() return calculated data values. Need to convert this values into
   // calculated-observed devided by error values used by GSL
   for (size_t i = 0; i < fitParams->n; i++)
-    l_forSimplexLSwrap[i] =
-        (l_forSimplexLSwrap[i] - fitParams->Y[i]) / fitParams->sigmaData[i];
+    l_forSimplexLSwrap[i] = (l_forSimplexLSwrap[i] - fitParams->Y[i]) / fitParams->sigmaData[i];
 
   double retVal = 0.0;
 
@@ -222,8 +217,7 @@ derivative free simplex minimization
 * @param xValues :: X values for data points
 * @param nData :: Number of data points
  */
-void Fit1D::functionDeriv(const double *in, Jacobian *out,
-                          const double *xValues, const size_t nData) {
+void Fit1D::functionDeriv(const double *in, Jacobian *out, const double *xValues, const size_t nData) {
   UNUSED_ARG(in);
   UNUSED_ARG(out);
   UNUSED_ARG(xValues);
@@ -240,8 +234,7 @@ modifyFinalFittedParameters()
 * @param fittedParameter :: Values of fitting parameters in the order listed in
 declareParameters()
  */
-void Fit1D::modifyInitialFittedParameters(
-    std::vector<double> &fittedParameter) {
+void Fit1D::modifyInitialFittedParameters(std::vector<double> &fittedParameter) {
   (void)fittedParameter; // Avoid compiler warning
 }
 
@@ -259,8 +252,7 @@ void Fit1D::modifyFinalFittedParameters(std::vector<double> &fittedParameter) {
 /** Initialisation method
  */
 void Fit1D::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input),
                   "Name of the input Workspace");
 
   auto mustBePositive = std::make_shared<BoundedValidator<int>>();
@@ -292,9 +284,8 @@ void Fit1D::init() {
   declareProperty("Fix", "",
                   "A list of comma separated parameter names which "
                   "should be fixed in the fit");
-  declareProperty(
-      "MaxIterations", 500, mustBePositive,
-      "Stop after this number of iterations if a good fit is not found");
+  declareProperty("MaxIterations", 500, mustBePositive,
+                  "Stop after this number of iterations if a good fit is not found");
   declareProperty("OutputStatus", "", Direction::Output);
   declareProperty("OutputChi2overDoF", 0.0, Direction::Output);
 
@@ -403,18 +394,14 @@ void Fit1D::exec() {
 
   FitData l_data(this, getProperty("Fix"));
 
-  l_data.n =
-      m_maxX -
-      m_minX; // m_minX and m_maxX are array index markers. I.e. e.g. 0 & 19.
+  l_data.n = m_maxX - m_minX; // m_minX and m_maxX are array index markers. I.e. e.g. 0 & 19.
   if (l_data.n == 0) {
     g_log.error("The data set is empty.");
     throw std::runtime_error("The data set is empty.");
   }
   if (l_data.n < l_data.p) {
-    g_log.error(
-        "Number of data points less than number of parameters to be fitted.");
-    throw std::runtime_error(
-        "Number of data points less than number of parameters to be fitted.");
+    g_log.error("Number of data points less than number of parameters to be fitted.");
+    throw std::runtime_error("Number of data points less than number of parameters to be fitted.");
   }
   l_data.X = new double[l_data.n];
   l_data.sigmaData = new double[l_data.n];
@@ -426,9 +413,7 @@ void Fit1D::exec() {
   const bool isHistogram = localworkspace->isHistogramData();
   for (unsigned int i = 0; i < l_data.n; ++i) {
     if (isHistogram)
-      l_data.X[i] =
-          0.5 * (XValues[m_minX + i] +
-                 XValues[m_minX + i + 1]); // take mid-point if histogram bin
+      l_data.X[i] = 0.5 * (XValues[m_minX + i] + XValues[m_minX + i + 1]); // take mid-point if histogram bin
     else
       l_data.X[i] = XValues[m_minX + i];
   }
@@ -459,8 +444,7 @@ void Fit1D::exec() {
   for (size_t i = 0; i < nParams(); i++) {
     m_fittedParameter.emplace_back(getProperty(m_parameterNames[i]));
   }
-  modifyInitialFittedParameters(
-      m_fittedParameter); // does nothing except if overwritten by derived class
+  modifyInitialFittedParameters(m_fittedParameter); // does nothing except if overwritten by derived class
   for (size_t i = 0; i < nParams(); i++) {
     l_data.parameters[i] = m_fittedParameter[i];
   }
@@ -503,8 +487,7 @@ void Fit1D::exec() {
 
   // set-up remaining GSL machinery to use simplex algorithm
 
-  const gsl_multimin_fminimizer_type *simplexType =
-      gsl_multimin_fminimizer_nmsimplex;
+  const gsl_multimin_fminimizer_type *simplexType = gsl_multimin_fminimizer_nmsimplex;
   gsl_multimin_fminimizer *simplexMinimizer = nullptr;
   gsl_vector *simplexStepSize = nullptr;
   if (!isDerivDefined) {
@@ -512,8 +495,7 @@ void Fit1D::exec() {
     simplexStepSize = gsl_vector_alloc(l_data.p);
     gsl_vector_set_all(simplexStepSize,
                        1.0); // is this always a sensible starting step size?
-    gsl_multimin_fminimizer_set(simplexMinimizer, &gslSimplexContainer,
-                                initFuncArg, simplexStepSize);
+    gsl_multimin_fminimizer_set(simplexMinimizer, &gslSimplexContainer, initFuncArg, simplexStepSize);
   }
 
   // finally do the fitting
@@ -521,8 +503,7 @@ void Fit1D::exec() {
   int iter = 0;
   int status;
   double finalCostFuncVal;
-  auto dof = static_cast<double>(l_data.n -
-                                 l_data.p); // dof stands for degrees of freedom
+  auto dof = static_cast<double>(l_data.n - l_data.p); // dof stands for degrees of freedom
 
   // Standard least-squares used if derivative function defined otherwise
   // simplex
@@ -568,8 +549,7 @@ void Fit1D::exec() {
         m_fittedParameter[i] = gsl_vector_get(simplexMinimizer->x, j++);
   }
 
-  modifyFinalFittedParameters(
-      m_fittedParameter); // do nothing except if overwritten by derived class
+  modifyFinalFittedParameters(m_fittedParameter); // do nothing except if overwritten by derived class
 
   // Output summary to log file
 
@@ -579,8 +559,7 @@ void Fit1D::exec() {
                       << "Status = " << reportOfFit << "\n"
                       << "Chi^2/DoF = " << finalCostFuncVal << "\n";
   for (size_t i = 0; i < m_fittedParameter.size(); i++)
-    g_log.information() << m_parameterNames[i] << " = " << m_fittedParameter[i]
-                        << "  \n";
+    g_log.information() << m_parameterNames[i] << " = " << m_fittedParameter[i] << "  \n";
 
   // also output summary to properties
 
@@ -620,20 +599,16 @@ void Fit1D::exec() {
         if (l_data.active[i])
           standardDeviations.emplace_back(sdExtended[i]);
 
-      declareProperty(
-          std::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
-              "OutputNormalisedCovarianceMatrix", "", Direction::Output),
-          "The name of the TableWorkspace in which to store the final "
-          "covariance matrix");
-      setPropertyValue("OutputNormalisedCovarianceMatrix",
-                       output + "_NormalisedCovarianceMatrix");
+      declareProperty(std::make_unique<WorkspaceProperty<API::ITableWorkspace>>("OutputNormalisedCovarianceMatrix", "",
+                                                                                Direction::Output),
+                      "The name of the TableWorkspace in which to store the final "
+                      "covariance matrix");
+      setPropertyValue("OutputNormalisedCovarianceMatrix", output + "_NormalisedCovarianceMatrix");
 
       Mantid::API::ITableWorkspace_sptr m_covariance =
-          Mantid::API::WorkspaceFactory::Instance().createTable(
-              "TableWorkspace");
+          Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
       m_covariance->addColumn("str", "Name");
-      std::vector<std::string>
-          paramThatAreFitted; // used for populating 1st "name" column
+      std::vector<std::string> paramThatAreFitted; // used for populating 1st "name" column
       for (size_t i = 0; i < nParams(); i++) {
         if (l_data.active[i]) {
           m_covariance->addColumn("double", m_parameterNames[i]);
@@ -650,8 +625,7 @@ void Fit1D::exec() {
             row << 1.0;
           else {
             row << 100.0 * gsl_matrix_get(covar, i, j) /
-                       sqrt(gsl_matrix_get(covar, i, i) *
-                            gsl_matrix_get(covar, j, j));
+                       sqrt(gsl_matrix_get(covar, i, i) * gsl_matrix_get(covar, j, j));
           }
         }
       }
@@ -659,14 +633,12 @@ void Fit1D::exec() {
       setProperty("OutputNormalisedCovarianceMatrix", m_covariance);
     }
 
-    declareProperty(std::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
-                        "OutputParameters", "", Direction::Output),
-                    "The name of the TableWorkspace in which to store the "
-                    "final fit parameters");
     declareProperty(
-        std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-            "OutputWorkspace", "", Direction::Output),
-        "Name of the output Workspace holding resulting simlated spectrum");
+        std::make_unique<WorkspaceProperty<API::ITableWorkspace>>("OutputParameters", "", Direction::Output),
+        "The name of the TableWorkspace in which to store the "
+        "final fit parameters");
+    declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
+                    "Name of the output Workspace holding resulting simlated spectrum");
 
     setPropertyValue("OutputParameters", output + "_Parameters");
     setPropertyValue("OutputWorkspace", output + "_Workspace");
@@ -698,26 +670,20 @@ void Fit1D::exec() {
     const MantidVec &inputY = inputWorkspace->readY(iSpec);
 
     int histN = isHistogram ? 1 : 0;
-    Mantid::DataObjects::Workspace2D_sptr ws =
-        std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
-            Mantid::API::WorkspaceFactory::Instance().create(
-                "Workspace2D", 3, l_data.n + histN, l_data.n));
+    Mantid::DataObjects::Workspace2D_sptr ws = std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
+        Mantid::API::WorkspaceFactory::Instance().create("Workspace2D", 3, l_data.n + histN, l_data.n));
     ws->setTitle("");
-    ws->getAxis(0)->unit() =
-        inputWorkspace->getAxis(0)
-            ->unit(); //    UnitFactory::Instance().create("TOF");
+    ws->getAxis(0)->unit() = inputWorkspace->getAxis(0)->unit(); //    UnitFactory::Instance().create("TOF");
 
     for (int i = 0; i < 3; i++)
-      ws->dataX(i).assign(inputX.begin() + m_minX,
-                          inputX.begin() + m_maxX + histN);
+      ws->dataX(i).assign(inputX.begin() + m_minX, inputX.begin() + m_maxX + histN);
 
     ws->dataY(0).assign(inputY.begin() + m_minX, inputY.begin() + m_maxX);
 
     MantidVec &Y = ws->dataY(1);
     MantidVec &E = ws->dataY(2);
 
-    auto lOut =
-        new double[l_data.n]; // to capture output from call to function()
+    auto lOut = new double[l_data.n];                 // to capture output from call to function()
     modifyInitialFittedParameters(m_fittedParameter); // does nothing except if
                                                       // overwritten by derived
                                                       // class
@@ -732,8 +698,7 @@ void Fit1D::exec() {
 
     delete[] lOut;
 
-    setProperty("OutputWorkspace",
-                std::dynamic_pointer_cast<MatrixWorkspace>(ws));
+    setProperty("OutputWorkspace", std::dynamic_pointer_cast<MatrixWorkspace>(ws));
 
     if (isDerivDefined)
       gsl_matrix_free(covar);
@@ -760,19 +725,16 @@ void Fit1D::exec() {
  *   @param fixed :: A list of comma separated names of the fixed parameters.
  */
 FitData::FitData(Fit1D *fit, const std::string &fixed)
-    : n(0), X(nullptr), Y(nullptr), sigmaData(nullptr), fit1D(fit),
-      forSimplexLSwrap(nullptr), parameters(nullptr) {
-  Mantid::Kernel::StringTokenizer namesStrTok(
-      fixed, ",", Mantid::Kernel::StringTokenizer::TOK_TRIM);
+    : n(0), X(nullptr), Y(nullptr), sigmaData(nullptr), fit1D(fit), forSimplexLSwrap(nullptr), parameters(nullptr) {
+  Mantid::Kernel::StringTokenizer namesStrTok(fixed, ",", Mantid::Kernel::StringTokenizer::TOK_TRIM);
   active.insert(active.begin(), fit1D->m_parameterNames.size(), true);
   for (const auto &name : namesStrTok) {
-    std::vector<std::string>::const_iterator i = std::find(
-        fit1D->m_parameterNames.begin(), fit1D->m_parameterNames.end(), name);
+    std::vector<std::string>::const_iterator i =
+        std::find(fit1D->m_parameterNames.begin(), fit1D->m_parameterNames.end(), name);
     if (i != fit1D->m_parameterNames.end()) {
       active[i - fit1D->m_parameterNames.begin()] = false;
     } else
-      throw std::invalid_argument("Attempt to fix non-existing parameter " +
-                                  name);
+      throw std::invalid_argument("Attempt to fix non-existing parameter " + name);
   }
   p = 0;
   for (int i = 0; i < int(active.size()); i++)

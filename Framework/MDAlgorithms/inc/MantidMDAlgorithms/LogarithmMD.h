@@ -21,14 +21,10 @@ class DLLExport LogarithmMD : public UnaryOperationMD {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Perform a natural logarithm of a MDHistoWorkspace.";
-  }
+  const std::string summary() const override { return "Perform a natural logarithm of a MDHistoWorkspace."; }
 
   int version() const override;
-  const std::vector<std::string> seeAlso() const override {
-    return {"PowerMD", "ExponentialMD"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"PowerMD", "ExponentialMD"}; }
 
 private:
   void initExtraProperties() override;

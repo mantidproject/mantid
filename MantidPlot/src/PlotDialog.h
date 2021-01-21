@@ -68,14 +68,11 @@ class PlotDialog : public QDialog {
   Q_OBJECT
 
 public:
-  PlotDialog(bool showExtended, ApplicationWindow *app, MultiLayer *ml,
-             const Qt::WFlags &fl = nullptr);
-  void initFonts(const QFont &titlefont, const QFont &axesfont,
-                 const QFont &numbersfont, const QFont &legendfont);
+  PlotDialog(bool showExtended, ApplicationWindow *app, MultiLayer *ml, const Qt::WFlags &fl = nullptr);
+  void initFonts(const QFont &titlefont, const QFont &axesfont, const QFont &numbersfont, const QFont &legendfont);
   void insertColumnsList(const QStringList &names) { columnNames = names; };
 
-  void setPlotType(int plotType, int curveNum,
-                   const QString &color = "Default");
+  void setPlotType(int plotType, int curveNum, const QString &color = "Default");
 
 public slots:
   void showAll(bool all);
@@ -97,8 +94,7 @@ private slots:
   void setActiveCurve(CurveTreeItem *item);
 
   void insertTabs(int plot_type);
-  void updateTabWindow(QTreeWidgetItem *currentItem,
-                       QTreeWidgetItem *previousItem);
+  void updateTabWindow(QTreeWidgetItem *currentItem, QTreeWidgetItem *previousItem);
   void showAreaColor(bool show);
 
   void removeSelectedCurve();
@@ -185,15 +181,11 @@ private:
   QLabel *mLabelCurrentColormap;
   QPushButton *mSelectColormap;
   QString mCurrentColorMap;
-  QWidget *curvePlotTypeBox, *layerPage, *layerGeometryPage, *piePage,
-      *fontsPage, *printPage, *contourLinesPage;
+  QWidget *curvePlotTypeBox, *layerPage, *layerGeometryPage, *piePage, *fontsPage, *printPage, *contourLinesPage;
   QTreeWidget *listBox;
-  QCheckBox *boxAntialiasing, *boxAll, *boxScaleLayers, *boxPrintCrops,
-      *boxSetCMapAsDefault;
-  ColorButton *boxBorderColor, *boxBackgroundColor, *boxCanvasColor,
-      *boxCanvasFrameColor;
-  QSpinBox *boxBackgroundTransparency, *boxCanvasTransparency, *boxBorderWidth,
-      *boxMargin, *boxCanvasFrameWidth;
+  QCheckBox *boxAntialiasing, *boxAll, *boxScaleLayers, *boxPrintCrops, *boxSetCMapAsDefault;
+  ColorButton *boxBorderColor, *boxBackgroundColor, *boxCanvasColor, *boxCanvasFrameColor;
+  QSpinBox *boxBackgroundTransparency, *boxCanvasTransparency, *boxBorderWidth, *boxMargin, *boxCanvasFrameWidth;
   QSpinBox *boxRadius;
   DoubleSpinBox *boxPieLineWidth;
   ColorBox *boxFirstColor, *boxPieLineColor;
@@ -225,8 +217,7 @@ private:
   DoubleSpinBox *widthBox;
   QComboBox *capBox;
   QCheckBox *throughBox;
-  QLabel *labelPosition, *labelXEnd, *labelYEnd, *justifyLabelsLbl,
-      *labelsColumnLbl;
+  QLabel *labelPosition, *labelXEnd, *labelYEnd, *justifyLabelsLbl, *labelsColumnLbl;
   QGroupBox *GroupBoxH;
   QWidget *histogramPage, *spacingPage;
   QLineEdit *binSizeBox, *histogramBeginBox, *histogramEndBox;
@@ -234,8 +225,7 @@ private:
   QPushButton *buttonStatistics, *btnEditCurve;
   QSpinBox *gapBox, *offsetBox, *boxWidth;
   QWidget *vectPage, *boxPage, *percentilePage, *axesPage;
-  QComboBox *xEndBox, *yEndBox, *boxType, *boxWhiskersType, *boxWhiskersRange,
-      *boxRange;
+  QComboBox *xEndBox, *yEndBox, *boxType, *boxWhiskersType, *boxWhiskersRange, *boxRange;
   QSpinBox *headAngleBox, *headLengthBox, *boxPercSize;
   DoubleSpinBox *vectWidthBox, *boxEdgeWidth;
   QCheckBox *filledHeadBox;
@@ -252,8 +242,7 @@ private:
   DoubleSpinBox *contourWidthBox;
   QGroupBox *levelsGroupBox, *axisScaleBox, *imageGroupBox;
   QGroupBox *defaultPenBox;
-  QRadioButton *defaultScaleBox, *grayScaleBox, *customScaleBox,
-      *defaultContourBox, *autoContourBox;
+  QRadioButton *defaultScaleBox, *grayScaleBox, *customScaleBox, *defaultContourBox, *autoContourBox;
 
   SymbolBox *boxMaxStyle, *boxMinStyle, *boxMeanStyle, *box99Style, *box1Style;
   QDoubleSpinBox *whiskerCnt, *boxCnt;
@@ -268,10 +257,9 @@ private:
   QWidget *labelsPage;
 
   QGroupBox *pieAutoLabelsBox, *boxPieWedge;
-  DoubleSpinBox *boxPieStartAzimuth, *boxPieEdgeDist, *boxPieViewAngle,
-      *boxPieThickness, *firstContourLineBox, *contourLinesDistanceBox;
-  QCheckBox *boxPieConterClockwise, *boxPieValues, *boxPiePercentages,
-      *boxPieCategories;
+  DoubleSpinBox *boxPieStartAzimuth, *boxPieEdgeDist, *boxPieViewAngle, *boxPieThickness, *firstContourLineBox,
+      *contourLinesDistanceBox;
+  QCheckBox *boxPieConterClockwise, *boxPieValues, *boxPiePercentages, *boxPieCategories;
   QWidget *pieLabelsPage;
   QSpinBox *boxPieOffset;
   QWidget *pieGeometryPage;

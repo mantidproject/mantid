@@ -23,9 +23,7 @@ class EstimateFitParametersTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static EstimateFitParametersTest *createSuite() {
-    return new EstimateFitParametersTest();
-  }
+  static EstimateFitParametersTest *createSuite() { return new EstimateFitParametersTest(); }
   static void destroySuite(EstimateFitParametersTest *suite) {
     AnalysisDataService::Instance().clear();
     delete suite;
@@ -38,50 +36,45 @@ public:
   }
 
   void test_no_constraints() {
-    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-        [](double, int) { return 0.0; }, 1, 0, 1, 0.1);
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction([](double, int) { return 0.0; }, 1, 0, 1, 0.1);
 
     EstimateFitParameters alg;
     alg.initialize();
     alg.setRethrows(true);
-    alg.setPropertyValue("Function",
-                         "name=UserFunction,Formula=a*x+b,a=1,ties=(b=0)");
+    alg.setPropertyValue("Function", "name=UserFunction,Formula=a*x+b,a=1,ties=(b=0)");
     alg.setProperty("InputWorkspace", ws);
     TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
   }
 
   void test_no_lower_bound() {
-    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-        [](double x, int) { return 2.0 + 3.0 * x; }, 1, 0, 1, 0.1);
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction([](double x, int) { return 2.0 + 3.0 * x; }, 1, 0,
+                                                                     1, 0.1);
 
     EstimateFitParameters alg;
     alg.initialize();
     alg.setRethrows(true);
-    alg.setPropertyValue(
-        "Function", "name=UserFunction,Formula=a*x+b,constraints=(a<4, b<4)");
+    alg.setPropertyValue("Function", "name=UserFunction,Formula=a*x+b,constraints=(a<4, b<4)");
     alg.setProperty("InputWorkspace", ws);
     TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
   }
 
   void test_no_upper_bound() {
-    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-        [](double x, int) { return 2.0 + 3.0 * x; }, 1, 0, 1, 0.1);
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction([](double x, int) { return 2.0 + 3.0 * x; }, 1, 0,
+                                                                     1, 0.1);
 
     EstimateFitParameters alg;
     alg.initialize();
     alg.setRethrows(true);
-    alg.setPropertyValue(
-        "Function", "name=UserFunction,Formula=a*x+b,constraints=(a>4, b>4)");
+    alg.setPropertyValue("Function", "name=UserFunction,Formula=a*x+b,constraints=(a>4, b>4)");
     alg.setProperty("InputWorkspace", ws);
     TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
   }
 
   void test_all_free() {
-    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-        [](double x, int) { return 2.0 + 3.0 * x; }, 1, 0, 1, 0.1);
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction([](double x, int) { return 2.0 + 3.0 * x; }, 1, 0,
+                                                                     1, 0.1);
 
-    std::string funStr(
-        "name=UserFunction,Formula=a*x+b,a=0,b=0,constraints=(1<a<4, 0<b<4)");
+    std::string funStr("name=UserFunction,Formula=a*x+b,a=0,b=0,constraints=(1<a<4, 0<b<4)");
     CalculateCostFunction calc;
     calc.initialize();
     calc.setPropertyValue("Function", funStr);
@@ -108,11 +101,10 @@ public:
   }
 
   void test_fixed() {
-    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-        [](double x, int) { return 2.0 + 3.0 * x; }, 1, 0, 1, 0.1);
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction([](double x, int) { return 2.0 + 3.0 * x; }, 1, 0,
+                                                                     1, 0.1);
 
-    std::string funStr(
-        "name=UserFunction,Formula=a*x+b,a=0,ties=(b=1.9),constraints=(1<a<4)");
+    std::string funStr("name=UserFunction,Formula=a*x+b,a=0,ties=(b=1.9),constraints=(1<a<4)");
     CalculateCostFunction calc;
     calc.initialize();
     calc.setPropertyValue("Function", funStr);
@@ -138,11 +130,10 @@ public:
   }
 
   void test_tied() {
-    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-        [](double x, int) { return 2.0 + 3.0 * x; }, 1, 0, 1, 0.1);
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction([](double x, int) { return 2.0 + 3.0 * x; }, 1, 0,
+                                                                     1, 0.1);
 
-    std::string funStr(
-        "name=UserFunction,Formula=a*x+b,a=0,ties=(b=a-1),constraints=(1<a<4)");
+    std::string funStr("name=UserFunction,Formula=a*x+b,a=0,ties=(b=a-1),constraints=(1<a<4)");
     CalculateCostFunction calc;
     calc.initialize();
     calc.setPropertyValue("Function", funStr);
@@ -172,8 +163,8 @@ public:
   }
 
   void test_fix_bad_parameters() {
-    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-        [](double x, int) { return exp(-x * x / 4.0); }, 1, -8.5, 8.5, 1.0);
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction([](double x, int) { return exp(-x * x / 4.0); }, 1,
+                                                                     -8.5, 8.5, 1.0);
 
     std::string funStr("name=BackToBackExponential,S=1.1,constraints=(0.01<I<"
                        "200,0.001<A<300,0.001<B<300,-5<X0<5,0.001<S<4)");
@@ -206,8 +197,8 @@ public:
   }
 
   void test_fix_bad_parameters_doesnt_change_values() {
-    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-        [](double x, int) { return exp(-x * x / 4.0); }, 1, -8.5, 8.5, 1.0);
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction([](double x, int) { return exp(-x * x / 4.0); }, 1,
+                                                                     -8.5, 8.5, 1.0);
 
     std::string funStr("name=BackToBackExponential,S=1.1,constraints=(0.01<I<"
                        "200,0.001<A<300,0.001<B<300,-5<X0<5,0.001<S<4)");
@@ -240,11 +231,10 @@ public:
   }
 
   void test_output() {
-    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-        [](double x, int) { return 2.0 + 3.0 * x; }, 1, 0, 1, 0.1);
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction([](double x, int) { return 2.0 + 3.0 * x; }, 1, 0,
+                                                                     1, 0.1);
 
-    std::string funStr(
-        "name=UserFunction,Formula=a*x+b,a=0,b=0,constraints=(1<a<4, 0<b<4)");
+    std::string funStr("name=UserFunction,Formula=a*x+b,a=0,b=0,constraints=(1<a<4, 0<b<4)");
     EstimateFitParameters alg;
     alg.initialize();
     alg.setRethrows(true);
@@ -253,8 +243,7 @@ public:
     alg.setProperty("OutputWorkspace", "out");
     alg.execute();
     IFunction_sptr fun = alg.getProperty("Function");
-    auto params =
-        AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("out");
+    auto params = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("out");
     TS_ASSERT(params);
     TS_ASSERT_EQUALS(params->rowCount(), 2);
     TS_ASSERT_EQUALS(params->columnCount(), 11);
@@ -264,8 +253,7 @@ public:
     for (size_t col = 1; col < params->columnCount(); ++col) {
       auto column = params->getColumn(col);
       for (size_t row = 0; row < column->size(); ++row) {
-        fun->setParameter(names->cell<std::string>(row),
-                          column->cell<double>(row));
+        fun->setParameter(names->cell<std::string>(row), column->cell<double>(row));
       }
       CalculateCostFunction calc;
       calc.initialize();
@@ -273,9 +261,7 @@ public:
       calc.setProperty("InputWorkspace", ws);
       calc.execute();
       double value = calc.getProperty("Value");
-      TSM_ASSERT_LESS_THAN(
-          "Parameter sets aren't sorted by cost function value.", costValue,
-          value);
+      TSM_ASSERT_LESS_THAN("Parameter sets aren't sorted by cost function value.", costValue, value);
     }
     AnalysisDataService::Instance().clear();
   }

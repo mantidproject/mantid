@@ -41,9 +41,7 @@ public:
   ~GeometryTriangulator();
   void triangulate();
   void generateMesh();
-  void setGeometryCache(size_t nPoints, size_t nFaces,
-                        std::vector<double> &&points,
-                        std::vector<uint32_t> &&faces);
+  void setGeometryCache(size_t nPoints, size_t nFaces, std::vector<double> &&points, std::vector<uint32_t> &&faces);
   /// Return the number of triangle faces
   size_t numTriangleFaces();
   /// Return the number of triangle vertices
@@ -56,10 +54,9 @@ public:
   const std::vector<uint32_t> &getTriangleFaces();
 #ifdef ENABLE_OPENCASCADE
 private:
-  std::unique_ptr<TopoDS_Shape>
-      m_objSurface; ///< Storage for the output surface
-                    /// Analyze the object
-                    /// OpenCascade analysis of object surface
+  std::unique_ptr<TopoDS_Shape> m_objSurface; ///< Storage for the output surface
+                                              /// Analyze the object
+                                              /// OpenCascade analysis of object surface
   void OCAnalyzeObject();
   size_t numPoints() const;
   size_t numFaces() const;

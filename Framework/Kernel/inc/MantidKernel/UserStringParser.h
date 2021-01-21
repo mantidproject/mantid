@@ -43,12 +43,10 @@ private:
   std::vector<std::string> separateComma(const std::string &);
   /// separates a given string to vector of vector of numbers using colon as the
   /// delimeter
-  std::vector<std::vector<unsigned int>>
-  separateColon(const std::string &input);
+  std::vector<std::vector<unsigned int>> separateColon(const std::string &input);
   /// separate delimiter string from input string and return a vector of numbers
   /// created from the separated string
-  std::vector<unsigned int> separateDelimiters(const std::string &input,
-                                               const std::string &delimiters);
+  std::vector<unsigned int> separateDelimiters(const std::string &input, const std::string &delimiters);
 
   /// converts a string to int.
   unsigned int toUInt(const std::string &input);
@@ -57,22 +55,18 @@ private:
 
   /// This method removes the separator string from the input string and
   /// converts the tokens to unisgned int
-  void Tokenize(const std::string &input, const std::string &delimiter,
-                unsigned int &start, unsigned int &end, unsigned int &step);
+  void Tokenize(const std::string &input, const std::string &delimiter, unsigned int &start, unsigned int &end,
+                unsigned int &step);
 
   /// convert the string into numbers
-  void parse(const std::string &userString,
-             std::vector<std::vector<unsigned int>> &numbers);
+  void parse(const std::string &userString, std::vector<std::vector<unsigned int>> &numbers);
   /// validates the input string
   bool isValid(const std::string &input, std::vector<std::string> &tokens);
   /// converts the parsed tokens to numbers
-  void convertToNumbers(const std::string &input,
-                        const std::vector<std::string> &tokens,
-                        unsigned int &start, unsigned int &end,
-                        unsigned int &step);
+  void convertToNumbers(const std::string &input, const std::vector<std::string> &tokens, unsigned int &start,
+                        unsigned int &end, unsigned int &step);
   // returns true if the separator before the step string is valid
-  bool isValidStepSeparator(const std::string &input,
-                            const std::vector<std::string> &tokens);
+  bool isValidStepSeparator(const std::string &input, const std::vector<std::string> &tokens);
 };
 } // namespace Kernel
 } // namespace Mantid

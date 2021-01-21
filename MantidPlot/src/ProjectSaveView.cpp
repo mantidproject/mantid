@@ -26,10 +26,9 @@ namespace MantidWidgets {
  * @param
  * @param parent :: parent widget for this object
  */
-ProjectSaveView::ProjectSaveView(
-    const QString &projectName, ProjectSerialiser &serialiser,
-    const std::vector<IProjectSerialisable *> &windows,
-    const std::vector<std::string> &activePythonInterfaces, QWidget *parent)
+ProjectSaveView::ProjectSaveView(const QString &projectName, ProjectSerialiser &serialiser,
+                                 const std::vector<IProjectSerialisable *> &windows,
+                                 const std::vector<std::string> &activePythonInterfaces, QWidget *parent)
     : QDialog(parent), m_serialisableWindows(windows.cbegin(), windows.cend()),
       m_allPythonInterfaces(activePythonInterfaces), m_serialiser(serialiser) {
 
@@ -51,17 +50,13 @@ ProjectSaveView::ProjectSaveView(
  * Get all window handles passed to the view
  * @return a vector of handles to each window
  */
-std::vector<API::IProjectSerialisable *> ProjectSaveView::getWindows() {
-  return m_serialisableWindows;
-}
+std::vector<API::IProjectSerialisable *> ProjectSaveView::getWindows() { return m_serialisableWindows; }
 
 /**
  * @brief Get all python interfaces that can be saved
  * @return a vector of names of launcher scripts for the interfaces
  */
-std::vector<std::string> ProjectSaveView::getAllPythonInterfaces() {
-  return m_allPythonInterfaces;
-}
+std::vector<std::string> ProjectSaveView::getAllPythonInterfaces() { return m_allPythonInterfaces; }
 
 /**
  * Get all of the checked workspace names
@@ -108,9 +103,7 @@ QString ProjectSaveView::getProjectPath() { return m_ui.projectPath->text(); }
  * Set the project path
  * @param path :: path the project will be saved to
  */
-void ProjectSaveView::setProjectPath(const QString &path) {
-  m_ui.projectPath->setText(path);
-}
+void ProjectSaveView::setProjectPath(const QString &path) { m_ui.projectPath->setText(path); }
 
 /**
  * Update the list of workspaces.
@@ -120,8 +113,7 @@ void ProjectSaveView::setProjectPath(const QString &path) {
  *
  * @param workspaces :: vector of workspace info objects to add to the view
  */
-void ProjectSaveView::updateWorkspacesList(
-    const std::vector<WorkspaceInfo> &workspaces) {
+void ProjectSaveView::updateWorkspacesList(const std::vector<WorkspaceInfo> &workspaces) {
   m_ui.workspaceList->clear();
   for (const auto &info : workspaces) {
     addWorkspaceItem(info);
@@ -135,8 +127,7 @@ void ProjectSaveView::updateWorkspacesList(
  * substituted by a single space character
  * @param workspaces :: vector of interface launcher script names
  */
-void ProjectSaveView::updateInterfacesList(
-    const std::vector<std::string> &interfaces) {
+void ProjectSaveView::updateInterfacesList(const std::vector<std::string> &interfaces) {
   m_ui.interfaceList->clear();
   for (const auto &launcherScript : interfaces) {
     const auto originalName = QString::fromStdString(launcherScript);
@@ -158,8 +149,7 @@ void ProjectSaveView::updateInterfacesList(
  *
  * @param windows :: vector of window info objects to add to the view
  */
-void ProjectSaveView::updateIncludedWindowsList(
-    const std::vector<WindowInfo> &windows) {
+void ProjectSaveView::updateIncludedWindowsList(const std::vector<WindowInfo> &windows) {
   m_ui.includedWindows->clear();
   for (const auto &info : windows) {
     addWindowItem(m_ui.includedWindows, info);
@@ -175,8 +165,7 @@ void ProjectSaveView::updateIncludedWindowsList(
  *
  * @param windows :: vector of window info objects to add to the view
  */
-void ProjectSaveView::updateExcludedWindowsList(
-    const std::vector<WindowInfo> &windows) {
+void ProjectSaveView::updateExcludedWindowsList(const std::vector<WindowInfo> &windows) {
   m_ui.excludedWindows->clear();
   for (const auto &info : windows) {
     addWindowItem(m_ui.excludedWindows, info);
@@ -189,8 +178,7 @@ void ProjectSaveView::updateExcludedWindowsList(
  * Remove a list of windows from the included windows list
  * @param windows :: vector of window names to remove from the include list
  */
-void ProjectSaveView::removeFromIncludedWindowsList(
-    const std::vector<std::string> &windows) {
+void ProjectSaveView::removeFromIncludedWindowsList(const std::vector<std::string> &windows) {
   for (const auto &name : windows) {
     removeItem(m_ui.includedWindows, name);
   }
@@ -200,8 +188,7 @@ void ProjectSaveView::removeFromIncludedWindowsList(
  * Remove a list of windows from the excluded windows list
  * @param windows :: vector of window names to remove from the exclude list
  */
-void ProjectSaveView::removeFromExcludedWindowsList(
-    const std::vector<std::string> &windows) {
+void ProjectSaveView::removeFromExcludedWindowsList(const std::vector<std::string> &windows) {
   for (const auto &name : windows) {
     removeItem(m_ui.excludedWindows, name);
   }
@@ -243,17 +230,15 @@ void ProjectSaveView::save(bool checked) {
   UNUSED_ARG(checked);
 
   if (m_ui.projectPath->text().isEmpty()) {
-    QMessageBox::warning(this, "Project Save",
-                         "Please choose a valid file path", QMessageBox::Ok);
+    QMessageBox::warning(this, "Project Save", "Please choose a valid file path", QMessageBox::Ok);
     return;
   }
   auto wsNames = getCheckedWorkspaceNames();
   if (m_presenter->needsSizeWarning(wsNames)) {
-    auto result = QMessageBox::question(
-        this, "Project Save",
-        "This project is very large, and so may take a long "
-        "time to save. Would you like to continue?",
-        QMessageBox::Yes | QMessageBox::No);
+    auto result = QMessageBox::question(this, "Project Save",
+                                        "This project is very large, and so may take a long "
+                                        "time to save. Would you like to continue?",
+                                        QMessageBox::Yes | QMessageBox::No);
     if (result == QMessageBox::No) {
       close();
       return;
@@ -289,8 +274,7 @@ void ProjectSaveView::findFilePath() {
   filter += "Compressed MantidPlot project (*.mantid.gz)";
 
   QString selectedFilter;
-  QString filename = QFileDialog::getSaveFileName(this, "Save Project As", "",
-                                                  filter, &selectedFilter);
+  QString filename = QFileDialog::getSaveFileName(this, "Save Project As", "", filter, &selectedFilter);
 
   m_ui.projectPath->setText(filename);
 }
@@ -304,9 +288,8 @@ void ProjectSaveView::findFilePath() {
  * @param state :: any of the values in Qt::CheckState
  * @return a vector of names of workspaces that had the state
  */
-std::vector<std::string>
-ProjectSaveView::getItemsWithCheckState(const QTreeWidget &tree,
-                                        const Qt::CheckState state) const {
+std::vector<std::string> ProjectSaveView::getItemsWithCheckState(const QTreeWidget &tree,
+                                                                 const Qt::CheckState state) const {
   std::vector<std::string> names;
   for (int i = 0; i < tree.topLevelItemCount(); ++i) {
     auto item = tree.topLevelItem(i);
@@ -362,8 +345,7 @@ void ProjectSaveView::removeItem(QTreeWidget *widget, const std::string &name) {
  * @param widget :: the widget to add the item to
  * @param info :: window info object with data to add
  */
-void ProjectSaveView::addWindowItem(QTreeWidget *widget,
-                                    const WindowInfo &info) {
+void ProjectSaveView::addWindowItem(QTreeWidget *widget, const WindowInfo &info) {
   QStringList lst;
   WindowIcons icons;
   lst << QString::fromStdString(info.name);
@@ -395,8 +377,7 @@ void ProjectSaveView::addWorkspaceItem(const WorkspaceInfo &info) {
  * @param info :: reference to the WorkspaceInfo to make an item for
  * @return new QTreeWidgetItem for the info object
  */
-QTreeWidgetItem *
-ProjectSaveView::makeWorkspaceItem(const WorkspaceInfo &info) const {
+QTreeWidgetItem *ProjectSaveView::makeWorkspaceItem(const WorkspaceInfo &info) const {
   QStringList lst;
   lst << QString::fromStdString(info.name);
   lst << QString::fromStdString(info.type);
@@ -419,10 +400,8 @@ ProjectSaveView::makeWorkspaceItem(const WorkspaceInfo &info) const {
  * @return whether the project already exists
  */
 bool ProjectSaveView::checkIfNewProject(const QString &projectName) const {
-  return (projectName == "untitled" ||
-          projectName.endsWith(".opj", Qt::CaseInsensitive) ||
-          projectName.endsWith(".ogm", Qt::CaseInsensitive) ||
-          projectName.endsWith(".ogw", Qt::CaseInsensitive) ||
+  return (projectName == "untitled" || projectName.endsWith(".opj", Qt::CaseInsensitive) ||
+          projectName.endsWith(".ogm", Qt::CaseInsensitive) || projectName.endsWith(".ogw", Qt::CaseInsensitive) ||
           projectName.endsWith(".ogg", Qt::CaseInsensitive));
 }
 
@@ -444,15 +423,12 @@ void ProjectSaveView::connectSignals() {
   connect(m_ui.workspaceList, SIGNAL(itemChanged(QTreeWidgetItem *, int)), this,
           SLOT(workspaceItemChanged(QTreeWidgetItem *, int)));
 
-  connect(m_ui.btnBrowseFilePath, SIGNAL(clicked(bool)), this,
-          SLOT(findFilePath()));
+  connect(m_ui.btnBrowseFilePath, SIGNAL(clicked(bool)), this, SLOT(findFilePath()));
   connect(m_ui.btnSave, SIGNAL(clicked(bool)), this, SLOT(save(bool)));
   connect(m_ui.btnCancel, SIGNAL(clicked(bool)), this, SLOT(close()));
 
-  connect(&m_serialiser, SIGNAL(setProgressBarRange(int, int)),
-          m_ui.saveProgressBar, SLOT(setRange(int, int)));
-  connect(&m_serialiser, SIGNAL(setProgressBarValue(int)), m_ui.saveProgressBar,
-          SLOT(setValue(int)));
+  connect(&m_serialiser, SIGNAL(setProgressBarRange(int, int)), m_ui.saveProgressBar, SLOT(setRange(int, int)));
+  connect(&m_serialiser, SIGNAL(setProgressBarValue(int)), m_ui.saveProgressBar, SLOT(setValue(int)));
 }
 
 /**

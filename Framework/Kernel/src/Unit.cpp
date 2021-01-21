@@ -20,9 +20,7 @@ namespace Kernel {
  * Default constructor
  * Gives the unit an empty UnitLabel
  */
-Unit::Unit()
-    : initialized(false), l1(0), l2(0), twoTheta(0), emode(0), efixed(0),
-      delta(0) {}
+Unit::Unit() : initialized(false), l1(0), l2(0), twoTheta(0), emode(0), efixed(0), delta(0) {}
 
 bool Unit::operator==(const Unit &u) const { return unitID() == u.unitID(); }
 
@@ -42,8 +40,7 @@ bool Unit::operator!=(const Unit &u) const { return !(*this == u); }
  *a conversion is found)
  *  @return            True if a 'quick conversion' exists, false otherwise
  */
-bool Unit::quickConversion(const Unit &destination, double &factor,
-                           double &power) const {
+bool Unit::quickConversion(const Unit &destination, double &factor, double &power) const {
   // Just extract the unit's name and forward to other quickConversion method
   return quickConversion(destination.unitID(), factor, power);
 }
@@ -63,8 +60,7 @@ bool Unit::quickConversion(const Unit &destination, double &factor,
  *(if a conversion is found)
  *  @return             True if a 'quick conversion' exists, false otherwise
  */
-bool Unit::quickConversion(std::string destUnitName, double &factor,
-                           double &power) const {
+bool Unit::quickConversion(std::string destUnitName, double &factor, double &power) const {
   // From the global map, try to get the map holding the conversions for this
   // unit
   ConversionsMap::const_iterator it = s_conversionFactors.find(unitID());
@@ -73,8 +69,7 @@ bool Unit::quickConversion(std::string destUnitName, double &factor,
     return false;
 
   // See if there's a conversion listed for the requested destination unit
-  std::transform(destUnitName.begin(), destUnitName.end(), destUnitName.begin(),
-                 toupper);
+  std::transform(destUnitName.begin(), destUnitName.end(), destUnitName.begin(), toupper);
   auto iter = it->second.find(destUnitName);
   // If not, return false
   if (iter == it->second.end())
@@ -96,8 +91,7 @@ Unit::ConversionsMap Unit::s_conversionFactors = Unit::ConversionsMap();
  *  @param factor :: The constant by which to multiply the input unit
  *  @param power ::  The power to which to raise the input unit (defaults to 1)
  */
-void Unit::addConversion(std::string to, const double &factor,
-                         const double &power) const {
+void Unit::addConversion(std::string to, const double &factor, const double &power) const {
   std::transform(to.begin(), to.end(), to.begin(), toupper);
   // Add the conversion to the map (does nothing if it's already there)
   s_conversionFactors[unitID()][to] = std::make_pair(factor, power);
@@ -116,8 +110,7 @@ void Unit::addConversion(std::string to, const double &factor,
  *meV)
  *  @param _delta ::    Not currently used
  */
-void Unit::initialize(const double &_l1, const double &_l2,
-                      const double &_twoTheta, const int &_emode,
+void Unit::initialize(const double &_l1, const double &_l2, const double &_twoTheta, const int &_emode,
                       const double &_efixed, const double &_delta) {
   l1 = _l1;
   l2 = _l2;
@@ -132,10 +125,8 @@ void Unit::initialize(const double &_l1, const double &_l2,
 //---------------------------------------------------------------------------------------
 /** Perform the conversion to TOF on a vector of data
  */
-void Unit::toTOF(std::vector<double> &xdata, std::vector<double> &ydata,
-                 const double &_l1, const double &_l2, const double &_twoTheta,
-                 const int &_emode, const double &_efixed,
-                 const double &_delta) {
+void Unit::toTOF(std::vector<double> &xdata, std::vector<double> &ydata, const double &_l1, const double &_l2,
+                 const double &_twoTheta, const int &_emode, const double &_efixed, const double &_delta) {
   UNUSED_ARG(ydata);
   this->initialize(_l1, _l2, _twoTheta, _emode, _efixed, _delta);
   size_t numX = xdata.size();
@@ -152,10 +143,8 @@ void Unit::toTOF(std::vector<double> &xdata, std::vector<double> &ydata,
 @param efixed
 @param delta
 */
-double Unit::convertSingleToTOF(const double xvalue, const double &l1,
-                                const double &l2, const double &twoTheta,
-                                const int &emode, const double &efixed,
-                                const double &delta) {
+double Unit::convertSingleToTOF(const double xvalue, const double &l1, const double &l2, const double &twoTheta,
+                                const int &emode, const double &efixed, const double &delta) {
   this->initialize(l1, l2, twoTheta, emode, efixed, delta);
   return this->singleToTOF(xvalue);
 }
@@ -163,10 +152,8 @@ double Unit::convertSingleToTOF(const double xvalue, const double &l1,
 //---------------------------------------------------------------------------------------
 /** Perform the conversion to TOF on a vector of data
  */
-void Unit::fromTOF(std::vector<double> &xdata, std::vector<double> &ydata,
-                   const double &_l1, const double &_l2,
-                   const double &_twoTheta, const int &_emode,
-                   const double &_efixed, const double &_delta) {
+void Unit::fromTOF(std::vector<double> &xdata, std::vector<double> &ydata, const double &_l1, const double &_l2,
+                   const double &_twoTheta, const int &_emode, const double &_efixed, const double &_delta) {
   UNUSED_ARG(ydata);
   this->initialize(_l1, _l2, _twoTheta, _emode, _efixed, _delta);
   size_t numX = xdata.size();
@@ -183,10 +170,8 @@ void Unit::fromTOF(std::vector<double> &xdata, std::vector<double> &ydata,
 @param efixed
 @param delta
 */
-double Unit::convertSingleFromTOF(const double xvalue, const double &l1,
-                                  const double &l2, const double &twoTheta,
-                                  const int &emode, const double &efixed,
-                                  const double &delta) {
+double Unit::convertSingleFromTOF(const double xvalue, const double &l1, const double &l2, const double &twoTheta,
+                                  const int &emode, const double &efixed, const double &delta) {
   this->initialize(l1, l2, twoTheta, emode, efixed, delta);
   return this->singleFromTOF(xvalue);
 }
@@ -212,14 +197,12 @@ void Empty::init() {}
 
 double Empty::singleToTOF(const double x) const {
   UNUSED_ARG(x);
-  throw Kernel::Exception::NotImplementedError(
-      "Cannot convert unit " + this->unitID() + " to time of flight");
+  throw Kernel::Exception::NotImplementedError("Cannot convert unit " + this->unitID() + " to time of flight");
 }
 
 double Empty::singleFromTOF(const double tof) const {
   UNUSED_ARG(tof);
-  throw Kernel::Exception::NotImplementedError(
-      "Cannot convert to unit " + this->unitID() + " from time of flight");
+  throw Kernel::Exception::NotImplementedError("Cannot convert to unit " + this->unitID() + " from time of flight");
 }
 
 Unit *Empty::clone() const { return new Empty(*this); }
@@ -227,16 +210,12 @@ Unit *Empty::clone() const { return new Empty(*this); }
 /**
  * @return NaN as Label can not be obtained from TOF in any reasonable manner
  */
-double Empty::conversionTOFMin() const {
-  return std::numeric_limits<double>::quiet_NaN();
-}
+double Empty::conversionTOFMin() const { return std::numeric_limits<double>::quiet_NaN(); }
 
 /**
  * @return NaN as Label can not be obtained from TOF in any reasonable manner
  */
-double Empty::conversionTOFMax() const {
-  return std::numeric_limits<double>::quiet_NaN();
-}
+double Empty::conversionTOFMax() const { return std::numeric_limits<double>::quiet_NaN(); }
 
 /* =============================================================================
  * LABEL
@@ -250,8 +229,7 @@ const UnitLabel Label::label() const { return m_label; }
 /// Constructor
 Label::Label() : Empty(), m_caption("Quantity"), m_label(Symbol::EmptyLabel) {}
 
-Label::Label(const std::string &caption, const std::string &label)
-    : Empty(), m_caption(), m_label(Symbol::EmptyLabel) {
+Label::Label(const std::string &caption, const std::string &label) : Empty(), m_caption(), m_label(Symbol::EmptyLabel) {
   setLabel(caption, label);
 }
 
@@ -302,15 +280,12 @@ double TOF::conversionTOFMax() const { return DBL_MAX; }
 DECLARE_UNIT(Wavelength)
 
 Wavelength::Wavelength()
-    : Unit(), sfpTo(DBL_MIN), factorTo(DBL_MIN), sfpFrom(DBL_MIN),
-      factorFrom(DBL_MIN), do_sfpFrom(false) {
+    : Unit(), sfpTo(DBL_MIN), factorTo(DBL_MIN), sfpFrom(DBL_MIN), factorFrom(DBL_MIN), do_sfpFrom(false) {
   const double AngstromsSquared = 1e20;
-  const double factor =
-      (AngstromsSquared * PhysicalConstants::h * PhysicalConstants::h) /
-      (2.0 * PhysicalConstants::NeutronMass * PhysicalConstants::meV);
+  const double factor = (AngstromsSquared * PhysicalConstants::h * PhysicalConstants::h) /
+                        (2.0 * PhysicalConstants::NeutronMass * PhysicalConstants::meV);
   addConversion("Energy", factor, -2.0);
-  addConversion("Energy_inWavenumber",
-                factor * PhysicalConstants::meVtoWavenumber, -2.0);
+  addConversion("Energy_inWavenumber", factor * PhysicalConstants::meVtoWavenumber, -2.0);
   addConversion("Momentum", 2 * M_PI, -1.0);
 }
 
@@ -325,16 +300,12 @@ void Wavelength::init() {
 
   if (emode == 1) {
     ltot = l2;
-    sfpTo =
-        (sqrt(PhysicalConstants::NeutronMass / (2.0 * PhysicalConstants::meV)) *
-         TOFisinMicroseconds * l1) /
-        sqrt(efixed);
+    sfpTo = (sqrt(PhysicalConstants::NeutronMass / (2.0 * PhysicalConstants::meV)) * TOFisinMicroseconds * l1) /
+            sqrt(efixed);
   } else if (emode == 2) {
     ltot = l1;
-    sfpTo =
-        (sqrt(PhysicalConstants::NeutronMass / (2.0 * PhysicalConstants::meV)) *
-         TOFisinMicroseconds * l2) /
-        sqrt(efixed);
+    sfpTo = (sqrt(PhysicalConstants::NeutronMass / (2.0 * PhysicalConstants::meV)) * TOFisinMicroseconds * l2) /
+            sqrt(efixed);
   } else {
     ltot = l1 + l2;
   }
@@ -348,16 +319,12 @@ void Wavelength::init() {
   if (efixed != DBL_MIN) {
     if (emode == 1) // Direct
     {
-      sfpFrom = (sqrt(PhysicalConstants::NeutronMass /
-                      (2.0 * PhysicalConstants::meV)) *
-                 TOFisinMicroseconds * l1) /
+      sfpFrom = (sqrt(PhysicalConstants::NeutronMass / (2.0 * PhysicalConstants::meV)) * TOFisinMicroseconds * l1) /
                 sqrt(efixed);
       do_sfpFrom = true;
     } else if (emode == 2) // Indirect
     {
-      sfpFrom = (sqrt(PhysicalConstants::NeutronMass /
-                      (2.0 * PhysicalConstants::meV)) *
-                 TOFisinMicroseconds * l2) /
+      sfpFrom = (sqrt(PhysicalConstants::NeutronMass / (2.0 * PhysicalConstants::meV)) * TOFisinMicroseconds * l2) /
                 sqrt(efixed);
       do_sfpFrom = true;
     }
@@ -425,8 +392,7 @@ Energy::Energy() : Unit(), factorTo(DBL_MIN), factorFrom(DBL_MIN) {
   addConversion("Energy_inWavenumber", PhysicalConstants::meVtoWavenumber);
   const double toAngstroms = 1e10;
   const double factor =
-      toAngstroms * PhysicalConstants::h /
-      sqrt(2.0 * PhysicalConstants::NeutronMass * PhysicalConstants::meV);
+      toAngstroms * PhysicalConstants::h / sqrt(2.0 * PhysicalConstants::NeutronMass * PhysicalConstants::meV);
   addConversion("Wavelength", factor, -0.5);
   addConversion("Momentum", 2 * M_PI / factor, 0.5);
 }
@@ -434,16 +400,13 @@ Energy::Energy() : Unit(), factorTo(DBL_MIN), factorFrom(DBL_MIN) {
 void Energy::init() {
   {
     const double TOFinMicroseconds = 1e6;
-    factorTo =
-        sqrt(PhysicalConstants::NeutronMass / (2.0 * PhysicalConstants::meV)) *
-        (l1 + l2) * TOFinMicroseconds;
+    factorTo = sqrt(PhysicalConstants::NeutronMass / (2.0 * PhysicalConstants::meV)) * (l1 + l2) * TOFinMicroseconds;
   }
   {
-    const double TOFisinMicroseconds =
-        1e-12; // The input tof number gets squared so this is (10E-6)^2
+    const double TOFisinMicroseconds = 1e-12; // The input tof number gets squared so this is (10E-6)^2
     const double ltot = l1 + l2;
-    factorFrom = ((PhysicalConstants::NeutronMass / 2.0) * (ltot * ltot)) /
-                 (PhysicalConstants::meV * TOFisinMicroseconds);
+    factorFrom =
+        ((PhysicalConstants::NeutronMass / 2.0) * (ltot * ltot)) / (PhysicalConstants::meV * TOFisinMicroseconds);
   }
 }
 
@@ -477,14 +440,12 @@ DECLARE_UNIT(Energy_inWavenumber)
 const UnitLabel Energy_inWavenumber::label() const { return Symbol::InverseCM; }
 
 /// Constructor
-Energy_inWavenumber::Energy_inWavenumber()
-    : Unit(), factorTo(DBL_MIN), factorFrom(DBL_MIN) {
+Energy_inWavenumber::Energy_inWavenumber() : Unit(), factorTo(DBL_MIN), factorFrom(DBL_MIN) {
   addConversion("Energy", 1.0 / PhysicalConstants::meVtoWavenumber);
   const double toAngstroms = 1e10;
   const double factor =
       toAngstroms * PhysicalConstants::h /
-      sqrt(2.0 * PhysicalConstants::NeutronMass * PhysicalConstants::meV /
-           PhysicalConstants::meVtoWavenumber);
+      sqrt(2.0 * PhysicalConstants::NeutronMass * PhysicalConstants::meV / PhysicalConstants::meVtoWavenumber);
   addConversion("Wavelength", factor, -0.5);
 
   addConversion("Momentum", 2 * M_PI / factor, 0.5);
@@ -493,17 +454,14 @@ Energy_inWavenumber::Energy_inWavenumber()
 void Energy_inWavenumber::init() {
   {
     const double TOFinMicroseconds = 1e6;
-    factorTo = sqrt(PhysicalConstants::NeutronMass *
-                    PhysicalConstants::meVtoWavenumber /
-                    (2.0 * PhysicalConstants::meV)) *
-               (l1 + l2) * TOFinMicroseconds;
+    factorTo =
+        sqrt(PhysicalConstants::NeutronMass * PhysicalConstants::meVtoWavenumber / (2.0 * PhysicalConstants::meV)) *
+        (l1 + l2) * TOFinMicroseconds;
   }
   {
-    const double TOFisinMicroseconds =
-        1e-12; // The input tof number gets squared so this is (10E-6)^2
+    const double TOFisinMicroseconds = 1e-12; // The input tof number gets squared so this is (10E-6)^2
     const double ltot = l1 + l2;
-    factorFrom = ((PhysicalConstants::NeutronMass / 2.0) * (ltot * ltot) *
-                  PhysicalConstants::meVtoWavenumber) /
+    factorFrom = ((PhysicalConstants::NeutronMass / 2.0) * (ltot * ltot) * PhysicalConstants::meVtoWavenumber) /
                  (PhysicalConstants::meV * TOFisinMicroseconds);
   }
 }
@@ -511,18 +469,13 @@ void Energy_inWavenumber::init() {
 double Energy_inWavenumber::singleToTOF(const double x) const {
   double temp = x;
   if (temp <= DBL_MIN)
-    temp =
-        DBL_MIN; // Protect against divide by zero and define conversion range
+    temp = DBL_MIN; // Protect against divide by zero and define conversion range
   return factorTo / sqrt(temp);
 }
 ///@return  Minimal time which can be reversibly converted into energy in
 /// wavenumner units
-double Energy_inWavenumber::conversionTOFMin() const {
-  return factorTo / sqrt(std::numeric_limits<double>::max());
-}
-double Energy_inWavenumber::conversionTOFMax() const {
-  return factorTo / sqrt(std::numeric_limits<double>::max());
-}
+double Energy_inWavenumber::conversionTOFMin() const { return factorTo / sqrt(std::numeric_limits<double>::max()); }
+double Energy_inWavenumber::conversionTOFMax() const { return factorTo / sqrt(std::numeric_limits<double>::max()); }
 
 double Energy_inWavenumber::singleFromTOF(const double tof) const {
   double temp = tof;
@@ -531,9 +484,7 @@ double Energy_inWavenumber::singleFromTOF(const double tof) const {
   return factorFrom / (temp * temp);
 }
 
-Unit *Energy_inWavenumber::clone() const {
-  return new Energy_inWavenumber(*this);
-}
+Unit *Energy_inWavenumber::clone() const { return new Energy_inWavenumber(*this); }
 
 // ==================================================================================================
 /* D-SPACING
@@ -553,9 +504,7 @@ dSpacing::dSpacing() : Unit(), factorTo(DBL_MIN), factorFrom(DBL_MIN) {
 
 void dSpacing::init() {
   // First the crux of the conversion
-  factorTo =
-      (2.0 * PhysicalConstants::NeutronMass * sin(twoTheta / 2.0) * (l1 + l2)) /
-      PhysicalConstants::h;
+  factorTo = (2.0 * PhysicalConstants::NeutronMass * sin(twoTheta / 2.0) * (l1 + l2)) / PhysicalConstants::h;
 
   // Now adjustments for the scale of units used
   const double TOFisinMicroseconds = 1e6;
@@ -567,9 +516,7 @@ void dSpacing::init() {
 }
 
 double dSpacing::singleToTOF(const double x) const { return x * factorTo; }
-double dSpacing::singleFromTOF(const double tof) const {
-  return tof / factorFrom;
-}
+double dSpacing::singleFromTOF(const double tof) const { return tof / factorFrom; }
 double dSpacing::conversionTOFMin() const { return 0; }
 double dSpacing::conversionTOFMax() const { return DBL_MAX / factorTo; }
 
@@ -583,16 +530,12 @@ Unit *dSpacing::clone() const { return new dSpacing(*this); }
  */
 DECLARE_UNIT(dSpacingPerpendicular)
 
-const UnitLabel dSpacingPerpendicular::label() const {
-  return Symbol::Angstrom;
-}
+const UnitLabel dSpacingPerpendicular::label() const { return Symbol::Angstrom; }
 
-dSpacingPerpendicular::dSpacingPerpendicular()
-    : Unit(), factorTo(DBL_MIN), factorFrom(DBL_MIN) {}
+dSpacingPerpendicular::dSpacingPerpendicular() : Unit(), factorTo(DBL_MIN), factorFrom(DBL_MIN) {}
 
 void dSpacingPerpendicular::init() {
-  factorTo =
-      (PhysicalConstants::NeutronMass * (l1 + l2)) / PhysicalConstants::h;
+  factorTo = (PhysicalConstants::NeutronMass * (l1 + l2)) / PhysicalConstants::h;
 
   // Now adjustments for the scale of units used
   const double TOFisinMicroseconds = 1e6;
@@ -619,16 +562,10 @@ double dSpacingPerpendicular::singleFromTOF(const double tof) const {
   double temp = tof / factorFrom;
   return sqrt(temp * temp - sfpFrom);
 }
-double dSpacingPerpendicular::conversionTOFMin() const {
-  return sqrt(-1.0 * sfpFrom);
-}
-double dSpacingPerpendicular::conversionTOFMax() const {
-  return sqrt(std::numeric_limits<double>::max()) / factorFrom;
-}
+double dSpacingPerpendicular::conversionTOFMin() const { return sqrt(-1.0 * sfpFrom); }
+double dSpacingPerpendicular::conversionTOFMax() const { return sqrt(std::numeric_limits<double>::max()) / factorFrom; }
 
-Unit *dSpacingPerpendicular::clone() const {
-  return new dSpacingPerpendicular(*this);
-}
+Unit *dSpacingPerpendicular::clone() const { return new dSpacingPerpendicular(*this); }
 
 // ================================================================================
 /* MOMENTUM TRANSFER
@@ -638,12 +575,9 @@ Unit *dSpacingPerpendicular::clone() const {
  */
 DECLARE_UNIT(MomentumTransfer)
 
-const UnitLabel MomentumTransfer::label() const {
-  return Symbol::InverseAngstrom;
-}
+const UnitLabel MomentumTransfer::label() const { return Symbol::InverseAngstrom; }
 
-MomentumTransfer::MomentumTransfer()
-    : Unit(), factorTo(DBL_MIN), factorFrom(DBL_MIN) {
+MomentumTransfer::MomentumTransfer() : Unit(), factorTo(DBL_MIN), factorFrom(DBL_MIN) {
   addConversion("QSquared", 1.0, 2.0);
   const double factor = 2.0 * M_PI;
   addConversion("dSpacing", factor, -1.0);
@@ -651,17 +585,13 @@ MomentumTransfer::MomentumTransfer()
 
 void MomentumTransfer::init() {
   // First the crux of the conversion
-  factorTo = (4.0 * M_PI * PhysicalConstants::NeutronMass * (l1 + l2) *
-              sin(twoTheta / 2.0)) /
-             PhysicalConstants::h;
+  factorTo = (4.0 * M_PI * PhysicalConstants::NeutronMass * (l1 + l2) * sin(twoTheta / 2.0)) / PhysicalConstants::h;
   // Now adjustments for the scale of units used
   const double TOFisinMicroseconds = 1e6;
   const double toAngstroms = 1e10;
   factorTo *= TOFisinMicroseconds / toAngstroms;
   // First the crux of the conversion
-  factorFrom = (4.0 * M_PI * PhysicalConstants::NeutronMass * (l1 + l2) *
-                sin(twoTheta / 2.0)) /
-               PhysicalConstants::h;
+  factorFrom = (4.0 * M_PI * PhysicalConstants::NeutronMass * (l1 + l2) * sin(twoTheta / 2.0)) / PhysicalConstants::h;
 
   // Now adjustments for the scale of units used
   factorFrom *= TOFisinMicroseconds / toAngstroms;
@@ -681,9 +611,7 @@ double MomentumTransfer::singleFromTOF(const double tof) const {
   return factorFrom / temp;
 }
 
-double MomentumTransfer::conversionTOFMin() const {
-  return factorFrom / DBL_MAX;
-}
+double MomentumTransfer::conversionTOFMin() const { return factorFrom / DBL_MAX; }
 double MomentumTransfer::conversionTOFMax() const { return DBL_MAX; }
 
 Unit *MomentumTransfer::clone() const { return new MomentumTransfer(*this); }
@@ -704,18 +632,14 @@ QSquared::QSquared() : Unit(), factorTo(DBL_MIN), factorFrom(DBL_MIN) {
 
 void QSquared::init() {
   // First the crux of the conversion
-  factorTo = (4.0 * M_PI * PhysicalConstants::NeutronMass * (l1 + l2) *
-              sin(twoTheta / 2.0)) /
-             PhysicalConstants::h;
+  factorTo = (4.0 * M_PI * PhysicalConstants::NeutronMass * (l1 + l2) * sin(twoTheta / 2.0)) / PhysicalConstants::h;
   // Now adjustments for the scale of units used
   const double TOFisinMicroseconds = 1e6;
   const double toAngstroms = 1e10;
   factorTo *= TOFisinMicroseconds / toAngstroms;
 
   // First the crux of the conversion
-  factorFrom = (4.0 * M_PI * PhysicalConstants::NeutronMass * (l1 + l2) *
-                sin(twoTheta / 2.0)) /
-               PhysicalConstants::h;
+  factorFrom = (4.0 * M_PI * PhysicalConstants::NeutronMass * (l1 + l2) * sin(twoTheta / 2.0)) / PhysicalConstants::h;
   // Now adjustments for the scale of units used
   factorFrom *= TOFisinMicroseconds / toAngstroms;
   factorFrom = factorFrom * factorFrom;
@@ -758,8 +682,7 @@ DECLARE_UNIT(DeltaE)
 const UnitLabel DeltaE::label() const { return Symbol::MilliElectronVolts; }
 
 DeltaE::DeltaE()
-    : Unit(), factorTo(DBL_MIN), factorFrom(DBL_MIN), t_other(DBL_MIN),
-      t_otherFrom(DBL_MIN), unitScaling(DBL_MIN) {
+    : Unit(), factorTo(DBL_MIN), factorFrom(DBL_MIN), t_other(DBL_MIN), t_otherFrom(DBL_MIN), unitScaling(DBL_MIN) {
   addConversion("DeltaE_inWavenumber", PhysicalConstants::meVtoWavenumber, 1.);
   addConversion("DeltaE_inFrequency", PhysicalConstants::meVtoFrequency, 1.);
 }
@@ -767,12 +690,9 @@ DeltaE::DeltaE()
 void DeltaE::init() {
   // Efixed must be set to something
   if (efixed == 0.0)
-    throw std::invalid_argument(
-        "efixed must be set for energy transfer calculation");
+    throw std::invalid_argument("efixed must be set for energy transfer calculation");
   const double TOFinMicroseconds = 1e6;
-  factorTo =
-      sqrt(PhysicalConstants::NeutronMass / (2.0 * PhysicalConstants::meV)) *
-      TOFinMicroseconds;
+  factorTo = sqrt(PhysicalConstants::NeutronMass / (2.0 * PhysicalConstants::meV)) * TOFinMicroseconds;
   if (emode == 1) {
     // t_other is t1
     t_other = (factorTo * l1) / sqrt(efixed);
@@ -782,14 +702,11 @@ void DeltaE::init() {
     t_other = (factorTo * l2) / sqrt(efixed);
     factorTo *= l1;
   } else {
-    throw std::invalid_argument(
-        "emode must be equal to 1 or 2 for energy transfer calculation");
+    throw std::invalid_argument("emode must be equal to 1 or 2 for energy transfer calculation");
   }
 
   //------------ from conversion ------------------
-  factorFrom =
-      sqrt(PhysicalConstants::NeutronMass / (2.0 * PhysicalConstants::meV)) *
-      TOFinMicroseconds;
+  factorFrom = sqrt(PhysicalConstants::NeutronMass / (2.0 * PhysicalConstants::meV)) * TOFinMicroseconds;
 
   if (emode == 1) {
     // t_otherFrom = t1
@@ -808,8 +725,7 @@ void DeltaE::init() {
 double DeltaE::singleToTOF(const double x) const {
   if (emode == 1) {
     const double e2 = efixed - x / unitScaling;
-    if (e2 <=
-        0.0) // This shouldn't ever happen (unless the efixed value is wrong)
+    if (e2 <= 0.0) // This shouldn't ever happen (unless the efixed value is wrong)
       return DeltaE::conversionTOFMax();
     else {
       // this_t = t2;
@@ -818,8 +734,7 @@ double DeltaE::singleToTOF(const double x) const {
     }
   } else if (emode == 2) {
     const double e1 = efixed + x / unitScaling;
-    if (e1 <=
-        0.0) // This shouldn't ever happen (unless the efixed value is wrong)
+    if (e1 <= 0.0) // This shouldn't ever happen (unless the efixed value is wrong)
       return DeltaE::conversionTOFMax();
     else {
       // this_t = t1;
@@ -855,8 +770,7 @@ double DeltaE::singleFromTOF(const double tof) const {
 }
 
 double DeltaE::conversionTOFMin() const {
-  double time(
-      DBL_MAX); // impossible for elastic, this units do not work for elastic
+  double time(DBL_MAX); // impossible for elastic, this units do not work for elastic
   if (emode == 1 || emode == 2)
     time = t_otherFrom * (1 + DBL_EPSILON);
   return time;
@@ -889,21 +803,15 @@ void DeltaE_inWavenumber::init() {
   unitScaling = PhysicalConstants::meVtoWavenumber;
 }
 
-Unit *DeltaE_inWavenumber::clone() const {
-  return new DeltaE_inWavenumber(*this);
-}
+Unit *DeltaE_inWavenumber::clone() const { return new DeltaE_inWavenumber(*this); }
 
 DeltaE_inWavenumber::DeltaE_inWavenumber() : DeltaE() {
   addConversion("DeltaE", 1 / PhysicalConstants::meVtoWavenumber, 1.);
 }
 
-double DeltaE_inWavenumber::conversionTOFMin() const {
-  return DeltaE::conversionTOFMin();
-}
+double DeltaE_inWavenumber::conversionTOFMin() const { return DeltaE::conversionTOFMin(); }
 
-double DeltaE_inWavenumber::conversionTOFMax() const {
-  return DeltaE::conversionTOFMax();
-}
+double DeltaE_inWavenumber::conversionTOFMax() const { return DeltaE::conversionTOFMax(); }
 
 // =====================================================================================================
 /* Energy Transfer in units of frequency
@@ -923,21 +831,15 @@ void DeltaE_inFrequency::init() {
   unitScaling = PhysicalConstants::meVtoFrequency;
 }
 
-Unit *DeltaE_inFrequency::clone() const {
-  return new DeltaE_inFrequency(*this);
-}
+Unit *DeltaE_inFrequency::clone() const { return new DeltaE_inFrequency(*this); }
 
 DeltaE_inFrequency::DeltaE_inFrequency() : DeltaE() {
   addConversion("DeltaE", 1.0 / PhysicalConstants::meVtoFrequency, 1.);
 }
 
-double DeltaE_inFrequency::conversionTOFMin() const {
-  return DeltaE::conversionTOFMin();
-}
+double DeltaE_inFrequency::conversionTOFMin() const { return DeltaE::conversionTOFMin(); }
 
-double DeltaE_inFrequency::conversionTOFMax() const {
-  return DeltaE::conversionTOFMax();
-}
+double DeltaE_inFrequency::conversionTOFMax() const { return DeltaE::conversionTOFMax(); }
 
 // =====================================================================================================
 /* Momentum in Angstrom^-1. It is 2*Pi/wavelength
@@ -948,18 +850,14 @@ DECLARE_UNIT(Momentum)
 const UnitLabel Momentum::label() const { return Symbol::InverseAngstrom; }
 
 Momentum::Momentum()
-    : Unit(), sfpTo(DBL_MIN), factorTo(DBL_MIN), sfpFrom(DBL_MIN),
-      factorFrom(DBL_MIN), do_sfpFrom(false) {
+    : Unit(), sfpTo(DBL_MIN), factorTo(DBL_MIN), sfpFrom(DBL_MIN), factorFrom(DBL_MIN), do_sfpFrom(false) {
 
   const double AngstromsSquared = 1e20;
-  const double factor =
-      (AngstromsSquared * PhysicalConstants::h * PhysicalConstants::h) /
-      (2.0 * PhysicalConstants::NeutronMass * PhysicalConstants::meV) /
-      (4 * M_PI * M_PI);
+  const double factor = (AngstromsSquared * PhysicalConstants::h * PhysicalConstants::h) /
+                        (2.0 * PhysicalConstants::NeutronMass * PhysicalConstants::meV) / (4 * M_PI * M_PI);
 
   addConversion("Energy", factor, 2.0);
-  addConversion("Energy_inWavenumber",
-                factor * PhysicalConstants::meVtoWavenumber, 2.0);
+  addConversion("Energy_inWavenumber", factor * PhysicalConstants::meVtoWavenumber, 2.0);
   addConversion("Wavelength", 2 * M_PI, -1.0);
   //
 }
@@ -973,21 +871,16 @@ void Momentum::init() {
 
   if (emode == 1) {
     ltot = l2;
-    sfpTo =
-        (sqrt(PhysicalConstants::NeutronMass / (2.0 * PhysicalConstants::meV)) *
-         TOFisinMicroseconds * l1) /
-        sqrt(efixed);
+    sfpTo = (sqrt(PhysicalConstants::NeutronMass / (2.0 * PhysicalConstants::meV)) * TOFisinMicroseconds * l1) /
+            sqrt(efixed);
   } else if (emode == 2) {
     ltot = l1;
-    sfpTo =
-        (sqrt(PhysicalConstants::NeutronMass / (2.0 * PhysicalConstants::meV)) *
-         TOFisinMicroseconds * l2) /
-        sqrt(efixed);
+    sfpTo = (sqrt(PhysicalConstants::NeutronMass / (2.0 * PhysicalConstants::meV)) * TOFisinMicroseconds * l2) /
+            sqrt(efixed);
   } else {
     ltot = l1 + l2;
   }
-  factorTo = 2 * M_PI * (PhysicalConstants::NeutronMass * (ltot)) /
-             PhysicalConstants::h;
+  factorTo = 2 * M_PI * (PhysicalConstants::NeutronMass * (ltot)) / PhysicalConstants::h;
   // Now adjustments for the scale of units used
   factorTo *= TOFisinMicroseconds / toAngstroms;
 
@@ -1067,11 +960,9 @@ SpinEchoLength::SpinEchoLength() : Wavelength() {}
 void SpinEchoLength::init() {
   // Efixed must be set to something
   if (efixed == 0.0)
-    throw std::invalid_argument(
-        "efixed must be set for spin echo length calculation");
+    throw std::invalid_argument("efixed must be set for spin echo length calculation");
   if (emode > 0) {
-    throw std::invalid_argument(
-        "emode must be equal to 0 for spin echo length calculation");
+    throw std::invalid_argument("emode must be equal to 0 for spin echo length calculation");
   }
   Wavelength::init();
 }
@@ -1118,11 +1009,9 @@ SpinEchoTime::SpinEchoTime() : Wavelength() {}
 void SpinEchoTime::init() {
   // Efixed must be set to something
   if (efixed == 0.0)
-    throw std::invalid_argument(
-        "efixed must be set for spin echo time calculation");
+    throw std::invalid_argument("efixed must be set for spin echo time calculation");
   if (emode > 0) {
-    throw std::invalid_argument(
-        "emode must be equal to 0 for spin echo time calculation");
+    throw std::invalid_argument("emode must be equal to 0 for spin echo time calculation");
   }
   Wavelength::init();
 }
@@ -1172,12 +1061,8 @@ double Time::singleFromTOF(const double tof) const {
   throw std::runtime_error("Time is not allowed to be converted from TOF. ");
 }
 
-double Time::conversionTOFMax() const {
-  return std::numeric_limits<double>::quiet_NaN();
-}
-double Time::conversionTOFMin() const {
-  return std::numeric_limits<double>::quiet_NaN();
-}
+double Time::conversionTOFMax() const { return std::numeric_limits<double>::quiet_NaN(); }
+double Time::conversionTOFMin() const { return std::numeric_limits<double>::quiet_NaN(); }
 
 Unit *Time::clone() const { return new Time(*this); }
 
@@ -1206,13 +1091,9 @@ double Degrees::singleFromTOF(const double tof) const {
   throw std::runtime_error("Degrees is not allowed to be converted from TOF. ");
 }
 
-double Degrees::conversionTOFMax() const {
-  return std::numeric_limits<double>::quiet_NaN();
-}
+double Degrees::conversionTOFMax() const { return std::numeric_limits<double>::quiet_NaN(); }
 
-double Degrees::conversionTOFMin() const {
-  return std::numeric_limits<double>::quiet_NaN();
-}
+double Degrees::conversionTOFMin() const { return std::numeric_limits<double>::quiet_NaN(); }
 
 Unit *Degrees::clone() const { return new Degrees(*this); }
 
@@ -1236,23 +1117,17 @@ void Temperature::init() {}
 
 double Temperature::singleToTOF(const double x) const {
   UNUSED_ARG(x);
-  throw std::runtime_error(
-      "Temperature is not allowed to be converted to TOF. ");
+  throw std::runtime_error("Temperature is not allowed to be converted to TOF. ");
 }
 
 double Temperature::singleFromTOF(const double tof) const {
   UNUSED_ARG(tof);
-  throw std::runtime_error(
-      "Temperature is not allowed to be converted from TOF. ");
+  throw std::runtime_error("Temperature is not allowed to be converted from TOF. ");
 }
 
-double Temperature::conversionTOFMin() const {
-  return std::numeric_limits<double>::quiet_NaN();
-}
+double Temperature::conversionTOFMin() const { return std::numeric_limits<double>::quiet_NaN(); }
 
-double Temperature::conversionTOFMax() const {
-  return std::numeric_limits<double>::quiet_NaN();
-}
+double Temperature::conversionTOFMax() const { return std::numeric_limits<double>::quiet_NaN(); }
 
 Unit *Temperature::clone() const { return new Temperature(*this); }
 
@@ -1274,28 +1149,21 @@ Unit *AtomicDistance::clone() const { return new AtomicDistance(*this); }
 
 double AtomicDistance::singleToTOF(const double x) const {
   UNUSED_ARG(x);
-  throw std::runtime_error(
-      "Atomic Distance is not allowed to be converted to TOF. ");
+  throw std::runtime_error("Atomic Distance is not allowed to be converted to TOF. ");
 }
 
 double AtomicDistance::singleFromTOF(const double tof) const {
   UNUSED_ARG(tof);
-  throw std::runtime_error(
-      "Atomic Distance is not allowed to be converted from TOF. ");
+  throw std::runtime_error("Atomic Distance is not allowed to be converted from TOF. ");
 }
 
-double AtomicDistance::conversionTOFMin() const {
-  return std::numeric_limits<double>::quiet_NaN();
-}
+double AtomicDistance::conversionTOFMin() const { return std::numeric_limits<double>::quiet_NaN(); }
 
-double AtomicDistance::conversionTOFMax() const {
-  return std::numeric_limits<double>::quiet_NaN();
-}
+double AtomicDistance::conversionTOFMax() const { return std::numeric_limits<double>::quiet_NaN(); }
 
 // ================================================================================
 
-double timeConversionValue(const std::string &input_unit,
-                           const std::string &output_unit) {
+double timeConversionValue(const std::string &input_unit, const std::string &output_unit) {
   std::map<std::string, double> timesList;
   double seconds = 1.0e9;
   double milliseconds = 1.0e-3 * seconds;
@@ -1318,11 +1186,9 @@ double timeConversionValue(const std::string &input_unit,
   double input_float = timesList[input_unit];
   double output_float = timesList[output_unit];
   if (input_float == 0)
-    throw std::runtime_error("timeConversionValue: input unit " + input_unit +
-                             " not known.");
+    throw std::runtime_error("timeConversionValue: input unit " + input_unit + " not known.");
   if (output_float == 0)
-    throw std::runtime_error("timeConversionValue: output unit " + input_unit +
-                             " not known.");
+    throw std::runtime_error("timeConversionValue: output unit " + input_unit + " not known.");
   return input_float / output_float;
 }
 

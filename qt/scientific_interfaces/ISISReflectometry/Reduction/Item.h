@@ -34,8 +34,7 @@ public:
 
   virtual void resetState(bool resetChildren = true);
   virtual void setSkipped(bool skipped);
-  virtual void renameOutputWorkspace(std::string const &oldName,
-                                     std::string const &newName) = 0;
+  virtual void renameOutputWorkspace(std::string const &oldName, std::string const &newName) = 0;
 
   virtual void setOutputNames(std::vector<std::string> const &outputNames) = 0;
   virtual void resetOutputs() = 0;

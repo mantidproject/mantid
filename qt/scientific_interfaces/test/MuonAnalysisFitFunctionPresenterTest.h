@@ -28,10 +28,7 @@ using namespace MantidQt::MantidWidgets;
 // Mock function browser widget
 class MockFunctionBrowser : public IFunctionBrowser {
 public:
-  MockFunctionBrowser() {
-    m_func =
-        Mantid::API::FunctionFactory::Instance().createFunction("Gaussian");
-  }
+  MockFunctionBrowser() { m_func = Mantid::API::FunctionFactory::Instance().createFunction("Gaussian"); }
   GNU_DIAG_OFF_SUGGEST_OVERRIDE
   MOCK_METHOD0(getFunctionString, QString());
   Mantid::API::IFunction_sptr getGlobalFunction() override { return m_func; }
@@ -45,10 +42,8 @@ public:
   MOCK_METHOD1(setNumberOfDatasets, void(int));
   MOCK_METHOD1(setDatasets, void(const QStringList &));
   MOCK_METHOD1(setDatasets, void(const QList<FunctionModelDataset> &));
-  MOCK_METHOD1(updateMultiDatasetParameters,
-               void(const Mantid::API::IFunction &));
-  MOCK_METHOD1(updateMultiDatasetParameters,
-               void(const Mantid::API::ITableWorkspace &paramTable));
+  MOCK_METHOD1(updateMultiDatasetParameters, void(const Mantid::API::IFunction &));
+  MOCK_METHOD1(updateMultiDatasetParameters, void(const Mantid::API::ITableWorkspace &paramTable));
   MOCK_CONST_METHOD2(isLocalParameterFixed, bool(const QString &, int));
   MOCK_CONST_METHOD2(getLocalParameterValue, double(const QString &, int));
   MOCK_CONST_METHOD2(getLocalParameterTie, QString(const QString &, int));
@@ -61,8 +56,7 @@ public:
   MOCK_METHOD3(setLocalParameterTie, void(const QString &, int, QString));
   MOCK_METHOD1(setCurrentDataset, void(int));
   MOCK_METHOD3(editLocalParameter,
-               void(const QString &parName, const QStringList &wsNames,
-                    const std::vector<size_t> &wsIndices));
+               void(const QString &parName, const QStringList &wsNames, const std::vector<size_t> &wsIndices));
   GNU_DIAG_ON_SUGGEST_OVERRIDE
 
 private:
@@ -94,12 +88,8 @@ class MuonAnalysisFitFunctionPresenterTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static MuonAnalysisFitFunctionPresenterTest *createSuite() {
-    return new MuonAnalysisFitFunctionPresenterTest();
-  }
-  static void destroySuite(MuonAnalysisFitFunctionPresenterTest *suite) {
-    delete suite;
-  }
+  static MuonAnalysisFitFunctionPresenterTest *createSuite() { return new MuonAnalysisFitFunctionPresenterTest(); }
+  static void destroySuite(MuonAnalysisFitFunctionPresenterTest *suite) { delete suite; }
 
   MuonAnalysisFitFunctionPresenterTest() {
     Mantid::API::FrameworkManager::Instance(); // To make sure everything is
@@ -115,10 +105,8 @@ public:
   void setUp() override {
     m_funcBrowser = new NiceMock<MockFunctionBrowser>();
     m_fitBrowser = new NiceMock<MockFitFunctionControl>();
-    m_presenter = new MuonAnalysisFitFunctionPresenter(nullptr, m_fitBrowser,
-                                                       m_funcBrowser);
-    m_presenter->setMultiFitState(
-        MantidQt::CustomInterfaces::Muon::MultiFitState::Enabled);
+    m_presenter = new MuonAnalysisFitFunctionPresenter(nullptr, m_fitBrowser, m_funcBrowser);
+    m_presenter->setMultiFitState(MantidQt::CustomInterfaces::Muon::MultiFitState::Enabled);
   }
 
   /// Run after each test to check expectations and remove mocks
@@ -131,11 +119,8 @@ public:
   }
 
   void test_updateFunction() {
-    EXPECT_CALL(*m_funcBrowser, getFunctionString())
-        .Times(1)
-        .WillOnce(Return("Test Function"));
-    EXPECT_CALL(*m_fitBrowser, setFunction(m_funcBrowser->getGlobalFunction()))
-        .Times(1);
+    EXPECT_CALL(*m_funcBrowser, getFunctionString()).Times(1).WillOnce(Return("Test Function"));
+    EXPECT_CALL(*m_fitBrowser, setFunction(m_funcBrowser->getGlobalFunction())).Times(1);
     m_presenter->updateFunction();
   }
 
@@ -143,43 +128,32 @@ public:
     EXPECT_CALL(*m_funcBrowser, getFunctionString())
         .Times(1)
         .WillOnce(Return("")); // empty string - last function removed
-    EXPECT_CALL(*m_fitBrowser, setFunction(Mantid::API::IFunction_sptr()))
-        .Times(1);
+    EXPECT_CALL(*m_fitBrowser, setFunction(Mantid::API::IFunction_sptr())).Times(1);
     m_presenter->updateFunction();
   }
 
   void test_updateFunctionAndFit_nonSequential() {
-    EXPECT_CALL(*m_funcBrowser, getFunctionString())
-        .Times(1)
-        .WillOnce(Return("Test Function"));
-    EXPECT_CALL(*m_fitBrowser, setFunction(m_funcBrowser->getGlobalFunction()))
-        .Times(1);
+    EXPECT_CALL(*m_funcBrowser, getFunctionString()).Times(1).WillOnce(Return("Test Function"));
+    EXPECT_CALL(*m_fitBrowser, setFunction(m_funcBrowser->getGlobalFunction())).Times(1);
     EXPECT_CALL(*m_fitBrowser, runFit()).Times(1);
     m_presenter->updateFunctionAndFit(false);
   }
 
   void test_updateFunctionAndFit_sequential() {
-    EXPECT_CALL(*m_funcBrowser, getFunctionString())
-        .Times(1)
-        .WillOnce(Return("Test Function"));
-    EXPECT_CALL(*m_fitBrowser, setFunction(m_funcBrowser->getGlobalFunction()))
-        .Times(1);
+    EXPECT_CALL(*m_funcBrowser, getFunctionString()).Times(1).WillOnce(Return("Test Function"));
+    EXPECT_CALL(*m_fitBrowser, setFunction(m_funcBrowser->getGlobalFunction())).Times(1);
     EXPECT_CALL(*m_fitBrowser, runSequentialFit()).Times(1);
     m_presenter->updateFunctionAndFit(true);
   }
 
   void test_handleFitFinished() {
-    m_presenter->setMultiFitState(
-        MantidQt::CustomInterfaces::Muon::MultiFitState::Enabled);
-    doTest_HandleFitFinishedOrUndone("MUSR00015189; Pair; long; Asym; 1; #1",
-                                     false);
+    m_presenter->setMultiFitState(MantidQt::CustomInterfaces::Muon::MultiFitState::Enabled);
+    doTest_HandleFitFinishedOrUndone("MUSR00015189; Pair; long; Asym; 1; #1", false);
   }
 
   void test_handleFitFinished_multiFitDisabled() {
-    m_presenter->setMultiFitState(
-        MantidQt::CustomInterfaces::Muon::MultiFitState::Disabled);
-    doTest_HandleFitFinishedOrUndone("MUSR00015189; Pair; long; Asym; 1; #1",
-                                     true);
+    m_presenter->setMultiFitState(MantidQt::CustomInterfaces::Muon::MultiFitState::Disabled);
+    doTest_HandleFitFinishedOrUndone("MUSR00015189; Pair; long; Asym; 1; #1", true);
   }
 
   void test_handleFitUndone() {
@@ -189,11 +163,8 @@ public:
 
   void test_handleParameterEdited() {
     const QString funcIndex = "f0.", paramName = "A0";
-    EXPECT_CALL(*m_funcBrowser, getFunctionString())
-        .Times(1)
-        .WillOnce(Return("Test Function"));
-    EXPECT_CALL(*m_fitBrowser, setFunction(m_funcBrowser->getGlobalFunction()))
-        .Times(1);
+    EXPECT_CALL(*m_funcBrowser, getFunctionString()).Times(1).WillOnce(Return("Test Function"));
+    EXPECT_CALL(*m_fitBrowser, setFunction(m_funcBrowser->getGlobalFunction())).Times(1);
     m_presenter->handleParameterEdited(funcIndex, paramName);
   }
 
@@ -234,33 +205,23 @@ public:
     EXPECT_CALL(*m_fitBrowser, setMultiFittingMode(false)).Times(1);
     m_presenter->setMultiFitState(MultiFitState::Disabled);
   }
-  void test_setFunctionInModel_multiFitOn_hasGuess() {
-    doTest_setFunctionInModel(MultiFitState::Enabled, true);
-  }
+  void test_setFunctionInModel_multiFitOn_hasGuess() { doTest_setFunctionInModel(MultiFitState::Enabled, true); }
 
-  void test_setFunctionInModel_multiFitOn_noGuess() {
-    doTest_setFunctionInModel(MultiFitState::Enabled, false);
-  }
+  void test_setFunctionInModel_multiFitOn_noGuess() { doTest_setFunctionInModel(MultiFitState::Enabled, false); }
 
-  void test_setFunctionInModel_multiFitOff_hasGuess() {
-    doTest_setFunctionInModel(MultiFitState::Disabled, true);
-  }
+  void test_setFunctionInModel_multiFitOff_hasGuess() { doTest_setFunctionInModel(MultiFitState::Disabled, true); }
 
-  void test_setFunctionInModel_multiFitOff_noGuess() {
-    doTest_setFunctionInModel(MultiFitState::Disabled, false);
-  }
+  void test_setFunctionInModel_multiFitOff_noGuess() { doTest_setFunctionInModel(MultiFitState::Disabled, false); }
 
 private:
   /// Run a test of "handleFitFinished" with the given workspace name
-  void doTest_HandleFitFinishedOrUndone(const QString &wsName,
-                                        bool compatibility) {
+  void doTest_HandleFitFinishedOrUndone(const QString &wsName, bool compatibility) {
     const int times = compatibility ? 0 : 1;
     const auto &function = createFunction();
     ON_CALL(*m_fitBrowser, getFunction()).WillByDefault(Return(function));
     EXPECT_CALL(*m_fitBrowser, getFunction()).Times(times);
-    EXPECT_CALL(*m_funcBrowser, updateMultiDatasetParameters(
-                                    Matcher<const Mantid::API::IFunction &>(
-                                        testing::Ref(*function))))
+    EXPECT_CALL(*m_funcBrowser,
+                updateMultiDatasetParameters(Matcher<const Mantid::API::IFunction &>(testing::Ref(*function))))
         .Times(times);
     m_presenter->handleFitFinished(wsName);
   }
@@ -268,9 +229,7 @@ private:
   /// Run a test of "setFunctionInModel" with the given options
   void doTest_setFunctionInModel(MultiFitState multiState, bool hasGuess) {
     m_presenter->setMultiFitState(multiState);
-    EXPECT_CALL(*m_fitBrowser, hasGuess())
-        .Times(AnyNumber())
-        .WillRepeatedly(Return(hasGuess));
+    EXPECT_CALL(*m_fitBrowser, hasGuess()).Times(AnyNumber()).WillRepeatedly(Return(hasGuess));
     const int times = multiState == MultiFitState::Enabled && hasGuess ? 1 : 0;
     const auto &function = createFunction();
     {

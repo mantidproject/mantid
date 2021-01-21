@@ -39,40 +39,30 @@ DECLARE_ALGORITHM(CalMuonDetectorPhases)
  */
 void CalMuonDetectorPhases::init() {
 
-  declareProperty(std::make_unique<API::WorkspaceProperty<>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<API::WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
                   "Name of the reference input workspace");
 
-  declareProperty("FirstGoodData", EMPTY_DBL(),
-                  "First good data point in units of micro-seconds",
-                  Direction::Input);
+  declareProperty("FirstGoodData", EMPTY_DBL(), "First good data point in units of micro-seconds", Direction::Input);
 
-  declareProperty("LastGoodData", EMPTY_DBL(),
-                  "Last good data point in units of micro-seconds",
-                  Direction::Input);
+  declareProperty("LastGoodData", EMPTY_DBL(), "Last good data point in units of micro-seconds", Direction::Input);
 
-  declareProperty("Frequency", EMPTY_DBL(),
-                  "Starting hint for the frequency in MHz", Direction::Input);
+  declareProperty("Frequency", EMPTY_DBL(), "Starting hint for the frequency in MHz", Direction::Input);
 
   declareProperty(
-      std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
-          "DetectorTable", "", Direction::Output),
+      std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>("DetectorTable", "", Direction::Output),
       "Name of the TableWorkspace in which to store the list "
       "of phases and asymmetries");
 
-  declareProperty(std::make_unique<API::WorkspaceProperty<API::WorkspaceGroup>>(
-                      "DataFitted", "", Direction::Output),
+  declareProperty(std::make_unique<API::WorkspaceProperty<API::WorkspaceGroup>>("DataFitted", "", Direction::Output),
                   "Name of the output workspace holding fitting results");
 
-  declareProperty(
-      std::make_unique<ArrayProperty<int>>("ForwardSpectra", Direction::Input),
-      "The spectra numbers of the forward group. If not specified "
-      "will read from file.");
+  declareProperty(std::make_unique<ArrayProperty<int>>("ForwardSpectra", Direction::Input),
+                  "The spectra numbers of the forward group. If not specified "
+                  "will read from file.");
 
-  declareProperty(
-      std::make_unique<ArrayProperty<int>>("BackwardSpectra", Direction::Input),
-      "The spectra numbers of the backward group. If not specified "
-      "will read from file.");
+  declareProperty(std::make_unique<ArrayProperty<int>>("BackwardSpectra", Direction::Input),
+                  "The spectra numbers of the backward group. If not specified "
+                  "will read from file.");
 }
 
 /** Validates the inputs.
@@ -86,8 +76,7 @@ std::map<std::string, std::string> CalMuonDetectorPhases::validateInputs() {
   if (inputWS) {
     // Check units, should be microseconds
     Unit_const_sptr unit = inputWS->getAxis(0)->unit();
-    if ((unit->label().ascii() != "Microseconds") &&
-        (unit->label().ascii() != "microsecond")) {
+    if ((unit->label().ascii() != "Microseconds") && (unit->label().ascii() != "microsecond")) {
       result["InputWorkspace"] = "InputWorkspace units must be microseconds";
     }
 
@@ -102,8 +91,7 @@ std::map<std::string, std::string> CalMuonDetectorPhases::validateInputs() {
     }
     for (int spec : backward) {
       if (spec < 1 || spec > nspec) {
-        result["BackwardSpectra"] =
-            "Invalid spectrum numbers in BackwardSpectra";
+        result["BackwardSpectra"] = "Invalid spectrum numbers in BackwardSpectra";
       }
     }
   }
@@ -122,8 +110,7 @@ void CalMuonDetectorPhases::exec() {
   double endTime = getEndTime();
 
   // Prepares the workspaces: extracts data from [startTime, endTime]
-  API::MatrixWorkspace_sptr tempWS =
-      extractDataFromWorkspace(startTime, endTime);
+  API::MatrixWorkspace_sptr tempWS = extractDataFromWorkspace(startTime, endTime);
 
   // Get the frequency
   double freq = getFrequency(tempWS);
@@ -152,10 +139,8 @@ void CalMuonDetectorPhases::exec() {
  * @param resTab :: [output] Table workspace storing the asymmetries and phases
  * @param resGroup :: [output] Workspace group storing the fitting results
  */
-void CalMuonDetectorPhases::fitWorkspace(
-    const API::MatrixWorkspace_sptr &ws, double freq,
-    const std::string &groupName, const API::ITableWorkspace_sptr &resTab,
-    API::WorkspaceGroup_sptr &resGroup) {
+void CalMuonDetectorPhases::fitWorkspace(const API::MatrixWorkspace_sptr &ws, double freq, const std::string &groupName,
+                                         const API::ITableWorkspace_sptr &resTab, API::WorkspaceGroup_sptr &resGroup) {
 
   auto nhist = static_cast<int>(ws->getNumberHistograms());
 
@@ -175,8 +160,7 @@ void CalMuonDetectorPhases::fitWorkspace(
   for (int wsIndex = 0; wsIndex < nhist; wsIndex++) {
     reportProgress(wsIndex, nhist);
     const auto &yValues = ws->y(wsIndex);
-    auto emptySpectrum = std::all_of(yValues.begin(), yValues.end(),
-                                     [](double value) { return value == 0.; });
+    auto emptySpectrum = std::all_of(yValues.begin(), yValues.end(), [](double value) { return value == 0.; });
     if (emptySpectrum) {
       g_log.warning("Spectrum " + std::to_string(wsIndex) + " is empty");
       TableWorkspace_sptr tab = std::make_shared<TableWorkspace>();
@@ -211,8 +195,7 @@ void CalMuonDetectorPhases::fitWorkspace(
         error << ": " << status;
         throw std::runtime_error(error.str());
       } else if (status != success) {
-        g_log.warning("Fit failed for spectrum at workspace index " +
-                      std::to_string(wsIndex) + ": " + status);
+        g_log.warning("Fit failed for spectrum at workspace index " + std::to_string(wsIndex) + ": " + status);
       }
 
       API::MatrixWorkspace_sptr fitOut = fit->getProperty("OutputWorkspace");
@@ -232,9 +215,8 @@ void CalMuonDetectorPhases::fitWorkspace(
  * @param resultsTab :: [input] Results table to update with a new row
  * @param spectrumNumber :: [input] Spectrum number
  */
-void CalMuonDetectorPhases::extractDetectorInfo(
-    API::ITableWorkspace &paramTab, API::ITableWorkspace &resultsTab,
-    const Indexing::SpectrumNumber spectrumNumber) {
+void CalMuonDetectorPhases::extractDetectorInfo(API::ITableWorkspace &paramTab, API::ITableWorkspace &resultsTab,
+                                                const Indexing::SpectrumNumber spectrumNumber) {
 
   double asym = paramTab.Double(0, 1);
   double phase = paramTab.Double(2, 1);
@@ -263,8 +245,7 @@ void CalMuonDetectorPhases::extractDetectorInfo(
  * varying frequency with flat background.
  * @returns :: The fitting function as a string
  */
-std::string CalMuonDetectorPhases::createFittingFunction(double freq,
-                                                         bool fixFreq) {
+std::string CalMuonDetectorPhases::createFittingFunction(double freq, bool fixFreq) {
   // The fitting function is:
   // f(x) = A * sin ( w * x - p ) [+ B]
   std::ostringstream ss;
@@ -293,17 +274,14 @@ std::string CalMuonDetectorPhases::createFittingFunction(double freq,
  * @param endTime :: [input] Last X value to consider
  * @return :: Pre-processed workspace to fit
  */
-API::MatrixWorkspace_sptr
-CalMuonDetectorPhases::extractDataFromWorkspace(double startTime,
-                                                double endTime) {
+API::MatrixWorkspace_sptr CalMuonDetectorPhases::extractDataFromWorkspace(double startTime, double endTime) {
   // Extract counts from startTime to endTime
   API::IAlgorithm_sptr crop = createChildAlgorithm("CropWorkspace");
   crop->setProperty("InputWorkspace", m_inputWS);
   crop->setProperty("XMin", startTime);
   crop->setProperty("XMax", endTime);
   crop->executeAsChildAlg();
-  std::shared_ptr<API::MatrixWorkspace> wsCrop =
-      crop->getProperty("OutputWorkspace");
+  std::shared_ptr<API::MatrixWorkspace> wsCrop = crop->getProperty("OutputWorkspace");
   return wsCrop;
 }
 
@@ -312,8 +290,7 @@ CalMuonDetectorPhases::extractDataFromWorkspace(double startTime,
  * @param wsInput :: [input] Workspace to work on
  * @return :: Workspace with decay removed
  */
-API::MatrixWorkspace_sptr CalMuonDetectorPhases::removeExpDecay(
-    const API::MatrixWorkspace_sptr &wsInput) {
+API::MatrixWorkspace_sptr CalMuonDetectorPhases::removeExpDecay(const API::MatrixWorkspace_sptr &wsInput) {
   API::IAlgorithm_sptr remove = createChildAlgorithm("RemoveExpDecay");
   remove->setProperty("InputWorkspace", wsInput);
   remove->executeAsChildAlg();
@@ -342,9 +319,8 @@ double CalMuonDetectorPhases::getFrequencyHint() const {
       // Multiply by muon gyromagnetic ratio: 0.01355 MHz/G
       freq *= PhysicalConstants::MuonGyromagneticRatio;
     } catch (...) {
-      throw std::runtime_error(
-          "Couldn't read sample_magn_field. Please provide a value for "
-          "the frequency");
+      throw std::runtime_error("Couldn't read sample_magn_field. Please provide a value for "
+                               "the frequency");
     }
   }
 
@@ -363,8 +339,7 @@ double CalMuonDetectorPhases::getFrequencyHint() const {
  * @param ws :: [input] Pointer to cropped workspace with exp decay removed
  * @return :: Fixed frequency value to use in the sequential fit
  */
-double
-CalMuonDetectorPhases::getFrequency(const API::MatrixWorkspace_sptr &ws) {
+double CalMuonDetectorPhases::getFrequency(const API::MatrixWorkspace_sptr &ws) {
   std::vector<int> forward = getProperty("ForwardSpectra");
   std::vector<int> backward = getProperty("BackwardSpectra");
 
@@ -375,8 +350,7 @@ CalMuonDetectorPhases::getFrequency(const API::MatrixWorkspace_sptr &ws) {
 
   // Calculate asymmetry
   const double alpha = getAlpha(ws, forward, backward);
-  const API::MatrixWorkspace_sptr wsAsym =
-      getAsymmetry(ws, forward, backward, alpha);
+  const API::MatrixWorkspace_sptr wsAsym = getAsymmetry(ws, forward, backward, alpha);
 
   // Fit an oscillating function, allowing frequency to vary
   double frequency = fitFrequencyFromAsymmetry(wsAsym);
@@ -392,9 +366,8 @@ CalMuonDetectorPhases::getFrequency(const API::MatrixWorkspace_sptr &ws) {
  * @param forward :: [output] Forward spectrum indices for given instrument
  * @param backward :: [output] Backward spectrum indices for given instrument
  */
-void CalMuonDetectorPhases::getGroupingFromInstrument(
-    const API::MatrixWorkspace_sptr &ws, std::vector<int> &forward,
-    std::vector<int> &backward) {
+void CalMuonDetectorPhases::getGroupingFromInstrument(const API::MatrixWorkspace_sptr &ws, std::vector<int> &forward,
+                                                      std::vector<int> &backward) {
   // make sure both arrays are empty
   forward.clear();
   backward.clear();
@@ -406,13 +379,11 @@ void CalMuonDetectorPhases::getGroupingFromInstrument(
     // Two possibilities for grouping - use workspace log
     auto fieldDir = ws->run().getLogData("main_field_direction");
     if (fieldDir) {
-      loader =
-          std::make_unique<API::GroupingLoader>(instrument, fieldDir->value());
+      loader = std::make_unique<API::GroupingLoader>(instrument, fieldDir->value());
     }
     if (!fieldDir) {
-      throw std::invalid_argument(
-          "Cannot use default instrument grouping for MUSR "
-          "as main field direction is unknown");
+      throw std::invalid_argument("Cannot use default instrument grouping for MUSR "
+                                  "as main field direction is unknown");
     }
   }
 
@@ -447,8 +418,7 @@ double CalMuonDetectorPhases::getStartTime() const {
   if (startTime == EMPTY_DBL()) {
     try {
       // Read FirstGoodData from workspace logs if possible
-      double firstGoodData =
-          m_inputWS->run().getLogAsSingleValue("FirstGoodData");
+      double firstGoodData = m_inputWS->run().getLogAsSingleValue("FirstGoodData");
       startTime = firstGoodData;
     } catch (...) {
       g_log.warning("Couldn't read FirstGoodData, setting to 0");
@@ -480,8 +450,7 @@ double CalMuonDetectorPhases::getEndTime() const {
  * @param backward :: [input] Backward group spectra numbers
  * @return :: Alpha, or 1.0 if calculation failed
  */
-double CalMuonDetectorPhases::getAlpha(const API::MatrixWorkspace_sptr &ws,
-                                       const std::vector<int> &forward,
+double CalMuonDetectorPhases::getAlpha(const API::MatrixWorkspace_sptr &ws, const std::vector<int> &forward,
                                        const std::vector<int> &backward) {
   double alpha = 1.0;
   try {
@@ -509,9 +478,9 @@ double CalMuonDetectorPhases::getAlpha(const API::MatrixWorkspace_sptr &ws,
  * @param alpha :: [input] Detector efficiency
  * @return :: Asymmetry for workspace
  */
-API::MatrixWorkspace_sptr CalMuonDetectorPhases::getAsymmetry(
-    const API::MatrixWorkspace_sptr &ws, const std::vector<int> &forward,
-    const std::vector<int> &backward, const double alpha) {
+API::MatrixWorkspace_sptr CalMuonDetectorPhases::getAsymmetry(const API::MatrixWorkspace_sptr &ws,
+                                                              const std::vector<int> &forward,
+                                                              const std::vector<int> &backward, const double alpha) {
   auto alg = createChildAlgorithm("AsymmetryCalc");
   alg->setProperty("InputWorkspace", ws);
   alg->setProperty("OutputWorkspace", "__NotUsed");
@@ -530,8 +499,7 @@ API::MatrixWorkspace_sptr CalMuonDetectorPhases::getAsymmetry(
  * @param wsAsym :: [input] Workspace with asymmetry to fit
  * @return :: Frequency found from fit
  */
-double CalMuonDetectorPhases::fitFrequencyFromAsymmetry(
-    const API::MatrixWorkspace_sptr &wsAsym) {
+double CalMuonDetectorPhases::fitFrequencyFromAsymmetry(const API::MatrixWorkspace_sptr &wsAsym) {
   // Starting value for frequency is hint
   double hint = getFrequencyHint();
   std::string funcStr = createFittingFunction(hint, false);
@@ -577,8 +545,7 @@ double CalMuonDetectorPhases::fitFrequencyFromAsymmetry(
  * @param thisSpectrum :: [input] Spectrum number currently being fitted
  * @param totalSpectra :: [input] Total number of spectra to fit
  */
-void CalMuonDetectorPhases::reportProgress(const int thisSpectrum,
-                                           const int totalSpectra) {
+void CalMuonDetectorPhases::reportProgress(const int thisSpectrum, const int totalSpectra) {
   double proportionDone = (double)thisSpectrum / (double)totalSpectra;
   std::ostringstream progMessage;
   progMessage << "Fitting " << thisSpectrum + 1 << " of " << totalSpectra;

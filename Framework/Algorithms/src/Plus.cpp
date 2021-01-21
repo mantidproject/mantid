@@ -19,24 +19,17 @@ DECLARE_ALGORITHM(Plus)
 // ===================================== HISTOGRAM BINARY OPERATIONS
 // ==========================================
 //---------------------------------------------------------------------------------------------
-void Plus::performBinaryOperation(const HistogramData::Histogram &lhs,
-                                  const HistogramData::Histogram &rhs,
-                                  HistogramData::HistogramY &YOut,
-                                  HistogramData::HistogramE &EOut) {
-  std::transform(lhs.y().begin(), lhs.y().end(), rhs.y().begin(), YOut.begin(),
-                 std::plus<>());
-  std::transform(lhs.e().begin(), lhs.e().end(), rhs.e().begin(), EOut.begin(),
-                 VectorHelper::SumGaussError<double>());
+void Plus::performBinaryOperation(const HistogramData::Histogram &lhs, const HistogramData::Histogram &rhs,
+                                  HistogramData::HistogramY &YOut, HistogramData::HistogramE &EOut) {
+  std::transform(lhs.y().begin(), lhs.y().end(), rhs.y().begin(), YOut.begin(), std::plus<>());
+  std::transform(lhs.e().begin(), lhs.e().end(), rhs.e().begin(), EOut.begin(), VectorHelper::SumGaussError<double>());
 }
 
 //---------------------------------------------------------------------------------------------
-void Plus::performBinaryOperation(const HistogramData::Histogram &lhs,
-                                  const double rhsY, const double rhsE,
-                                  HistogramData::HistogramY &YOut,
-                                  HistogramData::HistogramE &EOut) {
+void Plus::performBinaryOperation(const HistogramData::Histogram &lhs, const double rhsY, const double rhsE,
+                                  HistogramData::HistogramY &YOut, HistogramData::HistogramE &EOut) {
   using std::placeholders::_1;
-  std::transform(lhs.y().begin(), lhs.y().end(), YOut.begin(),
-                 [rhsY](double l) { return l + rhsY; });
+  std::transform(lhs.y().begin(), lhs.y().end(), YOut.begin(), [rhsY](double l) { return l + rhsY; });
   // Only do E if non-zero, otherwise just copy
 
   if (rhsE != 0.) {
@@ -56,8 +49,7 @@ void Plus::performBinaryOperation(const HistogramData::Histogram &lhs,
  *  @param lhs :: Reference to the EventList that will be modified in place.
  *  @param rhs :: Const reference to the EventList on the right hand side.
  */
-void Plus::performEventBinaryOperation(DataObjects::EventList &lhs,
-                                       const DataObjects::EventList &rhs) {
+void Plus::performEventBinaryOperation(DataObjects::EventList &lhs, const DataObjects::EventList &rhs) {
   // Easy, no? :) - This appends the event lists.
   lhs += rhs;
 }
@@ -70,18 +62,15 @@ void Plus::performEventBinaryOperation(DataObjects::EventList &lhs,
  *  @param rhsY :: The vector of rhs data values
  *  @param rhsE :: The vector of rhs error values
  */
-void Plus::performEventBinaryOperation(DataObjects::EventList &lhs,
-                                       const MantidVec &rhsX,
-                                       const MantidVec &rhsY,
+void Plus::performEventBinaryOperation(DataObjects::EventList &lhs, const MantidVec &rhsX, const MantidVec &rhsY,
                                        const MantidVec &rhsE) {
   (void)lhs; // Avoid compiler warnings
   (void)rhsX;
   (void)rhsY;
   (void)rhsE;
-  throw Exception::NotImplementedError(
-      "Plus::performEventBinaryOperation() cannot add a histogram to an event "
-      "list in an EventWorkspace. Try switching to a Workspace2D before "
-      "adding.");
+  throw Exception::NotImplementedError("Plus::performEventBinaryOperation() cannot add a histogram to an event "
+                                       "list in an EventWorkspace. Try switching to a Workspace2D before "
+                                       "adding.");
 }
 
 /** Carries out the binary operation IN-PLACE on a single EventList,
@@ -92,8 +81,7 @@ void Plus::performEventBinaryOperation(DataObjects::EventList &lhs,
  *  @param rhsY :: The rhs data value
  *  @param rhsE :: The rhs error value
  */
-void Plus::performEventBinaryOperation(DataObjects::EventList &lhs,
-                                       const double &rhsY, const double &rhsE) {
+void Plus::performEventBinaryOperation(DataObjects::EventList &lhs, const double &rhsY, const double &rhsE) {
   (void)lhs; // Avoid compiler warnings
   (void)rhsY;
   (void)rhsE;
@@ -144,9 +132,8 @@ void Plus::checkRequirements() {
  *  @param rhs :: second workspace to check for compatibility
  *  @return workspace unit compatibility flag
  */
-bool Plus::checkUnitCompatibility(
-    const API::MatrixWorkspace_const_sptr &lhs,
-    const API::MatrixWorkspace_const_sptr &rhs) const {
+bool Plus::checkUnitCompatibility(const API::MatrixWorkspace_const_sptr &lhs,
+                                  const API::MatrixWorkspace_const_sptr &rhs) const {
   if (lhs->size() > 1 && rhs->size() > 1) {
     if (lhs->YUnit() != rhs->YUnit()) {
       g_log.error("The two workspaces are not compatible because they have "
@@ -190,9 +177,8 @@ bool Plus::checkCompatibility(const API::MatrixWorkspace_const_sptr lhs,
  *  @retval "<reason why not compatible>" The two workspaces are NOT size
  * compatible
  */
-std::string
-Plus::checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,
-                             const API::MatrixWorkspace_const_sptr rhs) const {
+std::string Plus::checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,
+                                         const API::MatrixWorkspace_const_sptr rhs) const {
   if (m_erhs && m_elhs) {
     if (lhs->getNumberHistograms() == rhs->getNumberHistograms()) {
       return "";

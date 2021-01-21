@@ -29,8 +29,7 @@
 #include <QPushButton>
 #include <QSpinBox>
 
-LayerDialog::LayerDialog(QWidget *parent, const Qt::WFlags &fl)
-    : QDialog(parent, fl), multi_layer(nullptr) {
+LayerDialog::LayerDialog(QWidget *parent, const Qt::WFlags &fl) : QDialog(parent, fl), multi_layer(nullptr) {
   setObjectName("LayerDialog");
   setWindowTitle(tr("MantidPlot - Arrange Layers"));
 
@@ -211,12 +210,10 @@ void LayerDialog::update() {
   int graphs = layersBox->value();
   int old_graphs = multi_layer->layers();
   int dn = multi_layer->layers() - graphs;
-  if (dn > 0 &&
-      QMessageBox::question(
-          nullptr, tr("MantidPlot - Delete Layers?"),
-          tr("You are about to delete %1 existing layers.").arg(dn) + "\n" +
-              tr("Are you sure you want to continue this operation?"),
-          tr("&Continue"), tr("&Cancel"), QString(), 0, 1))
+  if (dn > 0 && QMessageBox::question(nullptr, tr("MantidPlot - Delete Layers?"),
+                                      tr("You are about to delete %1 existing layers.").arg(dn) + "\n" +
+                                          tr("Are you sure you want to continue this operation?"),
+                                      tr("&Continue"), tr("&Cancel"), QString(), 0, 1))
     return;
 
   multi_layer->setLayersNumber(graphs);
@@ -259,14 +256,11 @@ void LayerDialog::update() {
   }
 
   if (GroupCanvasSize->isChecked())
-    multi_layer->setLayerCanvasSize(boxCanvasWidth->value(),
-                                    boxCanvasHeight->value());
+    multi_layer->setLayerCanvasSize(boxCanvasWidth->value(), boxCanvasHeight->value());
 
-  multi_layer->setAlignement(alignHorBox->currentIndex(),
-                             alignVertBox->currentIndex());
+  multi_layer->setAlignement(alignHorBox->currentIndex(), alignVertBox->currentIndex());
 
-  multi_layer->setMargins(boxLeftSpace->value(), boxRightSpace->value(),
-                          boxTopSpace->value(), boxBottomSpace->value());
+  multi_layer->setMargins(boxLeftSpace->value(), boxRightSpace->value(), boxTopSpace->value(), boxBottomSpace->value());
 
   multi_layer->setSpacing(boxRowsGap->value(), boxColsGap->value());
   multi_layer->arrangeLayers(fitBox->isChecked(), GroupCanvasSize->isChecked());

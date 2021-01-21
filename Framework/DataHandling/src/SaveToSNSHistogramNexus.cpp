@@ -42,8 +42,7 @@ using namespace Geometry;
 
 /// Empty default constructor
 SaveToSNSHistogramNexus::SaveToSNSHistogramNexus()
-    : Algorithm(), m_progress(), m_compress(false), links_count(0), inId(),
-      outId() {}
+    : Algorithm(), m_progress(), m_compress(false), links_count(0), inId(), outId() {}
 
 /** Initialisation method.
  *
@@ -53,22 +52,18 @@ void SaveToSNSHistogramNexus::init() {
   // workspac
   std::initializer_list<std::string> exts = {".nxs"};
 
-  declareProperty(std::make_unique<FileProperty>("InputFilename", "",
-                                                 FileProperty::Load, exts),
+  declareProperty(std::make_unique<FileProperty>("InputFilename", "", FileProperty::Load, exts),
                   "The name of the original Nexus file for this data,\n"
                   "as a full or relative path");
 
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input),
                   "Name of the workspace to be saved");
 
-  declareProperty(std::make_unique<FileProperty>("OutputFilename", "",
-                                                 FileProperty::Save, exts),
+  declareProperty(std::make_unique<FileProperty>("OutputFilename", "", FileProperty::Save, exts),
                   "The name of the Nexus file to write, as a full or relative\n"
                   "path");
 
-  declareProperty(std::make_unique<PropertyWithValue<bool>>("Compress", false,
-                                                            Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("Compress", false, Direction::Input),
                   "Will the output NXS file data be compressed?");
 }
 
@@ -108,9 +103,7 @@ int SaveToSNSHistogramNexus::remove_path(const char *path) {
 /** Performs the copying from the input to the output file,
  *  while modifying the data and time_of_flight fields.
  */
-int SaveToSNSHistogramNexus::copy_file(const char *inFile, int nx__access,
-                                       const char *outFile,
-                                       int nx_write_access) {
+int SaveToSNSHistogramNexus::copy_file(const char *inFile, int nx__access, const char *outFile, int nx_write_access) {
   int nx_is_definition = 0;
   links_count = 0;
   current_path[0] = '\0';
@@ -146,8 +139,7 @@ int SaveToSNSHistogramNexus::copy_file(const char *inFile, int nx__access,
     for (int i = 0; i < links_count; i++) {
       if (NXopenpath(outId, links_to_make[i].to) != NX_OK)
         return NX_ERROR;
-      if (NXgetdataID(outId, &link) == NX_OK ||
-          NXgetgroupID(outId, &link) == NX_OK) {
+      if (NXgetdataID(outId, &link) == NX_OK || NXgetgroupID(outId, &link) == NX_OK) {
         if (NXopenpath(outId, links_to_make[i].from) != NX_OK)
           return NX_ERROR;
         char *tstr = strrchr(links_to_make[i].to, '/');
@@ -186,10 +178,9 @@ int SaveToSNSHistogramNexus::copy_file(const char *inFile, int nx__access,
  * @param bank :: name of the bank being written.
  * @return error code
  */
-int SaveToSNSHistogramNexus::WriteOutDataOrErrors(
-    const Geometry::RectangularDetector_const_sptr &det, int x_pixel_slab,
-    const char *field_name, const char *errors_field_name, bool doErrors,
-    bool doBoth, int is_definition, const std::string &bank) {
+int SaveToSNSHistogramNexus::WriteOutDataOrErrors(const Geometry::RectangularDetector_const_sptr &det, int x_pixel_slab,
+                                                  const char *field_name, const char *errors_field_name, bool doErrors,
+                                                  bool doBoth, int is_definition, const std::string &bank) {
   int dataRank, dataDimensions[NX_MAXRANK];
   int slabDimensions[NX_MAXRANK], slabStartIndices[NX_MAXRANK];
 
@@ -211,18 +202,15 @@ int SaveToSNSHistogramNexus::WriteOutDataOrErrors(
   if (doBoth)
     slabDimensions[0] = dataDimensions[0];
 
-  std::cout << "RectangularDetector " << det->getName()
-            << " being copied. Dimensions : " << dataDimensions[0] << ", "
+  std::cout << "RectangularDetector " << det->getName() << " being copied. Dimensions : " << dataDimensions[0] << ", "
             << dataDimensions[1] << ", " << dataDimensions[2] << ".\n";
 
   // ----- Open the data field -----------------------
   if (m_compress) {
-    if (NXcompmakedata(outId, field_name, NX_FLOAT32, dataRank, dataDimensions,
-                       NX_COMP_LZW, slabDimensions) != NX_OK)
+    if (NXcompmakedata(outId, field_name, NX_FLOAT32, dataRank, dataDimensions, NX_COMP_LZW, slabDimensions) != NX_OK)
       return NX_ERROR;
   } else {
-    if (NXmakedata(outId, field_name, NX_FLOAT32, dataRank, dataDimensions) !=
-        NX_OK)
+    if (NXmakedata(outId, field_name, NX_FLOAT32, dataRank, dataDimensions) != NX_OK)
       return NX_ERROR;
   }
   if (NXopendata(outId, field_name) != NX_OK)
@@ -234,8 +222,7 @@ int SaveToSNSHistogramNexus::WriteOutDataOrErrors(
     // field.
     NXname attrName = "errors";
     std::string attrBuffer = errors_field_name;
-    if (NXputattr(outId, attrName, attrBuffer.c_str(),
-                  static_cast<int>(attrBuffer.size()), NX_CHAR) != NX_OK)
+    if (NXputattr(outId, attrName, attrBuffer.c_str(), static_cast<int>(attrBuffer.size()), NX_CHAR) != NX_OK)
       return NX_ERROR;
   }
 
@@ -245,12 +232,11 @@ int SaveToSNSHistogramNexus::WriteOutDataOrErrors(
       return NX_ERROR;
 
     if (m_compress) {
-      if (NXcompmakedata(outId, errors_field_name, NX_FLOAT32, dataRank,
-                         dataDimensions, NX_COMP_LZW, slabDimensions) != NX_OK)
+      if (NXcompmakedata(outId, errors_field_name, NX_FLOAT32, dataRank, dataDimensions, NX_COMP_LZW, slabDimensions) !=
+          NX_OK)
         return NX_ERROR;
     } else {
-      if (NXmakedata(outId, errors_field_name, NX_FLOAT32, dataRank,
-                     dataDimensions) != NX_OK)
+      if (NXmakedata(outId, errors_field_name, NX_FLOAT32, dataRank, dataDimensions) != NX_OK)
         return NX_ERROR;
     }
     if (NXopendata(outId, errors_field_name) != NX_OK)
@@ -275,14 +261,12 @@ int SaveToSNSHistogramNexus::WriteOutDataOrErrors(
   double saveTime = 0;
 
   // Make a buffer of floats will all the counts in that bank.
-  auto data =
-      new float[slabDimensions[0] * slabDimensions[1] * slabDimensions[2]];
+  auto data = new float[slabDimensions[0] * slabDimensions[1] * slabDimensions[2]];
 
   // Only allocate an array for errors if it is needed
   float *errors = nullptr;
   if (doBoth)
-    errors =
-        new float[slabDimensions[0] * slabDimensions[1] * slabDimensions[2]];
+    errors = new float[slabDimensions[0] * slabDimensions[1] * slabDimensions[2]];
 
   for (int x = 0; x < det->xpixels(); x++) {
     // Which slab are we in?
@@ -302,14 +286,12 @@ int SaveToSNSHistogramNexus::WriteOutDataOrErrors(
       try {
         wi = m_map.find(det->getAtXY(x, y)->getID())->second;
       } catch (...) {
-        std::cout << "Error finding " << bank << " x " << x << " y " << y
-                  << "\n";
+        std::cout << "Error finding " << bank << " x " << x << " y " << y << "\n";
       }
 
       // Offset into array.
-      size_t index = size_t(slabx) * size_t(dataDimensions[1]) *
-                         size_t(dataDimensions[2]) +
-                     size_t(y) * size_t(dataDimensions[2]);
+      size_t index =
+          size_t(slabx) * size_t(dataDimensions[1]) * size_t(dataDimensions[2]) + size_t(y) * size_t(dataDimensions[2]);
 
       const auto &Y = m_inputWorkspace->y(wi);
       const auto &E = m_inputWorkspace->e(wi);
@@ -344,10 +326,8 @@ int SaveToSNSHistogramNexus::WriteOutDataOrErrors(
       saveTime += tim2.elapsed();
 
       std::ostringstream mess;
-      mess << det->getName() << ", " << field_name << " slab " << slabnum
-           << " of " << det->xpixels() / x_pixel_slab;
-      this->m_progress->reportIncrement(x_pixel_slab * det->ypixels(),
-                                        mess.str());
+      mess << det->getName() << ", " << field_name << " slab " << slabnum << " of " << det->xpixels() / x_pixel_slab;
+      this->m_progress->reportIncrement(x_pixel_slab * det->ypixels(), mess.str());
     }
 
   } // X loop
@@ -363,8 +343,7 @@ int SaveToSNSHistogramNexus::WriteOutDataOrErrors(
     else if (NXclosedata(outId) != NX_OK)
       returnerror = true;
     else {
-      this->m_progress->reportIncrement(det->xpixels() * det->ypixels() * 1,
-                                        det->getName() + " data");
+      this->m_progress->reportIncrement(det->xpixels() * det->ypixels() * 1, det->getName() + " data");
 
       if (NXopendata(outId, errors_field_name) != NX_OK)
         returnerror = true;
@@ -373,8 +352,7 @@ int SaveToSNSHistogramNexus::WriteOutDataOrErrors(
       else if (NXclosedata(outId) != NX_OK)
         returnerror = true;
       else {
-        this->m_progress->reportIncrement(det->xpixels() * det->ypixels() * 1,
-                                          det->getName() + " errors");
+        this->m_progress->reportIncrement(det->xpixels() * det->ypixels() * 1, det->getName() + " errors");
         saveTime += tim2.elapsed();
       }
     }
@@ -393,10 +371,8 @@ int SaveToSNSHistogramNexus::WriteOutDataOrErrors(
     }
   }
 
-  std::cout << "Filling out " << det->getName() << " took " << fillTime
-            << " sec.\n";
-  std::cout << "Saving      " << det->getName() << " took " << saveTime
-            << " sec.\n";
+  std::cout << "Filling out " << det->getName() << " took " << fillTime << " sec.\n";
+  std::cout << "Saving      " << det->getName() << " took " << saveTime << " sec.\n";
 
   delete[] data;
   if (doBoth)
@@ -412,8 +388,7 @@ int SaveToSNSHistogramNexus::WriteOutDataOrErrors(
  * @param is_definition
  * @return error code
  */
-int SaveToSNSHistogramNexus::WriteDataGroup(const std::string &bank,
-                                            int is_definition) {
+int SaveToSNSHistogramNexus::WriteDataGroup(const std::string &bank, int is_definition) {
   int dataType, dataRank, dataDimensions[NX_MAXRANK];
   NXname name;
   void *dataBuffer;
@@ -422,21 +397,16 @@ int SaveToSNSHistogramNexus::WriteDataGroup(const std::string &bank,
     return NX_ERROR;
 
   // Get the rectangular detector
-  IComponent_const_sptr det_comp =
-      m_inputWorkspace->getInstrument()->getComponentByName(std::string(bank));
-  RectangularDetector_const_sptr det =
-      std::dynamic_pointer_cast<const RectangularDetector>(det_comp);
+  IComponent_const_sptr det_comp = m_inputWorkspace->getInstrument()->getComponentByName(std::string(bank));
+  RectangularDetector_const_sptr det = std::dynamic_pointer_cast<const RectangularDetector>(det_comp);
   if (!det) {
-    g_log.information()
-        << "Detector '" + bank +
-               "' not found, or it is not a rectangular detector!\n";
+    g_log.information() << "Detector '" + bank + "' not found, or it is not a rectangular detector!\n";
     // Just copy that then.
     if (NXmalloc(&dataBuffer, dataRank, dataDimensions, dataType) != NX_OK)
       return NX_ERROR;
     if (NXgetdata(inId, dataBuffer) != NX_OK)
       return NX_ERROR;
-    if (NXcompmakedata(outId, name, dataType, dataRank, dataDimensions,
-                       NX_COMP_LZW, dataDimensions) != NX_OK)
+    if (NXcompmakedata(outId, name, dataType, dataRank, dataDimensions, NX_COMP_LZW, dataDimensions) != NX_OK)
       return NX_ERROR;
     if (NXopendata(outId, name) != NX_OK)
       return NX_ERROR;
@@ -452,9 +422,8 @@ int SaveToSNSHistogramNexus::WriteDataGroup(const std::string &bank,
     // YES it is a rectangular detector.
 
     // --- Memory requirements ----
-    size_t memory_required = size_t(det->xpixels() * det->ypixels()) *
-                             size_t(m_inputWorkspace->blocksize()) * 2 *
-                             sizeof(float);
+    size_t memory_required =
+        size_t(det->xpixels() * det->ypixels()) * size_t(m_inputWorkspace->blocksize()) * 2 * sizeof(float);
     Kernel::MemoryStats mem;
     mem.update();
     size_t memory_available = mem.availMem() * 1024;
@@ -470,9 +439,8 @@ int SaveToSNSHistogramNexus::WriteDataGroup(const std::string &bank,
     if (memory_available < memory_required) {
       // Compute how large of a slab you can still use.
       int x_slab;
-      x_slab = static_cast<int>(
-          memory_available /
-          (det->ypixels() * m_inputWorkspace->blocksize() * 2 * sizeof(float)));
+      x_slab =
+          static_cast<int>(memory_available / (det->ypixels() * m_inputWorkspace->blocksize() * 2 * sizeof(float)));
       if (x_slab <= 0)
         x_slab = 1;
       // Look for a slab size that evenly divides the # of pixels.
@@ -483,16 +451,14 @@ int SaveToSNSHistogramNexus::WriteDataGroup(const std::string &bank,
       }
 
       std::cout << "Saving in slabs of " << x_slab << " X pixels.\n";
-      if (this->WriteOutDataOrErrors(det, x_slab, "data", "data_errors", false,
-                                     false, is_definition, bank) != NX_OK)
+      if (this->WriteOutDataOrErrors(det, x_slab, "data", "data_errors", false, false, is_definition, bank) != NX_OK)
         return NX_ERROR;
-      if (this->WriteOutDataOrErrors(det, x_slab, "errors", "", true, false,
-                                     is_definition, bank) != NX_OK)
+      if (this->WriteOutDataOrErrors(det, x_slab, "errors", "", true, false, is_definition, bank) != NX_OK)
         return NX_ERROR;
     } else {
       std::cout << "Saving in one block.\n";
-      if (this->WriteOutDataOrErrors(det, det->xpixels(), "data", "data_errors",
-                                     false, true, is_definition, bank) != NX_OK)
+      if (this->WriteOutDataOrErrors(det, det->xpixels(), "data", "data_errors", false, true, is_definition, bank) !=
+          NX_OK)
         return NX_ERROR;
     }
   }
@@ -585,11 +551,9 @@ int SaveToSNSHistogramNexus::WriteGroup(int is_definition) {
             std::vector<float> tof_data(dataDimensions[0]);
 
             // And fill it with the X data
-            std::transform(X.cbegin(), X.cend(), tof_data.begin(),
-                           [](double x) { return static_cast<float>(x); });
+            std::transform(X.cbegin(), X.cend(), tof_data.begin(), [](double x) { return static_cast<float>(x); });
 
-            if (NXcompmakedata(outId, name, dataType, dataRank, dataDimensions,
-                               NX_COMP_LZW, dataDimensions) != NX_OK)
+            if (NXcompmakedata(outId, name, dataType, dataRank, dataDimensions, NX_COMP_LZW, dataDimensions) != NX_OK)
               return NX_ERROR;
             if (NXopendata(outId, name) != NX_OK)
               return NX_ERROR;
@@ -607,13 +571,11 @@ int SaveToSNSHistogramNexus::WriteGroup(int is_definition) {
             // Everything else gets copies
             if (NXgetinfo(inId, &dataRank, dataDimensions, &dataType) != NX_OK)
               return NX_ERROR;
-            if (NXmalloc(&dataBuffer, dataRank, dataDimensions, dataType) !=
-                NX_OK)
+            if (NXmalloc(&dataBuffer, dataRank, dataDimensions, dataType) != NX_OK)
               return NX_ERROR;
             if (NXgetdata(inId, dataBuffer) != NX_OK)
               return NX_ERROR;
-            if (NXcompmakedata(outId, name, dataType, dataRank, dataDimensions,
-                               NX_COMP_LZW, dataDimensions) != NX_OK)
+            if (NXcompmakedata(outId, name, dataType, dataRank, dataDimensions, NX_COMP_LZW, dataDimensions) != NX_OK)
               return NX_ERROR;
             if (NXopendata(outId, name) != NX_OK)
               return NX_ERROR;
@@ -663,9 +625,8 @@ int SaveToSNSHistogramNexus::WriteAttributes(int is_definition) {
   NXname attrName;
   void *attrBuffer;
 
-  std::array<const char *, 6> attrs = {{"NeXus_version", "XML_version",
-                                        "HDF_version", "HDF5_Version",
-                                        "file_name", "file_time"}};
+  std::array<const char *, 6> attrs = {
+      {"NeXus_version", "XML_version", "HDF_version", "HDF5_Version", "file_name", "file_time"}};
 
   do {
 #ifdef NEXUS43
@@ -682,9 +643,7 @@ int SaveToSNSHistogramNexus::WriteAttributes(int is_definition) {
       attrLen = dims[0];
 #endif
       if (std::none_of(attrs.cbegin(), attrs.cend(),
-                       [&attrName](const char *name) {
-                         return strcmp(attrName, name) == 0;
-                       })) {
+                       [&attrName](const char *name) { return strcmp(attrName, name) == 0; })) {
         attrLen++; /* Add space for string termination */
         if (NXmalloc(&attrBuffer, 1, &attrLen, attrType) != NX_OK)
           return NX_ERROR;
@@ -725,18 +684,15 @@ void SaveToSNSHistogramNexus::exec() {
   m_map = m_inputWorkspace->getDetectorIDToWorkspaceIndexMap();
 
   // Start the progress bar. 3 reports per histogram.
-  m_progress = std::make_unique<Progress>(
-      this, 0.0, 1.0, m_inputWorkspace->getNumberHistograms() * 3);
+  m_progress = std::make_unique<Progress>(this, 0.0, 1.0, m_inputWorkspace->getNumberHistograms() * 3);
 
-  EventWorkspace_const_sptr eventWorkspace =
-      std::dynamic_pointer_cast<const EventWorkspace>(m_inputWorkspace);
+  EventWorkspace_const_sptr eventWorkspace = std::dynamic_pointer_cast<const EventWorkspace>(m_inputWorkspace);
   if (eventWorkspace) {
     eventWorkspace->sortAll(TOF_SORT, m_progress.get());
   }
 
   int ret;
-  ret = this->copy_file(m_inputFilename.c_str(), NXACC_READ,
-                        m_outputFilename.c_str(), NXACC_CREATE5);
+  ret = this->copy_file(m_inputFilename.c_str(), NXACC_READ, m_outputFilename.c_str(), NXACC_CREATE5);
 
   if (ret == NX_ERROR)
     throw std::runtime_error("Nexus error while copying the file.");

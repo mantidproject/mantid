@@ -16,26 +16,20 @@ namespace Kernel {
  * @param filter :: A reference to a TimeSeriesProperty<bool> that will act as a
  * filter
  */
-LogFilter::LogFilter(const TimeSeriesProperty<bool> &filter)
-    : m_prop(), m_filter() {
-  addFilter(filter);
-}
+LogFilter::LogFilter(const TimeSeriesProperty<bool> &filter) : m_prop(), m_filter() { addFilter(filter); }
 
 /**
  * Constructor
  * @param prop :: Pointer to property to be filtered. Its actual type must be
  * TimeSeriesProperty<double>
  */
-LogFilter::LogFilter(const Property *prop) : m_prop(), m_filter() {
-  m_prop.reset(convertToTimeSeriesOfDouble(prop));
-}
+LogFilter::LogFilter(const Property *prop) : m_prop(), m_filter() { m_prop.reset(convertToTimeSeriesOfDouble(prop)); }
 
 /**
  * / Constructor from a TimeSeriesProperty<double> object to avoid overhead of
  * casts
  */
-LogFilter::LogFilter(const TimeSeriesProperty<double> *timeSeries)
-    : m_prop(), m_filter() {
+LogFilter::LogFilter(const TimeSeriesProperty<double> *timeSeries) : m_prop(), m_filter() {
   m_prop.reset(timeSeries->clone());
 }
 
@@ -90,8 +84,7 @@ void LogFilter::addFilter(const TimeSeriesProperty<bool> &filter) {
       TimeInterval time3;
       time3 = time1.intersection(time2);
       if (time3.isValid()) {
-        filterProperty->addValue(
-            time3.begin(), (filter1->nthValue(i) && filter2->nthValue(j)));
+        filterProperty->addValue(time3.begin(), (filter1->nthValue(i) && filter2->nthValue(j)));
       }
 
       if (time1.end() < time2.end()) {
@@ -131,8 +124,7 @@ void LogFilter::clear() {
 namespace {
 template <typename SrcType> struct ConvertToTimeSeriesDouble {
   static TimeSeriesProperty<double> *apply(const Property *prop) {
-    auto srcTypeSeries =
-        dynamic_cast<const TimeSeriesProperty<SrcType> *>(prop);
+    auto srcTypeSeries = dynamic_cast<const TimeSeriesProperty<SrcType> *>(prop);
     if (!srcTypeSeries)
       return nullptr;
     auto converted = new TimeSeriesProperty<double>(prop->name());
@@ -162,8 +154,7 @@ template <> struct ConvertToTimeSeriesDouble<double> {
  * @return A new TimeSeriesProperty<double> object converted from the input.
  * Throws std::invalid_argument if not possible
  */
-TimeSeriesProperty<double> *
-LogFilter::convertToTimeSeriesOfDouble(const Property *prop) {
+TimeSeriesProperty<double> *LogFilter::convertToTimeSeriesOfDouble(const Property *prop) {
   if (auto doubleSeries = ConvertToTimeSeriesDouble<double>::apply(prop)) {
     return doubleSeries;
   } else if (auto doubleSeries = ConvertToTimeSeriesDouble<int>::apply(prop)) {
@@ -171,9 +162,8 @@ LogFilter::convertToTimeSeriesOfDouble(const Property *prop) {
   } else if (auto doubleSeries = ConvertToTimeSeriesDouble<bool>::apply(prop)) {
     return doubleSeries;
   } else {
-    throw std::invalid_argument(
-        "LogFilter::convertToTimeSeriesOfDouble - Cannot convert property, \"" +
-        prop->name() + "\", to double series.");
+    throw std::invalid_argument("LogFilter::convertToTimeSeriesOfDouble - Cannot convert property, \"" + prop->name() +
+                                "\", to double series.");
   }
 }
 

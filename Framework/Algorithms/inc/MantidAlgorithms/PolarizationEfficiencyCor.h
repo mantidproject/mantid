@@ -22,9 +22,7 @@ class MANTID_ALGORITHMS_DLL PolarizationEfficiencyCor : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;
-  const std::vector<std::string> seeAlso() const override {
-    return {"PolarizationCorrectionFredrikze"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"PolarizationCorrectionFredrikze"}; }
   const std::string category() const override;
   const std::string summary() const override;
 
@@ -41,13 +39,10 @@ private:
   std::vector<std::string> getWorkspaceNameList() const;
   API::WorkspaceGroup_sptr getWorkspaceGroup() const;
   API::MatrixWorkspace_sptr getEfficiencies();
-  bool needInterpolation(API::MatrixWorkspace const &efficiencies,
-                         API::MatrixWorkspace const &inWS) const;
-  API::MatrixWorkspace_sptr
-  convertToHistogram(API::MatrixWorkspace_sptr efficiencies);
-  API::MatrixWorkspace_sptr
-  interpolate(const API::MatrixWorkspace_sptr &efficiencies,
-              const API::MatrixWorkspace_sptr &inWS);
+  bool needInterpolation(API::MatrixWorkspace const &efficiencies, API::MatrixWorkspace const &inWS) const;
+  API::MatrixWorkspace_sptr convertToHistogram(API::MatrixWorkspace_sptr efficiencies);
+  API::MatrixWorkspace_sptr interpolate(const API::MatrixWorkspace_sptr &efficiencies,
+                                        const API::MatrixWorkspace_sptr &inWS);
 };
 
 } // namespace Algorithms

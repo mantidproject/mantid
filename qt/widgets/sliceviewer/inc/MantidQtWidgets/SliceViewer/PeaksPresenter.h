@@ -41,8 +41,7 @@ class PeakOverlayView;
 class UpdateableOnDemand;
 
 // Alias
-using SetPeaksWorkspaces =
-    std::set<std::shared_ptr<const Mantid::API::IPeaksWorkspace>>;
+using SetPeaksWorkspaces = std::set<std::shared_ptr<const Mantid::API::IPeaksWorkspace>>;
 
 /*---------------------------------------------------------
 Abstract PeaksPresenter.
@@ -78,8 +77,7 @@ public:
   virtual void zoomToPeak(const int peakIndex) = 0;
   virtual bool isHidden() const = 0;
   virtual bool contentsDifferent(PeaksPresenter const *other) const = 0;
-  virtual void
-  reInitialize(std::shared_ptr<Mantid::API::IPeaksWorkspace> peaksWS) = 0;
+  virtual void reInitialize(std::shared_ptr<Mantid::API::IPeaksWorkspace> peaksWS) = 0;
   virtual void peakEditMode(EditMode mode) = 0;
   virtual bool deletePeaksIn(PeakBoundingBox plotCoordsBox) = 0;
   virtual bool addPeakAt(double plotCoordsPointX, double plotCoordsPointY) = 0;

@@ -16,9 +16,7 @@
 #include <boost/optional/optional.hpp>
 
 /// Save some typing
-using RebinOptions = std::pair<
-    MantidQt::CustomInterfaces::Muon::MuonAnalysisOptionTab::RebinType,
-    std::string>;
+using RebinOptions = std::pair<MantidQt::CustomInterfaces::Muon::MuonAnalysisOptionTab::RebinType, std::string>;
 
 namespace Mantid {
 namespace API {
@@ -33,8 +31,7 @@ namespace Muon {
 /// Holds information on the current run's file path
 struct CurrentRun {
 public:
-  CurrentRun(int runNumber, const QString &pathToFile)
-      : run(runNumber), filePath(pathToFile) {}
+  CurrentRun(int runNumber, const QString &pathToFile) : run(runNumber), filePath(pathToFile) {}
   int run;          // run number
   QString filePath; // path to file - may be a temp file
 };
@@ -49,29 +46,24 @@ class MANTIDQT_MUONINTERFACE_DLL MuonAnalysisFitDataPresenter : public QObject {
   Q_OBJECT
 public:
   /// Constructor overload with default arguments
-  MuonAnalysisFitDataPresenter(
-      MantidQt::MantidWidgets::IWorkspaceFitControl *fitBrowser,
-      MantidQt::MantidWidgets::IMuonFitDataSelector *dataSelector,
-      MuonAnalysisDataLoader &dataLoader, const Mantid::API::Grouping &grouping,
-      const Muon::PlotType &plotType);
+  MuonAnalysisFitDataPresenter(MantidQt::MantidWidgets::IWorkspaceFitControl *fitBrowser,
+                               MantidQt::MantidWidgets::IMuonFitDataSelector *dataSelector,
+                               MuonAnalysisDataLoader &dataLoader, const Mantid::API::Grouping &grouping,
+                               const Muon::PlotType &plotType);
   /// Constructor overload with default argument
-  MuonAnalysisFitDataPresenter(
-      MantidQt::MantidWidgets::IWorkspaceFitControl *fitBrowser,
-      MantidQt::MantidWidgets::IMuonFitDataSelector *dataSelector,
-      MuonAnalysisDataLoader &dataLoader, const Mantid::API::Grouping &grouping,
-      const Muon::PlotType &plotType, double timeZero);
+  MuonAnalysisFitDataPresenter(MantidQt::MantidWidgets::IWorkspaceFitControl *fitBrowser,
+                               MantidQt::MantidWidgets::IMuonFitDataSelector *dataSelector,
+                               MuonAnalysisDataLoader &dataLoader, const Mantid::API::Grouping &grouping,
+                               const Muon::PlotType &plotType, double timeZero);
   /// Constructor
-  MuonAnalysisFitDataPresenter(
-      MantidQt::MantidWidgets::IWorkspaceFitControl *fitBrowser,
-      MantidQt::MantidWidgets::IMuonFitDataSelector *dataSelector,
-      MuonAnalysisDataLoader &dataLoader, const Mantid::API::Grouping &grouping,
-      const Muon::PlotType &plotType, double timeZero,
-      const RebinOptions &rebinArgs);
+  MuonAnalysisFitDataPresenter(MantidQt::MantidWidgets::IWorkspaceFitControl *fitBrowser,
+                               MantidQt::MantidWidgets::IMuonFitDataSelector *dataSelector,
+                               MuonAnalysisDataLoader &dataLoader, const Mantid::API::Grouping &grouping,
+                               const Muon::PlotType &plotType, double timeZero, const RebinOptions &rebinArgs);
   /// Handles "selected data changed"
   void handleSelectedDataChanged(bool overwrite);
   /// Handles peak picker being reassigned to a new graph
-  void setAssignedFirstRun(const QString &wsName,
-                           const boost::optional<QString> &filePath);
+  void setAssignedFirstRun(const QString &wsName, const boost::optional<QString> &filePath);
   /// Get the workspace the peak picker is currently assigned to
   QString getAssignedFirstRun() const { return m_PPAssignedFirstRun; };
   /// Change the stored time zero
@@ -79,26 +71,20 @@ public:
   /// Change the stored rebin args
   void setRebinArgs(const RebinOptions &rebinArgs) { m_rebinArgs = rebinArgs; }
   /// Generate names of workspaces to be created
-  std::vector<std::string> generateWorkspaceNames(const std::string &instrument,
-                                                  const std::string &runString,
+  std::vector<std::string> generateWorkspaceNames(const std::string &instrument, const std::string &runString,
                                                   bool overwrite) const;
   /// Update the stored grouping
-  void setGrouping(const Mantid::API::Grouping &grouping) {
-    m_grouping = grouping;
-  }
+  void setGrouping(const Mantid::API::Grouping &grouping) { m_grouping = grouping; }
   /// Update the stored plot type
   void setPlotType(const Muon::PlotType &plotType) { m_plotType = plotType; }
   /// Create workspaces to fit
   void createWorkspacesToFit(const std::vector<std::string> &names) const;
   /// Rename fit workspaces, add logs and generate params table
-  void handleFittedWorkspaces(const std::string &baseName,
-                              const std::string &groupName = "") const;
+  void handleFittedWorkspaces(const std::string &baseName, const std::string &groupName = "") const;
   /// Extract workspaces from group and move up a level
-  void extractFittedWorkspaces(const std::string &baseName,
-                               const std::string &groupName = "") const;
+  void extractFittedWorkspaces(const std::string &baseName, const std::string &groupName = "") const;
   /// Set selected workspace
-  void setSelectedWorkspace(const QString &wsName,
-                            const boost::optional<QString> &filePath);
+  void setSelectedWorkspace(const QString &wsName, const boost::optional<QString> &filePath);
   /// Updates "overwrite" setting
   void setOverwrite(bool enabled) { m_overwrite = enabled; }
   /// Updates label to avoid overwriting existing results
@@ -129,27 +115,22 @@ public slots:
 
 private:
   /// Create analysis workspace
-  Mantid::API::Workspace_sptr createWorkspace(const std::string &name,
-                                              std::string &groupLabel) const;
+  Mantid::API::Workspace_sptr createWorkspace(const std::string &name, std::string &groupLabel) const;
   /// Update model and view with names of workspaces to fit
   void updateWorkspaceNames(const std::vector<std::string> &names) const;
   /// Get rebin options for analysis
   std::string getRebinParams(const Mantid::API::Workspace_sptr &ws) const;
   /// Add special logs to fitted workspaces
-  void addSpecialLogs(
-      const std::string &wsName,
-      const MantidQt::CustomInterfaces::Muon::DatasetParams &wsParams) const;
+  void addSpecialLogs(const std::string &wsName, const MantidQt::CustomInterfaces::Muon::DatasetParams &wsParams) const;
   /// Split parameters table into one for this dataset
-  Mantid::API::ITableWorkspace_sptr generateParametersTable(
-      const std::string &wsName,
-      const Mantid::API::ITableWorkspace_sptr inputTable) const;
+  Mantid::API::ITableWorkspace_sptr generateParametersTable(const std::string &wsName,
+                                                            const Mantid::API::ITableWorkspace_sptr inputTable) const;
   /// Set up connections
   void doConnect();
   /// Checks if current fit is simultaneous
   bool isSimultaneousFit() const;
   /// Set up UI based on workspace
-  void setUpDataSelector(const QString &wsName,
-                         const boost::optional<QString> &filePath);
+  void setUpDataSelector(const QString &wsName, const boost::optional<QString> &filePath);
   /// Check if multiple runs are selected
   bool isMultipleRuns() const;
   /// Update fit label to match run number(s)

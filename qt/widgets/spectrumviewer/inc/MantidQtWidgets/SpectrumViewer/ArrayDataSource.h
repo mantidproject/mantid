@@ -24,25 +24,21 @@
 namespace MantidQt {
 namespace SpectrumView {
 
-class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER ArrayDataSource
-    : public SpectrumDataSource {
+class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER ArrayDataSource : public SpectrumDataSource {
 public:
   /// Construct a DataSource object based on the specified array of floats
-  ArrayDataSource(double total_xmin, double total_xmax, double total_ymin,
-                  double total_ymax, size_t total_rows, size_t total_cols,
-                  std::vector<float> data);
+  ArrayDataSource(double total_xmin, double total_xmax, double total_ymin, double total_ymax, size_t total_rows,
+                  size_t total_cols, std::vector<float> data);
 
   ~ArrayDataSource() override;
 
-  bool hasData(const std::string &wsName,
-               const std::shared_ptr<Mantid::API::Workspace> &ws) override;
+  bool hasData(const std::string &wsName, const std::shared_ptr<Mantid::API::Workspace> &ws) override;
 
   /// Get DataArray covering full range of data in x, and y directions
   DataArray_const_sptr getDataArray(bool is_log_x) override;
 
   /// Get DataArray covering restricted range of data
-  DataArray_const_sptr getDataArray(double xMin, double xMax, double yMin,
-                                    double yMax, size_t nRows, size_t nCols,
+  DataArray_const_sptr getDataArray(double xMin, double xMax, double yMin, double yMax, size_t nRows, size_t nCols,
                                     bool isLogX) override;
 
   /// Get a list containing pairs of strings with information about x,y

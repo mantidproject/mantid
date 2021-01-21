@@ -19,8 +19,7 @@ class VTK_EXPORT vtkSinglePeakMarkerSource : public vtkPolyDataAlgorithm {
 public:
   static vtkSinglePeakMarkerSource *New();
   vtkSinglePeakMarkerSource(const vtkSinglePeakMarkerSource &) = delete;
-  vtkSinglePeakMarkerSource &
-  operator=(const vtkSinglePeakMarkerSource &) = delete;
+  vtkSinglePeakMarkerSource &operator=(const vtkSinglePeakMarkerSource &) = delete;
   // clang-format off
   vtkTypeMacro(vtkSinglePeakMarkerSource, vtkPolyDataAlgorithm)
   void PrintSelf(ostream &os, vtkIndent indent) override;
@@ -33,10 +32,8 @@ public:
 protected:
   vtkSinglePeakMarkerSource();
   ~vtkSinglePeakMarkerSource() override;
-  int RequestInformation(vtkInformation *, vtkInformationVector **,
-                         vtkInformationVector *) override;
-  int RequestData(vtkInformation *, vtkInformationVector **,
-                  vtkInformationVector *) override;
+  int RequestInformation(vtkInformation *, vtkInformationVector **, vtkInformationVector *) override;
+  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *) override;
 
 private:
   /// Position information

@@ -12,9 +12,7 @@ using namespace Mantid::API;
 
 namespace {
 
-std::string OR(std::string const &lhs, std::string const &rhs) {
-  return "(" + lhs + "|" + rhs + ")";
-}
+std::string OR(std::string const &lhs, std::string const &rhs) { return "(" + lhs + "|" + rhs + ")"; }
 
 std::string NATURAL_NUMBER(std::size_t const &digits) {
   return OR("0", "[1-9][0-9]{," + std::to_string(digits - 1) + "}");
@@ -29,8 +27,7 @@ std::string const MINUS = "\\-";
 std::string const NUMBER = NATURAL_NUMBER(4);
 std::string const NATURAL_RANGE = "(" + NUMBER + MINUS + NUMBER + ")";
 std::string const NATURAL_OR_RANGE = OR(NATURAL_RANGE, NUMBER);
-std::string const WORKSPACE_INDICES =
-    "(" + NATURAL_OR_RANGE + "(" + COMMA + NATURAL_OR_RANGE + ")*)";
+std::string const WORKSPACE_INDICES = "(" + NATURAL_OR_RANGE + "(" + COMMA + NATURAL_OR_RANGE + ")*)";
 
 } // namespace Regexes
 } // namespace
@@ -39,44 +36,32 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 IndirectPlotOptionsPresenter::IndirectPlotOptionsPresenter(
-    IndirectPlotOptionsView *view, IPyRunner *pythonRunner,
-    PlotWidget const &plotType, std::string const &fixedIndices,
+    IndirectPlotOptionsView *view, IPyRunner *pythonRunner, PlotWidget const &plotType, std::string const &fixedIndices,
     boost::optional<std::map<std::string, std::string>> const &availableActions)
-    : QObject(nullptr),
-      m_wsRemovedObserver(*this,
-                          &IndirectPlotOptionsPresenter::onWorkspaceRemoved),
-      m_wsReplacedObserver(*this,
-                           &IndirectPlotOptionsPresenter::onWorkspaceReplaced),
-      m_view(view), m_model(std::make_unique<IndirectPlotOptionsModel>(
-                        pythonRunner, availableActions)) {
+    : QObject(nullptr), m_wsRemovedObserver(*this, &IndirectPlotOptionsPresenter::onWorkspaceRemoved),
+      m_wsReplacedObserver(*this, &IndirectPlotOptionsPresenter::onWorkspaceReplaced), m_view(view),
+      m_model(std::make_unique<IndirectPlotOptionsModel>(pythonRunner, availableActions)) {
   setupPresenter(plotType, fixedIndices);
 }
 
 /// Used by the unit tests so that m_plotter can be mocked
-IndirectPlotOptionsPresenter::IndirectPlotOptionsPresenter(
-    IndirectPlotOptionsView *view, IndirectPlotOptionsModel *model,
-    PlotWidget const &plotType, std::string const &fixedIndices)
-    : QObject(nullptr),
-      m_wsRemovedObserver(*this,
-                          &IndirectPlotOptionsPresenter::onWorkspaceRemoved),
-      m_wsReplacedObserver(*this,
-                           &IndirectPlotOptionsPresenter::onWorkspaceReplaced),
-      m_view(view), m_model(std::move(model)) {
+IndirectPlotOptionsPresenter::IndirectPlotOptionsPresenter(IndirectPlotOptionsView *view,
+                                                           IndirectPlotOptionsModel *model, PlotWidget const &plotType,
+                                                           std::string const &fixedIndices)
+    : QObject(nullptr), m_wsRemovedObserver(*this, &IndirectPlotOptionsPresenter::onWorkspaceRemoved),
+      m_wsReplacedObserver(*this, &IndirectPlotOptionsPresenter::onWorkspaceReplaced), m_view(view),
+      m_model(std::move(model)) {
   setupPresenter(plotType, fixedIndices);
 }
 
-IndirectPlotOptionsPresenter::~IndirectPlotOptionsPresenter() {
-  watchADS(false);
-}
+IndirectPlotOptionsPresenter::~IndirectPlotOptionsPresenter() { watchADS(false); }
 
-void IndirectPlotOptionsPresenter::setupPresenter(
-    PlotWidget const &plotType, std::string const &fixedIndices) {
+void IndirectPlotOptionsPresenter::setupPresenter(PlotWidget const &plotType, std::string const &fixedIndices) {
   watchADS(true);
 
   connect(m_view, SIGNAL(selectedWorkspaceChanged(std::string const &)), this,
           SLOT(workspaceChanged(std::string const &)));
-  connect(m_view, SIGNAL(selectedIndicesChanged(std::string const &)), this,
-          SLOT(indicesChanged(std::string const &)));
+  connect(m_view, SIGNAL(selectedIndicesChanged(std::string const &)), this, SLOT(indicesChanged(std::string const &)));
 
   connect(m_view, SIGNAL(plotSpectraClicked()), this, SLOT(plotSpectra()));
   connect(m_view, SIGNAL(plotBinsClicked()), this, SLOT(plotBins()));
@@ -107,25 +92,20 @@ void IndirectPlotOptionsPresenter::setPlotType(PlotWidget const &plotType) {
 }
 
 void IndirectPlotOptionsPresenter::setPlotting(bool plotting) {
-  m_view->setPlotButtonText(
-      plotting ? "Plotting..."
-               : QString::fromStdString(
-                     m_model->availableActions()["Plot Spectra"]));
+  m_view->setPlotButtonText(plotting ? "Plotting..."
+                                     : QString::fromStdString(m_model->availableActions()["Plot Spectra"]));
   setOptionsEnabled(!plotting);
 }
 
 void IndirectPlotOptionsPresenter::setOptionsEnabled(bool enable) {
-  m_view->setWorkspaceComboBoxEnabled(m_view->numberOfWorkspaces() > 1 ? enable
-                                                                       : false);
+  m_view->setWorkspaceComboBoxEnabled(m_view->numberOfWorkspaces() > 1 ? enable : false);
   m_view->setIndicesLineEditEnabled(!m_model->indicesFixed() ? enable : false);
   m_view->setPlotButtonEnabled(enable);
 }
 
-void IndirectPlotOptionsPresenter::onWorkspaceRemoved(
-    WorkspacePreDeleteNotification_ptr nf) {
+void IndirectPlotOptionsPresenter::onWorkspaceRemoved(WorkspacePreDeleteNotification_ptr nf) {
   // Ignore non matrix workspaces
-  if (auto const removedWorkspace =
-          std::dynamic_pointer_cast<MatrixWorkspace>(nf->object())) {
+  if (auto const removedWorkspace = std::dynamic_pointer_cast<MatrixWorkspace>(nf->object())) {
     auto const removedName = removedWorkspace->getName();
     if (removedName == m_view->selectedWorkspace().toStdString())
       m_model->removeWorkspace();
@@ -133,26 +113,22 @@ void IndirectPlotOptionsPresenter::onWorkspaceRemoved(
   }
 }
 
-void IndirectPlotOptionsPresenter::onWorkspaceReplaced(
-    WorkspaceBeforeReplaceNotification_ptr nf) {
+void IndirectPlotOptionsPresenter::onWorkspaceReplaced(WorkspaceBeforeReplaceNotification_ptr nf) {
   // Ignore non matrix workspaces
-  if (auto const newWorkspace =
-          std::dynamic_pointer_cast<MatrixWorkspace>(nf->newObject())) {
+  if (auto const newWorkspace = std::dynamic_pointer_cast<MatrixWorkspace>(nf->newObject())) {
     auto const newName = newWorkspace->getName();
     if (newName == m_view->selectedWorkspace().toStdString())
       workspaceChanged(newName);
   }
 }
 
-void IndirectPlotOptionsPresenter::setWorkspaces(
-    std::vector<std::string> const &workspaces) {
+void IndirectPlotOptionsPresenter::setWorkspaces(std::vector<std::string> const &workspaces) {
   auto const workspaceNames = m_model->getAllWorkspaceNames(workspaces);
   m_view->setWorkspaces(workspaceNames);
   workspaceChanged(workspaceNames.front());
 }
 
-void IndirectPlotOptionsPresenter::setWorkspace(
-    std::string const &plotWorkspace) {
+void IndirectPlotOptionsPresenter::setWorkspace(std::string const &plotWorkspace) {
   bool success = m_model->setWorkspace(plotWorkspace);
   setOptionsEnabled(success);
   if (success && !m_model->indicesFixed())
@@ -175,10 +151,7 @@ void IndirectPlotOptionsPresenter::setIndices() {
     indicesChanged("0");
 }
 
-void IndirectPlotOptionsPresenter::workspaceChanged(
-    std::string const &workspaceName) {
-  setWorkspace(workspaceName);
-}
+void IndirectPlotOptionsPresenter::workspaceChanged(std::string const &workspaceName) { setWorkspace(workspaceName); }
 
 void IndirectPlotOptionsPresenter::indicesChanged(std::string const &indices) {
   auto const formattedIndices = m_model->formatIndices(indices);
@@ -224,8 +197,7 @@ void IndirectPlotOptionsPresenter::plotTiled() {
   }
 }
 
-bool IndirectPlotOptionsPresenter::validateWorkspaceSize(
-    MantidAxis const &axisType) {
+bool IndirectPlotOptionsPresenter::validateWorkspaceSize(MantidAxis const &axisType) {
   auto const errorMessage = m_model->singleDataPoint(axisType);
   if (errorMessage) {
     m_view->displayWarning(QString::fromStdString(errorMessage.get()));

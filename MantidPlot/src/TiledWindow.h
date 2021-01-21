@@ -28,16 +28,13 @@ class TiledWindow : public MdiSubWindow {
   Q_OBJECT
 
 public:
-  TiledWindow(QWidget *parent, const QString &label,
-              const QString &name = QString(), int nrows = 1, int ncols = 1,
+  TiledWindow(QWidget *parent, const QString &label, const QString &name = QString(), int nrows = 1, int ncols = 1,
               const Qt::WFlags &f = nullptr);
 
   /// Populate a menu with actions
   void populateMenu(QMenu *menu);
 
-  static IProjectSerialisable *loadFromProject(const std::string &lines,
-                                               ApplicationWindow *app,
-                                               const int fileVersion);
+  static IProjectSerialisable *loadFromProject(const std::string &lines, ApplicationWindow *app, const int fileVersion);
 
   /// Serialises to a string that can be saved to a project file.
   std::string saveToProject(ApplicationWindow *app) override;

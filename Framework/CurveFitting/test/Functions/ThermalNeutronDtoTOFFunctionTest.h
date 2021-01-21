@@ -23,18 +23,13 @@ class ThermalNeutronDtoTOFFunctionTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ThermalNeutronDtoTOFFunctionTest *createSuite() {
-    return new ThermalNeutronDtoTOFFunctionTest();
-  }
-  static void destroySuite(ThermalNeutronDtoTOFFunctionTest *suite) {
-    delete suite;
-  }
+  static ThermalNeutronDtoTOFFunctionTest *createSuite() { return new ThermalNeutronDtoTOFFunctionTest(); }
+  static void destroySuite(ThermalNeutronDtoTOFFunctionTest *suite) { delete suite; }
 
   void test_Calculation() {
     // 1. Input data for test
     std::vector<double> vec_d = {2.72452, 2.84566, 3.33684, 4.719, 5.44903};
-    std::array<double, 5> vec_tof = {
-        {62070.4, 64834.9, 76039.6, 107542, 124187}};
+    std::array<double, 5> vec_tof = {{62070.4, 64834.9, 76039.6, 107542, 124187}};
 
     // 2. Initialize the method
     ThermalNeutronDtoTOFFunction function;
@@ -56,8 +51,7 @@ public:
 
     // 4. Check result
     for (size_t i = 0; i < domain.size(); ++i) {
-      std::cout << "d = " << domain[i] << ", TOF = " << values[i]
-                << "  vs.  observed TOF = " << vec_tof[i] << '\n';
+      std::cout << "d = " << domain[i] << ", TOF = " << values[i] << "  vs.  observed TOF = " << vec_tof[i] << '\n';
       TS_ASSERT_DELTA(values[i], vec_tof[i], 10.0);
     }
 

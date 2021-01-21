@@ -20,8 +20,7 @@ using Mantid::Types::Core::DateAndTime;
 
 namespace {
 // there is a different EPOCH for DateAndTime vs npy_datetime
-const npy_datetime UNIX_EPOCH_NS =
-    DateAndTime("1970-01-01T00:00").totalNanoseconds();
+const npy_datetime UNIX_EPOCH_NS = DateAndTime("1970-01-01T00:00").totalNanoseconds();
 } // namespace
 
 namespace Mantid {
@@ -29,14 +28,12 @@ namespace PythonInterface {
 namespace Converters {
 
 npy_datetime to_npy_datetime(const DateAndTime &dateandtime) {
-  return static_cast<npy_datetime>(dateandtime.totalNanoseconds()) -
-         UNIX_EPOCH_NS;
+  return static_cast<npy_datetime>(dateandtime.totalNanoseconds()) - UNIX_EPOCH_NS;
 }
 
 PyObject *to_datetime64(const DateAndTime &dateandtime) {
   npy_datetime abstime = to_npy_datetime(dateandtime);
-  PyObject *ret =
-      PyArray_Scalar(reinterpret_cast<char *>(&abstime), descr_ns(), nullptr);
+  PyObject *ret = PyArray_Scalar(reinterpret_cast<char *>(&abstime), descr_ns(), nullptr);
 
   return ret;
 }
@@ -51,16 +48,14 @@ PyObject *to_datetime64(const DateAndTime &dateandtime) {
 PyArray_Descr *descr_ns() { return func_PyArray_Descr("M8[ns]"); }
 
 // internal function that handles raw pointer
-std::shared_ptr<Types::Core::DateAndTime>
-to_dateandtime(const PyObject *datetime) {
+std::shared_ptr<Types::Core::DateAndTime> to_dateandtime(const PyObject *datetime) {
   GNU_DIAG_OFF("cast-qual")
   if (!PyArray_IsScalar(datetime, Datetime)) {
     GNU_DIAG_ON("cast-qual")
     throw std::runtime_error("Expected datetime64");
   }
 
-  const auto *npdatetime =
-      reinterpret_cast<const PyDatetimeScalarObject *>(datetime);
+  const auto *npdatetime = reinterpret_cast<const PyDatetimeScalarObject *>(datetime);
   npy_datetime value = npdatetime->obval;
 
   // DateAndTime only understands nanoseconds
@@ -85,8 +80,7 @@ to_dateandtime(const PyObject *datetime) {
   return std::make_shared<DateAndTime>(UNIX_EPOCH_NS + value);
 }
 
-std::shared_ptr<Types::Core::DateAndTime>
-to_dateandtime(const boost::python::api::object &value) {
+std::shared_ptr<Types::Core::DateAndTime> to_dateandtime(const boost::python::api::object &value) {
   boost::python::extract<Types::Core::DateAndTime> converter_dt(value);
   if (converter_dt.check()) {
     return std::make_shared<DateAndTime>(converter_dt());

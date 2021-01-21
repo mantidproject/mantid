@@ -40,24 +40,19 @@ struct ModulationProperties {
 };
 
 /// Create a list of valid modulation vectors from the input
-std::vector<Kernel::V3D>
-validModulationVectors(const std::vector<double> &modVector1,
-                       const std::vector<double> &modVector2,
-                       const std::vector<double> &modVector3);
+std::vector<Kernel::V3D> validModulationVectors(const std::vector<double> &modVector1,
+                                                const std::vector<double> &modVector2,
+                                                const std::vector<double> &modVector3);
 
 /// Create a list of valid modulation vectors from the input
-std::vector<Kernel::V3D>
-addModulationVectors(const std::vector<double> &modVector1,
-                     const std::vector<double> &modVector2,
-                     const std::vector<double> &modVector3);
+std::vector<Kernel::V3D> addModulationVectors(const std::vector<double> &modVector1,
+                                              const std::vector<double> &modVector2,
+                                              const std::vector<double> &modVector3);
 
 /// Calculate a list of HKL offsets from the given modulation vectors.
-std::vector<MNPOffset>
-generateOffsetVectors(const std::vector<Kernel::V3D> &modVectors,
-                      const int maxOrder, const bool crossTerms);
+std::vector<MNPOffset> generateOffsetVectors(const std::vector<Kernel::V3D> &modVectors, const int maxOrder,
+                                             const bool crossTerms);
 /// Calculate a list of HKL offsets from the given lists of offsets
-std::vector<MNPOffset>
-generateOffsetVectors(const std::vector<double> &hOffsets,
-                      const std::vector<double> &kOffsets,
-                      const std::vector<double> &lOffsets);
+std::vector<MNPOffset> generateOffsetVectors(const std::vector<double> &hOffsets, const std::vector<double> &kOffsets,
+                                             const std::vector<double> &lOffsets);
 } // namespace Mantid::Crystal

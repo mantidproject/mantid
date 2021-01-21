@@ -17,8 +17,7 @@ SpectrumPlotItem::SpectrumPlotItem()
     : m_bufferID(0),
       /* m_dataArray0(NULL), */
       /* m_dataArray1(NULL), */
-      m_positiveColorTable(nullptr), m_negativeColorTable(nullptr),
-      m_intensityTable(nullptr) {}
+      m_positiveColorTable(nullptr), m_negativeColorTable(nullptr), m_intensityTable(nullptr) {}
 
 SpectrumPlotItem::~SpectrumPlotItem() {}
 
@@ -35,8 +34,7 @@ SpectrumPlotItem::~SpectrumPlotItem() {}
  *                            must have the same number of entries as the
  *                            positive color table.
  */
-void SpectrumPlotItem::setData(const DataArray_const_sptr &dataArray,
-                               std::vector<QRgb> *positiveColorTable,
+void SpectrumPlotItem::setData(const DataArray_const_sptr &dataArray, std::vector<QRgb> *positiveColorTable,
                                std::vector<QRgb> *negativeColorTable) {
   if (m_bufferID == 0) {
     m_dataArray1 = dataArray; // put new data in array 1, and switch to it
@@ -63,9 +61,7 @@ void SpectrumPlotItem::setData(const DataArray_const_sptr &dataArray,
  *                         that will be used to scale the corresponding
  *                         image values before mappign to a color index.
  */
-void SpectrumPlotItem::setIntensityTable(std::vector<double> *intensityTable) {
-  m_intensityTable = intensityTable;
-}
+void SpectrumPlotItem::setIntensityTable(std::vector<double> *intensityTable) { m_intensityTable = intensityTable; }
 
 /**
  *  Draw the image (this is called by QWT and must not be called directly.)
@@ -81,8 +77,7 @@ void SpectrumPlotItem::setIntensityTable(std::vector<double> *intensityTable) {
  *                      parameter is NOT USED by the SpectrumPlotItem, but is
  *                      passed in when QWT calls this method.
  */
-void SpectrumPlotItem::draw(QPainter *painter, const QwtScaleMap &xMap,
-                            const QwtScaleMap &yMap,
+void SpectrumPlotItem::draw(QPainter *painter, const QwtScaleMap &xMap, const QwtScaleMap &yMap,
                             const QRect & /*canvasRect*/) const {
   // If no color table, the data is not yet set, so just return
   if (!m_positiveColorTable)
@@ -185,8 +180,7 @@ void SpectrumPlotItem::draw(QPainter *painter, const QwtScaleMap &xMap,
   int width = pix_x_max - pix_x_min + 1;
   int height = pix_y_min - pix_y_max + 1; // y-axis is inverted for image
 
-  QPixmap scaled_pixmap = pixmap.scaled(width, height, Qt::IgnoreAspectRatio,
-                                        Qt::FastTransformation);
+  QPixmap scaled_pixmap = pixmap.scaled(width, height, Qt::IgnoreAspectRatio, Qt::FastTransformation);
 
   painter->drawPixmap(pix_x_min, pix_y_max, scaled_pixmap);
 

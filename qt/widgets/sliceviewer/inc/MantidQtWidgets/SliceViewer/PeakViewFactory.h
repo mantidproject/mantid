@@ -23,38 +23,32 @@ namespace SliceViewer {
  */
 class PeakViewFactory : public PeakOverlayViewFactoryBase {
 public:
-  PeakViewFactory(Mantid::API::IMDWorkspace_sptr mdWS,
-                  Mantid::API::IPeaksWorkspace_sptr peaksWS, QwtPlot *plot,
-                  QWidget *parent, const int plotXIndex, const int plotYIndex,
-                  const size_t colorNumber = 0);
+  PeakViewFactory(Mantid::API::IMDWorkspace_sptr mdWS, Mantid::API::IPeaksWorkspace_sptr peaksWS, QwtPlot *plot,
+                  QWidget *parent, const int plotXIndex, const int plotYIndex, const size_t colorNumber = 0);
   virtual ~PeakViewFactory();
-  std::shared_ptr<PeakOverlayView> createView(
-      PeaksPresenter *const presenter,
-      Mantid::Geometry::PeakTransform_const_sptr transform) const override;
-  void swapPeaksWorkspace(
-      std::shared_ptr<Mantid::API::IPeaksWorkspace> &peaksWS) override;
+  std::shared_ptr<PeakOverlayView> createView(PeaksPresenter *const presenter,
+                                              Mantid::Geometry::PeakTransform_const_sptr transform) const override;
+  void swapPeaksWorkspace(std::shared_ptr<Mantid::API::IPeaksWorkspace> &peaksWS) override;
   void getNonOrthogonalInfo(NonOrthogonalAxis &info) override;
 
 private:
   // Selector for the correct representation of a single peak
-  PeakRepresentation_sptr createSinglePeakRepresentation(
-      const Mantid::Geometry::IPeak &peak, Mantid::Kernel::V3D position,
-      Mantid::Geometry::PeakTransform_const_sptr transform) const;
+  PeakRepresentation_sptr createSinglePeakRepresentation(const Mantid::Geometry::IPeak &peak,
+                                                         Mantid::Kernel::V3D position,
+                                                         Mantid::Geometry::PeakTransform_const_sptr transform) const;
 
   // Creates a cross-like representation
-  PeakRepresentation_sptr createPeakRepresentationCross(
-      Mantid::Kernel::V3D position,
-      const Mantid::Geometry::PeakTransform_const_sptr &transform) const;
+  PeakRepresentation_sptr
+  createPeakRepresentationCross(Mantid::Kernel::V3D position,
+                                const Mantid::Geometry::PeakTransform_const_sptr &transform) const;
 
   // Creates a spherical representation
-  PeakRepresentation_sptr
-  createPeakRepresentationSphere(Mantid::Kernel::V3D position,
-                                 const Mantid::Geometry::IPeak &peak) const;
+  PeakRepresentation_sptr createPeakRepresentationSphere(Mantid::Kernel::V3D position,
+                                                         const Mantid::Geometry::IPeak &peak) const;
 
   // Creates a spherical representation
-  PeakRepresentation_sptr
-  createPeakRepresentationEllipsoid(Mantid::Kernel::V3D position,
-                                    const Mantid::Geometry::IPeak &peak) const;
+  PeakRepresentation_sptr createPeakRepresentationEllipsoid(Mantid::Kernel::V3D position,
+                                                            const Mantid::Geometry::IPeak &peak) const;
 
   // Set color palette
   void setForegroundAndBackgroundColors(const size_t colourNumber);
@@ -73,8 +67,7 @@ private:
 
   /// Ellipsoid calculator -- as we don't paint in parallel this is safe to
   /// share between the peaks
-  std::shared_ptr<Mantid::SliceViewer::EllipsoidPlaneSliceCalculator>
-      m_calculator;
+  std::shared_ptr<Mantid::SliceViewer::EllipsoidPlaneSliceCalculator> m_calculator;
 };
 } // namespace SliceViewer
 } // namespace MantidQt

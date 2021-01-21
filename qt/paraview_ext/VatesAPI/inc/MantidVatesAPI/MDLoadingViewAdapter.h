@@ -26,9 +26,7 @@ public:
 
   double getTime() const override { return m_adaptee->getTime(); }
 
-  size_t getRecursionDepth() const override {
-    return m_adaptee->getRecursionDepth();
-  }
+  size_t getRecursionDepth() const override { return m_adaptee->getRecursionDepth(); }
 
   bool getLoadInMemory() const override { return m_adaptee->getLoadInMemory(); }
 

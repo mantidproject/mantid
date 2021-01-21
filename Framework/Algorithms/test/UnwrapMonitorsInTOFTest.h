@@ -20,9 +20,7 @@ class UnwrapMonitorsInTOFTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static UnwrapMonitorsInTOFTest *createSuite() {
-    return new UnwrapMonitorsInTOFTest();
-  }
+  static UnwrapMonitorsInTOFTest *createSuite() { return new UnwrapMonitorsInTOFTest(); }
   static void destroySuite(UnwrapMonitorsInTOFTest *suite) { delete suite; }
 
   void test_Init() {
@@ -31,8 +29,7 @@ public:
     TS_ASSERT(alg.isInitialized())
   }
 
-  void
-  test_that_linear_workspace_has_the_monitors_duplicated_if_no_wavelength_limits_are_set() {
+  void test_that_linear_workspace_has_the_monitors_duplicated_if_no_wavelength_limits_are_set() {
     // Arrange
     auto workspace = provideTestWorkspace(true);
     std::string outputName = "test_output_unwrap_monitors";
@@ -46,8 +43,7 @@ public:
 
     // Assert
     auto &ads = Mantid::API::AnalysisDataService::Instance();
-    auto outputWorkspace =
-        ads.retrieveWS<Mantid::API::MatrixWorkspace>(outputName);
+    auto outputWorkspace = ads.retrieveWS<Mantid::API::MatrixWorkspace>(outputName);
 
     // Check that monitor 3 and 4 have their x and y data doubled, ie.
     // Value:  2  2  2  2  2  1  1  1  1  1   2   2   2   2   2   1   1   1   1
@@ -56,12 +52,10 @@ public:
     // 19  20  | * 1e4 (in microseconds)
     const double tolerance = 1e-8;
     std::array<size_t, 2> indicesToCheck{{3, 4}};
-    Mantid::HistogramData::BinEdges expectedBinEdges{
-        0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10,
-        11, 12, 13, 14, 15, 16, 17, 18, 19, 20};
+    Mantid::HistogramData::BinEdges expectedBinEdges{0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10,
+                                                     11, 12, 13, 14, 15, 16, 17, 18, 19, 20};
     expectedBinEdges *= 1e4;
-    Mantid::HistogramData::Counts expectedCounts{2, 2, 2, 2, 2, 1, 1, 1, 1, 1,
-                                                 2, 2, 2, 2, 2, 1, 1, 1, 1, 1};
+    Mantid::HistogramData::Counts expectedCounts{2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1};
     for (const auto &index : indicesToCheck) {
       auto histogram = outputWorkspace->histogram(index);
       auto binEdges = histogram.binEdges();
@@ -70,16 +64,13 @@ public:
       TSM_ASSERT_EQUALS("Should have 20 counts.", counts.size(), 20);
 
       auto expectedBinEdgeIt = expectedBinEdges.cbegin();
-      for (auto it = binEdges.cbegin();
-           it != binEdges.cend() ||
-           expectedBinEdgeIt != expectedBinEdges.cend();
+      for (auto it = binEdges.cbegin(); it != binEdges.cend() || expectedBinEdgeIt != expectedBinEdges.cend();
            ++it, ++expectedBinEdgeIt) {
         TS_ASSERT(std::abs(*it - *expectedBinEdgeIt) < tolerance);
       }
 
       auto expectedCountIt = expectedCounts.cbegin();
-      for (auto it = counts.cbegin();
-           it != counts.cend() || expectedCountIt != expectedCounts.cend();
+      for (auto it = counts.cbegin(); it != counts.cend() || expectedCountIt != expectedCounts.cend();
            ++it, ++expectedCountIt) {
         TS_ASSERT(std::abs(*it - *expectedCountIt) < tolerance);
       }
@@ -90,30 +81,25 @@ public:
     // have a value of 2 and there should be 10 of them. We only check index 0
     // here
     {
-      Mantid::HistogramData::BinEdges expectedBinEdgesDetector{0, 1, 2, 3, 4, 5,
-                                                               6, 7, 8, 9, 10};
-      Mantid::HistogramData::Counts expectedCountsDetector{2, 2, 2, 2, 2,
-                                                           2, 2, 2, 2, 2};
+      Mantid::HistogramData::BinEdges expectedBinEdgesDetector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+      Mantid::HistogramData::Counts expectedCountsDetector{2, 2, 2, 2, 2, 2, 2, 2, 2, 2};
 
       auto histogramDetector = outputWorkspace->histogram(0);
       auto binEdgesDetector = histogramDetector.binEdges();
       auto countsDetector = histogramDetector.dataY();
-      TSM_ASSERT_EQUALS("Should have 11 bin edges.", binEdgesDetector.size(),
-                        11);
+      TSM_ASSERT_EQUALS("Should have 11 bin edges.", binEdgesDetector.size(), 11);
       TSM_ASSERT_EQUALS("Should have 10 counts.", countsDetector.size(), 10);
 
       auto expectedBinEdgeDetectorIt = expectedBinEdgesDetector.cbegin();
       for (auto it = binEdgesDetector.cbegin();
-           it != binEdgesDetector.cend() ||
-           expectedBinEdgeDetectorIt != expectedBinEdgesDetector.cend();
+           it != binEdgesDetector.cend() || expectedBinEdgeDetectorIt != expectedBinEdgesDetector.cend();
            ++it, ++expectedBinEdgeDetectorIt) {
         TS_ASSERT(std::abs(*it - *expectedBinEdgeDetectorIt) < tolerance);
       }
 
       auto expectedCountDetectorIt = expectedCountsDetector.cbegin();
       for (auto it = expectedCountsDetector.cbegin();
-           it != expectedCountsDetector.cend() ||
-           expectedCountDetectorIt != expectedCountsDetector.cend();
+           it != expectedCountsDetector.cend() || expectedCountDetectorIt != expectedCountsDetector.cend();
            ++it, ++expectedCountDetectorIt) {
         TS_ASSERT(std::abs(*it - *expectedCountDetectorIt) < tolerance);
       }
@@ -143,8 +129,7 @@ public:
 
     // Assert
     auto &ads = Mantid::API::AnalysisDataService::Instance();
-    auto outputWorkspace =
-        ads.retrieveWS<Mantid::API::MatrixWorkspace>(outputName);
+    auto outputWorkspace = ads.retrieveWS<Mantid::API::MatrixWorkspace>(outputName);
 
     // Check monitor 3 which is position at 11 meters from the source
     // For a wavelength cutoff range in from 5 to 15 Angstrom we expect a TOF
@@ -152,12 +137,10 @@ public:
     // Every count outside of this range is expected to have been set to 0. Note
     // that the time is compared to Points no BinEdges
     const double tolerance = 1e-8;
-    Mantid::HistogramData::BinEdges expectedBinEdges{
-        0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10,
-        11, 12, 13, 14, 15, 16, 17, 18, 19, 20};
+    Mantid::HistogramData::BinEdges expectedBinEdges{0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10,
+                                                     11, 12, 13, 14, 15, 16, 17, 18, 19, 20};
     expectedBinEdges *= 1e4;
-    Mantid::HistogramData::Counts expectedCounts3{0, 2, 2, 2, 0, 0, 0, 0, 0, 0,
-                                                  0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    Mantid::HistogramData::Counts expectedCounts3{0, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     auto histogram3 = outputWorkspace->histogram(3);
     auto binEdges3 = histogram3.binEdges();
     auto counts3 = histogram3.counts();
@@ -165,8 +148,7 @@ public:
     TSM_ASSERT_EQUALS("Should have 20 bin edges.", counts3.size(), 20);
 
     auto expectedCount3It = expectedCounts3.cbegin();
-    for (auto it = counts3.cbegin();
-         it != counts3.cend() || expectedCount3It != expectedCounts3.cend();
+    for (auto it = counts3.cbegin(); it != counts3.cend() || expectedCount3It != expectedCounts3.cend();
          ++it, ++expectedCount3It) {
       TS_ASSERT(std::abs(*it - *expectedCount3It) < tolerance);
     }
@@ -176,8 +158,7 @@ public:
     // range of: 22750mus - 682500mus
     // Every count outside of this range is expected to have been set to 0. Note
     // that the time is compared to Points no BinEdges
-    Mantid::HistogramData::Counts expectedCounts4{0, 0, 2, 2, 2, 1, 1, 0, 0, 0,
-                                                  0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    Mantid::HistogramData::Counts expectedCounts4{0, 0, 2, 2, 2, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     auto histogram4 = outputWorkspace->histogram(4);
     auto binEdges4 = histogram4.binEdges();
     auto counts4 = histogram4.counts();
@@ -185,8 +166,7 @@ public:
     TSM_ASSERT_EQUALS("Should have 20 bin edges.", counts4.size(), 20);
 
     auto expectedCount4It = expectedCounts4.cbegin();
-    for (auto it = counts4.cbegin();
-         it != counts4.cend() || expectedCount4It != expectedCounts4.cend();
+    for (auto it = counts4.cbegin(); it != counts4.cend() || expectedCount4It != expectedCounts4.cend();
          ++it, ++expectedCount4It) {
       TS_ASSERT(std::abs(*it - *expectedCount4It) < tolerance);
     }
@@ -212,8 +192,7 @@ public:
     alg.setProperty("OutputWorkspace", outputName);
     alg.setProperty("WavelengthMin", wavelengthMin);
     alg.setProperty("WavelengthMax", wavelengthMax);
-    TSM_ASSERT_THROWS("Negative wavelength cutoffs are not allowed.",
-                      alg.execute(), const std::runtime_error &);
+    TSM_ASSERT_THROWS("Negative wavelength cutoffs are not allowed.", alg.execute(), const std::runtime_error &);
   }
 
 private:
@@ -230,12 +209,9 @@ private:
   Mantid::API::MatrixWorkspace_sptr provideTestWorkspace(bool includeMonitors) {
     const int numberOfBins = 10;
     const int numberOfHistograms = 5;
-    auto intialWorkspace =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
-            numberOfHistograms, numberOfBins, includeMonitors, false, true,
-            "TestInstrument");
-    auto workspace = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-        intialWorkspace);
+    auto intialWorkspace = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
+        numberOfHistograms, numberOfBins, includeMonitors, false, true, "TestInstrument");
+    auto workspace = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(intialWorkspace);
 
     // Set the monitor bins to the expected values
     const auto &spectrumInfo = workspace->spectrumInfo();

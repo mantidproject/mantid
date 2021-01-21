@@ -43,9 +43,7 @@ public:
 
   /// Algorithm's version for identification
   int version() const override { return 1; }
-  const std::vector<std::string> seeAlso() const override {
-    return {"Exponential", "Logarithm"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"Exponential", "Logarithm"}; }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Arithmetic"; }
 
@@ -53,9 +51,7 @@ private:
   // Overridden UnaryOperation methods
   void defineProperties() override;
   void retrieveProperties() override;
-  void performUnaryOperation(const double XIn, const double YIn,
-                             const double EIn, double &YOut,
-                             double &EOut) override;
+  void performUnaryOperation(const double XIn, const double YIn, const double EIn, double &YOut, double &EOut) override;
   /// calculate the power
   inline double calculatePower(const double base, const double exponent);
   /// Exponent to raise the base workspace to

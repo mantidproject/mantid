@@ -27,8 +27,7 @@ public:
 
   Mantid::VATES::ViewFrustum_const_sptr getCurrentViewFrustum();
 
-  void setCameraToPeak(double xpos, double ypos, double zpos,
-                       double peakRadius);
+  void setCameraToPeak(double xpos, double ypos, double zpos, double peakRadius);
 };
 } // namespace SimpleGui
 } // namespace Vates

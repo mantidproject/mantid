@@ -31,13 +31,11 @@ void BackToBackExponential::init() {
   // Do not change the order of these parameters!
   declareParameter("I", 0.0, "integrated intensity of the peak"); // 0
   declareParameter("A", 1.0,
-                   "exponential constant of rising part of neutron pulse"); // 1
-  declareParameter(
-      "B", 0.05, "exponential constant of decaying part of neutron pulse"); // 2
-  declareParameter("X0", 0.0, "peak position");                             // 3
-  declareParameter(
-      "S", 1.0,
-      "standard deviation of gaussian part of peakshape function"); // 4
+                   "exponential constant of rising part of neutron pulse");              // 1
+  declareParameter("B", 0.05, "exponential constant of decaying part of neutron pulse"); // 2
+  declareParameter("X0", 0.0, "peak position");                                          // 3
+  declareParameter("S", 1.0,
+                   "standard deviation of gaussian part of peakshape function"); // 4
 }
 
 /**
@@ -98,9 +96,7 @@ void BackToBackExponential::setFwhm(const double w) {
     const auto a = 0.5 * M_LN2;
     const auto b = 2 * sqrt(2 * M_LN2);
     // calculate new value of S (from solving eq in fwhm func)
-    setParameter(
-        "S", w0 * (gsl_sf_lambert_W0(-(a / b) * exp(-(a / b) * (w / w0))) / a +
-                   (w / w0) / b));
+    setParameter("S", w0 * (gsl_sf_lambert_W0(-(a / b) * exp(-(a / b) * (w / w0))) / a + (w / w0) / b));
   } else {
     // set to some small number relative to w0
     setParameter("S", 1e-6);
@@ -109,8 +105,7 @@ void BackToBackExponential::setFwhm(const double w) {
   setHeight(h0);
 }
 
-void BackToBackExponential::function1D(double *out, const double *xValues,
-                                       const size_t nData) const {
+void BackToBackExponential::function1D(double *out, const double *xValues, const size_t nData) const {
   /*
     const double& I = getParameter("I");
     const double& a = getParameter("A");
@@ -141,11 +136,9 @@ void BackToBackExponential::function1D(double *out, const double *xValues,
     if (fabs(diff) < extent) {
       double val = 0.0;
       double arg1 = a / 2 * (a * s2 + 2 * diff);
-      val += exp(arg1 + gsl_sf_log_erfc((a * s2 + diff) /
-                                        sqrt(2 * s2))); // prevent overflow
+      val += exp(arg1 + gsl_sf_log_erfc((a * s2 + diff) / sqrt(2 * s2))); // prevent overflow
       double arg2 = b / 2 * (b * s2 - 2 * diff);
-      val += exp(arg2 + gsl_sf_log_erfc((b * s2 - diff) /
-                                        sqrt(2 * s2))); // prevent overflow
+      val += exp(arg2 + gsl_sf_log_erfc((b * s2 - diff) / sqrt(2 * s2))); // prevent overflow
       out[i] = I * val * normFactor;
     } else
       out[i] = 0.0;
@@ -155,9 +148,7 @@ void BackToBackExponential::function1D(double *out, const double *xValues,
 /**
  * Evaluate function derivatives numerically.
  */
-void BackToBackExponential::functionDeriv1D(Jacobian *jacobian,
-                                            const double *xValues,
-                                            const size_t nData) {
+void BackToBackExponential::functionDeriv1D(Jacobian *jacobian, const double *xValues, const size_t nData) {
   FunctionDomain1DView domain(xValues, nData);
   this->calNumericalDeriv(domain, *jacobian);
 }

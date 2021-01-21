@@ -40,16 +40,12 @@ public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "LoadCanSAS1D"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Load a file written in the canSAS 1-D data format";
-  }
+  const std::string summary() const override { return "Load a file written in the canSAS 1-D data format"; }
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override {
-    return "DataHandling\\XML;SANS\\DataHandling";
-  }
+  const std::string category() const override { return "DataHandling\\XML;SANS\\DataHandling"; }
 
   /// Returns a confidence value that this algorithm can load a file
   int confidence(Kernel::FileDescriptor &descriptor) const override;
@@ -69,26 +65,20 @@ protected:
   void exec() override;
 
   /// Loads an individual SASentry element into a new workspace
-  virtual API::MatrixWorkspace_sptr
-  loadEntry(Poco::XML::Node *const workspaceData, std::string &runName);
+  virtual API::MatrixWorkspace_sptr loadEntry(Poco::XML::Node *const workspaceData, std::string &runName);
   /// Checks if the pointer to the loaded data is not null or throws if it is
-  void check(const Poco::XML::Element *const toCheck,
-             const std::string &name) const;
+  void check(const Poco::XML::Element *const toCheck, const std::string &name) const;
   /// Appends the new data workspace creating a workspace group if there was
   /// existing data
-  void appendDataToOutput(const API::MatrixWorkspace_sptr &newWork,
-                          const std::string &newWorkName,
+  void appendDataToOutput(const API::MatrixWorkspace_sptr &newWork, const std::string &newWorkName,
                           const API::WorkspaceGroup_sptr &container);
   /// Run LoadInstrument Child Algorithm
-  void runLoadInstrument(const std::string &inst_name,
-                         const API::MatrixWorkspace_sptr &localWorkspace);
+  void runLoadInstrument(const std::string &inst_name, const API::MatrixWorkspace_sptr &localWorkspace);
   /// Loads data into the run log
-  void createLogs(const Poco::XML::Element *const sasEntry,
-                  const API::MatrixWorkspace_sptr &wSpace) const;
+  void createLogs(const Poco::XML::Element *const sasEntry, const API::MatrixWorkspace_sptr &wSpace) const;
   /// Loads the information about hhe sample
-  void createSampleInformation(
-      const Poco::XML::Element *const sasEntry,
-      const Mantid::API::MatrixWorkspace_sptr &wSpace) const;
+  void createSampleInformation(const Poco::XML::Element *const sasEntry,
+                               const Mantid::API::MatrixWorkspace_sptr &wSpace) const;
 };
 } // namespace DataHandling
 } // namespace Mantid

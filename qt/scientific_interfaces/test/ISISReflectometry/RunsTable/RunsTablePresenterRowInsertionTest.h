@@ -14,29 +14,22 @@
 #include <gtest/gtest.h>
 
 using namespace MantidQt::CustomInterfaces::ISISReflectometry;
-using namespace MantidQt::CustomInterfaces::ISISReflectometry::
-    ModelCreationHelper;
+using namespace MantidQt::CustomInterfaces::ISISReflectometry::ModelCreationHelper;
 using testing::Mock;
 using testing::NiceMock;
 using testing::Return;
 
-class RunsTablePresenterRowInsertionTest : public CxxTest::TestSuite,
-                                           RunsTablePresenterTest {
+class RunsTablePresenterRowInsertionTest : public CxxTest::TestSuite, RunsTablePresenterTest {
 public:
-  static RunsTablePresenterRowInsertionTest *createSuite() {
-    return new RunsTablePresenterRowInsertionTest();
-  }
+  static RunsTablePresenterRowInsertionTest *createSuite() { return new RunsTablePresenterRowInsertionTest(); }
 
-  static void destroySuite(RunsTablePresenterRowInsertionTest *suite) {
-    delete suite;
-  }
+  static void destroySuite(RunsTablePresenterRowInsertionTest *suite) { delete suite; }
 
   void testUpdatesViewWhenRowInsertedAfterSelection() {
     auto reductionJobs = twoGroupsWithARowModel();
 
     selectedRowLocationsAre(m_jobs, {location(0, 0)});
-    EXPECT_CALL(m_jobs, appendChildRowOf(location(0)))
-        .WillOnce(Return(location(0, 1)));
+    EXPECT_CALL(m_jobs, appendChildRowOf(location(0))).WillOnce(Return(location(0, 1)));
 
     auto presenter = makePresenter(m_view, std::move(reductionJobs));
     presenter.notifyInsertRowRequested();
@@ -48,8 +41,7 @@ public:
     auto reductionJobs = twoEmptyGroupsModel();
 
     selectedRowLocationsAre(m_jobs, {location(0, 0)});
-    ON_CALL(m_jobs, appendChildRowOf(location(0)))
-        .WillByDefault(Return(location(0, 1)));
+    ON_CALL(m_jobs, appendChildRowOf(location(0))).WillByDefault(Return(location(0, 1)));
 
     auto presenter = makePresenter(m_view, std::move(reductionJobs));
     presenter.notifyInsertRowRequested();
@@ -76,10 +68,8 @@ public:
     auto reductionJobs = twoEmptyGroupsModel();
 
     selectedRowLocationsAre(m_jobs, {location(1), location(0)});
-    ON_CALL(m_jobs, appendChildRowOf(location(0)))
-        .WillByDefault(Return(location(0, 1)));
-    ON_CALL(m_jobs, appendChildRowOf(location(1)))
-        .WillByDefault(Return(location(1, 1)));
+    ON_CALL(m_jobs, appendChildRowOf(location(0))).WillByDefault(Return(location(0, 1)));
+    ON_CALL(m_jobs, appendChildRowOf(location(1))).WillByDefault(Return(location(1, 1)));
 
     auto presenter = makePresenter(m_view, std::move(reductionJobs));
     presenter.notifyInsertRowRequested();
@@ -95,10 +85,8 @@ public:
     auto reductionJobs = twoEmptyGroupsModel();
 
     selectedRowLocationsAre(m_jobs, {location(0), location(1)});
-    EXPECT_CALL(m_jobs, appendChildRowOf(location(0)))
-        .WillOnce(Return(location(0, 1)));
-    EXPECT_CALL(m_jobs, appendChildRowOf(location(1)))
-        .WillOnce(Return(location(1, 1)));
+    EXPECT_CALL(m_jobs, appendChildRowOf(location(0))).WillOnce(Return(location(0, 1)));
+    EXPECT_CALL(m_jobs, appendChildRowOf(location(1))).WillOnce(Return(location(1, 1)));
 
     auto presenter = makePresenter(m_view, std::move(reductionJobs));
     presenter.notifyInsertRowRequested();

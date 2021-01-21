@@ -33,17 +33,14 @@ Logger g_log("ComputeResourceInfo");
  * @throw std::runtime_error if name or required attributes are not
  * found
  */
-ComputeResourceInfo::ComputeResourceInfo(const FacilityInfo *fac,
-                                         const Poco::XML::Element *elem)
-    : m_facility(fac) {
+ComputeResourceInfo::ComputeResourceInfo(const FacilityInfo *fac, const Poco::XML::Element *elem) : m_facility(fac) {
 
   m_name = elem->getAttribute("name");
   if (m_name.empty()) {
     std::string elemStr;
     if (elem)
       elemStr = elem->innerText();
-    throw std::runtime_error(
-        "The compute resource name is not defined, at element: " + elemStr);
+    throw std::runtime_error("The compute resource name is not defined, at element: " + elemStr);
   }
 
   // default: Mantid web service API:
@@ -56,10 +53,8 @@ ComputeResourceInfo::ComputeResourceInfo(const FacilityInfo *fac,
 
   const std::string baseTag = "baseURL";
   Poco::AutoPtr<Poco::XML::NodeList> nl = elem->getElementsByTagName(baseTag);
-  if (!nl || nl->length() != 1 || !nl->item(0) ||
-      !nl->item(0)->hasChildNodes()) {
-    g_log.error("Failed to get base URL for remote compute resource '" +
-                m_name + "'");
+  if (!nl || nl->length() != 1 || !nl->item(0) || !nl->item(0)->hasChildNodes()) {
+    g_log.error("Failed to get base URL for remote compute resource '" + m_name + "'");
     throw std::runtime_error("Remote compute resources must have exactly one "
                              "baseURL tag. It was not found for the resource "
                              "'" +
@@ -71,14 +66,13 @@ ComputeResourceInfo::ComputeResourceInfo(const FacilityInfo *fac,
       if (txt) {
         m_baseURL = txt->getData();
       } else {
-        g_log.error("Failed to get base URL for remote compute resource '" +
-                    m_name + "'. The " + baseTag + " tag seems empty!");
-        throw std::runtime_error(
-            "Remote compute resources must have exactly one "
-            "baseURL tag containing a URL string. A tag was found for the "
-            "resource "
-            "'" +
-            m_name + "', but it seems empty!");
+        g_log.error("Failed to get base URL for remote compute resource '" + m_name + "'. The " + baseTag +
+                    " tag seems empty!");
+        throw std::runtime_error("Remote compute resources must have exactly one "
+                                 "baseURL tag containing a URL string. A tag was found for the "
+                                 "resource "
+                                 "'" +
+                                 m_name + "', but it seems empty!");
       }
     }
   }
@@ -91,21 +85,15 @@ ComputeResourceInfo::ComputeResourceInfo(const FacilityInfo *fac,
  *
  * @return True if the objects (names) are equal
  */
-bool ComputeResourceInfo::operator==(const ComputeResourceInfo &rhs) const {
-  return (this->name() == rhs.name());
-}
+bool ComputeResourceInfo::operator==(const ComputeResourceInfo &rhs) const { return (this->name() == rhs.name()); }
 
 std::string ComputeResourceInfo::name() const { return m_name; }
 
 std::string ComputeResourceInfo::baseURL() const { return m_baseURL; }
 
-std::string ComputeResourceInfo::remoteJobManagerType() const {
-  return m_managerType;
-}
+std::string ComputeResourceInfo::remoteJobManagerType() const { return m_managerType; }
 
-const FacilityInfo &ComputeResourceInfo::facility() const {
-  return *m_facility;
-}
+const FacilityInfo &ComputeResourceInfo::facility() const { return *m_facility; }
 
 /**
  * Prints the instrument name into an output stream
@@ -116,8 +104,7 @@ const FacilityInfo &ComputeResourceInfo::facility() const {
  * @return reference to the output stream being written to
  */
 std::ostream &operator<<(std::ostream &buffer, const ComputeResourceInfo &cr) {
-  buffer << "'" + cr.name() + "', at '" + cr.baseURL() + "', of type '" +
-                cr.remoteJobManagerType() + "'";
+  buffer << "'" + cr.name() + "', at '" + cr.baseURL() + "', of type '" + cr.remoteJobManagerType() + "'";
   return buffer;
 }
 

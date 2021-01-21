@@ -39,10 +39,8 @@ using namespace Mantid::Kernel;
  * @param experimentInfoIndex :: optional index in the array of
  *        ExperimentInfo objects. Should only be non-zero for MDWorkspaces.
  */
-LabelToolLogValuesDialog::LabelToolLogValuesDialog(const QString &wsname,
-                                                   QWidget *parentContainer,
-                                                   const Qt::WFlags &flags,
-                                                   size_t experimentInfoIndex)
+LabelToolLogValuesDialog::LabelToolLogValuesDialog(const QString &wsname, QWidget *parentContainer,
+                                                   const Qt::WFlags &flags, size_t experimentInfoIndex)
     : SampleLogDialogBase(wsname, parentContainer, flags, experimentInfoIndex) {
 
   setDialogWindowTitle(wsname);
@@ -53,8 +51,7 @@ LabelToolLogValuesDialog::LabelToolLogValuesDialog(const QString &wsname,
   uiLayout->addWidget(m_tree);
 
   // -------------- Statistics on logs ------------------------
-  std::string stats[NUM_STATS] = {
-      "Min:", "Max:", "Mean:", "Time Avg:", "Median:", "Std Dev:", "Duration:"};
+  std::string stats[NUM_STATS] = {"Min:", "Max:", "Mean:", "Time Avg:", "Median:", "Std Dev:", "Duration:"};
   QGroupBox *statsBox = new QGroupBox("Log Statistics");
   QFormLayout *statsBoxLayout = new QFormLayout;
 
@@ -144,8 +141,7 @@ void LabelToolLogValuesDialog::importItem(QTreeWidgetItem *item) {
   } else {
     // else import the selected statistic
     // constructing the log string using the hardcoded fields
-    logValuesString +=
-        statRadioChoice[activeRadioBoxPosition]->text() + "  " + statValuesText;
+    logValuesString += statRadioChoice[activeRadioBoxPosition]->text() + "  " + statValuesText;
   }
 
   parentWidget->setText(logValuesString);

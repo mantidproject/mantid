@@ -25,11 +25,10 @@ Constructor
 @throw invalid_argument if the repository is null
 @throw invalid_arument if view is null
 */
-MDEWInMemoryLoadingPresenter::MDEWInMemoryLoadingPresenter(
-    std::unique_ptr<MDLoadingView> view, WorkspaceProvider *repository,
-    std::string wsName)
-    : MDEWLoadingPresenter(std::move(view)), m_repository(repository),
-      m_wsName(wsName), m_wsTypeName(""), m_specialCoords(-1) {
+MDEWInMemoryLoadingPresenter::MDEWInMemoryLoadingPresenter(std::unique_ptr<MDLoadingView> view,
+                                                           WorkspaceProvider *repository, std::string wsName)
+    : MDEWLoadingPresenter(std::move(view)), m_repository(repository), m_wsName(wsName), m_wsTypeName(""),
+      m_specialCoords(-1) {
   if (m_wsName.empty()) {
     throw std::invalid_argument("The workspace name is empty.");
   }
@@ -52,9 +51,7 @@ bool MDEWInMemoryLoadingPresenter::canReadFile() const {
     // The workspace does not exist.
     bCanReadIt = false;
   } else if (nullptr ==
-             std::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(
-                 m_repository->fetchWorkspace(m_wsName))
-                 .get()) {
+             std::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(m_repository->fetchWorkspace(m_wsName)).get()) {
     // The workspace can be found, but is not an IMDEventWorkspace.
     bCanReadIt = false;
   } else {
@@ -71,16 +68,13 @@ Executes the underlying algorithm to create the MVP model.
 @param drawingProgressUpdate : Handler for GUI updates while
 vtkDataSetFactory::create occurs.
 */
-vtkSmartPointer<vtkDataSet>
-MDEWInMemoryLoadingPresenter::execute(vtkDataSetFactory *factory,
-                                      ProgressAction &,
-                                      ProgressAction &drawingProgressUpdate) {
+vtkSmartPointer<vtkDataSet> MDEWInMemoryLoadingPresenter::execute(vtkDataSetFactory *factory, ProgressAction &,
+                                                                  ProgressAction &drawingProgressUpdate) {
   using namespace Mantid::API;
   using namespace Mantid::Geometry;
 
   Workspace_sptr ws = m_repository->fetchWorkspace(m_wsName);
-  IMDEventWorkspace_sptr eventWs =
-      std::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(ws);
+  IMDEventWorkspace_sptr eventWs = std::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(ws);
 
   factory->setRecursionDepth(this->m_view->getRecursionDepth());
   auto visualDataSet = factory->oneStepCreate(eventWs, drawingProgressUpdate);
@@ -102,14 +96,12 @@ void MDEWInMemoryLoadingPresenter::executeLoadMetadata() {
   using namespace Mantid::API;
 
   Workspace_sptr ws = m_repository->fetchWorkspace(m_wsName);
-  IMDEventWorkspace_sptr eventWs =
-      std::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(ws);
+  IMDEventWorkspace_sptr eventWs = std::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(ws);
   m_wsTypeName = eventWs->id();
   m_specialCoords = eventWs->getSpecialCoordinateSystem();
 
   // Set the instrument which is associated with the workspace.
-  m_metadataJsonManager->setInstrument(
-      m_metaDataExtractor->extractInstrument(eventWs.get()));
+  m_metadataJsonManager->setInstrument(m_metaDataExtractor->extractInstrument(eventWs.get()));
 
   // Set the special coordinates
   m_metadataJsonManager->setSpecialCoordinates(m_specialCoords);
@@ -125,16 +117,12 @@ MDEWInMemoryLoadingPresenter::~MDEWInMemoryLoadingPresenter() {}
  Getter for the workspace type name.
  @return Workspace Type Name
 */
-std::string MDEWInMemoryLoadingPresenter::getWorkspaceTypeName() {
-  return m_wsTypeName;
-}
+std::string MDEWInMemoryLoadingPresenter::getWorkspaceTypeName() { return m_wsTypeName; }
 
 /**
  * Getter for the special coordinates.
  * @return the special coordinates value
  */
-int MDEWInMemoryLoadingPresenter::getSpecialCoordinates() {
-  return m_specialCoords;
-}
+int MDEWInMemoryLoadingPresenter::getSpecialCoordinates() { return m_specialCoords; }
 } // namespace VATES
 } // namespace Mantid

@@ -35,12 +35,10 @@ class Differentiation : public Filter {
 
 public:
   Differentiation(ApplicationWindow *parent, Graph *g);
-  Differentiation(ApplicationWindow *parent, Graph *g,
-                  const QString &curveTitle);
-  Differentiation(ApplicationWindow *parent, Graph *g,
-                  const QString &curveTitle, double start, double end);
-  Differentiation(ApplicationWindow *parent, Table *t, const QString &xCol,
-                  const QString &yCol, int start = 0, int end = -1);
+  Differentiation(ApplicationWindow *parent, Graph *g, const QString &curveTitle);
+  Differentiation(ApplicationWindow *parent, Graph *g, const QString &curveTitle, double start, double end);
+  Differentiation(ApplicationWindow *parent, Table *t, const QString &xCol, const QString &yCol, int start = 0,
+                  int end = -1);
 
 private:
   void init();

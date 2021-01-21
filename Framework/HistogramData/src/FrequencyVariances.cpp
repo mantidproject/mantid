@@ -15,14 +15,12 @@ namespace HistogramData {
 
 /// Constructs FrequencVariances from CountVariances and bin width based on
 /// BinEdges.
-FrequencyVariances::FrequencyVariances(const CountVariances &counts,
-                                       const BinEdges &edges)
+FrequencyVariances::FrequencyVariances(const CountVariances &counts, const BinEdges &edges)
     : FrequencyVariances(CountVariances(counts), edges) {}
 
 /// Move-constructs FrequencyVariances from CountVariances and bin width based
 /// on BinEdges.
-FrequencyVariances::FrequencyVariances(CountVariances &&counts,
-                                       const BinEdges &edges) {
+FrequencyVariances::FrequencyVariances(CountVariances &&counts, const BinEdges &edges) {
   if (!counts)
     return;
   if (!edges)

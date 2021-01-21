@@ -32,9 +32,7 @@ class CalculateDynamicRangeTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static CalculateDynamicRangeTest *createSuite() {
-    return new CalculateDynamicRangeTest();
-  }
+  static CalculateDynamicRangeTest *createSuite() { return new CalculateDynamicRangeTest(); }
   static void destroySuite(CalculateDynamicRangeTest *suite) { delete suite; }
 
   CalculateDynamicRangeTest() { FrameworkManager::Instance(); }
@@ -73,8 +71,7 @@ public:
     alg.setChild(true);
     MatrixWorkspace_sptr ws = create_workspace(2);
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Workspace", ws))
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty(
-        "ComponentNames", std::vector<std::string>{"bank1", "bank2"}))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("ComponentNames", std::vector<std::string>{"bank1", "bank2"}))
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
     ws = alg.getProperty("Workspace");

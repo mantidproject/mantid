@@ -35,31 +35,20 @@ namespace Algorithms {
 
 class MANTID_ALGORITHMS_DLL SparseWorkspace : public DataObjects::Workspace2D {
 public:
-  SparseWorkspace(const API::MatrixWorkspace &modelWS,
-                  const size_t wavelengthPoints, const size_t rows,
+  SparseWorkspace(const API::MatrixWorkspace &modelWS, const size_t wavelengthPoints, const size_t rows,
                   const size_t columns);
-  virtual HistogramData::Histogram
-  interpolateFromDetectorGrid(const double lat, const double lon) const;
-  virtual HistogramData::Histogram
-  bilinearInterpolateFromDetectorGrid(const double lat, const double lon) const;
+  virtual HistogramData::Histogram interpolateFromDetectorGrid(const double lat, const double lon) const;
+  virtual HistogramData::Histogram bilinearInterpolateFromDetectorGrid(const double lat, const double lon) const;
 
 protected:
   std::unique_ptr<Algorithms::DetectorGridDefinition> m_gridDef;
-  static std::array<double, 4>
-  inverseDistanceWeights(const std::array<double, 4> &distances);
-  static double greatCircleDistance(const double lat1, const double long1,
-                                    const double lat2, const double long2);
+  static std::array<double, 4> inverseDistanceWeights(const std::array<double, 4> &distances);
+  static double greatCircleDistance(const double lat1, const double long1, const double lat2, const double long2);
   Mantid::Geometry::IObject_sptr makeCubeShape();
-  static HistogramData::Histogram
-  modelHistogram(const API::MatrixWorkspace &modelWS,
-                 const size_t wavelengthPoints);
-  static std::tuple<double, double>
-  extremeWavelengths(const API::MatrixWorkspace &ws);
-  static std::tuple<double, double, double, double>
-  extremeAngles(const API::MatrixWorkspace &ws);
-  HistogramData::HistogramY
-  secondDerivative(const std::array<size_t, 3> indices,
-                   const double distanceStep) const;
+  static HistogramData::Histogram modelHistogram(const API::MatrixWorkspace &modelWS, const size_t wavelengthPoints);
+  static std::tuple<double, double> extremeWavelengths(const API::MatrixWorkspace &ws);
+  static std::tuple<double, double, double, double> extremeAngles(const API::MatrixWorkspace &ws);
+  HistogramData::HistogramY secondDerivative(const std::array<size_t, 3> indices, const double distanceStep) const;
   HistogramData::HistogramE esq(HistogramData::HistogramE e) const;
   HistogramData::HistogramE esqrt(HistogramData::HistogramE e) const;
 };

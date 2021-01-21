@@ -23,14 +23,12 @@ namespace ISISReflectometry {
 InstrumentPresenter is a presenter class for the widget 'Instrument' in the
 ISIS Reflectometry Interface.
 */
-class MANTIDQT_ISISREFLECTOMETRY_DLL InstrumentPresenter
-    : public InstrumentViewSubscriber,
-      public IInstrumentPresenter {
+class MANTIDQT_ISISREFLECTOMETRY_DLL InstrumentPresenter : public InstrumentViewSubscriber,
+                                                           public IInstrumentPresenter {
 public:
   InstrumentPresenter(
       IInstrumentView *view, Instrument instrument,
-      std::unique_ptr<IInstrumentOptionDefaults> instrumentDefaults =
-          std::make_unique<InstrumentOptionDefaults>());
+      std::unique_ptr<IInstrumentOptionDefaults> instrumentDefaults = std::make_unique<InstrumentOptionDefaults>());
   Instrument const &instrument() const override;
 
   // IInstrumentPresenver overrides

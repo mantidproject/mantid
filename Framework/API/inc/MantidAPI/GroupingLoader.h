@@ -44,14 +44,12 @@ public:
 class MANTID_API_DLL GroupingLoader {
 public:
   explicit GroupingLoader(Geometry::Instrument_const_sptr instrument);
-  GroupingLoader(Geometry::Instrument_const_sptr instrument,
-                 const std::string &mainFieldDirection);
+  GroupingLoader(Geometry::Instrument_const_sptr instrument, const std::string &mainFieldDirection);
   virtual ~GroupingLoader();
   /// Load the grouping from the instrument's IDF
   std::shared_ptr<Grouping> getGroupingFromIDF() const;
   /// Loads grouping from the XML file specified
-  static void loadGroupingFromXML(const std::string &filename,
-                                  Grouping &grouping);
+  static void loadGroupingFromXML(const std::string &filename, Grouping &grouping);
   /// Returns a "dummy" grouping of a single group with all the detectors in it
   std::shared_ptr<Grouping> getDummyGrouping();
 

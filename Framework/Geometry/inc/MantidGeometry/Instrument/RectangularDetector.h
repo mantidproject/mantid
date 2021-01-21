@@ -47,10 +47,8 @@ public:
   static bool compareName(const std::string &proposedMatch);
 
   /// Create all the detector pixels of this rectangular detector.
-  void initialize(std::shared_ptr<IObject> shape, int xpixels, double xstart,
-                  double xstep, int ypixels, double ystart, double ystep,
-                  int idstart, bool idfillbyfirst_y, int idstepbyrow,
-                  int idstep = 1);
+  void initialize(std::shared_ptr<IObject> shape, int xpixels, double xstart, double xstep, int ypixels, double ystart,
+                  double ystep, int idstart, bool idfillbyfirst_y, int idstepbyrow, int idstep = 1);
 
   //! Make a clone of the present component
   RectangularDetector *clone() const override;
@@ -72,17 +70,14 @@ public:
   // that here
   using CompAssembly::getBoundingBox;
 
-  void testIntersectionWithChildren(
-      Track &testRay,
-      std::deque<IComponent_const_sptr> &searchQueue) const override;
+  void testIntersectionWithChildren(Track &testRay, std::deque<IComponent_const_sptr> &searchQueue) const override;
 
   // ------------ IObjComponent methods ----------------
 
   /// Returns the material of the detector
   const Kernel::Material material() const override;
 
-  virtual size_t
-  registerContents(class ComponentVisitor &componentVisitor) const override;
+  virtual size_t registerContents(class ComponentVisitor &componentVisitor) const override;
 
   // ------------ End of IObjComponent methods ----------------
 
@@ -94,12 +89,10 @@ private:
   unsigned int m_textureID;
 };
 
-MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &,
-                                             const RectangularDetector &);
+MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &, const RectangularDetector &);
 
 using RectangularDetector_sptr = std::shared_ptr<RectangularDetector>;
-using RectangularDetector_const_sptr =
-    std::shared_ptr<const RectangularDetector>;
+using RectangularDetector_const_sptr = std::shared_ptr<const RectangularDetector>;
 
 } // Namespace Geometry
 } // Namespace Mantid

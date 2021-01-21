@@ -48,8 +48,7 @@ using std::vector;
 
 const char *colTypeNames[] = {"X", "Y", "Z", "XErr", "YErr", "Label", "None"};
 #define MAX_LEVEL 20
-#define ERROR_MSG                                                              \
-  "Please send the OPJ file and the opjfile.log to the author of liborigin!\n"
+#define ERROR_MSG "Please send the OPJ file and the opjfile.log to the author of liborigin!\n"
 
 #define SwapBytes(x) ByteSwap((unsigned char *)&x, sizeof(x))
 
@@ -63,34 +62,32 @@ int strcmp_i(const char *s1,
 }
 
 // for standard calls like 'int retval = fseek(f, 0x7, SEEK_SET);'
-#define CHECKED_FSEEK(debug, fd, offset, whence)                               \
-  {                                                                            \
-    int retval = fseek(fd, offset, whence);                                    \
-    if (retval < 0) {                                                          \
-      std::string posStr = "";                                                 \
-      if (SEEK_SET == whence)                                                  \
-        posStr = "beginning of the file";                                      \
-      else if (SEEK_CUR == whence)                                             \
-        posStr = "current position of the file";                               \
-      else if (SEEK_END == whence)                                             \
-        posStr = "end of the file";                                            \
-                                                                               \
-      fprintf(debug, " WARNING : could not move to position %d from the %s\n", \
-              offset, posStr.c_str());                                         \
-    }                                                                          \
+#define CHECKED_FSEEK(debug, fd, offset, whence)                                                                       \
+  {                                                                                                                    \
+    int retval = fseek(fd, offset, whence);                                                                            \
+    if (retval < 0) {                                                                                                  \
+      std::string posStr = "";                                                                                         \
+      if (SEEK_SET == whence)                                                                                          \
+        posStr = "beginning of the file";                                                                              \
+      else if (SEEK_CUR == whence)                                                                                     \
+        posStr = "current position of the file";                                                                       \
+      else if (SEEK_END == whence)                                                                                     \
+        posStr = "end of the file";                                                                                    \
+                                                                                                                       \
+      fprintf(debug, " WARNING : could not move to position %d from the %s\n", offset, posStr.c_str());                \
+    }                                                                                                                  \
   }
 
 // for standard calls like 'size_t retval = fread(&objectcount, 4, 1, f);'
-#define CHECKED_FREAD(debug, ptr, size, nmemb, stream)                         \
-  {                                                                            \
-    size_t retval = fread(ptr, size, nmemb, stream);                           \
-    if (static_cast<size_t>(size * nmemb) != retval) {                         \
-      fprintf(debug,                                                           \
-              " WARNING : could not read %llu bytes from file, read: "         \
-              "%llu bytes\n",                                                  \
-              static_cast<unsigned long long>(size) * nmemb,                   \
-              static_cast<unsigned long long>(retval));                        \
-    }                                                                          \
+#define CHECKED_FREAD(debug, ptr, size, nmemb, stream)                                                                 \
+  {                                                                                                                    \
+    size_t retval = fread(ptr, size, nmemb, stream);                                                                   \
+    if (static_cast<size_t>(size * nmemb) != retval) {                                                                 \
+      fprintf(debug,                                                                                                   \
+              " WARNING : could not read %llu bytes from file, read: "                                                 \
+              "%llu bytes\n",                                                                                          \
+              static_cast<unsigned long long>(size) * nmemb, static_cast<unsigned long long>(retval));                 \
+    }                                                                                                                  \
   }
 
 void OPJFile::ByteSwap(unsigned char *b, int n) {
@@ -128,8 +125,7 @@ int OPJFile::compareColumnnames(int spread, char *sname) const {
       return i;
   return -1;
 }
-int OPJFile::compareExcelColumnnames(int iexcel, int isheet,
-                                     char *sname) const {
+int OPJFile::compareExcelColumnnames(int iexcel, int isheet, char *sname) const {
   for (unsigned int i = 0; i < EXCEL[iexcel].sheet[isheet].column.size(); i++)
     if (EXCEL[iexcel].sheet[isheet].column[i].name == sname)
       return i;
@@ -208,10 +204,8 @@ string OPJFile::findObjectByIndex(int index) {
 
 void OPJFile::convertSpreadToExcel(int spread) {
   // add new Excel sheet
-  EXCEL.emplace_back(excel(SPREADSHEET[spread].name, SPREADSHEET[spread].label,
-                           SPREADSHEET[spread].maxRows,
-                           SPREADSHEET[spread].bHidden,
-                           SPREADSHEET[spread].bLoose));
+  EXCEL.emplace_back(excel(SPREADSHEET[spread].name, SPREADSHEET[spread].label, SPREADSHEET[spread].maxRows,
+                           SPREADSHEET[spread].bHidden, SPREADSHEET[spread].bLoose));
   for (auto &i : SPREADSHEET[spread].column) {
     string name = i.name;
     int pos = static_cast<int>(name.find_last_of("@"));
@@ -360,8 +354,7 @@ int OPJFile::ParseFormatOld() {
     SwapBytes(col_found);
 
   CHECKED_FREAD(debug, &c, 1, 1, f); // skip '\n'
-  fprintf(debug, " [column found = %d/0x%X @ 0x%X]\n", col_found, col_found,
-          (unsigned int)ftell(f));
+  fprintf(debug, " [column found = %d/0x%X @ 0x%X]\n", col_found, col_found, (unsigned int)ftell(f));
 
   int current_col = 1, nr = 0, nbytes = 0;
   double a;
@@ -381,8 +374,7 @@ int OPJFile::ParseFormatOld() {
     fprintf(debug, "\n");
 
     CHECKED_FREAD(debug, &valuesize, 1, 1, f);
-    fprintf(debug, " [valuesize = %d @ 0x%X]\n", valuesize,
-            (unsigned int)ftell(f) - 1);
+    fprintf(debug, " [valuesize = %d @ 0x%X]\n", valuesize, (unsigned int)ftell(f) - 1);
     if (valuesize <= 0) {
       fprintf(debug, " WARNING : found strange valuesize of %d\n", valuesize);
       valuesize = 10;
@@ -403,10 +395,9 @@ int OPJFile::ParseFormatOld() {
     CHECKED_FREAD(debug, &name, 25, 1, f);
     // char* sname = new char[26];
     char sname[26];
-    sprintf(sname, "%s", strtok(name, "_")); // spreadsheet name
-    char *cname = strtok(nullptr, "_");      // column name
-    while (char *tmpstr =
-               strtok(nullptr, "_")) { // get multiple-"_" title correct
+    sprintf(sname, "%s", strtok(name, "_"));      // spreadsheet name
+    char *cname = strtok(nullptr, "_");           // column name
+    while (char *tmpstr = strtok(nullptr, "_")) { // get multiple-"_" title correct
       strcat(sname, "_");
       strcat(sname, cname);
       strcpy(cname, tmpstr);
@@ -435,8 +426,7 @@ int OPJFile::ParseFormatOld() {
         return -1;
       }
     }
-    fprintf(debug, "SPREADSHEET = %s COLUMN %d NAME = %s (@0x%X)\n", sname,
-            current_col, cname, (unsigned int)ftell(f));
+    fprintf(debug, "SPREADSHEET = %s COLUMN %d NAME = %s (@0x%X)\n", sname, current_col, cname, (unsigned int)ftell(f));
     fflush(debug);
 
     if (cname == nullptr) {
@@ -515,8 +505,7 @@ int OPJFile::ParseFormatOld() {
       if (fmod(nbytes, (double)valuesize) > 0)
         fprintf(debug, "WARNING: data section could not be read correct\n");
       nr = nbytes / valuesize;
-      fprintf(debug, " [number of rows = %d (%d Bytes) @ 0x%X]\n", nr, nbytes,
-              (unsigned int)ftell(f));
+      fprintf(debug, " [number of rows = %d (%d Bytes) @ 0x%X]\n", nr, nbytes, (unsigned int)ftell(f));
       fflush(debug);
 
       SPREADSHEET[spread].maxRows < nr ? SPREADSHEET[spread].maxRows = nr : 0;
@@ -537,14 +526,12 @@ int OPJFile::ParseFormatOld() {
           if (IsBigEndian())
             SwapBytes(a);
           fprintf(debug, "%g ", a);
-          SPREADSHEET[spread].column[(current_col - 1)].odata.emplace_back(
-              originData(a));
+          SPREADSHEET[spread].column[(current_col - 1)].odata.emplace_back(originData(a));
         } else { // label
           char *stmp = new char[valuesize + 1];
           CHECKED_FREAD(debug, stmp, valuesize, 1, f);
           fprintf(debug, "%s ", stmp);
-          SPREADSHEET[spread].column[(current_col - 1)].odata.emplace_back(
-              originData(stmp));
+          SPREADSHEET[spread].column[(current_col - 1)].odata.emplace_back(originData(stmp));
           delete[] stmp;
         }
       }
@@ -563,8 +550,7 @@ int OPJFile::ParseFormatOld() {
     if (IsBigEndian())
       SwapBytes(col_found);
     CHECKED_FREAD(debug, &c, 1, 1, f); // skip '\n'
-    fprintf(debug, " [column found = %d/0x%X (@ 0x%X)]\n", col_found, col_found,
-            (unsigned int)ftell(f) - 5);
+    fprintf(debug, " [column found = %d/0x%X (@ 0x%X)]\n", col_found, col_found, (unsigned int)ftell(f) - 5);
     fflush(debug);
   }
 
@@ -581,31 +567,23 @@ int OPJFile::ParseFormatOld() {
   int LAYER = 0;
   int COL_JUMP = 0x1ED;
   for (unsigned int i = 0; i < SPREADSHEET.size(); i++) {
-    fprintf(debug, "   reading Spreadsheet %d/%zd properties\n", i + 1,
-            SPREADSHEET.size());
+    fprintf(debug, "   reading Spreadsheet %d/%zd properties\n", i + 1, SPREADSHEET.size());
     fflush(debug);
     if (i > 0) {
       if (version == 700)
-        POS += 0x2530 +
-               static_cast<int>(SPREADSHEET[i - 1].column.size()) * COL_JUMP;
+        POS += 0x2530 + static_cast<int>(SPREADSHEET[i - 1].column.size()) * COL_JUMP;
       else if (version == 610)
-        POS += 0x25A4 +
-               static_cast<int>(SPREADSHEET[i - 1].column.size()) * COL_JUMP;
+        POS += 0x25A4 + static_cast<int>(SPREADSHEET[i - 1].column.size()) * COL_JUMP;
       else if (version == 604)
-        POS += 0x25A0 +
-               static_cast<int>(SPREADSHEET[i - 1].column.size()) * COL_JUMP;
+        POS += 0x25A0 + static_cast<int>(SPREADSHEET[i - 1].column.size()) * COL_JUMP;
       else if (version == 601)
-        POS += 0x2560 + static_cast<int>(SPREADSHEET[i - 1].column.size()) *
-                            COL_JUMP; // ?
+        POS += 0x2560 + static_cast<int>(SPREADSHEET[i - 1].column.size()) * COL_JUMP; // ?
       else if (version == 600)
-        POS += 0x2560 +
-               static_cast<int>(SPREADSHEET[i - 1].column.size()) * COL_JUMP;
+        POS += 0x2560 + static_cast<int>(SPREADSHEET[i - 1].column.size()) * COL_JUMP;
       else if (version == 500)
-        POS += 0x92C +
-               static_cast<int>(SPREADSHEET[i - 1].column.size()) * COL_JUMP;
+        POS += 0x92C + static_cast<int>(SPREADSHEET[i - 1].column.size()) * COL_JUMP;
       else if (version == 410)
-        POS += 0x7FB +
-               static_cast<int>(SPREADSHEET[i - 1].column.size()) * COL_JUMP;
+        POS += 0x7FB + static_cast<int>(SPREADSHEET[i - 1].column.size()) * COL_JUMP;
     }
 
     fprintf(debug, "     reading Header\n");
@@ -622,8 +600,7 @@ int OPJFile::ParseFormatOld() {
     if (c == 'O')
       fprintf(debug, "     \"ORIGIN\" found ! (@ 0x%X)\n", POS + ORIGIN);
     while (c != 'O' && jump < MAX_LEVEL) { // no inf loop
-      fprintf(debug, "   TRY %d  \"O\"RIGIN not found ! : %c (@ 0x%X)",
-              jump + 1, c, POS + ORIGIN);
+      fprintf(debug, "   TRY %d  \"O\"RIGIN not found ! : %c (@ 0x%X)", jump + 1, c, POS + ORIGIN);
       fprintf(debug, "     POS=0x%X | ORIGIN = 0x%X\n", POS, ORIGIN);
       fflush(debug);
       POS += 0x1F2;
@@ -634,8 +611,7 @@ int OPJFile::ParseFormatOld() {
 
     int spread = i;
     if (jump == MAX_LEVEL) {
-      fprintf(debug, "   Spreadsheet SECTION not found !   (@ 0x%X)\n",
-              POS - 10 * 0x1F2 + 0x55);
+      fprintf(debug, "   Spreadsheet SECTION not found !   (@ 0x%X)\n", POS - 10 * 0x1F2 + 0x55);
       // setColName(spread);
       fclose(f);
       fclose(debug);
@@ -653,8 +629,8 @@ int OPJFile::ParseFormatOld() {
     if (spread == -1)
       spread = i;
 
-    fprintf(debug, "     SPREADSHEET %d NAME : %s  (@ 0x%X) has %zu columns\n",
-            spread + 1, name, POS + 0x12, SPREADSHEET[spread].column.size());
+    fprintf(debug, "     SPREADSHEET %d NAME : %s  (@ 0x%X) has %zu columns\n", spread + 1, name, POS + 0x12,
+            SPREADSHEET[spread].column.size());
     fflush(debug);
 
     int ATYPE = 0;
@@ -679,11 +655,9 @@ int OPJFile::ParseFormatOld() {
     fflush(debug);
 
     /////////////// COLUMN Types ///////////////////////////////////////////
-    fprintf(debug, "     Spreadsheet has %zu columns\n",
-            SPREADSHEET[spread].column.size());
+    fprintf(debug, "     Spreadsheet has %zu columns\n", SPREADSHEET[spread].column.size());
     for (unsigned int j = 0; j < SPREADSHEET[spread].column.size(); j++) {
-      fprintf(debug, "     reading COLUMN %d/%zd type\n", j + 1,
-              SPREADSHEET[spread].column.size());
+      fprintf(debug, "     reading COLUMN %d/%zd type\n", j + 1, SPREADSHEET[spread].column.size());
       fflush(debug);
       CHECKED_FSEEK(debug, f, LAYER + ATYPE + j * COL_JUMP, SEEK_SET);
       CHECKED_FREAD(debug, &name, 25, 1, f);
@@ -717,24 +691,20 @@ int OPJFile::ParseFormatOld() {
 
       SPREADSHEET[spread].column[j].type = type;
 
-      fprintf(debug, "       COLUMN \"%s\" type = %s (@ 0x%X)\n",
-              SPREADSHEET[spread].column[j].name.c_str(), colTypeNames[type],
-              LAYER + ATYPE + j * COL_JUMP);
+      fprintf(debug, "       COLUMN \"%s\" type = %s (@ 0x%X)\n", SPREADSHEET[spread].column[j].name.c_str(),
+              colTypeNames[type], LAYER + ATYPE + j * COL_JUMP);
       fflush(debug);
 
       // check column name
       int max_length = 11; // only first 11 chars are saved here !
-      int name_length =
-          static_cast<int>(SPREADSHEET[spread].column[j].name.length());
+      int name_length = static_cast<int>(SPREADSHEET[spread].column[j].name.length());
       int length = (name_length < max_length) ? name_length : max_length;
 
       if (SPREADSHEET[spread].column[j].name.substr(0, length) == name) {
-        fprintf(debug, "       TEST : column name = \"%s\". OK!\n",
-                SPREADSHEET[spread].column[j].name.c_str());
+        fprintf(debug, "       TEST : column name = \"%s\". OK!\n", SPREADSHEET[spread].column[j].name.c_str());
       } else {
-        fprintf(debug,
-                "       TEST : COLUMN %d name mismatch (\"%s\" != \"%s\")\n",
-                j + 1, name, SPREADSHEET[spread].column[j].name.c_str());
+        fprintf(debug, "       TEST : COLUMN %d name mismatch (\"%s\" != \"%s\")\n", j + 1, name,
+                SPREADSHEET[spread].column[j].name.c_str());
         // fprintf(debug,"ERROR : column name mismatch! Continue
         // anyway.\n"ERROR_MSG);
       }
@@ -841,12 +811,10 @@ int OPJFile::ParseFormatNew() {
     SwapBytes(col_found);
 
   CHECKED_FREAD(debug, &c, 1, 1, f); // skip '\n'
-  fprintf(debug, " [column found = %d/0x%X @ 0x%X]\n", col_found, col_found,
-          (unsigned int)ftell(f));
+  fprintf(debug, " [column found = %d/0x%X @ 0x%X]\n", col_found, col_found, (unsigned int)ftell(f));
   int colpos = int(ftell(f));
   if (colpos < 0) {
-    fprintf(debug,
-            " ERROR : ftell returned a negative value after finding a column");
+    fprintf(debug, " ERROR : ftell returned a negative value after finding a column");
     fclose(f);
     fclose(debug);
     return -1;
@@ -888,8 +856,7 @@ int OPJFile::ParseFormatNew() {
     fprintf(debug, "\n");
 
     CHECKED_FREAD(debug, &valuesize, 1, 1, f);
-    fprintf(debug, " [valuesize = %d @ 0x%X]\n", valuesize,
-            (unsigned int)ftell(f) - 1);
+    fprintf(debug, " [valuesize = %d @ 0x%X]\n", valuesize, (unsigned int)ftell(f) - 1);
     if (valuesize <= 0) {
       fprintf(debug, " WARNING : found strange valuesize of %d\n", valuesize);
       valuesize = 10;
@@ -910,10 +877,9 @@ int OPJFile::ParseFormatNew() {
     CHECKED_FREAD(debug, &name, 25, 1, f);
     // char* sname = new char[26];
     char sname[26];
-    sprintf(sname, "%s", strtok(name, "_")); // spreadsheet name
-    char *cname = strtok(nullptr, "_");      // column name
-    while (char *tmpstr =
-               strtok(nullptr, "_")) { // get multiple-"_" title correct
+    sprintf(sname, "%s", strtok(name, "_"));      // spreadsheet name
+    char *cname = strtok(nullptr, "_");           // column name
+    while (char *tmpstr = strtok(nullptr, "_")) { // get multiple-"_" title correct
       strcat(sname, "_");
       strcat(sname, cname);
       strcpy(cname, tmpstr);
@@ -1048,8 +1014,7 @@ int OPJFile::ParseFormatNew() {
             }
           break;
         default:
-          fprintf(debug, "UNKNOWN MATRIX DATATYPE: %.2X SKIP DATA\n",
-                  data_type);
+          fprintf(debug, "UNKNOWN MATRIX DATATYPE: %.2X SKIP DATA\n", data_type);
           CHECKED_FSEEK(debug, f, valuesize * size, SEEK_CUR);
           MATRIX.pop_back();
         }
@@ -1088,12 +1053,9 @@ int OPJFile::ParseFormatNew() {
         CHECKED_FREAD(debug, &d, 8, 1, f);
         if (IsBigEndian())
           SwapBytes(d);
-        FUNCTION.back().end =
-            FUNCTION.back().begin + d * (FUNCTION.back().points - 1);
-        fprintf(debug, "FUNCTION %s : %s \n", FUNCTION.back().name.c_str(),
-                FUNCTION.back().formula.c_str());
-        fprintf(debug, " interval %g : %g, number of points %d \n",
-                FUNCTION.back().begin, FUNCTION.back().end,
+        FUNCTION.back().end = FUNCTION.back().begin + d * (FUNCTION.back().points - 1);
+        fprintf(debug, "FUNCTION %s : %s \n", FUNCTION.back().name.c_str(), FUNCTION.back().formula.c_str());
+        fprintf(debug, " interval %g : %g, number of points %d \n", FUNCTION.back().begin, FUNCTION.back().end,
                 FUNCTION.back().points);
         CHECKED_FSEEK(debug, f, oldpos, SEEK_SET);
 
@@ -1125,12 +1087,11 @@ int OPJFile::ParseFormatNew() {
           current_col = 1;
         current_col++;
       }
-      fprintf(debug, "SPREADSHEET = %s COLUMN NAME = %s (%d) (@0x%X)\n", sname,
-              cname, current_col, (unsigned int)ftell(f));
+      fprintf(debug, "SPREADSHEET = %s COLUMN NAME = %s (%d) (@0x%X)\n", sname, cname, current_col,
+              (unsigned int)ftell(f));
       fflush(debug);
       SPREADSHEET[spread].column.emplace_back(spreadColumn(cname, dataIndex));
-      int sheetpos = static_cast<int>(
-          SPREADSHEET[spread].column.back().name.find_last_of("@"));
+      int sheetpos = static_cast<int>(SPREADSHEET[spread].column.back().name.find_last_of("@"));
       if (!SPREADSHEET[spread].bMultisheet && sheetpos != -1)
         if (std::stoi(string(cname).substr(sheetpos + 1)) > 1) {
           SPREADSHEET[spread].bMultisheet = true;
@@ -1150,8 +1111,7 @@ int OPJFile::ParseFormatNew() {
       if (fmod(nbytes, (double)valuesize) > 0)
         fprintf(debug, "WARNING: data section could not be read correct\n");
       nr = nbytes / valuesize;
-      fprintf(debug, " [number of rows = %d (%d Bytes) @ 0x%X]\n", nr, nbytes,
-              (unsigned int)ftell(f));
+      fprintf(debug, " [number of rows = %d (%d Bytes) @ 0x%X]\n", nr, nbytes, (unsigned int)ftell(f));
       fflush(debug);
 
       SPREADSHEET[spread].maxRows < nr ? SPREADSHEET[spread].maxRows = nr : 0;
@@ -1172,8 +1132,7 @@ int OPJFile::ParseFormatNew() {
           if (IsBigEndian())
             SwapBytes(a);
           fprintf(debug, "%g ", a);
-          SPREADSHEET[spread].column[(current_col - 1)].odata.emplace_back(
-              originData(a));
+          SPREADSHEET[spread].column[(current_col - 1)].odata.emplace_back(originData(a));
         } else if ((data_type & 0x100) == 0x100) // Text&Numeric
         {
           CHECKED_FREAD(debug, &c, 1, 1, f);
@@ -1185,8 +1144,7 @@ int OPJFile::ParseFormatNew() {
             if (IsBigEndian())
               SwapBytes(a);
             fprintf(debug, "%g ", a);
-            SPREADSHEET[spread].column[(current_col - 1)].odata.emplace_back(
-                originData(a));
+            SPREADSHEET[spread].column[(current_col - 1)].odata.emplace_back(originData(a));
             CHECKED_FSEEK(debug, f, valuesize - 10, SEEK_CUR);
           } else // text
           {
@@ -1195,8 +1153,7 @@ int OPJFile::ParseFormatNew() {
             if (strchr(stmp,
                        0x0E)) // try find non-printable symbol - garbage test
               stmp[0] = '\0';
-            SPREADSHEET[spread].column[(current_col - 1)].odata.emplace_back(
-                originData(stmp));
+            SPREADSHEET[spread].column[(current_col - 1)].odata.emplace_back(originData(stmp));
             fprintf(debug, "%s ", stmp);
             delete[] stmp;
           }
@@ -1207,8 +1164,7 @@ int OPJFile::ParseFormatNew() {
           if (strchr(stmp,
                      0x0E)) // try find non-printable symbol - garbage test
             stmp[0] = '\0';
-          SPREADSHEET[spread].column[(current_col - 1)].odata.emplace_back(
-              originData(stmp));
+          SPREADSHEET[spread].column[(current_col - 1)].odata.emplace_back(originData(stmp));
           fprintf(debug, "%s ", stmp);
           delete[] stmp;
         }
@@ -1233,8 +1189,7 @@ int OPJFile::ParseFormatNew() {
     if (IsBigEndian())
       SwapBytes(col_found);
     CHECKED_FSEEK(debug, f, 1, SEEK_CUR); // skip '\n'
-    fprintf(debug, " [column found = %d/0x%X (@ 0x%X)]\n", col_found, col_found,
-            (unsigned int)ftell(f) - 5);
+    fprintf(debug, " [column found = %d/0x%X (@ 0x%X)]\n", col_found, col_found, (unsigned int)ftell(f) - 5);
     colpos = int(ftell(f));
     fflush(debug);
   }
@@ -1242,8 +1197,7 @@ int OPJFile::ParseFormatNew() {
   ////////////////////////////////////////////////////////////////////////////
   for (unsigned int i = 0; i < SPREADSHEET.size(); ++i)
     if (SPREADSHEET[i].bMultisheet) {
-      fprintf(debug, "   CONVERT SPREADSHEET \"%s\" to EXCEL\n",
-              SPREADSHEET[i].name.c_str());
+      fprintf(debug, "   CONVERT SPREADSHEET \"%s\" to EXCEL\n", SPREADSHEET[i].name.c_str());
       fflush(debug);
       convertSpreadToExcel(i);
       i--;
@@ -1378,12 +1332,9 @@ int OPJFile::ParseFormatNew() {
       stmp = new char[size - labellen + 1];
       CHECKED_FREAD(debug, stmp, size - labellen, 1, f);
       NOTE.back().text = stmp;
-      fprintf(debug, "NOTE %zu NAME: %s\n", NOTE.size(),
-              NOTE.back().name.c_str());
-      fprintf(debug, "NOTE %zu LABEL: %s\n", NOTE.size(),
-              NOTE.back().label.c_str());
-      fprintf(debug, "NOTE %zu TEXT:\n%s\n", NOTE.size(),
-              NOTE.back().text.c_str());
+      fprintf(debug, "NOTE %zu NAME: %s\n", NOTE.size(), NOTE.back().name.c_str());
+      fprintf(debug, "NOTE %zu LABEL: %s\n", NOTE.size(), NOTE.back().label.c_str());
+      fprintf(debug, "NOTE %zu TEXT:\n%s\n", NOTE.size(), NOTE.back().text.c_str());
       delete[] stmp;
       CHECKED_FSEEK(debug, f, 1, SEEK_CUR);
     }
@@ -1435,8 +1386,7 @@ void OPJFile::readSpreadInfo(FILE *f, int file_size, FILE *debug) {
   int LAYER = POS;
   {
     // LAYER section
-    LAYER += headersize + 0x1 + 0x5 /* length of block = 0x12D + '\n'*/ +
-             0x12D + 0x1;
+    LAYER += headersize + 0x1 + 0x5 /* length of block = 0x12D + '\n'*/ + 0x12D + 0x1;
     // now structure is next : section_header_size=0x6F(4 bytes) + '\n' +
     // section_header(0x6F bytes) + section_body_1_size(4 bytes) + '\n' +
     // section_body_1 + section_body_2_size(maybe=0)(4 bytes) + '\n' +
@@ -1455,8 +1405,7 @@ void OPJFile::readSpreadInfo(FILE *f, int file_size, FILE *debug) {
       CHECKED_FREAD(debug, &sec_name, 41, 1, f);
       sec_name[41] = '\0';
 
-      fprintf(debug, "       DEBUG SECTION NAME: %s (@ 0x%X)\n", sec_name,
-              LAYER + 0x46);
+      fprintf(debug, "       DEBUG SECTION NAME: %s (@ 0x%X)\n", sec_name, LAYER + 0x46);
       fflush(debug);
 
       // section_body_1_size
@@ -1468,9 +1417,7 @@ void OPJFile::readSpreadInfo(FILE *f, int file_size, FILE *debug) {
 
       if (INT_MAX == sec_size) {
         // this would end in an overflow and it's obviously wrong
-        fprintf(debug,
-                "Error: while reading spread info, found section size: %d\n",
-                sec_size);
+        fprintf(debug, "Error: while reading spread info, found section size: %d\n", sec_size);
         fflush(debug);
       }
 
@@ -1521,8 +1468,7 @@ void OPJFile::readSpreadInfo(FILE *f, int file_size, FILE *debug) {
   fflush(debug);
 
   /////////////// COLUMN Types ///////////////////////////////////////////
-  fprintf(debug, "     Spreadsheet has %zu columns\n",
-          SPREADSHEET[spread].column.size());
+  fprintf(debug, "     Spreadsheet has %zu columns\n", SPREADSHEET[spread].column.size());
 
   while (true) {
     LAYER += 0x5;
@@ -1580,10 +1526,8 @@ void OPJFile::readSpreadInfo(FILE *f, int file_size, FILE *debug) {
       case 0x29: // Text&Numeric - Engineering
       case 0x30: // Numeric    - Dec1,000
       case 0x39: // Text&Numeric - Dec1,000
-        SPREADSHEET[spread].column[col_index].value_type =
-            (c1 % 0x10 == 0x9) ? 6 : 0;
-        SPREADSHEET[spread].column[col_index].value_type_specification =
-            c1 / 0x10;
+        SPREADSHEET[spread].column[col_index].value_type = (c1 % 0x10 == 0x9) ? 6 : 0;
+        SPREADSHEET[spread].column[col_index].value_type_specification = c1 / 0x10;
         if (c2 >= 0x80) {
           SPREADSHEET[spread].column[col_index].significant_digits = c2 - 0x80;
           SPREADSHEET[spread].column[col_index].numeric_display_type = 2;
@@ -1594,13 +1538,11 @@ void OPJFile::readSpreadInfo(FILE *f, int file_size, FILE *debug) {
         break;
       case 0x02: // Time
         SPREADSHEET[spread].column[col_index].value_type = 3;
-        SPREADSHEET[spread].column[col_index].value_type_specification =
-            c2 - 0x80;
+        SPREADSHEET[spread].column[col_index].value_type_specification = c2 - 0x80;
         break;
       case 0x03: // Date
         SPREADSHEET[spread].column[col_index].value_type = 2;
-        SPREADSHEET[spread].column[col_index].value_type_specification =
-            c2 - 0x80;
+        SPREADSHEET[spread].column[col_index].value_type_specification = c2 - 0x80;
         break;
       case 0x31: // Text
         SPREADSHEET[spread].column[col_index].value_type = 1;
@@ -1620,8 +1562,7 @@ void OPJFile::readSpreadInfo(FILE *f, int file_size, FILE *debug) {
         break;
       }
       fprintf(debug, "       COLUMN \"%s\" type = %s(%d) (@ 0x%X)\n",
-              SPREADSHEET[spread].column[col_index].name.c_str(),
-              colTypeNames[type], c, LAYER + 0x11);
+              SPREADSHEET[spread].column[col_index].name.c_str(), colTypeNames[type], c, LAYER + 0x11);
       fflush(debug);
     }
     LAYER += 0x1E7 + 0x1;
@@ -1705,8 +1646,7 @@ void OPJFile::readExcelInfo(FILE *f, int file_size, FILE *debug) {
       CHECKED_FREAD(debug, &sec_name, 41, 1, f);
       sec_name[41] = '\0';
 
-      fprintf(debug, "       DEBUG SECTION NAME: %s (@ 0x%X)\n", sec_name,
-              LAYER + 0x46);
+      fprintf(debug, "       DEBUG SECTION NAME: %s (@ 0x%X)\n", sec_name, LAYER + 0x46);
       fflush(debug);
 
       // section_body_1_size
@@ -1719,9 +1659,7 @@ void OPJFile::readExcelInfo(FILE *f, int file_size, FILE *debug) {
       if (INT_MAX == sec_size) {
         // this would end in an overflow for new[] below and it's obviously
         // wrong
-        fprintf(debug,
-                "Error: while reading Excel info, found section size: %d\n",
-                sec_size);
+        fprintf(debug, "Error: while reading Excel info, found section size: %d\n", sec_size);
         fflush(debug);
       }
 
@@ -1768,8 +1706,7 @@ void OPJFile::readExcelInfo(FILE *f, int file_size, FILE *debug) {
     fflush(debug);
 
     /////////////// COLUMN Types ///////////////////////////////////////////
-    fprintf(debug, "     Excel sheet %d has %zu columns\n", isheet,
-            EXCEL[iexcel].sheet[isheet].column.size());
+    fprintf(debug, "     Excel sheet %d has %zu columns\n", isheet, EXCEL[iexcel].sheet[isheet].column.size());
 
     while (true) {
       LAYER += 0x5;
@@ -1829,37 +1766,23 @@ void OPJFile::readExcelInfo(FILE *f, int file_size, FILE *debug) {
         case 0x29: // Text&Numeric - Engineering
         case 0x30: // Numeric    - Dec1,000
         case 0x39: // Text&Numeric - Dec1,000
-          EXCEL[iexcel].sheet[isheet].column[col_index].value_type =
-              (c1 % 0x10 == 0x9) ? 6 : 0;
-          EXCEL[iexcel]
-              .sheet[isheet]
-              .column[col_index]
-              .value_type_specification = c1 / 0x10;
+          EXCEL[iexcel].sheet[isheet].column[col_index].value_type = (c1 % 0x10 == 0x9) ? 6 : 0;
+          EXCEL[iexcel].sheet[isheet].column[col_index].value_type_specification = c1 / 0x10;
           if (c2 >= 0x80) {
-            EXCEL[iexcel].sheet[isheet].column[col_index].significant_digits =
-                c2 - 0x80;
-            EXCEL[iexcel].sheet[isheet].column[col_index].numeric_display_type =
-                2;
+            EXCEL[iexcel].sheet[isheet].column[col_index].significant_digits = c2 - 0x80;
+            EXCEL[iexcel].sheet[isheet].column[col_index].numeric_display_type = 2;
           } else if (c2 > 0) {
-            EXCEL[iexcel].sheet[isheet].column[col_index].decimal_places =
-                c2 - 0x03;
-            EXCEL[iexcel].sheet[isheet].column[col_index].numeric_display_type =
-                1;
+            EXCEL[iexcel].sheet[isheet].column[col_index].decimal_places = c2 - 0x03;
+            EXCEL[iexcel].sheet[isheet].column[col_index].numeric_display_type = 1;
           }
           break;
         case 0x02: // Time
           EXCEL[iexcel].sheet[isheet].column[col_index].value_type = 3;
-          EXCEL[iexcel]
-              .sheet[isheet]
-              .column[col_index]
-              .value_type_specification = c2 - 0x80;
+          EXCEL[iexcel].sheet[isheet].column[col_index].value_type_specification = c2 - 0x80;
           break;
         case 0x03: // Date
           EXCEL[iexcel].sheet[isheet].column[col_index].value_type = 2;
-          EXCEL[iexcel]
-              .sheet[isheet]
-              .column[col_index]
-              .value_type_specification = c2 - 0x80;
+          EXCEL[iexcel].sheet[isheet].column[col_index].value_type_specification = c2 - 0x80;
           break;
         case 0x31: // Text
           EXCEL[iexcel].sheet[isheet].column[col_index].value_type = 1;
@@ -1867,26 +1790,19 @@ void OPJFile::readExcelInfo(FILE *f, int file_size, FILE *debug) {
         case 0x4: // Month
         case 0x34:
           EXCEL[iexcel].sheet[isheet].column[col_index].value_type = 4;
-          EXCEL[iexcel]
-              .sheet[isheet]
-              .column[col_index]
-              .value_type_specification = c2;
+          EXCEL[iexcel].sheet[isheet].column[col_index].value_type_specification = c2;
           break;
         case 0x5: // Day
         case 0x35:
           EXCEL[iexcel].sheet[isheet].column[col_index].value_type = 5;
-          EXCEL[iexcel]
-              .sheet[isheet]
-              .column[col_index]
-              .value_type_specification = c2;
+          EXCEL[iexcel].sheet[isheet].column[col_index].value_type_specification = c2;
           break;
         default: // Text
           EXCEL[iexcel].sheet[isheet].column[col_index].value_type = 1;
           break;
         }
         fprintf(debug, "       COLUMN \"%s\" type = %s(%d) (@ 0x%X)\n",
-                EXCEL[iexcel].sheet[isheet].column[col_index].name.c_str(),
-                colTypeNames[type], c, LAYER + 0x11);
+                EXCEL[iexcel].sheet[isheet].column[col_index].name.c_str(), colTypeNames[type], c, LAYER + 0x11);
         fflush(debug);
       }
       LAYER += 0x1E7 + 0x1;
@@ -2011,9 +1927,7 @@ void OPJFile::readMatrixInfo(FILE *f, int file_size, FILE *debug) {
 
     if (INT_MAX == sec_size) {
       // this would end in an overflow for new[] below and it's obviously wrong
-      fprintf(debug,
-              "Error: while reading matrix info, found section size: %d\n",
-              sec_size);
+      fprintf(debug, "Error: while reading matrix info, found section size: %d\n", sec_size);
       fflush(debug);
     }
 
@@ -2376,35 +2290,30 @@ void OPJFile::readGraphInfo(FILE *f, int file_size, FILE *debug) {
         CHECKED_FREAD(debug, &stmp, sec_size, 1, f);
         GRAPH.back().layer.back().xAxis.pos = Bottom;
         GRAPH.back().layer.back().xAxis.label =
-            text(stmp, r, color, fontsize, rotation / 10, tab,
-                 (border >= 0x80 ? border - 0x80 : None), attach);
+            text(stmp, r, color, fontsize, rotation / 10, tab, (border >= 0x80 ? border - 0x80 : None), attach);
       } else if (0 == strcmp(sec_name, "XT")) {
         stmp[sec_size] = '\0';
         CHECKED_FREAD(debug, &stmp, sec_size, 1, f);
         GRAPH.back().layer.back().xAxis.pos = Top;
         GRAPH.back().layer.back().xAxis.label =
-            text(stmp, r, color, fontsize, rotation / 10, tab,
-                 (border >= 0x80 ? border - 0x80 : None), attach);
+            text(stmp, r, color, fontsize, rotation / 10, tab, (border >= 0x80 ? border - 0x80 : None), attach);
       } else if (0 == strcmp(sec_name, "YL")) {
         stmp[sec_size] = '\0';
         CHECKED_FREAD(debug, &stmp, sec_size, 1, f);
         GRAPH.back().layer.back().yAxis.pos = Left;
         GRAPH.back().layer.back().yAxis.label =
-            text(stmp, r, color, fontsize, rotation / 10, tab,
-                 (border >= 0x80 ? border - 0x80 : None), attach);
+            text(stmp, r, color, fontsize, rotation / 10, tab, (border >= 0x80 ? border - 0x80 : None), attach);
       } else if (0 == strcmp(sec_name, "YR")) {
         stmp[sec_size] = '\0';
         CHECKED_FREAD(debug, &stmp, sec_size, 1, f);
         GRAPH.back().layer.back().yAxis.pos = Right;
         GRAPH.back().layer.back().yAxis.label =
-            text(stmp, r, color, fontsize, rotation / 10, tab,
-                 (border >= 0x80 ? border - 0x80 : None), attach);
+            text(stmp, r, color, fontsize, rotation / 10, tab, (border >= 0x80 ? border - 0x80 : None), attach);
       } else if (0 == strcmp(sec_name, "Legend")) {
         stmp[sec_size] = '\0';
         CHECKED_FREAD(debug, &stmp, sec_size, 1, f);
         GRAPH.back().layer.back().legend =
-            text(stmp, r, color, fontsize, rotation / 10, tab,
-                 (border >= 0x80 ? border - 0x80 : None), attach);
+            text(stmp, r, color, fontsize, rotation / 10, tab, (border >= 0x80 ? border - 0x80 : None), attach);
       } else if (0 == strcmp(sec_name, "__BCO2")) // histogram
       {
         double d;
@@ -2455,17 +2364,12 @@ void OPJFile::readGraphInfo(FILE *f, int file_size, FILE *debug) {
         GRAPH.back().layer.back().bitmaps.back().left = bitmap_left;
         GRAPH.back().layer.back().bitmaps.back().top = bitmap_top;
         GRAPH.back().layer.back().bitmaps.back().width =
-            (GRAPH.back().layer.back().xAxis.max -
-             GRAPH.back().layer.back().xAxis.min) *
-            bitmap_width / 10000;
+            (GRAPH.back().layer.back().xAxis.max - GRAPH.back().layer.back().xAxis.min) * bitmap_width / 10000;
         GRAPH.back().layer.back().bitmaps.back().height =
-            (GRAPH.back().layer.back().yAxis.max -
-             GRAPH.back().layer.back().yAxis.min) *
-            bitmap_height / 10000;
+            (GRAPH.back().layer.back().yAxis.max - GRAPH.back().layer.back().yAxis.min) * bitmap_height / 10000;
         GRAPH.back().layer.back().bitmaps.back().attach = attach;
         GRAPH.back().layer.back().bitmaps.back().size = filesize;
-        GRAPH.back().layer.back().bitmaps.back().data =
-            new unsigned char[filesize];
+        GRAPH.back().layer.back().bitmaps.back().data = new unsigned char[filesize];
         unsigned char *data = GRAPH.back().layer.back().bitmaps.back().data;
         // add Bitmap header
         memcpy(data, "BM", 2);
@@ -2522,10 +2426,8 @@ void OPJFile::readGraphInfo(FILE *f, int file_size, FILE *debug) {
         col = findDataByIndex(w - 1);
         short nColY = w;
         if (col.size() > 0) {
-          fprintf(debug, "     GRAPH %zu layer %zu curve %zu Y : %s.%s\n",
-                  GRAPH.size(), GRAPH.back().layer.size(),
-                  GRAPH.back().layer.back().curve.size(), col[1].c_str(),
-                  col[0].c_str());
+          fprintf(debug, "     GRAPH %zu layer %zu curve %zu Y : %s.%s\n", GRAPH.size(), GRAPH.back().layer.size(),
+                  GRAPH.back().layer.back().curve.size(), col[1].c_str(), col[0].c_str());
           fflush(debug);
           curve.yColName = col[0];
           curve.dataName = col[1];
@@ -2537,15 +2439,12 @@ void OPJFile::readGraphInfo(FILE *f, int file_size, FILE *debug) {
           SwapBytes(w);
         col = findDataByIndex(w - 1);
         if (col.size() > 0) {
-          fprintf(debug, "     GRAPH %zu layer %zu curve %zu X : %s.%s\n",
-                  GRAPH.size(), GRAPH.back().layer.size(),
-                  GRAPH.back().layer.back().curve.size(), col[1].c_str(),
-                  col[0].c_str());
+          fprintf(debug, "     GRAPH %zu layer %zu curve %zu X : %s.%s\n", GRAPH.size(), GRAPH.back().layer.size(),
+                  GRAPH.back().layer.back().curve.size(), col[1].c_str(), col[0].c_str());
           fflush(debug);
           curve.xColName = col[0];
           if (curve.dataName != col[1])
-            fprintf(debug, "     GRAPH %zu X and Y from different tables\n",
-                    GRAPH.size());
+            fprintf(debug, "     GRAPH %zu X and Y from different tables\n", GRAPH.size());
         }
 
         CHECKED_FSEEK(debug, f, LAYER + 0x4C, SEEK_SET);
@@ -2800,17 +2699,13 @@ void OPJFile::readGraphInfo(FILE *f, int file_size, FILE *debug) {
         if (h == 2) {
           GRAPH.back().layer.back().xAxisBreak.minor_ticks_before =
               (unsigned char)(GRAPH.back().layer.back().xAxis.minorTicks);
-          GRAPH.back().layer.back().xAxisBreak.scale_increment_before =
-              GRAPH.back().layer.back().xAxis.step;
-          readGraphAxisBreakInfo(GRAPH.back().layer.back().xAxisBreak, f, debug,
-                                 LAYER);
+          GRAPH.back().layer.back().xAxisBreak.scale_increment_before = GRAPH.back().layer.back().xAxis.step;
+          readGraphAxisBreakInfo(GRAPH.back().layer.back().xAxisBreak, f, debug, LAYER);
         } else if (h == 4) {
           GRAPH.back().layer.back().yAxisBreak.minor_ticks_before =
               (unsigned char)(GRAPH.back().layer.back().yAxis.minorTicks);
-          GRAPH.back().layer.back().yAxisBreak.scale_increment_before =
-              GRAPH.back().layer.back().yAxis.step;
-          readGraphAxisBreakInfo(GRAPH.back().layer.back().yAxisBreak, f, debug,
-                                 LAYER);
+          GRAPH.back().layer.back().yAxisBreak.scale_increment_before = GRAPH.back().layer.back().yAxis.step;
+          readGraphAxisBreakInfo(GRAPH.back().layer.back().yAxisBreak, f, debug, LAYER);
         }
         LAYER += 0x2D + 0x1;
       } else
@@ -2819,65 +2714,53 @@ void OPJFile::readGraphInfo(FILE *f, int file_size, FILE *debug) {
     LAYER += 0x5;
 
     LAYER += 0x5;
-    readGraphGridInfo(GRAPH.back().layer.back().xAxis.minorGrid, f, debug,
-                      LAYER);
+    readGraphGridInfo(GRAPH.back().layer.back().xAxis.minorGrid, f, debug, LAYER);
     LAYER += 0x1E7 + 1;
 
     LAYER += 0x5;
-    readGraphGridInfo(GRAPH.back().layer.back().xAxis.majorGrid, f, debug,
-                      LAYER);
+    readGraphGridInfo(GRAPH.back().layer.back().xAxis.majorGrid, f, debug, LAYER);
     LAYER += 0x1E7 + 1;
 
     LAYER += 0x5;
-    readGraphAxisTickLabelsInfo(GRAPH.back().layer.back().xAxis.tickAxis[0],
-                                debug, f, LAYER);
+    readGraphAxisTickLabelsInfo(GRAPH.back().layer.back().xAxis.tickAxis[0], debug, f, LAYER);
     LAYER += 0x1E7 + 1;
 
     LAYER += 0x5;
-    readGraphAxisFormatInfo(GRAPH.back().layer.back().xAxis.formatAxis[0], f,
-                            debug, LAYER);
+    readGraphAxisFormatInfo(GRAPH.back().layer.back().xAxis.formatAxis[0], f, debug, LAYER);
     LAYER += 0x1E7 + 1;
 
     LAYER += 0x5;
-    readGraphAxisTickLabelsInfo(GRAPH.back().layer.back().xAxis.tickAxis[1],
-                                debug, f, LAYER);
+    readGraphAxisTickLabelsInfo(GRAPH.back().layer.back().xAxis.tickAxis[1], debug, f, LAYER);
     LAYER += 0x1E7 + 1;
 
     LAYER += 0x5;
-    readGraphAxisFormatInfo(GRAPH.back().layer.back().xAxis.formatAxis[1],
-                            debug, f, LAYER);
+    readGraphAxisFormatInfo(GRAPH.back().layer.back().xAxis.formatAxis[1], debug, f, LAYER);
     LAYER += 0x1E7 + 1;
 
     LAYER += 0x5;
 
     LAYER += 0x5;
-    readGraphGridInfo(GRAPH.back().layer.back().yAxis.minorGrid, f, debug,
-                      LAYER);
+    readGraphGridInfo(GRAPH.back().layer.back().yAxis.minorGrid, f, debug, LAYER);
     LAYER += 0x1E7 + 1;
 
     LAYER += 0x5;
-    readGraphGridInfo(GRAPH.back().layer.back().yAxis.majorGrid, f, debug,
-                      LAYER);
+    readGraphGridInfo(GRAPH.back().layer.back().yAxis.majorGrid, f, debug, LAYER);
     LAYER += 0x1E7 + 1;
 
     LAYER += 0x5;
-    readGraphAxisTickLabelsInfo(GRAPH.back().layer.back().yAxis.tickAxis[0], f,
-                                debug, LAYER);
+    readGraphAxisTickLabelsInfo(GRAPH.back().layer.back().yAxis.tickAxis[0], f, debug, LAYER);
     LAYER += 0x1E7 + 1;
 
     LAYER += 0x5;
-    readGraphAxisFormatInfo(GRAPH.back().layer.back().yAxis.formatAxis[0], f,
-                            debug, LAYER);
+    readGraphAxisFormatInfo(GRAPH.back().layer.back().yAxis.formatAxis[0], f, debug, LAYER);
     LAYER += 0x1E7 + 1;
 
     LAYER += 0x5;
-    readGraphAxisTickLabelsInfo(GRAPH.back().layer.back().yAxis.tickAxis[1], f,
-                                debug, LAYER);
+    readGraphAxisTickLabelsInfo(GRAPH.back().layer.back().yAxis.tickAxis[1], f, debug, LAYER);
     LAYER += 0x1E7 + 1;
 
     LAYER += 0x5;
-    readGraphAxisFormatInfo(GRAPH.back().layer.back().yAxis.formatAxis[1], f,
-                            debug, LAYER);
+    readGraphAxisFormatInfo(GRAPH.back().layer.back().yAxis.formatAxis[1], f, debug, LAYER);
     LAYER += 0x1E7 + 1;
 
     LAYER += 0x2 * 0x5 + 0x1ED * 0x6;
@@ -3001,8 +2884,7 @@ void OPJFile::skipObjectInfo(FILE *f, FILE *fdebug) {
   CHECKED_FSEEK(fdebug, f, POS, SEEK_SET);
 }
 
-void OPJFile::readGraphGridInfo(graphGrid &grid, FILE *f, FILE *debug,
-                                int pos) {
+void OPJFile::readGraphGridInfo(graphGrid &grid, FILE *f, FILE *debug, int pos) {
   unsigned char h;
   short w;
   CHECKED_FSEEK(debug, f, pos + 0x26, SEEK_SET);
@@ -3024,8 +2906,7 @@ void OPJFile::readGraphGridInfo(graphGrid &grid, FILE *f, FILE *debug,
   grid.width = (double)w / 500.0;
 }
 
-void OPJFile::readGraphAxisBreakInfo(graphAxisBreak &axis_break, FILE *f,
-                                     FILE *debug, int pos) {
+void OPJFile::readGraphAxisBreakInfo(graphAxisBreak &axis_break, FILE *f, FILE *debug, int pos) {
   axis_break.show = true;
 
   CHECKED_FSEEK(debug, f, pos + 0x0B, SEEK_SET);
@@ -3060,8 +2941,7 @@ void OPJFile::readGraphAxisBreakInfo(graphAxisBreak &axis_break, FILE *f,
   CHECKED_FREAD(debug, &axis_break.minor_ticks_after, 1, 1, f);
 }
 
-void OPJFile::readGraphAxisFormatInfo(graphAxisFormat &format, FILE *f,
-                                      FILE *debug, int pos) {
+void OPJFile::readGraphAxisFormatInfo(graphAxisFormat &format, FILE *f, FILE *debug, int pos) {
   unsigned char h;
   short w;
   double p;
@@ -3120,8 +3000,7 @@ void OPJFile::readGraphAxisFormatInfo(graphAxisFormat &format, FILE *f,
   }
 }
 
-void OPJFile::readGraphAxisTickLabelsInfo(graphAxisTick &tick, FILE *f,
-                                          FILE *debug, int pos) {
+void OPJFile::readGraphAxisTickLabelsInfo(graphAxisTick &tick, FILE *f, FILE *debug, int pos) {
   unsigned char h;
   unsigned char h1;
   short w;
@@ -3239,8 +3118,7 @@ void OPJFile::readProjectTree(FILE *f, FILE *debug) {
   fflush(debug);
 }
 
-void OPJFile::readProjectTreeFolder(FILE *f, FILE *debug,
-                                    tree<projectNode>::iterator parent) {
+void OPJFile::readProjectTreeFolder(FILE *f, FILE *debug, tree<projectNode>::iterator parent) {
   int POS = int(ftell(f));
 
   if (POS < 0)
@@ -3299,8 +3177,8 @@ void OPJFile::readProjectTreeFolder(FILE *f, FILE *debug,
 
   CHECKED_FREAD(debug, name, namesize, 1, f);
 
-  tree<projectNode>::iterator current_folder = projectTree.append_child(
-      parent, projectNode(name, 1, creation_date, modification_date));
+  tree<projectNode>::iterator current_folder =
+      projectTree.append_child(parent, projectNode(name, 1, creation_date, modification_date));
   POS += namesize + 1 + 5 + 5;
 
   int objectcount;
@@ -3331,11 +3209,9 @@ void OPJFile::readProjectTreeFolder(FILE *f, FILE *debug,
     if (IsBigEndian())
       SwapBytes(objectID);
     if (c == 0x10) {
-      projectTree.append_child(current_folder,
-                               projectNode(NOTE[objectID].name, 0));
+      projectTree.append_child(current_folder, projectNode(NOTE[objectID].name, 0));
     } else
-      projectTree.append_child(current_folder,
-                               projectNode(findObjectByIndex(objectID), 0));
+      projectTree.append_child(current_folder, projectNode(findObjectByIndex(objectID), 0));
     POS += 8 + 1 + 5 + 5;
   }
 
@@ -3353,8 +3229,7 @@ void OPJFile::readProjectTreeFolder(FILE *f, FILE *debug,
   delete[] name;
 }
 
-void OPJFile::readWindowProperties(originWindow &window, FILE *f, FILE *debug,
-                                   int POS, int headersize) {
+void OPJFile::readWindowProperties(originWindow &window, FILE *f, FILE *debug, int POS, int headersize) {
   window.objectID = objectIndex;
   objectIndex++;
 
@@ -3384,8 +3259,7 @@ void OPJFile::readWindowProperties(originWindow &window, FILE *f, FILE *debug,
 
   window.bHidden = (c & 0x08);
   if (window.bHidden) {
-    fprintf(debug, "     WINDOW %d NAME : %s is hidden\n", objectIndex,
-            window.name.c_str());
+    fprintf(debug, "     WINDOW %d NAME : %s is hidden\n", objectIndex, window.name.c_str());
     fflush(debug);
   }
 
@@ -3415,8 +3289,7 @@ void OPJFile::readWindowProperties(originWindow &window, FILE *f, FILE *debug,
       delete[] label;
     } else
       window.label = "";
-    fprintf(debug, "     WINDOW %d LABEL: %s\n", objectIndex,
-            window.label.c_str());
+    fprintf(debug, "     WINDOW %d LABEL: %s\n", objectIndex, window.label.c_str());
     fflush(debug);
   }
 }

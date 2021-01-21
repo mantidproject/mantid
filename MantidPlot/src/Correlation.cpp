@@ -36,16 +36,14 @@
 
 #include <gsl/gsl_fft_halfcomplex.h>
 
-Correlation::Correlation(ApplicationWindow *parent, Table *t,
-                         const QString &colName1, const QString &colName2,
+Correlation::Correlation(ApplicationWindow *parent, Table *t, const QString &colName1, const QString &colName2,
                          int startRow, int endRow)
     : Filter(parent, t) {
   setObjectName(tr("Correlation"));
   setDataFromTable(t, colName1, colName2, startRow, endRow);
 }
 
-bool Correlation::setDataFromTable(Table *t, const QString &colName1,
-                                   const QString &colName2, int startRow,
+bool Correlation::setDataFromTable(Table *t, const QString &colName1, const QString &colName2, int startRow,
                                    int endRow) {
   if (!t)
     return false;
@@ -56,14 +54,12 @@ bool Correlation::setDataFromTable(Table *t, const QString &colName1,
   int col2 = d_table->colIndex(colName2);
 
   if (col1 < 0) {
-    QMessageBox::warning(dynamic_cast<ApplicationWindow *>(parent()),
-                         tr("MantidPlot") + " - " + tr("Error"),
+    QMessageBox::warning(dynamic_cast<ApplicationWindow *>(parent()), tr("MantidPlot") + " - " + tr("Error"),
                          tr("The data set %1 does not exist!").arg(colName1));
     d_init_err = true;
     return false;
   } else if (col2 < 0) {
-    QMessageBox::warning(dynamic_cast<ApplicationWindow *>(parent()),
-                         tr("MantidPlot") + " - " + tr("Error"),
+    QMessageBox::warning(dynamic_cast<ApplicationWindow *>(parent()), tr("MantidPlot") + " - " + tr("Error"),
                          tr("The data set %1 does not exist!").arg(colName2));
     d_init_err = true;
     return false;
@@ -101,8 +97,7 @@ bool Correlation::setDataFromTable(Table *t, const QString &colName1,
       d_y[i] = d_table->cell(j, col2);
     }
   } else {
-    QMessageBox::critical(dynamic_cast<ApplicationWindow *>(parent()),
-                          tr("MantidPlot") + " - " + tr("Error"),
+    QMessageBox::critical(dynamic_cast<ApplicationWindow *>(parent()), tr("MantidPlot") + " - " + tr("Error"),
                           tr("Could not allocate memory, operation aborted!"));
     d_init_err = true;
     d_n = 0;
@@ -113,10 +108,8 @@ bool Correlation::setDataFromTable(Table *t, const QString &colName1,
 
 void Correlation::output() {
   // calculate the FFTs of the two functions
-  if (gsl_fft_real_radix2_transform(d_x, 1, d_n) == 0 &&
-      gsl_fft_real_radix2_transform(d_y, 1, d_n) == 0) {
-    for (int i = 0; i < d_n / 2;
-         i++) { // multiply the FFT by its complex conjugate
+  if (gsl_fft_real_radix2_transform(d_x, 1, d_n) == 0 && gsl_fft_real_radix2_transform(d_y, 1, d_n) == 0) {
+    for (int i = 0; i < d_n / 2; i++) { // multiply the FFT by its complex conjugate
       if (i == 0 || i == (d_n / 2) - 1)
         d_x[i] *= d_x[i];
       else {
@@ -128,8 +121,7 @@ void Correlation::output() {
       }
     }
   } else {
-    QMessageBox::warning(dynamic_cast<ApplicationWindow *>(parent()),
-                         tr("MantidPlot") + " - " + tr("Error"),
+    QMessageBox::warning(dynamic_cast<ApplicationWindow *>(parent()), tr("MantidPlot") + " - " + tr("Error"),
                          tr("Error in GSL forward FFT operation!"));
     return;
   }
@@ -186,8 +178,7 @@ void Correlation::addResultCurve() {
     if (!d_output_graph)
       d_output_graph = createOutputGraph()->activeGraph();
 
-    DataCurve *c =
-        new DataCurve(d_table, d_table->colName(cols), d_table->colName(cols2));
+    DataCurve *c = new DataCurve(d_table, d_table->colName(cols), d_table->colName(cols2));
     c->setData(x_temp.data(), y_temp.data(),
                d_n); // c->setData(x_temp, y_temp, d_n);
     c->setPen(QPen(ColorBox::color(d_curveColorIndex), 1));

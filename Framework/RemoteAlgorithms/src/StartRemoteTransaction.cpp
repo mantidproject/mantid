@@ -26,37 +26,29 @@ using namespace Mantid::Kernel;
 
 void StartRemoteTransaction::init() {
   // Compute Resources
-  std::vector<std::string> computes = Mantid::Kernel::ConfigService::Instance()
-                                          .getFacility()
-                                          .computeResources();
-  declareProperty("ComputeResource", "",
-                  std::make_shared<StringListValidator>(computes),
+  std::vector<std::string> computes = Mantid::Kernel::ConfigService::Instance().getFacility().computeResources();
+  declareProperty("ComputeResource", "", std::make_shared<StringListValidator>(computes),
                   "The name of the remote computer where the new transaction "
                   "will be created",
                   Direction::Input);
 
   // output property
-  declareProperty("TransactionID", std::string(""),
-                  "The ID of the new transaction", Direction::Output);
+  declareProperty("TransactionID", std::string(""), "The ID of the new transaction", Direction::Output);
 }
 
 void StartRemoteTransaction::exec() {
   std::shared_ptr<RemoteJobManager> jobManager =
-      Mantid::Kernel::ConfigService::Instance()
-          .getFacility()
-          .getRemoteJobManager(getPropertyValue("ComputeResource"));
+      Mantid::Kernel::ConfigService::Instance().getFacility().getRemoteJobManager(getPropertyValue("ComputeResource"));
 
   // jobManager is a std::shared_ptr...
   if (!jobManager) {
     // Requested compute resource doesn't exist
     // TODO: should we create our own exception class for this??
     throw(std::runtime_error(
-        std::string("Unable to create a compute resource named " +
-                    getPropertyValue("ComputeResource"))));
+        std::string("Unable to create a compute resource named " + getPropertyValue("ComputeResource"))));
   }
 
-  std::istream &respStream =
-      jobManager->httpGet("/transaction", "Action=Start");
+  std::istream &respStream = jobManager->httpGet("/transaction", "Action=Start");
   JSONObject resp;
   initFromStream(resp, respStream);
 

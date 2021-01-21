@@ -41,8 +41,7 @@ public:
     cansas1d.setPropertyValue("OutputWorkspace", outputSpace);
 
     std::string result;
-    TS_ASSERT_THROWS_NOTHING(result =
-                                 cansas1d.getPropertyValue("OutputWorkspace"))
+    TS_ASSERT_THROWS_NOTHING(result = cansas1d.getPropertyValue("OutputWorkspace"))
     TS_ASSERT(result == outputSpace);
 
     // Should now throw nothing
@@ -51,14 +50,10 @@ public:
 
     // Now need to test the resultant workspace, first retrieve it
     Mantid::API::Workspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws =
-            Mantid::API::AnalysisDataService::Instance().retrieve(outputSpace));
-    Mantid::DataObjects::Workspace2D_sptr ws2d =
-        std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(ws);
+    TS_ASSERT_THROWS_NOTHING(ws = Mantid::API::AnalysisDataService::Instance().retrieve(outputSpace));
+    Mantid::DataObjects::Workspace2D_sptr ws2d = std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(ws);
     // Check if filename is saved
-    TS_ASSERT_EQUALS(cansas1d.getPropertyValue("Filename"),
-                     ws2d->run().getProperty("Filename")->value());
+    TS_ASSERT_EQUALS(cansas1d.getPropertyValue("Filename"), ws2d->run().getProperty("Filename")->value());
 
     Mantid::Kernel::Property *logP = ws2d->run().getLogData("run_number");
     TS_ASSERT_EQUALS(logP->value(), "LOQ48097")
@@ -111,19 +106,16 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // Now need to test the resultant workspace, first retrieve it
-    Workspace_sptr ws =
-        Mantid::API::AnalysisDataService::Instance().retrieve(outputSpace);
+    Workspace_sptr ws = Mantid::API::AnalysisDataService::Instance().retrieve(outputSpace);
     WorkspaceGroup_sptr group = std::dynamic_pointer_cast<WorkspaceGroup>(ws);
     TS_ASSERT(group)
     vector<string> wNames = group->getNames();
 
-    TS_ASSERT_EQUALS(
-        wNames.size(),
-        2) // change this and the lines below when group workspace names change
+    TS_ASSERT_EQUALS(wNames.size(),
+                     2) // change this and the lines below when group workspace names change
 
     ws = Mantid::API::AnalysisDataService::Instance().retrieve(wNames[0]);
-    Mantid::DataObjects::Workspace2D_sptr ws2d =
-        std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(ws);
+    Mantid::DataObjects::Workspace2D_sptr ws2d = std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(ws);
     TS_ASSERT(ws2d)
 
     Run run = ws2d->run();
@@ -183,11 +175,8 @@ public:
 
     // Assert
     Mantid::API::Workspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws =
-            Mantid::API::AnalysisDataService::Instance().retrieve(outputSpace));
-    Mantid::DataObjects::Workspace2D_sptr ws2d =
-        std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(ws);
+    TS_ASSERT_THROWS_NOTHING(ws = Mantid::API::AnalysisDataService::Instance().retrieve(outputSpace));
+    Mantid::DataObjects::Workspace2D_sptr ws2d = std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(ws);
 
     TS_ASSERT_EQUALS(ws2d->getNumberHistograms(), 1);
 
@@ -223,17 +212,14 @@ const double LoadCanSAS1dTest::xs99631[] = {0.0109, 0.151, 0.2949};
 const double LoadCanSAS1dTest::ys99631[] = {5.44952, 0.15223, 0.14831};
 const double LoadCanSAS1dTest::es99631[] = {0.0588457, 0.0043596, 0.335294};
 
-const double LoadCanSAS1dTest::xs808[] = {
-    0.646222, 0.659146, 0.672329, 0.685775, 0.699491, 0.713481,
-    0.72775,  0.742305, 0.757152, 0.772295, 0.78774,  0.803495,
-    0.819565, 0.835956, 0.852676, 0.869729, 0.887124, 0.904866,
-    0.922963, 0.941423, 0.960251, 0.979456, 0.994577};
-const double LoadCanSAS1dTest::ys808[] = {
-    5.59202, 5.27307, 4.78682, 4.66635, 4.82897, 5.05591, 4.58635, 4.15975,
-    4.01298, 4.1226,  4.04966, 3.90263, 3.4256,  3.29929, 3.17003, 2.67487,
-    2.41979, 2.31446, 2.18734, 2.11788, 2.03716, 2.03615, 2.01552};
-const double LoadCanSAS1dTest::es808[] = {
-    0.219459,  0.203702,  0.186871,  0.178849,  0.172545,  0.17094,
-    0.153269,  0.141219,  0.13289,   0.130725,  0.123281,  0.11705,
-    0.104102,  0.0991949, 0.0933884, 0.082556,  0.0757769, 0.0715806,
-    0.0674828, 0.064006,  0.0600373, 0.0581645, 0.0766164};
+const double LoadCanSAS1dTest::xs808[] = {0.646222, 0.659146, 0.672329, 0.685775, 0.699491, 0.713481,
+                                          0.72775,  0.742305, 0.757152, 0.772295, 0.78774,  0.803495,
+                                          0.819565, 0.835956, 0.852676, 0.869729, 0.887124, 0.904866,
+                                          0.922963, 0.941423, 0.960251, 0.979456, 0.994577};
+const double LoadCanSAS1dTest::ys808[] = {5.59202, 5.27307, 4.78682, 4.66635, 4.82897, 5.05591, 4.58635, 4.15975,
+                                          4.01298, 4.1226,  4.04966, 3.90263, 3.4256,  3.29929, 3.17003, 2.67487,
+                                          2.41979, 2.31446, 2.18734, 2.11788, 2.03716, 2.03615, 2.01552};
+const double LoadCanSAS1dTest::es808[] = {0.219459,  0.203702,  0.186871,  0.178849,  0.172545,  0.17094,
+                                          0.153269,  0.141219,  0.13289,   0.130725,  0.123281,  0.11705,
+                                          0.104102,  0.0991949, 0.0933884, 0.082556,  0.0757769, 0.0715806,
+                                          0.0674828, 0.064006,  0.0600373, 0.0581645, 0.0766164};

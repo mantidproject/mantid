@@ -30,21 +30,18 @@ using MaxentSpaceComplex_sptr = std::shared_ptr<MaxentSpaceComplex>;
   The concatenated format of the data is chosen to enable existing code
   to calculate its chi squared.
 */
-class MANTID_ALGORITHMS_DLL MaxentTransformMultiFourier
-    : public MaxentTransformFourier {
+class MANTID_ALGORITHMS_DLL MaxentTransformMultiFourier : public MaxentTransformFourier {
 public:
   // Deleted default constructor
   MaxentTransformMultiFourier() = delete;
   // Constructor
-  MaxentTransformMultiFourier(const MaxentSpaceComplex_sptr &dataSpace,
-                              MaxentSpace_sptr imageSpace, size_t numSpec);
+  MaxentTransformMultiFourier(const MaxentSpaceComplex_sptr &dataSpace, MaxentSpace_sptr imageSpace, size_t numSpec);
   // Transfoms form image space to data space
   std::vector<double> imageToData(const std::vector<double> &image) override;
   // Transforms from data space to image space
   std::vector<double> dataToImage(const std::vector<double> &data) override;
   // Set the adjustments to be applie to data when converted from image
-  void setAdjustments(const std::vector<double> &linAdj,
-                      const std::vector<double> &constAdj);
+  void setAdjustments(const std::vector<double> &linAdj, const std::vector<double> &constAdj);
 
 private:
   MaxentSpace_sptr m_dataSpace;

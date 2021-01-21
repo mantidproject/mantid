@@ -23,8 +23,7 @@ the field data and then processing the xml contained within.
 */
 class DLLExport vtkDataSetToWsLocation {
 public:
-  vtkDataSetToWsLocation &
-  operator=(const vtkDataSetToWsLocation &other) = delete;
+  vtkDataSetToWsLocation &operator=(const vtkDataSetToWsLocation &other) = delete;
   vtkDataSetToWsLocation(const vtkDataSetToWsLocation &other) = delete;
   static std::string exec(vtkDataSet *dataSet);
   vtkDataSetToWsLocation(vtkDataSet *dataSet);

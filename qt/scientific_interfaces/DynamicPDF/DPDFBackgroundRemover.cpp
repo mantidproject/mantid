@@ -38,9 +38,8 @@ DECLARE_SUBWINDOW(BackgroundRemover)
 BackgroundRemover::BackgroundRemover(QWidget *parent)
     : UserSubWindow{parent}, m_sliceSelector(), m_inputDataControl(),
       m_displayControl(), m_fitControl{nullptr}, m_fourierTransform{nullptr} {
-  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      Mantid::Kernel::FeatureType::Interface,
-      {"DynamicPDF", "BackgroundRemover"}, false);
+  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(Mantid::Kernel::FeatureType::Interface,
+                                                                {"DynamicPDF", "BackgroundRemover"}, false);
 }
 
 /**
@@ -63,8 +62,7 @@ void BackgroundRemover::initLayout() {
   sizes.push_back(200);
   m_uiForm.splitterModelResiduals->setSizes(sizes);
   // user wants to load new slices
-  connect(m_uiForm.pushButtonSummonSliceSelector, SIGNAL(clicked()), this,
-          SLOT(summonSliceSelector()));
+  connect(m_uiForm.pushButtonSummonSliceSelector, SIGNAL(clicked()), this, SLOT(summonSliceSelector()));
   // user wants help
   connect(m_uiForm.pushButtonHelp, SIGNAL(clicked()), this, SLOT(showHelp()));
 }
@@ -77,8 +75,7 @@ void BackgroundRemover::initLayout() {
  * @brief Opens the Qt help page for the interface
  */
 void BackgroundRemover::showHelp() {
-  MantidQt::API::HelpWindow::showCustomInterface(
-      nullptr, QString("Dynamic PDF Background Remover"));
+  MantidQt::API::HelpWindow::showCustomInterface(nullptr, QString("Dynamic PDF Background Remover"));
 }
 
 /**
@@ -93,8 +90,7 @@ void BackgroundRemover::summonSliceSelector() {
     // Initialize the InputDataControl object
     m_inputDataControl = std::make_unique<InputDataControl>();
     // Initialize the DisplayControl object
-    m_displayControl = std::make_unique<DisplayControl>(
-        m_inputDataControl.get(), m_uiForm.displayModelFit);
+    m_displayControl = std::make_unique<DisplayControl>(m_inputDataControl.get(), m_uiForm.displayModelFit);
     m_displayControl->init();
     // Initialize the FitControl object
     m_fitControl->setInputDataControl(m_inputDataControl.get());
@@ -105,21 +101,18 @@ void BackgroundRemover::summonSliceSelector() {
     // Establish SIGNAL/SLOT connections
     // user loaded a workspace in the SliceSelector
     // (use get() for required raw pointer)
-    connect(m_sliceSelector.get(), SIGNAL(signalSlicesLoaded(QString)),
-            m_inputDataControl.get(), SLOT(updateWorkspace(QString)));
+    connect(m_sliceSelector.get(), SIGNAL(signalSlicesLoaded(QString)), m_inputDataControl.get(),
+            SLOT(updateWorkspace(QString)));
     // user selected a slice for fitting in SliceSelector
-    connect(m_sliceSelector.get(),
-            SIGNAL(signalSliceForFittingSelected(size_t)),
-            m_inputDataControl.get(), SLOT(updateSliceForFitting(size_t)));
+    connect(m_sliceSelector.get(), SIGNAL(signalSliceForFittingSelected(size_t)), m_inputDataControl.get(),
+            SLOT(updateSliceForFitting(size_t)));
     // slice for fitting updated
-    connect(m_inputDataControl.get(), SIGNAL(signalSliceForFittingUpdated()),
-            m_displayControl.get(), SLOT(updateSliceForFitting()));
+    connect(m_inputDataControl.get(), SIGNAL(signalSliceForFittingUpdated()), m_displayControl.get(),
+            SLOT(updateSliceForFitting()));
     m_fitControl->setConnections();
     m_fourierTransform->setConnections();
-    connect(m_uiForm.pbFourier, SIGNAL(clicked()), m_fourierTransform,
-            SLOT(transform()));
-    connect(m_uiForm.pbClearFourierPlot, SIGNAL(clicked()), m_fourierTransform,
-            SLOT(clearFourierPlot()));
+    connect(m_uiForm.pbFourier, SIGNAL(clicked()), m_fourierTransform, SLOT(transform()));
+    connect(m_uiForm.pbClearFourierPlot, SIGNAL(clicked()), m_fourierTransform, SLOT(clearFourierPlot()));
   }
 
   m_sliceSelector->show();

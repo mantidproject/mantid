@@ -27,29 +27,23 @@ using namespace API;
  *
  */
 void RenameWorkspaces::init() {
-  declareProperty(
-      std::make_unique<ArrayProperty<std::string>>(
-          "InputWorkspaces",
-          std::make_shared<MandatoryValidator<std::vector<std::string>>>()),
-      "Names of the Input Workspaces");
-  // WorkspaceNames - List of new names
   declareProperty(std::make_unique<ArrayProperty<std::string>>(
-                      "WorkspaceNames", Direction::Input),
+                      "InputWorkspaces", std::make_shared<MandatoryValidator<std::vector<std::string>>>()),
+                  "Names of the Input Workspaces");
+  // WorkspaceNames - List of new names
+  declareProperty(std::make_unique<ArrayProperty<std::string>>("WorkspaceNames", Direction::Input),
                   "New Names of the Workspaces");
   // --or--
   // Prefix
-  declareProperty("Prefix", std::string(""),
-                  "Prefix to add to input workspace names", Direction::Input);
+  declareProperty("Prefix", std::string(""), "Prefix to add to input workspace names", Direction::Input);
   // Suffix
-  declareProperty("Suffix", std::string(""),
-                  "Suffix to add to input workspace names", Direction::Input);
+  declareProperty("Suffix", std::string(""), "Suffix to add to input workspace names", Direction::Input);
   // Set to default true to maintain compatibility with existing scripts
   // as this just allowed overriding by default
-  declareProperty<bool>(
-      "OverwriteExisting", true,
-      "If true all existing workspaces with the output name will be"
-      " overwritten. Defaults to true to maintain backwards compatibility.",
-      Direction::Input);
+  declareProperty<bool>("OverwriteExisting", true,
+                        "If true all existing workspaces with the output name will be"
+                        " overwritten. Defaults to true to maintain backwards compatibility.",
+                        Direction::Input);
 }
 
 /**
@@ -68,8 +62,7 @@ std::map<std::string, std::string> RenameWorkspaces::validateInputs() {
 
   // Check properties
   if (newWsName.empty() && prefix.empty() && suffix.empty()) {
-    errorList["WorkspaceNames"] =
-        "No list of Workspace names, prefix or suffix has been supplied.";
+    errorList["WorkspaceNames"] = "No list of Workspace names, prefix or suffix has been supplied.";
   }
 
   if (!newWsName.empty() && (!prefix.empty() || !suffix.empty())) {
@@ -88,8 +81,7 @@ std::map<std::string, std::string> RenameWorkspaces::validateInputs() {
     for (size_t i = 0; i < newWsName.size() - 1; ++i) {
       for (size_t j = i + 1; j < newWsName.size(); ++j) {
         if (newWsName[i] == newWsName[j]) {
-          errorList["WorkspaceNames"] =
-              "Duplicate '" + newWsName[i] + "' found in WorkspaceNames.";
+          errorList["WorkspaceNames"] = "Duplicate '" + newWsName[i] + "' found in WorkspaceNames.";
         }
       }
     }
@@ -136,8 +128,7 @@ void RenameWorkspaces::exec() {
       // Name exists, stop if override if not set but let
       // RenameWorkspace handle deleting if we are overriding
       if (!overrideWorkspace) {
-        throw std::runtime_error("A workspace called " + name +
-                                 " already exists");
+        throw std::runtime_error("A workspace called " + name + " already exists");
       }
     }
   }
@@ -146,8 +137,7 @@ void RenameWorkspaces::exec() {
   for (size_t i = 0; i < nWs; ++i) {
     std::ostringstream os;
     os << "OutputWorkspace_" << i + 1;
-    declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-        os.str(), newWsName[i], Direction::Output));
+    declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(os.str(), newWsName[i], Direction::Output));
     auto alg = createChildAlgorithm("RenameWorkspace");
     alg->setPropertyValue("InputWorkspace", inputWsName[i]);
     alg->setPropertyValue("OutputWorkspace", newWsName[i]);

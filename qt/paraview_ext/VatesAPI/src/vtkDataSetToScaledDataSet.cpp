@@ -45,14 +45,11 @@ vtkDataSetToScaledDataSet::~vtkDataSetToScaledDataSet() = default;
  * @param info : info to obtain the output data set from.
  * @return The resulting scaled dataset
  */
-vtkPointSet *vtkDataSetToScaledDataSet::execute(double xScale, double yScale,
-                                                double zScale,
-                                                vtkPointSet *inputData,
+vtkPointSet *vtkDataSetToScaledDataSet::execute(double xScale, double yScale, double zScale, vtkPointSet *inputData,
                                                 vtkInformation *info) {
 
   // Extract output dataset from information.
-  vtkPointSet *outputData =
-      vtkPointSet::SafeDownCast(info->Get(vtkDataObject::DATA_OBJECT()));
+  vtkPointSet *outputData = vtkPointSet::SafeDownCast(info->Get(vtkDataObject::DATA_OBJECT()));
 
   return execute(xScale, yScale, zScale, inputData, outputData);
 }
@@ -71,9 +68,7 @@ vtkPointSet *vtkDataSetToScaledDataSet::execute(double xScale, double yScale,
  *new one created.
  * @return The resulting scaled dataset
  */
-vtkPointSet *vtkDataSetToScaledDataSet::execute(double xScale, double yScale,
-                                                double zScale,
-                                                vtkPointSet *inputData,
+vtkPointSet *vtkDataSetToScaledDataSet::execute(double xScale, double yScale, double zScale, vtkPointSet *inputData,
                                                 vtkPointSet *outputData) {
 
   if (!inputData) {
@@ -89,15 +84,12 @@ vtkPointSet *vtkDataSetToScaledDataSet::execute(double xScale, double yScale,
 
   vtkNew<vtkPoints> newPoints;
 
-  vtkFloatArray *oldPointsArray =
-      vtkFloatArray::FastDownCast(points->GetData());
-  vtkFloatArray *newPointsArray =
-      vtkFloatArray::FastDownCast(newPoints->GetData());
+  vtkFloatArray *oldPointsArray = vtkFloatArray::FastDownCast(points->GetData());
+  vtkFloatArray *newPointsArray = vtkFloatArray::FastDownCast(newPoints->GetData());
 
   if (!oldPointsArray || !newPointsArray) {
     throw std::runtime_error("Failed to cast vtkDataArray to vtkFloatArray.");
-  } else if (oldPointsArray->GetNumberOfComponents() != 3 ||
-             newPointsArray->GetNumberOfComponents() != 3) {
+  } else if (oldPointsArray->GetNumberOfComponents() != 3 || newPointsArray->GetNumberOfComponents() != 3) {
     throw std::runtime_error("points array must have 3 components.");
   }
 
@@ -140,9 +132,7 @@ vtkPointSet *vtkDataSetToScaledDataSet::execute(double xScale, double yScale,
  * @param inputData : Input dataset
  * @param outputData : Output dataset
  */
-void vtkDataSetToScaledDataSet::updateMetaData(double xScale, double yScale,
-                                               double zScale,
-                                               vtkPointSet *inputData,
+void vtkDataSetToScaledDataSet::updateMetaData(double xScale, double yScale, double zScale, vtkPointSet *inputData,
                                                vtkPointSet *outputData) {
   // We need to scale the basis vectors of the input ChangeOfBasis
   // (COB) Matrix and set it as the output COB Matrix.
@@ -155,9 +145,8 @@ void vtkDataSetToScaledDataSet::updateMetaData(double xScale, double yScale,
     w.Set(w.GetX() * zScale, w.GetY() * zScale, w.GetZ() * zScale);
     cobMatrix = vtkPVChangeOfBasisHelper::GetChangeOfBasisMatrix(u, v, w);
   } else {
-    g_log.warning(
-        "Could not extract the basis vectors from the Change-of-Basis-Matrix"
-        "data of the scaled data set.\n");
+    g_log.warning("Could not extract the basis vectors from the Change-of-Basis-Matrix"
+                  "data of the scaled data set.\n");
     cobMatrix = vtkSmartPointer<vtkMatrix4x4>::New();
     cobMatrix->Identity();
     cobMatrix->Element[0][0] *= xScale;
@@ -165,8 +154,7 @@ void vtkDataSetToScaledDataSet::updateMetaData(double xScale, double yScale,
     cobMatrix->Element[2][2] *= zScale;
   }
 
-  if (!vtkPVChangeOfBasisHelper::AddChangeOfBasisMatrixToFieldData(outputData,
-                                                                   cobMatrix)) {
+  if (!vtkPVChangeOfBasisHelper::AddChangeOfBasisMatrixToFieldData(outputData, cobMatrix)) {
     g_log.warning("The Change-of-Basis-Matrix could not be added to the field "
                   "data of the scaled data set.\n");
   }
@@ -174,8 +162,7 @@ void vtkDataSetToScaledDataSet::updateMetaData(double xScale, double yScale,
   // We also need to update the bounding box for the COB Matrix
   double boundingBox[6];
   inputData->GetBounds(boundingBox);
-  if (!vtkPVChangeOfBasisHelper::AddBoundingBoxInBasis(outputData,
-                                                       boundingBox)) {
+  if (!vtkPVChangeOfBasisHelper::AddBoundingBoxInBasis(outputData, boundingBox)) {
     g_log.warning("The bounding box could not be added to the field data of "
                   "the scaled data set.\n");
   }

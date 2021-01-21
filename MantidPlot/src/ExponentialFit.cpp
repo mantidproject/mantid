@@ -38,29 +38,25 @@
  *
  *****************************************************************************/
 
-ExponentialFit::ExponentialFit(ApplicationWindow *parent, Graph *g,
-                               bool expGrowth)
+ExponentialFit::ExponentialFit(ApplicationWindow *parent, Graph *g, bool expGrowth)
     : Fit(parent, g), is_exp_growth(expGrowth) {
   init();
 }
 
-ExponentialFit::ExponentialFit(ApplicationWindow *parent, Graph *g,
-                               const QString &curveTitle, bool expGrowth)
+ExponentialFit::ExponentialFit(ApplicationWindow *parent, Graph *g, const QString &curveTitle, bool expGrowth)
     : Fit(parent, g), is_exp_growth(expGrowth) {
   init();
   setDataFromCurve(curveTitle);
 }
 
-ExponentialFit::ExponentialFit(ApplicationWindow *parent, Graph *g,
-                               const QString &curveTitle, double start,
-                               double end, bool expGrowth)
+ExponentialFit::ExponentialFit(ApplicationWindow *parent, Graph *g, const QString &curveTitle, double start, double end,
+                               bool expGrowth)
     : Fit(parent, g), is_exp_growth(expGrowth) {
   init();
   setDataFromCurve(curveTitle, start, end);
 }
 
-ExponentialFit::ExponentialFit(ApplicationWindow *parent, Table *t,
-                               const QString &xCol, const QString &yCol,
+ExponentialFit::ExponentialFit(ApplicationWindow *parent, Table *t, const QString &xCol, const QString &yCol,
                                int startRow, int endRow, bool expGrowth)
     : Fit(parent, t), is_exp_growth(expGrowth) {
   init();
@@ -126,26 +122,21 @@ void ExponentialFit::calculateFitCurveData(double *X, double *Y) {
  *
  *****************************************************************************/
 
-TwoExpFit::TwoExpFit(ApplicationWindow *parent, Graph *g) : Fit(parent, g) {
-  init();
-}
+TwoExpFit::TwoExpFit(ApplicationWindow *parent, Graph *g) : Fit(parent, g) { init(); }
 
-TwoExpFit::TwoExpFit(ApplicationWindow *parent, Graph *g,
-                     const QString &curveTitle)
-    : Fit(parent, g) {
+TwoExpFit::TwoExpFit(ApplicationWindow *parent, Graph *g, const QString &curveTitle) : Fit(parent, g) {
   init();
   setDataFromCurve(curveTitle);
 }
 
-TwoExpFit::TwoExpFit(ApplicationWindow *parent, Graph *g,
-                     const QString &curveTitle, double start, double end)
+TwoExpFit::TwoExpFit(ApplicationWindow *parent, Graph *g, const QString &curveTitle, double start, double end)
     : Fit(parent, g) {
   init();
   setDataFromCurve(curveTitle, start, end);
 }
 
-TwoExpFit::TwoExpFit(ApplicationWindow *parent, Table *t, const QString &xCol,
-                     const QString &yCol, int startRow, int endRow)
+TwoExpFit::TwoExpFit(ApplicationWindow *parent, Table *t, const QString &xCol, const QString &yCol, int startRow,
+                     int endRow)
     : Fit(parent, t) {
   init();
   setDataFromTable(t, xCol, yCol, startRow, endRow);
@@ -166,8 +157,7 @@ void TwoExpFit::init() {
                 << "y0";
   d_explanation = tr("Exponential decay");
   d_formula = "A1*exp(-x/t1)+A2*exp(-x/t2)+y0";
-  d_param_explain << tr("first amplitude") << tr("first lifetime")
-                  << tr("second amplitude") << tr("second lifetime")
+  d_param_explain << tr("first amplitude") << tr("first lifetime") << tr("second amplitude") << tr("second lifetime")
                   << tr("offset");
 }
 
@@ -206,26 +196,20 @@ void TwoExpFit::calculateFitCurveData(double *X, double *Y) {
  *
  *****************************************************************************/
 
-ThreeExpFit::ThreeExpFit(ApplicationWindow *parent, Graph *g) : Fit(parent, g) {
-  init();
-}
+ThreeExpFit::ThreeExpFit(ApplicationWindow *parent, Graph *g) : Fit(parent, g) { init(); }
 
-ThreeExpFit::ThreeExpFit(ApplicationWindow *parent, Graph *g,
-                         const QString &curveTitle)
-    : Fit(parent, g) {
+ThreeExpFit::ThreeExpFit(ApplicationWindow *parent, Graph *g, const QString &curveTitle) : Fit(parent, g) {
   init();
   setDataFromCurve(curveTitle);
 }
 
-ThreeExpFit::ThreeExpFit(ApplicationWindow *parent, Graph *g,
-                         const QString &curveTitle, double start, double end)
+ThreeExpFit::ThreeExpFit(ApplicationWindow *parent, Graph *g, const QString &curveTitle, double start, double end)
     : Fit(parent, g) {
   init();
   setDataFromCurve(curveTitle, start, end);
 }
 
-ThreeExpFit::ThreeExpFit(ApplicationWindow *parent, Table *t,
-                         const QString &xCol, const QString &yCol, int startRow,
+ThreeExpFit::ThreeExpFit(ApplicationWindow *parent, Table *t, const QString &xCol, const QString &yCol, int startRow,
                          int endRow)
     : Fit(parent, t) {
   init();
@@ -249,10 +233,8 @@ void ThreeExpFit::init() {
                 << "y0";
   d_explanation = tr("Exponential decay");
   d_formula = "A1*exp(-x/t1)+A2*exp(-x/t2)+A3*exp(-x/t3)+y0";
-  d_param_explain << tr("first amplitude") << tr("first lifetime")
-                  << tr("second amplitude") << tr("second lifetime")
-                  << tr("third amplitude") << tr("third lifetime")
-                  << tr("offset");
+  d_param_explain << tr("first amplitude") << tr("first lifetime") << tr("second amplitude") << tr("second lifetime")
+                  << tr("third amplitude") << tr("third lifetime") << tr("offset");
 }
 
 void ThreeExpFit::customizeFitResults() {

@@ -34,8 +34,7 @@ OptionsMap convertOptionsFromQMap(const OptionsQMap &src) {
 ColumnOptionsMap convertColumnOptionsFromQMap(const ColumnOptionsQMap &src) {
   ColumnOptionsMap dest;
   // Loop through all columns in the QMap
-  for (auto columnIter = src.constBegin(); columnIter != src.constEnd();
-       ++columnIter) {
+  for (auto columnIter = src.constBegin(); columnIter != src.constEnd(); ++columnIter) {
     // Convert the options QMap into a std::map and set it as the value
     // for this column
     const auto columnName = columnIter.key();

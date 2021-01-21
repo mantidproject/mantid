@@ -12,22 +12,15 @@
 using namespace MantidQt::API;
 
 MdSettings::MdSettings()
-    : m_vsiGroup("Mantid/MdPlotting/Vsi"),
-      m_generalMdGroup("Mantid/MdPlotting/General"),
-      m_sliceViewerGroup(
-          "Mantid/SliceViewer"), // This is the same as in Slice Viewer !!
-      m_lblUserSettingColorMap("usersettingcolormap"),
-      m_lblLastSessionColorMap("lastsessioncolormap"),
-      m_lblGeneralMdColorMap("generalcolormap"),
-      m_lblGeneralMdColorMapName("generalcolormapname"),
-      m_lblUseGeneralMdColorMap("usegeneralcolormap"),
-      m_lblUseLastSessionColorMap("uselastsessioncolormap"),
+    : m_vsiGroup("Mantid/MdPlotting/Vsi"), m_generalMdGroup("Mantid/MdPlotting/General"),
+      m_sliceViewerGroup("Mantid/SliceViewer"), // This is the same as in Slice Viewer !!
+      m_lblUserSettingColorMap("usersettingcolormap"), m_lblLastSessionColorMap("lastsessioncolormap"),
+      m_lblGeneralMdColorMap("generalcolormap"), m_lblGeneralMdColorMapName("generalcolormapname"),
+      m_lblUseGeneralMdColorMap("usegeneralcolormap"), m_lblUseLastSessionColorMap("uselastsessioncolormap"),
       m_lblUserSettingBackgroundColor("usersettingbackgroundcolor"),
       m_lblLastSessionBackgroundColor("lastsessionbackgroundcolor"),
-      m_lblSliceViewerColorMap(
-          "ColormapFile"), // This is the same as in Slice Viewer !!,
-      m_lblUserSettingInitialView("initialview"),
-      m_lblLastSessionLogScale("lastsessionlogscale"),
+      m_lblSliceViewerColorMap("ColormapFile"), // This is the same as in Slice Viewer !!,
+      m_lblUserSettingInitialView("initialview"), m_lblLastSessionLogScale("lastsessionlogscale"),
       m_lblUserSettingAutoColorAxes("usersettingautocoloraxes")
 
 {
@@ -40,8 +33,7 @@ QString MdSettings::getUserSettingColorMap() {
   QSettings settings;
 
   settings.beginGroup(m_vsiGroup);
-  QString userSettingColorMap =
-      settings.value(m_lblUserSettingColorMap, QString("")).toString();
+  QString userSettingColorMap = settings.value(m_lblUserSettingColorMap, QString("")).toString();
   settings.endGroup();
 
   return userSettingColorMap;
@@ -59,8 +51,7 @@ QString MdSettings::getLastSessionColorMap() {
   QSettings settings;
 
   settings.beginGroup(m_vsiGroup);
-  QString colormap =
-      settings.value(m_lblLastSessionColorMap, QString("")).toString();
+  QString colormap = settings.value(m_lblLastSessionColorMap, QString("")).toString();
   settings.endGroup();
 
   return colormap;
@@ -78,10 +69,8 @@ QColor MdSettings::getUserSettingBackgroundColor() {
   QSettings settings;
 
   settings.beginGroup(m_vsiGroup);
-  auto backgroundColor = settings
-                             .value(m_lblUserSettingBackgroundColor,
-                                    m_mdConstants.getDefaultBackgroundColor())
-                             .value<QColor>();
+  auto backgroundColor =
+      settings.value(m_lblUserSettingBackgroundColor, m_mdConstants.getDefaultBackgroundColor()).value<QColor>();
   settings.endGroup();
 
   return backgroundColor;
@@ -99,18 +88,14 @@ QColor MdSettings::getLastSessionBackgroundColor() {
   QSettings settings;
 
   settings.beginGroup(m_vsiGroup);
-  auto backgroundColor = settings
-                             .value(m_lblLastSessionBackgroundColor,
-                                    m_mdConstants.getDefaultBackgroundColor())
-                             .value<QColor>();
+  auto backgroundColor =
+      settings.value(m_lblLastSessionBackgroundColor, m_mdConstants.getDefaultBackgroundColor()).value<QColor>();
   settings.endGroup();
 
   return backgroundColor;
 }
 
-QColor MdSettings::getDefaultBackgroundColor() {
-  return m_mdConstants.getDefaultBackgroundColor();
-}
+QColor MdSettings::getDefaultBackgroundColor() { return m_mdConstants.getDefaultBackgroundColor(); }
 
 void MdSettings::setLastSessionBackgroundColor(const QColor &backgroundColor) {
   QSettings settings;
@@ -120,8 +105,7 @@ void MdSettings::setLastSessionBackgroundColor(const QColor &backgroundColor) {
   settings.endGroup();
 }
 
-void MdSettings::setGeneralMdColorMap(const QString &colorMapName,
-                                      const QString &colorMapFile) {
+void MdSettings::setGeneralMdColorMap(const QString &colorMapName, const QString &colorMapFile) {
   QSettings settings;
 
   settings.beginGroup(m_generalMdGroup);
@@ -134,8 +118,7 @@ QString MdSettings::getGeneralMdColorMapFile() {
   QSettings settings;
 
   settings.beginGroup(m_generalMdGroup);
-  QString colorMap =
-      settings.value(m_lblGeneralMdColorMap, QString("")).toString();
+  QString colorMap = settings.value(m_lblGeneralMdColorMap, QString("")).toString();
   settings.endGroup();
 
   return colorMap;
@@ -145,10 +128,7 @@ QString MdSettings::getGeneralMdColorMapName() {
   QSettings settings;
 
   settings.beginGroup(m_generalMdGroup);
-  QString colorMap = settings
-                         .value(m_lblGeneralMdColorMapName,
-                                m_mdConstants.getGeneralMdColorMap())
-                         .toString();
+  QString colorMap = settings.value(m_lblGeneralMdColorMapName, m_mdConstants.getGeneralMdColorMap()).toString();
   settings.endGroup();
 
   return colorMap;
@@ -202,10 +182,7 @@ QString MdSettings::getUserSettingInitialView() {
   QSettings settings;
 
   settings.beginGroup(m_vsiGroup);
-  QString initialView = settings
-                            .value(m_lblUserSettingInitialView,
-                                   m_mdConstants.getTechniqueDependence())
-                            .toString();
+  QString initialView = settings.value(m_lblUserSettingInitialView, m_mdConstants.getTechniqueDependence()).toString();
   settings.endGroup();
 
   return initialView;
@@ -233,8 +210,7 @@ bool MdSettings::getUserSettingAutoColorAxes() {
   QSettings settings;
 
   settings.beginGroup(m_vsiGroup);
-  bool autoColor =
-      settings.value(m_lblUserSettingAutoColorAxes, false).toBool();
+  bool autoColor = settings.value(m_lblUserSettingAutoColorAxes, false).toBool();
   settings.endGroup();
 
   return autoColor;

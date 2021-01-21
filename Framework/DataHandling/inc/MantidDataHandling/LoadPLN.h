@@ -71,8 +71,7 @@ private:
   void exec(const std::string &hdfFile, const std::string &eventFile);
 
   // region of intereset
-  std::vector<bool> createRoiVector(const std::string &seltubes,
-                                    const std::string &maskfile);
+  std::vector<bool> createRoiVector(const std::string &seltubes, const std::string &maskfile);
 
 protected:
   // load parameters from input file
@@ -89,8 +88,7 @@ protected:
   void createWorkspace(const std::string &title);
 
   // prepare event storage
-  void prepareEventStorage(ANSTO::ProgressTracker &prog,
-                           std::vector<size_t> &eventCounts,
+  void prepareEventStorage(ANSTO::ProgressTracker &prog, std::vector<size_t> &eventCounts,
                            std::vector<EventVector_pt> &eventVectors);
 
   // set up the detector masks

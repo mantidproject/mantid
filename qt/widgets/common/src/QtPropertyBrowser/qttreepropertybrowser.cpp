@@ -102,11 +102,9 @@
 
 namespace {
 // Translation function for Qt4/Qt5. Qt5 has no encoding option
-QString translateUtf8Encoded(const char *context, const char *key,
-                             const char *disambiguation = nullptr, int n = -1) {
+QString translateUtf8Encoded(const char *context, const char *key, const char *disambiguation = nullptr, int n = -1) {
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  return QApplication::translate(context, key, disambiguation,
-                                 QApplication::UnicodeUTF8, n);
+  return QApplication::translate(context, key, disambiguation, QApplication::UnicodeUTF8, n);
 #else
   return QApplication::translate(context, key, disambiguation, n);
 #endif
@@ -122,14 +120,11 @@ class QtPropertyEditorView;
 // ------------ QtPropertyEditorView
 
 QtPropertyEditorView::QtPropertyEditorView(QWidget *parent, bool darkTopLevel)
-    : QTreeWidget(parent), m_editorPrivate(nullptr),
-      m_darkTopLevel(darkTopLevel) {
-  connect(header(), SIGNAL(sectionDoubleClicked(int)), this,
-          SLOT(resizeColumnToContents(int)));
+    : QTreeWidget(parent), m_editorPrivate(nullptr), m_darkTopLevel(darkTopLevel) {
+  connect(header(), SIGNAL(sectionDoubleClicked(int)), this, SLOT(resizeColumnToContents(int)));
 }
 
-void QtPropertyEditorView::drawRow(QPainter *painter,
-                                   const QStyleOptionViewItem &option,
+void QtPropertyEditorView::drawRow(QPainter *painter, const QStyleOptionViewItem &option,
                                    const QModelIndex &index) const {
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   QStyleOptionViewItemV3 opt = option;
@@ -148,8 +143,7 @@ void QtPropertyEditorView::drawRow(QPainter *painter,
     painter->fillRect(option.rect, c);
     opt.palette.setColor(QPalette::AlternateBase, c);
   } else {
-    QColor c = m_editorPrivate->calculatedBackgroundColor(
-        m_editorPrivate->indexToBrowserItem(index));
+    QColor c = m_editorPrivate->calculatedBackgroundColor(m_editorPrivate->indexToBrowserItem(index));
     if (index.parent() == QModelIndex() && m_darkTopLevel) {
       c = option.palette.color(QPalette::Mid);
     }
@@ -160,12 +154,10 @@ void QtPropertyEditorView::drawRow(QPainter *painter,
     }
   }
   QTreeWidget::drawRow(painter, opt, index);
-  QColor color = static_cast<QRgb>(
-      QApplication::style()->styleHint(QStyle::SH_Table_GridLineColor, &opt));
+  QColor color = static_cast<QRgb>(QApplication::style()->styleHint(QStyle::SH_Table_GridLineColor, &opt));
   painter->save();
   painter->setPen(QPen(color));
-  painter->drawLine(opt.rect.x(), opt.rect.bottom(), opt.rect.right(),
-                    opt.rect.bottom());
+  painter->drawLine(opt.rect.x(), opt.rect.bottom(), opt.rect.right(), opt.rect.bottom());
   painter->restore();
 }
 
@@ -177,8 +169,7 @@ void QtPropertyEditorView::keyPressEvent(QKeyEvent *event) {
     if (!m_editorPrivate->editedItem())
       if (const QTreeWidgetItem *item = currentItem())
         if (item->columnCount() >= 2 &&
-            ((item->flags() & (Qt::ItemIsEditable | Qt::ItemIsEnabled)) ==
-             (Qt::ItemIsEditable | Qt::ItemIsEnabled))) {
+            ((item->flags() & (Qt::ItemIsEditable | Qt::ItemIsEnabled)) == (Qt::ItemIsEditable | Qt::ItemIsEnabled))) {
           event->accept();
           // If the current position is at column 0, move to 1.
           QModelIndex index = currentIndex();
@@ -202,14 +193,11 @@ void QtPropertyEditorView::mousePressEvent(QMouseEvent *event) {
   auto index = currentIndex();
 
   if (item) {
-    if ((item != m_editorPrivate->editedItem()) &&
-        (event->button() == Qt::LeftButton) &&
+    if ((item != m_editorPrivate->editedItem()) && (event->button() == Qt::LeftButton) &&
         (header()->logicalIndexAt(event->pos().x()) == 1) &&
-        ((item->flags() & (Qt::ItemIsEditable | Qt::ItemIsEnabled)) ==
-         (Qt::ItemIsEditable | Qt::ItemIsEnabled))) {
+        ((item->flags() & (Qt::ItemIsEditable | Qt::ItemIsEnabled)) == (Qt::ItemIsEditable | Qt::ItemIsEnabled))) {
       editItem(item, 1);
-    } else if (!m_editorPrivate->hasValue(item) &&
-               m_editorPrivate->markPropertiesWithoutValue() &&
+    } else if (!m_editorPrivate->hasValue(item) && m_editorPrivate->markPropertiesWithoutValue() &&
                !rootIsDecorated()) {
       if (event->pos().x() + header()->offset() < 20)
         item->setExpanded(!item->isExpanded());
@@ -255,10 +243,8 @@ void QtPropertyEditorDelegate::closeEditor(QtProperty *property) {
     w->deleteLater();
 }
 
-QWidget *
-QtPropertyEditorDelegate::createEditor(QWidget *parent,
-                                       const QStyleOptionViewItem & /*option*/,
-                                       const QModelIndex &index) const {
+QWidget *QtPropertyEditorDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem & /*option*/,
+                                                const QModelIndex &index) const {
   if (index.column() == 1 && m_editorPrivate) {
     QtProperty *property = m_editorPrivate->indexToProperty(index);
     QTreeWidgetItem *item = m_editorPrivate->indexToItem(index);
@@ -266,10 +252,8 @@ QtPropertyEditorDelegate::createEditor(QWidget *parent,
       QWidget *editor = m_editorPrivate->createEditor(property, parent);
       if (editor) {
         editor->setAutoFillBackground(true);
-        editor->installEventFilter(
-            const_cast<QtPropertyEditorDelegate *>(this));
-        connect(editor, SIGNAL(destroyed(QObject *)), this,
-                SLOT(slotEditorDestroyed(QObject *)));
+        editor->installEventFilter(const_cast<QtPropertyEditorDelegate *>(this));
+        connect(editor, SIGNAL(destroyed(QObject *)), this, SLOT(slotEditorDestroyed(QObject *)));
         m_propertyToEditor[property] = editor;
         m_editorToProperty[editor] = property;
         m_editedItem = item;
@@ -286,10 +270,8 @@ QtPropertyEditorDelegate::createEditor(QWidget *parent,
     }
     QString optionName = m_editorPrivate->options()[optionIndex];
     if (property->hasOption(optionName)) {
-      QWidget *editor =
-          new PropertyOptionCheckBox(parent, property, optionName);
-      connect(editor,
-              SIGNAL(optionChanged(QtProperty *, const QString &, bool)), this,
+      QWidget *editor = new PropertyOptionCheckBox(parent, property, optionName);
+      connect(editor, SIGNAL(optionChanged(QtProperty *, const QString &, bool)), this,
               SIGNAL(optionChanged(QtProperty *, const QString &, bool)));
       return editor;
     }
@@ -297,15 +279,13 @@ QtPropertyEditorDelegate::createEditor(QWidget *parent,
   return nullptr;
 }
 
-void QtPropertyEditorDelegate::updateEditorGeometry(
-    QWidget *editor, const QStyleOptionViewItem &option,
-    const QModelIndex &index) const {
+void QtPropertyEditorDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option,
+                                                    const QModelIndex &index) const {
   Q_UNUSED(index)
   editor->setGeometry(option.rect.adjusted(0, 0, 0, -1));
 }
 
-void QtPropertyEditorDelegate::paint(QPainter *painter,
-                                     const QStyleOptionViewItem &option,
+void QtPropertyEditorDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
                                      const QModelIndex &index) const {
   bool hasValue = true;
   if (m_editorPrivate) {
@@ -329,11 +309,9 @@ void QtPropertyEditorDelegate::paint(QPainter *painter,
   QColor c;
   if (!hasValue && m_editorPrivate->markPropertiesWithoutValue()) {
     c = opt.palette.color(QPalette::Dark);
-    opt.palette.setColor(QPalette::Text,
-                         opt.palette.color(QPalette::BrightText));
+    opt.palette.setColor(QPalette::Text, opt.palette.color(QPalette::BrightText));
   } else {
-    c = m_editorPrivate->calculatedBackgroundColor(
-        m_editorPrivate->indexToBrowserItem(index));
+    c = m_editorPrivate->calculatedBackgroundColor(m_editorPrivate->indexToBrowserItem(index));
     if (c.isValid() && (opt.features & QStyleOptionViewItemV2::Alternate))
       c = c.lighter(112);
   }
@@ -343,14 +321,11 @@ void QtPropertyEditorDelegate::paint(QPainter *painter,
   QItemDelegate::paint(painter, opt, index);
 
   opt.palette.setCurrentColorGroup(QPalette::Active);
-  QColor color = static_cast<QRgb>(
-      QApplication::style()->styleHint(QStyle::SH_Table_GridLineColor, &opt));
+  QColor color = static_cast<QRgb>(QApplication::style()->styleHint(QStyle::SH_Table_GridLineColor, &opt));
   painter->save();
   painter->setPen(QPen(color));
-  if (!m_editorPrivate ||
-      (!m_editorPrivate->lastColumn(index.column()) && hasValue)) {
-    int right = (option.direction == Qt::LeftToRight) ? option.rect.right()
-                                                      : option.rect.left();
+  if (!m_editorPrivate || (!m_editorPrivate->lastColumn(index.column()) && hasValue)) {
+    int right = (option.direction == Qt::LeftToRight) ? option.rect.right() : option.rect.left();
     painter->drawLine(right, option.rect.y(), right, option.rect.bottom());
   }
   painter->restore();
@@ -363,19 +338,16 @@ void QtPropertyEditorDelegate::paint(QPainter *painter,
     QString optionName = m_editorPrivate->options()[optionIndex];
     if (property->hasOption(optionName)) {
       QStyleOptionButton opt;
-      auto state = property->checkOption(optionName) ? QStyle::State_On
-                                                     : QStyle::State_Off;
+      auto state = property->checkOption(optionName) ? QStyle::State_On : QStyle::State_Off;
       opt.state |= state;
       opt.rect = option.rect;
       opt.rect.setWidth(opt.rect.height());
-      QApplication::style()->drawPrimitive(QStyle::PE_IndicatorCheckBox, &opt,
-                                           painter);
+      QApplication::style()->drawPrimitive(QStyle::PE_IndicatorCheckBox, &opt, painter);
     }
   }
 }
 
-QSize QtPropertyEditorDelegate::sizeHint(const QStyleOptionViewItem &option,
-                                         const QModelIndex &index) const {
+QSize QtPropertyEditorDelegate::sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const {
   return QItemDelegate::sizeHint(option, index) + QSize(3, 4);
 }
 
@@ -390,8 +362,7 @@ bool QtPropertyEditorDelegate::eventFilter(QObject *object, QEvent *event) {
 
 //  -------- QtTreePropertyBrowserPrivate implementation
 QtTreePropertyBrowserPrivate::QtTreePropertyBrowserPrivate()
-    : m_treeWidget(nullptr), m_headerVisible(true),
-      m_resizeMode(QtTreePropertyBrowser::Stretch), m_delegate(nullptr),
+    : m_treeWidget(nullptr), m_headerVisible(true), m_resizeMode(QtTreePropertyBrowser::Stretch), m_delegate(nullptr),
       m_markPropertiesWithoutValue(false), m_browserChangedBlocked(false) {}
 
 // Draw an icon indicating opened/closing branches
@@ -423,9 +394,7 @@ static QIcon drawIndicatorIcon(const QPalette &palette, QStyle *style) {
   return rc;
 }
 
-void QtTreePropertyBrowserPrivate::init(QWidget *parent,
-                                        const QStringList &options,
-                                        bool darkTopLevel) {
+void QtTreePropertyBrowserPrivate::init(QWidget *parent, const QStringList &options, bool darkTopLevel) {
   auto *layout = new QHBoxLayout(parent);
   layout->setMargin(0);
   m_treeWidget = new QtPropertyEditorView(parent, darkTopLevel);
@@ -437,23 +406,19 @@ void QtTreePropertyBrowserPrivate::init(QWidget *parent,
   const int columnCount = 2 + m_options.size();
   m_treeWidget->setColumnCount(columnCount);
   QStringList labels;
-  labels.append(
-      translateUtf8Encoded("QtTreePropertyBrowser", "Property", nullptr));
-  labels.append(
-      QApplication::translate("QtTreePropertyBrowser", "Value", nullptr));
+  labels.append(translateUtf8Encoded("QtTreePropertyBrowser", "Property", nullptr));
+  labels.append(QApplication::translate("QtTreePropertyBrowser", "Value", nullptr));
   // add optional columns
   foreach (auto opt, m_options) {
-    labels.append(QApplication::translate("QtTreePropertyBrowser",
-                                          opt.toStdString().c_str(), nullptr));
+    labels.append(QApplication::translate("QtTreePropertyBrowser", opt.toStdString().c_str(), nullptr));
   }
   m_treeWidget->setHeaderLabels(labels);
   m_treeWidget->setAlternatingRowColors(true);
   m_treeWidget->setEditTriggers(QAbstractItemView::EditKeyPressed);
   m_delegate = new QtPropertyEditorDelegate(parent);
   m_delegate->setEditorPrivate(this);
-  QObject::connect(
-      m_delegate, SIGNAL(optionChanged(QtProperty *, const QString &, bool)),
-      parent, SIGNAL(optionChanged(QtProperty *, const QString &, bool)));
+  QObject::connect(m_delegate, SIGNAL(optionChanged(QtProperty *, const QString &, bool)), parent,
+                   SIGNAL(optionChanged(QtProperty *, const QString &, bool)));
   m_treeWidget->setItemDelegate(m_delegate);
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   m_treeWidget->header()->setMovable(false);
@@ -466,12 +431,9 @@ void QtTreePropertyBrowserPrivate::init(QWidget *parent,
 
   QObject::connect(m_treeWidget, SIGNAL(collapsed(const QModelIndex &)), q_ptr,
                    SLOT(slotCollapsed(const QModelIndex &)));
-  QObject::connect(m_treeWidget, SIGNAL(expanded(const QModelIndex &)), q_ptr,
-                   SLOT(slotExpanded(const QModelIndex &)));
-  QObject::connect(
-      m_treeWidget,
-      SIGNAL(currentItemChanged(QTreeWidgetItem *, QTreeWidgetItem *)), q_ptr,
-      SLOT(slotCurrentTreeItemChanged(QTreeWidgetItem *, QTreeWidgetItem *)));
+  QObject::connect(m_treeWidget, SIGNAL(expanded(const QModelIndex &)), q_ptr, SLOT(slotExpanded(const QModelIndex &)));
+  QObject::connect(m_treeWidget, SIGNAL(currentItemChanged(QTreeWidgetItem *, QTreeWidgetItem *)), q_ptr,
+                   SLOT(slotCurrentTreeItemChanged(QTreeWidgetItem *, QTreeWidgetItem *)));
 }
 
 QtBrowserItem *QtTreePropertyBrowserPrivate::currentItem() const {
@@ -480,8 +442,7 @@ QtBrowserItem *QtTreePropertyBrowserPrivate::currentItem() const {
   return nullptr;
 }
 
-void QtTreePropertyBrowserPrivate::setCurrentItem(QtBrowserItem *browserItem,
-                                                  bool block) {
+void QtTreePropertyBrowserPrivate::setCurrentItem(QtBrowserItem *browserItem, bool block) {
   const bool blocked = block ? m_treeWidget->blockSignals(true) : false;
   if (browserItem == nullptr)
     m_treeWidget->setCurrentItem(nullptr);
@@ -491,8 +452,7 @@ void QtTreePropertyBrowserPrivate::setCurrentItem(QtBrowserItem *browserItem,
     m_treeWidget->blockSignals(blocked);
 }
 
-QtProperty *
-QtTreePropertyBrowserPrivate::indexToProperty(const QModelIndex &index) const {
+QtProperty *QtTreePropertyBrowserPrivate::indexToProperty(const QModelIndex &index) const {
   QTreeWidgetItem *item = m_treeWidget->indexToItem(index);
   QtBrowserItem *idx = m_itemToIndex.value(item);
   if (idx)
@@ -500,20 +460,17 @@ QtTreePropertyBrowserPrivate::indexToProperty(const QModelIndex &index) const {
   return nullptr;
 }
 
-QtBrowserItem *QtTreePropertyBrowserPrivate::indexToBrowserItem(
-    const QModelIndex &index) const {
+QtBrowserItem *QtTreePropertyBrowserPrivate::indexToBrowserItem(const QModelIndex &index) const {
   QTreeWidgetItem *item = m_treeWidget->indexToItem(index);
   return m_itemToIndex.value(item);
 }
 
-QTreeWidgetItem *
-QtTreePropertyBrowserPrivate::indexToItem(const QModelIndex &index) const {
+QTreeWidgetItem *QtTreePropertyBrowserPrivate::indexToItem(const QModelIndex &index) const {
   return m_treeWidget->indexToItem(index);
 }
 
 bool QtTreePropertyBrowserPrivate::lastColumn(int column) const {
-  return m_treeWidget->header()->visualIndex(column) ==
-         m_treeWidget->columnCount() - 1;
+  return m_treeWidget->header()->visualIndex(column) == m_treeWidget->columnCount() - 1;
 }
 
 void QtTreePropertyBrowserPrivate::disableItem(QTreeWidgetItem *item) const {
@@ -551,8 +508,7 @@ bool QtTreePropertyBrowserPrivate::hasValue(QTreeWidgetItem *item) const {
   return false;
 }
 
-void QtTreePropertyBrowserPrivate::propertyInserted(QtBrowserItem *index,
-                                                    QtBrowserItem *afterIndex) {
+void QtTreePropertyBrowserPrivate::propertyInserted(QtBrowserItem *index, QtBrowserItem *afterIndex) {
   QTreeWidgetItem *afterItem = m_indexToItem.value(afterIndex);
   QTreeWidgetItem *parentItem = m_indexToItem.value(index->parent());
 
@@ -641,14 +597,11 @@ void QtTreePropertyBrowserPrivate::updateItem(QTreeWidgetItem *item) {
   m_treeWidget->viewport()->update();
 }
 
-QColor QtTreePropertyBrowserPrivate::calculatedBackgroundColor(
-    QtBrowserItem *item) const {
+QColor QtTreePropertyBrowserPrivate::calculatedBackgroundColor(QtBrowserItem *item) const {
   QtBrowserItem *i = item;
-  const QMap<QtBrowserItem *, QColor>::const_iterator itEnd =
-      m_indexToBackgroundColor.constEnd();
+  const QMap<QtBrowserItem *, QColor>::const_iterator itEnd = m_indexToBackgroundColor.constEnd();
   while (i) {
-    QMap<QtBrowserItem *, QColor>::const_iterator it =
-        m_indexToBackgroundColor.constFind(i);
+    QMap<QtBrowserItem *, QColor>::const_iterator it = m_indexToBackgroundColor.constFind(i);
     if (it != itEnd)
       return it.value();
     i = i->parent();
@@ -670,23 +623,19 @@ void QtTreePropertyBrowserPrivate::slotExpanded(const QModelIndex &index) {
     emit q_ptr->expanded(idx);
 }
 
-void QtTreePropertyBrowserPrivate::slotCurrentBrowserItemChanged(
-    QtBrowserItem *item) {
+void QtTreePropertyBrowserPrivate::slotCurrentBrowserItemChanged(QtBrowserItem *item) {
   if (!m_browserChangedBlocked && item != currentItem())
     setCurrentItem(item, true);
 }
 
-void QtTreePropertyBrowserPrivate::slotCurrentTreeItemChanged(
-    QTreeWidgetItem *newItem, QTreeWidgetItem * /*unused*/) {
+void QtTreePropertyBrowserPrivate::slotCurrentTreeItemChanged(QTreeWidgetItem *newItem, QTreeWidgetItem * /*unused*/) {
   QtBrowserItem *browserItem = newItem ? m_itemToIndex.value(newItem) : 0;
   m_browserChangedBlocked = true;
   q_ptr->setCurrentItem(browserItem);
   m_browserChangedBlocked = false;
 }
 
-QTreeWidgetItem *QtTreePropertyBrowserPrivate::editedItem() const {
-  return m_delegate->editedItem();
-}
+QTreeWidgetItem *QtTreePropertyBrowserPrivate::editedItem() const { return m_delegate->editedItem(); }
 
 void QtTreePropertyBrowserPrivate::closeEditor() {
   auto treeItem = editedItem();
@@ -701,8 +650,7 @@ void QtTreePropertyBrowserPrivate::editItem(QtBrowserItem *browserItem) {
   }
 }
 
-QTreeWidgetItem *
-QtTreePropertyBrowserPrivate::getItemWidget(QtBrowserItem *browserItem) {
+QTreeWidgetItem *QtTreePropertyBrowserPrivate::getItemWidget(QtBrowserItem *browserItem) {
   return m_indexToItem.value(browserItem, 0);
 }
 
@@ -728,13 +676,9 @@ void QtTreePropertyBrowserPrivate::setColumnSizes(int s0, int s1, int s2) {
   }
 }
 
-void QtTreePropertyBrowserPrivate::hideColumn(int col) {
-  m_treeWidget->header()->hideSection(col);
-}
+void QtTreePropertyBrowserPrivate::hideColumn(int col) { m_treeWidget->header()->hideSection(col); }
 
-void QtTreePropertyBrowserPrivate::showColumn(int col) {
-  m_treeWidget->header()->showSection(col);
-}
+void QtTreePropertyBrowserPrivate::showColumn(int col) { m_treeWidget->header()->showSection(col); }
 
 /**
     \class QtTreePropertyBrowser
@@ -782,9 +726,7 @@ void QtTreePropertyBrowserPrivate::showColumn(int col) {
 /**
     Creates a property browser with the given \a parent.
 */
-QtTreePropertyBrowser::QtTreePropertyBrowser(QWidget *parent,
-                                             const QStringList &options,
-                                             bool darkTopLevel)
+QtTreePropertyBrowser::QtTreePropertyBrowser(QWidget *parent, const QStringList &options, bool darkTopLevel)
     : QtAbstractPropertyBrowser(parent) {
   d_ptr = new QtTreePropertyBrowserPrivate;
   d_ptr->q_ptr = this;
@@ -810,21 +752,15 @@ QtTreePropertyBrowser::~QtTreePropertyBrowser() { delete d_ptr; }
     \property QtTreePropertyBrowser::indentation
     \brief indentation of the items in the tree view.
 */
-int QtTreePropertyBrowser::indentation() const {
-  return d_ptr->m_treeWidget->indentation();
-}
+int QtTreePropertyBrowser::indentation() const { return d_ptr->m_treeWidget->indentation(); }
 
-void QtTreePropertyBrowser::setIndentation(int i) {
-  d_ptr->m_treeWidget->setIndentation(i);
-}
+void QtTreePropertyBrowser::setIndentation(int i) { d_ptr->m_treeWidget->setIndentation(i); }
 
 /**
   \property QtTreePropertyBrowser::rootIsDecorated
   \brief whether to show controls for expanding and collapsing root items.
 */
-bool QtTreePropertyBrowser::rootIsDecorated() const {
-  return d_ptr->m_treeWidget->rootIsDecorated();
-}
+bool QtTreePropertyBrowser::rootIsDecorated() const { return d_ptr->m_treeWidget->rootIsDecorated(); }
 
 void QtTreePropertyBrowser::setRootIsDecorated(bool show) {
   d_ptr->m_treeWidget->setRootIsDecorated(show);
@@ -841,9 +777,7 @@ void QtTreePropertyBrowser::setRootIsDecorated(bool show) {
   \brief whether to draw the background using alternating colors.
   By default this property is set to true.
 */
-bool QtTreePropertyBrowser::alternatingRowColors() const {
-  return d_ptr->m_treeWidget->alternatingRowColors();
-}
+bool QtTreePropertyBrowser::alternatingRowColors() const { return d_ptr->m_treeWidget->alternatingRowColors(); }
 
 void QtTreePropertyBrowser::setAlternatingRowColors(bool enable) {
   d_ptr->m_treeWidget->setAlternatingRowColors(enable);
@@ -854,9 +788,7 @@ void QtTreePropertyBrowser::setAlternatingRowColors(bool enable) {
   \property QtTreePropertyBrowser::headerVisible
   \brief whether to show the header.
 */
-bool QtTreePropertyBrowser::isHeaderVisible() const {
-  return d_ptr->m_headerVisible;
-}
+bool QtTreePropertyBrowser::isHeaderVisible() const { return d_ptr->m_headerVisible; }
 
 void QtTreePropertyBrowser::setHeaderVisible(bool visible) {
   if (d_ptr->m_headerVisible == visible)
@@ -894,12 +826,9 @@ void QtTreePropertyBrowser::setHeaderVisible(bool visible) {
     \brief the resize mode of setions in the header.
 */
 
-QtTreePropertyBrowser::ResizeMode QtTreePropertyBrowser::resizeMode() const {
-  return d_ptr->m_resizeMode;
-}
+QtTreePropertyBrowser::ResizeMode QtTreePropertyBrowser::resizeMode() const { return d_ptr->m_resizeMode; }
 
-void QtTreePropertyBrowser::setResizeMode(
-    QtTreePropertyBrowser::ResizeMode mode) {
+void QtTreePropertyBrowser::setResizeMode(QtTreePropertyBrowser::ResizeMode mode) {
   if (d_ptr->m_resizeMode == mode)
     return;
 
@@ -932,9 +861,7 @@ void QtTreePropertyBrowser::setResizeMode(
     \brief the position of the splitter between the colunms.
 */
 
-int QtTreePropertyBrowser::splitterPosition() const {
-  return d_ptr->m_treeWidget->header()->sectionSize(0);
-}
+int QtTreePropertyBrowser::splitterPosition() const { return d_ptr->m_treeWidget->header()->sectionSize(0); }
 
 void QtTreePropertyBrowser::setSplitterPosition(int position) {
   d_ptr->m_treeWidget->header()->resizeSection(0, position);
@@ -1000,8 +927,7 @@ void QtTreePropertyBrowser::setItemVisible(QtBrowserItem *item, bool visible) {
     \sa backgroundColor(), calculatedBackgroundColor()
 */
 
-void QtTreePropertyBrowser::setBackgroundColor(QtBrowserItem *item,
-                                               const QColor &color) {
+void QtTreePropertyBrowser::setBackgroundColor(QtBrowserItem *item, const QColor &color) {
   if (!d_ptr->m_indexToItem.contains(item))
     return;
   if (color.isValid())
@@ -1033,8 +959,7 @@ QColor QtTreePropertyBrowser::backgroundColor(QtBrowserItem *item) const {
     \sa backgroundColor(), setBackgroundColor()
 */
 
-QColor
-QtTreePropertyBrowser::calculatedBackgroundColor(QtBrowserItem *item) const {
+QColor QtTreePropertyBrowser::calculatedBackgroundColor(QtBrowserItem *item) const {
   return d_ptr->calculatedBackgroundColor(item);
 }
 
@@ -1062,50 +987,37 @@ void QtTreePropertyBrowser::setPropertiesWithoutValueMarked(bool mark) {
   d_ptr->m_treeWidget->viewport()->update();
 }
 
-bool QtTreePropertyBrowser::propertiesWithoutValueMarked() const {
-  return d_ptr->m_markPropertiesWithoutValue;
-}
+bool QtTreePropertyBrowser::propertiesWithoutValueMarked() const { return d_ptr->m_markPropertiesWithoutValue; }
 
 /**
     \reimp
 */
-void QtTreePropertyBrowser::itemInserted(QtBrowserItem *item,
-                                         QtBrowserItem *afterItem) {
+void QtTreePropertyBrowser::itemInserted(QtBrowserItem *item, QtBrowserItem *afterItem) {
   d_ptr->propertyInserted(item, afterItem);
 }
 
 /**
     \reimp
 */
-void QtTreePropertyBrowser::itemRemoved(QtBrowserItem *item) {
-  d_ptr->propertyRemoved(item);
-}
+void QtTreePropertyBrowser::itemRemoved(QtBrowserItem *item) { d_ptr->propertyRemoved(item); }
 
 /**
     \reimp
 */
-void QtTreePropertyBrowser::itemChanged(QtBrowserItem *item) {
-  d_ptr->propertyChanged(item);
-}
+void QtTreePropertyBrowser::itemChanged(QtBrowserItem *item) { d_ptr->propertyChanged(item); }
 
 /**
     Sets the current item to \a item and opens the relevant editor for it.
 */
-void QtTreePropertyBrowser::editItem(QtBrowserItem *item) {
-  d_ptr->editItem(item);
-}
+void QtTreePropertyBrowser::editItem(QtBrowserItem *item) { d_ptr->editItem(item); }
 
-void QtTreePropertyBrowser::setColumnSizes(int s0, int s1, int s2) {
-  d_ptr->setColumnSizes(s0, s1, s2);
-}
+void QtTreePropertyBrowser::setColumnSizes(int s0, int s1, int s2) { d_ptr->setColumnSizes(s0, s1, s2); }
 
 void QtTreePropertyBrowser::hideColumn(int col) { d_ptr->hideColumn(col); }
 
 void QtTreePropertyBrowser::showColumn(int col) { d_ptr->showColumn(col); }
 
-QTreeWidgetItem *QtTreePropertyBrowser::getItemWidget(QtBrowserItem *item) {
-  return d_ptr->getItemWidget(item);
-}
+QTreeWidgetItem *QtTreePropertyBrowser::getItemWidget(QtBrowserItem *item) { return d_ptr->getItemWidget(item); }
 
 QTreeWidget *QtTreePropertyBrowser::treeWidget() { return d_ptr->treeWidget(); }
 

@@ -15,7 +15,6 @@
  * Once RHEL7 support is dropped usages should be replaced with the more
  * readable .value_or member function.
  */
-template <typename T, typename U>
-T value_or(boost::optional<T> const &value, U &&ifEmpty) {
+template <typename T, typename U> T value_or(boost::optional<T> const &value, U &&ifEmpty) {
   return value.get_value_or(ifEmpty);
 }

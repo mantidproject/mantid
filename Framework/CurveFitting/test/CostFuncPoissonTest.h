@@ -27,8 +27,7 @@ namespace {
 // Taken from CostFuncPoisson
 const double cutOffPoint = 0.0001;
 
-std::vector<double> calculateDeterminant(const FunctionValues &vals,
-                                         size_t numParams) {
+std::vector<double> calculateDeterminant(const FunctionValues &vals, size_t numParams) {
   Mantid::CurveFitting::Jacobian jacob(vals.size(), numParams);
   std::vector<double> expectedVals(numParams);
 
@@ -40,8 +39,7 @@ std::vector<double> calculateDeterminant(const FunctionValues &vals,
       const double fitted = vals.getCalculated(iDataPoint);
       const double binCounts = vals.getFitData(iDataPoint);
 
-      expectedVals[iParam] =
-          jacob.get(iDataPoint, iParam) * (1 - binCounts / fitted);
+      expectedVals[iParam] = jacob.get(iDataPoint, iParam) * (1 - binCounts / fitted);
     }
   }
 
@@ -71,12 +69,10 @@ FunctionDomain_sptr getFakeDomain(int startY, int endY) {
   return std::make_shared<FunctionDomain1DVector>(startY, endY, numSteps);
 }
 
-FunctionValues_sptr getFakeValues(const std::vector<double> &nValues,
-                                  const FunctionDomain &domain) {
+FunctionValues_sptr getFakeValues(const std::vector<double> &nValues, const FunctionDomain &domain) {
   // The number of fake values must match the domain points for the test to be
   // sane
-  assert(domain.size() == nValues.size() &&
-         "The number of points must match domain size");
+  assert(domain.size() == nValues.size() && "The number of points must match domain size");
   auto funcValues = std::make_shared<FunctionValues>(domain);
 
   for (size_t i = 0; i < nValues.size(); i++) {
@@ -100,9 +96,7 @@ class CostFuncPoissonTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static CostFuncPoissonTest *createSuite() {
-    return new CostFuncPoissonTest();
-  }
+  static CostFuncPoissonTest *createSuite() { return new CostFuncPoissonTest(); }
   static void destroySuite(CostFuncPoissonTest *suite) { delete suite; }
 
   void test_y_at_0_returns_inf() {
@@ -142,8 +136,7 @@ public:
 
     testInstance.addVal(domain, vals);
 
-    const int sumOfValues =
-        std::accumulate(differenceVals.begin(), differenceVals.end(), 0);
+    const int sumOfValues = std::accumulate(differenceVals.begin(), differenceVals.end(), 0);
     TS_ASSERT_EQUALS(testInstance.val(), sumOfValues * 2)
   }
 
@@ -183,8 +176,7 @@ public:
 
     const size_t numPoints = 10;
 
-    auto domain = std::make_shared<FunctionDomain1DVector>(
-        (cutOffPoint / numPoints), cutOffPoint, numPoints);
+    auto domain = std::make_shared<FunctionDomain1DVector>((cutOffPoint / numPoints), cutOffPoint, numPoints);
 
     std::vector<double> fakeVals(numPoints);
     std::iota(fakeVals.begin(), fakeVals.end(), 1);

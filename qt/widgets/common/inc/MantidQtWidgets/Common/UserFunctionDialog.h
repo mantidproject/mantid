@@ -50,8 +50,7 @@ private:
   QString getCurrentCategory() const;
   QString getFunction(const QString &cat, const QString &fun) const;
   QString getComment(const QString &cat, const QString &fun) const;
-  void setFunction(const QString &cat, const QString &fun, const QString &expr,
-                   const QString &comment = "");
+  void setFunction(const QString &cat, const QString &fun, const QString &expr, const QString &comment = "");
   bool isBuiltin(const QString &cat) const;
   void saveToFile();
 

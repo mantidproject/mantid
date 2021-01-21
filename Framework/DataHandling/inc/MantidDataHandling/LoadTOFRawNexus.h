@@ -26,8 +26,7 @@ namespace DataHandling {
  Loads a NeXus file that conforms to the TOFRaw instrument definition format and
  stores it in a 2D workspace.
  */
-class DLLExport LoadTOFRawNexus
-    : public API::IFileLoader<Kernel::NexusDescriptor> {
+class DLLExport LoadTOFRawNexus : public API::IFileLoader<Kernel::NexusDescriptor> {
 public:
   /// Default Constructor
   LoadTOFRawNexus();
@@ -36,15 +35,11 @@ public:
   const std::string name() const override { return "LoadTOFRawNexus"; }
 
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Loads a NeXus file confirming to the TOFRaw format";
-  }
+  const std::string summary() const override { return "Loads a NeXus file confirming to the TOFRaw format"; }
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
-  const std::vector<std::string> seeAlso() const override {
-    return {"LoadNexus"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"LoadNexus"}; }
 
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "DataHandling\\Nexus"; }
@@ -54,8 +49,7 @@ public:
   /// Returns a confidence value that this algorithm can load a file
   int confidence(Kernel::NexusDescriptor &descriptor) const override;
 
-  void countPixels(const std::string &nexusfilename,
-                   const std::string &entry_name,
+  void countPixels(const std::string &nexusfilename, const std::string &entry_name,
                    std::vector<std::string> &bankNames);
 
   /// Number of pixels
@@ -75,13 +69,10 @@ protected:
   void runLoadInstrument(DataObjects::Workspace2D_sptr);
 
   /// Load in details about the sample
-  void loadSampleData(DataObjects::Workspace2D_sptr,
-                      Mantid::NeXus::NXEntry &entry);
+  void loadSampleData(DataObjects::Workspace2D_sptr, Mantid::NeXus::NXEntry &entry);
 
-  void loadBank(const std::string &nexusfilename, const std::string &entry_name,
-                const std::string &bankName,
-                const API::MatrixWorkspace_sptr &WS,
-                const detid2index_map &id_to_wi);
+  void loadBank(const std::string &nexusfilename, const std::string &entry_name, const std::string &bankName,
+                const API::MatrixWorkspace_sptr &WS, const detid2index_map &id_to_wi);
 
   /// List of the absolute time of each pulse
   std::vector<Types::Core::DateAndTime> pulseTimes;

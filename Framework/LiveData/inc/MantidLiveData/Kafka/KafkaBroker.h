@@ -18,12 +18,10 @@ class DLLExport KafkaBroker : public IKafkaBroker {
 public:
   explicit KafkaBroker(std::string address);
 
-  std::unique_ptr<IKafkaStreamSubscriber>
-  subscribe(std::vector<std::string> topics,
-            SubscribeAtOption subscribeOption) const override;
-  std::unique_ptr<IKafkaStreamSubscriber>
-  subscribe(std::vector<std::string> topics, int64_t offset,
-            SubscribeAtOption subscribeOption) const override;
+  std::unique_ptr<IKafkaStreamSubscriber> subscribe(std::vector<std::string> topics,
+                                                    SubscribeAtOption subscribeOption) const override;
+  std::unique_ptr<IKafkaStreamSubscriber> subscribe(std::vector<std::string> topics, int64_t offset,
+                                                    SubscribeAtOption subscribeOption) const override;
 
 private:
   std::string m_address;

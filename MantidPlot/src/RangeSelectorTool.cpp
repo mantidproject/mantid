@@ -44,23 +44,18 @@
 
 using namespace MantidQt::API;
 
-RangeSelectorTool::RangeSelectorTool(Graph *graph, const QObject *status_target,
-                                     const char *status_slot)
-    : QwtPlotPicker(graph->plotWidget()->canvas()), PlotToolInterface(graph),
-      d_active_point(0), d_inactive_point(0), d_selected_curve(nullptr),
-      d_enabled(false), d_visible(false) {
+RangeSelectorTool::RangeSelectorTool(Graph *graph, const QObject *status_target, const char *status_slot)
+    : QwtPlotPicker(graph->plotWidget()->canvas()), PlotToolInterface(graph), d_active_point(0), d_inactive_point(0),
+      d_selected_curve(nullptr), d_enabled(false), d_visible(false) {
   d_selected_curve = nullptr;
   for (int i = d_graph->curves(); i >= 0; --i) {
     d_selected_curve = d_graph->curve(i);
-    if (d_selected_curve &&
-        d_selected_curve->rtti() == QwtPlotItem::Rtti_PlotCurve &&
-        d_selected_curve->dataSize() > 0)
+    if (d_selected_curve && d_selected_curve->rtti() == QwtPlotItem::Rtti_PlotCurve && d_selected_curve->dataSize() > 0)
       break;
     d_selected_curve = nullptr;
   }
   if (!d_selected_curve) {
-    QMessageBox::critical(d_graph, tr("MantidPlot - Warning"),
-                          tr("All the curves on this plot are empty!"));
+    QMessageBox::critical(d_graph, tr("MantidPlot - Warning"), tr("All the curves on this plot are empty!"));
     return;
   }
 
@@ -70,35 +65,29 @@ RangeSelectorTool::RangeSelectorTool(Graph *graph, const QObject *status_target,
   d_inactive_point = d_selected_curve->dataSize() - 1;
   int marker_size = 20;
 
-  d_active_marker.setSymbol(QwtSymbol(
-      QwtSymbol::Cross,
-      QBrush(QColor(255, 255, 255, 0)), // QBrush(QColor(255,255,0,128)),
-      QPen(Qt::red, 2), QSize(marker_size, marker_size)));
+  d_active_marker.setSymbol(QwtSymbol(QwtSymbol::Cross,
+                                      QBrush(QColor(255, 255, 255, 0)), // QBrush(QColor(255,255,0,128)),
+                                      QPen(Qt::red, 2), QSize(marker_size, marker_size)));
   d_active_marker.setLineStyle(QwtPlotMarker::VLine);
   d_active_marker.setLinePen(QPen(Qt::red, 1, Qt::DashLine));
-  d_inactive_marker.setSymbol(QwtSymbol(
-      QwtSymbol::Cross,
-      QBrush(QColor(255, 255, 255, 0)), // QBrush(QColor(255,255,0,128)),
-      QPen(Qt::black, 2), QSize(marker_size, marker_size)));
+  d_inactive_marker.setSymbol(QwtSymbol(QwtSymbol::Cross,
+                                        QBrush(QColor(255, 255, 255, 0)), // QBrush(QColor(255,255,0,128)),
+                                        QPen(Qt::black, 2), QSize(marker_size, marker_size)));
   d_inactive_marker.setLineStyle(QwtPlotMarker::VLine);
   d_inactive_marker.setLinePen(QPen(Qt::black, 1, Qt::DashLine));
-  d_active_marker.setValue(d_selected_curve->x(d_active_point),
-                           d_selected_curve->y(d_active_point));
-  d_inactive_marker.setValue(d_selected_curve->x(d_inactive_point),
-                             d_selected_curve->y(d_inactive_point));
+  d_active_marker.setValue(d_selected_curve->x(d_active_point), d_selected_curve->y(d_active_point));
+  d_inactive_marker.setValue(d_selected_curve->x(d_inactive_point), d_selected_curve->y(d_inactive_point));
   d_active_marker.attach(d_graph->plotWidget());
   d_inactive_marker.attach(d_graph->plotWidget());
 
   setTrackerMode(QwtPicker::AlwaysOn);
   setSelectionFlags(QwtPicker::PointSelection | QwtPicker::ClickSelection);
-  d_graph->plotWidget()->canvas()->setCursor(
-      QCursor(getQPixmap("vizor_xpm"), -1, -1));
+  d_graph->plotWidget()->canvas()->setCursor(QCursor(getQPixmap("vizor_xpm"), -1, -1));
   d_graph->plotWidget()->canvas()->setFocus();
   d_graph->plotWidget()->replot();
 
   if (status_target)
-    connect(this, SIGNAL(statusText(const QString &)), status_target,
-            status_slot);
+    connect(this, SIGNAL(statusText(const QString &)), status_target, status_slot);
   emit statusText(tr("Click or use Ctrl+arrow key to select range (arrows "
                      "select active cursor)!"));
 }
@@ -112,12 +101,10 @@ RangeSelectorTool::~RangeSelectorTool() {
 
 void RangeSelectorTool::pointSelected(const QPoint &pos) {
   int dist, point;
-  const int curve_key =
-      d_graph->plotWidget()->closestCurve(pos.x(), pos.y(), dist, point);
+  const int curve_key = d_graph->plotWidget()->closestCurve(pos.x(), pos.y(), dist, point);
   if (curve_key < 0 || dist >= 5) // 5 pixels tolerance
     return;
-  QwtPlotCurve *curve =
-      static_cast<QwtPlotCurve *>(d_graph->plotWidget()->curve(curve_key));
+  QwtPlotCurve *curve = static_cast<QwtPlotCurve *>(d_graph->plotWidget()->curve(curve_key));
   if (!curve)
     return;
 
@@ -127,13 +114,10 @@ void RangeSelectorTool::pointSelected(const QPoint &pos) {
     d_selected_curve = curve;
 
     d_active_point = point;
-    d_active_marker.setValue(d_selected_curve->x(d_active_point),
-                             d_selected_curve->y(d_active_point));
+    d_active_marker.setValue(d_selected_curve->x(d_active_point), d_selected_curve->y(d_active_point));
 
-    d_active_point > 0 ? d_inactive_point = 0
-                       : d_inactive_point = d_selected_curve->dataSize() - 1;
-    d_inactive_marker.setValue(curve->x(d_inactive_point),
-                               curve->y(d_inactive_point));
+    d_active_point > 0 ? d_inactive_point = 0 : d_inactive_point = d_selected_curve->dataSize() - 1;
+    d_inactive_marker.setValue(curve->x(d_inactive_point), curve->y(d_inactive_point));
     emitStatusText();
     emit changed();
   }
@@ -146,10 +130,8 @@ void RangeSelectorTool::setSelectedCurve(QwtPlotCurve *curve) {
   d_selected_curve = curve;
   d_active_point = 0;
   d_inactive_point = d_selected_curve->dataSize() - 1;
-  d_active_marker.setValue(d_selected_curve->x(d_active_point),
-                           d_selected_curve->y(d_active_point));
-  d_inactive_marker.setValue(d_selected_curve->x(d_inactive_point),
-                             d_selected_curve->y(d_inactive_point));
+  d_active_marker.setValue(d_selected_curve->x(d_active_point), d_selected_curve->y(d_active_point));
+  d_inactive_marker.setValue(d_selected_curve->x(d_inactive_point), d_selected_curve->y(d_inactive_point));
   emitStatusText();
   emit changed();
 }
@@ -158,45 +140,33 @@ void RangeSelectorTool::setActivePoint(int point) {
   if (!d_enabled || point == d_active_point)
     return;
   d_active_point = point;
-  d_active_marker.setValue(d_selected_curve->x(d_active_point),
-                           d_selected_curve->y(d_active_point));
+  d_active_marker.setValue(d_selected_curve->x(d_active_point), d_selected_curve->y(d_active_point));
   emitStatusText();
   emit changed();
 }
 
 void RangeSelectorTool::emitStatusText() {
   QLocale locale = d_graph->plotWidget()->locale();
-  if ((static_cast<PlotCurve *>(d_selected_curve))->type() ==
-      GraphOptions::Function) {
-    emit statusText(
-        QString("%1 <=> %2[%3]: x=%4; y=%5")
-            .arg(d_active_marker.xValue() > d_inactive_marker.xValue()
-                     ? tr("Right")
-                     : tr("Left"))
-            .arg(d_selected_curve->title().text())
-            .arg(d_active_point + 1)
-            .arg(locale.toString(d_selected_curve->x(d_active_point), 'G', 16))
-            .arg(
-                locale.toString(d_selected_curve->y(d_active_point), 'G', 16)));
+  if ((static_cast<PlotCurve *>(d_selected_curve))->type() == GraphOptions::Function) {
+    emit statusText(QString("%1 <=> %2[%3]: x=%4; y=%5")
+                        .arg(d_active_marker.xValue() > d_inactive_marker.xValue() ? tr("Right") : tr("Left"))
+                        .arg(d_selected_curve->title().text())
+                        .arg(d_active_point + 1)
+                        .arg(locale.toString(d_selected_curve->x(d_active_point), 'G', 16))
+                        .arg(locale.toString(d_selected_curve->y(d_active_point), 'G', 16)));
   } else {
     Table *t = (static_cast<DataCurve *>(d_selected_curve))->table();
     if (!t)
       return;
 
-    int row =
-        (static_cast<DataCurve *>(d_selected_curve))->tableRow(d_active_point);
+    int row = (static_cast<DataCurve *>(d_selected_curve))->tableRow(d_active_point);
 
-    emit statusText(
-        QString("%1 <=> %2[%3]: x=%4; y=%5")
-            .arg(d_active_marker.xValue() > d_inactive_marker.xValue()
-                     ? tr("Right")
-                     : tr("Left"))
-            .arg(d_selected_curve->title().text())
-            .arg(row + 1)
-            .arg(t->text(
-                row, t->colIndex((static_cast<DataCurve *>(d_selected_curve))
-                                     ->xColumnName())))
-            .arg(t->text(row, t->colIndex(d_selected_curve->title().text()))));
+    emit statusText(QString("%1 <=> %2[%3]: x=%4; y=%5")
+                        .arg(d_active_marker.xValue() > d_inactive_marker.xValue() ? tr("Right") : tr("Left"))
+                        .arg(d_selected_curve->title().text())
+                        .arg(row + 1)
+                        .arg(t->text(row, t->colIndex((static_cast<DataCurve *>(d_selected_curve))->xColumnName())))
+                        .arg(t->text(row, t->colIndex(d_selected_curve->title().text()))));
   }
 }
 
@@ -299,38 +269,29 @@ void RangeSelectorTool::clearSelection() {
   if (!d_selected_curve)
     return;
 
-  if ((static_cast<PlotCurve *>(d_selected_curve))->type() !=
-      GraphOptions::Function) {
+  if ((static_cast<PlotCurve *>(d_selected_curve))->type() != GraphOptions::Function) {
     Table *t = (static_cast<DataCurve *>(d_selected_curve))->table();
     if (!t)
       return;
 
-    if (t->isReadOnlyColumn(t->colIndex(
-            (static_cast<DataCurve *>(d_selected_curve))->xColumnName()))) {
-      QMessageBox::warning(
-          d_graph, tr("MantidPlot - Warning"),
-          tr("The column '%1' is read-only! Operation aborted!")
-              .arg(
-                  (static_cast<DataCurve *>(d_selected_curve))->xColumnName()));
+    if (t->isReadOnlyColumn(t->colIndex((static_cast<DataCurve *>(d_selected_curve))->xColumnName()))) {
+      QMessageBox::warning(d_graph, tr("MantidPlot - Warning"),
+                           tr("The column '%1' is read-only! Operation aborted!")
+                               .arg((static_cast<DataCurve *>(d_selected_curve))->xColumnName()));
       return;
-    } else if (t->isReadOnlyColumn(
-                   t->colIndex(d_selected_curve->title().text()))) {
+    } else if (t->isReadOnlyColumn(t->colIndex(d_selected_curve->title().text()))) {
       QMessageBox::warning(
           d_graph, tr("MantidPlot - Warning"),
-          tr("The column '%1' is read-only! Operation aborted!")
-              .arg(d_selected_curve->title().text()));
+          tr("The column '%1' is read-only! Operation aborted!").arg(d_selected_curve->title().text()));
       return;
     }
 
     int start_point = qMin(d_active_point, d_inactive_point);
-    int start_row =
-        (static_cast<DataCurve *>(d_selected_curve))->tableRow(start_point);
+    int start_row = (static_cast<DataCurve *>(d_selected_curve))->tableRow(start_point);
     int end_point = qMax(d_active_point, d_inactive_point);
-    int end_row =
-        (static_cast<DataCurve *>(d_selected_curve))->tableRow(end_point);
+    int end_row = (static_cast<DataCurve *>(d_selected_curve))->tableRow(end_point);
     int col = t->colIndex(d_selected_curve->title().text());
-    bool ok_update =
-        (end_point - start_point + 1) < d_selected_curve->dataSize();
+    bool ok_update = (end_point - start_point + 1) < d_selected_curve->dataSize();
     for (int i = start_row; i <= end_row; i++)
       t->setText(i, col, "");
     t->notifyChanges();
@@ -338,10 +299,8 @@ void RangeSelectorTool::clearSelection() {
     if (ok_update) {
       d_active_point = 0;
       d_inactive_point = d_selected_curve->dataSize() - 1;
-      d_active_marker.setValue(d_selected_curve->x(d_active_point),
-                               d_selected_curve->y(d_active_point));
-      d_inactive_marker.setValue(d_selected_curve->x(d_inactive_point),
-                                 d_selected_curve->y(d_inactive_point));
+      d_active_marker.setValue(d_selected_curve->x(d_active_point), d_selected_curve->y(d_active_point));
+      d_inactive_marker.setValue(d_selected_curve->x(d_inactive_point), d_selected_curve->y(d_inactive_point));
       emitStatusText();
       emit changed();
       d_graph->plotWidget()->replot();
@@ -355,26 +314,21 @@ void RangeSelectorTool::pasteSelection() {
   if (text.isEmpty())
     return;
 
-  if ((static_cast<PlotCurve *>(d_selected_curve))->type() ==
-      GraphOptions::Function)
+  if ((static_cast<PlotCurve *>(d_selected_curve))->type() == GraphOptions::Function)
     return;
 
   Table *t = (static_cast<DataCurve *>(d_selected_curve))->table();
   if (!t)
     return;
 
-  if (t->isReadOnlyColumn(t->colIndex(
-          (static_cast<DataCurve *>(d_selected_curve))->xColumnName()))) {
-    QMessageBox::warning(
-        d_graph, tr("MantidPlot - Warning"),
-        tr("The column '%1' is read-only! Operation aborted!")
-            .arg((static_cast<DataCurve *>(d_selected_curve))->xColumnName()));
-    return;
-  } else if (t->isReadOnlyColumn(
-                 t->colIndex(d_selected_curve->title().text()))) {
+  if (t->isReadOnlyColumn(t->colIndex((static_cast<DataCurve *>(d_selected_curve))->xColumnName()))) {
     QMessageBox::warning(d_graph, tr("MantidPlot - Warning"),
                          tr("The column '%1' is read-only! Operation aborted!")
-                             .arg(d_selected_curve->title().text()));
+                             .arg((static_cast<DataCurve *>(d_selected_curve))->xColumnName()));
+    return;
+  } else if (t->isReadOnlyColumn(t->colIndex(d_selected_curve->title().text()))) {
+    QMessageBox::warning(d_graph, tr("MantidPlot - Warning"),
+                         tr("The column '%1' is read-only! Operation aborted!").arg(d_selected_curve->title().text()));
     return;
   }
 
@@ -382,11 +336,9 @@ void RangeSelectorTool::pasteSelection() {
 
   QTextStream ts(&text, QIODevice::ReadOnly);
   int start_point = qMin(d_active_point, d_inactive_point);
-  int start_row =
-      (static_cast<DataCurve *>(d_selected_curve))->tableRow(start_point);
+  int start_row = (static_cast<DataCurve *>(d_selected_curve))->tableRow(start_point);
   int end_point = qMax(d_active_point, d_inactive_point);
-  int end_row =
-      (static_cast<DataCurve *>(d_selected_curve))->tableRow(end_point);
+  int end_row = (static_cast<DataCurve *>(d_selected_curve))->tableRow(end_point);
   int col = t->colIndex(d_selected_curve->title().text());
 
   int prec;
@@ -414,10 +366,8 @@ void RangeSelectorTool::pasteSelection() {
 
   t->notifyChanges();
 
-  d_active_marker.setValue(d_selected_curve->x(d_active_point),
-                           d_selected_curve->y(d_active_point));
-  d_inactive_marker.setValue(d_selected_curve->x(d_inactive_point),
-                             d_selected_curve->y(d_inactive_point));
+  d_active_marker.setValue(d_selected_curve->x(d_active_point), d_selected_curve->y(d_active_point));
+  d_inactive_marker.setValue(d_selected_curve->x(d_inactive_point), d_selected_curve->y(d_inactive_point));
   emitStatusText();
   emit changed();
   d_graph->plotWidget()->replot();
@@ -429,11 +379,9 @@ void RangeSelectorTool::setCurveRange() {
   if (!d_selected_curve)
     return;
 
-  if ((static_cast<PlotCurve *>(d_selected_curve))->type() !=
-      GraphOptions::Function) {
+  if ((static_cast<PlotCurve *>(d_selected_curve))->type() != GraphOptions::Function) {
     (static_cast<DataCurve *>(d_selected_curve))
-        ->setRowRange(qMin(d_active_point, d_inactive_point),
-                      qMax(d_active_point, d_inactive_point));
+        ->setRowRange(qMin(d_active_point, d_inactive_point), qMax(d_active_point, d_inactive_point));
     d_graph->updatePlot();
     d_graph->notifyChanges();
   }
@@ -442,6 +390,5 @@ void RangeSelectorTool::setCurveRange() {
 void RangeSelectorTool::setEnabled(bool on) {
   d_enabled = on;
   if (on)
-    d_graph->plotWidget()->canvas()->setCursor(
-        QCursor(getQPixmap("vizor_xpm"), -1, -1));
+    d_graph->plotWidget()->canvas()->setCursor(QCursor(getQPixmap("vizor_xpm"), -1, -1));
 }

@@ -39,14 +39,11 @@ public:
   /// Algorithm's version for identification
   int version() const override { return 1; }
   const std::vector<std::string> seeAlso() const override {
-    return {"IntegratePeaksHybrid", "IntegratePeaksMDHKL", "IntegratePeaksMD",
-            "IntegratePeaksUsingClusters"};
+    return {"IntegratePeaksHybrid", "IntegratePeaksMDHKL", "IntegratePeaksMD", "IntegratePeaksUsingClusters"};
   }
 
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "MDAlgorithms\\Peaks;Crystal\\Integration";
-  }
+  const std::string category() const override { return "MDAlgorithms\\Peaks;Crystal\\Integration"; }
 
 private:
   /// Initialise the properties
@@ -69,8 +66,7 @@ private:
   /// Get the run/measuring time map
   std::map<int, double> getMeasureTime();
 
-  std::vector<detid_t>
-  processMaskWorkspace(const DataObjects::MaskWorkspace_const_sptr &maskws);
+  std::vector<detid_t> processMaskWorkspace(const DataObjects::MaskWorkspace_const_sptr &maskws);
 
   void getPeakInformation();
 
@@ -81,9 +77,7 @@ private:
   /// Implement this method to normalize the intensity of each Pt.
   void normalizePeaksIntensities();
 
-  DataObjects::PeaksWorkspace_sptr
-  createPeakworkspace(Kernel::V3D peakCenter,
-                      const API::IMDEventWorkspace_sptr &mdws);
+  DataObjects::PeaksWorkspace_sptr createPeakworkspace(Kernel::V3D peakCenter, const API::IMDEventWorkspace_sptr &mdws);
 
   /// Input MDEventWorkspace
   Mantid::API::IMDEventWorkspace_sptr m_inputWS;

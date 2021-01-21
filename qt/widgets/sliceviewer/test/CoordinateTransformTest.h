@@ -31,35 +31,32 @@ private:
     Mantid::Kernel::ReciprocalLatticeUnitFactory factory;
     auto product = factory.create(Mantid::Kernel::Units::Symbol::RLU);
     Mantid::Geometry::HKL frame(product);
-    auto workspace =
-        Mantid::DataObjects::MDEventsTestHelper::makeMDEWWithFrames<3>(
-            5, -10, 10, frame);
+    auto workspace = Mantid::DataObjects::MDEventsTestHelper::makeMDEWWithFrames<3>(5, -10, 10, frame);
     return workspace;
   }
   size_t m_dimX = 0;
   size_t m_dimY = 1;
   size_t m_sliceDim = 2;
 
-  Mantid::API::IMDEventWorkspace_sptr getNonOrthogonalEventWorkspace(
-      bool wrongCoords = false, bool forgetUB = false, bool forgetWmat = false,
-      bool forgetAffmat = false, double scale = 1.0) {
+  Mantid::API::IMDEventWorkspace_sptr getNonOrthogonalEventWorkspace(bool wrongCoords = false, bool forgetUB = false,
+                                                                     bool forgetWmat = false, bool forgetAffmat = false,
+                                                                     double scale = 1.0) {
     Mantid::API::IMDEventWorkspace_sptr ws;
     std::string wsName = "simpleWS";
     if (wrongCoords) {
       Mantid::Geometry::QSample frame;
-      ws = Mantid::DataObjects::MDEventsTestHelper::makeAnyMDEWWithFrames<
-          Mantid::DataObjects::MDEvent<4>, 4>(1, 0.0, 1.0, frame, 1, wsName);
+      ws = Mantid::DataObjects::MDEventsTestHelper::makeAnyMDEWWithFrames<Mantid::DataObjects::MDEvent<4>, 4>(
+          1, 0.0, 1.0, frame, 1, wsName);
     } else {
       Mantid::Kernel::ReciprocalLatticeUnitFactory factory;
       auto product = factory.create(Mantid::Kernel::Units::Symbol::RLU);
       Mantid::Geometry::HKL frame(product);
-      ws = Mantid::DataObjects::MDEventsTestHelper::makeAnyMDEWWithFrames<
-          Mantid::DataObjects::MDEvent<4>, 4>(1, 0.0, 1.0, frame, 1, wsName);
+      ws = Mantid::DataObjects::MDEventsTestHelper::makeAnyMDEWWithFrames<Mantid::DataObjects::MDEvent<4>, 4>(
+          1, 0.0, 1.0, frame, 1, wsName);
     }
     if (!forgetUB) {
       // add UB Matrix
-      Mantid::API::IAlgorithm_sptr alg =
-          Mantid::API::AlgorithmManager::Instance().create("SetUB");
+      Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("SetUB");
       alg->initialize();
       alg->setRethrows(true);
       alg->setProperty("Workspace", wsName);
@@ -83,9 +80,7 @@ private:
     }
 
     // Create the coordinate transformation information
-    std::vector<Mantid::coord_t> affMatVals{1, 0, 0, 0, 0, 0, 0, 1, 0,
-                                            0, 0, 0, 0, 1, 0, 0, 1, 0,
-                                            0, 0, 0, 0, 0, 0, 1};
+    std::vector<Mantid::coord_t> affMatVals{1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1};
 
     Mantid::DataObjects::CoordTransformAffine affMat(4, 4);
     affMat.setMatrix(Mantid::Kernel::Matrix<Mantid::coord_t>(affMatVals));
@@ -99,8 +94,7 @@ private:
     wMat = temp.getVector();
     if (!forgetWmat) {
       Mantid::Kernel::PropertyWithValue<std::vector<double>> *p;
-      p = new Mantid::Kernel::PropertyWithValue<std::vector<double>>("W_MATRIX",
-                                                                     wMat);
+      p = new Mantid::Kernel::PropertyWithValue<std::vector<double>>("W_MATRIX", wMat);
       ws->getExperimentInfo(0)->mutableRun().addProperty(p, true);
     }
     return ws;
@@ -129,15 +123,12 @@ public:
     Mantid::Kernel::VMD coords = eventWorkspace->getNumDims();
 
     // Act
-    auto m_coordinateTransform =
-        MantidQt::SliceViewer::createCoordinateTransform(*eventWorkspace,
-                                                         m_dimX, m_dimY);
+    auto m_coordinateTransform = MantidQt::SliceViewer::createCoordinateTransform(*eventWorkspace, m_dimX, m_dimY);
     m_coordinateTransform->transform(coords, m_dimX, m_dimY, m_sliceDim);
 
     // cast into null
     TSM_ASSERT("Orthogonal workspaces should not be transformed",
-               dynamic_cast<MantidQt::SliceViewer::NullTransform *>(
-                   m_coordinateTransform.get()));
+               dynamic_cast<MantidQt::SliceViewer::NullTransform *>(m_coordinateTransform.get()));
   }
 
   void test_NonOrthogonalTransform() {
@@ -146,36 +137,29 @@ public:
     Mantid::Kernel::VMD coords = eventWorkspace->getNumDims();
 
     // Act
-    auto m_coordinateTransform =
-        MantidQt::SliceViewer::createCoordinateTransform(*eventWorkspace,
-                                                         m_dimX, m_dimY);
+    auto m_coordinateTransform = MantidQt::SliceViewer::createCoordinateTransform(*eventWorkspace, m_dimX, m_dimY);
     m_coordinateTransform->transform(coords, m_dimX, m_dimY, m_sliceDim);
 
     // Assert
     TSM_ASSERT("Orthogonal workspaces should not be transformed",
-               dynamic_cast<MantidQt::SliceViewer::NonOrthogonalTransform *>(
-                   m_coordinateTransform.get()));
+               dynamic_cast<MantidQt::SliceViewer::NonOrthogonalTransform *>(m_coordinateTransform.get()));
   }
 
   void test_NonOrthogonalZeroReturnsZero() {
     // arrange
     auto eventWorkspace = getNonOrthogonalEventWorkspace();
     Mantid::Kernel::VMD coords = eventWorkspace->getNumDims();
-    for (size_t d = 0; d < eventWorkspace->getNumDims();
-         d++) // change to num dims of eventworkspace
+    for (size_t d = 0; d < eventWorkspace->getNumDims(); d++) // change to num dims of eventworkspace
     {
       coords[d] = Mantid::Kernel::VMD_t(0.0);
     }
 
     // act
-    auto m_coordinateTransform =
-        MantidQt::SliceViewer::createCoordinateTransform(*eventWorkspace,
-                                                         m_dimX, m_dimY);
+    auto m_coordinateTransform = MantidQt::SliceViewer::createCoordinateTransform(*eventWorkspace, m_dimX, m_dimY);
     m_coordinateTransform->transform(coords, m_dimX, m_dimY, m_sliceDim);
 
     // assert
-    TSM_ASSERT_EQUALS("Zero coords should not be changed by skew matrix",
-                      coords[0], 0.0);
+    TSM_ASSERT_EQUALS("Zero coords should not be changed by skew matrix", coords[0], 0.0);
   }
 
   void test_NonOrthogonalSkewCorrectness() {
@@ -188,9 +172,7 @@ public:
     }
 
     // Act
-    auto m_coordinateTransform =
-        MantidQt::SliceViewer::createCoordinateTransform(*eventWorkspace,
-                                                         m_dimX, m_dimY);
+    auto m_coordinateTransform = MantidQt::SliceViewer::createCoordinateTransform(*eventWorkspace, m_dimX, m_dimY);
     m_coordinateTransform->transform(coords, m_dimX, m_dimY, m_sliceDim);
     double expectedValue = 0.75;
     bool skewCorrect = skewWithinTolerance(coords[0], expectedValue);
@@ -203,15 +185,11 @@ public:
     Mantid::Kernel::VMD coords = eventWorkspace->getNumDims();
 
     // Act
-    auto m_coordinateTransform =
-        MantidQt::SliceViewer::createCoordinateTransform(*eventWorkspace,
-                                                         m_dimX, m_dimY);
+    auto m_coordinateTransform = MantidQt::SliceViewer::createCoordinateTransform(*eventWorkspace, m_dimX, m_dimY);
     m_coordinateTransform->transform(coords, m_dimX, m_dimY, m_sliceDim);
     // Assert
-    TSM_ASSERT(
-        "Datasets with wrong coordinates (non HKL) should not be transformed",
-        dynamic_cast<MantidQt::SliceViewer::NullTransform *>(
-            m_coordinateTransform.get()));
+    TSM_ASSERT("Datasets with wrong coordinates (non HKL) should not be transformed",
+               dynamic_cast<MantidQt::SliceViewer::NullTransform *>(m_coordinateTransform.get()));
   }
 
   void test_ThrowsSimpleDatasetNoUBMatrix() {
@@ -220,14 +198,11 @@ public:
     Mantid::Kernel::VMD coords = eventWorkspace->getNumDims();
 
     // Act
-    auto m_coordinateTransform =
-        MantidQt::SliceViewer::createCoordinateTransform(*eventWorkspace,
-                                                         m_dimX, m_dimY);
+    auto m_coordinateTransform = MantidQt::SliceViewer::createCoordinateTransform(*eventWorkspace, m_dimX, m_dimY);
     m_coordinateTransform->transform(coords, m_dimX, m_dimY, m_sliceDim);
     // Assert
     TSM_ASSERT("Datasets without a UBmatrix should not be transformed",
-               dynamic_cast<MantidQt::SliceViewer::NullTransform *>(
-                   m_coordinateTransform.get()));
+               dynamic_cast<MantidQt::SliceViewer::NullTransform *>(m_coordinateTransform.get()));
   }
 
   void test_ThrowsSimpleDatasetNoWMatrix() {
@@ -236,30 +211,23 @@ public:
     Mantid::Kernel::VMD coords = eventWorkspace->getNumDims();
 
     // Act
-    auto m_coordinateTransform =
-        MantidQt::SliceViewer::createCoordinateTransform(*eventWorkspace,
-                                                         m_dimX, m_dimY);
+    auto m_coordinateTransform = MantidQt::SliceViewer::createCoordinateTransform(*eventWorkspace, m_dimX, m_dimY);
     m_coordinateTransform->transform(coords, m_dimX, m_dimY, m_sliceDim);
     // Assert
     TSM_ASSERT("Datasets without a Wmatrix should not be transformed",
-               dynamic_cast<MantidQt::SliceViewer::NullTransform *>(
-                   m_coordinateTransform.get()));
+               dynamic_cast<MantidQt::SliceViewer::NullTransform *>(m_coordinateTransform.get()));
   }
 
   void test_ThrowsSimpleDatasetNoAffMatrix() {
     // Arrange
-    auto eventWorkspace =
-        getNonOrthogonalEventWorkspace(false, false, false, true);
+    auto eventWorkspace = getNonOrthogonalEventWorkspace(false, false, false, true);
     Mantid::Kernel::VMD coords = eventWorkspace->getNumDims();
 
     // Act
-    auto m_coordinateTransform =
-        MantidQt::SliceViewer::createCoordinateTransform(*eventWorkspace,
-                                                         m_dimX, m_dimY);
+    auto m_coordinateTransform = MantidQt::SliceViewer::createCoordinateTransform(*eventWorkspace, m_dimX, m_dimY);
     m_coordinateTransform->transform(coords, m_dimX, m_dimY, m_sliceDim);
     // Assert
     TSM_ASSERT("Datasets without a Affmatrix should still be transformed",
-               dynamic_cast<MantidQt::SliceViewer::NonOrthogonalTransform *>(
-                   m_coordinateTransform.get()));
+               dynamic_cast<MantidQt::SliceViewer::NonOrthogonalTransform *>(m_coordinateTransform.get()));
   }
 };

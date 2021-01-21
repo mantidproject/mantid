@@ -52,8 +52,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * pqCameraReaction has the logic to handle common operations associated with
  * the camera such as reset view along X axis etc.
  */
-class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS
-    pqCameraReactionNonOrthogonalAxes : public pqReaction {
+class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS pqCameraReactionNonOrthogonalAxes : public pqReaction {
   Q_OBJECT
   using Superclass = pqReaction;
 
@@ -72,10 +71,8 @@ public:
   };
 
   pqCameraReactionNonOrthogonalAxes(QAction *parent, Mode mode);
-  pqCameraReactionNonOrthogonalAxes(const pqCameraReactionNonOrthogonalAxes &) =
-      delete;
-  pqCameraReactionNonOrthogonalAxes &
-  operator=(const pqCameraReactionNonOrthogonalAxes &) = delete;
+  pqCameraReactionNonOrthogonalAxes(const pqCameraReactionNonOrthogonalAxes &) = delete;
+  pqCameraReactionNonOrthogonalAxes &operator=(const pqCameraReactionNonOrthogonalAxes &) = delete;
   static void resetCamera();
   static void resetPositiveU();
   static void resetPositiveV();

@@ -18,28 +18,21 @@
 #include "SigmoidalFit.h"
 #include "fit_gsl.h"
 
-SigmoidalFit::SigmoidalFit(ApplicationWindow *parent, Graph *g)
-    : Fit(parent, g) {
-  init();
-}
+SigmoidalFit::SigmoidalFit(ApplicationWindow *parent, Graph *g) : Fit(parent, g) { init(); }
 
-SigmoidalFit::SigmoidalFit(ApplicationWindow *parent, Graph *g,
-                           const QString &curveTitle)
-    : Fit(parent, g) {
+SigmoidalFit::SigmoidalFit(ApplicationWindow *parent, Graph *g, const QString &curveTitle) : Fit(parent, g) {
   init();
   setDataFromCurve(curveTitle);
 }
 
-SigmoidalFit::SigmoidalFit(ApplicationWindow *parent, Graph *g,
-                           const QString &curveTitle, double start, double end)
+SigmoidalFit::SigmoidalFit(ApplicationWindow *parent, Graph *g, const QString &curveTitle, double start, double end)
     : Fit(parent, g) {
   init();
   setDataFromCurve(curveTitle, start, end);
 }
 
-SigmoidalFit::SigmoidalFit(ApplicationWindow *parent, Table *t,
-                           const QString &xCol, const QString &yCol,
-                           int startRow, int endRow)
+SigmoidalFit::SigmoidalFit(ApplicationWindow *parent, Table *t, const QString &xCol, const QString &yCol, int startRow,
+                           int endRow)
     : Fit(parent, t) {
   init();
   setDataFromTable(t, xCol, yCol, startRow, endRow);
@@ -51,8 +44,7 @@ void SigmoidalFit::init() {
   d_df = boltzmann_df;
   d_fdf = boltzmann_fdf;
   d_fsimplex = boltzmann_d;
-  d_param_explain << tr("init value") << tr("final value") << tr("center")
-                  << tr("time constant");
+  d_param_explain << tr("init value") << tr("final value") << tr("center") << tr("time constant");
   d_param_names << "A1"
                 << "A2"
                 << "x0"

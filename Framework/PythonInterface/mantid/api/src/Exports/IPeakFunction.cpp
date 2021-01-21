@@ -14,19 +14,15 @@ using Mantid::PythonInterface::IPeakFunctionAdapter;
 using namespace boost::python;
 
 void export_IPeakFunction() {
-  class_<IPeakFunction, bases<IFunction1D>,
-         std::shared_ptr<IPeakFunctionAdapter>, boost::noncopyable>(
+  class_<IPeakFunction, bases<IFunction1D>, std::shared_ptr<IPeakFunctionAdapter>, boost::noncopyable>(
       "IPeakFunction", "Base class for peak Fit functions")
       .def("functionLocal",
-           (object(IPeakFunctionAdapter::*)(const object &) const) &
-               IPeakFunctionAdapter::functionLocal,
+           (object(IPeakFunctionAdapter::*)(const object &) const) & IPeakFunctionAdapter::functionLocal,
            (arg("self"), arg("vec_x")),
            "Calculate the values of the function for the given x values. The "
            "output should be stored in the out array")
-      .def("intensity", &IPeakFunction::intensity, arg("self"),
-           "Returns the integral intensity of the peak function.")
-      .def("setIntensity", &IPeakFunction::setIntensity,
-           (arg("self"), arg("new_intensity")),
+      .def("intensity", &IPeakFunction::intensity, arg("self"), "Returns the integral intensity of the peak function.")
+      .def("setIntensity", &IPeakFunction::setIntensity, (arg("self"), arg("new_intensity")),
            "Changes the integral intensity of the peak function by setting its "
            "height.");
 }

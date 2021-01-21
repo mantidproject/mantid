@@ -46,10 +46,8 @@ void FindReplaceDialog::initLayout() {
   boxFind->setMaxCount(10);
   boxFind->setMaxVisibleItems(10);
   boxFind->setMinimumWidth(250);
-  boxFind->setSizePolicy(
-      QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed));
-  connect(boxFind, SIGNAL(editTextChanged(const QString &)), this,
-          SLOT(resetSearchFlags()));
+  boxFind->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed));
+  connect(boxFind, SIGNAL(editTextChanged(const QString &)), this, SLOT(resetSearchFlags()));
 
   m_topLayout->addWidget(boxFind, 0, 1);
 
@@ -84,8 +82,7 @@ void FindReplaceDialog::initLayout() {
   boxWrapAround->setChecked(true);
   bottomLayout->addWidget(boxWrapAround, 1, 1);
   find_options->addButton(boxWrapAround);
-  connect(find_options, SIGNAL(buttonClicked(int)), this,
-          SLOT(resetSearchFlags()));
+  connect(find_options, SIGNAL(buttonClicked(int)), this, SLOT(resetSearchFlags()));
 
   auto *vb1 = new QVBoxLayout();
   vb1->addWidget(gb1);
@@ -122,8 +119,7 @@ void FindReplaceDialog::addReplaceBox() {
   boxReplace->setAutoCompletion(true);
   boxReplace->setMaxCount(10);
   boxReplace->setMaxVisibleItems(10);
-  boxReplace->setSizePolicy(
-      QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed));
+  boxReplace->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed));
   m_topLayout->addWidget(boxReplace, 1, 1);
   m_topLayout->setColumnStretch(1, 10);
 }
@@ -151,9 +147,8 @@ void FindReplaceDialog::addReplaceButtons() {
 bool FindReplaceDialog::find(bool backwards) {
   QString searchString = boxFind->currentText();
   if (searchString.isEmpty()) {
-    QMessageBox::warning(
-        this, tr("Empty Search Field"),
-        tr("The search field is empty. Please enter some text and try again."));
+    QMessageBox::warning(this, tr("Empty Search Field"),
+                         tr("The search field is empty. Please enter some text and try again."));
     boxFind->setFocus();
     return false;
   }
@@ -169,8 +164,7 @@ bool FindReplaceDialog::find(bool backwards) {
     bool whole = boxWholeWords->isChecked();
     bool wrap = boxWrapAround->isChecked();
     bool regex = boxRegex->isChecked();
-    m_findInProgress =
-        m_editor->findFirst(searchString, regex, cs, whole, wrap, !backwards);
+    m_findInProgress = m_editor->findFirst(searchString, regex, cs, whole, wrap, !backwards);
   }
   return m_findInProgress;
 }
@@ -181,15 +175,13 @@ bool FindReplaceDialog::find(bool backwards) {
 void FindReplaceDialog::replace() {
   QString searchString = boxFind->currentText();
   if (searchString.isEmpty()) {
-    QMessageBox::warning(
-        this, tr("Empty Search Field"),
-        tr("The search field is empty. Please enter some text and try again."));
+    QMessageBox::warning(this, tr("Empty Search Field"),
+                         tr("The search field is empty. Please enter some text and try again."));
     boxFind->setFocus();
     return;
   }
 
-  if (!m_editor->hasSelectedText() ||
-      m_editor->selectedText() != searchString) {
+  if (!m_editor->hasSelectedText() || m_editor->selectedText() != searchString) {
     find(); // find and select next match
     return;
   }
@@ -209,9 +201,8 @@ void FindReplaceDialog::replace() {
 void FindReplaceDialog::replaceAll() {
   QString searchString = boxFind->currentText();
   if (searchString.isEmpty()) {
-    QMessageBox::warning(
-        this, tr("Empty Search Field"),
-        tr("The search field is empty. Please enter some text and try again."));
+    QMessageBox::warning(this, tr("Empty Search Field"),
+                         tr("The search field is empty. Please enter some text and try again."));
     boxFind->setFocus();
     return;
   }
@@ -230,8 +221,7 @@ void FindReplaceDialog::replaceAll() {
   bool whole = boxWholeWords->isChecked();
   bool wrap = boxWrapAround->isChecked();
   bool backward = boxSearchBackwards->isChecked();
-  m_editor->replaceAll(searchString, replaceString, regex, cs, whole, wrap,
-                       !backward);
+  m_editor->replaceAll(searchString, replaceString, regex, cs, whole, wrap, !backward);
 }
 
 /**
@@ -256,9 +246,7 @@ void FindReplaceDialog::findNotInProgress() { m_findInProgress = false; }
 /**
  * Clear the selection in the editor
  */
-void FindReplaceDialog::clearEditorSelection() {
-  m_editor->setSelection(-1, -1, -1, -1);
-}
+void FindReplaceDialog::clearEditorSelection() { m_editor->setSelection(-1, -1, -1, -1); }
 
 /**
  * Called when the widget is shown

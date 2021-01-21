@@ -30,8 +30,7 @@ void ExpDecayOsc::init() {
   declareParameter("Phi", 0.0, "Phase of oscillation at 0 (in Radians)");
 }
 
-void ExpDecayOsc::function1D(double *out, const double *xValues,
-                             const size_t nData) const {
+void ExpDecayOsc::function1D(double *out, const double *xValues, const size_t nData) const {
   const double gA0 = getParameter("A");
   const double gs = getParameter("Lambda");
   const double gf = getParameter("Frequency");
@@ -43,8 +42,7 @@ void ExpDecayOsc::function1D(double *out, const double *xValues,
   }
 }
 
-void ExpDecayOsc::functionDeriv1D(Jacobian *out, const double *xValues,
-                                  const size_t nData) {
+void ExpDecayOsc::functionDeriv1D(Jacobian *out, const double *xValues, const size_t nData) {
   const double gA0 = getParameter("A");
   const double gs = getParameter("Lambda");
   const double gf = getParameter("Frequency");

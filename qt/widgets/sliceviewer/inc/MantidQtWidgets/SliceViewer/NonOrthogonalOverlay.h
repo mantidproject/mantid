@@ -51,11 +51,9 @@ private:
   QPoint transform(QPointF coords) const;
   QPointF invTransform(QPoint pixels) const;
 
-  void drawYLines(QPainter &painter, QPen &gridPen, int widthScreen,
-                  const QwtValueList &yAxisTicks, double yAngle);
+  void drawYLines(QPainter &painter, QPen &gridPen, int widthScreen, const QwtValueList &yAxisTicks, double yAngle);
 
-  void drawXLines(QPainter &painter, QPen &gridPen, int heightScreen,
-                  const QwtValueList &xAxisTicks, double xAngle);
+  void drawXLines(QPainter &painter, QPen &gridPen, int heightScreen, const QwtValueList &xAxisTicks, double xAngle);
 
   void paintEvent(QPaintEvent *event) override;
 

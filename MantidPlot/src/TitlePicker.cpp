@@ -35,15 +35,13 @@ bool TitlePicker::eventFilter(QObject *object, QEvent *e) {
   if (object != (QObject *)title)
     return FALSE;
 
-  if (object->inherits("QwtTextLabel") &&
-      e->type() == QEvent::MouseButtonDblClick) {
+  if (object->inherits("QwtTextLabel") && e->type() == QEvent::MouseButtonDblClick) {
     emit doubleClicked();
     d_selected = true;
     return TRUE;
   }
 
-  if (object->inherits("QwtTextLabel") &&
-      e->type() == QEvent::MouseButtonPress) {
+  if (object->inherits("QwtTextLabel") && e->type() == QEvent::MouseButtonPress) {
     const QMouseEvent *me = (const QMouseEvent *)e;
 
     emit clicked();

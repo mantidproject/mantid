@@ -24,8 +24,7 @@ namespace IDA {
  * and set properties that can be used to generate a fit function.
  *
  */
-class MANTIDQT_INDIRECT_DLL IqtTemplateBrowser
-    : public FunctionTemplateBrowser {
+class MANTIDQT_INDIRECT_DLL IqtTemplateBrowser : public FunctionTemplateBrowser {
   Q_OBJECT
 public:
   explicit IqtTemplateBrowser(QWidget *parent = nullptr);
@@ -52,8 +51,7 @@ public:
   IFunction_sptr getFunction() const override;
   void setNumberOfDatasets(int) override;
   int getNumberOfDatasets() const override;
-  void setDatasets(
-      const QList<MantidWidgets::FunctionModelDataset> &datasets) override;
+  void setDatasets(const QList<MantidWidgets::FunctionModelDataset> &datasets) override;
   QStringList getGlobalParameters() const override;
   QStringList getLocalParameters() const override;
   void setGlobalParameters(const QStringList &globals) override;
@@ -63,17 +61,14 @@ public:
   void setCurrentDataset(int i) override;
   int getCurrentDataset() override;
   void updateParameterNames(const QMap<int, QString> &parameterNames) override;
-  void updateParameterDescriptions(
-      const QMap<int, std::string> &parameterNames); // override;
+  void updateParameterDescriptions(const QMap<int, std::string> &parameterNames); // override;
   void setErrorsEnabled(bool enabled) override;
   void clear() override;
-  void updateParameterEstimationData(
-      DataForParameterEstimationCollection &&data) override;
+  void updateParameterEstimationData(DataForParameterEstimationCollection &&data) override;
   void estimateFunctionParameters() override;
   void setBackgroundA0(double value) override;
   void setResolution(std::string const &, TableDatasetIndex const &) override {}
-  void
-  setResolution(const std::vector<std::pair<std::string, size_t>> &) override {}
+  void setResolution(const std::vector<std::pair<std::string, size_t>> &) override {}
   void setQValues(const std::vector<double> &) override {}
 
 protected slots:

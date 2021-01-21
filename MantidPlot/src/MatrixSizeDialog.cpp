@@ -26,8 +26,7 @@
 #include <QPushButton>
 #include <QSpinBox>
 
-MatrixSizeDialog::MatrixSizeDialog(Matrix *m, QWidget *parent,
-                                   const Qt::WFlags &fl)
+MatrixSizeDialog::MatrixSizeDialog(Matrix *m, QWidget *parent, const Qt::WFlags &fl)
     : QDialog(parent, fl), d_matrix(m) {
   setWindowTitle(tr("MantidPlot - Matrix Dimensions"));
 
@@ -109,11 +108,7 @@ void MatrixSizeDialog::apply() {
   if (oxs != fromX || oxe != toX || oys != fromY || oye != toY) {
     d_matrix->undoStack()->push(new MatrixSetCoordinatesCommand(
         d_matrix, oxs, oxe, oys, oye, fromX, toX, fromY, toY,
-        tr("Set Coordinates x[%1 : %2], y[%3 : %4]")
-            .arg(fromX)
-            .arg(toX)
-            .arg(fromY)
-            .arg(toY)));
+        tr("Set Coordinates x[%1 : %2], y[%3 : %4]").arg(fromX).arg(toX).arg(fromY).arg(toY)));
     d_matrix->setCoordinates(fromX, toX, fromY, toY);
   }
   d_matrix->setDimensions(boxRows->value(), boxCols->value());

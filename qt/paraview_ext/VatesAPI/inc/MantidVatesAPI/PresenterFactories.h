@@ -17,16 +17,12 @@ class WorkspaceProvider;
 
 class DLLExport EmptyWorkspaceNamePolicy {
 protected:
-  const std::string &
-  getWorkspaceName(const Mantid::API::IMDWorkspace & /*workspace*/);
+  const std::string &getWorkspaceName(const Mantid::API::IMDWorkspace & /*workspace*/);
 };
 
 class DLLExport NonEmptyWorkspaceNamePolicy {
 protected:
-  const std::string &
-  getWorkspaceName(const Mantid::API::IMDWorkspace &workspace) {
-    return workspace.getName();
-  }
+  const std::string &getWorkspaceName(const Mantid::API::IMDWorkspace &workspace) { return workspace.getName(); }
 };
 
 /**
@@ -41,13 +37,9 @@ class DLLExport InMemoryPresenterFactory : private WorkspaceNamePolicy {
   using WorkspaceNamePolicy::getWorkspaceName;
 
 public:
-  std::unique_ptr<Presenter>
-  create(std::unique_ptr<MDLoadingView> view,
-         Mantid::API::IMDWorkspace_sptr workspace,
-         std::unique_ptr<WorkspaceProvider> workspaceProvider) {
-    return std::make_unique<Presenter>(std::move(view),
-                                       workspaceProvider.release(),
-                                       getWorkspaceName(*workspace));
+  std::unique_ptr<Presenter> create(std::unique_ptr<MDLoadingView> view, Mantid::API::IMDWorkspace_sptr workspace,
+                                    std::unique_ptr<WorkspaceProvider> workspaceProvider) {
+    return std::make_unique<Presenter>(std::move(view), workspaceProvider.release(), getWorkspaceName(*workspace));
   }
 };
 } // namespace VATES

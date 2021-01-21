@@ -61,17 +61,13 @@ DECLARE_ALGORITHM(PolarizationEfficiencyCor)
 //----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string PolarizationEfficiencyCor::name() const {
-  return "PolarizationEfficiencyCor";
-}
+const std::string PolarizationEfficiencyCor::name() const { return "PolarizationEfficiencyCor"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int PolarizationEfficiencyCor::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string PolarizationEfficiencyCor::category() const {
-  return "Reflectometry";
-}
+const std::string PolarizationEfficiencyCor::category() const { return "Reflectometry"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string PolarizationEfficiencyCor::summary() const {
@@ -85,57 +81,45 @@ const std::string PolarizationEfficiencyCor::summary() const {
 void PolarizationEfficiencyCor::init() {
   bool const allowMultiSelection = true;
   bool const isOptional = true;
-  declareProperty(
-      std::make_unique<Kernel::ArrayProperty<std::string>>(
-          Prop::INPUT_WORKSPACES, "",
-          std::make_shared<ADSValidator>(allowMultiSelection, isOptional),
-          Kernel::Direction::Input),
-      "A list of names of workspaces to be corrected.");
+  declareProperty(std::make_unique<Kernel::ArrayProperty<std::string>>(
+                      Prop::INPUT_WORKSPACES, "", std::make_shared<ADSValidator>(allowMultiSelection, isOptional),
+                      Kernel::Direction::Input),
+                  "A list of names of workspaces to be corrected.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>(
-                      Prop::INPUT_WORKSPACE_GROUP, "", Kernel::Direction::Input,
-                      PropertyMode::Optional),
+  declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>(Prop::INPUT_WORKSPACE_GROUP, "",
+                                                                      Kernel::Direction::Input, PropertyMode::Optional),
                   "A group of workspaces to be corrected.");
 
-  const std::vector<std::string> methods{CorrectionMethod::WILDES,
-                                         CorrectionMethod::FREDRIKZE};
+  const std::vector<std::string> methods{CorrectionMethod::WILDES, CorrectionMethod::FREDRIKZE};
   declareProperty(Prop::CORRECTION_METHOD, CorrectionMethod::WILDES,
-                  std::make_shared<Kernel::ListValidator<std::string>>(methods),
-                  "Correction method.");
+                  std::make_shared<Kernel::ListValidator<std::string>>(methods), "Correction method.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      Prop::EFFICIENCIES, "", Kernel::Direction::Input),
-                  "A workspace containing the efficiency factors as "
-                  "histograms: P1, P2, F1 and F2 in the Wildes method and Pp, "
-                  "Ap, Rho and Alpha for Fredrikze.");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(Prop::EFFICIENCIES, "", Kernel::Direction::Input),
+      "A workspace containing the efficiency factors as "
+      "histograms: P1, P2, F1 and F2 in the Wildes method and Pp, "
+      "Ap, Rho and Alpha for Fredrikze.");
 
-  const std::string full = Flippers::OffOff + ", " + Flippers::OffOn + ", " +
-                           Flippers::OnOff + ", " + Flippers::OnOn;
-  const std::string missing01 =
-      Flippers::OffOff + ", " + Flippers::OnOff + ", " + Flippers::OnOn;
-  const std::string missing10 =
-      Flippers::OffOff + ", " + Flippers::OffOn + ", " + Flippers::OnOn;
+  const std::string full = Flippers::OffOff + ", " + Flippers::OffOn + ", " + Flippers::OnOff + ", " + Flippers::OnOn;
+  const std::string missing01 = Flippers::OffOff + ", " + Flippers::OnOff + ", " + Flippers::OnOn;
+  const std::string missing10 = Flippers::OffOff + ", " + Flippers::OffOn + ", " + Flippers::OnOn;
   const std::string missing0110 = Flippers::OffOff + ", " + Flippers::OnOn;
   const std::string noAnalyzer = Flippers::Off + ", " + Flippers::On;
   const std::string directBeam = Flippers::Off;
-  const std::vector<std::string> setups{
-      {"", full, missing01, missing10, missing0110, noAnalyzer, directBeam}};
-  declareProperty(
-      Prop::FLIPPERS, "",
-      std::make_shared<Kernel::ListValidator<std::string>>(setups),
-      "Flipper configurations of the input workspaces  (Wildes method only)");
+  const std::vector<std::string> setups{{"", full, missing01, missing10, missing0110, noAnalyzer, directBeam}};
+  declareProperty(Prop::FLIPPERS, "", std::make_shared<Kernel::ListValidator<std::string>>(setups),
+                  "Flipper configurations of the input workspaces  (Wildes method only)");
 
   std::vector<std::string> propOptions{"", "PA", "PNR"};
-  declareProperty("PolarizationAnalysis", "",
-                  std::make_shared<StringListValidator>(propOptions),
+  declareProperty("PolarizationAnalysis", "", std::make_shared<StringListValidator>(propOptions),
                   "What Polarization mode will be used?\n"
                   "PNR: Polarized Neutron Reflectivity mode\n"
                   "PA: Full Polarization Analysis PNR-PA "
                   "(Fredrikze method only)");
 
-  declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>(
-                      Prop::OUTPUT_WORKSPACES, "", Kernel::Direction::Output),
-                  "A group of polarization efficiency corrected workspaces.");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<WorkspaceGroup>>(Prop::OUTPUT_WORKSPACES, "", Kernel::Direction::Output),
+      "A group of polarization efficiency corrected workspaces.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -180,11 +164,9 @@ void PolarizationEfficiencyCor::execFredrikze() {
   alg->setProperty("InputWorkspace", group);
   alg->setProperty("Efficiencies", efficiencies);
   if (!isDefault(Prop::POLARIZATION_ANALYSIS)) {
-    alg->setPropertyValue("PolarizationAnalysis",
-                          getPropertyValue(Prop::POLARIZATION_ANALYSIS));
+    alg->setPropertyValue("PolarizationAnalysis", getPropertyValue(Prop::POLARIZATION_ANALYSIS));
   }
-  alg->setPropertyValue("OutputWorkspace",
-                        getPropertyValue(Prop::OUTPUT_WORKSPACES));
+  alg->setPropertyValue("OutputWorkspace", getPropertyValue(Prop::OUTPUT_WORKSPACES));
   alg->execute();
   API::WorkspaceGroup_sptr outWS = alg->getProperty("OutputWorkspace");
   setProperty(Prop::OUTPUT_WORKSPACES, outWS);
@@ -194,14 +176,12 @@ void PolarizationEfficiencyCor::execFredrikze() {
 /** Check that the inputs workspaces are set.
  */
 void PolarizationEfficiencyCor::checkWorkspaces() const {
-  if (isDefault(Prop::INPUT_WORKSPACES) &&
-      isDefault(Prop::INPUT_WORKSPACE_GROUP)) {
+  if (isDefault(Prop::INPUT_WORKSPACES) && isDefault(Prop::INPUT_WORKSPACE_GROUP)) {
     throw std::invalid_argument("Input workspaces are missing. Either a "
                                 "workspace group or a list of workspace names "
                                 "must be given.");
   }
-  if (!isDefault(Prop::INPUT_WORKSPACES) &&
-      !isDefault(Prop::INPUT_WORKSPACE_GROUP)) {
+  if (!isDefault(Prop::INPUT_WORKSPACES) && !isDefault(Prop::INPUT_WORKSPACE_GROUP)) {
     throw std::invalid_argument("Input workspaces must be given either as a "
                                 "workspace group or a list of names.");
   }
@@ -214,8 +194,7 @@ void PolarizationEfficiencyCor::checkWildesProperties() const {
   checkWorkspaces();
 
   if (!isDefault(Prop::POLARIZATION_ANALYSIS)) {
-    throw std::invalid_argument(
-        "Property PolarizationAnalysis cannot be used with the Wildes method.");
+    throw std::invalid_argument("Property PolarizationAnalysis cannot be used with the Wildes method.");
   }
 }
 
@@ -226,16 +205,14 @@ void PolarizationEfficiencyCor::checkFredrikzeProperties() const {
   checkWorkspaces();
 
   if (!isDefault(Prop::FLIPPERS)) {
-    throw std::invalid_argument(
-        "Property Flippers cannot be used with the Fredrikze method.");
+    throw std::invalid_argument("Property Flippers cannot be used with the Fredrikze method.");
   }
 }
 
 //----------------------------------------------------------------------------------------------
 /** Get the input workspaces as a list of names.
  */
-std::vector<std::string>
-PolarizationEfficiencyCor::getWorkspaceNameList() const {
+std::vector<std::string> PolarizationEfficiencyCor::getWorkspaceNameList() const {
   std::vector<std::string> names;
   if (!isDefault(Prop::INPUT_WORKSPACES)) {
     names = getProperty(Prop::INPUT_WORKSPACES);
@@ -246,9 +223,8 @@ PolarizationEfficiencyCor::getWorkspaceNameList() const {
       auto ws = group->getItem(i);
       auto const name = ws->getName();
       if (name.empty()) {
-        throw std::invalid_argument(
-            "Workspace from the input workspace group is not stored in the "
-            "Analysis Data Service which is required by the Wildes method.");
+        throw std::invalid_argument("Workspace from the input workspace group is not stored in the "
+                                    "Analysis Data Service which is required by the Wildes method.");
       }
       names.emplace_back(name);
     }
@@ -264,8 +240,7 @@ API::WorkspaceGroup_sptr PolarizationEfficiencyCor::getWorkspaceGroup() const {
   if (!isDefault(Prop::INPUT_WORKSPACE_GROUP)) {
     group = getProperty(Prop::INPUT_WORKSPACE_GROUP);
   } else {
-    throw std::invalid_argument(
-        "Input workspaces are required to be in a workspace group.");
+    throw std::invalid_argument("Input workspaces are required to be in a workspace group.");
   }
   return group;
 }
@@ -273,8 +248,8 @@ API::WorkspaceGroup_sptr PolarizationEfficiencyCor::getWorkspaceGroup() const {
 //----------------------------------------------------------------------------------------------
 /// Check if efficiencies workspace needs interpolation. Use inWS as for
 /// comparison.
-bool PolarizationEfficiencyCor::needInterpolation(
-    MatrixWorkspace const &efficiencies, MatrixWorkspace const &inWS) const {
+bool PolarizationEfficiencyCor::needInterpolation(MatrixWorkspace const &efficiencies,
+                                                  MatrixWorkspace const &inWS) const {
 
   if (!efficiencies.isHistogramData())
     return true;
@@ -291,8 +266,7 @@ bool PolarizationEfficiencyCor::needInterpolation(
 
 //----------------------------------------------------------------------------------------------
 /// Convert the efficiencies to histogram
-MatrixWorkspace_sptr PolarizationEfficiencyCor::convertToHistogram(
-    API::MatrixWorkspace_sptr efficiencies) {
+MatrixWorkspace_sptr PolarizationEfficiencyCor::convertToHistogram(API::MatrixWorkspace_sptr efficiencies) {
   if (efficiencies->isHistogramData()) {
     return efficiencies;
   }
@@ -307,9 +281,8 @@ MatrixWorkspace_sptr PolarizationEfficiencyCor::convertToHistogram(
 
 //----------------------------------------------------------------------------------------------
 /// Convert the efficiencies to histogram
-MatrixWorkspace_sptr
-PolarizationEfficiencyCor::interpolate(const MatrixWorkspace_sptr &efficiencies,
-                                       const MatrixWorkspace_sptr &inWS) {
+MatrixWorkspace_sptr PolarizationEfficiencyCor::interpolate(const MatrixWorkspace_sptr &efficiencies,
+                                                            const MatrixWorkspace_sptr &inWS) {
 
   efficiencies->setDistribution(true);
   auto alg = createChildAlgorithm("RebinToWorkspace");
@@ -329,8 +302,7 @@ API::MatrixWorkspace_sptr PolarizationEfficiencyCor::getEfficiencies() {
   MatrixWorkspace_sptr inWS;
   if (!isDefault(Prop::INPUT_WORKSPACES)) {
     std::vector<std::string> const names = getProperty(Prop::INPUT_WORKSPACES);
-    inWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        names.front());
+    inWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(names.front());
   } else {
     WorkspaceGroup_sptr group = getProperty(Prop::INPUT_WORKSPACE_GROUP);
     inWS = std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));

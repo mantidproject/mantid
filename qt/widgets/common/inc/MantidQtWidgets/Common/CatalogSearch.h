@@ -40,11 +40,9 @@ private:
   /// Make the headers in the provided table bold.
   void emboldenTableHeaders(QTableWidget *table);
   /// Setup table prior to adding data to it, such hiding vertical header.
-  void setupTable(QTableWidget *table, const size_t &numOfRows,
-                  const size_t &numOfColumns);
+  void setupTable(QTableWidget *table, const size_t &numOfRows, const size_t &numOfColumns);
   /// Populate the provided table with data from the provided workspace.
-  void populateTable(QTableWidget *table,
-                     const Mantid::API::ITableWorkspace_sptr &workspace);
+  void populateTable(QTableWidget *table, const Mantid::API::ITableWorkspace_sptr &workspace);
   /// Removes data associated with previous search.
   void clearSearch(QTableWidget *table, const std::string &workspace);
   ///  Clear the "search" frame when an investigation has been selected.
@@ -99,8 +97,7 @@ private:
   void updateDataFileLabels(QTableWidgetItem *item);
   /// Obtain all file extensions from the provided column (dataFileResults ->
   /// File name).
-  std::unordered_set<std::string>
-  getDataFileExtensions(const Mantid::API::Column_sptr &column);
+  std::unordered_set<std::string> getDataFileExtensions(const Mantid::API::Column_sptr &column);
   /// Add the list of file extensions to the "Filter type..." drop-down.
   void populateDataFileType(const std::unordered_set<std::string> &extensions);
   /// Disable the download button if user can access the files locally from the

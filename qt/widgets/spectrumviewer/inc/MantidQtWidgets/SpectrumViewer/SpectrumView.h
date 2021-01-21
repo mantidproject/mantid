@@ -45,10 +45,9 @@ class SpectrumDisplay;
 class SVConnections;
 class MatrixWSDataSource;
 
-class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SpectrumView
-    : public QMainWindow,
-      public MantidQt::API::WorkspaceObserver,
-      public MantidQt::API::IProjectSerialisable {
+class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SpectrumView : public QMainWindow,
+                                                        public MantidQt::API::WorkspaceObserver,
+                                                        public MantidQt::API::IProjectSerialisable {
   Q_OBJECT
 
 public:
@@ -58,15 +57,12 @@ public:
   ~SpectrumView() override;
   void renderWorkspace(const Mantid::API::MatrixWorkspace_const_sptr &wksp);
   void renderWorkspace(const QString &wsName);
-  QList<std::shared_ptr<SpectrumDisplay>> getSpectrumDisplays() const {
-    return m_spectrumDisplay;
-  }
+  QList<std::shared_ptr<SpectrumDisplay>> getSpectrumDisplays() const { return m_spectrumDisplay; }
 
   void selectData(int spectrumNumber, double dataVal);
   bool isTrackingOn() const;
   /// Load the state of the spectrum viewer from a Mantid project file
-  static API::IProjectSerialisable *loadFromProject(const std::string &lines,
-                                                    ApplicationWindow *app,
+  static API::IProjectSerialisable *loadFromProject(const std::string &lines, ApplicationWindow *app,
                                                     const int fileVersion);
   /// Save the state of the spectrum viewer to a Mantid project file
   virtual std::string saveToProject(ApplicationWindow *app) override;
@@ -88,12 +84,8 @@ protected slots:
 
 protected:
   void resizeEvent(QResizeEvent *event) override;
-  void
-  preDeleteHandle(const std::string &wsName,
-                  const std::shared_ptr<Mantid::API::Workspace> &ws) override;
-  void afterReplaceHandle(
-      const std::string &wsName,
-      const std::shared_ptr<Mantid::API::Workspace> &ws) override;
+  void preDeleteHandle(const std::string &wsName, const std::shared_ptr<Mantid::API::Workspace> &ws) override;
+  void afterReplaceHandle(const std::string &wsName, const std::shared_ptr<Mantid::API::Workspace> &ws) override;
 
   void dragMoveEvent(QDragMoveEvent *de) override;
   void dragEnterEvent(QDragEnterEvent *de) override;
@@ -103,9 +95,7 @@ private:
   void updateHandlers();
   void loadSettings();
   void saveSettings() const;
-  bool replaceExistingWorkspace(
-      const std::string &wsName,
-      std::shared_ptr<const Mantid::API::MatrixWorkspace> ws);
+  bool replaceExistingWorkspace(const std::string &wsName, std::shared_ptr<const Mantid::API::MatrixWorkspace> ws);
 
   std::vector<MatrixWSDataSource_sptr> m_dataSource;
   QList<std::shared_ptr<SpectrumDisplay>> m_spectrumDisplay;

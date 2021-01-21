@@ -29,12 +29,11 @@ const char *MASS_NAME = "Mass";
 } // namespace
 
 ComptonProfile::ComptonProfile()
-    : API::ParamFunction(), API::IFunction1D(), m_log("ComptonProfile"),
-      m_wsIndex(0), m_startX(0.0), m_endX(0.0), m_voigt(),
-      m_resolutionFunction(), m_yspace(), m_modQ(), m_e0(), m_mass(0.0) {
+    : API::ParamFunction(), API::IFunction1D(), m_log("ComptonProfile"), m_wsIndex(0), m_startX(0.0), m_endX(0.0),
+      m_voigt(), m_resolutionFunction(), m_yspace(), m_modQ(), m_e0(), m_mass(0.0) {
   using namespace Mantid::API;
-  m_resolutionFunction = std::dynamic_pointer_cast<VesuvioResolution>(
-      FunctionFactory::Instance().createFunction("VesuvioResolution"));
+  m_resolutionFunction =
+      std::dynamic_pointer_cast<VesuvioResolution>(FunctionFactory::Instance().createFunction("VesuvioResolution"));
 }
 
 //-------------------------------------- Function evaluation
@@ -48,8 +47,7 @@ ComptonProfile::ComptonProfile()
  * times in microseconds
  * @param nData The length of the out & xValues arrays
  */
-void ComptonProfile::function1D(double *out, const double *xValues,
-                                const size_t nData) const {
+void ComptonProfile::function1D(double *out, const double *xValues, const size_t nData) const {
   UNUSED_ARG(xValues); // Y-space values have already been pre-cached
 
   this->massProfile(out, nData);
@@ -63,8 +61,7 @@ void ComptonProfile::function1D(double *out, const double *xValues,
 void ComptonProfile::setUpForFit() {
 
   using namespace Mantid::API;
-  m_voigt = std::dynamic_pointer_cast<IPeakFunction>(
-      FunctionFactory::Instance().createFunction("Voigt"));
+  m_voigt = std::dynamic_pointer_cast<IPeakFunction>(FunctionFactory::Instance().createFunction("Voigt"));
   m_resolutionFunction->setUpForFit();
 }
 
@@ -75,15 +72,13 @@ void ComptonProfile::setUpForFit() {
  * @param startX Starting x-vaue (unused).
  * @param endX Ending x-vaue (unused).
  */
-void ComptonProfile::setMatrixWorkspace(
-    std::shared_ptr<const API::MatrixWorkspace> workspace, size_t wsIndex,
-    double startX, double endX) {
+void ComptonProfile::setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace> workspace, size_t wsIndex,
+                                        double startX, double endX) {
   auto inst = workspace->getInstrument();
   auto sample = inst->getSample();
   auto source = inst->getSource();
   if (!sample || !source) {
-    throw std::invalid_argument(
-        "ComptonProfile - Workspace has no source/sample.");
+    throw std::invalid_argument("ComptonProfile - Workspace has no source/sample.");
   }
   m_workspace = workspace;
   m_wsIndex = wsIndex;
@@ -102,16 +97,13 @@ void ComptonProfile::buildCaches() {
   }
 
   m_resolutionFunction->setAttributeValue("Mass", m_mass);
-  m_resolutionFunction->setMatrixWorkspace(m_workspace, m_wsIndex, m_startX,
-                                           m_endX);
+  m_resolutionFunction->setMatrixWorkspace(m_workspace, m_wsIndex, m_startX, m_endX);
 
-  Algorithms::DetectorParams detpar =
-      ConvertToYSpace::getDetectorParameters(m_workspace, m_wsIndex);
+  Algorithms::DetectorParams detpar = ConvertToYSpace::getDetectorParameters(m_workspace, m_wsIndex);
   this->cacheYSpaceValues(m_workspace->points(m_wsIndex), detpar);
 }
 
-void ComptonProfile::cacheYSpaceValues(const HistogramData::Points &tseconds,
-                                       const Algorithms::DetectorParams &detpar,
+void ComptonProfile::cacheYSpaceValues(const HistogramData::Points &tseconds, const Algorithms::DetectorParams &detpar,
                                        const ResolutionParams &respar) {
   m_resolutionFunction->setAttributeValue("Mass", m_mass);
   m_resolutionFunction->cacheResolutionComponents(detpar, respar);
@@ -122,15 +114,13 @@ void ComptonProfile::cacheYSpaceValues(const HistogramData::Points &tseconds,
  * @param tseconds A vector containing the time-of-flight values in seconds
  * @param detpar Structure containing detector parameters
  */
-void ComptonProfile::cacheYSpaceValues(
-    const HistogramData::Points &tseconds,
-    const Algorithms::DetectorParams &detpar) {
+void ComptonProfile::cacheYSpaceValues(const HistogramData::Points &tseconds,
+                                       const Algorithms::DetectorParams &detpar) {
 
   // ------ Fixed coefficients related to resolution & Y-space transforms
   // ------------------
   const double mevToK = PhysicalConstants::E_mev_toNeutronWavenumberSq;
-  const double massToMeV = 0.5 * PhysicalConstants::NeutronMass /
-                           PhysicalConstants::meV; // Includes factor of 1/2
+  const double massToMeV = 0.5 * PhysicalConstants::NeutronMass / PhysicalConstants::meV; // Includes factor of 1/2
 
   const double v1 = std::sqrt(detpar.efixed / massToMeV);
   const double k1 = std::sqrt(detpar.efixed / mevToK);
@@ -143,17 +133,13 @@ void ComptonProfile::cacheYSpaceValues(
   m_yspace.resize(nData);
   for (size_t i = 0; i < nData; ++i) {
     const double tsec = tseconds[i];
-    ConvertToYSpace::calculateY(m_yspace[i], m_modQ[i], m_e0[i], m_mass, tsec,
-                                k1, v1, detpar);
+    ConvertToYSpace::calculateY(m_yspace[i], m_modQ[i], m_e0[i], m_mass, tsec, k1, v1, detpar);
   }
 }
 
-void ComptonProfile::declareParameters() {
-  declareParameter(MASS_NAME, 0.0, "Atomic mass (amu)");
-}
+void ComptonProfile::declareParameters() { declareParameter(MASS_NAME, 0.0, "Atomic mass (amu)"); }
 
-void ComptonProfile::setParameter(size_t i, const double &value,
-                                  bool explicitlySet) {
+void ComptonProfile::setParameter(size_t i, const double &value, bool explicitlySet) {
   ParamFunction::setParameter(i, value, explicitlySet);
 
   // Mass parameter has changed, need to rebuild Y-space cache
@@ -177,11 +163,8 @@ void ComptonProfile::setParameter(size_t i, const double &value,
  * @param lorentzWidth LorentzFWHM parameter
  * @param gaussWidth GaussianFWHM parameter
  */
-void ComptonProfile::voigtApproxDiff(std::vector<double> &voigtDiff,
-                                     const std::vector<double> &yspace,
-                                     const double lorentzPos,
-                                     const double lorentzAmp,
-                                     const double lorentzWidth,
+void ComptonProfile::voigtApproxDiff(std::vector<double> &voigtDiff, const std::vector<double> &yspace,
+                                     const double lorentzPos, const double lorentzAmp, const double lorentzWidth,
                                      const double gaussWidth) const {
   double miny(DBL_MAX), maxy(-DBL_MAX);
   auto iend = yspace.end();
@@ -200,49 +183,38 @@ void ComptonProfile::voigtApproxDiff(std::vector<double> &voigtDiff,
   std::vector<double> ypmEps(yspace.size());
   // y+2eps
   using std::placeholders::_1;
-  std::transform(
-      yspace.begin(), yspace.end(), ypmEps.begin(),
-      std::bind(std::plus<double>(), _1, 2.0 * epsilon)); // Add 2 epsilon
-  m_resolutionFunction->voigtApprox(voigtDiff, ypmEps, lorentzPos, lorentzAmp,
-                                    lorentzWidth, gaussWidth);
+  std::transform(yspace.begin(), yspace.end(), ypmEps.begin(),
+                 std::bind(std::plus<double>(), _1, 2.0 * epsilon)); // Add 2 epsilon
+  m_resolutionFunction->voigtApprox(voigtDiff, ypmEps, lorentzPos, lorentzAmp, lorentzWidth, gaussWidth);
   // y-2eps
-  std::transform(
-      yspace.begin(), yspace.end(), ypmEps.begin(),
-      std::bind(std::minus<double>(), _1, 2.0 * epsilon)); // Subtract 2 epsilon
+  std::transform(yspace.begin(), yspace.end(), ypmEps.begin(),
+                 std::bind(std::minus<double>(), _1, 2.0 * epsilon)); // Subtract 2 epsilon
   std::vector<double> tmpResult(yspace.size());
-  m_resolutionFunction->voigtApprox(tmpResult, ypmEps, lorentzPos, lorentzAmp,
-                                    lorentzWidth, gaussWidth);
+  m_resolutionFunction->voigtApprox(tmpResult, ypmEps, lorentzPos, lorentzAmp, lorentzWidth, gaussWidth);
   // Difference of first two terms - result is put back in voigtDiff
-  std::transform(voigtDiff.begin(), voigtDiff.end(), tmpResult.begin(),
-                 voigtDiff.begin(), std::minus<double>());
+  std::transform(voigtDiff.begin(), voigtDiff.end(), tmpResult.begin(), voigtDiff.begin(), std::minus<double>());
 
   // y+eps
   std::transform(yspace.begin(), yspace.end(), ypmEps.begin(),
                  std::bind(std::plus<double>(), _1, epsilon)); // Add epsilon
-  m_resolutionFunction->voigtApprox(tmpResult, ypmEps, lorentzPos, lorentzAmp,
-                                    lorentzWidth, gaussWidth);
+  m_resolutionFunction->voigtApprox(tmpResult, ypmEps, lorentzPos, lorentzAmp, lorentzWidth, gaussWidth);
   std::transform(tmpResult.begin(), tmpResult.end(), tmpResult.begin(),
                  std::bind(std::multiplies<double>(), _1, 2.0)); // times 2
   // Difference with 3rd term - result is put back in voigtDiff
-  std::transform(voigtDiff.begin(), voigtDiff.end(), tmpResult.begin(),
-                 voigtDiff.begin(), std::minus<double>());
+  std::transform(voigtDiff.begin(), voigtDiff.end(), tmpResult.begin(), voigtDiff.begin(), std::minus<double>());
 
   // y-eps
-  std::transform(
-      yspace.begin(), yspace.end(), ypmEps.begin(),
-      std::bind(std::minus<double>(), _1, epsilon)); // Subtract epsilon
-  m_resolutionFunction->voigtApprox(tmpResult, ypmEps, lorentzPos, lorentzAmp,
-                                    lorentzWidth, gaussWidth);
+  std::transform(yspace.begin(), yspace.end(), ypmEps.begin(),
+                 std::bind(std::minus<double>(), _1, epsilon)); // Subtract epsilon
+  m_resolutionFunction->voigtApprox(tmpResult, ypmEps, lorentzPos, lorentzAmp, lorentzWidth, gaussWidth);
   std::transform(tmpResult.begin(), tmpResult.end(), tmpResult.begin(),
                  std::bind(std::multiplies<double>(), _1, 2.0)); // times 2
   // Sum final term
-  std::transform(voigtDiff.begin(), voigtDiff.end(), tmpResult.begin(),
-                 voigtDiff.begin(), std::plus<double>());
+  std::transform(voigtDiff.begin(), voigtDiff.end(), tmpResult.begin(), voigtDiff.begin(), std::plus<double>());
 
   // Finally divide by 2*eps^3
-  std::transform(
-      voigtDiff.begin(), voigtDiff.end(), voigtDiff.begin(),
-      std::bind(std::divides<double>(), _1, 2.0 * std::pow(epsilon, 3)));
+  std::transform(voigtDiff.begin(), voigtDiff.end(), voigtDiff.begin(),
+                 std::bind(std::divides<double>(), _1, 2.0 * std::pow(epsilon, 3)));
 }
 
 } // namespace Functions

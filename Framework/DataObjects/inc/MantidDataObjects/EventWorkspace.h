@@ -35,25 +35,19 @@ public:
   const std::string id() const override { return "EventWorkspace"; }
 
   // Constructor
-  EventWorkspace(
-      const Parallel::StorageMode storageMode = Parallel::StorageMode::Cloned);
+  EventWorkspace(const Parallel::StorageMode storageMode = Parallel::StorageMode::Cloned);
 
   // Destructor
   ~EventWorkspace() override;
 
   /// Returns a clone of the workspace
-  std::unique_ptr<EventWorkspace> clone() const {
-    return std::unique_ptr<EventWorkspace>(doClone());
-  }
+  std::unique_ptr<EventWorkspace> clone() const { return std::unique_ptr<EventWorkspace>(doClone()); }
 
   /// Returns a default-initialized clone of the workspace
-  std::unique_ptr<EventWorkspace> cloneEmpty() const {
-    return std::unique_ptr<EventWorkspace>(doCloneEmpty());
-  }
+  std::unique_ptr<EventWorkspace> cloneEmpty() const { return std::unique_ptr<EventWorkspace>(doCloneEmpty()); }
 
   // Initialize the pixels
-  void init(const std::size_t &, const std::size_t &,
-            const std::size_t &) override;
+  void init(const std::size_t &, const std::size_t &, const std::size_t &) override;
   void init(const HistogramData::Histogram &histogram) override;
 
   bool threadSafe() const override;
@@ -93,14 +87,11 @@ public:
 
   Mantid::Types::Core::DateAndTime getPulseTimeMin() const override;
   Mantid::Types::Core::DateAndTime getPulseTimeMax() const override;
-  void getPulseTimeMinMax(Mantid::Types::Core::DateAndTime &xmin,
-                          Mantid::Types::Core::DateAndTime &xmax) const;
+  void getPulseTimeMinMax(Mantid::Types::Core::DateAndTime &xmin, Mantid::Types::Core::DateAndTime &xmax) const;
 
-  Mantid::Types::Core::DateAndTime
-  getTimeAtSampleMin(double tofOffset = 0) const override;
+  Mantid::Types::Core::DateAndTime getTimeAtSampleMin(double tofOffset = 0) const override;
 
-  Mantid::Types::Core::DateAndTime
-  getTimeAtSampleMax(double tofOffset = 0) const override;
+  Mantid::Types::Core::DateAndTime getTimeAtSampleMax(double tofOffset = 0) const override;
 
   double getEventXMin() const;
   double getEventXMax() const;
@@ -114,17 +105,14 @@ public:
   const MantidVec &dataY(const std::size_t) const override;
   const MantidVec &dataE(const std::size_t) const override;
   const MantidVec &dataDx(const std::size_t) const override;
-  Kernel::cow_ptr<HistogramData::HistogramX>
-  refX(const std::size_t) const override;
+  Kernel::cow_ptr<HistogramData::HistogramX> refX(const std::size_t) const override;
 
   /// Generate a new histogram from specified event list at the given index.
-  void generateHistogram(const std::size_t index, const MantidVec &X,
-                         MantidVec &Y, MantidVec &E,
+  void generateHistogram(const std::size_t index, const MantidVec &X, MantidVec &Y, MantidVec &E,
                          bool skipError = false) const override;
 
   /// Generate a new histogram from specified event list at the given index.
-  void generateHistogramPulseTime(const std::size_t index, const MantidVec &X,
-                                  MantidVec &Y, MantidVec &E,
+  void generateHistogramPulseTime(const std::size_t index, const MantidVec &X, MantidVec &Y, MantidVec &E,
                                   bool skipError = false) const;
 
   // Set the x-axis data (histogram bins) for all pixels
@@ -156,8 +144,7 @@ public:
   void sortAll(EventSortType sortType, Mantid::API::Progress *prog) const;
   void sortAllOld(EventSortType sortType, Mantid::API::Progress *prog) const;
 
-  void getIntegratedSpectra(std::vector<double> &out, const double minX,
-                            const double maxX,
+  void getIntegratedSpectra(std::vector<double> &out, const double minX, const double maxX,
                             const bool entireRange) const override;
   EventWorkspace &operator=(const EventWorkspace &other) = delete;
 
@@ -167,9 +154,7 @@ protected:
 
 private:
   EventWorkspace *doClone() const override { return new EventWorkspace(*this); }
-  EventWorkspace *doCloneEmpty() const override {
-    return new EventWorkspace(storageMode());
-  }
+  EventWorkspace *doCloneEmpty() const override { return new EventWorkspace(storageMode()); }
 
   EventList &getSpectrumWithoutInvalidation(const size_t index) override;
 

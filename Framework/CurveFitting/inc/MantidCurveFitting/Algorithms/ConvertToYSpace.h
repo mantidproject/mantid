@@ -58,17 +58,13 @@ public:
 
   /// Creates a POD struct containing the required detector parameters for this
   /// spectrum
-  static DetectorParams
-  getDetectorParameters(const API::MatrixWorkspace_const_sptr &ws,
-                        const size_t index);
+  static DetectorParams getDetectorParameters(const API::MatrixWorkspace_const_sptr &ws, const size_t index);
   /// Retrieve a component parameter
-  static double getComponentParameter(const Geometry::IComponent &det,
-                                      const Geometry::ParameterMap &pmap,
+  static double getComponentParameter(const Geometry::IComponent &det, const Geometry::ParameterMap &pmap,
                                       const std::string &name);
   /// Convert single time value to Y,Q & Ei values
-  static void calculateY(double &yspace, double &qspace, double &ei,
-                         const double mass, const double tsec, const double k1,
-                         const double v1, const DetectorParams &detpar);
+  static void calculateY(double &yspace, double &qspace, double &ei, const double mass, const double tsec,
+                         const double k1, const double v1, const DetectorParams &detpar);
 
 private:
   void init() override;

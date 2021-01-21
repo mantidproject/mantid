@@ -38,9 +38,7 @@ class Bin2DPowderDiffractionTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static Bin2DPowderDiffractionTest *createSuite() {
-    return new Bin2DPowderDiffractionTest();
-  }
+  static Bin2DPowderDiffractionTest *createSuite() { return new Bin2DPowderDiffractionTest(); }
   static void destroySuite(Bin2DPowderDiffractionTest *suite) { delete suite; }
 
   //-------------------- Test success --------------------------------------
@@ -64,26 +62,22 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", eventWS));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "_bin2d_test1"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_bin2d_test1"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("dSpaceBinning", "2,2,6"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("dPerpendicularBinning", "1,2,5"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("dPerpendicularBinning", "1,2,5"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("NormalizeByBinArea", "0"));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
     // get and check output workspace
     std::shared_ptr<MatrixWorkspace> outputWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "_bin2d_test1");
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("_bin2d_test1");
     TS_ASSERT(outputWS);
 
     TS_ASSERT_EQUALS(outputWS->getAxis(0)->length(), 3);
     TS_ASSERT_EQUALS(outputWS->getAxis(0)->unit()->unitID(), "dSpacing");
     TS_ASSERT_EQUALS(outputWS->getAxis(1)->length(), 3);
-    TS_ASSERT_EQUALS(outputWS->getAxis(1)->unit()->unitID(),
-                     "dSpacingPerpendicular");
+    TS_ASSERT_EQUALS(outputWS->getAxis(1)->unit()->unitID(), "dSpacingPerpendicular");
 
     TS_ASSERT_DELTA((*(outputWS->getAxis(0)))(0), 2.0, 0.0001);
     TS_ASSERT_DELTA((*(outputWS->getAxis(0)))(1), 4.0, 0.0001);
@@ -112,26 +106,22 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", eventWS));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "_bin2d_test1"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_bin2d_test1"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("dSpaceBinning", "2,2,6"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("dPerpendicularBinning", "1,2,5"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("dPerpendicularBinning", "1,2,5"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("NormalizeByBinArea", "1"));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
     // get and check output workspace
     std::shared_ptr<MatrixWorkspace> outputWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "_bin2d_test1");
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("_bin2d_test1");
     TS_ASSERT(outputWS);
 
     TS_ASSERT_EQUALS(outputWS->getAxis(0)->length(), 3);
     TS_ASSERT_EQUALS(outputWS->getAxis(0)->unit()->unitID(), "dSpacing");
     TS_ASSERT_EQUALS(outputWS->getAxis(1)->length(), 3);
-    TS_ASSERT_EQUALS(outputWS->getAxis(1)->unit()->unitID(),
-                     "dSpacingPerpendicular");
+    TS_ASSERT_EQUALS(outputWS->getAxis(1)->unit()->unitID(), "dSpacingPerpendicular");
 
     TS_ASSERT_DELTA((*(outputWS->getAxis(0)))(0), 2.0, 0.0001);
     TS_ASSERT_DELTA((*(outputWS->getAxis(0)))(1), 4.0, 0.0001);
@@ -163,8 +153,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", eventWS));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "_bin2d_test1"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_bin2d_test1"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BinEdgesFile", binFileName));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("NormalizeByBinArea", "0"));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
@@ -172,14 +161,12 @@ public:
 
     // get and check output workspace
     std::shared_ptr<MatrixWorkspace> outputWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "_bin2d_test1");
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("_bin2d_test1");
     TS_ASSERT(outputWS);
 
     TS_ASSERT_EQUALS(outputWS->getAxis(0)->unit()->unitID(), "dSpacing");
     TS_ASSERT_EQUALS(outputWS->getAxis(1)->length(), 3);
-    TS_ASSERT_EQUALS(outputWS->getAxis(1)->unit()->unitID(),
-                     "dSpacingPerpendicular");
+    TS_ASSERT_EQUALS(outputWS->getAxis(1)->unit()->unitID(), "dSpacingPerpendicular");
 
     // bins vary, test x values
     TS_ASSERT_DELTA(outputWS->x(0)[0], 1.0, 0.0001);
@@ -212,9 +199,7 @@ public:
     using Mantid::DataHandling::MoveInstrumentComponent;
     using Mantid::Kernel::Unit;
 
-    EventWorkspace_sptr eventWS =
-        WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(1, 5,
-                                                                        true);
+    EventWorkspace_sptr eventWS = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(1, 5, true);
     eventWS->getAxis(0)->setUnit("Wavelength");
 
     Bin2DPowderDiffraction alg;
@@ -222,11 +207,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", eventWS));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "_bin2d_test3"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_bin2d_test3"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("dSpaceBinning", "2,2,6"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("dPerpendicularBinning", "1,2,5"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("dPerpendicularBinning", "1,2,5"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("NormalizeByBinArea", "0"));
     TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
     TS_ASSERT(!alg.isExecuted());
@@ -239,9 +222,7 @@ private:
     using Mantid::DataHandling::MoveInstrumentComponent;
     using Mantid::Kernel::Unit;
 
-    EventWorkspace_sptr eventWS =
-        WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(1, 5,
-                                                                        true);
+    EventWorkspace_sptr eventWS = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(1, 5, true);
     // Set the X axes
     const auto &xVals = eventWS->x(0);
     const size_t xSize = xVals.size();
@@ -277,8 +258,7 @@ private:
       }
       events.addDetectorID(Mantid::detid_t(i));
     }
-    logger.information() << "Number of events: " << numbins * numSpectra
-                         << std::endl;
+    logger.information() << "Number of events: " << numbins * numSpectra << std::endl;
 
     return eventWS;
   }

@@ -22,28 +22,21 @@ public:
   const std::string name() const override { return "Stitch1DMany"; }
   /// Algorithm's version for identification. @see Algorithm::version
   int version() const override { return 1; }
-  const std::vector<std::string> seeAlso() const override {
-    return {"Rebin", "Stitch1D"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"Rebin", "Stitch1D"}; }
   /// Algorithm's category for identification. @see Algorithm::category
   const std::string category() const override { return "Reflectometry"; }
   /// Summary of algorithm's purpose
-  const std::string summary() const override {
-    return "Stitches histogram matrix workspaces together";
-  }
+  const std::string summary() const override { return "Stitches histogram matrix workspaces together"; }
   /// Validates algorithm inputs
   std::map<std::string, std::string> validateInputs() override;
 
   /// Performs the Stitch1D algorithm at a specific workspace index
-  void doStitch1D(std::vector<API::MatrixWorkspace_sptr> &toStitch,
-                  const std::vector<double> &manualScaleFactors,
+  void doStitch1D(std::vector<API::MatrixWorkspace_sptr> &toStitch, const std::vector<double> &manualScaleFactors,
                   API::Workspace_sptr &outWS, std::string &outName);
 
   /// Performs the Stitch1DMany algorithm at a specific period
-  void doStitch1DMany(const size_t period, const bool useManualScaleFactors,
-                      std::string &outName,
-                      std::vector<double> &outScaleFactors,
-                      const bool storeInADS = true);
+  void doStitch1DMany(const size_t period, const bool useManualScaleFactors, std::string &outName,
+                      std::vector<double> &outScaleFactors, const bool storeInADS = true);
 
 private:
   /// Overwrites Algorithm method.

@@ -35,25 +35,18 @@ namespace MDAlgorithms {
 class DLLExport ConvertMDHistoToMatrixWorkspace : public API::Algorithm {
 public:
   /// Algorithm's name
-  const std::string name() const override {
-    return "ConvertMDHistoToMatrixWorkspace";
-  };
+  const std::string name() const override { return "ConvertMDHistoToMatrixWorkspace"; };
 
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Converts if it can a IMDHistoWorkspace to a Workspace2D.";
-  }
+  const std::string summary() const override { return "Converts if it can a IMDHistoWorkspace to a Workspace2D."; }
 
   /// Algorithm's version
   int version() const override { return (1); }
   const std::vector<std::string> seeAlso() const override {
-    return {"ConvertToMD", "CreateMDHistoWorkspace",
-            "ConvertTableToMatrixWorkspace", "MDHistoToWorkspace2D"};
+    return {"ConvertToMD", "CreateMDHistoWorkspace", "ConvertTableToMatrixWorkspace", "MDHistoToWorkspace2D"};
   }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "Utility\\Workspaces;MDAlgorithms\\Transforms";
-  }
+  const std::string category() const override { return "Utility\\Workspaces;MDAlgorithms\\Transforms"; }
 
 private:
   /// Initialisation code

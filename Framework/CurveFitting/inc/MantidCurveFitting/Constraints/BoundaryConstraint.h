@@ -35,17 +35,15 @@ public:
   BoundaryConstraint(const std::string &paramName);
 
   /// Constructor with boundary arguments
-  BoundaryConstraint(API::IFunction *fun, const std::string &paramName,
-                     const double lowerBound, const double upperBound,
-                     bool isDefault = false);
+  BoundaryConstraint(API::IFunction *fun, const std::string &paramName, const double lowerBound,
+                     const double upperBound, bool isDefault = false);
 
   /// Constructor with lower boundary argument
-  BoundaryConstraint(API::IFunction *fun, const std::string &paramName,
-                     const double lowerBound, bool isDefault = false);
+  BoundaryConstraint(API::IFunction *fun, const std::string &paramName, const double lowerBound,
+                     bool isDefault = false);
 
   /// Initialize the constraint from an expression
-  void initialize(API::IFunction *fun, const API::Expression &expr,
-                  bool isDefault) override;
+  void initialize(API::IFunction *fun, const API::Expression &expr, bool isDefault) override;
 
   /// implement IConstraint virtual functions
   void setPenaltyFactor(const double &c) override;

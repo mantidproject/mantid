@@ -8,17 +8,12 @@
 
 #include "BatchJobRunnerTest.h"
 
-class BatchJobRunnerProcessingTest : public CxxTest::TestSuite,
-                                     public BatchJobRunnerTest {
+class BatchJobRunnerProcessingTest : public CxxTest::TestSuite, public BatchJobRunnerTest {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static BatchJobRunnerProcessingTest *createSuite() {
-    return new BatchJobRunnerProcessingTest();
-  }
-  static void destroySuite(BatchJobRunnerProcessingTest *suite) {
-    delete suite;
-  }
+  static BatchJobRunnerProcessingTest *createSuite() { return new BatchJobRunnerProcessingTest(); }
+  static void destroySuite(BatchJobRunnerProcessingTest *suite) { delete suite; }
 
   void testInitialisedWithNonRunningState() {
     auto jobRunner = makeJobRunner();
@@ -122,8 +117,7 @@ public:
   }
 
   void testReductionResumedWithGroupAndNonInvalidRowSelected() {
-    auto jobRunner = makeJobRunner(
-        oneGroupWithOneRowAndOneGroupWithOneRowAndOneInvalidRowModel());
+    auto jobRunner = makeJobRunner(oneGroupWithOneRowAndOneGroupWithOneRowAndOneInvalidRowModel());
     selectGroup(jobRunner, 0);
     selectRow(jobRunner, 1, 0);
     jobRunner.notifyReductionResumed();
@@ -219,9 +213,7 @@ public:
     auto row = makeRow("12345", 0.5);
     auto jobRunner = makeJobRunner();
 
-    EXPECT_CALL(*m_jobAlgorithm, item())
-        .Times(AtLeast(1))
-        .WillRepeatedly(Return(&row));
+    EXPECT_CALL(*m_jobAlgorithm, item()).Times(AtLeast(1)).WillRepeatedly(Return(&row));
 
     jobRunner.algorithmStarted(m_jobAlgorithm);
     TS_ASSERT_EQUALS(row.state(), State::ITEM_RUNNING);
@@ -237,9 +229,7 @@ public:
     auto iVsQ = createWorkspace();
     auto iVsQBin = createWorkspace();
 
-    EXPECT_CALL(*m_jobAlgorithm, item())
-        .Times(AtLeast(1))
-        .WillRepeatedly(Return(&row));
+    EXPECT_CALL(*m_jobAlgorithm, item()).Times(AtLeast(1)).WillRepeatedly(Return(&row));
     EXPECT_CALL(*m_jobAlgorithm, updateItem()).Times(1);
 
     jobRunner.algorithmComplete(m_jobAlgorithm);
@@ -252,9 +242,7 @@ public:
     auto jobRunner = makeJobRunner();
     auto message = std::string("test error message");
 
-    EXPECT_CALL(*m_jobAlgorithm, item())
-        .Times(AtLeast(1))
-        .WillRepeatedly(Return(&row));
+    EXPECT_CALL(*m_jobAlgorithm, item()).Times(AtLeast(1)).WillRepeatedly(Return(&row));
 
     jobRunner.algorithmError(m_jobAlgorithm, message);
     TS_ASSERT_EQUALS(row.state(), State::ITEM_ERROR);

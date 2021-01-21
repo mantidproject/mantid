@@ -22,12 +22,10 @@ namespace MplCpp {
  * the matplotlib example on embedding a matplotlib canvas:
  * https://matplotlib.org/examples/user_interfaces/embedding_in_qt5.html
  */
-class MANTID_MPLCPP_DLL FigureCanvasQt : public QWidget,
-                                         public Common::Python::InstanceHolder {
+class MANTID_MPLCPP_DLL FigureCanvasQt : public QWidget, public Common::Python::InstanceHolder {
   Q_OBJECT
 public:
-  FigureCanvasQt(const int subplotspec, const QString &projection = "",
-                 QWidget *parent = nullptr);
+  FigureCanvasQt(const int subplotspec, const QString &projection = "", QWidget *parent = nullptr);
   FigureCanvasQt(Figure fig, QWidget *parent = nullptr);
 
   /// Attach an event filter to the underlying matplotlib canvas
@@ -36,9 +34,7 @@ public:
   inline Figure gcf() const { return m_figure; }
 
   /// Access to the current active axes instance.
-  template <typename AxesType = Axes> inline AxesType gca() const {
-    return m_figure.gca<AxesType>();
-  }
+  template <typename AxesType = Axes> inline AxesType gca() const { return m_figure.gca<AxesType>(); }
 
   void setTightLayout(QHash<QString, QVariant> const &args);
 

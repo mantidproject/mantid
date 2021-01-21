@@ -46,8 +46,7 @@ public:
    * @param func :: pointer to a void function()
    * @param cost :: computational cost
    */
-  FunctionTask(voidFunction func, double cost = 1.0)
-      : Task(cost), m_voidFunc(func) {}
+  FunctionTask(voidFunction func, double cost = 1.0) : Task(cost), m_voidFunc(func) {}
 
   //---------------------------------------------------------------------------------------------
   /** Constructor for a simple boost bound function.
@@ -62,8 +61,7 @@ public:
    * @param func :: std::function<> returned by std::bind()
    * @param cost :: computational cost
    */
-  FunctionTask(std::function<void()> func, double cost = 1.0)
-      : Task(cost), m_voidFunc(std::move(func)) {}
+  FunctionTask(std::function<void()> func, double cost = 1.0) : Task(cost), m_voidFunc(std::move(func)) {}
 
   //---------------------------------------------------------------------------------------------
   /** Main method that performs the work for the task. */

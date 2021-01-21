@@ -29,11 +29,10 @@ class BinEdges;
   @author Simon Heybrock
   @date 2016
 */
-class MANTID_HISTOGRAMDATA_DLL Points
-    : public detail::VectorOf<Points, HistogramX>,
-      public detail::Iterable<Points>,
-      public detail::Offsetable<Points>,
-      public detail::Scalable<Points> {
+class MANTID_HISTOGRAMDATA_DLL Points : public detail::VectorOf<Points, HistogramX>,
+                                        public detail::Iterable<Points>,
+                                        public detail::Offsetable<Points>,
+                                        public detail::Scalable<Points> {
 public:
   using VectorOf<Points, HistogramX>::VectorOf;
   using VectorOf<Points, HistogramX>::operator=;

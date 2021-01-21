@@ -26,16 +26,13 @@ private:
   /**
 Helper function. Creates a peaksworkspace with a single peak
 */
-  PeaksWorkspace_sptr
-  createPeaksWorkspace(const std::string &coordFrame,
-                       const Mantid::Kernel::V3D &peakPosition) {
+  PeaksWorkspace_sptr createPeaksWorkspace(const std::string &coordFrame, const Mantid::Kernel::V3D &peakPosition) {
     PeaksWorkspace_sptr ws = WorkspaceCreationHelper::createPeaksWorkspace(1);
     auto detectorIds = ws->getInstrument()->getDetectorIDs();
     Peak &peak = ws->getPeak(0);
     peak.setDetectorID(detectorIds.front());
     if (coordFrame == "Q (lab frame)") {
-      peak.setQLabFrame(peakPosition,
-                        1 /*set the detector distance explicitly*/);
+      peak.setQLabFrame(peakPosition, 1 /*set the detector distance explicitly*/);
     } else {
       throw std::runtime_error("Coordinate frame unsported in these tests.");
     }
@@ -48,17 +45,13 @@ public:
   static PeaksOnSurfaceTest *createSuite() { return new PeaksOnSurfaceTest(); }
   static void destroySuite(PeaksOnSurfaceTest *suite) { delete suite; }
 
-  void do_test_vertex_throws(const std::string &message,
-                             const std::string &vertex1,
-                             const std::string &vertex2,
-                             const std::string &vertex3,
-                             const std::string &vertex4) {
+  void do_test_vertex_throws(const std::string &message, const std::string &vertex1, const std::string &vertex2,
+                             const std::string &vertex3, const std::string &vertex4) {
     PeaksOnSurface alg;
     alg.setRethrows(true);
     alg.initialize();
     TS_ASSERT(alg.isInitialized());
-    alg.setProperty("InputWorkspace",
-                    WorkspaceCreationHelper::createPeaksWorkspace(2));
+    alg.setProperty("InputWorkspace", WorkspaceCreationHelper::createPeaksWorkspace(2));
     alg.setPropertyValue("CoordinateFrame", "Q (lab frame)");
     alg.setPropertyValue("Vertex1", vertex1);
     alg.setPropertyValue("Vertex2", vertex2);
@@ -70,25 +63,17 @@ public:
   }
 
   void test_too_few_entries() {
-    do_test_vertex_throws("Too few for Vertex1", "0,0", "0,1,0", "1,1,0",
-                          "1,0,0");
-    do_test_vertex_throws("Too few for Vertex2", "0,0,0", "0,1", "1,1,0",
-                          "1,0,0");
-    do_test_vertex_throws("Too few for Vertex3", "0,0,0", "0,1,0", "1,1",
-                          "1,0,0");
-    do_test_vertex_throws("Too few for Vertex4", "0,0,0", "0,1,0", "1,1,0",
-                          "1,0");
+    do_test_vertex_throws("Too few for Vertex1", "0,0", "0,1,0", "1,1,0", "1,0,0");
+    do_test_vertex_throws("Too few for Vertex2", "0,0,0", "0,1", "1,1,0", "1,0,0");
+    do_test_vertex_throws("Too few for Vertex3", "0,0,0", "0,1,0", "1,1", "1,0,0");
+    do_test_vertex_throws("Too few for Vertex4", "0,0,0", "0,1,0", "1,1,0", "1,0");
   }
 
   void test_too_many_entries() {
-    do_test_vertex_throws("Too many for Vertex1", "0,0,0,0", "0,1,0", "1,1,0",
-                          "1,0,0");
-    do_test_vertex_throws("Too many for Vertex2", "0,0,0", "0,1,0,0", "1,1,0",
-                          "1,0,0");
-    do_test_vertex_throws("Too many for Vertex3", "0,0,0", "0,1,0", "1,1,0,0",
-                          "1,0,0");
-    do_test_vertex_throws("Too many for Vertex4", "0,0,0", "0,1,0", "1,1,0",
-                          "1,0,0,0");
+    do_test_vertex_throws("Too many for Vertex1", "0,0,0,0", "0,1,0", "1,1,0", "1,0,0");
+    do_test_vertex_throws("Too many for Vertex2", "0,0,0", "0,1,0,0", "1,1,0", "1,0,0");
+    do_test_vertex_throws("Too many for Vertex3", "0,0,0", "0,1,0", "1,1,0,0", "1,0,0");
+    do_test_vertex_throws("Too many for Vertex4", "0,0,0", "0,1,0", "1,1,0", "1,0,0,0");
   }
 
   void test_well_formed_vertexes() {
@@ -96,8 +81,7 @@ public:
     alg.setRethrows(true);
     alg.initialize();
     TS_ASSERT(alg.isInitialized());
-    alg.setProperty("InputWorkspace",
-                    WorkspaceCreationHelper::createPeaksWorkspace(2));
+    alg.setProperty("InputWorkspace", WorkspaceCreationHelper::createPeaksWorkspace(2));
     alg.setPropertyValue("CoordinateFrame", "Q (lab frame)");
     alg.setPropertyValue("Vertex1", "0,0,0");
     alg.setPropertyValue("Vertex2", "0,1,0");
@@ -112,14 +96,12 @@ public:
     alg.setRethrows(true);
     alg.initialize();
     TS_ASSERT(alg.isInitialized());
-    alg.setProperty("InputWorkspace",
-                    WorkspaceCreationHelper::createPeaksWorkspace(2));
+    alg.setProperty("InputWorkspace", WorkspaceCreationHelper::createPeaksWorkspace(2));
     alg.setPropertyValue("CoordinateFrame", "Q (lab frame)");
     alg.setPropertyValue("Vertex1", "0,0,0");
     alg.setPropertyValue("Vertex2", "0,1,0");
-    alg.setPropertyValue(
-        "Vertex3",
-        "0.5,0.5,0.707106"); // x^2 + y^2 + z^2 == 1, but is not coplanar.
+    alg.setPropertyValue("Vertex3",
+                         "0.5,0.5,0.707106"); // x^2 + y^2 + z^2 == 1, but is not coplanar.
     alg.setPropertyValue("Vertex4", "1,0,0");
     alg.setPropertyValue("OutputWorkspace", "OutWS");
     TS_ASSERT_THROWS(alg.execute(), std::invalid_argument &);
@@ -130,8 +112,7 @@ public:
     alg.setRethrows(true);
     alg.initialize();
     TS_ASSERT(alg.isInitialized());
-    alg.setProperty("InputWorkspace",
-                    WorkspaceCreationHelper::createPeaksWorkspace(2));
+    alg.setProperty("InputWorkspace", WorkspaceCreationHelper::createPeaksWorkspace(2));
     alg.setPropertyValue("CoordinateFrame", "Q (lab frame)");
     alg.setPropertyValue("Vertex1", "0,0,0");
     alg.setPropertyValue("Vertex2", "0,1,0");
@@ -176,8 +157,7 @@ public:
     alg.setPropertyValue("OutputWorkspace", outName);
     alg.execute();
 
-    ITableWorkspace_sptr outWS =
-        AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(outName);
+    ITableWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(outName);
 
     TS_ASSERT_EQUALS(3, outWS->columnCount());
     TS_ASSERT_EQUALS("PeakIndex", outWS->getColumn(0)->name());
@@ -186,10 +166,8 @@ public:
     TS_ASSERT_EQUALS(1, outWS->rowCount());
 
     TSM_ASSERT_EQUALS("Peak index should be zero", 0, outWS->cell<int>(0, 0));
-    TSM_ASSERT_EQUALS("Peak intersect should be true", Boolean(true),
-                      outWS->cell<Boolean>(0, 1));
-    TSM_ASSERT_DELTA("Wrong distance calculated", 1.0,
-                     outWS->cell<double>(0, 2), 0.0001);
+    TSM_ASSERT_EQUALS("Peak intersect should be true", Boolean(true), outWS->cell<Boolean>(0, 1));
+    TSM_ASSERT_DELTA("Wrong distance calculated", 1.0, outWS->cell<double>(0, 2), 0.0001);
   }
 
   /*
@@ -225,12 +203,10 @@ public:
     alg.setPropertyValue("OutputWorkspace", outName);
     alg.execute();
 
-    ITableWorkspace_sptr outWS =
-        AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(outName);
+    ITableWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(outName);
 
     TSM_ASSERT_EQUALS("Peak index should be zero", 0, outWS->cell<int>(0, 0));
-    TSM_ASSERT_EQUALS("Peak intersect should be false", Boolean(false),
-                      outWS->cell<Boolean>(0, 1));
+    TSM_ASSERT_EQUALS("Peak intersect should be false", Boolean(false), outWS->cell<Boolean>(0, 1));
   }
 
   /*
@@ -266,14 +242,11 @@ therefore outside the surface boundaries.
     alg.setPropertyValue("OutputWorkspace", outName);
     alg.execute();
 
-    ITableWorkspace_sptr outWS =
-        AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(outName);
+    ITableWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(outName);
 
     TSM_ASSERT_EQUALS("Peak index should be zero", 0, outWS->cell<int>(0, 0));
-    TSM_ASSERT_EQUALS("Peak intersect should be false", Boolean(false),
-                      outWS->cell<Boolean>(0, 1));
-    TSM_ASSERT_EQUALS("Wrong distance calculated", 0.0,
-                      outWS->cell<double>(0, 2));
+    TSM_ASSERT_EQUALS("Peak intersect should be false", Boolean(false), outWS->cell<Boolean>(0, 1));
+    TSM_ASSERT_EQUALS("Wrong distance calculated", 0.0, outWS->cell<double>(0, 2));
   }
 
   /*
@@ -309,14 +282,11 @@ therefore does cross the surface boundaries.
     alg.setPropertyValue("OutputWorkspace", outName);
     alg.execute();
 
-    ITableWorkspace_sptr outWS =
-        AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(outName);
+    ITableWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(outName);
 
     TSM_ASSERT_EQUALS("Peak index should be zero", 0, outWS->cell<int>(0, 0));
-    TSM_ASSERT_EQUALS("Peak intersect should be false", Boolean(true),
-                      outWS->cell<Boolean>(0, 1));
-    TSM_ASSERT_EQUALS("Wrong distance calculated", 0.0,
-                      outWS->cell<double>(0, 2));
+    TSM_ASSERT_EQUALS("Peak intersect should be false", Boolean(true), outWS->cell<Boolean>(0, 1));
+    TSM_ASSERT_EQUALS("Wrong distance calculated", 0.0, outWS->cell<double>(0, 2));
   }
 
   void test_line_intersects_sphere_facility() {
@@ -329,27 +299,21 @@ therefore does cross the surface boundaries.
                                           // along x at y = 1 and z = 0, between
                                           // x = -1 and 1
 
-    TSM_ASSERT("Should just intersect sphere",
-               lineIntersectsSphere(line, lineStart, peakCenter, peakRadius));
+    TSM_ASSERT("Should just intersect sphere", lineIntersectsSphere(line, lineStart, peakCenter, peakRadius));
 
-    TSM_ASSERT(
-        "Should just skim but not intersect the sphere",
-        !lineIntersectsSphere(line, lineStart, peakCenter, peakRadius - delta));
+    TSM_ASSERT("Should just skim but not intersect the sphere",
+               !lineIntersectsSphere(line, lineStart, peakCenter, peakRadius - delta));
 
-    TSM_ASSERT(
-        "Should fully intersect sphere",
-        lineIntersectsSphere(line, lineStart, peakCenter, peakRadius + delta));
+    TSM_ASSERT("Should fully intersect sphere", lineIntersectsSphere(line, lineStart, peakCenter, peakRadius + delta));
 
     // Now move the peak center to give a scenario, where the line segment would
     // not intersect the sphere, but the the infinite line would.
     peakCenter = V3D(2, 1, 0);
-    TSM_ASSERT(
-        "Line segment does NOT intersect sphere, but infinite line does",
-        !lineIntersectsSphere(line, lineStart, peakCenter, peakRadius - delta));
+    TSM_ASSERT("Line segment does NOT intersect sphere, but infinite line does",
+               !lineIntersectsSphere(line, lineStart, peakCenter, peakRadius - delta));
 
-    TSM_ASSERT(
-        "Line segment does Just intersect sphere",
-        lineIntersectsSphere(line, lineStart, peakCenter, peakRadius + delta));
+    TSM_ASSERT("Line segment does Just intersect sphere",
+               lineIntersectsSphere(line, lineStart, peakCenter, peakRadius + delta));
   }
 };
 
@@ -362,18 +326,13 @@ private:
   Mantid::API::IPeaksWorkspace_sptr inputWS;
 
 public:
-  static PeaksOnSurfaceTestPerformance *createSuite() {
-    return new PeaksOnSurfaceTestPerformance();
-  }
-  static void destroySuite(PeaksOnSurfaceTestPerformance *suite) {
-    delete suite;
-  }
+  static PeaksOnSurfaceTestPerformance *createSuite() { return new PeaksOnSurfaceTestPerformance(); }
+  static void destroySuite(PeaksOnSurfaceTestPerformance *suite) { delete suite; }
 
   PeaksOnSurfaceTestPerformance() {
     int numPeaks = 4000;
     inputWS = std::make_shared<PeaksWorkspace>();
-    Mantid::Geometry::Instrument_sptr inst =
-        ComponentCreationHelper::createTestInstrumentRectangular2(1, 200);
+    Mantid::Geometry::Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular2(1, 200);
     inputWS->setInstrument(inst);
 
     for (int i = 0; i < numPeaks; ++i) {
@@ -399,8 +358,7 @@ public:
     alg.setProperty("PeakRadius", 0.4);
     alg.execute();
 
-    Mantid::API::ITableWorkspace_sptr outWS =
-        AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(outName);
+    Mantid::API::ITableWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(outName);
 
     TS_ASSERT_EQUALS(3, outWS->columnCount());
     TS_ASSERT_EQUALS(inputWS->rowCount(), outWS->rowCount());

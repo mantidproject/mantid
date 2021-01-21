@@ -19,17 +19,13 @@ DECLARE_ALGORITHM(SortPeaksWorkspace)
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string SortPeaksWorkspace::name() const {
-  return "SortPeaksWorkspace";
-}
+const std::string SortPeaksWorkspace::name() const { return "SortPeaksWorkspace"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int SortPeaksWorkspace::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string SortPeaksWorkspace::category() const {
-  return "Crystal\\Peaks;Utility\\Sorting";
-}
+const std::string SortPeaksWorkspace::category() const { return "Crystal\\Peaks;Utility\\Sorting"; }
 
 //----------------------------------------------------------------------------------------------
 
@@ -37,19 +33,15 @@ const std::string SortPeaksWorkspace::category() const {
 /** Initialize the algorithm's properties.
  */
 void SortPeaksWorkspace::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>("InputWorkspace", "", Direction::Input),
                   "An input workspace.");
-  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 
   auto mustHave = std::make_shared<MandatoryValidator<std::string>>();
   declareProperty("ColumnNameToSortBy", "", mustHave, "Column to sort by");
 
-  declareProperty(
-      "SortAscending", true,
-      "Sort the OutputWorkspace by the target column in a Ascending fashion.");
+  declareProperty("SortAscending", true, "Sort the OutputWorkspace by the target column in a Ascending fashion.");
 }
 
 //----------------------------------------------------------------------------------------------

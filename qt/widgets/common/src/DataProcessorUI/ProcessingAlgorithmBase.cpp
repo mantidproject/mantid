@@ -13,10 +13,9 @@ namespace MantidWidgets {
 namespace DataProcessor {
 
 /** Constructor */
-ProcessingAlgorithmBase::ProcessingAlgorithmBase(
-    const QString &name, const std::set<QString> &blacklist, const int version)
-    : m_algName(name), m_version(version), m_blacklist(blacklist),
-      m_inputWsProperties(), m_inputStrListProperties(),
+ProcessingAlgorithmBase::ProcessingAlgorithmBase(const QString &name, const std::set<QString> &blacklist,
+                                                 const int version)
+    : m_algName(name), m_version(version), m_blacklist(blacklist), m_inputWsProperties(), m_inputStrListProperties(),
       m_OutputWsProperties() {
 
   countWsProperties();
@@ -24,8 +23,8 @@ ProcessingAlgorithmBase::ProcessingAlgorithmBase(
 
 /** Default constructor (nothing to do) */
 ProcessingAlgorithmBase::ProcessingAlgorithmBase()
-    : m_algName(), m_version(-1), m_blacklist(), m_inputWsProperties(),
-      m_inputStrListProperties(), m_OutputWsProperties() {}
+    : m_algName(), m_version(-1), m_blacklist(), m_inputWsProperties(), m_inputStrListProperties(),
+      m_OutputWsProperties() {}
 
 /** Destructor */
 ProcessingAlgorithmBase::~ProcessingAlgorithmBase() {}
@@ -34,23 +33,19 @@ ProcessingAlgorithmBase::~ProcessingAlgorithmBase() {}
 void ProcessingAlgorithmBase::countWsProperties() {
 
   Mantid::API::IAlgorithm_sptr alg =
-      Mantid::API::AlgorithmManager::Instance().create(m_algName.toStdString(),
-                                                       m_version);
+      Mantid::API::AlgorithmManager::Instance().create(m_algName.toStdString(), m_version);
 
   auto properties = alg->getProperties();
   for (auto &prop : properties) {
 
     if (prop->direction() == Mantid::Kernel::Direction::Input &&
-        (prop->type() == "MatrixWorkspace" || prop->type() == "Workspace" ||
-         prop->type() == "Workspace2D")) {
+        (prop->type() == "MatrixWorkspace" || prop->type() == "Workspace" || prop->type() == "Workspace2D")) {
 
       m_inputWsProperties.emplace_back(QString::fromStdString(prop->name()));
     }
-    if (prop->direction() == Mantid::Kernel::Direction::Input &&
-        prop->type() == "str list") {
+    if (prop->direction() == Mantid::Kernel::Direction::Input && prop->type() == "str list") {
 
-      m_inputStrListProperties.emplace_back(
-          QString::fromStdString(prop->name()));
+      m_inputStrListProperties.emplace_back(QString::fromStdString(prop->name()));
     }
     if (prop->direction() == Mantid::Kernel::Direction::Output &&
         (prop->type() == "MatrixWorkspace" || prop->type() == "Workspace")) {
@@ -61,25 +56,18 @@ void ProcessingAlgorithmBase::countWsProperties() {
 }
 
 // Returns the input workspaces properties defined for this algorithm
-std::vector<QString> ProcessingAlgorithmBase::getInputWsProperties() {
-  return m_inputWsProperties;
-}
+std::vector<QString> ProcessingAlgorithmBase::getInputWsProperties() { return m_inputWsProperties; }
 // Returns the input str list properties defined for this algorithm
-std::vector<QString> ProcessingAlgorithmBase::getInputStrListProperties() {
-  return m_inputStrListProperties;
-}
+std::vector<QString> ProcessingAlgorithmBase::getInputStrListProperties() { return m_inputStrListProperties; }
 // Returns the output workspaces properties defined for this algorithm
-std::vector<QString> ProcessingAlgorithmBase::getOutputWsProperties() {
-  return m_OutputWsProperties;
-}
+std::vector<QString> ProcessingAlgorithmBase::getOutputWsProperties() { return m_OutputWsProperties; }
 
 /** Converts a string to a vector of strings. Input string will be split by
  * commas.
  * @param text :: the input string to convert
  * @return :: the string as a vector
  */
-std::vector<QString>
-ProcessingAlgorithmBase::convertStringToVector(const QString &text) {
+std::vector<QString> ProcessingAlgorithmBase::convertStringToVector(const QString &text) {
 
   if (text.isEmpty())
     return std::vector<QString>();
@@ -92,8 +80,7 @@ ProcessingAlgorithmBase::convertStringToVector(const QString &text) {
  * @param text :: the input string to convert
  * @return :: the string as a set
  */
-std::set<QString>
-ProcessingAlgorithmBase::convertStringToSet(const QString &text) {
+std::set<QString> ProcessingAlgorithmBase::convertStringToSet(const QString &text) {
 
   if (text.isEmpty())
     return std::set<QString>();

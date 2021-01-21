@@ -29,24 +29,16 @@ public:
 
     // Act
     std::vector<std::pair<double, double>> extents;
-    TSM_ASSERT_THROWS_NOTHING("Frustum is well defined, should not throw.",
-                              extents = frustum.toExtents());
+    TSM_ASSERT_THROWS_NOTHING("Frustum is well defined, should not throw.", extents = frustum.toExtents());
 
     // Assert
-    TSM_ASSERT_EQUALS("Extents should exist for x, y and z.", 3,
-                      extents.size());
-    TSM_ASSERT_EQUALS("Frustum is well defined and should have xmin = -1", -1.0,
-                      extents[0].first);
-    TSM_ASSERT_EQUALS("Frustum is well defined and should have xmax = 1", 1.0,
-                      extents[0].second);
-    TSM_ASSERT_EQUALS("Frustum is well defined and should have ymin = -1", -1.0,
-                      extents[1].first);
-    TSM_ASSERT_EQUALS("Frustum is well defined and should have ymin = -1", 1.0,
-                      extents[1].second);
-    TSM_ASSERT_EQUALS("Frustum is well defined and should have zmin = -1", -1.0,
-                      extents[2].first);
-    TSM_ASSERT_EQUALS("Frustum is well defined and should have zmax = 1", 1.0,
-                      extents[2].second);
+    TSM_ASSERT_EQUALS("Extents should exist for x, y and z.", 3, extents.size());
+    TSM_ASSERT_EQUALS("Frustum is well defined and should have xmin = -1", -1.0, extents[0].first);
+    TSM_ASSERT_EQUALS("Frustum is well defined and should have xmax = 1", 1.0, extents[0].second);
+    TSM_ASSERT_EQUALS("Frustum is well defined and should have ymin = -1", -1.0, extents[1].first);
+    TSM_ASSERT_EQUALS("Frustum is well defined and should have ymin = -1", 1.0, extents[1].second);
+    TSM_ASSERT_EQUALS("Frustum is well defined and should have zmin = -1", -1.0, extents[2].first);
+    TSM_ASSERT_EQUALS("Frustum is well defined and should have zmax = 1", 1.0, extents[2].second);
   }
 
   void testThatExtentsAreFoundForFrustumWithRotation() {
@@ -65,24 +57,16 @@ public:
 
     // Act
     std::vector<std::pair<double, double>> extents;
-    TSM_ASSERT_THROWS_NOTHING("Frustum is well defined, should not throw.",
-                              extents = frustum.toExtents());
+    TSM_ASSERT_THROWS_NOTHING("Frustum is well defined, should not throw.", extents = frustum.toExtents());
 
     // Assert
-    TSM_ASSERT_EQUALS("Extents should exist for x, y and z.", 3,
-                      extents.size());
-    TSM_ASSERT_EQUALS("Frustum is well defined and should have xmin = -1", -1.0,
-                      extents[0].first);
-    TSM_ASSERT_EQUALS("Frustum is well defined and should have xmax = 1", 1.0,
-                      extents[0].second);
-    TSM_ASSERT_EQUALS("Frustum is well defined and should have ymin = -1", -2.0,
-                      extents[1].first);
-    TSM_ASSERT_EQUALS("Frustum is well defined and should have ymin = -1", 2.0,
-                      extents[1].second);
-    TSM_ASSERT_EQUALS("Frustum is well defined and should have zmin = -1", -1.0,
-                      extents[2].first);
-    TSM_ASSERT_EQUALS("Frustum is well defined and should have zmax = 1", 1.0,
-                      extents[2].second);
+    TSM_ASSERT_EQUALS("Extents should exist for x, y and z.", 3, extents.size());
+    TSM_ASSERT_EQUALS("Frustum is well defined and should have xmin = -1", -1.0, extents[0].first);
+    TSM_ASSERT_EQUALS("Frustum is well defined and should have xmax = 1", 1.0, extents[0].second);
+    TSM_ASSERT_EQUALS("Frustum is well defined and should have ymin = -1", -2.0, extents[1].first);
+    TSM_ASSERT_EQUALS("Frustum is well defined and should have ymin = -1", 2.0, extents[1].second);
+    TSM_ASSERT_EQUALS("Frustum is well defined and should have zmin = -1", -1.0, extents[2].first);
+    TSM_ASSERT_EQUALS("Frustum is well defined and should have zmax = 1", 1.0, extents[2].second);
   }
 
   void testThatWrongPlanesThrowErrors() {
@@ -101,7 +85,7 @@ public:
     ViewFrustum frustum(left, right, bottom, top, far, near);
 
     // Assert
-    TSM_ASSERT_THROWS("Frustum is not well defined, should throw error",
-                      frustum.toExtents(), const std::runtime_error &);
+    TSM_ASSERT_THROWS("Frustum is not well defined, should throw error", frustum.toExtents(),
+                      const std::runtime_error &);
   }
 };

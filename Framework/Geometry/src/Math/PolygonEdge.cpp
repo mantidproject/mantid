@@ -34,9 +34,7 @@ PolygonEdge::PolygonEdge(const Kernel::V2D &start, const Kernel::V2D &end)
  * @param fraction :: The fraction of the current edge
  * @returns A point on the edge
  */
-Kernel::V2D PolygonEdge::point(const double fraction) const {
-  return start() + m_dir * fraction;
-}
+Kernel::V2D PolygonEdge::point(const double fraction) const { return start() + m_dir * fraction; }
 
 //-------------------------------------------------------------------------
 // Non-member functions
@@ -81,10 +79,8 @@ PointClassification classify(const V2D &pt, const PolygonEdge &edge) {
  * of the dot products between the normal to the other line
  * @returns An enumeration denoting the orientation type
  */
-PolygonEdge::Orientation orientation(const PolygonEdge &focusEdge,
-                                     const PolygonEdge &refEdge, double &t) {
-  V2D normalToRef((refEdge.end().Y() - refEdge.start().Y()),
-                  (refEdge.start().X() - refEdge.end().X()));
+PolygonEdge::Orientation orientation(const PolygonEdge &focusEdge, const PolygonEdge &refEdge, double &t) {
+  V2D normalToRef((refEdge.end().Y() - refEdge.start().Y()), (refEdge.start().X() - refEdge.end().X()));
   double denom = normalToRef.scalar_prod(focusEdge.direction());
   if (Kernel::equals(denom, 0.0)) {
     PointClassification edgeClass = classify(focusEdge.start(), refEdge);
@@ -106,9 +102,7 @@ PolygonEdge::Orientation orientation(const PolygonEdge &focusEdge,
  * @param edgeTwo :: The second polygon edge
  * @param crossPoint [Out] :: If found the point of intersection is filled here
  */
-PolygonEdge::Orientation crossingPoint(const PolygonEdge &edgeOne,
-                                       const PolygonEdge &edgeTwo,
-                                       V2D &crossPoint) {
+PolygonEdge::Orientation crossingPoint(const PolygonEdge &edgeOne, const PolygonEdge &edgeTwo, V2D &crossPoint) {
   using Kernel::gtEquals;
   using Kernel::ltEquals;
 
@@ -149,8 +143,7 @@ PolygonEdge::Orientation crossingPoint(const PolygonEdge &edgeOne,
  * @param aclass :: The point classification of a point on edge a
  * @param crossType :: The edge orientation classification
  */
-bool edgeAimsAt(const PolygonEdge &a, const PolygonEdge &b,
-                PointClassification aclass,
+bool edgeAimsAt(const PolygonEdge &a, const PolygonEdge &b, PointClassification aclass,
                 PolygonEdge::Orientation crossType) {
   const auto &va = a.direction();
   const auto &vb = b.direction();

@@ -25,24 +25,19 @@ using Mantid::Kernel::PropertyWithValue;
 /** Create the (blank) MDEW */
 static void createMDEW() {
   // ---- Start with empty MDEW ----
-  FrameworkManager::Instance().exec(
-      "CreateMDWorkspace", 18, "Dimensions", "3", "EventType", "MDEvent",
-      "Extents", "-10,10,-10,10,-10,10", "Names", "Q_lab_x,Q_lab_y,Q_lab_z",
-      "Units", "-,-,-", "SplitInto", "5", "SplitThreshold", "20",
-      "MaxRecursionDepth", "15", "OutputWorkspace", "MDEWS");
+  FrameworkManager::Instance().exec("CreateMDWorkspace", 18, "Dimensions", "3", "EventType", "MDEvent", "Extents",
+                                    "-10,10,-10,10,-10,10", "Names", "Q_lab_x,Q_lab_y,Q_lab_z", "Units", "-,-,-",
+                                    "SplitInto", "5", "SplitThreshold", "20", "MaxRecursionDepth", "15",
+                                    "OutputWorkspace", "MDEWS");
 
   // Give it an instrument
-  Instrument_sptr inst =
-      ComponentCreationHelper::createTestInstrumentRectangular2(1, 100, 0.05);
+  Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular2(1, 100, 0.05);
   IMDEventWorkspace_sptr ws;
-  TS_ASSERT_THROWS_NOTHING(
-      ws = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(
-          "MDEWS"));
+  TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>("MDEWS"));
   ExperimentInfo_sptr ei(new ExperimentInfo());
   ei->setInstrument(inst);
   // Give it a run number
-  ei->mutableRun().addProperty(
-      new PropertyWithValue<std::string>("run_number", "12345"), true);
+  ei->mutableRun().addProperty(new PropertyWithValue<std::string>("run_number", "12345"), true);
   ws->addExperimentInfo(ei);
 }
 
@@ -51,15 +46,13 @@ static void createMDEW() {
 static void addPeak(size_t num, double x, double y, double z, double radius) {
   std::ostringstream mess;
   mess << num / 2 << ", " << x << ", " << y << ", " << z << ", " << radius;
-  FrameworkManager::Instance().exec("FakeMDEventData", 4, "InputWorkspace",
-                                    "MDEWS", "PeakParams", mess.str().c_str());
+  FrameworkManager::Instance().exec("FakeMDEventData", 4, "InputWorkspace", "MDEWS", "PeakParams", mess.str().c_str());
 
   // Add a center with more events (half radius, half the total), to create a
   // "peak"
   std::ostringstream mess2;
   mess2 << num / 2 << ", " << x << ", " << y << ", " << z << ", " << radius / 2;
-  FrameworkManager::Instance().exec("FakeMDEventData", 4, "InputWorkspace",
-                                    "MDEWS", "PeakParams", mess2.str().c_str());
+  FrameworkManager::Instance().exec("FakeMDEventData", 4, "InputWorkspace", "MDEWS", "PeakParams", mess2.str().c_str());
 }
 
 //=====================================================================================
@@ -73,8 +66,8 @@ public:
     TS_ASSERT(alg.isInitialized())
   }
 
-  void do_test(bool deleteWS, int MaxPeaks, int expectedPeaks,
-               bool AppendPeaks = false, bool histo = false, int edge = 0) {
+  void do_test(bool deleteWS, int MaxPeaks, int expectedPeaks, bool AppendPeaks = false, bool histo = false,
+               int edge = 0) {
     // Name of the output workspace.
     std::string outWSName("peaksFound");
 
@@ -88,23 +81,18 @@ public:
 
     // Convert to a MDHistoWorkspace on option
     if (histo) {
-      FrameworkManager::Instance().exec(
-          "BinMD", 14, "AxisAligned", "1", "AlignedDim0", "Q_lab_x,-10,10,100",
-          "AlignedDim1", "Q_lab_y,-10,10,100", "AlignedDim2",
-          "Q_lab_z,-10,10,100", "IterateEvents", "1", "InputWorkspace", "MDEWS",
-          "OutputWorkspace", "MDEWS");
+      FrameworkManager::Instance().exec("BinMD", 14, "AxisAligned", "1", "AlignedDim0", "Q_lab_x,-10,10,100",
+                                        "AlignedDim1", "Q_lab_y,-10,10,100", "AlignedDim2", "Q_lab_z,-10,10,100",
+                                        "IterateEvents", "1", "InputWorkspace", "MDEWS", "OutputWorkspace", "MDEWS");
     }
 
     FindPeaksMD alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "MDEWS"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("DensityThresholdFactor", "2.0"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("PeakDistanceThreshold", "0.7"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DensityThresholdFactor", "2.0"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PeakDistanceThreshold", "0.7"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaxPeaks", int64_t(MaxPeaks)));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("AppendPeaks", AppendPeaks));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("EdgePixels", edge));
@@ -114,9 +102,7 @@ public:
 
     // Retrieve the workspace from data service.
     PeaksWorkspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>(
-            outWSName));
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>(outWSName));
     TS_ASSERT(ws);
     if (!ws)
       return;
@@ -182,12 +168,10 @@ public:
     // do_test(true, 100, 6, true /* Append */);
   }
 
-  void
-  test_exec_gives_PeaksWorkspace_Containing_DetectorIDs_That_Form_Part_Of_Peak() {
+  void test_exec_gives_PeaksWorkspace_Containing_DetectorIDs_That_Form_Part_Of_Peak() {
     do_test(false, 100, 3);
 
-    auto peaksWS = AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>(
-        "peaksFound");
+    auto peaksWS = AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>("peaksFound");
 
     const auto &peaks = peaksWS->getPeaks();
     const Mantid::DataObjects::Peak &peak1 = peaks[0];
@@ -202,46 +186,33 @@ public:
   }
 
   /** Run on MDHistoWorkspace */
-  void test_exec_histo() {
-    do_test(true, 100, 3, false, true /*histo conversion*/);
-  }
+  void test_exec_histo() { do_test(true, 100, 3, false, true /*histo conversion*/); }
 
   /** Run on MDHistoWorkspace, but limit to 1 peak */
-  void test_exec_histo_withMaxPeaks() {
-    do_test(true, 1, 1, false, true /*histo conversion*/);
-  }
+  void test_exec_histo_withMaxPeaks() { do_test(true, 1, 1, false, true /*histo conversion*/); }
 
   /** Test edge */
-  void test_exec_edge() {
-    do_test(true, 100, 3, false, false, 100 /*edge pixels*/);
-  }
+  void test_exec_edge() { do_test(true, 100, 3, false, false, 100 /*edge pixels*/); }
 
   /**Test number of event normalization selection fails for MDHistoWorkspace */
-  void
-  test_that_number_of_event_normalization_selection_throws_when_MDHistoWorkspace_is_selected() {
+  void test_that_number_of_event_normalization_selection_throws_when_MDHistoWorkspace_is_selected() {
     // Create an MDHistoWorkspace
     createMDEW();
     addPeak(100, 1, 2, 3, 0.1);
-    FrameworkManager::Instance().exec(
-        "BinMD", 14, "AxisAligned", "1", "AlignedDim0", "Q_lab_x,-10,10,100",
-        "AlignedDim1", "Q_lab_y,-10,10,100", "AlignedDim2",
-        "Q_lab_z,-10,10,100", "IterateEvents", "1", "InputWorkspace", "MDEWS",
-        "OutputWorkspace", "MDEWS");
+    FrameworkManager::Instance().exec("BinMD", 14, "AxisAligned", "1", "AlignedDim0", "Q_lab_x,-10,10,100",
+                                      "AlignedDim1", "Q_lab_y,-10,10,100", "AlignedDim2", "Q_lab_z,-10,10,100",
+                                      "IterateEvents", "1", "InputWorkspace", "MDEWS", "OutputWorkspace", "MDEWS");
 
     FindPeaksMD alg;
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "MDEWS"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "place_holder"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("DensityThresholdFactor", "2.0"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("PeakDistanceThreshold", "0.7"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "place_holder"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DensityThresholdFactor", "2.0"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PeakDistanceThreshold", "0.7"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaxPeaks", int64_t(10)));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("PeakFindingStrategy", "NumberOfEventsNormalization"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakFindingStrategy", "NumberOfEventsNormalization"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("SignalThresholdFactor", 1.3));
     TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
 
@@ -260,9 +231,7 @@ private:
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static FindPeaksMDTestPerformance *createSuite() {
-    return new FindPeaksMDTestPerformance();
-  }
+  static FindPeaksMDTestPerformance *createSuite() { return new FindPeaksMDTestPerformance(); }
   static void destroySuite(FindPeaksMDTestPerformance *suite) { delete suite; }
   FindPeaksMDTestPerformance() {
     FrameworkManager::Instance();
@@ -295,8 +264,7 @@ public:
     alg.execute();
 
     // Retrieve the workspace from data service.
-    PeaksWorkspace_sptr ws =
-        AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>(outWSName);
+    PeaksWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>(outWSName);
     TS_ASSERT(ws);
   }
 };

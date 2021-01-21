@@ -14,11 +14,11 @@
 #include <QDialog>
 #include <memory>
 
-ProjectRecoveryPresenter::ProjectRecoveryPresenter(
-    MantidQt::ProjectRecovery *projectRecovery, ApplicationWindow *parentWindow)
+ProjectRecoveryPresenter::ProjectRecoveryPresenter(MantidQt::ProjectRecovery *projectRecovery,
+                                                   ApplicationWindow *parentWindow)
     : m_mainWindow(parentWindow), m_recView(nullptr), m_failureView(nullptr),
-      m_model(std::make_unique<ProjectRecoveryModel>(projectRecovery, this)),
-      m_openView(RecoveryView), m_startMantidNormallyCalled(false) {}
+      m_model(std::make_unique<ProjectRecoveryModel>(projectRecovery, this)), m_openView(RecoveryView),
+      m_startMantidNormallyCalled(false) {}
 
 bool ProjectRecoveryPresenter::startRecoveryView() {
   try {
@@ -91,8 +91,7 @@ void ProjectRecoveryPresenter::startMantidNormally() {
   m_model->startMantidNormally();
 }
 
-void ProjectRecoveryPresenter::recoverSelectedCheckpoint(
-    const QString &selected) {
+void ProjectRecoveryPresenter::recoverSelectedCheckpoint(const QString &selected) {
   if (m_model->hasRecoveryStarted())
     return;
   auto checkpointToRecover = selected.toStdString();
@@ -154,6 +153,4 @@ void ProjectRecoveryPresenter::fillAllRows() {
   }
 }
 
-int ProjectRecoveryPresenter::getNumberOfCheckpoints() {
-  return ProjectRecoveryModel::getNumberOfCheckpoints();
-}
+int ProjectRecoveryPresenter::getNumberOfCheckpoints() { return ProjectRecoveryModel::getNumberOfCheckpoints(); }

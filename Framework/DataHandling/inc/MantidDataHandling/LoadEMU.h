@@ -44,8 +44,7 @@ private:
   using Base::exec;
   using Base::init;
   // region of intereset
-  std::vector<bool> createRoiVector(const std::string &seltubes,
-                                    const std::string &maskfile);
+  std::vector<bool> createRoiVector(const std::string &seltubes, const std::string &maskfile);
 
 protected:
   // load parameters from input file
@@ -66,14 +65,11 @@ protected:
   void loadDopplerParameters(API::LogManager &logm);
 
   // calibrate doppler phase
-  void calibrateDopplerPhase(const std::vector<size_t> &eventCounts,
-                             const std::vector<EventVector_pt> &eventVectors);
-  void dopplerTimeToTOF(std::vector<EventVector_pt> &eventVectors,
-                        double &minTOF, double &maxTOF);
+  void calibrateDopplerPhase(const std::vector<size_t> &eventCounts, const std::vector<EventVector_pt> &eventVectors);
+  void dopplerTimeToTOF(std::vector<EventVector_pt> &eventVectors, double &minTOF, double &maxTOF);
 
   // prepare event storage
-  void prepareEventStorage(ANSTO::ProgressTracker &prog,
-                           const std::vector<size_t> &eventCounts,
+  void prepareEventStorage(ANSTO::ProgressTracker &prog, const std::vector<size_t> &eventCounts,
                            std::vector<EventVector_pt> &eventVectors);
 
   // set up the detector masks

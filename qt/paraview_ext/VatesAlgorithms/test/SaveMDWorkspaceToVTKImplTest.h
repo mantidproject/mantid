@@ -23,48 +23,36 @@ public:
     Mantid::VATES::SaveMDWorkspaceToVTKImpl saveMDToVTK;
 
     // Act
-    const auto normalizations =
-        saveMDToVTK.getAllowedNormalizationsInStringRepresentation();
+    const auto normalizations = saveMDToVTK.getAllowedNormalizationsInStringRepresentation();
 
     // Assert
-    TSM_ASSERT_EQUALS("There should be 4 normalization options.",
-                      normalizations.size(), 4);
-    TSM_ASSERT_EQUALS("First normalization should be AutoSelect.",
-                      normalizations[0], "AutoSelect");
-    TSM_ASSERT_EQUALS("First normalization should be NoNormalization.",
-                      normalizations[1], "NoNormalization");
-    TSM_ASSERT_EQUALS("First normalization should be NumEventsNormalization.",
-                      normalizations[2], "NumEventsNormalization");
-    TSM_ASSERT_EQUALS("First normalization should be VolumeNormalization.",
-                      normalizations[3], "VolumeNormalization");
+    TSM_ASSERT_EQUALS("There should be 4 normalization options.", normalizations.size(), 4);
+    TSM_ASSERT_EQUALS("First normalization should be AutoSelect.", normalizations[0], "AutoSelect");
+    TSM_ASSERT_EQUALS("First normalization should be NoNormalization.", normalizations[1], "NoNormalization");
+    TSM_ASSERT_EQUALS("First normalization should be NumEventsNormalization.", normalizations[2],
+                      "NumEventsNormalization");
+    TSM_ASSERT_EQUALS("First normalization should be VolumeNormalization.", normalizations[3], "VolumeNormalization");
   }
 
   void test_string_representation_converts_to_visual_normalization() {
     // Arrange
     Mantid::VATES::SaveMDWorkspaceToVTKImpl saveMDToVTK;
-    const auto normalizations =
-        saveMDToVTK.getAllowedNormalizationsInStringRepresentation();
+    const auto normalizations = saveMDToVTK.getAllowedNormalizationsInStringRepresentation();
 
     // Act
-    const auto autoSelect =
-        saveMDToVTK.translateStringToVisualNormalization(normalizations[0]);
-    const auto noNormalization =
-        saveMDToVTK.translateStringToVisualNormalization(normalizations[1]);
-    const auto numEventsNormalization =
-        saveMDToVTK.translateStringToVisualNormalization(normalizations[2]);
-    const auto volumeNormalization =
-        saveMDToVTK.translateStringToVisualNormalization(normalizations[3]);
+    const auto autoSelect = saveMDToVTK.translateStringToVisualNormalization(normalizations[0]);
+    const auto noNormalization = saveMDToVTK.translateStringToVisualNormalization(normalizations[1]);
+    const auto numEventsNormalization = saveMDToVTK.translateStringToVisualNormalization(normalizations[2]);
+    const auto volumeNormalization = saveMDToVTK.translateStringToVisualNormalization(normalizations[3]);
 
     // Assert
-    TSM_ASSERT_EQUALS("The visual normalization should be AutoSelect.",
-                      autoSelect, Mantid::VATES::AutoSelect);
-    TSM_ASSERT_EQUALS("The visual normalization should be NoNormalization.",
-                      noNormalization, Mantid::VATES::NoNormalization);
-    TSM_ASSERT_EQUALS(
-        "The visual normalization should be NumEventsNormalization.",
-        numEventsNormalization, Mantid::VATES::NumEventsNormalization);
-    TSM_ASSERT_EQUALS("The visual normalization should be VolumeNormalization.",
-                      volumeNormalization, Mantid::VATES::VolumeNormalization);
+    TSM_ASSERT_EQUALS("The visual normalization should be AutoSelect.", autoSelect, Mantid::VATES::AutoSelect);
+    TSM_ASSERT_EQUALS("The visual normalization should be NoNormalization.", noNormalization,
+                      Mantid::VATES::NoNormalization);
+    TSM_ASSERT_EQUALS("The visual normalization should be NumEventsNormalization.", numEventsNormalization,
+                      Mantid::VATES::NumEventsNormalization);
+    TSM_ASSERT_EQUALS("The visual normalization should be VolumeNormalization.", volumeNormalization,
+                      Mantid::VATES::VolumeNormalization);
   }
 
   void test_detects_when_not_3D_workspace() {
@@ -93,8 +81,7 @@ public:
     TSM_ASSERT("Detects that a 3D MD workspace", is3D);
   }
 
-  void
-  test_that_saves_MD_Event_workspace_to_vts_file_without_extension_in_path_name() {
+  void test_that_saves_MD_Event_workspace_to_vts_file_without_extension_in_path_name() {
     // Arrange
     auto workspace = getTestWorkspace("MDEvent");
 
@@ -113,8 +100,7 @@ public:
     verify_file_creation(filenameExpected);
   }
 
-  void
-  test_that_saves_MD_Event_workspace_to_vts_file_with_extension_in_path_name() {
+  void test_that_saves_MD_Event_workspace_to_vts_file_with_extension_in_path_name() {
     // Arrange
     auto workspace = getTestWorkspace("MDEvent");
 
@@ -128,8 +114,7 @@ public:
     verify_file_creation(filename);
   }
 
-  void
-  test_that_saves_MD_Histo_workspace_to_vts_file_without_extension_in_path_name() {
+  void test_that_saves_MD_Histo_workspace_to_vts_file_without_extension_in_path_name() {
     // Arrange
     auto workspace = getTestWorkspace("MDHisto");
 
@@ -148,8 +133,7 @@ public:
     verify_file_creation(filenameExpected);
   }
 
-  void
-  test_that_saves_MD_Histo_workspace_to_vts_file_with_extension_in_path_name() {
+  void test_that_saves_MD_Histo_workspace_to_vts_file_with_extension_in_path_name() {
     // Arrange
     auto workspace = getTestWorkspace("MDHisto");
 
@@ -165,18 +149,14 @@ public:
   }
 
 private:
-  void do_test_saving_to_vtk_file(Mantid::API::IMDWorkspace_sptr workspace,
-                                  std::string filename) {
+  void do_test_saving_to_vtk_file(Mantid::API::IMDWorkspace_sptr workspace, std::string filename) {
     const int recursionDepth = 5;
 
     Mantid::VATES::SaveMDWorkspaceToVTKImpl saveMDToVTK;
 
-    const auto normalizations =
-        saveMDToVTK.getAllowedNormalizationsInStringRepresentation();
-    const auto normalization =
-        saveMDToVTK.translateStringToVisualNormalization(normalizations[0]);
-    saveMDToVTK.saveMDWorkspace(workspace, filename, normalization,
-                                recursionDepth, "NONE");
+    const auto normalizations = saveMDToVTK.getAllowedNormalizationsInStringRepresentation();
+    const auto normalization = saveMDToVTK.translateStringToVisualNormalization(normalizations[0]);
+    saveMDToVTK.saveMDWorkspace(workspace, filename, normalization, recursionDepth, "NONE");
   }
 
   Mantid::API::IMDWorkspace_sptr getTestWorkspace(std::string workspaceType) {
@@ -187,8 +167,7 @@ private:
     } else {
       const size_t numDims = 3;
       const size_t numBins = 5;
-      workspace =
-          MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, numDims, numBins);
+      workspace = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, numDims, numBins);
     }
     return workspace;
   }
@@ -202,9 +181,7 @@ private:
   }
 
   std::string getTemporaryFilename(std::string filenameWithoutPath) const {
-    auto default_save_directory =
-        Mantid::Kernel::ConfigService::Instance().getString(
-            "defaultsave.directory");
+    auto default_save_directory = Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory");
     std::string filenameWithPath(default_save_directory + filenameWithoutPath);
     return filenameWithPath;
   }
@@ -215,7 +192,5 @@ private:
     }
   }
 
-  bool doesFileExist(std::string filename) {
-    return Poco::File(filename).exists();
-  }
+  bool doesFileExist(std::string filename) { return Poco::File(filename).exists(); }
 };

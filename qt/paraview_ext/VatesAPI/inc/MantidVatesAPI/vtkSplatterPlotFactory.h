@@ -36,24 +36,20 @@ using SigFuncIMDNodePtr = Mantid::signal_t (Mantid::API::IMDNode::*)() const;
 class DLLExport vtkSplatterPlotFactory : public vtkDataSetFactory {
 public:
   /// Constructor
-  vtkSplatterPlotFactory(const std::string &scalarName,
-                         const size_t numPoints = 150000,
+  vtkSplatterPlotFactory(const std::string &scalarName, const size_t numPoints = 150000,
                          const double percentToUse = 5.0);
 
   /// Destructor
   ~vtkSplatterPlotFactory() override;
 
   /// Factory Method. Should also handle delegation to successors.
-  vtkSmartPointer<vtkDataSet>
-  create(ProgressAction &progressUpdating) const override;
+  vtkSmartPointer<vtkDataSet> create(ProgressAction &progressUpdating) const override;
 
   /// Initalize with a target workspace.
   void initialize(const Mantid::API::Workspace_sptr &workspace) override;
 
   /// Get the name of the type.
-  std::string getFactoryTypeName() const override {
-    return "vtkSplatterPlotFactory";
-  }
+  std::string getFactoryTypeName() const override { return "vtkSplatterPlotFactory"; }
 
   /// Set upper limit on the number of points that will be plotted
   virtual void SetNumberOfPoints(size_t points);
@@ -72,8 +68,7 @@ public:
 
 private:
   template <typename MDE, size_t nd>
-  void doCreate(
-      typename Mantid::DataObjects::MDEventWorkspace<MDE, nd>::sptr ws) const;
+  void doCreate(typename Mantid::DataObjects::MDEventWorkspace<MDE, nd>::sptr ws) const;
 
   /// Check if the MDHisto workspace is 3D or 4D in nature
   bool doMDHisto4D(const Mantid::API::IMDHistoWorkspace *workspace) const;
@@ -82,8 +77,7 @@ private:
   void doCreateMDHisto(const Mantid::API::IMDHistoWorkspace &workspace) const;
 
   /// Set the signals and the valid points which are to be displayed
-  signal_t extractScalarSignal(const Mantid::API::IMDHistoWorkspace &workspace,
-                               bool do4D, const int x, const int y,
+  signal_t extractScalarSignal(const Mantid::API::IMDHistoWorkspace &workspace, bool do4D, const int x, const int y,
                                const int z) const;
 
   /// Template Method pattern to validate the factory before use.
@@ -120,8 +114,7 @@ private:
   mutable std::unique_ptr<bool[]> sliceMask;
 
   /// Implicit function to define which boxes to render.
-  mutable std::shared_ptr<Mantid::Geometry::MDImplicitFunction>
-      sliceImplicitFunction;
+  mutable std::shared_ptr<Mantid::Geometry::MDImplicitFunction> sliceImplicitFunction;
 
   /// Variable to hold sorted list, so sort doesn't have to be repeated
   mutable std::vector<Mantid::API::IMDNode *> m_sortedBoxes;

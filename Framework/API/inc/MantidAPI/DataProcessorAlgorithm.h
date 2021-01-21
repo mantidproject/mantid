@@ -26,76 +26,60 @@ namespace API {
 
    @date 2012-04-04
  */
-template <class Base>
-class MANTID_API_DLL GenericDataProcessorAlgorithm : public Base {
+template <class Base> class MANTID_API_DLL GenericDataProcessorAlgorithm : public Base {
 public:
   GenericDataProcessorAlgorithm();
   std::string getPropertyValue(const std::string &name) const override;
-  Kernel::PropertyManagerOwner::TypedValue
-  getProperty(const std::string &name) const override;
+  Kernel::PropertyManagerOwner::TypedValue getProperty(const std::string &name) const override;
 
 protected:
-  std::shared_ptr<Algorithm> createChildAlgorithm(
-      const std::string &name, const double startProgress = -1.,
-      const double endProgress = -1., const bool enableLogging = true,
-      const int &version = -1) override;
+  std::shared_ptr<Algorithm> createChildAlgorithm(const std::string &name, const double startProgress = -1.,
+                                                  const double endProgress = -1., const bool enableLogging = true,
+                                                  const int &version = -1) override;
   void setLoadAlg(const std::string &alg);
   void setLoadAlgFileProp(const std::string &filePropName);
   void setAccumAlg(const std::string &alg);
   void setPropManagerPropName(const std::string &propName);
-  void mapPropertyName(const std::string &nameInProp,
-                       const std::string &nameInPropManager);
+  void mapPropertyName(const std::string &nameInProp, const std::string &nameInPropManager);
   void copyProperty(const API::Algorithm_sptr &alg, const std::string &name);
   virtual ITableWorkspace_sptr determineChunk(const std::string &filename);
   virtual MatrixWorkspace_sptr loadChunk(const size_t rowIndex);
-  Workspace_sptr load(const std::string &inputData,
-                      const bool loadQuiet = false);
+  Workspace_sptr load(const std::string &inputData, const bool loadQuiet = false);
   std::vector<std::string> splitInput(const std::string &input);
   void forwardProperties();
-  std::shared_ptr<Kernel::PropertyManager> getProcessProperties(
-      const std::string &propertyManager = std::string()) const;
+  std::shared_ptr<Kernel::PropertyManager>
+  getProcessProperties(const std::string &propertyManager = std::string()) const;
   /// MPI option. If false, we will use one job event if MPI is available
   bool m_useMPI;
   Workspace_sptr assemble(Workspace_sptr partialWS);
-  Workspace_sptr assemble(const std::string &partialWSName,
-                          const std::string &outputWSName);
-  void saveNexus(const std::string &outputWSName,
-                 const std::string &outputFile);
+  Workspace_sptr assemble(const std::string &partialWSName, const std::string &outputWSName);
+  void saveNexus(const std::string &outputWSName, const std::string &outputFile);
   bool isMainThread();
   int getNThreads();
 
   /// Divide a matrix workspace by another matrix workspace
-  MatrixWorkspace_sptr divide(const MatrixWorkspace_sptr lhs,
-                              const MatrixWorkspace_sptr rhs);
+  MatrixWorkspace_sptr divide(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs);
   /// Divide a matrix workspace by a single value
-  MatrixWorkspace_sptr divide(const MatrixWorkspace_sptr lhs,
-                              const double &rhsValue);
+  MatrixWorkspace_sptr divide(const MatrixWorkspace_sptr lhs, const double &rhsValue);
 
   /// Multiply a matrix workspace by another matrix workspace
-  MatrixWorkspace_sptr multiply(const MatrixWorkspace_sptr lhs,
-                                const MatrixWorkspace_sptr rhs);
+  MatrixWorkspace_sptr multiply(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs);
   /// Multiply a matrix workspace by a single value
-  MatrixWorkspace_sptr multiply(const MatrixWorkspace_sptr lhs,
-                                const double &rhsValue);
+  MatrixWorkspace_sptr multiply(const MatrixWorkspace_sptr lhs, const double &rhsValue);
 
   /// Add a matrix workspace to another matrix workspace
-  MatrixWorkspace_sptr plus(const MatrixWorkspace_sptr lhs,
-                            const MatrixWorkspace_sptr rhs);
+  MatrixWorkspace_sptr plus(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs);
   /// Add a single value to a matrix workspace
-  MatrixWorkspace_sptr plus(const MatrixWorkspace_sptr lhs,
-                            const double &rhsValue);
+  MatrixWorkspace_sptr plus(const MatrixWorkspace_sptr lhs, const double &rhsValue);
 
   /// Subract a matrix workspace by another matrix workspace
-  MatrixWorkspace_sptr minus(const MatrixWorkspace_sptr lhs,
-                             const MatrixWorkspace_sptr rhs);
+  MatrixWorkspace_sptr minus(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs);
   /// Subract a single value from a matrix workspace
-  MatrixWorkspace_sptr minus(const MatrixWorkspace_sptr lhs,
-                             const double &rhsValue);
+  MatrixWorkspace_sptr minus(const MatrixWorkspace_sptr lhs, const double &rhsValue);
 
 private:
   template <typename LHSType, typename RHSType, typename ResultType>
-  ResultType executeBinaryAlgorithm(const std::string &algorithmName,
-                                    const LHSType lhs, const RHSType rhs) {
+  ResultType executeBinaryAlgorithm(const std::string &algorithmName, const LHSType lhs, const RHSType rhs) {
     auto alg = createChildAlgorithm(algorithmName);
     alg->initialize();
 
@@ -136,17 +120,12 @@ private:
   void visualStudioC4661Workaround();
 };
 
-template <>
-MANTID_API_DLL void
-GenericDataProcessorAlgorithm<Algorithm>::visualStudioC4661Workaround();
+template <> MANTID_API_DLL void GenericDataProcessorAlgorithm<Algorithm>::visualStudioC4661Workaround();
 
 using DataProcessorAlgorithm = GenericDataProcessorAlgorithm<Algorithm>;
-using SerialDataProcessorAlgorithm =
-    GenericDataProcessorAlgorithm<SerialAlgorithm>;
-using ParallelDataProcessorAlgorithm =
-    GenericDataProcessorAlgorithm<ParallelAlgorithm>;
-using DistributedDataProcessorAlgorithm =
-    GenericDataProcessorAlgorithm<DistributedAlgorithm>;
+using SerialDataProcessorAlgorithm = GenericDataProcessorAlgorithm<SerialAlgorithm>;
+using ParallelDataProcessorAlgorithm = GenericDataProcessorAlgorithm<ParallelAlgorithm>;
+using DistributedDataProcessorAlgorithm = GenericDataProcessorAlgorithm<DistributedAlgorithm>;
 
 } // namespace API
 } // namespace Mantid

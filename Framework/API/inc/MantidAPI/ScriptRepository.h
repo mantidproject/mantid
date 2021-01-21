@@ -98,15 +98,14 @@ class MANTID_API_DLL ScriptRepoException : public std::exception {
 
 public:
   /// default constructor
-  ScriptRepoException(
-      const std::string &info = std::string("Unknown Exception"))
+  ScriptRepoException(const std::string &info = std::string("Unknown Exception"))
       : _system_error(""), _user_info(info), _file_path(""){};
 
-  ScriptRepoException(int err_, const std::string &info = std::string(),
-                      const std::string &file = std::string(), int line = -1);
+  ScriptRepoException(int err_, const std::string &info = std::string(), const std::string &file = std::string(),
+                      int line = -1);
 
-  ScriptRepoException(const std::string &info, const std::string &system,
-                      const std::string &file = std::string(), int line = -1);
+  ScriptRepoException(const std::string &info, const std::string &system, const std::string &file = std::string(),
+                      int line = -1);
 
   /// Returns the message string.
   const char *what() const noexcept override;
@@ -504,8 +503,8 @@ public:
 
 
    */
-  virtual void upload(const std::string &file_path, const std::string &comment,
-                      const std::string &author, const std::string &email) = 0;
+  virtual void upload(const std::string &file_path, const std::string &comment, const std::string &author,
+                      const std::string &email) = 0;
 
   /**
      Delete the file from the remote repository (it does not touch the local
@@ -539,8 +538,8 @@ public:
                or a non existent file, or not allowed operation, or any network
     erros.
    */
-  virtual void remove(const std::string &file_path, const std::string &comment,
-                      const std::string &author, const std::string &email) = 0;
+  virtual void remove(const std::string &file_path, const std::string &comment, const std::string &author,
+                      const std::string &email) = 0;
 
   /** Define the file patterns that will not be listed in listFiles.
       This is important to force the ScriptRepository to not list hidden files,

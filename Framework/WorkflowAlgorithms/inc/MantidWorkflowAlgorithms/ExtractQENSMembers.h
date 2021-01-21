@@ -29,43 +29,32 @@ private:
 
   std::vector<Mantid::API::MatrixWorkspace_sptr> getInputWorkspaces() const;
 
-  std::vector<double>
-  getQValues(const std::vector<Mantid::API::MatrixWorkspace_sptr> &workspaces);
+  std::vector<double> getQValues(const std::vector<Mantid::API::MatrixWorkspace_sptr> &workspaces);
 
-  std::vector<std::string>
-  getAxisLabels(const Mantid::API::MatrixWorkspace_sptr &workspace,
-                size_t axisIndex) const;
+  std::vector<std::string> getAxisLabels(const Mantid::API::MatrixWorkspace_sptr &workspace, size_t axisIndex) const;
 
-  std::vector<std::string>
-  renameConvolvedMembers(const std::vector<std::string> &members,
-                         const std::vector<std::string> &newNames) const;
+  std::vector<std::string> renameConvolvedMembers(const std::vector<std::string> &members,
+                                                  const std::vector<std::string> &newNames) const;
 
-  Mantid::API::MatrixWorkspace_sptr
-  extractSpectrum(const Mantid::API::MatrixWorkspace_sptr &inputWS,
-                  size_t spectrum);
+  Mantid::API::MatrixWorkspace_sptr extractSpectrum(const Mantid::API::MatrixWorkspace_sptr &inputWS, size_t spectrum);
 
-  Mantid::API::MatrixWorkspace_sptr
-  appendSpectra(const Mantid::API::MatrixWorkspace_sptr &inputWS,
-                const Mantid::API::MatrixWorkspace_sptr &spectraWorkspace);
+  Mantid::API::MatrixWorkspace_sptr appendSpectra(const Mantid::API::MatrixWorkspace_sptr &inputWS,
+                                                  const Mantid::API::MatrixWorkspace_sptr &spectraWorkspace);
 
-  Mantid::API::WorkspaceGroup_sptr
-  groupWorkspaces(const std::vector<std::string> &workspaceNames);
+  Mantid::API::WorkspaceGroup_sptr groupWorkspaces(const std::vector<std::string> &workspaceNames);
 
   std::vector<Mantid::API::MatrixWorkspace_sptr>
-  createMembersWorkspaces(const Mantid::API::MatrixWorkspace_sptr &initialWS,
-                          const std::vector<std::string> &members);
+  createMembersWorkspaces(const Mantid::API::MatrixWorkspace_sptr &initialWS, const std::vector<std::string> &members);
 
   void appendToMembers(const Mantid::API::MatrixWorkspace_sptr &resultWS,
                        std::vector<Mantid::API::MatrixWorkspace_sptr> &members);
 
-  void setNumericAxis(
-      const std::vector<Mantid::API::MatrixWorkspace_sptr> &workspaces,
-      const std::vector<double> &values, size_t axisIndex) const;
+  void setNumericAxis(const std::vector<Mantid::API::MatrixWorkspace_sptr> &workspaces,
+                      const std::vector<double> &values, size_t axisIndex) const;
 
-  std::vector<std::string> addMembersToADS(
-      const std::vector<std::string> &members,
-      const std::vector<Mantid::API::MatrixWorkspace_sptr> &memberWorkspaces,
-      const std::string &outputWSName);
+  std::vector<std::string> addMembersToADS(const std::vector<std::string> &members,
+                                           const std::vector<Mantid::API::MatrixWorkspace_sptr> &memberWorkspaces,
+                                           const std::string &outputWSName);
 };
 
 } // namespace Algorithms

@@ -22,10 +22,8 @@ std::input_iterator for the purposes of many std algorithms such as
 std::advance. See https://en.cppreference.com/w/cpp/iterator/advance for example
 */
 template <typename T, template <typename> class InfoItem>
-class InfoIteratorBase
-    : public boost::iterator_facade<InfoIteratorBase<T, InfoItem>, InfoItem<T>,
-                                    boost::random_access_traversal_tag,
-                                    InfoItem<T>> {
+class InfoIteratorBase : public boost::iterator_facade<InfoIteratorBase<T, InfoItem>, InfoItem<T>,
+                                                       boost::random_access_traversal_tag, InfoItem<T>> {
 
 public:
   /**
@@ -35,11 +33,9 @@ public:
    * @param totalSize : Represents maximum length of info. i.e. total number of
    * items that can be iterated over.
    */
-  InfoIteratorBase(T &info, const size_t index, const size_t totalSize)
-      : m_item(info, index), m_totalSize(totalSize) {
+  InfoIteratorBase(T &info, const size_t index, const size_t totalSize) : m_item(info, index), m_totalSize(totalSize) {
     if (index > totalSize)
-      throw std::invalid_argument(
-          "Iterator start point cannot be greater than maximum size");
+      throw std::invalid_argument("Iterator start point cannot be greater than maximum size");
   }
 
 private:
@@ -47,16 +43,11 @@ private:
   friend class boost::iterator_core_access;
 
   void advance(int64_t delta) {
-    m_item.m_index =
-        delta < 0 ? std::max(static_cast<uint64_t>(0),
-                             static_cast<uint64_t>(m_item.m_index) + delta)
-                  : std::min(m_totalSize,
-                             m_item.m_index + static_cast<size_t>(delta));
+    m_item.m_index = delta < 0 ? std::max(static_cast<uint64_t>(0), static_cast<uint64_t>(m_item.m_index) + delta)
+                               : std::min(m_totalSize, m_item.m_index + static_cast<size_t>(delta));
   }
 
-  bool equal(const InfoIteratorBase<T, InfoItem> &other) const {
-    return getIndex() == other.getIndex();
-  }
+  bool equal(const InfoIteratorBase<T, InfoItem> &other) const { return getIndex() == other.getIndex(); }
 
   void increment() {
     if (m_item.m_index < m_totalSize) {
@@ -77,8 +68,7 @@ private:
   InfoItem<T> dereference() const { return m_item; }
 
   uint64_t distance_to(const InfoIteratorBase<T, InfoItem> &other) const {
-    return static_cast<uint64_t>(other.getIndex()) -
-           static_cast<uint64_t>(getIndex());
+    return static_cast<uint64_t>(other.getIndex()) - static_cast<uint64_t>(getIndex());
   }
 
   InfoItem<T> m_item;

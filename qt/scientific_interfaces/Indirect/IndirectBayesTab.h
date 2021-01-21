@@ -64,8 +64,7 @@ protected:
   /// Function to run a string as python code
   void runPythonScript(const QString &pyInput);
   /// Formats the tree widget to make it easier to read
-  void formatTreeWidget(QtTreePropertyBrowser *treeWidget,
-                        QMap<QString, QtProperty *> const &properties) const;
+  void formatTreeWidget(QtTreePropertyBrowser *treeWidget, QMap<QString, QtProperty *> const &properties) const;
   /// Tree of the properties
   QtTreePropertyBrowser *m_propTree;
 

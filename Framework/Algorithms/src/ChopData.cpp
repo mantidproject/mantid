@@ -30,11 +30,9 @@ void ChopData::init() {
   wsVal->add<WorkspaceUnitValidator>("TOF");
   wsVal->add<HistogramValidator>();
   wsVal->add<SpectraAxisValidator>();
-  declareProperty(std::make_unique<WorkspaceProperty<>>(
-                      "InputWorkspace", "", Direction::Input, wsVal),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input, wsVal),
                   "Name of the input workspace to be split.");
-  declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>("OutputWorkspace", "", Direction::Output),
                   "Name for the WorkspaceGroup that will be created.");
 
   declareProperty("Step", 20000.0);
@@ -62,27 +60,23 @@ void ChopData::exec() {
   std::unique_ptr<Progress> progress;
 
   if (maxX < step) {
-    throw std::invalid_argument(
-        "Step value provided larger than size of workspace.");
+    throw std::invalid_argument("Step value provided larger than size of workspace.");
   }
 
-  if (rLower != EMPTY_DBL() && rUpper != EMPTY_DBL() &&
-      monitorWi != EMPTY_INT()) {
+  if (rLower != EMPTY_DBL() && rUpper != EMPTY_DBL() && monitorWi != EMPTY_INT()) {
 
     progress = std::make_unique<Progress>(this, 0.0, 1.0, chops * 2);
 
     // Select the spectrum that is to be used to compare the sections of the
     // workspace
     // This will generally be the monitor spectrum.
-    MatrixWorkspace_sptr monitorWS =
-        create<MatrixWorkspace>(*inputWS, 1, inputWS->histogram(monitorWi));
+    MatrixWorkspace_sptr monitorWS = create<MatrixWorkspace>(*inputWS, 1, inputWS->histogram(monitorWi));
 
     int lowest = 0;
 
     // Get ranges
     for (int i = 0; i < chops; i++) {
-      Mantid::API::IAlgorithm_sptr integ =
-          Mantid::API::Algorithm::createChildAlgorithm("Integration");
+      Mantid::API::IAlgorithm_sptr integ = Mantid::API::Algorithm::createChildAlgorithm("Integration");
       integ->initialize();
       integ->setProperty<MatrixWorkspace_sptr>("InputWorkspace", monitorWS);
       integ->setProperty<double>("RangeLower", i * step + rLower);
@@ -134,8 +128,7 @@ void ChopData::exec() {
 
     size_t nbins = indexHigh - indexLow;
 
-    MatrixWorkspace_sptr workspace =
-        create<MatrixWorkspace>(*inputWS, BinEdges(nbins + 1));
+    MatrixWorkspace_sptr workspace = create<MatrixWorkspace>(*inputWS, BinEdges(nbins + 1));
 
     // Copy over X, Y and E data
     PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *workspace))
@@ -145,16 +138,13 @@ void ChopData::exec() {
 
       PARALLEL_START_INTERUPT_REGION;
 
-      workspace->mutableX(j).assign(edges.cbegin() + indexLow,
-                                    edges.cbegin() + indexLow + nbins + 1);
+      workspace->mutableX(j).assign(edges.cbegin() + indexLow, edges.cbegin() + indexLow + nbins + 1);
 
       workspace->mutableX(j) += -stepDiff;
 
-      workspace->mutableY(j).assign(inputWS->y(j).cbegin() + indexLow,
-                                    inputWS->y(j).cbegin() + indexLow + nbins);
+      workspace->mutableY(j).assign(inputWS->y(j).cbegin() + indexLow, inputWS->y(j).cbegin() + indexLow + nbins);
 
-      workspace->mutableE(j).assign(inputWS->e(j).cbegin() + indexLow,
-                                    inputWS->e(j).cbegin() + indexLow + nbins);
+      workspace->mutableE(j).assign(inputWS->e(j).cbegin() + indexLow, inputWS->e(j).cbegin() + indexLow + nbins);
       PARALLEL_END_INTERUPT_REGION;
     }
     PARALLEL_CHECK_INTERUPT_REGION;
@@ -164,8 +154,7 @@ void ChopData::exec() {
     name << output << "_" << wsCounter;
     std::string wsname = name.str();
 
-    declareProperty(std::make_unique<WorkspaceProperty<>>(wsname, wsname,
-                                                          Direction::Output));
+    declareProperty(std::make_unique<WorkspaceProperty<>>(wsname, wsname, Direction::Output));
     setProperty(wsname, workspace);
     ++wsCounter;
 

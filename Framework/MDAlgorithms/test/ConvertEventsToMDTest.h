@@ -30,22 +30,17 @@ class ConvertEventsToMDTest : public CxxTest::TestSuite {
   std::unique_ptr<ConvertEvents2MDEvTestHelper> pAlg;
 
 public:
-  static ConvertEventsToMDTest *createSuite() {
-    return new ConvertEventsToMDTest();
-  }
+  static ConvertEventsToMDTest *createSuite() { return new ConvertEventsToMDTest(); }
   static void destroySuite(ConvertEventsToMDTest *suite) { delete suite; }
 
   void testEventWS() {
     // set up algorithm
-    TS_ASSERT_THROWS_NOTHING(
-        pAlg->setPropertyValue("InputWorkspace", "testEvWS"));
-    TS_ASSERT_THROWS_NOTHING(
-        pAlg->setPropertyValue("OutputWorkspace", "testMDEvWorkspace"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("InputWorkspace", "testEvWS"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("OutputWorkspace", "testMDEvWorkspace"));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("OtherDimensions", ""));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QDimensions", "Q3D"));
     pAlg->setPropertyValue("PreprocDetectorsWS", "");
-    TS_ASSERT_THROWS_NOTHING(
-        pAlg->setPropertyValue("dEAnalysisMode", "Elastic"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("dEAnalysisMode", "Elastic"));
     pAlg->setPropertyValue("MinValues", "-10,-10,-10");
     pAlg->setPropertyValue("MaxValues", " 10, 10, 10");
 
@@ -53,13 +48,11 @@ public:
     pAlg->execute();
     TSM_ASSERT("Should finish succesfully", pAlg->isExecuted());
     Mantid::API::Workspace_sptr spws;
-    TS_ASSERT_THROWS_NOTHING(
-        spws = AnalysisDataService::Instance().retrieve("testMDEvWorkspace"));
+    TS_ASSERT_THROWS_NOTHING(spws = AnalysisDataService::Instance().retrieve("testMDEvWorkspace"));
     TSM_ASSERT(" Worskpace should be retrieved", spws.get());
 
-    std::shared_ptr<DataObjects::MDEventWorkspace<DataObjects::MDEvent<3>, 3>>
-        ws = std::dynamic_pointer_cast<
-            DataObjects::MDEventWorkspace<DataObjects::MDEvent<3>, 3>>(spws);
+    std::shared_ptr<DataObjects::MDEventWorkspace<DataObjects::MDEvent<3>, 3>> ws =
+        std::dynamic_pointer_cast<DataObjects::MDEventWorkspace<DataObjects::MDEvent<3>, 3>>(spws);
     TSM_ASSERT("It should be 3D MD workspace", ws.get());
 
     if (ws.get()) {
@@ -77,12 +70,9 @@ public:
     pAlg->initialize();
 
     int numHist = 10;
-    Mantid::API::MatrixWorkspace_sptr wsEv =
-        std::dynamic_pointer_cast<MatrixWorkspace>(
-            WorkspaceCreationHelper::createRandomEventWorkspace(100, numHist,
-                                                                0.1));
-    wsEv->setInstrument(
-        ComponentCreationHelper::createTestInstrumentCylindrical(numHist));
+    Mantid::API::MatrixWorkspace_sptr wsEv = std::dynamic_pointer_cast<MatrixWorkspace>(
+        WorkspaceCreationHelper::createRandomEventWorkspace(100, numHist, 0.1));
+    wsEv->setInstrument(ComponentCreationHelper::createTestInstrumentCylindrical(numHist));
     // any inelastic units or unit conversion using TOF needs Ei to be present
     // among properties.
     // wsEv->mutableRun().addProperty("Ei",13.,"meV",true);

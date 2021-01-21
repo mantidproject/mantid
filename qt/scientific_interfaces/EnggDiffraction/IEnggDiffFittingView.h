@@ -142,14 +142,12 @@ public:
    * Update the fitting list widget with a list of workspace run and bank
    * numbers
    */
-  virtual void
-  updateFittingListWidget(const std::vector<std::string> &rows) = 0;
+  virtual void updateFittingListWidget(const std::vector<std::string> &rows) = 0;
 
   /**
    * @return The text on the current selected row of the list widget
    */
-  virtual boost::optional<std::string>
-  getFittingListWidgetCurrentValue() const = 0;
+  virtual boost::optional<std::string> getFittingListWidgetCurrentValue() const = 0;
 
   /**
    * @return Whether the list widget currently has an item selected
@@ -193,8 +191,7 @@ public:
    * @param plotSinglePeaks whether to plot single peak fitting ws
    * @param xAxisLabel Label specifying the x axis units
    */
-  virtual void setDataVector(std::vector<std::shared_ptr<QwtData>> &data,
-                             bool focused, bool plotSinglePeaks,
+  virtual void setDataVector(std::vector<std::shared_ptr<QwtData>> &data, bool focused, bool plotSinglePeaks,
                              const std::string &xAxisLabel) = 0;
 
   /**

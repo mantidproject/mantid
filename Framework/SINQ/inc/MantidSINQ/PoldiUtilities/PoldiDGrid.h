@@ -27,13 +27,9 @@ namespace Poldi {
 
 class MANTID_SINQ_DLL PoldiDGrid {
 public:
-  PoldiDGrid(
-      std::shared_ptr<PoldiAbstractDetector> detector =
-          std::shared_ptr<PoldiAbstractDetector>(),
-      std::shared_ptr<PoldiAbstractChopper> chopper =
-          std::shared_ptr<PoldiAbstractChopper>(),
-      double deltaT = 0.0,
-      std::pair<double, double> wavelengthRange = std::pair<double, double>());
+  PoldiDGrid(std::shared_ptr<PoldiAbstractDetector> detector = std::shared_ptr<PoldiAbstractDetector>(),
+             std::shared_ptr<PoldiAbstractChopper> chopper = std::shared_ptr<PoldiAbstractChopper>(),
+             double deltaT = 0.0, std::pair<double, double> wavelengthRange = std::pair<double, double>());
   void setDetector(std::shared_ptr<PoldiAbstractDetector> newDetector);
   void setChopper(std::shared_ptr<PoldiAbstractChopper> newChopper);
   void setDeltaT(double newDeltaT);

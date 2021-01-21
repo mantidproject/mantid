@@ -47,8 +47,8 @@ namespace SpectrumView {
  * @param matWs  Shared pointer to the matrix workspace being "wrapped"
  */
 MatrixWSDataSource::MatrixWSDataSource(const MatrixWorkspace_const_sptr &matWs)
-    : SpectrumDataSource(0.0, 1.0, 0.0, 1.0, 0, 0), m_matWs(matWs),
-      m_emodeHandler(nullptr), m_spectrumInfo(m_matWs->spectrumInfo()) {
+    : SpectrumDataSource(0.0, 1.0, 0.0, 1.0, 0, 0), m_matWs(matWs), m_emodeHandler(nullptr),
+      m_spectrumInfo(m_matWs->spectrumInfo()) {
   m_totalXMin = matWs->getXMin();
   m_totalXMax = matWs->getXMax();
 
@@ -76,14 +76,11 @@ MatrixWSDataSource::MatrixWSDataSource(const MatrixWorkspace_const_sptr &matWs)
 
 MatrixWSDataSource::~MatrixWSDataSource() {}
 
-bool MatrixWSDataSource::hasData(
-    const std::string &wsName,
-    const std::shared_ptr<Mantid::API::Workspace> &ws) {
+bool MatrixWSDataSource::hasData(const std::string &wsName, const std::shared_ptr<Mantid::API::Workspace> &ws) {
   if (m_matWs->getName() == wsName)
     return true;
 
-  Mantid::API::MatrixWorkspace_const_sptr other =
-      std::dynamic_pointer_cast<const MatrixWorkspace>(ws);
+  Mantid::API::MatrixWorkspace_const_sptr other = std::dynamic_pointer_cast<const MatrixWorkspace>(ws);
   if (!other)
     return false;
 
@@ -144,16 +141,12 @@ size_t MatrixWSDataSource::getNRows() {
  * @param isLogX  Flag indicating whether or not the data should be
  *                binned logarithmically.
  */
-DataArray_const_sptr MatrixWSDataSource::getDataArray(double xMin, double xMax,
-                                                      double yMin, double yMax,
-                                                      size_t numRows,
-                                                      size_t numCols,
-                                                      bool isLogX) {
+DataArray_const_sptr MatrixWSDataSource::getDataArray(double xMin, double xMax, double yMin, double yMax,
+                                                      size_t numRows, size_t numCols, bool isLogX) {
   /* Since we're rebinning, the columns can be arbitrary */
   /* but rows must be aligned to get whole spectra */
   size_t first_row;
-  SVUtils::CalculateInterval(m_totalYMin, m_totalYMax, m_totalRows, first_row,
-                             yMin, yMax, numRows);
+  SVUtils::CalculateInterval(m_totalYMin, m_totalYMax, m_totalRows, first_row, yMin, yMax, numRows);
 
   std::vector<float> newData(numRows * numCols);
 
@@ -181,8 +174,7 @@ DataArray_const_sptr MatrixWSDataSource::getDataArray(double xMin, double xMax,
   auto newDataIter = newData.begin();
   for (size_t i = 0; i < numRows; i++) {
     double midY = yMin + ((double)i + 0.5) * yStep;
-    SVUtils::Interpolate(m_totalYMin, m_totalYMax, midY, 0.0,
-                         (double)m_totalRows, dYIndex);
+    SVUtils::Interpolate(m_totalYMin, m_totalYMax, midY, 0.0, (double)m_totalRows, dYIndex);
     auto sourceRow = (size_t)dYIndex;
     yVals.clear();
     err.clear();
@@ -191,14 +183,12 @@ DataArray_const_sptr MatrixWSDataSource::getDataArray(double xMin, double xMax,
 
     m_matWs->generateHistogram(sourceRow, xScale, yVals, err, true);
     newDataIter =
-        std::transform(yVals.cbegin(), yVals.cend(), newDataIter,
-                       [](const double y) { return static_cast<float>(y); });
+        std::transform(yVals.cbegin(), yVals.cend(), newDataIter, [](const double y) { return static_cast<float>(y); });
   }
 
   // The calling code is responsible for deleting the DataArray when it is done
   // with it
-  DataArray_const_sptr newDataArray(
-      new DataArray(xMin, xMax, yMin, yMax, isLogX, numRows, numCols, newData));
+  DataArray_const_sptr newDataArray(new DataArray(xMin, xMax, yMin, yMax, isLogX, numRows, numCols, newData));
 
   return newDataArray;
 }
@@ -210,8 +200,7 @@ DataArray_const_sptr MatrixWSDataSource::getDataArray(double xMin, double xMax,
  *                binned logarithmically.
  */
 DataArray_const_sptr MatrixWSDataSource::getDataArray(bool isLogX) {
-  return getDataArray(m_totalXMin, m_totalXMax, m_totalYMin, m_totalYMax,
-                      m_totalRows, m_totalCols, isLogX);
+  return getDataArray(m_totalXMin, m_totalXMax, m_totalYMin, m_totalYMax, m_totalRows, m_totalCols, isLogX);
 }
 
 /**
@@ -220,9 +209,7 @@ DataArray_const_sptr MatrixWSDataSource::getDataArray(bool isLogX) {
  * @param emodeHandler  Pointer to the user interface handler that
  *                      can provide user values for emode and efixed.
  */
-void MatrixWSDataSource::setEModeHandler(EModeHandler *emodeHandler) {
-  m_emodeHandler = emodeHandler;
-}
+void MatrixWSDataSource::setEModeHandler(EModeHandler *emodeHandler) { m_emodeHandler = emodeHandler; }
 
 /**
  * Clear the vector of strings and then add pairs of strings giving information
@@ -339,8 +326,7 @@ std::vector<std::string> MatrixWSDataSource::getInfoList(double x, double y) {
             emode = 2;
           }
         } catch (std::runtime_error &) {
-          g_log.debug() << "Failed to get Efixed from detector ID: "
-                        << det.getID() << " in MatrixWSDataSource\n";
+          g_log.debug() << "Failed to get Efixed from detector ID: " << det.getID() << " in MatrixWSDataSource\n";
           efixed = 0;
         }
       }
@@ -354,49 +340,41 @@ std::vector<std::string> MatrixWSDataSource::getInfoList(double x, double y) {
       m_emodeHandler->setEMode(emode);
     }
 
-    double tof = old_unit->convertSingleToTOF(x, l1, l2, two_theta, emode,
-                                              efixed, delta);
+    double tof = old_unit->convertSingleToTOF(x, l1, l2, two_theta, emode, efixed, delta);
     if (!(x_label == "Time-of-flight"))
       SVUtils::PushNameValue("Time-of-flight", 8, 1, tof, list);
 
     if (!(x_label == "Wavelength")) {
       const Unit_sptr &wl_unit = UnitFactory::Instance().create("Wavelength");
-      double wavelength = wl_unit->convertSingleFromTOF(tof, l1, l2, two_theta,
-                                                        emode, efixed, delta);
+      double wavelength = wl_unit->convertSingleFromTOF(tof, l1, l2, two_theta, emode, efixed, delta);
       SVUtils::PushNameValue("Wavelength", 8, 4, wavelength, list);
     }
 
     if (!(x_label == "Energy")) {
       const Unit_sptr &e_unit = UnitFactory::Instance().create("Energy");
-      double energy = e_unit->convertSingleFromTOF(tof, l1, l2, two_theta,
-                                                   emode, efixed, delta);
+      double energy = e_unit->convertSingleFromTOF(tof, l1, l2, two_theta, emode, efixed, delta);
       SVUtils::PushNameValue("Energy", 8, 4, energy, list);
     }
 
     if ((!(x_label == "d-Spacing")) && (two_theta != 0.0) && (emode == 0)) {
       const Unit_sptr &d_unit = UnitFactory::Instance().create("dSpacing");
-      double d_spacing = d_unit->convertSingleFromTOF(tof, l1, l2, two_theta,
-                                                      emode, efixed, delta);
+      double d_spacing = d_unit->convertSingleFromTOF(tof, l1, l2, two_theta, emode, efixed, delta);
       SVUtils::PushNameValue("d-Spacing", 8, 4, d_spacing, list);
     }
 
     if ((!(x_label == "q")) && (two_theta != 0.0)) {
-      const Unit_sptr &q_unit =
-          UnitFactory::Instance().create("MomentumTransfer");
-      double mag_q = q_unit->convertSingleFromTOF(tof, l1, l2, two_theta, emode,
-                                                  efixed, delta);
+      const Unit_sptr &q_unit = UnitFactory::Instance().create("MomentumTransfer");
+      double mag_q = q_unit->convertSingleFromTOF(tof, l1, l2, two_theta, emode, efixed, delta);
       SVUtils::PushNameValue("|Q|", 8, 4, mag_q, list);
     }
 
     if ((!(x_label == "DeltaE")) && (two_theta != 0.0) && (emode != 0)) {
       const Unit_sptr &deltaE_unit = UnitFactory::Instance().create("DeltaE");
-      double delta_E = deltaE_unit->convertSingleFromTOF(tof, l1, l2, two_theta,
-                                                         emode, efixed, delta);
+      double delta_E = deltaE_unit->convertSingleFromTOF(tof, l1, l2, two_theta, emode, efixed, delta);
       SVUtils::PushNameValue("DeltaE", 8, 4, delta_E, list);
     }
   } catch (std::exception &e) {
-    g_log.debug() << "Failed to get information from Workspace:" << e.what()
-                  << '\n';
+    g_log.debug() << "Failed to get information from Workspace:" << e.what() << '\n';
   }
   return list;
 }

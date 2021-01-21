@@ -19,14 +19,12 @@ using namespace Mantid::API;
 @param tableWorkspace : The table workspace to wrap
 @param whitelist : A WhiteList containing the columns
 */
-QOneLevelTreeModel::QOneLevelTreeModel(
-    const ITableWorkspace_sptr &tableWorkspace, const WhiteList &whitelist)
+QOneLevelTreeModel::QOneLevelTreeModel(const ITableWorkspace_sptr &tableWorkspace, const WhiteList &whitelist)
     : AbstractTreeModel(tableWorkspace, whitelist) {
 
   if (tableWorkspace->columnCount() != m_whitelist.size())
-    throw std::invalid_argument(
-        "Invalid table workspace. Table workspace must "
-        "have the same number of columns as the white list");
+    throw std::invalid_argument("Invalid table workspace. Table workspace must "
+                                "have the same number of columns as the white list");
 
   // Create vector for caching row data
   for (size_t i = 0; i < tableWorkspace->rowCount(); ++i)
@@ -36,8 +34,7 @@ QOneLevelTreeModel::QOneLevelTreeModel(
   updateAllRowData();
 
   // This ensures the cached row data is updated when the table changes
-  connect(this, SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)),
-          this,
+  connect(this, SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)), this,
           SLOT(tableDataUpdated(const QModelIndex &, const QModelIndex &)));
 }
 
@@ -78,9 +75,7 @@ QVariant QOneLevelTreeModel::data(const QModelIndex &index, int role) const {
  * @param role : The role
  * @return : The column name
  */
-QVariant QOneLevelTreeModel::headerData(int section,
-                                        Qt::Orientation orientation,
-                                        int role) const {
+QVariant QOneLevelTreeModel::headerData(int section, Qt::Orientation orientation, int role) const {
 
   if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
     return m_whitelist.name(section);
@@ -112,8 +107,7 @@ RowData_sptr QOneLevelTreeModel::rowData(const QModelIndex &index) const {
  * @param parent : The parent element
  * @return : The index of the element
  */
-QModelIndex QOneLevelTreeModel::index(int row, int column,
-                                      const QModelIndex &parent) const {
+QModelIndex QOneLevelTreeModel::index(int row, int column, const QModelIndex &parent) const {
 
   UNUSED_ARG(parent);
   return createIndex(row, column);
@@ -124,13 +118,11 @@ QModelIndex QOneLevelTreeModel::index(int row, int column,
  * @param parent : The parent of this item
  * @return : The 'processed' status
  */
-bool QOneLevelTreeModel::isProcessed(int position,
-                                     const QModelIndex &parent) const {
+bool QOneLevelTreeModel::isProcessed(int position, const QModelIndex &parent) const {
 
   // No parent items exists, this should not be possible
   if (parent.isValid())
-    throw std::invalid_argument(
-        "Invalid parent index, there are no parent data items in this model.");
+    throw std::invalid_argument("Invalid parent index, there are no parent data items in this model.");
 
   // Incorrect position
   if (position < 0 || position >= rowCount())
@@ -146,13 +138,11 @@ bool QOneLevelTreeModel::isProcessed(int position,
  * @param parent : The parent of this item
  * @return : true if there was an error
  */
-bool QOneLevelTreeModel::reductionFailed(int position,
-                                         const QModelIndex &parent) const {
+bool QOneLevelTreeModel::reductionFailed(int position, const QModelIndex &parent) const {
 
   // No parent items exists, this should not be possible
   if (parent.isValid())
-    throw std::invalid_argument(
-        "Invalid parent index, there are no parent data items in this model.");
+    throw std::invalid_argument("Invalid parent index, there are no parent data items in this model.");
 
   // Incorrect position
   if (position < 0 || position >= rowCount())
@@ -179,8 +169,7 @@ QModelIndex QOneLevelTreeModel::parent(const QModelIndex &index) const {
  * @param parent : The parent of the set of elements
  * @return : Boolean indicating whether the insertion was successful or not
  */
-bool QOneLevelTreeModel::insertRows(int position, int count,
-                                    const QModelIndex &parent) {
+bool QOneLevelTreeModel::insertRows(int position, int count, const QModelIndex &parent) {
   if (parent.isValid())
     return false;
 
@@ -197,8 +186,7 @@ bool QOneLevelTreeModel::insertRows(int position, int count,
   // Update the table workspace and row process status vector
   for (int pos = position; pos < position + count; pos++) {
     m_tWS->insertRow(position);
-    m_rows.insert(m_rows.begin() + position,
-                  std::make_shared<RowData>(columnCount()));
+    m_rows.insert(m_rows.begin() + position, std::make_shared<RowData>(columnCount()));
   }
 
   endInsertRows();
@@ -213,8 +201,7 @@ bool QOneLevelTreeModel::insertRows(int position, int count,
  * @return : Boolean indicating whether the elements were removed successfully
  * or not
  */
-bool QOneLevelTreeModel::removeRows(int position, int count,
-                                    const QModelIndex &parent) {
+bool QOneLevelTreeModel::removeRows(int position, int count, const QModelIndex &parent) {
 
   if (parent.isValid())
     return false;
@@ -273,8 +260,7 @@ int QOneLevelTreeModel::rowCount(const QModelIndex &parent) const {
  * @param value : the new value
  * @param role : the role
  */
-bool QOneLevelTreeModel::setData(const QModelIndex &index,
-                                 const QVariant &value, int role) {
+bool QOneLevelTreeModel::setData(const QModelIndex &index, const QVariant &value, int role) {
 
   if (role != Qt::EditRole)
     return false;
@@ -299,8 +285,7 @@ bool QOneLevelTreeModel::setData(const QModelIndex &index,
  * @param parent : The parent of this row
  * @return : Boolean indicating whether process status was set successfully
  */
-bool QOneLevelTreeModel::setProcessed(bool processed, int position,
-                                      const QModelIndex &parent) {
+bool QOneLevelTreeModel::setProcessed(bool processed, int position, const QModelIndex &parent) {
 
   // No parent items exists, this should not be possible
   if (parent.isValid())
@@ -321,8 +306,7 @@ bool QOneLevelTreeModel::setProcessed(bool processed, int position,
  * @param parent : The parent of this row
  * @return : Boolean indicating whether error was set successfully
  */
-bool QOneLevelTreeModel::setError(const std::string &error, int position,
-                                  const QModelIndex &parent) {
+bool QOneLevelTreeModel::setError(const std::string &error, int position, const QModelIndex &parent) {
 
   // No parent items exists, this should not be possible
   if (parent.isValid())
@@ -342,9 +326,7 @@ bool QOneLevelTreeModel::setError(const std::string &error, int position,
  *
  * @return :: the underlying table workspace
  */
-ITableWorkspace_sptr QOneLevelTreeModel::getTableWorkspace() const {
-  return m_tWS;
-}
+ITableWorkspace_sptr QOneLevelTreeModel::getTableWorkspace() const { return m_tWS; }
 
 /** Update all cached row data from the table data
  */
@@ -363,8 +345,7 @@ void QOneLevelTreeModel::updateAllRowData() {
 /** Called when the data in the table has changed. Updates the
  * table values in the cached RowData
  */
-void QOneLevelTreeModel::tableDataUpdated(const QModelIndex & /*unused*/,
-                                          const QModelIndex & /*unused*/) {
+void QOneLevelTreeModel::tableDataUpdated(const QModelIndex & /*unused*/, const QModelIndex & /*unused*/) {
   updateAllRowData();
 }
 
@@ -389,8 +370,7 @@ location
 @param rowIndex :: The index to insert the new row after
 @param rowValues :: the values to set in the row cells
 */
-void QOneLevelTreeModel::insertRowWithValues(
-    int rowIndex, const std::map<QString, QString> &rowValues) {
+void QOneLevelTreeModel::insertRowWithValues(int rowIndex, const std::map<QString, QString> &rowValues) {
 
   insertRow(rowIndex);
 
@@ -410,8 +390,7 @@ void QOneLevelTreeModel::insertRowWithValues(
 /** Transfer data to the table
  * @param runs :: [input] Data to transfer as a vector of maps
  */
-void QOneLevelTreeModel::transfer(
-    const std::vector<std::map<QString, QString>> &runs) {
+void QOneLevelTreeModel::transfer(const std::vector<std::map<QString, QString>> &runs) {
 
   // If the table only has one row, check if it is empty and if so, remove it.
   // This is to make things nicer when transferring, as the default table has

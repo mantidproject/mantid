@@ -26,8 +26,7 @@ namespace SliceViewer {
 //========================================================================
 class PickerMachine : public QwtPickerMachine {
 public:
-  QwtPickerMachine::CommandList transition(const QwtEventPattern & /*unused*/,
-                                           const QEvent *e) override {
+  QwtPickerMachine::CommandList transition(const QwtEventPattern & /*unused*/, const QEvent *e) override {
     QwtPickerMachine::CommandList cmdList;
     if (e->type() == QEvent::MouseMove)
       cmdList += Move;
@@ -60,9 +59,7 @@ public:
   void widgetMouseMoveEvent(QMouseEvent *e) override;
   void widgetLeaveEvent(QEvent * /*unused*/) override;
 
-  QwtPickerMachine *stateMachine(int /*unused*/) const override {
-    return new PickerMachine;
-  }
+  QwtPickerMachine *stateMachine(int /*unused*/) const override { return new PickerMachine; }
 
 signals:
   void mouseMoved(double /*x*/, double /*y*/) const;
@@ -77,9 +74,7 @@ protected:
 /** Custom zoomer for zooming onto the slice */
 class CustomZoomer : public QwtPlotZoomer {
 public:
-  CustomZoomer(QwtPlotCanvas *canvas) : QwtPlotZoomer(canvas) {
-    setTrackerMode(QwtPicker::AlwaysOn);
-  }
+  CustomZoomer(QwtPlotCanvas *canvas) : QwtPlotZoomer(canvas) { setTrackerMode(QwtPicker::AlwaysOn); }
 
 protected:
   // Unhide base class method (avoids Intel compiler warning)

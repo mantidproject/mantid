@@ -43,15 +43,11 @@ namespace Crystal {
 
 DECLARE_ALGORITHM(SCDCalibratePanels)
 
-const std::string SCDCalibratePanels::name() const {
-  return "SCDCalibratePanels";
-}
+const std::string SCDCalibratePanels::name() const { return "SCDCalibratePanels"; }
 
 int SCDCalibratePanels::version() const { return 1; }
 
-const std::string SCDCalibratePanels::category() const {
-  return "Crystal\\Corrections";
-}
+const std::string SCDCalibratePanels::category() const { return "Crystal\\Corrections"; }
 
 void SCDCalibratePanels::exec() {
   PeaksWorkspace_sptr peaksWs = getProperty("PeakWorkspace");
@@ -63,11 +59,9 @@ void SCDCalibratePanels::exec() {
   Geometry::Instrument_const_sptr inst = peaksWs->getInstrument();
   if (edge > 0) {
     std::vector<Peak> &peaks = peaksWs->getPeaks();
-    auto it = std::remove_if(peaks.begin(), peaks.end(),
-                             [edge, inst](const Peak &pk) {
-                               return edgePixel(inst, pk.getBankName(),
-                                                pk.getCol(), pk.getRow(), edge);
-                             });
+    auto it = std::remove_if(peaks.begin(), peaks.end(), [edge, inst](const Peak &pk) {
+      return edgePixel(inst, pk.getBankName(), pk.getCol(), pk.getRow(), edge);
+    });
     peaks.erase(it, peaks.end());
   }
   findU(peaksWs);
@@ -95,8 +89,7 @@ void SCDCalibratePanels::exec() {
       PARALLEL_START_INTERUPT_REGION
       std::ostringstream mess;
       mess << "bank" << num;
-      IComponent_const_sptr comp =
-          inst->getComponentByName(mess.str(), maxRecurseDepth);
+      IComponent_const_sptr comp = inst->getComponentByName(mess.str(), maxRecurseDepth);
       PARALLEL_CRITICAL(MyBankNames)
       if (comp)
         MyBankNames.insert(mess.str());
@@ -111,10 +104,8 @@ void SCDCalibratePanels::exec() {
     }
   }
 
-  std::vector<std::string> fit_workspaces(MyBankNames.size() + MyPanels.size(),
-                                          "fit_");
-  std::vector<std::string> parameter_workspaces(
-      MyBankNames.size() + MyPanels.size(), "params_");
+  std::vector<std::string> fit_workspaces(MyBankNames.size() + MyPanels.size(), "fit_");
+  std::vector<std::string> parameter_workspaces(MyBankNames.size() + MyPanels.size(), "params_");
   int i = 0;
   for (auto &MyPanel : MyPanels) {
     fit_workspaces[i] += MyPanel;
@@ -123,17 +114,12 @@ void SCDCalibratePanels::exec() {
   }
   if (snapPanels) {
     findL2(MyPanels, peaksWs);
-    ITableWorkspace_sptr results =
-        AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
-            "params_West");
+    ITableWorkspace_sptr results = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("params_West");
     double delta = results->cell<double>(4, 1);
-    g_log.notice() << "For west rotation change det_arc1 " << delta
-                   << " degrees\n";
-    results = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
-        "params_East");
+    g_log.notice() << "For west rotation change det_arc1 " << delta << " degrees\n";
+    results = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("params_East");
     delta = results->cell<double>(4, 1);
-    g_log.notice() << "For east rotation change det_arc2 " << delta
-                   << " degrees\n";
+    g_log.notice() << "For east rotation change det_arc2 " << delta << " degrees\n";
   }
 
   for (auto &MyBankName : MyBankNames) {
@@ -168,8 +154,7 @@ void SCDCalibratePanels::exec() {
   std::sort(fit_workspaces.begin(), fit_workspaces.end());
 
   // collect output of fit for each spectrum into workspace groups
-  API::IAlgorithm_sptr groupAlg =
-      AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
+  API::IAlgorithm_sptr groupAlg = AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
   groupAlg->initialize();
   groupAlg->setProperty("InputWorkspaces", parameter_workspaces);
   groupAlg->setProperty("OutputWorkspace", "Fit_Parameters");
@@ -182,10 +167,8 @@ void SCDCalibratePanels::exec() {
   groupAlg->execute();
 
   // Use new instrument for PeaksWorkspace
-  Geometry::Instrument_sptr inst2 =
-      std::const_pointer_cast<Geometry::Instrument>(peaksWs->getInstrument());
-  Geometry::OrientedLattice lattice0 =
-      peaksWs->mutableSample().getOrientedLattice();
+  Geometry::Instrument_sptr inst2 = std::const_pointer_cast<Geometry::Instrument>(peaksWs->getInstrument());
+  Geometry::OrientedLattice lattice0 = peaksWs->mutableSample().getOrientedLattice();
   PARALLEL_FOR_IF(Kernel::threadSafe(*peaksWs))
   for (int i = 0; i < nPeaks; i++) {
     PARALLEL_START_INTERUPT_REGION
@@ -193,8 +176,7 @@ void SCDCalibratePanels::exec() {
     try {
       peak.setInstrument(inst2);
     } catch (const std::exception &exc) {
-      g_log.notice() << "Problem in applying calibration to peak " << i << " : "
-                     << exc.what() << "\n";
+      g_log.notice() << "Problem in applying calibration to peak " << i << " : " << exc.what() << "\n";
     }
     PARALLEL_END_INTERUPT_REGION
   }
@@ -216,16 +198,13 @@ void SCDCalibratePanels::exec() {
   //----------------- Calculate & Create Calculated vs Theoretical
   // workspaces------------------,);
   MatrixWorkspace_sptr ColWksp =
-      Mantid::API::WorkspaceFactory::Instance().create(
-          "Workspace2D", MyBankNames.size(), nPeaks, nPeaks);
+      Mantid::API::WorkspaceFactory::Instance().create("Workspace2D", MyBankNames.size(), nPeaks, nPeaks);
   ColWksp->setInstrument(inst2);
   MatrixWorkspace_sptr RowWksp =
-      Mantid::API::WorkspaceFactory::Instance().create(
-          "Workspace2D", MyBankNames.size(), nPeaks, nPeaks);
+      Mantid::API::WorkspaceFactory::Instance().create("Workspace2D", MyBankNames.size(), nPeaks, nPeaks);
   RowWksp->setInstrument(inst2);
   MatrixWorkspace_sptr TofWksp =
-      Mantid::API::WorkspaceFactory::Instance().create(
-          "Workspace2D", MyBankNames.size(), nPeaks, nPeaks);
+      Mantid::API::WorkspaceFactory::Instance().create("Workspace2D", MyBankNames.size(), nPeaks, nPeaks);
   TofWksp->setInstrument(inst2);
   OrientedLattice lattice = peaksWs->mutableSample().getOrientedLattice();
   const DblMatrix &UB = lattice.getUB();
@@ -253,8 +232,7 @@ void SCDCalibratePanels::exec() {
       Peak peak = peaksWs->getPeak(j);
       if (peak.getBankName() == bankName) {
         try {
-          V3D q_lab =
-              (peak.getGoniometerMatrix() * UB) * peak.getHKL() * M_2_PI;
+          V3D q_lab = (peak.getGoniometerMatrix() * UB) * peak.getHKL() * M_2_PI;
           Peak theoretical(peak.getInstrument(), q_lab);
           ColX[icount] = peak.getCol();
           ColY[icount] = theoretical.getCol();
@@ -280,19 +258,16 @@ void SCDCalibratePanels::exec() {
   saveNexus(tofFilename, TofWksp);
 }
 
-void SCDCalibratePanels::saveNexus(const std::string &outputFile,
-                                   const MatrixWorkspace_sptr &outputWS) {
+void SCDCalibratePanels::saveNexus(const std::string &outputFile, const MatrixWorkspace_sptr &outputWS) {
   IAlgorithm_sptr save = this->createChildAlgorithm("SaveNexus");
   save->setProperty("InputWorkspace", outputWS);
   save->setProperty("FileName", outputFile);
   save->execute();
 }
 
-void SCDCalibratePanels::findL1(
-    int nPeaks, const DataObjects::PeaksWorkspace_sptr &peaksWs) {
+void SCDCalibratePanels::findL1(int nPeaks, const DataObjects::PeaksWorkspace_sptr &peaksWs) {
   MatrixWorkspace_sptr L1WS = std::dynamic_pointer_cast<MatrixWorkspace>(
-      API::WorkspaceFactory::Instance().create("Workspace2D", 1, 3 * nPeaks,
-                                               3 * nPeaks));
+      API::WorkspaceFactory::Instance().create("Workspace2D", 1, 3 * nPeaks, 3 * nPeaks));
 
   IAlgorithm_sptr fitL1_alg;
   try {
@@ -302,8 +277,7 @@ void SCDCalibratePanels::findL1(
     throw;
   }
   std::ostringstream fun_str;
-  fun_str << "name=SCDPanelErrors,Workspace=" << peaksWs->getName()
-          << ",Bank=moderator";
+  fun_str << "name=SCDPanelErrors,Workspace=" << peaksWs->getName() << ",Bank=moderator";
   std::ostringstream tie_str;
   tie_str << "XShift=0.0,YShift=0.0,XRotate=0.0,YRotate=0.0,ZRotate=0.0,"
              "ScaleWidth=1.0,ScaleHeight=1.0,T0Shift ="
@@ -322,18 +296,14 @@ void SCDCalibratePanels::findL1(
   AnalysisDataService::Instance().addOrReplace("params_L1", paramsL1);
   double deltaL1 = paramsL1->getRef<double>("Value", 2);
   SCDPanelErrors com;
-  com.moveDetector(0.0, 0.0, deltaL1, 0.0, 0.0, 0.0, 1.0, 1.0, "moderator",
-                   peaksWs);
-  g_log.notice() << "L1 = "
-                 << -peaksWs->getInstrument()->getSource()->getPos().Z() << "  "
-                 << fitL1Status << " Chi2overDoF " << chisqL1 << "\n";
+  com.moveDetector(0.0, 0.0, deltaL1, 0.0, 0.0, 0.0, 1.0, 1.0, "moderator", peaksWs);
+  g_log.notice() << "L1 = " << -peaksWs->getInstrument()->getSource()->getPos().Z() << "  " << fitL1Status
+                 << " Chi2overDoF " << chisqL1 << "\n";
 }
 
-void SCDCalibratePanels::findT0(
-    int nPeaks, const DataObjects::PeaksWorkspace_sptr &peaksWs) {
+void SCDCalibratePanels::findT0(int nPeaks, const DataObjects::PeaksWorkspace_sptr &peaksWs) {
   MatrixWorkspace_sptr T0WS = std::dynamic_pointer_cast<MatrixWorkspace>(
-      API::WorkspaceFactory::Instance().create("Workspace2D", 1, 3 * nPeaks,
-                                               3 * nPeaks));
+      API::WorkspaceFactory::Instance().create("Workspace2D", 1, 3 * nPeaks, 3 * nPeaks));
 
   IAlgorithm_sptr fitT0_alg;
   try {
@@ -343,12 +313,10 @@ void SCDCalibratePanels::findT0(
     throw;
   }
   std::ostringstream fun_str;
-  fun_str << "name=SCDPanelErrors,Workspace=" << peaksWs->getName()
-          << ",Bank=none";
+  fun_str << "name=SCDPanelErrors,Workspace=" << peaksWs->getName() << ",Bank=none";
   std::ostringstream tie_str;
-  tie_str
-      << "XShift=0.0,YShift=0.0,ZShift=0.0,XRotate=0.0,YRotate=0.0,ZRotate=0.0,"
-         "ScaleWidth=1.0,ScaleHeight=1.0";
+  tie_str << "XShift=0.0,YShift=0.0,ZShift=0.0,XRotate=0.0,YRotate=0.0,ZRotate=0.0,"
+             "ScaleWidth=1.0,ScaleHeight=1.0";
   fitT0_alg->setPropertyValue("Function", fun_str.str());
   fitT0_alg->setProperty("Ties", tie_str.str());
   fitT0_alg->setProperty("InputWorkspace", T0WS);
@@ -372,21 +340,18 @@ void SCDCalibratePanels::findT0(
     oldT0 = run.getPropertyValueAsType<double>("T0");
   }
   run.addProperty<double>("T0", mT0 + oldT0, true);
-  g_log.notice() << "T0 = " << mT0 << "  " << fitT0Status << " Chi2overDoF "
-                 << chisqT0 << "\n";
+  g_log.notice() << "T0 = " << mT0 << "  " << fitT0Status << " Chi2overDoF " << chisqT0 << "\n";
   for (int i = 0; i < peaksWs->getNumberPeaks(); i++) {
     DataObjects::Peak &peak = peaksWs->getPeak(i);
 
     Units::Wavelength wl;
 
-    wl.initialize(peak.getL1(), peak.getL2(), peak.getScattering(), 0,
-                  peak.getInitialEnergy(), 0.0);
+    wl.initialize(peak.getL1(), peak.getL2(), peak.getScattering(), 0, peak.getInitialEnergy(), 0.0);
     peak.setWavelength(wl.singleFromTOF(peak.getTOF() + mT0));
   }
 }
 
-void SCDCalibratePanels::findU(
-    const DataObjects::PeaksWorkspace_sptr &peaksWs) {
+void SCDCalibratePanels::findU(const DataObjects::PeaksWorkspace_sptr &peaksWs) {
   IAlgorithm_sptr ub_alg;
   try {
     ub_alg = createChildAlgorithm("CalculateUMatrix", -1, -1, false);
@@ -400,8 +365,8 @@ void SCDCalibratePanels::findU(
   double alpha = getProperty("alpha");
   double beta = getProperty("beta");
   double gamma = getProperty("gamma");
-  if ((a == EMPTY_DBL() || b == EMPTY_DBL() || c == EMPTY_DBL() ||
-       alpha == EMPTY_DBL() || beta == EMPTY_DBL() || gamma == EMPTY_DBL()) &&
+  if ((a == EMPTY_DBL() || b == EMPTY_DBL() || c == EMPTY_DBL() || alpha == EMPTY_DBL() || beta == EMPTY_DBL() ||
+       gamma == EMPTY_DBL()) &&
       peaksWs->sample().hasOrientedLattice()) {
     OrientedLattice latt = peaksWs->mutableSample().getOrientedLattice();
     a = latt.a();
@@ -440,10 +405,9 @@ void SCDCalibratePanels::findU(
  * @param T0           -The time offset from the DetCal file
  * @param filename     -The name of the DetCal file to save the results to
  */
-void SCDCalibratePanels::saveIsawDetCal(
-    std::shared_ptr<Instrument> &instrument,
-    boost::container::flat_set<string> &AllBankName, double T0,
-    const string &filename) {
+void SCDCalibratePanels::saveIsawDetCal(std::shared_ptr<Instrument> &instrument,
+                                        boost::container::flat_set<string> &AllBankName, double T0,
+                                        const string &filename) {
   // having a filename triggers doing the work
   if (filename.empty())
     return;
@@ -452,10 +416,8 @@ void SCDCalibratePanels::saveIsawDetCal(
 
   // create a workspace to pass to SaveIsawDetCal
   const size_t number_spectra = instrument->getNumberDetectors();
-  DataObjects::Workspace2D_sptr wksp =
-      std::dynamic_pointer_cast<DataObjects::Workspace2D>(
-          WorkspaceFactory::Instance().create("Workspace2D", number_spectra, 2,
-                                              1));
+  DataObjects::Workspace2D_sptr wksp = std::dynamic_pointer_cast<DataObjects::Workspace2D>(
+      WorkspaceFactory::Instance().create("Workspace2D", number_spectra, 2, 1));
   wksp->setInstrument(instrument);
   wksp->rebuildSpectraMapping(true /* include monitors */);
 
@@ -472,8 +434,7 @@ void SCDCalibratePanels::saveIsawDetCal(
 }
 
 void SCDCalibratePanels::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
-                      "PeakWorkspace", "", Kernel::Direction::InOut),
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>("PeakWorkspace", "", Kernel::Direction::InOut),
                   "Workspace of Indexed Peaks");
 
   auto mustBePositive = std::make_shared<BoundedValidator<double>>();
@@ -504,8 +465,7 @@ void SCDCalibratePanels::init() {
                   "detectors.  Implemented only for "
                   "RectangularDetectors.");
 
-  declareProperty("EdgePixels", 0,
-                  "Remove peaks that are at pixels this close to edge. ");
+  declareProperty("EdgePixels", 0, "Remove peaks that are at pixels this close to edge. ");
   declareProperty("CalibrateBanks", true, "Calibrate the panels of the banks.");
   declareProperty("CalibrateSNAPPanels", false,
                   "Calibrate the 3 X 3 panels of the "
@@ -514,31 +474,22 @@ void SCDCalibratePanels::init() {
   // ---------- outputs
   const std::vector<std::string> detcalExts{".DetCal", ".Det_Cal"};
   declareProperty(
-      std::make_unique<FileProperty>("DetCalFilename", "SCDCalibrate.DetCal",
-                                     FileProperty::Save, detcalExts),
+      std::make_unique<FileProperty>("DetCalFilename", "SCDCalibrate.DetCal", FileProperty::Save, detcalExts),
       "Path to an ISAW-style .detcal file to save.");
 
-  declareProperty(
-      std::make_unique<FileProperty>("XmlFilename", "",
-                                     FileProperty::OptionalSave, ".xml"),
-      "Path to an Mantid .xml description(for LoadParameterFile) file to "
-      "save.");
+  declareProperty(std::make_unique<FileProperty>("XmlFilename", "", FileProperty::OptionalSave, ".xml"),
+                  "Path to an Mantid .xml description(for LoadParameterFile) file to "
+                  "save.");
 
-  declareProperty(std::make_unique<FileProperty>("ColFilename",
-                                                 "ColCalcvsTheor.nxs",
-                                                 FileProperty::Save, ".nxs"),
+  declareProperty(std::make_unique<FileProperty>("ColFilename", "ColCalcvsTheor.nxs", FileProperty::Save, ".nxs"),
                   "Path to a NeXus file comparing calculated and theoretical "
                   "column of each peak.");
 
-  declareProperty(std::make_unique<FileProperty>("RowFilename",
-                                                 "RowCalcvsTheor.nxs",
-                                                 FileProperty::Save, ".nxs"),
+  declareProperty(std::make_unique<FileProperty>("RowFilename", "RowCalcvsTheor.nxs", FileProperty::Save, ".nxs"),
                   "Path to a NeXus file comparing calculated and theoretical "
                   "row of each peak.");
 
-  declareProperty(std::make_unique<FileProperty>("TofFilename",
-                                                 "TofCalcvsTheor.nxs",
-                                                 FileProperty::Save, ".nxs"),
+  declareProperty(std::make_unique<FileProperty>("TofFilename", "TofCalcvsTheor.nxs", FileProperty::Save, ".nxs"),
                   "Path to a NeXus file comparing calculated and theoretical "
                   "TOF of each peak.");
 
@@ -550,16 +501,12 @@ void SCDCalibratePanels::init() {
   setPropertyGroup("TofFilename", OUTPUTS);
 }
 
-void writeXmlParameter(ofstream &ostream, const string &name,
-                       const double value) {
-  ostream << "  <parameter name =\"" << name << "\"><value val=\"" << value
-          << "\" /> </parameter>\n";
+void writeXmlParameter(ofstream &ostream, const string &name, const double value) {
+  ostream << "  <parameter name =\"" << name << "\"><value val=\"" << value << "\" /> </parameter>\n";
 }
 
-void SCDCalibratePanels::saveXmlFile(
-    const string &FileName,
-    const boost::container::flat_set<string> &AllBankNames,
-    const Instrument &instrument) const {
+void SCDCalibratePanels::saveXmlFile(const string &FileName, const boost::container::flat_set<string> &AllBankNames,
+                                     const Instrument &instrument) const {
   if (FileName.empty())
     return;
 
@@ -568,9 +515,8 @@ void SCDCalibratePanels::saveXmlFile(
   // create the file and add the header
   ofstream oss3(FileName.c_str());
   oss3 << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n";
-  oss3 << " <parameter-file instrument=\"" << instrument.getName()
-       << "\" valid-from=\"" << instrument.getValidFromDate().toISO8601String()
-       << "\">\n";
+  oss3 << " <parameter-file instrument=\"" << instrument.getName() << "\" valid-from=\""
+       << instrument.getValidFromDate().toISO8601String() << "\">\n";
   ParameterMap_sptr pmap = instrument.getParameterMap();
 
   // write out the detector banks
@@ -578,8 +524,7 @@ void SCDCalibratePanels::saveXmlFile(
     if (instrument.getName().compare("CORELLI") == 0.0)
       bankName.append("/sixteenpack");
     oss3 << "<component-link name=\"" << bankName << "\">\n";
-    std::shared_ptr<const IComponent> bank =
-        instrument.getComponentByName(bankName);
+    std::shared_ptr<const IComponent> bank = instrument.getComponentByName(bankName);
 
     Quat relRot = bank->getRelativeRot();
 
@@ -594,10 +539,8 @@ void SCDCalibratePanels::saveXmlFile(
     writeXmlParameter(oss3, "y", pos1.Y());
     writeXmlParameter(oss3, "z", pos1.Z());
 
-    vector<double> oldScalex =
-        pmap->getDouble(bank->getName(), string("scalex"));
-    vector<double> oldScaley =
-        pmap->getDouble(bank->getName(), string("scaley"));
+    vector<double> oldScalex = pmap->getDouble(bank->getName(), string("scalex"));
+    vector<double> oldScaley = pmap->getDouble(bank->getName(), string("scaley"));
 
     double scalex, scaley;
     if (!oldScalex.empty())
@@ -610,10 +553,8 @@ void SCDCalibratePanels::saveXmlFile(
     else
       scaley = 1.;
 
-    oss3 << R"(  <parameter name ="scalex"><value val=")" << scalex
-         << "\" /> </parameter>\n";
-    oss3 << R"(  <parameter name ="scaley"><value val=")" << scaley
-         << "\" /> </parameter>\n";
+    oss3 << R"(  <parameter name ="scalex"><value val=")" << scalex << "\" /> </parameter>\n";
+    oss3 << R"(  <parameter name ="scaley"><value val=")" << scaley << "\" /> </parameter>\n";
     oss3 << "</component-link>\n";
   } // for each bank in the group
 
@@ -634,9 +575,8 @@ void SCDCalibratePanels::saveXmlFile(
   oss3.flush();
   oss3.close();
 }
-void SCDCalibratePanels::findL2(
-    boost::container::flat_set<string> MyBankNames,
-    const DataObjects::PeaksWorkspace_sptr &peaksWs) {
+void SCDCalibratePanels::findL2(boost::container::flat_set<string> MyBankNames,
+                                const DataObjects::PeaksWorkspace_sptr &peaksWs) {
   bool changeSize = getProperty("ChangePanelSize");
   Geometry::Instrument_const_sptr inst = peaksWs->getInstrument();
 
@@ -648,23 +588,21 @@ void SCDCalibratePanels::findL2(
     PeaksWorkspace_sptr local = peaksWs->clone();
     AnalysisDataService::Instance().addOrReplace(bankName, local);
     std::vector<Peak> &localPeaks = local->getPeaks();
-    auto lit = std::remove_if(
-        localPeaks.begin(), localPeaks.end(), [&iBank](const Peak &pk) {
-          std::string name = pk.getBankName();
-          IComponent_const_sptr det =
-              pk.getInstrument()->getComponentByName(name);
-          if (det && iBank.substr(0, 4) != "bank") {
-            IComponent_const_sptr parent = det->getParent();
-            if (parent) {
-              IComponent_const_sptr grandparent = parent->getParent();
-              if (grandparent) {
-                name = grandparent->getName();
-              }
-            }
+    auto lit = std::remove_if(localPeaks.begin(), localPeaks.end(), [&iBank](const Peak &pk) {
+      std::string name = pk.getBankName();
+      IComponent_const_sptr det = pk.getInstrument()->getComponentByName(name);
+      if (det && iBank.substr(0, 4) != "bank") {
+        IComponent_const_sptr parent = det->getParent();
+        if (parent) {
+          IComponent_const_sptr grandparent = parent->getParent();
+          if (grandparent) {
+            name = grandparent->getName();
           }
+        }
+      }
 
-          return name != iBank;
-        });
+      return name != iBank;
+    });
     localPeaks.erase(lit, localPeaks.end());
 
     int nBankPeaks = local->getNumberPeaks();
@@ -674,8 +612,7 @@ void SCDCalibratePanels::findL2(
     }
 
     MatrixWorkspace_sptr q3DWS = std::dynamic_pointer_cast<MatrixWorkspace>(
-        API::WorkspaceFactory::Instance().create(
-            "Workspace2D", 1, 3 * nBankPeaks, 3 * nBankPeaks));
+        API::WorkspaceFactory::Instance().create("Workspace2D", 1, 3 * nBankPeaks, 3 * nBankPeaks));
 
     auto &outSpec = q3DWS->getSpectrum(0);
     auto &yVec = outSpec.mutableY();
@@ -719,8 +656,7 @@ void SCDCalibratePanels::findL2(
     fit_alg->executeAsChildAlg();
     std::string fitStatus = fit_alg->getProperty("OutputStatus");
     double chisq = fit_alg->getProperty("OutputChi2overDoF");
-    g_log.notice() << iBank << "  " << fitStatus << " Chi2overDoF " << chisq
-                   << "\n";
+    g_log.notice() << iBank << "  " << fitStatus << " Chi2overDoF " << chisq << "\n";
     MatrixWorkspace_sptr fitWS = fit_alg->getProperty("OutputWorkspace");
     AnalysisDataService::Instance().addOrReplace("fit_" + iBank, fitWS);
     ITableWorkspace_sptr paramsWS = fit_alg->getProperty("OutputParameters");
@@ -734,8 +670,7 @@ void SCDCalibratePanels::findL2(
     double scaleWidth = 1.0;
     double scaleHeight = 1.0;
     // Scaling only implemented for Rectangular Detectors
-    Geometry::IComponent_const_sptr comp =
-        peaksWs->getInstrument()->getComponentByName(iBank);
+    Geometry::IComponent_const_sptr comp = peaksWs->getInstrument()->getComponentByName(iBank);
     std::shared_ptr<const Geometry::RectangularDetector> rectDet =
         std::dynamic_pointer_cast<const Geometry::RectangularDetector>(comp);
     if (rectDet && changeSize) {
@@ -748,10 +683,8 @@ void SCDCalibratePanels::findL2(
       }
       fit2_alg->setPropertyValue("Function", fun_str.str());
       std::ostringstream tie_str2;
-      tie_str2 << "XShift=" << xShift << ",YShift=" << yShift
-               << ",ZShift=" << zShift << ",XRotate=" << xRotate
-               << ",YRotate=" << yRotate << ",ZRotate=" << zRotate
-               << ",T0Shift =" << mT0;
+      tie_str2 << "XShift=" << xShift << ",YShift=" << yShift << ",ZShift=" << zShift << ",XRotate=" << xRotate
+               << ",YRotate=" << yRotate << ",ZRotate=" << zRotate << ",T0Shift =" << mT0;
       fit2_alg->setProperty("Ties", tie_str2.str());
       fit2_alg->setProperty("InputWorkspace", q3DWS);
       fit2_alg->setProperty("CreateOutput", true);
@@ -759,8 +692,7 @@ void SCDCalibratePanels::findL2(
       fit2_alg->executeAsChildAlg();
       std::string fitStatus = fit2_alg->getProperty("OutputStatus");
       double chisq = fit2_alg->getProperty("OutputChi2overDoF");
-      g_log.notice() << iBank << "  " << fitStatus << " Chi2overDoF " << chisq
-                     << "\n";
+      g_log.notice() << iBank << "  " << fitStatus << " Chi2overDoF " << chisq << "\n";
       fitWS = fit2_alg->getProperty("OutputWorkspace");
       AnalysisDataService::Instance().addOrReplace("fit_" + iBank, fitWS);
       paramsWS = fit2_alg->getProperty("OutputParameters");
@@ -770,8 +702,7 @@ void SCDCalibratePanels::findL2(
     }
     AnalysisDataService::Instance().remove(bankName);
     SCDPanelErrors det;
-    det.moveDetector(xShift, yShift, zShift, xRotate, yRotate, zRotate,
-                     scaleWidth, scaleHeight, iBank, peaksWs);
+    det.moveDetector(xShift, yShift, zShift, xRotate, yRotate, zRotate, scaleWidth, scaleHeight, iBank, peaksWs);
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION

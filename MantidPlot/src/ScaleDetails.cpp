@@ -36,9 +36,7 @@ Mantid::Kernel::Logger g_log("ScaleDetails");
  *  @param parent :: the QWidget that acts as this widget's parent in the
  * hierarchy
  */
-ScaleDetails::ScaleDetails(ApplicationWindow *app, Graph *graph, int mappedaxis,
-                           QWidget *parent)
-    : QWidget(parent) {
+ScaleDetails::ScaleDetails(ApplicationWindow *app, Graph *graph, int mappedaxis, QWidget *parent) : QWidget(parent) {
   m_app = app;
   m_graph = graph;
   m_mappedaxis = mappedaxis;
@@ -54,8 +52,7 @@ ScaleDetails::ScaleDetails(ApplicationWindow *app, Graph *graph, int mappedaxis,
   m_dspnStart->setLocale(m_app->locale());
   m_dspnStart->setDecimals(m_app->d_graphing_digits);
   middleLayout->addWidget(m_dspnStart, 0, 1);
-  connect(m_dspnStart, SIGNAL(valueChanged(double)), this,
-          SLOT(recalcStepMin()));
+  connect(m_dspnStart, SIGNAL(valueChanged(double)), this, SLOT(recalcStepMin()));
 
   m_dteStartDateTime = new QDateTimeEdit();
   m_dteStartDateTime->setCalendarPopup(true);
@@ -72,8 +69,7 @@ ScaleDetails::ScaleDetails(ApplicationWindow *app, Graph *graph, int mappedaxis,
   m_dspnEnd->setLocale(m_app->locale());
   m_dspnEnd->setDecimals(m_app->d_graphing_digits);
   middleLayout->addWidget(m_dspnEnd, 1, 1);
-  connect(m_dspnStart, SIGNAL(valueChanged(double)), this,
-          SLOT(recalcStepMin()));
+  connect(m_dspnStart, SIGNAL(valueChanged(double)), this, SLOT(recalcStepMin()));
 
   m_dteEndDateTime = new QDateTimeEdit();
   m_dteEndDateTime->setCalendarPopup(true);
@@ -99,8 +95,7 @@ ScaleDetails::ScaleDetails(ApplicationWindow *app, Graph *graph, int mappedaxis,
   middleLayout->addWidget(m_lblN, 3, 0);
   middleLayout->addWidget(m_dspnN, 3, 1);
 
-  m_lblWarn = new QLabel(tr(
-      "Ensure axis and data ranges are\ncompatible with chosen axis scale."));
+  m_lblWarn = new QLabel(tr("Ensure axis and data ranges are\ncompatible with chosen axis scale."));
   middleLayout->addWidget(m_lblWarn, 4, 0, 1, 2);
   m_lblWarn->setVisible(false);
 
@@ -261,8 +256,7 @@ void ScaleDetails::initWidgets() {
     double end = qMax(scDiv->lBound(), scDiv->hBound());
     ScaleDraw::ScaleType type = m_graph->axisType(m_mappedaxis);
     if (type == ScaleDraw::Date) {
-      ScaleDraw *sclDraw =
-          dynamic_cast<ScaleDraw *>(d_plot->axisScaleDraw(m_mappedaxis));
+      ScaleDraw *sclDraw = dynamic_cast<ScaleDraw *>(d_plot->axisScaleDraw(m_mappedaxis));
       if (!sclDraw) {
         throw std::runtime_error("Could not convert the axis Scale Draw object "
                                  "to a ScaleDraw object");
@@ -287,8 +281,7 @@ void ScaleDetails::initWidgets() {
       m_dspnStep->setValue(m_graph->axisStep(m_mappedaxis) / 86400.0);
       m_dspnStep->setSingleStep(1);
     } else if (type == ScaleDraw::Time) {
-      if (ScaleDraw *sclDraw =
-              dynamic_cast<ScaleDraw *>(d_plot->axisScaleDraw(m_mappedaxis))) {
+      if (ScaleDraw *sclDraw = dynamic_cast<ScaleDraw *>(d_plot->axisScaleDraw(m_mappedaxis))) {
         QTime origin = sclDraw->dateTimeOrigin().time();
 
         m_dspnStart->hide();
@@ -354,15 +347,12 @@ void ScaleDetails::initWidgets() {
       } else {
         m_cmbMinorTicksBeforeBreak->addItems({"0", "1", "4", "9", "14", "19"});
       }
-      m_cmbMinorTicksBeforeBreak->setEditText(
-          QString::number(sc_engine->minTicksBeforeBreak()));
+      m_cmbMinorTicksBeforeBreak->setEditText(QString::number(sc_engine->minTicksBeforeBreak()));
 
-      m_cmbMinorTicksAfterBreak->setEditText(
-          QString::number(sc_engine->minTicksAfterBreak()));
+      m_cmbMinorTicksAfterBreak->setEditText(QString::number(sc_engine->minTicksAfterBreak()));
       m_chkLog10AfterBreak->setChecked(sc_engine->log10ScaleAfterBreak());
       m_chkBreakDecoration->setChecked(sc_engine->hasBreakDecoration());
-      m_chkInvert->setChecked(
-          sc_engine->testAttribute(QwtScaleEngine::Inverted));
+      m_chkInvert->setChecked(sc_engine->testAttribute(QwtScaleEngine::Inverted));
       m_cmbScaleType->setCurrentIndex(scale_type);
       m_dspnN->setValue(sc_engine->nthPower());
       m_cmbMinorValue->clear();
@@ -371,8 +361,7 @@ void ScaleDetails::initWidgets() {
       } else {
         m_cmbMinorValue->addItems({"0", "1", "4", "9", "14", "19"});
       }
-      m_cmbMinorValue->setEditText(
-          QString::number(d_plot->axisMaxMinor(m_mappedaxis)));
+      m_cmbMinorValue->setEditText(QString::number(d_plot->axisMaxMinor(m_mappedaxis)));
 
       bool isColorMap = m_graph->isColorBarEnabled(m_mappedaxis);
       m_grpAxesBreaks->setEnabled(!isColorMap);
@@ -396,62 +385,35 @@ void ScaleDetails::initWidgets() {
     connect(m_chkBreakDecoration, SIGNAL(clicked()), this, SLOT(setModified()));
     connect(m_radStep, SIGNAL(clicked()), this, SLOT(setModified()));
     connect(m_radMajor, SIGNAL(clicked()), this, SLOT(setModified()));
-    connect(m_cmbMinorTicksBeforeBreak, SIGNAL(currentIndexChanged(int)), this,
-            SLOT(setModified()));
-    connect(m_cmbMinorTicksAfterBreak, SIGNAL(currentIndexChanged(int)), this,
-            SLOT(setModified()));
-    connect(m_cmbMinorValue, SIGNAL(currentIndexChanged(int)), this,
-            SLOT(setModified()));
-    connect(m_cmbUnit, SIGNAL(currentIndexChanged(int)), this,
-            SLOT(setModified()));
-    connect(m_cmbScaleType, SIGNAL(currentIndexChanged(int)), this,
-            SLOT(setModified()));
-    connect(m_cmbScaleType, SIGNAL(currentIndexChanged(int)), this,
-            SLOT(checkscaletype()));
+    connect(m_cmbMinorTicksBeforeBreak, SIGNAL(currentIndexChanged(int)), this, SLOT(setModified()));
+    connect(m_cmbMinorTicksAfterBreak, SIGNAL(currentIndexChanged(int)), this, SLOT(setModified()));
+    connect(m_cmbMinorValue, SIGNAL(currentIndexChanged(int)), this, SLOT(setModified()));
+    connect(m_cmbUnit, SIGNAL(currentIndexChanged(int)), this, SLOT(setModified()));
+    connect(m_cmbScaleType, SIGNAL(currentIndexChanged(int)), this, SLOT(setModified()));
+    connect(m_cmbScaleType, SIGNAL(currentIndexChanged(int)), this, SLOT(checkscaletype()));
     connect(m_dspnEnd, SIGNAL(valueChanged(double)), this, SLOT(setModified()));
-    connect(m_dspnStart, SIGNAL(valueChanged(double)), this,
-            SLOT(setModified()));
+    connect(m_dspnStart, SIGNAL(valueChanged(double)), this, SLOT(setModified()));
     connect(m_dspnN, SIGNAL(valueChanged(double)), this, SLOT(setModified()));
-    connect(m_dspnStep, SIGNAL(valueChanged(double)), this,
-            SLOT(setModified()));
-    connect(m_dspnBreakStart, SIGNAL(valueChanged(double)), this,
-            SLOT(setModified()));
-    connect(m_dspnStepBeforeBreak, SIGNAL(valueChanged(double)), this,
-            SLOT(setModified()));
-    connect(m_dspnStepAfterBreak, SIGNAL(valueChanged(double)), this,
-            SLOT(setModified()));
-    connect(m_dspnBreakEnd, SIGNAL(valueChanged(double)), this,
-            SLOT(setModified()));
-    connect(m_spnMajorValue, SIGNAL(valueChanged(int)), this,
-            SLOT(setModified()));
-    connect(m_spnBreakPosition, SIGNAL(valueChanged(int)), this,
-            SLOT(setModified()));
-    connect(m_spnBreakWidth, SIGNAL(valueChanged(int)), this,
-            SLOT(setModified()));
-    connect(m_dteStartDateTime, SIGNAL(dateTimeChanged(QDateTime)), this,
-            SLOT(setModified()));
-    connect(m_dteStartDateTime, SIGNAL(dateChanged(QDate)), this,
-            SLOT(setModified()));
-    connect(m_dteStartDateTime, SIGNAL(timeChanged(QTime)), this,
-            SLOT(setModified()));
-    connect(m_dteEndDateTime, SIGNAL(dateTimeChanged(QDateTime)), this,
-            SLOT(setModified()));
-    connect(m_dteEndDateTime, SIGNAL(dateChanged(QDate)), this,
-            SLOT(setModified()));
-    connect(m_dteEndDateTime, SIGNAL(timeChanged(QTime)), this,
-            SLOT(setModified()));
-    connect(m_timStartTime, SIGNAL(dateTimeChanged(QDateTime)), this,
-            SLOT(setModified()));
-    connect(m_timStartTime, SIGNAL(dateChanged(QDate)), this,
-            SLOT(setModified()));
-    connect(m_timStartTime, SIGNAL(timeChanged(QTime)), this,
-            SLOT(setModified()));
-    connect(m_timEndTime, SIGNAL(dateTimeChanged(QDateTime)), this,
-            SLOT(setModified()));
-    connect(m_timEndTime, SIGNAL(dateChanged(QDate)), this,
-            SLOT(setModified()));
-    connect(m_timEndTime, SIGNAL(timeChanged(QTime)), this,
-            SLOT(setModified()));
+    connect(m_dspnStep, SIGNAL(valueChanged(double)), this, SLOT(setModified()));
+    connect(m_dspnBreakStart, SIGNAL(valueChanged(double)), this, SLOT(setModified()));
+    connect(m_dspnStepBeforeBreak, SIGNAL(valueChanged(double)), this, SLOT(setModified()));
+    connect(m_dspnStepAfterBreak, SIGNAL(valueChanged(double)), this, SLOT(setModified()));
+    connect(m_dspnBreakEnd, SIGNAL(valueChanged(double)), this, SLOT(setModified()));
+    connect(m_spnMajorValue, SIGNAL(valueChanged(int)), this, SLOT(setModified()));
+    connect(m_spnBreakPosition, SIGNAL(valueChanged(int)), this, SLOT(setModified()));
+    connect(m_spnBreakWidth, SIGNAL(valueChanged(int)), this, SLOT(setModified()));
+    connect(m_dteStartDateTime, SIGNAL(dateTimeChanged(QDateTime)), this, SLOT(setModified()));
+    connect(m_dteStartDateTime, SIGNAL(dateChanged(QDate)), this, SLOT(setModified()));
+    connect(m_dteStartDateTime, SIGNAL(timeChanged(QTime)), this, SLOT(setModified()));
+    connect(m_dteEndDateTime, SIGNAL(dateTimeChanged(QDateTime)), this, SLOT(setModified()));
+    connect(m_dteEndDateTime, SIGNAL(dateChanged(QDate)), this, SLOT(setModified()));
+    connect(m_dteEndDateTime, SIGNAL(timeChanged(QTime)), this, SLOT(setModified()));
+    connect(m_timStartTime, SIGNAL(dateTimeChanged(QDateTime)), this, SLOT(setModified()));
+    connect(m_timStartTime, SIGNAL(dateChanged(QDate)), this, SLOT(setModified()));
+    connect(m_timStartTime, SIGNAL(timeChanged(QTime)), this, SLOT(setModified()));
+    connect(m_timEndTime, SIGNAL(dateTimeChanged(QDateTime)), this, SLOT(setModified()));
+    connect(m_timEndTime, SIGNAL(dateChanged(QDate)), this, SLOT(setModified()));
+    connect(m_timEndTime, SIGNAL(timeChanged(QTime)), this, SLOT(setModified()));
 
     m_initialised = true;
   }
@@ -500,12 +462,10 @@ void ScaleDetails::axisEnabled(bool enabled) {
  *
  */
 bool ScaleDetails::valid() {
-  if (m_radStep->isChecked() &&
-      (m_dspnStep->value() < m_dspnStep->getMinimum()))
+  if (m_radStep->isChecked() && (m_dspnStep->value() < m_dspnStep->getMinimum()))
     return false;
 
-  return m_initialised && m_app && m_graph &&
-         !(m_dspnStart->value() >= m_dspnEnd->value());
+  return m_initialised && m_app && m_graph && !(m_dspnStart->value() >= m_dspnEnd->value());
 }
 
 /** Applies this axis' parameters to the graph
@@ -520,17 +480,14 @@ void ScaleDetails::apply() {
     // and Time and Mantid doesn't support them in data yet i've been told
     ScaleDraw::ScaleType type = m_graph->axisType(m_mappedaxis);
 
-    double start = 0.0, end = 0.0, step = 0.0, breakLeft = -DBL_MAX,
-           breakRight = DBL_MAX;
+    double start = 0.0, end = 0.0, step = 0.0, breakLeft = -DBL_MAX, breakRight = DBL_MAX;
     if (type == ScaleDraw::Date) {
-      ScaleDraw *sclDraw = dynamic_cast<ScaleDraw *>(
-          m_graph->plotWidget()->axisScaleDraw(m_mappedaxis));
+      ScaleDraw *sclDraw = dynamic_cast<ScaleDraw *>(m_graph->plotWidget()->axisScaleDraw(m_mappedaxis));
       QDateTime origin = sclDraw->dateTimeOrigin();
       start = (double)origin.secsTo(m_dteStartDateTime->dateTime());
       end = (double)origin.secsTo(m_dteEndDateTime->dateTime());
     } else if (type == ScaleDraw::Time) {
-      ScaleDraw *sclDraw = dynamic_cast<ScaleDraw *>(
-          m_graph->plotWidget()->axisScaleDraw(m_mappedaxis));
+      ScaleDraw *sclDraw = dynamic_cast<ScaleDraw *>(m_graph->plotWidget()->axisScaleDraw(m_mappedaxis));
       QTime origin = sclDraw->dateTimeOrigin().time();
       start = (double)origin.msecsTo(m_timStartTime->time());
       end = (double)origin.msecsTo(m_timEndTime->time());
@@ -571,16 +528,12 @@ void ScaleDetails::apply() {
       breakLeft = qMin(m_dspnBreakStart->value(), m_dspnBreakEnd->value());
       breakRight = qMax(m_dspnBreakStart->value(), m_dspnBreakEnd->value());
     }
-    m_graph->setScale(
-        m_mappedaxis, start, end, step, m_spnMajorValue->value(),
-        m_cmbMinorValue->currentText().toInt(), m_cmbScaleType->currentIndex(),
-        m_chkInvert->isChecked(), breakLeft, breakRight,
-        m_spnBreakPosition->value(), m_dspnStepBeforeBreak->value(),
-        m_dspnStepAfterBreak->value(),
-        m_cmbMinorTicksBeforeBreak->currentText().toInt(),
-        m_cmbMinorTicksAfterBreak->currentText().toInt(),
-        m_chkLog10AfterBreak->isChecked(), m_spnBreakWidth->value(),
-        m_chkBreakDecoration->isChecked(), m_dspnN->value());
+    m_graph->setScale(m_mappedaxis, start, end, step, m_spnMajorValue->value(), m_cmbMinorValue->currentText().toInt(),
+                      m_cmbScaleType->currentIndex(), m_chkInvert->isChecked(), breakLeft, breakRight,
+                      m_spnBreakPosition->value(), m_dspnStepBeforeBreak->value(), m_dspnStepAfterBreak->value(),
+                      m_cmbMinorTicksBeforeBreak->currentText().toInt(),
+                      m_cmbMinorTicksAfterBreak->currentText().toInt(), m_chkLog10AfterBreak->isChecked(),
+                      m_spnBreakWidth->value(), m_chkBreakDecoration->isChecked(), m_dspnN->value());
     m_graph->changeIntensity(true);
     m_graph->notifyChanges();
     m_modified = false;

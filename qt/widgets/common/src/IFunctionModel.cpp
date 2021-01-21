@@ -18,8 +18,7 @@ void IFunctionModel::setFunctionString(const QString &funStr) {
     clear();
     return;
   }
-  setFunction(
-      FunctionFactory::Instance().createInitialized(funStr.toStdString()));
+  setFunction(FunctionFactory::Instance().createInitialized(funStr.toStdString()));
 }
 
 QString IFunctionModel::getFunctionString() const {
@@ -43,8 +42,7 @@ int IFunctionModel::getNumberLocalFunctions() const {
   return n > 0 ? n : 1;
 }
 
-void IFunctionModel::copyParametersAndErrors(const IFunction &funFrom,
-                                             IFunction &funTo) {
+void IFunctionModel::copyParametersAndErrors(const IFunction &funFrom, IFunction &funTo) {
   if (funTo.nParams() != funFrom.nParams())
     return;
   for (size_t i = 0; i < funFrom.nParams(); ++i) {
@@ -53,8 +51,7 @@ void IFunctionModel::copyParametersAndErrors(const IFunction &funFrom,
   }
 }
 
-void IFunctionModel::copyParametersAndErrorsToAllLocalFunctions(
-    const IFunction &fun) {
+void IFunctionModel::copyParametersAndErrorsToAllLocalFunctions(const IFunction &fun) {
   for (auto i = 0; i < getNumberLocalFunctions(); ++i) {
     auto localFun = getSingleFunction(i);
     copyParametersAndErrors(fun, *localFun);

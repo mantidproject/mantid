@@ -56,9 +56,7 @@ class DLLExport LoadCanSAS1D2 : public LoadCanSAS1D {
 public:
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 2; }
-  const std::vector<std::string> seeAlso() const override {
-    return {"SaveCanSAS1D"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"SaveCanSAS1D"}; }
 
 protected:
   /// Overwrites Algorithm method. Extend to create the LoadTransmission flag.
@@ -66,18 +64,15 @@ protected:
 
   void exec() override;
   /// Extends the LoadEntry to deal with the possibility of Transmission data.
-  API::MatrixWorkspace_sptr loadEntry(Poco::XML::Node *const workspaceData,
-                                      std::string &runName) override;
+  API::MatrixWorkspace_sptr loadEntry(Poco::XML::Node *const workspaceData, std::string &runName) override;
   /// Add new method to deal with loading the transmission related data.
-  API::MatrixWorkspace_sptr loadTransEntry(Poco::XML::Node *const workspaceData,
-                                           std::string &runName,
+  API::MatrixWorkspace_sptr loadTransEntry(Poco::XML::Node *const workspaceData, std::string &runName,
                                            std::string trans_name);
 
   std::vector<API::MatrixWorkspace_sptr> trans_gp, trans_can_gp;
 
 private:
-  void processTransmission(std::vector<API::MatrixWorkspace_sptr> &trans_gp,
-                           const std::string &name,
+  void processTransmission(std::vector<API::MatrixWorkspace_sptr> &trans_gp, const std::string &name,
                            const std::string &output_name);
 };
 } // namespace DataHandling

@@ -33,8 +33,7 @@ using namespace Mantid::DataHandling;
 class TemporaryRenamer {
 public:
   /// Constructor: rename the file and store its original name
-  explicit TemporaryRenamer(const std::string &fileName)
-      : m_originalName(fileName) {
+  explicit TemporaryRenamer(const std::string &fileName) : m_originalName(fileName) {
     try {
       Poco::File file(m_originalName);
       TS_ASSERT(file.exists() && file.canWrite() && file.isFile());
@@ -56,11 +55,9 @@ public:
     }
   }
   /// Fail with an error
-  void failCopyWithError(const std::string &from, const std::string &to,
-                         const Poco::FileException &error) const {
+  void failCopyWithError(const std::string &from, const std::string &to, const Poco::FileException &error) const {
     std::ostringstream message;
-    message << "Failed to copy " << from << " to " << to << ": "
-            << error.displayText();
+    message << "Failed to copy " << from << " to " << to << ": " << error.displayText();
     TS_FAIL(message.str());
   }
 
@@ -73,13 +70,9 @@ private:
 class ProgressWatcher {
 public:
   /// Constructor
-  ProgressWatcher()
-      : m_loadedCount(0), m_foundCount(0),
-        m_observer(*this, &ProgressWatcher::handleProgress) {}
+  ProgressWatcher() : m_loadedCount(0), m_foundCount(0), m_observer(*this, &ProgressWatcher::handleProgress) {}
   /// Add a notification to the count
-  void handleProgress(
-      const Poco::AutoPtr<Mantid::API::Algorithm::ProgressNotification>
-          &notification) {
+  void handleProgress(const Poco::AutoPtr<Mantid::API::Algorithm::ProgressNotification> &notification) {
     const auto &message = notification->message;
     if (0 == message.compare(0, 5, "Found")) {
       ++m_foundCount;
@@ -92,10 +85,7 @@ public:
   /// Return the number of "loaded" progress reports seen so far
   size_t getLoadedCount() { return m_loadedCount; }
   /// Getter for the observer
-  Poco::NObserver<ProgressWatcher, Mantid::API::Algorithm::ProgressNotification>
-  getObserver() {
-    return m_observer;
-  }
+  Poco::NObserver<ProgressWatcher, Mantid::API::Algorithm::ProgressNotification> getObserver() { return m_observer; }
 
 private:
   /// Count of "file loaded" progress reports seen so far
@@ -103,20 +93,16 @@ private:
   /// Count of "file found" progress reports seen so far
   size_t m_foundCount;
   /// Observer
-  Poco::NObserver<ProgressWatcher, Mantid::API::Algorithm::ProgressNotification>
-      m_observer;
+  Poco::NObserver<ProgressWatcher, Mantid::API::Algorithm::ProgressNotification> m_observer;
 };
 
 class PlotAsymmetryByLogValueTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static PlotAsymmetryByLogValueTest *createSuite() {
-    return new PlotAsymmetryByLogValueTest();
-  }
+  static PlotAsymmetryByLogValueTest *createSuite() { return new PlotAsymmetryByLogValueTest(); }
   static void destroySuite(PlotAsymmetryByLogValueTest *suite) { delete suite; }
-  PlotAsymmetryByLogValueTest()
-      : firstRun("MUSR00015189.nxs"), lastRun("MUSR00015190.nxs") {}
+  PlotAsymmetryByLogValueTest() : firstRun("MUSR00015189.nxs"), lastRun("MUSR00015190.nxs") {}
 
   /// Clear the ADS at the end of every test
   void tearDown() override { AnalysisDataService::Instance().clear(); }
@@ -135,8 +121,7 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     MatrixWorkspace_sptr outWS = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve(
-            "PlotAsymmetryByLogValueTest_WS"));
+        AnalysisDataService::Instance().retrieve("PlotAsymmetryByLogValueTest_WS"));
 
     TS_ASSERT(outWS);
     TS_ASSERT_EQUALS(outWS->blocksize(), 2);
@@ -171,8 +156,7 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     MatrixWorkspace_sptr outWS = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve(
-            "PlotAsymmetryByLogValueTest_WS"));
+        AnalysisDataService::Instance().retrieve("PlotAsymmetryByLogValueTest_WS"));
 
     TS_ASSERT(outWS);
     TS_ASSERT_EQUALS(outWS->blocksize(), 2);
@@ -207,8 +191,7 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     MatrixWorkspace_sptr outWS = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve(
-            "PlotAsymmetryByLogValueTest_WS"));
+        AnalysisDataService::Instance().retrieve("PlotAsymmetryByLogValueTest_WS"));
 
     TS_ASSERT(outWS);
     TS_ASSERT_EQUALS(outWS->blocksize(), 2);
@@ -232,8 +215,7 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     MatrixWorkspace_sptr outWS = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve(
-            "PlotAsymmetryByLogValueTest_WS"));
+        AnalysisDataService::Instance().retrieve("PlotAsymmetryByLogValueTest_WS"));
 
     TS_ASSERT(outWS);
   }
@@ -252,8 +234,7 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     MatrixWorkspace_sptr outWS = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve(
-            "PlotAsymmetryByLogValueTest_WS"));
+        AnalysisDataService::Instance().retrieve("PlotAsymmetryByLogValueTest_WS"));
 
     TS_ASSERT(outWS);
   }
@@ -277,8 +258,7 @@ public:
     const std::string deadTimeWs = "DeadTimeWs";
     const std::string deadTimeFile = "TestDeadTimeFile.nxs";
 
-    ITableWorkspace_sptr deadTimeTable =
-        Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
+    ITableWorkspace_sptr deadTimeTable = Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
     deadTimeTable->addColumn("int", "spectrum");
     deadTimeTable->addColumn("double", "dead-time");
 
@@ -314,8 +294,8 @@ public:
     if (!alg.isExecuted())
       return;
 
-    MatrixWorkspace_sptr outWs = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve(ws));
+    MatrixWorkspace_sptr outWs =
+        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(ws));
 
     TS_ASSERT(outWs);
     TS_ASSERT_EQUALS(outWs->blocksize(), 2);
@@ -347,8 +327,8 @@ public:
     if (!alg.isExecuted())
       return;
 
-    MatrixWorkspace_sptr outWs = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve(ws));
+    MatrixWorkspace_sptr outWs =
+        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(ws));
 
     TS_ASSERT(outWs);
     TS_ASSERT_EQUALS(outWs->blocksize(), 2);
@@ -382,8 +362,7 @@ public:
       return;
 
     MatrixWorkspace_sptr outWs = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve(
-            "PlotAsymmetryByLogValueTest_WS"));
+        AnalysisDataService::Instance().retrieve("PlotAsymmetryByLogValueTest_WS"));
 
     TS_ASSERT(outWs);
     TS_ASSERT_EQUALS(outWs->blocksize(), 2);
@@ -422,8 +401,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    MatrixWorkspace_sptr outWs = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve(ws));
+    MatrixWorkspace_sptr outWs =
+        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(ws));
 
     TS_ASSERT(outWs);
     TS_ASSERT_EQUALS(outWs->blocksize(), 2);
@@ -454,8 +433,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    MatrixWorkspace_sptr outWs = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve(ws));
+    MatrixWorkspace_sptr outWs =
+        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(ws));
 
     TS_ASSERT(outWs);
     TS_ASSERT_EQUALS(outWs->blocksize(), 2);
@@ -501,8 +480,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    MatrixWorkspace_sptr outWS = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve(ws));
+    MatrixWorkspace_sptr outWS =
+        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(ws));
 
     TS_ASSERT(outWS);
     TS_ASSERT_EQUALS(outWS->blocksize(), 1);
@@ -527,8 +506,7 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     MatrixWorkspace_sptr outWS = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve(
-            "PlotAsymmetryByLogValueTest_WS"));
+        AnalysisDataService::Instance().retrieve("PlotAsymmetryByLogValueTest_WS"));
 
     TS_ASSERT(outWS);
 
@@ -554,8 +532,7 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     MatrixWorkspace_sptr outWS = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve(
-            "PlotAsymmetryByLogValueTest_WS"));
+        AnalysisDataService::Instance().retrieve("PlotAsymmetryByLogValueTest_WS"));
 
     TS_ASSERT(outWS);
 
@@ -582,8 +559,7 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     MatrixWorkspace_sptr outWS = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve(
-            "PlotAsymmetryByLogValueTest_WS"));
+        AnalysisDataService::Instance().retrieve("PlotAsymmetryByLogValueTest_WS"));
     TS_ASSERT(outWS);
     const auto &outputX = outWS->points(0);
     TS_ASSERT_EQUALS(outputX.size(), 2);
@@ -619,8 +595,7 @@ public:
     TS_ASSERT_EQUALS(watcher.getFoundCount(), 2);  // reused 2
   }
 
-  void
-  test_validate_inputs_fails_if_neither_first_and_last_or_workspacenames_is_defined() {
+  void test_validate_inputs_fails_if_neither_first_and_last_or_workspacenames_is_defined() {
     PlotAsymmetryByLogValue alg;
     alg.initialize();
     auto result = alg.validateInputs();
@@ -700,16 +675,11 @@ class PlotAsymmetryByLogValueTestPerformance : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static PlotAsymmetryByLogValueTestPerformance *createSuite() {
-    return new PlotAsymmetryByLogValueTestPerformance();
-  }
+  static PlotAsymmetryByLogValueTestPerformance *createSuite() { return new PlotAsymmetryByLogValueTestPerformance(); }
 
-  static void destroySuite(PlotAsymmetryByLogValueTestPerformance *suite) {
-    delete suite;
-  }
+  static void destroySuite(PlotAsymmetryByLogValueTestPerformance *suite) { delete suite; }
 
-  PlotAsymmetryByLogValueTestPerformance()
-      : firstRun("MUSR00015189.nxs"), lastRun("MUSR00015190.nxs") {}
+  PlotAsymmetryByLogValueTestPerformance() : firstRun("MUSR00015189.nxs"), lastRun("MUSR00015190.nxs") {}
 
   void setUp() override {
     alg.initialize();
@@ -721,9 +691,7 @@ public:
     alg.setPropertyValue("Green", "1");
   }
 
-  void tearDown() override {
-    Mantid::API::AnalysisDataService::Instance().remove("outputWS");
-  }
+  void tearDown() override { Mantid::API::AnalysisDataService::Instance().remove("outputWS"); }
 
   void testPerformanceWS() { alg.execute(); }
 

@@ -128,8 +128,7 @@ public:
   bool eventFilter(QObject *o, QEvent *e) override;
 
 private:
-  void draw(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap,
-            const QRect &r) const override;
+  void draw(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap, const QRect &r) const override;
   double theta(int xs, int ys, int xe, int ye) const;
 
   //! Flag specifying if the start arrow is visible

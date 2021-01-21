@@ -45,14 +45,10 @@
 
 #include <stdexcept>
 
-ContourLinesEditor::ContourLinesEditor(const QLocale &locale, int precision,
-                                       QWidget *parent)
-    : QWidget(parent), table(nullptr), insertBtn(nullptr), deleteBtn(nullptr),
-      d_spectrogram(nullptr), d_locale(locale), d_precision(precision),
-      penDialog(nullptr), penColorBox(nullptr), penStyleBox(nullptr),
-      penWidthBox(nullptr), applyAllColorBox(nullptr),
-      applyAllWidthBox(nullptr), applyAllStyleBox(nullptr), d_pen_index(0),
-      d_pen_list() {
+ContourLinesEditor::ContourLinesEditor(const QLocale &locale, int precision, QWidget *parent)
+    : QWidget(parent), table(nullptr), insertBtn(nullptr), deleteBtn(nullptr), d_spectrogram(nullptr), d_locale(locale),
+      d_precision(precision), penDialog(nullptr), penColorBox(nullptr), penStyleBox(nullptr), penWidthBox(nullptr),
+      applyAllColorBox(nullptr), applyAllWidthBox(nullptr), applyAllStyleBox(nullptr), d_pen_index(0), d_pen_list() {
   table = new QTableWidget();
   table->setColumnCount(2);
   table->hideColumn(1);
@@ -66,8 +62,7 @@ ContourLinesEditor::ContourLinesEditor(const QLocale &locale, int precision,
   table->setMinimumHeight(6 * table->horizontalHeader()->height() + 2);
   table->installEventFilter(this);
 
-  connect(table, SIGNAL(cellClicked(int, int)), this,
-          SLOT(showPenDialog(int, int)));
+  connect(table, SIGNAL(cellClicked(int, int)), this, SLOT(showPenDialog(int, int)));
 
   insertBtn = new QPushButton(tr("&Insert"));
   insertBtn->setEnabled(false);
@@ -99,8 +94,7 @@ void ContourLinesEditor::updateContourLevels() {
   int rows = table->rowCount();
   QwtValueList levels;
   for (int i = 0; i < rows; i++) {
-    DoubleSpinBox *spinBox =
-        dynamic_cast<DoubleSpinBox *>(table->cellWidget(i, 0));
+    DoubleSpinBox *spinBox = dynamic_cast<DoubleSpinBox *>(table->cellWidget(i, 0));
     if (spinBox)
       levels << spinBox->value();
   }
@@ -141,8 +135,7 @@ void ContourLinesEditor::updateContents() {
     sb->setDecimals(d_precision);
     sb->setValue(levels[i]);
     sb->setRange(range.minValue(), range.maxValue());
-    connect(sb, SIGNAL(activated(DoubleSpinBox *)), this,
-            SLOT(spinBoxActivated(DoubleSpinBox *)));
+    connect(sb, SIGNAL(activated(DoubleSpinBox *)), this, SLOT(spinBoxActivated(DoubleSpinBox *)));
     table->setCellWidget(i, 0, sb);
 
     QPen pen = d_spectrogram->defaultContourPen();
@@ -200,8 +193,7 @@ void ContourLinesEditor::insertLevel() {
   sb->setDecimals(d_precision);
   sb->setValue(val);
   sb->setRange(range.minValue(), range.maxValue());
-  connect(sb, SIGNAL(activated(DoubleSpinBox *)), this,
-          SLOT(spinBoxActivated(DoubleSpinBox *)));
+  connect(sb, SIGNAL(activated(DoubleSpinBox *)), this, SLOT(spinBoxActivated(DoubleSpinBox *)));
   table->setCellWidget(row, 0, sb);
 
   QPen pen = d_spectrogram->defaultContourPen();
@@ -323,8 +315,7 @@ void ContourLinesEditor::updatePenColumn() {
 }
 
 void ContourLinesEditor::updatePen() {
-  QPen pen =
-      QPen(penColorBox->color(), penWidthBox->value(), penStyleBox->style());
+  QPen pen = QPen(penColorBox->color(), penWidthBox->value(), penStyleBox->style());
 
   d_pen_list[d_pen_index] = pen;
 
@@ -415,8 +406,7 @@ ContourLinesEditor::~ContourLinesEditor() {
     delete penDialog;
 }
 
-template <class Widget>
-Widget *ContourLinesEditor::table_cellWidget(int i, int j) const {
+template <class Widget> Widget *ContourLinesEditor::table_cellWidget(int i, int j) const {
   Widget *w = dynamic_cast<Widget *>(table->cellWidget(i, j));
   if (!w) {
     throw std::logic_error("Unexpected widget type in ContourLinesEditor.");

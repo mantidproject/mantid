@@ -36,16 +36,13 @@ const std::string AverageLogData::name() const { return "AverageLogData"; }
 int AverageLogData::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string AverageLogData::category() const {
-  return "DataHandling\\Logs";
-}
+const std::string AverageLogData::category() const { return "DataHandling\\Logs"; }
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void AverageLogData::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>("InputWorkspace", "", Direction::Input),
                   "An input workspace that contains a Sample log property, and "
                   "a proton charge property.");
   declareProperty("LogName", "", "Name of the log to be averaged");
@@ -67,27 +64,21 @@ void AverageLogData::exec() {
     throw std::runtime_error("Failed to supply a LogName");
   }
   if (!inputWS->run().hasProperty(logname)) {
-    throw std::runtime_error("There is no property " + logname +
-                             " in the workspace.");
+    throw std::runtime_error("There is no property " + logname + " in the workspace.");
   }
 
-  auto *slog = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
-      inputWS->run().getLogData(logname));
+  auto *slog = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(inputWS->run().getLogData(logname));
   if (!slog) {
     throw std::runtime_error("Problem reading property " + logname);
   }
   Kernel::TimeSeriesProperty<double> *pclog =
-      dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
-          inputWS->run().getLogData("proton_charge"));
+      dynamic_cast<Kernel::TimeSeriesProperty<double> *>(inputWS->run().getLogData("proton_charge"));
   if (!pclog) {
     throw std::runtime_error("Problem reading the proton charge property");
   }
 
   double average(0), error(0), protoncharge(0);
-  double diffSeconds =
-      static_cast<double>(
-          (slog->firstTime() - pclog->firstTime()).total_nanoseconds()) *
-      1e-9;
+  double diffSeconds = static_cast<double>((slog->firstTime() - pclog->firstTime()).total_nanoseconds()) * 1e-9;
   if (getProperty("FixZero")) {
     diffSeconds = 0.;
   }
@@ -101,8 +92,7 @@ void AverageLogData::exec() {
   pctime.emplace_back(EMPTY_DBL() * 1.1); // larger than stime
   pcvalue.emplace_back(0.0);
 
-  auto isvalue = svalue.begin(), ipctime = pctime.begin(),
-       ipcvalue = pcvalue.begin();
+  auto isvalue = svalue.begin(), ipctime = pctime.begin(), ipcvalue = pcvalue.begin();
 
   for (auto istime = stime.begin(); istime < (--stime.end()); ++istime) {
     // ignore all proton pulses before the lowest time for the log
@@ -123,17 +113,14 @@ void AverageLogData::exec() {
   }
 
   if (protoncharge != 0) {
-    g_log.warning()
-        << "Proton charge is 0. Average and standard deviations are NANs\n";
+    g_log.warning() << "Proton charge is 0. Average and standard deviations are NANs\n";
   }
-  g_log.debug() << "Sum = " << average << "\nSum squares = " << error
-                << "\nPC = " << protoncharge << '\n';
+  g_log.debug() << "Sum = " << average << "\nSum squares = " << error << "\nPC = " << protoncharge << '\n';
   average /= protoncharge;
   error /= protoncharge;
   error = std::sqrt(std::fabs(error - average * average));
 
-  g_log.information() << "Average value of " << logname << " is " << average
-                      << " +/- " << error << '\n';
+  g_log.information() << "Average value of " << logname << " is " << average << " +/- " << error << '\n';
   setProperty("Average", average);
   setProperty("Error", error);
 }

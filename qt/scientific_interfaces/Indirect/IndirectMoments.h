@@ -46,10 +46,8 @@ protected slots:
 
   void setRunEnabled(bool enabled);
   void setSaveEnabled(bool enabled);
-  void updateRunButton(bool enabled = true,
-                       std::string const &enableOutputButtons = "unchanged",
-                       QString const &message = "Run",
-                       QString const &tooltip = "");
+  void updateRunButton(bool enabled = true, std::string const &enableOutputButtons = "unchanged",
+                       QString const &message = "Run", QString const &tooltip = "");
 
 private slots:
   void handleDataReady(QString const &dataName) override;

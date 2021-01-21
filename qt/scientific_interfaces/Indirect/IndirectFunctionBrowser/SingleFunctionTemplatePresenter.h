@@ -34,12 +34,10 @@ class SingleFunctionTemplateBrowser;
 class MANTIDQT_INDIRECT_DLL SingleFunctionTemplatePresenter : public QObject {
   Q_OBJECT
 public:
-  explicit SingleFunctionTemplatePresenter(
-      SingleFunctionTemplateBrowser *view,
-      const std::map<std::string, std::string> &functionInitialisationStrings,
-      std::unique_ptr<IDAFunctionParameterEstimation> parameterEstimation);
-  void updateAvailableFunctions(
-      const std::map<std::string, std::string> &functionInitialisationStrings);
+  explicit SingleFunctionTemplatePresenter(SingleFunctionTemplateBrowser *view,
+                                           const std::map<std::string, std::string> &functionInitialisationStrings,
+                                           std::unique_ptr<IDAFunctionParameterEstimation> parameterEstimation);
+  void updateAvailableFunctions(const std::map<std::string, std::string> &functionInitialisationStrings);
   void setFitType(const QString &name);
 
   void init();
@@ -59,8 +57,7 @@ public:
   void setCurrentDataset(int i);
   void setDatasets(const QList<FunctionModelDataset> &datasets);
   void setErrorsEnabled(bool enabled);
-  void
-  updateParameterEstimationData(DataForParameterEstimationCollection &&data);
+  void updateParameterEstimationData(DataForParameterEstimationCollection &&data);
   void estimateFunctionParameters();
 
 signals:

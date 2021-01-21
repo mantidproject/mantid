@@ -45,13 +45,10 @@ public:
     alg.initialize();
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", wsName));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("WorkspaceIndices", "0,2,4"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", ouputWsName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", ouputWsName));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
-    MatrixWorkspace_sptr outputWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            ouputWsName);
+    MatrixWorkspace_sptr outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(ouputWsName);
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(outputWS->y(0).front(), 1.0);
     TS_ASSERT_EQUALS(outputWS->y(1).front(), 3.0);
@@ -68,13 +65,10 @@ public:
     alg.initialize();
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", wsName));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("RemoveMaskedSpectra", true));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", ouputWsName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", ouputWsName));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
-    MatrixWorkspace_sptr outputWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            ouputWsName);
+    MatrixWorkspace_sptr outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(ouputWsName);
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(outputWS->y(0).front(), 1.0);
     TS_ASSERT_EQUALS(outputWS->y(1).front(), 3.0);
@@ -85,23 +79,18 @@ public:
     const std::string ouputWsName = "outputWorkspace";
     setupToscaWorkspace(wsName);
 
-    MatrixWorkspace_sptr inputWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
+    MatrixWorkspace_sptr inputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
     TS_ASSERT_EQUALS(inputWS->x(94).front(), 19900.0);
     TS_ASSERT_EQUALS(inputWS->x(144).front(), 19900.0);
 
     RemoveSpectra alg;
     alg.initialize();
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", wsName));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("RemoveSpectraWithNoDetector", true));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", ouputWsName));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("RemoveSpectraWithNoDetector", true));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", ouputWsName));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
-    MatrixWorkspace_sptr outputWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            ouputWsName);
+    MatrixWorkspace_sptr outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(ouputWsName);
     // Removed specs are workspace indices 140 and 144/specNum 141 and 145
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 147);
     TS_ASSERT_DELTA(outputWS->x(93).front(), 0.41157, 0.0001);  // was 93
@@ -119,12 +108,9 @@ private:
 
   MatrixWorkspace_sptr createInputWorkspace() const {
     // Set up a small workspace for testing
-    MatrixWorkspace_sptr space = WorkspaceFactory::Instance().create(
-        "Workspace2D", nSpec, nBins + 1, nBins);
-    space->setInstrument(
-        ComponentCreationHelper::createTestInstrumentCylindrical(1));
-    HistogramData::BinEdges edges(nBins + 1,
-                                  HistogramData::LinearGenerator(0.0, 1.0));
+    MatrixWorkspace_sptr space = WorkspaceFactory::Instance().create("Workspace2D", nSpec, nBins + 1, nBins);
+    space->setInstrument(ComponentCreationHelper::createTestInstrumentCylindrical(1));
+    HistogramData::BinEdges edges(nBins + 1, HistogramData::LinearGenerator(0.0, 1.0));
     for (size_t j = 0; j < nSpec; ++j) {
       const double yVal{static_cast<double>(j)};
       const double eVal{sqrt(yVal)};

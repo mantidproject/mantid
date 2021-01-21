@@ -39,16 +39,13 @@ class EXPORT_OPT_MANTIDQT_REFDETECTORVIEWER RefIVConnections : public QWidget {
 public:
   /// Construct the object that links the GUI components to the other specifed
   /// higher level objects.
-  RefIVConnections(Ui_RefImageViewer *ui, RefImageView *imageView,
-                   RefImageDisplay *imageDisplay,
-                   SpectrumView::GraphDisplay *hGraphDisplay,
-                   SpectrumView::GraphDisplay *vGraphDisplay);
+  RefIVConnections(Ui_RefImageViewer *ui, RefImageView *imageView, RefImageDisplay *imageDisplay,
+                   SpectrumView::GraphDisplay *hGraphDisplay, SpectrumView::GraphDisplay *vGraphDisplay);
 
   ~RefIVConnections() override;
 
   /// Set the pix map that shows the color scale from the specified color maps
-  void showColorScale(std::vector<QRgb> &positiveColorTable,
-                      std::vector<QRgb> &negativeColorTable);
+  void showColorScale(std::vector<QRgb> &positiveColorTable, std::vector<QRgb> &negativeColorTable);
 
 public slots:
   void closeViewer();
@@ -77,8 +74,8 @@ public slots:
   void spectrumColorScale();
 
 signals:
-  void peakBackTofRangeUpdate(double /*_t1*/, double /*_t2*/, double /*_t3*/,
-                              double /*_t4*/, double /*_t5*/, double /*_t6*/);
+  void peakBackTofRangeUpdate(double /*_t1*/, double /*_t2*/, double /*_t3*/, double /*_t4*/, double /*_t5*/,
+                              double /*_t6*/);
 
 private:
   RefIVConnections() {}

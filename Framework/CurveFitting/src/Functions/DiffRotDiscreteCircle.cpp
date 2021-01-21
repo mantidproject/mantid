@@ -43,8 +43,7 @@ void DiffRotDiscreteCircle::trickleDownAttribute(const std::string &name) {
 /**
  * @brief Overwrite attributes of member functions with the same name
  */
-void DiffRotDiscreteCircle::declareAttribute(
-    const std::string &name, const API::IFunction::Attribute &defaultValue) {
+void DiffRotDiscreteCircle::declareAttribute(const std::string &name, const API::IFunction::Attribute &defaultValue) {
   API::ImmutableCompositeFunction::declareAttribute(name, defaultValue);
   this->trickleDownAttribute(name);
 }
@@ -52,8 +51,7 @@ void DiffRotDiscreteCircle::declareAttribute(
 /**
  * @brief Overwrite attributes of member functions with the same name
  */
-void DiffRotDiscreteCircle::setAttribute(const std::string &name,
-                                         const Attribute &att) {
+void DiffRotDiscreteCircle::setAttribute(const std::string &name, const Attribute &att) {
   API::ImmutableCompositeFunction::setAttribute(name, att);
   this->trickleDownAttribute(name);
 }
@@ -63,12 +61,10 @@ void DiffRotDiscreteCircle::setAttribute(const std::string &name,
  */
 void DiffRotDiscreteCircle::init() {
   m_elastic = std::dynamic_pointer_cast<ElasticDiffRotDiscreteCircle>(
-      API::FunctionFactory::Instance().createFunction(
-          "ElasticDiffRotDiscreteCircle"));
+      API::FunctionFactory::Instance().createFunction("ElasticDiffRotDiscreteCircle"));
   this->addFunction(m_elastic);
   m_inelastic = std::dynamic_pointer_cast<InelasticDiffRotDiscreteCircle>(
-      API::FunctionFactory::Instance().createFunction(
-          "InelasticDiffRotDiscreteCircle"));
+      API::FunctionFactory::Instance().createFunction("InelasticDiffRotDiscreteCircle"));
   this->addFunction(m_inelastic);
 
   this->setAttributeValue("NumDeriv", true);

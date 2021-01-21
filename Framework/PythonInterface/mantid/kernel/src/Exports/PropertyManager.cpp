@@ -33,17 +33,13 @@ void export_PropertyManager() {
   // it actually used a shared_ptr to the object rather than a raw pointer.
   // This knowledge is used by DataServiceExporter::extractCppValue to assume
   // that it can always extract a shared_ptr type
-  class_<PropertyManager, PropertyManager_sptr, bases<IPropertyManager>,
-         boost::noncopyable>("PropertyManager")
+  class_<PropertyManager, PropertyManager_sptr, bases<IPropertyManager>, boost::noncopyable>("PropertyManager")
       .def("__init__", make_constructor(&createPropertyManager))
-      .def("getInvalidValuesFilterLogName",
-           &PropertyManager::getInvalidValuesFilterLogName)
+      .def("getInvalidValuesFilterLogName", &PropertyManager::getInvalidValuesFilterLogName)
       .staticmethod("getInvalidValuesFilterLogName")
-      .def("getLogNameFromInvalidValuesFilter",
-           &PropertyManager::getLogNameFromInvalidValuesFilter)
+      .def("getLogNameFromInvalidValuesFilter", &PropertyManager::getLogNameFromInvalidValuesFilter)
       .staticmethod("getLogNameFromInvalidValuesFilter")
-      .def("isAnInvalidValuesFilterLog",
-           &PropertyManager::isAnInvalidValuesFilterLog)
+      .def("isAnInvalidValuesFilterLog", &PropertyManager::isAnInvalidValuesFilterLog)
       .staticmethod("isAnInvalidValuesFilterLog");
 }
 

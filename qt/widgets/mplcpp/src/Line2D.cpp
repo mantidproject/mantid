@@ -39,10 +39,8 @@ Line2D::Line2D(Python::Object obj) : Artist(std::move(obj)), m_dataOwner{} {}
  * @param xdataOwner The source data for X. It is moved into this object
  * @param ydataOwner The source data for Y. It is moved into this object
  */
-Line2D::Line2D(Python::Object obj, std::vector<double> &&xdataOwner,
-               std::vector<double> &&ydataOwner)
-    : Artist(std::move(obj)), m_dataOwner{std::move(xdataOwner),
-                                          std::move(ydataOwner)} {
+Line2D::Line2D(Python::Object obj, std::vector<double> &&xdataOwner, std::vector<double> &&ydataOwner)
+    : Artist(std::move(obj)), m_dataOwner{std::move(xdataOwner), std::move(ydataOwner)} {
   assert(!m_dataOwner.xaxis.empty());
   assert(!m_dataOwner.yaxis.empty());
 }
@@ -107,8 +105,7 @@ QColor Line2D::getColor() const {
  * @param ydataOwner A vector of new data for Y. This container owns the data
  * for the line.
  */
-void Line2D::setData(std::vector<double> &&xdataOwner,
-                     std::vector<double> &&ydataOwner) {
+void Line2D::setData(std::vector<double> &&xdataOwner, std::vector<double> &&ydataOwner) {
   setData(Line2D::Data{std::move(xdataOwner), std::move(ydataOwner)});
 }
 

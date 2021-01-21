@@ -32,8 +32,7 @@ namespace SimpleGui {
  * @param parent the parent widget of the mode control widget
  */
 ColorSelectionWidget::ColorSelectionWidget(QWidget *parent)
-    : QWidget(parent), m_minHistoric(0.01), m_maxHistoric(0.01),
-      m_ignoreColorChangeCallbacks(false),
+    : QWidget(parent), m_minHistoric(0.01), m_maxHistoric(0.01), m_ignoreColorChangeCallbacks(false),
       m_inProcessUserRequestedAutoScale(false), m_colorScaleLock(nullptr) {
   this->m_ui.setupUi(this);
   this->m_ui.autoColorScaleCheckBox->setChecked(true);
@@ -52,20 +51,15 @@ ColorSelectionWidget::ColorSelectionWidget(QWidget *parent)
   // comming from user events from other sources (vtk callbacks and signals from
   // the
   // Paraview color map editor)
-  QObject::connect(this->m_ui.autoColorScaleCheckBox, SIGNAL(clicked(bool)),
-                   this, SLOT(autoCheckBoxClicked(bool)));
+  QObject::connect(this->m_ui.autoColorScaleCheckBox, SIGNAL(clicked(bool)), this, SLOT(autoCheckBoxClicked(bool)));
 
-  QObject::connect(this->m_ui.presetButton, SIGNAL(clicked()), this,
-                   SLOT(loadPreset()));
+  QObject::connect(this->m_ui.presetButton, SIGNAL(clicked()), this, SLOT(loadPreset()));
 
-  QObject::connect(this->m_ui.minValLineEdit, SIGNAL(editingFinished()), this,
-                   SLOT(getColorScaleRange()));
+  QObject::connect(this->m_ui.minValLineEdit, SIGNAL(editingFinished()), this, SLOT(getColorScaleRange()));
 
-  QObject::connect(this->m_ui.maxValLineEdit, SIGNAL(editingFinished()), this,
-                   SLOT(getColorScaleRange()));
+  QObject::connect(this->m_ui.maxValLineEdit, SIGNAL(editingFinished()), this, SLOT(getColorScaleRange()));
 
-  QObject::connect(this->m_ui.useLogScaleCheckBox, SIGNAL(clicked(bool)), this,
-                   SLOT(useLogScalingClicked(bool)));
+  QObject::connect(this->m_ui.useLogScaleCheckBox, SIGNAL(clicked(bool)), this, SLOT(useLogScalingClicked(bool)));
 }
 
 /**
@@ -92,11 +86,9 @@ void ColorSelectionWidget::loadBuiltinColorPresets() {
   // already been loaded.
   auto colorMapName = presets->GetFirstPresetWithName("hot");
   if (colorMapName.empty()) {
-    const std::string filenames[3] = {"All_slice_viewer_cmaps_for_vsi.json",
-                                      "All_idl_cmaps.json",
+    const std::string filenames[3] = {"All_slice_viewer_cmaps_for_vsi.json", "All_idl_cmaps.json",
                                       "All_mpl_cmaps.json"};
-    const std::string colorMapDirectory =
-        Kernel::ConfigService::Instance().getString("colormaps.directory");
+    const std::string colorMapDirectory = Kernel::ConfigService::Instance().getString("colormaps.directory");
     for (const auto &baseName : filenames) {
       std::string colorMap = colorMapDirectory + baseName;
       presets->ImportPresets(colorMap.c_str());
@@ -157,9 +149,7 @@ void ColorSelectionWidget::setAutoScale(bool autoScale) {
  * @param max maximum value (corresponding to the max line edit)
  * @param min minimum value (corresponding to the max line edit)
  */
-void ColorSelectionWidget::setMinMax(double &min, double &max) {
-  setMinSmallerMax(min, max);
-}
+void ColorSelectionWidget::setMinMax(double &min, double &max) { setMinSmallerMax(min, max); }
 
 /**
  * To prevent updates from external callbacks, useful for example
@@ -169,18 +159,14 @@ void ColorSelectionWidget::setMinMax(double &min, double &max) {
  *
  * @param ignore whether callbacks should be ignored.
  */
-void ColorSelectionWidget::ignoreColorChangeCallbacks(bool ignore) {
-  m_ignoreColorChangeCallbacks = ignore;
-}
+void ColorSelectionWidget::ignoreColorChangeCallbacks(bool ignore) { m_ignoreColorChangeCallbacks = ignore; }
 
 /**
  * Get the current state as for ignoring callbacks from color changes.
  *
  * @return whether this is currently ignoring color change callbacks.
  */
-bool ColorSelectionWidget::isIgnoringColorCallbacks() {
-  return m_ignoreColorChangeCallbacks;
-}
+bool ColorSelectionWidget::isIgnoringColorCallbacks() { return m_ignoreColorChangeCallbacks; }
 
 /**
  * This slot enables or diables the min and max line edits based on
@@ -213,8 +199,7 @@ void ColorSelectionWidget::loadPreset() {
   preset.setCustomizableUsePresetRange(false, false);
   preset.setCustomizableLoadAnnotations(false, false);
   preset.setCurrentPreset(qPrintable(m_mdSettings.getLastSessionColorMap()));
-  this->connect(&preset, SIGNAL(applyPreset(const Json::Value &)), this,
-                SLOT(onApplyPreset(const Json::Value &)));
+  this->connect(&preset, SIGNAL(applyPreset(const Json::Value &)), this, SLOT(onApplyPreset(const Json::Value &)));
   preset.exec();
 }
 
@@ -335,9 +320,7 @@ void ColorSelectionWidget::setupLogScale(int state) {
  * programatically
  * @param state Flag whether the checkbox should be checked or not
  */
-void ColorSelectionWidget::onSetLogScale(bool state) {
-  m_ui.useLogScaleCheckBox->setChecked(state);
-}
+void ColorSelectionWidget::onSetLogScale(bool state) { m_ui.useLogScaleCheckBox->setChecked(state); }
 
 /**
  * Make sure that min is smaller/equal than max. If not then set to the old
@@ -418,17 +401,13 @@ bool ColorSelectionWidget::getLogScaleState() const {
  * This function returns the minimum range value for the color scaling.
  * @return current minimum color scaling value
  */
-double ColorSelectionWidget::getMinRange() const {
-  return this->m_ui.minValLineEdit->text().toDouble();
-}
+double ColorSelectionWidget::getMinRange() const { return this->m_ui.minValLineEdit->text().toDouble(); }
 
 /**
  * This function returns the maximum range value for the color scaling.
  * @return current maximum color scaling value
  */
-double ColorSelectionWidget::getMaxRange() const {
-  return this->m_ui.maxValLineEdit->text().toDouble();
-}
+double ColorSelectionWidget::getMaxRange() const { return this->m_ui.maxValLineEdit->text().toDouble(); }
 
 /**
  * This function returns the color selection widget to its original state.
@@ -446,8 +425,7 @@ void ColorSelectionWidget::reset() {
  * Set the color scale lock
  * @param lock
  */
-void ColorSelectionWidget::setColorScaleLock(
-    Mantid::VATES::ColorScaleLock *lock) {
+void ColorSelectionWidget::setColorScaleLock(Mantid::VATES::ColorScaleLock *lock) {
   if (!m_colorScaleLock) {
     m_colorScaleLock = lock;
   }

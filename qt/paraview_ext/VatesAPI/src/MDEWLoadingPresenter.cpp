@@ -32,11 +32,9 @@ namespace Mantid {
 namespace VATES {
 /// Constructor
 MDEWLoadingPresenter::MDEWLoadingPresenter(std::unique_ptr<MDLoadingView> view)
-    : m_view(std::move(view)), m_isSetup(false), m_time(-1),
-      m_recursionDepth(0), m_loadInMemory(false), m_firstLoad(true),
-      m_metadataJsonManager(new MetadataJsonManager()),
-      m_metaDataExtractor(new MetaDataExtractorUtils()),
-      m_vatesConfigurations(new VatesConfigurations()) {
+    : m_view(std::move(view)), m_isSetup(false), m_time(-1), m_recursionDepth(0), m_loadInMemory(false),
+      m_firstLoad(true), m_metadataJsonManager(new MetadataJsonManager()),
+      m_metaDataExtractor(new MetaDataExtractorUtils()), m_vatesConfigurations(new VatesConfigurations()) {
   Mantid::API::FrameworkManager::Instance();
 }
 
@@ -47,8 +45,7 @@ MDEWLoadingPresenter::~MDEWLoadingPresenter() {}
 Extract the geometry and function information
 @param eventWs : event workspace to get the information from.
 */
-void MDEWLoadingPresenter::extractMetadata(
-    const Mantid::API::IMDEventWorkspace &eventWs) {
+void MDEWLoadingPresenter::extractMetadata(const Mantid::API::IMDEventWorkspace &eventWs) {
   using namespace Mantid::Geometry;
   MDGeometryBuilderXML<NoDimensionPolicy> refresh;
   xmlBuilder = refresh; // Reassign.
@@ -65,9 +62,8 @@ void MDEWLoadingPresenter::extractMetadata(
     }
     // std::cout << "dim " << d << min << " to " <<  max << '\n';
     axisLabels.push_back(makeAxisTitle(*inDim));
-    dimensions.push_back(std::make_shared<MDHistoDimension>(
-        inDim->getName(), inDim->getName(), inDim->getMDFrame(), min, max,
-        inDim->getNBins()));
+    dimensions.push_back(std::make_shared<MDHistoDimension>(inDim->getName(), inDim->getName(), inDim->getMDFrame(),
+                                                            min, max, inDim->getNBins()));
   }
 
   // Configuring the geometry xml builder allows the object panel associated
@@ -127,13 +123,12 @@ Determines wheter the file can be loaded based on it's extension.
 @param expectedExtension expected extension for the file to have
 @return TRUE, only if the extension is approved.
 */
-bool MDEWLoadingPresenter::canLoadFileBasedOnExtension(
-    const std::string &filename, const std::string &expectedExtension) const {
+bool MDEWLoadingPresenter::canLoadFileBasedOnExtension(const std::string &filename,
+                                                       const std::string &expectedExtension) const {
   // Quick check based on extension.
   const size_t startExtension = filename.find_last_of('.');
   const size_t endExtension = filename.length();
-  std::string extension =
-      filename.substr(startExtension, endExtension - startExtension);
+  std::string extension = filename.substr(startExtension, endExtension - startExtension);
   boost::algorithm::to_lower(extension);
   boost::algorithm::trim(extension);
   return extension == expectedExtension;
@@ -144,8 +139,7 @@ Append the geometry and function information onto the outgoing vtkDataSet.
 @param visualDataSet : outgoing dataset on which to append metadata.
 @param wsName : name of the workspace.
 */
-void MDEWLoadingPresenter::appendMetadata(vtkDataSet *visualDataSet,
-                                          const std::string &wsName) {
+void MDEWLoadingPresenter::appendMetadata(vtkDataSet *visualDataSet, const std::string &wsName) {
   using namespace Mantid::API;
 
   vtkNew<vtkFieldData> outputFD;
@@ -154,8 +148,7 @@ void MDEWLoadingPresenter::appendMetadata(vtkDataSet *visualDataSet,
   VatesKnowledgeSerializer serializer;
   serializer.setWorkspaceName(wsName);
   serializer.setGeometryXML(xmlBuilder.create());
-  serializer.setImplicitFunction(
-      std::make_shared<Mantid::Geometry::NullImplicitFunction>());
+  serializer.setImplicitFunction(std::make_shared<Mantid::Geometry::NullImplicitFunction>());
   std::string xmlString = serializer.createXMLString();
 
   // Serialize Json metadata
@@ -164,8 +157,7 @@ void MDEWLoadingPresenter::appendMetadata(vtkDataSet *visualDataSet,
   // Add metadata to dataset.
   MetadataToFieldData convert;
   convert(outputFD.GetPointer(), xmlString, XMLDefinitions::metaDataId());
-  convert(outputFD.GetPointer(), jsonString,
-          m_vatesConfigurations->getMetadataIdJson());
+  convert(outputFD.GetPointer(), jsonString, m_vatesConfigurations->getMetadataIdJson());
   visualDataSet->SetFieldData(outputFD.GetPointer());
 }
 
@@ -174,9 +166,8 @@ void MDEWLoadingPresenter::appendMetadata(vtkDataSet *visualDataSet,
  * @param visualDataSet: The VTK dataset to update
  */
 void MDEWLoadingPresenter::setAxisLabels(vtkDataSet *visualDataSet) {
-  if (!vtkPVChangeOfBasisHelper::AddBasisNames(
-          visualDataSet, axisLabels[0].c_str(), axisLabels[1].c_str(),
-          axisLabels[2].c_str())) {
+  if (!vtkPVChangeOfBasisHelper::AddBasisNames(visualDataSet, axisLabels[0].c_str(), axisLabels[1].c_str(),
+                                               axisLabels[2].c_str())) {
     g_log.warning("The basis names could not be added to the field data of "
                   "the data set.\n");
   }
@@ -215,8 +206,7 @@ std::vector<double> MDEWLoadingPresenter::getTimeStepValues() const {
   }
   std::vector<double> result;
   for (size_t i = 0; i < tDimension->getNBins(); i++) {
-    coord_t bin_centre =
-        coord_t((tDimension->getX(i) + tDimension->getX(i + 1)) * 0.5);
+    coord_t bin_centre = coord_t((tDimension->getX(i) + tDimension->getX(i + 1)) * 0.5);
     result.push_back(bin_centre);
   }
   return result;
@@ -238,8 +228,6 @@ std::string MDEWLoadingPresenter::getTimeStepLabel() const {
  * Getter for the instrument.
  * @returns The name of the instrument which is associated with the workspace.
  */
-const std::string &MDEWLoadingPresenter::getInstrument() {
-  return m_metadataJsonManager->getInstrument();
-}
+const std::string &MDEWLoadingPresenter::getInstrument() { return m_metadataJsonManager->getInstrument(); }
 } // namespace VATES
 } // namespace Mantid

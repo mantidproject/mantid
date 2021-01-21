@@ -23,8 +23,7 @@ private:
   // Helper method. Create xml. Notice this is a subset of the full xml-schema,
   // see Architectural design document.
   static std::string constructXML() {
-    return std::string("<?xml version=\"1.0\" encoding=\"utf-8\"?>") +
-           "<MDInstruction>" +
+    return std::string("<?xml version=\"1.0\" encoding=\"utf-8\"?>") + "<MDInstruction>" +
            "<MDWorkspaceName>WS_NAME</MDWorkspaceName>"
            "</MDInstruction>";
   }
@@ -32,8 +31,7 @@ private:
 public:
   void testThrowIfvtkDataSetNull() {
     vtkDataSet *nullArg = nullptr;
-    TS_ASSERT_THROWS(vtkDataSetToWsName temp(nullArg),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(vtkDataSetToWsName temp(nullArg), const std::runtime_error &);
   }
 
   void testExecution() {

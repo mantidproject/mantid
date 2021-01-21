@@ -63,9 +63,8 @@ public:
     TS_ASSERT(qxy.isExecuted())
 
     Mantid::API::MatrixWorkspace_sptr result;
-    TS_ASSERT_THROWS_NOTHING(
-        result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)))
+    TS_ASSERT_THROWS_NOTHING(result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+                                 Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)))
 
     TS_ASSERT_EQUALS(result->getNumberHistograms(), 100)
     for (size_t i = 0; i < result->getNumberHistograms(); i++) {
@@ -92,9 +91,8 @@ public:
     TS_ASSERT(qxy.isExecuted())
 
     Mantid::API::MatrixWorkspace_sptr result;
-    TS_ASSERT_THROWS_NOTHING(
-        result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)))
+    TS_ASSERT_THROWS_NOTHING(result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+                                 Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)))
 
     TS_ASSERT_EQUALS(result->getNumberHistograms(), 100)
     TS_ASSERT_EQUALS(result->blocksize(), 100)
@@ -119,21 +117,15 @@ public:
     TS_ASSERT_DELTA(result->e(18)[80], 344640, 1)
 
     Mantid::API::MatrixWorkspace_sptr sumOfCounts;
-    TS_ASSERT_THROWS_NOTHING(
-        sumOfCounts = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(
-                outputWS + "_sumOfCounts")))
+    TS_ASSERT_THROWS_NOTHING(sumOfCounts = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+                                 Mantid::API::AnalysisDataService::Instance().retrieve(outputWS + "_sumOfCounts")))
 
     Mantid::API::MatrixWorkspace_sptr sumOfNormFactors;
-    TS_ASSERT_THROWS_NOTHING(
-        sumOfNormFactors =
-            std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-                Mantid::API::AnalysisDataService::Instance().retrieve(
-                    outputWS + "_sumOfNormFactors")))
+    TS_ASSERT_THROWS_NOTHING(sumOfNormFactors = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+                                 Mantid::API::AnalysisDataService::Instance().retrieve(outputWS + "_sumOfNormFactors")))
 
     TS_ASSERT_DELTA(sumOfCounts->y(28)[71], 2.0000, 0.01)
-    TS_ASSERT_DELTA(sumOfNormFactors->y(28)[71], 8.6988767154375003e-006,
-                    0.00000001)
+    TS_ASSERT_DELTA(sumOfNormFactors->y(28)[71], 8.6988767154375003e-006, 0.00000001)
 
     TS_ASSERT_DELTA(sumOfCounts->e(28)[71], 1.4142135623730951, 0.01)
     TS_ASSERT_DELTA(sumOfNormFactors->e(28)[71], 0.0, 0.00000001)
@@ -163,9 +155,8 @@ public:
     TS_ASSERT(qxy.isExecuted())
 
     Mantid::API::MatrixWorkspace_sptr result;
-    TS_ASSERT_THROWS_NOTHING(
-        result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)))
+    TS_ASSERT_THROWS_NOTHING(result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+                                 Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)))
     TS_ASSERT_EQUALS(result->getNumberHistograms(), 100)
     TS_ASSERT_EQUALS(result->blocksize(), 100)
     TS_ASSERT_EQUALS((*(result->getAxis(1)))(0), -0.1)
@@ -213,8 +204,7 @@ public:
   std::string m_inputWS;
   std::string m_outputWS;
 
-  QxyTestPerformance()
-      : m_inputWS("QxyTest_input_in_wav"), m_outputWS("result") {}
+  QxyTestPerformance() : m_inputWS("QxyTest_input_in_wav"), m_outputWS("result") {}
 
   void setUp() override {
     Mantid::DataHandling::LoadRaw3 loader;
@@ -231,9 +221,7 @@ public:
     convert.execute();
   }
 
-  void tearDown() override {
-    Mantid::API::AnalysisDataService::Instance().remove(m_outputWS);
-  }
+  void tearDown() override { Mantid::API::AnalysisDataService::Instance().remove(m_outputWS); }
 
   void test_slow_performance() {
     Mantid::Algorithms::Qxy qxy;

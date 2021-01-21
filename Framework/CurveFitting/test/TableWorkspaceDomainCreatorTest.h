@@ -35,12 +35,8 @@ class TableWorkspaceDomainCreatorTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static TableWorkspaceDomainCreatorTest *createSuite() {
-    return new TableWorkspaceDomainCreatorTest();
-  }
-  static void destroySuite(TableWorkspaceDomainCreatorTest *suite) {
-    delete suite;
-  }
+  static TableWorkspaceDomainCreatorTest *createSuite() { return new TableWorkspaceDomainCreatorTest(); }
+  static void destroySuite(TableWorkspaceDomainCreatorTest *suite) { delete suite; }
 
   void test_exec_with_table_workspace() {
     auto ws = createTestTableWorkspace();
@@ -72,9 +68,8 @@ public:
 
     TS_ASSERT_EQUALS(fit->getPropertyValue("OutputStatus"), "success");
 
-    API::MatrixWorkspace_sptr outWS =
-        std::dynamic_pointer_cast<API::MatrixWorkspace>(
-            API::AnalysisDataService::Instance().retrieve("Output_Workspace"));
+    API::MatrixWorkspace_sptr outWS = std::dynamic_pointer_cast<API::MatrixWorkspace>(
+        API::AnalysisDataService::Instance().retrieve("Output_Workspace"));
 
     TS_ASSERT(outWS);
     TS_ASSERT_EQUALS(outWS->getNumberHistograms(), 3);
@@ -102,10 +97,8 @@ public:
     auto fit = setupBasicFitPropertiesAlgorithm(fun, ws);
     fit->execute();
 
-    API::ITableWorkspace_sptr covar =
-        std::dynamic_pointer_cast<API::ITableWorkspace>(
-            API::AnalysisDataService::Instance().retrieve(
-                "Output_NormalisedCovarianceMatrix"));
+    API::ITableWorkspace_sptr covar = std::dynamic_pointer_cast<API::ITableWorkspace>(
+        API::AnalysisDataService::Instance().retrieve("Output_NormalisedCovarianceMatrix"));
 
     TS_ASSERT(covar);
     TS_ASSERT_EQUALS(covar->columnCount(), 3);
@@ -132,9 +125,8 @@ public:
     auto fun = createExpDecayFunction(1.0, 1.0);
     auto fit = setupBasicFitPropertiesAlgorithm(fun, ws);
     fit->execute();
-    API::ITableWorkspace_sptr params =
-        std::dynamic_pointer_cast<API::ITableWorkspace>(
-            API::AnalysisDataService::Instance().retrieve("Output_Parameters"));
+    API::ITableWorkspace_sptr params = std::dynamic_pointer_cast<API::ITableWorkspace>(
+        API::AnalysisDataService::Instance().retrieve("Output_Parameters"));
 
     double chi2 = fit->getProperty("OutputChi2overDoF");
     TS_ASSERT_DELTA(chi2, 0.0, 1e-8);
@@ -165,8 +157,7 @@ public:
     TS_ASSERT(fit->isExecuted());
 
     Mantid::API::MatrixWorkspace_sptr out_ws =
-        Mantid::API::AnalysisDataService::Instance()
-            .retrieveWS<Mantid::API::MatrixWorkspace>("Output_Workspace");
+        Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>("Output_Workspace");
     TS_ASSERT(out_ws);
     TS_ASSERT_EQUALS(out_ws->getNumberHistograms(), 3);
     auto &e = out_ws->e(1);
@@ -203,12 +194,9 @@ public:
     fit->execute();
 
     TS_ASSERT(fit->isExecuted());
-    TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist(
-        "out_Workspace"));
-    TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist(
-        "out_Parameters"));
-    TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist(
-        "out_NormalisedCovarianceMatrix"));
+    TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist("out_Workspace"));
+    TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist("out_Parameters"));
+    TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist("out_NormalisedCovarianceMatrix"));
 
     Mantid::API::AnalysisDataService::Instance().clear();
   }
@@ -222,18 +210,15 @@ public:
     fit->execute();
 
     TS_ASSERT(fit->isExecuted());
-    TS_ASSERT(!Mantid::API::AnalysisDataService::Instance().doesExist(
-        "out_Workspace"));
-    TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist(
-        "out_Parameters"));
+    TS_ASSERT(!Mantid::API::AnalysisDataService::Instance().doesExist("out_Workspace"));
+    TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist("out_Parameters"));
 
     Mantid::API::AnalysisDataService::Instance().clear();
   }
 
   void test_takes_correct_columns_when_no_column_names_given_but_types_set() {
     // create table
-    API::ITableWorkspace_sptr table =
-        API::WorkspaceFactory::Instance().createTable();
+    API::ITableWorkspace_sptr table = API::WorkspaceFactory::Instance().createTable();
     table->addColumn("double", "Y data");
     table->addColumn("double", "Errors");
     table->addColumn("double", "other data");
@@ -284,8 +269,7 @@ public:
     tableDomainCreator.setColumnNames("X data", "Y data", "Errors");
     tableDomainCreator.createDomain(domain, values);
 
-    API::FunctionDomain1DVector *specDom =
-        dynamic_cast<API::FunctionDomain1DVector *>(domain.get());
+    API::FunctionDomain1DVector *specDom = dynamic_cast<API::FunctionDomain1DVector *>(domain.get());
     TS_ASSERT(specDom);
     TS_ASSERT_EQUALS(specDom->size(), ws->rowCount());
   }
@@ -301,15 +285,13 @@ public:
     API::FunctionDomain_sptr domain;
     API::FunctionValues_sptr values;
 
-    TableWorkspaceDomainCreator tableDomainCreator(
-        TableWorkspaceDomainCreator::Sequential);
+    TableWorkspaceDomainCreator tableDomainCreator(TableWorkspaceDomainCreator::Sequential);
     tableDomainCreator.setWorkspace(ws);
     tableDomainCreator.setMaxSize(3);
     tableDomainCreator.setColumnNames("X data", "Y data", "Errors");
     tableDomainCreator.createDomain(domain, values);
 
-    CurveFitting::SeqDomain *seq =
-        dynamic_cast<CurveFitting::SeqDomain *>(domain.get());
+    CurveFitting::SeqDomain *seq = dynamic_cast<CurveFitting::SeqDomain *>(domain.get());
     TS_ASSERT(seq);
     TS_ASSERT_EQUALS(seq->getNDomains(), 4);
     TS_ASSERT_EQUALS(seq->size(), 10);
@@ -327,15 +309,13 @@ public:
     API::FunctionDomain_sptr domain;
     API::FunctionValues_sptr values;
 
-    TableWorkspaceDomainCreator tableDomainCreator(
-        TableWorkspaceDomainCreator::Sequential);
+    TableWorkspaceDomainCreator tableDomainCreator(TableWorkspaceDomainCreator::Sequential);
     tableDomainCreator.setWorkspace(ws);
     tableDomainCreator.setMaxSize(3);
     tableDomainCreator.setColumnNames("X data", "Y data", "Errors");
     tableDomainCreator.createDomain(domain, values);
 
-    CurveFitting::SeqDomain *seq =
-        dynamic_cast<CurveFitting::SeqDomain *>(domain.get());
+    CurveFitting::SeqDomain *seq = dynamic_cast<CurveFitting::SeqDomain *>(domain.get());
     TS_ASSERT(seq);
 
     API::FunctionDomain_sptr dom;
@@ -383,19 +363,16 @@ public:
     auto propManager = std::make_shared<Mantid::Kernel::PropertyManager>();
     const std::string wsPropName = "TestWorkspaceInput";
     propManager->declareProperty(
-        std::make_unique<API::WorkspaceProperty<API::Workspace>>(
-            wsPropName, "", Mantid::Kernel::Direction::Input));
+        std::make_unique<API::WorkspaceProperty<API::Workspace>>(wsPropName, "", Mantid::Kernel::Direction::Input));
     propManager->setProperty<API::Workspace_sptr>(wsPropName, ws);
 
-    TableWorkspaceDomainCreator tableWSDomainCreator(propManager.get(),
-                                                     wsPropName);
+    TableWorkspaceDomainCreator tableWSDomainCreator(propManager.get(), wsPropName);
     tableWSDomainCreator.declareDatasetProperties("", true);
     tableWSDomainCreator.ignoreInvalidData(true);
     tableWSDomainCreator.setColumnNames("X data", "Y data", "Errors");
     tableWSDomainCreator.createDomain(domain, values);
 
-    API::FunctionValues *val =
-        dynamic_cast<API::FunctionValues *>(values.get());
+    API::FunctionValues *val = dynamic_cast<API::FunctionValues *>(values.get());
     for (size_t i = 0; i < val->size(); ++i) {
       if (i == 3 || i == 5 || i == 7 || i == 9 || i == 11) {
         TS_ASSERT_EQUALS(val->getFitWeight(i), 0.0);
@@ -450,8 +427,7 @@ public:
     API::FunctionDomain_sptr domain;
     API::FunctionValues_sptr values;
 
-    TableWorkspaceDomainCreator tableWSDomainCreator(fit.get(),
-                                                     "InputWorkspace");
+    TableWorkspaceDomainCreator tableWSDomainCreator(fit.get(), "InputWorkspace");
     tableWSDomainCreator.declareDatasetProperties("", false);
     tableWSDomainCreator.createDomain(domain, values);
 
@@ -482,8 +458,7 @@ public:
     API::FunctionDomain_sptr domain;
     API::FunctionValues_sptr values;
 
-    TableWorkspaceDomainCreator tableWSDomainCreator(fit.get(),
-                                                     "InputWorkspace");
+    TableWorkspaceDomainCreator tableWSDomainCreator(fit.get(), "InputWorkspace");
     tableWSDomainCreator.declareDatasetProperties("", false);
     tableWSDomainCreator.createDomain(domain, values);
 
@@ -514,8 +489,7 @@ public:
     API::FunctionDomain_sptr domain;
     API::FunctionValues_sptr values;
 
-    TableWorkspaceDomainCreator tableWSDomainCreator(fit.get(),
-                                                     "InputWorkspace");
+    TableWorkspaceDomainCreator tableWSDomainCreator(fit.get(), "InputWorkspace");
     tableWSDomainCreator.declareDatasetProperties("", false);
     tableWSDomainCreator.createDomain(domain, values);
 
@@ -546,8 +520,7 @@ public:
     API::FunctionDomain_sptr domain;
     API::FunctionValues_sptr values;
 
-    TableWorkspaceDomainCreator tableWSDomainCreator(fit.get(),
-                                                     "InputWorkspace");
+    TableWorkspaceDomainCreator tableWSDomainCreator(fit.get(), "InputWorkspace");
     tableWSDomainCreator.declareDatasetProperties("", false);
     tableWSDomainCreator.createDomain(domain, values);
 
@@ -574,8 +547,7 @@ public:
     fun->initialize();
     auto fit = setupBasicFitPropertiesAlgorithm(fun, ws);
 
-    TS_ASSERT_THROWS(fit->setProperty("Exclude", exclude),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(fit->setProperty("Exclude", exclude), const std::invalid_argument &);
 
     API::AnalysisDataService::Instance().clear();
   }
@@ -586,8 +558,7 @@ public:
     API::IFunction_sptr fun(new FlatBackground);
     fun->initialize();
     auto fit = setupBasicFitPropertiesAlgorithm(fun, ws);
-    TS_ASSERT_THROWS(fit->setProperty("Exclude", exclude),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(fit->setProperty("Exclude", exclude), const std::invalid_argument &);
 
     API::AnalysisDataService::Instance().clear();
   }
@@ -604,8 +575,7 @@ public:
     API::FunctionDomain_sptr domain;
     API::FunctionValues_sptr values;
 
-    TableWorkspaceDomainCreator tableWSDomainCreator(fit.get(),
-                                                     "InputWorkspace");
+    TableWorkspaceDomainCreator tableWSDomainCreator(fit.get(), "InputWorkspace");
     tableWSDomainCreator.declareDatasetProperties("", false);
     tableWSDomainCreator.createDomain(domain, values);
 
@@ -632,8 +602,7 @@ public:
     API::FunctionDomain_sptr domain;
     API::FunctionValues_sptr values;
 
-    TableWorkspaceDomainCreator tableWSDomainCreator(fit.get(),
-                                                     "InputWorkspace");
+    TableWorkspaceDomainCreator tableWSDomainCreator(fit.get(), "InputWorkspace");
     tableWSDomainCreator.declareDatasetProperties("", false);
     tableWSDomainCreator.createDomain(domain, values);
 
@@ -649,10 +618,8 @@ public:
   }
 
 private:
-  API::ITableWorkspace_sptr
-  createEmptyTableWith3ColumnsWorkspace(bool errors = true) {
-    API::ITableWorkspace_sptr table =
-        API::WorkspaceFactory::Instance().createTable();
+  API::ITableWorkspace_sptr createEmptyTableWith3ColumnsWorkspace(bool errors = true) {
+    API::ITableWorkspace_sptr table = API::WorkspaceFactory::Instance().createTable();
     table->addColumn("double", "X data");
     table->addColumn("double", "Y data");
     if (errors)
@@ -759,8 +726,7 @@ private:
     return fun;
   }
 
-  API::IFunction_sptr createGaussianFunction(double height, double peakCentre,
-                                             double sigma) {
+  API::IFunction_sptr createGaussianFunction(double height, double peakCentre, double sigma) {
     API::IFunction_sptr fun(new Gaussian);
     fun->initialize();
     fun->setParameter("Height", height);
@@ -769,10 +735,8 @@ private:
     return fun;
   }
 
-  std::shared_ptr<Fit>
-  setupBasicFitPropertiesAlgorithm(const API::IFunction_sptr &fun,
-                                   const API::Workspace_sptr &ws,
-                                   bool createOutput = true) {
+  std::shared_ptr<Fit> setupBasicFitPropertiesAlgorithm(const API::IFunction_sptr &fun, const API::Workspace_sptr &ws,
+                                                        bool createOutput = true) {
     auto fit = std::make_shared<Fit>();
     fit->initialize();
     fit->setProperty("Function", fun);

@@ -18,9 +18,7 @@ namespace API {
 /** Constructor
  * @param length the size of the text axis
  */
-TextAxis::TextAxis(const std::size_t &length) : Axis() {
-  m_values.resize(length);
-}
+TextAxis::TextAxis(const std::size_t &length) : Axis() { m_values.resize(length); }
 
 /** Virtual constructor
  *  @param parentWorkspace :: The workspace is not used in this implementation
@@ -31,8 +29,7 @@ Axis *TextAxis::clone(const MatrixWorkspace *const parentWorkspace) {
   return new TextAxis(*this);
 }
 
-Axis *TextAxis::clone(const std::size_t length,
-                      const MatrixWorkspace *const parentWorkspace) {
+Axis *TextAxis::clone(const std::size_t length, const MatrixWorkspace *const parentWorkspace) {
   UNUSED_ARG(parentWorkspace)
   auto newAxis = new TextAxis(*this);
   newAxis->m_values.clear();
@@ -47,12 +44,10 @@ Axis *TextAxis::clone(const std::size_t length,
  *  @return The value of the axis as a double
  *  @throw  IndexError If the index requested is not in the range of this axis
  */
-double TextAxis::operator()(const std::size_t &index,
-                            const std::size_t &verticalIndex) const {
+double TextAxis::operator()(const std::size_t &index, const std::size_t &verticalIndex) const {
   UNUSED_ARG(verticalIndex)
   if (index >= length()) {
-    throw Kernel::Exception::IndexError(index, length() - 1,
-                                        "TextAxis: Index out of range.");
+    throw Kernel::Exception::IndexError(index, length() - 1, "TextAxis: Index out of range.");
   }
 
   return EMPTY_DBL();
@@ -77,8 +72,7 @@ size_t TextAxis::indexOfValue(const double value) const {
   for (size_t i = 0; i < length(); i++) {
     spectraNumbers.emplace_back(static_cast<double>(i));
   }
-  return Mantid::Kernel::VectorHelper::indexOfValueFromCenters(spectraNumbers,
-                                                               value);
+  return Mantid::Kernel::VectorHelper::indexOfValueFromCenters(spectraNumbers, value);
 }
 
 /** Check if two axis defined as spectra or numeric axis are equivalent
@@ -101,9 +95,7 @@ bool TextAxis::operator==(const Axis &axis2) const {
  *  @param index :: The index of an axis value
  *  @return The label
  */
-std::string TextAxis::label(const std::size_t &index) const {
-  return m_values.at(index);
-}
+std::string TextAxis::label(const std::size_t &index) const { return m_values.at(index); }
 
 /**
  * Set the label for value at index
@@ -112,8 +104,7 @@ std::string TextAxis::label(const std::size_t &index) const {
  */
 void TextAxis::setLabel(const std::size_t &index, const std::string &lbl) {
   if (index >= length()) {
-    throw Kernel::Exception::IndexError(index, length() - 1,
-                                        "TextAxis: Index out of range.");
+    throw Kernel::Exception::IndexError(index, length() - 1, "TextAxis: Index out of range.");
   }
 
   m_values[index] = lbl;

@@ -23,9 +23,7 @@ Logger g_log("Interpolation");
 /* Functor used in std::lower_bound to replicate the original behavior.
  */
 struct LessOrEqualFunctor {
-  bool operator()(const DataXY &lhs, const DataXY &rhs) {
-    return lhs.first <= rhs.first;
-  }
+  bool operator()(const DataXY &lhs, const DataXY &rhs) { return lhs.first <= rhs.first; }
 };
 
 /** Constructor default to linear interpolation and x-unit set to TOF
@@ -39,27 +37,17 @@ Interpolation::Interpolation() : m_method("linear") {
  * @param key :: the x value to base the search on
  * @return iterator of the next largest x value
  */
-std::vector<DataXY>::const_iterator
-Interpolation::findIndexOfNextLargerValue(double key) const {
-  return std::lower_bound(m_data.begin(), m_data.end(), DataXY(key, 0),
-                          LessOrEqualFunctor());
+std::vector<DataXY>::const_iterator Interpolation::findIndexOfNextLargerValue(double key) const {
+  return std::lower_bound(m_data.begin(), m_data.end(), DataXY(key, 0), LessOrEqualFunctor());
 }
 
-std::vector<DataXY>::const_iterator Interpolation::cbegin() const {
-  return m_data.cbegin();
-}
+std::vector<DataXY>::const_iterator Interpolation::cbegin() const { return m_data.cbegin(); }
 
-std::vector<DataXY>::const_iterator Interpolation::cend() const {
-  return m_data.cend();
-}
+std::vector<DataXY>::const_iterator Interpolation::cend() const { return m_data.cend(); }
 
-void Interpolation::setXUnit(const std::string &unit) {
-  m_xUnit = UnitFactory::Instance().create(unit);
-}
+void Interpolation::setXUnit(const std::string &unit) { m_xUnit = UnitFactory::Instance().create(unit); }
 
-void Interpolation::setYUnit(const std::string &unit) {
-  m_yUnit = UnitFactory::Instance().create(unit);
-}
+void Interpolation::setYUnit(const std::string &unit) { m_yUnit = UnitFactory::Instance().create(unit); }
 
 /** Get interpolated value at location at
  * @param at :: Location where to get interpolated value
@@ -81,16 +69,13 @@ double Interpolation::value(const double &at) const {
   // check first if at is within the limits of interpolation interval
 
   if (at < m_data[0].first) {
-    return m_data[0].second - (m_data[0].first - at) *
-                                  (m_data[1].second - m_data[0].second) /
-                                  (m_data[1].first - m_data[0].first);
+    return m_data[0].second -
+           (m_data[0].first - at) * (m_data[1].second - m_data[0].second) / (m_data[1].first - m_data[0].first);
   }
 
   if (at > m_data[N - 1].first) {
-    return m_data[N - 1].second +
-           (at - m_data[N - 1].first) *
-               (m_data[N - 1].second - m_data[N - 2].second) /
-               (m_data[N - 1].first - m_data[N - 2].first);
+    return m_data[N - 1].second + (at - m_data[N - 1].first) * (m_data[N - 1].second - m_data[N - 2].second) /
+                                      (m_data[N - 1].first - m_data[N - 2].first);
   }
 
   try {
@@ -102,10 +87,8 @@ double Interpolation::value(const double &at) const {
     if (posBefore->first == at) {
       return posBefore->second;
     } else {
-      double interpolatedY =
-          posBefore->second + (at - posBefore->first) *
-                                  (pos->second - posBefore->second) /
-                                  (pos->first - posBefore->first);
+      double interpolatedY = posBefore->second + (at - posBefore->first) * (pos->second - posBefore->second) /
+                                                     (pos->first - posBefore->first);
       return interpolatedY;
     }
   } catch (const std::range_error &) {

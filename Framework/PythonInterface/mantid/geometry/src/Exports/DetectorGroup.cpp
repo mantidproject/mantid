@@ -15,9 +15,8 @@ using namespace boost::python;
 
 namespace {
 bool isMaskedDeprecated(const DetectorGroup &self) {
-  PyErr_Warn(PyExc_DeprecationWarning,
-             "'DetectorGroup::isMasked' is deprecated, "
-             "use 'SpectrumInfo::isMasked' instead.");
+  PyErr_Warn(PyExc_DeprecationWarning, "'DetectorGroup::isMasked' is deprecated, "
+                                       "use 'SpectrumInfo::isMasked' instead.");
   const auto &dets = self.getDetectors();
   bool masked = true;
   for (const auto &det : dets) {
@@ -42,8 +41,7 @@ bool isMonitorDeprecated(const DetectorGroup &self) {
 } // namespace
 
 void export_DetectorGroup() {
-  class_<DetectorGroup, bases<IDetector>, boost::noncopyable>("DetectorGroup",
-                                                              no_init)
+  class_<DetectorGroup, bases<IDetector>, boost::noncopyable>("DetectorGroup", no_init)
       .def("isMasked", &isMaskedDeprecated, arg("self"),
            "Returns the value of the masked flag. True means ignore this "
            "detector")

@@ -8,8 +8,7 @@
 #include <boost/filesystem.hpp>
 #include <string>
 
-FileResource::FileResource(const std::string &fileName, bool debugMode)
-    : m_debugMode(debugMode) {
+FileResource::FileResource(const std::string &fileName, bool debugMode) : m_debugMode(debugMode) {
 
   const auto temp_dir = boost::filesystem::temp_directory_path();
   auto temp_full_path = temp_dir;
@@ -23,15 +22,12 @@ FileResource::FileResource(const std::string &fileName, bool debugMode)
     m_full_path = temp_full_path;
 
   } else {
-    throw std::invalid_argument("failed to load temp directory: " +
-                                temp_dir.generic_string());
+    throw std::invalid_argument("failed to load temp directory: " + temp_dir.generic_string());
   }
 }
 
 void FileResource::setDebugMode(bool mode) { m_debugMode = mode; }
-std::string FileResource::fullPath() const {
-  return m_full_path.generic_string();
-}
+std::string FileResource::fullPath() const { return m_full_path.generic_string(); }
 
 FileResource::~FileResource() {
 
@@ -40,7 +36,6 @@ FileResource::~FileResource() {
     if (!m_debugMode)
       boost::filesystem::remove(m_full_path);
     else
-      std::cout << "Debug file at: " << m_full_path << " not removed. "
-                << std::endl;
+      std::cout << "Debug file at: " << m_full_path << " not removed. " << std::endl;
   }
 }

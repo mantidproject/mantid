@@ -39,9 +39,8 @@ class AxisDetails : public QWidget {
   Q_OBJECT
   // details for each axis in the Axis tab
 public:
-  AxisDetails(
-      ApplicationWindow *app, Graph *graph, int mappedaxis,
-      QWidget *parent = nullptr); // populate and fill in with existing data
+  AxisDetails(ApplicationWindow *app, Graph *graph, int mappedaxis,
+              QWidget *parent = nullptr); // populate and fill in with existing data
   ~AxisDetails() override;
   void initWidgets();
   bool modified() { return m_modified; }
@@ -69,8 +68,7 @@ private:
   QTextEdit *m_txtFormula, *m_txtTitle;
   QPushButton *m_btnLabelFont, *m_btnAxesFont;
   TextFormatButtons *m_formatButtons;
-  QComboBox *m_cmbMajorTicksType, *m_cmbTableName, *m_cmbMinorTicksType,
-      *m_cmbAxisType, *m_cmbFormat, *m_cmbColName;
+  QComboBox *m_cmbMajorTicksType, *m_cmbTableName, *m_cmbMinorTicksType, *m_cmbAxisType, *m_cmbFormat, *m_cmbColName;
   ColorButton *m_cbtnAxisColor, *m_cbtnAxisNumColor;
   QSpinBox *m_spnPrecision, *m_spnAngle, *m_spnBaseline;
   QLabel *m_lblColumn, *m_lblFormat, *m_lblPrecision, *m_lblTable;

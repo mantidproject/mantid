@@ -55,13 +55,10 @@ namespace Algorithms {
     @author Mathieu Doucet, ORNL
     @date 28/07/2010
 */
-class MANTID_ALGORITHMS_DLL CalculateTransmissionBeamSpreader
-    : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CalculateTransmissionBeamSpreader : public API::Algorithm {
 public:
   /// Algorithm's name
-  const std::string name() const override {
-    return "CalculateTransmissionBeamSpreader";
-  }
+  const std::string name() const override { return "CalculateTransmissionBeamSpreader"; }
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "Calculates the sample transmission using the beam spreader (aka "
@@ -74,9 +71,7 @@ public:
     return {"CalculateTransmission", "ApplyTransmissionCorrection"};
   }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "SANS;CorrectionFunctions\\TransmissionCorrections";
-  }
+  const std::string category() const override { return "SANS;CorrectionFunctions\\TransmissionCorrections"; }
 
 private:
   /// Initialisation code
@@ -85,15 +80,13 @@ private:
   void exec() override;
 
   /// Pull out a single spectrum from a 2D workspace
-  API::MatrixWorkspace_sptr extractSpectrum(const API::MatrixWorkspace_sptr &WS,
-                                            const size_t index);
+  API::MatrixWorkspace_sptr extractSpectrum(const API::MatrixWorkspace_sptr &WS, const size_t index);
   /// Call the Linear fitting algorithm as a child algorithm
   API::MatrixWorkspace_sptr fitToData(const API::MatrixWorkspace_sptr &WS);
   /// Sum the total detector, excluding masked pixels and monitors
   API::MatrixWorkspace_sptr sumSpectra(const API::MatrixWorkspace_sptr &WS);
 
-  bool logFit =
-      false; ///< If true, will take log of transmission curve before fitting
+  bool logFit = false; ///< If true, will take log of transmission curve before fitting
 };
 
 } // namespace Algorithms

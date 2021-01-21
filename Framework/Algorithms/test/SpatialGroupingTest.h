@@ -37,14 +37,13 @@ public:
 
   void testExec() {
     const int nhist(18);
-    auto workspace = DataObjects::create<DataObjects::Workspace2D>(
-        ComponentCreationHelper::createTestInstrumentCylindrical(2),
-        Indexing::IndexInfo(nhist), HistogramData::BinEdges(2));
+    auto workspace =
+        DataObjects::create<DataObjects::Workspace2D>(ComponentCreationHelper::createTestInstrumentCylindrical(2),
+                                                      Indexing::IndexInfo(nhist), HistogramData::BinEdges(2));
 
     Algorithms::SpatialGrouping alg;
     alg.initialize();
-    alg.setProperty<Mantid::API::MatrixWorkspace_sptr>("InputWorkspace",
-                                                       std::move(workspace));
+    alg.setProperty<Mantid::API::MatrixWorkspace_sptr>("InputWorkspace", std::move(workspace));
     alg.setProperty("Filename", "test_SpatialGrouping");
     alg.execute();
 
@@ -74,18 +73,17 @@ public:
     TS_ASSERT(input.is_open());
 
     // Testing file
-    std::vector<std::string> expected{
-        "<?xml version=\"1.0\" encoding=\"UTF-8\" "
-        "?>",
-        "<!-- XML Grouping File created by "
-        "SpatialGrouping Algorithm -->",
-        "<detector-grouping>",
-        "<group name=\"group1\"><detids "
-        "val=\"1,2,3,4,5,6,7,8,9\"/></group>",
-        "<group name=\"group2\"><detids "
-        "val=\"10,11,12,13,14,15,16,17,18\"/></"
-        "group>",
-        "</detector-grouping>"};
+    std::vector<std::string> expected{"<?xml version=\"1.0\" encoding=\"UTF-8\" "
+                                      "?>",
+                                      "<!-- XML Grouping File created by "
+                                      "SpatialGrouping Algorithm -->",
+                                      "<detector-grouping>",
+                                      "<group name=\"group1\"><detids "
+                                      "val=\"1,2,3,4,5,6,7,8,9\"/></group>",
+                                      "<group name=\"group2\"><detids "
+                                      "val=\"10,11,12,13,14,15,16,17,18\"/></"
+                                      "group>",
+                                      "</detector-grouping>"};
 
     std::vector<std::string>::iterator iter = expected.begin();
 

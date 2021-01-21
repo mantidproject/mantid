@@ -38,13 +38,9 @@ public:
 
   /// Algorithm's version
   int version() const override { return (1); }
-  const std::vector<std::string> seeAlso() const override {
-    return {"SaveSPE"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"SaveSPE"}; }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "DataHandling\\SPE;Inelastic\\DataHandling";
-  }
+  const std::string category() const override { return "DataHandling\\SPE;Inelastic\\DataHandling"; }
 
   /** the method used in tests. It requested the ChildAlgorithm, which does the
      detectors
@@ -52,9 +48,7 @@ public:
      can be retrieved
         from analysis data service and used to check  the results of the save
      algorithm. */
-  void set_resulting_workspace(const std::string &ws_name) {
-    det_par_ws_name = ws_name;
-  }
+  void set_resulting_workspace(const std::string &ws_name) { det_par_ws_name = ws_name; }
 
 private:
   /// Initialisation code

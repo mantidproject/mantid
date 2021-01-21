@@ -39,9 +39,8 @@ public:
   const std::string &getInstrument() override;
 
   /// Transpose a workspace to push integrated dimensions to the last
-  static void
-  transposeWs(Mantid::API::IMDHistoWorkspace_sptr &inHistoWs,
-              Mantid::API::IMDHistoWorkspace_sptr &outCachedHistoWs);
+  static void transposeWs(Mantid::API::IMDHistoWorkspace_sptr &inHistoWs,
+                          Mantid::API::IMDHistoWorkspace_sptr &outCachedHistoWs);
 
 protected:
   /*---------------------------------------------------------------------------
@@ -49,17 +48,13 @@ protected:
   ---------------------------------------------------------------------------*/
   std::unique_ptr<MDLoadingView> m_view;
 
-  Mantid::Geometry::MDGeometryBuilderXML<Mantid::Geometry::NoDimensionPolicy>
-      xmlBuilder;
+  Mantid::Geometry::MDGeometryBuilderXML<Mantid::Geometry::NoDimensionPolicy> xmlBuilder;
 
   Mantid::Geometry::IMDDimension_sptr tDimension;
   std::vector<std::string> axisLabels;
-  virtual void appendMetadata(vtkDataSet *visualDataSet,
-                              const std::string &wsName);
+  virtual void appendMetadata(vtkDataSet *visualDataSet, const std::string &wsName);
   virtual void extractMetadata(const Mantid::API::IMDHistoWorkspace &histoWs);
-  virtual bool
-  canLoadFileBasedOnExtension(const std::string &filename,
-                              const std::string &expectedExtension) const;
+  virtual bool canLoadFileBasedOnExtension(const std::string &filename, const std::string &expectedExtension) const;
   virtual bool shouldLoad();
   bool m_isSetup;
   double m_time;

@@ -51,31 +51,24 @@ class ProxyCompositePeaksPresenter;
 
 // Static Const values
 static const std::string g_iconPathPrefix = ":/SliceViewer/icons/";
-static const std::string g_iconZoomPlus =
-    g_iconPathPrefix + "colour zoom plus scale 32x32.png";
-static const std::string g_iconZoomMinus =
-    g_iconPathPrefix + "colour zoom minus scale 32x32.png";
-static const std::string g_iconViewFull =
-    g_iconPathPrefix + "view-fullscreen.png";
+static const std::string g_iconZoomPlus = g_iconPathPrefix + "colour zoom plus scale 32x32.png";
+static const std::string g_iconZoomMinus = g_iconPathPrefix + "colour zoom minus scale 32x32.png";
+static const std::string g_iconViewFull = g_iconPathPrefix + "view-fullscreen.png";
 static const std::string g_iconCutOn = g_iconPathPrefix + "cut on 32x32.png";
 static const std::string g_iconCut = g_iconPathPrefix + "cut 32x32.png";
 static const std::string g_iconGridOn = g_iconPathPrefix + "grid on 32x32.png";
 static const std::string g_iconGrid = g_iconPathPrefix + "grid 32x32.png";
-static const std::string g_iconRebinOn =
-    g_iconPathPrefix + "rebin on 32x32.png";
+static const std::string g_iconRebinOn = g_iconPathPrefix + "rebin on 32x32.png";
 static const std::string g_iconRebin = g_iconPathPrefix + "rebin 32x32.png";
-static const std::string g_iconPeakListOn =
-    g_iconPathPrefix + "Peak List on 32x32.png";
-static const std::string g_iconPeakList =
-    g_iconPathPrefix + "Peak List 32x32.png";
+static const std::string g_iconPeakListOn = g_iconPathPrefix + "Peak List on 32x32.png";
+static const std::string g_iconPeakList = g_iconPathPrefix + "Peak List 32x32.png";
 
 /** GUI for viewing a 2D slice out of a multi-dimensional workspace.
  * You can select which dimension to plot as X,Y, and the cut point
  * along the other dimension(s).
  *
  */
-class EXPORT_OPT_MANTIDQT_SLICEVIEWER SliceViewer : public QWidget,
-                                                    public ZoomablePeaksView {
+class EXPORT_OPT_MANTIDQT_SLICEVIEWER SliceViewer : public QWidget, public ZoomablePeaksView {
   friend class SliceViewerWindow;
 
   Q_OBJECT
@@ -131,9 +124,8 @@ public:
 
   /// Methods relating to peaks overlays.
   std::shared_ptr<ProxyCompositePeaksPresenter> getPeaksPresenter() const;
-  ProxyCompositePeaksPresenter *
-  setPeaksWorkspaces(const QStringList &list); // For python binding
-  void clearPeaksWorkspaces();                 // For python binding
+  ProxyCompositePeaksPresenter *setPeaksWorkspaces(const QStringList &list); // For python binding
+  void clearPeaksWorkspaces();                                               // For python binding
 
   /* -- Methods from implementation of ZoomablePeaksView. --*/
   void zoomToRectangle(const PeakBoundingBox &box) override;
@@ -141,9 +133,7 @@ public:
   void detach() override;
 
   /* Methods associated with workspace observers. Driven by SliceViewerWindow */
-  void peakWorkspaceChanged(
-      const std::string &wsName,
-      std::shared_ptr<Mantid::API::IPeaksWorkspace> &changedPeaksWS);
+  void peakWorkspaceChanged(const std::string &wsName, std::shared_ptr<Mantid::API::IPeaksWorkspace> &changedPeaksWS);
 
   /// Load the state of the slice viewer from a Mantid project file
   void loadFromProject(const std::string &lines);
@@ -232,17 +222,14 @@ private:
   enum AspectRatioType { Guess = 0, All = 1, Unlock = 2 };
   void loadSettings();
   void saveSettings();
-  void setIconFromString(QAction *action, const std::string &iconName,
-                         QIcon::Mode mode, QIcon::State state);
-  void setIconFromString(QAbstractButton *btn, const std::string &iconName,
-                         QIcon::Mode mode, QIcon::State state);
+  void setIconFromString(QAction *action, const std::string &iconName, QIcon::Mode mode, QIcon::State state);
+  void setIconFromString(QAbstractButton *btn, const std::string &iconName, QIcon::Mode mode, QIcon::State state);
   void initMenus();
   void initZoomer();
 
   void updateDisplay(bool resetAxes = false);
   void updateDimensionSliceWidgets();
-  void resetAxis(int axis,
-                 const Mantid::Geometry::IMDDimension_const_sptr &dim);
+  void resetAxis(int axis, const Mantid::Geometry::IMDDimension_const_sptr &dim);
 
   void findRangeFull();
   void findRangeSlice();
@@ -276,8 +263,7 @@ private:
   void applyOrthogonalAxisScaleDraw();
 
   /// Transfer data between QwtRasterDataMD
-  void transferSettings(const API::QwtRasterDataMD *const from,
-                        API::QwtRasterDataMD *to) const;
+  void transferSettings(const API::QwtRasterDataMD *const from, API::QwtRasterDataMD *to) const;
 
 private:
   // -------------------------- Widgets ----------------------------
@@ -357,8 +343,7 @@ private:
   bool m_logColor;
 
   /// Menus
-  QMenu *m_menuColorOptions, *m_menuView, *m_menuHelp, *m_menuLine, *m_menuFile,
-      *m_menuPeaks;
+  QMenu *m_menuColorOptions, *m_menuView, *m_menuHelp, *m_menuLine, *m_menuFile, *m_menuPeaks;
   QAction *m_actionFileClose;
   QAction *m_actionTransparentZeros;
   QAction *m_actionNormalizeNone;
@@ -370,8 +355,7 @@ private:
   QAction *m_lockAspectRatiosActionUnlock;
 
   /// Synced menu/buttons
-  MantidQt::API::SyncedCheckboxes *m_syncLineMode, *m_syncSnapToGrid,
-      *m_syncRebinMode, *m_syncAutoRebin;
+  MantidQt::API::SyncedCheckboxes *m_syncLineMode, *m_syncSnapToGrid, *m_syncRebinMode, *m_syncAutoRebin;
 
   /// Cached double for infinity
   double m_inf;
@@ -402,7 +386,7 @@ private:
   bool m_firstNonOrthogonalWorkspaceOpen;
   bool m_nonOrthogonalDefault; // sets whether nonOrthogonalview should be shown
                                // as a default
-  bool m_oldDimNonOrthogonal; // sets whether previous dimensions were displayed
+  bool m_oldDimNonOrthogonal;  // sets whether previous dimensions were displayed
   // as nonorthogonal, so if dims switch from orth -> nonOrth,
   // then nonOrth should default be shown again
   bool m_canSwitchScales; // stops qwtScaleDraw() from occuring in first set up

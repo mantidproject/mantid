@@ -20,8 +20,7 @@ using namespace Mantid::Kernel;
  * @param source : Source JSON
  * @return PeakShape object
  */
-Mantid::Geometry::PeakShape *
-PeakShapeSphericalFactory::create(const std::string &source) const {
+Mantid::Geometry::PeakShape *PeakShapeSphericalFactory::create(const std::string &source) const {
   Json::Reader reader;
   Json::Value root;
   Mantid::Geometry::PeakShape *product = nullptr;
@@ -31,25 +30,19 @@ PeakShapeSphericalFactory::create(const std::string &source) const {
 
       const std::string algorithmName(root["algorithm_name"].asString());
       const int algorithmVersion(root["algorithm_version"].asInt());
-      const auto frame(
-          static_cast<SpecialCoordinateSystem>(root["frame"].asInt()));
+      const auto frame(static_cast<SpecialCoordinateSystem>(root["frame"].asInt()));
       const double radius(root["radius"].asDouble());
 
-      if (!root["background_outer_radius"].empty() &&
-          !root["background_inner_radius"].empty()) {
-        const double backgroundOuterRadius(
-            root["background_outer_radius"].asDouble());
-        const double backgroundInnerRadius(
-            root["background_inner_radius"].asDouble());
-        product = new PeakShapeSpherical(radius, backgroundInnerRadius,
-                                         backgroundOuterRadius, frame,
-                                         algorithmName, algorithmVersion);
+      if (!root["background_outer_radius"].empty() && !root["background_inner_radius"].empty()) {
+        const double backgroundOuterRadius(root["background_outer_radius"].asDouble());
+        const double backgroundInnerRadius(root["background_inner_radius"].asDouble());
+        product = new PeakShapeSpherical(radius, backgroundInnerRadius, backgroundOuterRadius, frame, algorithmName,
+                                         algorithmVersion);
       }
 
       else {
 
-        product = new PeakShapeSpherical(radius, frame, algorithmName,
-                                         algorithmVersion);
+        product = new PeakShapeSpherical(radius, frame, algorithmName, algorithmVersion);
       }
     } else {
       if (m_successor) {
@@ -73,8 +66,7 @@ PeakShapeSphericalFactory::create(const std::string &source) const {
  * @brief Set successor
  * @param successorFactory : successor
  */
-void PeakShapeSphericalFactory::setSuccessor(
-    PeakShapeFactory_const_sptr successorFactory) {
+void PeakShapeSphericalFactory::setSuccessor(PeakShapeFactory_const_sptr successorFactory) {
   m_successor = successorFactory;
 }
 

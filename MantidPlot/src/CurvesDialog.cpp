@@ -56,12 +56,10 @@
 
 using namespace MantidQt::API;
 
-CurvesDialog::CurvesDialog(ApplicationWindow *app, Graph *g,
-                           const Qt::WFlags &fl)
+CurvesDialog::CurvesDialog(ApplicationWindow *app, Graph *g, const Qt::WFlags &fl)
     : QDialog(g, fl), d_app(app), d_graph(g) {
   if (!app) {
-    throw std::logic_error(
-        "Null ApplicationWindow pointer is passed to CurvesDialog.");
+    throw std::logic_error("Null ApplicationWindow pointer is passed to CurvesDialog.");
   }
   setObjectName("CurvesDialog");
   setWindowTitle(tr("MantidPlot - Add/Remove curves"));
@@ -85,8 +83,7 @@ CurvesDialog::CurvesDialog(ApplicationWindow *app, Graph *g,
   hl->addWidget(boxStyle);
 
   boxMatrixStyle = new QComboBox();
-  boxMatrixStyle->addItem(getQPixmap("color_map_xpm"),
-                          tr("Contour - Color Fill"));
+  boxMatrixStyle->addItem(getQPixmap("color_map_xpm"), tr("Contour - Color Fill"));
   boxMatrixStyle->addItem(getQPixmap("contour_map_xpm"), tr("Contour Lines"));
   boxMatrixStyle->addItem(getQPixmap("gray_map_xpm"), tr("Gray Scale Map"));
   boxMatrixStyle->addItem(getQPixmap("histogram_xpm"), tr("Histogram"));
@@ -157,25 +154,19 @@ CurvesDialog::CurvesDialog(ApplicationWindow *app, Graph *g,
 
   init();
 
-  connect(boxShowCurrentFolder, SIGNAL(toggled(bool)), this,
-          SLOT(showCurrentFolder(bool)));
-  connect(boxShowRange, SIGNAL(toggled(bool)), this,
-          SLOT(showCurveRange(bool)));
+  connect(boxShowCurrentFolder, SIGNAL(toggled(bool)), this, SLOT(showCurrentFolder(bool)));
+  connect(boxShowRange, SIGNAL(toggled(bool)), this, SLOT(showCurveRange(bool)));
   connect(btnRange, SIGNAL(clicked()), this, SLOT(showCurveRangeDialog()));
-  connect(btnAssociations, SIGNAL(clicked()), this,
-          SLOT(showPlotAssociations()));
+  connect(btnAssociations, SIGNAL(clicked()), this, SLOT(showPlotAssociations()));
   connect(btnEditFunction, SIGNAL(clicked()), this, SLOT(showFunctionDialog()));
   connect(btnAdd, SIGNAL(clicked()), this, SLOT(addCurves()));
   connect(btnRemove, SIGNAL(clicked()), this, SLOT(removeCurves()));
   connect(btnOK, SIGNAL(clicked()), this, SLOT(close()));
   connect(btnCancel, SIGNAL(clicked()), this, SLOT(close()));
   connect(contents, SIGNAL(itemSelectionChanged()), this, SLOT(enableBtnOK()));
-  connect(contents, SIGNAL(currentRowChanged(int)), this,
-          SLOT(showCurveBtn(int)));
-  connect(contents, SIGNAL(itemSelectionChanged()), this,
-          SLOT(enableRemoveBtn()));
-  connect(available, SIGNAL(itemSelectionChanged()), this,
-          SLOT(enableAddBtn()));
+  connect(contents, SIGNAL(currentRowChanged(int)), this, SLOT(showCurveBtn(int)));
+  connect(contents, SIGNAL(itemSelectionChanged()), this, SLOT(enableRemoveBtn()));
+  connect(available, SIGNAL(itemSelectionChanged()), this, SLOT(enableAddBtn()));
 
   QShortcut *shortcut = new QShortcut(QKeySequence(Qt::Key_Delete), this);
   connect(shortcut, SIGNAL(activated()), this, SLOT(removeCurves()));
@@ -200,8 +191,7 @@ void CurvesDialog::showCurveBtn(int) {
   if (!it)
     return;
 
-  if (it->rtti() == QwtPlotItem::Rtti_PlotSpectrogram ||
-      it->rtti() == QwtPlotItem::Rtti_PlotUserItem) {
+  if (it->rtti() == QwtPlotItem::Rtti_PlotSpectrogram || it->rtti() == QwtPlotItem::Rtti_PlotUserItem) {
     btnEditFunction->setEnabled(false);
     btnAssociations->setEnabled(false);
     btnRange->setEnabled(false);
@@ -271,8 +261,7 @@ void CurvesDialog::contextMenuEvent(QContextMenuEvent *e) {
     QList<QListWidgetItem *> lst = contents->selectedItems();
 
     if (lst.size() > 1)
-      contextMenu.addAction(tr("&Delete Selection"), this,
-                            SLOT(removeCurves()));
+      contextMenu.addAction(tr("&Delete Selection"), this, SLOT(removeCurves()));
     else if (lst.size() > 0)
       contextMenu.addAction(tr("&Delete Curve"), this, SLOT(removeCurves()));
     contextMenu.exec(QCursor::pos());
@@ -322,8 +311,7 @@ void CurvesDialog::init() {
         Graph *g = ml->layer(i);
         if (g) {
           for (int j = 0; j < g->curves(); j++) {
-            MantidMatrixCurve *c =
-                dynamic_cast<MantidMatrixCurve *>(g->curve(j));
+            MantidMatrixCurve *c = dynamic_cast<MantidMatrixCurve *>(g->curve(j));
             if (c) {
               available->addItem(c->title().text());
               // Store copies of the curves
@@ -409,8 +397,7 @@ bool CurvesDialog::addCurve(const QString &name) {
 
     if (style == GraphOptions::Line)
       cl.sType = 0;
-    else if (style == GraphOptions::VerticalBars ||
-             style == GraphOptions::HorizontalBars) {
+    else if (style == GraphOptions::VerticalBars || style == GraphOptions::HorizontalBars) {
       cl.filledArea = 1;
       cl.lCol = 0;
       cl.aCol = color;
@@ -421,8 +408,7 @@ bool CurvesDialog::addCurve(const QString &name) {
       cl.sType = 0;
     } else if (style == GraphOptions::VerticalDropLines)
       cl.connectType = 2;
-    else if (style == GraphOptions::VerticalSteps ||
-             style == GraphOptions::HorizontalSteps) {
+    else if (style == GraphOptions::VerticalSteps || style == GraphOptions::HorizontalSteps) {
       cl.connectType = 3;
       cl.sType = 0;
     } else if (style == GraphOptions::Spline)
@@ -473,8 +459,7 @@ void CurvesDialog::removeCurves() {
  *
  */
 void CurvesDialog::enableAddBtn() {
-  btnAdd->setEnabled(available->count() > 0 &&
-                     !available->selectedItems().isEmpty());
+  btnAdd->setEnabled(available->count() > 0 && !available->selectedItems().isEmpty());
 }
 
 /** Enables or disables the button when appropriate number of graphs are in
@@ -482,17 +467,13 @@ void CurvesDialog::enableAddBtn() {
  *
  */
 void CurvesDialog::enableRemoveBtn() {
-  btnRemove->setEnabled(contents->count() > 1 &&
-                        !contents->selectedItems().isEmpty());
+  btnRemove->setEnabled(contents->count() > 1 && !contents->selectedItems().isEmpty());
 }
 
 /** Enables btnOK when there is even one graph plotted in graph contents area
  *
  */
-void CurvesDialog::enableBtnOK() {
-  btnOK->setEnabled(contents->count() > 0 &&
-                    !contents->selectedItems().isEmpty());
-}
+void CurvesDialog::enableBtnOK() { btnOK->setEnabled(contents->count() > 0 && !contents->selectedItems().isEmpty()); }
 
 int CurvesDialog::curveStyle() {
   int style = 0;
@@ -544,8 +525,8 @@ void CurvesDialog::showCurveRange(bool on) {
       auto plotCurve = dynamic_cast<PlotCurve *>(it);
       if (plotCurve && plotCurve->type() != GraphOptions::Function) {
         if (DataCurve *c = dynamic_cast<DataCurve *>(it)) {
-          lst << c->title().text() + "[" + QString::number(c->startRow() + 1) +
-                     ":" + QString::number(c->endRow() + 1) + "]";
+          lst << c->title().text() + "[" + QString::number(c->startRow() + 1) + ":" + QString::number(c->endRow() + 1) +
+                     "]";
         }
       } else
         lst << it->title().text();
@@ -558,9 +539,7 @@ void CurvesDialog::showCurveRange(bool on) {
   enableRemoveBtn();
 }
 
-void CurvesDialog::updateCurveRange() {
-  showCurveRange(boxShowRange->isChecked());
-}
+void CurvesDialog::updateCurveRange() { showCurveRange(boxShowRange->isChecked()); }
 
 void CurvesDialog::showCurrentFolder(bool currentFolder) {
   d_app->d_show_current_folder = currentFolder;

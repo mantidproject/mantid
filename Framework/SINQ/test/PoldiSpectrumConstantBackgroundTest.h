@@ -21,12 +21,8 @@ class PoldiSpectrumConstantBackgroundTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static PoldiSpectrumConstantBackgroundTest *createSuite() {
-    return new PoldiSpectrumConstantBackgroundTest();
-  }
-  static void destroySuite(PoldiSpectrumConstantBackgroundTest *suite) {
-    delete suite;
-  }
+  static PoldiSpectrumConstantBackgroundTest *createSuite() { return new PoldiSpectrumConstantBackgroundTest(); }
+  static void destroySuite(PoldiSpectrumConstantBackgroundTest *suite) { delete suite; }
 
   PoldiSpectrumConstantBackgroundTest() { FrameworkManager::Instance(); }
 
@@ -38,11 +34,9 @@ public:
   }
 
   void testFunction() {
-    IFunction_sptr function = FunctionFactory::Instance().createFunction(
-        "PoldiSpectrumConstantBackground");
+    IFunction_sptr function = FunctionFactory::Instance().createFunction("PoldiSpectrumConstantBackground");
     TS_ASSERT(function);
-    MatrixWorkspace_sptr ws =
-        WorkspaceCreationHelper::create2DWorkspaceWhereYIsWorkspaceIndex(20, 2);
+    MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspaceWhereYIsWorkspaceIndex(20, 2);
 
     TS_ASSERT_THROWS_NOTHING(function->setWorkspace(ws));
     function->setParameter(0, 10.0);
@@ -57,11 +51,9 @@ public:
   }
 
   void testPoldiFunction1D() {
-    IFunction_sptr function = FunctionFactory::Instance().createFunction(
-        "PoldiSpectrumConstantBackground");
+    IFunction_sptr function = FunctionFactory::Instance().createFunction("PoldiSpectrumConstantBackground");
     TS_ASSERT(function);
-    MatrixWorkspace_sptr ws =
-        WorkspaceCreationHelper::create2DWorkspace123(20, 2);
+    MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspace123(20, 2);
 
     TS_ASSERT_THROWS_NOTHING(function->setWorkspace(ws));
     function->setParameter(0, 10.0);
@@ -72,8 +64,7 @@ public:
     // workspace has 20 spectra, value does not matter for function
     std::vector<int> indices(20, 1);
 
-    std::shared_ptr<IPoldiFunction1D> poldiFunction =
-        std::dynamic_pointer_cast<IPoldiFunction1D>(function);
+    std::shared_ptr<IPoldiFunction1D> poldiFunction = std::dynamic_pointer_cast<IPoldiFunction1D>(function);
     TS_ASSERT(poldiFunction);
     poldiFunction->poldiFunction1D(indices, domain, values);
 

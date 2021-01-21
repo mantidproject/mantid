@@ -19,8 +19,7 @@ class QSize;
 class FloatingWindow : public QMainWindow {
   Q_OBJECT
 public:
-  FloatingWindow(ApplicationWindow *appWindow,
-                 const Qt::WindowFlags &f = nullptr);
+  FloatingWindow(ApplicationWindow *appWindow, const Qt::WindowFlags &f = nullptr);
   ~FloatingWindow() override;
   void setStaysOnTopFlag();
   void removeStaysOnTopFlag();
@@ -43,8 +42,7 @@ protected:
 private:
   ApplicationWindow *d_app; ///< Pointer to the main window
 #ifdef Q_OS_WIN
-  Qt::WindowFlags
-      m_flags; ///< Keeps a copy of window flags, used when re-parenting
+  Qt::WindowFlags m_flags; ///< Keeps a copy of window flags, used when re-parenting
 #endif
   bool m_draggingToTiledWindow;
   bool m_isInsideTiledWindow;

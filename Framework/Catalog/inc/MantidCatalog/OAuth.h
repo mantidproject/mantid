@@ -34,8 +34,7 @@ enum class OAuthFlow : uint8_t {
 class MANTID_CATALOG_DLL OAuthToken {
 public:
   OAuthToken() = delete;
-  OAuthToken(const std::string &tokenType, int expiresIn,
-             const std::string &accessToken, const std::string &scope,
+  OAuthToken(const std::string &tokenType, int expiresIn, const std::string &accessToken, const std::string &scope,
              const boost::optional<std::string> &refreshToken);
   ~OAuthToken();
 
@@ -70,8 +69,7 @@ public:
 class MANTID_CATALOG_DLL ConfigServiceTokenStore : public IOAuthTokenStore {
 public:
   ConfigServiceTokenStore() = default;
-  ConfigServiceTokenStore &
-  operator=(const ConfigServiceTokenStore &other) = default;
+  ConfigServiceTokenStore &operator=(const ConfigServiceTokenStore &other) = default;
   ~ConfigServiceTokenStore() override;
 
   void setToken(const boost::optional<OAuthToken> &token) override;

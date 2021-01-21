@@ -22,8 +22,7 @@
 namespace Mantid {
 namespace Geometry {
 
-bool CompositeImplicitFunction::addFunction(
-    const Mantid::Geometry::MDImplicitFunction_sptr &constituentFunction) {
+bool CompositeImplicitFunction::addFunction(const Mantid::Geometry::MDImplicitFunction_sptr &constituentFunction) {
   bool bSuccess = false;
   if (constituentFunction.get() != nullptr) {
     this->m_Functions.emplace_back(constituentFunction);
@@ -32,9 +31,7 @@ bool CompositeImplicitFunction::addFunction(
   return bSuccess;
 }
 
-std::string CompositeImplicitFunction::getName() const {
-  return CompositeImplicitFunction::functionName();
-}
+std::string CompositeImplicitFunction::getName() const { return CompositeImplicitFunction::functionName(); }
 
 /** Serialize to XML */
 std::string CompositeImplicitFunction::toXMLString() const {
@@ -60,21 +57,17 @@ std::string CompositeImplicitFunction::toXMLString() const {
   DOMWriter writer;
   writer.writeNode(xmlstream, pDoc);
 
-  std::string formattedXMLString =
-      boost::str(boost::format(xmlstream.str().c_str()) % functionXML.c_str());
+  std::string formattedXMLString = boost::str(boost::format(xmlstream.str().c_str()) % functionXML.c_str());
   return formattedXMLString;
 }
 
 /** Return the number of functions in this composite
  * */
-int CompositeImplicitFunction::getNFunctions() const {
-  return static_cast<int>(this->m_Functions.size());
-}
+int CompositeImplicitFunction::getNFunctions() const { return static_cast<int>(this->m_Functions.size()); }
 
 bool CompositeImplicitFunction::isPointContained(const coord_t *coords) {
   bool evalResult = false;
-  std::vector<
-      std::shared_ptr<Mantid::Geometry::MDImplicitFunction>>::const_iterator it;
+  std::vector<std::shared_ptr<Mantid::Geometry::MDImplicitFunction>>::const_iterator it;
   for (it = this->m_Functions.begin(); it != this->m_Functions.end(); ++it) {
     evalResult = (*it)->isPointContained(coords);
     if (!evalResult) {
@@ -84,11 +77,9 @@ bool CompositeImplicitFunction::isPointContained(const coord_t *coords) {
   return evalResult;
 }
 
-bool CompositeImplicitFunction::isPointContained(
-    const std::vector<coord_t> &coords) {
+bool CompositeImplicitFunction::isPointContained(const std::vector<coord_t> &coords) {
   bool evalResult = false;
-  std::vector<
-      std::shared_ptr<Mantid::Geometry::MDImplicitFunction>>::const_iterator it;
+  std::vector<std::shared_ptr<Mantid::Geometry::MDImplicitFunction>>::const_iterator it;
   for (it = this->m_Functions.begin(); it != this->m_Functions.end(); ++it) {
     evalResult = (*it)->isPointContained(coords);
     if (!evalResult) {

@@ -61,13 +61,10 @@ public:
   /// Algorithm's version
   int version() const override { return (1); }
   const std::vector<std::string> seeAlso() const override {
-    return {"CropWorkspaceRagged", "CropToComponent", "RemoveBins",
-            "ExtractSingleSpectrum", "ExtractSpectra"};
+    return {"CropWorkspaceRagged", "CropToComponent", "RemoveBins", "ExtractSingleSpectrum", "ExtractSpectra"};
   }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "Transforms\\Splitting";
-  }
+  const std::string category() const override { return "Transforms\\Splitting"; }
 
 private:
   /// Initialisation code

@@ -37,9 +37,7 @@ class MockSearchAlgorithm : public Algorithm {
 public:
   const std::string name() const override { return "MockSearchAlgorithm"; };
   int version() const override { return 1; };
-  const std::string summary() const override {
-    return "A mock search algorithm";
-  };
+  const std::string summary() const override { return "A mock search algorithm"; };
 
 private:
   void init() override{};
@@ -53,22 +51,17 @@ private:
  */
 class MockQtCatalogSearcher : public QtCatalogSearcher {
 public:
-  MockQtCatalogSearcher(
-      IRunsView *view,
-      IAlgorithm_sptr searchAlg = std::make_shared<MockSearchAlgorithm>(),
-      bool const hasActiveSession = true)
+  MockQtCatalogSearcher(IRunsView *view, IAlgorithm_sptr searchAlg = std::make_shared<MockSearchAlgorithm>(),
+                        bool const hasActiveSession = true)
       : QtCatalogSearcher(view), m_searchAlg(searchAlg),
         m_hasActiveCatalogSession(hasActiveSession), m_logInWasCalled{false} {}
 
   bool logInWasCalled() const { return m_logInWasCalled; }
 
   // Override finishHandle to make it public
-  void finishHandle(const Mantid::API::IAlgorithm *alg) override {
-    QtCatalogSearcher::finishHandle(alg);
-  };
+  void finishHandle(const Mantid::API::IAlgorithm *alg) override { QtCatalogSearcher::finishHandle(alg); };
   // Override errorHandle to make it public
-  void errorHandle(const Mantid::API::IAlgorithm *alg,
-                   std::string const &what) override {
+  void errorHandle(const Mantid::API::IAlgorithm *alg, std::string const &what) override {
     QtCatalogSearcher::errorHandle(alg, what);
   };
 
@@ -77,22 +70,17 @@ private:
   bool m_hasActiveCatalogSession;
   bool m_logInWasCalled;
 
-  bool hasActiveCatalogSession() const override {
-    return m_hasActiveCatalogSession;
-  }
+  bool hasActiveCatalogSession() const override { return m_hasActiveCatalogSession; }
 
   // Override the log in function because it calls an algorithm that requires
   // ICat. Instead just allow the tests to check that it was called.
   void logInToCatalog() override { m_logInWasCalled = true; }
 
-  virtual Mantid::API::IAlgorithm_sptr createSearchAlgorithm() override {
-    return m_searchAlg;
-  };
+  virtual Mantid::API::IAlgorithm_sptr createSearchAlgorithm() override { return m_searchAlg; };
 
   // Override the method that gets the algorithm results so
   // we don't need a real algorithm
-  ITableWorkspace_sptr getSearchAlgorithmResultsTable(
-      Mantid::API::IAlgorithm_sptr searchAlg) override {
+  ITableWorkspace_sptr getSearchAlgorithmResultsTable(Mantid::API::IAlgorithm_sptr searchAlg) override {
     UNUSED_ARG(searchAlg);
     // Return a results table of a suitable format for the algorithm used
     if (requiresICat())
@@ -146,14 +134,10 @@ class QtCatalogSearcherTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static QtCatalogSearcherTest *createSuite() {
-    return new QtCatalogSearcherTest();
-  }
+  static QtCatalogSearcherTest *createSuite() { return new QtCatalogSearcherTest(); }
   static void destroySuite(QtCatalogSearcherTest *suite) { delete suite; }
 
-  QtCatalogSearcherTest()
-      : m_view(), m_notifyee(),
-        m_searchAlg(std::make_shared<MockSearchAlgorithm>()) {}
+  QtCatalogSearcherTest() : m_view(), m_notifyee(), m_searchAlg(std::make_shared<MockSearchAlgorithm>()) {}
 
   void test_constructor_subscribes_to_view() {
     EXPECT_CALL(m_view, subscribeSearch(_)).Times(1);
@@ -322,16 +306,13 @@ private:
   IAlgorithm_sptr m_searchAlg;
   NiceMock<MockSearchModel> m_searchResults;
 
-  MockQtCatalogSearcher
-  makeCatalogSearcher(bool const hasActiveSession = true) {
-    ON_CALL(m_view, mutableSearchResults())
-        .WillByDefault(ReturnRef(m_searchResults));
+  MockQtCatalogSearcher makeCatalogSearcher(bool const hasActiveSession = true) {
+    ON_CALL(m_view, mutableSearchResults()).WillByDefault(ReturnRef(m_searchResults));
     return MockQtCatalogSearcher(&m_view, m_searchAlg, hasActiveSession);
   }
 
   void checkSearchResults(SearchResults const &actual) {
-    auto const expected = SearchResults{SearchResult(RUN1_NUMBER, RUN1_TITLE),
-                                        SearchResult(RUN2_NUMBER, RUN2_TITLE)};
+    auto const expected = SearchResults{SearchResult(RUN1_NUMBER, RUN1_TITLE), SearchResult(RUN2_NUMBER, RUN2_TITLE)};
     TS_ASSERT_EQUALS(actual.size(), expected.size());
     for (size_t i = 0; i < actual.size(); ++i) {
       TS_ASSERT_EQUALS(actual[i], expected[i]);
@@ -347,41 +328,31 @@ private:
   std::shared_ptr<NiceMock<MockAlgorithmRunner>> expectGetAlgorithmRunner() {
     // Get the algorithm runner
     auto algRunner = std::make_shared<NiceMock<MockAlgorithmRunner>>();
-    EXPECT_CALL(m_view, getAlgorithmRunner())
-        .Times(AtLeast(1))
-        .WillRepeatedly(Return(algRunner));
+    EXPECT_CALL(m_view, getAlgorithmRunner()).Times(AtLeast(1)).WillRepeatedly(Return(algRunner));
     return algRunner;
   }
 
-  void expectAlgorithmStarted(
-      IAlgorithm_sptr searchAlg,
-      std::shared_ptr<NiceMock<MockAlgorithmRunner>> algRunner) {
+  void expectAlgorithmStarted(IAlgorithm_sptr searchAlg, std::shared_ptr<NiceMock<MockAlgorithmRunner>> algRunner) {
     EXPECT_CALL(*algRunner, startAlgorithmImpl(searchAlg)).Times(1);
   }
 
-  void expectNotifySearchFailed() {
-    EXPECT_CALL(m_notifyee, notifySearchFailed()).Times(AtLeast(1));
-  }
+  void expectNotifySearchFailed() { EXPECT_CALL(m_notifyee, notifySearchFailed()).Times(AtLeast(1)); }
 
-  void expectNotNotifiedSearchFailed() {
-    EXPECT_CALL(m_notifyee, notifySearchFailed()).Times(0);
-  }
+  void expectNotNotifiedSearchFailed() { EXPECT_CALL(m_notifyee, notifySearchFailed()).Times(0); }
 
   SearchResults doJournalSearch(MockQtCatalogSearcher &searcher) {
     // Passing non-empty cycle performs journal search
     return searcher.search(SearchCriteria{"INTER", "19_4", "6543210"});
   }
 
-  SearchResults doCatalogSearch(MockQtCatalogSearcher &searcher,
-                                std::string const &instrument = "INTER") {
+  SearchResults doCatalogSearch(MockQtCatalogSearcher &searcher, std::string const &instrument = "INTER") {
     // Passing empty cycle performs catalog search
     return searcher.search(SearchCriteria{instrument, "", "6543210"});
   }
 
   bool startAsyncJournalSearch(MockQtCatalogSearcher &searcher) {
     // Passing non-empty cycle performs journal search
-    return searcher.startSearchAsync(
-        SearchCriteria{"INTER", "19_4", "6543210"});
+    return searcher.startSearchAsync(SearchCriteria{"INTER", "19_4", "6543210"});
   }
 
   bool startAsyncCatalogSearch(MockQtCatalogSearcher &searcher) {

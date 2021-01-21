@@ -40,8 +40,7 @@ bool isUnit(const Mantid::Kernel::StringTokenizer &codes) {
   //  3. Open bracket
   //  4. Several characters
   //  5. Close bracket
-  std::string input =
-      std::accumulate(codes.begin(), codes.end(), std::string(""));
+  std::string input = std::accumulate(codes.begin(), codes.end(), std::string(""));
   std::string reg(R"(^[06][\w]+\([/ \w\^-]+\)$)");
   boost::regex baseRegex(reg);
   return boost::regex_match(input, baseRegex);
@@ -68,12 +67,9 @@ DECLARE_FILELOADER_ALGORITHM(LoadRKH)
  * @param prog :: handle to progress bar
  * @param readXError :: whether to read x errors (optional, default: false)
  */
-void LoadRKH::readLinesForRKH1D(std::istream &stream, int readStart,
-                                int readEnd, HistogramData::Points &x,
-                                HistogramData::Counts &y,
-                                HistogramData::CountStandardDeviations &ye,
-                                HistogramData::PointStandardDeviations &xe,
-                                Progress &prog, bool readXError) {
+void LoadRKH::readLinesForRKH1D(std::istream &stream, int readStart, int readEnd, HistogramData::Points &x,
+                                HistogramData::Counts &y, HistogramData::CountStandardDeviations &ye,
+                                HistogramData::PointStandardDeviations &xe, Progress &prog, bool readXError) {
 
   std::vector<double> xData;
   std::vector<double> yData;
@@ -134,14 +130,12 @@ int LoadRKH::confidence(Kernel::FileDescriptor &descriptor) const {
   // -- First line --
   std::getline(file, fileline);
   // LOQ or SANS2D (case insensitive)
-  if (boost::ifind_first(fileline, "loq").empty() &&
-      boost::ifind_first(fileline, "sans2d").empty())
+  if (boost::ifind_first(fileline, "loq").empty() && boost::ifind_first(fileline, "sans2d").empty())
     return 0;
 
   // Next should be date time string
-  static const char *MONTHS[12] = {"-JAN-", "-FEB-", "-MAR-", "-APR-",
-                                   "-MAY-", "-JUN-", "-JUL-", "-AUG-",
-                                   "-SEP-", "-OCT-", "-NOV-", "-DEC-"};
+  static const char *MONTHS[12] = {"-JAN-", "-FEB-", "-MAR-", "-APR-", "-MAY-", "-JUN-",
+                                   "-JUL-", "-AUG-", "-SEP-", "-OCT-", "-NOV-", "-DEC-"};
 
   bool foundMonth(false);
   for (auto &month : MONTHS) {
@@ -179,15 +173,12 @@ int LoadRKH::confidence(Kernel::FileDescriptor &descriptor) const {
  */
 void LoadRKH::init() {
   const std::vector<std::string> exts{".txt", ".q", ".dat"};
-  declareProperty(std::make_unique<API::FileProperty>(
-                      "Filename", "", API::FileProperty::Load, exts),
+  declareProperty(std::make_unique<API::FileProperty>("Filename", "", API::FileProperty::Load, exts),
                   "Name of the RKH file to load");
-  declareProperty(std::make_unique<API::WorkspaceProperty<>>(
-                      "OutputWorkspace", "", Kernel::Direction::Output),
+  declareProperty(std::make_unique<API::WorkspaceProperty<>>("OutputWorkspace", "", Kernel::Direction::Output),
                   "The name to use for the output workspace");
   // Get the units registered with the UnitFactory
-  std::vector<std::string> propOptions =
-      Kernel::UnitFactory::Instance().getKeys();
+  std::vector<std::string> propOptions = Kernel::UnitFactory::Instance().getKeys();
   m_unitKeys.insert(propOptions.begin(), propOptions.end());
 
   // m_RKHKeys will be taken as axis(1) units, the first axis will have only one
@@ -198,11 +189,9 @@ void LoadRKH::init() {
   m_RKHKeys.insert("SpectrumNumber");
   propOptions.insert(propOptions.end(), m_RKHKeys.begin(), m_RKHKeys.end());
 
-  declareProperty(
-      "FirstColumnValue", "Wavelength",
-      std::make_shared<Kernel::StringListValidator>(propOptions),
-      "Only used for 1D files, the units of the first column in the RKH "
-      "file (default Wavelength)");
+  declareProperty("FirstColumnValue", "Wavelength", std::make_shared<Kernel::StringListValidator>(propOptions),
+                  "Only used for 1D files, the units of the first column in the RKH "
+                  "file (default Wavelength)");
 }
 
 /**
@@ -246,9 +235,7 @@ void LoadRKH::exec() {
 bool LoadRKH::is2D(const std::string &testLine) {
   // split the line into words
   const Mantid::Kernel::StringTokenizer codes(
-      testLine, " ",
-      Mantid::Kernel::StringTokenizer::TOK_TRIM |
-          Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+      testLine, " ", Mantid::Kernel::StringTokenizer::TOK_TRIM | Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
   return isUnit(codes);
 }
 
@@ -256,8 +243,7 @@ bool LoadRKH::is2D(const std::string &testLine) {
  *  @return the new workspace
  */
 const API::MatrixWorkspace_sptr LoadRKH::read1D() {
-  g_log.information()
-      << "file appears to contain 1D information, reading in 1D data mode\n";
+  g_log.information() << "file appears to contain 1D information, reading in 1D data mode\n";
 
   // The 3rd line contains information regarding the number of points in the
   // file and
@@ -285,9 +271,7 @@ const API::MatrixWorkspace_sptr LoadRKH::read1D() {
     }
   }
 
-  g_log.information()
-      << "Total number of data points declared to be in the data file: "
-      << totalPoints << "\n";
+  g_log.information() << "Total number of data points declared to be in the data file: " << totalPoints << "\n";
 
   // What are we reading?
   std::string firstColVal = getProperty("FirstColumnValue");
@@ -298,8 +282,7 @@ const API::MatrixWorkspace_sptr LoadRKH::read1D() {
     readEnd = totalPoints;
   }
 
-  if (readStart < 1 || readEnd < 1 || readEnd < readStart ||
-      readStart > totalPoints || readEnd > totalPoints) {
+  if (readStart < 1 || readEnd < 1 || readEnd < readStart || readStart > totalPoints || readEnd > totalPoints) {
     g_log.error("Invalid data range specfied.");
     m_fileIn.close();
     throw std::invalid_argument("Invalid data range specfied.");
@@ -322,8 +305,7 @@ const API::MatrixWorkspace_sptr LoadRKH::read1D() {
 
   Progress prog(this, 0.0, 1.0, readEnd);
 
-  readLinesForRKH1D(m_fileIn, readStart, readEnd, columnOne, ydata, errdata,
-                    xError, prog, hasXError);
+  readLinesForRKH1D(m_fileIn, readStart, readEnd, columnOne, ydata, errdata, xError, prog, hasXError);
 
   m_fileIn.close();
 
@@ -336,11 +318,10 @@ const API::MatrixWorkspace_sptr LoadRKH::read1D() {
   }
 
   if (colIsUnit) {
-    MatrixWorkspace_sptr localworkspace = WorkspaceFactory::Instance().create(
-        "Workspace2D", 1, pointsToRead, pointsToRead);
+    MatrixWorkspace_sptr localworkspace =
+        WorkspaceFactory::Instance().create("Workspace2D", 1, pointsToRead, pointsToRead);
     localworkspace->getSpectrum(0).setDetectorID(static_cast<detid_t>(1));
-    localworkspace->getAxis(0)->unit() =
-        UnitFactory::Instance().create(firstColVal);
+    localworkspace->getAxis(0)->unit() = UnitFactory::Instance().create(firstColVal);
     localworkspace->setPoints(0, columnOne);
     localworkspace->setCounts(0, ydata);
     localworkspace->setCountStandardDeviations(0, errdata);
@@ -349,14 +330,11 @@ const API::MatrixWorkspace_sptr LoadRKH::read1D() {
     }
     return localworkspace;
   } else {
-    MatrixWorkspace_sptr localworkspace =
-        WorkspaceFactory::Instance().create("Workspace2D", pointsToRead, 1, 1);
+    MatrixWorkspace_sptr localworkspace = WorkspaceFactory::Instance().create("Workspace2D", pointsToRead, 1, 1);
     // Set the appropriate values
     for (int index = 0; index < pointsToRead; ++index) {
-      localworkspace->getSpectrum(index).setSpectrumNo(
-          static_cast<int>(columnOne[index]));
-      localworkspace->getSpectrum(index).setDetectorID(
-          static_cast<detid_t>(index + 1));
+      localworkspace->getSpectrum(index).setSpectrumNo(static_cast<int>(columnOne[index]));
+      localworkspace->getSpectrum(index).setDetectorID(static_cast<detid_t>(index + 1));
       localworkspace->dataY(index)[0] = ydata[index];
       localworkspace->dataE(index)[0] = errdata[index];
     }
@@ -378,8 +356,7 @@ const API::MatrixWorkspace_sptr LoadRKH::read1D() {
  * information
  */
 const MatrixWorkspace_sptr LoadRKH::read2D(const std::string &firstLine) {
-  g_log.information()
-      << "file appears to contain 2D information, reading in 2D data mode\n";
+  g_log.information() << "file appears to contain 2D information, reading in 2D data mode\n";
 
   MatrixWorkspace_sptr outWrksp;
   MantidVec axis0Data;
@@ -419,9 +396,7 @@ const MatrixWorkspace_sptr LoadRKH::read2D(const std::string &firstLine) {
  *  @throw invalid_argument if there is an inconsistency in the header
  * information
  */
-Progress LoadRKH::read2DHeader(const std::string &initalLine,
-                               MatrixWorkspace_sptr &outWrksp,
-                               MantidVec &axis0Data) {
+Progress LoadRKH::read2DHeader(const std::string &initalLine, MatrixWorkspace_sptr &outWrksp, MantidVec &axis0Data) {
   const std::string XUnit(readUnit(initalLine));
 
   std::string fileLine;
@@ -463,9 +438,7 @@ Progress LoadRKH::read2DHeader(const std::string &initalLine,
     std::getline(m_fileIn, fileLine);
   }
   Mantid::Kernel::StringTokenizer wsDimensions(
-      fileLine, " ",
-      Mantid::Kernel::StringTokenizer::TOK_TRIM |
-          Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+      fileLine, " ", Mantid::Kernel::StringTokenizer::TOK_TRIM | Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
   if (wsDimensions.count() < 2) {
     throw Exception::NotFoundError("Input file", "dimensions");
   }
@@ -475,8 +448,7 @@ Progress LoadRKH::read2DHeader(const std::string &initalLine,
   Progress prog(this, 0.05, 1.0, 2 * nAxis1Values);
 
   // we now have all the data we need to create the output workspace
-  outWrksp = WorkspaceFactory::Instance().create(
-      "Workspace2D", nAxis1Values, nAxis0Boundaries, nAxis0Values);
+  outWrksp = WorkspaceFactory::Instance().create("Workspace2D", nAxis1Values, nAxis0Boundaries, nAxis0Values);
   for (int i = 0; i < nAxis1Values; ++i) {
     outWrksp->getSpectrum(i).setDetectorID(static_cast<detid_t>(i + 1));
   }
@@ -518,9 +490,7 @@ void LoadRKH::readNumEntrys(const int nEntries, MantidVec &output) {
 const std::string LoadRKH::readUnit(const std::string &line) {
   // split the line into words
   const Mantid::Kernel::StringTokenizer codes(
-      line, " ",
-      Mantid::Kernel::StringTokenizer::TOK_TRIM |
-          Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+      line, " ", Mantid::Kernel::StringTokenizer::TOK_TRIM | Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
 
   if (!isUnit(codes)) {
     return "C++ no unit found";
@@ -553,9 +523,8 @@ const std::string LoadRKH::readUnit(const std::string &line) {
     if (unit.find('(') != 0 || unit.find(')') != unit.size()) {
       std::string qCode = std::to_string(SaveRKH::Q_CODE);
       if (symbol == qCode && theQuantity == "q" &&
-          (unit == "(1/Angstrom)" ||
-           unit == "(Angstrom^-1)")) { // 6 q (1/Angstrom) is the synatx for
-                                       // MomentumTransfer
+          (unit == "(1/Angstrom)" || unit == "(Angstrom^-1)")) { // 6 q (1/Angstrom) is the synatx for
+                                                                 // MomentumTransfer
         return "MomentumTransfer";
       }
 
@@ -585,8 +554,7 @@ void LoadRKH::skipLines(std::istream &strm, int nlines) {
  *  @param[out] toCenter an array that is one shorter than oldBoundaries, the
  * values of the means of pairs of values from the input
  */
-void LoadRKH::binCenter(const MantidVec &oldBoundaries,
-                        MantidVec &toCenter) const {
+void LoadRKH::binCenter(const MantidVec &oldBoundaries, MantidVec &toCenter) const {
   VectorHelper::convertToBinCentre(oldBoundaries, toCenter);
 }
 

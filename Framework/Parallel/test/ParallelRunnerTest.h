@@ -18,14 +18,12 @@ using namespace Mantid::Parallel;
 using ParallelTestHelpers::ParallelRunner;
 
 namespace {
-void get_sizes(const Communicator &comm, std::mutex &mutex,
-               std::vector<int> &sizes) {
+void get_sizes(const Communicator &comm, std::mutex &mutex, std::vector<int> &sizes) {
   std::lock_guard<std::mutex> lock(mutex);
   sizes.emplace_back(comm.size());
 }
 
-void get_ranks(const Communicator &comm, std::mutex &mutex,
-               std::set<int> &ranks) {
+void get_ranks(const Communicator &comm, std::mutex &mutex, std::set<int> &ranks) {
   std::lock_guard<std::mutex> lock(mutex);
   ranks.insert(comm.rank());
 }
@@ -46,8 +44,7 @@ public:
     parallel.run(get_sizes, std::ref(mutex), std::ref(sizes));
     // Currently ParallelRunner also runs the callable with a single rank.
     TS_ASSERT_EQUALS(std::count(sizes.begin(), sizes.end(), 1), 1);
-    TS_ASSERT_EQUALS(std::count(sizes.begin(), sizes.end(), parallel.size()),
-                     parallel.size());
+    TS_ASSERT_EQUALS(std::count(sizes.begin(), sizes.end(), parallel.size()), parallel.size());
   }
 
   void test_rank() {

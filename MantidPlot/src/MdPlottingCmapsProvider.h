@@ -31,8 +31,7 @@ public:
    * @param colorMapFiles Reference to a corresponding list with the file paths
    * for the color maps.
    */
-  void getColorMapsForMdPlotting(QStringList &colorMapNames,
-                                 QStringList &colorMapFiles);
+  void getColorMapsForMdPlotting(QStringList &colorMapNames, QStringList &colorMapFiles);
 
   /**
    * Get the name of all available color maps for the VSI (at least the ones
@@ -50,10 +49,8 @@ private:
    * @param colorMapDirectory Directory where the color maps are stored.
    * @param fileType suffix of the desired files.
    */
-  void appendAllFileNamesForFileType(QStringList &colorMapNames,
-                                     QStringList &colorMapFiles,
-                                     const QString &colorMapDirectory,
-                                     const QString &fileType);
+  void appendAllFileNamesForFileType(QStringList &colorMapNames, QStringList &colorMapFiles,
+                                     const QString &colorMapDirectory, const QString &fileType);
 
   /**
    * Compare the colormap names of the Slice Viewer and the VSI and extract all
@@ -63,7 +60,6 @@ private:
    * @param colorMapNamesVsi A list of color maps for the VSI.
    * @returns A vector of indices for the slice viewer list.
    */
-  std::vector<int>
-  getSliceViewerIndicesForCommonColorMaps(QStringList colorMapNamesSliceViewer,
-                                          const QStringList &colorMapNamesVsi);
+  std::vector<int> getSliceViewerIndicesForCommonColorMaps(QStringList colorMapNamesSliceViewer,
+                                                           const QStringList &colorMapNamesVsi);
 };

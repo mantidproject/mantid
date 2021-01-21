@@ -38,17 +38,13 @@ using namespace DataObjects;
  */
 void PeakIntegration::init() {
 
-  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
-                      "InPeaksWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>("InPeaksWorkspace", "", Direction::Input),
                   "Name of the peaks workspace.");
-  declareProperty(std::make_unique<WorkspaceProperty<>>(
-                      "InputWorkspace", "", Direction::Input,
-                      std::make_shared<InstrumentValidator>()),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input,
+                                                        std::make_shared<InstrumentValidator>()),
                   "A 2D workspace with X values of time of flight");
-  declareProperty(
-      std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
-          "OutPeaksWorkspace", "", Direction::Output),
-      "Name of the output peaks workspace with integrated intensities.");
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>("OutPeaksWorkspace", "", Direction::Output),
+                  "Name of the output peaks workspace with integrated intensities.");
   declareProperty("IkedaCarpenterTOF", false,
                   "Integrate TOF using IkedaCarpenter fit.\n"
                   "Default is false which is best for corrected data.");
@@ -81,8 +77,7 @@ void PeakIntegration::exec() {
   bool matchRun = getProperty("MatchingRunNo");
   if (peaksW->mutableSample().hasOrientedLattice()) {
     OrientedLattice latt = peaksW->mutableSample().getOrientedLattice();
-    qspan = 1. /
-            std::max(latt.a(), std::max(latt.b(), latt.c())); // 1/6*2Pi about 1
+    qspan = 1. / std::max(latt.a(), std::max(latt.b(), latt.c())); // 1/6*2Pi about 1
 
   } else {
     qspan = 0.12;
@@ -92,19 +87,16 @@ void PeakIntegration::exec() {
   const auto pixel_to_wi = inputW->getDetectorIDToWorkspaceIndexMap();
 
   // Sort events if EventWorkspace so it will run in parallel
-  EventWorkspace_const_sptr inWS =
-      std::dynamic_pointer_cast<const EventWorkspace>(inputW);
+  EventWorkspace_const_sptr inWS = std::dynamic_pointer_cast<const EventWorkspace>(inputW);
   if (inWS) {
     inWS->sortAll(TOF_SORT, nullptr);
   }
 
   // Get some stuff from the input workspace
   const auto YLength = static_cast<int>(inputW->blocksize());
-  outputW = API::WorkspaceFactory::Instance().create(
-      inputW, peaksW->getNumberPeaks(), YLength + 1, YLength);
+  outputW = API::WorkspaceFactory::Instance().create(inputW, peaksW->getNumberPeaks(), YLength + 1, YLength);
   // Copy geometry over.
-  API::WorkspaceFactory::Instance().initializeFromParent(*inputW, *outputW,
-                                                         true);
+  API::WorkspaceFactory::Instance().initializeFromParent(*inputW, *outputW, true);
   size_t Numberwi = inputW->getNumberHistograms();
   int NumberPeaks = peaksW->getNumberPeaks();
   int MinPeaks = 0;
@@ -118,8 +110,7 @@ void PeakIntegration::exec() {
     auto wiEntry = pixel_to_wi.find(pixelID);
     if (wiEntry != pixel_to_wi.end()) {
       size_t wi = wiEntry->second;
-      if ((matchRun && peak.getRunNumber() != inputW->getRunNumber()) ||
-          wi >= Numberwi)
+      if ((matchRun && peak.getRunNumber() != inputW->getRunNumber()) || wi >= Numberwi)
         badPeaks.emplace_back(i);
     } else // This is for appending peak workspaces when running
            // SNSSingleCrystalReduction one bank at at time
@@ -129,8 +120,7 @@ void PeakIntegration::exec() {
   peaksW->removePeaks(std::move(badPeaks));
   NumberPeaks = peaksW->getNumberPeaks();
   if (NumberPeaks <= 0) {
-    g_log.error(
-        "RunNumbers of InPeaksWorkspace and InputWorkspace do not match");
+    g_log.error("RunNumbers of InPeaksWorkspace and InputWorkspace do not match");
     return;
   }
 
@@ -153,15 +143,13 @@ void PeakIntegration::exec() {
     double TOFPeakd = peak.getTOF();
     std::string bankName = peak.getBankName();
 
-    std::shared_ptr<const IComponent> parent =
-        inputW->getInstrument()->getComponentByName(bankName);
+    std::shared_ptr<const IComponent> parent = inputW->getInstrument()->getComponentByName(bankName);
 
     if (!parent)
       continue;
 
     int TOFPeak = 0, TOFmin = 0, TOFmax = 0;
-    TOFmax =
-        fitneighbours(i, bankName, XPeak, YPeak, i, qspan, peaksW, pixel_to_wi);
+    TOFmax = fitneighbours(i, bankName, XPeak, YPeak, i, qspan, peaksW, pixel_to_wi);
 
     double I = 0., sigI = 0.;
     // Find point of peak centre
@@ -198,8 +186,7 @@ void PeakIntegration::exec() {
                         // Ikeda-Carpenter fit
     {
       for (iTOF = TOFmin; iTOF <= TOFmax; iTOF++) {
-        if (((Y[iTOF] - Y[TOFPeak] / 2.) * (Y[iTOF + 1] - Y[TOFPeak] / 2.)) <
-            0.)
+        if (((Y[iTOF] - Y[TOFPeak] / 2.) * (Y[iTOF + 1] - Y[TOFPeak] / 2.)) < 0.)
           break;
       }
       double Gamma = fabs(X[TOFPeak] - X[iTOF]);
@@ -219,16 +206,13 @@ void PeakIntegration::exec() {
       double Beta0 = 31.9;
       double Kappa = 46.0;
       std::ostringstream fun_str;
-      fun_str << "name=IkedaCarpenterPV,I=" << peakHeight
-              << ",Alpha0=" << Alpha0 << ",Alpha1=" << Alpha1
-              << ",Beta0=" << Beta0 << ",Kappa=" << Kappa
-              << ",SigmaSquared=" << SigmaSquared << ",Gamma=" << Gamma
+      fun_str << "name=IkedaCarpenterPV,I=" << peakHeight << ",Alpha0=" << Alpha0 << ",Alpha1=" << Alpha1
+              << ",Beta0=" << Beta0 << ",Kappa=" << Kappa << ",SigmaSquared=" << SigmaSquared << ",Gamma=" << Gamma
               << ",X0=" << peakLoc;
       fit_alg->setPropertyValue("Function", fun_str.str());
       if (Alpha0 != 1.6 || Alpha1 != 1.5 || Beta0 != 31.9 || Kappa != 46.0) {
         std::ostringstream tie_str;
-        tie_str << "Alpha0=" << Alpha0 << ",Alpha1=" << Alpha1
-                << ",Beta0=" << Beta0 << ",Kappa=" << Kappa;
+        tie_str << "Alpha0=" << Alpha0 << ",Alpha1=" << Alpha1 << ",Beta0=" << Beta0 << ",Kappa=" << Kappa;
         fit_alg->setProperty("Ties", tie_str.str());
       }
       fit_alg->setProperty("InputWorkspace", outputW);
@@ -302,10 +286,8 @@ void PeakIntegration::retrieveProperties() {
   }
 }
 
-int PeakIntegration::fitneighbours(int ipeak, const std::string &det_name,
-                                   int x0, int y0, int idet, double qspan,
-                                   PeaksWorkspace_sptr &Peaks,
-                                   const detid2index_map &pixel_to_wi) {
+int PeakIntegration::fitneighbours(int ipeak, const std::string &det_name, int x0, int y0, int idet, double qspan,
+                                   PeaksWorkspace_sptr &Peaks, const detid2index_map &pixel_to_wi) {
   UNUSED_ARG(ipeak);
   UNUSED_ARG(det_name);
   UNUSED_ARG(x0);
@@ -343,12 +325,10 @@ int PeakIntegration::fitneighbours(int ipeak, const std::string &det_name,
     if (m_IC) // Ikeda-Carpenter fit
     {
       Yout[iTOF] = logtable->getRef<double>(std::string("TotIntensity"), iTOF);
-      Eout[iTOF] =
-          logtable->getRef<double>(std::string("TotIntensityError"), iTOF);
+      Eout[iTOF] = logtable->getRef<double>(std::string("TotIntensityError"), iTOF);
     } else {
       Yout[iTOF] = logtable->getRef<double>(std::string("ISAWIntensity"), iTOF);
-      Eout[iTOF] =
-          logtable->getRef<double>(std::string("ISAWIntensityError"), iTOF);
+      Eout[iTOF] = logtable->getRef<double>(std::string("ISAWIntensityError"), iTOF);
     }
   }
 
@@ -361,8 +341,7 @@ int PeakIntegration::fitneighbours(int ipeak, const std::string &det_name,
   if (wiEntry != pixel_to_wi.end()) {
     size_t wi = wiEntry->second;
     // Set detectorIDs
-    outputW->getSpectrum(idet).addDetectorIDs(
-        inputW->getSpectrum(wi).getDetectorIDs());
+    outputW->getSpectrum(idet).addDetectorIDs(inputW->getSpectrum(wi).getDetectorIDs());
   }
 
   return TOFmax - 1;

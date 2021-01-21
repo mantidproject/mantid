@@ -44,12 +44,9 @@ RemoveLogs::RemoveLogs() {}
 void RemoveLogs::init() {
   // When used as a Child Algorithm the workspace name is not used - hence the
   // "Anonymous" to satisfy the validator
-  declareProperty(
-      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          "Workspace", "Anonymous", Direction::InOut),
-      "The name of the workspace to which the log data will be removed");
-  declareProperty(std::make_unique<ArrayProperty<std::string>>(
-                      "KeepLogs", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("Workspace", "Anonymous", Direction::InOut),
+                  "The name of the workspace to which the log data will be removed");
+  declareProperty(std::make_unique<ArrayProperty<std::string>>("KeepLogs", Direction::Input),
                   "List(comma separated) of logs to be kept");
 }
 
@@ -63,8 +60,7 @@ void RemoveLogs::exec() {
   // Get the input workspace and retrieve run from workspace.
   // the log file(s) will be loaded into the run object of the workspace
   const MatrixWorkspace_sptr localWorkspace = getProperty("Workspace");
-  const std::vector<Mantid::Kernel::Property *> &logData =
-      localWorkspace->run().getLogData();
+  const std::vector<Mantid::Kernel::Property *> &logData = localWorkspace->run().getLogData();
   std::vector<std::string> keepLogs = getProperty("KeepLogs");
   std::vector<std::string> logNames;
   logNames.reserve(logData.size());

@@ -31,8 +31,7 @@ public:
   vtkMDHWSource(const vtkMDHWSource &) = delete;
   void operator=(const vtkMDHWSource &) = delete;
   static vtkMDHWSource *New();
-  vtkTypeMacro(vtkMDHWSource, vtkStructuredGridAlgorithm) void PrintSelf(
-      ostream &os, vtkIndent indent) override;
+  vtkTypeMacro(vtkMDHWSource, vtkStructuredGridAlgorithm) void PrintSelf(ostream &os, vtkIndent indent) override;
 
   void SetWsName(const std::string &wsName);
 
@@ -60,10 +59,8 @@ public:
 protected:
   vtkMDHWSource();
   ~vtkMDHWSource() override;
-  int RequestInformation(vtkInformation *, vtkInformationVector **,
-                         vtkInformationVector *) override;
-  int RequestData(vtkInformation *, vtkInformationVector **,
-                  vtkInformationVector *) override;
+  int RequestInformation(vtkInformation *, vtkInformationVector **, vtkInformationVector *) override;
+  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *) override;
 
 private:
   /// Name of the workspace.

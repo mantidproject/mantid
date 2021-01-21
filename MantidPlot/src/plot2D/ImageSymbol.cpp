@@ -31,15 +31,13 @@
 #include <qwt_painter.h>
 
 ImageSymbol::ImageSymbol(const QString &fileName)
-    : QwtSymbol(QwtSymbol::StyleCnt, QBrush(), QPen(Qt::NoPen), QSize()),
-      d_image_path(fileName) {
+    : QwtSymbol(QwtSymbol::StyleCnt, QBrush(), QPen(Qt::NoPen), QSize()), d_image_path(fileName) {
   d_pixmap.load(fileName);
   setSize(d_pixmap.size());
 }
 
 ImageSymbol::ImageSymbol(const QPixmap &pixmap, const QString &fileName)
-    : QwtSymbol(QwtSymbol::StyleCnt, QBrush(), QPen(Qt::NoPen), QSize()),
-      d_image_path(fileName) {
+    : QwtSymbol(QwtSymbol::StyleCnt, QBrush(), QPen(Qt::NoPen), QSize()), d_image_path(fileName) {
   d_pixmap = QPixmap(pixmap);
   setSize(d_pixmap.size());
 }
@@ -56,6 +54,4 @@ ImageSymbol *ImageSymbol::clone() const {
   \param painter Painter
   \param r Bounding rectangle
 */
-void ImageSymbol::draw(QPainter *p, const QRect &r) const {
-  p->drawPixmap(r, d_pixmap);
-}
+void ImageSymbol::draw(QPainter *p, const QRect &r) const { p->drawPixmap(r, d_pixmap); }

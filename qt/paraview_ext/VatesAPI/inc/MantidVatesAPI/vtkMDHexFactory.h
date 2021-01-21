@@ -39,15 +39,13 @@ class DLLExport vtkMDHexFactory : public vtkDataSetFactory {
 
 public:
   /// Constructor
-  vtkMDHexFactory(const VisualNormalization normalizationOption,
-                  const size_t maxDepth = 1000);
+  vtkMDHexFactory(const VisualNormalization normalizationOption, const size_t maxDepth = 1000);
 
   /// Destructor
   ~vtkMDHexFactory() override;
 
   /// Factory Method. Should also handle delegation to successors.
-  vtkSmartPointer<vtkDataSet>
-  create(ProgressAction &progressUpdate) const override;
+  vtkSmartPointer<vtkDataSet> create(ProgressAction &progressUpdate) const override;
 
   /// Initalize with a target workspace.
   void initialize(const Mantid::API::Workspace_sptr &workspace) override;
@@ -61,15 +59,12 @@ public:
   void setTime(double timeStep);
 
 private:
-  coord_t
-  getNextBinBoundary(const Mantid::API::IMDEventWorkspace_sptr &imdws) const;
+  coord_t getNextBinBoundary(const Mantid::API::IMDEventWorkspace_sptr &imdws) const;
 
-  coord_t getPreviousBinBoundary(
-      const Mantid::API::IMDEventWorkspace_sptr &imdws) const;
+  coord_t getPreviousBinBoundary(const Mantid::API::IMDEventWorkspace_sptr &imdws) const;
 
   template <typename MDE, size_t nd>
-  void doCreate(
-      typename Mantid::DataObjects::MDEventWorkspace<MDE, nd>::sptr ws) const;
+  void doCreate(typename Mantid::DataObjects::MDEventWorkspace<MDE, nd>::sptr ws) const;
 
   /// Template Method pattern to validate the factory before use.
   void validate() const override;
@@ -93,8 +88,7 @@ private:
   mutable std::unique_ptr<bool[]> sliceMask;
 
   /// Implicit function to define which boxes to render.
-  mutable std::shared_ptr<Mantid::Geometry::MDImplicitFunction>
-      sliceImplicitFunction;
+  mutable std::shared_ptr<Mantid::Geometry::MDImplicitFunction> sliceImplicitFunction;
 
   /// Time value.
   double m_time;

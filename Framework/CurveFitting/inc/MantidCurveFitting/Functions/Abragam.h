@@ -26,21 +26,17 @@ Provide Abragam fitting function for muon scientists
  @date 21/03/2012
  */
 
-class MANTID_CURVEFITTING_DLL Abragam : public API::ParamFunction,
-                                        public API::IFunctionMW,
-                                        public API::IFunction1D {
+class MANTID_CURVEFITTING_DLL Abragam : public API::ParamFunction, public API::IFunctionMW, public API::IFunction1D {
 public:
   /// overwrite IFunction base class methods
   std::string name() const override { return "Abragam"; }
 
   /// overwrite IFunction base class methods
   const std::string category() const override { return "Muon\\MuonSpecific"; }
-  void functionDeriv(const API::FunctionDomain &domain,
-                     API::Jacobian &jacobian) override;
+  void functionDeriv(const API::FunctionDomain &domain, API::Jacobian &jacobian) override;
 
 protected:
-  void function1D(double *out, const double *xValues,
-                  const size_t nData) const override;
+  void function1D(double *out, const double *xValues, const size_t nData) const override;
   void setActiveParameter(size_t i, double value) override;
 
   /// overwrite IFunction base class method that declares function parameters

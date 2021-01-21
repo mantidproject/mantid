@@ -29,19 +29,13 @@ public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "SortEvents"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Sort the events in an EventWorkspace, for faster rebinning.";
-  }
+  const std::string summary() const override { return "Sort the events in an EventWorkspace, for faster rebinning."; }
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
-  const std::vector<std::string> seeAlso() const override {
-    return {"LoadEventNexus"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"LoadEventNexus"}; }
   /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override {
-    return "Events;Utility\\Sorting";
-  }
+  const std::string category() const override { return "Events;Utility\\Sorting"; }
 
 protected:
   // Overridden Algorithm methods

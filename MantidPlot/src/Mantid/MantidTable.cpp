@@ -33,16 +33,11 @@ using namespace MantidQt::API;
  * @param transpose ::
  * @return the MantidTable created
  */
-MantidTable::MantidTable(ScriptingEnv *env,
-                         const Mantid::API::ITableWorkspace_sptr &ws,
-                         const QString &label, ApplicationWindow *parent,
-                         bool transpose)
-    : Table(env,
-            transpose ? static_cast<int>(ws->columnCount())
-                      : static_cast<int>(ws->rowCount()),
-            transpose ? static_cast<int>(ws->rowCount() + 1)
-                      : static_cast<int>(ws->columnCount()),
-            label, parent, "", nullptr),
+MantidTable::MantidTable(ScriptingEnv *env, const Mantid::API::ITableWorkspace_sptr &ws, const QString &label,
+                         ApplicationWindow *parent, bool transpose)
+    : Table(env, transpose ? static_cast<int>(ws->columnCount()) : static_cast<int>(ws->rowCount()),
+            transpose ? static_cast<int>(ws->rowCount() + 1) : static_cast<int>(ws->columnCount()), label, parent, "",
+            nullptr),
       m_ws(ws), m_wsName(ws->getName()), m_transposed(transpose) {
   d_table->blockResizing(true);
 
@@ -61,8 +56,7 @@ MantidTable::MantidTable(ScriptingEnv *env,
 
   connect(this, SIGNAL(needToClose()), this, SLOT(closeTable()));
   connect(this, SIGNAL(needToUpdate()), this, SLOT(updateTable()));
-  connect(d_table, SIGNAL(unwantedResize()), this,
-          SLOT(dealWithUnwantedResize()));
+  connect(d_table, SIGNAL(unwantedResize()), this, SLOT(dealWithUnwantedResize()));
   observePreDelete();
   observeAfterReplace();
 }
@@ -129,8 +123,7 @@ void MantidTable::fillTable() {
     }
 
     // Special for errors?
-    if (colName.endsWith("_err", Qt::CaseInsensitive) ||
-        colName.endsWith("_error", Qt::CaseInsensitive)) {
+    if (colName.endsWith("_err", Qt::CaseInsensitive) || colName.endsWith("_error", Qt::CaseInsensitive)) {
       setColPlotDesignation(i, Table::yErr);
     }
 
@@ -262,11 +255,8 @@ void MantidTable::closeTable() {
 }
 
 //------------------------------------------------------------------------------------------------
-void MantidTable::preDeleteHandle(
-    const std::string &wsName,
-    const std::shared_ptr<Mantid::API::Workspace> &ws) {
-  Mantid::API::ITableWorkspace *ws_ptr =
-      dynamic_cast<Mantid::API::ITableWorkspace *>(ws.get());
+void MantidTable::preDeleteHandle(const std::string &wsName, const std::shared_ptr<Mantid::API::Workspace> &ws) {
+  Mantid::API::ITableWorkspace *ws_ptr = dynamic_cast<Mantid::API::ITableWorkspace *>(ws.get());
   if (!ws_ptr)
     return;
   if (ws_ptr == m_ws.get() || wsName == m_wsName) {
@@ -275,11 +265,8 @@ void MantidTable::preDeleteHandle(
 }
 
 //------------------------------------------------------------------------------------------------
-void MantidTable::afterReplaceHandle(
-    const std::string &wsName,
-    const std::shared_ptr<Mantid::API::Workspace> &ws) {
-  Mantid::API::ITableWorkspace_sptr new_ws =
-      std::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(ws);
+void MantidTable::afterReplaceHandle(const std::string &wsName, const std::shared_ptr<Mantid::API::Workspace> &ws) {
+  Mantid::API::ITableWorkspace_sptr new_ws = std::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(ws);
   if (!new_ws)
     return;
   if (new_ws.get() == m_ws.get() || wsName == m_wsName) {
@@ -319,9 +306,7 @@ void MantidTable::cellEdited(int row, int col) {
     // Put it back in the stream and let the column deduce the correct
     // type of the number.
     std::stringstream textStream;
-    textStream << std::setprecision(std::numeric_limits<long double>::digits10 +
-                                    1)
-               << number;
+    textStream << std::setprecision(std::numeric_limits<long double>::digits10 + 1) << number;
     std::istringstream stream(textStream.str());
     c->read(index, stream);
   } else {
@@ -330,8 +315,7 @@ void MantidTable::cellEdited(int row, int col) {
   }
 }
 
-void MantidTable::setPlotDesignation(Table::PlotDesignation pd,
-                                     bool rightColumns) {
+void MantidTable::setPlotDesignation(Table::PlotDesignation pd, bool rightColumns) {
   Table::setPlotDesignation(pd, rightColumns);
   setPlotTypeForSelectedColumns(pd);
 }
@@ -344,13 +328,11 @@ void MantidTable::setPlotDesignation(Table::PlotDesignation pd,
  */
 void MantidTable::deleteRows(int startRow, int endRow) {
   if (m_transposed) {
-    QMessageBox::warning(this, "MantidPlot - Warning",
-                         "Cannot delete rows in a transposed table");
+    QMessageBox::warning(this, "MantidPlot - Warning", "Cannot delete rows in a transposed table");
     return;
   }
 
-  Mantid::API::IAlgorithm_sptr alg =
-      Mantid::API::AlgorithmManager::Instance().create("DeleteTableRows");
+  Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("DeleteTableRows");
   alg->setPropertyValue("TableWorkspace", m_ws->getName());
   QStringList rows;
   rows << QString::number(startRow - 1) << QString::number(endRow - 1);
@@ -358,8 +340,7 @@ void MantidTable::deleteRows(int startRow, int endRow) {
   try {
     alg->execute();
   } catch (...) {
-    QMessageBox::critical(this, "MantidPlot - Error",
-                          "DeleteTableRow algorithm failed");
+    QMessageBox::critical(this, "MantidPlot - Error", "DeleteTableRow algorithm failed");
   }
 }
 
@@ -369,8 +350,7 @@ void MantidTable::deleteRows(int startRow, int endRow) {
  */
 bool MantidTable::isEditable() {
   bool retval = true;
-  if ((this->selectedColumn() == -1) ||
-      this->table()->isColumnReadOnly(this->selectedColumn())) {
+  if ((this->selectedColumn() == -1) || this->table()->isColumnReadOnly(this->selectedColumn())) {
     retval = false;
   }
   return retval;
@@ -422,8 +402,7 @@ void MantidTable::sortColumn(int col, int order) {
  * @param leadCol :: for sorting together, the column which determines the
  * permutation
  */
-void MantidTable::sortColumns(const QStringList &s, int type, int order,
-                              const QString &leadCol) {
+void MantidTable::sortColumns(const QStringList &s, int type, int order, const QString &leadCol) {
   if (!m_ws)
     return;
   if (m_ws->customSort()) {
@@ -462,6 +441,5 @@ void MantidTable::setPlotTypeForSelectedColumns(int plotType) {
 void MantidTable::sortTableDialog() {
   QHash<QString, QString> paramList;
   paramList["InputWorkspace"] = QString::fromStdString(m_wsName);
-  applicationWindow()->mantidUI->showAlgorithmDialog("SortTableWorkspace",
-                                                     paramList);
+  applicationWindow()->mantidUI->showAlgorithmDialog("SortTableWorkspace", paramList);
 }

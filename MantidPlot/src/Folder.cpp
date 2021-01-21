@@ -37,10 +37,8 @@
 using namespace MantidQt::API;
 
 Folder::Folder(Folder *parent, const QString &name)
-    : QObject(parent),
-      birthdate(QDateTime::currentDateTime().toString(Qt::LocalDate)),
-      d_log_info(QString()), myFolderListItem(nullptr),
-      d_active_window(nullptr) {
+    : QObject(parent), birthdate(QDateTime::currentDateTime().toString(Qt::LocalDate)), d_log_info(QString()),
+      myFolderListItem(nullptr), d_active_window(nullptr) {
   setObjectName(name);
 }
 
@@ -100,8 +98,7 @@ Folder *Folder::folderBelow() {
   return nullptr;
 }
 
-Folder *Folder::findSubfolder(const QString &s, bool caseSensitive,
-                              bool partialMatch) {
+Folder *Folder::findSubfolder(const QString &s, bool caseSensitive, bool partialMatch) {
   QObjectList folderList = children();
   if (!folderList.isEmpty()) {
     foreach (QObject *f, folderList) {
@@ -118,8 +115,7 @@ Folder *Folder::findSubfolder(const QString &s, bool caseSensitive,
           return static_cast<Folder *>(f);
       }
 
-      Folder *folder = (static_cast<Folder *>(f))
-                           ->findSubfolder(s, caseSensitive, partialMatch);
+      Folder *folder = (static_cast<Folder *>(f))->findSubfolder(s, caseSensitive, partialMatch);
       if (folder)
         return folder;
     }
@@ -127,8 +123,7 @@ Folder *Folder::findSubfolder(const QString &s, bool caseSensitive,
   return nullptr;
 }
 
-MdiSubWindow *Folder::findWindow(const QString &s, bool windowNames,
-                                 bool labels, bool caseSensitive,
+MdiSubWindow *Folder::findWindow(const QString &s, bool windowNames, bool labels, bool caseSensitive,
                                  bool partialMatch) {
   auto qt_cs = Qt::CaseInsensitive;
   if (!caseSensitive)
@@ -165,8 +160,7 @@ MdiSubWindow *Folder::findWindow(const QString &s, bool windowNames,
   return nullptr;
 }
 
-MdiSubWindow *Folder::window(const QString &name, const char *cls,
-                             bool recursive) {
+MdiSubWindow *Folder::window(const QString &name, const char *cls, bool recursive) {
   foreach (MdiSubWindow *w, lstWindows) {
     if (w->inherits(cls) && name == w->objectName())
       return w;
@@ -185,8 +179,7 @@ MdiSubWindow *Folder::window(const QString &name, const char *cls,
 void Folder::addWindow(MdiSubWindow *w) {
   if (w) {
     lstWindows.append(w);
-    connect(w, SIGNAL(closedWindow(MdiSubWindow *)), this,
-            SLOT(removeWindow(MdiSubWindow *)));
+    connect(w, SIGNAL(closedWindow(MdiSubWindow *)), this, SLOT(removeWindow(MdiSubWindow *)));
   }
 }
 
@@ -222,8 +215,8 @@ QString Folder::sizeToString() {
   foreach (MdiSubWindow *w, lstWindows)
     size += sizeof(w);
 
-  return QString::number(double(8 * size) / 1024.0, 'f', 1) + " " + tr("kB") +
-         " (" + QString::number(8 * size) + " " + tr("bytes") + ")";
+  return QString::number(double(8 * size) / 1024.0, 'f', 1) + " " + tr("kB") + " (" + QString::number(8 * size) + " " +
+         tr("bytes") + ")";
 }
 
 Folder *Folder::rootFolder() {
@@ -241,8 +234,7 @@ bool Folder::isEmpty() const { return lstWindows.isEmpty(); }
  *
  *****************************************************************************/
 
-FolderListItem::FolderListItem(QTreeWidget *parent, Folder *f)
-    : QTreeWidgetItem(parent) {
+FolderListItem::FolderListItem(QTreeWidget *parent, Folder *f) : QTreeWidgetItem(parent) {
   myFolder = f;
 
   setText(0, f->objectName());
@@ -251,8 +243,7 @@ FolderListItem::FolderListItem(QTreeWidget *parent, Folder *f)
   setFlags(Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled);
 }
 
-FolderListItem::FolderListItem(FolderListItem *parent, Folder *f)
-    : QTreeWidgetItem(parent) {
+FolderListItem::FolderListItem(FolderListItem *parent, Folder *f) : QTreeWidgetItem(parent) {
   myFolder = f;
 
   setText(0, f->objectName());
@@ -286,19 +277,17 @@ bool FolderListItem::isChildOf(FolderListItem *src) {
  *
  *****************************************************************************/
 
-FolderListView::FolderListView(QWidget *parent, const char *name)
-    : QTreeWidget(parent) {
+FolderListView::FolderListView(QWidget *parent, const char *name) : QTreeWidget(parent) {
   setWindowTitle(name);
   setAcceptDrops(true);
   viewport()->setAcceptDrops(true);
 
   if (parent) {
-    connect(this, SIGNAL(collapsed(const QModelIndex &)),
-            dynamic_cast<ApplicationWindow *>(parent), SLOT(modifiedProject()));
-    connect(this, SIGNAL(expanded(const QModelIndex &)),
-            dynamic_cast<ApplicationWindow *>(parent), SLOT(modifiedProject()));
-    connect(this, SIGNAL(expanded(const QModelIndex &)), this,
-            SLOT(expandedItem(const QModelIndex &)));
+    connect(this, SIGNAL(collapsed(const QModelIndex &)), dynamic_cast<ApplicationWindow *>(parent),
+            SLOT(modifiedProject()));
+    connect(this, SIGNAL(expanded(const QModelIndex &)), dynamic_cast<ApplicationWindow *>(parent),
+            SLOT(modifiedProject()));
+    connect(this, SIGNAL(expanded(const QModelIndex &)), this, SLOT(expandedItem(const QModelIndex &)));
   }
 }
 
@@ -324,7 +313,4 @@ QTreeWidgetItem *FolderListView::firstChild() { return topLevelItem(0); }
  *
  *****************************************************************************/
 
-WindowListItem::WindowListItem(QTreeWidget *parent, MdiSubWindow *w)
-    : QTreeWidgetItem(parent) {
-  myWindow = w;
-}
+WindowListItem::WindowListItem(QTreeWidget *parent, MdiSubWindow *w) : QTreeWidgetItem(parent) { myWindow = w; }

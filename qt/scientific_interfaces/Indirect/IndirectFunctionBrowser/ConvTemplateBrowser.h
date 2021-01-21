@@ -26,8 +26,7 @@ using namespace ConvTypes;
  * and set properties that can be used to generate a fit function.
  *
  */
-class MANTIDQT_INDIRECT_DLL ConvTemplateBrowser
-    : public FunctionTemplateBrowser {
+class MANTIDQT_INDIRECT_DLL ConvTemplateBrowser : public FunctionTemplateBrowser {
   Q_OBJECT
 public:
   explicit ConvTemplateBrowser(QWidget *parent = nullptr);
@@ -37,8 +36,7 @@ public:
   void setNumberOfDatasets(int) override;
   int getCurrentDataset() override;
   int getNumberOfDatasets() const override;
-  void setDatasets(
-      const QList<MantidWidgets::FunctionModelDataset> &datasets) override;
+  void setDatasets(const QList<MantidWidgets::FunctionModelDataset> &datasets) override;
   QStringList getGlobalParameters() const override;
   QStringList getLocalParameters() const override;
   void setGlobalParameters(const QStringList &globals) override;
@@ -49,15 +47,12 @@ public:
   void updateParameterNames(const QMap<int, QString> &parameterNames) override;
   void setErrorsEnabled(bool enabled) override;
   void clear() override;
-  void updateParameterEstimationData(
-      DataForParameterEstimationCollection &&data) override;
+  void updateParameterEstimationData(DataForParameterEstimationCollection &&data) override;
   void estimateFunctionParameters() override;
 
   void setBackgroundA0(double value) override;
-  void setResolution(std::string const &name,
-                     TableDatasetIndex const &index) override;
-  void setResolution(const std::vector<std::pair<std::string, size_t>>
-                         &fitResolutions) override;
+  void setResolution(std::string const &name, TableDatasetIndex const &index) override;
+  void setResolution(const std::vector<std::pair<std::string, size_t>> &fitResolutions) override;
   void addDeltaFunction();
   void removeDeltaFunction();
   void addTempCorrection(double value);
@@ -66,8 +61,7 @@ public:
   void setEnum(size_t subTypeIndex, int fitType);
   void setInt(size_t subTypeIndex, int val);
 
-  void updateTemperatureCorrectionAndDelta(bool tempCorrection,
-                                           bool deltaFunction);
+  void updateTemperatureCorrectionAndDelta(bool tempCorrection, bool deltaFunction);
 
 protected slots:
   void intChanged(QtProperty *) override;

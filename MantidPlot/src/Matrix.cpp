@@ -75,48 +75,35 @@ DECLARE_WINDOW(Matrix)
 using namespace Mantid;
 using namespace MantidQt::API;
 
-Matrix::Matrix(ScriptingEnv *env, const QString &label, QWidget *parent,
-               const QString &name, const Qt::WFlags &f)
-    : MdiSubWindow(parent, label, name, f), Scripted(env),
-      d_matrix_model(nullptr), m_bk_color(), d_stack(nullptr),
-      d_table_view(nullptr), imageLabel(nullptr), formula_str(), txt_format(),
-      num_precision(0), x_start(0.0), x_end(0.0), y_start(0.0), y_end(0.0),
-      d_view_type(ViewType::TableView),
-      d_header_view_type(HeaderViewType::ColumnRow), d_color_map(),
-      d_color_map_type(ColorMapType::Rainbow), d_column_width(0),
-      d_select_all_shortcut(nullptr), d_undo_stack(nullptr),
-      d_workspace(nullptr) {
+Matrix::Matrix(ScriptingEnv *env, const QString &label, QWidget *parent, const QString &name, const Qt::WFlags &f)
+    : MdiSubWindow(parent, label, name, f), Scripted(env), d_matrix_model(nullptr), m_bk_color(), d_stack(nullptr),
+      d_table_view(nullptr), imageLabel(nullptr), formula_str(), txt_format(), num_precision(0), x_start(0.0),
+      x_end(0.0), y_start(0.0), y_end(0.0), d_view_type(ViewType::TableView),
+      d_header_view_type(HeaderViewType::ColumnRow), d_color_map(), d_color_map_type(ColorMapType::Rainbow),
+      d_column_width(0), d_select_all_shortcut(nullptr), d_undo_stack(nullptr), d_workspace(nullptr) {
   m_bk_color = QColor(255, 255, 128);
   m_matrix_icon = getQPixmap("matrix_xpm");
 }
 
-Matrix::Matrix(ScriptingEnv *env, int r, int c, const QString &label,
-               QWidget *parent, const QString &name, const Qt::WFlags &f)
-    : MdiSubWindow(parent, label, name, f), Scripted(env),
-      d_matrix_model(nullptr), m_bk_color(), d_stack(nullptr),
-      d_table_view(nullptr), imageLabel(nullptr), formula_str(), txt_format(),
-      num_precision(0), x_start(0.0), x_end(0.0), y_start(0.0), y_end(0.0),
-      d_view_type(ViewType::TableView),
-      d_header_view_type(HeaderViewType::ColumnRow), d_color_map(),
-      d_color_map_type(ColorMapType::Rainbow), d_column_width(0),
-      d_select_all_shortcut(nullptr), d_undo_stack(nullptr),
-      d_workspace(nullptr) {
+Matrix::Matrix(ScriptingEnv *env, int r, int c, const QString &label, QWidget *parent, const QString &name,
+               const Qt::WFlags &f)
+    : MdiSubWindow(parent, label, name, f), Scripted(env), d_matrix_model(nullptr), m_bk_color(), d_stack(nullptr),
+      d_table_view(nullptr), imageLabel(nullptr), formula_str(), txt_format(), num_precision(0), x_start(0.0),
+      x_end(0.0), y_start(0.0), y_end(0.0), d_view_type(ViewType::TableView),
+      d_header_view_type(HeaderViewType::ColumnRow), d_color_map(), d_color_map_type(ColorMapType::Rainbow),
+      d_column_width(0), d_select_all_shortcut(nullptr), d_undo_stack(nullptr), d_workspace(nullptr) {
   m_bk_color = QColor(255, 255, 128);
   m_matrix_icon = getQPixmap("matrix_xpm");
   initTable(r, c);
 }
 
-Matrix::Matrix(ScriptingEnv *env, const QImage &image, const QString &label,
-               QWidget *parent, const QString &name, const Qt::WFlags &f)
-    : MdiSubWindow(parent, label, name, f), Scripted(env),
-      d_matrix_model(nullptr), m_bk_color(), d_stack(nullptr),
-      d_table_view(nullptr), imageLabel(nullptr), formula_str(),
-      txt_format(QChar()), num_precision(0), x_start(0.0), x_end(0.0),
-      y_start(0.0), y_end(0.0), d_view_type(ViewType::TableView),
-      d_header_view_type(HeaderViewType::ColumnRow), d_color_map(),
-      d_color_map_type(ColorMapType::Rainbow), d_column_width(0),
-      d_select_all_shortcut(nullptr), d_undo_stack(nullptr),
-      d_workspace(nullptr) {
+Matrix::Matrix(ScriptingEnv *env, const QImage &image, const QString &label, QWidget *parent, const QString &name,
+               const Qt::WFlags &f)
+    : MdiSubWindow(parent, label, name, f), Scripted(env), d_matrix_model(nullptr), m_bk_color(), d_stack(nullptr),
+      d_table_view(nullptr), imageLabel(nullptr), formula_str(), txt_format(QChar()), num_precision(0), x_start(0.0),
+      x_end(0.0), y_start(0.0), y_end(0.0), d_view_type(ViewType::TableView),
+      d_header_view_type(HeaderViewType::ColumnRow), d_color_map(), d_color_map_type(ColorMapType::Rainbow),
+      d_column_width(0), d_select_all_shortcut(nullptr), d_undo_stack(nullptr), d_workspace(nullptr) {
   m_bk_color = QColor(255, 255, 128);
   m_matrix_icon = getQPixmap("matrix_xpm");
   initImage(image);
@@ -156,12 +143,8 @@ void Matrix::initTable(int rows, int cols) {
   initTableView();
 
   // resize the table
-  setGeometry(50, 50,
-              qMin(_Matrix_initial_columns_, cols) *
-                      d_table_view->horizontalHeader()->sectionSize(0) +
-                  55,
-              (qMin(_Matrix_initial_rows_, rows) + 1) *
-                  d_table_view->verticalHeader()->sectionSize(0));
+  setGeometry(50, 50, qMin(_Matrix_initial_columns_, cols) * d_table_view->horizontalHeader()->sectionSize(0) + 55,
+              (qMin(_Matrix_initial_rows_, rows) + 1) * d_table_view->verticalHeader()->sectionSize(0));
 }
 
 void Matrix::initImage(const QImage &image) {
@@ -184,17 +167,11 @@ void Matrix::initImage(const QImage &image) {
 
 double Matrix::cell(int row, int col) { return d_matrix_model->cell(row, col); }
 
-void Matrix::setCell(int row, int col, double value) {
-  d_matrix_model->setCell(row, col, value);
-}
+void Matrix::setCell(int row, int col, double value) { d_matrix_model->setCell(row, col, value); }
 
-QString Matrix::text(int row, int col) {
-  return d_matrix_model->text(row, col);
-}
+QString Matrix::text(int row, int col) { return d_matrix_model->text(row, col); }
 
-void Matrix::setText(int row, int col, const QString &new_text) {
-  d_matrix_model->setText(row, col, new_text);
-}
+void Matrix::setText(int row, int col, const QString &new_text) { d_matrix_model->setText(row, col, new_text); }
 
 void Matrix::setCoordinates(double xs, double xe, double ys, double ye) {
   if (x_start == xs && x_end == xe && y_start == ys && y_end == ye)
@@ -308,14 +285,12 @@ void Matrix::setDimensions(int rows, int cols) {
   if (rows <= 0 || cols <= 0 || INT_MAX / rows < cols) // avoid integer overflow
   {
     QApplication::restoreOverrideCursor();
-    QMessageBox::critical(
-        d_matrix_model->matrix(),
-        tr("MantidPlot") + " - " + tr("Input Size Error"),
-        tr("The dimensions you have specified are not acceptable!") + "\n" +
-            tr("Please enter positive values for which the product "
-               "rows*columns does not exceed the maximum integer value "
-               "available (") +
-            tr(QString::number(INT_MAX).toAscii().constData()) + tr(")!"));
+    QMessageBox::critical(d_matrix_model->matrix(), tr("MantidPlot") + " - " + tr("Input Size Error"),
+                          tr("The dimensions you have specified are not acceptable!") + "\n" +
+                              tr("Please enter positive values for which the product "
+                                 "rows*columns does not exceed the maximum integer value "
+                                 "available (") +
+                              tr(QString::number(INT_MAX).toAscii().constData()) + tr(")!"));
     return;
   }
 
@@ -324,10 +299,9 @@ void Matrix::setDimensions(int rows, int cols) {
 
   double *buffer = d_matrix_model->dataCopy();
   if (buffer)
-    d_undo_stack->push(new MatrixSetSizeCommand(
-        d_matrix_model, QSize(r, c), QSize(rows, cols), buffer,
-        tr("Set Dimensions") + " " + QString::number(rows) + "x" +
-            QString::number(cols)));
+    d_undo_stack->push(
+        new MatrixSetSizeCommand(d_matrix_model, QSize(r, c), QSize(rows, cols), buffer,
+                                 tr("Set Dimensions") + " " + QString::number(rows) + "x" + QString::number(cols)));
   else if (ignoreUndo()) {
     d_matrix_model->setDimensions(rows, cols);
     resetView();
@@ -343,9 +317,8 @@ double Matrix::integrate() {
     int i1 = i + 1;
     for (int j = 0; j < cols; j++) {
       int j1 = j + 1;
-      sum +=
-          0.25 * (d_matrix_model->cell(i, j) + d_matrix_model->cell(i, j1) +
-                  d_matrix_model->cell(i1, j) + d_matrix_model->cell(i1, j1));
+      sum += 0.25 * (d_matrix_model->cell(i, j) + d_matrix_model->cell(i, j1) + d_matrix_model->cell(i1, j) +
+                     d_matrix_model->cell(i1, j1));
     }
   }
   return sum * dx() * dy();
@@ -356,10 +329,8 @@ double Matrix::determinant() {
   int cols = numCols();
 
   if (rows != cols) {
-    QMessageBox::critical(
-        dynamic_cast<ApplicationWindow *>(applicationWindow()),
-        tr("MantidPlot - Error"),
-        tr("Calculation failed, the matrix is not square!"));
+    QMessageBox::critical(dynamic_cast<ApplicationWindow *>(applicationWindow()), tr("MantidPlot - Error"),
+                          tr("Calculation failed, the matrix is not square!"));
     return GSL_POSINF;
   }
 
@@ -369,10 +340,9 @@ double Matrix::determinant() {
   gsl_permutation *p = gsl_permutation_alloc(rows);
   if (!A || !p) {
     QApplication::restoreOverrideCursor();
-    QMessageBox::critical(
-        dynamic_cast<ApplicationWindow *>(applicationWindow()),
-        tr("MantidPlot") + " - " + tr("Memory Allocation Error"),
-        tr("Not enough memory, operation aborted!"));
+    QMessageBox::critical(dynamic_cast<ApplicationWindow *>(applicationWindow()),
+                          tr("MantidPlot") + " - " + tr("Memory Allocation Error"),
+                          tr("Not enough memory, operation aborted!"));
     return 0.0;
   }
 
@@ -396,15 +366,12 @@ double Matrix::determinant() {
 
 void Matrix::invert() {
   if (numRows() != numCols()) {
-    QMessageBox::critical(
-        dynamic_cast<ApplicationWindow *>(applicationWindow()),
-        tr("MantidPlot - Error"),
-        tr("Inversion failed, the matrix is not square!"));
+    QMessageBox::critical(dynamic_cast<ApplicationWindow *>(applicationWindow()), tr("MantidPlot - Error"),
+                          tr("Inversion failed, the matrix is not square!"));
     return;
   }
   if (d_matrix_model->initWorkspace())
-    d_undo_stack->push(
-        new MatrixSymmetryOperation(d_matrix_model, Invert, tr("Invert")));
+    d_undo_stack->push(new MatrixSymmetryOperation(d_matrix_model, Invert, tr("Invert")));
 }
 
 void Matrix::transpose() {
@@ -412,8 +379,7 @@ void Matrix::transpose() {
   if (!d_workspace)
     return;
 
-  d_undo_stack->push(
-      new MatrixSymmetryOperation(d_matrix_model, Transpose, tr("Transpose")));
+  d_undo_stack->push(new MatrixSymmetryOperation(d_matrix_model, Transpose, tr("Transpose")));
 }
 
 void Matrix::flipVertically() {
@@ -421,8 +387,7 @@ void Matrix::flipVertically() {
   if (!d_workspace)
     return;
 
-  d_undo_stack->push(new MatrixSymmetryOperation(d_matrix_model, FlipVertically,
-                                                 tr("Flip Vertically")));
+  d_undo_stack->push(new MatrixSymmetryOperation(d_matrix_model, FlipVertically, tr("Flip Vertically")));
 }
 
 void Matrix::flipHorizontally() {
@@ -430,8 +395,7 @@ void Matrix::flipHorizontally() {
   if (!d_workspace)
     return;
 
-  d_undo_stack->push(new MatrixSymmetryOperation(
-      d_matrix_model, FlipHorizontally, tr("Flip Horizontally")));
+  d_undo_stack->push(new MatrixSymmetryOperation(d_matrix_model, FlipHorizontally, tr("Flip Horizontally")));
 }
 
 void Matrix::rotate90(bool clockwise) {
@@ -440,11 +404,9 @@ void Matrix::rotate90(bool clockwise) {
     return;
 
   if (clockwise)
-    d_undo_stack->push(new MatrixSymmetryOperation(
-        d_matrix_model, RotateClockwise, tr("Rotate 90�")));
+    d_undo_stack->push(new MatrixSymmetryOperation(d_matrix_model, RotateClockwise, tr("Rotate 90�")));
   else
-    d_undo_stack->push(new MatrixSymmetryOperation(
-        d_matrix_model, RotateCounterClockwise, tr("Rotate -90�")));
+    d_undo_stack->push(new MatrixSymmetryOperation(d_matrix_model, RotateCounterClockwise, tr("Rotate -90�")));
 }
 
 bool Matrix::canCalculate(bool useMuParser) {
@@ -452,10 +414,8 @@ bool Matrix::canCalculate(bool useMuParser) {
     return false;
 
   if (useMuParser) {
-    muParserScript *mup = new muParserScript(
-        scriptingEnv(), QString("<%1>").arg(objectName()), this, false);
-    connect(mup, SIGNAL(error(const QString &, const QString &, int)),
-            scriptingEnv(),
+    muParserScript *mup = new muParserScript(scriptingEnv(), QString("<%1>").arg(objectName()), this, false);
+    connect(mup, SIGNAL(error(const QString &, const QString &, int)), scriptingEnv(),
             SIGNAL(error(const QString &, const QString &, int)));
 
     double *ri = mup->defineVariable("i");
@@ -485,13 +445,10 @@ bool Matrix::canCalculate(bool useMuParser) {
         return false;
     }
   } else {
-    Script *script = scriptingEnv()->newScript(
-        QString("<%1>").arg(objectName()), this, Script::NonInteractive);
-    connect(script, SIGNAL(error(const QString &, const QString &, int)),
-            scriptingEnv(),
+    Script *script = scriptingEnv()->newScript(QString("<%1>").arg(objectName()), this, Script::NonInteractive);
+    connect(script, SIGNAL(error(const QString &, const QString &, int)), scriptingEnv(),
             SIGNAL(error(const QString &, const QString &, int)));
-    connect(script, SIGNAL(print(const QString &)), scriptingEnv(),
-            SIGNAL(print(const QString &)));
+    connect(script, SIGNAL(print(const QString &)), scriptingEnv(), SIGNAL(print(const QString &)));
 
     double r = 1.0;
     script->setDouble(r, "i");
@@ -511,13 +468,11 @@ bool Matrix::canCalculate(bool useMuParser) {
   return true;
 }
 
-bool Matrix::muParserCalculate(int startRow, int endRow, int startCol,
-                               int endCol) {
+bool Matrix::muParserCalculate(int startRow, int endRow, int startCol, int endCol) {
   double *buffer = d_matrix_model->dataCopy(startRow, endRow, startCol, endCol);
 
   if (buffer) {
-    d_undo_stack->push(new MatrixUndoCommand(d_matrix_model, MuParserCalculate,
-                                             startRow, endRow, startCol, endCol,
+    d_undo_stack->push(new MatrixUndoCommand(d_matrix_model, MuParserCalculate, startRow, endRow, startCol, endCol,
                                              buffer, tr("Calculate Values")));
     emit modifiedWindow(this);
     return true;
@@ -529,16 +484,14 @@ bool Matrix::muParserCalculate(int startRow, int endRow, int startCol,
   return false;
 }
 
-bool Matrix::calculate(int startRow, int endRow, int startCol, int endCol,
-                       bool forceMuParser) {
+bool Matrix::calculate(int startRow, int endRow, int startCol, int endCol, bool forceMuParser) {
   if (QString(scriptingEnv()->objectName()) == "muParser" || forceMuParser)
     return muParserCalculate(startRow, endRow, startCol, endCol);
 
   double *buffer = d_matrix_model->dataCopy(startRow, endRow, startCol, endCol);
   if (buffer) {
-    d_undo_stack->push(new MatrixUndoCommand(d_matrix_model, Calculate,
-                                             startRow, endRow, startCol, endCol,
-                                             buffer, tr("Calculate Values")));
+    d_undo_stack->push(new MatrixUndoCommand(d_matrix_model, Calculate, startRow, endRow, startCol, endCol, buffer,
+                                             tr("Calculate Values")));
     emit modifiedWindow(this);
     return true;
   } else if (ignoreUndo()) {
@@ -564,8 +517,7 @@ void Matrix::clearSelection() {
   int endCol = sel.right();
   double *buffer = d_matrix_model->dataCopy(startRow, endRow, startCol, endCol);
   if (buffer) {
-    d_undo_stack->push(new MatrixUndoCommand(d_matrix_model, Clear, startRow,
-                                             endRow, startCol, endCol, buffer,
+    d_undo_stack->push(new MatrixUndoCommand(d_matrix_model, Clear, startRow, endRow, startCol, endCol, buffer,
                                              tr("Clear Selection")));
     emit modifiedWindow(this);
   } else if (ignoreUndo()) {
@@ -615,8 +567,7 @@ void Matrix::pasteSelection() {
 
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-  QStringList linesList =
-      text.split(applicationWindow()->endOfLine(), QString::SkipEmptyParts);
+  QStringList linesList = text.split(applicationWindow()->endOfLine(), QString::SkipEmptyParts);
   int rows = linesList.size();
   if (!rows)
     return;
@@ -648,9 +599,8 @@ void Matrix::pasteSelection() {
 
   double *clipboardBuffer = (double *)malloc(rows * cols * sizeof(double));
   if (!clipboardBuffer) {
-    QMessageBox::critical(
-        this, tr("MantidPlot") + " - " + tr("Memory Allocation Error"),
-        tr("Not enough memory, operation aborted!"));
+    QMessageBox::critical(this, tr("MantidPlot") + " - " + tr("Memory Allocation Error"),
+                          tr("Not enough memory, operation aborted!"));
     QApplication::restoreOverrideCursor();
     return;
   }
@@ -676,12 +626,10 @@ void Matrix::pasteSelection() {
 
   QApplication::restoreOverrideCursor();
 
-  double *backupBuffer =
-      d_matrix_model->dataCopy(topRow, bottomRow, leftCol, rightCol);
+  double *backupBuffer = d_matrix_model->dataCopy(topRow, bottomRow, leftCol, rightCol);
   if (backupBuffer) {
-    d_undo_stack->push(new MatrixPasteCommand(
-        d_matrix_model, topRow, bottomRow, leftCol, rightCol, clipboardBuffer,
-        rows, cols, backupBuffer, oldRows, oldCols, tr("Paste")));
+    d_undo_stack->push(new MatrixPasteCommand(d_matrix_model, topRow, bottomRow, leftCol, rightCol, clipboardBuffer,
+                                              rows, cols, backupBuffer, oldRows, oldCols, tr("Paste")));
     emit modifiedWindow(this);
   } else if (ignoreUndo()) {
     d_matrix_model->pasteData(clipboardBuffer, topRow, leftCol, rows, cols);
@@ -714,13 +662,11 @@ void Matrix::deleteSelectedRows() {
   if (startRow < 0 || !count)
     return;
 
-  double *buffer = d_matrix_model->dataCopy(startRow, startRow + count - 1, 0,
-                                            numCols() - 1);
+  double *buffer = d_matrix_model->dataCopy(startRow, startRow + count - 1, 0, numCols() - 1);
   if (buffer) {
-    d_undo_stack->push(new MatrixDeleteRowsCommand(
-        d_matrix_model, startRow, count, buffer,
-        tr("Delete Rows") + " " + QString::number(startRow + 1) + " - " +
-            QString::number(startRow + count)));
+    d_undo_stack->push(new MatrixDeleteRowsCommand(d_matrix_model, startRow, count, buffer,
+                                                   tr("Delete Rows") + " " + QString::number(startRow + 1) + " - " +
+                                                       QString::number(startRow + count)));
     emit modifiedWindow(this);
   } else if (ignoreUndo()) {
     d_matrix_model->removeRows(startRow, count);
@@ -747,13 +693,11 @@ void Matrix::deleteSelectedColumns() {
   if (startCol < 0 || !count)
     return;
 
-  double *buffer = d_matrix_model->dataCopy(0, numRows() - 1, startCol,
-                                            startCol + count - 1);
+  double *buffer = d_matrix_model->dataCopy(0, numRows() - 1, startCol, startCol + count - 1);
   if (buffer) {
-    d_undo_stack->push(new MatrixDeleteColsCommand(
-        d_matrix_model, startCol, count, buffer,
-        tr("Delete Columns") + " " + QString::number(startCol + 1) + " - " +
-            QString::number(startCol + count)));
+    d_undo_stack->push(new MatrixDeleteColsCommand(d_matrix_model, startCol, count, buffer,
+                                                   tr("Delete Columns") + " " + QString::number(startCol + 1) + " - " +
+                                                       QString::number(startCol + count)));
     emit modifiedWindow(this);
   } else if (ignoreUndo()) {
     d_matrix_model->removeColumns(startCol, count);
@@ -802,9 +746,8 @@ void Matrix::insertRow() {
   if (!d_matrix_model->canResize(numRows() + 1, numCols()))
     return;
 
-  d_undo_stack->push(new MatrixInsertRowCommand(
-      d_matrix_model, index.row(),
-      tr("Insert Row") + " " + QString::number(index.row() + 1)));
+  d_undo_stack->push(new MatrixInsertRowCommand(d_matrix_model, index.row(),
+                                                tr("Insert Row") + " " + QString::number(index.row() + 1)));
   d_table_view->reset();
   emit modifiedWindow(this);
 }
@@ -821,9 +764,8 @@ void Matrix::insertColumn() {
   if (!d_matrix_model->canResize(numRows(), numCols() + 1))
     return;
 
-  d_undo_stack->push(new MatrixInsertColCommand(
-      d_matrix_model, index.column(),
-      tr("Insert Column") + " " + QString::number(index.column() + 1)));
+  d_undo_stack->push(new MatrixInsertColCommand(d_matrix_model, index.column(),
+                                                tr("Insert Column") + " " + QString::number(index.column() + 1)));
   d_table_view->reset();
   emit modifiedWindow(this);
 }
@@ -842,13 +784,11 @@ void Matrix::exportRasterImage(const QString &fileName, int quality) {
 
 void Matrix::exportToFile(const QString &fileName) {
   if (fileName.isEmpty()) {
-    QMessageBox::critical(this, tr("MantidPlot - Error"),
-                          tr("Please provide a valid file name!"));
+    QMessageBox::critical(this, tr("MantidPlot - Error"), tr("Please provide a valid file name!"));
     return;
   }
 
-  if (fileName.contains(".eps") || fileName.contains(".pdf") ||
-      fileName.contains(".ps")) {
+  if (fileName.contains(".eps") || fileName.contains(".pdf") || fileName.contains(".ps")) {
     exportVector(fileName);
     return;
   } else if (fileName.contains(".svg")) {
@@ -862,8 +802,7 @@ void Matrix::exportToFile(const QString &fileName) {
         return;
       }
     }
-    QMessageBox::critical(this, tr("MantidPlot - Error"),
-                          tr("File format not handled, operation aborted!"));
+    QMessageBox::critical(this, tr("MantidPlot - Error"), tr("File format not handled, operation aborted!"));
   }
 }
 
@@ -924,8 +863,7 @@ void Matrix::print(const QString &fileName) {
 
   // print header
   p.setFont(QFont());
-  QString header_label =
-      d_matrix_model->headerData(0, Qt::Horizontal).toString();
+  QString header_label = d_matrix_model->headerData(0, Qt::Horizontal).toString();
   QRect br;
   br = p.boundingRect(br, Qt::AlignCenter, header_label);
   p.drawLine(right, height, right, height + br.height());
@@ -953,8 +891,7 @@ void Matrix::print(const QString &fileName) {
   // print table values
   for (i = 0; i < rows; i++) {
     right = margin;
-    QString cell_text =
-        d_matrix_model->headerData(i, Qt::Horizontal).toString() + "\t";
+    QString cell_text = d_matrix_model->headerData(i, Qt::Horizontal).toString() + "\t";
     tr = p.boundingRect(tr, Qt::AlignCenter, cell_text);
     p.drawLine(right, height, right, height + tr.height());
 
@@ -990,14 +927,12 @@ void Matrix::print(const QString &fileName) {
   }
 }
 
-void Matrix::exportVector(const QString &fileName, int res, bool color,
-                          bool keepAspect, QPrinter::PageSize pageSize) {
+void Matrix::exportVector(const QString &fileName, int res, bool color, bool keepAspect, QPrinter::PageSize pageSize) {
   if (d_view_type != ImageView)
     return;
 
   if (fileName.isEmpty()) {
-    QMessageBox::critical(this, tr("MantidPlot - Error"),
-                          tr("Please provide a valid file name!"));
+    QMessageBox::critical(this, tr("MantidPlot - Error"), tr("Please provide a valid file name!"));
     return;
   }
 
@@ -1082,9 +1017,8 @@ void Matrix::range(double *min, double *max) {
 double **Matrix::allocateMatrixData(int rows, int columns) {
   double **data = (double **)malloc(rows * sizeof(double *));
   if (!data) {
-    QMessageBox::critical(
-        nullptr, tr("MantidPlot") + " - " + tr("Memory Allocation Error"),
-        tr("Not enough memory, operation aborted!"));
+    QMessageBox::critical(nullptr, tr("MantidPlot") + " - " + tr("Memory Allocation Error"),
+                          tr("Not enough memory, operation aborted!"));
     return nullptr;
   }
 
@@ -1095,9 +1029,8 @@ double **Matrix::allocateMatrixData(int rows, int columns) {
         free(data[j]);
       free(data);
 
-      QMessageBox::critical(
-          nullptr, tr("MantidPlot") + " - " + tr("Memory Allocation Error"),
-          tr("Not enough memory, operation aborted!"));
+      QMessageBox::critical(nullptr, tr("MantidPlot") + " - " + tr("Memory Allocation Error"),
+                            tr("Not enough memory, operation aborted!"));
       return nullptr;
     }
   }
@@ -1116,11 +1049,9 @@ void Matrix::goToRow(int row) {
     return;
 
   if (d_view_type == ImageView)
-    d_undo_stack->push(new MatrixSetViewCommand(this, d_view_type, TableView,
-                                                tr("Set Data Mode")));
+    d_undo_stack->push(new MatrixSetViewCommand(this, d_view_type, TableView, tr("Set Data Mode")));
   d_table_view->selectRow(row - 1);
-  d_table_view->scrollTo(d_matrix_model->index(row - 1, 0),
-                         QAbstractItemView::PositionAtTop);
+  d_table_view->scrollTo(d_matrix_model->index(row - 1, 0), QAbstractItemView::PositionAtTop);
 }
 
 void Matrix::goToColumn(int col) {
@@ -1128,19 +1059,16 @@ void Matrix::goToColumn(int col) {
     return;
 
   if (d_view_type == ImageView)
-    d_undo_stack->push(new MatrixSetViewCommand(this, d_view_type, TableView,
-                                                tr("Set Data Mode")));
+    d_undo_stack->push(new MatrixSetViewCommand(this, d_view_type, TableView, tr("Set Data Mode")));
   d_table_view->selectColumn(col - 1);
-  d_table_view->scrollTo(d_matrix_model->index(0, col - 1),
-                         QAbstractItemView::PositionAtCenter);
+  d_table_view->scrollTo(d_matrix_model->index(0, col - 1), QAbstractItemView::PositionAtCenter);
 }
 
 void Matrix::moveCell(const QModelIndex &index) {
   if (!index.isValid())
     return;
 
-  d_table_view->setCurrentIndex(
-      d_matrix_model->index(index.row() + 1, index.column()));
+  d_table_view->setCurrentIndex(d_matrix_model->index(index.row() + 1, index.column()));
 }
 
 void Matrix::copy(Matrix *m) {
@@ -1193,9 +1121,7 @@ void Matrix::displayImage(const QImage &image) {
   QImage im(imageLabel->size(), QImage::Format_RGB32);
   im.fill(0);
   QPainter p(&im);
-  p.drawImage(0, 0,
-              image.scaled(imageLabel->size(), Qt::KeepAspectRatio,
-                           Qt::SmoothTransformation));
+  p.drawImage(0, 0, image.scaled(imageLabel->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
   p.end();
   imageLabel->setPixmap(QPixmap::fromImage(im));
 }
@@ -1231,11 +1157,9 @@ void Matrix::initImageView() {
 
 void Matrix::initTableView() {
   d_table_view = new QTableView();
-  d_table_view->setSizePolicy(
-      QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
-  d_table_view->setSelectionMode(
-      QAbstractItemView::ContiguousSelection); // only one contiguous selection
-                                               // supported
+  d_table_view->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
+  d_table_view->setSelectionMode(QAbstractItemView::ContiguousSelection); // only one contiguous selection
+                                                                          // supported
   d_table_view->setModel(d_matrix_model);
   d_table_view->setEditTriggers(QAbstractItemView::DoubleClicked);
   d_table_view->setFocusPolicy(Qt::StrongFocus);
@@ -1262,10 +1186,8 @@ void Matrix::initTableView() {
   d_stack->addWidget(d_table_view);
 
   // recreate keyboard shortcut
-  d_select_all_shortcut =
-      new QShortcut(QKeySequence(tr("Ctrl+A", "Matrix: select all")), this);
-  connect(d_select_all_shortcut, SIGNAL(activated()), d_table_view,
-          SLOT(selectAll()));
+  d_select_all_shortcut = new QShortcut(QKeySequence(tr("Ctrl+A", "Matrix: select all")), this);
+  connect(d_select_all_shortcut, SIGNAL(activated()), d_table_view, SLOT(selectAll()));
 }
 
 QImage Matrix::image() { return d_matrix_model->renderImage(); }
@@ -1277,9 +1199,8 @@ void Matrix::importImage(const QString &fn) {
 
   double *buffer = d_matrix_model->dataCopy();
   if (buffer) {
-    d_undo_stack->push(new MatrixSetImageCommand(
-        d_matrix_model, image, d_view_type, 0, numRows() - 1, 0, numCols() - 1,
-        buffer, tr("Import Image") + " \"" + fn + "\""));
+    d_undo_stack->push(new MatrixSetImageCommand(d_matrix_model, image, d_view_type, 0, numRows() - 1, 0, numCols() - 1,
+                                                 buffer, tr("Import Image") + " \"" + fn + "\""));
     setWindowLabel(fn);
     emit modifiedWindow(this);
   } else if (ignoreUndo()) {
@@ -1329,18 +1250,15 @@ void Matrix::setColorMap(const QStringList &lst) {
 
   int mode = s.remove("<Mode>").remove("</Mode>").trimmed().toInt();
   s = *(++line);
-  QColor color1 =
-      QColor(s.remove("<MinColor>").remove("</MinColor>").trimmed());
+  QColor color1 = QColor(s.remove("<MinColor>").remove("</MinColor>").trimmed());
   s = *(++line);
-  QColor color2 =
-      QColor(s.remove("<MaxColor>").remove("</MaxColor>").trimmed());
+  QColor color2 = QColor(s.remove("<MaxColor>").remove("</MaxColor>").trimmed());
 
   d_color_map = QwtLinearColorMap(color1, color2);
   d_color_map.setMode((QwtLinearColorMap::Mode)mode);
 
   s = *(++line);
-  int stops =
-      s.remove("<ColorStops>").remove("</ColorStops>").trimmed().toInt();
+  int stops = s.remove("<ColorStops>").remove("</ColorStops>").trimmed().toInt();
   for (int i = 0; i < stops; i++) {
     s = (*(++line)).trimmed();
     s.remove("<Stop>").remove("</Stop>");
@@ -1389,9 +1307,8 @@ QwtDoubleRect Matrix::boundingRect() {
   double dx = fabs(x_end - x_start) / (double)(cols - 1);
   double dy = fabs(y_end - y_start) / (double)(rows - 1);
 
-  return QwtDoubleRect(qMin(x_start, x_end) - 0.5 * dx,
-                       qMin(y_start, y_end) - 0.5 * dy,
-                       fabs(x_end - x_start) + dx, fabs(y_end - y_start) + dy)
+  return QwtDoubleRect(qMin(x_start, x_end) - 0.5 * dx, qMin(y_start, y_end) - 0.5 * dy, fabs(x_end - x_start) + dx,
+                       fabs(y_end - y_start) + dy)
       .normalized();
 }
 
@@ -1399,9 +1316,8 @@ void Matrix::fft(bool inverse) {
   double *buffer = d_matrix_model->dataCopy();
   if (buffer) {
     QString commandText = inverse ? tr("Inverse FFT") : tr("Forward FFT");
-    d_undo_stack->push(new MatrixFftCommand(inverse, d_matrix_model, 0,
-                                            numRows() - 1, 0, numCols() - 1,
-                                            buffer, commandText));
+    d_undo_stack->push(
+        new MatrixFftCommand(inverse, d_matrix_model, 0, numRows() - 1, 0, numCols() - 1, buffer, commandText));
     emit modifiedWindow(this);
   } else if (ignoreUndo()) {
     d_matrix_model->fft(inverse);
@@ -1409,16 +1325,14 @@ void Matrix::fft(bool inverse) {
   }
 }
 
-bool Matrix::exportASCII(const QString &fname, const QString &separator,
-                         bool exportSelection) {
+bool Matrix::exportASCII(const QString &fname, const QString &separator, bool exportSelection) {
   QFile f(fname);
   if (!f.open(QIODevice::WriteOnly)) {
     QApplication::restoreOverrideCursor();
-    QMessageBox::critical(
-        this, tr("MantidPlot - ASCII Export Error"),
-        tr("Could not write to file: <br><h4>%1</h4><p>Please verify that you "
-           "have the right to write to this location!")
-            .arg(fname));
+    QMessageBox::critical(this, tr("MantidPlot - ASCII Export Error"),
+                          tr("Could not write to file: <br><h4>%1</h4><p>Please verify that you "
+                             "have the right to write to this location!")
+                              .arg(fname));
     return false;
   }
 
@@ -1427,8 +1341,7 @@ bool Matrix::exportASCII(const QString &fname, const QString &separator,
   QTextStream t(&f);
   QString eol = applicationWindow()->endOfLine();
   if (exportSelection && d_view_type == TableView) {
-    QModelIndexList selectedIndexes =
-        d_table_view->selectionModel()->selectedIndexes();
+    QModelIndexList selectedIndexes = d_table_view->selectionModel()->selectedIndexes();
     int topRow = selectedIndexes[0].row();
     int bottomRow = topRow;
     int leftCol = selectedIndexes[0].column();
@@ -1469,22 +1382,17 @@ bool Matrix::exportASCII(const QString &fname, const QString &separator,
   return true;
 }
 
-void Matrix::importASCII(const QString &fname, const QString &sep,
-                         int ignoredLines, bool stripSpaces,
-                         bool simplifySpaces, const QString &commentString,
-                         ImportMode importAs, const QLocale &locale,
+void Matrix::importASCII(const QString &fname, const QString &sep, int ignoredLines, bool stripSpaces,
+                         bool simplifySpaces, const QString &commentString, ImportMode importAs, const QLocale &locale,
                          int endLineChar, int maxRows) {
   double *buffer = d_matrix_model->dataCopy();
   if (buffer) {
     d_undo_stack->push(new MatrixImportAsciiCommand(
-        fname, sep, ignoredLines, stripSpaces, simplifySpaces, commentString,
-        importAs, locale, endLineChar, maxRows, d_matrix_model, 0,
-        numRows() - 1, 0, numCols() - 1, buffer,
-        tr("Import ASCII File") + " \"" + fname + "\""));
+        fname, sep, ignoredLines, stripSpaces, simplifySpaces, commentString, importAs, locale, endLineChar, maxRows,
+        d_matrix_model, 0, numRows() - 1, 0, numCols() - 1, buffer, tr("Import ASCII File") + " \"" + fname + "\""));
     emit modifiedWindow(this);
   } else if (ignoreUndo()) {
-    d_matrix_model->importASCII(fname, sep, ignoredLines, stripSpaces,
-                                simplifySpaces, commentString, importAs, locale,
+    d_matrix_model->importASCII(fname, sep, ignoredLines, stripSpaces, simplifySpaces, commentString, importAs, locale,
                                 endLineChar, maxRows);
     emit modifiedWindow(this);
   }
@@ -1493,11 +1401,9 @@ void Matrix::importASCII(const QString &fname, const QString &sep,
 bool Matrix::ignoreUndo() {
   QString msg = tr("Due to memory limitations it will not be possible to undo "
                    "this change. Do you want to continue anyways?");
-  return (QMessageBox::Yes ==
-          QMessageBox::warning(
-              dynamic_cast<ApplicationWindow *>(applicationWindow()),
-              tr("MantidPlot") + " - " + tr("Warning"), msg, QMessageBox::Yes,
-              QMessageBox::Cancel));
+  return (QMessageBox::Yes == QMessageBox::warning(dynamic_cast<ApplicationWindow *>(applicationWindow()),
+                                                   tr("MantidPlot") + " - " + tr("Warning"), msg, QMessageBox::Yes,
+                                                   QMessageBox::Cancel));
 }
 
 double *Matrix::initWorkspace(int size) {
@@ -1505,10 +1411,9 @@ double *Matrix::initWorkspace(int size) {
     d_workspace = (double *)malloc(size * sizeof(double));
 
   if (!d_workspace)
-    QMessageBox::critical(
-        dynamic_cast<ApplicationWindow *>(applicationWindow()),
-        tr("MantidPlot") + " - " + tr("Memory Allocation Error"),
-        tr("Not enough memory, operation aborted!"));
+    QMessageBox::critical(dynamic_cast<ApplicationWindow *>(applicationWindow()),
+                          tr("MantidPlot") + " - " + tr("Memory Allocation Error"),
+                          tr("Not enough memory, operation aborted!"));
 
   return d_workspace;
 }
@@ -1518,9 +1423,8 @@ Matrix::~Matrix() {
   delete d_matrix_model;
 }
 
-MantidQt::API::IProjectSerialisable *
-Matrix::loadFromProject(const std::string &lines, ApplicationWindow *app,
-                        const int fileVersion) {
+MantidQt::API::IProjectSerialisable *Matrix::loadFromProject(const std::string &lines, ApplicationWindow *app,
+                                                             const int fileVersion) {
   Q_UNUSED(fileVersion);
   std::vector<std::string> lineVec;
   boost::split(lineVec, lines, boost::is_any_of("\n"));
@@ -1584,8 +1488,7 @@ Matrix::loadFromProject(const std::string &lines, ApplicationWindow *app,
   }
 
   if (tsv.selectLine("Coordinates")) {
-    matrix->setCoordinates(tsv.asDouble(1), tsv.asDouble(2), tsv.asDouble(3),
-                           tsv.asDouble(4));
+    matrix->setCoordinates(tsv.asDouble(1), tsv.asDouble(2), tsv.asDouble(3), tsv.asDouble(4));
   }
 
   if (tsv.selectLine("ViewType")) {
@@ -1655,8 +1558,7 @@ std::string Matrix::saveToProject(ApplicationWindow *app) {
   MantidQt::API::TSVSerialiser tsv;
 
   tsv.writeRaw("<matrix>");
-  tsv.writeLine(objectName().toStdString())
-      << numRows() << numCols() << birthDate();
+  tsv.writeLine(objectName().toStdString()) << numRows() << numCols() << birthDate();
   tsv.writeRaw(app->windowGeometryInfo(this));
 
   tsv.writeLine("ColWidth") << d_column_width;
@@ -1683,24 +1585,18 @@ std::string Matrix::saveToProject(ApplicationWindow *app) {
     tsv.writeLine("ColorPolicy") << d_color_map_type;
   } else {
     tsv.writeRaw("<ColorMap>");
-    tsv.writeInlineSection(
-        "Mode", Mantid::Kernel::Strings::toString<int>(d_color_map.mode()));
-    tsv.writeInlineSection("MinColor",
-                           d_color_map.color1().name().toStdString());
-    tsv.writeInlineSection("MaxColor",
-                           d_color_map.color2().name().toStdString());
+    tsv.writeInlineSection("Mode", Mantid::Kernel::Strings::toString<int>(d_color_map.mode()));
+    tsv.writeInlineSection("MinColor", d_color_map.color1().name().toStdString());
+    tsv.writeInlineSection("MaxColor", d_color_map.color2().name().toStdString());
 
     QwtArray<double> colors = d_color_map.colorStops();
     size_t stops = colors.size();
-    tsv.writeInlineSection(
-        "ColorStops", Mantid::Kernel::Strings::toString<size_t>(stops - 2));
+    tsv.writeInlineSection("ColorStops", Mantid::Kernel::Strings::toString<size_t>(stops - 2));
     for (int i = 1; i < (int)stops - 1; ++i) {
       std::stringstream stopLine;
       stopLine << Mantid::Kernel::Strings::toString<double>(colors[i]);
       stopLine << "\t";
-      stopLine << QColor(d_color_map.rgb(QwtDoubleInterval(0, 1), colors[i]))
-                      .name()
-                      .toStdString();
+      stopLine << QColor(d_color_map.rgb(QwtDoubleInterval(0, 1), colors[i])).name().toStdString();
       tsv.writeInlineSection("Stop", stopLine.str());
     }
 

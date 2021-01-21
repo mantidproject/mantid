@@ -48,11 +48,10 @@
 
 using namespace MantidQt::API;
 
-DataPickerTool::DataPickerTool(Graph *graph, ApplicationWindow *app, Mode mode,
-                               const QObject *status_target,
+DataPickerTool::DataPickerTool(Graph *graph, ApplicationWindow *app, Mode mode, const QObject *status_target,
                                const char *status_slot)
-    : QwtPlotPicker(graph->plotWidget()->canvas()), PlotToolInterface(graph),
-      d_app(app), d_mode(mode), d_move_mode(Free) {
+    : QwtPlotPicker(graph->plotWidget()->canvas()), PlotToolInterface(graph), d_app(app), d_mode(mode),
+      d_move_mode(Free) {
   d_selected_curve = nullptr;
 
   d_selection_marker.setLineStyle(QwtPlotMarker::Cross);
@@ -64,13 +63,11 @@ DataPickerTool::DataPickerTool(Graph *graph, ApplicationWindow *app, Mode mode,
     d_graph->plotWidget()->canvas()->setCursor(Qt::PointingHandCursor);
   } else {
     setSelectionFlags(QwtPicker::PointSelection | QwtPicker::ClickSelection);
-    d_graph->plotWidget()->canvas()->setCursor(
-        QCursor(getQPixmap("vizor_xpm"), -1, -1));
+    d_graph->plotWidget()->canvas()->setCursor(QCursor(getQPixmap("vizor_xpm"), -1, -1));
   }
 
   if (status_target)
-    connect(this, SIGNAL(statusText(const QString &)), status_target,
-            status_slot);
+    connect(this, SIGNAL(statusText(const QString &)), status_target, status_slot);
   switch (d_mode) {
   case Display:
     emit statusText(tr("Click on plot or move cursor to display coordinates!"));
@@ -84,8 +81,7 @@ DataPickerTool::DataPickerTool(Graph *graph, ApplicationWindow *app, Mode mode,
   }
 
   if (status_target)
-    connect(this, SIGNAL(statusText(const QString &)), status_target,
-            status_slot);
+    connect(this, SIGNAL(statusText(const QString &)), status_target, status_slot);
   switch (d_mode) {
   case Display:
     emit statusText(tr("Click on plot or move cursor to display coordinates!"));
@@ -103,21 +99,17 @@ DataPickerTool::~DataPickerTool() { d_selection_marker.detach(); }
 
 void DataPickerTool::append(const QPoint &pos) {
   int dist, point_index;
-  const int curve =
-      d_graph->plotWidget()->closestCurve(pos.x(), pos.y(), dist, point_index);
+  const int curve = d_graph->plotWidget()->closestCurve(pos.x(), pos.y(), dist, point_index);
   if (curve <= 0 || dist >= 5) { // 5 pixels tolerance
     setSelection(nullptr, 0);
     return;
   }
-  setSelection(
-      dynamic_cast<QwtPlotCurve *>(d_graph->plotWidget()->curve(curve)),
-      point_index);
+  setSelection(dynamic_cast<QwtPlotCurve *>(d_graph->plotWidget()->curve(curve)), point_index);
   if (!d_selected_curve)
     return;
 
   QwtPlotPicker::append(
-      transform(QwtDoublePoint(d_selected_curve->x(d_selected_point),
-                               d_selected_curve->y(d_selected_point))));
+      transform(QwtDoublePoint(d_selected_curve->x(d_selected_point), d_selected_curve->y(d_selected_point))));
 }
 
 void DataPickerTool::setSelection(QwtPlotCurve *curve, int point_index) {
@@ -137,20 +129,16 @@ void DataPickerTool::setSelection(QwtPlotCurve *curve, int point_index) {
   auto plotCurve = dynamic_cast<PlotCurve *>(d_selected_curve);
   auto dataCurve = dynamic_cast<DataCurve *>(d_selected_curve);
 
-  d_restricted_move_pos =
-      QPoint(plot()->transform(xAxis(), d_selected_curve->x(d_selected_point)),
-             plot()->transform(yAxis(), d_selected_curve->y(d_selected_point)));
+  d_restricted_move_pos = QPoint(plot()->transform(xAxis(), d_selected_curve->x(d_selected_point)),
+                                 plot()->transform(yAxis(), d_selected_curve->y(d_selected_point)));
 
   if (plotCurve && plotCurve->type() == GraphOptions::Function) {
     QLocale locale = d_app->locale();
-    emit statusText(
-        QString("%1[%2]: x=%3; y=%4")
-            .arg(d_selected_curve->title().text())
-            .arg(d_selected_point + 1)
-            .arg(locale.toString(d_selected_curve->x(d_selected_point), 'G',
-                                 d_app->d_decimal_digits))
-            .arg(locale.toString(d_selected_curve->y(d_selected_point), 'G',
-                                 d_app->d_decimal_digits)));
+    emit statusText(QString("%1[%2]: x=%3; y=%4")
+                        .arg(d_selected_curve->title().text())
+                        .arg(d_selected_point + 1)
+                        .arg(locale.toString(d_selected_curve->x(d_selected_point), 'G', d_app->d_decimal_digits))
+                        .arg(locale.toString(d_selected_curve->y(d_selected_point), 'G', d_app->d_decimal_digits)));
   } else if (dataCurve) {
     int row = dataCurve->tableRow(d_selected_point);
 
@@ -165,8 +153,7 @@ void DataPickerTool::setSelection(QwtPlotCurve *curve, int point_index) {
                         .arg(t->text(row, yCol)));
   }
 
-  QwtDoublePoint selected_point_value(d_selected_curve->x(d_selected_point),
-                                      d_selected_curve->y(d_selected_point));
+  QwtDoublePoint selected_point_value(d_selected_curve->x(d_selected_point), d_selected_curve->y(d_selected_point));
   d_selection_marker.setValue(selected_point_value);
   if (d_selection_marker.plot() == nullptr)
     d_selection_marker.attach(d_graph->plotWidget());

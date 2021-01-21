@@ -25,8 +25,7 @@ public:
   ~vtkMD0DFactory() override;
 
   /// Factory Method.
-  vtkSmartPointer<vtkDataSet>
-  create(ProgressAction &progressUpdating) const override;
+  vtkSmartPointer<vtkDataSet> create(ProgressAction &progressUpdating) const override;
 
   void initialize(const Mantid::API::Workspace_sptr &workspace) override;
 

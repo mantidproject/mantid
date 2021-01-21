@@ -31,9 +31,7 @@ class MANTID_LIVEDATA_DLL StartLiveData : public LiveDataAlgorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Begin live data monitoring.";
-  }
+  const std::string summary() const override { return "Begin live data monitoring."; }
 
   int version() const override;
 
@@ -42,8 +40,7 @@ private:
   void exec() override;
   void afterPropertySet(const std::string &) override;
 
-  void copyListenerProperties(
-      const std::shared_ptr<Mantid::API::ILiveListener> &listener);
+  void copyListenerProperties(const std::shared_ptr<Mantid::API::ILiveListener> &listener);
   void removeListenerProperties();
 };
 

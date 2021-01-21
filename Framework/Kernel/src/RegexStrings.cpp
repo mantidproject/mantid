@@ -27,9 +27,7 @@ Logger logger("Regex");
   @param compNum :: item to extract [0:N-1]
   @return 0 on failure and 1 on success
 */
-template <typename T>
-int StrComp(const std::string &Text, const boost::regex &Re, T &Aout,
-            const int compNum) {
+template <typename T> int StrComp(const std::string &Text, const boost::regex &Re, T &Aout, const int compNum) {
   boost::sregex_iterator m1(Text.begin(), Text.end(), Re);
   boost::sregex_iterator empty;
   // Failed search
@@ -49,9 +47,7 @@ int StrComp(const std::string &Text, const boost::regex &Re, T &Aout,
   @param compNum :: item to extract [0:N-1]
   @return 0 on failure and 1 on success
 */
-template <typename T>
-int StrComp(const char *Text, const boost::regex &Re, T &Aout,
-            const int compNum) {
+template <typename T> int StrComp(const char *Text, const boost::regex &Re, T &Aout, const int compNum) {
   return StrComp(std::string(Text), Re, Aout, compNum);
 }
 
@@ -96,9 +92,7 @@ std::vector<std::string> StrParts(std::string Sdx, const boost::regex &Re) {
   @retval 0 :: failed to match the string or there were no parts to match.
   @retval 1 :: success
  */
-template <typename T>
-int StrFullCut(std::string &Text, const boost::regex &Re, T &Aout,
-               const int compNum) {
+template <typename T> int StrFullCut(std::string &Text, const boost::regex &Re, T &Aout, const int compNum) {
   boost::sregex_iterator m1(Text.begin(), Text.end(), Re);
   boost::sregex_iterator empty;
   if (m1 == empty)
@@ -110,8 +104,7 @@ int StrFullCut(std::string &Text, const boost::regex &Re, T &Aout,
   if (!Mantid::Kernel::Strings::convert((*m1)[compNum + 1].str(), Aout))
     return 0;
   // Found object
-  unsigned int zero =
-      0; // Needed for boost 1.40 (can't just put 0 in next line)
+  unsigned int zero = 0; // Needed for boost 1.40 (can't just put 0 in next line)
   Text.erase(m1->position(zero), (*m1)[0].str().length());
   return 1;
 }
@@ -127,9 +120,7 @@ int StrFullCut(std::string &Text, const boost::regex &Re, T &Aout,
   @retval 0 :: failed to match the string or there were no parts to match.
   @retval 1 :: success
  */
-template <typename T>
-int StrFullCut(std::string &Text, const boost::regex &Re,
-               std::vector<T> &Aout) {
+template <typename T> int StrFullCut(std::string &Text, const boost::regex &Re, std::vector<T> &Aout) {
   boost::sregex_iterator m1(Text.begin(), Text.end(), Re);
   boost::sregex_iterator empty;
   if (m1 == empty)
@@ -168,9 +159,7 @@ int StrFullCut(std::string &Text, const boost::regex &Re,
   @retval 0 :: failed to match the string or there were no parts to match.
   @retval 1 :: success
  */
-template <>
-int StrFullCut(std::string &Text, const boost::regex &Re,
-               std::vector<std::string> &Aout) {
+template <> int StrFullCut(std::string &Text, const boost::regex &Re, std::vector<std::string> &Aout) {
   boost::sregex_iterator m1(Text.begin(), Text.end(), Re);
   boost::sregex_iterator empty;
   if (m1 == empty)
@@ -201,9 +190,7 @@ int StrFullCut(std::string &Text, const boost::regex &Re,
   @retval 0 :: failed to match the string or there were no parts to match.
   @retval Number :: number of components added to Aout.
  */
-template <typename T>
-int StrFullSplit(const std::string &text, const boost::regex &Re,
-                 std::vector<T> &Aout) {
+template <typename T> int StrFullSplit(const std::string &text, const boost::regex &Re, std::vector<T> &Aout) {
   boost::sregex_iterator m1(text.begin(), text.end(), Re);
   boost::sregex_iterator empty;
   for (; m1 != empty; m1++)
@@ -227,9 +214,7 @@ int StrFullSplit(const std::string &text, const boost::regex &Re,
   @retval 0 :: failed to match the string or there were no parts to match.
   @retval Number :: number of components added to Aout.
  */
-template <typename T>
-int StrSingleSplit(const std::string &text, const boost::regex &Re,
-                   std::vector<T> &Aout) {
+template <typename T> int StrSingleSplit(const std::string &text, const boost::regex &Re, std::vector<T> &Aout) {
   boost::sregex_iterator m1(text.begin(), text.end(), Re);
   boost::sregex_iterator empty;
   if (m1 != empty)
@@ -255,9 +240,7 @@ int StrSingleSplit(const std::string &text, const boost::regex &Re,
   @retval 0 :: failed to match the string or there were no parts to match.
   @retval Number :: number of components added to Aout.
  */
-template <>
-int StrSingleSplit(const std::string &text, const boost::regex &Re,
-                   std::vector<std::string> &Aout) {
+template <> int StrSingleSplit(const std::string &text, const boost::regex &Re, std::vector<std::string> &Aout) {
   boost::sregex_iterator m1(text.begin(), text.end(), Re);
   boost::sregex_iterator empty;
   if (m1 != empty) {
@@ -275,15 +258,13 @@ int StrSingleSplit(const std::string &text, const boost::regex &Re,
   @param Out :: string to place match
   @return count of line that matched (or zero on failure)
 */
-DLLExport int findPattern(std::istream &fh, const boost::regex &Re,
-                          std::string &Out) {
+DLLExport int findPattern(std::istream &fh, const boost::regex &Re, std::string &Out) {
   char ss[512]; // max of 512
   boost::cmatch ans;
 
   int cnt = 1;
   fh.getline(ss, 512, '\n');
-  while (!fh.fail() &&
-         !boost::regex_search(ss, ans, Re, boost::match_default)) {
+  while (!fh.fail() && !boost::regex_search(ss, ans, Re, boost::match_default)) {
     fh.getline(ss, 512, '\n');
     cnt++;
   }
@@ -300,15 +281,13 @@ DLLExport int findPattern(std::istream &fh, const boost::regex &Re,
   @param Out :: component in ( ) expression must be first.
   @return count of line that matched (or zero on failure)
 */
-template <typename T>
-int findComp(std::istream &fh, const boost::regex &Re, T &Out) {
+template <typename T> int findComp(std::istream &fh, const boost::regex &Re, T &Out) {
   char ss[512]; // max of 512
   boost::cmatch ans;
 
   int cnt(1);
   fh.getline(ss, 512, '\n');
-  while (!fh.fail() &&
-         !boost::regex_search(ss, ans, Re, boost::match_default)) {
+  while (!fh.fail() && !boost::regex_search(ss, ans, Re, boost::match_default)) {
     cnt++;
     fh.getline(ss, 512, '\n');
   }
@@ -327,16 +306,13 @@ int findComp(std::istream &fh, const boost::regex &Re, T &Out) {
   @param Out :: component in ( ) expression must be first.
   @return count of line that matched (or zero on failure)
 */
-template <>
-DLLExport int findComp(std::istream &fh, const boost::regex &Re,
-                       std::string &Out) {
+template <> DLLExport int findComp(std::istream &fh, const boost::regex &Re, std::string &Out) {
   char ss[512]; // max of 512
   boost::cmatch ans;
 
   int cnt(1);
   fh.getline(ss, 512, '\n');
-  while (!fh.fail() &&
-         !boost::regex_search(ss, ans, Re, boost::match_default)) {
+  while (!fh.fail() && !boost::regex_search(ss, ans, Re, boost::match_default)) {
     cnt++;
     fh.getline(ss, 512, '\n');
   }
@@ -349,33 +325,21 @@ DLLExport int findComp(std::istream &fh, const boost::regex &Re,
 
 /// \cond TEMPLATE
 
-template DLLExport int StrFullCut(std::string &, const boost::regex &,
-                                  std::string &, const int);
-template DLLExport int StrFullCut(std::string &, const boost::regex &, int &,
-                                  const int);
-template DLLExport int StrFullCut(std::string &, const boost::regex &, double &,
-                                  const int);
+template DLLExport int StrFullCut(std::string &, const boost::regex &, std::string &, const int);
+template DLLExport int StrFullCut(std::string &, const boost::regex &, int &, const int);
+template DLLExport int StrFullCut(std::string &, const boost::regex &, double &, const int);
 
-template DLLExport int StrFullSplit(const std::string &, const boost::regex &,
-                                    std::vector<int> &);
-template DLLExport int StrFullSplit(const std::string &, const boost::regex &,
-                                    std::vector<double> &);
-template DLLExport int StrFullSplit(const std::string &, const boost::regex &,
-                                    std::vector<std::string> &);
+template DLLExport int StrFullSplit(const std::string &, const boost::regex &, std::vector<int> &);
+template DLLExport int StrFullSplit(const std::string &, const boost::regex &, std::vector<double> &);
+template DLLExport int StrFullSplit(const std::string &, const boost::regex &, std::vector<std::string> &);
 
-template DLLExport int StrSingleSplit(const std::string &, const boost::regex &,
-                                      std::vector<int> &);
-template DLLExport int StrSingleSplit(const std::string &, const boost::regex &,
-                                      std::vector<double> &);
+template DLLExport int StrSingleSplit(const std::string &, const boost::regex &, std::vector<int> &);
+template DLLExport int StrSingleSplit(const std::string &, const boost::regex &, std::vector<double> &);
 
-template DLLExport int StrComp(const char *, const boost::regex &, double &,
-                               const int);
-template DLLExport int StrComp(const char *, const boost::regex &, int &,
-                               const int);
-template DLLExport int StrComp(const std::string &, const boost::regex &,
-                               double &, const int);
-template DLLExport int StrComp(const std::string &, const boost::regex &, int &,
-                               const int);
+template DLLExport int StrComp(const char *, const boost::regex &, double &, const int);
+template DLLExport int StrComp(const char *, const boost::regex &, int &, const int);
+template DLLExport int StrComp(const std::string &, const boost::regex &, double &, const int);
+template DLLExport int StrComp(const std::string &, const boost::regex &, int &, const int);
 
 template DLLExport int findComp(std::istream &, const boost::regex &, int &);
 

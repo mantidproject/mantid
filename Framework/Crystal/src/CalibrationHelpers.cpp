@@ -26,14 +26,12 @@ namespace CalibrationHelpers {
  * @param newSampPos The relative shift for the new sample position
  * @param componentInfo ComponentInfo for the workspace being updated
  */
-void adjustUpSampleAndSourcePositions(const double L0, const V3D &newSampPos,
-                                      ComponentInfo &componentInfo) {
+void adjustUpSampleAndSourcePositions(const double L0, const V3D &newSampPos, ComponentInfo &componentInfo) {
 
   if (L0 <= 0)
     throw std::runtime_error("L0 is negative, must be positive.");
 
-  const V3D &oldSourceToSampleDir =
-      componentInfo.samplePosition() - componentInfo.sourcePosition();
+  const V3D &oldSourceToSampleDir = componentInfo.samplePosition() - componentInfo.sourcePosition();
   const double oldL1 = componentInfo.l1();
 
   V3D samplePos = componentInfo.samplePosition();
@@ -65,17 +63,13 @@ void adjustUpSampleAndSourcePositions(const double L0, const V3D &newSampPos,
  *bankNames.
  * @param componentInfo ComponentInfo object for the modifications
  */
-void adjustBankPositionsAndSizes(const std::vector<std::string> &bankNames,
-                                 const Instrument &newInstrument,
-                                 const V3D &pos, const Quat &rot,
-                                 const double detWScale,
-                                 const double detHtScale,
+void adjustBankPositionsAndSizes(const std::vector<std::string> &bankNames, const Instrument &newInstrument,
+                                 const V3D &pos, const Quat &rot, const double detWScale, const double detHtScale,
                                  ComponentInfo &componentInfo) {
   std::shared_ptr<ParameterMap> pmap = newInstrument.getParameterMap();
 
   for (const auto &bankName : bankNames) {
-    std::shared_ptr<const IComponent> bank1 =
-        newInstrument.getComponentByName(bankName);
+    std::shared_ptr<const IComponent> bank1 = newInstrument.getComponentByName(bankName);
     std::shared_ptr<const Geometry::RectangularDetector> bank =
         std::dynamic_pointer_cast<const RectangularDetector>(bank1);
 
@@ -83,8 +77,7 @@ void adjustBankPositionsAndSizes(const std::vector<std::string> &bankNames,
     Quat parentRot = bank->getParent()->getRotation();
     Quat newRot = parentRot * rot * relRot;
 
-    const auto bankComponentIndex =
-        componentInfo.indexOf(bank->getComponentID());
+    const auto bankComponentIndex = componentInfo.indexOf(bank->getComponentID());
     componentInfo.setRotation(bankComponentIndex, newRot);
 
     V3D rotatedPos = V3D(pos);
@@ -92,10 +85,8 @@ void adjustBankPositionsAndSizes(const std::vector<std::string> &bankNames,
 
     componentInfo.setPosition(bankComponentIndex, rotatedPos + bank->getPos());
 
-    std::vector<double> oldScalex =
-        pmap->getDouble(bank->getName(), std::string("scalex"));
-    std::vector<double> oldScaley =
-        pmap->getDouble(bank->getName(), std::string("scaley"));
+    std::vector<double> oldScalex = pmap->getDouble(bank->getName(), std::string("scalex"));
+    std::vector<double> oldScaley = pmap->getDouble(bank->getName(), std::string("scaley"));
 
     double scalex, scaley;
     if (!oldScalex.empty())
@@ -112,8 +103,7 @@ void adjustBankPositionsAndSizes(const std::vector<std::string> &bankNames,
     pmap->addDouble(bank.get(), std::string("scaley"), scaley);
 
     if (detWScale != 1.0 || detHtScale != 1.0)
-      applyRectangularDetectorScaleToComponentInfo(
-          componentInfo, bank->getComponentID(), detWScale, detHtScale);
+      applyRectangularDetectorScaleToComponentInfo(componentInfo, bank->getComponentID(), detWScale, detHtScale);
   }
 }
 

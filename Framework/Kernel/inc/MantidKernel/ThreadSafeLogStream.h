@@ -41,8 +41,7 @@ namespace Kernel {
 class MANTID_KERNEL_DLL ThreadSafeLogStreamBuf : public Poco::LogStreamBuf {
 public:
   /// Constructor
-  ThreadSafeLogStreamBuf(Poco::Logger &logger,
-                         Poco::Message::Priority priority);
+  ThreadSafeLogStreamBuf(Poco::Logger &logger, Poco::Message::Priority priority);
   int overflow(char c);
   using Poco::LogStreamBuf::overflow;
   void accumulate(const std::string &message);
@@ -95,19 +94,15 @@ protected:
       ls << "Some informational message\n";
       ls.error() << "Some error message\n";
  */
-class MANTID_KERNEL_DLL ThreadSafeLogStream : public ThreadSafeLogIOS,
-                                              public std::ostream {
+class MANTID_KERNEL_DLL ThreadSafeLogStream : public ThreadSafeLogIOS, public std::ostream {
 public:
   /// Creates the ThreadSafeLogStream, using the given logger and priority.
-  ThreadSafeLogStream(
-      Poco::Logger &logger,
-      Poco::Message::Priority priority = Poco::Message::PRIO_INFORMATION);
+  ThreadSafeLogStream(Poco::Logger &logger, Poco::Message::Priority priority = Poco::Message::PRIO_INFORMATION);
 
   /// Creates the ThreadSafeLogStream, using the logger identified
   /// by loggerName, and sets the priority.
-  ThreadSafeLogStream(
-      const std::string &loggerName,
-      Poco::Message::Priority priority = Poco::Message::PRIO_INFORMATION);
+  ThreadSafeLogStream(const std::string &loggerName,
+                      Poco::Message::Priority priority = Poco::Message::PRIO_INFORMATION);
   /// Sets the priority for log messages to Poco::Message::PRIO_FATAL.
   ThreadSafeLogStream &fatal();
   /// Sets the priority for log messages to Poco::Message::PRIO_FATAL

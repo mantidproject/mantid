@@ -37,8 +37,7 @@
 #include <QGroupBox>
 #include <QListWidget>
 
-PlotWizard::PlotWizard(QWidget *parent, const Qt::WFlags &fl)
-    : QDialog(parent, fl) {
+PlotWizard::PlotWizard(QWidget *parent, const Qt::WFlags &fl) : QDialog(parent, fl) {
   setWindowTitle(tr("MantidPlot - Select Columns to Plot"));
 
   setSizeGripEnabled(true);
@@ -112,8 +111,7 @@ PlotWizard::PlotWizard(QWidget *parent, const Qt::WFlags &fl)
   vlayout->addLayout(bottomLayout);
 
   // signals and slots connections
-  connect(boxTables, SIGNAL(activated(const QString &)), this,
-          SLOT(changeColumnsList(const QString &)));
+  connect(boxTables, SIGNAL(activated(const QString &)), this, SLOT(changeColumnsList(const QString &)));
   connect(buttonOk, SIGNAL(clicked()), this, SLOT(accept()));
   connect(buttonCancel, SIGNAL(clicked()), this, SLOT(reject()));
   connect(buttonNew, SIGNAL(clicked()), this, SLOT(addCurve()));
@@ -132,10 +130,8 @@ void PlotWizard::accept() {
   for (int i = 0; i < plotAssociations->count(); i++) {
     QString text = plotAssociations->item(i)->text();
     if (text.endsWith("(X)")) {
-      QMessageBox::critical(
-          this, tr("MantidPlot - Error"),
-          tr("Please define a Y column for the following curve") + ":\n\n" +
-              text);
+      QMessageBox::critical(this, tr("MantidPlot - Error"),
+                            tr("Please define a Y column for the following curve") + ":\n\n" + text);
       return;
     }
 
@@ -188,11 +184,9 @@ void PlotWizard::addXCol() {
 
   QString text = plotAssociations->currentItem()->text();
   if (text.contains("(X)"))
-    QMessageBox::warning(this, tr("MantidPlot - Error"),
-                         tr("You have already defined a X column!"));
+    QMessageBox::warning(this, tr("MantidPlot - Error"), tr("You have already defined a X column!"));
   else {
-    plotAssociations->currentItem()->setText(
-        text + columnsList->currentItem()->text() + "(X)");
+    plotAssociations->currentItem()->setText(text + columnsList->currentItem()->text() + "(X)");
   }
 }
 
@@ -202,14 +196,11 @@ void PlotWizard::addYCol() {
 
   QString text = plotAssociations->currentItem()->text();
   if (!text.contains("(X)"))
-    QMessageBox::warning(this, tr("MantidPlot - Error"),
-                         tr("You must define a X column first!"));
+    QMessageBox::warning(this, tr("MantidPlot - Error"), tr("You must define a X column first!"));
   else if (text.contains("(Y)"))
-    QMessageBox::warning(this, tr("MantidPlot - Error"),
-                         tr("You have already defined a Y column!"));
+    QMessageBox::warning(this, tr("MantidPlot - Error"), tr("You have already defined a Y column!"));
   else {
-    plotAssociations->currentItem()->setText(
-        text + ", " + columnsList->currentItem()->text() + "(Y)");
+    plotAssociations->currentItem()->setText(text + ", " + columnsList->currentItem()->text() + "(Y)");
   }
 }
 
@@ -219,18 +210,13 @@ void PlotWizard::addZCol() {
 
   QString text = plotAssociations->currentItem()->text();
   if (text.contains("(xErr)") || text.contains("(yErr)"))
-    QMessageBox::warning(
-        this, tr("MantidPlot - Error"),
-        tr("This kind of curve is not handled by MantidPlot!"));
+    QMessageBox::warning(this, tr("MantidPlot - Error"), tr("This kind of curve is not handled by MantidPlot!"));
   else if (!text.contains("(X)"))
-    QMessageBox::warning(this, tr("MantidPlot - Error"),
-                         tr("You must define a X column first!"));
+    QMessageBox::warning(this, tr("MantidPlot - Error"), tr("You must define a X column first!"));
   else if (text.contains("(Z)"))
-    QMessageBox::warning(this, tr("MantidPlot - Error"),
-                         tr("You have already defined a Z column!"));
+    QMessageBox::warning(this, tr("MantidPlot - Error"), tr("You have already defined a Z column!"));
   else {
-    plotAssociations->currentItem()->setText(
-        text + ", " + columnsList->currentItem()->text() + "(Z)");
+    plotAssociations->currentItem()->setText(text + ", " + columnsList->currentItem()->text() + "(Z)");
   }
 }
 
@@ -240,21 +226,15 @@ void PlotWizard::addXErrCol() {
 
   QString text = plotAssociations->currentItem()->text();
   if (text.contains("(Z)"))
-    QMessageBox::warning(
-        this, tr("MantidPlot - Error"),
-        tr("This kind of curve is not handled by MantidPlot!"));
+    QMessageBox::warning(this, tr("MantidPlot - Error"), tr("This kind of curve is not handled by MantidPlot!"));
   else if (!text.contains("(X)"))
-    QMessageBox::warning(this, tr("MantidPlot - Error"),
-                         tr("You must define a X column first!"));
+    QMessageBox::warning(this, tr("MantidPlot - Error"), tr("You must define a X column first!"));
   else if (!text.contains("(Y)"))
-    QMessageBox::warning(this, tr("MantidPlot - Error"),
-                         tr("You must define a Y column first!"));
+    QMessageBox::warning(this, tr("MantidPlot - Error"), tr("You must define a Y column first!"));
   else if (text.contains("(xErr)") || text.contains("(yErr)"))
-    QMessageBox::warning(this, tr("MantidPlot - Error"),
-                         tr("You have already defined an error-bars column!"));
+    QMessageBox::warning(this, tr("MantidPlot - Error"), tr("You have already defined an error-bars column!"));
   else {
-    plotAssociations->currentItem()->setText(
-        text + ", " + columnsList->currentItem()->text() + "(xErr)");
+    plotAssociations->currentItem()->setText(text + ", " + columnsList->currentItem()->text() + "(xErr)");
   }
 }
 
@@ -264,21 +244,15 @@ void PlotWizard::addYErrCol() {
 
   QString text = plotAssociations->currentItem()->text();
   if (text.contains("(Z)"))
-    QMessageBox::warning(
-        this, tr("MantidPlot - Error"),
-        tr("This kind of curve is not handled by MantidPlot!"));
+    QMessageBox::warning(this, tr("MantidPlot - Error"), tr("This kind of curve is not handled by MantidPlot!"));
   else if (!text.contains("(X)"))
-    QMessageBox::warning(this, tr("MantidPlot - Error"),
-                         tr("You must define a X column first!"));
+    QMessageBox::warning(this, tr("MantidPlot - Error"), tr("You must define a X column first!"));
   else if (!text.contains("(Y)"))
-    QMessageBox::warning(this, tr("MantidPlot - Error"),
-                         tr("You must define a Y column first!"));
+    QMessageBox::warning(this, tr("MantidPlot - Error"), tr("You must define a Y column first!"));
   else if (text.contains("(xErr)") || text.contains("(yErr)"))
-    QMessageBox::warning(this, tr("MantidPlot - Error"),
-                         tr("You have already defined an error-bars column!"));
+    QMessageBox::warning(this, tr("MantidPlot - Error"), tr("You have already defined an error-bars column!"));
   else {
-    plotAssociations->currentItem()->setText(
-        text + ", " + columnsList->currentItem()->text() + "(yErr)");
+    plotAssociations->currentItem()->setText(text + ", " + columnsList->currentItem()->text() + "(yErr)");
   }
 }
 
@@ -287,13 +261,9 @@ void PlotWizard::addCurve() {
   plotAssociations->setCurrentRow(plotAssociations->count() - 1);
 }
 
-void PlotWizard::removeCurve() {
-  plotAssociations->takeItem(plotAssociations->currentRow());
-}
+void PlotWizard::removeCurve() { plotAssociations->takeItem(plotAssociations->currentRow()); }
 
-void PlotWizard::insertTablesList(const QStringList &tables) {
-  boxTables->addItems(tables);
-}
+void PlotWizard::insertTablesList(const QStringList &tables) { boxTables->addItems(tables); }
 
 void PlotWizard::setColumnsListBoxContents(const QStringList &cols) {
   columnsList->clear();
@@ -305,8 +275,7 @@ void PlotWizard::setColumnsList(const QStringList &cols) { columns = cols; }
 
 bool PlotWizard::noCurves() {
   if (plotAssociations->count() == 0) {
-    QMessageBox::warning(nullptr, tr("MantidPlot - Error"),
-                         tr("You must add a new curve first!"));
+    QMessageBox::warning(nullptr, tr("MantidPlot - Error"), tr("You must add a new curve first!"));
     return true;
   } else
     return false;

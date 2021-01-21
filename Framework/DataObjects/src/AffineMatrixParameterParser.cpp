@@ -14,20 +14,16 @@ AffineMatrixParameterParser::AffineMatrixParameterParser() {}
 
 //----------------------------------------------------------------------------------------------
 
-AffineMatrixParameter *AffineMatrixParameterParser::createParameter(
-    Poco::XML::Element *parameterElement) {
+AffineMatrixParameter *AffineMatrixParameterParser::createParameter(Poco::XML::Element *parameterElement) {
   std::string typeName = parameterElement->getChildElement("Type")->innerText();
   if (AffineMatrixParameter::parameterName() != typeName) {
-    throw std::runtime_error(std::string(
-        "AffineMatrixParameterParser cannot parse parameter of type: " +
-        typeName));
+    throw std::runtime_error(std::string("AffineMatrixParameterParser cannot parse parameter of type: " + typeName));
   } else {
     // Convenience typedefs
     using VecStrings = std::vector<std::string>;
     using VecDoubles = std::vector<coord_t>;
 
-    std::string sParameterValue =
-        parameterElement->getChildElement("Value")->innerText();
+    std::string sParameterValue = parameterElement->getChildElement("Value")->innerText();
 
     VecStrings vecStrRows;
     VecStrings vecStrCols;
@@ -75,10 +71,8 @@ AffineMatrixParameter *AffineMatrixParameterParser::createParameter(
 
 //----------------------------------------------------------------------------------------------
 
-void AffineMatrixParameterParser::setSuccessorParser(
-    Mantid::API::ImplicitFunctionParameterParser * /*paramParser*/) {
-  throw std::runtime_error(
-      "Cannot set a successor parser on a AffineMatrixParameterParser");
+void AffineMatrixParameterParser::setSuccessorParser(Mantid::API::ImplicitFunctionParameterParser * /*paramParser*/) {
+  throw std::runtime_error("Cannot set a successor parser on a AffineMatrixParameterParser");
 }
 } // namespace DataObjects
 } // namespace Mantid

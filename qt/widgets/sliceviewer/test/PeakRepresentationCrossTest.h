@@ -13,19 +13,17 @@
 using namespace MantidQt::SliceViewer;
 using namespace testing;
 
-class PeakRepresentationCrossExposeProtectedWrapper
-    : public PeakRepresentationCross {
+class PeakRepresentationCrossExposeProtectedWrapper : public PeakRepresentationCross {
 public:
-  PeakRepresentationCrossExposeProtectedWrapper(
-      const Mantid::Kernel::V3D &origin, const double &maxZ, const double &minZ)
+  PeakRepresentationCrossExposeProtectedWrapper(const Mantid::Kernel::V3D &origin, const double &maxZ,
+                                                const double &minZ)
       : PeakRepresentationCross(origin, maxZ, minZ) {}
 
   double getOccupancyInView() { return m_crossViewFraction; }
 
   double getOccupancyIntoView() { return m_intoViewFraction; }
 
-  std::shared_ptr<PeakPrimitives> getDrawingInformationFromWrapper(
-      PeakRepresentationViewInformation viewInformation) {
+  std::shared_ptr<PeakPrimitives> getDrawingInformationFromWrapper(PeakRepresentationViewInformation viewInformation) {
     return this->getDrawingInformation(viewInformation);
   }
 };
@@ -42,9 +40,7 @@ public:
 
     /* Provide a mocked transform */
     auto *mockTransform = new MockPeakTransform;
-    EXPECT_CALL(*mockTransform, transform(_))
-        .Times(1)
-        .WillOnce(Return(Mantid::Kernel::V3D(0, 0, 0)));
+    EXPECT_CALL(*mockTransform, transform(_)).Times(1).WillOnce(Return(Mantid::Kernel::V3D(0, 0, 0)));
     PeakTransform_sptr transform(mockTransform);
 
     // Act
@@ -175,8 +171,7 @@ public:
     peak.setOccupancyIntoView(0);
 
     // Assert
-    TSM_ASSERT_DIFFERS("Should have ignored the zero value input", 0,
-                       peak.getOccupancyIntoView());
+    TSM_ASSERT_DIFFERS("Should have ignored the zero value input", 0, peak.getOccupancyIntoView());
     TS_ASSERT_EQUALS(defaultOccupancy, peak.getOccupancyIntoView());
   }
 };
@@ -189,8 +184,7 @@ class PeakRepresentationCrossTestPerformance : public CxxTest::TestSuite {
 private:
   using VecPeakRepCross = std::vector<std::shared_ptr<PeakRepresentationCross>>;
 
-  using VecPeakRepCrossWrapped = std::vector<
-      std::shared_ptr<PeakRepresentationCrossExposeProtectedWrapper>>;
+  using VecPeakRepCrossWrapped = std::vector<std::shared_ptr<PeakRepresentationCrossExposeProtectedWrapper>>;
 
   /// Collection to store a large number of PeakRepresentationCross.
   VecPeakRepCross m_peaks;
@@ -214,8 +208,7 @@ public:
         for (int z = 0; z < sizeInAxis; ++z) {
           Mantid::Kernel::V3D peakOrigin(x, y, z);
           m_peaks.emplace_back(
-              std::make_shared<MantidQt::SliceViewer::PeakRepresentationCross>(
-                  peakOrigin, maxZ, minZ));
+              std::make_shared<MantidQt::SliceViewer::PeakRepresentationCross>(peakOrigin, maxZ, minZ));
         }
       }
     }

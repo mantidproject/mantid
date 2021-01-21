@@ -42,10 +42,8 @@
 
 using namespace MantidQt::API;
 
-MultiPeakFitTool::MultiPeakFitTool(Graph *graph, ApplicationWindow *app,
-                                   MultiPeakFit::PeakProfile profile,
-                                   int num_peaks, const QObject *status_target,
-                                   const char *status_slot)
+MultiPeakFitTool::MultiPeakFitTool(Graph *graph, ApplicationWindow *app, MultiPeakFit::PeakProfile profile,
+                                   int num_peaks, const QObject *status_target, const char *status_slot)
     : PlotToolInterface(graph), d_profile(profile), d_num_peaks(num_peaks) {
   d_selected_peaks = 0;
   d_curve = nullptr;
@@ -56,20 +54,15 @@ MultiPeakFitTool::MultiPeakFitTool(Graph *graph, ApplicationWindow *app,
   d_fit->generateFunction(app->generateUniformFitPoints, app->fitPoints);
 
   if (status_target)
-    connect(this, SIGNAL(statusText(const QString &)), status_target,
-            status_slot);
-  d_picker_tool = new DataPickerTool(d_graph, app, DataPickerTool::Display,
-                                     this, SIGNAL(statusText(const QString &)));
-  d_graph->plotWidget()->canvas()->setCursor(
-      QCursor(getQPixmap("cursor_xpm"), -1, -1));
+    connect(this, SIGNAL(statusText(const QString &)), status_target, status_slot);
+  d_picker_tool = new DataPickerTool(d_graph, app, DataPickerTool::Display, this, SIGNAL(statusText(const QString &)));
+  d_graph->plotWidget()->canvas()->setCursor(QCursor(getQPixmap("cursor_xpm"), -1, -1));
 
-  connect(d_picker_tool, SIGNAL(selected(QwtPlotCurve *, int)), this,
-          SLOT(selectPeak(QwtPlotCurve *, int)));
+  connect(d_picker_tool, SIGNAL(selected(QwtPlotCurve *, int)), this, SLOT(selectPeak(QwtPlotCurve *, int)));
   d_graph->plotWidget()->canvas()->grabMouse();
 
-  emit statusText(
-      tr("Move cursor and click to select a point and double-click/press "
-         "'Enter' to set the position of a peak!"));
+  emit statusText(tr("Move cursor and click to select a point and double-click/press "
+                     "'Enter' to set the position of a peak!"));
 }
 
 MultiPeakFitTool::~MultiPeakFitTool() {
@@ -121,9 +114,8 @@ void MultiPeakFitTool::finalize() {
     QVarLengthArray<double> temp(n); // double temp[n];
     for (int i = 0; i < n; i++)
       temp[i] = fabs(y[i]);
-    size_t imax_temp = gsl_stats_max_index(
-        temp.data(), 1,
-        n); // size_t imax_temp = gsl_stats_max_index(temp, 1, n);
+    size_t imax_temp = gsl_stats_max_index(temp.data(), 1,
+                                           n); // size_t imax_temp = gsl_stats_max_index(temp, 1, n);
     double offset = 0.0;
     if (imax_temp == imax)
       offset = y[imin];
@@ -155,8 +147,7 @@ void MultiPeakFitTool::finalize() {
     d_graph->plotWidget()->removeMarker(mrks[n - i - 1]);
 
   d_graph->plotWidget()->replot();
-  if (d_graph->activeTool() &&
-      d_graph->activeTool()->rtti() == PlotToolInterface::Rtti_RangeSelector) {
+  if (d_graph->activeTool() && d_graph->activeTool()->rtti() == PlotToolInterface::Rtti_RangeSelector) {
     (static_cast<RangeSelectorTool *>(d_graph->activeTool()))->setEnabled();
   } else
     d_graph->plotWidget()->canvas()->unsetCursor();

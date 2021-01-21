@@ -20,9 +20,8 @@ namespace Mantid {
 namespace DataObjects {
 // Default headers(attributes) describing the contents of the data, written by
 // this class
-const char *EventHeaders[] = {
-    "signal, errorSquared, center (each dim.)",
-    "signal, errorSquared, runIndex, detectorId, center (each dim.)"};
+const char *EventHeaders[] = {"signal, errorSquared, center (each dim.)",
+                              "signal, errorSquared, runIndex, detectorId, center (each dim.)"};
 
 std::string BoxControllerNeXusIO::g_EventGroupName("event_data");
 std::string BoxControllerNeXusIO::g_DBDataName("free_space_blocks");
@@ -31,10 +30,8 @@ std::string BoxControllerNeXusIO::g_DBDataName("free_space_blocks");
  @param bc shared pointer to the box controller which uses this IO operations
 */
 BoxControllerNeXusIO::BoxControllerNeXusIO(API::BoxController *const bc)
-    : m_File(nullptr), m_ReadOnly(true), m_dataChunk(DATA_CHUNK), m_bc(bc),
-      m_BlockStart(2, 0), m_BlockSize(2, 0), m_CoordSize(sizeof(coord_t)),
-      m_EventType(FatEvent), m_EventsVersion("1.0"),
-      m_ReadConversion(noConversion) {
+    : m_File(nullptr), m_ReadOnly(true), m_dataChunk(DATA_CHUNK), m_bc(bc), m_BlockStart(2, 0), m_BlockSize(2, 0),
+      m_CoordSize(sizeof(coord_t)), m_EventType(FatEvent), m_EventsVersion("1.0"), m_ReadConversion(noConversion) {
   m_BlockSize[1] = 4 + m_bc->getNDims();
 
   for (auto &EventHeader : EventHeaders) {
@@ -46,13 +43,11 @@ BoxControllerNeXusIO::BoxControllerNeXusIO(API::BoxController *const bc)
   m_EventsTypesSupported[FatEvent] = MDEvent<1>::getTypeName();
 }
 /**get event type form its string representation*/
-BoxControllerNeXusIO::EventType BoxControllerNeXusIO::TypeFromString(
-    const std::vector<std::string> &typesSupported,
-    const std::string &typeName) {
+BoxControllerNeXusIO::EventType BoxControllerNeXusIO::TypeFromString(const std::vector<std::string> &typesSupported,
+                                                                     const std::string &typeName) {
   auto it = std::find(typesSupported.begin(), typesSupported.end(), typeName);
   if (it == typesSupported.end())
-    throw std::invalid_argument("Unsupported event type: " + typeName +
-                                " provided ");
+    throw std::invalid_argument("Unsupported event type: " + typeName + " provided ");
 
   return static_cast<EventType>(std::distance(typesSupported.begin(), it));
 }
@@ -70,8 +65,7 @@ BoxControllerNeXusIO::EventType BoxControllerNeXusIO::TypeFromString(
   itself defines the size and the format of the event
                         The events described in the class header are supported
   only  */
-void BoxControllerNeXusIO::setDataType(const size_t blockSize,
-                                       const std::string &typeName) {
+void BoxControllerNeXusIO::setDataType(const size_t blockSize, const std::string &typeName) {
   if (blockSize == 4 || blockSize == 8) {
 
     m_CoordSize = static_cast<unsigned int>(blockSize);
@@ -103,8 +97,7 @@ void BoxControllerNeXusIO::setDataType(const size_t blockSize,
  *itself defines the size and the format of the event
  */
 
-void BoxControllerNeXusIO::getDataType(size_t &CoordSize,
-                                       std::string &typeName) const {
+void BoxControllerNeXusIO::getDataType(size_t &CoordSize, std::string &typeName) const {
   CoordSize = m_CoordSize;
   typeName = m_EventsTypesSupported[m_EventType];
 }
@@ -117,16 +110,14 @@ void BoxControllerNeXusIO::getDataType(size_t &CoordSize,
  *
  *
  */
-bool BoxControllerNeXusIO::openFile(const std::string &fileName,
-                                    const std::string &mode) {
+bool BoxControllerNeXusIO::openFile(const std::string &fileName, const std::string &mode) {
   // file already opened
   if (m_File)
     return false;
 
   std::lock_guard<std::mutex> _lock(m_fileMutex);
   m_ReadOnly = true;
-  if (mode.find('w') != std::string::npos ||
-      mode.find('W') != std::string::npos) {
+  if (mode.find('w') != std::string::npos || mode.find('W') != std::string::npos) {
     m_ReadOnly = false;
   }
 
@@ -134,22 +125,19 @@ bool BoxControllerNeXusIO::openFile(const std::string &fileName,
   m_fileName = API::FileFinder::Instance().getFullPath(fileName);
   if (m_fileName.empty()) {
     if (!m_ReadOnly) {
-      std::string filePath =
-          Kernel::ConfigService::Instance().getString("defaultsave.directory");
+      std::string filePath = Kernel::ConfigService::Instance().getString("defaultsave.directory");
       if (filePath.empty())
         m_fileName = fileName;
       else
         m_fileName = filePath + "/" + fileName;
     } else
-      throw Kernel::Exception::FileError("Can not open file to read ",
-                                         m_fileName);
+      throw Kernel::Exception::FileError("Can not open file to read ", m_fileName);
   }
   auto nDims = static_cast<int>(this->m_bc->getNDims());
 
   bool group_exists;
   m_File = std::unique_ptr<::NeXus::File>(MDBoxFlatTree::createOrOpenMDWSgroup(
-      m_fileName, nDims, m_EventsTypesSupported[m_EventType], m_ReadOnly,
-      group_exists));
+      m_fileName, nDims, m_EventsTypesSupported[m_EventType], m_ReadOnly, group_exists));
 
   // we are in MD workspace Class  group now
   std::map<std::string, std::string> groupEntries;
@@ -176,16 +164,13 @@ bool BoxControllerNeXusIO::openFile(const std::string &fileName,
 void BoxControllerNeXusIO::CreateEventGroup() {
   if (m_ReadOnly)
     throw Kernel::Exception::FileError(
-        "The NXdata group: " + g_EventGroupName +
-            " does not exist in the file opened for read",
-        m_fileName);
+        "The NXdata group: " + g_EventGroupName + " does not exist in the file opened for read", m_fileName);
 
   try {
     m_File->makeGroup(g_EventGroupName, "NXdata", true);
     m_File->putAttr("version", m_EventsVersion);
   } catch (...) {
-    throw Kernel::Exception::FileError(
-        "Can not create new NXdata group: " + g_EventGroupName, m_fileName);
+    throw Kernel::Exception::FileError("Can not create new NXdata group: " + g_EventGroupName, m_fileName);
   }
 }
 
@@ -198,11 +183,10 @@ void BoxControllerNeXusIO::OpenAndCheckEventGroup() {
   m_File->getAttr("version", fileGroupVersion);
 
   if (fileGroupVersion != m_EventsVersion)
-    throw Kernel::Exception::FileError(
-        "Trying to open existing data grop to write new event data but the "
-        "group with differetn version: " +
-            fileGroupVersion + " already exists ",
-        m_fileName);
+    throw Kernel::Exception::FileError("Trying to open existing data grop to write new event data but the "
+                                       "group with differetn version: " +
+                                           fileGroupVersion + " already exists ",
+                                       m_fileName);
 }
 /** Helper function which prepares NeXus event structure to accept events   */
 void BoxControllerNeXusIO::prepareNxSToWrite_CurVersion() {
@@ -225,11 +209,9 @@ void BoxControllerNeXusIO::prepareNxSToWrite_CurVersion() {
 
     // Make and open the data
     if (m_CoordSize == 4)
-      m_File->makeCompData("event_data", ::NeXus::FLOAT32, m_BlockSize,
-                           ::NeXus::NONE, chunk, true);
+      m_File->makeCompData("event_data", ::NeXus::FLOAT32, m_BlockSize, ::NeXus::NONE, chunk, true);
     else
-      m_File->makeCompData("event_data", ::NeXus::FLOAT64, m_BlockSize,
-                           ::NeXus::NONE, chunk, true);
+      m_File->makeCompData("event_data", ::NeXus::FLOAT64, m_BlockSize, ::NeXus::NONE, chunk, true);
 
     // A little bit of description for humans to read later
     m_File->putAttr("description", m_EventsTypeHeaders[m_EventType]);
@@ -262,8 +244,7 @@ void BoxControllerNeXusIO::prepareNxSdata_CurVersion() {
     break;
 
   default:
-    throw Kernel::Exception::FileError("Unknown events data format ",
-                                       m_fileName);
+    throw Kernel::Exception::FileError("Unknown events data format ", m_fileName);
   }
 
   // check if the number of dimensions in the file corresponds to the number of
@@ -278,14 +259,11 @@ void BoxControllerNeXusIO::prepareNxSdata_CurVersion() {
     nFileDim = ndim2 - 4;
     break;
   default:
-    throw Kernel::Exception::FileError(
-        "Unexpected type of events in the data file", m_fileName);
+    throw Kernel::Exception::FileError("Unexpected type of events in the data file", m_fileName);
   }
 
   if (nFileDim != m_bc->getNDims())
-    throw Kernel::Exception::FileError(
-        "Trying to open event data with different number of dimensions ",
-        m_fileName);
+    throw Kernel::Exception::FileError("Trying to open event data with different number of dimensions ", m_fileName);
 
   // HACK -- there is no difference between empty event dataset and the dataset
   // with 1 event.
@@ -311,8 +289,7 @@ void BoxControllerNeXusIO::getDiskBufferFileData() {
 
   std::map<std::string, std::string> groupEntries;
   m_File->getEntries(groupEntries);
-  if (groupEntries.find(g_DBDataName) !=
-      groupEntries.end()) // data exist, open it
+  if (groupEntries.find(g_DBDataName) != groupEntries.end()) // data exist, open it
   {
     // Read the free space blocks in from the existing file
     m_File->readData(g_DBDataName, freeSpaceBlocks);
@@ -320,10 +297,8 @@ void BoxControllerNeXusIO::getDiskBufferFileData() {
   } else // create and open the group
   {
     if (m_ReadOnly)
-      throw Kernel::Exception::FileError(
-          "Attempt to create new DB group in the read-only file", m_fileName);
-    m_File->writeExtendibleData(g_DBDataName, freeSpaceBlocks, free_dims,
-                                free_chunk);
+      throw Kernel::Exception::FileError("Attempt to create new DB group in the read-only file", m_fileName);
+    m_File->writeExtendibleData(g_DBDataName, freeSpaceBlocks, free_dims, free_chunk);
   }
 }
 
@@ -333,8 +308,7 @@ void BoxControllerNeXusIO::getDiskBufferFileData() {
  *@param DataBlock     -- the vector with data to write
  *@param blockPosition -- The starting place to save data to   */
 template <typename Type>
-void BoxControllerNeXusIO::saveGenericBlock(
-    const std::vector<Type> &DataBlock, const uint64_t blockPosition) const {
+void BoxControllerNeXusIO::saveGenericBlock(const std::vector<Type> &DataBlock, const uint64_t blockPosition) const {
   std::vector<int64_t> start(2, 0);
   // Specify the dimensions
   std::vector<int64_t> dims(m_BlockSize);
@@ -359,16 +333,14 @@ void BoxControllerNeXusIO::saveGenericBlock(
  *array
  *@param DataBlock     -- the vector with data to write
  *@param blockPosition -- The starting place to save data to   */
-void BoxControllerNeXusIO::saveBlock(const std::vector<float> &DataBlock,
-                                     const uint64_t blockPosition) const {
+void BoxControllerNeXusIO::saveBlock(const std::vector<float> &DataBlock, const uint64_t blockPosition) const {
   this->saveGenericBlock(DataBlock, blockPosition);
 }
 /** Save double precision data block on specific position within properly opened
  *NeXus data array
  *@param DataBlock     -- the vector with data to write
  *@param blockPosition -- The starting place to save data to   */
-void BoxControllerNeXusIO::saveBlock(const std::vector<double> &DataBlock,
-                                     const uint64_t blockPosition) const {
+void BoxControllerNeXusIO::saveBlock(const std::vector<double> &DataBlock, const uint64_t blockPosition) const {
   this->saveGenericBlock(DataBlock, blockPosition);
 }
 
@@ -381,12 +353,10 @@ void BoxControllerNeXusIO::saveBlock(const std::vector<double> &DataBlock,
   representation.
 */
 template <typename Type>
-void BoxControllerNeXusIO::loadGenericBlock(std::vector<Type> &Block,
-                                            const uint64_t blockPosition,
+void BoxControllerNeXusIO::loadGenericBlock(std::vector<Type> &Block, const uint64_t blockPosition,
                                             const size_t nPoints) const {
   if (blockPosition + nPoints > this->getFileLength())
-    throw Kernel::Exception::FileError("Attemtp to read behind the file end",
-                                       m_fileName);
+    throw Kernel::Exception::FileError("Attemtp to read behind the file end", m_fileName);
 
   std::vector<int64_t> start(2, 0);
   std::vector<int64_t> size(m_BlockSize);
@@ -401,8 +371,7 @@ void BoxControllerNeXusIO::loadGenericBlock(std::vector<Type> &Block,
 }
 
 /** Helper funcion which allows to convert one data fomat into another */
-template <typename FROM, typename TO>
-void convertFormats(const std::vector<FROM> &inData, std::vector<TO> &outData) {
+template <typename FROM, typename TO> void convertFormats(const std::vector<FROM> &inData, std::vector<TO> &outData) {
   outData.reserve(inData.size());
   for (size_t i = 0; i < inData.size(); i++) {
     outData.emplace_back(static_cast<TO>(inData[i]));
@@ -416,8 +385,7 @@ void convertFormats(const std::vector<FROM> &inData, std::vector<TO> &outData) {
   *@returns Block -- resized block of data containing serialized events
   representation.
 */
-void BoxControllerNeXusIO::loadBlock(std::vector<float> &Block,
-                                     const uint64_t blockPosition,
+void BoxControllerNeXusIO::loadBlock(std::vector<float> &Block, const uint64_t blockPosition,
                                      const size_t nPoints) const {
   std::vector<double> tmp;
   switch (m_ReadConversion) {
@@ -429,8 +397,7 @@ void BoxControllerNeXusIO::loadBlock(std::vector<float> &Block,
     convertFormats(tmp, Block);
     break;
   default:
-    throw Kernel::Exception::FileError(
-        " Attempt to read float data from unsupported file format", m_fileName);
+    throw Kernel::Exception::FileError(" Attempt to read float data from unsupported file format", m_fileName);
   }
 }
 /** Load double  data block from the opened NeXus file.
@@ -441,8 +408,7 @@ void BoxControllerNeXusIO::loadBlock(std::vector<float> &Block,
   *@returns Block -- resized block of data containing serialized events
   representation.
 */
-void BoxControllerNeXusIO::loadBlock(std::vector<double> &Block,
-                                     const uint64_t blockPosition,
+void BoxControllerNeXusIO::loadBlock(std::vector<double> &Block, const uint64_t blockPosition,
                                      const size_t nPoints) const {
   std::vector<float> tmp;
   switch (m_ReadConversion) {
@@ -454,9 +420,7 @@ void BoxControllerNeXusIO::loadBlock(std::vector<double> &Block,
     convertFormats(tmp, Block);
     break;
   default:
-    throw Kernel::Exception::FileError(
-        " Attempt to read double data from unsupported file format",
-        m_fileName);
+    throw Kernel::Exception::FileError(" Attempt to read double data from unsupported file format", m_fileName);
   }
 }
 

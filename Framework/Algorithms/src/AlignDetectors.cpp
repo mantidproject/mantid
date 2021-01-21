@@ -43,14 +43,12 @@ namespace { // anonymous namespace
 class ConversionFactors {
 public:
   explicit ConversionFactors(const ITableWorkspace_const_sptr &table)
-      : m_difcCol(table->getColumn("difc")),
-        m_difaCol(table->getColumn("difa")),
+      : m_difcCol(table->getColumn("difc")), m_difaCol(table->getColumn("difa")),
         m_tzeroCol(table->getColumn("tzero")) {
     this->generateDetidToRow(table);
   }
 
-  std::function<double(double)>
-  getConversionFunc(const std::set<detid_t> &detIds) const {
+  std::function<double(double)> getConversionFunc(const std::set<detid_t> &detIds) const {
     const std::set<size_t> rows = this->getRow(detIds);
     double difc = 0.;
     double difa = 0.;
@@ -101,9 +99,7 @@ const std::string AlignDetectors::name() const { return "AlignDetectors"; }
 
 int AlignDetectors::version() const { return 1; }
 
-const std::string AlignDetectors::category() const {
-  return "Diffraction\\Calibration";
-}
+const std::string AlignDetectors::category() const { return "Diffraction\\Calibration"; }
 
 const std::string AlignDetectors::summary() const {
   return "Performs a unit change from TOF to dSpacing, correcting the X "
@@ -119,32 +115,27 @@ void AlignDetectors::init() {
   wsValidator->add<WorkspaceUnitValidator>("TOF");
   wsValidator->add<RawCountValidator>();
 
-  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input, wsValidator),
-                  "A workspace with units of TOF");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>("InputWorkspace", "", Direction::Input, wsValidator),
+      "A workspace with units of TOF");
 
-  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "The name to use for the output workspace");
 
   const std::vector<std::string> exts{".h5", ".hd5", ".hdf", ".cal"};
-  declareProperty(
-      std::make_unique<FileProperty>("CalibrationFile", "",
-                                     FileProperty::OptionalLoad, exts),
-      "Optional: The .cal file containing the position correction factors. "
-      "Either this or OffsetsWorkspace needs to be specified.");
+  declareProperty(std::make_unique<FileProperty>("CalibrationFile", "", FileProperty::OptionalLoad, exts),
+                  "Optional: The .cal file containing the position correction factors. "
+                  "Either this or OffsetsWorkspace needs to be specified.");
 
-  declareProperty(
-      std::make_unique<WorkspaceProperty<ITableWorkspace>>(
-          "CalibrationWorkspace", "", Direction::Input, PropertyMode::Optional),
-      "Optional: A Workspace containing the calibration information. Either "
-      "this or CalibrationFile needs to be specified.");
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>("CalibrationWorkspace", "", Direction::Input,
+                                                                       PropertyMode::Optional),
+                  "Optional: A Workspace containing the calibration information. Either "
+                  "this or CalibrationFile needs to be specified.");
 
-  declareProperty(
-      std::make_unique<WorkspaceProperty<OffsetsWorkspace>>(
-          "OffsetsWorkspace", "", Direction::Input, PropertyMode::Optional),
-      "Optional: A OffsetsWorkspace containing the calibration offsets. Either "
-      "this or CalibrationFile needs to be specified.");
+  declareProperty(std::make_unique<WorkspaceProperty<OffsetsWorkspace>>("OffsetsWorkspace", "", Direction::Input,
+                                                                        PropertyMode::Optional),
+                  "Optional: A OffsetsWorkspace containing the calibration offsets. Either "
+                  "this or CalibrationFile needs to be specified.");
 
   // make group associations.
   std::string calibrationGroup("Calibration");
@@ -162,8 +153,7 @@ std::map<std::string, std::string> AlignDetectors::validateInputs() {
   if (!calFileName.empty())
     numWays += 1;
 
-  ITableWorkspace_const_sptr calibrationWS =
-      getProperty("CalibrationWorkspace");
+  ITableWorkspace_const_sptr calibrationWS = getProperty("CalibrationWorkspace");
   if (bool(calibrationWS))
     numWays += 1;
 
@@ -189,8 +179,7 @@ std::map<std::string, std::string> AlignDetectors::validateInputs() {
   return result;
 }
 
-void AlignDetectors::loadCalFile(const MatrixWorkspace_sptr &inputWS,
-                                 const std::string &filename) {
+void AlignDetectors::loadCalFile(const MatrixWorkspace_sptr &inputWS, const std::string &filename) {
   IAlgorithm_sptr alg = createChildAlgorithm("LoadDiffCal");
   alg->setProperty("InputWorkspace", inputWS);
   alg->setPropertyValue("Filename", filename);
@@ -270,8 +259,7 @@ void AlignDetectors::exec() {
   }
 }
 
-void AlignDetectors::align(const ConversionFactors &converter,
-                           Progress &progress, MatrixWorkspace &outputWS) {
+void AlignDetectors::align(const ConversionFactors &converter, Progress &progress, MatrixWorkspace &outputWS) {
   PARALLEL_FOR_IF(Kernel::threadSafe(outputWS))
   for (int64_t i = 0; i < m_numberOfSpectra; ++i) {
     PARALLEL_START_INTERUPT_REGION
@@ -284,8 +272,7 @@ void AlignDetectors::align(const ConversionFactors &converter,
       std::transform(x.begin(), x.end(), x.begin(), toDspacing);
     } catch (const Exception::NotFoundError &) {
       // Zero the data in this case
-      outputWS.setHistogram(i, BinEdges(outputWS.x(i).size()),
-                            Counts(outputWS.y(i).size()));
+      outputWS.setHistogram(i, BinEdges(outputWS.x(i).size()), Counts(outputWS.y(i).size()));
     }
     progress.report();
     PARALLEL_END_INTERUPT_REGION
@@ -293,14 +280,12 @@ void AlignDetectors::align(const ConversionFactors &converter,
   PARALLEL_CHECK_INTERUPT_REGION
 }
 
-void AlignDetectors::align(const ConversionFactors &converter,
-                           Progress &progress, EventWorkspace &outputWS) {
+void AlignDetectors::align(const ConversionFactors &converter, Progress &progress, EventWorkspace &outputWS) {
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int64_t i = 0; i < m_numberOfSpectra; ++i) {
     PARALLEL_START_INTERUPT_REGION
 
-    auto toDspacing = converter.getConversionFunc(
-        outputWS.getSpectrum(size_t(i)).getDetectorIDs());
+    auto toDspacing = converter.getConversionFunc(outputWS.getSpectrum(size_t(i)).getDetectorIDs());
     outputWS.getSpectrum(i).convertTof(toDspacing);
 
     progress.report();
@@ -318,8 +303,8 @@ void AlignDetectors::align(const ConversionFactors &converter,
   outputWS.clearMRU();
 }
 
-Parallel::ExecutionMode AlignDetectors::getParallelExecutionMode(
-    const std::map<std::string, Parallel::StorageMode> &storageModes) const {
+Parallel::ExecutionMode
+AlignDetectors::getParallelExecutionMode(const std::map<std::string, Parallel::StorageMode> &storageModes) const {
   using namespace Parallel;
   const auto inputMode = storageModes.at("InputWorkspace");
   const auto &calibrationMode = storageModes.find("CalibrationWorkspace");

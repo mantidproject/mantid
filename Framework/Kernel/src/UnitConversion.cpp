@@ -26,14 +26,11 @@ namespace Kernel {
  * meV)
  * @return The value converted to the destination unit
  */
-double UnitConversion::run(const std::string &src, const std::string &dest,
-                           const double srcValue, const double l1,
-                           const double l2, const double theta,
-                           const DeltaEMode::Type emode, const double efixed) {
+double UnitConversion::run(const std::string &src, const std::string &dest, const double srcValue, const double l1,
+                           const double l2, const double theta, const DeltaEMode::Type emode, const double efixed) {
   Unit_sptr srcUnit = UnitFactory::Instance().create(src);
   Unit_sptr destUnit = UnitFactory::Instance().create(dest);
-  return UnitConversion::run(*srcUnit, *destUnit, srcValue, l1, l2, theta,
-                             emode, efixed);
+  return UnitConversion::run(*srcUnit, *destUnit, srcValue, l1, l2, theta, emode, efixed);
 }
 
 /**
@@ -49,15 +46,13 @@ double UnitConversion::run(const std::string &src, const std::string &dest,
  * meV)
  * @return The value converted to the destination unit
  */
-double UnitConversion::run(Unit &srcUnit, Unit &destUnit, const double srcValue,
-                           const double l1, const double l2, const double theta,
-                           const DeltaEMode::Type emode, const double efixed) {
+double UnitConversion::run(Unit &srcUnit, Unit &destUnit, const double srcValue, const double l1, const double l2,
+                           const double theta, const DeltaEMode::Type emode, const double efixed) {
   double factor(0.0), power(0.0);
   if (srcUnit.quickConversion(destUnit, factor, power)) {
     return convertQuickly(srcValue, factor, power);
   } else {
-    return convertViaTOF(srcUnit, destUnit, srcValue, l1, l2, theta, emode,
-                         efixed);
+    return convertViaTOF(srcUnit, destUnit, srcValue, l1, l2, theta, emode, efixed);
   }
 }
 
@@ -73,8 +68,7 @@ double UnitConversion::run(Unit &srcUnit, Unit &destUnit, const double srcValue,
  * @param power :: Raise the src value to this power
  * @return The converted unit
  */
-double UnitConversion::convertQuickly(const double srcValue,
-                                      const double factor, const double power) {
+double UnitConversion::convertQuickly(const double srcValue, const double factor, const double power) {
   return factor * std::pow(srcValue, power);
 }
 
@@ -90,10 +84,8 @@ double UnitConversion::convertQuickly(const double srcValue,
  * meV)
  * @return The value converted to the destination unit
  */
-double UnitConversion::convertViaTOF(Unit &srcUnit, Unit &destUnit,
-                                     const double srcValue, const double l1,
-                                     const double l2, const double theta,
-                                     const DeltaEMode::Type emode,
+double UnitConversion::convertViaTOF(Unit &srcUnit, Unit &destUnit, const double srcValue, const double l1,
+                                     const double l2, const double theta, const DeltaEMode::Type emode,
                                      const double efixed) {
   // Translate the emode to the int formulation
   int emodeAsInt(0);
@@ -108,16 +100,12 @@ double UnitConversion::convertViaTOF(Unit &srcUnit, Unit &destUnit,
     emodeAsInt = 2;
     break;
   default:
-    throw std::invalid_argument(
-        "UnitConversion::convertViaTOF - Unknown emode " +
-        std::to_string(emode));
+    throw std::invalid_argument("UnitConversion::convertViaTOF - Unknown emode " + std::to_string(emode));
   };
 
   const double unused(0.0);
-  const double tof = srcUnit.convertSingleToTOF(srcValue, l1, l2, theta,
-                                                emodeAsInt, efixed, unused);
-  return destUnit.convertSingleFromTOF(tof, l1, l2, theta, emodeAsInt, efixed,
-                                       unused);
+  const double tof = srcUnit.convertSingleToTOF(srcValue, l1, l2, theta, emodeAsInt, efixed, unused);
+  return destUnit.convertSingleFromTOF(tof, l1, l2, theta, emodeAsInt, efixed, unused);
 }
 
 /**
@@ -127,8 +115,7 @@ double UnitConversion::convertViaTOF(Unit &srcUnit, Unit &destUnit,
  * meV)
  * @return The value converted to ElasticQ
  */
-double UnitConversion::convertToElasticQ(const double theta,
-                                         const double efixed) {
+double UnitConversion::convertToElasticQ(const double theta, const double efixed) {
 
   Mantid::Kernel::Units::Energy energyUnit;
   double wavelengthFactor(0.0), wavelengthPower(0.0);

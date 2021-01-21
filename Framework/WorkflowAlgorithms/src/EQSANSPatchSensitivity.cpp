@@ -21,13 +21,10 @@ using namespace API;
 using namespace Geometry;
 
 void EQSANSPatchSensitivity::init() {
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("Workspace", "", Direction::InOut),
-      "Input sensitivity workspace to be patched");
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("PatchWorkspace", "",
-                                            Direction::Input),
-      "Workspace defining the patch. Masked detectors will be patched.");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("Workspace", "", Direction::InOut),
+                  "Input sensitivity workspace to be patched");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("PatchWorkspace", "", Direction::Input),
+                  "Workspace defining the patch. Masked detectors will be patched.");
   declareProperty("UseLinearRegression", true,
                   "If true, a linear regression "
                   "will be used instead of "
@@ -39,10 +36,8 @@ void EQSANSPatchSensitivity::exec() {
   MatrixWorkspace_sptr inputWS = getProperty("Workspace");
   MatrixWorkspace_sptr patchWS = getProperty("PatchWorkspace");
   bool useRegression = getProperty("UseLinearRegression");
-  const int nx_pixels = static_cast<int>(
-      inputWS->getInstrument()->getNumberParameter("number-of-x-pixels")[0]);
-  const int ny_pixels = static_cast<int>(
-      inputWS->getInstrument()->getNumberParameter("number-of-y-pixels")[0]);
+  const int nx_pixels = static_cast<int>(inputWS->getInstrument()->getNumberParameter("number-of-x-pixels")[0]);
+  const int ny_pixels = static_cast<int>(inputWS->getInstrument()->getNumberParameter("number-of-y-pixels")[0]);
 
   const auto numberOfSpectra = static_cast<int>(inputWS->getNumberHistograms());
 
@@ -109,8 +104,7 @@ void EQSANSPatchSensitivity::exec() {
       progress(0.91, "Applying patch");
       for (auto patched_id : patched_ids) {
         if (!inSpectrumInfo.hasDetectors(patched_id)) {
-          g_log.warning() << "Spectrum " << patched_id
-                          << " has no detector, skipping (not clearing mask)\n";
+          g_log.warning() << "Spectrum " << patched_id << " has no detector, skipping (not clearing mask)\n";
           continue;
         }
         MantidVec &YValues = inputWS->dataY(patched_id);
@@ -129,16 +123,14 @@ void EQSANSPatchSensitivity::exec() {
 
   // Call Calculate efficiency to renormalize
   progress(0.91, "Renormalizing");
-  IAlgorithm_sptr effAlg =
-      createChildAlgorithm("CalculateEfficiency", 0.91, 1, true, 1);
+  IAlgorithm_sptr effAlg = createChildAlgorithm("CalculateEfficiency", 0.91, 1, true, 1);
   effAlg->setProperty("InputWorkspace", inputWS);
   effAlg->setProperty("OutputWorkspace", inputWS);
   effAlg->execute();
   inputWS = effAlg->getProperty("OutputWorkspace");
   setProperty("Workspace", inputWS);
 
-  setProperty("OutputMessage",
-              "Applied wavelength-dependent sensitivity correction");
+  setProperty("OutputMessage", "Applied wavelength-dependent sensitivity correction");
 }
 
 } // namespace WorkflowAlgorithms

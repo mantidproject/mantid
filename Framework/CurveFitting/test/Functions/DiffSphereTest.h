@@ -45,11 +45,10 @@ public:
   void testDiffSphereElastic() {
 
     // define the fit function
-    std::string funtion_string =
-        "(composite=Convolution,FixResolution=true,NumDeriv=true;name=Gaussian,"
-        "Height=1.0,PeakCentre=0.0,Sigma=0.002,ties=(Height=1.0,PeakCentre=0.0,"
-        "Sigma=0.002);name=ElasticDiffSphere,Q=0.20092,Height=47.014,Radius="
-        "3.567)";
+    std::string funtion_string = "(composite=Convolution,FixResolution=true,NumDeriv=true;name=Gaussian,"
+                                 "Height=1.0,PeakCentre=0.0,Sigma=0.002,ties=(Height=1.0,PeakCentre=0.0,"
+                                 "Sigma=0.002);name=ElasticDiffSphere,Q=0.20092,Height=47.014,Radius="
+                                 "3.567)";
 
     // Initialize the fit function in the Fit algorithm
     Algorithms::Fit fitalg;
@@ -72,11 +71,10 @@ public:
      * and thus no unique fit exists. Thus, we fix parameter height and fit the
      * radius.
      */
-    funtion_string =
-        "(composite=Convolution,NumDeriv=true;name=Gaussian,"
-        "Height=1.0,PeakCentre=0.0,Sigma=0.002,ties=(Height=1.0,"
-        "PeakCentre=0.0,Sigma=0.002);name=ElasticDiffSphere,Q=0.20092,"
-        "Height=47.014,Radius=6.0,ties=(Height=47.014,Centre=0))";
+    funtion_string = "(composite=Convolution,NumDeriv=true;name=Gaussian,"
+                     "Height=1.0,PeakCentre=0.0,Sigma=0.002,ties=(Height=1.0,"
+                     "PeakCentre=0.0,Sigma=0.002);name=ElasticDiffSphere,Q=0.20092,"
+                     "Height=47.014,Radius=6.0,ties=(Height=47.014,Centre=0))";
     fitalg.setProperty("Function", funtion_string);
     fitalg.setProperty("InputWorkspace", data_workspace);
     fitalg.setPropertyValue("WorkspaceIndex", "0");
@@ -91,8 +89,7 @@ public:
     // debugging purposes
 
     // check the parameters of the resolution did not change
-    Mantid::API::IFunction_sptr fitalg_function =
-        fitalg.getProperty("Function");
+    Mantid::API::IFunction_sptr fitalg_function = fitalg.getProperty("Function");
     auto fitalg_conv = std::dynamic_pointer_cast<Convolution>(fitalg_function);
     Mantid::API::IFunction_sptr fitalg_resolution = fitalg_conv->getFunction(0);
     TS_ASSERT_DELTA(fitalg_resolution->getParameter("PeakCentre"), 0.0,
@@ -108,8 +105,7 @@ public:
     // purposes
 
     // check the parameters of the elastic part
-    Mantid::API::IFunction_sptr fitalg_structure_factor =
-        fitalg_conv->getFunction(1);
+    Mantid::API::IFunction_sptr fitalg_structure_factor = fitalg_conv->getFunction(1);
     TS_ASSERT_DELTA(fitalg_structure_factor->getParameter("Height"), 47.014,
                     47.014 * 0.05); // allow for a small percent variation
     TS_ASSERT_DELTA(fitalg_structure_factor->getParameter("Radius"), 3.567,
@@ -142,16 +138,14 @@ public:
                              // of the 99 coefficients to break down
 
     // initialize the elastic part
-    std::shared_ptr<ElasticDiffSphere> elastic_part =
-        std::make_shared<ElasticDiffSphere>();
+    std::shared_ptr<ElasticDiffSphere> elastic_part = std::make_shared<ElasticDiffSphere>();
     elastic_part->setParameter("Height", I);
     elastic_part->setParameter("Radius", R);
     elastic_part->setAttributeValue("Q", Q);
     elastic_part->init();
 
     // initialize the inelastic part
-    std::shared_ptr<InelasticDiffSphere> inelastic_part(
-        new InelasticDiffSphere());
+    std::shared_ptr<InelasticDiffSphere> inelastic_part(new InelasticDiffSphere());
     inelastic_part->setParameter("Intensity", I);
     inelastic_part->setParameter("Radius", R);
     inelastic_part->setParameter("Diffusion", D);
@@ -161,11 +155,9 @@ public:
     // calculate the normalization over different values of Q*R
     while (Q * R < QR_max) {
       elastic_part->setParameter("Radius", R);
-      double elastic_intensity =
-          elastic_part->HeightPrefactor(); // A_{0,0} coefficient
+      double elastic_intensity = elastic_part->HeightPrefactor(); // A_{0,0} coefficient
       inelastic_part->setParameter("Radius", R);
-      std::vector<double> YJ = inelastic_part->LorentzianCoefficients(
-          Q * R); // (2*l+1) * A_{n,l} coefficients
+      std::vector<double> YJ = inelastic_part->LorentzianCoefficients(Q * R); // (2*l+1) * A_{n,l} coefficients
       double inelastic_intensity = std::accumulate(YJ.begin(), YJ.end(), 0.0);
       TS_ASSERT_DELTA(elastic_intensity + inelastic_intensity, 1.0,
                       0.02); // Allow for a 2% deviation
@@ -173,19 +165,13 @@ public:
     }
   }
 
-  void testDiffSphereInelasticWithQParam() {
-    runDiffSphereInelasticTest(0.0, 0.20092);
-  }
+  void testDiffSphereInelasticWithQParam() { runDiffSphereInelasticTest(0.0, 0.20092); }
 
   void testDiffSphereInelasticWithWSIndex() { runDiffSphereInelasticTest(0.0); }
 
-  void testDiffSphereInelasticWithShiftWithQParam() {
-    runDiffSphereInelasticTest(0.2, 0.20092);
-  }
+  void testDiffSphereInelasticWithShiftWithQParam() { runDiffSphereInelasticTest(0.2, 0.20092); }
 
-  void testDiffSphereInelasticWithShiftWithWSIndex() {
-    runDiffSphereInelasticTest(0.2);
-  }
+  void testDiffSphereInelasticWithShiftWithWSIndex() { runDiffSphereInelasticTest(0.2); }
 
   void testDiffSphere() {
     // target parameters
@@ -203,48 +189,34 @@ public:
                       "name=Gaussian,Height=1.0,"
                    << "PeakCentre=0.0,Sigma=0.002,ties=(Height=1.0,PeakCentre="
                       "0.0,Sigma=0.002);"
-                   << "name=DiffSphere,Q="
-                   << boost::lexical_cast<std::string>(Q)
+                   << "name=DiffSphere,Q=" << boost::lexical_cast<std::string>(Q)
                    << ",Intensity=" << boost::lexical_cast<std::string>(I_0)
                    << ",Radius=" << boost::lexical_cast<std::string>(R_0)
-                   << ",Diffusion=" << boost::lexical_cast<std::string>(D_0)
-                   << ")";
+                   << ",Diffusion=" << boost::lexical_cast<std::string>(D_0) << ")";
     fitalg.setProperty("Function", funtion_stream.str());
 
     // Find out whether ties were correctly applied
-    Mantid::API::IFunction_sptr fitalg_function =
-        fitalg.getProperty("Function"); // main function
+    Mantid::API::IFunction_sptr fitalg_function = fitalg.getProperty("Function"); // main function
     fitalg_function->initialize();
-    auto fitalg_conv = std::dynamic_pointer_cast<Convolution>(
-        fitalg_function);                          // cast to Convolution
-    fitalg_function = fitalg_conv->getFunction(1); // DiffSphere
-    auto fitalg_structure_factor =
-        std::dynamic_pointer_cast<DiffSphere>(fitalg_function);
+    auto fitalg_conv = std::dynamic_pointer_cast<Convolution>(fitalg_function); // cast to Convolution
+    fitalg_function = fitalg_conv->getFunction(1);                              // DiffSphere
+    auto fitalg_structure_factor = std::dynamic_pointer_cast<DiffSphere>(fitalg_function);
 
     fitalg_function = fitalg_structure_factor->getFunction(0);
-    auto fitalg_elastic =
-        std::dynamic_pointer_cast<ElasticDiffSphere>(fitalg_function);
-    TS_ASSERT_DELTA(fitalg_elastic->getParameter("Height"), I_0,
-                    std::numeric_limits<double>::epsilon());
-    TS_ASSERT_DELTA(fitalg_elastic->getParameter("Radius"), R_0,
-                    std::numeric_limits<double>::epsilon());
-    TS_ASSERT_DELTA(fitalg_elastic->getAttribute("Q").asDouble(), Q,
-                    std::numeric_limits<double>::epsilon());
+    auto fitalg_elastic = std::dynamic_pointer_cast<ElasticDiffSphere>(fitalg_function);
+    TS_ASSERT_DELTA(fitalg_elastic->getParameter("Height"), I_0, std::numeric_limits<double>::epsilon());
+    TS_ASSERT_DELTA(fitalg_elastic->getParameter("Radius"), R_0, std::numeric_limits<double>::epsilon());
+    TS_ASSERT_DELTA(fitalg_elastic->getAttribute("Q").asDouble(), Q, std::numeric_limits<double>::epsilon());
     // std::cout << "Height=" << fitalg_elastic -> getParameter( "Height" ) << "
     // Radius=" << fitalg_elastic -> getParameter( "Radius" ) << "\n"; // for
     // debugging purposes only
 
     fitalg_function = fitalg_structure_factor->getFunction(1);
-    auto fitalg_inelastic =
-        std::dynamic_pointer_cast<InelasticDiffSphere>(fitalg_function);
-    TS_ASSERT_DELTA(fitalg_inelastic->getParameter("Intensity"), I_0,
-                    std::numeric_limits<double>::epsilon());
-    TS_ASSERT_DELTA(fitalg_inelastic->getParameter("Radius"), R_0,
-                    std::numeric_limits<double>::epsilon());
-    TS_ASSERT_DELTA(fitalg_inelastic->getParameter("Diffusion"), D_0,
-                    std::numeric_limits<double>::epsilon());
-    TS_ASSERT_DELTA(fitalg_inelastic->getAttribute("Q").asDouble(), Q,
-                    std::numeric_limits<double>::epsilon());
+    auto fitalg_inelastic = std::dynamic_pointer_cast<InelasticDiffSphere>(fitalg_function);
+    TS_ASSERT_DELTA(fitalg_inelastic->getParameter("Intensity"), I_0, std::numeric_limits<double>::epsilon());
+    TS_ASSERT_DELTA(fitalg_inelastic->getParameter("Radius"), R_0, std::numeric_limits<double>::epsilon());
+    TS_ASSERT_DELTA(fitalg_inelastic->getParameter("Diffusion"), D_0, std::numeric_limits<double>::epsilon());
+    TS_ASSERT_DELTA(fitalg_inelastic->getAttribute("Q").asDouble(), Q, std::numeric_limits<double>::epsilon());
     // std::cout << "Intensity=" << fitalg_inelastic->getParameter( "Intensity"
     // ) << " Radius=" << fitalg_inelastic->getParameter( "Radius" ) << "
     // Diffusion=" << fitalg_inelastic->getParameter( "Diffusion" ) <<"\n"; //
@@ -260,12 +232,10 @@ public:
                       "name=Gaussian,Height=1.0,"
                    << "PeakCentre=0.0,Sigma=0.002,ties=(Height=1.0,PeakCentre="
                       "0.0,Sigma=0.002);"
-                   << "name=DiffSphere,Q="
-                   << boost::lexical_cast<std::string>(Q)
+                   << "name=DiffSphere,Q=" << boost::lexical_cast<std::string>(Q)
                    << ",Intensity=" << boost::lexical_cast<std::string>(I)
                    << ",Radius=" << boost::lexical_cast<std::string>(R)
-                   << ",Diffusion=" << boost::lexical_cast<std::string>(D)
-                   << ")";
+                   << ",Diffusion=" << boost::lexical_cast<std::string>(D) << ")";
     fitalg.setProperty("Function", funtion_stream.str());
 
     // create the data workspace by evaluating the fit function in the Fit
@@ -325,8 +295,7 @@ public:
   }
 
 private:
-  void runDiffSphereInelasticTest(const double S,
-                                  const double Q = Mantid::EMPTY_DBL()) {
+  void runDiffSphereInelasticTest(const double S, const double Q = Mantid::EMPTY_DBL()) {
     // target fitting parameters
     const double I_0(47.014);
     const double R_0(2.1);
@@ -343,10 +312,8 @@ private:
     std::ostringstream funtion_stream;
     funtion_stream << "(composite=Convolution,FixResolution=true,NumDeriv=true;"
                       "name=Gaussian,Height=1.0,"
-                   << "PeakCentre=0.0,Sigma=0.002,ties=(Height=1.0,PeakCentre="
-                   << S << ",Sigma=0.002);"
-                   << "name=InelasticDiffSphere,Q="
-                   << boost::lexical_cast<std::string>(simQ)
+                   << "PeakCentre=0.0,Sigma=0.002,ties=(Height=1.0,PeakCentre=" << S << ",Sigma=0.002);"
+                   << "name=InelasticDiffSphere,Q=" << boost::lexical_cast<std::string>(simQ)
                    << ",Intensity=" << boost::lexical_cast<std::string>(I_0)
                    << ",Radius=" << boost::lexical_cast<std::string>(R_0)
                    << ",Diffusion=" << boost::lexical_cast<std::string>(D_0)
@@ -367,8 +334,7 @@ private:
     funtion_stream.clear();
     funtion_stream << "(composite=Convolution,FixResolution=true,NumDeriv=true;"
                       "name=Gaussian,Height=1.0,"
-                   << "PeakCentre=0.0,Sigma=0.002,ties=(Height=1.0,PeakCentre="
-                   << S << ",Sigma=0.002);"
+                   << "PeakCentre=0.0,Sigma=0.002,ties=(Height=1.0,PeakCentre=" << S << ",Sigma=0.002);"
                    << "name=InelasticDiffSphere";
 
     if (Q != Mantid::EMPTY_DBL())
@@ -401,8 +367,7 @@ private:
     // debugging purposes
 
     // check the parameters of the resolution did not change
-    Mantid::API::IFunction_sptr fitalg_function =
-        fitalg.getProperty("Function");
+    Mantid::API::IFunction_sptr fitalg_function = fitalg.getProperty("Function");
     auto fitalg_conv = std::dynamic_pointer_cast<Convolution>(fitalg_function);
     Mantid::API::IFunction_sptr fitalg_resolution = fitalg_conv->getFunction(0);
 
@@ -419,8 +384,7 @@ private:
     // purposes
 
     // check the parameters of the inelastic part close to the target parameters
-    Mantid::API::IFunction_sptr fitalg_structure_factor =
-        fitalg_conv->getFunction(1);
+    Mantid::API::IFunction_sptr fitalg_structure_factor = fitalg_conv->getFunction(1);
     TS_ASSERT_DELTA(fitalg_structure_factor->getParameter("Intensity"), I_0,
                     I_0 * 0.05); // allow for a small percent variation
     TS_ASSERT_DELTA(fitalg_structure_factor->getParameter("Radius"), R_0,
@@ -447,10 +411,8 @@ private:
   }
 
   /// save a worskapece to a nexus file
-  void saveWorkspace(Mantid::DataObjects::Workspace2D_sptr &ws,
-                     const std::string &filename) {
-    auto save =
-        Mantid::API::AlgorithmFactory::Instance().create("SaveNexus", 1);
+  void saveWorkspace(Mantid::DataObjects::Workspace2D_sptr &ws, const std::string &filename) {
+    auto save = Mantid::API::AlgorithmFactory::Instance().create("SaveNexus", 1);
     if (!save)
       throw std::runtime_error("Algorithm not created");
     save->initialize();
@@ -460,24 +422,21 @@ private:
   }
 
   // create a data workspace using a Fit algorithm
-  Mantid::DataObjects::Workspace2D_sptr
-  generateWorkspaceFromFitAlgorithm(Algorithms::Fit &fitalg) {
+  Mantid::DataObjects::Workspace2D_sptr generateWorkspaceFromFitAlgorithm(Algorithms::Fit &fitalg) {
     using namespace Mantid::Kernel;
     using namespace Mantid::Geometry;
 
     // initialize some frequency values centered around zero. Will work as dataX
     const size_t M = 1001;
     double dataX[M];
-    const double dw =
-        0.0004; // typical bin width for BASIS@ORNL beamline, in micro-seconds
+    const double dw = 0.0004; // typical bin width for BASIS@ORNL beamline, in micro-seconds
     for (size_t i = 0; i < M; i++)
       dataX[i] = (static_cast<double>(i) - M / 2) * dw;
 
     // Evaluate the fitting function. Will work as dataY
     Mantid::API::FunctionDomain1DView dataXview(&dataX[0], M);
     Mantid::API::FunctionValues dataYvalues(dataXview);
-    Mantid::API::IFunction_sptr fitalg_function =
-        fitalg.getProperty("Function");
+    Mantid::API::IFunction_sptr fitalg_function = fitalg.getProperty("Function");
     fitalg_function->function(dataXview, dataYvalues);
 
     // Create the workspace
@@ -488,10 +447,8 @@ private:
     inst->setReferenceFrame(std::make_shared<ReferenceFrame>(Y, Z, Left, ""));
 
     // Add the source position
-    ObjComponent *source = new ObjComponent(
-        "moderator",
-        ComponentCreationHelper::createSphere(0.1, V3D(0, 0, 0), "1"),
-        inst.get());
+    ObjComponent *source =
+        new ObjComponent("moderator", ComponentCreationHelper::createSphere(0.1, V3D(0, 0, 0), "1"), inst.get());
     source->setPos(V3D(0.0, 0.0, -84.0));
     inst->add(source);
     inst->markAsSource(source);
@@ -503,11 +460,10 @@ private:
     inst->markAsSamplePos(sample);
 
     // Add a detector
-    auto pixelShape = ComponentCreationHelper::createCappedCylinder(
-        0.05, 0.02, V3D(0.0, 0.0, 0.0), V3D(0., 1.0, 0.), "tube");
-    Detector *det =
-        new Detector("pixel-1", 1, pixelShape,
-                     inst.get()); // ID 5 is a valid detector for BASIS
+    auto pixelShape =
+        ComponentCreationHelper::createCappedCylinder(0.05, 0.02, V3D(0.0, 0.0, 0.0), V3D(0., 1.0, 0.), "tube");
+    Detector *det = new Detector("pixel-1", 1, pixelShape,
+                                 inst.get()); // ID 5 is a valid detector for BASIS
     det->setPos(0.942677, 0.0171308,
                 4.63343); // Position of first detector on BASIS
     inst->add(det);
@@ -518,24 +474,17 @@ private:
     ws->getSpectrum(0).addDetectorID(det->getID());
 
     // Set emergy mode and fixed energy
-    ws->mutableRun().addLogData(
-        new Mantid::Kernel::PropertyWithValue<std::string>("deltaE-mode",
-                                                           "Indirect"));
+    ws->mutableRun().addLogData(new Mantid::Kernel::PropertyWithValue<std::string>("deltaE-mode", "Indirect"));
     ws->setEFixed(det->getID(), 2.08275); // EFixed of first detector on BASIS
 
     double fractional_error = 0.01; // error taken as a percent of the signal
     for (size_t i = 0; i < M; i++) {
-      ws->dataX(0)[i] =
-          dataX[i] -
-          dw / 2; // bin boundaries are shifted by half the bind width
+      ws->dataX(0)[i] = dataX[i] - dw / 2; // bin boundaries are shifted by half the bind width
       ws->dataY(0)[i] = dataYvalues.getCalculated(i);
       ws->dataE(0)[i] =
-          fractional_error *
-          dataYvalues.getCalculated(
-              i); // assume the error is a small percent of the actual value
+          fractional_error * dataYvalues.getCalculated(i); // assume the error is a small percent of the actual value
     }
-    ws->dataX(0)[M] =
-        dataX[M - 1] + dw / 2; // recall number of bin boundaries is 1 + #bins
+    ws->dataX(0)[M] = dataX[M - 1] + dw / 2; // recall number of bin boundaries is 1 + #bins
 
     // return now the workspace
     return ws;

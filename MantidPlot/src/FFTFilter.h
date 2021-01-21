@@ -34,12 +34,10 @@ class FFTFilter : public Filter {
   Q_OBJECT
 
 public:
-  FFTFilter(ApplicationWindow *parent, Graph *g, const QString &curveTitle,
+  FFTFilter(ApplicationWindow *parent, Graph *g, const QString &curveTitle, int m = 1);
+  FFTFilter(ApplicationWindow *parent, Graph *g, const QString &curveTitle, double start, double end, int m = 1);
+  FFTFilter(ApplicationWindow *parent, Table *t, const QString &xCol, const QString &yCol, int start = 0, int end = -1,
             int m = 1);
-  FFTFilter(ApplicationWindow *parent, Graph *g, const QString &curveTitle,
-            double start, double end, int m = 1);
-  FFTFilter(ApplicationWindow *parent, Table *t, const QString &xCol,
-            const QString &yCol, int start = 0, int end = -1, int m = 1);
 
   enum FilterType { LowPass = 1, HighPass = 2, BandPass = 3, BandBlock = 4 };
 

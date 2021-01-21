@@ -46,8 +46,7 @@ public:
   /// algorithm algName.
   QString algorithmProperty(const QString &algName, const QString &propName);
   /// Replaces the value of a recorded property.
-  void updateAlgorithmProperty(const QString &algName, const QString &propName,
-                               const QString &propValue);
+  void updateAlgorithmProperty(const QString &algName, const QString &propName, const QString &propValue);
   /// Saves the properties.
   void save();
 

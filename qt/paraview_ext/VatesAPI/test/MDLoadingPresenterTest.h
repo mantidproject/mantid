@@ -31,25 +31,18 @@ class MOCKMDLoadingPresenter : public Mantid::VATES::MDLoadingPresenter {
 public:
   MOCKMDLoadingPresenter() {}
   ~MOCKMDLoadingPresenter() override {}
-  vtkSmartPointer<vtkDataSet>
-  execute(Mantid::VATES::vtkDataSetFactory *, Mantid::VATES::ProgressAction &,
-          Mantid::VATES::ProgressAction &) override {
+  vtkSmartPointer<vtkDataSet> execute(Mantid::VATES::vtkDataSetFactory *, Mantid::VATES::ProgressAction &,
+                                      Mantid::VATES::ProgressAction &) override {
     return nullptr;
   }
   void executeLoadMetadata() override {}
   bool hasTDimensionAvailable(void) const override { return true; }
-  std::vector<double> getTimeStepValues() const override {
-    return std::vector<double>();
-  }
+  std::vector<double> getTimeStepValues() const override { return std::vector<double>(); }
   std::string getTimeStepLabel() const override { return std::string(); }
   void setAxisLabels(vtkDataSet *) override {}
   bool canReadFile() const override { return true; }
-  const std::string &getGeometryXML() const override {
-    return MOCK_GEOMETRY_XML_MD_LOADING_PRESENTER;
-  }
-  const std::string &getInstrument() override {
-    return MOCK_INSTRUMENT_MD_LOADING_PRESENTER;
-  }
+  const std::string &getGeometryXML() const override { return MOCK_GEOMETRY_XML_MD_LOADING_PRESENTER; }
+  const std::string &getInstrument() override { return MOCK_INSTRUMENT_MD_LOADING_PRESENTER; }
 };
 } // namespace
 
@@ -57,8 +50,7 @@ class MDLoadingPresenterTest : public CxxTest::TestSuite {
 private:
   vtkSmartPointer<vtkUnstructuredGrid> makeDataSet() {
     FakeProgressAction progressUpdate;
-    MDEventWorkspace3Lean::sptr ws =
-        MDEventsTestHelper::makeMDEW<3>(8, -10.0, 10.0, 1);
+    MDEventWorkspace3Lean::sptr ws = MDEventsTestHelper::makeMDEW<3>(8, -10.0, 10.0, 1);
     Mantid::VATES::vtkMDHexFactory factory(VolumeNormalization);
     factory.initialize(ws);
     auto dataset = factory.create(progressUpdate);

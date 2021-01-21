@@ -55,13 +55,10 @@ public:
    * statusText(const QString&) is emitted
    * during initialization, before there's any other chance of connecting to it.
    */
-  TranslateCurveTool(Graph *graph, ApplicationWindow *app, Direction dir,
-                     const QObject *status_target = nullptr,
+  TranslateCurveTool(Graph *graph, ApplicationWindow *app, Direction dir, const QObject *status_target = nullptr,
                      const char *status_slot = "");
 
-  int rtti() const override {
-    return PlotToolInterface::Rtti_TranslateCurveTool;
-  };
+  int rtti() const override { return PlotToolInterface::Rtti_TranslateCurveTool; };
 signals:
   /**\brief Emitted whenever a new message should be presented to the user.
    *

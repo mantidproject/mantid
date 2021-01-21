@@ -40,13 +40,10 @@ public:
   /// Algorithm's version
   int version() const override { return 1; }
   const std::vector<std::string> seeAlso() const override {
-    return {"MayersSampleCorrection", "CarpenterSampleCorrection",
-            "PearlMCAbsorption", "VesuvioCalculateMS"};
+    return {"MayersSampleCorrection", "CarpenterSampleCorrection", "PearlMCAbsorption", "VesuvioCalculateMS"};
   }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "CorrectionFunctions\\AbsorptionCorrections";
-  }
+  const std::string category() const override { return "CorrectionFunctions\\AbsorptionCorrections"; }
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "Calculates attenuation due to absorption and scattering in a "
@@ -55,18 +52,14 @@ public:
 
 protected:
   virtual std::shared_ptr<IMCAbsorptionStrategy>
-  createStrategy(IMCInteractionVolume &interactionVol,
-                 const IBeamProfile &beamProfile,
-                 Kernel::DeltaEMode::Type EMode, const size_t nevents,
-                 const size_t maxScatterPtAttempts,
-                 const bool regenerateTracksForEachLambda);
-  virtual std::shared_ptr<IMCInteractionVolume> createInteractionVolume(
-      const API::Sample &sample, const size_t maxScatterPtAttempts,
-      const MCInteractionVolume::ScatteringPointVicinity pointsIn);
-  virtual std::shared_ptr<SparseWorkspace>
-  createSparseWorkspace(const API::MatrixWorkspace &modelWS,
-                        const size_t wavelengthPoints, const size_t rows,
-                        const size_t columns);
+  createStrategy(IMCInteractionVolume &interactionVol, const IBeamProfile &beamProfile, Kernel::DeltaEMode::Type EMode,
+                 const size_t nevents, const size_t maxScatterPtAttempts, const bool regenerateTracksForEachLambda);
+  virtual std::shared_ptr<IMCInteractionVolume>
+  createInteractionVolume(const API::Sample &sample, const size_t maxScatterPtAttempts,
+                          const MCInteractionVolume::ScatteringPointVicinity pointsIn);
+  virtual std::shared_ptr<SparseWorkspace> createSparseWorkspace(const API::MatrixWorkspace &modelWS,
+                                                                 const size_t wavelengthPoints, const size_t rows,
+                                                                 const size_t columns);
   virtual std::unique_ptr<InterpolationOption> createInterpolateOption();
 
 private:
@@ -74,21 +67,16 @@ private:
   void exec() override;
   std::map<std::string, std::string> validateInputs() override;
 
-  API::MatrixWorkspace_uptr
-  doSimulation(const API::MatrixWorkspace &inputWS, const size_t nevents,
-               const bool simulateTracksForEachWavelength, const int seed,
-               const InterpolationOption &interpolateOpt,
-               const bool useSparseInstrument,
-               const size_t maxScatterPtAttempts,
-               const MCInteractionVolume::ScatteringPointVicinity pointsIn);
-  API::MatrixWorkspace_uptr
-  createOutputWorkspace(const API::MatrixWorkspace &inputWS) const;
-  std::unique_ptr<IBeamProfile>
-  createBeamProfile(const Geometry::Instrument &instrument,
-                    const API::Sample &sample) const;
-  void interpolateFromSparse(
-      API::MatrixWorkspace &targetWS, const SparseWorkspace &sparseWS,
-      const Mantid::Algorithms::InterpolationOption &interpOpt);
+  API::MatrixWorkspace_uptr doSimulation(const API::MatrixWorkspace &inputWS, const size_t nevents,
+                                         const bool simulateTracksForEachWavelength, const int seed,
+                                         const InterpolationOption &interpolateOpt, const bool useSparseInstrument,
+                                         const size_t maxScatterPtAttempts,
+                                         const MCInteractionVolume::ScatteringPointVicinity pointsIn);
+  API::MatrixWorkspace_uptr createOutputWorkspace(const API::MatrixWorkspace &inputWS) const;
+  std::unique_ptr<IBeamProfile> createBeamProfile(const Geometry::Instrument &instrument,
+                                                  const API::Sample &sample) const;
+  void interpolateFromSparse(API::MatrixWorkspace &targetWS, const SparseWorkspace &sparseWS,
+                             const Mantid::Algorithms::InterpolationOption &interpOpt);
 };
 } // namespace Algorithms
 } // namespace Mantid

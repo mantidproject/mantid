@@ -19,16 +19,13 @@ namespace Algorithms {
 */
 class MANTID_ALGORITHMS_DLL DetectorGridDefinition {
 public:
-  DetectorGridDefinition(const double minLatitude, const double maxLatitude,
-                         const size_t latitudePoints, const double minLongitude,
-                         const double maxLongitude, const size_t longitudeStep);
+  DetectorGridDefinition(const double minLatitude, const double maxLatitude, const size_t latitudePoints,
+                         const double minLongitude, const double maxLongitude, const size_t longitudeStep);
 
   double latitudeAt(const size_t row) const;
   double longitudeAt(const size_t column) const;
-  std::array<size_t, 4> nearestNeighbourIndices(const double latitude,
-                                                const double longitude) const;
-  std::pair<size_t, size_t> getNearestVertex(const double latitude,
-                                             const double longitude) const;
+  std::array<size_t, 4> nearestNeighbourIndices(const double latitude, const double longitude) const;
+  std::pair<size_t, size_t> getNearestVertex(const double latitude, const double longitude) const;
   size_t numberColumns() const;
   size_t numberRows() const;
   size_t getDetectorIndex(size_t row, size_t col);

@@ -57,9 +57,7 @@ PointVariances Histogram::pointVariances() const {
 
 /// Returns the standard deviations of the points (or bin centers) of the
 /// Histogram.
-PointStandardDeviations Histogram::pointStandardDeviations() const {
-  return PointStandardDeviations(m_dx);
-}
+PointStandardDeviations Histogram::pointStandardDeviations() const { return PointStandardDeviations(m_dx); }
 
 /** Returns the counts of the Histogram.
 
@@ -77,9 +75,7 @@ Counts Histogram::counts() const {
 
   The variances are computed from the standard deviations that are stored in the
   Histogram, i.e., this method comes with an overhead. */
-CountVariances Histogram::countVariances() const {
-  return CountVariances(countStandardDeviations());
-}
+CountVariances Histogram::countVariances() const { return CountVariances(countStandardDeviations()); }
 
 /** Returns the standard deviations of the counts of the Histogram.
 
@@ -91,8 +87,7 @@ CountStandardDeviations Histogram::countStandardDeviations() const {
   if (yMode() != YMode::Frequencies)
     return CountStandardDeviations(m_e);
   else
-    return CountStandardDeviations(FrequencyStandardDeviations(m_e),
-                                   binEdges());
+    return CountStandardDeviations(FrequencyStandardDeviations(m_e), binEdges());
 }
 
 /** Returns the frequencies of the Histogram, i.e., the counts divided by the
@@ -112,9 +107,7 @@ Frequencies Histogram::frequencies() const {
 
   The variances are computed on the fly from other data stored in the
   Histogram, i.e., this method comes with an overhead. */
-FrequencyVariances Histogram::frequencyVariances() const {
-  return FrequencyVariances(frequencyStandardDeviations());
-}
+FrequencyVariances Histogram::frequencyVariances() const { return FrequencyVariances(frequencyStandardDeviations()); }
 
 /** Returns the standard deviations of the frequencies of the Histogram.
 
@@ -124,8 +117,7 @@ FrequencyVariances Histogram::frequencyVariances() const {
   Histogram, i.e., there is little overhead. */
 FrequencyStandardDeviations Histogram::frequencyStandardDeviations() const {
   if (yMode() == YMode::Counts)
-    return FrequencyStandardDeviations(CountStandardDeviations(m_e),
-                                       binEdges());
+    return FrequencyStandardDeviations(CountStandardDeviations(m_e), binEdges());
   else
     return FrequencyStandardDeviations(m_e);
 }
@@ -144,8 +136,7 @@ void Histogram::setSharedX(const Kernel::cow_ptr<HistogramX> &x) & {
   Throws if the size does not match the current size. */
 void Histogram::setSharedY(const Kernel::cow_ptr<HistogramY> &y) & {
   if (yMode() == YMode::Uninitialized)
-    throw std::logic_error(
-        "Histogram::setSharedY: YMode is not set and cannot be determined");
+    throw std::logic_error("Histogram::setSharedY: YMode is not set and cannot be determined");
   if (y)
     checkSize(*y);
   m_y = y;
@@ -224,20 +215,13 @@ template <> void Histogram::setValues(const Frequencies &y) {
   setFrequencies(y);
 }
 
-template <> void Histogram::setUncertainties(const CountVariances &e) {
-  setCountVariances(e);
-}
+template <> void Histogram::setUncertainties(const CountVariances &e) { setCountVariances(e); }
 
-template <> void Histogram::setUncertainties(const CountStandardDeviations &e) {
-  setCountStandardDeviations(e);
-}
+template <> void Histogram::setUncertainties(const CountStandardDeviations &e) { setCountStandardDeviations(e); }
 
-template <> void Histogram::setUncertainties(const FrequencyVariances &e) {
-  setFrequencyVariances(e);
-}
+template <> void Histogram::setUncertainties(const FrequencyVariances &e) { setFrequencyVariances(e); }
 
-template <>
-void Histogram::setUncertainties(const FrequencyStandardDeviations &e) {
+template <> void Histogram::setUncertainties(const FrequencyStandardDeviations &e) {
   setFrequencyStandardDeviations(e);
 }
 
@@ -262,8 +246,7 @@ template <> void Histogram::checkSize(const BinEdges &binEdges) const {
     target++;
   if (target != binEdges.size()) {
     std::stringstream msg;
-    msg << "Histogram: size mismatch of BinEdges: (" << target
-        << " != " << binEdges.size() << ")";
+    msg << "Histogram: size mismatch of BinEdges: (" << target << " != " << binEdges.size() << ")";
     throw std::logic_error(msg.str());
   }
 }
@@ -291,13 +274,9 @@ void Histogram::resize(size_t n) {
   }
 }
 
-HistogramIterator Histogram::begin() const & {
-  return HistogramIterator(*this, 0);
-}
+HistogramIterator Histogram::begin() const & { return HistogramIterator(*this, 0); }
 
-HistogramIterator Histogram::end() const & {
-  return HistogramIterator(*this, size());
-}
+HistogramIterator Histogram::end() const & { return HistogramIterator(*this, size()); }
 
 } // namespace HistogramData
 } // namespace Mantid

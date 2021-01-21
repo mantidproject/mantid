@@ -32,8 +32,7 @@ private:
   // helper methods
   std::string createSpectraList(const std::vector<int> &spectraList) {
     std::ostringstream oss;
-    std::copy(std::begin(spectraList), std::end(spectraList),
-              std::ostream_iterator<int>(oss, ","));
+    std::copy(std::begin(spectraList), std::end(spectraList), std::ostream_iterator<int>(oss, ","));
     std::string spectraStringList(oss.str());
     return spectraStringList;
   }
@@ -51,12 +50,9 @@ public:
     TS_ASSERT(ld.isExecuted());
     // Verify that the output workspace exists
     MatrixWorkspace_sptr output_ws;
-    TS_ASSERT_THROWS_NOTHING(
-        output_ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "outWS"));
+    TS_ASSERT_THROWS_NOTHING(output_ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS"));
 
-    Workspace2D_sptr output2D =
-        std::dynamic_pointer_cast<Workspace2D>(output_ws);
+    Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output_ws);
 
     const Mantid::API::Run &run = output2D->run();
     int goodfrm = run.getPropertyAsIntegerValue("goodfrm");
@@ -100,24 +96,18 @@ public:
     TS_ASSERT(ld.isExecuted());
     // Verify that the output workspace exists
     MatrixWorkspace_sptr output_ws;
-    TS_ASSERT_THROWS_NOTHING(
-        output_ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "outWS"));
+    TS_ASSERT_THROWS_NOTHING(output_ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS"));
 
-    Workspace2D_sptr output2D =
-        std::dynamic_pointer_cast<Workspace2D>(output_ws);
+    Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output_ws);
 
     // Check detector grouping table
     TableWorkspace_sptr deadTimeTable;
-    TS_ASSERT_THROWS_NOTHING(
-        deadTimeTable =
-            AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
-                deadTimeWSName));
+    TS_ASSERT_THROWS_NOTHING(deadTimeTable =
+                                 AnalysisDataService::Instance().retrieveWS<TableWorkspace>(deadTimeWSName));
     TS_ASSERT(deadTimeTable);
     // Check number of rows and columns
     TS_ASSERT_EQUALS(deadTimeTable->columnCount(), 2);
-    TS_ASSERT_EQUALS(deadTimeTable->rowCount(),
-                     output2D->getNumberHistograms());
+    TS_ASSERT_EQUALS(deadTimeTable->rowCount(), output2D->getNumberHistograms());
     // Check Deadtimes
     TS_ASSERT_DELTA(deadTimeTable->Double(0, 1), -0.0095861498, 1e-6);
     TS_ASSERT_DELTA(deadTimeTable->Double(20, 1), 0.0067306999, 1e-6);
@@ -138,8 +128,7 @@ public:
     TS_ASSERT(ads.doesExist("outWs"));
     TS_ASSERT(ads.doesExist("tzt"));
 
-    Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(
-        ads.retrieveWS<MatrixWorkspace>("outWs"));
+    Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(ads.retrieveWS<MatrixWorkspace>("outWs"));
     TableWorkspace_sptr tbl = ads.retrieveWS<TableWorkspace>("tzt");
 
     // Check number of rows and columns
@@ -162,18 +151,13 @@ public:
     TS_ASSERT(ld.isExecuted());
     // Verify that the output workspace exists
     MatrixWorkspace_sptr output_ws;
-    TS_ASSERT_THROWS_NOTHING(
-        output_ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "outWS"));
-    Workspace2D_sptr output2D =
-        std::dynamic_pointer_cast<Workspace2D>(output_ws);
+    TS_ASSERT_THROWS_NOTHING(output_ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS"));
+    Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output_ws);
 
     // Check detector grouping table
     TableWorkspace_sptr groupingTable;
-    TS_ASSERT_THROWS_NOTHING(
-        groupingTable =
-            AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
-                groupingWSName));
+    TS_ASSERT_THROWS_NOTHING(groupingTable =
+                                 AnalysisDataService::Instance().retrieveWS<TableWorkspace>(groupingWSName));
     TS_ASSERT(groupingTable);
     // Check number of rows and columns
     TS_ASSERT_EQUALS(groupingTable->columnCount(), 1);
@@ -183,14 +167,11 @@ public:
     // Half the detectors are in the first group
     for (int i = 1; i < 49; ++i)
       testGroupingVec.emplace_back(i);
-    TS_ASSERT_EQUALS(groupingTable->cell<std::vector<int>>(0, 0),
-                     testGroupingVec);
+    TS_ASSERT_EQUALS(groupingTable->cell<std::vector<int>>(0, 0), testGroupingVec);
     testGroupingVec.clear();
-    for (int i = 49; i < static_cast<int>(output2D->getNumberHistograms() + 1);
-         ++i)
+    for (int i = 49; i < static_cast<int>(output2D->getNumberHistograms() + 1); ++i)
       testGroupingVec.emplace_back(i);
-    TS_ASSERT_EQUALS(groupingTable->cell<std::vector<int>>(1, 0),
-                     testGroupingVec);
+    TS_ASSERT_EQUALS(groupingTable->cell<std::vector<int>>(1, 0), testGroupingVec);
   }
 
   void testExecWithSpectraList() {
@@ -211,11 +192,8 @@ public:
     TS_ASSERT(ld.isExecuted());
     // Verify that the output workspace exists
     MatrixWorkspace_sptr output_ws;
-    TS_ASSERT_THROWS_NOTHING(
-        output_ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "outWS"));
-    Workspace2D_sptr output2D =
-        std::dynamic_pointer_cast<Workspace2D>(output_ws);
+    TS_ASSERT_THROWS_NOTHING(output_ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS"));
+    Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output_ws);
 
     // Test correct spectra loaded
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 3);
@@ -228,10 +206,8 @@ public:
 
     // Check detector grouping table
     TableWorkspace_sptr deadTimeTable;
-    TS_ASSERT_THROWS_NOTHING(
-        deadTimeTable =
-            AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
-                deadTimeWSName));
+    TS_ASSERT_THROWS_NOTHING(deadTimeTable =
+                                 AnalysisDataService::Instance().retrieveWS<TableWorkspace>(deadTimeWSName));
     TS_ASSERT(deadTimeTable);
     // Check number of rows and columns
     TS_ASSERT_EQUALS(deadTimeTable->columnCount(), 2);
@@ -258,11 +234,8 @@ public:
     TS_ASSERT(ld.isExecuted());
     // Verify that the output workspace exists
     MatrixWorkspace_sptr output_ws;
-    TS_ASSERT_THROWS_NOTHING(
-        output_ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "outWS"));
-    Workspace2D_sptr output2D =
-        std::dynamic_pointer_cast<Workspace2D>(output_ws);
+    TS_ASSERT_THROWS_NOTHING(output_ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS"));
+    Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output_ws);
 
     // Test correct spectra loaded
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), specMax);
@@ -306,8 +279,7 @@ public:
     TS_ASSERT_EQUALS(maxThreads, PARALLEL_GET_MAX_THREADS)
   }
 
-  void
-  test_when_load_uncorrected_time_is_true_that_uncorrected_time_is_loaded() {
+  void test_when_load_uncorrected_time_is_true_that_uncorrected_time_is_loaded() {
     LoadMuonNexusV2 ld;
     ld.initialize();
     ld.setPropertyValue("Filename", "EMU00102347.nxs_v2");
@@ -316,8 +288,7 @@ public:
 
     ld.execute();
 
-    auto output_ws =
-        AnalysisDataService::Instance().retrieveWS<Workspace2D>("outWS");
+    auto output_ws = AnalysisDataService::Instance().retrieveWS<Workspace2D>("outWS");
 
     // Check that timeZero has not been applied yet.
     TS_ASSERT_DELTA(output_ws->x(3)[0], 0.0, 1e-5);
@@ -325,8 +296,7 @@ public:
     TS_ASSERT_DELTA(output_ws->x(81)[0], 0.0, 1e-5);
   }
 
-  void
-  test_time_zero_list_is_loaded_correctly_when_only_single_time_zero_in_file() {
+  void test_time_zero_list_is_loaded_correctly_when_only_single_time_zero_in_file() {
     LoadMuonNexusV2 ld;
     ld.initialize();
     ld.setPropertyValue("Filename", "EMU00102347.nxs_v2");
@@ -361,12 +331,9 @@ public:
     TS_ASSERT(ld.isExecuted());
     // Verify that the output workspace exists
     MatrixWorkspace_sptr output_ws;
-    TS_ASSERT_THROWS_NOTHING(
-        output_ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "outWS"));
+    TS_ASSERT_THROWS_NOTHING(output_ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS"));
 
-    Workspace2D_sptr output2D =
-        std::dynamic_pointer_cast<Workspace2D>(output_ws);
+    Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output_ws);
 
     const Mantid::API::Run &run = output2D->run();
     int goodfrm = run.getPropertyAsIntegerValue("goodfrm");
@@ -408,10 +375,7 @@ public:
     TS_ASSERT(ld.isExecuted());
     // Verify that the output workspace exists
     WorkspaceGroup_sptr outputGroup;
-    TS_ASSERT_THROWS_NOTHING(
-        outputGroup =
-            AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-                "outWS"));
+    TS_ASSERT_THROWS_NOTHING(outputGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("outWS"));
 
     TS_ASSERT_EQUALS(outputGroup->getNumberOfEntries(), 4);
 
@@ -421,8 +385,7 @@ public:
     double histogram_50_data[4] = {25001, 25000, 0, 0};
 
     for (int i = 0; i < outputGroup->getNumberOfEntries(); i++) {
-      auto output2D =
-          std::dynamic_pointer_cast<Workspace2D>(outputGroup->getItem(i));
+      auto output2D = std::dynamic_pointer_cast<Workspace2D>(outputGroup->getItem(i));
 
       const Mantid::API::Run &run = output2D->run();
       int goodfrm = run.getPropertyAsIntegerValue("goodfrm");
@@ -468,30 +431,22 @@ public:
     TS_ASSERT(ld.isExecuted());
     // Verify that the output workspace exists
     WorkspaceGroup_sptr outputGroup;
-    TS_ASSERT_THROWS_NOTHING(
-        outputGroup =
-            AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-                "outWS"));
+    TS_ASSERT_THROWS_NOTHING(outputGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("outWS"));
 
-    Workspace2D_sptr output2D =
-        std::dynamic_pointer_cast<Workspace2D>(outputGroup->getItem(0));
+    Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(outputGroup->getItem(0));
 
     // Check detector grouping table
     WorkspaceGroup_sptr deadTimeTableGroup;
-    TS_ASSERT_THROWS_NOTHING(
-        deadTimeTableGroup =
-            AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-                deadTimeWSName));
+    TS_ASSERT_THROWS_NOTHING(deadTimeTableGroup =
+                                 AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(deadTimeWSName));
     TS_ASSERT_EQUALS(deadTimeTableGroup->getNumberOfEntries(), 4);
 
     for (int i = 0; i < deadTimeTableGroup->getNumberOfEntries(); ++i) {
-      auto deadTimeTable = std::dynamic_pointer_cast<TableWorkspace>(
-          deadTimeTableGroup->getItem(i));
+      auto deadTimeTable = std::dynamic_pointer_cast<TableWorkspace>(deadTimeTableGroup->getItem(i));
       TS_ASSERT(deadTimeTable);
       // Check number of rows and columns
       TS_ASSERT_EQUALS(deadTimeTable->columnCount(), 2);
-      TS_ASSERT_EQUALS(deadTimeTable->rowCount(),
-                       output2D->getNumberHistograms());
+      TS_ASSERT_EQUALS(deadTimeTable->rowCount(), output2D->getNumberHistograms());
       // Check Deadtimes
       TS_ASSERT_DELTA(deadTimeTable->Double(0, 1), -0.0095861498, 1e-6);
       TS_ASSERT_DELTA(deadTimeTable->Double(20, 1), 0.0067306999, 1e-6);
@@ -511,19 +466,13 @@ public:
 
     // Verify that the output workspace exists
     WorkspaceGroup_sptr outputGroup;
-    TS_ASSERT_THROWS_NOTHING(
-        outputGroup =
-            AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-                "outWS"));
+    TS_ASSERT_THROWS_NOTHING(outputGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("outWS"));
 
-    Workspace2D_sptr output2D =
-        std::dynamic_pointer_cast<Workspace2D>(outputGroup->getItem(0));
+    Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(outputGroup->getItem(0));
     // Check detector grouping table
     TableWorkspace_sptr groupingTable;
-    TS_ASSERT_THROWS_NOTHING(
-        groupingTable =
-            AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
-                groupingWSName));
+    TS_ASSERT_THROWS_NOTHING(groupingTable =
+                                 AnalysisDataService::Instance().retrieveWS<TableWorkspace>(groupingWSName));
     TS_ASSERT(groupingTable);
     // Check number of rows and columns
     TS_ASSERT_EQUALS(groupingTable->columnCount(), 1);
@@ -533,14 +482,11 @@ public:
     // Half the detectors are in the first group
     for (int i = 1; i < 49; ++i)
       testGroupingVec.emplace_back(i);
-    TS_ASSERT_EQUALS(groupingTable->cell<std::vector<int>>(0, 0),
-                     testGroupingVec);
+    TS_ASSERT_EQUALS(groupingTable->cell<std::vector<int>>(0, 0), testGroupingVec);
     testGroupingVec.clear();
-    for (int i = 49; i < static_cast<int>(output2D->getNumberHistograms() + 1);
-         ++i)
+    for (int i = 49; i < static_cast<int>(output2D->getNumberHistograms() + 1); ++i)
       testGroupingVec.emplace_back(i);
-    TS_ASSERT_EQUALS(groupingTable->cell<std::vector<int>>(1, 0),
-                     testGroupingVec);
+    TS_ASSERT_EQUALS(groupingTable->cell<std::vector<int>>(1, 0), testGroupingVec);
   }
 };
 

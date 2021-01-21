@@ -43,8 +43,7 @@ public:
   }
 
   void test_exec() {
-    auto result =
-        SofQWTest::runSQW<Mantid::Algorithms::SofQWNormalisedPolygon>();
+    auto result = SofQWTest::runSQW<Mantid::Algorithms::SofQWNormalisedPolygon>();
 
     TS_ASSERT_EQUALS(result->getAxis(0)->length(), 1904);
     TS_ASSERT_EQUALS(result->getAxis(0)->unit()->unitID(), "DeltaE");
@@ -80,9 +79,7 @@ public:
     // Spectra-detector mapping
     constexpr size_t nspectra(6);
     using IDSet = std::set<int>;
-    const std::vector<IDSet> expectedIDs{{IDSet{}, IDSet{13}, IDSet{23},
-                                          IDSet{23, 33}, IDSet{33, 43},
-                                          IDSet{43}}};
+    const std::vector<IDSet> expectedIDs{{IDSet{}, IDSet{13}, IDSet{23}, IDSet{23, 33}, IDSet{33, 43}, IDSet{43}}};
 
     for (size_t i = 0; i < nspectra; ++i) {
       const auto &spectrum = result->getSpectrum(i);
@@ -98,8 +95,7 @@ public:
     constexpr int nbins{10};
     constexpr bool includeMonitors{false};
     constexpr bool startYNegative{true};
-    auto input = create2DWorkspaceWithFullInstrument(
-        nhist, nbins, includeMonitors, startYNegative);
+    auto input = create2DWorkspaceWithFullInstrument(nhist, nbins, includeMonitors, startYNegative);
     auto &componentInfo = input->mutableComponentInfo();
     for (size_t i = 0; i < nhist; ++i) {
       const std::string name = "pixel-" + std::to_string(i) + ")";
@@ -115,8 +111,7 @@ public:
     alg.setChild(true);
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", input))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("OutputWorkspace", "unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "unused_for_child"))
     const std::vector<double> qParams{0., 0.1, 1.};
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("QAxisBinning", qParams))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("EMode", "Direct"))
@@ -161,8 +156,7 @@ public:
     alg.setChild(true);
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", input))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("OutputWorkspace", "unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "unused_for_child"))
     const std::vector<double> qParams{0., 0.01, 1.};
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("QAxisBinning", qParams))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("EMode", "Direct"))
@@ -197,17 +191,14 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("EMode", "Indirect"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("EFixed", 1.84))
     const std::vector<double> eBinParams{-0.5, 0.1, -0.1, 0.2, 0.4};
-    const std::vector<double> expectedEBinEdges{-0.5, -0.4, -0.3, -0.2,
-                                                -0.1, 0.1,  0.3,  0.4};
+    const std::vector<double> expectedEBinEdges{-0.5, -0.4, -0.3, -0.2, -0.1, 0.1, 0.3, 0.4};
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("EAxisBinning", eBinParams))
     const std::vector<double> qBinParams{0.5, 0.1, 1.0, 0.2, 2.};
-    const std::vector<double> expectedQBinEdges{0.5, 0.6, 0.7, 0.8, 0.9, 1.0,
-                                                1.2, 1.4, 1.6, 1.8, 2.};
+    const std::vector<double> expectedQBinEdges{0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.2, 1.4, 1.6, 1.8, 2.};
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("QAxisBinning", qBinParams))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
-    Mantid::API::MatrixWorkspace_sptr outWS =
-        alg.getProperty("OutputWorkspace");
+    Mantid::API::MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
     TS_ASSERT_EQUALS(outWS->getNumberHistograms(), expectedQBinEdges.size() - 1)
     for (size_t i = 0; i < outWS->getNumberHistograms(); ++i) {
       const auto &x = outWS->x(i);
@@ -248,13 +239,11 @@ public:
     expectedEBinEdges.emplace_back(lastEdge);
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("EAxisBinning", eBinParams))
     const std::vector<double> qBinParams{0.5, 0.1, 1.0, 0.2, 2.};
-    const std::vector<double> expectedQBinEdges{0.5, 0.6, 0.7, 0.8, 0.9, 1.0,
-                                                1.2, 1.4, 1.6, 1.8, 2.};
+    const std::vector<double> expectedQBinEdges{0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.2, 1.4, 1.6, 1.8, 2.};
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("QAxisBinning", qBinParams))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
-    Mantid::API::MatrixWorkspace_sptr outWS =
-        alg.getProperty("OutputWorkspace");
+    Mantid::API::MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
     TS_ASSERT_EQUALS(outWS->getNumberHistograms(), expectedQBinEdges.size() - 1)
     for (size_t i = 0; i < outWS->getNumberHistograms(); ++i) {
       const auto &x = outWS->x(i);
@@ -286,8 +275,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("QAxisBinning", qBinParams))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
-    Mantid::API::MatrixWorkspace_sptr outWS =
-        alg.getProperty("OutputWorkspace");
+    Mantid::API::MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
     const auto axis = outWS->getAxis(1);
     // Test only the Q bin width, not the actual edges.
     for (size_t i = 0; i < axis->length() - 1; ++i) {
@@ -332,13 +320,11 @@ public:
     alg.setChild(true);
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", input))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("OutputWorkspace", "unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "unused_for_child"))
     const std::vector<double> qParams{0., 0.5, 6.};
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("QAxisBinning", qParams))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("EMode", "Direct"))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("DetectorTwoThetaRanges", twoThetaRanges))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("DetectorTwoThetaRanges", twoThetaRanges))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
     MatrixWorkspace_sptr output = alg.getProperty("OutputWorkspace");
@@ -363,13 +349,10 @@ public:
    * @param twoThetaRanges input table workspace
    * @return the algorithm object
    */
-  IAlgorithm_sptr
-  setUpAlg(Mantid::API::MatrixWorkspace_sptr const &inputWS,
-           const std::shared_ptr<Mantid::DataObjects::TableWorkspace>
-               &twoThetaRanges) {
+  IAlgorithm_sptr setUpAlg(Mantid::API::MatrixWorkspace_sptr const &inputWS,
+                           const std::shared_ptr<Mantid::DataObjects::TableWorkspace> &twoThetaRanges) {
     const std::vector<double> qBinParams{0.023};
-    IAlgorithm_sptr alg =
-        AlgorithmManager::Instance().create("SofQWNormalisedPolygon");
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("SofQWNormalisedPolygon");
     alg->initialize();
     alg->setProperty("InputWorkspace", inputWS);
     alg->setProperty("EMode", "Indirect");
@@ -383,12 +366,10 @@ public:
    * @param rowCount The number of detectors required
    * @return A pointer to the table workspace
    */
-  std::shared_ptr<Mantid::DataObjects::TableWorkspace>
-  createTableWorkspace(const std::vector<std::string> &dataTypes,
-                       const int rowCount) {
+  std::shared_ptr<Mantid::DataObjects::TableWorkspace> createTableWorkspace(const std::vector<std::string> &dataTypes,
+                                                                            const int rowCount) {
     auto twoThetaRanges = std::make_shared<TableWorkspace>();
-    std::vector<std::string> names = {"Detector ID", "Max two theta",
-                                      "Min two theta"};
+    std::vector<std::string> names = {"Detector ID", "Max two theta", "Min two theta"};
     for (std::vector<std::string>::size_type i = 0; i < dataTypes.size(); i++) {
       if (i >= names.size()) {
         twoThetaRanges->addColumn(dataTypes[i], "N/A");
@@ -403,72 +384,59 @@ public:
   void testTableHasThreeColumns() {
     const std::vector<std::string> dataTypes = {"int", "double"};
     auto inputWS = SofQWTest::loadTestFile();
-    const auto twoThetaRanges = createTableWorkspace(
-        dataTypes, static_cast<int>(inputWS->getNumberHistograms()));
+    const auto twoThetaRanges = createTableWorkspace(dataTypes, static_cast<int>(inputWS->getNumberHistograms()));
     const IAlgorithm_sptr alg = setUpAlg(inputWS, twoThetaRanges);
     auto results = alg->validateInputs();
-    TS_ASSERT_EQUALS(results["DetectorTwoThetaRanges"],
-                     "DetectorTwoThetaRanges requires 3 columns");
+    TS_ASSERT_EQUALS(results["DetectorTwoThetaRanges"], "DetectorTwoThetaRanges requires 3 columns");
   }
 
   void testTableHasFourColumns() {
-    const std::vector<std::string> dataTypes = {"int", "double", "double",
-                                                "double"};
+    const std::vector<std::string> dataTypes = {"int", "double", "double", "double"};
     auto inputWS = SofQWTest::loadTestFile();
-    const auto twoThetaRanges = createTableWorkspace(
-        dataTypes, static_cast<int>(inputWS->getNumberHistograms()));
+    const auto twoThetaRanges = createTableWorkspace(dataTypes, static_cast<int>(inputWS->getNumberHistograms()));
     const IAlgorithm_sptr alg = setUpAlg(inputWS, twoThetaRanges);
     auto results = alg->validateInputs();
-    TS_ASSERT_EQUALS(results["DetectorTwoThetaRanges"],
-                     "DetectorTwoThetaRanges requires 3 columns");
+    TS_ASSERT_EQUALS(results["DetectorTwoThetaRanges"], "DetectorTwoThetaRanges requires 3 columns");
   }
 
   void testColumnOneType() {
     const std::vector<std::string> dataTypes = {"double", "double", "double"};
     auto inputWS = SofQWTest::loadTestFile();
-    const auto twoThetaRanges = createTableWorkspace(
-        dataTypes, static_cast<int>(inputWS->getNumberHistograms()));
+    const auto twoThetaRanges = createTableWorkspace(dataTypes, static_cast<int>(inputWS->getNumberHistograms()));
     const IAlgorithm_sptr alg = setUpAlg(inputWS, twoThetaRanges);
     auto results = alg->validateInputs();
-    TS_ASSERT_EQUALS(
-        results["DetectorTwoThetaRanges"],
-        "The first column of DetectorTwoThetaRanges should be of type int");
+    TS_ASSERT_EQUALS(results["DetectorTwoThetaRanges"],
+                     "The first column of DetectorTwoThetaRanges should be of type int");
   }
 
   void testColumnTwoType() {
     const std::vector<std::string> dataTypes = {"int", "int", "double"};
     auto inputWS = SofQWTest::loadTestFile();
-    const auto twoThetaRanges = createTableWorkspace(
-        dataTypes, static_cast<int>(inputWS->getNumberHistograms()));
+    const auto twoThetaRanges = createTableWorkspace(dataTypes, static_cast<int>(inputWS->getNumberHistograms()));
     const IAlgorithm_sptr alg = setUpAlg(inputWS, twoThetaRanges);
     auto results = alg->validateInputs();
-    TS_ASSERT_EQUALS(
-        results["DetectorTwoThetaRanges"],
-        "The second column of DetectorTwoThetaRanges should be of type double");
+    TS_ASSERT_EQUALS(results["DetectorTwoThetaRanges"],
+                     "The second column of DetectorTwoThetaRanges should be of type double");
   }
 
   void testColumnThreeType() {
     const std::vector<std::string> dataTypes = {"int", "double", "int"};
     auto inputWS = SofQWTest::loadTestFile();
-    const auto twoThetaRanges = createTableWorkspace(
-        dataTypes, static_cast<int>(inputWS->getNumberHistograms()));
+    const auto twoThetaRanges = createTableWorkspace(dataTypes, static_cast<int>(inputWS->getNumberHistograms()));
     const IAlgorithm_sptr alg = setUpAlg(inputWS, twoThetaRanges);
     auto results = alg->validateInputs();
-    TS_ASSERT_EQUALS(
-        results["DetectorTwoThetaRanges"],
-        "The third column of DetectorTwoThetaRanges should be of type double");
+    TS_ASSERT_EQUALS(results["DetectorTwoThetaRanges"],
+                     "The third column of DetectorTwoThetaRanges should be of type double");
   }
 
   void testTableAndWorkspaceHaveSameNumDetectors() {
     const std::vector<std::string> dataTypes = {"int", "double", "double"};
     auto inputWS = SofQWTest::loadTestFile();
-    const auto twoThetaRanges = createTableWorkspace(
-        dataTypes, static_cast<int>(inputWS->getNumberHistograms() + 1));
+    const auto twoThetaRanges = createTableWorkspace(dataTypes, static_cast<int>(inputWS->getNumberHistograms() + 1));
     const IAlgorithm_sptr alg = setUpAlg(inputWS, twoThetaRanges);
     auto results = alg->validateInputs();
-    TS_ASSERT_EQUALS(
-        results["DetectorTwoThetaRanges"],
-        "The table and workspace do not have the same number of detectors");
+    TS_ASSERT_EQUALS(results["DetectorTwoThetaRanges"],
+                     "The table and workspace do not have the same number of detectors");
   }
 };
 
@@ -476,9 +444,7 @@ class SofQWNormalisedPolygonTestPerformance : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static SofQWNormalisedPolygonTestPerformance *createSuite() {
-    return new SofQWNormalisedPolygonTestPerformance();
-  }
+  static SofQWNormalisedPolygonTestPerformance *createSuite() { return new SofQWNormalisedPolygonTestPerformance(); }
   static void destroySuite(SofQWNormalisedPolygonTestPerformance *suite) {
     AnalysisDataService::Instance().clear();
     delete suite;
@@ -500,18 +466,14 @@ public:
     constexpr double bankHeight{1.};
     constexpr double heightDelta{bankHeight / static_cast<double>(rows)};
     for (size_t hIndex = 0; hIndex < columns; ++hIndex) {
-      const auto angle =
-          twoThetaZero + static_cast<double>(hIndex) * twoThetaDelta;
+      const auto angle = twoThetaZero + static_cast<double>(hIndex) * twoThetaDelta;
       const auto x = l2 * std::sin(angle);
       const auto z = l2 * std::cos(angle);
       for (size_t vIndex = 0; vIndex < rows; ++vIndex) {
-        const auto y =
-            -bankHeight / 2. + static_cast<double>(vIndex) * heightDelta;
+        const auto y = -bankHeight / 2. + static_cast<double>(vIndex) * heightDelta;
         const auto index = hIndex * rows + vIndex;
         const auto detID = static_cast<int>(index);
-        addDetector(instrument, V3D(x, y, z), detID,
-                    "det-" + std::to_string(vIndex) + ":" +
-                        std::to_string(hIndex));
+        addDetector(instrument, V3D(x, y, z), detID, "det-" + std::to_string(vIndex) + ":" + std::to_string(hIndex));
         m_largeWS->getSpectrum(index).setDetectorID(detID);
       }
     }
@@ -530,8 +492,7 @@ public:
     alg.setChild(true);
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", m_largeWS))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("OutputWorkspace", "unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "unused_for_child"))
     const std::vector<double> qParams{0.01};
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("QAxisBinning", qParams))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("EMode", "Direct"))

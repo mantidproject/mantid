@@ -34,10 +34,8 @@ public:
 protected:
   vtkPeaksReader();
   ~vtkPeaksReader() override;
-  int RequestInformation(vtkInformation *, vtkInformationVector **,
-                         vtkInformationVector *) override;
-  int RequestData(vtkInformation *, vtkInformationVector **,
-                  vtkInformationVector *) override;
+  int RequestInformation(vtkInformation *, vtkInformationVector **, vtkInformationVector *) override;
+  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *) override;
   /// Handle time variation.
   vtkMTimeType GetMTime() override;
 

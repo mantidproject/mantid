@@ -69,9 +69,7 @@ public:
   /// (Empty) Constructor
   AbsorptionCorrection();
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "CorrectionFunctions\\AbsorptionCorrections";
-  }
+  const std::string category() const override { return "CorrectionFunctions\\AbsorptionCorrections"; }
   /// Algorithm's summary
   const std::string summary() const override {
     return "Calculates an approximation of the attenuation due to absorption "
@@ -101,14 +99,14 @@ protected:
    */
   virtual void initialiseCachedDistances() = 0;
 
-  API::MatrixWorkspace_sptr m_inputWS;     ///< A pointer to the input workspace
-  const Geometry::IObject *m_sampleObject; ///< Local cache of sample object.
-  Kernel::V3D m_beamDirection;             ///< The direction of the beam.
-  std::vector<double> m_L1s,               ///< Cached L1 distances
-      m_elementVolumes;                    ///< Cached element volumes
+  API::MatrixWorkspace_sptr m_inputWS;         ///< A pointer to the input workspace
+  const Geometry::IObject *m_sampleObject;     ///< Local cache of sample object.
+  Kernel::V3D m_beamDirection;                 ///< The direction of the beam.
+  std::vector<double> m_L1s,                   ///< Cached L1 distances
+      m_elementVolumes;                        ///< Cached element volumes
   std::vector<Kernel::V3D> m_elementPositions; ///< Cached element positions
-  size_t m_numVolumeElements; ///< The number of volume elements
-  double m_sampleVolume;      ///< The total volume of the sample
+  size_t m_numVolumeElements;                  ///< The number of volume elements
+  double m_sampleVolume;                       ///< The total volume of the sample
 
 private:
   /// Initialisation code
@@ -119,30 +117,23 @@ private:
 
   void retrieveBaseProperties();
   void constructSample(API::Sample &sample);
-  void calculateDistances(const Geometry::IDetector &detector,
-                          std::vector<double> &L2s) const;
-  inline double doIntegration(const double linearCoefAbs,
-                              const std::vector<double> &L2s,
-                              const size_t startIndex,
+  void calculateDistances(const Geometry::IDetector &detector, std::vector<double> &L2s) const;
+  inline double doIntegration(const double linearCoefAbs, const std::vector<double> &L2s, const size_t startIndex,
                               const size_t endIndex) const;
-  inline double doIntegration(const double linearCoefAbsL1,
-                              const double linearCoefAbsL2,
-                              const std::vector<double> &L2s,
-                              const size_t startIndex,
-                              const size_t endIndex) const;
+  inline double doIntegration(const double linearCoefAbsL1, const double linearCoefAbsL2,
+                              const std::vector<double> &L2s, const size_t startIndex, const size_t endIndex) const;
 
   Kernel::Material m_material;
   double m_linearCoefTotScatt; ///< The total scattering cross-section in 1/m
-  int64_t m_num_lambda; ///< The number of points in wavelength, the rest is
+  int64_t m_num_lambda;        ///< The number of points in wavelength, the rest is
   /// interpolated linearly
   int64_t m_xStep; ///< The step in bin number between adjacent points
   Kernel::DeltaEMode::Type m_emode;
   double m_lambdaFixed; ///< The wavelength corresponding to the fixed energy,
   /// if provided
 
-  using expfunction =
-      double (*)(double);  ///< Typedef pointer to exponential function
-  expfunction EXPONENTIAL; ///< Pointer to exponential function
+  using expfunction = double (*)(double); ///< Typedef pointer to exponential function
+  expfunction EXPONENTIAL;                ///< Pointer to exponential function
 };
 
 } // namespace Algorithms

@@ -32,8 +32,7 @@ public:
 
   std::string name() const override { return "ResolutionTest_Gauss"; }
 
-  void functionLocal(double *out, const double *xValues,
-                     const size_t nData) const override {
+  void functionLocal(double *out, const double *xValues, const size_t nData) const override {
     double c = getParameter("c");
     double h = getParameter("h");
     double w = getParameter("s");
@@ -42,8 +41,7 @@ public:
       out[i] = h * exp(-x * x * w);
     }
   }
-  void functionDerivLocal(Jacobian *out, const double *xValues,
-                          const size_t nData) override {
+  void functionDerivLocal(Jacobian *out, const double *xValues, const size_t nData) override {
     double c = getParameter("c");
     double h = getParameter("h");
     double w = getParameter("s");
@@ -70,16 +68,10 @@ public:
 
 class ResolutionTest_Jacobian : public Jacobian {
 public:
-  void set(size_t, size_t, double) override {
-    throw std::runtime_error("Set method shouldn't be called.");
-  }
+  void set(size_t, size_t, double) override { throw std::runtime_error("Set method shouldn't be called."); }
 
-  double get(size_t, size_t) override {
-    throw std::runtime_error("Get method shouldn't be called.");
-  }
-  void zero() override {
-    throw std::runtime_error("Zero method shouldn't be called.");
-  }
+  double get(size_t, size_t) override { throw std::runtime_error("Get method shouldn't be called."); }
+  void zero() override { throw std::runtime_error("Zero method shouldn't be called."); }
 };
 
 DECLARE_FUNCTION(ResolutionTest_Gauss)
@@ -92,8 +84,8 @@ public:
   static void destroySuite(ResolutionTest *suite) { delete suite; }
 
   ResolutionTest()
-      : resH(3), resS(acos(0.)), N(117), DX(10), X0(-DX / 2), dX(DX / (N - 1)),
-        yErr(0), resFileName("ResolutionTestResolution.res") {}
+      : resH(3), resS(acos(0.)), N(117), DX(10), X0(-DX / 2), dX(DX / (N - 1)), yErr(0),
+        resFileName("ResolutionTestResolution.res") {}
 
   void setUp() override {
     std::ofstream fil(resFileName.c_str());

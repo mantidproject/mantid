@@ -21,11 +21,10 @@ namespace SpectrumView {
  *  @param totalRows  The total number of rows the data is divided into
  *  @param totalCols  The total number of columns the data is divided into
  */
-SpectrumDataSource::SpectrumDataSource(double totalXMin, double totalXMax,
-                                       double totalYMin, double totalYMax,
+SpectrumDataSource::SpectrumDataSource(double totalXMin, double totalXMax, double totalYMin, double totalYMax,
                                        size_t totalRows, size_t totalCols)
-    : m_totalXMin(totalXMin), m_totalXMax(totalXMax), m_totalYMin(totalYMin),
-      m_totalYMax(totalYMax), m_totalRows(totalRows), m_totalCols(totalCols) {}
+    : m_totalXMin(totalXMin), m_totalXMax(totalXMax), m_totalYMin(totalYMin), m_totalYMax(totalYMax),
+      m_totalRows(totalRows), m_totalCols(totalCols) {}
 
 SpectrumDataSource::~SpectrumDataSource() {}
 
@@ -115,8 +114,7 @@ void SpectrumDataSource::restrictCol(int &col) {
  *  Convenience method to get all the data at the maximum resolution.
  */
 DataArray_const_sptr SpectrumDataSource::getDataArray(bool isLogX) {
-  return getDataArray(m_totalXMin, m_totalXMax, m_totalYMin, m_totalYMax,
-                      m_totalRows, m_totalCols, isLogX);
+  return getDataArray(m_totalXMin, m_totalXMax, m_totalYMin, m_totalYMax, m_totalRows, m_totalCols, isLogX);
 }
 
 } // namespace SpectrumView

@@ -27,8 +27,7 @@ namespace {
 const int dead1 = 4;
 const int dead2 = 12;
 
-void populatePhaseTableWithDeadDetectors(const ITableWorkspace_sptr &phaseTable,
-                                         const MatrixWorkspace_sptr &ws) {
+void populatePhaseTableWithDeadDetectors(const ITableWorkspace_sptr &phaseTable, const MatrixWorkspace_sptr &ws) {
   phaseTable->addColumn("int", "DetectprID");
   phaseTable->addColumn("double", "Asymmetry");
   phaseTable->addColumn("double", "phase");
@@ -38,14 +37,11 @@ void populatePhaseTableWithDeadDetectors(const ITableWorkspace_sptr &phaseTable,
     if (i == dead1 || i == dead2) {
       phaseRow1 << int(i) << 999. << 0.0;
     } else {
-      phaseRow1 << int(i) << asym
-                << 2. * M_PI * double(i + 1) /
-                       (1. + double(ws->getNumberHistograms()));
+      phaseRow1 << int(i) << asym << 2. * M_PI * double(i + 1) / (1. + double(ws->getNumberHistograms()));
     }
   }
 }
-void populatePhaseTable(const ITableWorkspace_sptr &phaseTable,
-                        std::vector<std::string> names, bool swap = false) {
+void populatePhaseTable(const ITableWorkspace_sptr &phaseTable, std::vector<std::string> names, bool swap = false) {
   phaseTable->addColumn("int", names[0]);
   phaseTable->addColumn("double", names[1]);
   phaseTable->addColumn("double", names[2]);
@@ -61,12 +57,10 @@ void populatePhaseTable(const ITableWorkspace_sptr &phaseTable,
   }
 }
 void populatePhaseTable(const ITableWorkspace_sptr &phaseTable) {
-  populatePhaseTable(std::move(phaseTable),
-                     {"DetectorID", "Asymmetry", "Phase"});
+  populatePhaseTable(std::move(phaseTable), {"DetectorID", "Asymmetry", "Phase"});
 }
 
-IAlgorithm_sptr setupAlg(const MatrixWorkspace_sptr &m_loadedData,
-                         bool isChildAlg,
+IAlgorithm_sptr setupAlg(const MatrixWorkspace_sptr &m_loadedData, bool isChildAlg,
                          const ITableWorkspace_sptr &phaseTable) {
   // Set up PhaseQuad
   IAlgorithm_sptr phaseQuad = AlgorithmManager::Instance().create("PhaseQuad");
@@ -78,22 +72,18 @@ IAlgorithm_sptr setupAlg(const MatrixWorkspace_sptr &m_loadedData,
   return phaseQuad;
 }
 
-IAlgorithm_sptr setupAlg(const MatrixWorkspace_sptr &m_loadedData,
-                         bool isChildAlg) {
+IAlgorithm_sptr setupAlg(const MatrixWorkspace_sptr &m_loadedData, bool isChildAlg) {
   // Create and populate a detector table
-  std::shared_ptr<ITableWorkspace> phaseTable(
-      new Mantid::DataObjects::TableWorkspace);
+  std::shared_ptr<ITableWorkspace> phaseTable(new Mantid::DataObjects::TableWorkspace);
   populatePhaseTable(phaseTable);
 
   return setupAlg(std::move(m_loadedData), isChildAlg, phaseTable);
 }
 
-IAlgorithm_sptr setupAlg(const MatrixWorkspace_sptr &m_loadedData,
-                         bool isChildAlg, std::vector<std::string> names,
+IAlgorithm_sptr setupAlg(const MatrixWorkspace_sptr &m_loadedData, bool isChildAlg, std::vector<std::string> names,
                          bool swap = false) {
   // Create and populate a detector table
-  std::shared_ptr<ITableWorkspace> phaseTable(
-      new Mantid::DataObjects::TableWorkspace);
+  std::shared_ptr<ITableWorkspace> phaseTable(new Mantid::DataObjects::TableWorkspace);
   populatePhaseTable(phaseTable, std::move(names), swap);
 
   return setupAlg(std::move(m_loadedData), isChildAlg, phaseTable);
@@ -101,16 +91,14 @@ IAlgorithm_sptr setupAlg(const MatrixWorkspace_sptr &m_loadedData,
 
 IAlgorithm_sptr setupAlgDead(const MatrixWorkspace_sptr &m_loadedData) {
   // Create and populate a detector table
-  std::shared_ptr<ITableWorkspace> phaseTable(
-      new Mantid::DataObjects::TableWorkspace);
+  std::shared_ptr<ITableWorkspace> phaseTable(new Mantid::DataObjects::TableWorkspace);
   populatePhaseTableWithDeadDetectors(phaseTable, m_loadedData);
 
   return setupAlg(m_loadedData, true, phaseTable);
 }
 
 MatrixWorkspace_sptr setupWS(const MatrixWorkspace_sptr &m_loadedData) {
-  std::shared_ptr<ITableWorkspace> phaseTable(
-      new Mantid::DataObjects::TableWorkspace);
+  std::shared_ptr<ITableWorkspace> phaseTable(new Mantid::DataObjects::TableWorkspace);
   MatrixWorkspace_sptr ws = m_loadedData->clone();
   // create toy data set
   populatePhaseTableWithDeadDetectors(phaseTable, ws);
@@ -121,9 +109,7 @@ MatrixWorkspace_sptr setupWS(const MatrixWorkspace_sptr &m_loadedData) {
         ws->mutableY(spec)[j] = 0.0;
         ws->mutableE(spec)[j] = 0.0;
       } else {
-        ws->mutableY(spec)[j] =
-            sin(2.3 * xData[j] + phaseTable->Double(spec, 2)) *
-            exp(-xData[j] / 2.19703);
+        ws->mutableY(spec)[j] = sin(2.3 * xData[j] + phaseTable->Double(spec, 2)) * exp(-xData[j] / 2.19703);
         ws->mutableE(spec)[j] = cos(0.2 * xData[j]);
       }
     }
@@ -139,8 +125,7 @@ MatrixWorkspace_sptr loadMuonDataset() {
   loader->setPropertyValue("OutputWorkspace", "outputWs");
   loader->execute();
   Workspace_sptr temp = loader->getProperty("OutputWorkspace");
-  MatrixWorkspace_sptr m_loadedData =
-      std::dynamic_pointer_cast<MatrixWorkspace>(temp);
+  MatrixWorkspace_sptr m_loadedData = std::dynamic_pointer_cast<MatrixWorkspace>(temp);
   return m_loadedData;
 }
 } // namespace
@@ -160,8 +145,7 @@ public:
   }
 
   void testTheBasics() {
-    IAlgorithm_sptr phaseQuad =
-        AlgorithmManager::Instance().create("PhaseQuad");
+    IAlgorithm_sptr phaseQuad = AlgorithmManager::Instance().create("PhaseQuad");
     TS_ASSERT_EQUALS(phaseQuad->name(), "PhaseQuad");
     TS_ASSERT_EQUALS(phaseQuad->category(), "Muon");
     TS_ASSERT_THROWS_NOTHING(phaseQuad->initialize());
@@ -174,8 +158,7 @@ public:
     std::vector<bool> emptySpectrum;
     for (size_t h = 0; h < nspec; h++) {
       emptySpectrum.emplace_back(
-          std::all_of(ws->y(h).begin(), ws->y(h).end(),
-                      [](double value) { return value == 0.; }));
+          std::all_of(ws->y(h).begin(), ws->y(h).end(), [](double value) { return value == 0.; }));
     }
     for (size_t j = 0; j < emptySpectrum.size(); j++) {
       if (j == dead1 || j == dead2) {
@@ -193,11 +176,9 @@ public:
     MatrixWorkspace_sptr outputWs = phaseQuad->getProperty("OutputWorkspace");
 
     TS_ASSERT_EQUALS(outputWs->getNumberHistograms(), 2);
-    TS_ASSERT_EQUALS(
-        outputWs->getSpectrum(0).readX(),
-        m_loadedData->getSpectrum(0).readX()); // Check outputWs X values
-    TS_ASSERT_EQUALS(outputWs->getSpectrum(1).readX(),
-                     m_loadedData->getSpectrum(1).readX());
+    TS_ASSERT_EQUALS(outputWs->getSpectrum(0).readX(),
+                     m_loadedData->getSpectrum(0).readX()); // Check outputWs X values
+    TS_ASSERT_EQUALS(outputWs->getSpectrum(1).readX(), m_loadedData->getSpectrum(1).readX());
     // Check output log is not empty
     TS_ASSERT(outputWs->mutableRun().getLogData().size() > 0);
 
@@ -231,11 +212,9 @@ public:
     MatrixWorkspace_sptr outputWs = phaseQuad->getProperty("OutputWorkspace");
 
     TS_ASSERT_EQUALS(outputWs->getNumberHistograms(), 2);
-    TS_ASSERT_EQUALS(
-        outputWs->getSpectrum(0).readX(),
-        m_loadedData->getSpectrum(0).readX()); // Check outputWs X values
-    TS_ASSERT_EQUALS(outputWs->getSpectrum(1).readX(),
-                     m_loadedData->getSpectrum(1).readX());
+    TS_ASSERT_EQUALS(outputWs->getSpectrum(0).readX(),
+                     m_loadedData->getSpectrum(0).readX()); // Check outputWs X values
+    TS_ASSERT_EQUALS(outputWs->getSpectrum(1).readX(), m_loadedData->getSpectrum(1).readX());
     // Check output log is not empty
     TS_ASSERT(outputWs->mutableRun().getLogData().size() > 0);
 
@@ -291,11 +270,9 @@ public:
     MatrixWorkspace_sptr outputWs = phaseQuad->getProperty("OutputWorkspace");
 
     TS_ASSERT_EQUALS(outputWs->getNumberHistograms(), 2);
-    TS_ASSERT_EQUALS(
-        outputWs->getSpectrum(0).readX(),
-        m_loadedData->getSpectrum(0).readX()); // Check outputWs X values
-    TS_ASSERT_EQUALS(outputWs->getSpectrum(1).readX(),
-                     m_loadedData->getSpectrum(1).readX());
+    TS_ASSERT_EQUALS(outputWs->getSpectrum(0).readX(),
+                     m_loadedData->getSpectrum(0).readX()); // Check outputWs X values
+    TS_ASSERT_EQUALS(outputWs->getSpectrum(1).readX(), m_loadedData->getSpectrum(1).readX());
 
     const auto specReY = outputWs->getSpectrum(0).y();
     const auto specReE = outputWs->getSpectrum(0).e();
@@ -329,22 +306,16 @@ class PhaseQuadMuonTestPerformance : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static PhaseQuadMuonTestPerformance *createSuite() {
-    return new PhaseQuadMuonTestPerformance();
-  }
+  static PhaseQuadMuonTestPerformance *createSuite() { return new PhaseQuadMuonTestPerformance(); }
 
-  static void destroySuite(PhaseQuadMuonTestPerformance *suite) {
-    delete suite;
-  }
+  static void destroySuite(PhaseQuadMuonTestPerformance *suite) { delete suite; }
 
   void setUp() override {
     m_loadedData = loadMuonDataset();
     phaseQuad = setupAlg(m_loadedData, false);
   }
 
-  void tearDown() override {
-    Mantid::API::AnalysisDataService::Instance().remove("outputWs");
-  }
+  void tearDown() override { Mantid::API::AnalysisDataService::Instance().remove("outputWs"); }
 
   void testPerformanceWs() { phaseQuad->execute(); }
 

@@ -36,17 +36,13 @@ class ExponentialFit : public Fit {
 
 public:
   ExponentialFit(ApplicationWindow *parent, Graph *g, bool expGrowth = false);
-  ExponentialFit(ApplicationWindow *parent, Graph *g, const QString &curveTitle,
+  ExponentialFit(ApplicationWindow *parent, Graph *g, const QString &curveTitle, bool expGrowth = false);
+  ExponentialFit(ApplicationWindow *parent, Graph *g, const QString &curveTitle, double start, double end,
                  bool expGrowth = false);
-  ExponentialFit(ApplicationWindow *parent, Graph *g, const QString &curveTitle,
-                 double start, double end, bool expGrowth = false);
-  ExponentialFit(ApplicationWindow *parent, Table *t, const QString &xCol,
-                 const QString &yCol, int startRow = 1, int endRow = -1,
-                 bool expGrowth = false);
+  ExponentialFit(ApplicationWindow *parent, Table *t, const QString &xCol, const QString &yCol, int startRow = 1,
+                 int endRow = -1, bool expGrowth = false);
 
-  double eval(double *par, double x) override {
-    return par[0] * exp(-par[1] * x) + par[2];
-  };
+  double eval(double *par, double x) override { return par[0] * exp(-par[1] * x) + par[2]; };
 
 private:
   void init();
@@ -62,10 +58,9 @@ class TwoExpFit : public Fit {
 public:
   TwoExpFit(ApplicationWindow *parent, Graph *g);
   TwoExpFit(ApplicationWindow *parent, Graph *g, const QString &curveTitle);
-  TwoExpFit(ApplicationWindow *parent, Graph *g, const QString &curveTitle,
-            double start, double end);
-  TwoExpFit(ApplicationWindow *parent, Table *t, const QString &xCol,
-            const QString &yCol, int startRow = 1, int endRow = -1);
+  TwoExpFit(ApplicationWindow *parent, Graph *g, const QString &curveTitle, double start, double end);
+  TwoExpFit(ApplicationWindow *parent, Table *t, const QString &xCol, const QString &yCol, int startRow = 1,
+            int endRow = -1);
 
   double eval(double *par, double x) override {
     return par[0] * exp(-par[1] * x) + par[2] * exp(-par[3] * x) + par[4];
@@ -83,14 +78,12 @@ class ThreeExpFit : public Fit {
 public:
   ThreeExpFit(ApplicationWindow *parent, Graph *g);
   ThreeExpFit(ApplicationWindow *parent, Graph *g, const QString &curveTitle);
-  ThreeExpFit(ApplicationWindow *parent, Graph *g, const QString &curveTitle,
-              double start, double end);
-  ThreeExpFit(ApplicationWindow *parent, Table *t, const QString &xCol,
-              const QString &yCol, int startRow = 1, int endRow = -1);
+  ThreeExpFit(ApplicationWindow *parent, Graph *g, const QString &curveTitle, double start, double end);
+  ThreeExpFit(ApplicationWindow *parent, Table *t, const QString &xCol, const QString &yCol, int startRow = 1,
+              int endRow = -1);
 
   double eval(double *par, double x) override {
-    return par[0] * exp(-x * par[1]) + par[2] * exp(-x * par[3]) +
-           par[4] * exp(-x * par[5]) + par[6];
+    return par[0] * exp(-x * par[1]) + par[2] * exp(-x * par[3]) + par[4] * exp(-x * par[5]) + par[6];
   };
 
 private:

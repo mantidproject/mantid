@@ -49,8 +49,7 @@ size_t calculateMaxNeighbours(IMDHistoWorkspace const *const ws) {
  * workspace
  * @return Maximum number of clusters.
  */
-size_t calculateMaxClusters(IMDHistoWorkspace const *const ws,
-                            size_t nIterators) {
+size_t calculateMaxClusters(IMDHistoWorkspace const *const ws, size_t nIterators) {
   size_t maxClusters = 1;
   for (size_t i = 0; i < ws->getNumDims(); ++i) {
     maxClusters *= ws->getDimension(i)->getNBins() / 2;
@@ -67,8 +66,7 @@ size_t calculateMaxClusters(IMDHistoWorkspace const *const ws,
  * @param inWS: To clone
  * @return : Cloned MDHistoWorkspace
  */
-std::shared_ptr<Mantid::API::IMDHistoWorkspace>
-cloneInputWorkspace(IMDHistoWorkspace_sptr &inWS) {
+std::shared_ptr<Mantid::API::IMDHistoWorkspace> cloneInputWorkspace(IMDHistoWorkspace_sptr &inWS) {
   IMDHistoWorkspace_sptr outWS(inWS->clone());
 
   // Initialize to zero.
@@ -87,8 +85,7 @@ cloneInputWorkspace(IMDHistoWorkspace_sptr &inWS) {
  * @param maxIterations : Maximum number of possible iterations
  * @return
  */
-template <typename T>
-T reportEvery(const T &maxReports, const T &maxIterations) {
+template <typename T> T reportEvery(const T &maxReports, const T &maxIterations) {
   T frequency = maxReports;
   if (maxIterations >= maxReports) {
     frequency = maxIterations / maxReports;
@@ -98,8 +95,7 @@ T reportEvery(const T &maxReports, const T &maxIterations) {
 
 // Helper function for determining if a set contains a specific value.
 template <typename Container>
-bool does_contain_key(const Container &container,
-                      const typename Container::key_type &value) {
+bool does_contain_key(const Container &container, const typename Container::key_type &value) {
   return container.find(value) != container.end();
 }
 
@@ -122,15 +118,11 @@ using VecEdgeIndexPair = std::vector<EdgeIndexPair>;
  *iterator boundaries to resolve later.
  * @return
  */
-size_t doConnectedComponentLabeling(IMDIterator *iterator,
-                                    BackgroundStrategy *const strategy,
-                                    VecElements &neighbourElements,
-                                    Progress &progress, size_t maxNeighbours,
-                                    size_t startLabelId,
-                                    VecEdgeIndexPair &edgeIndexVec) {
+size_t doConnectedComponentLabeling(IMDIterator *iterator, BackgroundStrategy *const strategy,
+                                    VecElements &neighbourElements, Progress &progress, size_t maxNeighbours,
+                                    size_t startLabelId, VecEdgeIndexPair &edgeIndexVec) {
   size_t currentLabelCount = startLabelId;
-  strategy->configureIterator(
-      iterator); // Set up such things as desired Normalization.
+  strategy->configureIterator(iterator); // Set up such things as desired Normalization.
   do {
     if (!strategy->isBackground(iterator)) {
 
@@ -167,26 +159,22 @@ size_t doConnectedComponentLabeling(IMDIterator *iterator,
         DisjointElement &element = neighbourElements[currentIndex];
         element.setId(static_cast<int>(currentLabelCount));
         ++currentLabelCount;
-      } else if (neighbourIds.size() ==
-                 1) // Do we have a single unique id amongst all neighbours.
+      } else if (neighbourIds.size() == 1) // Do we have a single unique id amongst all neighbours.
       {
-        neighbourElements[currentIndex] =
-            neighbourElements[nonEmptyNeighbourIndexes.front()]; // Copy
-                                                                 // non-empty
-                                                                 // neighbour
+        neighbourElements[currentIndex] = neighbourElements[nonEmptyNeighbourIndexes.front()]; // Copy
+                                                                                               // non-empty
+                                                                                               // neighbour
       } else {
         // Choose the lowest neighbour index as the parent.
         size_t candidateSourceParentIndex = nonEmptyNeighbourIndexes[0];
         for (size_t i = 1; i < nonEmptyNeighbourIndexes.size(); ++i) {
           size_t neighIndex = nonEmptyNeighbourIndexes[i];
-          if (neighbourElements[neighIndex].getRoot() <
-              neighbourElements[candidateSourceParentIndex].getRoot()) {
+          if (neighbourElements[neighIndex].getRoot() < neighbourElements[candidateSourceParentIndex].getRoot()) {
             candidateSourceParentIndex = neighIndex;
           }
         }
         // Get the chosen parent
-        DisjointElement &parentElement =
-            neighbourElements[candidateSourceParentIndex];
+        DisjointElement &parentElement = neighbourElements[candidateSourceParentIndex];
         // Union remainder parents with the chosen parent
         for (auto neighIndex : nonEmptyNeighbourIndexes) {
           if (neighIndex != candidateSourceParentIndex) {
@@ -211,11 +199,9 @@ void memoryCheck(size_t nPoints) {
   const size_t freeMemory = memoryStats.availMem();         // in kB
   const size_t memoryCost = sizeOfElement * nPoints / 1000; // in kB
   if (memoryCost > freeMemory) {
-    std::string basicMessage =
-        "CCL requires more free memory than you have available.";
+    std::string basicMessage = "CCL requires more free memory than you have available.";
     std::stringstream sstream;
-    sstream << basicMessage << " Requires " << memoryCost
-            << " KB of contiguous memory.";
+    sstream << basicMessage << " Requires " << memoryCost << " KB of contiguous memory.";
     g_log.notice(sstream.str());
     throw std::runtime_error(basicMessage);
   }
@@ -227,12 +213,10 @@ void memoryCheck(size_t nPoints) {
  * @param startId : Start Id to use for labeling
  * @param nThreads : Optional argument of number of threads to use.
  */
-ConnectedComponentLabeling::ConnectedComponentLabeling(
-    const size_t &startId, const boost::optional<int> &nThreads)
+ConnectedComponentLabeling::ConnectedComponentLabeling(const size_t &startId, const boost::optional<int> &nThreads)
     : m_startId(startId), m_nThreads(nThreads) {
   if (m_nThreads.is_initialized() && m_nThreads.get() < 0) {
-    throw std::invalid_argument(
-        "Cannot request that CCL runs with less than one thread!");
+    throw std::invalid_argument("Cannot request that CCL runs with less than one thread!");
   }
 }
 
@@ -242,9 +226,7 @@ ConnectedComponentLabeling::ConnectedComponentLabeling(
  * the initial id used.
  * @param id: Id to start with
  */
-void ConnectedComponentLabeling::startLabelingId(const size_t &id) {
-  m_startId = id;
-}
+void ConnectedComponentLabeling::startLabelingId(const size_t &id) { m_startId = id; }
 
 /**
  @return: The start label id.
@@ -264,8 +246,7 @@ int ConnectedComponentLabeling::getNThreads() const {
   if (m_nThreads.is_initialized()) {
     return m_nThreads.get(); // Follow explicit instructions if provided.
   } else {
-    return API::FrameworkManager::Instance()
-        .getNumOMPThreads(); // Figure it out.
+    return API::FrameworkManager::Instance().getNumOMPThreads(); // Figure it out.
   }
 }
 
@@ -279,9 +260,9 @@ int ConnectedComponentLabeling::getNThreads() const {
  * @param progress : Progress object
  * @return : Map of label ids to clusters.
  */
-ClusterMap ConnectedComponentLabeling::calculateDisjointTree(
-    const IMDHistoWorkspace_sptr &ws, BackgroundStrategy *const baseStrategy,
-    Progress &progress) const {
+ClusterMap ConnectedComponentLabeling::calculateDisjointTree(const IMDHistoWorkspace_sptr &ws,
+                                                             BackgroundStrategy *const baseStrategy,
+                                                             Progress &progress) const {
   std::map<size_t, std::shared_ptr<ICluster>> clusterMap;
   VecElements neighbourElements(ws->getNPoints());
 
@@ -297,37 +278,30 @@ ClusterMap ConnectedComponentLabeling::calculateDisjointTree(
 
   if (nThreadsToUse > 1) {
     auto iterators = ws->createIterators(nThreadsToUse);
-    const size_t maxClustersPossible =
-        calculateMaxClusters(ws.get(), nThreadsToUse);
+    const size_t maxClustersPossible = calculateMaxClusters(ws.get(), nThreadsToUse);
 
     std::vector<VecEdgeIndexPair> parallelEdgeVec(nThreadsToUse);
 
-    std::vector<std::map<size_t, std::shared_ptr<Cluster>>>
-        parallelClusterMapVec(nThreadsToUse);
+    std::vector<std::map<size_t, std::shared_ptr<Cluster>>> parallelClusterMapVec(nThreadsToUse);
 
     // ------------- Stage One. Local CCL in parallel.
     g_log.debug("Parallel solve local CCL");
     // PARALLEL_FOR_NO_WSP_CHECK()
     for (int i = 0; i < nThreadsToUse; ++i) {
       API::IMDIterator *iterator = iterators[i].get();
-      boost::scoped_ptr<BackgroundStrategy> strategy(
-          baseStrategy->clone());                     // local strategy
-      VecEdgeIndexPair &edgeVec = parallelEdgeVec[i]; // local edge indexes
+      boost::scoped_ptr<BackgroundStrategy> strategy(baseStrategy->clone()); // local strategy
+      VecEdgeIndexPair &edgeVec = parallelEdgeVec[i];                        // local edge indexes
 
-      const size_t startLabel =
-          m_startId + (i * maxClustersPossible); // Ensure that label ids are
-                                                 // totally unique within each
-                                                 // parallel unit.
-      const size_t endLabel = doConnectedComponentLabeling(
-          iterator, strategy.get(), neighbourElements, progress, maxNeighbours,
-          startLabel, edgeVec);
+      const size_t startLabel = m_startId + (i * maxClustersPossible); // Ensure that label ids are
+                                                                       // totally unique within each
+                                                                       // parallel unit.
+      const size_t endLabel = doConnectedComponentLabeling(iterator, strategy.get(), neighbourElements, progress,
+                                                           maxNeighbours, startLabel, edgeVec);
 
       // Create clusters from labels.
-      std::map<size_t, std::shared_ptr<Cluster>> &localClusterMap =
-          parallelClusterMapVec[i]; // local cluster map.
+      std::map<size_t, std::shared_ptr<Cluster>> &localClusterMap = parallelClusterMapVec[i]; // local cluster map.
       for (size_t labelId = startLabel; labelId != endLabel; ++labelId) {
-        auto cluster = std::make_shared<Cluster>(
-            labelId); // Create a cluster for the label and key it by the label.
+        auto cluster = std::make_shared<Cluster>(labelId); // Create a cluster for the label and key it by the label.
         localClusterMap[labelId] = cluster;
       }
 
@@ -339,8 +313,7 @@ ClusterMap ConnectedComponentLabeling::calculateDisjointTree(
           // Second pass smoothing step
           const size_t currentIndex = iterator->getLinearIndex();
 
-          const size_t &labelAtIndex =
-              neighbourElements[currentIndex].getRoot();
+          const size_t &labelAtIndex = neighbourElements[currentIndex].getRoot();
           localClusterMap[labelAtIndex]->addIndex(currentIndex);
         }
       } while (iterator->next());
@@ -373,14 +346,12 @@ ClusterMap ConnectedComponentLabeling::calculateDisjointTree(
     auto iterator = ws->createIterator(nullptr);
     VecEdgeIndexPair edgeIndexPair; // This should never get filled in a single
                                     // threaded situation.
-    size_t endLabelId = doConnectedComponentLabeling(
-        iterator.get(), baseStrategy, neighbourElements, progress,
-        maxNeighbours, m_startId, edgeIndexPair);
+    size_t endLabelId = doConnectedComponentLabeling(iterator.get(), baseStrategy, neighbourElements, progress,
+                                                     maxNeighbours, m_startId, edgeIndexPair);
 
     // Create clusters from labels.
     for (size_t labelId = m_startId; labelId != endLabelId; ++labelId) {
-      auto cluster = std::make_shared<Cluster>(
-          labelId); // Create a cluster for the label and key it by the label.
+      auto cluster = std::make_shared<Cluster>(labelId); // Create a cluster for the label and key it by the label.
       clusterMap[labelId] = cluster;
     }
 
@@ -405,14 +376,11 @@ ClusterMap ConnectedComponentLabeling::calculateDisjointTree(
  * @param progress : Progress object
  * @return Cluster output workspace of results
  */
-std::shared_ptr<Mantid::API::IMDHistoWorkspace>
-ConnectedComponentLabeling::execute(IMDHistoWorkspace_sptr ws,
-                                    BackgroundStrategy *const strategy,
-                                    Progress &progress) const {
-  ClusterTuple result =
-      executeAndFetchClusters(std::move(ws), strategy, progress);
-  IMDHistoWorkspace_sptr outWS =
-      result.get<0>(); // Get the workspace, but discard cluster objects.
+std::shared_ptr<Mantid::API::IMDHistoWorkspace> ConnectedComponentLabeling::execute(IMDHistoWorkspace_sptr ws,
+                                                                                    BackgroundStrategy *const strategy,
+                                                                                    Progress &progress) const {
+  ClusterTuple result = executeAndFetchClusters(std::move(ws), strategy, progress);
+  IMDHistoWorkspace_sptr outWS = result.get<0>(); // Get the workspace, but discard cluster objects.
   return outWS;
 }
 
@@ -424,9 +392,9 @@ ConnectedComponentLabeling::execute(IMDHistoWorkspace_sptr ws,
  * @return Image Workspace containing clusters as well as a map of label ids to
  * cluster objects.
  */
-ClusterTuple ConnectedComponentLabeling::executeAndFetchClusters(
-    IMDHistoWorkspace_sptr ws, BackgroundStrategy *const strategy,
-    Progress &progress) const {
+ClusterTuple ConnectedComponentLabeling::executeAndFetchClusters(IMDHistoWorkspace_sptr ws,
+                                                                 BackgroundStrategy *const strategy,
+                                                                 Progress &progress) const {
   // Can we run the analysis
   memoryCheck(ws->getNPoints());
 

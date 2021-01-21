@@ -19,21 +19,17 @@ class NullPeaksPresenterVsiTest : public CxxTest::TestSuite {
 public:
   void testGettingPeaksWorkspaceThrows() {
     NullPeaksPresenterVsi presenter;
-    TSM_ASSERT_THROWS("Should not implement this method",
-                      presenter.getPeaksWorkspace(),
-                      const std::runtime_error &);
+    TSM_ASSERT_THROWS("Should not implement this method", presenter.getPeaksWorkspace(), const std::runtime_error &);
   }
 
   void testGettingUsablePeaksThrows() {
     NullPeaksPresenterVsi presenter;
-    TSM_ASSERT_THROWS("Should not implement this method",
-                      presenter.getViewablePeaks(), const std::runtime_error &);
+    TSM_ASSERT_THROWS("Should not implement this method", presenter.getViewablePeaks(), const std::runtime_error &);
   }
 
   void testGettingPeaksWorkspaceNameThrows() {
     NullPeaksPresenterVsi presenter;
-    TSM_ASSERT_THROWS("Should not implement this method",
-                      presenter.getViewablePeaks(), const std::runtime_error &);
+    TSM_ASSERT_THROWS("Should not implement this method", presenter.getViewablePeaks(), const std::runtime_error &);
   }
 
   void testGettingPeaksInfoThrows() {
@@ -41,12 +37,9 @@ public:
     int row = 0;
     double radius;
     Mantid::Kernel::V3D position;
-    Mantid::Kernel::SpecialCoordinateSystem coord =
-        Mantid::Kernel::SpecialCoordinateSystem::None;
+    Mantid::Kernel::SpecialCoordinateSystem coord = Mantid::Kernel::SpecialCoordinateSystem::None;
     Mantid::API::IPeaksWorkspace_sptr peaksWorkspace;
-    TSM_ASSERT_THROWS(
-        "Should not implement this method",
-        presenter.getPeaksInfo(peaksWorkspace, row, position, radius, coord),
-        const std::runtime_error &);
+    TSM_ASSERT_THROWS("Should not implement this method",
+                      presenter.getPeaksInfo(peaksWorkspace, row, position, radius, coord), const std::runtime_error &);
   }
 };

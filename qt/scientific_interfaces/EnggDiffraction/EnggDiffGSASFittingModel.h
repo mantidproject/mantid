@@ -34,14 +34,11 @@ public:
 
   ~EnggDiffGSASFittingModel();
 
-  void
-  setObserver(std::shared_ptr<IEnggDiffGSASFittingObserver> observer) override;
+  void setObserver(std::shared_ptr<IEnggDiffGSASFittingObserver> observer) override;
 
-  void doRefinements(
-      const std::vector<GSASIIRefineFitPeaksParameters> &params) override;
+  void doRefinements(const std::vector<GSASIIRefineFitPeaksParameters> &params) override;
 
-  boost::optional<Mantid::API::ITableWorkspace_sptr>
-  getLatticeParams(const RunLabel &runLabel) const override;
+  boost::optional<Mantid::API::ITableWorkspace_sptr> getLatticeParams(const RunLabel &runLabel) const override;
 
   boost::optional<double> getGamma(const RunLabel &runLabel) const override;
 
@@ -51,22 +48,18 @@ public:
 
   bool hasFitResultsForRun(const RunLabel &runLabel) const override;
 
-  Mantid::API::MatrixWorkspace_sptr
-  loadFocusedRun(const std::string &filename) const override;
+  Mantid::API::MatrixWorkspace_sptr loadFocusedRun(const std::string &filename) const override;
 
-  void saveRefinementResultsToHDF5(
-      const Mantid::API::IAlgorithm_sptr successfulAlgorithm,
-      const std::vector<GSASIIRefineFitPeaksOutputProperties>
-          &refinementResultSets,
-      const std::string &filename) const override;
+  void saveRefinementResultsToHDF5(const Mantid::API::IAlgorithm_sptr successfulAlgorithm,
+                                   const std::vector<GSASIIRefineFitPeaksOutputProperties> &refinementResultSets,
+                                   const std::string &filename) const override;
 
 protected:
   /// The following methods are marked as protected so that they can be exposed
   /// by a helper class in the tests
 
   /// Add a lattice parameter table to the map
-  void addLatticeParams(const RunLabel &runLabel,
-                        const Mantid::API::ITableWorkspace_sptr &table);
+  void addLatticeParams(const RunLabel &runLabel, const Mantid::API::ITableWorkspace_sptr &table);
 
   /// Add a gamma value to the gamma map
   void addGamma(const RunLabel &runLabel, const double gamma);
@@ -78,16 +71,13 @@ protected:
   void addSigma(const RunLabel &runLabel, const double sigma);
 
 protected slots:
-  void processRefinementsComplete(
-      Mantid::API::IAlgorithm_sptr alg,
-      const std::vector<GSASIIRefineFitPeaksOutputProperties>
-          &refinementResultSets);
+  void processRefinementsComplete(Mantid::API::IAlgorithm_sptr alg,
+                                  const std::vector<GSASIIRefineFitPeaksOutputProperties> &refinementResultSets);
 
   void processRefinementFailed(const std::string &failureMessage);
 
-  void processRefinementSuccessful(
-      Mantid::API::IAlgorithm_sptr successfulAlgorithm,
-      const GSASIIRefineFitPeaksOutputProperties &refinementResults);
+  void processRefinementSuccessful(Mantid::API::IAlgorithm_sptr successfulAlgorithm,
+                                   const GSASIIRefineFitPeaksOutputProperties &refinementResults);
 
   void processRefinementCancelled();
 
@@ -107,10 +97,8 @@ private:
 
   /// Add Rwp, sigma, gamma and lattice params table to their
   /// respective RunMaps
-  void
-  addFitResultsToMaps(const RunLabel &runLabel, const double rwp,
-                      const double sigma, const double gamma,
-                      const Mantid::API::ITableWorkspace_sptr &latticeParams);
+  void addFitResultsToMaps(const RunLabel &runLabel, const double rwp, const double sigma, const double gamma,
+                           const Mantid::API::ITableWorkspace_sptr &latticeParams);
 
   void deleteWorkerThread();
 
@@ -119,8 +107,7 @@ private:
   doGSASRefinementAlgorithm(const GSASIIRefineFitPeaksParameters &params);
 
   template <typename T>
-  boost::optional<T> getFromRunMapOptional(const RunMap<MAX_BANKS, T> &map,
-                                           const RunLabel &runLabel) const {
+  boost::optional<T> getFromRunMapOptional(const RunMap<MAX_BANKS, T> &map, const RunLabel &runLabel) const {
     if (map.contains(runLabel)) {
       return map.get(runLabel);
     }

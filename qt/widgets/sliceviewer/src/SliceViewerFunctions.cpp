@@ -18,14 +18,11 @@ namespace SliceViewer {
  * be sliced
  * @returns true if the slice goes fully or partially through the workspace
  */
-bool EXPORT_OPT_MANTIDQT_SLICEVIEWER doesSliceCutThroughWorkspace(
-    const Mantid::Kernel::VMD &min, const Mantid::Kernel::VMD &max,
-    const std::vector<Mantid::Geometry::MDHistoDimension_sptr> &dimensions) {
-  auto valueBetweenMinMax = [](const Mantid::Kernel::VMD_t value,
-                               const Mantid::Kernel::VMD_t min,
-                               const Mantid::Kernel::VMD_t max) {
-    return value >= min && value <= max;
-  };
+bool EXPORT_OPT_MANTIDQT_SLICEVIEWER
+doesSliceCutThroughWorkspace(const Mantid::Kernel::VMD &min, const Mantid::Kernel::VMD &max,
+                             const std::vector<Mantid::Geometry::MDHistoDimension_sptr> &dimensions) {
+  auto valueBetweenMinMax = [](const Mantid::Kernel::VMD_t value, const Mantid::Kernel::VMD_t min,
+                               const Mantid::Kernel::VMD_t max) { return value >= min && value <= max; };
 
   int dimCounter = 0;
   auto cutsThroughWorkspace = true;
@@ -33,10 +30,8 @@ bool EXPORT_OPT_MANTIDQT_SLICEVIEWER doesSliceCutThroughWorkspace(
   // Check in either dimension if the the min and max values are withing the
   // workspace boundaries
   for (const auto &dimension : dimensions) {
-    const auto minDimension =
-        static_cast<Mantid::Kernel::VMD_t>(dimension->getMinimum());
-    const auto maxDimension =
-        static_cast<Mantid::Kernel::VMD_t>(dimension->getMaximum());
+    const auto minDimension = static_cast<Mantid::Kernel::VMD_t>(dimension->getMinimum());
+    const auto maxDimension = static_cast<Mantid::Kernel::VMD_t>(dimension->getMaximum());
 
     // If the the value for min and max is not in the min-max range of the
     // dimension of the workspace
@@ -61,8 +56,8 @@ bool EXPORT_OPT_MANTIDQT_SLICEVIEWER doesSliceCutThroughWorkspace(
  * @param isAutoScalingOnLoad: is auto scaling on load selected
  * @returns true if autos scaling on load should be performed else false
  */
-bool EXPORT_OPT_MANTIDQT_SLICEVIEWER shouldAutoScaleForNewlySetWorkspace(
-    bool isFirstWorkspaceOpen, bool isAutoScalingOnLoad) {
+bool EXPORT_OPT_MANTIDQT_SLICEVIEWER shouldAutoScaleForNewlySetWorkspace(bool isFirstWorkspaceOpen,
+                                                                         bool isAutoScalingOnLoad) {
   return !isFirstWorkspaceOpen || isAutoScalingOnLoad;
 }
 
@@ -77,8 +72,8 @@ bool EXPORT_OPT_MANTIDQT_SLICEVIEWER shouldAutoScaleForNewlySetWorkspace(
  * @param useRebinMode: indicates if rebinning is to be used
  * @returns true rebin state is consistent, else false
  */
-bool EXPORT_OPT_MANTIDQT_SLICEVIEWER isRebinInConsistentState(
-    Mantid::API::IMDWorkspace *rebinnedWS, bool useRebinMode) {
+bool EXPORT_OPT_MANTIDQT_SLICEVIEWER isRebinInConsistentState(Mantid::API::IMDWorkspace *rebinnedWS,
+                                                              bool useRebinMode) {
   return rebinnedWS && useRebinMode;
 }
 } // namespace SliceViewer

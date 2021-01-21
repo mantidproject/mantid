@@ -20,8 +20,7 @@ namespace SimpleGui {
 
   @date 14/11/2011
  */
-class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_QTWIDGETS RotationPointDialog
-    : public QDialog {
+class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_QTWIDGETS RotationPointDialog : public QDialog {
   Q_OBJECT
 
 public:

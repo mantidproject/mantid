@@ -23,9 +23,7 @@ DECLARE_FUNCTION(FlatBackground)
 std::string FlatBackground::name() const { return "FlatBackground"; }
 
 /// The only parameter is the constant for the flat background.
-void FlatBackground::init() {
-  declareParameter("A0", 0.0, "coefficient for linear term");
-}
+void FlatBackground::init() { declareParameter("A0", 0.0, "coefficient for linear term"); }
 
 /**
  * Evaluate the function at the supplied points.
@@ -33,8 +31,7 @@ void FlatBackground::init() {
  * @param xValues The points to evaluate at
  * @param nData The number of points.
  */
-void FlatBackground::function1D(double *out, const double *xValues,
-                                const size_t nData) const {
+void FlatBackground::function1D(double *out, const double *xValues, const size_t nData) const {
   UNUSED_ARG(xValues);
 
   const double a0 = getParameter("A0");
@@ -50,8 +47,7 @@ void FlatBackground::function1D(double *out, const double *xValues,
  * @param xValues The points to evaluate at
  * @param nData The number of points.
  */
-void FlatBackground::functionDeriv1D(API::Jacobian *out, const double *xValues,
-                                     const size_t nData) {
+void FlatBackground::functionDeriv1D(API::Jacobian *out, const double *xValues, const size_t nData) {
   UNUSED_ARG(xValues);
 
   for (size_t i = 0; i < nData; i++) {
@@ -66,8 +62,7 @@ void FlatBackground::functionDeriv1D(API::Jacobian *out, const double *xValues,
 /// @param right :: A pointer to an array of successive right bin boundaries
 /// (size = nBins).
 /// @param nBins :: Number of bins.
-void FlatBackground::histogram1D(double *out, double left, const double *right,
-                                 const size_t nBins) const {
+void FlatBackground::histogram1D(double *out, double left, const double *right, const size_t nBins) const {
 
   const double a0 = getParameter("A0");
 
@@ -85,8 +80,7 @@ void FlatBackground::histogram1D(double *out, double left, const double *right,
 /// @param right :: A pointer to an array of successive right bin boundaries
 /// (size = nBins).
 /// @param nBins :: Number of bins.
-void FlatBackground::histogramDerivative1D(Jacobian *jacobian, double left,
-                                           const double *right,
+void FlatBackground::histogramDerivative1D(Jacobian *jacobian, double left, const double *right,
                                            const size_t nBins) const {
 
   double xl = left;

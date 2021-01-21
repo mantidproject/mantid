@@ -21,15 +21,13 @@ namespace API {
  * @param ws :: Pointer to a workspace.
  * @param maxDomainSize :: The maximum size each domain can have.
  */
-CompositeDomainMD::CompositeDomainMD(const IMDWorkspace_const_sptr &ws,
-                                     size_t maxDomainSize)
+CompositeDomainMD::CompositeDomainMD(const IMDWorkspace_const_sptr &ws, size_t maxDomainSize)
     : m_iterator(ws->createIterator()) {
   m_totalSize = m_iterator->getDataSize();
 
   size_t maxDomainSizeDiv = maxDomainSize + 1;
   if (maxDomainSizeDiv == 0) {
-    throw std::runtime_error(
-        "Attempted to use a maximum domain size that equals 0");
+    throw std::runtime_error("Attempted to use a maximum domain size that equals 0");
   }
   size_t nParts = m_totalSize / maxDomainSizeDiv;
 
@@ -39,8 +37,7 @@ CompositeDomainMD::CompositeDomainMD(const IMDWorkspace_const_sptr &ws,
     m_domains[i] = std::make_unique<FunctionDomainMD>(ws, start, maxDomainSize);
   }
   size_t start = (nParts - 1) * maxDomainSize;
-  m_domains.back() =
-      std::make_unique<FunctionDomainMD>(ws, start, m_totalSize - start);
+  m_domains.back() = std::make_unique<FunctionDomainMD>(ws, start, m_totalSize - start);
 }
 
 /**

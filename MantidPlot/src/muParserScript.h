@@ -42,13 +42,10 @@ class muParserScript : public Script {
   Q_OBJECT
 
 public:
-  muParserScript(ScriptingEnv *env, const QString &name, QObject *context,
-                 bool checkMultilineCode = true);
+  muParserScript(ScriptingEnv *env, const QString &name, QObject *context, bool checkMultilineCode = true);
   ~muParserScript();
 
-  bool compilesToCompleteStatement(const QString &) const override {
-    return true;
-  };
+  bool compilesToCompleteStatement(const QString &) const override { return true; };
 
 public slots:
   QVariant evaluateImpl() override;
@@ -70,23 +67,13 @@ private:
   double tableCell(int col, int row);
   double *addVariable(const char *name);
   double *addVariableR(const char *name);
-  static double *mu_addVariableR(const char *name) {
-    return current->addVariableR(name);
-  }
+  static double *mu_addVariableR(const char *name) { return current->addVariableR(name); }
   static double mu_col(const char *arg) { return current->col(arg); }
-  static double mu_cell(double row, double col) {
-    return current->cell(qRound(row), qRound(col));
-  }
-  static double mu_tableCell(double col, double row) {
-    return current->tableCell(qRound(col), qRound(row));
-  }
+  static double mu_cell(double row, double col) { return current->cell(qRound(row), qRound(col)); }
+  static double mu_tableCell(double col, double row) { return current->tableCell(qRound(col), qRound(row)); }
   static double mu_tablecol(const char *arg) { return current->tablecol(arg); }
-  static double *mu_addVariable(const char *name, void *) {
-    return current->addVariable(name);
-  }
-  static double *mu_addVariableR(const char *name, void *) {
-    return current->addVariableR(name);
-  }
+  static double *mu_addVariable(const char *name, void *) { return current->addVariable(name); }
+  static double *mu_addVariableR(const char *name, void *) { return current->addVariableR(name); }
   static QString compileColArg(const QString &in);
   static void clearVariables(QMap<QString, double *> &vars);
 

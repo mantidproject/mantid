@@ -49,10 +49,9 @@ PyObjectToVMD::PyObjectToVMD(const object &p) : m_obj(p), m_alreadyVMD(false) {
     // Can we index the object
     p.attr("__getitem__")(0);
   } catch (boost::python::error_already_set &) {
-    throw std::invalid_argument(
-        std::string("Cannot convert object to VMD. "
-                    "Expected a python sequence found: ") +
-        p.ptr()->ob_type->tp_name);
+    throw std::invalid_argument(std::string("Cannot convert object to VMD. "
+                                            "Expected a python sequence found: ") +
+                                p.ptr()->ob_type->tp_name);
   }
 }
 

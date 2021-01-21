@@ -26,17 +26,11 @@ public:
 
   const std::string name() const override { return "RingProfile"; };
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Calculates the sum of the counts against a circular ring.";
-  }
+  const std::string summary() const override { return "Calculates the sum of the counts against a circular ring."; }
 
   int version() const override { return 1; };
-  const std::vector<std::string> seeAlso() const override {
-    return {"LineProfile"};
-  }
-  const std::string category() const override {
-    return "Transforms\\Grouping";
-  };
+  const std::vector<std::string> seeAlso() const override { return {"LineProfile"}; }
+  const std::string category() const override { return "Transforms\\Grouping"; };
 
 protected:
   std::shared_ptr<API::Progress> m_progress;
@@ -51,14 +45,11 @@ private:
   /// validate the inputs of the algorithm for 2d matrix based instrument
   void checkInputsForNumericWorkspace(const API::MatrixWorkspace_sptr &);
   /// process ring profile for instrument based workspace
-  void processInstrumentRingProfile(const API::MatrixWorkspace_sptr &inputWS,
-                                    std::vector<double> &output_bins);
+  void processInstrumentRingProfile(const API::MatrixWorkspace_sptr &inputWS, std::vector<double> &output_bins);
   /// process ring profile for image based workspace
-  void processNumericImageRingProfile(const API::MatrixWorkspace_sptr &inputWS,
-                                      std::vector<double> &output_bins);
+  void processNumericImageRingProfile(const API::MatrixWorkspace_sptr &inputWS, std::vector<double> &output_bins);
   /// identify the bin position for the given pixel in the image based workspace
-  void getBinForPixel(const API::MatrixWorkspace_sptr &, int,
-                      std::vector<int> &);
+  void getBinForPixel(const API::MatrixWorkspace_sptr &, int, std::vector<int> &);
   //// identify the bin position for the pixel related to the given detector
   int getBinForPixel(const Kernel::V3D &position);
   /// copy of the minRadius input

@@ -51,8 +51,7 @@ class MockPeaksWorkspace : public PeaksWorkspace {
   using Mantid::DataObjects::PeaksWorkspace::addPeak;
 
 public:
-  MOCK_METHOD1(setInstrument,
-               void(const Mantid::Geometry::Instrument_const_sptr &inst));
+  MOCK_METHOD1(setInstrument, void(const Mantid::Geometry::Instrument_const_sptr &inst));
   MOCK_CONST_METHOD0(clone, Mantid::DataObjects::PeaksWorkspace *());
   MOCK_CONST_METHOD0(getNumberPeaks, int());
   MOCK_METHOD1(removePeak, void(int peakNum));
@@ -100,11 +99,9 @@ public:
     MockProgressAction mockProgress;
     // Expectation checks that progress should be >= 0 and <= 100 and called at
     // least once!
-    EXPECT_CALL(mockProgress, eventRaised(AllOf(Le(100), Ge(0))))
-        .Times(AtLeast(1));
+    EXPECT_CALL(mockProgress, eventRaised(AllOf(Le(100), Ge(0)))).Times(AtLeast(1));
 
-    std::shared_ptr<MockPeaksWorkspace> pw_ptr =
-        std::make_shared<MockPeaksWorkspace>();
+    std::shared_ptr<MockPeaksWorkspace> pw_ptr = std::make_shared<MockPeaksWorkspace>();
     MockPeaksWorkspace &pw = *pw_ptr;
 
     // Peaks workspace will return 5 identical peaks
@@ -115,15 +112,12 @@ public:
     factory.initialize(pw_ptr);
     auto set = factory.create(mockProgress);
 
-    TSM_ASSERT("Progress Updates not used as expected.",
-               Mock::VerifyAndClearExpectations(&mockProgress));
+    TSM_ASSERT("Progress Updates not used as expected.", Mock::VerifyAndClearExpectations(&mockProgress));
   }
 
   void test_q_lab() {
     MockPeak peak1;
-    EXPECT_CALL(peak1, getQLabFrame())
-        .Times(5)
-        .WillRepeatedly(Return(V3D(1, 2, 3)));
+    EXPECT_CALL(peak1, getQLabFrame()).Times(5).WillRepeatedly(Return(V3D(1, 2, 3)));
     EXPECT_CALL(peak1, getHKL()).Times(0);
     EXPECT_CALL(peak1, getQSampleFrame()).Times(0);
 
@@ -132,9 +126,7 @@ public:
 
   void test_q_sample() {
     MockPeak peak1;
-    EXPECT_CALL(peak1, getQSampleFrame())
-        .Times(5)
-        .WillRepeatedly(Return(V3D(1, 2, 3)));
+    EXPECT_CALL(peak1, getQSampleFrame()).Times(5).WillRepeatedly(Return(V3D(1, 2, 3)));
     EXPECT_CALL(peak1, getHKL()).Times(0);
     EXPECT_CALL(peak1, getQLabFrame()).Times(0);
 
@@ -159,16 +151,14 @@ public:
 
     vtkPeakMarkerFactory factory("signal");
 
-    TSM_ASSERT_THROWS(
-        "No workspace, so should not be possible to complete initialization.",
-        factory.initialize(ws_sptr), const std::runtime_error &);
+    TSM_ASSERT_THROWS("No workspace, so should not be possible to complete initialization.",
+                      factory.initialize(ws_sptr), const std::runtime_error &);
   }
 
   void testCreateWithoutInitializeThrows() {
     FakeProgressAction progressUpdate;
     vtkPeakMarkerFactory factory("signal");
-    TS_ASSERT_THROWS(factory.create(progressUpdate),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(factory.create(progressUpdate), const std::runtime_error &);
   }
 
   void testTypeName() {
@@ -192,8 +182,7 @@ public:
     // Note that no PeaksRadius property has been set.
 
     vtkPeakMarkerFactory factory("signal");
-    factory.initialize(
-        Mantid::API::IPeaksWorkspace_sptr(std::move(mockWorkspace)));
+    factory.initialize(Mantid::API::IPeaksWorkspace_sptr(std::move(mockWorkspace)));
     TS_ASSERT_EQUALS(expectedRadius, factory.getIntegrationRadius());
   }
 
@@ -202,10 +191,8 @@ public:
     // Note that no PeaksRadius property has been set.
 
     vtkPeakMarkerFactory factory("signal");
-    factory.initialize(
-        Mantid::API::IPeaksWorkspace_sptr(std::move(mockWorkspace)));
-    TS_ASSERT_EQUALS(
-        false, factory.isPeaksWorkspaceIntegrated()); // false is the default
+    factory.initialize(Mantid::API::IPeaksWorkspace_sptr(std::move(mockWorkspace)));
+    TS_ASSERT_EQUALS(false, factory.isPeaksWorkspaceIntegrated()); // false is the default
   }
 
   void testGetPeakRadiusWhenIntegrated() {
@@ -217,8 +204,7 @@ public:
                                                    // IntegratePeaksMD
 
     vtkPeakMarkerFactory factory("signal");
-    factory.initialize(
-        Mantid::API::IPeaksWorkspace_sptr(std::move(mockWorkspace)));
+    factory.initialize(Mantid::API::IPeaksWorkspace_sptr(std::move(mockWorkspace)));
     TS_ASSERT_EQUALS(expectedRadius, factory.getIntegrationRadius());
   }
 
@@ -231,8 +217,7 @@ public:
                                                    // IntegratePeaksMD
 
     vtkPeakMarkerFactory factory("signal");
-    factory.initialize(
-        Mantid::API::IPeaksWorkspace_sptr(std::move(mockWorkspace)));
+    factory.initialize(Mantid::API::IPeaksWorkspace_sptr(std::move(mockWorkspace)));
     TS_ASSERT_EQUALS(true, factory.isPeaksWorkspaceIntegrated());
   }
 
@@ -242,8 +227,7 @@ public:
     MockPeaksWorkspace &pw = *pw_ptr;
 
     double actualRadius = 2.0;
-    PeakShapeSpherical sphere(actualRadius,
-                              Kernel::SpecialCoordinateSystem::QLab);
+    PeakShapeSpherical sphere(actualRadius, Kernel::SpecialCoordinateSystem::QLab);
 
     MockPeakShape peak1;
     EXPECT_CALL(pw, getNumberPeaks()).WillOnce(Return(1));
@@ -279,23 +263,19 @@ public:
       double theta = 2. * M_PI * static_cast<double>(dir) / 6.;
 
       std::vector<Mantid::Kernel::V3D> directions{
-          {cos(theta), -1. * sin(theta), 0.},
-          {sin(theta), cos(theta), 0.},
-          {0., 0., 1.}};
+          {cos(theta), -1. * sin(theta), 0.}, {sin(theta), cos(theta), 0.}, {0., 0., 1.}};
       std::vector<double> abcRadii{1., 2., 3.};
       // not using these but the constructor requires we set a value.
       std::vector<double> abcRadiiBackgroundInner{1., 2., 3.};
       std::vector<double> abcRadiiBackgroundOuter{1., 2., 3.};
 
-      PeakShapeEllipsoid ellipsoid(
-          directions, abcRadii, abcRadiiBackgroundInner,
-          abcRadiiBackgroundOuter, Kernel::SpecialCoordinateSystem::QLab);
+      PeakShapeEllipsoid ellipsoid(directions, abcRadii, abcRadiiBackgroundInner, abcRadiiBackgroundOuter,
+                                   Kernel::SpecialCoordinateSystem::QLab);
 
       MockPeakShape peak1;
       EXPECT_CALL(pw, getNumberPeaks()).WillOnce(Return(1));
       EXPECT_CALL(pw, getPeak(_)).WillRepeatedly(ReturnRef(peak1));
-      EXPECT_CALL(peak1, getQLabFrame())
-          .WillRepeatedly(Return(V3D(0., 0., 0.)));
+      EXPECT_CALL(peak1, getQLabFrame()).WillRepeatedly(Return(V3D(0., 0., 0.)));
       EXPECT_CALL(peak1, getPeakShape()).WillRepeatedly(ReturnRef(ellipsoid));
 
       vtkPeakMarkerFactory factory("signal");
@@ -312,8 +292,7 @@ public:
         set->GetPoint(i, pt);
         double rot_x = pt[0] * cos(theta) - pt[1] * sin(theta);
         double rot_y = pt[0] * sin(theta) + pt[1] * cos(theta);
-        double test = rot_x * rot_x / (abcRadii[0] * abcRadii[0]) +
-                      rot_y * rot_y / (abcRadii[1] * abcRadii[1]) +
+        double test = rot_x * rot_x / (abcRadii[0] * abcRadii[0]) + rot_y * rot_y / (abcRadii[1] * abcRadii[1]) +
                       pt[2] * pt[2] / (abcRadii[2] * abcRadii[2]);
         TS_ASSERT_DELTA(test, 1., 1.0e-5);
       }

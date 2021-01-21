@@ -24,11 +24,10 @@ constexpr bool MULTIPERIODSLOADED = true;
 } // namespace
 
 // Constructor
-MultiPeriodLoadMuonStrategy::MultiPeriodLoadMuonStrategy(
-    Kernel::Logger &g_log, const std::string filename,
-    LoadMuonNexusV2NexusHelper &nexusLoader, API::WorkspaceGroup &workspace)
-    : LoadMuonStrategy(g_log, filename, nexusLoader),
-      m_workspaceGroup(workspace), m_detectors(getLoadedDetectors()) {}
+MultiPeriodLoadMuonStrategy::MultiPeriodLoadMuonStrategy(Kernel::Logger &g_log, const std::string filename,
+                                                         LoadMuonNexusV2NexusHelper &nexusLoader,
+                                                         API::WorkspaceGroup &workspace)
+    : LoadMuonStrategy(g_log, filename, nexusLoader), m_workspaceGroup(workspace), m_detectors(getLoadedDetectors()) {}
 
 /**
  * Loads Muon specific logs into each of the workspaces in the workspace group.
@@ -36,13 +35,11 @@ MultiPeriodLoadMuonStrategy::MultiPeriodLoadMuonStrategy(
  */
 void MultiPeriodLoadMuonStrategy::loadMuonLogData() {
   auto sampleInformation = m_nexusLoader.loadSampleInformationFromNexus();
-  std::string mainFieldDirection =
-      m_nexusLoader.loadMainFieldDirectionFromNexus();
+  std::string mainFieldDirection = m_nexusLoader.loadMainFieldDirectionFromNexus();
   double firstGoodData = m_nexusLoader.loadFirstGoodDataFromNexus();
 
   for (int i = 0; i < m_workspaceGroup.getNumberOfEntries(); ++i) {
-    auto workspace =
-        std::dynamic_pointer_cast<Workspace2D>(m_workspaceGroup.getItem(i));
+    auto workspace = std::dynamic_pointer_cast<Workspace2D>(m_workspaceGroup.getItem(i));
     auto &run = workspace->mutableRun();
     run.addProperty("main_field_direction", mainFieldDirection);
     run.addProperty("FirstGoodData", firstGoodData);
@@ -54,11 +51,9 @@ void MultiPeriodLoadMuonStrategy::loadMuonLogData() {
  * Loads the good frames data into each of the stored workspace objects
  */
 void MultiPeriodLoadMuonStrategy::loadGoodFrames() {
-  NXInt goodframes =
-      m_nexusLoader.loadGoodFramesDataFromNexus(MULTIPERIODSLOADED);
+  NXInt goodframes = m_nexusLoader.loadGoodFramesDataFromNexus(MULTIPERIODSLOADED);
   for (int i = 0; i < m_workspaceGroup.getNumberOfEntries(); ++i) {
-    auto workspace =
-        std::dynamic_pointer_cast<Workspace2D>(m_workspaceGroup.getItem(i));
+    auto workspace = std::dynamic_pointer_cast<Workspace2D>(m_workspaceGroup.getItem(i));
     auto &run = workspace->mutableRun();
     run.removeProperty(GOODFRAMESPROP);
     run.addProperty(GOODFRAMESPROP, goodframes[i]);
@@ -78,15 +73,12 @@ Workspace_sptr MultiPeriodLoadMuonStrategy::loadDetectorGrouping() const {
   WorkspaceGroup_sptr tableGroup = std::make_shared<WorkspaceGroup>();
   for (int i = 0; i < m_workspaceGroup.getNumberOfEntries(); ++i) {
     int periodNumber = i + 1;
-    auto grouping = m_nexusLoader.loadDetectorGroupingFromNexus(
-        m_detectors, MULTIPERIODSLOADED, periodNumber);
-    TableWorkspace_sptr table =
-        createDetectorGroupingTable(m_detectors, grouping);
+    auto grouping = m_nexusLoader.loadDetectorGroupingFromNexus(m_detectors, MULTIPERIODSLOADED, periodNumber);
+    TableWorkspace_sptr table = createDetectorGroupingTable(m_detectors, grouping);
     // if any of the tables are empty we'll load grouping from the IDF
     if (table->rowCount() == 0) {
       m_logger.notice("Loading grouping information from IDF");
-      return loadDefaultDetectorGrouping(
-          *std::dynamic_pointer_cast<Workspace2D>(m_workspaceGroup.getItem(i)));
+      return loadDefaultDetectorGrouping(*std::dynamic_pointer_cast<Workspace2D>(m_workspaceGroup.getItem(i)));
     }
     tableGroup->addWorkspace(table);
   }
@@ -98,8 +90,7 @@ Workspace_sptr MultiPeriodLoadMuonStrategy::loadDetectorGrouping() const {
 void MultiPeriodLoadMuonStrategy::applyTimeZeroCorrection() {
   double timeZero = m_nexusLoader.loadTimeZeroFromNexusFile();
   for (int i = 0; i < m_workspaceGroup.getNumberOfEntries(); ++i) {
-    auto workspace =
-        std::dynamic_pointer_cast<Workspace2D>(m_workspaceGroup.getItem(i));
+    auto workspace = std::dynamic_pointer_cast<Workspace2D>(m_workspaceGroup.getItem(i));
     auto numHistograms = workspace->getNumberHistograms();
     for (size_t i = 0; i < numHistograms; ++i) {
       auto &timeAxis = workspace->mutableX(i);
@@ -112,8 +103,7 @@ API::Workspace_sptr MultiPeriodLoadMuonStrategy::loadDeadTimeTable() const {
   WorkspaceGroup_sptr tableGroup = std::make_shared<WorkspaceGroup>();
   for (int i = 0; i < m_workspaceGroup.getNumberOfEntries(); ++i) {
     int periodNumber = i + 1;
-    auto deadTimes = m_nexusLoader.loadDeadTimesFromNexus(
-        m_detectors, MULTIPERIODSLOADED, periodNumber);
+    auto deadTimes = m_nexusLoader.loadDeadTimesFromNexus(m_detectors, MULTIPERIODSLOADED, periodNumber);
     tableGroup->addWorkspace(createDeadTimeTable(m_detectors, deadTimes));
   }
   return tableGroup;
@@ -125,8 +115,7 @@ API::Workspace_sptr MultiPeriodLoadMuonStrategy::loadDeadTimeTable() const {
  * @returns :: Time zero table
  */
 Workspace_sptr MultiPeriodLoadMuonStrategy::getTimeZeroTable() {
-  auto workspace =
-      std::dynamic_pointer_cast<Workspace2D>(m_workspaceGroup.getItem(0));
+  auto workspace = std::dynamic_pointer_cast<Workspace2D>(m_workspaceGroup.getItem(0));
   const auto numSpec = workspace->getNumberHistograms();
   auto timeZeros = m_nexusLoader.loadTimeZeroListFromNexusFile(numSpec);
   return createTimeZeroTable(numSpec, timeZeros);
@@ -137,8 +126,7 @@ Workspace_sptr MultiPeriodLoadMuonStrategy::getTimeZeroTable() {
  */
 std::vector<detid_t> MultiPeriodLoadMuonStrategy::getLoadedDetectors() {
   // Assume each spectrum maps to the same detector in each period.
-  auto workspace =
-      std::dynamic_pointer_cast<Workspace2D>(m_workspaceGroup.getItem(0));
+  auto workspace = std::dynamic_pointer_cast<Workspace2D>(m_workspaceGroup.getItem(0));
   return getLoadedDetectorsFromWorkspace(*workspace);
 }
 

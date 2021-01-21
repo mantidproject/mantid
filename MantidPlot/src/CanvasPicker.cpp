@@ -111,8 +111,7 @@ bool CanvasPicker::eventFilter(QObject *object, QEvent *e) {
     } else {
       const QMouseEvent *me = (const QMouseEvent *)e;
       int dist, point;
-      int curveKey =
-          plotWidget->closestCurve(me->pos().x(), me->pos().y(), dist, point);
+      int curveKey = plotWidget->closestCurve(me->pos().x(), me->pos().y(), dist, point);
       if (dist < 10)
         emit showPlotDialog(curveKey);
       else
@@ -189,13 +188,11 @@ bool CanvasPicker::eventFilter(QObject *object, QEvent *e) {
     int key = ((const QKeyEvent *)e)->key();
 
     int selectedMarker = plot()->selectedMarkerKey();
-    if (lines.contains(selectedMarker) &&
-        (key == Qt::Key_Enter || key == Qt::Key_Return)) {
+    if (lines.contains(selectedMarker) && (key == Qt::Key_Enter || key == Qt::Key_Return)) {
       emit viewLineDialog();
       return true;
     }
-    if (images.contains(selectedMarker) &&
-        (key == Qt::Key_Enter || key == Qt::Key_Return)) {
+    if (images.contains(selectedMarker) && (key == Qt::Key_Enter || key == Qt::Key_Return)) {
       emit viewImageDialog();
       return true;
     }
@@ -273,10 +270,7 @@ bool CanvasPicker::selectMarker(const QMouseEvent *e) {
     ArrowMarker *mrkL = dynamic_cast<ArrowMarker *>(plotWidget->marker(i));
     if (!mrkL)
       return false;
-    int d =
-        qRound(mrkL->width() + floor(mrkL->headLength() *
-                                         tan(M_PI * mrkL->headAngle() / 180.0) +
-                                     0.5));
+    int d = qRound(mrkL->width() + floor(mrkL->headLength() * tan(M_PI * mrkL->headAngle() / 180.0) + 0.5));
     double dist = mrkL->dist(point.x(), point.y());
     if (dist <= d) {
       disableEditing();

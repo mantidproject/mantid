@@ -13,8 +13,7 @@
 namespace MantidQt {
 namespace API {
 
-EXPORT_OPT_MANTIDQT_COMMON std::string
-qtPluginPathFromCfg(const std::string &key);
+EXPORT_OPT_MANTIDQT_COMMON std::string qtPluginPathFromCfg(const std::string &key);
 
 /// Load plugins from a path given by the key in the config service
 EXPORT_OPT_MANTIDQT_COMMON int loadPluginsFromCfgPath(const std::string &key);

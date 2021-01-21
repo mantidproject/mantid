@@ -24,19 +24,17 @@ namespace WorkflowAlgorithms {
  * @param subtractedPeriods :: [input] Vector of period indexes to be subtracted
  * from summed periods
  */
-IMuonAsymmetryCalculator::IMuonAsymmetryCalculator(
-    const WorkspaceGroup_sptr &inputWS, const std::vector<int> &summedPeriods,
-    const std::vector<int> &subtractedPeriods)
-    : m_inputWS(inputWS), m_summedPeriods(summedPeriods),
-      m_subtractedPeriods(subtractedPeriods) {}
+IMuonAsymmetryCalculator::IMuonAsymmetryCalculator(const WorkspaceGroup_sptr &inputWS,
+                                                   const std::vector<int> &summedPeriods,
+                                                   const std::vector<int> &subtractedPeriods)
+    : m_inputWS(inputWS), m_summedPeriods(summedPeriods), m_subtractedPeriods(subtractedPeriods) {}
 
 /**
  * Sums the specified periods of the input workspace group
  * @param periodsToSum :: [input] List of period indexes (1-based) to be summed
  * @returns Workspace containing the sum
  */
-MatrixWorkspace_sptr IMuonAsymmetryCalculator::sumPeriods(
-    const std::vector<int> &periodsToSum) const {
+MatrixWorkspace_sptr IMuonAsymmetryCalculator::sumPeriods(const std::vector<int> &periodsToSum) const {
   MatrixWorkspace_sptr outWS;
   if (!periodsToSum.empty()) {
     auto LHSWorkspace = m_inputWS->getItem(periodsToSum[0] - 1);
@@ -64,8 +62,8 @@ MatrixWorkspace_sptr IMuonAsymmetryCalculator::sumPeriods(
  * @param rhs :: [input] Workspace on RHS of subtraction
  * @returns Result of the subtraction
  */
-MatrixWorkspace_sptr IMuonAsymmetryCalculator::subtractWorkspaces(
-    const MatrixWorkspace_sptr &lhs, const MatrixWorkspace_sptr &rhs) const {
+MatrixWorkspace_sptr IMuonAsymmetryCalculator::subtractWorkspaces(const MatrixWorkspace_sptr &lhs,
+                                                                  const MatrixWorkspace_sptr &rhs) const {
   MatrixWorkspace_sptr outWS;
   if (lhs && rhs) {
     IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Minus");
@@ -85,13 +83,10 @@ MatrixWorkspace_sptr IMuonAsymmetryCalculator::subtractWorkspaces(
  * @param index :: [input] Index of spectrum to extract
  * @returns Result of the extraction
  */
-MatrixWorkspace_sptr
-IMuonAsymmetryCalculator::extractSpectrum(const Workspace_sptr &inputWS,
-                                          const int index) const {
+MatrixWorkspace_sptr IMuonAsymmetryCalculator::extractSpectrum(const Workspace_sptr &inputWS, const int index) const {
   MatrixWorkspace_sptr outWS;
   if (inputWS) {
-    IAlgorithm_sptr alg =
-        AlgorithmManager::Instance().create("ExtractSingleSpectrum");
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("ExtractSingleSpectrum");
     alg->setChild(true);
     alg->setProperty("InputWorkspace", inputWS);
     alg->setProperty("WorkspaceIndex", index);

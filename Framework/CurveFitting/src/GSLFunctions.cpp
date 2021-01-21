@@ -40,8 +40,7 @@ int gsl_f(const gsl_vector *x, void *params, gsl_vector *f) {
   }
   p->function->applyTies();
 
-  auto values = std::dynamic_pointer_cast<API::FunctionValues>(
-      p->costFunction->getValues());
+  auto values = std::dynamic_pointer_cast<API::FunctionValues>(p->costFunction->getValues());
   if (!values) {
     throw std::invalid_argument("FunctionValues expected");
   }
@@ -71,8 +70,7 @@ int gsl_f(const gsl_vector *x, void *params, gsl_vector *f) {
   // calculated-observed devided by error values used by GSL
 
   for (size_t i = 0; i < p->n; i++) {
-    f->data[i] = (values->getCalculated(i) - values->getFitData(i)) *
-                 values->getFitWeight(i);
+    f->data[i] = (values->getCalculated(i) - values->getFitData(i)) * values->getFitWeight(i);
   }
   return GSL_SUCCESS;
 }
@@ -132,8 +130,7 @@ int gsl_df(const gsl_vector *x, void *params, gsl_matrix *J) {
   // functionDeriv() return derivatives of calculated data values. Need to
   // convert this values into
   // derivatives of calculated-observed divided by error values used by GSL
-  auto values = std::dynamic_pointer_cast<API::FunctionValues>(
-      p->costFunction->getValues());
+  auto values = std::dynamic_pointer_cast<API::FunctionValues>(p->costFunction->getValues());
   if (!values) {
     throw std::invalid_argument("FunctionValues expected");
   }
@@ -162,8 +159,7 @@ int gsl_fdf(const gsl_vector *x, void *params, gsl_vector *f, gsl_matrix *J) {
  * Constructor. Creates declared -> active index map
  * @param cf :: ICostFunction
  */
-GSL_FitData::GSL_FitData(
-    const std::shared_ptr<CostFunctions::CostFuncLeastSquares> &cf)
+GSL_FitData::GSL_FitData(const std::shared_ptr<CostFunctions::CostFuncLeastSquares> &cf)
     : function(cf->getFittingFunction()), costFunction(cf) {
   gsl_set_error_handler_off();
   // number of active parameters

@@ -39,19 +39,16 @@
 
 using namespace MantidQt::API;
 
-ScreenPickerTool::ScreenPickerTool(Graph *graph, const QObject *status_target,
-                                   const char *status_slot)
+ScreenPickerTool::ScreenPickerTool(Graph *graph, const QObject *status_target, const char *status_slot)
     : QwtPlotPicker(graph->plotWidget()->canvas()), PlotToolInterface(graph) {
   d_selection_marker.setLineStyle(QwtPlotMarker::Cross);
   d_selection_marker.setLinePen(QPen(Qt::red, 1));
   setTrackerMode(QwtPicker::AlwaysOn);
   setSelectionFlags(QwtPicker::PointSelection | QwtPicker::ClickSelection);
-  d_graph->plotWidget()->canvas()->setCursor(
-      QCursor(getQPixmap("cursor_xpm"), -1, -1));
+  d_graph->plotWidget()->canvas()->setCursor(QCursor(getQPixmap("cursor_xpm"), -1, -1));
 
   if (status_target)
-    connect(this, SIGNAL(statusText(const QString &)), status_target,
-            status_slot);
+    connect(this, SIGNAL(statusText(const QString &)), status_target, status_slot);
   emit statusText(tr("Click on plot or move cursor to display coordinates!"));
 }
 
@@ -83,8 +80,7 @@ bool ScreenPickerTool::eventFilter(QObject *obj, QEvent *event) {
     switch (ke->key()) {
     case Qt::Key_Enter:
     case Qt::Key_Return: {
-      QwtDoublePoint pos =
-          invTransform(canvas()->mapFromGlobal(QCursor::pos()));
+      QwtDoublePoint pos = invTransform(canvas()->mapFromGlobal(QCursor::pos()));
       d_selection_marker.setValue(pos);
       if (d_selection_marker.plot() == nullptr)
         d_selection_marker.attach(d_graph->plotWidget());
@@ -109,9 +105,7 @@ bool ScreenPickerTool::eventFilter(QObject *obj, QEvent *event) {
  *
  *  @param pos  The current mouse location.
  */
-QwtText ScreenPickerTool::trackerText(const QPoint &pos) const {
-  return QwtPlotPicker::trackerText(pos);
-}
+QwtText ScreenPickerTool::trackerText(const QPoint &pos) const { return QwtPlotPicker::trackerText(pos); }
 
 /**
  *  This overrides the base class trackerText() function so that we can
@@ -125,8 +119,7 @@ QwtText ScreenPickerTool::trackerText(const QwtDoublePoint &pos) const {
   return QwtText(info);
 }
 
-DrawPointTool::DrawPointTool(ApplicationWindow *app, Graph *graph,
-                             const QObject *status_target,
+DrawPointTool::DrawPointTool(ApplicationWindow *app, Graph *graph, const QObject *status_target,
                              const char *status_slot)
     : ScreenPickerTool(graph, status_target, status_slot), d_app(app) {
   d_curve = nullptr;
@@ -141,8 +134,7 @@ void DrawPointTool::appendPoint(const QwtDoublePoint &pos) {
   emit statusText(info.sprintf("x=%g; y=%g", pos.x(), pos.y()));
 
   if (!d_table) {
-    d_table = d_app->newHiddenTable(d_app->generateUniqueName(tr("Draw")), "",
-                                    30, 2, "");
+    d_table = d_app->newHiddenTable(d_app->generateUniqueName(tr("Draw")), "", 30, 2, "");
     d_app->modifiedProject();
   }
 
@@ -160,10 +152,8 @@ void DrawPointTool::appendPoint(const QwtDoublePoint &pos) {
     d_curve = new DataCurve(d_table, d_table->colName(0), d_table->colName(1));
     d_curve->setAxis(QwtPlot::xBottom, QwtPlot::yLeft);
     d_curve->setPen(QPen(Qt::black, d_app->defaultCurveLineWidth));
-    d_curve->setSymbol(
-        QwtSymbol(QwtSymbol::Ellipse, QBrush(Qt::black),
-                  QPen(Qt::black, d_app->defaultCurveLineWidth),
-                  QSize(d_app->defaultSymbolSize, d_app->defaultSymbolSize)));
+    d_curve->setSymbol(QwtSymbol(QwtSymbol::Ellipse, QBrush(Qt::black), QPen(Qt::black, d_app->defaultCurveLineWidth),
+                                 QSize(d_app->defaultSymbolSize, d_app->defaultSymbolSize)));
     d_graph->insertPlotItem(d_curve, GraphOptions::LineSymbols);
   }
 
@@ -181,8 +171,7 @@ bool DrawPointTool::eventFilter(QObject *obj, QEvent *event) {
     switch (ke->key()) {
     case Qt::Key_Enter:
     case Qt::Key_Return: {
-      QwtDoublePoint pos =
-          invTransform(canvas()->mapFromGlobal(QCursor::pos()));
+      QwtDoublePoint pos = invTransform(canvas()->mapFromGlobal(QCursor::pos()));
       d_selection_marker.setValue(pos);
       if (d_selection_marker.plot() == nullptr)
         d_selection_marker.attach(d_graph->plotWidget());

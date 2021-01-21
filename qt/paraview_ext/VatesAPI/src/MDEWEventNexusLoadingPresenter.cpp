@@ -31,10 +31,9 @@ Constructor
 @throw invalid_arument if view is null
 @throw logic_error if cannot use the reader-presenter for this filetype.
 */
-MDEWEventNexusLoadingPresenter::MDEWEventNexusLoadingPresenter(
-    std::unique_ptr<MDLoadingView> view, const std::string &filename)
-    : MDEWLoadingPresenter(std::move(view)), m_filename(filename),
-      m_wsTypeName() {
+MDEWEventNexusLoadingPresenter::MDEWEventNexusLoadingPresenter(std::unique_ptr<MDLoadingView> view,
+                                                               const std::string &filename)
+    : MDEWLoadingPresenter(std::move(view)), m_filename(filename), m_wsTypeName() {
   if (this->m_filename.empty()) {
     throw std::invalid_argument("File name is an empty string.");
   }
@@ -74,35 +73,30 @@ progresses.
 @param drawingProgressUpdate : Handler for GUI updates while
 vtkDataSetFactory::create occurs.
 */
-vtkSmartPointer<vtkDataSet>
-MDEWEventNexusLoadingPresenter::execute(vtkDataSetFactory *factory,
-                                        ProgressAction &loadingProgressUpdate,
-                                        ProgressAction &drawingProgressUpdate) {
+vtkSmartPointer<vtkDataSet> MDEWEventNexusLoadingPresenter::execute(vtkDataSetFactory *factory,
+                                                                    ProgressAction &loadingProgressUpdate,
+                                                                    ProgressAction &drawingProgressUpdate) {
   using namespace Mantid::API;
   using namespace Mantid::Geometry;
 
   if (this->shouldLoad()) {
-    Poco::NObserver<ProgressAction,
-                    Mantid::API::Algorithm::ProgressNotification>
-        observer(loadingProgressUpdate, &ProgressAction::handler);
+    Poco::NObserver<ProgressAction, Mantid::API::Algorithm::ProgressNotification> observer(loadingProgressUpdate,
+                                                                                           &ProgressAction::handler);
     AnalysisDataService::Instance().remove("MD_EVENT_WS_ID");
 
     IAlgorithm_sptr alg = AlgorithmManager::Instance().create("LoadMD");
     alg->initialize();
     alg->setPropertyValue("Filename", this->m_filename);
     alg->setPropertyValue("OutputWorkspace", "MD_EVENT_WS_ID");
-    alg->setProperty(
-        "FileBackEnd",
-        !this->m_view->getLoadInMemory()); // Load from file by default.
+    alg->setProperty("FileBackEnd",
+                     !this->m_view->getLoadInMemory()); // Load from file by default.
     alg->addObserver(observer);
     alg->execute();
     alg->removeObserver(observer);
   }
 
-  Workspace_sptr result =
-      AnalysisDataService::Instance().retrieve("MD_EVENT_WS_ID");
-  Mantid::API::IMDEventWorkspace_sptr eventWs =
-      std::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(result);
+  Workspace_sptr result = AnalysisDataService::Instance().retrieve("MD_EVENT_WS_ID");
+  Mantid::API::IMDEventWorkspace_sptr eventWs = std::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(result);
 
   factory->setRecursionDepth(this->m_view->getRecursionDepth());
   // Create visualisation in one-shot.
@@ -135,10 +129,8 @@ void MDEWEventNexusLoadingPresenter::executeLoadMetadata() {
                    false); // Only require metadata, so do it in memory.
   alg->execute();
 
-  Workspace_sptr result =
-      AnalysisDataService::Instance().retrieve("MD_EVENT_WS_ID");
-  IMDEventWorkspace_sptr eventWs =
-      std::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(result);
+  Workspace_sptr result = AnalysisDataService::Instance().retrieve("MD_EVENT_WS_ID");
+  IMDEventWorkspace_sptr eventWs = std::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(result);
   m_wsTypeName = eventWs->id();
   // Call base-class extraction method.
   this->extractMetadata(*eventWs);
@@ -153,8 +145,6 @@ MDEWEventNexusLoadingPresenter::~MDEWEventNexusLoadingPresenter() {}
 Getter for the workspace type name.
 @return Workspace Type Name
 */
-std::string MDEWEventNexusLoadingPresenter::getWorkspaceTypeName() {
-  return m_wsTypeName;
-}
+std::string MDEWEventNexusLoadingPresenter::getWorkspaceTypeName() { return m_wsTypeName; }
 } // namespace VATES
 } // namespace Mantid

@@ -41,9 +41,7 @@ public:
     return "Runs a diagnostic test for saturation of PSD tubes and creates a "
            "MaskWorkspace marking the failed tube spectra.";
   }
-  const std::vector<std::string> seeAlso() const override {
-    return {"IdentifyNoisyDetectors"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"IdentifyNoisyDetectors"}; }
   const std::string category() const override;
 
 private:
@@ -52,12 +50,10 @@ private:
   void exec() override;
 
   /// Process a tube
-  bool performBleedTest(const std::vector<int> &tubeIndices,
-                        const API::MatrixWorkspace_const_sptr &inputWS,
+  bool performBleedTest(const std::vector<int> &tubeIndices, const API::MatrixWorkspace_const_sptr &inputWS,
                         double maxRate, int numIgnoredPixels);
   /// Mask a tube with the given workspace indices
-  void maskTube(const std::vector<int> &tubeIndices,
-                const API::MatrixWorkspace_sptr &workspace);
+  void maskTube(const std::vector<int> &tubeIndices, const API::MatrixWorkspace_sptr &workspace);
 };
 
 } // namespace Algorithms

@@ -27,10 +27,8 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-FqFitDataTablePresenter::FqFitDataTablePresenter(FqFitModel *model,
-                                                 QTableWidget *dataTable)
-    : IndirectDataTablePresenter(model->m_fitDataModel.get(), dataTable,
-                                 FqFitHeaders()) {
+FqFitDataTablePresenter::FqFitDataTablePresenter(FqFitModel *model, QTableWidget *dataTable)
+    : IndirectDataTablePresenter(model->m_fitDataModel.get(), dataTable, FqFitHeaders()) {
   auto header = dataTable->horizontalHeader();
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   header->setResizeMode(1, QHeaderView::Stretch);
@@ -52,11 +50,9 @@ void FqFitDataTablePresenter::addTableEntry(FitDomainIndex row) {
 
   auto subIndices = m_model->getSubIndices(row);
   const auto workspace = m_model->getWorkspace(subIndices.first);
-  const auto axis =
-      dynamic_cast<Mantid::API::TextAxis *>(workspace->getAxis(1));
+  const auto axis = dynamic_cast<Mantid::API::TextAxis *>(workspace->getAxis(1));
   const auto parameter = axis->label(subIndices.second.value);
-  auto cell =
-      std::make_unique<QTableWidgetItem>(QString::fromStdString(parameter));
+  auto cell = std::make_unique<QTableWidgetItem>(QString::fromStdString(parameter));
   auto flags = cell->flags();
   flags ^= Qt::ItemIsEditable;
   cell->setFlags(flags);

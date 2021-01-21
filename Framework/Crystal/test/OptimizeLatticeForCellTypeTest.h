@@ -47,16 +47,14 @@ public:
 
     PeaksWorkspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING(
-        ws = std::dynamic_pointer_cast<PeaksWorkspace>(
-            AnalysisDataService::Instance().retrieve(WSName)));
+        ws = std::dynamic_pointer_cast<PeaksWorkspace>(AnalysisDataService::Instance().retrieve(WSName)));
     TS_ASSERT(ws);
     if (!ws)
       return;
     FindUBUsingFFT alg_fft;
     TS_ASSERT_THROWS_NOTHING(alg_fft.initialize())
     TS_ASSERT(alg_fft.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        alg_fft.setPropertyValue("PeaksWorkspace", WSName));
+    TS_ASSERT_THROWS_NOTHING(alg_fft.setPropertyValue("PeaksWorkspace", WSName));
     TS_ASSERT_THROWS_NOTHING(alg_fft.setPropertyValue("MinD", "8.0"));
     TS_ASSERT_THROWS_NOTHING(alg_fft.setPropertyValue("MaxD", "13.0"));
     TS_ASSERT_THROWS_NOTHING(alg_fft.setPropertyValue("Tolerance", "0.15"));
@@ -75,8 +73,7 @@ public:
     // Check that the UB matrix is the same as in TOPAZ_3007.mat
     OrientedLattice latt = ws->mutableSample().getOrientedLattice();
 
-    double correct_UB[] = {-0.0451, 0.0406, -0.0125, 0.0016, -0.0031,
-                           0.1158,  0.0574, 0.0322,  0.0275};
+    double correct_UB[] = {-0.0451, 0.0406, -0.0125, 0.0016, -0.0031, 0.1158, 0.0574, 0.0322, 0.0275};
 
     std::vector<double> UB_calculated = latt.getUB().getVector();
 

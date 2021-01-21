@@ -20,8 +20,7 @@ class PeaksViewerOverlayDialog : public QDialog {
   Q_OBJECT
 
 public:
-  explicit PeaksViewerOverlayDialog(const PeaksPresenter_sptr &peaksPresenter,
-                                    QWidget *parent = nullptr);
+  explicit PeaksViewerOverlayDialog(const PeaksPresenter_sptr &peaksPresenter, QWidget *parent = nullptr);
   ~PeaksViewerOverlayDialog() override;
 
   void closeEvent(QCloseEvent * /*unused*/) override;

@@ -25,8 +25,7 @@ using namespace MantidQt::API;
  * @param flags :: Window flags
  */
 ScriptOutputDisplay::ScriptOutputDisplay(QWidget *parent)
-    : QTextEdit(parent), m_copy(nullptr), m_clear(nullptr), m_save(nullptr),
-      m_origFontSize(8), m_zoomLevel(0) {
+    : QTextEdit(parent), m_copy(nullptr), m_clear(nullptr), m_save(nullptr), m_origFontSize(8), m_zoomLevel(0) {
 #ifdef __APPLE__
   // Make all fonts 4 points bigger on the Mac because otherwise they're tiny!
   m_zoomLevel += 4;
@@ -49,8 +48,7 @@ ScriptOutputDisplay::ScriptOutputDisplay(QWidget *parent)
   resetFont();
 
   setContextMenuPolicy(Qt::CustomContextMenu);
-  connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this,
-          SLOT(showContextMenu(const QPoint &)));
+  connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(showContextMenu(const QPoint &)));
 
   initActions();
 }
@@ -141,17 +139,14 @@ bool ScriptOutputDisplay::isEmpty() const { return document()->isEmpty(); }
  * Populate a menu with editing actions
  * @param editMenu A new menu
  */
-void ScriptOutputDisplay::populateEditMenu(QMenu &editMenu) {
-  editMenu.addAction(m_clear);
-}
+void ScriptOutputDisplay::populateEditMenu(QMenu &editMenu) { editMenu.addAction(m_clear); }
 
 /**
  * Capture key presses.
  * @param event A pointer to the QKeyPressEvent object
  */
 void ScriptOutputDisplay::keyPressEvent(QKeyEvent *event) {
-  if ((event->key() == Qt::Key_C) &&
-      (event->modifiers() == Qt::KeyboardModifier::ControlModifier)) {
+  if ((event->key() == Qt::Key_C) && (event->modifiers() == Qt::KeyboardModifier::ControlModifier)) {
     this->copy();
   }
   // accept all key presses to prevent keyboard interaction
@@ -263,9 +258,7 @@ QString ScriptOutputDisplay::addTimestamp(const QString &msg) {
   QString timestamped = "%1\n"
                         "%2: %3\n"
                         "%4\n";
-  timestamped =
-      timestamped.arg(separator, QDateTime::currentDateTime().toString(),
-                      msg.trimmed(), separator);
+  timestamped = timestamped.arg(separator, QDateTime::currentDateTime().toString(), msg.trimmed(), separator);
   return timestamped;
 }
 

@@ -26,13 +26,9 @@ using namespace DataObjects;
 using namespace CurveFitting::Algorithms;
 
 /// Constructor
-LatticeDomainCreator::LatticeDomainCreator(
-    Kernel::IPropertyManager *manager, const std::string &workspacePropertyName,
-    API::IDomainCreator::DomainType domainType)
-    : IDomainCreator(manager,
-                     std::vector<std::string>(1, workspacePropertyName),
-                     domainType),
-      m_workspace() {
+LatticeDomainCreator::LatticeDomainCreator(Kernel::IPropertyManager *manager, const std::string &workspacePropertyName,
+                                           API::IDomainCreator::DomainType domainType)
+    : IDomainCreator(manager, std::vector<std::string>(1, workspacePropertyName), domainType), m_workspace() {
   m_workspacePropertyName = m_workspacePropertyNames.front();
 }
 
@@ -51,18 +47,15 @@ LatticeDomainCreator::LatticeDomainCreator(
  * @param values :: Pointer to outgoing FunctionValues object.
  * @param i0 :: Size offset for values object if it already contains data.
  */
-void LatticeDomainCreator::createDomain(
-    std::shared_ptr<API::FunctionDomain> &domain,
-    std::shared_ptr<API::FunctionValues> &values, size_t i0) {
+void LatticeDomainCreator::createDomain(std::shared_ptr<API::FunctionDomain> &domain,
+                                        std::shared_ptr<API::FunctionValues> &values, size_t i0) {
   setWorkspaceFromPropertyManager();
 
-  API::IPeaksWorkspace_sptr peaksWorkspace =
-      std::dynamic_pointer_cast<IPeaksWorkspace>(m_workspace);
+  API::IPeaksWorkspace_sptr peaksWorkspace = std::dynamic_pointer_cast<IPeaksWorkspace>(m_workspace);
   if (peaksWorkspace) {
     createDomainFromPeaksWorkspace(peaksWorkspace, domain, values, i0);
   } else {
-    API::ITableWorkspace_sptr tableWorkspace =
-        std::dynamic_pointer_cast<ITableWorkspace>(m_workspace);
+    API::ITableWorkspace_sptr tableWorkspace = std::dynamic_pointer_cast<ITableWorkspace>(m_workspace);
     if (tableWorkspace) {
       createDomainFromPeakTable(tableWorkspace, domain, values, i0);
     }
@@ -83,30 +76,25 @@ void LatticeDomainCreator::createDomain(
  * @param outputWorkspacePropertyName :: Name of output workspace property.
  * @return TableWorkspace with calculated and observed d-values.
  */
-Workspace_sptr LatticeDomainCreator::createOutputWorkspace(
-    const std::string &baseName, IFunction_sptr function,
-    std::shared_ptr<FunctionDomain> domain,
-    std::shared_ptr<FunctionValues> values,
-    const std::string &outputWorkspacePropertyName) {
+Workspace_sptr LatticeDomainCreator::createOutputWorkspace(const std::string &baseName, IFunction_sptr function,
+                                                           std::shared_ptr<FunctionDomain> domain,
+                                                           std::shared_ptr<FunctionValues> values,
+                                                           const std::string &outputWorkspacePropertyName) {
 
-  std::shared_ptr<LatticeDomain> latticeDomain =
-      std::dynamic_pointer_cast<LatticeDomain>(domain);
+  std::shared_ptr<LatticeDomain> latticeDomain = std::dynamic_pointer_cast<LatticeDomain>(domain);
   if (!latticeDomain) {
     throw std::invalid_argument("LatticeDomain is required.");
   }
 
-  ILatticeFunction_sptr latticeFunction =
-      std::dynamic_pointer_cast<ILatticeFunction>(function);
+  ILatticeFunction_sptr latticeFunction = std::dynamic_pointer_cast<ILatticeFunction>(function);
   if (!latticeFunction) {
-    throw std::invalid_argument(
-        "LatticeDomainCreator can only process ILatticeFunction.");
+    throw std::invalid_argument("LatticeDomainCreator can only process ILatticeFunction.");
   }
 
   // Calculate function values again.
   latticeFunction->functionLattice(*latticeDomain, *values);
 
-  ITableWorkspace_sptr tableWorkspace =
-      WorkspaceFactory::Instance().createTable();
+  ITableWorkspace_sptr tableWorkspace = WorkspaceFactory::Instance().createTable();
 
   if (tableWorkspace) {
     tableWorkspace->addColumn("V3D", "HKL");
@@ -124,13 +112,10 @@ Workspace_sptr LatticeDomainCreator::createOutputWorkspace(
   }
 
   if (m_manager && !outputWorkspacePropertyName.empty()) {
-    declareProperty(
-        new WorkspaceProperty<ITableWorkspace>(outputWorkspacePropertyName, "",
-                                               Kernel::Direction::Output),
-        "Result workspace");
+    declareProperty(new WorkspaceProperty<ITableWorkspace>(outputWorkspacePropertyName, "", Kernel::Direction::Output),
+                    "Result workspace");
 
-    m_manager->setPropertyValue(outputWorkspacePropertyName,
-                                baseName + "Workspace");
+    m_manager->setPropertyValue(outputWorkspacePropertyName, baseName + "Workspace");
     m_manager->setProperty(outputWorkspacePropertyName, tableWorkspace);
   }
 
@@ -138,14 +123,12 @@ Workspace_sptr LatticeDomainCreator::createOutputWorkspace(
 }
 
 size_t LatticeDomainCreator::getDomainSize() const {
-  API::IPeaksWorkspace_sptr peaksWorkspace =
-      std::dynamic_pointer_cast<IPeaksWorkspace>(m_workspace);
+  API::IPeaksWorkspace_sptr peaksWorkspace = std::dynamic_pointer_cast<IPeaksWorkspace>(m_workspace);
   if (peaksWorkspace) {
     return peaksWorkspace->getNumberPeaks();
   }
 
-  API::ITableWorkspace_sptr tableWorkspace =
-      std::dynamic_pointer_cast<ITableWorkspace>(m_workspace);
+  API::ITableWorkspace_sptr tableWorkspace = std::dynamic_pointer_cast<ITableWorkspace>(m_workspace);
   if (tableWorkspace) {
     return tableWorkspace->rowCount();
   }
@@ -156,26 +139,22 @@ size_t LatticeDomainCreator::getDomainSize() const {
 /// Get the workspace with peak data from the property manager.
 void LatticeDomainCreator::setWorkspaceFromPropertyManager() {
   if (!m_manager) {
-    throw std::invalid_argument(
-        "PropertyManager not set in LatticeDomainCreator.");
+    throw std::invalid_argument("PropertyManager not set in LatticeDomainCreator.");
   }
 
   try {
     m_workspace = m_manager->getProperty(m_workspacePropertyName);
   } catch (const Kernel::Exception::NotFoundError &) {
-    throw std::invalid_argument(
-        "Could not extract workspace from PropertyManager.");
+    throw std::invalid_argument("Could not extract workspace from PropertyManager.");
   }
 }
 
 /// Creates a LatticeDomain from an IPeaksWorkspace, using HKL and d-values.
-void LatticeDomainCreator::createDomainFromPeaksWorkspace(
-    const API::IPeaksWorkspace_sptr &workspace,
-    std::shared_ptr<API::FunctionDomain> &domain,
-    std::shared_ptr<API::FunctionValues> &values, size_t i0) {
+void LatticeDomainCreator::createDomainFromPeaksWorkspace(const API::IPeaksWorkspace_sptr &workspace,
+                                                          std::shared_ptr<API::FunctionDomain> &domain,
+                                                          std::shared_ptr<API::FunctionValues> &values, size_t i0) {
   if (!workspace) {
-    throw std::invalid_argument(
-        "This function only works on an IPeaksWorkspace-object.");
+    throw std::invalid_argument("This function only works on an IPeaksWorkspace-object.");
   }
 
   size_t peakCount = workspace->getNumberPeaks();
@@ -230,10 +209,9 @@ void LatticeDomainCreator::createDomainFromPeaksWorkspace(
  * @param values :: Pointer to outgoing FunctionValues object.
  * @param i0 :: Size offset for values object if it already contains data.
  */
-void LatticeDomainCreator::createDomainFromPeakTable(
-    const ITableWorkspace_sptr &workspace,
-    std::shared_ptr<FunctionDomain> &domain,
-    std::shared_ptr<FunctionValues> &values, size_t i0) {
+void LatticeDomainCreator::createDomainFromPeakTable(const ITableWorkspace_sptr &workspace,
+                                                     std::shared_ptr<FunctionDomain> &domain,
+                                                     std::shared_ptr<FunctionValues> &values, size_t i0) {
 
   size_t peakCount = workspace->rowCount();
 

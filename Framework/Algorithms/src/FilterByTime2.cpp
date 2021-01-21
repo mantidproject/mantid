@@ -23,13 +23,11 @@ void FilterByTime2::init() {
                          "start/stop times, not both.");
 
   declareProperty(
-      std::make_unique<WorkspaceProperty<DataObjects::EventWorkspace>>(
-          "InputWorkspace", "", Direction::Input),
+      std::make_unique<WorkspaceProperty<DataObjects::EventWorkspace>>("InputWorkspace", "", Direction::Input),
       "An input event workspace");
 
   declareProperty(
-      std::make_unique<WorkspaceProperty<DataObjects::EventWorkspace>>(
-          "OutputWorkspace", "", Direction::Output),
+      std::make_unique<WorkspaceProperty<DataObjects::EventWorkspace>>("OutputWorkspace", "", Direction::Output),
       "The name to use for the output workspace");
 
   auto min = std::make_shared<BoundedValidator<double>>();
@@ -48,26 +46,19 @@ void FilterByTime2::init() {
                   "ProtonCharge sample log) is used as the zero. " +
                       commonHelp);
 
-  std::string absoluteHelp(
-      "Specify date and UTC time in ISO8601 format, e.g. 2010-09-14T04:20:12." +
-      commonHelp);
-  declareProperty(
-      "AbsoluteStartTime", "",
-      "Absolute start time; events before this time are filtered out. " +
-          absoluteHelp);
+  std::string absoluteHelp("Specify date and UTC time in ISO8601 format, e.g. 2010-09-14T04:20:12." + commonHelp);
+  declareProperty("AbsoluteStartTime", "",
+                  "Absolute start time; events before this time are filtered out. " + absoluteHelp);
 
-  declareProperty(
-      "AbsoluteStopTime", "",
-      "Absolute stop time; events at of after this time are filtered out. " +
-          absoluteHelp);
+  declareProperty("AbsoluteStopTime", "",
+                  "Absolute stop time; events at of after this time are filtered out. " + absoluteHelp);
 }
 
 //----------------------------------------------------------------------------------------------
 /** Executes the algorithm
  */
 void FilterByTime2::exec() {
-  DataObjects::EventWorkspace_const_sptr inWS =
-      this->getProperty("InputWorkspace");
+  DataObjects::EventWorkspace_const_sptr inWS = this->getProperty("InputWorkspace");
   if (!inWS) {
     g_log.error() << "Input is not EventWorkspace\n";
     throw std::invalid_argument("Input is not EventWorksapce");
@@ -81,15 +72,12 @@ void FilterByTime2::exec() {
   std::string absstoptime = this->getProperty("AbsoluteStopTime");
 
   std::string start, stop;
-  if ((!absstarttime.empty()) && (!absstoptime.empty()) && (starttime <= 0.0) &&
-      (stoptime <= 0.0)) {
+  if ((!absstarttime.empty()) && (!absstoptime.empty()) && (starttime <= 0.0) && (stoptime <= 0.0)) {
     // Use the absolute string
     start = absstarttime;
     stop = absstoptime;
-  } else if ((!absstarttime.empty() || !absstoptime.empty()) &&
-             (starttime > 0.0 || stoptime > 0.0)) {
-    throw std::invalid_argument(
-        "It is not allowed to provide both absolute time and relative time.");
+  } else if ((!absstarttime.empty() || !absstoptime.empty()) && (starttime > 0.0 || stoptime > 0.0)) {
+    throw std::invalid_argument("It is not allowed to provide both absolute time and relative time.");
   } else {
     // Use second
     std::stringstream ss;
@@ -101,11 +89,10 @@ void FilterByTime2::exec() {
   }
 
   // 1. Generate Filters
-  g_log.debug() << "\nDB441: About to generate Filter.  StartTime = "
-                << starttime << "  StopTime = " << stoptime << '\n';
+  g_log.debug() << "\nDB441: About to generate Filter.  StartTime = " << starttime << "  StopTime = " << stoptime
+                << '\n';
 
-  API::Algorithm_sptr genfilter =
-      createChildAlgorithm("GenerateEventsFilter", 0.0, 20.0, true, 1);
+  API::Algorithm_sptr genfilter = createChildAlgorithm("GenerateEventsFilter", 0.0, 20.0, true, 1);
   genfilter->initialize();
   genfilter->setPropertyValue("InputWorkspace", inWS->getName());
   genfilter->setPropertyValue("OutputWorkspace", "FilterWS");
@@ -133,8 +120,7 @@ void FilterByTime2::exec() {
   g_log.debug() << "\nAbout to filter events. "
                 << "\n";
 
-  API::Algorithm_sptr filter =
-      createChildAlgorithm("FilterEvents", 20.0, 100.0, true, 1);
+  API::Algorithm_sptr filter = createChildAlgorithm("FilterEvents", 20.0, 100.0, true, 1);
   filter->initialize();
   filter->setPropertyValue("InputWorkspace", inWS->getName());
   filter->setPropertyValue("OutputWorkspaceBaseName", "ResultWS");
@@ -149,8 +135,7 @@ void FilterByTime2::exec() {
     g_log.debug() << "Filter events is successful. \n";
   }
 
-  DataObjects::EventWorkspace_sptr optws =
-      filter->getProperty("OutputWorkspace_0");
+  DataObjects::EventWorkspace_sptr optws = filter->getProperty("OutputWorkspace_0");
 
   this->setProperty("OutputWorkspace", optws);
 }

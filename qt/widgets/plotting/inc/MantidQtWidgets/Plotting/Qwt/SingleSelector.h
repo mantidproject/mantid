@@ -26,10 +26,8 @@ class EXPORT_OPT_MANTIDQT_PLOTTING SingleSelector : public QwtPlotPicker {
 public:
   enum SelectType { XSINGLE, YSINGLE };
 
-  SingleSelector(QwtPlot *plot, SelectType type = XSINGLE,
-                 double position = 0.0, bool visible = true);
-  SingleSelector(PreviewPlot *plot, SelectType type = XSINGLE,
-                 double position = 0.0, bool visible = true);
+  SingleSelector(QwtPlot *plot, SelectType type = XSINGLE, double position = 0.0, bool visible = true);
+  SingleSelector(PreviewPlot *plot, SelectType type = XSINGLE, double position = 0.0, bool visible = true);
   ~SingleSelector() override{};
 
   void setColour(const QColor &colour);

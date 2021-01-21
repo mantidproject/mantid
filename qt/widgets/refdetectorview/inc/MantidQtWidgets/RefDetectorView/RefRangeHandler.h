@@ -24,15 +24,13 @@
 namespace MantidQt {
 namespace RefDetectorViewer {
 
-class EXPORT_OPT_MANTIDQT_REFDETECTORVIEWER RefRangeHandler
-    : public SpectrumView::IRangeHandler {
+class EXPORT_OPT_MANTIDQT_REFDETECTORVIEWER RefRangeHandler : public SpectrumView::IRangeHandler {
 public:
   /// Construct object to manage min, max and step controls in the UI
   RefRangeHandler(Ui_RefImageViewer *ivUI);
 
   /// Configure min, max and step controls for the specified data source
-  void configureRangeControls(
-      SpectrumView::SpectrumDataSource_sptr dataSource) override;
+  void configureRangeControls(SpectrumView::SpectrumDataSource_sptr dataSource) override;
 
   /// Get the range of data to display in the image, from GUI controls
   void getRange(double &min, double &max, double &step) override;

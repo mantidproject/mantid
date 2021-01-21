@@ -24,13 +24,10 @@
 #include <QMessageBox>
 #include <QPainter>
 
-QwtPieCurve::QwtPieCurve(Table *t, const QString &name, int startRow,
-                         int endRow)
-    : DataCurve(t, QString(), name, startRow, endRow), d_pie_ray(50),
-      d_first_color(0), d_start_azimuth(270), d_view_angle(33), d_thickness(33),
-      d_horizontal_offset(0), d_edge_dist(25), d_counter_clockwise(false),
-      d_auto_labeling(true), d_values(false), d_percentages(true),
-      d_categories(false), d_fixed_labels_pos(true) {
+QwtPieCurve::QwtPieCurve(Table *t, const QString &name, int startRow, int endRow)
+    : DataCurve(t, QString(), name, startRow, endRow), d_pie_ray(50), d_first_color(0), d_start_azimuth(270),
+      d_view_angle(33), d_thickness(33), d_horizontal_offset(0), d_edge_dist(25), d_counter_clockwise(false),
+      d_auto_labeling(true), d_values(false), d_percentages(true), d_categories(false), d_fixed_labels_pos(true) {
   setPen(QPen(QColor(Qt::black), 1, Qt::SolidLine));
   setBrush(QBrush(Qt::SolidPattern));
   setStyle(QwtPlotCurve::UserCurve);
@@ -59,8 +56,7 @@ void QwtPieCurve::clone(QwtPieCurve *c) {
   d_table_rows = c->d_table_rows;
 }
 
-void QwtPieCurve::draw(QPainter *painter, const QwtScaleMap &xMap,
-                       const QwtScaleMap &yMap, int from, int to) const {
+void QwtPieCurve::draw(QPainter *painter, const QwtScaleMap &xMap, const QwtScaleMap &yMap, int from, int to) const {
   int size = dataSize();
   if (!painter || size <= 0)
     return;
@@ -74,14 +70,11 @@ void QwtPieCurve::draw(QPainter *painter, const QwtScaleMap &xMap,
     drawDisk(painter, xMap, yMap);
 }
 
-void QwtPieCurve::drawDisk(QPainter *painter, const QwtScaleMap &xMap,
-                           const QwtScaleMap &yMap) const {
+void QwtPieCurve::drawDisk(QPainter *painter, const QwtScaleMap &xMap, const QwtScaleMap &yMap) const {
   const double x_width = fabs(xMap.p1() - xMap.p2());
-  const double x_center =
-      (xMap.p1() + xMap.p2()) * 0.5 + d_horizontal_offset * 0.01 * x_width;
+  const double x_center = (xMap.p1() + xMap.p2()) * 0.5 + d_horizontal_offset * 0.01 * x_width;
   const double y_center = (yMap.p1() + yMap.p2()) * 0.5;
-  const double ray_x =
-      d_pie_ray * 0.005 * qMin(x_width, fabs(yMap.p1() - yMap.p2()));
+  const double ray_x = d_pie_ray * 0.005 * qMin(x_width, fabs(yMap.p1() - yMap.p2()));
   const double view_angle_rad = d_view_angle * M_PI / 180.0;
   const double ray_y = ray_x * sin(view_angle_rad);
   const double thick = 0.01 * d_thickness * ray_x * cos(view_angle_rad);
@@ -120,8 +113,7 @@ void QwtPieCurve::drawDisk(QPainter *painter, const QwtScaleMap &xMap,
           s += QString::number(d_table_rows[0]) + "\n";
 
         if (d_values && d_percentages)
-          s += (static_cast<Plot *>(plot()))->locale().toString(y(0), 'g', 4) +
-               " (100%)";
+          s += (static_cast<Plot *>(plot()))->locale().toString(y(0), 'g', 4) + " (100%)";
         else if (d_values)
           s += (static_cast<Plot *>(plot()))->locale().toString(y(0), 'g', 4);
         else if (d_percentages)
@@ -153,14 +145,12 @@ void QwtPieCurve::drawDisk(QPainter *painter, const QwtScaleMap &xMap,
   painter->restore();
 }
 
-void QwtPieCurve::drawSlices(QPainter *painter, const QwtScaleMap &xMap,
-                             const QwtScaleMap &yMap, int from, int to) const {
+void QwtPieCurve::drawSlices(QPainter *painter, const QwtScaleMap &xMap, const QwtScaleMap &yMap, int from,
+                             int to) const {
   const double x_width = fabs(xMap.p1() - xMap.p2());
-  const double x_center =
-      (xMap.p1() + xMap.p2()) * 0.5 + d_horizontal_offset * 0.01 * x_width;
+  const double x_center = (xMap.p1() + xMap.p2()) * 0.5 + d_horizontal_offset * 0.01 * x_width;
   const double y_center = (yMap.p1() + yMap.p2()) * 0.5;
-  const double ray_x =
-      d_pie_ray * 0.005 * qMin(x_width, fabs(yMap.p1() - yMap.p2()));
+  const double ray_x = d_pie_ray * 0.005 * qMin(x_width, fabs(yMap.p1() - yMap.p2()));
   const double view_angle_rad = d_view_angle * M_PI / 180.0;
   const double ray_y = ray_x * sin(view_angle_rad);
   const double thick = 0.01 * d_thickness * ray_x * cos(view_angle_rad);
@@ -223,14 +213,12 @@ void QwtPieCurve::drawSlices(QPainter *painter, const QwtScaleMap &xMap,
 
     bool draw3D = false;
     if (deg <= 180 && start_3D_view_angle >= 0 && start_3D_view_angle < 180) {
-      if ((end_3D_view_angle > 180 &&
-           end_3D_view_angle > start_3D_view_angle)) {
+      if ((end_3D_view_angle > 180 && end_3D_view_angle > start_3D_view_angle)) {
         deg = 180 - start_3D_view_angle;
         end_3D_view_angle = 180.0;
       }
       draw3D = true;
-    } else if (start_3D_view_angle >= 180 &&
-               end_3D_view_angle < start_3D_view_angle) {
+    } else if (start_3D_view_angle >= 180 && end_3D_view_angle < start_3D_view_angle) {
       if (end_3D_view_angle > 180)
         end_3D_view_angle = 180;
       deg = end_3D_view_angle;
@@ -294,8 +282,7 @@ void QwtPieCurve::drawSlices(QPainter *painter, const QwtScaleMap &xMap,
         if (d_categories)
           s += QString::number(d_table_rows[i]) + "\n";
         if (d_values && d_percentages)
-          s += locale.toString(yi, 'g', 4) + " (" +
-               locale.toString(q * 100, 'g', 4) + "%)";
+          s += locale.toString(yi, 'g', 4) + " (" + locale.toString(q * 100, 'g', 4) + "%)";
         else if (d_values)
           s += locale.toString(yi, 'g', 4);
         else if (d_percentages)
@@ -348,10 +335,8 @@ void QwtPieCurve::loadData() {
   // Limit number of slices to 1000 - seems plenty and avoids potential crash
   // (#4470)
   if (abs(d_end_row - d_start_row) > 1000) {
-    QString mess = QString("Pie charts are limited to 1000 segments!\n") +
-                   QString("You asked for ") +
-                   QString::number(abs(d_end_row - d_start_row)) +
-                   QString(" - plotting only the first 1000.");
+    QString mess = QString("Pie charts are limited to 1000 segments!\n") + QString("You asked for ") +
+                   QString::number(abs(d_end_row - d_start_row)) + QString(" - plotting only the first 1000.");
     QMessageBox::warning(qApp->topLevelWidgets()[0], "Pie chart", mess);
     d_end_row = d_start_row + 1000;
   }
@@ -443,8 +428,7 @@ void QwtPieCurve::initLabels() {
   }
 }
 
-PieLabel::PieLabel(Plot *plot, QwtPieCurve *pie)
-    : LegendWidget(plot), d_pie_curve(pie), d_custom_text(QString::null) {
+PieLabel::PieLabel(Plot *plot, QwtPieCurve *pie) : LegendWidget(plot), d_pie_curve(pie), d_custom_text(QString::null) {
   setBackgroundColor(QColor(255, 255, 255, 0));
   setFrameStyle(0);
 }

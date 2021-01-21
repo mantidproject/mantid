@@ -17,32 +17,20 @@
 namespace Mantid {
 namespace VATES {
 
-enum PLANELOCATION {
-  LEFTPLANE,
-  RIGHTPLANE,
-  BOTTOMPLANE,
-  TOPPLANE,
-  FARPLANE,
-  NEARPLANE
-};
+enum PLANELOCATION { LEFTPLANE, RIGHTPLANE, BOTTOMPLANE, TOPPLANE, FARPLANE, NEARPLANE };
 
 template <PLANELOCATION I, typename T> class DLLExport FrustumPlane {
 public:
-  explicit FrustumPlane(const T &paramA, const T &paramB, const T &paramC,
-                        const T &paramD)
-      : m_paramA(paramA), m_paramB(paramB), m_paramC(paramC), m_paramD(paramD) {
-  }
+  explicit FrustumPlane(const T &paramA, const T &paramB, const T &paramC, const T &paramD)
+      : m_paramA(paramA), m_paramB(paramB), m_paramC(paramC), m_paramD(paramD) {}
   FrustumPlane(const FrustumPlane<I, T> &other)
-      : m_paramA(other.m_paramA), m_paramB(other.m_paramB),
-        m_paramC(other.m_paramC), m_paramD(other.m_paramD) {}
+      : m_paramA(other.m_paramA), m_paramB(other.m_paramB), m_paramC(other.m_paramC), m_paramD(other.m_paramD) {}
   T A() { return m_paramA; }
   T B() { return m_paramB; }
   T C() { return m_paramC; }
   T D() { return m_paramD; }
 
-  std::vector<T> getPlaneCoefficients() {
-    return {m_paramA, m_paramB, m_paramC, m_paramD};
-  }
+  std::vector<T> getPlaneCoefficients() { return {m_paramA, m_paramB, m_paramC, m_paramD}; }
 
 private:
   T m_paramA;
@@ -61,9 +49,8 @@ using NearPlane = FrustumPlane<NEARPLANE, double>;
 
 class DLLExport ViewFrustum {
 public:
-  ViewFrustum(const LeftPlane &leftPlane, const RightPlane &rightPlane,
-              const BottomPlane &bottomPlane, const TopPlane &topPlane,
-              const FarPlane &farPlane, const NearPlane &nearPlane);
+  ViewFrustum(const LeftPlane &leftPlane, const RightPlane &rightPlane, const BottomPlane &bottomPlane,
+              const TopPlane &topPlane, const FarPlane &farPlane, const NearPlane &nearPlane);
   ViewFrustum(const ViewFrustum &other);
   ~ViewFrustum();
   ViewFrustum &operator=(const ViewFrustum &other);
@@ -79,14 +66,12 @@ private:
   mutable NearPlane m_nearPlane;
 
   template <PLANELOCATION p1, PLANELOCATION p2, PLANELOCATION p3, typename T>
-  std::vector<T>
-  getIntersectionPointThreePlanes(FrustumPlane<p1, T> plane1,
-                                  FrustumPlane<p2, T> plane2,
-                                  FrustumPlane<p3, T> plane3) const;
+  std::vector<T> getIntersectionPointThreePlanes(FrustumPlane<p1, T> plane1, FrustumPlane<p2, T> plane2,
+                                                 FrustumPlane<p3, T> plane3) const;
 
   template <typename T>
-  void initializeMatrix(Mantid::Kernel::Matrix<T> &matrix, std::vector<T> vec0,
-                        std::vector<T> vec1, std::vector<T> vec2) const;
+  void initializeMatrix(Mantid::Kernel::Matrix<T> &matrix, std::vector<T> vec0, std::vector<T> vec1,
+                        std::vector<T> vec2) const;
 };
 /**
  * Get the intersection point of three planes using Cramer's rule.
@@ -95,10 +80,8 @@ private:
  * @param plane3 The third frustum plane
  */
 template <PLANELOCATION p1, PLANELOCATION p2, PLANELOCATION p3, typename T>
-std::vector<T>
-ViewFrustum::getIntersectionPointThreePlanes(FrustumPlane<p1, T> plane1,
-                                             FrustumPlane<p2, T> plane2,
-                                             FrustumPlane<p3, T> plane3) const {
+std::vector<T> ViewFrustum::getIntersectionPointThreePlanes(FrustumPlane<p1, T> plane1, FrustumPlane<p2, T> plane2,
+                                                            FrustumPlane<p3, T> plane3) const {
   const size_t dim = 3;
 
   std::vector<T> aVec{plane1.A(), plane2.A(), plane3.A()};
@@ -109,8 +92,7 @@ ViewFrustum::getIntersectionPointThreePlanes(FrustumPlane<p1, T> plane1,
 
   // The input is Ax+By+Cz+D=0 but we need the form Ax+By+Cz=D
   const T factor = -1;
-  std::vector<T> dVec{factor * plane1.D(), factor * plane2.D(),
-                      factor * plane3.D()};
+  std::vector<T> dVec{factor * plane1.D(), factor * plane2.D(), factor * plane3.D()};
 
   // Get the different matrix permutations
   Mantid::Kernel::Matrix<T> abcMatrix(dim, dim);
@@ -132,8 +114,7 @@ ViewFrustum::getIntersectionPointThreePlanes(FrustumPlane<p1, T> plane1,
   T adcDet = adcMatrix.determinant();
   T abdDet = abdMatrix.determinant();
 
-  std::vector<T> intersection{dbcDet / abcDet, adcDet / abcDet,
-                              abdDet / abcDet};
+  std::vector<T> intersection{dbcDet / abcDet, adcDet / abcDet, abdDet / abcDet};
 
   return intersection;
 }
@@ -146,14 +127,12 @@ ViewFrustum::getIntersectionPointThreePlanes(FrustumPlane<p1, T> plane1,
  * @param vec2 The third vector.
  */
 template <typename T>
-void ViewFrustum::initializeMatrix(Mantid::Kernel::Matrix<T> &matrix,
-                                   std::vector<T> vec0, std::vector<T> vec1,
+void ViewFrustum::initializeMatrix(Mantid::Kernel::Matrix<T> &matrix, std::vector<T> vec0, std::vector<T> vec1,
                                    std::vector<T> vec2) const {
   std::pair<size_t, size_t> size = matrix.size();
 
   if (size.first != 3 || size.second != 3) {
-    throw std::runtime_error(
-        "Matrix for view frustum calculation has the wrong dimensionality.");
+    throw std::runtime_error("Matrix for view frustum calculation has the wrong dimensionality.");
   }
   matrix.setColumn(0, vec0);
   matrix.setColumn(1, vec1);
@@ -162,7 +141,6 @@ void ViewFrustum::initializeMatrix(Mantid::Kernel::Matrix<T> &matrix,
 
 /// shared pointer to the view frustum
 using ViewFrustum_sptr = std::shared_ptr<Mantid::VATES::ViewFrustum>;
-using ViewFrustum_const_sptr =
-    std::shared_ptr<const Mantid::VATES::ViewFrustum>;
+using ViewFrustum_const_sptr = std::shared_ptr<const Mantid::VATES::ViewFrustum>;
 } // namespace VATES
 } // namespace Mantid

@@ -23,11 +23,9 @@ public:
   XmlHandler() = default;
   XmlHandler(const std::string &);
 
-  std::map<std::string, std::string>
-  get_metadata(const std::vector<std::string> &tags_to_ignore);
+  std::map<std::string, std::string> get_metadata(const std::vector<std::string> &tags_to_ignore);
   std::string get_text_from_tag(const std::string &);
-  std::map<std::string, std::string>
-  get_attributes_from_tag(const std::string &);
+  std::map<std::string, std::string> get_attributes_from_tag(const std::string &);
   std::vector<std::string> get_subnodes(const std::string &);
 
 private:

@@ -27,8 +27,7 @@ public:
     TS_ASSERT(algorithm.isInitialized())
 
     TS_ASSERT_THROWS_NOTHING(algorithm.setPropertyValue("Filename", filename));
-    TS_ASSERT_THROWS_NOTHING(
-        algorithm.setPropertyValue("OutputWorkspace", "output_ws"));
+    TS_ASSERT_THROWS_NOTHING(algorithm.setPropertyValue("OutputWorkspace", "output_ws"));
 
     if (!algorithm.isInitialized())
       algorithm.initialize();
@@ -38,27 +37,17 @@ public:
     TS_ASSERT(algorithm.isExecuted())
 
     Mantid::API::MatrixWorkspace_sptr result;
-    TS_ASSERT_THROWS_NOTHING(
-        result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve("output_ws")))
+    TS_ASSERT_THROWS_NOTHING(result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+                                 Mantid::API::AnalysisDataService::Instance().retrieve("output_ws")))
 
-    TS_ASSERT_EQUALS(result->run().getPropertyValueAsType<double>(
-                         "sample-detector-distance-offset"),
-                     665.400000);
-    TS_ASSERT_EQUALS(result->run().getPropertyValueAsType<double>(
-                         "sample-detector-distance"),
-                     6.000000 * 1000);
-    TS_ASSERT_EQUALS(result->run().getPropertyValueAsType<double>(
-                         "sample-si-window-distance"),
-                     146.000000);
+    TS_ASSERT_EQUALS(result->run().getPropertyValueAsType<double>("sample-detector-distance-offset"), 665.400000);
+    TS_ASSERT_EQUALS(result->run().getPropertyValueAsType<double>("sample-detector-distance"), 6.000000 * 1000);
+    TS_ASSERT_EQUALS(result->run().getPropertyValueAsType<double>("sample-si-window-distance"), 146.000000);
 
-    TS_ASSERT_EQUALS(result->run().getPropertyValueAsType<double>(
-                         "total-sample-detector-distance"),
+    TS_ASSERT_EQUALS(result->run().getPropertyValueAsType<double>("total-sample-detector-distance"),
                      665.4 + 6.000000 * 1000 + 146.000000);
 
-    TS_ASSERT_EQUALS(result->run().getPropertyValueAsType<double>(
-                         "sample_detector_distance"),
-                     6.0 * 1000);
+    TS_ASSERT_EQUALS(result->run().getPropertyValueAsType<double>("sample_detector_distance"), 6.0 * 1000);
 
     TS_ASSERT_EQUALS(result->getAxis(0)->unit()->unitID(), "Wavelength")
 
@@ -74,10 +63,8 @@ public:
     TS_ASSERT(algorithm.isInitialized())
 
     TS_ASSERT_THROWS_NOTHING(algorithm.setPropertyValue("Filename", filename));
-    TS_ASSERT_THROWS_NOTHING(
-        algorithm.setPropertyValue("OutputWorkspace", "output_ws"));
-    TS_ASSERT_THROWS_NOTHING(
-        algorithm.setPropertyValue("SampleDetectorDistance", "19534"));
+    TS_ASSERT_THROWS_NOTHING(algorithm.setPropertyValue("OutputWorkspace", "output_ws"));
+    TS_ASSERT_THROWS_NOTHING(algorithm.setPropertyValue("SampleDetectorDistance", "19534"));
 
     if (!algorithm.isInitialized())
       algorithm.initialize();
@@ -87,13 +74,10 @@ public:
     TS_ASSERT(algorithm.isExecuted())
 
     Mantid::API::MatrixWorkspace_sptr result;
-    TS_ASSERT_THROWS_NOTHING(
-        result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve("output_ws")))
+    TS_ASSERT_THROWS_NOTHING(result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+                                 Mantid::API::AnalysisDataService::Instance().retrieve("output_ws")))
 
-    TS_ASSERT_EQUALS(result->run().getPropertyValueAsType<double>(
-                         "sample_detector_distance"),
-                     19534);
+    TS_ASSERT_EQUALS(result->run().getPropertyValueAsType<double>("sample_detector_distance"), 19534);
 
     TS_ASSERT_EQUALS(result->getAxis(0)->unit()->unitID(), "Wavelength")
 
@@ -109,10 +93,8 @@ public:
     TS_ASSERT(algorithm.isInitialized())
 
     TS_ASSERT_THROWS_NOTHING(algorithm.setPropertyValue("Filename", filename));
-    TS_ASSERT_THROWS_NOTHING(
-        algorithm.setPropertyValue("OutputWorkspace", "output_ws"));
-    TS_ASSERT_THROWS_NOTHING(
-        algorithm.setPropertyValue("SampleDetectorDistanceOffset", "749"));
+    TS_ASSERT_THROWS_NOTHING(algorithm.setPropertyValue("OutputWorkspace", "output_ws"));
+    TS_ASSERT_THROWS_NOTHING(algorithm.setPropertyValue("SampleDetectorDistanceOffset", "749"));
 
     if (!algorithm.isInitialized())
       algorithm.initialize();
@@ -122,13 +104,10 @@ public:
     TS_ASSERT(algorithm.isExecuted())
 
     Mantid::API::MatrixWorkspace_sptr result;
-    TS_ASSERT_THROWS_NOTHING(
-        result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve("output_ws")))
+    TS_ASSERT_THROWS_NOTHING(result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+                                 Mantid::API::AnalysisDataService::Instance().retrieve("output_ws")))
 
-    TS_ASSERT_EQUALS(result->run().getPropertyValueAsType<double>(
-                         "sample_detector_distance"),
-                     6.0 * 1000 + 749);
+    TS_ASSERT_EQUALS(result->run().getPropertyValueAsType<double>("sample_detector_distance"), 6.0 * 1000 + 749);
 
     TS_ASSERT_EQUALS(result->getAxis(0)->unit()->unitID(), "Wavelength")
 
@@ -148,12 +127,9 @@ public:
     TS_ASSERT(algorithm.isInitialized())
 
     TS_ASSERT_THROWS_NOTHING(algorithm.setPropertyValue("Filename", filename));
-    TS_ASSERT_THROWS_NOTHING(
-        algorithm.setPropertyValue("OutputWorkspace", "output_ws"));
-    TS_ASSERT_THROWS_NOTHING(
-        algorithm.setPropertyValue("SampleDetectorDistance", "19100"));
-    TS_ASSERT_THROWS_NOTHING(
-        algorithm.setPropertyValue("SampleDetectorDistanceOffset", "749"));
+    TS_ASSERT_THROWS_NOTHING(algorithm.setPropertyValue("OutputWorkspace", "output_ws"));
+    TS_ASSERT_THROWS_NOTHING(algorithm.setPropertyValue("SampleDetectorDistance", "19100"));
+    TS_ASSERT_THROWS_NOTHING(algorithm.setPropertyValue("SampleDetectorDistanceOffset", "749"));
 
     if (!algorithm.isInitialized())
       algorithm.initialize();
@@ -163,23 +139,14 @@ public:
     TS_ASSERT(algorithm.isExecuted())
 
     Mantid::API::MatrixWorkspace_sptr result;
-    TS_ASSERT_THROWS_NOTHING(
-        result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve("output_ws")))
+    TS_ASSERT_THROWS_NOTHING(result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+                                 Mantid::API::AnalysisDataService::Instance().retrieve("output_ws")))
     // In the fire but ignored for the final property!
-    TS_ASSERT_EQUALS(result->run().getPropertyValueAsType<double>(
-                         "sample-detector-distance-offset"),
-                     665.400000);
-    TS_ASSERT_EQUALS(result->run().getPropertyValueAsType<double>(
-                         "sample-detector-distance"),
-                     6.000000 * 1000);
-    TS_ASSERT_EQUALS(result->run().getPropertyValueAsType<double>(
-                         "sample-si-window-distance"),
-                     146.000000);
+    TS_ASSERT_EQUALS(result->run().getPropertyValueAsType<double>("sample-detector-distance-offset"), 665.400000);
+    TS_ASSERT_EQUALS(result->run().getPropertyValueAsType<double>("sample-detector-distance"), 6.000000 * 1000);
+    TS_ASSERT_EQUALS(result->run().getPropertyValueAsType<double>("sample-si-window-distance"), 146.000000);
 
-    TS_ASSERT_EQUALS(result->run().getPropertyValueAsType<double>(
-                         "sample_detector_distance"),
-                     19100);
+    TS_ASSERT_EQUALS(result->run().getPropertyValueAsType<double>("sample_detector_distance"), 19100);
 
     TS_ASSERT_EQUALS(result->getAxis(0)->unit()->unitID(), "Wavelength")
 

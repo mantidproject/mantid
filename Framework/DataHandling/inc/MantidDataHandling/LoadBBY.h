@@ -49,14 +49,10 @@ class DLLExport LoadBBY : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
   // description
   int version() const override { return 1; }
-  const std::vector<std::string> seeAlso() const override {
-    return {"Load", "LoadQKK"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"Load", "LoadQKK"}; }
   const std::string name() const override { return "LoadBBY"; }
   const std::string category() const override { return "DataHandling\\ANSTO"; }
-  const std::string summary() const override {
-    return "Loads a Bilby data file into a workspace.";
-  }
+  const std::string summary() const override { return "Loads a Bilby data file into a workspace."; }
 
   // returns a confidence value that this algorithm can load a specified file
   int confidence(Kernel::FileDescriptor &descriptor) const override;
@@ -72,27 +68,20 @@ private:
   static std::vector<bool> createRoiVector(const std::string &maskfile);
 
   // instrument creation
-  void createInstrument(ANSTO::Tar::File &tarFile,
-                        InstrumentInfo &instrumentInfo,
-                        std::map<std::string, double> &logParams,
-                        std::map<std::string, std::string> &logStrings,
+  void createInstrument(ANSTO::Tar::File &tarFile, InstrumentInfo &instrumentInfo,
+                        std::map<std::string, double> &logParams, std::map<std::string, std::string> &logStrings,
                         std::map<std::string, std::string> &allParams);
-  void loadInstrumentParameters(NeXus::NXEntry &entry,
-                                std::map<std::string, double> &logParams,
+  void loadInstrumentParameters(NeXus::NXEntry &entry, std::map<std::string, double> &logParams,
                                 std::map<std::string, std::string> &logStrings,
                                 std::map<std::string, std::string> &allParams);
 
   // load nx dataset
-  template <class T>
-  static bool loadNXDataSet(NeXus::NXEntry &entry, const std::string &path,
-                            T &value);
-  static bool loadNXString(NeXus::NXEntry &entry, const std::string &path,
-                           std::string &value);
+  template <class T> static bool loadNXDataSet(NeXus::NXEntry &entry, const std::string &path, T &value);
+  static bool loadNXString(NeXus::NXEntry &entry, const std::string &path, std::string &value);
 
   // binary file access
   template <class EventProcessor>
-  static void loadEvents(API::Progress &prog, const char *progMsg,
-                         ANSTO::Tar::File &tarFile,
+  static void loadEvents(API::Progress &prog, const char *progMsg, ANSTO::Tar::File &tarFile,
                          EventProcessor &eventProcessor);
 };
 

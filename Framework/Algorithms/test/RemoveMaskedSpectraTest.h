@@ -24,9 +24,7 @@ class RemoveMaskedSpectraTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static RemoveMaskedSpectraTest *createSuite() {
-    return new RemoveMaskedSpectraTest();
-  }
+  static RemoveMaskedSpectraTest *createSuite() { return new RemoveMaskedSpectraTest(); }
   static void destroySuite(RemoveMaskedSpectraTest *suite) {
     AnalysisDataService::Instance().clear();
     delete suite;
@@ -61,8 +59,7 @@ public:
     alg->setProperty("InputWorkspace", secondWS);
     alg->setPropertyValue("OutputWorkspace", "RemoveMaskedSpectraTest_MaskWS");
     alg->execute();
-    auto maskedWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        "RemoveMaskedSpectraTest_MaskWS");
+    auto maskedWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("RemoveMaskedSpectraTest_MaskWS");
 
     auto output = runAlgorithm(inputWS, maskedWS);
     TS_ASSERT_EQUALS(output->getNumberHistograms(), 2);
@@ -87,12 +84,9 @@ private:
 
   MatrixWorkspace_sptr createInputWorkspace() const {
     // Set up a small workspace for testing
-    MatrixWorkspace_sptr space = WorkspaceFactory::Instance().create(
-        "Workspace2D", nSpec, nBins + 1, nBins);
-    space->setInstrument(
-        ComponentCreationHelper::createTestInstrumentCylindrical(1));
-    HistogramData::BinEdges edges(nBins + 1,
-                                  HistogramData::LinearGenerator(0.0, 1.0));
+    MatrixWorkspace_sptr space = WorkspaceFactory::Instance().create("Workspace2D", nSpec, nBins + 1, nBins);
+    space->setInstrument(ComponentCreationHelper::createTestInstrumentCylindrical(1));
+    HistogramData::BinEdges edges(nBins + 1, HistogramData::LinearGenerator(0.0, 1.0));
     for (size_t j = 0; j < nSpec; ++j) {
       const double yVal{static_cast<double>(j)};
       const double eVal{sqrt(yVal)};
@@ -118,9 +112,8 @@ private:
     alg->execute();
   }
 
-  MatrixWorkspace_sptr
-  runAlgorithm(const MatrixWorkspace_sptr &inputWS,
-               const MatrixWorkspace_sptr &maskedWS = MatrixWorkspace_sptr()) {
+  MatrixWorkspace_sptr runAlgorithm(const MatrixWorkspace_sptr &inputWS,
+                                    const MatrixWorkspace_sptr &maskedWS = MatrixWorkspace_sptr()) {
     // Name of the output workspace.
     std::string outWSName("RemoveMaskedSpectraTest_OutputWS");
 
@@ -131,8 +124,7 @@ private:
     if (maskedWS) {
       TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaskedWorkspace", maskedWS));
     }
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
     if (!alg.isExecuted())
@@ -141,9 +133,7 @@ private:
     // Retrieve the workspace from data service. TODO: Change to your desired
     // type
     MatrixWorkspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            outWSName));
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSName));
     TS_ASSERT(ws);
     return ws;
   }

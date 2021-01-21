@@ -44,8 +44,7 @@ using namespace API;
  * @param workspace: the input workspace
  * @returns the collimation length
  */
-double SANSCollimationLengthEstimator::provideCollimationLength(
-    const Mantid::API::MatrixWorkspace_sptr &workspace) {
+double SANSCollimationLengthEstimator::provideCollimationLength(const Mantid::API::MatrixWorkspace_sptr &workspace) {
   // If the instrument does not have a correction specified then set the length
   // to 4
   const double defaultLColim = 4.0;
@@ -66,22 +65,17 @@ double SANSCollimationLengthEstimator::provideCollimationLength(
   const V3D SSD = samplePos - sourcePos;
   const double L1 = SSD.norm();
 
-  auto collimationLengthCorrection =
-      workspace->getInstrument()->getNumberParameter(collimationLengthID);
+  auto collimationLengthCorrection = workspace->getInstrument()->getNumberParameter(collimationLengthID);
 
-  if (workspace->getInstrument()->hasParameter(
-          "special-default-collimation-length-method")) {
+  if (workspace->getInstrument()->hasParameter("special-default-collimation-length-method")) {
     auto specialCollimationMethod =
-        workspace->getInstrument()->getStringParameter(
-            "special-default-collimation-length-method");
+        workspace->getInstrument()->getStringParameter("special-default-collimation-length-method");
     if (specialCollimationMethod[0] == "guide") {
       try {
-        return getCollimationLengthWithGuides(workspace, L1,
-                                              collimationLengthCorrection[0]);
+        return getCollimationLengthWithGuides(workspace, L1, collimationLengthCorrection[0]);
       } catch (std::invalid_argument &ex) {
         g_log.notice() << ex.what();
-        g_log.notice()
-            << "SANSCollimationLengthEstimator: Not using any guides";
+        g_log.notice() << "SANSCollimationLengthEstimator: Not using any guides";
         return L1 - collimationLengthCorrection[0];
       }
     } else {
@@ -103,9 +97,9 @@ double SANSCollimationLengthEstimator::provideCollimationLength(
  * @param collimationLengthCorrection: The correction to get the collimation
  * length
  */
-double SANSCollimationLengthEstimator::getCollimationLengthWithGuides(
-    const MatrixWorkspace_sptr &inOutWS, const double L1,
-    const double collimationLengthCorrection) const {
+double SANSCollimationLengthEstimator::getCollimationLengthWithGuides(const MatrixWorkspace_sptr &inOutWS,
+                                                                      const double L1,
+                                                                      const double collimationLengthCorrection) const {
   auto lCollim = L1 - collimationLengthCorrection;
 
   // Make sure we have guide cutoffs
@@ -116,21 +110,16 @@ double SANSCollimationLengthEstimator::getCollimationLengthWithGuides(
 
   // Make sure we have a defined number of guidess
   if (!inOutWS->getInstrument()->hasParameter("number-of-guides")) {
-    throw std::invalid_argument(
-        "TOFSANSResolutionByPixel: Could not get the number of guides.");
+    throw std::invalid_argument("TOFSANSResolutionByPixel: Could not get the number of guides.");
   }
 
   // Make sure we have a guide increment specified
-  if (!inOutWS->getInstrument()->hasParameter(
-          "guide-collimation-length-increment")) {
-    throw std::invalid_argument(
-        "TOFSANSResolutionByPixel: Could not find a guide increment.");
+  if (!inOutWS->getInstrument()->hasParameter("guide-collimation-length-increment")) {
+    throw std::invalid_argument("TOFSANSResolutionByPixel: Could not find a guide increment.");
   }
 
-  auto numberOfGuides = static_cast<unsigned int>(
-      inOutWS->getInstrument()->getNumberParameter("number-of-guides")[0]);
-  auto guideIncrement = inOutWS->getInstrument()->getNumberParameter(
-      "guide-collimation-length-increment")[0];
+  auto numberOfGuides = static_cast<unsigned int>(inOutWS->getInstrument()->getNumberParameter("number-of-guides")[0]);
+  auto guideIncrement = inOutWS->getInstrument()->getNumberParameter("guide-collimation-length-increment")[0];
 
   // Make sure that all guides are there. They are labelled as Guide1, Guide2,
   // Guide3, ...
@@ -149,8 +138,7 @@ double SANSCollimationLengthEstimator::getCollimationLengthWithGuides(
     }
   }
 
-  auto guideCutoff =
-      inOutWS->getInstrument()->getNumberParameter("guide-cutoff")[0];
+  auto guideCutoff = inOutWS->getInstrument()->getNumberParameter("guide-cutoff")[0];
   // Go through the guides and check in an alternate manner if the guide is
   // smaller
   // or larger than the cut off value. We start at the last guide and check that
@@ -181,13 +169,10 @@ double SANSCollimationLengthEstimator::getCollimationLengthWithGuides(
  * @param prop: a property
  * @returns the guide value
  */
-double SANSCollimationLengthEstimator::getGuideValue(
-    Mantid::Kernel::Property *prop) const {
-  if (auto timeSeriesProperty =
-          dynamic_cast<TimeSeriesProperty<double> *>(prop)) {
+double SANSCollimationLengthEstimator::getGuideValue(Mantid::Kernel::Property *prop) const {
+  if (auto timeSeriesProperty = dynamic_cast<TimeSeriesProperty<double> *>(prop)) {
     return timeSeriesProperty->firstValue();
-  } else if (auto doubleProperty =
-                 dynamic_cast<PropertyWithValue<double> *>(prop)) {
+  } else if (auto doubleProperty = dynamic_cast<PropertyWithValue<double> *>(prop)) {
     auto val = doubleProperty->value();
     if (checkForDouble(val)) {
       g_log.warning("SANSCollimationLengthEstimator: The Guide was not "

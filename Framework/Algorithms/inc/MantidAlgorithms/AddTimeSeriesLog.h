@@ -20,9 +20,7 @@ class MANTID_ALGORITHMS_DLL AddTimeSeriesLog : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Creates/updates a time-series log";
-  }
+  const std::string summary() const override { return "Creates/updates a time-series log"; }
 
   int version() const override;
   const std::vector<std::string> seeAlso() const override {
@@ -35,8 +33,7 @@ private:
   void exec() override;
 
   /// Remove an existing log of the given name
-  void removeExisting(API::MatrixWorkspace_sptr &logWS,
-                      const std::string &name);
+  void removeExisting(API::MatrixWorkspace_sptr &logWS, const std::string &name);
   /// Create or update the named log entry
   void createOrUpdate(API::Run &run, const std::string &name);
 };

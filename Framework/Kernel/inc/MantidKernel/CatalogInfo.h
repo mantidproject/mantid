@@ -53,8 +53,7 @@ public:
 
 private:
   /// Obtain the attribute from a given element tag and attribute name.
-  std::string getAttribute(const Poco::XML::Element *element,
-                           const std::string &tagName,
+  std::string getAttribute(const Poco::XML::Element *element, const std::string &tagName,
                            const std::string &attributeName);
 
   // Disabled assignment operator.

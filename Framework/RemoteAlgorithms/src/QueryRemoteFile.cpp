@@ -33,40 +33,31 @@ void QueryRemoteFile::init() {
   auto requireValue = std::make_shared<MandatoryValidator<std::string>>();
 
   // Compute Resources
-  std::vector<std::string> computes = Mantid::Kernel::ConfigService::Instance()
-                                          .getFacility()
-                                          .computeResources();
-  declareProperty("ComputeResource", "",
-                  std::make_shared<StringListValidator>(computes),
+  std::vector<std::string> computes = Mantid::Kernel::ConfigService::Instance().getFacility().computeResources();
+  declareProperty("ComputeResource", "", std::make_shared<StringListValidator>(computes),
                   "The name of the remote computer to query", Direction::Input);
 
   // The transaction ID comes from the StartRemoteTransaction algortithm
-  declareProperty("TransactionID", "", requireValue,
-                  "The ID of the transaction who's files we want to list",
+  declareProperty("TransactionID", "", requireValue, "The ID of the transaction who's files we want to list",
                   Direction::Input);
 
-  declareProperty(std::make_unique<ArrayProperty<std::string>>(
-                      "FileNames", Direction::Output),
+  declareProperty(std::make_unique<ArrayProperty<std::string>>("FileNames", Direction::Output),
                   "The names of all the files that were found");
 }
 
 void QueryRemoteFile::exec() {
   std::shared_ptr<RemoteJobManager> jobManager =
-      Mantid::Kernel::ConfigService::Instance()
-          .getFacility()
-          .getRemoteJobManager(getPropertyValue("ComputeResource"));
+      Mantid::Kernel::ConfigService::Instance().getFacility().getRemoteJobManager(getPropertyValue("ComputeResource"));
 
   // jobManager is a std::shared_ptr...
   if (!jobManager) {
     // Requested compute resource doesn't exist
     // TODO: should we create our own exception class for this??
     throw(std::runtime_error(
-        std::string("Unable to create a compute resource named " +
-                    getPropertyValue("ComputeResource"))));
+        std::string("Unable to create a compute resource named " + getPropertyValue("ComputeResource"))));
   }
 
-  std::istream &respStream = jobManager->httpGet(
-      "/files", std::string("TransID=") + getPropertyValue("TransactionID"));
+  std::istream &respStream = jobManager->httpGet("/files", std::string("TransID=") + getPropertyValue("TransactionID"));
   JSONObject resp;
   initFromStream(resp, respStream);
   if (jobManager->lastStatus() == Poco::Net::HTTPResponse::HTTP_OK) {

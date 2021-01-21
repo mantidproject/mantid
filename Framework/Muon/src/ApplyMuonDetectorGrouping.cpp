@@ -45,13 +45,11 @@ Mantid::Muon::PlotType getPlotType(const std::string &plotType) {
  * Convert the input workspace into a workspace group if e.g. it has only a
  * single period otherwise leave it alone.
  */
-Mantid::API::WorkspaceGroup_sptr
-convertInputWStoWSGroup(const Mantid::API::Workspace_sptr &inputWS) {
+Mantid::API::WorkspaceGroup_sptr convertInputWStoWSGroup(const Mantid::API::Workspace_sptr &inputWS) {
 
   // Cast input WS to a WorkspaceGroup
   auto muonWS = std::make_shared<Mantid::API::WorkspaceGroup>();
-  if (auto test =
-          std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(inputWS)) {
+  if (auto test = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(inputWS)) {
     muonWS->addWorkspace(test);
   } else {
     muonWS = std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(inputWS);
@@ -76,15 +74,13 @@ void ApplyMuonDetectorGrouping::init() {
 
   std::string emptyString("");
 
-  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-                      "InputWorkspace", emptyString, Direction::Input,
-                      PropertyMode::Mandatory),
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("InputWorkspace", emptyString, Direction::Input,
+                                                                 PropertyMode::Mandatory),
                   "Input workspace containing data from detectors which are to "
                   "be grouped.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>(
-                      "InputWorkspaceGroup", emptyString, Direction::InOut,
-                      PropertyMode::Mandatory),
+  declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>("InputWorkspaceGroup", emptyString,
+                                                                      Direction::InOut, PropertyMode::Mandatory),
                   "The workspace group to which the output will be added.");
 
   declareProperty("GroupName", emptyString,
@@ -97,55 +93,39 @@ void ApplyMuonDetectorGrouping::init() {
                   "IDs or hyphenated ranges of IDs.",
                   Direction::Input);
 
-  declareProperty(
-      "AnalysisType", "Counts",
-      std::make_shared<Kernel::ListValidator<std::string>>(g_analysisTypes),
-      "The type of analysis to perform on the spectra.", Direction::Input);
+  declareProperty("AnalysisType", "Counts", std::make_shared<Kernel::ListValidator<std::string>>(g_analysisTypes),
+                  "The type of analysis to perform on the spectra.", Direction::Input);
 
-  declareProperty(
-      "TimeMin", 0.1,
-      "Start time for the data in ms. Only used with the asymmetry analysis.",
-      Direction::Input);
-  setPropertySettings("TimeMin",
-                      std::make_unique<Kernel::EnabledWhenProperty>(
-                          "AnalysisType", Kernel::IS_EQUAL_TO, "Asymmetry"));
-
-  declareProperty(
-      "TimeMax", 32.0,
-      "End time for the data in ms. Only used with the asymmetry analysis.",
-      Direction::Input);
-  setPropertySettings("TimeMax",
-                      std::make_unique<Kernel::EnabledWhenProperty>(
-                          "AnalysisType", Kernel::IS_EQUAL_TO, "Asymmetry"));
-
-  declareProperty("RebinArgs", emptyString,
-                  "Rebin arguments. No rebinning if left empty.",
+  declareProperty("TimeMin", 0.1, "Start time for the data in ms. Only used with the asymmetry analysis.",
                   Direction::Input);
+  setPropertySettings("TimeMin",
+                      std::make_unique<Kernel::EnabledWhenProperty>("AnalysisType", Kernel::IS_EQUAL_TO, "Asymmetry"));
+
+  declareProperty("TimeMax", 32.0, "End time for the data in ms. Only used with the asymmetry analysis.",
+                  Direction::Input);
+  setPropertySettings("TimeMax",
+                      std::make_unique<Kernel::EnabledWhenProperty>("AnalysisType", Kernel::IS_EQUAL_TO, "Asymmetry"));
+
+  declareProperty("RebinArgs", emptyString, "Rebin arguments. No rebinning if left empty.", Direction::Input);
 
   declareProperty("TimeOffset", 0.0,
                   "Shift the times of all data by a fixed amount. The value "
                   "given corresponds to the bin that will become 0.0 seconds.",
                   Direction::Input);
 
-  declareProperty("SummedPeriods", std::to_string(1),
-                  "A list of periods to sum in multiperiod data.",
+  declareProperty("SummedPeriods", std::to_string(1), "A list of periods to sum in multiperiod data.",
                   Direction::Input);
-  declareProperty("SubtractedPeriods", emptyString,
-                  "A list of periods to subtract in multiperiod data.",
+  declareProperty("SubtractedPeriods", emptyString, "A list of periods to subtract in multiperiod data.",
                   Direction::Input);
 
-  declareProperty(
-      "ApplyDeadTimeCorrection", false,
-      "Whether dead time correction should be applied to input workspace");
-  declareProperty(
-      std::make_unique<WorkspaceProperty<TableWorkspace>>(
-          "DeadTimeTable", "", Direction::Input, PropertyMode::Optional),
-      "Table with dead time information. Must be specified if "
-      "ApplyDeadTimeCorrection is set true.");
-  setPropertySettings(
-      "DeadTimeTable",
-      std::make_unique<Kernel::EnabledWhenProperty>(
-          "ApplyDeadTimeCorrection", Kernel::IS_NOT_DEFAULT, ""));
+  declareProperty("ApplyDeadTimeCorrection", false,
+                  "Whether dead time correction should be applied to input workspace");
+  declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>("DeadTimeTable", "", Direction::Input,
+                                                                      PropertyMode::Optional),
+                  "Table with dead time information. Must be specified if "
+                  "ApplyDeadTimeCorrection is set true.");
+  setPropertySettings("DeadTimeTable", std::make_unique<Kernel::EnabledWhenProperty>("ApplyDeadTimeCorrection",
+                                                                                     Kernel::IS_NOT_DEFAULT, ""));
 
   // Perform Group Associations.
 
@@ -197,8 +177,7 @@ std::map<std::string, std::string> ApplyMuonDetectorGrouping::validateInputs() {
   }
 
   if (!std::any_of(std::begin(groupName), std::end(groupName), isalnum)) {
-    errors["GroupName"] =
-        "The group name must contain at least one alphnumeric character.";
+    errors["GroupName"] = "The group name must contain at least one alphnumeric character.";
   }
 
   return errors;
@@ -227,8 +206,7 @@ void ApplyMuonDetectorGrouping::exec() {
     if (renameAndMoveUnNormWorkspace(wsunNormName)) {
       wsNames.emplace_back(wsunNormName);
     } else {
-      g_log.notice(
-          "Cannot create unNorm workspace (Cannot find tmp_unNorm in ADS)");
+      g_log.notice("Cannot create unNorm workspace (Cannot find tmp_unNorm in ADS)");
     }
   }
 
@@ -237,8 +215,7 @@ void ApplyMuonDetectorGrouping::exec() {
     if (renameAndMoveUnNormWorkspace(wsunNormRawName)) {
       wsNames.emplace_back(wsunNormRawName);
     } else {
-      g_log.notice(
-          "Cannot create unNorm workspace (Cannot find tmp_unNorm in ADS)");
+      g_log.notice("Cannot create unNorm workspace (Cannot find tmp_unNorm in ADS)");
     }
   }
 
@@ -252,8 +229,8 @@ void ApplyMuonDetectorGrouping::exec() {
 /*
  * Generate the name of the new workspace
  */
-const std::string ApplyMuonDetectorGrouping::getNewWorkspaceName(
-    const Muon::AnalysisOptions &options, const std::string &groupWSName) {
+const std::string ApplyMuonDetectorGrouping::getNewWorkspaceName(const Muon::AnalysisOptions &options,
+                                                                 const std::string &groupWSName) {
 
   Muon::DatasetParams params;
   // don't fill in instrument, runs, periods; not required.
@@ -294,8 +271,7 @@ Muon::AnalysisOptions ApplyMuonDetectorGrouping::getUserInput() {
 /**
  * Clip Xmin/Xmax to the range in the first histogram of the input WS group.
  */
-void ApplyMuonDetectorGrouping::clipXRangeToWorkspace(
-    const WorkspaceGroup &ws, Muon::AnalysisOptions &options) {
+void ApplyMuonDetectorGrouping::clipXRangeToWorkspace(const WorkspaceGroup &ws, Muon::AnalysisOptions &options) {
 
   MatrixWorkspace_sptr clipWS;
   clipWS = std::dynamic_pointer_cast<MatrixWorkspace>(ws.getItem(0));
@@ -318,9 +294,8 @@ void ApplyMuonDetectorGrouping::clipXRangeToWorkspace(
 /**
  * Creates workspace, processing the data using the MuonProcess algorithm.
  */
-Workspace_sptr ApplyMuonDetectorGrouping::createAnalysisWorkspace(
-    const Workspace_sptr &inputWS, bool noRebin,
-    Muon::AnalysisOptions options) {
+Workspace_sptr ApplyMuonDetectorGrouping::createAnalysisWorkspace(const Workspace_sptr &inputWS, bool noRebin,
+                                                                  Muon::AnalysisOptions options) {
 
   IAlgorithm_sptr alg = Algorithm::createChildAlgorithm("MuonProcess");
 
@@ -338,8 +313,7 @@ Workspace_sptr ApplyMuonDetectorGrouping::createAnalysisWorkspace(
 /**
  * Give the "tmp_unNorm" workspace which is added to the ADS the correct name
  */
-bool ApplyMuonDetectorGrouping::renameAndMoveUnNormWorkspace(
-    const std::string &newName) {
+bool ApplyMuonDetectorGrouping::renameAndMoveUnNormWorkspace(const std::string &newName) {
   AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
   if (ads.doesExist("tmp_unNorm")) {
     ads.rename("tmp_unNorm", newName);
@@ -352,9 +326,8 @@ bool ApplyMuonDetectorGrouping::renameAndMoveUnNormWorkspace(
  * Set algorithm properties (input workspace, and period properties) according
  * to the given options. For use with MuonProcess.
  */
-void ApplyMuonDetectorGrouping::setMuonProcessPeriodProperties(
-    IAlgorithm &alg, const Workspace_sptr &inputWS,
-    const Muon::AnalysisOptions &options) const {
+void ApplyMuonDetectorGrouping::setMuonProcessPeriodProperties(IAlgorithm &alg, const Workspace_sptr &inputWS,
+                                                               const Muon::AnalysisOptions &options) const {
 
   auto inputGroup = std::make_shared<WorkspaceGroup>();
   // If is a group, will need to handle periods
@@ -380,8 +353,8 @@ void ApplyMuonDetectorGrouping::setMuonProcessPeriodProperties(
  * Set time properties according to the given options. For use with
  * MuonProcess.
  */
-void ApplyMuonDetectorGrouping::setMuonProcessAlgorithmTimeProperties(
-    IAlgorithm &alg, const Muon::AnalysisOptions &options) const {
+void ApplyMuonDetectorGrouping::setMuonProcessAlgorithmTimeProperties(IAlgorithm &alg,
+                                                                      const Muon::AnalysisOptions &options) const {
   alg.setProperty("TimeZero", options.timeZero);
   alg.setProperty("LoadedTimeZero", options.loadedTimeZero);
   alg.setProperty("Xmin", options.timeLimits.first);
@@ -399,8 +372,8 @@ void ApplyMuonDetectorGrouping::setMuonProcessAlgorithmTimeProperties(
 }
 
 // Set OutputType property of MuonProcess
-void ApplyMuonDetectorGrouping::setMuonProcessAlgorithmOutputTypeProperty(
-    IAlgorithm &alg, const Muon::AnalysisOptions &options) const {
+void ApplyMuonDetectorGrouping::setMuonProcessAlgorithmOutputTypeProperty(IAlgorithm &alg,
+                                                                          const Muon::AnalysisOptions &options) const {
 
   std::string outputType;
   switch (options.plotType) {
@@ -412,15 +385,14 @@ void ApplyMuonDetectorGrouping::setMuonProcessAlgorithmOutputTypeProperty(
     outputType = "GroupAsymmetry";
     break;
   default:
-    throw std::invalid_argument(
-        "Cannot create analysis workspace: Unsupported plot type");
+    throw std::invalid_argument("Cannot create analysis workspace: Unsupported plot type");
   }
   alg.setProperty("OutputType", outputType);
 }
 
 // Set grouping properies of MuonProcess
-void ApplyMuonDetectorGrouping::setMuonProcessAlgorithmGroupingProperties(
-    IAlgorithm &alg, const Muon::AnalysisOptions &options) const {
+void ApplyMuonDetectorGrouping::setMuonProcessAlgorithmGroupingProperties(IAlgorithm &alg,
+                                                                          const Muon::AnalysisOptions &options) const {
 
   alg.setProperty("DetectorGroupingTable", options.grouping.toTable());
   alg.setProperty("GroupIndex", 0);
@@ -430,8 +402,8 @@ void ApplyMuonDetectorGrouping::setMuonProcessAlgorithmGroupingProperties(
  * Set algorithm properties according to the given options. For use with
  * MuonProcess.
  */
-void ApplyMuonDetectorGrouping::setMuonProcessAlgorithmProperties(
-    IAlgorithm &alg, const Muon::AnalysisOptions &options) const {
+void ApplyMuonDetectorGrouping::setMuonProcessAlgorithmProperties(IAlgorithm &alg,
+                                                                  const Muon::AnalysisOptions &options) const {
 
   alg.setProperty("Mode", "Combined");
   alg.setProperty("CropWorkspace", false);

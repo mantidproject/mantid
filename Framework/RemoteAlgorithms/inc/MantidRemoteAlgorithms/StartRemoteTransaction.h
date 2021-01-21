@@ -12,8 +12,7 @@
 namespace Mantid {
 namespace RemoteAlgorithms {
 
-class DLLExport StartRemoteTransaction : public Mantid::API::Algorithm,
-                                         public API::DeprecatedAlgorithm {
+class DLLExport StartRemoteTransaction : public Mantid::API::Algorithm, public API::DeprecatedAlgorithm {
 public:
   /// Constructor
   StartRemoteTransaction() { this->useAlgorithm("StartRemoteTransaction", 2); }
@@ -21,9 +20,7 @@ public:
   /// Algorithm's name
   const std::string name() const override { return "StartRemoteTransaction"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Start a job transaction on a remote compute resource.";
-  }
+  const std::string summary() const override { return "Start a job transaction on a remote compute resource."; }
 
   /// Algorithm's version
   int version() const override { return (1); }

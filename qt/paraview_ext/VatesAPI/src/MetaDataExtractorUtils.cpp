@@ -34,12 +34,9 @@ MetaDataExtractorUtils::~MetaDataExtractorUtils() = default;
  * @param workspace Shared pointer to the workspace.
  * @returns The instrument name or an empty string.
  */
-std::string MetaDataExtractorUtils::extractInstrument(
-    const Mantid::API::IMDWorkspace *workspace) {
-  auto eventWorkspace =
-      dynamic_cast<const Mantid::API::IMDEventWorkspace *>(workspace);
-  auto histoWorkspace =
-      dynamic_cast<const Mantid::API::IMDHistoWorkspace *>(workspace);
+std::string MetaDataExtractorUtils::extractInstrument(const Mantid::API::IMDWorkspace *workspace) {
+  auto eventWorkspace = dynamic_cast<const Mantid::API::IMDEventWorkspace *>(workspace);
+  auto histoWorkspace = dynamic_cast<const Mantid::API::IMDHistoWorkspace *>(workspace);
 
   std::string instrument;
 
@@ -47,8 +44,7 @@ std::string MetaDataExtractorUtils::extractInstrument(
   // instrument.
   if (eventWorkspace) {
     if (eventWorkspace->getNumExperimentInfo() > 0) {
-      instrument =
-          eventWorkspace->getExperimentInfo(0)->getInstrument()->getName();
+      instrument = eventWorkspace->getExperimentInfo(0)->getInstrument()->getName();
     } else {
       g_log.notice() << "The event workspace does not have any instruments. \n";
 
@@ -56,16 +52,14 @@ std::string MetaDataExtractorUtils::extractInstrument(
     }
   } else if (histoWorkspace) {
     if (histoWorkspace->getNumExperimentInfo() > 0) {
-      instrument =
-          histoWorkspace->getExperimentInfo(0)->getInstrument()->getName();
+      instrument = histoWorkspace->getExperimentInfo(0)->getInstrument()->getName();
     } else {
       g_log.notice() << "The histo workspace does not have any instruments. \n";
 
       instrument = "";
     }
   } else {
-    g_log.warning()
-        << "The workspace does not seem to be either event or histo. \n";
+    g_log.warning() << "The workspace does not seem to be either event or histo. \n";
     instrument = "";
   }
 

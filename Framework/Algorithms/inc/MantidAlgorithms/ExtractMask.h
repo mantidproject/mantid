@@ -29,8 +29,7 @@ namespace Algorithms {
   <LI> OutputWorkspace - The name of the output mask workspace </LI>
   </UL>
 */
-class MANTID_ALGORITHMS_DLL ExtractMask
-    : public Mantid::API::DistributedAlgorithm {
+class MANTID_ALGORITHMS_DLL ExtractMask : public Mantid::API::DistributedAlgorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "ExtractMask"; }
@@ -42,9 +41,7 @@ public:
 
   /// Algorithm's version
   int version() const override { return 1; }
-  const std::vector<std::string> seeAlso() const override {
-    return {"ExtractMaskToTable"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"ExtractMaskToTable"}; }
   /// Algorithm's category for identification
   const std::string category() const override { return "Transforms\\Masking"; }
 

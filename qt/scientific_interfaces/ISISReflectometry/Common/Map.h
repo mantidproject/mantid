@@ -17,8 +17,7 @@ namespace CustomInterfaces {
 namespace ISISReflectometry {
 
 template <typename Container, typename Transform,
-          typename Out = typename std::result_of<
-              Transform(typename Container::value_type)>::type>
+          typename Out = typename std::result_of<Transform(typename Container::value_type)>::type>
 std::vector<Out> map(Container const &in, Transform transform) {
   auto out = std::vector<Out>();
   out.reserve(in.size());
@@ -26,8 +25,7 @@ std::vector<Out> map(Container const &in, Transform transform) {
   return out;
 }
 
-template <typename In, typename Transform,
-          typename Out = typename std::result_of<Transform(In)>::type>
+template <typename In, typename Transform, typename Out = typename std::result_of<Transform(In)>::type>
 boost::optional<Out> map(boost::optional<In> const &in, Transform transform) {
   if (in.is_initialized())
     return transform(in.get());
@@ -41,12 +39,8 @@ boost::optional<Out> map(boost::optional<In> const &in, Transform transform) {
  * @return The value as a string or an empty string
  *
  */
-template <typename T>
-std::string optionalToString(boost::optional<T> maybeValue) {
-  return map(maybeValue,
-             [](T const &value) -> std::string {
-               return std::to_string(value);
-             })
+template <typename T> std::string optionalToString(boost::optional<T> maybeValue) {
+  return map(maybeValue, [](T const &value) -> std::string { return std::to_string(value); })
       .get_value_or(std::string());
 }
 
@@ -71,8 +65,7 @@ template <typename T> std::string valueToString(T value, int precision) {
  * @return The value as a string (with specified precision if given)
  *
  */
-template <typename T>
-std::string valueToString(T value, boost::optional<int> precision) {
+template <typename T> std::string valueToString(T value, boost::optional<int> precision) {
   if (precision.is_initialized())
     return valueToString(value, precision.get());
   return std::to_string(value);
@@ -86,9 +79,7 @@ std::string valueToString(T value, boost::optional<int> precision) {
  * string
  *
  */
-template <typename T>
-std::string optionalToString(boost::optional<T> maybeValue,
-                             boost::optional<int> precision) {
+template <typename T> std::string optionalToString(boost::optional<T> maybeValue, boost::optional<int> precision) {
   if (maybeValue.is_initialized()) {
     if (precision.is_initialized()) {
       return valueToString(maybeValue.get(), precision.get());

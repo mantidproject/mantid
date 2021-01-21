@@ -18,22 +18,18 @@ class QwtScaleDrawNonOrthogonal : public QwtScaleDraw {
 public:
   enum class ScreenDimension { X, Y };
 
-  QwtScaleDrawNonOrthogonal(
-      QwtPlot *plot, ScreenDimension screenDimension,
-      const Mantid::API::IMDWorkspace_sptr &workspace, size_t dimX, size_t dimY,
-      Mantid::Kernel::VMD slicePoint,
-      MantidQt::SliceViewer::NonOrthogonalOverlay *gridPlot);
+  QwtScaleDrawNonOrthogonal(QwtPlot *plot, ScreenDimension screenDimension,
+                            const Mantid::API::IMDWorkspace_sptr &workspace, size_t dimX, size_t dimY,
+                            Mantid::Kernel::VMD slicePoint, MantidQt::SliceViewer::NonOrthogonalOverlay *gridPlot);
 
   void draw(QPainter *painter, const QPalette &palette) const override;
 
-  void drawLabelNonOrthogonal(QPainter *painter, double labelValue,
-                              double labelPos) const;
+  void drawLabelNonOrthogonal(QPainter *painter, double labelValue, double labelPos) const;
 
   void updateSlicePoint(Mantid::Kernel::VMD newSlicepoint);
 
 private:
-  void
-  setTransformationMatrices(const Mantid::API::IMDWorkspace_sptr &workspace);
+  void setTransformationMatrices(const Mantid::API::IMDWorkspace_sptr &workspace);
   qreal getScreenBottomInXyz() const;
   qreal getScreenLeftInXyz() const;
 

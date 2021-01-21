@@ -35,12 +35,10 @@ namespace SpectrumView {
  * @param data       Pointer to start of memory block holding the actual
  *                   data as a list of floats.
  */
-DataArray::DataArray(double xMin, double xMax, double yMin, double yMax,
-                     bool isLogX, size_t nRows, size_t nCols,
+DataArray::DataArray(double xMin, double xMax, double yMin, double yMax, bool isLogX, size_t nRows, size_t nCols,
                      const std::vector<float> &data)
-    : m_xMin(xMin), m_xMax(xMax), m_yMin(yMin), m_yMax(yMax), m_isLogX(isLogX),
-      m_nRows(nRows), m_nCols(nCols), m_dataMin(data[0]), m_dataMax(data[0]),
-      m_data(data) {
+    : m_xMin(xMin), m_xMax(xMax), m_yMin(yMin), m_yMax(yMax), m_isLogX(isLogX), m_nRows(nRows), m_nCols(nCols),
+      m_dataMin(data[0]), m_dataMax(data[0]), m_data(data) {
   double value;
   size_t index = 0;
 
@@ -241,8 +239,7 @@ size_t DataArray::columnOfX(double x) const {
 double DataArray::xOfColumn(size_t col) const {
   double xVal;
   if (m_isLogX)
-    xVal = m_xMin *
-           exp(((double)col + 0.5) / (double)m_nCols * log(m_xMax / m_xMin));
+    xVal = m_xMin * exp(((double)col + 0.5) / (double)m_nCols * log(m_xMax / m_xMin));
   else
     xVal = ((double)col + 0.5) / (double)m_nCols * (m_xMax - m_xMin) + m_xMin;
 

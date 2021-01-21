@@ -18,9 +18,7 @@ class ComptonPeakProfileTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ComptonPeakProfileTest *createSuite() {
-    return new ComptonPeakProfileTest();
-  }
+  static ComptonPeakProfileTest *createSuite() { return new ComptonPeakProfileTest(); }
   static void destroySuite(ComptonPeakProfileTest *suite) { delete suite; }
 
   void test_initialized_object_has_three_parameters() {
@@ -36,18 +34,14 @@ public:
 
     // Test names as they are used in scripts
     if (profile->nAttributes() > 0) {
-      const char *expectedAttrs[nattrs] = {"WorkspaceIndex", "Mass",
-                                           "VoigtEnergyCutOff"};
-      std::unordered_set<std::string> expectedAttrSet(expectedAttrs,
-                                                      expectedAttrs + nattrs);
+      const char *expectedAttrs[nattrs] = {"WorkspaceIndex", "Mass", "VoigtEnergyCutOff"};
+      std::unordered_set<std::string> expectedAttrSet(expectedAttrs, expectedAttrs + nattrs);
       std::vector<std::string> actualNames = profile->getAttributeNames();
 
       for (size_t i = 0; i < nattrs; ++i) {
         const std::string &name = actualNames[i];
         size_t keyCount = expectedAttrSet.count(name);
-        TSM_ASSERT_EQUALS("Expected " + name +
-                              " to be found as attribute but it was not.",
-                          1, keyCount);
+        TSM_ASSERT_EQUALS("Expected " + name + " to be found as attribute but it was not.", 1, keyCount);
       }
     }
   }
@@ -57,8 +51,7 @@ public:
 
     auto peakProfile = createFunction();
 
-    auto domain = std::shared_ptr<FunctionDomain1DVector>(
-        new FunctionDomain1DVector(-1, 1, 3));
+    auto domain = std::shared_ptr<FunctionDomain1DVector>(new FunctionDomain1DVector(-1, 1, 3));
     Mantid::API::FunctionValues outputs(*domain);
     peakProfile->setParameter(0, 0.93);
     peakProfile->setParameter(1, 0.4);
@@ -73,12 +66,11 @@ public:
 
 private:
   Mantid::API::IFunction_sptr createFunction() {
-    Mantid::API::IFunction_sptr profile =
-        std::make_shared<ComptonPeakProfile>();
+    Mantid::API::IFunction_sptr profile = std::make_shared<ComptonPeakProfile>();
     profile->initialize();
-    auto paramWS = ComptonProfileTestHelpers::createTestWorkspace(
-        1, 300, 351, 0.5, ComptonProfileTestHelpers::NoiseType::None, true,
-        true); // Only using for parameters
+    auto paramWS = ComptonProfileTestHelpers::createTestWorkspace(1, 300, 351, 0.5,
+                                                                  ComptonProfileTestHelpers::NoiseType::None, true,
+                                                                  true); // Only using for parameters
     profile->setAttributeValue("Mass", 1.0079);
     TS_ASSERT_THROWS_NOTHING(profile->setWorkspace(paramWS));
     profile->setUpForFit();

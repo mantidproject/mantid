@@ -34,8 +34,7 @@ public:
                                          // refer to this static constant
 
   /// Constructor
-  SelectWorkspacesDialog(QWidget *parent = nullptr,
-                         const std::string &typeFilter = "",
+  SelectWorkspacesDialog(QWidget *parent = nullptr, const std::string &typeFilter = "",
                          const std::string &customButtonLabel = "");
 
   /// Return the selected names

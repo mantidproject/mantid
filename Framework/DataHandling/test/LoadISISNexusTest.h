@@ -27,8 +27,7 @@ using namespace Mantid::DataHandling;
 class LoadISISNexusTest : public CxxTest::TestSuite {
 private:
   // Helper method to fetch the log property entry corresponding to period.
-  Property *fetchPeriodLog(const MatrixWorkspace_sptr &workspace,
-                           int expectedPeriodNumber) {
+  Property *fetchPeriodLog(const MatrixWorkspace_sptr &workspace, int expectedPeriodNumber) {
     std::stringstream period_number_stream;
     period_number_stream << expectedPeriodNumber;
     std::string log_name = "period " + period_number_stream.str();
@@ -45,11 +44,9 @@ private:
 
   // Helper method to check that the log data contains a specific period number
   // entry.
-  void checkPeriodLogData(const MatrixWorkspace_sptr &workspace,
-                          int expectedPeriodNumber) {
+  void checkPeriodLogData(const MatrixWorkspace_sptr &workspace, int expectedPeriodNumber) {
     Property *p = nullptr;
-    TS_ASSERT_THROWS_NOTHING(
-        p = fetchPeriodLog(workspace, expectedPeriodNumber));
+    TS_ASSERT_THROWS_NOTHING(p = fetchPeriodLog(workspace, expectedPeriodNumber));
     TS_ASSERT(p != nullptr)
     TSM_ASSERT_THROWS("Shouldn't have a period less than the expected entry",
                       fetchPeriodLog(workspace, expectedPeriodNumber - 1),
@@ -62,16 +59,13 @@ private:
     TS_ASSERT(period_property);
     // Check that the logs also contain a current_period property.
     Property *current_period_log = fetchCurrentPeriodLog(workspace);
-    TS_ASSERT_EQUALS(expectedPeriodNumber,
-                     std::stoi(current_period_log->value()));
+    TS_ASSERT_EQUALS(expectedPeriodNumber, std::stoi(current_period_log->value()));
 
     // Check time series properties have been filtered by period
     p = nullptr;
-    TSM_ASSERT_THROWS_NOTHING("Cannot retrieve stheta log",
-                              p = workspace->run().getLogData("stheta"));
+    TSM_ASSERT_THROWS_NOTHING("Cannot retrieve stheta log", p = workspace->run().getLogData("stheta"));
     auto stheta = dynamic_cast<FilteredTimeSeriesProperty<double> *>(p);
-    TSM_ASSERT("stheta log has not been converted to a FilteredTimeSeries",
-               stheta);
+    TSM_ASSERT("stheta log has not been converted to a FilteredTimeSeries", stheta);
     TS_ASSERT(42 > stheta->size());
   }
 
@@ -85,11 +79,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(ld.execute());
     TS_ASSERT(ld.isExecuted());
 
-    MatrixWorkspace_sptr ws =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
-    MatrixWorkspace_sptr mon_ws =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "outWS_monitors");
+    MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
+    MatrixWorkspace_sptr mon_ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS_monitors");
 
     TS_ASSERT_EQUALS(ws->blocksize(), 5);
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 17790);
@@ -124,16 +115,13 @@ public:
     TS_ASSERT_EQUALS(logs.size(), 50);
 
     TimeSeriesProperty<std::string> *slog =
-        dynamic_cast<TimeSeriesProperty<std::string> *>(
-            mon_ws->run().getLogData("icp_event"));
+        dynamic_cast<TimeSeriesProperty<std::string> *>(mon_ws->run().getLogData("icp_event"));
     TS_ASSERT(slog);
     std::string str = slog->value();
     TS_ASSERT_EQUALS(str.size(), 1023);
-    TS_ASSERT_EQUALS(str.substr(0, 37),
-                     "2009-Apr-28 09:20:29  CHANGE_PERIOD 1");
+    TS_ASSERT_EQUALS(str.substr(0, 37), "2009-Apr-28 09:20:29  CHANGE_PERIOD 1");
 
-    slog = dynamic_cast<TimeSeriesProperty<std::string> *>(
-        mon_ws->run().getLogData("icp_debug"));
+    slog = dynamic_cast<TimeSeriesProperty<std::string> *>(mon_ws->run().getLogData("icp_debug"));
     TS_ASSERT(slog);
     TS_ASSERT_EQUALS(slog->size(), 50);
 
@@ -150,8 +138,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(ld.execute());
     TS_ASSERT(ld.isExecuted());
 
-    MatrixWorkspace_sptr ws =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
+    MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
     TS_ASSERT_EQUALS(ws->blocksize(), 5);
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 17792);
     TS_ASSERT_EQUALS(ws->x(0)[0], 5.);
@@ -202,42 +189,34 @@ public:
     TS_ASSERT_EQUALS(logs.size(), 50);
 
     TimeSeriesProperty<std::string> *slog =
-        dynamic_cast<TimeSeriesProperty<std::string> *>(
-            ws->run().getLogData("icp_event"));
+        dynamic_cast<TimeSeriesProperty<std::string> *>(ws->run().getLogData("icp_event"));
     TS_ASSERT(slog);
     std::string str = slog->value();
     TS_ASSERT_EQUALS(str.size(), 1023);
-    TS_ASSERT_EQUALS(str.substr(0, 37),
-                     "2009-Apr-28 09:20:29  CHANGE_PERIOD 1");
+    TS_ASSERT_EQUALS(str.substr(0, 37), "2009-Apr-28 09:20:29  CHANGE_PERIOD 1");
 
-    slog = dynamic_cast<TimeSeriesProperty<std::string> *>(
-        ws->run().getLogData("icp_debug"));
+    slog = dynamic_cast<TimeSeriesProperty<std::string> *>(ws->run().getLogData("icp_debug"));
     TS_ASSERT(slog);
     TS_ASSERT_EQUALS(slog->size(), 50);
 
-    TimeSeriesProperty<int> *ilog = dynamic_cast<TimeSeriesProperty<int> *>(
-        ws->run().getLogData("total_counts"));
+    TimeSeriesProperty<int> *ilog = dynamic_cast<TimeSeriesProperty<int> *>(ws->run().getLogData("total_counts"));
     TS_ASSERT(ilog);
     TS_ASSERT_EQUALS(ilog->size(), 172);
 
-    ilog =
-        dynamic_cast<TimeSeriesProperty<int> *>(ws->run().getLogData("period"));
+    ilog = dynamic_cast<TimeSeriesProperty<int> *>(ws->run().getLogData("period"));
     TS_ASSERT(ilog);
     TS_ASSERT_EQUALS(ilog->size(), 172);
 
     TimeSeriesProperty<double> *dlog =
-        dynamic_cast<TimeSeriesProperty<double> *>(
-            ws->run().getLogData("proton_charge"));
+        dynamic_cast<TimeSeriesProperty<double> *>(ws->run().getLogData("proton_charge"));
     TS_ASSERT(dlog);
     TS_ASSERT_EQUALS(dlog->size(), 172);
 
-    TimeSeriesProperty<bool> *blog = dynamic_cast<TimeSeriesProperty<bool> *>(
-        ws->run().getLogData("period 1"));
+    TimeSeriesProperty<bool> *blog = dynamic_cast<TimeSeriesProperty<bool> *>(ws->run().getLogData("period 1"));
     TS_ASSERT(blog);
     TS_ASSERT_EQUALS(blog->size(), 1);
 
-    blog = dynamic_cast<TimeSeriesProperty<bool> *>(
-        ws->run().getLogData("running"));
+    blog = dynamic_cast<TimeSeriesProperty<bool> *>(ws->run().getLogData("running"));
     TS_ASSERT(blog);
     TS_ASSERT_EQUALS(blog->size(), 6);
 
@@ -260,8 +239,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(ld.execute());
     TS_ASSERT(ld.isExecuted());
 
-    MatrixWorkspace_sptr ws =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
+    MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
     TS_ASSERT_EQUALS(ws->blocksize(), 5);
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 15);
 
@@ -273,8 +251,7 @@ public:
 
     // these spectra are not loaded as above so their values are different
     // (occasionally 0)
-    TSM_ASSERT_EQUALS("Total workspace spectra N13, index 1 is occasionally 1 ",
-                      ws->y(5)[1], 1.);
+    TSM_ASSERT_EQUALS("Total workspace spectra N13, index 1 is occasionally 1 ", ws->y(5)[1], 1.);
     TS_ASSERT_EQUALS(ws->getSpectrum(5).getSpectrumNo(), 14);
     TS_ASSERT_EQUALS(*(ws->getSpectrum(5).getDetectorIDs().begin()), 14);
     TS_ASSERT_EQUALS(ws->y(6)[0], 0.);
@@ -320,8 +297,7 @@ public:
     auto spectNum2WSInd = ws->getSpectrumToWorkspaceIndexVector(offset);
 
     TS_ASSERT_EQUALS(38 + offset + 1, spectNum2WSInd.size());
-    size_t sample[] = {5,  10, 11, 12, 13, 14, 15, 16,
-                       17, 18, 19, 20, 34, 35, 38};
+    size_t sample[] = {5, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 34, 35, 38};
     std::vector<size_t> Sample(sample, sample + 15);
     for (size_t i = 0; i < Sample.size(); i++) {
       TS_ASSERT_EQUALS(i, spectNum2WSInd[Sample[i] + offset]);
@@ -345,8 +321,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(ld.execute());
     TS_ASSERT(ld.isExecuted());
 
-    MatrixWorkspace_sptr ws =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
+    MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
     TS_ASSERT_EQUALS(ws->blocksize(), 5);
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 11);
 
@@ -394,12 +369,9 @@ public:
     TS_ASSERT(ld.isExecuted());
 
     WorkspaceGroup_sptr grpout; //=WorkspaceGroup_sptr(new WorkspaceGroup);
-    TS_ASSERT_THROWS_NOTHING(
-        grpout = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-            "outWS"));
+    TS_ASSERT_THROWS_NOTHING(grpout = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("outWS"));
 
-    MatrixWorkspace_sptr ws =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS_1");
+    MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS_1");
     TS_ASSERT_EQUALS(ws->blocksize(), 995);
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 10);
     TS_ASSERT_DELTA(ws->run().getProtonCharge(), 0.069991, 1e-6);
@@ -431,8 +403,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(ld.execute());
     TS_ASSERT(ld.isExecuted());
 
-    MatrixWorkspace_sptr ws =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
+    MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
     TS_ASSERT_EQUALS(ws->blocksize(), 995);
     //   TS_ASSERT_EQUALS(ws->getNumberHistograms(),14);
     TS_ASSERT_EQUALS(ws->getTitle(), "hello\\0");
@@ -466,14 +437,11 @@ public:
 
     WorkspaceGroup_sptr grpWs;
     TS_ASSERT_THROWS_NOTHING(grpWs = ADS.retrieveWS<WorkspaceGroup>(wsName));
-    TSM_ASSERT_EQUALS("Should be two workspaces in the group", 2,
-                      grpWs->size());
+    TSM_ASSERT_EQUALS("Should be two workspaces in the group", 2, grpWs->size());
 
     // Check the individual workspace group members.
-    MatrixWorkspace_sptr ws1 =
-        std::dynamic_pointer_cast<MatrixWorkspace>(grpWs->getItem(0));
-    MatrixWorkspace_sptr ws2 =
-        std::dynamic_pointer_cast<MatrixWorkspace>(grpWs->getItem(1));
+    MatrixWorkspace_sptr ws1 = std::dynamic_pointer_cast<MatrixWorkspace>(grpWs->getItem(0));
+    MatrixWorkspace_sptr ws2 = std::dynamic_pointer_cast<MatrixWorkspace>(grpWs->getItem(1));
     TS_ASSERT(ws1 != nullptr);
     TS_ASSERT(ws2 != nullptr);
     // Check that workspace 1 has the correct period data, and no other period
@@ -485,15 +453,13 @@ public:
     // Check the multi-period proton charge extraction
     const Run &run = ws1->run();
     ArrayProperty<double> *protonChargeProperty =
-        dynamic_cast<ArrayProperty<double> *>(
-            run.getLogData("proton_charge_by_period"));
+        dynamic_cast<ArrayProperty<double> *>(run.getLogData("proton_charge_by_period"));
     double chargeSum = 0;
     for (size_t i = 0; i < grpWs->size(); ++i) {
       chargeSum += protonChargeProperty->operator()()[i];
     }
     PropertyWithValue<double> *totalChargeProperty =
-        dynamic_cast<PropertyWithValue<double> *>(
-            run.getLogData("gd_prtn_chrg"));
+        dynamic_cast<PropertyWithValue<double> *>(run.getLogData("gd_prtn_chrg"));
     double totalCharge = std::stod(totalChargeProperty->value());
     TSM_ASSERT_DELTA("Something is badly wrong if the sum across the periods "
                      "does not correspond to the total charge.",
@@ -515,8 +481,7 @@ public:
     AnalysisDataServiceImpl &ADS = AnalysisDataService::Instance();
     WorkspaceGroup_sptr grpWs;
     TS_ASSERT_THROWS_NOTHING(grpWs = ADS.retrieveWS<WorkspaceGroup>(wsName));
-    MatrixWorkspace_sptr ws1 =
-        std::dynamic_pointer_cast<MatrixWorkspace>(grpWs->getItem(0));
+    MatrixWorkspace_sptr ws1 = std::dynamic_pointer_cast<MatrixWorkspace>(grpWs->getItem(0));
 
     auto inst = ws1->getInstrument();
     TS_ASSERT(!inst->getFilename().empty()); // This is how we know we didn't
@@ -527,8 +492,7 @@ public:
 
     // check that POLREF_Parameters.xml has been loaded
     auto params = inst->getParameterMap();
-    TS_ASSERT_EQUALS(params->getString(inst.get(), "show-signed-theta"),
-                     "Always");
+    TS_ASSERT_EQUALS(params->getString(inst.get(), "show-signed-theta"), "Always");
   }
 
   void testExecMonExcluded() {
@@ -541,8 +505,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(ld.execute());
     TS_ASSERT(ld.isExecuted());
 
-    MatrixWorkspace_sptr ws =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
+    MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
     TS_ASSERT_EQUALS(ws->blocksize(), 5);
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 17790);
 
@@ -589,8 +552,7 @@ public:
     TS_ASSERT_EQUALS(*(ws->getSpectrum(37 - 2).getDetectorIDs().begin()), 38);
 
     TS_ASSERT_EQUALS(ws->getSpectrum(1234 - 2).getDetectorIDs().size(), 1);
-    TS_ASSERT_EQUALS(*(ws->getSpectrum(1234 - 2).getDetectorIDs().begin()),
-                     1235);
+    TS_ASSERT_EQUALS(*(ws->getSpectrum(1234 - 2).getDetectorIDs().begin()), 1235);
 
     TS_ASSERT_EQUALS(ws->getSpectrum(1234 - 2).getSpectrumNo(), 1235);
     TS_ASSERT(ws->getSpectrum(1234 - 2).hasDetectorID(1235));
@@ -599,42 +561,34 @@ public:
     TS_ASSERT_EQUALS(logs.size(), 50);
 
     TimeSeriesProperty<std::string> *slog =
-        dynamic_cast<TimeSeriesProperty<std::string> *>(
-            ws->run().getLogData("icp_event"));
+        dynamic_cast<TimeSeriesProperty<std::string> *>(ws->run().getLogData("icp_event"));
     TS_ASSERT(slog);
     std::string str = slog->value();
     TS_ASSERT_EQUALS(str.size(), 1023);
-    TS_ASSERT_EQUALS(str.substr(0, 37),
-                     "2009-Apr-28 09:20:29  CHANGE_PERIOD 1");
+    TS_ASSERT_EQUALS(str.substr(0, 37), "2009-Apr-28 09:20:29  CHANGE_PERIOD 1");
 
-    slog = dynamic_cast<TimeSeriesProperty<std::string> *>(
-        ws->run().getLogData("icp_debug"));
+    slog = dynamic_cast<TimeSeriesProperty<std::string> *>(ws->run().getLogData("icp_debug"));
     TS_ASSERT(slog);
     TS_ASSERT_EQUALS(slog->size(), 50);
 
-    TimeSeriesProperty<int> *ilog = dynamic_cast<TimeSeriesProperty<int> *>(
-        ws->run().getLogData("total_counts"));
+    TimeSeriesProperty<int> *ilog = dynamic_cast<TimeSeriesProperty<int> *>(ws->run().getLogData("total_counts"));
     TS_ASSERT(ilog);
     TS_ASSERT_EQUALS(ilog->size(), 172);
 
-    ilog =
-        dynamic_cast<TimeSeriesProperty<int> *>(ws->run().getLogData("period"));
+    ilog = dynamic_cast<TimeSeriesProperty<int> *>(ws->run().getLogData("period"));
     TS_ASSERT(ilog);
     TS_ASSERT_EQUALS(ilog->size(), 172);
 
     TimeSeriesProperty<double> *dlog =
-        dynamic_cast<TimeSeriesProperty<double> *>(
-            ws->run().getLogData("proton_charge"));
+        dynamic_cast<TimeSeriesProperty<double> *>(ws->run().getLogData("proton_charge"));
     TS_ASSERT(dlog);
     TS_ASSERT_EQUALS(dlog->size(), 172);
 
-    TimeSeriesProperty<bool> *blog = dynamic_cast<TimeSeriesProperty<bool> *>(
-        ws->run().getLogData("period 1"));
+    TimeSeriesProperty<bool> *blog = dynamic_cast<TimeSeriesProperty<bool> *>(ws->run().getLogData("period 1"));
     TS_ASSERT(blog);
     TS_ASSERT_EQUALS(blog->size(), 1);
 
-    blog = dynamic_cast<TimeSeriesProperty<bool> *>(
-        ws->run().getLogData("running"));
+    blog = dynamic_cast<TimeSeriesProperty<bool> *>(ws->run().getLogData("running"));
     TS_ASSERT(blog);
     TS_ASSERT_EQUALS(blog->size(), 6);
 
@@ -668,8 +622,7 @@ public:
     TS_ASSERT_EQUALS(2, detGroup->size());
     TS_ASSERT_EQUALS(2, monGroup->size());
 
-    auto detWS0 =
-        std::dynamic_pointer_cast<MatrixWorkspace>(detGroup->getItem(0));
+    auto detWS0 = std::dynamic_pointer_cast<MatrixWorkspace>(detGroup->getItem(0));
     TS_ASSERT_EQUALS(1000, detWS0->blocksize());
     TS_ASSERT_EQUALS(243, detWS0->getNumberHistograms());
     TS_ASSERT_DELTA(105, detWS0->x(1)[1], 1e-08);
@@ -677,8 +630,7 @@ public:
     TS_ASSERT_DELTA(M_SQRT2, detWS0->e(1)[1], 1e-08);
     TS_ASSERT_EQUALS(detWS0->getSpectrum(0).getSpectrumNo(), 4);
 
-    auto monWS0 =
-        std::dynamic_pointer_cast<MatrixWorkspace>(monGroup->getItem(0));
+    auto monWS0 = std::dynamic_pointer_cast<MatrixWorkspace>(monGroup->getItem(0));
     TS_ASSERT_EQUALS(1000, monWS0->blocksize());
     TS_ASSERT_EQUALS(3, monWS0->getNumberHistograms());
     TS_ASSERT_DELTA(105, monWS0->x(1)[1], 1e-08);
@@ -687,8 +639,7 @@ public:
     TS_ASSERT_EQUALS(monWS0->getSpectrum(0).getSpectrumNo(), 1);
     TS_ASSERT_EQUALS(monWS0->getSpectrum(2).getSpectrumNo(), 3);
 
-    auto monWS1 =
-        std::dynamic_pointer_cast<MatrixWorkspace>(monGroup->getItem(1));
+    auto monWS1 = std::dynamic_pointer_cast<MatrixWorkspace>(monGroup->getItem(1));
     TS_ASSERT_EQUALS(1000, monWS1->blocksize());
     TS_ASSERT_EQUALS(3, monWS1->getNumberHistograms());
     TS_ASSERT_DELTA(105, monWS1->x(1)[1], 1e-08);
@@ -700,17 +651,14 @@ public:
     // Same number of logs
     const auto &monPeriod1Run = monWS0->run();
     const auto &monPeriod2Run = monWS1->run();
-    TS_ASSERT_EQUALS(monPeriod1Run.getLogData().size(),
-                     monPeriod2Run.getLogData().size());
+    TS_ASSERT_EQUALS(monPeriod1Run.getLogData().size(), monPeriod2Run.getLogData().size());
     TS_ASSERT(monPeriod1Run.hasProperty("period 1"))
     TS_ASSERT(monPeriod2Run.hasProperty("period 2"))
   }
 
-  std::string extractStringLog(const MatrixWorkspace &matrixWS,
-                               const std::string &logName) {
+  std::string extractStringLog(const MatrixWorkspace &matrixWS, const std::string &logName) {
     auto run = matrixWS.run();
-    PropertyWithValue<std::string> *log =
-        dynamic_cast<PropertyWithValue<std::string> *>(run.getLogData(logName));
+    PropertyWithValue<std::string> *log = dynamic_cast<PropertyWithValue<std::string> *>(run.getLogData(logName));
     return log->value();
   }
 
@@ -728,26 +676,19 @@ public:
     auto groupWS = std::dynamic_pointer_cast<WorkspaceGroup>(detWS);
     TSM_ASSERT("Should have got back a workspace group", groupWS);
 
-    auto firstMatrixWS =
-        std::dynamic_pointer_cast<MatrixWorkspace>(groupWS->getItem(0));
+    auto firstMatrixWS = std::dynamic_pointer_cast<MatrixWorkspace>(groupWS->getItem(0));
 
     TS_ASSERT_EQUALS("34", extractStringLog(*firstMatrixWS, "measurement_id"));
-    TS_ASSERT_EQUALS("0",
-                     extractStringLog(*firstMatrixWS, "measurement_subid"));
+    TS_ASSERT_EQUALS("0", extractStringLog(*firstMatrixWS, "measurement_subid"));
     TS_ASSERT_EQUALS("", extractStringLog(*firstMatrixWS, "measurement_label"));
-    TS_ASSERT_EQUALS("PNR",
-                     extractStringLog(*firstMatrixWS, "measurement_type"));
+    TS_ASSERT_EQUALS("PNR", extractStringLog(*firstMatrixWS, "measurement_type"));
 
-    auto secondMatrixWS =
-        std::dynamic_pointer_cast<MatrixWorkspace>(groupWS->getItem(1));
+    auto secondMatrixWS = std::dynamic_pointer_cast<MatrixWorkspace>(groupWS->getItem(1));
 
     TS_ASSERT_EQUALS("34", extractStringLog(*secondMatrixWS, "measurement_id"));
-    TS_ASSERT_EQUALS("0",
-                     extractStringLog(*secondMatrixWS, "measurement_subid"));
-    TS_ASSERT_EQUALS("",
-                     extractStringLog(*secondMatrixWS, "measurement_label"));
-    TS_ASSERT_EQUALS("PNR",
-                     extractStringLog(*secondMatrixWS, "measurement_type"));
+    TS_ASSERT_EQUALS("0", extractStringLog(*secondMatrixWS, "measurement_subid"));
+    TS_ASSERT_EQUALS("", extractStringLog(*secondMatrixWS, "measurement_label"));
+    TS_ASSERT_EQUALS("PNR", extractStringLog(*secondMatrixWS, "measurement_type"));
   }
 
   //------------------------------------------------------------------
@@ -769,25 +710,20 @@ public:
     TS_ASSERT(ld.isExecuted());
 
     // Assert
-    MatrixWorkspace_sptr ws =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
+    MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
     TSM_ASSERT_EQUALS("Should have 17036 bins", ws->blocksize(), 17036);
-    TSM_ASSERT_EQUALS("Should have 168 detectors (no monitors)",
-                      ws->getNumberHistograms(), 168);
+    TSM_ASSERT_EQUALS("Should have 168 detectors (no monitors)", ws->getNumberHistograms(), 168);
 
     std::vector<Mantid::detid_t> monitorDetIDs{145, 146, 147, 148};
-    std::vector<Mantid::detid_t> neighborsToCheck{140, 141, 142, 143,
-                                                  144, 149, 150, 151};
+    std::vector<Mantid::detid_t> neighborsToCheck{140, 141, 142, 143, 144, 149, 150, 151};
     auto detIDtoWSIndexMap = ws->getDetectorIDToWorkspaceIndexMap();
 
     // Check monitors are not in workspace
     for (const auto &monitorDetID : monitorDetIDs) {
-      TSM_ASSERT("Should not be in the detID2WSIndexMap.",
-                 detIDtoWSIndexMap.count(monitorDetID) == 0);
+      TSM_ASSERT("Should not be in the detID2WSIndexMap.", detIDtoWSIndexMap.count(monitorDetID) == 0);
     }
     for (const auto &neighborToCheck : neighborsToCheck) {
-      TSM_ASSERT("Should be in the detID2WSIndexMap.",
-                 detIDtoWSIndexMap.count(neighborToCheck) == 1);
+      TSM_ASSERT("Should be in the detID2WSIndexMap.", detIDtoWSIndexMap.count(neighborToCheck) == 1);
     }
 
     // Check some of the data
@@ -804,28 +740,23 @@ public:
 
     // Check that the data has the expected spectrum number and the expected
     // detecor ID
-    TSM_ASSERT_EQUALS(
-        "Detector at WS index 142 should have a spectrum number of 143", 143,
-        ws->getSpectrum(142).getSpectrumNo());
-    TSM_ASSERT_EQUALS(
-        "Detector at WS index 143 should have a spectrum number of 144", 144,
-        ws->getSpectrum(143).getSpectrumNo());
+    TSM_ASSERT_EQUALS("Detector at WS index 142 should have a spectrum number of 143", 143,
+                      ws->getSpectrum(142).getSpectrumNo());
+    TSM_ASSERT_EQUALS("Detector at WS index 143 should have a spectrum number of 144", 144,
+                      ws->getSpectrum(143).getSpectrumNo());
 
     const auto &spectrumInfo = ws->spectrumInfo();
 
-    TSM_ASSERT_EQUALS(
-        "Detector at WS index 142 should have a detector ID of 143", 143,
-        spectrumInfo.detector(142).getID());
-    TSM_ASSERT_EQUALS(
-        "Detector at WS index 143 should have a detector ID of 144", 144,
-        spectrumInfo.detector(143).getID());
+    TSM_ASSERT_EQUALS("Detector at WS index 142 should have a detector ID of 143", 143,
+                      spectrumInfo.detector(142).getID());
+    TSM_ASSERT_EQUALS("Detector at WS index 143 should have a detector ID of 144", 144,
+                      spectrumInfo.detector(143).getID());
 
     // Clean up
     AnalysisDataService::Instance().remove("outWS");
   }
 
-  void
-  test_that_non_contiguous_data_loads_for_excluded_monitors_and_spetra_list_which_contains_monitors() {
+  void test_that_non_contiguous_data_loads_for_excluded_monitors_and_spetra_list_which_contains_monitors() {
     /*
     Monitors can be found at detID: 145, 146, 147, 148
     */
@@ -846,20 +777,17 @@ public:
     TS_ASSERT(ld.isExecuted());
 
     // Assert
-    MatrixWorkspace_sptr ws =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
+    MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
 
     TSM_ASSERT_EQUALS("Should have 17036 bins", ws->blocksize(), 17036);
-    TSM_ASSERT_EQUALS("Should have 25 detectors", ws->getNumberHistograms(),
-                      25);
+    TSM_ASSERT_EQUALS("Should have 25 detectors", ws->getNumberHistograms(), 25);
 
     // Check elements in workspace
     auto detIDtoWSIndexMap = ws->getDetectorIDToWorkspaceIndexMap();
 
     // Range from 1 to 11
     for (Mantid::detid_t detID = 1; detID < 12; ++detID) {
-      TSM_ASSERT("Should not be in workspace",
-                 detIDtoWSIndexMap.count(detID) == 0);
+      TSM_ASSERT("Should not be in workspace", detIDtoWSIndexMap.count(detID) == 0);
     }
 
     // 12
@@ -867,8 +795,7 @@ public:
 
     // Range from 13 t0 49
     for (Mantid::detid_t detID = 13; detID < 50; ++detID) {
-      TSM_ASSERT("Should not be in workspace",
-                 detIDtoWSIndexMap.count(detID) == 0);
+      TSM_ASSERT("Should not be in workspace", detIDtoWSIndexMap.count(detID) == 0);
     }
 
     // Range from 50 to 73
@@ -878,8 +805,7 @@ public:
 
     // Range from 74 to 144
     for (Mantid::detid_t detID = 74; detID < 145; ++detID) {
-      TSM_ASSERT("Should not be in workspace",
-                 detIDtoWSIndexMap.count(detID) == 0);
+      TSM_ASSERT("Should not be in workspace", detIDtoWSIndexMap.count(detID) == 0);
     }
 
     // 145 --> not in workspace !!!
@@ -887,18 +813,15 @@ public:
 
     // Range from 146 to 172 (which is the number of detectors + monitors)
     for (Mantid::detid_t detID = 146; detID <= 172; ++detID) {
-      TSM_ASSERT("Should not be in workspace",
-                 detIDtoWSIndexMap.count(detID) == 0);
+      TSM_ASSERT("Should not be in workspace", detIDtoWSIndexMap.count(detID) == 0);
     }
     // Check that the data has the expected spectrum number and the expected
     // detecor ID (for some sample spectra)
-    TSM_ASSERT_EQUALS(
-        "Detector at WS index 24 should have a spectrum number of 73", 73,
-        ws->getSpectrum(24).getSpectrumNo());
+    TSM_ASSERT_EQUALS("Detector at WS index 24 should have a spectrum number of 73", 73,
+                      ws->getSpectrum(24).getSpectrumNo());
 
     const auto &spectrumInfo = ws->spectrumInfo();
-    TSM_ASSERT_EQUALS("Detector at WS index 24 should have a detector ID of 73",
-                      73, spectrumInfo.detector(24).getID());
+    TSM_ASSERT_EQUALS("Detector at WS index 24 should have a detector ID of 73", 73, spectrumInfo.detector(24).getID());
 
     // Clean up
     AnalysisDataService::Instance().remove("outWS");
@@ -922,25 +845,20 @@ public:
     TS_ASSERT(ld.isExecuted());
 
     // Assert
-    MatrixWorkspace_sptr ws =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
+    MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
     TSM_ASSERT_EQUALS("Should have 17036 bins", ws->blocksize(), 17036);
-    TSM_ASSERT_EQUALS("Should have 172 detectors (including 4 monitors)",
-                      ws->getNumberHistograms(), 172);
+    TSM_ASSERT_EQUALS("Should have 172 detectors (including 4 monitors)", ws->getNumberHistograms(), 172);
 
     std::vector<Mantid::detid_t> monitorDetIDs{145, 146, 147, 148};
-    std::vector<Mantid::detid_t> neighborsToCheck{140, 141, 142, 143,
-                                                  144, 149, 150, 151};
+    std::vector<Mantid::detid_t> neighborsToCheck{140, 141, 142, 143, 144, 149, 150, 151};
     auto detIDtoWSIndexMap = ws->getDetectorIDToWorkspaceIndexMap();
 
     // Check monitors are not in workspace
     for (const auto &monitorDetID : monitorDetIDs) {
-      TSM_ASSERT("Should be in the detID2WSIndexMap.",
-                 detIDtoWSIndexMap.count(monitorDetID) == 1);
+      TSM_ASSERT("Should be in the detID2WSIndexMap.", detIDtoWSIndexMap.count(monitorDetID) == 1);
     }
     for (const auto &neighborToCheck : neighborsToCheck) {
-      TSM_ASSERT("Should be in the detID2WSIndexMap.",
-                 detIDtoWSIndexMap.count(neighborToCheck) == 1);
+      TSM_ASSERT("Should be in the detID2WSIndexMap.", detIDtoWSIndexMap.count(neighborToCheck) == 1);
     }
 
     // Check some of the data
@@ -959,27 +877,22 @@ public:
 
     // Check that the data has the expected spectrum number and the expected
     // detecor ID
-    TSM_ASSERT_EQUALS(
-        "Detector at WS index 142 should have a spectrum number of 143", 143,
-        ws->getSpectrum(142).getSpectrumNo());
-    TSM_ASSERT_EQUALS(
-        "Monitor at WS index 144 should have a spectrum number of 145", 145,
-        ws->getSpectrum(144).getSpectrumNo());
+    TSM_ASSERT_EQUALS("Detector at WS index 142 should have a spectrum number of 143", 143,
+                      ws->getSpectrum(142).getSpectrumNo());
+    TSM_ASSERT_EQUALS("Monitor at WS index 144 should have a spectrum number of 145", 145,
+                      ws->getSpectrum(144).getSpectrumNo());
 
     const auto &spectrumInfo = ws->spectrumInfo();
-    TSM_ASSERT_EQUALS(
-        "Detector at WS index 142 should have a detector ID of 143", 143,
-        spectrumInfo.detector(142).getID());
-    TSM_ASSERT_EQUALS(
-        "Detector at WS index 144 should have a detector ID of 145", 145,
-        spectrumInfo.detector(144).getID());
+    TSM_ASSERT_EQUALS("Detector at WS index 142 should have a detector ID of 143", 143,
+                      spectrumInfo.detector(142).getID());
+    TSM_ASSERT_EQUALS("Detector at WS index 144 should have a detector ID of 145", 145,
+                      spectrumInfo.detector(144).getID());
 
     // Clean up
     AnalysisDataService::Instance().remove("outWS");
   }
 
-  void
-  test_that_non_contiguous_data_loads_for_included_monitors_and_spectra_range_and_spetra_list() {
+  void test_that_non_contiguous_data_loads_for_included_monitors_and_spectra_range_and_spetra_list() {
     /*
     Monitors can be found at detID: 145, 146, 147, 148
     */
@@ -999,20 +912,17 @@ public:
     TS_ASSERT(ld.isExecuted());
 
     // Assert
-    MatrixWorkspace_sptr ws =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
+    MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
 
     TSM_ASSERT_EQUALS("Should have 17036 bins", ws->blocksize(), 17036);
-    TSM_ASSERT_EQUALS("Should have 26 detectors", ws->getNumberHistograms(),
-                      26);
+    TSM_ASSERT_EQUALS("Should have 26 detectors", ws->getNumberHistograms(), 26);
 
     // Check elements in workspace
     auto detIDtoWSIndexMap = ws->getDetectorIDToWorkspaceIndexMap();
 
     // Range from 1 to 11
     for (Mantid::detid_t detID = 1; detID < 12; ++detID) {
-      TSM_ASSERT("Should not be in workspace",
-                 detIDtoWSIndexMap.count(detID) == 0);
+      TSM_ASSERT("Should not be in workspace", detIDtoWSIndexMap.count(detID) == 0);
     }
 
     // 12
@@ -1020,8 +930,7 @@ public:
 
     // Range from 13 t0 49
     for (Mantid::detid_t detID = 13; detID < 50; ++detID) {
-      TSM_ASSERT("Should not be in workspace",
-                 detIDtoWSIndexMap.count(detID) == 0);
+      TSM_ASSERT("Should not be in workspace", detIDtoWSIndexMap.count(detID) == 0);
     }
 
     // Range from 50 to 73
@@ -1031,8 +940,7 @@ public:
 
     // Range from 74 to 144
     for (Mantid::detid_t detID = 74; detID < 145; ++detID) {
-      TSM_ASSERT("Should not be in workspace",
-                 detIDtoWSIndexMap.count(detID) == 0);
+      TSM_ASSERT("Should not be in workspace", detIDtoWSIndexMap.count(detID) == 0);
     }
 
     // 145
@@ -1040,8 +948,7 @@ public:
 
     // Range from 146 to 172 (which is the number of detectors + monitors)
     for (Mantid::detid_t detID = 146; detID <= 172; ++detID) {
-      TSM_ASSERT("Should not be in workspace",
-                 detIDtoWSIndexMap.count(detID) == 0);
+      TSM_ASSERT("Should not be in workspace", detIDtoWSIndexMap.count(detID) == 0);
     }
 
     double delta = 1e-6;
@@ -1056,18 +963,14 @@ public:
     // detecor ID (for some sample spectra)
     const auto &spectrumInfo = ws->spectrumInfo();
 
-    TSM_ASSERT_EQUALS(
-        "Detector at WS index 24 should have a spectrum number of 73", 73,
-        ws->getSpectrum(24).getSpectrumNo());
-    TSM_ASSERT_EQUALS("Detector at WS index 24 should have a detector ID of 73",
-                      73, spectrumInfo.detector(24).getID());
+    TSM_ASSERT_EQUALS("Detector at WS index 24 should have a spectrum number of 73", 73,
+                      ws->getSpectrum(24).getSpectrumNo());
+    TSM_ASSERT_EQUALS("Detector at WS index 24 should have a detector ID of 73", 73, spectrumInfo.detector(24).getID());
 
-    TSM_ASSERT_EQUALS(
-        "Monitor at WS index 25 should have a spectrum number of 145", 145,
-        ws->getSpectrum(25).getSpectrumNo());
-    TSM_ASSERT_EQUALS(
-        "Detector at WS index 25 should have a detector ID of 145", 145,
-        spectrumInfo.detector(25).getID());
+    TSM_ASSERT_EQUALS("Monitor at WS index 25 should have a spectrum number of 145", 145,
+                      ws->getSpectrum(25).getSpectrumNo());
+    TSM_ASSERT_EQUALS("Detector at WS index 25 should have a detector ID of 145", 145,
+                      spectrumInfo.detector(25).getID());
 
     // Clean up
     AnalysisDataService::Instance().remove("outWS");
@@ -1093,40 +996,31 @@ public:
     TS_ASSERT(ld.isExecuted());
 
     // Assert
-    MatrixWorkspace_sptr ws =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
-    MatrixWorkspace_sptr mon_ws =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "outWS_monitors");
+    MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
+    MatrixWorkspace_sptr mon_ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS_monitors");
 
     TSM_ASSERT_EQUALS("Should have 17036 bins", ws->blocksize(), 17036);
-    TSM_ASSERT_EQUALS("Should have 168 detectors", ws->getNumberHistograms(),
-                      168);
+    TSM_ASSERT_EQUALS("Should have 168 detectors", ws->getNumberHistograms(), 168);
 
     TSM_ASSERT_EQUALS("Should have 17036 bins", mon_ws->blocksize(), 17036);
-    TSM_ASSERT_EQUALS("Should have 4 monitors", mon_ws->getNumberHistograms(),
-                      4);
+    TSM_ASSERT_EQUALS("Should have 4 monitors", mon_ws->getNumberHistograms(), 4);
 
     std::vector<Mantid::detid_t> monitorDetIDs{145, 146, 147, 148};
-    std::vector<Mantid::detid_t> neighborsToCheck{140, 141, 142, 143,
-                                                  144, 149, 150, 151};
+    std::vector<Mantid::detid_t> neighborsToCheck{140, 141, 142, 143, 144, 149, 150, 151};
     auto detIDtoWSIndexMap = ws->getDetectorIDToWorkspaceIndexMap();
     auto detIDtoWSIndexMapMon = mon_ws->getDetectorIDToWorkspaceIndexMap();
 
     // Check monitors are not in workspace
     for (const auto &monitorDetID : monitorDetIDs) {
-      TSM_ASSERT("Should not be in the detID2WSIndexMap.",
-                 detIDtoWSIndexMap.count(monitorDetID) == 0);
+      TSM_ASSERT("Should not be in the detID2WSIndexMap.", detIDtoWSIndexMap.count(monitorDetID) == 0);
     }
 
     for (const auto &monitorDetID : monitorDetIDs) {
-      TSM_ASSERT("Should be in the detID2WSIndexMapMon.",
-                 detIDtoWSIndexMapMon.count(monitorDetID) == 1);
+      TSM_ASSERT("Should be in the detID2WSIndexMapMon.", detIDtoWSIndexMapMon.count(monitorDetID) == 1);
     }
 
     for (const auto &neighborToCheck : neighborsToCheck) {
-      TSM_ASSERT("Should be in the detID2WSIndexMap.",
-                 detIDtoWSIndexMap.count(neighborToCheck) == 1);
+      TSM_ASSERT("Should be in the detID2WSIndexMap.", detIDtoWSIndexMap.count(neighborToCheck) == 1);
     }
 
     // Check some of the data
@@ -1149,28 +1043,23 @@ public:
 
     // Check that the data has the expected spectrum number and the expected
     // detecor ID
-    TSM_ASSERT_EQUALS(
-        "Detector at WS index 142 should have a spectrum number of 143", 143,
-        ws->getSpectrum(142).getSpectrumNo());
-    TSM_ASSERT_EQUALS(
-        "Detector at WS index 143 should have a spectrum number of 144", 144,
-        ws->getSpectrum(143).getSpectrumNo());
+    TSM_ASSERT_EQUALS("Detector at WS index 142 should have a spectrum number of 143", 143,
+                      ws->getSpectrum(142).getSpectrumNo());
+    TSM_ASSERT_EQUALS("Detector at WS index 143 should have a spectrum number of 144", 144,
+                      ws->getSpectrum(143).getSpectrumNo());
 
     const auto &spectrumInfo = ws->spectrumInfo();
-    TSM_ASSERT_EQUALS(
-        "Detector at WS index 142 should have a detector ID of 143", 143,
-        spectrumInfo.detector(142).getID());
-    TSM_ASSERT_EQUALS(
-        "Detector at WS index 143 should have a detector ID of 144", 144,
-        spectrumInfo.detector(143).getID());
+    TSM_ASSERT_EQUALS("Detector at WS index 142 should have a detector ID of 143", 143,
+                      spectrumInfo.detector(142).getID());
+    TSM_ASSERT_EQUALS("Detector at WS index 143 should have a detector ID of 144", 144,
+                      spectrumInfo.detector(143).getID());
 
-    TSM_ASSERT_EQUALS(
-        "Monitor at WS index 0 should have a spectrum number of 145", 145,
-        mon_ws->getSpectrum(0).getSpectrumNo());
+    TSM_ASSERT_EQUALS("Monitor at WS index 0 should have a spectrum number of 145", 145,
+                      mon_ws->getSpectrum(0).getSpectrumNo());
 
     const auto &monSpectrumInfo = mon_ws->spectrumInfo();
-    TSM_ASSERT_EQUALS("Monitor at WS index 0 should have a detector ID of 145",
-                      145, monSpectrumInfo.detector(0).getID());
+    TSM_ASSERT_EQUALS("Monitor at WS index 0 should have a detector ID of 145", 145,
+                      monSpectrumInfo.detector(0).getID());
 
     // Clean up
     AnalysisDataService::Instance().remove("outWS");
@@ -1198,18 +1087,13 @@ public:
     TS_ASSERT(ld.isExecuted());
 
     // Assert
-    MatrixWorkspace_sptr ws =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
-    MatrixWorkspace_sptr mon_ws =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "outWS_monitors");
+    MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
+    MatrixWorkspace_sptr mon_ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS_monitors");
 
     TSM_ASSERT_EQUALS("Should have 17036 bins", ws->blocksize(), 17036);
-    TSM_ASSERT_EQUALS("Should have 25 detectors", ws->getNumberHistograms(),
-                      25);
+    TSM_ASSERT_EQUALS("Should have 25 detectors", ws->getNumberHistograms(), 25);
 
-    TSM_ASSERT_EQUALS("Monitor workspace should have 17036 bins",
-                      mon_ws->blocksize(), 17036);
+    TSM_ASSERT_EQUALS("Monitor workspace should have 17036 bins", mon_ws->blocksize(), 17036);
     TSM_ASSERT_EQUALS("Monitor workspace should have 1 detector, hence "
                       "respecting the selection",
                       mon_ws->getNumberHistograms(), 1);
@@ -1219,8 +1103,7 @@ public:
 
     // Range from 1 to 11
     for (Mantid::detid_t detID = 1; detID < 12; ++detID) {
-      TSM_ASSERT("Should not be in workspace",
-                 detIDtoWSIndexMap.count(detID) == 0);
+      TSM_ASSERT("Should not be in workspace", detIDtoWSIndexMap.count(detID) == 0);
     }
 
     // 12
@@ -1228,8 +1111,7 @@ public:
 
     // Range from 13 t0 49
     for (Mantid::detid_t detID = 13; detID < 50; ++detID) {
-      TSM_ASSERT("Should not be in workspace",
-                 detIDtoWSIndexMap.count(detID) == 0);
+      TSM_ASSERT("Should not be in workspace", detIDtoWSIndexMap.count(detID) == 0);
     }
 
     // Range from 50 to 73
@@ -1239,8 +1121,7 @@ public:
 
     // Range from 74 to 144
     for (Mantid::detid_t detID = 74; detID < 145; ++detID) {
-      TSM_ASSERT("Should not be in workspace",
-                 detIDtoWSIndexMap.count(detID) == 0);
+      TSM_ASSERT("Should not be in workspace", detIDtoWSIndexMap.count(detID) == 0);
     }
 
     // 145
@@ -1248,32 +1129,27 @@ public:
 
     // Range from 146 to 172 (which is the number of detectors + monitors)
     for (Mantid::detid_t detID = 146; detID <= 172; ++detID) {
-      TSM_ASSERT("Should not be in workspace",
-                 detIDtoWSIndexMap.count(detID) == 0);
+      TSM_ASSERT("Should not be in workspace", detIDtoWSIndexMap.count(detID) == 0);
     }
 
-    TSM_ASSERT_EQUALS(
-        "Detector at WS index 2 should have a spectrum number of 51", 51,
-        ws->getSpectrum(2).getSpectrumNo());
+    TSM_ASSERT_EQUALS("Detector at WS index 2 should have a spectrum number of 51", 51,
+                      ws->getSpectrum(2).getSpectrumNo());
     const auto &spectrumInfo = ws->spectrumInfo();
-    TSM_ASSERT_EQUALS("Detector at WS index 2 should have a detector ID of 51",
-                      51, spectrumInfo.detector(2).getID());
+    TSM_ASSERT_EQUALS("Detector at WS index 2 should have a detector ID of 51", 51, spectrumInfo.detector(2).getID());
 
     // Test the monitor workspace
-    TSM_ASSERT_EQUALS(
-        "Detector at WS index 0 should have a spectrum number of 145", 145,
-        mon_ws->getSpectrum(0).getSpectrumNo());
+    TSM_ASSERT_EQUALS("Detector at WS index 0 should have a spectrum number of 145", 145,
+                      mon_ws->getSpectrum(0).getSpectrumNo());
     const auto &monSpectrumInfo = mon_ws->spectrumInfo();
-    TSM_ASSERT_EQUALS("Detector at WS index 0 should have a detector ID of 145",
-                      145, monSpectrumInfo.detector(0).getID());
+    TSM_ASSERT_EQUALS("Detector at WS index 0 should have a detector ID of 145", 145,
+                      monSpectrumInfo.detector(0).getID());
 
     // Clean up
     AnalysisDataService::Instance().remove("outWS");
     AnalysisDataService::Instance().remove("outWS_monitors");
   }
 
-  void
-  test_that_non_contiguous_data_loads_all_monitors_for_separate_monitors_and_spectra_range_and_spectra_list() {
+  void test_that_non_contiguous_data_loads_all_monitors_for_separate_monitors_and_spectra_range_and_spectra_list() {
     /*
     Monitors can be found at detID: 145, 146, 147, 148
     */
@@ -1293,18 +1169,13 @@ public:
     TS_ASSERT(ld.isExecuted());
 
     // Assert
-    MatrixWorkspace_sptr ws =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
-    MatrixWorkspace_sptr mon_ws =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "outWS_monitors");
+    MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
+    MatrixWorkspace_sptr mon_ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS_monitors");
 
     TSM_ASSERT_EQUALS("Should have 17036 bins", ws->blocksize(), 17036);
-    TSM_ASSERT_EQUALS("Should have 25 detectors", ws->getNumberHistograms(),
-                      25);
+    TSM_ASSERT_EQUALS("Should have 25 detectors", ws->getNumberHistograms(), 25);
 
-    TSM_ASSERT_EQUALS("Monitor workspace should have 17036 bins",
-                      mon_ws->blocksize(), 17036);
+    TSM_ASSERT_EQUALS("Monitor workspace should have 17036 bins", mon_ws->blocksize(), 17036);
     TSM_ASSERT_EQUALS("Monitor workspace should have 4 detector, since none "
                       "was specifically selected",
                       mon_ws->getNumberHistograms(), 4);
@@ -1314,8 +1185,7 @@ public:
 
     // Range from 1 to 11
     for (Mantid::detid_t detID = 1; detID < 12; ++detID) {
-      TSM_ASSERT("Should not be in workspace",
-                 detIDtoWSIndexMap.count(detID) == 0);
+      TSM_ASSERT("Should not be in workspace", detIDtoWSIndexMap.count(detID) == 0);
     }
 
     // 12
@@ -1323,8 +1193,7 @@ public:
 
     // Range from 13 t0 49
     for (Mantid::detid_t detID = 13; detID < 50; ++detID) {
-      TSM_ASSERT("Should not be in workspace",
-                 detIDtoWSIndexMap.count(detID) == 0);
+      TSM_ASSERT("Should not be in workspace", detIDtoWSIndexMap.count(detID) == 0);
     }
 
     // Range from 50 to 73
@@ -1334,8 +1203,7 @@ public:
 
     // Range from 74 to 144
     for (Mantid::detid_t detID = 74; detID < 145; ++detID) {
-      TSM_ASSERT("Should not be in workspace",
-                 detIDtoWSIndexMap.count(detID) == 0);
+      TSM_ASSERT("Should not be in workspace", detIDtoWSIndexMap.count(detID) == 0);
     }
 
     // 145
@@ -1343,24 +1211,20 @@ public:
 
     // Range from 146 to 172 (which is the number of detectors + monitors)
     for (Mantid::detid_t detID = 146; detID <= 172; ++detID) {
-      TSM_ASSERT("Should not be in workspace",
-                 detIDtoWSIndexMap.count(detID) == 0);
+      TSM_ASSERT("Should not be in workspace", detIDtoWSIndexMap.count(detID) == 0);
     }
 
-    TSM_ASSERT_EQUALS(
-        "Detector at WS index 2 should have a spectrum number of 51", 51,
-        ws->getSpectrum(2).getSpectrumNo());
+    TSM_ASSERT_EQUALS("Detector at WS index 2 should have a spectrum number of 51", 51,
+                      ws->getSpectrum(2).getSpectrumNo());
     const auto &spectrumInfo = ws->spectrumInfo();
-    TSM_ASSERT_EQUALS("Detector at WS index 2 should have a detector ID of 51",
-                      51, spectrumInfo.detector(2).getID());
+    TSM_ASSERT_EQUALS("Detector at WS index 2 should have a detector ID of 51", 51, spectrumInfo.detector(2).getID());
 
     // Test the monitor workspace
-    TSM_ASSERT_EQUALS(
-        "Detector at WS index 2 should have a spectrum number of 147", 147,
-        mon_ws->getSpectrum(2).getSpectrumNo());
+    TSM_ASSERT_EQUALS("Detector at WS index 2 should have a spectrum number of 147", 147,
+                      mon_ws->getSpectrum(2).getSpectrumNo());
     const auto &monSpectrumInfo = mon_ws->spectrumInfo();
-    TSM_ASSERT_EQUALS("Detector at WS index 2 should have a detector ID of 147",
-                      147, monSpectrumInfo.detector(2).getID());
+    TSM_ASSERT_EQUALS("Detector at WS index 2 should have a detector ID of 147", 147,
+                      monSpectrumInfo.detector(2).getID());
 
     // Clean up
     AnalysisDataService::Instance().remove("outWS");
@@ -1387,36 +1251,28 @@ public:
     TS_ASSERT(ld.isExecuted());
 
     // Assert
-    MatrixWorkspace_sptr ws =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
+    MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
 
-    TSM_ASSERT_THROWS_ANYTHING(
-        "We should not see the creation of a separate monitor workspace",
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "outWS_monitors"));
+    TSM_ASSERT_THROWS_ANYTHING("We should not see the creation of a separate monitor workspace",
+                               AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS_monitors"));
 
     TSM_ASSERT_EQUALS("Should have 17036 bins", ws->blocksize(), 17036);
     TSM_ASSERT_EQUALS("Should have 2 detectors", ws->getNumberHistograms(), 2);
 
     const auto &spectrumInfo = ws->spectrumInfo();
 
-    TSM_ASSERT_EQUALS(
-        "Monitor at WS index 0 should have a spectrum number of 145", 145,
-        ws->getSpectrum(0).getSpectrumNo());
-    TSM_ASSERT_EQUALS("Monitor at WS index 0 should have a detector ID of 145",
-                      145, spectrumInfo.detector(0).getID());
-    TSM_ASSERT_EQUALS(
-        "Monitor at WS index 1 should have a spectrum number of 147", 147,
-        ws->getSpectrum(1).getSpectrumNo());
-    TSM_ASSERT_EQUALS("Monitor at WS index 1 should have a detector ID of 147",
-                      147, spectrumInfo.detector(1).getID());
+    TSM_ASSERT_EQUALS("Monitor at WS index 0 should have a spectrum number of 145", 145,
+                      ws->getSpectrum(0).getSpectrumNo());
+    TSM_ASSERT_EQUALS("Monitor at WS index 0 should have a detector ID of 145", 145, spectrumInfo.detector(0).getID());
+    TSM_ASSERT_EQUALS("Monitor at WS index 1 should have a spectrum number of 147", 147,
+                      ws->getSpectrum(1).getSpectrumNo());
+    TSM_ASSERT_EQUALS("Monitor at WS index 1 should have a detector ID of 147", 147, spectrumInfo.detector(1).getID());
 
     // Clean up
     AnalysisDataService::Instance().remove("outWS");
   }
 
-  void
-  test_that_non_contiguous_data_loads_only_monitors_in_parts_when_only_lower_bound_is_specfied() {
+  void test_that_non_contiguous_data_loads_only_monitors_in_parts_when_only_lower_bound_is_specfied() {
     /*
     Monitors can be found at detID: 145, 146, 147, 148
     */
@@ -1427,8 +1283,7 @@ public:
     ld.setPropertyValue("Filename", "INS09161.nxs");
     ld.setPropertyValue("OutputWorkspace", "outWS");
     ld.setPropertyValue("LoadMonitors", "1"); /*separate monitors*/
-    ld.setPropertyValue("SpectrumMin",
-                        "50"); /* Note that we don't specify a max*/
+    ld.setPropertyValue("SpectrumMin", "50"); /* Note that we don't specify a max*/
     ld.setPropertyValue("SpectrumList", "145");
 
     // Act
@@ -1436,18 +1291,13 @@ public:
     TS_ASSERT(ld.isExecuted());
 
     // Assert
-    MatrixWorkspace_sptr ws =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
-    MatrixWorkspace_sptr mon_ws =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "outWS_monitors");
+    MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
+    MatrixWorkspace_sptr mon_ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS_monitors");
 
     TSM_ASSERT_EQUALS("Should have 17036 bins", ws->blocksize(), 17036);
-    TSM_ASSERT_EQUALS("Should have 110(172-50 +1 -4) detectors",
-                      ws->getNumberHistograms(), 119);
+    TSM_ASSERT_EQUALS("Should have 110(172-50 +1 -4) detectors", ws->getNumberHistograms(), 119);
 
-    TSM_ASSERT_EQUALS("Monitor workspace should have 17036 bins",
-                      mon_ws->blocksize(), 17036);
+    TSM_ASSERT_EQUALS("Monitor workspace should have 17036 bins", mon_ws->blocksize(), 17036);
     TSM_ASSERT_EQUALS("Monitor workspace should have 4 detector, since none "
                       "was specifically selected",
                       mon_ws->getNumberHistograms(), 4);
@@ -1457,8 +1307,7 @@ public:
 
     // Range from 1 to 49
     for (Mantid::detid_t detID = 1; detID < 50; ++detID) {
-      TSM_ASSERT("Should not be in workspace",
-                 detIDtoWSIndexMap.count(detID) == 0);
+      TSM_ASSERT("Should not be in workspace", detIDtoWSIndexMap.count(detID) == 0);
     }
 
     // Range from 50 to 144
@@ -1474,17 +1323,14 @@ public:
 
     // Range from 146 to 172 (which is the number of detectors + monitors)
     for (Mantid::detid_t detID = 149; detID <= 172; ++detID) {
-      TSM_ASSERT("Should not be in workspace",
-                 detIDtoWSIndexMap.count(detID) == 1);
+      TSM_ASSERT("Should not be in workspace", detIDtoWSIndexMap.count(detID) == 1);
     }
 
-    TSM_ASSERT_EQUALS(
-        "Detector at WS index 2 should have a spectrum number of 52", 52,
-        ws->getSpectrum(2).getSpectrumNo());
+    TSM_ASSERT_EQUALS("Detector at WS index 2 should have a spectrum number of 52", 52,
+                      ws->getSpectrum(2).getSpectrumNo());
 
     const auto &spectrumInfo = ws->spectrumInfo();
-    TSM_ASSERT_EQUALS("Detector at WS index 2 should have a detector ID of 52",
-                      52, spectrumInfo.detector(2).getID());
+    TSM_ASSERT_EQUALS("Detector at WS index 2 should have a detector ID of 52", 52, spectrumInfo.detector(2).getID());
 
     // Clean up
     AnalysisDataService::Instance().remove("outWS");
@@ -1503,49 +1349,37 @@ public:
     ld.setPropertyValue("Filename", "LOQ49886.nxs");
     ld.setPropertyValue("OutputWorkspace", "outWS");
     ld.setPropertyValue("LoadMonitors", "1"); /*separate monitors*/
-    ld.setPropertyValue("SpectrumMin",
-                        "2"); /* Note that we don't specify a max*/
+    ld.setPropertyValue("SpectrumMin", "2");  /* Note that we don't specify a max*/
 
     // Act
     TS_ASSERT_THROWS_NOTHING(ld.execute());
     TS_ASSERT(ld.isExecuted());
 
     // Assert
-    MatrixWorkspace_sptr ws =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
-    MatrixWorkspace_sptr mon_ws =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "outWS_monitors");
+    MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
+    MatrixWorkspace_sptr mon_ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS_monitors");
 
     TSM_ASSERT_EQUALS("Should have 5 bins", ws->blocksize(), 5);
-    TSM_ASSERT_EQUALS("Should have 17790 detectors", ws->getNumberHistograms(),
-                      17790);
+    TSM_ASSERT_EQUALS("Should have 17790 detectors", ws->getNumberHistograms(), 17790);
 
-    TSM_ASSERT_EQUALS("Monitor workspace should have 5 bins",
-                      mon_ws->blocksize(), 5);
+    TSM_ASSERT_EQUALS("Monitor workspace should have 5 bins", mon_ws->blocksize(), 5);
     TSM_ASSERT_EQUALS("Monitor workspace should have 1 detector, since none "
                       "was specifically selected",
                       mon_ws->getNumberHistograms(), 1);
 
     // Check some samples
     const auto &spectrumInfo = ws->spectrumInfo();
-    TSM_ASSERT_EQUALS(
-        "Detector at WS index 2 should have a spectrum number of 5", 5,
-        ws->getSpectrum(2).getSpectrumNo());
-    TSM_ASSERT_EQUALS("Detector at WS index 2 should have a detector ID of 5",
-                      5, spectrumInfo.detector(2).getID());
-    TSM_ASSERT_EQUALS(
-        "Detector at WS index 3 should have a spectrum number of 6", 6,
-        ws->getSpectrum(3).getSpectrumNo());
-    TSM_ASSERT_EQUALS("Detector at WS index 3 should have a detector ID of 6",
-                      6, spectrumInfo.detector(3).getID());
+    TSM_ASSERT_EQUALS("Detector at WS index 2 should have a spectrum number of 5", 5,
+                      ws->getSpectrum(2).getSpectrumNo());
+    TSM_ASSERT_EQUALS("Detector at WS index 2 should have a detector ID of 5", 5, spectrumInfo.detector(2).getID());
+    TSM_ASSERT_EQUALS("Detector at WS index 3 should have a spectrum number of 6", 6,
+                      ws->getSpectrum(3).getSpectrumNo());
+    TSM_ASSERT_EQUALS("Detector at WS index 3 should have a detector ID of 6", 6, spectrumInfo.detector(3).getID());
 
-    TSM_ASSERT_EQUALS(
-        "Detector at WS index 0 should have a spectrum number of 2", 2,
-        mon_ws->getSpectrum(0).getSpectrumNo());
+    TSM_ASSERT_EQUALS("Detector at WS index 0 should have a spectrum number of 2", 2,
+                      mon_ws->getSpectrum(0).getSpectrumNo());
     const auto &monSpectrumInfo = mon_ws->spectrumInfo();
-    TSM_ASSERT_EQUALS("Detector at WS index 0 should have a detector ID of 2",
-                      2, monSpectrumInfo.detector(0).getID());
+    TSM_ASSERT_EQUALS("Detector at WS index 0 should have a detector ID of 2", 2, monSpectrumInfo.detector(0).getID());
 
     // Clean up
     AnalysisDataService::Instance().remove("outWS");
@@ -1567,8 +1401,7 @@ public:
   //------------------------------------------------------------------
   // Exceptions
   //------------------------------------------------------------------
-  void
-  test_that_when_selecting_range_with_only_monitors_and_exclude_monitors_exception_is_thrown() {
+  void test_that_when_selecting_range_with_only_monitors_and_exclude_monitors_exception_is_thrown() {
     // Scenario:
     // Data:    |--Mon--||--Det--||--Mon--||--Det--|
     // Select:   |  |
@@ -1589,8 +1422,7 @@ public:
                       ld.execute(), const std::invalid_argument &);
   }
 
-  void
-  test_that_when_selecting_range_with_only_monitors_in_the_middle_and_exclude_monitors_exception_is_thrown() {
+  void test_that_when_selecting_range_with_only_monitors_in_the_middle_and_exclude_monitors_exception_is_thrown() {
     // Scenario:
     // Data:    |--Mon--||--Det--||--Mon--||--Det--|
     // Select:                      |  |
@@ -1610,8 +1442,7 @@ public:
                       ld.execute(), const std::invalid_argument &);
   }
 
-  void
-  test_that_when_selecting_list_with_only_monitors_and_exclude_monitors_exception_is_thrown() {
+  void test_that_when_selecting_list_with_only_monitors_and_exclude_monitors_exception_is_thrown() {
     // Arrange
 
     LoadISISNexus2 ld;

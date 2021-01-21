@@ -21,9 +21,7 @@ namespace {
 // change the background colour with a style sheet. This also changes
 // the font slightly on Ubuntu so there may be a better way to do this,
 // but it's not a big issue so this should be fine for now.
-void showAsInvalid(QDoubleSpinBox &spinBox) {
-  spinBox.setStyleSheet("QDoubleSpinBox { background-color: #ffb8ad; }");
-}
+void showAsInvalid(QDoubleSpinBox &spinBox) { spinBox.setStyleSheet("QDoubleSpinBox { background-color: #ffb8ad; }"); }
 
 void showAsValid(QDoubleSpinBox &spinBox) { spinBox.setStyleSheet(""); }
 } // namespace
@@ -33,16 +31,13 @@ void showAsValid(QDoubleSpinBox &spinBox) { spinBox.setStyleSheet(""); }
  * used to find tooltips for the input properties
  * @param parent :: [input] The parent of this widget
  */
-QtInstrumentView::QtInstrumentView(
-    Mantid::API::IAlgorithm_sptr algorithmForTooltips, QWidget *parent)
+QtInstrumentView::QtInstrumentView(Mantid::API::IAlgorithm_sptr algorithmForTooltips, QWidget *parent)
     : QWidget(parent) {
   initLayout();
   registerSettingsWidgets(std::move(algorithmForTooltips));
 }
 
-void QtInstrumentView::subscribe(InstrumentViewSubscriber *notifyee) {
-  m_notifyee = notifyee;
-}
+void QtInstrumentView::subscribe(InstrumentViewSubscriber *notifyee) { m_notifyee = notifyee; }
 
 /**
 Initialise the Interface
@@ -55,28 +50,23 @@ void QtInstrumentView::initLayout() {
   m_ui.monBgMaxEdit->setSpecialValueText("Unset");
   m_ui.lamMinEdit->setSpecialValueText("Unset");
   m_ui.lamMaxEdit->setSpecialValueText("Unset");
-  connect(m_ui.getInstDefaultsButton, SIGNAL(clicked()), this,
-          SLOT(onRestoreDefaultsRequested()));
+  connect(m_ui.getInstDefaultsButton, SIGNAL(clicked()), this, SLOT(onRestoreDefaultsRequested()));
 }
 
 void QtInstrumentView::connectSettingsChange(QLineEdit &edit) {
-  connect(&edit, SIGNAL(textChanged(QString const &)), this,
-          SLOT(onSettingsChanged()));
+  connect(&edit, SIGNAL(textChanged(QString const &)), this, SLOT(onSettingsChanged()));
 }
 
 void QtInstrumentView::connectSettingsChange(QSpinBox &edit) {
-  connect(&edit, SIGNAL(valueChanged(QString const &)), this,
-          SLOT(onSettingsChanged()));
+  connect(&edit, SIGNAL(valueChanged(QString const &)), this, SLOT(onSettingsChanged()));
 }
 
 void QtInstrumentView::connectSettingsChange(QDoubleSpinBox &edit) {
-  connect(&edit, SIGNAL(valueChanged(QString const &)), this,
-          SLOT(onSettingsChanged()));
+  connect(&edit, SIGNAL(valueChanged(QString const &)), this, SLOT(onSettingsChanged()));
 }
 
 void QtInstrumentView::connectSettingsChange(QComboBox &edit) {
-  connect(&edit, SIGNAL(currentIndexChanged(int)), this,
-          SLOT(onSettingsChanged()));
+  connect(&edit, SIGNAL(currentIndexChanged(int)), this, SLOT(onSettingsChanged()));
 }
 
 void QtInstrumentView::connectSettingsChange(QCheckBox &edit) {
@@ -84,78 +74,56 @@ void QtInstrumentView::connectSettingsChange(QCheckBox &edit) {
 }
 
 void QtInstrumentView::disconnectSettingsChange(QLineEdit &edit) {
-  disconnect(&edit, SIGNAL(textChanged(QString const &)), this,
-             SLOT(onSettingsChanged()));
+  disconnect(&edit, SIGNAL(textChanged(QString const &)), this, SLOT(onSettingsChanged()));
 }
 
 void QtInstrumentView::disconnectSettingsChange(QSpinBox &edit) {
-  disconnect(&edit, SIGNAL(valueChanged(QString const &)), this,
-             SLOT(onSettingsChanged()));
+  disconnect(&edit, SIGNAL(valueChanged(QString const &)), this, SLOT(onSettingsChanged()));
 }
 
 void QtInstrumentView::disconnectSettingsChange(QDoubleSpinBox &edit) {
-  disconnect(&edit, SIGNAL(valueChanged(QString const &)), this,
-             SLOT(onSettingsChanged()));
+  disconnect(&edit, SIGNAL(valueChanged(QString const &)), this, SLOT(onSettingsChanged()));
 }
 
 void QtInstrumentView::disconnectSettingsChange(QComboBox &edit) {
-  disconnect(&edit, SIGNAL(currentIndexChanged(int)), this,
-             SLOT(onSettingsChanged()));
+  disconnect(&edit, SIGNAL(currentIndexChanged(int)), this, SLOT(onSettingsChanged()));
 }
 
 void QtInstrumentView::disconnectSettingsChange(QCheckBox &edit) {
   disconnect(&edit, SIGNAL(stateChanged(int)), this, SLOT(onSettingsChanged()));
 }
 
-void QtInstrumentView::onSettingsChanged() {
-  m_notifyee->notifySettingsChanged();
-}
+void QtInstrumentView::onSettingsChanged() { m_notifyee->notifySettingsChanged(); }
 
 void QtInstrumentView::onRestoreDefaultsRequested() {
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      Mantid::Kernel::FeatureType::Feature,
-      {"ISIS Reflectometry", "InstrumentTab", "RestoreDefaults"}, false);
+      Mantid::Kernel::FeatureType::Feature, {"ISIS Reflectometry", "InstrumentTab", "RestoreDefaults"}, false);
   m_notifyee->notifyRestoreDefaultsRequested();
 }
 
-void QtInstrumentView::disableAll() {
-  m_ui.instSettingsGroup->setEnabled(false);
-}
+void QtInstrumentView::disableAll() { m_ui.instSettingsGroup->setEnabled(false); }
 
 void QtInstrumentView::enableAll() { m_ui.instSettingsGroup->setEnabled(true); }
 
-void QtInstrumentView::enableDetectorCorrectionType() {
-  m_ui.detectorCorrectionTypeComboBox->setEnabled(true);
-}
+void QtInstrumentView::enableDetectorCorrectionType() { m_ui.detectorCorrectionTypeComboBox->setEnabled(true); }
 
-void QtInstrumentView::disableDetectorCorrectionType() {
-  m_ui.detectorCorrectionTypeComboBox->setEnabled(false);
-}
+void QtInstrumentView::disableDetectorCorrectionType() { m_ui.detectorCorrectionTypeComboBox->setEnabled(false); }
 
-void QtInstrumentView::registerSettingsWidgets(
-    const Mantid::API::IAlgorithm_sptr &alg) {
+void QtInstrumentView::registerSettingsWidgets(const Mantid::API::IAlgorithm_sptr &alg) {
   registerInstrumentSettingsWidgets(std::move(alg));
 }
 
-void QtInstrumentView::registerInstrumentSettingsWidgets(
-    const Mantid::API::IAlgorithm_sptr &alg) {
-  registerSettingWidget(*m_ui.intMonCheckBox, "NormalizeByIntegratedMonitors",
-                        alg);
-  registerSettingWidget(*m_ui.monIntMinEdit, "MonitorIntegrationWavelengthMin",
-                        alg);
-  registerSettingWidget(*m_ui.monIntMaxEdit, "MonitorIntegrationWavelengthMax",
-                        alg);
-  registerSettingWidget(*m_ui.monBgMinEdit, "MonitorBackgroundWavelengthMin",
-                        alg);
-  registerSettingWidget(*m_ui.monBgMaxEdit, "MonitorBackgroundWavelengthMax",
-                        alg);
+void QtInstrumentView::registerInstrumentSettingsWidgets(const Mantid::API::IAlgorithm_sptr &alg) {
+  registerSettingWidget(*m_ui.intMonCheckBox, "NormalizeByIntegratedMonitors", alg);
+  registerSettingWidget(*m_ui.monIntMinEdit, "MonitorIntegrationWavelengthMin", alg);
+  registerSettingWidget(*m_ui.monIntMaxEdit, "MonitorIntegrationWavelengthMax", alg);
+  registerSettingWidget(*m_ui.monBgMinEdit, "MonitorBackgroundWavelengthMin", alg);
+  registerSettingWidget(*m_ui.monBgMaxEdit, "MonitorBackgroundWavelengthMax", alg);
   registerSettingWidget(*m_ui.lamMinEdit, "WavelengthMin", alg);
   registerSettingWidget(*m_ui.lamMaxEdit, "WavelengthMax", alg);
   registerSettingWidget(*m_ui.I0MonitorIndex, "I0MonitorIndex", alg);
-  registerSettingWidget(*m_ui.detectorCorrectionTypeComboBox,
-                        "DetectorCorrectionType", alg);
-  registerSettingWidget(*m_ui.correctDetectorsCheckBox, "CorrectDetectors",
-                        alg);
+  registerSettingWidget(*m_ui.detectorCorrectionTypeComboBox, "DetectorCorrectionType", alg);
+  registerSettingWidget(*m_ui.correctDetectorsCheckBox, "CorrectDetectors", alg);
 }
 
 void QtInstrumentView::connectInstrumentSettingsWidgets() {
@@ -185,18 +153,15 @@ void QtInstrumentView::disconnectInstrumentSettingsWidgets() {
 }
 
 template <typename Widget>
-void QtInstrumentView::registerSettingWidget(
-    Widget &widget, std::string const &propertyName,
-    const Mantid::API::IAlgorithm_sptr &alg) {
+void QtInstrumentView::registerSettingWidget(Widget &widget, std::string const &propertyName,
+                                             const Mantid::API::IAlgorithm_sptr &alg) {
   connectSettingsChange(widget);
   setToolTipAsPropertyDocumentation(widget, propertyName, alg);
 }
 
-void QtInstrumentView::setToolTipAsPropertyDocumentation(
-    QWidget &widget, std::string const &propertyName,
-    const Mantid::API::IAlgorithm_sptr &alg) {
-  widget.setToolTip(QString::fromStdString(
-      alg->getPointerToProperty(propertyName)->documentation()));
+void QtInstrumentView::setToolTipAsPropertyDocumentation(QWidget &widget, std::string const &propertyName,
+                                                         const Mantid::API::IAlgorithm_sptr &alg) {
+  widget.setToolTip(QString::fromStdString(alg->getPointerToProperty(propertyName)->documentation()));
 }
 
 void QtInstrumentView::setSelected(QComboBox &box, std::string const &str) {
@@ -205,20 +170,17 @@ void QtInstrumentView::setSelected(QComboBox &box, std::string const &str) {
     box.setCurrentIndex(index);
 }
 
-void QtInstrumentView::setText(QLineEdit &lineEdit,
-                               boost::optional<double> value) {
+void QtInstrumentView::setText(QLineEdit &lineEdit, boost::optional<double> value) {
   if (value)
     setText(lineEdit, value.get());
 }
 
-void QtInstrumentView::setText(QLineEdit &lineEdit,
-                               boost::optional<int> value) {
+void QtInstrumentView::setText(QLineEdit &lineEdit, boost::optional<int> value) {
   if (value)
     setText(lineEdit, value.get());
 }
 
-void QtInstrumentView::setText(QLineEdit &lineEdit,
-                               boost::optional<std::string> const &text) {
+void QtInstrumentView::setText(QLineEdit &lineEdit, boost::optional<std::string> const &text) {
   if (text && !text->empty())
     setText(lineEdit, text);
 }
@@ -243,74 +205,47 @@ void QtInstrumentView::setChecked(QCheckBox &checkBox, bool checked) {
   checkBox.setCheckState(checkedAsCheckState);
 }
 
-std::string QtInstrumentView::getText(QLineEdit const &lineEdit) const {
-  return lineEdit.text().toStdString();
-}
+std::string QtInstrumentView::getText(QLineEdit const &lineEdit) const { return lineEdit.text().toStdString(); }
 
-std::string QtInstrumentView::getText(QComboBox const &box) const {
-  return box.currentText().toStdString();
-}
+std::string QtInstrumentView::getText(QComboBox const &box) const { return box.currentText().toStdString(); }
 
-QString QtInstrumentView::messageFor(
-    InstrumentParameterTypeMissmatch const &typeError) const {
-  return QString::fromStdString(typeError.parameterName()) +
-         " should hold an " + QString::fromStdString(typeError.expectedType()) +
-         " value but does not.\n";
+QString QtInstrumentView::messageFor(InstrumentParameterTypeMissmatch const &typeError) const {
+  return QString::fromStdString(typeError.parameterName()) + " should hold an " +
+         QString::fromStdString(typeError.expectedType()) + " value but does not.\n";
 }
 
 template <typename T, typename StringConverter>
 std::string toCsv(std::vector<T> const &values, StringConverter toString) {
   std::vector<std::string> valuesAsStrings;
   valuesAsStrings.reserve(values.size());
-  std::transform(values.cbegin(), values.cend(),
-                 std::back_inserter(valuesAsStrings), toString);
+  std::transform(values.cbegin(), values.cend(), std::back_inserter(valuesAsStrings), toString);
   return boost::algorithm::join(valuesAsStrings, ", ");
 }
 
-QString QtInstrumentView::messageFor(
-    std::vector<MissingInstrumentParameterValue> const &missingValues) const {
-  auto missingNamesCsv = toCsv(
-      missingValues,
-      [](const MissingInstrumentParameterValue &missingValue) -> std::string {
-        return missingValue.parameterName();
-      });
+QString QtInstrumentView::messageFor(std::vector<MissingInstrumentParameterValue> const &missingValues) const {
+  auto missingNamesCsv = toCsv(missingValues, [](const MissingInstrumentParameterValue &missingValue) -> std::string {
+    return missingValue.parameterName();
+  });
 
-  return QString::fromStdString(missingNamesCsv) +
-         QString(missingValues.size() == 1 ? " is" : " are") +
+  return QString::fromStdString(missingNamesCsv) + QString(missingValues.size() == 1 ? " is" : " are") +
          " not set in the instrument parameter file but should be.\n";
 }
 
-int QtInstrumentView::getMonitorIndex() const {
-  return m_ui.I0MonitorIndex->value();
-}
+int QtInstrumentView::getMonitorIndex() const { return m_ui.I0MonitorIndex->value(); }
 
-void QtInstrumentView::setMonitorIndex(int value) {
-  m_ui.I0MonitorIndex->setValue(value);
-}
+void QtInstrumentView::setMonitorIndex(int value) { m_ui.I0MonitorIndex->setValue(value); }
 
-bool QtInstrumentView::getIntegrateMonitors() const {
-  return m_ui.intMonCheckBox->isChecked();
-}
+bool QtInstrumentView::getIntegrateMonitors() const { return m_ui.intMonCheckBox->isChecked(); }
 
-void QtInstrumentView::setIntegrateMonitors(bool value) {
-  m_ui.intMonCheckBox->setChecked(value);
-}
+void QtInstrumentView::setIntegrateMonitors(bool value) { m_ui.intMonCheckBox->setChecked(value); }
 
-double QtInstrumentView::getLambdaMin() const {
-  return m_ui.lamMinEdit->value();
-}
+double QtInstrumentView::getLambdaMin() const { return m_ui.lamMinEdit->value(); }
 
-void QtInstrumentView::setLambdaMin(double value) {
-  m_ui.lamMinEdit->setValue(value);
-}
+void QtInstrumentView::setLambdaMin(double value) { m_ui.lamMinEdit->setValue(value); }
 
-double QtInstrumentView::getLambdaMax() const {
-  return m_ui.lamMaxEdit->value();
-}
+double QtInstrumentView::getLambdaMax() const { return m_ui.lamMaxEdit->value(); }
 
-void QtInstrumentView::setLambdaMax(double value) {
-  m_ui.lamMaxEdit->setValue(value);
-}
+void QtInstrumentView::setLambdaMax(double value) { m_ui.lamMaxEdit->setValue(value); }
 
 void QtInstrumentView::showLambdaRangeInvalid() {
   showAsInvalid(*m_ui.lamMinEdit);
@@ -322,21 +257,13 @@ void QtInstrumentView::showLambdaRangeValid() {
   showAsValid(*m_ui.lamMaxEdit);
 }
 
-double QtInstrumentView::getMonitorBackgroundMin() const {
-  return m_ui.monBgMinEdit->value();
-}
+double QtInstrumentView::getMonitorBackgroundMin() const { return m_ui.monBgMinEdit->value(); }
 
-void QtInstrumentView::setMonitorBackgroundMin(double value) {
-  m_ui.monBgMinEdit->setValue(value);
-}
+void QtInstrumentView::setMonitorBackgroundMin(double value) { m_ui.monBgMinEdit->setValue(value); }
 
-double QtInstrumentView::getMonitorBackgroundMax() const {
-  return m_ui.monBgMaxEdit->value();
-}
+double QtInstrumentView::getMonitorBackgroundMax() const { return m_ui.monBgMaxEdit->value(); }
 
-void QtInstrumentView::setMonitorBackgroundMax(double value) {
-  m_ui.monBgMaxEdit->setValue(value);
-}
+void QtInstrumentView::setMonitorBackgroundMax(double value) { m_ui.monBgMaxEdit->setValue(value); }
 
 void QtInstrumentView::showMonitorBackgroundRangeInvalid() {
   showAsInvalid(*m_ui.monBgMinEdit);
@@ -348,21 +275,13 @@ void QtInstrumentView::showMonitorBackgroundRangeValid() {
   showAsValid(*m_ui.monBgMaxEdit);
 }
 
-double QtInstrumentView::getMonitorIntegralMin() const {
-  return m_ui.monIntMinEdit->value();
-}
+double QtInstrumentView::getMonitorIntegralMin() const { return m_ui.monIntMinEdit->value(); }
 
-void QtInstrumentView::setMonitorIntegralMin(double value) {
-  m_ui.monIntMinEdit->setValue(value);
-}
+void QtInstrumentView::setMonitorIntegralMin(double value) { m_ui.monIntMinEdit->setValue(value); }
 
-double QtInstrumentView::getMonitorIntegralMax() const {
-  return m_ui.monIntMaxEdit->value();
-}
+double QtInstrumentView::getMonitorIntegralMax() const { return m_ui.monIntMaxEdit->value(); }
 
-void QtInstrumentView::setMonitorIntegralMax(double value) {
-  m_ui.monIntMaxEdit->setValue(value);
-}
+void QtInstrumentView::setMonitorIntegralMax(double value) { m_ui.monIntMaxEdit->setValue(value); }
 
 void QtInstrumentView::showMonitorIntegralRangeInvalid() {
   showAsInvalid(*m_ui.monIntMinEdit);
@@ -374,13 +293,9 @@ void QtInstrumentView::showMonitorIntegralRangeValid() {
   showAsValid(*m_ui.monIntMaxEdit);
 }
 
-bool QtInstrumentView::getCorrectDetectors() const {
-  return m_ui.correctDetectorsCheckBox->isChecked();
-}
+bool QtInstrumentView::getCorrectDetectors() const { return m_ui.correctDetectorsCheckBox->isChecked(); }
 
-void QtInstrumentView::setCorrectDetectors(bool value) {
-  m_ui.correctDetectorsCheckBox->setChecked(value);
-}
+void QtInstrumentView::setCorrectDetectors(bool value) { m_ui.correctDetectorsCheckBox->setChecked(value); }
 
 std::string QtInstrumentView::getDetectorCorrectionType() const {
   return getText(*m_ui.detectorCorrectionTypeComboBox);

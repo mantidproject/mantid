@@ -55,13 +55,10 @@ namespace VATES {
  * @param numPoints : Total number of points to create.
  * @param percentToUse : Cutoff for the densest boxes.
  */
-vtkSplatterPlotFactory::vtkSplatterPlotFactory(const std::string &scalarName,
-                                               const size_t numPoints,
+vtkSplatterPlotFactory::vtkSplatterPlotFactory(const std::string &scalarName, const size_t numPoints,
                                                const double percentToUse)
-    : m_scalarName(scalarName), m_numPoints(numPoints), m_buildSortedList(true),
-      m_wsName(""), slice(false), m_time(0.0),
-      m_metaDataExtractor(new MetaDataExtractorUtils()),
-      m_metadataJsonManager(new MetadataJsonManager()),
+    : m_scalarName(scalarName), m_numPoints(numPoints), m_buildSortedList(true), m_wsName(""), slice(false),
+      m_time(0.0), m_metaDataExtractor(new MetaDataExtractorUtils()), m_metadataJsonManager(new MetadataJsonManager()),
       m_vatesConfigurations(new VatesConfigurations()) {
   this->SetPercentToUse(percentToUse);
 }
@@ -78,8 +75,7 @@ vtkSplatterPlotFactory::~vtkSplatterPlotFactory() {}
  * scalar data.
  */
 template <typename MDE, size_t nd>
-void vtkSplatterPlotFactory::doCreate(
-    typename MDEventWorkspace<MDE, nd>::sptr ws) const {
+void vtkSplatterPlotFactory::doCreate(typename MDEventWorkspace<MDE, nd>::sptr ws) const {
   bool VERBOSE = true;
   CPUTimer tim;
   // Acquire a scoped read-only lock to the workspace (prevent segfault
@@ -88,8 +84,7 @@ void vtkSplatterPlotFactory::doCreate(
 
   // Find out how many events to plot, and the percentage of the largest
   // boxes to use.
-  size_t numPoints =
-      std::min(m_numPoints, static_cast<std::size_t>(ws->getNPoints()));
+  size_t numPoints = std::min(m_numPoints, static_cast<std::size_t>(ws->getNPoints()));
 
   std::string new_name = ws->getName();
   if (new_name != m_wsName || m_buildSortedList) {
@@ -98,42 +93,34 @@ void vtkSplatterPlotFactory::doCreate(
 
     m_sortedBoxes.clear();
     if (this->slice) {
-      ws->getBox()->getBoxes(m_sortedBoxes, 1000, true,
-                             this->sliceImplicitFunction.get());
+      ws->getBox()->getBoxes(m_sortedBoxes, 1000, true, this->sliceImplicitFunction.get());
     } else {
       ws->getBox()->getBoxes(m_sortedBoxes, 1000, true);
     }
 
     if (VERBOSE) {
-      std::cout << tim << " to retrieve the " << m_sortedBoxes.size()
-                << " boxes down.\n";
+      std::cout << tim << " to retrieve the " << m_sortedBoxes.size() << " boxes down.\n";
     }
 
     m_wsName = new_name;
     m_buildSortedList = false;
     // get list of boxes with signal > 0 and sort
     // the list in order of decreasing signal
-    m_sortedBoxes.erase(std::remove_if(m_sortedBoxes.begin(),
-                                       m_sortedBoxes.end(),
-                                       [](const API::IMDNode *box) {
-                                         return !box || box->getNPoints() == 0;
-                                       }),
+    m_sortedBoxes.erase(std::remove_if(m_sortedBoxes.begin(), m_sortedBoxes.end(),
+                                       [](const API::IMDNode *box) { return !box || box->getNPoints() == 0; }),
                         m_sortedBoxes.end());
     this->sortBoxesByDecreasingSignal(VERBOSE);
   }
-  size_t num_boxes_to_use = static_cast<size_t>(
-      m_percentToUse * static_cast<double>(m_sortedBoxes.size()) / 100.0);
+  size_t num_boxes_to_use = static_cast<size_t>(m_percentToUse * static_cast<double>(m_sortedBoxes.size()) / 100.0);
   if (num_boxes_to_use > 0 && num_boxes_to_use >= m_sortedBoxes.size()) {
     num_boxes_to_use = m_sortedBoxes.size() - 1;
   }
 
   // restrict the number of points to the
   // number of points in boxes being used
-  size_t total_points_available = std::accumulate(
-      m_sortedBoxes.begin(), std::next(m_sortedBoxes.begin(), num_boxes_to_use),
-      size_t{0}, [](size_t value, const Mantid::API::IMDNode *box) {
-        return value + box->getNPoints();
-      });
+  size_t total_points_available =
+      std::accumulate(m_sortedBoxes.begin(), std::next(m_sortedBoxes.begin(), num_boxes_to_use), size_t{0},
+                      [](size_t value, const Mantid::API::IMDNode *box) { return value + box->getNPoints(); });
 
   numPoints = std::min(numPoints, total_points_available);
 
@@ -149,8 +136,7 @@ void vtkSplatterPlotFactory::doCreate(
     std::cout << "numPoints                 = " << numPoints << '\n';
     std::cout << "num boxes above zero      = " << m_sortedBoxes.size() << '\n';
     std::cout << "num boxes to use          = " << num_boxes_to_use << '\n';
-    std::cout << "total_points_available    = " << total_points_available
-              << '\n';
+    std::cout << "total_points_available    = " << total_points_available << '\n';
     std::cout << "points needed per box     = " << points_per_box << '\n';
   }
 
@@ -181,11 +167,9 @@ void vtkSplatterPlotFactory::doCreate(
 
   size_t pointIndex = 0;
   for (size_t box_index = 0; box_index < num_boxes_to_use; ++box_index) {
-    MDBox<MDE, nd> *box =
-        dynamic_cast<MDBox<MDE, nd> *>(m_sortedBoxes[box_index]);
+    MDBox<MDE, nd> *box = dynamic_cast<MDBox<MDE, nd> *>(m_sortedBoxes[box_index]);
     if (box) {
-      size_t num_from_this_box =
-          std::min(points_per_box, static_cast<size_t>(box->getNPoints()));
+      size_t num_from_this_box = std::min(points_per_box, static_cast<size_t>(box->getNPoints()));
       pointIndex += num_from_this_box;
       // verify there are never more than numPoints.
       if (pointIndex > numPoints) {
@@ -194,12 +178,10 @@ void vtkSplatterPlotFactory::doCreate(
       }
       // Save signal
       float signal_normalized = static_cast<float>(box->getSignalNormalized());
-      signal_ptr =
-          std::fill_n(signal_ptr, num_from_this_box, signal_normalized);
+      signal_ptr = std::fill_n(signal_ptr, num_from_this_box, signal_normalized);
 
       const std::vector<MDE> &events = box->getConstEvents();
-      for (size_t event_index = 0; event_index < num_from_this_box;
-           ++event_index) {
+      for (size_t event_index = 0; event_index < num_from_this_box; ++event_index) {
         const MDE &ev = events[event_index];
         // Save location
         points_ptr = std::copy_n(ev.getCenter(), 3, points_ptr);
@@ -231,17 +213,13 @@ void vtkSplatterPlotFactory::doCreate(
  * Sort the boxes by their normalized signal in decreasing order
  * @param VERBOSE : if true then print when sorting happens
  */
-void vtkSplatterPlotFactory::sortBoxesByDecreasingSignal(
-    const bool VERBOSE) const {
+void vtkSplatterPlotFactory::sortBoxesByDecreasingSignal(const bool VERBOSE) const {
   if (VERBOSE) {
     std::cout << "START SORTING\n";
   }
 
   std::sort(m_sortedBoxes.begin(), m_sortedBoxes.end(),
-            [](IMDNode *box_1, IMDNode *box_2) {
-              return box_1->getSignalNormalized() >
-                     box_2->getSignalNormalized();
-            });
+            [](IMDNode *box_1, IMDNode *box_2) { return box_1->getSignalNormalized() > box_2->getSignalNormalized(); });
 
   if (VERBOSE) {
     std::cout << "DONE SORTING\n";
@@ -257,8 +235,7 @@ void vtkSplatterPlotFactory::sortBoxesByDecreasingSignal(
  * @return A fully constructed vtkUnstructuredGrid containing geometric and
  * scalar data.
  */
-void vtkSplatterPlotFactory::doCreateMDHisto(
-    const IMDHistoWorkspace &workspace) const {
+void vtkSplatterPlotFactory::doCreateMDHisto(const IMDHistoWorkspace &workspace) const {
   // Acquire a scoped read-only lock to the workspace (prevent segfault
   // from algos modifying wworkspace)
   ReadLock lock(workspace);
@@ -318,13 +295,11 @@ void vtkSplatterPlotFactory::doCreateMDHisto(
       in[1] = (minY + (static_cast<coord_t>(y) + 0.5f) * incrementY);
       for (int x = 0; x < nBinsX; x++) {
         // Get the signalScalar
-        signal_t signalScalar =
-            this->extractScalarSignal(workspace, do4D, x, y, z);
+        signal_t signalScalar = this->extractScalarSignal(workspace, do4D, x, y, z);
 
         // Make sure that the signal is not bad and is in the range and larger
         // than 0
-        if (std::isfinite(signalScalar) &&
-            (signalScalar > static_cast<signal_t>(0.0))) {
+        if (std::isfinite(signalScalar) && (signalScalar > static_cast<signal_t>(0.0))) {
           in[0] = (minX + (static_cast<coord_t>(x) + 0.5f) * incrementX);
           // Create the transformed value if required
           if (transform) {
@@ -360,19 +335,16 @@ void vtkSplatterPlotFactory::doCreateMDHisto(
  * @param z The z coordinate.
  * @returns The scalar signal.
  */
-signal_t
-vtkSplatterPlotFactory::extractScalarSignal(const IMDHistoWorkspace &workspace,
-                                            bool do4D, const int x, const int y,
-                                            const int z) const {
+signal_t vtkSplatterPlotFactory::extractScalarSignal(const IMDHistoWorkspace &workspace, bool do4D, const int x,
+                                                     const int y, const int z) const {
   signal_t signalScalar;
 
   if (do4D) {
-    signalScalar = workspace.getSignalNormalizedAt(
-        static_cast<size_t>(x), static_cast<size_t>(y), static_cast<size_t>(z),
-        static_cast<size_t>(m_time));
+    signalScalar = workspace.getSignalNormalizedAt(static_cast<size_t>(x), static_cast<size_t>(y),
+                                                   static_cast<size_t>(z), static_cast<size_t>(m_time));
   } else {
-    signalScalar = workspace.getSignalNormalizedAt(
-        static_cast<size_t>(x), static_cast<size_t>(y), static_cast<size_t>(z));
+    signalScalar =
+        workspace.getSignalNormalizedAt(static_cast<size_t>(x), static_cast<size_t>(y), static_cast<size_t>(z));
   }
 
   return signalScalar;
@@ -383,11 +355,9 @@ vtkSplatterPlotFactory::extractScalarSignal(const IMDHistoWorkspace &workspace,
  * @param workspace The MDHisto workspace
  * @returns Is the workspace 4D?
  */
-bool vtkSplatterPlotFactory::doMDHisto4D(
-    const IMDHistoWorkspace *workspace) const {
+bool vtkSplatterPlotFactory::doMDHisto4D(const IMDHistoWorkspace *workspace) const {
   bool bExactMatch = true;
-  if (workspace &&
-      checkWorkspace<IMDHistoWorkspace, 4>(*workspace, bExactMatch)) {
+  if (workspace && checkWorkspace<IMDHistoWorkspace, 4>(*workspace, bExactMatch)) {
     return true;
   }
   return false;
@@ -399,14 +369,12 @@ bool vtkSplatterPlotFactory::doMDHisto4D(
  * the stack.
  * @return fully constructed vtkDataSet.
  */
-vtkSmartPointer<vtkDataSet>
-vtkSplatterPlotFactory::create(ProgressAction &progressUpdating) const {
+vtkSmartPointer<vtkDataSet> vtkSplatterPlotFactory::create(ProgressAction &progressUpdating) const {
   UNUSED_ARG(progressUpdating);
 
   // If initialize() wasn't run, we don't have a workspace.
   if (!m_workspace) {
-    throw std::runtime_error(
-        "Invalid vtkSplatterPlotFactory. Workspace is null");
+    throw std::runtime_error("Invalid vtkSplatterPlotFactory. Workspace is null");
   }
 
   size_t nd = m_workspace->getNumDims();
@@ -449,10 +417,8 @@ vtkSplatterPlotFactory::create(ProgressAction &progressUpdating) const {
   m_instrument = m_metaDataExtractor->extractInstrument(m_workspace.get());
 
   // Check for the workspace type, i.e. if it is MDHisto or MDEvent
-  IMDEventWorkspace_sptr eventWorkspace =
-      std::dynamic_pointer_cast<IMDEventWorkspace>(m_workspace);
-  IMDHistoWorkspace_sptr histoWorkspace =
-      std::dynamic_pointer_cast<IMDHistoWorkspace>(m_workspace);
+  IMDEventWorkspace_sptr eventWorkspace = std::dynamic_pointer_cast<IMDEventWorkspace>(m_workspace);
+  IMDHistoWorkspace_sptr histoWorkspace = std::dynamic_pointer_cast<IMDHistoWorkspace>(m_workspace);
 
   if (eventWorkspace) {
     // Macro to call the right instance of the
@@ -495,14 +461,11 @@ void vtkSplatterPlotFactory::validate() const {
 
   // Make sure that the workspace is either an MDEvent Workspace or an
   // MDHistoWorkspace
-  IMDEventWorkspace_sptr eventWorkspace =
-      std::dynamic_pointer_cast<IMDEventWorkspace>(m_workspace);
-  IMDHistoWorkspace_sptr histoWorkspace =
-      std::dynamic_pointer_cast<IMDHistoWorkspace>(m_workspace);
+  IMDEventWorkspace_sptr eventWorkspace = std::dynamic_pointer_cast<IMDEventWorkspace>(m_workspace);
+  IMDHistoWorkspace_sptr histoWorkspace = std::dynamic_pointer_cast<IMDHistoWorkspace>(m_workspace);
 
   if (!eventWorkspace && !histoWorkspace) {
-    throw std::runtime_error(
-        "Workspace is neither an IMDHistoWorkspace nor an IMDEventWorkspace.");
+    throw std::runtime_error("Workspace is neither an IMDHistoWorkspace nor an IMDEventWorkspace.");
   }
 }
 
@@ -511,10 +474,8 @@ void vtkSplatterPlotFactory::validate() const {
  */
 void vtkSplatterPlotFactory::addMetadata() const {
   if (this->dataSet) {
-    m_metadataJsonManager->setInstrument(
-        m_metaDataExtractor->extractInstrument(m_workspace.get()));
-    m_metadataJsonManager->setSpecialCoordinates(
-        static_cast<int>(m_workspace->getSpecialCoordinateSystem()));
+    m_metadataJsonManager->setInstrument(m_metaDataExtractor->extractInstrument(m_workspace.get()));
+    m_metadataJsonManager->setSpecialCoordinates(static_cast<int>(m_workspace->getSpecialCoordinateSystem()));
 
     // Append metadata
     std::string jsonString = m_metadataJsonManager->getSerializedJson();
@@ -522,8 +483,7 @@ void vtkSplatterPlotFactory::addMetadata() const {
 
     // Add metadata to dataset.
     MetadataToFieldData convert;
-    convert(outputFD.GetPointer(), jsonString,
-            m_vatesConfigurations->getMetadataIdJson());
+    convert(outputFD.GetPointer(), jsonString, m_vatesConfigurations->getMetadataIdJson());
     dataSet->SetFieldData(outputFD.GetPointer());
   }
 }
@@ -533,22 +493,19 @@ void vtkSplatterPlotFactory::addMetadata() const {
  * @param fieldData The field data from the underlying source
  * @param dataSet The splatterplot data set.
  */
-void vtkSplatterPlotFactory::setMetadata(vtkFieldData *fieldData,
-                                         vtkDataSet *dataSet) {
+void vtkSplatterPlotFactory::setMetadata(vtkFieldData *fieldData, vtkDataSet *dataSet) {
   // Extract the xml-metadata part of the fieldData and the json-metadata from
   // the dataset
   FieldDataToMetadata convertFtoM;
   std::string xmlString = convertFtoM(fieldData, XMLDefinitions::metaDataId());
-  std::string jsonString = convertFtoM(
-      dataSet->GetFieldData(), m_vatesConfigurations->getMetadataIdJson());
+  std::string jsonString = convertFtoM(dataSet->GetFieldData(), m_vatesConfigurations->getMetadataIdJson());
 
   // Create a new field data array
   MetadataToFieldData convertMtoF;
   vtkNew<vtkFieldData> outputFD;
   outputFD->ShallowCopy(fieldData);
   convertMtoF(outputFD.GetPointer(), xmlString, XMLDefinitions::metaDataId());
-  convertMtoF(outputFD.GetPointer(), jsonString,
-              m_vatesConfigurations->getMetadataIdJson());
+  convertMtoF(outputFD.GetPointer(), jsonString, m_vatesConfigurations->getMetadataIdJson());
   dataSet->SetFieldData(outputFD.GetPointer());
 }
 
@@ -556,9 +513,7 @@ void vtkSplatterPlotFactory::setMetadata(vtkFieldData *fieldData,
  * Sets the number of points to show
  * @param points : The total number of points to plot.
  */
-void vtkSplatterPlotFactory::SetNumberOfPoints(size_t points) {
-  m_numPoints = points;
-}
+void vtkSplatterPlotFactory::SetNumberOfPoints(size_t points) { m_numPoints = points; }
 
 /**
  * Set the size of the initial portion of the sorted list of boxes that
@@ -570,8 +525,7 @@ void vtkSplatterPlotFactory::SetNumberOfPoints(size_t points) {
  *                       to the interval (0,100].
  */
 void vtkSplatterPlotFactory::SetPercentToUse(double percentToUse) {
-  m_percentToUse = boost::algorithm::clamp(
-      percentToUse, std::numeric_limits<double>::min(), 100.0);
+  m_percentToUse = boost::algorithm::clamp(percentToUse, std::numeric_limits<double>::min(), 100.0);
 }
 
 /**
@@ -589,8 +543,6 @@ void vtkSplatterPlotFactory::setTime(double time) {
  * Getter for the instrument.
  * @returns The name of the instrument which is associated with the workspace.
  */
-const std::string &vtkSplatterPlotFactory::getInstrument() {
-  return m_instrument;
-}
+const std::string &vtkSplatterPlotFactory::getInstrument() { return m_instrument; }
 } // namespace VATES
 } // namespace Mantid

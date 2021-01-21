@@ -24,8 +24,7 @@ MDTransfAxisNames::MDTransfAxisNames() : m_DefaultDimID(CnvrtToMD::nDefaultID) {
 }
 
 //
-std::vector<std::string>
-MDTransfAxisNames::getDefaultDimIDQ3D(DeltaEMode::Type dEMode) const {
+std::vector<std::string> MDTransfAxisNames::getDefaultDimIDQ3D(DeltaEMode::Type dEMode) const {
   std::vector<std::string> rez;
   if (dEMode == DeltaEMode::Elastic) {
     rez.resize(3);
@@ -44,8 +43,7 @@ MDTransfAxisNames::getDefaultDimIDQ3D(DeltaEMode::Type dEMode) const {
   return rez;
 }
 
-std::vector<std::string>
-MDTransfAxisNames::getDefaultDimIDModQ(DeltaEMode::Type dEMode) const {
+std::vector<std::string> MDTransfAxisNames::getDefaultDimIDModQ(DeltaEMode::Type dEMode) const {
   std::vector<std::string> rez;
 
   if (dEMode == DeltaEMode::Elastic) {
@@ -62,8 +60,7 @@ MDTransfAxisNames::getDefaultDimIDModQ(DeltaEMode::Type dEMode) const {
   return rez;
 }
 
-std::string makeAxisName(const Kernel::V3D &Dir,
-                         const std::vector<std::string> &QNames) {
+std::string makeAxisName(const Kernel::V3D &Dir, const std::vector<std::string> &QNames) {
   double eps(1.e-3);
   Kernel::V3D absDir(fabs(Dir.X()), fabs(Dir.Y()), fabs(Dir.Z()));
   std::string mainName;

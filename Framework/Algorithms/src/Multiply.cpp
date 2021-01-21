@@ -16,10 +16,8 @@ namespace Algorithms {
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(Multiply)
 
-void Multiply::performBinaryOperation(const HistogramData::Histogram &lhs,
-                                      const HistogramData::Histogram &rhs,
-                                      HistogramData::HistogramY &YOut,
-                                      HistogramData::HistogramE &EOut) {
+void Multiply::performBinaryOperation(const HistogramData::Histogram &lhs, const HistogramData::Histogram &rhs,
+                                      HistogramData::HistogramY &YOut, HistogramData::HistogramE &EOut) {
   const size_t bins = lhs.e().size();
   for (size_t j = 0; j < bins; ++j) {
     // Get references to the input Y's
@@ -39,10 +37,8 @@ void Multiply::performBinaryOperation(const HistogramData::Histogram &lhs,
   }
 }
 
-void Multiply::performBinaryOperation(const HistogramData::Histogram &lhs,
-                                      const double rhsY, const double rhsE,
-                                      HistogramData::HistogramY &YOut,
-                                      HistogramData::HistogramE &EOut) {
+void Multiply::performBinaryOperation(const HistogramData::Histogram &lhs, const double rhsY, const double rhsE,
+                                      HistogramData::HistogramY &YOut, HistogramData::HistogramE &EOut) {
   const size_t bins = lhs.e().size();
   for (size_t j = 0; j < bins; ++j) {
     // Get reference to input Y
@@ -57,8 +53,7 @@ void Multiply::performBinaryOperation(const HistogramData::Histogram &lhs,
   }
 }
 
-void Multiply::setOutputUnits(const API::MatrixWorkspace_const_sptr lhs,
-                              const API::MatrixWorkspace_const_sptr rhs,
+void Multiply::setOutputUnits(const API::MatrixWorkspace_const_sptr lhs, const API::MatrixWorkspace_const_sptr rhs,
                               API::MatrixWorkspace_sptr out) {
   if (!lhs->isDistribution() || !rhs->isDistribution())
     out->setDistribution(false);
@@ -72,8 +67,7 @@ void Multiply::setOutputUnits(const API::MatrixWorkspace_const_sptr lhs,
  *  @param lhs :: Reference to the EventList that will be modified in place.
  *  @param rhs :: Const reference to the EventList on the right hand side.
  */
-void Multiply::performEventBinaryOperation(DataObjects::EventList &lhs,
-                                           const DataObjects::EventList &rhs) {
+void Multiply::performEventBinaryOperation(DataObjects::EventList &lhs, const DataObjects::EventList &rhs) {
   // We must histogram the rhs event list to multiply.
   MantidVec rhsY, rhsE;
   rhs.generateHistogram(rhs.x().rawData(), rhsY, rhsE);
@@ -88,9 +82,7 @@ void Multiply::performEventBinaryOperation(DataObjects::EventList &lhs,
  *  @param rhsY :: The vector of rhs data values
  *  @param rhsE :: The vector of rhs error values
  */
-void Multiply::performEventBinaryOperation(DataObjects::EventList &lhs,
-                                           const MantidVec &rhsX,
-                                           const MantidVec &rhsY,
+void Multiply::performEventBinaryOperation(DataObjects::EventList &lhs, const MantidVec &rhsX, const MantidVec &rhsY,
                                            const MantidVec &rhsE) {
   // Multiply is implemented at the EventList level.
   lhs.multiply(rhsX, rhsY, rhsE);
@@ -104,9 +96,7 @@ void Multiply::performEventBinaryOperation(DataObjects::EventList &lhs,
  *  @param rhsY :: The rhs data value
  *  @param rhsE :: The rhs error value
  */
-void Multiply::performEventBinaryOperation(DataObjects::EventList &lhs,
-                                           const double &rhsY,
-                                           const double &rhsE) {
+void Multiply::performEventBinaryOperation(DataObjects::EventList &lhs, const double &rhsY, const double &rhsE) {
   // Multiply is implemented at the EventList level.
   lhs.multiply(rhsY, rhsE);
 }
@@ -156,9 +146,8 @@ void Multiply::checkRequirements() {
  *  @retval true The two workspaces are size compatible
  *  @retval false The two workspaces are NOT size compatible
  */
-std::string Multiply::checkSizeCompatibility(
-    const API::MatrixWorkspace_const_sptr lhs,
-    const API::MatrixWorkspace_const_sptr rhs) const {
+std::string Multiply::checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,
+                                             const API::MatrixWorkspace_const_sptr rhs) const {
   if (!m_keepEventWorkspace && !m_AllowDifferentNumberSpectra) {
     // Fallback on the default checks
     return CommutativeBinaryOperation::checkSizeCompatibility(lhs, rhs);
@@ -177,8 +166,7 @@ std::string Multiply::checkSizeCompatibility(
     // RHS only has one value (1D vertical), so the number of histograms needs
     // to match.
     // Each lhs spectrum will be divided by that scalar
-    if (m_rhsBlocksize == 1 &&
-        lhs->getNumberHistograms() == rhs->getNumberHistograms())
+    if (m_rhsBlocksize == 1 && lhs->getNumberHistograms() == rhs->getNumberHistograms())
       return "";
 
     if (m_matchXSize) {

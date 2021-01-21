@@ -9,14 +9,8 @@
 
 bool RecoveryThread::getFailedRun() { return m_failedRunInThread; }
 
-void RecoveryThread::setCheckpoint(const Poco::Path &checkpoint) {
-  m_checkpoint = checkpoint;
-}
+void RecoveryThread::setCheckpoint(const Poco::Path &checkpoint) { m_checkpoint = checkpoint; }
 
-void RecoveryThread::setProjRecPtr(MantidQt::ProjectRecovery *projectRec) {
-  m_projRec = projectRec;
-}
+void RecoveryThread::setProjRecPtr(MantidQt::ProjectRecovery *projectRec) { m_projRec = projectRec; }
 
-void RecoveryThread::run() {
-  m_failedRunInThread = !m_projRec->loadRecoveryCheckpoint(m_checkpoint);
-}
+void RecoveryThread::run() { m_failedRunInThread = !m_projRec->loadRecoveryCheckpoint(m_checkpoint); }

@@ -18,15 +18,11 @@ AppendGroupCommand defines the action "Insert Group"
 */
 class AppendGroupCommand : public CommandBase {
 public:
-  AppendGroupCommand(DataProcessorPresenter *tablePresenter)
-      : CommandBase(tablePresenter){};
-  AppendGroupCommand(const QDataProcessorWidget &widget)
-      : CommandBase(widget){};
+  AppendGroupCommand(DataProcessorPresenter *tablePresenter) : CommandBase(tablePresenter){};
+  AppendGroupCommand(const QDataProcessorWidget &widget) : CommandBase(widget){};
   virtual ~AppendGroupCommand(){};
 
-  void execute() override {
-    m_presenter->notify(DataProcessorPresenter::AppendGroupFlag);
-  };
+  void execute() override { m_presenter->notify(DataProcessorPresenter::AppendGroupFlag); };
   QString name() override { return QString("Insert Group After"); }
   QString icon() override { return QString("://insert_group.png"); }
   QString tooltip() override { return QString("Inserts group after"); }

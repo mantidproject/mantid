@@ -53,8 +53,7 @@ along the abscissas 'Shift'
 @author Roman Tolchenov, Tessella plc
 @date 4/09/2012
 */
-class MANTID_CURVEFITTING_DLL TabulatedFunction : public API::ParamFunction,
-                                                  public API::IFunction1D {
+class MANTID_CURVEFITTING_DLL TabulatedFunction : public API::ParamFunction, public API::IFunction1D {
 public:
   /// Constructor
   TabulatedFunction();
@@ -62,11 +61,9 @@ public:
   /// overwrite IFunction base class methods
   std::string name() const override { return "TabulatedFunction"; }
   const std::string category() const override { return "General"; }
-  void function1D(double *out, const double *xValues,
-                  const size_t nData) const override;
+  void function1D(double *out, const double *xValues, const size_t nData) const override;
   ///  function derivatives
-  void functionDeriv1D(API::Jacobian *out, const double *xValues,
-                       const size_t nData) override;
+  void functionDeriv1D(API::Jacobian *out, const double *xValues, const size_t nData) override;
 
   /// Returns the number of attributes associated with the function
   size_t nAttributes() const override;
@@ -75,8 +72,7 @@ public:
   /// Return a value of attribute attName
   Attribute getAttribute(const std::string &attName) const override;
   /// Set a value to attribute attName
-  void setAttribute(const std::string &attName,
-                    const IFunction::Attribute &value) override;
+  void setAttribute(const std::string &attName, const IFunction::Attribute &value) override;
 
 private:
   /// Call the appropriate load function
@@ -95,8 +91,7 @@ private:
   void clear() const;
 
   /// Evaluate the function for a list of arguments and given scaling factor
-  void eval(double scaling, double xshift, double xscale, double *out,
-            const double *xValues, const size_t nData) const;
+  void eval(double scaling, double xshift, double xscale, double *out, const double *xValues, const size_t nData) const;
 
   /// Fill in the x and y value containers (m_xData and m_yData)
   void setupData() const;

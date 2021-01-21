@@ -30,48 +30,37 @@ DECLARE_ALGORITHM(DeadTimeCorrection)
 //----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string DeadTimeCorrection::name() const {
-  return "DeadTimeCorrection";
-}
+const std::string DeadTimeCorrection::name() const { return "DeadTimeCorrection"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int DeadTimeCorrection::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string DeadTimeCorrection::category() const {
-  return "CorrectionFunctions";
-}
+const std::string DeadTimeCorrection::category() const { return "CorrectionFunctions"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-const std::string DeadTimeCorrection::summary() const {
-  return "Performs a dead time correction based on count rate.";
-}
+const std::string DeadTimeCorrection::summary() const { return "Performs a dead time correction based on count rate."; }
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void DeadTimeCorrection::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                                        Direction::Input),
-                  "An input workspace.");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input), "An input workspace.");
 
-  declareProperty(std::make_unique<PropertyWithValue<std::string>>(
-                      "GroupingPattern", "", Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<std::string>>("GroupingPattern", "", Direction::Input),
                   "See the GroupingPattern documentation of GroupDetectors.");
 
   auto positive = std::make_shared<BoundedValidator<double>>();
   positive->setLower(0.);
   declareProperty("Tau", 0., positive, "The count rate coefficient.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 
-  declareProperty(
-      std::make_unique<FileProperty>("MapFile", "", FileProperty::OptionalLoad,
-                                     std::vector<std::string>{".map", ".xml"}),
-      "A file that consists of lists of spectra numbers to group. See the "
-      "help of GroupDetectors for the file format");
+  declareProperty(std::make_unique<FileProperty>("MapFile", "", FileProperty::OptionalLoad,
+                                                 std::vector<std::string>{".map", ".xml"}),
+                  "A file that consists of lists of spectra numbers to group. See the "
+                  "help of GroupDetectors for the file format");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -125,19 +114,15 @@ void DeadTimeCorrection::exec() {
   }
   Progress progress(this, 0.0, 1.0, grouped->getNumberHistograms());
   PARALLEL_FOR_IF(Kernel::threadSafe(*outputWorkspace))
-  for (int index = 0; index < static_cast<int>(grouped->getNumberHistograms());
-       ++index) {
+  for (int index = 0; index < static_cast<int>(grouped->getNumberHistograms()); ++index) {
     PARALLEL_START_INTERUPT_REGION
-    progress.report("Performing the correction for the group at index " +
-                    std::to_string(index));
+    progress.report("Performing the correction for the group at index " + std::to_string(index));
     const double y = grouped->y(index)[0];
     double correction = 1. / (1. - tau * y);
     if (y >= 1. / tau) {
-      g_log.warning()
-          << "Saturation count rate reached for grouped detector at index "
-          << index
-          << ". Correction will be infinity. Check your tau or input "
-             "workspace, make sure it is normalised by acquisition time.\n";
+      g_log.warning() << "Saturation count rate reached for grouped detector at index " << index
+                      << ". Correction will be infinity. Check your tau or input "
+                         "workspace, make sure it is normalised by acquisition time.\n";
       correction = std::numeric_limits<double>::infinity();
     }
     const auto detIDs = grouped->getSpectrum(index).getDetectorIDs();

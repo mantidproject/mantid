@@ -24,16 +24,13 @@ namespace MantidWidgets {
  */
 struct EXPORT_OPT_MANTIDQT_COMMON FunctionModelDataset {
 public:
-  FunctionModelDataset(const QString &workspaceName,
-                       const FunctionModelSpectra &spectra);
+  FunctionModelDataset(const QString &workspaceName, const FunctionModelSpectra &spectra);
   FunctionModelDataset(QString workspaceName, FunctionModelSpectra &&spectra);
 
   inline QString datasetName() const noexcept { return m_workspaceName; }
   QStringList domainNames() const;
 
-  inline std::size_t numberOfSpectra() const noexcept {
-    return m_spectra.size().value;
-  }
+  inline std::size_t numberOfSpectra() const noexcept { return m_spectra.size().value; }
 
 private:
   QString m_workspaceName;

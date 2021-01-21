@@ -25,22 +25,18 @@ Mantid::Kernel::Logger g_log("IndirectDataReductionTab");
 namespace MantidQt {
 namespace CustomInterfaces {
 
-IndirectDataReductionTab::IndirectDataReductionTab(IndirectDataReduction *idrUI,
-                                                   QObject *parent)
+IndirectDataReductionTab::IndirectDataReductionTab(IndirectDataReduction *idrUI, QObject *parent)
     : IndirectTab(parent), m_idrUI(idrUI), m_tabRunning(false) {
-  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-          SLOT(tabExecutionComplete(bool)));
+  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(tabExecutionComplete(bool)));
 }
 
 IndirectDataReductionTab::~IndirectDataReductionTab() {}
 
-void IndirectDataReductionTab::setOutputPlotOptionsPresenter(
-    std::unique_ptr<IndirectPlotOptionsPresenter> presenter) {
+void IndirectDataReductionTab::setOutputPlotOptionsPresenter(std::unique_ptr<IndirectPlotOptionsPresenter> presenter) {
   m_plotOptionsPresenter = std::move(presenter);
 }
 
-void IndirectDataReductionTab::setOutputPlotOptionsWorkspaces(
-    std::vector<std::string> const &outputWorkspaces) {
+void IndirectDataReductionTab::setOutputPlotOptionsWorkspaces(std::vector<std::string> const &outputWorkspaces) {
   m_plotOptionsPresenter->setWorkspaces(outputWorkspaces);
 }
 
@@ -48,8 +44,7 @@ void IndirectDataReductionTab::runTab() {
   if (validate()) {
     m_tabStartTime = DateAndTime::getCurrentTime();
     m_tabRunning = true;
-    emit updateRunButton(false, "disable", "Running...",
-                         "Running data reduction...");
+    emit updateRunButton(false, "disable", "Running...", "Running data reduction...");
     try {
       if (m_plotOptionsPresenter) {
         m_plotOptionsPresenter->clearWorkspaces();
@@ -85,8 +80,7 @@ void IndirectDataReductionTab::tabExecutionComplete(bool error) {
  *
  * @returns Pointer to instrument workspace
  */
-Mantid::API::MatrixWorkspace_sptr
-IndirectDataReductionTab::instrumentWorkspace() const {
+Mantid::API::MatrixWorkspace_sptr IndirectDataReductionTab::instrumentWorkspace() const {
   return m_idrUI->instrumentWorkspace();
 }
 
@@ -100,27 +94,23 @@ QMap<QString, QString> IndirectDataReductionTab::getInstrumentDetails() const {
   return m_idrUI->getInstrumentDetails();
 }
 
-QString
-IndirectDataReductionTab::getInstrumentDetail(QString const &key) const {
+QString IndirectDataReductionTab::getInstrumentDetail(QString const &key) const {
   return getInstrumentDetail(getInstrumentDetails(), key);
 }
 
-QString IndirectDataReductionTab::getInstrumentDetail(
-    QMap<QString, QString> const &instrumentDetails, QString const &key) const {
+QString IndirectDataReductionTab::getInstrumentDetail(QMap<QString, QString> const &instrumentDetails,
+                                                      QString const &key) const {
   validateInstrumentDetail(key);
   return instrumentDetails[key];
 }
 
-void IndirectDataReductionTab::validateInstrumentDetail(
-    QString const &key) const {
+void IndirectDataReductionTab::validateInstrumentDetail(QString const &key) const {
   auto const instrumentName = getInstrumentName().toStdString();
 
   if (instrumentName.empty())
-    throw std::runtime_error(
-        "Please select a valid facility and/or instrument.");
+    throw std::runtime_error("Please select a valid facility and/or instrument.");
   else if (!hasInstrumentDetail(key))
-    throw std::runtime_error("Could not find " + key.toStdString() +
-                             " for the " + instrumentName +
+    throw std::runtime_error("Could not find " + key.toStdString() + " for the " + instrumentName +
                              " instrument. Please select a valid instrument.");
 }
 
@@ -128,8 +118,8 @@ bool IndirectDataReductionTab::hasInstrumentDetail(QString const &key) const {
   return hasInstrumentDetail(getInstrumentDetails(), key);
 }
 
-bool IndirectDataReductionTab::hasInstrumentDetail(
-    QMap<QString, QString> const &instrumentDetails, QString const &key) const {
+bool IndirectDataReductionTab::hasInstrumentDetail(QMap<QString, QString> const &instrumentDetails,
+                                                   QString const &key) const {
   return instrumentDetails.contains(key) && !instrumentDetails[key].isEmpty();
 }
 
@@ -138,8 +128,7 @@ bool IndirectDataReductionTab::hasInstrumentDetail(
  *
  * @return Instrument config widget
  */
-MantidWidgets::IndirectInstrumentConfig *
-IndirectDataReductionTab::getInstrumentConfiguration() const {
+MantidWidgets::IndirectInstrumentConfig *IndirectDataReductionTab::getInstrumentConfiguration() const {
   return m_idrUI->m_uiForm.iicInstrumentConfiguration;
 }
 
@@ -147,9 +136,7 @@ QString IndirectDataReductionTab::getInstrumentName() const {
   return getInstrumentConfiguration()->getInstrumentName();
 }
 
-QString IndirectDataReductionTab::getAnalyserName() const {
-  return getInstrumentConfiguration()->getAnalyserName();
-}
+QString IndirectDataReductionTab::getAnalyserName() const { return getInstrumentConfiguration()->getAnalyserName(); }
 
 QString IndirectDataReductionTab::getReflectionName() const {
   return getInstrumentConfiguration()->getReflectionName();
@@ -164,8 +151,8 @@ QString IndirectDataReductionTab::getReflectionName() const {
  *
  * @returns A map of range ID to value
  */
-std::map<std::string, double> IndirectDataReductionTab::getRangesFromInstrument(
-    QString instName, QString analyser, QString reflection) {
+std::map<std::string, double> IndirectDataReductionTab::getRangesFromInstrument(QString instName, QString analyser,
+                                                                                QString reflection) {
   // Get any unset parameters
   if (instName.isEmpty())
     instName = getInstrumentName();
@@ -203,8 +190,7 @@ std::map<std::string, double> IndirectDataReductionTab::getRangesFromInstrument(
   y.emplace_back(4);
   std::vector<double> e(4, 0);
 
-  IAlgorithm_sptr createWsAlg =
-      AlgorithmManager::Instance().create("CreateWorkspace");
+  IAlgorithm_sptr createWsAlg = AlgorithmManager::Instance().create("CreateWorkspace");
   createWsAlg->setChild(true);
   createWsAlg->initialize();
   createWsAlg->setProperty("OutputWorkspace", "__energy");
@@ -216,8 +202,7 @@ std::map<std::string, double> IndirectDataReductionTab::getRangesFromInstrument(
   createWsAlg->execute();
   MatrixWorkspace_sptr energyWs = createWsAlg->getProperty("OutputWorkspace");
 
-  IAlgorithm_sptr convertHistAlg =
-      AlgorithmManager::Instance().create("ConvertToHistogram");
+  IAlgorithm_sptr convertHistAlg = AlgorithmManager::Instance().create("ConvertToHistogram");
   convertHistAlg->setChild(true);
   convertHistAlg->initialize();
   convertHistAlg->setProperty("InputWorkspace", energyWs);
@@ -225,8 +210,7 @@ std::map<std::string, double> IndirectDataReductionTab::getRangesFromInstrument(
   convertHistAlg->execute();
   energyWs = convertHistAlg->getProperty("OutputWorkspace");
 
-  IAlgorithm_sptr loadInstAlg =
-      AlgorithmManager::Instance().create("LoadInstrument");
+  IAlgorithm_sptr loadInstAlg = AlgorithmManager::Instance().create("LoadInstrument");
   loadInstAlg->setChild(true);
   loadInstAlg->initialize();
   loadInstAlg->setProperty("Workspace", energyWs);
@@ -235,14 +219,11 @@ std::map<std::string, double> IndirectDataReductionTab::getRangesFromInstrument(
   loadInstAlg->execute();
   energyWs = loadInstAlg->getProperty("Workspace");
 
-  std::string idfDirectory =
-      Mantid::Kernel::ConfigService::Instance().getString(
-          "instrumentDefinition.directory");
-  QString ipfFilename = QString::fromStdString(idfDirectory) + instName + "_" +
-                        analyser + "_" + reflection + "_Parameters.xml";
+  std::string idfDirectory = Mantid::Kernel::ConfigService::Instance().getString("instrumentDefinition.directory");
+  QString ipfFilename =
+      QString::fromStdString(idfDirectory) + instName + "_" + analyser + "_" + reflection + "_Parameters.xml";
 
-  IAlgorithm_sptr loadParamAlg =
-      AlgorithmManager::Instance().create("LoadParameterFile");
+  IAlgorithm_sptr loadParamAlg = AlgorithmManager::Instance().create("LoadParameterFile");
   loadParamAlg->setChild(true);
   loadParamAlg->initialize();
   loadParamAlg->setProperty("Workspace", energyWs);
@@ -251,18 +232,15 @@ std::map<std::string, double> IndirectDataReductionTab::getRangesFromInstrument(
   energyWs = loadParamAlg->getProperty("Workspace");
 
   double efixed = getEFixed(energyWs);
-  auto spectraMinDbl =
-      energyWs->getInstrument()->getNumberParameter("spectra-min")[0];
-  Mantid::specnum_t spectraMin =
-      boost::lexical_cast<Mantid::specnum_t>(spectraMinDbl);
+  auto spectraMinDbl = energyWs->getInstrument()->getNumberParameter("spectra-min")[0];
+  Mantid::specnum_t spectraMin = boost::lexical_cast<Mantid::specnum_t>(spectraMinDbl);
 
   auto &spectrum = energyWs->getSpectrum(0);
   spectrum.setSpectrumNo(spectraMin);
   spectrum.clearDetectorIDs();
   spectrum.addDetectorID(spectraMin);
 
-  IAlgorithm_sptr convUnitsAlg =
-      AlgorithmManager::Instance().create("ConvertUnits");
+  IAlgorithm_sptr convUnitsAlg = AlgorithmManager::Instance().create("ConvertUnits");
   convUnitsAlg->setChild(true);
   convUnitsAlg->initialize();
   convUnitsAlg->setProperty("InputWorkspace", energyWs);
@@ -287,9 +265,7 @@ std::map<std::string, double> IndirectDataReductionTab::getRangesFromInstrument(
  *
  * @param filter :: true if you want to allow filtering
  */
-void IndirectDataReductionTab::filterInputData(bool filter) {
-  setFileExtensionsByName(filter);
-}
+void IndirectDataReductionTab::filterInputData(bool filter) { setFileExtensionsByName(filter); }
 
 } // namespace CustomInterfaces
 } // namespace MantidQt

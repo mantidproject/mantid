@@ -43,9 +43,8 @@
 #include <QPushButton>
 
 FilterDialog::FilterDialog(int type, QWidget *parent, const Qt::WFlags &fl)
-    : QDialog(parent, fl), graph(nullptr), buttonFilter(nullptr),
-      buttonCancel(nullptr), boxName(nullptr), boxOffset(nullptr),
-      boxStart(nullptr), boxEnd(nullptr), boxColor(nullptr) {
+    : QDialog(parent, fl), graph(nullptr), buttonFilter(nullptr), buttonCancel(nullptr), boxName(nullptr),
+      boxOffset(nullptr), boxStart(nullptr), boxEnd(nullptr), boxColor(nullptr) {
   setWindowTitle(tr("MantidPlot - Filter options"));
   filter_type = type;
 
@@ -117,8 +116,7 @@ void FilterDialog::filter() {
     parser.SetExpr(boxStart->text().replace(",", ".").toAscii().constData());
     from = parser.Eval();
   } catch (mu::ParserError &e) {
-    QMessageBox::critical(this, tr("MantidPlot - Frequency input error"),
-                          QString::fromStdString(e.GetMsg()));
+    QMessageBox::critical(this, tr("MantidPlot - Frequency input error"), QString::fromStdString(e.GetMsg()));
     boxStart->setFocus();
     return;
   }
@@ -136,8 +134,7 @@ void FilterDialog::filter() {
       parser.SetExpr(boxEnd->text().replace(",", ".").toAscii().constData());
       to = parser.Eval();
     } catch (mu::ParserError &e) {
-      QMessageBox::critical(this, tr("MantidPlot - High Frequency input error"),
-                            QString::fromStdString(e.GetMsg()));
+      QMessageBox::critical(this, tr("MantidPlot - High Frequency input error"), QString::fromStdString(e.GetMsg()));
       boxEnd->setFocus();
       return;
     }
@@ -150,16 +147,14 @@ void FilterDialog::filter() {
     }
 
     if (from >= to) {
-      QMessageBox::critical(
-          this, tr("MantidPlot - Frequency input error"),
-          tr("Please enter frequency limits that satisfy: Low < High !"));
+      QMessageBox::critical(this, tr("MantidPlot - Frequency input error"),
+                            tr("Please enter frequency limits that satisfy: Low < High !"));
       boxEnd->setFocus();
       return;
     }
   }
 
-  FFTFilter *f = new FFTFilter(dynamic_cast<ApplicationWindow *>(parent()),
-                               graph, boxName->currentText(), filter_type);
+  FFTFilter *f = new FFTFilter(dynamic_cast<ApplicationWindow *>(parent()), graph, boxName->currentText(), filter_type);
   if (filter_type == FFTFilter::BandPass) {
     f->setBand(from, to);
     f->enableOffset(boxOffset->isChecked());

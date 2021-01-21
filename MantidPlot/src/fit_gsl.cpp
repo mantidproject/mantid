@@ -27,8 +27,7 @@ int expd3_f(const gsl_vector *x, void *params, gsl_vector *f) {
   double y0 = gsl_vector_get(x, 6);
   size_t i;
   for (i = 0; i < n; i++) {
-    double Yi =
-        A1 * exp(-X[i] * t1) + A2 * exp(-X[i] * t2) + A3 * exp(-X[i] * t3) + y0;
+    double Yi = A1 * exp(-X[i] * t1) + A2 * exp(-X[i] * t2) + A3 * exp(-X[i] * t3) + y0;
     gsl_vector_set(f, i, (Yi - Y[i]) / sigma[i]);
   }
   return GSL_SUCCESS;
@@ -48,10 +47,7 @@ double expd3_d(const gsl_vector *x, void *params) {
   size_t i;
   double val = 0;
   for (i = 0; i < n; i++) {
-    double dYi = ((A1 * exp(-X[i] * t1) + A2 * exp(-X[i] * t2) +
-                   A3 * exp(-X[i] * t3) + y0) -
-                  Y[i]) /
-                 sigma[i];
+    double dYi = ((A1 * exp(-X[i] * t1) + A2 * exp(-X[i] * t2) + A3 * exp(-X[i] * t3) + y0) - Y[i]) / sigma[i];
     val += dYi * dYi;
   }
   return val;
@@ -122,8 +118,7 @@ double expd2_d(const gsl_vector *x, void *params) {
   size_t i;
   double val = 0;
   for (i = 0; i < n; i++) {
-    double dYi =
-        ((A1 * exp(-X[i] * t1) + A2 * exp(-X[i] * t2) + y0) - Y[i]) / sigma[i];
+    double dYi = ((A1 * exp(-X[i] * t1) + A2 * exp(-X[i] * t2) + y0) - Y[i]) / sigma[i];
     val += dYi * dYi;
   }
   return val;
@@ -247,8 +242,7 @@ double gauss_d(const gsl_vector *x, void *params) {
   double val = 0;
   for (i = 0; i < n; i++) {
     double diff = X[i] - C;
-    double dYi =
-        ((A * exp(-0.5 * diff * diff / (w * w)) + Y0) - Y[i]) / sigma[i];
+    double dYi = ((A * exp(-0.5 * diff * diff / (w * w)) + Y0) - Y[i]) / sigma[i];
     val += dYi * dYi;
   }
   return val;
@@ -369,8 +363,7 @@ int gauss_multi_peak_df(const gsl_vector *x, void *params, gsl_matrix *J) {
       double e = sqrt(M_2_PI) / s * exp(-2 * diff * diff / w2);
       gsl_matrix_set(J, i, 3 * j, e / w[j]);
       gsl_matrix_set(J, i, 3 * j + 1, 4 * diff * a[j] * e / (w2 * w[j]));
-      gsl_matrix_set(J, i, 3 * j + 2,
-                     a[j] / w2 * e * (4 * diff * diff / w2 - 1));
+      gsl_matrix_set(J, i, 3 * j + 2, a[j] / w2 * e * (4 * diff * diff / w2 - 1));
     }
     gsl_matrix_set(J, i, p - 1, 1.0 / s);
   }
@@ -379,8 +372,7 @@ int gauss_multi_peak_df(const gsl_vector *x, void *params, gsl_matrix *J) {
   delete[] w;
   return GSL_SUCCESS;
 }
-int gauss_multi_peak_fdf(const gsl_vector *x, void *params, gsl_vector *f,
-                         gsl_matrix *J) {
+int gauss_multi_peak_fdf(const gsl_vector *x, void *params, gsl_vector *f, gsl_matrix *J) {
   gauss_multi_peak_f(x, params, f);
   gauss_multi_peak_df(x, params, J);
   return GSL_SUCCESS;
@@ -471,8 +463,7 @@ int lorentz_multi_peak_df(const gsl_vector *x, void *params, gsl_matrix *J) {
       double num2 = num * num;
       double den = 4 * diff2 - w2;
       gsl_matrix_set(J, i, 3 * j, M_2_PI * w[j] * num / s);
-      gsl_matrix_set(J, i, 3 * j + 1,
-                     M_2_PI * 8 * diff * a[j] * w[j] * num2 / s);
+      gsl_matrix_set(J, i, 3 * j + 1, M_2_PI * 8 * diff * a[j] * w[j] * num2 / s);
       gsl_matrix_set(J, i, 3 * j + 2, M_2_PI * den * a[j] * num2 / s);
     }
     gsl_matrix_set(J, i, p - 1, 1.0 / s);
@@ -482,8 +473,7 @@ int lorentz_multi_peak_df(const gsl_vector *x, void *params, gsl_matrix *J) {
   delete[] w;
   return GSL_SUCCESS;
 }
-int lorentz_multi_peak_fdf(const gsl_vector *x, void *params, gsl_vector *f,
-                           gsl_matrix *J) {
+int lorentz_multi_peak_fdf(const gsl_vector *x, void *params, gsl_vector *f, gsl_matrix *J) {
   lorentz_multi_peak_f(x, params, f);
   lorentz_multi_peak_df(x, params, J);
   return GSL_SUCCESS;
@@ -513,8 +503,7 @@ int user_f(const gsl_vector *x, void *params, gsl_vector *f) {
     }
     delete[] parameters;
   } catch (mu::ParserError &e) {
-    QMessageBox::critical(nullptr, "MantidPlot - Input function error",
-                          QString::fromStdString(e.GetMsg()));
+    QMessageBox::critical(nullptr, "MantidPlot - Input function error", QString::fromStdString(e.GetMsg()));
     return GSL_EINVAL;
   }
   return GSL_SUCCESS;
@@ -546,8 +535,7 @@ double user_d(const gsl_vector *x, void *params) {
     }
     delete[] parameters;
   } catch (mu::ParserError &e) {
-    QMessageBox::critical(nullptr, "MantidPlot - Input function error",
-                          QString::fromStdString(e.GetMsg()));
+    QMessageBox::critical(nullptr, "MantidPlot - Input function error", QString::fromStdString(e.GetMsg()));
     return GSL_EINVAL;
   }
   return val;
@@ -573,8 +561,7 @@ int user_df(const gsl_vector *x, void *params, gsl_matrix *J) {
     for (int i = 0; i < (int)n; i++) {
       xvar = X[i];
       for (int j = 0; j < (int)p; j++)
-        gsl_matrix_set(J, i, j,
-                       1 / sigma[i] * parser.Diff(&param[j], param[j]));
+        gsl_matrix_set(J, i, j, 1 / sigma[i] * parser.Diff(&param[j], param[j]));
     }
     delete[] param;
   } catch (mu::ParserError &) {
@@ -615,8 +602,7 @@ double boltzmann_d(const gsl_vector *x, void *params) {
   size_t i;
   double val = 0;
   for (i = 0; i < n; i++) {
-    double dYi =
-        ((A1 - A2) / (1 + exp((X[i] - x0) / dx)) + A2 - Y[i]) / sigma[i];
+    double dYi = ((A1 - A2) / (1 + exp((X[i] - x0) / dx)) + A2 - Y[i]) / sigma[i];
     val += dYi * dYi;
   }
   return val;
@@ -647,8 +633,7 @@ int boltzmann_df(const gsl_vector *x, void *params, gsl_matrix *J) {
   }
   return GSL_SUCCESS;
 }
-int boltzmann_fdf(const gsl_vector *x, void *params, gsl_vector *f,
-                  gsl_matrix *J) {
+int boltzmann_fdf(const gsl_vector *x, void *params, gsl_vector *f, gsl_matrix *J) {
   boltzmann_f(x, params, f);
   boltzmann_df(x, params, J);
   return GSL_SUCCESS;
@@ -719,8 +704,7 @@ int logistic_df(const gsl_vector *x, void *params, gsl_matrix *J) {
   return GSL_SUCCESS;
 }
 
-int logistic_fdf(const gsl_vector *x, void *params, gsl_vector *f,
-                 gsl_matrix *J) {
+int logistic_fdf(const gsl_vector *x, void *params, gsl_vector *f, gsl_matrix *J) {
   logistic_f(x, params, f);
   logistic_df(x, params, J);
   return GSL_SUCCESS;

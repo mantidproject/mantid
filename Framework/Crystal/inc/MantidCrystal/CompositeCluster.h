@@ -23,12 +23,10 @@ public:
   CompositeCluster(const CompositeCluster &) = delete;
   CompositeCluster &operator=(const CompositeCluster &) = delete;
   /// integrate the cluster
-  ICluster::ClusterIntegratedValues integrate(
-      std::shared_ptr<const Mantid::API::IMDHistoWorkspace> ws) const override;
+  ICluster::ClusterIntegratedValues integrate(std::shared_ptr<const Mantid::API::IMDHistoWorkspace> ws) const override;
 
   /// Apply labels to the workspace
-  void
-  writeTo(std::shared_ptr<Mantid::API::IMDHistoWorkspace> ws) const override;
+  void writeTo(std::shared_ptr<Mantid::API::IMDHistoWorkspace> ws) const override;
 
   /// Original label
   size_t getOriginalLabel() const override;

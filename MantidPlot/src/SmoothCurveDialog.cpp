@@ -42,10 +42,8 @@
 #include <QPushButton>
 #include <QSpinBox>
 
-SmoothCurveDialog::SmoothCurveDialog(int method, QWidget *parent,
-                                     const Qt::WFlags &fl)
-    : QDialog(parent, fl), graph(nullptr), boxPointsLeft(nullptr),
-      boxPointsRight(nullptr), boxOrder(nullptr) {
+SmoothCurveDialog::SmoothCurveDialog(int method, QWidget *parent, const Qt::WFlags &fl)
+    : QDialog(parent, fl), graph(nullptr), boxPointsLeft(nullptr), boxPointsRight(nullptr), boxOrder(nullptr) {
   smooth_method = method;
 
   setObjectName("SmoothCurveDialog");
@@ -112,14 +110,12 @@ SmoothCurveDialog::SmoothCurveDialog(int method, QWidget *parent,
 
   connect(btnSmooth, SIGNAL(clicked()), this, SLOT(smooth()));
   connect(buttonCancel, SIGNAL(clicked()), this, SLOT(reject()));
-  connect(boxName, SIGNAL(activated(const QString &)), this,
-          SLOT(activateCurve(const QString &)));
+  connect(boxName, SIGNAL(activated(const QString &)), this, SLOT(activateCurve(const QString &)));
 }
 
 void SmoothCurveDialog::smooth() {
   SmoothFilter *sf =
-      new SmoothFilter(static_cast<ApplicationWindow *>(this->parent()), graph,
-                       boxName->currentText(), smooth_method);
+      new SmoothFilter(static_cast<ApplicationWindow *>(this->parent()), graph, boxName->currentText(), smooth_method);
   if (smooth_method == SmoothFilter::SavitzkyGolay) {
     sf->setSmoothPoints(boxPointsLeft->value(), boxPointsRight->value());
     sf->setPolynomOrder(boxOrder->value());

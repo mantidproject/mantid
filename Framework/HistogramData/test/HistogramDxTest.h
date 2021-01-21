@@ -28,7 +28,6 @@ public:
 
   void test_has_correct_mixins() {
     HistogramDx dx;
-    TS_ASSERT_THROWS_NOTHING(
-        UNUSED_ARG(dynamic_cast<detail::FixedLengthVector<HistogramDx> &>(dx)));
+    TS_ASSERT_THROWS_NOTHING(UNUSED_ARG(dynamic_cast<detail::FixedLengthVector<HistogramDx> &>(dx)));
   }
 };

@@ -16,20 +16,14 @@ class StaticKuboToyabeTimesGausDecayTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static StaticKuboToyabeTimesGausDecayTest *createSuite() {
-    return new StaticKuboToyabeTimesGausDecayTest();
-  }
-  static void destroySuite(StaticKuboToyabeTimesGausDecayTest *suite) {
-    delete suite;
-  }
+  static StaticKuboToyabeTimesGausDecayTest *createSuite() { return new StaticKuboToyabeTimesGausDecayTest(); }
+  static void destroySuite(StaticKuboToyabeTimesGausDecayTest *suite) { delete suite; }
 
   StaticKuboToyabeTimesGausDecayTest() : fn() {}
 
   void test_Initialize() { TS_ASSERT_THROWS_NOTHING(fn.initialize()); }
 
-  void test_Name() {
-    TS_ASSERT_EQUALS(fn.name(), "StaticKuboToyabeTimesGausDecay");
-  }
+  void test_Name() { TS_ASSERT_EQUALS(fn.name(), "StaticKuboToyabeTimesGausDecay"); }
 
   void test_Params() {
     TS_ASSERT_DELTA(fn.getParameter("A"), 1.0, 0.0001);

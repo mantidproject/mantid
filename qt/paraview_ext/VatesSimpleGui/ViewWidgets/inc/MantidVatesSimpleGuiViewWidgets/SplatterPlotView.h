@@ -38,8 +38,7 @@ class RebinnedSourcesManager;
  @author Michael Reuter
  @date 10/10/2011
  */
-class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS SplatterPlotView
-    : public ViewBase {
+class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS SplatterPlotView : public ViewBase {
   Q_OBJECT
 
 public:
@@ -49,10 +48,8 @@ public:
    * @param rebinnedSourcesManager Pointer to a RebinnedSourcesManager
    * @param createRenderProxy :: Whether to create a render proxy for this view
    */
-  explicit SplatterPlotView(
-      QWidget *parent = nullptr,
-      RebinnedSourcesManager *rebinnedSourcesManager = nullptr,
-      bool createRenderProxy = true);
+  explicit SplatterPlotView(QWidget *parent = nullptr, RebinnedSourcesManager *rebinnedSourcesManager = nullptr,
+                            bool createRenderProxy = true);
   /// Default destructor
   ~SplatterPlotView() override;
 
@@ -144,24 +141,21 @@ private:
   /// Destroy splatter plot specific sources and filters
   void destroyFiltersForSplatterPlotView();
   /// Find a filter in the proxy manager
-  pqPipelineFilter *findFilter(const QList<pqPipelineFilter *> &filters,
-                               const QString &name) const;
+  pqPipelineFilter *findFilter(const QList<pqPipelineFilter *> &filters, const QString &name) const;
 
-  bool m_noOverlay; ///< Flag to respond to overlay situation correctly
+  bool m_noOverlay;                                ///< Flag to respond to overlay situation correctly
   QList<QPointer<pqPipelineSource>> m_peaksSource; ///< A list of peaks sources
   QPointer<pqPipelineSource> m_probeSource;        ///< The VTK probe filter
   QPointer<pqPipelineSource> m_splatSource;        ///< The splatter plot source
-  QPointer<pqPipelineSource> m_threshSource; ///< The thresholding filter source
-  QPointer<pqPipelineSource> m_peaksFilter;  ///< The peaks filter
-  Ui::SplatterPlotView m_ui;     ///< The splatter plot view'a UI form
-  QPointer<pqRenderView> m_view; ///< The main view area
-  std::shared_ptr<CameraManager> m_cameraManager; ///< The camera manager
-  PeaksTableControllerVsi
-      *m_peaksTableController; ///< The peaks table controller
-  QAction *m_allPeaksAction; ///< The action for showing all peaks in the table.
-  QAction *m_removePeaksAction; ///< The action for removing the peaks table.
-  std::string
-      m_peaksWorkspaceNameDelimiter; ///< Delimiter for peaks workspace strings.
+  QPointer<pqPipelineSource> m_threshSource;       ///< The thresholding filter source
+  QPointer<pqPipelineSource> m_peaksFilter;        ///< The peaks filter
+  Ui::SplatterPlotView m_ui;                       ///< The splatter plot view'a UI form
+  QPointer<pqRenderView> m_view;                   ///< The main view area
+  std::shared_ptr<CameraManager> m_cameraManager;  ///< The camera manager
+  PeaksTableControllerVsi *m_peaksTableController; ///< The peaks table controller
+  QAction *m_allPeaksAction;                       ///< The action for showing all peaks in the table.
+  QAction *m_removePeaksAction;                    ///< The action for removing the peaks table.
+  std::string m_peaksWorkspaceNameDelimiter;       ///< Delimiter for peaks workspace strings.
 };
 
 } // namespace SimpleGui

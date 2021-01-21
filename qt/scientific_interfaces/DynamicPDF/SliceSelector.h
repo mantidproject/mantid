@@ -47,8 +47,7 @@ public:
   std::string m_label;
 };
 
-class SliceSelector : public QMainWindow,
-                      public MantidQt::API::WorkspaceObserver {
+class SliceSelector : public QMainWindow, public MantidQt::API::WorkspaceObserver {
   Q_OBJECT
 
 public:
@@ -56,9 +55,8 @@ public:
   ~SliceSelector();
 
 protected:
-  void preDeleteHandle(
-      const std::string &workspaceName,
-      const std::shared_ptr<Mantid::API::Workspace> &workspace) override;
+  void preDeleteHandle(const std::string &workspaceName,
+                       const std::shared_ptr<Mantid::API::Workspace> &workspace) override;
 
 signals:
   void signalSlicesLoaded(const QString &workspaceName);

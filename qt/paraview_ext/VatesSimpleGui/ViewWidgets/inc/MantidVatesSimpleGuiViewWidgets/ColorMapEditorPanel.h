@@ -20,8 +20,7 @@ namespace SimpleGui {
 
   @date 11/05/2015
  */
-class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS ColorMapEditorPanel
-    : public QDialog {
+class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS ColorMapEditorPanel : public QDialog {
   Q_OBJECT
 public:
   /// Default constructor.

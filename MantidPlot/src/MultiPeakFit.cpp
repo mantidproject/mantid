@@ -40,15 +40,13 @@
 #include <QLocale>
 #include <QMessageBox>
 
-MultiPeakFit::MultiPeakFit(ApplicationWindow *parent, Graph *g,
-                           PeakProfile profile, int peaks)
+MultiPeakFit::MultiPeakFit(ApplicationWindow *parent, Graph *g, PeakProfile profile, int peaks)
     : Fit(parent, g), d_profile(profile) {
   init(peaks);
 }
 
-MultiPeakFit::MultiPeakFit(ApplicationWindow *parent, Table *t, const QString &,
-                           const QString &, int, int, PeakProfile profile,
-                           int peaks)
+MultiPeakFit::MultiPeakFit(ApplicationWindow *parent, Table *t, const QString &, const QString &, int, int,
+                           PeakProfile profile, int peaks)
     : Fit(parent, t), d_profile(profile) {
   init(peaks);
 }
@@ -157,8 +155,7 @@ QString MultiPeakFit::peakFormula(int peakIndex, PeakProfile profile) {
     formula += "*exp(-2*(x-xc" + index + ")^2/w" + index + "^2)";
     break;
   case Lorentz:
-    formula += "2*A" + index + "/PI*w" + index + "/(4*(x-xc" + index + ")^2+w" +
-               index + "^2)";
+    formula += "2*A" + index + "/PI*w" + index + "/(4*(x-xc" + index + ")^2+w" + index + "^2)";
     break;
   }
   return formula;
@@ -177,9 +174,8 @@ void MultiPeakFit::guessInitialValues() {
   QVarLengthArray<double> temp(d_n); // double temp[d_n];
   for (int i = 0; i < d_n; i++)
     temp[i] = fabs(d_y[i]);
-  size_t imax_temp = gsl_stats_max_index(
-      temp.data(), 1,
-      d_n); // size_t imax_temp = gsl_stats_max_index(temp, 1, d_n);
+  size_t imax_temp = gsl_stats_max_index(temp.data(), 1,
+                                         d_n); // size_t imax_temp = gsl_stats_max_index(temp, 1, d_n);
 
   double offset, area;
   if (imax_temp == imax)
@@ -230,8 +226,7 @@ void MultiPeakFit::insertPeakFunctionCurve(double *x, double *y, int peak) {
     parameter = QString::number(d_results[p], 'e', d_prec);
     formula.replace(d_param_names[p], parameter);
   }
-  c->setFormula(
-      formula.replace("--", "+").replace("-+", "-").replace("+-", "-"));
+  c->setFormula(formula.replace("--", "+").replace("-+", "-").replace("+-", "-"));
   d_output_graph->insertPlotItem(c, GraphOptions::Line);
   d_output_graph->addFitCurve(c);
 }
@@ -243,9 +238,7 @@ void MultiPeakFit::generateFitCurve() {
 
   gsl_matrix *m = gsl_matrix_alloc(d_points, d_peaks);
   if (!m) {
-    QMessageBox::warning(
-        app, tr("MantidPlot - Fit Error"),
-        tr("Could not allocate enough memory for the fit curves!"));
+    QMessageBox::warning(app, tr("MantidPlot - Fit Error"), tr("Could not allocate enough memory for the fit curves!"));
     return;
   }
 
@@ -277,15 +270,13 @@ void MultiPeakFit::generateFitCurve() {
         d_output_graph = createOutputGraph()->activeGraph();
 
       if (d_peaks > 1)
-        insertFitFunctionCurve(
-            QString(objectName()) + tr("Fit"), X.data(), Y.data(),
-            2); // insertFitFunctionCurve(QString(objectName())
-                // + tr("Fit"), X, Y, 2);
+        insertFitFunctionCurve(QString(objectName()) + tr("Fit"), X.data(), Y.data(),
+                               2); // insertFitFunctionCurve(QString(objectName())
+                                   // + tr("Fit"), X, Y, 2);
       else
-        insertFitFunctionCurve(
-            QString(objectName()) + tr("Fit"), X.data(),
-            Y.data()); // insertFitFunctionCurve(QString(objectName())
-                       // + tr("Fit"), X, Y);
+        insertFitFunctionCurve(QString(objectName()) + tr("Fit"), X.data(),
+                               Y.data()); // insertFitFunctionCurve(QString(objectName())
+                                          // + tr("Fit"), X, Y);
 
       if (generate_peak_curves) {
         for (i = 0; i < peaks_aux; i++) { // add the peak curves
@@ -307,8 +298,7 @@ void MultiPeakFit::generateFitCurve() {
       dataSet = d_y_col_name;
     QString label = d_explanation + " " + tr("fit of") + " " + dataSet;
 
-    d_result_table =
-        app->newHiddenTable(tableName, label, d_points, peaks_aux + 2);
+    d_result_table = app->newHiddenTable(tableName, label, d_points, peaks_aux + 2);
     QStringList header{"1"};
     for (i = 0; i < peaks_aux; i++)
       header << tr("peak") + QString::number(i + 1);
@@ -326,8 +316,7 @@ void MultiPeakFit::generateFitCurve() {
         double w = d_results[3 * j + 2];
         double y_aux = 0;
         if (d_profile == Gauss)
-          y_aux += sqrt(M_2_PI) * d_results[3 * j] / w *
-                   exp(-2 * diff * diff / (w * w));
+          y_aux += sqrt(M_2_PI) * d_results[3 * j] / w * exp(-2 * diff * diff / (w * w));
         else
           y_aux += M_2_PI * d_results[3 * j] * w / (4 * diff * diff + w * w);
 
@@ -338,8 +327,7 @@ void MultiPeakFit::generateFitCurve() {
       }
       Y[i] = yi + d_results[d_p - 1]; // add offset
       if (d_peaks > 1)
-        d_result_table->setText(i, d_peaks + 1,
-                                locale.toString(Y[i], 'e', d_prec));
+        d_result_table->setText(i, d_peaks + 1, locale.toString(Y[i], 'e', d_prec));
     }
 
     customizeFitResults();
@@ -415,14 +403,9 @@ QString MultiPeakFit::logFitInfo(int iterations, int status) {
     info += locale.toString(d_results[3 * j + 2], 'e', d_prec) + "\t";
 
     if (d_profile == Lorentz)
-      info += locale.toString(M_2_PI * d_results[3 * j] / d_results[3 * j + 2],
-                              'e', d_prec) +
-              "\n";
+      info += locale.toString(M_2_PI * d_results[3 * j] / d_results[3 * j + 2], 'e', d_prec) + "\n";
     else
-      info += locale.toString(sqrt(M_2_PI) * d_results[3 * j] /
-                                  d_results[3 * j + 2],
-                              'e', d_prec) +
-              "\n";
+      info += locale.toString(sqrt(M_2_PI) * d_results[3 * j] / d_results[3 * j + 2], 'e', d_prec) + "\n";
   }
   info += "--------------------------------------------------------------------"
           "-------------------\n";
@@ -435,29 +418,25 @@ QString MultiPeakFit::logFitInfo(int iterations, int status) {
  *
  *****************************************************************************/
 
-LorentzFit::LorentzFit(ApplicationWindow *parent, Graph *g)
-    : MultiPeakFit(parent, g, MultiPeakFit::Lorentz, 1) {
+LorentzFit::LorentzFit(ApplicationWindow *parent, Graph *g) : MultiPeakFit(parent, g, MultiPeakFit::Lorentz, 1) {
   init();
 }
 
-LorentzFit::LorentzFit(ApplicationWindow *parent, Graph *g,
-                       const QString &curveTitle)
+LorentzFit::LorentzFit(ApplicationWindow *parent, Graph *g, const QString &curveTitle)
     : MultiPeakFit(parent, g, MultiPeakFit::Lorentz, 1) {
   init();
   setDataFromCurve(curveTitle);
 }
 
-LorentzFit::LorentzFit(ApplicationWindow *parent, Graph *g,
-                       const QString &curveTitle, double start, double end)
+LorentzFit::LorentzFit(ApplicationWindow *parent, Graph *g, const QString &curveTitle, double start, double end)
     : MultiPeakFit(parent, g, MultiPeakFit::Lorentz, 1) {
   init();
   setDataFromCurve(curveTitle, start, end);
 }
 
-LorentzFit::LorentzFit(ApplicationWindow *parent, Table *t, const QString &xCol,
-                       const QString &yCol, int startRow, int endRow)
-    : MultiPeakFit(parent, t, xCol, yCol, startRow, endRow,
-                   MultiPeakFit::Lorentz, 1) {
+LorentzFit::LorentzFit(ApplicationWindow *parent, Table *t, const QString &xCol, const QString &yCol, int startRow,
+                       int endRow)
+    : MultiPeakFit(parent, t, xCol, yCol, startRow, endRow, MultiPeakFit::Lorentz, 1) {
   init();
   setDataFromTable(t, xCol, yCol, startRow, endRow);
 }
@@ -474,29 +453,23 @@ void LorentzFit::init() {
  *
  *****************************************************************************/
 
-GaussFit::GaussFit(ApplicationWindow *parent, Graph *g)
-    : MultiPeakFit(parent, g, MultiPeakFit::Gauss, 1) {
-  init();
-}
+GaussFit::GaussFit(ApplicationWindow *parent, Graph *g) : MultiPeakFit(parent, g, MultiPeakFit::Gauss, 1) { init(); }
 
-GaussFit::GaussFit(ApplicationWindow *parent, Graph *g,
-                   const QString &curveTitle)
+GaussFit::GaussFit(ApplicationWindow *parent, Graph *g, const QString &curveTitle)
     : MultiPeakFit(parent, g, MultiPeakFit::Gauss, 1) {
   init();
   setDataFromCurve(curveTitle);
 }
 
-GaussFit::GaussFit(ApplicationWindow *parent, Graph *g,
-                   const QString &curveTitle, double start, double end)
+GaussFit::GaussFit(ApplicationWindow *parent, Graph *g, const QString &curveTitle, double start, double end)
     : MultiPeakFit(parent, g, MultiPeakFit::Gauss, 1) {
   init();
   setDataFromCurve(curveTitle, start, end);
 }
 
-GaussFit::GaussFit(ApplicationWindow *parent, Table *t, const QString &xCol,
-                   const QString &yCol, int startRow, int endRow)
-    : MultiPeakFit(parent, t, xCol, yCol, startRow, endRow, MultiPeakFit::Gauss,
-                   1) {
+GaussFit::GaussFit(ApplicationWindow *parent, Table *t, const QString &xCol, const QString &yCol, int startRow,
+                   int endRow)
+    : MultiPeakFit(parent, t, xCol, yCol, startRow, endRow, MultiPeakFit::Gauss, 1) {
   init();
   setDataFromTable(t, xCol, yCol, startRow, endRow);
 }
@@ -513,26 +486,20 @@ void GaussFit::init() {
  *
  *****************************************************************************/
 
-GaussAmpFit::GaussAmpFit(ApplicationWindow *parent, Graph *g) : Fit(parent, g) {
-  init();
-}
+GaussAmpFit::GaussAmpFit(ApplicationWindow *parent, Graph *g) : Fit(parent, g) { init(); }
 
-GaussAmpFit::GaussAmpFit(ApplicationWindow *parent, Graph *g,
-                         const QString &curveTitle)
-    : Fit(parent, g) {
+GaussAmpFit::GaussAmpFit(ApplicationWindow *parent, Graph *g, const QString &curveTitle) : Fit(parent, g) {
   init();
   setDataFromCurve(curveTitle);
 }
 
-GaussAmpFit::GaussAmpFit(ApplicationWindow *parent, Graph *g,
-                         const QString &curveTitle, double start, double end)
+GaussAmpFit::GaussAmpFit(ApplicationWindow *parent, Graph *g, const QString &curveTitle, double start, double end)
     : Fit(parent, g) {
   init();
   setDataFromCurve(curveTitle, start, end);
 }
 
-GaussAmpFit::GaussAmpFit(ApplicationWindow *parent, Table *t,
-                         const QString &xCol, const QString &yCol, int startRow,
+GaussAmpFit::GaussAmpFit(ApplicationWindow *parent, Table *t, const QString &xCol, const QString &yCol, int startRow,
                          int endRow)
     : Fit(parent, t) {
   init();
@@ -547,8 +514,7 @@ void GaussAmpFit::init() {
   d_fsimplex = gauss_d;
   d_p = 4;
   initWorkspace(d_p);
-  d_param_explain << tr("offset") << tr("amplitude") << tr("center")
-                  << tr("width");
+  d_param_explain << tr("offset") << tr("amplitude") << tr("center") << tr("width");
   d_param_names << "y0"
                 << "A"
                 << "xc"
@@ -598,9 +564,8 @@ void GaussAmpFit::guessInitialValues() {
   QVarLengthArray<double> temp(d_n); // double temp[d_n];
   for (int i = 0; i < d_n; i++)
     temp[i] = fabs(d_y[i]);
-  size_t imax_temp = gsl_stats_max_index(
-      temp.data(), 1,
-      d_n); // size_t imax_temp = gsl_stats_max_index(temp, 1, d_n);
+  size_t imax_temp = gsl_stats_max_index(temp.data(), 1,
+                                         d_n); // size_t imax_temp = gsl_stats_max_index(temp, 1, d_n);
 
   gsl_vector_set(d_param_init, 2, d_x[imax_temp]);
   gsl_vector_set(d_param_init, 3, gsl_stats_sd(d_x, 1, d_n));

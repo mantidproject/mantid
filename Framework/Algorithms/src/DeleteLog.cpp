@@ -29,13 +29,10 @@ const std::string DeleteLog::category() const { return "DataHandling\\Logs"; }
 /** Initialize the algorithm's properties.
  */
 void DeleteLog::init() {
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("Workspace", "", Direction::InOut),
-      "In/out workspace containing the logs. The workspace is "
-      "modified in place");
-  declareProperty("Name", "",
-                  std::make_shared<MandatoryValidator<std::string>>(), "",
-                  Direction::Input);
+  declareProperty(std::make_unique<WorkspaceProperty<>>("Workspace", "", Direction::InOut),
+                  "In/out workspace containing the logs. The workspace is "
+                  "modified in place");
+  declareProperty("Name", "", std::make_shared<MandatoryValidator<std::string>>(), "", Direction::Input);
 }
 
 /** Execute the algorithm.
@@ -47,8 +44,7 @@ void DeleteLog::exec() {
   if (run.hasProperty(logName)) {
     run.removeLogData(logName);
   } else {
-    g_log.warning() << "Unable to delete log '" << logName
-                    << "' from the given workspace as it does not exist.\n";
+    g_log.warning() << "Unable to delete log '" << logName << "' from the given workspace as it does not exist.\n";
   }
 }
 

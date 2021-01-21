@@ -49,8 +49,7 @@ using Kernel::Tolerance;
 using Kernel::V3D;
 
 Torus::Torus()
-    : Surface(), Centre(), Normal(1, 0, 0), Iradius(0), Dradius(0),
-      Displacement(0)
+    : Surface(), Centre(), Normal(1, 0, 0), Iradius(0), Dradius(0), Displacement(0)
 /**
   Constructor with centre line along X axis
   and centre on origin
@@ -88,8 +87,7 @@ int Torus::operator==(const Torus &A) const
   if (this == &A)
     return 1;
 
-  if ((fabs(Displacement - A.Displacement) > Tolerance) ||
-      (fabs(Iradius - A.Iradius) > Tolerance) ||
+  if ((fabs(Displacement - A.Displacement) > Tolerance) || (fabs(Iradius - A.Iradius) > Tolerance) ||
       (fabs(Dradius - A.Dradius) > Tolerance))
     return 0;
 
@@ -143,8 +141,7 @@ int Torus::setSurface(const std::string &Pstr)
   std::string Line = Pstr;
 
   std::string item;
-  if (!Mantid::Kernel::Strings::section(Line, item) ||
-      tolower(item[0]) != 't' || item.length() != 3)
+  if (!Mantid::Kernel::Strings::section(Line, item) || tolower(item[0]) != 't' || item.length() != 3)
     return errDesc;
 
   // Torus on X/Y/Z axis
@@ -300,8 +297,7 @@ void Torus::write(std::ostream &OX) const
  *  @param ymin :: the Y min value
  *  @param zmin :: the Z min value
  */
-void Torus::getBoundingBox(double &xmax, double &ymax, double &zmax,
-                           double &xmin, double &ymin, double &zmin) {
+void Torus::getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin) {
   UNUSED_ARG(xmax);
   UNUSED_ARG(ymax);
   UNUSED_ARG(zmax);

@@ -25,8 +25,7 @@ namespace Algorithms {
     @author Russell Taylor, Tessella Support Services plc
     @date 30/06/2009
 */
-class MANTID_ALGORITHMS_DLL ExtractSingleSpectrum
-    : public API::DistributedAlgorithm {
+class MANTID_ALGORITHMS_DLL ExtractSingleSpectrum : public API::DistributedAlgorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "ExtractSingleSpectrum"; }
@@ -42,9 +41,7 @@ public:
     return {"CropWorkspace", "ExtractSpectra", "PerformIndexOperations"};
   }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "Transforms\\Splitting";
-  }
+  const std::string category() const override { return "Transforms\\Splitting"; }
 
 private:
   /// Initialisation code

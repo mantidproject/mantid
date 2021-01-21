@@ -14,8 +14,7 @@
 namespace Mantid {
 namespace API {
 
-FuncMinimizerFactoryImpl::FuncMinimizerFactoryImpl()
-    : Kernel::DynamicFactory<IFuncMinimizer>() {
+FuncMinimizerFactoryImpl::FuncMinimizerFactoryImpl() : Kernel::DynamicFactory<IFuncMinimizer>() {
   // we need to make sure the library manager has been loaded before we
   // are constructed so that it is destroyed after us and thus does
   // not close any loaded DLLs with loaded algorithms in them
@@ -28,11 +27,9 @@ FuncMinimizerFactoryImpl::FuncMinimizerFactoryImpl()
  *   and optionally properties: "type,prop1=value1,prop2=value2"
  * @return A pointer to the created minimizer
  */
-std::shared_ptr<IFuncMinimizer>
-FuncMinimizerFactoryImpl::createMinimizer(const std::string &str) const {
+std::shared_ptr<IFuncMinimizer> FuncMinimizerFactoryImpl::createMinimizer(const std::string &str) const {
   // check if there are any properties defined - look for a comma
-  if (str.find(',') ==
-      std::string::npos) { // no properties - create minimizer and return
+  if (str.find(',') == std::string::npos) { // no properties - create minimizer and return
     return create(str);
   }
 

@@ -29,36 +29,27 @@ using namespace API;
 using namespace Geometry;
 using namespace DataObjects;
 
-TOFSANSResolution::TOFSANSResolution()
-    : API::Algorithm(), m_wl_resolution(0.) {}
+TOFSANSResolution::TOFSANSResolution() : API::Algorithm(), m_wl_resolution(0.) {}
 
 void TOFSANSResolution::init() {
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>(
-          "InputWorkspace", "", Direction::InOut,
-          std::make_shared<WorkspaceUnitValidator>("MomentumTransfer")),
-      "Name the workspace to calculate the resolution for");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::InOut,
+                                                        std::make_shared<WorkspaceUnitValidator>("MomentumTransfer")),
+                  "Name the workspace to calculate the resolution for");
 
   auto wsValidator = std::make_shared<WorkspaceUnitValidator>("Wavelength");
-  declareProperty(std::make_unique<WorkspaceProperty<>>(
-                      "ReducedWorkspace", "", Direction::Input, wsValidator),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("ReducedWorkspace", "", Direction::Input, wsValidator),
                   "I(Q) workspace");
-  declareProperty(std::make_unique<ArrayProperty<double>>(
-      "OutputBinning", std::make_shared<RebinParamsValidator>()));
+  declareProperty(std::make_unique<ArrayProperty<double>>("OutputBinning", std::make_shared<RebinParamsValidator>()));
 
   declareProperty("MinWavelength", EMPTY_DBL(), "Minimum wavelength to use.");
   declareProperty("MaxWavelength", EMPTY_DBL(), "Maximum wavelength to use.");
 
   auto positiveDouble = std::make_shared<BoundedValidator<double>>();
   positiveDouble->setLower(0);
-  declareProperty("PixelSizeX", 5.15, positiveDouble,
-                  "Pixel size in the X direction (mm).");
-  declareProperty("PixelSizeY", 5.15, positiveDouble,
-                  "Pixel size in the Y direction (mm).");
-  declareProperty("SampleApertureRadius", 5.0, positiveDouble,
-                  "Sample aperture radius (mm).");
-  declareProperty("SourceApertureRadius", 10.0, positiveDouble,
-                  "Source aperture radius (mm).");
+  declareProperty("PixelSizeX", 5.15, positiveDouble, "Pixel size in the X direction (mm).");
+  declareProperty("PixelSizeY", 5.15, positiveDouble, "Pixel size in the Y direction (mm).");
+  declareProperty("SampleApertureRadius", 5.0, positiveDouble, "Sample aperture radius (mm).");
+  declareProperty("SourceApertureRadius", 10.0, positiveDouble, "Source aperture radius (mm).");
   declareProperty("DeltaT", 250.0, positiveDouble, "TOF spread (microsec).");
 }
 
@@ -89,8 +80,7 @@ double TOFSANSResolution::getEffectiveYPixelSize() {
 void TOFSANSResolution::exec() {
   MatrixWorkspace_sptr iqWS = getProperty("InputWorkspace");
   MatrixWorkspace_sptr reducedWS = getProperty("ReducedWorkspace");
-  EventWorkspace_sptr reducedEventWS =
-      std::dynamic_pointer_cast<EventWorkspace>(reducedWS);
+  EventWorkspace_sptr reducedEventWS = std::dynamic_pointer_cast<EventWorkspace>(reducedWS);
   const double min_wl = getProperty("MinWavelength");
   const double max_wl = getProperty("MaxWavelength");
   double pixel_size_x = getEffectiveXPixelSize();
@@ -112,16 +102,14 @@ void TOFSANSResolution::exec() {
   // Create workspaces with each component of the resolution for debugging
   // purposes
   MatrixWorkspace_sptr thetaWS = WorkspaceFactory::Instance().create(iqWS);
-  declareProperty(std::make_unique<WorkspaceProperty<>>("ThetaError", "",
-                                                        Direction::Output));
+  declareProperty(std::make_unique<WorkspaceProperty<>>("ThetaError", "", Direction::Output));
   setPropertyValue("ThetaError", "__" + iqWS->getName() + "_theta_error");
   setProperty("ThetaError", thetaWS);
   thetaWS->setSharedX(0, iqWS->sharedX(0));
   auto &ThetaY = thetaWS->mutableY(0);
 
   MatrixWorkspace_sptr tofWS = WorkspaceFactory::Instance().create(iqWS);
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("TOFError", "", Direction::Output));
+  declareProperty(std::make_unique<WorkspaceProperty<>>("TOFError", "", Direction::Output));
   setPropertyValue("TOFError", "__" + iqWS->getName() + "_tof_error");
   setProperty("TOFError", tofWS);
   tofWS->setSharedX(0, iqWS->sharedX(0));
@@ -130,8 +118,7 @@ void TOFSANSResolution::exec() {
   // Initialize Dq
   HistogramData::HistogramDx DxOut(xLength - 1, 0.0);
 
-  const auto numberOfSpectra =
-      static_cast<int>(reducedWS->getNumberHistograms());
+  const auto numberOfSpectra = static_cast<int>(reducedWS->getNumberHistograms());
   Progress progress(this, 0.0, 1.0, numberOfSpectra);
 
   const auto &spectrumInfo = reducedWS->spectrumInfo();
@@ -141,8 +128,7 @@ void TOFSANSResolution::exec() {
   for (int i = 0; i < numberOfSpectra; i++) {
     PARALLEL_START_INTERUPT_REGION
     if (!spectrumInfo.hasDetectors(i)) {
-      g_log.warning() << "Workspace index " << i
-                      << " has no detector assigned to it - discarding\n";
+      g_log.warning() << "Workspace index " << i << " has no detector assigned to it - discarding\n";
       continue;
     }
     // Skip if we have a monitor or if the detector is masked.
@@ -181,32 +167,26 @@ void TOFSANSResolution::exec() {
       if (binParams[1] > 0.0) {
         iq = static_cast<int>(floor((q - binParams[0]) / binParams[1]));
       } else {
-        iq = static_cast<int>(
-            floor(log(q / binParams[0]) / log(1.0 - binParams[1])));
+        iq = static_cast<int>(floor(log(q / binParams[0]) / log(1.0 - binParams[1])));
       }
 
       const double src_to_pixel = L1 + L2;
       const double dTheta2 =
-          (3.0 * R1 * R1 / (L1 * L1) +
-           3.0 * R2 * R2 * src_to_pixel * src_to_pixel / (L1 * L1 * L2 * L2) +
-           2.0 * (pixel_size_x * pixel_size_x + pixel_size_y * pixel_size_y) /
-               (L2 * L2)) /
+          (3.0 * R1 * R1 / (L1 * L1) + 3.0 * R2 * R2 * src_to_pixel * src_to_pixel / (L1 * L1 * L2 * L2) +
+           2.0 * (pixel_size_x * pixel_size_x + pixel_size_y * pixel_size_y) / (L2 * L2)) /
           12.0;
 
       // This term is related to the TOF resolution
-      const double dwl_over_wl =
-          3.9560 * getTOFResolution(wl) / (1000.0 * (L1 + L2) * wl);
+      const double dwl_over_wl = 3.9560 * getTOFResolution(wl) / (1000.0 * (L1 + L2) * wl);
       // This term is related to the wavelength binning
       const double wl_bin_over_wl = wl_bin / wl;
       const double dq_over_q =
-          std::sqrt(dTheta2 / (theta * theta) + dwl_over_wl * dwl_over_wl +
-                    wl_bin_over_wl * wl_bin_over_wl);
+          std::sqrt(dTheta2 / (theta * theta) + dwl_over_wl * dwl_over_wl + wl_bin_over_wl * wl_bin_over_wl);
 
       // By using only events with a positive weight, we use only the data
       // distribution and leave out the background events.
       // Note: we are looping over bins, therefore the xLength-1.
-      if (iq >= 0 && iq < xLength - 1 && !std::isnan(dq_over_q) &&
-          dq_over_q > 0 && YIn[j] > 0) {
+      if (iq >= 0 && iq < xLength - 1 && !std::isnan(dq_over_q) && dq_over_q > 0 && YIn[j] > 0) {
         _dx[iq] += q * dq_over_q * YIn[j];
         _norm[iq] += YIn[j];
         _tofy[iq] += q * std::fabs(dwl_over_wl) * YIn[j];

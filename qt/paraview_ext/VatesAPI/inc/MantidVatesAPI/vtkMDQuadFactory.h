@@ -30,8 +30,7 @@ public:
   ~vtkMDQuadFactory() override;
 
   /// Factory Method. Should also handle delegation to successors.
-  vtkSmartPointer<vtkDataSet>
-  create(ProgressAction &progressUpdating) const override;
+  vtkSmartPointer<vtkDataSet> create(ProgressAction &progressUpdating) const override;
 
   /// Initalize with a target workspace.
   void initialize(const Mantid::API::Workspace_sptr &workspace) override;

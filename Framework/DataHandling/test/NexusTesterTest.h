@@ -34,8 +34,7 @@ public:
     NexusTester alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("SaveFilename", "NexusTester.nxs"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("SaveFilename", "NexusTester.nxs"));
     std::string fullFile = alg.getPropertyValue("SaveFilename");
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("LoadFilename", fullFile));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("ChunkSize", 10));

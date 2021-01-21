@@ -25,8 +25,7 @@ public:
   virtual ~ISliderHandler() {}
 
   /// Configure the image scrollbars for the specified data and drawing area
-  virtual void configureSliders(QRect drawArea,
-                                SpectrumDataSource_sptr dataSource) = 0;
+  virtual void configureSliders(QRect drawArea, SpectrumDataSource_sptr dataSource) = 0;
 
   /// Configure the horizontal scrollbar to cover the specified range
   virtual void configureHSlider(int nDataSteps, int nPixels) = 0;

@@ -39,15 +39,11 @@ PropertyWidgetFactory::~PropertyWidgetFactory() {}
  * @param row :: row in the above QGridLayout, if specified
  * @return the right PropertyWidget * subclass
  */
-PropertyWidget *
-PropertyWidgetFactory::createWidget(Mantid::Kernel::Property *prop,
-                                    QWidget *parent, QGridLayout *layout,
-                                    int row) {
+PropertyWidget *PropertyWidgetFactory::createWidget(Mantid::Kernel::Property *prop, QWidget *parent,
+                                                    QGridLayout *layout, int row) {
   auto *fileType = dynamic_cast<Mantid::API::FileProperty *>(prop);
-  auto *multipleFileType =
-      dynamic_cast<Mantid::API::MultipleFileProperty *>(prop);
-  PropertyWithValue<bool> *boolProp =
-      dynamic_cast<PropertyWithValue<bool> *>(prop);
+  auto *multipleFileType = dynamic_cast<Mantid::API::MultipleFileProperty *>(prop);
+  PropertyWithValue<bool> *boolProp = dynamic_cast<PropertyWithValue<bool> *>(prop);
 
   if (boolProp) {
     // CheckBox shown for BOOL properties

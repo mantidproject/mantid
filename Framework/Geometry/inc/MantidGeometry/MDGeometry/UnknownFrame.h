@@ -29,8 +29,7 @@ public:
   bool isSameType(const MDFrame &frame) const override;
   Mantid::Kernel::UnitLabel getUnitLabel() const override;
   const Mantid::Kernel::MDUnit &getMDUnit() const override;
-  Mantid::Kernel::SpecialCoordinateSystem
-  equivalientSpecialCoordinateSystem() const override;
+  Mantid::Kernel::SpecialCoordinateSystem equivalientSpecialCoordinateSystem() const override;
   UnknownFrame *clone() const override;
   // Type name
   static const std::string UnknownFrameName;

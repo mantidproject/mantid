@@ -25,38 +25,29 @@ namespace SimpleGui {
 
  @date 15/01/2015
  */
-class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS
-    RebinAlgorithmDialogProvider {
+class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS RebinAlgorithmDialogProvider {
 public:
   RebinAlgorithmDialogProvider(QWidget *parent);
 
   ~RebinAlgorithmDialogProvider();
 
-  void showDialog(const std::string &inputWorkspace,
-                  const std::string &outputWorkspace,
+  void showDialog(const std::string &inputWorkspace, const std::string &outputWorkspace,
                   const std::string &algorithmType);
 
   static const size_t BinCutOffValue;
 
 private:
-  MantidQt::API::AlgorithmDialog *
-  createDialog(const Mantid::API::IAlgorithm &algorithm,
-               const std::string &inputWorkspace,
-               const std::string &outputWorkspace,
-               const std::string &algorithmType);
+  MantidQt::API::AlgorithmDialog *createDialog(const Mantid::API::IAlgorithm &algorithm,
+                                               const std::string &inputWorkspace, const std::string &outputWorkspace,
+                                               const std::string &algorithmType);
 
-  void
-  setAxisDimensions(MantidQt::MantidWidgets::SlicingAlgorithmDialog *dialog,
-                    const std::string &inputWorkspace);
+  void setAxisDimensions(MantidQt::MantidWidgets::SlicingAlgorithmDialog *dialog, const std::string &inputWorkspace);
 
-  Mantid::API::IMDEventWorkspace_sptr
-  getWorkspace(const std::string &workspaceName);
+  Mantid::API::IMDEventWorkspace_sptr getWorkspace(const std::string &workspaceName);
 
-  Mantid::API::IAlgorithm_sptr createAlgorithm(const std::string &algName,
-                                               int version);
+  Mantid::API::IAlgorithm_sptr createAlgorithm(const std::string &algName, int version);
 
-  Mantid::VATES::ADSWorkspaceProvider<Mantid::API::IMDEventWorkspace>
-      m_adsWorkspaceProvider;
+  Mantid::VATES::ADSWorkspaceProvider<Mantid::API::IMDEventWorkspace> m_adsWorkspaceProvider;
 
   const QString m_lblInputWorkspace;
   const QString m_lblOutputWorkspace;

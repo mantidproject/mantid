@@ -17,17 +17,12 @@
 namespace MantidQt {
 namespace SliceViewer {
 
-PeakView::PeakView(PeaksPresenter *const presenter, QwtPlot *plot,
-                   QWidget *parent,
-                   const VecPeakRepresentation &vecPeakRepresentation,
-                   const int plotXIndex, const int plotYIndex,
-                   PeakViewColor foregroundColor, PeakViewColor backgroundColor,
-                   double largestEffectiveRadius)
-    : PeakOverlayInteractive(presenter, plot, plotXIndex, plotYIndex, parent),
-      m_peaks(vecPeakRepresentation), m_cachedOccupancyIntoView(0.015),
-      m_cachedOccupancyInView(0.015), m_showBackground(false),
-      m_foregroundColor(std::move(foregroundColor)),
-      m_backgroundColor(std::move(backgroundColor)),
+PeakView::PeakView(PeaksPresenter *const presenter, QwtPlot *plot, QWidget *parent,
+                   const VecPeakRepresentation &vecPeakRepresentation, const int plotXIndex, const int plotYIndex,
+                   PeakViewColor foregroundColor, PeakViewColor backgroundColor, double largestEffectiveRadius)
+    : PeakOverlayInteractive(presenter, plot, plotXIndex, plotYIndex, parent), m_peaks(vecPeakRepresentation),
+      m_cachedOccupancyIntoView(0.015), m_cachedOccupancyInView(0.015), m_showBackground(false),
+      m_foregroundColor(std::move(foregroundColor)), m_backgroundColor(std::move(backgroundColor)),
       m_largestEffectiveRadius(largestEffectiveRadius) {}
 
 PeakView::~PeakView() {}
@@ -35,10 +30,8 @@ PeakView::~PeakView() {}
 void PeakView::doPaintPeaks(QPaintEvent * /*event*/) {
   const auto windowHeight = height();
   const auto windowWidth = width();
-  const auto viewHeight =
-      m_plot->axisScaleDiv(QwtPlot::yLeft)->interval().width();
-  const auto viewWidth =
-      m_plot->axisScaleDiv(QwtPlot::xBottom)->interval().width();
+  const auto viewHeight = m_plot->axisScaleDiv(QwtPlot::yLeft)->interval().width();
+  const auto viewWidth = m_plot->axisScaleDiv(QwtPlot::xBottom)->interval().width();
 
   for (size_t i = 0; i < m_viewablePeaks.size(); ++i) {
     if (m_viewablePeaks[i]) {
@@ -48,8 +41,7 @@ void PeakView::doPaintPeaks(QPaintEvent * /*event*/) {
       const auto &origin = peak->getOrigin();
 
       // Set up the view information
-      const auto xOriginWindow =
-          m_plot->transform(QwtPlot::xBottom, origin.X());
+      const auto xOriginWindow = m_plot->transform(QwtPlot::xBottom, origin.X());
       const auto yOriginWindow = m_plot->transform(QwtPlot::yLeft, origin.Y());
 
       PeakRepresentationViewInformation peakRepresentationViewInformation;
@@ -60,8 +52,7 @@ void PeakView::doPaintPeaks(QPaintEvent * /*event*/) {
       peakRepresentationViewInformation.xOriginWindow = xOriginWindow;
       peakRepresentationViewInformation.yOriginWindow = yOriginWindow;
 
-      peak->draw(painter, m_foregroundColor, m_backgroundColor,
-                 peakRepresentationViewInformation);
+      peak->draw(painter, m_foregroundColor, m_backgroundColor, peakRepresentationViewInformation);
     }
   }
 }
@@ -72,8 +63,7 @@ coordinates
 @param viewablePeaks: collection of flags indicating the index of the peaks
 which are viewable.
 */
-void PeakView::setSlicePoint(const double &point,
-                             const std::vector<bool> &viewablePeaks) {
+void PeakView::setSlicePoint(const double &point, const std::vector<bool> &viewablePeaks) {
   m_viewablePeaks = viewablePeaks;
   for (size_t i = 0; i < m_viewablePeaks.size(); ++i) {
     if (m_viewablePeaks[i]) // is peak at this index visible.
@@ -90,16 +80,13 @@ void PeakView::showView() { this->show(); }
 
 void PeakView::updateView() { this->update(); }
 
-void PeakView::movePosition(
-    Mantid::Geometry::PeakTransform_sptr peakTransform) {
+void PeakView::movePosition(Mantid::Geometry::PeakTransform_sptr peakTransform) {
   for (auto &peak : m_peaks) {
     peak->movePosition(peakTransform);
   }
 }
 
-void PeakView::movePositionNonOrthogonal(
-    Mantid::Geometry::PeakTransform_sptr peakTransform,
-    NonOrthogonalAxis &info) {
+void PeakView::movePositionNonOrthogonal(Mantid::Geometry::PeakTransform_sptr peakTransform, NonOrthogonalAxis &info) {
   for (auto &peak : m_peaks) {
     peak->movePositionNonOrthogonal(peakTransform, info);
   }
@@ -112,9 +99,7 @@ void PeakView::showBackgroundRadius(const bool show) {
   m_showBackground = show;
 }
 
-PeakBoundingBox PeakView::getBoundingBox(const int peakIndex) const {
-  return m_peaks[peakIndex]->getBoundingBox();
-}
+PeakBoundingBox PeakView::getBoundingBox(const int peakIndex) const { return m_peaks[peakIndex]->getBoundingBox(); }
 
 void PeakView::changeOccupancyInView(const double fraction) {
   for (const auto &peak : m_peaks) {
@@ -132,9 +117,7 @@ void PeakView::changeOccupancyIntoView(const double fraction) {
 
 double PeakView::getOccupancyInView() const { return m_cachedOccupancyInView; }
 
-double PeakView::getOccupancyIntoView() const {
-  return m_cachedOccupancyIntoView;
-}
+double PeakView::getOccupancyIntoView() const { return m_cachedOccupancyIntoView; }
 
 bool PeakView::positionOnly() const { return false; }
 
@@ -156,20 +139,12 @@ void PeakView::takeSettingsFrom(const PeakOverlayView *const source) {
   this->changeOccupancyInView(source->getOccupancyInView());
 }
 
-void PeakView::changeForegroundColour(const PeakViewColor peakViewColor) {
-  m_foregroundColor = peakViewColor;
-}
+void PeakView::changeForegroundColour(const PeakViewColor peakViewColor) { m_foregroundColor = peakViewColor; }
 
-void PeakView::changeBackgroundColour(const PeakViewColor peakViewColor) {
-  m_backgroundColor = peakViewColor;
-}
+void PeakView::changeBackgroundColour(const PeakViewColor peakViewColor) { m_backgroundColor = peakViewColor; }
 
-PeakViewColor PeakView::getBackgroundPeakViewColor() const {
-  return m_backgroundColor;
-}
+PeakViewColor PeakView::getBackgroundPeakViewColor() const { return m_backgroundColor; }
 
-PeakViewColor PeakView::getForegroundPeakViewColor() const {
-  return m_foregroundColor;
-}
+PeakViewColor PeakView::getForegroundPeakViewColor() const { return m_foregroundColor; }
 } // namespace SliceViewer
 } // namespace MantidQt

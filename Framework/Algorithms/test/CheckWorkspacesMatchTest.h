@@ -36,13 +36,10 @@ class CheckWorkspacesMatchTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static CheckWorkspacesMatchTest *createSuite() {
-    return new CheckWorkspacesMatchTest();
-  }
+  static CheckWorkspacesMatchTest *createSuite() { return new CheckWorkspacesMatchTest(); }
   static void destroySuite(CheckWorkspacesMatchTest *suite) { delete suite; }
 
-  CheckWorkspacesMatchTest()
-      : ws1(WorkspaceCreationHelper::create2DWorkspace123(2, 2)) {
+  CheckWorkspacesMatchTest() : ws1(WorkspaceCreationHelper::create2DWorkspace123(2, 2)) {
     FrameworkManager::Instance();
   }
 
@@ -59,15 +56,13 @@ public:
     if (!checker.isInitialized())
       checker.initialize();
 
-    MatrixWorkspace_sptr ws =
-        WorkspaceCreationHelper::create2DWorkspaceBinned(10, 100);
+    MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspaceBinned(10, 100);
     // A workspace had better match itself!
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", ws));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", ws));
 
     TS_ASSERT(checker.execute());
-    TS_ASSERT_EQUALS(checker.getPropertyValue("Result"),
-                     checker.successString());
+    TS_ASSERT_EQUALS(checker.getPropertyValue("Result"), checker.successString());
     // Same, using the Mantid::API::equals() function
     TS_ASSERT(Mantid::API::equals(ws, ws));
   }
@@ -79,17 +74,14 @@ public:
     std::string outWS1Name("CreatePeaks1WorkspaceTest_OutputWS");
     std::string outWS2Name("CreatePeaks2WorkspaceTest_OutputWS");
 
-    Workspace2D_sptr instws =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 10);
+    Workspace2D_sptr instws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 10);
 
     CreatePeaksWorkspace alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("InstrumentWorkspace",
-                        std::dynamic_pointer_cast<MatrixWorkspace>(instws)));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWS1Name));
+        alg.setProperty("InstrumentWorkspace", std::dynamic_pointer_cast<MatrixWorkspace>(instws)));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWS1Name));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("NumberOfPeaks", 13));
     TS_ASSERT_THROWS_NOTHING(alg.execute();)
     TS_ASSERT(alg.isExecuted());
@@ -97,10 +89,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("InstrumentWorkspace",
-                        std::dynamic_pointer_cast<MatrixWorkspace>(instws)));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWS2Name));
+        alg.setProperty("InstrumentWorkspace", std::dynamic_pointer_cast<MatrixWorkspace>(instws)));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWS2Name));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("NumberOfPeaks", 13));
     TS_ASSERT_THROWS_NOTHING(alg.execute();)
     TS_ASSERT(alg.isExecuted());
@@ -108,18 +98,13 @@ public:
     // Retrieve the workspace from data service.
     PeaksWorkspace_sptr pws1, pws2;
     TS_ASSERT_THROWS_NOTHING(
-        pws1 = std::dynamic_pointer_cast<PeaksWorkspace>(
-            AnalysisDataService::Instance().retrieve(outWS1Name)));
+        pws1 = std::dynamic_pointer_cast<PeaksWorkspace>(AnalysisDataService::Instance().retrieve(outWS1Name)));
     TS_ASSERT_THROWS_NOTHING(
-        pws2 = std::dynamic_pointer_cast<PeaksWorkspace>(
-            AnalysisDataService::Instance().retrieve(outWS2Name)));
-    TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace1", std::dynamic_pointer_cast<Workspace>(pws1)));
-    TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace2", std::dynamic_pointer_cast<Workspace>(pws2)));
+        pws2 = std::dynamic_pointer_cast<PeaksWorkspace>(AnalysisDataService::Instance().retrieve(outWS2Name)));
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", std::dynamic_pointer_cast<Workspace>(pws1)));
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", std::dynamic_pointer_cast<Workspace>(pws2)));
     TS_ASSERT(checker.execute());
-    TS_ASSERT_EQUALS(checker.getPropertyValue("Result"),
-                     checker.successString());
+    TS_ASSERT_EQUALS(checker.getPropertyValue("Result"), checker.successString());
   }
 
   void testPeaks_extrapeak() {
@@ -129,17 +114,14 @@ public:
     std::string outWS3Name("CreatePeaks3WorkspaceTest_OutputWS");
     std::string outWS4Name("CreatePeaks4WorkspaceTest_OutputWS");
 
-    Workspace2D_sptr instws =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 10);
+    Workspace2D_sptr instws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 10);
 
     CreatePeaksWorkspace alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("InstrumentWorkspace",
-                        std::dynamic_pointer_cast<MatrixWorkspace>(instws)));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWS3Name));
+        alg.setProperty("InstrumentWorkspace", std::dynamic_pointer_cast<MatrixWorkspace>(instws)));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWS3Name));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("NumberOfPeaks", 13));
     TS_ASSERT_THROWS_NOTHING(alg.execute();)
     TS_ASSERT(alg.isExecuted());
@@ -147,10 +129,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("InstrumentWorkspace",
-                        std::dynamic_pointer_cast<MatrixWorkspace>(instws)));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWS4Name));
+        alg.setProperty("InstrumentWorkspace", std::dynamic_pointer_cast<MatrixWorkspace>(instws)));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWS4Name));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("NumberOfPeaks", 14));
     TS_ASSERT_THROWS_NOTHING(alg.execute();)
     TS_ASSERT(alg.isExecuted());
@@ -158,37 +138,27 @@ public:
     // Retrieve the workspace from data service.
     PeaksWorkspace_sptr pws1, pws2;
     TS_ASSERT_THROWS_NOTHING(
-        pws1 = std::dynamic_pointer_cast<PeaksWorkspace>(
-            AnalysisDataService::Instance().retrieve(outWS3Name)));
+        pws1 = std::dynamic_pointer_cast<PeaksWorkspace>(AnalysisDataService::Instance().retrieve(outWS3Name)));
     TS_ASSERT_THROWS_NOTHING(
-        pws2 = std::dynamic_pointer_cast<PeaksWorkspace>(
-            AnalysisDataService::Instance().retrieve(outWS4Name)));
+        pws2 = std::dynamic_pointer_cast<PeaksWorkspace>(AnalysisDataService::Instance().retrieve(outWS4Name)));
     TS_ASSERT_EQUALS(pws1->getNumberPeaks(), 13);
     TS_ASSERT_EQUALS(pws2->getNumberPeaks(), 14);
-    TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace1", std::dynamic_pointer_cast<Workspace>(pws1)));
-    TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace2", std::dynamic_pointer_cast<Workspace>(pws2)));
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", std::dynamic_pointer_cast<Workspace>(pws1)));
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", std::dynamic_pointer_cast<Workspace>(pws2)));
     TS_ASSERT(checker.execute());
-    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"),
-                      checker.successString());
+    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), checker.successString());
   }
 
   void testEvent_matches() {
     if (!checker.isInitialized())
       checker.initialize();
 
-    EventWorkspace_sptr ews1 =
-        WorkspaceCreationHelper::createEventWorkspace(10, 20, 30);
-    EventWorkspace_sptr ews2 =
-        WorkspaceCreationHelper::createEventWorkspace(10, 20, 30);
-    TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace1", std::dynamic_pointer_cast<MatrixWorkspace>(ews1)));
-    TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace2", std::dynamic_pointer_cast<MatrixWorkspace>(ews2)));
+    EventWorkspace_sptr ews1 = WorkspaceCreationHelper::createEventWorkspace(10, 20, 30);
+    EventWorkspace_sptr ews2 = WorkspaceCreationHelper::createEventWorkspace(10, 20, 30);
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", std::dynamic_pointer_cast<MatrixWorkspace>(ews1)));
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", std::dynamic_pointer_cast<MatrixWorkspace>(ews2)));
     TS_ASSERT(checker.execute());
-    TS_ASSERT_EQUALS(checker.getPropertyValue("Result"),
-                     checker.successString());
+    TS_ASSERT_EQUALS(checker.getPropertyValue("Result"), checker.successString());
 
     // Same, using the Mantid::API::equals() function
     TS_ASSERT(Mantid::API::equals(ews1, ews2));
@@ -198,14 +168,11 @@ public:
     if (!checker.isInitialized())
       checker.initialize();
 
-    EventWorkspace_sptr ews2 =
-        WorkspaceCreationHelper::createEventWorkspace(10, 20, 30);
+    EventWorkspace_sptr ews2 = WorkspaceCreationHelper::createEventWorkspace(10, 20, 30);
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", ws1));
-    TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace2", std::dynamic_pointer_cast<MatrixWorkspace>(ews2)));
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", std::dynamic_pointer_cast<MatrixWorkspace>(ews2)));
     TS_ASSERT(checker.execute());
-    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"),
-                      checker.successString());
+    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), checker.successString());
 
     // Same, using the Mantid::API::equals() function
     TS_ASSERT(!Mantid::API::equals(ws1, ews2));
@@ -215,17 +182,12 @@ public:
     if (!checker.isInitialized())
       checker.initialize();
 
-    EventWorkspace_sptr ews1 =
-        WorkspaceCreationHelper::createEventWorkspace(10, 20, 30);
-    EventWorkspace_sptr ews2 =
-        WorkspaceCreationHelper::createEventWorkspace(15, 20, 30);
-    TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace1", std::dynamic_pointer_cast<MatrixWorkspace>(ews1)));
-    TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace2", std::dynamic_pointer_cast<MatrixWorkspace>(ews2)));
+    EventWorkspace_sptr ews1 = WorkspaceCreationHelper::createEventWorkspace(10, 20, 30);
+    EventWorkspace_sptr ews2 = WorkspaceCreationHelper::createEventWorkspace(15, 20, 30);
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", std::dynamic_pointer_cast<MatrixWorkspace>(ews1)));
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", std::dynamic_pointer_cast<MatrixWorkspace>(ews2)));
     TS_ASSERT(checker.execute());
-    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"),
-                      checker.successString());
+    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), checker.successString());
     // Same, using the !Mantid::API::equals() function
     TS_ASSERT((!Mantid::API::equals(ews1, ews2)));
   }
@@ -233,17 +195,12 @@ public:
   void testEvent_differentEventLists() {
     if (!checker.isInitialized())
       checker.initialize();
-    EventWorkspace_sptr ews1 =
-        WorkspaceCreationHelper::createEventWorkspace(10, 20, 30);
-    EventWorkspace_sptr ews2 =
-        WorkspaceCreationHelper::createEventWorkspace(10, 20, 30, 0.0, 1.0, 2);
-    TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace1", std::dynamic_pointer_cast<MatrixWorkspace>(ews1)));
-    TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace2", std::dynamic_pointer_cast<MatrixWorkspace>(ews2)));
+    EventWorkspace_sptr ews1 = WorkspaceCreationHelper::createEventWorkspace(10, 20, 30);
+    EventWorkspace_sptr ews2 = WorkspaceCreationHelper::createEventWorkspace(10, 20, 30, 0.0, 1.0, 2);
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", std::dynamic_pointer_cast<MatrixWorkspace>(ews1)));
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", std::dynamic_pointer_cast<MatrixWorkspace>(ews2)));
     TS_ASSERT(checker.execute());
-    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"),
-                      checker.successString());
+    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), checker.successString());
     // Same, using the !Mantid::API::equals() function
     TS_ASSERT((!Mantid::API::equals(ews1, ews2)));
   }
@@ -251,17 +208,12 @@ public:
   void testEvent_differentBinBoundaries() {
     if (!checker.isInitialized())
       checker.initialize();
-    EventWorkspace_sptr ews1 =
-        WorkspaceCreationHelper::createEventWorkspace(10, 20, 30, 15.0, 10.0);
-    EventWorkspace_sptr ews2 =
-        WorkspaceCreationHelper::createEventWorkspace(10, 20, 30, 5.0, 10.0);
-    TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace1", std::dynamic_pointer_cast<MatrixWorkspace>(ews1)));
-    TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace2", std::dynamic_pointer_cast<MatrixWorkspace>(ews2)));
+    EventWorkspace_sptr ews1 = WorkspaceCreationHelper::createEventWorkspace(10, 20, 30, 15.0, 10.0);
+    EventWorkspace_sptr ews2 = WorkspaceCreationHelper::createEventWorkspace(10, 20, 30, 5.0, 10.0);
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", std::dynamic_pointer_cast<MatrixWorkspace>(ews1)));
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", std::dynamic_pointer_cast<MatrixWorkspace>(ews2)));
     TS_ASSERT(checker.execute());
-    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"),
-                      checker.successString());
+    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), checker.successString());
     // Same, using the !Mantid::API::equals() function
     TS_ASSERT((!Mantid::API::equals(ews1, ews2)));
   }
@@ -269,287 +221,197 @@ public:
   void testMDEvents_matches() {
     if (!checker.isInitialized())
       checker.initialize();
-    MDEventWorkspace3Lean::sptr mdews1 =
-        MDEventsTestHelper::makeFakeMDEventWorkspace("mdev1");
-    MDEventWorkspace3Lean::sptr mdews2 =
-        MDEventsTestHelper::makeFakeMDEventWorkspace("mdev2");
-    TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace1", std::dynamic_pointer_cast<IMDWorkspace>(mdews1)));
-    TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace2", std::dynamic_pointer_cast<IMDWorkspace>(mdews2)));
+    MDEventWorkspace3Lean::sptr mdews1 = MDEventsTestHelper::makeFakeMDEventWorkspace("mdev1");
+    MDEventWorkspace3Lean::sptr mdews2 = MDEventsTestHelper::makeFakeMDEventWorkspace("mdev2");
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", std::dynamic_pointer_cast<IMDWorkspace>(mdews1)));
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", std::dynamic_pointer_cast<IMDWorkspace>(mdews2)));
     TS_ASSERT(checker.execute());
-    TS_ASSERT_EQUALS(checker.getPropertyValue("Result"),
-                     checker.successString());
+    TS_ASSERT_EQUALS(checker.getPropertyValue("Result"), checker.successString());
   }
 
   void testMDEvents_different_eventtypes() {
     if (!checker.isInitialized())
       checker.initialize();
-    MDEventWorkspace3Lean::sptr mdews1 =
-        MDEventsTestHelper::makeAnyMDEW<MDLeanEvent<3>, 3>(2, 0.0, 10.0, 1000,
-                                                           "A");
-    MDEventWorkspace3::sptr mdews2 =
-        MDEventsTestHelper::makeAnyMDEW<MDEvent<3>, 3>(2, 0.0, 10.0, 1000, "B");
-    TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace1", std::dynamic_pointer_cast<IMDWorkspace>(mdews1)));
-    TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace2", std::dynamic_pointer_cast<IMDWorkspace>(mdews2)));
+    MDEventWorkspace3Lean::sptr mdews1 = MDEventsTestHelper::makeAnyMDEW<MDLeanEvent<3>, 3>(2, 0.0, 10.0, 1000, "A");
+    MDEventWorkspace3::sptr mdews2 = MDEventsTestHelper::makeAnyMDEW<MDEvent<3>, 3>(2, 0.0, 10.0, 1000, "B");
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", std::dynamic_pointer_cast<IMDWorkspace>(mdews1)));
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", std::dynamic_pointer_cast<IMDWorkspace>(mdews2)));
     TS_ASSERT(checker.execute());
-    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"),
-                      checker.successString());
+    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), checker.successString());
   }
 
   void testMDEvents_different_dims() {
     if (!checker.isInitialized())
       checker.initialize();
-    MDEventWorkspace4Lean::sptr mdews1 =
-        MDEventsTestHelper::makeMDEW<4>(5, -10.0, 10.0, 1);
-    MDEventWorkspace3Lean::sptr mdews2 =
-        MDEventsTestHelper::makeMDEW<3>(5, -10.0, 10.0, 1);
-    TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace1", std::dynamic_pointer_cast<IMDWorkspace>(mdews1)));
-    TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace2", std::dynamic_pointer_cast<IMDWorkspace>(mdews2)));
+    MDEventWorkspace4Lean::sptr mdews1 = MDEventsTestHelper::makeMDEW<4>(5, -10.0, 10.0, 1);
+    MDEventWorkspace3Lean::sptr mdews2 = MDEventsTestHelper::makeMDEW<3>(5, -10.0, 10.0, 1);
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", std::dynamic_pointer_cast<IMDWorkspace>(mdews1)));
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", std::dynamic_pointer_cast<IMDWorkspace>(mdews2)));
     TS_ASSERT(checker.execute());
-    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"),
-                      checker.successString());
+    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), checker.successString());
   }
 
   void testMDEvents_different_dimnames() {
     if (!checker.isInitialized())
       checker.initialize();
-    MDEventWorkspace3Lean::sptr mdews1 =
-        MDEventsTestHelper::makeAnyMDEW<MDLeanEvent<3>, 3>(2, 0.0, 10.0, 1000,
-                                                           "A");
+    MDEventWorkspace3Lean::sptr mdews1 = MDEventsTestHelper::makeAnyMDEW<MDLeanEvent<3>, 3>(2, 0.0, 10.0, 1000, "A");
     MDEventWorkspace3Lean::sptr mdews2 =
-        MDEventsTestHelper::makeAnyMDEW<MDLeanEvent<3>, 3>(2, 0.0, 10.0, 1000,
-                                                           "B", "X%d");
-    TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace1", std::dynamic_pointer_cast<IMDWorkspace>(mdews1)));
-    TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace2", std::dynamic_pointer_cast<IMDWorkspace>(mdews2)));
+        MDEventsTestHelper::makeAnyMDEW<MDLeanEvent<3>, 3>(2, 0.0, 10.0, 1000, "B", "X%d");
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", std::dynamic_pointer_cast<IMDWorkspace>(mdews1)));
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", std::dynamic_pointer_cast<IMDWorkspace>(mdews2)));
     TS_ASSERT(checker.execute());
-    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"),
-                      checker.successString());
+    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), checker.successString());
   }
 
   void testMDEvents_different_dimmin() {
     if (!checker.isInitialized())
       checker.initialize();
-    MDEventWorkspace3Lean::sptr mdews1 =
-        MDEventsTestHelper::makeAnyMDEW<MDLeanEvent<3>, 3>(2, 0.0, 10.0, 1000,
-                                                           "A");
-    MDEventWorkspace3Lean::sptr mdews2 =
-        MDEventsTestHelper::makeAnyMDEW<MDLeanEvent<3>, 3>(2, 1.0, 10.0, 1000,
-                                                           "B");
-    TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace1", std::dynamic_pointer_cast<IMDWorkspace>(mdews1)));
-    TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace2", std::dynamic_pointer_cast<IMDWorkspace>(mdews2)));
+    MDEventWorkspace3Lean::sptr mdews1 = MDEventsTestHelper::makeAnyMDEW<MDLeanEvent<3>, 3>(2, 0.0, 10.0, 1000, "A");
+    MDEventWorkspace3Lean::sptr mdews2 = MDEventsTestHelper::makeAnyMDEW<MDLeanEvent<3>, 3>(2, 1.0, 10.0, 1000, "B");
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", std::dynamic_pointer_cast<IMDWorkspace>(mdews1)));
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", std::dynamic_pointer_cast<IMDWorkspace>(mdews2)));
     TS_ASSERT(checker.execute());
-    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"),
-                      checker.successString());
+    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), checker.successString());
   }
 
   void testMDEvents_different_numdata() {
     if (!checker.isInitialized())
       checker.initialize();
-    MDEventWorkspace3Lean::sptr mdews1 =
-        MDEventsTestHelper::makeAnyMDEW<MDLeanEvent<3>, 3>(2, 0.0, 10.0, 1000,
-                                                           "A");
-    MDEventWorkspace3Lean::sptr mdews2 =
-        MDEventsTestHelper::makeAnyMDEW<MDLeanEvent<3>, 3>(2, 0.0, 10.0, 5000,
-                                                           "B");
-    TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace1", std::dynamic_pointer_cast<IMDWorkspace>(mdews1)));
-    TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace2", std::dynamic_pointer_cast<IMDWorkspace>(mdews2)));
+    MDEventWorkspace3Lean::sptr mdews1 = MDEventsTestHelper::makeAnyMDEW<MDLeanEvent<3>, 3>(2, 0.0, 10.0, 1000, "A");
+    MDEventWorkspace3Lean::sptr mdews2 = MDEventsTestHelper::makeAnyMDEW<MDLeanEvent<3>, 3>(2, 0.0, 10.0, 5000, "B");
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", std::dynamic_pointer_cast<IMDWorkspace>(mdews1)));
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", std::dynamic_pointer_cast<IMDWorkspace>(mdews2)));
     TS_ASSERT(checker.execute());
-    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"),
-                      checker.successString());
+    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), checker.successString());
   }
 
   void testMDEvents_different_data() {
     if (!checker.isInitialized())
       checker.initialize();
-    MDEventWorkspace3Lean::sptr mdews1 =
-        MDEventsTestHelper::makeAnyMDEW<MDLeanEvent<3>, 3>(2, 0.0, 10.0, 1000,
-                                                           "A");
-    MDEventWorkspace3Lean::sptr mdews2 =
-        MDEventsTestHelper::makeAnyMDEW<MDLeanEvent<3>, 3>(2, 0.0, 10.0, 1000,
-                                                           "B");
-    MDBoxBase<MDLeanEvent<3>, 3> *parentBox =
-        dynamic_cast<MDBoxBase<MDLeanEvent<3>, 3> *>(mdews2->getBox());
+    MDEventWorkspace3Lean::sptr mdews1 = MDEventsTestHelper::makeAnyMDEW<MDLeanEvent<3>, 3>(2, 0.0, 10.0, 1000, "A");
+    MDEventWorkspace3Lean::sptr mdews2 = MDEventsTestHelper::makeAnyMDEW<MDLeanEvent<3>, 3>(2, 0.0, 10.0, 1000, "B");
+    MDBoxBase<MDLeanEvent<3>, 3> *parentBox = dynamic_cast<MDBoxBase<MDLeanEvent<3>, 3> *>(mdews2->getBox());
     std::vector<IMDNode *> boxes;
     parentBox->getBoxes(boxes, 1000, true);
-    MDBox<MDLeanEvent<3>, 3> *box =
-        dynamic_cast<MDBox<MDLeanEvent<3>, 3> *>(boxes[0]);
+    MDBox<MDLeanEvent<3>, 3> *box = dynamic_cast<MDBox<MDLeanEvent<3>, 3> *>(boxes[0]);
     std::vector<MDLeanEvent<3>> &events = box->getEvents();
     const float offset = 0.1f;
     events[0].setSignal(events[0].getSignal() + offset);
-    TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace1", std::dynamic_pointer_cast<IMDWorkspace>(mdews1)));
-    TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace2", std::dynamic_pointer_cast<IMDWorkspace>(mdews2)));
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", std::dynamic_pointer_cast<IMDWorkspace>(mdews1)));
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", std::dynamic_pointer_cast<IMDWorkspace>(mdews2)));
     TS_ASSERT(checker.execute());
-    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"),
-                      checker.successString());
+    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), checker.successString());
   }
 
   void testMDEvents_different_error() {
     if (!checker.isInitialized())
       checker.initialize();
-    MDEventWorkspace3Lean::sptr mdews1 =
-        MDEventsTestHelper::makeAnyMDEW<MDLeanEvent<3>, 3>(2, 0.0, 10.0, 1000,
-                                                           "A");
-    MDEventWorkspace3Lean::sptr mdews2 =
-        MDEventsTestHelper::makeAnyMDEW<MDLeanEvent<3>, 3>(2, 0.0, 10.0, 1000,
-                                                           "B");
-    MDBoxBase<MDLeanEvent<3>, 3> *parentBox =
-        dynamic_cast<MDBoxBase<MDLeanEvent<3>, 3> *>(mdews2->getBox());
+    MDEventWorkspace3Lean::sptr mdews1 = MDEventsTestHelper::makeAnyMDEW<MDLeanEvent<3>, 3>(2, 0.0, 10.0, 1000, "A");
+    MDEventWorkspace3Lean::sptr mdews2 = MDEventsTestHelper::makeAnyMDEW<MDLeanEvent<3>, 3>(2, 0.0, 10.0, 1000, "B");
+    MDBoxBase<MDLeanEvent<3>, 3> *parentBox = dynamic_cast<MDBoxBase<MDLeanEvent<3>, 3> *>(mdews2->getBox());
     std::vector<IMDNode *> boxes;
     parentBox->getBoxes(boxes, 1000, true);
-    MDBox<MDLeanEvent<3>, 3> *box =
-        dynamic_cast<MDBox<MDLeanEvent<3>, 3> *>(boxes[0]);
+    MDBox<MDLeanEvent<3>, 3> *box = dynamic_cast<MDBox<MDLeanEvent<3>, 3> *>(boxes[0]);
     std::vector<MDLeanEvent<3>> &events = box->getEvents();
     const float offset = 0.1f;
     events[0].setErrorSquared(events[0].getErrorSquared() + offset);
-    TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace1", std::dynamic_pointer_cast<IMDWorkspace>(mdews1)));
-    TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace2", std::dynamic_pointer_cast<IMDWorkspace>(mdews2)));
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", std::dynamic_pointer_cast<IMDWorkspace>(mdews1)));
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", std::dynamic_pointer_cast<IMDWorkspace>(mdews2)));
     TS_ASSERT(checker.execute());
-    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"),
-                      checker.successString());
+    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), checker.successString());
   }
 
   void testMDHisto_matches() {
     if (!checker.isInitialized())
       checker.initialize();
-    MDHistoWorkspace_sptr mdhws1 =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(5.0, 4);
-    MDHistoWorkspace_sptr mdhws2 =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(5.0, 4);
-    TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace1", std::dynamic_pointer_cast<IMDWorkspace>(mdhws1)));
-    TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace2", std::dynamic_pointer_cast<IMDWorkspace>(mdhws2)));
+    MDHistoWorkspace_sptr mdhws1 = MDEventsTestHelper::makeFakeMDHistoWorkspace(5.0, 4);
+    MDHistoWorkspace_sptr mdhws2 = MDEventsTestHelper::makeFakeMDHistoWorkspace(5.0, 4);
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", std::dynamic_pointer_cast<IMDWorkspace>(mdhws1)));
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", std::dynamic_pointer_cast<IMDWorkspace>(mdhws2)));
     TS_ASSERT(checker.execute());
-    TS_ASSERT_EQUALS(checker.getPropertyValue("Result"),
-                     checker.successString());
+    TS_ASSERT_EQUALS(checker.getPropertyValue("Result"), checker.successString());
   }
 
   void testMDHist_different_dims() {
     if (!checker.isInitialized())
       checker.initialize();
-    MDHistoWorkspace_sptr mdhws1 =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(5.0, 4);
-    MDHistoWorkspace_sptr mdhws2 =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(5.0, 3);
-    TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace1", std::dynamic_pointer_cast<IMDWorkspace>(mdhws1)));
-    TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace2", std::dynamic_pointer_cast<IMDWorkspace>(mdhws2)));
+    MDHistoWorkspace_sptr mdhws1 = MDEventsTestHelper::makeFakeMDHistoWorkspace(5.0, 4);
+    MDHistoWorkspace_sptr mdhws2 = MDEventsTestHelper::makeFakeMDHistoWorkspace(5.0, 3);
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", std::dynamic_pointer_cast<IMDWorkspace>(mdhws1)));
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", std::dynamic_pointer_cast<IMDWorkspace>(mdhws2)));
     TS_ASSERT(checker.execute());
-    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"),
-                      checker.successString());
+    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), checker.successString());
   }
 
   void testMDHist_different_dimnames() {
     if (!checker.isInitialized())
       checker.initialize();
-    MDHistoWorkspace_sptr mdhws1 =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(5.0, 3);
+    MDHistoWorkspace_sptr mdhws1 = MDEventsTestHelper::makeFakeMDHistoWorkspace(5.0, 3);
     const int dims = 3;
     std::size_t numBins[dims] = {10, 10, 10};
     Mantid::coord_t min[dims] = {0.0, 0.0, 0.0};
     Mantid::coord_t max[dims] = {10.0, 10.0, 10.0};
     std::vector<std::string> names{"h", "k", "l"};
     MDHistoWorkspace_sptr mdhws2 =
-        MDEventsTestHelper::makeFakeMDHistoWorkspaceGeneral(
-            3, 5.0, 1.0, numBins, min, max, names);
-    TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace1", std::dynamic_pointer_cast<IMDWorkspace>(mdhws1)));
-    TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace2", std::dynamic_pointer_cast<IMDWorkspace>(mdhws2)));
+        MDEventsTestHelper::makeFakeMDHistoWorkspaceGeneral(3, 5.0, 1.0, numBins, min, max, names);
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", std::dynamic_pointer_cast<IMDWorkspace>(mdhws1)));
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", std::dynamic_pointer_cast<IMDWorkspace>(mdhws2)));
     TS_ASSERT(checker.execute());
-    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"),
-                      checker.successString());
+    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), checker.successString());
   }
 
   void testMDHist_different_dimbins() {
     if (!checker.isInitialized())
       checker.initialize();
-    MDHistoWorkspace_sptr mdhws1 =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(5.0, 3);
-    MDHistoWorkspace_sptr mdhws2 =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(5.0, 3, 5);
-    TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace1", std::dynamic_pointer_cast<IMDWorkspace>(mdhws1)));
-    TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace2", std::dynamic_pointer_cast<IMDWorkspace>(mdhws2)));
+    MDHistoWorkspace_sptr mdhws1 = MDEventsTestHelper::makeFakeMDHistoWorkspace(5.0, 3);
+    MDHistoWorkspace_sptr mdhws2 = MDEventsTestHelper::makeFakeMDHistoWorkspace(5.0, 3, 5);
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", std::dynamic_pointer_cast<IMDWorkspace>(mdhws1)));
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", std::dynamic_pointer_cast<IMDWorkspace>(mdhws2)));
     TS_ASSERT(checker.execute());
-    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"),
-                      checker.successString());
+    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), checker.successString());
   }
 
   void testMDHist_different_dimmax() {
     if (!checker.isInitialized())
       checker.initialize();
-    MDHistoWorkspace_sptr mdhws1 =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(5.0, 3);
+    MDHistoWorkspace_sptr mdhws1 = MDEventsTestHelper::makeFakeMDHistoWorkspace(5.0, 3);
     Mantid::coord_t max = static_cast<Mantid::coord_t>(10.1);
-    MDHistoWorkspace_sptr mdhws2 =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(5.0, 3, 10, max);
-    TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace1", std::dynamic_pointer_cast<IMDWorkspace>(mdhws1)));
-    TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace2", std::dynamic_pointer_cast<IMDWorkspace>(mdhws2)));
+    MDHistoWorkspace_sptr mdhws2 = MDEventsTestHelper::makeFakeMDHistoWorkspace(5.0, 3, 10, max);
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", std::dynamic_pointer_cast<IMDWorkspace>(mdhws1)));
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", std::dynamic_pointer_cast<IMDWorkspace>(mdhws2)));
     TS_ASSERT(checker.execute());
-    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"),
-                      checker.successString());
+    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), checker.successString());
   }
 
   void testMDHist_different_data() {
     if (!checker.isInitialized())
       checker.initialize();
-    MDHistoWorkspace_sptr mdhws1 =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(5.0, 4);
-    MDHistoWorkspace_sptr mdhws2 =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(5.1, 4);
-    TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace1", std::dynamic_pointer_cast<IMDWorkspace>(mdhws1)));
-    TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace2", std::dynamic_pointer_cast<IMDWorkspace>(mdhws2)));
+    MDHistoWorkspace_sptr mdhws1 = MDEventsTestHelper::makeFakeMDHistoWorkspace(5.0, 4);
+    MDHistoWorkspace_sptr mdhws2 = MDEventsTestHelper::makeFakeMDHistoWorkspace(5.1, 4);
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", std::dynamic_pointer_cast<IMDWorkspace>(mdhws1)));
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", std::dynamic_pointer_cast<IMDWorkspace>(mdhws2)));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Tolerance", 1.0e-5));
     TS_ASSERT(checker.execute());
-    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"),
-                      checker.successString());
+    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), checker.successString());
   }
 
   void testMDHist_different_error() {
     if (!checker.isInitialized())
       checker.initialize();
-    MDHistoWorkspace_sptr mdhws1 =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(5.0, 4);
-    MDHistoWorkspace_sptr mdhws2 =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(5.0, 4, 10, 10.0, 1.1);
-    TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace1", std::dynamic_pointer_cast<IMDWorkspace>(mdhws1)));
-    TS_ASSERT_THROWS_NOTHING(checker.setProperty(
-        "Workspace2", std::dynamic_pointer_cast<IMDWorkspace>(mdhws2)));
+    MDHistoWorkspace_sptr mdhws1 = MDEventsTestHelper::makeFakeMDHistoWorkspace(5.0, 4);
+    MDHistoWorkspace_sptr mdhws2 = MDEventsTestHelper::makeFakeMDHistoWorkspace(5.0, 4, 10, 10.0, 1.1);
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", std::dynamic_pointer_cast<IMDWorkspace>(mdhws1)));
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", std::dynamic_pointer_cast<IMDWorkspace>(mdhws2)));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Tolerance", 1.0e-5));
     TS_ASSERT(checker.execute());
-    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"),
-                      checker.successString());
+    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), checker.successString());
   }
 
   void testDifferentSize() {
     if (!checker.isInitialized())
       checker.initialize();
 
-    Mantid::API::MatrixWorkspace_sptr ws2 =
-        WorkspaceCreationHelper::create1DWorkspaceFib(2, true);
+    Mantid::API::MatrixWorkspace_sptr ws2 = WorkspaceCreationHelper::create1DWorkspaceFib(2, true);
 
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", ws1));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", ws2));
@@ -565,15 +427,13 @@ public:
     if (!checker.isInitialized())
       checker.initialize();
 
-    Mantid::API::MatrixWorkspace_sptr ws2 =
-        WorkspaceCreationHelper::create2DWorkspace123(2, 2, true);
+    Mantid::API::MatrixWorkspace_sptr ws2 = WorkspaceCreationHelper::create2DWorkspace123(2, 2, true);
 
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", ws1));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", ws2));
 
     TS_ASSERT(checker.execute());
-    TS_ASSERT_EQUALS(checker.getPropertyValue("Result"),
-                     "Histogram/point-like mismatch");
+    TS_ASSERT_EQUALS(checker.getPropertyValue("Result"), "Histogram/point-like mismatch");
 
     // Same, using the !Mantid::API::equals() function
     TS_ASSERT((!Mantid::API::equals(ws1, ws2)));
@@ -583,16 +443,14 @@ public:
     if (!checker.isInitialized())
       checker.initialize();
 
-    Mantid::API::MatrixWorkspace_sptr ws2 =
-        WorkspaceCreationHelper::create2DWorkspace123(2, 2);
+    Mantid::API::MatrixWorkspace_sptr ws2 = WorkspaceCreationHelper::create2DWorkspace123(2, 2);
     ws2->setDistribution(true);
 
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", ws1));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", ws2));
 
     TS_ASSERT(checker.execute());
-    TS_ASSERT_EQUALS(checker.getPropertyValue("Result"),
-                     "Distribution flag mismatch");
+    TS_ASSERT_EQUALS(checker.getPropertyValue("Result"), "Distribution flag mismatch");
 
     // Same, using the !Mantid::API::equals() function
     TS_ASSERT((!Mantid::API::equals(ws1, ws2)));
@@ -602,8 +460,7 @@ public:
     if (!checker.isInitialized())
       checker.initialize();
 
-    Mantid::API::MatrixWorkspace_sptr ws2 =
-        WorkspaceCreationHelper::create2DWorkspace123(2, 2);
+    Mantid::API::MatrixWorkspace_sptr ws2 = WorkspaceCreationHelper::create2DWorkspace123(2, 2);
     auto newAxis = std::make_unique<Mantid::API::NumericAxis>(2);
     ws2->replaceAxis(1, std::move(newAxis));
 
@@ -611,8 +468,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", ws2));
 
     TS_ASSERT(checker.execute())
-    TS_ASSERT_EQUALS(checker.getPropertyValue("Result"),
-                     "Axis 1 type mismatch");
+    TS_ASSERT_EQUALS(checker.getPropertyValue("Result"), "Axis 1 type mismatch");
 
     // Same, using the !Mantid::API::equals() function
     TS_ASSERT((!Mantid::API::equals(ws1, ws2)));
@@ -622,16 +478,14 @@ public:
     if (!checker.isInitialized())
       checker.initialize();
 
-    Mantid::API::MatrixWorkspace_sptr ws2 =
-        WorkspaceCreationHelper::create2DWorkspace123(2, 2);
+    Mantid::API::MatrixWorkspace_sptr ws2 = WorkspaceCreationHelper::create2DWorkspace123(2, 2);
     ws2->getAxis(0)->title() = "blah";
 
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", ws1));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", ws2));
 
     TS_ASSERT(checker.execute());
-    TS_ASSERT_EQUALS(checker.getPropertyValue("Result"),
-                     "Axis 0 title mismatch");
+    TS_ASSERT_EQUALS(checker.getPropertyValue("Result"), "Axis 0 title mismatch");
 
     // Same, using the !Mantid::API::equals() function
     TS_ASSERT((!Mantid::API::equals(ws1, ws2)));
@@ -641,17 +495,14 @@ public:
     if (!checker.isInitialized())
       checker.initialize();
 
-    Mantid::API::MatrixWorkspace_sptr ws2 =
-        WorkspaceCreationHelper::create2DWorkspace123(2, 2);
-    ws2->getAxis(0)->unit() =
-        Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
+    Mantid::API::MatrixWorkspace_sptr ws2 = WorkspaceCreationHelper::create2DWorkspace123(2, 2);
+    ws2->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
 
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", ws1));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", ws2));
 
     TS_ASSERT(checker.execute());
-    TS_ASSERT_EQUALS(checker.getPropertyValue("Result"),
-                     "Axis 0 unit mismatch");
+    TS_ASSERT_EQUALS(checker.getPropertyValue("Result"), "Axis 0 unit mismatch");
     // Same, using the !Mantid::API::equals() function
     TS_ASSERT((!Mantid::API::equals(ws1, ws2)));
   }
@@ -660,14 +511,11 @@ public:
     if (!checker.isInitialized())
       checker.initialize();
 
-    Mantid::API::MatrixWorkspace_sptr ws1local =
-        WorkspaceCreationHelper::create2DWorkspace123(2, 2);
-    Mantid::API::MatrixWorkspace_sptr ws2 =
-        WorkspaceCreationHelper::create2DWorkspace123(2, 2);
+    Mantid::API::MatrixWorkspace_sptr ws1local = WorkspaceCreationHelper::create2DWorkspace123(2, 2);
+    Mantid::API::MatrixWorkspace_sptr ws2 = WorkspaceCreationHelper::create2DWorkspace123(2, 2);
     // Put numeric axes on these workspaces as checkAxes won't test values on
     // spectra axes
-    auto newAxisWS1 =
-        std::make_unique<NumericAxis>(ws1local->getAxis(1)->length());
+    auto newAxisWS1 = std::make_unique<NumericAxis>(ws1local->getAxis(1)->length());
     newAxisWS1->setValue(0, 1);
     newAxisWS1->setValue(1, 2);
     auto newAxisWS2 = std::make_unique<NumericAxis>(ws2->getAxis(1)->length());
@@ -686,8 +534,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", ws2));
 
     TS_ASSERT(checker.execute())
-    TS_ASSERT_EQUALS(checker.getPropertyValue("Result"),
-                     "Axis 1 values mismatch");
+    TS_ASSERT_EQUALS(checker.getPropertyValue("Result"), "Axis 1 values mismatch");
     // Same, using the !Mantid::API::equals() function
     TS_ASSERT((!Mantid::API::equals(ws1local, ws2)));
   }
@@ -696,8 +543,7 @@ public:
     if (!checker.isInitialized())
       checker.initialize();
 
-    Mantid::API::MatrixWorkspace_sptr ws2 =
-        WorkspaceCreationHelper::create2DWorkspace123(2, 2);
+    Mantid::API::MatrixWorkspace_sptr ws2 = WorkspaceCreationHelper::create2DWorkspace123(2, 2);
     ws2->setYUnit("blah");
 
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", ws1));
@@ -713,14 +559,12 @@ public:
     if (!checker.isInitialized())
       checker.initialize();
 
-    Mantid::API::MatrixWorkspace_sptr ws2 =
-        WorkspaceCreationHelper::create2DWorkspace123(2, 2);
+    Mantid::API::MatrixWorkspace_sptr ws2 = WorkspaceCreationHelper::create2DWorkspace123(2, 2);
     ws2->getSpectrum(0).setSpectrumNo(1234);
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", ws1));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", ws2));
     TS_ASSERT(checker.execute());
-    TS_ASSERT_EQUALS(checker.getPropertyValue("Result"),
-                     "Spectrum number mismatch");
+    TS_ASSERT_EQUALS(checker.getPropertyValue("Result"), "Spectrum number mismatch");
 
     ws2 = WorkspaceCreationHelper::create2DWorkspace123(2, 2);
     ws2->getSpectrum(0).setDetectorID(99);
@@ -728,8 +572,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", ws1));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", ws2));
     TS_ASSERT(checker.execute());
-    TS_ASSERT_EQUALS(checker.getPropertyValue("Result"),
-                     "Detector IDs mismatch");
+    TS_ASSERT_EQUALS(checker.getPropertyValue("Result"), "Detector IDs mismatch");
 
     // Same, using the !Mantid::API::equals() function
     TS_ASSERT((!Mantid::API::equals(ws1, ws2)));
@@ -739,18 +582,15 @@ public:
     if (!checker.isInitialized())
       checker.initialize();
 
-    Mantid::API::MatrixWorkspace_sptr ws2 =
-        WorkspaceCreationHelper::create2DWorkspace123(2, 2);
-    Mantid::Geometry::Instrument_sptr instrument(
-        new Mantid::Geometry::Instrument("different"));
+    Mantid::API::MatrixWorkspace_sptr ws2 = WorkspaceCreationHelper::create2DWorkspace123(2, 2);
+    Mantid::Geometry::Instrument_sptr instrument(new Mantid::Geometry::Instrument("different"));
     ws2->setInstrument(instrument);
 
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", ws1));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", ws2));
 
     TS_ASSERT(checker.execute());
-    TS_ASSERT_EQUALS(checker.getPropertyValue("Result"),
-                     "Instrument name mismatch");
+    TS_ASSERT_EQUALS(checker.getPropertyValue("Result"), "Instrument name mismatch");
     // Same, using the !Mantid::API::equals() function
     TS_ASSERT((!Mantid::API::equals(ws1, ws2)));
   }
@@ -759,8 +599,7 @@ public:
     if (!checker.isInitialized())
       checker.initialize();
 
-    Mantid::API::MatrixWorkspace_sptr ws2 =
-        WorkspaceCreationHelper::create2DWorkspace123(2, 2);
+    Mantid::API::MatrixWorkspace_sptr ws2 = WorkspaceCreationHelper::create2DWorkspace123(2, 2);
     auto component = std::make_unique<Mantid::Geometry::Component>();
     ws2->instrumentParameters().addBool(component.get(), "myParam", true);
 
@@ -768,9 +607,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", ws2));
 
     TS_ASSERT(checker.execute());
-    TS_ASSERT_EQUALS(
-        checker.getPropertyValue("Result"),
-        "Instrument ParameterMap mismatch (differences in ordering ignored)");
+    TS_ASSERT_EQUALS(checker.getPropertyValue("Result"),
+                     "Instrument ParameterMap mismatch (differences in ordering ignored)");
     // Same, using the !Mantid::API::equals() function
     TS_ASSERT((!Mantid::API::equals(ws1, ws2)));
   }
@@ -779,8 +617,7 @@ public:
     if (!checker.isInitialized())
       checker.initialize();
 
-    Mantid::API::MatrixWorkspace_sptr ws2 =
-        WorkspaceCreationHelper::create2DWorkspace123(2, 2);
+    Mantid::API::MatrixWorkspace_sptr ws2 = WorkspaceCreationHelper::create2DWorkspace123(2, 2);
     ws2->maskBin(0, 0);
     ws2->dataY(0)[0] = 2;
     ws2->dataE(0)[0] = 3;
@@ -791,8 +628,7 @@ public:
     TS_ASSERT(checker.execute());
     TS_ASSERT_EQUALS(checker.getPropertyValue("Result"), "Masking mismatch");
 
-    Mantid::API::MatrixWorkspace_sptr ws3 =
-        WorkspaceCreationHelper::create2DWorkspace123(2, 2);
+    Mantid::API::MatrixWorkspace_sptr ws3 = WorkspaceCreationHelper::create2DWorkspace123(2, 2);
     ws3->maskBin(0, 1);
     ws3->dataY(0)[1] = 2;
     ws3->dataE(0)[1] = 3;
@@ -811,16 +647,14 @@ public:
       checker.initialize();
     checker.setProperty("CheckSample", true);
 
-    Mantid::API::MatrixWorkspace_sptr ws2 =
-        WorkspaceCreationHelper::create2DWorkspace123(2, 2);
+    Mantid::API::MatrixWorkspace_sptr ws2 = WorkspaceCreationHelper::create2DWorkspace123(2, 2);
     ws2->mutableSample().setName("different");
 
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", ws1));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", ws2));
 
     TS_ASSERT(checker.execute());
-    TS_ASSERT_EQUALS(checker.getPropertyValue("Result"),
-                     "Sample name mismatch");
+    TS_ASSERT_EQUALS(checker.getPropertyValue("Result"), "Sample name mismatch");
   }
 
   void testDifferentProtonCharge() {
@@ -828,16 +662,14 @@ public:
       checker.initialize();
     checker.setProperty("CheckSample", true);
 
-    Mantid::API::MatrixWorkspace_sptr ws2 =
-        WorkspaceCreationHelper::create2DWorkspace123(2, 2);
+    Mantid::API::MatrixWorkspace_sptr ws2 = WorkspaceCreationHelper::create2DWorkspace123(2, 2);
     ws2->mutableRun().setProtonCharge(99.99);
 
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", ws1));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", ws2));
 
     TS_ASSERT(checker.execute());
-    TS_ASSERT_EQUALS(checker.getPropertyValue("Result"),
-                     "Proton charge mismatch");
+    TS_ASSERT_EQUALS(checker.getPropertyValue("Result"), "Proton charge mismatch");
   }
 
   void testDifferentLogs() {
@@ -845,22 +677,17 @@ public:
       checker.initialize();
     checker.setProperty("CheckSample", true);
 
-    Mantid::API::MatrixWorkspace_sptr ws2 =
-        WorkspaceCreationHelper::create2DWorkspace123(2, 2);
-    ws2->mutableRun().addLogData(
-        new Mantid::Kernel::PropertyWithValue<int>("Prop1", 99));
+    Mantid::API::MatrixWorkspace_sptr ws2 = WorkspaceCreationHelper::create2DWorkspace123(2, 2);
+    ws2->mutableRun().addLogData(new Mantid::Kernel::PropertyWithValue<int>("Prop1", 99));
 
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", ws1));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", ws2));
 
     TS_ASSERT(checker.execute());
-    TS_ASSERT_EQUALS(checker.getPropertyValue("Result"),
-                     "Different numbers of logs");
+    TS_ASSERT_EQUALS(checker.getPropertyValue("Result"), "Different numbers of logs");
 
-    Mantid::API::MatrixWorkspace_sptr ws3 =
-        WorkspaceCreationHelper::create2DWorkspace123(2, 2);
-    ws3->mutableRun().addLogData(
-        new Mantid::Kernel::PropertyWithValue<int>("Prop2", 99));
+    Mantid::API::MatrixWorkspace_sptr ws3 = WorkspaceCreationHelper::create2DWorkspace123(2, 2);
+    ws3->mutableRun().addLogData(new Mantid::Kernel::PropertyWithValue<int>("Prop2", 99));
 
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", ws2));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", ws3));
@@ -868,10 +695,8 @@ public:
     TS_ASSERT(checker.execute());
     TS_ASSERT_EQUALS(checker.getPropertyValue("Result"), "Log mismatch");
 
-    Mantid::API::MatrixWorkspace_sptr ws4 =
-        WorkspaceCreationHelper::create2DWorkspace123(2, 2);
-    ws4->mutableRun().addLogData(
-        new Mantid::Kernel::PropertyWithValue<int>("Prop1", 100));
+    Mantid::API::MatrixWorkspace_sptr ws4 = WorkspaceCreationHelper::create2DWorkspace123(2, 2);
+    ws4->mutableRun().addLogData(new Mantid::Kernel::PropertyWithValue<int>("Prop1", 100));
 
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", ws2));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", ws4));
@@ -883,11 +708,9 @@ public:
   void test_Input_With_Two_Groups_That_Are_The_Same_Matches() {
     // Create a group
     const std::string groupName("TestGroup");
-    WorkspaceGroup_sptr group =
-        WorkspaceCreationHelper::createWorkspaceGroup(2, 2, 2, groupName);
+    WorkspaceGroup_sptr group = WorkspaceCreationHelper::createWorkspaceGroup(2, 2, 2, groupName);
 
-    doGroupTest(groupName, groupName,
-                Mantid::Algorithms::CheckWorkspacesMatch::successString());
+    doGroupTest(groupName, groupName, Mantid::Algorithms::CheckWorkspacesMatch::successString());
 
     cleanupGroup(group);
   }
@@ -895,14 +718,12 @@ public:
   void test_Input_With_Two_Groups_That_Are_Different_Sizes_Fails() {
     // Create a group
     const std::string groupOneName("TestGroupOne");
-    WorkspaceGroup_sptr groupOne =
-        WorkspaceCreationHelper::createWorkspaceGroup(2, 2, 2, groupOneName);
+    WorkspaceGroup_sptr groupOne = WorkspaceCreationHelper::createWorkspaceGroup(2, 2, 2, groupOneName);
     const std::string groupTwoName("TestGroupTwo");
-    WorkspaceGroup_sptr groupTwo =
-        WorkspaceCreationHelper::createWorkspaceGroup(3, 2, 2, groupTwoName);
+    WorkspaceGroup_sptr groupTwo = WorkspaceCreationHelper::createWorkspaceGroup(3, 2, 2, groupTwoName);
 
-    doGroupTest(groupOneName, groupTwoName, "GroupWorkspaces size mismatch.",
-                std::map<std::string, std::string>(), true);
+    doGroupTest(groupOneName, groupTwoName, "GroupWorkspaces size mismatch.", std::map<std::string, std::string>(),
+                true);
 
     cleanupGroup(groupOne);
     cleanupGroup(groupTwo);
@@ -910,15 +731,12 @@ public:
 
   void test_Input_With_A_Group_And_A_Single_Workspace_Gives_Type_Mismatch() {
     const std::string groupName("CheckWorkspacesMatch_TestGroup");
-    WorkspaceGroup_sptr group =
-        WorkspaceCreationHelper::createWorkspaceGroup(2, 2, 2, groupName);
-    Mantid::API::MatrixWorkspace_sptr ws2 =
-        WorkspaceCreationHelper::create2DWorkspace123(2, 2);
+    WorkspaceGroup_sptr group = WorkspaceCreationHelper::createWorkspaceGroup(2, 2, 2, groupName);
+    Mantid::API::MatrixWorkspace_sptr ws2 = WorkspaceCreationHelper::create2DWorkspace123(2, 2);
     const std::string wsName("CheckWorkspacesMatch_TestWS");
     Mantid::API::AnalysisDataService::Instance().add(wsName, ws2);
 
-    doGroupTest(groupName, wsName,
-                "Type mismatch. One workspace is a group, the other is not.");
+    doGroupTest(groupName, wsName, "Type mismatch. One workspace is a group, the other is not.");
 
     // Cleanup
     cleanupGroup(group);
@@ -929,27 +747,20 @@ public:
     Mantid::API::AnalysisDataService::Instance().clear();
     // Create a group
     const std::string groupOneName("TestGroupOne");
-    WorkspaceGroup_sptr groupOne =
-        WorkspaceCreationHelper::createWorkspaceGroup(2, 2, 2, groupOneName);
+    WorkspaceGroup_sptr groupOne = WorkspaceCreationHelper::createWorkspaceGroup(2, 2, 2, groupOneName);
     const std::string groupTwoName("TestGroupTwo");
-    WorkspaceGroup_sptr groupTwo =
-        WorkspaceCreationHelper::createWorkspaceGroup(2, 2, 2, groupTwoName);
-    Mantid::API::AnalysisDataServiceImpl &dataStore =
-        Mantid::API::AnalysisDataService::Instance();
+    WorkspaceGroup_sptr groupTwo = WorkspaceCreationHelper::createWorkspaceGroup(2, 2, 2, groupTwoName);
+    Mantid::API::AnalysisDataServiceImpl &dataStore = Mantid::API::AnalysisDataService::Instance();
     // Extract the zeroth element of groupTwo and add a spurious log
-    MatrixWorkspace_sptr zero = std::dynamic_pointer_cast<MatrixWorkspace>(
-        dataStore.retrieve(groupTwo->getNames()[0]));
+    MatrixWorkspace_sptr zero = std::dynamic_pointer_cast<MatrixWorkspace>(dataStore.retrieve(groupTwo->getNames()[0]));
     TS_ASSERT(zero);
     using Mantid::Kernel::PropertyWithValue;
-    zero->mutableRun().addProperty(
-        new PropertyWithValue<double>("ExtraLog", 10));
+    zero->mutableRun().addProperty(new PropertyWithValue<double>("ExtraLog", 10));
 
     std::map<std::string, std::string> otherProps{{"CheckSample", "1"}};
 
-    doGroupTest(
-        groupOneName, groupTwoName,
-        "Different numbers of logs. Inputs=[TestGroupOne_0,TestGroupTwo_0]",
-        otherProps);
+    doGroupTest(groupOneName, groupTwoName, "Different numbers of logs. Inputs=[TestGroupOne_0,TestGroupTwo_0]",
+                otherProps);
 
     // Cleanup
     cleanupGroup(groupOne);
@@ -959,10 +770,8 @@ public:
   void test_empty_tableworkspaces_match() {
     Mantid::Algorithms::CheckWorkspacesMatch alg;
     alg.initialize();
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty(
-        "Workspace1", WorkspaceFactory::Instance().createTable()));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty(
-        "Workspace2", WorkspaceFactory::Instance().createTable()));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Workspace1", WorkspaceFactory::Instance().createTable()));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Workspace2", WorkspaceFactory::Instance().createTable()));
     TS_ASSERT(alg.execute());
     TS_ASSERT_EQUALS(alg.getPropertyValue("Result"), "Success!");
   }
@@ -978,8 +787,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Workspace1", table1));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Workspace2", table2));
     TS_ASSERT(alg.execute());
-    TS_ASSERT_EQUALS(alg.getPropertyValue("Result"),
-                     "Number of columns mismatch");
+    TS_ASSERT_EQUALS(alg.getPropertyValue("Result"), "Number of columns mismatch");
   }
 
   void test_tableworkspace_different_number_of_rows_fails() {
@@ -1053,8 +861,7 @@ public:
     TS_ASSERT_EQUALS(alg.getPropertyValue("Result"), "Table data mismatch");
 
     table1 = setupTableWorkspace();
-    table2->cell<Mantid::Kernel::V3D>(0, 8) =
-        Mantid::Kernel::V3D(9.9, 8.8, 7.7);
+    table2->cell<Mantid::Kernel::V3D>(0, 8) = Mantid::Kernel::V3D(9.9, 8.8, 7.7);
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Workspace1", table1));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Workspace2", table2));
     TS_ASSERT(alg.execute());
@@ -1064,26 +871,20 @@ public:
   void test_mixing_peaks_and_table_workspaces_fails() {
     Mantid::Algorithms::CheckWorkspacesMatch alg;
     alg.initialize();
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty(
-        "Workspace1", WorkspaceFactory::Instance().createTable()));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty(
-        "Workspace2", WorkspaceFactory::Instance().createPeaks()));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Workspace1", WorkspaceFactory::Instance().createTable()));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Workspace2", WorkspaceFactory::Instance().createPeaks()));
     TS_ASSERT(alg.execute());
-    TS_ASSERT_EQUALS(alg.getPropertyValue("Result"),
-                     "One workspace is a PeaksWorkspace and the other is not.");
+    TS_ASSERT_EQUALS(alg.getPropertyValue("Result"), "One workspace is a PeaksWorkspace and the other is not.");
   }
 
   void test_mixing_matrix_and_table_workspaces_fails() {
     Mantid::Algorithms::CheckWorkspacesMatch alg;
     alg.initialize();
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty(
-        "Workspace1", WorkspaceFactory::Instance().createTable()));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty(
-        "Workspace2",
-        WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1)));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Workspace1", WorkspaceFactory::Instance().createTable()));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("Workspace2", WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1)));
     TS_ASSERT(alg.execute());
-    TS_ASSERT_EQUALS(alg.getPropertyValue("Result"),
-                     "One workspace is a TableWorkspace and the other is not.");
+    TS_ASSERT_EQUALS(alg.getPropertyValue("Result"), "One workspace is a TableWorkspace and the other is not.");
   }
 
 private:
@@ -1102,25 +903,20 @@ private:
 
     // A few rows
     TableRow row1 = table->appendRow();
-    row1 << -1 << static_cast<uint32_t>(0) << static_cast<int64_t>(1)
-         << static_cast<size_t>(10) << 5.5f << -9.9 << true << "Hello"
-         << Mantid::Kernel::V3D();
+    row1 << -1 << static_cast<uint32_t>(0) << static_cast<int64_t>(1) << static_cast<size_t>(10) << 5.5f << -9.9 << true
+         << "Hello" << Mantid::Kernel::V3D();
     TableRow row2 = table->appendRow();
-    row2 << 1 << static_cast<uint32_t>(2) << static_cast<int64_t>(-2)
-         << static_cast<size_t>(100) << 0.0f << 101.0 << false << "World"
-         << Mantid::Kernel::V3D(-1, 3, 4);
+    row2 << 1 << static_cast<uint32_t>(2) << static_cast<int64_t>(-2) << static_cast<size_t>(100) << 0.0f << 101.0
+         << false << "World" << Mantid::Kernel::V3D(-1, 3, 4);
     TableRow row3 = table->appendRow();
-    row3 << 6 << static_cast<uint32_t>(3) << static_cast<int64_t>(0)
-         << static_cast<size_t>(0) << -99.0f << 0.0 << false << "!"
-         << Mantid::Kernel::V3D(1, 6, 10);
+    row3 << 6 << static_cast<uint32_t>(3) << static_cast<int64_t>(0) << static_cast<size_t>(0) << -99.0f << 0.0 << false
+         << "!" << Mantid::Kernel::V3D(1, 6, 10);
 
     return table;
   }
 
-  void doGroupTest(const std::string &inputWSOne, const std::string &inputWSTwo,
-                   const std::string &expectedResult,
-                   const std::map<std::string, std::string> &otherProps =
-                       std::map<std::string, std::string>(),
+  void doGroupTest(const std::string &inputWSOne, const std::string &inputWSTwo, const std::string &expectedResult,
+                   const std::map<std::string, std::string> &otherProps = std::map<std::string, std::string>(),
                    bool expectFail = false) {
     Mantid::Algorithms::CheckWorkspacesMatch matcher;
     matcher.initialize();

@@ -22,33 +22,27 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 // needs to be dll-exported for the tests
-class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffGSASFittingPresenter
-    : public IEnggDiffGSASFittingPresenter {
+class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffGSASFittingPresenter : public IEnggDiffGSASFittingPresenter {
 
 public:
-  EnggDiffGSASFittingPresenter(
-      std::unique_ptr<IEnggDiffGSASFittingModel> model,
-      IEnggDiffGSASFittingView *view,
-      std::shared_ptr<IEnggDiffMultiRunFittingWidgetPresenter> multiRunWidget,
-      std::shared_ptr<IEnggDiffractionParam> mainSettings);
+  EnggDiffGSASFittingPresenter(std::unique_ptr<IEnggDiffGSASFittingModel> model, IEnggDiffGSASFittingView *view,
+                               std::shared_ptr<IEnggDiffMultiRunFittingWidgetPresenter> multiRunWidget,
+                               std::shared_ptr<IEnggDiffractionParam> mainSettings);
 
   EnggDiffGSASFittingPresenter(EnggDiffGSASFittingPresenter &&other) = default;
 
-  EnggDiffGSASFittingPresenter &
-  operator=(EnggDiffGSASFittingPresenter &&other) = default;
+  EnggDiffGSASFittingPresenter &operator=(EnggDiffGSASFittingPresenter &&other) = default;
 
   ~EnggDiffGSASFittingPresenter() override;
 
   void notify(IEnggDiffGSASFittingPresenter::Notification notif) override;
 
-  void notifyRefinementsComplete(
-      Mantid::API::IAlgorithm_sptr alg,
-      const std::vector<GSASIIRefineFitPeaksOutputProperties>
-          &refinementResultSets) override;
+  void
+  notifyRefinementsComplete(Mantid::API::IAlgorithm_sptr alg,
+                            const std::vector<GSASIIRefineFitPeaksOutputProperties> &refinementResultSets) override;
 
-  void notifyRefinementSuccessful(
-      const Mantid::API::IAlgorithm_sptr successfulAlgorithm,
-      const GSASIIRefineFitPeaksOutputProperties &refinementResults) override;
+  void notifyRefinementSuccessful(const Mantid::API::IAlgorithm_sptr successfulAlgorithm,
+                                  const GSASIIRefineFitPeaksOutputProperties &refinementResults) override;
 
   void notifyRefinementFailed(const std::string &failureMessage) override;
 
@@ -67,9 +61,8 @@ private:
 
   /// Collect GSASIIRefineFitPeaks input parameters for a given run from the
   /// presenter's various children
-  GSASIIRefineFitPeaksParameters
-  collectInputParameters(const RunLabel &runLabel,
-                         const Mantid::API::MatrixWorkspace_sptr &ws) const;
+  GSASIIRefineFitPeaksParameters collectInputParameters(const RunLabel &runLabel,
+                                                        const Mantid::API::MatrixWorkspace_sptr &ws) const;
 
   /**
    Perform refinements on a number of runs

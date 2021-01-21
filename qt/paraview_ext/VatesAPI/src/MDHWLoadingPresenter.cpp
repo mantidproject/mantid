@@ -54,9 +54,8 @@ namespace VATES {
  * @return A workspace that can be directly rendered from. Integrated dimensions
  *are always last.
  */
-void MDHWLoadingPresenter::transposeWs(
-    Mantid::API::IMDHistoWorkspace_sptr &inHistoWs,
-    Mantid::API::IMDHistoWorkspace_sptr &outCachedHistoWs) {
+void MDHWLoadingPresenter::transposeWs(Mantid::API::IMDHistoWorkspace_sptr &inHistoWs,
+                                       Mantid::API::IMDHistoWorkspace_sptr &outCachedHistoWs) {
   using namespace Mantid::API;
 
   if (!outCachedHistoWs) {
@@ -77,8 +76,7 @@ void MDHWLoadingPresenter::transposeWs(
     }
 
     std::vector<int> orderedDims = nonIntegratedDims;
-    orderedDims.insert(orderedDims.end(), integratedDims.begin(),
-                       integratedDims.end());
+    orderedDims.insert(orderedDims.end(), integratedDims.begin(), integratedDims.end());
 
     /*
      If there has been any reordering above, then the dimension indexes will
@@ -93,8 +91,7 @@ void MDHWLoadingPresenter::transposeWs(
       alg->setPropertyValue("OutputWorkspace", "dummy");
       alg->setProperty("Axes", orderedDims);
       alg->execute();
-      IMDHistoWorkspace_sptr visualHistoWs =
-          alg->getProperty("OutputWorkspace");
+      IMDHistoWorkspace_sptr visualHistoWs = alg->getProperty("OutputWorkspace");
       outCachedHistoWs = visualHistoWs;
     } else {
       // No need to transpose anything.
@@ -105,10 +102,8 @@ void MDHWLoadingPresenter::transposeWs(
 
 /// Constructor
 MDHWLoadingPresenter::MDHWLoadingPresenter(std::unique_ptr<MDLoadingView> view)
-    : m_view(std::move(view)), m_isSetup(false), m_time(-1),
-      m_loadInMemory(false), m_firstLoad(true),
-      m_metadataJsonManager(new MetadataJsonManager()),
-      m_metaDataExtractor(new MetaDataExtractorUtils()),
+    : m_view(std::move(view)), m_isSetup(false), m_time(-1), m_loadInMemory(false), m_firstLoad(true),
+      m_metadataJsonManager(new MetadataJsonManager()), m_metaDataExtractor(new MetaDataExtractorUtils()),
       m_vatesConfigurations(new VatesConfigurations()) {
   Mantid::API::FrameworkManager::Instance();
 }
@@ -120,8 +115,7 @@ MDHWLoadingPresenter::~MDHWLoadingPresenter() {}
 Extract the geometry and function information
 @param histoWs : histogram workspace to get the information from.
 */
-void MDHWLoadingPresenter::extractMetadata(
-    const Mantid::API::IMDHistoWorkspace &histoWs) {
+void MDHWLoadingPresenter::extractMetadata(const Mantid::API::IMDHistoWorkspace &histoWs) {
   using namespace Mantid::Geometry;
   MDGeometryBuilderXML<NoDimensionPolicy> refresh;
   xmlBuilder = refresh; // Reassign.
@@ -137,9 +131,8 @@ void MDHWLoadingPresenter::extractMetadata(
     }
     // std::cout << "dim " << d << min << " to " <<  max << '\n';
     axisLabels.push_back(makeAxisTitle(*inDim));
-    dimensions.push_back(std::make_shared<MDHistoDimension>(
-        inDim->getName(), inDim->getName(), inDim->getMDFrame(), min, max,
-        inDim->getNBins()));
+    dimensions.push_back(std::make_shared<MDHistoDimension>(inDim->getName(), inDim->getName(), inDim->getMDFrame(),
+                                                            min, max, inDim->getNBins()));
   }
 
   // Configuring the geometry xml builder allows the object panel associated
@@ -193,13 +186,12 @@ Determines wheter the file can be loaded based on it's extension.
 @param expectedExtension expected extension for the file to have
 @return TRUE, only if the extension is approved.
 */
-bool MDHWLoadingPresenter::canLoadFileBasedOnExtension(
-    const std::string &filename, const std::string &expectedExtension) const {
+bool MDHWLoadingPresenter::canLoadFileBasedOnExtension(const std::string &filename,
+                                                       const std::string &expectedExtension) const {
   // Quick check based on extension.
   const size_t startExtension = filename.find_last_of('.');
   const size_t endExtension = filename.length();
-  std::string extension =
-      filename.substr(startExtension, endExtension - startExtension);
+  std::string extension = filename.substr(startExtension, endExtension - startExtension);
   boost::algorithm::to_lower(extension);
   boost::algorithm::trim(extension);
   return extension == expectedExtension;
@@ -210,8 +202,7 @@ Append the geometry and function information onto the outgoing vtkDataSet.
 @param visualDataSet : outgoing dataset on which to append metadata.
 @param wsName : name of the workspace.
 */
-void MDHWLoadingPresenter::appendMetadata(vtkDataSet *visualDataSet,
-                                          const std::string &wsName) {
+void MDHWLoadingPresenter::appendMetadata(vtkDataSet *visualDataSet, const std::string &wsName) {
   using namespace Mantid::API;
 
   vtkNew<vtkFieldData> outputFD;
@@ -220,8 +211,7 @@ void MDHWLoadingPresenter::appendMetadata(vtkDataSet *visualDataSet,
   VatesKnowledgeSerializer serializer;
   serializer.setWorkspaceName(wsName);
   serializer.setGeometryXML(xmlBuilder.create());
-  serializer.setImplicitFunction(
-      std::make_shared<Mantid::Geometry::NullImplicitFunction>());
+  serializer.setImplicitFunction(std::make_shared<Mantid::Geometry::NullImplicitFunction>());
   std::string xmlString = serializer.createXMLString();
 
   // Serialize Json metadata
@@ -230,8 +220,7 @@ void MDHWLoadingPresenter::appendMetadata(vtkDataSet *visualDataSet,
   // Add metadata to dataset.
   MetadataToFieldData convert;
   convert(outputFD.GetPointer(), xmlString, XMLDefinitions::metaDataId());
-  convert(outputFD.GetPointer(), jsonString,
-          m_vatesConfigurations->getMetadataIdJson());
+  convert(outputFD.GetPointer(), jsonString, m_vatesConfigurations->getMetadataIdJson());
   visualDataSet->SetFieldData(outputFD.GetPointer());
 }
 
@@ -240,9 +229,8 @@ void MDHWLoadingPresenter::appendMetadata(vtkDataSet *visualDataSet,
  * @param visualDataSet: The VTK dataset to update
  */
 void MDHWLoadingPresenter::setAxisLabels(vtkDataSet *visualDataSet) {
-  if (!vtkPVChangeOfBasisHelper::AddBasisNames(
-          visualDataSet, axisLabels[0].c_str(), axisLabels[1].c_str(),
-          axisLabels[2].c_str())) {
+  if (!vtkPVChangeOfBasisHelper::AddBasisNames(visualDataSet, axisLabels[0].c_str(), axisLabels[1].c_str(),
+                                               axisLabels[2].c_str())) {
     g_log.warning("The basis names could not be added to the field data of "
                   "the data set.\n");
   }
@@ -302,8 +290,6 @@ std::string MDHWLoadingPresenter::getTimeStepLabel() const {
  * Getter for the instrument.
  * @returns The name of the instrument which is associated with the workspace.
  */
-const std::string &MDHWLoadingPresenter::getInstrument() {
-  return m_metadataJsonManager->getInstrument();
-}
+const std::string &MDHWLoadingPresenter::getInstrument() { return m_metadataJsonManager->getInstrument(); }
 } // namespace VATES
 } // namespace Mantid

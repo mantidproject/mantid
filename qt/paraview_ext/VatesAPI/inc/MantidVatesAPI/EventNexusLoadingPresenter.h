@@ -20,11 +20,9 @@ objects.
 class MDLoadingView;
 class DLLExport EventNexusLoadingPresenter : public MDEWLoadingPresenter {
 public:
-  EventNexusLoadingPresenter(std::unique_ptr<MDLoadingView> view,
-                             const std::string &fileName);
-  vtkSmartPointer<vtkDataSet>
-  execute(vtkDataSetFactory *factory, ProgressAction &loadingProgressUpdate,
-          ProgressAction &drawingProgressUpdate) override;
+  EventNexusLoadingPresenter(std::unique_ptr<MDLoadingView> view, const std::string &fileName);
+  vtkSmartPointer<vtkDataSet> execute(vtkDataSetFactory *factory, ProgressAction &loadingProgressUpdate,
+                                      ProgressAction &drawingProgressUpdate) override;
   void executeLoadMetadata() override;
   bool hasTDimensionAvailable() const override;
   std::vector<double> getTimeStepValues() const override;

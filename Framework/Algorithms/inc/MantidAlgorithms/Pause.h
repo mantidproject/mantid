@@ -20,9 +20,7 @@ class MANTID_ALGORITHMS_DLL Pause : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Pause a script for a given duration.";
-  }
+  const std::string summary() const override { return "Pause a script for a given duration."; }
 
   int version() const override;
   const std::string category() const override;

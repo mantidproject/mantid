@@ -54,29 +54,15 @@ class Graph3D : public MdiSubWindow {
   Q_OBJECT
 
 public:
-  Graph3D(const QString &label, QWidget *parent, const char *name = nullptr,
-          const Qt::WFlags &f = nullptr);
+  Graph3D(const QString &label, QWidget *parent, const char *name = nullptr, const Qt::WFlags &f = nullptr);
   ~Graph3D() override;
 
   void initPlot();
 
   enum PlotType { Scatter = 0, Trajectory = 1, Bars = 2, Ribbon = 3 };
-  enum PointStyle {
-    None = 0,
-    Dots = 1,
-    VerticalBars = 2,
-    HairCross = 3,
-    Cones = 4
-  };
+  enum PointStyle { None = 0, Dots = 1, VerticalBars = 2, HairCross = 3, Cones = 4 };
 
-  enum class SurfaceFunctionType {
-    XYZ,
-    Plot3D,
-    MatrixPlot3D,
-    MantidMatrixPlot3D,
-    Surface,
-    ParametricSurface
-  };
+  enum class SurfaceFunctionType { XYZ, Plot3D, MatrixPlot3D, MantidMatrixPlot3D, Surface, ParametricSurface };
 
   // A POD struct to pass around all of the parameters
   // for the 3D plots
@@ -107,31 +93,25 @@ public:
 public slots:
   void copy(Graph3D *g);
   void initCoord();
-  void addFunction(Function2D *hfun, double xl, double xr, double yl, double yr,
-                   double zl, double zr, size_t columns, size_t rows);
-  void addFunction(const QString &formula, double xl, double xr, double yl,
-                   double yr, double zl, double zr, size_t columns,
+  void addFunction(Function2D *hfun, double xl, double xr, double yl, double yr, double zl, double zr, size_t columns,
                    size_t rows);
-  void addParametricSurface(const QString &xFormula, const QString &yFormula,
-                            const QString &zFormula, double ul, double ur,
-                            double vl, double vr, int columns, int rows,
-                            bool uPeriodic, bool vPeriodic);
+  void addFunction(const QString &formula, double xl, double xr, double yl, double yr, double zl, double zr,
+                   size_t columns, size_t rows);
+  void addParametricSurface(const QString &xFormula, const QString &yFormula, const QString &zFormula, double ul,
+                            double ur, double vl, double vr, int columns, int rows, bool uPeriodic, bool vPeriodic);
   void insertNewData(Table *table, const QString &colName);
 
   Matrix *matrix() { return d_matrix; };
   void addMatrixData(Matrix *m); // used to plot matrixes
-  void addMatrixData(Matrix *m, double xl, double xr, double yl, double yr,
-                     double zl, double zr);
+  void addMatrixData(Matrix *m, double xl, double xr, double yl, double yr, double zl, double zr);
   void updateMatrixData(Matrix *m);
 
   void addData(Table *table, const QString &xColName, const QString &yColName);
-  void addData(Table *table, const QString &xColName, const QString &yColName,
-               double xl, double xr, double yl, double yr, double zl,
-               double zr);
+  void addData(Table *table, const QString &xColName, const QString &yColName, double xl, double xr, double yl,
+               double yr, double zl, double zr);
   void addData(Table *table, int xCol, int yCol, int zCol, int type = 0);
-  void loadData(Table *table, int xCol, int yCol, int zCol, double xl = 0.0,
-                double xr = 0.0, double yl = 0.0, double yr = 0.0,
-                double zl = 0.0, double zr = 0.0);
+  void loadData(Table *table, int xCol, int yCol, int zCol, double xl = 0.0, double xr = 0.0, double yl = 0.0,
+                double yr = 0.0, double zl = 0.0, double zr = 0.0);
 
   void clearData();
   bool hasData() { return sp->hasData(); };
@@ -200,12 +180,9 @@ public slots:
   double zStop();
   QStringList scaleLimits();
   void updateScale(int axis, const QStringList &options);
-  void setScales(double xl, double xr, double yl, double yr, double zl,
-                 double zr);
-  void updateScales(double xl, double xr, double yl, double yr, double zl,
-                    double zr, int xcol, int ycol);
-  void updateScalesFromMatrix(double xl, double xr, double yl, double yr,
-                              double zl, double zr);
+  void setScales(double xl, double xr, double yl, double yr, double zl, double zr);
+  void updateScales(double xl, double xr, double yl, double yr, double zl, double zr, int xcol, int ycol);
+  void updateScalesFromMatrix(double xl, double xr, double yl, double yr, double zl, double zr);
 
   QStringList scaleTicks();
   void setTicks(const QStringList &options);
@@ -281,15 +258,13 @@ public slots:
 
   void print() override;
   void copyImage();
-  void exportImage(const QString &fileName, int quality = 100,
-                   bool transparent = false);
+  void exportImage(const QString &fileName, int quality = 100, bool transparent = false);
   void exportPDF(const QString &fileName) override;
   void exportVector(const QString &fileName);
   void exportToFile(const QString &fileName);
 
-  static MantidQt::API::IProjectSerialisable *
-  loadFromProject(const std::string &lines, ApplicationWindow *app,
-                  const int fileVersion);
+  static MantidQt::API::IProjectSerialisable *loadFromProject(const std::string &lines, ApplicationWindow *app,
+                                                              const int fileVersion);
   std::string saveToProject(ApplicationWindow *app) override;
   std::vector<std::string> getWorkspaceNames() override;
 
@@ -336,8 +311,7 @@ public slots:
   QString plotTitle() { return title; };
   QColor titleColor() { return titleCol; };
   void setTitle(const QStringList &lst);
-  void setTitle(const QString &s, const QColor &color = QColor(Qt::black),
-                const QFont &font = QFont());
+  void setTitle(const QString &s, const QColor &color = QColor(Qt::black), const QFont &font = QFont());
   //@}
 
   //! \name Resolution
@@ -405,25 +379,16 @@ signals:
   void modified();
 
 private:
-  Graph3D::SurfaceFunctionParams
-  readSurfaceFunction(MantidQt::API::TSVSerialiser &tsv);
-  Graph3D::SurfaceFunctionType
-  readSurfaceFunctionType(const std::string &formula);
-  MantidMatrix *readWorkspaceForPlot(ApplicationWindow *app,
-                                     MantidQt::API::TSVSerialiser &tsv);
+  Graph3D::SurfaceFunctionParams readSurfaceFunction(MantidQt::API::TSVSerialiser &tsv);
+  Graph3D::SurfaceFunctionType readSurfaceFunctionType(const std::string &formula);
+  MantidMatrix *readWorkspaceForPlot(ApplicationWindow *app, MantidQt::API::TSVSerialiser &tsv);
   int read3DPlotStyle(MantidQt::API::TSVSerialiser &tsv);
-  void setupMantidMatrixPlot3D(ApplicationWindow *app,
-                               MantidQt::API::TSVSerialiser &tsv);
-  void setupPlot3D(ApplicationWindow *app, const QString &caption,
-                   const SurfaceFunctionParams &params);
-  void setupPlotXYZ(ApplicationWindow *app, const QString &caption,
-                    const SurfaceFunctionParams &params);
-  void setupPlotParametricSurface(ApplicationWindow *app,
-                                  const SurfaceFunctionParams &params);
-  void setupPlotSurface(ApplicationWindow *app,
-                        const SurfaceFunctionParams &params);
-  void setupMatrixPlot3D(ApplicationWindow *app, const QString &caption,
-                         const SurfaceFunctionParams &params);
+  void setupMantidMatrixPlot3D(ApplicationWindow *app, MantidQt::API::TSVSerialiser &tsv);
+  void setupPlot3D(ApplicationWindow *app, const QString &caption, const SurfaceFunctionParams &params);
+  void setupPlotXYZ(ApplicationWindow *app, const QString &caption, const SurfaceFunctionParams &params);
+  void setupPlotParametricSurface(ApplicationWindow *app, const SurfaceFunctionParams &params);
+  void setupPlotSurface(ApplicationWindow *app, const SurfaceFunctionParams &params);
+  void setupMatrixPlot3D(ApplicationWindow *app, const QString &caption, const SurfaceFunctionParams &params);
   void readScaleType(const std::string &scaleTypes);
 
   //! Wait this many msecs before redraw 3D plot (used for animations)
@@ -443,8 +408,7 @@ private:
   int labelsDist, legendMajorTicks;
   bool ignoreFonts;
   Qwt3D::StandardColor *col_;
-  double barsRad, alpha, d_point_size, crossHairRad, crossHairLineWidth,
-      conesRad;
+  double barsRad, alpha, d_point_size, crossHairRad, crossHairLineWidth, conesRad;
   //! Draw 3D points with smoothed angles.
   bool d_smooth_points;
   bool crossHairSmooth, crossHairBoxed;
@@ -467,8 +431,8 @@ private:
 //! Class for user defined parametric surfaces
 class UserParametricSurface : public Qwt3D::ParametricSurface {
 public:
-  UserParametricSurface(const QString &xFormula, const QString &yFormula,
-                        const QString &zFormula, Qwt3D::SurfacePlot &pw);
+  UserParametricSurface(const QString &xFormula, const QString &yFormula, const QString &zFormula,
+                        Qwt3D::SurfacePlot &pw);
   Qwt3D::Triple operator()(double u, double v) override;
 
   unsigned int rows() { return d_rows; };

@@ -47,8 +47,7 @@ public:
   /// contructor
   Expression(const std::vector<std::string> &ops);
   /// contructor
-  Expression(const std::vector<std::string> &binary,
-             const std::unordered_set<std::string> &unary);
+  Expression(const std::vector<std::string> &binary, const std::unordered_set<std::string> &unary);
   /// copy contructor
   Expression(const Expression &expr);
   /// Assignment operator
@@ -138,8 +137,7 @@ private:
      * this one.
      * @param p :: The precedence of the connecting operator.
      */
-    Token(size_t i, size_t j, size_t k, size_t p)
-        : is(i), ie(j), is1(k), prec(p) {}
+    Token(size_t i, size_t j, size_t k, size_t p) : is(i), ie(j), is1(k), prec(p) {}
     size_t is;   ///< The index of the first symbol of the token.
     size_t ie;   ///< The index of the last symbol of the token.
     size_t is1;  ///< The index of the first symbol of the next token.
@@ -169,23 +167,19 @@ private:
   Tokens m_tokens;    ///< The container for the token markers
   std::string m_expr; ///< Saved expression string
 
-  std::string m_funct; ///< Function name
-  std::string
-      m_op; ///< Operator connecting this expression to its sibling on the left
+  std::string m_funct;             ///< Function name
+  std::string m_op;                ///< Operator connecting this expression to its sibling on the left
   std::vector<Expression> m_terms; ///< Child expressions (function arguments)
 
   /**
    * Keeps operator that can be used in an expression
    */
   struct Operators {
-    std::vector<std::string>
-        binary; ///< Binary operators in reverse precedence order
-    std::unordered_set<std::string> unary; ///< Unary operators
-    std::map<std::string, size_t>
-        precedence; ///< Map of the operator precedence order
-    std::unordered_set<char>
-        symbols; ///< All the symbols that are used in the binary operators
-    std::map<std::string, char> op_number; ///< map of operators
+    std::vector<std::string> binary;          ///< Binary operators in reverse precedence order
+    std::unordered_set<std::string> unary;    ///< Unary operators
+    std::map<std::string, size_t> precedence; ///< Map of the operator precedence order
+    std::unordered_set<char> symbols;         ///< All the symbols that are used in the binary operators
+    std::map<std::string, char> op_number;    ///< map of operators
   };
 
   /**

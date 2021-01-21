@@ -45,8 +45,7 @@
 #include <QVBoxLayout>
 #include <QWidget>
 
-ErrDialog::ErrDialog(ApplicationWindow *parent, const Qt::WFlags &fl)
-    : QDialog(parent, fl) {
+ErrDialog::ErrDialog(ApplicationWindow *parent, const Qt::WFlags &fl) : QDialog(parent, fl) {
   setFocusPolicy(Qt::StrongFocus);
   setSizeGripEnabled(true);
 
@@ -152,19 +151,14 @@ ErrDialog::ErrDialog(ApplicationWindow *parent, const Qt::WFlags &fl)
   connect(buttonAdd, SIGNAL(clicked()), this, SLOT(add()));
   connect(buttonCancel, SIGNAL(clicked()), this, SLOT(reject()));
   connect(percentBox, SIGNAL(toggled(bool)), valueBox, SLOT(setEnabled(bool)));
-  connect(columnBox, SIGNAL(toggled(bool)), tableNamesBox,
-          SLOT(setEnabled(bool)));
-  connect(columnBox, SIGNAL(toggled(bool)), colNamesBox,
-          SLOT(setEnabled(bool)));
-  connect(tableNamesBox, SIGNAL(activated(int)), this,
-          SLOT(selectSrcTable(int)));
+  connect(columnBox, SIGNAL(toggled(bool)), tableNamesBox, SLOT(setEnabled(bool)));
+  connect(columnBox, SIGNAL(toggled(bool)), colNamesBox, SLOT(setEnabled(bool)));
+  connect(tableNamesBox, SIGNAL(activated(int)), this, SLOT(selectSrcTable(int)));
   // Don't allow X errors to be asked for if choosing Mantid errors
   connect(mantidBox, SIGNAL(toggled(bool)), xErrBox, SLOT(setDisabled(bool)));
 }
 
-void ErrDialog::setCurveNames(const QStringList &names) {
-  nameLabel->addItems(names);
-}
+void ErrDialog::setCurveNames(const QStringList &names) { nameLabel->addItems(names); }
 
 void ErrDialog::setSrcTables(const QList<MdiSubWindow *> &tables) {
   if (tables.isEmpty())
@@ -177,8 +171,8 @@ void ErrDialog::setSrcTables(const QList<MdiSubWindow *> &tables) {
     tableNamesBox->addItem(w->objectName());
 
   if (!nameLabel->currentText().contains("="))
-    tableNamesBox->setCurrentIndex(tableNamesBox->findText(
-        nameLabel->currentText().split("_", QString::SkipEmptyParts)[0]));
+    tableNamesBox->setCurrentIndex(
+        tableNamesBox->findText(nameLabel->currentText().split("_", QString::SkipEmptyParts)[0]));
   if (tableNamesBox->currentIndex() != -1)
     selectSrcTable(tableNamesBox->currentIndex());
 }
@@ -199,10 +193,7 @@ void ErrDialog::add() {
     direction = 1;
 
   if (columnBox->isChecked())
-    emit options(nameLabel->currentText(),
-                 tableNamesBox->currentText() + "_" +
-                     colNamesBox->currentText(),
-                 direction);
+    emit options(nameLabel->currentText(), tableNamesBox->currentText() + "_" + colNamesBox->currentText(), direction);
   else {
     int type;
     if (percentBox->isChecked())
@@ -212,8 +203,7 @@ void ErrDialog::add() {
     else // Use this if the Mantid box is checked
       type = 2;
 
-    emit options(nameLabel->currentText(), type, valueBox->text(), direction,
-                 drawAllErrors->isChecked());
+    emit options(nameLabel->currentText(), type, valueBox->text(), direction, drawAllErrors->isChecked());
   }
 
   // If there's only one curve, close the dialog now

@@ -50,8 +50,7 @@ template <class _CharT, class _Traits> class __save_flags {
 public:
   INLINE_VISIBILITY
   explicit __save_flags(__stream_type &__stream)
-      : __stream_(__stream), __fmtflags_(__stream.flags()),
-        __fill_(__stream.fill()) {}
+      : __stream_(__stream), __fmtflags_(__stream.flags()), __fill_(__stream.fill()) {}
   INLINE_VISIBILITY
   ~__save_flags() {
     __stream_.flags(__fmtflags_);
@@ -72,22 +71,17 @@ public:
     typedef normal_distribution distribution_type;
 
     INLINE_VISIBILITY
-    explicit param_type(result_type __mean = 0, result_type __stddev = 1)
-        : __mean_(__mean), __stddev_(__stddev) {}
+    explicit param_type(result_type __mean = 0, result_type __stddev = 1) : __mean_(__mean), __stddev_(__stddev) {}
 
     INLINE_VISIBILITY
     result_type mean() const { return __mean_; }
     INLINE_VISIBILITY
     result_type stddev() const { return __stddev_; }
 
-    friend INLINE_VISIBILITY bool operator==(const param_type &__x,
-                                             const param_type &__y) {
+    friend INLINE_VISIBILITY bool operator==(const param_type &__x, const param_type &__y) {
       return __x.__mean_ == __y.__mean_ && __x.__stddev_ == __y.__stddev_;
     }
-    friend INLINE_VISIBILITY bool operator!=(const param_type &__x,
-                                             const param_type &__y) {
-      return !(__x == __y);
-    }
+    friend INLINE_VISIBILITY bool operator!=(const param_type &__x, const param_type &__y) { return !(__x == __y); }
   };
 
 private:
@@ -101,17 +95,13 @@ public:
   explicit normal_distribution(result_type __mean = 0, result_type __stddev = 1)
       : __p_(param_type(__mean, __stddev)), _V_hot_(false) {}
   INLINE_VISIBILITY
-  explicit normal_distribution(const param_type &__p)
-      : __p_(__p), _V_hot_(false) {}
+  explicit normal_distribution(const param_type &__p) : __p_(__p), _V_hot_(false) {}
   INLINE_VISIBILITY
   void reset() { _V_hot_ = false; }
 
   // generating functions
-  template <class _URNG> INLINE_VISIBILITY result_type operator()(_URNG &__g) {
-    return (*this)(__g, __p_);
-  }
-  template <class _URNG>
-  result_type operator()(_URNG &__g, const param_type &__p);
+  template <class _URNG> INLINE_VISIBILITY result_type operator()(_URNG &__g) { return (*this)(__g, __p_); }
+  template <class _URNG> result_type operator()(_URNG &__g, const param_type &__p);
 
   // property functions
   INLINE_VISIBILITY
@@ -125,40 +115,30 @@ public:
   void param(const param_type &__p) { __p_ = __p; }
 
   INLINE_VISIBILITY
-  result_type min() const {
-    return -std::numeric_limits<result_type>::infinity();
-  }
+  result_type min() const { return -std::numeric_limits<result_type>::infinity(); }
   INLINE_VISIBILITY
-  result_type max() const {
-    return std::numeric_limits<result_type>::infinity();
-  }
+  result_type max() const { return std::numeric_limits<result_type>::infinity(); }
 
-  friend INLINE_VISIBILITY bool operator==(const normal_distribution &__x,
-                                           const normal_distribution &__y) {
-    return __x.__p_ == __y.__p_ && __x._V_hot_ == __y._V_hot_ &&
-           (!__x._V_hot_ || __x._V_ == __y._V_);
+  friend INLINE_VISIBILITY bool operator==(const normal_distribution &__x, const normal_distribution &__y) {
+    return __x.__p_ == __y.__p_ && __x._V_hot_ == __y._V_hot_ && (!__x._V_hot_ || __x._V_ == __y._V_);
   }
-  friend INLINE_VISIBILITY bool operator!=(const normal_distribution &__x,
-                                           const normal_distribution &__y) {
+  friend INLINE_VISIBILITY bool operator!=(const normal_distribution &__x, const normal_distribution &__y) {
     return !(__x == __y);
   }
 
   template <class _CharT, class _Traits, class _RT>
-  friend std::basic_ostream<_CharT, _Traits> &
-  operator<<(std::basic_ostream<_CharT, _Traits> &__os,
-             const normal_distribution<_RT> &__x);
+  friend std::basic_ostream<_CharT, _Traits> &operator<<(std::basic_ostream<_CharT, _Traits> &__os,
+                                                         const normal_distribution<_RT> &__x);
 
   template <class _CharT, class _Traits, class _RT>
-  friend std::basic_istream<_CharT, _Traits> &
-  operator>>(std::basic_istream<_CharT, _Traits> &__is,
-             normal_distribution<_RT> &__x);
+  friend std::basic_istream<_CharT, _Traits> &operator>>(std::basic_istream<_CharT, _Traits> &__is,
+                                                         normal_distribution<_RT> &__x);
 };
 
 GNU_DIAG_OFF("maybe-uninitialized")
 template <class _RealType>
 template <class _URNG>
-_RealType normal_distribution<_RealType>::operator()(_URNG &__g,
-                                                     const param_type &__p) {
+_RealType normal_distribution<_RealType>::operator()(_URNG &__g, const param_type &__p) {
   result_type _Up;
   if (_V_hot_) {
     _V_hot_ = false;
@@ -183,12 +163,10 @@ _RealType normal_distribution<_RealType>::operator()(_URNG &__g,
 GNU_DIAG_ON("maybe-uninitialized")
 
 template <class _CharT, class _Traits, class _RT>
-std::basic_ostream<_CharT, _Traits> &
-operator<<(std::basic_ostream<_CharT, _Traits> &__os,
-           const normal_distribution<_RT> &__x) {
+std::basic_ostream<_CharT, _Traits> &operator<<(std::basic_ostream<_CharT, _Traits> &__os,
+                                                const normal_distribution<_RT> &__x) {
   __save_flags<_CharT, _Traits> __lx(__os);
-  __os.flags(std::ios_base::dec | std::ios_base::left | std::ios_base::fixed |
-             std::ios_base::scientific);
+  __os.flags(std::ios_base::dec | std::ios_base::left | std::ios_base::fixed | std::ios_base::scientific);
   _CharT __sp = __os.widen(' ');
   __os.fill(__sp);
   __os << __x.mean() << __sp << __x.stddev() << __sp << __x._V_hot_;
@@ -198,9 +176,8 @@ operator<<(std::basic_ostream<_CharT, _Traits> &__os,
 }
 
 template <class _CharT, class _Traits, class _RT>
-std::basic_istream<_CharT, _Traits> &
-operator>>(std::basic_istream<_CharT, _Traits> &__is,
-           normal_distribution<_RT> &__x) {
+std::basic_istream<_CharT, _Traits> &operator>>(std::basic_istream<_CharT, _Traits> &__is,
+                                                normal_distribution<_RT> &__x) {
   typedef normal_distribution<_RT> _Eng;
   typedef typename _Eng::result_type result_type;
   typedef typename _Eng::param_type param_type;

@@ -16,12 +16,9 @@ namespace HistogramData {
 */
 class LinearGenerator {
 public:
-  LinearGenerator(double start, double increment)
-      : start(start), increment(increment) {}
+  LinearGenerator(double start, double increment) : start(start), increment(increment) {}
 
-  double operator()() {
-    return start + increment * static_cast<double>(count++);
-  }
+  double operator()() { return start + increment * static_cast<double>(count++); }
 
 private:
   double start;

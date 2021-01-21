@@ -26,42 +26,33 @@ class pqPipelineSource;
 namespace Mantid {
 namespace Vates {
 namespace SimpleGui {
-class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS PeaksTableControllerVsi
-    : public QWidget {
+class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS PeaksTableControllerVsi : public QWidget {
   Q_OBJECT
 public:
-  PeaksTableControllerVsi(std::shared_ptr<CameraManager> cameraManager,
-                          QWidget *parent = nullptr);
+  PeaksTableControllerVsi(std::shared_ptr<CameraManager> cameraManager, QWidget *parent = nullptr);
   ~PeaksTableControllerVsi() override;
   std::vector<bool> getViewablePeaks();
   bool hasPeaks();
   void showFullTable();
   void removeTable();
   std::string getConcatenatedWorkspaceNames(const std::string &delimiter);
-  void
-  updatePeaksWorkspaces(const QList<QPointer<pqPipelineSource>> &peakSources,
-                        pqPipelineSource *splatSource);
+  void updatePeaksWorkspaces(const QList<QPointer<pqPipelineSource>> &peakSources, pqPipelineSource *splatSource);
 signals:
   void setRotationToPoint(double x, double y, double z);
 public slots:
   void updateViewableArea();
   void onZoomToPeak(Mantid::API::IPeaksWorkspace_sptr peaksWorkspace, int row);
-  void onPeaksSorted(const std::string &columnToSortBy,
-                     const bool sortAscending,
+  void onPeaksSorted(const std::string &columnToSortBy, const bool sortAscending,
                      const Mantid::API::IPeaksWorkspace_sptr ws);
   void destroySinglePeakSource();
   void onPeakMarkerDestroyed();
 
 private:
   void addWorkspace(pqPipelineSource *source, pqPipelineSource *splatSource);
-  std::vector<std::string>
-  extractFrameFromSource(pqPipelineSource *splatSource);
-  void generateSinglePeaksSource(double position1, double position2,
-                                 double position3, double radius);
-  void resetSinglePeaksSource(double position1, double position2,
-                              double position3, double radius);
-  bool checkMatchingSources(pqPipelineSource *source,
-                            pqPipelineSource *splatSource);
+  std::vector<std::string> extractFrameFromSource(pqPipelineSource *splatSource);
+  void generateSinglePeaksSource(double position1, double position2, double position3, double radius);
+  void resetSinglePeaksSource(double position1, double position2, double position3, double radius);
+  bool checkMatchingSources(pqPipelineSource *source, pqPipelineSource *splatSource);
   double getMaxRadius(Mantid::Geometry::PeakShape_sptr shape);
   void removeLayout(QWidget *widget);
   void createTable();

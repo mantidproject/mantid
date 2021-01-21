@@ -27,14 +27,11 @@ namespace Impl {
  *only/read-write
  * @return A pointer to a numpy ndarray object
  */
-template <typename ContainerType>
-PyObject *wrapWithNDArray(const ContainerType &cdata,
-                          const NumpyWrapMode mode) {
+template <typename ContainerType> PyObject *wrapWithNDArray(const ContainerType &cdata, const NumpyWrapMode mode) {
   std::pair<size_t, size_t> matrixDims = cdata.size();
   npy_intp dims[2] = {matrixDims.first, matrixDims.second};
   int datatype = NDArrayTypeIndex<typename ContainerType::value_type>::typenum;
-  PyObject *ndarray =
-      PyArray_SimpleNewFromData(2, dims, datatype, (void *)&(cdata[0][0]));
+  PyObject *ndarray = PyArray_SimpleNewFromData(2, dims, datatype, (void *)&(cdata[0][0]));
   if (mode == ReadOnly) {
     PyArrayObject *np = (PyArrayObject *)ndarray;
     np->flags &= ~NPY_WRITEABLE;
@@ -44,9 +41,9 @@ PyObject *wrapWithNDArray(const ContainerType &cdata,
 //-----------------------------------------------------------------------
 // Explicit instantiations
 //-----------------------------------------------------------------------
-#define INSTANTIATE_MATRIX_WRAP(ElementType)                                   \
-  template DLLExport PyObject *wrapWithNDArray<Kernel::Matrix<ElementType>>(   \
-      const Kernel::Matrix<ElementType> &, const NumpyWrapMode);
+#define INSTANTIATE_MATRIX_WRAP(ElementType)                                                                           \
+  template DLLExport PyObject *wrapWithNDArray<Kernel::Matrix<ElementType>>(const Kernel::Matrix<ElementType> &,       \
+                                                                            const NumpyWrapMode);
 
 INSTANTIATE_MATRIX_WRAP(int);
 INSTANTIATE_MATRIX_WRAP(float);

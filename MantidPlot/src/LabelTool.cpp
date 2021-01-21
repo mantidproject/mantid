@@ -25,25 +25,16 @@ LabelTool::LabelTool(Graph *graph)
     : QObject(graph->plotWidget()->canvas()), PlotToolInterface(graph),
 
       m_canvasPicker(new QwtPicker(graph->plotWidget()->canvas())),
-      m_xAxisPicker(
-          new QwtPicker(graph->plotWidget()->axisWidget(Plot::xBottom))),
-      m_yAxisPicker(
-          new QwtPicker(graph->plotWidget()->axisWidget(Plot::yLeft))),
-      m_xPos(), m_yPos(), m_xPosSigFigs(), m_yPosSigFigs(), m_error(),
-      m_dataCoords(), m_curveWsName() {
-  connect(m_xAxisPicker, SIGNAL(selected(const QwtPolygon &)), this,
-          SLOT(xAxisClicked(const QwtPolygon &)));
-  connect(m_yAxisPicker, SIGNAL(selected(const QwtPolygon &)), this,
-          SLOT(yAxisClicked(const QwtPolygon &)));
-  connect(m_canvasPicker, SIGNAL(selected(const QwtPolygon &)), this,
-          SLOT(graphAreaClicked(const QwtPolygon &)));
+      m_xAxisPicker(new QwtPicker(graph->plotWidget()->axisWidget(Plot::xBottom))),
+      m_yAxisPicker(new QwtPicker(graph->plotWidget()->axisWidget(Plot::yLeft))), m_xPos(), m_yPos(), m_xPosSigFigs(),
+      m_yPosSigFigs(), m_error(), m_dataCoords(), m_curveWsName() {
+  connect(m_xAxisPicker, SIGNAL(selected(const QwtPolygon &)), this, SLOT(xAxisClicked(const QwtPolygon &)));
+  connect(m_yAxisPicker, SIGNAL(selected(const QwtPolygon &)), this, SLOT(yAxisClicked(const QwtPolygon &)));
+  connect(m_canvasPicker, SIGNAL(selected(const QwtPolygon &)), this, SLOT(graphAreaClicked(const QwtPolygon &)));
 
-  m_xAxisPicker->setSelectionFlags(QwtPicker::PointSelection |
-                                   QwtPicker::ClickSelection);
-  m_yAxisPicker->setSelectionFlags(QwtPicker::PointSelection |
-                                   QwtPicker::ClickSelection);
-  m_canvasPicker->setSelectionFlags(QwtPicker::PointSelection |
-                                    QwtPicker::ClickSelection);
+  m_xAxisPicker->setSelectionFlags(QwtPicker::PointSelection | QwtPicker::ClickSelection);
+  m_yAxisPicker->setSelectionFlags(QwtPicker::PointSelection | QwtPicker::ClickSelection);
+  m_canvasPicker->setSelectionFlags(QwtPicker::PointSelection | QwtPicker::ClickSelection);
 }
 
 /// Destructor for the tool.
@@ -80,8 +71,7 @@ void LabelTool::xAxisClicked(const QwtPolygon &x) {
   int deltaOrigins = canvasOriginX - xAxisOriginXValue;
   int xPositionCorrected = xPosition - deltaOrigins;
 
-  double xPos =
-      d_graph->plotWidget()->invTransform(QwtPlot::xBottom, xPositionCorrected);
+  double xPos = d_graph->plotWidget()->invTransform(QwtPlot::xBottom, xPositionCorrected);
 
   if (xPos < 0) {
     return;
@@ -125,8 +115,7 @@ void LabelTool::yAxisClicked(const QwtPolygon &y) {
   int deltaOrigins = canvasOriginY - yAxisOriginYValue;
   int yPositionCorrected = yPosition - deltaOrigins;
 
-  double yPos =
-      d_graph->plotWidget()->invTransform(QwtPlot::yLeft, yPositionCorrected);
+  double yPos = d_graph->plotWidget()->invTransform(QwtPlot::yLeft, yPositionCorrected);
 
   if (yPos < 0) {
     return;
@@ -218,10 +207,8 @@ void LabelTool::graphAreaClicked(const QwtPolygon &c) {
 
     for (size_t i = 0; i < numberOfDataPoints; ++i) {
       // The pixel values of the x and y coordinates of the data points.
-      int iPixelValueX =
-          d_graph->plotWidget()->transform(QwtPlot::xBottom, mwd->x(i));
-      int iPixelvalueY =
-          d_graph->plotWidget()->transform(QwtPlot::yLeft, mwd->y(i));
+      int iPixelValueX = d_graph->plotWidget()->transform(QwtPlot::xBottom, mwd->x(i));
+      int iPixelvalueY = d_graph->plotWidget()->transform(QwtPlot::yLeft, mwd->y(i));
 
       // Comparing the point of clicking with the positioning of the data
       // points.
@@ -334,8 +321,7 @@ void LabelTool::dataPointClicked() {
 
   QAction *addCoordinateLabel = new QAction(m_dataCoords, this);
   clickMenu->addAction(addCoordinateLabel);
-  connect(addCoordinateLabel, SIGNAL(triggered()), this,
-          SLOT(insertDataCoord()));
+  connect(addCoordinateLabel, SIGNAL(triggered()), this, SLOT(insertDataCoord()));
 
   QAction *addErrorLabel = new QAction(m_error, this);
   clickMenu->addAction(addErrorLabel);
@@ -382,8 +368,7 @@ void LabelTool::showLogValuesDialog() {
   label->setOriginCoord(m_xPos, m_yPos);
   label->setFont(d_graph->axisFont(0));
 
-  LabelToolLogValuesDialog *logValues =
-      new LabelToolLogValuesDialog(wsname, label);
+  LabelToolLogValuesDialog *logValues = new LabelToolLogValuesDialog(wsname, label);
   // window set visibe
   logValues->setVisible(true);
 }
@@ -443,8 +428,7 @@ QSet<QString> LabelTool::logValues() {
   QSet<QString> logProperties;
   const auto &ads = AnalysisDataService::Instance();
   foreach (QString workspaceName, workspaceNames()) {
-    auto matrixWs =
-        ads.retrieveWS<MatrixWorkspace>(workspaceName.toStdString());
+    auto matrixWs = ads.retrieveWS<MatrixWorkspace>(workspaceName.toStdString());
     const auto &properties = matrixWs->run().getProperties();
 
     for (const auto &prop : properties) {
@@ -455,8 +439,7 @@ QSet<QString> LabelTool::logValues() {
       } else {
         logValue = QString::fromStdString(prop->value());
       }
-      logProperties.insert(QString::fromStdString(prop->name()) + " : " +
-                           logValue);
+      logProperties.insert(QString::fromStdString(prop->name()) + " : " + logValue);
     }
   }
   return logProperties;
@@ -471,11 +454,9 @@ void LabelTool::insertXCoord() {
   // Calculates the value, in pixel coordinates, where the y-axis intersects
   // the
   // x-axis.
-  int yAxisOriginInPixCoords =
-      d_graph->plotWidget()->transform(QwtPlot::yLeft, 0.0);
+  int yAxisOriginInPixCoords = d_graph->plotWidget()->transform(QwtPlot::yLeft, 0.0);
 
-  double yAxisLabelPosition = d_graph->plotWidget()->invTransform(
-      QwtPlot::yLeft, (yAxisOriginInPixCoords - 30));
+  double yAxisLabelPosition = d_graph->plotWidget()->invTransform(QwtPlot::yLeft, (yAxisOriginInPixCoords - 30));
   double xPosSigFigs = m_xPosSigFigs.toDouble();
 
   xCoordLabel->setOriginCoord(xPosSigFigs, yAxisLabelPosition);
@@ -491,11 +472,9 @@ void LabelTool::insertYCoord() {
   // Calculates the value, in pixel coordinates, where the x-axis intersects
   // the
   // y-axis.
-  int xAxisOriginInPixCoords =
-      d_graph->plotWidget()->transform(QwtPlot::xBottom, 0.0);
+  int xAxisOriginInPixCoords = d_graph->plotWidget()->transform(QwtPlot::xBottom, 0.0);
 
-  double xAxisLabelPosition = d_graph->plotWidget()->invTransform(
-      QwtPlot::xBottom, (xAxisOriginInPixCoords + 2));
+  double xAxisLabelPosition = d_graph->plotWidget()->invTransform(QwtPlot::xBottom, (xAxisOriginInPixCoords + 2));
   double yPosSigFigs = m_yPosSigFigs.toDouble();
 
   yCoordLabel->setOriginCoord(xAxisLabelPosition, yPosSigFigs);
@@ -512,19 +491,15 @@ void LabelTool::insertDataCoord() {
   double xGraphCoordOfDataPoint = m_xPosSigFigs.toDouble();
   double yGraphCoordOfDataPoint = m_yPosSigFigs.toDouble();
 
-  int xPixCoordOfDataPoint = d_graph->plotWidget()->transform(
-      QwtPlot::xBottom, xGraphCoordOfDataPoint);
-  int yPixCoordOfDataPoint =
-      d_graph->plotWidget()->transform(QwtPlot::yLeft, yGraphCoordOfDataPoint);
+  int xPixCoordOfDataPoint = d_graph->plotWidget()->transform(QwtPlot::xBottom, xGraphCoordOfDataPoint);
+  int yPixCoordOfDataPoint = d_graph->plotWidget()->transform(QwtPlot::yLeft, yGraphCoordOfDataPoint);
 
   // The value to shift the x-coordinate of the label by to avoid an overlap
   // with its corresponding data point.
   int shiftValueX = 10;
 
-  double labelCoordinateX = d_graph->plotWidget()->invTransform(
-      QwtPlot::xBottom, (xPixCoordOfDataPoint + shiftValueX));
-  int xAxisOriginInPixCoords =
-      d_graph->plotWidget()->transform(QwtPlot::yLeft, 0.0);
+  double labelCoordinateX = d_graph->plotWidget()->invTransform(QwtPlot::xBottom, (xPixCoordOfDataPoint + shiftValueX));
+  int xAxisOriginInPixCoords = d_graph->plotWidget()->transform(QwtPlot::yLeft, 0.0);
 
   double labelCoordinateY;
 
@@ -542,13 +517,11 @@ void LabelTool::insertDataCoord() {
     // of the screen.
     int labelYPixCoord = yPixCoordOfDataPoint - shiftValueY;
 
-    labelCoordinateY =
-        d_graph->plotWidget()->invTransform(QwtPlot::yLeft, labelYPixCoord);
+    labelCoordinateY = d_graph->plotWidget()->invTransform(QwtPlot::yLeft, labelYPixCoord);
   }
 
   else {
-    labelCoordinateY = d_graph->plotWidget()->invTransform(
-        QwtPlot::yLeft, (yPixCoordOfDataPoint));
+    labelCoordinateY = d_graph->plotWidget()->invTransform(QwtPlot::yLeft, (yPixCoordOfDataPoint));
   }
 
   dataPointLabel->setOriginCoord(labelCoordinateX, labelCoordinateY);
@@ -564,19 +537,15 @@ void LabelTool::insertErrorValue() {
   double xGraphCoordOfDataPoint = m_xPosSigFigs.toDouble();
   double yGraphCoordOfDataPoint = m_yPosSigFigs.toDouble();
 
-  int xPixCoordOfDataPoint = d_graph->plotWidget()->transform(
-      QwtPlot::xBottom, xGraphCoordOfDataPoint);
-  int yPixCoordOfDataPoint =
-      d_graph->plotWidget()->transform(QwtPlot::yLeft, yGraphCoordOfDataPoint);
+  int xPixCoordOfDataPoint = d_graph->plotWidget()->transform(QwtPlot::xBottom, xGraphCoordOfDataPoint);
+  int yPixCoordOfDataPoint = d_graph->plotWidget()->transform(QwtPlot::yLeft, yGraphCoordOfDataPoint);
 
   // The value to shift the x-coordinate of the label by to avoid an overlap
   // with its corresponding data point.
   int shiftValueX = 10;
 
-  double labelCoordinateX = d_graph->plotWidget()->invTransform(
-      QwtPlot::xBottom, (xPixCoordOfDataPoint + shiftValueX));
-  int xAxisOriginInPixCoords =
-      d_graph->plotWidget()->transform(QwtPlot::yLeft, 0.0);
+  double labelCoordinateX = d_graph->plotWidget()->invTransform(QwtPlot::xBottom, (xPixCoordOfDataPoint + shiftValueX));
+  int xAxisOriginInPixCoords = d_graph->plotWidget()->transform(QwtPlot::yLeft, 0.0);
 
   double labelCoordinateY;
 
@@ -594,13 +563,11 @@ void LabelTool::insertErrorValue() {
     // of the screen.
     int labelYPixCoord = yPixCoordOfDataPoint - shiftValueY;
 
-    labelCoordinateY =
-        d_graph->plotWidget()->invTransform(QwtPlot::yLeft, labelYPixCoord);
+    labelCoordinateY = d_graph->plotWidget()->invTransform(QwtPlot::yLeft, labelYPixCoord);
   }
 
   else {
-    labelCoordinateY = d_graph->plotWidget()->invTransform(
-        QwtPlot::yLeft, (yPixCoordOfDataPoint));
+    labelCoordinateY = d_graph->plotWidget()->invTransform(QwtPlot::yLeft, (yPixCoordOfDataPoint));
   }
 
   errorPointLabel->setOriginCoord(labelCoordinateX, labelCoordinateY);

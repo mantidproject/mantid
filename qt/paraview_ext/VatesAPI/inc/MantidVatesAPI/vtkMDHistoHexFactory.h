@@ -43,18 +43,14 @@ public:
   void initialize(const Mantid::API::Workspace_sptr &workspace) override;
 
   /// Factory method
-  vtkSmartPointer<vtkDataSet>
-  create(ProgressAction &progressUpdating) const override;
+  vtkSmartPointer<vtkDataSet> create(ProgressAction &progressUpdating) const override;
 
-  std::string getFactoryTypeName() const override {
-    return "vtkMDHistoHexFactory";
-  }
+  std::string getFactoryTypeName() const override { return "vtkMDHistoHexFactory"; }
 
 protected:
   void validate() const override;
 
-  vtkSmartPointer<vtkDataSet> create3Dor4D(size_t timestep,
-                                           ProgressAction &update) const;
+  vtkSmartPointer<vtkDataSet> create3Dor4D(size_t timestep, ProgressAction &update) const;
 
   void validateWsNotNull() const;
 

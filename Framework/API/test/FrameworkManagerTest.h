@@ -17,9 +17,7 @@ using namespace Mantid::API;
 class FrameworkManagerTest : public CxxTest::TestSuite {
 public:
   // This means the constructor isn't called when running other tests
-  static FrameworkManagerTest *createSuite() {
-    return new FrameworkManagerTest();
-  }
+  static FrameworkManagerTest *createSuite() { return new FrameworkManagerTest(); }
   static void destroySuite(FrameworkManagerTest *suite) { delete suite; }
 
 #ifdef MPI_EXPERIMENTAL
@@ -40,7 +38,6 @@ public:
   }
 
   void testGetWorkspace() {
-    TS_ASSERT_THROWS(FrameworkManager::Instance().getWorkspace("wrongname"),
-                     const std::runtime_error &)
+    TS_ASSERT_THROWS(FrameworkManager::Instance().getWorkspace("wrongname"), const std::runtime_error &)
   }
 };

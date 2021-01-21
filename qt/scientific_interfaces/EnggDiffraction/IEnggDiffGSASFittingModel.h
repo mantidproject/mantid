@@ -32,8 +32,7 @@ public:
    Perform refinements on a number of runs
    @param params Parameters for each run to be passed to GSASIIRefineFitPeaks
    */
-  virtual void
-  doRefinements(const std::vector<GSASIIRefineFitPeaksParameters> &params) = 0;
+  virtual void doRefinements(const std::vector<GSASIIRefineFitPeaksParameters> &params) = 0;
 
   /**
    Get refined lattice parameters for a run
@@ -41,8 +40,7 @@ public:
    @return TableWorkspace of the corresponding lattice parameters (empty
    optional if the model does not contain fit results for this run)
    */
-  virtual boost::optional<Mantid::API::ITableWorkspace_sptr>
-  getLatticeParams(const RunLabel &runLabel) const = 0;
+  virtual boost::optional<Mantid::API::ITableWorkspace_sptr> getLatticeParams(const RunLabel &runLabel) const = 0;
 
   /// Get gamma peak broadening term for a given run, if a fit has been done on
   /// that run
@@ -70,8 +68,7 @@ public:
    @return The loaded workspace
    @throws If Load throws
    */
-  virtual Mantid::API::MatrixWorkspace_sptr
-  loadFocusedRun(const std::string &filename) const = 0;
+  virtual Mantid::API::MatrixWorkspace_sptr loadFocusedRun(const std::string &filename) const = 0;
 
   /**
    Save results of refinement (and refinement settings used) to HDF5 file
@@ -82,15 +79,13 @@ public:
    multi-run fit
    @param filename Name of the HDF5 file to save to
   */
-  virtual void saveRefinementResultsToHDF5(
-      const Mantid::API::IAlgorithm_sptr successfulAlgorithm,
-      const std::vector<GSASIIRefineFitPeaksOutputProperties>
-          &refinementResultSets,
-      const std::string &filename) const = 0;
+  virtual void
+  saveRefinementResultsToHDF5(const Mantid::API::IAlgorithm_sptr successfulAlgorithm,
+                              const std::vector<GSASIIRefineFitPeaksOutputProperties> &refinementResultSets,
+                              const std::string &filename) const = 0;
 
   /// set the observer for refinement
-  virtual void
-  setObserver(std::shared_ptr<IEnggDiffGSASFittingObserver> observer) = 0;
+  virtual void setObserver(std::shared_ptr<IEnggDiffGSASFittingObserver> observer) = 0;
 };
 
 } // namespace CustomInterfaces

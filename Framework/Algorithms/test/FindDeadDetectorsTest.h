@@ -75,8 +75,7 @@ public:
       }
       work_in->getSpectrum(i).setSpectrumNo(i);
 
-      Mantid::Geometry::Detector *det =
-          new Mantid::Geometry::Detector("", i, nullptr);
+      Mantid::Geometry::Detector *det = new Mantid::Geometry::Detector("", i, nullptr);
       instr->add(det);
       instr->markAsDetector(det);
       work_in->getSpectrum(i).setDetectorID(i);
@@ -106,9 +105,7 @@ public:
 
     // Get back the output workspace
     MatrixWorkspace_sptr work_out;
-    TS_ASSERT_THROWS_NOTHING(
-        work_out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "testdead_out"));
+    TS_ASSERT_THROWS_NOTHING(work_out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("testdead_out"));
 
     for (int i = 0; i < sizey; i++) {
       const double val = work_out->y(i)[0];
@@ -133,8 +130,7 @@ public:
     TS_ASSERT(alg.isExecuted());
     // retrieve the output workspace
     TS_ASSERT_THROWS_NOTHING(
-        work_out = std::dynamic_pointer_cast<MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve("testdead_out")))
+        work_out = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("testdead_out")))
     // Check the dead detectors found agrees with what was setup above
     for (int i = 0; i < sizey; i++) {
       const double val = work_out->y(i)[0];
@@ -152,8 +148,7 @@ public:
     TS_ASSERT(alg.isExecuted());
     // retrieve the output workspace
     TS_ASSERT_THROWS_NOTHING(
-        work_out = std::dynamic_pointer_cast<MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve("testdead_out")))
+        work_out = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("testdead_out")))
     // Check the dead detectors found agrees with what was setup above
     for (int i = 0; i < sizey; i++) {
       const double val = work_out->y(i)[0];

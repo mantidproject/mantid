@@ -23,9 +23,8 @@ namespace Geometry {
 using namespace Mantid::Kernel;
 
 /// SpaceGroup/Scatterers constructor
-CrystalStructure::CrystalStructure(
-    const UnitCell &unitCell, const SpaceGroup_const_sptr &spaceGroup,
-    const CompositeBraggScatterer_sptr &scatterers) {
+CrystalStructure::CrystalStructure(const UnitCell &unitCell, const SpaceGroup_const_sptr &spaceGroup,
+                                   const CompositeBraggScatterer_sptr &scatterers) {
   initializeScatterers();
 
   addScatterers(scatterers);
@@ -34,16 +33,13 @@ CrystalStructure::CrystalStructure(
 }
 
 /// String-based constructor
-CrystalStructure::CrystalStructure(const std::string &unitCellString,
-                                   const std::string &spaceGroupString,
+CrystalStructure::CrystalStructure(const std::string &unitCellString, const std::string &spaceGroupString,
                                    const std::string &scattererString) {
   initializeScatterers();
 
-  addScatterers(CompositeBraggScatterer::create(
-      IsotropicAtomBraggScattererParser(scattererString)()));
+  addScatterers(CompositeBraggScatterer::create(IsotropicAtomBraggScattererParser(scattererString)()));
   setCell(strToUnitCell(unitCellString));
-  setSpaceGroup(
-      SpaceGroupFactory::Instance().createSpaceGroup(spaceGroupString));
+  setSpaceGroup(SpaceGroupFactory::Instance().createSpaceGroup(spaceGroupString));
 }
 
 /// Returns the unit cell of the structure
@@ -57,9 +53,7 @@ void CrystalStructure::setCell(const UnitCell &cell) {
 }
 
 /// Returns the space group of the crystal structure
-SpaceGroup_const_sptr CrystalStructure::spaceGroup() const {
-  return m_spaceGroup;
-}
+SpaceGroup_const_sptr CrystalStructure::spaceGroup() const { return m_spaceGroup; }
 
 /**
  * Assigns a new space group to the crystal structure
@@ -80,8 +74,7 @@ CompositeBraggScatterer_sptr CrystalStructure::getScatterers() const {
 }
 
 /// Remove all scatterers and set the supplied ones as new scatterers.
-void CrystalStructure::setScatterers(
-    const CompositeBraggScatterer_sptr &scatterers) {
+void CrystalStructure::setScatterers(const CompositeBraggScatterer_sptr &scatterers) {
   m_scatterers->removeAllScatterers();
 
   addScatterers(scatterers);
@@ -89,8 +82,7 @@ void CrystalStructure::setScatterers(
 
 /// Adds all scatterers in the supplied collection into the internal one
 /// (scatterers are copied).
-void CrystalStructure::addScatterers(
-    const CompositeBraggScatterer_sptr &scatterers) {
+void CrystalStructure::addScatterers(const CompositeBraggScatterer_sptr &scatterers) {
   size_t count = scatterers->nScatterers();
 
   for (size_t i = 0; i < count; ++i) {
@@ -102,8 +94,7 @@ void CrystalStructure::addScatterers(
 
 /// Tries to set the centering from the space group symbol or removes the
 /// current centering if creation fails.
-void CrystalStructure::setReflectionConditionFromSpaceGroup(
-    const SpaceGroup_const_sptr &spaceGroup) {
+void CrystalStructure::setReflectionConditionFromSpaceGroup(const SpaceGroup_const_sptr &spaceGroup) {
   m_centering.reset();
 
   // First letter is centering
@@ -125,8 +116,7 @@ void CrystalStructure::setReflectionConditionFromSpaceGroup(
 /// Assigns the cell to all scatterers
 void CrystalStructure::assignUnitCellToScatterers(const UnitCell &unitCell) {
   if (!m_scatterers) {
-    throw std::runtime_error(
-        "Scatterer collection is a null pointer. Aborting.");
+    throw std::runtime_error("Scatterer collection is a null pointer. Aborting.");
   }
 
   if (m_scatterers->existsProperty("UnitCell")) {

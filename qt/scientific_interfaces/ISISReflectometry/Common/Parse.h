@@ -14,30 +14,22 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
-MANTIDQT_ISISREFLECTOMETRY_DLL boost::optional<double>
-parseDouble(std::string string);
+MANTIDQT_ISISREFLECTOMETRY_DLL boost::optional<double> parseDouble(std::string string);
 
-MANTIDQT_ISISREFLECTOMETRY_DLL boost::optional<double>
-parseNonNegativeDouble(std::string string);
+MANTIDQT_ISISREFLECTOMETRY_DLL boost::optional<double> parseNonNegativeDouble(std::string string);
 
-MANTIDQT_ISISREFLECTOMETRY_DLL boost::optional<double>
-parseNonNegativeNonZeroDouble(std::string string);
+MANTIDQT_ISISREFLECTOMETRY_DLL boost::optional<double> parseNonNegativeNonZeroDouble(std::string string);
 
-MANTIDQT_ISISREFLECTOMETRY_DLL boost::optional<int>
-parseInt(std::string string);
+MANTIDQT_ISISREFLECTOMETRY_DLL boost::optional<int> parseInt(std::string string);
 
-MANTIDQT_ISISREFLECTOMETRY_DLL boost::optional<int>
-parseNonNegativeInt(std::string string);
+MANTIDQT_ISISREFLECTOMETRY_DLL boost::optional<int> parseNonNegativeInt(std::string string);
 
-bool MANTIDQT_ISISREFLECTOMETRY_DLL
-isEntirelyWhitespace(std::string const &string);
+bool MANTIDQT_ISISREFLECTOMETRY_DLL isEntirelyWhitespace(std::string const &string);
 
 template <typename ParseItemFunction>
-boost::optional<std::vector<typename std::result_of<
-    ParseItemFunction(std::string const &)>::type::value_type>>
+boost::optional<std::vector<typename std::result_of<ParseItemFunction(std::string const &)>::type::value_type>>
 parseList(std::string commaSeparatedValues, ParseItemFunction parseItem) {
-  using ParsedItem = typename std::result_of<ParseItemFunction(
-      std::string const &)>::type::value_type;
+  using ParsedItem = typename std::result_of<ParseItemFunction(std::string const &)>::type::value_type;
   if (!commaSeparatedValues.empty()) {
     auto items = std::vector<std::string>();
     boost::algorithm::split(items, commaSeparatedValues, boost::is_any_of(","));

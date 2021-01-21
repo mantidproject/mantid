@@ -44,36 +44,30 @@ public:
   };
 
   static auto constexpr ColumnPropertyName =
-      std::array<const char *, OPTIONS_TABLE_COLUMN_COUNT>{
-          "ThetaIn",
-          "FirstTransmissionRunList",
-          "SecondTransmissionRunList",
-          "TransmissionProcessingInstructions",
-          "MomentumTransferMin",
-          "MomentumTransferMax",
-          "MomentumTransferStep",
-          "ScaleFactor",
-          "ProcessingInstructions",
-          "BackgroundProcessingInstructions"};
+      std::array<const char *, OPTIONS_TABLE_COLUMN_COUNT>{"ThetaIn",
+                                                           "FirstTransmissionRunList",
+                                                           "SecondTransmissionRunList",
+                                                           "TransmissionProcessingInstructions",
+                                                           "MomentumTransferMin",
+                                                           "MomentumTransferMax",
+                                                           "MomentumTransferStep",
+                                                           "ScaleFactor",
+                                                           "ProcessingInstructions",
+                                                           "BackgroundProcessingInstructions"};
 
-  PerThetaDefaults(
-      boost::optional<double> theta, TransmissionRunPair tranmissionRuns,
-      boost::optional<ProcessingInstructions>
-          transmissionProcessingInstructions,
-      RangeInQ qRange, boost::optional<double> scaleFactor,
-      boost::optional<ProcessingInstructions> processingInstructions,
-      boost::optional<ProcessingInstructions> backgroundProcessingInstructions);
+  PerThetaDefaults(boost::optional<double> theta, TransmissionRunPair tranmissionRuns,
+                   boost::optional<ProcessingInstructions> transmissionProcessingInstructions, RangeInQ qRange,
+                   boost::optional<double> scaleFactor, boost::optional<ProcessingInstructions> processingInstructions,
+                   boost::optional<ProcessingInstructions> backgroundProcessingInstructions);
 
   TransmissionRunPair const &transmissionWorkspaceNames() const;
   bool isWildcard() const;
   boost::optional<double> thetaOrWildcard() const;
   RangeInQ const &qRange() const;
   boost::optional<double> scaleFactor() const;
-  boost::optional<ProcessingInstructions>
-  transmissionProcessingInstructions() const;
+  boost::optional<ProcessingInstructions> transmissionProcessingInstructions() const;
   boost::optional<ProcessingInstructions> processingInstructions() const;
-  boost::optional<ProcessingInstructions>
-  backgroundProcessingInstructions() const;
+  boost::optional<ProcessingInstructions> backgroundProcessingInstructions() const;
 
 private:
   boost::optional<double> m_theta;
@@ -85,12 +79,9 @@ private:
   boost::optional<ProcessingInstructions> m_backgroundProcessingInstructions;
 };
 
-MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(PerThetaDefaults const &lhs,
-                                               PerThetaDefaults const &rhs);
-MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(PerThetaDefaults const &lhs,
-                                               PerThetaDefaults const &rhs);
-PerThetaDefaults::ValueArray
-perThetaDefaultsToArray(PerThetaDefaults const &perThetaDefaults);
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(PerThetaDefaults const &lhs, PerThetaDefaults const &rhs);
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(PerThetaDefaults const &lhs, PerThetaDefaults const &rhs);
+PerThetaDefaults::ValueArray perThetaDefaultsToArray(PerThetaDefaults const &perThetaDefaults);
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

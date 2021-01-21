@@ -29,24 +29,18 @@ DECLARE_ALGORITHM(ModifyDetectorDotDatFile)
 /** Initialize the algorithm's properties.
  */
 void ModifyDetectorDotDatFile::init() {
-  declareProperty(
-      std::make_unique<WorkspaceProperty<Workspace>>("InputWorkspace", "",
-                                                     Direction::Input),
-      "Workspace with detectors in the positions to be put into the detector "
-      "dot dat file");
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("InputWorkspace", "", Direction::Input),
+                  "Workspace with detectors in the positions to be put into the detector "
+                  "dot dat file");
 
   std::initializer_list<std::string> exts = {".dat", ".txt"};
 
-  declareProperty(
-      std::make_unique<FileProperty>("InputFilename", "", FileProperty::Load,
-                                     exts),
-      "Path to a detector dot dat file. Must be of type .dat or .txt");
+  declareProperty(std::make_unique<FileProperty>("InputFilename", "", FileProperty::Load, exts),
+                  "Path to a detector dot dat file. Must be of type .dat or .txt");
 
-  declareProperty(
-      std::make_unique<FileProperty>("OutputFilename", "", FileProperty::Save,
-                                     exts),
-      "Path to the modified detector dot dat file. Must be of type .dat or "
-      ".txt");
+  declareProperty(std::make_unique<FileProperty>("OutputFilename", "", FileProperty::Save, exts),
+                  "Path to the modified detector dot dat file. Must be of type .dat or "
+                  ".txt");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -62,8 +56,7 @@ void ModifyDetectorDotDatFile::exec() {
   // Check instrument
   Instrument_const_sptr inst = ws->getInstrument();
   if (!inst)
-    throw std::runtime_error(
-        "No instrument in the Workspace. Cannot modify detector dot dat file");
+    throw std::runtime_error("No instrument in the Workspace. Cannot modify detector dot dat file");
 
   // Open files
   std::ifstream in;
@@ -98,9 +91,7 @@ void ModifyDetectorDotDatFile::exec() {
   if (detectorCount < 1 || numColumns < 5 || numColumns > 1000) {
     out.close();
     in.close();
-    throw Exception::FileError(
-        "Incompatible file format found when reading line 2 in the input file",
-        inputFilename);
+    throw Exception::FileError("Incompatible file format found when reading line 2 in the input file", inputFilename);
   }
 
   // Copy column title line
@@ -128,8 +119,7 @@ void ModifyDetectorDotDatFile::exec() {
     int code;
     float dump; // ignored data
 
-    if (str.empty() ||
-        str[0] == '#') { // comments and empty lines are allowed and just copied
+    if (str.empty() || str[0] == '#') { // comments and empty lines are allowed and just copied
       out << str << "\n";
       continue;
     }
@@ -155,8 +145,7 @@ void ModifyDetectorDotDatFile::exec() {
         oss.precision(pOffset);
         oss << std::setw(wDet) << detID << std::setw(wOff) << offset;
         oss.precision(pOther);
-        oss << std::setw(wRad) << l2 << std::setw(wCode) << code
-            << std::setw(wAng) << theta << std::setw(wAng);
+        oss << std::setw(wRad) << l2 << std::setw(wCode) << code << std::setw(wAng) << theta << std::setw(wAng);
         if (numColumns > 5)
           oss << phi; // insert phi
         std::string prefix = oss.str();

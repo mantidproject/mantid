@@ -59,18 +59,15 @@ TextEditor::TextEditor(Graph *g) : QTextEdit(g), d_target(nullptr) {
     setAlignment((Qt::Alignment)t.renderFlags());
 
     QRect rect = g->axisTitleRect(scale);
-    if (scale->alignment() == QwtScaleDraw::BottomScale ||
-        scale->alignment() == QwtScaleDraw::TopScale) {
+    if (scale->alignment() == QwtScaleDraw::BottomScale || scale->alignment() == QwtScaleDraw::TopScale) {
       resize(rect.size());
       move(QPoint(d_target->x() + rect.x(), d_target->y() + rect.y()));
     } else {
       resize(QSize(rect.height(), rect.width()));
       if (scale->alignment() == QwtScaleDraw::LeftScale)
-        move(QPoint(d_target->x() + rect.x(),
-                    d_target->y() + rect.y() + rect.height() / 2));
+        move(QPoint(d_target->x() + rect.x(), d_target->y() + rect.y() + rect.height() / 2));
       else if (scale->alignment() == QwtScaleDraw::RightScale)
-        move(QPoint(d_target->x() - rect.height(),
-                    d_target->y() + rect.y() + rect.height() / 2));
+        move(QPoint(d_target->x() - rect.height(), d_target->y() + rect.y() + rect.height() / 2));
 
       t.setText(" ");
       t.setBackgroundPen(QPen(Qt::NoPen));
@@ -103,16 +100,14 @@ void TextEditor::closeEvent(QCloseEvent *e) {
         pieLabel->setCustomText(s);
         d_target->show();
         g->setSelectedText(nullptr);
-      } else if (QString(d_target->metaObject()->className()) ==
-                 "QwtTextLabel") {
+      } else if (QString(d_target->metaObject()->className()) == "QwtTextLabel") {
         QwtText title = g->plotWidget()->title();
         s = toPlainText();
         if (s.isEmpty())
           s = " ";
         title.setText(s);
         g->plotWidget()->setTitle(title);
-      } else if (QString(d_target->metaObject()->className()) ==
-                 "QwtScaleWidget") {
+      } else if (QString(d_target->metaObject()->className()) == "QwtScaleWidget") {
         QwtScaleWidget *scale = (QwtScaleWidget *)d_target;
         QwtText title = scale->title();
         s = toPlainText();
@@ -136,13 +131,10 @@ void TextEditor::formatText(const QString &prefix, const QString &postfix) {
   QString markedText = cursor.selectedText();
   cursor.insertText(prefix + markedText + postfix);
   if (markedText.isEmpty()) {
-    cursor.movePosition(QTextCursor::PreviousCharacter, QTextCursor::MoveAnchor,
-                        postfix.size());
+    cursor.movePosition(QTextCursor::PreviousCharacter, QTextCursor::MoveAnchor, postfix.size());
     setTextCursor(cursor);
   }
   setFocus();
 }
 
-void TextEditor::addSymbol(const QString &letter) {
-  textCursor().insertText(letter);
-}
+void TextEditor::addSymbol(const QString &letter) { textCursor().insertText(letter); }

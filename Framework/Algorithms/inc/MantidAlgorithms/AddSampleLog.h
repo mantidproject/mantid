@@ -36,9 +36,7 @@ public:
   /// Algorithm's name
   const std::string name() const override { return "AddSampleLog"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Used to insert a value into the sample logs in a workspace.";
-  }
+  const std::string summary() const override { return "Used to insert a value into the sample logs in a workspace."; }
 
   /// Algorithm's version
   int version() const override { return (1); }
@@ -54,44 +52,34 @@ private:
   /// Execution code
   void exec() override;
 
-  void addStringLog(API::Run &theRun, const std::string &propName,
-                    const std::string &propValue, const std::string &propUnit);
+  void addStringLog(API::Run &theRun, const std::string &propName, const std::string &propValue,
+                    const std::string &propUnit);
 
-  void addTimeSeriesProperty(API::Run &run_obj, const std::string &prop_name,
-                             const std::string &prop_value,
-                             const std::string &prop_unit,
-                             const std::string &prop_number_type);
+  void addTimeSeriesProperty(API::Run &run_obj, const std::string &prop_name, const std::string &prop_value,
+                             const std::string &prop_unit, const std::string &prop_number_type);
 
-  void addSingleValueProperty(API::Run &theRun, const std::string &propName,
-                              const std::string &propValue,
-                              const std::string &propUnit,
-                              const std::string &propNumberType);
+  void addSingleValueProperty(API::Run &theRun, const std::string &propName, const std::string &propValue,
+                              const std::string &propUnit, const std::string &propNumberType);
 
   /// set the time series property's entries to the newly added
   /// TimeSeriesProperty
-  void setTimeSeriesData(API::Run &run_obj, const std::string &property_name,
-                         bool value_is_int);
+  void setTimeSeriesData(API::Run &run_obj, const std::string &property_name, bool value_is_int);
 
   /// get run start time
   Types::Core::DateAndTime getRunStart(API::Run &run_obj);
 
   /// get value vector of the integer TimeSeriesProperty entries
-  std::vector<int> getIntValues(const API::MatrixWorkspace_const_sptr &dataws,
-                                int workspace_index);
+  std::vector<int> getIntValues(const API::MatrixWorkspace_const_sptr &dataws, int workspace_index);
 
   /// get value vector of the double TimeSeriesProperty entries
-  std::vector<double>
-  getDblValues(const API::MatrixWorkspace_const_sptr &dataws,
-               int workspace_index);
+  std::vector<double> getDblValues(const API::MatrixWorkspace_const_sptr &dataws, int workspace_index);
 
   /// get the vector of times of the TimeSeriesProperty entries
-  std::vector<Types::Core::DateAndTime>
-  getTimes(const API::MatrixWorkspace_const_sptr &dataws, int workspace_index,
-           bool is_epoch, bool is_second, API::Run &run_obj);
+  std::vector<Types::Core::DateAndTime> getTimes(const API::MatrixWorkspace_const_sptr &dataws, int workspace_index,
+                                                 bool is_epoch, bool is_second, API::Run &run_obj);
 
   /// get meta data from input workspace or user input
-  void getMetaData(const API::MatrixWorkspace_const_sptr &dataws,
-                   bool &epochtime, std::string &timeunit);
+  void getMetaData(const API::MatrixWorkspace_const_sptr &dataws, bool &epochtime, std::string &timeunit);
 };
 
 } // namespace Algorithms

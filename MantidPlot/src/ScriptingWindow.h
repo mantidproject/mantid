@@ -39,8 +39,8 @@ class ScriptingWindow : public QMainWindow {
 
 public:
   /// Constructor
-  ScriptingWindow(ScriptingEnv *env, bool capturePrint = true,
-                  QWidget *parent = nullptr, Qt::WindowFlags flags = nullptr);
+  ScriptingWindow(ScriptingEnv *env, bool capturePrint = true, QWidget *parent = nullptr,
+                  Qt::WindowFlags flags = nullptr);
   /// Destructor
   ~ScriptingWindow() override;
   /// Override the closeEvent
@@ -67,8 +67,7 @@ public:
   /// Saves the open script names to the current project
   std::string saveToProject(ApplicationWindow *app);
   /// Loads the open script names for the current project
-  void loadFromProject(const std::string &lines, ApplicationWindow *app,
-                       const int fileVersion);
+  void loadFromProject(const std::string &lines, ApplicationWindow *app, const int fileVersion);
   // Loads the scripts from a list of filenames
   void loadFromFileList(const QStringList &files);
 
@@ -168,14 +167,13 @@ private:
   /// File menu
   QMenu *m_fileMenu;
   /// File menu actions
-  QAction *m_newTab, *m_openInCurTab, *m_openInNewTab, *m_save, *m_saveAs,
-      *m_print, *m_closeTab;
+  QAction *m_newTab, *m_openInCurTab, *m_openInNewTab, *m_save, *m_saveAs, *m_print, *m_closeTab;
   QMenu *m_recentScripts;
   /// Edit menu
   QMenu *m_editMenu;
   /// Edit menu actions
-  QAction *m_undo, *m_redo, *m_cut, *m_copy, *m_paste, *m_comment, *m_uncomment,
-      *m_tabsToSpaces, *m_spacesToTabs, *m_find;
+  QAction *m_undo, *m_redo, *m_cut, *m_copy, *m_paste, *m_comment, *m_uncomment, *m_tabsToSpaces, *m_spacesToTabs,
+      *m_find;
   /// Run menu
   QMenu *m_runMenu;
   /// Execute menu actions
@@ -189,9 +187,8 @@ private:
   /// Window menu
   QMenu *m_windowMenu;
   /// Window actions
-  QAction *m_alwaysOnTop, *m_hide, *m_zoomIn, *m_zoomOut, *m_resetZoom,
-      *m_toggleProgress, *m_toggleFolding, *m_toggleWrapping,
-      *m_toggleWhitespace, *m_openConfigTabs, *m_selectFont;
+  QAction *m_alwaysOnTop, *m_hide, *m_zoomIn, *m_zoomOut, *m_resetZoom, *m_toggleProgress, *m_toggleFolding,
+      *m_toggleWrapping, *m_toggleWhitespace, *m_openConfigTabs, *m_selectFont;
   /// Help menu
   QMenu *m_helpMenu;
   /// Help actions

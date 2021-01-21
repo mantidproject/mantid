@@ -17,15 +17,11 @@ SaveTableAsCommand defines the action "Save Table As"
 */
 class SaveTableAsCommand : public CommandBase {
 public:
-  SaveTableAsCommand(DataProcessorPresenter *tablePresenter)
-      : CommandBase(tablePresenter){};
-  SaveTableAsCommand(const QDataProcessorWidget &widget)
-      : CommandBase(widget){};
+  SaveTableAsCommand(DataProcessorPresenter *tablePresenter) : CommandBase(tablePresenter){};
+  SaveTableAsCommand(const QDataProcessorWidget &widget) : CommandBase(widget){};
   virtual ~SaveTableAsCommand(){};
 
-  void execute() override {
-    m_presenter->notify(DataProcessorPresenter::SaveAsFlag);
-  };
+  void execute() override { m_presenter->notify(DataProcessorPresenter::SaveAsFlag); };
   QString name() override { return QString("Save Table As"); }
   QString icon() override { return QString("://filesaveas.png"); }
   QString tooltip() override { return QString("Save Table As"); }

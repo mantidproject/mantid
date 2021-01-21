@@ -47,8 +47,7 @@ public:
     TS_ASSERT(loader.isExecuted());
     PeaksWorkspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING(
-        ws = std::dynamic_pointer_cast<PeaksWorkspace>(
-            AnalysisDataService::Instance().retrieve(WSName)));
+        ws = std::dynamic_pointer_cast<PeaksWorkspace>(AnalysisDataService::Instance().retrieve(WSName)));
     TS_ASSERT(ws);
     // make a reasonable UB and
     // put it in the workspace
@@ -89,8 +88,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Tolerance", "0.1"));
 
     // specify a matrix that will swap H and K and negate L
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("HKLTransform", "0,1,0,1,0,0,0,0,-1"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("HKLTransform", "0,1,0,1,0,0,0,0,-1"));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 

@@ -25,14 +25,11 @@ namespace MantidWidgets {
 class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentWidgetEncoder {
 public:
   InstrumentWidgetEncoder();
-  QMap<QString, QVariant> encode(const InstrumentWidget &obj,
-                                 const QString &projectPath,
-                                 const bool saveMask = true);
+  QMap<QString, QVariant> encode(const InstrumentWidget &obj, const QString &projectPath, const bool saveMask = true);
 
 private:
   /// Encode Actor
-  QMap<QString, QVariant>
-  encodeActor(const std::unique_ptr<InstrumentActor> &obj);
+  QMap<QString, QVariant> encodeActor(const std::unique_ptr<InstrumentActor> &obj);
 
   /// Encode all tabs
   QMap<QString, QVariant> encodeTabs(const InstrumentWidget &obj);
@@ -42,8 +39,7 @@ private:
 
   /// Encode pick tab
   QMap<QString, QVariant> encodeRenderTab(const InstrumentWidgetRenderTab *tab);
-  QMap<QString, QVariant>
-  encodeColorBar(MantidQt::MantidWidgets::ColorBar *bar);
+  QMap<QString, QVariant> encodeColorBar(MantidQt::MantidWidgets::ColorBar *bar);
 
   /// Encode mask tab
   QMap<QString, QVariant> encodeMaskTab(const InstrumentWidgetMaskTab *tab);

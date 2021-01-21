@@ -26,9 +26,7 @@ namespace Poldi {
 class MANTID_SINQ_DLL MillerIndicesIO {
 public:
   static std::string toString(const MillerIndices &millerIndices) {
-    return (boost::format("%i %i %i") % millerIndices.h() % millerIndices.k() %
-            millerIndices.l())
-        .str();
+    return (boost::format("%i %i %i") % millerIndices.h() % millerIndices.k() % millerIndices.l()).str();
   }
 
   static MillerIndices fromString(const std::string &millerIncidesString) {

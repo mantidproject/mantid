@@ -33,8 +33,7 @@ std::string PeaksIntersection::hklFrame() { return "HKL"; }
 /** Initialize the algorithm's properties.
  */
 void PeaksIntersection::initBaseProperties() {
-  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>("InputWorkspace", "", Direction::Input),
                   "An input peaks workspace.");
 
   std::vector<std::string> propOptions;
@@ -43,20 +42,16 @@ void PeaksIntersection::initBaseProperties() {
   propOptions.emplace_back(qSampleFrame());
   propOptions.emplace_back(hklFrame());
 
-  declareProperty(
-      "CoordinateFrame", "DetectorSpace",
-      std::make_shared<StringListValidator>(propOptions),
-      "What coordinate system to use for intersection criteria?\n"
-      "  DetectorSpace: Real-space coordinates.\n"
-      "  Q (lab frame): Wave-vector change of the lattice in the lab frame.\n"
-      "  Q (sample frame): Momentum in the sample frame.\n"
-      "  HKL");
+  declareProperty("CoordinateFrame", "DetectorSpace", std::make_shared<StringListValidator>(propOptions),
+                  "What coordinate system to use for intersection criteria?\n"
+                  "  DetectorSpace: Real-space coordinates.\n"
+                  "  Q (lab frame): Wave-vector change of the lattice in the lab frame.\n"
+                  "  Q (sample frame): Momentum in the sample frame.\n"
+                  "  HKL");
 
-  declareProperty("PeakRadius", 0.0,
-                  "Effective peak radius in CoordinateFrame");
+  declareProperty("PeakRadius", 0.0, "Effective peak radius in CoordinateFrame");
 
-  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "An output table workspace. Two columns. Peak index into "
                   "input workspace, and boolean, where true is for positive "
                   "intersection.");
@@ -146,17 +141,14 @@ void PeaksIntersection::executePeaksIntersection(const bool checkPeakExtents) {
       if (checkPeakExtents) {
         // Take account of radius spherical extents.
         for (int j = 0; j < numberOfFaces; ++j) {
-          distance = normals[j].scalar_prod(
-              faces[j][0] -
-              peakCenter); // Distance between plane and peak center.
-          if (m_peakRadius >= std::abs(distance)) // Sphere passes through one
-                                                  // of the PLANES defined by
-                                                  // the box faces.
+          distance = normals[j].scalar_prod(faces[j][0] - peakCenter); // Distance between plane and peak center.
+          if (m_peakRadius >= std::abs(distance))                      // Sphere passes through one
+                                                                       // of the PLANES defined by
+                                                                       // the box faces.
           {
             // Check that it is actually within the face boundaries.
-            const V3D touchPoint = (normals[j] * distance) +
-                                   peakCenter; // Vector equation of line give
-                                               // touch point on plane.
+            const V3D touchPoint = (normals[j] * distance) + peakCenter; // Vector equation of line give
+                                                                         // touch point on plane.
 
             // checkTouchPoint(touchPoint, normals[i], faces[i][0]); //
             // Debugging line.

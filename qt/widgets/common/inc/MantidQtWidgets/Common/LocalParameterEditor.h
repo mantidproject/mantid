@@ -23,9 +23,8 @@ class EditLocalParameterDialog;
 class LocalParameterEditor : public QWidget {
   Q_OBJECT
 public:
-  LocalParameterEditor(QWidget *parent, int index, double value, bool fixed,
-                       const QString &tie, const QString &constraint,
-                       bool othersFixed, bool allOthersFixed, bool othersTied,
+  LocalParameterEditor(QWidget *parent, int index, double value, bool fixed, const QString &tie,
+                       const QString &constraint, bool othersFixed, bool allOthersFixed, bool othersTied,
                        bool logOptionsEnabled);
 signals:
   void setAllValues(double /*_t1*/);

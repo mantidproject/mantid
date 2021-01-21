@@ -40,36 +40,29 @@ const std::string IntegrateEPP::name() const { return "IntegrateEPP"; }
 int IntegrateEPP::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string IntegrateEPP::category() const {
-  return "Arithmetic;Transforms\\Rebin";
-}
+const std::string IntegrateEPP::category() const { return "Arithmetic;Transforms\\Rebin"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-const std::string IntegrateEPP::summary() const {
-  return "Integrate a workspace around elastic peak positions.";
-}
+const std::string IntegrateEPP::summary() const { return "Integrate a workspace around elastic peak positions."; }
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void IntegrateEPP::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
-                      PropertyNames::INPUT_WORKSPACE, "", Direction::Input),
-                  "A workspace to be integrated.");
-  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
-                      PropertyNames::OUTPUT_WORKSPACE, "", Direction::Output),
-                  "An workspace containing the integrated histograms.");
-  declareProperty(std::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
-                      PropertyNames::EPP_WORKSPACE, "", Direction::Input),
-                  "Table containing information on the elastic peaks.");
-  const auto mandatoryDouble =
-      std::make_shared<Kernel::MandatoryValidator<double>>();
-  const auto positiveDouble =
-      std::make_shared<Kernel::BoundedValidator<double>>();
+  declareProperty(
+      std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(PropertyNames::INPUT_WORKSPACE, "", Direction::Input),
+      "A workspace to be integrated.");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(PropertyNames::OUTPUT_WORKSPACE, "", Direction::Output),
+      "An workspace containing the integrated histograms.");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<API::ITableWorkspace>>(PropertyNames::EPP_WORKSPACE, "", Direction::Input),
+      "Table containing information on the elastic peaks.");
+  const auto mandatoryDouble = std::make_shared<Kernel::MandatoryValidator<double>>();
+  const auto positiveDouble = std::make_shared<Kernel::BoundedValidator<double>>();
   positiveDouble->setLower(0.0);
   positiveDouble->setLowerExclusive(true);
-  const auto mandatoryPositiveDouble =
-      std::make_shared<Kernel::CompositeValidator>();
+  const auto mandatoryPositiveDouble = std::make_shared<Kernel::CompositeValidator>();
   mandatoryPositiveDouble->add(mandatoryDouble);
   mandatoryPositiveDouble->add(positiveDouble);
   declareProperty(PropertyNames::WIDTH, 5.0, mandatoryPositiveDouble,
@@ -81,8 +74,7 @@ void IntegrateEPP::init() {
  */
 void IntegrateEPP::exec() {
   API::MatrixWorkspace_sptr inWS = getProperty(PropertyNames::INPUT_WORKSPACE);
-  API::ITableWorkspace_const_sptr eppWS =
-      getProperty(PropertyNames::EPP_WORKSPACE);
+  API::ITableWorkspace_const_sptr eppWS = getProperty(PropertyNames::EPP_WORKSPACE);
   const double sigmaMultiplier = getProperty(PropertyNames::WIDTH);
   const auto indexCol = eppWS->getColumn("WorkspaceIndex");
   const auto sigmaCol = eppWS->getColumn("Sigma");
@@ -99,8 +91,7 @@ void IntegrateEPP::exec() {
     const double halfWidth = sigmaMultiplier * sigmaCol->toDouble(i);
     const int index = indexCol->cell<int>(i);
     if (index < 0 || static_cast<size_t>(index) >= begins.size()) {
-      throw std::runtime_error(
-          "The 'WorkspaceIndex' column contains an invalid value.");
+      throw std::runtime_error("The 'WorkspaceIndex' column contains an invalid value.");
     }
     begins[index] = centre - halfWidth;
     ends[index] = centre + halfWidth;
@@ -124,13 +115,10 @@ void IntegrateEPP::exec() {
  */
 std::map<std::string, std::string> IntegrateEPP::validateInputs() {
   std::map<std::string, std::string> issues;
-  API::MatrixWorkspace_const_sptr inWS =
-      getProperty(PropertyNames::INPUT_WORKSPACE);
-  API::ITableWorkspace_const_sptr eppWS =
-      getProperty(PropertyNames::EPP_WORKSPACE);
+  API::MatrixWorkspace_const_sptr inWS = getProperty(PropertyNames::INPUT_WORKSPACE);
+  API::ITableWorkspace_const_sptr eppWS = getProperty(PropertyNames::EPP_WORKSPACE);
   if (eppWS->rowCount() > inWS->getNumberHistograms()) {
-    issues[PropertyNames::EPP_WORKSPACE] =
-        "The EPP workspace contains too many rows.";
+    issues[PropertyNames::EPP_WORKSPACE] = "The EPP workspace contains too many rows.";
   }
   return issues;
 }

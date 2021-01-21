@@ -20,14 +20,12 @@ class ADSWorkspaceProviderTest : public CxxTest::TestSuite {
 public:
   void setUp() override {
     // Put A test workspace into the ADS.
-    Mantid::API::AnalysisDataService::Instance().addOrReplace(
-        "WS", IMDWorkspace_sptr(new MockIMDWorkspace()));
+    Mantid::API::AnalysisDataService::Instance().addOrReplace("WS", IMDWorkspace_sptr(new MockIMDWorkspace()));
   }
 
   void testCanProvideWorkspace() {
     ADSWorkspaceProvider<IMDWorkspace> wsProvider;
-    TSM_ASSERT("Should indicate that the workspace CAN be provided.",
-               wsProvider.canProvideWorkspace("WS"));
+    TSM_ASSERT("Should indicate that the workspace CAN be provided.", wsProvider.canProvideWorkspace("WS"));
   }
 
   void testCannotProvideWorkspaceIfNonExistant() {
@@ -51,18 +49,14 @@ public:
 
   void testFetchWorkspace() {
     ADSWorkspaceProvider<IMDWorkspace> wsProvider;
-    TSM_ASSERT_THROWS_NOTHING("Should have fetched WS from ADS",
-                              wsProvider.fetchWorkspace("WS"));
+    TSM_ASSERT_THROWS_NOTHING("Should have fetched WS from ADS", wsProvider.fetchWorkspace("WS"));
     TS_ASSERT(NULL != wsProvider.fetchWorkspace("WS"));
   }
 
   void testDisposeOfWorkspace() {
     ADSWorkspaceProvider<IMDWorkspace> wsProvider;
-    TSM_ASSERT_THROWS_NOTHING("Should have workspace to start with.",
-                              wsProvider.fetchWorkspace("WS"));
-    TSM_ASSERT_THROWS_NOTHING("Should have removed existing workspace.",
-                              wsProvider.disposeWorkspace("WS"));
-    TSM_ASSERT_THROWS_ANYTHING("Should not be able to fetch the workspace now",
-                               wsProvider.fetchWorkspace("WS"));
+    TSM_ASSERT_THROWS_NOTHING("Should have workspace to start with.", wsProvider.fetchWorkspace("WS"));
+    TSM_ASSERT_THROWS_NOTHING("Should have removed existing workspace.", wsProvider.disposeWorkspace("WS"));
+    TSM_ASSERT_THROWS_ANYTHING("Should not be able to fetch the workspace now", wsProvider.fetchWorkspace("WS"));
   }
 };

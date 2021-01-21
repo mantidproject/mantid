@@ -54,8 +54,7 @@ public:
 
     // instrument.setDefaultViewAxis("X-");
     instrument.getLogfileCache().insert(
-        std::make_pair(std::make_pair("apple", det3),
-                       std::shared_ptr<XMLInstrumentParameter>()));
+        std::make_pair(std::make_pair("apple", det3), std::shared_ptr<XMLInstrumentParameter>()));
     instrument.getLogfileUnit()["banana"] = "yellow";
   }
 
@@ -91,12 +90,10 @@ public:
     TS_ASSERT_EQUALS(i.getValidToDate(), instrument.getValidToDate());
 
     // Check source and sample copied correctly, but different objects
-    TS_ASSERT_EQUALS(i.getSource()->getName(),
-                     instrument.getSource()->getName());
+    TS_ASSERT_EQUALS(i.getSource()->getName(), instrument.getSource()->getName());
     TS_ASSERT_EQUALS(i.getSource()->getPos(), instrument.getSource()->getPos());
     TS_ASSERT_DIFFERS(i.getSource(), instrument.getSource());
-    TS_ASSERT_EQUALS(i.getSample()->getName(),
-                     instrument.getSample()->getName());
+    TS_ASSERT_EQUALS(i.getSample()->getName(), instrument.getSample()->getName());
     TS_ASSERT_EQUALS(i.getSample()->getPos(), instrument.getSample()->getPos());
     TS_ASSERT_DIFFERS(i.getSample(), instrument.getSample());
 
@@ -136,8 +133,7 @@ public:
     TS_ASSERT(!i.getSource());
     ObjComponent *s = new ObjComponent("");
     // Cannot have an unnamed source
-    TS_ASSERT_THROWS(i.markAsSource(s),
-                     const Exception::InstrumentDefinitionError &);
+    TS_ASSERT_THROWS(i.markAsSource(s), const Exception::InstrumentDefinitionError &);
     s->setName("source");
     TS_ASSERT_THROWS_NOTHING(i.markAsSource(s));
     TS_ASSERT_EQUALS(i.getSource().get(), s);
@@ -154,8 +150,7 @@ public:
     TS_ASSERT(!i.getSample());
     Component *s = new Component("");
     // Cannot have an unnamed source
-    TS_ASSERT_THROWS(i.markAsSamplePos(s),
-                     const Exception::InstrumentDefinitionError &);
+    TS_ASSERT_THROWS(i.markAsSamplePos(s), const Exception::InstrumentDefinitionError &);
     s->setName("sample");
     TS_ASSERT_THROWS_NOTHING(i.markAsSamplePos(s));
     TS_ASSERT_EQUALS(i.getSample().get(), s);
@@ -170,9 +165,7 @@ public:
     delete ss;
   }
 
-  void testBeamDirection() {
-    TS_ASSERT_EQUALS(instrument.getBeamDirection(), V3D(0, 0, 1));
-  }
+  void testBeamDirection() { TS_ASSERT_EQUALS(instrument.getBeamDirection(), V3D(0, 0, 1)); }
 
   void testNumberDetectors() { // THIS MUST BE RUN BEFORE testDetector!!!!!!!
     // that test adds a detector to the instrument
@@ -184,11 +177,9 @@ public:
   }
 
   void testDetector() {
-    TS_ASSERT_THROWS(instrument.getDetector(0),
-                     const Exception::NotFoundError &);
+    TS_ASSERT_THROWS(instrument.getDetector(0), const Exception::NotFoundError &);
     TS_ASSERT_EQUALS(instrument.getDetector(1).get(), det);
-    TS_ASSERT_THROWS(instrument.getDetector(2),
-                     const Exception::NotFoundError &);
+    TS_ASSERT_THROWS(instrument.getDetector(2), const Exception::NotFoundError &);
     Detector *d = new Detector("det", 2, nullptr);
     TS_ASSERT_THROWS_NOTHING(instrument.markAsDetector(d));
     TS_ASSERT_EQUALS(instrument.getDetector(2).get(), d);
@@ -246,8 +237,7 @@ public:
 
     IDetector_const_sptr det;
     TS_ASSERT_THROWS_NOTHING(det = instrument.getDetectorG(detIDs));
-    std::shared_ptr<const DetectorGroup> detGroup =
-        std::dynamic_pointer_cast<const DetectorGroup>(det);
+    std::shared_ptr<const DetectorGroup> detGroup = std::dynamic_pointer_cast<const DetectorGroup>(det);
     TS_ASSERT(detGroup);
 
     TS_ASSERT_EQUALS(detGroup->nDets(), ndets);
@@ -261,8 +251,7 @@ public:
     std::set<detid_t> detIDs{10000};
 
     std::vector<IDetector_const_sptr> dets;
-    TS_ASSERT_THROWS(dets = instrument.getDetectors(detIDs),
-                     const Kernel::Exception::NotFoundError &);
+    TS_ASSERT_THROWS(dets = instrument.getDetectors(detIDs), const Kernel::Exception::NotFoundError &);
   }
 
   void testCasts() {
@@ -274,16 +263,13 @@ public:
 
   void testIDs() {
     ComponentID id1 = det->getComponentID();
-    TS_ASSERT_EQUALS(det->getName(),
-                     instrument.getComponentByID(id1)->getName());
+    TS_ASSERT_EQUALS(det->getName(), instrument.getComponentByID(id1)->getName());
 
     ComponentID id2 = det2->getComponentID();
-    TS_ASSERT_EQUALS(det2->getName(),
-                     instrument.getComponentByID(id2)->getName());
+    TS_ASSERT_EQUALS(det2->getName(), instrument.getComponentByID(id2)->getName());
 
     ComponentID id3 = det3->getComponentID();
-    TS_ASSERT_EQUALS(det3->getName(),
-                     instrument.getComponentByID(id3)->getName());
+    TS_ASSERT_EQUALS(det3->getName(), instrument.getComponentByID(id3)->getName());
   }
 
   void testGetByName() {
@@ -320,8 +306,7 @@ public:
 
   void test_getDetectorsInBank() {
     // 5 banks with 6x6 pixels in them.
-    Instrument_const_sptr inst =
-        ComponentCreationHelper::createTestInstrumentRectangular(5, 6);
+    Instrument_const_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular(5, 6);
     std::vector<IDetector_const_sptr> dets;
     inst->getDetectorsInBank(dets, "bank2");
     TS_ASSERT_EQUALS(dets.size(), 36);
@@ -330,25 +315,21 @@ public:
 
   void test_getDetectorsInBank2() {
     // 5 banks with 9 pixels each
-    Instrument_const_sptr inst =
-        ComponentCreationHelper::createTestInstrumentCylindrical(5);
+    Instrument_const_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(5);
     std::vector<IDetector_const_sptr> dets;
     inst->getDetectorsInBank(dets, "bank2");
     TS_ASSERT_EQUALS(dets.size(), 9);
   }
 
   void test_getDetectorsInBank_throwsIfBankNotFound() {
-    Instrument_const_sptr inst =
-        ComponentCreationHelper::createTestInstrumentRectangular(5, 6);
+    Instrument_const_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular(5, 6);
     std::vector<IDetector_const_sptr> dets;
-    TS_ASSERT_THROWS(inst->getDetectorsInBank(dets, "bank_in_the_dark_side"),
-                     const Exception::NotFoundError &)
+    TS_ASSERT_THROWS(inst->getDetectorsInBank(dets, "bank_in_the_dark_side"), const Exception::NotFoundError &)
   }
 
   void test_getDetectors() {
     // 5 banks with 6x6 pixels in them.
-    Instrument_sptr inst =
-        ComponentCreationHelper::createTestInstrumentRectangular(5, 6);
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular(5, 6);
     detid2det_map dets;
     inst->getDetectors(dets);
     TS_ASSERT_EQUALS(dets.size(), 36 * 5);
@@ -356,8 +337,7 @@ public:
 
   void test_getDetectorIDs() {
     // 5 banks with 6x6 pixels in them.
-    Instrument_sptr inst =
-        ComponentCreationHelper::createTestInstrumentRectangular(5, 6);
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular(5, 6);
     std::vector<detid_t> dets;
     dets = inst->getDetectorIDs();
     TS_ASSERT_EQUALS(dets.size(), 36 * 5);
@@ -367,8 +347,7 @@ public:
   }
 
   void test_getValidFromDate() {
-    Instrument_sptr inst =
-        ComponentCreationHelper::createTestInstrumentRectangular(5, 6);
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular(5, 6);
     Types::Core::DateAndTime validFrom("1900-01-31T23:59:59");
     Types::Core::DateAndTime validTo("2100-01-31 23:59:59");
     inst->setValidFromDate(validFrom);
@@ -404,31 +383,24 @@ public:
   }
 
   void testContainsRectDetectors() {
-    Instrument_sptr instrFull =
-        ComponentCreationHelper::createTestInstrumentRectangular(5, 3);
+    Instrument_sptr instrFull = ComponentCreationHelper::createTestInstrumentRectangular(5, 3);
 
-    TS_ASSERT_EQUALS(instrFull->containsRectDetectors(),
-                     Instrument::ContainsState::Full);
+    TS_ASSERT_EQUALS(instrFull->containsRectDetectors(), Instrument::ContainsState::Full);
 
-    Instrument_sptr instrPartial =
-        ComponentCreationHelper::createTestInstrumentRectangular(5, 3);
+    Instrument_sptr instrPartial = ComponentCreationHelper::createTestInstrumentRectangular(5, 3);
 
     // Add some non-rectangular component
     instrPartial->add(new Component("Component"));
 
-    TS_ASSERT_EQUALS(instrPartial->containsRectDetectors(),
-                     Instrument::ContainsState::Partial);
+    TS_ASSERT_EQUALS(instrPartial->containsRectDetectors(), Instrument::ContainsState::Partial);
 
-    Instrument_sptr instrNone =
-        ComponentCreationHelper::createTestInstrumentCylindrical(5);
+    Instrument_sptr instrNone = ComponentCreationHelper::createTestInstrumentCylindrical(5);
 
-    TS_ASSERT_EQUALS(instrNone->containsRectDetectors(),
-                     Instrument::ContainsState::None);
+    TS_ASSERT_EQUALS(instrNone->containsRectDetectors(), Instrument::ContainsState::None);
   }
 
   void testContainsRectDetectorsRecursive() {
-    Instrument_sptr instrRect =
-        ComponentCreationHelper::createTestInstrumentRectangular(5, 3);
+    Instrument_sptr instrRect = ComponentCreationHelper::createTestInstrumentRectangular(5, 3);
 
     CompAssembly *newAssembly1 = new CompAssembly("Assembly 1");
     CompAssembly *newAssembly2 = new CompAssembly("Assembly 2");
@@ -443,13 +415,11 @@ public:
 
     instrRect->add(newAssembly1);
 
-    TS_ASSERT_EQUALS(instrRect->containsRectDetectors(),
-                     Instrument::ContainsState::Full);
+    TS_ASSERT_EQUALS(instrRect->containsRectDetectors(), Instrument::ContainsState::Full);
 
     instrRect->add(new Component("Component"));
 
-    TS_ASSERT_EQUALS(instrRect->containsRectDetectors(),
-                     Instrument::ContainsState::Partial);
+    TS_ASSERT_EQUALS(instrRect->containsRectDetectors(), Instrument::ContainsState::Partial);
   }
 
   void test_detectorIndex() {
@@ -461,8 +431,7 @@ public:
   }
 
   void test_makeLegacyParameterMap() {
-    const auto &baseInstrument =
-        ComponentCreationHelper::createTestInstrumentCylindrical(3);
+    const auto &baseInstrument = ComponentCreationHelper::createTestInstrumentCylindrical(3);
     const auto bank1 = baseInstrument->getComponentByName("bank1");
     const auto bank2 = baseInstrument->getComponentByName("bank2");
     const auto bank3 = baseInstrument->getComponentByName("bank3");
@@ -484,22 +453,13 @@ public:
     auto &compInfo = pmap->mutableComponentInfo();
 
     // bank 1
-    TS_ASSERT(toVector3d(detInfo.position(0))
-                  .isApprox(toVector3d(bankOffset + V3D{-0.008, -0.0002, 0.0}),
-                            1e-12));
-    TS_ASSERT(toVector3d(detInfo.position(2))
-                  .isApprox(toVector3d(bankOffset + V3D{0.008, -0.0002, 0.0}),
-                            1e-12));
+    TS_ASSERT(toVector3d(detInfo.position(0)).isApprox(toVector3d(bankOffset + V3D{-0.008, -0.0002, 0.0}), 1e-12));
+    TS_ASSERT(toVector3d(detInfo.position(2)).isApprox(toVector3d(bankOffset + V3D{0.008, -0.0002, 0.0}), 1e-12));
     // bank 2
-    TS_ASSERT(toVector3d(detInfo.position(9))
-                  .isApprox(toVector3d(bankEpsilon + V3D{-0.008, -0.0002, 0.0}),
-                            1e-12));
+    TS_ASSERT(toVector3d(detInfo.position(9)).isApprox(toVector3d(bankEpsilon + V3D{-0.008, -0.0002, 0.0}), 1e-12));
     // bank 3
-    TS_ASSERT(toVector3d(detInfo.position(18))
-                  .isApprox(Eigen::Vector3d(0.0002, -0.008, 15.0), 1e-12));
-    TS_ASSERT_EQUALS(
-        compInfo.scaleFactor(compInfo.indexOf(bank3->getComponentID())),
-        bankScale);
+    TS_ASSERT(toVector3d(detInfo.position(18)).isApprox(Eigen::Vector3d(0.0002, -0.008, 15.0), 1e-12));
+    TS_ASSERT_EQUALS(compInfo.scaleFactor(compInfo.indexOf(bank3->getComponentID())), bankScale);
 
     const V3D detOffset{0.2, 0.3, 0.4};
     const V3D detEpsilon{5e-10, 5e-10, 5e-10};
@@ -516,8 +476,7 @@ public:
     detInfo.setRotation(19, detRotEps * detInfo.rotation(19));
     // Set a new scale factor
     const V3D newScaleFactor{2, 2, 2};
-    compInfo.setScaleFactor(compInfo.indexOf(bank3->getComponentID()),
-                            newScaleFactor);
+    compInfo.setScaleFactor(compInfo.indexOf(bank3->getComponentID()), newScaleFactor);
 
     // All position information should be purged
     TS_ASSERT_EQUALS(pmap->size(), 0);
@@ -528,29 +487,22 @@ public:
     TS_ASSERT(!legacyMap->hasDetectorInfo(baseInstrument.get()));
     Instrument legacyInstrument(baseInstrument, legacyMap);
 
-    TS_ASSERT_EQUALS(legacyInstrument.getDetector(1)->getPos(),
-                     bankOffset + V3D(-0.008, -0.0002, 0.0) + detOffset);
+    TS_ASSERT_EQUALS(legacyInstrument.getDetector(1)->getPos(), bankOffset + V3D(-0.008, -0.0002, 0.0) + detOffset);
     // Was shifted by something less than epsilon so this is the default
     // position.
-    TS_ASSERT_EQUALS(legacyInstrument.getDetector(3)->getPos(),
-                     bankOffset + V3D(0.008, -0.0002, 0.0));
+    TS_ASSERT_EQUALS(legacyInstrument.getDetector(3)->getPos(), bankOffset + V3D(0.008, -0.0002, 0.0));
     // Epsilon in parent is preserved, but not epsilon relative to parent.
-    TS_ASSERT_EQUALS(legacyInstrument.getDetector(10)->getPos(),
-                     bankEpsilon + V3D(-0.008, -0.0002, 0.0));
-    TS_ASSERT_EQUALS(legacyInstrument.getDetector(19)->getPos(),
-                     V3D(0.0002, -0.008, 15.0));
+    TS_ASSERT_EQUALS(legacyInstrument.getDetector(10)->getPos(), bankEpsilon + V3D(-0.008, -0.0002, 0.0));
+    TS_ASSERT_EQUALS(legacyInstrument.getDetector(19)->getPos(), V3D(0.0002, -0.008, 15.0));
     TS_ASSERT(toQuaterniond(legacyInstrument.getDetector(19)->getRotation())
                   .isApprox(toQuaterniond(detRot * bankRot), 1e-10));
     // Check the scale factor
-    TS_ASSERT(
-        toVector3d(
-            legacyInstrument.getComponentByName("bank3")->getScaleFactor())
-            .isApprox(toVector3d(newScaleFactor), 1e-10));
+    TS_ASSERT(toVector3d(legacyInstrument.getComponentByName("bank3")->getScaleFactor())
+                  .isApprox(toVector3d(newScaleFactor), 1e-10));
   }
 
   void test_makeLegacyParameterMap_scaled_RectangularDetector() {
-    const auto &baseInstrument =
-        ComponentCreationHelper::createTestInstrumentRectangular(1, 2);
+    const auto &baseInstrument = ComponentCreationHelper::createTestInstrumentRectangular(1, 2);
     const auto bank1 = baseInstrument->getComponentByName("bank1");
     auto pmap = std::make_shared<ParameterMap>();
     double scalex = 1.7;
@@ -565,16 +517,10 @@ public:
 
     // bank 1
     double pitch = 0.008;
-    TS_ASSERT(toVector3d(detInfo.position(0))
-                  .isApprox(toVector3d(V3D{0.0, 0.0, 5.0}), 1e-12));
-    TS_ASSERT(toVector3d(detInfo.position(1))
-                  .isApprox(toVector3d(V3D{0.0, scaley * pitch, 5.0}), 1e-12));
-    TS_ASSERT(toVector3d(detInfo.position(2))
-                  .isApprox(toVector3d(V3D{scalex * pitch, 0.0, 5.0}), 1e-12));
-    TS_ASSERT(
-        toVector3d(detInfo.position(3))
-            .isApprox(toVector3d(V3D{scalex * pitch, scaley * pitch, 5.0}),
-                      1e-12));
+    TS_ASSERT(toVector3d(detInfo.position(0)).isApprox(toVector3d(V3D{0.0, 0.0, 5.0}), 1e-12));
+    TS_ASSERT(toVector3d(detInfo.position(1)).isApprox(toVector3d(V3D{0.0, scaley * pitch, 5.0}), 1e-12));
+    TS_ASSERT(toVector3d(detInfo.position(2)).isApprox(toVector3d(V3D{scalex * pitch, 0.0, 5.0}), 1e-12));
+    TS_ASSERT(toVector3d(detInfo.position(3)).isApprox(toVector3d(V3D{scalex * pitch, scaley * pitch, 5.0}), 1e-12));
 
     const V3D detOffset{0.2, 0.3, 0.4};
     const V3D detEpsilon{5e-10, 5e-10, 5e-10};
@@ -589,22 +535,17 @@ public:
     // GridDetectorPixel (parameters ignored by
     // GridDetectorPixel::getRelativePos), so we cannot support this.
     detInfo.setPosition(3, detInfo.position(3) + detOffset);
-    TS_ASSERT_THROWS(instr->makeLegacyParameterMap(),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(instr->makeLegacyParameterMap(), const std::runtime_error &);
 
     // 2 bank parameters + 0 det parameters
     TS_ASSERT_EQUALS(legacyMap->size(), 2);
     TS_ASSERT(!legacyMap->hasDetectorInfo(baseInstrument.get()));
     Instrument legacyInstrument(baseInstrument, legacyMap);
 
-    TS_ASSERT_EQUALS(legacyInstrument.getDetector(4)->getPos(),
-                     V3D(0.0, 0.0, 5.0));
-    TS_ASSERT_EQUALS(legacyInstrument.getDetector(5)->getPos(),
-                     V3D(0.0, scaley * pitch, 5.0));
-    TS_ASSERT_EQUALS(legacyInstrument.getDetector(6)->getPos(),
-                     V3D(scalex * pitch, 0.0, 5.0));
-    TS_ASSERT_EQUALS(legacyInstrument.getDetector(7)->getPos(),
-                     V3D(scalex * pitch, scaley * pitch, 5.0));
+    TS_ASSERT_EQUALS(legacyInstrument.getDetector(4)->getPos(), V3D(0.0, 0.0, 5.0));
+    TS_ASSERT_EQUALS(legacyInstrument.getDetector(5)->getPos(), V3D(0.0, scaley * pitch, 5.0));
+    TS_ASSERT_EQUALS(legacyInstrument.getDetector(6)->getPos(), V3D(scalex * pitch, 0.0, 5.0));
+    TS_ASSERT_EQUALS(legacyInstrument.getDetector(7)->getPos(), V3D(scalex * pitch, scaley * pitch, 5.0));
   }
 
   void test_empty_Instrument() {
@@ -623,35 +564,30 @@ public:
   void test_duplicate_detectors_throw_via_mark_as_detector() {
 
     // Create a very basic instrument to visit
-    auto instrument = ComponentCreationHelper::createMinimalInstrument(
-        V3D(0, 0, 0) /*source pos*/, V3D(10, 0, 0) /*sample pos*/
-        ,
-        V3D(11, 0, 0) /*detector position*/);
+    auto instrument =
+        ComponentCreationHelper::createMinimalInstrument(V3D(0, 0, 0) /*source pos*/, V3D(10, 0, 0) /*sample pos*/
+                                                         ,
+                                                         V3D(11, 0, 0) /*detector position*/);
 
     // Create an add a duplicate detector
-    Detector *det =
-        new Detector("invalid_detector", 1 /*DUPLICATE detector id*/, nullptr);
+    Detector *det = new Detector("invalid_detector", 1 /*DUPLICATE detector id*/, nullptr);
     instrument->add(det);
-    TSM_ASSERT_THROWS("Duplicate ID, should throw",
-                      instrument->markAsDetector(det), std::runtime_error &);
+    TSM_ASSERT_THROWS("Duplicate ID, should throw", instrument->markAsDetector(det), std::runtime_error &);
   }
 
   void test_duplicate_detectors_throw_via_mark_as_detector_finalize() {
 
     // Create a very basic instrument to visit
-    auto instrument = ComponentCreationHelper::createMinimalInstrument(
-        V3D(0, 0, 0) /*source pos*/, V3D(10, 0, 0) /*sample pos*/
-        ,
-        V3D(11, 0, 0) /*detector position*/);
+    auto instrument =
+        ComponentCreationHelper::createMinimalInstrument(V3D(0, 0, 0) /*source pos*/, V3D(10, 0, 0) /*sample pos*/
+                                                         ,
+                                                         V3D(11, 0, 0) /*detector position*/);
 
     // Create an add a duplicate detector
-    Detector *det =
-        new Detector("invalid_detector", 1 /*DUPLICATE detector id*/, nullptr);
+    Detector *det = new Detector("invalid_detector", 1 /*DUPLICATE detector id*/, nullptr);
     instrument->add(det);
     instrument->markAsDetectorIncomplete(det);
-    TSM_ASSERT_THROWS("Duplicate ID, should throw",
-                      instrument->markAsDetectorFinalize(),
-                      std::runtime_error &);
+    TSM_ASSERT_THROWS("Duplicate ID, should throw", instrument->markAsDetectorFinalize(), std::runtime_error &);
   }
 
 private:
@@ -674,9 +610,7 @@ class InstrumentTestPerformance : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static InstrumentTestPerformance *createSuite() {
-    return new InstrumentTestPerformance();
-  }
+  static InstrumentTestPerformance *createSuite() { return new InstrumentTestPerformance(); }
   static void destroySuite(InstrumentTestPerformance *suite) { delete suite; }
 
   InstrumentTestPerformance() {
@@ -685,12 +619,11 @@ public:
     Mantid::Kernel::V3D trolley1Pos(0, 0, 3);
     Mantid::Kernel::V3D trolley2Pos(0, 0, 6);
 
-    m_instrumentNotParameterized = ComponentCreationHelper::sansInstrument(
-        sourcePos, samplePos, trolley1Pos, trolley2Pos);
+    m_instrumentNotParameterized =
+        ComponentCreationHelper::sansInstrument(sourcePos, samplePos, trolley1Pos, trolley2Pos);
 
     auto map = std::make_shared<ParameterMap>();
-    m_instrumentParameterized =
-        std::make_shared<Instrument>(m_instrumentNotParameterized, map);
+    m_instrumentParameterized = std::make_shared<Instrument>(m_instrumentNotParameterized, map);
   }
 
   void test_access_pos_non_parameterized() {

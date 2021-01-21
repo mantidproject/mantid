@@ -44,8 +44,7 @@ struct SelectedAlgorithm {
   /// implicit conversion to QString
   operator QString() { return name; }
   /// constructor
-  SelectedAlgorithm(const QString &nameIn, const int versionIn)
-      : name(nameIn), version(versionIn){};
+  SelectedAlgorithm(const QString &nameIn, const int versionIn) : name(nameIn), version(versionIn){};
 };
 
 //============================================================================
@@ -57,8 +56,7 @@ struct SelectedAlgorithm {
   */
 class EXPORT_OPT_MANTIDQT_COMMON AlgorithmSelectorWidget : public QWidget {
   Q_OBJECT
-  Q_PROPERTY(
-      bool showExecuteButton READ showExecuteButton WRITE showExecuteButton)
+  Q_PROPERTY(bool showExecuteButton READ showExecuteButton WRITE showExecuteButton)
 
 public:
   AlgorithmSelectorWidget(QWidget *parent);
@@ -86,12 +84,9 @@ protected:
 
 private:
   /// Callback for AlgorithmFactory update notifications
-  void handleAlgorithmFactoryUpdate(
-      Mantid::API::AlgorithmFactoryUpdateNotification_ptr /*unused*/);
+  void handleAlgorithmFactoryUpdate(Mantid::API::AlgorithmFactoryUpdateNotification_ptr /*unused*/);
   /// Observes algorithm factory update notifications
-  Poco::NObserver<AlgorithmSelectorWidget,
-                  Mantid::API::AlgorithmFactoryUpdateNotification>
-      m_updateObserver;
+  Poco::NObserver<AlgorithmSelectorWidget, Mantid::API::AlgorithmFactoryUpdateNotification> m_updateObserver;
   // Flag to indicate that we are updating
   bool m_updateInProgress;
 };

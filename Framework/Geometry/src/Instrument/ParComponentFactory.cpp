@@ -27,9 +27,7 @@ namespace Geometry {
  * @param map A pointer to the ParameterMap
  * @returns A pointer to a parameterized component
  */
-std::shared_ptr<IDetector>
-ParComponentFactory::createDetector(const IDetector *base,
-                                    const ParameterMap *map) {
+std::shared_ptr<IDetector> ParComponentFactory::createDetector(const IDetector *base, const ParameterMap *map) {
   // Clone may be a Detector or GridDetectorPixel instance (or nullptr)
   auto clone = base->cloneParameterized(map);
   return std::shared_ptr<IDetector>(clone);
@@ -43,9 +41,8 @@ ParComponentFactory::createDetector(const IDetector *base,
  * @param map A pointer to the ParameterMap
  * @returns A pointer to a parameterized component
  */
-std::shared_ptr<Instrument>
-ParComponentFactory::createInstrument(std::shared_ptr<const Instrument> base,
-                                      std::shared_ptr<ParameterMap> map) {
+std::shared_ptr<Instrument> ParComponentFactory::createInstrument(std::shared_ptr<const Instrument> base,
+                                                                  std::shared_ptr<ParameterMap> map) {
   return std::make_shared<Instrument>(base, map);
 }
 
@@ -57,25 +54,20 @@ ParComponentFactory::createInstrument(std::shared_ptr<const Instrument> base,
  * @param map A pointer to the ParameterMap
  * @returns A pointer to a parameterized component
  */
-IComponent_sptr
-ParComponentFactory::create(const std::shared_ptr<const IComponent> &base,
-                            const ParameterMap *map) {
-  std::shared_ptr<const IDetector> det_sptr =
-      std::dynamic_pointer_cast<const IDetector>(base);
+IComponent_sptr ParComponentFactory::create(const std::shared_ptr<const IComponent> &base, const ParameterMap *map) {
+  std::shared_ptr<const IDetector> det_sptr = std::dynamic_pointer_cast<const IDetector>(base);
   if (det_sptr) {
     return createDetector(det_sptr.get(), map);
   }
 
-  std::shared_ptr<const Instrument> inst_sptr =
-      std::dynamic_pointer_cast<const Instrument>(base);
+  std::shared_ptr<const Instrument> inst_sptr = std::dynamic_pointer_cast<const Instrument>(base);
   // @todo One of the review tasks is to take a look at the parameterized mess
   // and
   // short out this problem with different classes carrying different types of
   // pointers around
   if (inst_sptr) {
     return createInstrument(std::const_pointer_cast<Instrument>(inst_sptr),
-                            std::shared_ptr<ParameterMap>(
-                                const_cast<ParameterMap *>(map), NoDeleting()));
+                            std::shared_ptr<ParameterMap>(const_cast<ParameterMap *>(map), NoDeleting()));
   }
 
   // Everything gets created on the fly. Note that the order matters here

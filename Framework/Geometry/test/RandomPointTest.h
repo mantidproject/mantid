@@ -38,8 +38,7 @@ public:
     constexpr double xLength{0.3};
     constexpr double yLength{0.5};
     constexpr double zLength{0.2};
-    auto cuboid =
-        ComponentCreationHelper::createCuboid(xLength, yLength, zLength);
+    auto cuboid = ComponentCreationHelper::createCuboid(xLength, yLength, zLength);
     const auto point = inCuboid(cuboid->shapeInfo(), rng);
     constexpr double tolerance{1e-10};
     TS_ASSERT_DELTA(point.X(), xLength - randX * 2. * xLength, tolerance);
@@ -65,8 +64,7 @@ public:
         2.,
         -3.,
     };
-    auto cylinder = ComponentCreationHelper::createCappedCylinder(
-        radius, height, bottomCentre, axis, "cyl");
+    auto cylinder = ComponentCreationHelper::createCappedCylinder(radius, height, bottomCentre, axis, "cyl");
     V3D point = inCylinder(cylinder->shapeInfo(), rng);
     // Global->cylinder local coordinates
     point -= bottomCentre;
@@ -98,8 +96,8 @@ public:
         2.,
         -3.,
     };
-    auto hollowCylinder = ComponentCreationHelper::createHollowCylinder(
-        innerRadius, outerRadius, height, bottomCentre, axis, "hol-cyl");
+    auto hollowCylinder =
+        ComponentCreationHelper::createHollowCylinder(innerRadius, outerRadius, height, bottomCentre, axis, "hol-cyl");
     V3D point = inHollowCylinder(hollowCylinder->shapeInfo(), rng);
     // Global->cylinder local coordinates
     point -= bottomCentre;
@@ -132,12 +130,8 @@ public:
     const double azimuthalAngle{2. * M_PI * randT};
     const double polarAngle{std::acos(2. * randF - 1.)};
     const double r{radius * randR};
-    TS_ASSERT_DELTA(point.X(),
-                    r * std::cos(azimuthalAngle) * std::sin(polarAngle),
-                    tolerance);
-    TS_ASSERT_DELTA(point.Y(),
-                    r * std::sin(azimuthalAngle) * std::sin(polarAngle),
-                    tolerance);
+    TS_ASSERT_DELTA(point.X(), r * std::cos(azimuthalAngle) * std::sin(polarAngle), tolerance);
+    TS_ASSERT_DELTA(point.Y(), r * std::sin(azimuthalAngle) * std::sin(polarAngle), tolerance);
     TS_ASSERT_DELTA(point.Z(), r * std::cos(polarAngle), tolerance);
   }
 
@@ -186,12 +180,10 @@ public:
     constexpr double xLength{1.};
     constexpr double yLength{1.};
     constexpr double zLength{1.};
-    auto cuboid =
-        ComponentCreationHelper::createCuboid(xLength, yLength, zLength);
+    auto cuboid = ComponentCreationHelper::createCuboid(xLength, yLength, zLength);
     const BoundingBox box(0.1, 0.1, 0.1, -0.1, -0.1, -0.1);
     constexpr size_t maxAttempts{1};
-    const auto point =
-        bounded<inCuboid>(cuboid->shapeInfo(), rng, box, maxAttempts);
+    const auto point = bounded<inCuboid>(cuboid->shapeInfo(), rng, box, maxAttempts);
     TS_ASSERT(point)
     constexpr double tolerance{1e-10};
     TS_ASSERT_DELTA(point->X(), xLength - randX * 2. * xLength, tolerance);
@@ -212,12 +204,10 @@ public:
     constexpr double xLength{1.};
     constexpr double yLength{1.};
     constexpr double zLength{1.};
-    auto cuboid =
-        ComponentCreationHelper::createCuboid(xLength, yLength, zLength);
+    auto cuboid = ComponentCreationHelper::createCuboid(xLength, yLength, zLength);
     const BoundingBox box(0.1, 0.1, 0.1, -0.1, -0.1, -0.1);
     constexpr size_t maxAttempts{1};
-    const auto point =
-        bounded<inCuboid>(cuboid->shapeInfo(), rng, box, maxAttempts);
+    const auto point = bounded<inCuboid>(cuboid->shapeInfo(), rng, box, maxAttempts);
     TS_ASSERT(!point)
   }
 
@@ -266,12 +256,9 @@ public:
     const Mantid::Kernel::V3D basis2{1., 0., 0.};
     const Mantid::Kernel::V3D basis3{basis.cross_prod(basis2)};
 
-    auto localPoint =
-        localPointInCylinder(basis, alongAxis, polarAngle, radialLength);
+    auto localPoint = localPointInCylinder(basis, alongAxis, polarAngle, radialLength);
     const V3D localPointResult =
-        ((basis2 * std::cos(polarAngle) + basis3 * std::sin(polarAngle)) *
-         radialLength) +
-        alongAxis;
+        ((basis2 * std::cos(polarAngle) + basis3 * std::sin(polarAngle)) * radialLength) + alongAxis;
     TS_ASSERT_EQUALS(localPoint, localPointResult);
   }
 
@@ -298,12 +285,9 @@ public:
     }
     const Mantid::Kernel::V3D basis3{basis.cross_prod(basis2)};
 
-    auto localPoint =
-        localPointInCylinder(basis, alongAxis, polarAngle, radialLength);
+    auto localPoint = localPointInCylinder(basis, alongAxis, polarAngle, radialLength);
     const V3D localPointResult =
-        ((basis2 * std::cos(polarAngle) + basis3 * std::sin(polarAngle)) *
-         radialLength) +
-        alongAxis;
+        ((basis2 * std::cos(polarAngle) + basis3 * std::sin(polarAngle)) * radialLength) + alongAxis;
     TS_ASSERT_EQUALS(localPoint, localPointResult);
   }
 };

@@ -20,8 +20,7 @@ class RecoveryFailureView;
 class ProjectRecoveryPresenter {
 public:
   enum OpenView { RecoveryView, FailureView };
-  ProjectRecoveryPresenter(MantidQt::ProjectRecovery *projectRecovery,
-                           ApplicationWindow *parentWindow);
+  ProjectRecoveryPresenter(MantidQt::ProjectRecovery *projectRecovery, ApplicationWindow *parentWindow);
   ProjectRecoveryPresenter(const ProjectRecoveryPresenter &obj);
   ~ProjectRecoveryPresenter() = default;
   bool startRecoveryView();

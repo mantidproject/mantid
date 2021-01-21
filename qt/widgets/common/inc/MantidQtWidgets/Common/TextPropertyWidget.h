@@ -23,8 +23,8 @@ class DLLExport TextPropertyWidget : public PropertyWidget {
   Q_OBJECT
 
 public:
-  TextPropertyWidget(Mantid::Kernel::Property *prop, QWidget *parent = nullptr,
-                     QGridLayout *layout = nullptr, int row = -1);
+  TextPropertyWidget(Mantid::Kernel::Property *prop, QWidget *parent = nullptr, QGridLayout *layout = nullptr,
+                     int row = -1);
   ~TextPropertyWidget() override;
   QString getValue() const override;
   void setValueImpl(const QString &value) override;

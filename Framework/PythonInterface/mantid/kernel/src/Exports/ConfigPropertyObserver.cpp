@@ -20,8 +20,7 @@ public:
   ConfigPropertyObserverWrapper(PyObject *self, const std::string &propertyName)
       : ConfigPropertyObserver(propertyName), m_self(self) {}
 
-  void onPropertyValueChanged(const std::string &newValue,
-                              const std::string &prevValue) override {
+  void onPropertyValueChanged(const std::string &newValue, const std::string &prevValue) override {
     callMethod<void>(m_self, "onPropertyValueChanged", newValue, prevValue);
   }
 
@@ -31,16 +30,12 @@ private:
 
 namespace boost {
 namespace python {
-template <>
-struct has_back_reference<ConfigPropertyObserverWrapper> : mpl::true_ {};
+template <> struct has_back_reference<ConfigPropertyObserverWrapper> : mpl::true_ {};
 } // namespace python
 } // namespace boost
 
 void export_ConfigPropertyObserver() {
-  class_<ConfigPropertyObserverWrapper, boost::noncopyable>(
-      "ConfigPropertyObserver", init<std::string>())
+  class_<ConfigPropertyObserverWrapper, boost::noncopyable>("ConfigPropertyObserver", init<std::string>())
       .def(init<std::string>())
-      .def(
-          "onPropertyValueChanged",
-          pure_virtual(&ConfigPropertyObserverWrapper::onPropertyValueChanged));
+      .def("onPropertyValueChanged", pure_virtual(&ConfigPropertyObserverWrapper::onPropertyValueChanged));
 }

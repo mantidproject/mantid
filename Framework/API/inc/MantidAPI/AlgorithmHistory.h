@@ -46,21 +46,17 @@ public:
   /// The date-and-time will be stored as the Mantid::Types::Core::DateAndTime
   /// type
   explicit AlgorithmHistory(const Algorithm *const alg,
-                            const Types::Core::DateAndTime &start =
-                                Types::Core::DateAndTime::getCurrentTime(),
-                            const double &duration = -1.0,
-                            std::size_t uexeccount = 0);
+                            const Types::Core::DateAndTime &start = Types::Core::DateAndTime::getCurrentTime(),
+                            const double &duration = -1.0, std::size_t uexeccount = 0);
   ~AlgorithmHistory();
   AlgorithmHistory &operator=(const AlgorithmHistory &);
   AlgorithmHistory(const AlgorithmHistory &);
   AlgorithmHistory(const std::string &name, int vers, std::string uuid,
-                   const Types::Core::DateAndTime &start =
-                       Types::Core::DateAndTime::getCurrentTime(),
+                   const Types::Core::DateAndTime &start = Types::Core::DateAndTime::getCurrentTime(),
                    const double &duration = -1.0, std::size_t uexeccount = 0);
-  void addExecutionInfo(const Types::Core::DateAndTime &start,
-                        const double &duration);
-  void addProperty(const std::string &name, const std::string &value,
-                   bool isdefault, const unsigned int &direction = 99);
+  void addExecutionInfo(const Types::Core::DateAndTime &start, const double &duration);
+  void addProperty(const std::string &name, const std::string &value, bool isdefault,
+                   const unsigned int &direction = 99);
 
   /// add a child algorithm history record to this history object
   void addChildHistory(const AlgorithmHistory_sptr &childHist);
@@ -72,23 +68,17 @@ public:
   /// get execution duration
   double executionDuration() const { return m_executionDuration; }
   /// get execution date
-  Mantid::Types::Core::DateAndTime executionDate() const {
-    return m_executionDate;
-  }
+  Mantid::Types::Core::DateAndTime executionDate() const { return m_executionDate; }
   /// get the execution count
   const std::size_t &execCount() const { return m_execCount; }
   /// get the uuid
   const std::string &uuid() const { return m_uuid; }
   /// get parameter list of algorithm in history const
-  const Mantid::Kernel::PropertyHistories &getProperties() const {
-    return m_properties;
-  }
+  const Mantid::Kernel::PropertyHistories &getProperties() const { return m_properties; }
   /// get the string representation of a specified property
   const std::string &getPropertyValue(const std::string &name) const;
   /// get the child histories of this history object
-  const AlgorithmHistories &getChildHistories() const {
-    return m_childHistories;
-  }
+  const AlgorithmHistories &getChildHistories() const { return m_childHistories; }
   /// Retrieve a child algorithm history by index
   AlgorithmHistory_sptr getChildAlgorithmHistory(const size_t index) const;
   /// Add operator[] access
@@ -96,12 +86,9 @@ public:
   /// Retrieve the number of child algorithms
   size_t childHistorySize() const;
   /// print contents of object
-  void printSelf(std::ostream &, const int indent = 0,
-                 const size_t maxPropertyLength = 0) const;
+  void printSelf(std::ostream &, const int indent = 0, const size_t maxPropertyLength = 0) const;
   /// Less than operator
-  inline bool operator<(const AlgorithmHistory &other) const {
-    return execCount() < other.execCount();
-  }
+  inline bool operator<(const AlgorithmHistory &other) const { return execCount() < other.execCount(); }
   /// Equality operator
   inline bool operator==(const AlgorithmHistory &other) const {
     return (execCount() == other.execCount() && name() == other.name());
@@ -115,9 +102,8 @@ public:
   // Set the execution count
   void setExecCount(std::size_t execCount) { m_execCount = execCount; }
   /// Set data on history after it is created
-  void fillAlgorithmHistory(const Algorithm *const alg,
-                            const Types::Core::DateAndTime &start,
-                            const double &duration, std::size_t uexeccount);
+  void fillAlgorithmHistory(const Algorithm *const alg, const Types::Core::DateAndTime &start, const double &duration,
+                            std::size_t uexeccount);
   // Allow Algorithm::execute to change the exec count & duration after the
   // algorithm was executed
   friend class Algorithm;
@@ -145,8 +131,7 @@ private:
   std::string m_uuid;
 };
 
-MANTID_API_DLL std::ostream &operator<<(std::ostream &,
-                                        const AlgorithmHistory &);
+MANTID_API_DLL std::ostream &operator<<(std::ostream &, const AlgorithmHistory &);
 
 } // namespace API
 } // namespace Mantid

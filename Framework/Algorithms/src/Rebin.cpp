@@ -47,10 +47,8 @@ using HistogramData::Exception::InvalidBinEdgesError;
  * @param logger A reference to a logger
  * @returns A new vector containing the rebin parameters
  */
-std::vector<double>
-Rebin::rebinParamsFromInput(const std::vector<double> &inParams,
-                            const API::MatrixWorkspace &inputWS,
-                            Kernel::Logger &logger) {
+std::vector<double> Rebin::rebinParamsFromInput(const std::vector<double> &inParams,
+                                                const API::MatrixWorkspace &inputWS, Kernel::Logger &logger) {
   std::vector<double> rbParams;
   // The validator only passes parameters with size 1, or 3xn.  No need to check
   // again here
@@ -62,16 +60,14 @@ Rebin::rebinParamsFromInput(const std::vector<double> &inParams,
     double xmax = 0.;
     inputWS.getXMinMax(xmin, xmax);
 
-    logger.information() << "Using the current min and max as default " << xmin
-                         << ", " << xmax << '\n';
+    logger.information() << "Using the current min and max as default " << xmin << ", " << xmax << '\n';
     rbParams.resize(3);
     rbParams[0] = xmin;
     rbParams[1] = inParams[0];
     rbParams[2] = xmax;
     if ((rbParams[1] < 0.) && (xmin < 0.) && (xmax > 0.)) {
       std::stringstream msg;
-      msg << "Cannot create logorithmic binning that changes sign (xmin="
-          << xmin << ", xmax=" << xmax << ")";
+      msg << "Cannot create logorithmic binning that changes sign (xmin=" << xmin << ", xmax=" << xmax << ")";
       throw std::runtime_error(msg.str());
     }
   }
@@ -86,39 +82,32 @@ Rebin::rebinParamsFromInput(const std::vector<double> &inParams,
  *
  */
 void Rebin::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                                        Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
                   "Workspace containing the input data");
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "The name to give the output workspace");
 
-  declareProperty(
-      std::make_unique<ArrayProperty<double>>(
-          "Params", std::make_shared<RebinParamsValidator>()),
-      "A comma separated list of first bin boundary, width, last bin boundary. "
-      "Optionally "
-      "this can be followed by a comma and more widths and last boundary "
-      "pairs. "
-      "Optionally this can also be a single number, which is the bin width. "
-      "In this case, the boundary of binning will be determined by minimum and "
-      "maximum TOF "
-      "values among all events, or previous binning boundary, in case of event "
-      "Workspace, or "
-      "non-event Workspace, respectively. Negative width values indicate "
-      "logarithmic binning. ");
+  declareProperty(std::make_unique<ArrayProperty<double>>("Params", std::make_shared<RebinParamsValidator>()),
+                  "A comma separated list of first bin boundary, width, last bin boundary. "
+                  "Optionally "
+                  "this can be followed by a comma and more widths and last boundary "
+                  "pairs. "
+                  "Optionally this can also be a single number, which is the bin width. "
+                  "In this case, the boundary of binning will be determined by minimum and "
+                  "maximum TOF "
+                  "values among all events, or previous binning boundary, in case of event "
+                  "Workspace, or "
+                  "non-event Workspace, respectively. Negative width values indicate "
+                  "logarithmic binning. ");
 
-  declareProperty(
-      "PreserveEvents", true,
-      "Keep the output workspace as an EventWorkspace, "
-      "if the input has events. If the input and output EventWorkspace "
-      "names are the same, only the X bins are set, which is very quick. If "
-      "false, "
-      "then the workspace gets converted to a Workspace2D histogram.");
+  declareProperty("PreserveEvents", true,
+                  "Keep the output workspace as an EventWorkspace, "
+                  "if the input has events. If the input and output EventWorkspace "
+                  "names are the same, only the X bins are set, which is very quick. If "
+                  "false, "
+                  "then the workspace gets converted to a Workspace2D histogram.");
 
-  declareProperty(
-      "FullBinsOnly", false,
-      "Omit the final bin if it's width is smaller than the step size");
+  declareProperty("FullBinsOnly", false, "Omit the final bin if it's width is smaller than the step size");
 
   declareProperty("IgnoreBinErrors", false,
                   "Ignore errors related to "
@@ -143,8 +132,7 @@ void Rebin::exec() {
   // Rebinning in-place
   bool inPlace = (inputWS == outputWS);
 
-  std::vector<double> rbParams =
-      rebinParamsFromInput(getProperty("Params"), *inputWS, g_log);
+  std::vector<double> rbParams = rebinParamsFromInput(getProperty("Params"), *inputWS, g_log);
 
   const bool dist = inputWS->isDistribution();
   const bool isHist = inputWS->isHistogramData();
@@ -156,12 +144,11 @@ void Rebin::exec() {
 
   HistogramData::BinEdges XValues_new(0);
   // create new output X axis
-  static_cast<void>(VectorHelper::createAxisFromRebinParams(
-      rbParams, XValues_new.mutableRawData(), true, fullBinsOnly));
+  static_cast<void>(
+      VectorHelper::createAxisFromRebinParams(rbParams, XValues_new.mutableRawData(), true, fullBinsOnly));
 
   // Now, determine if the input workspace is actually an EventWorkspace
-  EventWorkspace_const_sptr eventInputWS =
-      std::dynamic_pointer_cast<const EventWorkspace>(inputWS);
+  EventWorkspace_const_sptr eventInputWS = std::dynamic_pointer_cast<const EventWorkspace>(inputWS);
 
   if (eventInputWS != nullptr) {
     //------- EventWorkspace as input -------------------------------------
@@ -176,10 +163,8 @@ void Rebin::exec() {
       eventOutputWS->setAllX(XValues_new);
     } else {
       //--------- Different output, OR you're inplace but not preserving Events
-      g_log.information() << "Creating a Workspace2D from the EventWorkspace "
-                          << eventInputWS->getName() << ".\n";
-      outputWS = DataObjects::create<DataObjects::Workspace2D>(
-          *inputWS, histnumber, XValues_new);
+      g_log.information() << "Creating a Workspace2D from the EventWorkspace " << eventInputWS->getName() << ".\n";
+      outputWS = DataObjects::create<DataObjects::Workspace2D>(*inputWS, histnumber, XValues_new);
 
       // Initialize progress reporting.
       Progress prog(this, 0.0, 1.0, histnumber);
@@ -206,9 +191,7 @@ void Rebin::exec() {
 
       // Copy all the axes
       for (int i = 1; i < inputWS->axes(); i++) {
-        outputWS->replaceAxis(
-            i,
-            std::unique_ptr<Axis>(inputWS->getAxis(i)->clone(outputWS.get())));
+        outputWS->replaceAxis(i, std::unique_ptr<Axis>(inputWS->getAxis(i)->clone(outputWS.get())));
         outputWS->getAxis(i)->unit() = inputWS->getAxis(i)->unit();
       }
 
@@ -230,8 +213,7 @@ void Rebin::exec() {
 
     if (!isHist) {
       g_log.information() << "Rebin: Converting Data to Histogram.\n";
-      Mantid::API::Algorithm_sptr ChildAlg =
-          createChildAlgorithm("ConvertToHistogram");
+      Mantid::API::Algorithm_sptr ChildAlg = createChildAlgorithm("ConvertToHistogram");
       ChildAlg->initialize();
       ChildAlg->setProperty("InputWorkspace", inputWS);
       ChildAlg->execute();
@@ -240,13 +222,11 @@ void Rebin::exec() {
 
     // make output Workspace the same type is the input, but with new length of
     // signal array
-    outputWS = DataObjects::create<API::HistoWorkspace>(*inputWS, histnumber,
-                                                        XValues_new);
+    outputWS = DataObjects::create<API::HistoWorkspace>(*inputWS, histnumber, XValues_new);
 
     // Copy over the 'vertical' axis
     if (inputWS->axes() > 1)
-      outputWS->replaceAxis(
-          1, std::unique_ptr<Axis>(inputWS->getAxis(1)->clone(outputWS.get())));
+      outputWS->replaceAxis(1, std::unique_ptr<Axis>(inputWS->getAxis(1)->clone(outputWS.get())));
     bool ignoreBinErrors = getProperty("IgnoreBinErrors");
 
     Progress prog(this, 0.0, 1.0, histnumber);
@@ -255,8 +235,7 @@ void Rebin::exec() {
       PARALLEL_START_INTERUPT_REGION
 
       try {
-        outputWS->setHistogram(
-            hist, HistogramData::rebin(inputWS->histogram(hist), XValues_new));
+        outputWS->setHistogram(hist, HistogramData::rebin(inputWS->histogram(hist), XValues_new));
       } catch (InvalidBinEdgesError &) {
         if (ignoreBinErrors)
           outputWS->setBinEdges(hist, XValues_new);
@@ -273,8 +252,7 @@ void Rebin::exec() {
     // More efficient to have this in a separate loop because
     // MatrixWorkspace::maskBins blocks multi-threading
     for (int i = 0; i < histnumber; ++i) {
-      if (inputWS->hasMaskedBins(
-              i)) // Does the current spectrum have any masked bins?
+      if (inputWS->hasMaskedBins(i)) // Does the current spectrum have any masked bins?
       {
         this->propagateMasks(inputWS, outputWS, i);
       }
@@ -286,8 +264,7 @@ void Rebin::exec() {
 
     if (!isHist) {
       g_log.information() << "Rebin: Converting Data back to Data Points.\n";
-      Mantid::API::Algorithm_sptr ChildAlg =
-          createChildAlgorithm("ConvertToPointData");
+      Mantid::API::Algorithm_sptr ChildAlg = createChildAlgorithm("ConvertToPointData");
       ChildAlg->initialize();
       ChildAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", outputWS);
       ChildAlg->execute();
@@ -308,8 +285,7 @@ void Rebin::exec() {
  *  @param outputWS :: The output workspace
  *  @param hist ::    The index of the current histogram
  */
-void Rebin::propagateMasks(const API::MatrixWorkspace_const_sptr &inputWS,
-                           const API::MatrixWorkspace_sptr &outputWS,
+void Rebin::propagateMasks(const API::MatrixWorkspace_const_sptr &inputWS, const API::MatrixWorkspace_sptr &outputWS,
                            int hist) {
   // Not too happy with the efficiency of this way of doing it, but it's a lot
   // simpler to use the
@@ -339,8 +315,7 @@ void Rebin::propagateMasks(const API::MatrixWorkspace_const_sptr &inputWS,
 
   //// Create a zero vector for the errors because we don't care about them here
   auto errSize = weights.size();
-  Histogram oldHist(BinEdges(std::move(masked_bins)),
-                    Frequencies(std::move(weights)),
+  Histogram oldHist(BinEdges(std::move(masked_bins)), Frequencies(std::move(weights)),
                     FrequencyStandardDeviations(errSize, 0));
   // Use rebin function to redistribute the weights. Note that distribution flag
   // is set

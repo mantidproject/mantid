@@ -32,14 +32,11 @@ class LoadEmptyInstrumentTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static LoadEmptyInstrumentTest *createSuite() {
-    return new LoadEmptyInstrumentTest();
-  }
+  static LoadEmptyInstrumentTest *createSuite() { return new LoadEmptyInstrumentTest(); }
   static void destroySuite(LoadEmptyInstrumentTest *suite) { delete suite; }
 
   /// Helper that checks that each spectrum has one detector
-  void check_workspace_detectors(const MatrixWorkspace_sptr &output,
-                                 size_t numberDetectors) {
+  void check_workspace_detectors(const MatrixWorkspace_sptr &output, size_t numberDetectors) {
     TS_ASSERT_EQUALS(output->getNumberHistograms(), numberDetectors);
     for (size_t i = 0; i < output->getNumberHistograms(); i++) {
       TS_ASSERT_EQUALS(output->getSpectrum(i).getDetectorIDs().size(), 1);
@@ -47,10 +44,8 @@ public:
   }
 
   // Helper method to create the IDF File.
-  ScopedFile createIDFFileObject(const std::string &idf_filename,
-                                 const std::string &idf_file_contents) {
-    const std::string instrument_dir =
-        ConfigService::Instance().getInstrumentDirectory() + "/unit_testing/";
+  ScopedFile createIDFFileObject(const std::string &idf_filename, const std::string &idf_file_contents) {
+    const std::string instrument_dir = ConfigService::Instance().getInstrumentDirectory() + "/unit_testing/";
 
     return ScopedFile(idf_file_contents, idf_filename, instrument_dir);
   }
@@ -70,8 +65,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(result = loaderSLS.getPropertyValue("Filename"));
     TS_ASSERT_EQUALS(result, inputFile);
 
-    TS_ASSERT_THROWS_NOTHING(result =
-                                 loaderSLS.getPropertyValue("OutputWorkspace"));
+    TS_ASSERT_THROWS_NOTHING(result = loaderSLS.getPropertyValue("OutputWorkspace"));
     TS_ASSERT(!result.compare(wsName));
 
     loaderSLS.execute();
@@ -79,8 +73,7 @@ public:
     TS_ASSERT(loaderSLS.isExecuted());
 
     MatrixWorkspace_sptr output;
-    output =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
+    output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
 
     // Check the total number of elements in the map for SLS
     check_workspace_detectors(output, 683);
@@ -101,8 +94,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(result = loaderSLS.getPropertyValue("Filename"));
     TS_ASSERT_EQUALS(result, inputFile);
 
-    TS_ASSERT_THROWS_NOTHING(result =
-                                 loaderSLS.getPropertyValue("OutputWorkspace"));
+    TS_ASSERT_THROWS_NOTHING(result = loaderSLS.getPropertyValue("OutputWorkspace"));
     TS_ASSERT(!result.compare(wsName));
 
     TS_ASSERT_THROWS_NOTHING(loaderSLS.execute());
@@ -110,8 +102,7 @@ public:
     TS_ASSERT(loaderSLS.isExecuted());
 
     MatrixWorkspace_sptr output;
-    output =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
+    output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
 
     // Check the total number of elements in the map for SLS
     check_workspace_detectors(output, 2502);
@@ -131,8 +122,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(result = loaderMUSR.getPropertyValue("Filename"));
     TS_ASSERT_EQUALS(result, inputFile);
 
-    TS_ASSERT_THROWS_NOTHING(
-        result = loaderMUSR.getPropertyValue("OutputWorkspace"));
+    TS_ASSERT_THROWS_NOTHING(result = loaderMUSR.getPropertyValue("OutputWorkspace"));
     TS_ASSERT(!result.compare(wsName));
 
     TS_ASSERT_THROWS_NOTHING(loaderMUSR.execute());
@@ -140,8 +130,7 @@ public:
     TS_ASSERT(loaderMUSR.isExecuted());
 
     MatrixWorkspace_sptr output;
-    output =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
+    output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
 
     // Check the total number of elements in the map for SLS
     check_workspace_detectors(output, 64);
@@ -152,8 +141,7 @@ public:
     LoadEmptyInstrument loader;
     TS_ASSERT_THROWS_NOTHING(loader.initialize());
     TS_ASSERT(loader.isInitialized());
-    loader.setPropertyValue("Filename",
-                            "unit_testing/IDF_for_UNIT_TESTING2.xml");
+    loader.setPropertyValue("Filename", "unit_testing/IDF_for_UNIT_TESTING2.xml");
     inputFile = loader.getPropertyValue("Filename");
     wsName = "LoadEmptyInstrumentParamTest";
     loader.setPropertyValue("OutputWorkspace", wsName);
@@ -220,10 +208,8 @@ public:
     TS_ASSERT(fitParam2.getConstraint().compare("") == 0);
     TS_ASSERT(fitParam2.getLookUpTable().containData());
     TS_ASSERT(fitParam2.getLookUpTable().getMethod().compare("linear") == 0);
-    TS_ASSERT(fitParam2.getLookUpTable().getXUnit()->unitID().compare("TOF") ==
-              0);
-    TS_ASSERT(fitParam2.getLookUpTable().getYUnit()->unitID().compare(
-                  "dSpacing") == 0);
+    TS_ASSERT(fitParam2.getLookUpTable().getXUnit()->unitID().compare("TOF") == 0);
+    TS_ASSERT(fitParam2.getLookUpTable().getYUnit()->unitID().compare("dSpacing") == 0);
 
     param = paramMap.getRecursive(&det, "formula", "fitting");
     const FitParameter &fitParam3 = param->value<FitParameter>();
@@ -275,13 +261,10 @@ public:
 
     // test that can hold of "string" parameter in two ways
     std::shared_ptr<const Instrument> i = ws->getInstrument();
-    std::shared_ptr<const IComponent> ptrNickelHolder =
-        i->getComponentByName("nickel-holder");
-    std::string dummyString =
-        paramMap.getString(&(*ptrNickelHolder), "fjols-string");
+    std::shared_ptr<const IComponent> ptrNickelHolder = i->getComponentByName("nickel-holder");
+    std::string dummyString = paramMap.getString(&(*ptrNickelHolder), "fjols-string");
     TS_ASSERT(dummyString.compare("boevs") == 0);
-    std::vector<std::string> dummyStringVec =
-        paramMap.getString("nickel-holder", "fjols-string");
+    std::vector<std::string> dummyStringVec = paramMap.getString("nickel-holder", "fjols-string");
     TS_ASSERT(dummyStringVec[0].compare("boevs") == 0);
 
     // check if combined translation works
@@ -409,8 +392,7 @@ public:
     TS_ASSERT_DELTA(ptrDet1206.getPos().Z(), 1, 0.0001);
 
     // testing r-position, t-position and p-position parameters
-    std::shared_ptr<const IComponent> ptrRTP_Test =
-        i->getComponentByName("rtpTest1");
+    std::shared_ptr<const IComponent> ptrRTP_Test = i->getComponentByName("rtpTest1");
     TS_ASSERT_DELTA(ptrRTP_Test->getPos().X(), 0.0, 0.0001);
     TS_ASSERT_DELTA(ptrRTP_Test->getPos().Y(), 0.0, 0.0001);
     TS_ASSERT_DELTA(ptrRTP_Test->getPos().Z(), 20.0, 0.0001);
@@ -440,8 +422,7 @@ public:
     LoadEmptyInstrument loader;
     TS_ASSERT_THROWS_NOTHING(loader.initialize());
     TS_ASSERT(loader.isInitialized());
-    loader.setPropertyValue("Filename",
-                            "unit_testing/IDF_for_UNIT_TESTING4.xml");
+    loader.setPropertyValue("Filename", "unit_testing/IDF_for_UNIT_TESTING4.xml");
     inputFile = loader.getPropertyValue("Filename");
     wsName = "LoadEmptyInstrumentParamTest";
     loader.setPropertyValue("OutputWorkspace", wsName);
@@ -628,8 +609,7 @@ public:
     const auto &paramMap = ws->constInstrumentParameters();
 
     const auto &detectorInfo = ws->detectorInfo();
-    const auto &det = detectorInfo.detector(
-        detectorInfo.indexOf(1100)); // should be a detector from bank_bsk
+    const auto &det = detectorInfo.detector(detectorInfo.indexOf(1100)); // should be a detector from bank_bsk
     Parameter_sptr param = paramMap.getRecursive(&det, "S", "fitting");
     const FitParameter &fitParam1 = param->value<FitParameter>();
     TS_ASSERT_DELTA(fitParam1.getValue(1.0), 11.8159, 0.0001);
@@ -654,8 +634,8 @@ public:
     const auto &paramMap2 = ws->constInstrumentParameters();
 
     const auto &detectorInfoAfter = ws->detectorInfo();
-    const auto &detAfter = detectorInfoAfter.detector(
-        detectorInfoAfter.indexOf(1100)); // should be a detector from bank_bsk
+    const auto &detAfter =
+        detectorInfoAfter.detector(detectorInfoAfter.indexOf(1100)); // should be a detector from bank_bsk
     param = paramMap2.getRecursive(&detAfter, "S", "fitting");
     const FitParameter &fitParam2 = param->value<FitParameter>();
     TS_ASSERT_DELTA(fitParam2.getValue(1.0), 11.8159, 0.0001);
@@ -734,8 +714,7 @@ public:
       return;
 
     if (asEvent) {
-      EventWorkspace_sptr eventWS =
-          std::dynamic_pointer_cast<EventWorkspace>(ws);
+      EventWorkspace_sptr eventWS = std::dynamic_pointer_cast<EventWorkspace>(ws);
       TS_ASSERT(eventWS);
     }
 
@@ -759,30 +738,21 @@ public:
 
     // same tests as above but using getNumberParameter()
     TS_ASSERT_DELTA((det.getNumberParameter("tube_pressure"))[0], 10.0, 0.0001);
-    TS_ASSERT_DELTA((det.getNumberParameter("tube_thickness"))[0], 0.0008,
-                    0.0001);
-    TS_ASSERT_DELTA((det.getNumberParameter("tube_temperature"))[0], 290.0,
-                    0.0001);
+    TS_ASSERT_DELTA((det.getNumberParameter("tube_thickness"))[0], 0.0008, 0.0001);
+    TS_ASSERT_DELTA((det.getNumberParameter("tube_temperature"))[0], 290.0, 0.0001);
     const auto &det2 = spectrumInfo.detector(2);
-    TS_ASSERT_DELTA((det2.getNumberParameter("tube_pressure"))[0], 10.0,
-                    0.0001);
-    TS_ASSERT_DELTA((det2.getNumberParameter("tube_thickness"))[0], 0.0008,
-                    0.0001);
-    TS_ASSERT_DELTA((det2.getNumberParameter("tube_temperature"))[0], 290.0,
-                    0.0001);
+    TS_ASSERT_DELTA((det2.getNumberParameter("tube_pressure"))[0], 10.0, 0.0001);
+    TS_ASSERT_DELTA((det2.getNumberParameter("tube_thickness"))[0], 0.0008, 0.0001);
+    TS_ASSERT_DELTA((det2.getNumberParameter("tube_temperature"))[0], 290.0, 0.0001);
     const auto &det3 = spectrumInfo.detector(3);
-    TS_ASSERT_DELTA((det3.getNumberParameter("tube_pressure"))[0], 10.0,
-                    0.0001);
-    TS_ASSERT_DELTA((det3.getNumberParameter("tube_thickness"))[0], 0.0008,
-                    0.0001);
-    TS_ASSERT_DELTA((det3.getNumberParameter("tube_temperature"))[0], 290.0,
-                    0.0001);
+    TS_ASSERT_DELTA((det3.getNumberParameter("tube_pressure"))[0], 10.0, 0.0001);
+    TS_ASSERT_DELTA((det3.getNumberParameter("tube_thickness"))[0], 0.0008, 0.0001);
+    TS_ASSERT_DELTA((det3.getNumberParameter("tube_temperature"))[0], 290.0, 0.0001);
 
     // demonstrate recursive look-up: tube_pressure2 defined in 'dummy' but
     // accessed from 'pixel'
     const auto &det1 = spectrumInfo.detector(1);
-    TS_ASSERT_DELTA((det1.getNumberParameter("tube_pressure2"))[0], 35.0,
-                    0.0001);
+    TS_ASSERT_DELTA((det1.getNumberParameter("tube_pressure2"))[0], 35.0, 0.0001);
 
     // Alternative way of doing a recursive look-up
     param = paramMap.getRecursive(&det1, "tube_pressure2");
@@ -817,8 +787,7 @@ public:
     TS_ASSERT_EQUALS((det.getNumberParameter("number-of-x-pixels"))[0], 192);
 
     Instrument_const_sptr inst = ws->getInstrument();
-    TS_ASSERT_EQUALS((inst->getNumberParameter("number-of-x-pixels")).size(),
-                     1);
+    TS_ASSERT_EQUALS((inst->getNumberParameter("number-of-x-pixels")).size(), 1);
     TS_ASSERT_EQUALS((inst->getNumberParameter("number-of-x-pixels"))[0], 192);
 
     AnalysisDataService::Instance().remove(wsName);
@@ -849,19 +818,15 @@ public:
     for (int iy = 0; iy <= 191; iy++) {
       for (int ix = 0; ix <= 191; ix++) {
         size_t index = detectorInfo.indexOf(1000000 + iy * 1000 + ix);
-        TS_ASSERT_DELTA(detectorInfo.position(index).X(),
-                        startX + pixelLength * ix, 0.0000001);
-        TS_ASSERT_DELTA(detectorInfo.position(index).Y(),
-                        startY + pixelLength * iy, 0.0000001);
+        TS_ASSERT_DELTA(detectorInfo.position(index).X(), startX + pixelLength * ix, 0.0000001);
+        TS_ASSERT_DELTA(detectorInfo.position(index).Y(), startY + pixelLength * iy, 0.0000001);
         TS_ASSERT_DELTA(detectorInfo.position(index).Z(), 23.281, 0.0000001);
       }
 
       for (int ix = 0; ix <= 191; ix++) {
         size_t index = detectorInfo.indexOf(2000000 + iy * 1000 + ix);
-        TS_ASSERT_DELTA(detectorInfo.position(index).X(),
-                        startX + pixelLength * ix + 1.1, 0.0000001);
-        TS_ASSERT_DELTA(detectorInfo.position(index).Y(),
-                        startY + pixelLength * iy, 0.0000001);
+        TS_ASSERT_DELTA(detectorInfo.position(index).X(), startX + pixelLength * ix + 1.1, 0.0000001);
+        TS_ASSERT_DELTA(detectorInfo.position(index).Y(), startY + pixelLength * iy, 0.0000001);
         TS_ASSERT_DELTA(detectorInfo.position(index).Z(), 23.281, 0.0000001);
       }
     }
@@ -921,8 +886,7 @@ public:
 
     loaderEMU2.initialize();
     loaderEMU2.setRethrows(true);
-    loaderEMU2.setPropertyValue("Filename",
-                                "unit_testing/EMU_for_UNIT_TESTING.XML");
+    loaderEMU2.setPropertyValue("Filename", "unit_testing/EMU_for_UNIT_TESTING.XML");
     wsName = "LoadEmptyInstrumentParamEMU2Test";
     loaderEMU2.setPropertyValue("OutputWorkspace", wsName);
 
@@ -973,27 +937,26 @@ public:
     const std::string instrumentName = "Minimal_Definition";
     const std::string idfFilename = instrumentName + "_MissingDetectorIDs.xml";
 
-    const std::string idfFileContents =
-        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-        "<instrument name=\"" +
-        instrumentName +
-        "\" valid-from   =\"1900-01-31 23:59:59\" valid-to=\"2100-01-31 "
-        "23:59:59\" last-modified=\"2012-10-05 11:00:00\">"
-        "<defaults/>"
-        "<component type=\"cylinder-right\" >" // this component here is no
-                                               // detector and therefore there
-                                               // is no idlist
-        "<location/>"
-        "</component>"
-        "<type name=\"cylinder-right\" >" // is=\"detector\" missing
-        "<cylinder id=\"some-shape\">"
-        "  <centre-of-bottom-base r=\"0.0\" t=\"0.0\" p=\"0.0\" />"
-        "  <axis x=\"0.0\" y=\"0.0\" z=\"1.0\" />"
-        "  <radius val=\"0.01\" />"
-        "  <height val=\"0.03\" />"
-        "</cylinder>"
-        "</type>"
-        "</instrument>";
+    const std::string idfFileContents = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+                                        "<instrument name=\"" +
+                                        instrumentName +
+                                        "\" valid-from   =\"1900-01-31 23:59:59\" valid-to=\"2100-01-31 "
+                                        "23:59:59\" last-modified=\"2012-10-05 11:00:00\">"
+                                        "<defaults/>"
+                                        "<component type=\"cylinder-right\" >" // this component here is no
+                                                                               // detector and therefore there
+                                                                               // is no idlist
+                                        "<location/>"
+                                        "</component>"
+                                        "<type name=\"cylinder-right\" >" // is=\"detector\" missing
+                                        "<cylinder id=\"some-shape\">"
+                                        "  <centre-of-bottom-base r=\"0.0\" t=\"0.0\" p=\"0.0\" />"
+                                        "  <axis x=\"0.0\" y=\"0.0\" z=\"1.0\" />"
+                                        "  <radius val=\"0.01\" />"
+                                        "  <height val=\"0.03\" />"
+                                        "</cylinder>"
+                                        "</type>"
+                                        "</instrument>";
 
     ScopedFile idfFile = createIDFFileObject(idfFilename, idfFileContents);
 
@@ -1020,19 +983,16 @@ public:
   void test_output_workspace_contains_instrument_with_expected_name() {
     LoadEmptyInstrument alg;
     alg.setChild(true);
-    const std::string inputFile =
-        "unit_testing/SMALLFAKE_example_geometry.hdf5";
+    const std::string inputFile = "unit_testing/SMALLFAKE_example_geometry.hdf5";
     alg.initialize();
     alg.setPropertyValue("Filename", inputFile);
     alg.setPropertyValue("OutputWorkspace", "dummy");
     alg.execute();
 
-    Mantid::API::MatrixWorkspace_sptr outputWs =
-        alg.getProperty("OutputWorkspace");
+    Mantid::API::MatrixWorkspace_sptr outputWs = alg.getProperty("OutputWorkspace");
 
     auto &componentInfo = outputWs->componentInfo();
-    TS_ASSERT_EQUALS(componentInfo.name(componentInfo.root()),
-                     "SmallFakeTubeInstrument");
+    TS_ASSERT_EQUALS(componentInfo.name(componentInfo.root()), "SmallFakeTubeInstrument");
   }
 
   void test_load_loki() {
@@ -1044,8 +1004,7 @@ public:
     alg.setPropertyValue("OutputWorkspace", "dummy");
     alg.execute();
 
-    Mantid::API::MatrixWorkspace_sptr outputWs =
-        alg.getProperty("OutputWorkspace");
+    Mantid::API::MatrixWorkspace_sptr outputWs = alg.getProperty("OutputWorkspace");
 
     auto &componentInfo = outputWs->componentInfo();
     auto &detectorInfo = outputWs->detectorInfo();
@@ -1064,8 +1023,7 @@ public:
     alg.setPropertyValue("OutputWorkspace", "dummy");
     alg.execute();
 
-    Mantid::API::MatrixWorkspace_sptr outputWs =
-        alg.getProperty("OutputWorkspace");
+    Mantid::API::MatrixWorkspace_sptr outputWs = alg.getProperty("OutputWorkspace");
 
     auto &componentInfo = outputWs->componentInfo();
     auto &detectorInfo = outputWs->detectorInfo();
@@ -1084,28 +1042,23 @@ public:
     alg.setPropertyValue("Filename", "WISH_Definition_10Panels.hdf5");
     alg.setPropertyValue("OutputWorkspace", "dummy");
     alg.execute();
-    Mantid::API::MatrixWorkspace_sptr wish_nexus =
-        alg.getProperty("OutputWorkspace");
+    Mantid::API::MatrixWorkspace_sptr wish_nexus = alg.getProperty("OutputWorkspace");
 
     // Now re-run
     alg.setPropertyValue("Filename", "WISH_Definition_10Panels.xml");
     alg.execute();
-    Mantid::API::MatrixWorkspace_sptr wish_xml =
-        alg.getProperty("OutputWorkspace");
+    Mantid::API::MatrixWorkspace_sptr wish_xml = alg.getProperty("OutputWorkspace");
 
     // Sanity check that we are not comparing the same instrument (i.e. via some
     // smart caching)
-    TSM_ASSERT("Premise of comparision test broken!",
-               wish_xml->getInstrument()->baseInstrument().get() !=
-                   wish_nexus->getInstrument()->baseInstrument().get());
+    TSM_ASSERT("Premise of comparision test broken!", wish_xml->getInstrument()->baseInstrument().get() !=
+                                                          wish_nexus->getInstrument()->baseInstrument().get());
 
     const auto &wish_nexus_detinfo = wish_nexus->detectorInfo();
     const auto &wish_xml_detinfo = wish_xml->detectorInfo();
     TS_ASSERT_EQUALS(wish_nexus_detinfo.size(), wish_xml_detinfo.size());
     for (size_t i = 0; i < wish_nexus_detinfo.size(); ++i) {
-      TSM_ASSERT_EQUALS("Detector position mismatch",
-                        wish_nexus_detinfo.position(i),
-                        wish_xml_detinfo.position(i));
+      TSM_ASSERT_EQUALS("Detector position mismatch", wish_nexus_detinfo.position(i), wish_xml_detinfo.position(i));
     }
   }
 

@@ -39,12 +39,9 @@ namespace CustomInterfaces {
  * @param deadTimesFile :: [input] If "from disk", the name of the file (else
  * blank)
  */
-MuonAnalysisDataLoader::MuonAnalysisDataLoader(
-    const DeadTimesType &deadTimesType, const QStringList &instruments,
-    const std::string &deadTimesFile)
-    : m_instruments(instruments),
-      m_cacheBlacklist("\\w*auto_\\w.tmp", Qt::CaseInsensitive,
-                       QRegExp::RegExp2) {
+MuonAnalysisDataLoader::MuonAnalysisDataLoader(const DeadTimesType &deadTimesType, const QStringList &instruments,
+                                               const std::string &deadTimesFile)
+    : m_instruments(instruments), m_cacheBlacklist("\\w*auto_\\w.tmp", Qt::CaseInsensitive, QRegExp::RegExp2) {
   this->setDeadTimesType(deadTimesType, deadTimesFile);
 }
 
@@ -54,8 +51,7 @@ MuonAnalysisDataLoader::MuonAnalysisDataLoader(
  * @param deadTimesFile :: [input] If "from disk", the name of the file (else
  * blank)
  */
-void MuonAnalysisDataLoader::setDeadTimesType(
-    const DeadTimesType &deadTimesType, const std::string &deadTimesFile) {
+void MuonAnalysisDataLoader::setDeadTimesType(const DeadTimesType &deadTimesType, const std::string &deadTimesFile) {
   m_deadTimesType = deadTimesType;
   m_deadTimesFile = deadTimesFile;
 }
@@ -64,10 +60,7 @@ void MuonAnalysisDataLoader::setDeadTimesType(
  * Set the list of supported instruments
  * @param instruments :: [input] List of supported instruments
  */
-void MuonAnalysisDataLoader::setSupportedInstruments(
-    const QStringList &instruments) {
-  m_instruments = instruments;
-}
+void MuonAnalysisDataLoader::setSupportedInstruments(const QStringList &instruments) { m_instruments = instruments; }
 
 /**
  * Load data from the given files into a struct
@@ -108,8 +101,7 @@ LoadResult MuonAnalysisDataLoader::loadFiles(const QStringList &files) const {
     std::string file = fileName.toStdString();
 
     // Set up load algorithm
-    IAlgorithm_sptr load =
-        AlgorithmManager::Instance().createUnmanaged("LoadMuonNexus");
+    IAlgorithm_sptr load = AlgorithmManager::Instance().createUnmanaged("LoadMuonNexus");
 
     load->initialize();
     load->setChild(true);
@@ -134,12 +126,10 @@ LoadResult MuonAnalysisDataLoader::loadFiles(const QStringList &files) const {
       instrName = getInstrumentName(loadedWorkspace);
 
       // Check that it is a valid Muon instrument
-      if (!m_instruments.contains(QString::fromStdString(instrName),
-                                  Qt::CaseInsensitive)) {
+      if (!m_instruments.contains(QString::fromStdString(instrName), Qt::CaseInsensitive)) {
         if (0 != instrName.compare("DEVA")) {
           // special case - no IDF but let it load anyway
-          throw std::runtime_error("Instrument is not recognized: " +
-                                   instrName);
+          throw std::runtime_error("Instrument is not recognized: " + instrName);
         }
       }
 
@@ -147,14 +137,12 @@ LoadResult MuonAnalysisDataLoader::loadFiles(const QStringList &files) const {
         result.loadedDeadTimes = load->getProperty("DeadTimeTable");
       }
       result.loadedGrouping = load->getProperty("DetectorGroupingTable");
-      result.mainFieldDirection =
-          static_cast<std::string>(load->getProperty("MainFieldDirection"));
+      result.mainFieldDirection = static_cast<std::string>(load->getProperty("MainFieldDirection"));
       result.timeZero = load->getProperty("TimeZero");
       result.firstGoodData = load->getProperty("FirstGoodData");
     } else {
       if (getInstrumentName(loadedWorkspace) != instrName)
-        throw std::runtime_error(
-            "All the files should be produced by the same instrument");
+        throw std::runtime_error("All the files should be produced by the same instrument");
     }
 
     loadedWorkspaces.emplace_back(loadedWorkspace);
@@ -174,8 +162,7 @@ LoadResult MuonAnalysisDataLoader::loadFiles(const QStringList &files) const {
   } else {
     // If multiple workspaces loaded - sum them to get the one to work with
     try {
-      result.loadedWorkspace =
-          MuonAnalysisHelper::sumWorkspaces(loadedWorkspaces);
+      result.loadedWorkspace = MuonAnalysisHelper::sumWorkspaces(loadedWorkspaces);
     } catch (std::exception &e) {
       std::ostringstream error;
       error << "Unable to sum workspaces together: " << e.what() << "\n";
@@ -198,8 +185,7 @@ LoadResult MuonAnalysisDataLoader::loadFiles(const QStringList &files) const {
  * @param workspace :: [input] Workspace to get instrument name from
  * @returns :: name of instrument (empty if failed to get it)
  */
-std::string MuonAnalysisDataLoader::getInstrumentName(
-    const Workspace_sptr &workspace) const {
+std::string MuonAnalysisDataLoader::getInstrumentName(const Workspace_sptr &workspace) const {
   if (workspace) {
     const auto period = MuonAnalysisHelper::firstPeriod(workspace);
     if (period) {
@@ -218,8 +204,7 @@ std::string MuonAnalysisDataLoader::getInstrumentName(
  * @param filenames A list of file paths
  * @return True if they should be cached on loading, false otherwise.
  */
-bool MuonAnalysisDataLoader::shouldBeCached(
-    const QStringList &filenames) const {
+bool MuonAnalysisDataLoader::shouldBeCached(const QStringList &filenames) const {
   for (const auto &filename : filenames) {
     if (m_cacheBlacklist.indexIn(filename) >= 0) {
       // match indicates not caching
@@ -235,9 +220,8 @@ bool MuonAnalysisDataLoader::shouldBeCached(
  * @param grouping :: [input] Grouping to use
  * @returns :: Workspace containing processed data
  */
-Workspace_sptr MuonAnalysisDataLoader::correctAndGroup(
-    const Muon::LoadResult &loadedData,
-    const Mantid::API::Grouping &grouping) const {
+Workspace_sptr MuonAnalysisDataLoader::correctAndGroup(const Muon::LoadResult &loadedData,
+                                                       const Mantid::API::Grouping &grouping) const {
   ITableWorkspace_sptr deadTimes;
   try { // to get the dead time correction
     deadTimes = getDeadTimesTable(loadedData);
@@ -249,8 +233,7 @@ Workspace_sptr MuonAnalysisDataLoader::correctAndGroup(
 
   // Now apply DTC, if used, and grouping
   Workspace_sptr correctedGroupedWS;
-  IAlgorithm_sptr alg =
-      AlgorithmManager::Instance().createUnmanaged("MuonProcess");
+  IAlgorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged("MuonProcess");
   alg->initialize();
   alg->setProperty("InputWorkspace", loadedData.loadedWorkspace);
   alg->setProperty("Mode", "CorrectAndGroup");
@@ -271,8 +254,7 @@ Workspace_sptr MuonAnalysisDataLoader::correctAndGroup(
  * @param loadedData :: [input] Load result
  * @returns :: dead times table
  */
-ITableWorkspace_sptr
-MuonAnalysisDataLoader::getDeadTimesTable(const LoadResult &loadedData) const {
+ITableWorkspace_sptr MuonAnalysisDataLoader::getDeadTimesTable(const LoadResult &loadedData) const {
   // Dead time table which will be used
   Workspace_sptr deadTimes;
   ITableWorkspace_sptr deadTimesTable;
@@ -280,8 +262,7 @@ MuonAnalysisDataLoader::getDeadTimesTable(const LoadResult &loadedData) const {
   if (m_deadTimesType != DeadTimesType::None) {
     if (m_deadTimesType == DeadTimesType::FromFile) {
       if (!loadedData.loadedDeadTimes) {
-        throw std::runtime_error(
-            "Data file doesn't appear to contain dead time values");
+        throw std::runtime_error("Data file doesn't appear to contain dead time values");
       }
       deadTimes = loadedData.loadedDeadTimes;
     } else if (m_deadTimesType == DeadTimesType::FromDisk) {
@@ -293,10 +274,8 @@ MuonAnalysisDataLoader::getDeadTimesTable(const LoadResult &loadedData) const {
   if (deadTimes) {
     if (auto table = std::dynamic_pointer_cast<ITableWorkspace>(deadTimes)) {
       deadTimesTable = table;
-    } else if (auto group =
-                   std::dynamic_pointer_cast<WorkspaceGroup>(deadTimes)) {
-      deadTimesTable =
-          std::dynamic_pointer_cast<ITableWorkspace>(group->getItem(0));
+    } else if (auto group = std::dynamic_pointer_cast<WorkspaceGroup>(deadTimes)) {
+      deadTimesTable = std::dynamic_pointer_cast<ITableWorkspace>(group->getItem(0));
     }
   }
 
@@ -308,23 +287,19 @@ MuonAnalysisDataLoader::getDeadTimesTable(const LoadResult &loadedData) const {
  * @param filename :: File to load dead times from
  * @return Table (group of tables) with dead times
  */
-Workspace_sptr MuonAnalysisDataLoader::loadDeadTimesFromFile(
-    const std::string &filename) const {
+Workspace_sptr MuonAnalysisDataLoader::loadDeadTimesFromFile(const std::string &filename) const {
   try {
-    IAlgorithm_sptr loadDeadTimes =
-        AlgorithmManager::Instance().create("LoadNexusProcessed");
+    IAlgorithm_sptr loadDeadTimes = AlgorithmManager::Instance().create("LoadNexusProcessed");
     loadDeadTimes->setChild(true);
     loadDeadTimes->setLogging(false); // We'll take care of logging ourself
-    loadDeadTimes->setPropertyValue(
-        "Filename", filename.empty() ? m_deadTimesFile : filename);
+    loadDeadTimes->setPropertyValue("Filename", filename.empty() ? m_deadTimesFile : filename);
     loadDeadTimes->setPropertyValue("OutputWorkspace", "__NotUsed");
     loadDeadTimes->execute();
 
     return loadDeadTimes->getProperty("OutputWorkspace");
   } catch (std::exception &e) {
     std::ostringstream errorMsg;
-    errorMsg << "Unable to load dead times from the specified file: "
-             << e.what();
+    errorMsg << "Unable to load dead times from the specified file: " << e.what();
     throw std::runtime_error(errorMsg.str());
   }
 }
@@ -338,10 +313,9 @@ Workspace_sptr MuonAnalysisDataLoader::loadDeadTimesFromFile(
  * analysis to do
  * @returns :: Workspace containing analysed data
  */
-Workspace_sptr MuonAnalysisDataLoader::createAnalysisWorkspace(
-    const Workspace_sptr &inputWS, const AnalysisOptions &options) const {
-  IAlgorithm_sptr alg =
-      AlgorithmManager::Instance().createUnmanaged("MuonProcess");
+Workspace_sptr MuonAnalysisDataLoader::createAnalysisWorkspace(const Workspace_sptr &inputWS,
+                                                               const AnalysisOptions &options) const {
+  IAlgorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged("MuonProcess");
 
   alg->initialize();
 
@@ -360,8 +334,7 @@ Workspace_sptr MuonAnalysisDataLoader::createAnalysisWorkspace(
     inputGroup->addWorkspace(ws);
     alg->setProperty("SummedPeriodSet", "1");
   } else {
-    throw std::runtime_error(
-        "Cannot create analysis workspace: unsupported workspace type");
+    throw std::runtime_error("Cannot create analysis workspace: unsupported workspace type");
   }
   alg->setProperty("InputWorkspace", inputGroup);
 
@@ -380,8 +353,8 @@ Workspace_sptr MuonAnalysisDataLoader::createAnalysisWorkspace(
  * @param alg :: [input, output] Algorithm to set properties to
  * @param options :: [input] Options to get properties from
  */
-void MuonAnalysisDataLoader::setProcessAlgorithmProperties(
-    const IAlgorithm_sptr &alg, const AnalysisOptions &options) const {
+void MuonAnalysisDataLoader::setProcessAlgorithmProperties(const IAlgorithm_sptr &alg,
+                                                           const AnalysisOptions &options) const {
   alg->setProperty("Mode", "Analyse");
   alg->setProperty("TimeZero", options.timeZero);             // user input
   alg->setProperty("LoadedTimeZero", options.loadedTimeZero); // from file
@@ -400,10 +373,8 @@ void MuonAnalysisDataLoader::setProcessAlgorithmProperties(
   // ---- Analysis ----
 
   // Find index of a name in a collection
-  const auto indexOf = [](const std::string &name,
-                          const std::vector<std::string> &collection) {
-    return std::distance(collection.begin(),
-                         std::find(collection.begin(), collection.end(), name));
+  const auto indexOf = [](const std::string &name, const std::vector<std::string> &collection) {
+    return std::distance(collection.begin(), std::find(collection.begin(), collection.end(), name));
   };
   if (isContainedIn(options.groupPairName, options.grouping.groupNames)) {
     // Group
@@ -417,13 +388,11 @@ void MuonAnalysisDataLoader::setProcessAlgorithmProperties(
       outputType = "GroupAsymmetry";
       break;
     default:
-      throw std::invalid_argument(
-          "Cannot create analysis workspace: Unsupported plot type");
+      throw std::invalid_argument("Cannot create analysis workspace: Unsupported plot type");
     }
     alg->setProperty("OutputType", outputType);
 
-    const auto groupNum =
-        indexOf(options.groupPairName, options.grouping.groupNames);
+    const auto groupNum = indexOf(options.groupPairName, options.grouping.groupNames);
     alg->setProperty("GroupIndex", static_cast<int>(groupNum));
   } else if (isContainedIn(options.groupPairName, options.grouping.pairNames)) {
     // Pair
@@ -433,14 +402,9 @@ void MuonAnalysisDataLoader::setProcessAlgorithmProperties(
       throw std::invalid_argument("Cannot create analysis workspace: Pairs "
                                   "support asymmetry plot type only");
 
-    const auto pairNum =
-        indexOf(options.groupPairName, options.grouping.pairNames);
-    alg->setProperty(
-        "PairFirstIndex",
-        static_cast<int>(options.grouping.pairs.at(pairNum).first));
-    alg->setProperty(
-        "PairSecondIndex",
-        static_cast<int>(options.grouping.pairs.at(pairNum).second));
+    const auto pairNum = indexOf(options.groupPairName, options.grouping.pairNames);
+    alg->setProperty("PairFirstIndex", static_cast<int>(options.grouping.pairs.at(pairNum).first));
+    alg->setProperty("PairSecondIndex", static_cast<int>(options.grouping.pairs.at(pairNum).second));
     alg->setProperty("Alpha", options.grouping.pairAlphas.at(pairNum));
   } else {
     throw std::invalid_argument("Cannot create analysis workspace: Group/pair "
@@ -459,8 +423,7 @@ void MuonAnalysisDataLoader::updateCache() const {
     const auto &ws = entry.second.loadedWorkspace;
     if (!ws) { // Workspace has been deleted
       invalidKeys.emplace_back(entry.first);
-    } else if (const auto wsGroup =
-                   std::dynamic_pointer_cast<WorkspaceGroup>(ws)) {
+    } else if (const auto wsGroup = std::dynamic_pointer_cast<WorkspaceGroup>(ws)) {
       if (wsGroup->size() == 0) { // Group has been cleared
         invalidKeys.emplace_back(entry.first);
       }

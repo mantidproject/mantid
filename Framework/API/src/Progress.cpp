@@ -76,8 +76,7 @@ void Progress::doReport(const std::string &msg) {
     p = m_end;
   if (!m_alg)
     return;
-  m_alg->progress(p, msg, this->getEstimatedTime(),
-                  this->m_notifyStepPrecision);
+  m_alg->progress(p, msg, this->getEstimatedTime(), this->m_notifyStepPrecision);
   m_alg->interruption_point();
 }
 

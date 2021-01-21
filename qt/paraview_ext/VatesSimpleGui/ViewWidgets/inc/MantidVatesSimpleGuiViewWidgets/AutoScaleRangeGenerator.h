@@ -44,11 +44,7 @@ public:
   VsiColorScale getColorScale();
 
   /// Enum for different modes
-  typedef enum COLORSCALEMODE {
-    STANDARD,
-    TECHNIQUEDEPENDENT,
-    OFFSET
-  } COLORSCALEMODE;
+  typedef enum COLORSCALEMODE { STANDARD, TECHNIQUEDEPENDENT, OFFSET } COLORSCALEMODE;
 
   /// Initialize the color scale
   void initializeColorScale();

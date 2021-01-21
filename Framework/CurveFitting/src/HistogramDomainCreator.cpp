@@ -21,8 +21,8 @@ using namespace API;
  * @param workspacePropertyName :: Name of the output property for a created
  * workspace in case a PropertyManager is used.
  */
-HistogramDomainCreator::HistogramDomainCreator(
-    Kernel::IPropertyManager &manager, const std::string &workspacePropertyName)
+HistogramDomainCreator::HistogramDomainCreator(Kernel::IPropertyManager &manager,
+                                               const std::string &workspacePropertyName)
     : IMWDomainCreator(&manager, workspacePropertyName) {}
 
 /**
@@ -32,20 +32,17 @@ HistogramDomainCreator::HistogramDomainCreator(
  * @param values :: Pointer to outgoing FunctionValues object.
  * @param i0 :: Size offset for values object if it already contains data.
  */
-void HistogramDomainCreator::createDomain(
-    std::shared_ptr<FunctionDomain> &domain,
-    std::shared_ptr<FunctionValues> &values, size_t i0) {
+void HistogramDomainCreator::createDomain(std::shared_ptr<FunctionDomain> &domain,
+                                          std::shared_ptr<FunctionValues> &values, size_t i0) {
 
   setParameters();
 
   if (!m_matrixWorkspace->isHistogramData()) {
-    throw std::runtime_error(
-        "Cannot create a histogram domain from point data.");
+    throw std::runtime_error("Cannot create a histogram domain from point data.");
   }
 
   if (m_domainType != Simple) {
-    throw std::runtime_error(
-        "Cannot create non-simple domain for histogram fitting.");
+    throw std::runtime_error("Cannot create non-simple domain for histogram fitting.");
   }
 
   const auto &X = m_matrixWorkspace->x(m_workspaceIndex);
@@ -110,12 +107,9 @@ void HistogramDomainCreator::createDomain(
  * @param outputWorkspacePropertyName :: The property name
  */
 std::shared_ptr<API::Workspace> HistogramDomainCreator::createOutputWorkspace(
-    const std::string &baseName, API::IFunction_sptr function,
-    std::shared_ptr<API::FunctionDomain> domain,
-    std::shared_ptr<API::FunctionValues> values,
-    const std::string &outputWorkspacePropertyName) {
-  auto ws = IMWDomainCreator::createOutputWorkspace(
-      baseName, function, domain, values, outputWorkspacePropertyName);
+    const std::string &baseName, API::IFunction_sptr function, std::shared_ptr<API::FunctionDomain> domain,
+    std::shared_ptr<API::FunctionValues> values, const std::string &outputWorkspacePropertyName) {
+  auto ws = IMWDomainCreator::createOutputWorkspace(baseName, function, domain, values, outputWorkspacePropertyName);
 
   if (m_matrixWorkspace->isDistribution()) {
     // Convert the calculated values to distribution

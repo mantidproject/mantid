@@ -12,15 +12,12 @@
 namespace Mantid {
 namespace VATES {
 
-void MetadataToFieldData::operator()(vtkFieldData *fieldData,
-                                     const std::string &metaData,
+void MetadataToFieldData::operator()(vtkFieldData *fieldData, const std::string &metaData,
                                      const std::string &id) const {
   execute(fieldData, metaData, id);
 }
 
-void MetadataToFieldData::execute(vtkFieldData *fieldData,
-                                  const std::string &metaData,
-                                  const std::string &id) const {
+void MetadataToFieldData::execute(vtkFieldData *fieldData, const std::string &metaData, const std::string &id) const {
   // clean out existing.
   vtkDataArray *array = fieldData->GetArray(id.c_str());
   if (array) {

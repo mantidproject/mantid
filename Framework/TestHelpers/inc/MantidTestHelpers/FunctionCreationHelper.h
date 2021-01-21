@@ -13,8 +13,7 @@ namespace Mantid {
 
 namespace TestHelpers {
 
-class FunctionChangesNParams : public Mantid::API::IFunction1D,
-                               public Mantid::API::ParamFunction {
+class FunctionChangesNParams : public Mantid::API::IFunction1D, public Mantid::API::ParamFunction {
 public:
   FunctionChangesNParams();
   std::string name() const override;
@@ -22,10 +21,8 @@ public:
   void iterationFinished() override;
 
 protected:
-  void function1D(double *out, const double *xValues,
-                  const size_t nData) const override;
-  void functionDeriv1D(Mantid::API::Jacobian *out, const double *xValues,
-                       const size_t nData) override;
+  void function1D(double *out, const double *xValues, const size_t nData) const override;
+  void functionDeriv1D(Mantid::API::Jacobian *out, const double *xValues, const size_t nData) override;
   size_t m_maxNParams = 5;
   bool m_canChange = false;
 };

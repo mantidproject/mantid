@@ -32,18 +32,14 @@ double toFractionalOccupancy() {
  * @param fraction: fractional occupancy
  * @return position
  */
-int calculatePosition(const double fraction) {
-  return static_cast<int>((1 / toFractionalOccupancy()) * fraction);
-}
+int calculatePosition(const double fraction) { return static_cast<int>((1 / toFractionalOccupancy()) * fraction); }
 
 /**
  * Calculate the fractional occupancy from the slider position.
  * @param sliderPosition : position of the slider
  * @return fractional occupancy
  */
-double calculateFraction(const double sliderPosition) {
-  return toFractionalOccupancy() * sliderPosition;
-}
+double calculateFraction(const double sliderPosition) { return toFractionalOccupancy() * sliderPosition; }
 
 /**
  * Take a double and produce a formatted string with single decimal precision.
@@ -61,33 +57,23 @@ QString formattedPercentageValue(double fraction) {
  * @param peaksPresenter : Peaks presenter to use
  * @param parent : Parent widget
  */
-PeaksViewerOverlayDialog::PeaksViewerOverlayDialog(
-    const PeaksPresenter_sptr &peaksPresenter, QWidget *parent)
-    : QDialog(parent), ui(new Ui::PeaksViewerOverlayDialog),
-      m_peaksPresenter(peaksPresenter) {
+PeaksViewerOverlayDialog::PeaksViewerOverlayDialog(const PeaksPresenter_sptr &peaksPresenter, QWidget *parent)
+    : QDialog(parent), ui(new Ui::PeaksViewerOverlayDialog), m_peaksPresenter(peaksPresenter) {
   ui->setupUi(this);
 
   m_originalOnProjectionFraction = peaksPresenter->getPeakSizeOnProjection();
-  m_originalIntoProjectionFraction =
-      peaksPresenter->getPeakSizeIntoProjection();
+  m_originalIntoProjectionFraction = peaksPresenter->getPeakSizeIntoProjection();
 
-  ui->sliderOnProjection->setSliderPosition(
-      calculatePosition(m_originalOnProjectionFraction));
-  ui->sliderIntoProjection->setSliderPosition(
-      calculatePosition(m_originalIntoProjectionFraction));
+  ui->sliderOnProjection->setSliderPosition(calculatePosition(m_originalOnProjectionFraction));
+  ui->sliderIntoProjection->setSliderPosition(calculatePosition(m_originalIntoProjectionFraction));
 
-  ui->lblPercentageOnProjection->setText(
-      formattedPercentageValue(m_originalOnProjectionFraction));
-  ui->lblPercentageIntoProjection->setText(
-      formattedPercentageValue(m_originalIntoProjectionFraction));
+  ui->lblPercentageOnProjection->setText(formattedPercentageValue(m_originalOnProjectionFraction));
+  ui->lblPercentageIntoProjection->setText(formattedPercentageValue(m_originalIntoProjectionFraction));
 
-  connect(ui->sliderIntoProjection, SIGNAL(sliderMoved(int)), this,
-          SLOT(onSliderIntoProjectionMoved(int)));
-  connect(ui->sliderOnProjection, SIGNAL(sliderMoved(int)), this,
-          SLOT(onSliderOnProjectionMoved(int)));
+  connect(ui->sliderIntoProjection, SIGNAL(sliderMoved(int)), this, SLOT(onSliderIntoProjectionMoved(int)));
+  connect(ui->sliderOnProjection, SIGNAL(sliderMoved(int)), this, SLOT(onSliderOnProjectionMoved(int)));
   connect(ui->btnReset, SIGNAL(clicked()), this, SLOT(onReset()));
-  connect(ui->btnGroupControls, SIGNAL(clicked(QAbstractButton *)), this,
-          SLOT(onCompleteClicked(QAbstractButton *)));
+  connect(ui->btnGroupControls, SIGNAL(clicked(QAbstractButton *)), this, SLOT(onCompleteClicked(QAbstractButton *)));
   connect(ui->btnHelp, SIGNAL(clicked()), this, SLOT(onHelp()));
 }
 
@@ -101,8 +87,7 @@ PeaksViewerOverlayDialog::~PeaksViewerOverlayDialog() { delete ui; }
 void PeaksViewerOverlayDialog::onSliderOnProjectionMoved(int value) {
   auto newFractionOccupancy = calculateFraction(value);
   m_peaksPresenter->setPeakSizeOnProjection(newFractionOccupancy);
-  ui->lblPercentageOnProjection->setText(
-      formattedPercentageValue(newFractionOccupancy));
+  ui->lblPercentageOnProjection->setText(formattedPercentageValue(newFractionOccupancy));
 }
 
 /**
@@ -112,8 +97,7 @@ void PeaksViewerOverlayDialog::onSliderOnProjectionMoved(int value) {
 void PeaksViewerOverlayDialog::onSliderIntoProjectionMoved(int value) {
   auto newFractionOccupancy = calculateFraction(value);
   m_peaksPresenter->setPeakSizeIntoProjection(newFractionOccupancy);
-  ui->lblPercentageIntoProjection->setText(
-      formattedPercentageValue(newFractionOccupancy));
+  ui->lblPercentageIntoProjection->setText(formattedPercentageValue(newFractionOccupancy));
 }
 
 /**
@@ -122,14 +106,10 @@ void PeaksViewerOverlayDialog::onSliderIntoProjectionMoved(int value) {
 void PeaksViewerOverlayDialog::onReset() {
   m_peaksPresenter->setPeakSizeOnProjection(m_originalOnProjectionFraction);
   m_peaksPresenter->setPeakSizeIntoProjection(m_originalIntoProjectionFraction);
-  ui->sliderOnProjection->setSliderPosition(
-      calculatePosition(m_originalOnProjectionFraction));
-  ui->sliderIntoProjection->setSliderPosition(
-      calculatePosition(m_originalIntoProjectionFraction));
-  ui->lblPercentageOnProjection->setText(
-      formattedPercentageValue(m_originalOnProjectionFraction));
-  ui->lblPercentageIntoProjection->setText(
-      formattedPercentageValue(m_originalIntoProjectionFraction));
+  ui->sliderOnProjection->setSliderPosition(calculatePosition(m_originalOnProjectionFraction));
+  ui->sliderIntoProjection->setSliderPosition(calculatePosition(m_originalIntoProjectionFraction));
+  ui->lblPercentageOnProjection->setText(formattedPercentageValue(m_originalOnProjectionFraction));
+  ui->lblPercentageIntoProjection->setText(formattedPercentageValue(m_originalIntoProjectionFraction));
 }
 
 /**
@@ -165,8 +145,7 @@ void PeaksViewerOverlayDialog::reject() {
  */
 void PeaksViewerOverlayDialog::onHelp() {
   QString helpPage = "PeaksViewer#Preference_Options";
-  MantidDesktopServices::openUrl(
-      QUrl(QString("http://www.mantidproject.org/") + helpPage));
+  MantidDesktopServices::openUrl(QUrl(QString("http://www.mantidproject.org/") + helpPage));
 }
 } // namespace SliceViewer
 } // namespace MantidQt

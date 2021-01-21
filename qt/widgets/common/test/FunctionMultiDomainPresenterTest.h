@@ -56,9 +56,7 @@ public:
       m_function->setError(i, 0.0);
     }
   }
-  boost::optional<QString> currentFunctionIndex() const override {
-    return m_currentFunctionIndex;
-  }
+  boost::optional<QString> currentFunctionIndex() const override { return m_currentFunctionIndex; }
 
   void setParameterTie(const QString &paramName, const QString &tie) override {
     if (!tie.isEmpty()) {
@@ -68,12 +66,9 @@ public:
     }
   }
 
-  void setParameterConstraint(const QString & /*paramName*/,
-                              const QString & /*constraint*/) override {}
+  void setParameterConstraint(const QString & /*paramName*/, const QString & /*constraint*/) override {}
 
-  void setGlobalParameters(const QStringList &globals) override {
-    m_globals = globals;
-  }
+  void setGlobalParameters(const QStringList &globals) override { m_globals = globals; }
   void functionHelpRequested() { emit functionHelpRequest(); }
   MOCK_METHOD0(getSelectedFunction, IFunction_sptr());
   MOCK_CONST_METHOD1(showFunctionHelp, void(const QString &));
@@ -83,13 +78,10 @@ public:
     m_currentFunctionIndex = prefix;
     if (prefix.isEmpty()) {
       auto fun = m_function ? m_function->asString() + ";" : "";
-      m_function = FunctionFactory::Instance().createInitialized(
-          fun + funStr.toStdString());
+      m_function = FunctionFactory::Instance().createInitialized(fun + funStr.toStdString());
     } else {
-      auto parentFun = std::dynamic_pointer_cast<CompositeFunction>(
-          getFunctionWithPrefix(prefix, m_function));
-      parentFun->addFunction(
-          FunctionFactory::Instance().createInitialized(funStr.toStdString()));
+      auto parentFun = std::dynamic_pointer_cast<CompositeFunction>(getFunctionWithPrefix(prefix, m_function));
+      parentFun->addFunction(FunctionFactory::Instance().createInitialized(funStr.toStdString()));
     }
     emit functionAdded(funStr);
   }
@@ -103,8 +95,7 @@ public:
     QString parentPrefix;
     int i;
     std::tie(parentPrefix, i) = splitFunctionPrefix(prefix);
-    auto fun = std::dynamic_pointer_cast<CompositeFunction>(
-        getFunctionWithPrefix(parentPrefix, m_function));
+    auto fun = std::dynamic_pointer_cast<CompositeFunction>(getFunctionWithPrefix(parentPrefix, m_function));
     if (i >= 0)
       fun->removeFunction(i);
     else
@@ -129,19 +120,14 @@ private:
   MOCK_METHOD2(setIntAttribute, void(const QString &, int));
   MOCK_METHOD2(setStringAttribute, void(const QString &, std::string &));
   MOCK_METHOD2(setBooleanAttribute, void(const QString &, bool));
-  MOCK_METHOD2(setVectorAttribute,
-               void(const QString &, std::vector<double> &));
+  MOCK_METHOD2(setVectorAttribute, void(const QString &, std::vector<double> &));
 };
 
 class FunctionMultiDomainPresenterTest : public CxxTest::TestSuite {
 
 public:
-  static FunctionMultiDomainPresenterTest *createSuite() {
-    return new FunctionMultiDomainPresenterTest;
-  }
-  static void destroySuite(FunctionMultiDomainPresenterTest *suite) {
-    delete suite;
-  }
+  static FunctionMultiDomainPresenterTest *createSuite() { return new FunctionMultiDomainPresenterTest; }
+  static void destroySuite(FunctionMultiDomainPresenterTest *suite) { delete suite; }
 
   FunctionMultiDomainPresenterTest() {
     // To make sure API is initialized properly
@@ -228,17 +214,11 @@ public:
     view->addFunction("f1.", "name=LinearBackground");
     auto newFun = presenter.getFunction()->getFunction(1)->getFunction(2);
     TS_ASSERT_EQUALS(newFun->name(), "LinearBackground");
-    newFun =
-        presenter.getFitFunction()->getFunction(0)->getFunction(1)->getFunction(
-            2);
+    newFun = presenter.getFitFunction()->getFunction(0)->getFunction(1)->getFunction(2);
     TS_ASSERT_EQUALS(newFun->name(), "LinearBackground");
-    newFun =
-        presenter.getFitFunction()->getFunction(1)->getFunction(1)->getFunction(
-            2);
+    newFun = presenter.getFitFunction()->getFunction(1)->getFunction(1)->getFunction(2);
     TS_ASSERT_EQUALS(newFun->name(), "LinearBackground");
-    newFun =
-        presenter.getFitFunction()->getFunction(2)->getFunction(1)->getFunction(
-            2);
+    newFun = presenter.getFitFunction()->getFunction(2)->getFunction(1)->getFunction(2);
     TS_ASSERT_EQUALS(newFun->name(), "LinearBackground");
   }
 
@@ -537,15 +517,12 @@ public:
     TS_ASSERT_EQUALS(locals[0], "A1");
   }
   void test_open_function_help_window() {
-    auto func =
-        FunctionFactory::Instance().createInitialized("name=LinearBackground");
+    auto func = FunctionFactory::Instance().createInitialized("name=LinearBackground");
     QString functionName = QString::fromStdString(func->name());
     auto view = std::make_unique<NiceMock<MockFunctionView>>();
     FunctionMultiDomainPresenter presenter(view.get());
 
-    EXPECT_CALL(*view, getSelectedFunction())
-        .Times(Exactly(1))
-        .WillOnce(Return(func));
+    EXPECT_CALL(*view, getSelectedFunction()).Times(Exactly(1)).WillOnce(Return(func));
     EXPECT_CALL(*view, showFunctionHelp(functionName)).Times(Exactly(1));
 
     view->functionHelpRequested();
@@ -554,9 +531,7 @@ public:
     auto view = std::make_unique<NiceMock<MockFunctionView>>();
     FunctionMultiDomainPresenter presenter(view.get());
 
-    EXPECT_CALL(*view, getSelectedFunction())
-        .Times(Exactly(1))
-        .WillOnce(Return(IFunction_sptr()));
+    EXPECT_CALL(*view, getSelectedFunction()).Times(Exactly(1)).WillOnce(Return(IFunction_sptr()));
     EXPECT_CALL(*view, showFunctionHelp(_)).Times(Exactly(0));
 
     view->functionHelpRequested();
@@ -565,31 +540,25 @@ public:
     auto view = std::make_unique<NiceMock<MockFunctionView>>();
     FunctionMultiDomainPresenter presenter(view.get());
     presenter.setNumberOfDatasets(1);
-    presenter.setFunctionString(
-        "name=TeixeiraWaterSQE, Q=3.14, WorkspaceIndex=4, Height=1, "
-        "DiffCoeff=2.3, Tau=1.25, Centre=0, "
-        "constraints=(Height>0, DiffCoeff>0, "
-        "Tau>0);name=FlatBackground;name=LinearBackground");
+    presenter.setFunctionString("name=TeixeiraWaterSQE, Q=3.14, WorkspaceIndex=4, Height=1, "
+                                "DiffCoeff=2.3, Tau=1.25, Centre=0, "
+                                "constraints=(Height>0, DiffCoeff>0, "
+                                "Tau>0);name=FlatBackground;name=LinearBackground");
 
-    auto function =
-        FunctionFactory::Instance().createInitializedMultiDomainFunction(
-            "name=TeixeiraWaterSQE, Q=41.3, "
-            "Height=1, DiffCoeff=2.3, Tau=1.25, Centre=0, "
-            "constraints=(Height>0, DiffCoeff>0, "
-            "Tau>0);name=FlatBackground;name=LinearBackground",
-            1);
+    auto function = FunctionFactory::Instance().createInitializedMultiDomainFunction(
+        "name=TeixeiraWaterSQE, Q=41.3, "
+        "Height=1, DiffCoeff=2.3, Tau=1.25, Centre=0, "
+        "constraints=(Height>0, DiffCoeff>0, "
+        "Tau>0);name=FlatBackground;name=LinearBackground",
+        1);
     auto &func = dynamic_cast<IFunction &>(*function);
 
     // this function has three attributes: NumDeriv (boolean attribute), f0.Q (a
     // double attribute) and f0.WorkspaceIndex (integer attribute) so we should
     // expect those calls
-    EXPECT_CALL(*view, setBooleanAttribute(QString("NumDeriv"), false))
-        .Times(Exactly(1));
-    EXPECT_CALL(*view, setDoubleAttribute(QString("f0.Q"), 41.3))
-        .Times(Exactly(1));
-    EXPECT_CALL(*view, setIntAttribute(QString("f0.WorkspaceIndex"),
-                                       Mantid::EMPTY_INT()))
-        .Times(Exactly(1));
+    EXPECT_CALL(*view, setBooleanAttribute(QString("NumDeriv"), false)).Times(Exactly(1));
+    EXPECT_CALL(*view, setDoubleAttribute(QString("f0.Q"), 41.3)).Times(Exactly(1));
+    EXPECT_CALL(*view, setIntAttribute(QString("f0.WorkspaceIndex"), Mantid::EMPTY_INT())).Times(Exactly(1));
 
     presenter.updateMultiDatasetAttributes(func);
   }
@@ -597,14 +566,11 @@ public:
   void test_attribute_changed_gets_attribute_value_from_view() {
     auto view = std::make_unique<NiceMock<MockFunctionView>>();
     FunctionMultiDomainPresenter presenter(view.get());
-    presenter.setFunctionString(
-        "name=TeixeiraWaterSQE, Q=3, WorkspaceIndex=4, Height=1, "
-        "DiffCoeff=2.3, Tau=1.25, Centre=0, "
-        "constraints=(Height>0, DiffCoeff>0, "
-        "Tau>0);name=FlatBackground;name=LinearBackground");
-    EXPECT_CALL(*view, getAttribute(QString("f0.Q")))
-        .Times(Exactly(1))
-        .WillOnce(Return(IFunction::Attribute()));
+    presenter.setFunctionString("name=TeixeiraWaterSQE, Q=3, WorkspaceIndex=4, Height=1, "
+                                "DiffCoeff=2.3, Tau=1.25, Centre=0, "
+                                "constraints=(Height>0, DiffCoeff>0, "
+                                "Tau>0);name=FlatBackground;name=LinearBackground");
+    EXPECT_CALL(*view, getAttribute(QString("f0.Q"))).Times(Exactly(1)).WillOnce(Return(IFunction::Attribute()));
 
     view->attributeChanged();
   }

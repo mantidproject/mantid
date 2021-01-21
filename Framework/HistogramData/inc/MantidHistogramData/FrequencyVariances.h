@@ -28,13 +28,10 @@ class FrequencyStandardDeviations;
   @date 2016
 */
 class MANTID_HISTOGRAMDATA_DLL FrequencyVariances
-    : public detail::VarianceVectorOf<FrequencyVariances, HistogramE,
-                                      FrequencyStandardDeviations> {
+    : public detail::VarianceVectorOf<FrequencyVariances, HistogramE, FrequencyStandardDeviations> {
 public:
-  using VarianceVectorOf<FrequencyVariances, HistogramE,
-                         FrequencyStandardDeviations>::VarianceVectorOf;
-  using VarianceVectorOf<FrequencyVariances, HistogramE,
-                         FrequencyStandardDeviations>::operator=;
+  using VarianceVectorOf<FrequencyVariances, HistogramE, FrequencyStandardDeviations>::VarianceVectorOf;
+  using VarianceVectorOf<FrequencyVariances, HistogramE, FrequencyStandardDeviations>::operator=;
   /// Default constructor, creates a NULL object.
   FrequencyVariances() = default;
   // The copy and move constructor and assignment are not captured properly by

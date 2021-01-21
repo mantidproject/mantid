@@ -31,9 +31,7 @@ DECLARE_ALGORITHM(MonitorLiveData)
 const std::string MonitorLiveData::name() const { return "MonitorLiveData"; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string MonitorLiveData::category() const {
-  return "DataHandling\\LiveData\\Support";
-}
+const std::string MonitorLiveData::category() const { return "DataHandling\\LiveData\\Support"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int MonitorLiveData::version() const { return 1; }
@@ -42,8 +40,7 @@ int MonitorLiveData::version() const { return 1; }
 /** Initialize the algorithm's properties.
  */
 void MonitorLiveData::init() {
-  declareProperty(std::make_unique<PropertyWithValue<double>>(
-                      "UpdateEvery", 60.0, Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<double>>("UpdateEvery", 60.0, Direction::Input),
                   "Frequency of updates, in seconds. Default 60.");
 
   this->initProps();
@@ -55,8 +52,7 @@ void MonitorLiveData::init() {
    window continues
     to track the live workspace.
  */
-void MonitorLiveData::doClone(const std::string &originalName,
-                              const std::string &newName) {
+void MonitorLiveData::doClone(const std::string &originalName, const std::string &newName) {
   auto &ads = AnalysisDataService::Instance();
   if (ads.doesExist(originalName)) {
     Workspace_sptr original = ads.retrieveWS<Workspace>(originalName);
@@ -68,38 +64,30 @@ void MonitorLiveData::doClone(const std::string &originalName,
         WriteLock _lock(*original);
 
         // Clone the monitor workspace, if there is one
-        auto originalMatrix =
-            std::dynamic_pointer_cast<MatrixWorkspace>(original);
+        auto originalMatrix = std::dynamic_pointer_cast<MatrixWorkspace>(original);
         MatrixWorkspace_sptr monitorWS, newMonitorWS;
-        if (originalMatrix &&
-            (monitorWS = originalMatrix->monitorWorkspace())) {
-          auto monitorsCloner =
-              createChildAlgorithm("CloneWorkspace", 0, 0, false);
+        if (originalMatrix && (monitorWS = originalMatrix->monitorWorkspace())) {
+          auto monitorsCloner = createChildAlgorithm("CloneWorkspace", 0, 0, false);
           monitorsCloner->setProperty("InputWorkspace", monitorWS);
           monitorsCloner->executeAsChildAlg();
-          Workspace_sptr outputWS =
-              monitorsCloner->getProperty("OutputWorkspace");
+          Workspace_sptr outputWS = monitorsCloner->getProperty("OutputWorkspace");
           newMonitorWS = std::dynamic_pointer_cast<MatrixWorkspace>(outputWS);
         }
 
-        Algorithm_sptr cloner =
-            createChildAlgorithm("CloneWorkspace", 0, 0, false);
+        Algorithm_sptr cloner = createChildAlgorithm("CloneWorkspace", 0, 0, false);
         cloner->setPropertyValue("InputWorkspace", originalName);
         cloner->setPropertyValue("OutputWorkspace", newName);
-        cloner->setAlwaysStoreInADS(
-            true); // We must force the ADS to be updated
+        cloner->setAlwaysStoreInADS(true); // We must force the ADS to be updated
         cloner->executeAsChildAlg();
 
         if (newMonitorWS) // If there was a monitor workspace, set it back on
                           // the result
         {
-          ads.retrieveWS<MatrixWorkspace>(newName)->setMonitorWorkspace(
-              newMonitorWS);
+          ads.retrieveWS<MatrixWorkspace>(newName)->setMonitorWorkspace(newMonitorWS);
         }
       } else {
         std::cout << "Not cloning\n";
-        g_log.warning() << "Not enough spare memory to clone " << originalName
-                        << ". Workspace will be reset.\n";
+        g_log.warning() << "Not enough spare memory to clone " << originalName << ". Workspace will be reset.\n";
       }
     }
   }
@@ -129,22 +117,19 @@ void MonitorLiveData::exec() {
   int runNumber = 0;
   int prevRunNumber = 0;
 
-  std::string AccumulationWorkspace =
-      this->getPropertyValue("AccumulationWorkspace");
+  std::string AccumulationWorkspace = this->getPropertyValue("AccumulationWorkspace");
   std::string OutputWorkspace = this->getPropertyValue("OutputWorkspace");
 
-  std::string NextAccumulationMethod =
-      this->getPropertyValue("AccumulationMethod");
+  std::string NextAccumulationMethod = this->getPropertyValue("AccumulationMethod");
 
   // Grab a copy of the WorkspaceHistory StartLiveData object from original
   // workspace
   auto outputWorkspaceExists = ads.doesExist(OutputWorkspace);
-  std::unique_ptr<Mantid::API::WorkspaceHistory> originalHistory =
-      std::make_unique<Mantid::API::WorkspaceHistory>();
+  std::unique_ptr<Mantid::API::WorkspaceHistory> originalHistory = std::make_unique<Mantid::API::WorkspaceHistory>();
 
   if (outputWorkspaceExists)
-    originalHistory = std::make_unique<Mantid::API::WorkspaceHistory>(
-        ads.retrieveWS<Workspace>(OutputWorkspace)->history());
+    originalHistory =
+        std::make_unique<Mantid::API::WorkspaceHistory>(ads.retrieveWS<Workspace>(OutputWorkspace)->history());
 
   // Keep going until you get cancelled
   while (true) {
@@ -155,16 +140,16 @@ void MonitorLiveData::exec() {
     double seconds = DateAndTime::secondsFromDuration(now - lastTime);
 
     // Report progress and exit if the user presses cancel
-    progress(0.0, "Live Waiting " + Strings::toString((int)seconds) + " of " +
-                      Strings::toString((int)UpdateEvery) + "s");
+    progress(0.0,
+             "Live Waiting " + Strings::toString((int)seconds) + " of " + Strings::toString((int)UpdateEvery) + "s");
 
     // Sleep for 50 msec
     Poco::Thread::sleep(50);
 
     if (seconds > UpdateEvery) {
       lastTime = now;
-      g_log.notice() << "Loading live data chunk " << m_chunkNumber << " at "
-                     << now.toFormattedString("%H:%M:%S") << '\n';
+      g_log.notice() << "Loading live data chunk " << m_chunkNumber << " at " << now.toFormattedString("%H:%M:%S")
+                     << '\n';
       progress(0.0, "Live Data " + Strings::toString(m_chunkNumber));
 
       // Time to run LoadLiveData again
@@ -191,10 +176,7 @@ void MonitorLiveData::exec() {
 
       // Copy StartLiveData to new workspace
       if (outputWorkspaceExists)
-        AnalysisDataService::Instance()
-            .retrieveWS<Workspace>(OutputWorkspace)
-            ->history()
-            .addHistory(*originalHistory);
+        AnalysisDataService::Instance().retrieveWS<Workspace>(OutputWorkspace)->history().addHistory(*originalHistory);
 
       NextAccumulationMethod = this->getPropertyValue("AccumulationMethod");
 
@@ -211,15 +193,13 @@ void MonitorLiveData::exec() {
         prevRunNumber = runNumber;
       }
 
-      if ((runStatus == ILiveListener::BeginRun) ||
-          (runStatus == ILiveListener::EndRun)) {
+      if ((runStatus == ILiveListener::BeginRun) || (runStatus == ILiveListener::EndRun)) {
         std::stringstream message;
         message << "Run";
         if (runNumber != 0)
           message << " #" << runNumber;
         message << " ended. ";
-        std::string RunTransitionBehavior =
-            this->getPropertyValue("RunTransitionBehavior");
+        std::string RunTransitionBehavior = this->getPropertyValue("RunTransitionBehavior");
         if (RunTransitionBehavior == "Stop") {
           g_log.notice() << message.str() << "Stopping live data monitoring.\n";
           break;
@@ -258,18 +238,14 @@ void MonitorLiveData::exec() {
     if (seconds > UpdateEvery)
       g_log.warning() << "Cannot process live data as quickly as requested: "
                          "requested every "
-                      << UpdateEvery << " seconds but it takes " << seconds
-                      << " seconds!\n";
+                      << UpdateEvery << " seconds but it takes " << seconds << " seconds!\n";
   } // loop until aborted
 
   // Set the outputs (only applicable when RunTransitionBehavior is "Stop")
-  Workspace_sptr OutputWS =
-      AnalysisDataService::Instance().retrieveWS<Workspace>(OutputWorkspace);
+  Workspace_sptr OutputWS = AnalysisDataService::Instance().retrieveWS<Workspace>(OutputWorkspace);
   this->setProperty("OutputWorkspace", OutputWS);
   if (!AccumulationWorkspace.empty()) {
-    Workspace_sptr AccumulationWS =
-        AnalysisDataService::Instance().retrieveWS<Workspace>(
-            AccumulationWorkspace);
+    Workspace_sptr AccumulationWS = AnalysisDataService::Instance().retrieveWS<Workspace>(AccumulationWorkspace);
     this->setProperty("AccumulationWorkspace", AccumulationWS);
   }
 

@@ -19,16 +19,13 @@ namespace SliceViewer {
 class PeakView : public PeakOverlayInteractive {
 public:
   PeakView(PeaksPresenter *const presenter, QwtPlot *plot, QWidget *parent,
-           const VecPeakRepresentation &vecPeakRepresentation,
-           const int plotXIndex, const int plotYIndex,
-           PeakViewColor foregroundColor, PeakViewColor backgroundColor,
-           double largestEffectiveRadius);
+           const VecPeakRepresentation &vecPeakRepresentation, const int plotXIndex, const int plotYIndex,
+           PeakViewColor foregroundColor, PeakViewColor backgroundColor, double largestEffectiveRadius);
 
   virtual ~PeakView();
 
   /// Set the slice point at position.
-  void setSlicePoint(const double &point,
-                     const std::vector<bool> &viewablePeaks) override;
+  void setSlicePoint(const double &point, const std::vector<bool> &viewablePeaks) override;
 
   /// Hide the view.
   void hideView() override;
@@ -41,11 +38,8 @@ public:
 
   /// Move the position of the peak, by using a different configuration of the
   /// existing origin indexes.
-  void
-  movePosition(Mantid::Geometry::PeakTransform_sptr peakTransform) override;
-  void
-  movePositionNonOrthogonal(Mantid::Geometry::PeakTransform_sptr peakTransform,
-                            NonOrthogonalAxis &info) override;
+  void movePosition(Mantid::Geometry::PeakTransform_sptr peakTransform) override;
+  void movePositionNonOrthogonal(Mantid::Geometry::PeakTransform_sptr peakTransform, NonOrthogonalAxis &info) override;
 
   /// Show the background radius
   void showBackgroundRadius(const bool show) override;

@@ -27,9 +27,7 @@ inline double cal_ag(const double gamma) { return LN2_DIV_PI / gamma; }
  * @param gamma :: FWHM
  * @return
  */
-inline constexpr double cal_bg(const double gamma) {
-  return LN2_M4 / (gamma * gamma);
-}
+inline constexpr double cal_bg(const double gamma) { return LN2_M4 / (gamma * gamma); }
 
 /** calculate normalized Gaussian
  * @param ag : a_G
@@ -37,8 +35,7 @@ inline constexpr double cal_bg(const double gamma) {
  * @param xdiffsq : (x - x0)**2
  * @return
  */
-inline double cal_gaussian(const double ag, const double bg,
-                           const double xdiffsq) {
+inline double cal_gaussian(const double ag, const double bg, const double xdiffsq) {
   return ag * std::exp(-bg * xdiffsq);
 }
 
@@ -48,9 +45,7 @@ inline double cal_gaussian(const double ag, const double bg,
  * @param xdiffsq
  * @return
  */
-inline constexpr double cal_lorentzian(const double gamma_div_2,
-                                       const double gammasq_div_4,
-                                       const double xdiffsq) {
+inline constexpr double cal_lorentzian(const double gamma_div_2, const double gammasq_div_4, const double xdiffsq) {
   return gamma_div_2 / (xdiffsq + gammasq_div_4) / M_PI;
 }
 
@@ -82,13 +77,11 @@ void PseudoVoigt::init() {
   declareParameter("PeakCentre", 0.);
   declareParameter("FWHM", 1.);
 
-  auto mixingConstraint =
-      std::make_unique<BoundaryConstraint>(this, "Mixing", 0.0, 1.0, true);
+  auto mixingConstraint = std::make_unique<BoundaryConstraint>(this, "Mixing", 0.0, 1.0, true);
   mixingConstraint->setPenaltyFactor(1e9);
   addConstraint(std::move(mixingConstraint));
 
-  auto fwhm_constraint =
-      std::make_unique<BoundaryConstraint>(this, "FWHM", 1.E-20, true);
+  auto fwhm_constraint = std::make_unique<BoundaryConstraint>(this, "FWHM", 1.E-20, true);
   fwhm_constraint->setPenaltyFactor(1e9);
   addConstraint(std::move(fwhm_constraint));
 
@@ -106,8 +99,7 @@ void PseudoVoigt::init() {
  * @param xValues :: array with input X values
  * @param nData :: size of data
  */
-void PseudoVoigt::functionLocal(double *out, const double *xValues,
-                                const size_t nData) const {
+void PseudoVoigt::functionLocal(double *out, const double *xValues, const size_t nData) const {
   // read values
   const double peak_intensity = getParameter("Intensity");
   const double x0 = getParameter("PeakCentre");
@@ -128,10 +120,8 @@ void PseudoVoigt::functionLocal(double *out, const double *xValues,
 
   for (size_t i = 0; i < nData; ++i) {
     double xDiffSquared = (xValues[i] - x0) * (xValues[i] - x0);
-    out[i] =
-        peak_intensity *
-        (gFraction * cal_gaussian(a_g, b_g, xDiffSquared) +
-         lFraction * cal_lorentzian(gamma_div_2, gammasq_div_4, xDiffSquared));
+    out[i] = peak_intensity * (gFraction * cal_gaussian(a_g, b_g, xDiffSquared) +
+                               lFraction * cal_lorentzian(gamma_div_2, gammasq_div_4, xDiffSquared));
   }
 }
 
@@ -140,8 +130,7 @@ void PseudoVoigt::functionLocal(double *out, const double *xValues,
  * @param xValues :: input X array
  * @param nData :: data size
  */
-void PseudoVoigt::functionDerivLocal(Jacobian *out, const double *xValues,
-                                     const size_t nData) {
+void PseudoVoigt::functionDerivLocal(Jacobian *out, const double *xValues, const size_t nData) {
   // get parameters
   double peak_intensity = getParameter("Intensity");
   double x0 = getParameter("PeakCentre");
@@ -162,8 +151,7 @@ void PseudoVoigt::functionDerivLocal(Jacobian *out, const double *xValues,
 
     // calculate normalized Gaussian and Lorentzian
     double gaussian_term = cal_gaussian(a_g, b_g, xDiffSquared);
-    double lorentzian_term =
-        cal_lorentzian(gamma_div_2, gammasq_div_4, xDiffSquared);
+    double lorentzian_term = cal_lorentzian(gamma_div_2, gammasq_div_4, xDiffSquared);
 
     // derivative to mixing/eta (0-th)
     out->set(i, 0, peak_intensity * (gaussian_term - lorentzian_term));
@@ -173,10 +161,8 @@ void PseudoVoigt::functionDerivLocal(Jacobian *out, const double *xValues,
 
     // peak center: x0
     const double derive_g_x0 = 2. * b_g * xDiff * gaussian_term;
-    const double derive_l_x0 =
-        4. * M_PI * xDiff / gamma * lorentzian_term * lorentzian_term;
-    const double deriv_x0 =
-        peak_intensity * (gFraction * derive_g_x0 + lFraction * derive_l_x0);
+    const double derive_l_x0 = 4. * M_PI * xDiff / gamma * lorentzian_term * lorentzian_term;
+    const double deriv_x0 = peak_intensity * (gFraction * derive_g_x0 + lFraction * derive_l_x0);
     out->set(i, 2, deriv_x0);
 
     // peak width: gamma or H
@@ -184,15 +170,13 @@ void PseudoVoigt::functionDerivLocal(Jacobian *out, const double *xValues,
     const double t2 = 2. * b_g * xDiffSquared * gaussian_term / gamma;
     const double t3 = lorentzian_term / gamma;
     const double t4 = -M_PI * lorentzian_term * lorentzian_term;
-    const double derive_gamma =
-        peak_intensity * (gFraction * (t1 + t2) + lFraction * (t3 + t4));
+    const double derive_gamma = peak_intensity * (gFraction * (t1 + t2) + lFraction * (t3 + t4));
     out->set(i, 3, derive_gamma);
   }
 }
 
 /// override because setParameter(size_t i ...) is overriden
-void PseudoVoigt::setParameter(const std::string &name, const double &value,
-                               bool explicitlySet) {
+void PseudoVoigt::setParameter(const std::string &name, const double &value, bool explicitlySet) {
   g_log.debug() << "[PV] Set " << name << " as " << value << "\n";
   API::IPeakFunction::setParameter(name, value, explicitlySet);
 }
@@ -214,12 +198,10 @@ void PseudoVoigt::setParameter(const std::string &name, const double &value,
  * @param explicitlySet :: whether it is an explicit set.  if true, then
  * consider to calculate other parameters
  */
-void PseudoVoigt::setParameter(size_t i, const double &value,
-                               bool explicitlySet) {
+void PseudoVoigt::setParameter(size_t i, const double &value, bool explicitlySet) {
   API::IPeakFunction::setParameter(i, value, explicitlySet);
 
-  g_log.debug() << "[PV] Set " << i << "-th parameter with value " << value
-                << "\n";
+  g_log.debug() << "[PV] Set " << i << "-th parameter with value " << value << "\n";
 
   // explicitly set means that there is a chance that some parameter shall be
   // re-calculated
@@ -246,29 +228,24 @@ bool PseudoVoigt::estimate_parameter_value() {
     // calculate mixings
     double peak_intensity = getParameter(1);
     double gamma = getParameter(3);
-    double mixing = (m_height * 0.5 * M_PI * gamma / peak_intensity - 1) /
-                    (sqrt(M_PI * M_LN2) - 1);
+    double mixing = (m_height * 0.5 * M_PI * gamma / peak_intensity - 1) / (sqrt(M_PI * M_LN2) - 1);
     if (mixing < 0) {
-      g_log.debug() << "Calculated mixing (eta) = " << mixing
-                    << " < 0.  Set to 0 instead"
+      g_log.debug() << "Calculated mixing (eta) = " << mixing << " < 0.  Set to 0 instead"
                     << "\n";
       mixing = 0;
     } else if (mixing > 1) {
-      g_log.debug() << "Calculated mixing (eta) = " << mixing
-                    << " > 1. Set to 1 instead"
+      g_log.debug() << "Calculated mixing (eta) = " << mixing << " > 1. Set to 1 instead"
                     << "\n";
       mixing = 1;
     }
 
-    setParameter(
-        0, mixing,
-        false); // no explicitly set: won't cause further re-calcualting
+    setParameter(0, mixing,
+                 false); // no explicitly set: won't cause further re-calcualting
   } else if (to_calculate_index == 1) {
     // calculate intensity
     double eta = getParameter(0);
     double gamma = getParameter(3);
-    double intensity =
-        m_height / 2. / (1 + (sqrt(M_PI * M_LN2) - 1) * eta) * (M_PI * gamma);
+    double intensity = m_height / 2. / (1 + (sqrt(M_PI * M_LN2) - 1) * eta) * (M_PI * gamma);
     setParameter(1, intensity, false);
     g_log.debug() << "Estimate peak intensity = " << intensity << "\n";
   } else if (to_calculate_index == 3) {
@@ -276,13 +253,10 @@ bool PseudoVoigt::estimate_parameter_value() {
     double eta = getParameter(0);
     double intensity = getParameter(1);
 
-    g_log.debug() << "Intensity = " << intensity << ", height = " << m_height
-                  << ", mixing = " << eta << "\n";
-    double gamma = intensity * 2 * (1 + (sqrt(M_PI * M_LN2) - 1) * eta) /
-                   (M_PI * m_height);
+    g_log.debug() << "Intensity = " << intensity << ", height = " << m_height << ", mixing = " << eta << "\n";
+    double gamma = intensity * 2 * (1 + (sqrt(M_PI * M_LN2) - 1) * eta) / (M_PI * m_height);
     if (gamma < 1.E-10) {
-      g_log.debug() << "Peak width (H or Gamma) = " << gamma
-                    << ". Set 1.E-2 instead"
+      g_log.debug() << "Peak width (H or Gamma) = " << gamma << ". Set 1.E-2 instead"
                     << "\n";
     }
     setParameter(3, gamma, false);
@@ -335,8 +309,7 @@ size_t PseudoVoigt::get_parameter_to_calculate_from_set() {
   size_t num_been_set{0};
 
   for (size_t i = 0; i < m_set_history_distances.size(); ++i) {
-    g_log.debug() << "distance[" << i << "] = " << m_set_history_distances[i]
-                  << "\n";
+    g_log.debug() << "distance[" << i << "] = " << m_set_history_distances[i] << "\n";
     if (m_set_history_distances[i] >= largest_distance) {
       // for those to set for: any number counts
       index_largest_distance = i;
@@ -362,8 +335,7 @@ double PseudoVoigt::height() const {
   double peak_intensity = getParameter("Intensity");
   double gamma = getParameter("FWHM");
   double eta = getParameter("Mixing");
-  const double height = 2. * peak_intensity *
-                        (1 + (sqrt(M_PI * M_LN2) - 1) * eta) / (M_PI * gamma);
+  const double height = 2. * peak_intensity * (1 + (sqrt(M_PI * M_LN2) - 1) * eta) / (M_PI * gamma);
 
   return height;
 }

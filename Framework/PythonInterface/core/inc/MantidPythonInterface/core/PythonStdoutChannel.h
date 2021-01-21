@@ -22,8 +22,7 @@
 
 namespace Poco {
 
-class MANTID_PYTHONINTERFACE_CORE_DLL PythonStdoutChannel
-    : public ConsoleChannel {
+class MANTID_PYTHONINTERFACE_CORE_DLL PythonStdoutChannel : public ConsoleChannel {
 public:
   /// Constructor for PythonStdoutChannel
   PythonStdoutChannel();

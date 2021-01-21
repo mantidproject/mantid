@@ -36,8 +36,7 @@
 #include <QLayout>
 #include <QPushButton>
 
-SortDialog::SortDialog(QWidget *parent, const Qt::WFlags &fl)
-    : QDialog(parent, fl) {
+SortDialog::SortDialog(QWidget *parent, const Qt::WFlags &fl) : QDialog(parent, fl) {
   setWindowTitle(tr("MantidPlot - Sorting Options"));
   setSizeGripEnabled(true);
 
@@ -79,10 +78,7 @@ SortDialog::SortDialog(QWidget *parent, const Qt::WFlags &fl)
   connect(boxType, SIGNAL(activated(int)), this, SLOT(changeType(int)));
 }
 
-void SortDialog::accept() {
-  emit sort(boxType->currentIndex(), boxOrder->currentIndex(),
-            columnsList->currentText());
-}
+void SortDialog::accept() { emit sort(boxType->currentIndex(), boxOrder->currentIndex(), columnsList->currentText()); }
 
 void SortDialog::insertColumnsList(const QStringList &cols) {
   columnsList->addItems(cols);

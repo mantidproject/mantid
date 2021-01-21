@@ -32,13 +32,11 @@ class MANTID_API_DLL SpectraAxis : public Axis {
 public:
   explicit SpectraAxis(const MatrixWorkspace *const parentWorkspace);
   Axis *clone(const MatrixWorkspace *const parentWorkspace) override;
-  Axis *clone(const std::size_t length,
-              const MatrixWorkspace *const parentWorkspace) override;
+  Axis *clone(const std::size_t length, const MatrixWorkspace *const parentWorkspace) override;
   std::size_t length() const override;
   /// If this is a spectra Axis - always true for this class
   bool isSpectra() const override { return true; }
-  double operator()(const std::size_t &index,
-                    const std::size_t &verticalIndex = 0) const override;
+  double operator()(const std::size_t &index, const std::size_t &verticalIndex = 0) const override;
   void setValue(const std::size_t &index, const double &value) override;
   size_t indexOfValue(const double value) const override;
   bool operator==(const Axis &) const override;

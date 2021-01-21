@@ -45,105 +45,88 @@ enum class MultiFitState { Enabled, Disabled };
 
 namespace MuonAnalysisHelper {
 /// Sets double validator for specified field
-MANTIDQT_MUONINTERFACE_DLL void setDoubleValidator(QLineEdit *field,
-                                                   bool allowEmpty = false);
+MANTIDQT_MUONINTERFACE_DLL void setDoubleValidator(QLineEdit *field, bool allowEmpty = false);
 
 /// Returns a first period MatrixWorkspace in a run workspace
-MANTIDQT_MUONINTERFACE_DLL Mantid::API::MatrixWorkspace_sptr
-firstPeriod(const Mantid::API::Workspace_sptr &ws);
+MANTIDQT_MUONINTERFACE_DLL Mantid::API::MatrixWorkspace_sptr firstPeriod(const Mantid::API::Workspace_sptr &ws);
 
 /// Validates the field and returns the value
-MANTIDQT_MUONINTERFACE_DLL double
-getValidatedDouble(QLineEdit *field, const QString &defaultValue,
-                   const QString &valueDescr, Mantid::Kernel::Logger &log);
+MANTIDQT_MUONINTERFACE_DLL double getValidatedDouble(QLineEdit *field, const QString &defaultValue,
+                                                     const QString &valueDescr, Mantid::Kernel::Logger &log);
 
 /// Returns a number of periods in a run workspace
-MANTIDQT_MUONINTERFACE_DLL size_t
-numPeriods(const Mantid::API::Workspace_sptr &ws);
+MANTIDQT_MUONINTERFACE_DLL size_t numPeriods(const Mantid::API::Workspace_sptr &ws);
 
 /// Print various information about the run
-MANTIDQT_MUONINTERFACE_DLL void
-printRunInfo(const Mantid::API::MatrixWorkspace_sptr &runWs,
-             std::ostringstream &out);
+MANTIDQT_MUONINTERFACE_DLL void printRunInfo(const Mantid::API::MatrixWorkspace_sptr &runWs, std::ostringstream &out);
 
 /// Get a run label for the workspace
-MANTIDQT_MUONINTERFACE_DLL std::string
-getRunLabel(const Mantid::API::Workspace_sptr &ws);
+MANTIDQT_MUONINTERFACE_DLL std::string getRunLabel(const Mantid::API::Workspace_sptr &ws);
 
 /// Get a run label for a list of workspaces
-MANTIDQT_MUONINTERFACE_DLL std::string
-getRunLabel(const std::vector<Mantid::API::Workspace_sptr> &wsList);
+MANTIDQT_MUONINTERFACE_DLL std::string getRunLabel(const std::vector<Mantid::API::Workspace_sptr> &wsList);
 
 MANTIDQT_MUONINTERFACE_DLL bool isNumber(const QString &string);
 /// Get a run label given instrument and run numbers
-MANTIDQT_MUONINTERFACE_DLL std::string
-getRunLabel(const std::string &instrument, const std::vector<int> &runNumbers);
+MANTIDQT_MUONINTERFACE_DLL std::string getRunLabel(const std::string &instrument, const std::vector<int> &runNumbers);
 
 /// Sums a list of workspaces together
 MANTIDQT_MUONINTERFACE_DLL Mantid::API::Workspace_sptr
 sumWorkspaces(const std::vector<Mantid::API::Workspace_sptr> &workspaces);
 
 /// Makes sure the specified workspaces are in specified group
-MANTIDQT_MUONINTERFACE_DLL void
-groupWorkspaces(const std::string &groupName,
-                const std::vector<std::string> &inputWorkspaces);
+MANTIDQT_MUONINTERFACE_DLL void groupWorkspaces(const std::string &groupName,
+                                                const std::vector<std::string> &inputWorkspaces);
 
 /// Finds runs of consecutive numbers
-MANTIDQT_MUONINTERFACE_DLL std::vector<std::pair<int, int>>
-findConsecutiveRuns(const std::vector<int> &runs);
+MANTIDQT_MUONINTERFACE_DLL std::vector<std::pair<int, int>> findConsecutiveRuns(const std::vector<int> &runs);
 
 /// Replaces sample log value
-MANTIDQT_MUONINTERFACE_DLL void replaceLogValue(const std::string &wsName,
-                                                const std::string &logName,
+MANTIDQT_MUONINTERFACE_DLL void replaceLogValue(const std::string &wsName, const std::string &logName,
                                                 const std::string &logValue);
 
 /// Finds all of the values for a log
-MANTIDQT_MUONINTERFACE_DLL std::vector<std::string>
-findLogValues(const Mantid::API::Workspace_sptr &ws,
-              const std::string &logName);
+MANTIDQT_MUONINTERFACE_DLL std::vector<std::string> findLogValues(const Mantid::API::Workspace_sptr &ws,
+                                                                  const std::string &logName);
 
 /// Finds the range of values for a log
-MANTIDQT_MUONINTERFACE_DLL std::pair<std::string, std::string> findLogRange(
-    const Mantid::API::Workspace_sptr &ws, const std::string &logName,
-    bool (*isLessThan)(const std::string &first, const std::string &second));
+MANTIDQT_MUONINTERFACE_DLL std::pair<std::string, std::string>
+findLogRange(const Mantid::API::Workspace_sptr &ws, const std::string &logName,
+             bool (*isLessThan)(const std::string &first, const std::string &second));
 
 /// Finds the range of values for a log for a vector of workspaces
-MANTIDQT_MUONINTERFACE_DLL std::pair<std::string, std::string> findLogRange(
-    const std::vector<Mantid::API::Workspace_sptr> &workspaces,
-    const std::string &logName,
-    bool (*isLessThan)(const std::string &first, const std::string &second));
+MANTIDQT_MUONINTERFACE_DLL std::pair<std::string, std::string>
+findLogRange(const std::vector<Mantid::API::Workspace_sptr> &workspaces, const std::string &logName,
+             bool (*isLessThan)(const std::string &first, const std::string &second));
 
 /// Concatenates time-series log of one workspace with the second
-MANTIDQT_MUONINTERFACE_DLL void
-appendTimeSeriesLogs(const std::shared_ptr<Mantid::API::Workspace> &toAppend,
-                     const std::shared_ptr<Mantid::API::Workspace> &resultant,
-                     const std::string &logName);
+MANTIDQT_MUONINTERFACE_DLL void appendTimeSeriesLogs(const std::shared_ptr<Mantid::API::Workspace> &toAppend,
+                                                     const std::shared_ptr<Mantid::API::Workspace> &resultant,
+                                                     const std::string &logName);
 
 /// Parse analysis workspace name
 MANTIDQT_MUONINTERFACE_DLL MantidQt::CustomInterfaces::Muon::DatasetParams
 parseWorkspaceName(const std::string &wsName);
 
 /// Generate new analysis workspace name
-MANTIDQT_MUONINTERFACE_DLL std::string generateWorkspaceName(
-    const MantidQt::CustomInterfaces::Muon::DatasetParams &params);
+MANTIDQT_MUONINTERFACE_DLL std::string
+generateWorkspaceName(const MantidQt::CustomInterfaces::Muon::DatasetParams &params);
 
 /// Get "run: period" string from workspace name
-MANTIDQT_MUONINTERFACE_DLL QString
-runNumberString(const std::string &workspaceName, const std::string &firstRun);
+MANTIDQT_MUONINTERFACE_DLL QString runNumberString(const std::string &workspaceName, const std::string &firstRun);
 
 /// Decide if grouping needs to be reloaded
-MANTIDQT_MUONINTERFACE_DLL bool isReloadGroupingNecessary(
-    const std::shared_ptr<Mantid::API::Workspace> &currentWorkspace,
-    const std::shared_ptr<Mantid::API::Workspace> &loadedWorkspace);
+MANTIDQT_MUONINTERFACE_DLL bool
+isReloadGroupingNecessary(const std::shared_ptr<Mantid::API::Workspace> &currentWorkspace,
+                          const std::shared_ptr<Mantid::API::Workspace> &loadedWorkspace);
 
 /// Parse run label into instrument and runs
-MANTIDQT_MUONINTERFACE_DLL void parseRunLabel(const std::string &label,
-                                              std::string &instrument,
+MANTIDQT_MUONINTERFACE_DLL void parseRunLabel(const std::string &label, std::string &instrument,
                                               std::vector<int> &runNumbers);
 
 /// Get colors for workspaces to go in table
-MANTIDQT_MUONINTERFACE_DLL QMap<int, QColor> getWorkspaceColors(
-    const std::vector<std::shared_ptr<Mantid::API::Workspace>> &workspaces);
+MANTIDQT_MUONINTERFACE_DLL QMap<int, QColor>
+getWorkspaceColors(const std::vector<std::shared_ptr<Mantid::API::Workspace>> &workspaces);
 
 /**
  * A class which deals with auto-saving the widget values. Widgets are
@@ -158,8 +141,7 @@ public:
   WidgetAutoSaver(const QString &groupName);
 
   /// Register new widget for auto-saving
-  void registerWidget(QWidget *widget, const QString &name,
-                      QVariant defaultValue);
+  void registerWidget(QWidget *widget, const QString &name, QVariant defaultValue);
 
   /// Begin new auto-save group
   void beginGroup(const QString &name);
@@ -205,13 +187,11 @@ private:
 };
 
 /// Validator which accepts valid doubles OR empty strings
-class MANTIDQT_MUONINTERFACE_DLL DoubleOrEmptyValidator
-    : public QDoubleValidator {
+class MANTIDQT_MUONINTERFACE_DLL DoubleOrEmptyValidator : public QDoubleValidator {
   Q_OBJECT
 
 public:
-  DoubleOrEmptyValidator(QObject *parent = nullptr)
-      : QDoubleValidator(parent) {}
+  DoubleOrEmptyValidator(QObject *parent = nullptr) : QDoubleValidator(parent) {}
 
   // See QValidator
   QValidator::State validate(QString &input, int &pos) const override {

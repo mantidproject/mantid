@@ -61,9 +61,7 @@ class IntegratePeakTimeSlicesTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static IntegratePeakTimeSlicesTest *createSuite() {
-    return new IntegratePeakTimeSlicesTest();
-  }
+  static IntegratePeakTimeSlicesTest *createSuite() { return new IntegratePeakTimeSlicesTest(); }
   static void destroySuite(IntegratePeakTimeSlicesTest *suite) { delete suite; }
 
   IntegratePeakTimeSlicesTest() { Mantid::API::FrameworkManager::Instance(); }
@@ -79,8 +77,7 @@ public:
     double MaxPeakTimeSpan = 4;
 
     double T[40] = {0.0};
-    Workspace2D_sptr wsPtr =
-        create2DWorkspaceWithRectangularInstrument(1, NRC, .05, NTimes);
+    Workspace2D_sptr wsPtr = create2DWorkspaceWithRectangularInstrument(1, NRC, .05, NTimes);
 
     wsPtr->getAxis(0)->setUnit("TOF");
 
@@ -91,8 +88,7 @@ public:
       wsPtr->setBinEdges(k, x_vals);
 
     Geometry::Instrument_const_sptr instP = wsPtr->getInstrument();
-    IComponent_const_sptr bankC =
-        instP->getComponentByName(std::string("bank1"));
+    IComponent_const_sptr bankC = instP->getComponentByName(std::string("bank1"));
 
     if (bankC->type().compare("RectangularDetector") != 0)
       throw std::runtime_error(" No Rect bank named bank 1");
@@ -100,8 +96,7 @@ public:
     std::shared_ptr<const Geometry::RectangularDetector> bankR =
         std::dynamic_pointer_cast<const Geometry::RectangularDetector>(bankC);
 
-    std::shared_ptr<Geometry::Detector> pixelp =
-        bankR->getAtXY(PeakCol, PeakRow);
+    std::shared_ptr<Geometry::Detector> pixelp = bankR->getAtXY(PeakCol, PeakRow);
     const auto &detectorInfo = wsPtr->detectorInfo();
     const auto detInfoIndex = detectorInfo.indexOf(pixelp->getID());
 
@@ -122,8 +117,7 @@ public:
 
     // Now set up data in workspace2D
     double dQ = 0;
-    double Q0 =
-        calcQ(bankR, detectorInfo, PeakRow, PeakCol, 1000.0 + 30.0 * 50);
+    double Q0 = calcQ(bankR, detectorInfo, PeakRow, PeakCol, 1000.0 + 30.0 * 50);
 
     double TotIntensity = 0;
 
@@ -137,16 +131,13 @@ public:
         detid2index_map::const_iterator it = map.find(detP->getID());
         size_t wsIndex = (*it).second;
 
-        double MaxR = max<double>(
-            0.0, MaxPeakIntensity * (1 - abs(row - PeakRow) / MaxPeakRCSpan));
-        double MaxRC =
-            max<double>(0.0, MaxR * (1 - abs(col - PeakCol) / MaxPeakRCSpan));
+        double MaxR = max<double>(0.0, MaxPeakIntensity * (1 - abs(row - PeakRow) / MaxPeakRCSpan));
+        double MaxRC = max<double>(0.0, MaxR * (1 - abs(col - PeakCol) / MaxPeakRCSpan));
         std::vector<double> dataY;
         std::vector<double> dataE;
 
         for (int chan = 0; chan < NTimes; chan++) {
-          double val = max<double>(
-              0.0, MaxRC * (1 - abs(chan - PeakChan) / MaxPeakTimeSpan));
+          double val = max<double>(0.0, MaxRC * (1 - abs(chan - PeakChan) / MaxPeakTimeSpan));
           TotIntensity += val;
           T[chan] += val;
           val += 1.4;
@@ -206,23 +197,17 @@ public:
       if (Twk->rowCount() < 5)
         return;
 
-      TS_ASSERT_LESS_THAN(
-          fabs(Twk->getRef<double>(std::string("Time"), 0) - 19200), 20);
+      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double>(std::string("Time"), 0) - 19200), 20);
 
-      TS_ASSERT_LESS_THAN(
-          fabs(Twk->getRef<double>(std::string("Background"), 1) - 1.08824),
-          .5);
+      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double>(std::string("Background"), 1) - 1.08824), .5);
 
-      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double>("Intensity", 2) - 11460),
-                          120);
+      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double>("Intensity", 2) - 11460), 120);
 
       TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double>("NCells", 3) - 439), 5);
 
-      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double>("ChiSqrOverDOF", 4) - 72),
-                          3.5);
+      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double>("ChiSqrOverDOF", 4) - 72), 3.5);
 
-      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double>("TotIntensity", 0) - 4979),
-                          10);
+      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double>("TotIntensity", 0) - 4979), 10);
 
     } catch (char *s) {
       std::cout << "Error= " << s << '\n';
@@ -237,8 +222,7 @@ private:
   /**
    *   Calculates Q
    */
-  double calcQ(const RectangularDetector_const_sptr &bankP,
-               const DetectorInfo &detectorInfo, int row, int col,
+  double calcQ(const RectangularDetector_const_sptr &bankP, const DetectorInfo &detectorInfo, int row, int col,
                double time) {
     std::shared_ptr<Detector> detP = bankP->getAtXY(col, row);
     const auto detInfoIndex = detectorInfo.indexOf(detP->getID());
@@ -258,10 +242,7 @@ private:
   /**
    * Creates a 2D workspace for testing purposes
    */
-  Workspace2D_sptr create2DWorkspaceWithRectangularInstrument(int Npanels,
-                                                              int NRC,
-                                                              double sideLength,
-                                                              int NTimes) {
+  Workspace2D_sptr create2DWorkspaceWithRectangularInstrument(int Npanels, int NRC, double sideLength, int NTimes) {
     // Workspace2D_sptr wsPtr =
     // WorkspaceFactory::Instance().create("Workspace2D", NPanels;
 
@@ -270,13 +251,10 @@ private:
     const size_t &nvals = (size_t)NTimes;
 
     Workspace2D_sptr wsPtr = std::dynamic_pointer_cast<Workspace2D>(
-        WorkspaceFactory::Instance().create("Workspace2D", NVectors, ntimes,
-                                            nvals));
+        WorkspaceFactory::Instance().create("Workspace2D", NVectors, ntimes, nvals));
     // wsPtr->initialize(NVectors, ntimes, nvals);
 
-    Instrument_sptr inst =
-        ComponentCreationHelper::createTestInstrumentRectangular2(Npanels, NRC,
-                                                                  sideLength);
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular2(Npanels, NRC, sideLength);
 
     wsPtr->setInstrument(inst);
 

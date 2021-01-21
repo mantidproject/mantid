@@ -38,8 +38,7 @@ QStringList indicesSuggestions() {
   return suggestions;
 }
 
-QString getAction(std::map<std::string, std::string> const &actions,
-                  std::string const &key) {
+QString getAction(std::map<std::string, std::string> const &actions, std::string const &key) {
   auto const iter = actions.find(key);
   if (iter != actions.end())
     return QString::fromStdString(iter->second);
@@ -76,9 +75,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 IndirectPlotOptionsView::IndirectPlotOptionsView(QWidget *parent)
-    : API::MantidWidget(parent),
-      m_suggestionsModel(
-          std::make_unique<QStringListModel>(indicesSuggestions())),
+    : API::MantidWidget(parent), m_suggestionsModel(std::make_unique<QStringListModel>(indicesSuggestions())),
       m_completer(std::make_unique<QCompleter>(m_suggestionsModel.get(), this)),
       m_plotOptions(new Ui::IndirectPlotOptions) {
   m_plotOptions->setupUi(this);
@@ -88,17 +85,14 @@ IndirectPlotOptionsView::IndirectPlotOptionsView(QWidget *parent)
 IndirectPlotOptionsView::~IndirectPlotOptionsView() {}
 
 void IndirectPlotOptionsView::setupView() {
-  connect(m_plotOptions->cbWorkspace,
-          SIGNAL(currentIndexChanged(QString const &)), this,
+  connect(m_plotOptions->cbWorkspace, SIGNAL(currentIndexChanged(QString const &)), this,
           SLOT(emitSelectedWorkspaceChanged(QString const &)));
 
-  connect(m_plotOptions->leIndices, SIGNAL(editingFinished()), this,
-          SLOT(emitSelectedIndicesChanged()));
+  connect(m_plotOptions->leIndices, SIGNAL(editingFinished()), this, SLOT(emitSelectedIndicesChanged()));
   connect(m_plotOptions->leIndices, SIGNAL(textEdited(QString const &)), this,
           SLOT(emitSelectedIndicesChanged(QString const &)));
 
-  connect(m_plotOptions->pbPlotSpectra, SIGNAL(clicked()), this,
-          SLOT(emitPlotSpectraClicked()));
+  connect(m_plotOptions->pbPlotSpectra, SIGNAL(clicked()), this, SLOT(emitPlotSpectraClicked()));
 
   setIndicesErrorLabelVisible(false);
 
@@ -108,8 +102,7 @@ void IndirectPlotOptionsView::setupView() {
   m_plotOptions->leIndices->setCompleter(m_completer.get());
 }
 
-void IndirectPlotOptionsView::emitSelectedWorkspaceChanged(
-    QString const &workspaceName) {
+void IndirectPlotOptionsView::emitSelectedWorkspaceChanged(QString const &workspaceName) {
   emit selectedWorkspaceChanged(workspaceName.toStdString());
 }
 
@@ -117,8 +110,7 @@ void IndirectPlotOptionsView::emitSelectedIndicesChanged() {
   emit selectedIndicesChanged(selectedIndices().toStdString());
 }
 
-void IndirectPlotOptionsView::emitSelectedIndicesChanged(
-    QString const &spectra) {
+void IndirectPlotOptionsView::emitSelectedIndicesChanged(QString const &spectra) {
   QString nonConstCopy = spectra;
   if (spectra.isEmpty()) {
     emit selectedIndicesChanged(spectra.toStdString());
@@ -145,37 +137,27 @@ void IndirectPlotOptionsView::emitPlotTiledClicked() {
   emit plotTiledClicked();
 }
 
-void IndirectPlotOptionsView::setPlotType(
-    PlotWidget const &plotType,
-    std::map<std::string, std::string> const &availableActions) {
+void IndirectPlotOptionsView::setPlotType(PlotWidget const &plotType,
+                                          std::map<std::string, std::string> const &availableActions) {
   auto plotMenu = new QMenu;
 
-  auto plotSpectraAction =
-      new QAction(getAction(availableActions, "Plot Spectra"), this);
+  auto plotSpectraAction = new QAction(getAction(availableActions, "Plot Spectra"), this);
   plotSpectraAction->setIcon(plotCurveIcon());
-  auto plotBinAction =
-      new QAction(getAction(availableActions, "Plot Bins"), this);
+  auto plotBinAction = new QAction(getAction(availableActions, "Plot Bins"), this);
   plotBinAction->setIcon(plotCurveIcon());
-  auto plotContourAction =
-      new QAction(getAction(availableActions, "Plot Contour"), this);
+  auto plotContourAction = new QAction(getAction(availableActions, "Plot Contour"), this);
   plotContourAction->setIcon(plotContourIcon());
-  auto plotTiledAction =
-      new QAction(getAction(availableActions, "Plot Tiled"), this);
+  auto plotTiledAction = new QAction(getAction(availableActions, "Plot Tiled"), this);
   plotTiledAction->setIcon(plotTiledIcon());
 
-  connect(plotSpectraAction, SIGNAL(triggered()), this,
-          SLOT(emitPlotSpectraClicked()));
-  connect(plotBinAction, SIGNAL(triggered()), this,
-          SLOT(emitPlotBinsClicked()));
-  connect(plotContourAction, SIGNAL(triggered()), this,
-          SLOT(emitPlotContourClicked()));
-  connect(plotTiledAction, SIGNAL(triggered()), this,
-          SLOT(emitPlotTiledClicked()));
+  connect(plotSpectraAction, SIGNAL(triggered()), this, SLOT(emitPlotSpectraClicked()));
+  connect(plotBinAction, SIGNAL(triggered()), this, SLOT(emitPlotBinsClicked()));
+  connect(plotContourAction, SIGNAL(triggered()), this, SLOT(emitPlotContourClicked()));
+  connect(plotTiledAction, SIGNAL(triggered()), this, SLOT(emitPlotTiledClicked()));
 
   m_plotOptions->tbPlot->setVisible(true);
   m_plotOptions->pbPlotSpectra->setVisible(true);
-  m_plotOptions->pbPlotSpectra->setText(
-      getAction(availableActions, "Plot Spectra"));
+  m_plotOptions->pbPlotSpectra->setText(getAction(availableActions, "Plot Spectra"));
 
   switch (plotType) {
   case PlotWidget::Spectra:
@@ -232,24 +214,17 @@ QValidator *IndirectPlotOptionsView::createValidator(QString const &regex) {
   return new QRegExpValidator(QRegExp(regex), this);
 }
 
-QString IndirectPlotOptionsView::selectedWorkspace() const {
-  return m_plotOptions->cbWorkspace->currentText();
-}
+QString IndirectPlotOptionsView::selectedWorkspace() const { return m_plotOptions->cbWorkspace->currentText(); }
 
-void IndirectPlotOptionsView::setWorkspaces(
-    std::vector<std::string> const &workspaces) {
+void IndirectPlotOptionsView::setWorkspaces(std::vector<std::string> const &workspaces) {
   clearWorkspaces();
   for (auto const &name : workspaces)
     m_plotOptions->cbWorkspace->addItem(QString::fromStdString(name));
 }
 
-int IndirectPlotOptionsView::numberOfWorkspaces() const {
-  return m_plotOptions->cbWorkspace->count();
-}
+int IndirectPlotOptionsView::numberOfWorkspaces() const { return m_plotOptions->cbWorkspace->count(); }
 
-void IndirectPlotOptionsView::clearWorkspaces() {
-  m_plotOptions->cbWorkspace->clear();
-}
+void IndirectPlotOptionsView::clearWorkspaces() { m_plotOptions->cbWorkspace->clear(); }
 
 void IndirectPlotOptionsView::removeWorkspace(QString const &workspaceName) {
   auto const index = m_plotOptions->cbWorkspace->findText(workspaceName);
@@ -257,9 +232,7 @@ void IndirectPlotOptionsView::removeWorkspace(QString const &workspaceName) {
     m_plotOptions->cbWorkspace->removeItem(index);
 }
 
-QString IndirectPlotOptionsView::selectedIndices() const {
-  return m_plotOptions->leIndices->text();
-}
+QString IndirectPlotOptionsView::selectedIndices() const { return m_plotOptions->leIndices->text(); }
 
 void IndirectPlotOptionsView::setIndices(QString const &indices) {
   API::SignalBlocker blocker(m_plotOptions->leIndices);

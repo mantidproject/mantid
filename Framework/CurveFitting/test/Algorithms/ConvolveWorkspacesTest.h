@@ -51,15 +51,11 @@ public:
     // Convolution of normalized Gaussians should have sigma =
     // sqrt(sig1^2+sig2^2)
     Workspace2D_sptr ws1 =
-        WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-            NormGaussianFunc1(), 1, -2.0, 2.0, 0.01, false);
+        WorkspaceCreationHelper::create2DWorkspaceFromFunction(NormGaussianFunc1(), 1, -2.0, 2.0, 0.01, false);
     Workspace2D_sptr ws2 =
-        WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-            NormGaussianFunc2(), 1, -2.0, 2.0, 0.01, false);
-    TS_ASSERT_THROWS_NOTHING(
-        AnalysisDataService::Instance().addOrReplace("wksp1", ws1));
-    TS_ASSERT_THROWS_NOTHING(
-        AnalysisDataService::Instance().addOrReplace("wksp2", ws2));
+        WorkspaceCreationHelper::create2DWorkspaceFromFunction(NormGaussianFunc2(), 1, -2.0, 2.0, 0.01, false);
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().addOrReplace("wksp1", ws1));
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().addOrReplace("wksp2", ws2));
 
     alg.initialize();
     alg.isInitialized();
@@ -94,20 +90,14 @@ class ConvolveWorkspacesTestPerformance : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ConvolveWorkspacesTestPerformance *createSuite() {
-    return new ConvolveWorkspacesTestPerformance();
-  }
-  static void destroySuite(ConvolveWorkspacesTestPerformance *suite) {
-    delete suite;
-  }
+  static ConvolveWorkspacesTestPerformance *createSuite() { return new ConvolveWorkspacesTestPerformance(); }
+  static void destroySuite(ConvolveWorkspacesTestPerformance *suite) { delete suite; }
 
   ConvolveWorkspacesTestPerformance() { FrameworkManager::Instance(); }
 
   void setUp() override {
-    ws1 = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-        NormGaussianFunc1(), 1000, -5.0, 5.0, 0.005, false);
-    ws2 = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-        NormGaussianFunc2(), 1000, -5.0, 5.0, 0.005, false);
+    ws1 = WorkspaceCreationHelper::create2DWorkspaceFromFunction(NormGaussianFunc1(), 1000, -5.0, 5.0, 0.005, false);
+    ws2 = WorkspaceCreationHelper::create2DWorkspaceFromFunction(NormGaussianFunc2(), 1000, -5.0, 5.0, 0.005, false);
     AnalysisDataService::Instance().addOrReplace("wksp1", ws1);
     AnalysisDataService::Instance().addOrReplace("wksp2", ws2);
   }

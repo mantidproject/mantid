@@ -25,9 +25,7 @@ const std::string MaskSpectra::name() const { return "MaskSpectra"; }
 int MaskSpectra::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string MaskSpectra::category() const {
-  return "Transforms\\Masking";
-}
+const std::string MaskSpectra::category() const { return "Transforms\\Masking"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string MaskSpectra::summary() const {
@@ -35,19 +33,16 @@ const std::string MaskSpectra::summary() const {
 }
 
 void MaskSpectra::init() {
-  declareWorkspaceInputProperties<
-      MatrixWorkspace, IndexType::SpectrumNum | IndexType::WorkspaceIndex>(
+  declareWorkspaceInputProperties<MatrixWorkspace, IndexType::SpectrumNum | IndexType::WorkspaceIndex>(
       "InputWorkspace", "The input workspace");
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace");
 }
 
 void MaskSpectra::exec() {
   std::shared_ptr<MatrixWorkspace> inputWS;
   Indexing::SpectrumIndexSet indexSet;
-  std::tie(inputWS, indexSet) =
-      getWorkspaceAndIndices<MatrixWorkspace>("InputWorkspace");
+  std::tie(inputWS, indexSet) = getWorkspaceAndIndices<MatrixWorkspace>("InputWorkspace");
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
   if (outputWS != inputWS) {
     outputWS = inputWS->clone();

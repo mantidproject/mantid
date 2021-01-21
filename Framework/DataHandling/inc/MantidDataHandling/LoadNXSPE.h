@@ -31,15 +31,11 @@ public:
   /// Algorithm's name for identification
   const std::string name() const override { return "LoadNXSPE"; };
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return " Algorithm to load an NXSPE file into a workspace2D.";
-  }
+  const std::string summary() const override { return " Algorithm to load an NXSPE file into a workspace2D."; }
 
   /// Algorithm's version for identification
   int version() const override { return 1; };
-  const std::vector<std::string> seeAlso() const override {
-    return {"SaveNXSPE", "LoadSPE"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"SaveNXSPE", "LoadSPE"}; }
   /// Algorithm's category for identification
   const std::string category() const override {
     return R"(DataHandling\Nexus;DataHandling\SPE;Inelastic\DataHandling)";
@@ -57,8 +53,7 @@ private:
   /// Run the algorithm
   void exec() override;
   /// Function to return a cuboid shape, with widths dx,dy,dz
-  std::shared_ptr<Geometry::CSGObject> createCuboid(double dx, double dy,
-                                                    double dz);
+  std::shared_ptr<Geometry::CSGObject> createCuboid(double dx, double dy, double dz);
 };
 
 } // namespace DataHandling

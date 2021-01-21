@@ -38,8 +38,7 @@
 
 #include <gsl/gsl_vector.h>
 
-Integration::Integration(const QString &formula, const QString &var,
-                         ApplicationWindow *parent, Graph *g, double start,
+Integration::Integration(const QString &formula, const QString &var, ApplicationWindow *parent, Graph *g, double start,
                          double end)
     : Filter(parent, g), d_formula(formula), d_variable(var) {
   d_init_err = false;
@@ -56,8 +55,7 @@ Integration::Integration(const QString &formula, const QString &var,
   try {
     parser.Eval();
   } catch (mu::ParserError &e) {
-    QMessageBox::critical(parent, tr("MantidPlot - Input error"),
-                          QString::fromStdString(e.GetMsg()));
+    QMessageBox::critical(parent, tr("MantidPlot - Input error"), QString::fromStdString(e.GetMsg()));
     d_init_err = true;
   }
 
@@ -69,27 +67,20 @@ Integration::Integration(const QString &formula, const QString &var,
   d_area = 0.0;
 }
 
-Integration::Integration(ApplicationWindow *parent, Graph *g)
-    : Filter(parent, g) {
-  init();
-}
+Integration::Integration(ApplicationWindow *parent, Graph *g) : Filter(parent, g) { init(); }
 
-Integration::Integration(ApplicationWindow *parent, Graph *g,
-                         const QString &curveTitle)
-    : Filter(parent, g) {
+Integration::Integration(ApplicationWindow *parent, Graph *g, const QString &curveTitle) : Filter(parent, g) {
   init();
   setDataFromCurve(curveTitle);
 }
 
-Integration::Integration(ApplicationWindow *parent, Graph *g,
-                         const QString &curveTitle, double start, double end)
+Integration::Integration(ApplicationWindow *parent, Graph *g, const QString &curveTitle, double start, double end)
     : Filter(parent, g) {
   init();
   setDataFromCurve(curveTitle, start, end);
 }
 
-Integration::Integration(ApplicationWindow *parent, Table *t,
-                         const QString &xCol, const QString &yCol, int start,
+Integration::Integration(ApplicationWindow *parent, Table *t, const QString &xCol, const QString &yCol, int start,
                          int end)
     : Filter(parent, t) {
   init();
@@ -176,18 +167,15 @@ QString Integration::logInfo() {
 
   QString logInfo = "[" + QDateTime::currentDateTime().toString(Qt::LocalDate);
   if (d_integrand == AnalyticalFunction) {
-    logInfo += "\n" + tr("Numerical integration of") + " f(" + d_variable +
-               ") = " + d_formula + " ";
+    logInfo += "\n" + tr("Numerical integration of") + " f(" + d_variable + ") = " + d_formula + " ";
     logInfo += tr("using a %1 order method").arg(d_method) + "\n";
     logInfo += tr("From") + " x = " + locale.toString(d_from, 'g', prec) + " ";
     logInfo += tr("to") + " x = " + locale.toString(d_to, 'g', prec) + "\n";
-    logInfo += tr("Tolerance") + " = " +
-               locale.toString(d_tolerance, 'g', prec) + "\n";
+    logInfo += tr("Tolerance") + " = " + locale.toString(d_tolerance, 'g', prec) + "\n";
     logInfo += tr("Iterations") + ": " + QString::number(romberg()) + "\n";
   } else if (d_integrand == DataSet) {
     if (d_graph)
-      logInfo +=
-          tr("\tPlot") + ": ''" + d_graph->multiLayer()->objectName() + "'']\n";
+      logInfo += tr("\tPlot") + ": ''" + d_graph->multiLayer()->objectName() + "'']\n";
     else
       logInfo += "\n";
     QString dataSet;
@@ -208,22 +196,19 @@ QString Integration::logInfo() {
     int maxID = static_cast<int>(gsl_vector_max_index(aux));
     gsl_vector_free(aux);
 
-    logInfo +=
-        tr("Peak at") + " x = " + locale.toString(d_x[maxID], 'g', prec) + "\t";
+    logInfo += tr("Peak at") + " x = " + locale.toString(d_x[maxID], 'g', prec) + "\t";
     logInfo += "y = " + locale.toString(d_y[maxID], 'g', prec) + "\n";
     d_area = trapez();
   }
 
   logInfo += tr("Area") + "=" + locale.toString(d_area, 'g', prec);
-  logInfo +=
-      "\n-------------------------------------------------------------\n";
+  logInfo += "\n-------------------------------------------------------------\n";
   return logInfo;
 }
 
 void Integration::setMethodOrder(int n) {
   if (n < 1 || n > 5) {
-    QMessageBox::critical(dynamic_cast<ApplicationWindow *>(this->parent()),
-                          tr("MantidPlot - Error"),
+    QMessageBox::critical(dynamic_cast<ApplicationWindow *>(this->parent()), tr("MantidPlot - Error"),
                           tr("Unknown integration method. Valid values must be "
                              "in the range: 1 (Trapezoidal Method) to 5."));
     return;
@@ -239,8 +224,7 @@ void Integration::output() {
     return;
 
   FunctionCurve *c =
-      d_output_graph->addFunction(QStringList(d_formula), d_from, d_to,
-                                  d_points, d_variable, FunctionCurve::Normal);
+      d_output_graph->addFunction(QStringList(d_formula), d_from, d_to, d_points, d_variable, FunctionCurve::Normal);
   if (c) {
     c->setBrush(QBrush(c->pen().color(), Qt::BDiagPattern));
     d_output_graph->replot();

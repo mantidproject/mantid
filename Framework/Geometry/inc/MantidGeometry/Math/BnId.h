@@ -52,10 +52,10 @@ public:
   bool operator<(const BnId &) const;  ///< operator> for tri-state object
   bool operator>(const BnId &) const;  ///< operator> for tri-state object
   int operator[](int const) const;     ///< Access operator
-  int operator++(int); ///< addition operator (returns !carry flag)
-  int operator++();    ///< addition operator (returns !carry flag)
-  int operator--(int); ///< subtraction operator (returns !carry flag)
-  int operator--();    ///< subtraction operator (returns !carry flag)
+  int operator++(int);                 ///< addition operator (returns !carry flag)
+  int operator++();                    ///< addition operator (returns !carry flag)
+  int operator--(int);                 ///< subtraction operator (returns !carry flag)
+  int operator--();                    ///< subtraction operator (returns !carry flag)
 
   int equivalent(const BnId &) const; ///< Equal but - is assume to be ok
   void reverse();                     ///< Swap -1 to 1 adn leaver the zeros

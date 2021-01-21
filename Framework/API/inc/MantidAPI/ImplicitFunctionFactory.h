@@ -24,20 +24,15 @@ ImplicitFunctions.
 
 namespace Mantid {
 namespace API {
-class MANTID_API_DLL ImplicitFunctionFactoryImpl
-    : public Kernel::DynamicFactory<Mantid::Geometry::MDImplicitFunction> {
+class MANTID_API_DLL ImplicitFunctionFactoryImpl : public Kernel::DynamicFactory<Mantid::Geometry::MDImplicitFunction> {
 public:
   ImplicitFunctionFactoryImpl(const ImplicitFunctionFactoryImpl &) = delete;
-  ImplicitFunctionFactoryImpl &
-  operator=(const ImplicitFunctionFactoryImpl &) = delete;
-  Mantid::Geometry::MDImplicitFunction_sptr
-  create(const std::string &className) const override;
+  ImplicitFunctionFactoryImpl &operator=(const ImplicitFunctionFactoryImpl &) = delete;
+  Mantid::Geometry::MDImplicitFunction_sptr create(const std::string &className) const override;
 
-  virtual Mantid::Geometry::MDImplicitFunction *
-  createUnwrapped(Poco::XML::Element *processXML) const;
+  virtual Mantid::Geometry::MDImplicitFunction *createUnwrapped(Poco::XML::Element *processXML) const;
 
-  Mantid::Geometry::MDImplicitFunction *
-  createUnwrapped(const std::string &processXML) const override;
+  Mantid::Geometry::MDImplicitFunction *createUnwrapped(const std::string &processXML) const override;
 
   friend struct Mantid::Kernel::CreateUsingNew<ImplicitFunctionFactoryImpl>;
 
@@ -48,8 +43,7 @@ private:
   ~ImplicitFunctionFactoryImpl() override = default;
 };
 
-using ImplicitFunctionFactory =
-    Mantid::Kernel::SingletonHolder<ImplicitFunctionFactoryImpl>;
+using ImplicitFunctionFactory = Mantid::Kernel::SingletonHolder<ImplicitFunctionFactoryImpl>;
 } // namespace API
 } // namespace Mantid
 

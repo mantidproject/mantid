@@ -29,16 +29,13 @@ class PeaksPresenter;
 /** Widget base class for representing peaks. Contains common code used by
  Interactive/Editable peak overlay widgets.
 */
-class EXPORT_OPT_MANTIDQT_SLICEVIEWER PeakOverlayInteractive
-    : public QWidget,
-      public PeakOverlayView {
+class EXPORT_OPT_MANTIDQT_SLICEVIEWER PeakOverlayInteractive : public QWidget, public PeakOverlayView {
   Q_OBJECT
 
 public:
   /// Constructor
-  PeakOverlayInteractive(PeaksPresenter *const peaksPresenter, QwtPlot *plot,
-                         const int plotXIndex, const int plotYIndex,
-                         QWidget *parent);
+  PeakOverlayInteractive(PeaksPresenter *const peaksPresenter, QwtPlot *plot, const int plotXIndex,
+                         const int plotYIndex, QWidget *parent);
   /// Destructor
   ~PeakOverlayInteractive() override;
 

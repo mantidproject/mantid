@@ -33,8 +33,7 @@ using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
 
 namespace {
-void loadEmptyInstrument(const std::string &filename,
-                         const std::string &wsName) {
+void loadEmptyInstrument(const std::string &filename, const std::string &wsName) {
   LoadEmptyInstrument loaderCAL;
 
   loaderCAL.initialize();
@@ -48,8 +47,7 @@ void loadEmptyInstrument(const std::string &filename,
 
 class LoadIsawDetCalTest : public CxxTest::TestSuite {
 public:
-  void checkPosition(const IComponent_const_sptr &det, const double x,
-                     const double y, const double z) {
+  void checkPosition(const IComponent_const_sptr &det, const double x, const double y, const double z) {
     if (det != nullptr) {
       const auto detPos = det->getPos();
       const V3D testPos(x, y, z);
@@ -59,8 +57,7 @@ public:
     }
   }
 
-  void checkRotation(const IComponent_const_sptr &det, const double w,
-                     const double a, const double b, const double c) {
+  void checkRotation(const IComponent_const_sptr &det, const double w, const double a, const double b, const double c) {
     if (det != nullptr) {
       const auto detRot = det->getRotation();
       const Quat testRot(w, a, b, c);
@@ -92,8 +89,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(testerCAL.execute());
     TS_ASSERT(testerCAL.isExecuted());
 
-    MatrixWorkspace_sptr output =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
+    MatrixWorkspace_sptr output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
 
     // Get some stuff from the input workspace
     Instrument_const_sptr ins = output->getInstrument();
@@ -110,8 +106,7 @@ public:
   }
 
   void checkSNAP(const std::string &wsName) {
-    MatrixWorkspace_const_sptr output =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
+    MatrixWorkspace_const_sptr output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
 
     // Get some stuff from the input workspace
     Instrument_const_sptr ins = output->getInstrument();
@@ -136,8 +131,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(testerCAL.initialize());
     TS_ASSERT_THROWS_NOTHING(testerCAL.isInitialized());
     testerCAL.setPropertyValue("InputWorkspace", wsName);
-    testerCAL.setPropertyValue("Filename",
-                               "SNAP_34172_low.DetCal,SNAP_34172_high.DetCal");
+    testerCAL.setPropertyValue("Filename", "SNAP_34172_low.DetCal,SNAP_34172_high.DetCal");
     TS_ASSERT_THROWS_NOTHING(testerCAL.execute());
     TS_ASSERT(testerCAL.isExecuted());
 
@@ -170,12 +164,8 @@ public:
 
 class LoadIsawDetCalTestPerformance : public CxxTest::TestSuite {
 public:
-  static LoadIsawDetCalTestPerformance *createSuite() {
-    return new LoadIsawDetCalTestPerformance();
-  }
-  static void destroySuite(LoadIsawDetCalTestPerformance *suite) {
-    delete suite;
-  }
+  static LoadIsawDetCalTestPerformance *createSuite() { return new LoadIsawDetCalTestPerformance(); }
+  static void destroySuite(LoadIsawDetCalTestPerformance *suite) { delete suite; }
 
   void setUp() override {
     loadEmptyInstrument("SNAP_Definition_2011-09-07.xml", wsName);

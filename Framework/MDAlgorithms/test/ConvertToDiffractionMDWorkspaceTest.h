@@ -36,12 +36,10 @@ public:
 
   /** Test various combinations of OutputDimensions parameter */
   void test_OutputDimensions_Parameter() {
-    EventWorkspace_sptr in_ws = Mantid::DataObjects::MDEventsTestHelper::
-        createDiffractionEventWorkspace(10);
+    EventWorkspace_sptr in_ws = Mantid::DataObjects::MDEventsTestHelper::createDiffractionEventWorkspace(10);
     AnalysisDataService::Instance().addOrReplace("testInEW", in_ws);
 
-    auto alg = AlgorithmManager::Instance().create(
-        "ConvertToDiffractionMDWorkspace", 1);
+    auto alg = AlgorithmManager::Instance().create("ConvertToDiffractionMDWorkspace", 1);
     alg->setPropertyValue("InputWorkspace", "testInEW");
     alg->setPropertyValue("OutputWorkspace", "testOutMD");
     alg->setPropertyValue("OutputDimensions", "Q (lab frame)");
@@ -49,9 +47,7 @@ public:
     TS_ASSERT(alg->isExecuted());
 
     MDEventWorkspace3Lean::sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance().retrieveWS<MDEventWorkspace3Lean>(
-            "testOutMD"));
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<MDEventWorkspace3Lean>("testOutMD"));
     TS_ASSERT(ws);
     if (!ws)
       return;
@@ -60,14 +56,12 @@ public:
     // Test the frame type
     for (size_t dim = 0; dim < ws->getNumDims(); ++dim) {
       const auto &frame = ws->getDimension(dim)->getMDFrame();
-      TSM_ASSERT_EQUALS("Should be convertible to a QSample frame",
-                        Mantid::Geometry::QLab::QLabName, frame.name());
+      TSM_ASSERT_EQUALS("Should be convertible to a QSample frame", Mantid::Geometry::QLab::QLabName, frame.name());
     }
 
     // But you can't add to an existing one of the wrong dimensions type, if you
     // choose Append
-    alg = AlgorithmManager::Instance().create("ConvertToDiffractionMDWorkspace",
-                                              1);
+    alg = AlgorithmManager::Instance().create("ConvertToDiffractionMDWorkspace", 1);
     alg->setPropertyValue("InputWorkspace", "testInEW");
     alg->setPropertyValue("OutputWorkspace", "testOutMD");
     alg->setPropertyValue("OutputDimensions", "HKL");
@@ -76,8 +70,7 @@ public:
     TS_ASSERT(!alg->isExecuted());
 
     // If Append is False, then it does work. The workspace gets replaced
-    alg = AlgorithmManager::Instance().create("ConvertToDiffractionMDWorkspace",
-                                              1);
+    alg = AlgorithmManager::Instance().create("ConvertToDiffractionMDWorkspace", 1);
     alg->setPropertyValue("InputWorkspace", "testInEW");
     alg->setPropertyValue("OutputWorkspace", "testOutMD");
     alg->setPropertyValue("OutputDimensions", "HKL");
@@ -87,8 +80,7 @@ public:
 
     // Let's remove the old workspace and try again - it will work.
     AnalysisDataService::Instance().remove("testOutMD");
-    alg = AlgorithmManager::Instance().create("ConvertToDiffractionMDWorkspace",
-                                              1);
+    alg = AlgorithmManager::Instance().create("ConvertToDiffractionMDWorkspace", 1);
     alg->setPropertyValue("InputWorkspace", "testInEW");
     alg->setPropertyValue("OutputWorkspace", "testOutMD");
     alg->setPropertyValue("OutputDimensions", "HKL");
@@ -96,9 +88,7 @@ public:
     alg->execute();
     TS_ASSERT(alg->isExecuted());
 
-    TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance().retrieveWS<MDEventWorkspace3Lean>(
-            "testOutMD"));
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<MDEventWorkspace3Lean>("testOutMD"));
     TS_ASSERT(ws);
     if (!ws)
       return;
@@ -107,22 +97,18 @@ public:
     // Test the frame type
     for (size_t dim = 0; dim < ws->getNumDims(); ++dim) {
       const auto &frame = ws->getDimension(dim)->getMDFrame();
-      TSM_ASSERT_EQUALS("Should be convertible to a HKL frame",
-                        Mantid::Geometry::HKL::HKLName, frame.name());
+      TSM_ASSERT_EQUALS("Should be convertible to a HKL frame", Mantid::Geometry::HKL::HKLName, frame.name());
     }
 
     AnalysisDataService::Instance().remove("testOutMD");
-    alg = AlgorithmManager::Instance().create("ConvertToDiffractionMDWorkspace",
-                                              1);
+    alg = AlgorithmManager::Instance().create("ConvertToDiffractionMDWorkspace", 1);
     alg->setPropertyValue("InputWorkspace", "testInEW");
     alg->setPropertyValue("OutputWorkspace", "testOutMD");
     alg->setPropertyValue("OutputDimensions", "Q (sample frame)");
     alg->execute();
     TS_ASSERT(alg->isExecuted());
 
-    TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance().retrieveWS<MDEventWorkspace3Lean>(
-            "testOutMD"));
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<MDEventWorkspace3Lean>("testOutMD"));
     TS_ASSERT(ws);
     if (!ws)
       return;
@@ -131,8 +117,8 @@ public:
     // Test the frame type
     for (size_t dim = 0; dim < ws->getNumDims(); ++dim) {
       const auto &frame = ws->getDimension(dim)->getMDFrame();
-      TSM_ASSERT_EQUALS("Should be convertible to a QSample frame",
-                        Mantid::Geometry::QSample::QSampleName, frame.name());
+      TSM_ASSERT_EQUALS("Should be convertible to a QSample frame", Mantid::Geometry::QSample::QSampleName,
+                        frame.name());
     }
   }
 
@@ -140,29 +126,20 @@ public:
 
   void test_MINITOPAZ_Weighted() { do_test_MINITOPAZ(WEIGHTED, 100, 400); }
 
-  void test_MINITOPAZ_addToExistingWorkspace() {
-    do_test_MINITOPAZ(TOF, 100, 400, 2);
-  }
+  void test_MINITOPAZ_addToExistingWorkspace() { do_test_MINITOPAZ(TOF, 100, 400, 2); }
 
-  void test_MINITOPAZ_OneEventPerBin_fromEventWorkspace() {
-    do_test_MINITOPAZ(TOF, 100, 400, 1, true, false);
-  }
+  void test_MINITOPAZ_OneEventPerBin_fromEventWorkspace() { do_test_MINITOPAZ(TOF, 100, 400, 1, true, false); }
 
-  void test_MINITOPAZ_OneEventPerBin_fromWorkspace2D() {
-    do_test_MINITOPAZ(TOF, 100, 400, 1, true, true);
-  }
+  void test_MINITOPAZ_OneEventPerBin_fromWorkspace2D() { do_test_MINITOPAZ(TOF, 100, 400, 1, true, true); }
 
-  void test_MINITOPAZ_fromWorkspace2D() {
-    do_test_MINITOPAZ(TOF, 100, 400, 1, false, true);
-  }
+  void test_MINITOPAZ_fromWorkspace2D() { do_test_MINITOPAZ(TOF, 100, 400, 1, false, true); }
 
 private:
-  void do_test_MINITOPAZ(EventType type, int numEventsPer, int numPixels,
-                         size_t numTimesToAdd = 1, bool OneEventPerBin = false,
-                         bool MakeWorkspace2D = false) {
+  void do_test_MINITOPAZ(EventType type, int numEventsPer, int numPixels, size_t numTimesToAdd = 1,
+                         bool OneEventPerBin = false, bool MakeWorkspace2D = false) {
 
-    EventWorkspace_sptr in_ws = Mantid::DataObjects::MDEventsTestHelper::
-        createDiffractionEventWorkspace(numEventsPer, numPixels);
+    EventWorkspace_sptr in_ws =
+        Mantid::DataObjects::MDEventsTestHelper::createDiffractionEventWorkspace(numEventsPer, numPixels);
     if (type == WEIGHTED)
       in_ws *= 2.0;
     if (type == WEIGHTED_NOTIME) {
@@ -174,10 +151,8 @@ private:
 
     // Rebin the workspace to have a manageable number bins
     AnalysisDataService::Instance().addOrReplace("inputWS", in_ws);
-    FrameworkManager::Instance().exec("Rebin", 8, "InputWorkspace", "inputWS",
-                                      "OutputWorkspace", "inputWS", "Params",
-                                      "0, 500, 16e3", "PreserveEvents",
-                                      MakeWorkspace2D ? "0" : "1");
+    FrameworkManager::Instance().exec("Rebin", 8, "InputWorkspace", "inputWS", "OutputWorkspace", "inputWS", "Params",
+                                      "0, 500, 16e3", "PreserveEvents", MakeWorkspace2D ? "0" : "1");
 
     ConvertToDiffractionMDWorkspace alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
@@ -189,9 +164,7 @@ private:
     TS_ASSERT(alg.isExecuted())
 
     MDEventWorkspace3Lean::sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance().retrieveWS<MDEventWorkspace3Lean>(
-            "test_md3"));
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<MDEventWorkspace3Lean>("test_md3"));
     TS_ASSERT(ws);
     if (!ws)
       return;
@@ -213,20 +186,15 @@ private:
       TS_ASSERT_THROWS_NOTHING(alg.execute();)
       TS_ASSERT(alg.isExecuted())
 
-      TS_ASSERT_THROWS_NOTHING(
-          ws =
-              AnalysisDataService::Instance().retrieveWS<MDEventWorkspace3Lean>(
-                  "test_md3"));
+      TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<MDEventWorkspace3Lean>("test_md3"));
       TS_ASSERT(ws);
       if (!ws)
         return;
 
-      TS_ASSERT_EQUALS(
-          npoints * (i + 1),
-          ws->getNPoints()); // There are now twice as many points as before
+      TS_ASSERT_EQUALS(npoints * (i + 1),
+                       ws->getNPoints()); // There are now twice as many points as before
       TS_ASSERT_EQUALS(ws->getNumExperimentInfo(), (i + 1));
-      TSM_ASSERT("ExperimentInfo object is valid",
-                 ws->getExperimentInfo(static_cast<uint16_t>(i)));
+      TSM_ASSERT("ExperimentInfo object is valid", ws->getExperimentInfo(static_cast<uint16_t>(i)));
     }
 
     AnalysisDataService::Instance().remove("test_md3");
@@ -235,21 +203,15 @@ private:
 
 class CTDMDWorkspaceTestPerformance : public CxxTest::TestSuite {
 public:
-  static CTDMDWorkspaceTestPerformance *createSuite() {
-    return new CTDMDWorkspaceTestPerformance();
-  }
-  static void destroySuite(CTDMDWorkspaceTestPerformance *suite) {
-    delete suite;
-  }
+  static CTDMDWorkspaceTestPerformance *createSuite() { return new CTDMDWorkspaceTestPerformance(); }
+  static void destroySuite(CTDMDWorkspaceTestPerformance *suite) { delete suite; }
 
   void setUp() override {
-    in_ws = MDEventsTestHelper::createDiffractionEventWorkspace(numEventsPer,
-                                                                numPixels);
+    in_ws = MDEventsTestHelper::createDiffractionEventWorkspace(numEventsPer, numPixels);
 
     // Rebin the workspace to have a manageable number bins
     AnalysisDataService::Instance().addOrReplace("inputWS", in_ws);
-    FrameworkManager::Instance().exec("Rebin", 8, "InputWorkspace", "inputWS",
-                                      "OutputWorkspace", "inputWS", "Params",
+    FrameworkManager::Instance().exec("Rebin", 8, "InputWorkspace", "inputWS", "OutputWorkspace", "inputWS", "Params",
                                       "0, 500, 16e3", "PreserveEvents", "1");
 
     alg.initialize();
@@ -260,9 +222,7 @@ public:
 
   void tearDown() override { AnalysisDataService::Instance().clear(); }
 
-  void testConvertToDiffractionMDWorkspacePerformance() {
-    TS_ASSERT_THROWS_NOTHING(alg.execute());
-  }
+  void testConvertToDiffractionMDWorkspacePerformance() { TS_ASSERT_THROWS_NOTHING(alg.execute()); }
 
 private:
   ConvertToDiffractionMDWorkspace alg;

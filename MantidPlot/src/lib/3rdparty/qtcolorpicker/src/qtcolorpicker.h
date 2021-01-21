@@ -75,17 +75,14 @@ class ColorPickerPopup;
 class QT_QTCOLORPICKER_EXPORT QtColorPicker : public QPushButton {
   Q_OBJECT
 
-  Q_PROPERTY(
-      bool colorDialog READ colorDialogEnabled WRITE setColorDialogEnabled)
+  Q_PROPERTY(bool colorDialog READ colorDialogEnabled WRITE setColorDialogEnabled)
 
 public:
-  QtColorPicker(QWidget *parent = nullptr, int columns = -1,
-                bool enableColorDialog = true);
+  QtColorPicker(QWidget *parent = nullptr, int columns = -1, bool enableColorDialog = true);
 
   ~QtColorPicker() override;
 
-  void insertColor(const QColor &color, const QString &text = QString::null,
-                   int index = -1);
+  void insertColor(const QColor &color, const QString &text = QString::null, int index = -1);
 
   QColor currentColor() const;
 

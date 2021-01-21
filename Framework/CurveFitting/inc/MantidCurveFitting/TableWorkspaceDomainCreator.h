@@ -28,37 +28,30 @@ class TableWorkspace;
 
 namespace CurveFitting {
 
-class MANTID_CURVEFITTING_DLL TableWorkspaceDomainCreator
-    : public API::IDomainCreator {
+class MANTID_CURVEFITTING_DLL TableWorkspaceDomainCreator : public API::IDomainCreator {
 public:
   // Constructor
-  TableWorkspaceDomainCreator(Kernel::IPropertyManager *fit,
-                              const std::string &workspacePropertyName,
+  TableWorkspaceDomainCreator(Kernel::IPropertyManager *fit, const std::string &workspacePropertyName,
                               DomainType domainType = Simple);
   /// Constructor
   TableWorkspaceDomainCreator(DomainType domainType = Simple);
 
   // Declare properties that specify the dataset within the workspace to fit to.
-  void declareDatasetProperties(const std::string &suffix = "",
-                                bool addProp = true) override;
+  void declareDatasetProperties(const std::string &suffix = "", bool addProp = true) override;
 
   // Create a domain from the input workspace
-  void createDomain(std::shared_ptr<API::FunctionDomain> &domain,
-                    std::shared_ptr<API::FunctionValues> &values,
+  void createDomain(std::shared_ptr<API::FunctionDomain> &domain, std::shared_ptr<API::FunctionValues> &values,
                     size_t i0 = 0) override;
 
   // Create an output workspace.
-  std::shared_ptr<API::Workspace> createOutputWorkspace(
-      const std::string &baseName, API::IFunction_sptr function,
-      std::shared_ptr<API::FunctionDomain> domain,
-      std::shared_ptr<API::FunctionValues> values,
-      const std::string &outputWorkspacePropertyName) override;
+  std::shared_ptr<API::Workspace> createOutputWorkspace(const std::string &baseName, API::IFunction_sptr function,
+                                                        std::shared_ptr<API::FunctionDomain> domain,
+                                                        std::shared_ptr<API::FunctionValues> values,
+                                                        const std::string &outputWorkspacePropertyName) override;
 
   /// Set the workspace
   /// @param ws :: workspace to set.
-  void setWorkspace(API::ITableWorkspace_sptr ws) {
-    m_tableWorkspace = std::move(ws);
-  }
+  void setWorkspace(API::ITableWorkspace_sptr ws) { m_tableWorkspace = std::move(ws); }
   /// Set the startX and endX
   /// @param startX :: Start of the domain
   /// @param endX :: End of the domain
@@ -74,8 +67,7 @@ public:
   /// @param xColName :: name of the x column
   /// @param yColName :: name of the y column
   /// @param errColName :: name of the y error column
-  void setColumnNames(const std::string &xColName, const std::string &yColName,
-                      const std::string &errColName) const {
+  void setColumnNames(const std::string &xColName, const std::string &yColName, const std::string &errColName) const {
     m_xColName = xColName;
     m_yColName = yColName;
     m_errColName = errColName;
@@ -93,26 +85,21 @@ private:
   /// Set the names of the X, Y and Error columns
   void setXYEColumnNames(const API::ITableWorkspace_sptr &ws) const;
   /// Creates the blank output workspace of the correct size
-  std::shared_ptr<API::MatrixWorkspace>
-  createEmptyResultWS(const size_t nhistograms, const size_t nyvalues);
+  std::shared_ptr<API::MatrixWorkspace> createEmptyResultWS(const size_t nhistograms, const size_t nyvalues);
   /// Set initial values for parameters with default values.
   void setInitialValues(API::IFunction &function);
   // Unrolls function into its constituent parts if it is a composite and adds
   // it to the list. Note this is recursive
-  void
-  appendCompositeFunctionMembers(std::list<API::IFunction_sptr> &functionList,
-                                 const API::IFunction_sptr &function) const;
+  void appendCompositeFunctionMembers(std::list<API::IFunction_sptr> &functionList,
+                                      const API::IFunction_sptr &function) const;
   // Create separate Convolutions for each component of the model of a
   // convolution
-  void appendConvolvedCompositeFunctionMembers(
-      std::list<API::IFunction_sptr> &functionList,
-      const API::IFunction_sptr &function) const;
+  void appendConvolvedCompositeFunctionMembers(std::list<API::IFunction_sptr> &functionList,
+                                               const API::IFunction_sptr &function) const;
   /// Add the calculated function values to the workspace
-  void addFunctionValuesToWS(
-      const API::IFunction_sptr &function,
-      std::shared_ptr<API::MatrixWorkspace> &ws, const size_t wsIndex,
-      const std::shared_ptr<API::FunctionDomain> &domain,
-      const std::shared_ptr<API::FunctionValues> &resultValues) const;
+  void addFunctionValuesToWS(const API::IFunction_sptr &function, std::shared_ptr<API::MatrixWorkspace> &ws,
+                             const size_t wsIndex, const std::shared_ptr<API::FunctionDomain> &domain,
+                             const std::shared_ptr<API::FunctionValues> &resultValues) const;
   /// Check workspace is in the correct form
   void setAndValidateWorkspace(const API::Workspace_sptr &ws) const;
 

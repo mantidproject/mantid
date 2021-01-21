@@ -49,14 +49,12 @@ using namespace Mantid;
 using namespace Mantid::API;
 
 PlotCurve::PlotCurve(const QString &name)
-    : QwtPlotCurve(name), d_type(0), d_x_offset(0.0), d_y_offset(0.0),
-      d_side_lines(false), d_skip_symbols(1), m_isDistribution(false) {}
+    : QwtPlotCurve(name), d_type(0), d_x_offset(0.0), d_y_offset(0.0), d_side_lines(false), d_skip_symbols(1),
+      m_isDistribution(false) {}
 
 PlotCurve::PlotCurve(const PlotCurve &c)
-    : QObject(), QwtPlotCurve(c.title().text()), d_type(c.d_type),
-      d_x_offset(c.d_x_offset), d_y_offset(c.d_y_offset),
-      d_side_lines(c.d_side_lines), d_skip_symbols(c.d_skip_symbols),
-      m_isDistribution(c.m_isDistribution) {}
+    : QObject(), QwtPlotCurve(c.title().text()), d_type(c.d_type), d_x_offset(c.d_x_offset), d_y_offset(c.d_y_offset),
+      d_side_lines(c.d_side_lines), d_skip_symbols(c.d_skip_symbols), m_isDistribution(c.m_isDistribution) {}
 
 QString PlotCurve::saveCurveLayout() {
   Plot *plot = static_cast<Plot *>(this->plot());
@@ -86,17 +84,14 @@ QString PlotCurve::saveCurveLayout() {
   if (brush.style() != Qt::NoBrush) {
     s += "<Brush>\n";
     s += "\t<Color>" + brush.color().name() + "</Color>\n";
-    s += "\t<Style>" +
-         QString::number(PatternBox::patternIndex(brush.style())) +
-         "</Style>\n";
+    s += "\t<Style>" + QString::number(PatternBox::patternIndex(brush.style())) + "</Style>\n";
     s += "</Brush>\n";
   }
 
   const QwtSymbol symbol = this->symbol();
   if (symbol.style() != QwtSymbol::NoSymbol) {
     s += "<Symbol>\n";
-    s += "\t<Style>" + QString::number(SymbolBox::symbolIndex(symbol.style())) +
-         "</Style>\n";
+    s += "\t<Style>" + QString::number(SymbolBox::symbolIndex(symbol.style())) + "</Style>\n";
     s += "\t<Size>" + QString::number(symbol.size().width()) + "</Size>\n";
 
     s += "\t<SymbolPen>\n";
@@ -108,9 +103,7 @@ QString PlotCurve::saveCurveLayout() {
     if (brush.style() != Qt::NoBrush) {
       s += "\t<SymbolBrush>\n";
       s += "\t\t<Color>" + symbol.brush().color().name() + "</Color>\n";
-      s += "\t\t<Style>" +
-           QString::number(PatternBox::patternIndex(symbol.brush().style())) +
-           "</Style>\n";
+      s += "\t\t<Style>" + QString::number(PatternBox::patternIndex(symbol.brush().style())) + "</Style>\n";
       s += "\t</SymbolBrush>\n";
     }
     s += "</Symbol>\n";
@@ -132,8 +125,7 @@ void PlotCurve::restoreCurveLayout(const QStringList &lst) {
         if (s.contains("<Color>"))
           pen.setColor(QColor(s.remove("<Color>").remove("</Color>")));
         else if (s.contains("<Style>"))
-          pen.setStyle(Graph::getPenStyle(
-              s.remove("<Style>").remove("</Style>").toInt()));
+          pen.setStyle(Graph::getPenStyle(s.remove("<Style>").remove("</Style>").toInt()));
         else if (s.contains("<Width>"))
           pen.setWidthF(s.remove("<Width>").remove("</Width>").toDouble());
       }
@@ -145,8 +137,7 @@ void PlotCurve::restoreCurveLayout(const QStringList &lst) {
         if (s.contains("<Color>"))
           brush.setColor(QColor(s.remove("<Color>").remove("</Color>")));
         else if (s.contains("<Style>"))
-          brush.setStyle(PatternBox::brushStyle(
-              s.remove("<Style>").remove("</Style>").toInt()));
+          brush.setStyle(PatternBox::brushStyle(s.remove("<Style>").remove("</Style>").toInt()));
       }
       setBrush(brush);
     } else if (s == "<Symbol>") {
@@ -154,11 +145,9 @@ void PlotCurve::restoreCurveLayout(const QStringList &lst) {
       while (s != "</Symbol>") {
         s = (*(++line)).trimmed();
         if (s.contains("<Style>"))
-          symbol.setStyle(
-              SymbolBox::style(s.remove("<Style>").remove("</Style>").toInt()));
+          symbol.setStyle(SymbolBox::style(s.remove("<Style>").remove("</Style>").toInt()));
         else if (s.contains("<Size>"))
-          symbol.setSize(
-              (QwtSymbol::Style)s.remove("<Size>").remove("</Size>").toInt());
+          symbol.setSize((QwtSymbol::Style)s.remove("<Size>").remove("</Size>").toInt());
         else if (s == "<SymbolPen>") {
           QPen pen;
           while (s != "</SymbolPen>") {
@@ -166,8 +155,7 @@ void PlotCurve::restoreCurveLayout(const QStringList &lst) {
             if (s.contains("<Color>"))
               pen.setColor(QColor(s.remove("<Color>").remove("</Color>")));
             else if (s.contains("<Style>"))
-              pen.setStyle(Graph::getPenStyle(
-                  s.remove("<Style>").remove("</Style>").toInt()));
+              pen.setStyle(Graph::getPenStyle(s.remove("<Style>").remove("</Style>").toInt()));
             else if (s.contains("<Width>"))
               pen.setWidthF(s.remove("<Width>").remove("</Width>").toDouble());
           }
@@ -179,8 +167,7 @@ void PlotCurve::restoreCurveLayout(const QStringList &lst) {
             if (s.contains("<Color>"))
               brush.setColor(QColor(s.remove("<Color>").remove("</Color>")));
             else if (s.contains("<Style>"))
-              brush.setStyle(PatternBox::brushStyle(
-                  s.remove("<Style>").remove("</Style>").toInt()));
+              brush.setStyle(PatternBox::brushStyle(s.remove("<Style>").remove("</Style>").toInt()));
           }
           symbol.setBrush(brush);
         }
@@ -200,8 +187,8 @@ void PlotCurve::aboutToBeDeleted() {
   emit forgetMe();
 }
 
-void PlotCurve::drawCurve(QPainter *p, int style, const QwtScaleMap &xMap,
-                          const QwtScaleMap &yMap, int from, int to) const {
+void PlotCurve::drawCurve(QPainter *p, int style, const QwtScaleMap &xMap, const QwtScaleMap &yMap, int from,
+                          int to) const {
   if (d_side_lines)
     drawSideLines(p, xMap, yMap, from, to);
   QwtPlotCurve::drawCurve(p, style, xMap, yMap, from, to);
@@ -225,9 +212,8 @@ void PlotCurve::setSkipSymbolsCount(int count) {
 
  \sa setSymbol(), draw(), drawCurve()
  */
-void PlotCurve::drawSymbols(QPainter *painter, const QwtSymbol &symbol,
-                            const QwtScaleMap &xMap, const QwtScaleMap &yMap,
-                            int from, int to) const {
+void PlotCurve::drawSymbols(QPainter *painter, const QwtSymbol &symbol, const QwtScaleMap &xMap,
+                            const QwtScaleMap &yMap, int from, int to) const {
   if (d_skip_symbols < 2) {
     QwtPlotCurve::drawSymbols(painter, symbol, xMap, yMap, from, to);
     return;
@@ -252,8 +238,7 @@ void PlotCurve::drawSymbols(QPainter *painter, const QwtSymbol &symbol,
   }
 }
 
-void PlotCurve::drawSideLines(QPainter *p, const QwtScaleMap &xMap,
-                              const QwtScaleMap &yMap, int from, int to) const {
+void PlotCurve::drawSideLines(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap, int from, int to) const {
   if (!p || dataSize() <= 0)
     return;
 
@@ -284,8 +269,7 @@ void PlotCurve::drawSideLines(QPainter *p, const QwtScaleMap &xMap,
 ///   the data's bounding rect to fit to a waterfall plot.
 /// @param yDataOffset :: Output value of an y-offset that should be applied to
 ///   the data's bounding rect to fit to a waterfall plot.
-void PlotCurve::computeWaterfallOffsets(double &xDataOffset,
-                                        double &yDataOffset) {
+void PlotCurve::computeWaterfallOffsets(double &xDataOffset, double &yDataOffset) {
   Plot *plot = static_cast<Plot *>(this->plot());
   Graph *g = static_cast<Graph *>(plot->parent());
 
@@ -307,10 +291,8 @@ void PlotCurve::computeWaterfallOffsets(double &xDataOffset,
       double yRange = plot->axisScaleDiv(Plot::yLeft)->range();
 
       // First compute offsets in a linear scale
-      xDataOffset =
-          index * g->waterfallXOffset() * 0.01 * xRange / (double)(curves - 1);
-      yDataOffset =
-          index * g->waterfallYOffset() * 0.01 * yRange / (double)(curves - 1);
+      xDataOffset = index * g->waterfallXOffset() * 0.01 * xRange / (double)(curves - 1);
+      yDataOffset = index * g->waterfallYOffset() * 0.01 * yRange / (double)(curves - 1);
 
       // Corresponding offset on the screen in pixels
       d_x_offset = plot->canvas()->width() * xDataOffset / xRange;
@@ -320,23 +302,17 @@ void PlotCurve::computeWaterfallOffsets(double &xDataOffset,
       // non-linear the offsets will change.
       { // x-offset
         auto trans = plot->axisScaleEngine(Plot::xBottom)->transformation();
-        auto a =
-            trans->xForm(g->curve(0)->maxXValue(),
-                         plot->axisScaleDiv(Plot::xBottom)->lowerBound(),
-                         g->curve(0)->maxXValue(), 0, plot->canvas()->width());
-        auto b = trans->invXForm(a + d_x_offset, 0, plot->canvas()->width(), 1,
-                                 g->curve(0)->maxXValue());
+        auto a = trans->xForm(g->curve(0)->maxXValue(), plot->axisScaleDiv(Plot::xBottom)->lowerBound(),
+                              g->curve(0)->maxXValue(), 0, plot->canvas()->width());
+        auto b = trans->invXForm(a + d_x_offset, 0, plot->canvas()->width(), 1, g->curve(0)->maxXValue());
         xDataOffset = b - g->curve(0)->maxXValue();
       }
 
       { // y-offset
         auto trans = plot->axisScaleEngine(Plot::yLeft)->transformation();
-        auto a =
-            trans->xForm(g->curve(0)->maxYValue(),
-                         plot->axisScaleDiv(Plot::yLeft)->lowerBound(),
-                         g->curve(0)->maxYValue(), 0, plot->canvas()->height());
-        auto b = trans->invXForm(a + d_y_offset, 0, plot->canvas()->height(), 1,
-                                 g->curve(0)->maxYValue());
+        auto a = trans->xForm(g->curve(0)->maxYValue(), plot->axisScaleDiv(Plot::yLeft)->lowerBound(),
+                              g->curve(0)->maxYValue(), 0, plot->canvas()->height());
+        auto b = trans->invXForm(a + d_y_offset, 0, plot->canvas()->height(), 1, g->curve(0)->maxYValue());
         yDataOffset = b - g->curve(0)->maxYValue();
       }
       // Set the z-order of the curves such that the first curve is on top.
@@ -358,27 +334,21 @@ void PlotCurve::computeWaterfallOffsets(double &xDataOffset,
 
 // --- DataCurve --- //
 
-DataCurve::DataCurve(Table *t, const QString &xColName, const QString &name,
-                     int startRow, int endRow)
-    : PlotCurve(name), d_table(t), d_x_column(xColName), d_start_row(startRow),
-      d_end_row(endRow), d_labels_column(QString()), d_click_pos_x(0.0),
-      d_click_pos_y(0.0), d_labels_color(Qt::black), d_labels_font(QFont()),
-      d_labels_angle(0.0), d_white_out_labels(false),
-      d_labels_align(Qt::AlignHCenter), d_labels_x_offset(0),
-      d_labels_y_offset(50), d_selected_label(nullptr) {
+DataCurve::DataCurve(Table *t, const QString &xColName, const QString &name, int startRow, int endRow)
+    : PlotCurve(name), d_table(t), d_x_column(xColName), d_start_row(startRow), d_end_row(endRow),
+      d_labels_column(QString()), d_click_pos_x(0.0), d_click_pos_y(0.0), d_labels_color(Qt::black),
+      d_labels_font(QFont()), d_labels_angle(0.0), d_white_out_labels(false), d_labels_align(Qt::AlignHCenter),
+      d_labels_x_offset(0), d_labels_y_offset(50), d_selected_label(nullptr) {
   if (t && d_end_row < 0)
     d_end_row = t->numRows() - 1;
 }
 
 DataCurve::DataCurve(const DataCurve &c)
-    : PlotCurve(c.title().text()), d_table(c.d_table), d_x_column(c.d_x_column),
-      d_start_row(c.d_start_row), d_end_row(c.d_end_row),
-      d_labels_column(c.d_labels_column), d_click_pos_x(c.d_click_pos_x),
-      d_click_pos_y(c.d_click_pos_y), d_labels_color(c.d_labels_color),
-      d_labels_font(c.d_labels_font), d_labels_angle(c.d_labels_angle),
-      d_white_out_labels(c.d_white_out_labels),
-      d_labels_align(c.d_labels_align), d_labels_x_offset(c.d_labels_x_offset),
-      d_labels_y_offset(c.d_labels_y_offset),
+    : PlotCurve(c.title().text()), d_table(c.d_table), d_x_column(c.d_x_column), d_start_row(c.d_start_row),
+      d_end_row(c.d_end_row), d_labels_column(c.d_labels_column), d_click_pos_x(c.d_click_pos_x),
+      d_click_pos_y(c.d_click_pos_y), d_labels_color(c.d_labels_color), d_labels_font(c.d_labels_font),
+      d_labels_angle(c.d_labels_angle), d_white_out_labels(c.d_white_out_labels), d_labels_align(c.d_labels_align),
+      d_labels_x_offset(c.d_labels_x_offset), d_labels_y_offset(c.d_labels_y_offset),
       d_selected_label(c.d_selected_label) {}
 
 void DataCurve::setRowRange(int startRow, int endRow) {
@@ -404,9 +374,7 @@ void DataCurve::setFullRange() {
     c->loadData();
 }
 
-bool DataCurve::isFullRange() const {
-  return !(d_start_row != 0 || d_end_row != d_table->numRows() - 1);
-}
+bool DataCurve::isFullRange() const { return !(d_start_row != 0 || d_end_row != d_table->numRows() - 1); }
 
 QString DataCurve::plotAssociation() const {
   QString s = title().text();
@@ -419,9 +387,7 @@ QString DataCurve::plotAssociation() const {
   return s;
 }
 
-void DataCurve::updateColumnNames(const QString &oldName,
-                                  const QString &newName,
-                                  bool updateTableName) {
+void DataCurve::updateColumnNames(const QString &oldName, const QString &newName, bool updateTableName) {
   if (updateTableName) {
     QString s = title().text();
     QStringList lst = s.split("_", QString::SkipEmptyParts);
@@ -442,8 +408,7 @@ void DataCurve::updateColumnNames(const QString &oldName,
 }
 
 bool DataCurve::updateData(Table *t, const QString &colName) {
-  if (d_table != t || (colName != title().text() && colName != d_x_column &&
-                       colName != d_labels_column))
+  if (d_table != t || (colName != title().text() && colName != d_x_column && colName != d_labels_column))
     return false;
 
   // Update data with all rows in table
@@ -559,11 +524,9 @@ void DataCurve::loadData() {
 
     if (xColType == Table::Text) {
       if (d_type == GraphOptions::HorizontalBars)
-        g->setLabelsTextFormat(QwtPlot::yLeft, ScaleDraw::Text, d_x_column,
-                               xLabels);
+        g->setLabelsTextFormat(QwtPlot::yLeft, ScaleDraw::Text, d_x_column, xLabels);
       else
-        g->setLabelsTextFormat(QwtPlot::xBottom, ScaleDraw::Text, d_x_column,
-                               xLabels);
+        g->setLabelsTextFormat(QwtPlot::xBottom, ScaleDraw::Text, d_x_column, xLabels);
     } else if (xColType == Table::Time || xColType == Table::Date) {
       int axis = QwtPlot::xBottom;
       if (d_type == GraphOptions::HorizontalBars)
@@ -578,8 +541,7 @@ void DataCurve::loadData() {
     }
 
     if (yColType == Table::Text)
-      g->setLabelsTextFormat(QwtPlot::yLeft, ScaleDraw::Text, title().text(),
-                             yLabels);
+      g->setLabelsTextFormat(QwtPlot::yLeft, ScaleDraw::Text, title().text(), yLabels);
   }
 
   if (!d_labels_list.isEmpty()) {
@@ -646,11 +608,9 @@ int DataCurve::tableRow(int point) const {
     for (int i = d_start_row; i <= d_end_row; i++) {
       QDate d = QDate::fromString(d_table->text(i, xcol), format);
       if (d.isValid()) {
-        if (d_type == GraphOptions::HorizontalBars &&
-            date0.daysTo(d) == y(point) && d_table->cell(i, ycol) == x(point))
+        if (d_type == GraphOptions::HorizontalBars && date0.daysTo(d) == y(point) && d_table->cell(i, ycol) == x(point))
           return i;
-        else if (date0.daysTo(d) == x(point) &&
-                 d_table->cell(i, ycol) == y(point))
+        else if (date0.daysTo(d) == x(point) && d_table->cell(i, ycol) == y(point))
           return i;
       }
     }
@@ -660,8 +620,7 @@ int DataCurve::tableRow(int point) const {
     for (int i = d_start_row; i <= d_end_row; i++) {
       QTime t = QTime::fromString(d_table->text(i, xcol), format);
       if (t.isValid()) {
-        if (d_type == GraphOptions::HorizontalBars &&
-            t0.msecsTo(t) == y(point) && d_table->cell(i, ycol) == x(point))
+        if (d_type == GraphOptions::HorizontalBars && t0.msecsTo(t) == y(point) && d_table->cell(i, ycol) == x(point))
           return i;
         if (t0.msecsTo(t) == x(point) && d_table->cell(i, ycol) == y(point))
           return i;
@@ -699,8 +658,7 @@ void DataCurve::loadLabels() {
   int ycol = d_table->colIndex(title().text());
   int labelsCol = d_table->colIndex(d_labels_column);
   int cols = d_table->numCols();
-  if (xcol < 0 || ycol < 0 || labelsCol < 0 || xcol >= cols || ycol >= cols ||
-      labelsCol >= cols)
+  if (xcol < 0 || ycol < 0 || labelsCol < 0 || xcol >= cols || ycol >= cols || labelsCol >= cols)
     return;
 
   QwtPlot *d_plot = plot();
@@ -729,8 +687,7 @@ void DataCurve::loadLabels() {
 
     QSize size = t.textSize();
     int dx = static_cast<int>(d_labels_x_offset * 0.01 * size.height());
-    int dy =
-        -static_cast<int>((d_labels_y_offset * 0.01 + 0.5) * size.height());
+    int dy = -static_cast<int>((d_labels_y_offset * 0.01 + 0.5) * size.height());
     int x2 = d_plot->transform(x_axis, x(index)) + dx;
     int y2 = d_plot->transform(y_axis, y(index)) + dy;
     switch (d_labels_align) {
@@ -820,8 +777,7 @@ void DataCurve::updateLabelsPosition() {
     int x_axis = xAxis();
     int y_axis = yAxis();
     int dx = static_cast<int>(d_labels_x_offset * 0.01 * size.height());
-    int dy =
-        -static_cast<int>((d_labels_y_offset * 0.01 + 0.5) * size.height());
+    int dy = -static_cast<int>((d_labels_y_offset * 0.01 + 0.5) * size.height());
     int x2 = d_plot->transform(x_axis, x(index)) + dx;
     int y2 = d_plot->transform(y_axis, y(index)) + dy;
     switch (d_labels_align) {
@@ -910,8 +866,7 @@ QString DataCurve::saveToString() {
   if (d_skip_symbols > 1)
     s += "<SkipPoints>" + QString::number(d_skip_symbols) + "</SkipPoints>\n";
 
-  if (d_labels_list.isEmpty() || type() == GraphOptions::Function ||
-      type() == GraphOptions::Box)
+  if (d_labels_list.isEmpty() || type() == GraphOptions::Function || type() == GraphOptions::Box)
     return s;
 
   s = "<CurveLabels>\n";
@@ -999,11 +954,9 @@ void DataCurve::setLabelsSelected(bool on) {
 bool DataCurve::validCurveType() const {
   int style = type();
 
-  return !(style == GraphOptions::Function || style == GraphOptions::Box ||
-           style == GraphOptions::Pie || style == GraphOptions::ErrorBars ||
-           style == GraphOptions::ColorMap ||
-           style == GraphOptions::GrayScale || style == GraphOptions::Contour ||
-           style == GraphOptions::ImagePlot);
+  return !(style == GraphOptions::Function || style == GraphOptions::Box || style == GraphOptions::Pie ||
+           style == GraphOptions::ErrorBars || style == GraphOptions::ColorMap || style == GraphOptions::GrayScale ||
+           style == GraphOptions::Contour || style == GraphOptions::ImagePlot);
 }
 
 void DataCurve::moveLabels(const QPoint &pos) {
@@ -1033,16 +986,12 @@ void DataCurve::moveLabels(const QPoint &pos) {
   d_click_pos_y = d_plot->invTransform(yAxis(), pos.y());
 }
 
-PlotCurve *DataCurve::clone(const Graph *) const {
-  return new DataCurve(*this);
-}
+PlotCurve *DataCurve::clone(const Graph *) const { return new DataCurve(*this); }
 
 PlotMarker::PlotMarker(int index, double angle)
-    : QwtPlotMarker(), d_index(index), d_angle(angle), d_label_x_offset(0.0),
-      d_label_y_offset(0.0) {}
+    : QwtPlotMarker(), d_index(index), d_angle(angle), d_label_x_offset(0.0), d_label_y_offset(0.0) {}
 
-void PlotMarker::draw(QPainter *p, const QwtScaleMap &xMap,
-                      const QwtScaleMap &yMap, const QRect &) const {
+void PlotMarker::draw(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap, const QRect &) const {
   p->save();
   int x = xMap.transform(xValue());
   int y = yMap.transform(yValue());

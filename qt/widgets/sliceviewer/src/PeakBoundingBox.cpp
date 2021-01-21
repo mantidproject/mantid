@@ -15,8 +15,7 @@ namespace SliceViewer {
  * Default Constructor
  */
 PeakBoundingBox::PeakBoundingBox()
-    : m_left(0), m_right(0), m_top(0), m_bottom(0), m_slicePoint(0), m_front(0),
-      m_back(0) {}
+    : m_left(0), m_right(0), m_top(0), m_bottom(0), m_slicePoint(0), m_front(0), m_back(0) {}
 
 /**
  * Constructor
@@ -26,12 +25,10 @@ PeakBoundingBox::PeakBoundingBox()
  * @param bottom : Box bottom
  * @param slicePoint : Slicing point.
  */
-PeakBoundingBox::PeakBoundingBox(const Left &left, const Right &right,
-                                 const Top &top, const Bottom &bottom,
+PeakBoundingBox::PeakBoundingBox(const Left &left, const Right &right, const Top &top, const Bottom &bottom,
                                  const SlicePoint &slicePoint)
-    : m_left(left), m_right(right), m_top(top), m_bottom(bottom),
-      m_slicePoint(slicePoint), m_front(Front(slicePoint())),
-      m_back(Back(slicePoint())) {
+    : m_left(left), m_right(right), m_top(top), m_bottom(bottom), m_slicePoint(slicePoint),
+      m_front(Front(slicePoint())), m_back(Back(slicePoint())) {
   validateBoundaries();
 }
 
@@ -45,12 +42,10 @@ PeakBoundingBox::PeakBoundingBox(const Left &left, const Right &right,
  * @param front : Box front
  * @param back : Box back
  */
-PeakBoundingBox::PeakBoundingBox(const Left &left, const Right &right,
-                                 const Top &top, const Bottom &bottom,
-                                 const SlicePoint &slicePoint,
-                                 const Front &front, const Back &back)
-    : m_left(left), m_right(right), m_top(top), m_bottom(bottom),
-      m_slicePoint(slicePoint), m_front(front), m_back(back) {
+PeakBoundingBox::PeakBoundingBox(const Left &left, const Right &right, const Top &top, const Bottom &bottom,
+                                 const SlicePoint &slicePoint, const Front &front, const Back &back)
+    : m_left(left), m_right(right), m_top(top), m_bottom(bottom), m_slicePoint(slicePoint), m_front(front),
+      m_back(back) {
   validateBoundaries();
 }
 
@@ -80,9 +75,8 @@ PeakBoundingBox::~PeakBoundingBox() {}
  * @param other
  */
 PeakBoundingBox::PeakBoundingBox(const PeakBoundingBox &other)
-    : m_left(other.m_left), m_right(other.m_right), m_top(other.m_top),
-      m_bottom(other.m_bottom), m_slicePoint(other.m_slicePoint),
-      m_front(other.m_front), m_back(other.m_back) {}
+    : m_left(other.m_left), m_right(other.m_right), m_top(other.m_top), m_bottom(other.m_bottom),
+      m_slicePoint(other.m_slicePoint), m_front(other.m_front), m_back(other.m_back) {}
 
 /**
  * Assignment operator
@@ -150,12 +144,10 @@ double PeakBoundingBox::slicePoint() const { return m_slicePoint(); }
  * @return True if and only if the box and slice points are identical.
  */
 bool PeakBoundingBox::operator==(const PeakBoundingBox &other) const {
-  return this->m_left() == other.m_left() &&
-         this->m_right() == other.m_right() &&
-         this->m_bottom() == other.m_bottom() &&
-         this->m_top() == other.m_top() &&
-         this->m_slicePoint() == other.m_slicePoint() &&
-         this->m_back() == other.m_back() && this->m_front() == other.m_front();
+  return this->m_left() == other.m_left() && this->m_right() == other.m_right() &&
+         this->m_bottom() == other.m_bottom() && this->m_top() == other.m_top() &&
+         this->m_slicePoint() == other.m_slicePoint() && this->m_back() == other.m_back() &&
+         this->m_front() == other.m_front();
 }
 
 /**
@@ -163,9 +155,7 @@ bool PeakBoundingBox::operator==(const PeakBoundingBox &other) const {
  * @param other : other object to compare against
  * @return False if and only if both box and slice points are identical
  */
-bool PeakBoundingBox::operator!=(const PeakBoundingBox &other) const {
-  return !(*this == other);
-}
+bool PeakBoundingBox::operator!=(const PeakBoundingBox &other) const { return !(*this == other); }
 
 /**
  * Make a new box using the SlicePosition and the sliceDelta to calculate a new
@@ -175,8 +165,7 @@ bool PeakBoundingBox::operator!=(const PeakBoundingBox &other) const {
  */
 PeakBoundingBox PeakBoundingBox::makeSliceBox(const double &sliceDelta) const {
   double halfWidth = std::abs(sliceDelta) / 2;
-  return PeakBoundingBox(m_left, m_right, m_top, m_bottom, m_slicePoint,
-                         Front(m_slicePoint() - halfWidth),
+  return PeakBoundingBox(m_left, m_right, m_top, m_bottom, m_slicePoint, Front(m_slicePoint() - halfWidth),
                          Back(m_back() + halfWidth));
 }
 
@@ -202,9 +191,8 @@ std::vector<double> PeakBoundingBox::toExtents() const {
 std::string PeakBoundingBox::toExtentsString() const {
   using boost::format;
   auto extents = toExtents();
-  return boost::str(format("%.2f,%.2f,%.2f,%.2f,%.2f,%.2f") % extents[0] %
-                    extents[1] % extents[2] % extents[3] % extents[4] %
-                    extents[5]);
+  return boost::str(format("%.2f,%.2f,%.2f,%.2f,%.2f,%.2f") % extents[0] % extents[1] % extents[2] % extents[3] %
+                    extents[4] % extents[5]);
 }
 
 /**
@@ -212,12 +200,10 @@ std::string PeakBoundingBox::toExtentsString() const {
  * and back according to the transform.
  * @param transform : Transform to use.
  */
-void PeakBoundingBox::transformBox(
-    const Mantid::Geometry::PeakTransform_sptr &transform) {
+void PeakBoundingBox::transformBox(const Mantid::Geometry::PeakTransform_sptr &transform) {
   using Mantid::Kernel::V3D;
   // Front bottom left
-  V3D newBottomLeft =
-      transform->transformBack(V3D(m_left(), m_bottom(), m_front()));
+  V3D newBottomLeft = transform->transformBack(V3D(m_left(), m_bottom(), m_front()));
   // Back top right
   V3D newTopRight = transform->transformBack(V3D(m_right(), m_top(), m_back()));
   // SlicePoint

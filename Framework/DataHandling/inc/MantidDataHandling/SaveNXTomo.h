@@ -65,9 +65,7 @@ public:
 
   /// Algorithm's version
   int version() const override { return (1); }
-  const std::vector<std::string> seeAlso() const override {
-    return {"SaveNexusProcessed"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"SaveNexusProcessed"}; }
 
   /// Algorithm's category for identification
   const std::string category() const override {
@@ -87,17 +85,13 @@ private:
   ::NeXus::File setupFile();
 
   /// Writes a single workspace into the file
-  void writeSingleWorkspace(const DataObjects::Workspace2D_sptr &workspace,
-                            ::NeXus::File &nxFile);
+  void writeSingleWorkspace(const DataObjects::Workspace2D_sptr &workspace, ::NeXus::File &nxFile);
 
   /// Write various pieces of data from the workspace log with checks on the
   /// structure of the nexus file
-  void writeLogValues(const DataObjects::Workspace2D_sptr &workspace,
-                      ::NeXus::File &nxFile, int thisFileInd);
-  void writeIntensityValue(const DataObjects::Workspace2D_sptr &workspace,
-                           ::NeXus::File &nxFile, int thisFileInd);
-  void writeImageKeyValue(const DataObjects::Workspace2D_sptr &workspace,
-                          ::NeXus::File &nxFile, int thisFileInd);
+  void writeLogValues(const DataObjects::Workspace2D_sptr &workspace, ::NeXus::File &nxFile, int thisFileInd);
+  void writeIntensityValue(const DataObjects::Workspace2D_sptr &workspace, ::NeXus::File &nxFile, int thisFileInd);
+  void writeImageKeyValue(const DataObjects::Workspace2D_sptr &workspace, ::NeXus::File &nxFile, int thisFileInd);
 
   /// Main exec routine, called for group or individual workspace processing.
   void processAll();

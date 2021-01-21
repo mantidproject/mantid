@@ -36,8 +36,7 @@ public:
 
   void test_exec() {
     // --- Get an instrument -----
-    Instrument_sptr inst =
-        ComponentCreationHelper::createTestInstrumentCylindrical(5);
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(5);
 
     // --- Make up some data ----
     GroupingWorkspace_sptr groupWS(new GroupingWorkspace(inst));
@@ -56,10 +55,8 @@ public:
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GroupingWorkspace", groupWS));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OffsetsWorkspace", offsetsWS));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty(
-        "MaskWorkspace", std::dynamic_pointer_cast<MatrixWorkspace>(maskWS)));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("Filename", "SaveCalFileTest.cal"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaskWorkspace", std::dynamic_pointer_cast<MatrixWorkspace>(maskWS)));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "SaveCalFileTest.cal"));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
@@ -71,14 +68,11 @@ public:
     getline(grFile, str);
     getline(grFile, str);
     getline(grFile, str);
-    TS_ASSERT_EQUALS(str,
-                     "        0              1      0.1230000       0      12");
+    TS_ASSERT_EQUALS(str, "        0              1      0.1230000       0      12");
     getline(grFile, str);
-    TS_ASSERT_EQUALS(str,
-                     "        1              2      0.4560000       1      23");
+    TS_ASSERT_EQUALS(str, "        1              2      0.4560000       1      23");
     getline(grFile, str);
-    TS_ASSERT_EQUALS(str,
-                     "        2              3      0.0000000       1      45");
+    TS_ASSERT_EQUALS(str, "        2              3      0.0000000       1      45");
 
     grFile.close();
     if (Poco::File(filename).exists())

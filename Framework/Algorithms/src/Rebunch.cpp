@@ -34,17 +34,14 @@ using API::WorkspaceProperty;
  *
  */
 void Rebunch::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input),
                   "The input workspace");
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "The result of rebinning");
 
   auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(1);
-  declareProperty("NBunch", 1, mustBePositive,
-                  "The number of bins that will be summed in each bunch");
+  declareProperty("NBunch", 1, mustBePositive, "The number of bins that will be summed in each bunch");
 }
 
 /** Executes the rebin algorithm
@@ -80,8 +77,7 @@ void Rebunch::exec() {
 
   // make output Workspace the same type is the input, but with new length of
   // signal array
-  API::MatrixWorkspace_sptr outputW =
-      API::WorkspaceFactory::Instance().create(inputW, histnumber, nx, ny);
+  API::MatrixWorkspace_sptr outputW = API::WorkspaceFactory::Instance().create(inputW, histnumber, nx, ny);
 
   int progress_step = histnumber / 100;
   if (progress_step == 0)
@@ -91,18 +87,14 @@ void Rebunch::exec() {
     PARALLEL_START_INTERUPT_REGION
     // output data arrays are implicitly filled by function
     if (point) {
-      rebunch_point(inputW->x(hist), inputW->y(hist), inputW->e(hist),
-                    outputW->mutableX(hist), outputW->mutableY(hist),
+      rebunch_point(inputW->x(hist), inputW->y(hist), inputW->e(hist), outputW->mutableX(hist), outputW->mutableY(hist),
                     outputW->mutableE(hist), n_bunch);
     } else if (dist) {
-      rebunch_hist_frequencies(inputW->x(hist), inputW->y(hist),
-                               inputW->e(hist), outputW->mutableX(hist),
-                               outputW->mutableY(hist), outputW->mutableE(hist),
-                               n_bunch);
+      rebunch_hist_frequencies(inputW->x(hist), inputW->y(hist), inputW->e(hist), outputW->mutableX(hist),
+                               outputW->mutableY(hist), outputW->mutableE(hist), n_bunch);
     } else {
-      rebunch_hist_counts(inputW->x(hist), inputW->y(hist), inputW->e(hist),
-                          outputW->mutableX(hist), outputW->mutableY(hist),
-                          outputW->mutableE(hist), n_bunch);
+      rebunch_hist_counts(inputW->x(hist), inputW->y(hist), inputW->e(hist), outputW->mutableX(hist),
+                          outputW->mutableY(hist), outputW->mutableE(hist), n_bunch);
     }
 
     if (hist % progress_step == 0) {
@@ -140,11 +132,8 @@ void Rebunch::exec() {
  * @throw runtime_error Thrown if algorithm cannot execute
  * @throw invalid_argument Thrown if input to function is incorrect
  **/
-void Rebunch::rebunch_hist_counts(const HistogramX &xold,
-                                  const HistogramY &yold,
-                                  const HistogramE &eold, HistogramX &xnew,
-                                  HistogramY &ynew, HistogramE &enew,
-                                  const size_t n_bunch) {
+void Rebunch::rebunch_hist_counts(const HistogramX &xold, const HistogramY &yold, const HistogramE &eold,
+                                  HistogramX &xnew, HistogramY &ynew, HistogramE &enew, const size_t n_bunch) {
   size_t size_x = xold.size();
   size_t size_y = yold.size();
 
@@ -203,11 +192,8 @@ void Rebunch::rebunch_hist_counts(const HistogramX &xold,
  * @throw runtime_error Thrown if algorithm cannot execute
  * @throw invalid_argument Thrown if input to function is incorrect
  **/
-void Rebunch::rebunch_hist_frequencies(const HistogramX &xold,
-                                       const HistogramY &yold,
-                                       const HistogramE &eold, HistogramX &xnew,
-                                       HistogramY &ynew, HistogramE &enew,
-                                       const size_t n_bunch) {
+void Rebunch::rebunch_hist_frequencies(const HistogramX &xold, const HistogramY &yold, const HistogramE &eold,
+                                       HistogramX &xnew, HistogramY &ynew, HistogramE &enew, const size_t n_bunch) {
   double width;
   size_t size_x = xold.size();
   size_t size_y = yold.size();
@@ -275,10 +261,8 @@ void Rebunch::rebunch_hist_frequencies(const HistogramX &xold,
  * @throw runtime_error Thrown if algorithm cannot execute
  * @throw invalid_argument Thrown if input to function is incorrect
  **/
-void Rebunch::rebunch_point(const HistogramX &xold, const HistogramY &yold,
-                            const HistogramE &eold, HistogramX &xnew,
-                            HistogramY &ynew, HistogramE &enew,
-                            const size_t n_bunch) {
+void Rebunch::rebunch_point(const HistogramX &xold, const HistogramY &yold, const HistogramE &eold, HistogramX &xnew,
+                            HistogramY &ynew, HistogramE &enew, const size_t n_bunch) {
 
   size_t size_y = yold.size();
   double xsum, ysum, esum;

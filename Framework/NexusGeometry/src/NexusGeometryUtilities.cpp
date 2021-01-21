@@ -15,8 +15,7 @@ using namespace H5;
 
 /// Find a single dataset inside parent group (returns first match). Optional
 /// wrapped - empty to indicate nothing found.
-boost::optional<H5::DataSet> findDataset(const H5::Group &parentGroup,
-                                         const H5std_string &name) {
+boost::optional<H5::DataSet> findDataset(const H5::Group &parentGroup, const H5std_string &name) {
   // Iterate over children, and determine if a group
   for (hsize_t i = 0; i < parentGroup.getNumObjs(); ++i) {
     if (parentGroup.getObjTypeByIdx(i) == DATASET_TYPE) {
@@ -31,8 +30,7 @@ boost::optional<H5::DataSet> findDataset(const H5::Group &parentGroup,
   return boost::optional<DataSet>{}; // Empty
 }
 
-boost::optional<H5::Group> findGroupByName(const H5::Group &parentGroup,
-                                           const H5std_string &name) {
+boost::optional<H5::Group> findGroupByName(const H5::Group &parentGroup, const H5std_string &name) {
 
   for (hsize_t i = 0; i < parentGroup.getNumObjs(); ++i) {
     if (parentGroup.getObjTypeByIdx(i) == GROUP_TYPE) {
@@ -47,9 +45,7 @@ boost::optional<H5::Group> findGroupByName(const H5::Group &parentGroup,
 
 bool hasNXAttribute(const H5::Group &group, const std::string &attributeValue) {
   bool result = false;
-  for (uint32_t attribute_index = 0;
-       attribute_index < static_cast<uint32_t>(group.getNumAttrs());
-       ++attribute_index) {
+  for (uint32_t attribute_index = 0; attribute_index < static_cast<uint32_t>(group.getNumAttrs()); ++attribute_index) {
     // Test attribute at current index for NX_class
     Attribute attribute = group.openAttribute(attribute_index);
     if (attribute.getName() == NX_CLASS) {
@@ -76,8 +72,7 @@ bool isNamed(const H5::H5Object &object, const std::string &name) {
 
 /// Find a single group inside parent (returns first match). class type must
 /// match NX_class. Optional wrapped - empty to indicate nothing found.
-boost::optional<H5::Group> findGroup(const H5::Group &parentGroup,
-                                     const H5std_string &classType) {
+boost::optional<H5::Group> findGroup(const H5::Group &parentGroup, const H5std_string &classType) {
   // Iterate over children, and determine if a group
   for (hsize_t i = 0; i < parentGroup.getNumObjs(); ++i) {
     if (parentGroup.getObjTypeByIdx(i) == GROUP_TYPE) {
@@ -95,8 +90,7 @@ boost::optional<H5::Group> findGroup(const H5::Group &parentGroup,
 
 /// Find all groups at the same level matching same class type. Returns first
 /// item found.
-std::vector<H5::Group> findGroups(const H5::Group &parentGroup,
-                                  const H5std_string &classType) {
+std::vector<H5::Group> findGroups(const H5::Group &parentGroup, const H5std_string &classType) {
   std::vector<H5::Group> groups;
   // Iterate over children, and determine if a group
   for (hsize_t i = 0; i < parentGroup.getNumObjs(); ++i) {
@@ -111,12 +105,10 @@ std::vector<H5::Group> findGroups(const H5::Group &parentGroup,
   }
   return groups; // Empty
 }
-H5::Group findGroupOrThrow(const H5::Group &parentGroup,
-                           const H5std_string &classType) {
+H5::Group findGroupOrThrow(const H5::Group &parentGroup, const H5std_string &classType) {
   auto found = findGroup(parentGroup, classType);
   if (!found) {
-    throw std::runtime_error(std::string("Could not find group class ") +
-                             classType);
+    throw std::runtime_error(std::string("Could not find group class ") + classType);
   } else
     return *found;
 }

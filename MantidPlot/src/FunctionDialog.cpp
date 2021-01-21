@@ -44,8 +44,7 @@
 #include <QTextEdit>
 #include <QWidget>
 
-FunctionDialog::FunctionDialog(ApplicationWindow *app, Graph *g,
-                               const Qt::WFlags &fl)
+FunctionDialog::FunctionDialog(ApplicationWindow *app, Graph *g, const Qt::WFlags &fl)
     : QDialog(g, fl), d_app(app), graph(g) {
   setObjectName("FunctionDialog");
   setWindowTitle(tr("MantidPlot - Add function curve"));
@@ -264,8 +263,7 @@ void FunctionDialog::acceptFunction() {
     parser.SetExpr(from.toAscii().constData());
     start = parser.Eval();
   } catch (mu::ParserError &e) {
-    QMessageBox::critical(nullptr, tr("MantidPlot - Start limit error"),
-                          QString::fromStdString(e.GetMsg()));
+    QMessageBox::critical(nullptr, tr("MantidPlot - Start limit error"), QString::fromStdString(e.GetMsg()));
     boxFrom->setFocus();
     return;
   }
@@ -274,16 +272,14 @@ void FunctionDialog::acceptFunction() {
     parser.SetExpr(to.toAscii().constData());
     end = parser.Eval();
   } catch (mu::ParserError &e) {
-    QMessageBox::critical(nullptr, tr("MantidPlot - End limit error"),
-                          QString::fromStdString(e.GetMsg()));
+    QMessageBox::critical(nullptr, tr("MantidPlot - End limit error"), QString::fromStdString(e.GetMsg()));
     boxTo->setFocus();
     return;
   }
 
   if (start >= end) {
-    QMessageBox::critical(
-        nullptr, tr("MantidPlot - Input error"),
-        tr("Please enter x limits that satisfy: from < end!"));
+    QMessageBox::critical(nullptr, tr("MantidPlot - Input error"),
+                          tr("Please enter x limits that satisfy: from < end!"));
     boxTo->setFocus();
     return;
   }
@@ -300,8 +296,7 @@ void FunctionDialog::acceptFunction() {
     x = end;
     parser.Eval();
   } catch (mu::ParserError &e) {
-    QMessageBox::critical(nullptr, tr("MantidPlot - Input function error"),
-                          QString::fromStdString(e.GetMsg()));
+    QMessageBox::critical(nullptr, tr("MantidPlot - Input function error"), QString::fromStdString(e.GetMsg()));
     boxFunction->setFocus();
     error = true;
   }
@@ -313,12 +308,10 @@ void FunctionDialog::acceptFunction() {
   if (!error) {
     d_app->updateFunctionLists(type, formulas);
     if (!graph)
-      d_app->newFunctionPlot(formulas, start, end, boxPoints->value(), "x",
-                             type);
+      d_app->newFunctionPlot(formulas, start, end, boxPoints->value(), "x", type);
     else {
       if (curveID >= 0)
-        graph->modifyFunctionCurve(curveID, type, formulas, "x", start, end,
-                                   boxPoints->value());
+        graph->modifyFunctionCurve(curveID, type, formulas, "x", start, end, boxPoints->value());
       else
         graph->addFunction(formulas, start, end, boxPoints->value(), "x", type);
     }
@@ -335,8 +328,7 @@ void FunctionDialog::acceptParametric() {
     parser.SetExpr(from.toAscii().constData());
     start = parser.Eval();
   } catch (mu::ParserError &e) {
-    QMessageBox::critical(nullptr, tr("MantidPlot - Start limit error"),
-                          QString::fromStdString(e.GetMsg()));
+    QMessageBox::critical(nullptr, tr("MantidPlot - Start limit error"), QString::fromStdString(e.GetMsg()));
     boxParFrom->setFocus();
     return;
   }
@@ -346,16 +338,14 @@ void FunctionDialog::acceptParametric() {
     parser.SetExpr(to.toAscii().constData());
     end = parser.Eval();
   } catch (mu::ParserError &e) {
-    QMessageBox::critical(nullptr, tr("MantidPlot - End limit error"),
-                          QString::fromStdString(e.GetMsg()));
+    QMessageBox::critical(nullptr, tr("MantidPlot - End limit error"), QString::fromStdString(e.GetMsg()));
     boxParTo->setFocus();
     return;
   }
 
   if (start >= end) {
-    QMessageBox::critical(
-        nullptr, tr("MantidPlot - Input error"),
-        tr("Please enter parameter limits that satisfy: from < end!"));
+    QMessageBox::critical(nullptr, tr("MantidPlot - Input error"),
+                          tr("Please enter parameter limits that satisfy: from < end!"));
     boxParTo->setFocus();
     return;
   }
@@ -373,8 +363,7 @@ void FunctionDialog::acceptParametric() {
     parameter = end;
     parser.Eval();
   } catch (mu::ParserError &e) {
-    QMessageBox::critical(nullptr, tr("MantidPlot - Input function error"),
-                          QString::fromStdString(e.GetMsg()));
+    QMessageBox::critical(nullptr, tr("MantidPlot - Input function error"), QString::fromStdString(e.GetMsg()));
     boxXFunction->setFocus();
     error = true;
   }
@@ -387,8 +376,7 @@ void FunctionDialog::acceptParametric() {
     parameter = end;
     parser.Eval();
   } catch (mu::ParserError &e) {
-    QMessageBox::critical(nullptr, tr("MantidPlot - Input function error"),
-                          QString::fromStdString(e.GetMsg()));
+    QMessageBox::critical(nullptr, tr("MantidPlot - Input function error"), QString::fromStdString(e.GetMsg()));
     boxYFunction->setFocus();
     error = true;
   }
@@ -400,16 +388,12 @@ void FunctionDialog::acceptParametric() {
   if (!error) {
     d_app->updateFunctionLists(type, formulas);
     if (!graph)
-      d_app->newFunctionPlot(formulas, start, end, boxParPoints->value(),
-                             boxParameter->text(), type);
+      d_app->newFunctionPlot(formulas, start, end, boxParPoints->value(), boxParameter->text(), type);
     else {
       if (curveID >= 0)
-        graph->modifyFunctionCurve(curveID, type, formulas,
-                                   boxParameter->text(), start, end,
-                                   boxParPoints->value());
+        graph->modifyFunctionCurve(curveID, type, formulas, boxParameter->text(), start, end, boxParPoints->value());
       else
-        graph->addFunction(formulas, start, end, boxParPoints->value(),
-                           boxParameter->text(), type);
+        graph->addFunction(formulas, start, end, boxParPoints->value(), boxParameter->text(), type);
     }
   }
 }
@@ -425,8 +409,7 @@ void FunctionDialog::acceptPolar() {
     parser.SetExpr(from.toAscii().constData());
     start = parser.Eval();
   } catch (mu::ParserError &e) {
-    QMessageBox::critical(nullptr, tr("MantidPlot - Start limit error"),
-                          QString::fromStdString(e.GetMsg()));
+    QMessageBox::critical(nullptr, tr("MantidPlot - Start limit error"), QString::fromStdString(e.GetMsg()));
     boxPolarFrom->setFocus();
     return;
   }
@@ -436,16 +419,14 @@ void FunctionDialog::acceptPolar() {
     parser.SetExpr(to.toAscii().constData());
     end = parser.Eval();
   } catch (mu::ParserError &e) {
-    QMessageBox::critical(nullptr, tr("MantidPlot - End limit error"),
-                          QString::fromStdString(e.GetMsg()));
+    QMessageBox::critical(nullptr, tr("MantidPlot - End limit error"), QString::fromStdString(e.GetMsg()));
     boxPolarTo->setFocus();
     return;
   }
 
   if (start >= end) {
-    QMessageBox::critical(
-        nullptr, tr("MantidPlot - Input error"),
-        tr("Please enter parameter limits that satisfy: from < end!"));
+    QMessageBox::critical(nullptr, tr("MantidPlot - Input error"),
+                          tr("Please enter parameter limits that satisfy: from < end!"));
     boxPolarTo->setFocus();
     return;
   }
@@ -458,15 +439,13 @@ void FunctionDialog::acceptPolar() {
     MyParser parser;
     double parameter = start;
     ;
-    parser.DefineVar((boxPolarParameter->text()).toAscii().constData(),
-                     &parameter);
+    parser.DefineVar((boxPolarParameter->text()).toAscii().constData(), &parameter);
     parser.SetExpr(rformula.toAscii().constData());
     parser.Eval();
     parameter = end;
     parser.Eval();
   } catch (mu::ParserError &e) {
-    QMessageBox::critical(nullptr, tr("MantidPlot - Input function error"),
-                          QString::fromStdString(e.GetMsg()));
+    QMessageBox::critical(nullptr, tr("MantidPlot - Input function error"), QString::fromStdString(e.GetMsg()));
     boxPolarRadius->setFocus();
     error = true;
   }
@@ -474,15 +453,13 @@ void FunctionDialog::acceptPolar() {
     MyParser parser;
     double parameter = start;
     ;
-    parser.DefineVar((boxPolarParameter->text()).toAscii().constData(),
-                     &parameter);
+    parser.DefineVar((boxPolarParameter->text()).toAscii().constData(), &parameter);
     parser.SetExpr(tformula.toAscii().constData());
     parser.Eval();
     parameter = end;
     parser.Eval();
   } catch (mu::ParserError &e) {
-    QMessageBox::critical(nullptr, tr("MantidPlot - Input function error"),
-                          QString::fromStdString(e.GetMsg()));
+    QMessageBox::critical(nullptr, tr("MantidPlot - Input function error"), QString::fromStdString(e.GetMsg()));
     boxPolarTheta->setFocus();
     error = true;
   }
@@ -495,16 +472,13 @@ void FunctionDialog::acceptPolar() {
     d_app->updateFunctionLists(type, formulas);
 
     if (!graph)
-      d_app->newFunctionPlot(formulas, start, end, boxPolarPoints->value(),
-                             boxPolarParameter->text(), type);
+      d_app->newFunctionPlot(formulas, start, end, boxPolarPoints->value(), boxPolarParameter->text(), type);
     else {
       if (curveID >= 0)
-        graph->modifyFunctionCurve(curveID, type, formulas,
-                                   boxPolarParameter->text(), start, end,
+        graph->modifyFunctionCurve(curveID, type, formulas, boxPolarParameter->text(), start, end,
                                    boxPolarPoints->value());
       else
-        graph->addFunction(formulas, start, end, boxPolarPoints->value(),
-                           boxPolarParameter->text(), type);
+        graph->addFunction(formulas, start, end, boxPolarPoints->value(), boxPolarParameter->text(), type);
     }
   }
 }
@@ -526,14 +500,12 @@ void FunctionDialog::accept() {
   close();
 }
 
-void FunctionDialog::insertParamFunctionsList(const QStringList &xList,
-                                              const QStringList &yList) {
+void FunctionDialog::insertParamFunctionsList(const QStringList &xList, const QStringList &yList) {
   boxXFunction->insertItems(0, xList);
   boxYFunction->insertItems(0, yList);
 }
 
-void FunctionDialog::insertPolarFunctionsList(const QStringList &rList,
-                                              const QStringList &thetaList) {
+void FunctionDialog::insertPolarFunctionsList(const QStringList &rList, const QStringList &thetaList) {
   boxPolarRadius->insertItems(0, rList);
   boxPolarTheta->insertItems(0, thetaList);
 }

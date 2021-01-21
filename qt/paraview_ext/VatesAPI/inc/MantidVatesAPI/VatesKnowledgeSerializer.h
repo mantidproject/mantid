@@ -51,8 +51,7 @@ public:
   VatesKnowledgeSerializer();
 
   /// Set the implicit function to use called.
-  void setImplicitFunction(
-      std::shared_ptr<const Mantid::Geometry::MDImplicitFunction> spFunction);
+  void setImplicitFunction(std::shared_ptr<const Mantid::Geometry::MDImplicitFunction> spFunction);
 
   /// Set the workspace name to apply.
   void setWorkspace(const Mantid::API::IMDWorkspace &workspace);

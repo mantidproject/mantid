@@ -32,28 +32,21 @@
 
 #include <QLocale>
 
-Differentiation::Differentiation(ApplicationWindow *parent, Graph *g)
-    : Filter(parent, g) {
-  init();
-}
+Differentiation::Differentiation(ApplicationWindow *parent, Graph *g) : Filter(parent, g) { init(); }
 
-Differentiation::Differentiation(ApplicationWindow *parent, Graph *g,
-                                 const QString &curveTitle)
-    : Filter(parent, g) {
+Differentiation::Differentiation(ApplicationWindow *parent, Graph *g, const QString &curveTitle) : Filter(parent, g) {
   init();
   setDataFromCurve(curveTitle);
 }
 
-Differentiation::Differentiation(ApplicationWindow *parent, Graph *g,
-                                 const QString &curveTitle, double start,
+Differentiation::Differentiation(ApplicationWindow *parent, Graph *g, const QString &curveTitle, double start,
                                  double end)
     : Filter(parent, g) {
   init();
   setDataFromCurve(curveTitle, start, end);
 }
 
-Differentiation::Differentiation(ApplicationWindow *parent, Table *t,
-                                 const QString &xCol, const QString &yCol,
+Differentiation::Differentiation(ApplicationWindow *parent, Table *t, const QString &xCol, const QString &yCol,
                                  int start, int end)
     : Filter(parent, t) {
   init();
@@ -68,13 +61,11 @@ void Differentiation::init() {
 void Differentiation::output() {
   std::vector<double> result(d_n - 1);
   for (int i = 1; i < d_n - 1; i++)
-    result[i] = 0.5 * ((d_y[i + 1] - d_y[i]) / (d_x[i + 1] - d_x[i]) +
-                       (d_y[i] - d_y[i - 1]) / (d_x[i] - d_x[i - 1]));
+    result[i] = 0.5 * ((d_y[i + 1] - d_y[i]) / (d_x[i + 1] - d_x[i]) + (d_y[i] - d_y[i - 1]) / (d_x[i] - d_x[i - 1]));
 
   ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parent());
   if (!app) {
-    throw std::logic_error(
-        "Parent of Differentiation is not ApplicationWindow as expected.");
+    throw std::logic_error("Parent of Differentiation is not ApplicationWindow as expected.");
   }
   QLocale locale = app->locale();
   QString tableName = app->generateUniqueName(QString(objectName()));
@@ -84,15 +75,11 @@ void Differentiation::output() {
   else
     dataSet = d_y_col_name;
 
-  d_result_table = app->newHiddenTable(
-      tableName,
-      tr("Derivative") + " " + tr("of", "Derivative of") + " " + dataSet,
-      d_n - 2, 2);
+  d_result_table =
+      app->newHiddenTable(tableName, tr("Derivative") + " " + tr("of", "Derivative of") + " " + dataSet, d_n - 2, 2);
   for (int i = 1; i < d_n - 1; i++) {
-    d_result_table->setText(
-        i - 1, 0, locale.toString(d_x[i], 'g', app->d_decimal_digits));
-    d_result_table->setText(
-        i - 1, 1, locale.toString(result[i], 'g', app->d_decimal_digits));
+    d_result_table->setText(i - 1, 0, locale.toString(d_x[i], 'g', app->d_decimal_digits));
+    d_result_table->setText(i - 1, 1, locale.toString(result[i], 'g', app->d_decimal_digits));
   }
 
   if (d_graphics_display) {
@@ -100,8 +87,7 @@ void Differentiation::output() {
       d_output_graph = createOutputGraph()->activeGraph();
 
     d_output_graph->insertCurve(d_result_table, tableName + "_2", 0);
-    QString legend = "\\l(1)" + tr("Derivative") + " " +
-                     tr("of", "Derivative of") + " " + dataSet;
+    QString legend = "\\l(1)" + tr("Derivative") + " " + tr("of", "Derivative of") + " " + dataSet;
     LegendWidget *l = d_output_graph->legend();
     if (l) {
       l->setText(legend);

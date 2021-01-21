@@ -22,13 +22,10 @@ namespace Algorithms {
  * @param center V3D defining the central point of the circle
  * @param radius Radius of beam
  */
-CircularBeamProfile::CircularBeamProfile(const Geometry::ReferenceFrame &frame,
-                                         const Kernel::V3D &center,
+CircularBeamProfile::CircularBeamProfile(const Geometry::ReferenceFrame &frame, const Kernel::V3D &center,
                                          double radius)
-    : IBeamProfile(), m_upIdx(frame.pointingUp()),
-      m_beamIdx(frame.pointingAlongBeam()),
-      m_horIdx(frame.pointingHorizontal()), m_radius(radius), m_min(),
-      m_center(center), m_beamDir() {
+    : IBeamProfile(), m_upIdx(frame.pointingUp()), m_beamIdx(frame.pointingAlongBeam()),
+      m_horIdx(frame.pointingHorizontal()), m_radius(radius), m_min(), m_center(center), m_beamDir() {
   m_min[m_upIdx] = m_center[m_upIdx] - radius;
   m_min[m_horIdx] = m_center[m_horIdx] - radius;
   m_min[m_beamIdx] = m_center[m_beamIdx];
@@ -41,8 +38,7 @@ CircularBeamProfile::CircularBeamProfile(const Geometry::ReferenceFrame &frame,
  * @param rng A reference to a random number generator
  * @return An IBeamProfile::Ray describing the start and direction
  */
-IBeamProfile::Ray CircularBeamProfile::generatePoint(
-    Kernel::PseudoRandomNumberGenerator &rng) const {
+IBeamProfile::Ray CircularBeamProfile::generatePoint(Kernel::PseudoRandomNumberGenerator &rng) const {
   V3D pt;
   const double rsq = m_radius * m_radius;
   const double R = std::sqrt(rng.nextValue() * rsq);
@@ -65,9 +61,8 @@ IBeamProfile::Ray CircularBeamProfile::generatePoint(
  * allowed region for the generated point.
  * @return An IBeamProfile::Ray describing the start and direction
  */
-IBeamProfile::Ray
-CircularBeamProfile::generatePoint(Kernel::PseudoRandomNumberGenerator &rng,
-                                   const Geometry::BoundingBox &bounds) const {
+IBeamProfile::Ray CircularBeamProfile::generatePoint(Kernel::PseudoRandomNumberGenerator &rng,
+                                                     const Geometry::BoundingBox &bounds) const {
   auto rngRay = generatePoint(rng);
   auto &rngPt = rngRay.startPos;
   const V3D minBound(bounds.minPoint()), maxBound(bounds.maxPoint());
@@ -89,24 +84,20 @@ CircularBeamProfile::generatePoint(Kernel::PseudoRandomNumberGenerator &rng,
  * @param sampleBox A reference to the bounding box of the sample
  * @return A BoundingBox defining the active region
  */
-Geometry::BoundingBox CircularBeamProfile::defineActiveRegion(
-    const Geometry::BoundingBox &sampleBox) const {
+Geometry::BoundingBox CircularBeamProfile::defineActiveRegion(const Geometry::BoundingBox &sampleBox) const {
   // In the beam direction use the maximum sample extent other wise restrict
   // the active region to the width/height of beam
   const auto &sampleMin(sampleBox.minPoint());
   const auto &sampleMax(sampleBox.maxPoint());
   V3D minPoint, maxPoint;
   minPoint[m_horIdx] = std::max(sampleMin[m_horIdx], m_min[m_horIdx]);
-  maxPoint[m_horIdx] =
-      std::min(sampleMax[m_horIdx], m_center[m_horIdx] + m_radius);
+  maxPoint[m_horIdx] = std::min(sampleMax[m_horIdx], m_center[m_horIdx] + m_radius);
   minPoint[m_upIdx] = std::max(sampleMin[m_upIdx], m_min[m_upIdx]);
-  maxPoint[m_upIdx] =
-      std::min(sampleMax[m_upIdx], m_center[m_upIdx] + m_radius);
+  maxPoint[m_upIdx] = std::min(sampleMax[m_upIdx], m_center[m_upIdx] + m_radius);
   minPoint[m_beamIdx] = sampleMin[m_beamIdx];
   maxPoint[m_beamIdx] = sampleMax[m_beamIdx];
 
-  return Geometry::BoundingBox(maxPoint.X(), maxPoint.Y(), maxPoint.Z(),
-                               minPoint.X(), minPoint.Y(), minPoint.Z());
+  return Geometry::BoundingBox(maxPoint.X(), maxPoint.Y(), maxPoint.Z(), minPoint.X(), minPoint.Y(), minPoint.Z());
 }
 
 } // namespace Algorithms

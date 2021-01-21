@@ -20,12 +20,10 @@
 namespace Mantid {
 namespace API {
 
-SpectrumInfo::SpectrumInfo(const Beamline::SpectrumInfo &spectrumInfo,
-                           const ExperimentInfo &experimentInfo,
+SpectrumInfo::SpectrumInfo(const Beamline::SpectrumInfo &spectrumInfo, const ExperimentInfo &experimentInfo,
                            Geometry::DetectorInfo &detectorInfo)
-    : m_experimentInfo(experimentInfo), m_detectorInfo(detectorInfo),
-      m_spectrumInfo(spectrumInfo), m_lastDetector(PARALLEL_GET_MAX_THREADS),
-      m_lastIndex(PARALLEL_GET_MAX_THREADS, -1) {}
+    : m_experimentInfo(experimentInfo), m_detectorInfo(detectorInfo), m_spectrumInfo(spectrumInfo),
+      m_lastDetector(PARALLEL_GET_MAX_THREADS), m_lastIndex(PARALLEL_GET_MAX_THREADS, -1) {}
 
 // Defined as default in source for forward declaration with std::unique_ptr.
 SpectrumInfo::~SpectrumInfo() = default;
@@ -33,19 +31,15 @@ SpectrumInfo::~SpectrumInfo() = default;
 /// Returns the size of the SpectrumInfo, i.e., the number of spectra.
 size_t SpectrumInfo::size() const { return m_spectrumInfo.size(); }
 
-size_t SpectrumInfo::detectorCount() const {
-  return m_spectrumInfo.detectorCount();
-}
+size_t SpectrumInfo::detectorCount() const { return m_spectrumInfo.detectorCount(); }
 
 /// Returns a const reference to the SpectrumDefinition of the spectrum.
-const SpectrumDefinition &
-SpectrumInfo::spectrumDefinition(const size_t index) const {
+const SpectrumDefinition &SpectrumInfo::spectrumDefinition(const size_t index) const {
   m_experimentInfo.updateSpectrumDefinitionIfNecessary(index);
   return m_spectrumInfo.spectrumDefinition(index);
 }
 
-const Kernel::cow_ptr<std::vector<SpectrumDefinition>> &
-SpectrumInfo::sharedSpectrumDefinitions() const {
+const Kernel::cow_ptr<std::vector<SpectrumDefinition>> &SpectrumInfo::sharedSpectrumDefinitions() const {
   for (size_t i = 0; i < size(); ++i)
     m_experimentInfo.updateSpectrumDefinitionIfNecessary(i);
   return m_spectrumInfo.sharedSpectrumDefinitions();
@@ -119,17 +113,15 @@ double SpectrumInfo::azimuthal(const size_t index) const {
  *  @param index Index of the spectrum that lat/long are required for
  *  @return A pair containing the latitude and longitude values.
  */
-std::pair<double, double>
-SpectrumInfo::geographicalAngles(const size_t index) const {
+std::pair<double, double> SpectrumInfo::geographicalAngles(const size_t index) const {
   double lat{0.0}, lon{0.0};
   for (const auto &detIndex : checkAndGetSpectrumDefinition(index)) {
     auto latlong = m_detectorInfo.geographicalAngles(detIndex);
     lat += latlong.first;
     lon += latlong.second;
   }
-  return std::pair<double, double>(
-      lat / static_cast<double>(spectrumDefinition(index).size()),
-      lon / static_cast<double>(spectrumDefinition(index).size()));
+  return std::pair<double, double>(lat / static_cast<double>(spectrumDefinition(index).size()),
+                                   lon / static_cast<double>(spectrumDefinition(index).size()));
 }
 
 /// Returns the position of the spectrum with given index.
@@ -164,19 +156,13 @@ void SpectrumInfo::setMasked(const size_t index, bool masked) {
 
 /// Return a const reference to the detector or detector group of the spectrum
 /// with given index.
-const Geometry::IDetector &SpectrumInfo::detector(const size_t index) const {
-  return getDetector(index);
-}
+const Geometry::IDetector &SpectrumInfo::detector(const size_t index) const { return getDetector(index); }
 
 /// Returns the source position.
-Kernel::V3D SpectrumInfo::sourcePosition() const {
-  return m_detectorInfo.sourcePosition();
-}
+Kernel::V3D SpectrumInfo::sourcePosition() const { return m_detectorInfo.sourcePosition(); }
 
 /// Returns the sample position.
-Kernel::V3D SpectrumInfo::samplePosition() const {
-  return m_detectorInfo.samplePosition();
-}
+Kernel::V3D SpectrumInfo::samplePosition() const { return m_detectorInfo.samplePosition(); }
 
 /// Returns L1 (distance from source to sample).
 double SpectrumInfo::l1() const { return m_detectorInfo.l1(); }
@@ -207,19 +193,16 @@ const Geometry::IDetector &SpectrumInfo::getDetector(const size_t index) const {
       const auto detIndex = index.first;
       det_ptrs.emplace_back(m_detectorInfo.getDetectorPtr(detIndex));
     }
-    m_lastDetector[thread] =
-        std::make_shared<Geometry::DetectorGroup>(det_ptrs);
+    m_lastDetector[thread] = std::make_shared<Geometry::DetectorGroup>(det_ptrs);
   }
   m_lastIndex[thread] = index;
   return *m_lastDetector[thread];
 }
 
-const SpectrumDefinition &
-SpectrumInfo::checkAndGetSpectrumDefinition(const size_t index) const {
+const SpectrumDefinition &SpectrumInfo::checkAndGetSpectrumDefinition(const size_t index) const {
   if (spectrumDefinition(index).size() == 0)
-    throw Kernel::Exception::NotFoundError(
-        "SpectrumInfo: No detectors for this workspace index.",
-        std::to_string(index));
+    throw Kernel::Exception::NotFoundError("SpectrumInfo: No detectors for this workspace index.",
+                                           std::to_string(index));
   return spectrumDefinition(index);
 }
 
@@ -229,14 +212,10 @@ SpectrumInfoIt SpectrumInfo::begin() { return SpectrumInfoIt(*this, 0); }
 // End method for iterator
 SpectrumInfoIt SpectrumInfo::end() { return SpectrumInfoIt(*this, size()); }
 
-const SpectrumInfoConstIt SpectrumInfo::cbegin() const {
-  return SpectrumInfoConstIt(*this, 0);
-}
+const SpectrumInfoConstIt SpectrumInfo::cbegin() const { return SpectrumInfoConstIt(*this, 0); }
 
 // End method for iterator
-const SpectrumInfoConstIt SpectrumInfo::cend() const {
-  return SpectrumInfoConstIt(*this, size());
-}
+const SpectrumInfoConstIt SpectrumInfo::cend() const { return SpectrumInfoConstIt(*this, size()); }
 
 } // namespace API
 } // namespace Mantid

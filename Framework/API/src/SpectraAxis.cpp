@@ -45,17 +45,14 @@ Axis *SpectraAxis::clone(const MatrixWorkspace *const parentWorkspace) {
  *  @param parentWorkspace The workspace to which the cloned axis belongs
  *  @return A pointer to a copy of the SpectraAxis on which the method is called
  */
-Axis *SpectraAxis::clone(const std::size_t length,
-                         const MatrixWorkspace *const parentWorkspace) {
+Axis *SpectraAxis::clone(const std::size_t length, const MatrixWorkspace *const parentWorkspace) {
   UNUSED_ARG(length)
   // In this implementation, there's no difference between the clone methods -
   // call the other one
   return clone(parentWorkspace);
 }
 
-std::size_t SpectraAxis::length() const {
-  return m_parentWS->getNumberHistograms();
-}
+std::size_t SpectraAxis::length() const { return m_parentWS->getNumberHistograms(); }
 
 /** Get the axis value at the position given
  *  @param  index The position along the axis for which the value is required
@@ -64,12 +61,10 @@ std::size_t SpectraAxis::length() const {
  *  @return The value of the axis as a double
  *  @throw  IndexError If the index requested is not in the range of this axis
  */
-double SpectraAxis::operator()(const std::size_t &index,
-                               const std::size_t &verticalIndex) const {
+double SpectraAxis::operator()(const std::size_t &index, const std::size_t &verticalIndex) const {
   UNUSED_ARG(verticalIndex)
   if (index >= length()) {
-    throw Kernel::Exception::IndexError(index, length() - 1,
-                                        "SpectraAxis: Index out of range.");
+    throw Kernel::Exception::IndexError(index, length() - 1, "SpectraAxis: Index out of range.");
   }
 
   return static_cast<double>(m_parentWS->getSpectrum(index).getSpectrumNo());
@@ -102,8 +97,7 @@ size_t SpectraAxis::indexOfValue(const double value) const {
     }
     // ends
     m_edges[0] = this->getValue(0) - (m_edges[1] - this->getValue(0));
-    m_edges[npts] = this->getValue(npts - 1) +
-                    (this->getValue(npts - 1) - m_edges[npts - 1]);
+    m_edges[npts] = this->getValue(npts - 1) + (this->getValue(npts - 1) - m_edges[npts - 1]);
   }
   return Mantid::Kernel::VectorHelper::indexOfValueFromEdges(m_edges, value);
 }
@@ -115,8 +109,7 @@ size_t SpectraAxis::indexOfValue(const double value) const {
  */
 specnum_t SpectraAxis::spectraNo(const std::size_t &index) const {
   if (index >= length()) {
-    throw Kernel::Exception::IndexError(index, length() - 1,
-                                        "SpectraAxis: Index out of range.");
+    throw Kernel::Exception::IndexError(index, length() - 1, "SpectraAxis: Index out of range.");
   }
 
   return m_parentWS->getSpectrum(index).getSpectrumNo();
@@ -163,19 +156,13 @@ bool SpectraAxis::operator==(const Axis &axis2) const {
  *  @param index :: The index of an axis value
  *  @return label of requested axis index
  */
-std::string SpectraAxis::label(const std::size_t &index) const {
-  return "sp-" + std::to_string(spectraNo(index));
-}
+std::string SpectraAxis::label(const std::size_t &index) const { return "sp-" + std::to_string(spectraNo(index)); }
 
 /// returns min value defined on axis
-double SpectraAxis::getMin() const {
-  return m_parentWS->getSpectrum(0).getSpectrumNo();
-}
+double SpectraAxis::getMin() const { return m_parentWS->getSpectrum(0).getSpectrumNo(); }
 
 /// returns max value defined on axis
-double SpectraAxis::getMax() const {
-  return m_parentWS->getSpectrum(length() - 1).getSpectrumNo();
-}
+double SpectraAxis::getMax() const { return m_parentWS->getSpectrum(length() - 1).getSpectrumNo(); }
 
 } // namespace API
 } // namespace Mantid

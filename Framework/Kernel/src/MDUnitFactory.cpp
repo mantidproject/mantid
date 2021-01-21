@@ -20,13 +20,11 @@ bool LabelUnitFactory::canInterpret(const std::string & /*unitString*/) const {
   return true; // Can always treat a unit as a label unit.
 }
 
-InverseAngstromsUnit *InverseAngstromsUnitFactory::createRaw(
-    const std::string & /*unitString*/) const {
+InverseAngstromsUnit *InverseAngstromsUnitFactory::createRaw(const std::string & /*unitString*/) const {
   return new InverseAngstromsUnit;
 }
 
-bool InverseAngstromsUnitFactory::canInterpret(
-    const std::string &unitString) const {
+bool InverseAngstromsUnitFactory::canInterpret(const std::string &unitString) const {
   boost::regex pattern("(Angstrom\\^-1)");
   boost::regex pattern2("A\\^-1");
   boost::smatch match; // Unused.
@@ -37,13 +35,11 @@ bool InverseAngstromsUnitFactory::canInterpret(
   return isFullAngstrom || isPartialAngstrom;
 }
 
-ReciprocalLatticeUnit *
-ReciprocalLatticeUnitFactory::createRaw(const std::string &unitString) const {
+ReciprocalLatticeUnit *ReciprocalLatticeUnitFactory::createRaw(const std::string &unitString) const {
   return new ReciprocalLatticeUnit(UnitLabel(unitString));
 }
 
-bool ReciprocalLatticeUnitFactory::canInterpret(
-    const std::string &unitString) const {
+bool ReciprocalLatticeUnitFactory::canInterpret(const std::string &unitString) const {
   auto isRLU = unitString == Units::Symbol::RLU.ascii();
 
   // In addition to having RLU we can encounter units of type "in 6.28 A^-1"

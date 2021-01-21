@@ -23,8 +23,7 @@ been formed.
 @author Owen Arnold, Tessella Support Services plc
 @date 13/05/2011
 */
-class DLLExport vtkDataSetToGeometry
-    : public Mantid::Geometry::MDGeometryXMLParser {
+class DLLExport vtkDataSetToGeometry : public Mantid::Geometry::MDGeometryXMLParser {
 
 private:
   vtkDataSet *m_dataSet;

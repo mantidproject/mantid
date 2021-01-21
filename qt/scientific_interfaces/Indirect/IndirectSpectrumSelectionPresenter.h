@@ -23,12 +23,10 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class MANTIDQT_INDIRECT_DLL IndirectSpectrumSelectionPresenter
-    : public QObject {
+class MANTIDQT_INDIRECT_DLL IndirectSpectrumSelectionPresenter : public QObject {
   Q_OBJECT
 public:
-  IndirectSpectrumSelectionPresenter(IndirectFittingModel *model,
-                                     IndirectSpectrumSelectionView *view);
+  IndirectSpectrumSelectionPresenter(IndirectFittingModel *model, IndirectSpectrumSelectionView *view);
   ~IndirectSpectrumSelectionPresenter() override;
   UserInputValidator &validate(UserInputValidator &validator);
 

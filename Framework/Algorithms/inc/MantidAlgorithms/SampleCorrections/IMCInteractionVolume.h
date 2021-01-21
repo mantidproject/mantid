@@ -27,8 +27,7 @@ struct ComponentScatterPoint {
   Kernel::V3D scatterPoint;
 };
 
-using TrackPair = std::tuple<bool, std::shared_ptr<Geometry::Track>,
-                             std::shared_ptr<Geometry::Track>>;
+using TrackPair = std::tuple<bool, std::shared_ptr<Geometry::Track>, std::shared_ptr<Geometry::Track>>;
 
 /**
   Defines a base class for objects describing a volume where interactions of
@@ -37,9 +36,8 @@ using TrackPair = std::tuple<bool, std::shared_ptr<Geometry::Track>,
 class MANTID_ALGORITHMS_DLL IMCInteractionVolume {
 public:
   virtual ~IMCInteractionVolume() = default;
-  virtual TrackPair calculateBeforeAfterTrack(
-      Kernel::PseudoRandomNumberGenerator &rng, const Kernel::V3D &startPos,
-      const Kernel::V3D &endPos, MCInteractionStatistics &stats) const = 0;
+  virtual TrackPair calculateBeforeAfterTrack(Kernel::PseudoRandomNumberGenerator &rng, const Kernel::V3D &startPos,
+                                              const Kernel::V3D &endPos, MCInteractionStatistics &stats) const = 0;
   virtual const Geometry::BoundingBox &getBoundingBox() const = 0;
   virtual const Geometry::BoundingBox getFullBoundingBox() const = 0;
   virtual void setActiveRegion(const Geometry::BoundingBox &region) = 0;

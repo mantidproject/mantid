@@ -33,16 +33,13 @@ public:
   };
 
   /// More complex constructor setting some defaults for the curve
-  MantidMatrixCurve(const QString &name, const QString &wsName, Graph *g,
-                    int index, IndexDir indexType, bool err = false,
-                    bool distr = false,
-                    GraphOptions::CurveType style = GraphOptions::Unspecified,
+  MantidMatrixCurve(const QString &name, const QString &wsName, Graph *g, int index, IndexDir indexType,
+                    bool err = false, bool distr = false, GraphOptions::CurveType style = GraphOptions::Unspecified,
                     bool multipleSpectra = false);
 
   /// More complex constructor setting some defaults for the curve
-  MantidMatrixCurve(const QString &wsName, Graph *g, int index,
-                    IndexDir indexType, bool err = false, bool distr = false,
-                    GraphOptions::CurveType style = GraphOptions::Unspecified);
+  MantidMatrixCurve(const QString &wsName, Graph *g, int index, IndexDir indexType, bool err = false,
+                    bool distr = false, GraphOptions::CurveType style = GraphOptions::Unspecified);
 
   /// Copy constructor
   MantidMatrixCurve(const MantidMatrixCurve &c);
@@ -92,8 +89,7 @@ public:
   /// already divided by the width
   bool isNormalizable() const;
 
-  void draw(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap,
-            const QRect &) const override;
+  void draw(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap, const QRect &) const override;
 
   /// Overridden virtual method
   void itemChanged() override;
@@ -115,8 +111,7 @@ private:
   using PlotCurve::draw; // Avoid Intel compiler warning
 
   /// Init the curve
-  void init(Graph *g, bool distr, GraphOptions::CurveType style,
-            bool multipleSpectra = false) override;
+  void init(Graph *g, bool distr, GraphOptions::CurveType style, bool multipleSpectra = false) override;
 
   /// Handles delete notification
   void postDeleteHandle(const std::string &wsName) override {
@@ -126,9 +121,7 @@ private:
     }
   }
   /// Handles afterReplace notification
-  void afterReplaceHandle(
-      const std::string &wsName,
-      const std::shared_ptr<Mantid::API::Workspace> &ws) override;
+  void afterReplaceHandle(const std::string &wsName, const std::shared_ptr<Mantid::API::Workspace> &ws) override;
 
   /// Handle an ADS clear notification
   void clearADSHandle() override { emit removeMe(this); }
@@ -143,12 +136,9 @@ private slots:
 
 private:
   /// Make the curve name
-  QString createCurveName(
-      const QString &prefix,
-      const std::shared_ptr<const Mantid::API::MatrixWorkspace> &ws);
+  QString createCurveName(const QString &prefix, const std::shared_ptr<const Mantid::API::MatrixWorkspace> &ws);
 
-  QString
-      m_wsName; ///< Workspace name. If empty the ws isn't in the data service
+  QString m_wsName; ///< Workspace name. If empty the ws isn't in the data service
   /// index
   int m_index;
   /// Is the index a spectrum or bin index

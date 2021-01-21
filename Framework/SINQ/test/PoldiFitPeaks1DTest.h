@@ -36,15 +36,12 @@ class PoldiFitPeaks1DTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static PoldiFitPeaks1DTest *createSuite() {
-    return new PoldiFitPeaks1DTest();
-  }
+  static PoldiFitPeaks1DTest *createSuite() { return new PoldiFitPeaks1DTest(); }
   static void destroySuite(PoldiFitPeaks1DTest *suite) { delete suite; }
 
   PoldiFitPeaks1DTest() {
-    m_testPeak =
-        PoldiPeak::create(MillerIndices(1, 1, 1), UncertainValue(1.108329),
-                          UncertainValue(2948.231), UncertainValue(0.002));
+    m_testPeak = PoldiPeak::create(MillerIndices(1, 1, 1), UncertainValue(1.108329), UncertainValue(2948.231),
+                                   UncertainValue(0.002));
     m_profileTestFunction = std::string("Gaussian");
     m_backgroundTestFunction = IFunction_sptr(new FlatBackground);
     m_backgroundTestFunction->initialize();
@@ -66,13 +63,11 @@ public:
     IFunction_sptr totalProfile = poldiFitPeaks.getPeakProfile(m_testPeak);
 
     // make sure that we get back a composite of peak and background
-    CompositeFunction_sptr composite =
-        std::dynamic_pointer_cast<CompositeFunction>(totalProfile);
+    CompositeFunction_sptr composite = std::dynamic_pointer_cast<CompositeFunction>(totalProfile);
     TS_ASSERT(composite);
 
     // make sure that the profile is the first function in the composite
-    IPeakFunction_sptr profile =
-        std::dynamic_pointer_cast<IPeakFunction>(composite->getFunction(0));
+    IPeakFunction_sptr profile = std::dynamic_pointer_cast<IPeakFunction>(composite->getFunction(0));
     TS_ASSERT(profile);
 
     TS_ASSERT_EQUALS(profile->centre(), m_testPeak->q());
@@ -94,8 +89,7 @@ public:
 
     TS_ASSERT_EQUALS(newPeak->q(), m_testPeak->q());
     TS_ASSERT_EQUALS(newPeak->intensity(), m_testPeak->intensity());
-    TS_ASSERT_EQUALS(newPeak->fwhm(PoldiPeak::AbsoluteQ),
-                     m_testPeak->fwhm(PoldiPeak::AbsoluteQ));
+    TS_ASSERT_EQUALS(newPeak->fwhm(PoldiPeak::AbsoluteQ), m_testPeak->fwhm(PoldiPeak::AbsoluteQ));
   }
 
   void testProperties() {

@@ -22,8 +22,7 @@ Provide Log Normal function: h*exp(-(log(x)-t)^2 / (2*b^2) )/x
 @author Jose Borreguero, NScD
 @date 11/14/2011
 */
-class MANTID_CURVEFITTING_DLL LogNormal : public API::ParamFunction,
-                                          public API::IFunction1D {
+class MANTID_CURVEFITTING_DLL LogNormal : public API::ParamFunction, public API::IFunction1D {
 public:
   /// Constructor
   LogNormal();
@@ -33,10 +32,8 @@ public:
   const std::string category() const override { return "Peak"; }
 
 protected:
-  void function1D(double *out, const double *xValues,
-                  const size_t nData) const override;
-  void functionDeriv1D(API::Jacobian *out, const double *xValues,
-                       const size_t nData) override;
+  void function1D(double *out, const double *xValues, const size_t nData) const override;
+  void functionDeriv1D(API::Jacobian *out, const double *xValues, const size_t nData) override;
 };
 
 } // namespace Functions

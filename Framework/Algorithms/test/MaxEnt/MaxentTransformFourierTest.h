@@ -23,9 +23,7 @@ class MaxentTransformFourierTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static MaxentTransformFourierTest *createSuite() {
-    return new MaxentTransformFourierTest();
-  }
+  static MaxentTransformFourierTest *createSuite() { return new MaxentTransformFourierTest(); }
   static void destroySuite(MaxentTransformFourierTest *suite) { delete suite; }
 
   void test_real_image_to_real_data() {
@@ -35,11 +33,9 @@ public:
     MaxentTransformFourier transform(dataSpace, imageSpace);
 
     // cos (x)
-    std::vector<double> realImage = {
-        1,         0.951057,  0.809017,  0.587785,     0.309017, 6.12323e-17,
-        -0.309017, -0.587785, -0.809017, -0.951057,    -1,       -0.951057,
-        -0.809017, -0.587785, -0.309017, -1.83697e-16, 0.309017, 0.587785,
-        0.809017,  0.951057};
+    std::vector<double> realImage = {1,         0.951057,     0.809017,  0.587785, 0.309017,  6.12323e-17, -0.309017,
+                                     -0.587785, -0.809017,    -0.951057, -1,       -0.951057, -0.809017,   -0.587785,
+                                     -0.309017, -1.83697e-16, 0.309017,  0.587785, 0.809017,  0.951057};
 
     TS_ASSERT_THROWS_NOTHING(transform.imageToData(realImage));
 
@@ -65,11 +61,9 @@ public:
     MaxentTransformFourier transform(dataSpace, imageSpace);
 
     // cos (x)
-    std::vector<double> realImage = {
-        1,         0.951057,  0.809017,  0.587785,     0.309017, 6.12323e-17,
-        -0.309017, -0.587785, -0.809017, -0.951057,    -1,       -0.951057,
-        -0.809017, -0.587785, -0.309017, -1.83697e-16, 0.309017, 0.587785,
-        0.809017,  0.951057};
+    std::vector<double> realImage = {1,         0.951057,     0.809017,  0.587785, 0.309017,  6.12323e-17, -0.309017,
+                                     -0.587785, -0.809017,    -0.951057, -1,       -0.951057, -0.809017,   -0.587785,
+                                     -0.309017, -1.83697e-16, 0.309017,  0.587785, 0.809017,  0.951057};
 
     TS_ASSERT_THROWS_NOTHING(transform.imageToData(realImage));
 
@@ -225,11 +219,9 @@ public:
     MaxentTransformFourier transform(dataSpace, imageSpace);
 
     // cos(x)
-    std::vector<double> realData = {
-        1,         0.951057,  0.809017,  0.587785,     0.309017, 6.12323e-17,
-        -0.309017, -0.587785, -0.809017, -0.951057,    -1,       -0.951057,
-        -0.809017, -0.587785, -0.309017, -1.83697e-16, 0.309017, 0.587785,
-        0.809017,  0.951057};
+    std::vector<double> realData = {1,         0.951057,     0.809017,  0.587785, 0.309017,  6.12323e-17, -0.309017,
+                                    -0.587785, -0.809017,    -0.951057, -1,       -0.951057, -0.809017,   -0.587785,
+                                    -0.309017, -1.83697e-16, 0.309017,  0.587785, 0.809017,  0.951057};
 
     TS_ASSERT_THROWS_NOTHING(transform.dataToImage(realData));
 
@@ -255,11 +247,9 @@ public:
     MaxentTransformFourier transform(dataSpace, imageSpace);
 
     // cos (x)
-    std::vector<double> realData = {
-        1,         0.951057,  0.809017,  0.587785,     0.309017, 6.12323e-17,
-        -0.309017, -0.587785, -0.809017, -0.951057,    -1,       -0.951057,
-        -0.809017, -0.587785, -0.309017, -1.83697e-16, 0.309017, 0.587785,
-        0.809017,  0.951057};
+    std::vector<double> realData = {1,         0.951057,     0.809017,  0.587785, 0.309017,  6.12323e-17, -0.309017,
+                                    -0.587785, -0.809017,    -0.951057, -1,       -0.951057, -0.809017,   -0.587785,
+                                    -0.309017, -1.83697e-16, 0.309017,  0.587785, 0.809017,  0.951057};
 
     TS_ASSERT_THROWS_NOTHING(transform.dataToImage(realData));
 

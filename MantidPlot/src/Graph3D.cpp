@@ -54,16 +54,12 @@ using namespace Qwt3D;
 using namespace Mantid;
 using namespace MantidQt::API;
 
-UserParametricSurface::UserParametricSurface(const QString &xFormula,
-                                             const QString &yFormula,
-                                             const QString &zFormula,
+UserParametricSurface::UserParametricSurface(const QString &xFormula, const QString &yFormula, const QString &zFormula,
                                              SurfacePlot &pw)
-    : ParametricSurface(pw), d_x_formula(xFormula), d_y_formula(yFormula),
-      d_z_formula(zFormula), d_rows(0), d_columns(0), d_u_periodic(false),
-      d_v_periodic(false), d_ul(0.0), d_ur(0.0), d_vl(0.0), d_vr(0.0) {}
+    : ParametricSurface(pw), d_x_formula(xFormula), d_y_formula(yFormula), d_z_formula(zFormula), d_rows(0),
+      d_columns(0), d_u_periodic(false), d_v_periodic(false), d_ul(0.0), d_ur(0.0), d_vl(0.0), d_vr(0.0) {}
 
-void UserParametricSurface::setDomain(double ul, double ur, double vl,
-                                      double vr) {
+void UserParametricSurface::setDomain(double ul, double ur, double vl, double vr) {
   ParametricSurface::setDomain(ul, ur, vl, vr);
   d_ul = ul;
   d_ur = ur;
@@ -100,14 +96,12 @@ Triple UserParametricSurface::operator()(double u, double v) {
     parser.SetExpr((const std::string)d_z_formula.toAscii());
     z = parser.Eval();
   } catch (mu::ParserError &e) {
-    QMessageBox::critical(nullptr, "MantidPlot - Input function error",
-                          QString::fromStdString(e.GetMsg()));
+    QMessageBox::critical(nullptr, "MantidPlot - Input function error", QString::fromStdString(e.GetMsg()));
   }
   return Triple(x, y, z);
 }
 
-Graph3D::Graph3D(const QString &label, QWidget *parent, const char *name,
-                 const Qt::WFlags &f)
+Graph3D::Graph3D(const QString &label, QWidget *parent, const char *name, const Qt::WFlags &f)
     : MdiSubWindow(parent, label, name, f) {
   initPlot();
 }
@@ -144,8 +138,7 @@ void Graph3D::initPlot() {
   titleFnt = QFont("Times New Roman", 14);
   titleFnt.setBold(true);
 
-  sp->setTitleFont(titleFnt.family(), titleFnt.pointSize(), titleFnt.weight(),
-                   titleFnt.italic());
+  sp->setTitleFont(titleFnt.family(), titleFnt.pointSize(), titleFnt.weight(), titleFnt.italic());
 
   axesCol = QColor(Qt::black);
   labelsCol = QColor(Qt::black);
@@ -184,13 +177,10 @@ void Graph3D::initPlot() {
   style_ = NOPLOT;
   initCoord();
 
-  connect(sp, SIGNAL(rotationChanged(double, double, double)), this,
-          SLOT(rotationChanged(double, double, double)));
+  connect(sp, SIGNAL(rotationChanged(double, double, double)), this, SLOT(rotationChanged(double, double, double)));
   connect(sp, SIGNAL(zoomChanged(double)), this, SLOT(zoomChanged(double)));
-  connect(sp, SIGNAL(scaleChanged(double, double, double)), this,
-          SLOT(scaleChanged(double, double, double)));
-  connect(sp, SIGNAL(shiftChanged(double, double, double)), this,
-          SLOT(shiftChanged(double, double, double)));
+  connect(sp, SIGNAL(scaleChanged(double, double, double)), this, SLOT(scaleChanged(double, double, double)));
+  connect(sp, SIGNAL(shiftChanged(double, double, double)), this, SLOT(shiftChanged(double, double, double)));
 
   m_zoomInScale = 1;
   m_zoomOutScale = 1;
@@ -230,9 +220,8 @@ void Graph3D::initCoord() {
   sp->coordinates()->setAutoScale(false);
 }
 
-void Graph3D::addFunction(Function2D *hfun, double xl, double xr, double yl,
-                          double yr, double zl, double zr, size_t columns,
-                          size_t rows) {
+void Graph3D::addFunction(Function2D *hfun, double xl, double xr, double yl, double yr, double zl, double zr,
+                          size_t columns, size_t rows) {
   if (d_surface)
     delete d_surface;
 
@@ -274,18 +263,15 @@ void Graph3D::addFunction(Function2D *hfun, double xl, double xr, double yl,
  * @param columns :: Number of columns in the surface mesh.
  * @param rows    :: Number of rows in the surface mesh.
  */
-void Graph3D::addFunction(const QString &formula, double xl, double xr,
-                          double yl, double yr, double zl, double zr,
+void Graph3D::addFunction(const QString &formula, double xl, double xr, double yl, double yr, double zl, double zr,
                           size_t columns, size_t rows) {
   UserFunction2D *fun = new UserFunction2D(formula);
   addFunction(fun, xl, xr, yl, yr, zl, zr, columns, rows);
 }
 
-void Graph3D::addParametricSurface(const QString &xFormula,
-                                   const QString &yFormula,
-                                   const QString &zFormula, double ul,
-                                   double ur, double vl, double vr, int columns,
-                                   int rows, bool uPeriodic, bool vPeriodic) {
+void Graph3D::addParametricSurface(const QString &xFormula, const QString &yFormula, const QString &zFormula, double ul,
+                                   double ur, double vl, double vr, int columns, int rows, bool uPeriodic,
+                                   bool vPeriodic) {
   if (d_surface)
     delete d_surface;
   else if (d_func)
@@ -314,8 +300,7 @@ void Graph3D::addParametricSurface(const QString &xFormula,
   update();
 }
 
-void Graph3D::addData(Table *table, const QString &xColName,
-                      const QString &yColName) {
+void Graph3D::addData(Table *table, const QString &xColName, const QString &yColName) {
   if (!table)
     return;
 
@@ -359,8 +344,7 @@ void Graph3D::addData(Table *table, const QString &xColName,
   double maxz = 0.6 * maxy;
   sp->makeCurrent();
   sp->legend()->setLimits(gsl_vector_min(y), maxy);
-  sp->loadFromData(data, xmesh, ymesh, gsl_vector_min(x), gsl_vector_max(x), 0,
-                   maxz);
+  sp->loadFromData(data, xmesh, ymesh, gsl_vector_min(x), gsl_vector_max(x), 0, maxz);
 
   if (d_autoscale)
     findBestLayout();
@@ -370,8 +354,7 @@ void Graph3D::addData(Table *table, const QString &xColName,
   Matrix::freeMatrixData(data, xmesh);
 }
 
-void Graph3D::addData(Table *table, const QString &xColName,
-                      const QString &yColName, double xl, double xr, double yl,
+void Graph3D::addData(Table *table, const QString &xColName, const QString &yColName, double xl, double xr, double yl,
                       double yr, double zl, double zr) {
   d_table = table;
   int r = table->numRows();
@@ -443,8 +426,7 @@ void Graph3D::addMatrixData(Matrix *m) {
   }
 
   sp->makeCurrent();
-  sp->loadFromData(data_matrix, cols, rows, m->xStart(), m->xEnd(), m->yStart(),
-                   m->yEnd());
+  sp->loadFromData(data_matrix, cols, rows, m->xStart(), m->xEnd(), m->yStart(), m->yEnd());
 
   double start, end;
   sp->coordinates()->axes[Z1].limits(start, end);
@@ -458,8 +440,7 @@ void Graph3D::addMatrixData(Matrix *m) {
   update();
 }
 
-void Graph3D::addMatrixData(Matrix *m, double xl, double xr, double yl,
-                            double yr, double zl, double zr) {
+void Graph3D::addMatrixData(Matrix *m, double xl, double xr, double yl, double yr, double zl, double zr) {
   d_matrix = m;
   plotAssociation = "matrix<" + QString(m->objectName()) + ">";
 
@@ -512,8 +493,8 @@ void Graph3D::addData(Table *table, int xCol, int yCol, int zCol, int type) {
     setBarStyle();
 }
 
-void Graph3D::loadData(Table *table, int xCol, int yCol, int zCol, double xl,
-                       double xr, double yl, double yr, double zl, double zr) {
+void Graph3D::loadData(Table *table, int xCol, int yCol, int zCol, double xl, double xr, double yl, double yr,
+                       double zl, double zr) {
   if (!table || xCol < 0 || yCol < 0 || zCol < 0)
     return;
 
@@ -531,14 +512,12 @@ void Graph3D::loadData(Table *table, int xCol, int yCol, int zCol, double xl,
   Qwt3D::CellField cells;
   int index = 0;
   for (int i = 0; i < table->numRows(); i++) {
-    if (!table->text(i, xCol).isEmpty() && !table->text(i, yCol).isEmpty() &&
-        !table->text(i, zCol).isEmpty()) {
+    if (!table->text(i, xCol).isEmpty() && !table->text(i, yCol).isEmpty() && !table->text(i, zCol).isEmpty()) {
       double x = table->cell(i, xCol);
       double y = table->cell(i, yCol);
       double z = table->cell(i, zCol);
 
-      if (check_limits &&
-          (x < xl || x > xr || y < yl || y > yr || z < zl || z > zr))
+      if (check_limits && (x < xl || x > xr || y < yl || y > yr || z < zl || z > zr))
         continue;
 
       data.emplace_back(Triple(x, y, z));
@@ -654,8 +633,7 @@ void Graph3D::updateMatrixData(Matrix *m) {
     for (int j = 0; j < rows; j++)
       data[i][j] = m->cell(j, i);
   }
-  sp->loadFromData(data, cols, rows, m->xStart(), m->xEnd(), m->yStart(),
-                   m->yEnd());
+  sp->loadFromData(data, cols, rows, m->xStart(), m->xEnd(), m->yStart(), m->yEnd());
 
   Qwt3D::Axis z_axis = sp->coordinates()->axes[Z1];
   double start, end;
@@ -690,8 +668,7 @@ void Graph3D::resetNonEmptyStyle() {
       break;
 
     case HairCross:
-      sp->setPlotStyle(CrossHair(crossHairRad, crossHairLineWidth,
-                                 crossHairSmooth, crossHairBoxed));
+      sp->setPlotStyle(CrossHair(crossHairRad, crossHairLineWidth, crossHairSmooth, crossHairBoxed));
       break;
 
     case Cones:
@@ -721,9 +698,7 @@ void Graph3D::setLabelsDistance(int val) {
   }
 }
 
-QFont Graph3D::numbersFont() {
-  return sp->coordinates()->axes[X1].numberFont();
-}
+QFont Graph3D::numbersFont() { return sp->coordinates()->axes[X1].numberFont(); }
 
 void Graph3D::setNumbersFont(const QFont &font) {
   sp->coordinates()->setNumberFont(font);
@@ -861,8 +836,7 @@ void Graph3D::setZAxisTickLength(double majorLength, double minorLength) {
   }
 }
 
-void Graph3D::setAxisTickLength(int axis, double majorLength,
-                                double minorLength) {
+void Graph3D::setAxisTickLength(int axis, double majorLength, double minorLength) {
   double majorl, minorl;
   switch (axis) {
   case 0:
@@ -987,17 +961,11 @@ void Graph3D::setZAxisLabel(const QString &label) {
   emit modified();
 }
 
-QFont Graph3D::xAxisLabelFont() {
-  return sp->coordinates()->axes[X1].labelFont();
-}
+QFont Graph3D::xAxisLabelFont() { return sp->coordinates()->axes[X1].labelFont(); }
 
-QFont Graph3D::yAxisLabelFont() {
-  return sp->coordinates()->axes[Y1].labelFont();
-}
+QFont Graph3D::yAxisLabelFont() { return sp->coordinates()->axes[Y1].labelFont(); }
 
-QFont Graph3D::zAxisLabelFont() {
-  return sp->coordinates()->axes[Z1].labelFont();
-}
+QFont Graph3D::zAxisLabelFont() { return sp->coordinates()->axes[Z1].labelFont(); }
 
 double Graph3D::xStart() {
   double start, stop;
@@ -1117,8 +1085,7 @@ void Graph3D::updateScale(int axis, const QStringList &options) {
         d_func->create();
         sp->createCoordinateSystem(Triple(xl, yl, start), Triple(xr, yr, stop));
       } else if (d_surface) {
-        d_surface->restrictRange(
-            ParallelEpiped(Triple(xl, yl, start), Triple(xr, yr, stop)));
+        d_surface->restrictRange(ParallelEpiped(Triple(xl, yl, start), Triple(xr, yr, stop)));
         d_surface->create();
         sp->createCoordinateSystem(Triple(xl, yl, start), Triple(xr, yr, stop));
       } else
@@ -1167,8 +1134,7 @@ void Graph3D::updateScale(int axis, const QStringList &options) {
         d_func->create();
         sp->createCoordinateSystem(Triple(xl, yl, start), Triple(xr, yr, stop));
       } else if (d_surface) {
-        d_surface->restrictRange(
-            ParallelEpiped(Triple(xl, yl, start), Triple(xr, yr, stop)));
+        d_surface->restrictRange(ParallelEpiped(Triple(xl, yl, start), Triple(xr, yr, stop)));
         d_surface->create();
         sp->createCoordinateSystem(Triple(xl, yl, start), Triple(xr, yr, stop));
       } else
@@ -1217,8 +1183,7 @@ void Graph3D::updateScale(int axis, const QStringList &options) {
         d_func->create();
         sp->createCoordinateSystem(Triple(xl, yl, start), Triple(xr, yr, stop));
       } else if (d_surface) {
-        d_surface->restrictRange(
-            ParallelEpiped(Triple(xl, yl, start), Triple(xr, yr, stop)));
+        d_surface->restrictRange(ParallelEpiped(Triple(xl, yl, start), Triple(xr, yr, stop)));
         d_surface->create();
         sp->createCoordinateSystem(Triple(xl, yl, start), Triple(xr, yr, stop));
       } else
@@ -1256,8 +1221,7 @@ void Graph3D::updateScale(int axis, const QStringList &options) {
   emit modified();
 }
 
-void Graph3D::setScales(double xl, double xr, double yl, double yr, double zl,
-                        double zr) {
+void Graph3D::setScales(double xl, double xr, double yl, double yr, double zl, double zr) {
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
   if (d_matrix)
@@ -1295,8 +1259,7 @@ void Graph3D::setScales(double xl, double xr, double yl, double yr, double zl,
   QApplication::restoreOverrideCursor();
 }
 
-void Graph3D::updateScalesFromMatrix(double xl, double xr, double yl, double yr,
-                                     double zl, double zr) {
+void Graph3D::updateScalesFromMatrix(double xl, double xr, double yl, double yr, double zl, double zr) {
   double xStart = qMin(d_matrix->xStart(), d_matrix->xEnd());
   double xEnd = qMax(d_matrix->xStart(), d_matrix->xEnd());
   double yStart = qMin(d_matrix->yStart(), d_matrix->yEnd());
@@ -1347,15 +1310,13 @@ void Graph3D::updateScalesFromMatrix(double xl, double xr, double yl, double yr,
   update();
 }
 
-void Graph3D::updateScales(double xl, double xr, double yl, double yr,
-                           double zl, double zr, int xcol, int ycol) {
+void Graph3D::updateScales(double xl, double xr, double yl, double yr, double zl, double zr, int xcol, int ycol) {
   int r = d_table->numRows();
   int xmesh = 0, ymesh = 2;
   double xv, yv;
 
   for (int i = 0; i < r; i++) {
-    if (!d_table->text(i, xcol).isEmpty() &&
-        !d_table->text(i, ycol).isEmpty()) {
+    if (!d_table->text(i, xcol).isEmpty() && !d_table->text(i, ycol).isEmpty()) {
       xv = d_table->cell(i, xcol);
       if (xv >= xl && xv <= xr)
         xmesh++;
@@ -1370,8 +1331,7 @@ void Graph3D::updateScales(double xl, double xr, double yl, double yr,
   for (int j = 0; j < ymesh; j++) {
     int k = 0;
     for (int i = 0; i < r; i++) {
-      if (!d_table->text(i, xcol).isEmpty() &&
-          !d_table->text(i, ycol).isEmpty()) {
+      if (!d_table->text(i, xcol).isEmpty() && !d_table->text(i, ycol).isEmpty()) {
         xv = d_table->cell(i, xcol);
         if (xv >= xl && xv <= xr) {
           yv = d_table->cell(i, ycol);
@@ -1547,8 +1507,7 @@ void Graph3D::scaleFonts(double factor) {
   sp->coordinates()->setNumberFont(font);
 
   titleFnt.setPointSizeF(factor * titleFnt.pointSizeF());
-  sp->setTitleFont(titleFnt.family(), titleFnt.pointSize(), titleFnt.weight(),
-                   titleFnt.italic());
+  sp->setTitleFont(titleFnt.family(), titleFnt.pointSize(), titleFnt.weight(), titleFnt.italic());
 
   font = xAxisLabelFont();
   font.setPointSizeF(factor * font.pointSizeF());
@@ -1682,8 +1641,7 @@ void Graph3D::setCrossStyle() {
   style_ = Qwt3D::USER;
 
   sp->makeCurrent();
-  sp->setPlotStyle(CrossHair(crossHairRad, crossHairLineWidth, crossHairSmooth,
-                             crossHairBoxed));
+  sp->setPlotStyle(CrossHair(crossHairRad, crossHairLineWidth, crossHairSmooth, crossHairBoxed));
   sp->updateData();
   sp->updateGL();
 }
@@ -1806,13 +1764,11 @@ void Graph3D::print() {
 }
 
 void Graph3D::copyImage() {
-  QApplication::clipboard()->setPixmap(sp->renderPixmap(),
-                                       QClipboard::Clipboard);
+  QApplication::clipboard()->setPixmap(sp->renderPixmap(), QClipboard::Clipboard);
   sp->updateData();
 }
 
-void Graph3D::exportImage(const QString &fileName, int quality,
-                          bool transparent) {
+void Graph3D::exportImage(const QString &fileName, int quality, bool transparent) {
   if (transparent) {
     QPixmap pic = sp->renderPixmap();
     sp->updateData();
@@ -1848,8 +1804,7 @@ void Graph3D::exportPDF(const QString &fileName) { exportVector(fileName); }
 
 void Graph3D::exportVector(const QString &fileName) {
   if (fileName.isEmpty()) {
-    QMessageBox::critical(this, tr("MantidPlot - Error"),
-                          tr("Please provide a valid file name!"));
+    QMessageBox::critical(this, tr("MantidPlot - Error"), tr("Please provide a valid file name!"));
     return;
   }
 
@@ -1870,13 +1825,11 @@ void Graph3D::exportVector(const QString &fileName) {
 
 void Graph3D::exportToFile(const QString &fileName) {
   if (fileName.isEmpty()) {
-    QMessageBox::critical(this, tr("MantidPlot - Error"),
-                          tr("Please provide a valid file name!"));
+    QMessageBox::critical(this, tr("MantidPlot - Error"), tr("Please provide a valid file name!"));
     return;
   }
 
-  if (fileName.contains(".eps") || fileName.contains(".pdf") ||
-      fileName.contains(".ps") || fileName.contains(".svg")) {
+  if (fileName.contains(".eps") || fileName.contains(".pdf") || fileName.contains(".ps") || fileName.contains(".svg")) {
     exportVector(fileName);
     return;
   } else {
@@ -1887,14 +1840,12 @@ void Graph3D::exportToFile(const QString &fileName) {
         return;
       }
     }
-    QMessageBox::critical(this, tr("MantidPlot - Error"),
-                          tr("File format not handled, operation aborted!"));
+    QMessageBox::critical(this, tr("MantidPlot - Error"), tr("File format not handled, operation aborted!"));
   }
 }
 
 bool Graph3D::eventFilter(QObject *object, QEvent *e) {
-  if (e->type() == QEvent::MouseButtonDblClick &&
-      object == (QObject *)this->sp) {
+  if (e->type() == QEvent::MouseButtonDblClick && object == (QObject *)this->sp) {
     emit showOptionsDialog();
     return TRUE;
   }
@@ -1984,8 +1935,7 @@ void Graph3D::setConeOptions(double rad, int quality) {
   conesQuality = quality;
 }
 
-void Graph3D::setCrossOptions(double rad, double linewidth, bool smooth,
-                              bool boxed) {
+void Graph3D::setCrossOptions(double rad, double linewidth, bool smooth, bool boxed) {
   crossHairRad = rad;
   crossHairLineWidth = linewidth;
   crossHairSmooth = smooth;
@@ -2103,9 +2053,7 @@ void Graph3D::customPlotStyle(int style) {
   sp->updateGL();
 }
 
-void Graph3D::setRotation(double xVal, double yVal, double zVal) {
-  sp->setRotation(xVal, yVal, zVal);
-}
+void Graph3D::setRotation(double xVal, double yVal, double zVal) { sp->setRotation(xVal, yVal, zVal); }
 
 void Graph3D::setZoom(double val) {
 
@@ -2122,9 +2070,7 @@ void Graph3D::setScale(double xVal, double yVal, double zVal) {
   sp->setScale(xVal, yVal, zVal);
 }
 
-void Graph3D::setShift(double xVal, double yVal, double zVal) {
-  sp->setShift(xVal, yVal, zVal);
-}
+void Graph3D::setShift(double xVal, double yVal, double zVal) { sp->setShift(xVal, yVal, zVal); }
 
 Qwt3D::PLOTSTYLE Graph3D::plotStyle() { return sp->plotStyle(); }
 
@@ -2170,12 +2116,10 @@ void Graph3D::setTitle(const QStringList &lst) {
   sp->setTitleColor(Qt2GL(titleCol));
 
   titleFnt = QFont(lst[3], lst[4].toInt(), lst[5].toInt(), lst[6].toInt());
-  sp->setTitleFont(titleFnt.family(), titleFnt.pointSize(), titleFnt.weight(),
-                   titleFnt.italic());
+  sp->setTitleFont(titleFnt.family(), titleFnt.pointSize(), titleFnt.weight(), titleFnt.italic());
 }
 
-void Graph3D::setTitle(const QString &s, const QColor &color,
-                       const QFont &font) {
+void Graph3D::setTitle(const QString &s, const QColor &color, const QFont &font) {
   if (title != s) {
     title = s;
     sp->setTitle(title);
@@ -2186,16 +2130,14 @@ void Graph3D::setTitle(const QString &s, const QColor &color,
 
   if (titleFnt != font) {
     titleFnt = font;
-    sp->setTitleFont(font.family(), font.pointSize(), font.weight(),
-                     font.italic());
+    sp->setTitleFont(font.family(), font.pointSize(), font.weight(), font.italic());
   }
 }
 
 void Graph3D::setTitleFont(const QFont &font) {
   if (titleFnt != font) {
     titleFnt = font;
-    sp->setTitleFont(font.family(), font.pointSize(), font.weight(),
-                     font.italic());
+    sp->setTitleFont(font.family(), font.pointSize(), font.weight(), font.italic());
   }
 }
 
@@ -2272,8 +2214,7 @@ void Graph3D::changeTransparency(double t) {
 
   alpha = t;
 
-  Qwt3D::StandardColor *color =
-      static_cast<StandardColor *>(const_cast<Color *>(sp->dataColor()));
+  Qwt3D::StandardColor *color = static_cast<StandardColor *>(const_cast<Color *>(sp->dataColor()));
   color->setAlpha(t);
 
   sp->showColorLegend(legendOn);
@@ -2288,8 +2229,7 @@ void Graph3D::setTransparency(double t) {
 
   alpha = t;
 
-  Qwt3D::StandardColor *color =
-      static_cast<StandardColor *>(const_cast<Color *>(sp->dataColor()));
+  Qwt3D::StandardColor *color = static_cast<StandardColor *>(const_cast<Color *>(sp->dataColor()));
   color->setAlpha(t);
 }
 
@@ -2322,8 +2262,7 @@ void Graph3D::rotate() {
   if (!sp)
     return;
 
-  sp->setRotation(static_cast<int>(sp->xRotation() + 1) % 360,
-                  static_cast<int>(sp->yRotation() + 1) % 360,
+  sp->setRotation(static_cast<int>(sp->xRotation() + 1) % 360, static_cast<int>(sp->yRotation() + 1) % 360,
                   static_cast<int>(sp->zRotation() + 1) % 360);
 }
 
@@ -2420,10 +2359,8 @@ void Graph3D::copy(Graph3D *g) {
       break;
 
     case HairCross:
-      setCrossOptions(g->crossHairRadius(), g->crossHairLinewidth(),
-                      g->smoothCrossHair(), g->boxedCrossHair());
-      sp->setPlotStyle(CrossHair(crossHairRad, crossHairLineWidth,
-                                 crossHairSmooth, crossHairBoxed));
+      setCrossOptions(g->crossHairRadius(), g->crossHairLinewidth(), g->smoothCrossHair(), g->boxedCrossHair());
+      sp->setPlotStyle(CrossHair(crossHairRad, crossHairLineWidth, crossHairSmooth, crossHairBoxed));
       break;
 
     case Cones:
@@ -2482,9 +2419,8 @@ Graph3D::~Graph3D() {
     delete d_surface;
 }
 
-MantidQt::API::IProjectSerialisable *
-Graph3D::loadFromProject(const std::string &lines, ApplicationWindow *app,
-                         const int fileVersion) {
+MantidQt::API::IProjectSerialisable *Graph3D::loadFromProject(const std::string &lines, ApplicationWindow *app,
+                                                              const int fileVersion) {
   Q_UNUSED(fileVersion);
   auto graph = new Graph3D("", app, "", nullptr);
 
@@ -2565,8 +2501,7 @@ Graph3D::loadFromProject(const std::string &lines, ApplicationWindow *app,
   }
 
   if (tsv.selectLine("tickLengths")) {
-    QString qTickLen =
-        QString::fromUtf8(tsv.lineAsString("tickLengths").c_str());
+    QString qTickLen = QString::fromUtf8(tsv.lineAsString("tickLengths").c_str());
     graph->setTickLengths(qTickLen.split("\t"));
   }
 
@@ -2581,20 +2516,17 @@ Graph3D::loadFromProject(const std::string &lines, ApplicationWindow *app,
   }
 
   if (tsv.selectLine("xAxisLabelFont")) {
-    QString qAxisFont =
-        QString::fromUtf8(tsv.lineAsString("xAxisLabelFont").c_str());
+    QString qAxisFont = QString::fromUtf8(tsv.lineAsString("xAxisLabelFont").c_str());
     graph->setXAxisLabelFont(qAxisFont.split("\t"));
   }
 
   if (tsv.selectLine("yAxisLabelFont")) {
-    QString qAxisFont =
-        QString::fromUtf8(tsv.lineAsString("yAxisLabelFont").c_str());
+    QString qAxisFont = QString::fromUtf8(tsv.lineAsString("yAxisLabelFont").c_str());
     graph->setYAxisLabelFont(qAxisFont.split("\t"));
   }
 
   if (tsv.selectLine("zAxisLabelFont")) {
-    QString qAxisFont =
-        QString::fromUtf8(tsv.lineAsString("zAxisLabelFont").c_str());
+    QString qAxisFont = QString::fromUtf8(tsv.lineAsString("zAxisLabelFont").c_str());
     graph->setZAxisLabelFont(qAxisFont.split("\t"));
   }
 
@@ -2656,13 +2588,11 @@ Graph3D::loadFromProject(const std::string &lines, ApplicationWindow *app,
   graph->setBirthDate(dateStr);
   app->setListViewDate(caption, dateStr);
   graph->setIgnoreFonts(true);
-  app->restoreWindowGeometry(
-      app, graph, QString::fromStdString(tsv.lineAsString("geometry")));
+  app->restoreWindowGeometry(app, graph, QString::fromStdString(tsv.lineAsString("geometry")));
   return graph;
 }
 
-void Graph3D::setupPlot3D(ApplicationWindow *app, const QString &caption,
-                          const SurfaceFunctionParams &params) {
+void Graph3D::setupPlot3D(ApplicationWindow *app, const QString &caption, const SurfaceFunctionParams &params) {
   QString func = QString::fromStdString(params.formula);
   int pos = func.indexOf("_", 0);
   QString wCaption = func.left(pos);
@@ -2678,8 +2608,7 @@ void Graph3D::setupPlot3D(ApplicationWindow *app, const QString &caption,
   posX = func.indexOf("(", pos);
   QString yCol = func.mid(pos + 1, posX - pos - 1);
 
-  addData(w, xCol, yCol, params.xStart, params.xStop, params.yStart,
-          params.yStop, params.zStart, params.zStop);
+  addData(w, xCol, yCol, params.xStart, params.xStop, params.yStart, params.yStop, params.zStart, params.zStop);
   update();
 
   QString label = caption;
@@ -2691,8 +2620,7 @@ void Graph3D::setupPlot3D(ApplicationWindow *app, const QString &caption,
   app->initPlot3D(this);
 }
 
-void Graph3D::setupPlotXYZ(ApplicationWindow *app, const QString &caption,
-                           const SurfaceFunctionParams &params) {
+void Graph3D::setupPlotXYZ(ApplicationWindow *app, const QString &caption, const SurfaceFunctionParams &params) {
   QString formula = QString::fromStdString(params.formula);
   int pos = formula.indexOf("_", 0);
   QString wCaption = formula.left(pos);
@@ -2717,8 +2645,7 @@ void Graph3D::setupPlotXYZ(ApplicationWindow *app, const QString &caption,
   int yCol = w->colIndex(yColName);
   int zCol = w->colIndex(zColName);
 
-  loadData(w, xCol, yCol, zCol, params.xStart, params.xStop, params.yStart,
-           params.yStop, params.zStart, params.zStop);
+  loadData(w, xCol, yCol, zCol, params.xStart, params.xStop, params.yStart, params.yStop, params.zStart, params.zStop);
 
   QString label = caption;
   if (app->alreadyUsedName(label))
@@ -2729,24 +2656,20 @@ void Graph3D::setupPlotXYZ(ApplicationWindow *app, const QString &caption,
   app->initPlot3D(this);
 }
 
-void Graph3D::setupPlotParametricSurface(ApplicationWindow *app,
-                                         const SurfaceFunctionParams &params) {
+void Graph3D::setupPlotParametricSurface(ApplicationWindow *app, const SurfaceFunctionParams &params) {
   QString label = app->generateUniqueName("Graph");
 
   resize(500, 400);
   setWindowTitle(label);
   setName(label);
   app->customPlot3D(this);
-  addParametricSurface(QString::fromStdString(params.xFormula),
-                       QString::fromStdString(params.yFormula),
-                       QString::fromStdString(params.zFormula), params.uStart,
-                       params.uEnd, params.vStart, params.vEnd, params.columns,
-                       params.rows, params.uPeriodic, params.vPeriodic);
+  addParametricSurface(QString::fromStdString(params.xFormula), QString::fromStdString(params.yFormula),
+                       QString::fromStdString(params.zFormula), params.uStart, params.uEnd, params.vStart, params.vEnd,
+                       params.columns, params.rows, params.uPeriodic, params.vPeriodic);
   app->initPlot3D(this);
 }
 
-void Graph3D::setupPlotSurface(ApplicationWindow *app,
-                               const SurfaceFunctionParams &params) {
+void Graph3D::setupPlotSurface(ApplicationWindow *app, const SurfaceFunctionParams &params) {
 
   QString label = app->generateUniqueName("Graph");
 
@@ -2754,15 +2677,13 @@ void Graph3D::setupPlotSurface(ApplicationWindow *app,
   setWindowTitle(label);
   setName(label);
   app->customPlot3D(this);
-  addFunction(QString::fromStdString(params.formula), params.xStart,
-              params.xStop, params.yStart, params.yStop, params.zStart,
-              params.zStop, params.columns, params.rows);
+  addFunction(QString::fromStdString(params.formula), params.xStart, params.xStop, params.yStart, params.yStop,
+              params.zStart, params.zStop, params.columns, params.rows);
 
   app->initPlot3D(this);
 }
 
-void Graph3D::setupMatrixPlot3D(ApplicationWindow *app, const QString &caption,
-                                const SurfaceFunctionParams &params) {
+void Graph3D::setupMatrixPlot3D(ApplicationWindow *app, const QString &caption, const SurfaceFunctionParams &params) {
 
   QString name = QString::fromStdString(params.formula);
   name.remove("matrix<", Qt::CaseSensitive);
@@ -2773,15 +2694,13 @@ void Graph3D::setupMatrixPlot3D(ApplicationWindow *app, const QString &caption,
 
   setWindowTitle(caption);
   setName(caption);
-  addMatrixData(m, params.xStart, params.xStop, params.yStart, params.yStop,
-                params.zStart, params.zStop);
+  addMatrixData(m, params.xStart, params.xStop, params.yStart, params.yStop, params.zStart, params.zStop);
   update();
 
   app->initPlot3D(this);
 }
 
-void Graph3D::setupMantidMatrixPlot3D(ApplicationWindow *app,
-                                      MantidQt::API::TSVSerialiser &tsv) {
+void Graph3D::setupMantidMatrixPlot3D(ApplicationWindow *app, MantidQt::API::TSVSerialiser &tsv) {
   using MantidQt::API::PlotAxis;
   MantidMatrix *matrix = readWorkspaceForPlot(app, tsv);
   int style = read3DPlotStyle(tsv);
@@ -2816,8 +2735,7 @@ void Graph3D::setupMantidMatrixPlot3D(ApplicationWindow *app,
     matrix->boundingRect();
 
     MantidMatrixFunction *fun = new MantidMatrixFunction(*matrix);
-    addFunction(fun, matrix->xStart(), matrix->xEnd(), matrix->yStart(),
-                matrix->yEnd(), zMin, zMax, matrix->numCols(),
+    addFunction(fun, matrix->xStart(), matrix->xEnd(), matrix->yStart(), matrix->yEnd(), zMin, zMax, matrix->numCols(),
                 matrix->numRows());
 
     auto workspace = matrix->workspace();
@@ -2831,8 +2749,7 @@ void Graph3D::setupMantidMatrixPlot3D(ApplicationWindow *app,
   }
 }
 
-MantidMatrix *Graph3D::readWorkspaceForPlot(ApplicationWindow *app,
-                                            MantidQt::API::TSVSerialiser &tsv) {
+MantidMatrix *Graph3D::readWorkspaceForPlot(ApplicationWindow *app, MantidQt::API::TSVSerialiser &tsv) {
   MantidMatrix *m = nullptr;
   if (tsv.selectLine("title")) {
     std::string wsName = tsv.asString(1);
@@ -2855,8 +2772,7 @@ int Graph3D::read3DPlotStyle(MantidQt::API::TSVSerialiser &tsv) {
   return style;
 }
 
-Graph3D::SurfaceFunctionParams
-Graph3D::readSurfaceFunction(MantidQt::API::TSVSerialiser &tsv) {
+Graph3D::SurfaceFunctionParams Graph3D::readSurfaceFunction(MantidQt::API::TSVSerialiser &tsv) {
   // We can't use {0} to zero initialise as GCC incorrectly thinks
   // the members are still uninitialised
   SurfaceFunctionParams params = SurfaceFunctionParams();
@@ -2904,8 +2820,7 @@ Graph3D::readSurfaceFunction(MantidQt::API::TSVSerialiser &tsv) {
   return params;
 }
 
-Graph3D::SurfaceFunctionType
-Graph3D::readSurfaceFunctionType(const std::string &formula) {
+Graph3D::SurfaceFunctionType Graph3D::readSurfaceFunctionType(const std::string &formula) {
   SurfaceFunctionType type;
 
   QString func = QString::fromStdString(formula);
@@ -2913,8 +2828,7 @@ Graph3D::readSurfaceFunctionType(const std::string &formula) {
     type = SurfaceFunctionType::Plot3D;
   else if (func.contains("(Z)", Qt::CaseSensitive))
     type = SurfaceFunctionType::XYZ;
-  else if (func.startsWith("matrix<", Qt::CaseSensitive) &&
-           func.endsWith(">", Qt::CaseInsensitive))
+  else if (func.startsWith("matrix<", Qt::CaseSensitive) && func.endsWith(">", Qt::CaseInsensitive))
     type = SurfaceFunctionType::MatrixPlot3D;
   else if (func.contains("mantidMatrix3D"))
     type = SurfaceFunctionType::MantidMatrixPlot3D;
@@ -2957,8 +2871,7 @@ std::string Graph3D::saveToProject(ApplicationWindow *app) {
   if (d_func) {
     surfFunc += d_func->saveToString() + "\t";
   } else if (d_surface) {
-    surfFunc += d_surface->xFormula() + "," + d_surface->yFormula() + "," +
-                d_surface->zFormula() + ",";
+    surfFunc += d_surface->xFormula() + "," + d_surface->yFormula() + "," + d_surface->zFormula() + ",";
     surfFunc += QString::number(d_surface->uStart(), 'e', 15) + ",";
     surfFunc += QString::number(d_surface->uEnd(), 'e', 15) + ",";
     surfFunc += QString::number(d_surface->vStart(), 'e', 15) + ",";
@@ -3011,8 +2924,7 @@ std::string Graph3D::saveToProject(ApplicationWindow *app) {
     else if (pointStyle == Cones)
       tsv << "cones" << conesRad << conesQuality;
     else if (pointStyle == HairCross)
-      tsv << "cross" << crossHairRad << crossHairLineWidth << crossHairSmooth
-          << crossHairBoxed;
+      tsv << "cross" << crossHairRad << crossHairLineWidth << crossHairSmooth << crossHairBoxed;
     break;
 
   case WIREFRAME:
@@ -3077,8 +2989,7 @@ std::string Graph3D::saveToProject(ApplicationWindow *app) {
   fnt = sp->coordinates()->axes[Z1].labelFont();
   tsv << fnt.family() << fnt.pointSize() << fnt.weight() << fnt.italic();
 
-  tsv.writeLine("rotation")
-      << sp->xRotation() << sp->yRotation() << sp->zRotation();
+  tsv.writeLine("rotation") << sp->xRotation() << sp->yRotation() << sp->zRotation();
   tsv.writeLine("zoom") << sp->zoom();
   tsv.writeLine("scaling") << sp->xScale() << sp->yScale() << sp->zScale();
   tsv.writeLine("shift") << sp->xShift() << sp->yShift() << sp->zShift();

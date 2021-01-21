@@ -88,9 +88,7 @@ public slots:
 
 signals:
   //! This is usually connected to the main window's defineErrorBars() slot
-  void options(const QString &curveName, int type, const QString &percent,
-               int direction, bool all);
+  void options(const QString &curveName, int type, const QString &percent, int direction, bool all);
   //! This is usually connected to the main window's defineErrorBars() slot
-  void options(const QString &curveName, const QString &errColumnName,
-               int direction);
+  void options(const QString &curveName, const QString &errColumnName, int direction);
 };

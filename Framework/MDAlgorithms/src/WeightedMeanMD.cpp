@@ -24,15 +24,13 @@ bool WeightedMeanMD::commutative() const { return true; }
 /// Check the inputs and throw if the algorithm cannot be run
 void WeightedMeanMD::checkInputs() {
   if (!m_lhs_histo || !m_rhs_histo)
-    throw std::invalid_argument(this->name() +
-                                " can only be run on a MDHistoWorkspace.");
+    throw std::invalid_argument(this->name() + " can only be run on a MDHistoWorkspace.");
 }
 
 //----------------------------------------------------------------------------------------------
 /// Run the algorithm with a MDHisotWorkspace as output and operand
-void WeightedMeanMD::execHistoHisto(
-    Mantid::DataObjects::MDHistoWorkspace_sptr out,
-    Mantid::DataObjects::MDHistoWorkspace_const_sptr operand) {
+void WeightedMeanMD::execHistoHisto(Mantid::DataObjects::MDHistoWorkspace_sptr out,
+                                    Mantid::DataObjects::MDHistoWorkspace_const_sptr operand) {
   using DataObjects::MDHistoWorkspaceIterator;
   auto lhs = out->createIterator();
   auto lhs_it = dynamic_cast<MDHistoWorkspaceIterator *>(lhs.get());
@@ -73,19 +71,14 @@ void WeightedMeanMD::execHistoHisto(
 
 //----------------------------------------------------------------------------------------------
 /// Run the algorithm with a MDHisotWorkspace as output, scalar and operand
-void WeightedMeanMD::execHistoScalar(
-    Mantid::DataObjects::MDHistoWorkspace_sptr /*out*/,
-    Mantid::DataObjects::WorkspaceSingleValue_const_sptr /*scalar*/) {
-  throw std::runtime_error(
-      this->name() + " can only be run with two MDHistoWorkspaces as inputs");
+void WeightedMeanMD::execHistoScalar(Mantid::DataObjects::MDHistoWorkspace_sptr /*out*/,
+                                     Mantid::DataObjects::WorkspaceSingleValue_const_sptr /*scalar*/) {
+  throw std::runtime_error(this->name() + " can only be run with two MDHistoWorkspaces as inputs");
 }
 
 //----------------------------------------------------------------------------------------------
 /// Run the algorithm on a MDEventWorkspace
-void WeightedMeanMD::execEvent() {
-  throw std::runtime_error(this->name() +
-                           " can only be run on a MDHistoWorkspace.");
-}
+void WeightedMeanMD::execEvent() { throw std::runtime_error(this->name() + " can only be run on a MDHistoWorkspace."); }
 
 } // namespace MDAlgorithms
 } // namespace Mantid

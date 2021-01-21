@@ -40,17 +40,16 @@ namespace LiveData {
  * @return A new workspace of the appropriate size
  */
 template <typename T>
-std::shared_ptr<T> IKafkaStreamDecoder::createBufferWorkspace(
-    const std::string &workspaceClassName, size_t nspectra, const int32_t *spec,
-    const int32_t *udet, uint32_t length) {
+std::shared_ptr<T> IKafkaStreamDecoder::createBufferWorkspace(const std::string &workspaceClassName, size_t nspectra,
+                                                              const int32_t *spec, const int32_t *udet,
+                                                              uint32_t length) {
   // Get spectra to detector mapping
   auto spdetMap = buildSpectrumToDetectorMap(spec, udet, length);
   assert(spdetMap.size() == nspectra);
 
   // Create histo workspace
   auto buffer =
-      std::static_pointer_cast<T>(API::WorkspaceFactory::Instance().create(
-          workspaceClassName, nspectra, 2, 1));
+      std::static_pointer_cast<T>(API::WorkspaceFactory::Instance().create(workspaceClassName, nspectra, 2, 1));
 
   // Set the units
   buffer->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("TOF");
@@ -73,23 +72,19 @@ std::shared_ptr<T> IKafkaStreamDecoder::createBufferWorkspace(
  * @param parent A reference to an existing workspace
  */
 template <typename T>
-std::shared_ptr<T> IKafkaStreamDecoder::createBufferWorkspace(
-    const std::string &workspaceClassName, const std::shared_ptr<T> &parent) {
-  auto buffer =
-      std::static_pointer_cast<T>(API::WorkspaceFactory::Instance().create(
-          workspaceClassName, parent->getNumberHistograms(), 2, 1));
+std::shared_ptr<T> IKafkaStreamDecoder::createBufferWorkspace(const std::string &workspaceClassName,
+                                                              const std::shared_ptr<T> &parent) {
+  auto buffer = std::static_pointer_cast<T>(
+      API::WorkspaceFactory::Instance().create(workspaceClassName, parent->getNumberHistograms(), 2, 1));
   // Copy meta data
-  API::WorkspaceFactory::Instance().initializeFromParent(*parent, *buffer,
-                                                         false);
+  API::WorkspaceFactory::Instance().initializeFromParent(*parent, *buffer, false);
   // Clear out the old logs, except for the most recent entry
   buffer->mutableRun().clearOutdatedTimeSeriesLogValues();
   return buffer;
 }
 
-template <typename T>
-void loadFromAlgorithm(const std::string &name, std::shared_ptr<T> workspace) {
-  auto alg =
-      API::AlgorithmManager::Instance().createUnmanaged("LoadInstrument");
+template <typename T> void loadFromAlgorithm(const std::string &name, std::shared_ptr<T> workspace) {
+  auto alg = API::AlgorithmManager::Instance().createUnmanaged("LoadInstrument");
   // Do not put the workspace in the ADS
   alg->setChild(true);
   alg->initialize();
@@ -107,8 +102,7 @@ void loadFromAlgorithm(const std::string &name, std::shared_ptr<T> workspace) {
  * @param parseJSON flag which will extract geometry from
  */
 template <typename T>
-bool IKafkaStreamDecoder::loadInstrument(const std::string &name,
-                                         std::shared_ptr<T> workspace,
+bool IKafkaStreamDecoder::loadInstrument(const std::string &name, std::shared_ptr<T> workspace,
                                          const std::string &jsonGeometry) {
   auto instrument = workspace->getInstrument();
   if (instrument->getNumberDetectors() != 0) // instrument already loaded.
@@ -120,22 +114,19 @@ bool IKafkaStreamDecoder::loadInstrument(const std::string &name,
         loadFromAlgorithm<T>(name, workspace);
       else {
         try {
-          NexusGeometry::JSONInstrumentBuilder builder(
-              "{\"nexus_structure\":" + jsonGeometry + "}");
+          NexusGeometry::JSONInstrumentBuilder builder("{\"nexus_structure\":" + jsonGeometry + "}");
           workspace->setInstrument(builder.buildGeometry());
         } catch (std::exception &exc) {
-          logger.warning()
-              << "Unable to load instrument from nexus_structure provided in "
-                 "run start message. Falling back on trying to use Mantid's "
-                 "instrument repository. Error encountered was \""
-              << exc.what() << "\"\n";
+          logger.warning() << "Unable to load instrument from nexus_structure provided in "
+                              "run start message. Falling back on trying to use Mantid's "
+                              "instrument repository. Error encountered was \""
+                           << exc.what() << "\"\n";
           loadFromAlgorithm<T>(name, workspace);
         }
       }
       return true;
     } catch (std::exception &exc) {
-      logger.warning() << "Error loading instrument '" << name << "': \""
-                       << exc.what()
+      logger.warning() << "Error loading instrument '" << name << "': \"" << exc.what()
                        << "\". The streamed data will have no associated "
                           "instrument geometry. \n";
     }
@@ -150,9 +141,7 @@ bool IKafkaStreamDecoder::loadInstrument(const std::string &name,
  * buffer data from the kafka stream.
  * @param workspaces buffer workspaces storing kafka data.
  */
-template <typename T>
-void IKafkaStreamDecoder::writeChopperTimestampsToWorkspaceLogs(
-    std::vector<T> workspaces) {
+template <typename T> void IKafkaStreamDecoder::writeChopperTimestampsToWorkspaceLogs(std::vector<T> workspaces) {
   if (!m_chopperStream)
     return;
 
@@ -167,23 +156,18 @@ void IKafkaStreamDecoder::writeChopperTimestampsToWorkspaceLogs(
 
   std::lock_guard<std::mutex> workspaceLock(m_mutex);
 
-  if (flatbuffers::BufferHasIdentifier(
-          reinterpret_cast<const uint8_t *>(buffer.c_str()),
-          CHOPPER_MESSAGE_ID.c_str())) {
-    auto chopperMsg =
-        Gettimestamp(reinterpret_cast<const uint8_t *>(buffer.c_str()));
+  if (flatbuffers::BufferHasIdentifier(reinterpret_cast<const uint8_t *>(buffer.c_str()), CHOPPER_MESSAGE_ID.c_str())) {
+    auto chopperMsg = Gettimestamp(reinterpret_cast<const uint8_t *>(buffer.c_str()));
 
     const auto *timestamps = chopperMsg->timestamps();
     std::vector<uint64_t> mantidTimestamps;
-    std::copy(timestamps->begin(), timestamps->end(),
-              std::back_inserter(mantidTimestamps));
+    std::copy(timestamps->begin(), timestamps->end(), std::back_inserter(mantidTimestamps));
     auto name = chopperMsg->name()->str();
     for (auto &workspace : workspaces) {
       auto mutableRunInfo = workspace->mutableRun();
       Kernel::ArrayProperty<uint64_t> *property;
       if (mutableRunInfo.hasProperty(name)) {
-        property = dynamic_cast<Kernel::ArrayProperty<uint64_t> *>(
-            mutableRunInfo.getProperty(name));
+        property = dynamic_cast<Kernel::ArrayProperty<uint64_t> *>(mutableRunInfo.getProperty(name));
       } else {
         property = new Mantid::Kernel::ArrayProperty<uint64_t>(name);
       }

@@ -23,22 +23,17 @@ namespace VATES {
  * @param farPlane The far plane.
  * @param nearPlane The near plane.
  */
-ViewFrustum::ViewFrustum(const LeftPlane &leftPlane,
-                         const RightPlane &rightPlane,
-                         const BottomPlane &bottomPlane,
-                         const TopPlane &topPlane, const FarPlane &farPlane,
-                         const NearPlane &nearPlane)
-    : m_leftPlane(leftPlane), m_rightPlane(rightPlane), m_topPlane(topPlane),
-      m_bottomPlane(bottomPlane), m_farPlane(farPlane), m_nearPlane(nearPlane) {
-}
+ViewFrustum::ViewFrustum(const LeftPlane &leftPlane, const RightPlane &rightPlane, const BottomPlane &bottomPlane,
+                         const TopPlane &topPlane, const FarPlane &farPlane, const NearPlane &nearPlane)
+    : m_leftPlane(leftPlane), m_rightPlane(rightPlane), m_topPlane(topPlane), m_bottomPlane(bottomPlane),
+      m_farPlane(farPlane), m_nearPlane(nearPlane) {}
 /**
  * Copy constructor for the view frustum.
  * @param other The initializing view frustum.
  */
 ViewFrustum::ViewFrustum(const ViewFrustum &other)
-    : m_leftPlane(other.m_leftPlane), m_rightPlane(other.m_rightPlane),
-      m_topPlane(other.m_topPlane), m_bottomPlane(other.m_bottomPlane),
-      m_farPlane(other.m_farPlane), m_nearPlane(other.m_nearPlane) {}
+    : m_leftPlane(other.m_leftPlane), m_rightPlane(other.m_rightPlane), m_topPlane(other.m_topPlane),
+      m_bottomPlane(other.m_bottomPlane), m_farPlane(other.m_farPlane), m_nearPlane(other.m_nearPlane) {}
 /// Destructor
 ViewFrustum::~ViewFrustum() {}
 
@@ -69,35 +64,24 @@ std::vector<std::pair<double, double>> ViewFrustum::toExtents() const {
   // Get the eight corner points of the view frustum
   std::vector<std::vector<double>> frustumPoints;
   frustumPoints.push_back(
-      getIntersectionPointThreePlanes<LEFTPLANE, TOPPLANE, FARPLANE, double>(
-          m_leftPlane, m_topPlane, m_farPlane));
+      getIntersectionPointThreePlanes<LEFTPLANE, TOPPLANE, FARPLANE, double>(m_leftPlane, m_topPlane, m_farPlane));
   frustumPoints.push_back(
-      getIntersectionPointThreePlanes<LEFTPLANE, TOPPLANE, NEARPLANE, double>(
-          m_leftPlane, m_topPlane, m_nearPlane));
+      getIntersectionPointThreePlanes<LEFTPLANE, TOPPLANE, NEARPLANE, double>(m_leftPlane, m_topPlane, m_nearPlane));
+
+  frustumPoints.push_back(getIntersectionPointThreePlanes<LEFTPLANE, BOTTOMPLANE, FARPLANE, double>(
+      m_leftPlane, m_bottomPlane, m_farPlane));
+  frustumPoints.push_back(getIntersectionPointThreePlanes<LEFTPLANE, BOTTOMPLANE, NEARPLANE, double>(
+      m_leftPlane, m_bottomPlane, m_nearPlane));
 
   frustumPoints.push_back(
-      getIntersectionPointThreePlanes<LEFTPLANE, BOTTOMPLANE, FARPLANE, double>(
-          m_leftPlane, m_bottomPlane, m_farPlane));
+      getIntersectionPointThreePlanes<RIGHTPLANE, TOPPLANE, FARPLANE, double>(m_rightPlane, m_topPlane, m_farPlane));
   frustumPoints.push_back(
-      getIntersectionPointThreePlanes<LEFTPLANE, BOTTOMPLANE, NEARPLANE,
-                                      double>(m_leftPlane, m_bottomPlane,
-                                              m_nearPlane));
+      getIntersectionPointThreePlanes<RIGHTPLANE, TOPPLANE, NEARPLANE, double>(m_rightPlane, m_topPlane, m_nearPlane));
 
-  frustumPoints.push_back(
-      getIntersectionPointThreePlanes<RIGHTPLANE, TOPPLANE, FARPLANE, double>(
-          m_rightPlane, m_topPlane, m_farPlane));
-  frustumPoints.push_back(
-      getIntersectionPointThreePlanes<RIGHTPLANE, TOPPLANE, NEARPLANE, double>(
-          m_rightPlane, m_topPlane, m_nearPlane));
-
-  frustumPoints.push_back(
-      getIntersectionPointThreePlanes<RIGHTPLANE, BOTTOMPLANE, FARPLANE,
-                                      double>(m_rightPlane, m_bottomPlane,
-                                              m_farPlane));
-  frustumPoints.push_back(
-      getIntersectionPointThreePlanes<RIGHTPLANE, BOTTOMPLANE, NEARPLANE,
-                                      double>(m_rightPlane, m_bottomPlane,
-                                              m_nearPlane));
+  frustumPoints.push_back(getIntersectionPointThreePlanes<RIGHTPLANE, BOTTOMPLANE, FARPLANE, double>(
+      m_rightPlane, m_bottomPlane, m_farPlane));
+  frustumPoints.push_back(getIntersectionPointThreePlanes<RIGHTPLANE, BOTTOMPLANE, NEARPLANE, double>(
+      m_rightPlane, m_bottomPlane, m_nearPlane));
 
   std::vector<std::pair<double, double>> extents;
 

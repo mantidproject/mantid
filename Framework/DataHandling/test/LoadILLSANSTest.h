@@ -71,8 +71,7 @@ public:
     alg.setChild(true);
     alg.initialize();
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "010560.nxs"))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "__unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "__unused_for_child"))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
     MatrixWorkspace_const_sptr outputWS = alg.getProperty("OutputWorkspace");
@@ -84,8 +83,7 @@ public:
     TS_ASSERT(outputWS->isHistogramData())
     TS_ASSERT(!outputWS->isDistribution())
     const auto &instrument = outputWS->getInstrument();
-    IComponent_const_sptr component =
-        instrument->getComponentByName("detector");
+    IComponent_const_sptr component = instrument->getComponentByName("detector");
     V3D pos = component->getPos();
     TS_ASSERT_DELTA(pos.Z(), 20.007, 1E-3)
     const auto &xAxis = outputWS->x(0).rawData();
@@ -106,14 +104,12 @@ public:
     alg.setChild(true);
     alg.initialize();
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "027194.nxs"))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "__unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "__unused_for_child"))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
     MatrixWorkspace_const_sptr outputWS = alg.getProperty("OutputWorkspace");
     TS_ASSERT(outputWS)
-    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(),
-                     192 * 256 + 2 * 32 * 256 + 2)
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 192 * 256 + 2 * 32 * 256 + 2)
     TS_ASSERT_EQUALS(outputWS->blocksize(), 1)
     TS_ASSERT(outputWS->detectorInfo().isMonitor(192 * 256 + 2 * 32 * 256))
     TS_ASSERT(outputWS->detectorInfo().isMonitor(192 * 256 + 2 * 32 * 256 + 1))
@@ -121,8 +117,7 @@ public:
     TS_ASSERT(!outputWS->isDistribution())
     const auto &instrument = outputWS->getInstrument();
 
-    IComponent_const_sptr component =
-        instrument->getComponentByName("detector_center");
+    IComponent_const_sptr component = instrument->getComponentByName("detector_center");
     V3D pos = component->getPos();
     TS_ASSERT_DELTA(pos.Z(), 8.9274824298, 1E-3)
 
@@ -152,8 +147,7 @@ public:
     alg.setChild(true);
     alg.initialize();
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "192068.nxs"))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "__unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "__unused_for_child"))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
     MatrixWorkspace_const_sptr outputWS = alg.getProperty("OutputWorkspace");
@@ -165,8 +159,7 @@ public:
     TS_ASSERT(outputWS->isHistogramData())
     TS_ASSERT(!outputWS->isDistribution())
     const auto &instrument = outputWS->getInstrument();
-    IComponent_const_sptr component =
-        instrument->getComponentByName("detector");
+    IComponent_const_sptr component = instrument->getComponentByName("detector");
     V3D pos = component->getPos();
     TS_ASSERT_DELTA(pos.Z(), 8, 0.01)
     TS_ASSERT_DELTA(pos.X(), -0.35, 0.01)
@@ -188,8 +181,7 @@ public:
     alg.setChild(true);
     alg.initialize();
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "375508.nxs"))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "__unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "__unused_for_child"))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
     MatrixWorkspace_const_sptr outputWS = alg.getProperty("OutputWorkspace");
@@ -229,8 +221,7 @@ public:
     alg.setChild(true);
     alg.initialize();
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "218356.nxs"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "__unused_for_child"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "__unused_for_child"));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
     MatrixWorkspace_const_sptr outputWS = alg.getProperty("OutputWorkspace");
@@ -240,8 +231,7 @@ public:
     TS_ASSERT(outputWS->detectorInfo().isMonitor(320 * 320 + 1));
 
     const auto &instrument = outputWS->getInstrument();
-    IComponent_const_sptr component =
-        instrument->getComponentByName("detector");
+    IComponent_const_sptr component = instrument->getComponentByName("detector");
     V3D pos = component->getPos();
     V3D origin(0, 0, 0);
     TS_ASSERT_DELTA(pos.distance(origin), 1, 1E-5);
@@ -285,8 +275,7 @@ public:
     alg.setChild(true);
     alg.initialize();
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "002294.nxs"))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "__unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "__unused_for_child"))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
     MatrixWorkspace_const_sptr outputWS = alg.getProperty("OutputWorkspace");
@@ -306,20 +295,15 @@ public:
     TS_ASSERT_EQUALS(spec[0], 220)
     TS_ASSERT_DELTA(err[0], sqrt(220), 1E-5)
     const auto &instrument = outputWS->getInstrument();
-    IComponent_const_sptr back =
-        instrument->getComponentByName("back_detector");
+    IComponent_const_sptr back = instrument->getComponentByName("back_detector");
     TS_ASSERT_EQUALS(back->getPos(), V3D(0, 0, 10.1128));
-    IComponent_const_sptr right =
-        instrument->getComponentByName("front_detector_right");
+    IComponent_const_sptr right = instrument->getComponentByName("front_detector_right");
     TS_ASSERT_EQUALS(right->getPos(), V3D(-0.41, 0, 1.4968));
-    IComponent_const_sptr left =
-        instrument->getComponentByName("front_detector_left");
+    IComponent_const_sptr left = instrument->getComponentByName("front_detector_left");
     TS_ASSERT_EQUALS(left->getPos(), V3D(0.41, 0, 1.4968));
-    IComponent_const_sptr top =
-        instrument->getComponentByName("front_detector_top");
+    IComponent_const_sptr top = instrument->getComponentByName("front_detector_top");
     TS_ASSERT_EQUALS(top->getPos(), V3D(0, 0.41, 1.3118));
-    IComponent_const_sptr bottom =
-        instrument->getComponentByName("front_detector_bottom");
+    IComponent_const_sptr bottom = instrument->getComponentByName("front_detector_bottom");
     TS_ASSERT_EQUALS(bottom->getPos(), V3D(0, -0.41, 1.3118));
     const auto unit = outputWS->getAxis(0)->unit()->unitID();
     TS_ASSERT_EQUALS(unit, "Wavelength");
@@ -331,8 +315,7 @@ public:
     alg.setChild(true);
     alg.initialize();
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "042610.nxs"))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "__unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "__unused_for_child"))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
     MatrixWorkspace_const_sptr outputWS = alg.getProperty("OutputWorkspace");
@@ -358,8 +341,8 @@ public:
 
   void checkTimeFormat(MatrixWorkspace_const_sptr outputWS) {
     TS_ASSERT(outputWS->run().hasProperty("start_time"));
-    TS_ASSERT(Mantid::Types::Core::DateAndTimeHelpers::stringIsISO8601(
-        outputWS->run().getProperty("start_time")->value()));
+    TS_ASSERT(
+        Mantid::Types::Core::DateAndTimeHelpers::stringIsISO8601(outputWS->run().getProperty("start_time")->value()));
   }
 };
 

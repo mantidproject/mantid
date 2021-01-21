@@ -21,14 +21,10 @@ class DLLExport ExponentialMD : public UnaryOperationMD {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Applies the exponential function on a MDHistoWorkspace.";
-  }
+  const std::string summary() const override { return "Applies the exponential function on a MDHistoWorkspace."; }
 
   int version() const override;
-  const std::vector<std::string> seeAlso() const override {
-    return {"PowerMD", "LogarithmMD"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"PowerMD", "LogarithmMD"}; }
 
 private:
   /// Check the inputs and throw if the algorithm cannot be run

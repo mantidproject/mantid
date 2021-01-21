@@ -22,9 +22,7 @@ MantidMatrixExtensionRequest::~MantidMatrixExtensionRequest() {}
  * @param type: provide the type
  * @returns a MantidMatrixTabeExtension
  */
-MantidMatrixTabExtension
-MantidMatrixExtensionRequest::createMantidMatrixTabExtension(
-    MantidMatrixModel::Type type) {
+MantidMatrixTabExtension MantidMatrixExtensionRequest::createMantidMatrixTabExtension(MantidMatrixModel::Type type) {
   MantidMatrixTabExtension extension;
 
   switch (type) {
@@ -38,8 +36,7 @@ MantidMatrixExtensionRequest::createMantidMatrixTabExtension(
     return extension;
   }
   default:
-    throw std::runtime_error(
-        "The requested extension type has not been implemented yet");
+    throw std::runtime_error("The requested extension type has not been implemented yet");
   }
 }
 
@@ -50,16 +47,15 @@ MantidMatrixExtensionRequest::createMantidMatrixTabExtension(
  * @param format: the format
  * @param precision: the precision
  */
-void MantidMatrixExtensionRequest::setNumberFormat(
-    MantidMatrixModel::Type type, MantidMatrixTabExtensionMap &extensions,
-    const QChar &format, int precision) {
+void MantidMatrixExtensionRequest::setNumberFormat(MantidMatrixModel::Type type,
+                                                   MantidMatrixTabExtensionMap &extensions, const QChar &format,
+                                                   int precision) {
   if (extensions.count(type) > 0) {
     auto &extension = extensions[type];
     m_extensionHandler->setNumberFormat(extension, format, precision);
     m_extensionHandler->recordFormat(extension, format, precision);
   } else {
-    g_log.warning(
-        "MantidMatrixExtensionRequest: Trying to alter an unknown extension.");
+    g_log.warning("MantidMatrixExtensionRequest: Trying to alter an unknown extension.");
   }
 }
 
@@ -69,9 +65,8 @@ void MantidMatrixExtensionRequest::setNumberFormat(
  * @param format: the format
  * @param precision: the precision
  */
-void MantidMatrixExtensionRequest::setNumberFormatForAll(
-    MantidMatrixTabExtensionMap &extensions, const QChar &format,
-    int precision) {
+void MantidMatrixExtensionRequest::setNumberFormatForAll(MantidMatrixTabExtensionMap &extensions, const QChar &format,
+                                                         int precision) {
   for (auto it = extensions.begin(); it != extensions.end(); ++it) {
     auto &extension = it->second;
     m_extensionHandler->setNumberFormat(extension, format, precision);
@@ -85,15 +80,13 @@ void MantidMatrixExtensionRequest::setNumberFormatForAll(
  * @param format: the format
  *@param precision: the precision
  */
-void MantidMatrixExtensionRequest::recordFormat(
-    MantidMatrixModel::Type type, MantidMatrixTabExtensionMap &extensions,
-    const QChar &format, int precision) {
+void MantidMatrixExtensionRequest::recordFormat(MantidMatrixModel::Type type, MantidMatrixTabExtensionMap &extensions,
+                                                const QChar &format, int precision) {
   if (extensions.count(type) > 0) {
     auto &extension = extensions[type];
     m_extensionHandler->recordFormat(extension, format, precision);
   } else {
-    g_log.warning(
-        "MantidMatrixExtensionRequest: Trying to alter an unknown extension.");
+    g_log.warning("MantidMatrixExtensionRequest: Trying to alter an unknown extension.");
   }
 }
 
@@ -104,15 +97,13 @@ void MantidMatrixExtensionRequest::recordFormat(
  * @param defaultValue: the default value
  * @returns the format character
  */
-QChar MantidMatrixExtensionRequest::getFormat(
-    MantidMatrixModel::Type type, MantidMatrixTabExtensionMap &extensions,
-    QChar defaultValue) {
+QChar MantidMatrixExtensionRequest::getFormat(MantidMatrixModel::Type type, MantidMatrixTabExtensionMap &extensions,
+                                              QChar defaultValue) {
   if (extensions.count(type) > 0) {
     auto &extension = extensions[type];
     return m_extensionHandler->getFormat(extension);
   } else {
-    g_log.warning(
-        "MantidMatrixExtensionRequest: Trying to alter an unknown extension.");
+    g_log.warning("MantidMatrixExtensionRequest: Trying to alter an unknown extension.");
     return defaultValue;
   }
 }
@@ -124,15 +115,13 @@ QChar MantidMatrixExtensionRequest::getFormat(
  * @param defaultValue: a default value
  * @returns the precision
  */
-int MantidMatrixExtensionRequest::getPrecision(
-    MantidMatrixModel::Type type, MantidMatrixTabExtensionMap &extensions,
-    int defaultValue) {
+int MantidMatrixExtensionRequest::getPrecision(MantidMatrixModel::Type type, MantidMatrixTabExtensionMap &extensions,
+                                               int defaultValue) {
   if (extensions.count(type) > 0) {
     auto &extension = extensions[type];
     return m_extensionHandler->getPrecision(extension);
   } else {
-    g_log.warning(
-        "MantidMatrixExtensionRequest: Trying to alter an unknown extension.");
+    g_log.warning("MantidMatrixExtensionRequest: Trying to alter an unknown extension.");
     return defaultValue;
   }
 }
@@ -143,8 +132,8 @@ int MantidMatrixExtensionRequest::getPrecision(
  * @param width: the width
  * @param numberOfColumns: the number of columns
  */
-void MantidMatrixExtensionRequest::setColumnWidthForAll(
-    MantidMatrixTabExtensionMap &extensions, int width, int numberOfColumns) {
+void MantidMatrixExtensionRequest::setColumnWidthForAll(MantidMatrixTabExtensionMap &extensions, int width,
+                                                        int numberOfColumns) {
   for (auto it = extensions.begin(); it != extensions.end(); ++it) {
     auto &extension = it->second;
     m_extensionHandler->setColumnWidth(extension, width, numberOfColumns);
@@ -159,9 +148,9 @@ void MantidMatrixExtensionRequest::setColumnWidthForAll(
  * @param defaultValue: a default table view
  * @returns a table view object
  */
-QTableView *MantidMatrixExtensionRequest::getTableView(
-    MantidMatrixModel::Type type, MantidMatrixTabExtensionMap &extensions,
-    int width, QTableView *defaultValue) {
+QTableView *MantidMatrixExtensionRequest::getTableView(MantidMatrixModel::Type type,
+                                                       MantidMatrixTabExtensionMap &extensions, int width,
+                                                       QTableView *defaultValue) {
   if (extensions.count(type) > 0) {
     auto &extension = extensions[type];
     m_extensionHandler->setColumnWidthPreference(extension, width);
@@ -178,15 +167,13 @@ QTableView *MantidMatrixExtensionRequest::getTableView(
  * @param width: the width to set
  * @returns a table view object
  */
-void MantidMatrixExtensionRequest::setColumnWidthPreference(
-    MantidMatrixModel::Type type, MantidMatrixTabExtensionMap &extensions,
-    int width) {
+void MantidMatrixExtensionRequest::setColumnWidthPreference(MantidMatrixModel::Type type,
+                                                            MantidMatrixTabExtensionMap &extensions, int width) {
   if (extensions.count(type) > 0) {
     auto &extension = extensions[type];
     m_extensionHandler->setColumnWidthPreference(extension, width);
   } else {
-    g_log.warning(
-        "MantidMatrixExtensionRequest: Trying to alter an unknown extension.");
+    g_log.warning("MantidMatrixExtensionRequest: Trying to alter an unknown extension.");
   }
 }
 
@@ -197,15 +184,13 @@ void MantidMatrixExtensionRequest::setColumnWidthPreference(
  * @param defaultValue: a default column width
  * @returns the precision
  */
-int MantidMatrixExtensionRequest::getColumnWidth(
-    MantidMatrixModel::Type type, MantidMatrixTabExtensionMap &extensions,
-    int defaultValue) {
+int MantidMatrixExtensionRequest::getColumnWidth(MantidMatrixModel::Type type, MantidMatrixTabExtensionMap &extensions,
+                                                 int defaultValue) {
   if (extensions.count(type) > 0) {
     auto &extension = extensions[type];
     return m_extensionHandler->getColumnWidth(extension);
   } else {
-    g_log.warning(
-        "MantidMatrixExtensionRequest: Trying to alter an unknown extension.");
+    g_log.warning("MantidMatrixExtensionRequest: Trying to alter an unknown extension.");
     return defaultValue;
   }
 }
@@ -216,8 +201,7 @@ int MantidMatrixExtensionRequest::getColumnWidth(
  * @param object: the object to compare to
  * @returns true if an extension matches the object else false
  */
-bool MantidMatrixExtensionRequest::tableViewMatchesObject(
-    MantidMatrixTabExtensionMap &extensions, QObject *object) {
+bool MantidMatrixExtensionRequest::tableViewMatchesObject(MantidMatrixTabExtensionMap &extensions, QObject *object) {
   for (auto it = extensions.begin(); it != extensions.end(); ++it) {
     auto &extension = it->second;
     if (extension.tableView.get() == object) {
@@ -234,9 +218,9 @@ bool MantidMatrixExtensionRequest::tableViewMatchesObject(
  * @param defaultValue: a default table view pointer
  * @returns the active table view
  */
-QTableView *MantidMatrixExtensionRequest::getActiveView(
-    MantidMatrixModel::Type type, MantidMatrixTabExtensionMap &extensions,
-    QTableView *defaultValue) {
+QTableView *MantidMatrixExtensionRequest::getActiveView(MantidMatrixModel::Type type,
+                                                        MantidMatrixTabExtensionMap &extensions,
+                                                        QTableView *defaultValue) {
   if (extensions.count(type) > 0) {
     auto &extension = extensions[type];
     return extension.tableView.get();
@@ -252,9 +236,9 @@ QTableView *MantidMatrixExtensionRequest::getActiveView(
  * @param defaultValue: a default active model
  * @returns the active model
  */
-MantidMatrixModel *MantidMatrixExtensionRequest::getActiveModel(
-    MantidMatrixModel::Type type, MantidMatrixTabExtensionMap &extensions,
-    MantidMatrixModel *defaultValue) {
+MantidMatrixModel *MantidMatrixExtensionRequest::getActiveModel(MantidMatrixModel::Type type,
+                                                                MantidMatrixTabExtensionMap &extensions,
+                                                                MantidMatrixModel *defaultValue) {
   if (extensions.count(type) > 0) {
     auto &extension = extensions[type];
     return extension.model;
@@ -270,9 +254,8 @@ MantidMatrixModel *MantidMatrixExtensionRequest::getActiveModel(
  * @param defaultValue: the default value
  * @returns the column width from the preferences
  */
-int MantidMatrixExtensionRequest::getColumnWidthPreference(
-    MantidMatrixModel::Type type, MantidMatrixTabExtensionMap &extensions,
-    int defaultValue) {
+int MantidMatrixExtensionRequest::getColumnWidthPreference(MantidMatrixModel::Type type,
+                                                           MantidMatrixTabExtensionMap &extensions, int defaultValue) {
   if (extensions.count(type) > 0) {
     auto &extension = extensions[type];
     return m_extensionHandler->getColumnWidthPreference(extension);

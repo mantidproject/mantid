@@ -64,11 +64,9 @@ static bool validate_severity(uint16_t val) {
   return true;
 }
 
-Packet::Packet(const uint8_t *data, uint32_t len)
-    : PacketHeader(data), m_data(data), m_len(len), m_allocated(false) {}
+Packet::Packet(const uint8_t *data, uint32_t len) : PacketHeader(data), m_data(data), m_len(len), m_allocated(false) {}
 
-Packet::Packet(const Packet &pkt)
-    : PacketHeader(pkt.packet()), m_allocated(true) {
+Packet::Packet(const Packet &pkt) : PacketHeader(pkt.packet()), m_allocated(true) {
   m_data = new uint8_t[pkt.packet_length()];
   m_len = pkt.packet_length();
   memcpy(const_cast<uint8_t *>(m_data), pkt.packet(), m_len);
@@ -82,34 +80,28 @@ Packet::~Packet() {
 /* ------------------------------------------------------------------------ */
 
 RawDataPkt::RawDataPkt(const uint8_t *data, uint32_t len)
-    : Packet(data, len),
-      m_fields(reinterpret_cast<const uint32_t *>(payload())) {
+    : Packet(data, len), m_fields(reinterpret_cast<const uint32_t *>(payload())) {
   if (m_version == 0x00 && m_payload_len < (6 * sizeof(uint32_t)))
     throw invalid_packet("RawDataPacket V0 is too short");
-  else if (m_version > ADARA::PacketType::RAW_EVENT_VERSION &&
-           m_payload_len < (6 * sizeof(uint32_t)))
+  else if (m_version > ADARA::PacketType::RAW_EVENT_VERSION && m_payload_len < (6 * sizeof(uint32_t)))
     throw invalid_packet("Newer RawDataPacket is too short");
 }
 
-RawDataPkt::RawDataPkt(const RawDataPkt &pkt)
-    : Packet(pkt), m_fields(reinterpret_cast<const uint32_t *>(payload())) {}
+RawDataPkt::RawDataPkt(const RawDataPkt &pkt) : Packet(pkt), m_fields(reinterpret_cast<const uint32_t *>(payload())) {}
 
 /* ------------------------------------------------------------------------ */
 
-MappedDataPkt::MappedDataPkt(const uint8_t *data, uint32_t len)
-    : RawDataPkt(data, len) {
+MappedDataPkt::MappedDataPkt(const uint8_t *data, uint32_t len) : RawDataPkt(data, len) {
   if (m_version == 0x00 && m_payload_len < (6 * sizeof(uint32_t)))
     throw invalid_packet("MappedDataPacket V0 is too short");
-  else if (m_version > ADARA::PacketType::MAPPED_EVENT_VERSION &&
-           m_payload_len < (6 * sizeof(uint32_t)))
+  else if (m_version > ADARA::PacketType::MAPPED_EVENT_VERSION && m_payload_len < (6 * sizeof(uint32_t)))
     throw invalid_packet("Newer MappedDataPacket is too short");
 }
 
 /* ------------------------------------------------------------------------ */
 
 RTDLPkt::RTDLPkt(const uint8_t *data, uint32_t len)
-    : Packet(data, len),
-      m_fields(reinterpret_cast<uint32_t *>(const_cast<uint8_t *>(payload())))
+    : Packet(data, len), m_fields(reinterpret_cast<uint32_t *>(const_cast<uint8_t *>(payload())))
 // Note: RTDLPkt m_fields can't be "const", as we Modify Pulse Charge!
 {
   if (m_version == 0x00 && m_payload_len != 120)
@@ -122,42 +114,34 @@ RTDLPkt::RTDLPkt(const uint8_t *data, uint32_t len)
 }
 
 RTDLPkt::RTDLPkt(const RTDLPkt &pkt)
-    : Packet(pkt),
-      m_fields(reinterpret_cast<uint32_t *>(const_cast<uint8_t *>(payload())))
+    : Packet(pkt), m_fields(reinterpret_cast<uint32_t *>(const_cast<uint8_t *>(payload())))
 // Note: RTDLPkt m_fields can't be "const", as we Modify Pulse Charge!
 {}
 
 /* ------------------------------------------------------------------------ */
 
-SourceListPkt::SourceListPkt(const uint8_t *data, uint32_t len)
-    : Packet(data, len) {}
+SourceListPkt::SourceListPkt(const uint8_t *data, uint32_t len) : Packet(data, len) {}
 
 /* ------------------------------------------------------------------------ */
 
 BankedEventPkt::BankedEventPkt(const uint8_t *data, uint32_t len)
-    : Packet(data, len),
-      m_fields(reinterpret_cast<const uint32_t *>(payload())),
-      m_curEvent(nullptr), m_lastFieldIndex(0), m_curFieldIndex(0),
-      m_sourceStartIndex(0), m_bankCount(0), m_TOFOffset(0),
-      m_isCorrected(false), m_bankNum(0), m_bankStartIndex(0), m_bankId(0),
-      m_eventCount(0) {
+    : Packet(data, len), m_fields(reinterpret_cast<const uint32_t *>(payload())), m_curEvent(nullptr),
+      m_lastFieldIndex(0), m_curFieldIndex(0), m_sourceStartIndex(0), m_bankCount(0), m_TOFOffset(0),
+      m_isCorrected(false), m_bankNum(0), m_bankStartIndex(0), m_bankId(0), m_eventCount(0) {
   if (m_version == 0x00 && m_payload_len < (4 * sizeof(uint32_t)))
     throw invalid_packet("BankedEvent V0 packet is too short");
   else if (m_version == 0x01 && m_payload_len < (4 * sizeof(uint32_t)))
     throw invalid_packet("BankedEvent V1 packet is too short");
-  else if (m_version > ADARA::PacketType::BANKED_EVENT_VERSION &&
-           m_payload_len < (4 * sizeof(uint32_t)))
+  else if (m_version > ADARA::PacketType::BANKED_EVENT_VERSION && m_payload_len < (4 * sizeof(uint32_t)))
     throw invalid_packet("Newer BankedEvent packet is too short");
 
   m_lastFieldIndex = (payload_length() / 4) - 1;
 }
 
 BankedEventPkt::BankedEventPkt(const BankedEventPkt &pkt)
-    : Packet(pkt), m_fields(reinterpret_cast<const uint32_t *>(payload())),
-      m_curEvent(nullptr), m_lastFieldIndex(0), m_curFieldIndex(0),
-      m_sourceStartIndex(0), m_bankCount(0), m_TOFOffset(0),
-      m_isCorrected(false), m_bankNum(0), m_bankStartIndex(0), m_bankId(0),
-      m_eventCount(0) {
+    : Packet(pkt), m_fields(reinterpret_cast<const uint32_t *>(payload())), m_curEvent(nullptr), m_lastFieldIndex(0),
+      m_curFieldIndex(0), m_sourceStartIndex(0), m_bankCount(0), m_TOFOffset(0), m_isCorrected(false), m_bankNum(0),
+      m_bankStartIndex(0), m_bankId(0), m_eventCount(0) {
   m_lastFieldIndex = ((payload_length() / 4) - 1);
 }
 
@@ -187,8 +171,7 @@ const Event *BankedEventPkt::nextEvent() const {
                   // the last event
   {
     m_curEvent = nullptr;
-    m_curFieldIndex +=
-        2; // go to where the next event will start (if there is a next event)
+    m_curFieldIndex += 2; // go to where the next event will start (if there is a next event)
 
     // have we passed the end of the bank?
     if (m_curFieldIndex < (m_bankStartIndex + 2 + (2 * m_eventCount))) {
@@ -222,8 +205,7 @@ const Event *BankedEventPkt::nextEvent() const {
 // the source is empty).  Sets m_curFieldIndex pointing at the
 // event or at the start of the next source if there were no events.
 void BankedEventPkt::firstEventInSource() const {
-  m_sourceStartIndex =
-      m_curFieldIndex; // index into m_fields for the start of this source
+  m_sourceStartIndex = m_curFieldIndex; // index into m_fields for the start of this source
   m_bankCount = m_fields[m_sourceStartIndex + 3];
   if (m_bankCount > 0) {
     // The != 0 comparison avoids a warning on MSVC about performance of forcing
@@ -254,8 +236,7 @@ void BankedEventPkt::firstEventInSource() const {
 // next bank if the bank is empty, or to the start of the next source if
 // was the last bank.
 void BankedEventPkt::firstEventInBank() const {
-  m_bankStartIndex =
-      m_curFieldIndex; // index into m_fields for the start of this bank
+  m_bankStartIndex = m_curFieldIndex; // index into m_fields for the start of this bank
   m_bankId = m_fields[m_bankStartIndex];
   m_eventCount = m_fields[m_bankStartIndex + 1];
   m_curFieldIndex = m_bankStartIndex + 2;
@@ -269,21 +250,18 @@ void BankedEventPkt::firstEventInBank() const {
 /* ------------------------------------------------------------------------ */
 
 BeamMonitorPkt::BeamMonitorPkt(const uint8_t *data, uint32_t len)
-    : Packet(data, len),
-      m_fields(reinterpret_cast<const uint32_t *>(payload())),
-      m_sectionStartIndex(0), m_eventNum(0) {
+    : Packet(data, len), m_fields(reinterpret_cast<const uint32_t *>(payload())), m_sectionStartIndex(0),
+      m_eventNum(0) {
   if (m_version == 0x00 && m_payload_len < (4 * sizeof(uint32_t)))
     throw invalid_packet("BeamMonitor V0 packet is too short");
   else if (m_version == 0x01 && m_payload_len < (4 * sizeof(uint32_t)))
     throw invalid_packet("BeamMonitor V1 packet is too short");
-  else if (m_version > ADARA::PacketType::BEAM_MONITOR_EVENT_VERSION &&
-           m_payload_len < (4 * sizeof(uint32_t)))
+  else if (m_version > ADARA::PacketType::BEAM_MONITOR_EVENT_VERSION && m_payload_len < (4 * sizeof(uint32_t)))
     throw invalid_packet("Newer BeamMonitor packet is too short");
 }
 
 BeamMonitorPkt::BeamMonitorPkt(const BeamMonitorPkt &pkt)
-    : Packet(pkt), m_fields(reinterpret_cast<const uint32_t *>(payload())),
-      m_sectionStartIndex(0), m_eventNum(0) {}
+    : Packet(pkt), m_fields(reinterpret_cast<const uint32_t *>(payload())), m_sectionStartIndex(0), m_eventNum(0) {}
 
 #define EVENT_COUNT_MASK 0x003FFFFF // lower 22 bits
 bool BeamMonitorPkt::nextSection() const
@@ -312,13 +290,9 @@ uint32_t BeamMonitorPkt::getSectionMonitorID() const {
   return (m_fields[m_sectionStartIndex] >> 22);
 }
 
-uint32_t BeamMonitorPkt::getSectionEventCount() const {
-  return m_fields[m_sectionStartIndex] & EVENT_COUNT_MASK;
-}
+uint32_t BeamMonitorPkt::getSectionEventCount() const { return m_fields[m_sectionStartIndex] & EVENT_COUNT_MASK; }
 
-uint32_t BeamMonitorPkt::getSectionSourceID() const {
-  return m_fields[m_sectionStartIndex + 1];
-}
+uint32_t BeamMonitorPkt::getSectionSourceID() const { return m_fields[m_sectionStartIndex + 1]; }
 
 uint32_t BeamMonitorPkt::getSectionTOFOffset() const {
   // need to mask off the high bit
@@ -332,8 +306,7 @@ bool BeamMonitorPkt::sectionTOFCorrected() const {
 
 #define CYCLE_MASK 0x7FE00000 // bits 30 to 21 (inclusive)
 #define TOF_MASK 0x001FFFFF   // bits 20 to 0 (inclusive)
-bool BeamMonitorPkt::nextEvent(bool &risingEdge, uint32_t &cycle,
-                               uint32_t &tof) const {
+bool BeamMonitorPkt::nextEvent(bool &risingEdge, uint32_t &cycle, uint32_t &tof) const {
   bool RV = false;
   if (m_sectionStartIndex != 0 && m_eventNum < getSectionEventCount()) {
     uint32_t rawEvent = m_fields[m_sectionStartIndex + 3 + m_eventNum];
@@ -351,18 +324,15 @@ bool BeamMonitorPkt::nextEvent(bool &risingEdge, uint32_t &cycle,
 
 /* ------------------------------------------------------------------------ */
 
-PixelMappingPkt::PixelMappingPkt(const uint8_t *data, uint32_t len)
-    : Packet(data, len) {}
+PixelMappingPkt::PixelMappingPkt(const uint8_t *data, uint32_t len) : Packet(data, len) {}
 
 /* ------------------------------------------------------------------------ */
 
 RunStatusPkt::RunStatusPkt(const uint8_t *data, uint32_t len)
-    : Packet(data, len),
-      m_fields(reinterpret_cast<const uint32_t *>(payload())) {
+    : Packet(data, len), m_fields(reinterpret_cast<const uint32_t *>(payload())) {
   if (m_version == 0x00 && m_payload_len != (3 * sizeof(uint32_t)))
     throw invalid_packet("RunStatus V0 packet is incorrect length");
-  else if (m_version > ADARA::PacketType::RUN_STATUS_VERSION &&
-           m_payload_len < (3 * sizeof(uint32_t)))
+  else if (m_version > ADARA::PacketType::RUN_STATUS_VERSION && m_payload_len < (3 * sizeof(uint32_t)))
     throw invalid_packet("Newer RunStatus packet is too short");
 }
 
@@ -373,19 +343,16 @@ RunStatusPkt::RunStatusPkt(const RunStatusPkt &pkt)
 
 RunInfoPkt::RunInfoPkt(const uint8_t *data, uint32_t len) : Packet(data, len) {
   uint32_t size = *reinterpret_cast<const uint32_t *>(payload());
-  const char *xml =
-      reinterpret_cast<const char *>(payload()) + sizeof(uint32_t);
+  const char *xml = reinterpret_cast<const char *>(payload()) + sizeof(uint32_t);
 
   if (m_version == 0x00 && m_payload_len < sizeof(uint32_t))
     throw invalid_packet("RunInfo V0 packet is too short");
-  else if (m_version > ADARA::PacketType::RUN_INFO_VERSION &&
-           m_payload_len < sizeof(uint32_t))
+  else if (m_version > ADARA::PacketType::RUN_INFO_VERSION && m_payload_len < sizeof(uint32_t))
     throw invalid_packet("Newer RunInfo packet is too short");
 
   if (m_version == 0x00 && m_payload_len < (size + sizeof(uint32_t)))
     throw invalid_packet("RunInfo V0 packet has oversize string");
-  else if (m_version > ADARA::PacketType::RUN_INFO_VERSION &&
-           m_payload_len < (size + sizeof(uint32_t)))
+  else if (m_version > ADARA::PacketType::RUN_INFO_VERSION && m_payload_len < (size + sizeof(uint32_t)))
     throw invalid_packet("Newer RunInfo packet has oversize string");
 
   /* TODO it would be better to create the string on access
@@ -396,24 +363,20 @@ RunInfoPkt::RunInfoPkt(const uint8_t *data, uint32_t len) : Packet(data, len) {
 
 /* ------------------------------------------------------------------------ */
 
-TransCompletePkt::TransCompletePkt(const uint8_t *data, uint32_t len)
-    : Packet(data, len) {
+TransCompletePkt::TransCompletePkt(const uint8_t *data, uint32_t len) : Packet(data, len) {
   uint32_t size = *reinterpret_cast<const uint32_t *>(payload());
-  const char *reason =
-      reinterpret_cast<const char *>(payload()) + sizeof(uint32_t);
+  const char *reason = reinterpret_cast<const char *>(payload()) + sizeof(uint32_t);
 
   if (m_version == 0x00 && m_payload_len < sizeof(uint32_t))
     throw invalid_packet("TransComplete V0 packet is too short");
-  else if (m_version > ADARA::PacketType::TRANS_COMPLETE_VERSION &&
-           m_payload_len < sizeof(uint32_t))
+  else if (m_version > ADARA::PacketType::TRANS_COMPLETE_VERSION && m_payload_len < sizeof(uint32_t))
     throw invalid_packet("Newer TransComplete packet is too short");
 
   m_status = static_cast<uint16_t>(size >> 16);
   size &= 0xffff;
   if (m_version == 0x00 && m_payload_len < (size + sizeof(uint32_t)))
     throw invalid_packet("TransComplete V0 packet has oversize string");
-  else if (m_version > ADARA::PacketType::TRANS_COMPLETE_VERSION &&
-           m_payload_len < (size + sizeof(uint32_t))) {
+  else if (m_version > ADARA::PacketType::TRANS_COMPLETE_VERSION && m_payload_len < (size + sizeof(uint32_t))) {
     throw invalid_packet("Newer TransComplete packet has oversize string");
   }
 
@@ -424,19 +387,16 @@ TransCompletePkt::TransCompletePkt(const uint8_t *data, uint32_t len)
 }
 
 TransCompletePkt::TransCompletePkt(const TransCompletePkt &pkt)
-    : Packet(pkt), m_status(VariableStatus::NOT_REPORTED),
-      m_reason(pkt.m_reason) {}
+    : Packet(pkt), m_status(VariableStatus::NOT_REPORTED), m_reason(pkt.m_reason) {}
 
 /* ------------------------------------------------------------------------ */
 
-ClientHelloPkt::ClientHelloPkt(const uint8_t *data, uint32_t len)
-    : Packet(data, len) {
+ClientHelloPkt::ClientHelloPkt(const uint8_t *data, uint32_t len) : Packet(data, len) {
   if (m_version == 0x00 && m_payload_len != sizeof(uint32_t))
     throw invalid_packet("ClientHello V0 packet is incorrect size");
   else if (m_version == 0x01 && m_payload_len != (2 * sizeof(uint32_t)))
     throw invalid_packet("ClientHello V1 packet is incorrect size");
-  else if (m_version > ADARA::PacketType::CLIENT_HELLO_VERSION &&
-           m_payload_len < (2 * sizeof(uint32_t)))
+  else if (m_version > ADARA::PacketType::CLIENT_HELLO_VERSION && m_payload_len < (2 * sizeof(uint32_t)))
     throw invalid_packet("Newer ClientHello packet is too short");
 
   const auto *fields = reinterpret_cast<const uint32_t *>(payload());
@@ -447,12 +407,10 @@ ClientHelloPkt::ClientHelloPkt(const uint8_t *data, uint32_t len)
 /* ------------------------------------------------------------------------ */
 
 AnnotationPkt::AnnotationPkt(const uint8_t *data, uint32_t len)
-    : Packet(data, len),
-      m_fields(reinterpret_cast<const uint32_t *>(payload())) {
+    : Packet(data, len), m_fields(reinterpret_cast<const uint32_t *>(payload())) {
   if (m_version == 0x00 && m_payload_len < (2 * sizeof(uint32_t)))
     throw invalid_packet("AnnotationPkt V0 packet is incorrect size");
-  else if (m_version > ADARA::PacketType::STREAM_ANNOTATION_VERSION &&
-           m_payload_len < (2 * sizeof(uint32_t))) {
+  else if (m_version > ADARA::PacketType::STREAM_ANNOTATION_VERSION && m_payload_len < (2 * sizeof(uint32_t))) {
     throw invalid_packet("Newer AnnotationPkt packet is incorrect size");
   }
 
@@ -480,41 +438,34 @@ SyncPkt::SyncPkt(const uint8_t *data, uint32_t len) : Packet(data, len) {
 
   if (m_version == 0x00 && m_payload_len < (size + 28))
     throw invalid_packet("Sync V0 packet has oversize string");
-  else if (m_version > ADARA::PacketType::SYNC_VERSION &&
-           m_payload_len < (size + 28))
+  else if (m_version > ADARA::PacketType::SYNC_VERSION && m_payload_len < (size + 28))
     throw invalid_packet("Newer Sync packet has oversize string");
 }
 
 /* ------------------------------------------------------------------------ */
 
-HeartbeatPkt::HeartbeatPkt(const uint8_t *data, uint32_t len)
-    : Packet(data, len) {
+HeartbeatPkt::HeartbeatPkt(const uint8_t *data, uint32_t len) : Packet(data, len) {
   if (m_version == 0x00 && m_payload_len != 0)
     throw invalid_packet("Heartbeat V0 packet is incorrect size");
-  else if (m_version > ADARA::PacketType::HEARTBEAT_VERSION &&
-           m_payload_len == 0)
+  else if (m_version > ADARA::PacketType::HEARTBEAT_VERSION && m_payload_len == 0)
     throw invalid_packet("Newer ClientHello packet is too short");
   // ...any newer version would have to grow, lol...? ;-D
 }
 
 /* ------------------------------------------------------------------------ */
 
-GeometryPkt::GeometryPkt(const uint8_t *data, uint32_t len)
-    : Packet(data, len) {
+GeometryPkt::GeometryPkt(const uint8_t *data, uint32_t len) : Packet(data, len) {
   uint32_t size = *reinterpret_cast<const uint32_t *>(payload());
-  const char *xml =
-      reinterpret_cast<const char *>(payload()) + sizeof(uint32_t);
+  const char *xml = reinterpret_cast<const char *>(payload()) + sizeof(uint32_t);
 
   if (m_version == 0x00 && m_payload_len < sizeof(uint32_t))
     throw invalid_packet("Geometry V0 packet is too short");
-  else if (m_version > ADARA::PacketType::GEOMETRY_VERSION &&
-           m_payload_len < sizeof(uint32_t))
+  else if (m_version > ADARA::PacketType::GEOMETRY_VERSION && m_payload_len < sizeof(uint32_t))
     throw invalid_packet("Newer Geometry packet is too short");
 
   if (m_version == 0x00 && m_payload_len < (size + sizeof(uint32_t)))
     throw invalid_packet("Geometry V0 packet has oversize string");
-  else if (m_version > ADARA::PacketType::GEOMETRY_VERSION &&
-           m_payload_len < (size + sizeof(uint32_t)))
+  else if (m_version > ADARA::PacketType::GEOMETRY_VERSION && m_payload_len < (size + sizeof(uint32_t)))
     throw invalid_packet("Newer Geometry packet has oversize string");
 
   /* TODO it would be better to create the string on access
@@ -525,10 +476,8 @@ GeometryPkt::GeometryPkt(const uint8_t *data, uint32_t len)
 
 /* ------------------------------------------------------------------------ */
 
-BeamlineInfoPkt::BeamlineInfoPkt(const uint8_t *data, uint32_t len)
-    : Packet(data, len) {
-  const char *info =
-      reinterpret_cast<const char *>(payload()) + sizeof(uint32_t);
+BeamlineInfoPkt::BeamlineInfoPkt(const uint8_t *data, uint32_t len) : Packet(data, len) {
+  const char *info = reinterpret_cast<const char *>(payload()) + sizeof(uint32_t);
   uint32_t sizes = *reinterpret_cast<const uint32_t *>(payload());
   uint32_t id_len, shortName_len, longName_len, info_len;
 
@@ -536,8 +485,7 @@ BeamlineInfoPkt::BeamlineInfoPkt(const uint8_t *data, uint32_t len)
     throw invalid_packet("Beamline Info V0 packet is too short");
   else if (m_version == 0x01 && m_payload_len < sizeof(uint32_t))
     throw invalid_packet("Beamline Info V1 packet is too short");
-  else if (m_version > ADARA::PacketType::BEAMLINE_INFO_VERSION &&
-           m_payload_len < sizeof(uint32_t))
+  else if (m_version > ADARA::PacketType::BEAMLINE_INFO_VERSION && m_payload_len < sizeof(uint32_t))
     throw invalid_packet("Newer Beamline Info packet is too short");
 
   longName_len = sizes & 0xff;
@@ -564,18 +512,15 @@ BeamlineInfoPkt::BeamlineInfoPkt(const uint8_t *data, uint32_t len)
 /* ------------------------------------------------------------------------ */
 
 BeamMonitorConfigPkt::BeamMonitorConfigPkt(const uint8_t *data, uint32_t len)
-    : Packet(data, len),
-      m_fields(reinterpret_cast<const uint32_t *>(payload())) {
+    : Packet(data, len), m_fields(reinterpret_cast<const uint32_t *>(payload())) {
   size_t sectionSize = sizeof(double) + (4 * sizeof(uint32_t));
 
-  if (m_version == 0x00 &&
-      m_payload_len != (sizeof(uint32_t) + (beamMonCount() * sectionSize))) {
+  if (m_version == 0x00 && m_payload_len != (sizeof(uint32_t) + (beamMonCount() * sectionSize))) {
     std::string msg("BeamMonitorConfig V0 packet is incorrect length: ");
     msg += std::to_string(m_payload_len);
     throw invalid_packet(msg);
   } else if (m_version > ADARA::PacketType::BEAM_MONITOR_CONFIG_VERSION &&
-             m_payload_len <
-                 (sizeof(uint32_t) + (beamMonCount() * sectionSize))) {
+             m_payload_len < (sizeof(uint32_t) + (beamMonCount() * sectionSize))) {
     std::string msg("Newer BeamMonitorConfig packet is too short: ");
     msg += std::to_string(m_payload_len);
     throw invalid_packet(msg);
@@ -588,9 +533,8 @@ BeamMonitorConfigPkt::BeamMonitorConfigPkt(const BeamMonitorConfigPkt &pkt)
 /* ------------------------------------------------------------------------ */
 
 DetectorBankSetsPkt::DetectorBankSetsPkt(const uint8_t *data, uint32_t len)
-    : Packet(data, len),
-      m_fields(reinterpret_cast<const uint32_t *>(payload())),
-      m_sectionOffsets(nullptr), m_after_banks_offset(nullptr) {
+    : Packet(data, len), m_fields(reinterpret_cast<const uint32_t *>(payload())), m_sectionOffsets(nullptr),
+      m_after_banks_offset(nullptr) {
   // Get Number of Detector Bank Sets...
   //    - Basic Packet Size Sanity Check
 
@@ -598,8 +542,7 @@ DetectorBankSetsPkt::DetectorBankSetsPkt(const uint8_t *data, uint32_t len)
     std::string msg("DetectorBankSets V0 packet is too short for Count! ");
     msg += std::to_string(m_payload_len);
     throw invalid_packet(msg);
-  } else if (m_version > ADARA::PacketType::DETECTOR_BANK_SETS_VERSION &&
-             m_payload_len < sizeof(uint32_t)) {
+  } else if (m_version > ADARA::PacketType::DETECTOR_BANK_SETS_VERSION && m_payload_len < sizeof(uint32_t)) {
     std::string msg("Newer DetectorBankSets packet is too short for Count! ");
     msg += std::to_string(m_payload_len);
     throw invalid_packet(msg);
@@ -625,8 +568,7 @@ DetectorBankSetsPkt::DetectorBankSetsPkt(const uint8_t *data, uint32_t len)
   uint32_t baseSectionOffsetPart2 = 0 + 3             // histo params
                                     + 2               // throttle rate (double)
                                     + m_suffix_offset;
-  uint32_t baseSectionOffsetNoBanks =
-      baseSectionOffsetPart1 + baseSectionOffsetPart2;
+  uint32_t baseSectionOffsetNoBanks = baseSectionOffsetPart1 + baseSectionOffsetPart2;
 
   // Running Section Offset (in number of uint32_t elements)
   uint32_t sectionOffset = 1; // for Detector Bank Set Count...
@@ -635,9 +577,7 @@ DetectorBankSetsPkt::DetectorBankSetsPkt(const uint8_t *data, uint32_t len)
     // Section Offset
     m_sectionOffsets[i] = sectionOffset;
 
-    if (m_version == 0x00 &&
-        m_payload_len <
-            ((sectionOffset + baseSectionOffsetNoBanks) * sizeof(uint32_t))) {
+    if (m_version == 0x00 && m_payload_len < ((sectionOffset + baseSectionOffsetNoBanks) * sizeof(uint32_t))) {
       std::string msg("DetectorBankSets V0 packet: too short for Set ");
       msg += std::to_string(i + 1);
       msg += " of ";
@@ -654,8 +594,7 @@ DetectorBankSetsPkt::DetectorBankSetsPkt(const uint8_t *data, uint32_t len)
       m_after_banks_offset = nullptr;
       throw invalid_packet(msg);
     } else if (m_version > ADARA::PacketType::DETECTOR_BANK_SETS_VERSION &&
-               m_payload_len < ((sectionOffset + baseSectionOffsetNoBanks) *
-                                sizeof(uint32_t))) {
+               m_payload_len < ((sectionOffset + baseSectionOffsetNoBanks) * sizeof(uint32_t))) {
       std::string msg("Newer DetectorBankSets packet: too short for Set ");
       msg += std::to_string(i + 1);
       msg += " of ";
@@ -674,8 +613,7 @@ DetectorBankSetsPkt::DetectorBankSetsPkt(const uint8_t *data, uint32_t len)
     }
 
     // Offset thru end of Bank Ids list...
-    sectionOffset += baseSectionOffsetPart1 +
-                     bankCount(i); // just in time m_sectionOffset delivery...!
+    sectionOffset += baseSectionOffsetPart1 + bankCount(i); // just in time m_sectionOffset delivery...!
 
     // Save as "After Banks" Offset...
     m_after_banks_offset[i] = sectionOffset;
@@ -720,8 +658,8 @@ DetectorBankSetsPkt::DetectorBankSetsPkt(const uint8_t *data, uint32_t len)
 }
 
 DetectorBankSetsPkt::DetectorBankSetsPkt(const DetectorBankSetsPkt &pkt)
-    : Packet(pkt), m_fields(reinterpret_cast<const uint32_t *>(payload())),
-      m_sectionOffsets(nullptr), m_after_banks_offset(nullptr) {
+    : Packet(pkt), m_fields(reinterpret_cast<const uint32_t *>(payload())), m_sectionOffsets(nullptr),
+      m_after_banks_offset(nullptr) {
   uint32_t numSets = detBankSetCount();
 
   // Don't Allocate Anything if there are No Detector Bank Sets...
@@ -729,12 +667,10 @@ DetectorBankSetsPkt::DetectorBankSetsPkt(const DetectorBankSetsPkt &pkt)
     return;
 
   m_sectionOffsets = new uint32_t[numSets];
-  memcpy(const_cast<uint32_t *>(m_sectionOffsets), pkt.m_sectionOffsets,
-         numSets * sizeof(uint32_t));
+  memcpy(const_cast<uint32_t *>(m_sectionOffsets), pkt.m_sectionOffsets, numSets * sizeof(uint32_t));
 
   m_after_banks_offset = new uint32_t[numSets];
-  memcpy(const_cast<uint32_t *>(m_after_banks_offset), pkt.m_after_banks_offset,
-         numSets * sizeof(uint32_t));
+  memcpy(const_cast<uint32_t *>(m_after_banks_offset), pkt.m_after_banks_offset, numSets * sizeof(uint32_t));
 }
 
 DetectorBankSetsPkt::~DetectorBankSetsPkt() {
@@ -744,34 +680,29 @@ DetectorBankSetsPkt::~DetectorBankSetsPkt() {
 
 /* ------------------------------------------------------------------------ */
 
-DataDonePkt::DataDonePkt(const uint8_t *data, uint32_t len)
-    : Packet(data, len) {
+DataDonePkt::DataDonePkt(const uint8_t *data, uint32_t len) : Packet(data, len) {
   if (m_version == 0x00 && m_payload_len != 0)
     throw invalid_packet("DataDone V0 packet is incorrect size");
-  else if (m_version > ADARA::PacketType::DATA_DONE_VERSION &&
-           m_payload_len == 0)
+  else if (m_version > ADARA::PacketType::DATA_DONE_VERSION && m_payload_len == 0)
     throw invalid_packet("Newer DataDone packet is too short");
   // ...any newer version would have to grow, lol...? ;-D
 }
 
 /* ------------------------------------------------------------------------ */
 
-DeviceDescriptorPkt::DeviceDescriptorPkt(const uint8_t *data, uint32_t len)
-    : Packet(data, len) {
+DeviceDescriptorPkt::DeviceDescriptorPkt(const uint8_t *data, uint32_t len) : Packet(data, len) {
   const auto *fields = reinterpret_cast<const uint32_t *>(payload());
   uint32_t size;
 
   if (m_version == 0x00 && m_payload_len < (2 * sizeof(uint32_t)))
     throw invalid_packet("DeviceDescriptor V0 packet is too short");
-  else if (m_version > ADARA::PacketType::DEVICE_DESC_VERSION &&
-           m_payload_len < (2 * sizeof(uint32_t)))
+  else if (m_version > ADARA::PacketType::DEVICE_DESC_VERSION && m_payload_len < (2 * sizeof(uint32_t)))
     throw invalid_packet("Newer DeviceDescriptor packet is too short");
 
   size = fields[1];
   if (m_version == 0x00 && m_payload_len < (size + (2 * sizeof(uint32_t)))) {
     throw invalid_packet("DeviceDescriptor V0 packet has oversize string");
-  } else if (m_version > ADARA::PacketType::DEVICE_DESC_VERSION &&
-             m_payload_len < (size + (2 * sizeof(uint32_t)))) {
+  } else if (m_version > ADARA::PacketType::DEVICE_DESC_VERSION && m_payload_len < (size + (2 * sizeof(uint32_t)))) {
     throw invalid_packet("Newer DeviceDescriptor packet has oversize string");
   }
 
@@ -785,14 +716,12 @@ DeviceDescriptorPkt::DeviceDescriptorPkt(const uint8_t *data, uint32_t len)
 /* ------------------------------------------------------------------------ */
 
 VariableU32Pkt::VariableU32Pkt(const uint8_t *data, uint32_t len)
-    : Packet(data, len),
-      m_fields(reinterpret_cast<const uint32_t *>(payload())) {
+    : Packet(data, len), m_fields(reinterpret_cast<const uint32_t *>(payload())) {
   if (m_version == 0x00 && m_payload_len != (4 * sizeof(uint32_t))) {
     std::string msg("VariableValue (U32) V0 packet is incorrect length: ");
     msg += std::to_string(m_payload_len);
     throw invalid_packet(msg);
-  } else if (m_version > ADARA::PacketType::VAR_VALUE_U32_VERSION &&
-             m_payload_len < (4 * sizeof(uint32_t))) {
+  } else if (m_version > ADARA::PacketType::VAR_VALUE_U32_VERSION && m_payload_len < (4 * sizeof(uint32_t))) {
     std::string msg("Newer VariableValue (U32) packet is too short: ");
     msg += std::to_string(m_payload_len);
     throw invalid_packet(msg);
@@ -817,10 +746,8 @@ VariableU32Pkt::VariableU32Pkt(const VariableU32Pkt &pkt)
 /* ------------------------------------------------------------------------ */
 
 VariableDoublePkt::VariableDoublePkt(const uint8_t *data, uint32_t len)
-    : Packet(data, len),
-      m_fields(reinterpret_cast<const uint32_t *>(payload())) {
-  if (m_version == 0x00 &&
-      m_payload_len != (sizeof(double) + (3 * sizeof(uint32_t)))) {
+    : Packet(data, len), m_fields(reinterpret_cast<const uint32_t *>(payload())) {
+  if (m_version == 0x00 && m_payload_len != (sizeof(double) + (3 * sizeof(uint32_t)))) {
     std::string msg("VariableValue (Double) V0 packet is incorrect length: ");
     msg += std::to_string(m_payload_len);
     throw invalid_packet(msg);
@@ -850,16 +777,14 @@ VariableDoublePkt::VariableDoublePkt(const VariableDoublePkt &pkt)
 /* ------------------------------------------------------------------------ */
 
 VariableStringPkt::VariableStringPkt(const uint8_t *data, uint32_t len)
-    : Packet(data, len),
-      m_fields(reinterpret_cast<const uint32_t *>(payload())) {
+    : Packet(data, len), m_fields(reinterpret_cast<const uint32_t *>(payload())) {
   uint32_t size;
 
   if (m_version == 0x00 && m_payload_len < (4 * sizeof(uint32_t))) {
     std::string msg("VariableValue (String) V0 packet is too short ");
     msg += std::to_string(m_payload_len);
     throw invalid_packet(msg);
-  } else if (m_version > ADARA::PacketType::VAR_VALUE_STRING_VERSION &&
-             m_payload_len < (4 * sizeof(uint32_t))) {
+  } else if (m_version > ADARA::PacketType::VAR_VALUE_STRING_VERSION && m_payload_len < (4 * sizeof(uint32_t))) {
     std::string msg("Newer VariableValue (String) packet is too short ");
     msg += std::to_string(m_payload_len);
     throw invalid_packet(msg);
@@ -874,8 +799,7 @@ VariableStringPkt::VariableStringPkt(const uint8_t *data, uint32_t len)
     throw invalid_packet(msg);
   } else if (m_version > ADARA::PacketType::VAR_VALUE_STRING_VERSION &&
              m_payload_len < (size + (4 * sizeof(uint32_t)))) {
-    std::string msg(
-        "Newer VariableValue (String) packet has oversize string: ");
+    std::string msg("Newer VariableValue (String) packet has oversize string: ");
     msg += std::to_string(size);
     msg += " vs payload ";
     msg += std::to_string(m_payload_len);
@@ -901,5 +825,4 @@ VariableStringPkt::VariableStringPkt(const uint8_t *data, uint32_t len)
 }
 
 VariableStringPkt::VariableStringPkt(const VariableStringPkt &pkt)
-    : Packet(pkt), m_fields(reinterpret_cast<const uint32_t *>(payload())),
-      m_val(pkt.m_val) {}
+    : Packet(pkt), m_fields(reinterpret_cast<const uint32_t *>(payload())), m_val(pkt.m_val) {}

@@ -78,18 +78,15 @@ public:
     TS_ASSERT(fun.isActive(i));
 
     TS_ASSERT_DELTA(fun.getParameter("f0.PeakCentre"), 0.0, 1e-3);
-    TS_ASSERT_DELTA(fun.getParameter("f0.Amplitude"), 2.749 * c_mbsr,
-                    1e-3 * c_mbsr);
+    TS_ASSERT_DELTA(fun.getParameter("f0.Amplitude"), 2.749 * c_mbsr, 1e-3 * c_mbsr);
     TS_ASSERT_DELTA(fun.getParameter("f0.FWHM"), 1.5, 1e-3);
 
     TS_ASSERT_DELTA(fun.getParameter("f1.PeakCentre"), 29.3261, 1e-3);
-    TS_ASSERT_DELTA(fun.getParameter("f1.Amplitude"), 0.7204 * c_mbsr,
-                    1e-3 * c_mbsr);
+    TS_ASSERT_DELTA(fun.getParameter("f1.Amplitude"), 0.7204 * c_mbsr, 1e-3 * c_mbsr);
     TS_ASSERT_DELTA(fun.getParameter("f1.FWHM"), 1.5, 1e-3);
 
     TS_ASSERT_DELTA(fun.getParameter("f2.PeakCentre"), 44.3412, 1e-3);
-    TS_ASSERT_DELTA(fun.getParameter("f2.Amplitude"), 0.4298 * c_mbsr,
-                    1e-3 * c_mbsr);
+    TS_ASSERT_DELTA(fun.getParameter("f2.Amplitude"), 0.4298 * c_mbsr, 1e-3 * c_mbsr);
     TS_ASSERT_DELTA(fun.getParameter("f2.FWHM"), 1.5, 1e-3);
 
     TS_ASSERT(fun.hasParameter("B20"));
@@ -121,10 +118,10 @@ public:
     FunctionValues y(x);
     fun->function(x, y);
 
-    auto testFun = FunctionFactory::Instance().createInitialized(
-        "name=Lorentzian,PeakCentre=0.0,Amplitude=2.749,FWHM=2.0;"
-        "name=Lorentzian,PeakCentre=29.3261,Amplitude=0.7204,FWHM=20.0;"
-        "name=Lorentzian,PeakCentre=44.3412,Amplitude=0.4298,FWHM=20.0;");
+    auto testFun =
+        FunctionFactory::Instance().createInitialized("name=Lorentzian,PeakCentre=0.0,Amplitude=2.749,FWHM=2.0;"
+                                                      "name=Lorentzian,PeakCentre=29.3261,Amplitude=0.7204,FWHM=20.0;"
+                                                      "name=Lorentzian,PeakCentre=44.3412,Amplitude=0.4298,FWHM=20.0;");
     FunctionValues t(x);
     testFun->function(x, t);
 
@@ -156,14 +153,13 @@ public:
     auto height1 = std::to_string(2.749 / (10.0 * sqrt(2.0 * M_PI)));
     auto height2 = std::to_string(0.7204 / (2.0 * sqrt(2.0 * M_PI)));
     auto height3 = std::to_string(0.4298 / (3.0 * sqrt(2.0 * M_PI)));
-    auto testFun = FunctionFactory::Instance().createInitialized(
-        "name=Gaussian,PeakCentre=0.0,Height=" + height1 +
-        ",Sigma=10.0;"
-        "name=Gaussian,PeakCentre=29.3261,Height=" +
-        height2 +
-        ",Sigma=2.0;"
-        "name=Gaussian,PeakCentre=44.3412,Height=" +
-        height3 + ",Sigma=3.0;");
+    auto testFun = FunctionFactory::Instance().createInitialized("name=Gaussian,PeakCentre=0.0,Height=" + height1 +
+                                                                 ",Sigma=10.0;"
+                                                                 "name=Gaussian,PeakCentre=29.3261,Height=" +
+                                                                 height2 +
+                                                                 ",Sigma=2.0;"
+                                                                 "name=Gaussian,PeakCentre=44.3412,Height=" +
+                                                                 height3 + ",Sigma=3.0;");
     FunctionValues t(x);
     testFun->function(x, t);
 
@@ -173,13 +169,12 @@ public:
   }
 
   void test_factory() {
-    std::string funDef =
-        "name=CrystalFieldSpectrum,Ion=Ce,Symmetry=C2v,"
-        "Temperature=44,ToleranceIntensity=0.002, B20=0.37,B22=3.9,"
-        "B40=-0.03,B42=-0.1,B44=-0.12, "
-        "f0.FWHM=2.2,f1.FWHM=1.8, "
-        "ties=(B60=0,B62=0,B64=0,B66=0,BmolX=0,BmolY=0,BmolZ=0,"
-        "BextX=0,BextY=0,BextZ=0,f2.FWHM=2.1)";
+    std::string funDef = "name=CrystalFieldSpectrum,Ion=Ce,Symmetry=C2v,"
+                         "Temperature=44,ToleranceIntensity=0.002, B20=0.37,B22=3.9,"
+                         "B40=-0.03,B42=-0.1,B44=-0.12, "
+                         "f0.FWHM=2.2,f1.FWHM=1.8, "
+                         "ties=(B60=0,B62=0,B64=0,B66=0,BmolX=0,BmolY=0,BmolZ=0,"
+                         "BextX=0,BextY=0,BextZ=0,f2.FWHM=2.1)";
     auto fun = FunctionFactory::Instance().createInitialized(funDef);
     TS_ASSERT(fun);
     TS_ASSERT_EQUALS(fun->name(), "CrystalFieldSpectrum");
@@ -218,9 +213,8 @@ public:
   }
 
   void test_constraints() {
-    std::string funDef =
-        "name=CrystalFieldSpectrum,Ion=Ce,B20=0.37,B22=3.9,"
-        "B40=-0.03,B42=-0.1,B44=-0.12,constraints=(0<B44<10,f1.FWHM>1.3)";
+    std::string funDef = "name=CrystalFieldSpectrum,Ion=Ce,B20=0.37,B22=3.9,"
+                         "B40=-0.03,B42=-0.1,B44=-0.12,constraints=(0<B44<10,f1.FWHM>1.3)";
     auto fun = FunctionFactory::Instance().createInitialized(funDef);
     TS_ASSERT(fun);
     auto i = fun->parameterIndex("f1.FWHM");
@@ -254,8 +248,7 @@ public:
     fun.setAttributeValue("FWHMX", x);
     fun.setAttributeValue("FWHMY", y);
     auto checkW = [&x, &y](double c) {
-      return y.front() +
-             (y.back() - y.front()) / (x.back() - x.front()) * (c - x.front());
+      return y.front() + (y.back() - y.front()) / (x.back() - x.front()) * (c - x.front());
     };
     fun.buildTargetFunction();
     {
@@ -414,8 +407,7 @@ public:
     fun.setAttributeValue("FWHMX", x);
     fun.setAttributeValue("FWHMY", y);
     auto checkW = [&x, &y](double c) {
-      return y.front() +
-             (y.back() - y.front()) / (x.back() - x.front()) * (c - x.front());
+      return y.front() + (y.back() - y.front()) / (x.back() - x.front()) * (c - x.front());
     };
 
     fun.buildTargetFunction();
@@ -470,8 +462,7 @@ public:
     fun.setAttributeValue("FWHMX", x);
     fun.setAttributeValue("FWHMY", y);
     auto checkW = [&x, &y](double c) {
-      return y.front() +
-             (y.back() - y.front()) / (x.back() - x.front()) * (c - x.front());
+      return y.front() + (y.back() - y.front()) / (x.back() - x.front()) * (c - x.front());
     };
     fun.buildTargetFunction();
     {
@@ -520,8 +511,7 @@ public:
     fun.setAttributeValue("FWHMY", y);
     fun.setAttributeValue("FWHMVariation", 0.01);
     auto checkW = [&x, &y](double c) {
-      return y.front() +
-             (y.back() - y.front()) / (x.back() - x.front()) * (c - x.front());
+      return y.front() + (y.back() - y.front()) / (x.back() - x.front()) * (c - x.front());
     };
     fun.buildTargetFunction();
     {
@@ -561,8 +551,7 @@ public:
     fun.setAttributeValue("FWHMY", y);
     fun.setAttributeValue("FWHMVariation", 0.01);
     auto checkW = [&x, &y](double c) {
-      return y.front() +
-             (y.back() - y.front()) / (x.back() - x.front()) * (c - x.front());
+      return y.front() + (y.back() - y.front()) / (x.back() - x.front()) * (c - x.front());
     };
     Gaussian gauss;
     gauss.initialize();
@@ -603,11 +592,9 @@ public:
     auto mc = AlgorithmFactory::Instance().create("EstimateFitParameters", -1);
     mc->initialize();
     mc->setRethrows(true);
-    mc->setPropertyValue(
-        "Function",
-        "name=CrystalFieldSpectrum,Ion=Ce,"
-        "Symmetry=C2v,Temperature=44.0,FWHM=1.0,NPeaks=3,FixAllPeaks=1,"
-        "constraints=(0<B20<2,1<B22<4,-0.1<B40<0.1,-0.1<B42<0.1,-0.1<B44<0.1)");
+    mc->setPropertyValue("Function", "name=CrystalFieldSpectrum,Ion=Ce,"
+                                     "Symmetry=C2v,Temperature=44.0,FWHM=1.0,NPeaks=3,FixAllPeaks=1,"
+                                     "constraints=(0<B20<2,1<B22<4,-0.1<B40<0.1,-0.1<B42<0.1,-0.1<B44<0.1)");
     mc->setProperty("InputWorkspace", ws);
     mc->setProperty("NSamples", 1000);
     mc->setProperty("Constraints", "0<f2.PeakCentre<50");
@@ -625,17 +612,16 @@ public:
 
   void test_change_number_of_fixed_params() {
 
-    std::string funDef =
-        "name=CrystalFieldSpectrum,Ion=Ce,Symmetry=C2v,"
-        "Temperature=44,FWHM=1.0,B20=0.37737,B22=3.977,"
-        "B40=-0.031787,B42=-0.11611,B44=-0.12544, "
-        "ties=(B60=0,B62=0,B64=0,B66=0,BmolX=0,BmolY=0,BmolZ=0,"
-        "BextX=0,BextY=0,BextZ=0,f2.FWHM=2.1);"
-        "name=CrystalFieldSpectrum,Ion=Pr,Symmetry=C2v,"
-        "Temperature=44,FWHM=1.0,B20=0.37737,B22=3.977,"
-        "B40=-0.031787,B42=-0.11611,B44=-0.12544, "
-        "ties=(B60=0,B62=0,B64=0,B66=0,BmolX=0,BmolY=0,BmolZ=0,"
-        "BextX=0,BextY=0,BextZ=0)";
+    std::string funDef = "name=CrystalFieldSpectrum,Ion=Ce,Symmetry=C2v,"
+                         "Temperature=44,FWHM=1.0,B20=0.37737,B22=3.977,"
+                         "B40=-0.031787,B42=-0.11611,B44=-0.12544, "
+                         "ties=(B60=0,B62=0,B64=0,B66=0,BmolX=0,BmolY=0,BmolZ=0,"
+                         "BextX=0,BextY=0,BextZ=0,f2.FWHM=2.1);"
+                         "name=CrystalFieldSpectrum,Ion=Pr,Symmetry=C2v,"
+                         "Temperature=44,FWHM=1.0,B20=0.37737,B22=3.977,"
+                         "B40=-0.031787,B42=-0.11611,B44=-0.12544, "
+                         "ties=(B60=0,B62=0,B64=0,B66=0,BmolX=0,BmolY=0,BmolZ=0,"
+                         "BextX=0,BextY=0,BextZ=0)";
     auto fun = FunctionFactory::Instance().createInitialized(funDef);
     auto ws = createWorkspace(*fun, -20, 170, 100);
 
@@ -663,16 +649,15 @@ public:
   }
 
   void test_ties_in_composite_function() {
-    std::string funDef =
-        "name=CrystalFieldSpectrum,Ion=Ce,Symmetry=C2v,Temperature=44.0,"
-        "ToleranceEnergy=1e-10,ToleranceIntensity=0.1,FixAllPeaks=False,"
-        "PeakShape=Lorentzian,FWHM=1.1,B44=-0.12544,B20=0.37737,B22=3.977,B40=-"
-        "0.031787,B42=-0.11611;name=CrystalFieldSpectrum,Ion=Pr,Symmetry=C2v,"
-        "Temperature="
-        "44.0,ToleranceEnergy=1e-10,ToleranceIntensity=0.1,FixAllPeaks=False,"
-        "PeakShape=Lorentzian,FWHM=1.1,B44=-0.12544,B20=0.37737,B22=3.977,B40=-"
-        "0.031787,B42=-0.11611;ties=(f1.IntensityScaling=2.0*f0."
-        "IntensityScaling,f0.f1.FWHM=f1.f2.FWHM/2)";
+    std::string funDef = "name=CrystalFieldSpectrum,Ion=Ce,Symmetry=C2v,Temperature=44.0,"
+                         "ToleranceEnergy=1e-10,ToleranceIntensity=0.1,FixAllPeaks=False,"
+                         "PeakShape=Lorentzian,FWHM=1.1,B44=-0.12544,B20=0.37737,B22=3.977,B40=-"
+                         "0.031787,B42=-0.11611;name=CrystalFieldSpectrum,Ion=Pr,Symmetry=C2v,"
+                         "Temperature="
+                         "44.0,ToleranceEnergy=1e-10,ToleranceIntensity=0.1,FixAllPeaks=False,"
+                         "PeakShape=Lorentzian,FWHM=1.1,B44=-0.12544,B20=0.37737,B22=3.977,B40=-"
+                         "0.031787,B42=-0.11611;ties=(f1.IntensityScaling=2.0*f0."
+                         "IntensityScaling,f0.f1.FWHM=f1.f2.FWHM/2)";
     auto fun = FunctionFactory::Instance().createInitialized(funDef);
     {
       auto index = fun->parameterIndex("f1.IntensityScaling");
@@ -681,8 +666,7 @@ public:
       if (!tie) {
         return;
       }
-      TS_ASSERT_EQUALS(tie->asString(),
-                       "f1.IntensityScaling=2.0*f0.IntensityScaling");
+      TS_ASSERT_EQUALS(tie->asString(), "f1.IntensityScaling=2.0*f0.IntensityScaling");
     }
     {
       auto index = fun->parameterIndex("f0.f1.FWHM");
@@ -849,25 +833,20 @@ public:
   }
 
 private:
-  std::pair<double, double> getBounds(API::IFunction &fun,
-                                      const std::string &parName) {
+  std::pair<double, double> getBounds(API::IFunction &fun, const std::string &parName) {
     auto ct = fun.getConstraint(fun.parameterIndex(parName));
     if (ct == nullptr) {
-      throw std::runtime_error("Parameter " + parName +
-                               " doesn't have constraint");
+      throw std::runtime_error("Parameter " + parName + " doesn't have constraint");
     }
     auto bc = dynamic_cast<Constraints::BoundaryConstraint *>(ct);
     if (ct == nullptr) {
-      throw std::runtime_error("Parameter " + parName +
-                               " doesn't have boundary constraint");
+      throw std::runtime_error("Parameter " + parName + " doesn't have boundary constraint");
     }
     return std::make_pair(bc->lower(), bc->upper());
   }
 
-  MatrixWorkspace_sptr createWorkspace(const IFunction &fun, double x0,
-                                       double x1, size_t nbins) {
-    auto ws =
-        WorkspaceFactory::Instance().create("Workspace2D", 1, nbins, nbins);
+  MatrixWorkspace_sptr createWorkspace(const IFunction &fun, double x0, double x1, size_t nbins) {
+    auto ws = WorkspaceFactory::Instance().create("Workspace2D", 1, nbins, nbins);
     FunctionDomain1DVector x(x0, x1, nbins);
     FunctionValues y(x);
     fun.function(x, y);

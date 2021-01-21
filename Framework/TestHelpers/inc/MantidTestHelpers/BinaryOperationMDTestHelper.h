@@ -15,20 +15,18 @@
 
 namespace BinaryOperationMDTestHelper {
 /// Run a binary algorithm.
-DLLExport Mantid::DataObjects::MDHistoWorkspace_sptr
-doTest(const std::string &algoName, const std::string &lhs,
-       const std::string &rhs, const std::string &outName, bool succeeds = true,
-       const std::string &otherProp = "",
-       const std::string &otherPropValue = "");
+DLLExport Mantid::DataObjects::MDHistoWorkspace_sptr doTest(const std::string &algoName, const std::string &lhs,
+                                                            const std::string &rhs, const std::string &outName,
+                                                            bool succeeds = true, const std::string &otherProp = "",
+                                                            const std::string &otherPropValue = "");
 
 } // namespace BinaryOperationMDTestHelper
 
 namespace UnaryOperationMDTestHelper {
 /// Run a unary algorithm.
-DLLExport Mantid::DataObjects::MDHistoWorkspace_sptr
-doTest(const std::string &algoName, const std::string &inName,
-       const std::string &outName, bool succeeds = true,
-       const std::string &otherProp = "",
-       const std::string &otherPropValue = "");
+DLLExport Mantid::DataObjects::MDHistoWorkspace_sptr doTest(const std::string &algoName, const std::string &inName,
+                                                            const std::string &outName, bool succeeds = true,
+                                                            const std::string &otherProp = "",
+                                                            const std::string &otherPropValue = "");
 
 } // namespace UnaryOperationMDTestHelper

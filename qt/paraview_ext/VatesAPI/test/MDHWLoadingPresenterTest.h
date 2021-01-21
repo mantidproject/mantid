@@ -40,16 +40,13 @@ private:
     using BaseClass = MDHWLoadingPresenter;
 
   public:
-    ConcreteMDHWLoadingPresenter(std::unique_ptr<MDLoadingView> view)
-        : MDHWLoadingPresenter(std::move(view)) {}
+    ConcreteMDHWLoadingPresenter(std::unique_ptr<MDLoadingView> view) : MDHWLoadingPresenter(std::move(view)) {}
 
-    void
-    extractMetadata(const Mantid::API::IMDHistoWorkspace &histoWs) override {
+    void extractMetadata(const Mantid::API::IMDHistoWorkspace &histoWs) override {
       MDHWLoadingPresenter::extractMetadata(histoWs);
     }
 
-    vtkSmartPointer<vtkDataSet> execute(vtkDataSetFactory *, ProgressAction &,
-                                        ProgressAction &) override {
+    vtkSmartPointer<vtkDataSet> execute(vtkDataSetFactory *, ProgressAction &, ProgressAction &) override {
       return vtkSmartPointer<vtkUnstructuredGrid>::New();
     }
 
@@ -73,37 +70,29 @@ public:
     EXPECT_CALL(*view, getTime()).Times(2).WillRepeatedly(Return(0));
     EXPECT_CALL(*view, updateAlgorithmProgress(_, _)).Times(0);
 
-    std::unique_ptr<MDLoadingView> uniqueView(
-        dynamic_cast<MDLoadingView *>(view));
+    std::unique_ptr<MDLoadingView> uniqueView(dynamic_cast<MDLoadingView *>(view));
     ConcreteMDHWLoadingPresenter presenter(std::move(uniqueView));
     TSM_ASSERT("Should request load on first usage.", presenter.shouldLoad());
     TSM_ASSERT("Should NOT request load on second usage. Should have it's "
                "state syncrhonised with view and the view hasn't changed!",
                !presenter.shouldLoad());
 
-    TSM_ASSERT("View not used as expected.",
-               Mock::VerifyAndClearExpectations(view));
+    TSM_ASSERT("View not used as expected.", Mock::VerifyAndClearExpectations(view));
   }
 
   void testTimeChanged() {
     auto view = new MockMDLoadingView();
     EXPECT_CALL(*view, getRecursionDepth()).Times(0);
     EXPECT_CALL(*view, getLoadInMemory()).Times(2);
-    EXPECT_CALL(*view, getTime())
-        .Times(2)
-        .WillOnce(Return(0))
-        .WillOnce(Return(1)); // Time has changed on 2nd call
+    EXPECT_CALL(*view, getTime()).Times(2).WillOnce(Return(0)).WillOnce(Return(1)); // Time has changed on 2nd call
     EXPECT_CALL(*view, updateAlgorithmProgress(_, _)).Times(0);
 
-    std::unique_ptr<MDLoadingView> uniqueView(
-        dynamic_cast<MDLoadingView *>(view));
+    std::unique_ptr<MDLoadingView> uniqueView(dynamic_cast<MDLoadingView *>(view));
     ConcreteMDHWLoadingPresenter presenter(std::move(uniqueView));
     TSM_ASSERT("Should request load on first usage.", presenter.shouldLoad());
-    TSM_ASSERT("Time has changed, but that shouldn't trigger load",
-               !presenter.shouldLoad());
+    TSM_ASSERT("Time has changed, but that shouldn't trigger load", !presenter.shouldLoad());
 
-    TSM_ASSERT("View not used as expected.",
-               Mock::VerifyAndClearExpectations(view));
+    TSM_ASSERT("View not used as expected.", Mock::VerifyAndClearExpectations(view));
   }
 
   void testLoadInMemoryChanged() {
@@ -116,100 +105,73 @@ public:
     EXPECT_CALL(*view, getTime()).Times(2).WillRepeatedly(Return(0));
     EXPECT_CALL(*view, updateAlgorithmProgress(_, _)).Times(0);
 
-    std::unique_ptr<MDLoadingView> uniqueView(
-        dynamic_cast<MDLoadingView *>(view));
+    std::unique_ptr<MDLoadingView> uniqueView(dynamic_cast<MDLoadingView *>(view));
     ConcreteMDHWLoadingPresenter presenter(std::move(uniqueView));
     TSM_ASSERT("Should request load on first usage.", presenter.shouldLoad());
-    TSM_ASSERT("Load in memory changed. this SHOULD trigger re-load",
-               presenter.shouldLoad());
+    TSM_ASSERT("Load in memory changed. this SHOULD trigger re-load", presenter.shouldLoad());
 
-    TSM_ASSERT("View not used as expected.",
-               Mock::VerifyAndClearExpectations(view));
+    TSM_ASSERT("View not used as expected.", Mock::VerifyAndClearExpectations(view));
   }
 
   void testhasTDimensionWhenIntegrated() {
-    ConcreteMDHWLoadingPresenter presenter(
-        std::make_unique<NiceMock<MockMDLoadingView>>());
+    ConcreteMDHWLoadingPresenter presenter(std::make_unique<NiceMock<MockMDLoadingView>>());
 
     // Test that it does work when setup.
-    Mantid::API::Workspace_sptr ws =
-        get3DWorkspace(true, false); // Integrated T Dimension
-    presenter.extractMetadata(
-        *std::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(ws));
+    Mantid::API::Workspace_sptr ws = get3DWorkspace(true, false); // Integrated T Dimension
+    presenter.extractMetadata(*std::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(ws));
 
-    TSM_ASSERT("This is a 4D workspace with an integrated T dimension",
-               !presenter.hasTDimensionAvailable());
+    TSM_ASSERT("This is a 4D workspace with an integrated T dimension", !presenter.hasTDimensionAvailable());
   }
 
   void testHasTDimensionWhenNotIntegrated() {
-    ConcreteMDHWLoadingPresenter presenter(
-        std::make_unique<NiceMock<MockMDLoadingView>>());
+    ConcreteMDHWLoadingPresenter presenter(std::make_unique<NiceMock<MockMDLoadingView>>());
 
     // Test that it does work when setup.
-    Mantid::API::Workspace_sptr ws =
-        get3DWorkspace(false, false); // Non-integrated T Dimension
-    presenter.extractMetadata(
-        *std::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(ws));
+    Mantid::API::Workspace_sptr ws = get3DWorkspace(false, false); // Non-integrated T Dimension
+    presenter.extractMetadata(*std::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(ws));
 
-    TSM_ASSERT("This is a 4D workspace with an integrated T dimension",
-               presenter.hasTDimensionAvailable());
+    TSM_ASSERT("This is a 4D workspace with an integrated T dimension", presenter.hasTDimensionAvailable());
   }
 
   void testHasTimeLabelWithTDimension() {
-    ConcreteMDHWLoadingPresenter presenter(
-        std::make_unique<NiceMock<MockMDLoadingView>>());
+    ConcreteMDHWLoadingPresenter presenter(std::make_unique<NiceMock<MockMDLoadingView>>());
 
     // Test that it does work when setup.
-    Mantid::API::Workspace_sptr ws =
-        get3DWorkspace(false, false); // Non-integrated T Dimension
-    presenter.extractMetadata(
-        *std::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(ws));
+    Mantid::API::Workspace_sptr ws = get3DWorkspace(false, false); // Non-integrated T Dimension
+    presenter.extractMetadata(*std::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(ws));
 
-    TSM_ASSERT_EQUALS("This is a 4D workspace with a T dimension", "D (A)",
-                      presenter.getTimeStepLabel());
+    TSM_ASSERT_EQUALS("This is a 4D workspace with a T dimension", "D (A)", presenter.getTimeStepLabel());
   }
 
   void testCanSetAxisLabelsFrom3DData() {
-    ConcreteMDHWLoadingPresenter presenter(
-        std::make_unique<NiceMock<MockMDLoadingView>>());
+    ConcreteMDHWLoadingPresenter presenter(std::make_unique<NiceMock<MockMDLoadingView>>());
 
     // Test that it does work when setup.
     Mantid::API::Workspace_sptr ws = get3DWorkspace(true, false);
-    presenter.extractMetadata(
-        *std::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(ws));
+    presenter.extractMetadata(*std::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(ws));
     vtkDataSet *ds = vtkUnstructuredGrid::New();
     TSM_ASSERT_THROWS_NOTHING("Should pass", presenter.setAxisLabels(ds));
-    TSM_ASSERT_EQUALS("X Label should match exactly",
-                      getStringFieldDataValue(ds, "AxisTitleForX"), "A ($A$)");
-    TSM_ASSERT_EQUALS("Y Label should match exactly",
-                      getStringFieldDataValue(ds, "AxisTitleForY"), "B ($A$)");
-    TSM_ASSERT_EQUALS("Z Label should match exactly",
-                      getStringFieldDataValue(ds, "AxisTitleForZ"), "C ($A$)");
+    TSM_ASSERT_EQUALS("X Label should match exactly", getStringFieldDataValue(ds, "AxisTitleForX"), "A ($A$)");
+    TSM_ASSERT_EQUALS("Y Label should match exactly", getStringFieldDataValue(ds, "AxisTitleForY"), "B ($A$)");
+    TSM_ASSERT_EQUALS("Z Label should match exactly", getStringFieldDataValue(ds, "AxisTitleForZ"), "C ($A$)");
   }
 
   void testCanSetAxisLabelsFrom4DData() {
-    ConcreteMDHWLoadingPresenter presenter(
-        std::make_unique<NiceMock<MockMDLoadingView>>());
+    ConcreteMDHWLoadingPresenter presenter(std::make_unique<NiceMock<MockMDLoadingView>>());
 
     // Test that it does work when setup.
     Mantid::API::Workspace_sptr ws = get3DWorkspace(false, false);
-    presenter.extractMetadata(
-        *std::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(ws));
+    presenter.extractMetadata(*std::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(ws));
     vtkDataSet *ds = vtkUnstructuredGrid::New();
     TSM_ASSERT_THROWS_NOTHING("Should pass", presenter.setAxisLabels(ds));
-    TSM_ASSERT_EQUALS("X Label should match exactly",
-                      getStringFieldDataValue(ds, "AxisTitleForX"), "A ($A$)");
-    TSM_ASSERT_EQUALS("Y Label should match exactly",
-                      getStringFieldDataValue(ds, "AxisTitleForY"), "B ($A$)");
-    TSM_ASSERT_EQUALS("Z Label should match exactly",
-                      getStringFieldDataValue(ds, "AxisTitleForZ"), "C ($A$)");
+    TSM_ASSERT_EQUALS("X Label should match exactly", getStringFieldDataValue(ds, "AxisTitleForX"), "A ($A$)");
+    TSM_ASSERT_EQUALS("Y Label should match exactly", getStringFieldDataValue(ds, "AxisTitleForY"), "B ($A$)");
+    TSM_ASSERT_EQUALS("Z Label should match exactly", getStringFieldDataValue(ds, "AxisTitleForZ"), "C ($A$)");
   }
 
-  Mantid::API::IMDHistoWorkspace_sptr
-  makeHistoWorkspace(const std::vector<int> &shape) {
+  Mantid::API::IMDHistoWorkspace_sptr makeHistoWorkspace(const std::vector<int> &shape) {
 
-    auto create =
-        AlgorithmManager::Instance().createUnmanaged("CreateMDHistoWorkspace");
+    auto create = AlgorithmManager::Instance().createUnmanaged("CreateMDHistoWorkspace");
     create->setChild(true);
     create->initialize();
 
@@ -245,8 +207,7 @@ public:
   void test_transpose_not_needed() {
 
     // return outWs;
-    int shape[4] = {10, 10,
-                    1}; // Well behaved input workspace. Integrated dim at end.
+    int shape[4] = {10, 10, 1}; // Well behaved input workspace. Integrated dim at end.
     std::vector<int> shapeVec(shape, shape + 3);
     auto inWs = makeHistoWorkspace(shapeVec);
 
@@ -255,19 +216,15 @@ public:
 
     TS_ASSERT_EQUALS(targetWs->getNumDims(), inWs->getNumDims());
     TS_ASSERT_EQUALS(targetWs->getNPoints(), inWs->getNPoints())
-    TS_ASSERT_EQUALS(targetWs->getDimension(0)->getName(),
-                     inWs->getDimension(0)->getName());
-    TS_ASSERT_EQUALS(targetWs->getDimension(1)->getName(),
-                     inWs->getDimension(1)->getName());
-    TS_ASSERT_EQUALS(targetWs->getDimension(2)->getName(),
-                     inWs->getDimension(2)->getName());
+    TS_ASSERT_EQUALS(targetWs->getDimension(0)->getName(), inWs->getDimension(0)->getName());
+    TS_ASSERT_EQUALS(targetWs->getDimension(1)->getName(), inWs->getDimension(1)->getName());
+    TS_ASSERT_EQUALS(targetWs->getDimension(2)->getName(), inWs->getDimension(2)->getName());
   }
 
   void test_transpose_rules_applied() {
 
     // return outWs;
-    int shape[4] = {10, 10, 1,
-                    10}; // Inproper input workspace. Needs transpose!
+    int shape[4] = {10, 10, 1, 10}; // Inproper input workspace. Needs transpose!
     std::vector<int> shapeVec(shape, shape + 4);
     auto inWs = makeHistoWorkspace(shapeVec);
 
@@ -276,15 +233,11 @@ public:
 
     TS_ASSERT_EQUALS(targetWs->getNumDims(), inWs->getNumDims());
     TS_ASSERT_EQUALS(targetWs->getNPoints(), inWs->getNPoints())
-    TS_ASSERT_EQUALS(targetWs->getDimension(0)->getName(),
-                     inWs->getDimension(0)->getName());
-    TS_ASSERT_EQUALS(targetWs->getDimension(1)->getName(),
-                     inWs->getDimension(1)->getName());
-    TSM_ASSERT_EQUALS("Integrated dims should be shifted to end",
-                      targetWs->getDimension(2)->getName(),
+    TS_ASSERT_EQUALS(targetWs->getDimension(0)->getName(), inWs->getDimension(0)->getName());
+    TS_ASSERT_EQUALS(targetWs->getDimension(1)->getName(), inWs->getDimension(1)->getName());
+    TSM_ASSERT_EQUALS("Integrated dims should be shifted to end", targetWs->getDimension(2)->getName(),
                       inWs->getDimension(3)->getName());
-    TSM_ASSERT_EQUALS("Integrated dims on the end",
-                      targetWs->getDimension(3)->getName(),
+    TSM_ASSERT_EQUALS("Integrated dims on the end", targetWs->getDimension(3)->getName(),
                       inWs->getDimension(2)->getName());
   }
 };

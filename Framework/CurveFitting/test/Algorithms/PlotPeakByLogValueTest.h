@@ -53,13 +53,10 @@ public:
     declareAttribute("WorkspaceIndex", Attribute(0));
   }
   std::string name() const override { return "PLOTPEAKBYLOGVALUETEST_Fun"; }
-  void function1D(double *out, const double *,
-                  const size_t nData) const override {
+  void function1D(double *out, const double *, const size_t nData) const override {
     if (nData == 0)
       return;
-    const double a =
-        getParameter("A") +
-        static_cast<double>(getAttribute("WorkspaceIndex").asInt());
+    const double a = getParameter("A") + static_cast<double>(getAttribute("WorkspaceIndex").asInt());
     std::fill_n(out, nData, a);
   }
 };
@@ -70,9 +67,7 @@ class PropertyNameIs {
 public:
   PropertyNameIs(std::string name) : m_name(std::move(name)){};
 
-  bool operator()(const Mantid::Kernel::PropertyHistory_sptr &p) {
-    return p->name() == m_name;
-  }
+  bool operator()(const Mantid::Kernel::PropertyHistory_sptr &p) { return p->name() == m_name; }
 
 private:
   std::string m_name;
@@ -101,9 +96,7 @@ class PlotPeakByLogValueTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static PlotPeakByLogValueTest *createSuite() {
-    return new PlotPeakByLogValueTest();
-  }
+  static PlotPeakByLogValueTest *createSuite() { return new PlotPeakByLogValueTest(); }
   static void destroySuite(PlotPeakByLogValueTest *suite) { delete suite; }
 
   PlotPeakByLogValueTest() { FrameworkManager::Instance(); }
@@ -123,8 +116,7 @@ public:
     alg.execute();
     TS_ASSERT(alg.isExecuted());
 
-    TWS_type result =
-        WorkspaceCreationHelper::getWS<TableWorkspace>("PlotPeakResult");
+    TWS_type result = WorkspaceCreationHelper::getWS<TableWorkspace>("PlotPeakResult");
     TS_ASSERT_EQUALS(result->columnCount(), 12);
 
     std::vector<std::string> tnames = result->getColumnNames();
@@ -172,8 +164,7 @@ public:
 
     PlotPeakByLogValue alg;
     alg.initialize();
-    alg.setPropertyValue("Input",
-                         "PlotPeakGroup_0;PlotPeakGroup_1;PlotPeakGroup_2");
+    alg.setPropertyValue("Input", "PlotPeakGroup_0;PlotPeakGroup_1;PlotPeakGroup_2");
     alg.setPropertyValue("OutputWorkspace", "PlotPeakResult");
     alg.setPropertyValue("WorkspaceIndex", "1");
     alg.setPropertyValue("LogValue", "var");
@@ -182,8 +173,7 @@ public:
                                      "1");
     alg.execute();
 
-    TWS_type result =
-        WorkspaceCreationHelper::getWS<TableWorkspace>("PlotPeakResult");
+    TWS_type result = WorkspaceCreationHelper::getWS<TableWorkspace>("PlotPeakResult");
     TS_ASSERT_EQUALS(result->columnCount(), 12);
 
     std::vector<std::string> tnames = result->getColumnNames();
@@ -231,8 +221,7 @@ public:
 
     PlotPeakByLogValue alg;
     alg.initialize();
-    alg.setPropertyValue("Input",
-                         "PlotPeakGroup_0;PlotPeakGroup_1;PlotPeakGroup_2");
+    alg.setPropertyValue("Input", "PlotPeakGroup_0;PlotPeakGroup_1;PlotPeakGroup_2");
     alg.setPropertyValue("OutputWorkspace", "PlotPeakResult");
     alg.setPropertyValue("WorkspaceIndex", "1");
     alg.setPropertyValue("LogValue", "SourceName");
@@ -241,8 +230,7 @@ public:
                                      "1");
     alg.execute();
 
-    TWS_type result =
-        WorkspaceCreationHelper::getWS<TableWorkspace>("PlotPeakResult");
+    TWS_type result = WorkspaceCreationHelper::getWS<TableWorkspace>("PlotPeakResult");
     TS_ASSERT_EQUALS(result->columnCount(), 12);
 
     std::vector<std::string> tnames = result->getColumnNames();
@@ -263,16 +251,14 @@ public:
 
     PlotPeakByLogValue alg;
     alg.initialize();
-    alg.setPropertyValue(
-        "Input", "PLOTPEAKBYLOGVALUETEST_WS,i0;PLOTPEAKBYLOGVALUETEST_WS,i1");
+    alg.setPropertyValue("Input", "PLOTPEAKBYLOGVALUETEST_WS,i0;PLOTPEAKBYLOGVALUETEST_WS,i1");
     alg.setPropertyValue("OutputWorkspace", "PlotPeakResult");
     alg.setPropertyValue("Function", "name=LinearBackground,A0=1,A1=0.3;name="
                                      "Gaussian,PeakCentre=5,Height=2,Sigma=0."
                                      "1");
     alg.execute();
 
-    TWS_type result =
-        WorkspaceCreationHelper::getWS<TableWorkspace>("PlotPeakResult");
+    TWS_type result = WorkspaceCreationHelper::getWS<TableWorkspace>("PlotPeakResult");
     TS_ASSERT_EQUALS(result->columnCount(), 12);
 
     std::vector<std::string> tnames = result->getColumnNames();
@@ -287,8 +273,7 @@ public:
   }
 
   void test_passWorkspaceIndexToFunction() {
-    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-        Fun(), 3, -5.0, 5.0, 0.1, false);
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(Fun(), 3, -5.0, 5.0, 0.1, false);
     AnalysisDataService::Instance().add("PLOTPEAKBYLOGVALUETEST_WS", ws);
     PlotPeakByLogValue alg;
     alg.initialize();
@@ -300,8 +285,7 @@ public:
 
     TS_ASSERT(alg.isExecuted());
 
-    TWS_type result =
-        WorkspaceCreationHelper::getWS<TableWorkspace>("PlotPeakResult");
+    TWS_type result = WorkspaceCreationHelper::getWS<TableWorkspace>("PlotPeakResult");
     TS_ASSERT(result);
 
     // each spectrum contains values equal to its spectrum number (from 1 to 3)
@@ -314,8 +298,7 @@ public:
   }
 
   void test_dont_passWorkspaceIndexToFunction() {
-    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-        Fun(), 3, -5.0, 5.0, 0.1, false);
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(Fun(), 3, -5.0, 5.0, 0.1, false);
     AnalysisDataService::Instance().add("PLOTPEAKBYLOGVALUETEST_WS", ws);
     PlotPeakByLogValue alg;
     alg.initialize();
@@ -327,8 +310,7 @@ public:
 
     TS_ASSERT(alg.isExecuted());
 
-    TWS_type result =
-        WorkspaceCreationHelper::getWS<TableWorkspace>("PlotPeakResult");
+    TWS_type result = WorkspaceCreationHelper::getWS<TableWorkspace>("PlotPeakResult");
     TS_ASSERT(result);
 
     // each spectrum contains values equal to its spectrum number (from 1 to 3)
@@ -343,23 +325,19 @@ public:
   }
 
   void test_passWorkspaceIndexToFunction_composit_function_case() {
-    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-        Fun(), 3, -5.0, 5.0, 0.1, false);
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(Fun(), 3, -5.0, 5.0, 0.1, false);
     AnalysisDataService::Instance().add("PLOTPEAKBYLOGVALUETEST_WS", ws);
     PlotPeakByLogValue alg;
     alg.initialize();
     alg.setPropertyValue("Input", "PLOTPEAKBYLOGVALUETEST_WS,v1:3");
     alg.setPropertyValue("OutputWorkspace", "PlotPeakResult");
     alg.setProperty("PassWSIndexToFunction", true);
-    alg.setPropertyValue(
-        "Function",
-        "name=FlatBackground,ties=(A0=0.5);name=PLOTPEAKBYLOGVALUETEST_Fun");
+    alg.setPropertyValue("Function", "name=FlatBackground,ties=(A0=0.5);name=PLOTPEAKBYLOGVALUETEST_Fun");
     alg.execute();
 
     TS_ASSERT(alg.isExecuted());
 
-    TWS_type result =
-        WorkspaceCreationHelper::getWS<TableWorkspace>("PlotPeakResult");
+    TWS_type result = WorkspaceCreationHelper::getWS<TableWorkspace>("PlotPeakResult");
     TS_ASSERT(result);
 
     // each spectrum contains values equal to its spectrum number (from 1 to 3)
@@ -372,8 +350,7 @@ public:
   }
 
   void test_createOutputOption() {
-    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-        Fun(), 3, -5.0, 5.0, 0.1, false);
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(Fun(), 3, -5.0, 5.0, 0.1, false);
     AnalysisDataService::Instance().add("PLOTPEAKBYLOGVALUETEST_WS", ws);
     PlotPeakByLogValue alg;
     alg.initialize();
@@ -381,15 +358,12 @@ public:
     alg.setPropertyValue("OutputWorkspace", "PlotPeakResult");
     alg.setProperty("PassWSIndexToFunction", true);
     alg.setProperty("CreateOutput", true);
-    alg.setPropertyValue(
-        "Function",
-        "name=FlatBackground,ties=(A0=0.5);name=PLOTPEAKBYLOGVALUETEST_Fun");
+    alg.setPropertyValue("Function", "name=FlatBackground,ties=(A0=0.5);name=PLOTPEAKBYLOGVALUETEST_Fun");
     alg.execute();
 
     TS_ASSERT(alg.isExecuted());
 
-    TWS_type result =
-        WorkspaceCreationHelper::getWS<TableWorkspace>("PlotPeakResult");
+    TWS_type result = WorkspaceCreationHelper::getWS<TableWorkspace>("PlotPeakResult");
     TS_ASSERT(result);
 
     // each spectrum contains values equal to its spectrum number (from 1 to 3)
@@ -399,14 +373,9 @@ public:
     } while (row.next());
 
     auto matrices =
-        AnalysisDataService::Instance().retrieveWS<const WorkspaceGroup>(
-            "PlotPeakResult_NormalisedCovarianceMatrices");
-    auto params =
-        AnalysisDataService::Instance().retrieveWS<const WorkspaceGroup>(
-            "PlotPeakResult_Parameters");
-    auto fits =
-        AnalysisDataService::Instance().retrieveWS<const WorkspaceGroup>(
-            "PlotPeakResult_Workspaces");
+        AnalysisDataService::Instance().retrieveWS<const WorkspaceGroup>("PlotPeakResult_NormalisedCovarianceMatrices");
+    auto params = AnalysisDataService::Instance().retrieveWS<const WorkspaceGroup>("PlotPeakResult_Parameters");
+    auto fits = AnalysisDataService::Instance().retrieveWS<const WorkspaceGroup>("PlotPeakResult_Workspaces");
 
     TS_ASSERT(matrices);
     TS_ASSERT(params);
@@ -424,8 +393,7 @@ public:
 
     PlotPeakByLogValue alg;
     alg.initialize();
-    alg.setPropertyValue("Input",
-                         "PlotPeakGroup_0;PlotPeakGroup_1;PlotPeakGroup_2");
+    alg.setPropertyValue("Input", "PlotPeakGroup_0;PlotPeakGroup_1;PlotPeakGroup_2");
     alg.setPropertyValue("OutputWorkspace", "PlotPeakResult");
     alg.setPropertyValue("WorkspaceIndex", "1");
     alg.setPropertyValue("LogValue", "var");
@@ -435,19 +403,13 @@ public:
                                      "1");
     TS_ASSERT(alg.execute());
 
-    TWS_type result =
-        WorkspaceCreationHelper::getWS<TableWorkspace>("PlotPeakResult");
+    TWS_type result = WorkspaceCreationHelper::getWS<TableWorkspace>("PlotPeakResult");
     TS_ASSERT_EQUALS(result->columnCount(), 12);
 
     auto matrices =
-        AnalysisDataService::Instance().retrieveWS<const WorkspaceGroup>(
-            "PlotPeakResult_NormalisedCovarianceMatrices");
-    auto params =
-        AnalysisDataService::Instance().retrieveWS<const WorkspaceGroup>(
-            "PlotPeakResult_Parameters");
-    auto fits =
-        AnalysisDataService::Instance().retrieveWS<const WorkspaceGroup>(
-            "PlotPeakResult_Workspaces");
+        AnalysisDataService::Instance().retrieveWS<const WorkspaceGroup>("PlotPeakResult_NormalisedCovarianceMatrices");
+    auto params = AnalysisDataService::Instance().retrieveWS<const WorkspaceGroup>("PlotPeakResult_Parameters");
+    auto fits = AnalysisDataService::Instance().retrieveWS<const WorkspaceGroup>("PlotPeakResult_Workspaces");
 
     TS_ASSERT(matrices);
     TS_ASSERT(params);
@@ -469,29 +431,21 @@ public:
     alg.setProperty("CreateOutput", true);
     alg.setProperty("OutputCompositeMembers", true);
     alg.setProperty("ConvolveMembers", true);
-    alg.setPropertyValue(
-        "Function",
-        "name=LinearBackground,A0=0,A1=0;"
-        "(composite=Convolution,FixResolution=true,NumDeriv=true;"
-        "name=Resolution,Workspace=PLOTPEAKBYLOGVALUETEST_WS,WorkspaceIndex=0;"
-        "name=Gaussian,Height=3000,PeakCentre=6493,Sigma=50;);");
+    alg.setPropertyValue("Function", "name=LinearBackground,A0=0,A1=0;"
+                                     "(composite=Convolution,FixResolution=true,NumDeriv=true;"
+                                     "name=Resolution,Workspace=PLOTPEAKBYLOGVALUETEST_WS,WorkspaceIndex=0;"
+                                     "name=Gaussian,Height=3000,PeakCentre=6493,Sigma=50;);");
     alg.execute();
 
     TS_ASSERT(alg.isExecuted());
 
-    TWS_type result =
-        WorkspaceCreationHelper::getWS<TableWorkspace>("PlotPeakResult");
+    TWS_type result = WorkspaceCreationHelper::getWS<TableWorkspace>("PlotPeakResult");
     TS_ASSERT(result);
 
     auto matrices =
-        AnalysisDataService::Instance().retrieveWS<const WorkspaceGroup>(
-            "PlotPeakResult_NormalisedCovarianceMatrices");
-    auto params =
-        AnalysisDataService::Instance().retrieveWS<const WorkspaceGroup>(
-            "PlotPeakResult_Parameters");
-    auto fits =
-        AnalysisDataService::Instance().retrieveWS<const WorkspaceGroup>(
-            "PlotPeakResult_Workspaces");
+        AnalysisDataService::Instance().retrieveWS<const WorkspaceGroup>("PlotPeakResult_NormalisedCovarianceMatrices");
+    auto params = AnalysisDataService::Instance().retrieveWS<const WorkspaceGroup>("PlotPeakResult_Parameters");
+    auto fits = AnalysisDataService::Instance().retrieveWS<const WorkspaceGroup>("PlotPeakResult_Workspaces");
 
     TS_ASSERT(matrices);
     TS_ASSERT(params);
@@ -503,9 +457,7 @@ public:
 
     auto wsNames = fits->getNames();
     for (const auto &wsName : wsNames) {
-      auto fit =
-          AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(
-              wsName);
+      auto fit = AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(wsName);
       TS_ASSERT(fit);
       TS_ASSERT(fit->getNumberHistograms() == 5);
     }
@@ -527,15 +479,12 @@ public:
                                      "1");
     alg.setPropertyValue("MaxIterations", "50");
     // This is a stupid use case but will at least demonstrate the functionality
-    alg.setPropertyValue("Minimizer",
-                         "Levenberg-Marquardt,AbsError=0.01,RelError=$wsindex");
+    alg.setPropertyValue("Minimizer", "Levenberg-Marquardt,AbsError=0.01,RelError=$wsindex");
 
     alg.execute();
     TS_ASSERT(alg.isExecuted());
 
-    auto fits =
-        AnalysisDataService::Instance().retrieveWS<const WorkspaceGroup>(
-            "PlotPeakResult_Workspaces");
+    auto fits = AnalysisDataService::Instance().retrieveWS<const WorkspaceGroup>("PlotPeakResult_Workspaces");
     TS_ASSERT(fits);
 
     if (fits->size() > 0) {
@@ -640,12 +589,10 @@ public:
     alg.setProperty("CreateOutput", true);
     alg.setProperty("OutputCompositeMembers", true);
     alg.setProperty("ConvolveMembers", true);
-    alg.setPropertyValue(
-        "Function",
-        "name=LinearBackground,A0=0,A1=0;"
-        "(composite=Convolution,FixResolution=true,NumDeriv=true;"
-        "name=Resolution,Workspace=PLOTPEAKBYLOGVALUETEST_WS,WorkspaceIndex=0;"
-        "name=Gaussian,Height=3000,PeakCentre=6493,Sigma=50;);");
+    alg.setPropertyValue("Function", "name=LinearBackground,A0=0,A1=0;"
+                                     "(composite=Convolution,FixResolution=true,NumDeriv=true;"
+                                     "name=Resolution,Workspace=PLOTPEAKBYLOGVALUETEST_WS,WorkspaceIndex=0;"
+                                     "name=Gaussian,Height=3000,PeakCentre=6493,Sigma=50;);");
     alg.execute();
 
     TS_ASSERT(alg.isExecuted());
@@ -665,12 +612,10 @@ public:
     alg.setProperty("CreateOutput", true);
     alg.setProperty("OutputCompositeMembers", true);
     alg.setProperty("ConvolveMembers", true);
-    alg.setPropertyValue(
-        "Function",
-        "name=LinearBackground,A0=0,A1=0;"
-        "(composite=Convolution,FixResolution=true,NumDeriv=true;"
-        "name=Resolution,Workspace=PLOTPEAKBYLOGVALUETEST_WS,WorkspaceIndex=0;"
-        "name=Gaussian,Height=3000,PeakCentre=6493,Sigma=50;);");
+    alg.setPropertyValue("Function", "name=LinearBackground,A0=0,A1=0;"
+                                     "(composite=Convolution,FixResolution=true,NumDeriv=true;"
+                                     "name=Resolution,Workspace=PLOTPEAKBYLOGVALUETEST_WS,WorkspaceIndex=0;"
+                                     "name=Gaussian,Height=3000,PeakCentre=6493,Sigma=50;);");
     alg.execute();
 
     TS_ASSERT(alg.isExecuted());
@@ -685,13 +630,11 @@ private:
     AnalysisDataService::Instance().add("PlotPeakGroup", m_wsg);
     const int N = 3;
     for (int iWS = 0; iWS < N; ++iWS) {
-      auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-          PlotPeak_Expression(iWS), 3, 0, 10, 0.005, hist);
+      auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(PlotPeak_Expression(iWS), 3, 0, 10, 0.005, hist);
       for (int i = 0; i < 3; ++i) {
         ws->getSpectrum(i).setSpectrumNo(0);
       }
-      Kernel::TimeSeriesProperty<double> *logd =
-          new Kernel::TimeSeriesProperty<double>("var");
+      Kernel::TimeSeriesProperty<double> *logd = new Kernel::TimeSeriesProperty<double>("var");
       logd->addValue("2007-11-01T18:18:53", 1 + iWS * 0.3);
       ws->mutableRun().addLogData(logd);
       std::ostringstream wsName;
@@ -701,10 +644,8 @@ private:
     }
   }
 
-  void createHistogramWorkspace(const std::string &name, std::size_t nbins,
-                                double x0, double x1) {
-    auto ws =
-        WorkspaceFactory::Instance().create("Workspace2D", 3, nbins + 1, nbins);
+  void createHistogramWorkspace(const std::string &name, std::size_t nbins, double x0, double x1) {
+    auto ws = WorkspaceFactory::Instance().create("Workspace2D", 3, nbins + 1, nbins);
     double dx = (x1 - x0) / static_cast<double>(nbins);
     ws->setBinEdges(0, nbins + 1, HistogramData::LinearGenerator(x0, dx));
     ws->setSharedX(1, ws->sharedX(0));
@@ -720,8 +661,7 @@ private:
       alg->setProperty("InputWorkspace", ws);
       alg->setProperty("OutputWorkspace", "out");
       alg->execute();
-      auto calc =
-          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out");
+      auto calc = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out");
       ws->dataY(i) = calc->readY(1);
     }
     AnalysisDataService::Instance().addOrReplace(name, ws);
@@ -730,26 +670,18 @@ private:
   MatrixWorkspace_sptr createTestWorkspace() {
     const int numHists(2);
     const int numBins(2000);
-    MatrixWorkspace_sptr testWS =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
-            numHists, numBins, true);
-    testWS->getAxis(0)->unit() =
-        Mantid::Kernel::UnitFactory::Instance().create("TOF");
+    MatrixWorkspace_sptr testWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(numHists, numBins, true);
+    testWS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("TOF");
     // Update X data  to a sensible values. Looks roughly like the MARI binning
     BinEdges xdata(numBins + 1, LinearGenerator(5.0, 5.5));
     // Update the Y values. We don't care about errors here
 
     // We'll simply use a gaussian as a test
-    const double peakOneCentre(6493.0), sigmaSqOne(250 * 250.),
-        peakTwoCentre(10625.), sigmaSqTwo(50 * 50);
+    const double peakOneCentre(6493.0), sigmaSqOne(250 * 250.), peakTwoCentre(10625.), sigmaSqTwo(50 * 50);
     const double peakOneHeight(3000.), peakTwoHeight(1000.);
     for (int i = 0; i < numBins; ++i) {
-      testWS->dataY(0)[i] =
-          peakOneHeight *
-          exp(-0.5 * pow(xdata[i] - peakOneCentre, 2.) / sigmaSqOne);
-      testWS->dataY(1)[i] =
-          peakTwoHeight *
-          exp(-0.5 * pow(xdata[i] - peakTwoCentre, 2.) / sigmaSqTwo);
+      testWS->dataY(0)[i] = peakOneHeight * exp(-0.5 * pow(xdata[i] - peakOneCentre, 2.) / sigmaSqOne);
+      testWS->dataY(1)[i] = peakTwoHeight * exp(-0.5 * pow(xdata[i] - peakTwoCentre, 2.) / sigmaSqTwo);
     }
     testWS->setBinEdges(0, xdata);
     testWS->setBinEdges(1, xdata);

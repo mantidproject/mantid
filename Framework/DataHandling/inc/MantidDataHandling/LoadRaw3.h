@@ -43,8 +43,7 @@ public:
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 3; }
   const std::vector<std::string> seeAlso() const override {
-    return {"LoadVesuvio", "RawFileInfo", "LoadSampleDetailsFromRaw",
-            "LoadRawBin0", "LoadRawSpectrum0"};
+    return {"LoadVesuvio", "RawFileInfo", "LoadSampleDetailsFromRaw", "LoadRawBin0", "LoadRawSpectrum0"};
   }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "DataHandling\\Raw"; }
@@ -56,29 +55,23 @@ private:
   void exec() override;
 
   /// returns true if the given spectrum is a monitor
-  bool isMonitor(const std::vector<specnum_t> &monitorIndexes,
-                 specnum_t spectrumNum);
+  bool isMonitor(const std::vector<specnum_t> &monitorIndexes, specnum_t spectrumNum);
 
   /// validate workspace sizes
-  void validateWorkspaceSizes(bool bexcludeMonitors, bool bseparateMonitors,
-                              const int64_t normalwsSpecs,
+  void validateWorkspaceSizes(bool bexcludeMonitors, bool bseparateMonitors, const int64_t normalwsSpecs,
                               const int64_t monitorwsSpecs);
 
   /// creates output workspace, monitors excluded from this workspace
-  void excludeMonitors(FILE *file, const int &period,
-                       const std::vector<specnum_t> &monitorList,
+  void excludeMonitors(FILE *file, const int &period, const std::vector<specnum_t> &monitorList,
                        const DataObjects::Workspace2D_sptr &ws_sptr);
 
   /// creates output workspace whcih includes monitors
-  void includeMonitors(FILE *file, const int64_t &period,
-                       const DataObjects::Workspace2D_sptr &ws_sptr);
+  void includeMonitors(FILE *file, const int64_t &period, const DataObjects::Workspace2D_sptr &ws_sptr);
 
   /// creates two output workspaces none normal workspace and separate one for
   /// monitors
-  void separateMonitors(FILE *file, const int64_t &period,
-                        const std::vector<specnum_t> &monitorList,
-                        const DataObjects::Workspace2D_sptr &ws_sptr,
-                        const DataObjects::Workspace2D_sptr &mws_sptr);
+  void separateMonitors(FILE *file, const int64_t &period, const std::vector<specnum_t> &monitorList,
+                        const DataObjects::Workspace2D_sptr &ws_sptr, const DataObjects::Workspace2D_sptr &mws_sptr);
 
   /// skip all spectra in a period
   void skipPeriod(FILE *file, const int64_t &period);

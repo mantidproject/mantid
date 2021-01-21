@@ -19,9 +19,7 @@ class IdentifyNoisyDetectorsTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static IdentifyNoisyDetectorsTest *createSuite() {
-    return new IdentifyNoisyDetectorsTest();
-  }
+  static IdentifyNoisyDetectorsTest *createSuite() { return new IdentifyNoisyDetectorsTest(); }
   static void destroySuite(IdentifyNoisyDetectorsTest *suite) { delete suite; }
 
   void testMetaInfo() {
@@ -56,18 +54,15 @@ public:
 
     alg = new IdentifyNoisyDetectors();
     TS_ASSERT_THROWS_NOTHING(alg->initialize());
-    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue(
-        "InputWorkspace", "identifynoisydetectors_input"));
-    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue(
-        "OutputWorkspace", "identifynoisydetectors_output"));
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("InputWorkspace", "identifynoisydetectors_input"));
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("OutputWorkspace", "identifynoisydetectors_output"));
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
 
     // identifynoisydetectors_output
     MatrixWorkspace_sptr workspace;
     TS_ASSERT_THROWS_NOTHING(
-        workspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "identifynoisydetectors_output"));
+        workspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("identifynoisydetectors_output"));
 
     // Check that it's got all the bad ones
     TS_ASSERT_EQUALS(workspace->y(0)[0], 0.0);

@@ -38,8 +38,7 @@ class MantidSampleLogDialog : public SampleLogDialogBase {
 
 public:
   /// Constructor
-  MantidSampleLogDialog(const QString &wsname, MantidUI *mui,
-                        const Qt::WFlags &flags = nullptr,
+  MantidSampleLogDialog(const QString &wsname, MantidUI *mui, const Qt::WFlags &flags = nullptr,
                         size_t experimentInfoIndex = 0);
 
   /// Destructor

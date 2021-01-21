@@ -26,27 +26,19 @@
 #include "MantidAPI/IMDHistoWorkspace_fwd.h"
 #include "MantidSINQ/DllConfig.h"
 
-class MANTID_SINQ_DLL SINQTranspose3D
-    : public Mantid::API::Algorithm,
-      public Mantid::API::DeprecatedAlgorithm {
+class MANTID_SINQ_DLL SINQTranspose3D : public Mantid::API::Algorithm, public Mantid::API::DeprecatedAlgorithm {
 public:
   /// Constructor
   SINQTranspose3D() { this->useAlgorithm("TransposeMD", 1); }
   /// Algorithm's name
   const std::string name() const override { return "Transpose3D"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "SINQ specific MD data reordering";
-  }
-  const std::vector<std::string> seeAlso() const override {
-    return {"TransposeMD", "Transpose"};
-  }
+  const std::string summary() const override { return "SINQ specific MD data reordering"; }
+  const std::vector<std::string> seeAlso() const override { return {"TransposeMD", "Transpose"}; }
   /// Algorithm's version
   int version() const override { return (1); }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "MDAlgorithms\\Transforms";
-  }
+  const std::string category() const override { return "MDAlgorithms\\Transforms"; }
 
 private:
   /// Initialisation code
@@ -59,6 +51,5 @@ private:
   void doTRICS(const Mantid::API::IMDHistoWorkspace_sptr &inws);
   void doAMOR(const Mantid::API::IMDHistoWorkspace_sptr &inws);
 
-  void copyMetaData(const Mantid::API::IMDHistoWorkspace_sptr &inws,
-                    const Mantid::API::IMDHistoWorkspace_sptr &outws);
+  void copyMetaData(const Mantid::API::IMDHistoWorkspace_sptr &inws, const Mantid::API::IMDHistoWorkspace_sptr &outws);
 };

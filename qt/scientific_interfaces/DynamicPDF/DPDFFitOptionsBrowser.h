@@ -24,8 +24,7 @@ namespace DynamicPDF {
 
   @date 2016-23-22
 */
-class MANTIDQT_DYNAMICPDF_DLL DPDFFitOptionsBrowser
-    : public MantidQt::MantidWidgets::FitOptionsBrowser {
+class MANTIDQT_DYNAMICPDF_DLL DPDFFitOptionsBrowser : public MantidQt::MantidWidgets::FitOptionsBrowser {
 
   Q_OBJECT
 

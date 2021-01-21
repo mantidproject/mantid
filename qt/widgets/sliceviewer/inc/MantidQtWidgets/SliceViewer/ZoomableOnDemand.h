@@ -21,8 +21,7 @@ class PeaksPresenter;
 class DLLExport ZoomableOnDemand {
 public:
   /// Zoom to a peak
-  virtual void zoomToPeak(PeaksPresenter *const presenter,
-                          const int peakIndex) = 0;
+  virtual void zoomToPeak(PeaksPresenter *const presenter, const int peakIndex) = 0;
   /// Reset/forget zoom
   virtual void resetZoom() = 0;
   /// destructor

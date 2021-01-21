@@ -34,11 +34,9 @@ class Convolution : public Filter {
   Q_OBJECT
 
 public:
-  Convolution(ApplicationWindow *parent, Table *t, const QString &signalColName,
-              const QString &responseColName);
+  Convolution(ApplicationWindow *parent, Table *t, const QString &signalColName, const QString &responseColName);
 
-  bool setDataFromTable(Table *t, const QString &signalColName,
-                        const QString &responseColName, int = 1,
+  bool setDataFromTable(Table *t, const QString &signalColName, const QString &responseColName, int = 1,
                         int = -1) override;
   //! Returns the size of the signal data set
   int signalDataSize() { return d_n_signal; };

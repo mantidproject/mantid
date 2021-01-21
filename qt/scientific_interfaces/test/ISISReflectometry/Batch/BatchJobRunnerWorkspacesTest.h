@@ -8,30 +8,22 @@
 
 #include "BatchJobRunnerTest.h"
 
-class BatchJobRunnerWorkspacesTest : public CxxTest::TestSuite,
-                                     public BatchJobRunnerTest {
+class BatchJobRunnerWorkspacesTest : public CxxTest::TestSuite, public BatchJobRunnerTest {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static BatchJobRunnerWorkspacesTest *createSuite() {
-    return new BatchJobRunnerWorkspacesTest();
-  }
-  static void destroySuite(BatchJobRunnerWorkspacesTest *suite) {
-    delete suite;
-  }
+  static BatchJobRunnerWorkspacesTest *createSuite() { return new BatchJobRunnerWorkspacesTest(); }
+  static void destroySuite(BatchJobRunnerWorkspacesTest *suite) { delete suite; }
 
   void testGetWorkspacesToSaveForOnlyRowInGroup() {
     auto jobRunner = makeJobRunner(oneGroupWithARowModel());
     auto *row = getRow(jobRunner, 0, 0);
     row->setOutputNames({"", "IvsQ", "IvsQBin"});
 
-    EXPECT_CALL(*m_jobAlgorithm, item())
-        .Times(AtLeast(1))
-        .WillRepeatedly(Return(row));
+    EXPECT_CALL(*m_jobAlgorithm, item()).Times(AtLeast(1)).WillRepeatedly(Return(row));
 
     // For a single row, we save the binned workspace for the row
-    auto workspacesToSave =
-        jobRunner.algorithmOutputWorkspacesToSave(m_jobAlgorithm);
+    auto workspacesToSave = jobRunner.algorithmOutputWorkspacesToSave(m_jobAlgorithm);
     TS_ASSERT_EQUALS(workspacesToSave, std::vector<std::string>{"IvsQBin"});
 
     verifyAndClear();
@@ -42,13 +34,10 @@ public:
     auto *row = getRow(jobRunner, 0, 0);
     row->setOutputNames({"", "IvsQ", "IvsQBin"});
 
-    EXPECT_CALL(*m_jobAlgorithm, item())
-        .Times(AtLeast(1))
-        .WillRepeatedly(Return(row));
+    EXPECT_CALL(*m_jobAlgorithm, item()).Times(AtLeast(1)).WillRepeatedly(Return(row));
 
     // For multiple rows, we don't save any workspaces
-    auto workspacesToSave =
-        jobRunner.algorithmOutputWorkspacesToSave(m_jobAlgorithm);
+    auto workspacesToSave = jobRunner.algorithmOutputWorkspacesToSave(m_jobAlgorithm);
     TS_ASSERT_EQUALS(workspacesToSave, std::vector<std::string>{});
 
     verifyAndClear();
@@ -61,14 +50,10 @@ public:
         "stitched_test",
     });
 
-    EXPECT_CALL(*m_jobAlgorithm, item())
-        .Times(AtLeast(1))
-        .WillRepeatedly(Return(&group));
+    EXPECT_CALL(*m_jobAlgorithm, item()).Times(AtLeast(1)).WillRepeatedly(Return(&group));
 
-    auto workspacesToSave =
-        jobRunner.algorithmOutputWorkspacesToSave(m_jobAlgorithm);
-    TS_ASSERT_EQUALS(workspacesToSave,
-                     std::vector<std::string>{"stitched_test"});
+    auto workspacesToSave = jobRunner.algorithmOutputWorkspacesToSave(m_jobAlgorithm);
+    TS_ASSERT_EQUALS(workspacesToSave, std::vector<std::string>{"stitched_test"});
 
     verifyAndClear();
   }

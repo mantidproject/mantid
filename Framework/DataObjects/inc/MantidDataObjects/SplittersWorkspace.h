@@ -11,8 +11,7 @@
 #include "MantidKernel/TimeSplitter.h"
 
 #ifdef _MSC_VER
-#pragma warning(                                                               \
-    disable : 4250) // Disable warning regarding inheritance via dominance
+#pragma warning(disable : 4250) // Disable warning regarding inheritance via dominance
 #endif
 
 namespace Mantid {
@@ -28,20 +27,15 @@ namespace DataObjects {
 
   @date 2012-04-03
 */
-class DLLExport SplittersWorkspace : public DataObjects::TableWorkspace,
-                                     public API::ISplittersWorkspace {
+class DLLExport SplittersWorkspace : public DataObjects::TableWorkspace, public API::ISplittersWorkspace {
 public:
   SplittersWorkspace();
 
   /// Returns a clone of the workspace
-  std::unique_ptr<SplittersWorkspace> clone() const {
-    return std::unique_ptr<SplittersWorkspace>(doClone());
-  }
+  std::unique_ptr<SplittersWorkspace> clone() const { return std::unique_ptr<SplittersWorkspace>(doClone()); }
 
   /// Returns a default-initialized clone of the workspace
-  std::unique_ptr<SplittersWorkspace> cloneEmpty() const {
-    return std::unique_ptr<SplittersWorkspace>(doCloneEmpty());
-  }
+  std::unique_ptr<SplittersWorkspace> cloneEmpty() const { return std::unique_ptr<SplittersWorkspace>(doCloneEmpty()); }
 
   SplittersWorkspace &operator=(const SplittersWorkspace &other) = delete;
   void addSplitter(Kernel::SplittingInterval splitter) override;
@@ -57,12 +51,8 @@ protected:
   SplittersWorkspace(const SplittersWorkspace &) = default;
 
 private:
-  SplittersWorkspace *doClone() const override {
-    return new SplittersWorkspace(*this);
-  }
-  SplittersWorkspace *doCloneEmpty() const override {
-    return new SplittersWorkspace();
-  }
+  SplittersWorkspace *doClone() const override { return new SplittersWorkspace(*this); }
+  SplittersWorkspace *doCloneEmpty() const override { return new SplittersWorkspace(); }
 };
 
 using SplittersWorkspace_sptr = std::shared_ptr<SplittersWorkspace>;

@@ -30,32 +30,22 @@ class WhiteList;
 /** QDataProcessorWidget : Provides an interface for processing table
 data.
 */
-class EXPORT_OPT_MANTIDQT_COMMON QDataProcessorWidget
-    : public MantidQt::API::MantidWidget,
-      public DataProcessorView,
-      public ProgressableView {
+class EXPORT_OPT_MANTIDQT_COMMON QDataProcessorWidget : public MantidQt::API::MantidWidget,
+                                                        public DataProcessorView,
+                                                        public ProgressableView {
 
   Q_OBJECT
 public:
-  QDataProcessorWidget(std::unique_ptr<DataProcessorPresenter> presenter,
-                       QWidget *parent = nullptr);
-  QDataProcessorWidget(const WhiteList & /*whitelist*/, QWidget *parent,
+  QDataProcessorWidget(std::unique_ptr<DataProcessorPresenter> presenter, QWidget *parent = nullptr);
+  QDataProcessorWidget(const WhiteList & /*whitelist*/, QWidget *parent, int group = 0);
+  QDataProcessorWidget(const WhiteList & /*whitelist*/, const ProcessingAlgorithm & /*algorithm*/, QWidget *parent,
                        int group = 0);
-  QDataProcessorWidget(const WhiteList & /*whitelist*/,
-                       const ProcessingAlgorithm & /*algorithm*/,
-                       QWidget *parent, int group = 0);
-  QDataProcessorWidget(const WhiteList & /*whitelist*/,
-                       const PreprocessMap & /*preprocessMap*/,
-                       const ProcessingAlgorithm & /*algorithm*/,
-                       QWidget *parent, int group = 0);
-  QDataProcessorWidget(const WhiteList & /*whitelist*/,
-                       const ProcessingAlgorithm & /*algorithm*/,
-                       const PostprocessingAlgorithm & /*postprocessor*/,
-                       QWidget *parent, int group = 0);
-  QDataProcessorWidget(const WhiteList & /*whitelist*/,
-                       const PreprocessMap & /*preprocessMap*/,
-                       const ProcessingAlgorithm & /*algorithm*/,
-                       const PostprocessingAlgorithm & /*postprocessor*/,
+  QDataProcessorWidget(const WhiteList & /*whitelist*/, const PreprocessMap & /*preprocessMap*/,
+                       const ProcessingAlgorithm & /*algorithm*/, QWidget *parent, int group = 0);
+  QDataProcessorWidget(const WhiteList & /*whitelist*/, const ProcessingAlgorithm & /*algorithm*/,
+                       const PostprocessingAlgorithm & /*postprocessor*/, QWidget *parent, int group = 0);
+  QDataProcessorWidget(const WhiteList & /*whitelist*/, const PreprocessMap & /*preprocessMap*/,
+                       const ProcessingAlgorithm & /*algorithm*/, const PostprocessingAlgorithm & /*postprocessor*/,
                        QWidget *parent, int group = 0);
   ~QDataProcessorWidget() override;
 
@@ -68,8 +58,7 @@ public:
   // Dialog/Prompt methods
   QString requestNotebookPath() override;
   /// Dialog/Prompt methods
-  QString askUserString(const QString &prompt, const QString &title,
-                        const QString &defaultValue) override;
+  QString askUserString(const QString &prompt, const QString &title, const QString &defaultValue) override;
   bool askUserYesNo(QString prompt, QString title) override;
   void giveUserWarning(QString prompt, QString title) override;
   void giveUserCritical(QString prompt, QString title) override;
@@ -104,11 +93,8 @@ public:
 
   // Setter methods
   void setSelection(const std::set<int> &groups) override;
-  void setInstrumentList(const QString &instruments,
-                         const QString &defaultInstrument) override;
-  void
-  setOptionsHintStrategy(MantidQt::MantidWidgets::HintStrategy *hintStrategy,
-                         int column) override;
+  void setInstrumentList(const QString &instruments, const QString &defaultInstrument) override;
+  void setOptionsHintStrategy(MantidQt::MantidWidgets::HintStrategy *hintStrategy, int column) override;
   void setClipboard(const QString &text) override;
   void setItemDelegate() override;
 
@@ -134,8 +120,7 @@ public:
   // Get value in a cell
   QString getCell(int row, int column, int parentRow = 0, int parentColumn = 0);
   // Set value in a cell
-  void setCell(const QString &value, int row, int column, int parentRow = 0,
-               int parentColumn = 0);
+  void setCell(const QString &value, int row, int column, int parentRow = 0, int parentColumn = 0);
   int getNumberOfRows();
   void clearTable();
 
@@ -184,8 +169,7 @@ public slots:
 
 private slots:
   void rowsUpdated(const QModelIndex &parent, int first, int last);
-  void rowDataUpdated(const QModelIndex &topLeft,
-                      const QModelIndex &bottomRight);
+  void rowDataUpdated(const QModelIndex &topLeft, const QModelIndex &bottomRight);
   void showContextMenu(const QPoint &pos);
   void processClicked();
   void ensureHasExtension(QString &filename) const;

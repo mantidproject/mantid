@@ -39,15 +39,12 @@ namespace {
 Kernel::Logger g_log("ThreeSliceView");
 } // namespace
 
-ThreeSliceView::ThreeSliceView(QWidget *parent,
-                               RebinnedSourcesManager *rebinnedSourcesManager,
-                               bool createRenderProxy)
+ThreeSliceView::ThreeSliceView(QWidget *parent, RebinnedSourcesManager *rebinnedSourcesManager, bool createRenderProxy)
     : ViewBase(parent, rebinnedSourcesManager), m_mainView(), m_ui() {
   this->m_ui.setupUi(this);
 
   if (createRenderProxy) {
-    this->m_mainView = this->createRenderView(this->m_ui.mainRenderFrame,
-                                              QString("OrthographicSliceView"));
+    this->m_mainView = this->createRenderView(this->m_ui.mainRenderFrame, QString("OrthographicSliceView"));
     pqActiveObjects::instance().setActiveView(this->m_mainView);
   }
 }
@@ -92,8 +89,7 @@ void ThreeSliceView::makeThreeSlice() {
     return;
   }
 
-  pqDataRepresentation *drep = builder->createDataRepresentation(
-      this->origSrc->getOutputPort(0), this->m_mainView);
+  pqDataRepresentation *drep = builder->createDataRepresentation(this->origSrc->getOutputPort(0), this->m_mainView);
   vtkSMPropertyHelper(drep->getProxy(), "Representation").Set("Slices");
   drep->getProxy()->UpdateVTKObjects();
   this->origRep = qobject_cast<pqPipelineRepresentation *>(drep);
@@ -111,9 +107,7 @@ void ThreeSliceView::setView(pqRenderView *view) {
   hbox->addWidget(m_mainView->widget());
 }
 
-ModeControlWidget::Views ThreeSliceView::getViewType() {
-  return ModeControlWidget::Views::THREESLICE;
-}
+ModeControlWidget::Views ThreeSliceView::getViewType() { return ModeControlWidget::Views::THREESLICE; }
 
 void ThreeSliceView::resetCamera() { this->m_mainView->resetCamera(); }
 } // namespace SimpleGui

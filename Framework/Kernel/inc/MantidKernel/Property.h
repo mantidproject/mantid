@@ -127,15 +127,13 @@ public:
   void setBriefDocumentation(const std::string &documentation);
 
   virtual void saveProperty(::NeXus::File * /*file*/) {
-    throw std::invalid_argument("Property::saveProperty - Cannot save '" +
-                                this->name() +
+    throw std::invalid_argument("Property::saveProperty - Cannot save '" + this->name() +
                                 "', property type not implemented.");
   }
   /// Returns the value of the property as a string
   virtual std::string value() const = 0;
   /// Returns the value of the property as a pretty printed string
-  virtual std::string valueAsPrettyStr(const size_t maxLength = 0,
-                                       const bool collapseLists = true) const;
+  virtual std::string valueAsPrettyStr(const size_t maxLength = 0, const bool collapseLists = true) const;
   /// Returns the value of the property as a Json::Value
   virtual Json::Value valueAsJson() const = 0;
   /// Whether the string returned by value() can be used for serialization.
@@ -177,10 +175,8 @@ public:
 
   /// Add to this
   virtual Property &operator+=(Property const *rhs) = 0;
-  virtual void filterByTime(const Types::Core::DateAndTime &start,
-                            const Types::Core::DateAndTime &stop);
-  virtual void splitByTime(std::vector<SplittingInterval> &splitter,
-                           std::vector<Property *> outputs,
+  virtual void filterByTime(const Types::Core::DateAndTime &start, const Types::Core::DateAndTime &stop);
+  virtual void splitByTime(std::vector<SplittingInterval> &splitter, std::vector<Property *> outputs,
                            bool isProtonCharge = true) const;
 
   virtual int size() const;
@@ -207,8 +203,7 @@ public:
 
 protected:
   /// Constructor
-  Property(std::string name, const std::type_info &type,
-           unsigned int direction = Direction::Input);
+  Property(std::string name, const std::type_info &type, unsigned int direction = Direction::Input);
   /// Copy constructor
   Property(const Property &right);
   /// The name of the property
@@ -247,11 +242,9 @@ private:
 };
 
 /// Compares this to another property for equality
-MANTID_KERNEL_DLL bool operator==(const Mantid::Kernel::Property &lhs,
-                                  const Mantid::Kernel::Property &rhs);
+MANTID_KERNEL_DLL bool operator==(const Mantid::Kernel::Property &lhs, const Mantid::Kernel::Property &rhs);
 /// Compares this to another property for inequality
-MANTID_KERNEL_DLL bool operator!=(const Mantid::Kernel::Property &lhs,
-                                  const Mantid::Kernel::Property &rhs);
+MANTID_KERNEL_DLL bool operator!=(const Mantid::Kernel::Property &lhs, const Mantid::Kernel::Property &rhs);
 
 /// Return the name corresponding to the mangled string given by typeid
 MANTID_KERNEL_DLL std::string getUnmangledTypeName(const std::type_info &type);

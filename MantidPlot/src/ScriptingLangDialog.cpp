@@ -35,9 +35,7 @@
 #include <QMessageBox>
 #include <QPushButton>
 
-ScriptingLangDialog::ScriptingLangDialog(ScriptingEnv *env,
-                                         ApplicationWindow *parent,
-                                         const Qt::WFlags &fl)
+ScriptingLangDialog::ScriptingLangDialog(ScriptingEnv *env, ApplicationWindow *parent, const Qt::WFlags &fl)
     : QDialog(parent, fl), Scripted(env) {
   setWindowTitle(tr("MantidPlot - Select scripting language"));
 
@@ -57,8 +55,7 @@ ScriptingLangDialog::ScriptingLangDialog(ScriptingEnv *env,
 
   connect(btnOK, SIGNAL(clicked()), this, SLOT(accept()));
   connect(btnCancel, SIGNAL(clicked()), this, SLOT(close()));
-  connect(langList, SIGNAL(itemActivated(QListWidgetItem *)), this,
-          SLOT(accept()));
+  connect(langList, SIGNAL(itemActivated(QListWidgetItem *)), this, SLOT(accept()));
 
   updateLangList();
 }
@@ -66,9 +63,7 @@ ScriptingLangDialog::ScriptingLangDialog(ScriptingEnv *env,
 void ScriptingLangDialog::updateLangList() {
   langList->clear();
   langList->insertItems(0, ScriptingLangManager::languages());
-  QListWidgetItem *current =
-      langList->findItems(scriptingEnv()->objectName(), Qt::MatchExactly)
-          .first();
+  QListWidgetItem *current = langList->findItems(scriptingEnv()->objectName(), Qt::MatchExactly).first();
   if (current)
     langList->setCurrentItem(current);
 }

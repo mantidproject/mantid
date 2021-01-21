@@ -90,16 +90,13 @@ signals:
   /// Signal emitted when the planar width changes
   void changedPlanarWidth(double /*_t1*/);
   /// Signal emitted when the start or end position has changed
-  void changedStartOrEnd(Mantid::Kernel::VMD /*_t1*/,
-                         Mantid::Kernel::VMD /*_t2*/);
+  void changedStartOrEnd(Mantid::Kernel::VMD /*_t1*/, Mantid::Kernel::VMD /*_t2*/);
   /// Signal emitted when changing fixed bin width mode
   void changedFixedBinWidth(bool /*_t1*/, double /*_t2*/);
 
 private:
-  Mantid::API::IAlgorithm_sptr
-  applyMDWorkspace(const Mantid::API::IMDWorkspace_sptr &ws);
-  Mantid::API::IAlgorithm_sptr
-  applyMatrixWorkspace(const Mantid::API::MatrixWorkspace_sptr &ws);
+  Mantid::API::IAlgorithm_sptr applyMDWorkspace(const Mantid::API::IMDWorkspace_sptr &ws);
+  Mantid::API::IAlgorithm_sptr applyMatrixWorkspace(const Mantid::API::MatrixWorkspace_sptr &ws);
   void setupScaleEngine(MantidQwtWorkspaceData &curveData);
   /// set the slice workspace from the ADS
   void setSliceWorkspace(const std::string &name);

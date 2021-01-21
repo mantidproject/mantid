@@ -31,18 +31,14 @@ class DLLExport SaveMDWorkspaceToVTKImpl {
 public:
   SaveMDWorkspaceToVTKImpl(SaveMDWorkspaceToVTK *parent = nullptr);
   ~SaveMDWorkspaceToVTKImpl() {}
-  void saveMDWorkspace(const Mantid::API::IMDWorkspace_sptr &workspace,
-                       const std::string &filename,
-                       VisualNormalization normalization, int recursionDepth,
-                       const std::string &compressorType);
+  void saveMDWorkspace(const Mantid::API::IMDWorkspace_sptr &workspace, const std::string &filename,
+                       VisualNormalization normalization, int recursionDepth, const std::string &compressorType);
 
   const static std::string structuredGridExtension;
   const static std::string unstructuredGridExtension;
 
-  std::vector<std::string>
-  getAllowedNormalizationsInStringRepresentation() const;
-  VisualNormalization
-  translateStringToVisualNormalization(const std::string &normalization) const;
+  std::vector<std::string> getAllowedNormalizationsInStringRepresentation() const;
+  VisualNormalization translateStringToVisualNormalization(const std::string &normalization) const;
   bool is3DWorkspace(const Mantid::API::IMDWorkspace &workspace) const;
   void progressFunction(vtkObject *caller, unsigned long, void *);
 
@@ -51,22 +47,19 @@ private:
   std::map<std::string, VisualNormalization> m_normalizations;
   void setupMembers();
   bool is4DWorkspace(const Mantid::API::IMDWorkspace &workspace) const;
-  int writeDataSetToVTKFile(vtkXMLWriter *writer, vtkDataSet *dataSet,
-                            const std::string &filename,
+  int writeDataSetToVTKFile(vtkXMLWriter *writer, vtkDataSet *dataSet, const std::string &filename,
                             vtkXMLWriter::CompressorType compressor);
   double selectTimeSliceValue(const Mantid::API::IMDWorkspace &workspace) const;
-  std::string getFullFilename(std::string filename,
-                              bool isHistoWorkspace) const;
+  std::string getFullFilename(std::string filename, bool isHistoWorkspace) const;
   vtkSmartPointer<vtkXMLWriter> getXMLWriter(bool isHistoWorkspace) const;
-  vtkSmartPointer<vtkDataSet> getDataSetWithOrthogonalCorrection(
-      vtkSmartPointer<vtkDataSet> dataSet, MDLoadingPresenter *presenter,
-      Mantid::API::IMDWorkspace_sptr workspace, bool isHistoWorkspace) const;
-  std::unique_ptr<vtkDataSetFactory>
-  getDataSetFactoryChain(bool isHistWorkspace,
-                         VisualNormalization normalization, double time) const;
-  std::unique_ptr<MDLoadingPresenter>
-  getPresenter(bool isHistoWorkspace, Mantid::API::IMDWorkspace_sptr workspace,
-               int recursionDepth) const;
+  vtkSmartPointer<vtkDataSet> getDataSetWithOrthogonalCorrection(vtkSmartPointer<vtkDataSet> dataSet,
+                                                                 MDLoadingPresenter *presenter,
+                                                                 Mantid::API::IMDWorkspace_sptr workspace,
+                                                                 bool isHistoWorkspace) const;
+  std::unique_ptr<vtkDataSetFactory> getDataSetFactoryChain(bool isHistWorkspace, VisualNormalization normalization,
+                                                            double time) const;
+  std::unique_ptr<MDLoadingPresenter> getPresenter(bool isHistoWorkspace, Mantid::API::IMDWorkspace_sptr workspace,
+                                                   int recursionDepth) const;
 };
 } // namespace VATES
 } // namespace Mantid

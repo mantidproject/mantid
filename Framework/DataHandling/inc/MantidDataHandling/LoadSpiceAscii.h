@@ -21,9 +21,7 @@ class DLLExport LoadSpiceAscii : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;
-  const std::vector<std::string> seeAlso() const override {
-    return {"LoadSpice2D", "LoadSpiceXML2DDet"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"LoadSpice2D", "LoadSpiceXML2DDet"}; }
   const std::string category() const override;
   const std::string summary() const override;
 
@@ -31,45 +29,34 @@ private:
   void init() override;
   void exec() override;
 
-  bool validateLogNamesType(const std::vector<std::string> &floatlognames,
-                            const std::vector<std::string> &intlognames,
+  bool validateLogNamesType(const std::vector<std::string> &floatlognames, const std::vector<std::string> &intlognames,
                             const std::vector<std::string> &strlognames);
 
   /// Parse SPICE Ascii file to dictionary
-  void parseSPICEAscii(const std::string &filename,
-                       std::vector<std::vector<std::string>> &datalist,
-                       std::vector<std::string> &titles,
-                       std::map<std::string, std::string> &runinfodict);
+  void parseSPICEAscii(const std::string &filename, std::vector<std::vector<std::string>> &datalist,
+                       std::vector<std::string> &titles, std::map<std::string, std::string> &runinfodict);
 
   /// Create data workspace
-  API::ITableWorkspace_sptr
-  createDataWS(const std::vector<std::vector<std::string>> &datalist,
-               const std::vector<std::string> &titles);
+  API::ITableWorkspace_sptr createDataWS(const std::vector<std::vector<std::string>> &datalist,
+                                         const std::vector<std::string> &titles);
 
   /// Create run information workspace
-  API::MatrixWorkspace_sptr
-  createRunInfoWS(std::map<std::string, std::string> runinfodict,
-                  std::vector<std::string> &floatlognamelist,
-                  std::vector<std::string> &intlognamelist,
-                  std::vector<std::string> &strlognamelist,
-                  bool ignoreunlisted);
+  API::MatrixWorkspace_sptr createRunInfoWS(std::map<std::string, std::string> runinfodict,
+                                            std::vector<std::string> &floatlognamelist,
+                                            std::vector<std::string> &intlognamelist,
+                                            std::vector<std::string> &strlognamelist, bool ignoreunlisted);
 
   /// Convert input date string to mantid date string
-  std::string processDateString(const std::string &rawdate,
-                                const std::string &dateformat);
+  std::string processDateString(const std::string &rawdate, const std::string &dateformat);
 
   /// Convert input time string to mantid time string
-  std::string processTimeString(const std::string &rawtime,
-                                const std::string &timeformat);
+  std::string processTimeString(const std::string &rawtime, const std::string &timeformat);
 
   /// Set up run start time
-  void setupRunStartTime(const API::MatrixWorkspace_sptr &runinfows,
-                         const std::vector<std::string> &datetimeprop);
+  void setupRunStartTime(const API::MatrixWorkspace_sptr &runinfows, const std::vector<std::string> &datetimeprop);
 
   /// Add property to workspace
-  template <typename T>
-  void addProperty(const API::MatrixWorkspace_sptr &ws,
-                   const std::string &pname, T pvalue);
+  template <typename T> void addProperty(const API::MatrixWorkspace_sptr &ws, const std::string &pname, T pvalue);
 };
 
 } // namespace DataHandling

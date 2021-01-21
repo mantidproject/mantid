@@ -22,9 +22,7 @@ public:
   /// Algorithm's name
   const std::string name() const override { return "EQSANSPatchSensitivity"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Patch EQSANS sensitivity correction.";
-  }
+  const std::string summary() const override { return "Patch EQSANS sensitivity correction."; }
   /// Algorithm's version
   int version() const override { return (1); }
   /// Algorithm's category for identification

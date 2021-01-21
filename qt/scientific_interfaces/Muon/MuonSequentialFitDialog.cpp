@@ -68,19 +68,16 @@ const std::string MuonSequentialFitDialog::SEQUENTIAL_PREFIX("MuonSeqFit_");
  * @param fitPropBrowser :: [input] Pointer to fit property browser
  * @param dataPresenter :: [input] Pointer to fit data presenter
  */
-MuonSequentialFitDialog::MuonSequentialFitDialog(
-    MuonFitPropertyBrowser *fitPropBrowser,
-    MuonAnalysisFitDataPresenter *dataPresenter)
-    : QDialog(fitPropBrowser), m_fitPropBrowser(fitPropBrowser),
-      m_dataPresenter(dataPresenter) {
+MuonSequentialFitDialog::MuonSequentialFitDialog(MuonFitPropertyBrowser *fitPropBrowser,
+                                                 MuonAnalysisFitDataPresenter *dataPresenter)
+    : QDialog(fitPropBrowser), m_fitPropBrowser(fitPropBrowser), m_dataPresenter(dataPresenter) {
   m_ui.setupUi(this);
 
   setState(Stopped);
 
   // Set initial run to be run number of the workspace selected in fit browser
   // when starting seq. fit dialog
-  const auto fitWS = std::dynamic_pointer_cast<const MatrixWorkspace>(
-      m_fitPropBrowser->getWorkspace());
+  const auto fitWS = std::dynamic_pointer_cast<const MatrixWorkspace>(m_fitPropBrowser->getWorkspace());
   m_ui.runs->setText(QString::number(fitWS->getRunNumber()) + "-");
   // Set the file finder to the correct instrument (not Mantid's default
   // instrument)
@@ -104,17 +101,12 @@ MuonSequentialFitDialog::MuonSequentialFitDialog(
   updateControlEnabled(m_state);
   updateCursor(m_state);
 
-  connect(m_ui.labelInput, SIGNAL(textChanged(const QString &)), this,
-          SLOT(updateLabelError(const QString &)));
+  connect(m_ui.labelInput, SIGNAL(textChanged(const QString &)), this, SLOT(updateLabelError(const QString &)));
 
-  connect(this, SIGNAL(stateChanged(DialogState)), this,
-          SLOT(updateControlButtonType(DialogState)));
-  connect(this, SIGNAL(stateChanged(DialogState)), this,
-          SLOT(updateInputEnabled(DialogState)));
-  connect(this, SIGNAL(stateChanged(DialogState)), this,
-          SLOT(updateControlEnabled(DialogState)));
-  connect(this, SIGNAL(stateChanged(DialogState)), this,
-          SLOT(updateCursor(DialogState)));
+  connect(this, SIGNAL(stateChanged(DialogState)), this, SLOT(updateControlButtonType(DialogState)));
+  connect(this, SIGNAL(stateChanged(DialogState)), this, SLOT(updateInputEnabled(DialogState)));
+  connect(this, SIGNAL(stateChanged(DialogState)), this, SLOT(updateControlEnabled(DialogState)));
+  connect(this, SIGNAL(stateChanged(DialogState)), this, SLOT(updateCursor(DialogState)));
 }
 
 /**
@@ -139,8 +131,7 @@ std::string MuonSequentialFitDialog::isValidLabel(const std::string &label) {
  * @param ws :: Workspace to get title from
  * @return The title, or empty string if unable to get one
  */
-std::string
-MuonSequentialFitDialog::getRunTitle(const Workspace_const_sptr &ws) {
+std::string MuonSequentialFitDialog::getRunTitle(const Workspace_const_sptr &ws) {
   auto matrixWS = std::dynamic_pointer_cast<const MatrixWorkspace>(ws);
 
   if (!matrixWS)
@@ -181,8 +172,7 @@ void MuonSequentialFitDialog::initDiagnosisTable() {
 
   // Make the table fill all the available space and columns be resized to fit
   // contents
-  m_ui.diagnosisTable->horizontalHeader()->setResizeMode(
-      QHeaderView::ResizeToContents);
+  m_ui.diagnosisTable->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
 
   // Make rows alternate bg colors for better user experience
   m_ui.diagnosisTable->setAlternatingRowColors(true);
@@ -194,24 +184,20 @@ void MuonSequentialFitDialog::initDiagnosisTable() {
  * @param fitQuality     :: Number representing goodness of the fit
  * @param fittedFunction :: Function containing fitted parameters
  */
-void MuonSequentialFitDialog::addDiagnosisEntry(
-    const std::string &runTitle, double fitQuality,
-    const IFunction_sptr &fittedFunction) {
+void MuonSequentialFitDialog::addDiagnosisEntry(const std::string &runTitle, double fitQuality,
+                                                const IFunction_sptr &fittedFunction) {
   int newRow = m_ui.diagnosisTable->rowCount();
 
   m_ui.diagnosisTable->insertRow(newRow);
 
   QString runTitleDisplay = QString::fromStdString(runTitle);
-  m_ui.diagnosisTable->setItem(newRow, 0,
-                               createTableWidgetItem(runTitleDisplay));
+  m_ui.diagnosisTable->setItem(newRow, 0, createTableWidgetItem(runTitleDisplay));
 
   QString fitQualityDisplay = QString::number(fitQuality);
-  m_ui.diagnosisTable->setItem(newRow, 1,
-                               createTableWidgetItem(fitQualityDisplay));
+  m_ui.diagnosisTable->setItem(newRow, 1, createTableWidgetItem(fitQualityDisplay));
 
   for (int i = 2; i < m_ui.diagnosisTable->columnCount(); i += 2) {
-    std::string paramName =
-        m_ui.diagnosisTable->horizontalHeaderItem(i)->text().toStdString();
+    std::string paramName = m_ui.diagnosisTable->horizontalHeaderItem(i)->text().toStdString();
     size_t paramIndex = fittedFunction->parameterIndex(paramName);
 
     QString value = QString::number(fittedFunction->getParameter(paramIndex));
@@ -228,8 +214,7 @@ void MuonSequentialFitDialog::addDiagnosisEntry(
  * Helper function to create new item for Diagnosis table.
  * @return Created and initialized item with text
  */
-QTableWidgetItem *
-MuonSequentialFitDialog::createTableWidgetItem(const QString &text) {
+QTableWidgetItem *MuonSequentialFitDialog::createTableWidgetItem(const QString &text) {
   auto newItem = new QTableWidgetItem(text);
   newItem->setFlags(newItem->flags() ^ Qt::ItemIsEditable);
   return newItem;
@@ -342,8 +327,7 @@ void MuonSequentialFitDialog::startFit() {
   // not be processed yet and search might not have been started yet.
   // Otherwise, search is not done as the widget sees that it has not been
   // changed.
-  connect(m_ui.runs, SIGNAL(fileInspectionFinished()), this,
-          SLOT(continueFit()));
+  connect(m_ui.runs, SIGNAL(fileInspectionFinished()), this, SLOT(continueFit()));
   if (!m_ui.runs->isSearching()) {
     m_ui.runs->findFiles();
   }
@@ -354,8 +338,7 @@ void MuonSequentialFitDialog::startFit() {
  * Called when the run control reports that its search has finished.
  */
 void MuonSequentialFitDialog::continueFit() {
-  disconnect(m_ui.runs, SIGNAL(fileInspectionFinished()), this,
-             SLOT(continueFit()));
+  disconnect(m_ui.runs, SIGNAL(fileInspectionFinished()), this, SLOT(continueFit()));
 
   // Validate input fields
   if (!isInputValid()) {
@@ -367,13 +350,11 @@ void MuonSequentialFitDialog::continueFit() {
   }
 
   // Get names of workspaces to fit
-  const auto wsNames = m_dataPresenter->generateWorkspaceNames(
-      m_ui.runs->getInstrumentOverride().toStdString(),
-      removePath(m_ui.runs->getText().toStdString()), false);
+  const auto wsNames = m_dataPresenter->generateWorkspaceNames(m_ui.runs->getInstrumentOverride().toStdString(),
+                                                               removePath(m_ui.runs->getText().toStdString()), false);
   if (wsNames.size() == 0) {
-    QMessageBox::critical(
-        this, "No data to fit",
-        "No data was found to fit (the list of workspaces to fit was empty).");
+    QMessageBox::critical(this, "No data to fit",
+                          "No data was found to fit (the list of workspaces to fit was empty).");
     setState(Stopped);
     return;
   }
@@ -395,11 +376,10 @@ void MuonSequentialFitDialog::continueFit() {
   AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
 
   if (ads.doesExist(labelGroupName)) {
-    QMessageBox::StandardButton answer =
-        QMessageBox::question(this, "Label already exists",
-                              "Label you specified was used for one of the "
-                              "previous fits. Do you want to overwrite it?",
-                              QMessageBox::Yes | QMessageBox::Cancel);
+    QMessageBox::StandardButton answer = QMessageBox::question(this, "Label already exists",
+                                                               "Label you specified was used for one of the "
+                                                               "previous fits. Do you want to overwrite it?",
+                                                               QMessageBox::Yes | QMessageBox::Cancel);
 
     if (answer != QMessageBox::Yes) {
       setState(Stopped);
@@ -421,12 +401,11 @@ void MuonSequentialFitDialog::continueFit() {
   m_ui.diagnosisTable->setRowCount(0);
 
   // Get fit function as specified by user in the fit browser
-  IFunction_sptr fitFunction = FunctionFactory::Instance().createInitialized(
-      m_fitPropBrowser->getFittingFunction()->asString());
+  IFunction_sptr fitFunction =
+      FunctionFactory::Instance().createInitialized(m_fitPropBrowser->getFittingFunction()->asString());
 
   // Whether we should use initial function for every fit
-  bool useInitFitFunction =
-      (m_ui.paramTypeGroup->checkedButton() == m_ui.paramTypeInitial);
+  bool useInitFitFunction = (m_ui.paramTypeGroup->checkedButton() == m_ui.paramTypeInitial);
 
   setState(Running);
   m_stopRequested = false;
@@ -443,19 +422,16 @@ void MuonSequentialFitDialog::continueFit() {
     // Workspaces to be fitted simultaneously for this run
     std::vector<std::string> workspacesToFit;
     const auto startIter = wsNames.begin() + i * datasetsPerRun;
-    std::copy(startIter, startIter + datasetsPerRun,
-              std::back_inserter(workspacesToFit));
+    std::copy(startIter, startIter + datasetsPerRun, std::back_inserter(workspacesToFit));
 
     // Get run title. Workspaces should be in ADS
     MatrixWorkspace_sptr matrixWS;
     try {
-      matrixWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-          workspacesToFit.front());
+      matrixWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspacesToFit.front());
     } catch (const Mantid::Kernel::Exception::NotFoundError &err) {
       QMessageBox::critical(
           this, "Data not found",
-          QString::fromStdString("Workspace to fit not found in ADS: " +
-                                 workspacesToFit.front() + err.what()));
+          QString::fromStdString("Workspace to fit not found in ADS: " + workspacesToFit.front() + err.what()));
       setState(Stopped);
       return;
     }
@@ -466,8 +442,7 @@ void MuonSequentialFitDialog::continueFit() {
 
     if (useInitFitFunction)
       // Create a copy so that the original function is not changed
-      functionToFit = FunctionFactory::Instance().createInitialized(
-          fitFunction->asString());
+      functionToFit = FunctionFactory::Instance().createInitialized(fitFunction->asString());
     else
       // Use the same function over and over, so that previous fitted params are
       // used for the next fit
@@ -508,9 +483,7 @@ void MuonSequentialFitDialog::continueFit() {
       fit->execute();
     } catch (const std::exception &err) {
       g_log.error(err.what());
-      QMessageBox::critical(
-          this, "Fitting failed",
-          "Unable to fit one of the files.\n\nCheck log for details");
+      QMessageBox::critical(this, "Fitting failed", "Unable to fit one of the files.\n\nCheck log for details");
       break;
     }
 
@@ -526,8 +499,7 @@ void MuonSequentialFitDialog::continueFit() {
     }
 
     // Add information about the fit to the diagnosis table
-    addDiagnosisEntry(runTitle, fit->getProperty("OutputChi2OverDof"),
-                      functionToFit);
+    addDiagnosisEntry(runTitle, fit->getProperty("OutputChi2OverDof"), functionToFit);
 
     // Update progress
     m_ui.progress->setFormat("%p% - " + QString::fromStdString(runTitle));
@@ -547,43 +519,36 @@ void MuonSequentialFitDialog::continueFit() {
  * @param firstWS :: [input] Pointer to first input workspace (to copy logs
  * from)
  */
-void MuonSequentialFitDialog::finishAfterRun(
-    const std::string &labelGroupName, const IAlgorithm_sptr &fitAlg,
-    bool simultaneous, const MatrixWorkspace_sptr &firstWS) const {
+void MuonSequentialFitDialog::finishAfterRun(const std::string &labelGroupName, const IAlgorithm_sptr &fitAlg,
+                                             bool simultaneous, const MatrixWorkspace_sptr &firstWS) const {
   auto &ads = AnalysisDataService::Instance();
   const std::string wsBaseName = fitAlg->getPropertyValue("Output");
   if (simultaneous) {
     // copy logs
-    auto fitWSGroup =
-        ads.retrieveWS<WorkspaceGroup>(wsBaseName + "_Workspaces");
+    auto fitWSGroup = ads.retrieveWS<WorkspaceGroup>(wsBaseName + "_Workspaces");
     for (size_t i = 0; i < fitWSGroup->size(); i++) {
-      auto fitWs =
-          std::dynamic_pointer_cast<MatrixWorkspace>(fitWSGroup->getItem(i));
+      auto fitWs = std::dynamic_pointer_cast<MatrixWorkspace>(fitWSGroup->getItem(i));
       if (fitWs) {
         fitWs->copyExperimentInfoFrom(firstWS.get());
       }
     }
     // insert workspace names into table
     try {
-      const std::string paramTableName =
-          fitAlg->getProperty("OutputParameters");
+      const std::string paramTableName = fitAlg->getProperty("OutputParameters");
       const auto paramTable = ads.retrieveWS<ITableWorkspace>(paramTableName);
       if (paramTable) {
         Mantid::API::TableRow f0Row = paramTable->appendRow();
-        f0Row << "f0=" + fitAlg->getPropertyValue("InputWorkspace") << 0.0
-              << 0.0;
+        f0Row << "f0=" + fitAlg->getPropertyValue("InputWorkspace") << 0.0 << 0.0;
         for (size_t i = 1; i < fitWSGroup->size(); i++) {
           const std::string suffix = boost::lexical_cast<std::string>(i);
-          const auto wsName =
-              fitAlg->getPropertyValue("InputWorkspace_" + suffix);
+          const auto wsName = fitAlg->getPropertyValue("InputWorkspace_" + suffix);
           Mantid::API::TableRow row = paramTable->appendRow();
           row << "f" + suffix + "=" + wsName << 0.0 << 0.0;
         }
       }
     } catch (const Mantid::Kernel::Exception::NotFoundError &) {
       // Not a fatal error, but shouldn't happen
-      g_log.warning(
-          "Could not find output parameters table for simultaneous fit");
+      g_log.warning("Could not find output parameters table for simultaneous fit");
     }
     // Group output together
     ads.add(wsBaseName, std::make_shared<WorkspaceGroup>());

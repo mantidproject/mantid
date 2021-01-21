@@ -21,9 +21,7 @@ public:
   CalculateCoverageDGS();
   const std::string name() const override;
   int version() const override;
-  const std::vector<std::string> seeAlso() const override {
-    return {"SetGoniometer", "SetUB"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"SetGoniometer", "SetUB"}; }
   const std::string category() const override;
   const std::string summary() const override;
 
@@ -49,8 +47,7 @@ private:
   /// Normalization workspace (this is the coverage workspace)
   Mantid::DataObjects::MDHistoWorkspace_sptr m_normWS;
 
-  std::vector<Kernel::VMD> calculateIntersections(const double theta,
-                                                  const double phi);
+  std::vector<Kernel::VMD> calculateIntersections(const double theta, const double phi);
   void cacheDimensionXValues();
 };
 

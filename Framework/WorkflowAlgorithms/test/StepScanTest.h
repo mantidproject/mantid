@@ -68,8 +68,7 @@ public:
     alg.initialize();
     TS_ASSERT(alg.isInitialized());
     TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS));
     TS_ASSERT(alg.execute());
@@ -79,16 +78,14 @@ public:
   // for system tests
   void test_simple_case() {
     // Add a non-zero value to the scan_index log
-    auto scan_index =
-        inputWS->mutableRun().getTimeSeriesProperty<int>("scan_index");
+    auto scan_index = inputWS->mutableRun().getTimeSeriesProperty<int>("scan_index");
     scan_index->addValue("2010-01-01T00:00:30", 1);
     // TODO: 'Close' the log, but I need to think about what happens if it isn't
     // closed
     scan_index->addValue("2010-01-01T00:01:40", 0);
 
     // Create a workspace to mask out one of the spectra
-    MatrixWorkspace_sptr mask =
-        WorkspaceFactory::Instance().create("MaskWorkspace", 3, 1, 1);
+    MatrixWorkspace_sptr mask = WorkspaceFactory::Instance().create("MaskWorkspace", 3, 1, 1);
     mask->dataY(1)[0] = 1;
 
     TS_ASSERT_THROWS_NOTHING(stepScan->setProperty("MaskWorkspace", mask));
@@ -98,9 +95,8 @@ public:
 
     // Retrieve the output table workspace from the ADS.
     Mantid::API::ITableWorkspace_sptr table;
-    TS_ASSERT_THROWS_NOTHING(
-        table = AnalysisDataService::Instance()
-                    .retrieveWS<Mantid::API::ITableWorkspace>(outWSName));
+    TS_ASSERT_THROWS_NOTHING(table =
+                                 AnalysisDataService::Instance().retrieveWS<Mantid::API::ITableWorkspace>(outWSName));
     TS_ASSERT(table);
     if (!table)
       return;
@@ -134,9 +130,8 @@ public:
     TS_ASSERT(stepScan->execute());
     // Retrieve the output table workspace from the ADS.
     Mantid::API::ITableWorkspace_sptr table;
-    TS_ASSERT_THROWS_NOTHING(
-        table = AnalysisDataService::Instance()
-                    .retrieveWS<Mantid::API::ITableWorkspace>(outWSName));
+    TS_ASSERT_THROWS_NOTHING(table =
+                                 AnalysisDataService::Instance().retrieveWS<Mantid::API::ITableWorkspace>(outWSName));
 
     TS_ASSERT_EQUALS(table->rowCount(), 1)
     TS_ASSERT_EQUALS(table->Int(0, 0), 0)

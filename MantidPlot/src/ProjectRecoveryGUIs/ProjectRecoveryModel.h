@@ -17,8 +17,7 @@ class ProjectRecoveryPresenter;
 class ProjectRecoveryModel {
 
 public:
-  ProjectRecoveryModel(MantidQt::ProjectRecovery *projectRecovery,
-                       ProjectRecoveryPresenter *presenter);
+  ProjectRecoveryModel(MantidQt::ProjectRecovery *projectRecovery, ProjectRecoveryPresenter *presenter);
   const std::vector<std::string> &getRow(const int i);
   std::vector<std::string> getRow(std::string checkpointName);
   void startMantidNormally();

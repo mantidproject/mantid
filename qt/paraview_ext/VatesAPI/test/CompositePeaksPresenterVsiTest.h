@@ -44,8 +44,7 @@ public:
     // Arrange
     CompositePeaksPresenterVsi presenter;
     // Assert
-    TS_ASSERT_THROWS(presenter.getPeaksWorkspaceName(),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(presenter.getPeaksWorkspaceName(), const std::runtime_error &);
   }
 
   void testThatGetListOfNamesOfSubPresenters() {
@@ -62,21 +61,16 @@ public:
     FarPlane farPlane(0.0, 0.0, 1.0, 1.0);
     NearPlane nearPlane(0.0, 0.0, -1.0, 1.0);
     ViewFrustum_const_sptr frustum =
-        std::make_shared<const Mantid::VATES::ViewFrustum>(
-            left, right, bottom, top, farPlane, nearPlane);
+        std::make_shared<const Mantid::VATES::ViewFrustum>(left, right, bottom, top, farPlane, nearPlane);
 
-    std::shared_ptr<MockPeaksWorkspaceComposite> pw_ptr =
-        std::make_shared<MockPeaksWorkspaceComposite>();
+    std::shared_ptr<MockPeaksWorkspaceComposite> pw_ptr = std::make_shared<MockPeaksWorkspaceComposite>();
 
     std::string name = "pw1";
-    PeaksPresenterVsi_sptr p1(
-        new ConcretePeaksPresenterVsi(pw_ptr, frustum, frame));
+    PeaksPresenterVsi_sptr p1(new ConcretePeaksPresenterVsi(pw_ptr, frustum, frame));
 
-    std::shared_ptr<MockPeaksWorkspaceComposite> pw_ptr2 =
-        std::make_shared<MockPeaksWorkspaceComposite>();
+    std::shared_ptr<MockPeaksWorkspaceComposite> pw_ptr2 = std::make_shared<MockPeaksWorkspaceComposite>();
     std::string name2 = "pw2";
-    PeaksPresenterVsi_sptr p2(
-        new ConcretePeaksPresenterVsi(pw_ptr2, frustum, frame));
+    PeaksPresenterVsi_sptr p2(new ConcretePeaksPresenterVsi(pw_ptr2, frustum, frame));
 
     presenter.addPresenter(p1);
     presenter.addPresenter(p2);
@@ -102,27 +96,21 @@ public:
     FarPlane farPlane(0.0, 0.0, 1.0, 1.0);
     NearPlane nearPlane(0.0, 0.0, -1.0, 1.0);
     ViewFrustum_const_sptr frustum =
-        std::make_shared<const Mantid::VATES::ViewFrustum>(
-            left, right, bottom, top, farPlane, nearPlane);
+        std::make_shared<const Mantid::VATES::ViewFrustum>(left, right, bottom, top, farPlane, nearPlane);
 
-    std::shared_ptr<MockPeaksWorkspaceComposite> pw_ptr =
-        std::make_shared<MockPeaksWorkspaceComposite>();
+    std::shared_ptr<MockPeaksWorkspaceComposite> pw_ptr = std::make_shared<MockPeaksWorkspaceComposite>();
     std::string name = "pw1";
-    PeaksPresenterVsi_sptr p1(
-        new ConcretePeaksPresenterVsi(pw_ptr, frustum, frame));
+    PeaksPresenterVsi_sptr p1(new ConcretePeaksPresenterVsi(pw_ptr, frustum, frame));
 
-    std::shared_ptr<MockPeaksWorkspaceComposite> pw_ptr2 =
-        std::make_shared<MockPeaksWorkspaceComposite>();
+    std::shared_ptr<MockPeaksWorkspaceComposite> pw_ptr2 = std::make_shared<MockPeaksWorkspaceComposite>();
     std::string name2 = "pw2";
-    PeaksPresenterVsi_sptr p2(
-        new ConcretePeaksPresenterVsi(pw_ptr2, frustum, frame));
+    PeaksPresenterVsi_sptr p2(new ConcretePeaksPresenterVsi(pw_ptr2, frustum, frame));
 
     presenter.addPresenter(p1);
     presenter.addPresenter(p2);
 
     // Act
-    std::vector<Mantid::API::IPeaksWorkspace_sptr> ws =
-        presenter.getPeaksWorkspaces();
+    std::vector<Mantid::API::IPeaksWorkspace_sptr> ws = presenter.getPeaksWorkspaces();
 
     // Assert
     TSM_ASSERT_EQUALS("Should have two entries", ws.size(), 2);

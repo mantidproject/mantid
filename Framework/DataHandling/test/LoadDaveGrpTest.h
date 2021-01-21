@@ -23,13 +23,10 @@ public:
     const std::string outputWSName("dave_grp");
     LoadDaveGrp loader;
     loader.initialize();
-    TS_ASSERT_THROWS_NOTHING(
-        loader.setPropertyValue("Filename", "DaveAscii.grp"));
-    TS_ASSERT_THROWS_NOTHING(
-        loader.setPropertyValue("OutputWorkspace", outputWSName));
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", "DaveAscii.grp"));
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("OutputWorkspace", outputWSName));
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("XAxisUnits", "DeltaE"));
-    TS_ASSERT_THROWS_NOTHING(
-        loader.setPropertyValue("YAxisUnits", "MomentumTransfer"));
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("YAxisUnits", "MomentumTransfer"));
     TS_ASSERT_THROWS_NOTHING(loader.setProperty<bool>("IsMicroEV", true));
     loader.execute();
 
@@ -40,8 +37,7 @@ public:
     TS_ASSERT_EQUALS(dataStore.doesExist(outputWSName), true);
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = dataStore.retrieve(outputWSName));
-    MatrixWorkspace_sptr outputWS =
-        std::dynamic_pointer_cast<MatrixWorkspace>(output);
+    MatrixWorkspace_sptr outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(output);
     if (outputWS) {
       TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 28);
       TS_ASSERT_EQUALS(outputWS->x(0).size(), 60);
@@ -52,14 +48,12 @@ public:
       TS_ASSERT_DELTA(outputWS->e(27)[7], 0.0187950781228, 1e-6);
 
       TS_ASSERT_EQUALS(outputWS->getAxis(0)->unit()->unitID(), "DeltaE");
-      TS_ASSERT_EQUALS(outputWS->getAxis(1)->unit()->unitID(),
-                       "MomentumTransfer");
+      TS_ASSERT_EQUALS(outputWS->getAxis(1)->unit()->unitID(), "MomentumTransfer");
 
       TS_ASSERT_EQUALS(outputWS->isDistribution(), true);
 
       // Check if filename is saved
-      TS_ASSERT_EQUALS(loader.getPropertyValue("Filename"),
-                       outputWS->run().getProperty("Filename")->value());
+      TS_ASSERT_EQUALS(loader.getPropertyValue("Filename"), outputWS->run().getProperty("Filename")->value());
       dataStore.remove(outputWSName);
     }
   }
@@ -68,16 +62,12 @@ public:
     const std::string outputWSName("dave_grp");
     LoadDaveGrp loader;
     loader.initialize();
-    TS_ASSERT_THROWS_NOTHING(
-        loader.setPropertyValue("Filename", "DaveAscii.grp"));
-    TS_ASSERT_THROWS_NOTHING(
-        loader.setPropertyValue("OutputWorkspace", outputWSName));
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", "DaveAscii.grp"));
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("OutputWorkspace", outputWSName));
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("XAxisUnits", "DeltaE"));
-    TS_ASSERT_THROWS_NOTHING(
-        loader.setPropertyValue("YAxisUnits", "MomentumTransfer"));
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("YAxisUnits", "MomentumTransfer"));
     TS_ASSERT_THROWS_NOTHING(loader.setProperty<bool>("IsMicroEV", true));
-    TS_ASSERT_THROWS_NOTHING(
-        loader.setProperty<bool>("ConvertToHistogram", true));
+    TS_ASSERT_THROWS_NOTHING(loader.setProperty<bool>("ConvertToHistogram", true));
     loader.execute();
 
     TS_ASSERT_EQUALS(loader.isExecuted(), true);
@@ -87,8 +77,7 @@ public:
     TS_ASSERT_EQUALS(dataStore.doesExist(outputWSName), true);
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = dataStore.retrieve(outputWSName));
-    MatrixWorkspace_sptr outputWS =
-        std::dynamic_pointer_cast<MatrixWorkspace>(output);
+    MatrixWorkspace_sptr outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(output);
     if (outputWS) {
       TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 28);
       TS_ASSERT_EQUALS(outputWS->x(0).size(), 61);

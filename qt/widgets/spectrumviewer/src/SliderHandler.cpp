@@ -15,8 +15,7 @@ namespace SpectrumView {
  *  Construct a SliderHandler object to manage the image scrollbars from the
  *  specified UI.
  */
-SliderHandler::SliderHandler(Ui_SpectrumViewer *svUI)
-    : ISliderHandler(), m_svUI(svUI) {}
+SliderHandler::SliderHandler(Ui_SpectrumViewer *svUI) : ISliderHandler(), m_svUI(svUI) {}
 
 /**
  * Reconfigure the image scrollbars for the specified data and drawing area.
@@ -27,8 +26,7 @@ SliderHandler::SliderHandler(Ui_SpectrumViewer *svUI)
  *                    be drawn
  * @param dataSource  SpectrumDataSource that provides the data to be drawn
  */
-void SliderHandler::reConfigureSliders(
-    QRect drawArea, const SpectrumDataSource_sptr &dataSource) {
+void SliderHandler::reConfigureSliders(QRect drawArea, const SpectrumDataSource_sptr &dataSource) {
   QScrollBar *vScroll = m_svUI->imageVerticalScrollBar;
 
   int oldVValue = vScroll->value();
@@ -47,8 +45,7 @@ void SliderHandler::reConfigureSliders(
  *                    be drawn
  * @param dataSource  SpectrumDataSource that provides the data to be drawn
  */
-void SliderHandler::configureSliders(QRect drawArea,
-                                     SpectrumDataSource_sptr dataSource) {
+void SliderHandler::configureSliders(QRect drawArea, SpectrumDataSource_sptr dataSource) {
   QScrollBar *vScroll = m_svUI->imageVerticalScrollBar;
   int numRows = (int)dataSource->getNRows();
   configureSlider(vScroll, numRows, drawArea.height(), numRows);
@@ -81,8 +78,7 @@ void SliderHandler::configureHSlider(int numDataSetps, int numPixels) {
  *  @param val           The initial position of the scrollbar, between 0 and
  *                       numDataSetps.
  */
-void SliderHandler::configureSlider(QScrollBar *scrollBar, int numDataSetps,
-                                    int numPixels, int val) {
+void SliderHandler::configureSlider(QScrollBar *scrollBar, int numDataSetps, int numPixels, int val) {
   int step = numPixels;
   if (step > numDataSetps)
     step = numDataSetps;
@@ -109,16 +105,12 @@ void SliderHandler::configureSlider(QScrollBar *scrollBar, int numDataSetps,
 /**
  * Return true if the image horizontal scrollbar is enabled.
  */
-bool SliderHandler::hSliderOn() {
-  return m_svUI->imageHorizontalScrollBar->isEnabled();
-}
+bool SliderHandler::hSliderOn() { return m_svUI->imageHorizontalScrollBar->isEnabled(); }
 
 /**
  * Return true if the image vertical scrollbar is enabled.
  */
-bool SliderHandler::vSliderOn() {
-  return m_svUI->imageVerticalScrollBar->isEnabled();
-}
+bool SliderHandler::vSliderOn() { return m_svUI->imageVerticalScrollBar->isEnabled(); }
 
 /**
  * Get the range of columns to display in the image.  NOTE: x_min will be

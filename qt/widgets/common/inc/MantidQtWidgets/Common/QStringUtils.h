@@ -20,10 +20,8 @@ namespace API {
  */
 inline QString toQStringInternal(const wchar_t *str) {
   return sizeof(wchar_t) == sizeof(QChar)
-             ? QString::fromUtf16(reinterpret_cast<const ushort *>(str),
-                                  static_cast<int>(wcslen(str)))
-             : QString::fromUcs4(reinterpret_cast<const uint *>(str),
-                                 static_cast<int>(wcslen(str)));
+             ? QString::fromUtf16(reinterpret_cast<const ushort *>(str), static_cast<int>(wcslen(str)))
+             : QString::fromUcs4(reinterpret_cast<const uint *>(str), static_cast<int>(wcslen(str)));
 }
 
 /**
@@ -35,10 +33,8 @@ inline QString toQStringInternal(const wchar_t *str) {
  */
 inline QString toQStringInternal(const std::wstring &str) {
   return sizeof(wchar_t) == sizeof(QChar)
-             ? QString::fromUtf16(reinterpret_cast<const ushort *>(str.data()),
-                                  static_cast<int>(str.size()))
-             : QString::fromUcs4(reinterpret_cast<const uint *>(str.data()),
-                                 static_cast<int>(str.size()));
+             ? QString::fromUtf16(reinterpret_cast<const ushort *>(str.data()), static_cast<int>(str.size()))
+             : QString::fromUcs4(reinterpret_cast<const uint *>(str.data()), static_cast<int>(str.size()));
 }
 } // namespace API
 } // namespace MantidQt

@@ -34,8 +34,7 @@ private:
   using ColourMapType = std::map<int, C>;
   ColourMapType m_backgroundMap;
   ColourMapType m_foregroundMap;
-  typename ColourMapType::iterator safeFetchPair(ColourMapType &map,
-                                                 const int index) {
+  typename ColourMapType::iterator safeFetchPair(ColourMapType &map, const int index) {
     auto it = map.find(index);
     if (it == map.end()) {
       std::stringstream stream;
@@ -45,8 +44,7 @@ private:
     return it;
   }
 
-  typename ColourMapType::const_iterator safeFetchPair(const ColourMapType &map,
-                                                       const int index) const {
+  typename ColourMapType::const_iterator safeFetchPair(const ColourMapType &map, const int index) const {
     auto it = map.find(index);
     if (it == map.end()) {
       std::stringstream stream;
@@ -61,45 +59,37 @@ template <typename C> PeakPalette<C>::PeakPalette() {}
 
 template <typename C>
 PeakPalette<C>::PeakPalette(const PeakPalette &other)
-    : m_backgroundMap(other.m_backgroundMap),
-      m_foregroundMap(other.m_foregroundMap) {}
+    : m_backgroundMap(other.m_backgroundMap), m_foregroundMap(other.m_foregroundMap) {}
 
-template <typename C>
-PeakPalette<C> &PeakPalette<C>::operator=(const PeakPalette<C> &other) {
+template <typename C> PeakPalette<C> &PeakPalette<C>::operator=(const PeakPalette<C> &other) {
   m_foregroundMap.clear();
   m_backgroundMap.clear();
   if (this != &other) {
-    m_foregroundMap.insert(other.m_foregroundMap.begin(),
-                           other.m_foregroundMap.end());
-    m_backgroundMap.insert(other.m_backgroundMap.begin(),
-                           other.m_backgroundMap.end());
+    m_foregroundMap.insert(other.m_foregroundMap.begin(), other.m_foregroundMap.end());
+    m_backgroundMap.insert(other.m_backgroundMap.begin(), other.m_backgroundMap.end());
   }
   return *this;
 }
 
 template <typename C> PeakPalette<C>::~PeakPalette() {}
 
-template <typename C>
-C PeakPalette<C>::foregroundIndexToColour(const int index) const {
+template <typename C> C PeakPalette<C>::foregroundIndexToColour(const int index) const {
   auto it = safeFetchPair(m_foregroundMap, index);
   return it->second;
 }
 
-template <typename C>
-C PeakPalette<C>::backgroundIndexToColour(const int index) const {
+template <typename C> C PeakPalette<C>::backgroundIndexToColour(const int index) const {
   auto it = safeFetchPair(m_backgroundMap, index);
   return it->second;
 }
 
-template <typename C>
-void PeakPalette<C>::setForegroundColour(const int index, const C colour) {
+template <typename C> void PeakPalette<C>::setForegroundColour(const int index, const C colour) {
   auto it = safeFetchPair(m_foregroundMap, index);
   // overwrite
   it->second = colour;
 }
 
-template <typename C>
-void PeakPalette<C>::setBackgroundColour(const int index, const C colour) {
+template <typename C> void PeakPalette<C>::setBackgroundColour(const int index, const C colour) {
   auto it = safeFetchPair(m_backgroundMap, index);
   // owverwirte
   it->second = colour;
@@ -112,20 +102,17 @@ template <typename C> int PeakPalette<C>::paletteSize() const {
   return static_cast<int>(m_foregroundMap.size());
 }
 
-template <typename C>
-bool PeakPalette<C>::operator==(const PeakPalette &other) const {
+template <typename C> bool PeakPalette<C>::operator==(const PeakPalette &other) const {
   bool areEqual = true;
   if (other.paletteSize() != this->paletteSize()) {
     areEqual = false;
   } else {
     for (int i = 0; i < this->paletteSize(); ++i) {
-      if (this->backgroundIndexToColour(i) !=
-          other.backgroundIndexToColour(i)) {
+      if (this->backgroundIndexToColour(i) != other.backgroundIndexToColour(i)) {
         areEqual = false;
         break;
       }
-      if (this->foregroundIndexToColour(i) !=
-          other.foregroundIndexToColour(i)) {
+      if (this->foregroundIndexToColour(i) != other.foregroundIndexToColour(i)) {
         areEqual = false;
         break;
       }

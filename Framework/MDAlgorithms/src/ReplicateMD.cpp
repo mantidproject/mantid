@@ -35,8 +35,7 @@ namespace {
  * @param forDim : Dimension to search for
  * @return found dimension or a null shared ptr of type IMDDimension
  */
-IMDDimension_const_sptr findMatchingDimension(const IMDHistoWorkspace &toSearch,
-                                              const IMDDimension &forDim) {
+IMDDimension_const_sptr findMatchingDimension(const IMDHistoWorkspace &toSearch, const IMDDimension &forDim) {
   IMDDimension_const_sptr foundDim;
   try {
     // This will throw if it doesn't exist.
@@ -56,8 +55,7 @@ IMDDimension_const_sptr findMatchingDimension(const IMDHistoWorkspace &toSearch,
  * @param dataWS : source of the missing/integrated dimension
  * @return Index in the SHAPE workspace
  */
-size_t findReplicationDimension(const IMDHistoWorkspace &shapeWS,
-                                const IMDHistoWorkspace &dataWS) {
+size_t findReplicationDimension(const IMDHistoWorkspace &shapeWS, const IMDHistoWorkspace &dataWS) {
   size_t index = -1;
   for (size_t i = 0; i < shapeWS.getNumDims(); ++i) {
     const auto shapeDim = shapeWS.getDimension(i);
@@ -77,15 +75,13 @@ size_t findReplicationDimension(const IMDHistoWorkspace &shapeWS,
  * @param dataWS : Workspace to transpose
  * @return Axis required for the transpose command.
  */
-std::vector<int> findAxes(const IMDHistoWorkspace &shapeWS,
-                          const IMDHistoWorkspace &dataWS) {
+std::vector<int> findAxes(const IMDHistoWorkspace &shapeWS, const IMDHistoWorkspace &dataWS) {
 
   std::vector<int> axes;
   for (size_t i = 0; i < dataWS.getNumDims(); ++i) {
     const auto dataDim = dataWS.getDimension(i);
     if (!dataDim->getIsIntegrated()) {
-      auto index = static_cast<int>(
-          shapeWS.getDimensionIndexById(dataDim->getDimensionId()));
+      auto index = static_cast<int>(shapeWS.getDimensionIndexById(dataDim->getDimensionId()));
       axes.emplace_back(index);
     }
   }
@@ -111,22 +107,17 @@ std::vector<int> findAxes(const IMDHistoWorkspace &shapeWS,
  * @param nDimsData : Number of dimensions in the data
  * @return Linear index in the data
  */
-size_t linearIndexToLinearIndex(const size_t &nDimsShape,
-                                const size_t &shapeReplicationIndex,
-                                const std::vector<size_t> &indexMaxShape,
-                                const std::vector<size_t> &indexMakerShape,
-                                const size_t &sourceIndex,
-                                std::vector<size_t> &indexMakerData,
+size_t linearIndexToLinearIndex(const size_t &nDimsShape, const size_t &shapeReplicationIndex,
+                                const std::vector<size_t> &indexMaxShape, const std::vector<size_t> &indexMakerShape,
+                                const size_t &sourceIndex, std::vector<size_t> &indexMakerData,
                                 const size_t &nDimsData) {
   std::vector<size_t> vecShapeIndexes(nDimsShape);
-  Utils::NestedForLoop::GetIndicesFromLinearIndex(
-      nDimsShape, sourceIndex, &indexMakerShape[0], &indexMaxShape[0],
-      &vecShapeIndexes[0]);
+  Utils::NestedForLoop::GetIndicesFromLinearIndex(nDimsShape, sourceIndex, &indexMakerShape[0], &indexMaxShape[0],
+                                                  &vecShapeIndexes[0]);
 
   vecShapeIndexes.erase(vecShapeIndexes.begin() + shapeReplicationIndex);
 
-  const size_t targetIndex = Utils::NestedForLoop::GetLinearIndex(
-      nDimsData, &vecShapeIndexes[0], &indexMakerData[0]);
+  const size_t targetIndex = Utils::NestedForLoop::GetLinearIndex(nDimsData, &vecShapeIndexes[0], &indexMakerData[0]);
 
   return targetIndex;
 }
@@ -144,9 +135,7 @@ const std::string ReplicateMD::name() const { return "ReplicateMD"; }
 int ReplicateMD::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string ReplicateMD::category() const {
-  return "MDAlgorithms\\Creation";
-}
+const std::string ReplicateMD::category() const { return "MDAlgorithms\\Creation"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string ReplicateMD::summary() const {
@@ -160,9 +149,7 @@ const std::string ReplicateMD::summary() const {
  * @param axes : target axes indexes
  * @return : Transposed workspace.
  */
-MDHistoWorkspace_const_sptr
-ReplicateMD::transposeMD(MDHistoWorkspace_sptr &toTranspose,
-                         const std::vector<int> &axes) {
+MDHistoWorkspace_const_sptr ReplicateMD::transposeMD(MDHistoWorkspace_sptr &toTranspose, const std::vector<int> &axes) {
 
   auto transposeMD = this->createChildAlgorithm("TransposeMD", 0.0, 0.5);
   transposeMD->setProperty("InputWorkspace", toTranspose);
@@ -181,11 +168,8 @@ std::map<std::string, std::string> ReplicateMD::validateInputs() {
   std::map<std::string, std::string> errorMap;
   IMDHistoWorkspace_sptr shapeWS = this->getProperty("ShapeWorkspace");
   IMDHistoWorkspace_sptr dataWS = this->getProperty("DataWorkspace");
-  if (shapeWS->getNumNonIntegratedDims() !=
-      dataWS->getNumNonIntegratedDims() + 1) {
-    errorMap.emplace(
-        "DataWorkspace",
-        "Expect to have n-1 non-interated dimensions of ShapeWorkspace");
+  if (shapeWS->getNumNonIntegratedDims() != dataWS->getNumNonIntegratedDims() + 1) {
+    errorMap.emplace("DataWorkspace", "Expect to have n-1 non-interated dimensions of ShapeWorkspace");
   }
 
   size_t nonMatchingCount = 0;
@@ -212,13 +196,11 @@ std::map<std::string, std::string> ReplicateMD::validateInputs() {
                     "same id dimension in the DataWorkspace";
           errorMap.emplace("DataWorkspace", stream.str());
         } else if (haveMatchingIntegratedDims) {
-          errorMap.emplace(
-              "ShapeWorkspace",
-              "Extra integrated dimensions must be only "
-              "the last dimensions, e.g.:\n\nThis is allowed:\n  "
-              "Shape: {10, 5, 1, 1}\n  Data:  { 1, 5, 1, 1}\n\nBut "
-              "this is not:\n  Shape: {10, 1, 5, 1}\n  Data:  { 1, 1, "
-              "5, 1}\n\nUse TransposeMD to re-arrange dimensions.");
+          errorMap.emplace("ShapeWorkspace", "Extra integrated dimensions must be only "
+                                             "the last dimensions, e.g.:\n\nThis is allowed:\n  "
+                                             "Shape: {10, 5, 1, 1}\n  Data:  { 1, 5, 1, 1}\n\nBut "
+                                             "this is not:\n  Shape: {10, 1, 5, 1}\n  Data:  { 1, 1, "
+                                             "5, 1}\n\nUse TransposeMD to re-arrange dimensions.");
           break;
         }
       }
@@ -229,10 +211,9 @@ std::map<std::string, std::string> ReplicateMD::validateInputs() {
 
   // Check number of missing/integrated dimensions
   if (nonMatchingCount != 1) {
-    errorMap.emplace("DataWorkspace",
-                     "There should be ONLY 1 dimension present "
-                     "in the ShapeWorkspace that is not present "
-                     "(or integrated out) in the DataWorkspace");
+    errorMap.emplace("DataWorkspace", "There should be ONLY 1 dimension present "
+                                      "in the ShapeWorkspace that is not present "
+                                      "(or integrated out) in the DataWorkspace");
   }
 
   return errorMap;
@@ -242,14 +223,11 @@ std::map<std::string, std::string> ReplicateMD::validateInputs() {
 /** Initialize the algorithm's properties.
  */
 void ReplicateMD::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
-                      "ShapeWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>("ShapeWorkspace", "", Direction::Input),
                   "An input workspace defining the shape of the output.");
-  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
-                      "DataWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>("DataWorkspace", "", Direction::Input),
                   "An input workspace containing the data to replicate.");
-  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "An output workspace with replicated data.");
 }
 
@@ -304,20 +282,15 @@ void ReplicateMD::exec() {
     // Check that the indices stored in axes are compatible with the
     // dimensionality of the data workspace
     const auto numberOfDimensionsOfDataWorkspace = static_cast<int>(nDimsData);
-    const auto found =
-        std::find_if(axes.cbegin(), axes.cend(),
-                     [numberOfDimensionsOfDataWorkspace](const auto &axis) {
-                       return axis >= numberOfDimensionsOfDataWorkspace;
-                     });
+    const auto found = std::find_if(axes.cbegin(), axes.cend(), [numberOfDimensionsOfDataWorkspace](const auto &axis) {
+      return axis >= numberOfDimensionsOfDataWorkspace;
+    });
     if (found != axes.cend()) {
-      std::string message =
-          "ReplicateMD: Cannot transpose the data workspace. Attempting to "
-          "swap dimension index " +
-          std::to_string(
-              std::distance(static_cast<const int *>(&axes[0]), &(*found))) +
-          " with index " + std::to_string(*found) +
-          ", but the dimensionality of the data workspace is " +
-          std::to_string(nDimsData);
+      std::string message = "ReplicateMD: Cannot transpose the data workspace. Attempting to "
+                            "swap dimension index " +
+                            std::to_string(std::distance(static_cast<const int *>(&axes[0]), &(*found))) +
+                            " with index " + std::to_string(*found) +
+                            ", but the dimensionality of the data workspace is " + std::to_string(nDimsData);
       throw std::runtime_error(message);
     }
     transposedDataWS = transposeMD(dataWS, axes);
@@ -330,8 +303,7 @@ void ReplicateMD::exec() {
   for (size_t i = 0; i < nDimsShape; ++i) {
     indexMaxShape[i] = shapeWS->getDimension(i)->getNBins();
   }
-  Utils::NestedForLoop::SetUpIndexMaker(nDimsShape, &indexMakerShape[0],
-                                        &indexMaxShape[0]);
+  Utils::NestedForLoop::SetUpIndexMaker(nDimsShape, &indexMakerShape[0], &indexMaxShape[0]);
 
   // Set up index maker for data.
   std::vector<size_t> indexMakerData(nDimsData);
@@ -339,17 +311,14 @@ void ReplicateMD::exec() {
   for (size_t i = 0; i < nDimsData; ++i) {
     indexMaxData[i] = transposedDataWS->getDimension(i)->getNBins();
   }
-  Utils::NestedForLoop::SetUpIndexMaker(nDimsData, &indexMakerData[0],
-                                        &indexMaxData[0]);
+  Utils::NestedForLoop::SetUpIndexMaker(nDimsData, &indexMakerData[0], &indexMaxData[0]);
 
   // Dimension index into the shape workspace where we will be replicating
-  const size_t shapeReplicationIndex =
-      findReplicationDimension(*shapeWS, *transposedDataWS);
+  const size_t shapeReplicationIndex = findReplicationDimension(*shapeWS, *transposedDataWS);
 
   // Create the output workspace from the shape.
   MDHistoWorkspace_sptr outputWS(shapeWS->clone());
-  const int nThreads = Mantid::API::FrameworkManager::Instance()
-                           .getNumOMPThreads(); // NThreads to Request
+  const int nThreads = Mantid::API::FrameworkManager::Instance().getNumOMPThreads(); // NThreads to Request
 
   // collection of iterators
   auto iterators = outputWS->createIterators(nThreads, nullptr);
@@ -366,20 +335,15 @@ void ReplicateMD::exec() {
       const auto sourceIndex = outIt->getLinearIndex();
 
       // Figure out the linear index in the data.
-      const size_t targetIndex = linearIndexToLinearIndex(
-          nDimsShape, shapeReplicationIndex, indexMaxShape, indexMakerShape,
-          sourceIndex, indexMakerData, nDimsData);
+      const size_t targetIndex = linearIndexToLinearIndex(nDimsShape, shapeReplicationIndex, indexMaxShape,
+                                                          indexMakerShape, sourceIndex, indexMakerData, nDimsData);
 
       // Copy the data across
-      outputWS->setSignalAt(sourceIndex,
-                            transposedDataWS->getSignalAt(targetIndex));
-      outputWS->setErrorSquaredAt(
-          sourceIndex, transposedDataWS->getErrorAt(targetIndex) *
-                           transposedDataWS->getErrorAt(targetIndex));
-      outputWS->setNumEventsAt(sourceIndex,
-                               transposedDataWS->getNumEventsAt(targetIndex));
-      outputWS->setMDMaskAt(sourceIndex,
-                            transposedDataWS->getIsMaskedAt(targetIndex));
+      outputWS->setSignalAt(sourceIndex, transposedDataWS->getSignalAt(targetIndex));
+      outputWS->setErrorSquaredAt(sourceIndex, transposedDataWS->getErrorAt(targetIndex) *
+                                                   transposedDataWS->getErrorAt(targetIndex));
+      outputWS->setNumEventsAt(sourceIndex, transposedDataWS->getNumEventsAt(targetIndex));
+      outputWS->setMDMaskAt(sourceIndex, transposedDataWS->getIsMaskedAt(targetIndex));
       progress.report();
 
     } while (outIt->next());

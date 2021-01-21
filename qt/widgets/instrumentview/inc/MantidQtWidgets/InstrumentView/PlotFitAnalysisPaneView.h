@@ -40,22 +40,15 @@ public:
   virtual QWidget *createFitPane(const double &start, const double &end) = 0;
 };
 
-class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW PlotFitAnalysisPaneView
-    : public QWidget,
-      public IPlotFitAnalysisPaneView {
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW PlotFitAnalysisPaneView : public QWidget, public IPlotFitAnalysisPaneView {
   Q_OBJECT
 
 public:
-  explicit PlotFitAnalysisPaneView(const double &start, const double &end,
-                                   QWidget *parent = nullptr);
+  explicit PlotFitAnalysisPaneView(const double &start, const double &end, QWidget *parent = nullptr);
 
-  void observeFitButton(Observer *listener) override {
-    m_fitObservable->attach(listener);
-  };
+  void observeFitButton(Observer *listener) override { m_fitObservable->attach(listener); };
 
-  void observeUpdateEstimateButton(Observer *listener) override {
-    m_updateEstimateObservable->attach(listener);
-  };
+  void observeUpdateEstimateButton(Observer *listener) override { m_updateEstimateObservable->attach(listener); };
 
   std::pair<double, double> getRange() override;
   Mantid::API::IFunction_sptr getFunction() override;

@@ -14,8 +14,7 @@ using namespace Mantid::Geometry;
 using namespace boost::python;
 
 namespace {
-boost::python::list createSymOps(SymmetryOperationFactoryImpl &self,
-                                 const std::string &identifiers) {
+boost::python::list createSymOps(SymmetryOperationFactoryImpl &self, const std::string &identifiers) {
   std::vector<SymmetryOperation> symOps = self.createSymOps(identifiers);
 
   boost::python::list pythonOperations;
@@ -28,22 +27,17 @@ boost::python::list createSymOps(SymmetryOperationFactoryImpl &self,
 } // namespace
 
 void export_SymmetryOperationFactory() {
-  class_<SymmetryOperationFactoryImpl, boost::noncopyable>(
-      "SymmetryOperationFactoryImpl", no_init)
-      .def("exists", &SymmetryOperationFactoryImpl::isSubscribed,
-           (arg("self"), arg("identifier")),
+  class_<SymmetryOperationFactoryImpl, boost::noncopyable>("SymmetryOperationFactoryImpl", no_init)
+      .def("exists", &SymmetryOperationFactoryImpl::isSubscribed, (arg("self"), arg("identifier")),
            "Returns true if the symmetry operation is supplied.")
-      .def("createSymOp", &SymmetryOperationFactoryImpl::createSymOp,
-           (arg("self"), arg("identifier")),
+      .def("createSymOp", &SymmetryOperationFactoryImpl::createSymOp, (arg("self"), arg("identifier")),
            "Creates the symmetry operation from the supplied x,y,z-identifier.")
       .def("createSymOps", &createSymOps, (arg("self"), arg("identifier")),
            "Creates a vector of SymmetryOperation objects from a semi-colon "
            "separated list of x,y,z-identifiers.")
-      .def("subscribedSymbols",
-           &SymmetryOperationFactoryImpl::subscribedSymbols, arg("self"),
+      .def("subscribedSymbols", &SymmetryOperationFactoryImpl::subscribedSymbols, arg("self"),
            "Return all subscribed symbols.")
-      .def("Instance", &SymmetryOperationFactory::Instance,
-           return_value_policy<reference_existing_object>(),
+      .def("Instance", &SymmetryOperationFactory::Instance, return_value_policy<reference_existing_object>(),
            "Returns a reference to the SymmetryOperationFactory singleton")
       .staticmethod("Instance");
 }

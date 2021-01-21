@@ -24,8 +24,7 @@ QPalette getFitStatusColor(const std::string &status) {
     statusPalette.setColor(QPalette::WindowText, Qt::green);
   } else if (status.find(FitStatusStrings::FAILED) != std::string::npos) {
     statusPalette.setColor(QPalette::WindowText, Qt::red);
-  } else if (status.find(FitStatusStrings::CHANGESTOOSMALL) !=
-             std::string::npos) {
+  } else if (status.find(FitStatusStrings::CHANGESTOOSMALL) != std::string::npos) {
     statusPalette.setColor(QPalette::WindowText, QColor(255, 165, 0));
   } else {
     statusPalette.setColor(QPalette::WindowText, Qt::black);
@@ -61,8 +60,7 @@ FitStatusWidget::FitStatusWidget(QWidget *parent) : QWidget(parent) {
   setLayout(fitInformationLayout);
 }
 
-void FitStatusWidget::update(const std::string &status,
-                             const double chiSquared) {
+void FitStatusWidget::update(const std::string &status, const double chiSquared) {
   setFitStatus(status);
   setFitChiSquared(chiSquared);
   show();

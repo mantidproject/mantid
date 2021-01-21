@@ -34,8 +34,7 @@
 #include <QSpinBox>
 #include <QStackedWidget>
 
-SurfaceDialog::SurfaceDialog(QWidget *parent, const Qt::WFlags &fl)
-    : QDialog(parent, fl) {
+SurfaceDialog::SurfaceDialog(QWidget *parent, const Qt::WFlags &fl) : QDialog(parent, fl) {
   setObjectName("SurfaceDialog");
   setWindowTitle(tr("MantidPlot - Define surface plot"));
   setSizeGripEnabled(true);
@@ -80,8 +79,7 @@ SurfaceDialog::SurfaceDialog(QWidget *parent, const Qt::WFlags &fl)
   d_graph = nullptr;
   setFocusProxy(boxFunction);
 
-  connect(boxType, SIGNAL(activated(int)), optionStack,
-          SLOT(setCurrentIndex(int)));
+  connect(boxType, SIGNAL(activated(int)), optionStack, SLOT(setCurrentIndex(int)));
   connect(buttonClear, SIGNAL(clicked()), this, SLOT(clearList()));
   connect(buttonOk, SIGNAL(clicked()), this, SLOT(accept()));
   connect(buttonCancel, SIGNAL(clicked()), this, SLOT(reject()));
@@ -303,8 +301,7 @@ void SurfaceDialog::acceptParametricSurface() {
     parser.SetExpr(x_formula.toAscii().constData());
     parser.Eval();
   } catch (mu::ParserError &e) {
-    QMessageBox::critical(app, tr("MantidPlot - X Formula Error"),
-                          QString::fromStdString(e.GetMsg()));
+    QMessageBox::critical(app, tr("MantidPlot - X Formula Error"), QString::fromStdString(e.GetMsg()));
     boxX->setFocus();
     return;
   }
@@ -319,8 +316,7 @@ void SurfaceDialog::acceptParametricSurface() {
     parser.SetExpr(y_formula.toAscii().constData());
     parser.Eval();
   } catch (mu::ParserError &e) {
-    QMessageBox::critical(app, tr("MantidPlot - Y Formula Error"),
-                          QString::fromStdString(e.GetMsg()));
+    QMessageBox::critical(app, tr("MantidPlot - Y Formula Error"), QString::fromStdString(e.GetMsg()));
     boxY->setFocus();
     return;
   }
@@ -335,8 +331,7 @@ void SurfaceDialog::acceptParametricSurface() {
     parser.SetExpr(z_formula.toAscii().constData());
     parser.Eval();
   } catch (mu::ParserError &e) {
-    QMessageBox::critical(app, tr("MantidPlot - Z Formula Error"),
-                          QString::fromStdString(e.GetMsg()));
+    QMessageBox::critical(app, tr("MantidPlot - Z Formula Error"), QString::fromStdString(e.GetMsg()));
     boxZ->setFocus();
     return;
   }
@@ -355,8 +350,7 @@ void SurfaceDialog::acceptParametricSurface() {
     parser.SetExpr(ufrom.toAscii().constData());
     ul = parser.Eval();
   } catch (mu::ParserError &e) {
-    QMessageBox::critical(app, tr("MantidPlot - u start limit error"),
-                          QString::fromStdString(e.GetMsg()));
+    QMessageBox::critical(app, tr("MantidPlot - u start limit error"), QString::fromStdString(e.GetMsg()));
     boxUFrom->setFocus();
     return;
   }
@@ -365,8 +359,7 @@ void SurfaceDialog::acceptParametricSurface() {
     parser.SetExpr(uto.toAscii().constData());
     ur = parser.Eval();
   } catch (mu::ParserError &e) {
-    QMessageBox::critical(app, tr("MantidPlot - u end limit error"),
-                          QString::fromStdString(e.GetMsg()));
+    QMessageBox::critical(app, tr("MantidPlot - u end limit error"), QString::fromStdString(e.GetMsg()));
     boxUTo->setFocus();
     return;
   }
@@ -375,8 +368,7 @@ void SurfaceDialog::acceptParametricSurface() {
     parser.SetExpr(vfrom.toAscii().constData());
     vl = parser.Eval();
   } catch (mu::ParserError &e) {
-    QMessageBox::critical(app, tr("MantidPlot - v start limit error"),
-                          QString::fromStdString(e.GetMsg()));
+    QMessageBox::critical(app, tr("MantidPlot - v start limit error"), QString::fromStdString(e.GetMsg()));
     boxVFrom->setFocus();
     return;
   }
@@ -385,21 +377,18 @@ void SurfaceDialog::acceptParametricSurface() {
     parser.SetExpr(vto.toAscii().constData());
     vr = parser.Eval();
   } catch (mu::ParserError &e) {
-    QMessageBox::critical(app, tr("MantidPlot - u end limit error"),
-                          QString::fromStdString(e.GetMsg()));
+    QMessageBox::critical(app, tr("MantidPlot - u end limit error"), QString::fromStdString(e.GetMsg()));
     boxVTo->setFocus();
     return;
   }
 
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
   if (!d_graph)
-    app->plotParametricSurface(
-        x_formula, y_formula, z_formula, ul, ur, vl, vr, boxColumns->value(),
-        boxRows->value(), boxUPeriodic->isChecked(), boxVPeriodic->isChecked());
+    app->plotParametricSurface(x_formula, y_formula, z_formula, ul, ur, vl, vr, boxColumns->value(), boxRows->value(),
+                               boxUPeriodic->isChecked(), boxVPeriodic->isChecked());
   else
-    d_graph->addParametricSurface(
-        x_formula, y_formula, z_formula, ul, ur, vl, vr, boxColumns->value(),
-        boxRows->value(), boxUPeriodic->isChecked(), boxVPeriodic->isChecked());
+    d_graph->addParametricSurface(x_formula, y_formula, z_formula, ul, ur, vl, vr, boxColumns->value(),
+                                  boxRows->value(), boxUPeriodic->isChecked(), boxVPeriodic->isChecked());
   QApplication::restoreOverrideCursor();
   close();
 }
@@ -420,8 +409,7 @@ void SurfaceDialog::acceptFunction() {
     parser.SetExpr(Xfrom.toAscii().constData());
     fromX = parser.Eval();
   } catch (mu::ParserError &e) {
-    QMessageBox::critical(app, tr("MantidPlot - X Start limit error"),
-                          QString::fromStdString(e.GetMsg()));
+    QMessageBox::critical(app, tr("MantidPlot - X Start limit error"), QString::fromStdString(e.GetMsg()));
     boxXFrom->setFocus();
     return;
   }
@@ -430,8 +418,7 @@ void SurfaceDialog::acceptFunction() {
     parser.SetExpr(Xto.toAscii().constData());
     toX = parser.Eval();
   } catch (mu::ParserError &e) {
-    QMessageBox::critical(app, tr("MantidPlot - X End limit error"),
-                          QString::fromStdString(e.GetMsg()));
+    QMessageBox::critical(app, tr("MantidPlot - X End limit error"), QString::fromStdString(e.GetMsg()));
     boxXTo->setFocus();
     return;
   }
@@ -441,8 +428,7 @@ void SurfaceDialog::acceptFunction() {
     parser.SetExpr(Yfrom.toAscii().constData());
     fromY = parser.Eval();
   } catch (mu::ParserError &e) {
-    QMessageBox::critical(app, tr("MantidPlot - Y Start limit error"),
-                          QString::fromStdString(e.GetMsg()));
+    QMessageBox::critical(app, tr("MantidPlot - Y Start limit error"), QString::fromStdString(e.GetMsg()));
     boxYFrom->setFocus();
     return;
   }
@@ -451,8 +437,7 @@ void SurfaceDialog::acceptFunction() {
     parser.SetExpr(Yto.toAscii().constData());
     toY = parser.Eval();
   } catch (mu::ParserError &e) {
-    QMessageBox::critical(app, tr("MantidPlot - Y End limit error"),
-                          QString::fromStdString(e.GetMsg()));
+    QMessageBox::critical(app, tr("MantidPlot - Y End limit error"), QString::fromStdString(e.GetMsg()));
     boxYTo->setFocus();
     return;
   }
@@ -461,8 +446,7 @@ void SurfaceDialog::acceptFunction() {
     parser.SetExpr(Zfrom.toAscii().constData());
     fromZ = parser.Eval();
   } catch (mu::ParserError &e) {
-    QMessageBox::critical(app, tr("MantidPlot - Z Start limit error"),
-                          QString::fromStdString(e.GetMsg()));
+    QMessageBox::critical(app, tr("MantidPlot - Z Start limit error"), QString::fromStdString(e.GetMsg()));
     boxZFrom->setFocus();
     return;
   }
@@ -471,15 +455,13 @@ void SurfaceDialog::acceptFunction() {
     parser.SetExpr(Zto.toAscii().constData());
     toZ = parser.Eval();
   } catch (mu::ParserError &e) {
-    QMessageBox::critical(app, tr("MantidPlot - Z End limit error"),
-                          QString::fromStdString(e.GetMsg()));
+    QMessageBox::critical(app, tr("MantidPlot - Z End limit error"), QString::fromStdString(e.GetMsg()));
     boxZTo->setFocus();
     return;
   }
 
   if (fromX >= toX || fromY >= toY || fromZ >= toZ) {
-    QMessageBox::critical(app, tr("MantidPlot - Input error"),
-                          tr("Please enter limits that satisfy: from < end!"));
+    QMessageBox::critical(app, tr("MantidPlot - Input error"), tr("Please enter limits that satisfy: from < end!"));
     boxXTo->setFocus();
     return;
   }
@@ -499,8 +481,7 @@ void SurfaceDialog::acceptFunction() {
     y = toY;
     parser.Eval();
   } catch (mu::ParserError &e) {
-    QMessageBox::critical(nullptr, tr("MantidPlot - Input function error"),
-                          QString::fromStdString(e.GetMsg()));
+    QMessageBox::critical(nullptr, tr("MantidPlot - Input function error"), QString::fromStdString(e.GetMsg()));
     boxFunction->setFocus();
     error = true;
   }
@@ -508,12 +489,10 @@ void SurfaceDialog::acceptFunction() {
   if (!error) {
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
     if (!d_graph) {
-      app->plotSurface(boxFunction->currentText(), fromX, toX, fromY, toY,
-                       fromZ, toZ, boxFuncColumns->value(),
+      app->plotSurface(boxFunction->currentText(), fromX, toX, fromY, toY, fromZ, toZ, boxFuncColumns->value(),
                        boxFuncRows->value());
     } else
-      d_graph->addFunction(boxFunction->currentText(), fromX, toX, fromY, toY,
-                           fromZ, toZ, boxFuncColumns->value(),
+      d_graph->addFunction(boxFunction->currentText(), fromX, toX, fromY, toY, fromZ, toZ, boxFuncColumns->value(),
                            boxFuncRows->value());
 
     app->updateSurfaceFuncList(boxFunction->currentText());

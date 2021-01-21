@@ -46,8 +46,7 @@ namespace DataHandling {
 DECLARE_ALGORITHM(LoadNexusMonitors2)
 
 namespace {
-void loadSampleDataISIScompatibilityInfo(
-    ::NeXus::File &file, Mantid::API::MatrixWorkspace_sptr const &WS) {
+void loadSampleDataISIScompatibilityInfo(::NeXus::File &file, Mantid::API::MatrixWorkspace_sptr const &WS) {
   try {
     file.openGroup("isis_vms_compat", "IXvms");
   } catch (::NeXus::Exception &) {
@@ -62,8 +61,7 @@ void loadSampleDataISIScompatibilityInfo(
     file.readData("SPB", spb);
     file.readData("RSPB", rspb);
 
-    WS->mutableSample().setGeometryFlag(
-        spb[2]); // the flag is in the third value
+    WS->mutableSample().setGeometryFlag(spb[2]); // the flag is in the third value
     WS->mutableSample().setThickness(rspb[3]);
     WS->mutableSample().setHeight(rspb[4]);
     WS->mutableSample().setWidth(rspb[5]);
@@ -82,8 +80,7 @@ const std::string LOAD_EVENTS("Events");
 const std::string LOAD_HISTO("Histogram");
 
 // collection of static methods to inspect monitors to determine type
-bool keyExists(std::string const &key,
-               std::map<std::string, std::string> const &entries) {
+bool keyExists(std::string const &key, std::map<std::string, std::string> const &entries) {
   return entries.find(key) != entries.cend();
 }
 
@@ -94,16 +91,14 @@ bool isHistoMonitor(::NeXus::File &monitorFileHandle) {
   return keyExists("data", fields) && keyExists("time_of_flight", fields);
 }
 
-std::size_t sizeOfUnopenedSDS(::NeXus::File &file,
-                              const std::string &fieldName) {
+std::size_t sizeOfUnopenedSDS(::NeXus::File &file, const std::string &fieldName) {
   file.openData(fieldName);
   auto size = static_cast<std::size_t>(file.getInfo().dims[0]);
   file.closeData();
   return size;
 }
 
-bool eventIdNotEmptyIfExists(::NeXus::File &file,
-                             std::map<std::string, std::string> const &fields) {
+bool eventIdNotEmptyIfExists(::NeXus::File &file, std::map<std::string, std::string> const &fields) {
   if (keyExists("event_id", fields))
     return sizeOfUnopenedSDS(file, "event_id") > 1;
   else
@@ -114,35 +109,27 @@ bool eventIdNotEmptyIfExists(::NeXus::File &file,
 // the currently open group
 bool isEventMonitor(::NeXus::File &file) {
   const auto fields = file.getEntries();
-  return keyExists("event_index", fields) &&
-         keyExists("event_time_offset", fields) &&
-         keyExists("event_time_zero", fields) &&
-         eventIdNotEmptyIfExists(file, fields);
+  return keyExists("event_index", fields) && keyExists("event_time_offset", fields) &&
+         keyExists("event_time_zero", fields) && eventIdNotEmptyIfExists(file, fields);
 }
 } // anonymous namespace
 
 //------------------------------------------------------------------------------
 /// Initialization method.
 void LoadNexusMonitors2::init() {
-  declareProperty(
-      std::make_unique<API::FileProperty>("Filename", "",
-                                          API::FileProperty::Load, ".nxs"),
-      "The name (including its full or relative path) of the NeXus file to "
-      "attempt to load. The file extension must either be .nxs or .NXS");
+  declareProperty(std::make_unique<API::FileProperty>("Filename", "", API::FileProperty::Load, ".nxs"),
+                  "The name (including its full or relative path) of the NeXus file to "
+                  "attempt to load. The file extension must either be .nxs or .NXS");
 
   declareProperty(
-      std::make_unique<API::WorkspaceProperty<API::Workspace>>(
-          "OutputWorkspace", "", Kernel::Direction::Output),
+      std::make_unique<API::WorkspaceProperty<API::Workspace>>("OutputWorkspace", "", Kernel::Direction::Output),
       "The name of the output workspace in which to load the NeXus monitors.");
 
-  declareProperty(
-      std::make_unique<Kernel::PropertyWithValue<std::string>>(
-          "NXentryName", "", Kernel::Direction::Input),
-      "Optional: Name of the NXentry to load if it's not the default.");
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<std::string>>("NXentryName", "", Kernel::Direction::Input),
+                  "Optional: Name of the NXentry to load if it's not the default.");
 
   std::vector<std::string> options{"", LOAD_EVENTS, LOAD_HISTO};
-  declareProperty("LoadOnly", "",
-                  std::make_shared<Kernel::StringListValidator>(options),
+  declareProperty("LoadOnly", "", std::make_shared<Kernel::StringListValidator>(options),
                   "If multiple repesentations exist, which one to load. "
                   "Default is to load the one that is present, and Histogram "
                   "if both are present.");
@@ -160,8 +147,7 @@ void LoadNexusMonitors2::exec() {
   API::Progress prog1(this, 0.0, 0.2, 2);
 
   if (!canOpenAsNeXus(m_filename)) {
-    throw std::runtime_error(
-        "Failed to recognize this file as a NeXus file, cannot continue.");
+    throw std::runtime_error("Failed to recognize this file as a NeXus file, cannot continue.");
   }
 
   m_top_entry_name = this->getPropertyValue("NXentryName");
@@ -179,8 +165,7 @@ void LoadNexusMonitors2::exec() {
 
   if (m_top_entry_name.empty()) {
     for (it = entries.begin(); it != entries.end(); ++it) {
-      if (((it->first == "entry") || (it->first == "raw_data_1")) &&
-          (it->second == "NXentry")) {
+      if (((it->first == "entry") || (it->first == "raw_data_1")) && (it->second == "NXentry")) {
         file.openGroup(it->first, it->second);
         m_top_entry_name = it->first;
         break;
@@ -188,8 +173,7 @@ void LoadNexusMonitors2::exec() {
     }
   } else {
     if (!keyExists(m_top_entry_name, entries)) {
-      throw std::invalid_argument(
-          m_filename + " does not contain an entry named " + m_top_entry_name);
+      throw std::invalid_argument(m_filename + " does not contain an entry named " + m_top_entry_name);
     }
     file.openGroup(m_top_entry_name, "NXentry"); // Open as will need to be
     // open for subsequent operations
@@ -233,10 +217,8 @@ void LoadNexusMonitors2::exec() {
     // already know spectrum and detector numbers
     g_log.debug() << "monIndex = " << m_monitorInfo[ws_index].detNum << '\n';
     g_log.debug() << "spectrumNo = " << m_monitorInfo[ws_index].specNum << '\n';
-    m_workspace->getSpectrum(ws_index).setSpectrumNo(
-        m_monitorInfo[ws_index].specNum);
-    m_workspace->getSpectrum(ws_index).setDetectorID(
-        m_monitorInfo[ws_index].detNum);
+    m_workspace->getSpectrum(ws_index).setSpectrumNo(m_monitorInfo[ws_index].specNum);
+    m_workspace->getSpectrum(ws_index).setDetectorID(m_monitorInfo[ws_index].detNum);
 
     // Don't actually read all of the monitors
     g_log.information() << "Loading " << m_monitorInfo[ws_index].name;
@@ -260,8 +242,7 @@ void LoadNexusMonitors2::exec() {
 
   if (useEventMon) // set the x-range to be the range for min/max events
   {
-    EventWorkspace_sptr eventWS =
-        std::dynamic_pointer_cast<EventWorkspace>(m_workspace);
+    EventWorkspace_sptr eventWS = std::dynamic_pointer_cast<EventWorkspace>(m_workspace);
     double xmin, xmax;
     eventWS->getEventXMinMax(xmin, xmax);
 
@@ -303,11 +284,9 @@ void LoadNexusMonitors2::exec() {
     file.close();
   }
 
-  g_log.debug() << "Instrument name read from NeXus file is " << instrumentName
-                << '\n';
+  g_log.debug() << "Instrument name read from NeXus file is " << instrumentName << '\n';
 
-  m_workspace->getAxis(0)->unit() =
-      Kernel::UnitFactory::Instance().create("TOF");
+  m_workspace->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("TOF");
   m_workspace->setYUnit("Counts");
 
   // Load the logs
@@ -318,21 +297,18 @@ void LoadNexusMonitors2::exec() {
     // The run_start will be loaded from the pulse times.
     Types::Core::DateAndTime run_start(0, 0);
     run_start = m_workspace->getFirstPulseTime();
-    m_workspace->mutableRun().addProperty("run_start",
-                                          run_start.toISO8601String(), true);
+    m_workspace->mutableRun().addProperty("run_start", run_start.toISO8601String(), true);
   } catch (...) {
     // Old files have the start_time defined, so all SHOULD be good.
     // The start_time, however, has been known to be wrong in old files.
   }
   // Load the instrument
-  LoadEventNexus::loadInstrument(m_filename, m_workspace, m_top_entry_name,
-                                 this);
+  LoadEventNexus::loadInstrument(m_filename, m_workspace, m_top_entry_name, this);
 
   // Load the meta data, but don't stop on errors
   g_log.debug() << "Loading metadata\n";
   try {
-    LoadEventNexus::loadEntryMetadata<API::MatrixWorkspace_sptr>(
-        m_filename, m_workspace, m_top_entry_name, descriptor);
+    LoadEventNexus::loadEntryMetadata<API::MatrixWorkspace_sptr>(m_filename, m_workspace, m_top_entry_name, descriptor);
   } catch (std::exception &e) {
     g_log.warning() << "Error while loading meta data: " << e.what() << '\n';
   }
@@ -388,8 +364,7 @@ void LoadNexusMonitors2::fixUDets(::NeXus::File &file) {
   // to the index within the UDET block that holds the detector ID
   std::vector<int32_t>::const_iterator beg = spec.begin();
   for (size_t mon_index = 0; mon_index < nmonitors; ++mon_index) {
-    std::vector<int32_t>::const_iterator itr =
-        std::find(spec.begin(), spec.end(), spec_ids[mon_index]);
+    std::vector<int32_t>::const_iterator itr = std::find(spec.begin(), spec.end(), spec_ids[mon_index]);
     if (itr == spec.end()) {
       det_ids[mon_index] = -1;
       continue;
@@ -406,9 +381,7 @@ void LoadNexusMonitors2::fixUDets(::NeXus::File &file) {
   }
 }
 
-void LoadNexusMonitors2::runLoadLogs(
-    const std::string &filename,
-    const API::MatrixWorkspace_sptr &localWorkspace) {
+void LoadNexusMonitors2::runLoadLogs(const std::string &filename, const API::MatrixWorkspace_sptr &localWorkspace) {
   // do the actual work
   API::IAlgorithm_sptr loadLogs = createChildAlgorithm("LoadNexusLogs");
 
@@ -416,8 +389,7 @@ void LoadNexusMonitors2::runLoadLogs(
   try {
     g_log.information() << "Loading logs from NeXus file...\n";
     loadLogs->setPropertyValue("Filename", filename);
-    loadLogs->setProperty<API::MatrixWorkspace_sptr>("Workspace",
-                                                     localWorkspace);
+    loadLogs->setProperty<API::MatrixWorkspace_sptr>("Workspace", localWorkspace);
     loadLogs->execute();
   } catch (...) {
     g_log.error() << "Error while loading Logs from Nexus. Some sample logs "
@@ -440,8 +412,7 @@ bool LoadNexusMonitors2::canOpenAsNeXus(const std::string &fname) {
     if (filePointer)
       filePointer->getEntries();
   } catch (::NeXus::Exception &e) {
-    g_log.error() << "Failed to open as a NeXus file: '" << fname
-                  << "', error description: " << e.what() << '\n';
+    g_log.error() << "Failed to open as a NeXus file: '" << fname << "', error description: " << e.what() << '\n';
     res = false;
   }
   return res;
@@ -454,24 +425,21 @@ bool LoadNexusMonitors2::canOpenAsNeXus(const std::string &fname) {
  *
  * @param numPeriods :: number of periods
  **/
-void LoadNexusMonitors2::splitMutiPeriodHistrogramData(
-    const size_t numPeriods) {
+void LoadNexusMonitors2::splitMutiPeriodHistrogramData(const size_t numPeriods) {
   // protection - we should not have entered the routine if these are not true
   // More than 1 period
   if (numPeriods < 2) {
-    g_log.warning()
-        << "Attempted to split multiperiod histogram workspace with "
-        << numPeriods << "periods, aborted.\n";
+    g_log.warning() << "Attempted to split multiperiod histogram workspace with " << numPeriods
+                    << "periods, aborted.\n";
     return;
   }
 
   // Y array should be divisible by the number of periods
   if (m_multiPeriodCounts[0].size() % numPeriods != 0) {
-    g_log.warning()
-        << "Attempted to split multiperiod histogram workspace with "
-        << m_multiPeriodCounts[0].size() << "data entries, into " << numPeriods
-        << "periods."
-           " Aborted.\n";
+    g_log.warning() << "Attempted to split multiperiod histogram workspace with " << m_multiPeriodCounts[0].size()
+                    << "data entries, into " << numPeriods
+                    << "periods."
+                       " Aborted.\n";
     return;
   }
 
@@ -486,21 +454,18 @@ void LoadNexusMonitors2::splitMutiPeriodHistrogramData(
   for (size_t i = 0; i < numPeriods; i++) {
     // create the period workspace
     API::MatrixWorkspace_sptr wsPeriod =
-        API::WorkspaceFactory::Instance().create(m_workspace, numSpectra,
-                                                 xLength, yLength);
+        API::WorkspaceFactory::Instance().create(m_workspace, numSpectra, xLength, yLength);
 
     auto offset = yLength * i;
 
     for (size_t wsIndex = 0; wsIndex < numSpectra; wsIndex++) {
       auto inYBegin = m_multiPeriodCounts[wsIndex].cbegin() + offset;
 
-      wsPeriod->setHistogram(wsIndex, edges,
-                             Counts(inYBegin, inYBegin + yLength));
+      wsPeriod->setHistogram(wsIndex, edges, Counts(inYBegin, inYBegin + yLength));
     }
     // add period logs
     monLogCreator.addStatusLog(wsPeriod->mutableRun());
-    monLogCreator.addPeriodLogs(static_cast<int>(i + 1),
-                                wsPeriod->mutableRun());
+    monLogCreator.addPeriodLogs(static_cast<int>(i + 1), wsPeriod->mutableRun());
 
     // add to workspace group
     wsGroup->addWorkspace(wsPeriod);
@@ -510,8 +475,7 @@ void LoadNexusMonitors2::splitMutiPeriodHistrogramData(
   this->setProperty("OutputWorkspace", wsGroup);
 }
 
-size_t LoadNexusMonitors2::getMonitorInfo(::NeXus::File &file,
-                                          size_t &numPeriods) {
+size_t LoadNexusMonitors2::getMonitorInfo(::NeXus::File &file, size_t &numPeriods) {
   // should already be open to the correct NXentry
 
   m_monitorInfo.clear();
@@ -544,8 +508,7 @@ size_t LoadNexusMonitors2::getMonitorInfo(::NeXus::File &file,
       string_map_t inner_entries = file.getEntries(); // get list of entries
       if (inner_entries.find("monitor_number") != inner_entries.end()) {
         // get monitor number from field in file
-        const auto detNum = NeXus::NeXusIOHelper::readNexusValue<int64_t>(
-            file, "monitor_number");
+        const auto detNum = NeXus::NeXusIOHelper::readNexusValue<int64_t>(file, "monitor_number");
         if (detNum > std::numeric_limits<detid_t>::max()) {
           throw std::runtime_error("Monitor number too larger to represent");
         }
@@ -563,8 +526,7 @@ size_t LoadNexusMonitors2::getMonitorInfo(::NeXus::File &file,
           loc = monitorName.rfind('r');
         }
 
-        info.detNum = -1 * boost::lexical_cast<int>(
-                               monitorName.substr(loc + 1)); // SNS default
+        info.detNum = -1 * boost::lexical_cast<int>(monitorName.substr(loc + 1)); // SNS default
       }
 
       // get the spectrum number
@@ -577,8 +539,7 @@ size_t LoadNexusMonitors2::getMonitorInfo(::NeXus::File &file,
         info.specNum = std::abs(info.detNum);
       }
 
-      if (info.hasHisto && (numPeriods == 0) &&
-          (inner_entries.find("period_index") != inner_entries.end())) {
+      if (info.hasHisto && (numPeriods == 0) && (inner_entries.find("period_index") != inner_entries.end())) {
         MantidVec period_data;
         file.openData("period_index");
         file.getDataCoerce(period_data);
@@ -594,48 +555,42 @@ size_t LoadNexusMonitors2::getMonitorInfo(::NeXus::File &file,
 
   // sort based on the absolute value of the monitor number
   // this takes care of the fact that SNS monitors have negative numbers
-  std::sort(m_monitorInfo.begin(), m_monitorInfo.end(),
-            [](const MonitorInfo &left, const MonitorInfo &right) {
-              return std::abs(left.detNum) < std::abs(right.detNum);
-            });
+  std::sort(m_monitorInfo.begin(), m_monitorInfo.end(), [](const MonitorInfo &left, const MonitorInfo &right) {
+    return std::abs(left.detNum) < std::abs(right.detNum);
+  });
 
   return m_monitorInfo.size();
 }
 
-bool LoadNexusMonitors2::createOutputWorkspace(
-    std::vector<bool> &loadMonitorFlags) {
+bool LoadNexusMonitors2::createOutputWorkspace(std::vector<bool> &loadMonitorFlags) {
   loadMonitorFlags.clear();
 
   size_t numEventMon =
-      std::count_if(m_monitorInfo.begin(), m_monitorInfo.end(),
-                    [](const MonitorInfo &info) { return info.hasEvent; });
+      std::count_if(m_monitorInfo.begin(), m_monitorInfo.end(), [](const MonitorInfo &info) { return info.hasEvent; });
   size_t numHistoMon =
-      std::count_if(m_monitorInfo.begin(), m_monitorInfo.end(),
-                    [](const MonitorInfo &info) { return info.hasHisto; });
+      std::count_if(m_monitorInfo.begin(), m_monitorInfo.end(), [](const MonitorInfo &info) { return info.hasHisto; });
 
   bool useEventMon; // which type of workspace to create/is created
   const std::string loadType = getProperty("LoadOnly");
   if (loadType == LOAD_EVENTS) {
     useEventMon = true;
     if (numEventMon == 0) { // make sure there are some
-      throw std::runtime_error(
-          "Loading event data. Trying to load event data but failed to "
-          "find event monitors. This file may be corrupted or it may not be "
-          "supported");
+      throw std::runtime_error("Loading event data. Trying to load event data but failed to "
+                               "find event monitors. This file may be corrupted or it may not be "
+                               "supported");
     }
   } else if (loadType == LOAD_HISTO) {
     useEventMon = false;
     if (numHistoMon == 0) { // make sure there are some
-      throw std::runtime_error(
-          "Not loading event data. Trying to load histogram data but failed to "
-          "find monitors with histogram data or could not interpret the data. "
-          "This file may be corrupted or it may not be supported");
+      throw std::runtime_error("Not loading event data. Trying to load histogram data but failed to "
+                               "find monitors with histogram data or could not interpret the data. "
+                               "This file may be corrupted or it may not be supported");
     }
   } else { // only other option is to go with the default
     if (numEventMon > 0 && numHistoMon > 0) {
       std::stringstream errmsg;
-      errmsg << "There are " << numHistoMon << " histogram monitors and "
-             << numEventMon << " event monitors. Loading Histogram by default. "
+      errmsg << "There are " << numHistoMon << " histogram monitors and " << numEventMon
+             << " event monitors. Loading Histogram by default. "
              << "Use \"LoadOnly\" or \"MonitorLoadOnly\" to specify which to "
                 "load.";
       m_log.warning(errmsg.str());
@@ -668,45 +623,37 @@ bool LoadNexusMonitors2::createOutputWorkspace(
     eventWS->initialize(m_monitorInfo.size(), 1, 1);
 
     // Set the units
-    eventWS->getAxis(0)->unit() =
-        Mantid::Kernel::UnitFactory::Instance().create("TOF");
+    eventWS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("TOF");
     eventWS->setYUnit("Counts");
     m_workspace = eventWS;
   } else { // only other option is histograms
     // Use histogram monitors and event monitors' histogram data.
     // And thus create a Workspace2D.
 
-    m_workspace = API::WorkspaceFactory::Instance().create(
-        "Workspace2D", m_monitorInfo.size(), 2, 1);
+    m_workspace = API::WorkspaceFactory::Instance().create("Workspace2D", m_monitorInfo.size(), 2, 1);
   }
 
   return useEventMon;
 }
 
-void LoadNexusMonitors2::readEventMonitorEntry(::NeXus::File &file,
-                                               size_t ws_index) {
+void LoadNexusMonitors2::readEventMonitorEntry(::NeXus::File &file, size_t ws_index) {
   // setup local variables
-  EventWorkspace_sptr eventWS =
-      std::dynamic_pointer_cast<EventWorkspace>(m_workspace);
+  EventWorkspace_sptr eventWS = std::dynamic_pointer_cast<EventWorkspace>(m_workspace);
   std::string tof_units, event_time_zero_units;
 
   // read in the data
-  auto event_index =
-      NeXus::NeXusIOHelper::readNexusVector<uint64_t>(file, "event_index");
+  auto event_index = NeXus::NeXusIOHelper::readNexusVector<uint64_t>(file, "event_index");
 
   file.openData("event_time_offset"); // time of flight
-  MantidVec time_of_flight =
-      NeXus::NeXusIOHelper::readNexusVector<double>(file);
+  MantidVec time_of_flight = NeXus::NeXusIOHelper::readNexusVector<double>(file);
   file.getAttr("units", tof_units);
-  Kernel::Units::timeConversionVector(time_of_flight, tof_units,
-                                      "microseconds");
+  Kernel::Units::timeConversionVector(time_of_flight, tof_units, "microseconds");
   file.closeData();
 
   file.openData("event_time_zero"); // pulse time
   MantidVec seconds = NeXus::NeXusIOHelper::readNexusVector<double>(file);
   file.getAttr("units", event_time_zero_units);
-  Kernel::Units::timeConversionVector(seconds, event_time_zero_units,
-                                      "seconds");
+  Kernel::Units::timeConversionVector(seconds, event_time_zero_units, "seconds");
   Mantid::Types::Core::DateAndTime pulsetime_offset;
   {
     std::string startTime;
@@ -725,8 +672,7 @@ void LoadNexusMonitors2::readEventMonitorEntry(::NeXus::File &file,
   size_t pulse_index(0);
   size_t numPulses = seconds.size();
   for (std::size_t j = 0; j < numEvents; ++j) {
-    while (!((j >= event_index[pulse_index]) &&
-             (j < event_index[pulse_index + 1]))) {
+    while (!((j >= event_index[pulse_index]) && (j < event_index[pulse_index + 1]))) {
       pulse_index += 1;
       if (pulse_index > (numPulses + 1))
         break;
@@ -737,16 +683,13 @@ void LoadNexusMonitors2::readEventMonitorEntry(::NeXus::File &file,
     if (pulsetime < lastpulsetime)
       pulsetimesincreasing = false;
     lastpulsetime = pulsetime;
-    event_list.addEventQuickly(
-        Types::Event::TofEvent(time_of_flight[j], pulsetime));
+    event_list.addEventQuickly(Types::Event::TofEvent(time_of_flight[j], pulsetime));
   }
   if (pulsetimesincreasing)
     event_list.setSortOrder(DataObjects::PULSETIME_SORT);
 }
 
-void LoadNexusMonitors2::readHistoMonitorEntry(::NeXus::File &file,
-                                               size_t ws_index,
-                                               size_t numPeriods) {
+void LoadNexusMonitors2::readHistoMonitorEntry(::NeXus::File &file, size_t ws_index, size_t numPeriods) {
   // Now, actually retrieve the necessary data
   file.openData("data");
   MantidVec data;
@@ -763,8 +706,7 @@ void LoadNexusMonitors2::readHistoMonitorEntry(::NeXus::File &file,
     m_multiPeriodBinEdges[ws_index] = std::move(tof);
     m_multiPeriodCounts[ws_index] = std::move(data);
   } else {
-    m_workspace->setHistogram(
-        ws_index, Histogram(BinEdges(std::move(tof)), Counts(std::move(data))));
+    m_workspace->setHistogram(ws_index, Histogram(BinEdges(std::move(tof)), Counts(std::move(data))));
   }
 }
 

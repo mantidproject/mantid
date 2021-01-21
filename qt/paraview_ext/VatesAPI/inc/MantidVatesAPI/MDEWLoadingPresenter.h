@@ -43,18 +43,14 @@ protected:
   Common/shared operations and members for all MDEW file-type loading.
   ---------------------------------------------------------------------------*/
   std::unique_ptr<MDLoadingView> m_view;
-  Mantid::Geometry::MDGeometryBuilderXML<Mantid::Geometry::NoDimensionPolicy>
-      xmlBuilder;
+  Mantid::Geometry::MDGeometryBuilderXML<Mantid::Geometry::NoDimensionPolicy> xmlBuilder;
 
   Mantid::Geometry::IMDDimension_sptr tDimension;
 
   std::vector<std::string> axisLabels;
-  virtual void appendMetadata(vtkDataSet *visualDataSet,
-                              const std::string &wsName);
+  virtual void appendMetadata(vtkDataSet *visualDataSet, const std::string &wsName);
   virtual void extractMetadata(const Mantid::API::IMDEventWorkspace &eventWs);
-  virtual bool
-  canLoadFileBasedOnExtension(const std::string &filename,
-                              const std::string &expectedExtension) const;
+  virtual bool canLoadFileBasedOnExtension(const std::string &filename, const std::string &expectedExtension) const;
   virtual bool shouldLoad();
   bool m_isSetup;
   double m_time;

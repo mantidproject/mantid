@@ -119,8 +119,7 @@ private slots:
   void addInstrumentDir();
   void enableButtons();
   void itemCheckedChanged(QTreeWidgetItem *item);
-  void updateChildren(std::map<std::string, std::string> &programKeysAndDetails,
-                      QTreeWidgetItem *program);
+  void updateChildren(std::map<std::string, std::string> &programKeysAndDetails, QTreeWidgetItem *program);
   void addDialog();
   void editDialog();
   void deleteDialog();
@@ -160,15 +159,12 @@ private:
   void updateProgramTree();
 
   // Options Window - Selected Options
-  void
-  buildTreeCategoryStructure(const QString &catNames, const bool isHidden,
-                             QMap<QString, QTreeWidgetItem *> &seenCategories);
-  QTreeWidgetItem *walkBackwardsThroughCategories(
-      const QString &catNames, int elementToCheck,
-      QMap<QString, QTreeWidgetItem *> &seenCategories,
-      Qt::CheckState childTickState);
-  void updateChildTickStatuses(QTreeWidgetItem &widgetPtr,
-                               const Qt::CheckState newState);
+  void buildTreeCategoryStructure(const QString &catNames, const bool isHidden,
+                                  QMap<QString, QTreeWidgetItem *> &seenCategories);
+  QTreeWidgetItem *walkBackwardsThroughCategories(const QString &catNames, int elementToCheck,
+                                                  QMap<QString, QTreeWidgetItem *> &seenCategories,
+                                                  Qt::CheckState childTickState);
+  void updateChildTickStatuses(QTreeWidgetItem &widgetPtr, const Qt::CheckState newState);
   void correctTreePatrialTicks(QTreeWidgetItem &topLevelCat);
 
   // MD Plotting
@@ -178,18 +174,15 @@ private:
   void updateMdPlottingSettings();
   void setupMdPlottingConnections();
 
-  QTreeWidgetItem *createCheckedTreeItem(const QString &name,
-                                         Qt::CheckState checkBoxState);
+  QTreeWidgetItem *createCheckedTreeItem(const QString &name, Qt::CheckState checkBoxState);
   QStringList buildHiddenCategoryString(QTreeWidgetItem *parent = nullptr);
 
   std::map<std::string, std::map<std::string, std::string>> m_sendToSettings;
 
-  QFont textFont, headerFont, axesFont, numbersFont, legendFont, titleFont,
-      appFont;
+  QFont textFont, headerFont, axesFont, numbersFont, legendFont, titleFont, appFont;
   QFont plot3DTitleFont, plot3DNumbersFont, plot3DAxesFont;
 
-  QCheckBox *boxScaleLayersOnPrint, *boxPrintCropmarks, *boxUpdateSeparators,
-      *linearFit2PointsBox;
+  QCheckBox *boxScaleLayersOnPrint, *boxPrintCropmarks, *boxUpdateSeparators, *linearFit2PointsBox;
   QTabWidget *plotsTabWidget, *appTabWidget, *mtdTabWidget;
   ColorButton *btnBackground3D, *btnMesh, *btnAxes, *btnLabels, *btnNumbers;
   ColorButton *btnFromColor, *btnToColor, *btnGrid;
@@ -199,10 +192,8 @@ private:
   QPushButton *buttonOk, *buttonCancel, *buttonApply;
   QPushButton *buttonTextFont, *buttonHeaderFont;
   QStackedWidget *generalDialog;
-  QWidget *appColors, *tables, *plotOptions, *plotTicks, *plotFonts, *confirm,
-      *plotPrint;
-  QWidget *application, *curves, *axesPage, *plots3D, *fitPage,
-      *numericFormatPage, *floatingWindowsPage;
+  QWidget *appColors, *tables, *plotOptions, *plotTicks, *plotFonts, *confirm, *plotPrint;
+  QWidget *application, *curves, *axesPage, *plots3D, *fitPage, *numericFormatPage, *floatingWindowsPage;
   // Mantid
   QWidget *instrumentPage;
   QComboBox *facility;
@@ -244,57 +235,45 @@ private:
   QTabWidget *mdPlottingTabWidget;
   QWidget *vsiPage, *mdPlottingGeneralPage;
   QComboBox *vsiDefaultColorMap, *vsiInitialView, *mdPlottingGeneralColorMap;
-  QLabel *lblVsiDefaultColorMap, *lblVsiDefaultBackground,
-      *lblGeneralDefaultColorMap, *lblBoxGeneralDefaultColorMap,
+  QLabel *lblVsiDefaultColorMap, *lblVsiDefaultBackground, *lblGeneralDefaultColorMap, *lblBoxGeneralDefaultColorMap,
       *lblVsiLastSession, *lblVsiInitialView;
   ColorButton *vsiDefaultBackground;
   QGroupBox *mdPlottingGeneralFrame, *mdPlottingVsiFrameBottom, *vsiAxesColor;
   QCheckBox *vsiLastSession;
   MantidQt::API::MdSettings m_mdSettings;
 
-  QPushButton *buttonAxesFont, *buttonNumbersFont, *buttonLegendFont,
-      *buttonTitleFont, *fontsBtn;
-  QCheckBox *boxSearchUpdates, *boxOrthogonal, *logBox, *plotLabelBox,
-      *scaleErrorsBox;
-  QCheckBox *boxTitle, *boxFrame, *boxDistribution, *boxPlots3D, *boxPlots2D,
-      *boxTables, *boxNotes, *boxFolders, *boxInstrWindow;
+  QPushButton *buttonAxesFont, *buttonNumbersFont, *buttonLegendFont, *buttonTitleFont, *fontsBtn;
+  QCheckBox *boxSearchUpdates, *boxOrthogonal, *logBox, *plotLabelBox, *scaleErrorsBox;
+  QCheckBox *boxTitle, *boxFrame, *boxDistribution, *boxPlots3D, *boxPlots2D, *boxTables, *boxNotes, *boxFolders,
+      *boxInstrWindow;
   QCheckBox *boxSave, *boxBackbones, *boxShowLegend, *boxSmoothMesh;
-  QCheckBox *boxAutoscaling, *boxShowProjection, *boxMatrices, *boxScaleFonts,
-      *boxResize, *boxAspectRatio;
-  QComboBox *boxMajTicks, *boxMinTicks, *boxStyle, *boxCurveStyle,
-      *boxSeparator, *boxLanguage, *boxDecimalSeparator;
-  QCheckBox *boxFloatingGraph, *boxFloatingTable, *boxFloatingInstrumentWindow,
-      *boxFloatingMantidMatrix, *boxFloatingNote, *boxFloatingMatrix;
+  QCheckBox *boxAutoscaling, *boxShowProjection, *boxMatrices, *boxScaleFonts, *boxResize, *boxAspectRatio;
+  QComboBox *boxMajTicks, *boxMinTicks, *boxStyle, *boxCurveStyle, *boxSeparator, *boxLanguage, *boxDecimalSeparator;
+  QCheckBox *boxFloatingGraph, *boxFloatingTable, *boxFloatingInstrumentWindow, *boxFloatingMantidMatrix,
+      *boxFloatingNote, *boxFloatingMatrix;
   QCheckBox *boxFloatingCustomInterfaces, *boxFloatingTiledWindows;
-  QSpinBox *boxMinutes, *boxLineWidth, *boxFrameWidth, *boxResolution,
-      *boxMargin, *boxPrecision, *boxAppPrecision;
-  QSpinBox *boxSymbolSize, *boxMinTicksLength, *boxMajTicksLength,
-      *generatePointsBox;
+  QSpinBox *boxMinutes, *boxLineWidth, *boxFrameWidth, *boxResolution, *boxMargin, *boxPrecision, *boxAppPrecision;
+  QSpinBox *boxSymbolSize, *boxMinTicksLength, *boxMajTicksLength, *generatePointsBox;
   DoubleSpinBox *boxCurveLineWidth;
   ColorButton *btnWorkspace, *btnPanels, *btnPanelsText;
   QListWidget *itemsList;
-  QLabel *labelFrameWidth, *lblLanguage, *lblWorkspace, *lblPanels,
-      *lblPageHeader;
-  QLabel *lblPanelsText, *lblFonts, *lblStyle, *lblDecimalSeparator,
-      *lblAppPrecision;
+  QLabel *labelFrameWidth, *lblLanguage, *lblWorkspace, *lblPanels, *lblPageHeader;
+  QLabel *lblPanelsText, *lblFonts, *lblStyle, *lblDecimalSeparator, *lblAppPrecision;
   QGroupBox *groupBoxConfirm;
   QGroupBox *groupBoxTableFonts, *groupBoxTableCol;
   QLabel *lblSeparator, *lblTableBackground, *lblTextColor, *lblHeaderColor;
-  QLabel *lblSymbSize, *lblAxesLineWidth, *lblCurveStyle, *lblResolution,
-      *lblPrecision;
+  QLabel *lblSymbSize, *lblAxesLineWidth, *lblCurveStyle, *lblResolution, *lblPrecision;
   QGroupBox *groupBox3DFonts, *groupBox3DCol;
-  QLabel *lblMargin, *lblMajTicks, *lblMajTicksLength, *lblLineWidth,
-      *lblMinTicks, *lblMinTicksLength, *lblPoints, *lblPeaksColor;
+  QLabel *lblMargin, *lblMajTicks, *lblMajTicksLength, *lblLineWidth, *lblMinTicks, *lblMinTicksLength, *lblPoints,
+      *lblPeaksColor;
   QGroupBox *groupBoxFittingCurve, *groupBoxFitParameters;
   QRadioButton *samePointsBtn, *generatePointsBtn;
   QGroupBox *groupBoxMultiPeak;
   ColorBox *boxPeaksColor;
   QLabel *lblScriptingLanguage, *lblInitWindow;
   QComboBox *boxScriptingLanguage, *boxInitWindow;
-  QCheckBox *boxAntialiasing, *boxAutoscale3DPlots, *boxTableComments,
-      *boxThousandsSeparator;
-  QCheckBox *boxPromptRenameTables, *boxBackupProject, *boxLabelsEditing,
-      *boxPromptDeleteWorkspace;
+  QCheckBox *boxAntialiasing, *boxAutoscale3DPlots, *boxTableComments, *boxThousandsSeparator;
+  QCheckBox *boxPromptRenameTables, *boxBackupProject, *boxLabelsEditing, *boxPromptDeleteWorkspace;
   QWidget *fileLocationsPage;
   QLabel *lblTranslationsPath, *lblHelpPath, *lblUndoStackSize, *lblEndOfLine;
   QLineEdit *translationsPathLine, *helpPathLine;
@@ -306,8 +285,7 @@ private:
 
   QLabel *labelGraphAxesLabelsDist, *labelTickLabelsDist;
   QSpinBox *boxAxesLabelsDist, *boxTickLabelsDist;
-  QLabel *xBottomLabel, *xTopLabel, *yLeftLabel, *yRightLabel, *enableAxisLabel,
-      *showNumbersLabel, *scaleLabel;
+  QLabel *xBottomLabel, *xTopLabel, *yLeftLabel, *yRightLabel, *enableAxisLabel, *showNumbersLabel, *scaleLabel;
   QCheckBox *boxEnableAxis, *boxShowAxisLabels;
   QGroupBox *enabledAxesGroupBox;
   QGridLayout *enabledAxesGrid;

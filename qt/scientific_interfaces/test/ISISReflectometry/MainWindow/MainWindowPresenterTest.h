@@ -23,8 +23,7 @@
 #include <gtest/gtest.h>
 
 using namespace MantidQt::CustomInterfaces::ISISReflectometry;
-using namespace MantidQt::CustomInterfaces::ISISReflectometry::
-    ModelCreationHelper;
+using namespace MantidQt::CustomInterfaces::ISISReflectometry::ModelCreationHelper;
 using MantidQt::API::IConfiguredAlgorithm_sptr;
 using MantidQt::MantidWidgets::ISlitCalculator;
 using testing::_;
@@ -38,9 +37,7 @@ class MainWindowPresenterTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static MainWindowPresenterTest *createSuite() {
-    return new MainWindowPresenterTest();
-  }
+  static MainWindowPresenterTest *createSuite() { return new MainWindowPresenterTest(); }
   static void destroySuite(MainWindowPresenterTest *suite) { delete suite; }
 
   MainWindowPresenterTest() : m_view(), m_messageHandler() {
@@ -89,13 +86,9 @@ public:
   void testBatchPresenterAddedWhenNewBatchRequested() {
     auto presenter = makePresenter();
     auto batchView = new NiceMock<MockBatchView>();
-    EXPECT_CALL(m_view, newBatch())
-        .Times(1)
-        .WillOnce(Return(dynamic_cast<IBatchView *>(batchView)));
+    EXPECT_CALL(m_view, newBatch()).Times(1).WillOnce(Return(dynamic_cast<IBatchView *>(batchView)));
     auto batchPresenter = new NiceMock<MockBatchPresenter>();
-    EXPECT_CALL(*m_makeBatchPresenter, makeProxy(batchView))
-        .Times(1)
-        .WillOnce(Return(batchPresenter));
+    EXPECT_CALL(*m_makeBatchPresenter, makeProxy(batchView)).Times(1).WillOnce(Return(batchPresenter));
     expectBatchAdded(batchPresenter);
 
     presenter.notifyNewBatchRequested();
@@ -307,10 +300,8 @@ public:
     auto presenter = makePresenter();
     setupInstrument(presenter, "INTER");
     auto const instrument = std::string("POLREF");
-    EXPECT_CALL(*m_batchPresenters[0], notifyInstrumentChanged(instrument))
-        .Times(1);
-    EXPECT_CALL(*m_batchPresenters[1], notifyInstrumentChanged(instrument))
-        .Times(1);
+    EXPECT_CALL(*m_batchPresenters[0], notifyInstrumentChanged(instrument)).Times(1);
+    EXPECT_CALL(*m_batchPresenters[1], notifyInstrumentChanged(instrument)).Times(1);
     presenter.notifyChangeInstrumentRequested(instrument);
     verifyAndClear();
   }
@@ -318,10 +309,8 @@ public:
   void testChangeInstrumentRequestedDoesNotUpdateInstrumentIfNotChanged() {
     auto presenter = makePresenter();
     auto const instrument = setupInstrument(presenter, "POLREF");
-    EXPECT_CALL(*m_batchPresenters[0], notifyInstrumentChanged(instrument))
-        .Times(0);
-    EXPECT_CALL(*m_batchPresenters[1], notifyInstrumentChanged(instrument))
-        .Times(0);
+    EXPECT_CALL(*m_batchPresenters[0], notifyInstrumentChanged(instrument)).Times(0);
+    EXPECT_CALL(*m_batchPresenters[1], notifyInstrumentChanged(instrument)).Times(0);
     presenter.notifyChangeInstrumentRequested(instrument);
     verifyAndClear();
   }
@@ -335,8 +324,7 @@ public:
     verifyAndClear();
   }
 
-  void
-  testChangeInstrumentDoesNotUpdateInstrumentInSlitCalculatorIfNotChanged() {
+  void testChangeInstrumentDoesNotUpdateInstrumentInSlitCalculatorIfNotChanged() {
     auto presenter = makePresenter();
     auto const instrument = setupInstrument(presenter, "POLREF");
     expectSlitCalculatorInstrumentNotUpdated();
@@ -355,10 +343,8 @@ public:
   void testUpdateInstrumentDoesNotUpdateInstrumentInChildPresenters() {
     auto presenter = makePresenter();
     auto const instrument = setupInstrument(presenter, "POLREF");
-    EXPECT_CALL(*m_batchPresenters[0], notifyInstrumentChanged(instrument))
-        .Times(0);
-    EXPECT_CALL(*m_batchPresenters[1], notifyInstrumentChanged(instrument))
-        .Times(0);
+    EXPECT_CALL(*m_batchPresenters[0], notifyInstrumentChanged(instrument)).Times(0);
+    EXPECT_CALL(*m_batchPresenters[1], notifyInstrumentChanged(instrument)).Times(0);
     presenter.notifyUpdateInstrumentRequested();
     verifyAndClear();
   }
@@ -440,12 +426,8 @@ public:
     expectWarnDiscardChanges(true);
     expectBatchUnsaved(batchIndex);
     expectUserDiscardsChanges();
-    EXPECT_CALL(m_messageHandler, askUserForLoadFileName("JSON (*.json)"))
-        .Times(1)
-        .WillOnce(Return(filename));
-    EXPECT_CALL(m_fileHandler, loadJSONFromFile(filename))
-        .Times(1)
-        .WillOnce(Return(map));
+    EXPECT_CALL(m_messageHandler, askUserForLoadFileName("JSON (*.json)")).Times(1).WillOnce(Return(filename));
+    EXPECT_CALL(m_fileHandler, loadJSONFromFile(filename)).Times(1).WillOnce(Return(map));
     EXPECT_CALL(*m_decoder, decodeBatch(&m_view, batchIndex, map)).Times(1);
     presenter.notifyLoadBatchRequested(batchIndex);
     verifyAndClear();
@@ -464,8 +446,7 @@ public:
   void testBatchPresentersNotifySetRoundPrecisionOnOptionsChanged() {
     auto presenter = makePresenter();
     auto prec = 2;
-    ON_CALL(*m_optionsPresenter, getIntOption(std::string("RoundPrecision")))
-        .WillByDefault(ReturnRef(prec));
+    ON_CALL(*m_optionsPresenter, getIntOption(std::string("RoundPrecision"))).WillByDefault(ReturnRef(prec));
     expectRoundChecked(true);
     for (auto batchPresenter : m_batchPresenters) {
       EXPECT_CALL(*batchPresenter, notifySetRoundPrecision(prec));
@@ -499,32 +480,26 @@ private:
     friend class MainWindowPresenterTest;
 
   public:
-    MainWindowPresenterFriend(
-        IMainWindowView *view, IMessageHandler *messageHandler,
-        IFileHandler *fileHandler, std::unique_ptr<IEncoder> encoder,
-        std::unique_ptr<IDecoder> decoder,
-        std::unique_ptr<ISlitCalculator> slitCalculator,
-        std::unique_ptr<IOptionsDialogPresenter> optionsDialogPresenter,
-        std::unique_ptr<IBatchPresenterFactory> makeBatchPresenter)
-        : MainWindowPresenter(view, messageHandler, fileHandler,
-                              std::move(encoder), std::move(decoder),
-                              std::move(slitCalculator),
-                              std::move(optionsDialogPresenter),
+    MainWindowPresenterFriend(IMainWindowView *view, IMessageHandler *messageHandler, IFileHandler *fileHandler,
+                              std::unique_ptr<IEncoder> encoder, std::unique_ptr<IDecoder> decoder,
+                              std::unique_ptr<ISlitCalculator> slitCalculator,
+                              std::unique_ptr<IOptionsDialogPresenter> optionsDialogPresenter,
+                              std::unique_ptr<IBatchPresenterFactory> makeBatchPresenter)
+        : MainWindowPresenter(view, messageHandler, fileHandler, std::move(encoder), std::move(decoder),
+                              std::move(slitCalculator), std::move(optionsDialogPresenter),
                               std::move(makeBatchPresenter)) {}
   };
 
   // Create an OptionsDialogPresenter and cache the raw pointer to it in
   // m_optionsPresenter
   std::unique_ptr<NiceMock<MockOptionsDialogPresenter>> makeOptionsPresenter() {
-    auto optionsPresenter =
-        std::make_unique<NiceMock<MockOptionsDialogPresenter>>();
+    auto optionsPresenter = std::make_unique<NiceMock<MockOptionsDialogPresenter>>();
     m_optionsPresenter = optionsPresenter.get();
     return optionsPresenter;
   }
 
-  MainWindowPresenterFriend makePresenter(
-      std::unique_ptr<NiceMock<MockOptionsDialogPresenter>> optionsPresenter =
-          std::make_unique<NiceMock<MockOptionsDialogPresenter>>()) {
+  MainWindowPresenterFriend makePresenter(std::unique_ptr<NiceMock<MockOptionsDialogPresenter>> optionsPresenter =
+                                              std::make_unique<NiceMock<MockOptionsDialogPresenter>>()) {
     m_optionsPresenter = optionsPresenter.get();
     auto encoder = std::make_unique<NiceMock<MockEncoder>>();
     m_encoder = encoder.get();
@@ -532,22 +507,19 @@ private:
     m_decoder = decoder.get();
     auto slitCalculator = std::make_unique<NiceMock<MockSlitCalculator>>();
     m_slitCalculator = slitCalculator.get();
-    auto makeBatchPresenter =
-        std::make_unique<NiceMock<MockBatchPresenterFactory>>();
+    auto makeBatchPresenter = std::make_unique<NiceMock<MockBatchPresenterFactory>>();
     m_makeBatchPresenter = makeBatchPresenter.get();
     // Set up a mock batch presenter for each view to be returned from the
     // factory
     for (auto batchView : m_batchViews) {
       auto batchPresenter = new NiceMock<MockBatchPresenter>();
       m_batchPresenters.emplace_back(batchPresenter);
-      ON_CALL(*m_makeBatchPresenter, makeProxy(batchView))
-          .WillByDefault(Return(batchPresenter));
+      ON_CALL(*m_makeBatchPresenter, makeProxy(batchView)).WillByDefault(Return(batchPresenter));
     }
     // Make the presenter
-    auto presenter = MainWindowPresenterFriend(
-        &m_view, &m_messageHandler, &m_fileHandler, std::move(encoder),
-        std::move(decoder), std::move(slitCalculator),
-        std::move(optionsPresenter), std::move(makeBatchPresenter));
+    auto presenter = MainWindowPresenterFriend(&m_view, &m_messageHandler, &m_fileHandler, std::move(encoder),
+                                               std::move(decoder), std::move(slitCalculator),
+                                               std::move(optionsPresenter), std::move(makeBatchPresenter));
     return presenter;
   }
 
@@ -564,10 +536,8 @@ private:
     m_batchPresenters.clear();
   }
 
-  std::string setupInstrument(MainWindowPresenterFriend &presenter,
-                              std::string const &instrumentName) {
-    presenter.m_instrument =
-        std::make_shared<Mantid::Geometry::Instrument>(instrumentName);
+  std::string setupInstrument(MainWindowPresenterFriend &presenter, std::string const &instrumentName) {
+    presenter.m_instrument = std::make_shared<Mantid::Geometry::Instrument>(instrumentName);
     return presenter.instrumentName();
   }
 
@@ -580,78 +550,52 @@ private:
   }
 
   void expectBatchCanBeClosed(int batchIndex) {
-    EXPECT_CALL(*m_batchPresenters[batchIndex], isAutoreducing())
-        .Times(1)
-        .WillOnce(Return(false));
-    EXPECT_CALL(*m_batchPresenters[batchIndex], isProcessing())
-        .Times(1)
-        .WillOnce(Return(false));
-    EXPECT_CALL(*m_batchPresenters[batchIndex], requestClose())
-        .Times(1)
-        .WillOnce(Return(true));
+    EXPECT_CALL(*m_batchPresenters[batchIndex], isAutoreducing()).Times(1).WillOnce(Return(false));
+    EXPECT_CALL(*m_batchPresenters[batchIndex], isProcessing()).Times(1).WillOnce(Return(false));
+    EXPECT_CALL(*m_batchPresenters[batchIndex], requestClose()).Times(1).WillOnce(Return(true));
   }
 
   void expectBatchIsAutoreducing(int batchIndex) {
-    EXPECT_CALL(*m_batchPresenters[batchIndex], isAutoreducing())
-        .Times(1)
-        .WillOnce(Return(true));
+    EXPECT_CALL(*m_batchPresenters[batchIndex], isAutoreducing()).Times(1).WillOnce(Return(true));
   }
 
   void expectBatchIsProcessing(int batchIndex) {
-    EXPECT_CALL(*m_batchPresenters[batchIndex], isProcessing())
-        .Times(1)
-        .WillOnce(Return(true));
+    EXPECT_CALL(*m_batchPresenters[batchIndex], isProcessing()).Times(1).WillOnce(Return(true));
   }
 
   void expectBatchIsNotAutoreducing(int batchIndex) {
-    EXPECT_CALL(*m_batchPresenters[batchIndex], isAutoreducing())
-        .Times(1)
-        .WillOnce(Return(false));
+    EXPECT_CALL(*m_batchPresenters[batchIndex], isAutoreducing()).Times(1).WillOnce(Return(false));
   }
 
   void expectBatchSaved(int batchIndex) {
-    EXPECT_CALL(*m_batchPresenters[batchIndex], isBatchUnsaved())
-        .Times(1)
-        .WillOnce(Return(false));
+    EXPECT_CALL(*m_batchPresenters[batchIndex], isBatchUnsaved()).Times(1).WillOnce(Return(false));
   }
 
   void expectBatchUnsaved(int batchIndex) {
-    EXPECT_CALL(*m_batchPresenters[batchIndex], isBatchUnsaved())
-        .Times(1)
-        .WillOnce(Return(true));
+    EXPECT_CALL(*m_batchPresenters[batchIndex], isBatchUnsaved()).Times(1).WillOnce(Return(true));
   }
 
   void expectBatchIsNotProcessing(int batchIndex) {
-    EXPECT_CALL(*m_batchPresenters[batchIndex], isProcessing())
-        .Times(1)
-        .WillOnce(Return(false));
+    EXPECT_CALL(*m_batchPresenters[batchIndex], isProcessing()).Times(1).WillOnce(Return(false));
   }
 
   void expectRequestCloseBatchFailed(int batchIndex) {
-    EXPECT_CALL(*m_batchPresenters[batchIndex], requestClose())
-        .Times(1)
-        .WillOnce(Return(false));
+    EXPECT_CALL(*m_batchPresenters[batchIndex], requestClose()).Times(1).WillOnce(Return(false));
   }
 
-  void expectBatchRemovedFromView(int batchIndex) {
-    EXPECT_CALL(m_view, removeBatch(batchIndex)).Times(1);
-  }
+  void expectBatchRemovedFromView(int batchIndex) { EXPECT_CALL(m_view, removeBatch(batchIndex)).Times(1); }
 
-  void expectBatchNotRemovedFromView(int batchIndex) {
-    EXPECT_CALL(m_view, removeBatch(batchIndex)).Times(0);
-  }
+  void expectBatchNotRemovedFromView(int batchIndex) { EXPECT_CALL(m_view, removeBatch(batchIndex)).Times(0); }
 
   void expectCannotCloseBatchWarning() {
-    EXPECT_CALL(m_messageHandler,
-                giveUserCritical("Cannot close batch while processing or "
-                                 "autoprocessing is in progress",
-                                 "Error"))
+    EXPECT_CALL(m_messageHandler, giveUserCritical("Cannot close batch while processing or "
+                                                   "autoprocessing is in progress",
+                                                   "Error"))
         .Times(1);
   }
 
   void expectWarnDiscardChanges(bool setting) {
-    EXPECT_CALL(*m_optionsPresenter,
-                getBoolOption(std::string("WarnDiscardChanges")))
+    EXPECT_CALL(*m_optionsPresenter, getBoolOption(std::string("WarnDiscardChanges")))
         .Times(1)
         .WillOnce(Return(setting));
   }
@@ -663,8 +607,7 @@ private:
   }
 
   void expectSlitCalculatorInstrumentUpdated(std::string const &instrument) {
-    EXPECT_CALL(*m_slitCalculator, setCurrentInstrumentName(instrument))
-        .Times(1);
+    EXPECT_CALL(*m_slitCalculator, setCurrentInstrumentName(instrument)).Times(1);
     EXPECT_CALL(*m_slitCalculator, processInstrumentHasBeenChanged()).Times(1);
   }
 
@@ -676,68 +619,47 @@ private:
   void expectBatchIsSavedToFile(int batchIndex) {
     auto const filename = std::string("test.json");
     auto const map = QMap<QString, QVariant>();
-    EXPECT_CALL(m_messageHandler, askUserForSaveFileName("JSON (*.json)"))
-        .Times(1)
-        .WillOnce(Return(filename));
-    EXPECT_CALL(*m_encoder, encodeBatch(&m_view, batchIndex, false))
-        .Times(1)
-        .WillOnce(Return(map));
+    EXPECT_CALL(m_messageHandler, askUserForSaveFileName("JSON (*.json)")).Times(1).WillOnce(Return(filename));
+    EXPECT_CALL(*m_encoder, encodeBatch(&m_view, batchIndex, false)).Times(1).WillOnce(Return(map));
     EXPECT_CALL(m_fileHandler, saveJSONToFile(filename, map)).Times(1);
   }
 
   void expectBatchIsLoadedFromFile(int batchIndex) {
     auto const filename = std::string("test.json");
     auto const map = QMap<QString, QVariant>();
-    EXPECT_CALL(m_messageHandler, askUserForLoadFileName("JSON (*.json)"))
-        .Times(1)
-        .WillOnce(Return(filename));
-    EXPECT_CALL(m_fileHandler, loadJSONFromFile(filename))
-        .Times(1)
-        .WillOnce(Return(map));
+    EXPECT_CALL(m_messageHandler, askUserForLoadFileName("JSON (*.json)")).Times(1).WillOnce(Return(filename));
+    EXPECT_CALL(m_fileHandler, loadJSONFromFile(filename)).Times(1).WillOnce(Return(map));
     EXPECT_CALL(*m_decoder, decodeBatch(&m_view, batchIndex, map)).Times(1);
   }
 
   void expectAskDiscardChanges() {
-    EXPECT_CALL(
-        m_messageHandler,
-        askUserOkCancel("This will cause unsaved changes to be lost. Continue?",
-                        "Discard changes?"))
+    EXPECT_CALL(m_messageHandler,
+                askUserOkCancel("This will cause unsaved changes to be lost. Continue?", "Discard changes?"))
         .Times(1);
   }
 
-  void expectDoNotAskDiscardChanges() {
-    EXPECT_CALL(m_messageHandler, askUserOkCancel(_, _)).Times(0);
-  }
+  void expectDoNotAskDiscardChanges() { EXPECT_CALL(m_messageHandler, askUserOkCancel(_, _)).Times(0); }
 
   void expectUserDiscardsChanges() {
-    EXPECT_CALL(m_messageHandler, askUserOkCancel(_, _))
-        .Times(1)
-        .WillOnce(Return(true));
+    EXPECT_CALL(m_messageHandler, askUserOkCancel(_, _)).Times(1).WillOnce(Return(true));
   }
 
   void expectUserDoesNotDiscardChanges() {
-    EXPECT_CALL(m_messageHandler, askUserOkCancel(_, _))
-        .Times(1)
-        .WillOnce(Return(false));
+    EXPECT_CALL(m_messageHandler, askUserOkCancel(_, _)).Times(1).WillOnce(Return(false));
   }
 
-  void assertFirstBatchWasRemovedFromModel(
-      MainWindowPresenterFriend const &presenter) {
+  void assertFirstBatchWasRemovedFromModel(MainWindowPresenterFriend const &presenter) {
     TS_ASSERT_EQUALS(presenter.m_batchPresenters.size(), 1);
     // Note that our local list of raw pointers is not updated so
     // the first item is invalid and the second item is now the
     // only remaining batch presenter in the model
-    TS_ASSERT_EQUALS(presenter.m_batchPresenters[0].get(),
-                     m_batchPresenters[1]);
+    TS_ASSERT_EQUALS(presenter.m_batchPresenters[0].get(), m_batchPresenters[1]);
   }
 
-  void
-  assertBatchNotRemovedFromModel(MainWindowPresenterFriend const &presenter) {
-    TS_ASSERT_EQUALS(presenter.m_batchPresenters.size(),
-                     m_batchPresenters.size());
+  void assertBatchNotRemovedFromModel(MainWindowPresenterFriend const &presenter) {
+    TS_ASSERT_EQUALS(presenter.m_batchPresenters.size(), m_batchPresenters.size());
     for (size_t index = 0; index < m_batchPresenters.size(); ++index)
-      TS_ASSERT_EQUALS(presenter.m_batchPresenters[index].get(),
-                       m_batchPresenters[index]);
+      TS_ASSERT_EQUALS(presenter.m_batchPresenters[index].get(), m_batchPresenters[index]);
   }
 
 private:

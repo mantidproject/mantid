@@ -84,17 +84,14 @@ public:
 
   /// Algorithm's version
   int version() const override { return (1); }
-  const std::vector<std::string> seeAlso() const override {
-    return {"AbsorptionCorrection"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"AbsorptionCorrection"}; }
 
 private:
   void defineProperties() override;
   void retrieveProperties() override;
   std::string sampleXML() override;
   void initialiseCachedDistances() override;
-  void getShapeFromSample(const Geometry::IObject &sampleShape,
-                          bool updateHeight, bool updateRadius);
+  void getShapeFromSample(const Geometry::IObject &sampleShape, bool updateHeight, bool updateRadius);
   std::map<std::string, std::string> validateInputs() override;
   Kernel::V3D m_cylAxis; ///< The axis orientation of the cylinder
   double m_cylHeight;    ///< The height of the cylindrical sample in m

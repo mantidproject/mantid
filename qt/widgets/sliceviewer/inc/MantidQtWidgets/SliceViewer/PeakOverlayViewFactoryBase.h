@@ -20,8 +20,7 @@ is abstract.
 
 @date 2012-08-24
 */
-class EXPORT_OPT_MANTIDQT_SLICEVIEWER PeakOverlayViewFactoryBase
-    : public PeakOverlayViewFactory {
+class EXPORT_OPT_MANTIDQT_SLICEVIEWER PeakOverlayViewFactoryBase : public PeakOverlayViewFactory {
 protected:
   QwtPlot *m_plot;
   QWidget *m_parent;
@@ -31,8 +30,7 @@ protected:
   const int m_plotYIndex;
 
 public:
-  PeakOverlayViewFactoryBase(QwtPlot *plot, QWidget *parent,
-                             const int plotXIndex, const int plotYIndex,
+  PeakOverlayViewFactoryBase(QwtPlot *plot, QWidget *parent, const int plotXIndex, const int plotYIndex,
                              const size_t colourNumber = 0);
   ~PeakOverlayViewFactoryBase() override;
   std::string getPlotXLabel() const override;

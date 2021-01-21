@@ -41,9 +41,7 @@ const std::string TransposeMD::name() const { return "TransposeMD"; }
 int TransposeMD::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string TransposeMD::category() const {
-  return "MDAlgorithms\\Transforms";
-}
+const std::string TransposeMD::category() const { return "MDAlgorithms\\Transforms"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string TransposeMD::summary() const {
@@ -55,21 +53,17 @@ const std::string TransposeMD::summary() const {
 /** Initialize the algorithm's properties.
  */
 void TransposeMD::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>("InputWorkspace", "", Direction::Input),
                   "An input workspace.");
 
   auto axisValidator = std::make_shared<ArrayBoundedValidator<int>>();
   axisValidator->setLower(0);
 
-  declareProperty(
-      std::make_unique<ArrayProperty<int>>("Axes", std::vector<int>(0),
-                                           axisValidator, Direction::Input),
-      "Permutes the axes according to the indexes given. Zero "
-      "based indexing. Defaults to no transpose.");
+  declareProperty(std::make_unique<ArrayProperty<int>>("Axes", std::vector<int>(0), axisValidator, Direction::Input),
+                  "Permutes the axes according to the indexes given. Zero "
+                  "based indexing. Defaults to no transpose.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }
 
@@ -80,8 +74,7 @@ void TransposeMD::exec() {
   IMDHistoWorkspace_sptr inWSProp = getProperty("InputWorkspace");
   auto inWS = std::dynamic_pointer_cast<MDHistoWorkspace>(inWSProp);
   if (!inWS) {
-    throw std::invalid_argument(
-        "Expect the InputWorkspace to be a MDHistoWorkspace");
+    throw std::invalid_argument("Expect the InputWorkspace to be a MDHistoWorkspace");
   }
 
   size_t nDimsInput = inWS->getNumDims();
@@ -106,8 +99,7 @@ void TransposeMD::exec() {
   std::vector<Geometry::IMDDimension_sptr> targetGeometry;
   for (size_t i = 0; i < nDimsOutput; ++i) {
     // Clone the dimension corresponding to the axis requested.
-    auto cloneDim = Geometry::IMDDimension_sptr(
-        new Geometry::MDHistoDimension(inWS->getDimension(axes[i]).get()));
+    auto cloneDim = Geometry::IMDDimension_sptr(new Geometry::MDHistoDimension(inWS->getDimension(axes[i]).get()));
     targetGeometry.emplace_back(cloneDim);
   }
 
@@ -117,17 +109,14 @@ void TransposeMD::exec() {
 
   // Configure the coordinate transform.
   std::vector<coord_t> scaling(nDimsOutput, 1); // No scaling
-  CoordTransformAligned coordTransform(nDimsInput, nDimsOutput, axes, origin,
-                                       scaling);
+  CoordTransformAligned coordTransform(nDimsInput, nDimsOutput, axes, origin, scaling);
 
   uint64_t nPoints = inWS->getNPoints();
   Progress progress(this, 0.0, 1.0, size_t(nPoints));
 
-  progress.reportIncrement(
-      size_t(double(nPoints) * 0.1)); // Report ~10% progress
+  progress.reportIncrement(size_t(double(nPoints) * 0.1)); // Report ~10% progress
 
-  const int nThreads = Mantid::API::FrameworkManager::Instance()
-                           .getNumOMPThreads(); // NThreads to Request
+  const int nThreads = Mantid::API::FrameworkManager::Instance().getNumOMPThreads(); // NThreads to Request
 
   auto iterators = inWS->createIterators(nThreads, nullptr);
 
@@ -146,8 +135,7 @@ void TransposeMD::exec() {
       outWS->setSignalAt(index, inIterator->getSignal());
       const signal_t error = inIterator->getError();
       outWS->setErrorSquaredAt(index, error * error);
-      outWS->setNumEventsAt(index,
-                            Mantid::signal_t(inIterator->getNumEvents()));
+      outWS->setNumEventsAt(index, Mantid::signal_t(inIterator->getNumEvents()));
       outWS->setMDMaskAt(index, inIterator->getIsMasked());
       progress.report();
     } while (inIterator->next());

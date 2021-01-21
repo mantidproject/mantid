@@ -18,29 +18,25 @@
  * It implements the QwtData interface.
  *
  */
-class EXPORT_OPT_MANTIDQT_PLOTTING MantidQwtIMDWorkspaceData
-    : public MantidQwtWorkspaceData {
+class EXPORT_OPT_MANTIDQT_PLOTTING MantidQwtIMDWorkspaceData : public MantidQwtWorkspaceData {
 public:
   /// For PlotAxisChoice, auto-determine it
   static const int PlotAuto = -2;
   /// For PlotAxisChoice, distance from start of line
   static const int PlotDistance = -1;
 
-  MantidQwtIMDWorkspaceData(
-      Mantid::API::IMDWorkspace_const_sptr workspace, const bool logScale,
-      Mantid::Kernel::VMD start = Mantid::Kernel::VMD(),
-      Mantid::Kernel::VMD end = Mantid::Kernel::VMD(),
-      Mantid::API::MDNormalization normalize = Mantid::API::NoNormalization,
-      bool isDistribution = false);
+  MantidQwtIMDWorkspaceData(Mantid::API::IMDWorkspace_const_sptr workspace, const bool logScale,
+                            Mantid::Kernel::VMD start = Mantid::Kernel::VMD(),
+                            Mantid::Kernel::VMD end = Mantid::Kernel::VMD(),
+                            Mantid::API::MDNormalization normalize = Mantid::API::NoNormalization,
+                            bool isDistribution = false);
 
   MantidQwtIMDWorkspaceData(const MantidQwtIMDWorkspaceData &data);
-  MantidQwtIMDWorkspaceData &
-  operator=(const MantidQwtIMDWorkspaceData & /*data*/);
+  MantidQwtIMDWorkspaceData &operator=(const MantidQwtIMDWorkspaceData & /*data*/);
   ~MantidQwtIMDWorkspaceData() override;
 
   QwtData *copy() const override;
-  virtual MantidQwtIMDWorkspaceData *
-  copy(Mantid::API::IMDWorkspace_sptr workspace) const;
+  virtual MantidQwtIMDWorkspaceData *copy(Mantid::API::IMDWorkspace_sptr workspace) const;
 
   size_t size() const override;
   size_t esize() const override;

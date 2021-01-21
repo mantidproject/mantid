@@ -36,9 +36,8 @@ using namespace API;
 using namespace DataObjects;
 
 SphericalAbsorption::SphericalAbsorption()
-    : API::Algorithm(), m_inputWS(), m_sampleObject(nullptr), m_beamDirection(),
-      m_L1s(), m_elementVolumes(), m_elementPositions(), m_numVolumeElements(0),
-      m_sampleVolume(0.), m_refAtten(0.0), m_scattering(0.), n_lambda(0),
+    : API::Algorithm(), m_inputWS(), m_sampleObject(nullptr), m_beamDirection(), m_L1s(), m_elementVolumes(),
+      m_elementPositions(), m_numVolumeElements(0), m_sampleVolume(0.), m_refAtten(0.0), m_scattering(0.), n_lambda(0),
       x_step(0), m_emode(0), m_lambdaFixed(0.) {}
 
 void SphericalAbsorption::init() {
@@ -47,12 +46,9 @@ void SphericalAbsorption::init() {
   wsValidator->add<WorkspaceUnitValidator>("Wavelength");
   wsValidator->add<InstrumentValidator>();
 
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                            Direction::Input, wsValidator),
-      "The X values for the input workspace must be in units of wavelength");
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input, wsValidator),
+                  "The X values for the input workspace must be in units of wavelength");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "Output workspace name");
 
   auto mustBePositive = std::make_shared<BoundedValidator<double>>();
@@ -80,11 +76,9 @@ void SphericalAbsorption::exec() {
   retrieveBaseProperties();
 
   // Create the output workspace
-  MatrixWorkspace_sptr correctionFactors =
-      WorkspaceFactory::Instance().create(m_inputWS);
-  correctionFactors->setDistribution(
-      true);                       // The output of this is a distribution
-  correctionFactors->setYUnit(""); // Need to explicitly set YUnit to nothing
+  MatrixWorkspace_sptr correctionFactors = WorkspaceFactory::Instance().create(m_inputWS);
+  correctionFactors->setDistribution(true); // The output of this is a distribution
+  correctionFactors->setYUnit("");          // Need to explicitly set YUnit to nothing
   correctionFactors->setYUnitLabel("Attenuation factor");
   double m_sphRadius = getProperty("SphericalSampleRadius"); // in cm
 
@@ -94,8 +88,7 @@ void SphericalAbsorption::exec() {
 
   IAlgorithm_sptr anvred = createChildAlgorithm("AnvredCorrection");
   anvred->setProperty<MatrixWorkspace_sptr>("InputWorkspace", m_inputWS);
-  anvred->setProperty<MatrixWorkspace_sptr>("OutputWorkspace",
-                                            correctionFactors);
+  anvred->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", correctionFactors);
   anvred->setProperty("PreserveEvents", true);
   anvred->setProperty("ReturnTransmissionOnly", true);
   anvred->setProperty("LinearScatteringCoef", m_scattering);
@@ -127,8 +120,7 @@ void SphericalAbsorption::retrieveBaseProperties() {
   {
     NeutronAtom neutron(0, 0, 0.0, 0.0, sigma_s, 0.0, sigma_s, sigma_atten);
     auto shape = std::shared_ptr<IObject>(
-        m_inputWS->sample().getShape().cloneWithMaterial(
-            Material("SetInSphericalAbsorption", neutron, rho)));
+        m_inputWS->sample().getShape().cloneWithMaterial(Material("SetInSphericalAbsorption", neutron, rho)));
     m_inputWS->mutableSample().setShape(shape);
   }
 

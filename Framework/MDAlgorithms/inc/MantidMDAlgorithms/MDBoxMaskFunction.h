@@ -20,8 +20,7 @@ private:
 
 public:
   // constructor
-  MDBoxMaskFunction(const Mantid::Kernel::V3D &pos,
-                    const double &radiusSquared) {
+  MDBoxMaskFunction(const Mantid::Kernel::V3D &pos, const double &radiusSquared) {
     m_pos = pos;
     m_radiusSquared = radiusSquared;
   }

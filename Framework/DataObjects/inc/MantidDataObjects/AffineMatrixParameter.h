@@ -21,8 +21,7 @@ using AffineMatrixType = Mantid::Kernel::Matrix<coord_t>;
  * @author Owen Arnold
  * @date 20/07/2011
  */
-class DLLExport AffineMatrixParameter
-    : public Mantid::API::ImplicitFunctionParameter {
+class DLLExport AffineMatrixParameter : public Mantid::API::ImplicitFunctionParameter {
 public:
   // ImplcitFunctionParameter Methods.
   std::string getName() const override;

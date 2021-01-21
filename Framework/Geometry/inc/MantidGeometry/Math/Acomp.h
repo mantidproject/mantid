@@ -86,23 +86,20 @@ public:
   Acomp &operator*=(const Acomp &);
 
   const Acomp *itemC(int const) const; ///< returns a pointer to Comp (or zero)
-  int itemN(int const) const; ///< returns an integer to Units (or zero)
+  int itemN(int const) const;          ///< returns an integer to Units (or zero)
 
-  std::pair<int, int>
-  size() const;         ///< get the size of the units and the Acomp sub-comp
-  int isSimple() const; ///< true if only Units
-  int isDNF() const;    ///< is Units only in union
-  int isCNF() const;    ///< is Units only in intersections
-  int isNull() const;   ///< is nothing in the comp.
-  int isSingle() const; ///< only one part
+  std::pair<int, int> size() const; ///< get the size of the units and the Acomp sub-comp
+  int isSimple() const;             ///< true if only Units
+  int isDNF() const;                ///< is Units only in union
+  int isCNF() const;                ///< is Units only in intersections
+  int isNull() const;               ///< is nothing in the comp.
+  int isSingle() const;             ///< only one part
   int contains(const Acomp &) const;
-  int isInter() const { return Intersect; } ///< Deterimine if inter/union
-  int isTrue(
-      const std::map<int, int> &) const; ///< Determine if the rule is true.
+  int isInter() const { return Intersect; }     ///< Deterimine if inter/union
+  int isTrue(const std::map<int, int> &) const; ///< Determine if the rule is true.
 
-  void Sort(); ///< Sort the Units+Comp items
-  void
-  getLiterals(std::map<int, int> &) const; ///< Get literals (+/- different)
+  void Sort();                                     ///< Sort the Units+Comp items
+  void getLiterals(std::map<int, int> &) const;    ///< Get literals (+/- different)
   void getAbsLiterals(std::map<int, int> &) const; ///< Get literals (positve)
   std::vector<int> getKeys() const;
   int logicalEqual(const Acomp &) const;
@@ -110,18 +107,15 @@ public:
   int makeDNFobject(); ///< Make the object into DNF form (Sum of Products)
   int makeCNFobject(); ///< Make the object into CNF form (Product of Sums)
 
-  void complement(); ///< Take complement of component
-  std::pair<Acomp, Acomp>
-  algDiv(const Acomp &);               ///< Carry out Algebric division
-  void setString(const std::string &); ///< Processes a line of type abc'+efg
+  void complement();                             ///< Take complement of component
+  std::pair<Acomp, Acomp> algDiv(const Acomp &); ///< Carry out Algebric division
+  void setString(const std::string &);           ///< Processes a line of type abc'+efg
   void writeFull(std::ostream &,
-                 int const = 0) const; ///< Full write out to determine state
-  std::string display() const;         ///< Pretty print statment
-  std::string
-  displayDepth(int const = 0) const; ///< Really pretty print statment of tree
+                 int const = 0) const;           ///< Full write out to determine state
+  std::string display() const;                   ///< Pretty print statment
+  std::string displayDepth(int const = 0) const; ///< Really pretty print statment of tree
 
-  void printImplicates(const std::vector<BnId> &,
-                       const Kernel::Matrix<int> &) const;
+  void printImplicates(const std::vector<BnId> &, const Kernel::Matrix<int> &) const;
 };
 
 std::ostream &operator<<(std::ostream &, const Acomp &);

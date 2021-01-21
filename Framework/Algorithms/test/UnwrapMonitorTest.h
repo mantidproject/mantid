@@ -148,17 +148,14 @@ public:
 
 private:
   const MatrixWorkspace_sptr makeFakeWorkspace() {
-    const MatrixWorkspace_sptr testWS =
-        WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(
-            2, 3, 50);
+    const MatrixWorkspace_sptr testWS = WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(2, 3, 50);
     testWS->getAxis(0)->setUnit("TOF");
     return testWS;
   }
 
   // Initialise the algorithm and set the properties. Creates a fake workspace
   // for the input and returns it.
-  MatrixWorkspace_const_sptr setupAlgorithm(UnwrapMonitor &algo,
-                                            const double lref) {
+  MatrixWorkspace_const_sptr setupAlgorithm(UnwrapMonitor &algo, const double lref) {
     // create the workspace
     const MatrixWorkspace_sptr inWS = makeFakeWorkspace();
 
@@ -174,15 +171,13 @@ private:
   }
 
   // Run the algorithm and do some basic checks. Returns the output workspace.
-  MatrixWorkspace_const_sptr
-  runAlgorithm(UnwrapMonitor &algo, const MatrixWorkspace_const_sptr &inWS) {
+  MatrixWorkspace_const_sptr runAlgorithm(UnwrapMonitor &algo, const MatrixWorkspace_const_sptr &inWS) {
     // run the algorithm
     TS_ASSERT(algo.execute());
     TS_ASSERT(algo.isExecuted());
 
     // verify the output workspace
-    const MatrixWorkspace_const_sptr outWS =
-        algo.getProperty("OutputWorkspace");
+    const MatrixWorkspace_const_sptr outWS = algo.getProperty("OutputWorkspace");
     TS_ASSERT_EQUALS(inWS->getNumberHistograms(),
                      outWS->getNumberHistograms()); // shouldn't drop histograms
 

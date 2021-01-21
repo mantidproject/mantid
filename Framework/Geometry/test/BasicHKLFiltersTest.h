@@ -29,9 +29,7 @@ class BasicHKLFiltersTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static BasicHKLFiltersTest *createSuite() {
-    return new BasicHKLFiltersTest();
-  }
+  static BasicHKLFiltersTest *createSuite() { return new BasicHKLFiltersTest(); }
   static void destroySuite(BasicHKLFiltersTest *suite) { delete suite; }
 
   void testHKLFilterNone() {
@@ -47,16 +45,12 @@ public:
     UnitCell cell(10., 10., 10.);
 
     TS_ASSERT_THROWS_NOTHING(HKLFilterDRange dFilter(cell, 1.0));
-    TS_ASSERT_THROWS(HKLFilterDRange dFilter(cell, -1.0),
-                     const std::range_error &);
-    TS_ASSERT_THROWS(HKLFilterDRange dFilter(cell, 0.0),
-                     const std::range_error &);
+    TS_ASSERT_THROWS(HKLFilterDRange dFilter(cell, -1.0), const std::range_error &);
+    TS_ASSERT_THROWS(HKLFilterDRange dFilter(cell, 0.0), const std::range_error &);
 
     TS_ASSERT_THROWS_NOTHING(HKLFilterDRange dFilter(cell, 1.0, 2.0));
-    TS_ASSERT_THROWS(HKLFilterDRange dFilter(cell, 1.0, 0.5),
-                     const std::range_error &);
-    TS_ASSERT_THROWS(HKLFilterDRange dFilter(cell, 1.0, -0.5),
-                     const std::range_error &);
+    TS_ASSERT_THROWS(HKLFilterDRange dFilter(cell, 1.0, 0.5), const std::range_error &);
+    TS_ASSERT_THROWS(HKLFilterDRange dFilter(cell, 1.0, -0.5), const std::range_error &);
   }
 
   void testHKLFilterDRangeDescription() {
@@ -84,27 +78,22 @@ public:
 
   void testHKLFilterSpaceGroupConstructor() {
     SpaceGroup_const_sptr invalid;
-    TS_ASSERT_THROWS(HKLFilterSpaceGroup sgFilter(invalid),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(HKLFilterSpaceGroup sgFilter(invalid), const std::runtime_error &);
 
-    SpaceGroup_const_sptr sg =
-        SpaceGroupFactory::Instance().createSpaceGroup("F d -3 m");
+    SpaceGroup_const_sptr sg = SpaceGroupFactory::Instance().createSpaceGroup("F d -3 m");
     TS_ASSERT_THROWS_NOTHING(HKLFilterSpaceGroup sgFilter(sg));
   }
 
   void testHKLFilterSpaceGroupDescription() {
-    SpaceGroup_const_sptr sg =
-        SpaceGroupFactory::Instance().createSpaceGroup("F d -3 m");
+    SpaceGroup_const_sptr sg = SpaceGroupFactory::Instance().createSpaceGroup("F d -3 m");
 
     HKLFilterSpaceGroup sgFilter(sg);
 
-    TS_ASSERT_EQUALS(sgFilter.getDescription(),
-                     "(Space group: " + sg->hmSymbol() + ")");
+    TS_ASSERT_EQUALS(sgFilter.getDescription(), "(Space group: " + sg->hmSymbol() + ")");
   }
 
   void testHKLFilterSpaceGroupIsAllowed() {
-    SpaceGroup_const_sptr sg =
-        SpaceGroupFactory::Instance().createSpaceGroup("F d -3 m");
+    SpaceGroup_const_sptr sg = SpaceGroupFactory::Instance().createSpaceGroup("F d -3 m");
 
     HKLFilterSpaceGroup sgFilter(sg);
 
@@ -119,11 +108,9 @@ public:
 
   void testHKLFilterStructureFactorConstructor() {
     StructureFactorCalculator_sptr invalid;
-    TS_ASSERT_THROWS(HKLFilterStructureFactor sfFilter(invalid),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(HKLFilterStructureFactor sfFilter(invalid), const std::runtime_error &);
 
-    StructureFactorCalculator_sptr mock =
-        std::make_shared<MockStructureFactorCalculator>();
+    StructureFactorCalculator_sptr mock = std::make_shared<MockStructureFactorCalculator>();
     TS_ASSERT_THROWS_NOTHING(HKLFilterStructureFactor sfFilter(mock));
     TS_ASSERT_THROWS_NOTHING(HKLFilterStructureFactor sfFilter(mock, 12.0));
   }
@@ -132,20 +119,15 @@ public:
     std::ostringstream reference;
     reference << "(F^2 > " << 1.0 << ")";
 
-    StructureFactorCalculator_sptr mock =
-        std::make_shared<MockStructureFactorCalculator>();
+    StructureFactorCalculator_sptr mock = std::make_shared<MockStructureFactorCalculator>();
     HKLFilterStructureFactor sfFilter(mock, 1.0);
     TS_ASSERT_EQUALS(sfFilter.getDescription(), reference.str());
   }
 
   void testHKLFilterStructureFactorIsAllowed() {
-    std::shared_ptr<MockStructureFactorCalculator> mock =
-        std::make_shared<MockStructureFactorCalculator>();
+    std::shared_ptr<MockStructureFactorCalculator> mock = std::make_shared<MockStructureFactorCalculator>();
 
-    EXPECT_CALL(*mock, getFSquared(_))
-        .WillOnce(Return(2.0))
-        .WillOnce(Return(0.5))
-        .WillOnce(Return(1.0));
+    EXPECT_CALL(*mock, getFSquared(_)).WillOnce(Return(2.0)).WillOnce(Return(0.5)).WillOnce(Return(1.0));
 
     HKLFilterStructureFactor sfFilter(mock, 1.0);
     TS_ASSERT(sfFilter.isAllowed(V3D(1, 1, 1)));

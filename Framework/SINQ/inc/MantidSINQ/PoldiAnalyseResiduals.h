@@ -32,24 +32,17 @@ public:
   const std::string summary() const override;
 
 protected:
-  double sumCounts(const DataObjects::Workspace2D_sptr &workspace,
-                   const std::vector<int> &workspaceIndices) const;
-  size_t numberOfPoints(const DataObjects::Workspace2D_sptr &workspace,
-                        const std::vector<int> &workspaceIndices) const;
-  void addValue(DataObjects::Workspace2D_sptr &workspace, double value,
-                const std::vector<int> &workspaceIndices) const;
+  double sumCounts(const DataObjects::Workspace2D_sptr &workspace, const std::vector<int> &workspaceIndices) const;
+  size_t numberOfPoints(const DataObjects::Workspace2D_sptr &workspace, const std::vector<int> &workspaceIndices) const;
+  void addValue(DataObjects::Workspace2D_sptr &workspace, double value, const std::vector<int> &workspaceIndices) const;
 
-  DataObjects::Workspace2D_sptr
-  calculateResidualWorkspace(const DataObjects::Workspace2D_sptr &measured,
-                             const DataObjects::Workspace2D_sptr &calculated);
-  void normalizeResiduals(DataObjects::Workspace2D_sptr &residuals,
-                          const std::vector<int> &validWorkspaceIndices);
-  double relativeCountChange(const DataObjects::Workspace2D_sptr &sum,
-                             double totalMeasuredCounts);
+  DataObjects::Workspace2D_sptr calculateResidualWorkspace(const DataObjects::Workspace2D_sptr &measured,
+                                                           const DataObjects::Workspace2D_sptr &calculated);
+  void normalizeResiduals(DataObjects::Workspace2D_sptr &residuals, const std::vector<int> &validWorkspaceIndices);
+  double relativeCountChange(const DataObjects::Workspace2D_sptr &sum, double totalMeasuredCounts);
 
-  DataObjects::Workspace2D_sptr
-  addWorkspaces(const DataObjects::Workspace2D_sptr &lhs,
-                const DataObjects::Workspace2D_sptr &rhs);
+  DataObjects::Workspace2D_sptr addWorkspaces(const DataObjects::Workspace2D_sptr &lhs,
+                                              const DataObjects::Workspace2D_sptr &rhs);
   void logIteration(int iteration, double relativeChange);
 
   bool nextIterationAllowed(int iterations, double relativeChange);

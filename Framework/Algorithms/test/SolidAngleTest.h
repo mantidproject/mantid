@@ -96,11 +96,9 @@ public:
 
     // Get back the saved workspace
     Workspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(
-        output = AnalysisDataService::Instance().retrieve(outputSpace));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(outputSpace));
     Workspace_sptr input;
-    TS_ASSERT_THROWS_NOTHING(
-        input = AnalysisDataService::Instance().retrieve(inputSpace));
+    TS_ASSERT_THROWS_NOTHING(input = AnalysisDataService::Instance().retrieve(inputSpace));
 
     Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output);
     Workspace2D_sptr input2D = std::dynamic_pointer_cast<Workspace2D>(input);
@@ -141,11 +139,9 @@ public:
 
     // Get back the saved workspace
     Workspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(
-        output = AnalysisDataService::Instance().retrieve(outputSpace));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(outputSpace));
     Workspace_sptr input;
-    TS_ASSERT_THROWS_NOTHING(
-        input = AnalysisDataService::Instance().retrieve(inputSpace));
+    TS_ASSERT_THROWS_NOTHING(input = AnalysisDataService::Instance().retrieve(inputSpace));
 
     Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output);
     Workspace2D_sptr input2D = std::dynamic_pointer_cast<Workspace2D>(input);
@@ -186,8 +182,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg1.execute());
     TS_ASSERT(alg1.isExecuted());
     Workspace_sptr output1;
-    TS_ASSERT_THROWS_NOTHING(
-        output1 = AnalysisDataService::Instance().retrieve(outputWorkspace1));
+    TS_ASSERT_THROWS_NOTHING(output1 = AnalysisDataService::Instance().retrieve(outputWorkspace1));
 
     if (!alg2.isInitialized())
       alg2.initialize();
@@ -197,13 +192,10 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg2.execute());
     TS_ASSERT(alg2.isExecuted());
     Workspace_sptr output2;
-    TS_ASSERT_THROWS_NOTHING(
-        output2 = AnalysisDataService::Instance().retrieve(outputWorkspace2));
+    TS_ASSERT_THROWS_NOTHING(output2 = AnalysisDataService::Instance().retrieve(outputWorkspace2));
 
-    Workspace2D_sptr output2D_1 =
-        std::dynamic_pointer_cast<Workspace2D>(output1);
-    Workspace2D_sptr output2D_2 =
-        std::dynamic_pointer_cast<Workspace2D>(output2);
+    Workspace2D_sptr output2D_1 = std::dynamic_pointer_cast<Workspace2D>(output1);
+    Workspace2D_sptr output2D_2 = std::dynamic_pointer_cast<Workspace2D>(output2);
     const size_t numberOfSpectra1 = output2D_1->getNumberHistograms();
     const size_t numberOfSpectra2 = output2D_2->getNumberHistograms();
     TS_ASSERT_EQUALS(numberOfSpectra1, numberOfSpectra2);
@@ -237,9 +229,7 @@ public:
     m_testee.setPropertyValue("InputWorkspace", "__ws");
     m_testee.setPropertyValue("OutputWorkspace", "__ws");
   }
-  void testSolidAnglePerformance() {
-    TS_ASSERT_THROWS_NOTHING(m_testee.execute());
-  }
+  void testSolidAnglePerformance() { TS_ASSERT_THROWS_NOTHING(m_testee.execute()); }
 
 private:
   SolidAngle m_testee;

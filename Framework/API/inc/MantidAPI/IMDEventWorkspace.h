@@ -33,28 +33,22 @@ namespace API {
  * @date Dec 3, 2010
  *
  * */
-class MANTID_API_DLL IMDEventWorkspace : public API::IMDWorkspace,
-                                         public API::MultipleExperimentInfos {
+class MANTID_API_DLL IMDEventWorkspace : public API::IMDWorkspace, public API::MultipleExperimentInfos {
 public:
   IMDEventWorkspace();
 
   /// Returns a clone of the workspace
-  IMDEventWorkspace_uptr clone() const {
-    return IMDEventWorkspace_uptr(doClone());
-  }
+  IMDEventWorkspace_uptr clone() const { return IMDEventWorkspace_uptr(doClone()); }
 
   /// Returns a default-initialized clone of the workspace
-  IMDEventWorkspace_uptr cloneEmpty() const {
-    return IMDEventWorkspace_uptr(doCloneEmpty());
-  }
+  IMDEventWorkspace_uptr cloneEmpty() const { return IMDEventWorkspace_uptr(doCloneEmpty()); }
 
   /// Perform initialization after dimensions (and others) have been set.
   virtual void initialize() = 0;
   IMDEventWorkspace &operator=(const IMDEventWorkspace &) = delete;
 
   /// Get the minimum extents that hold the data
-  virtual std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>>
-  getMinimumExtents(size_t depth = 2) const = 0;
+  virtual std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> getMinimumExtents(size_t depth = 2) const = 0;
 
   /// Returns some information about the box controller, to be displayed in the
   /// GUI, for example
@@ -63,8 +57,7 @@ public:
   virtual Mantid::API::BoxController_sptr getBoxController() = 0;
   virtual Mantid::API::BoxController_const_sptr getBoxController() const = 0;
 
-  virtual void getBoxes(std::vector<API::IMDNode *> &boxes, size_t maxDepth,
-                        bool leafOnly) = 0;
+  virtual void getBoxes(std::vector<API::IMDNode *> &boxes, size_t maxDepth, bool leafOnly) = 0;
 
   /// @return true if the workspace is file-backed
   virtual bool isFileBacked() const = 0;
@@ -95,24 +88,19 @@ public:
 
   bool threadSafe() const override;
 
-  virtual void setCoordinateSystem(
-      const Mantid::Kernel::SpecialCoordinateSystem coordinateSystem) = 0;
+  virtual void setCoordinateSystem(const Mantid::Kernel::SpecialCoordinateSystem coordinateSystem) = 0;
 
   /// Preferred visual normalizaiton method for any histo workspaces created
   /// from this.
-  virtual void setDisplayNormalizationHisto(
-      Mantid::API::MDNormalization preferredNormalizationHisto) = 0;
+  virtual void setDisplayNormalizationHisto(Mantid::API::MDNormalization preferredNormalizationHisto) = 0;
   Mantid::API::MDNormalization displayNormalizationHisto() const override = 0;
 
   /// Preferred visual normalization method.
-  virtual void setDisplayNormalization(
-      Mantid::API::MDNormalization preferredNormalization) = 0;
+  virtual void setDisplayNormalization(Mantid::API::MDNormalization preferredNormalization) = 0;
   Mantid::API::MDNormalization displayNormalization() const override = 0;
 
   // Check if this class has an oriented lattice on a sample object
-  virtual bool hasOrientedLattice() const override {
-    return MultipleExperimentInfos::hasOrientedLattice();
-  }
+  virtual bool hasOrientedLattice() const override { return MultipleExperimentInfos::hasOrientedLattice(); }
 
   virtual void setBox(API::IMDNode *box) = 0;
 

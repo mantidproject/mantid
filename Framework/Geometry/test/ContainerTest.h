@@ -30,8 +30,7 @@ public:
   void test_Default_Constructor_Has_No_Sample_Shape() {
     Container can;
     TS_ASSERT_EQUALS(false, can.hasCustomizableSampleShape());
-    TS_ASSERT_THROWS(can.createSampleShape(Container::ShapeArgs()),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(can.createSampleShape(Container::ShapeArgs()), const std::runtime_error &);
   }
 
   void test_Construction_With_XML_Assumes_XML_For_Can_Itself() {
@@ -52,14 +51,9 @@ public:
                         "<radius val=\"1.0\" /> "
                         "</sphere></samplegeometry>");
     IObject_sptr sampleShape;
-    TS_ASSERT_THROWS_NOTHING(
-        sampleShape = can->createSampleShape(Container::ShapeArgs()));
+    TS_ASSERT_THROWS_NOTHING(sampleShape = can->createSampleShape(Container::ShapeArgs()));
     TS_ASSERT(sampleShape->hasValidShape());
-    TS_ASSERT_DELTA(
-        1.0,
-        getSphereRadius(
-            dynamic_cast<const Mantid::Geometry::CSGObject &>(*sampleShape)),
-        1e-10);
+    TS_ASSERT_DELTA(1.0, getSphereRadius(dynamic_cast<const Mantid::Geometry::CSGObject &>(*sampleShape)), 1e-10);
   }
 
   void test_CreateSampleShape_Args_Override_Defaults() {
@@ -72,11 +66,7 @@ public:
     Container::ShapeArgs args = {{"radius", 0.5}};
     TS_ASSERT_THROWS_NOTHING(sampleShape = can->createSampleShape(args));
     TS_ASSERT(sampleShape->hasValidShape());
-    TS_ASSERT_DELTA(
-        0.5,
-        getSphereRadius(
-            dynamic_cast<const Mantid::Geometry::CSGObject &>(*sampleShape)),
-        1e-10);
+    TS_ASSERT_DELTA(0.5, getSphereRadius(dynamic_cast<const Mantid::Geometry::CSGObject &>(*sampleShape)), 1e-10);
   }
 
   void test_CreateSampleShape_Args_Not_Matching_Do_Nothing() {
@@ -89,11 +79,7 @@ public:
     Container::ShapeArgs args = {{"height", 0.5}};
     TS_ASSERT_THROWS_NOTHING(sampleShape = can->createSampleShape(args));
     TS_ASSERT(sampleShape->hasValidShape());
-    TS_ASSERT_DELTA(
-        1.0,
-        getSphereRadius(
-            dynamic_cast<const Mantid::Geometry::CSGObject &>(*sampleShape)),
-        1e-10);
+    TS_ASSERT_DELTA(1.0, getSphereRadius(dynamic_cast<const Mantid::Geometry::CSGObject &>(*sampleShape)), 1e-10);
   }
 
   // ---------------------------------------------------------------------------
@@ -109,13 +95,12 @@ public:
 
 private:
   Mantid::Geometry::Container_sptr createTestCan() {
-    return std::make_shared<Container>(
-        "<type name=\"usertype\"><cylinder>"
-        "<centre-of-bottom-base x=\"0.0\" y=\"0.0\" z=\"0.0\" />"
-        "<axis x=\"0.0\" y=\"1.0\" z=\"0\" />"
-        "<radius val =\"0.0030\" />"
-        "<height val =\"0.05\" />"
-        "</cylinder></type>");
+    return std::make_shared<Container>("<type name=\"usertype\"><cylinder>"
+                                       "<centre-of-bottom-base x=\"0.0\" y=\"0.0\" z=\"0.0\" />"
+                                       "<axis x=\"0.0\" y=\"1.0\" z=\"0\" />"
+                                       "<radius val =\"0.0030\" />"
+                                       "<height val =\"0.05\" />"
+                                       "</cylinder></type>");
   }
   double getSphereRadius(const Mantid::Geometry::CSGObject &shape) {
     using Mantid::Geometry::Sphere;

@@ -21,8 +21,7 @@ public:
   std::vector<double> fromComplex(const std::vector<double> &values) override;
 };
 
-using MaxentSpaceReal_sptr =
-    std::shared_ptr<Mantid::Algorithms::MaxentSpaceReal>;
+using MaxentSpaceReal_sptr = std::shared_ptr<Mantid::Algorithms::MaxentSpaceReal>;
 
 } // namespace Algorithms
 } // namespace Mantid

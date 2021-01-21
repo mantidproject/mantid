@@ -39,9 +39,8 @@ class VectorCurve : public DataCurve {
 public:
   enum VectorStyle { XYXY, XYAM };
 
-  VectorCurve(VectorStyle style, Table *t, const QString &xColName,
-              const char *name, const QString &endCol1, const QString &endCol2,
-              int startRow, int endRow);
+  VectorCurve(VectorStyle style, Table *t, const QString &xColName, const char *name, const QString &endCol1,
+              const QString &endCol2, int startRow, int endRow);
   ~VectorCurve() override;
 
   enum Position { Tail, Middle, Head };
@@ -52,11 +51,9 @@ public:
 
   using DataCurve::draw; // Unhide base class method (avoids Intel compiler
                          // warning)
-  void draw(QPainter *painter, const QwtScaleMap &xMap, const QwtScaleMap &yMap,
-            int from, int to) const override;
+  void draw(QPainter *painter, const QwtScaleMap &xMap, const QwtScaleMap &yMap, int from, int to) const override;
 
-  void drawVector(QPainter *painter, const QwtScaleMap &xMap,
-                  const QwtScaleMap &yMap, int from, int to) const;
+  void drawVector(QPainter *painter, const QwtScaleMap &xMap, const QwtScaleMap &yMap, int from, int to) const;
 
   void drawArrowHead(QPainter *p, int xs, int ys, int xe, int ye) const;
   double theta(int x0, int y0, int x1, int y1) const;
@@ -91,8 +88,7 @@ public:
   void loadData() override;
 
   QString plotAssociation() const override;
-  void updateColumnNames(const QString &oldName, const QString &newName,
-                         bool updateTableName) override;
+  void updateColumnNames(const QString &oldName, const QString &newName, bool updateTableName) override;
 
 protected:
   QwtArrayData *vectorEnd;

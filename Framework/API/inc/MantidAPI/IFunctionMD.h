@@ -57,17 +57,12 @@ public:
   /// @param ws :: Shared pointer to a workspace
   void setWorkspace(std::shared_ptr<const Workspace> ws) override;
 
-  void function(const FunctionDomain &domain,
-                FunctionValues &values) const override;
-  void functionDeriv(const FunctionDomain &domain,
-                     Jacobian &jacobian) override {
-    calNumericalDeriv(domain, jacobian);
-  }
+  void function(const FunctionDomain &domain, FunctionValues &values) const override;
+  void functionDeriv(const FunctionDomain &domain, Jacobian &jacobian) override { calNumericalDeriv(domain, jacobian); }
 
 protected:
   /// Performs the function evaluations on the MD domain
-  void evaluateFunction(const FunctionDomainMD &domain,
-                        FunctionValues &values) const;
+  void evaluateFunction(const FunctionDomainMD &domain, FunctionValues &values) const;
 
   virtual void useDimension(const std::string &id);
   /// Do finction initialization after useAllDimensions() was called
@@ -78,8 +73,7 @@ protected:
   /// maps dimension id to its index in m_dimensions
   std::map<std::string, size_t> m_dimensionIndexMap;
   /// dimensions used in this function in the expected order
-  std::vector<std::shared_ptr<const Mantid::Geometry::IMDDimension>>
-      m_dimensions;
+  std::vector<std::shared_ptr<const Mantid::Geometry::IMDDimension>> m_dimensions;
 
 private:
   /// Use all the dimensions in the workspace

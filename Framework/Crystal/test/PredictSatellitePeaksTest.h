@@ -53,8 +53,7 @@ public:
 
     PeaksWorkspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING(
-        ws = std::dynamic_pointer_cast<PeaksWorkspace>(
-            AnalysisDataService::Instance().retrieve("Modulated")));
+        ws = std::dynamic_pointer_cast<PeaksWorkspace>(AnalysisDataService::Instance().retrieve("Modulated")));
     TS_ASSERT(ws);
     if (!ws)
       return;
@@ -62,10 +61,8 @@ public:
     FindUBUsingIndexedPeaks alg2;
     TS_ASSERT_THROWS_NOTHING(alg2.initialize())
     TS_ASSERT(alg2.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        alg2.setPropertyValue("ToleranceForSatellite", "0.05"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg2.setPropertyValue("PeaksWorkspace", "Modulated"));
+    TS_ASSERT_THROWS_NOTHING(alg2.setPropertyValue("ToleranceForSatellite", "0.05"));
+    TS_ASSERT_THROWS_NOTHING(alg2.setPropertyValue("PeaksWorkspace", "Modulated"));
     TS_ASSERT_THROWS_NOTHING(alg2.execute(););
     TS_ASSERT(alg2.isExecuted());
 

@@ -56,8 +56,7 @@ int getGeometryID(const std::string &selection) {
  * @param run : the run to update the logs for
  * @param logName : the name of the log to update
  */
-bool setLogFromElementIfNameIs(std::string const &searchName, Element *elem,
-                               Run &run, std::string const &logName) {
+bool setLogFromElementIfNameIs(std::string const &searchName, Element *elem, Run &run, std::string const &logName) {
   if (!elem)
     return false;
 
@@ -99,8 +98,7 @@ int LoadCanSAS1D::confidence(Kernel::FileDescriptor &descriptor) const {
     try {
       pDoc = pParser.parse(&src);
     } catch (...) {
-      throw Kernel::Exception::FileError("Unable to parse File:",
-                                         descriptor.filename());
+      throw Kernel::Exception::FileError("Unable to parse File:", descriptor.filename());
     }
     // Get pointer to root element
     Element *pRootElem = pDoc->documentElement();
@@ -116,11 +114,9 @@ int LoadCanSAS1D::confidence(Kernel::FileDescriptor &descriptor) const {
 
 /// Overwrites Algorithm Init method.
 void LoadCanSAS1D::init() {
-  declareProperty(std::make_unique<API::FileProperty>(
-                      "Filename", "", API::FileProperty::Load, ".xml"),
+  declareProperty(std::make_unique<API::FileProperty>("Filename", "", API::FileProperty::Load, ".xml"),
                   "The name of the CanSAS1D file to load");
-  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-                      "OutputWorkspace", "", Kernel::Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("OutputWorkspace", "", Kernel::Direction::Output),
                   "The name to use for the output workspace");
 }
 
@@ -142,21 +138,18 @@ void LoadCanSAS1D::exec() {
   // Get pointer to root element
   Element *pRootElem = pDoc->documentElement();
   if (!pRootElem->hasChildNodes()) {
-    throw Kernel::Exception::NotFoundError(
-        "No root element in CanSAS1D XML file", fileName);
+    throw Kernel::Exception::NotFoundError("No root element in CanSAS1D XML file", fileName);
   }
   // there can be multiple <SASentry> elements, each one contains a period which
   // will go into a workspace group if there are more than one of them
-  Poco::AutoPtr<NodeList> entryList =
-      pRootElem->getElementsByTagName("SASentry");
+  Poco::AutoPtr<NodeList> entryList = pRootElem->getElementsByTagName("SASentry");
   size_t numEntries = entryList->length();
   Workspace_sptr outputWork;
   MatrixWorkspace_sptr WS;
   std::string runName;
   switch (numEntries) {
   case 0:
-    throw Exception::NotFoundError("No <SASentry>s were found in the file",
-                                   fileName);
+    throw Exception::NotFoundError("No <SASentry>s were found in the file", fileName);
     break;
   case 1:
     // the value of the string runName is unused in this case
@@ -183,9 +176,7 @@ void LoadCanSAS1D::exec() {
  * @throw NotFoundError if any expected elements couldn't be read
  * @throw NotImplementedError if the entry doesn't contain exactly one run
  */
-MatrixWorkspace_sptr
-LoadCanSAS1D::loadEntry(Poco::XML::Node *const workspaceData,
-                        std::string &runName) {
+MatrixWorkspace_sptr LoadCanSAS1D::loadEntry(Poco::XML::Node *const workspaceData, std::string &runName) {
   auto *workspaceElem = dynamic_cast<Element *>(workspaceData);
   check(workspaceElem, "<SASentry>");
   runName = workspaceElem->getAttribute("name");
@@ -200,12 +191,10 @@ LoadCanSAS1D::loadEntry(Poco::XML::Node *const workspaceData,
   Element *sasDataElem = workspaceElem->getChildElement("SASdata");
   check(sasDataElem, "<SASdata>");
   // getting number of Idata elements in the xml file
-  Poco::AutoPtr<NodeList> idataElemList =
-      sasDataElem->getElementsByTagName("Idata");
+  Poco::AutoPtr<NodeList> idataElemList = sasDataElem->getElementsByTagName("Idata");
   size_t nBins = idataElemList->length();
 
-  MatrixWorkspace_sptr dataWS =
-      WorkspaceFactory::Instance().create("Workspace2D", 1, nBins, nBins);
+  MatrixWorkspace_sptr dataWS = WorkspaceFactory::Instance().create("Workspace2D", 1, nBins, nBins);
 
   createLogs(workspaceElem, dataWS);
 
@@ -303,12 +292,10 @@ LoadCanSAS1D::loadEntry(Poco::XML::Node *const workspaceData,
  * @param[in] name element name
  *  @throw NotFoundError if the pointer is NULL
  */
-void LoadCanSAS1D::check(const Poco::XML::Element *const toCheck,
-                         const std::string &name) const {
+void LoadCanSAS1D::check(const Poco::XML::Element *const toCheck, const std::string &name) const {
   if (!toCheck) {
     std::string fileName = getPropertyValue("Filename");
-    throw Kernel::Exception::NotFoundError(
-        "<" + name + "> element not found in CanSAS1D XML file", fileName);
+    throw Kernel::Exception::NotFoundError("<" + name + "> element not found in CanSAS1D XML file", fileName);
   }
 }
 /** Appends the first workspace to the second workspace. The second workspace
@@ -320,9 +307,8 @@ void LoadCanSAS1D::check(const Poco::XML::Element *const toCheck,
  * @param[out] container the data will be added to this group
  * @throw ExistsError if a workspace with this name had already been added
  */
-void LoadCanSAS1D::appendDataToOutput(
-    const API::MatrixWorkspace_sptr &newWork, const std::string &newWorkName,
-    const API::WorkspaceGroup_sptr &container) {
+void LoadCanSAS1D::appendDataToOutput(const API::MatrixWorkspace_sptr &newWork, const std::string &newWorkName,
+                                      const API::WorkspaceGroup_sptr &container) {
   // the name of the property, like the workspace name must be different for
   // each workspace. Add "_run" at the end to stop problems with names like
   // "outputworkspace"
@@ -331,8 +317,7 @@ void LoadCanSAS1D::appendDataToOutput(
   // the following code registers the workspace with the AnalysisDataService and
   // with the workspace group, I'm taking this oone trust I don't know why it's
   // done this way sorry, Steve
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-      propName, newWorkName, Direction::Output));
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(propName, newWorkName, Direction::Output));
   container->addWorkspace(newWork);
   setProperty(propName, newWork);
 }
@@ -340,25 +325,20 @@ void LoadCanSAS1D::appendDataToOutput(
  * @param inst_name :: The name written in the Nexus file
  * @param localWorkspace :: The workspace to insert the instrument into
  */
-void LoadCanSAS1D::runLoadInstrument(
-    const std::string &inst_name,
-    const API::MatrixWorkspace_sptr &localWorkspace) {
+void LoadCanSAS1D::runLoadInstrument(const std::string &inst_name, const API::MatrixWorkspace_sptr &localWorkspace) {
 
   API::IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
 
   // Now execute the Child Algorithm. Catch and log any error, but don't stop.
   try {
     loadInst->setPropertyValue("InstrumentName", inst_name);
-    loadInst->setProperty<API::MatrixWorkspace_sptr>("Workspace",
-                                                     localWorkspace);
-    loadInst->setProperty("RewriteSpectraMap",
-                          Mantid::Kernel::OptionalBool(true));
+    loadInst->setProperty<API::MatrixWorkspace_sptr>("Workspace", localWorkspace);
+    loadInst->setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(true));
     loadInst->execute();
   } catch (std::invalid_argument &) {
     g_log.information("Invalid argument to LoadInstrument Child Algorithm");
   } catch (std::runtime_error &) {
-    g_log.information(
-        "Unable to successfully run LoadInstrument Child Algorithm");
+    g_log.information("Unable to successfully run LoadInstrument Child Algorithm");
   }
 }
 
@@ -366,36 +346,30 @@ void LoadCanSAS1D::runLoadInstrument(
  *  @param[in] sasEntry the entry corresponding to the passed workspace
  *  @param[in] wSpace the log will be created in this workspace
  */
-void LoadCanSAS1D::createLogs(const Poco::XML::Element *const sasEntry,
-                              const API::MatrixWorkspace_sptr &wSpace) const {
+void LoadCanSAS1D::createLogs(const Poco::XML::Element *const sasEntry, const API::MatrixWorkspace_sptr &wSpace) const {
   API::Run &run = wSpace->mutableRun();
   Element *runText = sasEntry->getChildElement("Run");
   check(runText, "Run");
-  run.addLogData(
-      new PropertyWithValue<std::string>("run_number", runText->innerText()));
+  run.addLogData(new PropertyWithValue<std::string>("run_number", runText->innerText()));
 
   Element *process = sasEntry->getChildElement("SASprocess");
   if (process) {
     Poco::AutoPtr<NodeList> terms = process->getElementsByTagName("term");
     auto setUserFile = false;
     auto setBatchFile = false;
-    for (unsigned int i = 0;
-         i < terms->length() && (!setUserFile || !setBatchFile); ++i) {
+    for (unsigned int i = 0; i < terms->length() && (!setUserFile || !setBatchFile); ++i) {
       Node *term = terms->item(i);
       auto *elem = dynamic_cast<Element *>(term);
-      if (!setUserFile &&
-          setLogFromElementIfNameIs("user_file", elem, run, "UserFile"))
+      if (!setUserFile && setLogFromElementIfNameIs("user_file", elem, run, "UserFile"))
         setUserFile = true;
-      else if (!setBatchFile &&
-               setLogFromElementIfNameIs("batch_file", elem, run, "BatchFile"))
+      else if (!setBatchFile && setLogFromElementIfNameIs("batch_file", elem, run, "BatchFile"))
         setBatchFile = true;
     }
   }
 }
 
-void LoadCanSAS1D::createSampleInformation(
-    const Poco::XML::Element *const sasEntry,
-    const Mantid::API::MatrixWorkspace_sptr &wSpace) const {
+void LoadCanSAS1D::createSampleInformation(const Poco::XML::Element *const sasEntry,
+                                           const Mantid::API::MatrixWorkspace_sptr &wSpace) const {
   auto &sample = wSpace->mutableSample();
 
   // Get the thickness information
@@ -409,8 +383,7 @@ void LoadCanSAS1D::createSampleInformation(
 
   auto sasInstrumentElement = sasEntry->getChildElement("SASinstrument");
   check(sasInstrumentElement, "<SASinstrument>");
-  auto sasCollimationElement =
-      sasInstrumentElement->getChildElement("SAScollimation");
+  auto sasCollimationElement = sasInstrumentElement->getChildElement("SAScollimation");
   check(sasCollimationElement, "<SAScollimation>");
 
   // Since we have shipped a sligthly invalid CanSAS1D format we need to

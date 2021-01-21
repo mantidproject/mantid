@@ -37,9 +37,7 @@ const std::string CalculateSlits::name() const { return "CalculateSlits"; }
 int CalculateSlits::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string CalculateSlits::category() const {
-  return "Reflectometry\\ISIS";
-}
+const std::string CalculateSlits::category() const { return "Reflectometry\\ISIS"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string CalculateSlits::summary() const {
@@ -58,17 +56,12 @@ void CalculateSlits::init() {
   declareProperty("Slit2SA", Mantid::EMPTY_DBL(),
                   "Offset in the beam direction in mm. (Due to Slit 2 being "
                   "translatable in the vertical axis)");
-  declareProperty("Resolution", Mantid::EMPTY_DBL(),
-                  "The Resolution that you desire to obtain in the experiment");
-  declareProperty(
-      "Footprint", Mantid::EMPTY_DBL(),
-      "The Footprint you wish to achieve for the experiment, in mm");
+  declareProperty("Resolution", Mantid::EMPTY_DBL(), "The Resolution that you desire to obtain in the experiment");
+  declareProperty("Footprint", Mantid::EMPTY_DBL(), "The Footprint you wish to achieve for the experiment, in mm");
   declareProperty("Angle", Mantid::EMPTY_DBL(), "Incident angle in degrees.");
 
-  declareProperty("Slit1", Mantid::EMPTY_DBL(), "Calculated Slit 1 width in mm",
-                  Direction::Output);
-  declareProperty("Slit2", Mantid::EMPTY_DBL(), "Calculated Slit 2 width in mm",
-                  Direction::Output);
+  declareProperty("Slit1", Mantid::EMPTY_DBL(), "Calculated Slit 1 width in mm", Direction::Output);
+  declareProperty("Slit2", Mantid::EMPTY_DBL(), "Calculated Slit 2 width in mm", Direction::Output);
 }
 
 //----------------------------------------------------------------------------------------------

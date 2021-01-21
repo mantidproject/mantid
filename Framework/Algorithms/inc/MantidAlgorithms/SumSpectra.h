@@ -50,9 +50,7 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return (1); }
-  const std::vector<std::string> seeAlso() const override {
-    return {"SumNeighbours"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"SumNeighbours"}; }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Transforms\\Grouping"; }
   /// Cross-input validation
@@ -60,22 +58,18 @@ public:
 
 private:
   /// Handle logic for RebinnedOutput workspaces
-  void doFractionalSum(const API::MatrixWorkspace_sptr &outputWorkspace,
-                       API::Progress &progress, size_t &numSpectra,
+  void doFractionalSum(const API::MatrixWorkspace_sptr &outputWorkspace, API::Progress &progress, size_t &numSpectra,
                        size_t &numMasked, size_t &numZeros);
   /// Handle logic for Workspace2D workspaces
-  void doSimpleSum(const API::MatrixWorkspace_sptr &outputWorkspace,
-                   API::Progress &progress, size_t &numSpectra,
+  void doSimpleSum(const API::MatrixWorkspace_sptr &outputWorkspace, API::Progress &progress, size_t &numSpectra,
                    size_t &numMasked, size_t &numZeros);
 
   // Overridden Algorithm methods
   void init() override;
   void exec() override;
-  void execEvent(const API::MatrixWorkspace_sptr &outputWorkspace,
-                 API::Progress &progress, size_t &numSpectra, size_t &numMasked,
-                 size_t &numZeros);
-  specnum_t
-  getOutputSpecNo(const API::MatrixWorkspace_const_sptr &localworkspace);
+  void execEvent(const API::MatrixWorkspace_sptr &outputWorkspace, API::Progress &progress, size_t &numSpectra,
+                 size_t &numMasked, size_t &numZeros);
+  specnum_t getOutputSpecNo(const API::MatrixWorkspace_const_sptr &localworkspace);
 
   API::MatrixWorkspace_sptr replaceSpecialValues();
   void determineIndices(const size_t numberOfSpectra);

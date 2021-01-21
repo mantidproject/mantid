@@ -31,8 +31,7 @@ namespace {
  * @param name The name of the object
  * @param mapping A dict object
  */
-void addFromDict(PropertyManagerDataServiceImpl &self, const std::string &name,
-                 const dict &mapping) {
+void addFromDict(PropertyManagerDataServiceImpl &self, const std::string &name, const dict &mapping) {
   self.add(name, createPropertyManager(mapping));
 }
 /**
@@ -42,8 +41,7 @@ void addFromDict(PropertyManagerDataServiceImpl &self, const std::string &name,
  * @param name The name of the object
  * @param mapping A dict object
  */
-void addOrReplaceFromDict(PropertyManagerDataServiceImpl &self,
-                          const std::string &name, const dict &mapping) {
+void addOrReplaceFromDict(PropertyManagerDataServiceImpl &self, const std::string &name, const dict &mapping) {
   self.addOrReplace(name, createPropertyManager(mapping));
 }
 } // namespace
@@ -54,13 +52,11 @@ void export_PropertyManagerDataService() {
 
   register_ptr_to_python<PropertyManager_wptr>();
 
-  using PMDExporter =
-      DataServiceExporter<PropertyManagerDataServiceImpl, PropertyManager_sptr>;
+  using PMDExporter = DataServiceExporter<PropertyManagerDataServiceImpl, PropertyManager_sptr>;
   auto pmdType = PMDExporter::define("PropertyManagerDataServiceImpl");
 
   pmdType
-      .def("Instance", &PropertyManagerDataService::Instance,
-           return_value_policy<reference_existing_object>(),
+      .def("Instance", &PropertyManagerDataService::Instance, return_value_policy<reference_existing_object>(),
            "Return a reference to the singleton instance")
       .staticmethod("Instance")
       // adds an overload from a dictionary

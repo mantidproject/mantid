@@ -36,12 +36,10 @@ using namespace testing;
 class vtkMDHexFactoryTest : public CxxTest::TestSuite {
 private:
   void doDimensionalityTesting(bool doCheckDimensionality) {
-    Mantid::DataObjects::MDEventWorkspace3Lean::sptr input_ws =
-        MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 1);
+    Mantid::DataObjects::MDEventWorkspace3Lean::sptr input_ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 1);
 
     using namespace Mantid::API;
-    IAlgorithm_sptr slice =
-        AlgorithmManager::Instance().createUnmanaged("SliceMD");
+    IAlgorithm_sptr slice = AlgorithmManager::Instance().createUnmanaged("SliceMD");
     slice->initialize();
     slice->setProperty("InputWorkspace", input_ws);
     slice->setPropertyValue("AlignedDim0", "Axis0, -10, 10, 1");
@@ -50,15 +48,13 @@ private:
     slice->setPropertyValue("OutputWorkspace", "binned");
     slice->execute();
 
-    Workspace_sptr binned_ws =
-        AnalysisDataService::Instance().retrieve("binned");
+    Workspace_sptr binned_ws = AnalysisDataService::Instance().retrieve("binned");
     FakeProgressAction progressUpdater;
 
     vtkMDHexFactory factory(VATES::VolumeNormalization);
     factory.setCheckDimensionality(doCheckDimensionality);
     if (doCheckDimensionality) {
-      TS_ASSERT_THROWS(factory.initialize(binned_ws),
-                       const std::runtime_error &);
+      TS_ASSERT_THROWS(factory.initialize(binned_ws), const std::runtime_error &);
     } else {
       TS_ASSERT_THROWS_NOTHING(factory.initialize(binned_ws));
       vtkSmartPointer<vtkDataSet> product;
@@ -72,8 +68,7 @@ public:
   void testCreateWithoutInitalizeThrows() {
     FakeProgressAction progressUpdater;
     vtkMDHexFactory factory(VATES::VolumeNormalization);
-    TSM_ASSERT_THROWS("Have NOT initalized object. Should throw.",
-                      factory.create(progressUpdater),
+    TSM_ASSERT_THROWS("Have NOT initalized object. Should throw.", factory.create(progressUpdater),
                       const std::runtime_error &);
   }
 
@@ -81,8 +76,7 @@ public:
     vtkMDHexFactory factory(VATES::VolumeNormalization);
 
     IMDEventWorkspace *ws = nullptr;
-    TSM_ASSERT_THROWS("This is a NULL workspace. Should throw.",
-                      factory.initialize(Workspace_sptr(ws)),
+    TSM_ASSERT_THROWS("This is a NULL workspace. Should throw.", factory.initialize(Workspace_sptr(ws)),
                       const std::invalid_argument &);
   }
 
@@ -93,8 +87,7 @@ public:
 
   void testInitializeDelegatesToSuccessor() {
     auto mockSuccessor = new MockvtkDataSetFactory();
-    auto uniqueSuccessor =
-        std::unique_ptr<MockvtkDataSetFactory>(mockSuccessor);
+    auto uniqueSuccessor = std::unique_ptr<MockvtkDataSetFactory>(mockSuccessor);
     EXPECT_CALL(*mockSuccessor, initialize(_)).Times(1);
     EXPECT_CALL(*mockSuccessor, getFactoryTypeName()).Times(1);
 
@@ -106,15 +99,13 @@ public:
 
     // Need the raw pointer to test assertions here. Object is not yet deleted
     // as the factory is still in scope.
-    TSM_ASSERT("Successor has not been used properly.",
-               Mock::VerifyAndClearExpectations(mockSuccessor));
+    TSM_ASSERT("Successor has not been used properly.", Mock::VerifyAndClearExpectations(mockSuccessor));
   }
 
   void testCreateDelegatesToSuccessor() {
     FakeProgressAction progressUpdater;
     auto mockSuccessor = new MockvtkDataSetFactory();
-    auto uniqueSuccessor =
-        std::unique_ptr<MockvtkDataSetFactory>(mockSuccessor);
+    auto uniqueSuccessor = std::unique_ptr<MockvtkDataSetFactory>(mockSuccessor);
     EXPECT_CALL(*mockSuccessor, initialize(_)).Times(1);
     EXPECT_CALL(*mockSuccessor, create(Ref(progressUpdater)))
         .Times(1)
@@ -128,8 +119,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(factory.initialize(ws));
     TS_ASSERT_THROWS_NOTHING(factory.create(progressUpdater));
 
-    TSM_ASSERT("Successor has not been used properly.",
-               Mock::VerifyAndClearExpectations(mockSuccessor));
+    TSM_ASSERT("Successor has not been used properly.", Mock::VerifyAndClearExpectations(mockSuccessor));
   }
 
   void testOnInitaliseCannotDelegateToSuccessor() {
@@ -145,8 +135,7 @@ public:
     FakeProgressAction progressUpdater;
     vtkMDHexFactory factory(VATES::VolumeNormalization);
     // initialize not called!
-    TS_ASSERT_THROWS(factory.create(progressUpdater),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(factory.create(progressUpdater), const std::runtime_error &);
   }
 
   void test_roundUp_positive_numbers() {
@@ -183,8 +172,7 @@ public:
   void test_3DWorkspace() {
     FakeProgressAction progressUpdate;
 
-    Mantid::DataObjects::MDEventWorkspace3Lean::sptr ws =
-        MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 1);
+    Mantid::DataObjects::MDEventWorkspace3Lean::sptr ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 1);
     vtkMDHexFactory factory(VATES::VolumeNormalization);
     factory.initialize(ws);
     vtkSmartPointer<vtkDataSet> product;
@@ -195,18 +183,12 @@ public:
     const size_t expected_n_cells = 1000;
     const size_t expected_n_signals = expected_n_cells;
 
-    TSM_ASSERT_EQUALS("Wrong number of points", expected_n_points,
+    TSM_ASSERT_EQUALS("Wrong number of points", expected_n_points, product->GetNumberOfPoints());
+    TSM_ASSERT_EQUALS("Wrong number of cells", expected_n_cells, product->GetNumberOfCells());
+    TSM_ASSERT_EQUALS("Wrong number of points to cells. Hexahedron has 8 vertexes.", expected_n_cells * 8,
                       product->GetNumberOfPoints());
-    TSM_ASSERT_EQUALS("Wrong number of cells", expected_n_cells,
-                      product->GetNumberOfCells());
-    TSM_ASSERT_EQUALS(
-        "Wrong number of points to cells. Hexahedron has 8 vertexes.",
-        expected_n_cells * 8, product->GetNumberOfPoints());
-    TSM_ASSERT_EQUALS(
-        "No signal Array", "signal",
-        std::string(product->GetCellData()->GetArray(0)->GetName()));
-    TSM_ASSERT_EQUALS("Wrong sized signal Array", expected_n_signals,
-                      product->GetCellData()->GetArray(0)->GetSize());
+    TSM_ASSERT_EQUALS("No signal Array", "signal", std::string(product->GetCellData()->GetArray(0)->GetName()));
+    TSM_ASSERT_EQUALS("Wrong sized signal Array", expected_n_signals, product->GetCellData()->GetArray(0)->GetSize());
 
     /*Check dataset bounds*/
     double *bounds = product->GetBounds();
@@ -222,8 +204,7 @@ public:
     MockProgressAction mockProgressAction;
     EXPECT_CALL(mockProgressAction, eventRaised(_)).Times(AtLeast(1));
 
-    Mantid::DataObjects::MDEventWorkspace4Lean::sptr ws =
-        MDEventsTestHelper::makeMDEW<4>(5, -10.0, 10.0, 1);
+    Mantid::DataObjects::MDEventWorkspace4Lean::sptr ws = MDEventsTestHelper::makeMDEW<4>(5, -10.0, 10.0, 1);
     vtkMDHexFactory factory(VATES::VolumeNormalization);
     factory.initialize(ws);
     vtkSmartPointer<vtkDataSet> product;
@@ -234,18 +215,12 @@ public:
     const size_t expected_n_cells = 125;
     const size_t expected_n_signals = expected_n_cells;
 
-    TSM_ASSERT_EQUALS("Wrong number of points", expected_n_points,
+    TSM_ASSERT_EQUALS("Wrong number of points", expected_n_points, product->GetNumberOfPoints());
+    TSM_ASSERT_EQUALS("Wrong number of cells", expected_n_cells, product->GetNumberOfCells());
+    TSM_ASSERT_EQUALS("Wrong number of points to cells. Hexahedron has 8 vertexes.", expected_n_cells * 8,
                       product->GetNumberOfPoints());
-    TSM_ASSERT_EQUALS("Wrong number of cells", expected_n_cells,
-                      product->GetNumberOfCells());
-    TSM_ASSERT_EQUALS(
-        "Wrong number of points to cells. Hexahedron has 8 vertexes.",
-        expected_n_cells * 8, product->GetNumberOfPoints());
-    TSM_ASSERT_EQUALS(
-        "No signal Array", "signal",
-        std::string(product->GetCellData()->GetArray(0)->GetName()));
-    TSM_ASSERT_EQUALS("Wrong sized signal Array", expected_n_signals,
-                      product->GetCellData()->GetArray(0)->GetSize());
+    TSM_ASSERT_EQUALS("No signal Array", "signal", std::string(product->GetCellData()->GetArray(0)->GetName()));
+    TSM_ASSERT_EQUALS("Wrong sized signal Array", expected_n_signals, product->GetCellData()->GetArray(0)->GetSize());
 
     /*Check dataset bounds*/
     double *bounds = product->GetBounds();
@@ -269,8 +244,7 @@ public:
     MockProgressAction mockProgressAction;
     EXPECT_CALL(mockProgressAction, eventRaised(_)).Times(AtLeast(1));
 
-    Mantid::DataObjects::MDEventWorkspace4Lean::sptr ws =
-        MDEventsTestHelper::makeMDEW<4>(4, -10.0, 10.0, 1);
+    Mantid::DataObjects::MDEventWorkspace4Lean::sptr ws = MDEventsTestHelper::makeMDEW<4>(4, -10.0, 10.0, 1);
     vtkMDHexFactory factory(VATES::VolumeNormalization);
     factory.initialize(ws);
     vtkSmartPointer<vtkDataSet> product;
@@ -281,18 +255,12 @@ public:
     const size_t expected_n_cells = 64;
     const size_t expected_n_signals = expected_n_cells;
 
-    TSM_ASSERT_EQUALS("Wrong number of points", expected_n_points,
+    TSM_ASSERT_EQUALS("Wrong number of points", expected_n_points, product->GetNumberOfPoints());
+    TSM_ASSERT_EQUALS("Wrong number of cells", expected_n_cells, product->GetNumberOfCells());
+    TSM_ASSERT_EQUALS("Wrong number of points to cells. Hexahedron has 8 vertexes.", expected_n_cells * 8,
                       product->GetNumberOfPoints());
-    TSM_ASSERT_EQUALS("Wrong number of cells", expected_n_cells,
-                      product->GetNumberOfCells());
-    TSM_ASSERT_EQUALS(
-        "Wrong number of points to cells. Hexahedron has 8 vertexes.",
-        expected_n_cells * 8, product->GetNumberOfPoints());
-    TSM_ASSERT_EQUALS(
-        "No signal Array", "signal",
-        std::string(product->GetCellData()->GetArray(0)->GetName()));
-    TSM_ASSERT_EQUALS("Wrong sized signal Array", expected_n_signals,
-                      product->GetCellData()->GetArray(0)->GetSize());
+    TSM_ASSERT_EQUALS("No signal Array", "signal", std::string(product->GetCellData()->GetArray(0)->GetName()));
+    TSM_ASSERT_EQUALS("Wrong sized signal Array", expected_n_signals, product->GetCellData()->GetArray(0)->GetSize());
   }
 };
 
@@ -325,18 +293,12 @@ public:
     const size_t expected_n_cells = 1000000;
     const size_t expected_n_signals = expected_n_cells;
 
-    TSM_ASSERT_EQUALS("Wrong number of points", expected_n_points,
+    TSM_ASSERT_EQUALS("Wrong number of points", expected_n_points, product->GetNumberOfPoints());
+    TSM_ASSERT_EQUALS("Wrong number of cells", expected_n_cells, product->GetNumberOfCells());
+    TSM_ASSERT_EQUALS("Wrong number of points to cells. Hexahedron has 8 vertexes.", expected_n_cells * 8,
                       product->GetNumberOfPoints());
-    TSM_ASSERT_EQUALS("Wrong number of cells", expected_n_cells,
-                      product->GetNumberOfCells());
-    TSM_ASSERT_EQUALS(
-        "Wrong number of points to cells. Hexahedron has 8 vertexes.",
-        expected_n_cells * 8, product->GetNumberOfPoints());
-    TSM_ASSERT_EQUALS(
-        "No signal Array", "signal",
-        std::string(product->GetCellData()->GetArray(0)->GetName()));
-    TSM_ASSERT_EQUALS("Wrong sized signal Array", expected_n_signals,
-                      product->GetCellData()->GetArray(0)->GetSize());
+    TSM_ASSERT_EQUALS("No signal Array", "signal", std::string(product->GetCellData()->GetArray(0)->GetName()));
+    TSM_ASSERT_EQUALS("Wrong sized signal Array", expected_n_signals, product->GetCellData()->GetArray(0)->GetSize());
 
     if (false) {
       /*Check dataset bounds - this call takes a significant amount of time and
@@ -365,17 +327,11 @@ public:
     const size_t expected_n_cells = 4 * 32768;
     const size_t expected_n_signals = expected_n_cells;
 
-    TSM_ASSERT_EQUALS("Wrong number of points", expected_n_points,
+    TSM_ASSERT_EQUALS("Wrong number of points", expected_n_points, product->GetNumberOfPoints());
+    TSM_ASSERT_EQUALS("Wrong number of cells", expected_n_cells, product->GetNumberOfCells());
+    TSM_ASSERT_EQUALS("Wrong number of points to cells. Hexahedron has 8 vertexes.", expected_n_cells * 8,
                       product->GetNumberOfPoints());
-    TSM_ASSERT_EQUALS("Wrong number of cells", expected_n_cells,
-                      product->GetNumberOfCells());
-    TSM_ASSERT_EQUALS(
-        "Wrong number of points to cells. Hexahedron has 8 vertexes.",
-        expected_n_cells * 8, product->GetNumberOfPoints());
-    TSM_ASSERT_EQUALS(
-        "No signal Array", "signal",
-        std::string(product->GetCellData()->GetArray(0)->GetName()));
-    TSM_ASSERT_EQUALS("Wrong sized signal Array", expected_n_signals,
-                      product->GetCellData()->GetArray(0)->GetSize());
+    TSM_ASSERT_EQUALS("No signal Array", "signal", std::string(product->GetCellData()->GetArray(0)->GetName()));
+    TSM_ASSERT_EQUALS("Wrong sized signal Array", expected_n_signals, product->GetCellData()->GetArray(0)->GetSize());
   }
 };

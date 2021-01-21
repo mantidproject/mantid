@@ -23,9 +23,7 @@ class FindFilesWorkerTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static FindFilesWorkerTest *createSuite() {
-    return new FindFilesWorkerTest();
-  }
+  static FindFilesWorkerTest *createSuite() { return new FindFilesWorkerTest(); }
   static void destroySuite(FindFilesWorkerTest *suite) { delete suite; }
 
   void test_find_file_with_algorithm() {
@@ -42,8 +40,7 @@ public:
     TS_ASSERT(widget->isFinishedSignalRecieved())
     TS_ASSERT_EQUALS(results.error, "")
     TS_ASSERT_EQUALS(results.filenames.size(), 1)
-    TS_ASSERT(
-        boost::algorithm::contains(results.filenames[0], parameters.searchText))
+    TS_ASSERT(boost::algorithm::contains(results.filenames[0], parameters.searchText))
     TS_ASSERT_EQUALS(results.valueForProperty, results.filenames[0])
   }
 
@@ -64,8 +61,7 @@ public:
     TS_ASSERT(widget->isFinishedSignalRecieved())
     TS_ASSERT_EQUALS(results.error, "")
     TS_ASSERT_EQUALS(results.filenames.size(), 1)
-    TS_ASSERT(
-        boost::algorithm::contains(results.filenames[0], parameters.searchText))
+    TS_ASSERT(boost::algorithm::contains(results.filenames[0], parameters.searchText))
     TS_ASSERT_EQUALS(results.valueForProperty, results.filenames[0])
   }
 
@@ -131,12 +127,9 @@ private:
 
   FakeFileFinderWidget *createWidget(FindFilesWorker *worker) {
     auto widget = new FakeFileFinderWidget();
-    widget->connect(worker, SIGNAL(finished(const FindFilesSearchResults &)),
-                    widget,
-                    SLOT(inspectThreadResult(const FindFilesSearchResults &)),
-                    Qt::QueuedConnection);
-    widget->connect(worker, SIGNAL(finished(const FindFilesSearchResults &)),
-                    widget, SIGNAL(fileFindingFinished()),
+    widget->connect(worker, SIGNAL(finished(const FindFilesSearchResults &)), widget,
+                    SLOT(inspectThreadResult(const FindFilesSearchResults &)), Qt::QueuedConnection);
+    widget->connect(worker, SIGNAL(finished(const FindFilesSearchResults &)), widget, SIGNAL(fileFindingFinished()),
                     Qt::QueuedConnection);
     return widget;
   }

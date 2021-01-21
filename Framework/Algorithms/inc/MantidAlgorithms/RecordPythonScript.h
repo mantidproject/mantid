@@ -25,10 +25,9 @@ namespace Algorithms {
   <li>InputWorkspace - the workspace name who's history is to be saved.</li>
   </ul>
 */
-class MANTID_ALGORITHMS_DLL RecordPythonScript
-    : public Algorithms::GeneratePythonScript,
-      public API::AlgorithmObserver,
-      public API::DeprecatedAlgorithm {
+class MANTID_ALGORITHMS_DLL RecordPythonScript : public Algorithms::GeneratePythonScript,
+                                                 public API::AlgorithmObserver,
+                                                 public API::DeprecatedAlgorithm {
 public:
   RecordPythonScript();
   /// Algorithm's name for identification

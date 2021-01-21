@@ -17,18 +17,14 @@ using namespace MantidQt::Widgets::MplCpp;
 
 namespace {
 
-Python::Object
-newMarker(FigureCanvasQt *canvas, QString const &colour, double position,
-          double minimum, double maximum, QString const &markerType,
-          boost::optional<QHash<QString, QVariant>> const &otherKwargs) {
+Python::Object newMarker(FigureCanvasQt *canvas, QString const &colour, double position, double minimum, double maximum,
+                         QString const &markerType, boost::optional<QHash<QString, QVariant>> const &otherKwargs) {
   GlobalInterpreterLock lock;
 
-  Python::Object markersModule{
-      Python::NewRef(PyImport_ImportModule("mantidqt.plotting.markers"))};
+  Python::Object markersModule{Python::NewRef(PyImport_ImportModule("mantidqt.plotting.markers"))};
 
-  auto const args = Python::NewRef(Py_BuildValue(
-      "(Osddds)", canvas->pyobj().ptr(), colour.toLatin1().constData(),
-      position, minimum, maximum, markerType.toLatin1().constData()));
+  auto const args = Python::NewRef(Py_BuildValue("(Osddds)", canvas->pyobj().ptr(), colour.toLatin1().constData(),
+                                                 position, minimum, maximum, markerType.toLatin1().constData()));
   Python::Dict kwargs = Python::qHashToDict(otherKwargs.get());
 
   auto const marker = markersModule.attr("SingleMarker")(*args, **kwargs);
@@ -51,12 +47,9 @@ namespace MplCpp {
  * @param markerType Whether the marker is vertical or horizontal
  * @param otherKwargs Other optional kwargs
  */
-SingleMarker::SingleMarker(FigureCanvasQt *canvas, QString const &color,
-                           double position, double minimum, double maximum,
-                           QString const &markerType,
-                           QHash<QString, QVariant> const &otherKwargs)
-    : InstanceHolder(newMarker(canvas, color, position, minimum, maximum,
-                               markerType, otherKwargs)) {}
+SingleMarker::SingleMarker(FigureCanvasQt *canvas, QString const &color, double position, double minimum,
+                           double maximum, QString const &markerType, QHash<QString, QVariant> const &otherKwargs)
+    : InstanceHolder(newMarker(canvas, color, position, minimum, maximum, markerType, otherKwargs)) {}
 
 /**
  * @brief Redraw the marker
@@ -90,8 +83,7 @@ void SingleMarker::setColor(QString const &color) {
 bool SingleMarker::setPosition(double position) {
   GlobalInterpreterLock lock;
 
-  auto const positionChanged =
-      Python::Object(pyobj().attr("set_position")(position));
+  auto const positionChanged = Python::Object(pyobj().attr("set_position")(position));
   return PyLong_AsLong(positionChanged.ptr()) > 0;
 }
 
@@ -117,33 +109,25 @@ void SingleMarker::setBounds(double minimum, double maximum) {
  * @brief Set the lower bound of the marker.
  * @param minimum The lower bound.
  */
-void SingleMarker::setLowerBound(double minimum) {
-  callMethodNoCheck<void>(pyobj(), "set_lower_bound", minimum);
-}
+void SingleMarker::setLowerBound(double minimum) { callMethodNoCheck<void>(pyobj(), "set_lower_bound", minimum); }
 
 /**
  * @brief Set the upper bound of the marker.
  * @param maximum The upper bound.
  */
-void SingleMarker::setUpperBound(double maximum) {
-  callMethodNoCheck<void>(pyobj(), "set_upper_bound", maximum);
-}
+void SingleMarker::setUpperBound(double maximum) { callMethodNoCheck<void>(pyobj(), "set_upper_bound", maximum); }
 
 /**
  * @brief Notifies the marker to start moving.
  * @param x The x position of the mouse press in axes coords.
  * @param y The y position of the mouse press in axes coords.
  */
-void SingleMarker::mouseMoveStart(double x, double y) {
-  callMethodNoCheck<void>(pyobj(), "mouse_move_start", x, y);
-}
+void SingleMarker::mouseMoveStart(double x, double y) { callMethodNoCheck<void>(pyobj(), "mouse_move_start", x, y); }
 
 /**
  * @brief Notifies the marker to stop moving.
  */
-void SingleMarker::mouseMoveStop() {
-  callMethodNoCheck<void>(pyobj(), "mouse_move_stop");
-}
+void SingleMarker::mouseMoveStop() { callMethodNoCheck<void>(pyobj(), "mouse_move_stop"); }
 
 /**
  * @brief Notifies the marker to start moving.

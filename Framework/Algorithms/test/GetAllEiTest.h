@@ -23,25 +23,19 @@ using namespace HistogramData;
 namespace {
 DataObjects::Workspace2D_sptr createTestingWS(bool noLogs = false) {
   double delay(2000), chopSpeed(100), inital_chop_phase(-3000);
-  auto ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
-      2, 1000, true);
+  auto ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 1000, true);
   auto pInstrument = ws->getInstrument();
   auto chopper = pInstrument->getComponentByName("chopper-position");
 
   // add chopper parameters
   auto &paramMap = ws->instrumentParameters();
-  const std::string description(
-      "The initial rotation phase of the disk used to calculate the time"
-      " for neutrons arriving at the chopper according to the formula time = "
-      "delay + initial_phase/Speed");
-  paramMap.add<double>("double", chopper.get(), "initial_phase",
-                       inital_chop_phase, &description);
-  paramMap.add<std::string>("string", chopper.get(), "ChopperDelayLog",
-                            "fermi_delay");
-  paramMap.add<std::string>("string", chopper.get(), "ChopperSpeedLog",
-                            "fermi_speed");
-  paramMap.add<std::string>("string", chopper.get(), "FilterBaseLog",
-                            "is_running");
+  const std::string description("The initial rotation phase of the disk used to calculate the time"
+                                " for neutrons arriving at the chopper according to the formula time = "
+                                "delay + initial_phase/Speed");
+  paramMap.add<double>("double", chopper.get(), "initial_phase", inital_chop_phase, &description);
+  paramMap.add<std::string>("string", chopper.get(), "ChopperDelayLog", "fermi_delay");
+  paramMap.add<std::string>("string", chopper.get(), "ChopperSpeedLog", "fermi_speed");
+  paramMap.add<std::string>("string", chopper.get(), "FilterBaseLog", "is_running");
   paramMap.add<bool>("bool", chopper.get(), "filter_with_derivative", false);
 
   // test instrument parameters (obtained from workspace):
@@ -52,8 +46,7 @@ DataObjects::Workspace2D_sptr createTestingWS(bool noLogs = false) {
   double l_mon2 = spectrumInfo.position(1).distance(moderatorPosition);
   //,l_mon1(20-9),l_mon2(20-2);
   double t_chop(delay + inital_chop_phase / chopSpeed);
-  double Period =
-      (0.5 * 1.e+6) / chopSpeed; // 0.5 because some choppers open twice.
+  double Period = (0.5 * 1.e+6) / chopSpeed; // 0.5 because some choppers open twice.
 
   ws->setBinEdges(0, BinEdges(ws->x(0).size(), LinearGenerator(5, 10)));
 
@@ -66,35 +59,28 @@ DataObjects::Workspace2D_sptr createTestingWS(bool noLogs = false) {
   double tm2(0.0);
 
   auto t = ws->points(0);
-  std::transform(t.cbegin(), t.cend(), ws->mutableY(0).begin(),
-                 [t1, t2, &tm1, &tm2](const double t) {
-                   tm1 = t - t1;
-                   tm2 = t - t2;
-                   return (10000 * std::exp(-tm1 * tm1 / 1000.) +
-                           20000 * std::exp(-tm2 * tm2 / 1000.));
-                 });
+  std::transform(t.cbegin(), t.cend(), ws->mutableY(0).begin(), [t1, t2, &tm1, &tm2](const double t) {
+    tm1 = t - t1;
+    tm2 = t - t2;
+    return (10000 * std::exp(-tm1 * tm1 / 1000.) + 20000 * std::exp(-tm2 * tm2 / 1000.));
+  });
 
   // signal at second monitor
   t1 = t_chop * l_mon2 / l_chop;
   t2 = (t_chop + Period) * l_mon2 / l_chop;
 
-  std::transform(t.cbegin(), t.cend(), ws->mutableY(1).begin(),
-                 [t1, t2, &tm1, &tm2](const double t) {
-                   tm1 = t - t1;
-                   tm2 = t - t2;
-                   return (100 * std::exp(-tm1 * tm1 / 1000.) +
-                           200 * std::exp(-tm2 * tm2 / 1000.));
-                 });
+  std::transform(t.cbegin(), t.cend(), ws->mutableY(1).begin(), [t1, t2, &tm1, &tm2](const double t) {
+    tm1 = t - t1;
+    tm2 = t - t2;
+    return (100 * std::exp(-tm1 * tm1 / 1000.) + 200 * std::exp(-tm2 * tm2 / 1000.));
+  });
 
   if (noLogs)
     return ws;
 
-  auto chopDelayLog =
-      std::make_unique<Kernel::TimeSeriesProperty<double>>("Chopper_Delay");
-  auto chopSpeedLog =
-      std::make_unique<Kernel::TimeSeriesProperty<double>>("Chopper_Speed");
-  auto isRunning =
-      std::make_unique<Kernel::TimeSeriesProperty<double>>("is_running");
+  auto chopDelayLog = std::make_unique<Kernel::TimeSeriesProperty<double>>("Chopper_Delay");
+  auto chopSpeedLog = std::make_unique<Kernel::TimeSeriesProperty<double>>("Chopper_Speed");
+  auto isRunning = std::make_unique<Kernel::TimeSeriesProperty<double>>("is_running");
 
   for (int i = 0; i < 10; i++) {
     auto time = Types::Core::DateAndTime(10 * i, 0);
@@ -113,42 +99,29 @@ DataObjects::Workspace2D_sptr createTestingWS(bool noLogs = false) {
 
 class GetAllEiTester : public GetAllEi {
 public:
-  void find_chop_speed_and_delay(const API::MatrixWorkspace_sptr &inputWS,
-                                 double &chop_speed, double &chop_delay) {
+  void find_chop_speed_and_delay(const API::MatrixWorkspace_sptr &inputWS, double &chop_speed, double &chop_delay) {
     GetAllEi::findChopSpeedAndDelay(inputWS, chop_speed, chop_delay);
   }
-  void findGuessOpeningTimes(const std::pair<double, double> &TOF_range,
-                             double ChopDelay, double Period,
+  void findGuessOpeningTimes(const std::pair<double, double> &TOF_range, double ChopDelay, double Period,
                              std::vector<double> &guess_opening_times) {
-    GetAllEi::findGuessOpeningTimes(TOF_range, ChopDelay, Period,
-                                    guess_opening_times);
+    GetAllEi::findGuessOpeningTimes(TOF_range, ChopDelay, Period, guess_opening_times);
   }
   bool filterLogProvided() const { return (m_pFilterLog != nullptr); }
-  double getAvrgLogValue(const API::MatrixWorkspace_sptr &inputWS,
-                         const std::string &propertyName) {
+  double getAvrgLogValue(const API::MatrixWorkspace_sptr &inputWS, const std::string &propertyName) {
     std::vector<Kernel::SplittingInterval> splitter;
     return GetAllEi::getAvrgLogValue(inputWS, propertyName, splitter);
   }
-  API::MatrixWorkspace_sptr
-  buildWorkspaceToFit(const API::MatrixWorkspace_sptr &inputWS,
-                      size_t &wsIndex0) {
+  API::MatrixWorkspace_sptr buildWorkspaceToFit(const API::MatrixWorkspace_sptr &inputWS, size_t &wsIndex0) {
     return GetAllEi::buildWorkspaceToFit(inputWS, wsIndex0);
   }
-  void findBinRanges(const HistogramX &eBins, const HistogramY &signal,
-                     const std::vector<double> &guess_energies,
-                     double Eresolution, std::vector<size_t> &irangeMin,
-                     std::vector<size_t> &irangeMax,
+  void findBinRanges(const HistogramX &eBins, const HistogramY &signal, const std::vector<double> &guess_energies,
+                     double Eresolution, std::vector<size_t> &irangeMin, std::vector<size_t> &irangeMax,
                      std::vector<bool> &guessValid) {
-    GetAllEi::findBinRanges(eBins, signal, guess_energies, Eresolution,
-                            irangeMin, irangeMax, guessValid);
+    GetAllEi::findBinRanges(eBins, signal, guess_energies, Eresolution, irangeMin, irangeMax, guessValid);
   }
-  void setResolution(double newResolution) {
-    this->m_max_Eresolution = newResolution;
-  }
-  size_t calcDerivativeAndCountZeros(const std::vector<double> &bins,
-                                     const std::vector<double> &signal,
-                                     std::vector<double> &deriv,
-                                     std::vector<double> &zeros) {
+  void setResolution(double newResolution) { this->m_max_Eresolution = newResolution; }
+  size_t calcDerivativeAndCountZeros(const std::vector<double> &bins, const std::vector<double> &signal,
+                                     std::vector<double> &deriv, std::vector<double> &zeros) {
     return GetAllEi::calcDerivativeAndCountZeros(bins, signal, deriv, zeros);
   }
 };
@@ -179,10 +152,8 @@ public:
     m_getAllEi.initialize();
     m_getAllEi.setProperty("Workspace", ws);
     m_getAllEi.setProperty("OutputWorkspace", "monitor_peaks");
-    TSM_ASSERT_THROWS(
-        "should throw runtime error on as spectra ID should be positive",
-        m_getAllEi.setProperty("Monitor1SpecID", -1),
-        const std::invalid_argument &);
+    TSM_ASSERT_THROWS("should throw runtime error on as spectra ID should be positive",
+                      m_getAllEi.setProperty("Monitor1SpecID", -1), const std::invalid_argument &);
 
     m_getAllEi.setProperty("Monitor1SpecID", 1);
     m_getAllEi.setProperty("Monitor2SpecID", 2);
@@ -197,25 +168,20 @@ public:
     auto log_messages = m_getAllEi.validateInputs();
     TSM_ASSERT_EQUALS("Two logs should fail", log_messages.size(), 2);
     // add invalid property type
-    ws->mutableRun().addLogData(
-        new Kernel::PropertyWithValue<double>("Chopper_Speed", 10.));
+    ws->mutableRun().addLogData(new Kernel::PropertyWithValue<double>("Chopper_Speed", 10.));
     auto log_messages2 = m_getAllEi.validateInputs();
     TSM_ASSERT_EQUALS("Two logs should fail", log_messages2.size(), 2);
 
-    TSM_ASSERT_DIFFERS("should fail for different reason ",
-                       log_messages["ChopperSpeedLog"],
+    TSM_ASSERT_DIFFERS("should fail for different reason ", log_messages["ChopperSpeedLog"],
                        log_messages2["ChopperSpeedLog"]);
     // add correct property type:
     ws->mutableRun().clearLogs();
-    ws->mutableRun().addLogData(
-        new Kernel::TimeSeriesProperty<double>("Chopper_Speed"));
+    ws->mutableRun().addLogData(new Kernel::TimeSeriesProperty<double>("Chopper_Speed"));
     log_messages = m_getAllEi.validateInputs();
     TSM_ASSERT_EQUALS("One log should fail", log_messages.size(), 1);
     TSM_ASSERT("Filter log is not provided ", !m_getAllEi.filterLogProvided());
-    ws->mutableRun().addLogData(
-        new Kernel::TimeSeriesProperty<double>("Chopper_Delay"));
-    ws->mutableRun().addLogData(
-        new Kernel::TimeSeriesProperty<double>("proton_charge"));
+    ws->mutableRun().addLogData(new Kernel::TimeSeriesProperty<double>("Chopper_Delay"));
+    ws->mutableRun().addLogData(new Kernel::TimeSeriesProperty<double>("proton_charge"));
     log_messages = m_getAllEi.validateInputs();
 
     TSM_ASSERT_EQUALS("All logs are defined", log_messages.size(), 0);
@@ -223,8 +189,7 @@ public:
 
     m_getAllEi.setProperty("Monitor1SpecID", 3);
     log_messages = m_getAllEi.validateInputs();
-    TSM_ASSERT_EQUALS("Workspace should not have spectra with ID=3",
-                      log_messages.size(), 1);
+    TSM_ASSERT_EQUALS("Workspace should not have spectra with ID=3", log_messages.size(), 1);
   }
   //
   void test_get_chopper_speed() {
@@ -241,8 +206,7 @@ public:
     m_getAllEi.setProperty("FilterBaseLog", "proton_charge");
     m_getAllEi.setProperty("FilterWithDerivative", false);
 
-    auto chopSpeed =
-        std::make_unique<Kernel::TimeSeriesProperty<double>>("Chopper_Speed");
+    auto chopSpeed = std::make_unique<Kernel::TimeSeriesProperty<double>>("Chopper_Speed");
     for (int i = 0; i < 10; i++) {
       chopSpeed->addValue(Types::Core::DateAndTime(10000 + 10 * i, 0), 1.);
     }
@@ -255,26 +219,20 @@ public:
     ws->mutableRun().addLogData(chopSpeed.release());
 
     // Test sort log by run time.
-    TSM_ASSERT_THROWS(
-        "Attempt to get log without start/stop time set should fail",
-        m_getAllEi.getAvrgLogValue(ws, "ChopperSpeedLog"),
-        const std::runtime_error &);
+    TSM_ASSERT_THROWS("Attempt to get log without start/stop time set should fail",
+                      m_getAllEi.getAvrgLogValue(ws, "ChopperSpeedLog"), const std::runtime_error &);
 
-    ws->mutableRun().setStartAndEndTime(Types::Core::DateAndTime(90, 0),
-                                        Types::Core::DateAndTime(10000, 0));
+    ws->mutableRun().setStartAndEndTime(Types::Core::DateAndTime(90, 0), Types::Core::DateAndTime(10000, 0));
     double val = m_getAllEi.getAvrgLogValue(ws, "ChopperSpeedLog");
     TS_ASSERT_DELTA(val, (10 * 10 + 100.) / 11., 1.e-6);
 
-    ws->mutableRun().setStartAndEndTime(Types::Core::DateAndTime(100, 0),
-                                        Types::Core::DateAndTime(10000, 0));
+    ws->mutableRun().setStartAndEndTime(Types::Core::DateAndTime(100, 0), Types::Core::DateAndTime(10000, 0));
     val = m_getAllEi.getAvrgLogValue(ws, "ChopperSpeedLog");
     TS_ASSERT_DELTA(val, 10., 1.e-6);
 
     // Test sort log by log.
-    auto chopDelay =
-        std::make_unique<Kernel::TimeSeriesProperty<double>>("Chopper_Delay");
-    auto goodFram =
-        std::make_unique<Kernel::TimeSeriesProperty<double>>("proton_charge");
+    auto chopDelay = std::make_unique<Kernel::TimeSeriesProperty<double>>("Chopper_Delay");
+    auto goodFram = std::make_unique<Kernel::TimeSeriesProperty<double>>("proton_charge");
 
     for (int i = 0; i < 10; i++) {
       auto time = Types::Core::DateAndTime(200 + 10 * i, 0);
@@ -305,11 +263,9 @@ public:
 
     double chop_speed, chop_delay;
     m_getAllEi.find_chop_speed_and_delay(ws, chop_speed, chop_delay);
-    TSM_ASSERT_DELTA("Chopper delay should have special speed ",
-                     (10 * 0.1 + 20) / 12., chop_delay, 1.e-6);
+    TSM_ASSERT_DELTA("Chopper delay should have special speed ", (10 * 0.1 + 20) / 12., chop_delay, 1.e-6);
 
-    goodFram =
-        std::make_unique<Kernel::TimeSeriesProperty<double>>("proton_charge");
+    goodFram = std::make_unique<Kernel::TimeSeriesProperty<double>>("proton_charge");
     for (int i = 0; i < 10; i++) {
       auto time = Types::Core::DateAndTime(100 + 10 * i, 0);
       goodFram->addValue(time, 1);
@@ -320,8 +276,7 @@ public:
     TSM_ASSERT_EQUALS("All logs are defined now", errors.size(), 0);
 
     m_getAllEi.find_chop_speed_and_delay(ws, chop_speed, chop_delay);
-    TSM_ASSERT_DELTA("Chopper delay should have special speed", 0.1, chop_delay,
-                     1.e-6);
+    TSM_ASSERT_DELTA("Chopper delay should have special speed", 0.1, chop_delay, 1.e-6);
   }
   void test_get_chopper_speed_filter_derivative() {
 
@@ -338,12 +293,9 @@ public:
     m_getAllEi.setProperty("FilterWithDerivative", true);
 
     // Test select log by log derivative
-    auto chopDelay =
-        std::make_unique<Kernel::TimeSeriesProperty<double>>("Chopper_Delay");
-    auto chopSpeed =
-        std::make_unique<Kernel::TimeSeriesProperty<double>>("Chopper_Speed");
-    auto protCharge =
-        std::make_unique<Kernel::TimeSeriesProperty<double>>("proton_charge");
+    auto chopDelay = std::make_unique<Kernel::TimeSeriesProperty<double>>("Chopper_Delay");
+    auto chopSpeed = std::make_unique<Kernel::TimeSeriesProperty<double>>("Chopper_Speed");
+    auto protCharge = std::make_unique<Kernel::TimeSeriesProperty<double>>("proton_charge");
 
     double gf(0);
     for (int i = 0; i < 50; i++) {
@@ -370,10 +322,8 @@ public:
 
     double chop_speed, chop_delay;
     m_getAllEi.find_chop_speed_and_delay(ws, chop_speed, chop_delay);
-    TSM_ASSERT_DELTA("Chopper delay should have defined value ", 10.,
-                     chop_delay, 1.e-6);
-    TSM_ASSERT_DELTA("Chopper speed should have defined speed", 50., chop_speed,
-                     1.e-6);
+    TSM_ASSERT_DELTA("Chopper delay should have defined value ", 10., chop_delay, 1.e-6);
+    TSM_ASSERT_DELTA("Chopper speed should have defined speed", 50., chop_speed, 1.e-6);
   }
 
   void test_guess_opening_times() {
@@ -382,40 +332,32 @@ public:
     double t0(6), Period(10);
     std::vector<double> guess_tof;
     m_getAllEi.findGuessOpeningTimes(TOF_range, t0, Period, guess_tof);
-    TSM_ASSERT_EQUALS("should have 10 periods within the specified interval",
-                      guess_tof.size(), 10);
+    TSM_ASSERT_EQUALS("should have 10 periods within the specified interval", guess_tof.size(), 10);
 
     guess_tof.resize(0);
     t0 = TOF_range.first;
     m_getAllEi.findGuessOpeningTimes(TOF_range, t0, Period, guess_tof);
-    TSM_ASSERT_EQUALS(
-        "Still should be 10 periods within the specified interval",
-        guess_tof.size(), 10);
+    TSM_ASSERT_EQUALS("Still should be 10 periods within the specified interval", guess_tof.size(), 10);
 
     t0 = TOF_range.second;
-    TSM_ASSERT_THROWS(
-        "Should throw out of range",
-        m_getAllEi.findGuessOpeningTimes(TOF_range, t0, Period, guess_tof),
-        const std::runtime_error &);
+    TSM_ASSERT_THROWS("Should throw out of range", m_getAllEi.findGuessOpeningTimes(TOF_range, t0, Period, guess_tof),
+                      const std::runtime_error &);
 
     t0 = 1;
     guess_tof.resize(0);
     m_getAllEi.findGuessOpeningTimes(TOF_range, t0, Period, guess_tof);
-    TSM_ASSERT_EQUALS(" should be 9 periods within the specified interval",
-                      guess_tof.size(), 9);
+    TSM_ASSERT_EQUALS(" should be 9 periods within the specified interval", guess_tof.size(), 9);
 
     guess_tof.resize(0);
     t0 = 21;
     TOF_range.first = 20;
     m_getAllEi.findGuessOpeningTimes(TOF_range, t0, Period, guess_tof);
-    TSM_ASSERT_EQUALS(" should be 8 periods within the specified interval",
-                      guess_tof.size(), 8);
+    TSM_ASSERT_EQUALS(" should be 8 periods within the specified interval", guess_tof.size(), 8);
   }
   //
   void test_internalWS_to_fit() {
     Mantid::DataObjects::Workspace2D_sptr tws =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(5, 100,
-                                                                     true);
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(5, 100, true);
     auto &spectrumInfoT = tws->spectrumInfo();
     auto det1TPosition = spectrumInfoT.position(0);
     auto det2TPosition = spectrumInfoT.position(4);
@@ -434,19 +376,15 @@ public:
     auto &spectrumInfoW = wws->spectrumInfo();
     auto det1WPosition = spectrumInfoW.position(0);
     auto det2WPosition = spectrumInfoW.position(1);
-    TSM_ASSERT_EQUALS("should be the same first detector position",
-                      det1WPosition, det1TPosition);
-    TSM_ASSERT_EQUALS("should be the same second detector position",
-                      det2WPosition, det2TPosition);
+    TSM_ASSERT_EQUALS("should be the same first detector position", det1WPosition, det1TPosition);
+    TSM_ASSERT_EQUALS("should be the same second detector position", det2WPosition, det2TPosition);
 
     TSM_ASSERT_EQUALS("Detector's ID for the first spectrum and new workspace "
                       "should coincide",
-                      *(detID1.begin()),
-                      (*wws->getSpectrum(0).getDetectorIDs().begin()));
+                      *(detID1.begin()), (*wws->getSpectrum(0).getDetectorIDs().begin()));
     TSM_ASSERT_EQUALS("Detector's ID for the second spectrum and new workspace "
                       "should coincide",
-                      *(detID2.begin()),
-                      (*wws->getSpectrum(1).getDetectorIDs().begin()));
+                      *(detID2.begin()), (*wws->getSpectrum(1).getDetectorIDs().begin()));
     auto Xsp1 = wws->getSpectrum(0).mutableX();
     auto Xsp2 = wws->getSpectrum(1).mutableX();
     size_t nSpectra = Xsp2.size();
@@ -466,8 +404,7 @@ public:
     std::vector<double> zeros;
 
     std::vector<double> deriv;
-    size_t nZer =
-        m_getAllEi.calcDerivativeAndCountZeros(bins, signal, deriv, zeros);
+    size_t nZer = m_getAllEi.calcDerivativeAndCountZeros(bins, signal, deriv, zeros);
     TS_ASSERT_EQUALS(nZer, 0);
     TS_ASSERT_DELTA(deriv[0], deriv[1], 1.e-9);
     TS_ASSERT_DELTA(deriv[0], deriv[5], 1.e-9);
@@ -517,8 +454,7 @@ public:
     std::vector<double> guess(dguess, dguess + sizeof(dguess) / sizeof(double));
     std::vector<bool> guessValid;
 
-    m_getAllEi.findBinRanges(ebin, signal, guess, 0.1, bin_min, bin_max,
-                             guessValid);
+    m_getAllEi.findBinRanges(ebin, signal, guess, 0.1, bin_min, bin_max, guessValid);
 
     TS_ASSERT_EQUALS(bin_min.size(), 2)
     TS_ASSERT_EQUALS(bin_max.size(), 2)
@@ -533,8 +469,7 @@ public:
     guess[1] = 3;
     guess[2] = 6;
     guess[3] = 11;
-    m_getAllEi.findBinRanges(ebin, signal, guess, 0.01, bin_min, bin_max,
-                             guessValid);
+    m_getAllEi.findBinRanges(ebin, signal, guess, 0.01, bin_min, bin_max, guessValid);
     TS_ASSERT_EQUALS(bin_min.size(), 3)
     TS_ASSERT_EQUALS(bin_max.size(), 3)
     TS_ASSERT_EQUALS(guessValid.size(), 4)
@@ -570,11 +505,8 @@ public:
     m_getAllEi.setProperty("OutputWorkspace", "allEiWs");
 
     TS_ASSERT_THROWS_NOTHING(m_getAllEi.execute());
-    TSM_ASSERT_EQUALS("GetAllEi Algorithms should be executed",
-                      m_getAllEi.isExecuted(), true);
-    TS_ASSERT_THROWS_NOTHING(
-        out_ws = API::AnalysisDataService::Instance()
-                     .retrieveWS<API::MatrixWorkspace>("allEiWs"));
+    TSM_ASSERT_EQUALS("GetAllEi Algorithms should be executed", m_getAllEi.isExecuted(), true);
+    TS_ASSERT_THROWS_NOTHING(out_ws = API::AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>("allEiWs"));
 
     TSM_ASSERT("Should be able to retrieve workspace", out_ws);
     auto wso = dynamic_cast<DataObjects::Workspace2D *>(out_ws.get());
@@ -583,8 +515,7 @@ public:
       return;
 
     auto &x = wso->mutableX(0);
-    TSM_ASSERT_EQUALS("Second peak should be filtered by monitor ranges",
-                      x.size(), 1);
+    TSM_ASSERT_EQUALS("Second peak should be filtered by monitor ranges", x.size(), 1);
     TS_ASSERT_DELTA(x[0], 134.316, 1.e-3)
   }
 
@@ -596,16 +527,12 @@ class GetAllEiTestPerformance : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static GetAllEiTestPerformance *createSuite() {
-    return new GetAllEiTestPerformance();
-  }
+  static GetAllEiTestPerformance *createSuite() { return new GetAllEiTestPerformance(); }
   static void destroySuite(GetAllEiTestPerformance *suite) { delete suite; }
 
   void setUp() override { inputMatrix = createTestingWS(false); }
 
-  void tearDown() override {
-    Mantid::API::AnalysisDataService::Instance().remove("monitor_peaks");
-  }
+  void tearDown() override { Mantid::API::AnalysisDataService::Instance().remove("monitor_peaks"); }
 
   void testPerformance() {
     GetAllEi getAllEi;

@@ -44,19 +44,14 @@
 /**
  * Constructor
  */
-MultiTabScriptInterpreter::MultiTabScriptInterpreter(ScriptingEnv *env,
-                                                     QWidget *parent)
-    : QTabWidget(parent), Scripted(env), m_last_dir(""), m_cursor_pos(),
-      m_reportProgress(false), m_recentScriptList(),
-      m_nullScript(new NullScriptFileInterpreter), m_current(m_nullScript),
-      m_globalZoomLevel(0), m_showWhitespace(false), m_replaceTabs(true),
-      m_tabWhitespaceCount(4), m_fontFamily(), m_codeFolding(false),
+MultiTabScriptInterpreter::MultiTabScriptInterpreter(ScriptingEnv *env, QWidget *parent)
+    : QTabWidget(parent), Scripted(env), m_last_dir(""), m_cursor_pos(), m_reportProgress(false), m_recentScriptList(),
+      m_nullScript(new NullScriptFileInterpreter), m_current(m_nullScript), m_globalZoomLevel(0),
+      m_showWhitespace(false), m_replaceTabs(true), m_tabWhitespaceCount(4), m_fontFamily(), m_codeFolding(false),
       m_LineWrapping(false) {
-  connect(this, SIGNAL(currentChanged(int)), this,
-          SLOT(tabSelectionChanged(int)));
+  connect(this, SIGNAL(currentChanged(int)), this, SLOT(tabSelectionChanged(int)));
   setTabsClosable(true);
-  connect(this, SIGNAL(tabCloseRequested(int)), this,
-          SLOT(closeTabAtIndex(int)));
+  connect(this, SIGNAL(tabCloseRequested(int)), this, SLOT(closeTabAtIndex(int)));
 }
 
 /**
@@ -94,8 +89,7 @@ bool MultiTabScriptInterpreter::isExecuting() {
  * @param filename :: An optional filename
  */
 void MultiTabScriptInterpreter::newTab(int index, const QString &filename) {
-  ScriptFileInterpreter *scriptRunner =
-      new ScriptFileInterpreter(this, "ScriptWindow");
+  ScriptFileInterpreter *scriptRunner = new ScriptFileInterpreter(this, "ScriptWindow");
   scriptRunner->setup(*scriptingEnv(), filename);
   scriptRunner->toggleProgressReporting(m_reportProgress);
   scriptRunner->toggleCodeFolding(m_codeFolding);
@@ -104,19 +98,16 @@ void MultiTabScriptInterpreter::newTab(int index, const QString &filename) {
   scriptRunner->setTabWhitespaceCount(m_tabWhitespaceCount);
   scriptRunner->toggleReplaceTabs(m_replaceTabs);
   scriptRunner->setFont(m_fontFamily);
-  connect(scriptRunner, SIGNAL(editorModificationChanged(bool)), this,
-          SLOT(currentEditorModified(bool)));
+  connect(scriptRunner, SIGNAL(editorModificationChanged(bool)), this, SLOT(currentEditorModified(bool)));
   index = insertTab(index, scriptRunner, "");
   setCurrentIndex(index);
   setTabTitle(scriptRunner, filename); // Make sure the tooltip is set
   scriptRunner->setFocus();
   scriptRunner->editor()->zoomIn(globalZoomLevel());
   scriptRunner->messages()->setZoom(globalZoomLevel());
-  connect(scriptRunner, SIGNAL(textZoomedIn()), this,
-          SLOT(zoomInAllButCurrent()));
+  connect(scriptRunner, SIGNAL(textZoomedIn()), this, SLOT(zoomInAllButCurrent()));
   connect(scriptRunner, SIGNAL(textZoomedIn()), this, SLOT(trackZoomIn()));
-  connect(scriptRunner, SIGNAL(textZoomedOut()), this,
-          SLOT(zoomOutAllButCurrent()));
+  connect(scriptRunner, SIGNAL(textZoomedOut()), this, SLOT(zoomOutAllButCurrent()));
   connect(scriptRunner, SIGNAL(textZoomedOut()), this, SLOT(trackZoomOut()));
 
   emit newTabCreated(index);
@@ -127,17 +118,13 @@ void MultiTabScriptInterpreter::newTab(int index, const QString &filename) {
  * Open a file in the current tab
  * @param filename :: An optional file name
  */
-void MultiTabScriptInterpreter::openInCurrentTab(const QString &filename) {
-  open(false, filename);
-}
+void MultiTabScriptInterpreter::openInCurrentTab(const QString &filename) { open(false, filename); }
 
 /**
  * Open a file in a new tab
  * @param filename :: An optional file name
  */
-void MultiTabScriptInterpreter::openInNewTab(const QString &filename) {
-  open(true, filename);
-}
+void MultiTabScriptInterpreter::openInNewTab(const QString &filename) { open(true, filename); }
 
 /**
  * open the selected script from the File->Recent Scripts  in a new tab
@@ -251,9 +238,7 @@ QStringList MultiTabScriptInterpreter::fileNamesToQStringList() {
 /**
  * Show the find/replace dialog
  */
-void MultiTabScriptInterpreter::showFindReplaceDialog() {
-  m_current->showFindReplaceDialog();
-}
+void MultiTabScriptInterpreter::showFindReplaceDialog() { m_current->showFindReplaceDialog(); }
 
 /// undo
 void MultiTabScriptInterpreter::undo() { m_current->undo(); }
@@ -278,16 +263,13 @@ void MultiTabScriptInterpreter::uncomment() { m_current->uncomment(); }
  * Execute the highlighted code from the current tab
  * *@param mode :: The mode used to execute
  */
-bool MultiTabScriptInterpreter::executeAll(const Script::ExecutionMode mode) {
-  return m_current->executeAll(mode);
-}
+bool MultiTabScriptInterpreter::executeAll(const Script::ExecutionMode mode) { return m_current->executeAll(mode); }
 
 /** Execute the highlighted code from the current tab using the
  * given execution mode
  * @param mode :: The mode used to execute
  */
-void MultiTabScriptInterpreter::executeSelection(
-    const Script::ExecutionMode mode) {
+void MultiTabScriptInterpreter::executeSelection(const Script::ExecutionMode mode) {
   m_current->executeSelection(mode);
 }
 
@@ -304,9 +286,7 @@ void MultiTabScriptInterpreter::evaluate() {
   QMessageBox::information(this, "MantidPlot", "Evaluate is not implemented.");
 }
 
-void MultiTabScriptInterpreter::clearScriptVariables() {
-  m_current->clearVariables();
-}
+void MultiTabScriptInterpreter::clearScriptVariables() { m_current->clearVariables(); }
 
 /// Tracks the global zoom level
 void MultiTabScriptInterpreter::trackZoomIn() {
@@ -427,21 +407,18 @@ void MultiTabScriptInterpreter::openConfigTabs() {
   configTabs.setModal(false);
   configTabs.setWindowTitle("Configure Tab Whitespace");
 
-  QBoxLayout *layoutTabDialogue =
-      new QBoxLayout(QBoxLayout::Direction::TopToBottom);
+  QBoxLayout *layoutTabDialogue = new QBoxLayout(QBoxLayout::Direction::TopToBottom);
   configTabs.setLayout(layoutTabDialogue);
 
   // Toggle replace tab with spaces
   QCheckBox *chkbxReplaceTabs = new QCheckBox("Replace tabs with spaces?");
   chkbxReplaceTabs->setChecked(m_replaceTabs);
-  connect(chkbxReplaceTabs, SIGNAL(toggled(bool)), this,
-          SLOT(toggleReplaceTabs(bool)));
+  connect(chkbxReplaceTabs, SIGNAL(toggled(bool)), this, SLOT(toggleReplaceTabs(bool)));
   layoutTabDialogue->addWidget(chkbxReplaceTabs);
 
   // Count spaces per tab
   QFrame *frameSpacesPerTab = new QFrame();
-  QBoxLayout *layoutSpacesPerTab =
-      new QBoxLayout(QBoxLayout::Direction::LeftToRight);
+  QBoxLayout *layoutSpacesPerTab = new QBoxLayout(QBoxLayout::Direction::LeftToRight);
   frameSpacesPerTab->setLayout(layoutSpacesPerTab);
   layoutTabDialogue->addWidget(frameSpacesPerTab);
 
@@ -451,8 +428,7 @@ void MultiTabScriptInterpreter::openConfigTabs() {
   QSpinBox *spinnerSpaceCount = new QSpinBox();
   spinnerSpaceCount->setRange(0, 20);
   spinnerSpaceCount->setValue(m_tabWhitespaceCount);
-  connect(spinnerSpaceCount, SIGNAL(valueChanged(int)), this,
-          SLOT(changeWhitespaceCount(int)));
+  connect(spinnerSpaceCount, SIGNAL(valueChanged(int)), this, SLOT(changeWhitespaceCount(int)));
   layoutSpacesPerTab->addWidget(spinnerSpaceCount);
 
   configTabs.exec();
@@ -495,8 +471,7 @@ void MultiTabScriptInterpreter::showSelectFont() {
   selectFont->setModal(false);
   selectFont->setWindowTitle("Configure Tab Whitespace");
 
-  QBoxLayout *layoutFontDialogue =
-      new QBoxLayout(QBoxLayout::Direction::TopToBottom);
+  QBoxLayout *layoutFontDialogue = new QBoxLayout(QBoxLayout::Direction::TopToBottom);
   selectFont->setLayout(layoutFontDialogue);
 
   // Get available fonts
@@ -506,9 +481,7 @@ void MultiTabScriptInterpreter::showSelectFont() {
   layoutFontDialogue->addWidget(fontList);
 
   // Select saved choice. If not available, use current font
-  QString fontToUse =
-      m_current->font()
-          .family(); // Not actually the font used by default by the lexer
+  QString fontToUse = m_current->font().family(); // Not actually the font used by default by the lexer
 
   if (database.families().contains(m_fontFamily))
     fontToUse = m_fontFamily;
@@ -521,8 +494,7 @@ void MultiTabScriptInterpreter::showSelectFont() {
   }
 
   QFrame *frameButtons = new QFrame();
-  QBoxLayout *layoutButtons =
-      new QBoxLayout(QBoxLayout::Direction::LeftToRight);
+  QBoxLayout *layoutButtons = new QBoxLayout(QBoxLayout::Direction::LeftToRight);
   frameButtons->setLayout(layoutButtons);
   layoutFontDialogue->addWidget(frameButtons);
 
@@ -570,9 +542,7 @@ void MultiTabScriptInterpreter::closeTabAtIndex(int index) {
  * this just gets
  * the current cursor position and calls the closeAtPosition function
  */
-void MultiTabScriptInterpreter::closeClickedTab() {
-  closeTabAtPosition(m_cursor_pos);
-}
+void MultiTabScriptInterpreter::closeClickedTab() { closeTabAtPosition(m_cursor_pos); }
 
 /**
  * Mark the current tab as changed. True means that the editor has
@@ -601,10 +571,8 @@ void MultiTabScriptInterpreter::tabSelectionChanged(int index) {
   m_current->disconnect(SIGNAL(executionStopped()));
   if (count() > 0) {
     m_current = interpreterAt(index);
-    connect(m_current, SIGNAL(executionStarted()), this,
-            SLOT(sendScriptExecutingSignal()));
-    connect(m_current, SIGNAL(executionStopped()), this,
-            SLOT(sendScriptStoppedSignal()));
+    connect(m_current, SIGNAL(executionStarted()), this, SLOT(sendScriptExecutingSignal()));
+    connect(m_current, SIGNAL(executionStopped()), this, SLOT(sendScriptStoppedSignal()));
     emit executionStateChanged(m_current->isExecuting());
     setFocusProxy(m_current);
     m_current->setFocus();
@@ -616,16 +584,12 @@ void MultiTabScriptInterpreter::tabSelectionChanged(int index) {
 /**
  * Emits the executionStateChanged(true) signal
  */
-void MultiTabScriptInterpreter::sendScriptExecutingSignal() {
-  emit executionStateChanged(true);
-}
+void MultiTabScriptInterpreter::sendScriptExecutingSignal() { emit executionStateChanged(true); }
 
 /**
  * Emits the executionStateChanged(false) signal
  */
-void MultiTabScriptInterpreter::sendScriptStoppedSignal() {
-  emit executionStateChanged(false);
-}
+void MultiTabScriptInterpreter::sendScriptStoppedSignal() { emit executionStateChanged(false); }
 
 //--------------------------------------------
 // Private member functions (non-slot)
@@ -685,8 +649,7 @@ void MultiTabScriptInterpreter::open(bool newtab, const QString &filename) {
     QString filter = scriptingEnv()->fileFilter();
     filter += tr("Text") + " (*.txt *.TXT);;";
     filter += tr("All Files") + " (*)";
-    fileToOpen = QFileDialog::getOpenFileName(
-        this, tr("MantidPlot - Open a script from a file"), m_last_dir, filter);
+    fileToOpen = QFileDialog::getOpenFileName(this, tr("MantidPlot - Open a script from a file"), m_last_dir, filter);
     if (fileToOpen.isEmpty()) {
       return;
     }
@@ -712,8 +675,7 @@ void MultiTabScriptInterpreter::open(bool newtab, const QString &filename) {
  * @param widget A pointer to the widget on the tab
  * @param filename The filename on the tab
  */
-void MultiTabScriptInterpreter::setTabTitle(QWidget *widget,
-                                            const QString &filename) {
+void MultiTabScriptInterpreter::setTabTitle(QWidget *widget, const QString &filename) {
   setTabText(this->indexOf(widget), createTabTitle(filename));
   setTabToolTip(this->indexOf(widget), filename);
 }
@@ -724,8 +686,7 @@ void MultiTabScriptInterpreter::setTabTitle(QWidget *widget,
  * @param filename The filename of the script.
  * @return A string to use as the tab title
  */
-QString
-MultiTabScriptInterpreter::createTabTitle(const QString &filename) const {
+QString MultiTabScriptInterpreter::createTabTitle(const QString &filename) const {
   QString title;
   if (filename.isEmpty()) {
     title = "Untitled";
@@ -748,8 +709,7 @@ void MultiTabScriptInterpreter::closeTabAtPosition(const QPoint &pos) {
 /**
  * Keeps the recent script list up to date
  */
-void MultiTabScriptInterpreter::updateRecentScriptList(
-    const QString &filename) {
+void MultiTabScriptInterpreter::updateRecentScriptList(const QString &filename) {
   m_recentScriptList.removeAll(filename);
   m_recentScriptList.push_front(filename);
   if (m_recentScriptList.count() > MaxRecentScripts) {
@@ -761,14 +721,10 @@ void MultiTabScriptInterpreter::updateRecentScriptList(
  * This method returns the recent scripts list
  * @returns a list containing the name of the recent scripts.
  */
-QStringList MultiTabScriptInterpreter::recentScripts() {
-  return m_recentScriptList;
-}
+QStringList MultiTabScriptInterpreter::recentScripts() { return m_recentScriptList; }
 
 /**
  * sets the recent scripts list
  * @param rslist :: list containing the name of the recent scripts.
  */
-void MultiTabScriptInterpreter::setRecentScripts(const QStringList &rslist) {
-  m_recentScriptList = rslist;
-}
+void MultiTabScriptInterpreter::setRecentScripts(const QStringList &rslist) { m_recentScriptList = rslist; }

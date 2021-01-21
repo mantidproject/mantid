@@ -21,8 +21,7 @@
 #include <QLabel>
 #include <QLayout>
 
-ImageDialog::ImageDialog(QWidget *parent, const Qt::WFlags &fl)
-    : QDialog(parent, fl), aspect_ratio(1.) {
+ImageDialog::ImageDialog(QWidget *parent, const Qt::WFlags &fl) : QDialog(parent, fl), aspect_ratio(1.) {
   setObjectName("ImageDialog");
   setWindowTitle(tr("MantidPlot - Image Geometry"));
 
@@ -103,8 +102,7 @@ void ImageDialog::setSize(const QSize &size) {
 
 void ImageDialog::adjustHeight(int width) {
   if (keepRatioBox->isChecked()) {
-    disconnect(boxHeight, SIGNAL(valueChanged(int)), this,
-               SLOT(adjustWidth(int)));
+    disconnect(boxHeight, SIGNAL(valueChanged(int)), this, SLOT(adjustWidth(int)));
     boxHeight->setValue(static_cast<int>(width / aspect_ratio));
     connect(boxHeight, SIGNAL(valueChanged(int)), this, SLOT(adjustWidth(int)));
   } else
@@ -113,18 +111,14 @@ void ImageDialog::adjustHeight(int width) {
 
 void ImageDialog::adjustWidth(int height) {
   if (keepRatioBox->isChecked()) {
-    disconnect(boxWidth, SIGNAL(valueChanged(int)), this,
-               SLOT(adjustHeight(int)));
+    disconnect(boxWidth, SIGNAL(valueChanged(int)), this, SLOT(adjustHeight(int)));
     boxWidth->setValue(static_cast<int>(height * aspect_ratio));
     connect(boxWidth, SIGNAL(valueChanged(int)), this, SLOT(adjustHeight(int)));
   } else
     aspect_ratio = double(boxWidth->value()) / (double)height;
 }
 
-void ImageDialog::update() {
-  emit setGeometry(boxX->value(), boxY->value(), boxWidth->value(),
-                   boxHeight->value());
-}
+void ImageDialog::update() { emit setGeometry(boxX->value(), boxY->value(), boxWidth->value(), boxHeight->value()); }
 
 void ImageDialog::accept() {
   update();

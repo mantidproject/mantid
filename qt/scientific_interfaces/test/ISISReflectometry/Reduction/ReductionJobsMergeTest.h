@@ -31,9 +31,7 @@ public:
   ReductionJobsMergeTest() : m_thetaTolerance(0.001) {}
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ReductionJobsMergeTest *createSuite() {
-    return new ReductionJobsMergeTest();
-  }
+  static ReductionJobsMergeTest *createSuite() { return new ReductionJobsMergeTest(); }
 
   static void destroySuite(ReductionJobsMergeTest *suite) { delete suite; }
 
@@ -44,8 +42,7 @@ public:
     return Row({name}, angle, {"", ""}, RangeInQ(), boost::none, {}, wsNames);
   }
 
-  Row rowWithNamesAndAngle(std::vector<std::string> const &names,
-                           double angle) {
+  Row rowWithNamesAndAngle(std::vector<std::string> const &names, double angle) {
     auto wsNames = ReductionWorkspaces(names, TransmissionRunPair{});
     return Row(names, angle, {"", ""}, RangeInQ(), boost::none, {}, wsNames);
   }
@@ -151,8 +148,7 @@ public:
 
     TS_ASSERT_EQUALS(1u, target.groups().size());
     TS_ASSERT_EQUALS(1u, target.groups()[0].rows().size());
-    TS_ASSERT_EQUALS(std::vector<std::string>({"C", "D"}),
-                     target.groups()[0].rows()[0].get().runNumbers());
+    TS_ASSERT_EQUALS(std::vector<std::string>({"C", "D"}), target.groups()[0].rows()[0].get().runNumbers());
     TS_ASSERT(Mock::VerifyAndClearExpectations(&listener));
   }
 
@@ -168,16 +164,14 @@ public:
 
     TS_ASSERT_EQUALS(1u, target.groups().size());
     TS_ASSERT_EQUALS(1u, target.groups()[0].rows().size());
-    TS_ASSERT_EQUALS(std::vector<std::string>({"C", "D"}),
-                     target.groups()[0].rows()[0].get().runNumbers());
+    TS_ASSERT_EQUALS(std::vector<std::string>({"C", "D"}), target.groups()[0].rows()[0].get().runNumbers());
     TS_ASSERT(Mock::VerifyAndClearExpectations(&listener));
   }
 
   bool haveEqualRunNumbers(ReductionJobs const &lhs, ReductionJobs const &rhs) {
     if (lhs.groups().size() == rhs.groups().size()) {
       for (auto groupPair : zip_range(lhs.groups(), rhs.groups())) {
-        for (auto rowPair : zip_range(boost::get<0>(groupPair).rows(),
-                                      boost::get<1>(groupPair).rows())) {
+        for (auto rowPair : zip_range(boost::get<0>(groupPair).rows(), boost::get<1>(groupPair).rows())) {
           auto const &lhsRow = boost::get<0>(rowPair);
           auto const &rhsRow = boost::get<1>(rowPair);
           if (lhsRow.is_initialized() != rhsRow.is_initialized())
@@ -194,22 +188,17 @@ public:
   }
 
   void testMergingRowsProducesUnionOfRunNumbers() {
-    auto row = mergedRow(rowWithNamesAndAngle({"A", "B"}, 0.0),
-                         rowWithNamesAndAngle({"B", "C"}, 0.0));
+    auto row = mergedRow(rowWithNamesAndAngle({"A", "B"}, 0.0), rowWithNamesAndAngle({"B", "C"}, 0.0));
 
-    TS_ASSERT_EQUALS(std::vector<std::string>({"A", "B", "C"}),
-                     row.runNumbers());
+    TS_ASSERT_EQUALS(std::vector<std::string>({"A", "B", "C"}), row.runNumbers());
   }
 
   void testMergeIntoSelfResultsInNoChange() {
     NiceMock<MockModificationListener> listener;
     auto target = ReductionJobs();
-    target.appendGroup(
-        Group("S1 SI/ D20 ", {rowWithNameAndAngle("47450", 0.7),
-                              rowWithNameAndAngle("47451", 2.3)}));
+    target.appendGroup(Group("S1 SI/ D20 ", {rowWithNameAndAngle("47450", 0.7), rowWithNameAndAngle("47451", 2.3)}));
 
-    target.appendGroup(
-        Group("S2 SI/ D20 ", {rowWithNamesAndAngle({"47450", "47453"}, 0.7)}));
+    target.appendGroup(Group("S2 SI/ D20 ", {rowWithNamesAndAngle({"47450", "47453"}, 0.7)}));
 
     auto addition = target;
     mergeJobsInto(target, addition, m_thetaTolerance, listener);
@@ -273,8 +262,7 @@ public:
   void testMergeRowWithExtraRunNumbersIntoExistingRow() {
     auto jobs = oneGroupWithARowModel();
     auto existingGroupName = std::string("Test group 1");
-    auto updatedRow =
-        makeRow(std::vector<std::string>{"12345", "12346", "12347"}, 0.5);
+    auto updatedRow = makeRow(std::vector<std::string>{"12345", "12346", "12347"}, 0.5);
     auto expected = jobs;
     expected.mutableGroups()[0].mutableRows()[0] = updatedRow;
     mergeRowIntoGroup(jobs, updatedRow, m_thetaTolerance, existingGroupName);
@@ -285,8 +273,7 @@ public:
     // Construct the original jobs with a row with multiple runs
     auto jobs = oneEmptyGroupModel();
     auto existingGroupName = std::string("Test group 1");
-    auto existingRow =
-        makeRow(std::vector<std::string>{"12345", "12346", "12347"}, 0.5);
+    auto existingRow = makeRow(std::vector<std::string>{"12345", "12346", "12347"}, 0.5);
     jobs.mutableGroups()[0].appendRow(existingRow);
     // Try to merge a new row with one of the existing runs
     auto newRow = makeRow("12346", 0.5);
@@ -296,8 +283,7 @@ public:
     TS_ASSERT_EQUALS(jobs, expected);
   }
 
-  void
-  testMergeRowWithSomeExistingAndSomeAdditionalRunNumbersIntoExistingRow() {
+  void testMergeRowWithSomeExistingAndSomeAdditionalRunNumbersIntoExistingRow() {
     // Construct the original jobs with a row with multiple runs
     auto jobs = oneEmptyGroupModel();
     auto existingGroupName = std::string("Test group 1");
@@ -306,8 +292,7 @@ public:
     // Try to merge a new row with one of the existing runs and one new one
     auto newRow = makeRow(std::vector<std::string>{"12345", "12347"}, 0.5);
     // The result should contain all runs
-    auto expectedRow =
-        makeRow(std::vector<std::string>{"12345", "12346", "12347"}, 0.5);
+    auto expectedRow = makeRow(std::vector<std::string>{"12345", "12346", "12347"}, 0.5);
     auto expected = jobs;
     expected.mutableGroups()[0].mutableRows()[0] = expectedRow;
     mergeRowIntoGroup(jobs, newRow, m_thetaTolerance, existingGroupName);
@@ -326,8 +311,7 @@ public:
     // The result has all runs sorted (note that it also re-sorts existing
     // ones, although in reality we would never have an unsorted list as a
     // starting point)
-    auto expectedRow =
-        makeRow(std::vector<std::string>{"22222", "33333", "44444"}, 0.5);
+    auto expectedRow = makeRow(std::vector<std::string>{"22222", "33333", "44444"}, 0.5);
     auto expected = jobs;
     expected.mutableGroups()[0].mutableRows()[0] = expectedRow;
     mergeRowIntoGroup(jobs, newRow, m_thetaTolerance, existingGroupName);

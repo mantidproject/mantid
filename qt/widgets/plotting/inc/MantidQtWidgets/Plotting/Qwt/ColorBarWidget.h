@@ -22,9 +22,7 @@ class QwtScaleWidgetExtended : public QwtScaleWidget {
   Q_OBJECT
 
 public:
-  QwtScaleWidgetExtended(QWidget *parent = nullptr) : QwtScaleWidget(parent) {
-    this->setMouseTracking(true);
-  }
+  QwtScaleWidgetExtended(QWidget *parent = nullptr) : QwtScaleWidget(parent) { this->setMouseTracking(true); }
 
   void mouseMoveEvent(QMouseEvent *event) override {
     double val = 1.0 - double(event->y()) / double(this->height());

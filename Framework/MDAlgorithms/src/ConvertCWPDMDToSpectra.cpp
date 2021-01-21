@@ -36,46 +36,37 @@ const double BIGNUMBER = 1.0E100;
 
 void ConvertCWPDMDToSpectra::init() {
 
-  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>("InputWorkspace", "", Direction::Input),
                   "Name of the input MDEventWorkspace that stores detectors "
                   "counts from a constant-wave powder diffraction experiment.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>(
-                      "InputMonitorWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>("InputMonitorWorkspace", "", Direction::Input),
                   "Name of the input MDEventWorkspace that stores monitor "
                   "counts from a constant-wave powder diffraciton experiment.");
 
-  declareProperty(
-      std::make_unique<ArrayProperty<double>>("BinningParams"),
-      "A comma separated list of first bin boundary, width, last bin boundary. "
-      "Optionally\n"
-      "this can be followed by a comma and more widths and last boundary "
-      "pairs.\n"
-      "Negative width values indicate logarithmic binning.");
+  declareProperty(std::make_unique<ArrayProperty<double>>("BinningParams"),
+                  "A comma separated list of first bin boundary, width, last bin boundary. "
+                  "Optionally\n"
+                  "this can be followed by a comma and more widths and last boundary "
+                  "pairs.\n"
+                  "Negative width values indicate logarithmic binning.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace for reduced data.");
 
-  std::array<std::string, 3> vecunits = {
-      {"2theta", "dSpacing", "Momentum Transfer (Q)"}};
+  std::array<std::string, 3> vecunits = {{"2theta", "dSpacing", "Momentum Transfer (Q)"}};
   auto unitval = std::make_shared<ListValidator<std::string>>(vecunits);
-  declareProperty("UnitOutput", "2theta", unitval,
-                  "Unit of the output workspace.");
+  declareProperty("UnitOutput", "2theta", unitval, "Unit of the output workspace.");
 
-  declareProperty("NeutronWaveLength", EMPTY_DBL(),
-                  "Constant wavelength of the neutrons from reactor source.");
+  declareProperty("NeutronWaveLength", EMPTY_DBL(), "Constant wavelength of the neutrons from reactor source.");
 
-  declareProperty(
-      "NeutornWaveLengthPropertyName", "wavelength",
-      "Property name of the neutron wavelength in the sample log."
-      "If output unit is other than 2theta and NeutronWaveLength is not given,"
-      "then the neutron wavelength will be searched in sample logs by "
-      "name specified by this property.");
+  declareProperty("NeutornWaveLengthPropertyName", "wavelength",
+                  "Property name of the neutron wavelength in the sample log."
+                  "If output unit is other than 2theta and NeutronWaveLength is not given,"
+                  "then the neutron wavelength will be searched in sample logs by "
+                  "name specified by this property.");
 
-  declareProperty("ScaleFactor", 1.0,
-                  "Scaling factor on the normalized counts.");
+  declareProperty("ScaleFactor", 1.0, "Scaling factor on the normalized counts.");
 
   declareProperty(std::make_unique<ArrayProperty<int>>("ExcludedDetectorIDs"),
                   "A comma separated list of integers to indicate the IDs of "
@@ -117,32 +108,24 @@ void ConvertCWPDMDToSpectra::exec() {
   std::map<int, double> map_runWavelength;
   if (outputunit != "2theta") {
     // set up runid and wavelength  map
-    std::string wavelengthpropertyname =
-        getProperty("NeutornWaveLengthPropertyName");
+    std::string wavelengthpropertyname = getProperty("NeutornWaveLengthPropertyName");
 
     uint16_t numexpinfo = inputDataWS->getNumExperimentInfo();
     for (uint16_t iexp = 0; iexp < numexpinfo; ++iexp) {
-      int runid = std::stoi(inputDataWS->getExperimentInfo(iexp)
-                                ->run()
-                                .getProperty("run_number")
-                                ->value());
+      int runid = std::stoi(inputDataWS->getExperimentInfo(iexp)->run().getProperty("run_number")->value());
       // skip if run id is not a valid one
       if (runid < 0)
         continue;
       double thislambda = wavelength;
-      if (inputDataWS->getExperimentInfo(iexp)->run().hasProperty(
-              wavelengthpropertyname))
-        thislambda = std::stod(inputDataWS->getExperimentInfo(iexp)
-                                   ->run()
-                                   .getProperty(wavelengthpropertyname)
-                                   ->value());
+      if (inputDataWS->getExperimentInfo(iexp)->run().hasProperty(wavelengthpropertyname))
+        thislambda =
+            std::stod(inputDataWS->getExperimentInfo(iexp)->run().getProperty(wavelengthpropertyname)->value());
       else if (wavelength == EMPTY_DBL()) {
         std::stringstream errss;
         errss << "In order to convert unit to " << outputunit
               << ", either NeutronWaveLength "
                  " is to be specified or property "
-              << wavelengthpropertyname << " must exist for run " << runid
-              << ".";
+              << wavelengthpropertyname << " must exist for run " << runid << ".";
         throw std::runtime_error(errss.str());
       }
       map_runWavelength.emplace(runid, thislambda);
@@ -154,30 +137,26 @@ void ConvertCWPDMDToSpectra::exec() {
   xmin = xmax = binsize = -1;
   if (binParams.size() == 1) {
     binsize = binParams[0];
-    g_log.warning()
-        << "Only bin size " << binParams[0]
-        << " is specified.  Xmin and Xmax "
-           " will be calcualted from motor positions and wavelength.  "
-           "More CPU time will be used."
-        << "\n";
+    g_log.warning() << "Only bin size " << binParams[0]
+                    << " is specified.  Xmin and Xmax "
+                       " will be calcualted from motor positions and wavelength.  "
+                       "More CPU time will be used."
+                    << "\n";
   } else if (binParams.size() == 3) {
     xmin = binParams[0];
     binsize = binParams[1];
     xmax = binParams[2];
     if (xmin >= xmax)
-      throw std::runtime_error(
-          "Min value of the bin must be smaller than maximum value.");
+      throw std::runtime_error("Min value of the bin must be smaller than maximum value.");
   } else {
     // Either 1 or 3 parameters.  Throw exception
-    throw std::runtime_error(
-        "Binning parameters must have either 1 or 3 items.");
+    throw std::runtime_error("Binning parameters must have either 1 or 3 items.");
   }
 
   // Rebin
   std::sort(excluded_detids.begin(), excluded_detids.end());
-  API::MatrixWorkspace_sptr outws = reducePowderData(
-      inputDataWS, inputMonitorWS, outputunit, map_runWavelength, xmin, xmax,
-      binsize, doLinearInterpolation, excluded_detids);
+  API::MatrixWorkspace_sptr outws = reducePowderData(inputDataWS, inputMonitorWS, outputunit, map_runWavelength, xmin,
+                                                     xmax, binsize, doLinearInterpolation, excluded_detids);
 
   // Scale
   scaleMatrixWorkspace(outws, scaleFactor, m_infitesimal);
@@ -210,12 +189,9 @@ void ConvertCWPDMDToSpectra::exec() {
  * @return
  */
 API::MatrixWorkspace_sptr ConvertCWPDMDToSpectra::reducePowderData(
-    const API::IMDEventWorkspace_const_sptr &dataws,
-    const IMDEventWorkspace_const_sptr &monitorws,
-    const std::string &targetunit,
-    const std::map<int, double> &map_runwavelength, const double xmin,
-    const double xmax, const double binsize, bool dolinearinterpolation,
-    const std::vector<detid_t> &vec_excludeddets) {
+    const API::IMDEventWorkspace_const_sptr &dataws, const IMDEventWorkspace_const_sptr &monitorws,
+    const std::string &targetunit, const std::map<int, double> &map_runwavelength, const double xmin, const double xmax,
+    const double binsize, bool dolinearinterpolation, const std::vector<detid_t> &vec_excludeddets) {
   // Get some information
   int64_t numevents = dataws->getNEvents();
 
@@ -224,15 +200,13 @@ API::MatrixWorkspace_sptr ConvertCWPDMDToSpectra::reducePowderData(
   if (xmin < 0 || xmax < 0) {
     // xmin or xmax cannot be negative (2theta, dspace and q are always
     // positive)
-    findXBoundary(dataws, targetunit, map_runwavelength, lowerboundary,
-                  upperboundary);
+    findXBoundary(dataws, targetunit, map_runwavelength, lowerboundary, upperboundary);
   } else {
     lowerboundary = xmin;
     upperboundary = xmax;
   }
 
-  g_log.debug() << "Binning  from " << lowerboundary << " to " << upperboundary
-                << "\n";
+  g_log.debug() << "Binning  from " << lowerboundary << " to " << upperboundary << "\n";
 
   // Create bins in 2theta (degree)
   size_t sizex, sizey;
@@ -241,14 +215,10 @@ API::MatrixWorkspace_sptr ConvertCWPDMDToSpectra::reducePowderData(
     ++lowerboundary;
 
   sizey = sizex - 1;
-  g_log.debug() << "Number of events = " << numevents
-                << ", bin size = " << binsize << ", SizeX = " << sizex << ", "
-                << ", SizeY = " << sizey
-                << ", Delta = " << upperboundary - lowerboundary
-                << ", Bin size = " << binsize << ", sizex_d = "
-                << (upperboundary - lowerboundary) / binsize + 2 << "\n";
-  std::vector<double> vecx(sizex), vecy(sizex - 1, 0), vecm(sizex - 1, 0),
-      vece(sizex - 1, 0);
+  g_log.debug() << "Number of events = " << numevents << ", bin size = " << binsize << ", SizeX = " << sizex << ", "
+                << ", SizeY = " << sizey << ", Delta = " << upperboundary - lowerboundary << ", Bin size = " << binsize
+                << ", sizex_d = " << (upperboundary - lowerboundary) / binsize + 2 << "\n";
+  std::vector<double> vecx(sizex), vecy(sizex - 1, 0), vecm(sizex - 1, 0), vece(sizex - 1, 0);
 
   for (size_t i = 0; i < sizex; ++i) {
     vecx[i] = lowerboundary + static_cast<double>(i) * binsize;
@@ -262,8 +232,7 @@ API::MatrixWorkspace_sptr ConvertCWPDMDToSpectra::reducePowderData(
     unitchar = 'q';
 
   binMD(dataws, unitchar, map_runwavelength, vecx, vecy, vec_excludeddets);
-  binMD(std::move(monitorws), unitchar, map_runwavelength, vecx, vecm,
-        vec_excludeddets);
+  binMD(std::move(monitorws), unitchar, map_runwavelength, vecx, vecm, vec_excludeddets);
 
   // Normalize by division
   double maxmonitorcounts = 0;
@@ -286,8 +255,7 @@ API::MatrixWorkspace_sptr ConvertCWPDMDToSpectra::reducePowderData(
   }
 
   // Create workspace and set values
-  API::MatrixWorkspace_sptr pdws =
-      WorkspaceFactory::Instance().create("Workspace2D", 1, sizex, sizey);
+  API::MatrixWorkspace_sptr pdws = WorkspaceFactory::Instance().create("Workspace2D", 1, sizex, sizey);
   // Set unit
   pdws->setYUnitLabel("Intensity");
   if (unitchar == 'd')
@@ -299,8 +267,7 @@ API::MatrixWorkspace_sptr ConvertCWPDMDToSpectra::reducePowderData(
     pdws->getAxis(0)->setUnit("Degrees");
   }
 
-  pdws->setHistogram(0, BinEdges(vecx), Counts(vecy),
-                     CountStandardDeviations(vece));
+  pdws->setHistogram(0, BinEdges(vecx), Counts(vecy), CountStandardDeviations(vece));
 
   // Interpolation
   m_infitesimal = 0.1 / (maxmonitorcounts);
@@ -320,11 +287,9 @@ API::MatrixWorkspace_sptr ConvertCWPDMDToSpectra::reducePowderData(
  * @param xmin :: (output) lower binning boundary
  * @param xmax :: (output) upper binning boundary
  */
-void ConvertCWPDMDToSpectra::findXBoundary(
-    const API::IMDEventWorkspace_const_sptr &dataws,
-    const std::string &targetunit,
-    const std::map<int, double> &map_runwavelength, double &xmin,
-    double &xmax) {
+void ConvertCWPDMDToSpectra::findXBoundary(const API::IMDEventWorkspace_const_sptr &dataws,
+                                           const std::string &targetunit,
+                                           const std::map<int, double> &map_runwavelength, double &xmin, double &xmax) {
   // Go through all instruments
   uint16_t numruns = dataws->getNumExperimentInfo();
 
@@ -334,8 +299,7 @@ void ConvertCWPDMDToSpectra::findXBoundary(
   for (uint16_t irun = 0; irun < numruns; ++irun) {
     // Skip the Experiment Information does not have run
     if (!dataws->getExperimentInfo(irun)->getInstrument()) {
-      g_log.warning() << "iRun = " << irun << " of total " << numruns
-                      << " does not have instrument associated"
+      g_log.warning() << "iRun = " << irun << " of total " << numruns << " does not have instrument associated"
                       << "\n";
       continue;
     }
@@ -354,27 +318,22 @@ void ConvertCWPDMDToSpectra::findXBoundary(
     }
 
     // Get source and sample position
-    std::vector<detid_t> vec_detid =
-        dataws->getExperimentInfo(irun)->getInstrument()->getDetectorIDs(true);
+    std::vector<detid_t> vec_detid = dataws->getExperimentInfo(irun)->getInstrument()->getDetectorIDs(true);
     if (vec_detid.empty()) {
       g_log.information() << "Run " << runnumber << " has no detectors."
                           << "\n";
       continue;
     }
-    const V3D samplepos =
-        dataws->getExperimentInfo(irun)->getInstrument()->getSample()->getPos();
-    const V3D sourcepos =
-        dataws->getExperimentInfo(irun)->getInstrument()->getSource()->getPos();
+    const V3D samplepos = dataws->getExperimentInfo(irun)->getInstrument()->getSample()->getPos();
+    const V3D sourcepos = dataws->getExperimentInfo(irun)->getInstrument()->getSource()->getPos();
 
     // Get all detectors
     // std::vector<detid_t> vec_detid =
     // dataws->getExperimentInfo(irun)->getInstrument()->getDetectorIDs(true);
     std::vector<Geometry::IDetector_const_sptr> vec_det =
-        dataws->getExperimentInfo(irun)->getInstrument()->getDetectors(
-            vec_detid);
+        dataws->getExperimentInfo(irun)->getInstrument()->getDetectors(vec_detid);
     size_t numdets = vec_det.size();
-    g_log.debug() << "Run = " << runnumber
-                  << ": Number of detectors = " << numdets << "\n";
+    g_log.debug() << "Run = " << runnumber << ": Number of detectors = " << numdets << "\n";
 
     // Scan all the detectors to get Xmin and Xmax
     for (size_t idet = 0; idet < numdets; ++idet) {
@@ -388,8 +347,7 @@ void ConvertCWPDMDToSpectra::findXBoundary(
 
       Kernel::V3D v_det_sample = detpos - samplepos;
       Kernel::V3D v_sample_src = samplepos - sourcepos;
-      double twotheta =
-          calculate2Theta(v_det_sample, v_sample_src) / M_PI * 180.;
+      double twotheta = calculate2Theta(v_det_sample, v_sample_src) / M_PI * 180.;
 
       // convert unit optionally
       double outx = -1;
@@ -415,8 +373,7 @@ void ConvertCWPDMDToSpectra::findXBoundary(
     }
   }
 
-  g_log.debug() << "Find boundary for unit " << targetunit << ": [" << xmin
-                << ", " << xmax << "]"
+  g_log.debug() << "Find boundary for unit " << targetunit << ": [" << xmin << ", " << xmax << "]"
                 << "\n";
 }
 
@@ -430,33 +387,26 @@ void ConvertCWPDMDToSpectra::findXBoundary(
  * @param vecy
  * @param vec_excludedet
  */
-void ConvertCWPDMDToSpectra::binMD(
-    const API::IMDEventWorkspace_const_sptr &mdws, const char &unitbit,
-    const std::map<int, double> &map_runlambda, const std::vector<double> &vecx,
-    std::vector<double> &vecy, const std::vector<detid_t> &vec_excludedet) {
+void ConvertCWPDMDToSpectra::binMD(const API::IMDEventWorkspace_const_sptr &mdws, const char &unitbit,
+                                   const std::map<int, double> &map_runlambda, const std::vector<double> &vecx,
+                                   std::vector<double> &vecy, const std::vector<detid_t> &vec_excludedet) {
   // Check whether MD workspace has proper instrument and experiment Info
   if (mdws->getNumExperimentInfo() == 0)
-    throw std::runtime_error(
-        "There is no ExperimentInfo object that has been set to "
-        "input MDEventWorkspace!");
+    throw std::runtime_error("There is no ExperimentInfo object that has been set to "
+                             "input MDEventWorkspace!");
   else
-    g_log.information()
-        << "Number of ExperimentInfo objects of MDEventWrokspace is "
-        << mdws->getNumExperimentInfo() << "\n";
+    g_log.information() << "Number of ExperimentInfo objects of MDEventWrokspace is " << mdws->getNumExperimentInfo()
+                        << "\n";
 
   // Get sample position
   ExperimentInfo_const_sptr expinfo = mdws->getExperimentInfo(0);
-  Geometry::IComponent_const_sptr sample =
-      expinfo->getInstrument()->getSample();
+  Geometry::IComponent_const_sptr sample = expinfo->getInstrument()->getSample();
   const V3D samplepos = sample->getPos();
-  g_log.debug() << "Sample position is " << samplepos.X() << ", "
-                << samplepos.Y() << ", " << samplepos.Z() << "\n";
+  g_log.debug() << "Sample position is " << samplepos.X() << ", " << samplepos.Y() << ", " << samplepos.Z() << "\n";
 
-  Geometry::IComponent_const_sptr source =
-      expinfo->getInstrument()->getSource();
+  Geometry::IComponent_const_sptr source = expinfo->getInstrument()->getSource();
   const V3D sourcepos = source->getPos();
-  g_log.debug() << "Source position is " << sourcepos.X() << ","
-                << sourcepos.Y() << ", " << sourcepos.Z() << "\n";
+  g_log.debug() << "Source position is " << sourcepos.X() << "," << sourcepos.Y() << ", " << sourcepos.Z() << "\n";
 
   // Go through all events to find out their positions
   auto mditer = mdws->createIterator();
@@ -467,8 +417,7 @@ void ConvertCWPDMDToSpectra::binMD(
   while (scancell) {
     // get the number of events of this cell
     size_t numev2 = mditer->getNumEvents();
-    g_log.debug() << "MDWorkspace " << mdws->getName() << " Cell "
-                  << nextindex - 1 << ": Number of events = " << numev2
+    g_log.debug() << "MDWorkspace " << mdws->getName() << " Cell " << nextindex - 1 << ": Number of events = " << numev2
                   << " Does NEXT cell exist = " << mditer->next() << "\n";
 
     // loop over all the events in current cell
@@ -476,8 +425,7 @@ void ConvertCWPDMDToSpectra::binMD(
       // get detector position for 2theta
       detid_t detid = mditer->getInnerDetectorID(iev);
       if (isExcluded(vec_excludedet, detid)) {
-        g_log.debug() << "Detector " << detid << " is excluded.  Signal = "
-                      << mditer->getInnerSignal(iev) << "\n";
+        g_log.debug() << "Detector " << detid << " is excluded.  Signal = " << mditer->getInnerSignal(iev) << "\n";
         continue;
       }
 
@@ -487,8 +435,7 @@ void ConvertCWPDMDToSpectra::binMD(
       Kernel::V3D detpos(tempx, tempy, tempz);
       Kernel::V3D v_det_sample = detpos - samplepos;
       Kernel::V3D v_sample_src = samplepos - sourcepos;
-      double twotheta =
-          calculate2Theta(v_det_sample, v_sample_src) / M_PI * 180.;
+      double twotheta = calculate2Theta(v_det_sample, v_sample_src) / M_PI * 180.;
 
       // convert unit optionally
       auto temprun = static_cast<int>(mditer->getInnerRunIndex(iev));
@@ -502,8 +449,7 @@ void ConvertCWPDMDToSpectra::binMD(
           if (miter == map_runlambda.end()) {
             std::stringstream errss;
             errss << "Event " << iev << " has run ID as " << temprun << ". "
-                  << "It has no corresponding ExperimentInfo in MDWorkspace "
-                  << mdws->getName() << ".";
+                  << "It has no corresponding ExperimentInfo in MDWorkspace " << mdws->getName() << ".";
             throw std::runtime_error(errss.str());
           }
           currWavelength = miter->second;
@@ -533,18 +479,15 @@ void ConvertCWPDMDToSpectra::binMD(
         // Other situation
         auto vfiter = std::lower_bound(vecx.cbegin(), vecx.cend(), outx);
         xindex = static_cast<int>(vfiter - vecx.cbegin());
-        if ((xindex < static_cast<int>(vecx.size())) &&
-            (outx + 1.0E-5 < vecx[xindex])) {
+        if ((xindex < static_cast<int>(vecx.size())) && (outx + 1.0E-5 < vecx[xindex])) {
           // assume the bin's boundaries are of [...) and consider numerical
           // error
           xindex -= 1;
         } else {
-          g_log.debug() << "Case for almost same.  Event X = " << outx
-                        << ", Boundary = " << vecx[xindex] << "\n";
+          g_log.debug() << "Case for almost same.  Event X = " << outx << ", Boundary = " << vecx[xindex] << "\n";
         }
         if (xindex < 0 || xindex >= static_cast<int>(vecy.size())) {
-          g_log.warning() << "Case unexpected:  Event X = " << outx
-                          << ", Boundary = " << vecx[xindex] << "\n";
+          g_log.warning() << "Case unexpected:  Event X = " << outx << ", Boundary = " << vecx[xindex] << "\n";
         }
       }
 
@@ -553,27 +496,20 @@ void ConvertCWPDMDToSpectra::binMD(
         // Out of left boundary
         int32_t innerDetid = mditer->getInnerDetectorID(iev);
         uint16_t runid = mditer->getInnerRunIndex(iev);
-        g_log.debug() << "Event is out of user-specified range by "
-                      << (outx - vecx.front()) << ", xindex = " << xindex
-                      << ", " << unitbit << " = " << outx
-                      << " out of left boundeary [" << vecx.front() << ", "
-                      << vecx.back() << "]. dep pos = " << detpos.X() << ", "
-                      << detpos.Y() << ", " << detpos.Z() << ", Run = " << runid
-                      << ", DetectorID = " << innerDetid << "\n";
+        g_log.debug() << "Event is out of user-specified range by " << (outx - vecx.front()) << ", xindex = " << xindex
+                      << ", " << unitbit << " = " << outx << " out of left boundeary [" << vecx.front() << ", "
+                      << vecx.back() << "]. dep pos = " << detpos.X() << ", " << detpos.Y() << ", " << detpos.Z()
+                      << ", Run = " << runid << ", DetectorID = " << innerDetid << "\n";
         continue;
       } else if (xindex >= static_cast<int>(vecy.size())) {
         // Out of right boundary
         int32_t innerDetid = mditer->getInnerDetectorID(iev);
         uint16_t runid = mditer->getInnerRunIndex(iev);
         g_log.debug() << "Event is out of user-specified range "
-                      << "xindex = " << xindex << ", " << unitbit << " = "
-                      << outx << " out of [" << vecx.front() << ", "
-                      << vecx.back() << "]. dep pos = " << detpos.X() << ", "
-                      << detpos.Y() << ", " << detpos.Z()
-                      << "; sample pos = " << samplepos.X() << ", "
-                      << samplepos.Y() << ", " << samplepos.Z()
-                      << ", Run = " << runid << ", DetectorID = " << innerDetid
-                      << "\n";
+                      << "xindex = " << xindex << ", " << unitbit << " = " << outx << " out of [" << vecx.front()
+                      << ", " << vecx.back() << "]. dep pos = " << detpos.X() << ", " << detpos.Y() << ", "
+                      << detpos.Z() << "; sample pos = " << samplepos.X() << ", " << samplepos.Y() << ", "
+                      << samplepos.Z() << ", Run = " << runid << ", DetectorID = " << innerDetid << "\n";
         continue;
       } else {
         double signal = mditer->getInnerSignal(iev);
@@ -601,10 +537,10 @@ void ConvertCWPDMDToSpectra::binMD(
  * @param matrixws
  * @param infinitesimal
  */
-void ConvertCWPDMDToSpectra::linearInterpolation(
-    const API::MatrixWorkspace_sptr &matrixws, const double &infinitesimal) {
-  g_log.debug() << "Number of spectrum = " << matrixws->getNumberHistograms()
-                << " Infinitesimal = " << infinitesimal << "\n";
+void ConvertCWPDMDToSpectra::linearInterpolation(const API::MatrixWorkspace_sptr &matrixws,
+                                                 const double &infinitesimal) {
+  g_log.debug() << "Number of spectrum = " << matrixws->getNumberHistograms() << " Infinitesimal = " << infinitesimal
+                << "\n";
   size_t numspec = matrixws->getNumberHistograms();
   for (size_t i = 0; i < numspec; ++i) {
     // search for the first nonzero value and last nonzero value
@@ -629,10 +565,8 @@ void ConvertCWPDMDToSpectra::linearInterpolation(
       else
         --maxNonZeroIndex;
     }
-    g_log.debug() << "iMinNonZero = " << minNonZeroIndex
-                  << ", iMaxNonZero = " << maxNonZeroIndex
-                  << " Workspace index = " << i
-                  << ", Y size = " << matrixws->readY(i).size() << "\n";
+    g_log.debug() << "iMinNonZero = " << minNonZeroIndex << ", iMaxNonZero = " << maxNonZeroIndex
+                  << " Workspace index = " << i << ", Y size = " << matrixws->readY(i).size() << "\n";
     if (minNonZeroIndex >= maxNonZeroIndex)
       throw std::runtime_error("It is not right!");
 
@@ -655,8 +589,7 @@ void ConvertCWPDMDToSpectra::linearInterpolation(
         double rightx = matrixws->readX(i)[iright];
         double righty = matrixws->readY(i)[iright];
         double curx = matrixws->readX(i)[j];
-        double curinterpoy =
-            lefty + (righty - lefty) * (curx - leftx) / (rightx - leftx);
+        double curinterpoy = lefty + (righty - lefty) * (curx - leftx) / (rightx - leftx);
         matrixws->dataY(i)[j] = curinterpoy;
         matrixws->dataE(i)[j] = sqrt(curinterpoy);
       }
@@ -672,13 +605,11 @@ void ConvertCWPDMDToSpectra::linearInterpolation(
  * @param matrixws
  * @param inputmdws
  */
-void ConvertCWPDMDToSpectra::setupSampleLogs(
-    const API::MatrixWorkspace_sptr &matrixws,
-    const API::IMDEventWorkspace_const_sptr &inputmdws) {
+void ConvertCWPDMDToSpectra::setupSampleLogs(const API::MatrixWorkspace_sptr &matrixws,
+                                             const API::IMDEventWorkspace_const_sptr &inputmdws) {
   // get hold of the last experiment info from md workspace to copy over
   auto lastindex = static_cast<uint16_t>(inputmdws->getNumExperimentInfo() - 1);
-  ExperimentInfo_const_sptr lastexpinfo =
-      inputmdws->getExperimentInfo(lastindex);
+  ExperimentInfo_const_sptr lastexpinfo = inputmdws->getExperimentInfo(lastindex);
 
   // get hold of experiment info from matrix ws
   Run &targetrun = matrixws->mutableRun();
@@ -698,9 +629,8 @@ void ConvertCWPDMDToSpectra::setupSampleLogs(
  * @param scalefactor
  * @param infinitesimal
  */
-void ConvertCWPDMDToSpectra::scaleMatrixWorkspace(
-    const API::MatrixWorkspace_sptr &matrixws, const double &scalefactor,
-    const double &infinitesimal) {
+void ConvertCWPDMDToSpectra::scaleMatrixWorkspace(const API::MatrixWorkspace_sptr &matrixws, const double &scalefactor,
+                                                  const double &infinitesimal) {
   size_t numspec = matrixws->getNumberHistograms();
   for (size_t iws = 0; iws < numspec; ++iws) {
     MantidVec &datay = matrixws->dataY(iws);
@@ -723,11 +653,9 @@ void ConvertCWPDMDToSpectra::scaleMatrixWorkspace(
  * @param detid
  * @return
  */
-bool ConvertCWPDMDToSpectra::isExcluded(
-    const std::vector<detid_t> &vec_excludedet, const detid_t detid) {
+bool ConvertCWPDMDToSpectra::isExcluded(const std::vector<detid_t> &vec_excludedet, const detid_t detid) {
 
-  return std::find(vec_excludedet.begin(), vec_excludedet.end(), detid) !=
-         vec_excludedet.end();
+  return std::find(vec_excludedet.begin(), vec_excludedet.end(), detid) != vec_excludedet.end();
 }
 
 } // namespace MDAlgorithms

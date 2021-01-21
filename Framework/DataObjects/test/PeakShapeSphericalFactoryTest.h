@@ -32,12 +32,8 @@ class PeakShapeSphericalFactoryTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static PeakShapeSphericalFactoryTest *createSuite() {
-    return new PeakShapeSphericalFactoryTest();
-  }
-  static void destroySuite(PeakShapeSphericalFactoryTest *suite) {
-    delete suite;
-  }
+  static PeakShapeSphericalFactoryTest *createSuite() { return new PeakShapeSphericalFactoryTest(); }
+  static void destroySuite(PeakShapeSphericalFactoryTest *suite) { delete suite; }
 
   void test_invalid_json_with_no_successor() {
     PeakShapeSphericalFactory factory;
@@ -73,15 +69,12 @@ public:
     const int algorithmVersion = 3;
 
     // Make a source shape
-    PeakShapeSpherical sourceShape(radius, frame, algorithmName,
-                                   algorithmVersion);
+    PeakShapeSpherical sourceShape(radius, frame, algorithmName, algorithmVersion);
 
     PeakShapeSphericalFactory factory;
-    Mantid::Geometry::PeakShape *productShape =
-        factory.create(sourceShape.toJSON());
+    Mantid::Geometry::PeakShape *productShape = factory.create(sourceShape.toJSON());
 
-    PeakShapeSpherical *sphericalShapeProduct =
-        dynamic_cast<PeakShapeSpherical *>(productShape);
+    PeakShapeSpherical *sphericalShapeProduct = dynamic_cast<PeakShapeSpherical *>(productShape);
     TS_ASSERT(sphericalShapeProduct);
 
     TS_ASSERT_EQUALS(sourceShape, *sphericalShapeProduct);
@@ -97,16 +90,13 @@ public:
     const int algorithmVersion = 3;
 
     // Make a source shape with background outer and inner radius
-    PeakShapeSpherical sourceShape(radius, backgroundInnerRadius,
-                                   backgroundOuterRadius, frame, algorithmName,
+    PeakShapeSpherical sourceShape(radius, backgroundInnerRadius, backgroundOuterRadius, frame, algorithmName,
                                    algorithmVersion);
 
     PeakShapeSphericalFactory factory;
-    Mantid::Geometry::PeakShape *productShape =
-        factory.create(sourceShape.toJSON());
+    Mantid::Geometry::PeakShape *productShape = factory.create(sourceShape.toJSON());
 
-    PeakShapeSpherical *sphericalShapeProduct =
-        dynamic_cast<PeakShapeSpherical *>(productShape);
+    PeakShapeSpherical *sphericalShapeProduct = dynamic_cast<PeakShapeSpherical *>(productShape);
     TS_ASSERT(sphericalShapeProduct);
 
     TS_ASSERT_EQUALS(sourceShape, *sphericalShapeProduct);

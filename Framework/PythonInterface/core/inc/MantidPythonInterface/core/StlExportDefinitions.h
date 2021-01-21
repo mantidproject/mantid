@@ -28,8 +28,7 @@ namespace PythonInterface {
  * @param value :: The elements value
  * @return A string representation of the value for printing within a sequence
  */
-template <typename ElementType>
-inline std::string toString(const ElementType &value) {
+template <typename ElementType> inline std::string toString(const ElementType &value) {
   std::ostringstream os;
   os << value;
   return os.str();
@@ -49,8 +48,7 @@ template <> inline std::string toString(const std::string &value) {
 }
 
 /// Convert a sequence of values to a string for printing
-template <typename SequenceType, typename ElementType>
-std::string toString(const SequenceType &values) {
+template <typename SequenceType, typename ElementType> std::string toString(const SequenceType &values) {
   auto iend = values.end();
   std::ostringstream os;
   for (auto itr = values.begin(); itr != iend;) {
@@ -100,13 +98,9 @@ template <typename ElementType> struct std_set_exporter {
 
   static void insert_element(w_t &self, e_t const &x) { self.insert(x); }
 
-  static void insert_set(w_t &self, w_t const &other) {
-    self.insert(other.begin(), other.end());
-  }
+  static void insert_set(w_t &self, w_t const &other) { self.insert(other.begin(), other.end()); }
 
-  static bool contains(w_t const &self, e_t const &x) {
-    return self.find(x) != self.end();
-  }
+  static bool contains(w_t const &self, e_t const &x) { return self.find(x) != self.end(); }
 
   static e_t getitem(w_t const &self, std::size_t i) {
     if (i >= self.size()) {
@@ -144,8 +138,7 @@ template <typename ElementType> struct std_set_exporter {
         .def("append", insert_element, (arg("self"), arg("element")))
         .def("insert", insert_set, (arg("self"), arg("set")))
         .def("extend", insert_set, (arg("self"), arg("set")))
-        .def("erase", (std::size_t(w_t::*)(e_t const &)) & w_t::erase,
-             (arg("self"), arg("index")))
+        .def("erase", (std::size_t(w_t::*)(e_t const &)) & w_t::erase, (arg("self"), arg("index")))
         .def("clear", &w_t::clear, arg("self"))
         .enable_pickling()
 

@@ -44,14 +44,11 @@ namespace VATES {
  * @param input : The dataset to peaks filter
  * @param output : The resulting peaks filtered dataset
  */
-vtkDataSetToPeaksFilteredDataSet::vtkDataSetToPeaksFilteredDataSet(
-    vtkSmartPointer<vtkUnstructuredGrid> input,
-    vtkSmartPointer<vtkUnstructuredGrid> output)
+vtkDataSetToPeaksFilteredDataSet::vtkDataSetToPeaksFilteredDataSet(vtkSmartPointer<vtkUnstructuredGrid> input,
+                                                                   vtkSmartPointer<vtkUnstructuredGrid> output)
     : m_radiusNoShape(0.2), m_radiusFactor(2), m_defaultRadius(0.1),
-      m_radiusType(Geometry::PeakShape::RadiusType::Radius),
-      m_isInitialised(false),
-      m_coordinateSystem(Mantid::Kernel::SpecialCoordinateSystem::None),
-      m_inputData(input), m_outputData(output) {
+      m_radiusType(Geometry::PeakShape::RadiusType::Radius), m_isInitialised(false),
+      m_coordinateSystem(Mantid::Kernel::SpecialCoordinateSystem::None), m_inputData(input), m_outputData(output) {
   if (nullptr == input) {
     throw std::runtime_error("Cannot construct "
                              "vtkDataSetToPeaksFilteredDataSet with NULL input "
@@ -74,16 +71,14 @@ vtkDataSetToPeaksFilteredDataSet::~vtkDataSetToPeaksFilteredDataSet() {}
  * Inner Radius(1)
  * @param coordinateSystem: A coordinate system.
  */
-void vtkDataSetToPeaksFilteredDataSet::initialize(
-    const std::vector<Mantid::API::IPeaksWorkspace_sptr> &peaksWorkspaces,
-    double radiusNoShape, Geometry::PeakShape::RadiusType radiusType,
-    int coordinateSystem) {
+void vtkDataSetToPeaksFilteredDataSet::initialize(const std::vector<Mantid::API::IPeaksWorkspace_sptr> &peaksWorkspaces,
+                                                  double radiusNoShape, Geometry::PeakShape::RadiusType radiusType,
+                                                  int coordinateSystem) {
   m_peaksWorkspaces = peaksWorkspaces;
   m_radiusNoShape = radiusNoShape;
   m_radiusType = radiusType;
   m_isInitialised = true;
-  m_coordinateSystem =
-      static_cast<Mantid::Kernel::SpecialCoordinateSystem>(coordinateSystem);
+  m_coordinateSystem = static_cast<Mantid::Kernel::SpecialCoordinateSystem>(coordinateSystem);
 }
 
 /**
@@ -95,16 +90,14 @@ void vtkDataSetToPeaksFilteredDataSet::initialize(
  * http://www.vtk.org/Wiki/VTK/Examples/Cxx/PolyData/ExtractSelection
  * @param progressUpdating The handle for the progress bar.
  */
-void vtkDataSetToPeaksFilteredDataSet::execute(
-    ProgressAction &progressUpdating) {
+void vtkDataSetToPeaksFilteredDataSet::execute(ProgressAction &progressUpdating) {
   if (!m_isInitialised) {
     throw std::runtime_error("vtkDataSetToPeaksFilteredDataSet needs "
                              "initialize run before executing");
   }
 
   // Get the peaks location and the radius information
-  std::vector<std::pair<Mantid::Kernel::V3D, double>> peaksInfo =
-      getPeaksInfo(m_peaksWorkspaces);
+  std::vector<std::pair<Mantid::Kernel::V3D, double>> peaksInfo = getPeaksInfo(m_peaksWorkspaces);
 
   // Compare each element of the vtk data set and check which ones to keep
   vtkPoints *points = m_inputData->GetPoints();
@@ -112,8 +105,7 @@ void vtkDataSetToPeaksFilteredDataSet::execute(
   vtkSmartPointer<vtkIdTypeArray> ids = vtkSmartPointer<vtkIdTypeArray>::New();
   ids->SetNumberOfComponents(1);
 
-  double progressFactor =
-      1.0 / static_cast<double>(points->GetNumberOfPoints());
+  double progressFactor = 1.0 / static_cast<double>(points->GetNumberOfPoints());
   for (int i = 0; i < points->GetNumberOfPoints(); i++) {
     progressUpdating.eventRaised(double(i) * progressFactor);
     double point[3];
@@ -164,8 +156,7 @@ void vtkDataSetToPeaksFilteredDataSet::execute(
  * radius.
  */
 std::vector<std::pair<Mantid::Kernel::V3D, double>>
-vtkDataSetToPeaksFilteredDataSet::getPeaksInfo(
-    const std::vector<Mantid::API::IPeaksWorkspace_sptr> &peaksWorkspaces) {
+vtkDataSetToPeaksFilteredDataSet::getPeaksInfo(const std::vector<Mantid::API::IPeaksWorkspace_sptr> &peaksWorkspaces) {
   std::vector<std::pair<Mantid::Kernel::V3D, double>> peaksInfo;
   // Iterate over all peaksworkspaces and add the their info to the output
   // vector
@@ -174,8 +165,7 @@ vtkDataSetToPeaksFilteredDataSet::getPeaksInfo(
     // Iterate over all peaks for the workspace
     for (int i = 0; i < numPeaks; i++) {
       const Mantid::Geometry::IPeak &peak = workspace->getPeak(i);
-      peaksInfo.emplace_back(this->getPeakPosition(peak),
-                             this->getPeakRadius(peak.getPeakShape()));
+      peaksInfo.emplace_back(this->getPeakPosition(peak), this->getPeakRadius(peak.getPeakShape()));
     }
   }
   return peaksInfo;
@@ -187,8 +177,7 @@ GNU_DIAG_OFF("strict-aliasing")
  * @param shape The PeakShape from which the information will be extracted.
  * @return radius of peak shape.
  */
-double vtkDataSetToPeaksFilteredDataSet::getPeakRadius(
-    const Mantid::Geometry::PeakShape &shape) {
+double vtkDataSetToPeaksFilteredDataSet::getPeakRadius(const Mantid::Geometry::PeakShape &shape) {
   double radius = m_defaultRadius;
 
   boost::optional<double> rad = shape.radius(m_radiusType);
@@ -208,8 +197,7 @@ double vtkDataSetToPeaksFilteredDataSet::getPeakRadius(
  * @param peak The Peak from which the information will be extracted.
  * @return position of peak shape in the specified coordinate system.
  */
-Kernel::V3D vtkDataSetToPeaksFilteredDataSet::getPeakPosition(
-    const Mantid::Geometry::IPeak &peak) {
+Kernel::V3D vtkDataSetToPeaksFilteredDataSet::getPeakPosition(const Mantid::Geometry::IPeak &peak) {
   // Get the position in the correct frame.
   Kernel::V3D position;
   switch (m_coordinateSystem) {
@@ -232,9 +220,7 @@ Kernel::V3D vtkDataSetToPeaksFilteredDataSet::getPeakPosition(
  * Get the radius for no shape
  * @returns The shape of the radius.
  */
-double vtkDataSetToPeaksFilteredDataSet::getRadiusNoShape() {
-  return m_radiusNoShape;
-}
+double vtkDataSetToPeaksFilteredDataSet::getRadiusNoShape() { return m_radiusNoShape; }
 
 /**
  * Get the radius factor which is used to calculate the radius of the culled
@@ -242,8 +228,6 @@ double vtkDataSetToPeaksFilteredDataSet::getRadiusNoShape() {
  * The culling radius is the radius of the peak times the radius factor.
  * @returns The radius factor.
  */
-double vtkDataSetToPeaksFilteredDataSet::getRadiusFactor() {
-  return m_radiusFactor;
-}
+double vtkDataSetToPeaksFilteredDataSet::getRadiusFactor() { return m_radiusFactor; }
 } // namespace VATES
 } // namespace Mantid

@@ -37,40 +37,32 @@ void Authenticate::init() {
   auto requireValue = std::make_shared<MandatoryValidator<std::string>>();
 
   // Compute Resources
-  std::vector<std::string> computes = Mantid::Kernel::ConfigService::Instance()
-                                          .getFacility()
-                                          .computeResources();
-  declareProperty("ComputeResource", "",
-                  std::make_shared<StringListValidator>(computes),
+  std::vector<std::string> computes = Mantid::Kernel::ConfigService::Instance().getFacility().computeResources();
+  declareProperty("ComputeResource", "", std::make_shared<StringListValidator>(computes),
                   "The remote computer to authenticate to", Direction::Input);
 
   // Say who we are (or at least, who we want to execute the remote python code)
-  declareProperty("UserName", "", requireValue,
-                  "Name of the user to authenticate as", Direction::Input);
+  declareProperty("UserName", "", requireValue, "Name of the user to authenticate as", Direction::Input);
 
   // Password doesn't get echoed to the screen...
-  declareProperty(std::make_unique<MaskedProperty<std::string>>(
-                      "Password", "", requireValue, Direction::Input),
+  declareProperty(std::make_unique<MaskedProperty<std::string>>("Password", "", requireValue, Direction::Input),
                   "The password associated with the specified user");
 }
 
 void Authenticate::exec() {
   std::shared_ptr<RemoteJobManager> jobManager =
-      ConfigService::Instance().getFacility().getRemoteJobManager(
-          getPropertyValue("ComputeResource"));
+      ConfigService::Instance().getFacility().getRemoteJobManager(getPropertyValue("ComputeResource"));
 
   // jobManager is a std::shared_ptr...
   if (!jobManager) {
     // Requested compute resource doesn't exist
     // TODO: should we create our own exception class for this??
     throw(std::runtime_error(
-        std::string("Unknown create a compute resource named " +
-                    getPropertyValue("ComputeResource"))));
+        std::string("Unknown create a compute resource named " + getPropertyValue("ComputeResource"))));
   }
 
   std::istream &respStream =
-      jobManager->httpGet("/authenticate", "", getPropertyValue("UserName"),
-                          getPropertyValue("Password"));
+      jobManager->httpGet("/authenticate", "", getPropertyValue("UserName"), getPropertyValue("Password"));
   if (jobManager->lastStatus() != Poco::Net::HTTPResponse::HTTP_OK) {
     JSONObject resp;
     initFromStream(resp, respStream);

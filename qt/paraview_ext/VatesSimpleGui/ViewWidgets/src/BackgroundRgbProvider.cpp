@@ -32,11 +32,9 @@ BackgroundRgbProvider::~BackgroundRgbProvider() {
   update();
 }
 
-std::vector<double>
-BackgroundRgbProvider::getRgb(bool useCurrentBackgroundColor) {
+std::vector<double> BackgroundRgbProvider::getRgb(bool useCurrentBackgroundColor) {
   // Get the rgb setting from the config file
-  std::vector<double> userSettingRgb =
-      getRgbFromSetting(useCurrentBackgroundColor);
+  std::vector<double> userSettingRgb = getRgbFromSetting(useCurrentBackgroundColor);
 
   // Normalize the entries to 256
   userSettingRgb[0] = userSettingRgb[0] / 255.0;
@@ -46,8 +44,7 @@ BackgroundRgbProvider::getRgb(bool useCurrentBackgroundColor) {
   return userSettingRgb;
 }
 
-std::vector<double>
-BackgroundRgbProvider::getRgbFromSetting(bool useCurrentBackgroundColor) {
+std::vector<double> BackgroundRgbProvider::getRgbFromSetting(bool useCurrentBackgroundColor) {
   // Set the mantid default here
   QColor userBackground;
 
@@ -89,45 +86,36 @@ BackgroundRgbProvider::getRgbFromSetting(bool useCurrentBackgroundColor) {
     bVal = defaultBackgroundColor.blue();
   }
 
-  return {static_cast<double>(rVal), static_cast<double>(gVal),
-          static_cast<double>(bVal)};
+  return {static_cast<double>(rVal), static_cast<double>(gVal), static_cast<double>(bVal)};
 }
 
-void BackgroundRgbProvider::update() {
-  m_mdSettings.setLastSessionBackgroundColor(currentBackgroundColor);
-}
+void BackgroundRgbProvider::update() { m_mdSettings.setLastSessionBackgroundColor(currentBackgroundColor); }
 
-void BackgroundRgbProvider::setBackgroundColor(pqRenderView *view,
-                                               bool useCurrentBackgroundColor) {
+void BackgroundRgbProvider::setBackgroundColor(pqRenderView *view, bool useCurrentBackgroundColor) {
   std::vector<double> backgroundRgb = getRgb(useCurrentBackgroundColor);
 
   vtkSMDoubleVectorProperty *background =
-      vtkSMDoubleVectorProperty::SafeDownCast(
-          view->getViewProxy()->GetProperty("Background"));
+      vtkSMDoubleVectorProperty::SafeDownCast(view->getViewProxy()->GetProperty("Background"));
 
-  background->SetElements3(backgroundRgb[0], backgroundRgb[1],
-                           backgroundRgb[2]);
+  background->SetElements3(backgroundRgb[0], backgroundRgb[1], backgroundRgb[2]);
 
   view->resetCamera();
 }
 
 void BackgroundRgbProvider::observe(pqRenderView *view) {
   // For more information http://www.vtk.org/Wiki/VTK/Tutorials/Callbacks
-  vtkSmartPointer<vtkCallbackCommand> backgroundColorChangeCallback =
-      vtkSmartPointer<vtkCallbackCommand>::New();
-  backgroundColorChangeCallback->SetCallback(
-      backgroundColorChangeCallbackFunction);
+  vtkSmartPointer<vtkCallbackCommand> backgroundColorChangeCallback = vtkSmartPointer<vtkCallbackCommand>::New();
+  backgroundColorChangeCallback->SetCallback(backgroundColorChangeCallbackFunction);
 
   view->getViewProxy()
       ->GetProperty("Background")
       ->AddObserver(vtkCommand::ModifiedEvent, backgroundColorChangeCallback);
 }
 
-void BackgroundRgbProvider::backgroundColorChangeCallbackFunction(
-    vtkObject *caller, long unsigned int, void *, void *) {
+void BackgroundRgbProvider::backgroundColorChangeCallbackFunction(vtkObject *caller, long unsigned int, void *,
+                                                                  void *) {
   // Extract the background color and persist it
-  vtkSMDoubleVectorProperty *background =
-      vtkSMDoubleVectorProperty::SafeDownCast(caller);
+  vtkSMDoubleVectorProperty *background = vtkSMDoubleVectorProperty::SafeDownCast(caller);
 
   int numberOfElements = background->GetNumberOfElements();
   double *elements = background->GetElements();

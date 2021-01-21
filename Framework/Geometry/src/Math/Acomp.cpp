@@ -94,9 +94,8 @@ are equal. Sort of the class is required.
   if (A.Comp.size() != Comp.size())
     return false;
   // Intersect not the same (unless size==1)
-  if (A.Intersect != Intersect &&
-      Units.size() + Comp.size() != 1) // Intersect type is not relevent
-    return false;                      // if singular.
+  if (A.Intersect != Intersect && Units.size() + Comp.size() != 1) // Intersect type is not relevent
+    return false;                                                  // if singular.
 
   // If Units not empty compare each and determine
   // if equal.
@@ -319,8 +318,7 @@ Assumes that the component is sorted and inserts appropiately.
   if (Stype.first + Stype.second == 0)
     throw std::runtime_error("Pair Count wrong in AddComp");
 
-  if (AX.isSingle() ||
-      AX.Intersect == Intersect) // single unit component/Conjoint
+  if (AX.isSingle() || AX.Intersect == Intersect) // single unit component/Conjoint
   {
     std::vector<int>::const_iterator aup;
     for (aup = AX.Units.begin(); aup != AX.Units.end(); ++aup) {
@@ -333,8 +331,7 @@ Assumes that the component is sorted and inserts appropiately.
     for (acp = AX.Comp.begin(); acp != AX.Comp.end(); ++acp) {
       std::vector<Acomp>::iterator cpt;
       cpt = std::lower_bound(Comp.begin(), Comp.end(), *acp);
-      if (cpt == Comp.end() ||
-          (AX.Units.end() != aup && *cpt != *aup)) // Only insert if new
+      if (cpt == Comp.end() || (AX.Units.end() != aup && *cpt != *aup)) // Only insert if new
         Comp.insert(cpt, *acp);
     }
     return;
@@ -401,16 +398,13 @@ must not contain a toplevel +
       else if (isalpha(Ln[iu]) || Ln[iu] == '%') {
         if (Ln[iu] == '%') {
           iu++;
-          const int Nmove =
-              Mantid::Kernel::Strings::convPartNum(Ln.substr(iu), numItem);
+          const int Nmove = Mantid::Kernel::Strings::convPartNum(Ln.substr(iu), numItem);
           if (!Nmove)
-            throw std::invalid_argument(
-                "Acomp::procIntersection error in line Ln\"" + Ln + "\"");
+            throw std::invalid_argument("Acomp::procIntersection error in line Ln\"" + Ln + "\"");
           numItem += 52;
           iu += Nmove;
         } else {
-          numItem = (islower(Ln[iu])) ? static_cast<int>(1 + Ln[iu] - 'a')
-                                      : static_cast<int>(27 + Ln[iu] - 'A');
+          numItem = (islower(Ln[iu])) ? static_cast<int>(1 + Ln[iu] - 'a') : static_cast<int>(27 + Ln[iu] - 'A');
           iu++;
         }
         if (iu < Ln.length() && Ln[iu] == '\'') {
@@ -834,8 +828,7 @@ i.e. one pass.
     Tmod.clear(); // erase all at the start
     // set PI status to 1
     using std::placeholders::_1;
-    for_each(Work.begin(), Work.end(),
-             std::bind(std::mem_fn(&BnId::setPI), _1, 1));
+    for_each(Work.begin(), Work.end(), std::bind(std::mem_fn(&BnId::setPI), _1, 1));
 
     // Collect into pairs which have a difference of +/- one
     // object
@@ -910,8 +903,7 @@ It is set on exit (to the EPI)
     }
     if (DNFscore[ic] == 0) {
       logger.error() << "PIForm:\n";
-      copy(PIform.begin(), PIform.end(),
-           std::ostream_iterator<BnId>(logger.error(), "\n"));
+      copy(PIform.begin(), PIform.end(), std::ostream_iterator<BnId>(logger.error(), "\n"));
       logger.error() << "Error with DNF / EPI determination at " << ic << '\n';
       logger.error() << " Items " << DNFobj[ic] << '\n';
       return 0;
@@ -950,9 +942,7 @@ It is set on exit (to the EPI)
   }
   // Remove dead items from active list
   using std::placeholders::_1;
-  DNFactive.erase(remove_if(DNFactive.begin(), DNFactive.end(),
-                            std::bind(std::less<int>(), _1, 0)),
-                  DNFactive.end());
+  DNFactive.erase(remove_if(DNFactive.begin(), DNFactive.end(), std::bind(std::less<int>(), _1, 0)), DNFactive.end());
 
   /// DEBUG PRINT
   if (debug) {
@@ -1037,8 +1027,7 @@ Get the key numbers in the system
   return keyNumbers;
 }
 
-int Acomp::getDNFobject(std::vector<int> &keyNumbers,
-                        std::vector<BnId> &DNFobj) const
+int Acomp::getDNFobject(std::vector<int> &keyNumbers, std::vector<BnId> &DNFobj) const
 /**
 Creates the DNF items (ie the binary list
 of true statements) It forms a sum of products.
@@ -1149,8 +1138,7 @@ component)
   return 0;
 }
 
-int Acomp::getCNFobject(std::vector<int> &keyNumbers,
-                        std::vector<BnId> &CNFobj) const
+int Acomp::getCNFobject(std::vector<int> &keyNumbers, std::vector<BnId> &CNFobj) const
 /**
 Creates the CNF items (ie the binary list
 of false statements) It forms a sum of products.
@@ -1356,8 +1344,7 @@ singles exist and up-promotes them.
       copy(Lower->Units.begin(), Lower->Units.end(), Units.begin());
     }
     if (!Lower->Comp.empty()) {
-      Comp.resize(Lower->Comp.size() +
-                  1); // +1 has space for our initial object
+      Comp.resize(Lower->Comp.size() + 1); // +1 has space for our initial object
       copy(Lower->Comp.begin(), Lower->Comp.end(), Comp.begin() + 1);
     }
     Comp.erase(Comp.begin(), Comp.begin() + 1);
@@ -1426,16 +1413,14 @@ given a inner bracket expand that etc.
   while (sPos != std::string::npos && Ln[sPos + 1] == '(') {
     int bLevel(1);
     int ePos;
-    for (ePos = static_cast<int>(sPos) + 2;
-         bLevel > 0 && ePos < static_cast<int>(Ln.size()); ePos++) {
+    for (ePos = static_cast<int>(sPos) + 2; bLevel > 0 && ePos < static_cast<int>(Ln.size()); ePos++) {
       if (Ln[ePos] == '(')
         bLevel++;
       else if (Ln[ePos] == ')')
         bLevel--;
     }
     if (bLevel)
-      throw std::invalid_argument("Acomp::setString error in line Ln\"" + Ln +
-                                  "\"");
+      throw std::invalid_argument("Acomp::setString error in line Ln\"" + Ln + "\"");
     // std::string Part= Ln.substr(sPos,ePos-sPos);
     CM.setString(Ln.substr(sPos + 2, ePos - sPos - 3));
     CM.complement();
@@ -1477,8 +1462,7 @@ Gets the size of the Units and the Comp
 @return size of Unit, Comp
 */
 {
-  return std::pair<int, int>(static_cast<int>(Units.size()),
-                             static_cast<int>(Comp.size()));
+  return std::pair<int, int>(static_cast<int>(Units.size()), static_cast<int>(Comp.size()));
 }
 
 int Acomp::itemN(const int Index) const
@@ -1515,8 +1499,7 @@ ab -> a'+b'
 {
   Intersect = 1 - Intersect;
   using std::placeholders::_1;
-  transform(Units.begin(), Units.end(), Units.begin(),
-            std::bind(std::multiplies<int>(), _1, -1));
+  transform(Units.begin(), Units.end(), Units.begin(), std::bind(std::multiplies<int>(), _1, -1));
   sort(Units.begin(), Units.end()); /// Resort the list. use reverse?
 
   for_each(Comp.begin(), Comp.end(), std::mem_fn(&Acomp::complement));
@@ -1607,17 +1590,14 @@ Real pretty print out statement  :-)
       cx << '+';
     //      if ( join && (*vc)->type() )
     if (!vc->Intersect)
-      cx << "D" << dval << " " << '(' << vc->displayDepth(dval + 1) << ')'
-         << " " << dval << "E";
+      cx << "D" << dval << " " << '(' << vc->displayDepth(dval + 1) << ')' << " " << dval << "E";
     else
-      cx << "D" << dval << " " << vc->displayDepth(dval + 1) << " " << dval
-         << "E";
+      cx << "D" << dval << " " << vc->displayDepth(dval + 1) << " " << dval << "E";
   }
   return cx.str();
 }
 
-void Acomp::printImplicates(const std::vector<BnId> &PIform,
-                            const Kernel::Matrix<int> &Grid) const
+void Acomp::printImplicates(const std::vector<BnId> &PIform, const Kernel::Matrix<int> &Grid) const
 /**
 Debug function to print out
 PI and Grid :

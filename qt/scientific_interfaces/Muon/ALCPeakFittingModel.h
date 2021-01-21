@@ -17,24 +17,18 @@ namespace CustomInterfaces {
 
 /** ALCPeakFittingModel : Concrete model for ALC peak fitting
  */
-class MANTIDQT_MUONINTERFACE_DLL ALCPeakFittingModel
-    : public IALCPeakFittingModel {
+class MANTIDQT_MUONINTERFACE_DLL ALCPeakFittingModel : public IALCPeakFittingModel {
 public:
   // -- IALCPeakFittingModel interface
   // -----------------------------------------------------------
-  Mantid::API::IFunction_const_sptr fittedPeaks() const override {
-    return m_fittedPeaks;
-  }
+  Mantid::API::IFunction_const_sptr fittedPeaks() const override { return m_fittedPeaks; }
   Mantid::API::MatrixWorkspace_sptr data() const override { return m_data; }
-  Mantid::API::ITableWorkspace_sptr parameterTable() const {
-    return m_parameterTable;
-  }
+  Mantid::API::ITableWorkspace_sptr parameterTable() const { return m_parameterTable; }
 
   void fitPeaks(Mantid::API::IFunction_const_sptr peaks) override;
 
-  Mantid::API::MatrixWorkspace_sptr
-  guessData(Mantid::API::IFunction_const_sptr function,
-            const std::vector<double> &xValues) override;
+  Mantid::API::MatrixWorkspace_sptr guessData(Mantid::API::IFunction_const_sptr function,
+                                              const std::vector<double> &xValues) override;
   // -- End of IALCPeakFittingModel interface
   // ----------------------------------------------------
 

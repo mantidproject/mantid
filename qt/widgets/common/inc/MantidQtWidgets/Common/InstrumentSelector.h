@@ -62,8 +62,7 @@ signals:
   /// Indicate that the instrument selection has changed. The parameter will
   /// contain the new name
   void instrumentSelectionChanged(const QString & /*_t1*/);
-  void configValueChanged(const QString & /*_t1*/, const QString & /*_t2*/,
-                          const QString & /*_t3*/);
+  void configValueChanged(const QString & /*_t1*/, const QString & /*_t2*/, const QString & /*_t3*/);
   /// Signals that the list of instruments has been updated
   void instrumentListUpdated();
 
@@ -74,15 +73,11 @@ private slots:
 private:
   void handleConfigChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf);
   /// Filter the list to only show those supporting the given technique
-  void
-  filterByTechniquesAtFacility(const QStringList &techniques,
-                               const Mantid::Kernel::FacilityInfo &facility);
+  void filterByTechniquesAtFacility(const QStringList &techniques, const Mantid::Kernel::FacilityInfo &facility);
 
 private: // members
   /// Poco Observer for Config Service Notifications
-  Poco::NObserver<InstrumentSelector,
-                  Mantid::Kernel::ConfigValChangeNotification>
-      m_changeObserver;
+  Poco::NObserver<InstrumentSelector, Mantid::Kernel::ConfigValChangeNotification> m_changeObserver;
   /// A list of technqiues. Only those instruments supporting these techniques
   /// are shown.
   QStringList m_techniques;

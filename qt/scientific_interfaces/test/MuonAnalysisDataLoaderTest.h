@@ -40,14 +40,11 @@ using MantidQt::CustomInterfaces::Muon::PlotType;
 /// Inherits from class under test so that protected methods can be tested
 class TestDataLoader : public MuonAnalysisDataLoader {
 public:
-  TestDataLoader(const DeadTimesType &deadTimesType,
-                 const QStringList &instruments,
+  TestDataLoader(const DeadTimesType &deadTimesType, const QStringList &instruments,
                  const std::string &deadTimesFile = "")
       : MuonAnalysisDataLoader(deadTimesType, instruments, deadTimesFile){};
-  void setProcessAlgorithmProperties(const IAlgorithm_sptr &alg,
-                                     const AnalysisOptions &options) const {
-    MuonAnalysisDataLoader::setProcessAlgorithmProperties(std::move(alg),
-                                                          options);
+  void setProcessAlgorithmProperties(const IAlgorithm_sptr &alg, const AnalysisOptions &options) const {
+    MuonAnalysisDataLoader::setProcessAlgorithmProperties(std::move(alg), options);
   }
 };
 
@@ -55,9 +52,7 @@ class MuonAnalysisDataLoaderTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static MuonAnalysisDataLoaderTest *createSuite() {
-    return new MuonAnalysisDataLoaderTest();
-  }
+  static MuonAnalysisDataLoaderTest *createSuite() { return new MuonAnalysisDataLoaderTest(); }
   static void destroySuite(MuonAnalysisDataLoaderTest *suite) { delete suite; }
 
   /// Constructor
@@ -91,14 +86,12 @@ public:
     const auto loadedWS = result.loadedWorkspace;
     TS_ASSERT(loadedWS);
     // Test that there are 2 periods
-    const auto wsGroup =
-        std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(loadedWS);
+    const auto wsGroup = std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(loadedWS);
     TS_ASSERT(wsGroup);
     TS_ASSERT_EQUALS(wsGroup->getNumberOfEntries(), 2);
     // Test that there are 6 spectra per period
     for (int i = 0; i < 2; i++) {
-      const auto ws = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-          wsGroup->getItem(i));
+      const auto ws = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(wsGroup->getItem(i));
       TS_ASSERT(ws);
       TS_ASSERT_EQUALS(ws->getNumberHistograms(), 6);
       TS_ASSERT_EQUALS(ws->getInstrument()->getName(), "DEVA");
@@ -118,8 +111,7 @@ public:
     const auto loadedWS = result.loadedWorkspace;
     TS_ASSERT(loadedWS);
     // Test that there are 2 periods
-    const auto wsGroup =
-        std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(loadedWS);
+    const auto wsGroup = std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(loadedWS);
     TS_ASSERT(wsGroup);
     TS_ASSERT_EQUALS(wsGroup->getNumberOfEntries(), 2);
   }
@@ -134,8 +126,7 @@ public:
   void test_getDeadTimesTable_FromFile_NotPresent() {
     MuonAnalysisDataLoader loader(DeadTimesType::FromFile, {"MUSR"});
     LoadResult result;
-    TS_ASSERT_THROWS(loader.getDeadTimesTable(result),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(loader.getDeadTimesTable(result), const std::runtime_error &);
   }
 
   void test_getDeadTimesTable_FromFile() {
@@ -160,24 +151,19 @@ public:
 
   void test_getDeadTimesTable_FromDisk() {
     const auto deadTimes = createDeadTimeTable({1, 2, 3}, {0.1, 0.2, 0.3});
-    auto save = Mantid::API::AlgorithmFactory::Instance().create(
-        "SaveNexusProcessed", 1);
+    auto save = Mantid::API::AlgorithmFactory::Instance().create("SaveNexusProcessed", 1);
     save->initialize();
     save->setChild(true);
-    save->setProperty("InputWorkspace",
-                      std::dynamic_pointer_cast<Workspace>(deadTimes));
+    save->setProperty("InputWorkspace", std::dynamic_pointer_cast<Workspace>(deadTimes));
     Poco::Path tempFile(Poco::Path::temp());
     tempFile.setFileName("tempdeadtimes.nxs");
     save->setPropertyValue("Filename", tempFile.toString());
     save->execute();
-    MuonAnalysisDataLoader loader(DeadTimesType::FromDisk, {"MUSR"},
-                                  tempFile.toString());
+    MuonAnalysisDataLoader loader(DeadTimesType::FromDisk, {"MUSR"}, tempFile.toString());
     const auto loadedDeadTimes = loader.getDeadTimesTable(LoadResult());
     for (size_t i = 0; i < 3; i++) {
-      TS_ASSERT_EQUALS(loadedDeadTimes->cell<int>(i, 0),
-                       deadTimes->cell<int>(i, 0));
-      TS_ASSERT_EQUALS(loadedDeadTimes->cell<double>(i, 1),
-                       deadTimes->cell<double>(i, 1));
+      TS_ASSERT_EQUALS(loadedDeadTimes->cell<int>(i, 0), deadTimes->cell<int>(i, 0));
+      TS_ASSERT_EQUALS(loadedDeadTimes->cell<double>(i, 1), deadTimes->cell<double>(i, 1));
     }
     Poco::File(tempFile).remove();
   }
@@ -192,21 +178,17 @@ public:
     grouping.pairNames = {"long"};
     grouping.pairs.emplace_back(1, 0);
     Mantid::API::Workspace_sptr corrected;
-    TS_ASSERT_THROWS_NOTHING(corrected =
-                                 loader.correctAndGroup(result, grouping));
-    auto correctedGroup =
-        std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(corrected);
+    TS_ASSERT_THROWS_NOTHING(corrected = loader.correctAndGroup(result, grouping));
+    auto correctedGroup = std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(corrected);
     TS_ASSERT(correctedGroup);
     TS_ASSERT_EQUALS(correctedGroup->size(), 2);
     for (size_t i = 0; i < correctedGroup->size(); i++) {
-      auto matrixWS = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-          correctedGroup->getItem(i));
+      auto matrixWS = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(correctedGroup->getItem(i));
       TS_ASSERT(matrixWS);
       // Check that each period has number of spectra = number of groups
       TS_ASSERT_EQUALS(matrixWS->getNumberHistograms(), grouping.groups.size());
       // Check that each period has been corrected for dead time
-      TS_ASSERT_DELTA(matrixWS->getSpectrum(0).y()[0],
-                      i == 0 ? 84.1692 : 16.0749, 0.0001);
+      TS_ASSERT_DELTA(matrixWS->getSpectrum(0).y()[0], i == 0 ? 84.1692 : 16.0749, 0.0001);
     }
   }
 
@@ -235,8 +217,7 @@ public:
   }
 
   void test_setProcessAlgorithmProperties_PairLog_Throws() {
-    doTest_setAlgorithmProperties(ItemType::Pair, PlotType::Logarithm, "",
-                                  true);
+    doTest_setAlgorithmProperties(ItemType::Pair, PlotType::Logarithm, "", true);
   }
 
   void test_createAnalysisWorkspace() {
@@ -250,8 +231,7 @@ public:
     grouping.pairs.emplace_back(0, 1);
     grouping.pairAlphas = {1.0};
     Mantid::API::Workspace_sptr corrected;
-    TS_ASSERT_THROWS_NOTHING(corrected =
-                                 loader.correctAndGroup(result, grouping));
+    TS_ASSERT_THROWS_NOTHING(corrected = loader.correctAndGroup(result, grouping));
     Mantid::API::Workspace_sptr analysed;
     AnalysisOptions options(grouping);
     options.groupPairName = "long";
@@ -263,22 +243,17 @@ public:
     options.timeLimits.first = 0.11;
     options.timeLimits.second = 10.0;
     options.timeZero = 0.55;
-    TS_ASSERT_THROWS_NOTHING(
-        analysed = loader.createAnalysisWorkspace(corrected, options));
+    TS_ASSERT_THROWS_NOTHING(analysed = loader.createAnalysisWorkspace(corrected, options));
     // test the output
-    Mantid::MantidVec expectedOutput = {
-        -0.037308, -0.0183329, 0.0250825, -0.0154756, 0.018308,
-        0.0116216, -0.019053,  0.0100087, -0.0393029, -0.001696};
-    const auto outputWS =
-        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(analysed);
+    Mantid::MantidVec expectedOutput = {-0.037308, -0.0183329, 0.0250825, -0.0154756, 0.018308,
+                                        0.0116216, -0.019053,  0.0100087, -0.0393029, -0.001696};
+    const auto outputWS = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(analysed);
     TS_ASSERT(outputWS);
     const auto &data = outputWS->y(0);
     TS_ASSERT_EQUALS(data.size(), 1958);
     const auto &xData = outputWS->x(0);
-    auto offset = std::distance(xData.begin(),
-                                std::lower_bound(xData.begin(), xData.end(),
-                                                 options.timeLimits.first)) +
-                  1;
+    auto offset =
+        std::distance(xData.begin(), std::lower_bound(xData.begin(), xData.end(), options.timeLimits.first)) + 1;
     for (size_t i = 0; i < expectedOutput.size(); i++) {
       TS_ASSERT_DELTA(data[i + offset], expectedOutput[i], 1e-6);
     }
@@ -291,11 +266,9 @@ private:
    * @param deadTimes :: vector containing the corresponding dead times
    * @return Dead Time Table created using the data
    */
-  TableWorkspace_sptr createDeadTimeTable(std::vector<int> specToLoad,
-                                          std::vector<double> deadTimes) {
+  TableWorkspace_sptr createDeadTimeTable(std::vector<int> specToLoad, std::vector<double> deadTimes) {
     TableWorkspace_sptr deadTimeTable =
-        std::dynamic_pointer_cast<TableWorkspace>(
-            WorkspaceFactory::Instance().createTable("TableWorkspace"));
+        std::dynamic_pointer_cast<TableWorkspace>(WorkspaceFactory::Instance().createTable("TableWorkspace"));
 
     deadTimeTable->addColumn("int", "spectrum");
     deadTimeTable->addColumn("double", "dead-time");
@@ -316,8 +289,7 @@ private:
    * @param shouldThrow :: [input, optional] If call should fail or not (default
    * false)
    */
-  void doTest_setAlgorithmProperties(ItemType item, PlotType plot,
-                                     const std::string &rebinArgs,
+  void doTest_setAlgorithmProperties(ItemType item, PlotType plot, const std::string &rebinArgs,
                                      bool shouldThrow = false) {
     TestDataLoader loader(DeadTimesType::FromFile, {"MUSR"});
     Mantid::API::Grouping grouping;
@@ -327,8 +299,7 @@ private:
     grouping.pairs.emplace_back(1, 0);
     grouping.pairAlphas = {1.0};
 
-    auto alg =
-        Mantid::API::AlgorithmFactory::Instance().create("MuonProcess", 1);
+    auto alg = Mantid::API::AlgorithmFactory::Instance().create("MuonProcess", 1);
     alg->initialize();
 
     AnalysisOptions options(grouping);
@@ -344,20 +315,15 @@ private:
     options.timeZero = 0.014;
 
     if (shouldThrow) {
-      TS_ASSERT_THROWS(loader.setProcessAlgorithmProperties(alg, options),
-                       const std::invalid_argument &);
+      TS_ASSERT_THROWS(loader.setProcessAlgorithmProperties(alg, options), const std::invalid_argument &);
     } else {
-      TS_ASSERT_THROWS_NOTHING(
-          loader.setProcessAlgorithmProperties(alg, options));
+      TS_ASSERT_THROWS_NOTHING(loader.setProcessAlgorithmProperties(alg, options));
       // test options == alg props
       TS_ASSERT_EQUALS(alg->getPropertyValue("Mode"), "Analyse");
       TS_ASSERT_EQUALS((double)alg->getProperty("TimeZero"), options.timeZero);
-      TS_ASSERT_EQUALS((double)alg->getProperty("LoadedTimeZero"),
-                       options.loadedTimeZero);
-      TS_ASSERT_EQUALS((double)alg->getProperty("Xmin"),
-                       options.timeLimits.first);
-      TS_ASSERT_EQUALS((double)alg->getProperty("Xmax"),
-                       options.timeLimits.second);
+      TS_ASSERT_EQUALS((double)alg->getProperty("LoadedTimeZero"), options.loadedTimeZero);
+      TS_ASSERT_EQUALS((double)alg->getProperty("Xmin"), options.timeLimits.first);
+      TS_ASSERT_EQUALS((double)alg->getProperty("Xmax"), options.timeLimits.second);
       TS_ASSERT_EQUALS(alg->getPropertyValue("RebinParams"), options.rebinArgs);
       const std::string outputType = alg->getPropertyValue("OutputType");
       if (item == ItemType::Group) {

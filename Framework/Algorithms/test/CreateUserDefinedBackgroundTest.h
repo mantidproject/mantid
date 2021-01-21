@@ -37,26 +37,18 @@ double background(double xPoint, int iSpec = 0) {
 }
 
 // Function to generate test peaks without background
-double peaks(double xPoint) {
-  return gauss(xPoint, 1.0, 2.0, 0.1) + gauss(xPoint, 1.0, 4.0, 0.1);
-}
+double peaks(double xPoint) { return gauss(xPoint, 1.0, 2.0, 0.1) + gauss(xPoint, 1.0, 4.0, 0.1); }
 
 // Function to generate test data: a background with some peaks
-double dataFunction(double xPoint, int iSpec) {
-  return background(xPoint, iSpec) + peaks(xPoint);
-}
+double dataFunction(double xPoint, int iSpec) { return background(xPoint, iSpec) + peaks(xPoint); }
 } // namespace
 
 class CreateUserDefinedBackgroundTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static CreateUserDefinedBackgroundTest *createSuite() {
-    return new CreateUserDefinedBackgroundTest();
-  }
-  static void destroySuite(CreateUserDefinedBackgroundTest *suite) {
-    delete suite;
-  }
+  static CreateUserDefinedBackgroundTest *createSuite() { return new CreateUserDefinedBackgroundTest(); }
+  static void destroySuite(CreateUserDefinedBackgroundTest *suite) { delete suite; }
 
   /// Constructor: cache the value of the setting
   CreateUserDefinedBackgroundTest() : m_key("graph1d.autodistribution") {
@@ -64,9 +56,7 @@ public:
   }
 
   /// Destructor: reset the setting to its stored value
-  ~CreateUserDefinedBackgroundTest() {
-    Mantid::Kernel::ConfigService::Instance().setString(m_key, m_option);
-  }
+  ~CreateUserDefinedBackgroundTest() { Mantid::Kernel::ConfigService::Instance().setString(m_key, m_option); }
 
   void test_Init() {
     CreateUserDefinedBackground alg;
@@ -78,8 +68,7 @@ public:
     CreateUserDefinedBackground alg;
     TS_ASSERT_EQUALS(alg.version(), 1);
     TS_ASSERT_EQUALS(alg.name(), "CreateUserDefinedBackground");
-    TS_ASSERT_EQUALS(alg.category(),
-                     "CorrectionFunctions\\BackgroundCorrections");
+    TS_ASSERT_EQUALS(alg.category(), "CorrectionFunctions\\BackgroundCorrections");
   }
 
   void test_exec_PointsWS_NormalisePlotsOff() {
@@ -109,14 +98,12 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputBackgroundWorkspace", "__NotUsed"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputBackgroundWorkspace", "__NotUsed"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundPoints", bgPoints))
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    MatrixWorkspace_sptr outputWS =
-        alg.getProperty("OutputBackgroundWorkspace");
+    MatrixWorkspace_sptr outputWS = alg.getProperty("OutputBackgroundWorkspace");
     TS_ASSERT(outputWS);
 
     // The expected result
@@ -137,14 +124,12 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputBackgroundWorkspace", "__NotUsed"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputBackgroundWorkspace", "__NotUsed"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundPoints", bgPoints))
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    MatrixWorkspace_sptr outputWS =
-        alg.getProperty("OutputBackgroundWorkspace");
+    MatrixWorkspace_sptr outputWS = alg.getProperty("OutputBackgroundWorkspace");
     TS_ASSERT(outputWS);
 
     // The expected result
@@ -165,20 +150,17 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputBackgroundWorkspace", "__NotUsed"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputBackgroundWorkspace", "__NotUsed"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundPoints", bgPoints))
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
-    MatrixWorkspace_sptr outputWS =
-        alg.getProperty("OutputBackgroundWorkspace");
+    MatrixWorkspace_sptr outputWS = alg.getProperty("OutputBackgroundWorkspace");
     TS_ASSERT(outputWS);
 
     // The expected result
     const auto expected = createExpectedResults(false);
-    TS_ASSERT_DELTA(expected->frequencies(0).back(),
-                    outputWS->frequencies(0).back(), 0.001);
+    TS_ASSERT_DELTA(expected->frequencies(0).back(), outputWS->frequencies(0).back(), 0.001);
   }
 
   void test_exec_HistoWS_extend_NormalisePlotsOff() {
@@ -197,20 +179,17 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputBackgroundWorkspace", "__NotUsed"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputBackgroundWorkspace", "__NotUsed"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundPoints", bgPoints))
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    MatrixWorkspace_sptr outputWS =
-        alg.getProperty("OutputBackgroundWorkspace");
+    MatrixWorkspace_sptr outputWS = alg.getProperty("OutputBackgroundWorkspace");
     TS_ASSERT(outputWS);
 
     // The expected result
     const auto expected = createExpectedResults(true);
-    TS_ASSERT_DELTA(expected->counts(0).back(), outputWS->counts(0).back(),
-                    0.001);
+    TS_ASSERT_DELTA(expected->counts(0).back(), outputWS->counts(0).back(), 0.001);
   }
 
   void test_exec_HistoWS_extend_NormalisePlotsOn() {
@@ -229,20 +208,17 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputBackgroundWorkspace", "__NotUsed"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputBackgroundWorkspace", "__NotUsed"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundPoints", bgPoints))
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    MatrixWorkspace_sptr outputWS =
-        alg.getProperty("OutputBackgroundWorkspace");
+    MatrixWorkspace_sptr outputWS = alg.getProperty("OutputBackgroundWorkspace");
     TS_ASSERT(outputWS);
 
     // The expected result
     const auto expected = createExpectedResults(true, true);
-    TS_ASSERT_DELTA(expected->counts(0).back(), outputWS->counts(0).back(),
-                    0.001);
+    TS_ASSERT_DELTA(expected->counts(0).back(), outputWS->counts(0).back(), 0.001);
   }
 
   void test_exec_distribution() {
@@ -256,14 +232,12 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputBackgroundWorkspace", "__NotUsed"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputBackgroundWorkspace", "__NotUsed"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundPoints", bgPoints))
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    MatrixWorkspace_sptr outputWS =
-        alg.getProperty("OutputBackgroundWorkspace");
+    MatrixWorkspace_sptr outputWS = alg.getProperty("OutputBackgroundWorkspace");
     TS_ASSERT(outputWS);
 
     // The expected result
@@ -276,8 +250,7 @@ public:
 private:
   /// Create workspace containing test data
   MatrixWorkspace_sptr createTestData(bool isHisto) {
-    return WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-        dataFunction, 1, 0.0, 10.0, 0.1, isHisto);
+    return WorkspaceCreationHelper::create2DWorkspaceFromFunction(dataFunction, 1, 0.0, 10.0, 0.1, isHisto);
   }
 
   /// Create table containing user-selected background points
@@ -295,8 +268,7 @@ private:
   }
 
   /// Create expected results
-  MatrixWorkspace_sptr createExpectedResults(bool isHisto,
-                                             bool plotsNormalised = false) {
+  MatrixWorkspace_sptr createExpectedResults(bool isHisto, bool plotsNormalised = false) {
     std::vector<double> xData, yData, eData;
     constexpr double binWidth = 0.1;
     for (size_t i = 0; i < 100; ++i) {
@@ -315,8 +287,7 @@ private:
       yData.emplace_back(background(10.0));
       eData.emplace_back(0.0);
     }
-    auto alg =
-        Mantid::API::AlgorithmFactory::Instance().create("CreateWorkspace", 1);
+    auto alg = Mantid::API::AlgorithmFactory::Instance().create("CreateWorkspace", 1);
     alg->initialize();
     alg->setChild(true);
     alg->setProperty("OutputWorkspace", "__NotUsed");
@@ -330,11 +301,9 @@ private:
   }
 
   /// Compare workspaces
-  bool workspacesEqual(const MatrixWorkspace_sptr &lhs,
-                       const MatrixWorkspace_sptr &rhs, double tolerance,
+  bool workspacesEqual(const MatrixWorkspace_sptr &lhs, const MatrixWorkspace_sptr &rhs, double tolerance,
                        bool relativeError = false) {
-    auto alg = Mantid::API::AlgorithmFactory::Instance().create(
-        "CompareWorkspaces", 1);
+    auto alg = Mantid::API::AlgorithmFactory::Instance().create("CompareWorkspaces", 1);
     alg->setChild(true);
     alg->initialize();
     alg->setProperty<MatrixWorkspace_sptr>("Workspace1", lhs);
@@ -357,14 +326,12 @@ private:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputBackgroundWorkspace", "__NotUsed"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputBackgroundWorkspace", "__NotUsed"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundPoints", bgPoints))
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
-    MatrixWorkspace_sptr outputWS =
-        alg.getProperty("OutputBackgroundWorkspace");
+    MatrixWorkspace_sptr outputWS = alg.getProperty("OutputBackgroundWorkspace");
     TS_ASSERT(outputWS);
 
     // The expected result

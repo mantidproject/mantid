@@ -50,9 +50,7 @@ public:
   /// Algorithm's name
   const std::string name() const override { return "FindCenterOfMassPosition"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Finds the beam center in a 2D SANS data set.";
-  }
+  const std::string summary() const override { return "Finds the beam center in a 2D SANS data set."; }
 
   /// Algorithm's version
   int version() const override { return (2); }

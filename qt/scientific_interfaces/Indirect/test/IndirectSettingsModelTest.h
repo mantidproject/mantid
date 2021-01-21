@@ -15,9 +15,7 @@ using namespace MantidQt::CustomInterfaces;
 
 class IndirectSettingsModelTest : public CxxTest::TestSuite {
 public:
-  static IndirectSettingsModelTest *createSuite() {
-    return new IndirectSettingsModelTest();
-  }
+  static IndirectSettingsModelTest *createSuite() { return new IndirectSettingsModelTest(); }
 
   static void destroySuite(IndirectSettingsModelTest *suite) { delete suite; }
 

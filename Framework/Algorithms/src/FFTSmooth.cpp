@@ -31,22 +31,17 @@ using namespace HistogramData;
 
 /// Initialisation method. Declares properties to be used in algorithm.
 void FFTSmooth::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>("InputWorkspace", "", Direction::Input),
                   "The name of the input workspace.");
-  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "The name of the output workspace.");
 
   auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
-  declareProperty("WorkspaceIndex", 0, mustBePositive,
-                  "Workspace index for smoothing");
+  declareProperty("WorkspaceIndex", 0, mustBePositive, "Workspace index for smoothing");
 
   std::vector<std::string> type{"Zeroing"};
-  declareProperty("Filter", "Zeroing",
-                  std::make_shared<StringListValidator>(type),
-                  "The type of the applied filter");
+  declareProperty("Filter", "Zeroing", std::make_shared<StringListValidator>(type), "The type of the applied filter");
   declareProperty("Params", "", "The filter parameters");
 }
 
@@ -66,11 +61,9 @@ void FFTSmooth::exec() {
   builder.setX(m_inWS->x(0).size() + dn);
   builder.setY(m_inWS->y(0).size() + dn);
   builder.setDistribution(m_inWS->isDistribution());
-  API::MatrixWorkspace_sptr symmWS =
-      create<Workspace2D>(*m_inWS, 1, builder.build());
+  API::MatrixWorkspace_sptr symmWS = create<Workspace2D>(*m_inWS, 1, builder.build());
 
-  double dx = (m_inWS->x(spec).back() - m_inWS->x(spec).front()) /
-              static_cast<double>(m_inWS->x(spec).size() - 1);
+  double dx = (m_inWS->x(spec).back() - m_inWS->x(spec).front()) / static_cast<double>(m_inWS->x(spec).size() - 1);
 
   auto &symX = symmWS->mutableX(0);
   auto &symY = symmWS->mutableY(0);
@@ -111,8 +104,7 @@ void FFTSmooth::exec() {
     else
       n = std::stoi(sn);
     if (n < 1)
-      throw std::invalid_argument(
-          "Truncation parameter must be an integer > 1");
+      throw std::invalid_argument("Truncation parameter must be an integer > 1");
     zero(n);
   }
 
@@ -132,8 +124,7 @@ void FFTSmooth::exec() {
   builder.setX(m_inWS->x(0).size());
   builder.setY(m_inWS->y(0).size());
   builder.setDistribution(m_inWS->isDistribution());
-  API::MatrixWorkspace_sptr outWS =
-      create<MatrixWorkspace>(*m_inWS, 1, builder.build());
+  API::MatrixWorkspace_sptr outWS = create<MatrixWorkspace>(*m_inWS, 1, builder.build());
 
   dn = static_cast<int>(tmpWS->blocksize()) / 2;
 
@@ -176,10 +167,8 @@ void FFTSmooth::truncate(int n) {
   xi.assign(X.begin(), X.begin() + nx);
 
   using std::placeholders::_1;
-  std::transform(yr.begin(), yr.end(), yr.begin(),
-                 std::bind(std::multiplies<double>(), _1, f));
-  std::transform(yi.begin(), yi.end(), yi.begin(),
-                 std::bind(std::multiplies<double>(), _1, f));
+  std::transform(yr.begin(), yr.end(), yr.begin(), std::bind(std::multiplies<double>(), _1, f));
+  std::transform(yi.begin(), yi.end(), yi.begin(), std::bind(std::multiplies<double>(), _1, f));
 }
 
 /** Smoothing by zeroing.
@@ -202,11 +191,9 @@ void FFTSmooth::zero(int n) {
   m_filteredWS->setSharedX(0, m_unfilteredWS->sharedX(0));
   m_filteredWS->setSharedX(1, m_unfilteredWS->sharedX(0));
 
-  std::copy(m_unfilteredWS->y(0).cbegin(), m_unfilteredWS->y(0).begin() + ny,
-            m_filteredWS->mutableY(0).begin());
+  std::copy(m_unfilteredWS->y(0).cbegin(), m_unfilteredWS->y(0).begin() + ny, m_filteredWS->mutableY(0).begin());
 
-  std::copy(m_unfilteredWS->y(1).cbegin(), m_unfilteredWS->y(1).begin() + ny,
-            m_filteredWS->mutableY(1).begin());
+  std::copy(m_unfilteredWS->y(1).cbegin(), m_unfilteredWS->y(1).begin() + ny, m_filteredWS->mutableY(1).begin());
 }
 
 } // namespace Algorithms

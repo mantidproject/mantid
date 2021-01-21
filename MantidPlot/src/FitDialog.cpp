@@ -56,8 +56,7 @@
 
 using namespace MantidQt::API;
 
-FitDialog::FitDialog(Graph *g, QWidget *parent, const Qt::WFlags &fl)
-    : QDialog(parent, fl) {
+FitDialog::FitDialog(Graph *g, QWidget *parent, const Qt::WFlags &fl) : QDialog(parent, fl) {
   setObjectName("FitDialog");
   setWindowTitle(tr("MantidPlot - Fit Wizard"));
   setSizeGripEnabled(true);
@@ -88,8 +87,7 @@ FitDialog::FitDialog(Graph *g, QWidget *parent, const Qt::WFlags &fl)
 void FitDialog::initFitPage() {
   ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
   if (!app) {
-    throw std::logic_error(
-        "Parent of FitDialog is not ApplicationWindow as expected.");
+    throw std::logic_error("Parent of FitDialog is not ApplicationWindow as expected.");
   }
 
   QGridLayout *gl1 = new QGridLayout();
@@ -115,8 +113,7 @@ void FitDialog::initFitPage() {
   btnParamRange = new QPushButton();
   btnParamRange->setIcon(QIcon(getQPixmap("param_range_btn_xpm")));
   btnParamRange->setCheckable(true);
-  connect(btnParamRange, SIGNAL(toggled(bool)), this,
-          SLOT(showParameterRange(bool)));
+  connect(btnParamRange, SIGNAL(toggled(bool)), this, SLOT(showParameterRange(bool)));
   vb->addWidget(btnParamRange);
   previewBox = new QCheckBox(tr("&Preview"));
   connect(previewBox, SIGNAL(stateChanged(int)), this, SLOT(updatePreview()));
@@ -127,15 +124,12 @@ void FitDialog::initFitPage() {
   boxParams = new QTableWidget();
   boxParams->setColumnCount(5);
   boxParams->horizontalHeader()->setClickable(false);
-  boxParams->horizontalHeader()->setResizeMode(0,
-                                               QHeaderView::ResizeToContents);
+  boxParams->horizontalHeader()->setResizeMode(0, QHeaderView::ResizeToContents);
   boxParams->horizontalHeader()->setResizeMode(1, QHeaderView::Stretch);
   boxParams->horizontalHeader()->setResizeMode(2, QHeaderView::Stretch);
   boxParams->horizontalHeader()->setResizeMode(3, QHeaderView::Stretch);
-  boxParams->horizontalHeader()->setResizeMode(4,
-                                               QHeaderView::ResizeToContents);
-  QStringList header{tr("Parameter"), tr("From"), tr("Value"), tr("To"),
-                     tr("Constant")};
+  boxParams->horizontalHeader()->setResizeMode(4, QHeaderView::ResizeToContents);
+  QStringList header{tr("Parameter"), tr("From"), tr("Value"), tr("To"), tr("Constant")};
   boxParams->setHorizontalHeaderLabels(header);
   boxParams->verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);
   boxParams->verticalHeader()->hide();
@@ -244,17 +238,14 @@ void FitDialog::initFitPage() {
   fitPage->setLayout(vbox1);
   tw->addWidget(fitPage);
 
-  connect(boxCurve, SIGNAL(activated(const QString &)), this,
-          SLOT(activateCurve(const QString &)));
+  connect(boxCurve, SIGNAL(activated(const QString &)), this, SLOT(activateCurve(const QString &)));
   connect(buttonOk, SIGNAL(clicked()), this, SLOT(accept()));
   connect(buttonCancel1, SIGNAL(clicked()), this, SLOT(close()));
   connect(buttonEdit, SIGNAL(clicked()), this, SLOT(showEditPage()));
   connect(btnDeleteFitCurves, SIGNAL(clicked()), this, SLOT(deleteFitCurves()));
-  connect(boxWeighting, SIGNAL(activated(int)), this,
-          SLOT(enableWeightingParameters(int)));
+  connect(boxWeighting, SIGNAL(activated(int)), this, SLOT(enableWeightingParameters(int)));
   connect(buttonAdvanced, SIGNAL(clicked()), this, SLOT(showAdvancedPage()));
-  connect(tableNamesBox, SIGNAL(activated(int)), this,
-          SLOT(selectSrcTable(int)));
+  connect(tableNamesBox, SIGNAL(activated(int)), this, SLOT(selectSrcTable(int)));
 
   setFocusProxy(boxFunction);
 }
@@ -293,8 +284,7 @@ void FitDialog::initEditPage() {
   polynomOrderBox->setMinimum(1);
   polynomOrderBox->setValue(1);
   polynomOrderBox->hide();
-  connect(polynomOrderBox, SIGNAL(valueChanged(int)), this,
-          SLOT(setNumPeaks(int)));
+  connect(polynomOrderBox, SIGNAL(valueChanged(int)), this, SLOT(setNumPeaks(int)));
   hbox1->addWidget(polynomOrderBox);
 
   buttonPlugins = new QPushButton(tr("Choose plug&ins folder..."));
@@ -349,10 +339,8 @@ void FitDialog::initEditPage() {
 
   connect(buttonPlugins, SIGNAL(clicked()), this, SLOT(chooseFolder()));
   connect(buttonClear, SIGNAL(clicked()), this, SLOT(resetFunction()));
-  connect(categoryBox, SIGNAL(currentRowChanged(int)), this,
-          SLOT(showFunctionsList(int)));
-  connect(funcBox, SIGNAL(currentRowChanged(int)), this,
-          SLOT(showExpression(int)));
+  connect(categoryBox, SIGNAL(currentRowChanged(int)), this, SLOT(showFunctionsList(int)));
+  connect(funcBox, SIGNAL(currentRowChanged(int)), this, SLOT(showExpression(int)));
   connect(boxUseBuiltIn, SIGNAL(toggled(bool)), this, SLOT(setFunction(bool)));
   connect(btnAddName, SIGNAL(clicked()), this, SLOT(addFunctionName()));
   connect(btnAddTxt, SIGNAL(clicked()), this, SLOT(addFunction()));
@@ -365,14 +353,12 @@ void FitDialog::initEditPage() {
 void FitDialog::initAdvancedPage() {
   ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
   if (!app) {
-    throw std::logic_error(
-        "Parent of FitDialog is not ApplicationWindow as expected.");
+    throw std::logic_error("Parent of FitDialog is not ApplicationWindow as expected.");
   }
 
   generatePointsBtn = new QRadioButton(tr("&Uniform X Function"));
   generatePointsBtn->setChecked(app->generateUniformFitPoints);
-  connect(generatePointsBtn, SIGNAL(clicked()), this,
-          SLOT(enableApplyChanges()));
+  connect(generatePointsBtn, SIGNAL(clicked()), this, SLOT(enableApplyChanges()));
 
   QGridLayout *gl1 = new QGridLayout();
   gl1->addWidget(generatePointsBtn, 0, 0);
@@ -383,8 +369,7 @@ void FitDialog::initAdvancedPage() {
   generatePointsBox->setRange(0, 1000000);
   generatePointsBox->setSingleStep(10);
   generatePointsBox->setValue(app->fitPoints);
-  connect(generatePointsBox, SIGNAL(valueChanged(int)), this,
-          SLOT(enableApplyChanges(int)));
+  connect(generatePointsBox, SIGNAL(valueChanged(int)), this, SLOT(enableApplyChanges(int)));
   showPointsBox(!app->generateUniformFitPoints);
 
   QHBoxLayout *hb = new QHBoxLayout();
@@ -406,8 +391,7 @@ void FitDialog::initAdvancedPage() {
   boxPrecision = new QSpinBox();
   boxPrecision->setRange(0, 13);
   boxPrecision->setValue(app->fit_output_precision);
-  connect(boxPrecision, SIGNAL(valueChanged(int)), this,
-          SLOT(enableApplyChanges(int)));
+  connect(boxPrecision, SIGNAL(valueChanged(int)), this, SLOT(enableApplyChanges(int)));
 
   gl2->addWidget(boxPrecision, 0, 2);
   btnParamTable = new QPushButton(tr("Parameters &Table"));
@@ -425,21 +409,18 @@ void FitDialog::initAdvancedPage() {
 
   scaleErrorsBox = new QCheckBox(tr("Scale Errors with sqrt(Chi^2/doF)"));
   scaleErrorsBox->setChecked(app->fit_scale_errors);
-  connect(scaleErrorsBox, SIGNAL(stateChanged(int)), this,
-          SLOT(enableApplyChanges(int)));
+  connect(scaleErrorsBox, SIGNAL(stateChanged(int)), this, SLOT(enableApplyChanges(int)));
 
   QGroupBox *gb2 = new QGroupBox(tr("Parameters Output"));
   gb2->setLayout(gl2);
 
   logBox = new QCheckBox(tr("&Write Parameters to Result Log"));
   logBox->setChecked(app->writeFitResultsToLog);
-  connect(logBox, SIGNAL(stateChanged(int)), this,
-          SLOT(enableApplyChanges(int)));
+  connect(logBox, SIGNAL(stateChanged(int)), this, SLOT(enableApplyChanges(int)));
 
   plotLabelBox = new QCheckBox(tr("&Paste Parameters to Plot"));
   plotLabelBox->setChecked(app->pasteFitResultsToPlot);
-  connect(plotLabelBox, SIGNAL(stateChanged(int)), this,
-          SLOT(enableApplyChanges(int)));
+  connect(plotLabelBox, SIGNAL(stateChanged(int)), this, SLOT(enableApplyChanges(int)));
 
   QHBoxLayout *hbox1 = new QHBoxLayout();
 
@@ -471,18 +452,15 @@ void FitDialog::initAdvancedPage() {
 
   connect(btnParamTable, SIGNAL(clicked()), this, SLOT(showParametersTable()));
   connect(btnCovMatrix, SIGNAL(clicked()), this, SLOT(showCovarianceMatrix()));
-  connect(samePointsBtn, SIGNAL(toggled(bool)), this,
-          SLOT(showPointsBox(bool)));
-  connect(generatePointsBtn, SIGNAL(toggled(bool)), this,
-          SLOT(showPointsBox(bool)));
+  connect(samePointsBtn, SIGNAL(toggled(bool)), this, SLOT(showPointsBox(bool)));
+  connect(generatePointsBtn, SIGNAL(toggled(bool)), this, SLOT(showPointsBox(bool)));
   connect(buttonCancel3, SIGNAL(clicked()), this, SLOT(close()));
 }
 
 void FitDialog::applyChanges() {
   ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
   if (!app) {
-    throw std::logic_error(
-        "Parent of FitDialog is not ApplicationWindow as expected.");
+    throw std::logic_error("Parent of FitDialog is not ApplicationWindow as expected.");
   }
   int prec = boxPrecision->value();
   app->fit_output_precision = prec;
@@ -502,12 +480,9 @@ void FitDialog::applyChanges() {
   app->writeFitResultsToLog = logBox->isChecked();
   app->fitPoints = generatePointsBox->value();
   app->generateUniformFitPoints = generatePointsBtn->isChecked();
-  if (d_current_fit &&
-      !(strcmp("PolynomialFit", d_current_fit->metaObject()->className()) ==
-        0) &&
+  if (d_current_fit && !(strcmp("PolynomialFit", d_current_fit->metaObject()->className()) == 0) &&
       !(strcmp("LinearFit", d_current_fit->metaObject()->className()) == 0) &&
-      !(strcmp("LinearSlopeFit", d_current_fit->metaObject()->className()) ==
-        0))
+      !(strcmp("LinearSlopeFit", d_current_fit->metaObject()->className()) == 0))
     app->fit_scale_errors = scaleErrorsBox->isChecked();
   app->saveSettings();
   btnApply->setEnabled(false);
@@ -516,15 +491,12 @@ void FitDialog::applyChanges() {
 void FitDialog::showParametersTable() {
   QString tableName = paramTableName->text();
   if (tableName.isEmpty()) {
-    QMessageBox::critical(
-        this, tr("MantidPlot - Error"),
-        tr("Please enter a valid name for the parameters table."));
+    QMessageBox::critical(this, tr("MantidPlot - Error"), tr("Please enter a valid name for the parameters table."));
     return;
   }
 
   if (!d_current_fit) {
-    QMessageBox::critical(this, tr("MantidPlot - Error"),
-                          tr("Please perform a fit first and try again."));
+    QMessageBox::critical(this, tr("MantidPlot - Error"), tr("Please perform a fit first and try again."));
     return;
   }
 
@@ -534,15 +506,12 @@ void FitDialog::showParametersTable() {
 void FitDialog::showCovarianceMatrix() {
   QString matrixName = covMatrixName->text();
   if (matrixName.isEmpty()) {
-    QMessageBox::critical(
-        this, tr("MantidPlot - Error"),
-        tr("Please enter a valid name for the covariance matrix."));
+    QMessageBox::critical(this, tr("MantidPlot - Error"), tr("Please enter a valid name for the covariance matrix."));
     return;
   }
 
   if (!d_current_fit) {
-    QMessageBox::critical(this, tr("MantidPlot - Error"),
-                          tr("Please perform a fit first and try again."));
+    QMessageBox::critical(this, tr("MantidPlot - Error"), tr("Please perform a fit first and try again."));
     return;
   }
 
@@ -593,13 +562,11 @@ void FitDialog::activateCurve(const QString &curveName) {
 
 void FitDialog::saveUserFunction() {
   if (editBox->toPlainText().isEmpty()) {
-    QMessageBox::critical(this, tr("MantidPlot - Input function error"),
-                          tr("Please enter a valid function!"));
+    QMessageBox::critical(this, tr("MantidPlot - Input function error"), tr("Please enter a valid function!"));
     editBox->setFocus();
     return;
   } else if (boxName->text().isEmpty()) {
-    QMessageBox::critical(this, tr("MantidPlot - Input function error"),
-                          tr("Please enter a function name!"));
+    QMessageBox::critical(this, tr("MantidPlot - Input function error"), tr("Please enter a function name!"));
     boxName->setFocus();
     return;
   } else if (boxParam->text().remove(QRegExp("[,;\\s]")).isEmpty()) {
@@ -610,18 +577,16 @@ void FitDialog::saveUserFunction() {
   }
 
   if (builtInFunctionNames().contains(boxName->text())) {
-    QMessageBox::critical(
-        this, tr("MantidPlot - Error: function name"),
-        "<p><b>" + boxName->text() + "</b>" +
-            tr(" is a built-in function name"
-               "<p>You must choose another name for your function!"));
+    QMessageBox::critical(this, tr("MantidPlot - Error: function name"),
+                          "<p><b>" + boxName->text() + "</b>" +
+                              tr(" is a built-in function name"
+                                 "<p>You must choose another name for your function!"));
     editBox->setFocus();
     return;
   }
 
   if (editBox->toPlainText().contains(boxName->text())) {
-    QMessageBox::critical(this, tr("MantidPlot - Input function error"),
-                          tr("You can't define functions recursively!"));
+    QMessageBox::critical(this, tr("MantidPlot - Input function error"), tr("You can't define functions recursively!"));
     editBox->setFocus();
     return;
   }
@@ -633,8 +598,7 @@ void FitDialog::saveUserFunction() {
     int index = lst.indexOf(name);
     d_current_fit = dynamic_cast<NonLinearFit *>(d_user_functions[index]);
     if (d_current_fit) {
-      d_current_fit->setParametersList(boxParam->text().split(
-          QRegExp("[,;]+[\\s]*"), QString::SkipEmptyParts));
+      d_current_fit->setParametersList(boxParam->text().split(QRegExp("[,;]+[\\s]*"), QString::SkipEmptyParts));
       d_current_fit->setFormula(formula);
       d_current_fit->save(d_current_fit->fileName());
 
@@ -644,14 +608,12 @@ void FitDialog::saveUserFunction() {
   } else {
     ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
     if (!app) {
-      throw std::logic_error(
-          "Parent of FitDialog is not ApplicationWindow as expected.");
+      throw std::logic_error("Parent of FitDialog is not ApplicationWindow as expected.");
     }
     QString filter = tr("MantidPlot fit model") + " (*.fit);;";
     filter += tr("All files") + " (*)";
-    QString fn = QFileDialog::getSaveFileName(
-        app, tr("MantidPlot") + " - " + tr("Save Fit Model As"),
-        app->fitModelsPath + "/" + name, filter);
+    QString fn = QFileDialog::getSaveFileName(app, tr("MantidPlot") + " - " + tr("Save Fit Model As"),
+                                              app->fitModelsPath + "/" + name, filter);
     if (!fn.isEmpty()) {
       QFileInfo fi(fn);
       app->fitModelsPath = fi.dir().absolutePath();
@@ -661,8 +623,7 @@ void FitDialog::saveUserFunction() {
 
       d_current_fit = new NonLinearFit(app, d_graph);
       d_current_fit->setObjectName(name);
-      d_current_fit->setParametersList(boxParam->text().split(
-          QRegExp("[,;]+[\\s]*"), QString::SkipEmptyParts));
+      d_current_fit->setParametersList(boxParam->text().split(QRegExp("[,;]+[\\s]*"), QString::SkipEmptyParts));
       d_current_fit->setFormula(formula);
       if (d_current_fit->save(fn)) {
         QStringList lst = userFunctionNames();
@@ -677,8 +638,7 @@ void FitDialog::saveUserFunction() {
           funcBox->setCurrentRow(index);
         }
 
-        if (d_user_functions.count() > 0 && !boxUseBuiltIn->isEnabled() &&
-            categoryBox->currentRow() == 0)
+        if (d_user_functions.count() > 0 && !boxUseBuiltIn->isEnabled() && categoryBox->currentRow() == 0)
           boxUseBuiltIn->setEnabled(true);
       }
     }
@@ -690,12 +650,9 @@ void FitDialog::removeUserFunction() {
   if (lst.isEmpty())
     return;
 
-  QString s = tr("Are you sure you want to remove fit model file:\n %1 ?")
-                  .arg(d_current_fit->fileName());
-  if (QMessageBox::Yes !=
-      QMessageBox::question(this,
-                            tr("MantidPlot") + " - " + tr("Remove Fit Model"),
-                            s, QMessageBox::Yes, QMessageBox::Cancel))
+  QString s = tr("Are you sure you want to remove fit model file:\n %1 ?").arg(d_current_fit->fileName());
+  if (QMessageBox::Yes != QMessageBox::question(this, tr("MantidPlot") + " - " + tr("Remove Fit Model"), s,
+                                                QMessageBox::Yes, QMessageBox::Cancel))
     return;
 
   QString name = funcBox->currentItem()->text();
@@ -722,8 +679,7 @@ void FitDialog::removeUserFunction() {
 void FitDialog::showFitPage() {
   QString formula = editBox->toPlainText().simplified();
   if (formula.isEmpty()) {
-    QMessageBox::critical(this, tr("MantidPlot - Input function error"),
-                          tr("Please enter a valid function!"));
+    QMessageBox::critical(this, tr("MantidPlot - Input function error"), tr("Please enter a valid function!"));
     editBox->setFocus();
     return;
   }
@@ -731,8 +687,7 @@ void FitDialog::showFitPage() {
   ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
   if (!boxUseBuiltIn->isChecked()) {
     d_current_fit = new NonLinearFit(app, d_graph);
-    d_current_fit->setParametersList(boxParam->text().split(
-        QRegExp("[,;]+[\\s]*"), QString::SkipEmptyParts));
+    d_current_fit->setParametersList(boxParam->text().split(QRegExp("[,;]+[\\s]*"), QString::SkipEmptyParts));
     formula = parseFormula(formula);
     d_current_fit->setFormula(formula);
   }
@@ -741,8 +696,7 @@ void FitDialog::showFitPage() {
     return;
 
   if (d_current_fit->type() == Fit::BuiltIn &&
-      (isOfType(d_current_fit, "PolynomialFit") ||
-       isOfType(d_current_fit, "LinearFit") ||
+      (isOfType(d_current_fit, "PolynomialFit") || isOfType(d_current_fit, "LinearFit") ||
        isOfType(d_current_fit, "LinearSlopeFit"))) {
     btnParamRange->setEnabled(false);
     boxAlgorithm->setEnabled(false);
@@ -764,8 +718,7 @@ void FitDialog::showFitPage() {
   int aux = parameters;
   if (aux > 7)
     aux = 7;
-  boxParams->setMinimumHeight(4 + (aux + 1) *
-                                      boxParams->horizontalHeader()->height());
+  boxParams->setMinimumHeight(4 + (aux + 1) * boxParams->horizontalHeader()->height());
 
   // QLocale locale = app->locale();
   int prec = boxPrecision->value();
@@ -815,8 +768,7 @@ void FitDialog::showFitPage() {
   }
 
   boxFunction->setText(formula);
-  lblFunction->setText(boxName->text() + " (x, " +
-                       boxParam->text().simplified() + ")");
+  lblFunction->setText(boxName->text() + " (x, " + boxParam->text().simplified() + ")");
 
   tw->setCurrentWidget(fitPage);
   if (previewBox->isChecked())
@@ -831,8 +783,7 @@ void FitDialog::showEditPage() {
 
 void FitDialog::showAdvancedPage() {
   tw->setCurrentWidget(advancedPage);
-  if (d_current_fit && (isOfType(d_current_fit, "PolynomialFit") ||
-                        isOfType(d_current_fit, "LinearFit") ||
+  if (d_current_fit && (isOfType(d_current_fit, "PolynomialFit") || isOfType(d_current_fit, "LinearFit") ||
                         isOfType(d_current_fit, "LinearSlopeFit"))) {
     scaleErrorsBox->setChecked(false);
     scaleErrorsBox->setEnabled(false);
@@ -919,8 +870,7 @@ void FitDialog::showFunctionsList(int category) {
 void FitDialog::chooseFolder() {
   ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
   if (categoryBox->currentRow() == 3) { // plugins
-    QString dir = QFileDialog::getExistingDirectory(
-        this, tr("Choose the plugins folder"), app->fitPluginsPath);
+    QString dir = QFileDialog::getExistingDirectory(this, tr("Choose the plugins folder"), app->fitPluginsPath);
     if (!dir.isEmpty()) {
       funcBox->clear();
       explainBox->clear();
@@ -928,8 +878,7 @@ void FitDialog::chooseFolder() {
       loadPlugins();
     }
   } else if (!categoryBox->currentRow()) { // user-defined
-    QString dir = QFileDialog::getExistingDirectory(
-        this, tr("Choose the fit models folder"), app->fitModelsPath);
+    QString dir = QFileDialog::getExistingDirectory(this, tr("Choose the fit models folder"), app->fitModelsPath);
     if (!dir.isEmpty()) {
       funcBox->clear();
       explainBox->clear();
@@ -949,8 +898,7 @@ void FitDialog::loadPlugins() {
 
   ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
   if (!app) {
-    throw std::logic_error(
-        "Parent of FitDialog is not ApplicationWindow as expected.");
+    throw std::logic_error("Parent of FitDialog is not ApplicationWindow as expected.");
   }
   QString path = app->fitPluginsPath + "/";
   QString modelsDirPath = app->fitModelsPath + "/";
@@ -977,9 +925,7 @@ void FitDialog::loadPlugins() {
     boxUseBuiltIn->setEnabled(false);
 }
 
-void FitDialog::showParseFunctions() {
-  funcBox->addItems(MyParser::functionsList());
-}
+void FitDialog::showParseFunctions() { funcBox->addItems(MyParser::functionsList()); }
 
 void FitDialog::showExpression(int function) {
   if (function < 0)
@@ -990,8 +936,7 @@ void FitDialog::showExpression(int function) {
   else if (categoryBox->currentRow() == 1) {
     polynomOrderLabel->hide();
     polynomOrderBox->hide();
-    if (funcBox->currentItem()->text() == tr("Gauss") ||
-        funcBox->currentItem()->text() == tr("Lorentz")) {
+    if (funcBox->currentItem()->text() == tr("Gauss") || funcBox->currentItem()->text() == tr("Lorentz")) {
       polynomOrderLabel->setText(tr("Peaks"));
       polynomOrderLabel->show();
       polynomOrderBox->show();
@@ -1046,17 +991,14 @@ void FitDialog::addFunctionName() {
 void FitDialog::accept() {
   ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
   if (!app) {
-    throw std::logic_error(
-        "Parent of FitDialog is not ApplicationWindow as expected.");
+    throw std::logic_error("Parent of FitDialog is not ApplicationWindow as expected.");
   }
 
   QString curve = boxCurve->currentText();
   QStringList curvesList = d_graph->curvesList();
   if (!curvesList.contains(curve)) {
-    QMessageBox::critical(
-        app, tr("MantidPlot - Warning"),
-        tr("The curve <b> %1 </b> doesn't exist anymore! Operation aborted!")
-            .arg(curve));
+    QMessageBox::critical(app, tr("MantidPlot - Warning"),
+                          tr("The curve <b> %1 </b> doesn't exist anymore! Operation aborted!").arg(curve));
     boxCurve->clear();
     boxCurve->addItems(curvesList);
     return;
@@ -1067,9 +1009,7 @@ void FitDialog::accept() {
   double eps = boxTolerance->value();
 
   if (start >= end) {
-    QMessageBox::critical(
-        app, tr("MantidPlot - Input error"),
-        tr("Please enter x limits that satisfy: from < end!"));
+    QMessageBox::critical(app, tr("MantidPlot - Input error"), tr("Please enter x limits that satisfy: from < end!"));
     boxTo->setFocus();
     return;
   }
@@ -1096,8 +1036,7 @@ void FitDialog::accept() {
         QCheckBox *cb = boxParams_cellWidget<QCheckBox>(i, 4);
         if (!cb->isChecked()) {
           paramsInit[j] = boxParams_cellWidget<DoubleSpinBox>(i, 2)->value();
-          parser.DefineVar(boxParams->item(i, 0)->text().toAscii().constData(),
-                           &paramsInit[j]);
+          parser.DefineVar(boxParams->item(i, 0)->text().toAscii().constData(), &paramsInit[j]);
           parameters << boxParams->item(i, 0)->text();
 
           if (d_current_fit->type() != Fit::BuiltIn) {
@@ -1108,15 +1047,13 @@ void FitDialog::accept() {
           j++;
         } else {
           double val = boxParams_cellWidget<DoubleSpinBox>(i, 2)->value();
-          formula.replace(boxParams->item(i, 0)->text(),
-                          QString::number(val, 'e', app->fit_output_precision));
+          formula.replace(boxParams->item(i, 0)->text(), QString::number(val, 'e', app->fit_output_precision));
         }
       }
     } else {
       for (int i = 0; i < n; i++) {
         paramsInit[i] = boxParams_cellWidget<DoubleSpinBox>(i, 2)->value();
-        parser.DefineVar(boxParams->item(i, 0)->text().toAscii().constData(),
-                         &paramsInit[i]);
+        parser.DefineVar(boxParams->item(i, 0)->text().toAscii().constData(), &paramsInit[i]);
         parameters << boxParams->item(i, 0)->text();
 
         if (d_current_fit->type() != Fit::BuiltIn) {
@@ -1132,13 +1069,10 @@ void FitDialog::accept() {
     parser.DefineVar("x", &x);
     parser.Eval();
   } catch (mu::ParserError &e) {
-    QString errorMsg =
-        boxFunction->toPlainText() + " = " + formula + "\n" +
-        QString::fromStdString(e.GetMsg()) + "\n" +
-        tr("Please verify that you have initialized all the parameters!");
+    QString errorMsg = boxFunction->toPlainText() + " = " + formula + "\n" + QString::fromStdString(e.GetMsg()) + "\n" +
+                       tr("Please verify that you have initialized all the parameters!");
 
-    QMessageBox::critical(app, tr("MantidPlot - Input function error"),
-                          errorMsg);
+    QMessageBox::critical(app, tr("MantidPlot - Input function error"), errorMsg);
     boxFunction->setFocus();
     error = true;
   }
@@ -1154,20 +1088,17 @@ void FitDialog::accept() {
     d_current_fit->setInitialGuesses(paramsInit.data());
 
     if (!d_current_fit->setDataFromCurve(curve, start, end) ||
-        !d_current_fit->setWeightingData(
-            (Fit::WeightingMethod)boxWeighting->currentIndex(),
-            tableNamesBox->currentText() + "_" + colNamesBox->currentText()))
+        !d_current_fit->setWeightingData((Fit::WeightingMethod)boxWeighting->currentIndex(),
+                                         tableNamesBox->currentText() + "_" + colNamesBox->currentText()))
       return;
 
     d_current_fit->setTolerance(eps);
     d_current_fit->setOutputPrecision(app->fit_output_precision);
     d_current_fit->setAlgorithm((Fit::Algorithm)boxAlgorithm->currentIndex());
     d_current_fit->setColor(boxColor->currentIndex());
-    d_current_fit->generateFunction(generatePointsBtn->isChecked(),
-                                    generatePointsBox->value());
+    d_current_fit->generateFunction(generatePointsBtn->isChecked(), generatePointsBox->value());
     d_current_fit->setMaximumIterations(boxPoints->value());
-    if (!isOfType(d_current_fit, "PolynomialFit") &&
-        !isOfType(d_current_fit, "LinearFit") &&
+    if (!isOfType(d_current_fit, "PolynomialFit") && !isOfType(d_current_fit, "LinearFit") &&
         !isOfType(d_current_fit, "LinearSlopeFit"))
       d_current_fit->scaleErrors(scaleErrorsBox->isChecked());
     d_current_fit->fit();
@@ -1227,8 +1158,8 @@ void FitDialog::setSrcTables(const QList<MdiSubWindow *> &tables) {
   foreach (MdiSubWindow *w, srcTables)
     tableNamesBox->addItem(w->objectName());
 
-  tableNamesBox->setCurrentIndex(tableNamesBox->findText(
-      boxCurve->currentText().split("_", QString::SkipEmptyParts)[0]));
+  tableNamesBox->setCurrentIndex(
+      tableNamesBox->findText(boxCurve->currentText().split("_", QString::SkipEmptyParts)[0]));
   selectSrcTable(tableNamesBox->currentIndex());
 }
 
@@ -1282,8 +1213,7 @@ void FitDialog::resetFunction() {
 void FitDialog::initBuiltInFunctions() {
   ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
   if (!app) {
-    throw std::logic_error(
-        "Parent of FitDialog is not ApplicationWindow as expected.");
+    throw std::logic_error("Parent of FitDialog is not ApplicationWindow as expected.");
   }
 
   d_built_in_functions << new SigmoidalFit(app, d_graph);
@@ -1315,8 +1245,7 @@ void FitDialog::initBuiltInFunctions() {
 }
 
 void FitDialog::setNumPeaks(int peaks) {
-  if (d_current_fit->objectName() == tr("Gauss") ||
-      d_current_fit->objectName() == tr("Lorentz")) {
+  if (d_current_fit->objectName() == tr("Gauss") || d_current_fit->objectName() == tr("Lorentz")) {
     if (auto fit = dynamic_cast<MultiPeakFit *>(d_current_fit))
       fit->setNumPeaks(peaks);
   } else if (d_current_fit->objectName() == tr("Polynomial")) {
@@ -1340,8 +1269,7 @@ void FitDialog::loadUserFunctions() {
   d_user_functions.clear();
   ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
   if (!app) {
-    throw std::logic_error(
-        "Parent of FitDialog is not ApplicationWindow as expected.");
+    throw std::logic_error("Parent of FitDialog is not ApplicationWindow as expected.");
   }
   QString path = app->fitModelsPath + "/";
   QDir dir(path);
@@ -1396,8 +1324,7 @@ void FitDialog::saveInitialGuesses() {
 
   int rows = boxParams->rowCount();
   for (int i = 0; i < rows; i++)
-    d_current_fit->setInitialGuess(
-        i, boxParams_cellWidget<DoubleSpinBox>(i, 2)->value());
+    d_current_fit->setInitialGuess(i, boxParams_cellWidget<DoubleSpinBox>(i, 2)->value());
 
   QString fileName = d_current_fit->fileName();
   if (!fileName.isEmpty())
@@ -1405,14 +1332,12 @@ void FitDialog::saveInitialGuesses() {
   else {
     ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
     if (!app) {
-      throw std::logic_error(
-          "Parent of FitDialog is not ApplicationWindow as expected.");
+      throw std::logic_error("Parent of FitDialog is not ApplicationWindow as expected.");
     }
     QString filter = tr("MantidPlot fit model") + " (*.fit);;";
     filter += tr("All files") + " (*)";
-    QString fn = QFileDialog::getSaveFileName(
-        app, tr("MantidPlot") + " - " + tr("Save Fit Model As"),
-        app->fitModelsPath + "/" + d_current_fit->objectName(), filter);
+    QString fn = QFileDialog::getSaveFileName(app, tr("MantidPlot") + " - " + tr("Save Fit Model As"),
+                                              app->fitModelsPath + "/" + d_current_fit->objectName(), filter);
     if (!fn.isEmpty()) {
       QFileInfo fi(fn);
       QString baseName = fi.fileName();
@@ -1470,15 +1395,13 @@ void FitDialog::updatePreview() {
 
   if (!d_preview_curve) {
     d_preview_curve = new QwtPlotCurve();
-    d_preview_curve->setRenderHint(QwtPlotItem::RenderAntialiased,
-                                   d_graph->antialiasing());
+    d_preview_curve->setRenderHint(QwtPlotItem::RenderAntialiased, d_graph->antialiasing());
     d_preview_curve->attach(d_graph->plotWidget());
   }
 
   d_preview_curve->setPen(QPen(ColorBox::color(boxColor->currentIndex()), 1));
-  d_preview_curve->setData(
-      X.data(), Y.data(),
-      d_points); // d_preview_curve->setData(X, Y, d_points);
+  d_preview_curve->setData(X.data(), Y.data(),
+                           d_points); // d_preview_curve->setData(X, Y, d_points);
   d_graph->replot();
 }
 
@@ -1515,8 +1438,7 @@ bool FitDialog::isOfType(const QObject *obj, const char *toCompare) const {
   return strcmp(obj->metaObject()->className(), toCompare) == 0;
 }
 
-template <class Widget>
-Widget *FitDialog::boxParams_cellWidget(int i, int j) const {
+template <class Widget> Widget *FitDialog::boxParams_cellWidget(int i, int j) const {
   Widget *w = dynamic_cast<Widget *>(boxParams->cellWidget(i, j));
   if (!w) {
     throw std::logic_error("Unexpected widget type in FitDialog.");

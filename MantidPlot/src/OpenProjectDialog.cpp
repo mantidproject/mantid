@@ -35,20 +35,16 @@
 #include <QLabel>
 #include <QPushButton>
 
-OpenProjectDialog::OpenProjectDialog(QWidget *parent, bool extended)
-    : ExtensibleFileDialog(parent, extended) {
+OpenProjectDialog::OpenProjectDialog(QWidget *parent, bool extended) : ExtensibleFileDialog(parent, extended) {
   // setCaption(tr("QtiPlot - Open Project"));
   setWindowTitle(tr("MantidPlot - Open Project"));
   setFileMode(ExistingFile);
   QStringList filters;
   // filters << tr("QtiPlot project") + " (*.qti)"
   //<< tr("Compressed QtiPlot project") + " (*.qti.gz)"
-  filters << tr("MantidPlot project") + " (*.mantid)"
-          << tr("Compressed MantidPlot project") + " (*.mantid.gz)"
-          << tr("Origin project") + " (*.opj *.OPJ)"
-          << tr("Origin matrix") + " (*.ogm *.OGM)"
-          << tr("Origin worksheet") + " (*.ogw *.OGW)"
-          << tr("Origin graph") + " (*.ogg *.OGG)"
+  filters << tr("MantidPlot project") + " (*.mantid)" << tr("Compressed MantidPlot project") + " (*.mantid.gz)"
+          << tr("Origin project") + " (*.opj *.OPJ)" << tr("Origin matrix") + " (*.ogm *.OGM)"
+          << tr("Origin worksheet") + " (*.ogw *.OGW)" << tr("Origin graph") + " (*.ogg *.OGG)"
           << tr("Backup files") + " (*.mantid~)"
           //<< tr("Python Source") + " (*.py *.PY)"
           << tr("All files") + " (*)";
@@ -66,8 +62,7 @@ OpenProjectDialog::OpenProjectDialog(QWidget *parent, bool extended)
   setExtensionWidget(advanced_options);
 
 #if QT_VERSION >= 0x040300
-  connect(this, SIGNAL(filterSelected(const QString &)), this,
-          SLOT(updateAdvancedOptions(const QString &)));
+  connect(this, SIGNAL(filterSelected(const QString &)), this, SLOT(updateAdvancedOptions(const QString &)));
 #else
   QList<QComboBox *> combo_boxes = findChildren<QComboBox *>();
   if (combo_boxes.size() >= 2)

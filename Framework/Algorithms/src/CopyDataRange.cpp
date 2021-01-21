@@ -19,34 +19,26 @@ using namespace Mantid::HistogramData;
 
 namespace {
 
-void copyDataRange(const MatrixWorkspace_const_sptr &inputWorkspace,
-                   const MatrixWorkspace_sptr &destWorkspace,
-                   int const &specMin, int const &specMax, int const &xMinIndex,
-                   int const &xMaxIndex, int yInsertionIndex,
-                   int const &xInsertionIndex) {
+void copyDataRange(const MatrixWorkspace_const_sptr &inputWorkspace, const MatrixWorkspace_sptr &destWorkspace,
+                   int const &specMin, int const &specMax, int const &xMinIndex, int const &xMaxIndex,
+                   int yInsertionIndex, int const &xInsertionIndex) {
   for (auto specIndex = specMin; specIndex <= specMax; ++specIndex) {
-    std::copy(inputWorkspace->y(specIndex).begin() + xMinIndex,
-              inputWorkspace->y(specIndex).begin() + xMaxIndex + 1,
-              destWorkspace->mutableY(yInsertionIndex).begin() +
-                  xInsertionIndex);
-    std::copy(inputWorkspace->e(specIndex).begin() + xMinIndex,
-              inputWorkspace->e(specIndex).begin() + xMaxIndex + 1,
-              destWorkspace->mutableE(yInsertionIndex).begin() +
-                  xInsertionIndex);
+    std::copy(inputWorkspace->y(specIndex).begin() + xMinIndex, inputWorkspace->y(specIndex).begin() + xMaxIndex + 1,
+              destWorkspace->mutableY(yInsertionIndex).begin() + xInsertionIndex);
+    std::copy(inputWorkspace->e(specIndex).begin() + xMinIndex, inputWorkspace->e(specIndex).begin() + xMaxIndex + 1,
+              destWorkspace->mutableE(yInsertionIndex).begin() + xInsertionIndex);
     ++yInsertionIndex;
   }
 }
 
-void copyDataRange(const MatrixWorkspace_const_sptr &inputWorkspace,
-                   const MatrixWorkspace_sptr &destWorkspace,
-                   int const &specMin, int const &specMax, double const &xMin,
-                   double const &xMax, int yInsertionIndex,
+void copyDataRange(const MatrixWorkspace_const_sptr &inputWorkspace, const MatrixWorkspace_sptr &destWorkspace,
+                   int const &specMin, int const &specMax, double const &xMin, double const &xMax, int yInsertionIndex,
                    int const &xInsertionIndex) {
   auto const xMinIndex = static_cast<int>(inputWorkspace->yIndexOfX(xMin, 0));
   auto const xMaxIndex = static_cast<int>(inputWorkspace->yIndexOfX(xMax, 0));
 
-  copyDataRange(inputWorkspace, std::move(destWorkspace), specMin, specMax,
-                xMinIndex, xMaxIndex, yInsertionIndex, xInsertionIndex);
+  copyDataRange(inputWorkspace, std::move(destWorkspace), specMin, specMax, xMinIndex, xMaxIndex, yInsertionIndex,
+                xInsertionIndex);
 }
 
 } // namespace
@@ -63,9 +55,7 @@ const std::string CopyDataRange::name() const { return "CopyDataRange"; }
 int CopyDataRange::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string CopyDataRange::category() const {
-  return "Utility\\Workspaces";
-}
+const std::string CopyDataRange::category() const { return "Utility\\Workspaces"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string CopyDataRange::summary() const {
@@ -75,34 +65,28 @@ const std::string CopyDataRange::summary() const {
 
 void CopyDataRange::init() {
 
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input),
                   "The workspace containing a range of data to be used for the "
                   "replacement.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "DestWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("DestWorkspace", "", Direction::Input),
                   "The workspace to have range of data replaced.");
 
   auto const positiveInt = std::make_shared<Kernel::BoundedValidator<int>>();
   positiveInt->setLower(0);
   auto const anyDouble = std::make_shared<Kernel::BoundedValidator<double>>();
 
-  declareProperty("StartWorkspaceIndex", 0, positiveInt,
-                  "The index denoting the start of the spectra range.");
+  declareProperty("StartWorkspaceIndex", 0, positiveInt, "The index denoting the start of the spectra range.");
 
-  declareProperty("EndWorkspaceIndex", EMPTY_INT(), positiveInt,
-                  "The index denoting the end of the spectra range.");
+  declareProperty("EndWorkspaceIndex", EMPTY_INT(), positiveInt, "The index denoting the end of the spectra range.");
 
-  declareProperty(
-      "XMin", EMPTY_DBL(), anyDouble,
-      "An X value that is equal to the lowest point to copy (point data), or "
-      "an X value that is within the first bin to copy (histogram data).");
+  declareProperty("XMin", EMPTY_DBL(), anyDouble,
+                  "An X value that is equal to the lowest point to copy (point data), or "
+                  "an X value that is within the first bin to copy (histogram data).");
 
-  declareProperty(
-      "XMax", EMPTY_DBL(), anyDouble,
-      "An X value that is equal to the highest point to copy (point data), or "
-      "an X value that is within the last bin to copy (histogram data).");
+  declareProperty("XMax", EMPTY_DBL(), anyDouble,
+                  "An X value that is equal to the highest point to copy (point data), or "
+                  "an X value that is within the last bin to copy (histogram data).");
 
   declareProperty("InsertionYIndex", 0, positiveInt,
                   "The index denoting the histogram position for the start of "
@@ -112,8 +96,7 @@ void CopyDataRange::init() {
                   "The index denoting the x position for the start of the data "
                   "replacement in the DestWorkspace.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "The name to give the output workspace.");
 }
 
@@ -138,8 +121,7 @@ std::map<std::string, std::string> CopyDataRange::validateInputs() {
     if (xMinIndex > xMaxIndex)
       errors["XMin"] = "XMin must come after XMax.";
 
-    if (destWorkspace->y(0).size() <=
-        static_cast<std::size_t>(xInsertionIndex) + xMaxIndex - xMinIndex)
+    if (destWorkspace->y(0).size() <= static_cast<std::size_t>(xInsertionIndex) + xMaxIndex - xMinIndex)
       errors["InsertionXIndex"] = "The x data range selected will not fit into "
                                   "the destination workspace.";
 
@@ -149,15 +131,12 @@ std::map<std::string, std::string> CopyDataRange::validateInputs() {
   }
 
   if (specMaxIndex >= static_cast<int>(inputWorkspace->getNumberHistograms()))
-    errors["EndWorkspaceIndex"] =
-        "The EndWorkspaceIndex is larger than the number of histograms in the "
-        "input workspace.";
+    errors["EndWorkspaceIndex"] = "The EndWorkspaceIndex is larger than the number of histograms in the "
+                                  "input workspace.";
   if (specMinIndex > specMaxIndex)
-    errors["StartWorkspaceIndex"] =
-        "The StartWorkspaceIndex must be smaller than the EndWorkspaceIndex.";
+    errors["StartWorkspaceIndex"] = "The StartWorkspaceIndex must be smaller than the EndWorkspaceIndex.";
 
-  if (static_cast<int>(destWorkspace->getNumberHistograms()) <=
-      yInsertionIndex + specMaxIndex - specMinIndex)
+  if (static_cast<int>(destWorkspace->getNumberHistograms()) <= yInsertionIndex + specMaxIndex - specMinIndex)
     errors["InsertionYIndex"] = "The y data range selected will not fit into "
                                 "the destination workspace.";
 
@@ -178,8 +157,8 @@ void CopyDataRange::exec() {
   if (destWorkspace != outputWorkspace)
     outputWorkspace = destWorkspace->clone();
 
-  copyDataRange(inputWorkspace, outputWorkspace, specMinIndex, specMaxIndex,
-                xMin, xMax, yInsertionIndex, xInsertionIndex);
+  copyDataRange(inputWorkspace, outputWorkspace, specMinIndex, specMaxIndex, xMin, xMax, yInsertionIndex,
+                xInsertionIndex);
 
   setProperty("OutputWorkspace", outputWorkspace);
 }

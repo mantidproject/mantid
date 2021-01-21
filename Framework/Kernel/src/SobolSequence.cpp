@@ -16,8 +16,7 @@ namespace Kernel {
  * Constructor taking the number of dimensions for the sequence
  */
 SobolSequence::SobolSequence(const unsigned int ndims)
-    : QuasiRandomNumberSequence(ndims), m_gslGenerator(nullptr),
-      m_savedGenerator(nullptr) {
+    : QuasiRandomNumberSequence(ndims), m_gslGenerator(nullptr), m_savedGenerator(nullptr) {
   setNumberOfDimensions(ndims);
 }
 
@@ -42,9 +41,7 @@ void SobolSequence::generateNextPoint() {
 void SobolSequence::restart() { gsl_qrng_init(m_gslGenerator); }
 
 /// Saves the current state of the generator
-void SobolSequence::save() {
-  m_savedGenerator = gsl_qrng_clone(m_gslGenerator);
-}
+void SobolSequence::save() { m_savedGenerator = gsl_qrng_clone(m_gslGenerator); }
 
 /// Restores the generator to the last saved point, or the beginning if nothing
 /// has been saved
@@ -61,15 +58,13 @@ void SobolSequence::restore() {
  * any previous state information including any saved state
  */
 void SobolSequence::setNumberOfDimensions(const unsigned int ndims) {
-  gsl_qrng *generator =
-      gsl_qrng_alloc(gsl_qrng_sobol, static_cast<unsigned int>(ndims));
+  gsl_qrng *generator = gsl_qrng_alloc(gsl_qrng_sobol, static_cast<unsigned int>(ndims));
   if (generator) {
     deleteCurrentGenerator();
     m_gslGenerator = generator;
   } else {
-    throw std::invalid_argument(
-        "SobolSequence::setNumberOfDimensions - "
-        "Error initializing sequence, insufficient memory.");
+    throw std::invalid_argument("SobolSequence::setNumberOfDimensions - "
+                                "Error initializing sequence, insufficient memory.");
   }
 }
 

@@ -58,8 +58,7 @@ private slots:
   void pickAxisLabelFont();
   void pickNumbersFont();
 
-  QStringList scaleOptions(int axis, double start, double end,
-                           const QString &majors, const QString &minors);
+  QStringList scaleOptions(int axis, double start, double end, const QString &majors, const QString &minors);
   void viewScaleLimits(int axis);
   void disableMeshOptions();
   void showBarsTab(double rad);

@@ -50,10 +50,9 @@
 #include <QRadioButton>
 
 FFTDialog::FFTDialog(int type, QWidget *parent, const Qt::WFlags &fl)
-    : QDialog(parent, fl), buttonOK(nullptr), buttonCancel(nullptr),
-      forwardBtn(nullptr), backwardBtn(nullptr), boxName(nullptr),
-      boxReal(nullptr), boxImaginary(nullptr), boxSampling(nullptr),
-      boxNormalize(nullptr), boxOrder(nullptr) {
+    : QDialog(parent, fl), buttonOK(nullptr), buttonCancel(nullptr), forwardBtn(nullptr), backwardBtn(nullptr),
+      boxName(nullptr), boxReal(nullptr), boxImaginary(nullptr), boxSampling(nullptr), boxNormalize(nullptr),
+      boxOrder(nullptr) {
   setWindowTitle(tr("MantidPlot - FFT Options"));
 
   d_matrix = nullptr;
@@ -80,8 +79,7 @@ FFTDialog::FFTDialog(int type, QWidget *parent, const Qt::WFlags &fl)
 
   if (d_type != onMatrix) {
     boxName = new QComboBox();
-    connect(boxName, SIGNAL(activated(const QString &)), this,
-            SLOT(activateCurve(const QString &)));
+    connect(boxName, SIGNAL(activated(const QString &)), this, SLOT(activateCurve(const QString &)));
     gl1->addWidget(boxName, 0, 1);
     setFocusProxy(boxName);
   }
@@ -155,30 +153,26 @@ void FFTDialog::accept() {
     parser.SetExpr(boxSampling->text().toAscii().constData());
     sampling = parser.Eval();
   } catch (mu::ParserError &e) {
-    QMessageBox::critical(this, tr("MantidPlot - Sampling value error"),
-                          QString::fromStdString(e.GetMsg()));
+    QMessageBox::critical(this, tr("MantidPlot - Sampling value error"), QString::fromStdString(e.GetMsg()));
     boxSampling->setFocus();
     return;
   }
 
   ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parent());
   if (!app) {
-    throw std::logic_error(
-        "Parent of FFTDialog is not ApplicationWindow as expected.");
+    throw std::logic_error("Parent of FFTDialog is not ApplicationWindow as expected.");
   }
   FFT *fft = nullptr;
   if (graph)
     fft = new FFT(app, graph, boxName->currentText());
   else if (d_table) {
     if (boxReal->currentText().isEmpty()) {
-      QMessageBox::critical(
-          this, tr("MantidPlot - Error"),
-          tr("Please choose a column for the real part of the data!"));
+      QMessageBox::critical(this, tr("MantidPlot - Error"),
+                            tr("Please choose a column for the real part of the data!"));
       boxReal->setFocus();
       return;
     }
-    fft = new FFT(app, d_table, boxReal->currentText(),
-                  boxImaginary->currentText());
+    fft = new FFT(app, d_table, boxReal->currentText(), boxImaginary->currentText());
   }
 
   if (fft) {
@@ -246,8 +240,7 @@ void FFTDialog::setTable(Table *t) {
 void FFTDialog::setMatrix(Matrix *m) {
   ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parent());
   if (!app) {
-    throw std::logic_error(
-        "Parent of FFTDialog is not ApplicationWindow as expected.");
+    throw std::logic_error("Parent of FFTDialog is not ApplicationWindow as expected.");
   }
   QStringList lst = app->matrixNames();
   boxReal->addItems(lst);
@@ -262,8 +255,7 @@ void FFTDialog::setMatrix(Matrix *m) {
 void FFTDialog::fftMatrix() {
   ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parent());
   if (!app) {
-    throw std::logic_error(
-        "Parent of FFTDialog is not ApplicationWindow as expected.");
+    throw std::logic_error("Parent of FFTDialog is not ApplicationWindow as expected.");
   }
   Matrix *mReal = app->matrix(boxReal->currentText());
   if (!mReal)
@@ -284,12 +276,10 @@ void FFTDialog::fftMatrix() {
                             "imaginary part will be neglected!"));
   }
 
-  double **x_int_re =
-      Matrix::allocateMatrixData(height, width); /* real coeff matrix */
+  double **x_int_re = Matrix::allocateMatrixData(height, width); /* real coeff matrix */
   if (!x_int_re)
     return;
-  double **x_int_im =
-      Matrix::allocateMatrixData(height, width); /* imaginary coeff  matrix*/
+  double **x_int_im = Matrix::allocateMatrixData(height, width); /* imaginary coeff  matrix*/
   if (!x_int_im) {
     Matrix::freeMatrixData(x_int_re, height);
     return;
@@ -309,10 +299,8 @@ void FFTDialog::fftMatrix() {
 
   double **x_fin_re = nullptr, **x_fin_im = nullptr;
   if (inverse) {
-    x_fin_re =
-        Matrix::allocateMatrixData(height, width); // coeff of the initial image
-    x_fin_im = Matrix::allocateMatrixData(
-        height, width); // filled with 0 if everythng OK
+    x_fin_re = Matrix::allocateMatrixData(height, width); // coeff of the initial image
+    x_fin_im = Matrix::allocateMatrixData(height, width); // filled with 0 if everythng OK
     if (!x_fin_re || !x_fin_im) {
       Matrix::freeMatrixData(x_int_re, height);
       Matrix::freeMatrixData(x_int_im, height);
@@ -327,20 +315,17 @@ void FFTDialog::fftMatrix() {
   Matrix *realCoeffMatrix = app->newMatrix(height, width);
   QString realCoeffMatrixName = app->generateUniqueName(tr("RealMatrixFFT"));
   app->setWindowName(realCoeffMatrix, realCoeffMatrixName);
-  realCoeffMatrix->setWindowLabel(tr("Real part of the FFT transform of") +
-                                  " " + mReal->objectName());
+  realCoeffMatrix->setWindowLabel(tr("Real part of the FFT transform of") + " " + mReal->objectName());
 
   Matrix *imagCoeffMatrix = app->newMatrix(height, width);
   QString imagCoeffMatrixName = app->generateUniqueName(tr("ImagMatrixFFT"));
   app->setWindowName(imagCoeffMatrix, imagCoeffMatrixName);
-  imagCoeffMatrix->setWindowLabel(tr("Imaginary part of the FFT transform of") +
-                                  " " + mReal->objectName());
+  imagCoeffMatrix->setWindowLabel(tr("Imaginary part of the FFT transform of") + " " + mReal->objectName());
 
   Matrix *ampMatrix = app->newMatrix(height, width);
   QString ampMatrixName = app->generateUniqueName(tr("AmplitudeMatrixFFT"));
   app->setWindowName(ampMatrix, ampMatrixName);
-  ampMatrix->setWindowLabel(tr("Amplitudes of the FFT transform of") + " " +
-                            mReal->objectName());
+  ampMatrix->setWindowLabel(tr("Amplitudes of the FFT transform of") + " " + mReal->objectName());
 
   if (inverse) {
     for (int i = 0; i < height; i++) {

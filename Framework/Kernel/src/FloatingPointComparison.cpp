@@ -36,9 +36,7 @@ template <typename TYPE> bool equals(const TYPE x, const TYPE y) {
  * @returns True if the numbers are considered <= within the machine tolerance,
  * false otherwise
  */
-template <typename T> MANTID_KERNEL_DLL bool ltEquals(const T x, const T y) {
-  return (equals(x, y) || x < y);
-}
+template <typename T> MANTID_KERNEL_DLL bool ltEquals(const T x, const T y) { return (equals(x, y) || x < y); }
 
 /**
  * Compare two floating-point numbers as to whether they satisfy x>=y within
@@ -48,9 +46,7 @@ template <typename T> MANTID_KERNEL_DLL bool ltEquals(const T x, const T y) {
  * @returns True if the numbers are considered <= within the machine tolerance,
  * false otherwise
  */
-template <typename T> MANTID_KERNEL_DLL bool gtEquals(const T x, const T y) {
-  return (equals(x, y) || x > y);
-}
+template <typename T> MANTID_KERNEL_DLL bool gtEquals(const T x, const T y) { return (equals(x, y) || x > y); }
 
 ///@cond
 // Concrete instantiations

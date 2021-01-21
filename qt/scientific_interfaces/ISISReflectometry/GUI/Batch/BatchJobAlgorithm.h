@@ -19,17 +19,14 @@ namespace ISISReflectometry {
  * The BatchJobAlgorithm class overrides ConfiguredAlgorithm so that
  * we can add our own data to it.
  */
-class MANTIDQT_ISISREFLECTOMETRY_DLL BatchJobAlgorithm
-    : public IBatchJobAlgorithm,
-      public MantidQt::API::ConfiguredAlgorithm {
+class MANTIDQT_ISISREFLECTOMETRY_DLL BatchJobAlgorithm : public IBatchJobAlgorithm,
+                                                         public MantidQt::API::ConfiguredAlgorithm {
 public:
-  using UpdateFunction = void (*)(const Mantid::API::IAlgorithm_sptr &algorithm,
-                                  Item &item);
+  using UpdateFunction = void (*)(const Mantid::API::IAlgorithm_sptr &algorithm, Item &item);
 
-  BatchJobAlgorithm(
-      Mantid::API::IAlgorithm_sptr algorithm,
-      MantidQt::API::ConfiguredAlgorithm::AlgorithmRuntimeProps properties,
-      UpdateFunction updateFunction, Item *item);
+  BatchJobAlgorithm(Mantid::API::IAlgorithm_sptr algorithm,
+                    MantidQt::API::ConfiguredAlgorithm::AlgorithmRuntimeProps properties, UpdateFunction updateFunction,
+                    Item *item);
 
   Item *item() override;
   void updateItem() override;

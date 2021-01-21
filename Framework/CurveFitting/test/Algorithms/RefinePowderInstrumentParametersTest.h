@@ -28,12 +28,8 @@ class RefinePowderInstrumentParametersTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static RefinePowderInstrumentParametersTest *createSuite() {
-    return new RefinePowderInstrumentParametersTest();
-  }
-  static void destroySuite(RefinePowderInstrumentParametersTest *suite) {
-    delete suite;
-  }
+  static RefinePowderInstrumentParametersTest *createSuite() { return new RefinePowderInstrumentParametersTest(); }
+  static void destroySuite(RefinePowderInstrumentParametersTest *suite) { delete suite; }
 
   /** Test algorithm initialization
    */
@@ -57,21 +53,17 @@ public:
     std::vector<std::vector<int>> hkls;
     std::vector<std::vector<double>> peakparameters;
     importPeakParametersFile(peakfilename, hkls, peakparameters);
-    DataObjects::TableWorkspace_sptr peakparamws =
-        createReflectionWorkspace(hkls, peakparameters);
+    DataObjects::TableWorkspace_sptr peakparamws = createReflectionWorkspace(hkls, peakparameters);
 
-    std::string insfilename(
-        "/home/wzz/Mantid/Code/debug/MyTestData/Bank7InstrumentParameters.txt");
+    std::string insfilename("/home/wzz/Mantid/Code/debug/MyTestData/Bank7InstrumentParameters.txt");
     std::map<std::string, double> instrparameters;
     map<string, vector<double>> mcparameters;
     importInstrumentTxtFile(insfilename, instrparameters, mcparameters);
     DataObjects::TableWorkspace_sptr geomparamws =
-        createInstrumentParameterWorkspace(instrparameters, newparamvalues,
-                                           mcparameters);
+        createInstrumentParameterWorkspace(instrparameters, newparamvalues, mcparameters);
 
     AnalysisDataService::Instance().addOrReplace("PeakParameters", peakparamws);
-    AnalysisDataService::Instance().addOrReplace("InstrumentParameters",
-                                                 geomparamws);
+    AnalysisDataService::Instance().addOrReplace("InstrumentParameters", geomparamws);
 
     // 2. [No] Fit
     RefinePowderInstrumentParameters alg;
@@ -81,8 +73,7 @@ public:
     alg.setProperty("BraggPeakParameterWorkspace", peakparamws);
     alg.setProperty("InstrumentParameterWorkspace", geomparamws);
     alg.setProperty("OutputWorkspace", "FittedCurve");
-    alg.setProperty("OutputInstrumentParameterWorkspace",
-                    "InstrumentParameterTable");
+    alg.setProperty("OutputInstrumentParameterWorkspace", "InstrumentParameterTable");
     alg.setProperty("MinNumberFittedPeaks", 3);
     alg.setProperty("ParametersToFit", "");
     alg.setProperty("RefinementAlgorithm", "DirectFit");
@@ -94,8 +85,7 @@ public:
     alg.setProperty("BraggPeakParameterWorkspace", peakparamws);
     alg.setProperty("InstrumentParameterWorkspace", geomparamws);
     alg.setProperty("OutputWorkspace", "FittedCurve");
-    alg.setProperty("OutputInstrumentParameterWorkspace",
-                    "InstrumentParameterTable");
+    alg.setProperty("OutputInstrumentParameterWorkspace", "InstrumentParameterTable");
     alg.setProperty("MinNumberFittedPeaks", 3);
     alg.setProperty("ParametersToFit", "Tcross");
     alg.setProperty("RefinementAlgorithm", "DirectFit");
@@ -104,10 +94,8 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // 3. Check result
-    DataObjects::TableWorkspace_sptr newgeomparamws =
-        std::dynamic_pointer_cast<DataObjects::TableWorkspace>(
-            AnalysisDataService::Instance().retrieve(
-                "InstrumentParameterTable"));
+    DataObjects::TableWorkspace_sptr newgeomparamws = std::dynamic_pointer_cast<DataObjects::TableWorkspace>(
+        AnalysisDataService::Instance().retrieve("InstrumentParameterTable"));
 
     std::map<std::string, double> fitparamvalues;
     parseParameterTableWorkspace(newgeomparamws, fitparamvalues);
@@ -142,21 +130,17 @@ public:
     std::vector<std::vector<int>> hkls;
     std::vector<std::vector<double>> peakparameters;
     importPeakParametersFile(peakfilename, hkls, peakparameters);
-    DataObjects::TableWorkspace_sptr peakparamws =
-        createReflectionWorkspace(hkls, peakparameters);
+    DataObjects::TableWorkspace_sptr peakparamws = createReflectionWorkspace(hkls, peakparameters);
 
-    std::string insfilename(
-        "/home/wzz/Mantid/Code/debug/MyTestData/Bank1InstrumentParameters.txt");
+    std::string insfilename("/home/wzz/Mantid/Code/debug/MyTestData/Bank1InstrumentParameters.txt");
     std::map<std::string, double> instrparameters;
     map<string, vector<double>> mcparameters;
     importInstrumentTxtFile(insfilename, instrparameters, mcparameters);
     DataObjects::TableWorkspace_sptr geomparamws =
-        createInstrumentParameterWorkspace(instrparameters, newparamvalues,
-                                           mcparameters);
+        createInstrumentParameterWorkspace(instrparameters, newparamvalues, mcparameters);
 
     AnalysisDataService::Instance().addOrReplace("PeakParameters", peakparamws);
-    AnalysisDataService::Instance().addOrReplace("InstrumentParameters",
-                                                 geomparamws);
+    AnalysisDataService::Instance().addOrReplace("InstrumentParameters", geomparamws);
 
     // 2. Set up algorithm parameters
     RefinePowderInstrumentParameters alg;
@@ -180,19 +164,16 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // 4. Check result
-    DataObjects::TableWorkspace_sptr newgeomparamws =
-        std::dynamic_pointer_cast<DataObjects::TableWorkspace>(
-            AnalysisDataService::Instance().retrieve("FittedParameters"));
+    DataObjects::TableWorkspace_sptr newgeomparamws = std::dynamic_pointer_cast<DataObjects::TableWorkspace>(
+        AnalysisDataService::Instance().retrieve("FittedParameters"));
 
-    DataObjects::Workspace2D_sptr dataws =
-        std::dynamic_pointer_cast<DataObjects::Workspace2D>(
-            AnalysisDataService::Instance().retrieve("FittedPeakPositions"));
+    DataObjects::Workspace2D_sptr dataws = std::dynamic_pointer_cast<DataObjects::Workspace2D>(
+        AnalysisDataService::Instance().retrieve("FittedPeakPositions"));
     TS_ASSERT(dataws);
     TS_ASSERT_EQUALS(dataws->getNumberHistograms(), 21);
 
-    DataObjects::TableWorkspace_sptr mcresultws =
-        std::dynamic_pointer_cast<DataObjects::TableWorkspace>(
-            AnalysisDataService::Instance().retrieve("BestMCResults"));
+    DataObjects::TableWorkspace_sptr mcresultws = std::dynamic_pointer_cast<DataObjects::TableWorkspace>(
+        AnalysisDataService::Instance().retrieve("BestMCResults"));
     TS_ASSERT_EQUALS(mcresultws->rowCount(), 10);
 
     std::map<std::string, double> fitparamvalues;
@@ -220,21 +201,17 @@ public:
     std::vector<std::vector<int>> hkls;
     std::vector<std::vector<double>> peakparameters;
     importPeakParametersFile(peakfilename, hkls, peakparameters);
-    DataObjects::TableWorkspace_sptr peakparamws =
-        createReflectionWorkspace(hkls, peakparameters);
+    DataObjects::TableWorkspace_sptr peakparamws = createReflectionWorkspace(hkls, peakparameters);
 
-    std::string insfilename(
-        "/home/wzz/Mantid/Code/debug/MyTestData/Bank1InstrumentParameters.txt");
+    std::string insfilename("/home/wzz/Mantid/Code/debug/MyTestData/Bank1InstrumentParameters.txt");
     std::map<std::string, double> instrparameters;
     map<string, vector<double>> mcparameters;
     importInstrumentTxtFile(insfilename, instrparameters, mcparameters);
     DataObjects::TableWorkspace_sptr geomparamws =
-        createInstrumentParameterWorkspace(instrparameters, newparamvalues,
-                                           mcparameters);
+        createInstrumentParameterWorkspace(instrparameters, newparamvalues, mcparameters);
 
     AnalysisDataService::Instance().addOrReplace("PeakParameters", peakparamws);
-    AnalysisDataService::Instance().addOrReplace("InstrumentParameters",
-                                                 geomparamws);
+    AnalysisDataService::Instance().addOrReplace("InstrumentParameters", geomparamws);
 
     // 2. Set up algorithm parameters
     RefinePowderInstrumentParameters alg;
@@ -256,13 +233,11 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // 4. Check result
-    DataObjects::TableWorkspace_sptr newgeomparamws =
-        std::dynamic_pointer_cast<DataObjects::TableWorkspace>(
-            AnalysisDataService::Instance().retrieve("FittedParameters"));
+    DataObjects::TableWorkspace_sptr newgeomparamws = std::dynamic_pointer_cast<DataObjects::TableWorkspace>(
+        AnalysisDataService::Instance().retrieve("FittedParameters"));
 
-    DataObjects::Workspace2D_sptr dataws =
-        std::dynamic_pointer_cast<DataObjects::Workspace2D>(
-            AnalysisDataService::Instance().retrieve("FittedPeakPositions"));
+    DataObjects::Workspace2D_sptr dataws = std::dynamic_pointer_cast<DataObjects::Workspace2D>(
+        AnalysisDataService::Instance().retrieve("FittedPeakPositions"));
     TS_ASSERT(dataws);
     TS_ASSERT_EQUALS(dataws->getNumberHistograms(), 3);
 
@@ -282,13 +257,11 @@ public:
 
   /** Create reflection table workspaces
    */
-  DataObjects::TableWorkspace_sptr
-  createReflectionWorkspace(std::vector<std::vector<int>> hkls,
-                            std::vector<std::vector<double>> peakparams) {
+  DataObjects::TableWorkspace_sptr createReflectionWorkspace(std::vector<std::vector<int>> hkls,
+                                                             std::vector<std::vector<double>> peakparams) {
     // 1. Crate table workspace
     DataObjects::TableWorkspace *tablews = new DataObjects::TableWorkspace();
-    DataObjects::TableWorkspace_sptr hklws =
-        DataObjects::TableWorkspace_sptr(tablews);
+    DataObjects::TableWorkspace_sptr hklws = DataObjects::TableWorkspace_sptr(tablews);
 
     tablews->addColumn("int", "H");
     tablews->addColumn("int", "K");
@@ -315,8 +288,7 @@ public:
       cout << '\n';
     }
 
-    std::cout << "Created Table Workspace with " << hkls.size()
-              << " entries of peaks.\n";
+    std::cout << "Created Table Workspace with " << hkls.size() << " entries of peaks.\n";
 
     return hklws;
   }
@@ -326,10 +298,8 @@ public:
    * Output: a vector for (H, K, L) and a vector for (Height, TOF_H, ALPHA,
    * BETA, ...
    */
-  void
-  importPeakParametersFile(const std::string &filename,
-                           std::vector<std::vector<int>> &hkls,
-                           std::vector<std::vector<double>> &peakparameters) {
+  void importPeakParametersFile(const std::string &filename, std::vector<std::vector<int>> &hkls,
+                                std::vector<std::vector<double>> &peakparameters) {
     // 1. Open file
     std::ifstream ins;
     ins.open(filename.c_str());
@@ -379,34 +349,29 @@ public:
 
   /** Create instrument geometry parameter/LeBail parameter workspaces
    */
-  DataObjects::TableWorkspace_sptr createInstrumentParameterWorkspace(
-      std::map<std::string, double> parameters,
-      std::map<std::string, double> newvalueparameters,
-      map<string, vector<double>> mcparameters) {
+  DataObjects::TableWorkspace_sptr createInstrumentParameterWorkspace(std::map<std::string, double> parameters,
+                                                                      std::map<std::string, double> newvalueparameters,
+                                                                      map<string, vector<double>> mcparameters) {
     // 1. Combine 2 inputs
     std::map<std::string, double>::iterator nvit;
     std::stringstream infoss;
     infoss << "Importing instrument related parameters: \n";
-    for (nvit = newvalueparameters.begin(); nvit != newvalueparameters.end();
-         ++nvit) {
+    for (nvit = newvalueparameters.begin(); nvit != newvalueparameters.end(); ++nvit) {
       std::map<std::string, double>::iterator fdit;
       fdit = parameters.find(nvit->first);
       if (fdit != parameters.end()) {
         fdit->second = nvit->second;
-        infoss << "Name: " << std::setw(15) << fdit->first
-               << ", Value: " << fdit->second << '\n';
+        infoss << "Name: " << std::setw(15) << fdit->first << ", Value: " << fdit->second << '\n';
       }
     }
     std::cout << infoss.str();
 
     // 2. Crate table workspace
     DataObjects::TableWorkspace *tablews = new DataObjects::TableWorkspace();
-    DataObjects::TableWorkspace_sptr geomws =
-        DataObjects::TableWorkspace_sptr(tablews);
+    DataObjects::TableWorkspace_sptr geomws = DataObjects::TableWorkspace_sptr(tablews);
 
-    std::vector<std::string> paramnames{"Zero",  "Zerot",          "Dtt1",
-                                        "Dtt1t", "Dtt2t",          "Tcross",
-                                        "Width", "LatticeConstant"};
+    std::vector<std::string> paramnames{"Zero",  "Zerot",  "Dtt1",  "Dtt1t",
+                                        "Dtt2t", "Tcross", "Width", "LatticeConstant"};
 
     tablews->addColumn("str", "Name");
     tablews->addColumn("double", "Value");
@@ -441,8 +406,7 @@ public:
    * Input:  a text based file
    * Output: a map for (parameter name, parameter value)
    */
-  void importInstrumentTxtFile(const std::string &filename,
-                               std::map<std::string, double> &parameters,
+  void importInstrumentTxtFile(const std::string &filename, std::map<std::string, double> &parameters,
                                std::map<string, vector<double>> &parametermcs) {
     // 1. Open file
     std::ifstream ins;
@@ -488,9 +452,8 @@ public:
   }
 
   /// =================  Check Output ================ ///
-  void parseParameterTableWorkspace(
-      const Mantid::DataObjects::TableWorkspace_sptr &paramws,
-      std::map<std::string, double> &paramvalues) {
+  void parseParameterTableWorkspace(const Mantid::DataObjects::TableWorkspace_sptr &paramws,
+                                    std::map<std::string, double> &paramvalues) {
 
     for (size_t irow = 0; irow < paramws->rowCount(); ++irow) {
       Mantid::API::TableRow row = paramws->getRow(irow);

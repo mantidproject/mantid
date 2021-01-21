@@ -10,8 +10,7 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
-AlgorithmProgressPresenterBase::AlgorithmProgressPresenterBase(QObject *parent)
-    : QObject(parent) {
+AlgorithmProgressPresenterBase::AlgorithmProgressPresenterBase(QObject *parent) : QObject(parent) {
   const auto connection = Qt::QueuedConnection;
   connect(this, &AlgorithmProgressPresenterBase::algorithmStartedSignal, this,
           &AlgorithmProgressPresenterBase::algorithmStartedSlot, connection);
@@ -27,18 +26,14 @@ AlgorithmProgressPresenterBase::AlgorithmProgressPresenterBase(QObject *parent)
 /// started signal, which is allows the GUIs to be updated, by triggering the
 /// slot in the GUI thread. It is safe to call this function from any thread
 /// @param alg The ID of the algorithm that has started executing
-void AlgorithmProgressPresenterBase::algorithmStarted(
-    Mantid::API::AlgorithmID alg) {
+void AlgorithmProgressPresenterBase::algorithmStarted(Mantid::API::AlgorithmID alg) {
   emit algorithmStartedSignal(alg);
 }
 /// This function is called whenever an algorithm ended. It emits a signal
 /// triggering the slot inside the GUI thread. It is safe to call this function
 /// from any thread
 /// @param alg The ID of the algorithm that has started executing
-void AlgorithmProgressPresenterBase::algorithmEnded(
-    Mantid::API::AlgorithmID alg) {
-  emit algorithmEndedSignal(alg);
-}
+void AlgorithmProgressPresenterBase::algorithmEnded(Mantid::API::AlgorithmID alg) { emit algorithmEndedSignal(alg); }
 /// Updates the parameter progress bar to display the progress. If there is a
 /// message, the progress bar format is changed to display it as well.
 /// @param progressBar The progress bar that will be updated
@@ -47,9 +42,9 @@ void AlgorithmProgressPresenterBase::algorithmEnded(
 /// already have been copied into the GUI thread, so it is safe to receive it by
 /// @param estimatedTime :: estimated time to completion in seconds
 /// @param progressPrecision :: number of digits after the decimal
-void AlgorithmProgressPresenterBase::setProgressBar(
-    QProgressBar *progressBar, const double progress, const QString &message,
-    const double estimatedTime, const int progressPrecision) {
+void AlgorithmProgressPresenterBase::setProgressBar(QProgressBar *progressBar, const double progress,
+                                                    const QString &message, const double estimatedTime,
+                                                    const int progressPrecision) {
   progressBar->setValue(static_cast<int>(progress * 100));
   // Make the progress string
   std::ostringstream mess;
@@ -85,11 +80,10 @@ void AlgorithmProgressPresenterBase::setProgressBar(
 /// @param msg The message that the algorithm has sent
 /// @param estimatedTime :: estimated time to completion in seconds
 /// @param progressPrecision :: number of digits after the decimal
-void AlgorithmProgressPresenterBase::updateProgressBar(
-    Mantid::API::AlgorithmID alg, double progress, const std::string &msg,
-    const double estimatedTime, const int progressPrecision) {
-  emit updateProgressBarSignal(alg, progress, QString::fromStdString(msg),
-                               estimatedTime, progressPrecision);
+void AlgorithmProgressPresenterBase::updateProgressBar(Mantid::API::AlgorithmID alg, double progress,
+                                                       const std::string &msg, const double estimatedTime,
+                                                       const int progressPrecision) {
+  emit updateProgressBarSignal(alg, progress, QString::fromStdString(msg), estimatedTime, progressPrecision);
 }
 } // namespace MantidWidgets
 } // namespace MantidQt

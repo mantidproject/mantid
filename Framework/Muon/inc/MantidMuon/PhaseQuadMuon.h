@@ -26,12 +26,8 @@ public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "PhaseQuad"; }
   /// Summary of algorithm's purpose
-  const std::string summary() const override {
-    return "Generates a quadrature phase signal.";
-  }
-  const std::vector<std::string> seeAlso() const override {
-    return {"MuonMaxent"};
-  }
+  const std::string summary() const override { return "Generates a quadrature phase signal."; }
+  const std::vector<std::string> seeAlso() const override { return {"MuonMaxent"}; }
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
@@ -47,8 +43,7 @@ private:
   /// Calculate the normalization constants
   std::vector<double> getExponentialDecay(const API::MatrixWorkspace_sptr &ws);
   /// Create squashograms
-  API::MatrixWorkspace_sptr squash(const API::MatrixWorkspace_sptr &ws,
-                                   const API::ITableWorkspace_sptr &phase,
+  API::MatrixWorkspace_sptr squash(const API::MatrixWorkspace_sptr &ws, const API::ITableWorkspace_sptr &phase,
                                    const std::vector<double> &n0);
 };
 

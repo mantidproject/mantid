@@ -19,9 +19,7 @@ namespace API {
     @author Roman Tolchenov, Tessella Support Services plc
     @date 16/10/2009
 */
-class MANTID_API_DLL IPowderDiffPeakFunction
-    : public virtual API::ParamFunction,
-      public virtual API::IFunction1D {
+class MANTID_API_DLL IPowderDiffPeakFunction : public virtual API::ParamFunction, public virtual API::IFunction1D {
 public:
   /// Constructor and Destructor
   IPowderDiffPeakFunction();
@@ -57,21 +55,17 @@ public:
   virtual void calculateParameters(bool explicitoutput) const = 0;
 
   /// Set up the flag to show whether (from client) cell parameter value changed
-  virtual void setUnitCellParameterValueChangeFlag(bool changed) {
-    m_cellParamValueChanged = changed;
-  }
+  virtual void setUnitCellParameterValueChangeFlag(bool changed) { m_cellParamValueChanged = changed; }
 
   /// The flag to show whether the parameters set to peak function making an
   /// valid peak
   virtual bool isPhysical() { return m_parameterValid; }
 
   /// Override setting a new value to the i-th parameter
-  void setParameter(size_t i, const double &value,
-                    bool explicitlySet = true) override;
+  void setParameter(size_t i, const double &value, bool explicitlySet = true) override;
 
   /// Override setting a new value to a parameter by name
-  void setParameter(const std::string &name, const double &value,
-                    bool explicitlySet = true) override;
+  void setParameter(const std::string &name, const double &value, bool explicitlySet = true) override;
 
   /// Check whether a parameter is a profile parameter
   virtual bool hasProfileParameter(std::string paramname);
@@ -81,12 +75,10 @@ public:
 
   /// Calculate function in a range
   using IFunction1D::function;
-  virtual void function(std::vector<double> &out,
-                        const std::vector<double> &xValues) const = 0;
+  virtual void function(std::vector<double> &out, const std::vector<double> &xValues) const = 0;
 
   /// Get maximum value on a given set of data points
-  virtual double getMaximumValue(const std::vector<double> &xValues,
-                                 size_t &indexmax) const;
+  virtual double getMaximumValue(const std::vector<double> &xValues, size_t &indexmax) const;
 
 protected:
   /// Local function for GSL minimizer

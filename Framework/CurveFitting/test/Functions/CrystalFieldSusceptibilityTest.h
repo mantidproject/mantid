@@ -37,9 +37,8 @@ public:
     fun.function(x, y);
 
     // Test values obtained from McPhase, interpolated by a polynomial
-    auto testFun1 = FunctionFactory::Instance().createInitialized(
-        "name=UserFunction,Formula=a*x*x*x+b*x*x+c*x+d,"
-        "a=2.22169e-6,b=-1.310952e-3,c=0.90995,d=1.61086");
+    auto testFun1 = FunctionFactory::Instance().createInitialized("name=UserFunction,Formula=a*x*x*x+b*x*x+c*x+d,"
+                                                                  "a=2.22169e-6,b=-1.310952e-3,c=0.90995,d=1.61086");
     FunctionValues t(x);
     testFun1->function(x, t);
 
@@ -49,11 +48,10 @@ public:
   }
 
   void test_factory() {
-    std::string funDef =
-        "name=CrystalFieldSusceptibility,Ion=Pr,Symmetry=C2v,"
-        "Unit=SI,Hdir=(1,2,0),inverse=1,"
-        "B20=0.37,B22=3.9, B40=-0.03,B42=-0.1,B44=-0.12,Lambda=-0.2, "
-        "ties=(BmolX=0,BmolY=0,BmolZ=0,BextX=0,BextY=0,BextZ=0)";
+    std::string funDef = "name=CrystalFieldSusceptibility,Ion=Pr,Symmetry=C2v,"
+                         "Unit=SI,Hdir=(1,2,0),inverse=1,"
+                         "B20=0.37,B22=3.9, B40=-0.03,B42=-0.1,B44=-0.12,Lambda=-0.2, "
+                         "ties=(BmolX=0,BmolY=0,BmolZ=0,BextX=0,BextY=0,BextZ=0)";
     auto fun = FunctionFactory::Instance().createInitialized(funDef);
     TS_ASSERT(fun);
     TS_ASSERT_EQUALS(fun->name(), "CrystalFieldSusceptibility");

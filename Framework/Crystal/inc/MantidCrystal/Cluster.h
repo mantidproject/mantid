@@ -26,12 +26,10 @@ public:
   Cluster(const size_t &label);
 
   /// integrate the cluster
-  ClusterIntegratedValues integrate(
-      std::shared_ptr<const Mantid::API::IMDHistoWorkspace> ws) const override;
+  ClusterIntegratedValues integrate(std::shared_ptr<const Mantid::API::IMDHistoWorkspace> ws) const override;
 
   /// Apply labels to the workspace
-  void
-  writeTo(std::shared_ptr<Mantid::API::IMDHistoWorkspace> ws) const override;
+  void writeTo(std::shared_ptr<Mantid::API::IMDHistoWorkspace> ws) const override;
 
   /// Get the cluster label
   size_t getLabel() const override;

@@ -31,10 +31,8 @@ using namespace Mantid;
 
 /// Default constructor
 MuonNexusReader::MuonNexusReader()
-    : nexus_instrument_name(), nexus_samplename(), nexusLogCount(0),
-      startTime_time_t(), t_nsp1(0), t_ntc1(0), t_nper(0),
-      corrected_times(nullptr), counts(nullptr), detectorGroupings(nullptr),
-      numDetectors(0) {}
+    : nexus_instrument_name(), nexus_samplename(), nexusLogCount(0), startTime_time_t(), t_nsp1(0), t_ntc1(0),
+      t_nper(0), corrected_times(nullptr), counts(nullptr), detectorGroupings(nullptr), numDetectors(0) {}
 
 /// Destructor deletes temp storage
 MuonNexusReader::~MuonNexusReader() {
@@ -50,8 +48,7 @@ MuonNexusReader::~MuonNexusReader() {
 void MuonNexusReader::openFirstNXentry(NeXus::File &handle) {
   std::map<string, string> entries = handle.getEntries();
   const auto entry =
-      std::find_if(entries.cbegin(), entries.cend(),
-                   [](const auto entry) { return entry.second == NXENTRY; });
+      std::find_if(entries.cbegin(), entries.cend(), [](const auto entry) { return entry.second == NXENTRY; });
   if (entry == entries.cend())
     throw std::runtime_error("Failed to find NXentry");
   handle.openGroup(entry->first, NXENTRY);
@@ -131,9 +128,8 @@ void MuonNexusReader::readFromFile(const string &filename) {
   // If not available set as one period.
   entries = handle.getEntries();
   t_nper = 1;
-  if (std::any_of(entries.cbegin(), entries.cend(), [](const auto &entry) {
-        return entry.first == "switching_states";
-      })) {
+  if (std::any_of(entries.cbegin(), entries.cend(),
+                  [](const auto &entry) { return entry.first == "switching_states"; })) {
     int ssPeriods;
     handle.readData("switching_states", ssPeriods);
     t_nper = abs(ssPeriods);
@@ -158,9 +154,7 @@ void MuonNexusReader::getTimeChannels(float *timebnds, const int &nbnds) const {
   timebnds[nbnds - 1] = timebnds[nbnds - 2] + float(2.0) * binHalfWidth;
 }
 
-string MuonNexusReader::getInstrumentName() const {
-  return (nexus_instrument_name);
-}
+string MuonNexusReader::getInstrumentName() const { return (nexus_instrument_name); }
 
 // NeXus Muon file reader for NXlog data.
 // Read the given Nexus file into temp storage.
@@ -197,8 +191,7 @@ void MuonNexusReader::readLogData(const string &filename) {
 
       handle.closeGroup();
     }
-    if (nxclass == "NXSample" ||
-        nxclass == "NXsample") // NXSample should be NXsample
+    if (nxclass == "NXSample" || nxclass == "NXsample") // NXSample should be NXsample
     {
       handle.openGroup(nxname, nxclass);
       handle.readData("name", nexus_samplename);
@@ -208,8 +201,7 @@ void MuonNexusReader::readLogData(const string &filename) {
       handle.readData(START_TIME, startTime);
       if ((startTime.find('T')) != string::npos)
         startTime.replace(startTime.find('T'), 1, " ");
-      boost::posix_time::ptime pt =
-          boost::posix_time::time_from_string(startTime);
+      boost::posix_time::ptime pt = boost::posix_time::time_from_string(startTime);
       startTime_time_t = to_time_t(pt);
     }
   }
@@ -230,8 +222,7 @@ bool MuonNexusReader::readMuonLogData(NeXus::File &handle) {
   try {
     handle.openData(VALUES);
   } catch (NeXus::Exception &) {
-    g_log.warning() << "No " << VALUES << " set in " << handle.getPath()
-                    << "\n";
+    g_log.warning() << "No " << VALUES << " set in " << handle.getPath() << "\n";
     return false;
   }
 
@@ -247,13 +238,11 @@ bool MuonNexusReader::readMuonLogData(NeXus::File &handle) {
     values.assign(dataVals.get(), dataVals.get() + info.dims[0]);
     stringValues.resize(info.dims[0]); // Leave empty
   } else if (info.type == NX_CHAR && info.dims.size() == 2) {
-    boost::scoped_array<char> dataVals(
-        new char[info.dims[0] * info.dims[1] + 1]);
+    boost::scoped_array<char> dataVals(new char[info.dims[0] * info.dims[1] + 1]);
     handle.getData(dataVals.get());
     dataVals[info.dims[0] * info.dims[1]] = 0;
     for (int i = 0; i < info.dims[0]; ++i) {
-      std::string str(&dataVals[i * info.dims[1]],
-                      &dataVals[(i + 1) * info.dims[1]]);
+      std::string str(&dataVals[i * info.dims[1]], &dataVals[(i + 1) * info.dims[1]]);
       stringValues.emplace_back(str);
     }
     values.resize(info.dims[0]); // Leave empty
@@ -277,8 +266,7 @@ bool MuonNexusReader::readMuonLogData(NeXus::File &handle) {
   if (info.type == NX_FLOAT32 && info.dims.size() == 1) {
     handle.getData(timeVals.get());
   } else {
-    throw std::runtime_error(
-        "Error in MuonNexusReader: expected float array for log times");
+    throw std::runtime_error("Error in MuonNexusReader: expected float array for log times");
   }
   handle.closeData();
 
@@ -296,8 +284,7 @@ bool MuonNexusReader::readMuonLogData(NeXus::File &handle) {
   return true;
 }
 
-void MuonNexusReader::getLogValues(const int &logNumber, const int &logSequence,
-                                   std::time_t &logTime, double &value) {
+void MuonNexusReader::getLogValues(const int &logNumber, const int &logSequence, std::time_t &logTime, double &value) {
   // for the given log find the logTime and value at given sequence in log
   double time = logTimes[logNumber][logSequence];
   // boost::posix_time::ptime pt=boost::posix_time::time_from_string(startTime);
@@ -308,9 +295,8 @@ void MuonNexusReader::getLogValues(const int &logNumber, const int &logSequence,
   value = logValues[logNumber][logSequence];
 }
 
-void MuonNexusReader::getLogStringValues(const int &logNumber,
-                                         const int &logSequence,
-                                         std::time_t &logTime, string &value) {
+void MuonNexusReader::getLogStringValues(const int &logNumber, const int &logSequence, std::time_t &logTime,
+                                         string &value) {
   // for the given log find the logTime and value at given sequence in log
   double time = logTimes[logNumber][logSequence];
   logTime = static_cast<std::time_t>(time) + startTime_time_t;
@@ -324,9 +310,7 @@ void MuonNexusReader::getLogStringValues(const int &logNumber,
 
 int MuonNexusReader::numberOfLogs() const { return (nexusLogCount); }
 
-int MuonNexusReader::getLogLength(const int i) const {
-  return (static_cast<int>(logTimes[i].size()));
-}
+int MuonNexusReader::getLogLength(const int i) const { return (static_cast<int>(logTimes[i].size())); }
 
 bool MuonNexusReader::logTypeNumeric(const int i) const { return (logType[i]); }
 

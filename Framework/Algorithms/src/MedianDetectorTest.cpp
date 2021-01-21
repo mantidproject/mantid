@@ -23,72 +23,57 @@ using namespace Geometry;
 
 /// Default constructor
 MedianDetectorTest::MedianDetectorTest()
-    : DetectorDiagnostic(), m_inputWS(), m_loFrac(0.1), m_hiFrac(1.5),
-      m_minWsIndex(0), m_maxWsIndex(EMPTY_INT()), m_rangeLower(0.0),
-      m_rangeUpper(0.0), m_solidAngle(false) {}
+    : DetectorDiagnostic(), m_inputWS(), m_loFrac(0.1), m_hiFrac(1.5), m_minWsIndex(0), m_maxWsIndex(EMPTY_INT()),
+      m_rangeLower(0.0), m_rangeUpper(0.0), m_solidAngle(false) {}
 
 const std::string MedianDetectorTest::category() const { return "Diagnostics"; }
 
 /// Declare algorithm properties
 void MedianDetectorTest::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<>>(
-                      "InputWorkspace", "", Direction::Input,
-                      std::make_shared<HistogramValidator>()),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input,
+                                                        std::make_shared<HistogramValidator>()),
                   "Name of the input workspace");
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                            Direction::Output),
-      "A MaskWorkspace where 0 denotes a masked spectra. Any spectra containing"
-      "a zero is also masked on the output");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
+                  "A MaskWorkspace where 0 denotes a masked spectra. Any spectra containing"
+                  "a zero is also masked on the output");
 
   auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0);
   auto mustBePosInt = std::make_shared<BoundedValidator<int>>();
   mustBePosInt->setLower(0);
-  declareProperty(
-      "LevelsUp", 0, mustBePosInt,
-      "Levels above pixel that will be used to compute the median.\n"
-      "If no level is specified, or 0, the median is over the whole "
-      "instrument.");
+  declareProperty("LevelsUp", 0, mustBePosInt,
+                  "Levels above pixel that will be used to compute the median.\n"
+                  "If no level is specified, or 0, the median is over the whole "
+                  "instrument.");
   declareProperty("SignificanceTest", 3.3, mustBePositive,
                   "Error criterion as a multiple of error bar i.e. to fail the "
                   "test, the magnitude of the\n"
                   "difference with respect to the median value must also "
                   "exceed this number of error bars");
-  declareProperty("LowThreshold", 0.1,
-                  "Lower acceptable bound as fraction of median value");
-  declareProperty("HighThreshold", 1.5,
-                  "Upper acceptable bound as fraction of median value");
-  declareProperty("LowOutlier", 0.01,
-                  "Lower bound defining outliers as fraction of median value");
-  declareProperty("HighOutlier", 100.,
-                  "Upper bound defining outliers as fraction of median value");
+  declareProperty("LowThreshold", 0.1, "Lower acceptable bound as fraction of median value");
+  declareProperty("HighThreshold", 1.5, "Upper acceptable bound as fraction of median value");
+  declareProperty("LowOutlier", 0.01, "Lower bound defining outliers as fraction of median value");
+  declareProperty("HighOutlier", 100., "Upper bound defining outliers as fraction of median value");
   declareProperty("ExcludeZeroesFromMedian", false,
                   "If false (default) zeroes will be included in "
                   "the median calculation, otherwise they will not be included "
                   "but they will be left unmasked");
 
-  declareProperty(
-      "StartWorkspaceIndex", 0, mustBePosInt,
-      "The index number of the first spectrum to include in the calculation\n"
-      "(default 0)");
-  declareProperty(
-      "EndWorkspaceIndex", EMPTY_INT(), mustBePosInt,
-      "The index number of the last spectrum to include in the calculation\n"
-      "(default the last histogram)");
-  declareProperty(
-      "RangeLower", EMPTY_DBL(),
-      "No bin with a boundary at an x value less than this will be included\n"
-      "in the summation used to decide if a detector is 'bad' (default: the\n"
-      "start of each histogram)");
-  declareProperty(
-      "RangeUpper", EMPTY_DBL(),
-      "No bin with a boundary at an x value higher than this value will\n"
-      "be included in the summation used to decide if a detector is 'bad'\n"
-      "(default: the end of each histogram)");
-  declareProperty(
-      "CorrectForSolidAngle", false,
-      "Flag to correct for solid angle efficiency. False by default.");
+  declareProperty("StartWorkspaceIndex", 0, mustBePosInt,
+                  "The index number of the first spectrum to include in the calculation\n"
+                  "(default 0)");
+  declareProperty("EndWorkspaceIndex", EMPTY_INT(), mustBePosInt,
+                  "The index number of the last spectrum to include in the calculation\n"
+                  "(default the last histogram)");
+  declareProperty("RangeLower", EMPTY_DBL(),
+                  "No bin with a boundary at an x value less than this will be included\n"
+                  "in the summation used to decide if a detector is 'bad' (default: the\n"
+                  "start of each histogram)");
+  declareProperty("RangeUpper", EMPTY_DBL(),
+                  "No bin with a boundary at an x value higher than this value will\n"
+                  "be included in the summation used to decide if a detector is 'bad'\n"
+                  "(default: the end of each histogram)");
+  declareProperty("CorrectForSolidAngle", false, "Flag to correct for solid angle efficiency. False by default.");
   declareProperty("NumberOfFailures", 0, Direction::Output);
 }
 
@@ -103,13 +88,12 @@ void MedianDetectorTest::exec() {
   // Ensures we have a workspace with a single bin. It will contain any input
   // masking and will be used to record any
   // required masking from this algorithm
-  MatrixWorkspace_sptr countsWS = integrateSpectra(
-      m_inputWS, m_minWsIndex, m_maxWsIndex, m_rangeLower, m_rangeUpper, true);
+  MatrixWorkspace_sptr countsWS =
+      integrateSpectra(m_inputWS, m_minWsIndex, m_maxWsIndex, m_rangeLower, m_rangeUpper, true);
 
   // 0. Correct for solid angle, if desired
   if (m_solidAngle) {
-    MatrixWorkspace_sptr solidAngle =
-        getSolidAngles(m_minWsIndex, m_maxWsIndex);
+    MatrixWorkspace_sptr solidAngle = getSolidAngles(m_minWsIndex, m_maxWsIndex);
     if (solidAngle != nullptr) {
       countsWS = countsWS / solidAngle;
     }
@@ -122,8 +106,7 @@ void MedianDetectorTest::exec() {
   MaskWorkspace_sptr maskWS;
 
   // 1. Calculate the median
-  std::vector<double> median =
-      calculateMedian(*countsWS, excludeZeroes, specmap);
+  std::vector<double> median = calculateMedian(*countsWS, excludeZeroes, specmap);
   std::vector<double>::iterator medit;
   for (medit = median.begin(); medit != median.end(); ++medit) {
     g_log.debug() << "Median value = " << (*medit) << "\n";
@@ -134,8 +117,7 @@ void MedianDetectorTest::exec() {
   // 3. Recalulate the median
   median = calculateMedian(*countsWS, excludeZeroes, specmap);
   for (medit = median.begin(); medit != median.end(); ++medit) {
-    g_log.information() << "Median value with outliers removed = " << (*medit)
-                        << "\n";
+    g_log.information() << "Median value with outliers removed = " << (*medit) << "\n";
   }
 
   maskWS = this->generateEmptyMask(countsWS);
@@ -198,8 +180,7 @@ void MedianDetectorTest::retrieveProperties() {
  * @param lastSpec :: the index number of the last histogram to analyse
  * @return A pointer to the workspace (or an empty pointer)
  */
-API::MatrixWorkspace_sptr MedianDetectorTest::getSolidAngles(int firstSpec,
-                                                             int lastSpec) {
+API::MatrixWorkspace_sptr MedianDetectorTest::getSolidAngles(int firstSpec, int lastSpec) {
   g_log.debug("Calculating solid angles");
   // get percentage completed estimates for now, t0 and when we've finished t1
   double t0 = m_fracDone, t1 = advanceProgress(RTGetSolidAngle);
@@ -237,10 +218,8 @@ API::MatrixWorkspace_sptr MedianDetectorTest::getSolidAngles(int firstSpec,
  * @param indexmap Index map.
  * @returns The number failed.
  */
-int MedianDetectorTest::maskOutliers(
-    const std::vector<double> &medianvec,
-    const API::MatrixWorkspace_sptr &countsWS,
-    std::vector<std::vector<size_t>> indexmap) {
+int MedianDetectorTest::maskOutliers(const std::vector<double> &medianvec, const API::MatrixWorkspace_sptr &countsWS,
+                                     std::vector<std::vector<size_t>> indexmap) {
 
   // Fractions of the median
   const double out_lo = getProperty("LowOutlier");
@@ -251,8 +230,7 @@ int MedianDetectorTest::maskOutliers(
   bool checkForMask = false;
   Geometry::Instrument_const_sptr instrument = countsWS->getInstrument();
   if (instrument != nullptr) {
-    checkForMask = ((instrument->getSource() != nullptr) &&
-                    (instrument->getSample() != nullptr));
+    checkForMask = ((instrument->getSource() != nullptr) && (instrument->getSample() != nullptr));
   }
   auto &spectrumInfo = countsWS->mutableSpectrumInfo();
 
@@ -264,8 +242,7 @@ int MedianDetectorTest::maskOutliers(
     for (int j = 0; j < static_cast<int>(hists.size()); ++j) { // NOLINT
       const double value = countsWS->y(hists[j])[0];
       if ((value == 0.) && checkForMask) {
-        if (spectrumInfo.hasDetectors(hists[j]) &&
-            spectrumInfo.isMasked(hists[j])) {
+        if (spectrumInfo.hasDetectors(hists[j]) && spectrumInfo.isMasked(hists[j])) {
           numFailed -= 1; // it was already masked
         }
       }
@@ -300,11 +277,9 @@ int MedianDetectorTest::maskOutliers(
  * @return The number of detectors that failed the tests, not including those
  * skipped.
  */
-int MedianDetectorTest::doDetectorTests(
-    const API::MatrixWorkspace_sptr &countsWS,
-    const std::vector<double> &medianvec,
-    std::vector<std::vector<size_t>> indexmap,
-    const API::MatrixWorkspace_sptr &maskWS) {
+int MedianDetectorTest::doDetectorTests(const API::MatrixWorkspace_sptr &countsWS, const std::vector<double> &medianvec,
+                                        std::vector<std::vector<size_t>> indexmap,
+                                        const API::MatrixWorkspace_sptr &maskWS) {
   g_log.debug("Applying the criteria to find failing detectors");
 
   // A spectra can't fail if the statistics show its value is consistent with
@@ -323,8 +298,7 @@ int MedianDetectorTest::doDetectorTests(
   bool checkForMask = false;
   Geometry::Instrument_const_sptr instrument = countsWS->getInstrument();
   if (instrument != nullptr) {
-    checkForMask = ((instrument->getSource() != nullptr) &&
-                    (instrument->getSample() != nullptr));
+    checkForMask = ((instrument->getSource() != nullptr) && (instrument->getSample() != nullptr));
   }
   const auto &spectrumInfo = countsWS->spectrumInfo();
 
@@ -335,14 +309,12 @@ int MedianDetectorTest::doDetectorTests(
     const size_t nhist = hists.size();
     g_log.debug() << "new component with " << nhist << " spectra.\n";
     for (size_t i = 0; i < nhist; ++i) {
-      g_log.debug() << "Counts workspace index=" << i
-                    << ", Mask workspace index=" << hists.at(i) << '\n';
+      g_log.debug() << "Counts workspace index=" << i << ", Mask workspace index=" << hists.at(i) << '\n';
       PARALLEL_START_INTERUPT_REGION
       ++steps;
       // update the progressbar information
       if (steps % progStep == 0) {
-        progress(advanceProgress(progStep * static_cast<double>(RTMarkDetects) /
-                                 numSpec));
+        progress(advanceProgress(progStep * static_cast<double>(RTMarkDetects) / numSpec));
       }
 
       if (checkForMask && spectrumInfo.hasDetectors(hists.at(i))) {

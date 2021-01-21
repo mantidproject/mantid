@@ -31,14 +31,11 @@ namespace Indexing {
 */
 class MANTID_INDEXING_DLL SpectrumNumberTranslator {
 public:
-  SpectrumNumberTranslator(const std::vector<SpectrumNumber> &spectrumNumbers,
-                           const Partitioner &partitioner,
+  SpectrumNumberTranslator(const std::vector<SpectrumNumber> &spectrumNumbers, const Partitioner &partitioner,
                            const PartitionIndex &partition);
-  SpectrumNumberTranslator(const std::vector<SpectrumNumber> &spectrumNumbers,
+  SpectrumNumberTranslator(const std::vector<SpectrumNumber> &spectrumNumbers, const SpectrumNumberTranslator &parent);
+  SpectrumNumberTranslator(const std::vector<GlobalSpectrumIndex> &globalIndices,
                            const SpectrumNumberTranslator &parent);
-  SpectrumNumberTranslator(
-      const std::vector<GlobalSpectrumIndex> &globalIndices,
-      const SpectrumNumberTranslator &parent);
 
   size_t globalSize() const;
   size_t localSize() const;
@@ -48,12 +45,9 @@ public:
 
   SpectrumIndexSet makeIndexSet() const;
   SpectrumIndexSet makeIndexSet(SpectrumNumber min, SpectrumNumber max) const;
-  SpectrumIndexSet makeIndexSet(GlobalSpectrumIndex min,
-                                GlobalSpectrumIndex max) const;
-  SpectrumIndexSet
-  makeIndexSet(const std::vector<SpectrumNumber> &spectrumNumbers) const;
-  SpectrumIndexSet
-  makeIndexSet(const std::vector<GlobalSpectrumIndex> &globalIndices) const;
+  SpectrumIndexSet makeIndexSet(GlobalSpectrumIndex min, GlobalSpectrumIndex max) const;
+  SpectrumIndexSet makeIndexSet(const std::vector<SpectrumNumber> &spectrumNumbers) const;
+  SpectrumIndexSet makeIndexSet(const std::vector<GlobalSpectrumIndex> &globalIndices) const;
 
   PartitionIndex partitionOf(const GlobalSpectrumIndex globalIndex) const;
 
@@ -62,8 +56,7 @@ private:
   void checkUniqueSpectrumNumbers() const;
   // Not thread-safe! Use only in combination with std::call_once!
   void setupSpectrumNumberToIndexMap() const;
-  std::vector<SpectrumNumber>
-  spectrumNumbers(const std::vector<GlobalSpectrumIndex> &globalIndices) const;
+  std::vector<SpectrumNumber> spectrumNumbers(const std::vector<GlobalSpectrumIndex> &globalIndices) const;
 
   struct SpectrumNumberHash {
     // Pass-by-value as qualifiers ignored on cast result type and
@@ -75,10 +68,8 @@ private:
 
   bool m_isPartitioned;
   const PartitionIndex m_partition;
-  std::unordered_map<SpectrumNumber, PartitionIndex, SpectrumNumberHash>
-      m_spectrumNumberToPartition;
-  mutable std::vector<std::pair<SpectrumNumber, size_t>>
-      m_spectrumNumberToIndex;
+  std::unordered_map<SpectrumNumber, PartitionIndex, SpectrumNumberHash> m_spectrumNumberToPartition;
+  mutable std::vector<std::pair<SpectrumNumber, size_t>> m_spectrumNumberToIndex;
   std::vector<std::pair<GlobalSpectrumIndex, size_t>> m_globalToLocal;
   std::vector<SpectrumNumber> m_spectrumNumbers;
   std::vector<SpectrumNumber> m_globalSpectrumNumbers;
@@ -87,9 +78,7 @@ private:
 };
 
 /// Returns the global number of spectra.
-inline size_t SpectrumNumberTranslator::globalSize() const {
-  return m_globalSpectrumNumbers.size();
-}
+inline size_t SpectrumNumberTranslator::globalSize() const { return m_globalSpectrumNumbers.size(); }
 
 /// Returns the local number of spectra.
 inline size_t SpectrumNumberTranslator::localSize() const {
@@ -99,21 +88,16 @@ inline size_t SpectrumNumberTranslator::localSize() const {
 }
 
 /// Returns the spectrum number for given index.
-inline SpectrumNumber
-SpectrumNumberTranslator::spectrumNumber(const size_t index) const {
+inline SpectrumNumber SpectrumNumberTranslator::spectrumNumber(const size_t index) const {
   if (!isPartitioned())
     return m_globalSpectrumNumbers[index];
   return m_spectrumNumbers[index];
 }
 
 // Full set
-inline SpectrumIndexSet SpectrumNumberTranslator::makeIndexSet() const {
-  return SpectrumIndexSet(localSize());
-}
+inline SpectrumIndexSet SpectrumNumberTranslator::makeIndexSet() const { return SpectrumIndexSet(localSize()); }
 
-inline bool SpectrumNumberTranslator::isPartitioned() const {
-  return m_isPartitioned;
-}
+inline bool SpectrumNumberTranslator::isPartitioned() const { return m_isPartitioned; }
 
 } // namespace Indexing
 } // namespace Mantid

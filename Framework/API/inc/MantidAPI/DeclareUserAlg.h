@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#define DECLARE_USER_ALG(x)                                                    \
-  Algorithm *x##_create() { return new x; }                                    \
-                                                                               \
+#define DECLARE_USER_ALG(x)                                                                                            \
+  Algorithm *x##_create() { return new x; }                                                                            \
+                                                                                                                       \
   void x##_destroy(Algorithm *p) { delete p; }

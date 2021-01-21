@@ -8,20 +8,14 @@
 
 #include "BatchJobRunnerTest.h"
 
-using namespace MantidQt::CustomInterfaces::ISISReflectometry::
-    ModelCreationHelper;
+using namespace MantidQt::CustomInterfaces::ISISReflectometry::ModelCreationHelper;
 
-class BatchJobRunnerProgressBarTest : public CxxTest::TestSuite,
-                                      public BatchJobRunnerTest {
+class BatchJobRunnerProgressBarTest : public CxxTest::TestSuite, public BatchJobRunnerTest {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static BatchJobRunnerProgressBarTest *createSuite() {
-    return new BatchJobRunnerProgressBarTest();
-  }
-  static void destroySuite(BatchJobRunnerProgressBarTest *suite) {
-    delete suite;
-  }
+  static BatchJobRunnerProgressBarTest *createSuite() { return new BatchJobRunnerProgressBarTest(); }
+  static void destroySuite(BatchJobRunnerProgressBarTest *suite) { delete suite; }
 
   void testProgressWithEmptyTable() {
     auto jobRunner = makeJobRunner(oneEmptyGroupModel());

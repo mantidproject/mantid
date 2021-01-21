@@ -28,8 +28,7 @@ public:
   /// Algorithm's version
   int version() const override;
   const std::vector<std::string> seeAlso() const override {
-    return {"ExtractFFTSpectrum", "FFT",      "FFTDerivative", "RealFFT",
-            "SassenaFFT",         "FFTSmooth"};
+    return {"ExtractFFTSpectrum", "FFT", "FFTDerivative", "RealFFT", "SassenaFFT", "FFTSmooth"};
   }
   /// Algorithm's category
   const std::string category() const override;
@@ -46,42 +45,31 @@ private:
   /// Run the algorithm
   void exec() override;
   /// Returns spectrum 'spec' as a complex vector
-  std::vector<double> toComplex(API::MatrixWorkspace_const_sptr &inWS,
-                                size_t spec, bool errors,
+  std::vector<double> toComplex(API::MatrixWorkspace_const_sptr &inWS, size_t spec, bool errors,
                                 bool concatenatedSpectra);
   // Calculates chi-square by solving the matrix equation A*x = b
-  double calculateChi(const QuadraticCoefficients &coeffs, double a,
-                      std::vector<double> &beta);
+  double calculateChi(const QuadraticCoefficients &coeffs, double a, std::vector<double> &beta);
   // Calculates the SVD of the input matrix A
-  std::vector<double> solveSVD(Kernel::DblMatrix &A,
-                               const Kernel::DblMatrix &B);
+  std::vector<double> solveSVD(Kernel::DblMatrix &A, const Kernel::DblMatrix &B);
   /// Moves the system one step closer towards the solution
-  std::vector<double> move(const QuadraticCoefficients &coeffs,
-                           double ChiTargetOverN, double chiEps,
-                           size_t alphaIter);
+  std::vector<double> move(const QuadraticCoefficients &coeffs, double ChiTargetOverN, double chiEps, size_t alphaIter);
   /// Applies a distance penalty
-  std::vector<double> applyDistancePenalty(const std::vector<double> &beta,
-                                           const QuadraticCoefficients &coeffs,
-                                           const std::vector<double> &image,
-                                           double background, double distEps);
+  std::vector<double> applyDistancePenalty(const std::vector<double> &beta, const QuadraticCoefficients &coeffs,
+                                           const std::vector<double> &image, double background, double distEps);
   /// Updates the image
-  std::vector<double> updateImage(const std::vector<double> &image,
-                                  const std::vector<double> &delta,
+  std::vector<double> updateImage(const std::vector<double> &image, const std::vector<double> &delta,
                                   const std::vector<std::vector<double>> &dirs);
 
   /// Populates the output workspace containing the reconstructed data
-  void populateDataWS(API::MatrixWorkspace_const_sptr &inWS, size_t spec,
-                      size_t nspec, const std::vector<double> &result,
-                      bool concatenatedSpectra, bool complex,
+  void populateDataWS(API::MatrixWorkspace_const_sptr &inWS, size_t spec, size_t nspec,
+                      const std::vector<double> &result, bool concatenatedSpectra, bool complex,
                       API::MatrixWorkspace_sptr &outWS);
   /// Populates the output workspace containing the reconstructed image
-  void populateImageWS(API::MatrixWorkspace_const_sptr &inWS, size_t spec,
-                       size_t nspec, const std::vector<double> &result,
-                       bool complex, API::MatrixWorkspace_sptr &outWS,
+  void populateImageWS(API::MatrixWorkspace_const_sptr &inWS, size_t spec, size_t nspec,
+                       const std::vector<double> &result, bool complex, API::MatrixWorkspace_sptr &outWS,
                        bool autoShift);
   /// Checks the bin spacing is equal
-  void validateBinEdges(const std::string &wsName,
-                        std::map<std::string, std::string> &messages);
+  void validateBinEdges(const std::string &wsName, std::map<std::string, std::string> &messages);
 };
 
 } // namespace Algorithms

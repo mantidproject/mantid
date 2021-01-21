@@ -18,9 +18,8 @@ public:
   void testReflectometryPlot() {
     MockPythonRunner pythonRunner;
     auto plotter = Plotter(&pythonRunner);
-    const std::string testCode =
-        "base_graph = None\nbase_graph = plotSpectrum(\"ws1\", 0, True, window "
-        "= base_graph)\nbase_graph.activeLayer().logLogAxes()\n";
+    const std::string testCode = "base_graph = None\nbase_graph = plotSpectrum(\"ws1\", 0, True, window "
+                                 "= base_graph)\nbase_graph.activeLayer().logLogAxes()\n";
 
     EXPECT_CALL(pythonRunner, runPythonAlgorithm(testCode));
 

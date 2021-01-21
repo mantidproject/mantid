@@ -27,22 +27,17 @@ class Histogram;
   @date 2017
 */
 class MANTID_HISTOGRAMDATA_DLL HistogramIterator
-    : public boost::iterator_facade<HistogramIterator, const HistogramItem &,
-                                    boost::bidirectional_traversal_tag> {
+    : public boost::iterator_facade<HistogramIterator, const HistogramItem &, boost::bidirectional_traversal_tag> {
 
 public:
-  HistogramIterator(const Histogram &histogram, const size_t index)
-      : m_item(histogram, index){};
+  HistogramIterator(const Histogram &histogram, const size_t index) : m_item(histogram, index){};
 
 private:
   friend class boost::iterator_core_access;
 
   void advance(int64_t delta) {
-    m_item.m_index =
-        delta < 0 ? std::max(static_cast<uint64_t>(0),
-                             static_cast<uint64_t>(m_item.m_index) + delta)
-                  : std::min(m_item.m_histogram.size(),
-                             m_item.m_index + static_cast<size_t>(delta));
+    m_item.m_index = delta < 0 ? std::max(static_cast<uint64_t>(0), static_cast<uint64_t>(m_item.m_index) + delta)
+                               : std::min(m_item.m_histogram.size(), m_item.m_index + static_cast<size_t>(delta));
   }
 
   void increment() {
@@ -61,15 +56,12 @@ private:
 
   void setIndex(const size_t index) { m_item.m_index = index; }
 
-  bool equal(const HistogramIterator &other) const {
-    return getIndex() == other.getIndex();
-  }
+  bool equal(const HistogramIterator &other) const { return getIndex() == other.getIndex(); }
 
   const HistogramItem &dereference() const { return m_item; }
 
   uint64_t distance_to(const HistogramIterator &other) const {
-    return static_cast<uint64_t>(other.getIndex()) -
-           static_cast<uint64_t>(getIndex());
+    return static_cast<uint64_t>(other.getIndex()) - static_cast<uint64_t>(getIndex());
   }
 
   HistogramItem m_item;

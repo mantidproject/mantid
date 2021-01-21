@@ -15,17 +15,12 @@ filters and sources through
 @date 31/11/2014
 */
 
-VatesConfigurations::VatesConfigurations()
-    : maxRecursionDepth(10000), metaDataId("VATES_Metadata_Json") {}
+VatesConfigurations::VatesConfigurations() : maxRecursionDepth(10000), metaDataId("VATES_Metadata_Json") {}
 
 VatesConfigurations::~VatesConfigurations() {}
 
-int VatesConfigurations::getMaxRecursionDepth() {
-  return this->maxRecursionDepth;
-}
+int VatesConfigurations::getMaxRecursionDepth() { return this->maxRecursionDepth; }
 
-std::string VatesConfigurations::getMetadataIdJson() {
-  return this->metaDataId;
-}
+std::string VatesConfigurations::getMetadataIdJson() { return this->metaDataId; }
 } // namespace VATES
 } // namespace Mantid

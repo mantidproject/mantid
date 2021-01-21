@@ -16,8 +16,7 @@ namespace Reflectometry {
 /** SpecularReflectionPositionCorrect : Algorithm to perform vertical position
  corrections based on the specular reflection condition.
  */
-class MANTID_REFLECTOMETRY_DLL SpecularReflectionPositionCorrect
-    : public SpecularReflectionAlgorithm {
+class MANTID_REFLECTOMETRY_DLL SpecularReflectionPositionCorrect : public SpecularReflectionAlgorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose
@@ -34,16 +33,12 @@ private:
   void exec() override;
 
   /// Correct detector positions.
-  void correctPosition(const API::MatrixWorkspace_sptr &toCorrect,
-                       const double &twoThetaInDeg,
-                       const Geometry::IComponent_const_sptr &sample,
-                       const Geometry::IComponent_const_sptr &detector);
+  void correctPosition(const API::MatrixWorkspace_sptr &toCorrect, const double &twoThetaInDeg,
+                       const Geometry::IComponent_const_sptr &sample, const Geometry::IComponent_const_sptr &detector);
 
   /// Move detectors.
-  void moveDetectors(const API::MatrixWorkspace_sptr &toCorrect,
-                     Geometry::IComponent_const_sptr detector,
-                     const Geometry::IComponent_const_sptr &sample,
-                     const double &upOffset, const double &acrossOffset,
+  void moveDetectors(const API::MatrixWorkspace_sptr &toCorrect, Geometry::IComponent_const_sptr detector,
+                     const Geometry::IComponent_const_sptr &sample, const double &upOffset, const double &acrossOffset,
                      const Mantid::Kernel::V3D &detectorPosition);
 };
 

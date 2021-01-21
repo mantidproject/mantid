@@ -27,8 +27,7 @@ namespace {
  * @param stream The open stream on which to perform the read
  * @param value An object of type T to fill with the value from the file
  */
-template <typename T>
-inline void readFromStream(std::istream &stream, T &value) {
+template <typename T> inline void readFromStream(std::istream &stream, T &value) {
   stream.read(reinterpret_cast<char *>(&value), sizeof(T));
 }
 
@@ -40,9 +39,7 @@ inline void readFromStream(std::istream &stream, T &value) {
  * the file
  * @param nvals The number of values to read
  */
-template <typename T>
-inline void readFromStream(std::istream &stream, std::vector<T> &value,
-                           size_t nvals) {
+template <typename T> inline void readFromStream(std::istream &stream, std::vector<T> &value, size_t nvals) {
   if (value.size() < nvals)
     value.resize(nvals);
   stream.read(reinterpret_cast<char *>(value.data()), nvals * sizeof(T));
@@ -58,8 +55,7 @@ inline void readFromStream(std::istream &stream, std::vector<T> &value,
  * across the rows first (RowMajor) or down columns first (ColumnMajor)
  */
 template <typename T>
-inline void readFromStream(std::istream &stream, Matrix<T> &value,
-                           const std::vector<int32_t> &shape,
+inline void readFromStream(std::istream &stream, Matrix<T> &value, const std::vector<int32_t> &shape,
                            BinaryStreamReader::MatrixOrdering order) {
   assert(2 <= shape.size());
   const size_t s0(shape[0]), s1(shape[1]), totalLength(s0 * s1);
@@ -98,8 +94,7 @@ inline void readFromStream(std::istream &stream, Matrix<T> &value,
 BinaryStreamReader::BinaryStreamReader(std::istream &istrm)
     : m_istrm(istrm), m_strLengthSize(static_cast<uint64_t>(sizeof(int32_t))) {
   if (!istrm) {
-    throw std::runtime_error(
-        "BinaryStreamReader: Input stream is in a bad state. Cannot continue.");
+    throw std::runtime_error("BinaryStreamReader: Input stream is in a bad state. Cannot continue.");
   }
 }
 
@@ -197,8 +192,7 @@ BinaryStreamReader &BinaryStreamReader::operator>>(uint32_t &value) {
  * @param nvals The number values to attempt to read from the stream
  * @return A reference to the BinaryStreamReader object
  */
-BinaryStreamReader &BinaryStreamReader::read(std::vector<int16_t> &value,
-                                             const size_t nvals) {
+BinaryStreamReader &BinaryStreamReader::read(std::vector<int16_t> &value, const size_t nvals) {
   readFromStream(m_istrm, value, nvals);
   return *this;
 }
@@ -209,8 +203,7 @@ BinaryStreamReader &BinaryStreamReader::read(std::vector<int16_t> &value,
  * @param nvals The number values to attempt to read from the stream
  * @return A reference to the BinaryStreamReader object
  */
-BinaryStreamReader &BinaryStreamReader::read(std::vector<int32_t> &value,
-                                             const size_t nvals) {
+BinaryStreamReader &BinaryStreamReader::read(std::vector<int32_t> &value, const size_t nvals) {
   readFromStream(m_istrm, value, nvals);
   return *this;
 }
@@ -221,8 +214,7 @@ BinaryStreamReader &BinaryStreamReader::read(std::vector<int32_t> &value,
  * @param nvals The number values to attempt to read from the stream
  * @return A reference to the BinaryStreamReader object
  */
-BinaryStreamReader &BinaryStreamReader::read(std::vector<int64_t> &value,
-                                             const size_t nvals) {
+BinaryStreamReader &BinaryStreamReader::read(std::vector<int64_t> &value, const size_t nvals) {
   readFromStream(m_istrm, value, nvals);
   return *this;
 }
@@ -233,8 +225,7 @@ BinaryStreamReader &BinaryStreamReader::read(std::vector<int64_t> &value,
  * @param nvals The number values to attempt to read from the stream
  * @return A reference to the BinaryStreamReader object
  */
-BinaryStreamReader &BinaryStreamReader::read(std::vector<float> &value,
-                                             const size_t nvals) {
+BinaryStreamReader &BinaryStreamReader::read(std::vector<float> &value, const size_t nvals) {
   readFromStream(m_istrm, value, nvals);
   return *this;
 }
@@ -245,8 +236,7 @@ BinaryStreamReader &BinaryStreamReader::read(std::vector<float> &value,
  * @param nvals The number values to attempt to read from the stream
  * @return A reference to the BinaryStreamReader object
  */
-BinaryStreamReader &BinaryStreamReader::read(std::vector<double> &value,
-                                             const size_t nvals) {
+BinaryStreamReader &BinaryStreamReader::read(std::vector<double> &value, const size_t nvals) {
   readFromStream(m_istrm, value, nvals);
   return *this;
 }
@@ -257,8 +247,7 @@ BinaryStreamReader &BinaryStreamReader::read(std::vector<double> &value,
  * @param length The number characters to attempt to read from the stream
  * @return A reference to the BinaryStreamReader object
  */
-BinaryStreamReader &BinaryStreamReader::read(std::string &value,
-                                             const size_t length) {
+BinaryStreamReader &BinaryStreamReader::read(std::string &value, const size_t length) {
   value.resize(length);
   m_istrm.read(const_cast<char *>(value.data()), length);
   return *this;
@@ -273,10 +262,8 @@ BinaryStreamReader &BinaryStreamReader::read(std::string &value,
  * across the rows first (RowMajor) or down columns first (ColumnMajor)
  * @return A reference to the BinaryStreamReader object
  */
-BinaryStreamReader &
-BinaryStreamReader::read(std::vector<std::string> &value,
-                         const std::vector<int32_t> &shape,
-                         BinaryStreamReader::MatrixOrdering order) {
+BinaryStreamReader &BinaryStreamReader::read(std::vector<std::string> &value, const std::vector<int32_t> &shape,
+                                             BinaryStreamReader::MatrixOrdering order) {
   assert(2 <= shape.size());
 
   const size_t s0(shape[0]), s1(shape[1]), totalLength(s0 * s1);
@@ -310,10 +297,8 @@ BinaryStreamReader::read(std::vector<std::string> &value,
  * across the rows first (RowMajor) or down columns first (ColumnMajor)
  * @return A reference to the BinaryStreamReader object
  */
-BinaryStreamReader &
-BinaryStreamReader::read(Kernel::Matrix<float> &value,
-                         const std::vector<int32_t> &shape,
-                         BinaryStreamReader::MatrixOrdering order) {
+BinaryStreamReader &BinaryStreamReader::read(Kernel::Matrix<float> &value, const std::vector<int32_t> &shape,
+                                             BinaryStreamReader::MatrixOrdering order) {
   readFromStream(m_istrm, value, shape, order);
   return *this;
 }
@@ -327,10 +312,8 @@ BinaryStreamReader::read(Kernel::Matrix<float> &value,
  * across the rows first (RowMajor) or down columns first (ColumnMajor)
  * @return A reference to the BinaryStreamReader object
  */
-BinaryStreamReader &
-BinaryStreamReader::read(Kernel::Matrix<double> &value,
-                         const std::vector<int32_t> &shape,
-                         BinaryStreamReader::MatrixOrdering order) {
+BinaryStreamReader &BinaryStreamReader::read(Kernel::Matrix<double> &value, const std::vector<int32_t> &shape,
+                                             BinaryStreamReader::MatrixOrdering order) {
   readFromStream(m_istrm, value, shape, order);
   return *this;
 }
@@ -339,9 +322,7 @@ BinaryStreamReader::read(Kernel::Matrix<double> &value,
  * Will move the stream to the given position
  * @param nbytes The number of bytes from position 0 to move
  */
-void BinaryStreamReader::moveStreamToPosition(size_t nbytes) {
-  m_istrm.seekg(nbytes, std::ios_base::beg);
-}
+void BinaryStreamReader::moveStreamToPosition(size_t nbytes) { m_istrm.seekg(nbytes, std::ios_base::beg); }
 
 } // namespace Kernel
 } // namespace Mantid

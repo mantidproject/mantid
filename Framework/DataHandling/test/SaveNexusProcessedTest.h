@@ -57,9 +57,7 @@ class SaveNexusProcessedTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static SaveNexusProcessedTest *createSuite() {
-    return new SaveNexusProcessedTest();
-  }
+  static SaveNexusProcessedTest *createSuite() { return new SaveNexusProcessedTest(); }
   static void destroySuite(SaveNexusProcessedTest *suite) { delete suite; }
 
   SaveNexusProcessedTest() {
@@ -100,8 +98,7 @@ public:
     savedNexus.openGroup("mantid_workspace_1", "NXentry");
     savedNexus.openGroup("workspace", "NXdata");
 
-    TSM_ASSERT_THROWS_NOTHING("Should find xerrors entry",
-                              savedNexus.openData("xerrors"));
+    TSM_ASSERT_THROWS_NOTHING("Should find xerrors entry", savedNexus.openData("xerrors"));
     savedNexus.close();
     // Clean up
     if (clearfiles)
@@ -126,8 +123,7 @@ public:
     // get workspace
     //
     Workspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(
-        output = AnalysisDataService::Instance().retrieve(outputSpace));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(outputSpace));
     Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output);
     //
     if (!algToBeTested.isInitialized())
@@ -146,8 +142,7 @@ public:
     algToBeTested.setPropertyValue("Append", "0");
     outputFile = algToBeTested.getPropertyValue("Filename");
     std::string result;
-    TS_ASSERT_THROWS_NOTHING(result =
-                                 algToBeTested.getPropertyValue("Filename"));
+    TS_ASSERT_THROWS_NOTHING(result = algToBeTested.getPropertyValue("Filename"));
     TS_ASSERT(!result.compare(outputFile));
 
     TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());
@@ -155,8 +150,7 @@ public:
 
     if (clearfiles)
       remove(outputFile.c_str());
-    TS_ASSERT_THROWS_NOTHING(
-        AnalysisDataService::Instance().remove(outputSpace));
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().remove(outputSpace));
   }
 
   void testExecOnMuon() {
@@ -179,8 +173,7 @@ public:
     // get workspace
     //
     Workspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(
-        output = AnalysisDataService::Instance().retrieve(outputSpace));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(outputSpace));
     Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output);
     if (!algToBeTested.isInitialized())
       algToBeTested.initialize();
@@ -201,8 +194,7 @@ public:
     algToBeTested.setPropertyValue("Append", "0");
 
     std::string result;
-    TS_ASSERT_THROWS_NOTHING(result =
-                                 algToBeTested.getPropertyValue("Filename"));
+    TS_ASSERT_THROWS_NOTHING(result = algToBeTested.getPropertyValue("Filename"));
     TS_ASSERT(!result.compare(outputFile));
 
     TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());
@@ -210,8 +202,7 @@ public:
 
     if (clearfiles)
       Poco::File(outputFile).remove();
-    TS_ASSERT_THROWS_NOTHING(
-        AnalysisDataService::Instance().remove(outputSpace));
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().remove(outputSpace));
   }
 
   /**
@@ -225,11 +216,10 @@ public:
    * @param CompressNexus :: compress
    * @return
    */
-  static EventWorkspace_sptr
-  do_testExec_EventWorkspaces(const std::string &filename_root, EventType type,
-                              std::string &outputFile, bool makeDifferentTypes,
-                              bool clearfiles, bool PreserveEvents = true,
-                              bool CompressNexus = false) {
+  static EventWorkspace_sptr do_testExec_EventWorkspaces(const std::string &filename_root, EventType type,
+                                                         std::string &outputFile, bool makeDifferentTypes,
+                                                         bool clearfiles, bool PreserveEvents = true,
+                                                         bool CompressNexus = false) {
     std::vector<std::vector<int>> groups(5);
     groups[0].emplace_back(10);
     groups[0].emplace_back(11);
@@ -240,9 +230,7 @@ public:
     groups[3].emplace_back(40);
     groups[4].emplace_back(50);
 
-    EventWorkspace_sptr WS =
-        WorkspaceCreationHelper::createGroupedEventWorkspace(groups, 100, 1.0,
-                                                             1.0);
+    EventWorkspace_sptr WS = WorkspaceCreationHelper::createGroupedEventWorkspace(groups, 100, 1.0, 1.0);
     WS->getSpectrum(3).clear(false);
     // Switch the event type
     if (makeDifferentTypes) {
@@ -290,39 +278,33 @@ public:
 
   void testExec_EventWorkspace_TofEvent() {
     std::string outputFile;
-    do_testExec_EventWorkspaces("SaveNexusProcessed_", TOF, outputFile, false,
-                                clearfiles);
+    do_testExec_EventWorkspaces("SaveNexusProcessed_", TOF, outputFile, false, clearfiles);
   }
 
   void testExec_EventWorkspace_WeightedEvent() {
     std::string outputFile;
-    do_testExec_EventWorkspaces("SaveNexusProcessed_", WEIGHTED, outputFile,
-                                false, clearfiles);
+    do_testExec_EventWorkspaces("SaveNexusProcessed_", WEIGHTED, outputFile, false, clearfiles);
   }
 
   void testExec_EventWorkspace_WeightedEventNoTime() {
     std::string outputFile;
-    do_testExec_EventWorkspaces("SaveNexusProcessed_", WEIGHTED_NOTIME,
-                                outputFile, false, clearfiles);
+    do_testExec_EventWorkspaces("SaveNexusProcessed_", WEIGHTED_NOTIME, outputFile, false, clearfiles);
   }
 
   void testExec_EventWorkspace_DifferentTypes() {
     std::string outputFile;
-    do_testExec_EventWorkspaces("SaveNexusProcessed_DifferentTypes_",
-                                WEIGHTED_NOTIME, outputFile, true, clearfiles);
+    do_testExec_EventWorkspaces("SaveNexusProcessed_DifferentTypes_", WEIGHTED_NOTIME, outputFile, true, clearfiles);
   }
 
   void testExec_EventWorkspace_DontPreserveEvents() {
     std::string outputFile;
-    do_testExec_EventWorkspaces("SaveNexusProcessed_EventTo2D", TOF, outputFile,
-                                false, clearfiles,
+    do_testExec_EventWorkspaces("SaveNexusProcessed_EventTo2D", TOF, outputFile, false, clearfiles,
                                 false /* DONT preserve events */);
   }
   void testExec_EventWorkspace_CompressNexus() {
     std::string outputFile;
-    do_testExec_EventWorkspaces(
-        "SaveNexusProcessed_EventTo2D", TOF, outputFile, false, clearfiles,
-        true /* DONT preserve events */, true /* Compress */);
+    do_testExec_EventWorkspaces("SaveNexusProcessed_EventTo2D", TOF, outputFile, false, clearfiles,
+                                true /* DONT preserve events */, true /* Compress */);
   }
 
   void testExecSaveLabel() {
@@ -331,14 +313,12 @@ public:
       alg.initialize();
 
     // create dummy 2D-workspace
-    Workspace2D_sptr localWorkspace2D = std::dynamic_pointer_cast<Workspace2D>(
-        WorkspaceFactory::Instance().create("Workspace2D", 1, 10, 10));
+    Workspace2D_sptr localWorkspace2D =
+        std::dynamic_pointer_cast<Workspace2D>(WorkspaceFactory::Instance().create("Workspace2D", 1, 10, 10));
 
     // set units to be a label
-    localWorkspace2D->getAxis(0)->unit() =
-        UnitFactory::Instance().create("Label");
-    auto label = std::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(
-        localWorkspace2D->getAxis(0)->unit());
+    localWorkspace2D->getAxis(0)->unit() = UnitFactory::Instance().create("Label");
+    auto label = std::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(localWorkspace2D->getAxis(0)->unit());
     label->setLabel("Temperature", "K");
 
     double d = 0.0;
@@ -377,8 +357,7 @@ public:
   }
 
   void testSaveGroupWorkspace() {
-    const std::string output_filename =
-        "SaveNexusProcessedTest_GroupWorkspaceFile.nxs";
+    const std::string output_filename = "SaveNexusProcessedTest_GroupWorkspaceFile.nxs";
 
     // Clean out any previous instances.
     bool doesFileExist = Poco::File(output_filename).exists();
@@ -390,8 +369,7 @@ public:
     const int nBins = 1;
     const std::string stem = "test_group_ws";
     Mantid::API::WorkspaceGroup_sptr group_ws =
-        WorkspaceCreationHelper::createWorkspaceGroup(nEntries, nHist, nBins,
-                                                      stem);
+        WorkspaceCreationHelper::createWorkspaceGroup(nEntries, nHist, nBins, stem);
 
     SaveNexusProcessed alg;
     alg.setRethrows(true);
@@ -410,8 +388,7 @@ public:
   }
 
   void testSaveTableVectorColumn() {
-    std::string outputFileName =
-        "SaveNexusProcessedTest_testSaveTableVectorColumn.nxs";
+    std::string outputFileName = "SaveNexusProcessedTest_testSaveTableVectorColumn.nxs";
 
     // Create a table which we will save
     ITableWorkspace_sptr table = WorkspaceFactory::Instance().createTable();
@@ -488,8 +465,7 @@ public:
         TS_ASSERT_EQUALS(savedNexus.getStrAttr(attrInfos1[4]), "");
 
         TS_ASSERT_EQUALS(attrInfos1[5].name, "name");
-        TS_ASSERT_EQUALS(savedNexus.getStrAttr(attrInfos1[5]),
-                         "IntVectorColumn");
+        TS_ASSERT_EQUALS(savedNexus.getStrAttr(attrInfos1[5]), "IntVectorColumn");
       }
 
       // -- Checking double column -----
@@ -524,8 +500,7 @@ public:
         TS_ASSERT_EQUALS(savedNexus.getStrAttr(attrInfos2[4]), "");
 
         TS_ASSERT_EQUALS(attrInfos2[5].name, "name");
-        TS_ASSERT_EQUALS(savedNexus.getStrAttr(attrInfos2[5]),
-                         "DoubleVectorColumn");
+        TS_ASSERT_EQUALS(savedNexus.getStrAttr(attrInfos2[5]), "DoubleVectorColumn");
       }
     } catch (std::exception &e) {
       TS_FAIL(e.what());
@@ -538,8 +513,8 @@ public:
     std::string outputFileName = "SaveNexusProcessedTest_testSaveTable.nxs";
 
     // Create a table which we will save
-    auto table = std::dynamic_pointer_cast<Mantid::DataObjects::TableWorkspace>(
-        WorkspaceFactory::Instance().createTable());
+    auto table =
+        std::dynamic_pointer_cast<Mantid::DataObjects::TableWorkspace>(WorkspaceFactory::Instance().createTable());
     table->setRowCount(3);
     table->addColumn("int", "IntColumn");
     {
@@ -726,8 +701,8 @@ public:
     std::string outputFileName = "SaveNexusProcessedTest_testSaveTable.nxs";
 
     // Create a table which we will save
-    auto table = std::dynamic_pointer_cast<Mantid::DataObjects::TableWorkspace>(
-        WorkspaceFactory::Instance().createTable());
+    auto table =
+        std::dynamic_pointer_cast<Mantid::DataObjects::TableWorkspace>(WorkspaceFactory::Instance().createTable());
     table->setRowCount(3);
     table->addColumn("int", "IntColumn");
     {
@@ -803,12 +778,10 @@ public:
   void test_masking() {
     LoadEmptyInstrument createWorkspace;
     createWorkspace.initialize();
-    createWorkspace.setPropertyValue("Filename",
-                                     "unit_testing/IDF_for_UNIT_TESTING.xml");
+    createWorkspace.setPropertyValue("Filename", "unit_testing/IDF_for_UNIT_TESTING.xml");
     createWorkspace.setPropertyValue("OutputWorkspace", "testSpace");
     createWorkspace.execute();
-    auto ws = std::dynamic_pointer_cast<Workspace2D>(
-        AnalysisDataService::Instance().retrieve("testSpace"));
+    auto ws = std::dynamic_pointer_cast<Workspace2D>(AnalysisDataService::Instance().retrieve("testSpace"));
     ws->mutableDetectorInfo().setMasked(1, true);
     TS_ASSERT_EQUALS(ws->detectorInfo().isMasked(0), false);
     TS_ASSERT_EQUALS(ws->detectorInfo().isMasked(1), true);
@@ -830,8 +803,8 @@ public:
     loadAlg.setPropertyValue("OutputWorkspace", "testSpaceReloaded");
     TS_ASSERT_THROWS_NOTHING(loadAlg.execute());
     TS_ASSERT(loadAlg.isExecuted());
-    auto wsReloaded = std::dynamic_pointer_cast<Workspace2D>(
-        AnalysisDataService::Instance().retrieve("testSpaceReloaded"));
+    auto wsReloaded =
+        std::dynamic_pointer_cast<Workspace2D>(AnalysisDataService::Instance().retrieve("testSpaceReloaded"));
     TS_ASSERT_EQUALS(wsReloaded->detectorInfo().isMasked(0), false);
     TS_ASSERT_EQUALS(wsReloaded->detectorInfo().isMasked(1), true);
     TS_ASSERT_EQUALS(wsReloaded->detectorInfo().isMasked(2), false);
@@ -853,8 +826,7 @@ public:
       wsIndex.emplace_back(i);
     }
     SaveNexusProcessed alg;
-    TS_ASSERT_THROWS_NOTHING(
-        alg.saveSpectraDetectorMapNexus(*ws, th.file.get(), wsIndex);)
+    TS_ASSERT_THROWS_NOTHING(alg.saveSpectraDetectorMapNexus(*ws, th.file.get(), wsIndex);)
     TS_ASSERT_THROWS_NOTHING(th.file->openData("detector_index"))
     std::vector<int32_t> data;
     TS_ASSERT_THROWS_NOTHING(th.file->getData(data))
@@ -889,8 +861,7 @@ public:
       wsIndex.emplace_back(i);
     }
     SaveNexusProcessed alg;
-    TS_ASSERT_THROWS_NOTHING(
-        alg.saveSpectrumNumbersNexus(*ws, th.file.get(), wsIndex);)
+    TS_ASSERT_THROWS_NOTHING(alg.saveSpectrumNumbersNexus(*ws, th.file.get(), wsIndex);)
     TS_ASSERT_THROWS_NOTHING(th.file->openData("spectra"))
     std::vector<int32_t> data;
     TS_ASSERT_THROWS_NOTHING(th.file->getData(data))
@@ -901,10 +872,10 @@ public:
   }
 
   void test_when_nested_workspaces_are_being_saved() {
-    Workspace2D_sptr ws1 = std::dynamic_pointer_cast<Workspace2D>(
-        WorkspaceFactory::Instance().create("Workspace2D", 1, 10, 10));
-    Workspace2D_sptr ws2 = std::dynamic_pointer_cast<Workspace2D>(
-        WorkspaceFactory::Instance().create("Workspace2D", 1, 10, 10));
+    Workspace2D_sptr ws1 =
+        std::dynamic_pointer_cast<Workspace2D>(WorkspaceFactory::Instance().create("Workspace2D", 1, 10, 10));
+    Workspace2D_sptr ws2 =
+        std::dynamic_pointer_cast<Workspace2D>(WorkspaceFactory::Instance().create("Workspace2D", 1, 10, 10));
 
     Mantid::API::WorkspaceGroup_sptr gws1 = std::make_shared<WorkspaceGroup>();
     gws1->addWorkspace(ws1);
@@ -915,8 +886,7 @@ public:
 
     SaveNexusProcessed saveAlg;
     saveAlg.initialize();
-    TS_ASSERT_THROWS_NOTHING(
-        saveAlg.setPropertyValue("InputWorkspace", "gws2"));
+    TS_ASSERT_THROWS_NOTHING(saveAlg.setPropertyValue("InputWorkspace", "gws2"));
     std::string file = "namesdoesntmatterasitshouldntsaveanyway.nxs";
     TS_ASSERT_THROWS_NOTHING(saveAlg.setPropertyValue("Filename", file));
     TS_ASSERT_THROWS(saveAlg.execute(), const std::runtime_error &);
@@ -924,9 +894,7 @@ public:
   }
 
 private:
-  void doTestColumnInfo(::NeXus::File &file, int type,
-                        const std::string &interpret_as,
-                        const std::string &name) {
+  void doTestColumnInfo(::NeXus::File &file, int type, const std::string &interpret_as, const std::string &name) {
     ::NeXus::Info columnInfo = file.getInfo();
     TSM_ASSERT_EQUALS(name, columnInfo.dims.size(), 1);
     TSM_ASSERT_EQUALS(name, columnInfo.dims[0], 3);
@@ -947,9 +915,8 @@ private:
     }
   }
 
-  void doTestColumnInfo2(::NeXus::File &file, int type,
-                         const std::string &interpret_as,
-                         const std::string &name, int dim1) {
+  void doTestColumnInfo2(::NeXus::File &file, int type, const std::string &interpret_as, const std::string &name,
+                         int dim1) {
     ::NeXus::Info columnInfo = file.getInfo();
     TSM_ASSERT_EQUALS(name, columnInfo.dims.size(), 2);
     TSM_ASSERT_EQUALS(name, columnInfo.dims[0], 3);
@@ -972,22 +939,18 @@ private:
   }
 
   template <typename T>
-  void doTestColumnData(const std::string &name, ::NeXus::File &file,
-                        const T expectedData[], size_t len = 3) {
+  void doTestColumnData(const std::string &name, ::NeXus::File &file, const T expectedData[], size_t len = 3) {
     std::vector<T> data;
     file.getData(data);
 
     TSM_ASSERT_EQUALS(name, data.size(), len);
     for (size_t i = 0; i < len; ++i) {
-      std::string mess =
-          name + ", item #" + boost::lexical_cast<std::string>(i);
+      std::string mess = name + ", item #" + boost::lexical_cast<std::string>(i);
       TSM_ASSERT_EQUALS(mess, data[i], expectedData[i]);
     };
   }
 
-  std::string
-  doExec(std::string outputFile = "SaveNexusProcessedTest_testExec.nxs",
-         bool useXErrors = false) {
+  std::string doExec(std::string outputFile = "SaveNexusProcessedTest_testExec.nxs", bool useXErrors = false) {
     SaveNexusProcessed algToBeTested;
     if (!algToBeTested.isInitialized())
       algToBeTested.initialize();
@@ -996,10 +959,9 @@ private:
     TS_ASSERT_THROWS(algToBeTested.execute(), const std::runtime_error &);
 
     // create dummy 2D-workspace
-    Workspace2D_sptr localWorkspace2D = std::dynamic_pointer_cast<Workspace2D>(
-        WorkspaceFactory::Instance().create("Workspace2D", 1, 10, 10));
-    localWorkspace2D->getAxis(0)->unit() =
-        UnitFactory::Instance().create("TOF");
+    Workspace2D_sptr localWorkspace2D =
+        std::dynamic_pointer_cast<Workspace2D>(WorkspaceFactory::Instance().create("Workspace2D", 1, 10, 10));
+    localWorkspace2D->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
     double d = 0.0;
     if (useXErrors) {
       localWorkspace2D->setPointStandardDeviations(0, 10);
@@ -1020,16 +982,14 @@ private:
     algToBeTested.setPropertyValue("InputWorkspace", "testSpace");
     dataName = "spectra";
     title = "A simple workspace saved in Processed Nexus format";
-    TS_ASSERT_THROWS_NOTHING(
-        algToBeTested.setPropertyValue("Filename", outputFile));
+    TS_ASSERT_THROWS_NOTHING(algToBeTested.setPropertyValue("Filename", outputFile));
     outputFile = algToBeTested.getPropertyValue("Filename");
     algToBeTested.setPropertyValue("Title", title);
     if (Poco::File(outputFile).exists())
       Poco::File(outputFile).remove();
 
     std::string result;
-    TS_ASSERT_THROWS_NOTHING(result =
-                                 algToBeTested.getPropertyValue("Filename"));
+    TS_ASSERT_THROWS_NOTHING(result = algToBeTested.getPropertyValue("Filename"));
     TS_ASSERT(!result.compare(outputFile));
 
     // changed so that 1D workspaces are no longer written.
@@ -1043,8 +1003,7 @@ private:
    * @param numSpectra
    * @return
    */
-  std::shared_ptr<MatrixWorkspace>
-  makeWorkspaceWithDetectors(size_t numSpectra, size_t numBins) const {
+  std::shared_ptr<MatrixWorkspace> makeWorkspaceWithDetectors(size_t numSpectra, size_t numBins) const {
     std::shared_ptr<MatrixWorkspace> ws2 = std::make_shared<WorkspaceTester>();
     ws2->initialize(numSpectra, numBins, numBins);
 
@@ -1053,10 +1012,8 @@ private:
     // number
     for (size_t i = 0; i < ws2->getNumberHistograms(); ++i) {
       // Create a detector for each spectra
-      Detector *det =
-          new Detector("pixel", static_cast<detid_t>(i), inst.get());
-      det->setShape(
-          ComponentCreationHelper::createSphere(0.01, V3D(0, 0, 0), "1"));
+      Detector *det = new Detector("pixel", static_cast<detid_t>(i), inst.get());
+      det->setShape(ComponentCreationHelper::createSphere(0.01, V3D(0, 0, 0), "1"));
       inst->add(det);
       inst->markAsDetector(det);
       ws2->getSpectrum(i).addDetectorID(static_cast<detid_t>(i));

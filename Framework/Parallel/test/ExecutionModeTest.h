@@ -20,24 +20,16 @@ public:
   static void destroySuite(ExecutionModeTest *suite) { delete suite; }
 
   void test_getCorrespondingExecutionMode() {
-    TS_ASSERT_EQUALS(getCorrespondingExecutionMode(StorageMode::Cloned),
-                     ExecutionMode::Identical);
-    TS_ASSERT_EQUALS(getCorrespondingExecutionMode(StorageMode::Distributed),
-                     ExecutionMode::Distributed);
-    TS_ASSERT_EQUALS(getCorrespondingExecutionMode(StorageMode::MasterOnly),
-                     ExecutionMode::MasterOnly);
+    TS_ASSERT_EQUALS(getCorrespondingExecutionMode(StorageMode::Cloned), ExecutionMode::Identical);
+    TS_ASSERT_EQUALS(getCorrespondingExecutionMode(StorageMode::Distributed), ExecutionMode::Distributed);
+    TS_ASSERT_EQUALS(getCorrespondingExecutionMode(StorageMode::MasterOnly), ExecutionMode::MasterOnly);
   }
 
   void test_toString() {
-    TS_ASSERT_EQUALS(toString(ExecutionMode::Invalid),
-                     "Parallel::ExecutionMode::Invalid");
-    TS_ASSERT_EQUALS(toString(ExecutionMode::Serial),
-                     "Parallel::ExecutionMode::Serial");
-    TS_ASSERT_EQUALS(toString(ExecutionMode::Identical),
-                     "Parallel::ExecutionMode::Identical");
-    TS_ASSERT_EQUALS(toString(ExecutionMode::Distributed),
-                     "Parallel::ExecutionMode::Distributed");
-    TS_ASSERT_EQUALS(toString(ExecutionMode::MasterOnly),
-                     "Parallel::ExecutionMode::MasterOnly");
+    TS_ASSERT_EQUALS(toString(ExecutionMode::Invalid), "Parallel::ExecutionMode::Invalid");
+    TS_ASSERT_EQUALS(toString(ExecutionMode::Serial), "Parallel::ExecutionMode::Serial");
+    TS_ASSERT_EQUALS(toString(ExecutionMode::Identical), "Parallel::ExecutionMode::Identical");
+    TS_ASSERT_EQUALS(toString(ExecutionMode::Distributed), "Parallel::ExecutionMode::Distributed");
+    TS_ASSERT_EQUALS(toString(ExecutionMode::MasterOnly), "Parallel::ExecutionMode::MasterOnly");
   }
 };

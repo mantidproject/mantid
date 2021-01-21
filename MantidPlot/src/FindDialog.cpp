@@ -41,8 +41,7 @@
 #include <QRegExp>
 #include <QVBoxLayout>
 
-FindDialog::FindDialog(QWidget *parent, const Qt::WFlags &fl)
-    : QDialog(parent, fl) {
+FindDialog::FindDialog(QWidget *parent, const Qt::WFlags &fl) : QDialog(parent, fl) {
   setWindowTitle(tr("MantidPlot") + " - " + tr("Find"));
   setSizeGripEnabled(true);
 
@@ -52,8 +51,7 @@ FindDialog::FindDialog(QWidget *parent, const Qt::WFlags &fl)
   topLayout->addWidget(new QLabel(tr("Start From")), 0, 0);
   labelStart = new QLabel();
   labelStart->setFrameStyle(QFrame::Panel | QFrame::Sunken);
-  labelStart->setSizePolicy(
-      QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed));
+  labelStart->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed));
   topLayout->addWidget(labelStart, 0, 1, 1, 4);
 
   topLayout->addWidget(new QLabel(tr("Find")), 1, 0);
@@ -64,8 +62,7 @@ FindDialog::FindDialog(QWidget *parent, const Qt::WFlags &fl)
   boxFind->setAutoCompletion(true);
   boxFind->setMaxCount(10);
   boxFind->setMaxVisibleItems(10);
-  boxFind->setSizePolicy(
-      QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed));
+  boxFind->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed));
   topLayout->addWidget(boxFind, 1, 1, 1, 4);
 
   QGroupBox *groupBox = new QGroupBox(tr("Search in"));
@@ -121,8 +118,7 @@ FindDialog::FindDialog(QWidget *parent, const Qt::WFlags &fl)
 void FindDialog::setStartPath() {
   ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
   if (!app) {
-    throw std::logic_error(
-        "Parent of FindDialog is not ApplicationWindow as expected.");
+    throw std::logic_error("Parent of FindDialog is not ApplicationWindow as expected.");
   }
   labelStart->setText(app->currentFolder()->path());
 }
@@ -130,12 +126,10 @@ void FindDialog::setStartPath() {
 void FindDialog::accept() {
   ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
   if (!app) {
-    throw std::logic_error(
-        "Parent of FindDialog is not ApplicationWindow as expected.");
+    throw std::logic_error("Parent of FindDialog is not ApplicationWindow as expected.");
   }
-  app->find(boxFind->currentText(), boxWindowNames->isChecked(),
-            boxWindowLabels->isChecked(), boxFolderNames->isChecked(),
-            boxCaseSensitive->isChecked(), boxPartialMatch->isChecked(),
+  app->find(boxFind->currentText(), boxWindowNames->isChecked(), boxWindowLabels->isChecked(),
+            boxFolderNames->isChecked(), boxCaseSensitive->isChecked(), boxPartialMatch->isChecked(),
             boxSubfolders->isChecked());
   // add the combo box's current text to the list when the find button is
   // pressed

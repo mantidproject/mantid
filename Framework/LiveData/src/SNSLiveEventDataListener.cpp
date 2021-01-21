@@ -61,14 +61,12 @@ const std::string RUN_TITLE_PROPERTY("run_title");
 const std::string EXPERIMENT_ID_PROPERTY("experiment_identifier");
 
 // Helper function to get a DateAndTime value from an ADARA packet header
-Mantid::Types::Core::DateAndTime
-timeFromPacket(const ADARA::PacketHeader &hdr) {
+Mantid::Types::Core::DateAndTime timeFromPacket(const ADARA::PacketHeader &hdr) {
   const auto seconds = static_cast<uint32_t>(hdr.pulseId() >> 32);
   const uint32_t nanoseconds = hdr.pulseId() & 0xFFFFFFFF;
 
   // Make sure we pick the correct constructor (the Mac gets an ambiguous error)
-  return DateAndTime(static_cast<int64_t>(seconds),
-                     static_cast<int64_t>(nanoseconds));
+  return DateAndTime(static_cast<int64_t>(seconds), static_cast<int64_t>(nanoseconds));
 }
 
 } // anonymous namespace
@@ -96,8 +94,7 @@ SNSLiveEventDataListener::SNSLiveEventDataListener()
   // Initialize m_keepPausedEvents from the config file.
   // NOTE: To the best of my knowledge, the existence of this property is not
   // documented anywhere and this lack of documentation is deliberate.
-  auto keepPausedEvents =
-      ConfigService::Instance().getValue<bool>("livelistener.keeppausedevents");
+  auto keepPausedEvents = ConfigService::Instance().getValue<bool>("livelistener.keeppausedevents");
 
   // If the property hasn't been set, assume false
   m_keepPausedEvents = keepPausedEvents.get_value_or(false);
@@ -111,8 +108,7 @@ SNSLiveEventDataListener::~SNSLiveEventDataListener() {
     // seem to have an equivalent to pthread_cancel
     m_stopThread = true;
     try {
-      m_thread.join(RECV_TIMEOUT * 2 *
-                    1000); // *1000 because join() wants time in milliseconds
+      m_thread.join(RECV_TIMEOUT * 2 * 1000); // *1000 because join() wants time in milliseconds
     } catch (Poco::TimeoutException &) {
       // And just what do we do here?!?
       // Log a message, sure, but other than that we can either hang the
@@ -151,8 +147,7 @@ bool SNSLiveEventDataListener::connect(const Poco::Net::SocketAddress &address)
     try {
       m_socket.connect(tempAddress); // BLOCKING connect
     } catch (...) {
-      g_log.error() << "Connection to " << tempAddress.toString()
-                    << " failed.\n";
+      g_log.error() << "Connection to " << tempAddress.toString() << " failed.\n";
       return false;
     }
   } else {
@@ -164,8 +159,7 @@ bool SNSLiveEventDataListener::connect(const Poco::Net::SocketAddress &address)
     }
   }
 
-  m_socket.setReceiveTimeout(Poco::Timespan(
-      RECV_TIMEOUT, 0)); // POCO timespan is seconds, microseconds
+  m_socket.setReceiveTimeout(Poco::Timespan(RECV_TIMEOUT, 0)); // POCO timespan is seconds, microseconds
   g_log.debug() << "Connected to " << m_socket.address().toString() << '\n';
 
   m_isConnected = true;
@@ -214,27 +208,22 @@ void SNSLiveEventDataListener::run() {
   try {
     if (!m_isConnected) // sanity check
     {
-      throw std::runtime_error(std::string(
-          "SNSLiveEventDataListener::run(): No connection to SMS server."));
+      throw std::runtime_error(std::string("SNSLiveEventDataListener::run(): No connection to SMS server."));
     }
 
     // First thing to do is send a hello packet
-    uint32_t typeVal =
-        ADARA_PKT_TYPE(ADARA::PacketType::Type::CLIENT_HELLO_TYPE, 0);
+    uint32_t typeVal = ADARA_PKT_TYPE(ADARA::PacketType::Type::CLIENT_HELLO_TYPE, 0);
     uint32_t helloPkt[5] = {4, typeVal, 0, 0, 0};
     // TODO: The packet version should be bumped to 1 and we should add
     // the extra flags field.  This will have to wait until we're ready
     // to update the StartLiveListener GUI, though.
 
     Poco::Timestamp now;
-    auto now_usec =
-        static_cast<uint32_t>(now.epochMicroseconds() - now.epochTime());
-    helloPkt[2] =
-        static_cast<uint32_t>(now.epochTime() - ADARA::EPICS_EPOCH_OFFSET);
+    auto now_usec = static_cast<uint32_t>(now.epochMicroseconds() - now.epochTime());
+    helloPkt[2] = static_cast<uint32_t>(now.epochTime() - ADARA::EPICS_EPOCH_OFFSET);
     helloPkt[3] = now_usec * 1000;
-    helloPkt[4] = static_cast<uint32_t>(
-        m_startTime.totalNanoseconds() /
-        1000000000); // divide by a billion to get time in seconds
+    helloPkt[4] = static_cast<uint32_t>(m_startTime.totalNanoseconds() /
+                                        1000000000); // divide by a billion to get time in seconds
 
     if (m_socket.sendBytes(helloPkt, sizeof(helloPkt)) != sizeof(helloPkt))
     // Yes, I know a send isn't guaranteed to send the whole buffer in one
@@ -269,8 +258,7 @@ void SNSLiveEventDataListener::run() {
           bytesRead = m_socket.receiveBytes(bufFillAddr, bufFillLen);
         } catch (Poco::TimeoutException &) {
           // Don't need to stop processing or anything - just log a warning
-          g_log.warning(
-              "Timeout reading from the network.  Is SMS still sending?");
+          g_log.warning("Timeout reading from the network.  Is SMS still sending?");
         } catch (Poco::Net::NetException &e) {
           std::string msg("Parser::read(): ");
           msg += e.name();
@@ -330,18 +318,15 @@ void SNSLiveEventDataListener::run() {
     m_isConnected = false;
     m_workspaceInitialized = true; // see the comments in the default exception
                                    // handler for why we set this value.
-    std::string newMsg(
-        "Invalid argument exception thrown from the background thread: ");
+    std::string newMsg("Invalid argument exception thrown from the background thread: ");
     newMsg += e.what();
     m_backgroundException = std::make_shared<std::runtime_error>(newMsg);
   } catch (...) { // Default exception handler
-    g_log.fatal(
-        "Uncaught exception in SNSLiveEventDataListener network read thread."
-        " Thread is exiting.");
+    g_log.fatal("Uncaught exception in SNSLiveEventDataListener network read thread."
+                " Thread is exiting.");
     m_isConnected = false;
 
-    m_backgroundException = std::make_shared<std::runtime_error>(
-        "Unknown error in backgound thread");
+    m_backgroundException = std::make_shared<std::runtime_error>("Unknown error in backgound thread");
   }
 }
 
@@ -428,16 +413,13 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::BankedEventPkt &pkt) {
         if (pkt.getSourceCORFlag()) {
           appendEvent(event->pixel, event->tof / 10.0, eventTime);
         } else {
-          appendEvent(event->pixel,
-                      (event->tof + pkt.getSourceTOFOffset()) / 10.0,
-                      eventTime);
+          appendEvent(event->pixel, (event->tof + pkt.getSourceTOFOffset()) / 10.0, eventTime);
         }
       }
 
       event = pkt.nextEvent();
       if (pkt.curBankId() != lastBankID) {
-        g_log.debug() << "BankID " << lastBankID << " had " << eventsPerBank
-                      << " events\n";
+        g_log.debug() << "BankID " << lastBankID << " had " << eventsPerBank << " events\n";
 
         lastBankID = pkt.curBankId();
         eventsPerBank = 0;
@@ -473,8 +455,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::BeamMonitorPkt &pkt) {
   // m_eventBuffer->m_monitorWorkspace), so lock the mutex
   std::lock_guard<std::mutex> scopedLock(m_mutex);
 
-  auto monitorBuffer = std::static_pointer_cast<DataObjects::EventWorkspace>(
-      m_eventBuffer->monitorWorkspace());
+  auto monitorBuffer = std::static_pointer_cast<DataObjects::EventWorkspace>(m_eventBuffer->monitorWorkspace());
   const auto pktTime = timeFromPacket(pkt);
 
   while (pkt.nextSection()) {
@@ -483,16 +464,13 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::BeamMonitorPkt &pkt) {
     if (monitorID > 5) {
       // Currently, we only handle monitors 0-5.  At the present time, that's
       // sufficient.
-      g_log.error()
-          << "Mantid cannot handle monitor ID's higher than 5.  If "
-          << monitorID
-          << " is actually valid, then an appropriate "
-             "entry must be made to the "
-          << " ADDABLE list at the top of Framework/API/src/Run.cpp\n";
+      g_log.error() << "Mantid cannot handle monitor ID's higher than 5.  If " << monitorID
+                    << " is actually valid, then an appropriate "
+                       "entry must be made to the "
+                    << " ADDABLE list at the top of Framework/API/src/Run.cpp\n";
     } else {
       std::string monName("monitor");
-      monName += static_cast<char>(
-          monitorID + 48); // The +48 converts to the ASCII character
+      monName += static_cast<char>(monitorID + 48); // The +48 converts to the ASCII character
       monName += "_counts";
       // Note: The monitor name must exactly match one of the entries in the
       // ADDABLE list at the top of Run.cpp!
@@ -517,12 +495,10 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::BeamMonitorPkt &pkt) {
         while (pkt.nextEvent(risingEdge, cycle, tof)) {
           // Add the event. Note that they're in units of 100 ns in the packet,
           // need to change to microseconds.
-          monitorBuffer->getSpectrum(it->second)
-              .addEventQuickly(Types::Event::TofEvent(tof / 10.0, pktTime));
+          monitorBuffer->getSpectrum(it->second).addEventQuickly(Types::Event::TofEvent(tof / 10.0, pktTime));
         }
       } else {
-        g_log.error() << "Event from unknown monitor ID (" << monitorID
-                      << ") seen.\n";
+        g_log.error() << "Event from unknown monitor ID (" << monitorID << ") seen.\n";
       }
     }
   }
@@ -556,11 +532,9 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::GeometryPkt &pkt) {
     // logfile node.
 
     Poco::XML::DOMParser parser;
-    Poco::AutoPtr<Poco::XML::Document> doc =
-        parser.parseString(m_instrumentXML);
+    Poco::AutoPtr<Poco::XML::Document> doc = parser.parseString(m_instrumentXML);
 
-    const Poco::AutoPtr<Poco::XML::NodeList> nodes =
-        doc->getElementsByTagName("parameter");
+    const Poco::AutoPtr<Poco::XML::NodeList> nodes = doc->getElementsByTagName("parameter");
     // Oddly, NodeLists don't seem to have any provision for iterators.  Also,
     // the length() function actually traverses the list to get the count,
     // so we should probably call it once and store it in a variable instead
@@ -647,9 +621,8 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::RunStatusPkt &pkt) {
     if (m_status != NoRun) {
       // Previous status should have been NoRun.  Spit out a warning if it's
       // not.
-      g_log.warning()
-          << "Unexpected start of run.  Run status should have been " << NoRun
-          << " (NoRun), but was " << m_status << '\n';
+      g_log.warning() << "Unexpected start of run.  Run status should have been " << NoRun << " (NoRun), but was "
+                      << m_status << '\n';
     }
 
     if (m_workspaceInitialized) {
@@ -710,10 +683,9 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::RunStatusPkt &pkt) {
       if (haveRunNumber) {
         // run_number should not exist at this point, and if it does, we can't
         // do much about it.
-        g_log.warning(
-            "run_number property already exists.  Current value will be "
-            "ignored.\n"
-            "(This should never happen.  Talk to the Mantid developers.)");
+        g_log.warning("run_number property already exists.  Current value will be "
+                      "ignored.\n"
+                      "(This should never happen.  Talk to the Mantid developers.)");
       } else {
         // Save a copy of the packet so we can call setRunDetails() later
         // (after extractData() has been called to fetch any data remaining
@@ -724,8 +696,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::RunStatusPkt &pkt) {
         // as a member, and thus have to actually allocate our deferred packet
         // with new.  Fortunately, this doesn't happen to often, so performance
         // isn't an issue.
-        m_deferredRunDetailsPkt =
-            std::shared_ptr<ADARA::RunStatusPkt>(new ADARA::RunStatusPkt(pkt));
+        m_deferredRunDetailsPkt = std::shared_ptr<ADARA::RunStatusPkt>(new ADARA::RunStatusPkt(pkt));
       }
     }
 
@@ -742,14 +713,13 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::RunStatusPkt &pkt) {
       // Previous status should have been Running or BeginRun.  Spit out a
       // warning if it's not.  (If it's BeginRun, that's fine.  It just means
       // that the run ended before extractData() was called.)
-      g_log.warning() << "Unexpected end of run.  Run status should have been "
-                      << Running << " (Running), but was " << m_status << '\n';
+      g_log.warning() << "Unexpected end of run.  Run status should have been " << Running << " (Running), but was "
+                      << m_status << '\n';
     }
     m_status = EndRun;
 
     // Add the run_end property
-    m_eventBuffer->mutableRun().addProperty(
-        "run_end", timeFromPacket(pkt).toISO8601String());
+    m_eventBuffer->mutableRun().addProperty("run_end", timeFromPacket(pkt).toISO8601String());
 
     // Set the flag to make us stop reading from the network.
     // Stopping network reads solves a number of problems:
@@ -803,8 +773,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::RunStatusPkt &pkt) {
 
 void SNSLiveEventDataListener::setRunDetails(const ADARA::RunStatusPkt &pkt) {
   m_runNumber = pkt.runNumber();
-  m_eventBuffer->mutableRun().addProperty(
-      "run_number", Strings::toString<int>(pkt.runNumber()));
+  m_eventBuffer->mutableRun().addProperty("run_number", Strings::toString<int>(pkt.runNumber()));
   g_log.notice() << "Run number is " << m_runNumber << '\n';
 
   // runStart() is in the EPICS epoch - ie Jan 1, 1990.  Convert to Unix epoch
@@ -836,16 +805,13 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::VariableU32Pkt &pkt) {
   // Check to see if we should process this packet now.  If not, add it to the
   // variable map because we might need to process it later
   if (ignorePacket(pkt)) {
-    m_variableMap.emplace(std::make_pair(devId, pvId),
-                          std::make_shared<ADARA::VariableU32Pkt>(pkt));
+    m_variableMap.emplace(std::make_pair(devId, pvId), std::make_shared<ADARA::VariableU32Pkt>(pkt));
   } else {
     // Look up the name of this variable
-    NameMapType::const_iterator it =
-        m_nameMap.find(std::make_pair(devId, pvId));
+    NameMapType::const_iterator it = m_nameMap.find(std::make_pair(devId, pvId));
 
     if (it == m_nameMap.end()) {
-      g_log.error() << "Ignoring variable value packet for device " << devId
-                    << ", variable " << pvId
+      g_log.error() << "Ignoring variable value packet for device " << devId << ", variable " << pvId
                     << " because we haven't received a device descriptor "
                        "packet for it.\n";
     } else {
@@ -886,16 +852,13 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::VariableDoublePkt &pkt) {
   // Check to see if we should process this packet now.  If not, add it to the
   // variable map because we might need to process it later
   if (ignorePacket(pkt)) {
-    m_variableMap.emplace(std::make_pair(devId, pvId),
-                          std::make_shared<ADARA::VariableDoublePkt>(pkt));
+    m_variableMap.emplace(std::make_pair(devId, pvId), std::make_shared<ADARA::VariableDoublePkt>(pkt));
   } else {
     // Look up the name of this variable
-    NameMapType::const_iterator it =
-        m_nameMap.find(std::make_pair(devId, pvId));
+    NameMapType::const_iterator it = m_nameMap.find(std::make_pair(devId, pvId));
 
     if (it == m_nameMap.end()) {
-      g_log.error() << "Ignoring variable value packet for device " << devId
-                    << ", variable " << pvId
+      g_log.error() << "Ignoring variable value packet for device " << devId << ", variable " << pvId
                     << " because we haven't received a device descriptor "
                        "packet for it.\n";
     } else {
@@ -939,16 +902,13 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::VariableStringPkt &pkt) {
   // Check to see if we should process this packet now.  If not, add it to the
   // variable map because we might need to process it later
   if (ignorePacket(pkt)) {
-    m_variableMap.emplace(std::make_pair(devId, pvId),
-                          std::make_shared<ADARA::VariableStringPkt>(pkt));
+    m_variableMap.emplace(std::make_pair(devId, pvId), std::make_shared<ADARA::VariableStringPkt>(pkt));
   } else {
     // Look up the name of this variable
-    NameMapType::const_iterator it =
-        m_nameMap.find(std::make_pair(devId, pvId));
+    NameMapType::const_iterator it = m_nameMap.find(std::make_pair(devId, pvId));
 
     if (it == m_nameMap.end()) {
-      g_log.error() << "Ignoring variable value packet for device " << devId
-                    << ", variable " << pvId
+      g_log.error() << "Ignoring variable value packet for device " << devId << ", variable " << pvId
                     << " because we haven't received a device descriptor "
                        "packet for it.\n";
     } else {
@@ -989,8 +949,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::DeviceDescriptorPkt &pkt) {
   // these packets
 
   Poco::XML::DOMParser parser;
-  Poco::AutoPtr<Poco::XML::Document> doc =
-      parser.parseMemory(pkt.description().c_str(), pkt.description().length());
+  Poco::AutoPtr<Poco::XML::Document> doc = parser.parseMemory(pkt.description().c_str(), pkt.description().length());
   const Poco::XML::Node *deviceNode = doc->firstChild();
 
   // The 'device' should be the root element of the document.  I'm just being
@@ -1055,15 +1014,13 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::DeviceDescriptorPkt &pkt) {
         if (pvName.empty()) {
           pvName = "<UNKNOWN>";
         }
-        g_log.warning() << "Ignoring process variable " << pvName
-                        << " because it was missing required fields.\n";
+        g_log.warning() << "Ignoring process variable " << pvName << " because it was missing required fields.\n";
       } else {
         // Check the nameMap - we may have already received a description for
         // this
         // device.  (SMS will re-send DeviceDescriptor packets under certain
         // circumstances.)
-        NameMapType::const_iterator it =
-            m_nameMap.find(std::make_pair(pkt.devId(), pvIdNum));
+        NameMapType::const_iterator it = m_nameMap.find(std::make_pair(pkt.devId(), pvIdNum));
         if (it == m_nameMap.end()) {
           // create the property in the workspace - this is a little bit kludgy
           // because
@@ -1074,8 +1031,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::DeviceDescriptorPkt &pkt) {
           Property *prop = nullptr;
           if (pvType == "double") {
             prop = new TimeSeriesProperty<double>(pvName);
-          } else if ((pvType == "integer") || (pvType == "unsigned") ||
-                     (pvType == "unsigned integer") ||
+          } else if ((pvType == "integer") || (pvType == "unsigned") || (pvType == "unsigned integer") ||
                      (pvType.compare(0, 5, "enum_") == 0))
           // Note: Mantid doesn't currently support unsigned int properties
           // Note: We're treating enums as ints (at least for now)
@@ -1087,9 +1043,8 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::DeviceDescriptorPkt &pkt) {
             prop = new TimeSeriesProperty<std::string>(pvName);
           } else {
             // invalid type string
-            g_log.warning()
-                << "Ignoring process variable " << pvName
-                << " because it had an unrecognized type (" << pvType << ").\n";
+            g_log.warning() << "Ignoring process variable " << pvName << " because it had an unrecognized type ("
+                            << pvType << ").\n";
           }
 
           if (prop) {
@@ -1151,24 +1106,18 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::AnnotationPkt &pkt) {
       break;
 
     case ADARA::MarkerType::SCAN_STOP:
-      m_eventBuffer->mutableRun()
-          .getTimeSeriesProperty<int>(SCAN_PROPERTY)
-          ->addValue(timeFromPacket(pkt), 0);
+      m_eventBuffer->mutableRun().getTimeSeriesProperty<int>(SCAN_PROPERTY)->addValue(timeFromPacket(pkt), 0);
       g_log.information() << "Scan Stop:  " << pkt.scanIndex() << '\n';
       break;
 
     case ADARA::MarkerType::PAUSE:
-      m_eventBuffer->mutableRun()
-          .getTimeSeriesProperty<int>(PAUSE_PROPERTY)
-          ->addValue(timeFromPacket(pkt), 1);
+      m_eventBuffer->mutableRun().getTimeSeriesProperty<int>(PAUSE_PROPERTY)->addValue(timeFromPacket(pkt), 1);
       g_log.information() << "Run paused\n";
       m_runPaused = true;
       break;
 
     case ADARA::MarkerType::RESUME:
-      m_eventBuffer->mutableRun()
-          .getTimeSeriesProperty<int>(PAUSE_PROPERTY)
-          ->addValue(timeFromPacket(pkt), 0);
+      m_eventBuffer->mutableRun().getTimeSeriesProperty<int>(PAUSE_PROPERTY)->addValue(timeFromPacket(pkt), 0);
       g_log.information() << "Run resumed\n";
       m_runPaused = false;
       break;
@@ -1244,8 +1193,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::RunInfoPkt &pkt) {
   }
 
   if (proposalID.length()) {
-    Property *prop =
-        m_eventBuffer->mutableRun().getProperty(EXPERIMENT_ID_PROPERTY);
+    Property *prop = m_eventBuffer->mutableRun().getProperty(EXPERIMENT_ID_PROPERTY);
 
     // Sanity check: We're likely to get multiple RunInfo packets in a
     // run, but the values shouldn't change mid-run...
@@ -1261,8 +1209,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::RunInfoPkt &pkt) {
   }
 
   if (runTitle.length()) {
-    Property *prop =
-        m_eventBuffer->mutableRun().getProperty(RUN_TITLE_PROPERTY);
+    Property *prop = m_eventBuffer->mutableRun().getProperty(RUN_TITLE_PROPERTY);
 
     // Sanity check
     std::string prevPropVal = prop->value();
@@ -1314,9 +1261,7 @@ void SNSLiveEventDataListener::initWorkspacePart1() {
 void SNSLiveEventDataListener::initWorkspacePart2() {
   // Use the LoadEmptyInstrument algorithm to create a proper workspace
   // for whatever beamline we're on
-  std::shared_ptr<Algorithm> loadInst =
-      Mantid::API::AlgorithmManager::Instance().createUnmanaged(
-          "LoadInstrument");
+  std::shared_ptr<Algorithm> loadInst = Mantid::API::AlgorithmManager::Instance().createUnmanaged("LoadInstrument");
   loadInst->initialize();
   loadInst->setChild(true); // keep the workspace out of the ADS
   loadInst->setProperty("InstrumentXML", m_instrumentXML);
@@ -1331,8 +1276,8 @@ void SNSLiveEventDataListener::initWorkspacePart2() {
   // (at the start of another run, for example), the list will be
   // repopulated when we receive the next geometry packet.
 
-  auto tmp = createWorkspace<DataObjects::EventWorkspace>(
-      m_eventBuffer->getInstrument()->getDetectorIDs(true).size(), 2, 1);
+  auto tmp =
+      createWorkspace<DataObjects::EventWorkspace>(m_eventBuffer->getInstrument()->getDetectorIDs(true).size(), 2, 1);
   WorkspaceFactory::Instance().initializeFromParent(*m_eventBuffer, *tmp, true);
   if (m_eventBuffer->getNumberHistograms() != tmp->getNumberHistograms()) {
     // need to generate the spectra to detector map
@@ -1344,19 +1289,14 @@ void SNSLiveEventDataListener::initWorkspacePart2() {
   m_eventBuffer->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
   m_eventBuffer->setYUnit("Counts");
 
-  m_indexMap = m_eventBuffer->getDetectorIDToWorkspaceIndexMap(
-      true /* bool throwIfMultipleDets */);
+  m_indexMap = m_eventBuffer->getDetectorIDToWorkspaceIndexMap(true /* bool throwIfMultipleDets */);
 
   // We always want to have at least one value for the the scan index time
   // series.  We may have already gotten a scan start packet by the time we
   // get here and therefor don't need to do anything.  If not, we need to put
   // a 0 into the time series.
-  if (m_eventBuffer->mutableRun()
-          .getTimeSeriesProperty<int>(SCAN_PROPERTY)
-          ->size() == 0) {
-    m_eventBuffer->mutableRun()
-        .getTimeSeriesProperty<int>(SCAN_PROPERTY)
-        ->addValue(m_dataStartTime, 0);
+  if (m_eventBuffer->mutableRun().getTimeSeriesProperty<int>(SCAN_PROPERTY)->size() == 0) {
+    m_eventBuffer->mutableRun().getTimeSeriesProperty<int>(SCAN_PROPERTY)->addValue(m_dataStartTime, 0);
   }
 
   initMonitorWorkspace();
@@ -1368,10 +1308,8 @@ void SNSLiveEventDataListener::initWorkspacePart2() {
 /// monitor IDs set
 void SNSLiveEventDataListener::initMonitorWorkspace() {
   auto monitors = m_eventBuffer->getInstrument()->getMonitors();
-  auto monitorsBuffer = WorkspaceFactory::Instance().create(
-      "EventWorkspace", monitors.size(), 1, 1);
-  WorkspaceFactory::Instance().initializeFromParent(*m_eventBuffer,
-                                                    *monitorsBuffer, true);
+  auto monitorsBuffer = WorkspaceFactory::Instance().create("EventWorkspace", monitors.size(), 1, 1);
+  WorkspaceFactory::Instance().initializeFromParent(*m_eventBuffer, *monitorsBuffer, true);
   // Set the id numbers
   for (size_t i = 0; i < monitors.size(); ++i) {
     monitorsBuffer->getSpectrum(i).setDetectorID(monitors[i]);
@@ -1405,9 +1343,8 @@ bool SNSLiveEventDataListener::haveRequiredLogs() {
 }
 
 /// Adds an event to the workspace
-void SNSLiveEventDataListener::appendEvent(
-    const uint32_t pixelId, const double tof,
-    const Mantid::Types::Core::DateAndTime pulseTime)
+void SNSLiveEventDataListener::appendEvent(const uint32_t pixelId, const double tof,
+                                           const Mantid::Types::Core::DateAndTime pulseTime)
 // NOTE: This function does NOT lock the mutex!  Make sure you do that
 // before calling this function!
 {
@@ -1419,8 +1356,7 @@ void SNSLiveEventDataListener::appendEvent(
     Types::Event::TofEvent event(tof, pulseTime);
     m_eventBuffer->getSpectrum(workspaceIndex).addEventQuickly(event);
   } else {
-    g_log.warning() << "Invalid pixel ID: " << pixelId << " (TofF: " << tof
-                    << " microseconds)\n";
+    g_log.warning() << "Invalid pixel ID: " << pixelId << " (TofF: " << tof << " microseconds)\n";
   }
 }
 
@@ -1444,8 +1380,7 @@ std::shared_ptr<Workspace> SNSLiveEventDataListener::extractData() {
   // NotYet exception so that the user has the opportunity to cancel.
   static const double maxBlockTime = 10.0;
   const DateAndTime endTime = DateAndTime::getCurrentTime() + maxBlockTime;
-  while ((!m_workspaceInitialized) &&
-         (DateAndTime::getCurrentTime() < endTime)) {
+  while ((!m_workspaceInitialized) && (DateAndTime::getCurrentTime() < endTime)) {
     Poco::Thread::sleep(100); // 100 milliseconds
   }
   if (!m_workspaceInitialized) {
@@ -1463,12 +1398,10 @@ std::shared_ptr<Workspace> SNSLiveEventDataListener::extractData() {
 
   // Make a brand new EventWorkspace
   EventWorkspace_sptr temp = std::dynamic_pointer_cast<EventWorkspace>(
-      API::WorkspaceFactory::Instance().create(
-          "EventWorkspace", m_eventBuffer->getNumberHistograms(), 2, 1));
+      API::WorkspaceFactory::Instance().create("EventWorkspace", m_eventBuffer->getNumberHistograms(), 2, 1));
 
   // Copy geometry over.
-  API::WorkspaceFactory::Instance().initializeFromParent(*m_eventBuffer, *temp,
-                                                         false);
+  API::WorkspaceFactory::Instance().initializeFromParent(*m_eventBuffer, *temp, false);
 
   // Clear out the old logs, except for the most recent entry
   temp->mutableRun().clearOutdatedTimeSeriesLogValues();
@@ -1481,10 +1414,9 @@ std::shared_ptr<Workspace> SNSLiveEventDataListener::extractData() {
 
   // Create a fresh monitor workspace and insert into the new 'main' workspace
   auto monitorBuffer = m_eventBuffer->monitorWorkspace();
-  auto newMonitorBuffer = WorkspaceFactory::Instance().create(
-      "EventWorkspace", monitorBuffer->getNumberHistograms(), 1, 1);
-  WorkspaceFactory::Instance().initializeFromParent(*monitorBuffer,
-                                                    *newMonitorBuffer, false);
+  auto newMonitorBuffer =
+      WorkspaceFactory::Instance().create("EventWorkspace", monitorBuffer->getNumberHistograms(), 1, 1);
+  WorkspaceFactory::Instance().initializeFromParent(*monitorBuffer, *newMonitorBuffer, false);
   temp->setMonitorWorkspace(newMonitorBuffer);
 
   // Lock the mutex and swap the workspaces
@@ -1573,8 +1505,7 @@ ILiveListener::RunStatus SNSLiveEventDataListener::runStatus() {
 // are
 // older than we requested.)
 // Returns false if the packet should be processed, true if is should be ignored
-bool SNSLiveEventDataListener::ignorePacket(
-    const ADARA::PacketHeader &hdr, const ADARA::RunStatus::Enum status) {
+bool SNSLiveEventDataListener::ignorePacket(const ADARA::PacketHeader &hdr, const ADARA::RunStatus::Enum status) {
   // Since we're filtering based on time (either the absolute timestamp or
   // nothing
   // before the start of the most recent run), once we've determined a given
@@ -1586,8 +1517,7 @@ bool SNSLiveEventDataListener::ignorePacket(
 
   // Are we looking for the start of the run?
   if (m_filterUntilRunStart) {
-    if (hdr.base_type() == ADARA::PacketType::Type::RUN_STATUS_TYPE &&
-        status == ADARA::RunStatus::NEW_RUN) {
+    if (hdr.base_type() == ADARA::PacketType::Type::RUN_STATUS_TYPE && status == ADARA::RunStatus::NEW_RUN) {
       // A new run is starting...
       m_ignorePackets = false;
     }

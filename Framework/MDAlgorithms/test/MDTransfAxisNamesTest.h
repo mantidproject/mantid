@@ -19,9 +19,7 @@ class MDTransfAxisNamesTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static MDTransfAxisNamesTest *createSuite() {
-    return new MDTransfAxisNamesTest();
-  }
+  static MDTransfAxisNamesTest *createSuite() { return new MDTransfAxisNamesTest(); }
   static void destroySuite(MDTransfAxisNamesTest *suite) { delete suite; }
 
   void test_name() {
@@ -39,8 +37,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(name = makeAxisName(V3D(-1, 0.99, -1.001), Names));
     TS_ASSERT_EQUALS("[-Q3,0.99Q3,-Q3]", name);
 
-    TS_ASSERT_THROWS_NOTHING(name =
-                                 makeAxisName(V3D(-1, 0.9999, -1.001), Names));
+    TS_ASSERT_THROWS_NOTHING(name = makeAxisName(V3D(-1, 0.9999, -1.001), Names));
     TS_ASSERT_EQUALS("[-Q3,Q3,-Q3]", name);
 
     TS_ASSERT_THROWS_NOTHING(name = makeAxisName(V3D(-1, 0.999, -1.01), Names));

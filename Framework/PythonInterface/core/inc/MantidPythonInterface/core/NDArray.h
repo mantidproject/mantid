@@ -52,9 +52,7 @@ namespace converter {
 /**
  * Register ndarray as a type that manages a PyObject* internally.
  */
-template <>
-struct MANTID_PYTHONINTERFACE_CORE_DLL
-    object_manager_traits<Mantid::PythonInterface::NDArray> {
+template <> struct MANTID_PYTHONINTERFACE_CORE_DLL object_manager_traits<Mantid::PythonInterface::NDArray> {
   BOOST_STATIC_CONSTANT(bool, is_specialized = true);
   static bool check(PyObject *obj);
   static python::detail::new_reference adopt(PyObject *obj);

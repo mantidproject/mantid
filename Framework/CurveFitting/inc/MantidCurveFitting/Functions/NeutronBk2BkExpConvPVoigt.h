@@ -21,8 +21,7 @@ namespace Functions {
   It is the number 3 neutron TOF function of GSAS and number 9 peak profile of
   FullProf.
 */
-class MANTID_CURVEFITTING_DLL NeutronBk2BkExpConvPVoigt
-    : public API::IPowderDiffPeakFunction {
+class MANTID_CURVEFITTING_DLL NeutronBk2BkExpConvPVoigt : public API::IPowderDiffPeakFunction {
 
 public:
   NeutronBk2BkExpConvPVoigt();
@@ -40,12 +39,10 @@ public:
   void calculateParameters(bool explicitoutput) const override;
 
   /// Override setting a new value to the i-th parameter
-  void setParameter(size_t i, const double &value,
-                    bool explicitlySet = true) override;
+  void setParameter(size_t i, const double &value, bool explicitlySet = true) override;
 
   /// Override setting a new value to a parameter by name
-  void setParameter(const std::string &name, const double &value,
-                    bool explicitlySet = true) override;
+  void setParameter(const std::string &name, const double &value, bool explicitlySet = true) override;
 
   /// Set peak's height
   // virtual void setHeight(const double h);
@@ -53,12 +50,10 @@ public:
   // virtual double height()const;
 
   using IFunction1D::function;
-  void function(std::vector<double> &out,
-                const std::vector<double> &xValues) const override;
+  void function(std::vector<double> &out, const std::vector<double> &xValues) const override;
 
   /// Function you want to fit to.
-  void function1D(double *out, const double *xValues,
-                  const size_t nData) const override;
+  void function1D(double *out, const double *xValues, const size_t nData) const override;
 
 private:
   //----- Overwrite IFunction ------------------------------------------------
@@ -80,9 +75,8 @@ private:
   void calHandEta(double sigma2, double gamma, double &H, double &eta) const;
 
   /// Calculate peak profile I(TOF) = Omega(TOF)
-  double calOmega(const double x, const double eta, const double N,
-                  const double alpha, const double beta, const double H,
-                  const double sigma2, const double invert_sqrt2sigma,
+  double calOmega(const double x, const double eta, const double N, const double alpha, const double beta,
+                  const double H, const double sigma2, const double invert_sqrt2sigma,
                   const bool explicitoutput = false) const;
 
   static int s_peakRadius;

@@ -15,8 +15,7 @@ namespace Functions {
 /**
 Calculates crystal field spectrum.
 */
-class MANTID_CURVEFITTING_DLL CrystalFieldSpectrum
-    : public API::FunctionGenerator {
+class MANTID_CURVEFITTING_DLL CrystalFieldSpectrum : public API::FunctionGenerator {
 public:
   CrystalFieldSpectrum();
 
@@ -26,8 +25,7 @@ public:
   void buildTargetFunction() const override;
 
 protected:
-  std::string writeToString(
-      const std::string &parentLocalAttributesStr = "") const override;
+  std::string writeToString(const std::string &parentLocalAttributesStr = "") const override;
   void updateTargetFunction() const override;
 
 private:

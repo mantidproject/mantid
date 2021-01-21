@@ -31,9 +31,7 @@ using namespace Mantid::Geometry;
 
 class LoadSampleShapeTest : public CxxTest::TestSuite {
 public:
-  static LoadSampleShapeTest *createSuite() {
-    return new LoadSampleShapeTest();
-  }
+  static LoadSampleShapeTest *createSuite() { return new LoadSampleShapeTest(); }
   static void destroySuite(LoadSampleShapeTest *suite) { delete suite; }
 
   void testInit() {
@@ -42,12 +40,10 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
 
-    TSM_ASSERT_EQUALS("should be 8 properties here", 8,
-                      (size_t)(alg.getProperties().size()));
+    TSM_ASSERT_EQUALS("should be 8 properties here", 8, (size_t)(alg.getProperties().size()));
   }
 
-  void
-  test_output_workspace_has_MeshObject_when_different_from_input_workspace() {
+  void test_output_workspace_has_MeshObject_when_different_from_input_workspace() {
     LoadSampleShape alg;
     loadMeshObject(alg, "cube.stl", false);
   }
@@ -104,8 +100,7 @@ public:
     LoadSampleShape alg;
     alg.initialize();
     const int npeaks(10);
-    PeaksWorkspace_sptr inputWS =
-        WorkspaceCreationHelper::createPeaksWorkspace(npeaks);
+    PeaksWorkspace_sptr inputWS = WorkspaceCreationHelper::createPeaksWorkspace(npeaks);
     alg.setChild(true);
     alg.setProperty("InputWorkspace", inputWS);
     alg.setPropertyValue("OutputWorkspace", "__dummy_unused");
@@ -149,28 +144,23 @@ public:
   void testLoadWithRotation() {
     LoadSampleShape alg;
     // cylinder in stl is along the z axis
-    auto shape =
-        loadMeshObject(alg, "cylinderOffsetZ.stl", false, "90", "0", "0");
+    auto shape = loadMeshObject(alg, "cylinderOffsetZ.stl", false, "90", "0", "0");
     TS_ASSERT_EQUALS(shape->getBoundingBox().yMin(), -0.30);
   }
 
   void testLoadWithRotationAndTranslation() {
     LoadSampleShape alg;
     // cylinder in stl is along the z axis, length 30cm and radius 2.5cm
-    auto shape = loadMeshObject(alg, "cylinderOffsetZ.stl", false, "90", "0",
-                                "0", "0,1,0");
+    auto shape = loadMeshObject(alg, "cylinderOffsetZ.stl", false, "90", "0", "0", "0,1,0");
     // translation is applied after the rotation
     TS_ASSERT_EQUALS(shape->getBoundingBox().yMin(), -0.29);
   }
 
 private:
   // Create workspaces and add them to algorithm properties
-  MatrixWorkspace_sptr prepareWorkspaces(LoadSampleShape &alg,
-                                         bool outputWsSameAsInputWs) {
+  MatrixWorkspace_sptr prepareWorkspaces(LoadSampleShape &alg, bool outputWsSameAsInputWs) {
     const int nvectors(2), nbins(10);
-    MatrixWorkspace_sptr inputWS =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(nvectors,
-                                                                     nbins);
+    MatrixWorkspace_sptr inputWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(nvectors, nbins);
     alg.setChild(true);
     alg.setProperty("InputWorkspace", inputWS);
     alg.setPropertyValue("OutputWorkspace", "__dummy_unused");
@@ -180,20 +170,15 @@ private:
     return inputWS;
   }
 
-  const MeshObject *loadMeshObject(LoadSampleShape &alg,
-                                   const std::string &filename,
-                                   bool outputWsSameAsInputWs,
-                                   const std::string &xRotation = "0",
-                                   const std::string &yRotation = "0",
-                                   const std::string &zRotation = "0",
-                                   const std::string &translation = "0,0,0") {
+  const MeshObject *loadMeshObject(LoadSampleShape &alg, const std::string &filename, bool outputWsSameAsInputWs,
+                                   const std::string &xRotation = "0", const std::string &yRotation = "0",
+                                   const std::string &zRotation = "0", const std::string &translation = "0,0,0") {
     alg.initialize();
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", filename));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("xDegrees", xRotation));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("yDegrees", yRotation));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("zDegrees", zRotation));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("TranslationVector", translation));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("TranslationVector", translation));
     prepareWorkspaces(alg, outputWsSameAsInputWs);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
@@ -221,16 +206,13 @@ private:
   }
 
   std::unique_ptr<MeshObject> createCube() {
-    const std::vector<uint32_t> faces{0, 1, 2, 0, 3, 1, 0, 2, 4, 2, 1, 5,
-                                      2, 5, 4, 6, 1, 3, 6, 5, 1, 4, 5, 6,
-                                      7, 3, 0, 0, 4, 7, 7, 6, 3, 4, 6, 7};
-    const std::vector<Mantid::Kernel::V3D> vertices{
-        Mantid::Kernel::V3D(-5, -5, -15), Mantid::Kernel::V3D(5, 5, -15),
-        Mantid::Kernel::V3D(5, -5, -15),  Mantid::Kernel::V3D(-5, 5, -15),
-        Mantid::Kernel::V3D(5, -5, 15),   Mantid::Kernel::V3D(5, 5, 15),
-        Mantid::Kernel::V3D(-5, 5, 15),   Mantid::Kernel::V3D(-5, -5, 15)};
-    auto cube = std::make_unique<MeshObject>(faces, vertices,
-                                             Mantid::Kernel::Material());
+    const std::vector<uint32_t> faces{0, 1, 2, 0, 3, 1, 0, 2, 4, 2, 1, 5, 2, 5, 4, 6, 1, 3,
+                                      6, 5, 1, 4, 5, 6, 7, 3, 0, 0, 4, 7, 7, 6, 3, 4, 6, 7};
+    const std::vector<Mantid::Kernel::V3D> vertices{Mantid::Kernel::V3D(-5, -5, -15), Mantid::Kernel::V3D(5, 5, -15),
+                                                    Mantid::Kernel::V3D(5, -5, -15),  Mantid::Kernel::V3D(-5, 5, -15),
+                                                    Mantid::Kernel::V3D(5, -5, 15),   Mantid::Kernel::V3D(5, 5, 15),
+                                                    Mantid::Kernel::V3D(-5, 5, 15),   Mantid::Kernel::V3D(-5, -5, 15)};
+    auto cube = std::make_unique<MeshObject>(faces, vertices, Mantid::Kernel::Material());
     return cube;
   }
 };
@@ -238,8 +220,7 @@ private:
 class LoadSampleShapeTestPerformance : public CxxTest::TestSuite {
 public:
   void setUp() override {
-    auto inWs =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 4);
+    auto inWs = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 4);
     alg = setupAlg(inWs);
   }
 

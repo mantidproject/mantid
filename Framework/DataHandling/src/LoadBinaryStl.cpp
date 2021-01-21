@@ -13,8 +13,7 @@ namespace Mantid {
 namespace DataHandling {
 
 namespace {
-uint32_t getNumberTriangles(Kernel::BinaryStreamReader streamReader,
-                            const int header) {
+uint32_t getNumberTriangles(Kernel::BinaryStreamReader streamReader, const int header) {
   uint32_t numberTrianglesLong;
   // skip header
   streamReader.moveStreamToPosition(header);
@@ -41,8 +40,7 @@ bool LoadBinaryStl::isBinarySTL(const std::string &filename) {
   Kernel::BinaryStreamReader streamReader = Kernel::BinaryStreamReader(myFile);
   numberTrianglesLong = getNumberTriangles(streamReader, HEADER_SIZE);
   myFile.close();
-  if (!(fileSize == (HEADER_SIZE + TRIANGLE_COUNT_DATA_SIZE +
-                     (numberTrianglesLong * TRIANGLE_DATA_SIZE)))) {
+  if (!(fileSize == (HEADER_SIZE + TRIANGLE_COUNT_DATA_SIZE + (numberTrianglesLong * TRIANGLE_DATA_SIZE)))) {
     // File is not the Header plus the number of triangles it claims to be long,
     // invalid binary Stl
     return false;
@@ -54,15 +52,12 @@ bool LoadBinaryStl::isBinarySTL(const std::string &filename) {
 std::unique_ptr<Geometry::MeshObject> LoadBinaryStl::readShape() {
 
   Kernel::BinaryStreamReader streamReader = Kernel::BinaryStreamReader(m_file);
-  const auto numberTrianglesLong =
-      getNumberTriangles(streamReader, HEADER_SIZE);
-  uint32_t nextToRead =
-      HEADER_SIZE + TRIANGLE_COUNT_DATA_SIZE + VECTOR_DATA_SIZE;
+  const auto numberTrianglesLong = getNumberTriangles(streamReader, HEADER_SIZE);
+  uint32_t nextToRead = HEADER_SIZE + TRIANGLE_COUNT_DATA_SIZE + VECTOR_DATA_SIZE;
   // now read in all the triangles
   m_triangle.reserve(3 * numberTrianglesLong);
   m_vertices.reserve(3 * numberTrianglesLong);
-  g_logstl.debug("Began reading " + std::to_string(numberTrianglesLong) +
-                 " triangles.");
+  g_logstl.debug("Began reading " + std::to_string(numberTrianglesLong) + " triangles.");
   uint32_t vertexCount = 0;
   for (uint32_t i = 0; i < numberTrianglesLong; i++) {
 
@@ -85,13 +80,11 @@ std::unique_ptr<Geometry::MeshObject> LoadBinaryStl::readShape() {
   } else {
     material = Mantid::Kernel::Material();
   }
-  auto retVal = std::make_unique<Geometry::MeshObject>(
-      std::move(m_triangle), std::move(m_vertices), material);
+  auto retVal = std::make_unique<Geometry::MeshObject>(std::move(m_triangle), std::move(m_vertices), material);
   return retVal;
 }
 
-void LoadBinaryStl::readTriangle(Kernel::BinaryStreamReader streamReader,
-                                 uint32_t &vertexCount) {
+void LoadBinaryStl::readTriangle(Kernel::BinaryStreamReader streamReader, uint32_t &vertexCount) {
   // read in the verticies
   for (int i = 0; i < 3; i++) {
     float xVal;

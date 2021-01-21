@@ -33,64 +33,46 @@ SaveAscii::SaveAscii() : m_separatorIndex() {}
 
 /// Initialisation method.
 void SaveAscii::init() {
-  declareProperty(
-      std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "",
-                                                           Direction::Input),
-      "The name of the workspace containing the data you want to save to a "
-      "Ascii file.");
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input),
+                  "The name of the workspace containing the data you want to save to a "
+                  "Ascii file.");
   const std::vector<std::string> asciiExts{".dat", ".txt", ".csv"};
-  declareProperty(std::make_unique<FileProperty>("Filename", "",
-                                                 FileProperty::Save, asciiExts),
+  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Save, asciiExts),
                   "The filename of the output Ascii file.");
 
   auto mustBeNonNegative = std::make_shared<BoundedValidator<int>>();
   mustBeNonNegative->setLower(0);
-  declareProperty("WorkspaceIndexMin", 0, mustBeNonNegative,
-                  "The starting workspace index.");
-  declareProperty("WorkspaceIndexMax", EMPTY_INT(), mustBeNonNegative,
-                  "The ending workspace index.");
-  declareProperty(std::make_unique<ArrayProperty<int>>("SpectrumList"),
-                  "List of workspace indices to save.");
-  declareProperty("Precision", EMPTY_INT(), mustBeNonNegative,
-                  "Precision of output double values.");
-  declareProperty(
-      "WriteXError", false,
-      "If true, the error on X will be written as the fourth column.");
+  declareProperty("WorkspaceIndexMin", 0, mustBeNonNegative, "The starting workspace index.");
+  declareProperty("WorkspaceIndexMax", EMPTY_INT(), mustBeNonNegative, "The ending workspace index.");
+  declareProperty(std::make_unique<ArrayProperty<int>>("SpectrumList"), "List of workspace indices to save.");
+  declareProperty("Precision", EMPTY_INT(), mustBeNonNegative, "Precision of output double values.");
+  declareProperty("WriteXError", false, "If true, the error on X will be written as the fourth column.");
 
-  declareProperty("CommentIndicator", "",
-                  "Character(s) to put in front of comment lines.");
+  declareProperty("CommentIndicator", "", "Character(s) to put in front of comment lines.");
 
   // For the ListValidator
-  std::string spacers[6][2] = {
-      {"CSV", ","},   {"Tab", "\t"},      {"Space", " "},
-      {"Colon", ":"}, {"SemiColon", ";"}, {"UserDefined", "UserDefined"}};
+  std::string spacers[6][2] = {{"CSV", ","},   {"Tab", "\t"},      {"Space", " "},
+                               {"Colon", ":"}, {"SemiColon", ";"}, {"UserDefined", "UserDefined"}};
   std::vector<std::string> sepOptions;
   for (auto &spacer : spacers) {
     std::string option = spacer[0];
-    m_separatorIndex.insert(
-        std::pair<std::string, std::string>(option, spacer[1]));
+    m_separatorIndex.insert(std::pair<std::string, std::string>(option, spacer[1]));
     sepOptions.emplace_back(option);
   }
 
-  declareProperty("Separator", "CSV",
-                  std::make_shared<StringListValidator>(sepOptions),
+  declareProperty("Separator", "CSV", std::make_shared<StringListValidator>(sepOptions),
                   "Character(s) to put as separator between X, Y, E values.");
 
-  declareProperty(
-      std::make_unique<PropertyWithValue<std::string>>("CustomSeparator", "",
-                                                       Direction::Input),
-      "If present, will override any specified choice given to Separator.");
+  declareProperty(std::make_unique<PropertyWithValue<std::string>>("CustomSeparator", "", Direction::Input),
+                  "If present, will override any specified choice given to Separator.");
   getPointerToProperty("CustomSeparator")->setAutoTrim(false);
 
   setPropertySettings("CustomSeparator",
-                      std::make_unique<VisibleWhenProperty>(
-                          "Separator", IS_EQUAL_TO, "UserDefined"));
+                      std::make_unique<VisibleWhenProperty>("Separator", IS_EQUAL_TO, "UserDefined"));
 
-  declareProperty("ColumnHeader", true,
-                  "If true, put column headers into file. ");
+  declareProperty("ColumnHeader", true, "If true, put column headers into file. ");
 
-  declareProperty("ICEFormat", false,
-                  "If true, special column headers for ICE in file. ");
+  declareProperty("ICEFormat", false, "If true, special column headers for ICE in file. ");
 }
 
 /**

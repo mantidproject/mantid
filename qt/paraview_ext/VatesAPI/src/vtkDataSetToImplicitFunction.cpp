@@ -20,8 +20,7 @@ Static creational method to run functionality in one method call.
 @param dataSet : input dataset containing field data.
 @return extracted implicit function.
 */
-Mantid::Geometry::MDImplicitFunction *
-vtkDataSetToImplicitFunction::exec(vtkDataSet *dataSet) {
+Mantid::Geometry::MDImplicitFunction *vtkDataSetToImplicitFunction::exec(vtkDataSet *dataSet) {
   vtkDataSetToImplicitFunction temp(dataSet);
   return temp.execute();
 }
@@ -30,11 +29,9 @@ vtkDataSetToImplicitFunction::exec(vtkDataSet *dataSet) {
 Constructor
 @param dataSet : input dataset containing field data.
 */
-vtkDataSetToImplicitFunction::vtkDataSetToImplicitFunction(vtkDataSet *dataSet)
-    : m_dataset(dataSet) {
+vtkDataSetToImplicitFunction::vtkDataSetToImplicitFunction(vtkDataSet *dataSet) : m_dataset(dataSet) {
   if (!m_dataset) {
-    throw std::runtime_error(
-        "Tried to construct vtkDataSetToImplicitFunction with NULL vtkDataSet");
+    throw std::runtime_error("Tried to construct vtkDataSetToImplicitFunction with NULL vtkDataSet");
   }
 }
 
@@ -45,23 +42,18 @@ Execution method to run the extraction.
 Mantid::Geometry::MDImplicitFunction *vtkDataSetToImplicitFunction::execute() {
   using Mantid::Geometry::MDGeometryXMLDefinitions;
   using Mantid::Geometry::NullImplicitFunction;
-  std::unique_ptr<Mantid::Geometry::MDImplicitFunction> function =
-      std::make_unique<NullImplicitFunction>();
+  std::unique_ptr<Mantid::Geometry::MDImplicitFunction> function = std::make_unique<NullImplicitFunction>();
 
   FieldDataToMetadata convert;
-  std::string xmlString =
-      convert(m_dataset->GetFieldData(), XMLDefinitions::metaDataId());
+  std::string xmlString = convert(m_dataset->GetFieldData(), XMLDefinitions::metaDataId());
   if (false == xmlString.empty()) {
     Poco::XML::DOMParser pParser;
     Poco::AutoPtr<Poco::XML::Document> pDoc = pParser.parseString(xmlString);
     Poco::XML::Element *pRootElem = pDoc->documentElement();
-    Poco::XML::Element *functionElem = pRootElem->getChildElement(
-        MDGeometryXMLDefinitions::functionElementName());
+    Poco::XML::Element *functionElem = pRootElem->getChildElement(MDGeometryXMLDefinitions::functionElementName());
     if (functionElem) {
-      auto existingFunction =
-          std::unique_ptr<Mantid::Geometry::MDImplicitFunction>(
-              Mantid::API::ImplicitFunctionFactory::Instance().createUnwrapped(
-                  functionElem));
+      auto existingFunction = std::unique_ptr<Mantid::Geometry::MDImplicitFunction>(
+          Mantid::API::ImplicitFunctionFactory::Instance().createUnwrapped(functionElem));
       function.swap(existingFunction);
     }
   }

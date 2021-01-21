@@ -20,27 +20,22 @@
 namespace Mantid {
 namespace Algorithms {
 
-std::map<std::string, std::map<std::string, double>>
-getSampleSpeciesInfo(const API::MatrixWorkspace_const_sptr &ws) {
+std::map<std::string, std::map<std::string, double>> getSampleSpeciesInfo(const API::MatrixWorkspace_const_sptr &ws) {
   // get sample information : mass, total scattering length, and concentration
   // of each species
   double totalStoich = 0.0;
   std::map<std::string, std::map<std::string, double>> atomSpecies;
-  const Kernel::Material::ChemicalFormula formula =
-      ws->sample().getMaterial().chemicalFormula();
+  const Kernel::Material::ChemicalFormula formula = ws->sample().getMaterial().chemicalFormula();
   const double xSection = ws->sample().getMaterial().totalScatterXSection();
   const double bSqrdBar = xSection / (4.0 * M_PI);
 
   for (const auto &element : formula) {
     const std::map<std::string, double> atomMap{
-        {"mass", element.atom->mass},
-        {"stoich", element.multiplicity},
-        {"bSqrdBar", bSqrdBar}};
+        {"mass", element.atom->mass}, {"stoich", element.multiplicity}, {"bSqrdBar", bSqrdBar}};
     atomSpecies[element.atom->symbol] = atomMap;
     totalStoich += element.multiplicity;
   }
-  std::map<std::string, std::map<std::string, double>>::iterator atom =
-      atomSpecies.begin();
+  std::map<std::string, std::map<std::string, double>>::iterator atom = atomSpecies.begin();
   while (atom != atomSpecies.end()) {
     atom->second["concentration"] = atom->second["stoich"] / totalStoich;
     ++atom;
@@ -52,35 +47,28 @@ DECLARE_ALGORITHM(CalculatePlaczekSelfScattering)
 
 void CalculatePlaczekSelfScattering::init() {
   declareProperty(
-      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-          "InputWorkspace", "", Kernel::Direction::Input),
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>("InputWorkspace", "", Kernel::Direction::Input),
       "Raw diffraction data workspace for associated correction to be "
       "calculated for. Workspace must have instument and sample data.");
   declareProperty(
-      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-          "IncidentSpecta", "", Kernel::Direction::Input),
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>("IncidentSpecta", "", Kernel::Direction::Input),
       "Workspace of fitted incident spectrum with it's first derivative.");
   declareProperty(
-      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-          "OutputWorkspace", "", Kernel::Direction::Output),
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>("OutputWorkspace", "", Kernel::Direction::Output),
       "Workspace with the Self scattering correction");
-  declareProperty("CrystalDensity", EMPTY_DBL(),
-                  "The crystalographic density of the sample material.");
+  declareProperty("CrystalDensity", EMPTY_DBL(), "The crystalographic density of the sample material.");
 }
 //----------------------------------------------------------------------------------------------
 /** Validate inputs.
  */
-std::map<std::string, std::string>
-CalculatePlaczekSelfScattering::validateInputs() {
+std::map<std::string, std::string> CalculatePlaczekSelfScattering::validateInputs() {
   std::map<std::string, std::string> issues;
   const API::MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
   const API::SpectrumInfo specInfo = inWS->spectrumInfo();
   if (specInfo.size() == 0) {
-    issues["InputWorkspace"] =
-        "Input workspace does not have detector information";
+    issues["InputWorkspace"] = "Input workspace does not have detector information";
   }
-  Kernel::Material::ChemicalFormula formula =
-      inWS->sample().getMaterial().chemicalFormula();
+  Kernel::Material::ChemicalFormula formula = inWS->sample().getMaterial().chemicalFormula();
   if (formula.size() == 0) {
     issues["InputWorkspace"] = "Input workspace does not have a valid sample";
   }
@@ -93,8 +81,7 @@ CalculatePlaczekSelfScattering::validateInputs() {
 void CalculatePlaczekSelfScattering::exec() {
   const API::MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
   const API::MatrixWorkspace_sptr incidentWS = getProperty("IncidentSpecta");
-  constexpr double factor =
-      1.0 / 1.66053906660e-27; // atomic mass unit-kilogram relationship
+  constexpr double factor = 1.0 / 1.66053906660e-27;       // atomic mass unit-kilogram relationship
   constexpr double neutronMass = factor * 1.674927471e-27; // neutron mass
   // get sample information : mass, total scattering length, and concentration
   // of each species
@@ -102,11 +89,9 @@ void CalculatePlaczekSelfScattering::exec() {
   // calculate summation term w/ neutron mass over molecular mass ratio
 
   auto sumLambda = [&neutronMass](double sum, auto &atom) {
-    return sum + atom.second["concentration"] * atom.second["bSqrdBar"] *
-                     neutronMass / atom.second["mass"];
+    return sum + atom.second["concentration"] * atom.second["bSqrdBar"] * neutronMass / atom.second["mass"];
   };
-  double summationTerm =
-      std::accumulate(atomSpecies.begin(), atomSpecies.end(), 0.0, sumLambda);
+  double summationTerm = std::accumulate(atomSpecies.begin(), atomSpecies.end(), 0.0, sumLambda);
 
   double numberDensity = inWS->sample().getMaterial().numberDensity();
   double crystalDensity = getProperty("CrystalDensity");
@@ -152,8 +137,7 @@ void CalculatePlaczekSelfScattering::exec() {
   }
   xLambdas.reserve(nReserve);
   placzekCorrection.reserve(nReserve);
-  API::MatrixWorkspace_sptr outputWS =
-      DataObjects::create<API::HistoWorkspace>(*inWS);
+  API::MatrixWorkspace_sptr outputWS = DataObjects::create<API::HistoWorkspace>(*inWS);
   // The algorithm computes the signal values at bin centres so they should
   // be treated as a distribution
   outputWS->setDistribution(true);
@@ -167,14 +151,12 @@ void CalculatePlaczekSelfScattering::exec() {
       const double f = specInfo.l1() / pathLength;
       const double sinThetaBy2 = sin(specInfo.twoTheta(specIndex) / 2.0);
       Kernel::Units::Wavelength wavelength;
-      wavelength.initialize(specInfo.l1(), specInfo.l2(specIndex),
-                            specInfo.twoTheta(specIndex), 0, 1.0, 1.0);
+      wavelength.initialize(specInfo.l1(), specInfo.l2(specIndex), specInfo.twoTheta(specIndex), 0, 1.0, 1.0);
       for (size_t xIndex = 0; xIndex < xLambda.size() - 1; xIndex++) {
         const double term1 = (f - 1.0) * phi1[xIndex];
         const double term2 = f * (1.0 - eps1[xIndex]);
         const double inelasticPlaczekSelfCorrection =
-            2.0 * (term1 + term2 - 3) * sinThetaBy2 * sinThetaBy2 *
-            summationTerm;
+            2.0 * (term1 + term2 - 3) * sinThetaBy2 * sinThetaBy2 * summationTerm;
         x[xIndex] = wavelength.singleToTOF(xLambda[xIndex]);
         y[xIndex] = (1 + inelasticPlaczekSelfCorrection) * densityRatio;
       }

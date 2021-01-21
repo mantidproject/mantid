@@ -31,8 +31,7 @@ MeshObject2D makeSimpleTriangleMesh() {
   triangles.insert(triangles.end(), {0, 1, 2});
   return MeshObject2D(triangles, vertices, Mantid::Kernel::Material());
 }
-MeshObject2D makeTrapezoidMesh(const V3D &a, const V3D &b, const V3D &c,
-                               const V3D &d) {
+MeshObject2D makeTrapezoidMesh(const V3D &a, const V3D &b, const V3D &c, const V3D &d) {
   std::vector<V3D> vertices{a, b, c, d};
   std::vector<uint32_t> triangles;
   triangles.insert(triangles.end(), {0, 1, 2});
@@ -88,19 +87,15 @@ public:
     vertices.emplace_back(V3D(1, 0, 0));
 
     std::vector<uint32_t> triangles;
-    triangles.insert(triangles.end(),
-                     {0, 1, 1}); // invalid, but doesn't matter for this test
+    triangles.insert(triangles.end(), {0, 1, 1}); // invalid, but doesn't matter for this test
 
     // Test constructor taking lvalue references
-    TSM_ASSERT_THROWS(
-        "Too few points, should throw",
-        MeshObject2D(triangles, vertices, Mantid::Kernel::Material()),
-        std::invalid_argument &);
+    TSM_ASSERT_THROWS("Too few points, should throw", MeshObject2D(triangles, vertices, Mantid::Kernel::Material()),
+                      std::invalid_argument &);
 
     // Test constructor taking rvalue references
     TSM_ASSERT_THROWS("Too few points, should throw",
-                      MeshObject2D(std::move(triangles), std::move(vertices),
-                                   Mantid::Kernel::Material()),
+                      MeshObject2D(std::move(triangles), std::move(vertices), Mantid::Kernel::Material()),
                       std::invalid_argument &);
   }
 
@@ -114,15 +109,12 @@ public:
     triangles.insert(triangles.end(), {0, 1, 2});
 
     // Test constructor taking lvalue references
-    TSM_ASSERT_THROWS(
-        "Colinear points, should throw",
-        MeshObject2D(triangles, vertices, Mantid::Kernel::Material()),
-        std::invalid_argument &);
+    TSM_ASSERT_THROWS("Colinear points, should throw", MeshObject2D(triangles, vertices, Mantid::Kernel::Material()),
+                      std::invalid_argument &);
 
     // Test constructor taking rvalue references
     TSM_ASSERT_THROWS("Colinear points, should throw",
-                      MeshObject2D(std::move(triangles), std::move(vertices),
-                                   Mantid::Kernel::Material()),
+                      MeshObject2D(std::move(triangles), std::move(vertices), Mantid::Kernel::Material()),
                       std::invalid_argument &);
   }
 
@@ -138,15 +130,12 @@ public:
     triangles.insert(triangles.end(), {0, 1, 2});
 
     // Test constructor taking lvalue references
-    TSM_ASSERT_THROWS(
-        "non-coplanar points, should throw",
-        MeshObject2D(triangles, vertices, Mantid::Kernel::Material()),
-        std::invalid_argument &);
+    TSM_ASSERT_THROWS("non-coplanar points, should throw",
+                      MeshObject2D(triangles, vertices, Mantid::Kernel::Material()), std::invalid_argument &);
 
     // Test constructor taking rvalue references
     TSM_ASSERT_THROWS("non-coplanar points, should throw",
-                      MeshObject2D(std::move(triangles), std::move(vertices),
-                                   Mantid::Kernel::Material()),
+                      MeshObject2D(std::move(triangles), std::move(vertices), Mantid::Kernel::Material()),
                       std::invalid_argument &);
   }
 
@@ -184,9 +173,8 @@ public:
   void test_solidAngle_side_on() {
     using namespace Mantid::Kernel;
     auto mesh = makeSimpleTriangleMesh();
-    auto solidAngle = mesh.solidAngle(
-        V3D{0, 2, 0}); // observer is in plane of triangle, outside the triangle
-    TS_ASSERT_EQUALS(solidAngle, 0); // seen side-on solid angle is 0
+    auto solidAngle = mesh.solidAngle(V3D{0, 2, 0}); // observer is in plane of triangle, outside the triangle
+    TS_ASSERT_EQUALS(solidAngle, 0);                 // seen side-on solid angle is 0
   }
   void test_square_solid_angle() {
 
@@ -199,10 +187,8 @@ public:
     double halfSideLength = unitSphereRadius * sin(M_PI / 4);
     double observerDistance = unitSphereRadius * cos(M_PI / 4);
     std::vector<V3D> vertices = {
-        V3D{-halfSideLength, -halfSideLength, observerDistance},
-        V3D{-halfSideLength, halfSideLength, observerDistance},
-        V3D{halfSideLength, halfSideLength, observerDistance},
-        V3D{halfSideLength, -halfSideLength, observerDistance}};
+        V3D{-halfSideLength, -halfSideLength, observerDistance}, V3D{-halfSideLength, halfSideLength, observerDistance},
+        V3D{halfSideLength, halfSideLength, observerDistance}, V3D{halfSideLength, -halfSideLength, observerDistance}};
     std::vector<uint32_t> triangles{2, 1, 0, 0, 3, 2};
     MeshObject2D mesh(triangles, vertices, Mantid::Kernel::Material{});
     double solidAngle = mesh.solidAngle(V3D{0, 0, 0});
@@ -224,10 +210,8 @@ public:
     double halfSideLength = unitSphereRadius * sin(M_PI / 4);
     double observerDistance = unitSphereRadius * cos(M_PI / 4);
     std::vector<V3D> vertices = {
-        V3D{-halfSideLength, -halfSideLength, observerDistance},
-        V3D{-halfSideLength, halfSideLength, observerDistance},
-        V3D{halfSideLength, halfSideLength, observerDistance},
-        V3D{halfSideLength, -halfSideLength, observerDistance}};
+        V3D{-halfSideLength, -halfSideLength, observerDistance}, V3D{-halfSideLength, halfSideLength, observerDistance},
+        V3D{halfSideLength, halfSideLength, observerDistance}, V3D{halfSideLength, -halfSideLength, observerDistance}};
     std::vector<uint32_t> triangles{2, 1, 0, 0, 3, 2};
     // Scaling square uniformly (and reducing distance to origin by same
     // factor), yields same angular area 4pi/6
@@ -246,8 +230,7 @@ public:
   void test_isValid_multi_triangle() {
 
     // Make 2 Triangles bounded by the specified V3Ds
-    auto mesh = makeTrapezoidMesh(V3D{0, 0, 0}, V3D{0, 1, 0}, V3D{1, 1, 0},
-                                  V3D{1, 0, 0});
+    auto mesh = makeTrapezoidMesh(V3D{0, 0, 0}, V3D{0, 1, 0}, V3D{1, 1, 0}, V3D{1, 0, 0});
     double delta = 1e-6;
     TS_ASSERT(mesh.isValid(V3D{0, 0, 0}));
     TS_ASSERT(mesh.isValid(V3D{0.5, 0.5, 0}));
@@ -262,33 +245,27 @@ public:
     auto mesh = makeSimpleTriangleMesh();
 
     // Track goes through triangle body
-    Mantid::Geometry::Track onTargetTrack(V3D{0.5, 0.5, -1},
-                                          V3D{0, 0, 1} /*along z*/);
+    Mantid::Geometry::Track onTargetTrack(V3D{0.5, 0.5, -1}, V3D{0, 0, 1} /*along z*/);
     TS_ASSERT_EQUALS(mesh.interceptSurface(onTargetTrack), 1);
     TS_ASSERT_EQUALS(onTargetTrack.count(), 1);
 
     // Track completely misses
-    Mantid::Geometry::Track missTargetTrack(
-        V3D{50, 0.5, -1},
-        V3D{0, 0, 1} /*along z*/); // Intersects plane but no triangles
+    Mantid::Geometry::Track missTargetTrack(V3D{50, 0.5, -1},
+                                            V3D{0, 0, 1} /*along z*/); // Intersects plane but no triangles
     TS_ASSERT_EQUALS(mesh.interceptSurface(missTargetTrack), 0);
     TS_ASSERT_EQUALS(missTargetTrack.count(), 0);
 
     // Track goes through edge
-    Mantid::Geometry::Track edgeTargetTrack(
-        V3D{0, 0, -1}, V3D{0, 0, 1} /*along z*/); // Passes through lower edge
+    Mantid::Geometry::Track edgeTargetTrack(V3D{0, 0, -1}, V3D{0, 0, 1} /*along z*/); // Passes through lower edge
     TS_ASSERT_EQUALS(mesh.interceptSurface(edgeTargetTrack), 1);
     TS_ASSERT_EQUALS(edgeTargetTrack.count(), 1);
   }
 
   void test_equals() {
 
-    auto a = makeTrapezoidMesh(V3D{0, 0, 0}, V3D{0, 1, 0}, V3D{1, 1, 0},
-                               V3D{1, 0, 0});
-    auto b = makeTrapezoidMesh(V3D{0, 0, 0}, V3D{0, 1, 0}, V3D{1, 1, 0},
-                               V3D{1, 0, 0});
-    auto c = makeTrapezoidMesh(V3D{0.1, 0, 0}, V3D{0, 1, 0}, V3D{1, 1, 0},
-                               V3D{1, 0, 0});
+    auto a = makeTrapezoidMesh(V3D{0, 0, 0}, V3D{0, 1, 0}, V3D{1, 1, 0}, V3D{1, 0, 0});
+    auto b = makeTrapezoidMesh(V3D{0, 0, 0}, V3D{0, 1, 0}, V3D{1, 1, 0}, V3D{1, 0, 0});
+    auto c = makeTrapezoidMesh(V3D{0.1, 0, 0}, V3D{0, 1, 0}, V3D{1, 1, 0}, V3D{1, 0, 0});
     TS_ASSERT_EQUALS(a, b);
     TS_ASSERT_DIFFERS(a, c);
   }
@@ -303,12 +280,11 @@ public:
     using namespace Mantid::Kernel;
     auto a = makeSimpleTriangleMesh();
     // Use a different material
-    auto b = std::unique_ptr<MeshObject2D>(a.cloneWithMaterial(
-        Material("hydrogen", Material::parseChemicalFormula("H"), 3)));
+    auto b = std::unique_ptr<MeshObject2D>(
+        a.cloneWithMaterial(Material("hydrogen", Material::parseChemicalFormula("H"), 3)));
     TS_ASSERT_DIFFERS(a, *b);
     // Use same material
-    auto c = std::unique_ptr<MeshObject2D>(
-        a.cloneWithMaterial(Material{})); // same empty material
+    auto c = std::unique_ptr<MeshObject2D>(a.cloneWithMaterial(Material{})); // same empty material
     TS_ASSERT_EQUALS(a, *c);
   }
 
@@ -316,8 +292,7 @@ public:
     auto mesh = makeSimpleTriangleMesh(); // Lies in z plane
     auto boundingBox = mesh.getBoundingBox();
     TS_ASSERT_EQUALS(boundingBox.zMin(), 0);
-    TS_ASSERT_DELTA(boundingBox.zMax(), boundingBox.zMin(),
-                    MeshObject2D::MinThickness);
+    TS_ASSERT_DELTA(boundingBox.zMax(), boundingBox.zMin(), MeshObject2D::MinThickness);
     TS_ASSERT_EQUALS(boundingBox.xMin(), -1);
     TS_ASSERT_EQUALS(boundingBox.xMax(), 1);
     TS_ASSERT_EQUALS(boundingBox.yMin(), 0);
@@ -332,8 +307,7 @@ public:
     auto mesh = makeSimpleTriangleMesh();
     testing::NiceMock<MockRNG> generator;
     boost::optional<V3D> point;
-    TS_ASSERT_THROWS(point = mesh.generatePointInObject(generator, 10),
-                     std::runtime_error &);
+    TS_ASSERT_THROWS(point = mesh.generatePointInObject(generator, 10), std::runtime_error &);
   }
   // Characterisation test.
   void test_generatePointInObject_with_active_region_not_supported() {
@@ -344,9 +318,7 @@ public:
     testing::NiceMock<MockRNG> generator;
     Mantid::Geometry::BoundingBox boundingBox;
     boost::optional<V3D> point;
-    TS_ASSERT_THROWS(point =
-                         mesh.generatePointInObject(generator, boundingBox, 10),
-                     std::runtime_error &);
+    TS_ASSERT_THROWS(point = mesh.generatePointInObject(generator, boundingBox, 10), std::runtime_error &);
   }
 
   // Characterisation test.
@@ -356,9 +328,7 @@ public:
     double radius, height, innerRadius;
     Mantid::Geometry::detail::ShapeInfo::GeometryShape shape;
 
-    TS_ASSERT_THROWS(
-        mesh.GetObjectGeom(shape, vectors, innerRadius, radius, height),
-        std::runtime_error &);
+    TS_ASSERT_THROWS(mesh.GetObjectGeom(shape, vectors, innerRadius, radius, height), std::runtime_error &);
   }
 
   void test_get_material() {

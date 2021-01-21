@@ -43,11 +43,8 @@ namespace Mantid {
 namespace Vates {
 namespace SimpleGui {
 
-MultiSliceView::MultiSliceView(QWidget *parent,
-                               RebinnedSourcesManager *rebinnedSourcesManager,
-                               bool createRenderProxy)
-    : ViewBase(parent, rebinnedSourcesManager),
-      m_contextMenu(new QMenu(tr("Context menu"), this)),
+MultiSliceView::MultiSliceView(QWidget *parent, RebinnedSourcesManager *rebinnedSourcesManager, bool createRenderProxy)
+    : ViewBase(parent, rebinnedSourcesManager), m_contextMenu(new QMenu(tr("Context menu"), this)),
       m_edit(new QLineEdit(this)) {
   this->m_ui.setupUi(this);
 
@@ -57,18 +54,14 @@ MultiSliceView::MultiSliceView(QWidget *parent,
   action->setDefaultWidget(m_edit);
   m_contextMenu->addAction(action);
 
-  QObject::connect(this->m_edit, SIGNAL(textChanged(const QString &)), this,
-                   SLOT(checkState(const QString &)));
-  QObject::connect(this->m_edit, SIGNAL(editingFinished()), this,
-                   SLOT(setSlicePosition()));
+  QObject::connect(this->m_edit, SIGNAL(textChanged(const QString &)), this, SLOT(checkState(const QString &)));
+  QObject::connect(this->m_edit, SIGNAL(editingFinished()), this, SLOT(setSlicePosition()));
 
   if (createRenderProxy) {
-    pqRenderView *tmp =
-        this->createRenderView(this->m_ui.renderFrame, QString("MultiSlice"));
+    pqRenderView *tmp = this->createRenderView(this->m_ui.renderFrame, QString("MultiSlice"));
     this->setupData();
     this->m_mainView = qobject_cast<pqMultiSliceView *>(tmp);
-    QObject::connect(this->m_mainView,
-                     SIGNAL(sliceClicked(int, double, int, int)), this,
+    QObject::connect(this->m_mainView, SIGNAL(sliceClicked(int, double, int, int)), this,
                      SLOT(checkSliceClicked(int, double, int, int)));
   }
 }
@@ -80,24 +73,19 @@ void MultiSliceView::destroyView() {
   builder->destroy(this->m_mainView);
 }
 
-pqRenderView *MultiSliceView::getView() {
-  return qobject_cast<pqRenderView *>(this->m_mainView.data());
-}
+pqRenderView *MultiSliceView::getView() { return qobject_cast<pqRenderView *>(this->m_mainView.data()); }
 
 void MultiSliceView::setupData() {
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
 
   // Make sure that origsrc exists
   if (this->origSrc) {
-    pqDataRepresentation *drep = builder->createDataRepresentation(
-        this->origSrc->getOutputPort(0), this->m_mainView,
-        "CompositeAlignedGeometrySliceRepresentation");
+    pqDataRepresentation *drep = builder->createDataRepresentation(this->origSrc->getOutputPort(0), this->m_mainView,
+                                                                   "CompositeAlignedGeometrySliceRepresentation");
     vtkSMPropertyHelper(drep->getProxy(), "Representation").Set("Slices");
     if (!this->isPeaksWorkspace(this->origSrc)) {
-      vtkSMPVRepresentationProxy::SetScalarColoring(
-          drep->getProxy(), "signal", vtkDataObject::FIELD_ASSOCIATION_CELLS);
-      vtkSMMultiSliceViewProxy *viewPxy =
-          vtkSMMultiSliceViewProxy::SafeDownCast(this->m_mainView->getProxy());
+      vtkSMPVRepresentationProxy::SetScalarColoring(drep->getProxy(), "signal", vtkDataObject::FIELD_ASSOCIATION_CELLS);
+      vtkSMMultiSliceViewProxy *viewPxy = vtkSMMultiSliceViewProxy::SafeDownCast(this->m_mainView->getProxy());
       viewPxy->CreateDefaultRepresentation(this->origSrc->getProxy(), 0);
     }
     drep->getProxy()->UpdateVTKObjects();
@@ -124,14 +112,11 @@ void MultiSliceView::setView(pqRenderView *view) {
   QHBoxLayout *hbox = new QHBoxLayout(this->m_ui.renderFrame);
   hbox->setMargin(0);
   hbox->addWidget(m_mainView->widget());
-  QObject::connect(this->m_mainView,
-                   SIGNAL(sliceClicked(int, double, int, int)), this,
+  QObject::connect(this->m_mainView, SIGNAL(sliceClicked(int, double, int, int)), this,
                    SLOT(checkSliceClicked(int, double, int, int)));
 }
 
-ModeControlWidget::Views MultiSliceView::getViewType() {
-  return ModeControlWidget::Views::MULTISLICE;
-}
+ModeControlWidget::Views MultiSliceView::getViewType() { return ModeControlWidget::Views::MULTISLICE; }
 
 void MultiSliceView::resetCamera() { this->m_mainView->resetCamera(); }
 
@@ -144,10 +129,8 @@ void MultiSliceView::resetCamera() { this->m_mainView->resetCamera(); }
  * @param button : which mouse button is being used
  * @param modifier : which modifier key is being used
  */
-void MultiSliceView::checkSliceClicked(int axisIndex, double sliceOffsetOnAxis,
-                                       int button, int modifier) {
-  if (button == vtkContextMouseEvent::LEFT_BUTTON ||
-      button == vtkContextMouseEvent::RIGHT_BUTTON) {
+void MultiSliceView::checkSliceClicked(int axisIndex, double sliceOffsetOnAxis, int button, int modifier) {
+  if (button == vtkContextMouseEvent::LEFT_BUTTON || button == vtkContextMouseEvent::RIGHT_BUTTON) {
     if (modifier == vtkContextMouseEvent::SHIFT_MODIFIER) {
       this->showCutInSliceViewer(axisIndex, sliceOffsetOnAxis);
     } else if (modifier == vtkContextMouseEvent::ALT_MODIFIER) {
@@ -156,15 +139,13 @@ void MultiSliceView::checkSliceClicked(int axisIndex, double sliceOffsetOnAxis,
   }
 }
 
-void MultiSliceView::editSlicePosition(int axisIndex,
-                                       double sliceOffsetOnAxis) {
+void MultiSliceView::editSlicePosition(int axisIndex, double sliceOffsetOnAxis) {
 
   m_axisIndex = axisIndex;
   m_sliceOffsetOnAxis = sliceOffsetOnAxis;
 
   double bounds[6];
-  vtkSMMultiSliceViewProxy::GetDataBounds(this->origSrc->getSourceProxy(), 0,
-                                          bounds);
+  vtkSMMultiSliceViewProxy::GetDataBounds(this->origSrc->getSourceProxy(), 0, bounds);
   if (axisIndex == 0) {
     m_edit->setValidator(new QDoubleValidator(bounds[0], bounds[1], 5, this));
   } else if (axisIndex == 1) {
@@ -207,14 +188,12 @@ void MultiSliceView::setSlicePosition() {
   }
 
   auto viewProxy = m_mainView->getViewProxy();
-  std::vector<double> slices =
-      vtkSMPropertyHelper(viewProxy, name.c_str()).GetDoubleArray();
+  std::vector<double> slices = vtkSMPropertyHelper(viewProxy, name.c_str()).GetDoubleArray();
   auto it = std::find(slices.begin(), slices.end(), m_sliceOffsetOnAxis);
   if (it != slices.end()) {
     *it = newPosition;
   }
-  vtkSMPropertyHelper(viewProxy, name.c_str())
-      .Set(slices.data(), static_cast<int>(slices.size()));
+  vtkSMPropertyHelper(viewProxy, name.c_str()).Set(slices.data(), static_cast<int>(slices.size()));
   viewProxy->UpdateVTKObjects();
 
   m_contextMenu->hide();
@@ -234,8 +213,7 @@ void MultiSliceView::checkSliceViewCompat() {
 }
 
 void MultiSliceView::changedSlicePoint(Mantid::Kernel::VMD selectedPoint) {
-  vtkSMPropertyHelper(this->m_mainView->getProxy(), "XSlicesValues")
-      .Set(selectedPoint[0]);
+  vtkSMPropertyHelper(this->m_mainView->getProxy(), "XSlicesValues").Set(selectedPoint[0]);
   this->m_mainView->getProxy()->UpdateVTKObjects();
   this->m_mainView->render();
 }
@@ -248,14 +226,12 @@ void MultiSliceView::changedSlicePoint(Mantid::Kernel::VMD selectedPoint) {
  * @param axisIndex the index of the slice to be opened in SliceViewer
  * @param sliceOffsetOnAxis position of the slice along given axis
  */
-void MultiSliceView::showCutInSliceViewer(int axisIndex,
-                                          double sliceOffsetOnAxis) {
+void MultiSliceView::showCutInSliceViewer(int axisIndex, double sliceOffsetOnAxis) {
   // Get the associated workspace name
   QString wsName = this->getWorkspaceName();
 
   // Have to jump through some hoops since a rebinner could be used.
-  pqServerManagerModel *smModel =
-      pqApplicationCore::instance()->getServerManagerModel();
+  pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
   QList<pqPipelineSource *> srcs = smModel->findItems<pqPipelineSource *>();
   pqPipelineSource *src1 = nullptr;
   pqPipelineSource *src2 = nullptr;
@@ -270,8 +246,7 @@ void MultiSliceView::showCutInSliceViewer(int axisIndex,
   src1 = smModel->getItemAtIndex<pqPipelineSource *>(0);
 
   // Get the current dataset characteristics
-  const char *inGeomXML =
-      vtkSMPropertyHelper(src1->getProxy(), "InputGeometryXML").GetAsString();
+  const char *inGeomXML = vtkSMPropertyHelper(src1->getProxy(), "InputGeometryXML").GetAsString();
   // Check for timesteps and insert the value into the XML if necessary
   std::string geomXML;
   if (this->srcHasTimeSteps(src1)) {
@@ -299,9 +274,7 @@ void MultiSliceView::showCutInSliceViewer(int axisIndex,
     }
 
     std::vector<double> scaling =
-        vtkSMPropertyHelper(src2->getProxy(),
-                            scalingProperty.toLatin1().constData(), true)
-            .GetDoubleArray();
+        vtkSMPropertyHelper(src2->getProxy(), scalingProperty.toLatin1().constData(), true).GetDoubleArray();
 
     if (!scaling.empty()) {
       sliceOffsetOnAxis /= scaling[0];
@@ -312,36 +285,28 @@ void MultiSliceView::showCutInSliceViewer(int axisIndex,
   double origin[3] = {0.0, 0.0, 0.0};
   origin[axisIndex] = sliceOffsetOnAxis;
 
-  vtkVector3d sliceNormalsInBasis[3] = {
-      {1.0, 0.0, 0.0}, {0.0, 1.0, 0.0}, {0.0, 0.0, 1.0}};
+  vtkVector3d sliceNormalsInBasis[3] = {{1.0, 0.0, 0.0}, {0.0, 1.0, 0.0}, {0.0, 0.0, 1.0}};
 
   // Create the XML holder
   VATES::VatesKnowledgeSerializer rks;
   rks.setWorkspaceName(wsName.toStdString());
   rks.setGeometryXML(geomXML);
 
-  rks.setImplicitFunction(std::make_shared<MDPlaneImplicitFunction>(
-      3, sliceNormalsInBasis[axisIndex].GetData(), origin));
+  rks.setImplicitFunction(
+      std::make_shared<MDPlaneImplicitFunction>(3, sliceNormalsInBasis[axisIndex].GetData(), origin));
   QString titleAddition = "";
 
   // Use the WidgetFactory to create the slice viewer window
-  SliceViewerWindow *w =
-      MantidQt::Factory::WidgetFactory::Instance()->createSliceViewerWindow(
-          wsName, titleAddition);
+  SliceViewerWindow *w = MantidQt::Factory::WidgetFactory::Instance()->createSliceViewerWindow(wsName, titleAddition);
   try {
     // Set the slice points, etc, using the XML definition of the plane function
     w->getSlicer()->openFromXML(QString::fromStdString(rks.createXMLString()));
     w->show();
-    this->connect(w->getSlicer(),
-                  SIGNAL(changedSlicePoint(Mantid::Kernel::VMD)),
+    this->connect(w->getSlicer(), SIGNAL(changedSlicePoint(Mantid::Kernel::VMD)),
                   SLOT(changedSlicePoint(Mantid::Kernel::VMD)));
   } catch (std::runtime_error &e) {
-    QString message =
-        "The slice could not be shown because of the following error:\n" +
-        QString(e.what());
-    QMessageBox::warning(this, tr("MantidPlot"),
-                         tr(message.toLatin1().constData()), QMessageBox::Ok,
-                         QMessageBox::Ok);
+    QString message = "The slice could not be shown because of the following error:\n" + QString(e.what());
+    QMessageBox::warning(this, tr("MantidPlot"), tr(message.toLatin1().constData()), QMessageBox::Ok, QMessageBox::Ok);
     delete w;
   }
 }
@@ -351,9 +316,7 @@ void MultiSliceView::showCutInSliceViewer(int axisIndex,
  * closed. The function is a no-op (except for factory creation) when no
  * SliceViewer windows were requested.
  */
-void MultiSliceView::closeSubWindows() {
-  MantidQt::Factory::WidgetFactory::Instance()->closeAllSliceViewerWindows();
-}
+void MultiSliceView::closeSubWindows() { MantidQt::Factory::WidgetFactory::Instance()->closeAllSliceViewerWindows(); }
 
 } // namespace SimpleGui
 } // namespace Vates

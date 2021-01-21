@@ -31,18 +31,15 @@ using namespace Mantid::DataObjects;
 class vtkMDHWSignalArrayTest : public CxxTest::TestSuite {
 public:
   void testGetTuple() {
-    MDHistoWorkspace_sptr ws_sptr =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3);
+    MDHistoWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3);
     vtkNew<vtkMDHWSignalArray<double>> signal;
     std::size_t offset = 0;
     const int nBinsX = static_cast<int>(ws_sptr->getXDimension()->getNBins());
     const int nBinsY = static_cast<int>(ws_sptr->getYDimension()->getNBins());
     const int nBinsZ = static_cast<int>(ws_sptr->getZDimension()->getNBins());
     const int imageSize = (nBinsX) * (nBinsY) * (nBinsZ);
-    signal->InitializeArray(ws_sptr->mutableSignalArray(),
-                            ws_sptr->mutableNumEventsArray(),
-                            ws_sptr->getInverseVolume(),
-                            SignalArrayNormalization::None, imageSize, offset);
+    signal->InitializeArray(ws_sptr->mutableSignalArray(), ws_sptr->mutableNumEventsArray(),
+                            ws_sptr->getInverseVolume(), SignalArrayNormalization::None, imageSize, offset);
 
     for (auto index = 0; index < imageSize; ++index) {
       double output1[1];
@@ -69,8 +66,7 @@ public:
 
   void testGetTuplesPtIds() {
 
-    MDHistoWorkspace_sptr ws_sptr =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3);
+    MDHistoWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3);
     vtkNew<vtkMDHWSignalArray<double>> signal;
     std::size_t offset = 0;
     const int nBinsX = static_cast<int>(ws_sptr->getXDimension()->getNBins());
@@ -78,10 +74,8 @@ public:
     const int nBinsZ = static_cast<int>(ws_sptr->getZDimension()->getNBins());
     const int imageSize = (nBinsX) * (nBinsY) * (nBinsZ);
 
-    signal->InitializeArray(ws_sptr->mutableSignalArray(),
-                            ws_sptr->mutableNumEventsArray(),
-                            ws_sptr->getInverseVolume(),
-                            SignalArrayNormalization::None, imageSize, offset);
+    signal->InitializeArray(ws_sptr->mutableSignalArray(), ws_sptr->mutableNumEventsArray(),
+                            ws_sptr->getInverseVolume(), SignalArrayNormalization::None, imageSize, offset);
 
     vtkNew<vtkIdList> ptIds;
 
@@ -105,8 +99,7 @@ public:
   // Enable in next (v5.4) ParaView release
   // https://gitlab.kitware.com/vtk/vtk/merge_requests/2593
   void xtestLookupMaskedValues() {
-    MDHistoWorkspace_sptr ws_sptr =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3, 4);
+    MDHistoWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3, 4);
     vtkNew<vtkMDHWSignalArray<double>> signal;
     const int nBinsX = static_cast<int>(ws_sptr->getXDimension()->getNBins());
     const int nBinsY = static_cast<int>(ws_sptr->getYDimension()->getNBins());
@@ -118,31 +111,25 @@ public:
     ws_sptr->setMDMaskAt(7, true);
     ws_sptr->setMDMaskAt(42, true);
 
-    signal->InitializeArray(ws_sptr->mutableSignalArray(),
-                            ws_sptr->mutableNumEventsArray(),
-                            ws_sptr->getInverseVolume(),
-                            SignalArrayNormalization::None, imageSize, offset);
+    signal->InitializeArray(ws_sptr->mutableSignalArray(), ws_sptr->mutableNumEventsArray(),
+                            ws_sptr->getInverseVolume(), SignalArrayNormalization::None, imageSize, offset);
 
     vtkNew<vtkIdList> idList1, idList2;
 
     signal->LookupTypedValue(1.0, idList2.GetPointer());
-    TSM_ASSERT_EQUALS("IDs for the 61 unmasked points should have been found",
-                      idList2->GetNumberOfIds(), 61);
+    TSM_ASSERT_EQUALS("IDs for the 61 unmasked points should have been found", idList2->GetNumberOfIds(), 61);
   }
 
   void testGetTuplesRange() {
-    MDHistoWorkspace_sptr ws_sptr =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3);
+    MDHistoWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3);
     vtkNew<vtkMDHWSignalArray<double>> signal;
     const int nBinsX = static_cast<int>(ws_sptr->getXDimension()->getNBins());
     const int nBinsY = static_cast<int>(ws_sptr->getYDimension()->getNBins());
     const int nBinsZ = static_cast<int>(ws_sptr->getZDimension()->getNBins());
     const int imageSize = (nBinsX) * (nBinsY) * (nBinsZ);
     std::size_t offset = 0;
-    signal->InitializeArray(ws_sptr->mutableSignalArray(),
-                            ws_sptr->mutableNumEventsArray(),
-                            ws_sptr->getInverseVolume(),
-                            SignalArrayNormalization::None, imageSize, offset);
+    signal->InitializeArray(ws_sptr->mutableSignalArray(), ws_sptr->mutableNumEventsArray(),
+                            ws_sptr->getInverseVolume(), SignalArrayNormalization::None, imageSize, offset);
 
     vtkNew<vtkDoubleArray> doubleArray;
     doubleArray->SetNumberOfComponents(1);
@@ -158,35 +145,29 @@ public:
   }
 
   void testLookupOneValue() {
-    MDHistoWorkspace_sptr ws_sptr =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(8.0, 3, 10, 5.0);
+    MDHistoWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(8.0, 3, 10, 5.0);
     vtkNew<vtkMDHWSignalArray<double>> signal;
     const int nBinsX = static_cast<int>(ws_sptr->getXDimension()->getNBins());
     const int nBinsY = static_cast<int>(ws_sptr->getYDimension()->getNBins());
     const int nBinsZ = static_cast<int>(ws_sptr->getZDimension()->getNBins());
     const int imageSize = (nBinsX) * (nBinsY) * (nBinsZ);
     std::size_t offset = 0;
-    signal->InitializeArray(ws_sptr->mutableSignalArray(),
-                            ws_sptr->mutableNumEventsArray(),
-                            ws_sptr->getInverseVolume(),
-                            SignalArrayNormalization::None, imageSize, offset);
+    signal->InitializeArray(ws_sptr->mutableSignalArray(), ws_sptr->mutableNumEventsArray(),
+                            ws_sptr->getInverseVolume(), SignalArrayNormalization::None, imageSize, offset);
     TS_ASSERT_EQUALS(signal->LookupValue(1.0), -1);
     TS_ASSERT_EQUALS(signal->LookupTypedValue(1.0), -1);
   }
 
   void testLookupAllValues() {
-    MDHistoWorkspace_sptr ws_sptr =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3);
+    MDHistoWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3);
     vtkNew<vtkMDHWSignalArray<double>> signal;
     const int nBinsX = static_cast<int>(ws_sptr->getXDimension()->getNBins());
     const int nBinsY = static_cast<int>(ws_sptr->getYDimension()->getNBins());
     const int nBinsZ = static_cast<int>(ws_sptr->getZDimension()->getNBins());
     const int imageSize = (nBinsX) * (nBinsY) * (nBinsZ);
     std::size_t offset = 0;
-    signal->InitializeArray(ws_sptr->mutableSignalArray(),
-                            ws_sptr->mutableNumEventsArray(),
-                            ws_sptr->getInverseVolume(),
-                            SignalArrayNormalization::None, imageSize, offset);
+    signal->InitializeArray(ws_sptr->mutableSignalArray(), ws_sptr->mutableNumEventsArray(),
+                            ws_sptr->getInverseVolume(), SignalArrayNormalization::None, imageSize, offset);
 
     vtkNew<vtkIdList> idList1, idList2;
     signal->LookupValue(0.0, idList1.GetPointer());
@@ -208,17 +189,14 @@ public:
   int imageSize;
 
   void setUp() override {
-    ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3, 200, 10.0,
-                                                           1.0, "", 4.0);
+    ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3, 200, 10.0, 1.0, "", 4.0);
     std::size_t offset = 0;
     const int nBinsX = static_cast<int>(ws_sptr->getXDimension()->getNBins());
     const int nBinsY = static_cast<int>(ws_sptr->getYDimension()->getNBins());
     const int nBinsZ = static_cast<int>(ws_sptr->getZDimension()->getNBins());
     imageSize = (nBinsX) * (nBinsY) * (nBinsZ);
-    m_signal->InitializeArray(
-        ws_sptr->mutableSignalArray(), ws_sptr->mutableNumEventsArray(),
-        ws_sptr->getInverseVolume(), SignalArrayNormalization::Volume,
-        imageSize, offset);
+    m_signal->InitializeArray(ws_sptr->mutableSignalArray(), ws_sptr->mutableNumEventsArray(),
+                              ws_sptr->getInverseVolume(), SignalArrayNormalization::Volume, imageSize, offset);
   }
 
   void tearDown() override {}

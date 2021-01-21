@@ -17,8 +17,7 @@ using namespace boost::python;
 GET_POINTER_SPECIALIZATION(SpecialWorkspace2D)
 
 void export_SpecialWorkspace2D() {
-  class_<SpecialWorkspace2D, bases<Workspace2D>, boost::noncopyable>(
-      "SpecialWorkspace2D", no_init);
+  class_<SpecialWorkspace2D, bases<Workspace2D>, boost::noncopyable>("SpecialWorkspace2D", no_init);
 
   // register pointers
   RegisterWorkspacePtrToPython<SpecialWorkspace2D>();

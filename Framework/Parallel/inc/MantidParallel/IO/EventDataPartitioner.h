@@ -35,8 +35,7 @@ template <class TimeOffsetType> struct Event {
 template <class TimeOffsetType> class AbstractEventDataPartitioner {
 public:
   using Event = detail::Event<TimeOffsetType>;
-  AbstractEventDataPartitioner(const int numWorkers)
-      : m_numWorkers(numWorkers) {}
+  AbstractEventDataPartitioner(const int numWorkers) : m_numWorkers(numWorkers) {}
   virtual ~AbstractEventDataPartitioner() = default;
 
   /** Partition given data.
@@ -46,10 +45,8 @@ public:
    * @param eventTimeOffset list TOF values, same length as globalSpectrumIndex
    * @param range defines start and end of data for lookup in PulseTimeGenerator
    */
-  virtual void partition(std::vector<std::vector<Event>> &partitioned,
-                         const int32_t *globalSpectrumIndex,
-                         const TimeOffsetType *eventTimeOffset,
-                         const Chunker::LoadRange &range) = 0;
+  virtual void partition(std::vector<std::vector<Event>> &partitioned, const int32_t *globalSpectrumIndex,
+                         const TimeOffsetType *eventTimeOffset, const Chunker::LoadRange &range) = 0;
 
   virtual Types::Core::DateAndTime next() = 0;
   virtual void setEventOffset(const size_t event) = 0;
@@ -59,24 +56,17 @@ protected:
 };
 
 template <class IndexType, class TimeZeroType, class TimeOffsetType>
-class EventDataPartitioner
-    : public AbstractEventDataPartitioner<TimeOffsetType> {
+class EventDataPartitioner : public AbstractEventDataPartitioner<TimeOffsetType> {
 public:
   using Event = detail::Event<TimeOffsetType>;
-  EventDataPartitioner(const int numWorkers,
-                       PulseTimeGenerator<IndexType, TimeZeroType> &&gen)
-      : AbstractEventDataPartitioner<TimeOffsetType>(numWorkers),
-        m_pulseTimes(std::move(gen)) {}
+  EventDataPartitioner(const int numWorkers, PulseTimeGenerator<IndexType, TimeZeroType> &&gen)
+      : AbstractEventDataPartitioner<TimeOffsetType>(numWorkers), m_pulseTimes(std::move(gen)) {}
 
-  void partition(std::vector<std::vector<Event>> &partitioned,
-                 const int32_t *globalSpectrumIndex,
-                 const TimeOffsetType *eventTimeOffset,
-                 const Chunker::LoadRange &range) override;
+  void partition(std::vector<std::vector<Event>> &partitioned, const int32_t *globalSpectrumIndex,
+                 const TimeOffsetType *eventTimeOffset, const Chunker::LoadRange &range) override;
 
   Types::Core::DateAndTime next() override { return m_pulseTimes.next(); }
-  void setEventOffset(const size_t event) override {
-    m_pulseTimes.seek(event);
-  };
+  void setEventOffset(const size_t event) override { m_pulseTimes.seek(event); };
 
 private:
   PulseTimeGenerator<IndexType, TimeZeroType> m_pulseTimes;
@@ -84,13 +74,11 @@ private:
 
 template <class IndexType, class TimeZeroType, class TimeOffsetType>
 void EventDataPartitioner<IndexType, TimeZeroType, TimeOffsetType>::partition(
-    std::vector<std::vector<Event>> &partitioned,
-    const int32_t *globalSpectrumIndex, const TimeOffsetType *eventTimeOffset,
-    const Chunker::LoadRange &range) {
+    std::vector<std::vector<Event>> &partitioned, const int32_t *globalSpectrumIndex,
+    const TimeOffsetType *eventTimeOffset, const Chunker::LoadRange &range) {
   for (auto &item : partitioned)
     item.clear();
-  const auto workers =
-      AbstractEventDataPartitioner<TimeOffsetType>::m_numWorkers;
+  const auto workers = AbstractEventDataPartitioner<TimeOffsetType>::m_numWorkers;
   partitioned.resize(workers);
 
   m_pulseTimes.seek(range.eventOffset);
@@ -98,8 +86,8 @@ void EventDataPartitioner<IndexType, TimeZeroType, TimeOffsetType>::partition(
     // Currently this supports only a hard-coded round-robin partitioning.
     int partition = globalSpectrumIndex[event] % workers;
     auto index = globalSpectrumIndex[event] / workers;
-    partitioned[partition].emplace_back(detail::Event<TimeOffsetType>{
-        index, eventTimeOffset[event], m_pulseTimes.next()});
+    partitioned[partition].emplace_back(
+        detail::Event<TimeOffsetType>{index, eventTimeOffset[event], m_pulseTimes.next()});
   }
 }
 

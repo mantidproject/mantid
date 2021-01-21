@@ -24,17 +24,14 @@ Functional Tests
 class PeaksInRegionTest : public CxxTest::TestSuite {
 
 private:
-  using PeakWorkspaceWithExtents =
-      boost::tuple<PeaksWorkspace_sptr, std::vector<double>>;
+  using PeakWorkspaceWithExtents = boost::tuple<PeaksWorkspace_sptr, std::vector<double>>;
 
   /**
   Helper function. Creates a peaksworkspace with a single peak
   */
-  PeakWorkspaceWithExtents
-  createPeaksWorkspace(const std::string &coordFrame, double xMinFromPeak,
-                       double xMaxFromPeak, double yMinFromPeak,
-                       double yMaxFromPeak, double zMinFromPeak,
-                       double zMaxFromPeak) {
+  PeakWorkspaceWithExtents createPeaksWorkspace(const std::string &coordFrame, double xMinFromPeak, double xMaxFromPeak,
+                                                double yMinFromPeak, double yMaxFromPeak, double zMinFromPeak,
+                                                double zMaxFromPeak) {
     PeaksWorkspace_sptr ws = WorkspaceCreationHelper::createPeaksWorkspace(1);
     const auto &detectorIds = ws->detectorInfo().detectorIDs();
     Peak &peak = ws->getPeak(0);
@@ -78,21 +75,18 @@ public:
     alg.setRethrows(true);
     alg.initialize();
     TS_ASSERT(alg.isInitialized());
-    alg.setProperty("InputWorkspace",
-                    WorkspaceCreationHelper::createPeaksWorkspace(2));
+    alg.setProperty("InputWorkspace", WorkspaceCreationHelper::createPeaksWorkspace(2));
     alg.setPropertyValue("CoordinateFrame", "Q (lab frame)");
     alg.setPropertyValue("Extents", "-1,1,-1,1,-1,1");
     alg.setPropertyValue("OutputWorkspace", "OutWS");
   }
 
-  void do_test_extents_throws(const std::string &message,
-                              const std::string &extents) {
+  void do_test_extents_throws(const std::string &message, const std::string &extents) {
     PeaksInRegion alg;
     alg.setRethrows(true);
     alg.initialize();
     TS_ASSERT(alg.isInitialized());
-    alg.setProperty("InputWorkspace",
-                    WorkspaceCreationHelper::createPeaksWorkspace(2));
+    alg.setProperty("InputWorkspace", WorkspaceCreationHelper::createPeaksWorkspace(2));
     alg.setPropertyValue("CoordinateFrame", "Q (lab frame)");
     alg.setPropertyValue("Extents", extents);
     alg.setPropertyValue("OutputWorkspace", "OutWS");
@@ -100,13 +94,9 @@ public:
     TSM_ASSERT_THROWS(message, alg.execute(), std::invalid_argument &);
   }
 
-  void test_bad_extent_format_too_few() {
-    do_test_extents_throws("Too few extents", "-1,1,-1,1,-1,1,-1");
-  }
+  void test_bad_extent_format_too_few() { do_test_extents_throws("Too few extents", "-1,1,-1,1,-1,1,-1"); }
 
-  void test_bad_extent_format_too_many() {
-    do_test_extents_throws("Too many extents", "-1,1,-1,1,-1,1,-1,1,-1");
-  }
+  void test_bad_extent_format_too_many() { do_test_extents_throws("Too many extents", "-1,1,-1,1,-1,1,-1,1,-1"); }
 
   void test_bad_extent_pairs() {
     do_test_extents_throws("Invalid x extents", "-1,-1.1,-1,1,-1,1");
@@ -125,9 +115,8 @@ public:
     const double zMinFromPeak = 1;
     const double zMaxFromPeak = 1;
 
-    PeakWorkspaceWithExtents tuple = createPeaksWorkspace(
-        coordFrame, xMinFromPeak, xMaxFromPeak, yMinFromPeak, yMaxFromPeak,
-        zMinFromPeak, zMaxFromPeak);
+    PeakWorkspaceWithExtents tuple = createPeaksWorkspace(coordFrame, xMinFromPeak, xMaxFromPeak, yMinFromPeak,
+                                                          yMaxFromPeak, zMinFromPeak, zMaxFromPeak);
 
     PeaksInRegion alg;
     alg.setRethrows(true);
@@ -138,8 +127,7 @@ public:
     alg.setPropertyValue("OutputWorkspace", outName);
     alg.execute();
 
-    ITableWorkspace_sptr outWS =
-        AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(outName);
+    ITableWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(outName);
 
     TS_ASSERT_EQUALS(3, outWS->columnCount());
     TS_ASSERT_EQUALS("PeakIndex", outWS->getColumn(0)->name());
@@ -149,20 +137,16 @@ public:
     TS_ASSERT_EQUALS(1, outWS->rowCount());
 
     TSM_ASSERT_EQUALS("Peak index should be zero", 0, outWS->cell<int>(0, 0));
-    TSM_ASSERT_EQUALS("Peak intersect should be true", Boolean(true),
-                      outWS->cell<Boolean>(0, 1));
+    TSM_ASSERT_EQUALS("Peak intersect should be true", Boolean(true), outWS->cell<Boolean>(0, 1));
   }
 
-  void
-  do_test_out_of_bounds_center_only(const std::string &coordFrame,
-                                    double xMinFromPeak, double xMaxFromPeak,
-                                    double yMinFromPeak, double yMaxFromPeak,
-                                    double zMinFromPeak, double zMaxFromPeak) {
+  void do_test_out_of_bounds_center_only(const std::string &coordFrame, double xMinFromPeak, double xMaxFromPeak,
+                                         double yMinFromPeak, double yMaxFromPeak, double zMinFromPeak,
+                                         double zMaxFromPeak) {
     const std::string outName = "OutWS";
 
-    PeakWorkspaceWithExtents tuple = createPeaksWorkspace(
-        coordFrame, xMinFromPeak, xMaxFromPeak, yMinFromPeak, yMaxFromPeak,
-        zMinFromPeak, zMaxFromPeak);
+    PeakWorkspaceWithExtents tuple = createPeaksWorkspace(coordFrame, xMinFromPeak, xMaxFromPeak, yMinFromPeak,
+                                                          yMaxFromPeak, zMinFromPeak, zMaxFromPeak);
     PeaksInRegion alg;
     alg.setRethrows(true);
     alg.initialize();
@@ -173,8 +157,7 @@ public:
     alg.setProperty("CheckPeakExtents", false);
     alg.execute();
 
-    ITableWorkspace_sptr outWS =
-        AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(outName);
+    ITableWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(outName);
 
     TS_ASSERT_EQUALS(3, outWS->columnCount());
     TS_ASSERT_EQUALS("PeakIndex", outWS->getColumn(0)->name());
@@ -183,25 +166,16 @@ public:
     TS_ASSERT_EQUALS(1, outWS->rowCount());
 
     TSM_ASSERT_EQUALS("Peak index should be zero", 0, outWS->cell<int>(0, 0));
-    TSM_ASSERT_EQUALS("Peak intersect should be false", Boolean(false),
-                      outWS->cell<Boolean>(0, 1));
+    TSM_ASSERT_EQUALS("Peak intersect should be false", Boolean(false), outWS->cell<Boolean>(0, 1));
   }
 
-  void test_detectorSpace_with_peak_in_bounds() {
-    do_test_within_bounds_center_only("Detector space");
-  }
+  void test_detectorSpace_with_peak_in_bounds() { do_test_within_bounds_center_only("Detector space"); }
 
-  void test_qLab_with_peak_in_bounds() {
-    do_test_within_bounds_center_only("Q (lab frame)");
-  }
+  void test_qLab_with_peak_in_bounds() { do_test_within_bounds_center_only("Q (lab frame)"); }
 
-  void test_qSample_with_peak_in_bounds() {
-    do_test_within_bounds_center_only("Q (sample frame)");
-  }
+  void test_qSample_with_peak_in_bounds() { do_test_within_bounds_center_only("Q (sample frame)"); }
 
-  void test_HKL_with_peak_in_bounds() {
-    do_test_within_bounds_center_only("HKL");
-  }
+  void test_HKL_with_peak_in_bounds() { do_test_within_bounds_center_only("HKL"); }
 
   void test_detectorSpace_with_peaks_out_of_bounds() {
     const std::string coordinateFrame = "Detector space";
@@ -267,16 +241,13 @@ public:
                                       -0.5); // outside zmax
   }
 
-  void do_test_bounds_check_extents(const std::string &coordFrame,
-                                    double xMinFromPeak, double xMaxFromPeak,
-                                    double yMinFromPeak, double yMaxFromPeak,
-                                    double zMinFromPeak, double zMaxFromPeak,
+  void do_test_bounds_check_extents(const std::string &coordFrame, double xMinFromPeak, double xMaxFromPeak,
+                                    double yMinFromPeak, double yMaxFromPeak, double zMinFromPeak, double zMaxFromPeak,
                                     double radius, bool expectation) {
     const std::string outName = "OutWS";
 
-    PeakWorkspaceWithExtents tuple = createPeaksWorkspace(
-        coordFrame, xMinFromPeak, xMaxFromPeak, yMinFromPeak, yMaxFromPeak,
-        zMinFromPeak, zMaxFromPeak);
+    PeakWorkspaceWithExtents tuple = createPeaksWorkspace(coordFrame, xMinFromPeak, xMaxFromPeak, yMinFromPeak,
+                                                          yMaxFromPeak, zMinFromPeak, zMaxFromPeak);
     PeaksInRegion alg;
     alg.setRethrows(true);
     alg.initialize();
@@ -288,13 +259,11 @@ public:
     alg.setProperty("PeakRadius", radius);
     alg.execute();
 
-    ITableWorkspace_sptr outWS =
-        AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(outName);
+    ITableWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(outName);
 
     TS_ASSERT_EQUALS(1, outWS->rowCount());
     TSM_ASSERT_EQUALS("Peak index should be zero", 0, outWS->cell<int>(0, 0));
-    TSM_ASSERT_EQUALS("Peak intersect calculated incorrectly",
-                      Boolean(expectation), outWS->cell<Boolean>(0, 1));
+    TSM_ASSERT_EQUALS("Peak intersect calculated incorrectly", Boolean(expectation), outWS->cell<Boolean>(0, 1));
   }
 
   void test_peak_intersects_xmin_boundary_when_radius_large_enough() {
@@ -303,13 +272,11 @@ public:
 
     double peakRadius = 0.49; // not enough for the sphere to penetrate the
                               // bounding box. Expect failure
-    do_test_bounds_check_extents(coordinateFrame, -wallDistanceFromPeakCenter,
-                                 1, 1, 1, 1, 1, peakRadius, false);
+    do_test_bounds_check_extents(coordinateFrame, -wallDistanceFromPeakCenter, 1, 1, 1, 1, 1, peakRadius, false);
 
     peakRadius = 0.51; // just enough for the sphere to penetrate the bounding
                        // box. Expect pass.
-    do_test_bounds_check_extents(coordinateFrame, -wallDistanceFromPeakCenter,
-                                 1, 1, 1, 1, 1, peakRadius, true);
+    do_test_bounds_check_extents(coordinateFrame, -wallDistanceFromPeakCenter, 1, 1, 1, 1, 1, peakRadius, true);
   }
 
   void test_peak_intersects_xmax_boundary_when_radius_large_enough() {
@@ -318,15 +285,11 @@ public:
 
     double peakRadius = 0.49; // not enough for the sphere to penetrate the
                               // bounding box. Expect failure
-    do_test_bounds_check_extents(coordinateFrame, 1,
-                                 -wallDistanceFromPeakCenter, 1, 1, 1, 1,
-                                 peakRadius, false);
+    do_test_bounds_check_extents(coordinateFrame, 1, -wallDistanceFromPeakCenter, 1, 1, 1, 1, peakRadius, false);
 
     peakRadius = 0.51; // just enough for the sphere to penetrate the bounding
                        // box. Expect pass.
-    do_test_bounds_check_extents(coordinateFrame, 1,
-                                 -wallDistanceFromPeakCenter, 1, 1, 1, 1,
-                                 peakRadius, true);
+    do_test_bounds_check_extents(coordinateFrame, 1, -wallDistanceFromPeakCenter, 1, 1, 1, 1, peakRadius, true);
   }
 
   void test_peak_intersects_ymin_boundary_when_radius_large_enough() {
@@ -335,15 +298,11 @@ public:
 
     double peakRadius = 0.49; // not enough for the sphere to penetrate the
                               // bounding box. Expect failure
-    do_test_bounds_check_extents(coordinateFrame, 1, 1,
-                                 -wallDistanceFromPeakCenter, 1, 1, 1,
-                                 peakRadius, false);
+    do_test_bounds_check_extents(coordinateFrame, 1, 1, -wallDistanceFromPeakCenter, 1, 1, 1, peakRadius, false);
 
     peakRadius = 0.51; // just enough for the sphere to penetrate the bounding
                        // box. Expect pass.
-    do_test_bounds_check_extents(coordinateFrame, 1, 1,
-                                 -wallDistanceFromPeakCenter, 1, 1, 1,
-                                 peakRadius, true);
+    do_test_bounds_check_extents(coordinateFrame, 1, 1, -wallDistanceFromPeakCenter, 1, 1, 1, peakRadius, true);
   }
 
   void test_peak_intersects_ymax_boundary_when_radius_large_enough() {
@@ -352,15 +311,11 @@ public:
 
     double peakRadius = 0.49; // not enough for the sphere to penetrate the
                               // bounding box. Expect failure
-    do_test_bounds_check_extents(coordinateFrame, 1, 1, 1,
-                                 -wallDistanceFromPeakCenter, 1, 1, peakRadius,
-                                 false);
+    do_test_bounds_check_extents(coordinateFrame, 1, 1, 1, -wallDistanceFromPeakCenter, 1, 1, peakRadius, false);
 
     peakRadius = 0.51; // just enough for the sphere to penetrate the bounding
                        // box. Expect pass.
-    do_test_bounds_check_extents(coordinateFrame, 1, 1, 1,
-                                 -wallDistanceFromPeakCenter, 1, 1, peakRadius,
-                                 true);
+    do_test_bounds_check_extents(coordinateFrame, 1, 1, 1, -wallDistanceFromPeakCenter, 1, 1, peakRadius, true);
   }
 
   void test_peak_intersects_zmin_boundary_when_radius_large_enough() {
@@ -369,15 +324,11 @@ public:
 
     double peakRadius = 0.49; // not enough for the sphere to penetrate the
                               // bounding box. Expect failure
-    do_test_bounds_check_extents(coordinateFrame, 1, 1, 1, 1,
-                                 -wallDistanceFromPeakCenter, 1, peakRadius,
-                                 false);
+    do_test_bounds_check_extents(coordinateFrame, 1, 1, 1, 1, -wallDistanceFromPeakCenter, 1, peakRadius, false);
 
     peakRadius = 0.51; // just enough for the sphere to penetrate the bounding
                        // box. Expect pass.
-    do_test_bounds_check_extents(coordinateFrame, 1, 1, 1, 1,
-                                 -wallDistanceFromPeakCenter, 1, peakRadius,
-                                 true);
+    do_test_bounds_check_extents(coordinateFrame, 1, 1, 1, 1, -wallDistanceFromPeakCenter, 1, peakRadius, true);
   }
 
   void test_peak_intersects_zmax_boundary_when_radius_large_enough() {
@@ -386,19 +337,15 @@ public:
 
     double peakRadius = 0.49; // not enough for the sphere to penetrate the
                               // bounding box. Expect failure
-    do_test_bounds_check_extents(coordinateFrame, 1, 1, 1, 1, 1,
-                                 -wallDistanceFromPeakCenter, peakRadius,
-                                 false);
+    do_test_bounds_check_extents(coordinateFrame, 1, 1, 1, 1, 1, -wallDistanceFromPeakCenter, peakRadius, false);
 
     peakRadius = 0.51; // just enough for the sphere to penetrate the bounding
                        // box. Expect pass.
-    do_test_bounds_check_extents(coordinateFrame, 1, 1, 1, 1, 1,
-                                 -wallDistanceFromPeakCenter, peakRadius, true);
+    do_test_bounds_check_extents(coordinateFrame, 1, 1, 1, 1, 1, -wallDistanceFromPeakCenter, peakRadius, true);
   }
 
   void test_false_intersection_when_check_peak_extents() {
-    std::vector<double> extents = {
-        0, 1, 0, 1, 0, 1}; // Extents go from 0, 1 in each dimension.
+    std::vector<double> extents = {0, 1, 0, 1, 0, 1}; // Extents go from 0, 1 in each dimension.
 
     PeaksWorkspace_sptr ws = WorkspaceCreationHelper::createPeaksWorkspace(1);
     Peak &peak = ws->getPeak(0);
@@ -422,13 +369,11 @@ public:
     alg.setProperty("PeakRadius", 0.1);
     alg.execute();
 
-    ITableWorkspace_sptr outWS =
-        AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(outName);
+    ITableWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(outName);
 
     TS_ASSERT_EQUALS(1, outWS->rowCount());
     TSM_ASSERT_EQUALS("Peak index should be zero", 0, outWS->cell<int>(0, 0));
-    TSM_ASSERT_EQUALS("Peak does NOT intersect the box", Boolean(false),
-                      outWS->cell<Boolean>(0, 1));
+    TSM_ASSERT_EQUALS("Peak does NOT intersect the box", Boolean(false), outWS->cell<Boolean>(0, 1));
   }
 };
 
@@ -441,18 +386,13 @@ private:
   Mantid::API::IPeaksWorkspace_sptr inputWS;
 
 public:
-  static PeaksInRegionTestPerformance *createSuite() {
-    return new PeaksInRegionTestPerformance();
-  }
-  static void destroySuite(PeaksInRegionTestPerformance *suite) {
-    delete suite;
-  }
+  static PeaksInRegionTestPerformance *createSuite() { return new PeaksInRegionTestPerformance(); }
+  static void destroySuite(PeaksInRegionTestPerformance *suite) { delete suite; }
 
   PeaksInRegionTestPerformance() {
     int numPeaks = 4000;
     inputWS = std::make_shared<PeaksWorkspace>();
-    Mantid::Geometry::Instrument_sptr inst =
-        ComponentCreationHelper::createTestInstrumentRectangular2(1, 200);
+    Mantid::Geometry::Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular2(1, 200);
     inputWS->setInstrument(inst);
 
     for (int i = 0; i < numPeaks; ++i) {
@@ -475,8 +415,7 @@ public:
     alg.setProperty("CheckPeakExtents", false);
     alg.execute();
 
-    Mantid::API::ITableWorkspace_sptr outWS =
-        AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(outName);
+    Mantid::API::ITableWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(outName);
 
     TS_ASSERT_EQUALS(3, outWS->columnCount());
     TS_ASSERT_EQUALS(inputWS->rowCount(), outWS->rowCount());
@@ -497,8 +436,7 @@ public:
     alg.setProperty("PeakRadius", 0.4);
     alg.execute();
 
-    Mantid::API::ITableWorkspace_sptr outWS =
-        AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(outName);
+    Mantid::API::ITableWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(outName);
 
     TS_ASSERT_EQUALS(3, outWS->columnCount());
     TS_ASSERT_EQUALS(inputWS->rowCount(), outWS->rowCount());

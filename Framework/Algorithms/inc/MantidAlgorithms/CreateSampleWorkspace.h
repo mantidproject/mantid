@@ -26,9 +26,7 @@ public:
 
   const std::string name() const override;
   int version() const override;
-  const std::vector<std::string> seeAlso() const override {
-    return {"CreateWorkspace"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"CreateWorkspace"}; }
   const std::string category() const override;
   /// Algorithm's summary
   const std::string summary() const override {
@@ -39,36 +37,27 @@ private:
   void init() override;
   void exec() override;
 
-  DataObjects::EventWorkspace_sptr
-  createEventWorkspace(int numPixels, int numBins, int numMonitors,
-                       int numEvents, double x0, double binDelta,
-                       const Geometry::Instrument_sptr &inst,
-                       const std::string &functionString, bool isRandom);
-  API::MatrixWorkspace_sptr
-  createHistogramWorkspace(int numPixels, int numBins, int numMonitors,
-                           double x0, double binDelta,
-                           const Geometry::Instrument_sptr &inst,
-                           const std::string &functionString, bool isRandom);
-  API::MatrixWorkspace_sptr
-  createScanningWorkspace(int numBins, double x0, double binDelta,
-                          const Geometry::Instrument_sptr &inst,
-                          const std::string &functionString, bool isRandom,
-                          int numScanPoints);
-  Geometry::Instrument_sptr createTestInstrumentRectangular(
-      API::Progress &progress, int numBanks, int numMonitors, int pixels,
-      double pixelSpacing, const double bankDistanceFromSample,
-      const double sourceSampleDistance);
-  Geometry::IObject_sptr createCappedCylinder(double radius, double height,
-                                              const Kernel::V3D &baseCentre,
-                                              const Kernel::V3D &axis,
-                                              const std::string &id);
-  Geometry::IObject_sptr createSphere(double radius, const Kernel::V3D &centre,
-                                      const std::string &id);
-  std::vector<double> evalFunction(const std::string &functionString,
-                                   const std::vector<double> &xVal,
+  DataObjects::EventWorkspace_sptr createEventWorkspace(int numPixels, int numBins, int numMonitors, int numEvents,
+                                                        double x0, double binDelta,
+                                                        const Geometry::Instrument_sptr &inst,
+                                                        const std::string &functionString, bool isRandom);
+  API::MatrixWorkspace_sptr createHistogramWorkspace(int numPixels, int numBins, int numMonitors, double x0,
+                                                     double binDelta, const Geometry::Instrument_sptr &inst,
+                                                     const std::string &functionString, bool isRandom);
+  API::MatrixWorkspace_sptr createScanningWorkspace(int numBins, double x0, double binDelta,
+                                                    const Geometry::Instrument_sptr &inst,
+                                                    const std::string &functionString, bool isRandom,
+                                                    int numScanPoints);
+  Geometry::Instrument_sptr createTestInstrumentRectangular(API::Progress &progress, int numBanks, int numMonitors,
+                                                            int pixels, double pixelSpacing,
+                                                            const double bankDistanceFromSample,
+                                                            const double sourceSampleDistance);
+  Geometry::IObject_sptr createCappedCylinder(double radius, double height, const Kernel::V3D &baseCentre,
+                                              const Kernel::V3D &axis, const std::string &id);
+  Geometry::IObject_sptr createSphere(double radius, const Kernel::V3D &centre, const std::string &id);
+  std::vector<double> evalFunction(const std::string &functionString, const std::vector<double> &xVal,
                                    double noiseScale);
-  void replaceAll(std::string &str, const std::string &from,
-                  const std::string &to);
+  void replaceAll(std::string &str, const std::string &from, const std::string &to);
   void addChopperParameters(API::MatrixWorkspace_sptr &ws);
 
   /// A pointer to the random number generator

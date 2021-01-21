@@ -56,16 +56,11 @@ private:
     GNU_DIAG_ON_SUGGEST_OVERRIDE
   };
 
-  static std::string createDimensionXMLString(unsigned int nbins, int min,
-                                              int max, std::string name,
-                                              std::string id) {
-    std::string xmlstream =
-        std::string("<Dimension ID=\"%s\">") + "<Name>%s</Name>" +
-        "<UpperBounds>%i</UpperBounds>" + "<LowerBounds>%i</LowerBounds>" +
-        "<NumberOfBins>%i</NumberOfBins>" + "</Dimension>";
+  static std::string createDimensionXMLString(unsigned int nbins, int min, int max, std::string name, std::string id) {
+    std::string xmlstream = std::string("<Dimension ID=\"%s\">") + "<Name>%s</Name>" + "<UpperBounds>%i</UpperBounds>" +
+                            "<LowerBounds>%i</LowerBounds>" + "<NumberOfBins>%i</NumberOfBins>" + "</Dimension>";
 
-    std::string formattedXMLString = boost::str(
-        boost::format(xmlstream.c_str()) % id % name % max % min % nbins);
+    std::string formattedXMLString = boost::str(boost::format(xmlstream.c_str()) % id % name % max % min % nbins);
     return formattedXMLString;
   }
 
@@ -73,23 +68,19 @@ public:
   void testCopyConstruction() {
     auto pDimensionX = std::make_shared<MockIMDDimension>();
     std::string a{"_a"}, b{"_b"}, c{"_c"}, d{"_d"};
-    EXPECT_CALL(Const(*pDimensionX), getDimensionId())
-        .WillRepeatedly(ReturnRef(a));
+    EXPECT_CALL(Const(*pDimensionX), getDimensionId()).WillRepeatedly(ReturnRef(a));
     EXPECT_CALL(*pDimensionX, toXMLString()).WillRepeatedly(Return("_a_xml"));
 
     auto pDimensionY = std::make_shared<MockIMDDimension>();
-    EXPECT_CALL(Const(*pDimensionY), getDimensionId())
-        .WillRepeatedly(ReturnRef(b));
+    EXPECT_CALL(Const(*pDimensionY), getDimensionId()).WillRepeatedly(ReturnRef(b));
     EXPECT_CALL(*pDimensionY, toXMLString()).WillRepeatedly(Return("_b_xml"));
 
     auto pDimensionZ = std::make_shared<MockIMDDimension>();
-    EXPECT_CALL(Const(*pDimensionZ), getDimensionId())
-        .WillRepeatedly(ReturnRef(c));
+    EXPECT_CALL(Const(*pDimensionZ), getDimensionId()).WillRepeatedly(ReturnRef(c));
     EXPECT_CALL(*pDimensionZ, toXMLString()).WillRepeatedly(Return("_c_xml"));
 
     auto pDimensionT = std::make_shared<MockIMDDimension>();
-    EXPECT_CALL(Const(*pDimensionT), getDimensionId())
-        .WillRepeatedly(ReturnRef(d));
+    EXPECT_CALL(Const(*pDimensionT), getDimensionId()).WillRepeatedly(ReturnRef(d));
     EXPECT_CALL(*pDimensionT, toXMLString()).WillRepeatedly(Return("_d_xml"));
 
     MDGeometryBuilderXML<NoDimensionPolicy> original;
@@ -102,31 +93,25 @@ public:
     MDGeometryBuilderXML<NoDimensionPolicy> copy(original);
 
     // Test that the outputs of the original and copy are the same.
-    TSM_ASSERT_EQUALS(
-        "Copy construction has failed to generate a genuine copy.",
-        original.create(), copy.create());
+    TSM_ASSERT_EQUALS("Copy construction has failed to generate a genuine copy.", original.create(), copy.create());
   }
 
   void testAssignment() {
     auto pDimensionX = std::make_shared<MockIMDDimension>();
     std::string a{"_a"}, b{"_b"}, c{"_c"}, d{"_d"};
-    EXPECT_CALL(Const(*pDimensionX), getDimensionId())
-        .WillRepeatedly(ReturnRef(a));
+    EXPECT_CALL(Const(*pDimensionX), getDimensionId()).WillRepeatedly(ReturnRef(a));
     EXPECT_CALL(*pDimensionX, toXMLString()).WillRepeatedly(Return("_a_xml"));
 
     auto pDimensionY = std::make_shared<MockIMDDimension>();
-    EXPECT_CALL(Const(*pDimensionY), getDimensionId())
-        .WillRepeatedly(ReturnRef(b));
+    EXPECT_CALL(Const(*pDimensionY), getDimensionId()).WillRepeatedly(ReturnRef(b));
     EXPECT_CALL(*pDimensionY, toXMLString()).WillRepeatedly(Return("_b_xml"));
 
     auto pDimensionZ = std::make_shared<MockIMDDimension>();
-    EXPECT_CALL(Const(*pDimensionZ), getDimensionId())
-        .WillRepeatedly(ReturnRef(c));
+    EXPECT_CALL(Const(*pDimensionZ), getDimensionId()).WillRepeatedly(ReturnRef(c));
     EXPECT_CALL(*pDimensionZ, toXMLString()).WillRepeatedly(Return("_c_xml"));
 
     auto pDimensionT = std::make_shared<MockIMDDimension>();
-    EXPECT_CALL(Const(*pDimensionT), getDimensionId())
-        .WillRepeatedly(ReturnRef(d));
+    EXPECT_CALL(Const(*pDimensionT), getDimensionId()).WillRepeatedly(ReturnRef(d));
     EXPECT_CALL(*pDimensionT, toXMLString()).WillRepeatedly(Return("_d_xml"));
 
     MDGeometryBuilderXML<NoDimensionPolicy> A;
@@ -140,74 +125,59 @@ public:
 
     // Test that the outputs of the original and the one ovewritten are the
     // same.
-    TSM_ASSERT_EQUALS("Assignment has failed to clone the original.",
-                      A.create(), B.create());
+    TSM_ASSERT_EQUALS("Assignment has failed to clone the original.", A.create(), B.create());
   }
 
   void testCannotAddSameDimensionMultipleTimes() {
     auto pDimensionX = std::make_shared<MockIMDDimension>();
     std::string a{"a"};
-    EXPECT_CALL(Const(*pDimensionX), getDimensionId())
-        .WillRepeatedly(ReturnRef(a));
+    EXPECT_CALL(Const(*pDimensionX), getDimensionId()).WillRepeatedly(ReturnRef(a));
     IMDDimension_const_sptr dimension(pDimensionX);
 
     MDGeometryBuilderXML<NoDimensionPolicy> builder;
-    TSM_ASSERT("Addition of dimension to empty set should have succeeded.",
-               builder.addOrdinaryDimension(dimension));
-    TSM_ASSERT(
-        "Addition of same dimension to set should have failed.",
-        !builder.addOrdinaryDimension(dimension)); // Test can re-Add/overwrite.
+    TSM_ASSERT("Addition of dimension to empty set should have succeeded.", builder.addOrdinaryDimension(dimension));
+    TSM_ASSERT("Addition of same dimension to set should have failed.",
+               !builder.addOrdinaryDimension(dimension)); // Test can re-Add/overwrite.
   }
 
   void testAddingNullDimensionReturnsFalse() {
     Mantid::Geometry::IMDDimension *pDim = nullptr;
     IMDDimension_const_sptr nullDimension(pDim);
     MDGeometryBuilderXML<NoDimensionPolicy> builder;
-    TSM_ASSERT("Adding null dimension should return false.",
-               !builder.addOrdinaryDimension(nullDimension));
-    TSM_ASSERT("Adding null x dimension should return false.",
-               !builder.addXDimension(nullDimension));
-    TSM_ASSERT("Adding null y dimension should return false.",
-               !builder.addYDimension(nullDimension));
-    TSM_ASSERT("Adding null z dimension should return false.",
-               !builder.addZDimension(nullDimension));
-    TSM_ASSERT("Adding null t dimension should return false.",
-               !builder.addTDimension(nullDimension));
+    TSM_ASSERT("Adding null dimension should return false.", !builder.addOrdinaryDimension(nullDimension));
+    TSM_ASSERT("Adding null x dimension should return false.", !builder.addXDimension(nullDimension));
+    TSM_ASSERT("Adding null y dimension should return false.", !builder.addYDimension(nullDimension));
+    TSM_ASSERT("Adding null z dimension should return false.", !builder.addZDimension(nullDimension));
+    TSM_ASSERT("Adding null t dimension should return false.", !builder.addTDimension(nullDimension));
   }
 
   void testStrictPolicy() {
     auto pDimensionX = std::make_shared<MockIMDDimension>();
     std::string a{"a"};
-    EXPECT_CALL(Const(*pDimensionX), getDimensionId())
-        .WillRepeatedly(ReturnRef(a));
+    EXPECT_CALL(Const(*pDimensionX), getDimensionId()).WillRepeatedly(ReturnRef(a));
     EXPECT_CALL(*pDimensionX, getIsIntegrated()).WillRepeatedly(Return(true));
     IMDDimension_const_sptr dimension(pDimensionX);
 
     MDGeometryBuilderXML<StrictDimensionPolicy> builder;
     TSM_ASSERT_THROWS("Strict policy should prevent add of a dimension to the "
                       "x mapping, which is integrated.",
-                      builder.addXDimension(dimension),
-                      const std::invalid_argument &);
+                      builder.addXDimension(dimension), const std::invalid_argument &);
     TSM_ASSERT_THROWS("Strict policy should prevent add of a dimension to the "
                       "y mapping, which is integrated.",
-                      builder.addYDimension(dimension),
-                      const std::invalid_argument &);
+                      builder.addYDimension(dimension), const std::invalid_argument &);
     TSM_ASSERT_THROWS("Strict policy should prevent add of a dimension to the "
                       "z mapping, which is integrated.",
-                      builder.addZDimension(dimension),
-                      const std::invalid_argument &);
+                      builder.addZDimension(dimension), const std::invalid_argument &);
     TSM_ASSERT_THROWS("Strict policy should prevent add of a dimension to the "
                       "t mapping, which is integrated.",
-                      builder.addTDimension(dimension),
-                      const std::invalid_argument &);
+                      builder.addTDimension(dimension), const std::invalid_argument &);
   }
 
   // Same as test above, but shouldn't throw.
   void testNoPolicy() {
     std::string a{"a"};
     auto pDimensionX = std::make_shared<MockIMDDimension>();
-    EXPECT_CALL(Const(*pDimensionX), getDimensionId())
-        .WillRepeatedly(ReturnRef(a));
+    EXPECT_CALL(Const(*pDimensionX), getDimensionId()).WillRepeatedly(ReturnRef(a));
     EXPECT_CALL(*pDimensionX, getIsIntegrated()).WillRepeatedly(Return(true));
     IMDDimension_const_sptr dimension(pDimensionX);
 
@@ -234,8 +204,7 @@ public:
         .WillOnce(Return(createDimensionXMLString(1, -1, 1, "O", "o")));
 
     std::string o{"o"};
-    EXPECT_CALL(Const(*pDimensionOrdinary), getDimensionId())
-        .WillRepeatedly(ReturnRef(o));
+    EXPECT_CALL(Const(*pDimensionOrdinary), getDimensionId()).WillRepeatedly(ReturnRef(o));
 
     MDGeometryBuilderXML<NoDimensionPolicy> builder;
     builder.addOrdinaryDimension(IMDDimension_const_sptr(pDimensionOrdinary));
@@ -246,28 +215,18 @@ public:
     Poco::XML::Element *pRootElem = pDoc->documentElement();
 
     // Check that the number of dimensions provided is correct.
-    Poco::AutoPtr<Poco::XML::NodeList> dimension =
-        pRootElem->getElementsByTagName("Dimension");
-    TSM_ASSERT_EQUALS("Wrong number of dimensions in geometry xml", 1,
-                      dimension->length());
+    Poco::AutoPtr<Poco::XML::NodeList> dimension = pRootElem->getElementsByTagName("Dimension");
+    TSM_ASSERT_EQUALS("Wrong number of dimensions in geometry xml", 1, dimension->length());
 
     // Check that mapping nodes give correct mappings.
     TSM_ASSERT_EQUALS("Should have no DimensionY mapping", "",
-                      pRootElem->getChildElement("XDimension")
-                          ->getChildElement("RefDimensionId")
-                          ->innerText());
+                      pRootElem->getChildElement("XDimension")->getChildElement("RefDimensionId")->innerText());
     TSM_ASSERT_EQUALS("Should have no DimensionY mapping", "",
-                      pRootElem->getChildElement("YDimension")
-                          ->getChildElement("RefDimensionId")
-                          ->innerText());
+                      pRootElem->getChildElement("YDimension")->getChildElement("RefDimensionId")->innerText());
     TSM_ASSERT_EQUALS("Should have no DimensionZ mapping", "",
-                      pRootElem->getChildElement("ZDimension")
-                          ->getChildElement("RefDimensionId")
-                          ->innerText());
+                      pRootElem->getChildElement("ZDimension")->getChildElement("RefDimensionId")->innerText());
     TSM_ASSERT_EQUALS("Should have no DimensionT mapping", "",
-                      pRootElem->getChildElement("TDimension")
-                          ->getChildElement("RefDimensionId")
-                          ->innerText());
+                      pRootElem->getChildElement("TDimension")->getChildElement("RefDimensionId")->innerText());
   }
 
   void testManyOrinaryDimensions() {
@@ -279,15 +238,9 @@ public:
     EXPECT_CALL(Const(*pDimB), getDimensionId()).WillRepeatedly(ReturnRef(b));
     EXPECT_CALL(Const(*pDimC), getDimensionId()).WillRepeatedly(ReturnRef(c));
 
-    EXPECT_CALL(*pDimA, toXMLString())
-        .Times(1)
-        .WillOnce(Return(createDimensionXMLString(1, -1, 1, "A", "a")));
-    EXPECT_CALL(*pDimB, toXMLString())
-        .Times(1)
-        .WillOnce(Return(createDimensionXMLString(1, -1, 1, "B", "b")));
-    EXPECT_CALL(*pDimC, toXMLString())
-        .Times(1)
-        .WillOnce(Return(createDimensionXMLString(1, -1, 1, "C", "c")));
+    EXPECT_CALL(*pDimA, toXMLString()).Times(1).WillOnce(Return(createDimensionXMLString(1, -1, 1, "A", "a")));
+    EXPECT_CALL(*pDimB, toXMLString()).Times(1).WillOnce(Return(createDimensionXMLString(1, -1, 1, "B", "b")));
+    EXPECT_CALL(*pDimC, toXMLString()).Times(1).WillOnce(Return(createDimensionXMLString(1, -1, 1, "C", "c")));
 
     VecIMDDimension_sptr vecDims;
     vecDims.emplace_back(IMDDimension_sptr(pDimA));
@@ -306,10 +259,8 @@ public:
   void testWithXDimensionOnly() {
     auto pDimensionX = std::make_shared<MockIMDDimension>();
     std::string a{"a"};
-    EXPECT_CALL(*pDimensionX, toXMLString())
-        .WillOnce(Return(createDimensionXMLString(1, -1, 1, "A", a)));
-    EXPECT_CALL(Const(*pDimensionX), getDimensionId())
-        .WillRepeatedly(ReturnRef(a));
+    EXPECT_CALL(*pDimensionX, toXMLString()).WillOnce(Return(createDimensionXMLString(1, -1, 1, "A", a)));
+    EXPECT_CALL(Const(*pDimensionX), getDimensionId()).WillRepeatedly(ReturnRef(a));
 
     MDGeometryBuilderXML<NoDimensionPolicy> builder;
     builder.addXDimension(IMDDimension_const_sptr(pDimensionX));
@@ -320,28 +271,18 @@ public:
     Poco::XML::Element *pRootElem = pDoc->documentElement();
 
     // Check that the number of dimensions provided is correct.
-    Poco::AutoPtr<Poco::XML::NodeList> dimension =
-        pRootElem->getElementsByTagName("Dimension");
-    TSM_ASSERT_EQUALS("Wrong number of dimensions in geometry xml", 1,
-                      dimension->length());
+    Poco::AutoPtr<Poco::XML::NodeList> dimension = pRootElem->getElementsByTagName("Dimension");
+    TSM_ASSERT_EQUALS("Wrong number of dimensions in geometry xml", 1, dimension->length());
 
     // Check that mapping nodes give correct mappings.
     TSM_ASSERT_EQUALS("No DimensionX mapping is incorrect", "a",
-                      pRootElem->getChildElement("XDimension")
-                          ->getChildElement("RefDimensionId")
-                          ->innerText());
+                      pRootElem->getChildElement("XDimension")->getChildElement("RefDimensionId")->innerText());
     TSM_ASSERT_EQUALS("Should have no DimensionY mapping", "",
-                      pRootElem->getChildElement("YDimension")
-                          ->getChildElement("RefDimensionId")
-                          ->innerText());
+                      pRootElem->getChildElement("YDimension")->getChildElement("RefDimensionId")->innerText());
     TSM_ASSERT_EQUALS("Should have no DimensionZ mapping", "",
-                      pRootElem->getChildElement("ZDimension")
-                          ->getChildElement("RefDimensionId")
-                          ->innerText());
+                      pRootElem->getChildElement("ZDimension")->getChildElement("RefDimensionId")->innerText());
     TSM_ASSERT_EQUALS("Should have no DimensionT mapping", "",
-                      pRootElem->getChildElement("TDimension")
-                          ->getChildElement("RefDimensionId")
-                          ->innerText());
+                      pRootElem->getChildElement("TDimension")->getChildElement("RefDimensionId")->innerText());
   }
 
   void testWithXYDimensionOnly() {
@@ -349,15 +290,11 @@ public:
     auto pDimensionY = std::make_shared<MockIMDDimension>();
     std::string a{"a"}, b{"b"};
 
-    EXPECT_CALL(*pDimensionX, toXMLString())
-        .WillRepeatedly(Return(createDimensionXMLString(1, -1, 1, "A", a)));
-    EXPECT_CALL(Const(*pDimensionX), getDimensionId())
-        .WillRepeatedly(ReturnRef(a));
+    EXPECT_CALL(*pDimensionX, toXMLString()).WillRepeatedly(Return(createDimensionXMLString(1, -1, 1, "A", a)));
+    EXPECT_CALL(Const(*pDimensionX), getDimensionId()).WillRepeatedly(ReturnRef(a));
 
-    EXPECT_CALL(*pDimensionY, toXMLString())
-        .WillRepeatedly(Return(createDimensionXMLString(1, -1, 1, "B", b)));
-    EXPECT_CALL(Const(*pDimensionY), getDimensionId())
-        .WillRepeatedly(ReturnRef(b));
+    EXPECT_CALL(*pDimensionY, toXMLString()).WillRepeatedly(Return(createDimensionXMLString(1, -1, 1, "B", b)));
+    EXPECT_CALL(Const(*pDimensionY), getDimensionId()).WillRepeatedly(ReturnRef(b));
 
     MDGeometryBuilderXML<NoDimensionPolicy> builder;
     builder.addXDimension(IMDDimension_const_sptr(pDimensionX));
@@ -370,28 +307,18 @@ public:
     Poco::XML::Element *pRootElem = pDoc->documentElement();
 
     // Check that the number of dimensions provided is correct.
-    Poco::AutoPtr<Poco::XML::NodeList> dimension =
-        pRootElem->getElementsByTagName("Dimension");
-    TSM_ASSERT_EQUALS("Wrong number of dimensions in geometry xml", 2,
-                      dimension->length());
+    Poco::AutoPtr<Poco::XML::NodeList> dimension = pRootElem->getElementsByTagName("Dimension");
+    TSM_ASSERT_EQUALS("Wrong number of dimensions in geometry xml", 2, dimension->length());
 
     // Check that mapping nodes give correct mappings.
     TSM_ASSERT_EQUALS("No DimensionX mapping is incorrect", "a",
-                      pRootElem->getChildElement("XDimension")
-                          ->getChildElement("RefDimensionId")
-                          ->innerText());
+                      pRootElem->getChildElement("XDimension")->getChildElement("RefDimensionId")->innerText());
     TSM_ASSERT_EQUALS("Should have no DimensionY mapping", "b",
-                      pRootElem->getChildElement("YDimension")
-                          ->getChildElement("RefDimensionId")
-                          ->innerText());
+                      pRootElem->getChildElement("YDimension")->getChildElement("RefDimensionId")->innerText());
     TSM_ASSERT_EQUALS("Should have no DimensionZ mapping", "",
-                      pRootElem->getChildElement("ZDimension")
-                          ->getChildElement("RefDimensionId")
-                          ->innerText());
+                      pRootElem->getChildElement("ZDimension")->getChildElement("RefDimensionId")->innerText());
     TSM_ASSERT_EQUALS("Should have no DimensionT mapping", "",
-                      pRootElem->getChildElement("TDimension")
-                          ->getChildElement("RefDimensionId")
-                          ->innerText());
+                      pRootElem->getChildElement("TDimension")->getChildElement("RefDimensionId")->innerText());
   }
 
   void testWithXYZDimensionOnly() {
@@ -400,20 +327,14 @@ public:
     auto pDimensionZ = std::make_shared<MockIMDDimension>();
     std::string a{"a"}, b{"b"}, c{"c"};
 
-    EXPECT_CALL(*pDimensionX, toXMLString())
-        .WillRepeatedly(Return(createDimensionXMLString(1, -1, 1, "A", a)));
-    EXPECT_CALL(Const(*pDimensionX), getDimensionId())
-        .WillRepeatedly(ReturnRef(a));
+    EXPECT_CALL(*pDimensionX, toXMLString()).WillRepeatedly(Return(createDimensionXMLString(1, -1, 1, "A", a)));
+    EXPECT_CALL(Const(*pDimensionX), getDimensionId()).WillRepeatedly(ReturnRef(a));
 
-    EXPECT_CALL(*pDimensionY, toXMLString())
-        .WillRepeatedly(Return(createDimensionXMLString(1, -1, 1, "B", b)));
-    EXPECT_CALL(Const(*pDimensionY), getDimensionId())
-        .WillRepeatedly(ReturnRef(b));
+    EXPECT_CALL(*pDimensionY, toXMLString()).WillRepeatedly(Return(createDimensionXMLString(1, -1, 1, "B", b)));
+    EXPECT_CALL(Const(*pDimensionY), getDimensionId()).WillRepeatedly(ReturnRef(b));
 
-    EXPECT_CALL(*pDimensionZ, toXMLString())
-        .WillRepeatedly(Return(createDimensionXMLString(1, -1, 1, "C", c)));
-    EXPECT_CALL(Const(*pDimensionZ), getDimensionId())
-        .WillRepeatedly(ReturnRef(c));
+    EXPECT_CALL(*pDimensionZ, toXMLString()).WillRepeatedly(Return(createDimensionXMLString(1, -1, 1, "C", c)));
+    EXPECT_CALL(Const(*pDimensionZ), getDimensionId()).WillRepeatedly(ReturnRef(c));
 
     MDGeometryBuilderXML<NoDimensionPolicy> builder;
     builder.addXDimension(IMDDimension_const_sptr(pDimensionX));
@@ -427,28 +348,18 @@ public:
     Poco::XML::Element *pRootElem = pDoc->documentElement();
 
     // Check that the number of dimensions provided is correct.
-    Poco::AutoPtr<Poco::XML::NodeList> dimension =
-        pRootElem->getElementsByTagName("Dimension");
-    TSM_ASSERT_EQUALS("Wrong number of dimensions in geometry xml", 3,
-                      dimension->length());
+    Poco::AutoPtr<Poco::XML::NodeList> dimension = pRootElem->getElementsByTagName("Dimension");
+    TSM_ASSERT_EQUALS("Wrong number of dimensions in geometry xml", 3, dimension->length());
 
     // Check that mapping nodes give correct mappings.
     TSM_ASSERT_EQUALS("No DimensionX mapping is incorrect", "a",
-                      pRootElem->getChildElement("XDimension")
-                          ->getChildElement("RefDimensionId")
-                          ->innerText());
+                      pRootElem->getChildElement("XDimension")->getChildElement("RefDimensionId")->innerText());
     TSM_ASSERT_EQUALS("Should have no DimensionY mapping", "b",
-                      pRootElem->getChildElement("YDimension")
-                          ->getChildElement("RefDimensionId")
-                          ->innerText());
+                      pRootElem->getChildElement("YDimension")->getChildElement("RefDimensionId")->innerText());
     TSM_ASSERT_EQUALS("Should have no DimensionZ mapping", "c",
-                      pRootElem->getChildElement("ZDimension")
-                          ->getChildElement("RefDimensionId")
-                          ->innerText());
+                      pRootElem->getChildElement("ZDimension")->getChildElement("RefDimensionId")->innerText());
     TSM_ASSERT_EQUALS("Should have no DimensionT mapping", "",
-                      pRootElem->getChildElement("TDimension")
-                          ->getChildElement("RefDimensionId")
-                          ->innerText());
+                      pRootElem->getChildElement("TDimension")->getChildElement("RefDimensionId")->innerText());
   }
 
   void testFullCreate() {
@@ -458,25 +369,17 @@ public:
     auto pDimensionT = std::make_shared<MockIMDDimension>();
     std::string a{"a"}, b{"b"}, c{"c"}, d{"d"};
 
-    EXPECT_CALL(*pDimensionX, toXMLString())
-        .WillRepeatedly(Return(createDimensionXMLString(1, -1, 1, "A", a)));
-    EXPECT_CALL(Const(*pDimensionX), getDimensionId())
-        .WillRepeatedly(ReturnRef(a));
+    EXPECT_CALL(*pDimensionX, toXMLString()).WillRepeatedly(Return(createDimensionXMLString(1, -1, 1, "A", a)));
+    EXPECT_CALL(Const(*pDimensionX), getDimensionId()).WillRepeatedly(ReturnRef(a));
 
-    EXPECT_CALL(*pDimensionY, toXMLString())
-        .WillRepeatedly(Return(createDimensionXMLString(1, -1, 1, "B", b)));
-    EXPECT_CALL(Const(*pDimensionY), getDimensionId())
-        .WillRepeatedly(ReturnRef(b));
+    EXPECT_CALL(*pDimensionY, toXMLString()).WillRepeatedly(Return(createDimensionXMLString(1, -1, 1, "B", b)));
+    EXPECT_CALL(Const(*pDimensionY), getDimensionId()).WillRepeatedly(ReturnRef(b));
 
-    EXPECT_CALL(*pDimensionZ, toXMLString())
-        .WillRepeatedly(Return(createDimensionXMLString(1, -1, 1, "C", c)));
-    EXPECT_CALL(Const(*pDimensionZ), getDimensionId())
-        .WillRepeatedly(ReturnRef(c));
+    EXPECT_CALL(*pDimensionZ, toXMLString()).WillRepeatedly(Return(createDimensionXMLString(1, -1, 1, "C", c)));
+    EXPECT_CALL(Const(*pDimensionZ), getDimensionId()).WillRepeatedly(ReturnRef(c));
 
-    EXPECT_CALL(*pDimensionT, toXMLString())
-        .WillRepeatedly(Return(createDimensionXMLString(1, -1, 1, "D", d)));
-    EXPECT_CALL(Const(*pDimensionT), getDimensionId())
-        .WillRepeatedly(ReturnRef(d));
+    EXPECT_CALL(*pDimensionT, toXMLString()).WillRepeatedly(Return(createDimensionXMLString(1, -1, 1, "D", d)));
+    EXPECT_CALL(Const(*pDimensionT), getDimensionId()).WillRepeatedly(ReturnRef(d));
 
     MDGeometryBuilderXML<NoDimensionPolicy> builder;
     builder.addXDimension(pDimensionX);
@@ -493,41 +396,27 @@ public:
     Poco::XML::Element *pRootElem = pDoc->documentElement();
 
     // Check that the number of dimensions provided is correct.
-    Poco::AutoPtr<Poco::XML::NodeList> dimension =
-        pRootElem->getElementsByTagName("Dimension");
-    TSM_ASSERT_EQUALS("Wrong number of dimensions in geometry xml", 4,
-                      dimension->length());
+    Poco::AutoPtr<Poco::XML::NodeList> dimension = pRootElem->getElementsByTagName("Dimension");
+    TSM_ASSERT_EQUALS("Wrong number of dimensions in geometry xml", 4, dimension->length());
 
     // Check that mapping nodes have been provided.
-    Poco::AutoPtr<Poco::XML::NodeList> xdimension =
-        pRootElem->getElementsByTagName("XDimension");
+    Poco::AutoPtr<Poco::XML::NodeList> xdimension = pRootElem->getElementsByTagName("XDimension");
     TSM_ASSERT_EQUALS("No DimensionX in geometry xml", 1, xdimension->length());
-    Poco::AutoPtr<Poco::XML::NodeList> ydimension =
-        pRootElem->getElementsByTagName("YDimension");
+    Poco::AutoPtr<Poco::XML::NodeList> ydimension = pRootElem->getElementsByTagName("YDimension");
     TSM_ASSERT_EQUALS("No DimensionY in geometry xml", 1, ydimension->length());
-    Poco::AutoPtr<Poco::XML::NodeList> zdimension =
-        pRootElem->getElementsByTagName("ZDimension");
+    Poco::AutoPtr<Poco::XML::NodeList> zdimension = pRootElem->getElementsByTagName("ZDimension");
     TSM_ASSERT_EQUALS("No DimensionZ in geometry xml", 1, zdimension->length());
-    Poco::AutoPtr<Poco::XML::NodeList> tdimension =
-        pRootElem->getElementsByTagName("TDimension");
+    Poco::AutoPtr<Poco::XML::NodeList> tdimension = pRootElem->getElementsByTagName("TDimension");
     TSM_ASSERT_EQUALS("No DimensionT in geometry xml", 1, tdimension->length());
 
     // Check that mapping nodes give correct mappings.
     TSM_ASSERT_EQUALS("No DimensionX mapping is incorrect", "a",
-                      pRootElem->getChildElement("XDimension")
-                          ->getChildElement("RefDimensionId")
-                          ->innerText());
+                      pRootElem->getChildElement("XDimension")->getChildElement("RefDimensionId")->innerText());
     TSM_ASSERT_EQUALS("No DimensionY mapping is incorrect", "b",
-                      pRootElem->getChildElement("YDimension")
-                          ->getChildElement("RefDimensionId")
-                          ->innerText());
+                      pRootElem->getChildElement("YDimension")->getChildElement("RefDimensionId")->innerText());
     TSM_ASSERT_EQUALS("No DimensionZ mapping is incorrect", "c",
-                      pRootElem->getChildElement("ZDimension")
-                          ->getChildElement("RefDimensionId")
-                          ->innerText());
+                      pRootElem->getChildElement("ZDimension")->getChildElement("RefDimensionId")->innerText());
     TSM_ASSERT_EQUALS("No DimensionT mapping is incorrect", "d",
-                      pRootElem->getChildElement("TDimension")
-                          ->getChildElement("RefDimensionId")
-                          ->innerText());
+                      pRootElem->getChildElement("TDimension")->getChildElement("RefDimensionId")->innerText());
   }
 };

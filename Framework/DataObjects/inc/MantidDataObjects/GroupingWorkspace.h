@@ -31,35 +31,25 @@ public:
   GroupingWorkspace &operator=(const GroupingWorkspace &) = delete;
 
   /// Returns a clone of the workspace
-  std::unique_ptr<GroupingWorkspace> clone() const {
-    return std::unique_ptr<GroupingWorkspace>(doClone());
-  }
+  std::unique_ptr<GroupingWorkspace> clone() const { return std::unique_ptr<GroupingWorkspace>(doClone()); }
 
   /// Returns a default-initialized clone of the workspace
-  std::unique_ptr<GroupingWorkspace> cloneEmpty() const {
-    return std::unique_ptr<GroupingWorkspace>(doCloneEmpty());
-  }
+  std::unique_ptr<GroupingWorkspace> cloneEmpty() const { return std::unique_ptr<GroupingWorkspace>(doCloneEmpty()); }
 
   /** Gets the name of the workspace type
   @return Standard string name  */
   const std::string id() const override { return "GroupingWorkspace"; }
 
-  void makeDetectorIDToGroupMap(std::map<detid_t, int> &detIDToGroup,
-                                int64_t &ngroups) const;
-  void makeDetectorIDToGroupVector(std::vector<int> &detIDToGroup,
-                                   int64_t &ngroups) const;
+  void makeDetectorIDToGroupMap(std::map<detid_t, int> &detIDToGroup, int64_t &ngroups) const;
+  void makeDetectorIDToGroupVector(std::vector<int> &detIDToGroup, int64_t &ngroups) const;
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
   GroupingWorkspace(const GroupingWorkspace &) = default;
 
 private:
-  GroupingWorkspace *doClone() const override {
-    return new GroupingWorkspace(*this);
-  }
-  GroupingWorkspace *doCloneEmpty() const override {
-    return new GroupingWorkspace();
-  }
+  GroupingWorkspace *doClone() const override { return new GroupingWorkspace(*this); }
+  GroupingWorkspace *doCloneEmpty() const override { return new GroupingWorkspace(); }
 };
 
 /// shared pointer to the GroupingWorkspace class

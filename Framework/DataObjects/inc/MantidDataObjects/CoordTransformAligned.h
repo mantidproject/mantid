@@ -37,13 +37,10 @@ DECLARE_VECTOR_PARAMETER(ScalingParam, coord_t)
 */
 class DLLExport CoordTransformAligned : public Mantid::API::CoordTransform {
 public:
-  CoordTransformAligned(const size_t inD, const size_t outD,
-                        const size_t *dimensionToBinFrom, const coord_t *origin,
+  CoordTransformAligned(const size_t inD, const size_t outD, const size_t *dimensionToBinFrom, const coord_t *origin,
                         const coord_t *scaling);
-  CoordTransformAligned(const size_t inD, const size_t outD,
-                        std::vector<size_t> dimensionToBinFrom,
-                        std::vector<coord_t> origin,
-                        std::vector<coord_t> scaling);
+  CoordTransformAligned(const size_t inD, const size_t outD, std::vector<size_t> dimensionToBinFrom,
+                        std::vector<coord_t> origin, std::vector<coord_t> scaling);
   CoordTransform *clone() const override;
 
   std::string toXMLString() const override;

@@ -30,9 +30,7 @@ struct ParameterValue {
 
 struct ResultLocationNew {
   ResultLocationNew() = default;
-  ResultLocationNew(const Mantid::API::WorkspaceGroup_sptr &group,
-                    WorkspaceGroupIndex i)
-      : result(group), index(i) {}
+  ResultLocationNew(const Mantid::API::WorkspaceGroup_sptr &group, WorkspaceGroupIndex i) : result(group), index(i) {}
   std::weak_ptr<Mantid::API::WorkspaceGroup> result;
   WorkspaceGroupIndex index = WorkspaceGroupIndex{0};
 };
@@ -45,11 +43,9 @@ public:
   virtual ~IIndirectFitOutput() = default;
   virtual bool isSpectrumFit(FitDomainIndex index) const = 0;
 
-  virtual std::unordered_map<std::string, ParameterValue>
-  getParameters(FitDomainIndex index) const = 0;
+  virtual std::unordered_map<std::string, ParameterValue> getParameters(FitDomainIndex index) const = 0;
 
-  virtual boost::optional<ResultLocationNew>
-  getResultLocation(FitDomainIndex index) const = 0;
+  virtual boost::optional<ResultLocationNew> getResultLocation(FitDomainIndex index) const = 0;
   virtual std::vector<std::string> getResultParameterNames() const = 0;
   virtual Mantid::API::WorkspaceGroup_sptr getLastResultWorkspace() const = 0;
   virtual Mantid::API::WorkspaceGroup_sptr getLastResultGroup() const = 0;
@@ -57,16 +53,14 @@ public:
   virtual void clear() = 0;
   virtual bool isEmpty() const = 0;
 
-  virtual void
-  addOutput(const Mantid::API::WorkspaceGroup_sptr &resultGroup,
-            Mantid::API::ITableWorkspace_sptr parameterTable,
-            const Mantid::API::WorkspaceGroup_sptr &resultWorkspace) = 0;
+  virtual void addOutput(const Mantid::API::WorkspaceGroup_sptr &resultGroup,
+                         Mantid::API::ITableWorkspace_sptr parameterTable,
+                         const Mantid::API::WorkspaceGroup_sptr &resultWorkspace) = 0;
 
-  virtual void
-  addSingleOutput(const Mantid::API::WorkspaceGroup_sptr &resultGroup,
-                  Mantid::API::ITableWorkspace_sptr parameterTable,
-                  const Mantid::API::WorkspaceGroup_sptr &resultWorkspace,
-                  FitDomainIndex fitDomainIndex) = 0;
+  virtual void addSingleOutput(const Mantid::API::WorkspaceGroup_sptr &resultGroup,
+                               Mantid::API::ITableWorkspace_sptr parameterTable,
+                               const Mantid::API::WorkspaceGroup_sptr &resultWorkspace,
+                               FitDomainIndex fitDomainIndex) = 0;
 };
 
 } // namespace IDA

@@ -157,8 +157,8 @@ class Graph : public QWidget {
   Q_OBJECT
 
 public:
-  Graph(int x = 0, int y = 0, int width = 500, int height = 400,
-        QWidget *parent = nullptr, const Qt::WFlags &f = nullptr);
+  Graph(int x = 0, int y = 0, int width = 500, int height = 400, QWidget *parent = nullptr,
+        const Qt::WFlags &f = nullptr);
   ~Graph() override;
 
   enum Ticks { NoTicks = 0, Out = 1, InOut = 2, In = 3 };
@@ -222,9 +222,7 @@ public slots:
 
   /// when using MD curves (true == normalizbleMD()), what type of normalization
   int normalizationMD() const { return m_normalizationMD; }
-  void setNormalizationMD(const int normalization) {
-    m_normalizationMD = normalization;
-  }
+  void setNormalizationMD(const int normalization) { m_normalizationMD = normalization; }
 
   //! Accessor method for #d_plot.
   Plot *plotWidget() { return d_plot; };
@@ -233,43 +231,31 @@ public slots:
   //! \name Pie Curves
   //@{
   //! Returns true if this Graph is a pie plot, false otherwise.
-  bool isPiePlot() {
-    return (c_type.count() == 1 && c_type[0] == GraphOptions::Pie);
-  };
+  bool isPiePlot() { return (c_type.count() == 1 && c_type[0] == GraphOptions::Pie); };
   //! Used when creating a pie plot.
-  QwtPieCurve *plotPie(Table *w, const QString &name, int startRow = 0,
-                       int endRow = -1);
+  QwtPieCurve *plotPie(Table *w, const QString &name, int startRow = 0, int endRow = -1);
   //! Used when restoring a pie plot from a project file.
-  QwtPieCurve *
-  plotPie(Table *w, const QString &name, const QPen &pen, int brush, int size,
-          int firstColor, int startRow = 0, int endRow = -1,
-          bool visible = true, double d_start_azimuth = 270,
-          double d_view_angle = 90, double d_thickness = 33,
-          double d_horizontal_offset = 0.0, double d_edge_dist = 25,
-          bool d_counter_clockwise = false, bool d_auto_labeling = true,
-          bool d_values = false, bool d_percentages = true,
-          bool d_categories = false, bool d_fixed_labels_pos = true);
+  QwtPieCurve *plotPie(Table *w, const QString &name, const QPen &pen, int brush, int size, int firstColor,
+                       int startRow = 0, int endRow = -1, bool visible = true, double d_start_azimuth = 270,
+                       double d_view_angle = 90, double d_thickness = 33, double d_horizontal_offset = 0.0,
+                       double d_edge_dist = 25, bool d_counter_clockwise = false, bool d_auto_labeling = true,
+                       bool d_values = false, bool d_percentages = true, bool d_categories = false,
+                       bool d_fixed_labels_pos = true);
 
   void removePie();
   QString pieLegendText();
   QString savePieCurveLayout();
   //@}
 
-  bool addCurves(Table *w, const QStringList &names, int style = 0,
-                 double lWidth = 1, int sSize = 3, int startRow = 0,
+  bool addCurves(Table *w, const QStringList &names, int style = 0, double lWidth = 1, int sSize = 3, int startRow = 0,
                  int endRow = -1);
-  PlotCurve *insertCurve(Table *w, const QString &name, int style,
-                         int startRow = 0, int endRow = -1);
+  PlotCurve *insertCurve(Table *w, const QString &name, int style, int startRow = 0, int endRow = -1);
   PlotCurve *insertCurve(Table *w, int xcol, const QString &name, int style);
-  PlotCurve *insertCurve(Table *w, const QString &xColName,
-                         const QString &yColName, int style, int startRow = 0,
+  PlotCurve *insertCurve(Table *w, const QString &xColName, const QString &yColName, int style, int startRow = 0,
                          int endRow = -1);
-  PlotCurve *
-  insertCurve(const QString &workspaceName, int index, bool err = false,
-              GraphOptions::CurveType style = GraphOptions::Unspecified,
-              bool distribution = false);
-  PlotCurve *insertCurve(PlotCurve *c, int lineWidth = -1,
-                         int curveType = GraphOptions::User);
+  PlotCurve *insertCurve(const QString &workspaceName, int index, bool err = false,
+                         GraphOptions::CurveType style = GraphOptions::Unspecified, bool distribution = false);
+  PlotCurve *insertCurve(PlotCurve *c, int lineWidth = -1, int curveType = GraphOptions::User);
   void insertPlotItem(QwtPlotItem *i, int type);
 
   void insertCurve(Graph *g, int i);
@@ -303,9 +289,7 @@ public slots:
   //! Map curve pointer to index.
   int curveIndex(QwtPlotCurve *c) const;
   //! map curve title to index
-  int curveIndex(const QString &title) {
-    return plotItemsList().indexOf(title);
-  }
+  int curveIndex(const QString &title) { return plotItemsList().indexOf(title); }
   //! get curve by index
   QwtPlotCurve *curve(int index);
   //! get curve by name
@@ -327,8 +311,7 @@ public slots:
   //! get plot item by index
   int plotItemIndex(QwtPlotItem *it) const;
 
-  void updateCurveNames(const QString &oldName, const QString &newName,
-                        bool updateTableName = true);
+  void updateCurveNames(const QString &oldName, const QString &newName, bool updateTableName = true);
 
   int curveType(int curveIndex);
   void setCurveType(int curve, int style);
@@ -356,11 +339,9 @@ public slots:
   //! Provided for convenience in scripts
   void exportToFile(const QString &fileName);
   void exportSVG(const QString &fname);
-  void exportVector(const QString &fileName, int res = 0, bool color = true,
-                    bool keepAspect = true,
+  void exportVector(const QString &fileName, int res = 0, bool color = true, bool keepAspect = true,
                     QPrinter::PageSize pageSize = QPrinter::Custom);
-  void exportImage(const QString &fileName, int quality = 100,
-                   bool transparent = false);
+  void exportImage(const QString &fileName, int quality = 100, bool transparent = false);
   //@}
 
   void replot() { d_plot->replot(); };
@@ -368,28 +349,22 @@ public slots:
 
   //! \name Error Bars
   //@{
-  QwtErrorPlotCurve *addErrorBars(const QString &xColName,
-                                  const QString &yColName, Table *errTable,
-                                  const QString &errColName, int type = 1,
-                                  double width = 1, int cap = 8,
-                                  const QColor &color = QColor(Qt::black),
-                                  bool through = false, bool minus = true,
+  QwtErrorPlotCurve *addErrorBars(const QString &xColName, const QString &yColName, Table *errTable,
+                                  const QString &errColName, int type = 1, double width = 1, int cap = 8,
+                                  const QColor &color = QColor(Qt::black), bool through = false, bool minus = true,
                                   bool plus = true);
 
-  QwtErrorPlotCurve *addErrorBars(const QString &yColName, Table *errTable,
-                                  const QString &errColName, int type = 1,
-                                  double width = 1, int cap = 8,
-                                  const QColor &color = QColor(Qt::black),
-                                  bool through = false, bool minus = true,
-                                  bool plus = true);
+  QwtErrorPlotCurve *addErrorBars(const QString &yColName, Table *errTable, const QString &errColName, int type = 1,
+                                  double width = 1, int cap = 8, const QColor &color = QColor(Qt::black),
+                                  bool through = false, bool minus = true, bool plus = true);
 
   /// Adds the errors to an existing MantidCurve
   void addMantidErrorBars(const QString &curveName, bool drawAll);
   /// Removes the errors off an existing MantidCurve
   void removeMantidErrorBars(const QString &curveName);
 
-  void updateErrorBars(QwtErrorPlotCurve *er, bool xErr, double width, int cap,
-                       const QColor &c, bool plus, bool minus, bool through);
+  void updateErrorBars(QwtErrorPlotCurve *er, bool xErr, double width, int cap, const QColor &c, bool plus, bool minus,
+                       bool through);
 
   ErrorBarSettings *errorBarSettings(int curveIndex, int errorBarIndex = 0);
 
@@ -408,20 +383,17 @@ public slots:
   //@}
 
   //! Set axis scale
-  void setScale(int axis, double start, double end, double step = 0.0,
-                int majorTicks = 5, int minorTicks = 5, int type = 0,
-                bool inverted = false, double left_break = -DBL_MAX,
-                double right_break = DBL_MAX, int pos = 50,
-                double stepBeforeBreak = 0.0, double stepAfterBreak = 0.0,
-                int minTicksBeforeBreak = 4, int minTicksAfterBreak = 4,
-                bool log10AfterBreak = false, int breakWidth = 4,
+  void setScale(int axis, double start, double end, double step = 0.0, int majorTicks = 5, int minorTicks = 5,
+                int type = 0, bool inverted = false, double left_break = -DBL_MAX, double right_break = DBL_MAX,
+                int pos = 50, double stepBeforeBreak = 0.0, double stepAfterBreak = 0.0, int minTicksBeforeBreak = 4,
+                int minTicksAfterBreak = 4, bool log10AfterBreak = false, int breakWidth = 4,
                 bool breakDecoration = true, double nth_power = 2.0);
   void setScale(QwtPlot::Axis axis, ScaleTransformation::Type scaleType);
   void setScale(QwtPlot::Axis axis, const QString &logOrLin);
   double axisStep(int axis) { return d_user_step[axis]; };
   //! Set the axis scale
-  void setAxisScale(int axis, double start, double end, int scaleType = -1,
-                    double step = 0.0, int majorTicks = 5, int minorTicks = 5);
+  void setAxisScale(int axis, double start, double end, int scaleType = -1, double step = 0.0, int majorTicks = 5,
+                    int minorTicks = 5);
 
   /// in plot windows change both axis to log-log
   void logLogAxes();
@@ -457,8 +429,7 @@ public slots:
 
   //! \name Project Loading/Saving
   //@{
-  void loadFromProject(const std::string &lines, ApplicationWindow *app,
-                       const int fileVersion);
+  void loadFromProject(const std::string &lines, ApplicationWindow *app, const int fileVersion);
   std::string saveToProject();
 
   std::string saveCurve(int i);
@@ -468,8 +439,7 @@ public slots:
   // Still used by saveCurve. Needs a clean-up.
   QString saveCurveLayout(int index);
   // A method to populate the CurveLayout struct on loading a project
-  CurveLayout fillCurveSettings(const QStringList &curve, int fileVersion,
-                                unsigned int offset = 0);
+  CurveLayout fillCurveSettings(const QStringList &curve, int fileVersion, unsigned int offset = 0);
   //@}
 
   //! \name Text Markers
@@ -584,11 +554,9 @@ public slots:
   QColor axisLabelsColor(int axis);
   void setAxisLabelsColor(int axis, const QColor &color);
 
-  void showAxis(int axis, int type, const QString &formatInfo, Table *table,
-                bool axisOn, int majTicksType, int minTicksType, bool labelsOn,
-                const QColor &c, int format, int prec, int rotation,
-                int baselineDist, const QString &formula,
-                const QColor &labelsColor);
+  void showAxis(int axis, int type, const QString &formatInfo, Table *table, bool axisOn, int majTicksType,
+                int minTicksType, bool labelsOn, const QColor &c, int format, int prec, int rotation, int baselineDist,
+                const QString &formula, const QColor &labelsColor);
 
   void enableAxis(int axis, bool on = true);
   void enableAxisLabels(int axis, bool on = true);
@@ -618,24 +586,20 @@ public slots:
 
   int minorTickLength();
   int majorTickLength();
-  void setAxisTicksLength(int axis, int majTicksType, int minTicksType,
-                          int minLength, int majLength);
+  void setAxisTicksLength(int axis, int majTicksType, int minTicksType, int minLength, int majLength);
   void setTicksLength(int minLength, int majLength);
   void changeTicksLength(int minLength, int majLength);
   //! Used for restoring project files
   void setLabelsNumericFormat(const QStringList &l);
-  void setLabelsNumericFormat(int axis, int format, int prec = 6,
-                              const QString &formula = QString());
+  void setLabelsNumericFormat(int axis, int format, int prec = 6, const QString &formula = QString());
   void setLabelsDateTimeFormat(int axis, int type, const QString &formatInfo);
   void setLabelsDayFormat(int axis, int format);
   void setLabelsMonthFormat(int axis, int format);
 
   QString axisFormatInfo(int axis);
 
-  void setLabelsTextFormat(int axis, int type, const QString &name,
-                           const QStringList &lst);
-  void setLabelsTextFormat(int axis, int type, const QString &labelsColName,
-                           Table *table);
+  void setLabelsTextFormat(int axis, int type, const QString &name, const QStringList &lst);
+  void setLabelsTextFormat(int axis, int type, const QString &labelsColName, Table *table);
 
   QString axisFormula(int axis);
   void setAxisFormula(int axis, const QString &);
@@ -684,8 +648,7 @@ public slots:
    * the generic
    * tool interface.
    */
-  bool enableRangeSelectors(const QObject *status_target = nullptr,
-                            const char *status_slot = "");
+  bool enableRangeSelectors(const QObject *status_target = nullptr, const char *status_slot = "");
   /// Check if the gange selectors are active
   bool areRangeSelectorsOn() const { return !d_range_selector.isNull(); }
 
@@ -712,16 +675,12 @@ public slots:
 
   //! \name User-defined Functions
   //@{
-  void modifyFunctionCurve(int curve, int type, const QStringList &formulas,
-                           const QString &var, double start, double end,
-                           int points);
-  FunctionCurve *addFunction(const QStringList &formulas, double start,
-                             double end, int points = 100,
-                             const QString &var = "x", int type = 0,
-                             const QString &title = QString::null);
+  void modifyFunctionCurve(int curve, int type, const QStringList &formulas, const QString &var, double start,
+                           double end, int points);
+  FunctionCurve *addFunction(const QStringList &formulas, double start, double end, int points = 100,
+                             const QString &var = "x", int type = 0, const QString &title = QString::null);
   //! Used when reading from a project file with version < 0.9.5.
-  FunctionCurve *insertFunctionCurve(const QString &formula, int points,
-                                     int fileVersion);
+  FunctionCurve *insertFunctionCurve(const QString &formula, int points, int fileVersion);
   //! Used when reading from a project file with version >= 0.9.5.
   void restoreFunction(const QStringList &lst);
 
@@ -736,10 +695,8 @@ public slots:
 
   //! \name Vector Curves
   //@{
-  VectorCurve *plotVectorCurve(Table *w, const QStringList &colList, int style,
-                               int startRow = 0, int endRow = -1);
-  void updateVectorsLayout(int curve, const QColor &color, double width,
-                           int arrowLength, int arrowAngle, bool filled,
+  VectorCurve *plotVectorCurve(Table *w, const QStringList &colList, int style, int startRow = 0, int endRow = -1);
+  void updateVectorsLayout(int curve, const QColor &color, double width, int arrowLength, int arrowAngle, bool filled,
                            int position, const QString &xEndColName = QString(),
                            const QString &yEndColName = QString());
   //@}
@@ -747,8 +704,7 @@ public slots:
   //! \name Box Plots
   //@{
   BoxCurve *openBoxDiagram(Table *w, const QStringList &l, int fileVersion);
-  void plotBoxDiagram(Table *w, const QStringList &names, int startRow = 0,
-                      int endRow = -1);
+  void plotBoxDiagram(Table *w, const QStringList &names, int startRow = 0, int endRow = -1);
   //@}
 
   void setCurveSymbol(int index, const QwtSymbol &s);
@@ -776,10 +732,8 @@ public slots:
   static QString penStyleName(Qt::PenStyle style);
   static Qt::PenStyle getPenStyle(const QString &s);
   static Qt::PenStyle getPenStyle(int style);
-  static void showPlotErrorMessage(QWidget *parent,
-                                   const QStringList &emptyColumns);
-  static QPrinter::PageSize minPageSize(const QPrinter &printer,
-                                        const QRect &r);
+  static void showPlotErrorMessage(QWidget *parent, const QStringList &emptyColumns);
+  static QPrinter::PageSize minPageSize(const QPrinter &printer, const QRect &r);
 
   void showTitleContextMenu();
   void copyTitle();
@@ -807,12 +761,10 @@ public slots:
   Spectrogram *spectrogram();
   //! Add a spectrogram to the graph
   Spectrogram *plotSpectrogram(Matrix *m, GraphOptions::CurveType type);
-  Spectrogram *plotSpectrogram(Function2D *f, int nrows, int ncols, double left,
-                               double top, double width, double height,
-                               double minz, double maxz,
+  Spectrogram *plotSpectrogram(Function2D *f, int nrows, int ncols, double left, double top, double width,
+                               double height, double minz, double maxz,
                                GraphOptions::CurveType type); // Mantid
-  Spectrogram *plotSpectrogram(Function2D *f, int nrows, int ncols,
-                               QwtDoubleRect bRect, double minz, double maxz,
+  Spectrogram *plotSpectrogram(Function2D *f, int nrows, int ncols, QwtDoubleRect bRect, double minz, double maxz,
                                GraphOptions::CurveType type); // Mantid
   // Spectrogram* plotSpectrogram(UserHelperFunction *f,int nrows, int
   // ncols,QwtDoubleRect bRect,double minz,double maxz,CurveType type);//Mantid
@@ -833,9 +785,7 @@ public slots:
 
   //! \name Waterfall
   //@{
-  bool isWaterfallPlot() {
-    return d_waterfall_offset_x != 0 || d_waterfall_offset_y != 0;
-  };
+  bool isWaterfallPlot() { return d_waterfall_offset_x != 0 || d_waterfall_offset_y != 0; };
   int waterfallXOffset() { return d_waterfall_offset_x; };
   int waterfallYOffset() { return d_waterfall_offset_y; };
   void setWaterfallOffset(int x, int y, bool update = false);

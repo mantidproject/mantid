@@ -41,34 +41,26 @@ namespace Kernel {
 
 template <>
 MANTID_API_DLL Mantid::API::IEventWorkspace_sptr
-IPropertyManager::getValue<Mantid::API::IEventWorkspace_sptr>(
-    const std::string &name) const {
-  auto *prop =
-      dynamic_cast<PropertyWithValue<Mantid::API::IEventWorkspace_sptr> *>(
-          getPointerToProperty(name));
+IPropertyManager::getValue<Mantid::API::IEventWorkspace_sptr>(const std::string &name) const {
+  auto *prop = dynamic_cast<PropertyWithValue<Mantid::API::IEventWorkspace_sptr> *>(getPointerToProperty(name));
   if (prop) {
     return *prop;
   } else {
     std::string message =
-        "Attempt to assign property " + name +
-        " to incorrect type. Expected shared_ptr<IEventWorkspace>.";
+        "Attempt to assign property " + name + " to incorrect type. Expected shared_ptr<IEventWorkspace>.";
     throw std::runtime_error(message);
   }
 }
 
 template <>
 MANTID_API_DLL Mantid::API::IEventWorkspace_const_sptr
-IPropertyManager::getValue<Mantid::API::IEventWorkspace_const_sptr>(
-    const std::string &name) const {
-  auto *prop =
-      dynamic_cast<PropertyWithValue<Mantid::API::IEventWorkspace_sptr> *>(
-          getPointerToProperty(name));
+IPropertyManager::getValue<Mantid::API::IEventWorkspace_const_sptr>(const std::string &name) const {
+  auto *prop = dynamic_cast<PropertyWithValue<Mantid::API::IEventWorkspace_sptr> *>(getPointerToProperty(name));
   if (prop) {
     return prop->operator()();
   } else {
     std::string message =
-        "Attempt to assign property " + name +
-        " to incorrect type. Expected const shared_ptr<IEventWorkspace>.";
+        "Attempt to assign property " + name + " to incorrect type. Expected const shared_ptr<IEventWorkspace>.";
     throw std::runtime_error(message);
   }
 }

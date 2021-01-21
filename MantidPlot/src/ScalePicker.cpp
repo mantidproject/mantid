@@ -27,8 +27,8 @@
 #include <QPen>
 
 ScalePicker::ScalePicker(QwtPlot *plot)
-    : QObject(plot), d_title_selected(false), d_labels_selected(false),
-      d_selected_axis(nullptr), d_current_axis(nullptr) {
+    : QObject(plot), d_title_selected(false), d_labels_selected(false), d_selected_axis(nullptr),
+      d_current_axis(nullptr) {
   refresh();
 }
 
@@ -58,8 +58,7 @@ bool ScalePicker::eventFilter(QObject *object, QEvent *e) {
       else if (!scaleTicksRect(scale).contains(pos))
         selectLabels(scale);
 
-      return !(me->modifiers() & Qt::ShiftModifier) &&
-             !scaleTicksRect(scale).contains(pos);
+      return !(me->modifiers() & Qt::ShiftModifier) && !scaleTicksRect(scale).contains(pos);
     } else if (me->button() == Qt::RightButton) {
       mouseRightClicked(scale, pos);
       return true;
@@ -68,16 +67,14 @@ bool ScalePicker::eventFilter(QObject *object, QEvent *e) {
   return QObject::eventFilter(object, e);
 }
 
-void ScalePicker::mouseDblClicked(const QwtScaleWidget *scale,
-                                  const QPoint &pos) {
+void ScalePicker::mouseDblClicked(const QwtScaleWidget *scale, const QPoint &pos) {
   if (titleRect(scale).contains(pos))
     emit axisTitleDblClicked();
   else if (scaleRect(scale).contains(pos))
     emit axisDblClicked(scale->alignment());
 }
 
-void ScalePicker::mouseRightClicked(const QwtScaleWidget *scale,
-                                    const QPoint &pos) {
+void ScalePicker::mouseRightClicked(const QwtScaleWidget *scale, const QPoint &pos) {
   if (scaleRect(scale).contains(pos))
     emit axisRightClicked(scale->alignment());
   else
@@ -88,8 +85,7 @@ void ScalePicker::mouseRightClicked(const QwtScaleWidget *scale,
 QRect ScalePicker::scaleRect(const QwtScaleWidget *scale) const {
   int margin = 1; // pixels tolerance
   QRect rect = scale->rect();
-  rect.setRect(rect.x() - margin, rect.y() - margin, rect.width() + 2 * margin,
-               rect.height() + 2 * margin);
+  rect.setRect(rect.x() - margin, rect.y() - margin, rect.width() + 2 * margin, rect.height() + 2 * margin);
 
   if (scale->title().text().isEmpty())
     return rect;
@@ -118,8 +114,7 @@ QRect ScalePicker::scaleRect(const QwtScaleWidget *scale) const {
 
 void ScalePicker::refresh() {
   for (uint i = 0; i < QwtPlot::axisCnt; i++) {
-    QwtScaleWidget *scale =
-        static_cast<QwtScaleWidget *>(plot()->axisWidget(i));
+    QwtScaleWidget *scale = static_cast<QwtScaleWidget *>(plot()->axisWidget(i));
     if (scale)
       scale->installEventFilter(this);
   }

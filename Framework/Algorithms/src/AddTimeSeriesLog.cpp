@@ -29,15 +29,12 @@ namespace {
  * @param value The value at the given time
  */
 template <typename T>
-void createOrUpdateValue(API::Run &run, const std::string &name,
-                         const std::string &time, const T value) {
+void createOrUpdateValue(API::Run &run, const std::string &name, const std::string &time, const T value) {
   TimeSeriesProperty<T> *timeSeries(nullptr);
   if (run.hasProperty(name)) {
     timeSeries = dynamic_cast<TimeSeriesProperty<T> *>(run.getLogData(name));
     if (!timeSeries)
-      throw std::invalid_argument(
-          "Log '" + name +
-          "' already exists but the values are a different type.");
+      throw std::invalid_argument("Log '" + name + "' already exists but the values are a different type.");
   } else {
     timeSeries = new TimeSeriesProperty<T>(name);
     run.addProperty(timeSeries);
@@ -57,9 +54,7 @@ const std::string AddTimeSeriesLog::name() const { return "AddTimeSeriesLog"; }
 int AddTimeSeriesLog::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string AddTimeSeriesLog::category() const {
-  return "DataHandling\\Logs";
-}
+const std::string AddTimeSeriesLog::category() const { return "DataHandling\\Logs"; }
 
 //----------------------------------------------------------------------------------------------
 
@@ -68,23 +63,19 @@ const std::string AddTimeSeriesLog::category() const {
  * Initialize the algorithm's properties.
  */
 void AddTimeSeriesLog::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "Workspace", "", Direction::InOut),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("Workspace", "", Direction::InOut),
                   "In/out workspace that will store the new log information");
 
-  declareProperty(
-      "Name", "", std::make_shared<MandatoryValidator<std::string>>(),
-      "A string name for either a new time series log to be created "
-      "or an existing name to update",
-      Direction::Input);
-  declareProperty(
-      "Time", "", std::make_shared<DateTimeValidator>(),
-      "An ISO formatted date/time string specifying the timestamp for "
-      "the given log value, e.g 2010-09-14T04:20:12",
-      Direction::Input);
+  declareProperty("Name", "", std::make_shared<MandatoryValidator<std::string>>(),
+                  "A string name for either a new time series log to be created "
+                  "or an existing name to update",
+                  Direction::Input);
+  declareProperty("Time", "", std::make_shared<DateTimeValidator>(),
+                  "An ISO formatted date/time string specifying the timestamp for "
+                  "the given log value, e.g 2010-09-14T04:20:12",
+                  Direction::Input);
   auto nonEmtpyDbl = std::make_shared<MandatoryValidator<double>>();
-  declareProperty("Value", EMPTY_DBL(), nonEmtpyDbl,
-                  "The value for the log at the given time", Direction::Input);
+  declareProperty("Value", EMPTY_DBL(), nonEmtpyDbl, "The value for the log at the given time", Direction::Input);
 
   auto optionsValidator = std::make_shared<ListValidator<std::string>>();
   optionsValidator->addAllowedValue("double");
@@ -94,10 +85,8 @@ void AddTimeSeriesLog::init() {
                   "Type=int will have "
                   "the fractional part chopped off.",
                   Direction::Input);
-  declareProperty(
-      "DeleteExisting", false,
-      "If true and the named log exists then the whole log is removed first.",
-      Direction::Input);
+  declareProperty("DeleteExisting", false, "If true and the named log exists then the whole log is removed first.",
+                  Direction::Input);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -120,8 +109,7 @@ void AddTimeSeriesLog::exec() {
  * @param logWS The workspace containing the log
  * @param name The name of the log to delete
  */
-void AddTimeSeriesLog::removeExisting(API::MatrixWorkspace_sptr &logWS,
-                                      const std::string &name) {
+void AddTimeSeriesLog::removeExisting(API::MatrixWorkspace_sptr &logWS, const std::string &name) {
   auto deleter = createChildAlgorithm("DeleteLog", -1, -1, false);
   deleter->setProperty("Workspace", logWS);
   deleter->setProperty("Name", name);

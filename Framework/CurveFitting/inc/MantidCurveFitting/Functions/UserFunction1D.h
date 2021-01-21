@@ -63,26 +63,20 @@ public:
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return (1); }
   /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override {
-    return "Optimization\\FitAlgorithms";
-  }
+  const std::string category() const override { return "Optimization\\FitAlgorithms"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Fits a histogram from a workspace to a user defined function.";
-  }
+  const std::string summary() const override { return "Fits a histogram from a workspace to a user defined function."; }
   const std::vector<std::string> seeAlso() const override { return {"Fit"}; }
 
 protected:
   /// overwrite base class methods
   // double function(const double* in, const double& x);
-  void function(const double *in, double *out, const double *xValues,
-                const size_t nData) override;
+  void function(const double *in, double *out, const double *xValues, const size_t nData) override;
   void declareAdditionalProperties() override;
   void declareParameters() override{};
   void prepare() override;
   /// Derivatives of function with respect to parameters you are trying to fit
-  void functionDeriv(const double *in, API::Jacobian *out,
-                     const double *xValues, const size_t nData) override;
+  void functionDeriv(const double *in, API::Jacobian *out, const double *xValues, const size_t nData) override;
 
   static double *AddVariable(const char *varName, void *palg);
 

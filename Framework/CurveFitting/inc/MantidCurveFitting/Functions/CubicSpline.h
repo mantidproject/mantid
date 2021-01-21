@@ -37,12 +37,9 @@ public:
   /// overwrite IFunction base class methods
   std::string name() const override { return "CubicSpline"; }
   const std::string category() const override { return "Background"; }
-  void function1D(double *out, const double *xValues,
-                  const size_t nData) const override;
-  void derivative1D(double *out, const double *xValues, size_t nData,
-                    const size_t order) const override;
-  void setParameter(size_t i, const double &value,
-                    bool explicitlySet = true) override;
+  void function1D(double *out, const double *xValues, const size_t nData) const override;
+  void derivative1D(double *out, const double *xValues, size_t nData, const size_t order) const override;
+  void setParameter(size_t i, const double &value, bool explicitlySet = true) override;
   using ParamFunction::setParameter;
 
   /// Set a value to attribute attName
@@ -74,20 +71,16 @@ private:
   void reallocGSLObjects(const int n);
 
   /// Method to setup the gsl function
-  void setupInput(boost::scoped_array<double> &x,
-                  boost::scoped_array<double> &y, int n) const;
+  void setupInput(boost::scoped_array<double> &x, boost::scoped_array<double> &y, int n) const;
 
   /// Calculate the spline
-  void calculateSpline(double *out, const double *xValues,
-                       const size_t nData) const;
+  void calculateSpline(double *out, const double *xValues, const size_t nData) const;
 
   /// Calculate the derivative
-  void calculateDerivative(double *out, const double *xValues,
-                           const size_t nData, const size_t order) const;
+  void calculateDerivative(double *out, const double *xValues, const size_t nData, const size_t order) const;
 
   /// Initialise GSL objects if required
-  void initGSLObjects(boost::scoped_array<double> &x,
-                      boost::scoped_array<double> &y, int n) const;
+  void initGSLObjects(boost::scoped_array<double> &x, boost::scoped_array<double> &y, int n) const;
 
   /// Check if an error occurred and throw appropriate message
   void checkGSLError(const int status, const int errorType) const;

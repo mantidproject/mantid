@@ -37,12 +37,8 @@ class PolarizationEfficiencyCorTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static PolarizationEfficiencyCorTest *createSuite() {
-    return new PolarizationEfficiencyCorTest();
-  }
-  static void destroySuite(PolarizationEfficiencyCorTest *suite) {
-    delete suite;
-  }
+  static PolarizationEfficiencyCorTest *createSuite() { return new PolarizationEfficiencyCorTest(); }
+  static void destroySuite(PolarizationEfficiencyCorTest *suite) { delete suite; }
 
   PolarizationEfficiencyCorTest() {
     // To make sure API is initialized properly
@@ -69,8 +65,7 @@ public:
     alg.setProperty("InputWorkspaceGroup", createWorkspaceGroup(4));
     alg.setProperty("Efficiencies", createEfficiencies("Wildes"));
     alg.execute();
-    WorkspaceGroup_sptr out =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("out");
+    WorkspaceGroup_sptr out = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("out");
     TS_ASSERT_EQUALS(out->size(), 4);
   }
   void test_input_ws_wildes_group() {
@@ -82,8 +77,7 @@ public:
     alg.setProperty("CorrectionMethod", "Wildes");
     alg.setProperty("Efficiencies", createEfficiencies("Wildes"));
     alg.execute();
-    WorkspaceGroup_sptr out =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("out");
+    WorkspaceGroup_sptr out = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("out");
     TS_ASSERT_EQUALS(out->size(), 4);
   }
   void test_input_ws_fredrikze_group() {
@@ -95,8 +89,7 @@ public:
     alg.setProperty("CorrectionMethod", "Fredrikze");
     alg.setProperty("Efficiencies", createEfficiencies("Fredrikze"));
     alg.execute();
-    WorkspaceGroup_sptr out =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("out");
+    WorkspaceGroup_sptr out = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("out");
     TS_ASSERT_EQUALS(out->size(), 4);
   }
   void test_input_ws_wildes_wrong_input_size() {
@@ -130,8 +123,7 @@ public:
     alg.setProperty("CorrectionMethod", "Wildes");
     alg.setProperty("Efficiencies", createEfficiencies("Wildes"));
     alg.execute();
-    WorkspaceGroup_sptr out =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("out");
+    WorkspaceGroup_sptr out = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("out");
     TS_ASSERT_EQUALS(out->size(), 4);
   }
   void test_input_ws_frederikze_needs_group() {
@@ -201,8 +193,7 @@ public:
     alg.setProperty("Efficiencies", createEfficiencies("Wildes"));
     alg.setProperty("Flippers", "00, 01, 10, 11");
     alg.execute();
-    WorkspaceGroup_sptr out =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("out");
+    WorkspaceGroup_sptr out = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("out");
     TS_ASSERT_EQUALS(out->size(), 4);
   }
   void test_flippers_missing_01() {
@@ -215,8 +206,7 @@ public:
     alg.setProperty("Efficiencies", createEfficiencies("Wildes"));
     alg.setProperty("Flippers", "00, 10, 11");
     alg.execute();
-    WorkspaceGroup_sptr out =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("out");
+    WorkspaceGroup_sptr out = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("out");
     TS_ASSERT_EQUALS(out->size(), 4);
   }
   void test_flippers_missing_10() {
@@ -229,8 +219,7 @@ public:
     alg.setProperty("Efficiencies", createEfficiencies("Wildes"));
     alg.setProperty("Flippers", "00, 01, 11");
     alg.execute();
-    WorkspaceGroup_sptr out =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("out");
+    WorkspaceGroup_sptr out = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("out");
     TS_ASSERT_EQUALS(out->size(), 4);
   }
   void test_flippers_missing_0110() {
@@ -243,8 +232,7 @@ public:
     alg.setProperty("Efficiencies", createEfficiencies("Wildes"));
     alg.setProperty("Flippers", "00, 11");
     alg.execute();
-    WorkspaceGroup_sptr out =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("out");
+    WorkspaceGroup_sptr out = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("out");
     TS_ASSERT_EQUALS(out->size(), 4);
   }
   void test_flippers_no_analyser() {
@@ -257,8 +245,7 @@ public:
     alg.setProperty("Efficiencies", createEfficiencies("Wildes"));
     alg.setProperty("Flippers", "0, 1");
     alg.execute();
-    WorkspaceGroup_sptr out =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("out");
+    WorkspaceGroup_sptr out = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("out");
     TS_ASSERT_EQUALS(out->size(), 2);
   }
   void test_flippers_direct_beam() {
@@ -271,8 +258,7 @@ public:
     alg.setProperty("Efficiencies", createEfficiencies("Wildes"));
     alg.setProperty("Flippers", "0");
     alg.execute();
-    WorkspaceGroup_sptr out =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("out");
+    WorkspaceGroup_sptr out = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("out");
     TS_ASSERT_EQUALS(out->size(), 1);
   }
   void test_flippers_wrong_flippers() {
@@ -323,8 +309,7 @@ public:
     alg.setProperty("Efficiencies", createEfficiencies("Fredrikze"));
     alg.setProperty("PolarizationAnalysis", "PNR");
     alg.execute();
-    WorkspaceGroup_sptr out =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("out");
+    WorkspaceGroup_sptr out = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("out");
     TS_ASSERT_EQUALS(out->size(), 2);
   }
   void test_polarization_analysis_pa() {
@@ -337,8 +322,7 @@ public:
     alg.setProperty("Efficiencies", createEfficiencies("Fredrikze"));
     alg.setProperty("PolarizationAnalysis", "PA");
     alg.execute();
-    WorkspaceGroup_sptr out =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("out");
+    WorkspaceGroup_sptr out = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("out");
     TS_ASSERT_EQUALS(out->size(), 4);
   }
   void test_polarization_analysis_wrong_group_size() {
@@ -375,8 +359,7 @@ public:
     alg.setProperty("CorrectionMethod", "Wildes");
     alg.setProperty("Efficiencies", createEfficiencies("histo"));
     alg.execute();
-    WorkspaceGroup_sptr out =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("out");
+    WorkspaceGroup_sptr out = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("out");
     TS_ASSERT_EQUALS(out->size(), 4);
   }
 
@@ -390,14 +373,12 @@ public:
     alg.setProperty("CorrectionMethod", "Wildes");
     alg.setProperty("Efficiencies", createEfficiencies("points"));
     alg.execute();
-    WorkspaceGroup_sptr out =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("out");
+    WorkspaceGroup_sptr out = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("out");
     TS_ASSERT_EQUALS(out->size(), 4);
 
     for (size_t i = 0; i < out->size(); ++i) {
       auto ws = AnalysisDataService::Instance().retrieve(inputs[i]);
-      auto checkAlg =
-          AlgorithmManager::Instance().createUnmanaged("CompareWorkspaces");
+      auto checkAlg = AlgorithmManager::Instance().createUnmanaged("CompareWorkspaces");
       checkAlg->initialize();
       checkAlg->setChild(true);
       checkAlg->setProperty("Workspace1", ws);
@@ -418,14 +399,12 @@ public:
     alg.setProperty("CorrectionMethod", "Wildes");
     alg.setProperty("Efficiencies", createEfficiencies("points-short"));
     alg.execute();
-    WorkspaceGroup_sptr out =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("out");
+    WorkspaceGroup_sptr out = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("out");
     TS_ASSERT_EQUALS(out->size(), 4);
 
     for (size_t i = 0; i < out->size(); ++i) {
       auto ws = AnalysisDataService::Instance().retrieve(inputs[i]);
-      auto checkAlg =
-          AlgorithmManager::Instance().createUnmanaged("CompareWorkspaces");
+      auto checkAlg = AlgorithmManager::Instance().createUnmanaged("CompareWorkspaces");
       checkAlg->initialize();
       checkAlg->setChild(true);
       checkAlg->setProperty("Workspace1", ws);
@@ -470,9 +449,8 @@ private:
   }
 
   MatrixWorkspace_sptr createEfficiencies(std::string const &kind) {
-    static std::map<std::string, std::vector<std::string>> const labels = {
-        {"Wildes", {"P1", "P2", "F1", "F2"}},
-        {"Fredrikze", {"Pp", "Ap", "Rho", "Alpha"}}};
+    static std::map<std::string, std::vector<std::string>> const labels = {{"Wildes", {"P1", "P2", "F1", "F2"}},
+                                                                           {"Fredrikze", {"Pp", "Ap", "Rho", "Alpha"}}};
     if (kind == "Wildes" || kind == "Fredrikze") {
       auto inWS = createWorkspaces(1)[0];
       MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create(inWS, 4);
@@ -491,8 +469,7 @@ private:
       auto ws3 = createHistoWS(10, 0, 10);
       auto ws4 = createHistoWS(10, 0, 10);
 
-      auto alg = AlgorithmFactory::Instance().create(
-          "JoinISISPolarizationEfficiencies", -1);
+      auto alg = AlgorithmFactory::Instance().create("JoinISISPolarizationEfficiencies", -1);
       alg->initialize();
       alg->setChild(true);
       alg->setRethrows(true);
@@ -510,8 +487,7 @@ private:
       auto ws3 = createPointWS(10, 0, 10);
       auto ws4 = createPointWS(10, 0, 10);
 
-      auto alg = AlgorithmFactory::Instance().create(
-          "JoinISISPolarizationEfficiencies", -1);
+      auto alg = AlgorithmFactory::Instance().create("JoinISISPolarizationEfficiencies", -1);
       alg->initialize();
       alg->setChild(true);
       alg->setRethrows(true);
@@ -529,8 +505,7 @@ private:
       auto ws3 = createPointWS(4, 0, 10);
       auto ws4 = createPointWS(4, 0, 10);
 
-      auto alg = AlgorithmFactory::Instance().create(
-          "JoinISISPolarizationEfficiencies", -1);
+      auto alg = AlgorithmFactory::Instance().create("JoinISISPolarizationEfficiencies", -1);
       alg->initialize();
       alg->setChild(true);
       alg->setRethrows(true);
@@ -546,8 +521,7 @@ private:
     throw std::logic_error("Unknown efficeincy test kind");
   }
 
-  MatrixWorkspace_sptr createHistoWS(size_t size, double startX,
-                                     double endX) const {
+  MatrixWorkspace_sptr createHistoWS(size_t size, double startX, double endX) const {
     double const dX = (endX - startX) / double(size);
     BinEdges xVals(size + 1, LinearGenerator(startX, dX));
     Counts yVals(size, 1.0);
@@ -556,8 +530,7 @@ private:
     return retVal;
   }
 
-  MatrixWorkspace_sptr createPointWS(size_t size, double startX,
-                                     double endX) const {
+  MatrixWorkspace_sptr createPointWS(size_t size, double startX, double endX) const {
     double const dX = (endX - startX) / double(size - 1);
     Points xVals(size, LinearGenerator(startX, dX));
     Counts yVals(size, 1.0);

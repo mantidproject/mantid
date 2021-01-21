@@ -16,15 +16,11 @@ namespace MantidWidgets {
  */
 class UnwrappedSphere : public RotationSurface {
 public:
-  UnwrappedSphere(const InstrumentActor *rootActor,
-                  const Mantid::Kernel::V3D &origin,
-                  const Mantid::Kernel::V3D &axis);
+  UnwrappedSphere(const InstrumentActor *rootActor, const Mantid::Kernel::V3D &origin, const Mantid::Kernel::V3D &axis);
 
 protected:
-  void rotate(const UnwrappedDetector &udet,
-              Mantid::Kernel::Quat &R) const override;
-  void project(const Mantid::Kernel::V3D &pos, double &u, double &v,
-               double &uscale, double &vscale) const override;
+  void rotate(const UnwrappedDetector &udet, Mantid::Kernel::Quat &R) const override;
+  void project(const Mantid::Kernel::V3D &pos, double &u, double &v, double &uscale, double &vscale) const override;
 };
 
 } // namespace MantidWidgets

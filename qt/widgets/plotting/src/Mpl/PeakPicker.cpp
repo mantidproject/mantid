@@ -16,17 +16,14 @@ namespace MantidWidgets {
 
 PeakPicker::PeakPicker(PreviewPlot *plot, const QColor &colour)
     : QObject(), m_plot(plot), m_peak(nullptr),
-      m_peakMarker(std::make_unique<PeakMarker>(
-          m_plot->canvas(), 1, std::get<0>(m_plot->getAxisRange()),
-          std::get<1>(m_plot->getAxisRange(AxisID::YLeft)), 0.0, 0.0)) {
+      m_peakMarker(std::make_unique<PeakMarker>(m_plot->canvas(), 1, std::get<0>(m_plot->getAxisRange()),
+                                                std::get<1>(m_plot->getAxisRange(AxisID::YLeft)), 0.0, 0.0)) {
   UNUSED_ARG(colour);
 
   m_plot->canvas()->draw();
 
-  connect(m_plot, SIGNAL(mouseDown(QPoint)), this,
-          SLOT(handleMouseDown(QPoint)));
-  connect(m_plot, SIGNAL(mouseMove(QPoint)), this,
-          SLOT(handleMouseMove(QPoint)));
+  connect(m_plot, SIGNAL(mouseDown(QPoint)), this, SLOT(handleMouseDown(QPoint)));
+  connect(m_plot, SIGNAL(mouseMove(QPoint)), this, SLOT(handleMouseMove(QPoint)));
   connect(m_plot, SIGNAL(mouseUp(QPoint)), this, SLOT(handleMouseUp(QPoint)));
 
   connect(m_plot, SIGNAL(redraw()), this, SLOT(redrawMarker()));
@@ -39,8 +36,7 @@ void PeakPicker::remove() { m_peakMarker->remove(); }
 void PeakPicker::setPeak(const Mantid::API::IPeakFunction_const_sptr &peak) {
   if (peak) {
     m_peak = std::dynamic_pointer_cast<Mantid::API::IPeakFunction>(
-        Mantid::API::FunctionFactory::Instance().createInitialized(
-            peak->asString()));
+        Mantid::API::FunctionFactory::Instance().createInitialized(peak->asString()));
     m_peakMarker->updatePeak(peak->centre(), peak->height(), peak->fwhm());
   }
 }
@@ -64,8 +60,7 @@ void PeakPicker::handleMouseDown(const QPoint &point) {
 
 void PeakPicker::handleMouseMove(const QPoint &point) {
   const auto dataCoords = m_plot->toDataCoords(point);
-  const auto markerMoved =
-      m_peakMarker->mouseMove(dataCoords.x(), dataCoords.y());
+  const auto markerMoved = m_peakMarker->mouseMove(dataCoords.x(), dataCoords.y());
 
   if (markerMoved) {
     m_plot->replot();

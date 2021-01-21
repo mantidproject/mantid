@@ -40,16 +40,14 @@
 
 #include <gsl/gsl_sort.h>
 
-Filter::Filter(ApplicationWindow *parent, Graph *g, const QString &name)
-    : QObject(parent) {
+Filter::Filter(ApplicationWindow *parent, Graph *g, const QString &name) : QObject(parent) {
   init();
   setObjectName(name);
   d_graph = g;
   d_output_graph = g;
 }
 
-Filter::Filter(ApplicationWindow *parent, Table *t, const QString &name)
-    : QObject(parent) {
+Filter::Filter(ApplicationWindow *parent, Table *t, const QString &name) : QObject(parent) {
   init();
   setObjectName(name);
   d_table = t;
@@ -58,8 +56,7 @@ Filter::Filter(ApplicationWindow *parent, Table *t, const QString &name)
 void Filter::init() {
   ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
   if (!app) {
-    throw std::logic_error(
-        "Parent of qtiplot's Filter is not ApplicationWindow as expected.");
+    throw std::logic_error("Parent of qtiplot's Filter is not ApplicationWindow as expected.");
   }
   d_n = 0;
   d_curveColorIndex = 1;
@@ -82,8 +79,7 @@ void Filter::init() {
 
 void Filter::setInterval(double from, double to) {
   if (!d_curve) {
-    QMessageBox::critical(dynamic_cast<ApplicationWindow *>(parent()),
-                          tr("MantidPlot") + " - " + tr("Error"),
+    QMessageBox::critical(dynamic_cast<ApplicationWindow *>(parent()), tr("MantidPlot") + " - " + tr("Error"),
                           tr("Please assign a curve first!"));
     return;
   }
@@ -104,18 +100,14 @@ void Filter::setDataCurve(int curve, double start, double end) {
     d_n = curveData(d_curve, start, end, &d_x, &d_y);
 
   if (d_n == -1) {
-    QMessageBox::critical(dynamic_cast<ApplicationWindow *>(parent()),
-                          tr("MantidPlot") + " - " + tr("Error"),
+    QMessageBox::critical(dynamic_cast<ApplicationWindow *>(parent()), tr("MantidPlot") + " - " + tr("Error"),
                           tr("Several data points have the same x value "
                              "causing divisions by zero, operation aborted!"));
     d_init_err = true;
     return;
   } else if (d_n < d_min_points) {
-    QMessageBox::critical(
-        dynamic_cast<ApplicationWindow *>(parent()),
-        tr("MantidPlot") + " - " + tr("Error"),
-        tr("You need at least %1 points in order to perform this operation!")
-            .arg(d_min_points));
+    QMessageBox::critical(dynamic_cast<ApplicationWindow *>(parent()), tr("MantidPlot") + " - " + tr("Error"),
+                          tr("You need at least %1 points in order to perform this operation!").arg(d_min_points));
     d_init_err = true;
     return;
   }
@@ -126,8 +118,7 @@ void Filter::setDataCurve(int curve, double start, double end) {
 
 int Filter::curveIndex(const QString &curveTitle, Graph *g) {
   if (curveTitle.isEmpty()) {
-    QMessageBox::critical(dynamic_cast<ApplicationWindow *>(parent()),
-                          tr("MantidPlot - Filter Error"),
+    QMessageBox::critical(dynamic_cast<ApplicationWindow *>(parent()), tr("MantidPlot - Filter Error"),
                           tr("Please enter a valid curve name!"));
     d_init_err = true;
     return -1;
@@ -158,8 +149,7 @@ bool Filter::setDataFromCurve(const QString &curveTitle, Graph *g) {
   return true;
 }
 
-bool Filter::setDataFromCurve(const QString &curveTitle, double from, double to,
-                              Graph *g) {
+bool Filter::setDataFromCurve(const QString &curveTitle, double from, double to, Graph *g) {
   int index = curveIndex(curveTitle, g);
   if (index < 0) {
     d_init_err = true;
@@ -177,12 +167,10 @@ void Filter::setColor(const QString &colorName) {
   else if (colorName == "darkYellow")
     c = QColor(Qt::darkYellow);
   if (!ColorBox::isValidColor(c)) {
-    QMessageBox::critical(
-        dynamic_cast<ApplicationWindow *>(parent()),
-        tr("MantidPlot - Color Name Error"),
-        tr("The color name '%1' is not valid, a default color (red) will be "
-           "used instead!")
-            .arg(colorName));
+    QMessageBox::critical(dynamic_cast<ApplicationWindow *>(parent()), tr("MantidPlot - Color Name Error"),
+                          tr("The color name '%1' is not valid, a default color (red) will be "
+                             "used instead!")
+                              .arg(colorName));
     d_curveColorIndex = 1;
     return;
   }
@@ -207,12 +195,10 @@ bool Filter::run() {
   if (d_n < 0) {
     ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
     if (!app) {
-      throw std::logic_error(
-          "Parent of Filter is not ApplicationWindow as expected.");
+      throw std::logic_error("Parent of Filter is not ApplicationWindow as expected.");
     }
-    QMessageBox::critical(
-        app, tr("MantidPlot") + " - " + tr("Error"),
-        tr("You didn't specify a valid data set for this operation!"));
+    QMessageBox::critical(app, tr("MantidPlot") + " - " + tr("Error"),
+                          tr("You didn't specify a valid data set for this operation!"));
     return false;
   }
 
@@ -221,8 +207,7 @@ bool Filter::run() {
   output(); // data analysis and output
   ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
   if (!app) {
-    throw std::logic_error(
-        "Parent of Filter is not ApplicationWindow as expected.");
+    throw std::logic_error("Parent of Filter is not ApplicationWindow as expected.");
   }
   app->updateLog(logInfo());
 
@@ -236,8 +221,7 @@ void Filter::output() {
   addResultCurve(X.data(), Y.data());
 }
 
-int Filter::sortedCurveData(QwtPlotCurve *c, double start, double end,
-                            double **x, double **y) {
+int Filter::sortedCurveData(QwtPlotCurve *c, double start, double end, double **x, double **y) {
   if (!c)
     return 0;
 
@@ -267,8 +251,7 @@ int Filter::sortedCurveData(QwtPlotCurve *c, double start, double end,
   return n;
 }
 
-int Filter::curveData(QwtPlotCurve *c, double start, double end, double **x,
-                      double **y) {
+int Filter::curveData(QwtPlotCurve *c, double start, double end, double **x, double **y) {
   if (!c)
     return 0;
 
@@ -286,8 +269,7 @@ int Filter::curveData(QwtPlotCurve *c, double start, double end, double **x,
   return n;
 }
 
-int Filter::curveRange(QwtPlotCurve *c, double start, double end, int *iStart,
-                       int *iEnd) {
+int Filter::curveRange(QwtPlotCurve *c, double start, double end, int *iStart, int *iEnd) {
   if (!c)
     return 0;
 
@@ -331,8 +313,7 @@ int Filter::curveRange(QwtPlotCurve *c, double start, double end, int *iStart,
 QwtPlotCurve *Filter::addResultCurve(double *x, double *y) {
   ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
   if (!app) {
-    throw std::logic_error(
-        "Parent of Filter is not ApplicationWindow as expected.");
+    throw std::logic_error("Parent of Filter is not ApplicationWindow as expected.");
   }
   QLocale locale = app->locale();
   const QString tableName = app->generateUniqueName(QString(objectName()));
@@ -342,13 +323,10 @@ QwtPlotCurve *Filter::addResultCurve(double *x, double *y) {
   else
     dataSet = d_y_col_name;
 
-  d_result_table = app->newHiddenTable(
-      tableName, d_explanation + " " + tr("of") + " " + dataSet, d_points, 2);
+  d_result_table = app->newHiddenTable(tableName, d_explanation + " " + tr("of") + " " + dataSet, d_points, 2);
   for (int i = 0; i < d_points; i++) {
-    d_result_table->setText(i, 0,
-                            locale.toString(x[i], 'e', app->d_decimal_digits));
-    d_result_table->setText(i, 1,
-                            locale.toString(y[i], 'e', app->d_decimal_digits));
+    d_result_table->setText(i, 0, locale.toString(x[i], 'e', app->d_decimal_digits));
+    d_result_table->setText(i, 1, locale.toString(y[i], 'e', app->d_decimal_digits));
   }
 
   DataCurve *c = nullptr;
@@ -379,17 +357,14 @@ void Filter::enableGraphicsDisplay(bool on, Graph *g) {
 MultiLayer *Filter::createOutputGraph() {
   ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
   if (!app) {
-    throw std::logic_error(
-        "Parent of Filter is not ApplicationWindow as expected.");
+    throw std::logic_error("Parent of Filter is not ApplicationWindow as expected.");
   }
   MultiLayer *ml = app->newGraph(objectName() + tr("Plot"));
   d_output_graph = ml->activeGraph();
   return ml;
 }
 
-bool Filter::setDataFromTable(Table *t, const QString &xColName,
-                              const QString &yColName, int startRow,
-                              int endRow) {
+bool Filter::setDataFromTable(Table *t, const QString &xColName, const QString &yColName, int startRow, int endRow) {
   d_init_err = true;
 
   if (!t)
@@ -400,8 +375,7 @@ bool Filter::setDataFromTable(Table *t, const QString &xColName,
   if (xcol < 0 || ycol < 0)
     return false;
 
-  if (t->columnType(xcol) != Table::Numeric ||
-      t->columnType(ycol) != Table::Numeric)
+  if (t->columnType(xcol) != Table::Numeric || t->columnType(ycol) != Table::Numeric)
     return false;
 
   startRow--;
@@ -433,13 +407,10 @@ bool Filter::setDataFromTable(Table *t, const QString &xColName,
   if (size < d_min_points) {
     ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
     if (!app) {
-      throw std::logic_error(
-          "Parent of Filter is not ApplicationWindow as expected.");
+      throw std::logic_error("Parent of Filter is not ApplicationWindow as expected.");
     }
-    QMessageBox::critical(
-        app, tr("MantidPlot") + " - " + tr("Error"),
-        tr("You need at least %1 points in order to perform this operation!")
-            .arg(d_min_points));
+    QMessageBox::critical(app, tr("MantidPlot") + " - " + tr("Error"),
+                          tr("You need at least %1 points in order to perform this operation!").arg(d_min_points));
     return false;
   }
 

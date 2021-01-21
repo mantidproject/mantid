@@ -13,15 +13,12 @@ using Mantid::API::FileLoaderRegistryImpl;
 using namespace boost::python;
 
 void export_FileLoaderRegistry() {
-  class_<FileLoaderRegistryImpl, boost::noncopyable>("FileLoaderRegistryImpl",
-                                                     no_init)
-      .def("canLoad", &FileLoaderRegistryImpl::canLoad,
-           (arg("self"), arg("algorithm_name"), arg("file_name")),
+  class_<FileLoaderRegistryImpl, boost::noncopyable>("FileLoaderRegistryImpl", no_init)
+      .def("canLoad", &FileLoaderRegistryImpl::canLoad, (arg("self"), arg("algorithm_name"), arg("file_name")),
            "Perform a check that that the given algorithm can load the file")
-      .def("Instance", &FileLoaderRegistry::Instance,
-           return_value_policy<reference_existing_object>(),
+      .def("Instance", &FileLoaderRegistry::Instance, return_value_policy<reference_existing_object>(),
            "Returns a reference to the FileLoaderRegistry singleton instance")
-      .def("chooseLoader", &FileLoaderRegistryImpl::chooseLoader,
-           (arg("self"), arg("file_path")), "Returns the winning algorithm")
+      .def("chooseLoader", &FileLoaderRegistryImpl::chooseLoader, (arg("self"), arg("file_path")),
+           "Returns the winning algorithm")
       .staticmethod("Instance");
 }

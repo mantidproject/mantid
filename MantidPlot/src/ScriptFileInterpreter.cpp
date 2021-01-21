@@ -27,12 +27,10 @@
  * Construct a widget
  * @param parent :: The parent widget
  */
-ScriptFileInterpreter::ScriptFileInterpreter(QWidget *parent,
-                                             const QString &settingsGroup)
+ScriptFileInterpreter::ScriptFileInterpreter(QWidget *parent, const QString &settingsGroup)
     : QWidget(parent), m_splitter(new QSplitter(Qt::Vertical, this)),
-      m_editor(new ScriptEditor(this, nullptr, settingsGroup)),
-      m_messages(new ScriptOutputDisplay), m_status(new QStatusBar),
-      m_runner() {
+      m_editor(new ScriptEditor(this, nullptr, settingsGroup)), m_messages(new ScriptOutputDisplay),
+      m_status(new QStatusBar), m_runner() {
 
   // Initialise line wrapping to include visual arrow indicator
   m_editor->setWrapVisualFlags(QsciScintilla::WrapFlagByText);
@@ -40,8 +38,7 @@ ScriptFileInterpreter::ScriptFileInterpreter(QWidget *parent,
   setupChildWidgets();
 
   setContextMenuPolicy(Qt::CustomContextMenu);
-  connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this,
-          SLOT(showContextMenu(const QPoint &)));
+  connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(showContextMenu(const QPoint &)));
 
   connect(m_editor, SIGNAL(textZoomedIn()), m_messages, SLOT(zoomUp()));
   connect(m_editor, SIGNAL(textZoomedOut()), m_messages, SLOT(zoomDown()));
@@ -134,25 +131,19 @@ void ScriptFileInterpreter::setFont(const QString &fontFamily) {
 }
 
 /// Toggle replacing tabs with whitespace
-void ScriptFileInterpreter::toggleReplaceTabs(bool state) {
-  m_editor->setIndentationsUseTabs(!state);
-}
+void ScriptFileInterpreter::toggleReplaceTabs(bool state) { m_editor->setIndentationsUseTabs(!state); }
 
 /// Number of spaces to insert for a tab
-void ScriptFileInterpreter::setTabWhitespaceCount(int count) {
-  m_editor->setTabWidth(count);
-}
+void ScriptFileInterpreter::setTabWhitespaceCount(int count) { m_editor->setTabWidth(count); }
 
 /// Toggles the whitespace on/off
 void ScriptFileInterpreter::toggleWhitespace(bool state) {
   m_editor->setEolVisibility(state);
 
   if (state)
-    m_editor->setWhitespaceVisibility(
-        QsciScintilla::WhitespaceVisibility::WsVisible);
+    m_editor->setWhitespaceVisibility(QsciScintilla::WhitespaceVisibility::WsVisible);
   else
-    m_editor->setWhitespaceVisibility(
-        QsciScintilla::WhitespaceVisibility::WsInvisible);
+    m_editor->setWhitespaceVisibility(QsciScintilla::WhitespaceVisibility::WsInvisible);
 }
 
 /// Comment a block of code
@@ -184,8 +175,7 @@ void ScriptFileInterpreter::toggleComment(bool addComment) {
   if (addComment) {
     for (int i = selFromLine; i <= selToLine; ++i) {
       std::string thisLine = m_editor->text(i).toUtf8().constData();
-      int lineFirstChar =
-          static_cast<int>(thisLine.find_first_not_of(whitespaces + "\n"));
+      int lineFirstChar = static_cast<int>(thisLine.find_first_not_of(whitespaces + "\n"));
 
       if (minInd == -1 || (lineFirstChar != -1 && lineFirstChar < minInd)) {
         minInd = lineFirstChar;
@@ -196,16 +186,14 @@ void ScriptFileInterpreter::toggleComment(bool addComment) {
   for (int i = selFromLine; i <= selToLine; ++i) {
     std::string thisLine = m_editor->text(i).toUtf8().constData();
 
-    int lineFirstChar =
-        static_cast<int>(thisLine.find_first_not_of(whitespaces + "\n"));
+    int lineFirstChar = static_cast<int>(thisLine.find_first_not_of(whitespaces + "\n"));
 
     if (lineFirstChar != -1) {
       if (addComment) {
         thisLine.insert(minInd, "#");
       } else {
         // Check that the first character is a #
-        if (thisLine[lineFirstChar] ==
-            '#') // Remove the comment, or ignore to add as is
+        if (thisLine[lineFirstChar] == '#') // Remove the comment, or ignore to add as is
         {
           thisLine = thisLine.erase(lineFirstChar, 1);
         }
@@ -215,8 +203,7 @@ void ScriptFileInterpreter::toggleComment(bool addComment) {
     replacementText = replacementText + QString::fromStdString(thisLine);
   }
 
-  m_editor->setSelection(selFromLine, 0, selToLine,
-                         m_editor->lineLength(selToLine));
+  m_editor->setSelection(selFromLine, 0, selToLine, m_editor->lineLength(selToLine));
   m_editor->replaceSelectedText(replacementText);
   m_editor->setCursorPosition(selFromLine, selFromInd);
 }
@@ -233,8 +220,7 @@ void ScriptFileInterpreter::showContextMenu(const QPoint &clickPoint) {
   context.addAction("C&ut", m_editor, SLOT(cut()));
   context.addAction("P&aste", m_editor, SLOT(paste()));
 
-  auto *execAction =
-      context.addAction("E&xecute Selection", this, SLOT(executeSelection()));
+  auto *execAction = context.addAction("E&xecute Selection", this, SLOT(executeSelection()));
   context.insertSeparator(execAction);
   context.addAction("Execute &All", this, SLOT(executeAll()));
 
@@ -267,16 +253,13 @@ void ScriptFileInterpreter::emitZoomOut() { emit textZoomedOut(); }
  * identify the
  * current script
  */
-void ScriptFileInterpreter::setup(const ScriptingEnv &env,
-                                  const QString &identifier) {
+void ScriptFileInterpreter::setup(const ScriptingEnv &env, const QString &identifier) {
   setupEditor(env, identifier);
   setupScriptRunner(env, identifier);
-  connect(m_runner.data(),
-          SIGNAL(autoCompleteListGenerated(const QStringList &)), m_editor,
+  connect(m_runner.data(), SIGNAL(autoCompleteListGenerated(const QStringList &)), m_editor,
           SLOT(updateCompletionAPI(const QStringList &)));
   m_runner->generateAutoCompleteList();
-  connect(m_runner.data(), SIGNAL(currentLineChanged(int, bool)), m_editor,
-          SLOT(updateProgressMarker(int, bool)));
+  connect(m_runner.data(), SIGNAL(currentLineChanged(int, bool)), m_editor, SLOT(updateProgressMarker(int, bool)));
 }
 
 /**
@@ -288,14 +271,10 @@ QString ScriptFileInterpreter::filename() const { return m_editor->fileName(); }
  * Has the script been modified
  * @return True if the script has been modified
  */
-bool ScriptFileInterpreter::isScriptModified() const {
-  return m_editor->isModified();
-}
+bool ScriptFileInterpreter::isScriptModified() const { return m_editor->isModified(); }
 
 /// Is the script running
-bool ScriptFileInterpreter::isExecuting() const {
-  return m_runner->isExecuting();
-}
+bool ScriptFileInterpreter::isExecuting() const { return m_runner->isExecuting(); }
 
 /// Save to the currently stored name
 void ScriptFileInterpreter::saveToCurrentFile() {
@@ -323,9 +302,7 @@ void ScriptFileInterpreter::saveScript(const QString &filename) {
  * @param filename :: The filename to save the script in
  */
 
-void ScriptFileInterpreter::saveOutput(const QString &filename) {
-  m_messages->saveToFile(filename);
-}
+void ScriptFileInterpreter::saveOutput(const QString &filename) { m_messages->saveToFile(filename); }
 
 /**
  * Print script
@@ -348,9 +325,7 @@ void ScriptFileInterpreter::cut() { m_editor->cut(); }
 /// Paste into the editor
 void ScriptFileInterpreter::paste() { m_editor->paste(); }
 /// Find in editor
-void ScriptFileInterpreter::showFindReplaceDialog() {
-  m_editor->showFindReplaceDialog();
-}
+void ScriptFileInterpreter::showFindReplaceDialog() { m_editor->showFindReplaceDialog(); }
 
 /**
  * Execute the whole script in the editor. Always clears the contents of the
@@ -434,8 +409,7 @@ void ScriptFileInterpreter::setupChildWidgets() {
  * identify the
  * current script
  */
-void ScriptFileInterpreter::setupEditor(const ScriptingEnv &env,
-                                        const QString &identifier) {
+void ScriptFileInterpreter::setupEditor(const ScriptingEnv &env, const QString &identifier) {
   if (QFileInfo(identifier).exists()) {
     readFileIntoEditor(identifier);
   }
@@ -447,12 +421,9 @@ void ScriptFileInterpreter::setupEditor(const ScriptingEnv &env,
   m_editor->setCursorPosition(0, 0);
 
   connect(m_editor, SIGNAL(textChanged()), this, SIGNAL(textChanged()));
-  connect(m_editor, SIGNAL(modificationChanged(bool)), this,
-          SIGNAL(editorModificationChanged(bool)));
-  connect(m_editor, SIGNAL(undoAvailable(bool)), this,
-          SIGNAL(editorUndoAvailable(bool)));
-  connect(m_editor, SIGNAL(redoAvailable(bool)), this,
-          SIGNAL(editorRedoAvailable(bool)));
+  connect(m_editor, SIGNAL(modificationChanged(bool)), this, SIGNAL(editorModificationChanged(bool)));
+  connect(m_editor, SIGNAL(undoAvailable(bool)), this, SIGNAL(editorUndoAvailable(bool)));
+  connect(m_editor, SIGNAL(redoAvailable(bool)), this, SIGNAL(editorRedoAvailable(bool)));
 }
 
 /**
@@ -461,34 +432,25 @@ void ScriptFileInterpreter::setupEditor(const ScriptingEnv &env,
  * identify the
  * current script
  */
-void ScriptFileInterpreter::setupScriptRunner(const ScriptingEnv &env,
-                                              const QString &identifier) {
-  m_runner = QSharedPointer<Script>(
-      env.newScript(identifier, this, Script::Interactive));
+void ScriptFileInterpreter::setupScriptRunner(const ScriptingEnv &env, const QString &identifier) {
+  m_runner = QSharedPointer<Script>(env.newScript(identifier, this, Script::Interactive));
 
-  connect(m_runner.data(), SIGNAL(started(const QString &)), this,
-          SLOT(setExecutingStatus()));
+  connect(m_runner.data(), SIGNAL(started(const QString &)), this, SLOT(setExecutingStatus()));
   connect(m_runner.data(), SIGNAL(started(const QString &)), m_messages,
           SLOT(displayMessageWithTimestamp(const QString &)));
-  connect(m_runner.data(), SIGNAL(started(const QString &)), this,
-          SIGNAL(executionStarted()));
+  connect(m_runner.data(), SIGNAL(started(const QString &)), this, SIGNAL(executionStarted()));
 
   connect(m_runner.data(), SIGNAL(finished(const QString &)), m_messages,
           SLOT(displayMessageWithTimestamp(const QString &)));
-  connect(m_runner.data(), SIGNAL(finished(const QString &)), this,
-          SLOT(setStoppedStatus()));
-  connect(m_runner.data(), SIGNAL(finished(const QString &)), this,
-          SIGNAL(executionStopped()));
+  connect(m_runner.data(), SIGNAL(finished(const QString &)), this, SLOT(setStoppedStatus()));
+  connect(m_runner.data(), SIGNAL(finished(const QString &)), this, SIGNAL(executionStopped()));
 
-  connect(m_runner.data(), SIGNAL(print(const QString &)), m_messages,
-          SLOT(displayMessage(const QString &)));
+  connect(m_runner.data(), SIGNAL(print(const QString &)), m_messages, SLOT(displayMessage(const QString &)));
 
-  connect(m_runner.data(), SIGNAL(error(const QString &, const QString &, int)),
-          m_messages, SLOT(displayError(const QString &)));
-  connect(m_runner.data(), SIGNAL(error(const QString &, const QString &, int)),
-          this, SLOT(setStoppedStatus()));
-  connect(m_runner.data(), SIGNAL(error(const QString &, const QString &, int)),
-          this, SIGNAL(executionStopped()));
+  connect(m_runner.data(), SIGNAL(error(const QString &, const QString &, int)), m_messages,
+          SLOT(displayError(const QString &)));
+  connect(m_runner.data(), SIGNAL(error(const QString &, const QString &, int)), this, SLOT(setStoppedStatus()));
+  connect(m_runner.data(), SIGNAL(error(const QString &, const QString &, int)), this, SIGNAL(executionStopped()));
 }
 
 /**
@@ -500,9 +462,8 @@ bool ScriptFileInterpreter::readFileIntoEditor(const QString &filename) {
   m_editor->setFileName(filename);
   QFile scriptFile(filename);
   if (!scriptFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
-    QMessageBox::critical(
-        this, tr("MantidPlot - File error"),
-        tr("Could not open file \"%1\" for reading.").arg(filename));
+    QMessageBox::critical(this, tr("MantidPlot - File error"),
+                          tr("Could not open file \"%1\" for reading.").arg(filename));
     return false;
   }
   m_editor->read(&scriptFile);
@@ -515,8 +476,7 @@ bool ScriptFileInterpreter::readFileIntoEditor(const QString &filename) {
  * Use the current Script object to execute the code asynchronously
  * @param code :: The code string to run
  */
-bool ScriptFileInterpreter::executeCode(const ScriptCode &code,
-                                        const Script::ExecutionMode mode) {
+bool ScriptFileInterpreter::executeCode(const ScriptCode &code, const Script::ExecutionMode mode) {
   if (code.isEmpty())
     // This cannot fail
     return true;
@@ -540,10 +500,8 @@ bool ScriptFileInterpreter::executeCode(const ScriptCode &code,
 //-----------------------------------------------------------------------------
 // ScriptCloseDialog
 //-----------------------------------------------------------------------------
-ScriptCloseDialog::ScriptCloseDialog(ScriptFileInterpreter &interpreter,
-                                     QWidget *parent)
-    : QWidget(parent), m_msgBox(new QMessageBox(this)),
-      m_interpreter(interpreter) {
+ScriptCloseDialog::ScriptCloseDialog(ScriptFileInterpreter &interpreter, QWidget *parent)
+    : QWidget(parent), m_msgBox(new QMessageBox(this)), m_interpreter(interpreter) {
   QVBoxLayout *layout = new QVBoxLayout;
   layout->addWidget(m_msgBox);
   setLayout(layout);
@@ -555,8 +513,7 @@ ScriptCloseDialog::ScriptCloseDialog(ScriptFileInterpreter &interpreter,
  * @return True or False depending on whether the script should be closed
  */
 bool ScriptCloseDialog::shouldScriptClose() {
-  const bool executing(m_interpreter.isExecuting()),
-      modified(m_interpreter.isScriptModified());
+  const bool executing(m_interpreter.isExecuting()), modified(m_interpreter.isScriptModified());
   // Is the dialog even necessary?
   if (!modified && !executing)
     return true;
@@ -576,8 +533,7 @@ bool ScriptCloseDialog::shouldScriptClose() {
       m_msgBox->setText(QString("Save changes before closing?"));
       m_msgBox->button(QMessageBox::Save)->setText("Save As");
     } else {
-      m_msgBox->setText(
-          QString("Save changes to '%1' before closing?").arg(filename));
+      m_msgBox->setText(QString("Save changes to '%1' before closing?").arg(filename));
     }
     if (executing) {
       m_msgBox->setInformativeText(tr("The script will be aborted."));
@@ -604,8 +560,7 @@ bool ScriptCloseDialog::shouldScriptClose() {
     if (filename.isEmpty()) {
       m_msgBox->setText(tr("Abort and close?"));
     } else {
-      m_msgBox->setText(
-          tr("Abort '%1' and close?").arg(m_interpreter.filename()));
+      m_msgBox->setText(tr("Abort '%1' and close?").arg(m_interpreter.filename()));
     }
     m_msgBox->addButton(QMessageBox::Abort);
     m_msgBox->addButton(QMessageBox::Cancel);

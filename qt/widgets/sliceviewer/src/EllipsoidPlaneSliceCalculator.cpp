@@ -96,10 +96,8 @@ namespace {
  * @param zVal: the z value (in the ellipse frame)
  * @return the origin of the ellipse
  */
-Mantid::Kernel::V3D getOrigin(const Mantid::Kernel::DblMatrix &AInverse,
-                              const Mantid::Kernel::DblMatrix &B,
-                              Mantid::Kernel::V3D originEllipsoid,
-                              double zVal) {
+Mantid::Kernel::V3D getOrigin(const Mantid::Kernel::DblMatrix &AInverse, const Mantid::Kernel::DblMatrix &B,
+                              Mantid::Kernel::V3D originEllipsoid, double zVal) {
   const auto multiplied = AInverse * B;
 
   // Apply the -0.5 factor and shift back into the ellipsoid frame
@@ -110,11 +108,9 @@ Mantid::Kernel::V3D getOrigin(const Mantid::Kernel::DblMatrix &AInverse,
 }
 
 struct EigenSystemEllipse {
-  EigenSystemEllipse(Mantid::Kernel::V2D majorAxis,
-                     Mantid::Kernel::V2D minorAxis, double majorRadius,
+  EigenSystemEllipse(Mantid::Kernel::V2D majorAxis, Mantid::Kernel::V2D minorAxis, double majorRadius,
                      double minorRadius)
-      : majorAxis(majorAxis), minorAxis(minorAxis), majorRadius(majorRadius),
-        minorRadius(minorRadius) {}
+      : majorAxis(majorAxis), minorAxis(minorAxis), majorRadius(majorRadius), minorRadius(minorRadius) {}
 
   const Mantid::Kernel::V2D majorAxis;
   const Mantid::Kernel::V2D minorAxis;
@@ -131,9 +127,8 @@ struct EigenSystemEllipse {
  * Note that we follow the procedure suggested here:
  *http://www.geometrictools.com/Documentation/InformationAboutEllipses.pdf.
  */
-std::pair<Mantid::Kernel::V2D, Mantid::Kernel::V2D>
-getEigenVectorsForEllipse(const Mantid::Kernel::DblMatrix &MM,
-                          double eigenValueMinor) {
+std::pair<Mantid::Kernel::V2D, Mantid::Kernel::V2D> getEigenVectorsForEllipse(const Mantid::Kernel::DblMatrix &MM,
+                                                                              double eigenValueMinor) {
   auto isM00LargerThanM11 = MM[0][0] >= MM[1][1];
 
   // Create minor axis
@@ -168,10 +163,8 @@ getEigenVectorsForEllipse(const Mantid::Kernel::DblMatrix &MM,
  * @param c: the c shift factor
  * @return radii and directions
  */
-EigenSystemEllipse getAxesInformation(Mantid::Kernel::DblMatrix A,
-                                      const Mantid::Kernel::DblMatrix &AInverse,
-                                      const Mantid::Kernel::DblMatrix &B,
-                                      const Mantid::Kernel::DblMatrix &BT,
+EigenSystemEllipse getAxesInformation(Mantid::Kernel::DblMatrix A, const Mantid::Kernel::DblMatrix &AInverse,
+                                      const Mantid::Kernel::DblMatrix &B, const Mantid::Kernel::DblMatrix &BT,
                                       double c) {
   // Calculate the denominator: (Transpose[B]*A^(-1)*B/4 - (c-1))
   const auto temp1 = AInverse * B;
@@ -187,8 +180,7 @@ EigenSystemEllipse getAxesInformation(Mantid::Kernel::DblMatrix A,
   // just write down the result of the EV calculation and save time
   // EV = (MM00 + MM11 +/- Sqrt[(MM00-M11)^2 + 4(MM01)^2])/2
   const auto evPart1 = MM[0][0] + MM[1][1];
-  const auto evPart2 =
-      std::sqrt(std::pow(MM[0][0] - MM[1][1], 2) + 4 * std::pow(MM[0][1], 2));
+  const auto evPart2 = std::sqrt(std::pow(MM[0][0] - MM[1][1], 2) + 4 * std::pow(MM[0][1], 2));
 
   const auto evMinorAxis = (evPart1 + evPart2) * 0.5;
   const auto evMajorAxis = (evPart1 - evPart2) * 0.5;
@@ -201,8 +193,7 @@ EigenSystemEllipse getAxesInformation(Mantid::Kernel::DblMatrix A,
 
   // Note that we don't have to perform any transformations on the radius, as
   // they will not be affected by a translation
-  return EigenSystemEllipse(eigenVectors.first, eigenVectors.second,
-                            radiusMajorAxis, radiusMinorAxis);
+  return EigenSystemEllipse(eigenVectors.first, eigenVectors.second, radiusMajorAxis, radiusMinorAxis);
 }
 
 /**
@@ -218,9 +209,7 @@ EigenSystemEllipse getAxesInformation(Mantid::Kernel::DblMatrix A,
  * calculate the eigenvectors and get the angle from the components of the
  *eigenvectors.
  */
-double getAngle(Mantid::Kernel::V2D majorAxis) {
-  return std::atan2(majorAxis.Y(), majorAxis.X());
-}
+double getAngle(Mantid::Kernel::V2D majorAxis) { return std::atan2(majorAxis.Y(), majorAxis.X()); }
 
 bool isBetweenEndpoints(double endpoint1, double endpoint2, double z) {
   const auto isBetween1And2 = (endpoint1 < z) && (z < endpoint2);
@@ -233,12 +222,12 @@ bool isBetweenEndpoints(double endpoint1, double endpoint2, double z) {
 namespace Mantid {
 namespace SliceViewer {
 
-SliceEllipseInfo EllipsoidPlaneSliceCalculator::getSlicePlaneInfo(
-    std::vector<Mantid::Kernel::V3D> directions, std::vector<double> radii,
-    Mantid::Kernel::V3D originEllipsoid, double zPlane) const {
+SliceEllipseInfo EllipsoidPlaneSliceCalculator::getSlicePlaneInfo(std::vector<Mantid::Kernel::V3D> directions,
+                                                                  std::vector<double> radii,
+                                                                  Mantid::Kernel::V3D originEllipsoid,
+                                                                  double zPlane) const {
   // Setup the Ellipsoid Matrix
-  auto m =
-      createEllipsoidMatrixInXYZFrame(std::move(directions), std::move(radii));
+  auto m = createEllipsoidMatrixInXYZFrame(std::move(directions), std::move(radii));
 
   auto isEllipsoid = checkIfIsEllipse(m);
 
@@ -257,8 +246,7 @@ SliceEllipseInfo EllipsoidPlaneSliceCalculator::getSlicePlaneInfo(
  * @param m: the ellipsoid matrix
  * @return true if we are dealing with a true ellipsoid
  */
-bool EllipsoidPlaneSliceCalculator::checkIfIsEllipse(
-    const Kernel::Matrix<double> &m) const {
+bool EllipsoidPlaneSliceCalculator::checkIfIsEllipse(const Kernel::Matrix<double> &m) const {
   auto isEllipse = (m[0][0] * m[1][1] - std::pow(m[0][1], 2)) > 0;
   return isEllipse;
 }
@@ -268,16 +256,14 @@ bool EllipsoidPlaneSliceCalculator::checkIfIsEllipse(
  * @param m: the ellipsoid matrix
  * @return true if we are dealing with circle
  */
-bool EllipsoidPlaneSliceCalculator::checkIfIsCircle(
-    const Mantid::Kernel::Matrix<double> &m) const {
+bool EllipsoidPlaneSliceCalculator::checkIfIsCircle(const Mantid::Kernel::Matrix<double> &m) const {
   auto isM00EqualM11 = Mantid::SliceViewer::almost_equal(m[0][0], m[1][1]);
   auto isM01Zero = Mantid::SliceViewer::almost_equal(m[0][1], 0.0);
   return isM00EqualM11 && isM01Zero;
 }
 
-SliceEllipseInfo EllipsoidPlaneSliceCalculator::getSolutionForEllipsoid(
-    const Kernel::Matrix<double> &m, double zPlane,
-    Mantid::Kernel::V3D originEllipsoid) const {
+SliceEllipseInfo EllipsoidPlaneSliceCalculator::getSolutionForEllipsoid(const Kernel::Matrix<double> &m, double zPlane,
+                                                                        Mantid::Kernel::V3D originEllipsoid) const {
   // Shift the z value into a suitable frame
   const double z = zPlane - originEllipsoid.Z();
 
@@ -326,8 +312,7 @@ SliceEllipseInfo EllipsoidPlaneSliceCalculator::getSolutionForEllipsoid(
   const auto isCircle = checkIfIsCircle(m);
   const double angle = isCircle ? 0.0 : getAngle(eigenSystem.majorAxis);
 
-  return SliceEllipseInfo(origin, eigenSystem.majorRadius,
-                          eigenSystem.minorRadius, angle);
+  return SliceEllipseInfo(origin, eigenSystem.majorRadius, eigenSystem.minorRadius, angle);
 }
 
 /**
@@ -355,9 +340,8 @@ SliceEllipseInfo EllipsoidPlaneSliceCalculator::getSolutionForEllipsoid(
  * See here for more info: https://en.wikipedia.org/wiki/Ellipsoid
  *                         https://en.wikipedia.org/wiki/Quadratic_form
  */
-Mantid::Kernel::Matrix<double>
-createEllipsoidMatrixInXYZFrame(std::vector<Mantid::Kernel::V3D> directions,
-                                std::vector<double> radii) {
+Mantid::Kernel::Matrix<double> createEllipsoidMatrixInXYZFrame(std::vector<Mantid::Kernel::V3D> directions,
+                                                               std::vector<double> radii) {
   // Setup the transform matrix from the xyz system to the eigen vector
   // system, ie the directions
   auto vec0 = std::vector<double>(directions[0]);
@@ -402,10 +386,8 @@ createEllipsoidMatrixInXYZFrame(std::vector<Mantid::Kernel::V3D> directions,
  * @param zPlane: the z plane value
  * @return true if the a cut exists, else false
  */
-bool checkIfCutExists(const std::vector<Mantid::Kernel::V3D> &directions,
-                      const std::vector<double> &radii,
-                      const Mantid::Kernel::V3D &originEllipsoid,
-                      double zPlane) {
+bool checkIfCutExists(const std::vector<Mantid::Kernel::V3D> &directions, const std::vector<double> &radii,
+                      const Mantid::Kernel::V3D &originEllipsoid, double zPlane) {
   // Translate into ellipsoid
   const double z = zPlane - originEllipsoid.Z();
 
@@ -433,9 +415,8 @@ bool checkIfCutExists(const std::vector<Mantid::Kernel::V3D> &directions,
  * @param radii: the radii
  * @return the length of the largest radius projection per {x,y,z}
  */
-std::vector<double>
-getProjectionLengths(const std::vector<Mantid::Kernel::V3D> &directions,
-                     std::vector<double> radii) {
+std::vector<double> getProjectionLengths(const std::vector<Mantid::Kernel::V3D> &directions,
+                                         std::vector<double> radii) {
   std::vector<Mantid::Kernel::V3D> directionsScaled;
 
   for (int index = 0; index < 3; ++index) {
@@ -443,14 +424,11 @@ getProjectionLengths(const std::vector<Mantid::Kernel::V3D> &directions,
   }
 
   // We group the magnitudes of the x, y and z components
-  std::vector<double> x = {std::abs(directionsScaled[0].X()),
-                           std::abs(directionsScaled[1].X()),
+  std::vector<double> x = {std::abs(directionsScaled[0].X()), std::abs(directionsScaled[1].X()),
                            std::abs(directionsScaled[2].X())};
-  std::vector<double> y = {std::abs(directionsScaled[0].Y()),
-                           std::abs(directionsScaled[1].Y()),
+  std::vector<double> y = {std::abs(directionsScaled[0].Y()), std::abs(directionsScaled[1].Y()),
                            std::abs(directionsScaled[2].Y())};
-  std::vector<double> z = {std::abs(directionsScaled[0].Z()),
-                           std::abs(directionsScaled[1].Z()),
+  std::vector<double> z = {std::abs(directionsScaled[0].Z()), std::abs(directionsScaled[1].Z()),
                            std::abs(directionsScaled[2].Z())};
 
   // Pick the largest element for each component
@@ -461,10 +439,9 @@ getProjectionLengths(const std::vector<Mantid::Kernel::V3D> &directions,
   return std::vector<double>{*xMax, *yMax, *zMax};
 }
 
-MantidQt::SliceViewer::PeakBoundingBox getPeakBoundingBoxForEllipsoid(
-    const std::vector<Mantid::Kernel::V3D> &directions,
-    const std::vector<double> &radii,
-    const Mantid::Kernel::V3D &originEllipsoid) {
+MantidQt::SliceViewer::PeakBoundingBox
+getPeakBoundingBoxForEllipsoid(const std::vector<Mantid::Kernel::V3D> &directions, const std::vector<double> &radii,
+                               const Mantid::Kernel::V3D &originEllipsoid) {
   // Get the length of largest projection onto x,y,z
   auto projectionLengths = getProjectionLengths(directions, radii);
 
@@ -473,14 +450,10 @@ MantidQt::SliceViewer::PeakBoundingBox getPeakBoundingBoxForEllipsoid(
   // Corners
   EllipsoidPlaneSliceCalculator calc;
   auto zoomOutFactor = calc.getZoomOutFactor();
-  const double leftValue =
-      originEllipsoid.X() - zoomOutFactor * projectionLengths[0];
-  const double rightValue =
-      originEllipsoid.X() + zoomOutFactor * projectionLengths[0];
-  const double bottomValue =
-      originEllipsoid.Y() - zoomOutFactor * projectionLengths[1];
-  const double topValue =
-      originEllipsoid.Y() + zoomOutFactor * projectionLengths[1];
+  const double leftValue = originEllipsoid.X() - zoomOutFactor * projectionLengths[0];
+  const double rightValue = originEllipsoid.X() + zoomOutFactor * projectionLengths[0];
+  const double bottomValue = originEllipsoid.Y() - zoomOutFactor * projectionLengths[1];
+  const double topValue = originEllipsoid.Y() + zoomOutFactor * projectionLengths[1];
 
   Left left(leftValue);
   Right right(rightValue);
@@ -491,8 +464,6 @@ MantidQt::SliceViewer::PeakBoundingBox getPeakBoundingBoxForEllipsoid(
   return PeakBoundingBox(left, right, top, bottom, slicePoint);
 }
 
-double EllipsoidPlaneSliceCalculator::getZoomOutFactor() const {
-  return m_zoomOutFactor;
-}
+double EllipsoidPlaneSliceCalculator::getZoomOutFactor() const { return m_zoomOutFactor; }
 } // namespace SliceViewer
 } // namespace Mantid

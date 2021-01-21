@@ -31,37 +31,30 @@ namespace MantidWidgets {
 class FitScriptGeneratorDataTable;
 class IFitScriptGeneratorPresenter;
 
-class EXPORT_OPT_MANTIDQT_COMMON FitScriptGeneratorView
-    : public IFitScriptGeneratorView {
+class EXPORT_OPT_MANTIDQT_COMMON FitScriptGeneratorView : public IFitScriptGeneratorView {
   Q_OBJECT
 
 public:
-  FitScriptGeneratorView(
-      QWidget *parent = nullptr,
-      QMap<QString, QString> const &fitOptions = QMap<QString, QString>());
+  FitScriptGeneratorView(QWidget *parent = nullptr,
+                         QMap<QString, QString> const &fitOptions = QMap<QString, QString>());
   ~FitScriptGeneratorView() override;
 
   void subscribePresenter(IFitScriptGeneratorPresenter *presenter) override;
 
   [[nodiscard]] std::string workspaceName(FitDomainIndex index) const override;
-  [[nodiscard]] WorkspaceIndex
-  workspaceIndex(FitDomainIndex index) const override;
+  [[nodiscard]] WorkspaceIndex workspaceIndex(FitDomainIndex index) const override;
   [[nodiscard]] double startX(FitDomainIndex index) const override;
   [[nodiscard]] double endX(FitDomainIndex index) const override;
 
   [[nodiscard]] std::vector<FitDomainIndex> selectedRows() const override;
 
-  void removeWorkspaceDomain(std::string const &workspaceName,
-                             WorkspaceIndex workspaceIndex) override;
-  void addWorkspaceDomain(std::string const &workspaceName,
-                          WorkspaceIndex workspaceIndex, double startX,
+  void removeWorkspaceDomain(std::string const &workspaceName, WorkspaceIndex workspaceIndex) override;
+  void addWorkspaceDomain(std::string const &workspaceName, WorkspaceIndex workspaceIndex, double startX,
                           double endX) override;
 
   [[nodiscard]] bool openAddWorkspaceDialog() override;
-  [[nodiscard]] std::vector<Mantid::API::MatrixWorkspace_const_sptr>
-  getDialogWorkspaces() override;
-  [[nodiscard]] std::vector<WorkspaceIndex>
-  getDialogWorkspaceIndices() const override;
+  [[nodiscard]] std::vector<Mantid::API::MatrixWorkspace_const_sptr> getDialogWorkspaces() override;
+  [[nodiscard]] std::vector<WorkspaceIndex> getDialogWorkspaceIndices() const override;
 
   void resetSelection() override;
 
@@ -69,16 +62,10 @@ public:
 
 public:
   /// Testing accessors
-  FitScriptGeneratorDataTable *tableWidget() const override {
-    return m_dataTable.get();
-  }
+  FitScriptGeneratorDataTable *tableWidget() const override { return m_dataTable.get(); }
   QPushButton *removeButton() const override { return m_ui.pbRemove; }
-  QPushButton *addWorkspaceButton() const override {
-    return m_ui.pbAddWorkspace;
-  }
-  AddWorkspaceDialog *addWorkspaceDialog() const override {
-    return m_dialog.get();
-  }
+  QPushButton *addWorkspaceButton() const override { return m_ui.pbAddWorkspace; }
+  AddWorkspaceDialog *addWorkspaceDialog() const override { return m_dialog.get(); }
 
 private slots:
   void onRemoveClicked();

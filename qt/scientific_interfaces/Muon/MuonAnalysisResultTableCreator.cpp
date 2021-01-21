@@ -32,8 +32,7 @@ namespace {
 std::vector<std::string> qStringListToVector(const QStringList &qsl) {
   std::vector<std::string> vec;
   vec.reserve(qsl.size());
-  std::transform(qsl.begin(), qsl.end(), std::back_inserter(vec),
-                 [](const QString &qs) { return qs.toStdString(); });
+  std::transform(qsl.begin(), qsl.end(), std::back_inserter(vec), [](const QString &qs) { return qs.toStdString(); });
   return vec;
 }
 
@@ -44,8 +43,8 @@ std::vector<std::string> qStringListToVector(const QStringList &qsl) {
  * @param name :: [input] Name of column
  * @param plotType :: [input] Plot type as integer
  */
-void addColumnToTable(ITableWorkspace_sptr &table, const std::string &dataType,
-                      const std::string &name, const int plotType) {
+void addColumnToTable(ITableWorkspace_sptr &table, const std::string &dataType, const std::string &name,
+                      const int plotType) {
 
   auto column = table->addColumn(dataType, name);
   column->setPlotType(plotType);
@@ -80,14 +79,13 @@ namespace CustomInterfaces {
  * (false, default) or multiple labels (true)
  * @throws std::invalid_argument if pointer logValues is nullptr
  */
-MuonAnalysisResultTableCreator::MuonAnalysisResultTableCreator(
-    const QStringList &itemsSelected, const QStringList &logsSelected,
-    const LogValuesMap *logValues, bool multipleLabels)
-    : m_items(itemsSelected), m_logs(logsSelected), m_logValues(logValues),
-      m_multiple(multipleLabels), m_firstStart_ns(0) {
+MuonAnalysisResultTableCreator::MuonAnalysisResultTableCreator(const QStringList &itemsSelected,
+                                                               const QStringList &logsSelected,
+                                                               const LogValuesMap *logValues, bool multipleLabels)
+    : m_items(itemsSelected), m_logs(logsSelected), m_logValues(logValues), m_multiple(multipleLabels),
+      m_firstStart_ns(0) {
   if (!m_logValues) {
-    throw std::invalid_argument(
-        "Log values passed in to result table creator are null!");
+    throw std::invalid_argument("Log values passed in to result table creator are null!");
   }
 }
 /**
@@ -132,8 +130,7 @@ ITableWorkspace_sptr MuonAnalysisResultTableCreator::createTable() const {
     // multiple files use strings due to x-y format
     if (dashIndex != 0 && dashIndex != -1) {
       addColumnToTable(table, "str", log.toStdString(), PLOT_TYPE_X);
-    } else if (MuonAnalysisHelper::isNumber(val.toString()) &&
-               !log.endsWith(" (text)")) {
+    } else if (MuonAnalysisHelper::isNumber(val.toString()) && !log.endsWith(" (text)")) {
       addColumnToResultsTable(table, wsParamsByLabel, log); //
 
     } else {
@@ -157,8 +154,7 @@ ITableWorkspace_sptr MuonAnalysisResultTableCreator::createTable() const {
  * If there are no labels, puts all workspaces under a "dummy" label.
  * @returns :: map of label to list of workspace names
  */
-std::map<QString, std::vector<std::string>>
-MuonAnalysisResultTableCreator::getWorkspacesByLabel() const {
+std::map<QString, std::vector<std::string>> MuonAnalysisResultTableCreator::getWorkspacesByLabel() const {
   std::map<QString, std::vector<std::string>> wsByLabel;
 
   if (m_multiple) {
@@ -166,8 +162,7 @@ MuonAnalysisResultTableCreator::getWorkspacesByLabel() const {
     for (const auto &label : m_items) {
       std::vector<std::string> names;
       const auto &group =
-          AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-              "MuonSimulFit_" + label.toStdString());
+          AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("MuonSimulFit_" + label.toStdString());
       for (const auto &name : group->getNames()) {
         const size_t pos = name.find("_Workspace");
         if (pos != std::string::npos) {
@@ -177,8 +172,7 @@ MuonAnalysisResultTableCreator::getWorkspacesByLabel() const {
       if (names.empty()) {
         // This guarantees the list of workspaces for each label will not be
         // empty
-        throw std::runtime_error("No fitted workspaces found for label " +
-                                 label.toStdString());
+        throw std::runtime_error("No fitted workspaces found for label " + label.toStdString());
       }
       wsByLabel[label] = names;
     }
@@ -196,8 +190,7 @@ MuonAnalysisResultTableCreator::getWorkspacesByLabel() const {
  * @return :: pointer to parameters table
  * @throws std::runtime_error if workspace not found or wrong type
  */
-ITableWorkspace_sptr MuonAnalysisResultTableCreator::getFitParametersTable(
-    const QString &name) const {
+ITableWorkspace_sptr MuonAnalysisResultTableCreator::getFitParametersTable(const QString &name) const {
   if (m_multiple) {
     return tableFromLabel(name.toStdString());
   } else {
@@ -211,11 +204,8 @@ ITableWorkspace_sptr MuonAnalysisResultTableCreator::getFitParametersTable(
  * @return :: pointer to parameters table
  * @throws std::runtime_error if workspace not found or wrong type
  */
-ITableWorkspace_sptr MuonAnalysisResultTableCreator::tableFromWorkspace(
-    const std::string &wsName) const {
-  if (const auto &table =
-          AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
-              wsName + "_Parameters")) {
+ITableWorkspace_sptr MuonAnalysisResultTableCreator::tableFromWorkspace(const std::string &wsName) const {
+  if (const auto &table = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(wsName + "_Parameters")) {
     return table;
   } else {
     throw std::runtime_error("Could not retrieve parameters table " + wsName);
@@ -228,25 +218,17 @@ ITableWorkspace_sptr MuonAnalysisResultTableCreator::tableFromWorkspace(
  * @return :: pointer to parameters table
  * @throws std::runtime_error if workspace not found or wrong type
  */
-ITableWorkspace_sptr
-MuonAnalysisResultTableCreator::tableFromLabel(const std::string &label) const {
-  if (const auto &wsGroup =
-          AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-              "MuonSimulFit_" + label)) {
+ITableWorkspace_sptr MuonAnalysisResultTableCreator::tableFromLabel(const std::string &label) const {
+  if (const auto &wsGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("MuonSimulFit_" + label)) {
     const auto wsNames = wsGroup->getNames();
-    const auto found =
-        std::find_if(wsNames.cbegin(), wsNames.cend(), [](const auto &name) {
-          return name.find("_Parameters") != std::string::npos;
-        });
+    const auto found = std::find_if(wsNames.cbegin(), wsNames.cend(),
+                                    [](const auto &name) { return name.find("_Parameters") != std::string::npos; });
     if (found != wsNames.cend()) {
-      return std::dynamic_pointer_cast<ITableWorkspace>(
-          wsGroup->getItem(*found));
+      return std::dynamic_pointer_cast<ITableWorkspace>(wsGroup->getItem(*found));
     }
-    throw std::runtime_error("Could not retrieve parameters table for label " +
-                             label);
+    throw std::runtime_error("Could not retrieve parameters table for label " + label);
   } else {
-    throw std::runtime_error("Could not retrieve fitted parameters for label " +
-                             label);
+    throw std::runtime_error("Could not retrieve fitted parameters for label " + label);
   }
 }
 
@@ -262,8 +244,7 @@ void MuonAnalysisResultTableCreator::checkSameFitModel() const {
     paramTables.emplace_back(getFitParametersTable(item));
   }
   if (!haveSameParameters(paramTables)) {
-    throw std::runtime_error(
-        "Please pick workspaces with the same fitted parameters");
+    throw std::runtime_error("Please pick workspaces with the same fitted parameters");
   }
 }
 
@@ -273,16 +254,13 @@ void MuonAnalysisResultTableCreator::checkSameFitModel() const {
  * @throws std::runtime_error if number of datasets differs between labels.
  */
 void MuonAnalysisResultTableCreator::checkSameNumberOfDatasets(
-    const std::map<QString, std::vector<std::string>> &workspacesByLabel)
-    const {
+    const std::map<QString, std::vector<std::string>> &workspacesByLabel) const {
   const size_t firstNumRuns = workspacesByLabel.begin()->second.size();
   if (std::any_of(workspacesByLabel.begin(), workspacesByLabel.end(),
-                  [&firstNumRuns](
-                      const std::pair<QString, std::vector<std::string>> &fit) {
+                  [&firstNumRuns](const std::pair<QString, std::vector<std::string>> &fit) {
                     return fit.second.size() != firstNumRuns;
                   })) {
-    throw std::runtime_error(
-        "Please pick fit labels with the same number of workspaces");
+    throw std::runtime_error("Please pick fit labels with the same number of workspaces");
   }
 }
 
@@ -293,8 +271,7 @@ void MuonAnalysisResultTableCreator::checkSameNumberOfDatasets(
  * @param workspacesByLabel :: [input] map of label to list of workspace names
  */
 int64_t MuonAnalysisResultTableCreator::getFirstStartTimeNanosec(
-    const std::map<QString, std::vector<std::string>> &workspacesByLabel)
-    const {
+    const std::map<QString, std::vector<std::string>> &workspacesByLabel) const {
   // Cache the start time of the first run. We don't know which label was first,
   // so test them all.
   int64_t firstStart_ns = std::numeric_limits<int64_t>::max();
@@ -302,8 +279,7 @@ int64_t MuonAnalysisResultTableCreator::getFirstStartTimeNanosec(
     // item is a pair of <label name -> workspace names>
     const auto &wsNames = item.second;
     if (const auto &ws =
-            Mantid::API::AnalysisDataService::Instance()
-                .retrieveWS<ExperimentInfo>(wsNames.front() + "_Workspace")) {
+            Mantid::API::AnalysisDataService::Instance().retrieveWS<ExperimentInfo>(wsNames.front() + "_Workspace")) {
       const int64_t start_ns = ws->run().startTime().totalNanoseconds();
       if (start_ns < firstStart_ns) {
         firstStart_ns = start_ns;
@@ -319,10 +295,8 @@ int64_t MuonAnalysisResultTableCreator::getFirstStartTimeNanosec(
  * @param workspacesByLabel :: [input] map of label to list of workspace names
  * @returns :: map of <label name, <workspace name, <parameter, value>>>
  */
-QMap<QString, WSParameterList>
-MuonAnalysisResultTableCreator::getParametersByLabel(
-    const std::map<QString, std::vector<std::string>> &workspacesByLabel)
-    const {
+QMap<QString, WSParameterList> MuonAnalysisResultTableCreator::getParametersByLabel(
+    const std::map<QString, std::vector<std::string>> &workspacesByLabel) const {
   QMap<QString, WSParameterList> wsParamsByLabel;
   for (const auto &labelToWsNames : workspacesByLabel) {
     WSParameterList wsParamsList;
@@ -360,23 +334,19 @@ MuonAnalysisResultTableCreator::getParametersByLabel(
  * <parameter, value>>>
  * @returns :: List of parameters to display
  */
-QStringList MuonAnalysisResultTableCreator::addParameterColumns(
-    ITableWorkspace_sptr &table,
-    const QMap<QString, WSParameterList> &paramsByLabel) const {
+QStringList
+MuonAnalysisResultTableCreator::addParameterColumns(ITableWorkspace_sptr &table,
+                                                    const QMap<QString, WSParameterList> &paramsByLabel) const {
   QStringList paramsToDisplay;
   auto paramNames = paramsByLabel.begin()->begin()->keys();
   // Remove the errors and cost function - just want the parameters
-  paramNames.erase(std::remove_if(paramNames.begin(), paramNames.end(),
-                                  [](const QString &qs) {
-                                    return qs.endsWith("Error") ||
-                                           qs.startsWith("Cost function");
-                                  }),
-                   paramNames.end());
+  paramNames.erase(
+      std::remove_if(paramNames.begin(), paramNames.end(),
+                     [](const QString &qs) { return qs.endsWith("Error") || qs.startsWith("Cost function"); }),
+      paramNames.end());
 
   // Add columns to table and update list of parameters to display
-  const auto addToTableAndList = [&table, &paramsToDisplay](
-                                     const QString &paramName,
-                                     const std::string &colName) {
+  const auto addToTableAndList = [&table, &paramsToDisplay](const QString &paramName, const std::string &colName) {
     addColumnToTable(table, "double", colName, PLOT_TYPE_Y);
     addColumnToTable(table, "double", colName + ERROR_STRING, PLOT_TYPE_YERR);
     paramsToDisplay.append(paramName);
@@ -392,8 +362,7 @@ QStringList MuonAnalysisResultTableCreator::addParameterColumns(
       } else {
         const int nDatasetsPerLabel = paramsByLabel.begin()->count();
         for (int i = 0; i < nDatasetsPerLabel; ++i) {
-          const auto &columnName =
-              'f' + std::to_string(i) + '.' + param.toStdString();
+          const auto &columnName = 'f' + std::to_string(i) + '.' + param.toStdString();
           addToTableAndList(param, columnName);
         }
       }
@@ -421,9 +390,8 @@ QStringList MuonAnalysisResultTableCreator::addParameterColumns(
  * map of workspace name to <name, value> map)
  * @returns :: Whether the parameter was global
  */
-bool MuonAnalysisResultTableCreator::isGlobal(
-    const QString &param,
-    const QMap<QString, WSParameterList> &paramList) const {
+bool MuonAnalysisResultTableCreator::isGlobal(const QString &param,
+                                              const QMap<QString, WSParameterList> &paramList) const {
   // It is safe to assume the same fit model was used for all labels.
   // So just test the first:
   return isGlobal(param, *paramList.begin());
@@ -436,14 +404,12 @@ bool MuonAnalysisResultTableCreator::isGlobal(
  * @param paramList :: [input] Map of workspace name to <name, value> map
  * @returns :: Whether the parameter was global
  */
-bool MuonAnalysisResultTableCreator::isGlobal(
-    const QString &param, const WSParameterList &paramList) const {
+bool MuonAnalysisResultTableCreator::isGlobal(const QString &param, const WSParameterList &paramList) const {
   const double firstValue = paramList.begin()->value(param);
   if (paramList.size() > 1) {
     for (auto it = paramList.begin() + 1; it != paramList.end(); ++it) {
       // If any parameter differs from the first it cannot be global
-      if (std::abs(it->value(param) - firstValue) >
-          std::numeric_limits<double>::epsilon()) {
+      if (std::abs(it->value(param) - firstValue) > std::numeric_limits<double>::epsilon()) {
         return false;
       }
     }
@@ -461,10 +427,9 @@ bool MuonAnalysisResultTableCreator::isGlobal(
  * <parameter, value>>>
  * @param paramsToDisplay :: [input] List of parameters to display in table
  */
-void MuonAnalysisResultTableCreator::writeData(
-    ITableWorkspace_sptr &table,
-    const QMap<QString, WSParameterList> &paramsByLabel,
-    const QStringList &paramsToDisplay) const {
+void MuonAnalysisResultTableCreator::writeData(ITableWorkspace_sptr &table,
+                                               const QMap<QString, WSParameterList> &paramsByLabel,
+                                               const QStringList &paramsToDisplay) const {
   if (m_multiple) {
     writeDataForMultipleFits(table, paramsByLabel, paramsToDisplay);
   } else {
@@ -479,10 +444,9 @@ void MuonAnalysisResultTableCreator::writeData(
  * <parameter, value>>>
  * @param paramsToDisplay :: [input] List of parameters to display in table
  */
-void MuonAnalysisResultTableCreator::writeDataForSingleFit(
-    ITableWorkspace_sptr &table,
-    const QMap<QString, WSParameterList> &paramsByLabel,
-    const QStringList &paramsToDisplay) const {
+void MuonAnalysisResultTableCreator::writeDataForSingleFit(ITableWorkspace_sptr &table,
+                                                           const QMap<QString, WSParameterList> &paramsByLabel,
+                                                           const QStringList &paramsToDisplay) const {
   assert(!m_multiple);
   assert(m_logValues);
 
@@ -506,8 +470,7 @@ void MuonAnalysisResultTableCreator::writeDataForSingleFit(
       QString valueToWrite;
       // Special case: if log is time in sec, subtract the first start time
       if (log.endsWith(" (s)")) {
-        auto seconds =
-            val.toDouble() - static_cast<double>(m_firstStart_ns) * 1.e-9;
+        auto seconds = val.toDouble() - static_cast<double>(m_firstStart_ns) * 1.e-9;
         valueToWrite = QString::number(seconds);
       } else if (col_type == "double") {
         valueToWrite = QString::number(val.toDouble());
@@ -537,10 +500,9 @@ void MuonAnalysisResultTableCreator::writeDataForSingleFit(
  * <parameter, value>>>
  * @param log :: [input] the log we are going to add to the table
  */
-void MuonAnalysisResultTableCreator::addColumnToResultsTable(
-    ITableWorkspace_sptr &table,
-    const QMap<QString, WSParameterList> &paramsByLabel,
-    const QString &log) const {
+void MuonAnalysisResultTableCreator::addColumnToResultsTable(ITableWorkspace_sptr &table,
+                                                             const QMap<QString, WSParameterList> &paramsByLabel,
+                                                             const QString &log) const {
   // if its a single fit we know its a double
   if (!m_multiple) {
     addColumnToTable(table, "double", log.toStdString(), PLOT_TYPE_X);
@@ -554,11 +516,9 @@ void MuonAnalysisResultTableCreator::addColumnToResultsTable(
     const auto &val = logValues[log];
     // Special case: if log is time in sec, subtract the first start time
     if (log.endsWith(" (s)")) {
-      auto seconds =
-          val.toDouble() - static_cast<double>(m_firstStart_ns) * 1.e-9;
+      auto seconds = val.toDouble() - static_cast<double>(m_firstStart_ns) * 1.e-9;
       valuesPerWorkspace.append(QString::number(seconds));
-    } else if (MuonAnalysisHelper::isNumber(val.toString()) &&
-               !log.endsWith(" (text)")) {
+    } else if (MuonAnalysisHelper::isNumber(val.toString()) && !log.endsWith(" (text)")) {
 
       valuesPerWorkspace.append(QString::number(val.toDouble()));
 
@@ -590,10 +550,9 @@ void MuonAnalysisResultTableCreator::addColumnToResultsTable(
  * <parameter, value>>>
  * @param paramsToDisplay :: [input] List of parameters to display in table
  */
-void MuonAnalysisResultTableCreator::writeDataForMultipleFits(
-    ITableWorkspace_sptr &table,
-    const QMap<QString, WSParameterList> &paramsByLabel,
-    const QStringList &paramsToDisplay) const {
+void MuonAnalysisResultTableCreator::writeDataForMultipleFits(ITableWorkspace_sptr &table,
+                                                              const QMap<QString, WSParameterList> &paramsByLabel,
+                                                              const QStringList &paramsToDisplay) const {
   assert(m_multiple);
   assert(m_logValues);
 
@@ -615,13 +574,11 @@ void MuonAnalysisResultTableCreator::writeDataForMultipleFits(
         auto dashIndex = val.toString().indexOf("-");
         // Special case: if log is time in sec, subtract the first start time
         if (log.endsWith(" (s)")) {
-          auto seconds =
-              val.toDouble() - static_cast<double>(m_firstStart_ns) * 1.e-9;
+          auto seconds = val.toDouble() - static_cast<double>(m_firstStart_ns) * 1.e-9;
           valuesPerWorkspace.append(QString::number(seconds));
         } else if (dashIndex != 0 && dashIndex != -1) {
           valuesPerWorkspace.append(logValues[log].toString());
-        } else if (MuonAnalysisHelper::isNumber(val.toString()) &&
-                   !log.endsWith(" (text)")) {
+        } else if (MuonAnalysisHelper::isNumber(val.toString()) && !log.endsWith(" (text)")) {
 
           valuesPerWorkspace.append(QString::number(val.toDouble()));
 
@@ -635,8 +592,7 @@ void MuonAnalysisResultTableCreator::writeDataForMultipleFits(
       // (https://bugreports.qt.io/browse/QTBUG-41092)
       valuesPerWorkspace.sort();
 
-      auto dashIndex =
-          valuesPerWorkspace.front().toStdString().find_first_of("-");
+      auto dashIndex = valuesPerWorkspace.front().toStdString().find_first_of("-");
       if (dashIndex != std::string::npos && dashIndex != 0) {
         std::ostringstream oss;
         auto dad = valuesPerWorkspace.front().toStdString();
@@ -651,8 +607,7 @@ void MuonAnalysisResultTableCreator::writeDataForMultipleFits(
             row << min;
           } else {
             std::ostringstream oss;
-            oss << valuesPerWorkspace.front().toStdString() << "-"
-                << valuesPerWorkspace.back().toStdString();
+            oss << valuesPerWorkspace.front().toStdString() << "-" << valuesPerWorkspace.back().toStdString();
             row << oss.str();
           }
         } else {
@@ -675,9 +630,7 @@ void MuonAnalysisResultTableCreator::writeDataForMultipleFits(
     }
 
     // Parse column name - could be param name or f[n].param
-    const auto parseColumnName =
-        [&paramsToDisplay](
-            const std::string &columnName) -> std::pair<int, std::string> {
+    const auto parseColumnName = [&paramsToDisplay](const std::string &columnName) -> std::pair<int, std::string> {
       if (paramsToDisplay.contains(QString::fromStdString(columnName))) {
         return {0, columnName};
       } else {
@@ -689,8 +642,7 @@ void MuonAnalysisResultTableCreator::writeDataForMultipleFits(
             const auto wsIndex = std::stoi(columnName.substr(1, pos));
             return {wsIndex, paramName};
           } catch (const std::exception &ex) {
-            throw std::runtime_error("Failed to parse column name " +
-                                     columnName + ": " + ex.what());
+            throw std::runtime_error("Failed to parse column name " + columnName + ": " + ex.what());
           }
         } else {
           throw std::runtime_error("Failed to parse column name " + columnName);
@@ -701,8 +653,7 @@ void MuonAnalysisResultTableCreator::writeDataForMultipleFits(
     // Add param values
     const auto &params = paramsByLabel[labelName];
     while (columnIndex < table->columnCount()) {
-      const auto &parsedColName =
-          parseColumnName(table->getColumn(columnIndex)->name());
+      const auto &parsedColName = parseColumnName(table->getColumn(columnIndex)->name());
       const QString wsName = params.keys().at(parsedColName.first);
       const QString &paramName = QString::fromStdString(parsedColName.second);
       row << params[wsName].value(paramName);
@@ -716,8 +667,7 @@ void MuonAnalysisResultTableCreator::writeDataForMultipleFits(
  * @param tables :: [input] Fit tables
  * @returns :: True if all fits used same model, otherwise false.
  */
-bool MuonAnalysisResultTableCreator::haveSameParameters(
-    const std::vector<ITableWorkspace_sptr> &tables) const {
+bool MuonAnalysisResultTableCreator::haveSameParameters(const std::vector<ITableWorkspace_sptr> &tables) const {
   bool sameParams = true;
 
   // lambda to pull keys out of table
@@ -752,8 +702,7 @@ bool MuonAnalysisResultTableCreator::haveSameParameters(
  * as these columns correspond to fixed parameters.
  * @param table :: [input, output] Pointer to TableWorkspace to edit
  */
-void MuonAnalysisResultTableCreator::removeFixedParameterErrors(
-    const ITableWorkspace_sptr &table) const {
+void MuonAnalysisResultTableCreator::removeFixedParameterErrors(const ITableWorkspace_sptr &table) const {
   assert(table);
   const size_t nRows = table->rowCount();
   const auto colNames = table->getColumnNames();
@@ -762,8 +711,7 @@ void MuonAnalysisResultTableCreator::removeFixedParameterErrors(
   for (const auto &name : colNames) {
     // if name does not end with "Error", continue
     const size_t nameLength = name.length();
-    if (nameLength < ERROR_LENGTH ||
-        name.compare(nameLength - ERROR_LENGTH, ERROR_LENGTH, ERROR_STRING)) {
+    if (nameLength < ERROR_LENGTH || name.compare(nameLength - ERROR_LENGTH, ERROR_LENGTH, ERROR_STRING)) {
       continue;
     }
 

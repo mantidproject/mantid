@@ -42,21 +42,17 @@ public:
 
   void test_MakeFileBacked() { do_test_exec(23, "SaveMDTest.nxs", true); }
 
-  void test_MakeFileBacked_then_UpdateFileBackEnd() {
-    do_test_exec(23, "SaveMDTest_updating.nxs", true, true);
-  }
+  void test_MakeFileBacked_then_UpdateFileBackEnd() { do_test_exec(23, "SaveMDTest_updating.nxs", true, true); }
 
   void test_MakeFileBacked_then_save_under_other_file_name() {
     do_test_exec(23, "SaveMDTest_other_file_name_test.nxs", true, false, true);
   }
 
-  void do_test_exec(size_t numPerBox, const std::string &filename,
-                    bool MakeFileBacked = false, bool UpdateFileBackEnd = false,
-                    bool OtherFileName = false) {
+  void do_test_exec(size_t numPerBox, const std::string &filename, bool MakeFileBacked = false,
+                    bool UpdateFileBackEnd = false, bool OtherFileName = false) {
 
     // Make a 1D MDEventWorkspace
-    MDEventWorkspace1Lean::sptr ws =
-        MDEventsTestHelper::makeMDEW<1>(10, 0.0, 10.0, numPerBox);
+    MDEventWorkspace1Lean::sptr ws = MDEventsTestHelper::makeMDEW<1>(10, 0.0, 10.0, numPerBox);
     // Make sure it is split
     ws->splitBox();
 
@@ -72,8 +68,7 @@ public:
     SaveMD alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputWorkspace", "SaveMDTest_ws"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "SaveMDTest_ws"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", filename));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MakeFileBacked", MakeFileBacked));
 
@@ -91,8 +86,7 @@ public:
 
     if (MakeFileBacked) {
       TSM_ASSERT("Workspace was made file-backed", ws->isFileBacked());
-      TSM_ASSERT("File back-end no longer needs updating.",
-                 !ws->fileNeedsUpdating());
+      TSM_ASSERT("File back-end no longer needs updating.", !ws->fileNeedsUpdating());
     }
 
     // Continue the test
@@ -108,8 +102,7 @@ public:
   }
 
   /// Add some data and update the back-end
-  void do_test_UpdateFileBackEnd(const MDEventWorkspace1Lean::sptr &ws,
-                                 const std::string &filename) {
+  void do_test_UpdateFileBackEnd(const MDEventWorkspace1Lean::sptr &ws, const std::string &filename) {
     size_t initial_numEvents = ws->getNPoints();
     TSM_ASSERT_EQUALS("Starting off with 230 events.", initial_numEvents, 230);
 
@@ -124,25 +117,21 @@ public:
     // Manually set the flag that the algo would set
     ws->setFileNeedsUpdating(true);
 
-    TSM_ASSERT_EQUALS("Correctly added 100 events to original 230.",
-                      ws->getNPoints(), 230 + 100);
+    TSM_ASSERT_EQUALS("Correctly added 100 events to original 230.", ws->getNPoints(), 230 + 100);
 
     SaveMD alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputWorkspace", "SaveMDTest_ws"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "SaveMDTest_ws"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", filename));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("UpdateFileBackEnd", true));
     alg.execute();
     TS_ASSERT(alg.isExecuted());
 
     // Since there are 330 events, the file needs to be that big (or bigger).
-    TS_ASSERT_LESS_THAN(330,
-                        ws->getBoxController()->getFileIO()->getFileLength());
+    TS_ASSERT_LESS_THAN(330, ws->getBoxController()->getFileIO()->getFileLength());
 
-    TSM_ASSERT("File back-end no longer needs updating.",
-               !ws->fileNeedsUpdating());
+    TSM_ASSERT("File back-end no longer needs updating.", !ws->fileNeedsUpdating());
     // Clean up file
     ws->clearFileBacked(false);
     std::string fullPath = alg.getPropertyValue("Filename");
@@ -150,8 +139,7 @@ public:
       Poco::File(fullPath).remove();
   }
 
-  void do_test_OtherFileName(const MDEventWorkspace1Lean::sptr &ws,
-                             const std::string &originalFileName) {
+  void do_test_OtherFileName(const MDEventWorkspace1Lean::sptr &ws, const std::string &originalFileName) {
     const std::string otherFileName = "SaveMD_other_file_name.nxs";
 
     auto algSave = AlgorithmManager::Instance().createUnmanaged("SaveMD");
@@ -171,19 +159,14 @@ public:
       load_alg->setProperty("FileBackEnd", true);
       load_alg->setProperty("OutputWorkspace", "blank");
       TS_ASSERT_THROWS_NOTHING(load_alg->execute());
-      Mantid::API::IMDWorkspace_sptr reference_out_ws =
-          load_alg->getProperty("OutputWorkspace");
+      Mantid::API::IMDWorkspace_sptr reference_out_ws = load_alg->getProperty("OutputWorkspace");
       // Make sure that the output workspaces exist
       TS_ASSERT(ws);
       TS_ASSERT(reference_out_ws);
-      auto ws_cast =
-          std::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace_sptr>(
-              reference_out_ws);
+      auto ws_cast = std::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace_sptr>(reference_out_ws);
 
       // Compare the loaded and original workspace
-      auto compare_alg =
-          Mantid::API::AlgorithmManager::Instance().createUnmanaged(
-              "CompareMDWorkspaces");
+      auto compare_alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("CompareMDWorkspaces");
       compare_alg->setChild(true);
       compare_alg->initialize();
       compare_alg->setProperty("Workspace1", ws);
@@ -209,8 +192,7 @@ public:
   void test_saveExpInfo() {
     std::string filename("MultiExperSaveTest.nxs");
     // Make a 1D MDEventWorkspace
-    MDEventWorkspace1Lean::sptr ws =
-        MDEventsTestHelper::makeMDEW<1>(10, 0.0, 10.0, 2);
+    MDEventWorkspace1Lean::sptr ws = MDEventsTestHelper::makeMDEW<1>(10, 0.0, 10.0, 2);
     // Make sure it is split
     ws->splitBox();
 
@@ -237,8 +219,7 @@ public:
     SaveMD alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputWorkspace", "SaveMDTest_ws"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "SaveMDTest_ws"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", filename));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MakeFileBacked", "0"));
     alg.execute();
@@ -252,8 +233,7 @@ public:
   void test_saveAffine() {
     std::string filename("MDAffineSaveTest.nxs");
     // Make a 4D MDEventWorkspace
-    MDEventWorkspace4Lean::sptr ws =
-        MDEventsTestHelper::makeMDEW<4>(10, 0.0, 10.0, 2);
+    MDEventWorkspace4Lean::sptr ws = MDEventsTestHelper::makeMDEW<4>(10, 0.0, 10.0, 2);
     AnalysisDataService::Instance().addOrReplace("SaveMDTest_ws", ws);
 
     // Bin data to get affine matrix
@@ -270,8 +250,7 @@ public:
     SaveMD alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputWorkspace", "SaveMDTestHisto_ws"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "SaveMDTestHisto_ws"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", filename));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MakeFileBacked", "0"));
     alg.execute();
@@ -302,8 +281,7 @@ public:
   }
 
   void test_histo2() {
-    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(
-        2.5, 2, 10, 10.0, 3.5, "histo2", 4.5);
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(2.5, 2, 10, 10.0, 3.5, "histo2", 4.5);
     doTestHisto(ws);
   }
 };
@@ -317,11 +295,9 @@ public:
     ws->getBoxController()->setSplitInto(5);
     ws->getBoxController()->setSplitThreshold(2000);
 
-    AnalysisDataService::Instance().addOrReplace("SaveMDTestPerformance_ws",
-                                                 ws);
+    AnalysisDataService::Instance().addOrReplace("SaveMDTestPerformance_ws", ws);
 
-    FrameworkManager::Instance().exec("FakeMDEventData", 4, "InputWorkspace",
-                                      "SaveMDTestPerformance_ws",
+    FrameworkManager::Instance().exec("FakeMDEventData", 4, "InputWorkspace", "SaveMDTestPerformance_ws",
                                       "UniformParams", "10000000");
 
     ws->refreshCache();
@@ -331,10 +307,8 @@ public:
     SaveMD alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputWorkspace", "SaveMDTestPerformance_ws"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("Filename", "SaveMDTestPerformance.nxs"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "SaveMDTestPerformance_ws"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "SaveMDTestPerformance.nxs"));
     alg.execute();
     TS_ASSERT(alg.isExecuted());
   }

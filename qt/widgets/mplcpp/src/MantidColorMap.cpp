@@ -26,15 +26,12 @@ namespace MplCpp {
  * @param parent A widget to act as parent for the chooser dialog
  * @return
  */
-QString MantidColorMap::chooseColorMap(const QString &previous,
-                                       QWidget *parent) {
-  static QStringList allowedCMaps{"coolwarm", "gray",   "jet",    "plasma",
-                                  "summer",   "winter", "viridis"};
+QString MantidColorMap::chooseColorMap(const QString &previous, QWidget *parent) {
+  static QStringList allowedCMaps{"coolwarm", "gray", "jet", "plasma", "summer", "winter", "viridis"};
   const int currentIdx = allowedCMaps.indexOf(previous);
   bool ok;
-  QString item =
-      QInputDialog::getItem(parent, "Select colormap...", "Name:", allowedCMaps,
-                            currentIdx >= 0 ? currentIdx : 0, false, &ok);
+  QString item = QInputDialog::getItem(parent, "Select colormap...", "Name:", allowedCMaps,
+                                       currentIdx >= 0 ? currentIdx : 0, false, &ok);
   if (ok && !item.isEmpty())
     return item;
   else
@@ -63,8 +60,7 @@ QString MantidColorMap::exists(const QString &name) {
 /**
  * Construct a default colormap
  */
-MantidColorMap::MantidColorMap()
-    : m_mappable(Normalize(0, 1), getCMap(defaultCMapName())) {}
+MantidColorMap::MantidColorMap() : m_mappable(Normalize(0, 1), getCMap(defaultCMapName())) {}
 
 /**
  * Reset the colormap to the default
@@ -98,8 +94,7 @@ void MantidColorMap::changeScaleType(MantidColorMap::ScaleType type) {
     m_mappable.setNorm(Normalize());
     break;
   case ScaleType::Log10:
-    m_mappable.setNorm(SymLogNorm(SymLogNorm::DefaultLinearThreshold,
-                                  SymLogNorm::DefaultLinearScale, 0, 1));
+    m_mappable.setNorm(SymLogNorm(SymLogNorm::DefaultLinearThreshold, SymLogNorm::DefaultLinearScale, 0, 1));
     break;
   case ScaleType::Power:
     m_mappable.setNorm(PowerNorm(m_gamma, 0, 1));
@@ -109,9 +104,7 @@ void MantidColorMap::changeScaleType(MantidColorMap::ScaleType type) {
 /**
  * @return The current scale type of the map
  */
-MantidColorMap::ScaleType MantidColorMap::getScaleType() const {
-  return m_scaleType;
-}
+MantidColorMap::ScaleType MantidColorMap::getScaleType() const { return m_scaleType; }
 
 /**
  * @brief Set the value of the exponent for the power scale
@@ -143,8 +136,7 @@ QRgb MantidColorMap::rgb(double vmin, double vmax, double value) const {
  * @param values The values to be transformed
  * @return An array of QRgb describing the colors
  */
-std::vector<QRgb> MantidColorMap::rgb(double vmin, double vmax,
-                                      const std::vector<double> &values) const {
+std::vector<QRgb> MantidColorMap::rgb(double vmin, double vmax, const std::vector<double> &values) const {
   m_mappable.setClim(vmin, vmax);
   return m_mappable.toRGBA(values);
 }

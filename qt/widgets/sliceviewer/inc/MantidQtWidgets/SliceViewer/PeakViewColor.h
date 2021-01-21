@@ -22,11 +22,9 @@
  * New peak types will need to have a color entry registered here.
  */
 struct PeakViewColor {
-  PeakViewColor(const QColor &colorCross = QColor(),
-                const QColor &colorSphere = QColor(),
+  PeakViewColor(const QColor &colorCross = QColor(), const QColor &colorSphere = QColor(),
                 const QColor &colorEllipsoid = QColor())
-      : colorCross(colorCross), colorSphere(colorSphere),
-        colorEllipsoid(colorEllipsoid) {}
+      : colorCross(colorCross), colorSphere(colorSphere), colorEllipsoid(colorEllipsoid) {}
 
   bool operator==(const PeakViewColor &other) const {
     auto sameColorCross = this->colorCross == other.colorCross;
@@ -36,9 +34,7 @@ struct PeakViewColor {
     return sameColorCross && sameColorSphere && sameColorEllipsoid;
   }
 
-  bool operator!=(const PeakViewColor &other) const {
-    return !(*this == other);
-  }
+  bool operator!=(const PeakViewColor &other) const { return !(*this == other); }
 
   QColor colorCross;
   QColor colorSphere;

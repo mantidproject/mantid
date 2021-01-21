@@ -22,16 +22,12 @@
 #include <qpixmap.h>
 
 const QwtSymbol::Style SymbolBox::symbols[] = {
-    QwtSymbol::NoSymbol,  QwtSymbol::Ellipse,   QwtSymbol::Rect,
-    QwtSymbol::Diamond,   QwtSymbol::Triangle,  QwtSymbol::DTriangle,
-    QwtSymbol::UTriangle, QwtSymbol::LTriangle, QwtSymbol::RTriangle,
-    QwtSymbol::Cross,     QwtSymbol::XCross,    QwtSymbol::HLine,
-    QwtSymbol::VLine,     QwtSymbol::Star1,     QwtSymbol::Star2,
-    QwtSymbol::Hexagon};
+    QwtSymbol::NoSymbol,  QwtSymbol::Ellipse,   QwtSymbol::Rect,      QwtSymbol::Diamond,
+    QwtSymbol::Triangle,  QwtSymbol::DTriangle, QwtSymbol::UTriangle, QwtSymbol::LTriangle,
+    QwtSymbol::RTriangle, QwtSymbol::Cross,     QwtSymbol::XCross,    QwtSymbol::HLine,
+    QwtSymbol::VLine,     QwtSymbol::Star1,     QwtSymbol::Star2,     QwtSymbol::Hexagon};
 
-SymbolBox::SymbolBox(bool showNoSymbol, QWidget *parent) : QComboBox(parent) {
-  init(showNoSymbol);
-}
+SymbolBox::SymbolBox(bool showNoSymbol, QWidget *parent) : QComboBox(parent) { init(showNoSymbol); }
 
 void SymbolBox::init(bool showNoSymbol) {
   QPixmap icon = QPixmap(15, 15);
@@ -188,6 +184,4 @@ void SymbolBox::focusInEvent(QFocusEvent *e) {
   return QComboBox::focusInEvent(e);
 }
 
-size_t SymbolBox::numberOfSymbols() {
-  return sizeof(symbols) / sizeof(QwtSymbol::Style);
-}
+size_t SymbolBox::numberOfSymbols() { return sizeof(symbols) / sizeof(QwtSymbol::Style); }

@@ -25,9 +25,7 @@ public:
   static SassenaFFTTest *createSuite() { return new SassenaFFTTest(); }
   static void destroySuite(SassenaFFTTest *suite) { delete suite; }
 
-  SassenaFFTTest()
-      : T2ueV(1000.0 / Mantid::PhysicalConstants::meVtoKelvin), ps2meV(4.136),
-        nbins(2001) {}
+  SassenaFFTTest() : T2ueV(1000.0 / Mantid::PhysicalConstants::meVtoKelvin), ps2meV(4.136), nbins(2001) {}
 
   void test_init() {
     TS_ASSERT_THROWS_NOTHING(m_alg.initialize())
@@ -38,8 +36,7 @@ public:
   void test_ZeroImaginary() {
     // params defines (height,stdev) values for fqt.Re, fqt.Im, and fqt0,
     // respectively
-    const double params[] = {1.0, 1.0, 0.0,
-                             0.1, 0.1, 2.0}; // params[3]=0.0 entails no fqt.Im
+    const double params[] = {1.0, 1.0, 0.0, 0.1, 0.1, 2.0}; // params[3]=0.0 entails no fqt.Im
     if (!m_alg.isInitialized()) {
       m_alg.initialize();
     }
@@ -56,8 +53,7 @@ public:
     // The Fourier transform is an exponential h'*exp(-x^2/(2*s'^2) with
     // h'=sqrt(2*pi*s)=2.507 and s'=1/(2*pi*s)=0.159
     DataObjects::Workspace2D_const_sptr ws =
-        API::AnalysisDataService::Instance()
-            .retrieveWS<DataObjects::Workspace2D>(gwsName + "_sqw");
+        API::AnalysisDataService::Instance().retrieveWS<DataObjects::Workspace2D>(gwsName + "_sqw");
     const double exponentFactor = 0.0;
     checkHeight(ws, sqrt(2 * M_PI), exponentFactor);
     checkAverage(ws, 0.0, exponentFactor);
@@ -86,11 +82,9 @@ public:
     // this->printWorkspace2D("/tmp/sqwDetailedBalanceCondition.dat",gwsName
     // +"_sqw"); // uncomment line for debugging purposes only
     DataObjects::Workspace2D_const_sptr ws =
-        API::AnalysisDataService::Instance()
-            .retrieveWS<DataObjects::Workspace2D>(gwsName + "_sqw");
-    const double exponentFactor =
-        -1.0 / (2.0 * T * T2ueV); // negative of the quantum-correction to
-                                  // classical S(Q,E): exp(E/(2*kT)
+        API::AnalysisDataService::Instance().retrieveWS<DataObjects::Workspace2D>(gwsName + "_sqw");
+    const double exponentFactor = -1.0 / (2.0 * T * T2ueV); // negative of the quantum-correction to
+                                                            // classical S(Q,E): exp(E/(2*kT)
     checkHeight(ws, sqrt(2 * M_PI), exponentFactor);
     checkAverage(ws, 0.0, exponentFactor);
     checkSigma(ws, 1.0 / (2.0 * M_PI), exponentFactor);
@@ -106,22 +100,17 @@ private:
    * @exponentFactor negative of the exponent factor in the detailed balance
    * condition.
    */
-  void checkHeight(DataObjects::Workspace2D_const_sptr &ws, const double &value,
-                   const double &exponentFactor) {
+  void checkHeight(DataObjects::Workspace2D_const_sptr &ws, const double &value, const double &exponentFactor) {
     const double frErr = 1E-03; // allowed fractional error
     const size_t nspectra = ws->getNumberHistograms();
     MantidVec yv;
     for (size_t i = 0; i < nspectra; i++) {
       yv = ws->readY(i);
-      size_t index =
-          nbins / 2; // This position should yield ws->readX(i).at(index)==0.0
+      size_t index = nbins / 2; // This position should yield ws->readX(i).at(index)==0.0
       double x = ws->readX(i).at(index);
-      double h = yv.at(index) * exp(exponentFactor *
-                                    x); // remove the quantum-correction from ws
+      double h = yv.at(index) * exp(exponentFactor * x); // remove the quantum-correction from ws
       double goldStandard = value / (1 + static_cast<double>(i));
-      double error1 =
-          DBL_EPSILON * std::sqrt(static_cast<double>(
-                            yv.size())); // rounding error if value==0
+      double error1 = DBL_EPSILON * std::sqrt(static_cast<double>(yv.size())); // rounding error if value==0
       double error = std::max(error1, frErr * std::fabs(goldStandard));
       TS_ASSERT_DELTA(h, goldStandard, error);
     }
@@ -134,16 +123,14 @@ private:
    * @exponentFactor negative of the exponent factor in the detailed balance
    * condition.
    */
-  void checkAverage(DataObjects::Workspace2D_const_sptr &ws,
-                    const double &value, const double &exponentFactor) {
+  void checkAverage(DataObjects::Workspace2D_const_sptr &ws, const double &value, const double &exponentFactor) {
     const double frErr = 1E-03; // allowed fractional error
     const size_t nspectra = ws->getNumberHistograms();
     MantidVec yv, xv;
     double factor; // remove the detailed balance condition
     for (size_t i = 0; i < nspectra; i++) {
       double goldStandard =
-          (1 + static_cast<double>(i)) *
-          value; // recall each spectra was created with a different stdev
+          (1 + static_cast<double>(i)) * value; // recall each spectra was created with a different stdev
       xv = ws->readX(i);
       yv = ws->readY(i);
       double sum = 0.0;
@@ -156,9 +143,7 @@ private:
         ++itx;
       }
       average /= sum;
-      double error1 = std::sqrt(DBL_EPSILON *
-                                std::sqrt(static_cast<double>(
-                                    yv.size()))); // rounding error if value==0
+      double error1 = std::sqrt(DBL_EPSILON * std::sqrt(static_cast<double>(yv.size()))); // rounding error if value==0
       double error = std::max(error1, frErr * std::fabs(goldStandard));
       TS_ASSERT_DELTA(average, goldStandard, error);
     }
@@ -171,19 +156,16 @@ private:
    * @exponentFactor negative of the exponent factor in the detailed balance
    * condition.
    */
-  void checkSigma(DataObjects::Workspace2D_const_sptr &ws, const double &value,
-                  const double &exponentFactor) {
+  void checkSigma(DataObjects::Workspace2D_const_sptr &ws, const double &value, const double &exponentFactor) {
     const double frErr = 1E-03; // allowed fractional error
     const size_t nspectra = ws->getNumberHistograms();
     MantidVec yv, xv;
     for (size_t i = 0; i < nspectra; i++) {
       double goldStandard =
-          ps2meV * (1 + static_cast<double>(i)) *
-          value; // recall each spectra was created with a different stdev
-      double dx = (-2.0) * ws->readX(i).at(0); // extent along the X-axis
+          ps2meV * (1 + static_cast<double>(i)) * value; // recall each spectra was created with a different stdev
+      double dx = (-2.0) * ws->readX(i).at(0);           // extent along the X-axis
       yv = ws->readY(i);
-      size_t index =
-          nbins / 2; // This position should yield ws->readX(i).at(index)==0.0
+      size_t index = nbins / 2; // This position should yield ws->readX(i).at(index)==0.0
       double x = ws->readX(i).at(index);
       double factor = exp(exponentFactor * x);
       double h = yv.at(index) * exp(x);
@@ -197,9 +179,7 @@ private:
       }
       sum *= dx / static_cast<double>(nbins);
       double sigma = sum / (h * std::sqrt(2 * M_PI));
-      double error1 =
-          DBL_EPSILON * std::sqrt(static_cast<double>(
-                            yv.size())); // rounding error if value==0
+      double error1 = DBL_EPSILON * std::sqrt(static_cast<double>(yv.size())); // rounding error if value==0
       double error = std::max(error1, frErr * std::fabs(goldStandard));
       TS_ASSERT_DELTA(sigma, goldStandard, error);
     }
@@ -209,8 +189,7 @@ private:
    * Gaussian centered at zero and with positive times only
    * @param sigma standard deviation
    */
-  void Gaussian(MantidVec &xv, MantidVec &yv, const double &Heigth,
-                const double &sigma) {
+  void Gaussian(MantidVec &xv, MantidVec &yv, const double &Heigth, const double &sigma) {
     for (size_t i = 0; i < xv.size(); i++) {
       double z = xv[i] / sigma;
       yv[i] = Heigth * exp(-z * z / 2.0);
@@ -233,8 +212,8 @@ private:
    * standard deviation sigma.
    * sigma increases as sigma0*2^nspectra
    */
-  void createWorkspace2D(const std::string &wsName, const double &Heigth,
-                         const double &sigma0, const size_t &nspectra) {
+  void createWorkspace2D(const std::string &wsName, const double &Heigth, const double &sigma0,
+                         const size_t &nspectra) {
     DataObjects::Workspace2D_sptr ws(new DataObjects::Workspace2D);
     ws->initialize(nspectra, nbins,
                    nbins); // arguments are NVectors, XLength, and YLength

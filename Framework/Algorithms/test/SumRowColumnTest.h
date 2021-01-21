@@ -21,8 +21,7 @@ public:
   static void destroySuite(SumRowColumnTest *suite) { delete suite; }
 
   SumRowColumnTest() : inputWS("SumRowColumnTestWS") {
-    AnalysisDataService::Instance().add(
-        inputWS, WorkspaceCreationHelper::create2DWorkspaceBinned(100, 10));
+    AnalysisDataService::Instance().add(inputWS, WorkspaceCreationHelper::create2DWorkspaceBinned(100, 10));
   }
 
   ~SumRowColumnTest() override { AnalysisDataService::Instance().clear(); }
@@ -47,8 +46,7 @@ public:
   void testHorizontal() {
     Mantid::Algorithms::SumRowColumn summer2;
     TS_ASSERT_THROWS_NOTHING(summer2.initialize())
-    TS_ASSERT_THROWS_NOTHING(
-        summer2.setPropertyValue("InputWorkspace", inputWS))
+    TS_ASSERT_THROWS_NOTHING(summer2.setPropertyValue("InputWorkspace", inputWS))
     TS_ASSERT_THROWS_NOTHING(summer2.setPropertyValue("OutputWorkspace", "H"))
     TS_ASSERT_THROWS_NOTHING(summer2.setPropertyValue("Orientation", "D_H"))
 
@@ -57,8 +55,7 @@ public:
 
     MatrixWorkspace_const_sptr output;
     TS_ASSERT_THROWS_NOTHING(
-        output = std::dynamic_pointer_cast<MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve("H")));
+        output = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("H")));
     // Check a couple of values
     TS_ASSERT_EQUALS(output->x(0).size(), 10)
     TS_ASSERT_EQUALS(output->y(0).size(), 10)
@@ -71,15 +68,13 @@ public:
     TS_ASSERT_EQUALS(output->e(0)[9], 0)
 
     TSM_ASSERT("Should have an empty unit",
-               std::dynamic_pointer_cast<Mantid::Kernel::Units::Empty>(
-                   output->getAxis(0)->unit()))
+               std::dynamic_pointer_cast<Mantid::Kernel::Units::Empty>(output->getAxis(0)->unit()))
   }
 
   void testVertical() {
     Mantid::Algorithms::SumRowColumn summer2;
     TS_ASSERT_THROWS_NOTHING(summer2.initialize())
-    TS_ASSERT_THROWS_NOTHING(
-        summer2.setPropertyValue("InputWorkspace", inputWS))
+    TS_ASSERT_THROWS_NOTHING(summer2.setPropertyValue("InputWorkspace", inputWS))
     TS_ASSERT_THROWS_NOTHING(summer2.setPropertyValue("OutputWorkspace", "V"))
     TS_ASSERT_THROWS_NOTHING(summer2.setPropertyValue("Orientation", "D_V"))
     TS_ASSERT_THROWS_NOTHING(summer2.setPropertyValue("XMin", "4"))
@@ -92,8 +87,7 @@ public:
 
     MatrixWorkspace_const_sptr output;
     TS_ASSERT_THROWS_NOTHING(
-        output = std::dynamic_pointer_cast<MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve("V")));
+        output = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("V")));
     // Check a couple of values
     TS_ASSERT_EQUALS(output->x(0).size(), 10)
     TS_ASSERT_EQUALS(output->y(0).size(), 10)

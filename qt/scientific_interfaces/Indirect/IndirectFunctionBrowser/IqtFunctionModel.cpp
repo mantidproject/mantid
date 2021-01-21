@@ -19,15 +19,14 @@ using namespace MantidWidgets;
 using namespace Mantid::API;
 
 namespace {
-std::map<IqtFunctionModel::ParamID, QString> g_paramName{
-    {IqtFunctionModel::ParamID::EXP1_HEIGHT, "Height"},
-    {IqtFunctionModel::ParamID::EXP1_LIFETIME, "Lifetime"},
-    {IqtFunctionModel::ParamID::EXP2_HEIGHT, "Height"},
-    {IqtFunctionModel::ParamID::EXP2_LIFETIME, "Lifetime"},
-    {IqtFunctionModel::ParamID::STRETCH_HEIGHT, "Height"},
-    {IqtFunctionModel::ParamID::STRETCH_LIFETIME, "Lifetime"},
-    {IqtFunctionModel::ParamID::STRETCH_STRETCHING, "Stretching"},
-    {IqtFunctionModel::ParamID::BG_A0, "A0"}};
+std::map<IqtFunctionModel::ParamID, QString> g_paramName{{IqtFunctionModel::ParamID::EXP1_HEIGHT, "Height"},
+                                                         {IqtFunctionModel::ParamID::EXP1_LIFETIME, "Lifetime"},
+                                                         {IqtFunctionModel::ParamID::EXP2_HEIGHT, "Height"},
+                                                         {IqtFunctionModel::ParamID::EXP2_LIFETIME, "Lifetime"},
+                                                         {IqtFunctionModel::ParamID::STRETCH_HEIGHT, "Height"},
+                                                         {IqtFunctionModel::ParamID::STRETCH_LIFETIME, "Lifetime"},
+                                                         {IqtFunctionModel::ParamID::STRETCH_STRETCHING, "Stretching"},
+                                                         {IqtFunctionModel::ParamID::BG_A0, "A0"}};
 }
 
 IqtFunctionModel::IqtFunctionModel() {}
@@ -96,20 +95,14 @@ void IqtFunctionModel::setFunction(IFunction_sptr fun) {
   m_model.setFunction(fun);
 }
 
-IFunction_sptr IqtFunctionModel::getFitFunction() const {
-  return m_model.getFitFunction();
-}
+IFunction_sptr IqtFunctionModel::getFitFunction() const { return m_model.getFitFunction(); }
 
 bool IqtFunctionModel::hasFunction() const { return m_model.hasFunction(); }
 
-void IqtFunctionModel::addFunction(const QString &prefix,
-                                   const QString &funStr) {
+void IqtFunctionModel::addFunction(const QString &prefix, const QString &funStr) {
   if (!prefix.isEmpty())
-    throw std::runtime_error(
-        "Function doesn't have member function with prefix " +
-        prefix.toStdString());
-  auto fun =
-      FunctionFactory::Instance().createInitialized(funStr.toStdString());
+    throw std::runtime_error("Function doesn't have member function with prefix " + prefix.toStdString());
+  auto fun = FunctionFactory::Instance().createInitialized(funStr.toStdString());
   auto const name = fun->name();
   QString newPrefix;
   if (name == "ExpDecay") {
@@ -167,9 +160,7 @@ void IqtFunctionModel::removeFunction(const QString &prefix) {
     removeBackground();
     return;
   }
-  throw std::runtime_error(
-      "Function doesn't have member function with prefix " +
-      prefix.toStdString());
+  throw std::runtime_error("Function doesn't have member function with prefix " + prefix.toStdString());
 }
 
 void IqtFunctionModel::setNumberOfExponentials(int n) {
@@ -183,9 +174,7 @@ void IqtFunctionModel::setNumberOfExponentials(int n) {
   }
 }
 
-int IqtFunctionModel::getNumberOfExponentials() const {
-  return m_numberOfExponentials;
-}
+int IqtFunctionModel::getNumberOfExponentials() const { return m_numberOfExponentials; }
 
 void IqtFunctionModel::setStretchExponential(bool on) {
   auto oldValues = getCurrentValues();
@@ -198,9 +187,7 @@ void IqtFunctionModel::setStretchExponential(bool on) {
   }
 }
 
-bool IqtFunctionModel::hasStretchExponential() const {
-  return m_hasStretchExponential;
-}
+bool IqtFunctionModel::hasStretchExponential() const { return m_hasStretchExponential; }
 
 void IqtFunctionModel::setBackground(const QString &name) {
   auto oldValues = getCurrentValues();
@@ -233,8 +220,7 @@ void IqtFunctionModel::tieIntensities(bool on) {
   }
 }
 
-void IqtFunctionModel::updateParameterEstimationData(
-    DataForParameterEstimationCollection &&data) {
+void IqtFunctionModel::updateParameterEstimationData(DataForParameterEstimationCollection &&data) {
   m_estimationData = std::move(data);
 }
 
@@ -248,51 +234,33 @@ QString IqtFunctionModel::setBackgroundA0(double value) {
 
 void IqtFunctionModel::setNumberDomains(int n) { m_model.setNumberDomains(n); }
 
-int IqtFunctionModel::getNumberDomains() const {
-  return m_model.getNumberDomains();
-}
+int IqtFunctionModel::getNumberDomains() const { return m_model.getNumberDomains(); }
 
-void IqtFunctionModel::setParameter(const QString &paramName, double value) {
-  m_model.setParameter(paramName, value);
-}
+void IqtFunctionModel::setParameter(const QString &paramName, double value) { m_model.setParameter(paramName, value); }
 
-void IqtFunctionModel::setParameterError(const QString &paramName,
-                                         double value) {
+void IqtFunctionModel::setParameterError(const QString &paramName, double value) {
   m_model.setParameterError(paramName, value);
 }
 
-double IqtFunctionModel::getParameter(const QString &paramName) const {
-  return m_model.getParameter(paramName);
-}
+double IqtFunctionModel::getParameter(const QString &paramName) const { return m_model.getParameter(paramName); }
 
 double IqtFunctionModel::getParameterError(const QString &paramName) const {
   return m_model.getParameterError(paramName);
 }
 
-QString
-IqtFunctionModel::getParameterDescription(const QString &paramName) const {
+QString IqtFunctionModel::getParameterDescription(const QString &paramName) const {
   return m_model.getParameterDescription(paramName);
 }
 
-QStringList IqtFunctionModel::getParameterNames() const {
-  return m_model.getParameterNames();
-}
+QStringList IqtFunctionModel::getParameterNames() const { return m_model.getParameterNames(); }
 
-IFunction_sptr IqtFunctionModel::getSingleFunction(int index) const {
-  return m_model.getSingleFunction(index);
-}
+IFunction_sptr IqtFunctionModel::getSingleFunction(int index) const { return m_model.getSingleFunction(index); }
 
-IFunction_sptr IqtFunctionModel::getCurrentFunction() const {
-  return m_model.getCurrentFunction();
-}
+IFunction_sptr IqtFunctionModel::getCurrentFunction() const { return m_model.getCurrentFunction(); }
 
-QStringList IqtFunctionModel::getGlobalParameters() const {
-  return m_model.getGlobalParameters();
-}
+QStringList IqtFunctionModel::getGlobalParameters() const { return m_model.getGlobalParameters(); }
 
-QStringList IqtFunctionModel::getLocalParameters() const {
-  return m_model.getLocalParameters();
-}
+QStringList IqtFunctionModel::getLocalParameters() const { return m_model.getLocalParameters(); }
 
 void IqtFunctionModel::setGlobalParameters(const QStringList &globals) {
   m_globals.clear();
@@ -303,9 +271,7 @@ void IqtFunctionModel::setGlobalParameters(const QStringList &globals) {
   m_model.setGlobalParameters(newGlobals);
 }
 
-bool IqtFunctionModel::isGlobal(const QString &parName) const {
-  return m_model.isGlobal(parName);
-}
+bool IqtFunctionModel::isGlobal(const QString &parName) const { return m_model.isGlobal(parName); }
 
 void IqtFunctionModel::setGlobal(const QString &parName, bool on) {
   if (parName.isEmpty())
@@ -342,12 +308,9 @@ QStringList IqtFunctionModel::makeGlobalList() const {
   return globals;
 }
 
-void IqtFunctionModel::updateMultiDatasetParameters(const IFunction &fun) {
-  m_model.updateMultiDatasetParameters(fun);
-}
+void IqtFunctionModel::updateMultiDatasetParameters(const IFunction &fun) { m_model.updateMultiDatasetParameters(fun); }
 
-void IqtFunctionModel::updateMultiDatasetParameters(
-    const ITableWorkspace &paramTable) {
+void IqtFunctionModel::updateMultiDatasetParameters(const ITableWorkspace &paramTable) {
   auto const nRows = paramTable.rowCount();
   if (nRows == 0)
     return;
@@ -366,105 +329,72 @@ void IqtFunctionModel::updateMultiDatasetParameters(
     auto errorColumn = paramTable.getColumn((name + "_Err").toStdString());
     if (nRows > 1) {
       for (size_t i = 0; i < nRows; ++i) {
-        m_model.setLocalParameterValue(name, static_cast<int>(i),
-                                       valueColumn->toDouble(i),
-                                       errorColumn->toDouble(i));
+        m_model.setLocalParameterValue(name, static_cast<int>(i), valueColumn->toDouble(i), errorColumn->toDouble(i));
       }
     } else {
       auto const i = m_model.currentDomainIndex();
-      m_model.setLocalParameterValue(name, static_cast<int>(i),
-                                     valueColumn->toDouble(0),
-                                     errorColumn->toDouble(0));
+      m_model.setLocalParameterValue(name, static_cast<int>(i), valueColumn->toDouble(0), errorColumn->toDouble(0));
     }
   }
 }
 
-void IqtFunctionModel::updateParameters(const IFunction &fun) {
-  m_model.updateParameters(fun);
-}
+void IqtFunctionModel::updateParameters(const IFunction &fun) { m_model.updateParameters(fun); }
 
-void IqtFunctionModel::setCurrentDomainIndex(int i) {
-  m_model.setCurrentDomainIndex(i);
-}
+void IqtFunctionModel::setCurrentDomainIndex(int i) { m_model.setCurrentDomainIndex(i); }
 
-int IqtFunctionModel::currentDomainIndex() const {
-  return m_model.currentDomainIndex();
-}
+int IqtFunctionModel::currentDomainIndex() const { return m_model.currentDomainIndex(); }
 
-void IqtFunctionModel::changeTie(const QString &paramName, const QString &tie) {
-  m_model.changeTie(paramName, tie);
-}
+void IqtFunctionModel::changeTie(const QString &paramName, const QString &tie) { m_model.changeTie(paramName, tie); }
 
-void IqtFunctionModel::addConstraint(const QString &functionIndex,
-                                     const QString &constraint) {
+void IqtFunctionModel::addConstraint(const QString &functionIndex, const QString &constraint) {
   m_model.addConstraint(functionIndex, constraint);
 }
 
-void IqtFunctionModel::removeConstraint(const QString &paramName) {
-  m_model.removeConstraint(paramName);
-}
+void IqtFunctionModel::removeConstraint(const QString &paramName) { m_model.removeConstraint(paramName); }
 
-void IqtFunctionModel::setDatasets(
-    const QList<FunctionModelDataset> &datasets) {
-  m_model.setDatasets(datasets);
-}
+void IqtFunctionModel::setDatasets(const QList<FunctionModelDataset> &datasets) { m_model.setDatasets(datasets); }
 
-QStringList IqtFunctionModel::getDatasetNames() const {
-  return m_model.getDatasetNames();
-}
+QStringList IqtFunctionModel::getDatasetNames() const { return m_model.getDatasetNames(); }
 
-QStringList IqtFunctionModel::getDatasetDomainNames() const {
-  return m_model.getDatasetDomainNames();
-}
+QStringList IqtFunctionModel::getDatasetDomainNames() const { return m_model.getDatasetDomainNames(); }
 
-double IqtFunctionModel::getLocalParameterValue(const QString &parName,
-                                                int i) const {
+double IqtFunctionModel::getLocalParameterValue(const QString &parName, int i) const {
   return m_model.getLocalParameterValue(parName, i);
 }
 
-bool IqtFunctionModel::isLocalParameterFixed(const QString &parName,
-                                             int i) const {
+bool IqtFunctionModel::isLocalParameterFixed(const QString &parName, int i) const {
   return m_model.isLocalParameterFixed(parName, i);
 }
 
-QString IqtFunctionModel::getLocalParameterTie(const QString &parName,
-                                               int i) const {
+QString IqtFunctionModel::getLocalParameterTie(const QString &parName, int i) const {
   return m_model.getLocalParameterTie(parName, i);
 }
 
-QString IqtFunctionModel::getLocalParameterConstraint(const QString &parName,
-                                                      int i) const {
+QString IqtFunctionModel::getLocalParameterConstraint(const QString &parName, int i) const {
   return m_model.getLocalParameterConstraint(parName, i);
 }
 
-void IqtFunctionModel::setLocalParameterValue(const QString &parName, int i,
-                                              double value) {
+void IqtFunctionModel::setLocalParameterValue(const QString &parName, int i, double value) {
   m_model.setLocalParameterValue(parName, i, value);
 }
 
-void IqtFunctionModel::setLocalParameterValue(const QString &parName, int i,
-                                              double value, double error) {
+void IqtFunctionModel::setLocalParameterValue(const QString &parName, int i, double value, double error) {
   m_model.setLocalParameterValue(parName, i, value, error);
 }
 
-void IqtFunctionModel::setLocalParameterTie(const QString &parName, int i,
-                                            const QString &tie) {
+void IqtFunctionModel::setLocalParameterTie(const QString &parName, int i, const QString &tie) {
   m_model.setLocalParameterTie(parName, i, tie);
 }
 
-void IqtFunctionModel::setLocalParameterConstraint(const QString &parName,
-                                                   int i,
-                                                   const QString &constraint) {
+void IqtFunctionModel::setLocalParameterConstraint(const QString &parName, int i, const QString &constraint) {
   m_model.setLocalParameterConstraint(parName, i, constraint);
 }
 
-void IqtFunctionModel::setLocalParameterFixed(const QString &parName, int i,
-                                              bool fixed) {
+void IqtFunctionModel::setLocalParameterFixed(const QString &parName, int i, bool fixed) {
   m_model.setLocalParameterFixed(parName, i, fixed);
 }
 
-void IqtFunctionModel::setGlobalParameterValue(const QString &paramName,
-                                               double value) {
+void IqtFunctionModel::setGlobalParameterValue(const QString &paramName, double value) {
   m_model.setGlobalParameterValue(paramName, value);
 }
 
@@ -477,28 +407,22 @@ void IqtFunctionModel::setParameter(ParamID name, double value) {
 
 boost::optional<double> IqtFunctionModel::getParameter(ParamID name) const {
   auto const paramName = getParameterName(name);
-  return paramName ? m_model.getParameter(*paramName)
-                   : boost::optional<double>();
+  return paramName ? m_model.getParameter(*paramName) : boost::optional<double>();
 }
 
-boost::optional<double>
-IqtFunctionModel::getParameterError(ParamID name) const {
+boost::optional<double> IqtFunctionModel::getParameterError(ParamID name) const {
   auto const paramName = getParameterName(name);
-  return paramName ? m_model.getParameterError(*paramName)
-                   : boost::optional<double>();
+  return paramName ? m_model.getParameterError(*paramName) : boost::optional<double>();
 }
 
-boost::optional<QString>
-IqtFunctionModel::getParameterName(ParamID name) const {
+boost::optional<QString> IqtFunctionModel::getParameterName(ParamID name) const {
   auto const prefix = getPrefix(name);
   return prefix ? *prefix + g_paramName.at(name) : boost::optional<QString>();
 }
 
-boost::optional<QString>
-IqtFunctionModel::getParameterDescription(ParamID name) const {
+boost::optional<QString> IqtFunctionModel::getParameterDescription(ParamID name) const {
   auto const paramName = getParameterName(name);
-  return paramName ? m_model.getParameterDescription(*paramName)
-                   : boost::optional<QString>();
+  return paramName ? m_model.getParameterDescription(*paramName) : boost::optional<QString>();
 }
 
 boost::optional<QString> IqtFunctionModel::getPrefix(ParamID name) const {
@@ -513,57 +437,39 @@ boost::optional<QString> IqtFunctionModel::getPrefix(ParamID name) const {
   }
 }
 
-QMap<IqtFunctionModel::ParamID, double>
-IqtFunctionModel::getCurrentValues() const {
+QMap<IqtFunctionModel::ParamID, double> IqtFunctionModel::getCurrentValues() const {
   QMap<ParamID, double> values;
-  auto store = [&values, this](ParamID name) {
-    values[name] = *getParameter(name);
-  };
+  auto store = [&values, this](ParamID name) { values[name] = *getParameter(name); };
   applyParameterFunction(store);
   return values;
 }
 
-QMap<IqtFunctionModel::ParamID, double>
-IqtFunctionModel::getCurrentErrors() const {
+QMap<IqtFunctionModel::ParamID, double> IqtFunctionModel::getCurrentErrors() const {
   QMap<ParamID, double> errors;
-  auto store = [&errors, this](ParamID name) {
-    errors[name] = *getParameterError(name);
-  };
+  auto store = [&errors, this](ParamID name) { errors[name] = *getParameterError(name); };
   applyParameterFunction(store);
   return errors;
 }
 
 QMap<int, QString> IqtFunctionModel::getParameterNameMap() const {
   QMap<int, QString> out;
-  auto addToMap = [&out, this](ParamID name) {
-    out[static_cast<int>(name)] = *getParameterName(name);
-  };
+  auto addToMap = [&out, this](ParamID name) { out[static_cast<int>(name)] = *getParameterName(name); };
   applyParameterFunction(addToMap);
   return out;
 }
 
 QMap<int, std::string> IqtFunctionModel::getParameterDescriptionMap() const {
   QMap<int, std::string> out;
-  auto expDecay = FunctionFactory::Instance().createInitialized(
-      buildExpDecayFunctionString());
-  out[static_cast<int>(ParamID::EXP1_HEIGHT)] =
-      expDecay->parameterDescription(0);
-  out[static_cast<int>(ParamID::EXP1_LIFETIME)] =
-      expDecay->parameterDescription(1);
-  out[static_cast<int>(ParamID::EXP2_HEIGHT)] =
-      expDecay->parameterDescription(0);
-  out[static_cast<int>(ParamID::EXP2_LIFETIME)] =
-      expDecay->parameterDescription(1);
-  auto stretchExp = FunctionFactory::Instance().createInitialized(
-      buildStretchExpFunctionString());
-  out[static_cast<int>(ParamID::STRETCH_HEIGHT)] =
-      stretchExp->parameterDescription(0);
-  out[static_cast<int>(ParamID::STRETCH_LIFETIME)] =
-      stretchExp->parameterDescription(1);
-  out[static_cast<int>(ParamID::STRETCH_STRETCHING)] =
-      stretchExp->parameterDescription(2);
-  auto background = FunctionFactory::Instance().createInitialized(
-      buildBackgroundFunctionString());
+  auto expDecay = FunctionFactory::Instance().createInitialized(buildExpDecayFunctionString());
+  out[static_cast<int>(ParamID::EXP1_HEIGHT)] = expDecay->parameterDescription(0);
+  out[static_cast<int>(ParamID::EXP1_LIFETIME)] = expDecay->parameterDescription(1);
+  out[static_cast<int>(ParamID::EXP2_HEIGHT)] = expDecay->parameterDescription(0);
+  out[static_cast<int>(ParamID::EXP2_LIFETIME)] = expDecay->parameterDescription(1);
+  auto stretchExp = FunctionFactory::Instance().createInitialized(buildStretchExpFunctionString());
+  out[static_cast<int>(ParamID::STRETCH_HEIGHT)] = stretchExp->parameterDescription(0);
+  out[static_cast<int>(ParamID::STRETCH_LIFETIME)] = stretchExp->parameterDescription(1);
+  out[static_cast<int>(ParamID::STRETCH_STRETCHING)] = stretchExp->parameterDescription(2);
+  auto background = FunctionFactory::Instance().createInitialized(buildBackgroundFunctionString());
   out[static_cast<int>(ParamID::BG_A0)] = background->parameterDescription(0);
   return out;
 }
@@ -574,8 +480,7 @@ void IqtFunctionModel::setCurrentValues(const QMap<ParamID, double> &values) {
   }
 }
 
-void IqtFunctionModel::applyParameterFunction(
-    const std::function<void(ParamID)> &paramFun) const {
+void IqtFunctionModel::applyParameterFunction(const std::function<void(ParamID)> &paramFun) const {
   if (m_numberOfExponentials > 0) {
     paramFun(ParamID::EXP1_HEIGHT);
     paramFun(ParamID::EXP1_LIFETIME);
@@ -594,8 +499,7 @@ void IqtFunctionModel::applyParameterFunction(
   }
 }
 
-boost::optional<IqtFunctionModel::ParamID>
-IqtFunctionModel::getParameterId(const QString &parName) {
+boost::optional<IqtFunctionModel::ParamID> IqtFunctionModel::getParameterId(const QString &parName) {
   boost::optional<ParamID> result;
   auto getter = [&result, parName, this](ParamID pid) {
     if (parName == *getParameterName(pid))
@@ -690,8 +594,7 @@ QString IqtFunctionModel::buildFunctionString() const {
 boost::optional<QString> IqtFunctionModel::getExp1Prefix() const {
   if (m_numberOfExponentials == 0)
     return boost::optional<QString>();
-  if (m_numberOfExponentials == 1 && !m_hasStretchExponential &&
-      m_background.isEmpty())
+  if (m_numberOfExponentials == 1 && !m_hasStretchExponential && m_background.isEmpty())
     return QString("");
   return QString("f0.");
 }
@@ -715,8 +618,7 @@ boost::optional<QString> IqtFunctionModel::getBackgroundPrefix() const {
     return boost::optional<QString>();
   if (m_numberOfExponentials == 0 && !m_hasStretchExponential)
     return QString("");
-  return QString("f%1.").arg(m_numberOfExponentials +
-                             (m_hasStretchExponential ? 1 : 0));
+  return QString("f%1.").arg(m_numberOfExponentials + (m_hasStretchExponential ? 1 : 0));
 }
 
 } // namespace IDA

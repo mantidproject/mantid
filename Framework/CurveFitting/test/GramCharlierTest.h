@@ -37,14 +37,11 @@ public:
     decltype(input) output;
     fn.function1D(output.data(), input.data(), input.size());
 
-    TSM_ASSERT_EQUALS("Input/output data sizes should match", output.size(),
-                      input.size());
+    TSM_ASSERT_EQUALS("Input/output data sizes should match", output.size(), input.size());
     // Values computed independently with UserFunction in MantidPlot
-    decltype(input) expected = {
-        {0.00132130149415442, 0.00127865974554395, 0.0012345081447521,
-         0.00118898601238179, 0.00114223710903171, 0.00109440900868656,
-         0.00104565245357959, 0.000996120694139449, 0.000945968817727083,
-         0.000895353069936715, 0.000844430172276783}};
+    decltype(input) expected = {{0.00132130149415442, 0.00127865974554395, 0.0012345081447521, 0.00118898601238179,
+                                 0.00114223710903171, 0.00109440900868656, 0.00104565245357959, 0.000996120694139449,
+                                 0.000945968817727083, 0.000895353069936715, 0.000844430172276783}};
     checkMatch(expected, output);
   }
 
@@ -63,12 +60,10 @@ private:
   /// Verify that the sequences match within some precision. It is assumed
   /// that the sizes match on entry
   template <typename ExpectedSeqType, typename ComputedSeqType>
-  void checkMatch(const ExpectedSeqType &expected,
-                  const ComputedSeqType &computed) {
+  void checkMatch(const ExpectedSeqType &expected, const ComputedSeqType &computed) {
     const double precision(1e-10);
     for (size_t i = 0; i < expected.size(); ++i) {
-      TSM_ASSERT_DELTA("Mismatch in " + std::to_string(i) + "th element",
-                       expected[i], computed[i], precision);
+      TSM_ASSERT_DELTA("Mismatch in " + std::to_string(i) + "th element", expected[i], computed[i], precision);
     }
   }
 };

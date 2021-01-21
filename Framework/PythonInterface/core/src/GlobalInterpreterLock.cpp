@@ -30,9 +30,7 @@ bool GlobalInterpreterLock::locked() {
 /**
  * @return A handle to the Python threadstate before the acquire() call.
  */
-PyGILState_STATE GlobalInterpreterLock::acquire() {
-  return PyGILState_Ensure();
-}
+PyGILState_STATE GlobalInterpreterLock::acquire() { return PyGILState_Ensure(); }
 
 /**
  * There must be have been a call to acquire() to create the tstate value given
@@ -40,9 +38,7 @@ PyGILState_STATE GlobalInterpreterLock::acquire() {
  * @param tstate The Python threadstate returned by the matching call to
  * acquire()
  */
-void GlobalInterpreterLock::release(PyGILState_STATE tstate) {
-  PyGILState_Release(tstate);
-}
+void GlobalInterpreterLock::release(PyGILState_STATE tstate) { PyGILState_Release(tstate); }
 
 //------------------------------------------------------------------------------
 // GlobalInterpreterLock Public members

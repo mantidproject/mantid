@@ -47,8 +47,7 @@
 
 #include <qwt_scale_widget.h>
 
-TextDialog::TextDialog(TextType type, QWidget *parent, const Qt::WFlags &fl)
-    : QDialog(parent, fl) {
+TextDialog::TextDialog(TextType type, QWidget *parent, const Qt::WFlags &fl) : QDialog(parent, fl) {
   setAttribute(Qt::WA_DeleteOnClose);
   setWindowTitle(tr("MantidPlot - Text options"));
   setSizeGripEnabled(true);
@@ -124,8 +123,7 @@ TextDialog::TextDialog(TextType type, QWidget *parent, const Qt::WFlags &fl)
     backgroundBtn->setEnabled(false);
     topLayout->addWidget(backgroundBtn, 4, 1);
 
-    connect(boxBackgroundTransparency, SIGNAL(valueChanged(int)), this,
-            SLOT(updateTransparency(int)));
+    connect(boxBackgroundTransparency, SIGNAL(valueChanged(int)), this, SLOT(updateTransparency(int)));
 
     boxApplyToAll = new QCheckBox(tr("Apply format to all &labels in layer"));
     topLayout->addWidget(boxApplyToAll, 5, 0);
@@ -161,8 +159,7 @@ TextDialog::TextDialog(TextType type, QWidget *parent, const Qt::WFlags &fl)
   textEditBox->setAcceptRichText(false);
   textEditBox->setFont(QFont());
 
-  formatButtons =
-      new TextFormatButtons(textEditBox, TextFormatButtons::AxisLabel);
+  formatButtons = new TextFormatButtons(textEditBox, TextFormatButtons::AxisLabel);
 
   setFocusPolicy(Qt::StrongFocus);
   setFocusProxy(textEditBox);
@@ -342,8 +339,7 @@ void TextDialog::setDefaultValues() {
 
   QColor c = backgroundBtn->color();
   c.setAlpha(boxBackgroundTransparency->value());
-  app->setLegendDefaultSettings(backgroundBox->currentIndex(), selectedFont,
-                                colorBtn->color(), c);
+  app->setLegendDefaultSettings(backgroundBox->currentIndex(), selectedFont, colorBtn->color(), c);
 }
 
 void TextDialog::accept() {
@@ -408,6 +404,4 @@ void TextDialog::setText(const QString &t) {
   textEditBox->setFocus();
 }
 
-void TextDialog::updateTransparency(int alpha) {
-  backgroundBtn->setEnabled(alpha);
-}
+void TextDialog::updateTransparency(int alpha) { backgroundBtn->setEnabled(alpha); }

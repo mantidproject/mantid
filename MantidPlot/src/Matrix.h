@@ -64,8 +64,8 @@ class Matrix : public MdiSubWindow, public Scripted {
   Q_OBJECT
 
 protected:
-  Matrix(ScriptingEnv *env, const QString &label, QWidget *parent,
-         const QString &name = QString(), const Qt::WFlags &f = nullptr);
+  Matrix(ScriptingEnv *env, const QString &label, QWidget *parent, const QString &name = QString(),
+         const Qt::WFlags &f = nullptr);
 
 public:
   /**
@@ -80,10 +80,9 @@ public:
 ::    * @param name :: window name
    * @param f :: window flags
    */
-  Matrix(ScriptingEnv *env, int r, int c, const QString &label, QWidget *parent,
-         const QString &name = QString(), const Qt::WFlags &f = nullptr);
-  Matrix(ScriptingEnv *env, const QImage &image, const QString &label,
-         QWidget *parent, const QString &name = QString(),
+  Matrix(ScriptingEnv *env, int r, int c, const QString &label, QWidget *parent, const QString &name = QString(),
+         const Qt::WFlags &f = nullptr);
+  Matrix(ScriptingEnv *env, const QImage &image, const QString &label, QWidget *parent, const QString &name = QString(),
          const Qt::WFlags &f = nullptr);
   ~Matrix() override;
 
@@ -122,16 +121,13 @@ public:
   void exportRasterImage(const QString &fileName, int quality = 100);
   void exportSVG(const QString &fileName);
   void exportToFile(const QString &fileName);
-  void exportVector(const QString &fileName, int res = 0, bool color = true,
-                    bool keepAspect = true,
+  void exportVector(const QString &fileName, int res = 0, bool color = true, bool keepAspect = true,
                     QPrinter::PageSize pageSize = QPrinter::Custom);
 
   MatrixModel *matrixModel() { return d_matrix_model; };
   QUndoStack *undoStack() { return d_undo_stack; };
 
-  QItemSelectionModel *selectionModel() {
-    return d_table_view->selectionModel();
-  };
+  QItemSelectionModel *selectionModel() { return d_table_view->selectionModel(); };
 
   //! Return the number of rows
   int numRows() { return d_matrix_model->rowCount(); };
@@ -176,21 +172,15 @@ public:
   void invert();
 
   //! Calculate matrix values using the #formula_str.
-  bool calculate(int startRow = 0, int endRow = -1, int startCol = 0,
-                 int endCol = -1, bool forceMuParser = true);
+  bool calculate(int startRow = 0, int endRow = -1, int startCol = 0, int endCol = -1, bool forceMuParser = true);
   //! Calculate matrix values using the #formula_str (optimization for
   // muParser).
-  bool muParserCalculate(int startRow = 0, int endRow = -1, int startCol = 0,
-                         int endCol = -1);
+  bool muParserCalculate(int startRow = 0, int endRow = -1, int startCol = 0, int endCol = -1);
 
-  bool exportASCII(const QString &fname, const QString &separator,
-                   bool exportSelection);
-  void importASCII(const QString &fname, const QString &sep, int ignoredLines,
-                   bool stripSpaces, bool simplifySpaces,
-                   const QString &commentString,
-                   ImportMode importAs = Overwrite,
-                   const QLocale &l = QLocale(), int endLineChar = 0,
-                   int maxRows = -1);
+  bool exportASCII(const QString &fname, const QString &separator, bool exportSelection);
+  void importASCII(const QString &fname, const QString &sep, int ignoredLines, bool stripSpaces, bool simplifySpaces,
+                   const QString &commentString, ImportMode importAs = Overwrite, const QLocale &l = QLocale(),
+                   int endLineChar = 0, int maxRows = -1);
 
   QPixmap matrixIcon() { return m_matrix_icon; }
 
@@ -258,9 +248,8 @@ public slots:
   void restore(const QStringList &l) override;
 
   // loading and saving project files
-  static MantidQt::API::IProjectSerialisable *
-  loadFromProject(const std::string &lines, ApplicationWindow *app,
-                  const int fileVersion);
+  static MantidQt::API::IProjectSerialisable *loadFromProject(const std::string &lines, ApplicationWindow *app,
+                                                              const int fileVersion);
   std::string saveToProject(ApplicationWindow *app) override;
   std::vector<std::string> getWorkspaceNames() override;
 

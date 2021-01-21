@@ -49,15 +49,12 @@ static const std::string SAMPLE_LOG_X_AXIS_PROPERTY = "SampleLogAsXAxis";
 DECLARE_ALGORITHM(ConjoinXRuns)
 
 const std::string ConjoinXRuns::SUM_MERGE = "conjoin_sample_logs_sum";
-const std::string ConjoinXRuns::TIME_SERIES_MERGE =
-    "conjoin_sample_logs_time_series";
+const std::string ConjoinXRuns::TIME_SERIES_MERGE = "conjoin_sample_logs_time_series";
 const std::string ConjoinXRuns::LIST_MERGE = "conjoin_sample_logs_list";
 const std::string ConjoinXRuns::WARN_MERGE = "conjoin_sample_logs_warn";
-const std::string ConjoinXRuns::WARN_MERGE_TOLERANCES =
-    "conjoin_sample_logs_warn_tolerances";
+const std::string ConjoinXRuns::WARN_MERGE_TOLERANCES = "conjoin_sample_logs_warn_tolerances";
 const std::string ConjoinXRuns::FAIL_MERGE = "conjoin_sample_logs_fail";
-const std::string ConjoinXRuns::FAIL_MERGE_TOLERANCES =
-    "conjoin_sample_logs_fail_tolerances";
+const std::string ConjoinXRuns::FAIL_MERGE_TOLERANCES = "conjoin_sample_logs_fail_tolerances";
 
 //----------------------------------------------------------------------------------------------
 
@@ -68,9 +65,7 @@ const std::string ConjoinXRuns::name() const { return "ConjoinXRuns"; }
 int ConjoinXRuns::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string ConjoinXRuns::category() const {
-  return "Transforms\\Merging";
-}
+const std::string ConjoinXRuns::category() const { return "Transforms\\Merging"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string ConjoinXRuns::summary() const {
@@ -82,55 +77,41 @@ const std::string ConjoinXRuns::summary() const {
  */
 void ConjoinXRuns::init() {
   declareProperty(
-      std::make_unique<ArrayProperty<std::string>>(
-          INPUT_WORKSPACE_PROPERTY, std::make_shared<ADSValidator>()),
+      std::make_unique<ArrayProperty<std::string>>(INPUT_WORKSPACE_PROPERTY, std::make_shared<ADSValidator>()),
       "The names of the input workspaces or workspace groups as a list. At "
       "least two point-data MatrixWorkspaces are "
       "required, having the same instrument, same number of spectra and "
       "units.");
-  declareProperty(
-      SAMPLE_LOG_X_AXIS_PROPERTY, "",
-      "The name of the numeric sample log to become the x-axis of the output. "
-      "Empty by default, in which case the x-axis of the input "
-      "workspaces are stitched. "
-      "If specified, this will be the x-axis. It has to be numeric, in which "
-      "case all the input workspaces must have only one point or numeric "
-      "time series, in which case the number "
-      "of elements in the series must match the number of points for each "
-      "workspace.");
-  declareProperty(std::make_unique<WorkspaceProperty<API::Workspace>>(
-                      OUTPUT_WORKSPACE_PROPERTY, "", Direction::Output),
+  declareProperty(SAMPLE_LOG_X_AXIS_PROPERTY, "",
+                  "The name of the numeric sample log to become the x-axis of the output. "
+                  "Empty by default, in which case the x-axis of the input "
+                  "workspaces are stitched. "
+                  "If specified, this will be the x-axis. It has to be numeric, in which "
+                  "case all the input workspaces must have only one point or numeric "
+                  "time series, in which case the number "
+                  "of elements in the series must match the number of points for each "
+                  "workspace.");
+  declareProperty(std::make_unique<WorkspaceProperty<API::Workspace>>(OUTPUT_WORKSPACE_PROPERTY, "", Direction::Output),
                   "The output workspace.");
 
-  declareProperty(SampleLogsBehaviour::TIME_SERIES_PROP, "",
-                  SampleLogsBehaviour::TIME_SERIES_DOC);
-  declareProperty(SampleLogsBehaviour::LIST_PROP, "",
-                  SampleLogsBehaviour::LIST_DOC);
-  declareProperty(SampleLogsBehaviour::WARN_PROP, "",
-                  SampleLogsBehaviour::WARN_DOC);
-  declareProperty(SampleLogsBehaviour::WARN_TOL_PROP, "",
-                  SampleLogsBehaviour::WARN_TOL_DOC);
-  declareProperty(SampleLogsBehaviour::FAIL_PROP, "",
-                  SampleLogsBehaviour::FAIL_DOC);
-  declareProperty(SampleLogsBehaviour::FAIL_TOL_PROP, "",
-                  SampleLogsBehaviour::FAIL_TOL_DOC);
-  declareProperty(SampleLogsBehaviour::SUM_PROP, "",
-                  SampleLogsBehaviour::SUM_DOC);
+  declareProperty(SampleLogsBehaviour::TIME_SERIES_PROP, "", SampleLogsBehaviour::TIME_SERIES_DOC);
+  declareProperty(SampleLogsBehaviour::LIST_PROP, "", SampleLogsBehaviour::LIST_DOC);
+  declareProperty(SampleLogsBehaviour::WARN_PROP, "", SampleLogsBehaviour::WARN_DOC);
+  declareProperty(SampleLogsBehaviour::WARN_TOL_PROP, "", SampleLogsBehaviour::WARN_TOL_DOC);
+  declareProperty(SampleLogsBehaviour::FAIL_PROP, "", SampleLogsBehaviour::FAIL_DOC);
+  declareProperty(SampleLogsBehaviour::FAIL_TOL_PROP, "", SampleLogsBehaviour::FAIL_TOL_DOC);
+  declareProperty(SampleLogsBehaviour::SUM_PROP, "", SampleLogsBehaviour::SUM_DOC);
 
-  const std::vector<std::string> failBehaviourOptions = {SKIP_BEHAVIOUR,
-                                                         STOP_BEHAVIOUR};
-  declareProperty(
-      "FailBehaviour", SKIP_BEHAVIOUR,
-      std::make_shared<StringListValidator>(failBehaviourOptions),
-      "Choose whether to skip the workspace and continue, or stop and "
-      "throw and error, when encountering a failure on merging.");
+  const std::vector<std::string> failBehaviourOptions = {SKIP_BEHAVIOUR, STOP_BEHAVIOUR};
+  declareProperty("FailBehaviour", SKIP_BEHAVIOUR, std::make_shared<StringListValidator>(failBehaviourOptions),
+                  "Choose whether to skip the workspace and continue, or stop and "
+                  "throw and error, when encountering a failure on merging.");
 }
 
 std::map<std::string, std::string> ConjoinXRuns::validateInputs() {
   std::map<std::string, std::string> issues;
 
-  const std::vector<std::string> inputs_given =
-      getProperty(INPUT_WORKSPACE_PROPERTY);
+  const std::vector<std::string> inputs_given = getProperty(INPUT_WORKSPACE_PROPERTY);
   m_logEntry = getPropertyValue(SAMPLE_LOG_X_AXIS_PROPERTY);
 
   std::vector<std::string> workspaces;
@@ -143,21 +124,17 @@ std::map<std::string, std::string> ConjoinXRuns::validateInputs() {
   // find if there are grouped workspaces that are not Matrix or not a
   // point-data
   for (const auto &input : workspaces) {
-    MatrixWorkspace_sptr ws =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(input);
+    MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(input);
     if (!ws) {
-      issues[INPUT_WORKSPACE_PROPERTY] +=
-          "Workspace " + input + " is not a MatrixWorkspace\n";
+      issues[INPUT_WORKSPACE_PROPERTY] += "Workspace " + input + " is not a MatrixWorkspace\n";
     } else if (ws->isHistogramData()) {
-      issues[INPUT_WORKSPACE_PROPERTY] +=
-          "Workspace " + ws->getName() + " is not a point-data\n";
+      issues[INPUT_WORKSPACE_PROPERTY] += "Workspace " + ws->getName() + " is not a point-data\n";
     } else {
       try {
         ws->blocksize();
       } catch (std::length_error &) {
         issues[INPUT_WORKSPACE_PROPERTY] +=
-            "Workspace " + ws->getName() +
-            " has different number of points per histogram\n";
+            "Workspace " + ws->getName() + " has different number of points per histogram\n";
       }
       m_inputWS.emplace_back(ws);
     }
@@ -174,16 +151,12 @@ std::map<std::string, std::string> ConjoinXRuns::validateInputs() {
       // check if all the others are compatible with the first one
       std::string compatible = combHelper.checkCompatibility(ws, true);
       if (!compatible.empty()) {
-        issues[INPUT_WORKSPACE_PROPERTY] +=
-            "Workspace " + ws->getName() + " is not compatible: " + compatible +
-            "\n";
+        issues[INPUT_WORKSPACE_PROPERTY] += "Workspace " + ws->getName() + " is not compatible: " + compatible + "\n";
       }
       // if the log entry is given, validate it
       const std::string logValid = checkLogEntry(ws);
       if (!logValid.empty()) {
-        issues[INPUT_WORKSPACE_PROPERTY] += "Invalid sample log entry for " +
-                                            ws->getName() + ": " + logValid +
-                                            "\n";
+        issues[INPUT_WORKSPACE_PROPERTY] += "Invalid sample log entry for " + ws->getName() + ": " + logValid + "\n";
       }
     }
   }
@@ -216,15 +189,12 @@ std::string ConjoinXRuns::checkLogEntry(const MatrixWorkspace_sptr &ws) const {
 
         TimeSeriesProperty<double> *timeSeriesDouble(nullptr);
         TimeSeriesProperty<int> *timeSeriesInt(nullptr);
-        timeSeriesDouble = dynamic_cast<TimeSeriesProperty<double> *>(
-            run.getLogData(m_logEntry));
-        timeSeriesInt =
-            dynamic_cast<TimeSeriesProperty<int> *>(run.getLogData(m_logEntry));
+        timeSeriesDouble = dynamic_cast<TimeSeriesProperty<double> *>(run.getLogData(m_logEntry));
+        timeSeriesInt = dynamic_cast<TimeSeriesProperty<int> *>(run.getLogData(m_logEntry));
 
         if (timeSeriesDouble) {
           if (blocksize != timeSeriesDouble->size()) {
-            result =
-                "Size of the double time series does not match the blocksize";
+            result = "Size of the double time series does not match the blocksize";
           }
         } else if (timeSeriesInt) {
           if (blocksize != timeSeriesInt->size()) {
@@ -233,8 +203,7 @@ std::string ConjoinXRuns::checkLogEntry(const MatrixWorkspace_sptr &ws) const {
         } else {
           // if numeric scalar, must have one bin
           if (ws->blocksize() != 1) {
-            result =
-                "One bin workspaces is required if the log is numeric scalar";
+            result = "One bin workspaces is required if the log is numeric scalar";
           }
         }
       } catch (std::invalid_argument &) {
@@ -250,24 +219,21 @@ std::string ConjoinXRuns::checkLogEntry(const MatrixWorkspace_sptr &ws) const {
  * @param ws : the input workspace
  * @return : the x-axis to use for the output workspace
  */
-std::vector<double>
-ConjoinXRuns::getXAxis(const MatrixWorkspace_sptr &ws) const {
+std::vector<double> ConjoinXRuns::getXAxis(const MatrixWorkspace_sptr &ws) const {
 
   std::vector<double> axis;
   axis.reserve(ws->y(0).size());
   auto &run = ws->run();
   // try time series first
   TimeSeriesProperty<double> *timeSeriesDouble(nullptr);
-  timeSeriesDouble =
-      dynamic_cast<TimeSeriesProperty<double> *>(run.getLogData(m_logEntry));
+  timeSeriesDouble = dynamic_cast<TimeSeriesProperty<double> *>(run.getLogData(m_logEntry));
   if (timeSeriesDouble) {
     // try double series
     axis = timeSeriesDouble->filteredValuesAsVector();
   } else {
     // try int series next
     TimeSeriesProperty<int> *timeSeriesInt(nullptr);
-    timeSeriesInt =
-        dynamic_cast<TimeSeriesProperty<int> *>(run.getLogData(m_logEntry));
+    timeSeriesInt = dynamic_cast<TimeSeriesProperty<int> *>(run.getLogData(m_logEntry));
     if (timeSeriesInt) {
       std::vector<int> intAxis = timeSeriesInt->filteredValuesAsVector();
       axis = std::vector<double>(intAxis.begin(), intAxis.end());
@@ -343,44 +309,37 @@ void ConjoinXRuns::joinSpectrum(int64_t wsIndex) {
  */
 void ConjoinXRuns::exec() {
 
-  const std::vector<std::string> inputs_given =
-      getProperty(INPUT_WORKSPACE_PROPERTY);
+  const std::vector<std::string> inputs_given = getProperty(INPUT_WORKSPACE_PROPERTY);
   m_logEntry = getPropertyValue(SAMPLE_LOG_X_AXIS_PROPERTY);
 
   SampleLogsBehaviour::SampleLogNames logEntries = {};
   logEntries.sampleLogsSum = getPropertyValue(SampleLogsBehaviour::SUM_PROP);
-  logEntries.sampleLogsTimeSeries =
-      getPropertyValue(SampleLogsBehaviour::TIME_SERIES_PROP);
+  logEntries.sampleLogsTimeSeries = getPropertyValue(SampleLogsBehaviour::TIME_SERIES_PROP);
   logEntries.sampleLogsList = getPropertyValue(SampleLogsBehaviour::LIST_PROP);
   logEntries.sampleLogsWarn = getPropertyValue(SampleLogsBehaviour::WARN_PROP);
-  logEntries.sampleLogsWarnTolerances =
-      getPropertyValue(SampleLogsBehaviour::WARN_TOL_PROP);
+  logEntries.sampleLogsWarnTolerances = getPropertyValue(SampleLogsBehaviour::WARN_TOL_PROP);
   logEntries.sampleLogsFail = getPropertyValue(SampleLogsBehaviour::FAIL_PROP);
-  logEntries.sampleLogsFailTolerances =
-      getPropertyValue(SampleLogsBehaviour::FAIL_TOL_PROP);
+  logEntries.sampleLogsFailTolerances = getPropertyValue(SampleLogsBehaviour::FAIL_TOL_PROP);
   const std::string sampleLogsFailBehaviour = getProperty("FailBehaviour");
 
   m_inputWS.clear();
 
   for (const auto &input : RunCombinationHelper::unWrapGroups(inputs_given)) {
-    MatrixWorkspace_sptr ws =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(input);
+    MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(input);
     m_inputWS.emplace_back(ws);
   }
 
   auto first = m_inputWS.front();
 
-  SampleLogsBehaviour::ParameterName parName = {
-      ConjoinXRuns::SUM_MERGE,
-      ConjoinXRuns::TIME_SERIES_MERGE,
-      ConjoinXRuns::LIST_MERGE,
-      ConjoinXRuns::WARN_MERGE,
-      ConjoinXRuns::WARN_MERGE_TOLERANCES,
-      ConjoinXRuns::FAIL_MERGE,
-      ConjoinXRuns::FAIL_MERGE_TOLERANCES};
+  SampleLogsBehaviour::ParameterName parName = {ConjoinXRuns::SUM_MERGE,
+                                                ConjoinXRuns::TIME_SERIES_MERGE,
+                                                ConjoinXRuns::LIST_MERGE,
+                                                ConjoinXRuns::WARN_MERGE,
+                                                ConjoinXRuns::WARN_MERGE_TOLERANCES,
+                                                ConjoinXRuns::FAIL_MERGE,
+                                                ConjoinXRuns::FAIL_MERGE_TOLERANCES};
 
-  SampleLogsBehaviour sampleLogsBehaviour =
-      SampleLogsBehaviour(first, g_log, logEntries, parName);
+  SampleLogsBehaviour sampleLogsBehaviour = SampleLogsBehaviour(first, g_log, logEntries, parName);
   auto it = m_inputWS.begin();
 
   // Temporary workspace to carry the merged sample logs
@@ -400,8 +359,8 @@ void ConjoinXRuns::exec() {
       outBlockSize += (*it)->y(0).size();
     } catch (std::invalid_argument &e) {
       if (sampleLogsFailBehaviour == SKIP_BEHAVIOUR) {
-        g_log.error() << "Could not join workspace: " << (*it)->getName()
-                      << ". Reason: \"" << e.what() << "\". Skipping.\n";
+        g_log.error() << "Could not join workspace: " << (*it)->getName() << ". Reason: \"" << e.what()
+                      << "\". Skipping.\n";
         sampleLogsBehaviour.resetSampleLogs(temp);
         // remove the skipped one from the list
         it = m_inputWS.erase(it);

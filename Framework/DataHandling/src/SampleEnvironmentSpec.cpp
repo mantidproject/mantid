@@ -13,8 +13,7 @@ namespace DataHandling {
  * Constructor
  * @param name The string name of the specification
  */
-SampleEnvironmentSpec::SampleEnvironmentSpec(std::string name)
-    : m_name(std::move(name)), m_cans(), m_components() {}
+SampleEnvironmentSpec::SampleEnvironmentSpec(std::string name) : m_name(std::move(name)), m_cans(), m_components() {}
 
 /**
  * Find a can by id string
@@ -22,8 +21,7 @@ SampleEnvironmentSpec::SampleEnvironmentSpec(std::string name)
  * @return A pointer to the retrieved Container instance
  * @throws std::invalid_argument
  */
-Geometry::Container_const_sptr
-SampleEnvironmentSpec::findContainer(const std::string &id) const {
+Geometry::Container_const_sptr SampleEnvironmentSpec::findContainer(const std::string &id) const {
   // if there's only one can and an id wasn't specified then return it
   if ((m_cans.size() == 1) && (id.empty())) {
     return m_cans.begin()->second;
@@ -43,10 +41,8 @@ SampleEnvironmentSpec::findContainer(const std::string &id) const {
  * Build a new SampleEnvironment instance from a given can ID
  * @return A new instance of a SampleEnvironment
  */
-Geometry::SampleEnvironment_uptr
-SampleEnvironmentSpec::buildEnvironment(const std::string &canID) const {
-  auto env = std::make_unique<Geometry::SampleEnvironment>(
-      m_name, findContainer(canID));
+Geometry::SampleEnvironment_uptr SampleEnvironmentSpec::buildEnvironment(const std::string &canID) const {
+  auto env = std::make_unique<Geometry::SampleEnvironment>(m_name, findContainer(canID));
   for (const auto &component : m_components) {
     env->add(component);
   }
@@ -58,12 +54,10 @@ SampleEnvironmentSpec::buildEnvironment(const std::string &canID) const {
  * @param can A pointer to a Container object
  * @throws std::invalid::argument if the id is empty
  */
-void SampleEnvironmentSpec::addContainer(
-    const Geometry::Container_const_sptr &can) {
+void SampleEnvironmentSpec::addContainer(const Geometry::Container_const_sptr &can) {
   if (can->id().empty()) {
-    throw std::invalid_argument(
-        "SampleEnvironmentSpec::addContainer() - Container must "
-        "have an id field. Empty string found.");
+    throw std::invalid_argument("SampleEnvironmentSpec::addContainer() - Container must "
+                                "have an id field. Empty string found.");
   }
   m_cans.emplace(can->id(), can);
 }
@@ -72,8 +66,7 @@ void SampleEnvironmentSpec::addContainer(
  * Add a non-can component to the specification
  * @param component A pointer to a Object
  */
-void SampleEnvironmentSpec::addComponent(
-    const Geometry::IObject_const_sptr &component) {
+void SampleEnvironmentSpec::addComponent(const Geometry::IObject_const_sptr &component) {
   m_components.emplace_back(component);
 }
 

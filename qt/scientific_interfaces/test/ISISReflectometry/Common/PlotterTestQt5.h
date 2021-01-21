@@ -23,8 +23,7 @@ public:
   void testReflectometryPlot() {
     // Just test that it doesn't segfault when plotting as nothing is returned
     // or accessible from here to test
-    auto alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
-        "CreateSampleWorkspace");
+    auto alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("CreateSampleWorkspace");
     alg->initialize();
     alg->setProperty("OutputWorkspace", "ws1");
     alg->execute();

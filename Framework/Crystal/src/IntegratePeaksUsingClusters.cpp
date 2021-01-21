@@ -34,17 +34,13 @@ DECLARE_ALGORITHM(IntegratePeaksUsingClusters)
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string IntegratePeaksUsingClusters::name() const {
-  return "IntegratePeaksUsingClusters";
-}
+const std::string IntegratePeaksUsingClusters::name() const { return "IntegratePeaksUsingClusters"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int IntegratePeaksUsingClusters::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string IntegratePeaksUsingClusters::category() const {
-  return "MDAlgorithms\\Peaks;Crystal\\Integration";
-}
+const std::string IntegratePeaksUsingClusters::category() const { return "MDAlgorithms\\Peaks;Crystal\\Integration"; }
 
 //----------------------------------------------------------------------------------------------
 
@@ -52,11 +48,9 @@ const std::string IntegratePeaksUsingClusters::category() const {
 /** Initialize the algorithm's properties.
  */
 void IntegratePeaksUsingClusters::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>("InputWorkspace", "", Direction::Input),
                   "Input md workspace.");
-  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
-                      "PeaksWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>("PeaksWorkspace", "", Direction::Input),
                   "A PeaksWorkspace containing the peaks to integrate.");
 
   auto positiveValidator = std::make_shared<BoundedValidator<double>>();
@@ -67,24 +61,19 @@ void IntegratePeaksUsingClusters::init() {
   compositeValidator->add(positiveValidator);
   compositeValidator->add(std::make_shared<MandatoryValidator<double>>());
 
-  declareProperty(std::make_unique<PropertyWithValue<double>>(
-                      "Threshold", 0, compositeValidator, Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<double>>("Threshold", 0, compositeValidator, Direction::Input),
                   "Threshold signal above which to consider peaks");
 
-  std::array<std::string, 3> normalizations = {
-      {"NoNormalization", "VolumeNormalization", "NumEventsNormalization"}};
+  std::array<std::string, 3> normalizations = {{"NoNormalization", "VolumeNormalization", "NumEventsNormalization"}};
 
   declareProperty("Normalization", normalizations[1],
-                  Kernel::IValidator_sptr(
-                      new Kernel::ListValidator<std::string>(normalizations)),
+                  Kernel::IValidator_sptr(new Kernel::ListValidator<std::string>(normalizations)),
                   "Normalization to use with Threshold. Defaults to "
                   "VolumeNormalization to account for different binning.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "An output integrated peaks workspace.");
-  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
-                      "OutputWorkspaceMD", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>("OutputWorkspaceMD", "", Direction::Output),
                   "MDHistoWorkspace containing the labeled clusters used by "
                   "the algorithm.");
 }
@@ -118,8 +107,7 @@ void IntegratePeaksUsingClusters::exec() {
   }
 
   {
-    const SpecialCoordinateSystem mdCoordinates =
-        mdWS->getSpecialCoordinateSystem();
+    const SpecialCoordinateSystem mdCoordinates = mdWS->getSpecialCoordinateSystem();
     if (mdCoordinates == None) {
       throw std::invalid_argument("The coordinate system of the input "
                                   "MDWorkspace cannot be established. Create "
@@ -130,15 +118,13 @@ void IntegratePeaksUsingClusters::exec() {
 
   const double threshold = getProperty("Threshold");
   // Make a background strategy for the CCL analysis to use.
-  HardThresholdBackground backgroundStrategy(threshold,
-                                             this->getNormalization());
+  HardThresholdBackground backgroundStrategy(threshold, this->getNormalization());
   // CCL. Multi-processor version.
   ConnectedComponentLabeling analysis;
 
   Progress progress(this, 0.0, 1.0, 1);
   // Perform CCL.
-  ClusterTuple clusters =
-      analysis.executeAndFetchClusters(mdWS, &backgroundStrategy, progress);
+  ClusterTuple clusters = analysis.executeAndFetchClusters(mdWS, &backgroundStrategy, progress);
   // Extract the clusters
   ConnectedComponentMappingTypes::ClusterMap &clusterMap = clusters.get<1>();
   // Extract the labeled image
@@ -158,14 +144,11 @@ void IntegratePeaksUsingClusters::exec() {
   for (int i = 0; i < peakWS->getNumberPeaks(); ++i) {
     PARALLEL_START_INTERUPT_REGION
     Geometry::IPeak &peak = peakWS->getPeak(i);
-    const Mantid::signal_t signalValue = projection.signalAtPeakCenter(
-        peak); // No normalization when extracting label ids!
+    const Mantid::signal_t signalValue =
+        projection.signalAtPeakCenter(peak); // No normalization when extracting label ids!
     if (std::isnan(signalValue)) {
-      g_log.warning()
-          << "Warning: image for integration is off edge of detector for peak "
-          << i << '\n';
-    } else if (signalValue <
-               static_cast<Mantid::signal_t>(analysis.getStartLabelId())) {
+      g_log.warning() << "Warning: image for integration is off edge of detector for peak " << i << '\n';
+    } else if (signalValue < static_cast<Mantid::signal_t>(analysis.getStartLabelId())) {
       g_log.information() << "Peak: " << i
                           << " Has no corresponding cluster/blob detected on "
                              "the image. This could be down to your Threshold "
@@ -173,16 +156,14 @@ void IntegratePeaksUsingClusters::exec() {
     } else {
       const auto labelIdAtPeak = static_cast<size_t>(signalValue);
       ICluster *const cluster = clusterMap[labelIdAtPeak].get();
-      ICluster::ClusterIntegratedValues integratedValues =
-          cluster->integrate(mdWS);
+      ICluster::ClusterIntegratedValues integratedValues = cluster->integrate(mdWS);
       peak.setIntensity(integratedValues.get<0>());
       peak.setSigmaIntensity(std::sqrt(integratedValues.get<1>()));
 
       PARALLEL_CRITICAL(IntegratePeaksUsingClusters) {
         auto it = labelsTakenByPeaks.find(labelIdAtPeak);
         if (it != labelsTakenByPeaks.end()) {
-          g_log.warning() << "Overlapping Peaks. Peak: " << i
-                          << " overlaps with another Peak: " << it->second
+          g_log.warning() << "Overlapping Peaks. Peak: " << i << " overlaps with another Peak: " << it->second
                           << " and shares label id: " << it->first << '\n';
         }
         labelsTakenByPeaks.emplace(labelIdAtPeak, i);

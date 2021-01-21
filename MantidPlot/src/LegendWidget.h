@@ -79,8 +79,7 @@ private:
   void drawSymbol(PlotCurve *c, int point, QPainter *p, int x, int y, int l);
   void drawText(QPainter *, const QRect &, QwtArray<int>, int);
 
-  QwtArray<int> itemsHeight(int y, int symbolLineLength, int &width,
-                            int &height);
+  QwtArray<int> itemsHeight(int y, int symbolLineLength, int &width, int &height);
   int symbolsMaxWidth();
   QString parse(const QString &str);
 

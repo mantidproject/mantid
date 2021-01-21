@@ -28,9 +28,7 @@ FirstExperimentInfoQueryAdapter
 
 Templated adapter over the FirstExperimentInfoQuery interface.
 ----------------------------------------------------------*/
-template <typename T>
-class DLLExport FirstExperimentInfoQueryAdapter
-    : public FirstExperimentInfoQuery {
+template <typename T> class DLLExport FirstExperimentInfoQueryAdapter : public FirstExperimentInfoQuery {
 public:
   using Adaptee_sptr = std::shared_ptr<const T>;
 
@@ -41,19 +39,16 @@ public:
   FirstExperimentInfoQueryAdapter(Mantid::API::IMDWorkspace_sptr ws) {
     m_ws = std::dynamic_pointer_cast<const T>(ws);
     if (!m_ws) {
-      throw std::invalid_argument(
-          "Workspace object is of the wrong type for this adapter.");
+      throw std::invalid_argument("Workspace object is of the wrong type for this adapter.");
     }
   }
 
   bool hasOrientedLattice() const {
     Mantid::API::MultipleExperimentInfos_const_sptr expInfos =
-        std::dynamic_pointer_cast<const Mantid::API::MultipleExperimentInfos>(
-            m_ws);
+        std::dynamic_pointer_cast<const Mantid::API::MultipleExperimentInfos>(m_ws);
     bool hasLattice = false;
     if (expInfos != NULL && expInfos->getNumExperimentInfo() > 0) {
-      Mantid::API::ExperimentInfo_const_sptr expInfo =
-          expInfos->getExperimentInfo(0);
+      Mantid::API::ExperimentInfo_const_sptr expInfo = expInfos->getExperimentInfo(0);
       hasLattice = expInfo->sample().hasOrientedLattice();
     }
     return hasLattice;
@@ -61,12 +56,10 @@ public:
 
   bool hasRotatedGoniometer() const {
     Mantid::API::MultipleExperimentInfos_const_sptr expInfos =
-        std::dynamic_pointer_cast<const Mantid::API::MultipleExperimentInfos>(
-            m_ws);
+        std::dynamic_pointer_cast<const Mantid::API::MultipleExperimentInfos>(m_ws);
     bool hasRotatedGoniometer = false;
     if (expInfos != NULL && expInfos->getNumExperimentInfo() > 0) {
-      Mantid::API::ExperimentInfo_const_sptr expInfo =
-          expInfos->getExperimentInfo(0);
+      Mantid::API::ExperimentInfo_const_sptr expInfo = expInfos->getExperimentInfo(0);
       hasRotatedGoniometer = expInfo->run().getGoniometerMatrix().isRotation();
     }
     return hasRotatedGoniometer;

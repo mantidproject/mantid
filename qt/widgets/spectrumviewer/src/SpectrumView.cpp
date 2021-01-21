@@ -37,16 +37,12 @@ namespace SpectrumView {
  *  @param parent Top-level widget for object.
  */
 SpectrumView::SpectrumView(QWidget *parent)
-    : QMainWindow(parent), WorkspaceObserver(), m_ui(new Ui::SpectrumViewer()),
-      m_sliderHandler(nullptr), m_rangeHandler(nullptr),
-      m_emodeHandler(nullptr) {
+    : QMainWindow(parent), WorkspaceObserver(), m_ui(new Ui::SpectrumViewer()), m_sliderHandler(nullptr),
+      m_rangeHandler(nullptr), m_emodeHandler(nullptr) {
   m_ui->setupUi(this);
-  connect(m_ui->imageTabs, SIGNAL(currentChanged(int)), this,
-          SLOT(changeSpectrumDisplay(int)));
-  connect(m_ui->imageTabs, SIGNAL(tabCloseRequested(int)), this,
-          SLOT(respondToTabCloseReqest(int)));
-  connect(m_ui->tracking_always_on, SIGNAL(toggled(bool)), this,
-          SLOT(changeTracking(bool)));
+  connect(m_ui->imageTabs, SIGNAL(currentChanged(int)), this, SLOT(changeSpectrumDisplay(int)));
+  connect(m_ui->imageTabs, SIGNAL(tabCloseRequested(int)), this, SLOT(respondToTabCloseReqest(int)));
+  connect(m_ui->tracking_always_on, SIGNAL(toggled(bool)), this, SLOT(changeTracking(bool)));
   updateHandlers();
   setAcceptDrops(true);
   loadSettings();
@@ -55,8 +51,8 @@ SpectrumView::SpectrumView(QWidget *parent)
   observeAfterReplace();
   observePreDelete();
   observeADSClear();
-  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      Mantid::Kernel::FeatureType::Interface, "SpectrumView", false);
+  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(Mantid::Kernel::FeatureType::Interface, "SpectrumView",
+                                                                false);
 
 #ifdef Q_OS_MAC
   // Work around to ensure that floating windows remain on top of the main
@@ -98,8 +94,7 @@ void SpectrumView::resizeEvent(QResizeEvent *event) {
  *
  * @param wksp The matrix workspace to render
  */
-void SpectrumView::renderWorkspace(
-    const Mantid::API::MatrixWorkspace_const_sptr &wksp) {
+void SpectrumView::renderWorkspace(const Mantid::API::MatrixWorkspace_const_sptr &wksp) {
 
   // Handle rendering of a workspace we already track
   if (replaceExistingWorkspace(wksp->getName(), wksp))
@@ -127,39 +122,32 @@ void SpectrumView::renderWorkspace(
 
   int tab = 0;
   if (isFirstPlot) {
-    m_ui->imageTabs->setTabText(
-        m_ui->imageTabs->indexOf(m_ui->imageTabs->currentWidget()),
-        QString::fromStdString(wksp->getName()));
-    m_hGraph = std::make_shared<GraphDisplay>(m_ui->h_graphPlot,
-                                              m_ui->h_graph_table, false);
-    m_vGraph = std::make_shared<GraphDisplay>(m_ui->v_graphPlot,
-                                              m_ui->v_graph_table, true);
+    m_ui->imageTabs->setTabText(m_ui->imageTabs->indexOf(m_ui->imageTabs->currentWidget()),
+                                QString::fromStdString(wksp->getName()));
+    m_hGraph = std::make_shared<GraphDisplay>(m_ui->h_graphPlot, m_ui->h_graph_table, false);
+    m_vGraph = std::make_shared<GraphDisplay>(m_ui->v_graphPlot, m_ui->v_graph_table, true);
   } else {
     spectrumPlot = new QwtPlot(this);
     auto widget = new QWidget();
     auto layout = new QHBoxLayout();
     layout->addWidget(spectrumPlot);
     widget->setLayout(layout);
-    tab = m_ui->imageTabs->addTab(widget,
-                                  QString::fromStdString(wksp->getName()));
+    tab = m_ui->imageTabs->addTab(widget, QString::fromStdString(wksp->getName()));
     m_ui->imageTabs->setTabsClosable(true);
   }
 
   auto spectrumDisplay = std::make_shared<SpectrumDisplay>(
-      spectrumPlot, m_sliderHandler, m_rangeHandler, m_hGraph.get(),
-      m_vGraph.get(), m_ui->image_table, isTrackingOn());
+      spectrumPlot, m_sliderHandler, m_rangeHandler, m_hGraph.get(), m_vGraph.get(), m_ui->image_table, isTrackingOn());
   spectrumDisplay->setDataSource(dataSource);
 
   if (isFirstPlot) {
-    m_svConnections = std::make_shared<SVConnections>(
-        m_ui, this, spectrumDisplay.get(), m_hGraph.get(), m_vGraph.get());
-    connect(this, SIGNAL(spectrumDisplayChanged(SpectrumDisplay *)),
-            m_svConnections.get(), SLOT(setSpectrumDisplay(SpectrumDisplay *)));
+    m_svConnections =
+        std::make_shared<SVConnections>(m_ui, this, spectrumDisplay.get(), m_hGraph.get(), m_vGraph.get());
+    connect(this, SIGNAL(spectrumDisplayChanged(SpectrumDisplay *)), m_svConnections.get(),
+            SLOT(setSpectrumDisplay(SpectrumDisplay *)));
     m_svConnections->imageSplitterMoved();
   } else {
-    foreach (std::shared_ptr<SpectrumDisplay> sd, m_spectrumDisplay) {
-      sd->addOther(spectrumDisplay);
-    }
+    foreach (std::shared_ptr<SpectrumDisplay> sd, m_spectrumDisplay) { sd->addOther(spectrumDisplay); }
     spectrumDisplay->addOthers(m_spectrumDisplay);
   }
 
@@ -174,8 +162,7 @@ void SpectrumView::renderWorkspace(
  */
 void SpectrumView::renderWorkspace(const QString &wsName) {
   Mantid::API::MatrixWorkspace_const_sptr wksp =
-      Mantid::API::AnalysisDataService::Instance()
-          .retrieveWS<const Mantid::API::MatrixWorkspace>(wsName.toStdString());
+      Mantid::API::AnalysisDataService::Instance().retrieveWS<const Mantid::API::MatrixWorkspace>(wsName.toStdString());
 
   renderWorkspace(wksp);
 }
@@ -200,9 +187,7 @@ void SpectrumView::closeWindow() { close(); }
  * @param wsName Name of workspace
  * @param ws Pointer to workspace
  */
-void SpectrumView::preDeleteHandle(
-    const std::string &wsName,
-    const std::shared_ptr<Mantid::API::Workspace> &ws) {
+void SpectrumView::preDeleteHandle(const std::string &wsName, const std::shared_ptr<Mantid::API::Workspace> &ws) {
   if (m_spectrumDisplay.front()->hasData(wsName, ws)) {
     emit needToClose();
   }
@@ -215,12 +200,9 @@ void SpectrumView::preDeleteHandle(
  * @param wsName Name of workspace
  * @param ws Pointer to workspace
  */
-void SpectrumView::afterReplaceHandle(
-    const std::string &wsName,
-    const std::shared_ptr<Mantid::API::Workspace> &ws) {
+void SpectrumView::afterReplaceHandle(const std::string &wsName, const std::shared_ptr<Mantid::API::Workspace> &ws) {
   // We would only ever be replacing a workspace here
-  replaceExistingWorkspace(
-      wsName, std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws));
+  replaceExistingWorkspace(wsName, std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws));
 }
 
 /**
@@ -232,17 +214,15 @@ void SpectrumView::afterReplaceHandle(
  * @param matrixWorkspace : Pointer to the workspace object
  * @return : True only if a replacement was completed
  */
-bool SpectrumView::replaceExistingWorkspace(
-    const std::string &wsName,
-    std::shared_ptr<const Mantid::API::MatrixWorkspace> matrixWorkspace) {
+bool SpectrumView::replaceExistingWorkspace(const std::string &wsName,
+                                            std::shared_ptr<const Mantid::API::MatrixWorkspace> matrixWorkspace) {
 
   bool replacementMade = false;
 
   auto existingDataSource =
-      std::find_if(m_dataSource.begin(), m_dataSource.end(),
-                   [&wsName](const MatrixWSDataSource_sptr &item) {
-                     return wsName == item->getWorkspace()->getName();
-                   });
+      std::find_if(m_dataSource.begin(), m_dataSource.end(), [&wsName](const MatrixWSDataSource_sptr &item) {
+        return wsName == item->getWorkspace()->getName();
+      });
   if (existingDataSource != m_dataSource.end()) {
     auto index = std::distance(m_dataSource.begin(), existingDataSource);
     auto targetSpectrumDisplay = m_spectrumDisplay[static_cast<int>(index)];
@@ -261,8 +241,7 @@ bool SpectrumView::replaceExistingWorkspace(
 
 void SpectrumView::dropEvent(QDropEvent *de) {
   std::string workspaceName{de->mimeData()->text().toStdString()};
-  auto matrixWs = Mantid::API::AnalysisDataService::Instance()
-                      .retrieveWS<Mantid::API::MatrixWorkspace>(workspaceName);
+  auto matrixWs = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(workspaceName);
   if (matrixWs) {
     renderWorkspace(matrixWs);
   }
@@ -322,13 +301,10 @@ void SpectrumView::selectData(int spectrumNumber, double dataVal) {
 /**
  * Check if mouse tracking should be "always on".
  */
-bool SpectrumView::isTrackingOn() const {
-  return m_ui->tracking_always_on->isChecked();
-}
+bool SpectrumView::isTrackingOn() const { return m_ui->tracking_always_on->isChecked(); }
 
-API::IProjectSerialisable *
-SpectrumView::loadFromProject(const std::string &lines, ApplicationWindow *app,
-                              const int fileVersion) {
+API::IProjectSerialisable *SpectrumView::loadFromProject(const std::string &lines, ApplicationWindow *app,
+                                                         const int fileVersion) {
   UNUSED_ARG(app);
   UNUSED_ARG(fileVersion);
   API::TSVSerialiser tsv(lines);
@@ -463,9 +439,7 @@ std::string SpectrumView::saveToProject(ApplicationWindow *app) {
   return tsv.outputLines();
 }
 
-std::string SpectrumView::getWindowName() {
-  return this->windowTitle().toStdString();
-}
+std::string SpectrumView::getWindowName() { return this->windowTitle().toStdString(); }
 
 std::vector<std::string> SpectrumView::getWorkspaceNames() {
   std::vector<std::string> names;
@@ -489,8 +463,7 @@ void SpectrumView::changeTracking(bool on) {
 void SpectrumView::loadSettings() {
   QSettings settings;
   settings.beginGroup("Mantid/MultiDatasetFit");
-  m_ui->tracking_always_on->setChecked(
-      settings.value("CursorTracking", true).toBool());
+  m_ui->tracking_always_on->setChecked(settings.value("CursorTracking", true).toBool());
 }
 
 /// Save settings

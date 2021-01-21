@@ -28,14 +28,11 @@ class FrequencyVariances;
   @date 2016
 */
 class MANTID_HISTOGRAMDATA_DLL FrequencyStandardDeviations
-    : public detail::StandardDeviationVectorOf<FrequencyStandardDeviations,
-                                               HistogramE, FrequencyVariances> {
+    : public detail::StandardDeviationVectorOf<FrequencyStandardDeviations, HistogramE, FrequencyVariances> {
 public:
-  using StandardDeviationVectorOf<
-      FrequencyStandardDeviations, HistogramE,
-      FrequencyVariances>::StandardDeviationVectorOf;
   using StandardDeviationVectorOf<FrequencyStandardDeviations, HistogramE,
-                                  FrequencyVariances>::operator=;
+                                  FrequencyVariances>::StandardDeviationVectorOf;
+  using StandardDeviationVectorOf<FrequencyStandardDeviations, HistogramE, FrequencyVariances>::operator=;
   /// Default constructor, creates a NULL object.
   FrequencyStandardDeviations() = default;
   // The copy and move constructor and assignment are not captured properly by
@@ -45,16 +42,12 @@ public:
   /// Move constructor.
   FrequencyStandardDeviations(FrequencyStandardDeviations &&) = default;
   /// Copy assignment. Lightweight, internal data will be shared.
-  FrequencyStandardDeviations &
-  operator=(const FrequencyStandardDeviations &) & = default;
+  FrequencyStandardDeviations &operator=(const FrequencyStandardDeviations &) & = default;
   /// Move assignment.
-  FrequencyStandardDeviations &
-  operator=(FrequencyStandardDeviations &&) & = default;
+  FrequencyStandardDeviations &operator=(FrequencyStandardDeviations &&) & = default;
 
-  FrequencyStandardDeviations(const CountStandardDeviations &counts,
-                              const BinEdges &edges);
-  FrequencyStandardDeviations(CountStandardDeviations &&counts,
-                              const BinEdges &edges);
+  FrequencyStandardDeviations(const CountStandardDeviations &counts, const BinEdges &edges);
+  FrequencyStandardDeviations(CountStandardDeviations &&counts, const BinEdges &edges);
 };
 
 } // namespace HistogramData

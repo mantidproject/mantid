@@ -40,8 +40,7 @@ SymmetryElementRotation::RotationSense getRotationSense(SymmetryElement &self) {
 void export_SymmetryElement() {
   register_ptr_to_python<std::shared_ptr<SymmetryElement>>();
 
-  scope symmetryElementScope =
-      class_<SymmetryElement, boost::noncopyable>("SymmetryElement", no_init);
+  scope symmetryElementScope = class_<SymmetryElement, boost::noncopyable>("SymmetryElement", no_init);
 
   enum_<SymmetryElementRotation::RotationSense>("RotationSense")
       .value("Positive", SymmetryElementRotation::Positive)

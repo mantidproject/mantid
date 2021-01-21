@@ -38,24 +38,18 @@ using namespace HistogramData;
  *
  */
 void Integration::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                                        Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
                   "The input workspace to integrate.");
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "The output workspace with the results of the integration.");
 
-  declareProperty("RangeLower", EMPTY_DBL(),
-                  "The lower integration limit (an X value).");
-  declareProperty("RangeUpper", EMPTY_DBL(),
-                  "The upper integration limit (an X value).");
+  declareProperty("RangeLower", EMPTY_DBL(), "The lower integration limit (an X value).");
+  declareProperty("RangeUpper", EMPTY_DBL(), "The upper integration limit (an X value).");
 
   auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
-  declareProperty("StartWorkspaceIndex", 0, mustBePositive,
-                  "Index of the first spectrum to integrate.");
-  declareProperty("EndWorkspaceIndex", EMPTY_INT(), mustBePositive,
-                  "Index of the last spectrum to integrate.");
+  declareProperty("StartWorkspaceIndex", 0, mustBePositive, "Index of the first spectrum to integrate.");
+  declareProperty("EndWorkspaceIndex", EMPTY_INT(), mustBePositive, "Index of the last spectrum to integrate.");
   declareProperty("IncludePartialBins", false,
                   "If true then partial bins from the beginning and end of the "
                   "input range are also included in the integration.");
@@ -75,8 +69,7 @@ public:
   bool operator()(const double &left, const double &right) const {
     // soft equal, if the diff left-right is below a numerical error
     // (uncertainty) threshold, we cannot say
-    return (left < right) && (std::abs(left - right) >
-                              1 * std::numeric_limits<double>::epsilon());
+    return (left < right) && (std::abs(left - right) > 1 * std::numeric_limits<double>::epsilon());
   }
 };
 
@@ -105,8 +98,7 @@ void Integration::exec() {
   // Get the input workspace
   MatrixWorkspace_sptr localworkspace = this->getInputWorkspace();
 
-  const auto numberOfSpectra =
-      static_cast<int>(localworkspace->getNumberHistograms());
+  const auto numberOfSpectra = static_cast<int>(localworkspace->getNumberHistograms());
 
   // Check 'StartWorkspaceIndex' is in range 0-numberOfSpectra
   if (minWsIndex >= numberOfSpectra) {
@@ -116,17 +108,13 @@ void Integration::exec() {
   if (isEmpty(maxWsIndex))
     maxWsIndex = numberOfSpectra - 1;
   if (maxWsIndex > numberOfSpectra - 1 || maxWsIndex < minWsIndex) {
-    g_log.warning(
-        "EndWorkspaceIndex out of range! Set to max workspace index.");
+    g_log.warning("EndWorkspaceIndex out of range! Set to max workspace index.");
     maxWsIndex = numberOfSpectra - 1;
   }
-  auto rangeListCheck = [minWsIndex, maxWsIndex](
-                            const std::vector<double> &list, const char *name) {
-    if (!list.empty() &&
-        list.size() != static_cast<size_t>(maxWsIndex - minWsIndex) + 1) {
+  auto rangeListCheck = [minWsIndex, maxWsIndex](const std::vector<double> &list, const char *name) {
+    if (!list.empty() && list.size() != static_cast<size_t>(maxWsIndex - minWsIndex) + 1) {
       std::ostringstream sout;
-      sout << name << " has " << list.size() << " values but it should contain "
-           << maxWsIndex - minWsIndex + 1 << '\n';
+      sout << name << " has " << list.size() << " values but it should contain " << maxWsIndex - minWsIndex + 1 << '\n';
       throw std::runtime_error(sout.str());
     }
   };
@@ -136,22 +124,17 @@ void Integration::exec() {
   double progressStart = 0.0;
   //---------------------------------------------------------------------------------
   // Now, determine if the input workspace is actually an EventWorkspace
-  EventWorkspace_sptr eventInputWS =
-      std::dynamic_pointer_cast<EventWorkspace>(localworkspace);
+  EventWorkspace_sptr eventInputWS = std::dynamic_pointer_cast<EventWorkspace>(localworkspace);
 
   if (eventInputWS != nullptr) {
     //------- EventWorkspace as input -------------------------------------
     if (!minRanges.empty() || !maxRanges.empty()) {
-      throw std::runtime_error(
-          "Range lists not supported for EventWorkspaces.");
+      throw std::runtime_error("Range lists not supported for EventWorkspaces.");
     }
     // Get the eventworkspace rebinned to apply the upper and lowerrange
-    double evntMinRange =
-        isEmpty(minRange) ? eventInputWS->getEventXMin() : minRange;
-    double evntMaxRange =
-        isEmpty(maxRange) ? eventInputWS->getEventXMax() : maxRange;
-    localworkspace =
-        rangeFilterEventWorkspace(eventInputWS, evntMinRange, evntMaxRange);
+    double evntMinRange = isEmpty(minRange) ? eventInputWS->getEventXMin() : minRange;
+    double evntMaxRange = isEmpty(maxRange) ? eventInputWS->getEventXMax() : maxRange;
+    localworkspace = rangeFilterEventWorkspace(eventInputWS, evntMinRange, evntMaxRange);
 
     progressStart = 0.5;
   }
@@ -161,12 +144,9 @@ void Integration::exec() {
 
   // Create the 2D workspace (with 1 bin) for the output
 
-  MatrixWorkspace_sptr outputWorkspace = create<Workspace2D>(
-      *localworkspace, maxWsIndex - minWsIndex + 1, BinEdges(2));
-  auto rebinned_input =
-      std::dynamic_pointer_cast<const RebinnedOutput>(localworkspace);
-  auto rebinned_output =
-      std::dynamic_pointer_cast<RebinnedOutput>(outputWorkspace);
+  MatrixWorkspace_sptr outputWorkspace = create<Workspace2D>(*localworkspace, maxWsIndex - minWsIndex + 1, BinEdges(2));
+  auto rebinned_input = std::dynamic_pointer_cast<const RebinnedOutput>(localworkspace);
+  auto rebinned_output = std::dynamic_pointer_cast<RebinnedOutput>(outputWorkspace);
 
   bool is_distrib = outputWorkspace->isDistribution();
   Progress progress(this, progressStart, 1.0, maxWsIndex - minWsIndex + 1);
@@ -187,8 +167,7 @@ void Integration::exec() {
       if (newAxis)
         newAxis->setLabel(outWI, localworkspace->getAxis(1)->label(i));
     } else if (axisIsNumeric) {
-      NumericAxis *newAxis =
-          dynamic_cast<NumericAxis *>(outputWorkspace->getAxis(1));
+      NumericAxis *newAxis = dynamic_cast<NumericAxis *>(outputWorkspace->getAxis(1));
       if (newAxis)
         newAxis->setValue(outWI, (*(localworkspace->getAxis(1)))(i));
     }
@@ -208,10 +187,8 @@ void Integration::exec() {
 
     // Find the range [min,max]
     MantidVec::const_iterator lowit, highit;
-    const double lowerLimit =
-        minRanges.empty() ? minRange : std::max(minRange, minRanges[outWI]);
-    const double upperLimit =
-        maxRanges.empty() ? maxRange : std::min(maxRange, maxRanges[outWI]);
+    const double lowerLimit = minRanges.empty() ? minRange : std::max(minRange, minRanges[outWI]);
+    const double upperLimit = maxRanges.empty() ? maxRange : std::min(maxRange, maxRanges[outWI]);
 
     // If doing partial bins, we want to set the bin boundaries to the specified
     // values regardless of whether they're 'in range' for this spectrum
@@ -223,9 +200,8 @@ void Integration::exec() {
 
     if (upperLimit < lowerLimit) {
       std::ostringstream sout;
-      sout << "Upper integration limit " << upperLimit
-           << " for workspace index " << i << " smaller than the lower limit "
-           << lowerLimit << ". Setting integral to zero.\n";
+      sout << "Upper integration limit " << upperLimit << " for workspace index " << i
+           << " smaller than the lower limit " << lowerLimit << ". Setting integral to zero.\n";
       g_log.warning() << sout.str();
       progress.report();
       continue;
@@ -268,26 +244,22 @@ void Integration::exec() {
         sumF = std::accumulate(F.begin() + distmin, F.begin() + distmax, 0.0);
         if (distmin > 0)
           Fmin = F[distmin - 1];
-        Fmax = F[static_cast<std::size_t>(distmax) < F.size() ? distmax
-                                                              : F.size() - 1];
+        Fmax = F[static_cast<std::size_t>(distmax) < F.size() ? distmax : F.size() - 1];
       }
       if (!is_distrib) {
         // Sum the Y, and sum the E in quadrature
         {
           sumY = std::accumulate(Y.begin() + distmin, Y.begin() + distmax, 0.0);
-          sumE = std::accumulate(E.begin() + distmin, E.begin() + distmax, 0.0,
-                                 VectorHelper::SumSquares<double>());
+          sumE = std::accumulate(E.begin() + distmin, E.begin() + distmax, 0.0, VectorHelper::SumSquares<double>());
         }
       } else {
         // Sum Y*binwidth and Sum the (E*binwidth)^2.
         std::vector<double> widths(X.size());
         // highit+1 is safe while input workspace guaranteed to be histogram
         std::adjacent_difference(lowit, highit + 1, widths.begin());
-        sumY = std::inner_product(Y.begin() + distmin, Y.begin() + distmax,
-                                  widths.begin() + 1, 0.0);
-        sumE = std::inner_product(E.begin() + distmin, E.begin() + distmax,
-                                  widths.begin() + 1, 0.0, std::plus<double>(),
-                                  VectorHelper::TimesSquares<double>());
+        sumY = std::inner_product(Y.begin() + distmin, Y.begin() + distmax, widths.begin() + 1, 0.0);
+        sumE = std::inner_product(E.begin() + distmin, E.begin() + distmax, widths.begin() + 1, 0.0,
+                                  std::plus<double>(), VectorHelper::TimesSquares<double>());
       }
     }
     // If partial bins are included, set integration range to exact range
@@ -349,9 +321,8 @@ void Integration::exec() {
 /**
  * Uses rebin to reduce event workspaces to a single bin histogram
  */
-API::MatrixWorkspace_sptr Integration::rangeFilterEventWorkspace(
-    const API::MatrixWorkspace_sptr &workspace, double minRange,
-    double maxRange) {
+API::MatrixWorkspace_sptr Integration::rangeFilterEventWorkspace(const API::MatrixWorkspace_sptr &workspace,
+                                                                 double minRange, double maxRange) {
   bool childLog = g_log.is(Logger::Priority::PRIO_DEBUG);
   auto childAlg = createChildAlgorithm("Rebin", 0, 0.5, childLog);
   childAlg->setProperty("InputWorkspace", workspace);
@@ -409,17 +380,14 @@ std::map<std::string, std::string> Integration::validateInputs() {
   const double maxRange = getProperty("RangeUpper");
   const std::vector<double> minRanges = getProperty("RangeLowerList");
   const std::vector<double> maxRanges = getProperty("RangeUpperList");
-  if (!minRanges.empty() && !maxRanges.empty() &&
-      minRanges.size() != maxRanges.size()) {
-    issues["RangeLowerList"] =
-        "RangeLowerList has different number of values as RangeUpperList.";
+  if (!minRanges.empty() && !maxRanges.empty() && minRanges.size() != maxRanges.size()) {
+    issues["RangeLowerList"] = "RangeLowerList has different number of values as RangeUpperList.";
     return issues;
   }
   for (size_t i = 0; i < minRanges.size(); ++i) {
     const auto x = minRanges[i];
     if (!isEmpty(maxRange) && x > maxRange) {
-      issues["RangeLowerList"] =
-          "RangeLowerList has a value greater than RangeUpper.";
+      issues["RangeLowerList"] = "RangeLowerList has a value greater than RangeUpper.";
       break;
     } else if (!maxRanges.empty() && x > maxRanges[i]) {
       issues["RangeLowerList"] = "RangeLowerList has a value greater than the "
@@ -428,10 +396,8 @@ std::map<std::string, std::string> Integration::validateInputs() {
     }
   }
   if (!isEmpty(minRange)) {
-    if (std::any_of(maxRanges.cbegin(), maxRanges.cend(),
-                    [minRange](const auto x) { return x < minRange; })) {
-      issues["RangeUpperList"] =
-          "RangeUpperList has a value lower than RangeLower.";
+    if (std::any_of(maxRanges.cbegin(), maxRanges.cend(), [minRange](const auto x) { return x < minRange; })) {
+      issues["RangeUpperList"] = "RangeUpperList has a value lower than RangeLower.";
     }
   }
   return issues;

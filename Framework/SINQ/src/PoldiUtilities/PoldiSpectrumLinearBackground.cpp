@@ -18,34 +18,29 @@ DECLARE_FUNCTION(PoldiSpectrumLinearBackground)
 
 /// Default constructor
 PoldiSpectrumLinearBackground::PoldiSpectrumLinearBackground()
-    : ParamFunction(), IFunction1DSpectrum(), IPoldiFunction1D(),
-      m_timeBinCount(0) {}
+    : ParamFunction(), IFunction1DSpectrum(), IPoldiFunction1D(), m_timeBinCount(0) {}
 
-void PoldiSpectrumLinearBackground::setWorkspace(
-    std::shared_ptr<const Workspace> ws) {
-  MatrixWorkspace_const_sptr matrixWs =
-      std::dynamic_pointer_cast<const MatrixWorkspace>(ws);
+void PoldiSpectrumLinearBackground::setWorkspace(std::shared_ptr<const Workspace> ws) {
+  MatrixWorkspace_const_sptr matrixWs = std::dynamic_pointer_cast<const MatrixWorkspace>(ws);
 
   if (matrixWs && matrixWs->getNumberHistograms() > 0) {
     m_timeBinCount = matrixWs->x(0).size();
   }
 }
 
-size_t PoldiSpectrumLinearBackground::getTimeBinCount() const {
-  return m_timeBinCount;
-}
+size_t PoldiSpectrumLinearBackground::getTimeBinCount() const { return m_timeBinCount; }
 
 /// Calculates the function values as f(x) = A1 * wi
-void PoldiSpectrumLinearBackground::function1DSpectrum(
-    const FunctionDomain1DSpectrum &domain, FunctionValues &values) const {
+void PoldiSpectrumLinearBackground::function1DSpectrum(const FunctionDomain1DSpectrum &domain,
+                                                       FunctionValues &values) const {
   auto wsIndexDouble = static_cast<double>(domain.getWorkspaceIndex());
 
   values.setCalculated(wsIndexDouble * getParameter(0));
 }
 
 /// Sets the Jacobian, which is wi at any point.
-void PoldiSpectrumLinearBackground::functionDeriv1DSpectrum(
-    const FunctionDomain1DSpectrum &domain, Jacobian &jacobian) {
+void PoldiSpectrumLinearBackground::functionDeriv1DSpectrum(const FunctionDomain1DSpectrum &domain,
+                                                            Jacobian &jacobian) {
   auto wsIndexDouble = static_cast<double>(domain.getWorkspaceIndex());
 
   for (size_t i = 0; i < domain.size(); ++i) {
@@ -53,14 +48,12 @@ void PoldiSpectrumLinearBackground::functionDeriv1DSpectrum(
   }
 }
 
-void PoldiSpectrumLinearBackground::poldiFunction1D(
-    const std::vector<int> &indices, const FunctionDomain1D &domain,
-    FunctionValues &values) const {
+void PoldiSpectrumLinearBackground::poldiFunction1D(const std::vector<int> &indices, const FunctionDomain1D &domain,
+                                                    FunctionValues &values) const {
   double backgroundDetector = getParameter(0);
   auto wireCount = static_cast<double>(indices.size());
-  double distributionFactor = wireCount * wireCount *
-                              static_cast<double>(m_timeBinCount) /
-                              (2.0 * static_cast<double>(domain.size()));
+  double distributionFactor =
+      wireCount * wireCount * static_cast<double>(m_timeBinCount) / (2.0 * static_cast<double>(domain.size()));
   double backgroundD = backgroundDetector * distributionFactor;
 
   for (size_t i = 0; i < values.size(); ++i) {

@@ -26,21 +26,17 @@ class MANTID_CURVEFITTING_DLL MultiDomainCreator : public API::IDomainCreator {
   // friend class Fit;
 public:
   /// Constructor
-  MultiDomainCreator(Kernel::IPropertyManager *fit,
-                     const std::vector<std::string> &workspacePropertyNames)
-      : API::IDomainCreator(fit, workspacePropertyNames),
-        m_creators(workspacePropertyNames.size()) {}
+  MultiDomainCreator(Kernel::IPropertyManager *fit, const std::vector<std::string> &workspacePropertyNames)
+      : API::IDomainCreator(fit, workspacePropertyNames), m_creators(workspacePropertyNames.size()) {}
 
   /// Create a domain from the input workspace
-  void createDomain(std::shared_ptr<API::FunctionDomain> &domain,
-                    std::shared_ptr<API::FunctionValues> &ivalues,
+  void createDomain(std::shared_ptr<API::FunctionDomain> &domain, std::shared_ptr<API::FunctionValues> &ivalues,
                     size_t i0 = 0) override;
   /// Create the output workspace
-  std::shared_ptr<API::Workspace> createOutputWorkspace(
-      const std::string &baseName, API::IFunction_sptr function,
-      std::shared_ptr<API::FunctionDomain> domain,
-      std::shared_ptr<API::FunctionValues> values,
-      const std::string &outputWorkspacePropertyName) override;
+  std::shared_ptr<API::Workspace> createOutputWorkspace(const std::string &baseName, API::IFunction_sptr function,
+                                                        std::shared_ptr<API::FunctionDomain> domain,
+                                                        std::shared_ptr<API::FunctionValues> values,
+                                                        const std::string &outputWorkspacePropertyName) override;
 
   /// Return the size of the domain to be created.
   size_t getDomainSize() const override { return 0; }

@@ -27,10 +27,8 @@ at the field data and then processing the xml contained within.
 class DLLExport vtkDataSetToImplicitFunction {
 public:
   vtkDataSetToImplicitFunction(vtkDataSet *dataSet);
-  vtkDataSetToImplicitFunction &
-  operator=(const vtkDataSetToImplicitFunction &other) = delete;
-  vtkDataSetToImplicitFunction(const vtkDataSetToImplicitFunction &other) =
-      delete;
+  vtkDataSetToImplicitFunction &operator=(const vtkDataSetToImplicitFunction &other) = delete;
+  vtkDataSetToImplicitFunction(const vtkDataSetToImplicitFunction &other) = delete;
   static Mantid::Geometry::MDImplicitFunction *exec(vtkDataSet *dataSet);
   Mantid::Geometry::MDImplicitFunction *execute();
   ~vtkDataSetToImplicitFunction();

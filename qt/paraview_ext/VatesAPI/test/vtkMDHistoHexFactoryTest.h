@@ -36,8 +36,7 @@ public:
     FakeProgressAction progressUpdate;
 
     // Workspace with value 1.0 everywhere
-    MDHistoWorkspace_sptr ws_sptr =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3);
+    MDHistoWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3);
     ws_sptr->setTransformFromOriginal(new NullCoordTransform);
 
     // Constructional method ensures that factory is only suitable for providing
@@ -50,30 +49,25 @@ public:
                       "present on the product dataset.",
                       2, product->GetCellData()->GetNumberOfArrays());
     vtkDataArray *signalData = product->GetCellData()->GetArray(0);
-    TSM_ASSERT_EQUALS("The obtained cell data has the wrong name.",
-                      std::string("signal"),
+    TSM_ASSERT_EQUALS("The obtained cell data has the wrong name.", std::string("signal"),
                       std::string(signalData->GetName()));
     const int correctCellNumber = 10 * 10 * 10;
-    TSM_ASSERT_EQUALS("The number of signal values generated is incorrect.",
-                      correctCellNumber, signalData->GetSize());
+    TSM_ASSERT_EQUALS("The number of signal values generated is incorrect.", correctCellNumber, signalData->GetSize());
   }
 
   void testProgressUpdating() {
     MockProgressAction mockProgressAction;
     // Expectation checks that progress should be >= 0 and <= 100 and called at
     // least once!
-    EXPECT_CALL(mockProgressAction, eventRaised(AllOf(Le(100), Ge(0))))
-        .Times(AtLeast(1));
+    EXPECT_CALL(mockProgressAction, eventRaised(AllOf(Le(100), Ge(0)))).Times(AtLeast(1));
 
-    MDHistoWorkspace_sptr ws_sptr =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3);
+    MDHistoWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3);
     vtkMDHistoHexFactory factory(Mantid::VATES::VolumeNormalization);
 
     factory.initialize(ws_sptr);
     auto product = factory.create(mockProgressAction);
 
-    TSM_ASSERT("Progress Updates not used as expected.",
-               Mock::VerifyAndClearExpectations(&mockProgressAction));
+    TSM_ASSERT("Progress Updates not used as expected.", Mock::VerifyAndClearExpectations(&mockProgressAction));
   }
 
   void testIsValidThrowsWhenNoWorkspace() {
@@ -82,31 +76,25 @@ public:
 
     vtkMDHistoHexFactory factory(Mantid::VATES::VolumeNormalization);
 
-    TSM_ASSERT_THROWS(
-        "No workspace, so should not be possible to complete initialization.",
-        factory.initialize(ws_sptr), const std::invalid_argument &);
+    TSM_ASSERT_THROWS("No workspace, so should not be possible to complete initialization.",
+                      factory.initialize(ws_sptr), const std::invalid_argument &);
   }
 
   void testCreateWithoutInitializeThrows() {
     FakeProgressAction progressUpdate;
     vtkMDHistoHexFactory factory(Mantid::VATES::VolumeNormalization);
-    TS_ASSERT_THROWS(factory.create(progressUpdate),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(factory.create(progressUpdate), const std::runtime_error &);
   }
 
   void testInitializationDelegates() {
     // If the workspace provided is not a 4D imdworkspace, it should call the
     // successor's initalization
-    Mantid::API::IMDWorkspace_sptr ws_sptr =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2);
+    Mantid::API::IMDWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2);
 
     auto pMockFactorySuccessor = new MockvtkDataSetFactory();
-    auto uniqueSuccessor =
-        std::unique_ptr<MockvtkDataSetFactory>(pMockFactorySuccessor);
-    EXPECT_CALL(*pMockFactorySuccessor, initialize(_))
-        .Times(1); // expect it then to call initialize on the successor.
-    EXPECT_CALL(*pMockFactorySuccessor, getFactoryTypeName())
-        .WillOnce(testing::Return("TypeA"));
+    auto uniqueSuccessor = std::unique_ptr<MockvtkDataSetFactory>(pMockFactorySuccessor);
+    EXPECT_CALL(*pMockFactorySuccessor, initialize(_)).Times(1); // expect it then to call initialize on the successor.
+    EXPECT_CALL(*pMockFactorySuccessor, getFactoryTypeName()).WillOnce(testing::Return("TypeA"));
 
     // Constructional method ensures that factory is only suitable for providing
     // mesh information.
@@ -119,16 +107,14 @@ public:
 
     // Need the raw pointer to test assertions here. Object is not yet deleted
     // as the factory is still in scope.
-    TSM_ASSERT("successor factory not used as expected.",
-               Mock::VerifyAndClearExpectations(pMockFactorySuccessor));
+    TSM_ASSERT("successor factory not used as expected.", Mock::VerifyAndClearExpectations(pMockFactorySuccessor));
   }
 
   void testInitializationDelegatesThrows() {
     // If the workspace provided is not a 4D imdworkspace, it should call the
     // successor's initalization. If there is no successor an exception should
     // be thrown.
-    Mantid::API::IMDWorkspace_sptr ws_sptr =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2);
+    Mantid::API::IMDWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2);
 
     // Constructional method ensures that factory is only suitable for providing
     // mesh information.
@@ -144,23 +130,18 @@ public:
     // If the workspace provided is not a 4D imdworkspace, it should call the
     // successor's initalization
     // 2 dimensions on the workspace.
-    Mantid::API::IMDWorkspace_sptr ws_sptr =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2);
+    Mantid::API::IMDWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2);
 
     auto pMockFactorySuccessor = new MockvtkDataSetFactory();
-    auto uniqueSuccessor =
-        std::unique_ptr<MockvtkDataSetFactory>(pMockFactorySuccessor);
-    EXPECT_CALL(*pMockFactorySuccessor, initialize(_))
-        .Times(1); // expect it then to call initialize on the successor.
+    auto uniqueSuccessor = std::unique_ptr<MockvtkDataSetFactory>(pMockFactorySuccessor);
+    EXPECT_CALL(*pMockFactorySuccessor, initialize(_)).Times(1); // expect it then to call initialize on the successor.
     EXPECT_CALL(*pMockFactorySuccessor, create(Ref(progressUpdate)))
         .Times(1)
-        .WillOnce(
-            Return(vtkSmartPointer<vtkStructuredGrid>::New())); // expect it
-                                                                // then to call
-                                                                // create on the
-                                                                // successor.
-    EXPECT_CALL(*pMockFactorySuccessor, getFactoryTypeName())
-        .WillOnce(testing::Return("TypeA"));
+        .WillOnce(Return(vtkSmartPointer<vtkStructuredGrid>::New())); // expect it
+                                                                      // then to call
+                                                                      // create on the
+                                                                      // successor.
+    EXPECT_CALL(*pMockFactorySuccessor, getFactoryTypeName()).WillOnce(testing::Return("TypeA"));
 
     // Constructional method ensures that factory is only suitable for providing
     // mesh information.
@@ -174,8 +155,7 @@ public:
 
     // Need the raw pointer to test assertions here. Object is not yet deleted
     // as the factory is still in scope.
-    TSM_ASSERT("successor factory not used as expected.",
-               Mock::VerifyAndClearExpectations(pMockFactorySuccessor));
+    TSM_ASSERT("successor factory not used as expected.", Mock::VerifyAndClearExpectations(pMockFactorySuccessor));
   }
 
   void testTypeName() {

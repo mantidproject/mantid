@@ -79,8 +79,7 @@ private:
   /// Create
   void createDynamicLayout();
   /// Create the widgets for a given property
-  int createWidgetsForProperty(const Mantid::Kernel::Property *prop,
-                               QVBoxLayout *propertyLayout, QWidget *parent);
+  int createWidgetsForProperty(const Mantid::Kernel::Property *prop, QVBoxLayout *propertyLayout, QWidget *parent);
   /// Ignore requests to load until they are re-enabled.
   void disableLoadRequests();
   /// Accept requests to load until they are disabled.

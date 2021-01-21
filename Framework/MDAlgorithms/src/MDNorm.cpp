@@ -42,21 +42,14 @@ using namespace Mantid::DataObjects;
 namespace {
 using VectorDoubleProperty = Kernel::PropertyWithValue<std::vector<double>>;
 // function to  compare two intersections (h,k,l,Momentum) by Momentum
-bool compareMomentum(const std::array<double, 4> &v1,
-                     const std::array<double, 4> &v2) {
-  return (v1[3] < v2[3]);
-}
+bool compareMomentum(const std::array<double, 4> &v1, const std::array<double, 4> &v2) { return (v1[3] < v2[3]); }
 
 // k=sqrt(energyToK * E)
-constexpr double energyToK = 8.0 * M_PI * M_PI *
-                             PhysicalConstants::NeutronMass *
-                             PhysicalConstants::meV * 1e-20 /
+constexpr double energyToK = 8.0 * M_PI * M_PI * PhysicalConstants::NeutronMass * PhysicalConstants::meV * 1e-20 /
                              (PhysicalConstants::h * PhysicalConstants::h);
 
 // compare absolute values of doubles
-static bool abs_compare(double a, double b) {
-  return (std::fabs(a) < std::fabs(b));
-}
+static bool abs_compare(double a, double b) { return (std::fabs(a) < std::fabs(b)); }
 } // namespace
 
 // Register the algorithm into the AlgorithmFactory
@@ -67,11 +60,9 @@ DECLARE_ALGORITHM(MDNorm)
  * Constructor
  */
 MDNorm::MDNorm()
-    : m_normWS(), m_inputWS(), m_isRLU(false), m_UB(3, 3, true),
-      m_W(3, 3, true), m_transformation(), m_hX(), m_kX(), m_lX(), m_eX(),
-      m_hIdx(-1), m_kIdx(-1), m_lIdx(-1), m_eIdx(-1), m_numExptInfos(0),
-      m_Ei(0.0), m_diffraction(true), m_accumulate(false), m_dEIntegrated(true),
-      m_samplePos(), m_beamDir(), convention("") {}
+    : m_normWS(), m_inputWS(), m_isRLU(false), m_UB(3, 3, true), m_W(3, 3, true), m_transformation(), m_hX(), m_kX(),
+      m_lX(), m_eX(), m_hIdx(-1), m_kIdx(-1), m_lIdx(-1), m_eIdx(-1), m_numExptInfos(0), m_Ei(0.0), m_diffraction(true),
+      m_accumulate(false), m_dEIntegrated(true), m_samplePos(), m_beamDir(), convention("") {}
 
 /// Algorithms name for identification. @see Algorithm::name
 const std::string MDNorm::name() const { return "MDNorm"; }
@@ -80,9 +71,7 @@ const std::string MDNorm::name() const { return "MDNorm"; }
 int MDNorm::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string MDNorm::category() const {
-  return "MDAlgorithms\\Normalisation";
-}
+const std::string MDNorm::category() const { return "MDAlgorithms\\Normalisation"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string MDNorm::summary() const {
@@ -94,13 +83,12 @@ const std::string MDNorm::summary() const {
 /** Initialize the algorithm's properties.
  */
 void MDNorm::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<API::IMDEventWorkspace>>(
-                      "InputWorkspace", "", Kernel::Direction::Input),
-                  "An input MDEventWorkspace. Must be in Q_sample frame.");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<API::IMDEventWorkspace>>("InputWorkspace", "", Kernel::Direction::Input),
+      "An input MDEventWorkspace. Must be in Q_sample frame.");
 
   // RLU and settings
-  declareProperty("RLU", true,
-                  "Use reciprocal lattice units. If false, use Q_sample");
+  declareProperty("RLU", true, "Use reciprocal lattice units. If false, use Q_sample");
   setPropertyGroup("RLU", "Q projections RLU");
 
   auto mustBe3D = std::make_shared<Kernel::ArrayLengthValidator<double>>(3);
@@ -109,28 +97,19 @@ void MDNorm::init() {
   Q1[1] = 1.;
   Q2[2] = 1.;
 
-  declareProperty(
-      std::make_unique<ArrayProperty<double>>("QDimension0", Q0, mustBe3D),
-      "The first Q projection axis - Default is (1,0,0)");
-  setPropertySettings(
-      "QDimension0",
-      std::make_unique<Kernel::VisibleWhenProperty>("RLU", IS_EQUAL_TO, "1"));
+  declareProperty(std::make_unique<ArrayProperty<double>>("QDimension0", Q0, mustBe3D),
+                  "The first Q projection axis - Default is (1,0,0)");
+  setPropertySettings("QDimension0", std::make_unique<Kernel::VisibleWhenProperty>("RLU", IS_EQUAL_TO, "1"));
   setPropertyGroup("QDimension0", "Q projections RLU");
 
-  declareProperty(
-      std::make_unique<ArrayProperty<double>>("QDimension1", Q1, mustBe3D),
-      "The second Q projection axis - Default is (0,1,0)");
-  setPropertySettings(
-      "QDimension1",
-      std::make_unique<Kernel::VisibleWhenProperty>("RLU", IS_EQUAL_TO, "1"));
+  declareProperty(std::make_unique<ArrayProperty<double>>("QDimension1", Q1, mustBe3D),
+                  "The second Q projection axis - Default is (0,1,0)");
+  setPropertySettings("QDimension1", std::make_unique<Kernel::VisibleWhenProperty>("RLU", IS_EQUAL_TO, "1"));
   setPropertyGroup("QDimension1", "Q projections RLU");
 
-  declareProperty(
-      std::make_unique<ArrayProperty<double>>("QDimension2", Q2, mustBe3D),
-      "The thirdtCalculateCover Q projection axis - Default is (0,0,1)");
-  setPropertySettings(
-      "QDimension2",
-      std::make_unique<Kernel::VisibleWhenProperty>("RLU", IS_EQUAL_TO, "1"));
+  declareProperty(std::make_unique<ArrayProperty<double>>("QDimension2", Q2, mustBe3D),
+                  "The thirdtCalculateCover Q projection axis - Default is (0,0,1)");
+  setPropertySettings("QDimension2", std::make_unique<Kernel::VisibleWhenProperty>("RLU", IS_EQUAL_TO, "1"));
   setPropertyGroup("QDimension2", "Q projections RLU");
 
   // vanadium
@@ -138,19 +117,15 @@ void MDNorm::init() {
   fluxValidator->add<InstrumentValidator>();
   fluxValidator->add<CommonBinsValidator>();
   auto solidAngleValidator = fluxValidator->clone();
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>(
-          "SolidAngleWorkspace", "", Direction::Input,
-          API::PropertyMode::Optional, solidAngleValidator),
-      "An input workspace containing integrated vanadium "
-      "(a measure of the solid angle).\n"
-      "Mandatory for diffraction, optional for direct geometry inelastic");
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>(
-          "FluxWorkspace", "", Direction::Input, API::PropertyMode::Optional,
-          fluxValidator),
-      "An input workspace containing momentum dependent flux.\n"
-      "Mandatory for diffraction. No effect on direct geometry inelastic");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("SolidAngleWorkspace", "", Direction::Input,
+                                                        API::PropertyMode::Optional, solidAngleValidator),
+                  "An input workspace containing integrated vanadium "
+                  "(a measure of the solid angle).\n"
+                  "Mandatory for diffraction, optional for direct geometry inelastic");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("FluxWorkspace", "", Direction::Input,
+                                                        API::PropertyMode::Optional, fluxValidator),
+                  "An input workspace containing momentum dependent flux.\n"
+                  "Mandatory for diffraction. No effect on direct geometry inelastic");
   setPropertyGroup("SolidAngleWorkspace", "Vanadium normalization");
   setPropertyGroup("FluxWorkspace", "Vanadium normalization");
 
@@ -162,54 +137,46 @@ void MDNorm::init() {
     if (i < 3) {
       defaultName = "QDimension" + Strings::toString(i);
     }
-    declareProperty(std::make_unique<PropertyWithValue<std::string>>(
-                        propName, defaultName, Direction::Input),
-                    "Name for the " + Strings::toString(i) +
-                        "th dimension. Leave blank for NONE.");
+    declareProperty(std::make_unique<PropertyWithValue<std::string>>(propName, defaultName, Direction::Input),
+                    "Name for the " + Strings::toString(i) + "th dimension. Leave blank for NONE.");
     auto atMost3 = std::make_shared<ArrayLengthValidator<double>>(0, 3);
     std::vector<double> temp;
-    declareProperty(
-        std::make_unique<ArrayProperty<double>>(propBinning, temp, atMost3),
-        "Binning for the " + Strings::toString(i) + "th dimension.\n" +
-            "- Leave blank for complete integration\n" +
-            "- One value is interpreted as step\n"
-            "- Two values are interpreted integration interval\n" +
-            "- Three values are interpreted as min, step, max");
+    declareProperty(std::make_unique<ArrayProperty<double>>(propBinning, temp, atMost3),
+                    "Binning for the " + Strings::toString(i) + "th dimension.\n" +
+                        "- Leave blank for complete integration\n" +
+                        "- One value is interpreted as step\n"
+                        "- Two values are interpreted integration interval\n" +
+                        "- Three values are interpreted as min, step, max");
     setPropertyGroup(propName, "Binning");
     setPropertyGroup(propBinning, "Binning");
   }
 
   // symmetry operations
-  declareProperty(std::make_unique<PropertyWithValue<std::string>>(
-                      "SymmetryOperations", "", Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<std::string>>("SymmetryOperations", "", Direction::Input),
                   "If specified the symmetry will be applied, "
                   "can be space group name, point group name, or list "
                   "individual symmetries.");
 
   // temporary workspaces
-  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
-                      "TemporaryDataWorkspace", "", Direction::Input,
-                      PropertyMode::Optional),
+  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>("TemporaryDataWorkspace", "", Direction::Input,
+                                                                         PropertyMode::Optional),
                   "An input MDHistoWorkspace used to accumulate data from "
                   "multiple MDEventWorkspaces. If unspecified a blank "
                   "MDHistoWorkspace will be created.");
-  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
-                      "TemporaryNormalizationWorkspace", "", Direction::Input,
-                      PropertyMode::Optional),
+  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>("TemporaryNormalizationWorkspace", "",
+                                                                         Direction::Input, PropertyMode::Optional),
                   "An input MDHistoWorkspace used to accumulate normalization "
                   "from multiple MDEventWorkspaces. If unspecified a blank "
                   "MDHistoWorkspace will be created.");
   setPropertyGroup("TemporaryDataWorkspace", "Temporary workspaces");
   setPropertyGroup("TemporaryNormalizationWorkspace", "Temporary workspaces");
 
-  declareProperty(std::make_unique<WorkspaceProperty<API::Workspace>>(
-                      "OutputWorkspace", "", Kernel::Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<API::Workspace>>("OutputWorkspace", "", Kernel::Direction::Output),
                   "A name for the normalized output MDHistoWorkspace.");
-  declareProperty(std::make_unique<WorkspaceProperty<API::Workspace>>(
-                      "OutputDataWorkspace", "", Kernel::Direction::Output),
-                  "A name for the output data MDHistoWorkspace.");
-  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-                      "OutputNormalizationWorkspace", "", Direction::Output),
+  declareProperty(
+      std::make_unique<WorkspaceProperty<API::Workspace>>("OutputDataWorkspace", "", Kernel::Direction::Output),
+      "A name for the output data MDHistoWorkspace.");
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("OutputNormalizationWorkspace", "", Direction::Output),
                   "A name for the output normalization MDHistoWorkspace.");
 }
 
@@ -219,57 +186,46 @@ std::map<std::string, std::string> MDNorm::validateInputs() {
   std::map<std::string, std::string> errorMessage;
 
   // Check for input workspace frame
-  Mantid::API::IMDEventWorkspace_sptr inputWS =
-      this->getProperty("InputWorkspace");
+  Mantid::API::IMDEventWorkspace_sptr inputWS = this->getProperty("InputWorkspace");
   if (inputWS->getNumDims() < 3) {
-    errorMessage.emplace("InputWorkspace",
-                         "The input workspace must be at least 3D");
+    errorMessage.emplace("InputWorkspace", "The input workspace must be at least 3D");
   } else {
     for (size_t i = 0; i < 3; i++) {
-      if (inputWS->getDimension(i)->getMDFrame().name() !=
-          Mantid::Geometry::QSample::QSampleName) {
-        errorMessage.emplace("InputWorkspace",
-                             "The input workspace must be in Q_sample");
+      if (inputWS->getDimension(i)->getMDFrame().name() != Mantid::Geometry::QSample::QSampleName) {
+        errorMessage.emplace("InputWorkspace", "The input workspace must be in Q_sample");
       }
     }
   }
   // Check if the vanadium is available for diffraction
   bool diffraction = true;
-  if ((inputWS->getNumDims() > 3) &&
-      (inputWS->getDimension(3)->getName() == "DeltaE")) {
+  if ((inputWS->getNumDims() > 3) && (inputWS->getDimension(3)->getName() == "DeltaE")) {
     diffraction = false;
   }
   if (diffraction) {
-    API::MatrixWorkspace_const_sptr solidAngleWS =
-        getProperty("SolidAngleWorkspace");
+    API::MatrixWorkspace_const_sptr solidAngleWS = getProperty("SolidAngleWorkspace");
     API::MatrixWorkspace_const_sptr fluxWS = getProperty("FluxWorkspace");
     if (solidAngleWS == nullptr) {
-      errorMessage.emplace("SolidAngleWorkspace",
-                           "SolidAngleWorkspace is required for diffraction");
+      errorMessage.emplace("SolidAngleWorkspace", "SolidAngleWorkspace is required for diffraction");
     }
     if (fluxWS == nullptr) {
-      errorMessage.emplace("FluxWorkspace",
-                           "FluxWorkspace is required for diffraction");
+      errorMessage.emplace("FluxWorkspace", "FluxWorkspace is required for diffraction");
     }
   }
   // Check for property MDNorm_low and MDNorm_high
   size_t nExperimentInfos = inputWS->getNumExperimentInfo();
   if (nExperimentInfos == 0) {
-    errorMessage.emplace("InputWorkspace",
-                         "There must be at least one experiment info");
+    errorMessage.emplace("InputWorkspace", "There must be at least one experiment info");
   } else {
     for (size_t iExpInfo = 0; iExpInfo < nExperimentInfos; iExpInfo++) {
-      auto &currentExptInfo =
-          *(inputWS->getExperimentInfo(static_cast<uint16_t>(iExpInfo)));
+      auto &currentExptInfo = *(inputWS->getExperimentInfo(static_cast<uint16_t>(iExpInfo)));
       if (!currentExptInfo.run().hasProperty("MDNorm_low")) {
         errorMessage.emplace("InputWorkspace", "Missing MDNorm_low log. Please "
                                                "use CropWorkspaceForMDNorm "
                                                "before converting to MD");
       }
       if (!currentExptInfo.run().hasProperty("MDNorm_high")) {
-        errorMessage.emplace("InputWorkspace",
-                             "Missing MDNorm_high log. Please use "
-                             "CropWorkspaceForMDNorm before converting to MD");
+        errorMessage.emplace("InputWorkspace", "Missing MDNorm_high log. Please use "
+                                               "CropWorkspaceForMDNorm before converting to MD");
       }
     }
   }
@@ -283,18 +239,14 @@ std::map<std::string, std::string> MDNorm::validateInputs() {
     W.setColumn(1, Q1Basis);
     W.setColumn(2, Q2Basis);
     if (fabs(W.determinant()) < 1e-5) {
-      errorMessage.emplace("QDimension0",
-                           "The projection dimensions are coplanar or zero");
-      errorMessage.emplace("QDimension1",
-                           "The projection dimensions are coplanar or zero");
-      errorMessage.emplace("QDimension2",
-                           "The projection dimensions are coplanar or zero");
+      errorMessage.emplace("QDimension0", "The projection dimensions are coplanar or zero");
+      errorMessage.emplace("QDimension1", "The projection dimensions are coplanar or zero");
+      errorMessage.emplace("QDimension2", "The projection dimensions are coplanar or zero");
     }
     if (!inputWS->getExperimentInfo(0)->sample().hasOrientedLattice()) {
-      errorMessage.emplace("InputWorkspace",
-                           "There is no oriented lattice "
-                           "associated with the input workspace. "
-                           "Use SetUB algorithm");
+      errorMessage.emplace("InputWorkspace", "There is no oriented lattice "
+                                             "associated with the input workspace. "
+                                             "Use SetUB algorithm");
     }
   }
   // check dimension names
@@ -312,76 +264,57 @@ std::map<std::string, std::string> MDNorm::validateInputs() {
     std::string binningName = "Dimension" + Strings::toString(i) + "Binning";
     std::vector<double> binning = getProperty(binningName);
     if (!dimName.empty()) {
-      auto it = std::find(originalDimensionNames.begin(),
-                          originalDimensionNames.end(), dimName);
+      auto it = std::find(originalDimensionNames.begin(), originalDimensionNames.end(), dimName);
       if (it == originalDimensionNames.end()) {
-        errorMessage.emplace(
-            propName,
-            "Name '" + dimName +
-                "' is not one of the "
-                "original workspace names or a directional dimension");
+        errorMessage.emplace(propName, "Name '" + dimName +
+                                           "' is not one of the "
+                                           "original workspace names or a directional dimension");
       } else {
         // make sure dimension is unique
-        auto itSel = std::find(selectedDimensions.begin(),
-                               selectedDimensions.end(), dimName);
+        auto itSel = std::find(selectedDimensions.begin(), selectedDimensions.end(), dimName);
         if (itSel == selectedDimensions.end()) {
           selectedDimensions.emplace_back(dimName);
         } else {
-          errorMessage.emplace(propName,
-                               "Name '" + dimName + "' was already selected");
+          errorMessage.emplace(propName, "Name '" + dimName + "' was already selected");
         }
       }
     } else {
       if (!binning.empty()) {
-        errorMessage.emplace(
-            binningName,
-            "There should be no binning if the dimension name is empty");
+        errorMessage.emplace(binningName, "There should be no binning if the dimension name is empty");
       }
     }
   }
   // since Q dimensions can be non - orthogonal, all must be present
-  if ((std::find(selectedDimensions.begin(), selectedDimensions.end(),
-                 "QDimension0") == selectedDimensions.end()) ||
-      (std::find(selectedDimensions.begin(), selectedDimensions.end(),
-                 "QDimension1") == selectedDimensions.end()) ||
-      (std::find(selectedDimensions.begin(), selectedDimensions.end(),
-                 "QDimension2") == selectedDimensions.end())) {
+  if ((std::find(selectedDimensions.begin(), selectedDimensions.end(), "QDimension0") == selectedDimensions.end()) ||
+      (std::find(selectedDimensions.begin(), selectedDimensions.end(), "QDimension1") == selectedDimensions.end()) ||
+      (std::find(selectedDimensions.begin(), selectedDimensions.end(), "QDimension2") == selectedDimensions.end())) {
     for (std::size_t i = 0; i < 6; i++) {
       std::string propName = "Dimension" + Strings::toString(i) + "Name";
-      errorMessage.emplace(
-          propName,
-          "All of QDimension0, QDimension1, QDimension2 must be present");
+      errorMessage.emplace(propName, "All of QDimension0, QDimension1, QDimension2 must be present");
     }
   }
   // symmetry operations
   std::string symOps = this->getProperty("SymmetryOperations");
   if (!symOps.empty()) {
-    bool isSpaceGroup =
-        Geometry::SpaceGroupFactory::Instance().isSubscribed(symOps);
-    bool isPointGroup =
-        Geometry::PointGroupFactory::Instance().isSubscribed(symOps);
+    bool isSpaceGroup = Geometry::SpaceGroupFactory::Instance().isSubscribed(symOps);
+    bool isPointGroup = Geometry::PointGroupFactory::Instance().isSubscribed(symOps);
     if (!isSpaceGroup && !isPointGroup) {
       try {
         Geometry::SymmetryOperationFactory::Instance().createSymOps(symOps);
       } catch (const Mantid::Kernel::Exception::ParseError &) {
-        errorMessage.emplace("SymmetryOperations",
-                             "The input is not a space group, a point group, "
-                             "or a list of symmetry operations");
+        errorMessage.emplace("SymmetryOperations", "The input is not a space group, a point group, "
+                                                   "or a list of symmetry operations");
       }
     }
   }
   // validate accumulation workspaces, if provided
-  std::shared_ptr<IMDHistoWorkspace> tempNormWS =
-      this->getProperty("TemporaryNormalizationWorkspace");
-  Mantid::API::IMDHistoWorkspace_sptr tempDataWS =
-      this->getProperty("TemporaryDataWorkspace");
+  std::shared_ptr<IMDHistoWorkspace> tempNormWS = this->getProperty("TemporaryNormalizationWorkspace");
+  Mantid::API::IMDHistoWorkspace_sptr tempDataWS = this->getProperty("TemporaryDataWorkspace");
 
   // check that either both or neuther accumulation workspaces are provied
   if ((tempNormWS && !tempDataWS) || (!tempNormWS && tempDataWS)) {
-    errorMessage.emplace(
-        "TemporaryDataWorkspace",
-        "Must provide either no accumulation workspaces or,"
-        "both TemporaryNormalizationWorkspaces and TemporaryDataWorkspace");
+    errorMessage.emplace("TemporaryDataWorkspace", "Must provide either no accumulation workspaces or,"
+                                                   "both TemporaryNormalizationWorkspaces and TemporaryDataWorkspace");
   }
   // check that both accumulation workspaces are on the same grid
   if (tempNormWS && tempDataWS) {
@@ -391,21 +324,16 @@ std::map<std::string, std::string> MDNorm::validateInputs() {
       for (size_t i = 0; i < numNormDims; i++) {
         const auto dim1 = tempNormWS->getDimension(i);
         const auto dim2 = tempDataWS->getDimension(i);
-        if ((dim1->getMinimum() != dim2->getMinimum()) ||
-            (dim1->getMaximum() != dim2->getMaximum()) ||
-            (dim1->getNBins() != dim2->getNBins()) ||
-            (dim1->getName() != dim2->getName())) {
-          errorMessage.emplace("TemporaryDataWorkspace",
-                               "Binning for TemporaryNormalizationWorkspaces "
-                               "and TemporaryDataWorkspace must be the same.");
+        if ((dim1->getMinimum() != dim2->getMinimum()) || (dim1->getMaximum() != dim2->getMaximum()) ||
+            (dim1->getNBins() != dim2->getNBins()) || (dim1->getName() != dim2->getName())) {
+          errorMessage.emplace("TemporaryDataWorkspace", "Binning for TemporaryNormalizationWorkspaces "
+                                                         "and TemporaryDataWorkspace must be the same.");
           break;
         }
       }
     } else { // accumulation workspaces have different number of dimensions
-      errorMessage.emplace(
-          "TemporaryDataWorkspace",
-          "TemporaryNormalizationWorkspace and TemporaryDataWorkspace "
-          "do not have the same number of dimensions");
+      errorMessage.emplace("TemporaryDataWorkspace", "TemporaryNormalizationWorkspace and TemporaryDataWorkspace "
+                                                     "do not have the same number of dimensions");
     }
   }
 
@@ -424,17 +352,14 @@ void MDNorm::exec() {
     symOps = "x,y,z";
   }
   if (Geometry::SpaceGroupFactory::Instance().isSubscribed(symOps)) {
-    auto spaceGroup =
-        Geometry::SpaceGroupFactory::Instance().createSpaceGroup(symOps);
+    auto spaceGroup = Geometry::SpaceGroupFactory::Instance().createSpaceGroup(symOps);
     auto pointGroup = spaceGroup->getPointGroup();
     symmetryOps = pointGroup->getSymmetryOperations();
   } else if (Geometry::PointGroupFactory::Instance().isSubscribed(symOps)) {
-    auto pointGroup =
-        Geometry::PointGroupFactory::Instance().createPointGroup(symOps);
+    auto pointGroup = Geometry::PointGroupFactory::Instance().createPointGroup(symOps);
     symmetryOps = pointGroup->getSymmetryOperations();
   } else {
-    symmetryOps =
-        Geometry::SymmetryOperationFactory::Instance().createSymOps(symOps);
+    symmetryOps = Geometry::SymmetryOperationFactory::Instance().createSymOps(symOps);
   }
   g_log.debug() << "Symmetry operations\n";
   for (auto so : symmetryOps) {
@@ -455,15 +380,13 @@ void MDNorm::exec() {
   }
   m_samplePos = sample->getPos();
   m_beamDir = normalize(m_samplePos - source->getPos());
-  if ((m_inputWS->getNumDims() > 3) &&
-      (m_inputWS->getDimension(3)->getName() == "DeltaE")) {
+  if ((m_inputWS->getNumDims() > 3) && (m_inputWS->getDimension(3)->getName() == "DeltaE")) {
     m_diffraction = false;
     if (exptInfoZero.run().hasProperty("Ei")) {
       Kernel::Property *eiprop = exptInfoZero.run().getProperty("Ei");
       m_Ei = boost::lexical_cast<double>(eiprop->value());
       if (m_Ei <= 0) {
-        throw std::invalid_argument(
-            "Ei stored in the workspace is not positive");
+        throw std::invalid_argument("Ei stored in the workspace is not positive");
       }
     } else {
       throw std::invalid_argument("Could not find Ei value in the workspace.");
@@ -477,13 +400,11 @@ void MDNorm::exec() {
 
   m_numExptInfos = outputDataWS->getNumExperimentInfo();
   // loop over all experiment infos
-  for (uint16_t expInfoIndex = 0; expInfoIndex < m_numExptInfos;
-       expInfoIndex++) {
+  for (uint16_t expInfoIndex = 0; expInfoIndex < m_numExptInfos; expInfoIndex++) {
     // Check for other dimensions if we could measure anything in the original
     // data
     bool skipNormalization = false;
-    const std::vector<coord_t> otherValues =
-        getValuesFromOtherDimensions(skipNormalization, expInfoIndex);
+    const std::vector<coord_t> otherValues = getValuesFromOtherDimensions(skipNormalization, expInfoIndex);
 
     cacheDimensionXValues();
 
@@ -505,8 +426,7 @@ void MDNorm::exec() {
   IAlgorithm_sptr divideMD = createChildAlgorithm("DivideMD", 0.99, 1.);
   divideMD->setProperty("LHSWorkspace", outputDataWS);
   divideMD->setProperty("RHSWorkspace", m_normWS);
-  divideMD->setPropertyValue("OutputWorkspace",
-                             getPropertyValue("OutputWorkspace"));
+  divideMD->setPropertyValue("OutputWorkspace", getPropertyValue("OutputWorkspace"));
   divideMD->executeAsChildAlg();
   API::IMDWorkspace_sptr out = divideMD->getProperty("OutputWorkspace");
   this->setProperty("OutputWorkspace", out);
@@ -525,8 +445,7 @@ std::string MDNorm::QDimensionNameQSample(int i) {
   else if (i == 2)
     return std::string("Q_sample_z");
   else
-    throw std::invalid_argument(
-        "Index must be 0, 1, or 2 for QDimensionNameQSample");
+    throw std::invalid_argument("Index must be 0, 1, or 2 for QDimensionNameQSample");
 }
 /**
  * Get the dimension name when using reciprocal lattice units.
@@ -549,8 +468,7 @@ std::string MDNorm::QDimensionName(std::vector<double> projection) {
     } else if (projection[i] == -1) {
       name << "-" << character;
     } else {
-      name << std::defaultfloat << std::setprecision(3) << projection[i]
-           << character;
+      name << std::defaultfloat << std::setprecision(3) << projection[i] << character;
     }
     if (i != 2) {
       name << ",";
@@ -580,9 +498,7 @@ std::map<std::string, std::string> MDNorm::getBinParameters() {
     m_Q0Basis = getProperty("QDimension0");
     m_Q1Basis = getProperty("QDimension1");
     m_Q2Basis = getProperty("QDimension2");
-    m_UB =
-        m_inputWS->getExperimentInfo(0)->sample().getOrientedLattice().getUB() *
-        2 * M_PI;
+    m_UB = m_inputWS->getExperimentInfo(0)->sample().getOrientedLattice().getUB() * 2 * M_PI;
   }
 
   std::vector<double> W(m_Q0Basis);
@@ -594,34 +510,26 @@ std::map<std::string, std::string> MDNorm::getBinParameters() {
   // Find maximum Q
   auto &exptInfo0 = *(m_inputWS->getExperimentInfo(static_cast<uint16_t>(0)));
   auto upperLimitsVector =
-      (*(dynamic_cast<Kernel::PropertyWithValue<std::vector<double>> *>(
-          exptInfo0.getLog("MDNorm_high"))))();
+      (*(dynamic_cast<Kernel::PropertyWithValue<std::vector<double>> *>(exptInfo0.getLog("MDNorm_high"))))();
   double maxQ;
   if (m_diffraction) {
-    maxQ = 2. * (*std::max_element(upperLimitsVector.begin(),
-                                   upperLimitsVector.end()));
+    maxQ = 2. * (*std::max_element(upperLimitsVector.begin(), upperLimitsVector.end()));
   } else {
     double Ei;
-    double maxDE =
-        *std::max_element(upperLimitsVector.begin(), upperLimitsVector.end());
+    double maxDE = *std::max_element(upperLimitsVector.begin(), upperLimitsVector.end());
     auto loweLimitsVector =
-        (*(dynamic_cast<Kernel::PropertyWithValue<std::vector<double>> *>(
-            exptInfo0.getLog("MDNorm_low"))))();
-    double minDE =
-        *std::min_element(loweLimitsVector.begin(), loweLimitsVector.end());
+        (*(dynamic_cast<Kernel::PropertyWithValue<std::vector<double>> *>(exptInfo0.getLog("MDNorm_low"))))();
+    double minDE = *std::min_element(loweLimitsVector.begin(), loweLimitsVector.end());
     if (exptInfo0.run().hasProperty("Ei")) {
       Kernel::Property *eiprop = exptInfo0.run().getProperty("Ei");
       Ei = boost::lexical_cast<double>(eiprop->value());
       if (Ei <= 0) {
-        throw std::invalid_argument(
-            "Ei stored in the workspace is not positive");
+        throw std::invalid_argument("Ei stored in the workspace is not positive");
       }
     } else {
       throw std::invalid_argument("Could not find Ei value in the workspace.");
     }
-    const double energyToK = 8.0 * M_PI * M_PI *
-                             PhysicalConstants::NeutronMass *
-                             PhysicalConstants::meV * 1e-20 /
+    const double energyToK = 8.0 * M_PI * M_PI * PhysicalConstants::NeutronMass * PhysicalConstants::meV * 1e-20 /
                              (PhysicalConstants::h * PhysicalConstants::h);
     double ki = std::sqrt(energyToK * Ei);
     double kfmin = std::sqrt(energyToK * (Ei - minDE));
@@ -642,10 +550,8 @@ std::map<std::string, std::string> MDNorm::getBinParameters() {
       std::stringstream propertyValue;
       propertyValue << dimName;
       // get the index in the original workspace
-      auto dimIndex =
-          std::distance(originalDimensionNames.begin(),
-                        std::find(originalDimensionNames.begin(),
-                                  originalDimensionNames.end(), dimName));
+      auto dimIndex = std::distance(originalDimensionNames.begin(),
+                                    std::find(originalDimensionNames.begin(), originalDimensionNames.end(), dimName));
       auto dimension = m_inputWS->getDimension(dimIndex);
       propertyValue << "," << dimension->getMDUnits().getUnitLabel().ascii();
       for (size_t j = 0; j < originalDimensionNames.size(); j++) {
@@ -712,9 +618,7 @@ std::map<std::string, std::string> MDNorm::getBinParameters() {
   parameters.emplace("OutputExtents", extents.str());
   parameters.emplace("OutputBins", bins.str());
   m_transformation = Mantid::Kernel::Matrix<coord_t>(
-      transformation,
-      static_cast<size_t>((transformation.size()) / m_inputWS->getNumDims()),
-      m_inputWS->getNumDims());
+      transformation, static_cast<size_t>((transformation.size()) / m_inputWS->getNumDims()), m_inputWS->getNumDims());
   return parameters;
 }
 
@@ -722,11 +626,9 @@ std::map<std::string, std::string> MDNorm::getBinParameters() {
  * Create & cached the normalization workspace
  * @param dataWS The binned workspace that will be used for the data
  */
-void MDNorm::createNormalizationWS(
-    const DataObjects::MDHistoWorkspace &dataWS) {
+void MDNorm::createNormalizationWS(const DataObjects::MDHistoWorkspace &dataWS) {
   // Copy the MDHisto workspace, and change signals and errors to 0.
-  std::shared_ptr<IMDHistoWorkspace> tmp =
-      this->getProperty("TemporaryNormalizationWorkspace");
+  std::shared_ptr<IMDHistoWorkspace> tmp = this->getProperty("TemporaryNormalizationWorkspace");
   m_normWS = std::dynamic_pointer_cast<MDHistoWorkspace>(tmp);
   if (!m_normWS) {
     m_normWS = dataWS.clone();
@@ -744,17 +646,14 @@ void MDNorm::createNormalizationWS(
  * @return :: bool - true means the binning is correct to aggreagete using
  * tempDataWS
  */
-void MDNorm::validateBinningForTemporaryDataWorkspace(
-    const std::map<std::string, std::string> &parameters,
-    const Mantid::API::IMDHistoWorkspace_sptr &tempDataWS) {
+void MDNorm::validateBinningForTemporaryDataWorkspace(const std::map<std::string, std::string> &parameters,
+                                                      const Mantid::API::IMDHistoWorkspace_sptr &tempDataWS) {
 
   // parse the paramters map and get extents from tempDataWS
   const std::string numBinsStr = parameters.at("OutputBins");
   const std::string extentsStr = parameters.at("OutputExtents");
-  const std::vector<size_t> numBins =
-      VectorHelper::splitStringIntoVector<size_t>(numBinsStr);
-  const std::vector<double> extents =
-      VectorHelper::splitStringIntoVector<double>(extentsStr);
+  const std::vector<size_t> numBins = VectorHelper::splitStringIntoVector<size_t>(numBinsStr);
+  const std::vector<double> extents = VectorHelper::splitStringIntoVector<double>(extentsStr);
 
   // make sure the number of dimensions is the same for both workspaces
   size_t numDimsTemp = tempDataWS->getNumDims();
@@ -793,8 +692,7 @@ void MDNorm::validateBinningForTemporaryDataWorkspace(
 
   // sort out which axes are dimensional and check names
   size_t parametersIndex = 0;
-  std::vector<size_t> dimensionIndex(
-      numDimsTemp + 1, 3); // stores h, k, l or Qx, Qy, Qz dimensions
+  std::vector<size_t> dimensionIndex(numDimsTemp + 1, 3); // stores h, k, l or Qx, Qy, Qz dimensions
   for (auto const &p : parameters) {
     auto key = p.first;
     auto value = p.second;
@@ -802,16 +700,14 @@ void MDNorm::validateBinningForTemporaryDataWorkspace(
     // do not use ==
     if (value.find("QDimension0") != std::string::npos) {
       dimensionIndex[0] = parametersIndex;
-      const std::string dimXName =
-          tempDataWS->getDimension(parametersIndex)->getName();
+      const std::string dimXName = tempDataWS->getDimension(parametersIndex)->getName();
       if (m_isRLU) { // hkl
         if (dimXName != QDimensionName(m_Q0Basis)) {
           std::stringstream errorMessage;
           std::stringstream debugMessage;
           errorMessage << "TemporaryDataWorkspace does not have the  ";
           errorMessage << "correct name for dimension " << parametersIndex;
-          debugMessage << "QDimension0 Names: Output will be: "
-                       << QDimensionName(m_Q0Basis);
+          debugMessage << "QDimension0 Names: Output will be: " << QDimensionName(m_Q0Basis);
           debugMessage << " TemporaryDataWorkspace: " << dimXName;
           g_log.warning(debugMessage.str());
           throw(std::invalid_argument(errorMessage.str()));
@@ -822,8 +718,7 @@ void MDNorm::validateBinningForTemporaryDataWorkspace(
           std::stringstream debugMessage;
           errorMessage << "TemporaryDataWorkspace does not have the  ";
           errorMessage << "correct name for dimension " << parametersIndex;
-          debugMessage << "QDimension0 Names: Output will be: "
-                       << QDimensionNameQSample(0);
+          debugMessage << "QDimension0 Names: Output will be: " << QDimensionNameQSample(0);
           debugMessage << " TemporaryDataWorkspace: " << dimXName;
           g_log.warning(debugMessage.str());
           throw(std::invalid_argument(errorMessage.str()));
@@ -831,16 +726,14 @@ void MDNorm::validateBinningForTemporaryDataWorkspace(
       }
     } else if (value.find("QDimension1") != std::string::npos) {
       dimensionIndex[1] = parametersIndex;
-      const std::string dimYName =
-          tempDataWS->getDimension(parametersIndex)->getName();
+      const std::string dimYName = tempDataWS->getDimension(parametersIndex)->getName();
       if (m_isRLU) { // hkl
         if (dimYName != QDimensionName(m_Q1Basis)) {
           std::stringstream errorMessage;
           std::stringstream debugMessage;
           errorMessage << "TemporaryDataWorkspace does not have the  ";
           errorMessage << "correct name for dimension " << parametersIndex;
-          debugMessage << "QDimension1 Names: Output will be: "
-                       << QDimensionName(m_Q1Basis);
+          debugMessage << "QDimension1 Names: Output will be: " << QDimensionName(m_Q1Basis);
           debugMessage << " TemporaryDataWorkspace: " << dimYName;
           g_log.warning(debugMessage.str());
           throw(std::invalid_argument(errorMessage.str()));
@@ -851,8 +744,7 @@ void MDNorm::validateBinningForTemporaryDataWorkspace(
           std::stringstream debugMessage;
           errorMessage << "TemporaryDataWorkspace does not have the  ";
           errorMessage << "correct name for dimension " << parametersIndex;
-          debugMessage << "QDimension1 Names: Output will be: "
-                       << QDimensionNameQSample(1);
+          debugMessage << "QDimension1 Names: Output will be: " << QDimensionNameQSample(1);
           debugMessage << " TemporaryDataWorkspace: " << dimYName;
           g_log.warning(debugMessage.str());
           throw(std::invalid_argument(errorMessage.str()));
@@ -860,16 +752,14 @@ void MDNorm::validateBinningForTemporaryDataWorkspace(
       }
     } else if (value.find("QDimension2") != std::string::npos) {
       dimensionIndex[2] = parametersIndex;
-      const std::string dimZName =
-          tempDataWS->getDimension(parametersIndex)->getName();
+      const std::string dimZName = tempDataWS->getDimension(parametersIndex)->getName();
       if (m_isRLU) { // hkl
         if (dimZName != QDimensionName(m_Q2Basis)) {
           std::stringstream errorMessage;
           std::stringstream debugMessage;
           errorMessage << "TemporaryDataWorkspace does not have the  ";
           errorMessage << "correct name for dimension " << parametersIndex;
-          debugMessage << "QDimension2 Names: Output will be: "
-                       << QDimensionName(m_Q2Basis);
+          debugMessage << "QDimension2 Names: Output will be: " << QDimensionName(m_Q2Basis);
           debugMessage << " TemporaryDataWorkspace: " << dimZName;
           g_log.warning(debugMessage.str());
           throw(std::invalid_argument(errorMessage.str()));
@@ -880,8 +770,7 @@ void MDNorm::validateBinningForTemporaryDataWorkspace(
           std::stringstream debugMessage;
           errorMessage << "TemporaryDataWorkspace does not have the  ";
           errorMessage << "correct name for dimension " << parametersIndex;
-          debugMessage << "QDimension2 Names: Output will be: "
-                       << QDimensionNameQSample(2);
+          debugMessage << "QDimension2 Names: Output will be: " << QDimensionNameQSample(2);
           debugMessage << " TemporaryDataWorkspace: " << dimZName;
           g_log.warning(debugMessage.str());
           throw(std::invalid_argument(errorMessage.str()));
@@ -890,18 +779,16 @@ void MDNorm::validateBinningForTemporaryDataWorkspace(
 
     } else if ((key != "OutputBins") && (key != "OutputExtents")) {
       // make sure the names of non-directional dimensions are the same
-      const std::string nameData =
-          tempDataWS->getDimension(parametersIndex)->getName();
+      const std::string nameData = tempDataWS->getDimension(parametersIndex)->getName();
       if (value.find(nameData) != 0) {
         g_log.error() << "Dimension " << nameData
                       << " from the temporary workspace"
                          " is not one of the binning dimensions, "
                          " or dimensions are in the wrong order."
                       << std::endl;
-        throw(
-            std::invalid_argument("Beside the Q dimensions, "
-                                  "TemporaryDataWorkspace does not have the "
-                                  "same dimension names as OutputWorkspace."));
+        throw(std::invalid_argument("Beside the Q dimensions, "
+                                    "TemporaryDataWorkspace does not have the "
+                                    "same dimension names as OutputWorkspace."));
       }
     }
     parametersIndex++;
@@ -918,10 +805,8 @@ void MDNorm::validateBinningForTemporaryDataWorkspace(
  * All slicing algorithm properties are passed along
  * @return MDHistoWorkspace as a result of the binning
  */
-DataObjects::MDHistoWorkspace_sptr MDNorm::binInputWS(
-    const std::vector<Geometry::SymmetryOperation> &symmetryOps) {
-  Mantid::API::IMDHistoWorkspace_sptr tempDataWS =
-      this->getProperty("TemporaryDataWorkspace");
+DataObjects::MDHistoWorkspace_sptr MDNorm::binInputWS(const std::vector<Geometry::SymmetryOperation> &symmetryOps) {
+  Mantid::API::IMDHistoWorkspace_sptr tempDataWS = this->getProperty("TemporaryDataWorkspace");
   Mantid::API::Workspace_sptr outputWS;
   std::map<std::string, std::string> parameters = getBinParameters();
 
@@ -950,14 +835,12 @@ DataObjects::MDHistoWorkspace_sptr MDNorm::binInputWS(
 
     // bin the data
     double fraction = 1. / static_cast<double>(symmetryOps.size());
-    IAlgorithm_sptr binMD = createChildAlgorithm(
-        "BinMD", soIndex * 0.3 * fraction, (soIndex + 1) * 0.3 * fraction);
+    IAlgorithm_sptr binMD = createChildAlgorithm("BinMD", soIndex * 0.3 * fraction, (soIndex + 1) * 0.3 * fraction);
     binMD->setPropertyValue("AxisAligned", "0");
     binMD->setProperty("InputWorkspace", m_inputWS);
     binMD->setProperty("TemporaryDataWorkspace", tempDataWS);
     binMD->setPropertyValue("NormalizeBasisVectors", "0");
-    binMD->setPropertyValue("OutputWorkspace",
-                            getPropertyValue("OutputDataWorkspace"));
+    binMD->setPropertyValue("OutputWorkspace", getPropertyValue("OutputDataWorkspace"));
     // set binning properties
     size_t qindex = 0;
     for (auto const &p : parameters) {
@@ -1015,8 +898,7 @@ DataObjects::MDHistoWorkspace_sptr MDNorm::binInputWS(
         value = basisVector.str();
       }
 
-      g_log.debug() << "Binning parameter " << key << " value: " << value
-                    << "\n";
+      g_log.debug() << "Binning parameter " << key << " value: " << value << "\n";
       binMD->setPropertyValue(key, value);
       qindex++;
     }
@@ -1035,15 +917,12 @@ DataObjects::MDHistoWorkspace_sptr MDNorm::binInputWS(
   auto outputMDHWS = std::dynamic_pointer_cast<MDHistoWorkspace>(outputWS);
   // set MDUnits for Q dimensions
   if (m_isRLU) {
-    Mantid::Geometry::MDFrameArgument argument(
-        Mantid::Geometry::HKL::HKLName, Mantid::Kernel::Units::Symbol::RLU);
+    Mantid::Geometry::MDFrameArgument argument(Mantid::Geometry::HKL::HKLName, Mantid::Kernel::Units::Symbol::RLU);
     auto mdFrameFactory = Mantid::Geometry::makeMDFrameFactoryChain();
     Mantid::Geometry::MDFrame_uptr hklFrame = mdFrameFactory->create(argument);
     for (size_t i : qDimensionIndices) {
-      auto mdHistoDimension = std::const_pointer_cast<
-          Mantid::Geometry::MDHistoDimension>(
-          std::dynamic_pointer_cast<const Mantid::Geometry::MDHistoDimension>(
-              outputMDHWS->getDimension(i)));
+      auto mdHistoDimension = std::const_pointer_cast<Mantid::Geometry::MDHistoDimension>(
+          std::dynamic_pointer_cast<const Mantid::Geometry::MDHistoDimension>(outputMDHWS->getDimension(i)));
       mdHistoDimension->setMDFrame(*hklFrame);
     }
     // add W_matrix
@@ -1063,9 +942,7 @@ DataObjects::MDHistoWorkspace_sptr MDNorm::binInputWS(
  * @return A vector of values from other dimensions to be include in normalized
  * MD position calculation
  */
-std::vector<coord_t>
-MDNorm::getValuesFromOtherDimensions(bool &skipNormalization,
-                                     uint16_t expInfoIndex) const {
+std::vector<coord_t> MDNorm::getValuesFromOtherDimensions(bool &skipNormalization, uint16_t expInfoIndex) const {
   const auto &currentRun = m_inputWS->getExperimentInfo(expInfoIndex)->run();
 
   std::vector<coord_t> otherDimValues;
@@ -1088,8 +965,8 @@ MDNorm::getValuesFromOtherDimensions(bool &skipNormalization,
         skipNormalization = true;
       }
     } else {
-      coord_t value = static_cast<coord_t>(currentRun.getLogAsSingleValue(
-          dimension->getName(), Mantid::Kernel::Math::TimeAveragedMean));
+      coord_t value = static_cast<coord_t>(
+          currentRun.getLogAsSingleValue(dimension->getName(), Mantid::Kernel::Math::TimeAveragedMean));
       otherDimValues.emplace_back(value);
       if (value < inputDimMin || value > inputDimMax) {
         skipNormalization = true;
@@ -1144,16 +1021,13 @@ void MDNorm::cacheDimensionXValues() {
  * @param expInfoIndex - current experiment info index
  * @param soIndex - the index of symmetry operation (for progress purposes)
  */
-void MDNorm::calculateNormalization(const std::vector<coord_t> &otherValues,
-                                    const Geometry::SymmetryOperation &so,
+void MDNorm::calculateNormalization(const std::vector<coord_t> &otherValues, const Geometry::SymmetryOperation &so,
                                     uint16_t expInfoIndex, size_t soIndex) {
   const auto &currentExptInfo = *(m_inputWS->getExperimentInfo(expInfoIndex));
   std::vector<double> lowValues, highValues;
-  auto *lowValuesLog = dynamic_cast<VectorDoubleProperty *>(
-      currentExptInfo.getLog("MDNorm_low"));
+  auto *lowValuesLog = dynamic_cast<VectorDoubleProperty *>(currentExptInfo.getLog("MDNorm_low"));
   lowValues = (*lowValuesLog)();
-  auto *highValuesLog = dynamic_cast<VectorDoubleProperty *>(
-      currentExptInfo.getLog("MDNorm_high"));
+  auto *highValuesLog = dynamic_cast<VectorDoubleProperty *>(currentExptInfo.getLog("MDNorm_high"));
   highValues = (*highValuesLog)();
 
   DblMatrix R = currentExptInfo.run().getGoniometerMatrix();
@@ -1173,18 +1047,15 @@ void MDNorm::calculateNormalization(const std::vector<coord_t> &otherValues,
   // Mappings
   const auto ndets = static_cast<int64_t>(spectrumInfo.size());
   bool haveSA = false;
-  API::MatrixWorkspace_const_sptr solidAngleWS =
-      getProperty("SolidAngleWorkspace");
+  API::MatrixWorkspace_const_sptr solidAngleWS = getProperty("SolidAngleWorkspace");
   API::MatrixWorkspace_const_sptr integrFlux = getProperty("FluxWorkspace");
   if (solidAngleWS != nullptr) {
     haveSA = true;
   }
   const detid2index_map solidAngDetToIdx =
-      (haveSA) ? solidAngleWS->getDetectorIDToWorkspaceIndexMap()
-               : detid2index_map();
+      (haveSA) ? solidAngleWS->getDetectorIDToWorkspaceIndexMap() : detid2index_map();
   const detid2index_map fluxDetToIdx =
-      (m_diffraction) ? integrFlux->getDetectorIDToWorkspaceIndexMap()
-                      : detid2index_map();
+      (m_diffraction) ? integrFlux->getDetectorIDToWorkspaceIndexMap() : detid2index_map();
 
   const size_t vmdDims = (m_diffraction) ? 3 : 4;
   std::vector<std::atomic<signal_t>> signalArray(m_normWS->getNPoints());
@@ -1195,8 +1066,7 @@ void MDNorm::calculateNormalization(const std::vector<coord_t> &otherValues,
   double progStep = 0.7 / static_cast<double>(m_numExptInfos * m_numSymmOps);
   auto progIndex = static_cast<double>(soIndex + expInfoIndex * m_numSymmOps);
   auto prog =
-      std::make_unique<API::Progress>(this, 0.3 + progStep * progIndex,
-                                      0.3 + progStep * (1. + progIndex), ndets);
+      std::make_unique<API::Progress>(this, 0.3 + progStep * progIndex, 0.3 + progStep * (1. + progIndex), ndets);
   bool safe = true;
   if (m_diffraction) {
     safe = Kernel::threadSafe(*integrFlux);
@@ -1206,8 +1076,7 @@ PRAGMA_OMP(parallel for private(intersections, xValues, yValues, pos, posNew) if
 for (int64_t i = 0; i < ndets; i++) {
   PARALLEL_START_INTERUPT_REGION
 
-  if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i) ||
-      spectrumInfo.isMasked(i)) {
+  if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i) || spectrumInfo.isMasked(i)) {
     continue;
   }
 
@@ -1229,15 +1098,13 @@ for (int64_t i = 0; i < ndets; i++) {
   }
 
   // Intersections
-  this->calculateIntersections(intersections, theta, phi, Qtransform,
-                               lowValues[i], highValues[i]);
+  this->calculateIntersections(intersections, theta, phi, Qtransform, lowValues[i], highValues[i]);
   if (intersections.empty())
     continue;
   // Get solid angle for this contribution
   double solid = protonCharge;
   if (haveSA) {
-    solid =
-        solidAngleWS->y(solidAngDetToIdx.find(detID)->second)[0] * protonCharge;
+    solid = solidAngleWS->y(solidAngDetToIdx.find(detID)->second)[0] * protonCharge;
   }
   if (m_diffraction) {
     // -- calculate integrals for the intersection --
@@ -1271,18 +1138,14 @@ for (int64_t i = 0; i < ndets; i++) {
       delta = curIntSec[3] - prevIntSec[3];
       eps = 1e-7;
     } else {
-      delta = (curIntSec[3] * curIntSec[3] - prevIntSec[3] * prevIntSec[3]) /
-              energyToK;
+      delta = (curIntSec[3] * curIntSec[3] - prevIntSec[3] * prevIntSec[3]) / energyToK;
       eps = 1e-10;
     }
     if (delta < eps)
       continue; // Assume zero contribution if difference is small
     // Average between two intersections for final position
-    std::transform(curIntSec.data(), curIntSec.data() + vmdDims,
-                   prevIntSec.data(), pos.begin(),
-                   [](const double rhs, const double lhs) {
-                     return static_cast<coord_t>(0.5 * (rhs + lhs));
-                   });
+    std::transform(curIntSec.data(), curIntSec.data() + vmdDims, prevIntSec.data(), pos.begin(),
+                   [](const double rhs, const double lhs) { return static_cast<coord_t>(0.5 * (rhs + lhs)); });
     signal_t signal;
     if (m_diffraction) {
       // index of the current intersection
@@ -1300,8 +1163,7 @@ for (int64_t i = 0; i < ndets; i++) {
     size_t linIndex = m_normWS->getLinearIndexAtCoord(posNew.data());
     if (linIndex == size_t(-1))
       continue;
-    Mantid::Kernel::AtomicOp(signalArray[linIndex], signal,
-                             std::plus<signal_t>());
+    Mantid::Kernel::AtomicOp(signalArray[linIndex], signal, std::plus<signal_t>());
   }
 
   prog->report();
@@ -1310,13 +1172,10 @@ for (int64_t i = 0; i < ndets; i++) {
 }
 PARALLEL_CHECK_INTERUPT_REGION
 if (m_accumulate) {
-  std::transform(
-      signalArray.cbegin(), signalArray.cend(), m_normWS->getSignalArray(),
-      m_normWS->mutableSignalArray(),
-      [](const std::atomic<signal_t> &a, const signal_t &b) { return a + b; });
+  std::transform(signalArray.cbegin(), signalArray.cend(), m_normWS->getSignalArray(), m_normWS->mutableSignalArray(),
+                 [](const std::atomic<signal_t> &a, const signal_t &b) { return a + b; });
 } else {
-  std::copy(signalArray.cbegin(), signalArray.cend(),
-            m_normWS->mutableSignalArray());
+  std::copy(signalArray.cbegin(), signalArray.cend(), m_normWS->mutableSignalArray());
 }
 m_accumulate = true;
 }
@@ -1331,12 +1190,10 @@ m_accumulate = true;
  * @param lowvalue The lowest momentum or energy transfer for the trajectory
  * @param highvalue The highest momentum or energy transfer for the trajectory
  */
-void MDNorm::calculateIntersections(
-    std::vector<std::array<double, 4>> &intersections, const double theta,
-    const double phi, const Kernel::DblMatrix &transform, double lowvalue,
-    double highvalue) {
-  V3D qout(sin(theta) * cos(phi), sin(theta) * sin(phi), cos(theta)),
-      qin(0., 0., 1);
+void MDNorm::calculateIntersections(std::vector<std::array<double, 4>> &intersections, const double theta,
+                                    const double phi, const Kernel::DblMatrix &transform, double lowvalue,
+                                    double highvalue) {
+  V3D qout(sin(theta) * cos(phi), sin(theta) * sin(phi), cos(theta)), qin(0., 0., 1);
 
   qout = transform * qout;
   qin = transform * qin;
@@ -1357,12 +1214,9 @@ void MDNorm::calculateIntersections(
     kfmax = std::sqrt(energyToK * (m_Ei - lowvalue));
   }
 
-  double hStart = qin.X() * kimin - qout.X() * kfmin,
-         hEnd = qin.X() * kimax - qout.X() * kfmax;
-  double kStart = qin.Y() * kimin - qout.Y() * kfmin,
-         kEnd = qin.Y() * kimax - qout.Y() * kfmax;
-  double lStart = qin.Z() * kimin - qout.Z() * kfmin,
-         lEnd = qin.Z() * kimax - qout.Z() * kfmax;
+  double hStart = qin.X() * kimin - qout.X() * kfmin, hEnd = qin.X() * kimax - qout.X() * kfmax;
+  double kStart = qin.Y() * kimin - qout.Y() * kfmin, kEnd = qin.Y() * kimax - qout.Y() * kfmax;
+  double lStart = qin.Z() * kimin - qout.Z() * kfmin, lEnd = qin.Z() * kimax - qout.Z() * kfmax;
 
   double eps = 1e-10;
   auto hNBins = m_hX.size();
@@ -1385,8 +1239,7 @@ void MDNorm::calculateIntersections(
         // kfmax
         double ki = fk * (hi - hStart) + kStart;
         double li = fl * (hi - hStart) + lStart;
-        if ((ki >= m_kX[0]) && (ki <= m_kX[kNBins - 1]) && (li >= m_lX[0]) &&
-            (li <= m_lX[lNBins - 1])) {
+        if ((ki >= m_kX[0]) && (ki <= m_kX[kNBins - 1]) && (li >= m_lX[0]) && (li <= m_lX[lNBins - 1])) {
           double momi = fmom * (hi - hStart) + kfmin;
           intersections.push_back({{hi, ki, li, momi}});
         }
@@ -1406,8 +1259,7 @@ void MDNorm::calculateIntersections(
         // kfmax
         double hi = fh * (ki - kStart) + hStart;
         double li = fl * (ki - kStart) + lStart;
-        if ((hi >= m_hX[0]) && (hi <= m_hX[hNBins - 1]) && (li >= m_lX[0]) &&
-            (li <= m_lX[lNBins - 1])) {
+        if ((hi >= m_hX[0]) && (hi <= m_hX[hNBins - 1]) && (li >= m_lX[0]) && (li <= m_lX[lNBins - 1])) {
           double momi = fmom * (ki - kStart) + kfmin;
           intersections.push_back({{hi, ki, li, momi}});
         }
@@ -1426,8 +1278,7 @@ void MDNorm::calculateIntersections(
       if (((lStart - li) * (lEnd - li) < 0)) {
         double hi = fh * (li - lStart) + hStart;
         double ki = fk * (li - lStart) + kStart;
-        if ((hi >= m_hX[0]) && (hi <= m_hX[hNBins - 1]) && (ki >= m_kX[0]) &&
-            (ki <= m_kX[kNBins - 1])) {
+        if ((hi >= m_hX[0]) && (hi <= m_hX[hNBins - 1]) && (ki >= m_kX[0]) && (ki <= m_kX[kNBins - 1])) {
           double momi = fmom * (li - lStart) + kfmin;
           intersections.push_back({{hi, ki, li, momi}});
         }
@@ -1442,8 +1293,7 @@ void MDNorm::calculateIntersections(
         double h = qin.X() * kimin - qout.X() * kfi;
         double k = qin.Y() * kimin - qout.Y() * kfi;
         double l = qin.Z() * kimin - qout.Z() * kfi;
-        if ((h >= m_hX[0]) && (h <= m_hX[hNBins - 1]) && (k >= m_kX[0]) &&
-            (k <= m_kX[kNBins - 1]) && (l >= m_lX[0]) &&
+        if ((h >= m_hX[0]) && (h <= m_hX[hNBins - 1]) && (k >= m_kX[0]) && (k <= m_kX[kNBins - 1]) && (l >= m_lX[0]) &&
             (l <= m_lX[lNBins - 1])) {
           intersections.push_back({{h, k, l, kfi}});
         }
@@ -1452,14 +1302,12 @@ void MDNorm::calculateIntersections(
   }
 
   // endpoints
-  if ((hStart >= m_hX[0]) && (hStart <= m_hX[hNBins - 1]) &&
-      (kStart >= m_kX[0]) && (kStart <= m_kX[kNBins - 1]) &&
+  if ((hStart >= m_hX[0]) && (hStart <= m_hX[hNBins - 1]) && (kStart >= m_kX[0]) && (kStart <= m_kX[kNBins - 1]) &&
       (lStart >= m_lX[0]) && (lStart <= m_lX[lNBins - 1])) {
     intersections.push_back({{hStart, kStart, lStart, kfmin}});
   }
-  if ((hEnd >= m_hX[0]) && (hEnd <= m_hX[hNBins - 1]) && (kEnd >= m_kX[0]) &&
-      (kEnd <= m_kX[kNBins - 1]) && (lEnd >= m_lX[0]) &&
-      (lEnd <= m_lX[lNBins - 1])) {
+  if ((hEnd >= m_hX[0]) && (hEnd <= m_hX[hNBins - 1]) && (kEnd >= m_kX[0]) && (kEnd <= m_kX[kNBins - 1]) &&
+      (lEnd >= m_lX[0]) && (lEnd <= m_lX[lNBins - 1])) {
     intersections.push_back({{hEnd, kEnd, lEnd, kfmax}});
   }
 
@@ -1475,9 +1323,8 @@ void MDNorm::calculateIntersections(
  * @param sp :: A workspace index for a spectrum in integrFlux to interpolate.
  * @param yValues :: A vector to save the results.
  */
-void MDNorm::calcIntegralsForIntersections(
-    const std::vector<double> &xValues, const API::MatrixWorkspace &integrFlux,
-    size_t sp, std::vector<double> &yValues) {
+void MDNorm::calcIntegralsForIntersections(const std::vector<double> &xValues, const API::MatrixWorkspace &integrFlux,
+                                           size_t sp, std::vector<double> &yValues) {
   assert(xValues.size() == yValues.size());
 
   // the x-data from the workspace

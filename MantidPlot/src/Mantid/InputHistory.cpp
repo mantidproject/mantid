@@ -57,8 +57,7 @@ void InputHistoryImpl::save() {
     alg.next();
     const QList<PropertyData> &prop_hist = alg.value();
     settings.beginGroup(alg.key());
-    for (QList<PropertyData>::const_iterator prop = prop_hist.begin();
-         prop != prop_hist.end(); ++prop)
+    for (QList<PropertyData>::const_iterator prop = prop_hist.begin(); prop != prop_hist.end(); ++prop)
       settings.setValue(prop->name, prop->value);
     settings.endGroup();
   }
@@ -68,15 +67,12 @@ void InputHistoryImpl::save() {
      Upadates the non-default algorithm properties in the history.
      @param alg :: Pointer to the algorthm
 */
-void InputHistoryImpl::updateAlgorithm(
-    const Mantid::API::IAlgorithm_sptr &alg) {
+void InputHistoryImpl::updateAlgorithm(const Mantid::API::IAlgorithm_sptr &alg) {
   const std::vector<Property *> &props = alg->getProperties();
   QList<PropertyData> prop_hist_list;
-  for (std::vector<Property *>::const_iterator prop = props.begin();
-       prop != props.end(); ++prop)
+  for (std::vector<Property *>::const_iterator prop = props.begin(); prop != props.end(); ++prop)
     if (!(*prop)->isDefault()) {
-      PropertyData prop_hist(QString::fromStdString((*prop)->name()),
-                             QString::fromStdString((*prop)->value()));
+      PropertyData prop_hist(QString::fromStdString((*prop)->name()), QString::fromStdString((*prop)->value()));
       prop_hist_list.push_back(prop_hist);
     } else {
       PropertyData prop_hist(QString::fromStdString((*prop)->name()), "");
@@ -91,25 +87,20 @@ void InputHistoryImpl::printAll() {
     alg.next();
     logger.information() << alg.key().toStdString() << '\n';
     const QList<PropertyData> &prop_list = alg.value();
-    for (QList<PropertyData>::const_iterator prop = prop_list.begin();
-         prop != prop_list.end(); ++prop)
-      logger.information() << prop->name.toStdString() << ": "
-                           << prop->value.toStdString() << '\n';
+    for (QList<PropertyData>::const_iterator prop = prop_list.begin(); prop != prop_list.end(); ++prop)
+      logger.information() << prop->name.toStdString() << ": " << prop->value.toStdString() << '\n';
   }
 }
 
 /**
     @param algName :: Algorithm name
 */
-QMap<QString, QString>
-InputHistoryImpl::algorithmProperties(const QString &algName) {
-  QMap<QString, QList<PropertyData>>::const_iterator a =
-      m_history.find(algName);
+QMap<QString, QString> InputHistoryImpl::algorithmProperties(const QString &algName) {
+  QMap<QString, QList<PropertyData>>::const_iterator a = m_history.find(algName);
   if (a != m_history.end()) {
     QMap<QString, QString> m;
     const QList<PropertyData> &prop_list = a.value();
-    for (QList<PropertyData>::const_iterator prop = prop_list.begin();
-         prop != prop_list.end(); ++prop)
+    for (QList<PropertyData>::const_iterator prop = prop_list.begin(); prop != prop_list.end(); ++prop)
       m[prop->name] = prop->value;
     return m;
   }
@@ -123,8 +114,7 @@ InputHistoryImpl::algorithmProperties(const QString &algName) {
    default value was used.
 */
 
-QString InputHistoryImpl::algorithmProperty(const QString &algName,
-                                            const QString &propName) {
+QString InputHistoryImpl::algorithmProperty(const QString &algName, const QString &propName) {
   QMap<QString, QString> prop = algorithmProperties(algName);
   return prop[propName];
 }
@@ -152,8 +142,7 @@ QString InputHistoryImpl::getNameOnlyFromFilePath(const QString &filePath) {
   return s.mid(i + 1, j - i - 1);
 }
 
-void InputHistoryImpl::updateAlgorithmProperty(const QString &algName,
-                                               const QString &propName,
+void InputHistoryImpl::updateAlgorithmProperty(const QString &algName, const QString &propName,
                                                const QString &propValue) {
   QMap<QString, QList<PropertyData>>::iterator a = m_history.find(algName);
   if (a == m_history.end()) {

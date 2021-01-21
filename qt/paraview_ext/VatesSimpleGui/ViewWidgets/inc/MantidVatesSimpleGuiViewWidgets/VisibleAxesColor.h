@@ -19,8 +19,7 @@ public:
    * @param view The view which has its color set.
    */
   unsigned long setAndObserveAxesColor(pqView *view);
-  void setOrientationAxesLabelColor(pqView *view,
-                                    const std::array<double, 3> &color);
+  void setOrientationAxesLabelColor(pqView *view, const std::array<double, 3> &color);
   void setGridAxesColor(pqView *view, const std::array<double, 3> &color);
   void setScalarBarColor(pqView *view, const std::array<double, 3> &color);
   unsigned long observe(pqView *view);

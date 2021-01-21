@@ -23,8 +23,7 @@ inline void serialize(Archive & ar,
   split_free(ar, elist, file_version);
 } */
 template <class Archive>
-void save(Archive &ar, const Mantid::DataObjects::EventList &elist,
-          const unsigned int /*version*/) {
+void save(Archive &ar, const Mantid::DataObjects::EventList &elist, const unsigned int /*version*/) {
   int etype;
   switch (elist.getEventType()) {
   case Mantid::API::TOF: {
@@ -34,8 +33,7 @@ void save(Archive &ar, const Mantid::DataObjects::EventList &elist,
     int evsize = static_cast<int>(events.size());
     ar &evsize;
     std::vector<Mantid::DataObjects::TofEvent>::iterator itev;
-    std::vector<Mantid::DataObjects::TofEvent>::iterator itev_end =
-        events.end();
+    std::vector<Mantid::DataObjects::TofEvent>::iterator itev_end = events.end();
     for (itev = events.begin(); itev != itev_end; ++itev) {
       double tof = itev->tof();
       ar &tof;
@@ -47,13 +45,11 @@ void save(Archive &ar, const Mantid::DataObjects::EventList &elist,
   case Mantid::API::WEIGHTED: {
     etype = 2;
     ar &etype;
-    std::vector<Mantid::DataObjects::WeightedEvent> events =
-        elist.getWeightedEvents();
+    std::vector<Mantid::DataObjects::WeightedEvent> events = elist.getWeightedEvents();
     int evsize = static_cast<int>(events.size());
     ar &evsize;
     std::vector<Mantid::DataObjects::WeightedEvent>::iterator itev;
-    std::vector<Mantid::DataObjects::WeightedEvent>::iterator itev_end =
-        events.end();
+    std::vector<Mantid::DataObjects::WeightedEvent>::iterator itev_end = events.end();
     for (itev = events.begin(); itev != itev_end; ++itev) {
       double tof = itev->tof();
       ar &tof;
@@ -69,13 +65,11 @@ void save(Archive &ar, const Mantid::DataObjects::EventList &elist,
   case Mantid::API::WEIGHTED_NOTIME: {
     etype = 3;
     ar &etype;
-    std::vector<Mantid::DataObjects::WeightedEventNoTime> events =
-        elist.getWeightedEventsNoTime();
+    std::vector<Mantid::DataObjects::WeightedEventNoTime> events = elist.getWeightedEventsNoTime();
     int evsize = static_cast<int>(events.size());
     ar &evsize;
     std::vector<Mantid::DataObjects::WeightedEventNoTime>::iterator itev;
-    std::vector<Mantid::DataObjects::WeightedEventNoTime>::iterator itev_end =
-        events.end();
+    std::vector<Mantid::DataObjects::WeightedEventNoTime>::iterator itev_end = events.end();
     for (itev = events.begin(); itev != itev_end; ++itev) {
       double tof = itev->tof();
       ar &tof;
@@ -88,9 +82,7 @@ void save(Archive &ar, const Mantid::DataObjects::EventList &elist,
   }
   }
 }
-template <class Archive>
-void load(Archive &ar, Mantid::DataObjects::EventList &elist,
-          unsigned int /*version*/) {
+template <class Archive> void load(Archive &ar, Mantid::DataObjects::EventList &elist, unsigned int /*version*/) {
   int etype = 0;
   ar &etype;
   int evsize;
@@ -123,8 +115,7 @@ void load(Archive &ar, Mantid::DataObjects::EventList &elist,
       ar &weight;
       ar &errSq;
       pulseTime = Mantid::Kernel::DateAndTime(time);
-      mylist.push_back(
-          Mantid::DataObjects::WeightedEvent(tof, pulseTime, weight, errSq));
+      mylist.push_back(Mantid::DataObjects::WeightedEvent(tof, pulseTime, weight, errSq));
     }
     elist = Mantid::DataObjects::EventList(mylist);
     break;
@@ -138,8 +129,7 @@ void load(Archive &ar, Mantid::DataObjects::EventList &elist,
       ar &tof;
       ar &weight;
       ar &errSq;
-      mylist.push_back(
-          Mantid::DataObjects::WeightedEventNoTime(tof, weight, errSq));
+      mylist.push_back(Mantid::DataObjects::WeightedEventNoTime(tof, weight, errSq));
     }
     elist = Mantid::DataObjects::EventList(mylist);
     break;
@@ -148,9 +138,7 @@ void load(Archive &ar, Mantid::DataObjects::EventList &elist,
 }
 // load data required for construction and invoke constructor in place
 template <class Archive>
-inline void load_construct_data(Archive &ar,
-                                Mantid::DataObjects::EventList *elist,
-                                const unsigned int /*file_version*/
+inline void load_construct_data(Archive &ar, Mantid::DataObjects::EventList *elist, const unsigned int /*file_version*/
 ) {
   // default just uses the default constructor to initialize
   // previously allocated memory.

@@ -36,19 +36,16 @@
 #include <QShortcut>
 #include <QToolBar>
 
-CustomActionDialog::CustomActionDialog(QWidget *parent, const Qt::WFlags &fl)
-    : QDialog(parent, fl) {
+CustomActionDialog::CustomActionDialog(QWidget *parent, const Qt::WFlags &fl) : QDialog(parent, fl) {
   setWindowTitle(tr("MantidPlot") + " - " + tr("Add Custom Action"));
 
   itemsList = new QListWidget();
   itemsList->setSelectionMode(QAbstractItemView::SingleSelection);
-  itemsList->setSizePolicy(
-      QSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred));
+  itemsList->setSizePolicy(QSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred));
   itemsList->setSpacing(2);
 
   QGroupBox *gb1 = new QGroupBox();
-  gb1->setSizePolicy(
-      QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred));
+  gb1->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred));
 
   QGridLayout *gl1 = new QGridLayout(gb1);
 
@@ -135,8 +132,7 @@ CustomActionDialog::CustomActionDialog(QWidget *parent, const Qt::WFlags &fl)
   connect(iconBtn, SIGNAL(clicked()), this, SLOT(chooseIcon()));
   connect(fileBtn, SIGNAL(clicked()), this, SLOT(chooseFile()));
   connect(folderBtn, SIGNAL(clicked()), this, SLOT(chooseFolder()));
-  connect(itemsList, SIGNAL(currentRowChanged(int)), this,
-          SLOT(setCurrentAction(int)));
+  connect(itemsList, SIGNAL(currentRowChanged(int)), this, SLOT(setCurrentAction(int)));
 }
 
 void CustomActionDialog::init() {
@@ -187,8 +183,7 @@ void CustomActionDialog::updateDisplayList() {
 
   ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parent());
   if (!app) {
-    throw std::logic_error(
-        "Parent of CustomActionDialog is not ApplicationWindow as expected.");
+    throw std::logic_error("Parent of CustomActionDialog is not ApplicationWindow as expected.");
   }
 
   QList<QAction *> actionsList = app->customActionsList();
@@ -253,29 +248,25 @@ QAction *CustomActionDialog::addAction() {
 
 bool CustomActionDialog::validUserInput() {
   QString folder = folderBox->text();
-  while (folder.isEmpty() || !QFileInfo(folder).exists() ||
-         !QFileInfo(folder).isReadable()) {
+  while (folder.isEmpty() || !QFileInfo(folder).exists() || !QFileInfo(folder).isReadable()) {
     chooseFolder();
     folder = folderBox->text();
   }
 
   ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parent());
   if (!app) {
-    throw std::logic_error(
-        "Parent of CustomActionDialog is not ApplicationWindow as expected.");
+    throw std::logic_error("Parent of CustomActionDialog is not ApplicationWindow as expected.");
   }
   QList<QAction *> actions = app->customActionsList();
 
   if (textBox->text().isEmpty()) {
-    QMessageBox::critical(
-        app, tr("MantidPlot") + " - " + tr("Error"),
-        tr("Please provide a description for your custom action!"));
+    QMessageBox::critical(app, tr("MantidPlot") + " - " + tr("Error"),
+                          tr("Please provide a description for your custom action!"));
     textBox->setFocus();
     return false;
   } else if (textBox->text().contains(".")) {
-    QMessageBox::critical(
-        app, tr("MantidPlot") + " - " + tr("Error"),
-        tr("Dot characters are not allowed in the description text!"));
+    QMessageBox::critical(app, tr("MantidPlot") + " - " + tr("Error"),
+                          tr("Dot characters are not allowed in the description text!"));
     textBox->setFocus();
     textBox->setText(textBox->text().remove(".").simplified());
     return false;
@@ -306,8 +297,7 @@ bool CustomActionDialog::validUserInput() {
 
   QString iconPath = iconBox->text();
   QFileInfo iconInfo(iconPath);
-  if (!iconPath.isEmpty() &&
-      (!iconInfo.exists() || !iconInfo.isFile() || !iconInfo.isReadable())) {
+  if (!iconPath.isEmpty() && (!iconInfo.exists() || !iconInfo.isFile() || !iconInfo.isReadable())) {
     iconPath = QString();
     QMessageBox::critical(app, tr("MantidPlot") + " - " + tr("Error"),
                           tr("The image file you have specified doesn't exist "
@@ -333,11 +323,10 @@ bool CustomActionDialog::validUserInput() {
   }
 
   if (shortcuts.contains(shortcutBox->text().remove(QRegExp("\\s")))) {
-    QMessageBox::critical(
-        app, tr("MantidPlot") + " - " + tr("Error"),
-        tr("Please provide a different key sequence! The following shortcut "
-           "key sequences are already assigned:") +
-            "\n\n" + s);
+    QMessageBox::critical(app, tr("MantidPlot") + " - " + tr("Error"),
+                          tr("Please provide a different key sequence! The following shortcut "
+                             "key sequences are already assigned:") +
+                              "\n\n" + s);
     shortcutBox->setFocus();
     return false;
   }
@@ -370,10 +359,8 @@ void CustomActionDialog::customizeAction(QAction *action) {
 
 void CustomActionDialog::removeAction() {
   QString s = tr("Are you sure you want to remove this action?");
-  if (QMessageBox::Yes !=
-      QMessageBox::question(this,
-                            tr("MantidPlot") + " - " + tr("Remove Action"), s,
-                            QMessageBox::Yes, QMessageBox::Cancel))
+  if (QMessageBox::Yes != QMessageBox::question(this, tr("MantidPlot") + " - " + tr("Remove Action"), s,
+                                                QMessageBox::Yes, QMessageBox::Cancel))
     return;
 
   int row = itemsList->currentRow();
@@ -383,8 +370,7 @@ void CustomActionDialog::removeAction() {
 
   ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parent());
   if (!app) {
-    throw std::logic_error(
-        "Parent of CustomActionDialog is not ApplicationWindow as expected.");
+    throw std::logic_error("Parent of CustomActionDialog is not ApplicationWindow as expected.");
   }
   QFile f(app->customActionsDirPath + "/" + action->text() + ".qca");
   f.remove();
@@ -405,14 +391,12 @@ void CustomActionDialog::saveCurrentAction() {
   QList<QWidget *> list = action->associatedWidgets();
   QWidget *w = list[0];
   QString parentName = w->objectName();
-  if ((toolBarBtn->isChecked() &&
-       w->objectName() != toolBarBox->currentText()) ||
+  if ((toolBarBtn->isChecked() && w->objectName() != toolBarBox->currentText()) ||
       (menuBtn->isChecked() && w->objectName() != menuBox->currentText())) {
     // relocate action: create a new one and delete the old
     ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parent());
     if (!app) {
-      throw std::logic_error(
-          "Parent of CustomActionDialog is not ApplicationWindow as expected.");
+      throw std::logic_error("Parent of CustomActionDialog is not ApplicationWindow as expected.");
     }
     QAction *newAction = new QAction(app);
     customizeAction(newAction);
@@ -446,18 +430,16 @@ void CustomActionDialog::saveAction(QAction *action) {
 
   ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parent());
   if (!app) {
-    throw std::logic_error(
-        "Parent of CustomActionDialog is not ApplicationWindow as expected.");
+    throw std::logic_error("Parent of CustomActionDialog is not ApplicationWindow as expected.");
   }
   QString fileName = app->customActionsDirPath + "/" + action->text() + ".qca";
   QFile f(fileName);
   if (!f.open(QIODevice::WriteOnly)) {
     QApplication::restoreOverrideCursor();
-    QMessageBox::critical(
-        app, tr("MantidPlot") + " - " + tr("File Save Error"),
-        tr("Could not write to file: <br><h4> %1 </h4><p>Please verify that "
-           "you have the right to write to this location!")
-            .arg(fileName));
+    QMessageBox::critical(app, tr("MantidPlot") + " - " + tr("File Save Error"),
+                          tr("Could not write to file: <br><h4> %1 </h4><p>Please verify that "
+                             "you have the right to write to this location!")
+                              .arg(fileName));
     return;
   }
 
@@ -489,15 +471,13 @@ void CustomActionDialog::chooseIcon() {
   }
   filter += ");;" + aux2;
 
-  QString fn = QFileDialog::getOpenFileName(
-      this, tr("MantidPlot - Load icon from file"), iconBox->text(), filter);
+  QString fn = QFileDialog::getOpenFileName(this, tr("MantidPlot - Load icon from file"), iconBox->text(), filter);
   if (!fn.isEmpty())
     iconBox->setText(fn);
 }
 
 void CustomActionDialog::chooseFile() {
-  QString fileName = QFileDialog::getOpenFileName(
-      this, tr("Choose script file"), fileBox->text());
+  QString fileName = QFileDialog::getOpenFileName(this, tr("Choose script file"), fileBox->text());
   if (!fileName.isEmpty())
     fileBox->setText(fileName);
 }
@@ -505,8 +485,8 @@ void CustomActionDialog::chooseFile() {
 void CustomActionDialog::chooseFolder() {
   ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parentWidget());
 
-  QString dir = QFileDialog::getExistingDirectory(
-      this, tr("Choose the custom actions folder"), app->customActionsDirPath);
+  QString dir =
+      QFileDialog::getExistingDirectory(this, tr("Choose the custom actions folder"), app->customActionsDirPath);
   if (!dir.isEmpty() && QFileInfo(dir).isReadable()) {
     QList<QAction *> actionsList = app->customActionsList();
     foreach (QAction *a, actionsList)
@@ -522,8 +502,7 @@ void CustomActionDialog::chooseFolder() {
 QAction *CustomActionDialog::actionAt(int row) {
   ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parent());
   if (!app)
-    throw std::runtime_error(
-        "The parent of this dialog was not the Application Window");
+    throw std::runtime_error("The parent of this dialog was not the Application Window");
   QList<QAction *> actions = app->customActionsList();
   if (actions.isEmpty() || row < 0 || row >= actions.count())
     return nullptr;
@@ -550,15 +529,13 @@ void CustomActionDialog::setCurrentAction(int row) {
     return;
 
   if (qstrcmp("QToolBar", w->metaObject()->className()) == 0) {
-    int index =
-        toolBarBox->findText((dynamic_cast<QToolBar *>(w))->windowTitle());
+    int index = toolBarBox->findText((dynamic_cast<QToolBar *>(w))->windowTitle());
     if (index >= 0) {
       toolBarBox->setCurrentIndex(index);
       toolBarBtn->setChecked(true);
     }
   } else {
-    int index =
-        menuBox->findText((dynamic_cast<QMenu *>(w))->title().remove("&"));
+    int index = menuBox->findText((dynamic_cast<QMenu *>(w))->title().remove("&"));
     if (index >= 0) {
       menuBox->setCurrentIndex(index);
       menuBtn->setChecked(true);
@@ -573,13 +550,10 @@ void CustomActionDialog::setCurrentAction(int row) {
  *****************************************************************************/
 
 CustomActionHandler::CustomActionHandler(QAction *action)
-    : metFitTag(true), filePath(QString()), d_widget_name(QString()),
-      d_action(action) {}
+    : metFitTag(true), filePath(QString()), d_widget_name(QString()), d_action(action) {}
 
-bool CustomActionHandler::startElement(const QString & /* namespaceURI */,
-                                       const QString & /* localName */,
-                                       const QString &qName,
-                                       const QXmlAttributes &attributes) {
+bool CustomActionHandler::startElement(const QString & /* namespaceURI */, const QString & /* localName */,
+                                       const QString &qName, const QXmlAttributes &attributes) {
   if (!metFitTag && qName != "action") {
     errorStr = QObject::tr("The file is not a MantidPlot custom action file.");
     return false;
@@ -588,8 +562,7 @@ bool CustomActionHandler::startElement(const QString & /* namespaceURI */,
   if (qName == "action") {
     QString version = attributes.value("version");
     if (!version.isEmpty() && version != "1.0") {
-      errorStr = QObject::tr(
-          "The file is not an MantidPlot custom action version 1.0 file.");
+      errorStr = QObject::tr("The file is not an MantidPlot custom action version 1.0 file.");
       return false;
     }
     metFitTag = true;
@@ -599,8 +572,7 @@ bool CustomActionHandler::startElement(const QString & /* namespaceURI */,
   return true;
 }
 
-bool CustomActionHandler::endElement(const QString & /* namespaceURI */,
-                                     const QString & /* localName */,
+bool CustomActionHandler::endElement(const QString & /* namespaceURI */, const QString & /* localName */,
                                      const QString &qName) {
   if (qName == "text")
     d_action->setText(currentText);

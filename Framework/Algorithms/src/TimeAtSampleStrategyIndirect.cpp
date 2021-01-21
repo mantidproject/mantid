@@ -29,26 +29,20 @@ namespace Algorithms {
 
 /** Constructor
  */
-TimeAtSampleStrategyIndirect::TimeAtSampleStrategyIndirect(
-    MatrixWorkspace_const_sptr ws)
+TimeAtSampleStrategyIndirect::TimeAtSampleStrategyIndirect(MatrixWorkspace_const_sptr ws)
     : m_ws(std::move(ws)), m_spectrumInfo(m_ws->spectrumInfo()) {}
 
-Correction
-TimeAtSampleStrategyIndirect::calculate(const size_t &workspace_index) const {
+Correction TimeAtSampleStrategyIndirect::calculate(const size_t &workspace_index) const {
 
   // A constant among all spectra
-  constexpr double TWO_MEV_OVER_MASS =
-      2. * PhysicalConstants::meV / PhysicalConstants::NeutronMass;
+  constexpr double TWO_MEV_OVER_MASS = 2. * PhysicalConstants::meV / PhysicalConstants::NeutronMass;
 
   const IDetector *det = &m_spectrumInfo.detector(workspace_index);
   if (m_spectrumInfo.isMonitor(workspace_index)) {
     // use the same math as TimeAtSampleStrategyElastic
     const double L1s = m_spectrumInfo.l1();
-    const auto &beamDir =
-        m_ws->getInstrument()->getReferenceFrame()->vecPointingAlongBeam();
-    const double L1m =
-        beamDir.scalar_prod(m_spectrumInfo.sourcePosition() -
-                            m_spectrumInfo.position(workspace_index));
+    const auto &beamDir = m_ws->getInstrument()->getReferenceFrame()->vecPointingAlongBeam();
+    const double L1m = beamDir.scalar_prod(m_spectrumInfo.sourcePosition() - m_spectrumInfo.position(workspace_index));
     const double scale = std::abs(L1s / L1m);
     return Correction(0., scale);
   }
@@ -65,14 +59,14 @@ TimeAtSampleStrategyIndirect::calculate(const size_t &workspace_index) const {
   } catch (std::runtime_error &) {
     // Throws if a DetectorGroup, use single provided value
     std::stringstream errmsg;
-    errmsg << "Inelastic instrument detector " << det->getID()
-           << " of spectrum " << workspace_index << " does not have EFixed ";
+    errmsg << "Inelastic instrument detector " << det->getID() << " of spectrum " << workspace_index
+           << " does not have EFixed ";
     throw std::runtime_error(errmsg.str());
   }
   if (efix <= 0.) {
     std::stringstream errmsg;
-    errmsg << "Inelastic instrument detector " << det->getID()
-           << " of spectrum " << workspace_index << " does not have EFixed ";
+    errmsg << "Inelastic instrument detector " << det->getID() << " of spectrum " << workspace_index
+           << " does not have EFixed ";
     throw std::runtime_error(errmsg.str());
   }
 

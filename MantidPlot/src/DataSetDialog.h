@@ -44,15 +44,12 @@ class DataSetDialog : public QDialog {
   Q_OBJECT
 
 public:
-  DataSetDialog(const QString &text, ApplicationWindow *app, Graph *g = nullptr,
-                const Qt::WFlags &fl = nullptr);
+  DataSetDialog(const QString &text, ApplicationWindow *app, Graph *g = nullptr, const Qt::WFlags &fl = nullptr);
 
 public slots:
   void accept() override;
   void setCurveNames(const QStringList &names);
-  void setOperationType(ApplicationWindow::Analysis operation) {
-    d_operation = operation;
-  }
+  void setOperationType(ApplicationWindow::Analysis operation) { d_operation = operation; }
   void setCurentDataSet(const QString &s);
 
 signals:

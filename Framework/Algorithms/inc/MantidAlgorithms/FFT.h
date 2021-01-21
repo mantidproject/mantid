@@ -35,15 +35,12 @@ public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "FFT"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Performs complex Fast Fourier Transform";
-  }
+  const std::string summary() const override { return "Performs complex Fast Fourier Transform"; }
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
   const std::vector<std::string> seeAlso() const override {
-    return {"ExtractFFTSpectrum", "FFTDerivative", "MaxEnt", "RealFFT",
-            "SassenaFFT",         "FFTSmooth"};
+    return {"ExtractFFTSpectrum", "FFTDerivative", "MaxEnt", "RealFFT", "SassenaFFT", "FFTSmooth"};
   }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Arithmetic\\FFT"; }
@@ -60,15 +57,12 @@ private:
   void createUnitsLabels(double &df);
 
   // Perform forward transformation
-  void transformForward(std::vector<double> &data, const int xSize,
-                        const int ySize, const int dys,
-                        const bool addPositiveOnly, const bool centerShift,
-                        const bool isComplex, const int iReal, const int iImag,
-                        const double df, const double dx);
+  void transformForward(std::vector<double> &data, const int xSize, const int ySize, const int dys,
+                        const bool addPositiveOnly, const bool centerShift, const bool isComplex, const int iReal,
+                        const int iImag, const double df, const double dx);
   // Perform backward transformation
-  void transformBackward(std::vector<double> &data, const int xSize,
-                         const int ySize, const int dys, const bool centerShift,
-                         const bool isComplex, const int iReal, const int iImag,
+  void transformBackward(std::vector<double> &data, const int xSize, const int ySize, const int dys,
+                         const bool centerShift, const bool isComplex, const int iReal, const int iImag,
                          const double df);
 
   void setupTAxis(const int nOut, const bool addPositiveOnly);

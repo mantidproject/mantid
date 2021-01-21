@@ -19,12 +19,8 @@ class RotateInstrumentComponentTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static RotateInstrumentComponentTest *createSuite() {
-    return new RotateInstrumentComponentTest();
-  }
-  static void destroySuite(RotateInstrumentComponentTest *suite) {
-    delete suite;
-  }
+  static RotateInstrumentComponentTest *createSuite() { return new RotateInstrumentComponentTest(); }
+  static void destroySuite(RotateInstrumentComponentTest *suite) { delete suite; }
 
   void test_Init() {
     RotateInstrumentComponent alg;
@@ -36,8 +32,7 @@ public:
     using namespace Mantid::API;
 
     MatrixWorkspace_sptr testWS =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
-            1, 1, false); // no monitors
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1, 1, false); // no monitors
 
     double angle = 45.0;
     Mantid::Kernel::V3D axis(0., 1., 1.);
@@ -58,8 +53,7 @@ public:
     using namespace Mantid::API;
 
     MatrixWorkspace_sptr testWS =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
-            1, 1, false); // no monitors
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1, 1, false); // no monitors
 
     double angle = 45.0;
     Mantid::Kernel::V3D axis(0., 0., 1.);
@@ -84,10 +78,9 @@ public:
   }
 
 private:
-  Mantid::API::MatrixWorkspace_sptr
-  runRotateInstrument(const Mantid::API::MatrixWorkspace_sptr &testWS,
-                      const std::string &compName, const double angle,
-                      const Mantid::Kernel::V3D &axis, const bool relative) {
+  Mantid::API::MatrixWorkspace_sptr runRotateInstrument(const Mantid::API::MatrixWorkspace_sptr &testWS,
+                                                        const std::string &compName, const double angle,
+                                                        const Mantid::Kernel::V3D &axis, const bool relative) {
     RotateInstrumentComponent alg;
     alg.initialize();
     alg.setChild(true);

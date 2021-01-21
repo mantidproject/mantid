@@ -25,11 +25,9 @@ public:
 
   const std::string category() const override { return "Background"; }
 
-  void function1D(double *out, const double *xValues,
-                  const size_t nData) const override;
+  void function1D(double *out, const double *xValues, const size_t nData) const override;
 
-  void functionDeriv1D(API::Jacobian *out, const double *xValues,
-                       const size_t nData) override;
+  void functionDeriv1D(API::Jacobian *out, const double *xValues, const size_t nData) override;
 
   /// Returns the number of attributes associated with the function (polynomial
   /// order n)

@@ -41,24 +41,18 @@ const std::string ConvertDiffCal::name() const { return "ConvertDiffCal"; }
 int ConvertDiffCal::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string ConvertDiffCal::category() const {
-  return "Diffraction\\Utility";
-}
+const std::string ConvertDiffCal::category() const { return "Diffraction\\Utility"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-const std::string ConvertDiffCal::summary() const {
-  return "Convert diffraction calibration from old to new style";
-}
+const std::string ConvertDiffCal::summary() const { return "Convert diffraction calibration from old to new style"; }
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void ConvertDiffCal::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<OffsetsWorkspace>>(
-                      "OffsetsWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<OffsetsWorkspace>>("OffsetsWorkspace", "", Direction::Input),
                   "OffsetsWorkspace containing the calibration offsets.");
-  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }
 
@@ -69,13 +63,11 @@ void ConvertDiffCal::init() {
  * @param index
  * @return The proper detector id.
  */
-detid_t getDetID(const OffsetsWorkspace_const_sptr &offsetsWS,
-                 const size_t index) {
+detid_t getDetID(const OffsetsWorkspace_const_sptr &offsetsWS, const size_t index) {
   auto detIDs = offsetsWS->getSpectrum(index).getDetectorIDs();
   if (detIDs.size() != 1) {
     std::stringstream msg;
-    msg << "Encountered spectrum with multiple detector ids (size="
-        << detIDs.size() << ")";
+    msg << "Encountered spectrum with multiple detector ids (size=" << detIDs.size() << ")";
     throw std::logic_error(msg.str());
   }
   return (*(detIDs.begin()));
@@ -87,13 +79,11 @@ detid_t getDetID(const OffsetsWorkspace_const_sptr &offsetsWS,
  * @param detid
  * @return The offset value or zero if not specified.
  */
-double getOffset(const OffsetsWorkspace_const_sptr &offsetsWS,
-                 const detid_t detid) {
+double getOffset(const OffsetsWorkspace_const_sptr &offsetsWS, const detid_t detid) {
   const double offset = offsetsWS->getValue(detid, 0.0);
   if (offset <= -1.) { // non-physical
     std::stringstream msg;
-    msg << "Encountered offset of " << offset
-        << " which converts data to negative d-spacing for detectorID " << detid
+    msg << "Encountered offset of " << offset << " which converts data to negative d-spacing for detectorID " << detid
         << "\n";
     throw std::logic_error(msg.str());
   }
@@ -106,8 +96,7 @@ double getOffset(const OffsetsWorkspace_const_sptr &offsetsWS,
  * @param spectrumInfo
  * @return The offset adjusted value of DIFC
  */
-double calculateDIFC(const OffsetsWorkspace_const_sptr &offsetsWS,
-                     const size_t index,
+double calculateDIFC(const OffsetsWorkspace_const_sptr &offsetsWS, const size_t index,
                      const Mantid::API::SpectrumInfo &spectrumInfo) {
   const detid_t detid = getDetID(offsetsWS, index);
   const double offset = getOffset(offsetsWS, detid);
@@ -120,8 +109,8 @@ double calculateDIFC(const OffsetsWorkspace_const_sptr &offsetsWS,
   }
   // the factor returned is what is needed to convert TOF->d-spacing
   // the table is supposed to be filled with DIFC which goes the other way
-  const double factor = Mantid::Geometry::Conversion::tofToDSpacingFactor(
-      spectrumInfo.l1(), spectrumInfo.l2(index), twotheta, offset);
+  const double factor =
+      Mantid::Geometry::Conversion::tofToDSpacingFactor(spectrumInfo.l1(), spectrumInfo.l2(index), twotheta, offset);
   return 1. / factor;
 }
 

@@ -41,8 +41,7 @@ using std::placeholders::_1;
 
 bool is1DCompositeFunction(const IFunction_sptr &function) {
   bool is1D = true;
-  const auto compositeFunction =
-      std::dynamic_pointer_cast<CompositeFunction>(function);
+  const auto compositeFunction = std::dynamic_pointer_cast<CompositeFunction>(function);
   if (compositeFunction) {
     for (size_t index = 0; index < compositeFunction->nFunctions(); index++) {
       if (!is1DCompositeFunction(compositeFunction->getFunction(index))) {
@@ -51,15 +50,14 @@ bool is1DCompositeFunction(const IFunction_sptr &function) {
       }
     }
   } else {
-    const IFunction1D_sptr fun =
-        std::dynamic_pointer_cast<IFunction1D>(function);
+    const IFunction1D_sptr fun = std::dynamic_pointer_cast<IFunction1D>(function);
     is1D = fun ? true : false;
   }
   return is1D;
 }
 
-void evaluateFunctionOnRange(const IFunction_sptr &function, size_t domainSize,
-                             const double *range, std::vector<double> &output) {
+void evaluateFunctionOnRange(const IFunction_sptr &function, size_t domainSize, const double *range,
+                             std::vector<double> &output) {
   const IFunction1D_sptr fun = std::dynamic_pointer_cast<IFunction1D>(function);
   if (!fun) {
     FunctionDomain1DView ds(range, domainSize);
@@ -81,13 +79,11 @@ Convolution::Convolution() {
 
 void Convolution::init() {}
 
-void Convolution::functionDeriv(const FunctionDomain &domain,
-                                Jacobian &jacobian) {
+void Convolution::functionDeriv(const FunctionDomain &domain, Jacobian &jacobian) {
   calNumericalDeriv(domain, jacobian);
 }
 
-void Convolution::setAttribute(const std::string &attName,
-                               const IFunction::Attribute &att) {
+void Convolution::setAttribute(const std::string &attName, const IFunction::Attribute &att) {
   // if the resolution is there fix/unfix its parameters according to the
   // attribute value
   if (attName == "FixResolution" && nFunctions() > 0) {
@@ -110,8 +106,7 @@ namespace {
 // A struct incapsulating workspaces for real fft
 struct RealFFTWorkspace {
   explicit RealFFTWorkspace(size_t nData)
-      : workspace(gsl_fft_real_workspace_alloc(nData)),
-        wavetable(gsl_fft_real_wavetable_alloc(nData)) {}
+      : workspace(gsl_fft_real_workspace_alloc(nData)), wavetable(gsl_fft_real_wavetable_alloc(nData)) {}
   ~RealFFTWorkspace() {
     gsl_fft_real_wavetable_free(wavetable);
     gsl_fft_real_workspace_free(workspace);
@@ -129,8 +124,7 @@ struct RealFFTWorkspace {
  * @param values :: buffer to store the values returned by the function after
  * acting on the domain.
  */
-void Convolution::function(const FunctionDomain &domain,
-                           FunctionValues &values) const {
+void Convolution::function(const FunctionDomain &domain, FunctionValues &values) const {
   innerFunctionsAre1D();
 
   if (nFunctions() == 0) {
@@ -140,16 +134,14 @@ void Convolution::function(const FunctionDomain &domain,
   const auto &d1d = dynamic_cast<const FunctionDomain1D &>(domain);
   const size_t nData = domain.size();
   const double *xValues = d1d.getPointerAt(0);
-  double dx =
-      (xValues[nData - 1] - xValues[0]) / static_cast<double>((nData - 1));
+  double dx = (xValues[nData - 1] - xValues[0]) / static_cast<double>((nData - 1));
   // positive x-values:
   auto ixP = static_cast<size_t>(xValues[nData - 1] / dx);
   auto ixN = nData - ixP - 1; // negative x-values (ixP+ixN=nData-1)
 
   // determine whether to use FFT or Direct calculations
   int assymmetry = abs(static_cast<int>(ixP - ixN));
-  if (xValues[0] * xValues[nData - 1] < 0 &&
-      assymmetry > tolerance * static_cast<double>(ixP + ixN)) {
+  if (xValues[0] * xValues[nData - 1] < 0 && assymmetry > tolerance * static_cast<double>(ixP + ixN)) {
     functionDirectMode(domain, values);
   } else {
     functionFFTMode(domain, values);
@@ -174,8 +166,7 @@ void Convolution::innerFunctionsAre1D() const {
  * @param values :: buffer to store the values returned by the function after
  * acting on the domain.
  */
-void Convolution::functionFFTMode(const FunctionDomain &domain,
-                                  FunctionValues &values) const {
+void Convolution::functionFFTMode(const FunctionDomain &domain, FunctionValues &values) const {
   const auto &d1d = dynamic_cast<const FunctionDomain1D &>(domain);
   size_t nData = domain.size();
   const double *xValues = d1d.getPointerAt(0);
@@ -188,8 +179,7 @@ void Convolution::functionFFTMode(const FunctionDomain &domain,
     // the resolution must be defined on interval -L < xr < L, L ==
     // (xValues[nData-1] - xValues[0]) / 2
     std::vector<double> xr(nData);
-    double dx =
-        (xValues[nData - 1] - xValues[0]) / static_cast<double>((nData - 1));
+    double dx = (xValues[nData - 1] - xValues[0]) / static_cast<double>((nData - 1));
     // make sure that xr[nData/2] == 0.0
     xr[n2] = 0.0;
     for (int i = 1; i < n2; i++) {
@@ -218,10 +208,8 @@ void Convolution::functionFFTMode(const FunctionDomain &domain,
         m_resolution[n2 + i] = tmp;
       }
     }
-    gsl_fft_real_transform(m_resolution.data(), 1, nData, workspace.wavetable,
-                           workspace.workspace);
-    std::transform(m_resolution.begin(), m_resolution.end(),
-                   m_resolution.begin(),
+    gsl_fft_real_transform(m_resolution.data(), 1, nData, workspace.wavetable, workspace.workspace);
+    std::transform(m_resolution.begin(), m_resolution.end(), m_resolution.begin(),
                    std::bind(std::multiplies<double>(), _1, dx));
   }
 
@@ -230,22 +218,19 @@ void Convolution::functionFFTMode(const FunctionDomain &domain,
   if (nFunctions() == 1) {
     // return the resolution transform for testing
     double dx = 1.; // nData > 1? xValues[1] - xValues[0]: 1.;
-    std::transform(m_resolution.begin(), m_resolution.end(),
-                   values.getPointerToCalculated(0),
+    std::transform(m_resolution.begin(), m_resolution.end(), values.getPointerToCalculated(0),
                    std::bind(std::multiplies<double>(), _1, dx));
     return;
   }
 
-  IFunction1D_sptr resolution =
-      std::dynamic_pointer_cast<IFunction1D>(getFunction(0));
+  IFunction1D_sptr resolution = std::dynamic_pointer_cast<IFunction1D>(getFunction(0));
 
   // check for delta functions
   std::vector<std::shared_ptr<DeltaFunction>> dltFuns;
   double dltF = 0;
   bool deltaFunctionsOnly = false;
   bool deltaShifted = false;
-  CompositeFunction_sptr cf =
-      std::dynamic_pointer_cast<CompositeFunction>(getFunction(1));
+  CompositeFunction_sptr cf = std::dynamic_pointer_cast<CompositeFunction>(getFunction(1));
   if (cf) {
     dltFuns.reserve(cf->nFunctions());
     for (size_t i = 0; i < cf->nFunctions(); ++i) {
@@ -262,8 +247,7 @@ void Convolution::functionFFTMode(const FunctionDomain &domain,
       // all delta functions - return scaled resolution
       deltaFunctionsOnly = true;
     }
-  } else if (auto df =
-                 std::dynamic_pointer_cast<DeltaFunction>(getFunction(1))) {
+  } else if (auto df = std::dynamic_pointer_cast<DeltaFunction>(getFunction(1))) {
     // single delta function - return scaled resolution
     deltaFunctionsOnly = true;
     dltFuns.emplace_back(df);
@@ -279,14 +263,12 @@ void Convolution::functionFFTMode(const FunctionDomain &domain,
   if (!deltaFunctionsOnly) {
     // Transform the model function
     getFunction(1)->function(domain, values);
-    gsl_fft_real_transform(out, 1, nData, workspace.wavetable,
-                           workspace.workspace);
+    gsl_fft_real_transform(out, 1, nData, workspace.wavetable, workspace.workspace);
 
     // Fourier transform is integration - multiply by the step in the
     // integration variable
     double dx = nData > 1 ? xValues[1] - xValues[0] : 1.;
-    std::transform(out, out + nData, out,
-                   std::bind(std::multiplies<double>(), _1, dx));
+    std::transform(out, out + nData, out, std::bind(std::multiplies<double>(), _1, dx));
 
     // now out contains fourier transform of the model function
 
@@ -305,17 +287,14 @@ void Convolution::functionFFTMode(const FunctionDomain &domain,
     }
 
     // Inverse fourier transform of fun
-    gsl_fft_halfcomplex_wavetable *wavetable_r =
-        gsl_fft_halfcomplex_wavetable_alloc(nData);
-    gsl_fft_halfcomplex_inverse(out, 1, nData, wavetable_r,
-                                workspace.workspace);
+    gsl_fft_halfcomplex_wavetable *wavetable_r = gsl_fft_halfcomplex_wavetable_alloc(nData);
+    gsl_fft_halfcomplex_inverse(out, 1, nData, wavetable_r, workspace.workspace);
     gsl_fft_halfcomplex_wavetable_free(wavetable_r);
 
     // Inverse fourier transform is integration - multiply by the step in the
     // integration variable
     dx = nData > 1 ? 1. / (xValues[1] - xValues[0]) : 1.;
-    std::transform(out, out + nData, out,
-                   std::bind(std::multiplies<double>(), _1, dx));
+    std::transform(out, out + nData, out, std::bind(std::multiplies<double>(), _1, dx));
   } else {
     values.zeroCalculated();
   }
@@ -325,20 +304,17 @@ void Convolution::functionFFTMode(const FunctionDomain &domain,
     // resolution
     std::vector<double> tmp(nData);
     evaluateFunctionOnRange(getFunction(0), nData, xValues, tmp);
-    std::transform(tmp.begin(), tmp.end(), tmp.begin(),
-                   std::bind(std::multiplies<double>(), _1, dltF));
+    std::transform(tmp.begin(), tmp.end(), tmp.begin(), std::bind(std::multiplies<double>(), _1, dltF));
     std::transform(out, out + nData, tmp.data(), out, std::plus<double>());
   } else if (!dltFuns.empty()) {
     std::vector<double> x(nData);
     for (const auto &df : dltFuns) {
       double shift = -df->getParameter("Centre");
       dltF = df->getParameter("Height") * df->HeightPrefactor();
-      std::transform(xValues, xValues + nData, x.data(),
-                     std::bind(std::plus<double>(), _1, shift));
+      std::transform(xValues, xValues + nData, x.data(), std::bind(std::plus<double>(), _1, shift));
       std::vector<double> tmp(nData);
       evaluateFunctionOnRange(getFunction(0), nData, &x[0], tmp);
-      std::transform(tmp.begin(), tmp.end(), tmp.begin(),
-                     std::bind(std::multiplies<double>(), _1, dltF));
+      std::transform(tmp.begin(), tmp.end(), tmp.begin(), std::bind(std::multiplies<double>(), _1, dltF));
       std::transform(out, out + nData, tmp.data(), out, std::plus<double>());
     }
   }
@@ -354,16 +330,14 @@ void Convolution::functionFFTMode(const FunctionDomain &domain,
  * @param values :: buffer to store the values returned by the function after
  * acting on the domain.
  */
-void Convolution::functionDirectMode(const FunctionDomain &domain,
-                                     FunctionValues &values) const {
+void Convolution::functionDirectMode(const FunctionDomain &domain, FunctionValues &values) const {
   const auto &d1d = dynamic_cast<const FunctionDomain1D &>(domain);
   const size_t nData = domain.size();
   const double *xValues = d1d.getPointerAt(0);
-  double dx =
-      (xValues[nData - 1] - xValues[0]) / static_cast<double>((nData - 1));
+  double dx = (xValues[nData - 1] - xValues[0]) / static_cast<double>((nData - 1));
   auto ixP = static_cast<size_t>(xValues[nData - 1] / dx); // positive
                                                            // x-values
-  auto ixN = nData - ixP - 1; // negative x-values (ixP+ixN=nData-1)
+  auto ixN = nData - ixP - 1;                              // negative x-values (ixP+ixN=nData-1)
 
   refreshResolution();
 
@@ -394,8 +368,7 @@ void Convolution::functionDirectMode(const FunctionDomain &domain,
   double dltF = 0;
   bool deltaFunctionsOnly = false;
   bool deltaShifted = false;
-  CompositeFunction_sptr cf =
-      std::dynamic_pointer_cast<CompositeFunction>(getFunction(1));
+  CompositeFunction_sptr cf = std::dynamic_pointer_cast<CompositeFunction>(getFunction(1));
   if (cf) {
     dltFuns.reserve(cf->nFunctions());
     for (size_t i = 0; i < cf->nFunctions(); ++i) {
@@ -412,8 +385,7 @@ void Convolution::functionDirectMode(const FunctionDomain &domain,
       // all delta functions - return scaled resolution
       deltaFunctionsOnly = true;
     }
-  } else if (auto df =
-                 std::dynamic_pointer_cast<DeltaFunction>(getFunction(1))) {
+  } else if (auto df = std::dynamic_pointer_cast<DeltaFunction>(getFunction(1))) {
     // single delta function - return scaled resolution
     deltaFunctionsOnly = true;
     dltFuns.emplace_back(df);
@@ -450,20 +422,17 @@ void Convolution::functionDirectMode(const FunctionDomain &domain,
     // in issue 16064
     std::vector<double> tmp(nData);
     evaluateFunctionOnRange(getFunction(0), nData, xValues, tmp);
-    std::transform(tmp.begin(), tmp.end(), tmp.begin(),
-                   std::bind(std::multiplies<double>(), _1, dltF));
+    std::transform(tmp.begin(), tmp.end(), tmp.begin(), std::bind(std::multiplies<double>(), _1, dltF));
     std::transform(out, out + nData, tmp.data(), out, std::plus<double>());
   } else if (!dltFuns.empty()) {
     std::vector<double> x(nData);
     for (const auto &df : dltFuns) {
       double shift = -df->getParameter("Centre");
       dltF = df->getParameter("Height") * df->HeightPrefactor();
-      std::transform(xValues, xValues + nData, x.data(),
-                     std::bind(std::plus<double>(), _1, shift));
+      std::transform(xValues, xValues + nData, x.data(), std::bind(std::plus<double>(), _1, shift));
       std::vector<double> tmp(nData);
       evaluateFunctionOnRange(getFunction(0), nData, &x[0], tmp);
-      std::transform(tmp.begin(), tmp.end(), tmp.begin(),
-                     std::bind(std::multiplies<double>(), _1, dltF));
+      std::transform(tmp.begin(), tmp.end(), tmp.begin(), std::bind(std::multiplies<double>(), _1, dltF));
       std::transform(out, out + nData, tmp.data(), out, std::plus<double>());
     }
   }
@@ -494,11 +463,9 @@ size_t Convolution::addFunction(IFunction_sptr f) {
   } else {
     API::IFunction_sptr f1 = getFunction(1);
     if (!f1) {
-      throw std::runtime_error(
-          "IFunction expected but function of another type found");
+      throw std::runtime_error("IFunction expected but function of another type found");
     }
-    CompositeFunction_sptr cf =
-        std::dynamic_pointer_cast<CompositeFunction>(f1);
+    CompositeFunction_sptr cf = std::dynamic_pointer_cast<CompositeFunction>(f1);
     if (cf == nullptr) {
       cf = std::dynamic_pointer_cast<CompositeFunction>(
           API::FunctionFactory::Instance().createFunction("CompositeFunction"));

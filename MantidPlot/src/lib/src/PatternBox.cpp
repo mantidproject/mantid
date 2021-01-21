@@ -33,11 +33,9 @@
 #include <qpixmap.h>
 
 const Qt::BrushStyle PatternBox::patterns[] = {
-    Qt::SolidPattern,     Qt::HorPattern,    Qt::VerPattern,
-    Qt::CrossPattern,     Qt::BDiagPattern,  Qt::FDiagPattern,
-    Qt::DiagCrossPattern, Qt::Dense1Pattern, Qt::Dense2Pattern,
-    Qt::Dense3Pattern,    Qt::Dense4Pattern, Qt::Dense5Pattern,
-    Qt::Dense6Pattern,    Qt::Dense7Pattern};
+    Qt::SolidPattern,  Qt::HorPattern,       Qt::VerPattern,    Qt::CrossPattern,  Qt::BDiagPattern,
+    Qt::FDiagPattern,  Qt::DiagCrossPattern, Qt::Dense1Pattern, Qt::Dense2Pattern, Qt::Dense3Pattern,
+    Qt::Dense4Pattern, Qt::Dense5Pattern,    Qt::Dense6Pattern, Qt::Dense7Pattern};
 
 PatternBox::PatternBox(QWidget *parent) : QComboBox(parent) { init(); }
 
@@ -172,6 +170,4 @@ int PatternBox::patternIndex(const Qt::BrushStyle &style) {
   return 0; // default pattern is solid.
 }
 
-size_t PatternBox::numberOfPatterns() {
-  return sizeof(patterns) / sizeof(Qt::BrushStyle);
-}
+size_t PatternBox::numberOfPatterns() { return sizeof(patterns) / sizeof(Qt::BrushStyle); }

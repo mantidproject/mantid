@@ -12,8 +12,7 @@
 namespace Mantid {
 namespace VATES {
 // Note that we need to have a non-empty default string
-MetadataJsonManager::MetadataJsonManager()
-    : instrument("_EMPTY_"), specialCoordinates(-1) {}
+MetadataJsonManager::MetadataJsonManager() : instrument("_EMPTY_"), specialCoordinates(-1) {}
 
 MetadataJsonManager::~MetadataJsonManager() {}
 
@@ -35,8 +34,7 @@ std::string MetadataJsonManager::getSerializedJson() {
  * Read in the serialized JSON data and opulate the JSON container
  * @param serializedJson The serialized JSON string.
  */
-void MetadataJsonManager::readInSerializedJson(
-    const std::string &serializedJson) {
+void MetadataJsonManager::readInSerializedJson(const std::string &serializedJson) {
   Json::Reader reader;
   metadataContainer.clear();
 
@@ -44,16 +42,14 @@ void MetadataJsonManager::readInSerializedJson(
 
   if (parseSuccess) {
     // Set the instrument
-    if (metadataContainer.isObject() &&
-        metadataContainer.isMember("instrument")) {
+    if (metadataContainer.isObject() && metadataContainer.isMember("instrument")) {
       instrument = metadataContainer["instrument"].asString();
     } else {
       instrument = "_EMPTY_";
     }
 
     // Set the instrument
-    if (metadataContainer.isObject() &&
-        metadataContainer.isMember("specialCoordinates")) {
+    if (metadataContainer.isObject() && metadataContainer.isMember("specialCoordinates")) {
       specialCoordinates = metadataContainer["specialCoordinates"].asInt();
     } else {
       specialCoordinates = -1;
@@ -65,9 +61,7 @@ void MetadataJsonManager::readInSerializedJson(
  * Set the instrument.
  * @param instrument The instrument associated with the workspace.
  */
-void MetadataJsonManager::setInstrument(const std::string &instrument) {
-  this->instrument = instrument;
-}
+void MetadataJsonManager::setInstrument(const std::string &instrument) { this->instrument = instrument; }
 
 /**
  * Get the instrument.

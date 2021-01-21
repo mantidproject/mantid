@@ -12,8 +12,7 @@ namespace Mantid {
 namespace Kernel {
 namespace Diffraction {
 
-double calcTofMin(const double difc, const double difa, const double tzero,
-                  const double tofmin) {
+double calcTofMin(const double difc, const double difa, const double tzero, const double tofmin) {
   if (difa == 0.) {
     if (tzero != 0.) {
       // check for negative d-spacing
@@ -32,8 +31,7 @@ double calcTofMin(const double difc, const double difa, const double tzero,
  * Returns the maximum TOF that can be used or tofmax. Whichever is smaller. In
  * the case when this is a negative number, just return 0.
  */
-double calcTofMax(const double difc, const double difa, const double tzero,
-                  const double tofmax) {
+double calcTofMax(const double difc, const double difa, const double tzero, const double tofmax) {
   if (difa < 0.) {
     // check for imaginary part in quadratic equation
     if (tzero > 0.) {
@@ -99,9 +97,7 @@ struct tof_to_d {
 };
 } // anonymous namespace
 
-std::function<double(double)> getTofToDConversionFunc(const double difc,
-                                                      const double difa,
-                                                      const double tzero) {
+std::function<double(double)> getTofToDConversionFunc(const double difc, const double difa, const double tzero) {
   if (difa == 0.) {
     if (tzero == 0.) {
       return tof_to_d_difc_only(difc);
@@ -130,9 +126,7 @@ struct d_to_tof_difc_and_tzero {
     this->tzero = tzero;
   }
 
-  double operator()(const double dspacing) const {
-    return difc * dspacing + tzero;
-  }
+  double operator()(const double dspacing) const { return difc * dspacing + tzero; }
 
   double difc;
   double tzero;
@@ -145,9 +139,7 @@ struct d_to_tof {
     this->tzero = tzero;
   }
 
-  double operator()(const double dspacing) const {
-    return difc * dspacing + difa * dspacing * dspacing + tzero;
-  }
+  double operator()(const double dspacing) const { return difc * dspacing + difa * dspacing * dspacing + tzero; }
 
   double difc;
   double difa;
@@ -155,9 +147,7 @@ struct d_to_tof {
 };
 } // anonymous namespace
 
-std::function<double(double)> getDToTofConversionFunc(const double difc,
-                                                      const double difa,
-                                                      const double tzero) {
+std::function<double(double)> getDToTofConversionFunc(const double difc, const double difa, const double tzero) {
   if (difa == 0.) {
     if (tzero == 0.)
       return d_to_tof_difc_only(difc);

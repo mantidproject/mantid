@@ -36,14 +36,11 @@ class FitPropertyBrowser;
 /**
  * Helps display and edit functions in FitPropertyBrowser
  */
-class EXPORT_OPT_MANTIDQT_COMMON PropertyHandler
-    : public QObject,
-      public Mantid::API::FunctionHandler {
+class EXPORT_OPT_MANTIDQT_COMMON PropertyHandler : public QObject, public Mantid::API::FunctionHandler {
   Q_OBJECT
 public:
   // Constructor
-  PropertyHandler(const Mantid::API::IFunction_sptr &fun,
-                  std::shared_ptr<Mantid::API::CompositeFunction> parent,
+  PropertyHandler(const Mantid::API::IFunction_sptr &fun, std::shared_ptr<Mantid::API::CompositeFunction> parent,
                   FitPropertyBrowser *browser, QtBrowserItem *item = nullptr);
 
   /// Destructor
@@ -81,14 +78,12 @@ public:
    * calls findCompositeFunction recursively with all its children or
    * zero
    */
-  std::shared_ptr<const Mantid::API::CompositeFunction>
-  findCompositeFunction(QtBrowserItem *item) const;
+  std::shared_ptr<const Mantid::API::CompositeFunction> findCompositeFunction(QtBrowserItem *item) const;
   /** Returns 'this' if item == m_item or
    * calls findFunction recursively with all its children or
    * zero
    */
-  std::shared_ptr<const Mantid::API::IFunction>
-  findFunction(QtBrowserItem *item) const;
+  std::shared_ptr<const Mantid::API::IFunction> findFunction(QtBrowserItem *item) const;
 
   PropertyHandler *findHandler(const Mantid::API::IFunction *fun);
   PropertyHandler *findHandler(const Mantid::API::IFunction_const_sptr &fun);
@@ -118,16 +113,14 @@ public:
    * @param attName :: The name of the attribute
    * @param attValue :: The new attribute value
    */
-  void setAttribute(QString const &attName,
-                    Mantid::API::IFunction::Attribute const &attValue);
+  void setAttribute(QString const &attName, Mantid::API::IFunction::Attribute const &attValue);
 
   /**
    * Set function's attribute if it has type double or int
    * @param attName :: The name of the attribute
    * @param attValue :: The new attribute value
    */
-  template <typename AttributeType>
-  void setAttribute(QString const &attName, AttributeType const &attValue);
+  template <typename AttributeType> void setAttribute(QString const &attName, AttributeType const &attValue);
 
   /**
    * Set function's attribute of any type.
@@ -187,8 +180,7 @@ public:
   void removeTie(QtProperty *prop, const std::string &globalName);
   void removeTie(QtProperty *prop);
   void removeTie(const QString &propName);
-  void addConstraint(QtProperty *parProp, bool lo, bool up, double loBound,
-                     double upBound);
+  void addConstraint(QtProperty *parProp, bool lo, bool up, double loBound, double upBound);
   void removeConstraint(QtProperty *parProp);
 
   // Return list of handlers of peak functions which can be used in
@@ -226,27 +218,23 @@ protected:
 
 private:
   FitPropertyBrowser *m_browser;
-  std::shared_ptr<Mantid::API::CompositeFunction>
-      m_cf; //< if the function is composite holds pointer to it
-  std::shared_ptr<Mantid::API::IPeakFunction>
-      m_pf; //< if the function is peak holds pointer to it
-  std::shared_ptr<Mantid::API::CompositeFunction>
-      m_parent; //< if the function has parent holds pointer to it
+  std::shared_ptr<Mantid::API::CompositeFunction> m_cf;     //< if the function is composite holds pointer to it
+  std::shared_ptr<Mantid::API::IPeakFunction> m_pf;         //< if the function is peak holds pointer to it
+  std::shared_ptr<Mantid::API::CompositeFunction> m_parent; //< if the function has parent holds pointer to it
   QtProperty *m_type;
-  QtBrowserItem *m_item;              //< the browser item
-  QList<QtProperty *> m_attributes;   //< function attribute properties
-  QList<QtProperty *> m_parameters;   //< function parameter properties
-  QMap<QString, QtProperty *> m_ties; //< tie properties
-  QMap<QString, std::pair<QtProperty *, QtProperty *>>
-      m_constraints;                   //< constraints
-  QList<QtProperty *> m_vectorMembers; //< vector member properties
-  QList<QtProperty *> m_vectorSizes;   //< vector size properties
+  QtBrowserItem *m_item;                                              //< the browser item
+  QList<QtProperty *> m_attributes;                                   //< function attribute properties
+  QList<QtProperty *> m_parameters;                                   //< function parameter properties
+  QMap<QString, QtProperty *> m_ties;                                 //< tie properties
+  QMap<QString, std::pair<QtProperty *, QtProperty *>> m_constraints; //< constraints
+  QList<QtProperty *> m_vectorMembers;                                //< vector member properties
+  QList<QtProperty *> m_vectorSizes;                                  //< vector size properties
   bool m_isMultispectral; ///< true if fitting to multiple spectra using MultiBG
   /// function
   QtProperty *m_workspace;      ///< workspace name for multispectral fitting
   QtProperty *m_workspaceIndex; ///< workspace index for multispectral fitting
   double m_base;                //< the baseline for a peak
-  int m_ci; //< approximate index in the workspace at the peak centre
+  int m_ci;                     //< approximate index in the workspace at the peak centre
   // mutable FunctionCurve* m_curve;//< the curve to plot the handled function
   mutable bool m_hasPlot;
 

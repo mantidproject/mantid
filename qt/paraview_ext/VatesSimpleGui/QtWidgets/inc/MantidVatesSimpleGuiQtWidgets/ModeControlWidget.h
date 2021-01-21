@@ -23,8 +23,7 @@ namespace SimpleGui {
   @author Michael Reuter
   @date 24/05/2011
  */
-class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_QTWIDGETS ModeControlWidget
-    : public QWidget {
+class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_QTWIDGETS ModeControlWidget : public QWidget {
   Q_OBJECT
 
 public:
@@ -89,7 +88,7 @@ protected slots:
   void onThreeSliceViewButtonClicked();
 
 private:
-  Ui::ModeControlWidgetClass ui; ///< The mode control widget's UI form
+  Ui::ModeControlWidgetClass ui;                ///< The mode control widget's UI form
   std::map<QString, Views> mapFromStringToView; //< Holds the mapping from the a
   // string to an associated enum
 };

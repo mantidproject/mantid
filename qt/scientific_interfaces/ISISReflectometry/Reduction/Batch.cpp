@@ -9,10 +9,8 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
-Batch::Batch(Experiment const &experiment, Instrument const &instrument,
-             RunsTable &runsTable, Slicing const &slicing)
-    : m_experiment(experiment), m_instrument(instrument),
-      m_runsTable(runsTable), m_slicing(slicing) {}
+Batch::Batch(Experiment const &experiment, Instrument const &instrument, RunsTable &runsTable, Slicing const &slicing)
+    : m_experiment(experiment), m_instrument(instrument), m_runsTable(runsTable), m_slicing(slicing) {}
 
 Experiment const &Batch::experiment() const { return m_experiment; }
 
@@ -24,30 +22,23 @@ RunsTable &Batch::mutableRunsTable() { return m_runsTable; }
 
 Slicing const &Batch::slicing() const { return m_slicing; }
 
-std::vector<MantidWidgets::Batch::RowLocation>
-Batch::selectedRowLocations() const {
+std::vector<MantidWidgets::Batch::RowLocation> Batch::selectedRowLocations() const {
   return m_runsTable.selectedRowLocations();
 }
 
-std::vector<Group> Batch::selectedGroups() const {
-  return m_runsTable.selectedGroups();
-}
+std::vector<Group> Batch::selectedGroups() const { return m_runsTable.selectedGroups(); }
 
 PerThetaDefaults const *Batch::defaultsForTheta(double thetaAngle) const {
-  return experiment().defaultsForTheta(thetaAngle,
-                                       runsTable().thetaTolerance());
+  return experiment().defaultsForTheta(thetaAngle, runsTable().thetaTolerance());
 }
 
-PerThetaDefaults const *Batch::wildcardDefaults() const {
-  return experiment().wildcardDefaults();
-}
+PerThetaDefaults const *Batch::wildcardDefaults() const { return experiment().wildcardDefaults(); }
 
 void Batch::resetState() { m_runsTable.resetState(); }
 
 void Batch::resetSkippedItems() { m_runsTable.resetSkippedItems(); }
 
-boost::optional<Item &>
-Batch::getItemWithOutputWorkspaceOrNone(std::string const &wsName) {
+boost::optional<Item &> Batch::getItemWithOutputWorkspaceOrNone(std::string const &wsName) {
   return m_runsTable.getItemWithOutputWorkspaceOrNone(wsName);
 }
 } // namespace ISISReflectometry

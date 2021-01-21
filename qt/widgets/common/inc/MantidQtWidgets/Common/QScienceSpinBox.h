@@ -41,8 +41,7 @@ private:
 private:
   void initLocalValues(QWidget *parent);
   bool isIntermediateValue(const QString &str) const;
-  QVariant validateAndInterpret(QString &input, int &pos,
-                                QValidator::State &state) const;
+  QVariant validateAndInterpret(QString &input, int &pos, QValidator::State &state) const;
   QValidator::State validate(QString &text, int &pos) const override;
   void fixup(QString &input) const override;
   QString stripped(const QString &t, int *pos) const;

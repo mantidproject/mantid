@@ -34,42 +34,31 @@ std::string createRebinString(double minimum, double maximum, double width) {
 }
 
 template <typename Generator>
-void randomizeHistogramWithinError(HistogramY &row, const HistogramE &errors,
-                                   Generator &generator) {
+void randomizeHistogramWithinError(HistogramY &row, const HistogramE &errors, Generator &generator) {
   for (auto i = 0u; i < row.size(); ++i)
     row[i] += generator(errors[i]);
 }
 
-MatrixWorkspace_sptr
-randomizeWorkspaceWithinError(MatrixWorkspace_sptr workspace,
-                              MersenneTwister &mTwister) {
-  auto randomNumberGenerator = [&mTwister](const double error) {
-    return mTwister.nextValue(-error, error);
-  };
+MatrixWorkspace_sptr randomizeWorkspaceWithinError(MatrixWorkspace_sptr workspace, MersenneTwister &mTwister) {
+  auto randomNumberGenerator = [&mTwister](const double error) { return mTwister.nextValue(-error, error); };
   for (auto i = 0u; i < workspace->getNumberHistograms(); ++i)
-    randomizeHistogramWithinError(workspace->mutableY(i), workspace->e(i),
-                                  randomNumberGenerator);
+    randomizeHistogramWithinError(workspace->mutableY(i), workspace->e(i), randomNumberGenerator);
   return workspace;
 }
 
 double standardDeviation(const std::vector<double> &inputValues) {
   const auto inputSize = boost::numeric_cast<double>(inputValues.size());
-  const auto mean =
-      std::accumulate(inputValues.begin(), inputValues.end(), 0.0) / inputSize;
+  const auto mean = std::accumulate(inputValues.begin(), inputValues.end(), 0.0) / inputSize;
   const double sumOfXMinusMeanSquared =
       std::accumulate(inputValues.cbegin(), inputValues.cend(), 0.,
-                      [mean](const auto sum, const auto x) {
-                        return sum + std::pow(x - mean, 2);
-                      });
+                      [mean](const auto sum, const auto x) { return sum + std::pow(x - mean, 2); });
   return sqrt(sumOfXMinusMeanSquared / (inputSize - 1));
 }
 
-std::vector<double>
-standardDeviationArray(const std::vector<std::vector<double>> &yValues) {
+std::vector<double> standardDeviationArray(const std::vector<std::vector<double>> &yValues) {
   std::vector<double> standardDeviations;
   standardDeviations.reserve(yValues.size());
-  std::transform(yValues.begin(), yValues.end(),
-                 std::back_inserter(standardDeviations), standardDeviation);
+  std::transform(yValues.begin(), yValues.end(), std::back_inserter(standardDeviations), standardDeviation);
   return standardDeviations;
 }
 
@@ -78,11 +67,9 @@ Get all histograms at a given index from a set of workspaces. Arranges the
 output such that the first vector contains the first value from each workspace,
 the second vector contains all the second values, etc.
 */
-std::vector<std::vector<double>>
-allYValuesAtIndex(const std::vector<MatrixWorkspace_sptr> &workspaces,
-                  const std::size_t index) {
-  std::vector<std::vector<double>> yValues(
-      workspaces[0]->getDimension(0)->getNBins());
+std::vector<std::vector<double>> allYValuesAtIndex(const std::vector<MatrixWorkspace_sptr> &workspaces,
+                                                   const std::size_t index) {
+  std::vector<std::vector<double>> yValues(workspaces[0]->getDimension(0)->getNBins());
   for (auto &&workspace : workspaces) {
     const auto values = workspace->y(index).rawData();
     for (auto j = 0u; j < values.size(); ++j)
@@ -106,13 +93,9 @@ const std::string CalculateIqt::name() const { return "CalculateIqt"; }
 
 int CalculateIqt::version() const { return 1; }
 
-const std::vector<std::string> CalculateIqt::seeAlso() const {
-  return {"TransformToIqt"};
-}
+const std::vector<std::string> CalculateIqt::seeAlso() const { return {"TransformToIqt"}; }
 
-const std::string CalculateIqt::category() const {
-  return "Inelastic\\Indirect";
-}
+const std::string CalculateIqt::category() const { return "Inelastic\\Indirect"; }
 
 const std::string CalculateIqt::summary() const {
   return "Calculates I(Q,t) from S(Q,w) and computes the errors using a "
@@ -121,11 +104,9 @@ const std::string CalculateIqt::summary() const {
 
 void CalculateIqt::init() {
 
-  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                                        Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
                   "The name of the sample workspace.");
-  declareProperty(std::make_unique<WorkspaceProperty<>>("ResolutionWorkspace",
-                                                        "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("ResolutionWorkspace", "", Direction::Input),
                   "The name of the resolution workspace.");
 
   declareProperty("EnergyMin", -0.5, "Minimum energy for fit. Default = -0.5.");
@@ -137,12 +118,10 @@ void CalculateIqt::init() {
 
   declareProperty("NumberOfIterations", DEFAULT_ITERATIONS, positiveInt,
                   "Number of randomised simulations within error to run.");
-  declareProperty(
-      "SeedValue", DEFAULT_SEED, positiveInt,
-      "Seed the random number generator for monte-carlo error calculation.");
+  declareProperty("SeedValue", DEFAULT_SEED, positiveInt,
+                  "Seed the random number generator for monte-carlo error calculation.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "The name to use for the output workspace.");
 
   declareProperty("CalculateErrors", true, "Calculate monte-carlo errors.");
@@ -158,8 +137,7 @@ void CalculateIqt::exec() {
   resolution = normalizedFourierTransform(resolution, rebinParams);
 
   auto outputWorkspace =
-      monteCarloErrorCalculation(sampleWorkspace, resolution, rebinParams, seed,
-                                 calculateErrors, nIterations);
+      monteCarloErrorCalculation(sampleWorkspace, resolution, rebinParams, seed, calculateErrors, nIterations);
 
   outputWorkspace = replaceSpecialValues(outputWorkspace);
   setProperty("OutputWorkspace", outputWorkspace);
@@ -172,10 +150,10 @@ std::string CalculateIqt::rebinParamsAsString() {
   return createRebinString(e_min, e_max, e_width);
 }
 
-MatrixWorkspace_sptr CalculateIqt::monteCarloErrorCalculation(
-    const MatrixWorkspace_sptr &sample, const MatrixWorkspace_sptr &resolution,
-    const std::string &rebinParams, const int seed, const bool calculateErrors,
-    const int nIterations) {
+MatrixWorkspace_sptr CalculateIqt::monteCarloErrorCalculation(const MatrixWorkspace_sptr &sample,
+                                                              const MatrixWorkspace_sptr &resolution,
+                                                              const std::string &rebinParams, const int seed,
+                                                              const bool calculateErrors, const int nIterations) {
   auto outputWorkspace = calculateIqt(sample, resolution, rebinParams);
   std::vector<MatrixWorkspace_sptr> simulatedWorkspaces;
   simulatedWorkspaces.reserve(nIterations);
@@ -188,8 +166,7 @@ MatrixWorkspace_sptr CalculateIqt::monteCarloErrorCalculation(
     for (auto i = 0; i < nIterations - 1; ++i) {
       errorCalculationProg.report("Calculating Monte Carlo errors...");
       PARALLEL_START_INTERUPT_REGION
-      auto simulated =
-          doSimulation(sample->clone(), resolution, rebinParams, mTwister);
+      auto simulated = doSimulation(sample->clone(), resolution, rebinParams, mTwister);
       PARALLEL_CRITICAL(emplace_back)
       simulatedWorkspaces.emplace_back(simulated);
       PARALLEL_END_INTERUPT_REGION
@@ -212,8 +189,7 @@ std::map<std::string, std::string> CalculateIqt::validateInputs() {
   return issues;
 }
 
-MatrixWorkspace_sptr CalculateIqt::rebin(const MatrixWorkspace_sptr &workspace,
-                                         const std::string &params) {
+MatrixWorkspace_sptr CalculateIqt::rebin(const MatrixWorkspace_sptr &workspace, const std::string &params) {
   IAlgorithm_sptr rebinAlgorithm = this->createChildAlgorithm("Rebin");
   rebinAlgorithm->initialize();
   rebinAlgorithm->setProperty("InputWorkspace", workspace);
@@ -223,10 +199,8 @@ MatrixWorkspace_sptr CalculateIqt::rebin(const MatrixWorkspace_sptr &workspace,
   return rebinAlgorithm->getProperty("OutputWorkspace");
 }
 
-MatrixWorkspace_sptr
-CalculateIqt::integration(const MatrixWorkspace_sptr &workspace) {
-  IAlgorithm_sptr integrationAlgorithm =
-      this->createChildAlgorithm("Integration");
+MatrixWorkspace_sptr CalculateIqt::integration(const MatrixWorkspace_sptr &workspace) {
+  IAlgorithm_sptr integrationAlgorithm = this->createChildAlgorithm("Integration");
   integrationAlgorithm->initialize();
   integrationAlgorithm->setProperty("InputWorkspace", workspace);
   integrationAlgorithm->setProperty("OutputWorkspace", "_");
@@ -234,10 +208,8 @@ CalculateIqt::integration(const MatrixWorkspace_sptr &workspace) {
   return integrationAlgorithm->getProperty("OutputWorkspace");
 }
 
-MatrixWorkspace_sptr
-CalculateIqt::convertToPointData(const MatrixWorkspace_sptr &workspace) {
-  IAlgorithm_sptr pointDataAlgorithm =
-      this->createChildAlgorithm("ConvertToPointData");
+MatrixWorkspace_sptr CalculateIqt::convertToPointData(const MatrixWorkspace_sptr &workspace) {
+  IAlgorithm_sptr pointDataAlgorithm = this->createChildAlgorithm("ConvertToPointData");
   pointDataAlgorithm->initialize();
   pointDataAlgorithm->setProperty("InputWorkspace", workspace);
   pointDataAlgorithm->setProperty("OutputWorkspace", "_");
@@ -245,10 +217,8 @@ CalculateIqt::convertToPointData(const MatrixWorkspace_sptr &workspace) {
   return pointDataAlgorithm->getProperty("OutputWorkspace");
 }
 
-MatrixWorkspace_sptr
-CalculateIqt::extractFFTSpectrum(const MatrixWorkspace_sptr &workspace) {
-  IAlgorithm_sptr FFTAlgorithm =
-      this->createChildAlgorithm("ExtractFFTSpectrum");
+MatrixWorkspace_sptr CalculateIqt::extractFFTSpectrum(const MatrixWorkspace_sptr &workspace) {
+  IAlgorithm_sptr FFTAlgorithm = this->createChildAlgorithm("ExtractFFTSpectrum");
   FFTAlgorithm->initialize();
   FFTAlgorithm->setProperty("InputWorkspace", workspace);
   FFTAlgorithm->setProperty("OutputWorkspace", "_");
@@ -257,9 +227,8 @@ CalculateIqt::extractFFTSpectrum(const MatrixWorkspace_sptr &workspace) {
   return FFTAlgorithm->getProperty("OutputWorkspace");
 }
 
-MatrixWorkspace_sptr
-CalculateIqt::divide(const MatrixWorkspace_sptr &lhsWorkspace,
-                     const MatrixWorkspace_sptr &rhsWorkspace) {
+MatrixWorkspace_sptr CalculateIqt::divide(const MatrixWorkspace_sptr &lhsWorkspace,
+                                          const MatrixWorkspace_sptr &rhsWorkspace) {
   IAlgorithm_sptr divideAlgorithm = this->createChildAlgorithm("Divide");
   divideAlgorithm->initialize();
   divideAlgorithm->setProperty("LHSWorkspace", lhsWorkspace);
@@ -269,9 +238,7 @@ CalculateIqt::divide(const MatrixWorkspace_sptr &lhsWorkspace,
   return divideAlgorithm->getProperty("OutputWorkspace");
 }
 
-MatrixWorkspace_sptr
-CalculateIqt::cropWorkspace(const MatrixWorkspace_sptr &workspace,
-                            const double xMax) {
+MatrixWorkspace_sptr CalculateIqt::cropWorkspace(const MatrixWorkspace_sptr &workspace, const double xMax) {
   IAlgorithm_sptr cropAlgorithm = this->createChildAlgorithm("CropWorkspace");
   cropAlgorithm->initialize();
   cropAlgorithm->setProperty("InputWorkspace", workspace);
@@ -281,10 +248,8 @@ CalculateIqt::cropWorkspace(const MatrixWorkspace_sptr &workspace,
   return cropAlgorithm->getProperty("OutputWorkspace");
 }
 
-MatrixWorkspace_sptr
-CalculateIqt::replaceSpecialValues(const MatrixWorkspace_sptr &workspace) {
-  IAlgorithm_sptr specialValuesAlgorithm =
-      this->createChildAlgorithm("ReplaceSpecialValues");
+MatrixWorkspace_sptr CalculateIqt::replaceSpecialValues(const MatrixWorkspace_sptr &workspace) {
+  IAlgorithm_sptr specialValuesAlgorithm = this->createChildAlgorithm("ReplaceSpecialValues");
   specialValuesAlgorithm->initialize();
   specialValuesAlgorithm->setProperty("InputWorkspace", workspace);
   specialValuesAlgorithm->setProperty("OutputWorkspace", "_");
@@ -295,9 +260,8 @@ CalculateIqt::replaceSpecialValues(const MatrixWorkspace_sptr &workspace) {
   return specialValuesAlgorithm->getProperty("OutputWorkspace");
 }
 
-MatrixWorkspace_sptr
-CalculateIqt::normalizedFourierTransform(MatrixWorkspace_sptr workspace,
-                                         const std::string &rebinParams) {
+MatrixWorkspace_sptr CalculateIqt::normalizedFourierTransform(MatrixWorkspace_sptr workspace,
+                                                              const std::string &rebinParams) {
   workspace = rebin(workspace, rebinParams);
   auto workspace_int = integration(workspace);
   workspace = convertToPointData(workspace);
@@ -305,39 +269,33 @@ CalculateIqt::normalizedFourierTransform(MatrixWorkspace_sptr workspace,
   return divide(workspace, workspace_int);
 }
 
-MatrixWorkspace_sptr
-CalculateIqt::calculateIqt(MatrixWorkspace_sptr workspace,
-                           const MatrixWorkspace_sptr &resolutionWorkspace,
-                           const std::string &rebinParams) {
+MatrixWorkspace_sptr CalculateIqt::calculateIqt(MatrixWorkspace_sptr workspace,
+                                                const MatrixWorkspace_sptr &resolutionWorkspace,
+                                                const std::string &rebinParams) {
   workspace = normalizedFourierTransform(workspace, rebinParams);
   return divide(workspace, std::move(resolutionWorkspace));
 }
 
-MatrixWorkspace_sptr CalculateIqt::doSimulation(MatrixWorkspace_sptr sample,
-                                                MatrixWorkspace_sptr resolution,
-                                                const std::string &rebinParams,
-                                                MersenneTwister &mTwister) {
-  auto simulatedWorkspace =
-      randomizeWorkspaceWithinError(std::move(sample), mTwister);
+MatrixWorkspace_sptr CalculateIqt::doSimulation(MatrixWorkspace_sptr sample, MatrixWorkspace_sptr resolution,
+                                                const std::string &rebinParams, MersenneTwister &mTwister) {
+  auto simulatedWorkspace = randomizeWorkspaceWithinError(std::move(sample), mTwister);
   return calculateIqt(simulatedWorkspace, std::move(resolution), rebinParams);
 }
 
-MatrixWorkspace_sptr CalculateIqt::setErrorsToStandardDeviation(
-    const std::vector<MatrixWorkspace_sptr> &simulatedWorkspaces) {
+MatrixWorkspace_sptr
+CalculateIqt::setErrorsToStandardDeviation(const std::vector<MatrixWorkspace_sptr> &simulatedWorkspaces) {
   auto outputWorkspace = simulatedWorkspaces.front();
   PARALLEL_FOR_IF(Mantid::Kernel::threadSafe(*outputWorkspace))
   for (auto i = 0; i < getWorkspaceNumberOfHistograms(outputWorkspace); ++i) {
     PARALLEL_START_INTERUPT_REGION
-    outputWorkspace->mutableE(i) =
-        standardDeviationArray(allYValuesAtIndex(simulatedWorkspaces, i));
+    outputWorkspace->mutableE(i) = standardDeviationArray(allYValuesAtIndex(simulatedWorkspaces, i));
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
   return outputWorkspace;
 }
 
-MatrixWorkspace_sptr CalculateIqt::setErrorsToZero(
-    const std::vector<MatrixWorkspace_sptr> &simulatedWorkspaces) {
+MatrixWorkspace_sptr CalculateIqt::setErrorsToZero(const std::vector<MatrixWorkspace_sptr> &simulatedWorkspaces) {
   auto outputWorkspace = simulatedWorkspaces.front();
   PARALLEL_FOR_IF(Mantid::Kernel::threadSafe(*outputWorkspace))
   for (auto i = 0; i < getWorkspaceNumberOfHistograms(outputWorkspace); ++i) {

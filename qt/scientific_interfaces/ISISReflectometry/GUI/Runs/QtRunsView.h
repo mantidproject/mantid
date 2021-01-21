@@ -28,9 +28,7 @@ namespace ISISReflectometry {
 /** QtRunsView : Provides an interface for the "Runs" tab in the
 ISIS Reflectometry interface.
 */
-class MANTIDQT_ISISREFLECTOMETRY_DLL QtRunsView
-    : public MantidQt::API::MantidWidget,
-      public IRunsView {
+class MANTIDQT_ISISREFLECTOMETRY_DLL QtRunsView : public MantidQt::API::MantidWidget, public IRunsView {
   Q_OBJECT
 public:
   QtRunsView(QWidget *parent, const RunsTableViewFactory &makeView);
@@ -80,10 +78,8 @@ public:
   std::string getSearchCycle() const override;
   int getLiveDataUpdateInterval() const override;
 
-  std::shared_ptr<MantidQt::API::AlgorithmRunner>
-  getAlgorithmRunner() const override;
-  std::shared_ptr<MantidQt::API::AlgorithmRunner>
-  getMonitorAlgorithmRunner() const override;
+  std::shared_ptr<MantidQt::API::AlgorithmRunner> getAlgorithmRunner() const override;
+  std::shared_ptr<MantidQt::API::AlgorithmRunner> getMonitorAlgorithmRunner() const override;
 
   // Live data monitor
   void startMonitor() override;

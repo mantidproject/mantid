@@ -47,18 +47,15 @@ enum class TransferMatch {
 RunsPresenter is a presenter class for the Reflectometry Interface. It
 handles any interface functionality and model manipulation.
 */
-class MANTIDQT_ISISREFLECTOMETRY_DLL RunsPresenter
-    : public IRunsPresenter,
-      public RunsViewSubscriber,
-      public RunNotifierSubscriber,
-      public SearcherSubscriber,
-      public Mantid::API::AlgorithmObserver {
+class MANTIDQT_ISISREFLECTOMETRY_DLL RunsPresenter : public IRunsPresenter,
+                                                     public RunsViewSubscriber,
+                                                     public RunNotifierSubscriber,
+                                                     public SearcherSubscriber,
+                                                     public Mantid::API::AlgorithmObserver {
 public:
   RunsPresenter(IRunsView *mainView, ProgressableView *progressView,
-                const RunsTablePresenterFactory &makeRunsTablePresenter,
-                double thetaTolerance,
-                std::vector<std::string> const &instruments,
-                IMessageHandler *messageHandler);
+                const RunsTablePresenterFactory &makeRunsTablePresenter, double thetaTolerance,
+                std::vector<std::string> const &instruments, IMessageHandler *messageHandler);
   RunsPresenter(RunsPresenter const &) = delete;
   ~RunsPresenter() override;
   RunsPresenter const &operator=(RunsPresenter const &) = delete;
@@ -77,8 +74,7 @@ public:
   void setRoundPrecision(int &precision) override;
   void resetRoundPrecision() override;
   std::string instrumentName() const override;
-  bool
-  notifyChangeInstrumentRequested(std::string const &instrumentName) override;
+  bool notifyChangeInstrumentRequested(std::string const &instrumentName) override;
   void notifyResumeReductionRequested() override;
   void notifyPauseReductionRequested() override;
   void notifyRowStateChanged() override;
@@ -166,8 +162,7 @@ private:
   void autoreduceNewRuns();
 
   ProgressPresenter setupProgressBar(const std::set<int> &rowsToTransfer);
-  void transfer(const std::set<int> &rowsToTransfer,
-                const TransferMatch matchType = TransferMatch::Any);
+  void transfer(const std::set<int> &rowsToTransfer, const TransferMatch matchType = TransferMatch::Any);
   void updateWidgetEnabledState() const;
   /// Check that a given set of row indices are valid to transfer
   bool validateRowsToTransfer(const std::set<int> &rowsToTransfer);
@@ -176,8 +171,7 @@ private:
   void stopMonitor();
   void startMonitorComplete();
   std::string liveDataReductionAlgorithm();
-  std::string liveDataReductionOptions(const std::string &inputWorkspace,
-                                       const std::string &instrument);
+  std::string liveDataReductionOptions(const std::string &inputWorkspace, const std::string &instrument);
 
   Mantid::API::IAlgorithm_sptr setupLiveDataMonitorAlgorithm();
 
@@ -185,8 +179,7 @@ private:
   void handleError(const std::string &message);
 
   void finishHandle(const Mantid::API::IAlgorithm *alg) override;
-  void errorHandle(const Mantid::API::IAlgorithm *alg,
-                   const std::string &what) override;
+  void errorHandle(const Mantid::API::IAlgorithm *alg, const std::string &what) override;
   void updateViewWhenMonitorStarting();
   void updateViewWhenMonitorStarted();
   void updateViewWhenMonitorStopped();

@@ -27,16 +27,11 @@ class ComponentInfoBankHelpersTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ComponentInfoBankHelpersTest *createSuite() {
-    return new ComponentInfoBankHelpersTest();
-  }
-  static void destroySuite(ComponentInfoBankHelpersTest *suite) {
-    delete suite;
-  }
+  static ComponentInfoBankHelpersTest *createSuite() { return new ComponentInfoBankHelpersTest(); }
+  static void destroySuite(ComponentInfoBankHelpersTest *suite) { delete suite; }
 
   void test_DetectorFixedInBankTrueForRectangularBank() {
-    auto rectInstr =
-        ComponentCreationHelper::createTestInstrumentRectangular(1, 2);
+    auto rectInstr = ComponentCreationHelper::createTestInstrumentRectangular(1, 2);
     auto wrappers = InstrumentVisitor::makeWrappers(*rectInstr);
     const auto &componentInfo = *wrappers.first;
 
@@ -80,8 +75,7 @@ public:
 
   void test_any_non_root_assembly_containing_detectors_considered_saveable() {
     // test instrument with detector tubes.
-    auto instr = ComponentCreationHelper::createInstrumentWithPSDTubes(
-        2 /*number of tubes*/, 2 /*pixels per tube*/);
+    auto instr = ComponentCreationHelper::createInstrumentWithPSDTubes(2 /*number of tubes*/, 2 /*pixels per tube*/);
     auto wrappers = InstrumentVisitor::makeWrappers(*instr);
     const auto &compInfo = (*wrappers.first);
     const auto &detInfo = (*wrappers.second);
@@ -93,8 +87,7 @@ public:
 
   void test_monitors_in_bank_make_it_unsaveable() {
     // Instrument which has NO monitors
-    auto instr = ComponentCreationHelper::createInstrumentWithPSDTubes(
-        2 /*number of tubes*/, 2 /*pixels per tube*/);
+    auto instr = ComponentCreationHelper::createInstrumentWithPSDTubes(2 /*number of tubes*/, 2 /*pixels per tube*/);
     auto wrappers = InstrumentVisitor::makeWrappers(*instr);
     {
       const auto &compInfo = (*wrappers.first);
@@ -121,8 +114,7 @@ public:
     // test instrument with a detetctor to test that IsSaveableBank will
     // return false for detectors
     auto instr = ComponentCreationHelper::createMinimalInstrument(
-        V3D(0.0, 0.0, -10.0) /*source pos*/, V3D(0.0, 0.0, 0.0) /*sample pos*/,
-        V3D(0.0, 0.0, 10.0) /*bank pos*/);
+        V3D(0.0, 0.0, -10.0) /*source pos*/, V3D(0.0, 0.0, 0.0) /*sample pos*/, V3D(0.0, 0.0, 10.0) /*bank pos*/);
     auto wrappers = InstrumentVisitor::makeWrappers(*instr);
     const auto &compInfo = (*wrappers.first);
 
@@ -132,8 +124,8 @@ public:
 
   void test_isSaveableBank_finds_rectangular() {
     // create an instrument with a rectangular detector bank
-    auto instr = ComponentCreationHelper::createTestInstrumentRectangular2(
-        2 /*number of banks*/, 2 /*number of pixels*/);
+    auto instr =
+        ComponentCreationHelper::createTestInstrumentRectangular2(2 /*number of banks*/, 2 /*number of pixels*/);
     auto wrappers = InstrumentVisitor::makeWrappers(*instr);
     const auto &compInfo = (*wrappers.first);
     const auto &detInfo = (*wrappers.second);
@@ -141,8 +133,7 @@ public:
     const size_t bankIdx = 13;
     // assert rectangular bank at bankIdx
 
-    TS_ASSERT(compInfo.componentType(bankIdx) ==
-              Beamline::ComponentType::Rectangular);
+    TS_ASSERT(compInfo.componentType(bankIdx) == Beamline::ComponentType::Rectangular);
     // assert isSaveableBank returns true
     TS_ASSERT(isSaveableBank(compInfo, detInfo, bankIdx))
   }
@@ -170,10 +161,8 @@ public:
     // create instrument with geometry as above
     auto instr = ComponentCreationHelper::createSimpleInstrumentWithRotation(
         Mantid::Kernel::V3D(0.0, 0.0, -10.0) /*arbitrary source pos*/,
-        Mantid::Kernel::V3D(0.0, 0.0, 0.0) /*arbitrary sample pos*/,
-        V3D(0.0, 0.0, 10.0) /* bank position*/,
-        Quat(45.0, V3D(0.0, 1.0, 0.0)) /* bank rotation*/,
-        Quat(45.0, V3D(0.0, 1.0, 0.0)) /* detector position*/,
+        Mantid::Kernel::V3D(0.0, 0.0, 0.0) /*arbitrary sample pos*/, V3D(0.0, 0.0, 10.0) /* bank position*/,
+        Quat(45.0, V3D(0.0, 1.0, 0.0)) /* bank rotation*/, Quat(45.0, V3D(0.0, 1.0, 0.0)) /* detector position*/,
         detectorOffset); // detector offset which is expected back.
 
     auto wrappers = InstrumentVisitor::makeWrappers(*instr);
@@ -181,8 +170,7 @@ public:
     const size_t bankIdx = 3; // bank index
     const size_t detIdx = 0;  // detector index
     // Eigen copy of the detector offset that was specified in the instrument
-    Eigen::Vector3d expected_offset =
-        Mantid::Kernel::toVector3d(detectorOffset);
+    Eigen::Vector3d expected_offset = Mantid::Kernel::toVector3d(detectorOffset);
     // ofsset returned by offsetFromAncestor
     auto returnedOffset = offsetFromAncestor(compInfo, bankIdx, detIdx);
     // assert offsetFromAncestor gives back the detector offset
@@ -190,15 +178,13 @@ public:
     TS_ASSERT(expected_offset.isApprox(returnedOffset));
   }
 
-  void
-  test_offsetFromAncestor_throws_if_ancestor_index_is_not_greater_than_current_index() {
+  void test_offsetFromAncestor_throws_if_ancestor_index_is_not_greater_than_current_index() {
 
     /* provide offsetFromAncestor with an ancestor index value not greater than
     current index, and assert offsetFromAncestor will throw. */
 
     // test instrument with arbitrary geometry
-    auto instrument = ComponentCreationHelper::createMinimalInstrument(
-        V3D(0, 0, -10), V3D(0, 0, 0), V3D(0, 0, 10));
+    auto instrument = ComponentCreationHelper::createMinimalInstrument(V3D(0, 0, -10), V3D(0, 0, 0), V3D(0, 0, 10));
     auto wrappers = InstrumentVisitor::makeWrappers(*instrument);
 
     // instrument cache to be used with call offsetFromAncestor
@@ -206,16 +192,14 @@ public:
 
     size_t ancestorIndex = 0; // proposed ancestor < current index
     size_t currentIndex = 1;  // proposed current index
-    TS_ASSERT_THROWS(offsetFromAncestor(compInfo, ancestorIndex, currentIndex),
-                     std::invalid_argument &);
+    TS_ASSERT_THROWS(offsetFromAncestor(compInfo, ancestorIndex, currentIndex), std::invalid_argument &);
   }
 
   void test_isAncestorOf_finds_ancestor() {
 
     // NOTE: as defined in isAncestorOf, the root index is not included.
 
-    auto instrument = ComponentCreationHelper::createTestInstrumentRectangular2(
-        1 /*number of banks*/, 2 /*pixels*/);
+    auto instrument = ComponentCreationHelper::createTestInstrumentRectangular2(1 /*number of banks*/, 2 /*pixels*/);
     auto wrappers = InstrumentVisitor::makeWrappers(*instrument);
 
     // instrument cache to be used with call offsetFromAncestor
@@ -231,8 +215,7 @@ public:
     TS_ASSERT(isAncestorOf(compInfo, bank, pixels[3]));
   }
 
-  void
-  test_isAncestorOf_returns_false_with_child_or_sibling_proposed_as_ancestor() {
+  void test_isAncestorOf_returns_false_with_child_or_sibling_proposed_as_ancestor() {
 
     // clang-format off
     /*
@@ -249,8 +232,7 @@ public:
 
     // NOTE: as defined in isAncestorOf, the root index is not included.
 
-    auto instrument = ComponentCreationHelper::createTestInstrumentRectangular2(
-        1 /*number of banks*/, 2 /*pixels*/);
+    auto instrument = ComponentCreationHelper::createTestInstrumentRectangular2(1 /*number of banks*/, 2 /*pixels*/);
     auto wrappers = InstrumentVisitor::makeWrappers(*instrument);
 
     // instrument cache to be used with call offsetFromAncestor
@@ -276,15 +258,13 @@ public:
 
     // NOTE: as defined in isAncestorOf, the root index is not included.
 
-    auto instrument = ComponentCreationHelper::createTestInstrumentRectangular2(
-        1 /*number of banks*/, 2 /*pixels*/);
+    auto instrument = ComponentCreationHelper::createTestInstrumentRectangular2(1 /*number of banks*/, 2 /*pixels*/);
     auto wrappers = InstrumentVisitor::makeWrappers(*instrument);
 
     // instrument cache to be used with call offsetFromAncestor
     const auto &compInfo = (*wrappers.first);
 
-    auto pixels =
-        compInfo.detectorsInSubtree(6 /*index of bank*/); // 4 detectors of bank
+    auto pixels = compInfo.detectorsInSubtree(6 /*index of bank*/); // 4 detectors of bank
 
     for (const size_t i : pixels)
       TS_ASSERT(isAncestorOf(compInfo, i, i));
@@ -310,15 +290,13 @@ public:
 
     // NOTE: as defined in isAncestorOf, the root index is not included.
 
-    auto instrument = ComponentCreationHelper::createTestInstrumentRectangular2(
-        1 /*number of banks*/, 2 /*pixels*/);
+    auto instrument = ComponentCreationHelper::createTestInstrumentRectangular2(1 /*number of banks*/, 2 /*pixels*/);
     auto wrappers = InstrumentVisitor::makeWrappers(*instrument);
 
     // instrument cache to be used with call offsetFromAncestor
     const auto &compInfo = (*wrappers.first);
 
-    auto pixels =
-        compInfo.detectorsInSubtree(6 /*index of bank*/); // 4 detectors of bank
+    auto pixels = compInfo.detectorsInSubtree(6 /*index of bank*/); // 4 detectors of bank
     auto source = compInfo.source();
 
     for (const size_t i : pixels)

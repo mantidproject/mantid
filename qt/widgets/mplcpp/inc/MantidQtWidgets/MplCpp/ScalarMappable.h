@@ -34,11 +34,9 @@ public:
   void setCmap(const Colormap &cmap);
   void setCmap(const QString &cmap);
   void setNorm(const NormalizeBase &norm);
-  void setClim(boost::optional<double> vmin = boost::none,
-               boost::optional<double> vmax = boost::none);
+  void setClim(boost::optional<double> vmin = boost::none, boost::optional<double> vmax = boost::none);
   QRgb toRGBA(double x, double alpha = 1.0) const;
-  std::vector<QRgb> toRGBA(const std::vector<double> &x,
-                           double alpha = 1.0) const;
+  std::vector<QRgb> toRGBA(const std::vector<double> &x, double alpha = 1.0) const;
 };
 
 } // namespace MplCpp

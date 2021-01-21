@@ -85,12 +85,9 @@ public:
 private:
   using DataCurve::draw; // Unhide base class method (avoids Intel compiler
                          // warning)
-  void draw(QPainter *painter, const QwtScaleMap &xMap, const QwtScaleMap &yMap,
-            int from, int to) const override;
-  void drawSlices(QPainter *painter, const QwtScaleMap &xMap,
-                  const QwtScaleMap &yMap, int from, int to) const;
-  void drawDisk(QPainter *painter, const QwtScaleMap &xMap,
-                const QwtScaleMap &yMap) const;
+  void draw(QPainter *painter, const QwtScaleMap &xMap, const QwtScaleMap &yMap, int from, int to) const override;
+  void drawSlices(QPainter *painter, const QwtScaleMap &xMap, const QwtScaleMap &yMap, int from, int to) const;
+  void drawDisk(QPainter *painter, const QwtScaleMap &xMap, const QwtScaleMap &yMap) const;
 
   int d_pie_ray;
   int d_first_color;

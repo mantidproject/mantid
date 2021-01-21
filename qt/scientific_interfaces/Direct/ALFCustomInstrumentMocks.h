@@ -36,11 +36,8 @@ using namespace MantidQt::MantidWidgets;
 
 class mockALFData {
 public:
-  mockALFData(const std::string &name, const std::string &instName,
-              const int &run, const bool TOF)
-      : m_name(name) {
-    auto ws = WorkspaceCreationHelper::create2DWorkspaceWithValuesAndXerror(
-        1, 10, false, 0.1, 0.2, 0.01, 0.3);
+  mockALFData(const std::string &name, const std::string &instName, const int &run, const bool TOF) : m_name(name) {
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceWithValuesAndXerror(1, 10, false, 0.1, 0.2, 0.01, 0.3);
     // set instrument
     std::shared_ptr<Instrument> inst = std::make_shared<Instrument>();
     inst->setName(instName);
@@ -73,10 +70,8 @@ public:
   MOCK_METHOD1(storeSingleTube, void(const std::string &name));
   MOCK_METHOD0(averageTube, void());
   MOCK_METHOD1(hasTubeBeenExtracted, bool(const std::string &name));
-  MOCK_METHOD1(extractTubeCondition,
-               bool(std::map<std::string, bool> tabBools));
-  MOCK_METHOD1(averageTubeCondition,
-               bool(std::map<std::string, bool> tabBools));
+  MOCK_METHOD1(extractTubeCondition, bool(std::map<std::string, bool> tabBools));
+  MOCK_METHOD1(averageTubeCondition, bool(std::map<std::string, bool> tabBools));
   MOCK_METHOD0(extractSingleTube, void());
   MOCK_METHOD0(WSName, std::string());
   MOCK_METHOD0(getDefaultFunction, Mantid::API::CompositeFunction_sptr());
@@ -96,8 +91,7 @@ public:
 
 class MockALFCustomInstrumentView : public IALFCustomInstrumentView {
 public:
-  explicit MockALFCustomInstrumentView(const std::string &instrument,
-                                       QWidget *parent = nullptr) {
+  explicit MockALFCustomInstrumentView(const std::string &instrument, QWidget *parent = nullptr) {
     (void)instrument;
     (void)parent;
   };
@@ -113,13 +107,9 @@ public:
   MOCK_METHOD1(warningBox, void(const std::string &error));
   MOCK_METHOD1(setInstrumentWidget, void(InstrumentWidget *instrument));
   MOCK_METHOD0(getInstrumentView, InstrumentWidget *());
-  MOCK_METHOD2(
-      setUpInstrument,
-      void(const std::string &fileName,
-           std::vector<std::function<bool(std::map<std::string, bool>)>>
-               &binders));
-  MOCK_METHOD1(addObserver,
-               void(std::tuple<std::string, Observer *> &listener));
+  MOCK_METHOD2(setUpInstrument, void(const std::string &fileName,
+                                     std::vector<std::function<bool(std::map<std::string, bool>)>> &binders));
+  MOCK_METHOD1(addObserver, void(std::tuple<std::string, Observer *> &listener));
   MOCK_METHOD1(setupInstrumentAnalysisSplitters, void(QWidget *analysis));
   MOCK_METHOD0(setupHelp, void());
 };

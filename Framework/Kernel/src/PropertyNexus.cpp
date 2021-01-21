@@ -46,9 +46,8 @@ namespace PropertyNexus {
  * @return Property *
  */
 template <typename NumT>
-std::unique_ptr<Property>
-makeProperty(::NeXus::File *file, const std::string &name,
-             const std::vector<Types::Core::DateAndTime> &times) {
+std::unique_ptr<Property> makeProperty(::NeXus::File *file, const std::string &name,
+                                       const std::vector<Types::Core::DateAndTime> &times) {
   std::vector<NumT> values;
   file->getData(values);
   if (times.empty()) {
@@ -71,9 +70,8 @@ makeProperty(::NeXus::File *file, const std::string &name,
  * @param times :: vector of times, empty = single property with value
  * @return Property *
  */
-std::unique_ptr<Property>
-makeTimeSeriesBoolProperty(::NeXus::File *file, const std::string &name,
-                           const std::vector<Types::Core::DateAndTime> &times) {
+std::unique_ptr<Property> makeTimeSeriesBoolProperty(::NeXus::File *file, const std::string &name,
+                                                     const std::vector<Types::Core::DateAndTime> &times) {
   std::vector<uint8_t> savedValues;
   file->getData(savedValues);
   const size_t nvals = savedValues.size();
@@ -87,17 +85,15 @@ makeTimeSeriesBoolProperty(::NeXus::File *file, const std::string &name,
 }
 
 /** Make a string/vector\<string\> property */
-std::unique_ptr<Property>
-makeStringProperty(::NeXus::File *file, const std::string &name,
-                   const std::vector<Types::Core::DateAndTime> &times) {
+std::unique_ptr<Property> makeStringProperty(::NeXus::File *file, const std::string &name,
+                                             const std::vector<Types::Core::DateAndTime> &times) {
   std::vector<std::string> values;
   if (times.empty()) {
     std::string bigString = file->getStrData();
     return std::make_unique<PropertyWithValue<std::string>>(name, bigString);
   } else {
     if (file->getInfo().dims.size() != 2)
-      throw std::runtime_error("NXlog loading failed on field " + name +
-                               ". Expected rank 2.");
+      throw std::runtime_error("NXlog loading failed on field " + name + ". Expected rank 2.");
     int64_t numStrings = file->getInfo().dims[0];
     int64_t span = file->getInfo().dims[1];
     auto data = std::make_unique<char[]>(numStrings * span);
@@ -120,8 +116,7 @@ makeStringProperty(::NeXus::File *file, const std::string &name,
  * @param group :: name of NXlog group to open
  * @return Property pointer
  */
-std::unique_ptr<Property> loadProperty(::NeXus::File *file,
-                                       const std::string &group) {
+std::unique_ptr<Property> loadProperty(::NeXus::File *file, const std::string &group) {
   file->openGroup(group, "NXlog");
 
   // Times in second offsets

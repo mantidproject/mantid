@@ -20,8 +20,7 @@ namespace DataHandling {
 /** LoadNXcanSAS : Tries to load an NXcanSAS file type into a Workspace2D.
  *  This can load either 1D or 2D data
  */
-class MANTID_DATAHANDLING_DLL LoadNXcanSAS
-    : public API::IFileLoader<Kernel::NexusDescriptor> {
+class MANTID_DATAHANDLING_DLL LoadNXcanSAS : public API::IFileLoader<Kernel::NexusDescriptor> {
 public:
   /// Constructor
   LoadNXcanSAS();
@@ -29,15 +28,11 @@ public:
   ~LoadNXcanSAS() override {}
   const std::string name() const override { return "LoadNXcanSAS"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Loads an HDF5 NXcanSAS file into a MatrixWorkspace.";
-  }
+  const std::string summary() const override { return "Loads an HDF5 NXcanSAS file into a MatrixWorkspace."; }
 
   /// Algorithm's version
   int version() const override { return (1); }
-  const std::vector<std::string> seeAlso() const override {
-    return {"LoadCanSAS1D", "SaveNXcanSAS"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"LoadCanSAS1D", "SaveNXcanSAS"}; }
   /// Algorithm's category for identification
   const std::string category() const override { return "DataHandling\\Nexus"; }
 

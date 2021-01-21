@@ -78,8 +78,7 @@ void LoadMuonNexus2::exec() {
   int confidenceV2 = 0;
   // If the file is hdf5 then we can possibly use LoadMuonNexusV2
   // To check this we'll have to create an HDF5 descriptor for the file.
-  if (Kernel::NexusDescriptor::isReadable(filePath,
-                                          Kernel::NexusDescriptor::Version5)) {
+  if (Kernel::NexusDescriptor::isReadable(filePath, Kernel::NexusDescriptor::Version5)) {
     Kernel::NexusHDF5Descriptor descriptorHDF5(filePath);
     confidenceV2 = loadV2.confidence(descriptorHDF5);
   };
@@ -94,8 +93,7 @@ void LoadMuonNexus2::exec() {
     doExec();
   } else {
     // Version 1 or V2
-    IAlgorithm_sptr childAlg = createChildAlgorithm(
-        getLoadAlgName(confidence1, confidenceV2), 0, 1, true, 1);
+    IAlgorithm_sptr childAlg = createChildAlgorithm(getLoadAlgName(confidence1, confidenceV2), 0, 1, true, 1);
     auto loader = std::dynamic_pointer_cast<API::Algorithm>(childAlg);
     loader->copyPropertiesFrom(*this);
     loader->executeAsChildAlg();
@@ -192,15 +190,12 @@ void LoadMuonNexus2::doExec() {
   }
 
   // Create the 2D workspace for the output
-  DataObjects::Workspace2D_sptr localWorkspace =
-      std::dynamic_pointer_cast<DataObjects::Workspace2D>(
-          WorkspaceFactory::Instance().create("Workspace2D", total_specs,
-                                              nBins + 1, nBins));
+  DataObjects::Workspace2D_sptr localWorkspace = std::dynamic_pointer_cast<DataObjects::Workspace2D>(
+      WorkspaceFactory::Instance().create("Workspace2D", total_specs, nBins + 1, nBins));
   // Set the unit on the workspace to muon time, for now in the form of a Label
   // Unit
   std::shared_ptr<Kernel::Units::Label> lblUnit =
-      std::dynamic_pointer_cast<Kernel::Units::Label>(
-          UnitFactory::Instance().create("Label"));
+      std::dynamic_pointer_cast<Kernel::Units::Label>(UnitFactory::Instance().create("Label"));
   lblUnit->setLabel("Time", Units::Symbol::Microsecond);
   localWorkspace->getAxis(0)->unit() = lblUnit;
   // Set y axis unit
@@ -217,8 +212,7 @@ void LoadMuonNexus2::doExec() {
   }
 
   if (m_numberOfPeriods > 1) {
-    setProperty("OutputWorkspace",
-                std::dynamic_pointer_cast<Workspace>(wsGrpSptr));
+    setProperty("OutputWorkspace", std::dynamic_pointer_cast<Workspace>(wsGrpSptr));
   }
 
   // period_index is currently unused
@@ -254,8 +248,8 @@ void LoadMuonNexus2::doExec() {
       loadLogs(localWorkspace, entry, period);
     } else // We are working on a higher period of a multiperiod raw file
     {
-      localWorkspace = std::dynamic_pointer_cast<DataObjects::Workspace2D>(
-          WorkspaceFactory::Instance().create(localWorkspace));
+      localWorkspace =
+          std::dynamic_pointer_cast<DataObjects::Workspace2D>(WorkspaceFactory::Instance().create(localWorkspace));
     }
 
     std::string outws;
@@ -265,8 +259,7 @@ void LoadMuonNexus2::doExec() {
       suffix << (period + 1);
       outws = outputWorkspace + "_" + suffix.str();
       std::string WSName = localWSName + "_" + suffix.str();
-      declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-          outws, WSName, Direction::Output));
+      declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(outws, WSName, Direction::Output));
       if (wsGrpSptr)
         wsGrpSptr->addWorkspace(localWorkspace);
     }
@@ -279,11 +272,9 @@ void LoadMuonNexus2::doExec() {
 
     int wsIndex = 0;
     localWorkspace->mutableX(0) = timeBins;
-    for (auto spec = static_cast<int>(m_spec_min);
-         spec <= static_cast<int>(m_spec_max); ++spec) {
+    for (auto spec = static_cast<int>(m_spec_min); spec <= static_cast<int>(m_spec_max); ++spec) {
       int i = index_spectrum[spec]; // if spec not found i is 0
-      localWorkspace->setHistogram(
-          wsIndex, loadData(localWorkspace->binEdges(0), counts, period, i));
+      localWorkspace->setHistogram(wsIndex, loadData(localWorkspace->binEdges(0), counts, period, i));
       localWorkspace->getSpectrum(wsIndex).setSpectrumNo(spectrum_index[i]);
       localWorkspace->getSpectrum(wsIndex).setDetectorIDs(detMapping.at(i));
       wsIndex++;
@@ -294,8 +285,7 @@ void LoadMuonNexus2::doExec() {
     if (m_list) {
       for (auto spec : m_spec_list) {
         int k = index_spectrum[spec]; // if spec not found k is 0
-        localWorkspace->setHistogram(
-            wsIndex, loadData(localWorkspace->binEdges(0), counts, period, k));
+        localWorkspace->setHistogram(wsIndex, loadData(localWorkspace->binEdges(0), counts, period, k));
         localWorkspace->getSpectrum(wsIndex).setSpectrumNo(spectrum_index[k]);
         localWorkspace->getSpectrum(wsIndex).setDetectorIDs(detMapping.at(k));
         wsIndex++;
@@ -308,16 +298,14 @@ void LoadMuonNexus2::doExec() {
     bool autogroup = getProperty("AutoGroup");
 
     if (autogroup) {
-      g_log.warning(
-          "Autogrouping is not implemented for muon NeXus version 2 files");
+      g_log.warning("Autogrouping is not implemented for muon NeXus version 2 files");
     }
 
     // Assign the result to the output workspace property
     if (m_numberOfPeriods > 1)
       setProperty(outws, std::static_pointer_cast<Workspace>(localWorkspace));
     else {
-      setProperty("OutputWorkspace",
-                  std::dynamic_pointer_cast<Workspace>(localWorkspace));
+      setProperty("OutputWorkspace", std::dynamic_pointer_cast<Workspace>(localWorkspace));
     }
 
   } // loop over periods
@@ -326,9 +314,7 @@ void LoadMuonNexus2::doExec() {
 /** loadData
  *  Load the counts data from an NXInt into a workspace
  */
-Histogram LoadMuonNexus2::loadData(const BinEdges &edges,
-                                   const Mantid::NeXus::NXInt &counts,
-                                   int period, int spec) {
+Histogram LoadMuonNexus2::loadData(const BinEdges &edges, const Mantid::NeXus::NXInt &counts, int period, int spec) {
   int nBins = 0;
   const int *data = nullptr;
 
@@ -351,8 +337,7 @@ Histogram LoadMuonNexus2::loadData(const BinEdges &edges,
  *   @param entry :: The Nexus entry
  *   @param period :: The period of this workspace
  */
-void LoadMuonNexus2::loadLogs(const API::MatrixWorkspace_sptr &ws,
-                              NXEntry &entry, int period) {
+void LoadMuonNexus2::loadLogs(const API::MatrixWorkspace_sptr &ws, NXEntry &entry, int period) {
   // Avoid compiler warning
   (void)period;
 
@@ -362,8 +347,7 @@ void LoadMuonNexus2::loadLogs(const API::MatrixWorkspace_sptr &ws,
   NXMainClass runlogs = entry.openNXClass<NXMainClass>("sample");
   ws->mutableSample().setName(sampleName);
 
-  for (std::vector<NXClassInfo>::const_iterator it = runlogs.groups().begin();
-       it != runlogs.groups().end(); ++it) {
+  for (std::vector<NXClassInfo>::const_iterator it = runlogs.groups().begin(); it != runlogs.groups().end(); ++it) {
     NXLog nxLog = runlogs.openNXLog(it->nxname);
     Kernel::Property *logv = nxLog.createTimeSeries(start_time);
     if (!logv)
@@ -379,8 +363,7 @@ void LoadMuonNexus2::loadLogs(const API::MatrixWorkspace_sptr &ws,
 
   std::string run_num = std::to_string(entry.getInt("run_number"));
   // The sample is left to delete the property
-  ws->mutableRun().addLogData(
-      new PropertyWithValue<std::string>("run_number", run_num));
+  ws->mutableRun().addLogData(new PropertyWithValue<std::string>("run_number", run_num));
 
   ws->populateInstrumentParameters();
 }
@@ -388,8 +371,7 @@ void LoadMuonNexus2::loadLogs(const API::MatrixWorkspace_sptr &ws,
 /**  Log the run details from the file
  * @param localWorkspace :: The workspace details to use
  */
-void LoadMuonNexus2::loadRunDetails(
-    const DataObjects::Workspace2D_sptr &localWorkspace) {
+void LoadMuonNexus2::loadRunDetails(const DataObjects::Workspace2D_sptr &localWorkspace) {
   API::Run &runDetails = localWorkspace->mutableRun();
 
   runDetails.addProperty("run_title", localWorkspace->getTitle(), true);
@@ -488,8 +470,7 @@ int LoadMuonNexus2::confidence(Kernel::NexusDescriptor &descriptor) const {
  * @returns :: map of index -> detector IDs
  * @throws std::runtime_error if fails to read data from file
  */
-std::map<int, std::set<int>>
-LoadMuonNexus2::loadDetectorMapping(const Mantid::NeXus::NXInt &spectrumIndex) {
+std::map<int, std::set<int>> LoadMuonNexus2::loadDetectorMapping(const Mantid::NeXus::NXInt &spectrumIndex) {
   std::map<int, std::set<int>> mapping;
   const int nSpectra = spectrumIndex.dim0();
 

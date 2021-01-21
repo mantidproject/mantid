@@ -36,14 +36,11 @@ class RunCombinationHelperTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static RunCombinationHelperTest *createSuite() {
-    return new RunCombinationHelperTest();
-  }
+  static RunCombinationHelperTest *createSuite() { return new RunCombinationHelperTest(); }
   static void destroySuite(RunCombinationHelperTest *suite) { delete suite; }
 
   void setUp() override {
-    m_reference =
-        create2DWorkspaceWithFullInstrument(2, 3, true, false, true, "test");
+    m_reference = create2DWorkspaceWithFullInstrument(2, 3, true, false, true, "test");
     setUnits(m_reference);
     m_testee.setReferenceProperties(m_reference);
   }
@@ -55,10 +52,9 @@ public:
     auto table = WorkspaceFactory::Instance().createTable("TableWorkspace");
     storeWS("table", table);
 
-    TS_ASSERT_THROWS_EQUALS(
-        m_testee.unWrapGroups(std::vector<std::string>{"ws1", "table"}),
-        const std::runtime_error &e, std::string(e.what()),
-        "The input table is neither a WorkspaceGroup nor a MatrixWorkspace");
+    TS_ASSERT_THROWS_EQUALS(m_testee.unWrapGroups(std::vector<std::string>{"ws1", "table"}),
+                            const std::runtime_error &e, std::string(e.what()),
+                            "The input table is neither a WorkspaceGroup nor a MatrixWorkspace");
 
     removeWS("ws1");
   }
@@ -75,13 +71,11 @@ public:
 
     GroupWorkspaces grouper;
     grouper.initialize();
-    grouper.setProperty("InputWorkspaces",
-                        std::vector<std::string>{"ws1", "ws2"});
+    grouper.setProperty("InputWorkspaces", std::vector<std::string>{"ws1", "ws2"});
     grouper.setProperty("OutputWorkspace", "ws12");
     grouper.execute();
 
-    auto flatVector =
-        m_testee.unWrapGroups(std::vector<std::string>{"ws12", "ws3"});
+    auto flatVector = m_testee.unWrapGroups(std::vector<std::string>{"ws12", "ws3"});
     TS_ASSERT_EQUALS(flatVector[0], "ws1");
     TS_ASSERT_EQUALS(flatVector[1], "ws2");
     TS_ASSERT_EQUALS(flatVector[2], "ws3");
@@ -97,28 +91,22 @@ public:
   }
 
   void testIncompatibleInstrument() {
-    MatrixWorkspace_sptr ws =
-        create2DWorkspaceWithFullInstrument(2, 3, true, false, true, "other");
+    MatrixWorkspace_sptr ws = create2DWorkspaceWithFullInstrument(2, 3, true, false, true, "other");
     setUnits(ws);
-    TS_ASSERT_EQUALS(m_testee.checkCompatibility(ws),
-                     "different instrument names; ");
+    TS_ASSERT_EQUALS(m_testee.checkCompatibility(ws), "different instrument names; ");
   }
 
   void testIncompatibleNumHistograms() {
-    MatrixWorkspace_sptr ws =
-        create2DWorkspaceWithFullInstrument(3, 3, true, false, true, "test");
+    MatrixWorkspace_sptr ws = create2DWorkspaceWithFullInstrument(3, 3, true, false, true, "test");
     setUnits(ws);
-    TS_ASSERT_EQUALS(m_testee.checkCompatibility(ws, true),
-                     "different number of histograms; ");
+    TS_ASSERT_EQUALS(m_testee.checkCompatibility(ws, true), "different number of histograms; ");
     TS_ASSERT(m_testee.checkCompatibility(ws).empty());
   }
 
   void testIncompatibleDataType() {
-    MatrixWorkspace_sptr ws =
-        create2DWorkspaceWithFullInstrument(2, 3, true, false, false, "test");
+    MatrixWorkspace_sptr ws = create2DWorkspaceWithFullInstrument(2, 3, true, false, false, "test");
     setUnits(ws);
-    TS_ASSERT_EQUALS(m_testee.checkCompatibility(ws),
-                     "different distribution or histogram type; ");
+    TS_ASSERT_EQUALS(m_testee.checkCompatibility(ws), "different distribution or histogram type; ");
   }
 
   void testIncompatibleXUnits() {
@@ -136,26 +124,22 @@ public:
   void testIncompatibleSpectrumAxisUnits() {
     MatrixWorkspace_sptr ws = m_reference->clone();
     ws->getAxis(1)->unit() = UnitFactory::Instance().create("QSquared");
-    TS_ASSERT_EQUALS(m_testee.checkCompatibility(ws),
-                     "different spectrum axis units; ");
+    TS_ASSERT_EQUALS(m_testee.checkCompatibility(ws), "different spectrum axis units; ");
   }
 
   void testIncompatibleMultiple() {
     MatrixWorkspace_sptr ws = m_reference->clone();
     ws->getAxis(0)->unit() = UnitFactory::Instance().create("Energy");
     ws->getAxis(1)->unit() = UnitFactory::Instance().create("QSquared");
-    TS_ASSERT_EQUALS(m_testee.checkCompatibility(ws),
-                     "different X units; different spectrum axis units; ");
+    TS_ASSERT_EQUALS(m_testee.checkCompatibility(ws), "different X units; different spectrum axis units; ");
   }
 
   void testIncompatibleDx() {
     // create a workspace where spectrum 1 has Dx
     MatrixWorkspace_sptr ws2 = m_reference->clone();
-    auto dx =
-        Mantid::Kernel::make_cow<Mantid::HistogramData::HistogramDx>(3, 0.2);
+    auto dx = Mantid::Kernel::make_cow<Mantid::HistogramData::HistogramDx>(3, 0.2);
     ws2->setSharedDx(1, dx);
-    TS_ASSERT_EQUALS(m_testee.checkCompatibility(ws2),
-                     "spectra must have either Dx values or not; ");
+    TS_ASSERT_EQUALS(m_testee.checkCompatibility(ws2), "spectra must have either Dx values or not; ");
   }
 
   void test_scanning_workspaces_throw_no_error() {
@@ -171,19 +155,16 @@ public:
     const auto nonScanWS = createSampleScanningWorkspace(1);
 
     m_testee.setReferenceProperties(scanWS);
-    TS_ASSERT_EQUALS(m_testee.checkCompatibility(nonScanWS),
-                     "a mix of workspaces with and without detector scans; ");
+    TS_ASSERT_EQUALS(m_testee.checkCompatibility(nonScanWS), "a mix of workspaces with and without detector scans; ");
   }
 
-  void
-  test_scanning_workspaces_with_different_numbers_of_detectors_throws_error() {
+  void test_scanning_workspaces_with_different_numbers_of_detectors_throws_error() {
     const auto scanWS1 = createSampleScanningWorkspace(2);
     const auto scanWS2 = createSampleScanningWorkspace(2, 5);
 
     m_testee.setReferenceProperties(scanWS1);
-    TS_ASSERT_EQUALS(m_testee.checkCompatibility(scanWS2),
-                     "workspaces with detectors scans have different number of "
-                     "detectors; ");
+    TS_ASSERT_EQUALS(m_testee.checkCompatibility(scanWS2), "workspaces with detectors scans have different number of "
+                                                           "detectors; ");
   }
 
 private:
@@ -193,10 +174,8 @@ private:
     ws->setYUnit("Counts");
   }
 
-  MatrixWorkspace_sptr createSampleScanningWorkspace(int nTimeIndexes,
-                                                     int nhist = 2) {
-    return create2DDetectorScanWorkspaceWithFullInstrument(
-        nhist, 3, nTimeIndexes, 0, 1, true, false, true, "test");
+  MatrixWorkspace_sptr createSampleScanningWorkspace(int nTimeIndexes, int nhist = 2) {
+    return create2DDetectorScanWorkspaceWithFullInstrument(nhist, 3, nTimeIndexes, 0, 1, true, false, true, "test");
   }
 
   RunCombinationHelper m_testee;

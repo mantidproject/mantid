@@ -19,8 +19,7 @@ namespace Kernel {
  * that takes an initial seed and produces a set of numbers. It specialises
  * the interface for a general random number generator.
  */
-class MANTID_KERNEL_DLL PseudoRandomNumberGenerator
-    : public NDRandomNumberGenerator {
+class MANTID_KERNEL_DLL PseudoRandomNumberGenerator : public NDRandomNumberGenerator {
 public:
   /// Default constructor setting the dimension to 1
   PseudoRandomNumberGenerator();
@@ -29,8 +28,7 @@ public:
   PseudoRandomNumberGenerator(const PseudoRandomNumberGenerator &) = delete;
 
   /// Disable assignment operator
-  PseudoRandomNumberGenerator &
-  operator=(const PseudoRandomNumberGenerator &) = delete;
+  PseudoRandomNumberGenerator &operator=(const PseudoRandomNumberGenerator &) = delete;
 
   /// Set the random number seed
   virtual void setSeed(const size_t seedValue) = 0;

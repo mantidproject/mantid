@@ -42,9 +42,7 @@ public:
     return {"CopySample", "SetSampleMaterial", "LoadSampleShape"};
   }
   /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override {
-    return "DataHandling\\Instrument";
-  }
+  const std::string category() const override { return "DataHandling\\Instrument"; }
   std::map<std::string, std::string> validateInputs() override;
 
 private:
@@ -52,11 +50,9 @@ private:
   void init() override;
   void exec() override;
 
-  void loadEnvironmentFromSTL(const std::string filename, API::Sample &sample,
-                              const bool add, std::string debugString);
+  void loadEnvironmentFromSTL(const std::string filename, API::Sample &sample, const bool add, std::string debugString);
 
-  void loadEnvironmentFrom3MF(API::MatrixWorkspace_const_sptr inputWS,
-                              const std::string filename, API::Sample &sample,
+  void loadEnvironmentFrom3MF(API::MatrixWorkspace_const_sptr inputWS, const std::string filename, API::Sample &sample,
                               const bool add, std::string debugString);
 };
 

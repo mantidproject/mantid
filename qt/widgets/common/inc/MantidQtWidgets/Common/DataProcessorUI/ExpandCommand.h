@@ -17,14 +17,11 @@ ExpandCommand defines the action "Expand Selection"
 */
 class ExpandCommand : public CommandBase {
 public:
-  ExpandCommand(DataProcessorPresenter *tablePresenter)
-      : CommandBase(tablePresenter){};
+  ExpandCommand(DataProcessorPresenter *tablePresenter) : CommandBase(tablePresenter){};
   ExpandCommand(const QDataProcessorWidget &widget) : CommandBase(widget){};
   virtual ~ExpandCommand(){};
 
-  void execute() override {
-    m_presenter->notify(DataProcessorPresenter::ExpandSelectionFlag);
-  };
+  void execute() override { m_presenter->notify(DataProcessorPresenter::ExpandSelectionFlag); };
   QString name() override { return QString("Expand Selection"); }
   QString icon() override { return QString("://fit_frame.png"); }
   QString tooltip() override { return QString("Selects an entire group"); }

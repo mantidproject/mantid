@@ -26,21 +26,16 @@ public:
 
   void test_Compare() {
     // tof event
-    TofEvent tofEvent1(20.0,
-                       Types::Core::DateAndTime("1990-01-02 00:00:02.000"));
-    TofEvent tofEvent2(
-        20.05, Types::Core::DateAndTime("1990-01-02 00:00:02.000000001"));
+    TofEvent tofEvent1(20.0, Types::Core::DateAndTime("1990-01-02 00:00:02.000"));
+    TofEvent tofEvent2(20.05, Types::Core::DateAndTime("1990-01-02 00:00:02.000000001"));
 
     TS_ASSERT(tofEvent1 == tofEvent1);
     TS_ASSERT(!(tofEvent1 == tofEvent2));
     TS_ASSERT(tofEvent1.equals(tofEvent2, .1, 1));
 
     // weighted
-    WeightedEvent wghtEvent1(
-        20.0, Types::Core::DateAndTime("1990-01-02 00:00:02.000"), 1., 1.);
-    WeightedEvent wghtEvent2(
-        20.05, Types::Core::DateAndTime("1990-01-02 00:00:02.000000001"), 1.05,
-        1.);
+    WeightedEvent wghtEvent1(20.0, Types::Core::DateAndTime("1990-01-02 00:00:02.000"), 1., 1.);
+    WeightedEvent wghtEvent2(20.05, Types::Core::DateAndTime("1990-01-02 00:00:02.000000001"), 1.05, 1.);
 
     TS_ASSERT(wghtEvent1 == wghtEvent1);
     TS_ASSERT(!(wghtEvent1 == wghtEvent2));

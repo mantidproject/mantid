@@ -42,35 +42,26 @@ public:
   size_t getActualBinCount();
 
 protected:
-  void
-  setChopperFromWorkspace(const API::MatrixWorkspace_const_sptr &workspace);
+  void setChopperFromWorkspace(const API::MatrixWorkspace_const_sptr &workspace);
   void setChopper(PoldiAbstractChopper_sptr chopper);
 
-  void setTimeBinWidthFromWorkspace(
-      const API::MatrixWorkspace_const_sptr &workspace);
+  void setTimeBinWidthFromWorkspace(const API::MatrixWorkspace_const_sptr &workspace);
   void setTimeBinWidth(double timeBinWidth);
   void setActualBinCount(size_t actualBinCount);
 
   double getMaximumTimeValue(size_t calculatedBinCount);
   double getMinimumExtraTimeValue(size_t calculatedBinCount);
 
-  API::MatrixWorkspace_sptr
-  getCroppedWorkspace(API::MatrixWorkspace_sptr workspace);
-  API::MatrixWorkspace_sptr
-  getExtraCountsWorkspace(API::MatrixWorkspace_sptr workspace);
+  API::MatrixWorkspace_sptr getCroppedWorkspace(API::MatrixWorkspace_sptr workspace);
+  API::MatrixWorkspace_sptr getExtraCountsWorkspace(API::MatrixWorkspace_sptr workspace);
 
-  API::MatrixWorkspace_sptr
-  getWorkspaceBelowX(const API::MatrixWorkspace_sptr &workspace, double x);
-  API::MatrixWorkspace_sptr
-  getWorkspaceAboveX(const API::MatrixWorkspace_sptr &workspace, double x);
+  API::MatrixWorkspace_sptr getWorkspaceBelowX(const API::MatrixWorkspace_sptr &workspace, double x);
+  API::MatrixWorkspace_sptr getWorkspaceAboveX(const API::MatrixWorkspace_sptr &workspace, double x);
 
-  API::Algorithm_sptr
-  getCropAlgorithmForWorkspace(const API::MatrixWorkspace_sptr &workspace);
-  API::MatrixWorkspace_sptr
-  getOutputWorkspace(const API::Algorithm_sptr &algorithm);
+  API::Algorithm_sptr getCropAlgorithmForWorkspace(const API::MatrixWorkspace_sptr &workspace);
+  API::MatrixWorkspace_sptr getOutputWorkspace(const API::Algorithm_sptr &algorithm);
 
-  API::MatrixWorkspace_sptr
-  getSummedSpectra(const API::MatrixWorkspace_sptr &workspace);
+  API::MatrixWorkspace_sptr getSummedSpectra(const API::MatrixWorkspace_sptr &workspace);
 
   PoldiAbstractChopper_sptr m_chopper;
   double m_timeBinWidth;

@@ -37,22 +37,19 @@
 #include <QTextStream>
 
 Fit::Fit(ApplicationWindow *parent, Graph *g, const QString &name)
-    : Filter(parent, g, name), d_f(nullptr), d_df(nullptr), d_fdf(nullptr),
-      d_fsimplex(nullptr), d_w(nullptr) {
+    : Filter(parent, g, name), d_f(nullptr), d_df(nullptr), d_fdf(nullptr), d_fsimplex(nullptr), d_w(nullptr) {
   init();
 }
 
 Fit::Fit(ApplicationWindow *parent, Table *t, const QString &name)
-    : Filter(parent, t, name), d_f(nullptr), d_df(nullptr), d_fdf(nullptr),
-      d_fsimplex(nullptr), d_w(nullptr) {
+    : Filter(parent, t, name), d_f(nullptr), d_df(nullptr), d_fdf(nullptr), d_fsimplex(nullptr), d_w(nullptr) {
   init();
 }
 
 void Fit::init() {
   ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
   if (!app) {
-    throw std::logic_error(
-        "Parent of qtiplot's Fit is not ApplicationWindow as expected.");
+    throw std::logic_error("Parent of qtiplot's Fit is not ApplicationWindow as expected.");
   }
   d_p = 0;
   d_n = 0;
@@ -87,8 +84,7 @@ void Fit::init() {
   d_param_range_right = nullptr;
 }
 
-gsl_multifit_fdfsolver *Fit::fitGSL(gsl_multifit_function_fdf f,
-                                    int &iterations, int &status) {
+gsl_multifit_fdfsolver *Fit::fitGSL(gsl_multifit_function_fdf f, int &iterations, int &status) {
   const gsl_multifit_fdfsolver_type *T;
   if (d_solver)
     T = gsl_multifit_fdfsolver_lmder;
@@ -143,8 +139,7 @@ gsl_multifit_fdfsolver *Fit::fitGSL(gsl_multifit_function_fdf f,
   return s;
 }
 
-gsl_multimin_fminimizer *Fit::fitSimplex(gsl_multimin_function f,
-                                         int &iterations, int &status) {
+gsl_multimin_fminimizer *Fit::fitSimplex(gsl_multimin_function f, int &iterations, int &status) {
   const gsl_multimin_fminimizer_type *T = gsl_multimin_fminimizer_nmsimplex;
 
   // size of the simplex
@@ -197,8 +192,7 @@ gsl_multimin_fminimizer *Fit::fitSimplex(gsl_multimin_function f,
   return s_min;
 }
 
-bool Fit::setDataFromTable(Table *t, const QString &xColName,
-                           const QString &yColName, int from, int to) {
+bool Fit::setDataFromTable(Table *t, const QString &xColName, const QString &yColName, int from, int to) {
   if (d_n > 0) // delete old weighting data set
     delete[] d_w;
 
@@ -289,8 +283,7 @@ QString Fit::logFitInfo(int iterations, int status) {
     info += tr("No weighting");
     break;
   case Instrumental:
-    info += tr("Instrumental") + ", " + tr("using error bars dataset") + ": " +
-            weighting_dataset;
+    info += tr("Instrumental") + ", " + tr("using error bars dataset") + ": " + weighting_dataset;
     break;
   case Statistical:
     info += tr("Statistical");
@@ -311,13 +304,11 @@ QString Fit::logFitInfo(int iterations, int status) {
     else
       info += tr("Scaled Levenberg-Marquardt");
 
-    info += tr(" algorithm with tolerance = ") + locale.toString(d_tolerance) +
-            "\n";
+    info += tr(" algorithm with tolerance = ") + locale.toString(d_tolerance) + "\n";
   }
 
-  info += tr("From x") + " = " + locale.toString(d_x[0], 'e', d_prec) + " " +
-          tr("to x") + " = " + locale.toString(d_x[d_n - 1], 'e', d_prec) +
-          "\n";
+  info += tr("From x") + " = " + locale.toString(d_x[0], 'e', d_prec) + " " + tr("to x") + " = " +
+          locale.toString(d_x[d_n - 1], 'e', d_prec) + "\n";
   double chi_2_dof = chi_2 / (d_n - d_p);
   for (int i = 0; i < d_p; i++) {
     info += d_param_names[i];
@@ -325,20 +316,16 @@ QString Fit::logFitInfo(int iterations, int status) {
       info += " (" + d_param_explain[i] + ")";
     info += " = " + locale.toString(d_results[i], 'e', d_prec) + " +/- ";
     if (d_scale_errors)
-      info += locale.toString(sqrt(chi_2_dof * gsl_matrix_get(covar, i, i)),
-                              'e', d_prec) +
-              "\n";
+      info += locale.toString(sqrt(chi_2_dof * gsl_matrix_get(covar, i, i)), 'e', d_prec) + "\n";
     else
-      info += locale.toString(sqrt(gsl_matrix_get(covar, i, i)), 'e', d_prec) +
-              "\n";
+      info += locale.toString(sqrt(gsl_matrix_get(covar, i, i)), 'e', d_prec) + "\n";
   }
   info += "--------------------------------------------------------------------"
           "------------------\n";
   info += "Chi^2/doF = " + locale.toString(chi_2_dof, 'e', d_prec) + "\n";
 
   double sst = (d_n - 1) * gsl_stats_variance(d_y, 1, d_n);
-  info +=
-      tr("R^2") + " = " + locale.toString(1 - chi_2 / sst, 'e', d_prec) + "\n";
+  info += tr("R^2") + " = " + locale.toString(1 - chi_2 / sst, 'e', d_prec) + "\n";
   info += "--------------------------------------------------------------------"
           "-------------------\n";
   if (is_non_linear) {
@@ -371,19 +358,14 @@ QString Fit::legendInfo() {
   double chi_2_dof = chi_2 / (d_n - d_p);
   info += "Chi^2/doF = " + locale.toString(chi_2_dof, 'e', d_prec) + "\n";
   double sst = (d_n - 1) * gsl_stats_variance(d_y, 1, d_n);
-  info +=
-      tr("R^2") + " = " + locale.toString(1 - chi_2 / sst, 'e', d_prec) + "\n";
+  info += tr("R^2") + " = " + locale.toString(1 - chi_2 / sst, 'e', d_prec) + "\n";
 
   for (int i = 0; i < d_p; i++) {
-    info += d_param_names[i] + " = " +
-            locale.toString(d_results[i], 'e', d_prec) + " +/- ";
+    info += d_param_names[i] + " = " + locale.toString(d_results[i], 'e', d_prec) + " +/- ";
     if (d_scale_errors)
-      info += locale.toString(sqrt(chi_2_dof * gsl_matrix_get(covar, i, i)),
-                              'e', d_prec) +
-              "\n";
+      info += locale.toString(sqrt(chi_2_dof * gsl_matrix_get(covar, i, i)), 'e', d_prec) + "\n";
     else
-      info += locale.toString(sqrt(gsl_matrix_get(covar, i, i)), 'e', d_prec) +
-              "\n";
+      info += locale.toString(sqrt(gsl_matrix_get(covar, i, i)), 'e', d_prec) + "\n";
   }
   return info;
 }
@@ -391,8 +373,7 @@ QString Fit::legendInfo() {
 bool Fit::setWeightingData(WeightingMethod w, const QString &colName) {
   ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
   if (!app) {
-    throw std::logic_error(
-        "Parent of qtiplot's Fit is not ApplicationWindow as expected.");
+    throw std::logic_error("Parent of qtiplot's Fit is not ApplicationWindow as expected.");
   }
   auto dataCurve = dynamic_cast<DataCurve *>(d_curve);
   switch (w) {
@@ -422,9 +403,7 @@ bool Fit::setWeightingData(WeightingMethod w, const QString &colName) {
     }
     // or if it's a Table curve
     if (!d_graph && d_table) {
-      QMessageBox::critical(
-          app, tr("MantidPlot - Error"),
-          tr("You cannot use the instrumental weighting method."));
+      QMessageBox::critical(app, tr("MantidPlot - Error"), tr("You cannot use the instrumental weighting method."));
       return false;
     }
 
@@ -495,13 +474,11 @@ bool Fit::setWeightingData(WeightingMethod w, const QString &colName) {
 Table *Fit::parametersTable(const QString &tableName) {
   ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
   if (!app) {
-    throw std::logic_error(
-        "Parent of qtiplot's Fit is not ApplicationWindow as expected.");
+    throw std::logic_error("Parent of qtiplot's Fit is not ApplicationWindow as expected.");
   }
   d_param_table = app->table(tableName);
   if (!d_param_table || d_param_table->objectName() != tableName) {
-    d_param_table =
-        app->newTable(app->generateUniqueName(tableName, false), d_p, 3);
+    d_param_table = app->newTable(app->generateUniqueName(tableName, false), d_p, 3);
   }
 
   d_param_table->setHeader({tr("Parameter"), tr("Value"), tr("Error")});
@@ -529,8 +506,7 @@ void Fit::writeParametersToTable(Table *t, bool append) {
 
   ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
   if (!app) {
-    throw std::logic_error(
-        "Parent of qtiplot's Fit is not ApplicationWindow as expected.");
+    throw std::logic_error("Parent of qtiplot's Fit is not ApplicationWindow as expected.");
   }
   QLocale locale = app->locale();
 
@@ -538,8 +514,7 @@ void Fit::writeParametersToTable(Table *t, bool append) {
     int j = rows + i;
     t->setText(j, 0, d_param_names[i]);
     t->setText(j, 1, locale.toString(d_results[i], 'g', d_prec));
-    t->setText(j, 2,
-               locale.toString(sqrt(gsl_matrix_get(covar, i, i)), 'g', d_prec));
+    t->setText(j, 2, locale.toString(sqrt(gsl_matrix_get(covar, i, i)), 'g', d_prec));
   }
 
   for (int i = 0; i < 3; i++) {
@@ -550,13 +525,11 @@ void Fit::writeParametersToTable(Table *t, bool append) {
 Matrix *Fit::covarianceMatrix(const QString &matrixName) {
   ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
   if (!app) {
-    throw std::logic_error(
-        "Parent of qtiplot's Fit is not ApplicationWindow as expected.");
+    throw std::logic_error("Parent of qtiplot's Fit is not ApplicationWindow as expected.");
   }
   d_cov_matrix = app->matrix(matrixName);
   if (!d_cov_matrix || d_cov_matrix->objectName() != matrixName)
-    d_cov_matrix =
-        app->newMatrix(app->generateUniqueName(matrixName, false), d_p, d_p);
+    d_cov_matrix = app->newMatrix(app->generateUniqueName(matrixName, false), d_p, d_p);
 
   d_cov_matrix->setNumericPrecision(d_prec);
   for (int i = 0; i < d_p; i++) {
@@ -588,8 +561,7 @@ void Fit::fit() {
 
   ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
   if (!app) {
-    throw std::logic_error(
-        "Parent of qtiplot's Fit is not ApplicationWindow as expected.");
+    throw std::logic_error("Parent of qtiplot's Fit is not ApplicationWindow as expected.");
   }
 
   if (!d_n) {
@@ -612,9 +584,8 @@ void Fit::fit() {
     return;
   }
   if (d_formula.isEmpty()) {
-    QMessageBox::critical(
-        app, tr("MantidPlot - Fit Error"),
-        tr("You must specify a valid fit function first. Operation aborted!"));
+    QMessageBox::critical(app, tr("MantidPlot - Fit Error"),
+                          tr("You must specify a valid fit function first. Operation aborted!"));
     return;
   }
 
@@ -624,13 +595,7 @@ void Fit::fit() {
   QString names = d_param_names.join(",");
   const char *parNames = names.toAscii().constData();
 
-  struct FitData d_data = {static_cast<size_t>(d_n),
-                           static_cast<size_t>(d_p),
-                           d_x,
-                           d_y,
-                           d_w,
-                           function,
-                           parNames};
+  struct FitData d_data = {static_cast<size_t>(d_n), static_cast<size_t>(d_p), d_x, d_y, d_w, function, parNames};
 
   int status, iterations = d_max_iterations;
   if (d_solver == NelderMeadSimplex) {
@@ -696,8 +661,7 @@ void Fit::generateFitCurve() {
   delete[] Y;
 }
 
-void Fit::insertFitFunctionCurve(const QString &name, double *x, double *y,
-                                 int penWidth) {
+void Fit::insertFitFunctionCurve(const QString &name, double *x, double *y, int penWidth) {
   QString formula = d_formula;
   for (int j = 0; j < d_p; j++) {
     QString parameter = QString::number(d_results[j], 'e', d_prec);
@@ -725,11 +689,10 @@ bool Fit::save(const QString &fileName) {
   QFile f(fileName);
   if (!f.open(QIODevice::WriteOnly)) {
     QApplication::restoreOverrideCursor();
-    QMessageBox::critical(
-        nullptr, tr("MantidPlot") + " - " + tr("File Save Error"),
-        tr("Could not write to file: <br><h4> %1 </h4><p>Please verify that "
-           "you have the right to write to this location!")
-            .arg(fileName));
+    QMessageBox::critical(nullptr, tr("MantidPlot") + " - " + tr("File Save Error"),
+                          tr("Could not write to file: <br><h4> %1 </h4><p>Please verify that "
+                             "you have the right to write to this location!")
+                              .arg(fileName));
     return false;
   }
 
@@ -743,18 +706,14 @@ bool Fit::save(const QString &fileName) {
   out << "<type>" + QString::number(d_fit_type) + "</type>\n";
 
   QString function = d_formula;
-  out << "<function>" + function.replace("<", "&lt;").replace(">", "&gt;") +
-             "</function>\n";
+  out << "<function>" + function.replace("<", "&lt;").replace(">", "&gt;") + "</function>\n";
 
   QString indent = QString(4, ' ');
   for (int i = 0; i < d_p; i++) {
     out << "<parameter>\n";
     out << indent << "<name>" + d_param_names[i] + "</name>\n";
     out << indent << "<explanation>" + d_param_explain[i] + "</explanation>\n";
-    out << indent
-        << "<value>" +
-               QString::number(gsl_vector_get(d_param_init, i), 'e', 13) +
-               "</value>\n";
+    out << indent << "<value>" + QString::number(gsl_vector_get(d_param_init, i), 'e', 13) + "</value>\n";
     out << "</parameter>\n";
   }
   out << "</fit>\n";
@@ -770,10 +729,8 @@ bool Fit::load(const QString &fileName) {
 
   QFile file(fileName);
   if (!file.open(QFile::ReadOnly | QFile::Text)) {
-    QMessageBox::warning(
-        (dynamic_cast<ApplicationWindow *>(this->parent())),
-        tr("MantidPlot Fit Model"),
-        tr("Cannot read file %1:\n%2.").arg(fileName).arg(file.errorString()));
+    QMessageBox::warning((dynamic_cast<ApplicationWindow *>(this->parent())), tr("MantidPlot Fit Model"),
+                         tr("Cannot read file %1:\n%2.").arg(fileName).arg(file.errorString()));
     return false;
   }
 

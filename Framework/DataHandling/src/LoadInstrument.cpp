@@ -45,47 +45,40 @@ enum class LoaderType { Xml = 1, Idf = 2, Nxs = 3 };
 void LoadInstrument::init() {
   // When used as a Child Algorithm the workspace name is not used - hence the
   // "Anonymous" to satisfy the validator
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "Workspace", "Anonymous", Direction::InOut),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("Workspace", "Anonymous", Direction::InOut),
                   "The name of the workspace to load the instrument definition "
                   "into. Any existing instrument will be replaced.");
   declareProperty(
-      std::make_unique<FileProperty>("Filename", "", FileProperty::OptionalLoad,
-                                     LoadGeometry::validExtensions()),
+      std::make_unique<FileProperty>("Filename", "", FileProperty::OptionalLoad, LoadGeometry::validExtensions()),
       "The filename (including its full or relative path) of an instrument "
       "definition file. The file extension must either be .xml or .XML when "
       "specifying an instrument definition file. Files can also be .hdf5 or "
       ".nxs for usage with NeXus Geometry files. Note Filename or "
       "InstrumentName must be specified but not both.");
-  declareProperty(std::make_unique<ArrayProperty<detid_t>>("MonitorList",
-                                                           Direction::Output),
+  declareProperty(std::make_unique<ArrayProperty<detid_t>>("MonitorList", Direction::Output),
                   "Will be filled with a list of the detector ids of any "
                   "monitors loaded in to the workspace.");
-  declareProperty(
-      "InstrumentName", "",
-      "Name of instrument. Can be used instead of Filename to specify an"
-      "instrument definition.");
-  declareProperty("InstrumentXML", "",
-                  "The full XML instrument definition as a string.");
-  declareProperty(
-      std::make_unique<PropertyWithValue<OptionalBool>>(
-          "RewriteSpectraMap", OptionalBool::Unset,
-          std::make_shared<MandatoryValidator<OptionalBool>>()),
-      "If set to True then a 1:1 map between the spectrum numbers and "
-      "detector/monitor IDs is set up such that the detector/monitor IDs in "
-      "the IDF are ordered from smallest to largest number and then assigned "
-      "in that order to the spectra in the workspace. For example if the IDF "
-      "has defined detectors/monitors with IDs 1, 5, 10 and the workspace "
-      "contains 3 spectra with numbers 1, 2, 3 (and workspace indices 0, 1, 2) "
-      "then spectrum number 1 is associated with detector ID 1, spectrum "
-      "number 2 with detector ID 5 and spectrum number 3 with detector ID 10."
-      "If the number of spectra and detectors do not match then the operation "
-      "is performed until the maximum number of either is reached. For example "
-      "if there are 12 spectra and 50 detectors then the first 12 detectors "
-      "are assigned to the 12 spectra in the workspace."
-      "If set to False then the spectrum numbers and detector IDs of the "
-      "workspace are not modified."
-      "This property must be set to either True or False.");
+  declareProperty("InstrumentName", "",
+                  "Name of instrument. Can be used instead of Filename to specify an"
+                  "instrument definition.");
+  declareProperty("InstrumentXML", "", "The full XML instrument definition as a string.");
+  declareProperty(std::make_unique<PropertyWithValue<OptionalBool>>(
+                      "RewriteSpectraMap", OptionalBool::Unset, std::make_shared<MandatoryValidator<OptionalBool>>()),
+                  "If set to True then a 1:1 map between the spectrum numbers and "
+                  "detector/monitor IDs is set up such that the detector/monitor IDs in "
+                  "the IDF are ordered from smallest to largest number and then assigned "
+                  "in that order to the spectra in the workspace. For example if the IDF "
+                  "has defined detectors/monitors with IDs 1, 5, 10 and the workspace "
+                  "contains 3 spectra with numbers 1, 2, 3 (and workspace indices 0, 1, 2) "
+                  "then spectrum number 1 is associated with detector ID 1, spectrum "
+                  "number 2 with detector ID 5 and spectrum number 3 with detector ID 10."
+                  "If the number of spectra and detectors do not match then the operation "
+                  "is performed until the maximum number of either is reached. For example "
+                  "if there are 12 spectra and 50 detectors then the first 12 detectors "
+                  "are assigned to the 12 spectra in the workspace."
+                  "If set to False then the spectrum numbers and detector IDs of the "
+                  "workspace are not modified."
+                  "This property must be set to either True or False.");
 }
 
 //------------------------------------------------------------------------------------------------------------------------------
@@ -134,31 +127,26 @@ void LoadInstrument::exec() {
       if (instname.empty()) {
         g_log.error("Either the InstrumentName or Filename property of "
                     "LoadInstrument most be specified");
-        throw Kernel::Exception::FileError(
-            "Either the InstrumentName or Filename property of LoadInstrument "
-            "must be specified to load an instrument",
-            filename);
+        throw Kernel::Exception::FileError("Either the InstrumentName or Filename property of LoadInstrument "
+                                           "must be specified to load an instrument",
+                                           filename);
       } else {
-        filename = InstrumentFileFinder::getInstrumentFilename(
-            instname, ws->getWorkspaceStartDate());
+        filename = InstrumentFileFinder::getInstrumentFilename(instname, ws->getWorkspaceStartDate());
         setPropertyValue("Filename", filename);
       }
     }
     if (filename.empty()) {
-      throw Exception::NotFoundError(
-          "Unable to find an Instrument File for instrument: ", instname);
+      throw Exception::NotFoundError("Unable to find an Instrument File for instrument: ", instname);
     }
 
     // Remove the path from the filename for use with the InstrumentDataService
     const std::string::size_type stripPath = filename.find_last_of("\\/");
-    std::string instrumentFile =
-        filename.substr(stripPath + 1, filename.size());
+    std::string instrumentFile = filename.substr(stripPath + 1, filename.size());
 
     // Strip off "_Definition.xml"
     auto definitionRange = boost::ifind_first(instrumentFile, "_Def");
     if (definitionRange) {
-      instname = instrumentFile.substr(
-          0, std::distance(instrumentFile.begin(), definitionRange.begin()));
+      instname = instrumentFile.substr(0, std::distance(instrumentFile.begin(), definitionRange.begin()));
     } else {
       g_log.warning("The instrument definition filename does not contain "
                     "_Definition. Your instrument name will be set to: " +
@@ -174,8 +162,7 @@ void LoadInstrument::exec() {
       // Assign the loader type to Nxs
       loader_type = LoaderType::Nxs;
     } else {
-      throw Kernel::Exception::FileError(
-          "No valid loader found for instrument file ", filename);
+      throw Kernel::Exception::FileError("No valid loader found for instrument file ", filename);
     }
   }
 
@@ -185,18 +172,15 @@ void LoadInstrument::exec() {
 
   // Define a parser if using IDFs
   if (loader_type == LoaderType::Xml)
-    parser =
-        InstrumentDefinitionParser(filename, instname, InstrumentXML->value());
+    parser = InstrumentDefinitionParser(filename, instname, InstrumentXML->value());
   else if (loader_type == LoaderType::Idf)
-    parser = InstrumentDefinitionParser(filename, instname,
-                                        Strings::loadFile(filename));
+    parser = InstrumentDefinitionParser(filename, instname, Strings::loadFile(filename));
 
   // Find the mangled instrument name that includes the modified date
   if (loader_type < LoaderType::Nxs)
     instrumentNameMangled = parser.getMangledName();
   else if (loader_type == LoaderType::Nxs)
-    instrumentNameMangled =
-        NexusGeometry::NexusGeometryParser::getMangledName(filename, instname);
+    instrumentNameMangled = NexusGeometry::NexusGeometryParser::getMangledName(filename, instname);
   else
     throw std::runtime_error("Unknown instrument LoaderType");
 
@@ -207,8 +191,7 @@ void LoadInstrument::exec() {
     // Check whether the instrument is already in the InstrumentDataService
     if (InstrumentDataService::Instance().doesExist(instrumentNameMangled)) {
       // If it does, just use the one from the one stored there
-      instrument =
-          InstrumentDataService::Instance().retrieve(instrumentNameMangled);
+      instrument = InstrumentDataService::Instance().retrieve(instrumentNameMangled);
     } else {
 
       if (loader_type < LoaderType::Nxs) {
@@ -224,8 +207,7 @@ void LoadInstrument::exec() {
         instrument->parseTreeAndCacheBeamline();
       } else {
         Instrument_const_sptr ins =
-            NexusGeometry::NexusGeometryParser::createInstrument(
-                filename, NexusGeometry::makeLogger(&m_log));
+            NexusGeometry::NexusGeometryParser::createInstrument(filename, NexusGeometry::makeLogger(&m_log));
         instrument = std::const_pointer_cast<Instrument>(ins);
       }
       // Add to data service for later retrieval
@@ -255,17 +237,14 @@ void LoadInstrument::exec() {
 
 //-----------------------------------------------------------------------------------------------------------------------
 /// Run the Child Algorithm LoadInstrument (or LoadInstrumentFromRaw)
-void LoadInstrument::runLoadParameterFile(
-    const std::shared_ptr<API::MatrixWorkspace> &ws,
-    const std::string &filename) {
+void LoadInstrument::runLoadParameterFile(const std::shared_ptr<API::MatrixWorkspace> &ws,
+                                          const std::string &filename) {
   g_log.debug("Loading the parameter definition...");
 
   // First search for XML parameter file in same folder as IDF file
   const std::string::size_type dir_end = filename.find_last_of("\\/");
-  std::string directoryName =
-      filename.substr(0, dir_end + 1); // include final '/'.
-  std::string fullPathParamIDF =
-      InstrumentFileFinder::getParameterPath(filename, directoryName);
+  std::string directoryName = filename.substr(0, dir_end + 1); // include final '/'.
+  std::string fullPathParamIDF = InstrumentFileFinder::getParameterPath(filename, directoryName);
 
   if (!fullPathParamIDF.empty()) {
 
@@ -280,12 +259,10 @@ void LoadInstrument::runLoadParameterFile(
       loadParamAlg->execute();
       g_log.debug("Parameters loaded successfully.");
     } catch (std::invalid_argument &e) {
-      g_log.information(
-          "LoadParameterFile: No parameter file found for this instrument");
+      g_log.information("LoadParameterFile: No parameter file found for this instrument");
       g_log.information(e.what());
     } catch (std::runtime_error &e) {
-      g_log.information(
-          "Unable to successfully run LoadParameterFile Child Algorithm");
+      g_log.information("Unable to successfully run LoadParameterFile Child Algorithm");
       g_log.information(e.what());
     }
   } else {

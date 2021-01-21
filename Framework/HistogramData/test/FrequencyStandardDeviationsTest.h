@@ -21,18 +21,13 @@ class FrequencyStandardDeviationsTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static FrequencyStandardDeviationsTest *createSuite() {
-    return new FrequencyStandardDeviationsTest();
-  }
-  static void destroySuite(FrequencyStandardDeviationsTest *suite) {
-    delete suite;
-  }
+  static FrequencyStandardDeviationsTest *createSuite() { return new FrequencyStandardDeviationsTest(); }
+  static void destroySuite(FrequencyStandardDeviationsTest *suite) { delete suite; }
 
   void test_has_correct_mixins() {
     FrequencyStandardDeviations data;
     TS_ASSERT_THROWS_NOTHING(UNUSED_ARG(
-        (dynamic_cast<detail::StandardDeviationVectorOf<
-             FrequencyStandardDeviations, HistogramE, FrequencyVariances> &>(
+        (dynamic_cast<detail::StandardDeviationVectorOf<FrequencyStandardDeviations, HistogramE, FrequencyVariances> &>(
             data))));
   }
 
@@ -58,33 +53,25 @@ public:
   void test_construct_from_empty_CountStandardDeviations_null_BinEdges() {
     const CountStandardDeviations counts(0);
     const BinEdges edges{};
-    TS_ASSERT_THROWS(
-        const FrequencyStandardDeviations frequencies(counts, edges),
-        const std::logic_error &);
+    TS_ASSERT_THROWS(const FrequencyStandardDeviations frequencies(counts, edges), const std::logic_error &);
   }
 
   void test_construct_from_empty_CountStandardDeviations_size_mismatch() {
     const CountStandardDeviations counts(0);
     const BinEdges edges{1.0, 2.0};
-    TS_ASSERT_THROWS(
-        const FrequencyStandardDeviations frequencies(counts, edges),
-        const std::logic_error &);
+    TS_ASSERT_THROWS(const FrequencyStandardDeviations frequencies(counts, edges), const std::logic_error &);
   }
 
   void test_construct_from_CountStandardDeviations_null_BinEdges() {
     const CountStandardDeviations counts(1);
     const BinEdges edges{};
-    TS_ASSERT_THROWS(
-        const FrequencyStandardDeviations frequencies(counts, edges),
-        const std::logic_error &);
+    TS_ASSERT_THROWS(const FrequencyStandardDeviations frequencies(counts, edges), const std::logic_error &);
   }
 
   void test_construct_from_CountStandardDeviations_size_mismatch() {
     const CountStandardDeviations counts(2);
     const BinEdges edges{1.0, 2.0};
-    TS_ASSERT_THROWS(
-        const FrequencyStandardDeviations frequencies(counts, edges),
-        const std::logic_error &);
+    TS_ASSERT_THROWS(const FrequencyStandardDeviations frequencies(counts, edges), const std::logic_error &);
   }
 
   void test_construct_from_CountStandardDeviations() {

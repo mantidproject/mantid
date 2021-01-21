@@ -31,17 +31,13 @@ DECLARE_ALGORITHM(SpecularReflectionCalculateTheta)
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string SpecularReflectionCalculateTheta::name() const {
-  return "SpecularReflectionCalculateTheta";
-}
+const std::string SpecularReflectionCalculateTheta::name() const { return "SpecularReflectionCalculateTheta"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int SpecularReflectionCalculateTheta::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string SpecularReflectionCalculateTheta::category() const {
-  return "Reflectometry";
-}
+const std::string SpecularReflectionCalculateTheta::category() const { return "Reflectometry"; }
 
 //----------------------------------------------------------------------------------------------
 
@@ -49,13 +45,10 @@ const std::string SpecularReflectionCalculateTheta::category() const {
 /** Initialize the algorithm's properties.
  */
 void SpecularReflectionCalculateTheta::init() {
-  declareProperty(
-      std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "",
-                                                           Direction::Input),
-      "An Input workspace to calculate the specular relection theta on.");
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input),
+                  "An Input workspace to calculate the specular relection theta on.");
   this->initCommonProperties();
-  declareProperty(std::make_unique<PropertyWithValue<double>>(
-                      "TwoTheta", Mantid::EMPTY_DBL(), Direction::Output),
+  declareProperty(std::make_unique<PropertyWithValue<double>>("TwoTheta", Mantid::EMPTY_DBL(), Direction::Output),
                   "Calculated two theta scattering angle in degrees.");
 }
 

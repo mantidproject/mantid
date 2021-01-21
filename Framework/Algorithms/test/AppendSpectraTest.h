@@ -31,9 +31,7 @@ public:
   static AppendSpectraTest *createSuite() { return new AppendSpectraTest(); }
   static void destroySuite(AppendSpectraTest *suite) { delete suite; }
 
-  AppendSpectraTest()
-      : ws1Name("ConjoinWorkspacesTest_grp1"),
-        ws2Name("ConjoinWorkspacesTest_grp2") {}
+  AppendSpectraTest() : ws1Name("ConjoinWorkspacesTest_grp1"), ws2Name("ConjoinWorkspacesTest_grp2") {}
 
   void setupWS() {
     IAlgorithm *loader;
@@ -67,10 +65,8 @@ public:
       alg.initialize();
 
     // Get the two input workspaces for later
-    MatrixWorkspace_sptr in1 =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("top");
-    MatrixWorkspace_sptr in2 =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("bottom");
+    MatrixWorkspace_sptr in1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("top");
+    MatrixWorkspace_sptr in2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("bottom");
 
     // Mask a spectrum and check it is carried over
     const size_t maskTop(5), maskBottom(10);
@@ -87,9 +83,7 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     MatrixWorkspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING(
-        output =
-            AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("top"));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("top"));
     TS_ASSERT_EQUALS(output->getNumberHistograms(), 25);
     // Check a few values
     TS_ASSERT_EQUALS(output->readX(0)[0], in1->readX(0)[0]);
@@ -98,10 +92,8 @@ public:
     TS_ASSERT_EQUALS(output->readE(7)[700], in1->readE(7)[700]);
     TS_ASSERT_EQUALS(output->readY(19)[55], in2->readY(9)[55]);
     TS_ASSERT_EQUALS(output->readE(10)[321], in2->readE(0)[321]);
-    TS_ASSERT_EQUALS(output->getAxis(1)->spectraNo(5),
-                     in1->getAxis(1)->spectraNo(5));
-    TS_ASSERT_EQUALS(output->getAxis(1)->spectraNo(12),
-                     in2->getAxis(1)->spectraNo(2));
+    TS_ASSERT_EQUALS(output->getAxis(1)->spectraNo(5), in1->getAxis(1)->spectraNo(5));
+    TS_ASSERT_EQUALS(output->getAxis(1)->spectraNo(12), in2->getAxis(1)->spectraNo(2));
 
     // Check masking
     TS_ASSERT_EQUALS(output->spectrumInfo().isMasked(maskTop), true);
@@ -117,10 +109,8 @@ public:
       alg.initialize();
 
     // Get the two input workspaces for later
-    MatrixWorkspace_sptr in1 =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("top");
-    MatrixWorkspace_sptr in2 =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("bottom");
+    MatrixWorkspace_sptr in1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("top");
+    MatrixWorkspace_sptr in2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("bottom");
 
     // Now it should succeed
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace1", "top"));
@@ -131,9 +121,7 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     MatrixWorkspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING(
-        output =
-            AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("top"));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("top"));
     TS_ASSERT_EQUALS(output->getNumberHistograms(), 40);
     // Check a few values
     TS_ASSERT_EQUALS(output->readX(0)[0], in1->readX(0)[0]);
@@ -154,17 +142,14 @@ public:
 
   //----------------------------------------------------------------------------------------------
   void testExecMismatchedWorkspaces() {
-    MatrixWorkspace_sptr ews =
-        WorkspaceCreationHelper::createEventWorkspace(10, 10);
+    MatrixWorkspace_sptr ews = WorkspaceCreationHelper::createEventWorkspace(10, 10);
 
     // Check it fails if mixing event workspaces and workspace 2Ds
     AppendSpectra alg;
     alg.initialize();
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace1", ews));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty(
-        "InputWorkspace2", WorkspaceCreationHelper::create2DWorkspace(10, 10)));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "outevent"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace2", WorkspaceCreationHelper::create2DWorkspace(10, 10)));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "outevent"));
     alg.execute();
     TS_ASSERT(!alg.isExecuted());
   }
@@ -172,12 +157,9 @@ public:
   void testExecNonConstantBins() {
     AppendSpectra alg;
     alg.initialize();
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty(
-        "InputWorkspace1", WorkspaceCreationHelper::create2DWorkspace(10, 10)));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty(
-        "InputWorkspace2", WorkspaceCreationHelper::create2DWorkspace(10, 15)));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "outExecNonConstantBins"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace1", WorkspaceCreationHelper::create2DWorkspace(10, 10)));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace2", WorkspaceCreationHelper::create2DWorkspace(10, 15)));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "outExecNonConstantBins"));
     alg.execute();
     TS_ASSERT(!alg.isExecuted());
   }
@@ -188,18 +170,15 @@ public:
     int numBins = 20;
 
     if (event) {
-      ws1 = WorkspaceCreationHelper::createEventWorkspace2(
-          10, numBins); // 2 events per bin
+      ws1 = WorkspaceCreationHelper::createEventWorkspace2(10, numBins); // 2 events per bin
       ws2 = WorkspaceCreationHelper::createEventWorkspace2(5, numBins);
     } else {
       ws1 = WorkspaceCreationHelper::create2DWorkspace(10, numBins);
       ws2 = WorkspaceCreationHelper::create2DWorkspace(5, numBins);
     }
     // Add instrument so detector IDs are valid and get copied.
-    InstrumentCreationHelper::addFullInstrumentToWorkspace(*ws1, false, false,
-                                                           "");
-    InstrumentCreationHelper::addFullInstrumentToWorkspace(*ws2, false, false,
-                                                           "");
+    InstrumentCreationHelper::addFullInstrumentToWorkspace(*ws1, false, false, "");
+    InstrumentCreationHelper::addFullInstrumentToWorkspace(*ws2, false, false, "");
 
     auto ws1Log = new TimeSeriesProperty<std::string>("aLog");
     ws1Log->addValue(DateAndTime("2014-06-19T16:40:00"), "Hello");
@@ -224,8 +203,7 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     TS_ASSERT_THROWS_NOTHING(
-        out = std::dynamic_pointer_cast<MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve(ws1Name));)
+        out = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(ws1Name));)
     TS_ASSERT(out);
     if (!out)
       return;
@@ -242,11 +220,9 @@ public:
     }
 
     if (combineLogs) {
-      TS_ASSERT_EQUALS(
-          out->run().getTimeSeriesProperty<std::string>("aLog")->size(), 2)
+      TS_ASSERT_EQUALS(out->run().getTimeSeriesProperty<std::string>("aLog")->size(), 2)
     } else {
-      TS_ASSERT_EQUALS(
-          out->run().getTimeSeriesProperty<std::string>("aLog")->size(), 1)
+      TS_ASSERT_EQUALS(out->run().getTimeSeriesProperty<std::string>("aLog")->size(), 1)
     }
   }
 
@@ -265,14 +241,9 @@ public:
     const std::string outputWorkspace = "appended";
 
     createWorkspaceWithAxisAndLabel(inputWorkspace, "Text", "Text");
-    doTestAppendSpectraWithWorkspaces(inputWorkspace, inputWorkspace,
-                                      outputWorkspace);
-    MatrixWorkspace_const_sptr inputWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            inputWorkspace);
-    MatrixWorkspace_const_sptr outputWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            outputWorkspace);
+    doTestAppendSpectraWithWorkspaces(inputWorkspace, inputWorkspace, outputWorkspace);
+    MatrixWorkspace_const_sptr inputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputWorkspace);
+    MatrixWorkspace_const_sptr outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWorkspace);
 
     // Y axis number is 1, no need to cast up to TextAxis as we're only reading
     // the values
@@ -290,14 +261,9 @@ public:
     const std::string outputWorkspace = "appended";
 
     createWorkspaceWithAxisAndLabel(inputWorkspace, "Text", "");
-    doTestAppendSpectraWithWorkspaces(inputWorkspace, inputWorkspace,
-                                      outputWorkspace);
-    MatrixWorkspace_const_sptr inputWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            inputWorkspace);
-    MatrixWorkspace_const_sptr outputWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            outputWorkspace);
+    doTestAppendSpectraWithWorkspaces(inputWorkspace, inputWorkspace, outputWorkspace);
+    MatrixWorkspace_const_sptr inputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputWorkspace);
+    MatrixWorkspace_const_sptr outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWorkspace);
 
     // Y axis number is 1, no need to cast up to TextAxis as we're only reading
     // the values
@@ -317,18 +283,11 @@ public:
 
     createWorkspaceWithAxisAndLabel(inputWorkspace1, "Text", "Text");
     createWorkspaceWithAxisAndLabel(inputWorkspace2, "Text", "");
-    doTestAppendSpectraWithWorkspaces(inputWorkspace1, inputWorkspace2,
-                                      outputWorkspace);
+    doTestAppendSpectraWithWorkspaces(inputWorkspace1, inputWorkspace2, outputWorkspace);
 
-    MatrixWorkspace_const_sptr inputWS1 =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            inputWorkspace1);
-    MatrixWorkspace_const_sptr inputWS2 =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            inputWorkspace2);
-    MatrixWorkspace_const_sptr outputWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            outputWorkspace);
+    MatrixWorkspace_const_sptr inputWS1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputWorkspace1);
+    MatrixWorkspace_const_sptr inputWS2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputWorkspace2);
+    MatrixWorkspace_const_sptr outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWorkspace);
 
     // Y axis number is 1, no need to cast up to TextAxis as we're only reading
     // the values
@@ -355,14 +314,9 @@ public:
     const std::string outputWorkspace = "appended";
 
     createWorkspaceWithAxisAndLabel(inputWorkspace, "Time", "1.0");
-    doTestAppendSpectraWithWorkspaces(inputWorkspace, inputWorkspace,
-                                      outputWorkspace);
-    MatrixWorkspace_const_sptr inputWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            inputWorkspace);
-    MatrixWorkspace_const_sptr outputWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            outputWorkspace);
+    doTestAppendSpectraWithWorkspaces(inputWorkspace, inputWorkspace, outputWorkspace);
+    MatrixWorkspace_const_sptr inputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputWorkspace);
+    MatrixWorkspace_const_sptr outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWorkspace);
 
     // Y axis number is 1, no need to cast up to TextAxis as we're only reading
     // the values
@@ -382,18 +336,11 @@ public:
 
     createWorkspaceWithAxisAndLabel(inputWorkspace1, "Time", "1.0");
     createWorkspaceWithAxisAndLabel(inputWorkspace2, "Time", "2.0");
-    doTestAppendSpectraWithWorkspaces(inputWorkspace1, inputWorkspace2,
-                                      outputWorkspace);
+    doTestAppendSpectraWithWorkspaces(inputWorkspace1, inputWorkspace2, outputWorkspace);
 
-    MatrixWorkspace_const_sptr inputWS1 =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            inputWorkspace1);
-    MatrixWorkspace_const_sptr inputWS2 =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            inputWorkspace2);
-    MatrixWorkspace_const_sptr outputWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            outputWorkspace);
+    MatrixWorkspace_const_sptr inputWS1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputWorkspace1);
+    MatrixWorkspace_const_sptr inputWS2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputWorkspace2);
+    MatrixWorkspace_const_sptr outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWorkspace);
 
     // Y axis number is 1, no need to cast up to TextAxis as we're only reading
     // the values
@@ -408,31 +355,24 @@ public:
       TS_ASSERT_EQUALS(inputAxis1->getValue(0), outputAxis->getValue(i));
       // this will check the labels for the second workspace that is
       // appended at position starting from the length of the first workspace
-      TS_ASSERT_EQUALS(inputAxis2->getValue(0),
-                       outputAxis->getValue(i + ws1len));
+      TS_ASSERT_EQUALS(inputAxis2->getValue(0), outputAxis->getValue(i + ws1len));
     }
   }
 
 private:
-  void doTestAppendSpectraWithWorkspaces(const std::string &inputWorkspace1,
-                                         const std::string &inputWorkspace2,
+  void doTestAppendSpectraWithWorkspaces(const std::string &inputWorkspace1, const std::string &inputWorkspace2,
                                          const std::string &outputWorkspace) {
-    auto appendSpectra =
-        Mantid::API::AlgorithmManager::Instance().create("AppendSpectra");
+    auto appendSpectra = Mantid::API::AlgorithmManager::Instance().create("AppendSpectra");
     TS_ASSERT_THROWS_NOTHING(appendSpectra->setRethrows(true));
-    TS_ASSERT_THROWS_NOTHING(
-        appendSpectra->setProperty("InputWorkspace1", inputWorkspace1));
-    TS_ASSERT_THROWS_NOTHING(
-        appendSpectra->setProperty("InputWorkspace2", inputWorkspace2));
-    TS_ASSERT_THROWS_NOTHING(
-        appendSpectra->setProperty("OutputWorkspace", outputWorkspace));
+    TS_ASSERT_THROWS_NOTHING(appendSpectra->setProperty("InputWorkspace1", inputWorkspace1));
+    TS_ASSERT_THROWS_NOTHING(appendSpectra->setProperty("InputWorkspace2", inputWorkspace2));
+    TS_ASSERT_THROWS_NOTHING(appendSpectra->setProperty("OutputWorkspace", outputWorkspace));
     TS_ASSERT_THROWS_NOTHING(appendSpectra->execute());
     TS_ASSERT(appendSpectra->isExecuted());
   }
   /** Creates a 2D workspace with 5 histograms
    */
-  void createWorkspaceWithAxisAndLabel(const std::string &outputName,
-                                       const std::string &axisType,
+  void createWorkspaceWithAxisAndLabel(const std::string &outputName, const std::string &axisType,
                                        const std::string &axisValue) {
     int nspec = 5;
     std::vector<std::string> YVals;
@@ -448,25 +388,21 @@ private:
       dataY.emplace_back(double(i));
     }
 
-    auto createWS =
-        Mantid::API::AlgorithmManager::Instance().create("CreateWorkspace");
+    auto createWS = Mantid::API::AlgorithmManager::Instance().create("CreateWorkspace");
     TS_ASSERT_THROWS_NOTHING(createWS->setProperty("OutputWorkspace", "we"));
     TS_ASSERT_THROWS_NOTHING(createWS->setProperty("DataX", dataX));
     TS_ASSERT_THROWS_NOTHING(createWS->setProperty("DataY", dataY));
     TS_ASSERT_THROWS_NOTHING(createWS->setProperty("NSpec", nspec));
     TS_ASSERT_THROWS_NOTHING(createWS->setProperty("UnitX", "Wavelength"));
-    TS_ASSERT_THROWS_NOTHING(
-        createWS->setProperty("VerticalAxisUnit", axisType));
-    TS_ASSERT_THROWS_NOTHING(
-        createWS->setProperty("VerticalAxisValues", YVals));
+    TS_ASSERT_THROWS_NOTHING(createWS->setProperty("VerticalAxisUnit", axisType));
+    TS_ASSERT_THROWS_NOTHING(createWS->setProperty("VerticalAxisValues", YVals));
     TS_ASSERT_THROWS_NOTHING(createWS->setProperty("YUnitLabel", "Counts"));
     TS_ASSERT_THROWS_NOTHING(createWS->execute());
 
     // we do a rebin so we can have nice bins
     auto rebin = Mantid::API::AlgorithmManager::Instance().create("Rebin");
     TS_ASSERT_THROWS_NOTHING(rebin->setProperty("InputWorkspace", "we"));
-    TS_ASSERT_THROWS_NOTHING(
-        rebin->setProperty("Params", std::vector<double>{1}));
+    TS_ASSERT_THROWS_NOTHING(rebin->setProperty("Params", std::vector<double>{1}));
     TS_ASSERT_THROWS_NOTHING(rebin->setProperty("OutputWorkspace", outputName));
     TS_ASSERT_THROWS_NOTHING(rebin->execute());
     TS_ASSERT(rebin->isExecuted());

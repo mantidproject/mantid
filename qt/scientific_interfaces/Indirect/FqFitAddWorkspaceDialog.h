@@ -37,10 +37,8 @@ public slots:
   void emitParameterTypeChanged(const QString &index);
 
 signals:
-  void workspaceChanged(FqFitAddWorkspaceDialog *dialog,
-                        const std::string &workspace);
-  void parameterTypeChanged(FqFitAddWorkspaceDialog *dialog,
-                            const std::string &type);
+  void workspaceChanged(FqFitAddWorkspaceDialog *dialog, const std::string &workspace);
+  void parameterTypeChanged(FqFitAddWorkspaceDialog *dialog, const std::string &type);
 
 private:
   Ui::FqFitAddWorkspaceDialog m_uiForm;

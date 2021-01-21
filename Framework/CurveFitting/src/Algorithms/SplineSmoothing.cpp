@@ -30,9 +30,8 @@ using Functions::BSpline;
 /** Constructor
  */
 SplineSmoothing::SplineSmoothing()
-    : M_START_SMOOTH_POINTS(10), m_cspline(std::make_shared<BSpline>()),
-      m_inputWorkspace(), m_inputWorkspacePointData(),
-      m_derivativeWorkspaceGroup(new WorkspaceGroup) {}
+    : M_START_SMOOTH_POINTS(10), m_cspline(std::make_shared<BSpline>()), m_inputWorkspace(),
+      m_inputWorkspacePointData(), m_derivativeWorkspaceGroup(new WorkspaceGroup) {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -50,29 +49,24 @@ const std::string SplineSmoothing::category() const {
 /** Initialize the algorithm's properties.
  */
 void SplineSmoothing::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input),
                   "The workspace on which to perform the smoothing algorithm.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "The workspace containing the calculated points");
 
-  declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>(
-                      "OutputWorkspaceDeriv", "", Direction::Output,
-                      PropertyMode::Optional),
+  declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>("OutputWorkspaceDeriv", "", Direction::Output,
+                                                                      PropertyMode::Optional),
                   "The workspace containing the calculated derivatives");
 
   auto validator = std::make_shared<BoundedValidator<int>>();
   validator->setLower(0);
   validator->setUpper(2);
-  declareProperty("DerivOrder", 0, validator,
-                  "Order to derivatives to calculate.");
+  declareProperty("DerivOrder", 0, validator, "Order to derivatives to calculate.");
 
   auto errorSizeValidator = std::make_shared<BoundedValidator<double>>();
   errorSizeValidator->setLower(0.0);
-  declareProperty("Error", 0.05, errorSizeValidator,
-                  "The amount of error we wish to tolerate in smoothing");
+  declareProperty("Error", 0.05, errorSizeValidator, "The amount of error we wish to tolerate in smoothing");
 
   auto numOfBreaks = std::make_shared<BoundedValidator<int>>();
   numOfBreaks->setLower(0);
@@ -94,8 +88,7 @@ void SplineSmoothing::exec() {
   m_outputWorkspace = setupOutputWorkspace(m_inputWorkspacePointData, histNo);
 
   if (order > 0 && getPropertyValue("OutputWorkspaceDeriv").empty()) {
-    throw std::runtime_error(
-        "You must specify an output workspace for the spline derivatives.");
+    throw std::runtime_error("You must specify an output workspace for the spline derivatives.");
   }
 
   Progress pgress(this, 0.0, 1.0, histNo);
@@ -138,11 +131,9 @@ void SplineSmoothing::smoothSpectrum(const int index) {
  * @param index :: index of the spectrum
  * @param order :: order of derivatives to calculate
  */
-void SplineSmoothing::calculateSpectrumDerivatives(const int index,
-                                                   const int order) {
+void SplineSmoothing::calculateSpectrumDerivatives(const int index, const int order) {
   if (order > 0) {
-    API::MatrixWorkspace_sptr derivs =
-        setupOutputWorkspace(m_inputWorkspace, order);
+    API::MatrixWorkspace_sptr derivs = setupOutputWorkspace(m_inputWorkspace, order);
 
     for (int j = 0; j < order; ++j) {
       derivs->setSharedX(j, m_inputWorkspace->sharedX(index));
@@ -158,8 +149,7 @@ void SplineSmoothing::calculateSpectrumDerivatives(const int index,
  * @param ws :: The input workspace
  * @param row :: The row of spectra to use
  */
-void SplineSmoothing::performAdditionalFitting(const MatrixWorkspace_sptr &ws,
-                                               const int row) {
+void SplineSmoothing::performAdditionalFitting(const MatrixWorkspace_sptr &ws, const int row) {
   // perform additional fitting of the points
   auto fit = createChildAlgorithm("Fit");
   fit->setProperty("Function", std::dynamic_pointer_cast<IFunction>(m_cspline));
@@ -177,13 +167,11 @@ void SplineSmoothing::performAdditionalFitting(const MatrixWorkspace_sptr &ws,
  * @param size :: The number of spectra the workspace should be created with
  * @return The pointer to the newly created workspace
  */
-API::MatrixWorkspace_sptr
-SplineSmoothing::setupOutputWorkspace(const MatrixWorkspace_sptr &inws,
-                                      const int size) const {
+API::MatrixWorkspace_sptr SplineSmoothing::setupOutputWorkspace(const MatrixWorkspace_sptr &inws,
+                                                                const int size) const {
   // Must pass a shared pointer instead of a reference as the
   // workspace factory will not accept raw pointers.
-  MatrixWorkspace_sptr outputWorkspace =
-      WorkspaceFactory::Instance().create(inws, size);
+  MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(inws, size);
 
   // create labels for output workspace
   auto tAxis = std::make_unique<API::TextAxis>(size);
@@ -201,8 +189,7 @@ SplineSmoothing::setupOutputWorkspace(const MatrixWorkspace_sptr &inws,
  * @param workspace :: The input workspace
  * @return the converted workspace containing point data
  */
-MatrixWorkspace_sptr
-SplineSmoothing::convertBinnedData(MatrixWorkspace_sptr workspace) {
+MatrixWorkspace_sptr SplineSmoothing::convertBinnedData(MatrixWorkspace_sptr workspace) {
   if (workspace->isHistogramData()) {
     auto alg = createChildAlgorithm("ConvertToPointData");
     alg->setProperty("InputWorkspace", workspace);
@@ -231,8 +218,7 @@ void SplineSmoothing::convertToHistogram() {
  * @param outputWorkspace :: The output workspace
  * @param row :: The row of spectra to use
  */
-void SplineSmoothing::calculateSmoothing(const MatrixWorkspace &inputWorkspace,
-                                         MatrixWorkspace &outputWorkspace,
+void SplineSmoothing::calculateSmoothing(const MatrixWorkspace &inputWorkspace, MatrixWorkspace &outputWorkspace,
                                          size_t row) const {
   // define the spline's parameters
   const auto &xIn = inputWorkspace.x(row);
@@ -252,10 +238,8 @@ void SplineSmoothing::calculateSmoothing(const MatrixWorkspace &inputWorkspace,
  * @param order :: The order of derivatives to calculate
  * @param row :: The row of spectra to use
  */
-void SplineSmoothing::calculateDerivatives(
-    const MatrixWorkspace &inputWorkspace,
-    API::MatrixWorkspace &outputWorkspace, const int order,
-    const size_t row) const {
+void SplineSmoothing::calculateDerivatives(const MatrixWorkspace &inputWorkspace, API::MatrixWorkspace &outputWorkspace,
+                                           const int order, const size_t row) const {
   const auto &xIn = inputWorkspace.x(row);
   const double *xValues = &(xIn[0]);
   double *yValues = &(outputWorkspace.mutableY(order - 1)[0]);
@@ -273,8 +257,7 @@ void SplineSmoothing::calculateDerivatives(
  * @param ysmooth :: The corresponding y data points defined by the spline
  * @return Boolean meaning if the values were accurate enough
  */
-bool SplineSmoothing::checkSmoothingAccuracy(const int start, const int end,
-                                             const double *ys,
+bool SplineSmoothing::checkSmoothingAccuracy(const int start, const int end, const double *ys,
                                              const double *ysmooth) const {
   double error = getProperty("Error");
 
@@ -297,9 +280,7 @@ bool SplineSmoothing::checkSmoothingAccuracy(const int start, const int end,
  * @param xs :: The x data points from the noisy data
  * @param ys :: The y data points for the noisy data
  */
-void SplineSmoothing::addSmoothingPoints(const std::set<int> &points,
-                                         const double *xs,
-                                         const double *ys) const {
+void SplineSmoothing::addSmoothingPoints(const std::set<int> &points, const double *xs, const double *ys) const {
   // resize the number of attributes
   auto num_points = static_cast<int>(points.size());
   std::vector<double> breakPoints;
@@ -309,8 +290,7 @@ void SplineSmoothing::addSmoothingPoints(const std::set<int> &points,
   std::transform(points.begin(), points.end(), std::back_inserter(breakPoints),
                  [&xs](const auto &point) { return xs[point]; });
 
-  m_cspline->setAttribute("BreakPoints",
-                          API::IFunction::Attribute(breakPoints));
+  m_cspline->setAttribute("BreakPoints", API::IFunction::Attribute(breakPoints));
 
   int i = 0;
   for (auto const &point : points) {
@@ -326,8 +306,7 @@ void SplineSmoothing::addSmoothingPoints(const std::set<int> &points,
  * @param inputWorkspace :: The input workspace containing noisy data
  * @param row :: The row of spectra to use
  */
-void SplineSmoothing::selectSmoothingPoints(
-    const MatrixWorkspace &inputWorkspace, const size_t row) {
+void SplineSmoothing::selectSmoothingPoints(const MatrixWorkspace &inputWorkspace, const size_t row) {
   std::set<int> smoothPts;
   const auto &xs = inputWorkspace.x(row);
   const auto &ys = inputWorkspace.y(row);
@@ -388,8 +367,7 @@ void SplineSmoothing::selectSmoothingPoints(
       int end = *iter;
 
       // check each point falls within our range of error.
-      bool accurate =
-          checkSmoothingAccuracy(start, end, &ys[0], ysmooth.data());
+      bool accurate = checkSmoothingAccuracy(start, end, &ys[0], ysmooth.data());
 
       // if not, flag for resmoothing and add another point between these two
       // data points

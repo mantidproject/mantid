@@ -39,19 +39,13 @@ namespace WorkflowAlgorithms {
 class DLLExport EQSANSDarkCurrentSubtraction2 : public API::Algorithm {
 public:
   /// Algorithm's name
-  const std::string name() const override {
-    return "EQSANSDarkCurrentSubtraction";
-  }
+  const std::string name() const override { return "EQSANSDarkCurrentSubtraction"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Perform EQSANS dark current subtraction.";
-  }
+  const std::string summary() const override { return "Perform EQSANS dark current subtraction."; }
   /// Algorithm's version
   int version() const override { return (2); }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "Workflow\\SANS\\UsesPropertyManager";
-  }
+  const std::string category() const override { return "Workflow\\SANS\\UsesPropertyManager"; }
 
 private:
   /// Initialisation code

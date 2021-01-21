@@ -32,16 +32,12 @@ public:
   /// Algorithm's name
   const std::string name() const override { return "CorrectToFile"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Correct data using a file in the LOQ RKH format";
-  }
+  const std::string summary() const override { return "Correct data using a file in the LOQ RKH format"; }
 
   /// Algorithm's version
   int version() const override { return (1); }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "SANS;CorrectionFunctions";
-  }
+  const std::string category() const override { return "SANS;CorrectionFunctions"; }
 
 private:
   /// used for the progress bar: the, approximate, fraction of processing time
@@ -54,10 +50,8 @@ private:
   /// Load in the RKH file for that has the correction information
   API::MatrixWorkspace_sptr loadInFile(const std::string &corrFile);
   /// Multiply or divide the input workspace as specified by the user
-  void doWkspAlgebra(const API::MatrixWorkspace_sptr &lhs,
-                     const API::MatrixWorkspace_sptr &rhs,
-                     const std::string &algName,
-                     API::MatrixWorkspace_sptr &result);
+  void doWkspAlgebra(const API::MatrixWorkspace_sptr &lhs, const API::MatrixWorkspace_sptr &rhs,
+                     const std::string &algName, API::MatrixWorkspace_sptr &result);
 };
 } // namespace Algorithms
 } // namespace Mantid

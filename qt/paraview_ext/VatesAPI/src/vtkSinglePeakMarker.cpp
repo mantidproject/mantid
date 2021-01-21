@@ -22,9 +22,7 @@ vtkSinglePeakMarker::vtkSinglePeakMarker() {}
 
 vtkSinglePeakMarker::~vtkSinglePeakMarker() {}
 
-vtkPolyData *vtkSinglePeakMarker::createSinglePeakMarker(double x, double y,
-                                                         double z,
-                                                         double radius) {
+vtkPolyData *vtkSinglePeakMarker::createSinglePeakMarker(double x, double y, double z, double radius) {
 
   // Point
   vtkPoints *peakPoint = vtkPoints::New();
@@ -63,8 +61,7 @@ vtkPolyData *vtkSinglePeakMarker::createSinglePeakMarker(double x, double y,
   vtkTransform *transform = vtkTransform::New();
   transform->Translate(0, 0, 0);
 
-  vtkTransformPolyDataFilter *transformFilter =
-      vtkTransformPolyDataFilter::New();
+  vtkTransformPolyDataFilter *transformFilter = vtkTransformPolyDataFilter::New();
   transformFilter->SetTransform(transform);
   transformFilter->SetInputConnection(sphere->GetOutputPort());
   transformFilter->Update();

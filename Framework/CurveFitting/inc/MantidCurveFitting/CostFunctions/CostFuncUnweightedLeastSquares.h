@@ -23,8 +23,7 @@ namespace CostFunctions {
     @author Michael Wedel, Paul Scherrer Institut - SINQ
     @date 03/03/2015
 */
-class MANTID_CURVEFITTING_DLL CostFuncUnweightedLeastSquares
-    : public CostFuncLeastSquares {
+class MANTID_CURVEFITTING_DLL CostFuncUnweightedLeastSquares : public CostFuncLeastSquares {
 public:
   CostFuncUnweightedLeastSquares();
 
@@ -33,8 +32,7 @@ public:
 
 protected:
   void calActiveCovarianceMatrix(GSLMatrix &covar, double epsrel) override;
-  std::vector<double>
-  getFitWeights(API::FunctionValues_sptr values) const override;
+  std::vector<double> getFitWeights(API::FunctionValues_sptr values) const override;
 
   double getResidualVariance() const;
 };

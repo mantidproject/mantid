@@ -21,8 +21,7 @@ namespace detail {
  * @param count Number of items in data chunk
  * @param bankOffset Offset to subtract from the array `event_id_start`.
  */
-void eventIdToGlobalSpectrumIndex(int32_t *event_id_start, size_t count,
-                                  const int32_t bankOffset) {
+void eventIdToGlobalSpectrumIndex(int32_t *event_id_start, size_t count, const int32_t bankOffset) {
   for (size_t i = 0; i < count; ++i)
     event_id_start[i] -= bankOffset;
 }

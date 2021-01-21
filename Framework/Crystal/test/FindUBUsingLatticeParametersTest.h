@@ -28,12 +28,8 @@ using namespace Mantid::Kernel;
 
 class FindUBUsingLatticeParametersTest : public CxxTest::TestSuite {
 public:
-  static FindUBUsingLatticeParametersTest *createSuite() {
-    return new FindUBUsingLatticeParametersTest();
-  }
-  static void destroySuite(FindUBUsingLatticeParametersTest *suite) {
-    delete suite;
-  }
+  static FindUBUsingLatticeParametersTest *createSuite() { return new FindUBUsingLatticeParametersTest(); }
+  static void destroySuite(FindUBUsingLatticeParametersTest *suite) { delete suite; }
 
   FindUBUsingLatticeParametersTest() { m_ws = loadPeaksWorkspace(); }
 
@@ -53,8 +49,7 @@ public:
     FindUBUsingLatticeParameters alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("PeaksWorkspace", m_ws->getName()));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PeaksWorkspace", m_ws->getName()));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("a", "14.131"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("b", "19.247"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("c", "8.606"));
@@ -71,9 +66,8 @@ public:
     // Check that the UB matrix is the same as in TOPAZ_3007.mat
     OrientedLattice latt = m_ws->mutableSample().getOrientedLattice();
 
-    double correct_UB[] = {0.04542050,  0.040619900, 0.0122354,
-                           -0.00140347, -0.00318493, -0.1165450,
-                           -0.05749760, 0.03223800,  -0.0273738};
+    double correct_UB[] = {0.04542050, 0.040619900, 0.0122354,  -0.00140347, -0.00318493,
+                           -0.1165450, -0.05749760, 0.03223800, -0.0273738};
 
     std::vector<double> UB_calculated = latt.getUB().getVector();
 
@@ -103,8 +97,7 @@ public:
     FindUBUsingLatticeParameters alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("PeaksWorkspace", m_ws->getName()));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PeaksWorkspace", m_ws->getName()));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("a", "14.131"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("b", "19.247"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("c", "8.606"));
@@ -122,9 +115,8 @@ public:
     // Check that the UB matrix is the same as in TOPAZ_3007.mat
     OrientedLattice latt = m_ws->mutableSample().getOrientedLattice();
 
-    double correct_UB[] = {0.04542050,  0.040619900, 0.0127661,
-                           -0.00198382, -0.00264404, -0.1165450,
-                           -0.05749760, 0.03223800,  -0.0257623};
+    double correct_UB[] = {0.04542050, 0.040619900, 0.0127661,  -0.00198382, -0.00264404,
+                           -0.1165450, -0.05749760, 0.03223800, -0.0257623};
 
     std::vector<double> UB_calculated = latt.getUB().getVector();
 
@@ -159,8 +151,7 @@ public:
     FindUBUsingLatticeParameters alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("PeaksWorkspace", m_ws->getName()));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PeaksWorkspace", m_ws->getName()));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("a", "14.131"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("b", "19.247"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("c", "8.606"));
@@ -178,8 +169,7 @@ public:
     // Check that the UB matrix is the same as in TOPAZ_3007.mat
     OrientedLattice latt = m_ws->mutableSample().getOrientedLattice();
 
-    double correct_UB[] = {0.0450,  0.0407,  0.0127, -0.0008, -0.0044,
-                           -0.1158, -0.0584, 0.0307, -0.0242};
+    double correct_UB[] = {0.0450, 0.0407, 0.0127, -0.0008, -0.0044, -0.1158, -0.0584, 0.0307, -0.0242};
 
     std::vector<double> UB_calculated = latt.getUB().getVector();
 
@@ -211,8 +201,7 @@ private:
 
     PeaksWorkspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING(
-        ws = std::dynamic_pointer_cast<PeaksWorkspace>(
-            AnalysisDataService::Instance().retrieve(WSName)));
+        ws = std::dynamic_pointer_cast<PeaksWorkspace>(AnalysisDataService::Instance().retrieve(WSName)));
     TS_ASSERT(ws);
     return ws;
   }

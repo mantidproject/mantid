@@ -40,40 +40,24 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 void pqCameraToolbarNonOrthogonalAxes::constructor() {
   Ui::pqCameraToolbarNonOrthogonalAxes ui;
   ui.setupUi(this);
-  new pqCameraReactionNonOrthogonalAxes(
-      ui.actionResetCamera, pqCameraReactionNonOrthogonalAxes::RESET_CAMERA);
-  new pqCameraReactionNonOrthogonalAxes(
-      ui.actionZoomToData, pqCameraReactionNonOrthogonalAxes::ZOOM_TO_DATA);
-  new pqCameraReactionNonOrthogonalAxes(
-      ui.actionPositiveU, pqCameraReactionNonOrthogonalAxes::RESET_POSITIVE_U);
-  new pqCameraReactionNonOrthogonalAxes(
-      ui.actionNegativeU, pqCameraReactionNonOrthogonalAxes::RESET_NEGATIVE_U);
-  new pqCameraReactionNonOrthogonalAxes(
-      ui.actionPositiveV, pqCameraReactionNonOrthogonalAxes::RESET_POSITIVE_V);
-  new pqCameraReactionNonOrthogonalAxes(
-      ui.actionNegativeV, pqCameraReactionNonOrthogonalAxes::RESET_NEGATIVE_V);
-  new pqCameraReactionNonOrthogonalAxes(
-      ui.actionPositiveW, pqCameraReactionNonOrthogonalAxes::RESET_POSITIVE_W);
-  new pqCameraReactionNonOrthogonalAxes(
-      ui.actionNegativeW, pqCameraReactionNonOrthogonalAxes::RESET_NEGATIVE_W);
-  new pqCameraReactionNonOrthogonalAxes(
-      ui.actionRotate90degCW,
-      pqCameraReactionNonOrthogonalAxes::ROTATE_CAMERA_CCW);
-  new pqCameraReactionNonOrthogonalAxes(
-      ui.actionRotate90degCCW,
-      pqCameraReactionNonOrthogonalAxes::ROTATE_CAMERA_CW);
+  new pqCameraReactionNonOrthogonalAxes(ui.actionResetCamera, pqCameraReactionNonOrthogonalAxes::RESET_CAMERA);
+  new pqCameraReactionNonOrthogonalAxes(ui.actionZoomToData, pqCameraReactionNonOrthogonalAxes::ZOOM_TO_DATA);
+  new pqCameraReactionNonOrthogonalAxes(ui.actionPositiveU, pqCameraReactionNonOrthogonalAxes::RESET_POSITIVE_U);
+  new pqCameraReactionNonOrthogonalAxes(ui.actionNegativeU, pqCameraReactionNonOrthogonalAxes::RESET_NEGATIVE_U);
+  new pqCameraReactionNonOrthogonalAxes(ui.actionPositiveV, pqCameraReactionNonOrthogonalAxes::RESET_POSITIVE_V);
+  new pqCameraReactionNonOrthogonalAxes(ui.actionNegativeV, pqCameraReactionNonOrthogonalAxes::RESET_NEGATIVE_V);
+  new pqCameraReactionNonOrthogonalAxes(ui.actionPositiveW, pqCameraReactionNonOrthogonalAxes::RESET_POSITIVE_W);
+  new pqCameraReactionNonOrthogonalAxes(ui.actionNegativeW, pqCameraReactionNonOrthogonalAxes::RESET_NEGATIVE_W);
+  new pqCameraReactionNonOrthogonalAxes(ui.actionRotate90degCW, pqCameraReactionNonOrthogonalAxes::ROTATE_CAMERA_CCW);
+  new pqCameraReactionNonOrthogonalAxes(ui.actionRotate90degCCW, pqCameraReactionNonOrthogonalAxes::ROTATE_CAMERA_CW);
 
-  new pqRenderViewSelectionReaction(ui.actionZoomToBox, nullptr,
-                                    pqRenderViewSelectionReaction::ZOOM_TO_BOX);
+  new pqRenderViewSelectionReaction(ui.actionZoomToBox, nullptr, pqRenderViewSelectionReaction::ZOOM_TO_BOX);
 
   this->ZoomToDataAction = ui.actionZoomToData;
-  this->ZoomToDataAction->setEnabled(
-      pqActiveObjects::instance().activeSource() != nullptr);
+  this->ZoomToDataAction->setEnabled(pqActiveObjects::instance().activeSource() != nullptr);
 
-  QObject::connect(&pqActiveObjects::instance(), SIGNAL(viewChanged(pqView *)),
-                   this, SLOT(updateEnabledState()));
-  QObject::connect(&pqActiveObjects::instance(),
-                   SIGNAL(sourceChanged(pqPipelineSource *)), this,
+  QObject::connect(&pqActiveObjects::instance(), SIGNAL(viewChanged(pqView *)), this, SLOT(updateEnabledState()));
+  QObject::connect(&pqActiveObjects::instance(), SIGNAL(sourceChanged(pqPipelineSource *)), this,
                    SLOT(updateEnabledState()));
 }
 

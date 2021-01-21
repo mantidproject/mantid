@@ -24,11 +24,8 @@ public:
 
     vtkUnstructuredGrid *ugrid = nullptr;
 
-    TSM_ASSERT_THROWS_NOTHING(
-        "Should create the unstructured grid without problems.",
-        ugrid = grid.createNullData());
-    TSM_ASSERT("Should have exactly one point",
-               ugrid->GetNumberOfPoints() == 1);
+    TSM_ASSERT_THROWS_NOTHING("Should create the unstructured grid without problems.", ugrid = grid.createNullData());
+    TSM_ASSERT("Should have exactly one point", ugrid->GetNumberOfPoints() == 1);
     TSM_ASSERT("Should have exactly one cell", ugrid->GetNumberOfCells() == 1);
     vtkPoints *p = ugrid->GetPoints();
     double coord[3];

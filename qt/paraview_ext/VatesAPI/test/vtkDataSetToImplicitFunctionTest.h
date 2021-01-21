@@ -24,8 +24,7 @@ class vtkDataSetToImplicitFunctionTest : public CxxTest::TestSuite {
 public:
   void testThrowIfvtkDataSetNull() {
     vtkDataSet *nullArg = nullptr;
-    TS_ASSERT_THROWS(vtkDataSetToImplicitFunction temp(nullArg),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(vtkDataSetToImplicitFunction temp(nullArg), const std::runtime_error &);
   }
 
   void testNoImplcitFunction() {
@@ -34,9 +33,7 @@ public:
 
     vtkDataSetToImplicitFunction extractor(ds.GetPointer());
     std::unique_ptr<Mantid::Geometry::MDImplicitFunction> func;
-    TS_ASSERT_THROWS_NOTHING(
-        func = std::unique_ptr<Mantid::Geometry::MDImplicitFunction>(
-            extractor.execute()));
+    TS_ASSERT_THROWS_NOTHING(func = std::unique_ptr<Mantid::Geometry::MDImplicitFunction>(extractor.execute()));
     TS_ASSERT_EQUALS("NullImplicitFunction", func->getName());
   }
 
@@ -45,9 +42,8 @@ public:
     ds->SetFieldData(createFieldDataWithCharArray("<MDInstruction/>"));
 
     std::unique_ptr<Mantid::Geometry::MDImplicitFunction> func;
-    TS_ASSERT_THROWS_NOTHING(
-        func = std::unique_ptr<Mantid::Geometry::MDImplicitFunction>(
-            vtkDataSetToImplicitFunction::exec(ds.GetPointer())));
+    TS_ASSERT_THROWS_NOTHING(func = std::unique_ptr<Mantid::Geometry::MDImplicitFunction>(
+                                 vtkDataSetToImplicitFunction::exec(ds.GetPointer())));
     TS_ASSERT_EQUALS("NullImplicitFunction", func->getName());
   }
 };

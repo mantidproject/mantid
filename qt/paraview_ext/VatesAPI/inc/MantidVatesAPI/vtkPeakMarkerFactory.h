@@ -39,8 +39,7 @@ public:
   };
 
   /// Constructor
-  vtkPeakMarkerFactory(const std::string &scalarname,
-                       ePeakDimensions dimensions = Peak_in_Q_lab);
+  vtkPeakMarkerFactory(const std::string &scalarname, ePeakDimensions dimensions = Peak_in_Q_lab);
 
   /// Initialize the object with a workspace.
   void initialize(Mantid::API::Workspace_sptr workspace);
@@ -68,14 +67,12 @@ private:
   Kernel::V3D getPosition(const Mantid::Geometry::IPeak &peak) const;
 
   /// Get ellipsoid axes
-  std::vector<Mantid::Kernel::V3D>
-  getAxes(const Mantid::DataObjects::PeakShapeEllipsoid &ellipticalShape,
-          const Mantid::Geometry::IPeak &peak) const;
+  std::vector<Mantid::Kernel::V3D> getAxes(const Mantid::DataObjects::PeakShapeEllipsoid &ellipticalShape,
+                                           const Mantid::Geometry::IPeak &peak) const;
 
   /// Get the tranform tensor for vtkTensorGlyph
-  std::array<float, 9> getTransformTensor(
-      const Mantid::DataObjects::PeakShapeEllipsoid &ellipticalShape,
-      const Mantid::Geometry::IPeak &peak) const;
+  std::array<float, 9> getTransformTensor(const Mantid::DataObjects::PeakShapeEllipsoid &ellipticalShape,
+                                          const Mantid::Geometry::IPeak &peak) const;
 
   /// Peaks workspace containg peaks to mark
   Mantid::API::IPeaksWorkspace_sptr m_workspace;

@@ -98,8 +98,7 @@ class QTime;
 class QDateTime;
 class QLocale;
 
-class EXPORT_OPT_MANTIDQT_COMMON QtGroupPropertyManager
-    : public QtAbstractPropertyManager {
+class EXPORT_OPT_MANTIDQT_COMMON QtGroupPropertyManager : public QtAbstractPropertyManager {
   Q_OBJECT
 public:
   QtGroupPropertyManager(QObject *parent = nullptr);
@@ -114,8 +113,7 @@ protected:
 
 class QtIntPropertyManagerPrivate;
 
-class EXPORT_OPT_MANTIDQT_COMMON QtIntPropertyManager
-    : public QtAbstractPropertyManager {
+class EXPORT_OPT_MANTIDQT_COMMON QtIntPropertyManager : public QtAbstractPropertyManager {
   Q_OBJECT
 public:
   QtIntPropertyManager(QObject *parent = nullptr);
@@ -150,8 +148,7 @@ private:
 
 class QtBoolPropertyManagerPrivate;
 
-class EXPORT_OPT_MANTIDQT_COMMON QtBoolPropertyManager
-    : public QtAbstractPropertyManager {
+class EXPORT_OPT_MANTIDQT_COMMON QtBoolPropertyManager : public QtAbstractPropertyManager {
   Q_OBJECT
 public:
   QtBoolPropertyManager(QObject *parent = nullptr);
@@ -178,8 +175,7 @@ private:
 
 class QtDoublePropertyManagerPrivate;
 
-class EXPORT_OPT_MANTIDQT_COMMON QtDoublePropertyManager
-    : public QtAbstractPropertyManager {
+class EXPORT_OPT_MANTIDQT_COMMON QtDoublePropertyManager : public QtAbstractPropertyManager {
   Q_OBJECT
 public:
   QtDoublePropertyManager(QObject *parent = nullptr);
@@ -217,8 +213,7 @@ private:
 
 class QtStringPropertyManagerPrivate;
 
-class EXPORT_OPT_MANTIDQT_COMMON QtStringPropertyManager
-    : public QtAbstractPropertyManager {
+class EXPORT_OPT_MANTIDQT_COMMON QtStringPropertyManager : public QtAbstractPropertyManager {
   Q_OBJECT
 public:
   QtStringPropertyManager(QObject *parent = nullptr);
@@ -247,8 +242,7 @@ private:
 
 class QtDatePropertyManagerPrivate;
 
-class EXPORT_OPT_MANTIDQT_COMMON QtDatePropertyManager
-    : public QtAbstractPropertyManager {
+class EXPORT_OPT_MANTIDQT_COMMON QtDatePropertyManager : public QtAbstractPropertyManager {
   Q_OBJECT
 public:
   QtDatePropertyManager(QObject *parent = nullptr);
@@ -265,8 +259,7 @@ public Q_SLOTS:
   void setRange(QtProperty *property, const QDate &minVal, const QDate &maxVal);
 Q_SIGNALS:
   void valueChanged(QtProperty *property, const QDate &val);
-  void rangeChanged(QtProperty *property, const QDate &minVal,
-                    const QDate &maxVal);
+  void rangeChanged(QtProperty *property, const QDate &minVal, const QDate &maxVal);
 
 protected:
   QString valueText(const QtProperty *property) const override;
@@ -281,8 +274,7 @@ private:
 
 class QtTimePropertyManagerPrivate;
 
-class EXPORT_OPT_MANTIDQT_COMMON QtTimePropertyManager
-    : public QtAbstractPropertyManager {
+class EXPORT_OPT_MANTIDQT_COMMON QtTimePropertyManager : public QtAbstractPropertyManager {
   Q_OBJECT
 public:
   QtTimePropertyManager(QObject *parent = nullptr);
@@ -308,8 +300,7 @@ private:
 
 class QtDateTimePropertyManagerPrivate;
 
-class EXPORT_OPT_MANTIDQT_COMMON QtDateTimePropertyManager
-    : public QtAbstractPropertyManager {
+class EXPORT_OPT_MANTIDQT_COMMON QtDateTimePropertyManager : public QtAbstractPropertyManager {
   Q_OBJECT
 public:
   QtDateTimePropertyManager(QObject *parent = nullptr);
@@ -335,8 +326,7 @@ private:
 
 class QtKeySequencePropertyManagerPrivate;
 
-class EXPORT_OPT_MANTIDQT_COMMON QtKeySequencePropertyManager
-    : public QtAbstractPropertyManager {
+class EXPORT_OPT_MANTIDQT_COMMON QtKeySequencePropertyManager : public QtAbstractPropertyManager {
   Q_OBJECT
 public:
   QtKeySequencePropertyManager(QObject *parent = nullptr);
@@ -362,8 +352,7 @@ private:
 
 class QtCharPropertyManagerPrivate;
 
-class EXPORT_OPT_MANTIDQT_COMMON QtCharPropertyManager
-    : public QtAbstractPropertyManager {
+class EXPORT_OPT_MANTIDQT_COMMON QtCharPropertyManager : public QtAbstractPropertyManager {
   Q_OBJECT
 public:
   QtCharPropertyManager(QObject *parent = nullptr);
@@ -390,8 +379,7 @@ private:
 class QtEnumPropertyManager;
 class QtLocalePropertyManagerPrivate;
 
-class EXPORT_OPT_MANTIDQT_COMMON QtLocalePropertyManager
-    : public QtAbstractPropertyManager {
+class EXPORT_OPT_MANTIDQT_COMMON QtLocalePropertyManager : public QtAbstractPropertyManager {
   Q_OBJECT
 public:
   QtLocalePropertyManager(QObject *parent = nullptr);
@@ -421,8 +409,7 @@ private:
 
 class QtPointPropertyManagerPrivate;
 
-class EXPORT_OPT_MANTIDQT_COMMON QtPointPropertyManager
-    : public QtAbstractPropertyManager {
+class EXPORT_OPT_MANTIDQT_COMMON QtPointPropertyManager : public QtAbstractPropertyManager {
   Q_OBJECT
 public:
   QtPointPropertyManager(QObject *parent = nullptr);
@@ -452,8 +439,7 @@ private:
 
 class QtPointFPropertyManagerPrivate;
 
-class EXPORT_OPT_MANTIDQT_COMMON QtPointFPropertyManager
-    : public QtAbstractPropertyManager {
+class EXPORT_OPT_MANTIDQT_COMMON QtPointFPropertyManager : public QtAbstractPropertyManager {
   Q_OBJECT
 public:
   QtPointFPropertyManager(QObject *parent = nullptr);
@@ -486,8 +472,7 @@ private:
 
 class QtSizePropertyManagerPrivate;
 
-class EXPORT_OPT_MANTIDQT_COMMON QtSizePropertyManager
-    : public QtAbstractPropertyManager {
+class EXPORT_OPT_MANTIDQT_COMMON QtSizePropertyManager : public QtAbstractPropertyManager {
   Q_OBJECT
 public:
   QtSizePropertyManager(QObject *parent = nullptr);
@@ -506,8 +491,7 @@ public Q_SLOTS:
   void setRange(QtProperty *property, const QSize &minVal, const QSize &maxVal);
 Q_SIGNALS:
   void valueChanged(QtProperty *property, const QSize &val);
-  void rangeChanged(QtProperty *property, const QSize &minVal,
-                    const QSize &maxVal);
+  void rangeChanged(QtProperty *property, const QSize &minVal, const QSize &maxVal);
 
 protected:
   QString valueText(const QtProperty *property) const override;
@@ -524,8 +508,7 @@ private:
 
 class QtSizeFPropertyManagerPrivate;
 
-class EXPORT_OPT_MANTIDQT_COMMON QtSizeFPropertyManager
-    : public QtAbstractPropertyManager {
+class EXPORT_OPT_MANTIDQT_COMMON QtSizeFPropertyManager : public QtAbstractPropertyManager {
   Q_OBJECT
 public:
   QtSizeFPropertyManager(QObject *parent = nullptr);
@@ -542,13 +525,11 @@ public Q_SLOTS:
   void setValue(QtProperty *property, const QSizeF &val);
   void setMinimum(QtProperty *property, const QSizeF &minVal);
   void setMaximum(QtProperty *property, const QSizeF &maxVal);
-  void setRange(QtProperty *property, const QSizeF &minVal,
-                const QSizeF &maxVal);
+  void setRange(QtProperty *property, const QSizeF &minVal, const QSizeF &maxVal);
   void setDecimals(QtProperty *property, int prec);
 Q_SIGNALS:
   void valueChanged(QtProperty *property, const QSizeF &val);
-  void rangeChanged(QtProperty *property, const QSizeF &minVal,
-                    const QSizeF &maxVal);
+  void rangeChanged(QtProperty *property, const QSizeF &minVal, const QSizeF &maxVal);
   void decimalsChanged(QtProperty *property, int prec);
 
 protected:
@@ -566,8 +547,7 @@ private:
 
 class QtRectPropertyManagerPrivate;
 
-class EXPORT_OPT_MANTIDQT_COMMON QtRectPropertyManager
-    : public QtAbstractPropertyManager {
+class EXPORT_OPT_MANTIDQT_COMMON QtRectPropertyManager : public QtAbstractPropertyManager {
   Q_OBJECT
 public:
   QtRectPropertyManager(QObject *parent = nullptr);
@@ -600,8 +580,7 @@ private:
 
 class QtRectFPropertyManagerPrivate;
 
-class EXPORT_OPT_MANTIDQT_COMMON QtRectFPropertyManager
-    : public QtAbstractPropertyManager {
+class EXPORT_OPT_MANTIDQT_COMMON QtRectFPropertyManager : public QtAbstractPropertyManager {
   Q_OBJECT
 public:
   QtRectFPropertyManager(QObject *parent = nullptr);
@@ -637,8 +616,7 @@ private:
 
 class QtEnumPropertyManagerPrivate;
 
-class EXPORT_OPT_MANTIDQT_COMMON QtEnumPropertyManager
-    : public QtAbstractPropertyManager {
+class EXPORT_OPT_MANTIDQT_COMMON QtEnumPropertyManager : public QtAbstractPropertyManager {
   Q_OBJECT
 public:
   QtEnumPropertyManager(QObject *parent = nullptr);
@@ -671,8 +649,7 @@ private:
 
 class QtFlagPropertyManagerPrivate;
 
-class EXPORT_OPT_MANTIDQT_COMMON QtFlagPropertyManager
-    : public QtAbstractPropertyManager {
+class EXPORT_OPT_MANTIDQT_COMMON QtFlagPropertyManager : public QtAbstractPropertyManager {
   Q_OBJECT
 public:
   QtFlagPropertyManager(QObject *parent = nullptr);
@@ -705,8 +682,7 @@ private:
 
 class QtSizePolicyPropertyManagerPrivate;
 
-class EXPORT_OPT_MANTIDQT_COMMON QtSizePolicyPropertyManager
-    : public QtAbstractPropertyManager {
+class EXPORT_OPT_MANTIDQT_COMMON QtSizePolicyPropertyManager : public QtAbstractPropertyManager {
   Q_OBJECT
 public:
   QtSizePolicyPropertyManager(QObject *parent = nullptr);
@@ -738,8 +714,7 @@ private:
 
 class QtFontPropertyManagerPrivate;
 
-class EXPORT_OPT_MANTIDQT_COMMON QtFontPropertyManager
-    : public QtAbstractPropertyManager {
+class EXPORT_OPT_MANTIDQT_COMMON QtFontPropertyManager : public QtAbstractPropertyManager {
   Q_OBJECT
 public:
   QtFontPropertyManager(QObject *parent = nullptr);
@@ -776,8 +751,7 @@ private:
 
 class QtColorPropertyManagerPrivate;
 
-class EXPORT_OPT_MANTIDQT_COMMON QtColorPropertyManager
-    : public QtAbstractPropertyManager {
+class EXPORT_OPT_MANTIDQT_COMMON QtColorPropertyManager : public QtAbstractPropertyManager {
   Q_OBJECT
 public:
   QtColorPropertyManager(QObject *parent = nullptr);
@@ -808,8 +782,7 @@ private:
 
 class QtCursorPropertyManagerPrivate;
 
-class EXPORT_OPT_MANTIDQT_COMMON QtCursorPropertyManager
-    : public QtAbstractPropertyManager {
+class EXPORT_OPT_MANTIDQT_COMMON QtCursorPropertyManager : public QtAbstractPropertyManager {
   Q_OBJECT
 public:
   QtCursorPropertyManager(QObject *parent = nullptr);
@@ -838,8 +811,7 @@ private:
 
 // Private classes //
 
-template <class PrivateData, class Value>
-static void setSimpleMinimumData(PrivateData *data, const Value &minVal) {
+template <class PrivateData, class Value> static void setSimpleMinimumData(PrivateData *data, const Value &minVal) {
   data->minVal = minVal;
   if (data->maxVal < data->minVal)
     data->maxVal = data->minVal;
@@ -848,8 +820,7 @@ static void setSimpleMinimumData(PrivateData *data, const Value &minVal) {
     data->val = data->minVal;
 }
 
-template <class PrivateData, class Value>
-static void setSimpleMaximumData(PrivateData *data, const Value &maxVal) {
+template <class PrivateData, class Value> static void setSimpleMaximumData(PrivateData *data, const Value &maxVal) {
   data->maxVal = maxVal;
   if (data->minVal > data->maxVal)
     data->minVal = data->maxVal;
@@ -858,8 +829,7 @@ static void setSimpleMaximumData(PrivateData *data, const Value &maxVal) {
     data->val = data->maxVal;
 }
 
-template <class PrivateData, class Value>
-static void setSizeMinimumData(PrivateData *data, const Value &newMinVal) {
+template <class PrivateData, class Value> static void setSizeMinimumData(PrivateData *data, const Value &newMinVal) {
   data->minVal = newMinVal;
   if (data->maxVal.width() < data->minVal.width())
     data->maxVal.setWidth(data->minVal.width());
@@ -872,8 +842,7 @@ static void setSizeMinimumData(PrivateData *data, const Value &newMinVal) {
     data->val.setHeight(data->minVal.height());
 }
 
-template <class PrivateData, class Value>
-static void setSizeMaximumData(PrivateData *data, const Value &newMaxVal) {
+template <class PrivateData, class Value> static void setSizeMaximumData(PrivateData *data, const Value &newMaxVal) {
   data->maxVal = newMaxVal;
   if (data->minVal.width() > data->maxVal.width())
     data->minVal.setWidth(data->maxVal.width());
@@ -887,8 +856,7 @@ static void setSizeMaximumData(PrivateData *data, const Value &newMaxVal) {
 }
 
 template <class SizeValue>
-static SizeValue qBoundSize(const SizeValue &minVal, const SizeValue &val,
-                            const SizeValue &maxVal) {
+static SizeValue qBoundSize(const SizeValue &minVal, const SizeValue &val, const SizeValue &maxVal) {
   SizeValue croppedVal = val;
   if (minVal.width() > val.width())
     croppedVal.setWidth(minVal.width());
@@ -927,20 +895,15 @@ template <class Value> void orderSizeBorders(Value &minVal, Value &maxVal) {
   maxVal = toSize;
 }
 
-inline static void orderBorders(QSize &minVal, QSize &maxVal) {
-  orderSizeBorders(minVal, maxVal);
-}
+inline static void orderBorders(QSize &minVal, QSize &maxVal) { orderSizeBorders(minVal, maxVal); }
 
-inline static void orderBorders(QSizeF &minVal, QSizeF &maxVal) {
-  orderSizeBorders(minVal, maxVal);
-}
+inline static void orderBorders(QSizeF &minVal, QSizeF &maxVal) { orderSizeBorders(minVal, maxVal); }
 
 ////////
 
 template <class Value, class PrivateData>
-static Value getData(const QMap<const QtProperty *, PrivateData> &propertyMap,
-                     Value PrivateData::*data, const QtProperty *property,
-                     const Value &defaultValue = Value()) {
+static Value getData(const QMap<const QtProperty *, PrivateData> &propertyMap, Value PrivateData::*data,
+                     const QtProperty *property, const Value &defaultValue = Value()) {
   using PropertyToData = QMap<const QtProperty *, PrivateData>;
   using PropertyToDataConstIterator = typename PropertyToData::const_iterator;
   const PropertyToDataConstIterator it = propertyMap.constFind(property);
@@ -950,35 +913,28 @@ static Value getData(const QMap<const QtProperty *, PrivateData> &propertyMap,
 }
 
 template <class Value, class PrivateData>
-static Value getValue(const QMap<const QtProperty *, PrivateData> &propertyMap,
-                      const QtProperty *property,
+static Value getValue(const QMap<const QtProperty *, PrivateData> &propertyMap, const QtProperty *property,
                       const Value &defaultValue = Value()) {
   return getData<Value>(propertyMap, &PrivateData::val, property, defaultValue);
 }
 
 template <class Value, class PrivateData>
-static Value
-getMinimum(const QMap<const QtProperty *, PrivateData> &propertyMap,
-           const QtProperty *property, const Value &defaultValue = Value()) {
-  return getData<Value>(propertyMap, &PrivateData::minVal, property,
-                        defaultValue);
+static Value getMinimum(const QMap<const QtProperty *, PrivateData> &propertyMap, const QtProperty *property,
+                        const Value &defaultValue = Value()) {
+  return getData<Value>(propertyMap, &PrivateData::minVal, property, defaultValue);
 }
 
 template <class Value, class PrivateData>
-static Value
-getMaximum(const QMap<const QtProperty *, PrivateData> &propertyMap,
-           const QtProperty *property, const Value &defaultValue = Value()) {
-  return getData<Value>(propertyMap, &PrivateData::maxVal, property,
-                        defaultValue);
+static Value getMaximum(const QMap<const QtProperty *, PrivateData> &propertyMap, const QtProperty *property,
+                        const Value &defaultValue = Value()) {
+  return getData<Value>(propertyMap, &PrivateData::maxVal, property, defaultValue);
 }
 
 template <class ValueChangeParameter, class Value, class PropertyManager>
-static void setSimpleValue(
-    QMap<const QtProperty *, Value> &propertyMap, PropertyManager *manager,
-    void (PropertyManager::*propertyChangedSignal)(QtProperty *),
-    void (PropertyManager::*valueChangedSignal)(QtProperty *,
-                                                ValueChangeParameter),
-    QtProperty *property, const Value &val) {
+static void setSimpleValue(QMap<const QtProperty *, Value> &propertyMap, PropertyManager *manager,
+                           void (PropertyManager::*propertyChangedSignal)(QtProperty *),
+                           void (PropertyManager::*valueChangedSignal)(QtProperty *, ValueChangeParameter),
+                           QtProperty *property, const Value &val) {
   using PropertyToData = QMap<const QtProperty *, Value>;
   using PropertyToDataIterator = typename PropertyToData::iterator;
   const PropertyToDataIterator it = propertyMap.find(property);
@@ -994,16 +950,12 @@ static void setSimpleValue(
   emit(manager->*valueChangedSignal)(property, val);
 }
 
-template <class ValueChangeParameter, class PropertyManagerPrivate,
-          class PropertyManager, class Value>
-static void setValueInRange(
-    PropertyManager *manager, PropertyManagerPrivate *managerPrivate,
-    void (PropertyManager::*propertyChangedSignal)(QtProperty *),
-    void (PropertyManager::*valueChangedSignal)(QtProperty *,
-                                                ValueChangeParameter),
-    QtProperty *property, const Value &val,
-    void (PropertyManagerPrivate::*setSubPropertyValue)(QtProperty *,
-                                                        ValueChangeParameter)) {
+template <class ValueChangeParameter, class PropertyManagerPrivate, class PropertyManager, class Value>
+static void setValueInRange(PropertyManager *manager, PropertyManagerPrivate *managerPrivate,
+                            void (PropertyManager::*propertyChangedSignal)(QtProperty *),
+                            void (PropertyManager::*valueChangedSignal)(QtProperty *, ValueChangeParameter),
+                            QtProperty *property, const Value &val,
+                            void (PropertyManagerPrivate::*setSubPropertyValue)(QtProperty *, ValueChangeParameter)) {
   using PrivateData = typename PropertyManagerPrivate::Data;
   using PropertyToData = QMap<const QtProperty *, PrivateData>;
   using PropertyToDataIterator = typename PropertyToData::iterator;
@@ -1030,21 +982,15 @@ static void setValueInRange(
   emit(manager->*valueChangedSignal)(property, data.val);
 }
 
-template <class ValueChangeParameter, class PropertyManagerPrivate,
-          class PropertyManager, class Value>
-static void setBorderValues(
-    PropertyManager *manager, PropertyManagerPrivate *managerPrivate,
-    void (PropertyManager::*propertyChangedSignal)(QtProperty *),
-    void (PropertyManager::*valueChangedSignal)(QtProperty *,
-                                                ValueChangeParameter),
-    void (PropertyManager::*rangeChangedSignal)(QtProperty *,
-                                                ValueChangeParameter,
-                                                ValueChangeParameter),
-    QtProperty *property, const Value &minVal, const Value &maxVal,
-    void (PropertyManagerPrivate::*setSubPropertyRange)(QtProperty *,
-                                                        ValueChangeParameter,
-                                                        ValueChangeParameter,
-                                                        ValueChangeParameter)) {
+template <class ValueChangeParameter, class PropertyManagerPrivate, class PropertyManager, class Value>
+static void
+setBorderValues(PropertyManager *manager, PropertyManagerPrivate *managerPrivate,
+                void (PropertyManager::*propertyChangedSignal)(QtProperty *),
+                void (PropertyManager::*valueChangedSignal)(QtProperty *, ValueChangeParameter),
+                void (PropertyManager::*rangeChangedSignal)(QtProperty *, ValueChangeParameter, ValueChangeParameter),
+                QtProperty *property, const Value &minVal, const Value &maxVal,
+                void (PropertyManagerPrivate::*setSubPropertyRange)(QtProperty *, ValueChangeParameter,
+                                                                    ValueChangeParameter, ValueChangeParameter)) {
   using PrivateData = typename PropertyManagerPrivate::Data;
   using PropertyToData = QMap<const QtProperty *, PrivateData>;
   using PropertyToDataIterator = typename PropertyToData::iterator;
@@ -1069,8 +1015,7 @@ static void setBorderValues(
   emit(manager->*rangeChangedSignal)(property, data.minVal, data.maxVal);
 
   if (setSubPropertyRange)
-    (managerPrivate->*setSubPropertyRange)(property, data.minVal, data.maxVal,
-                                           data.val);
+    (managerPrivate->*setSubPropertyRange)(property, data.minVal, data.maxVal, data.val);
 
   if (data.val == oldVal)
     return;
@@ -1079,23 +1024,17 @@ static void setBorderValues(
   emit(manager->*valueChangedSignal)(property, data.val);
 }
 
-template <class ValueChangeParameter, class PropertyManagerPrivate,
-          class PropertyManager, class Value, class PrivateData>
-static void setBorderValue(
-    PropertyManager *manager, PropertyManagerPrivate *managerPrivate,
-    void (PropertyManager::*propertyChangedSignal)(QtProperty *),
-    void (PropertyManager::*valueChangedSignal)(QtProperty *,
-                                                ValueChangeParameter),
-    void (PropertyManager::*rangeChangedSignal)(QtProperty *,
-                                                ValueChangeParameter,
-                                                ValueChangeParameter),
-    QtProperty *property, Value (PrivateData::*getRangeVal)() const,
-    void (PrivateData::*setRangeVal)(ValueChangeParameter),
-    const Value &borderVal,
-    void (PropertyManagerPrivate::*setSubPropertyRange)(QtProperty *,
-                                                        ValueChangeParameter,
-                                                        ValueChangeParameter,
-                                                        ValueChangeParameter)) {
+template <class ValueChangeParameter, class PropertyManagerPrivate, class PropertyManager, class Value,
+          class PrivateData>
+static void
+setBorderValue(PropertyManager *manager, PropertyManagerPrivate *managerPrivate,
+               void (PropertyManager::*propertyChangedSignal)(QtProperty *),
+               void (PropertyManager::*valueChangedSignal)(QtProperty *, ValueChangeParameter),
+               void (PropertyManager::*rangeChangedSignal)(QtProperty *, ValueChangeParameter, ValueChangeParameter),
+               QtProperty *property, Value (PrivateData::*getRangeVal)() const,
+               void (PrivateData::*setRangeVal)(ValueChangeParameter), const Value &borderVal,
+               void (PropertyManagerPrivate::*setSubPropertyRange)(QtProperty *, ValueChangeParameter,
+                                                                   ValueChangeParameter, ValueChangeParameter)) {
   using PropertyToData = QMap<const QtProperty *, PrivateData>;
   using PropertyToDataIterator = typename PropertyToData::iterator;
   const PropertyToDataIterator it = managerPrivate->m_values.find(property);
@@ -1114,8 +1053,7 @@ static void setBorderValue(
   emit(manager->*rangeChangedSignal)(property, data.minVal, data.maxVal);
 
   if (setSubPropertyRange)
-    (managerPrivate->*setSubPropertyRange)(property, data.minVal, data.maxVal,
-                                           data.val);
+    (managerPrivate->*setSubPropertyRange)(property, data.minVal, data.maxVal, data.val);
 
   if (data.val == oldVal)
     return;
@@ -1124,47 +1062,35 @@ static void setBorderValue(
   emit(manager->*valueChangedSignal)(property, data.val);
 }
 
-template <class ValueChangeParameter, class PropertyManagerPrivate,
-          class PropertyManager, class Value, class PrivateData>
-static void setMinimumValue(
-    PropertyManager *manager, PropertyManagerPrivate *managerPrivate,
-    void (PropertyManager::*propertyChangedSignal)(QtProperty *),
-    void (PropertyManager::*valueChangedSignal)(QtProperty *,
-                                                ValueChangeParameter),
-    void (PropertyManager::*rangeChangedSignal)(QtProperty *,
-                                                ValueChangeParameter,
-                                                ValueChangeParameter),
-    QtProperty *property, const Value &minVal) {
-  void (PropertyManagerPrivate::*setSubPropertyRange)(
-      QtProperty *, ValueChangeParameter, ValueChangeParameter,
-      ValueChangeParameter) = nullptr;
-  setBorderValue<ValueChangeParameter, PropertyManagerPrivate, PropertyManager,
-                 Value, PrivateData>(
-      manager, managerPrivate, propertyChangedSignal, valueChangedSignal,
-      rangeChangedSignal, property, &PropertyManagerPrivate::Data::minimumValue,
-      &PropertyManagerPrivate::Data::setMinimumValue, minVal,
+template <class ValueChangeParameter, class PropertyManagerPrivate, class PropertyManager, class Value,
+          class PrivateData>
+static void setMinimumValue(PropertyManager *manager, PropertyManagerPrivate *managerPrivate,
+                            void (PropertyManager::*propertyChangedSignal)(QtProperty *),
+                            void (PropertyManager::*valueChangedSignal)(QtProperty *, ValueChangeParameter),
+                            void (PropertyManager::*rangeChangedSignal)(QtProperty *, ValueChangeParameter,
+                                                                        ValueChangeParameter),
+                            QtProperty *property, const Value &minVal) {
+  void (PropertyManagerPrivate::*setSubPropertyRange)(QtProperty *, ValueChangeParameter, ValueChangeParameter,
+                                                      ValueChangeParameter) = nullptr;
+  setBorderValue<ValueChangeParameter, PropertyManagerPrivate, PropertyManager, Value, PrivateData>(
+      manager, managerPrivate, propertyChangedSignal, valueChangedSignal, rangeChangedSignal, property,
+      &PropertyManagerPrivate::Data::minimumValue, &PropertyManagerPrivate::Data::setMinimumValue, minVal,
       setSubPropertyRange);
 }
 
-template <class ValueChangeParameter, class PropertyManagerPrivate,
-          class PropertyManager, class Value, class PrivateData>
-static void setMaximumValue(
-    PropertyManager *manager, PropertyManagerPrivate *managerPrivate,
-    void (PropertyManager::*propertyChangedSignal)(QtProperty *),
-    void (PropertyManager::*valueChangedSignal)(QtProperty *,
-                                                ValueChangeParameter),
-    void (PropertyManager::*rangeChangedSignal)(QtProperty *,
-                                                ValueChangeParameter,
-                                                ValueChangeParameter),
-    QtProperty *property, const Value &maxVal) {
-  void (PropertyManagerPrivate::*setSubPropertyRange)(
-      QtProperty *, ValueChangeParameter, ValueChangeParameter,
-      ValueChangeParameter) = nullptr;
-  setBorderValue<ValueChangeParameter, PropertyManagerPrivate, PropertyManager,
-                 Value, PrivateData>(
-      manager, managerPrivate, propertyChangedSignal, valueChangedSignal,
-      rangeChangedSignal, property, &PropertyManagerPrivate::Data::maximumValue,
-      &PropertyManagerPrivate::Data::setMaximumValue, maxVal,
+template <class ValueChangeParameter, class PropertyManagerPrivate, class PropertyManager, class Value,
+          class PrivateData>
+static void setMaximumValue(PropertyManager *manager, PropertyManagerPrivate *managerPrivate,
+                            void (PropertyManager::*propertyChangedSignal)(QtProperty *),
+                            void (PropertyManager::*valueChangedSignal)(QtProperty *, ValueChangeParameter),
+                            void (PropertyManager::*rangeChangedSignal)(QtProperty *, ValueChangeParameter,
+                                                                        ValueChangeParameter),
+                            QtProperty *property, const Value &maxVal) {
+  void (PropertyManagerPrivate::*setSubPropertyRange)(QtProperty *, ValueChangeParameter, ValueChangeParameter,
+                                                      ValueChangeParameter) = nullptr;
+  setBorderValue<ValueChangeParameter, PropertyManagerPrivate, PropertyManager, Value, PrivateData>(
+      manager, managerPrivate, propertyChangedSignal, valueChangedSignal, rangeChangedSignal, property,
+      &PropertyManagerPrivate::Data::maximumValue, &PropertyManagerPrivate::Data::setMaximumValue, maxVal,
       setSubPropertyRange);
 }
 
@@ -1327,8 +1253,7 @@ class QtRectFPropertyManagerPrivate {
 public:
   void slotDoubleChanged(QtProperty *property, double value);
   void slotPropertyDestroyed(QtProperty *property);
-  void setConstraint(QtProperty *property, const QRectF &constraint,
-                     const QRectF &val);
+  void setConstraint(QtProperty *property, const QRectF &constraint, const QRectF &val);
 
   struct Data {
     Data() : val(0, 0, 0, 0), decimals(2) {}
@@ -1359,8 +1284,7 @@ class QtRectPropertyManagerPrivate {
 public:
   void slotIntChanged(QtProperty *property, int value);
   void slotPropertyDestroyed(QtProperty *property);
-  void setConstraint(QtProperty *property, const QRect &constraint,
-                     const QRect &val);
+  void setConstraint(QtProperty *property, const QRect &constraint, const QRect &val);
 
   struct Data {
     Data() : val(0, 0, 0, 0) {}
@@ -1391,25 +1315,18 @@ public:
   void slotDoubleChanged(QtProperty *property, double value);
   void slotPropertyDestroyed(QtProperty *property);
   void setValue(QtProperty *property, const QSizeF &val);
-  void setRange(QtProperty *property, const QSizeF &minVal,
-                const QSizeF &maxVal, const QSizeF &val);
+  void setRange(QtProperty *property, const QSizeF &minVal, const QSizeF &maxVal, const QSizeF &val);
 
   struct Data {
-    Data()
-        : val(QSizeF(0, 0)), minVal(QSizeF(0, 0)),
-          maxVal(QSizeF(INT_MAX, INT_MAX)), decimals(2) {}
+    Data() : val(QSizeF(0, 0)), minVal(QSizeF(0, 0)), maxVal(QSizeF(INT_MAX, INT_MAX)), decimals(2) {}
     QSizeF val;
     QSizeF minVal;
     QSizeF maxVal;
     int decimals;
     QSizeF minimumValue() const { return minVal; }
     QSizeF maximumValue() const { return maxVal; }
-    void setMinimumValue(const QSizeF &newMinVal) {
-      setSizeMinimumData(this, newMinVal);
-    }
-    void setMaximumValue(const QSizeF &newMaxVal) {
-      setSizeMaximumData(this, newMaxVal);
-    }
+    void setMinimumValue(const QSizeF &newMinVal) { setSizeMinimumData(this, newMinVal); }
+    void setMaximumValue(const QSizeF &newMaxVal) { setSizeMaximumData(this, newMaxVal); }
   };
 
   using PropertyValueMap = QMap<const QtProperty *, Data>;
@@ -1458,24 +1375,17 @@ public:
   void slotIntChanged(QtProperty *property, int value);
   void slotPropertyDestroyed(QtProperty *property);
   void setValue(QtProperty *property, const QSize &val);
-  void setRange(QtProperty *property, const QSize &minVal, const QSize &maxVal,
-                const QSize &val);
+  void setRange(QtProperty *property, const QSize &minVal, const QSize &maxVal, const QSize &val);
 
   struct Data {
-    Data()
-        : val(QSize(0, 0)), minVal(QSize(0, 0)),
-          maxVal(QSize(INT_MAX, INT_MAX)) {}
+    Data() : val(QSize(0, 0)), minVal(QSize(0, 0)), maxVal(QSize(INT_MAX, INT_MAX)) {}
     QSize val;
     QSize minVal;
     QSize maxVal;
     QSize minimumValue() const { return minVal; }
     QSize maximumValue() const { return maxVal; }
-    void setMinimumValue(const QSize &newMinVal) {
-      setSizeMinimumData(this, newMinVal);
-    }
-    void setMaximumValue(const QSize &newMaxVal) {
-      setSizeMaximumData(this, newMaxVal);
-    }
+    void setMinimumValue(const QSize &newMinVal) { setSizeMinimumData(this, newMinVal); }
+    void setMaximumValue(const QSize &newMaxVal) { setSizeMaximumData(this, newMaxVal); }
   };
 
   using PropertyValueMap = QMap<const QtProperty *, Data>;

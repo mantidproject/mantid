@@ -73,17 +73,13 @@ namespace Reflectometry {
 DECLARE_ALGORITHM(FindReflectometryLines2)
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string FindReflectometryLines2::name() const {
-  return "FindReflectometryLines";
-}
+const std::string FindReflectometryLines2::name() const { return "FindReflectometryLines"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int FindReflectometryLines2::version() const { return 2; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string FindReflectometryLines2::category() const {
-  return "Reflectometry;ILL\\Reflectometry";
-}
+const std::string FindReflectometryLines2::category() const { return "Reflectometry;ILL\\Reflectometry"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string FindReflectometryLines2::summary() const {
@@ -94,27 +90,19 @@ const std::string FindReflectometryLines2::summary() const {
 /// Initialize the algorithm's properties.
 void FindReflectometryLines2::init() {
   declareProperty(
-      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-          Prop::INPUT_WS, "", Kernel::Direction::Input),
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(Prop::INPUT_WS, "", Kernel::Direction::Input),
       "A reflectometry workspace.");
-  declareProperty(
-      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-          Prop::OUTPUT_WS, "", Kernel::Direction::Output,
-          API::PropertyMode::Optional),
-      "A workspace containing the fractional workspace index of "
-      "the line centre.");
-  declareProperty(Prop::LINE_CENTRE, EMPTY_DBL(),
-                  "The fractional workspace index of the line centre",
+  declareProperty(std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+                      Prop::OUTPUT_WS, "", Kernel::Direction::Output, API::PropertyMode::Optional),
+                  "A workspace containing the fractional workspace index of "
+                  "the line centre.");
+  declareProperty(Prop::LINE_CENTRE, EMPTY_DBL(), "The fractional workspace index of the line centre",
                   Kernel::Direction::Output);
-  declareProperty(Prop::RANGE_LOWER, EMPTY_DBL(),
-                  "The lower peak search limit (an X value).");
-  declareProperty(Prop::RANGE_UPPER, EMPTY_DBL(),
-                  "The upper peak search limit (an X value).");
+  declareProperty(Prop::RANGE_LOWER, EMPTY_DBL(), "The lower peak search limit (an X value).");
+  declareProperty(Prop::RANGE_UPPER, EMPTY_DBL(), "The upper peak search limit (an X value).");
   auto mustBePositive = std::make_shared<Kernel::BoundedValidator<int>>();
   mustBePositive->setLower(0);
-  declareProperty(
-      Prop::START_INDEX, 0, mustBePositive,
-      "Index of the first histogram to include in the peak search.");
+  declareProperty(Prop::START_INDEX, 0, mustBePositive, "Index of the first histogram to include in the peak search.");
   declareProperty(Prop::END_INDEX, EMPTY_INT(), mustBePositive,
                   "Index of the last histogram to include in the peak search.");
 }
@@ -175,9 +163,7 @@ double FindReflectometryLines2::findPeak(API::MatrixWorkspace_sptr &ws) {
   double const centreByMax = static_cast<double>(startIndex) + centreIndex;
   g_log.debug() << "Line maximum position: " << centreByMax << '\n';
   // determine sigma
-  auto lessThanHalfMax = [height, medianY](double const x) {
-    return x - medianY < 0.5 * (height - medianY);
-  };
+  auto lessThanHalfMax = [height, medianY](double const x) { return x - medianY < 0.5 * (height - medianY); };
   using IterType = HistogramData::HistogramY::const_iterator;
   std::reverse_iterator<IterType> revMaxValueIt{maxValueIt};
   auto revMinFwhmIt = std::find_if(revMaxValueIt, Ys.crend(), lessThanHalfMax);
@@ -188,12 +174,9 @@ double FindReflectometryLines2::findPeak(API::MatrixWorkspace_sptr &ws) {
                        "value as line center.\n";
     return centreByMax;
   }
-  auto const fwhm =
-      static_cast<double>(std::distance(revMaxFwhmIt, revMinFwhmIt) + 1);
-  g_log.debug() << "Initial fwhm (full width at half maximum): " << fwhm
-                << '\n';
-  auto func =
-      API::FunctionFactory::Instance().createFunction("CompositeFunction");
+  auto const fwhm = static_cast<double>(std::distance(revMaxFwhmIt, revMinFwhmIt) + 1);
+  g_log.debug() << "Initial fwhm (full width at half maximum): " << fwhm << '\n';
+  auto func = API::FunctionFactory::Instance().createFunction("CompositeFunction");
   auto sum = std::dynamic_pointer_cast<API::CompositeFunction>(func);
   func = API::FunctionFactory::Instance().createFunction("Gaussian");
   auto gaussian = std::dynamic_pointer_cast<API::IPeakFunction>(func);
@@ -228,8 +211,7 @@ double FindReflectometryLines2::findPeak(API::MatrixWorkspace_sptr &ws) {
  *  @param ws a workspace to integrate
  *  @return a workspace containing the integrals
  */
-API::MatrixWorkspace_sptr
-FindReflectometryLines2::integrate(API::MatrixWorkspace_sptr &ws) {
+API::MatrixWorkspace_sptr FindReflectometryLines2::integrate(API::MatrixWorkspace_sptr &ws) {
   int const startIndex = getProperty(Prop::START_INDEX);
   int const endIndex = getProperty(Prop::END_INDEX);
   double const startX = getProperty(Prop::RANGE_LOWER);
@@ -243,8 +225,7 @@ FindReflectometryLines2::integrate(API::MatrixWorkspace_sptr &ws) {
   integration->setProperty("StartWorkspaceIndex", startIndex);
   integration->setProperty("EndWorkspaceIndex", endIndex);
   integration->execute();
-  API::MatrixWorkspace_sptr integralWS =
-      integration->getProperty("OutputWorkspace");
+  API::MatrixWorkspace_sptr integralWS = integration->getProperty("OutputWorkspace");
   return integralWS;
 }
 
@@ -252,15 +233,13 @@ FindReflectometryLines2::integrate(API::MatrixWorkspace_sptr &ws) {
  *  @param ws a workspace to transpos
  *  @return a transposed workspace
  */
-API::MatrixWorkspace_sptr
-FindReflectometryLines2::transpose(API::MatrixWorkspace_sptr &ws) {
+API::MatrixWorkspace_sptr FindReflectometryLines2::transpose(API::MatrixWorkspace_sptr &ws) {
   API::IAlgorithm_sptr transpose = createChildAlgorithm("Transpose");
   transpose->initialize();
   transpose->setProperty("InputWorkspace", ws);
   transpose->setProperty("OutputWorkspace", "__unused_for_child");
   transpose->execute();
-  API::MatrixWorkspace_sptr transposedWS =
-      transpose->getProperty("OutputWorkspace");
+  API::MatrixWorkspace_sptr transposedWS = transpose->getProperty("OutputWorkspace");
   return transposedWS;
 }
 

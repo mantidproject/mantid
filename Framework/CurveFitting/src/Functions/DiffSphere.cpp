@@ -50,8 +50,7 @@ void DiffSphere::trickleDownAttribute(const std::string &name) {
 /**
  * @brief Overwrite attributes of member functions with same name
  */
-void DiffSphere::declareAttribute(
-    const std::string &name, const API::IFunction::Attribute &defaultValue) {
+void DiffSphere::declareAttribute(const std::string &name, const API::IFunction::Attribute &defaultValue) {
   API::ImmutableCompositeFunction::declareAttribute(name, defaultValue);
   this->trickleDownAttribute(name);
 }
@@ -61,8 +60,7 @@ void DiffSphere::declareAttribute(
  * @param name Name of the attribute
  * @param att the attribute to be propagated to elastic and inelastic parts
  */
-void DiffSphere::setAttribute(const std::string &name,
-                              const API::IFunction::Attribute &att) {
+void DiffSphere::setAttribute(const std::string &name, const API::IFunction::Attribute &att) {
   API::ImmutableCompositeFunction::setAttribute(name, att);
   this->trickleDownAttribute(name);
 }
@@ -88,8 +86,7 @@ void DiffSphere::init() {
   this->setAlias("f1.Shift", "Shift");
 
   // Set the ties between Elastic and Inelastic parameters
-  this->addDefaultTies(
-      "f0.Height=f1.Intensity,f0.Radius=f1.Radius,f0.Centre=0");
+  this->addDefaultTies("f0.Height=f1.Intensity,f0.Radius=f1.Radius,f0.Centre=0");
   this->applyTies();
 }
 

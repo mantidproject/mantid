@@ -28,11 +28,9 @@ using Mantid::Geometry::Instrument;
 using namespace MantidQt;
 using namespace MantidQt::MantidWidgets;
 
-class MockBaseCustomInstrumentView
-    : public MantidQt::MantidWidgets::IBaseCustomInstrumentView {
+class MockBaseCustomInstrumentView : public MantidQt::MantidWidgets::IBaseCustomInstrumentView {
 public:
-  explicit MockBaseCustomInstrumentView(const std::string &instrument,
-                                        QWidget *parent = nullptr) {
+  explicit MockBaseCustomInstrumentView(const std::string &instrument, QWidget *parent = nullptr) {
     (void)instrument;
     (void)parent;
   };
@@ -45,21 +43,16 @@ public:
 
   MOCK_METHOD1(setInstrumentWidget, void(InstrumentWidget *instrument));
   MOCK_METHOD0(getInstrumentView, MantidWidgets::InstrumentWidget *());
-  MOCK_METHOD2(
-      setUpInstrument,
-      void(const std::string &fileName,
-           std::vector<std::function<bool(std::map<std::string, bool>)>>
-               &instrument));
-  MOCK_METHOD1(addObserver,
-               void(std::tuple<std::string, Observer *> &listener));
+  MOCK_METHOD2(setUpInstrument, void(const std::string &fileName,
+                                     std::vector<std::function<bool(std::map<std::string, bool>)>> &instrument));
+  MOCK_METHOD1(addObserver, void(std::tuple<std::string, Observer *> &listener));
   MOCK_METHOD1(setupInstrumentAnalysisSplitters, void(QWidget *analysis));
   MOCK_METHOD0(setupHelp, void());
   // override getQWidget
   MOCK_METHOD0(getQWidget, QWidget *());
 };
 
-class MockBaseCustomInstrumentModel
-    : public MantidQt::MantidWidgets::IBaseCustomInstrumentModel {
+class MockBaseCustomInstrumentModel : public MantidQt::MantidWidgets::IBaseCustomInstrumentModel {
 public:
   explicit MockBaseCustomInstrumentModel(){};
   ~MockBaseCustomInstrumentModel(){};
@@ -80,15 +73,12 @@ public:
 
 // Allows us to turn on and off mocks to functions from the presenter
 // do not repeat testing
-class PartMockBaseCustomInstrumentPresenter
-    : public BaseCustomInstrumentPresenter {
+class PartMockBaseCustomInstrumentPresenter : public BaseCustomInstrumentPresenter {
 public:
-  explicit PartMockBaseCustomInstrumentPresenter(
-      IBaseCustomInstrumentView *view, IBaseCustomInstrumentModel *model,
-      IPlotFitAnalysisPanePresenter *analysis)
-      : BaseCustomInstrumentPresenter(view, model, analysis),
-        m_initInstrument(0), m_load(0), m_layout(0), m_sideEffects(0),
-        m_mockInitInstrument(false), m_mockLoad(false), m_mockLayout(false),
+  explicit PartMockBaseCustomInstrumentPresenter(IBaseCustomInstrumentView *view, IBaseCustomInstrumentModel *model,
+                                                 IPlotFitAnalysisPanePresenter *analysis)
+      : BaseCustomInstrumentPresenter(view, model, analysis), m_initInstrument(0), m_load(0), m_layout(0),
+        m_sideEffects(0), m_mockInitInstrument(false), m_mockLoad(false), m_mockLayout(false),
         m_mockSideEffects(false){};
   ~PartMockBaseCustomInstrumentPresenter(){};
 
@@ -98,8 +88,7 @@ public:
   void setMockLayout() { m_mockLayout = true; };
   void setMockSideEffects() { m_mockSideEffects = true; };
   // override functions so we can call mocked versions
-  void initInstrument(std::pair<instrumentSetUp, instrumentObserverOptions>
-                          *setUp = nullptr) override {
+  void initInstrument(std::pair<instrumentSetUp, instrumentObserverOptions> *setUp = nullptr) override {
     if (m_mockInitInstrument) {
       m_initInstrument += 1;
     } else {
@@ -107,8 +96,7 @@ public:
     };
   }
 
-  void initLayout(std::pair<instrumentSetUp, instrumentObserverOptions> *setup =
-                      nullptr) override final {
+  void initLayout(std::pair<instrumentSetUp, instrumentObserverOptions> *setup = nullptr) override final {
     if (m_mockLayout == true) {
       m_layout += 1;
     } else {
@@ -139,14 +127,9 @@ public:
   int getLoadSideEffectsCount() { return m_sideEffects; };
 
   // allow tests to get at protected/private functions/members
-  void setUpInstrumentAnalysisSplitter() override {
-    BaseCustomInstrumentPresenter::setUpInstrumentAnalysisSplitter();
-  };
-  void loadRunNumber() override {
-    BaseCustomInstrumentPresenter::loadRunNumber();
-  };
-  std::pair<instrumentSetUp, instrumentObserverOptions> *
-  setupInstrument() override {
+  void setUpInstrumentAnalysisSplitter() override { BaseCustomInstrumentPresenter::setUpInstrumentAnalysisSplitter(); };
+  void loadRunNumber() override { BaseCustomInstrumentPresenter::loadRunNumber(); };
+  std::pair<instrumentSetUp, instrumentObserverOptions> *setupInstrument() override {
     return BaseCustomInstrumentPresenter::setupInstrument();
   };
 

@@ -27,8 +27,7 @@ public:
   void acceptView(LatticeView *view);
 
 private:
-  bool checkInput(double a1, double a2, double a3, double b1, double b2,
-                  double b3);
+  bool checkInput(double a1, double a2, double a3, double b1, double b2, double b3);
   LatticeView *m_view;
   LoanedMemento &m_WsMemento;
 };

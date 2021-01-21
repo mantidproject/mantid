@@ -41,8 +41,7 @@ private:
   /// The text that goes into the beginning of the output directory message
   static const QString OUT_MSG;
 
-  Poco::NObserver<SANSAddFiles, Mantid::Kernel::ConfigValChangeNotification>
-      m_newOutDir;
+  Poco::NObserver<SANSAddFiles, Mantid::Kernel::ConfigValChangeNotification> m_newOutDir;
 
   /// Cache for custom binning string
   QString m_customBinning;
@@ -55,8 +54,7 @@ private:
   /// Text for tooltip for save event data
   QString m_saveEventDataToolTip;
   /// Set the bin field
-  void setHistogramUiLogic(const QString &label, const QString &toolTip,
-                           const QString &lineEditText, bool enabled);
+  void setHistogramUiLogic(const QString &label, const QString &toolTip, const QString &lineEditText, bool enabled);
   /// Set the histo gram input enabled or disabled
   void setInputEnabled(bool enabled);
   /// Create Python string list
@@ -67,8 +65,7 @@ private:
   void initLayout() override;
   void setToolTips();
   QListWidgetItem *insertListFront(const QString &text);
-  void
-  changeOutputDir(Mantid::Kernel::ConfigValChangeNotification_ptr pDirInfo);
+  void changeOutputDir(Mantid::Kernel::ConfigValChangeNotification_ptr pDirInfo);
   void setOutDir(const std::string &dir);
   bool checkValidityTimeShiftsForAddedEventFiles();
 

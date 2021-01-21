@@ -65,20 +65,16 @@ enum PointClassification {
   Destination /**< Point equals edge destination */
 };
 /// Helper function for classification
-MANTID_GEOMETRY_DLL PointClassification classify(const Kernel::V2D &pt,
-                                                 const PolygonEdge &edge);
+MANTID_GEOMETRY_DLL PointClassification classify(const Kernel::V2D &pt, const PolygonEdge &edge);
 
 /// Calculate the orientation type of one edge wrt to another
-MANTID_GEOMETRY_DLL PolygonEdge::Orientation
-orientation(const PolygonEdge &focusEdge, const PolygonEdge &refEdge,
-            double &t);
+MANTID_GEOMETRY_DLL PolygonEdge::Orientation orientation(const PolygonEdge &focusEdge, const PolygonEdge &refEdge,
+                                                         double &t);
 /// Calculate the crossing point of one edge with wrt another
-MANTID_GEOMETRY_DLL PolygonEdge::Orientation
-crossingPoint(const PolygonEdge &edgeOne, const PolygonEdge &edgeTwo,
-              Kernel::V2D &crossPoint);
+MANTID_GEOMETRY_DLL PolygonEdge::Orientation crossingPoint(const PolygonEdge &edgeOne, const PolygonEdge &edgeTwo,
+                                                           Kernel::V2D &crossPoint);
 /// Return if the edges aim at each other
-MANTID_GEOMETRY_DLL bool edgeAimsAt(const PolygonEdge &a, const PolygonEdge &b,
-                                    PointClassification aclass,
+MANTID_GEOMETRY_DLL bool edgeAimsAt(const PolygonEdge &a, const PolygonEdge &b, PointClassification aclass,
                                     PolygonEdge::Orientation crossType);
 
 } // namespace Geometry

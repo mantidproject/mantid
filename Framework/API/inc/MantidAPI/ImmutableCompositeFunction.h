@@ -30,25 +30,19 @@ public:
   /// Returns the function's name
   std::string name() const override { return "ImmutableCompositeFunction"; }
   /// Set i-th parameter
-  void setParameter(size_t i, const double &value,
-                    bool explicitlySet = true) override {
+  void setParameter(size_t i, const double &value, bool explicitlySet = true) override {
     CompositeFunction::setParameter(i, value, explicitlySet);
   }
   /// Set i-th parameter description
-  void setParameterDescription(size_t i,
-                               const std::string &description) override {
+  void setParameterDescription(size_t i, const std::string &description) override {
     CompositeFunction::setParameterDescription(i, description);
   }
   /// Set parameter by name.
-  void setParameter(const std::string &name, const double &value,
-                    bool explicitlySet = true) override;
+  void setParameter(const std::string &name, const double &value, bool explicitlySet = true) override;
   /// Set description of parameter by name.
-  void setParameterDescription(const std::string &name,
-                               const std::string &description) override;
+  void setParameterDescription(const std::string &name, const std::string &description) override;
   /// Get i-th parameter
-  double getParameter(size_t i) const override {
-    return CompositeFunction::getParameter(i);
-  }
+  double getParameter(size_t i) const override { return CompositeFunction::getParameter(i); }
   /// Get parameter by name.
   double getParameter(const std::string &name) const override;
   /// Returns the index of parameter name
@@ -68,8 +62,7 @@ protected:
   /// Add default constraints
   void addDefaultConstraints(const std::string &constraints);
   /// Writes itself into a string
-  std::string writeToString(
-      const std::string &parentLocalAttributesStr = "") const override;
+  std::string writeToString(const std::string &parentLocalAttributesStr = "") const override;
 
 private:
   /// Keep paramater aliases

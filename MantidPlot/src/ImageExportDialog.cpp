@@ -41,8 +41,7 @@
 #include <QPushButton>
 #include <QStackedWidget>
 
-ImageExportDialog::ImageExportDialog(QWidget *parent, bool vector_options,
-                                     bool extended, const Qt::WFlags &flags)
+ImageExportDialog::ImageExportDialog(QWidget *parent, bool vector_options, bool extended, const Qt::WFlags &flags)
     : ExtensibleFileDialog(parent, extended, flags) {
   setWindowTitle(tr("MantidPlot - Choose a filename to save under"));
   setAcceptMode(QFileDialog::AcceptSave);
@@ -72,8 +71,7 @@ ImageExportDialog::ImageExportDialog(QWidget *parent, bool vector_options,
   setExtensionWidget(d_advanced_options);
 
 #if QT_VERSION >= 0x040300
-  connect(this, SIGNAL(filterSelected(const QString &)), this,
-          SLOT(updateAdvancedOptions(const QString &)));
+  connect(this, SIGNAL(filterSelected(const QString &)), this, SLOT(updateAdvancedOptions(const QString &)));
 #else
   QList<QComboBox *> combo_boxes = findChildren<QComboBox *>();
   if (combo_boxes.size() >= 2)
@@ -86,8 +84,7 @@ ImageExportDialog::ImageExportDialog(QWidget *parent, bool vector_options,
 void ImageExportDialog::initAdvancedOptions() {
   ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
   if (!app) {
-    throw std::logic_error(
-        "Parent of ImageExportDialog is not ApplicationWindow as expected.");
+    throw std::logic_error("Parent of ImageExportDialog is not ApplicationWindow as expected.");
   }
   d_advanced_options = new QStackedWidget();
 
@@ -141,8 +138,7 @@ void ImageExportDialog::initAdvancedOptions() {
   boxPageSize->setEnabled(app->d_export_vector_size != QPrinter::Custom);
   vector_layout->addWidget(boxPageSize, 3, 1, 1, 2);
 
-  connect(d_standard_page, SIGNAL(toggled(bool)), boxPageSize,
-          SLOT(setEnabled(bool)));
+  connect(d_standard_page, SIGNAL(toggled(bool)), boxPageSize, SLOT(setEnabled(bool)));
 
   d_keep_aspect = new QCheckBox();
   d_keep_aspect->setText(tr("&Keep aspect ratio"));
@@ -172,14 +168,12 @@ void ImageExportDialog::updateAdvancedOptions(const QString &filter) {
     return;
   }
   d_extension_toggle->setEnabled(true);
-  if (filter.contains("*.eps") || filter.contains("*.ps") ||
-      filter.contains("*.pdf"))
+  if (filter.contains("*.eps") || filter.contains("*.ps") || filter.contains("*.pdf"))
     d_advanced_options->setCurrentIndex(0);
   else {
     d_advanced_options->setCurrentIndex(1);
-    d_transparency->setEnabled(
-        filter.contains("*.tif") || filter.contains("*.tiff") ||
-        filter.contains("*.png") || filter.contains("*.xpm"));
+    d_transparency->setEnabled(filter.contains("*.tif") || filter.contains("*.tiff") || filter.contains("*.png") ||
+                               filter.contains("*.xpm"));
   }
 }
 

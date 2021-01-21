@@ -48,13 +48,10 @@ using namespace Mantid::Kernel;
  *	@date 05/11/2009
  *
  */
-SampleLogDialogBase::SampleLogDialogBase(const QString &wsname,
-                                         QWidget *parentContainer,
-                                         const Qt::WFlags &flags,
+SampleLogDialogBase::SampleLogDialogBase(const QString &wsname, QWidget *parentContainer, const Qt::WFlags &flags,
                                          size_t experimentInfoIndex)
-    : QDialog(parentContainer, flags), m_tree(new QTreeWidget()),
-      m_parentContainer(parentContainer), m_wsname(wsname.toStdString()),
-      m_experimentInfoIndex(experimentInfoIndex), buttonPlot(nullptr),
+    : QDialog(parentContainer, flags), m_tree(new QTreeWidget()), m_parentContainer(parentContainer),
+      m_wsname(wsname.toStdString()), m_experimentInfoIndex(experimentInfoIndex), buttonPlot(nullptr),
       buttonClose(nullptr), m_spinNumber(nullptr) {
 
   for (size_t i = 0; i < NUM_STATS; ++i) {
@@ -112,8 +109,7 @@ void SampleLogDialogBase::showLogStatistics() {
  *	@author Martyn Gigg, Tessella Support Services plc
  *	@date 05/11/2009
  */
-void SampleLogDialogBase::showLogStatisticsOfItem(
-    QTreeWidgetItem *item, const LogFilterGenerator::FilterType filter) {
+void SampleLogDialogBase::showLogStatisticsOfItem(QTreeWidgetItem *item, const LogFilterGenerator::FilterType filter) {
   // Assume that you can't show the stats
   for (size_t i = 0; i < NUM_STATS; i++) {
     statValues[i]->setText(QString(""));
@@ -140,10 +136,8 @@ void SampleLogDialogBase::showLogStatisticsOfItem(
     Mantid::Kernel::TimeSeriesPropertyStatistics stats;
     Mantid::Kernel::Property *logData = m_ei->run().getLogData(logName);
     // Get the stats if its a series of int or double; fail otherwise
-    Mantid::Kernel::TimeSeriesProperty<double> *tspd =
-        dynamic_cast<TimeSeriesProperty<double> *>(logData);
-    Mantid::Kernel::TimeSeriesProperty<int> *tspi =
-        dynamic_cast<TimeSeriesProperty<int> *>(logData);
+    Mantid::Kernel::TimeSeriesProperty<double> *tspd = dynamic_cast<TimeSeriesProperty<double> *>(logData);
+    Mantid::Kernel::TimeSeriesProperty<int> *tspi = dynamic_cast<TimeSeriesProperty<int> *>(logData);
     LogFilterGenerator generator(filter, m_ei->run());
     const auto &logFilter = generator.generateFilter(logName);
     if (tspd) {
@@ -217,36 +211,29 @@ void SampleLogDialogBase::init() {
 
   // ------------------- Retrieve the proper ExperimentInfo workspace
   // -------------------------------
-  IMDWorkspace_sptr ws =
-      AnalysisDataService::Instance().retrieveWS<IMDWorkspace>(m_wsname);
+  IMDWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<IMDWorkspace>(m_wsname);
   if (!ws)
-    throw std::runtime_error("Wrong type of a workspace (" + m_wsname +
-                             " is not an IMDWorkspace)");
+    throw std::runtime_error("Wrong type of a workspace (" + m_wsname + " is not an IMDWorkspace)");
   // Is it MatrixWorkspace, which itself is ExperimentInfo?
   m_ei = std::dynamic_pointer_cast<const ExperimentInfo>(ws);
   ;
   if (!m_ei) {
-    std::shared_ptr<MultipleExperimentInfos> mei =
-        std::dynamic_pointer_cast<MultipleExperimentInfos>(ws);
+    std::shared_ptr<MultipleExperimentInfos> mei = std::dynamic_pointer_cast<MultipleExperimentInfos>(ws);
     if (mei) {
       if (m_experimentInfoIndex >= mei->getNumExperimentInfo()) {
-        std::cerr << "ExperimentInfo requested (#" +
-                         Strings::toString(m_experimentInfoIndex) +
-                         ") is not available. There are " +
-                         Strings::toString(mei->getNumExperimentInfo()) +
+        std::cerr << "ExperimentInfo requested (#" + Strings::toString(m_experimentInfoIndex) +
+                         ") is not available. There are " + Strings::toString(mei->getNumExperimentInfo()) +
                          " in the workspace\n";
         // Make a blank experiment info object
         m_ei = ExperimentInfo_const_sptr(new ExperimentInfo());
       } else
-        m_ei = mei->getExperimentInfo(
-            static_cast<uint16_t>(m_experimentInfoIndex));
+        m_ei = mei->getExperimentInfo(static_cast<uint16_t>(m_experimentInfoIndex));
     }
   }
   if (!m_ei)
     throw std::runtime_error("Wrong type of a workspace (no ExperimentInfo)");
 
-  const std::vector<Mantid::Kernel::Property *> &logData =
-      m_ei->run().getLogData();
+  const std::vector<Mantid::Kernel::Property *> &logData = m_ei->run().getLogData();
   auto pEnd = logData.end();
   int max_length(0);
   for (auto pItr = logData.begin(); pItr != pEnd; ++pItr) {
@@ -274,10 +261,8 @@ void SampleLogDialogBase::init() {
 
     Mantid::Kernel::TimeSeriesProperty<double> *tspd =
         dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double> *>(*pItr);
-    Mantid::Kernel::TimeSeriesProperty<int> *tspi =
-        dynamic_cast<Mantid::Kernel::TimeSeriesProperty<int> *>(*pItr);
-    Mantid::Kernel::TimeSeriesProperty<bool> *tspb =
-        dynamic_cast<Mantid::Kernel::TimeSeriesProperty<bool> *>(*pItr);
+    Mantid::Kernel::TimeSeriesProperty<int> *tspi = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<int> *>(*pItr);
+    Mantid::Kernel::TimeSeriesProperty<bool> *tspb = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<bool> *>(*pItr);
 
     // See what type of data we have
     if (tspd || tspi || tspb) {
@@ -299,12 +284,10 @@ void SampleLogDialogBase::init() {
         msg << "(" << (*pItr)->size() << " entries)";
       }
       treeItem->setText(2, QString::fromStdString(msg.str()));
-    } else if (auto strSeries = dynamic_cast<
-                   Mantid::Kernel::TimeSeriesProperty<std::string> *>(*pItr)) {
+    } else if (auto strSeries = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<std::string> *>(*pItr)) {
       treeItem->setText(1, "str. series");
       treeItem->setData(1, Qt::UserRole, static_cast<int>(stringTSeries));
-      treeItem->setData(0, Qt::UserRole,
-                        QString::fromStdString((*pItr)->value()));
+      treeItem->setData(0, Qt::UserRole, QString::fromStdString((*pItr)->value()));
       std::ostringstream msg;
       if ((*pItr)->size() == 1) {
         // Print out the only entry
@@ -314,39 +297,28 @@ void SampleLogDialogBase::init() {
         msg << "(" << (*pItr)->size() << " entries)";
       }
       treeItem->setText(2, QString::fromStdString(msg.str()));
-    } else if (dynamic_cast<Mantid::Kernel::PropertyWithValue<std::string> *>(
-                   *pItr)) {
+    } else if (dynamic_cast<Mantid::Kernel::PropertyWithValue<std::string> *>(*pItr)) {
       treeItem->setText(1, "string");
       treeItem->setData(1, Qt::UserRole, static_cast<int>(string));
-      treeItem->setData(0, Qt::UserRole,
-                        QString::fromStdString((*pItr)->value()));
+      treeItem->setData(0, Qt::UserRole, QString::fromStdString((*pItr)->value()));
       treeItem->setText(2, QString::fromStdString((*pItr)->value()));
 
     } else if (dynamic_cast<Mantid::Kernel::PropertyWithValue<int> *>(*pItr) ||
-               dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(
-                   *pItr)) {
+               dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(*pItr)) {
       treeItem->setText(1, "numeric");
-      treeItem->setData(
-          1, Qt::UserRole,
-          static_cast<int>(numeric)); // Save the "role" as numeric.
-      treeItem->setData(0, Qt::UserRole,
-                        QString::fromStdString((*pItr)->value()));
+      treeItem->setData(1, Qt::UserRole,
+                        static_cast<int>(numeric)); // Save the "role" as numeric.
+      treeItem->setData(0, Qt::UserRole, QString::fromStdString((*pItr)->value()));
       treeItem->setText(2, QString::fromStdString((*pItr)->value()));
-    } else if (
-        dynamic_cast<Mantid::Kernel::ArrayProperty<int> *>(*pItr) ||
-        dynamic_cast<ArrayProperty<double> *>(*pItr) ||
-        dynamic_cast<Mantid::Kernel::PropertyWithValue<std::vector<double>> *>(
-            *pItr) ||
-        dynamic_cast<Mantid::Kernel::PropertyWithValue<std::vector<int>> *>(
-            *pItr) ||
-        dynamic_cast<Mantid::Kernel::PropertyWithValue<std::vector<long>> *>(
-            *pItr)) {
+    } else if (dynamic_cast<Mantid::Kernel::ArrayProperty<int> *>(*pItr) ||
+               dynamic_cast<ArrayProperty<double> *>(*pItr) ||
+               dynamic_cast<Mantid::Kernel::PropertyWithValue<std::vector<double>> *>(*pItr) ||
+               dynamic_cast<Mantid::Kernel::PropertyWithValue<std::vector<int>> *>(*pItr) ||
+               dynamic_cast<Mantid::Kernel::PropertyWithValue<std::vector<long>> *>(*pItr)) {
       treeItem->setText(1, "numeric array");
-      treeItem->setData(
-          1, Qt::UserRole,
-          static_cast<int>(numericArray)); // Save the "role" as numeric array.
-      treeItem->setData(0, Qt::UserRole,
-                        QString::fromStdString((*pItr)->value()));
+      treeItem->setData(1, Qt::UserRole,
+                        static_cast<int>(numericArray)); // Save the "role" as numeric array.
+      treeItem->setData(0, Qt::UserRole, QString::fromStdString((*pItr)->value()));
       std::ostringstream msg;
       msg << "(" << (*pItr)->size() << " entries)";
       treeItem->setText(2, QString::fromStdString(msg.str()));
@@ -402,8 +374,7 @@ void SampleLogDialogBase::addImportAndCloseButtonsTo(QBoxLayout *qLayout) {
   QHBoxLayout *topButtons = new QHBoxLayout;
   buttonPlot = new QPushButton(tr("&Import selected log"));
   buttonPlot->setAutoDefault(true);
-  buttonPlot->setToolTip(
-      "Import log file as a table and construct a 1D graph if appropriate");
+  buttonPlot->setToolTip("Import log file as a table and construct a 1D graph if appropriate");
   topButtons->addWidget(buttonPlot);
 
   buttonClose = new QPushButton(tr("Close"));
@@ -422,8 +393,7 @@ void SampleLogDialogBase::addImportAndCloseButtonsTo(QBoxLayout *qLayout) {
 void SampleLogDialogBase::addExperimentInfoSelectorTo(QBoxLayout *qLayout) {
   // -------------- The ExperimentInfo selector------------------------
   std::shared_ptr<Mantid::API::MultipleExperimentInfos> mei =
-      AnalysisDataService::Instance().retrieveWS<MultipleExperimentInfos>(
-          m_wsname);
+      AnalysisDataService::Instance().retrieveWS<MultipleExperimentInfos>(m_wsname);
 
   if (mei) {
     if (mei->getNumExperimentInfo() > 0) {
@@ -436,8 +406,7 @@ void SampleLogDialogBase::addExperimentInfoSelectorTo(QBoxLayout *qLayout) {
       numSelectorLayout->addWidget(lbl);
       numSelectorLayout->addWidget(m_spinNumber);
       // Double-click imports a log file
-      connect(m_spinNumber, SIGNAL(valueChanged(int)), this,
-              SLOT(selectExpInfoNumber(int)));
+      connect(m_spinNumber, SIGNAL(valueChanged(int)), this, SLOT(selectExpInfoNumber(int)));
       qLayout->addLayout(numSelectorLayout);
     }
   }
@@ -449,19 +418,14 @@ void SampleLogDialogBase::addExperimentInfoSelectorTo(QBoxLayout *qLayout) {
 void SampleLogDialogBase::setUpTreeWidgetConnections() {
   // want a custom context menu
   m_tree->setContextMenuPolicy(Qt::CustomContextMenu);
-  connect(m_tree, SIGNAL(customContextMenuRequested(const QPoint &)), this,
-          SLOT(popupMenu(const QPoint &)));
+  connect(m_tree, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(popupMenu(const QPoint &)));
 
   // Double-click imports a log file
-  connect(m_tree, SIGNAL(itemDoubleClicked(QTreeWidgetItem *, int)), this,
-          SLOT(importItem(QTreeWidgetItem *)));
+  connect(m_tree, SIGNAL(itemDoubleClicked(QTreeWidgetItem *, int)), this, SLOT(importItem(QTreeWidgetItem *)));
 
   // Selecting shows the stats of it
-  connect(m_tree, SIGNAL(itemClicked(QTreeWidgetItem *, int)), this,
-          SLOT(showLogStatistics()));
+  connect(m_tree, SIGNAL(itemClicked(QTreeWidgetItem *, int)), this, SLOT(showLogStatistics()));
 
   // Selecting shows the stats of it
-  connect(m_tree,
-          SIGNAL(currentItemChanged(QTreeWidgetItem *, QTreeWidgetItem *)),
-          this, SLOT(showLogStatistics()));
+  connect(m_tree, SIGNAL(currentItemChanged(QTreeWidgetItem *, QTreeWidgetItem *)), this, SLOT(showLogStatistics()));
 }

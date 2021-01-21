@@ -32,14 +32,11 @@ public:
   static void destroySuite(SaveAsciiTest *suite) { delete suite; }
 
   SaveAsciiTest() {}
-  ~SaveAsciiTest() override {
-    FrameworkManager::Instance().deleteWorkspace("SaveAsciiWS");
-  }
+  ~SaveAsciiTest() override { FrameworkManager::Instance().deleteWorkspace("SaveAsciiWS"); }
 
   void testExec() {
-    Mantid::DataObjects::Workspace2D_sptr wsToSave =
-        std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
-            WorkspaceFactory::Instance().create("Workspace2D", 2, 3, 3));
+    Mantid::DataObjects::Workspace2D_sptr wsToSave = std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
+        WorkspaceFactory::Instance().create("Workspace2D", 2, 3, 3));
     for (int i = 0; i < 2; i++) {
       auto &X = wsToSave->mutableX(i);
       auto &Y = wsToSave->mutableY(i);
@@ -74,8 +71,7 @@ public:
 
     // Currently we just test that the first few column headers and a separator
     // are as expected
-    in >> header1 >> separator >> header2 >> separator >> header3 >>
-        separator >> header4;
+    in >> header1 >> separator >> header2 >> separator >> header3 >> separator >> header4;
     TS_ASSERT_EQUALS(separator, ",");
     TS_ASSERT_EQUALS(header1, "X");
     TS_ASSERT_EQUALS(header2, "Y0");
@@ -112,9 +108,8 @@ public:
   }
 
   void testExec_DX() {
-    Mantid::DataObjects::Workspace2D_sptr wsToSave =
-        std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
-            WorkspaceFactory::Instance().create("Workspace2D", 2, 3, 3));
+    Mantid::DataObjects::Workspace2D_sptr wsToSave = std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
+        WorkspaceFactory::Instance().create("Workspace2D", 2, 3, 3));
     for (int i = 0; i < 2; i++) {
       auto &X = wsToSave->mutableX(i);
       auto &Y = wsToSave->mutableY(i);
@@ -151,8 +146,7 @@ public:
 
     // Test that the first few column headers, separator and first two bins are
     // as expected
-    in >> header1 >> separator >> header2 >> separator >> header3 >>
-        separator >> header4;
+    in >> header1 >> separator >> header2 >> separator >> header3 >> separator >> header4;
     TS_ASSERT_EQUALS(separator, ",");
     TS_ASSERT_EQUALS(header1, "X");
     TS_ASSERT_EQUALS(header2, "Y0");

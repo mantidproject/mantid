@@ -30,8 +30,7 @@ DECLARE_FUNCMINIMIZER(FRConjugateGradientMinimizer,Conjugate gradient (Fletcher-
 
 /// Return a concrete type to initialize m_gslSolver
 /// gsl_multimin_fdfminimizer_vector_bfgs2
-const gsl_multimin_fdfminimizer_type *
-FRConjugateGradientMinimizer::getGSLMinimizerType() {
+const gsl_multimin_fdfminimizer_type *FRConjugateGradientMinimizer::getGSLMinimizerType() {
   return gsl_multimin_fdfminimizer_conjugate_fr;
 }
 

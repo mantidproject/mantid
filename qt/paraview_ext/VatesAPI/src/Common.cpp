@@ -68,8 +68,7 @@ std::string convertAxesTitleToLatex(const std::string &toConvert) {
   return converted;
 }
 
-void setAxisLabel(const std::string &metadataLabel,
-                  const std::string &labelString, vtkFieldData *fieldData) {
+void setAxisLabel(const std::string &metadataLabel, const std::string &labelString, vtkFieldData *fieldData) {
   vtkNew<vtkStringArray> axisTitle;
   axisTitle->SetName(metadataLabel.c_str());
   axisTitle->SetNumberOfComponents(1);

@@ -34,13 +34,10 @@ public:
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; };
   const std::vector<std::string> seeAlso() const override {
-    return {"LoadEventNexus", "FilterByXValue", "FilterEvents",
-            "FilterLogByTime", "FilterBadPulses"};
+    return {"LoadEventNexus", "FilterByXValue", "FilterEvents", "FilterLogByTime", "FilterBadPulses"};
   }
   /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override {
-    return "Events\\EventFiltering";
-  }
+  const std::string category() const override { return "Events\\EventFiltering"; }
 
 private:
   // Implement abstract Algorithm methods

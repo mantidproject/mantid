@@ -21,12 +21,8 @@ class FileBackedExperimentInfoTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static FileBackedExperimentInfoTest *createSuite() {
-    return new FileBackedExperimentInfoTest();
-  }
-  static void destroySuite(FileBackedExperimentInfoTest *suite) {
-    delete suite;
-  }
+  static FileBackedExperimentInfoTest *createSuite() { return new FileBackedExperimentInfoTest(); }
+  static void destroySuite(FileBackedExperimentInfoTest *suite) { delete suite; }
 
   FileBackedExperimentInfoTest() {
     using Mantid::API::ExperimentInfo;
@@ -41,8 +37,7 @@ public:
     ::NeXus::File nxFile(m_filename, NXACC_READ);
     nxFile.openGroup("mantid_workspace_1", "NXentry");
     std::string paramString;
-    m_inMemoryExptInfo->loadExperimentInfoNexus(m_filename, &nxFile,
-                                                paramString);
+    m_inMemoryExptInfo->loadExperimentInfoNexus(m_filename, &nxFile, paramString);
     m_inMemoryExptInfo->readParameterMap(paramString);
   }
 
@@ -51,8 +46,7 @@ public:
     TS_ASSERT_EQUALS(fileBacked->toString(), m_inMemoryExptInfo->toString());
   }
 
-  void
-  test_cloneExperimentInfo_returns_new_file_backed_object_and_does_not_touch_file() {
+  void test_cloneExperimentInfo_returns_new_file_backed_object_and_does_not_touch_file() {
     auto fileBacked = createTestObject();
     auto *clonedFileBacked = fileBacked->cloneExperimentInfo();
 
@@ -64,8 +58,7 @@ public:
   void test_getInstrument_populates_object() {
     auto fileBacked = createTestObject();
 
-    TS_ASSERT_EQUALS(fileBacked->constInstrumentParameters(),
-                     m_inMemoryExptInfo->constInstrumentParameters());
+    TS_ASSERT_EQUALS(fileBacked->constInstrumentParameters(), m_inMemoryExptInfo->constInstrumentParameters());
   }
 
   void test_instrumentParameters_const_ref_method_populate_object() {
@@ -100,17 +93,14 @@ public:
   void test_sample() {
     auto fileBacked = createTestObject();
 
-    TS_ASSERT_EQUALS(m_inMemoryExptInfo->sample().getGeometryFlag(),
-                     fileBacked->sample().getGeometryFlag());
-    TS_ASSERT_EQUALS(m_inMemoryExptInfo->sample().getGeometryFlag(),
-                     fileBacked->mutableSample().getGeometryFlag());
+    TS_ASSERT_EQUALS(m_inMemoryExptInfo->sample().getGeometryFlag(), fileBacked->sample().getGeometryFlag());
+    TS_ASSERT_EQUALS(m_inMemoryExptInfo->sample().getGeometryFlag(), fileBacked->mutableSample().getGeometryFlag());
   }
 
   void test_run() {
     auto fileBacked = createTestObject();
 
-    TS_ASSERT_EQUALS(m_inMemoryExptInfo->run().getProtonCharge(),
-                     fileBacked->run().getProtonCharge())
+    TS_ASSERT_EQUALS(m_inMemoryExptInfo->run().getProtonCharge(), fileBacked->run().getProtonCharge())
   }
 
   void test_getLog() {
@@ -127,8 +117,7 @@ public:
   void test_getRunNumber() {
     auto fileBacked = createTestObject();
 
-    TS_ASSERT_EQUALS(m_inMemoryExptInfo->getRunNumber(),
-                     fileBacked->getRunNumber());
+    TS_ASSERT_EQUALS(m_inMemoryExptInfo->getRunNumber(), fileBacked->getRunNumber());
   }
 
   void test_getEMode() {
@@ -163,8 +152,7 @@ private:
   Mantid::API::ExperimentInfo_sptr createTestObject() {
     // Create the file backed experiment info, shouldn't be loaded yet.
     // Manipulate it through the interface
-    return std::make_shared<FileBackedExperimentInfo>(m_filename,
-                                                      "/mantid_workspace_1");
+    return std::make_shared<FileBackedExperimentInfo>(m_filename, "/mantid_workspace_1");
   }
 
   Mantid::API::ExperimentInfo_sptr m_inMemoryExptInfo;

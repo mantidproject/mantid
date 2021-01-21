@@ -22,8 +22,7 @@ if the bank which houses the detector is rectangular, a grid or structured.
 @param detIndex Index of the detector to be tested
 @returns True if the detector is fixed in a bank, False otherwise.
 */
-bool isDetectorFixedInBank(const ComponentInfo &compInfo,
-                           const size_t detIndex) {
+bool isDetectorFixedInBank(const ComponentInfo &compInfo, const size_t detIndex) {
   auto parent = compInfo.parent(detIndex);
   auto grandParent = compInfo.parent(parent);
   auto grandParentType = compInfo.componentType(grandParent);
@@ -31,8 +30,7 @@ bool isDetectorFixedInBank(const ComponentInfo &compInfo,
   auto greatGrandParentType = compInfo.componentType(greatGrandParent);
 
   if (compInfo.isDetector(detIndex) &&
-      (grandParentType == ComponentType::Rectangular ||
-       grandParentType == ComponentType::Structured ||
+      (grandParentType == ComponentType::Rectangular || grandParentType == ComponentType::Structured ||
        greatGrandParentType == ComponentType::Grid)) {
     return true;
   }
@@ -51,8 +49,7 @@ bool isDetectorFixedInBank(const ComponentInfo &compInfo,
  * @param idx : size_t index of component
  * @return true if component at index is bank, false otherwise.
  */
-bool isSaveableBank(const ComponentInfo &compInfo, const DetectorInfo &detInfo,
-                    const size_t idx) {
+bool isSaveableBank(const ComponentInfo &compInfo, const DetectorInfo &detInfo, const size_t idx) {
   // return false if is a detector.
   if (compInfo.isDetector(idx))
     return false;
@@ -86,8 +83,7 @@ bool isSaveableBank(const ComponentInfo &compInfo, const DetectorInfo &detInfo,
  * @param possibleAncestor : the queried ancestor.
  * @param current : the queried descendant.
  */
-bool isAncestorOf(const ComponentInfo &compInfo, const size_t possibleAncestor,
-                  const size_t current) {
+bool isAncestorOf(const ComponentInfo &compInfo, const size_t possibleAncestor, const size_t current) {
   size_t next = current;
   while (next != compInfo.root()) {
     if (next == possibleAncestor)
@@ -110,26 +106,21 @@ bool isAncestorOf(const ComponentInfo &compInfo, const size_t possibleAncestor,
  * @return Eigen::vector3d offset of the component at the current index relative
  * to the ancestor component
  */
-Eigen::Vector3d
-offsetFromAncestor(const Mantid::Geometry::ComponentInfo &compInfo,
-                   const size_t ancestorIdx, const size_t currentIdx) {
+Eigen::Vector3d offsetFromAncestor(const Mantid::Geometry::ComponentInfo &compInfo, const size_t ancestorIdx,
+                                   const size_t currentIdx) {
 
   if ((ancestorIdx <= currentIdx)) {
-    throw std::invalid_argument(
-        "Index of ancestor component is not higher than current Index.");
+    throw std::invalid_argument("Index of ancestor component is not higher than current Index.");
   }
 
   if (ancestorIdx == currentIdx) {
     return Mantid::Kernel::toVector3d(compInfo.position(currentIdx));
   } else {
-    const auto ancestorPos =
-        Mantid::Kernel::toVector3d(compInfo.position(ancestorIdx));
+    const auto ancestorPos = Mantid::Kernel::toVector3d(compInfo.position(ancestorIdx));
     auto transformation = Eigen::Affine3d(
-        Mantid::Kernel::toQuaterniond(compInfo.rotation(ancestorIdx))
-            .conjugate()); // Inverse ancestor rotation
+        Mantid::Kernel::toQuaterniond(compInfo.rotation(ancestorIdx)).conjugate()); // Inverse ancestor rotation
     transformation.translate(-ancestorPos);
-    return transformation *
-           Mantid::Kernel::toVector3d(compInfo.position(currentIdx));
+    return transformation * Mantid::Kernel::toVector3d(compInfo.position(currentIdx));
   }
 }
 

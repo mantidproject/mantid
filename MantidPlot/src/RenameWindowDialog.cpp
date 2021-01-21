@@ -37,8 +37,7 @@
 #include <QMessageBox>
 #include <QRadioButton>
 
-RenameWindowDialog::RenameWindowDialog(QWidget *parent, const Qt::WFlags &fl)
-    : QDialog(parent, fl) {
+RenameWindowDialog::RenameWindowDialog(QWidget *parent, const Qt::WFlags &fl) : QDialog(parent, fl) {
   setWindowTitle(tr("MantidPlot - Rename Window"));
 
   QGridLayout *leftLayout = new QGridLayout();
@@ -124,8 +123,7 @@ void RenameWindowDialog::accept() {
   QString label = boxLabelEdit->toPlainText();
 
   MdiSubWindow::CaptionPolicy policy = getCaptionPolicy();
-  if (text == name && label == window->windowLabel() &&
-      window->captionPolicy() == policy)
+  if (text == name && label == window->windowLabel() && window->captionPolicy() == policy)
     close();
 
   ApplicationWindow *app = static_cast<ApplicationWindow *>(parentWidget());

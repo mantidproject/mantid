@@ -18,9 +18,7 @@ class DiffPeaksWorkspacesTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static DiffPeaksWorkspacesTest *createSuite() {
-    return new DiffPeaksWorkspacesTest();
-  }
+  static DiffPeaksWorkspacesTest *createSuite() { return new DiffPeaksWorkspacesTest(); }
   static void destroySuite(DiffPeaksWorkspacesTest *suite) { delete suite; }
 
   void test_init() {
@@ -33,8 +31,7 @@ public:
     DiffPeaksWorkspaces alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     // Tolerance has to be positive.
-    TS_ASSERT_THROWS(alg.setProperty("Tolerance", -1.0),
-                     const std::invalid_argument &)
+    TS_ASSERT_THROWS(alg.setProperty("Tolerance", -1.0), const std::invalid_argument &)
   }
 
   // It shouldn't be a problem to subtract identical workspaces. You just get an
@@ -57,9 +54,7 @@ public:
 
     // Retrieve the workspace from data service.
     IPeaksWorkspace_const_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance().retrieveWS<IPeaksWorkspace>(
-            outWSName));
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<IPeaksWorkspace>(outWSName));
     TS_ASSERT(ws);
     if (!ws)
       return;
@@ -75,10 +70,8 @@ public:
     using namespace Mantid::API;
     using namespace Mantid::DataObjects;
 
-    PeaksWorkspace_sptr lhsWS =
-        WorkspaceCreationHelper::createPeaksWorkspace(2);
-    PeaksWorkspace_sptr rhsWS =
-        WorkspaceCreationHelper::createPeaksWorkspace(6);
+    PeaksWorkspace_sptr lhsWS = WorkspaceCreationHelper::createPeaksWorkspace(2);
+    PeaksWorkspace_sptr rhsWS = WorkspaceCreationHelper::createPeaksWorkspace(6);
 
     // Name of the output workspace.
     std::string outWSName("CombinePeaksWorkspacesTest_OutputWS");
@@ -92,9 +85,7 @@ public:
 
     // Retrieve the workspace from data service.
     IPeaksWorkspace_const_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance().retrieveWS<IPeaksWorkspace>(
-            outWSName));
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<IPeaksWorkspace>(outWSName));
     TS_ASSERT(ws);
     if (!ws)
       return;
@@ -109,10 +100,8 @@ public:
     using namespace Mantid::API;
     using namespace Mantid::DataObjects;
 
-    PeaksWorkspace_sptr lhsWS =
-        WorkspaceCreationHelper::createPeaksWorkspace(2);
-    PeaksWorkspace_sptr rhsWS =
-        WorkspaceCreationHelper::createPeaksWorkspace(2);
+    PeaksWorkspace_sptr lhsWS = WorkspaceCreationHelper::createPeaksWorkspace(2);
+    PeaksWorkspace_sptr rhsWS = WorkspaceCreationHelper::createPeaksWorkspace(2);
 
     // Shift the rhs peaks in Q
     auto &rhsPeaks = rhsWS->getPeaks();
@@ -132,18 +121,14 @@ public:
 
     // Retrieve the workspace from data service.
     IPeaksWorkspace_const_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance().retrieveWS<IPeaksWorkspace>(
-            outWSName));
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<IPeaksWorkspace>(outWSName));
     TS_ASSERT(ws);
     if (!ws)
       return;
 
     TS_ASSERT_EQUALS(ws->getNumberPeaks(), 2)
-    TS_ASSERT_EQUALS(ws->getPeak(0).getQLabFrame(),
-                     lhsWS->getPeak(0).getQLabFrame())
-    TS_ASSERT_EQUALS(ws->getPeak(1).getQLabFrame(),
-                     lhsWS->getPeak(1).getQLabFrame())
+    TS_ASSERT_EQUALS(ws->getPeak(0).getQLabFrame(), lhsWS->getPeak(0).getQLabFrame())
+    TS_ASSERT_EQUALS(ws->getPeak(1).getQLabFrame(), lhsWS->getPeak(1).getQLabFrame())
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);
@@ -153,10 +138,8 @@ public:
     using namespace Mantid::API;
     using namespace Mantid::DataObjects;
 
-    PeaksWorkspace_sptr lhsWS =
-        WorkspaceCreationHelper::createPeaksWorkspace(6);
-    PeaksWorkspace_sptr rhsWS =
-        WorkspaceCreationHelper::createPeaksWorkspace(4);
+    PeaksWorkspace_sptr lhsWS = WorkspaceCreationHelper::createPeaksWorkspace(6);
+    PeaksWorkspace_sptr rhsWS = WorkspaceCreationHelper::createPeaksWorkspace(4);
 
     // Slightly adjust the peaks in one of the workspaces
     auto &rhsPeaks = rhsWS->getPeaks();
@@ -193,26 +176,18 @@ public:
 
     // Retrieve the workspace from data service.
     IPeaksWorkspace_const_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance().retrieveWS<IPeaksWorkspace>(
-            outWSName));
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<IPeaksWorkspace>(outWSName));
     TS_ASSERT(ws);
     if (!ws)
       return;
 
     TS_ASSERT_EQUALS(ws->getNumberPeaks(), 5)
-    TS_ASSERT_EQUALS(ws->getPeak(0).getQLabFrame(),
-                     lhsWS->getPeak(0).getQLabFrame())
-    TS_ASSERT_EQUALS(ws->getPeak(1).getQLabFrame(),
-                     lhsWS->getPeak(1).getQLabFrame())
-    TS_ASSERT_EQUALS(ws->getPeak(2).getQLabFrame(),
-                     lhsWS->getPeak(2).getQLabFrame())
-    TS_ASSERT_EQUALS(ws->getPeak(3).getQLabFrame(),
-                     lhsWS->getPeak(4).getQLabFrame())
-    TS_ASSERT_EQUALS(ws->getPeak(4).getQLabFrame(),
-                     lhsWS->getPeak(5).getQLabFrame())
-    TS_ASSERT_EQUALS(ws->getInstrument()->baseInstrument(),
-                     lhsWS->getInstrument()->baseInstrument())
+    TS_ASSERT_EQUALS(ws->getPeak(0).getQLabFrame(), lhsWS->getPeak(0).getQLabFrame())
+    TS_ASSERT_EQUALS(ws->getPeak(1).getQLabFrame(), lhsWS->getPeak(1).getQLabFrame())
+    TS_ASSERT_EQUALS(ws->getPeak(2).getQLabFrame(), lhsWS->getPeak(2).getQLabFrame())
+    TS_ASSERT_EQUALS(ws->getPeak(3).getQLabFrame(), lhsWS->getPeak(4).getQLabFrame())
+    TS_ASSERT_EQUALS(ws->getPeak(4).getQLabFrame(), lhsWS->getPeak(5).getQLabFrame())
+    TS_ASSERT_EQUALS(ws->getInstrument()->baseInstrument(), lhsWS->getInstrument()->baseInstrument())
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);

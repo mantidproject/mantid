@@ -13,8 +13,7 @@
 
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
-class MockEnggDiffFittingView
-    : public MantidQt::CustomInterfaces::IEnggDiffFittingView {
+class MockEnggDiffFittingView : public MantidQt::CustomInterfaces::IEnggDiffFittingView {
 
 public:
   // virtual void showStatus(const std::string &sts);
@@ -22,20 +21,17 @@ public:
 
   // virtual void userWarning(const std::string &warn, const std::string
   // &description);
-  MOCK_METHOD2(userWarning,
-               void(const std::string &warn, const std::string &description));
+  MOCK_METHOD2(userWarning, void(const std::string &warn, const std::string &description));
 
   // virtual void userError(const std::string &err, const std::string
   // &description);
-  MOCK_METHOD2(userError,
-               void(const std::string &err, const std::string &description));
+  MOCK_METHOD2(userError, void(const std::string &err, const std::string &description));
 
   // virtual void enableCalibrateFocusFitUserActions(bool enable);
   MOCK_METHOD1(enableCalibrateFocusFitUserActions, void(bool));
 
   // virtual EnggDiffCalibSettings currentCalibSettings() const;
-  MOCK_CONST_METHOD0(currentCalibSettings,
-                     MantidQt::CustomInterfaces::EnggDiffCalibSettings());
+  MOCK_CONST_METHOD0(currentCalibSettings, MantidQt::CustomInterfaces::EnggDiffCalibSettings());
 
   // virtual std::string enggRunPythonCode(const std::string &pyCode)
   MOCK_METHOD1(enggRunPythonCode, std::string(const std::string &));
@@ -104,8 +100,7 @@ public:
   MOCK_CONST_METHOD1(setFittingListWidgetCurrentRow, void(int idx));
 
   // gets current value of the fitting list widget
-  MOCK_CONST_METHOD0(getFittingListWidgetCurrentValue,
-                     boost::optional<std::string>());
+  MOCK_CONST_METHOD0(getFittingListWidgetCurrentValue, boost::optional<std::string>());
 
   // sets the peak list according to the QString given
   MOCK_CONST_METHOD1(setPeakList, void(const std::string &peakList));
@@ -145,9 +140,8 @@ public:
   MOCK_CONST_METHOD0(saveSettings, void());
 
   // virtual void setDataVector
-  MOCK_METHOD4(setDataVector,
-               void(std::vector<std::shared_ptr<QwtData>> &data, bool focused,
-                    bool plotSinglePeaks, const std::string &xAxisLabel));
+  MOCK_METHOD4(setDataVector, void(std::vector<std::shared_ptr<QwtData>> &data, bool focused, bool plotSinglePeaks,
+                                   const std::string &xAxisLabel));
 
   // virtual void resetCanvas
   MOCK_METHOD0(resetCanvas, void());
@@ -162,8 +156,7 @@ public:
 
   // virtual void updateFittingListWidget(const std::vector<std::string> &rows)
   // = 0;
-  MOCK_METHOD1(updateFittingListWidget,
-               void(const std::vector<std::string> &rows));
+  MOCK_METHOD1(updateFittingListWidget, void(const std::vector<std::string> &rows));
 };
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE

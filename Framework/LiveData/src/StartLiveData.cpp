@@ -45,39 +45,31 @@ int StartLiveData::version() const { return 1; }
 /** Initialize the algorithm's properties.
  */
 void StartLiveData::init() {
-  declareProperty(std::make_unique<PropertyWithValue<bool>>("FromNow", true,
-                                                            Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("FromNow", true, Direction::Input),
                   "Process live data starting from the current time only.");
 
-  declareProperty(
-      std::make_unique<PropertyWithValue<bool>>("FromStartOfRun", false,
-                                                Direction::Input),
-      "Record live data, but go back to the the start of the run and process "
-      "all data since then.");
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("FromStartOfRun", false, Direction::Input),
+                  "Record live data, but go back to the the start of the run and process "
+                  "all data since then.");
 
-  declareProperty(
-      std::make_unique<PropertyWithValue<bool>>("FromTime", false,
-                                                Direction::Input),
-      "Record live data, but go back to a specific time and process all data "
-      "since then.\n"
-      "You must specify the StartTime property if this is checked.");
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("FromTime", false, Direction::Input),
+                  "Record live data, but go back to a specific time and process all data "
+                  "since then.\n"
+                  "You must specify the StartTime property if this is checked.");
 
-  declareProperty(
-      std::make_unique<PropertyWithValue<double>>("UpdateEvery", 30.0,
-                                                  Direction::Input),
-      "Frequency of updates, in seconds. Default 30.\n"
-      "If you specify 0, MonitorLiveData will not launch and you will get only "
-      "one chunk.");
+  declareProperty(std::make_unique<PropertyWithValue<double>>("UpdateEvery", 30.0, Direction::Input),
+                  "Frequency of updates, in seconds. Default 30.\n"
+                  "If you specify 0, MonitorLiveData will not launch and you will get only "
+                  "one chunk.");
 
   // Initialize the properties common to LiveDataAlgorithm.
   initProps();
 
-  declareProperty(std::make_unique<AlgorithmProperty>(
-                      "MonitorLiveData", std::make_shared<NullValidator>(),
-                      Direction::Output),
-                  "A handle to the MonitorLiveData algorithm instance that "
-                  "continues to read live data after this algorithm "
-                  "completes.");
+  declareProperty(
+      std::make_unique<AlgorithmProperty>("MonitorLiveData", std::make_shared<NullValidator>(), Direction::Output),
+      "A handle to the MonitorLiveData algorithm instance that "
+      "continues to read live data after this algorithm "
+      "completes.");
 }
 
 /**
@@ -88,8 +80,7 @@ void StartLiveData::init() {
  */
 void StartLiveData::afterPropertySet(const std::string &propName) {
   // If any of these properties change, the listener class might change
-  if (propName == "Instrument" || propName == "Listener" ||
-      propName == "Connection") {
+  if (propName == "Instrument" || propName == "Listener" || propName == "Connection") {
     // Properties of old listener, if any, need to be removed
     removeListenerProperties();
 
@@ -107,8 +98,7 @@ void StartLiveData::afterPropertySet(const std::string &propName) {
  *
  * @param listener ILiveListener from which to copy properties
  */
-void StartLiveData::copyListenerProperties(
-    const std::shared_ptr<ILiveListener> &listener) {
+void StartLiveData::copyListenerProperties(const std::shared_ptr<ILiveListener> &listener) {
   // Add clones of listener's properties to this algorithm
   for (auto listenerProp : listener->getProperties()) {
     auto prop = std::unique_ptr<Property>(listenerProp->clone());
@@ -153,8 +143,7 @@ void StartLiveData::exec() {
     numChecked++;
 
   if (numChecked != 1)
-    throw std::runtime_error(
-        "Please check exactly one of FromNow, FromStartOfRun, FromTime.");
+    throw std::runtime_error("Please check exactly one of FromNow, FromStartOfRun, FromTime.");
 
   // Adjust the StartTime if you are starting from run/now.
   if (FromNow)
@@ -179,8 +168,7 @@ void StartLiveData::exec() {
 
     // check for a requested time in the future
     if (reqStartTime > DateAndTime::getCurrentTime()) {
-      g_log.error(
-          "Requested start time in the future. Resetting to current time.");
+      g_log.error("Requested start time in the future. Resetting to current time.");
       this->setPropertyValue("StartTime", "1990-01-01T00:00:00");
     }
   }
@@ -198,11 +186,9 @@ void StartLiveData::exec() {
                 "The effective start time is therefore 'now'.");
   }
 
-  auto loadAlg = std::dynamic_pointer_cast<LoadLiveData>(
-      createChildAlgorithm("LoadLiveData"));
+  auto loadAlg = std::dynamic_pointer_cast<LoadLiveData>(createChildAlgorithm("LoadLiveData"));
   if (!loadAlg)
-    throw std::logic_error(
-        "Error creating LoadLiveData - contact the Mantid developer team");
+    throw std::logic_error("Error creating LoadLiveData - contact the Mantid developer team");
   // Copy settings from THIS to LoadAlg
   loadAlg->copyPropertyValuesFrom(*this);
   // Force replacing the output workspace on the first run, to clear out old
@@ -223,8 +209,7 @@ void StartLiveData::exec() {
   double UpdateEvery = this->getProperty("UpdateEvery");
   if (UpdateEvery > 0) {
     // Create the MonitorLiveData
-    IAlgorithm_sptr algBase =
-        AlgorithmManager::Instance().create("MonitorLiveData", -1);
+    IAlgorithm_sptr algBase = AlgorithmManager::Instance().create("MonitorLiveData", -1);
     auto *monitorAlg = dynamic_cast<MonitorLiveData *>(algBase.get());
 
     if (!monitorAlg)

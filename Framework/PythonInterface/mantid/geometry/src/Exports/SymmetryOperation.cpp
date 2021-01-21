@@ -28,10 +28,8 @@ Mantid::Kernel::V3D applyToVector(SymmetryOperation &self, const object &hkl) {
   return self.transformHKL(Converters::PyObjectToV3D(hkl)());
 }
 
-Mantid::Kernel::V3D applyToCoordinates(SymmetryOperation &self,
-                                       const object &coordinates) {
-  return self.operator*<Mantid::Kernel::V3D>(
-      Converters::PyObjectToV3D(coordinates)());
+Mantid::Kernel::V3D applyToCoordinates(SymmetryOperation &self, const object &coordinates) {
+  return self.operator*<Mantid::Kernel::V3D>(Converters::PyObjectToV3D(coordinates)());
 }
 } // namespace
 
@@ -45,16 +43,13 @@ void export_SymmetryOperation() {
            "identity.")
       .def("getIdentifier", &SymmetryOperation::identifier, arg("self"),
            "The identifier of the operation in x,y,z-notation.")
-      .def("transformCoordinates", &applyToCoordinates,
-           (arg("self"), arg("coordinates")),
+      .def("transformCoordinates", &applyToCoordinates, (arg("self"), arg("coordinates")),
            "Returns transformed coordinates. For transforming HKLs, use "
            "transformHKL.")
       .def("transformHKL", &applyToVector, (arg("self"), arg("hkl")),
            "Returns transformed HKLs. For transformation of coordinates use "
            "transformCoordinates.")
-      .def("apply", &applyToVector, (arg("self"), arg("hkl")),
-           "An alias for transformHKL.");
+      .def("apply", &applyToVector, (arg("self"), arg("hkl")), "An alias for transformHKL.");
 
-  std_vector_exporter<Mantid::Geometry::SymmetryOperation>::wrap(
-      "std_vector_symmetryoperation");
+  std_vector_exporter<Mantid::Geometry::SymmetryOperation>::wrap("std_vector_symmetryoperation");
 }

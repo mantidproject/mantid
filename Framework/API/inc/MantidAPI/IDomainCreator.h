@@ -41,26 +41,22 @@ public:
   /// Type of domain to create.
   enum DomainType { Simple = 0, Sequential, Parallel };
   /// Constrcutor
-  IDomainCreator(Kernel::IPropertyManager *manager,
-                 const std::vector<std::string> &workspacePropertyNames,
+  IDomainCreator(Kernel::IPropertyManager *manager, const std::vector<std::string> &workspacePropertyNames,
                  DomainType domainType = Simple);
   /// Virtual destructor
   virtual ~IDomainCreator() = default;
   /// Initialize
-  virtual void initialize(Kernel::IPropertyManager *, const std::string &,
-                          DomainType) {}
+  virtual void initialize(Kernel::IPropertyManager *, const std::string &, DomainType) {}
 
   /// Toggle output of either just composite or composite + members
-  void separateCompositeMembersInOutput(const bool value,
-                                        const bool conv = false);
+  void separateCompositeMembersInOutput(const bool value, const bool conv = false);
 
   /// Declare properties that specify the dataset within the workspace to fit
   /// to.
   /// @param suffix :: A suffix to give to all new properties.
   /// @param addProp :: If false don't actually declare new properties but do
   /// other stuff if needed
-  virtual void declareDatasetProperties(const std::string &suffix = "",
-                                        bool addProp = true) {
+  virtual void declareDatasetProperties(const std::string &suffix = "", bool addProp = true) {
     UNUSED_ARG(suffix);
     UNUSED_ARG(addProp);
   }
@@ -76,8 +72,7 @@ public:
   /// @param i0 :: Starting index in values for the fitting data.
   /// Implementations must make sure values has enough room
   ///   for the data from index i0 to the end of the container.
-  virtual void createDomain(std::shared_ptr<API::FunctionDomain> &domain,
-                            std::shared_ptr<API::FunctionValues> &values,
+  virtual void createDomain(std::shared_ptr<API::FunctionDomain> &domain, std::shared_ptr<API::FunctionValues> &values,
                             size_t i0 = 0) = 0;
 
   /// Create an output workspace filled with data simulated with the fitting
@@ -91,11 +86,10 @@ public:
   ///                                       If empty do not create the property,
   ///                                       just return a pointer
   /// @return A shared pointer to the created workspace.
-  virtual std::shared_ptr<API::Workspace> createOutputWorkspace(
-      const std::string &baseName, API::IFunction_sptr function,
-      std::shared_ptr<API::FunctionDomain> domain,
-      std::shared_ptr<API::FunctionValues> values,
-      const std::string &outputWorkspacePropertyName = "OutputWorkspace") {
+  virtual std::shared_ptr<API::Workspace>
+  createOutputWorkspace(const std::string &baseName, API::IFunction_sptr function,
+                        std::shared_ptr<API::FunctionDomain> domain, std::shared_ptr<API::FunctionValues> values,
+                        const std::string &outputWorkspacePropertyName = "OutputWorkspace") {
     UNUSED_ARG(baseName);
     UNUSED_ARG(function);
     UNUSED_ARG(domain);
@@ -142,10 +136,8 @@ using IDomainCreator_sptr = std::shared_ptr<IDomainCreator>;
  * subscribe method.
  * The id is the key that should be used to create the object
  */
-#define DECLARE_DOMAINCREATOR(classname)                                       \
-  namespace {                                                                  \
-  Mantid::Kernel::RegistrationHelper                                           \
-      register_alg_##classname(((Mantid::API::DomainCreatorFactory::Instance() \
-                                     .subscribe<classname>(#classname)),       \
-                                0));                                           \
+#define DECLARE_DOMAINCREATOR(classname)                                                                               \
+  namespace {                                                                                                          \
+  Mantid::Kernel::RegistrationHelper                                                                                   \
+      register_alg_##classname(((Mantid::API::DomainCreatorFactory::Instance().subscribe<classname>(#classname)), 0)); \
   }

@@ -27,9 +27,7 @@ namespace {
 /**
  * @returns The mantidqt.plotting.functions module
  */
-Python::Object functionsModule() {
-  return Python::NewRef(PyImport_ImportModule("mantidqt.plotting.functions"));
-}
+Python::Object functionsModule() { return Python::NewRef(PyImport_ImportModule("mantidqt.plotting.functions")); }
 
 /**
  * Construct a Python list from a vector of strings
@@ -37,8 +35,7 @@ Python::Object functionsModule() {
  * @return A new Python list object
  */
 Python::Object constructArgs(const std::vector<std::string> &workspaces) {
-  return Python::NewRef(Py_BuildValue(
-      "(O)", Converters::ToPyList<std::string>()(workspaces).ptr()));
+  return Python::NewRef(Py_BuildValue("(O)", Converters::ToPyList<std::string>()(workspaces).ptr()));
 }
 
 /**
@@ -49,23 +46,19 @@ Python::Object constructArgs(const std::vector<std::string> &workspaces) {
 Python::Object constructArgs(const QStringList &workspaces) {
   const auto sipAPI = Python::Detail::sipAPI();
   const auto copy = new QStringList(workspaces);
-  const auto *sobj = sipAPI->api_convert_from_new_type(
-      copy, sipAPI->api_find_type("QStringList"), Py_None);
+  const auto *sobj = sipAPI->api_convert_from_new_type(copy, sipAPI->api_find_type("QStringList"), Py_None);
   return Python::NewRef(Py_BuildValue("(O)", sobj));
 }
 
 /**
  * Construct kwargs list for the plot function
  */
-Python::Object
-constructKwargs(boost::optional<std::vector<int>> spectrumNums,
-                boost::optional<std::vector<int>> wkspIndices,
-                boost::optional<Python::Object> fig,
-                boost::optional<QHash<QString, QVariant>> plotKwargs,
-                boost::optional<QHash<QString, QVariant>> axProperties,
-                boost::optional<std::string> windowTitle,
-                boost::optional<bool> errors, boost::optional<bool> overplot,
-                boost::optional<bool> tiled) {
+Python::Object constructKwargs(boost::optional<std::vector<int>> spectrumNums,
+                               boost::optional<std::vector<int>> wkspIndices, boost::optional<Python::Object> fig,
+                               boost::optional<QHash<QString, QVariant>> plotKwargs,
+                               boost::optional<QHash<QString, QVariant>> axProperties,
+                               boost::optional<std::string> windowTitle, boost::optional<bool> errors,
+                               boost::optional<bool> overplot, boost::optional<bool> tiled) {
   // Make sure to decide whether spectrum numbers or workspace indices
   Python::Dict kwargs;
 
@@ -74,9 +67,8 @@ constructKwargs(boost::optional<std::vector<int>> spectrumNums,
   } else if (wkspIndices && !spectrumNums) {
     kwargs["wksp_indices"] = Converters::ToPyList<int>()(wkspIndices.get());
   } else {
-    throw std::invalid_argument(
-        "Passed spectrum numbers and workspace indices, please only pass one, "
-        "with the other being boost::none.");
+    throw std::invalid_argument("Passed spectrum numbers and workspace indices, please only pass one, "
+                                "with the other being boost::none.");
   }
 
   if (errors)
@@ -97,18 +89,14 @@ constructKwargs(boost::optional<std::vector<int>> spectrumNums,
   return std::move(kwargs);
 }
 
-Python::Object plot(const Python::Object &args,
-                    boost::optional<std::vector<int>> spectrumNums,
-                    boost::optional<std::vector<int>> wkspIndices,
-                    boost::optional<Python::Object> fig,
+Python::Object plot(const Python::Object &args, boost::optional<std::vector<int>> spectrumNums,
+                    boost::optional<std::vector<int>> wkspIndices, boost::optional<Python::Object> fig,
                     boost::optional<QHash<QString, QVariant>> plotKwargs,
-                    boost::optional<QHash<QString, QVariant>> axProperties,
-                    boost::optional<std::string> windowTitle, bool errors,
-                    bool overplot, bool tiled) {
-  const auto kwargs = constructKwargs(
-      std::move(spectrumNums), std::move(wkspIndices), std::move(fig),
-      std::move(plotKwargs), std::move(axProperties), std::move(windowTitle),
-      errors, overplot, tiled);
+                    boost::optional<QHash<QString, QVariant>> axProperties, boost::optional<std::string> windowTitle,
+                    bool errors, bool overplot, bool tiled) {
+  const auto kwargs =
+      constructKwargs(std::move(spectrumNums), std::move(wkspIndices), std::move(fig), std::move(plotKwargs),
+                      std::move(axProperties), std::move(windowTitle), errors, overplot, tiled);
   try {
     return functionsModule().attr("plot")(*args, **kwargs);
   } catch (Python::ErrorAlreadySet &) {
@@ -118,38 +106,27 @@ Python::Object plot(const Python::Object &args,
 
 } // namespace
 
-Python::Object plot(const std::vector<std::string> &workspaces,
-                    boost::optional<std::vector<int>> spectrumNums,
-                    boost::optional<std::vector<int>> wkspIndices,
-                    boost::optional<Python::Object> fig,
+Python::Object plot(const std::vector<std::string> &workspaces, boost::optional<std::vector<int>> spectrumNums,
+                    boost::optional<std::vector<int>> wkspIndices, boost::optional<Python::Object> fig,
                     boost::optional<QHash<QString, QVariant>> plotKwargs,
-                    boost::optional<QHash<QString, QVariant>> axProperties,
-                    boost::optional<std::string> windowTitle, bool errors,
-                    bool overplot, bool tiled) {
+                    boost::optional<QHash<QString, QVariant>> axProperties, boost::optional<std::string> windowTitle,
+                    bool errors, bool overplot, bool tiled) {
   GlobalInterpreterLock lock;
-  return plot(constructArgs(workspaces), std::move(spectrumNums),
-              std::move(wkspIndices), std::move(fig), std::move(plotKwargs),
-              std::move(axProperties), std::move(windowTitle), errors, overplot,
-              tiled);
+  return plot(constructArgs(workspaces), std::move(spectrumNums), std::move(wkspIndices), std::move(fig),
+              std::move(plotKwargs), std::move(axProperties), std::move(windowTitle), errors, overplot, tiled);
 }
 
-Python::Object plot(const QStringList &workspaces,
-                    boost::optional<std::vector<int>> spectrumNums,
-                    boost::optional<std::vector<int>> wkspIndices,
-                    boost::optional<Python::Object> fig,
+Python::Object plot(const QStringList &workspaces, boost::optional<std::vector<int>> spectrumNums,
+                    boost::optional<std::vector<int>> wkspIndices, boost::optional<Python::Object> fig,
                     boost::optional<QHash<QString, QVariant>> plotKwargs,
-                    boost::optional<QHash<QString, QVariant>> axProperties,
-                    boost::optional<std::string> windowTitle, bool errors,
-                    bool overplot, bool tiled) {
+                    boost::optional<QHash<QString, QVariant>> axProperties, boost::optional<std::string> windowTitle,
+                    bool errors, bool overplot, bool tiled) {
   GlobalInterpreterLock lock;
-  return plot(constructArgs(workspaces), std::move(spectrumNums),
-              std::move(wkspIndices), std::move(fig), std::move(plotKwargs),
-              std::move(axProperties), std::move(windowTitle), errors, overplot,
-              tiled);
+  return plot(constructArgs(workspaces), std::move(spectrumNums), std::move(wkspIndices), std::move(fig),
+              std::move(plotKwargs), std::move(axProperties), std::move(windowTitle), errors, overplot, tiled);
 }
 
-Python::Object pcolormesh(const QStringList &workspaces,
-                          boost::optional<Python::Object> fig) {
+Python::Object pcolormesh(const QStringList &workspaces, boost::optional<Python::Object> fig) {
   GlobalInterpreterLock lock;
   try {
     const auto args = constructArgs(workspaces);

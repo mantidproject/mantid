@@ -115,15 +115,14 @@ void NotebookWriter::headerComment() {
   strings.append(Json::Value(Mantid::Kernel::MantidVersion::version()));
   strings.append(Json::Value("\n"));
   strings.append(Json::Value(Mantid::Kernel::MantidVersion::releaseNotes()));
-  strings.append(Json::Value(
-      "\n\nThe following information may be useful:\n"
-      "* [Mantid Framework Python API Reference]"
-      "(http://docs.mantidproject.org/nightly/api/python/index.html)\n"
-      "* [IPython Notebook "
-      "Documentation](http://ipython.org/ipython-doc/stable/notebook/)\n"
-      "* [matplotlib Documentation](http://matplotlib.org/contents.html)\n\n"
-      "Help requests and bug reports should be submitted to the [Mantid forum.]"
-      "(http://forum.mantidproject.org)"));
+  strings.append(Json::Value("\n\nThe following information may be useful:\n"
+                             "* [Mantid Framework Python API Reference]"
+                             "(http://docs.mantidproject.org/nightly/api/python/index.html)\n"
+                             "* [IPython Notebook "
+                             "Documentation](http://ipython.org/ipython-doc/stable/notebook/)\n"
+                             "* [matplotlib Documentation](http://matplotlib.org/contents.html)\n\n"
+                             "Help requests and bug reports should be submitted to the [Mantid forum.]"
+                             "(http://forum.mantidproject.org)"));
 
   markdownCell(strings);
 }
@@ -138,14 +137,13 @@ void NotebookWriter::headerCode() {
 
   Json::Value import_mantid(Json::arrayValue);
 
-  import_mantid.append(Json::Value(
-      "#Import Mantid's Python API and IPython plotting tools\n"
-      "from mantid.simpleapi import *\n"
-      "from MantidIPython import *\n"
-      "\n"
-      "#Some magic to tell matplotlib how to behave in IPython Notebook. Use "
-      "'%matplotlib nbagg' for interactive plots, if available.\n"
-      "%matplotlib inline"));
+  import_mantid.append(Json::Value("#Import Mantid's Python API and IPython plotting tools\n"
+                                   "from mantid.simpleapi import *\n"
+                                   "from MantidIPython import *\n"
+                                   "\n"
+                                   "#Some magic to tell matplotlib how to behave in IPython Notebook. Use "
+                                   "'%matplotlib nbagg' for interactive plots, if available.\n"
+                                   "%matplotlib inline"));
 
   codeCell(import_mantid);
 }

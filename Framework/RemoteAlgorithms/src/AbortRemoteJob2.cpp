@@ -28,28 +28,22 @@ void AbortRemoteJob2::init() {
   auto requireValue = std::make_shared<MandatoryValidator<std::string>>();
 
   // Compute Resources
-  std::vector<std::string> computes = Mantid::Kernel::ConfigService::Instance()
-                                          .getFacility()
-                                          .computeResources();
-  declareProperty(
-      "ComputeResource", "", std::make_shared<StringListValidator>(computes),
-      "The remote computer where the job is running", Direction::Input);
+  std::vector<std::string> computes = Mantid::Kernel::ConfigService::Instance().getFacility().computeResources();
+  declareProperty("ComputeResource", "", std::make_shared<StringListValidator>(computes),
+                  "The remote computer where the job is running", Direction::Input);
 
   // The ID of the job we want to Abort
-  declareProperty("JobID", "", requireValue, "The ID of the job to abort",
-                  Direction::Input);
+  declareProperty("JobID", "", requireValue, "The ID of the job to abort", Direction::Input);
 }
 
 void AbortRemoteJob2::exec() {
 
   const std::string comp = getPropertyValue("ComputeResource");
-  Mantid::API::IRemoteJobManager_sptr jobManager =
-      Mantid::API::RemoteJobManagerFactory::Instance().create(comp);
+  Mantid::API::IRemoteJobManager_sptr jobManager = Mantid::API::RemoteJobManagerFactory::Instance().create(comp);
 
   std::string jid = getPropertyValue("JobID");
   jobManager->abortRemoteJob(jid);
-  g_log.information() << "Aborted job with ID " << jid
-                      << " on the compute resource" << comp << '\n';
+  g_log.information() << "Aborted job with ID " << jid << " on the compute resource" << comp << '\n';
 }
 
 } // namespace RemoteAlgorithms

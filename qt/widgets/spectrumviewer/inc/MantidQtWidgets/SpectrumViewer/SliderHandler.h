@@ -32,12 +32,10 @@ public:
   SliderHandler(Ui_SpectrumViewer *svUI);
 
   /// Configure the image scrollbars for the specified data and drawing area
-  void configureSliders(QRect drawArea,
-                        SpectrumDataSource_sptr dataSource) override;
+  void configureSliders(QRect drawArea, SpectrumDataSource_sptr dataSource) override;
 
   /// Configure the image scrollbars for the specified drawing area
-  void reConfigureSliders(QRect drawArea,
-                          const SpectrumDataSource_sptr &dataSource);
+  void reConfigureSliders(QRect drawArea, const SpectrumDataSource_sptr &dataSource);
 
   /// Configure the horizontal scrollbar to cover the specified range
   void configureHSlider(int nDataSteps, int nPixels) override;
@@ -56,8 +54,7 @@ public:
 
 private:
   /// Configure the specified scrollbar to cover the specified range
-  void configureSlider(QScrollBar *scrollBar, int nDataSteps, int nPixels,
-                       int val);
+  void configureSlider(QScrollBar *scrollBar, int nDataSteps, int nPixels, int val);
 
   Ui_SpectrumViewer *m_svUI;
 };

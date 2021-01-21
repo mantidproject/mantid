@@ -15,9 +15,7 @@ class ImageInfoModelMDTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ImageInfoModelMDTest *createSuite() {
-    return new ImageInfoModelMDTest();
-  }
+  static ImageInfoModelMDTest *createSuite() { return new ImageInfoModelMDTest(); }
   static void destroySuite(ImageInfoModelMDTest *suite) { delete suite; }
 
   void test_info_with_md_ws() {
@@ -37,8 +35,7 @@ public:
   }
 
 private:
-  void assertInfoMatches(const ImageInfoModel::ImageInfo &info,
-                         const std::vector<std::string> &expectedValues) {
+  void assertInfoMatches(const ImageInfoModel::ImageInfo &info, const std::vector<std::string> &expectedValues) {
     constexpr std::array<const char *, 3> expectedHeaders{"x", "y", "Signal"};
     TS_ASSERT_EQUALS(expectedHeaders.size(), info.size())
     for (int i = 0; i < info.size(); ++i) {

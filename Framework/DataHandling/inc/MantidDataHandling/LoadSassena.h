@@ -46,44 +46,33 @@ public:
   /// Algorithm's name
   const std::string name() const override { return "LoadSassena"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return " load a Sassena output file into a group workspace.";
-  }
+  const std::string summary() const override { return " load a Sassena output file into a group workspace."; }
 
   /// Algorithm's version
   int version() const override { return 1; }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "DataHandling\\Sassena";
-  }
+  const std::string category() const override { return "DataHandling\\Sassena"; }
 
   /// Returns a confidence value that this algorithm can load a file
   int confidence(Kernel::NexusDescriptor &descriptor) const override;
 
 protected:
   /// Add a workspace to the group and register in the analysis data service
-  void registerWorkspace(const API::WorkspaceGroup_sptr &gws,
-                         const std::string &wsName,
-                         const DataObjects::Workspace2D_sptr &ws,
-                         const std::string &description);
+  void registerWorkspace(const API::WorkspaceGroup_sptr &gws, const std::string &wsName,
+                         const DataObjects::Workspace2D_sptr &ws, const std::string &description);
   /// Read info about one HDF5 dataset, log if error
-  herr_t dataSetInfo(const hid_t &h5file, const std::string &setName,
-                     hsize_t *dims) const;
+  herr_t dataSetInfo(const hid_t &h5file, const std::string &setName, hsize_t *dims) const;
   /// Read dataset data to a buffer ot type double
-  herr_t dataSetDouble(const hid_t &h5file, const std::string &setName,
-                       std::vector<double> &buf);
+  herr_t dataSetDouble(const hid_t &h5file, const std::string &setName, std::vector<double> &buf);
   /// Load qvectors dataset, calculate modulus of vectors
-  HistogramData::Points loadQvectors(const hid_t &h5file,
-                                     const API::WorkspaceGroup_sptr &gws,
+  HistogramData::Points loadQvectors(const hid_t &h5file, const API::WorkspaceGroup_sptr &gws,
                                      std::vector<int> &sorting_indexes);
   /// Load structure factor asa function of q-vector modulus
-  void loadFQ(const hid_t &h5file, const API::WorkspaceGroup_sptr &gws,
-              const std::string &setName, const HistogramData::Points &qvmod,
-              const std::vector<int> &sorting_indexes);
+  void loadFQ(const hid_t &h5file, const API::WorkspaceGroup_sptr &gws, const std::string &setName,
+              const HistogramData::Points &qvmod, const std::vector<int> &sorting_indexes);
   /// Load time-dependent structure factor
-  void loadFQT(const hid_t &h5file, const API::WorkspaceGroup_sptr &gws,
-               const std::string &setName, const HistogramData::Points &qvmod,
-               const std::vector<int> &sorting_indexes);
+  void loadFQT(const hid_t &h5file, const API::WorkspaceGroup_sptr &gws, const std::string &setName,
+               const HistogramData::Points &qvmod, const std::vector<int> &sorting_indexes);
 
 private:
   /// Initialization code

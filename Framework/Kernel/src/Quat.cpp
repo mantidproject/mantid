@@ -63,8 +63,7 @@ Quat::Quat(const V3D &src, const V3D &des) {
 Quat::Quat(const Kernel::DblMatrix &RotMat) { this->setQuat(RotMat); }
 
 //! Constructor with values
-Quat::Quat(const double _w, const double _a, const double _b, const double _c)
-    : w(_w), a(_a), b(_b), c(_c) {}
+Quat::Quat(const double _w, const double _a, const double _b, const double _c) : w(_w), a(_a), b(_b), c(_c) {}
 
 /** Constructor from an angle and axis.
  * This construct a  quaternion to represent a rotation
@@ -98,8 +97,7 @@ Quat::Quat(const V3D &rX, const V3D &rY, const V3D &rZ) {
  * @param bb :: the value for b
  * @param cc :: the value for c
  */
-void Quat::set(const double ww, const double aa, const double bb,
-               const double cc) {
+void Quat::set(const double ww, const double aa, const double bb, const double cc) {
   w = ww;
   a = aa;
   b = bb;
@@ -135,8 +133,7 @@ bool Quat::isNull(const double tolerance) const {
 /// @param _ax0 :: The first component of the axis
 /// @param _ax1 :: The second component of the axis
 /// @param _ax2 :: The third component of the axis
-void Quat::getAngleAxis(double &_deg, double &_ax0, double &_ax1,
-                        double &_ax2) const {
+void Quat::getAngleAxis(double &_deg, double &_ax0, double &_ax1, double &_ax2) const {
   // If it represents a rotation of 0(2\pi), get an angle of 0 and axis (0,0,1)
   if (isNull(1e-5)) {
     _deg = 0;
@@ -171,18 +168,13 @@ void Quat::setRotation(const double deg) {
  * @param bb :: the value for b
  * @param cc :: the value for c
  */
-void Quat::operator()(const double ww, const double aa, const double bb,
-                      const double cc) {
-  this->set(ww, aa, bb, cc);
-}
+void Quat::operator()(const double ww, const double aa, const double bb, const double cc) { this->set(ww, aa, bb, cc); }
 
 /** Sets the quat values from an angle and a vector
  * @param angle :: the numbers of degrees
  * @param axis :: the axis of rotation
  */
-void Quat::operator()(const double angle, const V3D &axis) {
-  this->setAngleAxis(angle, axis);
-}
+void Quat::operator()(const double angle, const V3D &axis) { this->setAngleAxis(angle, axis); }
 
 /** Sets the quat values from another Quat
  * @param q :: the quat to copy
@@ -251,9 +243,7 @@ void Quat::init() {
  * @param _q :: the quaternion to add
  * @return *this+_q
  */
-Quat Quat::operator+(const Quat &_q) const {
-  return Quat(w + _q.w, a + _q.a, b + _q.b, c + _q.c);
-}
+Quat Quat::operator+(const Quat &_q) const { return Quat(w + _q.w, a + _q.a, b + _q.b, c + _q.c); }
 
 /** Quaternion self-addition operator
  * @param _q :: the quaternion to add
@@ -271,9 +261,7 @@ Quat &Quat::operator+=(const Quat &_q) {
  * @param _q :: the quaternion to add
  * @return *this-_q
  */
-Quat Quat::operator-(const Quat &_q) const {
-  return Quat(w - _q.w, a - _q.a, b - _q.b, c - _q.c);
-}
+Quat Quat::operator-(const Quat &_q) const { return Quat(w - _q.w, a - _q.a, b - _q.b, c - _q.c); }
 
 /** Quaternion self-substraction operator
  * @param _q :: the quaternion to add
@@ -330,8 +318,8 @@ Quat &Quat::operator*=(const Quat &_q) {
  */
 bool Quat::operator==(const Quat &q) const {
   using namespace std;
-  return !(fabs(w - q.w) > Tolerance || fabs(a - q.a) > Tolerance ||
-           fabs(b - q.b) > Tolerance || fabs(c - q.c) > Tolerance);
+  return !(fabs(w - q.w) > Tolerance || fabs(a - q.a) > Tolerance || fabs(b - q.b) > Tolerance ||
+           fabs(c - q.c) > Tolerance);
 
   // return (quat_tol(w,q.w) && quat_tol(a,q.a) && quat_tol(b,q.b) &&
   // quat_tol(c,q.c));
@@ -463,8 +451,7 @@ void Quat::GLMatrix(double *mat) const {
 }
 /// using convention at
 /// http://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation
-std::vector<double> Quat::getRotation(bool check_normalisation,
-                                      bool throw_on_errors) const {
+std::vector<double> Quat::getRotation(bool check_normalisation, bool throw_on_errors) const {
   double aa = a * a;
   double ab = a * b;
   double ac = a * c;
@@ -620,9 +607,7 @@ double &Quat::operator[](const int Index) {
 /** Prints a string representation of itself
  * @param os :: the stream to output to
  */
-void Quat::printSelf(std::ostream &os) const {
-  os << "[" << w << "," << a << "," << b << "," << c << "]";
-}
+void Quat::printSelf(std::ostream &os) const { os << "[" << w << "," << a << "," << b << "," << c << "]"; }
 
 /**  Read data from a stream in the format returned by printSelf ("[w,a,b,c]").
  *   @param IX :: Input Stream
@@ -641,8 +626,7 @@ void Quat::readPrinted(std::istream &IX) {
   size_t c1 = in.find_first_of(',');
   size_t c2 = in.find_first_of(',', c1 + 1);
   size_t c3 = in.find_first_of(',', c2 + 1);
-  if (c1 == std::string::npos || c2 == std::string::npos ||
-      c3 == std::string::npos)
+  if (c1 == std::string::npos || c2 == std::string::npos || c3 == std::string::npos)
     throw std::runtime_error("Wrong format for Quat input: [" + in + "]");
 
   w = std::stod(in.substr(i + 1, c1 - i - 1));
@@ -684,8 +668,7 @@ void Quat::fromString(const std::string &str) {
   this->readPrinted(mess);
 }
 
-void Quat::rotateBB(double &xmin, double &ymin, double &zmin, double &xmax,
-                    double &ymax, double &zmax) const {
+void Quat::rotateBB(double &xmin, double &ymin, double &zmin, double &xmax, double &ymax, double &zmax) const {
   // Defensive
   if (xmin > xmax)
     std::swap(xmin, xmax);
@@ -710,10 +693,8 @@ void Quat::rotateBB(double &xmin, double &ymin, double &zmin, double &xmax,
       index = j + i * 4; // The OpenGL matrix is linear and represent a 4x4
                          // matrix but only the 3x3 upper-left inner part
       // contains the rotation
-      minV[j] += (rotMatr[index] > 0) ? rotMatr[index] * minT[i]
-                                      : rotMatr[index] * maxT[i];
-      maxV[j] += (rotMatr[index] > 0) ? rotMatr[index] * maxT[i]
-                                      : rotMatr[index] * minT[i];
+      minV[j] += (rotMatr[index] > 0) ? rotMatr[index] * minT[i] : rotMatr[index] * maxT[i];
+      maxV[j] += (rotMatr[index] > 0) ? rotMatr[index] * maxT[i] : rotMatr[index] * minT[i];
     }
   }
   // Adjust value.
@@ -746,8 +727,7 @@ void Quat::rotateBB(double &xmin, double &ymin, double &zmin, double &xmax,
  * @returns A vector of the Euler angles in degrees. The order of the angles is
  *the same as in the convention parameter.
  */
-std::vector<double>
-Quat::getEulerAngles(const std::string &convention = "XYZ") const {
+std::vector<double> Quat::getEulerAngles(const std::string &convention = "XYZ") const {
   std::string conv(convention);
 
   if (conv.length() != 3)
@@ -757,8 +737,7 @@ Quat::getEulerAngles(const std::string &convention = "XYZ") const {
 
   // Check it's only XYZ in the string
   if (conv.find_first_not_of("XYZ") != std::string::npos)
-    throw std::invalid_argument(
-        "Wrong convention name (characters other than XYZ)");
+    throw std::invalid_argument("Wrong convention name (characters other than XYZ)");
 
   // Cannot be XXY, XYY, or similar. Only first and last may be the same: YXY
   if ((conv[0] == conv[1]) || (conv[2] == conv[1]))
@@ -775,8 +754,7 @@ Quat::getEulerAngles(const std::string &convention = "XYZ") const {
   s >> first >> second >> last;
 
   // Do we want Tait-Bryan angles, as opposed to 'classic' Euler angles?
-  const int TB =
-      (first * second * last == 0 && first + second + last == 3) ? 1 : 0;
+  const int TB = (first * second * last == 0 && first + second + last == 3) ? 1 : 0;
 
   const int par01 = ((second - first + 9) % 3 == 1) ? 1 : -1;
   const int par12 = ((last - second + 9) % 3 == 1) ? 1 : -1;
@@ -802,8 +780,7 @@ Quat::getEulerAngles(const std::string &convention = "XYZ") const {
   DblMatrix Rm3(Quat(-angles[2], axis3).getRotation());
   DblMatrix Rp = R * Rm3;
 
-  const double s1 =
-      par01 * Rp[(first - par01 + 9) % 3][(first + par01 + 9) % 3];
+  const double s1 = par01 * Rp[(first - par01 + 9) % 3][(first + par01 + 9) % 3];
   const double c1 = Rp[second][second];
   const double s2 = par01 * Rp[first][3 - first - second];
   const double c2 = Rp[first][first];

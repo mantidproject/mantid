@@ -44,12 +44,9 @@ public:
   MOCK_CONST_METHOD0(function, QString());
   MOCK_CONST_METHOD1(sectionRow, SectionRow(int));
 
-  MOCK_METHOD2(setDataCurve, void(MatrixWorkspace_sptr workspace,
-                                  const std::size_t &workspaceIndex));
-  MOCK_METHOD2(setCorrectedCurve, void(MatrixWorkspace_sptr workspace,
-                                       const std::size_t &workspaceIndex));
-  MOCK_METHOD2(setBaselineCurve, void(MatrixWorkspace_sptr workspace,
-                                      const std::size_t &workspaceIndex));
+  MOCK_METHOD2(setDataCurve, void(MatrixWorkspace_sptr workspace, const std::size_t &workspaceIndex));
+  MOCK_METHOD2(setCorrectedCurve, void(MatrixWorkspace_sptr workspace, const std::size_t &workspaceIndex));
+  MOCK_METHOD2(setBaselineCurve, void(MatrixWorkspace_sptr workspace, const std::size_t &workspaceIndex));
   MOCK_METHOD1(setFunction, void(IFunction_const_sptr));
 
   MOCK_CONST_METHOD0(noOfSectionRows, int());
@@ -80,8 +77,7 @@ public:
   MOCK_CONST_METHOD0(fittedFunction, IFunction_const_sptr());
   MOCK_CONST_METHOD0(correctedData, MatrixWorkspace_sptr());
   MOCK_CONST_METHOD2(baselineData,
-                     MatrixWorkspace_sptr(IFunction_const_sptr function,
-                                          const std::vector<double> &xValues));
+                     MatrixWorkspace_sptr(IFunction_const_sptr function, const std::vector<double> &xValues));
   MOCK_CONST_METHOD0(data, MatrixWorkspace_sptr());
 
   MOCK_METHOD2(fit, void(IFunction_const_sptr, const std::vector<Section> &));
@@ -89,9 +85,7 @@ public:
 
 MATCHER_P(FunctionName, name, "") { return arg->name() == name; }
 
-MATCHER_P3(FunctionParameter, param, value, delta, "") {
-  return fabs(arg->getParameter(param) - value) < delta;
-}
+MATCHER_P3(FunctionParameter, param, value, delta, "") { return fabs(arg->getParameter(param) - value) < delta; }
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE
 
@@ -108,12 +102,8 @@ class ALCBaselineModellingPresenterTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running otherl tests
-  static ALCBaselineModellingPresenterTest *createSuite() {
-    return new ALCBaselineModellingPresenterTest();
-  }
-  static void destroySuite(ALCBaselineModellingPresenterTest *suite) {
-    delete suite;
-  }
+  static ALCBaselineModellingPresenterTest *createSuite() { return new ALCBaselineModellingPresenterTest(); }
+  static void destroySuite(ALCBaselineModellingPresenterTest *suite) { delete suite; }
 
   ALCBaselineModellingPresenterTest() {
     FrameworkManager::Instance(); // To make sure everything is initialized
@@ -137,11 +127,9 @@ public:
 
   // Creates a workspace with x = [1,2,3...size], y = x + deltaY and e = 1
   MatrixWorkspace_sptr createTestWs(size_t size, double deltaY = 0) {
-    MatrixWorkspace_sptr ws =
-        WorkspaceFactory::Instance().create("Workspace2D", 1, size, size);
+    MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D", 1, size, size);
 
-    ws->setHistogram(0, Points(size, LinearGenerator(1, 1)),
-                     Counts(size, LinearGenerator(1 + deltaY, 1)),
+    ws->setHistogram(0, Points(size, LinearGenerator(1, 1)), Counts(size, LinearGenerator(1 + deltaY, 1)),
                      CountStandardDeviations(size, 1));
 
     return ws;
@@ -170,8 +158,7 @@ public:
 
   void test_correctedChanged() {
     const auto correctedWorkspace = createTestWs(3, 2);
-    ON_CALL(*m_model, correctedData())
-        .WillByDefault(Return(correctedWorkspace));
+    ON_CALL(*m_model, correctedData()).WillByDefault(Return(correctedWorkspace));
 
     EXPECT_CALL(*m_view, setCorrectedCurve(correctedWorkspace, 0)).Times(1);
 
@@ -179,8 +166,7 @@ public:
   }
 
   void test_correctedChanged_toEmpty() {
-    ON_CALL(*m_model, correctedData())
-        .WillByDefault(Return(MatrixWorkspace_sptr()));
+    ON_CALL(*m_model, correctedData()).WillByDefault(Return(MatrixWorkspace_sptr()));
 
     EXPECT_CALL(*m_view, removePlot(QString("Corrected"))).Times(1);
 
@@ -188,17 +174,14 @@ public:
   }
 
   void test_fittedFunctionChanged() {
-    IFunction_const_sptr function =
-        FunctionFactory::Instance().createInitialized(
-            "name=FlatBackground,A0=5");
+    IFunction_const_sptr function = FunctionFactory::Instance().createInitialized("name=FlatBackground,A0=5");
     const auto dataWorkspace = createTestWs(3);
     const auto xValues = dataWorkspace->x(0).rawData();
     const auto baselineWorkspace = createTestWs(3, 2);
 
     ON_CALL(*m_model, fittedFunction()).WillByDefault(Return(function));
     ON_CALL(*m_model, data()).WillByDefault(Return(dataWorkspace));
-    ON_CALL(*m_model, baselineData(function, xValues))
-        .WillByDefault(Return(baselineWorkspace));
+    ON_CALL(*m_model, baselineData(function, xValues)).WillByDefault(Return(baselineWorkspace));
 
     EXPECT_CALL(*m_view, setBaselineCurve(baselineWorkspace, 0)).Times(1);
 
@@ -206,8 +189,7 @@ public:
   }
 
   void test_fittedFunctionChanged_toEmpty() {
-    ON_CALL(*m_model, fittedFunction())
-        .WillByDefault(Return(IFunction_const_sptr()));
+    ON_CALL(*m_model, fittedFunction()).WillByDefault(Return(IFunction_const_sptr()));
 
     EXPECT_CALL(*m_view, setFunction(IFunction_const_sptr()));
     EXPECT_CALL(*m_view, removePlot(QString("Baseline")));
@@ -221,8 +203,7 @@ public:
 
     Expectation tableExtended = EXPECT_CALL(*m_view, setNoOfSectionRows(2));
 
-    EXPECT_CALL(*m_view, setSectionRow(1, Pair(QString("1"), QString("10"))))
-        .After(tableExtended);
+    EXPECT_CALL(*m_view, setSectionRow(1, Pair(QString("1"), QString("10")))).After(tableExtended);
 
     EXPECT_CALL(*m_view, addSectionSelector(1, Pair(1, 10)));
 
@@ -248,10 +229,8 @@ public:
 
     Expectation tableShrinked = EXPECT_CALL(*m_view, setNoOfSectionRows(2));
 
-    EXPECT_CALL(*m_view, setSectionRow(0, Pair(QString("1"), QString("2"))))
-        .After(tableShrinked);
-    EXPECT_CALL(*m_view, setSectionRow(1, Pair(QString("5"), QString("6"))))
-        .After(tableShrinked);
+    EXPECT_CALL(*m_view, setSectionRow(0, Pair(QString("1"), QString("2")))).After(tableShrinked);
+    EXPECT_CALL(*m_view, setSectionRow(1, Pair(QString("5"), QString("6")))).After(tableShrinked);
 
     ExpectationSet selectorsCleared;
 
@@ -259,17 +238,14 @@ public:
     selectorsCleared += EXPECT_CALL(*m_view, deleteSectionSelector(1));
     selectorsCleared += EXPECT_CALL(*m_view, deleteSectionSelector(2));
 
-    EXPECT_CALL(*m_view, addSectionSelector(0, Pair(1, 2)))
-        .After(selectorsCleared);
-    EXPECT_CALL(*m_view, addSectionSelector(1, Pair(5, 6)))
-        .After(selectorsCleared);
+    EXPECT_CALL(*m_view, addSectionSelector(0, Pair(1, 2))).After(selectorsCleared);
+    EXPECT_CALL(*m_view, addSectionSelector(1, Pair(5, 6))).After(selectorsCleared);
 
     m_view->requestRemoveSection(1);
   }
 
   void test_onSectionSelectorModified() {
-    ON_CALL(*m_view, sectionSelector(5))
-        .WillByDefault(Return(std::make_pair(1, 2)));
+    ON_CALL(*m_view, sectionSelector(5)).WillByDefault(Return(std::make_pair(1, 2)));
 
     EXPECT_CALL(*m_view, setSectionRow(5, Pair(QString("1"), QString("2"))));
 
@@ -289,11 +265,9 @@ public:
     ON_CALL(*m_view, sectionRow(0)).WillByDefault(Return(sectionRow(10, 20)));
     ON_CALL(*m_view, sectionRow(1)).WillByDefault(Return(sectionRow(40, 55)));
 
-    ON_CALL(*m_view, function())
-        .WillByDefault(Return(QString("name=FlatBackground,A0=3")));
+    ON_CALL(*m_view, function()).WillByDefault(Return(QString("name=FlatBackground,A0=3")));
 
-    EXPECT_CALL(*m_model, fit(AllOf(FunctionName("FlatBackground"),
-                                    FunctionParameter("A0", 3, 1E-8)),
+    EXPECT_CALL(*m_model, fit(AllOf(FunctionName("FlatBackground"), FunctionParameter("A0", 3, 1E-8)),
                               ElementsAre(Pair(10, 20), Pair(40, 55))));
 
     m_view->requestFit();
@@ -305,13 +279,11 @@ public:
     ON_CALL(*m_view, sectionRow(0)).WillByDefault(Return(sectionRow(1, 2)));
 
     // Valid function
-    ON_CALL(*m_view, function())
-        .WillByDefault(Return(QString("name=FlatBackground,A0=3")));
+    ON_CALL(*m_view, function()).WillByDefault(Return(QString("name=FlatBackground,A0=3")));
 
     std::string errorMsg = "Bad error";
 
-    ON_CALL(*m_model, fit(_, _))
-        .WillByDefault(Throw(std::runtime_error(errorMsg)));
+    ON_CALL(*m_model, fit(_, _)).WillByDefault(Throw(std::runtime_error(errorMsg)));
     EXPECT_CALL(*m_view, displayError(QString::fromStdString(errorMsg)));
 
     m_view->requestFit();
@@ -350,8 +322,7 @@ public:
     ON_CALL(*m_view, noOfSectionRows()).WillByDefault(Return(0));
 
     // Any valid function
-    ON_CALL(*m_view, function())
-        .WillByDefault(Return(QString("name=FlatBackground,A0=0")));
+    ON_CALL(*m_view, function()).WillByDefault(Return(QString("name=FlatBackground,A0=0")));
 
     EXPECT_CALL(*m_model, fit(_, _)).Times(0);
     EXPECT_CALL(*m_view, displayError(_));

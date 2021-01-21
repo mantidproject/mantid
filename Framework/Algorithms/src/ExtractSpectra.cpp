@@ -43,9 +43,7 @@ const std::string ExtractSpectra::name() const { return "ExtractSpectra"; }
 int ExtractSpectra::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string ExtractSpectra::category() const {
-  return "Transforms\\Splitting";
-}
+const std::string ExtractSpectra::category() const { return "Transforms\\Splitting"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string ExtractSpectra::summary() const {
@@ -70,11 +68,8 @@ std::map<std::string, std::string> ExtractSpectra::validateInputs() {
 /** Initialize the algorithm's properties.
  */
 void ExtractSpectra::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                                        Direction::Input),
-                  "The input workspace");
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input), "The input workspace");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace");
 
   declareProperty("XMin", EMPTY_DBL(),
@@ -94,10 +89,9 @@ void ExtractSpectra::init() {
                   "(default: first entry in the Workspace)");
   // As the property takes ownership of the validator pointer, have to take care
   // to pass in a unique pointer to each property.
-  declareProperty(
-      "EndWorkspaceIndex", EMPTY_INT(), mustBePositive,
-      "The index number of the last entry in the Workspace to be loaded\n"
-      "(default: last entry in the Workspace)");
+  declareProperty("EndWorkspaceIndex", EMPTY_INT(), mustBePositive,
+                  "The index number of the last entry in the Workspace to be loaded\n"
+                  "(default: last entry in the Workspace)");
   declareProperty(std::make_unique<ArrayProperty<size_t>>("WorkspaceIndexList"),
                   "A comma-separated list of individual workspace indices to "
                   "read.  Only used if\n"
@@ -132,8 +126,7 @@ void ExtractSpectra::exec() {
     setupAsChildAlgorithm(extract);
     extract->setWorkspaceInputProperties(
         "InputWorkspace", m_inputWorkspace, IndexType::WorkspaceIndex,
-        std::vector<int64_t>(m_workspaceIndexList.begin(),
-                             m_workspaceIndexList.end()));
+        std::vector<int64_t>(m_workspaceIndexList.begin(), m_workspaceIndexList.end()));
     extract->execute();
     m_inputWorkspace = extract->getProperty("OutputWorkspace");
   }
@@ -155,8 +148,7 @@ void ExtractSpectra::execHistogram() {
   Progress prog(this, 0.0, 1.0, size);
   for (int i = 0; i < size; ++i) {
     if (m_commonBoundaries) {
-      m_inputWorkspace->setHistogram(i, slice(m_inputWorkspace->histogram(i),
-                                              m_minX, m_maxX - m_histogram));
+      m_inputWorkspace->setHistogram(i, slice(m_inputWorkspace->histogram(i), m_minX, m_maxX - m_histogram));
     } else {
       this->cropRagged(*m_inputWorkspace, i);
     }
@@ -168,8 +160,7 @@ void ExtractSpectra::execHistogram() {
 namespace { // anonymous namespace
 
 template <class T> struct eventFilter {
-  eventFilter(const double minValue, const double maxValue)
-      : minValue(minValue), maxValue(maxValue) {}
+  eventFilter(const double minValue, const double maxValue) : minValue(minValue), maxValue(maxValue) {}
 
   bool operator()(const T &value) {
     const double tof = value.tof();
@@ -180,12 +171,8 @@ template <class T> struct eventFilter {
   double maxValue;
 };
 
-template <class T>
-void filterEventsHelper(std::vector<T> &events, const double xmin,
-                        const double xmax) {
-  events.erase(
-      std::remove_if(events.begin(), events.end(), eventFilter<T>(xmin, xmax)),
-      events.end());
+template <class T> void filterEventsHelper(std::vector<T> &events, const double xmin, const double xmax) {
+  events.erase(std::remove_if(events.begin(), events.end(), eventFilter<T>(xmin, xmax)), events.end());
 }
 } // namespace
 
@@ -240,8 +227,7 @@ void ExtractSpectra::execEvent() {
       const auto oldDx = el.pointStandardDeviations();
       el.setHistogram(binEdges);
       if (oldDx) {
-        el.setPointStandardDeviations(oldDx.begin() + m_minX,
-                                      oldDx.begin() + (m_maxX - m_histogram));
+        el.setPointStandardDeviations(oldDx.begin() + m_minX, oldDx.begin() + (m_maxX - m_histogram));
       }
     }
     propagateBinMasking(*eventW, i);
@@ -252,8 +238,7 @@ void ExtractSpectra::execEvent() {
 }
 
 /// Propagate bin masking if there is any.
-void ExtractSpectra::propagateBinMasking(MatrixWorkspace &workspace,
-                                         const int i) const {
+void ExtractSpectra::propagateBinMasking(MatrixWorkspace &workspace, const int i) const {
   if (workspace.hasMaskedBins(i)) {
     MatrixWorkspace::MaskList filteredMask;
     for (const auto &mask : workspace.maskedBins(i)) {
@@ -282,8 +267,7 @@ void ExtractSpectra::checkProperties() {
       throw std::out_of_range("XMin must be less than XMax");
     }
     m_croppingInX = true;
-    if (m_commonBoundaries &&
-        !std::dynamic_pointer_cast<EventWorkspace>(m_inputWorkspace) &&
+    if (m_commonBoundaries && !std::dynamic_pointer_cast<EventWorkspace>(m_inputWorkspace) &&
         (m_minX == m_maxX || (m_histogram && m_maxX == m_minX + 1))) {
       m_minX--;
       m_maxX = m_minX + 1 + m_histogram;
@@ -300,8 +284,7 @@ void ExtractSpectra::checkProperties() {
   // 3. Start and stop index
   std::vector<detid_t> detectorList = getProperty("DetectorList");
   if (!detectorList.empty()) {
-    m_workspaceIndexList =
-        m_inputWorkspace->getIndicesFromDetectorIDs(detectorList);
+    m_workspaceIndexList = m_inputWorkspace->getIndicesFromDetectorIDs(detectorList);
   } else {
     m_workspaceIndexList = getProperty("WorkspaceIndexList");
 
@@ -316,9 +299,8 @@ void ExtractSpectra::checkProperties() {
       if (maxSpec < minSpec) {
         g_log.error("StartWorkspaceIndex must be less than or equal to "
                     "EndWorkspaceIndex");
-        throw std::out_of_range(
-            "StartWorkspaceIndex must be less than or equal "
-            "to EndWorkspaceIndex");
+        throw std::out_of_range("StartWorkspaceIndex must be less than or equal "
+                                "to EndWorkspaceIndex");
       }
       if (maxSpec - minSpec + 1 != numberOfSpectra) {
         m_workspaceIndexList.reserve(maxSpec - minSpec + 1);
@@ -343,8 +325,7 @@ size_t ExtractSpectra::getXMinIndex(const size_t wsIndex) {
     const auto &X = m_inputWorkspace->x(wsIndex);
     if (m_commonBoundaries && minX_val > X.back()) {
       std::stringstream msg;
-      msg << "XMin is greater than the largest X value (" << minX_val << " > "
-          << X.back() << ")";
+      msg << "XMin is greater than the largest X value (" << minX_val << " > " << X.back() << ")";
       throw std::out_of_range(msg.str());
     }
     // Reduce cut-off value slightly to allow for rounding errors
@@ -369,8 +350,7 @@ size_t ExtractSpectra::getXMaxIndex(const size_t wsIndex) {
   if (!isEmpty(maxX_val)) { // we have a user value, check it and maybe store it
     if (m_commonBoundaries && maxX_val < X.front()) {
       std::stringstream msg;
-      msg << "XMax is less than the smallest X value (" << maxX_val << " < "
-          << X.front() << ")";
+      msg << "XMax is less than the smallest X value (" << maxX_val << " < " << X.front() << ")";
       throw std::out_of_range(msg.str());
     }
     // Increase cut-off value slightly to allow for rounding errors

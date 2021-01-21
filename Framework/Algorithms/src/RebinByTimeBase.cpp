@@ -35,29 +35,24 @@ private:
 public:
   explicit ConvertToRelativeTime(const DateAndTime &offSet)
       : m_offSet(static_cast<double>(offSet.totalNanoseconds()) * 1e-9) {}
-  MantidVec::value_type operator()(const MantidVec::value_type &absTNanoSec) {
-    return (absTNanoSec * 1e-9) - m_offSet;
-  }
+  MantidVec::value_type operator()(const MantidVec::value_type &absTNanoSec) { return (absTNanoSec * 1e-9) - m_offSet; }
 };
 
 /** Initialize the algorithm's properties.
  */
 void RebinByTimeBase::init() {
   declareProperty(
-      std::make_unique<API::WorkspaceProperty<API::IEventWorkspace>>(
-          "InputWorkspace", "", Direction::Input),
+      std::make_unique<API::WorkspaceProperty<API::IEventWorkspace>>("InputWorkspace", "", Direction::Input),
       "An input workspace containing TOF events.");
 
-  declareProperty(std::make_unique<ArrayProperty<double>>(
-                      "Params", std::make_shared<RebinParamsValidator>()),
+  declareProperty(std::make_unique<ArrayProperty<double>>("Params", std::make_shared<RebinParamsValidator>()),
                   "A comma separated list of first bin boundary, width, last "
                   "bin boundary. Optionally\n"
                   "this can be followed by a comma and more widths and last "
                   "boundary pairs. Values are in seconds since run start.");
 
   declareProperty(
-      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-          "OutputWorkspace", "", Direction::Output),
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
       "An output workspace.");
 }
 
@@ -70,8 +65,7 @@ void RebinByTimeBase::exec() {
 
   if (!std::dynamic_pointer_cast<EventWorkspace>(inWS)) {
     const std::string algName = this->name();
-    throw std::invalid_argument(
-        algName + " Algorithm requires an EventWorkspace as an input.");
+    throw std::invalid_argument(algName + " Algorithm requires an EventWorkspace as an input.");
   }
 
   // retrieve the properties
@@ -92,12 +86,10 @@ void RebinByTimeBase::exec() {
     const DateAndTime startTime = runStartTime + inParams[0];
     const DateAndTime endTime = runStartTime + inParams[2];
     // Rebinning params in nanoseconds.
-    rebinningParams.emplace_back(
-        static_cast<double>(startTime.totalNanoseconds()));
+    rebinningParams.emplace_back(static_cast<double>(startTime.totalNanoseconds()));
     tStep = inParams[1] * nanoSecondsInASecond;
     rebinningParams.emplace_back(tStep);
-    rebinningParams.emplace_back(
-        static_cast<double>(endTime.totalNanoseconds()));
+    rebinningParams.emplace_back(static_cast<double>(endTime.totalNanoseconds()));
   } else if (inParams.size() == 1) {
     const uint64_t xmin = getMinX(inWS);
     const uint64_t xmax = getMaxX(inWS);
@@ -110,8 +102,7 @@ void RebinByTimeBase::exec() {
 
   // Validate the timestep.
   if (tStep <= 0) {
-    throw std::invalid_argument(
-        "Cannot have a timestep less than or equal to zero.");
+    throw std::invalid_argument("Cannot have a timestep less than or equal to zero.");
   }
 
   // Initialize progress reporting.
@@ -119,23 +110,20 @@ void RebinByTimeBase::exec() {
 
   MantidVecPtr XValues_new;
   // create new X axis, with absolute times in seconds.
-  static_cast<void>(VectorHelper::createAxisFromRebinParams(
-      rebinningParams, XValues_new.access()));
+  static_cast<void>(VectorHelper::createAxisFromRebinParams(rebinningParams, XValues_new.access()));
 
   ConvertToRelativeTime transformToRelativeT(runStartTime);
 
   // Transform the output into relative times in seconds.
   MantidVec OutXValues_scaled(XValues_new->size());
-  std::transform(XValues_new->begin(), XValues_new->end(),
-                 OutXValues_scaled.begin(), transformToRelativeT);
+  std::transform(XValues_new->begin(), XValues_new->end(), OutXValues_scaled.begin(), transformToRelativeT);
 
-  MatrixWorkspace_sptr outputWS = DataObjects::create<DataObjects::Workspace2D>(
-      *inWS, histnumber, HistogramData::BinEdges(*XValues_new));
+  MatrixWorkspace_sptr outputWS =
+      DataObjects::create<DataObjects::Workspace2D>(*inWS, histnumber, HistogramData::BinEdges(*XValues_new));
 
   // Copy all the axes
   for (int i = 1; i < inWS->axes(); i++) {
-    outputWS->replaceAxis(
-        i, std::unique_ptr<Axis>(inWS->getAxis(i)->clone(outputWS.get())));
+    outputWS->replaceAxis(i, std::unique_ptr<Axis>(inWS->getAxis(i)->clone(outputWS.get())));
     outputWS->getAxis(i)->unit() = inWS->getAxis(i)->unit();
   }
 

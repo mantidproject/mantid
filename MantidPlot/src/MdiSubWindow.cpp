@@ -51,26 +51,19 @@ using std::ifstream;
 using std::string;
 using namespace Mantid;
 
-MdiSubWindow::MdiSubWindow(QWidget *parent, const QString &label,
-                           const QString &name, const Qt::WFlags &f)
-    : MdiSubWindowParent_t(parent, f),
-      d_app(static_cast<ApplicationWindow *>(parent)),
-      d_folder(d_app->currentFolder()), d_label(label), d_status(Normal),
-      d_caption_policy(Both), d_confirm_close(true),
-      d_birthdate(QDateTime::currentDateTime().toString(Qt::LocalDate)),
-      d_min_restore_size(QSize()) {
+MdiSubWindow::MdiSubWindow(QWidget *parent, const QString &label, const QString &name, const Qt::WFlags &f)
+    : MdiSubWindowParent_t(parent, f), d_app(static_cast<ApplicationWindow *>(parent)),
+      d_folder(d_app->currentFolder()), d_label(label), d_status(Normal), d_caption_policy(Both), d_confirm_close(true),
+      d_birthdate(QDateTime::currentDateTime().toString(Qt::LocalDate)), d_min_restore_size(QSize()) {
   init(parent, label, name, f);
 }
 
 MdiSubWindow::MdiSubWindow()
-    : MdiSubWindowParent_t(nullptr, nullptr), d_app(nullptr), d_folder(nullptr),
-      d_label(""), d_status(Normal), d_caption_policy(Both),
-      d_confirm_close(true),
-      d_birthdate(QDateTime::currentDateTime().toString(Qt::LocalDate)),
+    : MdiSubWindowParent_t(nullptr, nullptr), d_app(nullptr), d_folder(nullptr), d_label(""), d_status(Normal),
+      d_caption_policy(Both), d_confirm_close(true), d_birthdate(QDateTime::currentDateTime().toString(Qt::LocalDate)),
       d_min_restore_size(QSize()) {}
 
-void MdiSubWindow::init(QWidget *parent, const QString &label,
-                        const QString &name, const Qt::WFlags &flags) {
+void MdiSubWindow::init(QWidget *parent, const QString &label, const QString &name, const Qt::WFlags &flags) {
   setParent(parent);
   setObjectName(name);
   setName(name);
@@ -83,12 +76,9 @@ void MdiSubWindow::init(QWidget *parent, const QString &label,
   d_label = label;
 
   confirmClose(false);
-  if (parent->metaObject()->indexOfSlot(
-          QMetaObject::normalizedSignature("changeToDocked(MdiSubWindow*)"))) {
-    connect(this, SIGNAL(dockToMDIArea(MdiSubWindow *)), parent,
-            SLOT(changeToDocked(MdiSubWindow *)));
-    connect(this, SIGNAL(undockFromMDIArea(MdiSubWindow *)), parent,
-            SLOT(changeToFloating(MdiSubWindow *)));
+  if (parent->metaObject()->indexOfSlot(QMetaObject::normalizedSignature("changeToDocked(MdiSubWindow*)"))) {
+    connect(this, SIGNAL(dockToMDIArea(MdiSubWindow *)), parent, SLOT(changeToDocked(MdiSubWindow *)));
+    connect(this, SIGNAL(undockFromMDIArea(MdiSubWindow *)), parent, SLOT(changeToFloating(MdiSubWindow *)));
   }
 }
 
@@ -122,14 +112,12 @@ void MdiSubWindow::updateCaption() {
 
 void MdiSubWindow::setLabel(const QString &label) { d_label = label; }
 
-MantidQt::API::IProjectSerialisable *
-MdiSubWindow::loadFromProject(const std::string &lines, ApplicationWindow *app,
-                              const int fileVersion) {
+MantidQt::API::IProjectSerialisable *MdiSubWindow::loadFromProject(const std::string &lines, ApplicationWindow *app,
+                                                                   const int fileVersion) {
   Q_UNUSED(lines);
   Q_UNUSED(app);
   Q_UNUSED(fileVersion);
-  throw std::runtime_error(
-      "LoadToProject not implemented for raw MdiSubWindow");
+  throw std::runtime_error("LoadToProject not implemented for raw MdiSubWindow");
 }
 
 std::string MdiSubWindow::saveToProject(ApplicationWindow *app) {
@@ -221,9 +209,7 @@ void MdiSubWindow::undock() {
 /**
  * @return True if the subwindow is undocked
  */
-bool MdiSubWindow::isFloating() const {
-  return (this->getFloatingWindow() != nullptr);
-}
+bool MdiSubWindow::isFloating() const { return (this->getFloatingWindow() != nullptr); }
 
 /**
  */
@@ -235,9 +221,7 @@ void MdiSubWindow::dock() {
 /**
  * @return True if the subwindow is docked to the MDI area
  */
-bool MdiSubWindow::isDocked() const {
-  return (this->getDockedWindow() != nullptr);
-}
+bool MdiSubWindow::isDocked() const { return (this->getDockedWindow() != nullptr); }
 
 /**
  */
@@ -253,11 +237,9 @@ void MdiSubWindow::closeEvent(QCloseEvent *e) {
 
   // If you need to confirm the close, ask the user
   if (d_confirm_close) {
-    result =
-        QMessageBox::information(this, tr("MantidPlot"),
-                                 tr("Do you want to hide or delete") +
-                                     "<p><b>'" + objectName() + "'</b> ?",
-                                 tr("Delete"), tr("Hide"), tr("Cancel"), 0, 2);
+    result = QMessageBox::information(this, tr("MantidPlot"),
+                                      tr("Do you want to hide or delete") + "<p><b>'" + objectName() + "'</b> ?",
+                                      tr("Delete"), tr("Hide"), tr("Cancel"), 0, 2);
   }
 
   switch (result) {
@@ -267,8 +249,7 @@ void MdiSubWindow::closeEvent(QCloseEvent *e) {
       emit closedWindow(this);
       // Continue; the mdi window should close (?)
     } else {
-      QMessageBox::critical(parentWidget(), "MantidPlot - Error",
-                            "Window cannot be closed");
+      QMessageBox::critical(parentWidget(), "MantidPlot - Error", "Window cannot be closed");
       e->ignore();
     }
     break;
@@ -306,9 +287,7 @@ QString MdiSubWindow::aspect() {
 }
 
 QString MdiSubWindow::sizeToString() {
-  return QString::number(8. * static_cast<float>(sizeof(this)) / 1024.0, 'f',
-                         1) +
-         " " + tr("kB");
+  return QString::number(8. * static_cast<float>(sizeof(this)) / 1024.0, 'f', 1) + " " + tr("kB");
 }
 
 void MdiSubWindow::changeEvent(QEvent *event) {
@@ -397,13 +376,10 @@ void MdiSubWindow::setMaximized() {
   setStatus(Maximized);
 }
 
-QString MdiSubWindow::parseAsciiFile(const QString &fname,
-                                     const QString &commentString, int endLine,
-                                     int ignoreFirstLines, int maxRows,
-                                     int &rows) {
+QString MdiSubWindow::parseAsciiFile(const QString &fname, const QString &commentString, int endLine,
+                                     int ignoreFirstLines, int maxRows, int &rows) {
   if (endLine == 2)
-    return parseMacAsciiFile(fname, commentString, ignoreFirstLines, maxRows,
-                             rows);
+    return parseMacAsciiFile(fname, commentString, ignoreFirstLines, maxRows, rows);
 
   // QTextStream replaces '\r\n' with '\n', therefore we don't need a special
   // treatement in this case!
@@ -419,8 +395,7 @@ QString MdiSubWindow::parseAsciiFile(const QString &fname,
   tempFile.open();
   QTextStream temp(&tempFile);
 
-  for (int i = 0; i < ignoreFirstLines;
-       i++) // skip first 'ignoreFirstLines' lines
+  for (int i = 0; i < ignoreFirstLines; i++) // skip first 'ignoreFirstLines' lines
     t.readLine();
 
   bool validCommentString = !commentString.isEmpty();
@@ -456,10 +431,8 @@ QString MdiSubWindow::parseAsciiFile(const QString &fname,
   return path;
 }
 
-QString MdiSubWindow::parseMacAsciiFile(const QString &fname,
-                                        const QString &commentString,
-                                        int ignoreFirstLines, int maxRows,
-                                        int &rows) {
+QString MdiSubWindow::parseMacAsciiFile(const QString &fname, const QString &commentString, int ignoreFirstLines,
+                                        int maxRows, int &rows) {
   ifstream f;
   f.open(fname.toAscii());
   if (!f)
@@ -471,8 +444,7 @@ QString MdiSubWindow::parseMacAsciiFile(const QString &fname,
   tempFile.open();
   QTextStream temp(&tempFile);
 
-  for (int i = 0; i < ignoreFirstLines;
-       i++) { // skip first 'ignoreFirstLines' lines
+  for (int i = 0; i < ignoreFirstLines; i++) { // skip first 'ignoreFirstLines' lines
     string s;
     getline(f, s, '\r');
   }

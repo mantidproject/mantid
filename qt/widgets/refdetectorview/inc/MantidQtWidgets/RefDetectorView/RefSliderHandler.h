@@ -26,16 +26,13 @@
 namespace MantidQt {
 namespace RefDetectorViewer {
 
-class EXPORT_OPT_MANTIDQT_REFDETECTORVIEWER RefSliderHandler
-    : public SpectrumView::ISliderHandler {
+class EXPORT_OPT_MANTIDQT_REFDETECTORVIEWER RefSliderHandler : public SpectrumView::ISliderHandler {
 public:
   /// Construct object to manage image scrollbars from the specified UI
   RefSliderHandler(Ui_RefImageViewer *ivUI);
 
   /// Configure the image scrollbars for the specified data and drawing area
-  void
-  configureSliders(QRect drawArea,
-                   SpectrumView::SpectrumDataSource_sptr dataSource) override;
+  void configureSliders(QRect drawArea, SpectrumView::SpectrumDataSource_sptr dataSource) override;
 
   /// Configure the horizontal scrollbar to cover the specified range
   void configureHSlider(int nDataSteps, int nPixels) override;
@@ -54,8 +51,7 @@ public:
 
 private:
   /// Configure the specified scrollbar to cover the specified range
-  void configureSlider(QScrollBar *scrollBar, int nDataSteps, int nPixels,
-                       int val);
+  void configureSlider(QScrollBar *scrollBar, int nDataSteps, int nPixels, int val);
 
   Ui_RefImageViewer *m_ivUI;
 };

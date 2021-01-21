@@ -9,16 +9,14 @@
 namespace Mantid {
 namespace API {
 
-Parallel::ExecutionMode SerialAlgorithm::getParallelExecutionMode(
-    const std::map<std::string, Parallel::StorageMode> &storageModes) const {
+Parallel::ExecutionMode
+SerialAlgorithm::getParallelExecutionMode(const std::map<std::string, Parallel::StorageMode> &storageModes) const {
   using namespace Parallel;
-  const auto nonMasterOnly = std::find_if(
-      storageModes.cbegin(), storageModes.cend(), [](const auto &element) {
-        return element.second != StorageMode::MasterOnly;
-      });
+  const auto nonMasterOnly = std::find_if(storageModes.cbegin(), storageModes.cend(), [](const auto &element) {
+    return element.second != StorageMode::MasterOnly;
+  });
   if (nonMasterOnly != storageModes.cend()) {
-    throw std::runtime_error(nonMasterOnly->first + " must have " +
-                             Parallel::toString(StorageMode::MasterOnly));
+    throw std::runtime_error(nonMasterOnly->first + " must have " + Parallel::toString(StorageMode::MasterOnly));
   }
   return getCorrespondingExecutionMode(StorageMode::MasterOnly);
 }

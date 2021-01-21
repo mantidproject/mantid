@@ -22,23 +22,17 @@ namespace {
 Mantid::Kernel::Logger g_log("S(Q,w)");
 
 MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-      workspaceName);
+  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName);
 }
 
-double roundToPrecision(double value, double precision) {
-  return value - std::remainder(value, precision);
-}
+double roundToPrecision(double value, double precision) { return value - std::remainder(value, precision); }
 
-std::pair<double, double>
-roundToWidth(std::tuple<double, double> const &axisRange, double width) {
+std::pair<double, double> roundToWidth(std::tuple<double, double> const &axisRange, double width) {
   return std::make_pair(roundToPrecision(std::get<0>(axisRange), width) + width,
-                        roundToPrecision(std::get<1>(axisRange), width) -
-                            width);
+                        roundToPrecision(std::get<1>(axisRange), width) - width);
 }
 
-void convertToSpectrumAxis(std::string const &inputName,
-                           std::string const &outputName) {
+void convertToSpectrumAxis(std::string const &inputName, std::string const &outputName) {
   auto converter = AlgorithmManager::Instance().create("ConvertSpectrumAxis");
   converter->initialize();
   converter->setProperty("InputWorkspace", inputName);
@@ -48,8 +42,7 @@ void convertToSpectrumAxis(std::string const &inputName,
   converter->execute();
 }
 
-std::pair<double, double>
-convertTupleToPair(std::tuple<double, double> const &tuple) {
+std::pair<double, double> convertTupleToPair(std::tuple<double, double> const &tuple) {
   return std::make_pair(std::get<0>(tuple), std::get<1>(tuple));
 }
 
@@ -60,26 +53,19 @@ namespace CustomInterfaces {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-IndirectSqw::IndirectSqw(IndirectDataReduction *idrUI, QWidget *parent)
-    : IndirectDataReductionTab(idrUI, parent) {
+IndirectSqw::IndirectSqw(IndirectDataReduction *idrUI, QWidget *parent) : IndirectDataReductionTab(idrUI, parent) {
   m_uiForm.setupUi(parent);
-  setOutputPlotOptionsPresenter(std::make_unique<IndirectPlotOptionsPresenter>(
-      m_uiForm.ipoPlotOptions, this, PlotWidget::SpectraContour));
+  setOutputPlotOptionsPresenter(
+      std::make_unique<IndirectPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, this, PlotWidget::SpectraContour));
 
-  connect(m_uiForm.dsSampleInput, SIGNAL(dataReady(QString const &)), this,
-          SLOT(handleDataReady(QString const &)));
-  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-          SLOT(sqwAlgDone(bool)));
+  connect(m_uiForm.dsSampleInput, SIGNAL(dataReady(QString const &)), this, SLOT(handleDataReady(QString const &)));
+  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(sqwAlgDone(bool)));
 
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
 
-  connect(this,
-          SIGNAL(updateRunButton(bool, std::string const &, QString const &,
-                                 QString const &)),
-          this,
-          SLOT(updateRunButton(bool, std::string const &, QString const &,
-                               QString const &)));
+  connect(this, SIGNAL(updateRunButton(bool, std::string const &, QString const &, QString const &)), this,
+          SLOT(updateRunButton(bool, std::string const &, QString const &, QString const &)));
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   m_uiForm.rqwPlot2D->setXAxisLabel("Energy (meV)");
@@ -121,8 +107,7 @@ bool IndirectSqw::validate() {
   double const qLow = m_uiForm.spQLow->value();
   double const qWidth = m_uiForm.spQWidth->value();
   double const qHigh = m_uiForm.spQHigh->value();
-  auto const qRange =
-      m_uiForm.rqwPlot2D->getAxisRange(MantidWidgets::AxisID::YLeft);
+  auto const qRange = m_uiForm.rqwPlot2D->getAxisRange(MantidWidgets::AxisID::YLeft);
 
   UserInputValidator uiv;
 
@@ -131,8 +116,7 @@ bool IndirectSqw::validate() {
 
   // Validate Q binning
   uiv.checkBins(qLow, qWidth, qHigh, tolerance);
-  uiv.checkRangeIsEnclosed("The contour plots Q axis",
-                           convertTupleToPair(qRange), "the Q range provided",
+  uiv.checkRangeIsEnclosed("The contour plots Q axis", convertTupleToPair(qRange), "the Q range provided",
                            std::make_pair(qLow, qHigh));
 
   // If selected, validate energy binning
@@ -140,12 +124,10 @@ bool IndirectSqw::validate() {
     double const eLow = m_uiForm.spELow->value();
     double const eWidth = m_uiForm.spEWidth->value();
     double const eHigh = m_uiForm.spEHigh->value();
-    auto const eRange =
-        m_uiForm.rqwPlot2D->getAxisRange(MantidWidgets::AxisID::XBottom);
+    auto const eRange = m_uiForm.rqwPlot2D->getAxisRange(MantidWidgets::AxisID::XBottom);
 
     uiv.checkBins(eLow, eWidth, eHigh, tolerance);
-    uiv.checkRangeIsEnclosed("The contour plots Energy axis",
-                             convertTupleToPair(eRange), "the E range provided",
+    uiv.checkRangeIsEnclosed("The contour plots Energy axis", convertTupleToPair(eRange), "the E range provided",
                              std::make_pair(eLow, eHigh));
   }
 
@@ -163,16 +145,13 @@ void IndirectSqw::run() {
   auto const sqwWsName = sampleWsName.left(sampleWsName.length() - 4) + "_sqw";
   auto const eRebinWsName = sampleWsName.left(sampleWsName.length() - 4) + "_r";
 
-  auto const rebinString = m_uiForm.spQLow->text() + "," +
-                           m_uiForm.spQWidth->text() + "," +
-                           m_uiForm.spQHigh->text();
+  auto const rebinString = m_uiForm.spQLow->text() + "," + m_uiForm.spQWidth->text() + "," + m_uiForm.spQHigh->text();
 
   // Rebin in energy
   bool const rebinInEnergy = m_uiForm.ckRebinInEnergy->isChecked();
   if (rebinInEnergy) {
-    auto const eRebinString = m_uiForm.spELow->text() + "," +
-                              m_uiForm.spEWidth->text() + "," +
-                              m_uiForm.spEHigh->text();
+    auto const eRebinString =
+        m_uiForm.spELow->text() + "," + m_uiForm.spEWidth->text() + "," + m_uiForm.spEHigh->text();
 
     auto energyRebinAlg = AlgorithmManager::Instance().create("Rebin");
     energyRebinAlg->initialize();
@@ -195,8 +174,7 @@ void IndirectSqw::run() {
   sqwAlg->setProperty("ReplaceNaNs", true);
 
   BatchAlgorithmRunner::AlgorithmRuntimeProps sqwInputProps;
-  sqwInputProps["InputWorkspace"] =
-      rebinInEnergy ? eRebinWsName.toStdString() : sampleWsName.toStdString();
+  sqwInputProps["InputWorkspace"] = rebinInEnergy ? eRebinWsName.toStdString() : sampleWsName.toStdString();
 
   m_batchAlgoRunner->addAlgorithm(sqwAlg, sqwInputProps);
 
@@ -257,8 +235,7 @@ void IndirectSqw::plotRqwContour(std::string const &sampleName) {
 
 void IndirectSqw::setDefaultQAndEnergy() {
   setQRange(m_uiForm.rqwPlot2D->getAxisRange(MantidWidgets::AxisID::YLeft));
-  setEnergyRange(
-      m_uiForm.rqwPlot2D->getAxisRange(MantidWidgets::AxisID::XBottom));
+  setEnergyRange(m_uiForm.rqwPlot2D->getAxisRange(MantidWidgets::AxisID::XBottom));
 }
 
 void IndirectSqw::setQRange(std::tuple<double, double> const &axisRange) {
@@ -276,10 +253,8 @@ void IndirectSqw::setEnergyRange(std::tuple<double, double> const &axisRange) {
 void IndirectSqw::setFileExtensionsByName(bool filter) {
   QStringList const noSuffixes{""};
   auto const tabName("Sqw");
-  m_uiForm.dsSampleInput->setFBSuffixes(filter ? getSampleFBSuffixes(tabName)
-                                               : getExtensions(tabName));
-  m_uiForm.dsSampleInput->setWSSuffixes(filter ? getSampleWSSuffixes(tabName)
-                                               : noSuffixes);
+  m_uiForm.dsSampleInput->setFBSuffixes(filter ? getSampleFBSuffixes(tabName) : getExtensions(tabName));
+  m_uiForm.dsSampleInput->setWSSuffixes(filter ? getSampleWSSuffixes(tabName) : noSuffixes);
 }
 
 void IndirectSqw::runClicked() { runTab(); }
@@ -290,17 +265,11 @@ void IndirectSqw::saveClicked() {
   m_batchAlgoRunner->executeBatch();
 }
 
-void IndirectSqw::setRunEnabled(bool enabled) {
-  m_uiForm.pbRun->setEnabled(enabled);
-}
+void IndirectSqw::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(enabled); }
 
-void IndirectSqw::setSaveEnabled(bool enabled) {
-  m_uiForm.pbSave->setEnabled(enabled);
-}
+void IndirectSqw::setSaveEnabled(bool enabled) { m_uiForm.pbSave->setEnabled(enabled); }
 
-void IndirectSqw::updateRunButton(bool enabled,
-                                  std::string const &enableOutputButtons,
-                                  QString const &message,
+void IndirectSqw::updateRunButton(bool enabled, std::string const &enableOutputButtons, QString const &message,
                                   QString const &tooltip) {
   setRunEnabled(enabled);
   m_uiForm.pbRun->setText(message);

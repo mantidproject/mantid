@@ -43,8 +43,7 @@ public:
    * @return EventWorkspace_sptr
    */
   EventWorkspace_sptr createDiffractionEventWorkspace(int numEvents) {
-    FacilityHelper::ScopedFacilities loadTESTFacility(
-        "unit_testing/UnitTestFacilities.xml", "TEST");
+    FacilityHelper::ScopedFacilities loadTESTFacility("unit_testing/UnitTestFacilities.xml", "TEST");
 
     int numPixels = 10000;
     int numBins = 16;
@@ -52,17 +51,15 @@ public:
     std::mt19937 rng(1);
     std::uniform_real_distribution<double> flat(-1.0, 1.0);
 
-    std::shared_ptr<EventWorkspace> retVal = create<EventWorkspace>(
-        numPixels, BinEdges(numBins, LinearGenerator(0.0, binDelta)));
+    std::shared_ptr<EventWorkspace> retVal =
+        create<EventWorkspace>(numPixels, BinEdges(numBins, LinearGenerator(0.0, binDelta)));
 
     // --------- Load the instrument -----------
     LoadInstrument *loadInst = new LoadInstrument();
     loadInst->initialize();
-    loadInst->setPropertyValue("Filename",
-                               "unit_testing/MINITOPAZ_Definition.xml");
+    loadInst->setPropertyValue("Filename", "unit_testing/MINITOPAZ_Definition.xml");
     loadInst->setProperty("Workspace", retVal);
-    loadInst->setProperty("RewriteSpectraMap",
-                          Mantid::Kernel::OptionalBool(true));
+    loadInst->setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(true));
     loadInst->execute();
     delete loadInst;
     // Populate the instrument parameters in this workspace - this works around
@@ -82,12 +79,9 @@ public:
 
       // Peak
       int r = static_cast<int>(
-          numEvents / std::sqrt((pix / 100 - 50.5) * (pix / 100 - 50.5) +
-                                (pix % 100 - 50.5) * (pix % 100 - 50.5)));
+          numEvents / std::sqrt((pix / 100 - 50.5) * (pix / 100 - 50.5) + (pix % 100 - 50.5) * (pix % 100 - 50.5)));
       for (int i = 0; i < r; i++) {
-        el += TofEvent(
-            5844. + 10. * ((flat(rng) + flat(rng) + flat(rng)) * 2. - 3.),
-            run_start + double(i));
+        el += TofEvent(5844. + 10. * ((flat(rng) + flat(rng) + flat(rng)) * 2. - 3.), run_start + double(i));
       }
     }
 
@@ -109,8 +103,7 @@ public:
   void do_test_MINITOPAZ(bool ev) {
     int numEventsPer = 100;
     MatrixWorkspace_sptr inputW = createDiffractionEventWorkspace(numEventsPer);
-    EventWorkspace_sptr in_ws =
-        std::dynamic_pointer_cast<EventWorkspace>(inputW);
+    EventWorkspace_sptr in_ws = std::dynamic_pointer_cast<EventWorkspace>(inputW);
     inputW->getAxis(0)->setUnit("TOF");
     // Register the workspace in the data service
 
@@ -131,8 +124,7 @@ public:
     inputW->mutableRun().addProperty("run_number", 3007);
 
     std::shared_ptr<Mantid::API::Algorithm> algu =
-        Mantid::API::AlgorithmFactory::Instance().create(
-            std::string("LoadIsawUB"), 1);
+        Mantid::API::AlgorithmFactory::Instance().create(std::string("LoadIsawUB"), 1);
     algu->initialize();
     algu->setProperty<Workspace_sptr>("InputWorkspace", inputW);
     algu->setPropertyValue("Filename", "TOPAZ_3007.mat");
@@ -140,16 +132,14 @@ public:
 
     if (ev) {
       std::shared_ptr<Mantid::API::Algorithm> algb =
-          Mantid::API::AlgorithmFactory::Instance().create(std::string("Rebin"),
-                                                           1);
+          Mantid::API::AlgorithmFactory::Instance().create(std::string("Rebin"), 1);
       algb->initialize();
       algb->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputW);
       algb->setPropertyValue("OutputWorkspace", "RebinResult");
       algb->setPropertyValue("Params", "5760.,10.0,5920.");
       algb->setProperty("PreserveEvents", ev);
       algb->execute();
-      inputW = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-          "RebinResult");
+      inputW = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("RebinResult");
     }
 
     CentroidPeaks alg;
@@ -164,9 +154,7 @@ public:
     TS_ASSERT(alg.isExecuted())
 
     PeaksWorkspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>(
-            "TOPAZ"));
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>("TOPAZ"));
     TS_ASSERT(ws);
     if (!ws)
       return;

@@ -20,12 +20,9 @@ public:
   static void destroySuite(StorageModeTest *suite) { delete suite; }
 
   void test_toString() {
-    TS_ASSERT_EQUALS(toString(StorageMode::Cloned),
-                     "Parallel::StorageMode::Cloned");
-    TS_ASSERT_EQUALS(toString(StorageMode::Distributed),
-                     "Parallel::StorageMode::Distributed");
-    TS_ASSERT_EQUALS(toString(StorageMode::MasterOnly),
-                     "Parallel::StorageMode::MasterOnly");
+    TS_ASSERT_EQUALS(toString(StorageMode::Cloned), "Parallel::StorageMode::Cloned");
+    TS_ASSERT_EQUALS(toString(StorageMode::Distributed), "Parallel::StorageMode::Distributed");
+    TS_ASSERT_EQUALS(toString(StorageMode::MasterOnly), "Parallel::StorageMode::MasterOnly");
   }
 
   void test_toString_map() {
@@ -37,24 +34,17 @@ public:
   }
 
   void test_fromString() {
-    TS_ASSERT_EQUALS(fromString("Parallel::StorageMode::Cloned"),
-                     StorageMode::Cloned);
-    TS_ASSERT_EQUALS(fromString("Parallel::StorageMode::Distributed"),
-                     StorageMode::Distributed);
-    TS_ASSERT_EQUALS(fromString("Parallel::StorageMode::MasterOnly"),
-                     StorageMode::MasterOnly);
-    TS_ASSERT_THROWS_EQUALS(fromString(""), const std::invalid_argument &e,
-                            std::string(e.what()),
+    TS_ASSERT_EQUALS(fromString("Parallel::StorageMode::Cloned"), StorageMode::Cloned);
+    TS_ASSERT_EQUALS(fromString("Parallel::StorageMode::Distributed"), StorageMode::Distributed);
+    TS_ASSERT_EQUALS(fromString("Parallel::StorageMode::MasterOnly"), StorageMode::MasterOnly);
+    TS_ASSERT_THROWS_EQUALS(fromString(""), const std::invalid_argument &e, std::string(e.what()),
                             "Parallel::fromString could not convert provided "
                             "input into a Parallel::StorageMode.");
   }
 
   void test_fromString_toString() {
-    TS_ASSERT_EQUALS(fromString(toString(StorageMode::Cloned)),
-                     StorageMode::Cloned);
-    TS_ASSERT_EQUALS(fromString(toString(StorageMode::Distributed)),
-                     StorageMode::Distributed);
-    TS_ASSERT_EQUALS(fromString(toString(StorageMode::MasterOnly)),
-                     StorageMode::MasterOnly);
+    TS_ASSERT_EQUALS(fromString(toString(StorageMode::Cloned)), StorageMode::Cloned);
+    TS_ASSERT_EQUALS(fromString(toString(StorageMode::Distributed)), StorageMode::Distributed);
+    TS_ASSERT_EQUALS(fromString(toString(StorageMode::MasterOnly)), StorageMode::MasterOnly);
   }
 };

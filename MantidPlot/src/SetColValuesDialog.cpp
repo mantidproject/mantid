@@ -49,8 +49,7 @@
 #include <QCheckBox>
 #endif
 
-SetColValuesDialog::SetColValuesDialog(ScriptingEnv *env, Table *t,
-                                       const Qt::WFlags &fl)
+SetColValuesDialog::SetColValuesDialog(ScriptingEnv *env, Table *t, const Qt::WFlags &fl)
     : QDialog(t, fl), Scripted(env) {
   setObjectName("SetColValuesDialog");
   setWindowTitle(tr("MantidPlot - Set column values"));
@@ -99,13 +98,11 @@ SetColValuesDialog::SetColValuesDialog(ScriptingEnv *env, Table *t,
   vbox1->addLayout(hbox1);
   vbox1->addLayout(gl1);
   gb->setLayout(vbox1);
-  gb->setSizePolicy(
-      QSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred));
+  gb->setSizePolicy(QSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred));
 
   explain = new QTextEdit();
   explain->setReadOnly(true);
-  explain->setSizePolicy(
-      QSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred));
+  explain->setSizePolicy(QSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred));
   QPalette palette = explain->palette();
   palette.setColor(QPalette::Active, QPalette::Base, Qt::lightGray);
   explain->setPalette(palette);

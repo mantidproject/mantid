@@ -25,18 +25,14 @@ DECLARE_ALGORITHM(ConvertToMDMinMaxLocal)
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string ConvertToMDMinMaxLocal::name() const {
-  return "ConvertToMDMinMaxLocal";
-}
+const std::string ConvertToMDMinMaxLocal::name() const { return "ConvertToMDMinMaxLocal"; }
 
 //----------------------------------------------------------------------------------------------
 void ConvertToMDMinMaxLocal::init() {
   ConvertToMDParent::init();
 
-  declareProperty(std::make_unique<Kernel::ArrayProperty<double>>(
-      "MinValues", Direction::Output));
-  declareProperty(std::make_unique<Kernel::ArrayProperty<double>>(
-      "MaxValues", Direction::Output));
+  declareProperty(std::make_unique<Kernel::ArrayProperty<double>>("MinValues", Direction::Output));
+  declareProperty(std::make_unique<Kernel::ArrayProperty<double>>("MaxValues", Direction::Output));
 }
 
 //----------------------------------------------------------------------------------------------
@@ -69,8 +65,7 @@ void ConvertToMDMinMaxLocal::exec() {
 
   // get raw pointer to Q-transformation (do not delete this pointer, it's held
   // by MDTransfFactory!)
-  MDTransfInterface *pQtransf =
-      MDTransfFactory::Instance().create(QModReq).get();
+  MDTransfInterface *pQtransf = MDTransfFactory::Instance().create(QModReq).get();
   // get number of dimensions this Q transformation generates from the
   // workspace.
   auto iEmode = Kernel::DeltaEMode::fromString(dEModReq);
@@ -107,12 +102,11 @@ void ConvertToMDMinMaxLocal::exec() {
 
   // set up target coordinate system and identify/set the (multi) dimension's
   // names to use
-  targWSDescr.m_RotMatrix =
-      MsliceProj.getTransfMatrix(targWSDescr, QFrame, convertTo_);
+  targWSDescr.m_RotMatrix = MsliceProj.getTransfMatrix(targWSDescr, QFrame, convertTo_);
 
   // preprocess detectors (or make fake detectors in CopyMD case)
-  targWSDescr.m_PreprDetTable = this->preprocessDetectorsPositions(
-      InWS2D, dEModReq, false, std::string(getProperty("PreprocDetectorsWS")));
+  targWSDescr.m_PreprDetTable =
+      this->preprocessDetectorsPositions(InWS2D, dEModReq, false, std::string(getProperty("PreprocDetectorsWS")));
 
   // do the job
   findMinMaxValues(targWSDescr, pQtransf, iEmode, MinValues, MaxValues);
@@ -121,10 +115,8 @@ void ConvertToMDMinMaxLocal::exec() {
   setProperty("MaxValues", MaxValues);
 }
 
-void ConvertToMDMinMaxLocal::findMinMaxValues(MDWSDescription &WSDescription,
-                                              MDTransfInterface *const pQtransf,
-                                              Kernel::DeltaEMode::Type iEMode,
-                                              std::vector<double> &MinValues,
+void ConvertToMDMinMaxLocal::findMinMaxValues(MDWSDescription &WSDescription, MDTransfInterface *const pQtransf,
+                                              Kernel::DeltaEMode::Type iEMode, std::vector<double> &MinValues,
                                               std::vector<double> &MaxValues) {
 
   MDAlgorithms::UnitsConversionHelper unitsConverter;
@@ -143,8 +135,7 @@ void ConvertToMDMinMaxLocal::findMinMaxValues(MDWSDescription &WSDescription,
 
   //
   auto nHist = static_cast<long>(inWS->getNumberHistograms());
-  auto detIDMap =
-      WSDescription.m_PreprDetTable->getColVector<size_t>("detIDMap");
+  auto detIDMap = WSDescription.m_PreprDetTable->getColVector<size_t>("detIDMap");
 
   // vector to place transformed coordinates;
   std::vector<coord_t> locCoord(nDims);
@@ -164,8 +155,7 @@ void ConvertToMDMinMaxLocal::findMinMaxValues(MDWSDescription &WSDescription,
     auto source_range = inWS->getSpectrum(iSpctr).getXDataRange();
 
     // extract part of this range which has well defined unit conversion
-    source_range = unitsConverter.getConversionRange(source_range.first,
-                                                     source_range.second);
+    source_range = unitsConverter.getConversionRange(source_range.first, source_range.second);
 
     double x1 = unitsConverter.convertUnits(source_range.first);
     double x2 = unitsConverter.convertUnits(source_range.second);

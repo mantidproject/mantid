@@ -26,22 +26,18 @@
 #include <gsl/gsl_fft_complex.h>
 #include <gsl/gsl_fft_halfcomplex.h>
 
-FFT::FFT(ApplicationWindow *parent, Table *t, const QString &realColName,
-         const QString &imagColName, int from, int to)
+FFT::FFT(ApplicationWindow *parent, Table *t, const QString &realColName, const QString &imagColName, int from, int to)
     : Filter(parent, t) {
   init();
   setDataFromTable(t, realColName, imagColName, from, to);
 }
 
-FFT::FFT(ApplicationWindow *parent, Graph *g, const QString &curveTitle)
-    : Filter(parent, g) {
+FFT::FFT(ApplicationWindow *parent, Graph *g, const QString &curveTitle) : Filter(parent, g) {
   init();
   setDataFromCurve(curveTitle);
 }
 
-FFT::FFT(ApplicationWindow *parent, Graph *g, const QString &curveTitle,
-         double start, double end)
-    : Filter(parent, g) {
+FFT::FFT(ApplicationWindow *parent, Graph *g, const QString &curveTitle, double start, double end) : Filter(parent, g) {
   init();
   setDataFromCurve(curveTitle, start, end);
 }
@@ -64,8 +60,7 @@ QString FFT::fftCurve() {
   std::vector<double> result(2 * d_n);
 
   if (amp.empty() || result.empty()) {
-    QMessageBox::critical(dynamic_cast<ApplicationWindow *>(parent()),
-                          tr("MantidPlot") + " - " + tr("Error"),
+    QMessageBox::critical(dynamic_cast<ApplicationWindow *>(parent()), tr("MantidPlot") + " - " + tr("Error"),
                           tr("Could not allocate memory, operation aborted!"));
     d_init_err = true;
     return "";
@@ -75,18 +70,15 @@ QString FFT::fftCurve() {
   double aMax = 0.0;                            // max amplitude
   QString text;
   if (!d_inverse) {
-    d_explanation = tr("Forward") + " " + tr("FFT") + " " + tr("of") + " " +
-                    d_curve->title().text();
+    d_explanation = tr("Forward") + " " + tr("FFT") + " " + tr("of") + " " + d_curve->title().text();
     text = tr("Frequency");
 
     gsl_fft_real_workspace *work = gsl_fft_real_workspace_alloc(d_n);
     gsl_fft_real_wavetable *real = gsl_fft_real_wavetable_alloc(d_n);
 
     if (!work || !real) {
-      QMessageBox::critical(
-          dynamic_cast<ApplicationWindow *>(parent()),
-          tr("MantidPlot") + " - " + tr("Error"),
-          tr("Could not allocate memory, operation aborted!"));
+      QMessageBox::critical(dynamic_cast<ApplicationWindow *>(parent()), tr("MantidPlot") + " - " + tr("Error"),
+                            tr("Could not allocate memory, operation aborted!"));
       d_init_err = true;
       return "";
     }
@@ -97,8 +89,7 @@ QString FFT::fftCurve() {
     gsl_fft_real_wavetable_free(real);
     gsl_fft_real_workspace_free(work);
   } else {
-    d_explanation = tr("Inverse") + " " + tr("FFT") + " " + tr("of") + " " +
-                    d_curve->title().text();
+    d_explanation = tr("Inverse") + " " + tr("FFT") + " " + tr("of") + " " + d_curve->title().text();
     text = tr("Time");
 
     gsl_fft_real_unpack(d_y, result.data(), 1, d_n);
@@ -106,10 +97,8 @@ QString FFT::fftCurve() {
     gsl_fft_complex_workspace *workspace = gsl_fft_complex_workspace_alloc(d_n);
 
     if (!workspace || !wavetable) {
-      QMessageBox::critical(
-          dynamic_cast<ApplicationWindow *>(parent()),
-          tr("MantidPlot") + " - " + tr("Error"),
-          tr("Could not allocate memory, operation aborted!"));
+      QMessageBox::critical(dynamic_cast<ApplicationWindow *>(parent()), tr("MantidPlot") + " - " + tr("Error"),
+                            tr("Could not allocate memory, operation aborted!"));
       d_init_err = true;
       return "";
     }
@@ -144,15 +133,13 @@ QString FFT::fftCurve() {
 
   ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parent());
   if (!app) {
-    throw std::logic_error(
-        "Parent of FFTDialog is not ApplicationWindow as expected.");
+    throw std::logic_error("Parent of FFTDialog is not ApplicationWindow as expected.");
   }
 
   QLocale locale = app->locale();
   int prec = app->d_decimal_digits;
 
-  text += "\t" + tr("Real") + "\t" + tr("Imaginary") + "\t" + tr("Amplitude") +
-          "\t" + tr("Angle") + "\n";
+  text += "\t" + tr("Real") + "\t" + tr("Imaginary") + "\t" + tr("Amplitude") + "\t" + tr("Angle") + "\n";
   for (i = 0; i < d_n; i++) {
     i2 = 2 * i;
     text += locale.toString(d_x[i], 'g', prec) + "\t";
@@ -162,8 +149,7 @@ QString FFT::fftCurve() {
       text += locale.toString(amp[i] / aMax, 'g', prec) + "\t";
     else
       text += locale.toString(amp[i], 'g', prec) + "\t";
-    text +=
-        locale.toString(atan(result[i2 + 1] / result[i2]), 'g', prec) + "\n";
+    text += locale.toString(atan(result[i2 + 1] / result[i2]), 'g', prec) + "\n";
   }
   return text;
 }
@@ -176,8 +162,7 @@ QString FFT::fftTable() {
   gsl_fft_complex_workspace *workspace = gsl_fft_complex_workspace_alloc(d_n);
 
   if (!amp || !wavetable || !workspace) {
-    QMessageBox::critical(dynamic_cast<ApplicationWindow *>(parent()),
-                          tr("MantidPlot") + " - " + tr("Error"),
+    QMessageBox::critical(dynamic_cast<ApplicationWindow *>(parent()), tr("MantidPlot") + " - " + tr("Error"),
                           tr("Could not allocate memory, operation aborted!"));
     delete[] amp;
     if (wavetable)
@@ -192,13 +177,11 @@ QString FFT::fftTable() {
   double aMax = 0.0;                            // max amplitude
   QString text;
   if (!d_inverse) {
-    d_explanation = tr("Forward") + " " + tr("FFT") + " " + tr("of") + " " +
-                    d_table->colName(d_real_col);
+    d_explanation = tr("Forward") + " " + tr("FFT") + " " + tr("of") + " " + d_table->colName(d_real_col);
     text = tr("Frequency");
     gsl_fft_complex_forward(d_y, 1, d_n, wavetable, workspace);
   } else {
-    d_explanation = tr("Inverse") + " " + tr("FFT") + " " + tr("of") + " " +
-                    d_table->colName(d_real_col);
+    d_explanation = tr("Inverse") + " " + tr("FFT") + " " + tr("of") + " " + d_table->colName(d_real_col);
     text = tr("Time");
     gsl_fft_complex_inverse(d_y, 1, d_n, wavetable, workspace);
   }
@@ -230,14 +213,12 @@ QString FFT::fftTable() {
 
   ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parent());
   if (!app) {
-    throw std::logic_error(
-        "Parent of FFTDialog is not ApplicationWindow as expected.");
+    throw std::logic_error("Parent of FFTDialog is not ApplicationWindow as expected.");
   }
   QLocale locale = app->locale();
   int prec = app->d_decimal_digits;
 
-  text += "\t" + tr("Real") + "\t" + tr("Imaginary") + "\t" + tr("Amplitude") +
-          "\t" + tr("Angle") + "\n";
+  text += "\t" + tr("Real") + "\t" + tr("Imaginary") + "\t" + tr("Amplitude") + "\t" + tr("Angle") + "\n";
   for (i = 0; i < d_n; i++) {
     int i2 = 2 * i;
     text += locale.toString(d_x[i], 'g', prec) + "\t";
@@ -267,8 +248,7 @@ void FFT::output() {
 void FFT::output(const QString &text) {
   ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parent());
   if (!app) {
-    throw std::logic_error(
-        "Parent of FFT is not ApplicationWindow as expected.");
+    throw std::logic_error("Parent of FFT is not ApplicationWindow as expected.");
   }
   QString tableName = app->generateUniqueName(QString(objectName()));
   d_result_table = app->newHiddenTable(tableName, d_explanation, d_n, 5, text);
@@ -287,10 +267,8 @@ void FFT::output(const QString &text) {
       d_output_graph->setXAxisTitle(tr("Time") + +" (" + tr("s") + ")");
     d_output_graph->setYAxisTitle(tr("Amplitude"));
 
-    d_output_graph->insertCurve(d_result_table, 0,
-                                tableName + "_" + tr("Amplitude"), 0);
-    d_output_graph->setCurvePen(d_output_graph->curves() - 1,
-                                QPen(ColorBox::color(d_curveColorIndex), 1));
+    d_output_graph->insertCurve(d_result_table, 0, tableName + "_" + tr("Amplitude"), 0);
+    d_output_graph->setCurvePen(d_output_graph->curves() - 1, QPen(ColorBox::color(d_curveColorIndex), 1));
     d_output_graph->replot();
 
     if (ml)
@@ -298,8 +276,7 @@ void FFT::output(const QString &text) {
   }
 }
 
-bool FFT::setDataFromTable(Table *t, const QString &realColName,
-                           const QString &imagColName, int from, int to) {
+bool FFT::setDataFromTable(Table *t, const QString &realColName, const QString &imagColName, int from, int to) {
   d_init_err = true;
 
   if (!t)
@@ -348,8 +325,7 @@ bool FFT::setDataFromTable(Table *t, const QString &realColName,
         d_y[i2 + 1] = d_table->cell(i, d_imag_col);
     }
   } else {
-    QMessageBox::critical(dynamic_cast<ApplicationWindow *>(parent()),
-                          tr("MantidPlot") + " - " + tr("Error"),
+    QMessageBox::critical(dynamic_cast<ApplicationWindow *>(parent()), tr("MantidPlot") + " - " + tr("Error"),
                           tr("Could not allocate memory, operation aborted!"));
     d_init_err = true;
     return false;

@@ -47,20 +47,14 @@ namespace IO {
 */
 class MANTID_PARALLEL_DLL MultiProcessEventLoader {
 public:
-  MultiProcessEventLoader(uint32_t numPixels, uint32_t numProcesses,
-                          uint32_t numThreads, const std::string &binary,
+  MultiProcessEventLoader(uint32_t numPixels, uint32_t numProcesses, uint32_t numThreads, const std::string &binary,
                           bool precalc = true);
-  void
-  load(const std::string &filename, const std::string &groupname,
-       const std::vector<std::string> &bankNames,
-       const std::vector<int32_t> &bankOffsets,
-       std::vector<std::vector<Types::Event::TofEvent> *> eventLists) const;
+  void load(const std::string &filename, const std::string &groupname, const std::vector<std::string> &bankNames,
+            const std::vector<int32_t> &bankOffsets,
+            std::vector<std::vector<Types::Event::TofEvent> *> eventLists) const;
 
-  static void fillFromFile(EventsListsShmemStorage &storage,
-                           const std::string &filename,
-                           const std::string &groupname,
-                           const std::vector<std::string> &bankNames,
-                           const std::vector<int32_t> &bankOffsets,
+  static void fillFromFile(EventsListsShmemStorage &storage, const std::string &filename, const std::string &groupname,
+                           const std::vector<std::string> &bankNames, const std::vector<int32_t> &bankOffsets,
                            std::size_t from, std::size_t to, bool precalc);
 
   enum struct LoadType { preCalcEvents, producerConsumer };
@@ -70,26 +64,18 @@ private:
   static std::string generateStoragename();
   static std::string generateTimeBasedPrefix();
 
-  template <typename MultiProcessEventLoader::LoadType LT =
-                LoadType::preCalcEvents>
-  struct GroupLoader {
+  template <typename MultiProcessEventLoader::LoadType LT = LoadType::preCalcEvents> struct GroupLoader {
     template <typename T>
-    static void loadFromGroup(EventsListsShmemStorage &storage,
-                              const H5::Group &group,
-                              const std::vector<std::string> &bankNames,
-                              const std::vector<int32_t> &bankOffsets,
+    static void loadFromGroup(EventsListsShmemStorage &storage, const H5::Group &group,
+                              const std::vector<std::string> &bankNames, const std::vector<int32_t> &bankOffsets,
                               std::size_t from, std::size_t to);
 
-    static void loadFromGroupWrapper(const H5::DataType &type,
-                                     EventsListsShmemStorage &storage,
-                                     const H5::Group &group,
-                                     const std::vector<std::string> &bankNames,
-                                     const std::vector<int32_t> &bankOffsets,
+    static void loadFromGroupWrapper(const H5::DataType &type, EventsListsShmemStorage &storage, const H5::Group &group,
+                                     const std::vector<std::string> &bankNames, const std::vector<int32_t> &bankOffsets,
                                      std::size_t from, std::size_t to);
   };
 
-  void assembleFromShared(
-      std::vector<std::vector<Mantid::Types::Event::TofEvent> *> &result) const;
+  void assembleFromShared(std::vector<std::vector<Mantid::Types::Event::TofEvent> *> &result) const;
 
   size_t estimateShmemAmount(size_t eventCount) const;
 
@@ -105,30 +91,25 @@ private:
 
 /// Wrapper to avoid manual processing of all cases of 2 template arguments
 template <typename MultiProcessEventLoader::LoadType LT>
-void MultiProcessEventLoader::GroupLoader<LT>::loadFromGroupWrapper(
-    const H5::DataType &type, EventsListsShmemStorage &storage,
-    const H5::Group &instrument, const std::vector<std::string> &bankNames,
-    const std::vector<int32_t> &bankOffsets, std::size_t from, std::size_t to) {
+void MultiProcessEventLoader::GroupLoader<LT>::loadFromGroupWrapper(const H5::DataType &type,
+                                                                    EventsListsShmemStorage &storage,
+                                                                    const H5::Group &instrument,
+                                                                    const std::vector<std::string> &bankNames,
+                                                                    const std::vector<int32_t> &bankOffsets,
+                                                                    std::size_t from, std::size_t to) {
   if (type == H5::PredType::NATIVE_INT32)
-    return loadFromGroup<int32_t>(storage, instrument, bankNames, bankOffsets,
-                                  from, to);
+    return loadFromGroup<int32_t>(storage, instrument, bankNames, bankOffsets, from, to);
   if (type == H5::PredType::NATIVE_INT64)
-    return loadFromGroup<int64_t>(storage, instrument, bankNames, bankOffsets,
-                                  from, to);
+    return loadFromGroup<int64_t>(storage, instrument, bankNames, bankOffsets, from, to);
   if (type == H5::PredType::NATIVE_UINT32)
-    return loadFromGroup<uint32_t>(storage, instrument, bankNames, bankOffsets,
-                                   from, to);
+    return loadFromGroup<uint32_t>(storage, instrument, bankNames, bankOffsets, from, to);
   if (type == H5::PredType::NATIVE_UINT64)
-    return loadFromGroup<uint64_t>(storage, instrument, bankNames, bankOffsets,
-                                   from, to);
+    return loadFromGroup<uint64_t>(storage, instrument, bankNames, bankOffsets, from, to);
   if (type == H5::PredType::NATIVE_FLOAT)
-    return loadFromGroup<float>(storage, instrument, bankNames, bankOffsets,
-                                from, to);
+    return loadFromGroup<float>(storage, instrument, bankNames, bankOffsets, from, to);
   if (type == H5::PredType::NATIVE_DOUBLE)
-    return loadFromGroup<double>(storage, instrument, bankNames, bankOffsets,
-                                 from, to);
-  throw std::runtime_error(
-      "Unsupported H5::DataType for event_time_offset in NXevent_data");
+    return loadFromGroup<double>(storage, instrument, bankNames, bankOffsets, from, to);
+  throw std::runtime_error("Unsupported H5::DataType for event_time_offset in NXevent_data");
 }
 
 // aliase  for ToF type used in TofEvent
@@ -140,12 +121,9 @@ using ToFType = decltype(std::declval<TofEvent>().tof());
 
 template <>
 template <typename T>
-void MultiProcessEventLoader::GroupLoader<
-    MultiProcessEventLoader::LoadType::preCalcEvents>::
-    loadFromGroup(EventsListsShmemStorage &storage, const H5::Group &instrument,
-                  const std::vector<std::string> &bankNames,
-                  const std::vector<int32_t> &bankOffsets,
-                  const std::size_t from, const std::size_t to) {
+void MultiProcessEventLoader::GroupLoader<MultiProcessEventLoader::LoadType::preCalcEvents>::loadFromGroup(
+    EventsListsShmemStorage &storage, const H5::Group &instrument, const std::vector<std::string> &bankNames,
+    const std::vector<int32_t> &bankOffsets, const std::size_t from, const std::size_t to) {
   std::vector<int32_t> eventId;
   std::vector<T> eventTimeOffset;
 
@@ -173,8 +151,7 @@ void MultiProcessEventLoader::GroupLoader<
       eventId.resize(cnt);
       loader.readEventID(eventId.data(), start, cnt);
 
-      detail::eventIdToGlobalSpectrumIndex(eventId.data(), cnt,
-                                           bankOffsets[bankIdx]);
+      detail::eventIdToGlobalSpectrumIndex(eventId.data(), cnt, bankOffsets[bankIdx]);
 
       std::unordered_map<int32_t, std::size_t> eventsPerPixel;
       for (auto &pixId : eventId) {
@@ -190,14 +167,10 @@ void MultiProcessEventLoader::GroupLoader<
       part->setEventOffset(start);
       for (std::size_t i = 0; i < eventId.size(); ++i) {
         try {
-          storage.appendEvent(
-              0, eventId[i],
-              TofEvent{boost::numeric_cast<ToFType>(eventTimeOffset[i]),
-                       part->next()});
+          storage.appendEvent(0, eventId[i], TofEvent{boost::numeric_cast<ToFType>(eventTimeOffset[i]), part->next()});
         } catch (...) {
-          std::throw_with_nested(
-              std::runtime_error("Something wrong in multiprocess "
-                                 "LoadFromGroup precountEvent mode."));
+          std::throw_with_nested(std::runtime_error("Something wrong in multiprocess "
+                                                    "LoadFromGroup precountEvent mode."));
         }
       }
     }
@@ -212,15 +185,11 @@ void MultiProcessEventLoader::GroupLoader<
  * Implements the 'producer-consumer' strategy*/
 template <>
 template <typename T>
-void MultiProcessEventLoader::GroupLoader<
-    MultiProcessEventLoader::LoadType::producerConsumer>::
-    loadFromGroup(EventsListsShmemStorage &storage, const H5::Group &instrument,
-                  const std::vector<std::string> &bankNames,
-                  const std::vector<int32_t> &bankOffsets,
-                  const std::size_t from, const std::size_t to) {
+void MultiProcessEventLoader::GroupLoader<MultiProcessEventLoader::LoadType::producerConsumer>::loadFromGroup(
+    EventsListsShmemStorage &storage, const H5::Group &instrument, const std::vector<std::string> &bankNames,
+    const std::vector<int32_t> &bankOffsets, const std::size_t from, const std::size_t to) {
   constexpr std::size_t chunksPerBank{10};
-  const std::size_t chLen{
-      std::max<std::size_t>((to - from) / chunksPerBank, 1)};
+  const std::size_t chLen{std::max<std::size_t>((to - from) / chunksPerBank, 1)};
   auto bankSizes = EventLoader::readBankSizes(instrument, bankNames);
 
   struct Task {
@@ -231,10 +200,9 @@ void MultiProcessEventLoader::GroupLoader<
     IO::NXEventDataLoader<T> loader;
     decltype(loader.setBankIndex(0)) partitioner;
 
-    Task(const H5::Group &instrument, const std::vector<std::string> &bankNames,
-         unsigned bank, std::size_t cur, std::size_t cnt)
-        : bankIdx(bank), from(cur), eventId(cnt), eventTimeOffset(cnt),
-          loader(1, instrument, bankNames) {}
+    Task(const H5::Group &instrument, const std::vector<std::string> &bankNames, unsigned bank, std::size_t cur,
+         std::size_t cnt)
+        : bankIdx(bank), from(cur), eventId(cnt), eventTimeOffset(cnt), loader(1, instrument, bankNames) {}
   };
 
   std::vector<std::vector<TofEvent>> pixels(storage.pixelCount());
@@ -277,13 +245,10 @@ void MultiProcessEventLoader::GroupLoader<
   }
 
   auto loadToshmem = [&]() {
-    for (auto startPixel = pixNum.fetch_add(portion);
-         startPixel < storage.pixelCount();
+    for (auto startPixel = pixNum.fetch_add(portion); startPixel < storage.pixelCount();
          startPixel = pixNum.fetch_add(portion)) {
-      for (auto pixel = startPixel;
-           pixel < std::min(startPixel + portion, pixels.size()); ++pixel)
-        storage.appendEvent(0, pixel, pixels[pixel].begin(),
-                            pixels[pixel].end());
+      for (auto pixel = startPixel; pixel < std::min(startPixel + portion, pixels.size()); ++pixel)
+        storage.appendEvent(0, pixel, pixels[pixel].begin(), pixels[pixel].end());
     }
   };
 
@@ -292,13 +257,9 @@ void MultiProcessEventLoader::GroupLoader<
     try {
       for (auto &task : tasks) {
         task.partitioner = task.loader.setBankIndex(task.bankIdx);
-        task.loader.readEventTimeOffset(task.eventTimeOffset.data(), task.from,
-                                        task.eventTimeOffset.size());
-        task.loader.readEventID(task.eventId.data(), task.from,
-                                task.eventId.size());
-        detail::eventIdToGlobalSpectrumIndex(task.eventId.data(),
-                                             task.eventId.size(),
-                                             bankOffsets[task.bankIdx]);
+        task.loader.readEventTimeOffset(task.eventTimeOffset.data(), task.from, task.eventTimeOffset.size());
+        task.loader.readEventID(task.eventId.data(), task.from, task.eventId.size());
+        detail::eventIdToGlobalSpectrumIndex(task.eventId.data(), task.eventId.size(), bankOffsets[task.bankIdx]);
         ++taskCount;
       }
       ++finished;
@@ -325,9 +286,7 @@ void MultiProcessEventLoader::GroupLoader<
           task.partitioner->setEventOffset(task.from);
           for (unsigned i = 0; i < task.eventId.size(); ++i) {
             pixels.at(task.eventId[i])
-                .emplace_back(
-                    boost::numeric_cast<ToFType>(task.eventTimeOffset[i]),
-                    task.partitioner->next());
+                .emplace_back(boost::numeric_cast<ToFType>(task.eventTimeOffset[i]), task.partitioner->next());
           }
           task.eventId.resize(0);
           task.eventId.shrink_to_fit();
@@ -363,9 +322,8 @@ void MultiProcessEventLoader::GroupLoader<
     if (sorterException)
       std::rethrow_exception(sorterException);
   } catch (...) {
-    std::throw_with_nested(
-        std::runtime_error("Something wrong in multiprocess "
-                           "LoadFromGroup producerConsumer mode."));
+    std::throw_with_nested(std::runtime_error("Something wrong in multiprocess "
+                                              "LoadFromGroup producerConsumer mode."));
   }
 }
 

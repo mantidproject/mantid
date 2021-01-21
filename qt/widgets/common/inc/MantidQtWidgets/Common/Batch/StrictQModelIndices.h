@@ -35,64 +35,46 @@ private:
 };
 
 template <typename Derived>
-StrictQModelIndex<Derived>::StrictQModelIndex(QModelIndex const &index)
-    : m_untypedIndex(index) {}
+StrictQModelIndex<Derived>::StrictQModelIndex(QModelIndex const &index) : m_untypedIndex(index) {}
+
+template <typename Derived> QModelIndex StrictQModelIndex<Derived>::untyped() const { return m_untypedIndex; }
 
 template <typename Derived>
-QModelIndex StrictQModelIndex<Derived>::untyped() const {
-  return m_untypedIndex;
-}
-
-template <typename Derived>
-bool operator==(StrictQModelIndex<Derived> const &lhs,
-                StrictQModelIndex<Derived> const &rhs) {
+bool operator==(StrictQModelIndex<Derived> const &lhs, StrictQModelIndex<Derived> const &rhs) {
   return lhs.untyped() == rhs.untyped();
 }
 
-template <typename Derived> int StrictQModelIndex<Derived>::row() const {
-  return m_untypedIndex.row();
-}
+template <typename Derived> int StrictQModelIndex<Derived>::row() const { return m_untypedIndex.row(); }
 
-template <typename Derived> int StrictQModelIndex<Derived>::column() const {
-  return m_untypedIndex.column();
-}
+template <typename Derived> int StrictQModelIndex<Derived>::column() const { return m_untypedIndex.column(); }
 
-template <typename Derived> bool StrictQModelIndex<Derived>::isValid() const {
-  return m_untypedIndex.isValid();
-}
+template <typename Derived> bool StrictQModelIndex<Derived>::isValid() const { return m_untypedIndex.isValid(); }
 
 template <typename Derived> Derived StrictQModelIndex<Derived>::parent() const {
   return Derived(m_untypedIndex.parent());
 }
 
-template <typename Derived>
-Derived StrictQModelIndex<Derived>::sibling(int row, int column) const {
+template <typename Derived> Derived StrictQModelIndex<Derived>::sibling(int row, int column) const {
   return Derived(m_untypedIndex.sibling(row, column));
 }
 
-class EXPORT_OPT_MANTIDQT_COMMON QModelIndexForFilteredModel
-    : public StrictQModelIndex<QModelIndexForFilteredModel> {
+class EXPORT_OPT_MANTIDQT_COMMON QModelIndexForFilteredModel : public StrictQModelIndex<QModelIndexForFilteredModel> {
   using StrictQModelIndex<QModelIndexForFilteredModel>::StrictQModelIndex;
 };
 
-inline QModelIndexForFilteredModel
-fromFilteredModel(QModelIndex const &filteredModelIndex,
-                  QAbstractItemModel const &model) {
-  assertOrThrow(filteredModelIndex.model() == nullptr ||
-                    filteredModelIndex.model() == &model,
+inline QModelIndexForFilteredModel fromFilteredModel(QModelIndex const &filteredModelIndex,
+                                                     QAbstractItemModel const &model) {
+  assertOrThrow(filteredModelIndex.model() == nullptr || filteredModelIndex.model() == &model,
                 "assertFromFilteredModel: Index model assertion was not true.");
   return QModelIndexForFilteredModel(filteredModelIndex);
 }
 
-class EXPORT_OPT_MANTIDQT_COMMON QModelIndexForMainModel
-    : public StrictQModelIndex<QModelIndexForMainModel> {
+class EXPORT_OPT_MANTIDQT_COMMON QModelIndexForMainModel : public StrictQModelIndex<QModelIndexForMainModel> {
   using StrictQModelIndex<QModelIndexForMainModel>::StrictQModelIndex;
 };
 
-inline QModelIndexForMainModel fromMainModel(QModelIndex const &mainModelIndex,
-                                             QAbstractItemModel const &model) {
-  assertOrThrow(mainModelIndex.model() == nullptr ||
-                    mainModelIndex.model() == &model,
+inline QModelIndexForMainModel fromMainModel(QModelIndex const &mainModelIndex, QAbstractItemModel const &model) {
+  assertOrThrow(mainModelIndex.model() == nullptr || mainModelIndex.model() == &model,
                 "assertFromMainModel: Index model assertion was not true.");
   return QModelIndexForMainModel(mainModelIndex);
 }

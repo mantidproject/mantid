@@ -53,11 +53,9 @@ public:
     WSName = "savePHXTest_input";
     API::MatrixWorkspace_const_sptr input = makeWorkspace(WSName);
 
-    TS_ASSERT_THROWS_NOTHING(
-        phxSaver.setPropertyValue("InputWorkspace", WSName));
+    TS_ASSERT_THROWS_NOTHING(phxSaver.setPropertyValue("InputWorkspace", WSName));
     TestOutputFile = std::string("testPHX.phx");
-    TS_ASSERT_THROWS_NOTHING(
-        phxSaver.setPropertyValue("Filename", TestOutputFile));
+    TS_ASSERT_THROWS_NOTHING(phxSaver.setPropertyValue("Filename", TestOutputFile));
     TestOutputFile = phxSaver.getPropertyValue("Filename"); // get absolute path
 
     this->TestOutputParTableWSName = "TestOutputParWS";
@@ -117,18 +115,13 @@ public:
     column_name[4] = "azimuthal_width";
     column_name[5] = "detID";
 
-    API::Workspace_sptr sample =
-        API::AnalysisDataService::Instance().retrieve(TestOutputParTableWSName);
-    DataObjects::TableWorkspace_sptr spTW =
-        std::dynamic_pointer_cast<DataObjects::TableWorkspace>(sample);
-    TSM_ASSERT(
-        "should be able to retrieve sample workspace from the dataservice",
-        spTW);
+    API::Workspace_sptr sample = API::AnalysisDataService::Instance().retrieve(TestOutputParTableWSName);
+    DataObjects::TableWorkspace_sptr spTW = std::dynamic_pointer_cast<DataObjects::TableWorkspace>(sample);
+    TSM_ASSERT("should be able to retrieve sample workspace from the dataservice", spTW);
 
     std::ifstream testFile;
     testFile.open(TestOutputFile.c_str());
-    TSM_ASSERT(" Can not open test file produced by algorithm PHXSaver",
-               testFile.is_open());
+    TSM_ASSERT(" Can not open test file produced by algorithm PHXSaver", testFile.is_open());
     int ic(0);
     std::vector<float> sample_value(7, 0);
     while (ic < 5) {
@@ -136,8 +129,7 @@ public:
       std::getline(testFile, result);
       if (testFile.eof())
         break;
-      std::vector<float> test =
-          Kernel::VectorHelper::splitStringIntoVector<float>(result);
+      std::vector<float> test = Kernel::VectorHelper::splitStringIntoVector<float>(result);
 
       // get sample value[s];
       if (ic == 0) {
@@ -153,14 +145,11 @@ public:
       }
 
       for (size_t i = 0; i < test.size(); i++) {
-        TSM_ASSERT_DELTA("wrong sring: " + count[ic] + "  obtained from file;",
-                         sample_value[i], test[i], 1e-3);
+        TSM_ASSERT_DELTA("wrong sring: " + count[ic] + "  obtained from file;", sample_value[i], test[i], 1e-3);
       }
       ic++;
     }
-    TSM_ASSERT_EQUALS(
-        " Expecting 4 rows ascii file, but got different number of rows", 4,
-        ic);
+    TSM_ASSERT_EQUALS(" Expecting 4 rows ascii file, but got different number of rows", 4, ic);
     testFile.close();
   }
 
@@ -175,15 +164,12 @@ private:
   MatrixWorkspace_sptr makeWorkspace(const std::string &input) {
     // all the Y values in this new workspace are set to DEFAU_Y, which
     // currently = 2
-    MatrixWorkspace_sptr inputWS =
-        WorkspaceCreationHelper::create2DWorkspaceBinned(NHIST, 10, 1.0);
+    MatrixWorkspace_sptr inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(NHIST, 10, 1.0);
     return setUpWorkspace(input, inputWS);
   }
 
-  MatrixWorkspace_sptr setUpWorkspace(const std::string &input,
-                                      MatrixWorkspace_sptr inputWS) {
-    inputWS->getAxis(0)->unit() =
-        Mantid::Kernel::UnitFactory::Instance().create("DeltaE");
+  MatrixWorkspace_sptr setUpWorkspace(const std::string &input, MatrixWorkspace_sptr inputWS) {
+    inputWS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("DeltaE");
 
     // we do not need to deal with analysisi data service here in test to avoid
     // holding the workspace there after the test

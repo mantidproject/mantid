@@ -20,15 +20,12 @@ class SpectrumDetectorMappingTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static SpectrumDetectorMappingTest *createSuite() {
-    return new SpectrumDetectorMappingTest();
-  }
+  static SpectrumDetectorMappingTest *createSuite() { return new SpectrumDetectorMappingTest(); }
   static void destroySuite(SpectrumDetectorMappingTest *suite) { delete suite; }
 
   void test_workspace_constructor() {
     MatrixWorkspace_const_sptr ws;
-    TS_ASSERT_THROWS(SpectrumDetectorMapping map(ws),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(SpectrumDetectorMapping map(ws), const std::invalid_argument &);
   }
 
   void test_workspace_constructor_fills_map() {
@@ -51,8 +48,7 @@ public:
   }
 
   void test_vector_constructor_unequal_lengths() {
-    TS_ASSERT_THROWS(SpectrumDetectorMapping(std::vector<specnum_t>(2),
-                                             std::vector<detid_t>(1)),
+    TS_ASSERT_THROWS(SpectrumDetectorMapping(std::vector<specnum_t>(2), std::vector<detid_t>(1)),
                      const std::invalid_argument &);
   }
 
@@ -122,10 +118,8 @@ public:
   void test_array_constructor_null_inputs() {
     specnum_t specs[2];
     detid_t detids[2];
-    TS_ASSERT_THROWS(SpectrumDetectorMapping(nullptr, detids, 10),
-                     const std::invalid_argument &);
-    TS_ASSERT_THROWS(SpectrumDetectorMapping(specs, nullptr, 10),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(SpectrumDetectorMapping(nullptr, detids, 10), const std::invalid_argument &);
+    TS_ASSERT_THROWS(SpectrumDetectorMapping(specs, nullptr, 10), const std::invalid_argument &);
   }
 
   void test_array_constructor() {
@@ -155,11 +149,8 @@ public:
     SpectrumDetectorMapping map(ws);
     // The happy path is tested in the methods above. Just test invalid entry
     // here.
-    TS_ASSERT_THROWS(map.getDetectorIDsForSpectrumNo(1),
-                     const std::out_of_range &);
-    TS_ASSERT_THROWS(map.getDetectorIDsForSpectrumNo(0),
-                     const std::out_of_range &);
-    TS_ASSERT_THROWS(map.getDetectorIDsForSpectrumNo(-1),
-                     const std::out_of_range &);
+    TS_ASSERT_THROWS(map.getDetectorIDsForSpectrumNo(1), const std::out_of_range &);
+    TS_ASSERT_THROWS(map.getDetectorIDsForSpectrumNo(0), const std::out_of_range &);
+    TS_ASSERT_THROWS(map.getDetectorIDsForSpectrumNo(-1), const std::out_of_range &);
   }
 };

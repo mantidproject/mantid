@@ -9,8 +9,7 @@
 #include <QHeaderView>
 #include <QTableView>
 
-MantidMatrixDxExtensionHandler::MantidMatrixDxExtensionHandler()
-    : m_type(MantidMatrixModel::Type::DX) {}
+MantidMatrixDxExtensionHandler::MantidMatrixDxExtensionHandler() : m_type(MantidMatrixModel::Type::DX) {}
 
 MantidMatrixDxExtensionHandler::~MantidMatrixDxExtensionHandler() {}
 
@@ -20,8 +19,8 @@ MantidMatrixDxExtensionHandler::~MantidMatrixDxExtensionHandler() {}
  * @param format: the format
  * @param precision: the precision
  */
-void MantidMatrixDxExtensionHandler::setNumberFormat(
-    MantidMatrixTabExtension &extension, const QChar &format, int precision) {
+void MantidMatrixDxExtensionHandler::setNumberFormat(MantidMatrixTabExtension &extension, const QChar &format,
+                                                     int precision) {
   if (extension.type == m_type) {
     extension.model->setFormat(format, precision);
   } else {
@@ -35,8 +34,8 @@ void MantidMatrixDxExtensionHandler::setNumberFormat(
  * @param format: the format
  * @param precision: the precision
  */
-void MantidMatrixDxExtensionHandler::recordFormat(
-    MantidMatrixTabExtension &extension, const QChar &format, int precision) {
+void MantidMatrixDxExtensionHandler::recordFormat(MantidMatrixTabExtension &extension, const QChar &format,
+                                                  int precision) {
   if (extension.type == m_type) {
     MantidPreferences::MantidMatrixNumberFormatDx(format);
     MantidPreferences::MantidMatrixNumberPrecisionDx(precision);
@@ -50,8 +49,7 @@ void MantidMatrixDxExtensionHandler::recordFormat(
  * @param extension: the extension
  * @returns a format character
  */
-QChar MantidMatrixDxExtensionHandler::getFormat(
-    MantidMatrixTabExtension &extension) {
+QChar MantidMatrixDxExtensionHandler::getFormat(MantidMatrixTabExtension &extension) {
   if (extension.type == m_type) {
     return MantidPreferences::MantidMatrixNumberFormatDx();
   } else {
@@ -64,8 +62,7 @@ QChar MantidMatrixDxExtensionHandler::getFormat(
  * @param extension: the extension
  * @returns the precision
  */
-int MantidMatrixDxExtensionHandler::getPrecision(
-    MantidMatrixTabExtension &extension) {
+int MantidMatrixDxExtensionHandler::getPrecision(MantidMatrixTabExtension &extension) {
   if (extension.type == m_type) {
     return MantidPreferences::MantidMatrixNumberPrecisionDx();
   } else {
@@ -79,8 +76,8 @@ int MantidMatrixDxExtensionHandler::getPrecision(
  * @param width: the width
  * @param numberOfColumns: the number of columns
  */
-void MantidMatrixDxExtensionHandler::setColumnWidth(
-    MantidMatrixTabExtension &extension, int width, int numberOfColumns) {
+void MantidMatrixDxExtensionHandler::setColumnWidth(MantidMatrixTabExtension &extension, int width,
+                                                    int numberOfColumns) {
   if (extension.type == m_type) {
     auto &table_view = extension.tableView;
     table_view->horizontalHeader()->setDefaultSectionSize(width);
@@ -97,8 +94,7 @@ void MantidMatrixDxExtensionHandler::setColumnWidth(
  * @param extension: the extension
  * @returns the column width
  */
-int MantidMatrixDxExtensionHandler::getColumnWidth(
-    MantidMatrixTabExtension &extension) {
+int MantidMatrixDxExtensionHandler::getColumnWidth(MantidMatrixTabExtension &extension) {
   if (extension.type == m_type) {
     auto &table_view = extension.tableView;
     return table_view->columnWidth(0);
@@ -112,8 +108,7 @@ int MantidMatrixDxExtensionHandler::getColumnWidth(
  * @param extension: the extension
  * @returns a pointer to the table view
  */
-QTableView *MantidMatrixDxExtensionHandler::getTableView(
-    MantidMatrixTabExtension &extension) {
+QTableView *MantidMatrixDxExtensionHandler::getTableView(MantidMatrixTabExtension &extension) {
   if (extension.type == m_type) {
     return extension.tableView.get();
   } else {
@@ -126,8 +121,7 @@ QTableView *MantidMatrixDxExtensionHandler::getTableView(
  * @param extension: the extension
  * @param width: the width
  */
-void MantidMatrixDxExtensionHandler::setColumnWidthPreference(
-    MantidMatrixTabExtension &extension, int width) {
+void MantidMatrixDxExtensionHandler::setColumnWidthPreference(MantidMatrixTabExtension &extension, int width) {
   if (extension.type == m_type) {
     MantidPreferences::MantidMatrixColumnWidthDx(width);
   } else {
@@ -138,8 +132,7 @@ void MantidMatrixDxExtensionHandler::setColumnWidthPreference(
 /**
  * Get the column width preference
  */
-int MantidMatrixDxExtensionHandler::getColumnWidthPreference(
-    MantidMatrixTabExtension &extension) {
+int MantidMatrixDxExtensionHandler::getColumnWidthPreference(MantidMatrixTabExtension &extension) {
   if (extension.type == m_type) {
     return MantidPreferences::MantidMatrixColumnWidthDx();
   } else {

@@ -78,9 +78,7 @@ public:
     return {"AlignDetectors", "AlignAndFocusPowder", "LoadCalFile"};
   }
   /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override {
-    return "Diffraction\\Focussing";
-  }
+  const std::string category() const override { return "Diffraction\\Focussing"; }
 
 private:
   // Overridden Algorithm methods

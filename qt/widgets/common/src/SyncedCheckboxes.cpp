@@ -17,8 +17,7 @@ namespace API {
  * @param button :: button to link
  * @param checked :: state (checked or not) that they start in
  */
-SyncedCheckboxes::SyncedCheckboxes(QAction *menu, QAbstractButton *button,
-                                   bool checked)
+SyncedCheckboxes::SyncedCheckboxes(QAction *menu, QAbstractButton *button, bool checked)
     : m_menu(menu), m_button(button) {
   m_menu->setCheckable(true);
   m_button->setCheckable(true);

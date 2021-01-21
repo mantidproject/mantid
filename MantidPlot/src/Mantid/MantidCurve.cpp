@@ -25,8 +25,7 @@ Constructor
 @param allError : flag indicating that all error bars should be plotted.
 */
 MantidCurve::MantidCurve(const QString &wsName, bool err, bool allError)
-    : PlotCurve(wsName), WorkspaceObserver(), m_drawErrorBars(err),
-      m_drawAllErrorBars(allError),
+    : PlotCurve(wsName), WorkspaceObserver(), m_drawErrorBars(err), m_drawAllErrorBars(allError),
       m_errorSettings(new ErrorBarSettings(this)) {}
 
 /**
@@ -34,8 +33,8 @@ Constructor
 @param err : flag indicating that errors should be used.
 */
 MantidCurve::MantidCurve(bool err)
-    : PlotCurve(), WorkspaceObserver(), m_drawErrorBars(err),
-      m_drawAllErrorBars(false), m_errorSettings(new ErrorBarSettings(this)) {}
+    : PlotCurve(), WorkspaceObserver(), m_drawErrorBars(err), m_drawAllErrorBars(false),
+      m_errorSettings(new ErrorBarSettings(this)) {}
 
 /**
 Helper method to apply a chosen style.
@@ -43,17 +42,14 @@ Helper method to apply a chosen style.
 @param ml : pointer to multilayer object
 @param lineWidth: ref to linewidth, which may be internally adjusted
 */
-void MantidCurve::applyStyleChoice(GraphOptions::CurveType style,
-                                   MultiLayer *ml, int &lineWidth) {
+void MantidCurve::applyStyleChoice(GraphOptions::CurveType style, MultiLayer *ml, int &lineWidth) {
 
   if (style == GraphOptions::Unspecified)
-    style = static_cast<GraphOptions::CurveType>(
-        ml->applicationWindow()->defaultCurveStyle);
+    style = static_cast<GraphOptions::CurveType>(ml->applicationWindow()->defaultCurveStyle);
 
   QwtPlotCurve::CurveStyle qwtStyle;
   const int symbolSize = ml->applicationWindow()->defaultSymbolSize;
-  const QwtSymbol symbol(QwtSymbol::Ellipse, QBrush(Qt::black), QPen(),
-                         QSize(symbolSize, symbolSize));
+  const QwtSymbol symbol(QwtSymbol::Ellipse, QBrush(Qt::black), QPen(), QSize(symbolSize, symbolSize));
   switch (style) {
   case GraphOptions::Line:
     qwtStyle = QwtPlotCurve::Lines;
@@ -74,8 +70,7 @@ void MantidCurve::applyStyleChoice(GraphOptions::CurveType style,
     break;
   }
   setStyle(qwtStyle);
-  lineWidth =
-      static_cast<int>(floor(ml->applicationWindow()->defaultCurveLineWidth));
+  lineWidth = static_cast<int>(floor(ml->applicationWindow()->defaultCurveLineWidth));
 }
 
 /**
@@ -141,8 +136,7 @@ QString MantidCurve::createCopyName(const QString &curveName) {
   return curveName.mid(0, i) + " (copy" + QString::number(k + 1) + ")";
 }
 
-void MantidCurve::doDraw(QPainter *p, const QwtScaleMap &xMap,
-                         const QwtScaleMap &yMap, const QRect &,
+void MantidCurve::doDraw(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap, const QRect &,
                          MantidQwtWorkspaceData const *const d) const {
   int sh = 0;
   if (symbol().style() != QwtSymbol::NoSymbol) {
@@ -163,8 +157,7 @@ void MantidCurve::doDraw(QPainter *p, const QwtScaleMap &xMap,
   const int skipPoints = skipSymbolsCount();
   for (int i = 0; i < static_cast<int>(d->esize()); i += skipPoints) {
     const int xi = xMap.transform(d->ex(i));
-    if (m_drawAllErrorBars ||
-        (xi > x1 && xi < x2 && (i == 0 || abs(xi - xi0) > dx2))) {
+    if (m_drawAllErrorBars || (xi > x1 && xi < x2 && (i == 0 || abs(xi - xi0) > dx2))) {
       const double Y = y(i);
       const double E = d->e(i);
       const int yi = yMap.transform(Y);

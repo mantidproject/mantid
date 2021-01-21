@@ -49,9 +49,7 @@ compiling, linking, and/or using OpenSSL is allowed.
 /* SOAP Header: */
 struct SOAP_ENV__Header {
 public:
-  int soap_type() const {
-    return 7;
-  } /* = unique id SOAP_TYPE_SOAP_ENV__Header */
+  int soap_type() const { return 7; } /* = unique id SOAP_TYPE_SOAP_ENV__Header */
 #ifdef WITH_NOEMPTYSTRUCT
 private:
   char dummy; /* dummy member to enable compilation */
@@ -68,9 +66,8 @@ private:
 /* SOAP Fault Code: */
 struct SOAP_ENV__Code {
 public:
-  char *SOAP_ENV__Value; /* optional element of type xsd:QName */
-  struct SOAP_ENV__Code
-      *SOAP_ENV__Subcode; /* optional element of type SOAP-ENV:Code */
+  char *SOAP_ENV__Value;                    /* optional element of type xsd:QName */
+  struct SOAP_ENV__Code *SOAP_ENV__Subcode; /* optional element of type SOAP-ENV:Code */
 public:
   int soap_type() const { return 8; } /* = unique id SOAP_TYPE_SOAP_ENV__Code */
 };
@@ -89,9 +86,7 @@ public:
   int __type;  /* any type of element <fault> (defined below) */
   void *fault; /* transient */
 public:
-  int soap_type() const {
-    return 10;
-  } /* = unique id SOAP_TYPE_SOAP_ENV__Detail */
+  int soap_type() const { return 10; } /* = unique id SOAP_TYPE_SOAP_ENV__Detail */
 };
 #endif
 
@@ -106,9 +101,7 @@ struct SOAP_ENV__Reason {
 public:
   char *SOAP_ENV__Text; /* optional element of type xsd:string */
 public:
-  int soap_type() const {
-    return 13;
-  } /* = unique id SOAP_TYPE_SOAP_ENV__Reason */
+  int soap_type() const { return 13; } /* = unique id SOAP_TYPE_SOAP_ENV__Reason */
 };
 #endif
 
@@ -121,23 +114,17 @@ public:
 /* SOAP Fault: */
 struct SOAP_ENV__Fault {
 public:
-  char *faultcode;   /* optional element of type xsd:QName */
-  char *faultstring; /* optional element of type xsd:string */
-  char *faultactor;  /* optional element of type xsd:string */
-  struct SOAP_ENV__Detail
-      *detail; /* optional element of type SOAP-ENV:Detail */
-  struct SOAP_ENV__Code
-      *SOAP_ENV__Code; /* optional element of type SOAP-ENV:Code */
-  struct SOAP_ENV__Reason
-      *SOAP_ENV__Reason; /* optional element of type SOAP-ENV:Reason */
-  char *SOAP_ENV__Node;  /* optional element of type xsd:string */
-  char *SOAP_ENV__Role;  /* optional element of type xsd:string */
-  struct SOAP_ENV__Detail
-      *SOAP_ENV__Detail; /* optional element of type SOAP-ENV:Detail */
+  char *faultcode;                           /* optional element of type xsd:QName */
+  char *faultstring;                         /* optional element of type xsd:string */
+  char *faultactor;                          /* optional element of type xsd:string */
+  struct SOAP_ENV__Detail *detail;           /* optional element of type SOAP-ENV:Detail */
+  struct SOAP_ENV__Code *SOAP_ENV__Code;     /* optional element of type SOAP-ENV:Code */
+  struct SOAP_ENV__Reason *SOAP_ENV__Reason; /* optional element of type SOAP-ENV:Reason */
+  char *SOAP_ENV__Node;                      /* optional element of type xsd:string */
+  char *SOAP_ENV__Role;                      /* optional element of type xsd:string */
+  struct SOAP_ENV__Detail *SOAP_ENV__Detail; /* optional element of type SOAP-ENV:Detail */
 public:
-  int soap_type() const {
-    return 14;
-  } /* = unique id SOAP_TYPE_SOAP_ENV__Fault */
+  int soap_type() const { return 14; } /* = unique id SOAP_TYPE_SOAP_ENV__Fault */
 };
 #endif
 

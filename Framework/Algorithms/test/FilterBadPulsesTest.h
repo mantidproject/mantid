@@ -21,9 +21,7 @@ class FilterBadPulsesTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static FilterBadPulsesTest *createSuite() {
-    return new FilterBadPulsesTest();
-  }
+  static FilterBadPulsesTest *createSuite() { return new FilterBadPulsesTest(); }
   static void destroySuite(FilterBadPulsesTest *suite) { delete suite; }
 
   FilterBadPulsesTest() : inputWS("testInput"), outputWS("testOutput") {}
@@ -34,8 +32,7 @@ public:
   }
 
   void setUp_Event() {
-    IAlgorithm_sptr loader =
-        AlgorithmManager::Instance().create("LoadEventNexus");
+    IAlgorithm_sptr loader = AlgorithmManager::Instance().create("LoadEventNexus");
     loader->initialize();
     loader->setPropertyValue("Filename", "CNCS_7860_event.nxs");
     loader->setPropertyValue("OutputWorkspace", inputWS);
@@ -60,8 +57,7 @@ public:
 
     // Retrieve Workspace changed
     EventWorkspace_sptr outWS;
-    outWS =
-        AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outputWS);
+    outWS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outputWS);
     TS_ASSERT(outWS); // workspace is loaded
 
     // Things that haven't changed

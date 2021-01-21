@@ -22,9 +22,7 @@ public:
   static BraggScattererTest *createSuite() { return new BraggScattererTest(); }
   static void destroySuite(BraggScattererTest *suite) { delete suite; }
 
-  void testConstruction() {
-    TS_ASSERT_THROWS_NOTHING(MockBraggScatterer scatterer);
-  }
+  void testConstruction() { TS_ASSERT_THROWS_NOTHING(MockBraggScatterer scatterer); }
 
   void testInitialization() {
     BraggScatterer_sptr scatterer = getDefaultScatterer();
@@ -35,9 +33,7 @@ public:
   }
 
 private:
-  BraggScatterer_sptr getDefaultScatterer() {
-    return std::make_shared<MockBraggScatterer>();
-  }
+  BraggScatterer_sptr getDefaultScatterer() { return std::make_shared<MockBraggScatterer>(); }
 
   BraggScatterer_sptr getInitializedScatterer() {
     BraggScatterer_sptr raw = getDefaultScatterer();

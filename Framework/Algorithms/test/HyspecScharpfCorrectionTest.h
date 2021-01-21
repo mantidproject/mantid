@@ -17,9 +17,7 @@ class HyspecScharpfCorrectionTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static HyspecScharpfCorrectionTest *createSuite() {
-    return new HyspecScharpfCorrectionTest();
-  }
+  static HyspecScharpfCorrectionTest *createSuite() { return new HyspecScharpfCorrectionTest(); }
   static void destroySuite(HyspecScharpfCorrectionTest *suite) { delete suite; }
 
   void test_Init() {
@@ -31,8 +29,7 @@ public:
   void test_exec() {
     // Create test input
     std::vector<double> L2 = {1.0}, polar = {M_PI_4}, azimuthal = {0.};
-    auto inputWS = WorkspaceCreationHelper::createProcessedInelasticWS(
-        L2, polar, azimuthal, 30, -10, 20, 17.1);
+    auto inputWS = WorkspaceCreationHelper::createProcessedInelasticWS(L2, polar, azimuthal, 30, -10, 20, 17.1);
     HyspecScharpfCorrection alg;
 
     alg.setChild(true);
@@ -40,15 +37,13 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(
-        "OutputWorkspace", "HyspecScharpfCorrectionOutput"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "HyspecScharpfCorrectionOutput"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("PolarizationAngle", -11.0));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
     // Retrieve the workspace from the algorithm.
-    Mantid::API::MatrixWorkspace_sptr outputWS =
-        alg.getProperty("OutputWorkspace");
+    Mantid::API::MatrixWorkspace_sptr outputWS = alg.getProperty("OutputWorkspace");
     TS_ASSERT(outputWS);
     auto histo = outputWS->histogram(0);
     auto x = histo.points();
@@ -64,9 +59,7 @@ public:
     }
     // test one value, say DeltaE=6.5
     double kikf = std::sqrt(1. - 6.5 / 17.1);
-    auto alpha =
-        std::atan2(-kikf * std::sin(M_PI_4), 1. - kikf * std::cos(M_PI_4)) +
-        11. * M_PI / 180.;
+    auto alpha = std::atan2(-kikf * std::sin(M_PI_4), 1. - kikf * std::cos(M_PI_4)) + 11. * M_PI / 180.;
     TS_ASSERT_DELTA(x[16], 6.5, 1e-10);
     // note that it does the correction factor as a float
     // as it is a common code with events

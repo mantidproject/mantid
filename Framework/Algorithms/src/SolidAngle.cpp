@@ -52,8 +52,7 @@ constexpr double MM_TO_METERS = 1. / 1000.;
  */
 struct AlphaAngleCalculator {
   AlphaAngleCalculator(const DetectorInfo &detectorInfo)
-      : m_detectorInfo(detectorInfo),
-        m_samplePos(detectorInfo.samplePosition()) {}
+      : m_detectorInfo(detectorInfo), m_samplePos(detectorInfo.samplePosition()) {}
   double getAlpha(size_t index) const {
     const auto sampleDetVec = m_detectorInfo.position(index) - m_samplePos;
     auto inPlane = sampleDetVec;
@@ -82,18 +81,14 @@ struct AlphaAngleHorizontal : public AlphaAngleCalculator {
  *Creates the solid angle calculator based on the selected method.
  */
 struct SolidAngleCalculator {
-  SolidAngleCalculator(const ComponentInfo &componentInfo,
-                       const DetectorInfo &detectorInfo,
-                       const std::string &method, const double pixelArea)
-      : m_componentInfo(componentInfo), m_detectorInfo(detectorInfo),
-        m_pixelArea(pixelArea), m_samplePos(detectorInfo.samplePosition()),
-        m_beamLine(m_samplePos - detectorInfo.sourcePosition()) {
+  SolidAngleCalculator(const ComponentInfo &componentInfo, const DetectorInfo &detectorInfo, const std::string &method,
+                       const double pixelArea)
+      : m_componentInfo(componentInfo), m_detectorInfo(detectorInfo), m_pixelArea(pixelArea),
+        m_samplePos(detectorInfo.samplePosition()), m_beamLine(m_samplePos - detectorInfo.sourcePosition()) {
     if (method.find("Vertical") != std::string::npos) {
-      m_alphaAngleCalculator =
-          std::make_unique<AlphaAngleVertical>(detectorInfo);
+      m_alphaAngleCalculator = std::make_unique<AlphaAngleVertical>(detectorInfo);
     } else if (method.find("Horizontal") != std::string::npos) {
-      m_alphaAngleCalculator =
-          std::make_unique<AlphaAngleHorizontal>(detectorInfo);
+      m_alphaAngleCalculator = std::make_unique<AlphaAngleHorizontal>(detectorInfo);
     }
   }
   virtual double solidAngle(size_t index) const = 0;
@@ -110,9 +105,7 @@ protected:
 
 struct GenericShape : public SolidAngleCalculator {
   using SolidAngleCalculator::SolidAngleCalculator;
-  double solidAngle(size_t index) const override {
-    return m_detectorInfo.detector(index).solidAngle(m_samplePos);
-  }
+  double solidAngle(size_t index) const override { return m_detectorInfo.detector(index).solidAngle(m_samplePos); }
 };
 
 struct Rectangle : public SolidAngleCalculator {
@@ -122,8 +115,7 @@ struct Rectangle : public SolidAngleCalculator {
     const double cosTheta = sampleDetVec.cosAngle(m_beamLine);
     const double l2 = m_detectorInfo.l2(index);
     const V3D scaleFactor = m_componentInfo.scaleFactor(index);
-    const double scaledPixelArea =
-        m_pixelArea * scaleFactor[0] * scaleFactor[1];
+    const double scaledPixelArea = m_pixelArea * scaleFactor[0] * scaleFactor[1];
     return scaledPixelArea * cosTheta / (l2 * l2);
   }
 };
@@ -134,8 +126,7 @@ struct Tube : public SolidAngleCalculator {
     const double cosAlpha = m_alphaAngleCalculator->getAlpha(index);
     const double l2 = m_detectorInfo.l2(index);
     const V3D scaleFactor = m_componentInfo.scaleFactor(index);
-    const double scaledPixelArea =
-        m_pixelArea * scaleFactor[0] * scaleFactor[1];
+    const double scaledPixelArea = m_pixelArea * scaleFactor[0] * scaleFactor[1];
     return scaledPixelArea * cosAlpha / (l2 * l2);
   }
 };
@@ -148,10 +139,8 @@ struct Wing : public SolidAngleCalculator {
     const double cosAlpha = m_alphaAngleCalculator->getAlpha(index);
     const double l2 = m_detectorInfo.l2(index);
     const V3D scaleFactor = m_componentInfo.scaleFactor(index);
-    const double scaledPixelArea =
-        m_pixelArea * scaleFactor[0] * scaleFactor[1];
-    return scaledPixelArea * cosAlpha * cosAlpha * cosAlpha /
-           (l2 * l2 * cosTheta * cosTheta);
+    const double scaledPixelArea = m_pixelArea * scaleFactor[0] * scaleFactor[1];
+    return scaledPixelArea * cosAlpha * cosAlpha * cosAlpha / (l2 * l2 * cosTheta * cosTheta);
   }
 };
 
@@ -159,9 +148,8 @@ struct Wing : public SolidAngleCalculator {
 
 /// Initialisation method
 void SolidAngle::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input,
-                      std::make_shared<InstrumentValidator>()),
+  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>("InputWorkspace", "", Direction::Input,
+                                                                            std::make_shared<InstrumentValidator>()),
                   "This workspace is used to identify the instrument to use "
                   "and also which\n"
                   "spectra to create a solid angle for. If the Max and Min "
@@ -169,8 +157,7 @@ void SolidAngle::init() {
                   "not provided one solid angle will be created for each "
                   "spectra in the input\n"
                   "workspace");
-  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "The name of the workspace to be created as the output of "
                   "the algorithm.  A workspace of this name will be created "
                   "and stored in the Analysis Data Service.");
@@ -186,11 +173,9 @@ void SolidAngle::init() {
                   "found (default: the\n"
                   "last spectrum in the workspace)");
 
-  const std::vector<std::string> methods{GENERIC_SHAPE, RECTANGLE,
-                                         VERTICAL_TUBE, HORIZONTAL_TUBE,
-                                         VERTICAL_WING, HORIZONTAL_WING};
-  declareProperty("Method", GENERIC_SHAPE,
-                  std::make_shared<StringListValidator>(methods),
+  const std::vector<std::string> methods{GENERIC_SHAPE,   RECTANGLE,     VERTICAL_TUBE,
+                                         HORIZONTAL_TUBE, VERTICAL_WING, HORIZONTAL_WING};
+  declareProperty("Method", GENERIC_SHAPE, std::make_shared<StringListValidator>(methods),
                   "Select the method to calculate the Solid Angle.");
 }
 
@@ -216,8 +201,7 @@ void SolidAngle::exec() {
     m_MaxSpec = numberOfSpectra - 1;
   }
 
-  MatrixWorkspace_sptr outputWS =
-      WorkspaceFactory::Instance().create(inputWS, numberOfSpectra, 2, 1);
+  MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(inputWS, numberOfSpectra, 2, 1);
   // The result of this will be a distribution
   outputWS->setDistribution(true);
   outputWS->setYUnit("");
@@ -236,34 +220,26 @@ void SolidAngle::exec() {
   using namespace SolidAngleHelpers;
   if (method != GENERIC_SHAPE) {
     const auto instrument = inputWS->getInstrument();
-    if (instrument->hasParameter("x-pixel-size") &&
-        instrument->hasParameter("y-pixel-size")) {
-      const double pixelSizeX =
-          instrument->getNumberParameter("x-pixel-size")[0] * MM_TO_METERS;
-      const double pixelSizeY =
-          instrument->getNumberParameter("y-pixel-size")[0] * MM_TO_METERS;
+    if (instrument->hasParameter("x-pixel-size") && instrument->hasParameter("y-pixel-size")) {
+      const double pixelSizeX = instrument->getNumberParameter("x-pixel-size")[0] * MM_TO_METERS;
+      const double pixelSizeY = instrument->getNumberParameter("y-pixel-size")[0] * MM_TO_METERS;
       pixelArea = pixelSizeX * pixelSizeY; // l2 is retrieved per pixel
     } else {
       // TODO: try to get the pixel sizes from bounding box
-      throw std::runtime_error(
-          "Missing necessary instrument parameters for non generic shape: "
-          "x-pixel-size and y-pixel-size [in mm].");
+      throw std::runtime_error("Missing necessary instrument parameters for non generic shape: "
+                               "x-pixel-size and y-pixel-size [in mm].");
     }
   }
 
   std::unique_ptr<SolidAngleCalculator> solidAngleCalculator;
   if (method == GENERIC_SHAPE) {
-    solidAngleCalculator = std::make_unique<GenericShape>(
-        componentInfo, detectorInfo, method, pixelArea);
+    solidAngleCalculator = std::make_unique<GenericShape>(componentInfo, detectorInfo, method, pixelArea);
   } else if (method == RECTANGLE) {
-    solidAngleCalculator = std::make_unique<Rectangle>(
-        componentInfo, detectorInfo, method, pixelArea);
+    solidAngleCalculator = std::make_unique<Rectangle>(componentInfo, detectorInfo, method, pixelArea);
   } else if (method == VERTICAL_TUBE || method == HORIZONTAL_TUBE) {
-    solidAngleCalculator =
-        std::make_unique<Tube>(componentInfo, detectorInfo, method, pixelArea);
+    solidAngleCalculator = std::make_unique<Tube>(componentInfo, detectorInfo, method, pixelArea);
   } else if (method == VERTICAL_WING || method == HORIZONTAL_WING) {
-    solidAngleCalculator =
-        std::make_unique<Wing>(componentInfo, detectorInfo, method, pixelArea);
+    solidAngleCalculator = std::make_unique<Wing>(componentInfo, detectorInfo, method, pixelArea);
   }
 
   std::atomic<size_t> failCount{0};
@@ -289,8 +265,7 @@ void SolidAngle::exec() {
     PARALLEL_END_INTERUPT_REGION
   } // loop over spectra
   PARALLEL_CHECK_INTERUPT_REGION
-  g_log.warning() << "min max total" << m_MinSpec << " " << m_MaxSpec << " "
-                  << numberOfSpectra;
+  g_log.warning() << "min max total" << m_MinSpec << " " << m_MaxSpec << " " << numberOfSpectra;
 
   auto &outputSpectrumInfo = outputWS->mutableSpectrumInfo();
   // Loop over the histograms (detector spectra)
@@ -320,8 +295,7 @@ void SolidAngle::exec() {
  * SolidAngle::initSpectrum Sets the default value for the spectra for which
  * solid angle is not calculated.
  */
-void SolidAngle::initSpectrum(const MatrixWorkspace &inputWS,
-                              MatrixWorkspace &outputWS, const size_t wsIndex) {
+void SolidAngle::initSpectrum(const MatrixWorkspace &inputWS, MatrixWorkspace &outputWS, const size_t wsIndex) {
   outputWS.mutableX(wsIndex)[0] = inputWS.x(wsIndex).front();
   outputWS.mutableX(wsIndex)[1] = inputWS.x(wsIndex).back();
   outputWS.mutableE(wsIndex) = 0.;

@@ -23,16 +23,10 @@ class PoldiSpectrumLinearBackgroundTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static PoldiSpectrumLinearBackgroundTest *createSuite() {
-    return new PoldiSpectrumLinearBackgroundTest();
-  }
-  static void destroySuite(PoldiSpectrumLinearBackgroundTest *suite) {
-    delete suite;
-  }
+  static PoldiSpectrumLinearBackgroundTest *createSuite() { return new PoldiSpectrumLinearBackgroundTest(); }
+  static void destroySuite(PoldiSpectrumLinearBackgroundTest *suite) { delete suite; }
 
-  PoldiSpectrumLinearBackgroundTest() : m_xValues(20, 1.0) {
-    FrameworkManager::Instance();
-  }
+  PoldiSpectrumLinearBackgroundTest() : m_xValues(20, 1.0) { FrameworkManager::Instance(); }
 
   void testParameterCount() {
     PoldiSpectrumLinearBackground function;
@@ -42,8 +36,7 @@ public:
   }
 
   void testConstruction() {
-    IFunction_sptr function = FunctionFactory::Instance().createFunction(
-        "PoldiSpectrumLinearBackground");
+    IFunction_sptr function = FunctionFactory::Instance().createFunction("PoldiSpectrumLinearBackground");
 
     TS_ASSERT(function);
     TS_ASSERT_EQUALS(function->name(), "PoldiSpectrumLinearBackground");
@@ -55,8 +48,7 @@ public:
   }
 
   void testSetWorkspace() {
-    IFunction_sptr function = FunctionFactory::Instance().createFunction(
-        "PoldiSpectrumLinearBackground");
+    IFunction_sptr function = FunctionFactory::Instance().createFunction("PoldiSpectrumLinearBackground");
     std::shared_ptr<PoldiSpectrumLinearBackground> castedFunction =
         std::dynamic_pointer_cast<PoldiSpectrumLinearBackground>(function);
 
@@ -69,15 +61,13 @@ public:
     TS_ASSERT_EQUALS(castedFunction->getTimeBinCount(), 0);
 
     // valid workspace with 10 bins
-    MatrixWorkspace_sptr ws =
-        WorkspaceCreationHelper::create2DWorkspace123(1, 10);
+    MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspace123(1, 10);
     TS_ASSERT_THROWS_NOTHING(castedFunction->setWorkspace(ws));
     TS_ASSERT_EQUALS(castedFunction->getTimeBinCount(), 10);
   }
 
   void testFunctionValue() {
-    IFunction_sptr function = FunctionFactory::Instance().createFunction(
-        "PoldiSpectrumLinearBackground");
+    IFunction_sptr function = FunctionFactory::Instance().createFunction("PoldiSpectrumLinearBackground");
     function->setParameter("A1", 2.0);
 
     FunctionDomain1DSpectrum domainOne(1, m_xValues);
@@ -95,13 +85,11 @@ public:
   }
 
   void testJacobian() {
-    IFunction_sptr function = FunctionFactory::Instance().createFunction(
-        "PoldiSpectrumLinearBackground");
+    IFunction_sptr function = FunctionFactory::Instance().createFunction("PoldiSpectrumLinearBackground");
     function->setParameter("A1", 2.0);
 
     FunctionDomain1DSpectrum domainOne(1, m_xValues);
-    Mantid::CurveFitting::Jacobian jacobian(domainOne.size(),
-                                            function->nParams());
+    Mantid::CurveFitting::Jacobian jacobian(domainOne.size(), function->nParams());
     function->functionDeriv(domainOne, jacobian);
 
     for (size_t i = 0; i < domainOne.size(); ++i) {
@@ -119,15 +107,12 @@ public:
   void testFit() {
     /* Luckily, these are exactly the data described by this function,
      * using A1 = 1.0, so this is used as a test */
-    MatrixWorkspace_sptr ws =
-        WorkspaceCreationHelper::create2DWorkspaceWhereYIsWorkspaceIndex(20, 2);
+    MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspaceWhereYIsWorkspaceIndex(20, 2);
 
-    IFunction_sptr function = FunctionFactory::Instance().createFunction(
-        "PoldiSpectrumLinearBackground");
+    IFunction_sptr function = FunctionFactory::Instance().createFunction("PoldiSpectrumLinearBackground");
     function->setParameter("A1", 2.0);
 
-    IAlgorithm_sptr fit =
-        Mantid::API::AlgorithmManager::Instance().create("Fit");
+    IAlgorithm_sptr fit = Mantid::API::AlgorithmManager::Instance().create("Fit");
     fit->initialize();
 
     fit->setProperty("Function", function);

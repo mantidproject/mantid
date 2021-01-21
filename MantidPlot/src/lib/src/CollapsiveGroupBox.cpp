@@ -17,8 +17,7 @@
  ***************************************************************************/
 #include "CollapsiveGroupBox.h"
 
-CollapsiveGroupBox::CollapsiveGroupBox(const QString &title, QWidget *parent)
-    : QGroupBox(title, parent) {
+CollapsiveGroupBox::CollapsiveGroupBox(const QString &title, QWidget *parent) : QGroupBox(title, parent) {
   setCheckable(true);
   connect(this, SIGNAL(toggled(bool)), this, SLOT(setExpanded(bool)));
 }

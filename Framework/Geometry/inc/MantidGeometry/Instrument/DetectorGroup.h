@@ -33,15 +33,12 @@ public:
   void addDetector(const IDetector_const_sptr &det);
 
   // IDetector methods
-  IDetector *cloneParameterized(const ParameterMap *) const override {
-    return nullptr;
-  }
+  IDetector *cloneParameterized(const ParameterMap *) const override { return nullptr; }
   detid_t getID() const override;
   std::size_t nDets() const override;
   Kernel::V3D getPos() const override;
   double getDistance(const IComponent &comp) const override;
-  double getTwoTheta(const Kernel::V3D &observer,
-                     const Kernel::V3D &axis) const override;
+  double getTwoTheta(const Kernel::V3D &observer, const Kernel::V3D &axis) const override;
   double getSignedTwoTheta(const Kernel::V3D &observer, const Kernel::V3D &axis,
                            const Kernel::V3D &instrumentUp) const override;
   double getPhi() const override;
@@ -68,15 +65,12 @@ public:
   /// Return the parameter names
   std::set<std::string> getParameterNames(bool recursive = true) const override;
   /// return the parameter names and the component they are from
-  std::map<std::string, ComponentID>
-  getParameterNamesByComponent() const override;
+  std::map<std::string, ComponentID> getParameterNamesByComponent() const override;
   /// Returns a boolean indicating whether the parameter exists or not
-  bool hasParameter(const std::string &name,
-                    bool recursive = true) const override;
+  bool hasParameter(const std::string &name, bool recursive = true) const override;
   // Hack used untill Geomertry can not exprot different types parematers
   // properly
-  std::string getParameterType(const std::string &name,
-                               bool recursive = true) const override;
+  std::string getParameterType(const std::string &name, bool recursive = true) const override;
   /**
    * Get a parameter defined as a double
    * @param pname :: The name of the parameter
@@ -84,8 +78,7 @@ public:
    * components
    * @returns A list of size 0 as this is not a parameterized component
    */
-  std::vector<double> getNumberParameter(const std::string &pname,
-                                         bool recursive = true) const override;
+  std::vector<double> getNumberParameter(const std::string &pname, bool recursive = true) const override;
   /**
    * Get a parameter defined as a Kernel::V3D
    * @param pname :: The name of the parameter
@@ -93,9 +86,7 @@ public:
    * components
    * @returns A list of size 0 as this is not a parameterized component
    */
-  std::vector<Kernel::V3D>
-  getPositionParameter(const std::string &pname,
-                       bool recursive = true) const override;
+  std::vector<Kernel::V3D> getPositionParameter(const std::string &pname, bool recursive = true) const override;
   /**
    * Get a parameter defined as a Kernel::Quaternion
    * @param pname :: The name of the parameter
@@ -103,9 +94,7 @@ public:
    * components
    * @returns A list of size 0 as this is not a parameterized component
    */
-  std::vector<Kernel::Quat>
-  getRotationParameter(const std::string &pname,
-                       bool recursive = true) const override;
+  std::vector<Kernel::Quat> getRotationParameter(const std::string &pname, bool recursive = true) const override;
 
   /**
    * Get a parameter defined as a string
@@ -114,9 +103,7 @@ public:
    * components
    * @returns A list of size 0 as this is not a parameterized component
    */
-  std::vector<std::string>
-  getStringParameter(const std::string &pname,
-                     bool recursive = true) const override;
+  std::vector<std::string> getStringParameter(const std::string &pname, bool recursive = true) const override;
 
   /**
    * Get a parameter defined as an integer
@@ -125,8 +112,7 @@ public:
    * components
    * @returns A list of size 0 as this is not a parameterized component
    */
-  std::vector<int> getIntParameter(const std::string &pname,
-                                   bool recursive = true) const override;
+  std::vector<int> getIntParameter(const std::string &pname, bool recursive = true) const override;
 
   /**
    * Get a parameter defined as an integer
@@ -135,8 +121,7 @@ public:
    * components
    * @returns A list of size 0 as this is not a parameterized component
    */
-  std::vector<bool> getBoolParameter(const std::string &pname,
-                                     bool recursive = true) const override;
+  std::vector<bool> getBoolParameter(const std::string &pname, bool recursive = true) const override;
 
   /**
    * Get a string representation of a parameter
@@ -145,8 +130,7 @@ public:
    * components
    * @returns A empty string as this is not a parameterized component
    */
-  std::string getParameterAsString(const std::string &pname,
-                                   bool recursive = true) const override;
+  std::string getParameterAsString(const std::string &pname, bool recursive = true) const override;
 
   /** returns the detector's group topology if it has been calculated before or
   invokes the procedure of
@@ -159,14 +143,11 @@ public:
      the logic behind getComponentID overload, so CopyInstrumentParameters will
      fail on
       grouped instrument but it is something TO DO:      */
-  IComponent const *getBaseComponent() const override {
-    return const_cast<const DetectorGroup *>(this);
-  }
+  IComponent const *getBaseComponent() const override { return const_cast<const DetectorGroup *>(this); }
 
   const ParameterMap &parameterMap() const override;
   size_t index() const override;
-  virtual size_t
-  registerContents(class ComponentVisitor &visitor) const override;
+  virtual size_t registerContents(class ComponentVisitor &visitor) const override;
 
 protected:
   /// The ID of this effective detector
@@ -189,9 +170,7 @@ protected:
   // functions inherited from IComponent
   Component *clone() const override { return nullptr; }
   ComponentID getComponentID() const override { return nullptr; }
-  std::shared_ptr<const IComponent> getParent() const override {
-    return std::shared_ptr<const IComponent>();
-  }
+  std::shared_ptr<const IComponent> getParent() const override { return std::shared_ptr<const IComponent>(); }
   const IComponent *getBareParent() const override { return nullptr; }
   std::vector<std::shared_ptr<const IComponent>> getAncestors() const override {
     return std::vector<std::shared_ptr<const IComponent>>();
@@ -221,17 +200,14 @@ protected:
 
   // functions inherited from IObjComponent
 
-  void getBoundingBox(double &, double &, double &, double &, double &,
-                      double &) const {}
+  void getBoundingBox(double &, double &, double &, double &, double &, double &) const {}
 
   void draw() const override {}
   void drawObject() const override {}
   void initDraw() const override {}
 
   /// Returns the shape of the Object
-  const std::shared_ptr<const IObject> shape() const override {
-    return std::shared_ptr<const IObject>();
-  }
+  const std::shared_ptr<const IObject> shape() const override { return std::shared_ptr<const IObject>(); }
   /// Returns the material of the Object
   const Kernel::Material material() const override;
 

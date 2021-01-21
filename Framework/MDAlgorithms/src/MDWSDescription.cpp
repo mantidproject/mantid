@@ -31,9 +31,8 @@ namespace MDAlgorithms {
  */
 void MDWSDescription::setDimName(unsigned int nDim, const std::string &Name) {
   if (nDim >= m_NDims) {
-    std::string ERR =
-        "setDimName::Dimension index: " + std::to_string(nDim) +
-        " out of total dimensions range: " + std::to_string(m_NDims);
+    std::string ERR = "setDimName::Dimension index: " + std::to_string(nDim) +
+                      " out of total dimensions range: " + std::to_string(m_NDims);
     throw(std::invalid_argument(ERR));
   }
   m_DimNames[nDim] = Name;
@@ -44,9 +43,8 @@ void MDWSDescription::setDimName(unsigned int nDim, const std::string &Name) {
  *along axis and have nothing in common with units, defined by unit factory */
 void MDWSDescription::setDimUnit(unsigned int nDim, const std::string &Unit) {
   if (nDim >= m_NDims) {
-    std::string ERR =
-        "setDimUnit::Dimension index: " + std::to_string(nDim) +
-        " out of total dimensions range: " + std::to_string(m_NDims);
+    std::string ERR = "setDimUnit::Dimension index: " + std::to_string(nDim) +
+                      " out of total dimensions range: " + std::to_string(m_NDims);
     throw(std::invalid_argument(ERR));
   }
   m_DimUnits[nDim] = Unit;
@@ -66,10 +64,8 @@ correspond to energy analysis modes, supported by selected Q-mode
 which will be used as dimensions.
 
 */
-void MDWSDescription::buildFromMatrixWS(
-    const API::MatrixWorkspace_sptr &pWS, const std::string &QMode,
-    const std::string &dEMode,
-    const std::vector<std::string> &dimPropertyNames) {
+void MDWSDescription::buildFromMatrixWS(const API::MatrixWorkspace_sptr &pWS, const std::string &QMode,
+                                        const std::string &dEMode, const std::vector<std::string> &dimPropertyNames) {
   m_InWS = pWS;
   // fill additional dimensions values, defined by workspace properties;
   this->fillAddProperties(m_InWS, dimPropertyNames, m_AddCoord);
@@ -99,18 +95,16 @@ void MDWSDescription::buildFromMatrixWS(
                                   "description vectors inconsistent as have "
                                   "different length"));
     } else {
-      throw(std::invalid_argument(
-          " dimension limits vectors and dimension description vectors "
-          "inconsistent as have different length\n"
-          " Are you trying to add to existing workspace with convertToMD, "
-          "which generates workspace with different number of dimensions?"));
+      throw(std::invalid_argument(" dimension limits vectors and dimension description vectors "
+                                  "inconsistent as have different length\n"
+                                  " Are you trying to add to existing workspace with convertToMD, "
+                                  "which generates workspace with different number of dimensions?"));
     }
   }
 
   //*********** fill in dimension id-s, dimension units and dimension names
   // get default dim ID-s. TODO: it should be possibility to override it later;
-  std::vector<std::string> MatrDimID =
-      pQtransf->getDefaultDimID(m_Emode, m_InWS);
+  std::vector<std::string> MatrDimID = pQtransf->getDefaultDimID(m_Emode, m_InWS);
   std::vector<std::string> MatrUnitID = pQtransf->outputUnitID(m_Emode, m_InWS);
   for (unsigned int i = 0; i < m_NDims; i++) {
     if (i < nMatrixDim) {
@@ -125,9 +119,7 @@ void MDWSDescription::buildFromMatrixWS(
   }
 }
 
-void MDWSDescription::setWS(API::MatrixWorkspace_sptr otherMatrixWS) {
-  m_InWS = std::move(otherMatrixWS);
-}
+void MDWSDescription::setWS(API::MatrixWorkspace_sptr otherMatrixWS) { m_InWS = std::move(otherMatrixWS); }
 /// Method checks if input workspace has defined goniometer
 bool MDWSDescription::hasGoniometer() const {
   if (m_InWS)
@@ -148,8 +140,7 @@ Kernel::Matrix<double> MDWSDescription::getGoniometerMatr() const {
  * Primary used to obtain existing ws parameters
  *@param pWS -- shared pointer to existing MD workspace
  */
-void MDWSDescription::buildFromMDWS(
-    const API::IMDEventWorkspace_const_sptr &pWS) {
+void MDWSDescription::buildFromMDWS(const API::IMDEventWorkspace_const_sptr &pWS) {
   m_NDims = static_cast<unsigned int>(pWS->getNumDims());
   // prepare all arrays:
   m_DimNames.resize(m_NDims);
@@ -184,16 +175,14 @@ void MDWSDescription::buildFromMDWS(
  *@param SourceMatrWS -- the MDWS description obtained from input matrix
  *workspace and the algorithm parameters
  */
-void MDWSDescription::setUpMissingParameters(
-    const MDWSDescription &SourceMatrWS) {
+void MDWSDescription::setUpMissingParameters(const MDWSDescription &SourceMatrWS) {
   m_InWS = SourceMatrWS.m_InWS;
   m_Emode = SourceMatrWS.m_Emode;
   m_LorentzCorr = SourceMatrWS.m_LorentzCorr;
   m_AbsMin = SourceMatrWS.m_AbsMin;
   this->AlgID = SourceMatrWS.AlgID;
 
-  m_AddCoord.assign(SourceMatrWS.m_AddCoord.begin(),
-                    SourceMatrWS.m_AddCoord.end());
+  m_AddCoord.assign(SourceMatrWS.m_AddCoord.begin(), SourceMatrWS.m_AddCoord.end());
 }
 
 /**function compares old workspace description with the new workspace
@@ -213,13 +202,10 @@ void MDWSDescription::setUpMissingParameters(
  *compatible with existing MD workspace
  *
  */
-void MDWSDescription::checkWSCorresponsMDWorkspace(
-    MDWSDescription &NewMDWorkspaceD) {
+void MDWSDescription::checkWSCorresponsMDWorkspace(MDWSDescription &NewMDWorkspaceD) {
   if (m_NDims != NewMDWorkspaceD.m_NDims) {
-    std::string ERR =
-        "Dimension numbers are inconsistent: this workspace has " +
-        std::to_string(m_NDims) + " dimensions and target one: " +
-        std::to_string(NewMDWorkspaceD.m_NDims);
+    std::string ERR = "Dimension numbers are inconsistent: this workspace has " + std::to_string(m_NDims) +
+                      " dimensions and target one: " + std::to_string(NewMDWorkspaceD.m_NDims);
     throw(std::invalid_argument(ERR));
   }
 
@@ -248,9 +234,8 @@ void MDWSDescription::checkWSCorresponsMDWorkspace(
 
 /// empty constructor
 MDWSDescription::MDWSDescription(unsigned int nDimensions)
-    : m_Wtransf(3, 3, true), m_RotMatrix(9, 0), m_buildingNewWorkspace(true),
-      m_Emode(Kernel::DeltaEMode::Undefined), m_LorentzCorr(false),
-      m_AbsMin(0.), m_coordinateSystem(Mantid::Kernel::None) {
+    : m_Wtransf(3, 3, true), m_RotMatrix(9, 0), m_buildingNewWorkspace(true), m_Emode(Kernel::DeltaEMode::Undefined),
+      m_LorentzCorr(false), m_AbsMin(0.), m_coordinateSystem(Mantid::Kernel::None) {
 
   this->resizeDimDescriptions(nDimensions);
   m_DimMin.assign(m_NDims, std::numeric_limits<double>::quiet_NaN());
@@ -261,8 +246,7 @@ MDWSDescription::MDWSDescription(unsigned int nDimensions)
   m_RotMatrix[4] = 1.;
   m_RotMatrix[8] = 1.;
 }
-void MDWSDescription::resizeDimDescriptions(unsigned int nDimensions,
-                                            size_t nBins) {
+void MDWSDescription::resizeDimDescriptions(unsigned int nDimensions, size_t nBins) {
   m_NDims = nDimensions;
 
   m_DimNames.assign(m_NDims, "mdn");
@@ -284,11 +268,10 @@ void MDWSDescription::resizeDimDescriptions(unsigned int nDimensions,
 void MDWSDescription::setNumBins(const std::vector<int> &nBins_toSplit) {
 
   if (!(nBins_toSplit.size() == 1 || nBins_toSplit.size() == this->m_NDims))
-    throw std::invalid_argument(
-        " Number of dimensions: " + std::to_string(nBins_toSplit.size()) +
-        " defining number of bins to split into is not equal to total number "
-        "of dimensions: " +
-        std::to_string(this->m_NDims));
+    throw std::invalid_argument(" Number of dimensions: " + std::to_string(nBins_toSplit.size()) +
+                                " defining number of bins to split into is not equal to total number "
+                                "of dimensions: " +
+                                std::to_string(this->m_NDims));
 
   this->m_NBins.resize(this->m_NDims);
 
@@ -309,8 +292,7 @@ void MDWSDescription::setNumBins(const std::vector<int> &nBins_toSplit) {
  *@param maxVal  -- vector of maximal dimension's values
  *
  */
-void MDWSDescription::setMinMax(const std::vector<double> &minVal,
-                                const std::vector<double> &maxVal) {
+void MDWSDescription::setMinMax(const std::vector<double> &minVal, const std::vector<double> &maxVal) {
   m_DimMin.assign(minVal.begin(), minVal.end());
   m_DimMax.assign(maxVal.begin(), maxVal.end());
 
@@ -318,8 +300,7 @@ void MDWSDescription::setMinMax(const std::vector<double> &minVal,
 }
 
 /**get vector of minimal and maximal values from the class */
-void MDWSDescription::getMinMax(std::vector<double> &min,
-                                std::vector<double> &max) const {
+void MDWSDescription::getMinMax(std::vector<double> &min, std::vector<double> &max) const {
   min.assign(m_DimMin.begin(), m_DimMin.end());
   max.assign(m_DimMax.begin(), m_DimMax.end());
 }
@@ -328,14 +309,11 @@ void MDWSDescription::getMinMax(std::vector<double> &min,
 //******************************************************************************************************************************************
 /** Method checks if the workspace is expected to be processed in powder mode */
 bool MDWSDescription::isPowder() const {
-  return (this->AlgID == "|Q|") ||
-         (this->AlgID.empty() && !m_InWS->sample().hasOrientedLattice());
+  return (this->AlgID == "|Q|") || (this->AlgID.empty() && !m_InWS->sample().hasOrientedLattice());
 }
 
 /** Returns symbolic representation of current Emode */
-std::string MDWSDescription::getEModeStr() const {
-  return Kernel::DeltaEMode::asString(m_Emode);
-}
+std::string MDWSDescription::getEModeStr() const { return Kernel::DeltaEMode::asString(m_Emode); }
 
 /** function extracts the coordinates from additional workspace properties and
  *places them to proper position within
@@ -349,10 +327,9 @@ std::string MDWSDescription::getEModeStr() const {
  *  @return AddCoord       -- vector of additional coordinates (derived from WS
  *properties) for current multidimensional event
  */
-void MDWSDescription::fillAddProperties(
-    const Mantid::API::MatrixWorkspace_const_sptr &inWS2D,
-    const std::vector<std::string> &dimPropertyNames,
-    std::vector<coord_t> &AddCoord) {
+void MDWSDescription::fillAddProperties(const Mantid::API::MatrixWorkspace_const_sptr &inWS2D,
+                                        const std::vector<std::string> &dimPropertyNames,
+                                        std::vector<coord_t> &AddCoord) {
   size_t nDimPropNames = dimPropertyNames.size();
   if (AddCoord.size() != nDimPropNames)
     AddCoord.resize(nDimPropNames);
@@ -360,13 +337,11 @@ void MDWSDescription::fillAddProperties(
 
   for (size_t i = 0; i < nDimPropNames; i++) {
     try {
-      const double value = runObj.getLogAsSingleValue(
-          dimPropertyNames[i], Mantid::Kernel::Math::TimeAveragedMean);
+      const double value = runObj.getLogAsSingleValue(dimPropertyNames[i], Mantid::Kernel::Math::TimeAveragedMean);
       AddCoord[i] = static_cast<coord_t>(value);
     } catch (std::invalid_argument &) {
-      std::string ERR =
-          " Can not interpret property, used as dimension.\n Property: " +
-          dimPropertyNames[i] + " cannot be converted into a double.";
+      std::string ERR = " Can not interpret property, used as dimension.\n Property: " + dimPropertyNames[i] +
+                        " cannot be converted into a double.";
       throw(std::invalid_argument(ERR));
     }
   }
@@ -375,32 +350,25 @@ void MDWSDescription::fillAddProperties(
 /** function verifies the consistency of the min and max dimensions values
  * checking if all necessary
  * values were defined and min values are smaller then max values */
-void MDWSDescription::checkMinMaxNdimConsistent(
-    const std::vector<double> &minVal, const std::vector<double> &maxVal) {
+void MDWSDescription::checkMinMaxNdimConsistent(const std::vector<double> &minVal, const std::vector<double> &maxVal) {
   if (minVal.size() != maxVal.size()) {
-    std::string ERR =
-        " number of specified min dimension values: " +
-        std::to_string(minVal.size()) +
-        " and number of max values: " + std::to_string(maxVal.size()) +
-        " are not consistent\n";
+    std::string ERR = " number of specified min dimension values: " + std::to_string(minVal.size()) +
+                      " and number of max values: " + std::to_string(maxVal.size()) + " are not consistent\n";
     throw(std::invalid_argument(ERR));
   }
 
   for (size_t i = 0; i < minVal.size(); i++) {
     if (maxVal[i] <= minVal[i]) {
-      std::string ERR = " min value " +
-                        boost::lexical_cast<std::string>(minVal[i]) +
-                        " not less then max value" +
-                        boost::lexical_cast<std::string>(maxVal[i]) +
-                        " in direction: " + std::to_string(i) + "\n";
+      std::string ERR = " min value " + boost::lexical_cast<std::string>(minVal[i]) + " not less then max value" +
+                        boost::lexical_cast<std::string>(maxVal[i]) + " in direction: " + std::to_string(i) + "\n";
       throw(std::invalid_argument(ERR));
     }
   }
 }
 
 /** function retrieves copy of the oriented lattice from the workspace */
-std::shared_ptr<Geometry::OrientedLattice> MDWSDescription::getOrientedLattice(
-    const Mantid::API::MatrixWorkspace_const_sptr &inWS2D) {
+std::shared_ptr<Geometry::OrientedLattice>
+MDWSDescription::getOrientedLattice(const Mantid::API::MatrixWorkspace_const_sptr &inWS2D) {
   // try to get the WS oriented lattice
   std::shared_ptr<Geometry::OrientedLattice> orl;
   if (inWS2D->sample().hasOrientedLattice())
@@ -413,8 +381,7 @@ std::shared_ptr<Geometry::OrientedLattice> MDWSDescription::getOrientedLattice(
 /** Set the special coordinate system if any.
 @param system : coordinate system.
 */
-void MDWSDescription::setCoordinateSystem(
-    const Mantid::Kernel::SpecialCoordinateSystem system) {
+void MDWSDescription::setCoordinateSystem(const Mantid::Kernel::SpecialCoordinateSystem system) {
   m_coordinateSystem = system;
 }
 
@@ -432,15 +399,10 @@ Geometry::MDFrame_uptr MDWSDescription::getFrame(size_t d) const {
  * Sets the frame.
  * @param frameKey : Frame key desired.
  */
-void MDWSDescription::setFrame(const std::string &frameKey) {
-  m_frameKey = frameKey;
-}
+void MDWSDescription::setFrame(const std::string &frameKey) { m_frameKey = frameKey; }
 
 /// @return the special coordinate system if any.
-Mantid::Kernel::SpecialCoordinateSystem
-MDWSDescription::getCoordinateSystem() const {
-  return m_coordinateSystem;
-}
+Mantid::Kernel::SpecialCoordinateSystem MDWSDescription::getCoordinateSystem() const { return m_coordinateSystem; }
 
 /**
  * Is the algorithm running in Q3D mode?
@@ -448,9 +410,7 @@ MDWSDescription::getCoordinateSystem() const {
  */
 bool MDWSDescription::isQ3DMode() const { return this->AlgID == "Q3D"; }
 
-bool MDWSDescription::hasLattice() const {
-  return m_InWS->sample().hasOrientedLattice();
-}
+bool MDWSDescription::hasLattice() const { return m_InWS->sample().hasOrientedLattice(); }
 
 } // end namespace MDAlgorithms
 } // end namespace Mantid

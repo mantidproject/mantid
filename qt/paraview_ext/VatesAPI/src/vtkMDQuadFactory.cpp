@@ -32,8 +32,7 @@ Mantid::Kernel::Logger g_log("vtkMDQuadFactory");
 namespace Mantid {
 namespace VATES {
 /// Constructor
-vtkMDQuadFactory::vtkMDQuadFactory(
-    const VisualNormalization normalizationOption)
+vtkMDQuadFactory::vtkMDQuadFactory(const VisualNormalization normalizationOption)
     : m_normalizationOption(normalizationOption) {}
 
 /// Destructor
@@ -45,10 +44,8 @@ Create the vtkStructuredGrid from the provided workspace
 stack.
 @return fully constructed vtkDataSet.
 */
-vtkSmartPointer<vtkDataSet>
-vtkMDQuadFactory::create(ProgressAction &progressUpdating) const {
-  auto product = tryDelegatingCreation<IMDEventWorkspace, 2>(m_workspace,
-                                                             progressUpdating);
+vtkSmartPointer<vtkDataSet> vtkMDQuadFactory::create(ProgressAction &progressUpdating) const {
+  auto product = tryDelegatingCreation<IMDEventWorkspace, 2>(m_workspace, progressUpdating);
   if (product != nullptr) {
     return product;
   } else {
@@ -56,8 +53,7 @@ vtkMDQuadFactory::create(ProgressAction &progressUpdating) const {
                     << " is being used. You are viewing data with less than "
                        "three dimensions in the VSI. \n";
 
-    IMDEventWorkspace_sptr imdws =
-        this->castAndCheck<IMDEventWorkspace, 2>(m_workspace);
+    IMDEventWorkspace_sptr imdws = this->castAndCheck<IMDEventWorkspace, 2>(m_workspace);
     // Acquire a scoped read-only lock to the workspace (prevent segfault from
     // algos modifying ws)
     Mantid::Kernel::ReadLock lock(*imdws);
@@ -71,14 +67,12 @@ vtkMDQuadFactory::create(ProgressAction &progressUpdating) const {
     auto masks = std::make_unique<bool[]>(nDims);
     for (size_t i_dim = 0; i_dim < nDims; ++i_dim) {
       bool bIntegrated = imdws->getDimension(i_dim)->getIsIntegrated();
-      masks[i_dim] =
-          !bIntegrated; // TRUE for unmaksed, integrated dimensions are masked.
+      masks[i_dim] = !bIntegrated; // TRUE for unmaksed, integrated dimensions are masked.
     }
 
     // Make iterator, which will use the desired normalization. Ensure
     // destruction in any eventuality.
-    auto it =
-        createIteratorWithNormalization(m_normalizationOption, imdws.get());
+    auto it = createIteratorWithNormalization(m_normalizationOption, imdws.get());
 
     // Create 4 points per box.
     vtkNew<vtkPoints> points;
@@ -118,8 +112,7 @@ vtkMDQuadFactory::create(ProgressAction &progressUpdating) const {
         useBox[iBox] = true;
         signals->InsertNextValue(static_cast<float>(signal));
 
-        auto coords =
-            it->getVertexesArray(nVertexes, nNonIntegrated, masks.get());
+        auto coords = it->getVertexesArray(nVertexes, nNonIntegrated, masks.get());
         // Iterate through all coordinates. Candidate for speed improvement.
         for (size_t v = 0; v < nVertexes; ++v) {
           coord_t *coord = coords.get() + v * 2;
@@ -139,8 +132,7 @@ vtkMDQuadFactory::create(ProgressAction &progressUpdating) const {
     } while (it->next());
 
     for (size_t ii = 0; ii < it->getDataSize(); ++ii) {
-      progressUpdating.eventRaised((progressFactor * double(ii)) +
-                                   progressOffset);
+      progressUpdating.eventRaised((progressFactor * double(ii)) + progressOffset);
 
       if (useBox[ii] == true) {
         vtkIdType pointIds = vtkIdType(ii * 4);
@@ -177,15 +169,12 @@ void vtkMDQuadFactory::initialize(const Mantid::API::Workspace_sptr &ws) {
 }
 
 /// Get the name of the type.
-std::string vtkMDQuadFactory::getFactoryTypeName() const {
-  return "vtkMDQuadFactory";
-}
+std::string vtkMDQuadFactory::getFactoryTypeName() const { return "vtkMDQuadFactory"; }
 
 /// Template Method pattern to validate the factory before use.
 void vtkMDQuadFactory::validate() const {
   if (!m_workspace) {
-    throw std::runtime_error(
-        "vtkMDQuadFactory has no workspace to run against");
+    throw std::runtime_error("vtkMDQuadFactory has no workspace to run against");
   }
 }
 } // namespace VATES

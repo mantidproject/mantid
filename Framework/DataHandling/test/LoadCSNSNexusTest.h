@@ -56,9 +56,7 @@ public:
     TS_ASSERT(algToBeTested.isExecuted());
     //
     //  test workspace created by LoadCSNSNexus
-    MatrixWorkspace_sptr outputItem =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            outputSpace);
+    MatrixWorkspace_sptr outputItem = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace);
     TS_ASSERT_EQUALS(outputItem->getNumberHistograms(), 5328);
 
     AnalysisDataService::Instance().remove(outputSpace);
@@ -72,13 +70,9 @@ private:
 
 class LoadCSNSNexusTestPerformance : public CxxTest::TestSuite {
 public:
-  static LoadCSNSNexusTestPerformance *createSuite() {
-    return new LoadCSNSNexusTestPerformance();
-  }
+  static LoadCSNSNexusTestPerformance *createSuite() { return new LoadCSNSNexusTestPerformance(); }
 
-  static void destroySuite(LoadCSNSNexusTestPerformance *suite) {
-    delete suite;
-  }
+  static void destroySuite(LoadCSNSNexusTestPerformance *suite) { delete suite; }
 
   void setUp() override {
     if (!loadCSNSNexusAlg.isInitialized())
@@ -91,9 +85,7 @@ public:
     loadCSNSNexusAlg.setPropertyValue("Filename", inputFile);
     loadCSNSNexusAlg.setPropertyValue("Bankname", "module322");
   }
-  void tearDown() override {
-    AnalysisDataService::Instance().remove("outputWS");
-  }
+  void tearDown() override { AnalysisDataService::Instance().remove("outputWS"); }
 
   void testExec() { loadCSNSNexusAlg.execute(); }
 

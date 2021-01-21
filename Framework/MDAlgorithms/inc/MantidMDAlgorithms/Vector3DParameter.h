@@ -22,8 +22,7 @@ pattern to implement common code associated with vector storage.
 @date 01/02/2011
 */
 template <typename Derived, typename ElemType>
-class DLLExport Vector3DParameter
-    : public Mantid::API::ImplicitFunctionParameter {
+class DLLExport Vector3DParameter : public Mantid::API::ImplicitFunctionParameter {
 public:
   Vector3DParameter(ElemType a, ElemType b, ElemType c);
   Vector3DParameter();
@@ -43,8 +42,7 @@ protected:
   bool m_isValid;
 };
 
-template <typename Derived, typename ElemType>
-bool Vector3DParameter<Derived, ElemType>::isValid() const {
+template <typename Derived, typename ElemType> bool Vector3DParameter<Derived, ElemType>::isValid() const {
   return m_isValid;
 }
 
@@ -53,27 +51,23 @@ Derived &Vector3DParameter<Derived, ElemType>::operator=(const Derived &other) {
   if (&other != this) {
     this->m_isValid = other.m_isValid;
     this->m_vector.swap(std::vector<ElemType>(3));
-    std::copy(other.m_vector.begin(), other.m_vector.end(),
-              this->m_vector.begin());
+    std::copy(other.m_vector.begin(), other.m_vector.end(), this->m_vector.begin());
   }
   return *(dynamic_cast<Derived *>(this));
 }
 
 template <typename Derived, typename ElemType>
-bool Vector3DParameter<Derived, ElemType>::
-operator==(const Derived &other) const {
+bool Vector3DParameter<Derived, ElemType>::operator==(const Derived &other) const {
   return std::equal(m_vector.begin(), m_vector.end(), other.m_vector.begin());
 }
 
 template <typename Derived, typename ElemType>
-bool Vector3DParameter<Derived, ElemType>::
-operator!=(const Derived &other) const {
+bool Vector3DParameter<Derived, ElemType>::operator!=(const Derived &other) const {
   return !(*this == other);
 }
 
 template <typename Derived, typename ElemType>
-Vector3DParameter<Derived, ElemType>::Vector3DParameter(
-    const Vector3DParameter<Derived, ElemType> &other)
+Vector3DParameter<Derived, ElemType>::Vector3DParameter(const Vector3DParameter<Derived, ElemType> &other)
     : m_vector(3) {
   m_isValid = other.isValid();
   if (true == other.m_isValid) {
@@ -84,44 +78,34 @@ Vector3DParameter<Derived, ElemType>::Vector3DParameter(
 }
 
 template <typename Derived, typename ElemType>
-Vector3DParameter<Derived, ElemType>::Vector3DParameter()
-    : m_vector(3, 0), m_isValid(false) {}
+Vector3DParameter<Derived, ElemType>::Vector3DParameter() : m_vector(3, 0), m_isValid(false) {}
 
 template <typename Derived, typename ElemType>
-Vector3DParameter<Derived, ElemType>::Vector3DParameter(ElemType a, ElemType b,
-                                                        ElemType c)
-    : m_vector(3) {
+Vector3DParameter<Derived, ElemType>::Vector3DParameter(ElemType a, ElemType b, ElemType c) : m_vector(3) {
   m_vector[0] = a;
   m_vector[1] = b;
   m_vector[2] = c;
   m_isValid = true;
 }
 
-template <typename Derived, typename ElemType>
-ElemType Vector3DParameter<Derived, ElemType>::getX() const {
+template <typename Derived, typename ElemType> ElemType Vector3DParameter<Derived, ElemType>::getX() const {
   return m_vector[0];
 }
 
-template <typename Derived, typename ElemType>
-ElemType Vector3DParameter<Derived, ElemType>::getY() const {
+template <typename Derived, typename ElemType> ElemType Vector3DParameter<Derived, ElemType>::getY() const {
   return m_vector[1];
 }
 
-template <typename Derived, typename ElemType>
-ElemType Vector3DParameter<Derived, ElemType>::getZ() const {
+template <typename Derived, typename ElemType> ElemType Vector3DParameter<Derived, ElemType>::getZ() const {
   return m_vector[2];
 }
 
-template <typename Derived, typename ElemType>
-std::string Vector3DParameter<Derived, ElemType>::toXMLString() const {
-  std::string valueXMLtext =
-      boost::str(boost::format("%.4f, %.4f, %.4f") % m_vector[0] % m_vector[1] %
-                 m_vector[2]);
+template <typename Derived, typename ElemType> std::string Vector3DParameter<Derived, ElemType>::toXMLString() const {
+  std::string valueXMLtext = boost::str(boost::format("%.4f, %.4f, %.4f") % m_vector[0] % m_vector[1] % m_vector[2]);
   return this->parameterXMLTemplate(valueXMLtext);
 }
 
-template <typename Derived, typename ElemType>
-ElemType &Vector3DParameter<Derived, ElemType>::operator[](int index) {
+template <typename Derived, typename ElemType> ElemType &Vector3DParameter<Derived, ElemType>::operator[](int index) {
   return m_vector[index];
 }
 
@@ -132,18 +116,15 @@ ElemType &Vector3DParameter<Derived, ElemType>::operator[](int index) {
 // Most of the work is done in the VectorParamter base class, which utilises
 // CRTP.
 //-----------------------------------------------------------------------------------------------------------------//
-#define DECLARE_3D_VECTOR_PARAMETER(classname, type_)                          \
-  class classname                                                              \
-      : public Mantid::MDAlgorithms::Vector3DParameter<classname, double> {    \
-  public:                                                                      \
-    using SuperType = Vector3DParameter<classname, type_> SuperType;           \
-    static std::string parameterName() { return #classname; }                  \
-    classname(type_ a, type_ b, type_ c) : SuperType(a, b, c) {}               \
-    classname() : SuperType() {}                                               \
-    std::string getName() const { return #classname; }                         \
-    classname *clone() const {                                                 \
-      return new classname(m_vector[0], m_vector[1], m_vector[2]);             \
-    }                                                                          \
+#define DECLARE_3D_VECTOR_PARAMETER(classname, type_)                                                                  \
+  class classname : public Mantid::MDAlgorithms::Vector3DParameter<classname, double> {                                \
+  public:                                                                                                              \
+    using SuperType = Vector3DParameter<classname, type_> SuperType;                                                   \
+    static std::string parameterName() { return #classname; }                                                          \
+    classname(type_ a, type_ b, type_ c) : SuperType(a, b, c) {}                                                       \
+    classname() : SuperType() {}                                                                                       \
+    std::string getName() const { return #classname; }                                                                 \
+    classname *clone() const { return new classname(m_vector[0], m_vector[1], m_vector[2]); }                          \
   };
 } // namespace MDAlgorithms
 } // namespace Mantid

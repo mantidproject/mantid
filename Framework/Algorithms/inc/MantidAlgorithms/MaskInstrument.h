@@ -18,16 +18,13 @@ namespace Algorithms {
   @author Simon Heybrock
   @date 2017
 */
-class MANTID_ALGORITHMS_DLL MaskInstrument : public API::DistributedAlgorithm,
-                                             public API::DeprecatedAlgorithm {
+class MANTID_ALGORITHMS_DLL MaskInstrument : public API::DistributedAlgorithm, public API::DeprecatedAlgorithm {
 public:
   MaskInstrument();
 
   const std::string name() const override;
   int version() const override;
-  const std::vector<std::string> seeAlso() const override {
-    return {"MaskDetectors"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"MaskDetectors"}; }
   const std::string category() const override;
   const std::string summary() const override;
 

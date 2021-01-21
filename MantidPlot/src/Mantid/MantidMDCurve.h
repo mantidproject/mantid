@@ -24,8 +24,7 @@ class MantidMDCurve : public MantidCurve {
   Q_OBJECT
 public:
   /// More complex constructor setting some defaults for the curve
-  MantidMDCurve(const QString &wsName, Graph *g, bool err = false,
-                bool distr = false,
+  MantidMDCurve(const QString &wsName, Graph *g, bool err = false, bool distr = false,
                 GraphOptions::CurveType style = GraphOptions::HorizontalSteps);
 
   /// Copy constructor
@@ -63,8 +62,7 @@ public:
     m_drawAllErrorBars = drawAll;
   }
 
-  void draw(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap,
-            const QRect &) const override;
+  void draw(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap, const QRect &) const override;
 
   /// saves the MantidMatrixCurve details to project file.
   QString saveToString();
@@ -76,8 +74,7 @@ private:
   using PlotCurve::draw; // Avoid Intel compiler warning
 
   /// Init the curve
-  void init(Graph *g, bool distr, GraphOptions::CurveType style,
-            bool multipleSpectra = false) override;
+  void init(Graph *g, bool distr, GraphOptions::CurveType style, bool multipleSpectra = false) override;
 
   /// Handles delete notification
   void postDeleteHandle(const std::string &wsName) override {
@@ -87,9 +84,7 @@ private:
     }
   }
   /// Handles afterReplace notification
-  void afterReplaceHandle(
-      const std::string &wsName,
-      const std::shared_ptr<Mantid::API::Workspace> &ws) override;
+  void afterReplaceHandle(const std::string &wsName, const std::shared_ptr<Mantid::API::Workspace> &ws) override;
 
   /// Handle an ADS clear notification
   void clearADSHandle() override { emit removeMe(this); }
@@ -103,6 +98,5 @@ private slots:
   void dataReset(const QString &);
 
 private:
-  QString
-      m_wsName; ///< Workspace name. If empty the ws isn't in the data service
+  QString m_wsName; ///< Workspace name. If empty the ws isn't in the data service
 };

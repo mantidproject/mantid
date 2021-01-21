@@ -30,15 +30,13 @@ namespace {
  */
 class MockedInternetHelper : public InternetHelper {
 protected:
-  int sendHTTPSRequest(const std::string &url,
-                       std::ostream &responseStream) override {
+  int sendHTTPSRequest(const std::string &url, std::ostream &responseStream) override {
     UNUSED_ARG(url);
 
     responseStream << "HTTPS request succeeded";
     return 200;
   }
-  int sendHTTPRequest(const std::string &url,
-                      std::ostream &responseStream) override {
+  int sendHTTPRequest(const std::string &url, std::ostream &responseStream) override {
     UNUSED_ARG(url);
     responseStream << "HTTP request succeeded";
     return 200;
@@ -66,13 +64,11 @@ public:
 
   void test_sendRequest_HTTPS() {
     MockedInternetHelper internetHelper;
-    std::string httpsUrl =
-        "https://api.github.com/repos/mantidproject/mantid/contents";
+    std::string httpsUrl = "https://api.github.com/repos/mantidproject/mantid/contents";
 
     std::stringstream ss;
     int response = 0;
-    TS_ASSERT_THROWS_NOTHING(response =
-                                 internetHelper.sendRequest(httpsUrl, ss);)
+    TS_ASSERT_THROWS_NOTHING(response = internetHelper.sendRequest(httpsUrl, ss);)
     TS_ASSERT_EQUALS(200, response);
     TS_ASSERT_EQUALS("HTTPS request succeeded", ss.str());
   }
@@ -99,8 +95,7 @@ public:
 
   void test_DownloadFile_HTTPS() {
     MockedInternetHelper internetHelper;
-    std::string httpsUrl =
-        "https://api.github.com/repos/mantidproject/mantid/contents";
+    std::string httpsUrl = "https://api.github.com/repos/mantidproject/mantid/contents";
     Poco::TemporaryFile tmpFile;
     int response = internetHelper.downloadFile(httpsUrl, tmpFile.path());
     TS_ASSERT_EQUALS(200, response);
@@ -120,63 +115,53 @@ public:
 
   void test_ContentType_GetSet() {
     MockedInternetHelper internetHelper;
-    TSM_ASSERT_EQUALS("Default content type is not application/json",
-                      internetHelper.getContentType(), "application/json");
+    TSM_ASSERT_EQUALS("Default content type is not application/json", internetHelper.getContentType(),
+                      "application/json");
     internetHelper.setContentType("test value");
-    TSM_ASSERT_EQUALS("setContentType failed", internetHelper.getContentType(),
-                      "test value");
+    TSM_ASSERT_EQUALS("setContentType failed", internetHelper.getContentType(), "test value");
   }
 
   void test_Method_GetSet() {
     MockedInternetHelper internetHelper;
-    TSM_ASSERT_EQUALS("Default method is not GET", internetHelper.getMethod(),
-                      "GET");
+    TSM_ASSERT_EQUALS("Default method is not GET", internetHelper.getMethod(), "GET");
     internetHelper.setMethod("POST");
     TSM_ASSERT_EQUALS("setMethod failed", internetHelper.getMethod(), "POST");
   }
 
   void test_Timeout_GetSet() {
     MockedInternetHelper internetHelper;
-    TSM_ASSERT_EQUALS("Default timeout is not 30", internetHelper.getTimeout(),
-                      30);
+    TSM_ASSERT_EQUALS("Default timeout is not 30", internetHelper.getTimeout(), 30);
     internetHelper.setTimeout(1);
     TSM_ASSERT_EQUALS("setTimeout failed", internetHelper.getTimeout(), 1);
   }
 
   void test_Body_GetSet() {
     MockedInternetHelper internetHelper;
-    TSM_ASSERT_EQUALS("Default body is not empty", internetHelper.getBody(),
-                      "");
+    TSM_ASSERT_EQUALS("Default body is not empty", internetHelper.getBody(), "");
     internetHelper.setBody("Test string");
-    TSM_ASSERT_EQUALS("setBody failed", internetHelper.getBody(),
-                      "Test string");
+    TSM_ASSERT_EQUALS("setBody failed", internetHelper.getBody(), "Test string");
     TSM_ASSERT_EQUALS("method is not POST", internetHelper.getMethod(), "POST");
-    TSM_ASSERT_EQUALS("Contentlength is wrong",
-                      internetHelper.getContentLength(), 11);
+    TSM_ASSERT_EQUALS("Contentlength is wrong", internetHelper.getContentLength(), 11);
     internetHelper.setBody("");
     TSM_ASSERT_EQUALS("setBody failed", internetHelper.getBody(), "");
     TSM_ASSERT_EQUALS("method is not GET", internetHelper.getMethod(), "GET");
-    TSM_ASSERT_EQUALS("Contentlength is wrong",
-                      internetHelper.getContentLength(), 0);
+    TSM_ASSERT_EQUALS("Contentlength is wrong", internetHelper.getContentLength(), 0);
   }
 
   void test_BodyStream_GetSet() {
     MockedInternetHelper internetHelper;
     std::ostringstream ss;
     ss << "Test string";
-    TSM_ASSERT_EQUALS("Default body is not empty", internetHelper.getBody(),
-                      "");
+    TSM_ASSERT_EQUALS("Default body is not empty", internetHelper.getBody(), "");
     internetHelper.setBody(ss);
     TSM_ASSERT_EQUALS("setBody failed", internetHelper.getBody(), ss.str());
     TSM_ASSERT_EQUALS("method is not POST", internetHelper.getMethod(), "POST");
-    TSM_ASSERT_EQUALS("Contentlength is wrong",
-                      internetHelper.getContentLength(), 11);
+    TSM_ASSERT_EQUALS("Contentlength is wrong", internetHelper.getContentLength(), 11);
     ss.str("");
     internetHelper.setBody(ss);
     TSM_ASSERT_EQUALS("setBody failed", internetHelper.getBody(), "");
     TSM_ASSERT_EQUALS("method is not GET", internetHelper.getMethod(), "GET");
-    TSM_ASSERT_EQUALS("Contentlength is wrong",
-                      internetHelper.getContentLength(), 0);
+    TSM_ASSERT_EQUALS("Contentlength is wrong", internetHelper.getContentLength(), 0);
   }
 
   void test_BodyForm_GetSet() {
@@ -187,55 +172,39 @@ public:
     form.set("field3", "value=3");
     form.set("field4", "value&4");
 
-    form.addPart("attachment1",
-                 new Poco::Net::StringPartSource("This is an attachment"));
-    Poco::Net::StringPartSource *pSPS = new Poco::Net::StringPartSource(
-        "This is another attachment", "text/plain", "att2.txt");
+    form.addPart("attachment1", new Poco::Net::StringPartSource("This is an attachment"));
+    Poco::Net::StringPartSource *pSPS =
+        new Poco::Net::StringPartSource("This is another attachment", "text/plain", "att2.txt");
     pSPS->headers().set("Content-ID", "1234abcd");
     form.addPart("attachment2", pSPS);
-    TSM_ASSERT_EQUALS("Default body is not empty", internetHelper.getBody(),
-                      "");
+    TSM_ASSERT_EQUALS("Default body is not empty", internetHelper.getBody(), "");
     TSM_ASSERT_EQUALS("method is not GET", internetHelper.getMethod(), "GET");
     internetHelper.setBody(form);
     std::string body = internetHelper.getBody();
-    TSM_ASSERT_DIFFERS("setBody failed \"--MIME_boundary\"",
-                       body.find("--MIME_boundary"), std::string::npos);
-    TSM_ASSERT_DIFFERS("setBody failed \"This is an attachment\"",
-                       body.find("This is an attachment"), std::string::npos);
-    TSM_ASSERT_DIFFERS("setBody failed \"This is another attachment\"",
-                       body.find("This is another attachment"),
+    TSM_ASSERT_DIFFERS("setBody failed \"--MIME_boundary\"", body.find("--MIME_boundary"), std::string::npos);
+    TSM_ASSERT_DIFFERS("setBody failed \"This is an attachment\"", body.find("This is an attachment"),
                        std::string::npos);
-    TSM_ASSERT_DIFFERS("setBody failed \"field1\"", body.find("field1"),
+    TSM_ASSERT_DIFFERS("setBody failed \"This is another attachment\"", body.find("This is another attachment"),
                        std::string::npos);
-    TSM_ASSERT_DIFFERS("setBody failed \"field2\"", body.find("field2"),
-                       std::string::npos);
-    TSM_ASSERT_DIFFERS("setBody failed \"field3\"", body.find("field3"),
-                       std::string::npos);
-    TSM_ASSERT_DIFFERS("setBody failed \"field4\"", body.find("field4"),
-                       std::string::npos);
-    TSM_ASSERT_DIFFERS("setBody failed \"value1\"", body.find("value1"),
-                       std::string::npos);
-    TSM_ASSERT_DIFFERS("setBody failed \"value 2\"", body.find("value 2"),
-                       std::string::npos);
-    TSM_ASSERT_DIFFERS("setBody failed \"value=3\"", body.find("value=3"),
-                       std::string::npos);
-    TSM_ASSERT_DIFFERS("setBody failed \"value&4\"", body.find("value&4"),
-                       std::string::npos);
+    TSM_ASSERT_DIFFERS("setBody failed \"field1\"", body.find("field1"), std::string::npos);
+    TSM_ASSERT_DIFFERS("setBody failed \"field2\"", body.find("field2"), std::string::npos);
+    TSM_ASSERT_DIFFERS("setBody failed \"field3\"", body.find("field3"), std::string::npos);
+    TSM_ASSERT_DIFFERS("setBody failed \"field4\"", body.find("field4"), std::string::npos);
+    TSM_ASSERT_DIFFERS("setBody failed \"value1\"", body.find("value1"), std::string::npos);
+    TSM_ASSERT_DIFFERS("setBody failed \"value 2\"", body.find("value 2"), std::string::npos);
+    TSM_ASSERT_DIFFERS("setBody failed \"value=3\"", body.find("value=3"), std::string::npos);
+    TSM_ASSERT_DIFFERS("setBody failed \"value&4\"", body.find("value&4"), std::string::npos);
     TSM_ASSERT_EQUALS("method is not POST", internetHelper.getMethod(), "POST");
-    TSM_ASSERT_LESS_THAN("Contentlength is wrong", 700,
-                         internetHelper.getContentLength());
+    TSM_ASSERT_LESS_THAN("Contentlength is wrong", 700, internetHelper.getContentLength());
   }
 
   void test_Headers_GetSet() {
     MockedInternetHelper internetHelper;
-    TSM_ASSERT_EQUALS("Default headers are not empty",
-                      internetHelper.headers().size(), 0);
+    TSM_ASSERT_EQUALS("Default headers are not empty", internetHelper.headers().size(), 0);
     internetHelper.addHeader("Test", "value");
     internetHelper.addHeader("Test2", "value2");
-    TSM_ASSERT_EQUALS("addHeader failed", internetHelper.getHeader("Test"),
-                      "value");
-    TSM_ASSERT_EQUALS("addHeader failed", internetHelper.getHeader("Test2"),
-                      "value2");
+    TSM_ASSERT_EQUALS("addHeader failed", internetHelper.getHeader("Test"), "value");
+    TSM_ASSERT_EQUALS("addHeader failed", internetHelper.getHeader("Test2"), "value2");
     internetHelper.removeHeader("Test");
     TSM_ASSERT_EQUALS("Remove failed", internetHelper.headers().size(), 1);
     internetHelper.clearHeaders();

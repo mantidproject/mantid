@@ -27,8 +27,7 @@ API::MatrixWorkspace_sptr createSampleWorkspace() {
 }
 
 void addBankID(const API::MatrixWorkspace_sptr &ws, const size_t bankID) {
-  auto addLogAlg =
-      API::FrameworkManager::Instance().createAlgorithm("AddSampleLog");
+  auto addLogAlg = API::FrameworkManager::Instance().createAlgorithm("AddSampleLog");
   addLogAlg->initialize();
   addLogAlg->setProperty("Workspace", ws);
   addLogAlg->setPropertyValue("LogName", "bankid");
@@ -47,18 +46,12 @@ public:
     const RunLabel runLabel("123", 1);
     EXPECT_CALL(*m_mockModel, addFittedPeaks(runLabel, ws)).Times(1);
 
-    EXPECT_CALL(*m_mockModel, getFocusedRun(runLabel))
-        .Times(1)
-        .WillOnce(Return(ws));
+    EXPECT_CALL(*m_mockModel, getFocusedRun(runLabel)).Times(1).WillOnce(Return(ws));
     EXPECT_CALL(*m_mockView, reportPlotInvalidFocusedRun(testing::_)).Times(0);
     EXPECT_CALL(*m_mockView, resetCanvas()).Times(1);
     EXPECT_CALL(*m_mockView, plotFocusedRun(testing::_)).Times(1);
-    EXPECT_CALL(*m_mockModel, hasFittedPeaksForRun(runLabel))
-        .Times(1)
-        .WillOnce(Return(true));
-    EXPECT_CALL(*m_mockView, showFitResultsSelected())
-        .Times(1)
-        .WillOnce(Return(false));
+    EXPECT_CALL(*m_mockModel, hasFittedPeaksForRun(runLabel)).Times(1).WillOnce(Return(true));
+    EXPECT_CALL(*m_mockView, showFitResultsSelected()).Times(1).WillOnce(Return(false));
     EXPECT_CALL(*m_mockModel, getFittedPeaks(testing::_)).Times(0);
 
     presenter->addFittedPeaks(runLabel, ws);
@@ -72,9 +65,7 @@ public:
     const RunLabel runLabel("0", 2);
 
     const std::vector<RunLabel> workspaceLabels({runLabel});
-    EXPECT_CALL(*m_mockModel, getAllWorkspaceLabels())
-        .Times(1)
-        .WillOnce(Return(workspaceLabels));
+    EXPECT_CALL(*m_mockModel, getAllWorkspaceLabels()).Times(1).WillOnce(Return(workspaceLabels));
 
     EXPECT_CALL(*m_mockView, updateRunList(workspaceLabels));
     presenter->addFocusedRun(ws);
@@ -88,8 +79,7 @@ public:
 
     const RunLabel runLabel("0", 2);
     const std::vector<RunLabel> workspaceLabels({runLabel});
-    ON_CALL(*m_mockModel, getAllWorkspaceLabels())
-        .WillByDefault(Return(workspaceLabels));
+    ON_CALL(*m_mockModel, getAllWorkspaceLabels()).WillByDefault(Return(workspaceLabels));
     EXPECT_CALL(*m_mockView, updateRunList(workspaceLabels));
 
     presenter->addFocusedRun(ws);
@@ -100,9 +90,7 @@ public:
     auto presenter = setUpPresenter();
 
     const RunLabel runLabel("123", 1);
-    EXPECT_CALL(*m_mockModel, getFittedPeaks(runLabel))
-        .Times(1)
-        .WillOnce(Return(boost::none));
+    EXPECT_CALL(*m_mockModel, getFittedPeaks(runLabel)).Times(1).WillOnce(Return(boost::none));
 
     presenter->getFittedPeaks(runLabel);
     assertMocksUsedCorrectly();
@@ -112,9 +100,7 @@ public:
     auto presenter = setUpPresenter();
 
     const RunLabel runLabel("123", 1);
-    EXPECT_CALL(*m_mockModel, getFocusedRun(runLabel))
-        .Times(1)
-        .WillOnce(Return(boost::none));
+    EXPECT_CALL(*m_mockModel, getFocusedRun(runLabel)).Times(1).WillOnce(Return(boost::none));
 
     presenter->getFocusedRun(runLabel);
     assertMocksUsedCorrectly();
@@ -124,24 +110,18 @@ public:
     auto presenter = setUpPresenter();
 
     const RunLabel runLabel("123", 1);
-    EXPECT_CALL(*m_mockView, getSelectedRunLabel())
-        .Times(1)
-        .WillOnce(Return(runLabel));
+    EXPECT_CALL(*m_mockView, getSelectedRunLabel()).Times(1).WillOnce(Return(runLabel));
 
-    EXPECT_CALL(*m_mockModel, getFocusedRun(runLabel))
-        .Times(1)
-        .WillOnce(Return(createSampleWorkspace()));
+    EXPECT_CALL(*m_mockModel, getFocusedRun(runLabel)).Times(1).WillOnce(Return(createSampleWorkspace()));
 
     EXPECT_CALL(*m_mockView, reportPlotInvalidFocusedRun(testing::_)).Times(0);
     EXPECT_CALL(*m_mockView, resetCanvas()).Times(1);
     EXPECT_CALL(*m_mockView, plotFocusedRun(testing::_)).Times(1);
 
-    ON_CALL(*m_mockModel, hasFittedPeaksForRun(runLabel))
-        .WillByDefault(Return(false));
+    ON_CALL(*m_mockModel, hasFittedPeaksForRun(runLabel)).WillByDefault(Return(false));
     EXPECT_CALL(*m_mockView, plotFittedPeaks(testing::_)).Times(0);
 
-    presenter->notify(
-        IEnggDiffMultiRunFittingWidgetPresenter::Notification::SelectRun);
+    presenter->notify(IEnggDiffMultiRunFittingWidgetPresenter::Notification::SelectRun);
     assertMocksUsedCorrectly();
   }
 
@@ -149,17 +129,12 @@ public:
     auto presenter = setUpPresenter();
 
     const RunLabel runLabel("123", 1);
-    EXPECT_CALL(*m_mockView, getSelectedRunLabel())
-        .Times(1)
-        .WillOnce(Return(runLabel));
-    EXPECT_CALL(*m_mockModel, getFocusedRun(runLabel))
-        .Times(1)
-        .WillOnce(Return(boost::none));
+    EXPECT_CALL(*m_mockView, getSelectedRunLabel()).Times(1).WillOnce(Return(runLabel));
+    EXPECT_CALL(*m_mockModel, getFocusedRun(runLabel)).Times(1).WillOnce(Return(boost::none));
     EXPECT_CALL(*m_mockView, reportPlotInvalidFocusedRun(runLabel)).Times(1);
     EXPECT_CALL(*m_mockView, resetCanvas()).Times(0);
 
-    presenter->notify(
-        IEnggDiffMultiRunFittingWidgetPresenter::Notification::SelectRun);
+    presenter->notify(IEnggDiffMultiRunFittingWidgetPresenter::Notification::SelectRun);
     assertMocksUsedCorrectly();
   }
 
@@ -170,31 +145,23 @@ public:
     ON_CALL(*m_mockView, getSelectedRunLabel()).WillByDefault(Return(runLabel));
 
     const auto sampleWorkspace = createSampleWorkspace();
-    ON_CALL(*m_mockModel, getFocusedRun(runLabel))
-        .WillByDefault(Return(sampleWorkspace));
+    ON_CALL(*m_mockModel, getFocusedRun(runLabel)).WillByDefault(Return(sampleWorkspace));
 
-    ON_CALL(*m_mockModel, hasFittedPeaksForRun(runLabel))
-        .WillByDefault(Return(true));
+    ON_CALL(*m_mockModel, hasFittedPeaksForRun(runLabel)).WillByDefault(Return(true));
     ON_CALL(*m_mockView, showFitResultsSelected()).WillByDefault(Return(true));
-    EXPECT_CALL(*m_mockModel, getFittedPeaks(runLabel))
-        .Times(1)
-        .WillOnce(Return(sampleWorkspace));
+    EXPECT_CALL(*m_mockModel, getFittedPeaks(runLabel)).Times(1).WillOnce(Return(sampleWorkspace));
     EXPECT_CALL(*m_mockView, reportPlotInvalidFittedPeaks(testing::_)).Times(0);
     EXPECT_CALL(*m_mockView, plotFittedPeaks(testing::_)).Times(1);
 
-    presenter->notify(
-        IEnggDiffMultiRunFittingWidgetPresenter::Notification::SelectRun);
+    presenter->notify(IEnggDiffMultiRunFittingWidgetPresenter::Notification::SelectRun);
     assertMocksUsedCorrectly();
   }
 
   void test_selectRunDoesNothingWhenNoRunSelected() {
     auto presenter = setUpPresenter();
 
-    EXPECT_CALL(*m_mockView, getSelectedRunLabel())
-        .Times(1)
-        .WillOnce(Return(boost::none));
-    presenter->notify(
-        IEnggDiffMultiRunFittingWidgetPresenter::Notification::SelectRun);
+    EXPECT_CALL(*m_mockView, getSelectedRunLabel()).Times(1).WillOnce(Return(boost::none));
+    presenter->notify(IEnggDiffMultiRunFittingWidgetPresenter::Notification::SelectRun);
     assertMocksUsedCorrectly();
   }
 
@@ -202,38 +169,28 @@ public:
     auto presenter = setUpPresenter();
 
     const RunLabel runLabel("123", 1);
-    EXPECT_CALL(*m_mockView, getSelectedRunLabel())
-        .Times(1)
-        .WillOnce(Return(runLabel));
+    EXPECT_CALL(*m_mockView, getSelectedRunLabel()).Times(1).WillOnce(Return(runLabel));
 
     const boost::optional<Mantid::API::MatrixWorkspace_sptr> sampleWorkspace(
         WorkspaceCreationHelper::create2DWorkspaceBinned(1, 100));
-    EXPECT_CALL(*m_mockModel, getFocusedRun(runLabel))
-        .Times(1)
-        .WillOnce(Return(sampleWorkspace));
+    EXPECT_CALL(*m_mockModel, getFocusedRun(runLabel)).Times(1).WillOnce(Return(sampleWorkspace));
 
     EXPECT_CALL(*m_mockView, resetCanvas()).Times(1);
     EXPECT_CALL(*m_mockView, plotFocusedRun(testing::_)).Times(1);
 
-    EXPECT_CALL(*m_mockModel, hasFittedPeaksForRun(runLabel))
-        .Times(1)
-        .WillOnce(Return(false));
+    EXPECT_CALL(*m_mockModel, hasFittedPeaksForRun(runLabel)).Times(1).WillOnce(Return(false));
 
-    presenter->notify(IEnggDiffMultiRunFittingWidgetPresenter::Notification::
-                          PlotPeaksStateChanged);
+    presenter->notify(IEnggDiffMultiRunFittingWidgetPresenter::Notification::PlotPeaksStateChanged);
     assertMocksUsedCorrectly();
   }
 
   void test_plotPeaksStateChangedDoesNotCrashWhenNoRunSelected() {
     auto presenter = setUpPresenter();
 
-    EXPECT_CALL(*m_mockView, getSelectedRunLabel())
-        .Times(1)
-        .WillOnce(Return(boost::none));
+    EXPECT_CALL(*m_mockView, getSelectedRunLabel()).Times(1).WillOnce(Return(boost::none));
     EXPECT_CALL(*m_mockModel, getFocusedRun(testing::_)).Times(0);
 
-    presenter->notify(IEnggDiffMultiRunFittingWidgetPresenter::Notification::
-                          PlotPeaksStateChanged);
+    presenter->notify(IEnggDiffMultiRunFittingWidgetPresenter::Notification::PlotPeaksStateChanged);
     assertMocksUsedCorrectly();
   }
 
@@ -241,44 +198,33 @@ public:
     auto presenter = setUpPresenter();
 
     const RunLabel runLabel("123", 1);
-    EXPECT_CALL(*m_mockView, getSelectedRunLabel())
-        .Times(1)
-        .WillOnce(Return(runLabel));
+    EXPECT_CALL(*m_mockView, getSelectedRunLabel()).Times(1).WillOnce(Return(runLabel));
     EXPECT_CALL(*m_mockModel, removeRun(runLabel));
 
     const std::vector<RunLabel> runLabels({runLabel});
-    EXPECT_CALL(*m_mockModel, getAllWorkspaceLabels())
-        .Times(1)
-        .WillOnce(Return(runLabels));
+    EXPECT_CALL(*m_mockModel, getAllWorkspaceLabels()).Times(1).WillOnce(Return(runLabels));
     EXPECT_CALL(*m_mockView, updateRunList(runLabels));
     EXPECT_CALL(*m_mockView, resetCanvas());
 
-    presenter->notify(
-        IEnggDiffMultiRunFittingWidgetPresenter::Notification::RemoveRun);
+    presenter->notify(IEnggDiffMultiRunFittingWidgetPresenter::Notification::RemoveRun);
     assertMocksUsedCorrectly();
   }
 
   void test_removeRunDoesNothingWhenNoRunSelected() {
     auto presenter = setUpPresenter();
-    EXPECT_CALL(*m_mockView, getSelectedRunLabel())
-        .Times(1)
-        .WillOnce(Return(boost::none));
+    EXPECT_CALL(*m_mockView, getSelectedRunLabel()).Times(1).WillOnce(Return(boost::none));
     EXPECT_CALL(*m_mockModel, removeRun(testing::_)).Times(0);
-    presenter->notify(
-        IEnggDiffMultiRunFittingWidgetPresenter::Notification::RemoveRun);
+    presenter->notify(IEnggDiffMultiRunFittingWidgetPresenter::Notification::RemoveRun);
     assertMocksUsedCorrectly();
   }
 
   void test_plotToSeparateWindowDoesNothingWhenNoRunSelected() {
     auto presenter = setUpPresenter();
 
-    EXPECT_CALL(*m_mockView, getSelectedRunLabel())
-        .Times(1)
-        .WillOnce(Return(boost::none));
+    EXPECT_CALL(*m_mockView, getSelectedRunLabel()).Times(1).WillOnce(Return(boost::none));
     EXPECT_CALL(*m_mockView, reportNoRunSelectedForPlot()).Times(1);
 
-    presenter->notify(IEnggDiffMultiRunFittingWidgetPresenter::Notification::
-                          PlotToSeparateWindow);
+    presenter->notify(IEnggDiffMultiRunFittingWidgetPresenter::Notification::PlotToSeparateWindow);
     assertMocksUsedCorrectly();
   }
 
@@ -286,34 +232,23 @@ public:
     auto presenter = setUpPresenter();
     const RunLabel runLabel("123", 1);
 
-    EXPECT_CALL(*m_mockView, getSelectedRunLabel())
-        .Times(1)
-        .WillOnce(Return(runLabel));
+    EXPECT_CALL(*m_mockView, getSelectedRunLabel()).Times(1).WillOnce(Return(runLabel));
 
     const boost::optional<Mantid::API::MatrixWorkspace_sptr> sampleWorkspace(
         WorkspaceCreationHelper::create2DWorkspaceBinned(1, 100));
 
-    EXPECT_CALL(*m_mockModel, getFocusedRun(runLabel))
-        .Times(1)
-        .WillOnce(Return(sampleWorkspace));
+    EXPECT_CALL(*m_mockModel, getFocusedRun(runLabel)).Times(1).WillOnce(Return(sampleWorkspace));
 
     EXPECT_CALL(*m_mockView, reportNoRunSelectedForPlot()).Times(0);
     EXPECT_CALL(*m_mockView, reportPlotInvalidFocusedRun(testing::_)).Times(0);
 
-    EXPECT_CALL(*m_mockView, showFitResultsSelected())
-        .Times(1)
-        .WillOnce(Return(true));
-    EXPECT_CALL(*m_mockModel, hasFittedPeaksForRun(runLabel))
-        .Times(1)
-        .WillOnce(Return(false));
+    EXPECT_CALL(*m_mockView, showFitResultsSelected()).Times(1).WillOnce(Return(true));
+    EXPECT_CALL(*m_mockModel, hasFittedPeaksForRun(runLabel)).Times(1).WillOnce(Return(false));
 
-    EXPECT_CALL(*m_mockView, plotToSeparateWindow(
-                                 "123_1_external_plot",
-                                 boost::make_optional(false, std::string())))
+    EXPECT_CALL(*m_mockView, plotToSeparateWindow("123_1_external_plot", boost::make_optional(false, std::string())))
         .Times(1);
 
-    presenter->notify(IEnggDiffMultiRunFittingWidgetPresenter::Notification::
-                          PlotToSeparateWindow);
+    presenter->notify(IEnggDiffMultiRunFittingWidgetPresenter::Notification::PlotToSeparateWindow);
     assertMocksUsedCorrectly();
   }
 
@@ -321,39 +256,26 @@ public:
     auto presenter = setUpPresenter();
     const RunLabel runLabel("123", 1);
 
-    EXPECT_CALL(*m_mockView, getSelectedRunLabel())
-        .Times(1)
-        .WillOnce(Return(runLabel));
+    EXPECT_CALL(*m_mockView, getSelectedRunLabel()).Times(1).WillOnce(Return(runLabel));
 
     const boost::optional<Mantid::API::MatrixWorkspace_sptr> sampleWorkspace(
         WorkspaceCreationHelper::create2DWorkspaceBinned(1, 100));
 
-    EXPECT_CALL(*m_mockModel, getFocusedRun(runLabel))
-        .Times(1)
-        .WillOnce(Return(sampleWorkspace));
+    EXPECT_CALL(*m_mockModel, getFocusedRun(runLabel)).Times(1).WillOnce(Return(sampleWorkspace));
 
-    EXPECT_CALL(*m_mockView, showFitResultsSelected())
-        .Times(1)
-        .WillOnce(Return(true));
-    EXPECT_CALL(*m_mockModel, hasFittedPeaksForRun(runLabel))
-        .Times(1)
-        .WillOnce(Return(true));
+    EXPECT_CALL(*m_mockView, showFitResultsSelected()).Times(1).WillOnce(Return(true));
+    EXPECT_CALL(*m_mockModel, hasFittedPeaksForRun(runLabel)).Times(1).WillOnce(Return(true));
 
     const boost::optional<Mantid::API::MatrixWorkspace_sptr> sampleFittedPeaks(
         WorkspaceCreationHelper::create2DWorkspaceBinned(1, 100));
-    EXPECT_CALL(*m_mockModel, getFittedPeaks(runLabel))
-        .Times(1)
-        .WillOnce(Return(sampleFittedPeaks));
+    EXPECT_CALL(*m_mockModel, getFittedPeaks(runLabel)).Times(1).WillOnce(Return(sampleFittedPeaks));
     EXPECT_CALL(*m_mockView, reportPlotInvalidFittedPeaks(testing::_)).Times(0);
 
-    EXPECT_CALL(*m_mockView,
-                plotToSeparateWindow("123_1_external_plot",
-                                     boost::optional<std::string>(
-                                         "123_1_fitted_peaks_external_plot")))
+    EXPECT_CALL(*m_mockView, plotToSeparateWindow("123_1_external_plot",
+                                                  boost::optional<std::string>("123_1_fitted_peaks_external_plot")))
         .Times(1);
 
-    presenter->notify(IEnggDiffMultiRunFittingWidgetPresenter::Notification::
-                          PlotToSeparateWindow);
+    presenter->notify(IEnggDiffMultiRunFittingWidgetPresenter::Notification::PlotToSeparateWindow);
     assertMocksUsedCorrectly();
   }
 
@@ -369,14 +291,12 @@ private:
   MockEnggDiffMultiRunFittingWidgetView *m_mockView;
 
   std::unique_ptr<EnggDiffMultiRunFittingWidgetPresenter> setUpPresenter() {
-    auto mockModel_uptr = std::make_unique<
-        testing::NiceMock<MockEnggDiffMultiRunFittingWidgetModel>>();
+    auto mockModel_uptr = std::make_unique<testing::NiceMock<MockEnggDiffMultiRunFittingWidgetModel>>();
     m_mockModel = mockModel_uptr.get();
 
     m_mockView = new testing::NiceMock<MockEnggDiffMultiRunFittingWidgetView>();
 
-    return std::make_unique<EnggDiffMultiRunFittingWidgetPresenter>(
-        std::move(mockModel_uptr), m_mockView);
+    return std::make_unique<EnggDiffMultiRunFittingWidgetPresenter>(std::move(mockModel_uptr), m_mockView);
   }
 
   void assertMocksUsedCorrectly() {

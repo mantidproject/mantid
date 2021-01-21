@@ -24,8 +24,7 @@ class QtProperty;
 class FitParameterTie {
 public:
   /// Constructor
-  explicit FitParameterTie(
-      const std::shared_ptr<Mantid::API::CompositeFunction> &cf);
+  explicit FitParameterTie(const std::shared_ptr<Mantid::API::CompositeFunction> &cf);
   /// Destructor
   ~FitParameterTie();
   /// Set the tying expression, e.g. "f1.Sigma = 2*f0.Sigma + 1"

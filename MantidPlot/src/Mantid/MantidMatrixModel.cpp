@@ -34,16 +34,14 @@ MantidMatrixModel
 @param start :: Starting index
 @param type :: Type of the data to display: Y, X, or E
 */
-MantidMatrixModel::MantidMatrixModel(QObject *parent,
-                                     const Mantid::API::MatrixWorkspace *ws,
-                                     int rows, int cols, int start, Type type)
+MantidMatrixModel::MantidMatrixModel(QObject *parent, const Mantid::API::MatrixWorkspace *ws, int rows, int cols,
+                                     int start, Type type)
     : QAbstractTableModel(parent), m_type(type), m_format('e'), m_prec(6) {
   setup(ws, rows, cols, start);
 }
 
 /// Call this function if the workspace has changed
-void MantidMatrixModel::setup(const Mantid::API::MatrixWorkspace *ws, int rows,
-                              int cols, int start) {
+void MantidMatrixModel::setup(const Mantid::API::MatrixWorkspace *ws, int rows, int cols, int start) {
   m_workspace = ws;
   m_rows = rows;
   m_cols = cols;
@@ -51,8 +49,7 @@ void MantidMatrixModel::setup(const Mantid::API::MatrixWorkspace *ws, int rows,
   m_endRow = m_rows - 1;
   m_startRow = start >= 0 ? start : 0;
   m_mon_color = QColor(255, 253, 209);
-  m_mask_color =
-      QApplication::palette().color(QPalette::Disabled, QPalette::Background);
+  m_mask_color = QApplication::palette().color(QPalette::Disabled, QPalette::Background);
 
   m_colNumCorr = 0;
   const size_t numHist = ws->getNumberHistograms();
@@ -94,13 +91,11 @@ double MantidMatrixModel::data(int row, int col) const {
   return val;
 }
 
-QVariant MantidMatrixModel::headerData(int section, Qt::Orientation orientation,
-                                       int role) const {
+QVariant MantidMatrixModel::headerData(int section, Qt::Orientation orientation, int role) const {
   if (!(role == Qt::DisplayRole || role == Qt::ToolTipRole))
     return QVariant();
   if (orientation == Qt::Vertical && m_workspace->axes() > 1) {
-    Mantid::API::TextAxis *xAxis =
-        dynamic_cast<Mantid::API::TextAxis *>(m_workspace->getAxis(1));
+    Mantid::API::TextAxis *xAxis = dynamic_cast<Mantid::API::TextAxis *>(m_workspace->getAxis(1));
     if (xAxis) {
       return QString::fromStdString(xAxis->label(section));
     }
@@ -119,26 +114,22 @@ QVariant MantidMatrixModel::headerData(int section, Qt::Orientation orientation,
   if (m_workspace->axes() > axisIndex) // if the axis exists
   {
     Mantid::API::Axis *axis = m_workspace->getAxis(axisIndex);
-    Mantid::API::TextAxis *textAxis =
-        dynamic_cast<Mantid::API::TextAxis *>(axis);
+    Mantid::API::TextAxis *textAxis = dynamic_cast<Mantid::API::TextAxis *>(axis);
     if (textAxis) // just return the text label
     {
       return QString::fromStdString(textAxis->label(section));
     }
 
-    Mantid::API::SpectraAxis *spAxis =
-        dynamic_cast<Mantid::API::SpectraAxis *>(axis);
+    Mantid::API::SpectraAxis *spAxis = dynamic_cast<Mantid::API::SpectraAxis *>(axis);
     if (spAxis) {
       if (role == Qt::ToolTipRole) {
         return QString("index %1%2spectra no %3")
             .arg(QString::number(section), toolTipSeperator,
-                 QString::number(
-                     m_workspace->getSpectrum(section).getSpectrumNo()));
+                 QString::number(m_workspace->getSpectrum(section).getSpectrumNo()));
       } else {
         return QString("%1%2sp-%3")
             .arg(QString::number(section), headerSeperator,
-                 QString::number(
-                     m_workspace->getSpectrum(section).getSpectrumNo()));
+                 QString::number(m_workspace->getSpectrum(section).getSpectrumNo()));
       }
     }
 
@@ -160,11 +151,9 @@ QVariant MantidMatrixModel::headerData(int section, Qt::Orientation orientation,
         if (role == Qt::ToolTipRole) {
           return QString("index %1%2bin centre value varies%3Rebin to set "
                          "common bins")
-              .arg(QString::number(section), toolTipSeperator,
-                   toolTipSeperator);
+              .arg(QString::number(section), toolTipSeperator, toolTipSeperator);
         } else {
-          return QString("%1%2bins vary")
-              .arg(QString::number(section), headerSeperator);
+          return QString("%1%2bins vary").arg(QString::number(section), headerSeperator);
         }
       }
 
@@ -183,38 +172,31 @@ QVariant MantidMatrixModel::headerData(int section, Qt::Orientation orientation,
 
       if (role == Qt::ToolTipRole) {
         return QString("index %1%2%3 %4%5 (bin centre)")
-            .arg(QString::number(section), toolTipSeperator,
-                 QString::fromStdString(axis->unit()->caption()),
+            .arg(QString::number(section), toolTipSeperator, QString::fromStdString(axis->unit()->caption()),
                  QString::number(binCentreValue), unit);
       } else {
         return QString("%1%2%3%4")
-            .arg(QString::number(section), headerSeperator,
-                 QString::number(binCentreValue), unit);
+            .arg(QString::number(section), headerSeperator, QString::number(binCentreValue), unit);
       }
     }
 
     // Handle BinEdgeAxis for vertical axis
-    Mantid::API::BinEdgeAxis *binEdgeAxis =
-        dynamic_cast<Mantid::API::BinEdgeAxis *>(axis);
+    Mantid::API::BinEdgeAxis *binEdgeAxis = dynamic_cast<Mantid::API::BinEdgeAxis *>(axis);
     if (binEdgeAxis && axisIndex == 1) {
       const Mantid::MantidVec &axisBinEdges = binEdgeAxis->getValues();
-      double binCentreValue =
-          (axisBinEdges[section] + axisBinEdges[section + 1]) / 2.0;
+      double binCentreValue = (axisBinEdges[section] + axisBinEdges[section + 1]) / 2.0;
 
       if (role == Qt::ToolTipRole) {
         return QString("index %1%2%3 %4%5 (bin centre)")
-            .arg(QString::number(section), toolTipSeperator,
-                 QString::fromStdString(axis->unit()->caption()),
+            .arg(QString::number(section), toolTipSeperator, QString::fromStdString(axis->unit()->caption()),
                  QString::number(binCentreValue), unit);
       } else {
         return QString("%1%2%3%4")
-            .arg(QString::number(section), headerSeperator,
-                 QString::number(binCentreValue), unit);
+            .arg(QString::number(section), headerSeperator, QString::number(binCentreValue), unit);
       }
     }
 
-    Mantid::API::NumericAxis *numAxis =
-        dynamic_cast<Mantid::API::NumericAxis *>(axis);
+    Mantid::API::NumericAxis *numAxis = dynamic_cast<Mantid::API::NumericAxis *>(axis);
     if (numAxis) {
       QString valueString;
       try {
@@ -225,14 +207,12 @@ QVariant MantidMatrixModel::headerData(int section, Qt::Orientation orientation,
 
       if (role == Qt::ToolTipRole) {
         return QString("index %1%2%3 %4%5")
-            .arg(QString::number(section), toolTipSeperator,
-                 QString::fromStdString(axis->unit()->caption()), valueString,
-                 unit);
+            .arg(QString::number(section), toolTipSeperator, QString::fromStdString(axis->unit()->caption()),
+                 valueString, unit);
       } else {
         if (headerSeperator == " ")
           headerSeperator = "   ";
-        return QString("%1%2%3%4")
-            .arg(QString::number(section), headerSeperator, valueString, unit);
+        return QString("%1%2%3%4").arg(QString::number(section), headerSeperator, valueString, unit);
       }
     }
   }
@@ -271,8 +251,7 @@ QVariant MantidMatrixModel::data(const QModelIndex &index, int role) const {
     return QVariant(m_locale.toString(val, m_format, m_prec));
   }
   case Qt::BackgroundRole: {
-    if (checkMaskedCache(index.row()) ||
-        checkMaskedBinCache(index.row(), index.column())) {
+    if (checkMaskedCache(index.row()) || checkMaskedBinCache(index.row(), index.column())) {
       return m_mask_color;
     } else if (checkMonitorCache(index.row())) {
       return m_mon_color;

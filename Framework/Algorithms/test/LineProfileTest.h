@@ -56,14 +56,11 @@ public:
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Direction", "Horizontal"))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("Centre", static_cast<double>(nHist) / 2))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Centre", static_cast<double>(nHist) / 2))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("HalfWidth", 0.49))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("Start", static_cast<double>(start)))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Start", static_cast<double>(start)))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("End", static_cast<double>(end)))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
@@ -83,10 +80,8 @@ public:
       TS_ASSERT_EQUALS(e, inputWS->e(0)[0])
     }
     const auto vertAxis = outputWS->getAxis(1);
-    TS_ASSERT_EQUALS(vertAxis->getValue(0),
-                     static_cast<double>(nHist) / 2 - 0.5)
-    TS_ASSERT_EQUALS(vertAxis->getValue(1),
-                     static_cast<double>(nHist) / 2 + 0.5)
+    TS_ASSERT_EQUALS(vertAxis->getValue(0), static_cast<double>(nHist) / 2 - 0.5)
+    TS_ASSERT_EQUALS(vertAxis->getValue(1), static_cast<double>(nHist) / 2 + 0.5)
   }
 
   void test_summing_profile() {
@@ -98,8 +93,7 @@ public:
     }
     const int start = 2;
     const int end = nBins - 2;
-    MatrixWorkspace_sptr outputWS =
-        profileOverTwoSpectra(inputWS, start, end, "Sum");
+    MatrixWorkspace_sptr outputWS = profileOverTwoSpectra(inputWS, start, end, "Sum");
     TS_ASSERT(outputWS);
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1)
     const auto hist = outputWS->histogram(0);
@@ -113,10 +107,8 @@ public:
       TS_ASSERT_EQUALS(e, 2 * inputWS->e(0)[0])
     }
     const auto vertAxis = outputWS->getAxis(1);
-    TS_ASSERT_EQUALS(vertAxis->getValue(0),
-                     static_cast<double>(nHist) / 2 - 0.5)
-    TS_ASSERT_EQUALS(vertAxis->getValue(1),
-                     static_cast<double>(nHist) / 2 + 1.5)
+    TS_ASSERT_EQUALS(vertAxis->getValue(0), static_cast<double>(nHist) / 2 - 0.5)
+    TS_ASSERT_EQUALS(vertAxis->getValue(1), static_cast<double>(nHist) / 2 + 1.5)
   }
 
   void test_horizontal_profile_linewidth_outside_workspace() {
@@ -133,13 +125,11 @@ public:
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Direction", "Horizontal"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Centre", 1.0))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("HalfWidth", 3.0))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("Start", static_cast<double>(start)))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Start", static_cast<double>(start)))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("End", static_cast<double>(end)))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
@@ -156,8 +146,7 @@ public:
       TS_ASSERT_EQUALS(y, inputWS->y(0)[0])
     }
     for (const auto e : hist.e()) {
-      TS_ASSERT_EQUALS(e,
-                       std::sqrt(4 * inputWS->e(0)[0] * inputWS->e(0)[0]) / 4)
+      TS_ASSERT_EQUALS(e, std::sqrt(4 * inputWS->e(0)[0] * inputWS->e(0)[0]) / 4)
     }
     const auto vertAxis = outputWS->getAxis(1);
     TS_ASSERT_EQUALS(vertAxis->getValue(0), 1.0)
@@ -174,11 +163,9 @@ public:
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Direction", "Horizontal"))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("Centre", static_cast<double>(nHist) / 2))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Centre", static_cast<double>(nHist) / 2))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("HalfWidth", 2.0 * nBins))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
@@ -210,14 +197,11 @@ public:
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Direction", "Vertical"))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("Centre", static_cast<double>(nBins) / 2))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Centre", static_cast<double>(nBins) / 2))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("HalfWidth", 3.0))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("Start", static_cast<double>(start)))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Start", static_cast<double>(start)))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("End", static_cast<double>(end)))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
@@ -234,14 +218,11 @@ public:
       TS_ASSERT_EQUALS(y, inputWS->y(0)[0])
     }
     for (const auto e : hist.e()) {
-      TS_ASSERT_EQUALS(e,
-                       std::sqrt(7 * inputWS->e(0)[0] * inputWS->e(0)[0]) / 7)
+      TS_ASSERT_EQUALS(e, std::sqrt(7 * inputWS->e(0)[0] * inputWS->e(0)[0]) / 7)
     }
     const auto vertAxis = outputWS->getAxis(1);
-    TS_ASSERT_EQUALS(vertAxis->getValue(0),
-                     static_cast<double>(nBins) / 2 - 3.5)
-    TS_ASSERT_EQUALS(vertAxis->getValue(1),
-                     static_cast<double>(nBins) / 2 + 3.5)
+    TS_ASSERT_EQUALS(vertAxis->getValue(0), static_cast<double>(nBins) / 2 - 3.5)
+    TS_ASSERT_EQUALS(vertAxis->getValue(1), static_cast<double>(nBins) / 2 + 3.5)
   }
 
   void test_vertical_profile_over_entire_workspace() {
@@ -255,11 +236,9 @@ public:
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Direction", "Vertical"))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("Centre", static_cast<double>(nBins) / 2))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Centre", static_cast<double>(nBins) / 2))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("HalfWidth", 3.0))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
@@ -276,14 +255,11 @@ public:
       TS_ASSERT_EQUALS(y, inputWS->y(0)[0])
     }
     for (const auto e : hist.e()) {
-      TS_ASSERT_EQUALS(e,
-                       std::sqrt(7 * inputWS->e(0)[0] * inputWS->e(0)[0]) / 7)
+      TS_ASSERT_EQUALS(e, std::sqrt(7 * inputWS->e(0)[0] * inputWS->e(0)[0]) / 7)
     }
     const auto vertAxis = outputWS->getAxis(1);
-    TS_ASSERT_EQUALS(vertAxis->getValue(0),
-                     static_cast<double>(nBins) / 2 - 3.5)
-    TS_ASSERT_EQUALS(vertAxis->getValue(1),
-                     static_cast<double>(nBins) / 2 + 3.5)
+    TS_ASSERT_EQUALS(vertAxis->getValue(0), static_cast<double>(nBins) / 2 - 3.5)
+    TS_ASSERT_EQUALS(vertAxis->getValue(1), static_cast<double>(nBins) / 2 + 3.5)
   }
 
   void test_failure_when_profile_outside_workspace() {
@@ -297,8 +273,7 @@ public:
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Direction", "Horizontal"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Centre", -10.0))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("HalfWidth", 1.0))
@@ -313,8 +288,7 @@ public:
     alg.setChild(true);
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("HalfWidth", std::numeric_limits<double>::min()))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("HalfWidth", std::numeric_limits<double>::min()))
     TS_ASSERT_THROWS_ANYTHING(alg.setProperty("HalfWidth", 0.0))
     TS_ASSERT_THROWS_ANYTHING(alg.setProperty("HalfWidth", -1.0))
   }
@@ -330,8 +304,7 @@ public:
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Direction", "Horizontal"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Centre", -10.0))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("HalfWidth", 1.0))
@@ -356,8 +329,7 @@ public:
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Direction", "Horizontal"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Centre", 3.5))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("HalfWidth", 0.5))
@@ -384,8 +356,7 @@ public:
         TS_ASSERT_EQUALS(hist.e()[i], inputWS->e(0)[0])
         continue;
       }
-      TS_ASSERT_EQUALS(hist.e()[i],
-                       std::sqrt(2 * inputWS->e(0)[0] * inputWS->e(0)[0]) / 2)
+      TS_ASSERT_EQUALS(hist.e()[i], std::sqrt(2 * inputWS->e(0)[0] * inputWS->e(0)[0]) / 2)
     }
     const auto vertAxis = outputWS->getAxis(1);
     TS_ASSERT_EQUALS(vertAxis->getValue(0), 3)
@@ -399,8 +370,7 @@ public:
     inputWS->mutableRun().addProperty("test_property", true);
     const int start = 2;
     const int end = nBins - 2;
-    MatrixWorkspace_sptr outputWS =
-        profileOverTwoSpectra(inputWS, start, end, "Sum");
+    MatrixWorkspace_sptr outputWS = profileOverTwoSpectra(inputWS, start, end, "Sum");
     TS_ASSERT(outputWS);
     const auto &logs = outputWS->run();
     TS_ASSERT(logs.hasProperty("test_property"));
@@ -411,9 +381,8 @@ public:
     const size_t nBins = 23;
     MatrixWorkspace_sptr inputWS = create2DWorkspace154(nHist, nBins);
     auto &oldHistory = inputWS->history();
-    auto historyEntry = std::make_shared<AlgorithmHistory>(
-        "LineProfileTestDummyAlgorithmName", 1,
-        boost::uuids::to_string(boost::uuids::random_generator()()));
+    auto historyEntry = std::make_shared<AlgorithmHistory>("LineProfileTestDummyAlgorithmName", 1,
+                                                           boost::uuids::to_string(boost::uuids::random_generator()()));
     oldHistory.addHistory(historyEntry);
     const int start = 2;
     const int end = nBins - 2;
@@ -423,21 +392,17 @@ public:
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(
-        "OutputWorkspace", "LineProfileTest_test_input_history"))
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty(
-        "Centre", static_cast<double>(inputWS->getNumberHistograms()) / 2))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "LineProfileTest_test_input_history"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Centre", static_cast<double>(inputWS->getNumberHistograms()) / 2))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("HalfWidth", 0.5))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("Start", static_cast<double>(start)))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Start", static_cast<double>(start)))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("End", static_cast<double>(end)))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Mode", "Sum"))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
 
     MatrixWorkspace_sptr outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve(
-            "LineProfileTest_test_input_history"));
+        AnalysisDataService::Instance().retrieve("LineProfileTest_test_input_history"));
     TS_ASSERT(outputWS);
     const auto &history = outputWS->getHistory();
     TS_ASSERT_EQUALS(history.size(), 2)
@@ -455,8 +420,7 @@ public:
     TS_ASSERT(inputWS->isDistribution());
     const int start = 2;
     const int end = nBins - 2;
-    MatrixWorkspace_sptr outputWS =
-        profileOverTwoSpectra(inputWS, start, end, "Sum");
+    MatrixWorkspace_sptr outputWS = profileOverTwoSpectra(inputWS, start, end, "Sum");
     TS_ASSERT(outputWS);
     TS_ASSERT(outputWS->isHistogramData());
     TS_ASSERT(outputWS->isDistribution());
@@ -471,8 +435,7 @@ public:
     TS_ASSERT(!inputWS->isDistribution());
     const int start = 2;
     const int end = nBins - 2;
-    MatrixWorkspace_sptr outputWS =
-        profileOverTwoSpectra(inputWS, start, end, "Sum");
+    MatrixWorkspace_sptr outputWS = profileOverTwoSpectra(inputWS, start, end, "Sum");
     TS_ASSERT(outputWS);
     TS_ASSERT(outputWS->isHistogramData());
     TS_ASSERT(!outputWS->isDistribution());
@@ -494,11 +457,9 @@ public:
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Direction", "Vertical"))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("Centre", static_cast<double>(nBins) / 2))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Centre", static_cast<double>(nBins) / 2))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("HalfWidth", 3.0))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
@@ -509,8 +470,7 @@ public:
     TS_ASSERT(!outputWS->isDistribution())
   }
 
-  void
-  test_vertical_point_data_input_gives_nondistribution_point_data_output() {
+  void test_vertical_point_data_input_gives_nondistribution_point_data_output() {
     const size_t nHist = 13;
     const size_t nBins = 23;
     MatrixWorkspace_sptr inputWS = create2DWorkspace154(nHist, nBins);
@@ -522,11 +482,9 @@ public:
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Direction", "Vertical"))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("Centre", static_cast<double>(nBins) / 2))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Centre", static_cast<double>(nBins) / 2))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("HalfWidth", 3.0))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
@@ -550,8 +508,7 @@ public:
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Direction", "Vertical"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Centre", 11.1 / 2.))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("HalfWidth", 6.))
@@ -576,29 +533,24 @@ public:
       TS_ASSERT_DELTA(y, horizontalIntegral / nBins, 1e-12)
     }
     const auto &Es = outputWS->e(0);
-    const auto horizontalError =
-        std::sqrt(3. * 0.1 * 0.1 + 2. * 1. * 1. + 1. * 10. * 10.) / binHeight;
+    const auto horizontalError = std::sqrt(3. * 0.1 * 0.1 + 2. * 1. * 1. + 1. * 10. * 10.) / binHeight;
     const std::vector<double> profileErrors(nHist, horizontalError / nBins);
     TS_ASSERT_EQUALS(Es.rawData(), profileErrors)
   }
 
 private:
-  MatrixWorkspace_sptr
-  profileOverTwoSpectra(const MatrixWorkspace_sptr &inputWS, const int start,
-                        const int end, const std::string &mode) {
+  MatrixWorkspace_sptr profileOverTwoSpectra(const MatrixWorkspace_sptr &inputWS, const int start, const int end,
+                                             const std::string &mode) {
     LineProfile alg;
     // Don't put output in ADS by default
     alg.setChild(true);
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty(
-        "Centre", static_cast<double>(inputWS->getNumberHistograms()) / 2))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Centre", static_cast<double>(inputWS->getNumberHistograms()) / 2))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("HalfWidth", 0.5))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("Start", static_cast<double>(start)))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Start", static_cast<double>(start)))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("End", static_cast<double>(end)))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Mode", mode))
     TS_ASSERT_THROWS_NOTHING(alg.execute())

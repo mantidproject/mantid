@@ -17,8 +17,7 @@ namespace MantidWidgets {
 class EXPORT_OPT_MANTIDQT_PLOTTING ErrorCurve : public QwtPlotItem {
 
 public:
-  ErrorCurve(const QwtPlotCurve *dataCurve,
-             const std::vector<double> &errors = std::vector<double>());
+  ErrorCurve(const QwtPlotCurve *dataCurve, const std::vector<double> &errors = std::vector<double>());
   /// Set error bars
   void setErrorBars(const std::vector<double> &errors);
   /// Number of points in the curve

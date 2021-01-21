@@ -20,53 +20,43 @@ using Mantid::API::Workspace_sptr;
 
 std::string boolToString(bool value) { return value ? "1" : "0"; }
 
-void update(std::string const &property, std::string const &value,
-            AlgorithmRuntimeProps &properties) {
+void update(std::string const &property, std::string const &value, AlgorithmRuntimeProps &properties) {
   if (!value.empty())
     properties[property] = value;
 }
 
-void update(std::string const &property,
-            boost::optional<std::string> const &value,
-            AlgorithmRuntimeProps &properties) {
+void update(std::string const &property, boost::optional<std::string> const &value, AlgorithmRuntimeProps &properties) {
   if (value)
     update(property, value.get(), properties);
 }
 
-void update(std::string const &property, bool value,
-            AlgorithmRuntimeProps &properties) {
+void update(std::string const &property, bool value, AlgorithmRuntimeProps &properties) {
   update(property, boolToString(value), properties);
 }
 
-void update(std::string const &property, int value,
-            AlgorithmRuntimeProps &properties) {
+void update(std::string const &property, int value, AlgorithmRuntimeProps &properties) {
   update(property, std::to_string(value), properties);
 }
 
-void update(std::string const &property, size_t value,
-            AlgorithmRuntimeProps &properties) {
+void update(std::string const &property, size_t value, AlgorithmRuntimeProps &properties) {
   update(property, std::to_string(value), properties);
 }
 
-void update(std::string const &property, double value,
-            AlgorithmRuntimeProps &properties) {
+void update(std::string const &property, double value, AlgorithmRuntimeProps &properties) {
   update(property, std::to_string(value), properties);
 }
 
-void update(std::string const &property, boost::optional<double> const &value,
-            AlgorithmRuntimeProps &properties) {
+void update(std::string const &property, boost::optional<double> const &value, AlgorithmRuntimeProps &properties) {
   if (value)
     update(property, value.get(), properties);
 }
 
-void updateFromMap(AlgorithmRuntimeProps &properties,
-                   std::map<std::string, std::string> const &parameterMap) {
+void updateFromMap(AlgorithmRuntimeProps &properties, std::map<std::string, std::string> const &parameterMap) {
   for (auto kvp : parameterMap) {
     update(kvp.first, kvp.second, properties);
   }
 }
-std::string getOutputWorkspace(const IAlgorithm_sptr &algorithm,
-                               std::string const &property) {
+std::string getOutputWorkspace(const IAlgorithm_sptr &algorithm, std::string const &property) {
   auto const workspaceName = algorithm->getPropertyValue(property);
   return workspaceName;
 }

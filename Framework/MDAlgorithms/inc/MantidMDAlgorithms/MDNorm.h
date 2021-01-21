@@ -25,36 +25,27 @@ public:
   const std::string category() const override;
   const std::string summary() const override;
   const std::vector<std::string> seeAlso() const override {
-    return {"CropWorkspaceForMDNorm", "MDNormSCD", "MDNormDirectSC",
-            "RecalculateTrajectoriesExtents"};
+    return {"CropWorkspaceForMDNorm", "MDNormSCD", "MDNormDirectSC", "RecalculateTrajectoriesExtents"};
   }
 
 private:
   void init() override;
   void exec() override;
-  void validateBinningForTemporaryDataWorkspace(
-      const std::map<std::string, std::string> &,
-      const Mantid::API::IMDHistoWorkspace_sptr &);
+  void validateBinningForTemporaryDataWorkspace(const std::map<std::string, std::string> &,
+                                                const Mantid::API::IMDHistoWorkspace_sptr &);
   std::map<std::string, std::string> validateInputs() override final;
   std::string QDimensionName(std::vector<double> projection);
   std::string QDimensionNameQSample(int i);
   std::map<std::string, std::string> getBinParameters();
   void createNormalizationWS(const DataObjects::MDHistoWorkspace &dataWS);
-  DataObjects::MDHistoWorkspace_sptr
-  binInputWS(const std::vector<Geometry::SymmetryOperation> &symmetryOps);
-  std::vector<coord_t>
-  getValuesFromOtherDimensions(bool &skipNormalization,
-                               uint16_t expInfoIndex = 0) const;
+  DataObjects::MDHistoWorkspace_sptr binInputWS(const std::vector<Geometry::SymmetryOperation> &symmetryOps);
+  std::vector<coord_t> getValuesFromOtherDimensions(bool &skipNormalization, uint16_t expInfoIndex = 0) const;
   void cacheDimensionXValues();
-  void calculateNormalization(const std::vector<coord_t> &otherValues,
-                              const Geometry::SymmetryOperation &so,
+  void calculateNormalization(const std::vector<coord_t> &otherValues, const Geometry::SymmetryOperation &so,
                               uint16_t expInfoIndex, size_t soIndex);
-  void calculateIntersections(std::vector<std::array<double, 4>> &intersections,
-                              const double theta, const double phi,
-                              const Kernel::DblMatrix &transform,
-                              double lowvalue, double highvalue);
-  void calcIntegralsForIntersections(const std::vector<double> &xValues,
-                                     const API::MatrixWorkspace &integrFlux,
+  void calculateIntersections(std::vector<std::array<double, 4>> &intersections, const double theta, const double phi,
+                              const Kernel::DblMatrix &transform, double lowvalue, double highvalue);
+  void calcIntegralsForIntersections(const std::vector<double> &xValues, const API::MatrixWorkspace &integrFlux,
                                      size_t sp, std::vector<double> &yValues);
 
   /// Normalization workspace
@@ -64,8 +55,7 @@ private:
   /// flag for reciprocal lattice units
   bool m_isRLU;
   /// The projection vectors
-  std::vector<double> m_Q0Basis{1., 0., 0.}, m_Q1Basis{0., 1., 0.},
-      m_Q2Basis{0., 0., 1.};
+  std::vector<double> m_Q0Basis{1., 0., 0.}, m_Q1Basis{0., 1., 0.}, m_Q2Basis{0., 0., 1.};
   /// UB matrix
   Mantid::Kernel::DblMatrix m_UB;
   /// W matrix

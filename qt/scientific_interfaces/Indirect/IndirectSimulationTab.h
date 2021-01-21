@@ -35,10 +35,8 @@ public:
   IndirectSimulationTab(QWidget *parent = nullptr);
   ~IndirectSimulationTab() override;
 
-  void setOutputPlotOptionsPresenter(
-      std::unique_ptr<IndirectPlotOptionsPresenter> presenter);
-  void setOutputPlotOptionsWorkspaces(
-      std::vector<std::string> const &outputWorkspaces);
+  void setOutputPlotOptionsPresenter(std::unique_ptr<IndirectPlotOptionsPresenter> presenter);
+  void setOutputPlotOptionsWorkspaces(std::vector<std::string> const &outputWorkspaces);
   void clearOutputPlotOptionsWorkspaces();
 
   virtual void loadSettings(const QSettings &settings) = 0;

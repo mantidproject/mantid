@@ -22,8 +22,7 @@ public:
 
   MOCK_CONST_METHOD1(displayGamma, void(const double gamma));
 
-  MOCK_CONST_METHOD1(displayLatticeParams,
-                     void(const Mantid::API::ITableWorkspace_sptr));
+  MOCK_CONST_METHOD1(displayLatticeParams, void(const Mantid::API::ITableWorkspace_sptr));
 
   MOCK_CONST_METHOD1(displayRwp, void(const double rwp));
 
@@ -57,8 +56,7 @@ public:
 
   MOCK_CONST_METHOD0(getXMin, boost::optional<double>());
 
-  MOCK_METHOD1(plotCurve,
-               void(const std::vector<std::shared_ptr<QwtData>> &curve));
+  MOCK_METHOD1(plotCurve, void(const std::vector<std::shared_ptr<QwtData>> &curve));
 
   MOCK_METHOD0(resetCanvas, void());
 
@@ -70,11 +68,9 @@ public:
 
   MOCK_METHOD1(updateRunList, void(const std::vector<RunLabel> &runLabels));
 
-  MOCK_CONST_METHOD2(userError, void(const std::string &errorTitle,
-                                     const std::string &errorDescription));
+  MOCK_CONST_METHOD2(userError, void(const std::string &errorTitle, const std::string &errorDescription));
 
-  MOCK_CONST_METHOD2(userWarning, void(const std::string &warningTitle,
-                                       const std::string &warningDescription));
+  MOCK_CONST_METHOD2(userWarning, void(const std::string &warningTitle, const std::string &warningDescription));
 };
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE

@@ -36,21 +36,18 @@ enum TransformType {
   Relative = 1  ///< The transformation given is relative to the original value
 };
 
-MANTID_GEOMETRY_DLL Geometry::Instrument_sptr
-createMinimalInstrument(const Mantid::Kernel::V3D &sourcePos,
-                        const Mantid::Kernel::V3D &samplePos,
-                        const Mantid::Kernel::V3D &detectorPos);
+MANTID_GEOMETRY_DLL Geometry::Instrument_sptr createMinimalInstrument(const Mantid::Kernel::V3D &sourcePos,
+                                                                      const Mantid::Kernel::V3D &samplePos,
+                                                                      const Mantid::Kernel::V3D &detectorPos);
 
-MANTID_GEOMETRY_DLL Geometry::Instrument_sptr
-createVirtualInstrument(Kernel::V3D sourcePos, Kernel::V3D samplePos,
-                        const std::vector<Kernel::V3D> &vecdetpos,
-                        const std::vector<detid_t> &vecdetid);
+MANTID_GEOMETRY_DLL Geometry::Instrument_sptr createVirtualInstrument(Kernel::V3D sourcePos, Kernel::V3D samplePos,
+                                                                      const std::vector<Kernel::V3D> &vecdetpos,
+                                                                      const std::vector<detid_t> &vecdetid);
 
-MANTID_GEOMETRY_DLL std::shared_ptr<Geometry::CSGObject>
-createSphere(double radius, const Kernel::V3D &centre, const std::string &id);
+MANTID_GEOMETRY_DLL std::shared_ptr<Geometry::CSGObject> createSphere(double radius, const Kernel::V3D &centre,
+                                                                      const std::string &id);
 
-MANTID_GEOMETRY_DLL std::string
-sphereXML(double radius, const Kernel::V3D &centre, const std::string &id);
+MANTID_GEOMETRY_DLL std::string sphereXML(double radius, const Kernel::V3D &centre, const std::string &id);
 } // namespace ComponentHelper
 } // namespace Geometry
 } // namespace Mantid

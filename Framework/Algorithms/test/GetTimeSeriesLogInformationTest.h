@@ -32,8 +32,7 @@ DataObjects::EventWorkspace_sptr createEventWorkspace() {
 
   // 1. Empty workspace
   DataObjects::EventWorkspace_sptr eventws =
-      WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(2, 2,
-                                                                      true);
+      WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(2, 2, true);
   // eventws->setName("TestWorkspace");
 
   // 2. Run star time
@@ -43,13 +42,11 @@ DataObjects::EventWorkspace_sptr createEventWorkspace() {
 
   Types::Core::DateAndTime runstarttime(runstarttime_ns);
   Types::Core::DateAndTime runendtime(runstoptime_ns);
-  eventws->mutableRun().addProperty("run_start",
-                                    runstarttime.toISO8601String());
+  eventws->mutableRun().addProperty("run_start", runstarttime.toISO8601String());
   eventws->mutableRun().addProperty("run_end", runendtime.toISO8601String());
 
   // 3. Proton charge log
-  Kernel::TimeSeriesProperty<double> *protonchargelog =
-      new Kernel::TimeSeriesProperty<double>("proton_charge");
+  Kernel::TimeSeriesProperty<double> *protonchargelog = new Kernel::TimeSeriesProperty<double>("proton_charge");
   int64_t curtime_ns = runstarttime_ns;
   while (curtime_ns <= runstoptime_ns) {
     Types::Core::DateAndTime curtime(curtime_ns);
@@ -59,8 +56,7 @@ DataObjects::EventWorkspace_sptr createEventWorkspace() {
   eventws->mutableRun().addProperty(protonchargelog, true);
 
   // 4. Sine value log (value record 1/4 of pulse time.  it is FAST)
-  Kernel::TimeSeriesProperty<double> *sinlog =
-      new Kernel::TimeSeriesProperty<double>("FastSineLog");
+  Kernel::TimeSeriesProperty<double> *sinlog = new Kernel::TimeSeriesProperty<double>("FastSineLog");
   double period = static_cast<double>(pulsetime_ns);
   curtime_ns = runstarttime_ns;
   while (curtime_ns < runstoptime_ns) {
@@ -72,8 +68,7 @@ DataObjects::EventWorkspace_sptr createEventWorkspace() {
   eventws->mutableRun().addProperty(sinlog, true);
 
   // 5. Cosine value log (value record 4 pulse time.  it is SLOW)
-  Kernel::TimeSeriesProperty<double> *coslog =
-      new Kernel::TimeSeriesProperty<double>("SlowCosineLog");
+  Kernel::TimeSeriesProperty<double> *coslog = new Kernel::TimeSeriesProperty<double>("SlowCosineLog");
   period = static_cast<double>(pulsetime_ns * 10);
   curtime_ns = runstarttime_ns;
   while (curtime_ns < runstoptime_ns) {
@@ -91,12 +86,8 @@ class GetTimeSeriesLogInformationTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static GetTimeSeriesLogInformationTest *createSuite() {
-    return new GetTimeSeriesLogInformationTest();
-  }
-  static void destroySuite(GetTimeSeriesLogInformationTest *suite) {
-    delete suite;
-  }
+  static GetTimeSeriesLogInformationTest *createSuite() { return new GetTimeSeriesLogInformationTest(); }
+  static void destroySuite(GetTimeSeriesLogInformationTest *suite) { delete suite; }
 
   void test_Init() {
     GetTimeSeriesLogInformation getalg;
@@ -131,15 +122,11 @@ public:
   static GetTimeSeriesLogInformationTestPerformance *createSuite() {
     return new GetTimeSeriesLogInformationTestPerformance();
   }
-  static void destroySuite(GetTimeSeriesLogInformationTestPerformance *suite) {
-    delete suite;
-  }
+  static void destroySuite(GetTimeSeriesLogInformationTestPerformance *suite) { delete suite; }
 
   void setUp() override { inputWS = createEventWorkspace(); }
 
-  void tearDown() override {
-    Mantid::API::AnalysisDataService::Instance().remove("TimeStat");
-  }
+  void tearDown() override { Mantid::API::AnalysisDataService::Instance().remove("TimeStat"); }
 
   void testPerformance() {
     GetTimeSeriesLogInformation getalg;

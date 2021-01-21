@@ -36,8 +36,8 @@ public:
     bool includeMonitors = true;
     bool startYNegative = true;
     const std::string instrumentName("SimpleFakeInstrument");
-    InstrumentCreationHelper::addFullInstrumentToWorkspace(
-        m_workspace, includeMonitors, startYNegative, instrumentName);
+    InstrumentCreationHelper::addFullInstrumentToWorkspace(m_workspace, includeMonitors, startYNegative,
+                                                           instrumentName);
 
     std::set<int64_t> toMask{0, 3};
     auto &detInfo = m_workspace.mutableDetectorInfo();
@@ -47,37 +47,24 @@ public:
       }
     }
 
-    m_workspaceNoInstrument.initialize(numberOfHistograms, numberOfBins + 1,
-                                       numberOfBins);
+    m_workspaceNoInstrument.initialize(numberOfHistograms, numberOfBins + 1, numberOfBins);
 
-    m_goofyRefFrame = std::make_shared<ReferenceFrame>(
-        PointingAlong::X, PointingAlong::Y, Handedness::Left, "");
-    m_standardRefFrame = std::make_shared<ReferenceFrame>(
-        PointingAlong::Y, PointingAlong::Z, Handedness::Right, "");
+    m_goofyRefFrame = std::make_shared<ReferenceFrame>(PointingAlong::X, PointingAlong::Y, Handedness::Left, "");
+    m_standardRefFrame = std::make_shared<ReferenceFrame>(PointingAlong::Y, PointingAlong::Z, Handedness::Right, "");
   }
 
-  void test_comparison() {
-    TS_ASSERT(
-        m_workspace.detectorInfo().isEquivalent(m_workspace.detectorInfo()));
-  }
+  void test_comparison() { TS_ASSERT(m_workspace.detectorInfo().isEquivalent(m_workspace.detectorInfo())); }
 
   void test_size() { TS_ASSERT_EQUALS(m_workspace.detectorInfo().size(), 5); }
 
-  void test_sourcePosition() {
-    TS_ASSERT_EQUALS(m_workspace.detectorInfo().sourcePosition(),
-                     V3D(0.0, 0.0, -20.0));
-  }
+  void test_sourcePosition() { TS_ASSERT_EQUALS(m_workspace.detectorInfo().sourcePosition(), V3D(0.0, 0.0, -20.0)); }
 
-  void test_samplePosition() {
-    TS_ASSERT_EQUALS(m_workspace.detectorInfo().samplePosition(),
-                     V3D(0.0, 0.0, 0.0));
-  }
+  void test_samplePosition() { TS_ASSERT_EQUALS(m_workspace.detectorInfo().samplePosition(), V3D(0.0, 0.0, 0.0)); }
 
   void test_l1() { TS_ASSERT_EQUALS(m_workspace.detectorInfo().l1(), 20.0); }
 
   void test_l1_no_instrument() {
-    TS_ASSERT_THROWS(m_workspaceNoInstrument.detectorInfo().l1(),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(m_workspaceNoInstrument.detectorInfo().l1(), const std::runtime_error &);
   }
 
   void test_l1_no_instrument_call_once_regression() {
@@ -86,10 +73,8 @@ public:
     // Previously this happened for DetectorInfo so here we see if a failing
     // call to `l1` can be repeated. If the bug is reintroduced this test will
     // not fail but FREEZE.
-    TS_ASSERT_THROWS(m_workspaceNoInstrument.detectorInfo().l1(),
-                     const std::runtime_error &);
-    TS_ASSERT_THROWS(m_workspaceNoInstrument.detectorInfo().l1(),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(m_workspaceNoInstrument.detectorInfo().l1(), const std::runtime_error &);
+    TS_ASSERT_THROWS(m_workspaceNoInstrument.detectorInfo().l1(), const std::runtime_error &);
   }
 
   void test_isMonitor() {
@@ -155,8 +140,7 @@ public:
   void test_twoThetaLegacy() {
     const auto &detectorInfo = m_workspace.detectorInfo();
     auto det = m_workspace.getDetector(2);
-    TS_ASSERT_EQUALS(detectorInfo.twoTheta(2),
-                     m_workspace.detectorTwoTheta(*det));
+    TS_ASSERT_EQUALS(detectorInfo.twoTheta(2), m_workspace.detectorTwoTheta(*det));
   }
 
   void test_signedTwoTheta() {
@@ -317,8 +301,7 @@ public:
     TS_ASSERT_EQUALS(detInfo.position(0), V3D(0.0, -0.1, 5.0));
 
     auto &compInfo = m_workspace.mutableComponentInfo();
-    compInfo.setPosition(compInfo.indexOf(root->getComponentID()),
-                         oldPos + offset);
+    compInfo.setPosition(compInfo.indexOf(root->getComponentID()), oldPos + offset);
 
     TS_ASSERT_EQUALS(detInfo.sourcePosition(), V3D(1.0, 0.0, -20.0));
     TS_ASSERT_EQUALS(detInfo.samplePosition(), V3D(1.0, 0.0, 0.0));
@@ -379,8 +362,7 @@ public:
     Quat rot(180.0, e2);
 
     auto &compInfo = m_workspace.mutableComponentInfo();
-    compInfo.setPosition(compInfo.indexOf(root->getComponentID()),
-                         V3D{0.0, 0.0, 1.0});
+    compInfo.setPosition(compInfo.indexOf(root->getComponentID()), V3D{0.0, 0.0, 1.0});
     compInfo.setRotation(compInfo.indexOf(root->getComponentID()), rot);
 
     // Rotations *and* positions have changed since *parent* was rotated
@@ -440,8 +422,7 @@ public:
   void test_positions_rotations_multi_level() {
     WorkspaceTester ws;
     ws.initialize(9, 1, 1);
-    ws.setInstrument(
-        ComponentCreationHelper::createTestInstrumentCylindrical(1));
+    ws.setInstrument(ComponentCreationHelper::createTestInstrumentCylindrical(1));
     auto &detInfo = ws.mutableDetectorInfo();
     const auto root = ws.getInstrument();
     const auto bank = root->getComponentByName("bank1");
@@ -473,13 +454,11 @@ public:
     size_t numberOfBins = 1;
     workspace.initialize(numberOfHistograms, numberOfBins + 1, numberOfBins);
     for (int32_t i = 0; i < numberOfHistograms; ++i)
-      workspace.getSpectrum(i).setSpectrumNo(
-          static_cast<int32_t>(numberOfHistograms) - i);
+      workspace.getSpectrum(i).setSpectrumNo(static_cast<int32_t>(numberOfHistograms) - i);
     bool includeMonitors = false;
     bool startYNegative = true;
     const std::string instrumentName("SimpleFakeInstrument");
-    InstrumentCreationHelper::addFullInstrumentToWorkspace(
-        workspace, includeMonitors, startYNegative, instrumentName);
+    InstrumentCreationHelper::addFullInstrumentToWorkspace(workspace, includeMonitors, startYNegative, instrumentName);
     // Check that *workspace* does not have sorted IDs.
     TS_ASSERT_EQUALS(workspace.getDetector(0)->getID(), 5);
     TS_ASSERT_EQUALS(workspace.getDetector(1)->getID(), 4);
@@ -506,8 +485,7 @@ public:
   void test_assignment_mismatch() {
     auto ws1 = makeWorkspace(1);
     auto ws2 = makeWorkspace(2);
-    TS_ASSERT_THROWS(ws2->mutableDetectorInfo() = ws1->detectorInfo(),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(ws2->mutableDetectorInfo() = ws1->detectorInfo(), const std::runtime_error &);
   }
 
 private:
@@ -517,9 +495,8 @@ private:
   std::shared_ptr<Mantid::Geometry::ReferenceFrame> m_goofyRefFrame;
   std::shared_ptr<Mantid::Geometry::ReferenceFrame> m_standardRefFrame;
 
-  std::unique_ptr<MatrixWorkspace>
-  makeWorkspace(size_t numSpectra, bool goofyReferenceFrame = false,
-                V3D detPos = {0, 0, 0}) {
+  std::unique_ptr<MatrixWorkspace> makeWorkspace(size_t numSpectra, bool goofyReferenceFrame = false,
+                                                 V3D detPos = {0, 0, 0}) {
     auto ws = std::make_unique<WorkspaceTester>();
     ws->initialize(numSpectra, 1, 1);
     auto inst = std::make_shared<Instrument>("TestInstrument");
@@ -534,8 +511,7 @@ private:
       inst->add(det);
       inst->markAsDetector(det);
     }
-    ComponentCreationHelper::addSourceToInstrument(inst, V3D(0.0, 0.0, -10.0),
-                                                   "source");
+    ComponentCreationHelper::addSourceToInstrument(inst, V3D(0.0, 0.0, -10.0), "source");
     ComponentCreationHelper::addSampleToInstrument(inst, V3D(0.0, 0.0, 0.0));
     ws->setInstrument(inst);
     auto &detInfo = ws->mutableDetectorInfo();
@@ -550,9 +526,7 @@ private:
 
 class DetectorInfoTestPerformance : public CxxTest::TestSuite {
 public:
-  static DetectorInfoTestPerformance *createSuite() {
-    return new DetectorInfoTestPerformance();
-  }
+  static DetectorInfoTestPerformance *createSuite() { return new DetectorInfoTestPerformance(); }
   static void destroySuite(DetectorInfoTestPerformance *suite) { delete suite; }
 
   DetectorInfoTestPerformance() : m_workspace() {
@@ -562,8 +536,8 @@ public:
     bool includeMonitors = false;
     bool startYNegative = true;
     const std::string instrumentName("SimpleFakeInstrument");
-    InstrumentCreationHelper::addFullInstrumentToWorkspace(
-        m_workspace, includeMonitors, startYNegative, instrumentName);
+    InstrumentCreationHelper::addFullInstrumentToWorkspace(m_workspace, includeMonitors, startYNegative,
+                                                           instrumentName);
   }
 
   void test_typical() {
@@ -635,8 +609,7 @@ public:
     const auto &root = instrument->getComponentByName("SimpleFakeInstrument");
 
     auto &compInfo = m_workspace.mutableComponentInfo();
-    compInfo.setPosition(compInfo.indexOf(root->getComponentID()),
-                         Kernel::V3D(0.1, 0.0, 0.0));
+    compInfo.setPosition(compInfo.indexOf(root->getComponentID()), Kernel::V3D(0.1, 0.0, 0.0));
     for (int repeat = 0; repeat < 32; ++repeat) {
       Kernel::V3D result;
       const auto &detectorInfo = m_workspace.detectorInfo();

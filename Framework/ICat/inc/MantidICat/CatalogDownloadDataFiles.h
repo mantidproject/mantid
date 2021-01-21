@@ -49,9 +49,7 @@ public:
     return {"DownloadFile", "CatalogGetDataFiles", "CatalogLogin"};
   }
   /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override {
-    return "DataHandling\\Catalog";
-  }
+  const std::string category() const override { return "DataHandling\\Catalog"; }
 
   /** This method is used for unit testing purpose.
    * as the Poco::Net library httpget throws an exception when the nd server n/w
@@ -74,8 +72,7 @@ private:
   /// Saves the downloaded file to disc
   std::string saveFiletoDisk(std::istream &rs, const std::string &fileName);
   /// Saves downloaded file to local disk
-  std::string doDownloadandSavetoLocalDrive(const std::string &URL,
-                                            const std::string &fileName);
+  std::string doDownloadandSavetoLocalDrive(const std::string &URL, const std::string &fileName);
 
 private:
   /// progress indicator

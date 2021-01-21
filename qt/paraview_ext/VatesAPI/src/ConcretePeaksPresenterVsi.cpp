@@ -26,11 +26,9 @@ using Mantid::DataObjects::PeaksWorkspace;
  * @param frustum The view frustum
  * @param frame The coordinate frame
  */
-ConcretePeaksPresenterVsi::ConcretePeaksPresenterVsi(
-    Mantid::API::IPeaksWorkspace_sptr peaksWorkspace,
-    ViewFrustum_const_sptr frustum, std::string frame)
-    : m_viewableRegion(frustum), m_peaksWorkspace(peaksWorkspace),
-      m_frame(frame) {}
+ConcretePeaksPresenterVsi::ConcretePeaksPresenterVsi(Mantid::API::IPeaksWorkspace_sptr peaksWorkspace,
+                                                     ViewFrustum_const_sptr frustum, std::string frame)
+    : m_viewableRegion(frustum), m_peaksWorkspace(peaksWorkspace), m_frame(frame) {}
 
 /// Destructor
 ConcretePeaksPresenterVsi::~ConcretePeaksPresenterVsi() {}
@@ -39,10 +37,7 @@ ConcretePeaksPresenterVsi::~ConcretePeaksPresenterVsi() {}
  * Update the view frustum
  * @param frustum The view frustum.
  */
-void ConcretePeaksPresenterVsi::updateViewFrustum(
-    ViewFrustum_const_sptr frustum) {
-  m_viewableRegion = frustum;
-}
+void ConcretePeaksPresenterVsi::updateViewFrustum(ViewFrustum_const_sptr frustum) { m_viewableRegion = frustum; }
 
 /**
  * Get the viewable peaks. Essentially copied from the slice viewer.
@@ -58,14 +53,12 @@ std::vector<bool> ConcretePeaksPresenterVsi::getViewablePeaks() const {
     std::string viewable = m_viewableRegion->toExtentsAsString();
     auto peaksWS = std::dynamic_pointer_cast<PeaksWorkspace>(m_peaksWorkspace);
 
-    Mantid::API::IAlgorithm_sptr alg =
-        Mantid::API::AlgorithmManager::Instance().create("PeaksInRegion");
+    Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("PeaksInRegion");
     alg->setChild(true);
     alg->setRethrows(true);
     alg->initialize();
     alg->setProperty("InputWorkspace", peaksWS);
-    alg->setProperty("OutputWorkspace",
-                     peaksWS->getName() + "_peaks_in_region");
+    alg->setProperty("OutputWorkspace", peaksWS->getName() + "_peaks_in_region");
     alg->setProperty("Extents", viewable);
     alg->setProperty("CheckPeakExtents", true);
     alg->setProperty("PeakRadius", effectiveRadius);
@@ -89,10 +82,7 @@ std::vector<bool> ConcretePeaksPresenterVsi::getViewablePeaks() const {
  * Get the underlying peaks workspace
  * @returns A pointer to the underlying peaks workspace.
  */
-Mantid::API::IPeaksWorkspace_sptr
-ConcretePeaksPresenterVsi::getPeaksWorkspace() const {
-  return m_peaksWorkspace;
-}
+Mantid::API::IPeaksWorkspace_sptr ConcretePeaksPresenterVsi::getPeaksWorkspace() const { return m_peaksWorkspace; }
 
 /**
  * Get the frame
@@ -104,9 +94,7 @@ std::string ConcretePeaksPresenterVsi::getFrame() const { return m_frame; }
  * Get the name of the underlying peaks workspace.
  * @returns The name of the peaks workspace.
  */
-std::string ConcretePeaksPresenterVsi::getPeaksWorkspaceName() const {
-  return m_peaksWorkspace->getName();
-}
+std::string ConcretePeaksPresenterVsi::getPeaksWorkspaceName() const { return m_peaksWorkspace->getName(); }
 
 /**
  * Get the peaks info for a single peak, defined by the row in the peaks table.
@@ -116,10 +104,9 @@ std::string ConcretePeaksPresenterVsi::getPeaksWorkspaceName() const {
  * @param radius A reference which holds the radius of the peak.
  * @param specialCoordinateSystem The coordinate system.
  */
-void ConcretePeaksPresenterVsi::getPeaksInfo(
-    Mantid::API::IPeaksWorkspace_sptr peaksWorkspace, int row,
-    Mantid::Kernel::V3D &position, double &radius,
-    Mantid::Kernel::SpecialCoordinateSystem specialCoordinateSystem) const {
+void ConcretePeaksPresenterVsi::getPeaksInfo(Mantid::API::IPeaksWorkspace_sptr peaksWorkspace, int row,
+                                             Mantid::Kernel::V3D &position, double &radius,
+                                             Mantid::Kernel::SpecialCoordinateSystem specialCoordinateSystem) const {
 
   switch (specialCoordinateSystem) {
   case (Mantid::Kernel::SpecialCoordinateSystem::QLab):
@@ -136,8 +123,7 @@ void ConcretePeaksPresenterVsi::getPeaksInfo(
   }
 
   // Peak radius
-  Mantid::Geometry::PeakShape_sptr shape(
-      peaksWorkspace->getPeakPtr(row)->getPeakShape().clone());
+  Mantid::Geometry::PeakShape_sptr shape(peaksWorkspace->getPeakPtr(row)->getPeakShape().clone());
   radius = getMaxRadius(*shape);
 }
 
@@ -146,12 +132,10 @@ void ConcretePeaksPresenterVsi::getPeaksInfo(
  * @param shape The shape of a peak.
  * @returns The maximal radius of the peak.
  */
-double ConcretePeaksPresenterVsi::getMaxRadius(
-    const Mantid::Geometry::PeakShape &shape) const {
+double ConcretePeaksPresenterVsi::getMaxRadius(const Mantid::Geometry::PeakShape &shape) const {
   const double defaultRadius = 1.0;
 
-  boost::optional<double> radius =
-      shape.radius(Mantid::Geometry::PeakShape::Radius);
+  boost::optional<double> radius = shape.radius(Mantid::Geometry::PeakShape::Radius);
   if (radius) {
     return radius.get();
   } else {
@@ -166,13 +150,11 @@ double ConcretePeaksPresenterVsi::getMaxRadius(
  * @param ascending If the workspace is to be sorted in a ascending or
  * descending manner.
  */
-void ConcretePeaksPresenterVsi::sortPeaksWorkspace(
-    const std::string &byColumnName, const bool ascending) {
+void ConcretePeaksPresenterVsi::sortPeaksWorkspace(const std::string &byColumnName, const bool ascending) {
   auto peaksWS = std::dynamic_pointer_cast<PeaksWorkspace>(m_peaksWorkspace);
 
   // Sort the Peaks in-place.
-  Mantid::API::IAlgorithm_sptr alg =
-      Mantid::API::AlgorithmManager::Instance().create("SortPeaksWorkspace");
+  Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("SortPeaksWorkspace");
   alg->setChild(true);
   alg->setRethrows(true);
   alg->initialize();

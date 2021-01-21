@@ -15,8 +15,7 @@ class MultiPeriodLoadMuonStrategy : public LoadMuonStrategy {
 public:
   // Constructor
   MultiPeriodLoadMuonStrategy(Kernel::Logger &g_log, const std::string filename,
-                              LoadMuonNexusV2NexusHelper &nexusLoader,
-                              API::WorkspaceGroup &workspaceGroup);
+                              LoadMuonNexusV2NexusHelper &nexusLoader, API::WorkspaceGroup &workspaceGroup);
   // Loads the muon log data
   void loadMuonLogData() override;
   // Returns the good frames from the nexus entry

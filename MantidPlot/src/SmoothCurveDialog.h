@@ -42,8 +42,7 @@ class SmoothCurveDialog : public QDialog {
   Q_OBJECT
 
 public:
-  SmoothCurveDialog(int method, QWidget *parent = nullptr,
-                    const Qt::WFlags &fl = nullptr);
+  SmoothCurveDialog(int method, QWidget *parent = nullptr, const Qt::WFlags &fl = nullptr);
 
 public slots:
   void setGraph(Graph *g);

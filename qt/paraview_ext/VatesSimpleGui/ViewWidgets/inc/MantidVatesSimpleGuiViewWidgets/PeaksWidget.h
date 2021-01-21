@@ -18,22 +18,18 @@
 namespace Mantid {
 namespace Vates {
 namespace SimpleGui {
-class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS PeaksWidget
-    : public QWidget {
+class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS PeaksWidget : public QWidget {
   Q_OBJECT
 public:
-  PeaksWidget(Mantid::API::IPeaksWorkspace_sptr ws,
-              const std::string &coordinateSystem, QWidget *parent = nullptr);
+  PeaksWidget(Mantid::API::IPeaksWorkspace_sptr ws, const std::string &coordinateSystem, QWidget *parent = nullptr);
   void setupMvc(std::vector<bool> visiblePeaks);
   void updateModel(std::vector<bool> visiblePeaks);
 signals:
   void zoomToPeak(Mantid::API::IPeaksWorkspace_sptr ws, int row);
-  void sortPeaks(const std::string &columnToSortBy, const bool sortAscending,
-                 Mantid::API::IPeaksWorkspace_sptr ws);
+  void sortPeaks(const std::string &columnToSortBy, const bool sortAscending, Mantid::API::IPeaksWorkspace_sptr ws);
 public slots:
   void onCurrentChanged(const QModelIndex &current, const QModelIndex &);
-  void onPeaksSorted(const std::string &columnToSortBy,
-                     const bool sortAscending);
+  void onPeaksSorted(const std::string &columnToSortBy, const bool sortAscending);
 
 private:
   /// Auto-generated UI controls.

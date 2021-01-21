@@ -30,8 +30,7 @@ public:
     // Assert
     std::string expectedInstrument("_EMPTY_");
 
-    TSM_ASSERT("The instrument string is empty, since it does not exist.",
-               expectedInstrument == instrument);
+    TSM_ASSERT("The instrument string is empty, since it does not exist.", expectedInstrument == instrument);
   }
 
   void testSetValuesCanBeReadOut() {
@@ -42,8 +41,7 @@ public:
     // Act
     manager.setInstrument(instrument);
     // Assert
-    TSM_ASSERT_EQUALS("The instrument is read in and out.", instrument,
-                      manager.getInstrument());
+    TSM_ASSERT_EQUALS("The instrument is read in and out.", instrument, manager.getInstrument());
   }
 
   void testJsonStringIsReadInAndPopualtesContainer() {
@@ -56,8 +54,7 @@ public:
 
     // Assert
 
-    TSM_ASSERT("The instrument of the serialized Json string is detected.",
-               manager.getInstrument() == "OSIRIS");
+    TSM_ASSERT("The instrument of the serialized Json string is detected.", manager.getInstrument() == "OSIRIS");
   }
 
   void testJsonStringWhichDoesNotHaveFieldsProducesDefaultValues() {
@@ -88,7 +85,6 @@ public:
 
     // Assert
     TSM_ASSERT("Json string is being produced", !jsonString.empty());
-    TSM_ASSERT_EQUALS("Json string contains inserted instrument.", "OSIRIS",
-                      container["instrument"].asString());
+    TSM_ASSERT_EQUALS("Json string contains inserted instrument.", "OSIRIS", container["instrument"].asString());
   }
 };

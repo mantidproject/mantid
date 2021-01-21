@@ -48,8 +48,7 @@ public:
   /// Algorithm's version for identification
   int version() const override;
   const std::vector<std::string> seeAlso() const override {
-    return {"ConvertToDiffractionMDWorkspace", "ConvertToMDMinMaxGlobal",
-            "ConvertToMDMinMaxLocal", "CreateMDWorkspace",
+    return {"ConvertToDiffractionMDWorkspace", "ConvertToMDMinMaxGlobal", "ConvertToMDMinMaxLocal", "CreateMDWorkspace",
             "SetSpecialCoordinates"};
   }
 
@@ -60,8 +59,7 @@ private:
   /// progress reporter
   boost::scoped_ptr<API::Progress> m_Progress;
 
-  void setupFileBackend(const std::string &filebackPath,
-                        const API::IMDEventWorkspace_sptr &outputWS);
+  void setupFileBackend(const std::string &filebackPath, const API::IMDEventWorkspace_sptr &outputWS);
 
   //------------------------------------------------------------------------------------------------------------------------------------------
 protected: // for testing, otherwise private:
@@ -76,33 +74,24 @@ protected: // for testing, otherwise private:
    * workspace*/
   bool doWeNeedNewTargetWorkspace(const API::IMDEventWorkspace_sptr &spws);
   /**Create new MD workspace using existing parameters for algorithm */
-  API::IMDEventWorkspace_sptr
-  createNewMDWorkspace(const MDAlgorithms::MDWSDescription &targWSDescr,
-                       const bool filebackend, const std::string &filename);
+  API::IMDEventWorkspace_sptr createNewMDWorkspace(const MDAlgorithms::MDWSDescription &targWSDescr,
+                                                   const bool filebackend, const std::string &filename);
 
-  bool buildTargetWSDescription(const API::IMDEventWorkspace_sptr &spws,
-                                const std::string &QModReq,
-                                const std::string &dEModReq,
-                                const std::vector<std::string> &otherDimNames,
-                                std::vector<double> &dimMin,
-                                std::vector<double> &dimMax,
-                                const std::string &QFrame,
-                                const std::string &convertTo_,
-                                MDAlgorithms::MDWSDescription &targWSDescr);
+  bool buildTargetWSDescription(const API::IMDEventWorkspace_sptr &spws, const std::string &QModReq,
+                                const std::string &dEModReq, const std::vector<std::string> &otherDimNames,
+                                std::vector<double> &dimMin, std::vector<double> &dimMax, const std::string &QFrame,
+                                const std::string &convertTo_, MDAlgorithms::MDWSDescription &targWSDescr);
 
   /// par of store metadata routine which generate metadata necessary for
   /// initializing ConvertToMD plugin
-  void addExperimentInfo(API::IMDEventWorkspace_sptr &mdEventWS,
-                         MDAlgorithms::MDWSDescription &targWSDescr) const;
+  void addExperimentInfo(API::IMDEventWorkspace_sptr &mdEventWS, MDAlgorithms::MDWSDescription &targWSDescr) const;
 
   /// Store metadata and set some metadata, needed for plugin to run on the
   /// target workspace description
   void copyMetaData(API::IMDEventWorkspace_sptr &mdEventWS) const;
 
-  void findMinMax(const Mantid::API::MatrixWorkspace_sptr &inWS,
-                  const std::string &QMode, const std::string &dEMode,
-                  const std::string &QFrame, const std::string &ConvertTo,
-                  const std::vector<std::string> &otherDim,
+  void findMinMax(const Mantid::API::MatrixWorkspace_sptr &inWS, const std::string &QMode, const std::string &dEMode,
+                  const std::string &QFrame, const std::string &ConvertTo, const std::vector<std::string> &otherDim,
                   std::vector<double> &minVal, std::vector<double> &maxVal);
 
   /// Sets up the top level splitting, i.e. of level 0, for the box controller

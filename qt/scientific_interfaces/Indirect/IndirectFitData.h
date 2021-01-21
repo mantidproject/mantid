@@ -31,13 +31,10 @@ using namespace MantidWidgets;
 */
 class MANTIDQT_INDIRECT_DLL IndirectFitData {
 public:
-  IndirectFitData(const Mantid::API::MatrixWorkspace_sptr &workspace,
-                  const FunctionModelSpectra &spectra);
+  IndirectFitData(const Mantid::API::MatrixWorkspace_sptr &workspace, const FunctionModelSpectra &spectra);
 
-  std::string displayName(const std::string &formatString,
-                          const std::string &rangeDelimiter) const;
-  std::string displayName(const std::string &formatString,
-                          WorkspaceIndex spectrum) const;
+  std::string displayName(const std::string &formatString, const std::string &rangeDelimiter) const;
+  std::string displayName(const std::string &formatString, WorkspaceIndex spectrum) const;
   std::string getBasename() const;
 
   Mantid::API::MatrixWorkspace_sptr workspace() const;
@@ -53,16 +50,11 @@ public:
   std::vector<double> excludeRegionsVector(WorkspaceIndex spectrum) const;
   std::vector<double> getQValues() const;
 
-  template <typename F> void applySpectra(F &&functor) const {
-    ApplySpectra<F>(std::forward<F>(functor))(m_spectra);
-  }
+  template <typename F> void applySpectra(F &&functor) const { ApplySpectra<F>(std::forward<F>(functor))(m_spectra); }
 
   template <typename F>
-  WorkspaceIndex
-  applyEnumeratedSpectra(F &&functor,
-                         WorkspaceIndex start = WorkspaceIndex{0}) const {
-    return ApplyEnumeratedSpectra<F>(std::forward<F>(functor),
-                                     start)(m_spectra);
+  WorkspaceIndex applyEnumeratedSpectra(F &&functor, WorkspaceIndex start = WorkspaceIndex{0}) const {
+    return ApplyEnumeratedSpectra<F>(std::forward<F>(functor), start)(m_spectra);
   }
 
   void setSpectra(std::string const &spectra);
@@ -72,8 +64,7 @@ public:
   void setStartX(double const &startX);
   void setEndX(double const &endX, WorkspaceIndex const &spectrum);
   void setEndX(double const &endX);
-  void setExcludeRegionString(std::string const &excludeRegion,
-                              WorkspaceIndex const &spectrum);
+  void setExcludeRegionString(std::string const &excludeRegion, WorkspaceIndex const &spectrum);
 
 private:
   void validateSpectra(FunctionModelSpectra const &spectra);

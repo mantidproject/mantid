@@ -32,14 +32,12 @@ using Kernel::V3D;
  * @param detectorPos : V3D detector position
  * @return Instrument generated.
  */
-Geometry::Instrument_sptr
-createMinimalInstrument(const Mantid::Kernel::V3D &sourcePos,
-                        const Mantid::Kernel::V3D &samplePos,
-                        const Mantid::Kernel::V3D &detectorPos) {
+Geometry::Instrument_sptr createMinimalInstrument(const Mantid::Kernel::V3D &sourcePos,
+                                                  const Mantid::Kernel::V3D &samplePos,
+                                                  const Mantid::Kernel::V3D &detectorPos) {
   Instrument_sptr instrument = std::make_shared<Instrument>();
-  instrument->setReferenceFrame(std::make_shared<ReferenceFrame>(
-      Mantid::Geometry::Y /*up*/, Mantid::Geometry::X /*along*/, Left,
-      "0,0,0"));
+  instrument->setReferenceFrame(
+      std::make_shared<ReferenceFrame>(Mantid::Geometry::Y /*up*/, Mantid::Geometry::X /*along*/, Left, "0,0,0"));
 
   // A source
   ObjComponent *source = new ObjComponent("source");
@@ -64,14 +62,12 @@ createMinimalInstrument(const Mantid::Kernel::V3D &sourcePos,
   return instrument;
 }
 
-Geometry::Instrument_sptr
-createVirtualInstrument(Kernel::V3D sourcePos, Kernel::V3D samplePos,
-                        const std::vector<Kernel::V3D> &vecdetpos,
-                        const std::vector<detid_t> &vecdetid) {
+Geometry::Instrument_sptr createVirtualInstrument(Kernel::V3D sourcePos, Kernel::V3D samplePos,
+                                                  const std::vector<Kernel::V3D> &vecdetpos,
+                                                  const std::vector<detid_t> &vecdetid) {
   Instrument_sptr instrument = std::make_shared<Instrument>();
-  instrument->setReferenceFrame(std::make_shared<ReferenceFrame>(
-      Mantid::Geometry::Y /*up*/, Mantid::Geometry::Z /*along*/, Right,
-      "0,0,0"));
+  instrument->setReferenceFrame(
+      std::make_shared<ReferenceFrame>(Mantid::Geometry::Y /*up*/, Mantid::Geometry::Z /*along*/, Right, "0,0,0"));
 
   // A source
   ObjComponent *source = new ObjComponent("source");
@@ -89,8 +85,7 @@ createVirtualInstrument(Kernel::V3D sourcePos, Kernel::V3D samplePos,
   // A detector
   size_t numdets = vecdetpos.size();
   for (size_t i = 0; i < numdets; ++i) {
-    Detector *det =
-        new Detector("point-detector", vecdetid[i] /*detector id*/, nullptr);
+    Detector *det = new Detector("point-detector", vecdetid[i] /*detector id*/, nullptr);
     det->setPos(vecdetpos[i]);
     // FIXME - should be cubi... pixel
     det->setShape(createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
@@ -104,8 +99,7 @@ createVirtualInstrument(Kernel::V3D sourcePos, Kernel::V3D samplePos,
 /**
  * Create a sphere object
  */
-std::shared_ptr<CSGObject> createSphere(double radius, const V3D &centre,
-                                        const std::string &id) {
+std::shared_ptr<CSGObject> createSphere(double radius, const V3D &centre, const std::string &id) {
   ShapeFactory shapeMaker;
   return shapeMaker.createShape(sphereXML(radius, centre, id));
 }
@@ -113,12 +107,10 @@ std::shared_ptr<CSGObject> createSphere(double radius, const V3D &centre,
 /**
  * Return the XML for a sphere.
  */
-std::string sphereXML(double radius, const Kernel::V3D &centre,
-                      const std::string &id) {
+std::string sphereXML(double radius, const Kernel::V3D &centre, const std::string &id) {
   std::ostringstream xml;
   xml << "<sphere id=\"" << id << "\">"
-      << "<centre x=\"" << centre.X() << "\"  y=\"" << centre.Y() << "\" z=\""
-      << centre.Z() << "\" />"
+      << "<centre x=\"" << centre.X() << "\"  y=\"" << centre.Y() << "\" z=\"" << centre.Z() << "\" />"
       << "<radius val=\"" << radius << "\" />"
       << "</sphere>";
   return xml.str();

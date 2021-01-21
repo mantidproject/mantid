@@ -68,11 +68,9 @@ public:
   CorrectionsTab(QWidget *parent = nullptr);
 
   /// Set the presenter for the output plotting options
-  void setOutputPlotOptionsPresenter(
-      std::unique_ptr<IndirectPlotOptionsPresenter> presenter);
+  void setOutputPlotOptionsPresenter(std::unique_ptr<IndirectPlotOptionsPresenter> presenter);
   /// Set the active workspaces used in the plotting options
-  void setOutputPlotOptionsWorkspaces(
-      std::vector<std::string> const &outputWorkspaces);
+  void setOutputPlotOptionsWorkspaces(std::vector<std::string> const &outputWorkspaces);
   /// Used to clear the workspaces held by the output plotting widget
   void clearOutputPlotOptionsWorkspaces();
 
@@ -84,18 +82,14 @@ public:
 
 protected:
   /// Check the binning between two workspaces match
-  bool checkWorkspaceBinningMatches(
-      const Mantid::API::MatrixWorkspace_const_sptr &left,
-      const Mantid::API::MatrixWorkspace_const_sptr &right);
+  bool checkWorkspaceBinningMatches(const Mantid::API::MatrixWorkspace_const_sptr &left,
+                                    const Mantid::API::MatrixWorkspace_const_sptr &right);
   /// Adds a unit conversion step to the algorithm queue
-  boost::optional<std::string>
-  addConvertUnitsStep(const Mantid::API::MatrixWorkspace_sptr &ws,
-                      const std::string &unitID,
-                      const std::string &suffix = "UNIT",
-                      std::string eMode = "", double eFixed = 0.0);
+  boost::optional<std::string> addConvertUnitsStep(const Mantid::API::MatrixWorkspace_sptr &ws,
+                                                   const std::string &unitID, const std::string &suffix = "UNIT",
+                                                   std::string eMode = "", double eFixed = 0.0);
   /// Displays and logs the error for a workspace with an invalid type
-  void displayInvalidWorkspaceTypeError(const std::string &workspaceName,
-                                        Mantid::Kernel::Logger &log);
+  void displayInvalidWorkspaceTypeError(const std::string &workspaceName, Mantid::Kernel::Logger &log);
 
   /// DoubleEditorFactory
   DoubleEditorFactory *m_dblEdFac;

@@ -17,17 +17,14 @@ bool isIterable(PyObject *iterable) {
 }
 
 template <typename T>
-boost::optional<T>
-typeErrorIfNoneElseValue(boost::optional<T> const &maybeValue,
-                         std::string const &errorMessage) {
+boost::optional<T> typeErrorIfNoneElseValue(boost::optional<T> const &maybeValue, std::string const &errorMessage) {
   if (!maybeValue.is_initialized())
     PyErr_SetString(PyExc_TypeError, errorMessage.c_str());
   return maybeValue;
 }
 
 template <typename T, typename ConversionFunction>
-boost::optional<boost::optional<T>>
-pythonObjectToOptional(PyObject *object, ConversionFunction pyObjectAsValue) {
+boost::optional<boost::optional<T>> pythonObjectToOptional(PyObject *object, ConversionFunction pyObjectAsValue) {
   if (object == Py_None)
     return boost::none;
   else
@@ -35,8 +32,7 @@ pythonObjectToOptional(PyObject *object, ConversionFunction pyObjectAsValue) {
 }
 
 template <typename T, typename ConversionFunction>
-PyObject *optionalToPyObject(boost::optional<T> const &item,
-                             ConversionFunction valueAsPyObject) {
+PyObject *optionalToPyObject(boost::optional<T> const &item, ConversionFunction valueAsPyObject) {
   if (item.is_initialized()) {
     return valueAsPyObject(item.get());
   } else {
@@ -45,8 +41,7 @@ PyObject *optionalToPyObject(boost::optional<T> const &item,
 }
 
 template <typename T, typename ConversionFunction>
-PyObject *vectorToPythonList(std::vector<T> const &vector,
-                             ConversionFunction itemToPyObject) {
+PyObject *vectorToPythonList(std::vector<T> const &vector, ConversionFunction itemToPyObject) {
   PyObject *pythonList = PyList_New(vector.size());
   if (pythonList != nullptr) {
     for (int i = 0; i < static_cast<int>(vector.size()); ++i) {
@@ -66,8 +61,7 @@ PyObject *vectorToPythonList(std::vector<T> const &vector,
 }
 
 template <typename T, typename ConversionFunction>
-boost::optional<std::vector<T>>
-pythonListToVector(PyObject *pythonList, ConversionFunction pyObjectToItem) {
+boost::optional<std::vector<T>> pythonListToVector(PyObject *pythonList, ConversionFunction pyObjectToItem) {
   auto length = static_cast<int>(PyObject_Size(pythonList));
   PyObject *iterator = PyObject_GetIter(pythonList);
   if (iterator != nullptr) {
@@ -93,8 +87,7 @@ pythonListToVector(PyObject *pythonList, ConversionFunction pyObjectToItem) {
 }
 
 template <typename T>
-int transferToSip(boost::optional<T> const &cppValue, T **sipCppPtr,
-                  int *sipIsErr, int sipState) {
+int transferToSip(boost::optional<T> const &cppValue, T **sipCppPtr, int *sipIsErr, int sipState) {
   if (cppValue.is_initialized()) {
     auto heapValue = ::std::make_unique<T>(std::move(cppValue.get()));
     *sipCppPtr = heapValue.release();
@@ -105,16 +98,14 @@ int transferToSip(boost::optional<T> const &cppValue, T **sipCppPtr,
   }
 }
 
-template <typename T>
-boost::optional<T> asOptional(int *sipIsErr, T *sipCppPtr) {
+template <typename T> boost::optional<T> asOptional(int *sipIsErr, T *sipCppPtr) {
   if (*sipIsErr)
     return boost::none;
   else
     return *sipCppPtr;
 }
 
-inline boost::optional<std::string>
-pythonStringToStdString(PyObject *pyString) {
+inline boost::optional<std::string> pythonStringToStdString(PyObject *pyString) {
   if (PyUnicode_Check(pyString)) {
     PyObject *s = PyUnicode_AsEncodedString(pyString, "UTF-8", "");
     auto val = std::string(TO_CSTRING(s));
@@ -128,8 +119,7 @@ pythonStringToStdString(PyObject *pyString) {
 }
 
 PyObject *stdStringToPythonString(std::string const &cppString) {
-  if (auto *utf8String = PyUnicode_DecodeUTF8(cppString.c_str(),
-                                              cppString.length(), nullptr)) {
+  if (auto *utf8String = PyUnicode_DecodeUTF8(cppString.c_str(), cppString.length(), nullptr)) {
     return utf8String;
   } else {
     PyErr_Clear();

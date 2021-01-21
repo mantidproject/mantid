@@ -18,8 +18,8 @@ namespace Mantid {
 namespace VATES {
 
 template <typename TimeMapper>
-vtkMDHistoHex4DFactory<TimeMapper>::vtkMDHistoHex4DFactory(
-    const VisualNormalization normalization, const double timestep)
+vtkMDHistoHex4DFactory<TimeMapper>::vtkMDHistoHex4DFactory(const VisualNormalization normalization,
+                                                           const double timestep)
     : vtkMDHistoHexFactory(normalization), m_timestep(timestep) {}
 
 /**
@@ -44,14 +44,11 @@ Copy Constructor
 @param other : instance to copy from.
 */
 template <typename TimeMapper>
-vtkMDHistoHex4DFactory<TimeMapper>::vtkMDHistoHex4DFactory(
-    const vtkMDHistoHex4DFactory<TimeMapper> &other)
-    : vtkMDHistoHexFactory(other), m_timestep(other.m_timestep),
-      m_timeMapper(other.m_timeMapper) {}
+vtkMDHistoHex4DFactory<TimeMapper>::vtkMDHistoHex4DFactory(const vtkMDHistoHex4DFactory<TimeMapper> &other)
+    : vtkMDHistoHexFactory(other), m_timestep(other.m_timestep), m_timeMapper(other.m_timeMapper) {}
 
 template <typename TimeMapper>
-void vtkMDHistoHex4DFactory<TimeMapper>::initialize(
-    const Mantid::API::Workspace_sptr &workspace) {
+void vtkMDHistoHex4DFactory<TimeMapper>::initialize(const Mantid::API::Workspace_sptr &workspace) {
   m_workspace = doInitialize<MDHistoWorkspace, 4>(workspace);
   if (m_workspace) {
     double tMax = m_workspace->getTDimension()->getMaximum();
@@ -62,10 +59,7 @@ void vtkMDHistoHex4DFactory<TimeMapper>::initialize(
   }
 }
 
-template <typename TimeMapper>
-void vtkMDHistoHex4DFactory<TimeMapper>::validate() const {
-  validateWsNotNull();
-}
+template <typename TimeMapper> void vtkMDHistoHex4DFactory<TimeMapper>::validate() const { validateWsNotNull(); }
 
 /**
 Create the vtkStructuredGrid from the provided workspace
@@ -74,10 +68,8 @@ stack.
 @return fully constructed vtkDataSet.
 */
 template <typename TimeMapper>
-vtkSmartPointer<vtkDataSet> vtkMDHistoHex4DFactory<TimeMapper>::create(
-    ProgressAction &progressUpdating) const {
-  auto product =
-      tryDelegatingCreation<MDHistoWorkspace, 4>(m_workspace, progressUpdating);
+vtkSmartPointer<vtkDataSet> vtkMDHistoHex4DFactory<TimeMapper>::create(ProgressAction &progressUpdating) const {
+  auto product = tryDelegatingCreation<MDHistoWorkspace, 4>(m_workspace, progressUpdating);
   if (product != nullptr) {
     return product;
   } else {
@@ -86,8 +78,7 @@ vtkSmartPointer<vtkDataSet> vtkMDHistoHex4DFactory<TimeMapper>::create(
   }
 }
 
-template <typename TimeMapper>
-vtkMDHistoHex4DFactory<TimeMapper>::~vtkMDHistoHex4DFactory() {}
+template <typename TimeMapper> vtkMDHistoHex4DFactory<TimeMapper>::~vtkMDHistoHex4DFactory() {}
 
 template class vtkMDHistoHex4DFactory<TimeToTimeStep>;
 template class vtkMDHistoHex4DFactory<TimeStepToTimeStep>;

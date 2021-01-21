@@ -25,9 +25,7 @@ class QwtSymbol;
 
 /// Labelling tool for graphs, which can also read points on a graph, as well as
 /// the axis.
-class LabelTool : public QObject,
-                  public QVector<QPoint>,
-                  public PlotToolInterface {
+class LabelTool : public QObject, public QVector<QPoint>, public PlotToolInterface {
   Q_OBJECT
 public:
   explicit LabelTool(Graph *graph);

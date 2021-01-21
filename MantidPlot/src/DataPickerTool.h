@@ -44,8 +44,7 @@ class DataPickerTool : public QwtPlotPicker, public PlotToolInterface {
 public:
   enum Mode { Display, Move, Remove };
   enum MoveMode { Free, Vertical, Horizontal };
-  DataPickerTool(Graph *graph, ApplicationWindow *app, Mode mode,
-                 const QObject *status_target = nullptr,
+  DataPickerTool(Graph *graph, ApplicationWindow *app, Mode mode, const QObject *status_target = nullptr,
                  const char *status_slot = "");
   ~DataPickerTool() override;
   Mode getMode() const { return d_mode; }

@@ -12,14 +12,13 @@ using namespace Mantid::API;
 namespace Mantid {
 namespace VATES {
 
-boost::optional<int> findRecursionDepthForTopLevelSplitting(
-    const std::string &workspaceName,
-    const WorkspaceProvider &workspaceProvider) {
+boost::optional<int> findRecursionDepthForTopLevelSplitting(const std::string &workspaceName,
+                                                            const WorkspaceProvider &workspaceProvider) {
   const int topLevelRecursionDepth = 1;
   boost::optional<int> recursionDepth;
   if (workspaceProvider.canProvideWorkspace(workspaceName)) {
-    auto workspace = std::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(
-        workspaceProvider.fetchWorkspace(workspaceName));
+    auto workspace =
+        std::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(workspaceProvider.fetchWorkspace(workspaceName));
     auto boxController = workspace->getBoxController();
     if (boxController->getSplitTopInto()) {
       recursionDepth = topLevelRecursionDepth;

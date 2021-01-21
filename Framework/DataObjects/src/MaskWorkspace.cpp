@@ -53,9 +53,7 @@ MaskWorkspace::MaskWorkspace(std::size_t numvectors) {
  * workspace.
  * @return MaskWorkspace
  */
-MaskWorkspace::MaskWorkspace(
-    const Mantid::Geometry::Instrument_const_sptr &instrument,
-    const bool includeMonitors)
+MaskWorkspace::MaskWorkspace(const Mantid::Geometry::Instrument_const_sptr &instrument, const bool includeMonitors)
     : SpecialWorkspace2D(std::move(instrument), includeMonitors) {
   this->clearMask();
 }
@@ -66,8 +64,7 @@ MaskWorkspace::MaskWorkspace(
  * It must have an instrument.
  * @return MaskWorkspace
  */
-MaskWorkspace::MaskWorkspace(const API::MatrixWorkspace_const_sptr &parent)
-    : SpecialWorkspace2D(parent) {
+MaskWorkspace::MaskWorkspace(const API::MatrixWorkspace_const_sptr &parent) : SpecialWorkspace2D(parent) {
   this->clearMask();
 }
 
@@ -100,8 +97,7 @@ size_t MaskWorkspace::getNumberMasked() const {
         numMasked += ids.size();
     } else {
       std::stringstream errss;
-      errss << "No instrument is associated with mask workspace "
-            << this->getName();
+      errss << "No instrument is associated with mask workspace " << this->getName();
       throw std::runtime_error(errss.str());
     }
   }
@@ -158,12 +154,10 @@ bool MaskWorkspace::isMasked(const detid_t detectorID) const {
   if (!this->hasInstrument()) {
     std::stringstream msg;
     if (!this->getInstrument())
-      msg << "There is no instrument associated with workspace \'"
-          << this->getName() << "\'";
+      msg << "There is no instrument associated with workspace \'" << this->getName() << "\'";
     else
-      msg << "There is no proper instrument associated with workspace \'"
-          << this->getName() << "\'.  Number of detectors = "
-          << this->getInstrument()->getNumberDetectors();
+      msg << "There is no proper instrument associated with workspace \'" << this->getName()
+          << "\'.  Number of detectors = " << this->getInstrument()->getNumberDetectors();
     throw std::runtime_error(msg.str());
   }
 
@@ -207,8 +201,7 @@ bool MaskWorkspace::isMasked(const std::set<detid_t> &detectorIDs) const {
  * Use this method with MaskWorkspace that doesn't have an instrument.
  */
 bool MaskWorkspace::isMaskedIndex(const std::size_t wkspIndex) const {
-  return (this->dataY(wkspIndex)[0] !=
-          LIVE_VALUE); // if is not live it should masked
+  return (this->dataY(wkspIndex)[0] != LIVE_VALUE); // if is not live it should masked
 }
 
 /**
@@ -229,15 +222,13 @@ void MaskWorkspace::setMasked(const detid_t detectorID, const bool mask) {
  * Mask a set of pixels. This is a convenience function to
  * call MaskWorkspace::setMasked(const detid_t, const bool).
  */
-void MaskWorkspace::setMasked(const std::set<detid_t> &detectorIDs,
-                              const bool mask) {
+void MaskWorkspace::setMasked(const std::set<detid_t> &detectorIDs, const bool mask) {
   for (auto detectorID : detectorIDs) {
     this->setMasked(detectorID, mask);
   }
 }
 
-void MaskWorkspace::setMaskedIndex(const std::size_t wkspIndex,
-                                   const bool mask) {
+void MaskWorkspace::setMaskedIndex(const std::size_t wkspIndex, const bool mask) {
   double value(LIVE_VALUE);
   if (mask)
     value = DEAD_VALUE;
@@ -254,8 +245,7 @@ const std::string MaskWorkspace::id() const { return "MaskWorkspace"; }
 //--------------------------------------------------------------------------------------------
 /** Copy from
  */
-void MaskWorkspace::copyFrom(
-    std::shared_ptr<const SpecialWorkspace2D> sourcews) {
+void MaskWorkspace::copyFrom(std::shared_ptr<const SpecialWorkspace2D> sourcews) {
   SpecialWorkspace2D::copyFrom(sourcews);
 }
 
@@ -295,34 +285,26 @@ namespace Kernel {
 
 template <>
 DLLExport Mantid::DataObjects::MaskWorkspace_sptr
-IPropertyManager::getValue<Mantid::DataObjects::MaskWorkspace_sptr>(
-    const std::string &name) const {
-  auto *prop = dynamic_cast<
-      PropertyWithValue<Mantid::DataObjects::MaskWorkspace_sptr> *>(
-      getPointerToProperty(name));
+IPropertyManager::getValue<Mantid::DataObjects::MaskWorkspace_sptr>(const std::string &name) const {
+  auto *prop = dynamic_cast<PropertyWithValue<Mantid::DataObjects::MaskWorkspace_sptr> *>(getPointerToProperty(name));
   if (prop) {
     return *prop;
   } else {
     std::string message =
-        "Attempt to assign property " + name +
-        " to incorrect type. Expected shared_ptr<MaskWorkspace>.";
+        "Attempt to assign property " + name + " to incorrect type. Expected shared_ptr<MaskWorkspace>.";
     throw std::runtime_error(message);
   }
 }
 
 template <>
 DLLExport Mantid::DataObjects::MaskWorkspace_const_sptr
-IPropertyManager::getValue<Mantid::DataObjects::MaskWorkspace_const_sptr>(
-    const std::string &name) const {
-  auto *prop = dynamic_cast<
-      PropertyWithValue<Mantid::DataObjects::MaskWorkspace_sptr> *>(
-      getPointerToProperty(name));
+IPropertyManager::getValue<Mantid::DataObjects::MaskWorkspace_const_sptr>(const std::string &name) const {
+  auto *prop = dynamic_cast<PropertyWithValue<Mantid::DataObjects::MaskWorkspace_sptr> *>(getPointerToProperty(name));
   if (prop) {
     return prop->operator()();
   } else {
     std::string message =
-        "Attempt to assign property " + name +
-        " to incorrect type. Expected const shared_ptr<MaskWorkspace>.";
+        "Attempt to assign property " + name + " to incorrect type. Expected const shared_ptr<MaskWorkspace>.";
     throw std::runtime_error(message);
   }
 }

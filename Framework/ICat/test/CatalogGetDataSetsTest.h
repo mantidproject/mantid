@@ -17,9 +17,7 @@ using namespace ICatTestHelper;
 class CatalogGetDataSetsTest : public CxxTest::TestSuite {
 public:
   // This means the constructor isn't called when running other tests
-  static CatalogGetDataSetsTest *createSuite() {
-    return new CatalogGetDataSetsTest();
-  }
+  static CatalogGetDataSetsTest *createSuite() { return new CatalogGetDataSetsTest(); }
   static void destroySuite(CatalogGetDataSetsTest *suite) { delete suite; }
 
   CatalogGetDataSetsTest() : m_fakeLogin(std::make_unique<FakeICatLogin>()) {}

@@ -27,8 +27,7 @@ class DLLExport PeakShapeBase : public Mantid::Geometry::PeakShape {
 
 public:
   /// Constructor
-  PeakShapeBase(Kernel::SpecialCoordinateSystem frame,
-                std::string algorithmName = std::string(),
+  PeakShapeBase(Kernel::SpecialCoordinateSystem frame, std::string algorithmName = std::string(),
                 int algorithmVersion = -1);
   /// Get the coordinate frame
   Kernel::SpecialCoordinateSystem frame() const override;

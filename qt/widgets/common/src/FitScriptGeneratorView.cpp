@@ -20,12 +20,10 @@ using namespace MantidQt::MantidWidgets;
 
 namespace {
 
-std::vector<WorkspaceIndex>
-convertToWorkspaceIndex(std::vector<int> const &indices) {
+std::vector<WorkspaceIndex> convertToWorkspaceIndex(std::vector<int> const &indices) {
   std::vector<WorkspaceIndex> workspaceIndices;
   workspaceIndices.reserve(indices.size());
-  std::transform(indices.cbegin(), indices.cend(),
-                 std::back_inserter(workspaceIndices),
+  std::transform(indices.cbegin(), indices.cend(), std::back_inserter(workspaceIndices),
                  [](int index) { return WorkspaceIndex(index); });
   return workspaceIndices;
 }
@@ -39,14 +37,11 @@ using ColumnIndex = FitScriptGeneratorDataTable::ColumnIndex;
 using FittingType = FitOptionsBrowser::FittingType;
 using ViewEvent = IFitScriptGeneratorView::Event;
 
-FitScriptGeneratorView::FitScriptGeneratorView(
-    QWidget *parent, QMap<QString, QString> const &fitOptions)
-    : IFitScriptGeneratorView(parent), m_presenter(),
-      m_dialog(std::make_unique<AddWorkspaceDialog>(this)),
+FitScriptGeneratorView::FitScriptGeneratorView(QWidget *parent, QMap<QString, QString> const &fitOptions)
+    : IFitScriptGeneratorView(parent), m_presenter(), m_dialog(std::make_unique<AddWorkspaceDialog>(this)),
       m_dataTable(std::make_unique<FitScriptGeneratorDataTable>()),
       m_functionBrowser(std::make_unique<FunctionBrowser>(nullptr, true)),
-      m_fitOptionsBrowser(std::make_unique<FitOptionsBrowser>(
-          nullptr, FittingType::SimultaneousAndSequential)) {
+      m_fitOptionsBrowser(std::make_unique<FitOptionsBrowser>(nullptr, FittingType::SimultaneousAndSequential)) {
   m_ui.setupUi(this);
 
   m_ui.fDataTable->layout()->addWidget(m_dataTable.get());
@@ -66,20 +61,16 @@ FitScriptGeneratorView::~FitScriptGeneratorView() {
 
 void FitScriptGeneratorView::connectUiSignals() {
   connect(m_ui.pbRemove, SIGNAL(clicked()), this, SLOT(onRemoveClicked()));
-  connect(m_ui.pbAddWorkspace, SIGNAL(clicked()), this,
-          SLOT(onAddWorkspaceClicked()));
-  connect(m_dataTable.get(), SIGNAL(cellChanged(int, int)), this,
-          SLOT(onCellChanged(int, int)));
+  connect(m_ui.pbAddWorkspace, SIGNAL(clicked()), this, SLOT(onAddWorkspaceClicked()));
+  connect(m_dataTable.get(), SIGNAL(cellChanged(int, int)), this, SLOT(onCellChanged(int, int)));
 }
 
-void FitScriptGeneratorView::setFitBrowserOptions(
-    QMap<QString, QString> const &fitOptions) {
+void FitScriptGeneratorView::setFitBrowserOptions(QMap<QString, QString> const &fitOptions) {
   for (auto it = fitOptions.constBegin(); it != fitOptions.constEnd(); ++it)
     setFitBrowserOption(it.key(), it.value());
 }
 
-void FitScriptGeneratorView::setFitBrowserOption(QString const &name,
-                                                 QString const &value) {
+void FitScriptGeneratorView::setFitBrowserOption(QString const &name, QString const &value) {
   if (name == "FittingType")
     setFittingType(value);
   else
@@ -92,22 +83,14 @@ void FitScriptGeneratorView::setFittingType(QString const &fitType) {
   else if (fitType == "Simultaneous")
     m_fitOptionsBrowser->setCurrentFittingType(FittingType::Simultaneous);
   else
-    throw std::invalid_argument("Invalid fitting type '" +
-                                fitType.toStdString() + "' provided.");
+    throw std::invalid_argument("Invalid fitting type '" + fitType.toStdString() + "' provided.");
 }
 
-void FitScriptGeneratorView::subscribePresenter(
-    IFitScriptGeneratorPresenter *presenter) {
-  m_presenter = presenter;
-}
+void FitScriptGeneratorView::subscribePresenter(IFitScriptGeneratorPresenter *presenter) { m_presenter = presenter; }
 
-void FitScriptGeneratorView::onRemoveClicked() {
-  m_presenter->notifyPresenter(ViewEvent::RemoveClicked);
-}
+void FitScriptGeneratorView::onRemoveClicked() { m_presenter->notifyPresenter(ViewEvent::RemoveClicked); }
 
-void FitScriptGeneratorView::onAddWorkspaceClicked() {
-  m_presenter->notifyPresenter(ViewEvent::AddClicked);
-}
+void FitScriptGeneratorView::onAddWorkspaceClicked() { m_presenter->notifyPresenter(ViewEvent::AddClicked); }
 
 void FitScriptGeneratorView::onCellChanged(int row, int column) {
   UNUSED_ARG(row);
@@ -123,51 +106,35 @@ std::string FitScriptGeneratorView::workspaceName(FitDomainIndex index) const {
   return m_dataTable->workspaceName(index);
 }
 
-WorkspaceIndex
-FitScriptGeneratorView::workspaceIndex(FitDomainIndex index) const {
+WorkspaceIndex FitScriptGeneratorView::workspaceIndex(FitDomainIndex index) const {
   return m_dataTable->workspaceIndex(index);
 }
 
-double FitScriptGeneratorView::startX(FitDomainIndex index) const {
-  return m_dataTable->startX(index);
-}
+double FitScriptGeneratorView::startX(FitDomainIndex index) const { return m_dataTable->startX(index); }
 
-double FitScriptGeneratorView::endX(FitDomainIndex index) const {
-  return m_dataTable->endX(index);
-}
+double FitScriptGeneratorView::endX(FitDomainIndex index) const { return m_dataTable->endX(index); }
 
-std::vector<FitDomainIndex> FitScriptGeneratorView::selectedRows() const {
-  return m_dataTable->selectedRows();
-}
+std::vector<FitDomainIndex> FitScriptGeneratorView::selectedRows() const { return m_dataTable->selectedRows(); }
 
-void FitScriptGeneratorView::removeWorkspaceDomain(
-    std::string const &workspaceName, WorkspaceIndex workspaceIndex) {
+void FitScriptGeneratorView::removeWorkspaceDomain(std::string const &workspaceName, WorkspaceIndex workspaceIndex) {
   m_dataTable->removeDomain(workspaceName, workspaceIndex);
 }
 
-void FitScriptGeneratorView::addWorkspaceDomain(
-    std::string const &workspaceName, WorkspaceIndex workspaceIndex,
-    double startX, double endX) {
-  m_dataTable->addDomain(QString::fromStdString(workspaceName), workspaceIndex,
-                         startX, endX);
+void FitScriptGeneratorView::addWorkspaceDomain(std::string const &workspaceName, WorkspaceIndex workspaceIndex,
+                                                double startX, double endX) {
+  m_dataTable->addDomain(QString::fromStdString(workspaceName), workspaceIndex, startX, endX);
 }
 
-bool FitScriptGeneratorView::openAddWorkspaceDialog() {
-  return m_dialog->exec() == QDialog::Accepted;
-}
+bool FitScriptGeneratorView::openAddWorkspaceDialog() { return m_dialog->exec() == QDialog::Accepted; }
 
-std::vector<MatrixWorkspace_const_sptr>
-FitScriptGeneratorView::getDialogWorkspaces() {
+std::vector<MatrixWorkspace_const_sptr> FitScriptGeneratorView::getDialogWorkspaces() {
   auto const workspaces = m_dialog->getWorkspaces();
   if (workspaces.empty())
-    displayWarning("Failed to add workspace: '" +
-                   m_dialog->workspaceName().toStdString() +
-                   "' doesn't exist.");
+    displayWarning("Failed to add workspace: '" + m_dialog->workspaceName().toStdString() + "' doesn't exist.");
   return workspaces;
 }
 
-std::vector<WorkspaceIndex>
-FitScriptGeneratorView::getDialogWorkspaceIndices() const {
+std::vector<WorkspaceIndex> FitScriptGeneratorView::getDialogWorkspaceIndices() const {
   return convertToWorkspaceIndex(m_dialog->workspaceIndices());
 }
 

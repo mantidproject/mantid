@@ -47,8 +47,7 @@ void LorentzianTest::init() {
 //               provided in the xValues array
 //     nData   - the number of data points where a function value
 //               must be calculated
-void LorentzianTest::functionLocal(double *out, const double *xValues,
-                                   const size_t nData) const {
+void LorentzianTest::functionLocal(double *out, const double *xValues, const size_t nData) const {
   const double h = height();
   const double c = centre();
   const double w = fwhm() / 2.;
@@ -70,8 +69,7 @@ void LorentzianTest::functionLocal(double *out, const double *xValues,
 //        calNumericalDeriv(out, xValues, nData);
 //      }
 // I.e. substitute the code below with the four lines of code above
-void LorentzianTest::functionDerivLocal(Jacobian *out, const double *xValues,
-                                        const size_t nData) {
+void LorentzianTest::functionDerivLocal(Jacobian *out, const double *xValues, const size_t nData) {
   const double h = height();
   const double c = centre();
   const double w = fwhm() / 2.;
@@ -81,8 +79,7 @@ void LorentzianTest::functionDerivLocal(Jacobian *out, const double *xValues,
     const double invDenominator = 1 / ((diff * diff + w * w));
     out->set(i, 0, w * w * invDenominator);
     out->set(i, 1, 2.0 * h * diff * w * w * invDenominator * invDenominator);
-    out->set(i, 2,
-             h * (-w * w * invDenominator + 1) * 2.0 * w * invDenominator);
+    out->set(i, 2, h * (-w * w * invDenominator + 1) * 2.0 * w * invDenominator);
   }
 }
 

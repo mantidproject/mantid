@@ -23,14 +23,11 @@ namespace DataHandling {
 
   @date 15/05/17
 */
-class MANTID_DATAHANDLING_DLL LoadILLDiffraction
-    : public API::IFileLoader<Kernel::NexusDescriptor> {
+class MANTID_DATAHANDLING_DLL LoadILLDiffraction : public API::IFileLoader<Kernel::NexusDescriptor> {
 public:
   const std::string name() const override;
   int version() const override;
-  const std::vector<std::string> seeAlso() const override {
-    return {"LoadNexus"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"LoadNexus"}; }
   const std::string category() const override;
   const std::string summary() const override;
   int confidence(Kernel::NexusDescriptor &descriptor) const override;
@@ -47,8 +44,7 @@ private:
     std::string unit;
 
     ScannedVariables(std::string n, std::string p, std::string u)
-        : axis(0), scanned(0), name(std::move(n)), property(std::move(p)),
-          unit(std::move(u)) {}
+        : axis(0), scanned(0), name(std::move(n)), property(std::move(p)), unit(std::move(u)) {}
 
     void setAxis(int a) { axis = a; }
     void setScanned(int s) { scanned = s; }
@@ -58,31 +54,25 @@ private:
   std::map<std::string, std::string> validateInputs() override;
   void exec() override;
 
-  void calculateRelativeRotations(std::vector<double> &instrumentAngles,
-                                  const Kernel::V3D &firstTubePosition);
+  void calculateRelativeRotations(std::vector<double> &instrumentAngles, const Kernel::V3D &firstTubePosition);
 
   void fillDataScanMetaData(const NeXus::NXDouble &);
   void fillMovingInstrumentScan(const NeXus::NXUInt &, const NeXus::NXDouble &);
-  void fillStaticInstrumentScan(const NeXus::NXUInt &, const NeXus::NXDouble &,
-                                const double &);
+  void fillStaticInstrumentScan(const NeXus::NXUInt &, const NeXus::NXDouble &, const double &);
 
-  std::vector<Types::Core::DateAndTime>
-  getAbsoluteTimes(const NeXus::NXDouble &) const;
+  std::vector<Types::Core::DateAndTime> getAbsoluteTimes(const NeXus::NXDouble &) const;
   std::vector<double> getAxis(const NeXus::NXDouble &) const;
   std::vector<double> getDurations(const NeXus::NXDouble &) const;
   std::vector<double> getMonitor(const NeXus::NXDouble &) const;
   std::string getInstrumentFilePath(const std::string &) const;
-  Kernel::V3D getReferenceComponentPosition(
-      const API::MatrixWorkspace_sptr &instrumentWorkspace);
+  Kernel::V3D getReferenceComponentPosition(const API::MatrixWorkspace_sptr &instrumentWorkspace);
   bool containsCalibratedData(const std::string &filename) const;
 
-  std::vector<double>
-  getScannedVaribleByPropertyName(const NeXus::NXDouble &scan,
-                                  const std::string &propertyName) const;
+  std::vector<double> getScannedVaribleByPropertyName(const NeXus::NXDouble &scan,
+                                                      const std::string &propertyName) const;
 
   void initStaticWorkspace(const std::string &start_time);
-  void initMovingWorkspace(const NeXus::NXDouble &scan,
-                           const std::string &start_time);
+  void initMovingWorkspace(const NeXus::NXDouble &scan, const std::string &start_time);
 
   void loadDataScan();
   API::MatrixWorkspace_sptr loadEmptyInstrument(const std::string &start_time);
@@ -98,9 +88,9 @@ private:
 
   ///< the 2theta offset for D20 to account for dead pixels
   double m_offsetTheta{0.};
-  size_t m_sizeDim1; ///< size of dim1, number of tubes (D2B) or the whole
-                     /// detector (D20)
-  size_t m_sizeDim2; ///< size of dim2, number of pixels (1 for D20!)
+  size_t m_sizeDim1;              ///< size of dim1, number of tubes (D2B) or the whole
+                                  /// detector (D20)
+  size_t m_sizeDim2;              ///< size of dim2, number of pixels (1 for D20!)
   size_t m_numberDetectorsRead;   ///< number of cells read from file
   size_t m_numberDetectorsActual; ///< number of cells actually active
   size_t m_numberScanPoints;      ///< number of scan points
@@ -112,13 +102,13 @@ private:
   Types::Core::DateAndTime m_startTime; ///< start time of acquisition
   ScanType m_scanType;                  ///< NoScan, DetectorScan or OtherScan
   double m_pixelHeight{0.};             ///< height of the pixel in D2B
-  double m_maxHeight{0.}; ///< maximum absolute height of the D2B tubes
+  double m_maxHeight{0.};               ///< maximum absolute height of the D2B tubes
 
   std::vector<ScannedVariables> m_scanVar;  ///< holds the scan info
   LoadHelper m_loadHelper;                  ///< a helper for metadata
   API::MatrixWorkspace_sptr m_outWorkspace; ///< output workspace
-  bool m_useCalibratedData{false}; ///< whether to use the calibrated data in
-                                   ///< the nexus (D2B only)
+  bool m_useCalibratedData{false};          ///< whether to use the calibrated data in
+                                            ///< the nexus (D2B only)
 };
 
 } // namespace DataHandling

@@ -34,10 +34,7 @@ constexpr auto PYTHONPATHS_KEY = "pythonscripts.directories";
  * are created if we are being imported from vanilla Python. This function
  * registers the any C++ algorithms and should be called once.
  */
-void declareCPPAlgorithms() {
-  AlgorithmFactory::Instance()
-      .subscribe<Mantid::PythonInterface::RunPythonScript>();
-}
+void declareCPPAlgorithms() { AlgorithmFactory::Instance().subscribe<Mantid::PythonInterface::RunPythonScript>(); }
 
 /**
  * @brief Append to the sys.path any paths defined in the config key
@@ -46,9 +43,7 @@ void declareCPPAlgorithms() {
 void updatePythonPaths() {
   auto packagesetup = import("mantid.kernel.packagesetup");
   packagesetup.attr("update_sys_paths")(
-      ConfigService::Instance()
-          .getValue<std::string>(PYTHONPATHS_KEY)
-          .get_value_or(""));
+      ConfigService::Instance().getValue<std::string>(PYTHONPATHS_KEY).get_value_or(""));
 }
 
 /**
@@ -89,27 +84,21 @@ bool hasInstance() { return INSTANCE_CALLED; }
 } // namespace
 
 void export_FrameworkManager() {
-  class_<FrameworkManagerImpl, boost::noncopyable>("FrameworkManagerImpl",
-                                                   no_init)
-      .def("setNumOMPThreadsToConfigValue",
-           &FrameworkManagerImpl::setNumOMPThreadsToConfigValue, arg("self"),
+  class_<FrameworkManagerImpl, boost::noncopyable>("FrameworkManagerImpl", no_init)
+      .def("setNumOMPThreadsToConfigValue", &FrameworkManagerImpl::setNumOMPThreadsToConfigValue, arg("self"),
            "Sets the number of OpenMP threads to the value "
            "specified in the "
            "config file")
 
-      .def("setNumOMPThreads", &FrameworkManagerImpl::setNumOMPThreads,
-           (arg("self"), arg("nthread")),
+      .def("setNumOMPThreads", &FrameworkManagerImpl::setNumOMPThreads, (arg("self"), arg("nthread")),
            "Set the number of OpenMP threads to the given value")
 
-      .def("getNumOMPThreads", &FrameworkManagerImpl::getNumOMPThreads,
-           arg("self"),
+      .def("getNumOMPThreads", &FrameworkManagerImpl::getNumOMPThreads, arg("self"),
            "Returns the number of OpenMP threads that will be used.")
 
-      .def("clear", &FrameworkManagerImpl::clear, arg("self"),
-           "Clear all memory held by Mantid")
+      .def("clear", &FrameworkManagerImpl::clear, arg("self"), "Clear all memory held by Mantid")
 
-      .def("clearAlgorithms", &FrameworkManagerImpl::clearAlgorithms,
-           arg("self"),
+      .def("clearAlgorithms", &FrameworkManagerImpl::clearAlgorithms, arg("self"),
            "Clear memory held by algorithms (does not include workspaces)")
 
       .def("clearData", &FrameworkManagerImpl::clearData, arg("self"),
@@ -117,18 +106,15 @@ void export_FrameworkManager() {
            "workspaces, "
            "including hidden)")
 
-      .def("clearInstruments", &FrameworkManagerImpl::clearInstruments,
-           arg("self"), "Clear memory held by the cached instruments")
+      .def("clearInstruments", &FrameworkManagerImpl::clearInstruments, arg("self"),
+           "Clear memory held by the cached instruments")
 
-      .def("clearPropertyManagers",
-           &FrameworkManagerImpl::clearPropertyManagers, arg("self"),
+      .def("clearPropertyManagers", &FrameworkManagerImpl::clearPropertyManagers, arg("self"),
            "Clear memory held by the PropertyManagerDataService")
 
-      .def("shutdown", &FrameworkManagerImpl::shutdown, arg("self"),
-           "Effectively shutdown this service")
+      .def("shutdown", &FrameworkManagerImpl::shutdown, arg("self"), "Effectively shutdown this service")
 
-      .def("hasInstance", hasInstance,
-           "Returns True if Instance has been called, false otherwise")
+      .def("hasInstance", hasInstance, "Returns True if Instance has been called, false otherwise")
       .staticmethod("hasInstance")
 
       .def("Instance", instance, "Return a reference to the singleton instance",

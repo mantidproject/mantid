@@ -51,8 +51,7 @@ class EXPORT_OPT_MANTIDQT_PLOTTING PreviewPlot : public API::MantidWidget {
 
   Q_PROPERTY(QColor canvasColour READ canvasColour WRITE setCanvasColour)
   Q_PROPERTY(bool showLegend READ legendIsShown WRITE showLegend)
-  Q_PROPERTY(QStringList curveErrorBars READ getShownErrorBars WRITE
-                 setLinesWithErrors)
+  Q_PROPERTY(QStringList curveErrorBars READ getShownErrorBars WRITE setLinesWithErrors)
 
 public:
   PreviewPlot(QWidget *parent = nullptr, bool init = true);
@@ -67,25 +66,20 @@ public:
   bool legendIsShown();
   QStringList getShownErrorBars();
 
-  void setAxisRange(QPair<double, double> range,
-                    AxisID axisID = AxisID::XBottom);
-  std::tuple<double, double>
-  getAxisRange(AxisID axisID = AxisID::XBottom) const;
+  void setAxisRange(QPair<double, double> range, AxisID axisID = AxisID::XBottom);
+  std::tuple<double, double> getAxisRange(AxisID axisID = AxisID::XBottom) const;
   void setOverrideAxisLabel(AxisID const &axisID, char const *const label);
   void tickLabelFormat(char *axis, char *style, bool useOffset);
 
-  QPair<double, double>
-  getCurveRange(const Mantid::API::MatrixWorkspace_sptr &ws);
+  QPair<double, double> getCurveRange(const Mantid::API::MatrixWorkspace_sptr &ws);
   QPair<double, double> getCurveRange(const QString &curveName);
 
-  void addSpectrum(
-      const QString &curveName, const Mantid::API::MatrixWorkspace_sptr &ws,
-      const size_t wsIndex = 0, const QColor &curveColour = QColor(),
-      const QHash<QString, QVariant> &plotKwargs = QHash<QString, QVariant>());
-  void addSpectrum(
-      const QString &curveName, const QString &wsName, const size_t wsIndex = 0,
-      const QColor &curveColour = QColor(),
-      const QHash<QString, QVariant> &plotKwargs = QHash<QString, QVariant>());
+  void addSpectrum(const QString &curveName, const Mantid::API::MatrixWorkspace_sptr &ws, const size_t wsIndex = 0,
+                   const QColor &curveColour = QColor(),
+                   const QHash<QString, QVariant> &plotKwargs = QHash<QString, QVariant>());
+  void addSpectrum(const QString &curveName, const QString &wsName, const size_t wsIndex = 0,
+                   const QColor &curveColour = QColor(),
+                   const QHash<QString, QVariant> &plotKwargs = QHash<QString, QVariant>());
 
   void removeSpectrum(const Mantid::API::MatrixWorkspace_sptr &ws);
   void removeSpectrum(const QString &curveName);
@@ -94,17 +88,13 @@ public:
   void setCurveStyle(const QString &curveName, const int style);
   void setCurveSymbol(const QString &curveName, const int symbol);
 
-  RangeSelector *
-  addRangeSelector(const QString &rsName,
-                   RangeSelector::SelectType type = RangeSelector::XMINMAX);
+  RangeSelector *addRangeSelector(const QString &rsName, RangeSelector::SelectType type = RangeSelector::XMINMAX);
   RangeSelector *getRangeSelector(const QString &rsName);
   void removeRangeSelector(const QString &rsName, bool del);
   bool hasRangeSelector(const QString &rsName);
 
-  SingleSelector *
-  addSingleSelector(const QString &rsName,
-                    SingleSelector::SelectType type = SingleSelector::XSINGLE,
-                    double position = 0.0);
+  SingleSelector *addSingleSelector(const QString &rsName, SingleSelector::SelectType type = SingleSelector::XSINGLE,
+                                    double position = 0.0);
   SingleSelector *getSingleSelector(const QString &rsName);
 
   QString getAxisType(int axisID);
@@ -147,26 +137,20 @@ private:
     size_t wsIndex;
 
     PlotCurveConfiguration()
-        : curve(nullptr), errorCurve(nullptr), showErrorsAction(nullptr),
-          label(nullptr), colour(), wsIndex(0) {}
+        : curve(nullptr), errorCurve(nullptr), showErrorsAction(nullptr), label(nullptr), colour(), wsIndex(0) {}
   };
 
   void handleRemoveEvent(Mantid::API::WorkspacePreDeleteNotification_ptr pNf);
-  void
-  handleReplaceEvent(Mantid::API::WorkspaceAfterReplaceNotification_ptr pNf);
+  void handleReplaceEvent(Mantid::API::WorkspaceAfterReplaceNotification_ptr pNf);
 
-  void addCurve(PlotCurveConfiguration &curveConfig,
-                Mantid::API::MatrixWorkspace_sptr ws, const size_t wsIndex,
+  void addCurve(PlotCurveConfiguration &curveConfig, Mantid::API::MatrixWorkspace_sptr ws, const size_t wsIndex,
                 const QColor &curveColour, const QString &curveName = "");
   void removeCurve(QwtPlotItem *curve);
 
-  QList<QAction *> addOptionsToMenus(const QString &menuName,
-                                     QActionGroup *group,
-                                     const QStringList &items,
+  QList<QAction *> addOptionsToMenus(const QString &menuName, QActionGroup *group, const QStringList &items,
                                      const QString &defaultItem);
 
-  QStringList
-  getCurvesForWorkspace(const Mantid::API::MatrixWorkspace_sptr &ws);
+  QStringList getCurvesForWorkspace(const Mantid::API::MatrixWorkspace_sptr &ws);
 
 private slots:
   void showContextMenu(QPoint position);
@@ -187,10 +171,8 @@ private:
   QMap<QString, bool> m_ssVisibility;
 
   /// Poco Observers for ADS Notifications
-  Poco::NObserver<PreviewPlot, Mantid::API::WorkspacePreDeleteNotification>
-      m_removeObserver;
-  Poco::NObserver<PreviewPlot, Mantid::API::WorkspaceAfterReplaceNotification>
-      m_replaceObserver;
+  Poco::NObserver<PreviewPlot, Mantid::API::WorkspacePreDeleteNotification> m_removeObserver;
+  Poco::NObserver<PreviewPlot, Mantid::API::WorkspaceAfterReplaceNotification> m_replaceObserver;
 
   /// If the widget was initialised
   bool m_init;

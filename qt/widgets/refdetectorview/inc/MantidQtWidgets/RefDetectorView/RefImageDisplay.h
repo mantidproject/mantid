@@ -21,23 +21,18 @@ namespace RefDetectorViewer {
    the gui)
  */
 
-class EXPORT_OPT_MANTIDQT_REFDETECTORVIEWER RefImageDisplay
-    : public SpectrumView::SpectrumDisplay {
+class EXPORT_OPT_MANTIDQT_REFDETECTORVIEWER RefImageDisplay : public SpectrumView::SpectrumDisplay {
 public:
   /// Make a SpectrumDisplay to display with the given widgets and controls
-  RefImageDisplay(QwtPlot *imagePlot, RefSliderHandler *sliderHandler,
-                  RefRangeHandler *rangeHandler,
-                  RefLimitsHandler *limitsHandler,
-                  SpectrumView::GraphDisplay *hGraph,
-                  SpectrumView::GraphDisplay *vGraph,
-                  QTableWidget *tableWidget);
+  RefImageDisplay(QwtPlot *imagePlot, RefSliderHandler *sliderHandler, RefRangeHandler *rangeHandler,
+                  RefLimitsHandler *limitsHandler, SpectrumView::GraphDisplay *hGraph,
+                  SpectrumView::GraphDisplay *vGraph, QTableWidget *tableWidget);
 
   ~RefImageDisplay() override;
 
   /// Record the point that the user is currently pointing at with the mouse
   /// default right click (mouseClick = 2)
-  QPair<double, double> setPointedAtPoint(QPoint point, int mouseClick = 2,
-                                          bool isFirst = true) override;
+  QPair<double, double> setPointedAtPoint(QPoint point, int mouseClick = 2, bool isFirst = true) override;
 
 private:
   RefLimitsHandler *m_limitsHandler; // Owned by RefImagePlotItem

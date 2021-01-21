@@ -23,15 +23,13 @@ public:
   enum Option { List, Sum };
   /// Create a grouping file to extract all detectors in detector_list excluding
   /// those in exclude
-  DetXMLFile(const std::vector<int> &detector_list, const QList<int> &exclude,
-             const QString &fname);
+  DetXMLFile(const std::vector<int> &detector_list, const QList<int> &exclude, const QString &fname);
 
   /// Create a grouping file to extract detectors in dets. Option List - one
   /// group - one detector,
   /// Option Sum - one group which is a sum of the detectors
   /// If fname is empty create a temporary file
-  DetXMLFile(const QList<int> &dets, Option opt = List,
-             const QString &fname = "");
+  DetXMLFile(const QList<int> &dets, Option opt = List, const QString &fname = "");
 
   /// Destructor
   ~DetXMLFile();

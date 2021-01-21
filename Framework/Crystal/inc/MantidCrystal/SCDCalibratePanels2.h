@@ -50,9 +50,7 @@ public:
   const std::string category() const override { return "Crystal\\Corrections"; }
 
   /// Extra help info
-  const std::vector<std::string> seeAlso() const override {
-    return {"CalculateUMatrix"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"CalculateUMatrix"}; }
 
 private:
   /// Overwrites Algorithm method. Does nothing at present
@@ -65,8 +63,7 @@ private:
   std::map<std::string, std::string> validateInputs() override;
 
   /// Private function dedicated for parsing lattice constant
-  void parseLatticeConstant(
-      std::shared_ptr<Mantid::DataObjects::PeaksWorkspace> pws);
+  void parseLatticeConstant(std::shared_ptr<Mantid::DataObjects::PeaksWorkspace> pws);
 
   /// Private function for getting names of banks to be calibrated
   void getBankNames(std::shared_ptr<Mantid::DataObjects::PeaksWorkspace> pws);
@@ -84,28 +81,22 @@ private:
   void adjustT0(double dT0, DataObjects::PeaksWorkspace_sptr &pws);
 
   /// Helper functions for adjusting components
-  void adjustComponent(double dx, double dy, double dz, double rvx, double rvy,
-                       double rvz, double rang, std::string cmptName,
-                       DataObjects::PeaksWorkspace_sptr &pws);
+  void adjustComponent(double dx, double dy, double dz, double rvx, double rvy, double rvz, double rang,
+                       std::string cmptName, DataObjects::PeaksWorkspace_sptr &pws);
 
   /// Generate a Table workspace to store the calibration results
-  DataObjects::TableWorkspace_sptr
-  generateCalibrationTable(std::shared_ptr<Geometry::Instrument> &instrument);
+  DataObjects::TableWorkspace_sptr generateCalibrationTable(std::shared_ptr<Geometry::Instrument> &instrument);
 
   /// Save to xml file for Mantid to load
-  void saveXmlFile(const std::string &FileName,
-                   boost::container::flat_set<std::string> &AllBankNames,
+  void saveXmlFile(const std::string &FileName, boost::container::flat_set<std::string> &AllBankNames,
                    std::shared_ptr<Geometry::Instrument> &instrument);
 
   /// Save to ISAW type det calibration output for backward compatiblity
-  void saveIsawDetCal(const std::string &filename,
-                      boost::container::flat_set<std::string> &AllBankName,
-                      std::shared_ptr<Geometry::Instrument> &instrument,
-                      double T0);
+  void saveIsawDetCal(const std::string &filename, boost::container::flat_set<std::string> &AllBankName,
+                      std::shared_ptr<Geometry::Instrument> &instrument, double T0);
 
   /// Save the calibration table to a CSV file
-  void saveCalibrationTable(const std::string &FileName,
-                            DataObjects::TableWorkspace_sptr &tws);
+  void saveCalibrationTable(const std::string &FileName, DataObjects::TableWorkspace_sptr &tws);
 
   /// unique vars for a given instance of calibration
   double m_a, m_b, m_c, m_alpha, m_beta, m_gamma;
@@ -121,13 +112,11 @@ private:
   const int MINIMUM_PEAKS_PER_BANK{6};
 
   // Column names and types
-  const std::string calibrationTableColumnNames[8] = {
-      "ComponentName",    "Xposition",        "Yposition",
-      "Zposition",        "XdirectionCosine", "YdirectionCosine",
-      "ZdirectionCosine", "RotationAngle"};
-  const std::string calibrationTableColumnTypes[8] = {
-      "str",    "double", "double", "double",
-      "double", "double", "double", "double"};
+  const std::string calibrationTableColumnNames[8] = {"ComponentName",    "Xposition",        "Yposition",
+                                                      "Zposition",        "XdirectionCosine", "YdirectionCosine",
+                                                      "ZdirectionCosine", "RotationAngle"};
+  const std::string calibrationTableColumnTypes[8] = {"str",    "double", "double", "double",
+                                                      "double", "double", "double", "double"};
 
   boost::container::flat_set<std::string> m_BankNames;
   Mantid::DataObjects::TableWorkspace_sptr mCaliTable;

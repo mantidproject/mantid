@@ -34,14 +34,10 @@ const std::string RunPythonScript::name() const { return "RunPythonScript"; }
 int RunPythonScript::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string RunPythonScript::category() const {
-  return "DataHandling\\LiveData\\Support";
-}
+const std::string RunPythonScript::category() const { return "DataHandling\\LiveData\\Support"; }
 
 /// @copydoc Algorithm::summary
-const std::string RunPythonScript::summary() const {
-  return "Executes a snippet of Python code";
-}
+const std::string RunPythonScript::summary() const { return "Executes a snippet of Python code"; }
 
 /**
  * Override standard group behaviour so that the algorithm is only
@@ -54,17 +50,14 @@ bool RunPythonScript::checkGroups() { return false; }
  */
 void RunPythonScript::init() {
   declareProperty(
-      std::make_unique<WorkspaceProperty<Workspace>>(
-          "InputWorkspace", "", Direction::Input, PropertyMode::Optional),
+      std::make_unique<WorkspaceProperty<Workspace>>("InputWorkspace", "", Direction::Input, PropertyMode::Optional),
       "An input workspace that the python code will modify."
       "The workspace will be in the python variable named 'input'.");
   declareProperty("Code", "", "Python code (can be on multiple lines).");
-  declareProperty(std::make_unique<FileProperty>(
-                      "Filename", "", FileProperty::OptionalLoad, "py"),
+  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::OptionalLoad, "py"),
                   "A File containing a python script");
   declareProperty(
-      std::make_unique<WorkspaceProperty<Workspace>>(
-          "OutputWorkspace", "", Direction::Output, PropertyMode::Optional),
+      std::make_unique<WorkspaceProperty<Workspace>>("OutputWorkspace", "", Direction::Output, PropertyMode::Optional),
       "An output workspace to be produced by the python code."
       "The workspace will be in the python variable named 'output'.");
 }
@@ -133,7 +126,7 @@ std::string RunPythonScript::scriptCode() const {
   }
 
   // Unify line endings
-  boost::regex eol("\\R"); // \R is Perl syntax for matching any EOL sequence
+  boost::regex eol("\\R");                              // \R is Perl syntax for matching any EOL sequence
   userCode = boost::regex_replace(userCode, eol, "\n"); // converts all to LF
 
   // Wrap and indent the user code (see method documentation)
@@ -148,9 +141,8 @@ std::string RunPythonScript::scriptCode() const {
   while (getline(is, line)) {
     os << indent << indent << line << "\n";
   }
-  os << indent << indent
-     << "return input,output\n"; // When executed the global scope needs to know
-                                 // about input,output so we return them
+  os << indent << indent << "return input,output\n"; // When executed the global scope needs to know
+                                                     // about input,output so we return them
   os << "input,output = _DUMMY_ALG().PyExec(input,output)";
 
   if (g_log.is(Kernel::Logger::Priority::PRIO_DEBUG))
@@ -169,8 +161,7 @@ std::string RunPythonScript::scriptCode() const {
  * @return A pointer to the output workspace if one was generated. If one was
  * not then this is an empty pointer
  */
-std::shared_ptr<API::Workspace>
-RunPythonScript::executeScript(const std::string &script) const {
+std::shared_ptr<API::Workspace> RunPythonScript::executeScript(const std::string &script) const {
   using namespace API;
   using namespace boost::python;
 
@@ -188,8 +179,7 @@ RunPythonScript::executeScript(const std::string &script) const {
  * @param script The script code
  * @returns A dictionary defining the input & output variables
  */
-boost::python::dict
-RunPythonScript::doExecuteScript(const std::string &script) const {
+boost::python::dict RunPythonScript::doExecuteScript(const std::string &script) const {
   // Retrieve the main module.
   auto main = boost::python::import("__main__");
   // Retrieve the main module's namespace
@@ -222,13 +212,11 @@ boost::python::dict RunPythonScript::buildLocals() const {
 
   API::Workspace_sptr inputWS = getProperty("InputWorkspace");
   if (inputWS) {
-    locals["input"] =
-        object(handle<>(to_python_value<API::Workspace_sptr>()(inputWS)));
+    locals["input"] = object(handle<>(to_python_value<API::Workspace_sptr>()(inputWS)));
   }
   std::string outputWSName = getPropertyValue("OutputWorkspace");
   if (!outputWSName.empty()) {
-    locals["output"] =
-        object(handle<>(to_python_value<const std::string &>()(outputWSName)));
+    locals["output"] = object(handle<>(to_python_value<const std::string &>()(outputWSName)));
   }
   return locals;
 }
@@ -239,8 +227,7 @@ boost::python::dict RunPythonScript::buildLocals() const {
  * @return A pointer to the output workspace if created, otherwise an empty
  * pointer
  */
-std::shared_ptr<API::Workspace> RunPythonScript::extractOutputWorkspace(
-    const boost::python::dict &locals) const {
+std::shared_ptr<API::Workspace> RunPythonScript::extractOutputWorkspace(const boost::python::dict &locals) const {
   using namespace API;
   using namespace boost::python;
 
@@ -261,9 +248,8 @@ std::shared_ptr<API::Workspace> RunPythonScript::extractOutputWorkspace(
       // but didn't create one.
       return AnalysisDataService::Instance().retrieve(extractString());
     } else {
-      throw std::runtime_error(
-          "Invalid type assigned to 'output' variable. Must "
-          "be a string or a Workspace object");
+      throw std::runtime_error("Invalid type assigned to 'output' variable. Must "
+                               "be a string or a Workspace object");
     }
   }
 }

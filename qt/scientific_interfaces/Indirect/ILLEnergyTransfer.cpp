@@ -16,8 +16,7 @@ using namespace Mantid::API;
 
 namespace {
 
-void saveNexusProcessed(std::string const &workspaceName,
-                        std::string const &filename) {
+void saveNexusProcessed(std::string const &workspaceName, std::string const &filename) {
   auto saver = AlgorithmManager::Instance().create("SaveNexusProcessed");
   saver->initialize();
   saver->setProperty("InputWorkspace", workspaceName);
@@ -32,24 +31,17 @@ namespace CustomInterfaces {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-ILLEnergyTransfer::ILLEnergyTransfer(IndirectDataReduction *idrUI,
-                                     QWidget *parent)
+ILLEnergyTransfer::ILLEnergyTransfer(IndirectDataReduction *idrUI, QWidget *parent)
     : IndirectDataReductionTab(idrUI, parent) {
   m_uiForm.setupUi(parent);
 
-  connect(this, SIGNAL(newInstrumentConfiguration()), this,
-          SLOT(setInstrumentDefault()));
-  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-          SLOT(algorithmComplete(bool)));
+  connect(this, SIGNAL(newInstrumentConfiguration()), this, SLOT(setInstrumentDefault()));
+  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
 
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
 
-  connect(this,
-          SIGNAL(updateRunButton(bool, std::string const &, QString const &,
-                                 QString const &)),
-          this,
-          SLOT(updateRunButton(bool, std::string const &, QString const &,
-                               QString const &)));
+  connect(this, SIGNAL(updateRunButton(bool, std::string const &, QString const &, QString const &)), this,
+          SLOT(updateRunButton(bool, std::string const &, QString const &, QString const &)));
 
   // Validate to remove invalid markers
   validateTab();
@@ -80,8 +72,7 @@ bool ILLEnergyTransfer::validate() {
   } else {
     bool isDouble = true;
     m_backScaling = m_uiForm.leBackgroundFactor->text().toDouble(&isDouble);
-    if ((!isDouble || m_backScaling <= 0) &&
-        !m_uiForm.rfBackgroundRun->getUserInput().toString().isEmpty()) {
+    if ((!isDouble || m_backScaling <= 0) && !m_uiForm.rfBackgroundRun->getUserInput().toString().isEmpty()) {
       uiv.addErrorMessage("BackgroundScaleFactor is invalid. "
                           "It has to be a positive number.");
     }
@@ -102,9 +93,8 @@ bool ILLEnergyTransfer::validate() {
       m_peakRange[1] = range[1].toDouble(&isDouble2);
 
       if (!isDouble1 || !isDouble2) {
-        uiv.addErrorMessage(
-            "Calibration Peak Range is invalid. \n"
-            "Provide comma separated two energy values in meV.");
+        uiv.addErrorMessage("Calibration Peak Range is invalid. \n"
+                            "Provide comma separated two energy values in meV.");
       } else {
         if (m_peakRange[0] >= m_peakRange[1]) {
           uiv.addErrorMessage("Calibration Peak Range is invalid. \n"
@@ -120,8 +110,7 @@ bool ILLEnergyTransfer::validate() {
   } else {
     bool isDouble = true;
     m_backCalibScaling = m_uiForm.leBackCalibScale->text().toDouble(&isDouble);
-    if ((!isDouble || m_backCalibScaling <= 0) &&
-        !m_uiForm.rfBackCalibrationRun->getUserInput().toString().isEmpty()) {
+    if ((!isDouble || m_backCalibScaling <= 0) && !m_uiForm.rfBackCalibrationRun->getUserInput().toString().isEmpty()) {
       uiv.addErrorMessage("Scale factor for calibration background is invalid. "
                           "It has to be a positive number.");
     }
@@ -130,17 +119,15 @@ bool ILLEnergyTransfer::validate() {
   // Calibration file required if calibration background is given
   if (!m_uiForm.rfBackCalibrationRun->getUserInput().toString().isEmpty() &&
       m_uiForm.rfCalibrationRun->getUserInput().toString().isEmpty()) {
-    uiv.addErrorMessage(
-        "Calibration file is required if calibration background is given");
+    uiv.addErrorMessage("Calibration file is required if calibration background is given");
   }
 
   // Validate the manual PSD integration range
   if (m_uiForm.rdGroupRange->isChecked()) {
     auto range = m_uiForm.lePixelRange->text().split(',');
     if (range.size() != 2) {
-      uiv.addErrorMessage(
-          "PSD Integration Range is invalid. \n"
-          "Provide comma separated two pixel numbers, e.g. 1,128");
+      uiv.addErrorMessage("PSD Integration Range is invalid. \n"
+                          "Provide comma separated two pixel numbers, e.g. 1,128");
     } else {
       bool isDouble1 = true;
       m_pixelRange[0] = range[0].toInt(&isDouble1);
@@ -148,16 +135,13 @@ bool ILLEnergyTransfer::validate() {
       m_pixelRange[1] = range[1].toInt(&isDouble2);
 
       if (!isDouble1 || !isDouble2) {
-        uiv.addErrorMessage(
-            "PSD Integration Range is invalid. \n"
-            "Provide comma separated two pixel numbers, e.g. 1,128");
+        uiv.addErrorMessage("PSD Integration Range is invalid. \n"
+                            "Provide comma separated two pixel numbers, e.g. 1,128");
       } else {
-        if (m_pixelRange[0] >= m_pixelRange[1] || m_pixelRange[0] < 1 ||
-            m_pixelRange[1] > 128) {
-          uiv.addErrorMessage(
-              "PSD Integration Range is invalid. \n"
-              "Start or end pixel number is outside range [1-128], "
-              "or start pixel number is >= than the end pixel number.");
+        if (m_pixelRange[0] >= m_pixelRange[1] || m_pixelRange[0] < 1 || m_pixelRange[1] > 128) {
+          uiv.addErrorMessage("PSD Integration Range is invalid. \n"
+                              "Start or end pixel number is outside range [1-128], "
+                              "or start pixel number is >= than the end pixel number.");
         }
       }
     }
@@ -173,8 +157,7 @@ bool ILLEnergyTransfer::validate() {
   if (m_uiForm.rdQENS->isChecked()) {
     int useVanadiumRun = m_uiForm.sbUnmirrorOption->value();
     if ((useVanadiumRun == 5 || useVanadiumRun == 7) &&
-        (!m_uiForm.rfAlignmentRun->isValid() ||
-         m_uiForm.rfAlignmentRun->getUserInput().toString().isEmpty()))
+        (!m_uiForm.rfAlignmentRun->isValid() || m_uiForm.rfAlignmentRun->getUserInput().toString().isEmpty()))
       uiv.addErrorMessage("Alignment run is invalid.");
   }
 
@@ -196,32 +179,27 @@ bool ILLEnergyTransfer::validate() {
 
 void ILLEnergyTransfer::run() {
   QString runFilename = m_uiForm.rfInput->getUserInput().toString();
-  QString backgroundFilename =
-      m_uiForm.rfBackgroundRun->getUserInput().toString();
-  QString calibrationFilename =
-      m_uiForm.rfCalibrationRun->getUserInput().toString();
-  QString calibrationBackgroundFilename =
-      m_uiForm.rfBackCalibrationRun->getUserInput().toString();
+  QString backgroundFilename = m_uiForm.rfBackgroundRun->getUserInput().toString();
+  QString calibrationFilename = m_uiForm.rfCalibrationRun->getUserInput().toString();
+  QString calibrationBackgroundFilename = m_uiForm.rfBackCalibrationRun->getUserInput().toString();
 
   IAlgorithm_sptr reductionAlg = nullptr;
 
   if (m_uiForm.rdQENS->isChecked()) // QENS
   {
-    reductionAlg =
-        AlgorithmManager::Instance().create("IndirectILLReductionQENS");
+    reductionAlg = AlgorithmManager::Instance().create("IndirectILLReductionQENS");
     reductionAlg->initialize();
 
     // Set options
     long int uo = m_uiForm.sbUnmirrorOption->value();
     reductionAlg->setProperty("UnmirrorOption", uo);
     reductionAlg->setProperty("SumRuns", m_uiForm.ckSum->isChecked());
-    reductionAlg->setProperty("CropDeadMonitorChannels",
-                              m_uiForm.cbCrop->isChecked());
+    reductionAlg->setProperty("CropDeadMonitorChannels", m_uiForm.cbCrop->isChecked());
 
     // Calibraiton peak range
     if (!calibrationFilename.toStdString().empty()) {
-      auto peakRange = boost::lexical_cast<std::string>(m_peakRange[0]) + "," +
-                       boost::lexical_cast<std::string>(m_peakRange[1]);
+      auto peakRange =
+          boost::lexical_cast<std::string>(m_peakRange[0]) + "," + boost::lexical_cast<std::string>(m_peakRange[1]);
       reductionAlg->setProperty("CalibrationPeakRange", peakRange);
     }
 
@@ -233,23 +211,16 @@ void ILLEnergyTransfer::run() {
 
   } else { // FWS
 
-    reductionAlg =
-        AlgorithmManager::Instance().create("IndirectILLReductionFWS");
+    reductionAlg = AlgorithmManager::Instance().create("IndirectILLReductionFWS");
     reductionAlg->initialize();
 
-    reductionAlg->setProperty(
-        "Observable", m_uiForm.cbObservable->currentText().toStdString());
+    reductionAlg->setProperty("Observable", m_uiForm.cbObservable->currentText().toStdString());
 
-    reductionAlg->setProperty(
-        "BackgroundOption", m_uiForm.cbBackOption->currentText().toStdString());
+    reductionAlg->setProperty("BackgroundOption", m_uiForm.cbBackOption->currentText().toStdString());
 
-    reductionAlg->setProperty(
-        "CalibrationOption",
-        m_uiForm.cbCalibOption->currentText().toStdString());
+    reductionAlg->setProperty("CalibrationOption", m_uiForm.cbCalibOption->currentText().toStdString());
 
-    reductionAlg->setProperty(
-        "CalibrationBackgroundOption",
-        m_uiForm.cbBackCalibOption->currentText().toStdString());
+    reductionAlg->setProperty("CalibrationBackgroundOption", m_uiForm.cbBackCalibOption->currentText().toStdString());
 
     reductionAlg->setProperty("SortXAxis", m_uiForm.cbSortX->isChecked());
   }
@@ -261,29 +232,23 @@ void ILLEnergyTransfer::run() {
 
   // Handle background file
   if (!backgroundFilename.toStdString().empty()) {
-    reductionAlg->setProperty("BackgroundRun",
-                              backgroundFilename.toStdString());
+    reductionAlg->setProperty("BackgroundRun", backgroundFilename.toStdString());
     reductionAlg->setProperty("BackgroundScalingFactor", m_backScaling);
   }
 
   // Handle calibration file
   if (!calibrationFilename.toStdString().empty()) {
-    reductionAlg->setProperty("CalibrationRun",
-                              calibrationFilename.toStdString());
+    reductionAlg->setProperty("CalibrationRun", calibrationFilename.toStdString());
   }
 
   // Handle calibration background file
   if (!calibrationBackgroundFilename.toStdString().empty()) {
-    reductionAlg->setProperty("CalibrationBackgroundRun",
-                              calibrationBackgroundFilename.toStdString());
-    reductionAlg->setProperty("CalibrationBackgroundScalingFactor",
-                              m_backCalibScaling);
+    reductionAlg->setProperty("CalibrationBackgroundRun", calibrationBackgroundFilename.toStdString());
+    reductionAlg->setProperty("CalibrationBackgroundScalingFactor", m_backCalibScaling);
   }
 
-  reductionAlg->setProperty("Analyser",
-                            getInstrumentDetail("analyser").toStdString());
-  reductionAlg->setProperty("Reflection",
-                            getInstrumentDetail("reflection").toStdString());
+  reductionAlg->setProperty("Analyser", getInstrumentDetail("analyser").toStdString());
+  reductionAlg->setProperty("Reflection", getInstrumentDetail("reflection").toStdString());
 
   std::string target = m_uiForm.cbSpectrumTarget->currentText().toStdString();
   reductionAlg->setProperty("SpectrumAxis", target);
@@ -308,8 +273,8 @@ void ILLEnergyTransfer::run() {
 
   // Handle manual PSD integration range
   if (m_uiForm.rdGroupRange->isChecked()) {
-    auto pixelRange = boost::lexical_cast<std::string>(m_pixelRange[0]) + "," +
-                      boost::lexical_cast<std::string>(m_pixelRange[1]);
+    auto pixelRange =
+        boost::lexical_cast<std::string>(m_pixelRange[0]) + "," + boost::lexical_cast<std::string>(m_pixelRange[1]);
     reductionAlg->setProperty("ManualPSDIntegrationRange", pixelRange);
   }
 
@@ -350,8 +315,7 @@ void ILLEnergyTransfer::runClicked() { runTab(); }
 void ILLEnergyTransfer::plot() {
   auto &ads = AnalysisDataService::Instance();
 
-  auto const outputGroupName =
-      m_uiForm.leOutWS->text().toStdString() + m_suffix;
+  auto const outputGroupName = m_uiForm.leOutWS->text().toStdString() + m_suffix;
   if (ads.doesExist(outputGroupName)) {
     auto const outputGroup = ads.retrieveWS<WorkspaceGroup>(outputGroupName);
     auto const workspaceName = outputGroup->getItem(0)->getName();
@@ -380,13 +344,9 @@ void ILLEnergyTransfer::setInstrumentDefault() {
   m_uiForm.rfMapFile->setInstrumentOverride(instrument);
 }
 
-void ILLEnergyTransfer::setRunEnabled(bool enabled) {
-  m_uiForm.pbRun->setEnabled(enabled);
-}
+void ILLEnergyTransfer::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(enabled); }
 
-void ILLEnergyTransfer::updateRunButton(bool enabled,
-                                        std::string const &enableOutputButtons,
-                                        QString const &message,
+void ILLEnergyTransfer::updateRunButton(bool enabled, std::string const &enableOutputButtons, QString const &message,
                                         QString const &tooltip) {
   UNUSED_ARG(enableOutputButtons);
   setRunEnabled(enabled);

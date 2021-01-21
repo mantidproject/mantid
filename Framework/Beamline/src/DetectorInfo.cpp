@@ -13,30 +13,21 @@
 namespace Mantid {
 namespace Beamline {
 
-DetectorInfo::DetectorInfo(
-    std::vector<Eigen::Vector3d> positions,
-    std::vector<Eigen::Quaterniond,
-                Eigen::aligned_allocator<Eigen::Quaterniond>>
-        rotations)
+DetectorInfo::DetectorInfo(std::vector<Eigen::Vector3d> positions,
+                           std::vector<Eigen::Quaterniond, Eigen::aligned_allocator<Eigen::Quaterniond>> rotations)
     : m_isMonitor(Kernel::make_cow<std::vector<bool>>(positions.size())),
       m_isMasked(Kernel::make_cow<std::vector<bool>>(positions.size())),
-      m_positions(
-          Kernel::make_cow<std::vector<Eigen::Vector3d>>(std::move(positions))),
-      m_rotations(Kernel::make_cow<
-                  std::vector<Eigen::Quaterniond,
-                              Eigen::aligned_allocator<Eigen::Quaterniond>>>(
+      m_positions(Kernel::make_cow<std::vector<Eigen::Vector3d>>(std::move(positions))),
+      m_rotations(Kernel::make_cow<std::vector<Eigen::Quaterniond, Eigen::aligned_allocator<Eigen::Quaterniond>>>(
           std::move(rotations))) {
   if (m_positions->size() != m_rotations->size())
     throw std::runtime_error("DetectorInfo: Position and rotations vectors "
                              "must have identical size");
 }
 
-DetectorInfo::DetectorInfo(
-    std::vector<Eigen::Vector3d> positions,
-    std::vector<Eigen::Quaterniond,
-                Eigen::aligned_allocator<Eigen::Quaterniond>>
-        rotations,
-    const std::vector<size_t> &monitorIndices)
+DetectorInfo::DetectorInfo(std::vector<Eigen::Vector3d> positions,
+                           std::vector<Eigen::Quaterniond, Eigen::aligned_allocator<Eigen::Quaterniond>> rotations,
+                           const std::vector<size_t> &monitorIndices)
     : DetectorInfo(std::move(positions), std::move(rotations)) {
   for (const auto i : monitorIndices)
     m_isMonitor.access().at(i) = true;
@@ -59,26 +50,21 @@ bool DetectorInfo::isEquivalent(const DetectorInfo &other) const {
     return false;
   if (size() == 0)
     return true;
-  if (!(m_isMonitor == other.m_isMonitor) &&
-      (*m_isMonitor != *other.m_isMonitor))
+  if (!(m_isMonitor == other.m_isMonitor) && (*m_isMonitor != *other.m_isMonitor))
     return false;
   if (!(m_isMasked == other.m_isMasked) && (*m_isMasked != *other.m_isMasked))
     return false;
 
   // Scanning related fields. Not testing m_indexMap since
   // those just are internally derived from m_indices.
-  if (this->hasComponentInfo() &&
-      (this->scanIntervals() != other.scanIntervals()))
+  if (this->hasComponentInfo() && (this->scanIntervals() != other.scanIntervals()))
     return false;
 
   // Positions: Absolute difference matter, so comparison is not relative.
   // Changes below 1 nm = 1e-9 m are allowed.
   if (!(m_positions == other.m_positions) &&
-      !std::equal(m_positions->begin(), m_positions->end(),
-                  other.m_positions->begin(),
-                  [](const Eigen::Vector3d &a, const Eigen::Vector3d &b) {
-                    return (a - b).norm() < 1e-9;
-                  }))
+      !std::equal(m_positions->begin(), m_positions->end(), other.m_positions->begin(),
+                  [](const Eigen::Vector3d &a, const Eigen::Vector3d &b) { return (a - b).norm() < 1e-9; }))
     return false;
   // At a distance of L = 1000 m (a reasonable upper limit for instrument sizes)
   // from the rotation center we want a difference of less than d = 1 nm = 1e-9
@@ -91,10 +77,8 @@ bool DetectorInfo::isEquivalent(const DetectorInfo &other) const {
   constexpr double safety_factor = 2.0;
   const double imag_norm_max = sin(d_max / (2.0 * L * safety_factor));
   if (!(m_rotations == other.m_rotations) &&
-      !std::equal(m_rotations->begin(), m_rotations->end(),
-                  other.m_rotations->begin(),
-                  [imag_norm_max](const Eigen::Quaterniond &a,
-                                  const Eigen::Quaterniond &b) {
+      !std::equal(m_rotations->begin(), m_rotations->end(), other.m_rotations->begin(),
+                  [imag_norm_max](const Eigen::Quaterniond &a, const Eigen::Quaterniond &b) {
                     return (a * b.conjugate()).vec().norm() < imag_norm_max;
                   }))
     return false;
@@ -126,9 +110,7 @@ bool DetectorInfo::isMasked(const size_t index) const {
 }
 
 /// Returns true if the detector with given index is masked.
-bool DetectorInfo::isMasked(const std::pair<size_t, size_t> &index) const {
-  return (*m_isMasked)[linearIndex(index)];
-}
+bool DetectorInfo::isMasked(const std::pair<size_t, size_t> &index) const { return (*m_isMasked)[linearIndex(index)]; }
 
 /** Set the mask flag of the detector with given detector index. Not thread
  * safe.
@@ -141,8 +123,7 @@ void DetectorInfo::setMasked(const size_t index, bool masked) {
 }
 
 /// Set the mask flag of the detector with given index. Not thread safe.
-void DetectorInfo::setMasked(const std::pair<size_t, size_t> &index,
-                             bool masked) {
+void DetectorInfo::setMasked(const std::pair<size_t, size_t> &index, bool masked) {
   m_isMasked.access()[linearIndex(index)] = masked;
 }
 
@@ -153,15 +134,12 @@ size_t DetectorInfo::scanCount() const { return m_componentInfo->scanCount(); }
  *
  * The interval start and end values would typically correspond to nanoseconds
  * since 1990, as in Types::Core::DateAndTime. */
-const std::vector<std::pair<int64_t, int64_t>>
-DetectorInfo::scanIntervals() const {
+const std::vector<std::pair<int64_t, int64_t>> DetectorInfo::scanIntervals() const {
   return m_componentInfo->scanIntervals();
 }
 
 namespace {
-void failMerge(const std::string &what) {
-  throw std::runtime_error(std::string("Cannot merge DetectorInfo: ") + what);
-}
+void failMerge(const std::string &what) { throw std::runtime_error(std::string("Cannot merge DetectorInfo: ") + what); }
 } // namespace
 
 /** Merges the contents of other into this.
@@ -188,8 +166,7 @@ void failMerge(const std::string &what) {
  * a given interval should be merged or not was built by `ComponentInfo` and
  * passed on to this function.
  */
-void DetectorInfo::merge(const DetectorInfo &other,
-                         const std::vector<bool> &merge) {
+void DetectorInfo::merge(const DetectorInfo &other, const std::vector<bool> &merge) {
   checkSizes(other);
   for (size_t timeIndex = 0; timeIndex < other.scanCount(); ++timeIndex) {
     if (!merge[timeIndex])
@@ -199,28 +176,20 @@ void DetectorInfo::merge(const DetectorInfo &other,
     auto &rotations = m_rotations.access();
     const size_t indexStart = other.linearIndex({0, timeIndex});
     size_t indexEnd = indexStart + size();
-    isMasked.insert(isMasked.end(), other.m_isMasked->begin() + indexStart,
-                    other.m_isMasked->begin() + indexEnd);
-    positions.insert(positions.end(), other.m_positions->begin() + indexStart,
-                     other.m_positions->begin() + indexEnd);
-    rotations.insert(rotations.end(), other.m_rotations->begin() + indexStart,
-                     other.m_rotations->begin() + indexEnd);
+    isMasked.insert(isMasked.end(), other.m_isMasked->begin() + indexStart, other.m_isMasked->begin() + indexEnd);
+    positions.insert(positions.end(), other.m_positions->begin() + indexStart, other.m_positions->begin() + indexEnd);
+    rotations.insert(rotations.end(), other.m_rotations->begin() + indexStart, other.m_rotations->begin() + indexEnd);
   }
 }
 
-void DetectorInfo::setComponentInfo(ComponentInfo *componentInfo) {
-  m_componentInfo = componentInfo;
-}
+void DetectorInfo::setComponentInfo(ComponentInfo *componentInfo) { m_componentInfo = componentInfo; }
 
-bool DetectorInfo::hasComponentInfo() const {
-  return m_componentInfo != nullptr;
-}
+bool DetectorInfo::hasComponentInfo() const { return m_componentInfo != nullptr; }
 
 double DetectorInfo::l1() const {
   // TODO Not scan safe yet for scanning ComponentInfo
   if (!hasComponentInfo()) {
-    throw std::runtime_error(
-        "DetectorInfo has no valid ComponentInfo thus cannot determine l1");
+    throw std::runtime_error("DetectorInfo has no valid ComponentInfo thus cannot determine l1");
   }
   return m_componentInfo->l1();
 }
@@ -246,8 +215,7 @@ const Eigen::Vector3d &DetectorInfo::samplePosition() const {
 void DetectorInfo::checkSizes(const DetectorInfo &other) const {
   if (size() != other.size())
     failMerge("size mismatch");
-  if (!(m_isMonitor == other.m_isMonitor) &&
-      (*m_isMonitor != *other.m_isMonitor))
+  if (!(m_isMonitor == other.m_isMonitor) && (*m_isMonitor != *other.m_isMonitor))
     failMerge("monitor flags mismatch");
   // TODO If we make masking time-independent we need to check masking here.
 }

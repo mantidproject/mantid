@@ -30,14 +30,10 @@ using namespace SpectrumView;
  * @param tableWidget    The widget where the information about a pointed
  *                       at location will be displayed.
  */
-RefImageDisplay::RefImageDisplay(QwtPlot *imagePlot,
-                                 RefSliderHandler *sliderHandler,
-                                 RefRangeHandler *rangeHandler,
-                                 RefLimitsHandler *limitsHandler,
-                                 GraphDisplay *hGraph, GraphDisplay *vGraph,
+RefImageDisplay::RefImageDisplay(QwtPlot *imagePlot, RefSliderHandler *sliderHandler, RefRangeHandler *rangeHandler,
+                                 RefLimitsHandler *limitsHandler, GraphDisplay *hGraph, GraphDisplay *vGraph,
                                  QTableWidget *tableWidget)
-    : SpectrumView::SpectrumDisplay(imagePlot, sliderHandler, rangeHandler,
-                                    hGraph, vGraph, tableWidget),
+    : SpectrumView::SpectrumDisplay(imagePlot, sliderHandler, rangeHandler, hGraph, vGraph, tableWidget),
       m_limitsHandler(limitsHandler) {
   // We need a different SpectrumPlotItem class, so delete the one created in
   // the
@@ -61,8 +57,7 @@ RefImageDisplay::~RefImageDisplay() {}
  *display.
  * @return A pair containing the (x,y) values in the graph of the point
  */
-QPair<double, double>
-RefImageDisplay::setPointedAtPoint(QPoint point, int mouseClick, bool isFront) {
+QPair<double, double> RefImageDisplay::setPointedAtPoint(QPoint point, int mouseClick, bool isFront) {
   UNUSED_ARG(isFront);
   // Call the base class method for most of the work
   QPair<double, double> xy = SpectrumDisplay::setPointedAtPoint(point);

@@ -41,10 +41,8 @@ class Filter : public QObject {
   Q_OBJECT
 
 public:
-  Filter(ApplicationWindow *parent, Table *t = nullptr,
-         const QString &name = QString());
-  Filter(ApplicationWindow *parent, Graph *g = nullptr,
-         const QString &name = QString());
+  Filter(ApplicationWindow *parent, Table *t = nullptr, const QString &name = QString());
+  Filter(ApplicationWindow *parent, Graph *g = nullptr, const QString &name = QString());
   ~Filter() override;
 
   //! Actually does the job. Should be reimplemented in derived classes.
@@ -52,11 +50,9 @@ public:
 
   virtual void setDataCurve(int curve, double start, double end);
   bool setDataFromCurve(const QString &curveTitle, Graph *g = nullptr);
-  bool setDataFromCurve(const QString &curveTitle, double from, double to,
-                        Graph *g = nullptr);
+  bool setDataFromCurve(const QString &curveTitle, double from, double to, Graph *g = nullptr);
 
-  virtual bool setDataFromTable(Table *, const QString &, const QString &,
-                                int = 1, int = -1);
+  virtual bool setDataFromTable(Table *, const QString &, const QString &, int = 1, int = -1);
 
   //! Changes the data range if the source curve was already assigned. Provided
   // for convenience.
@@ -107,14 +103,11 @@ protected:
   //! Sets x and y to the curve points between start and end. Memory will be
   // allocated with new double[].
   //! Returns the number of points within range == size of x and y arrays.
-  virtual int curveData(QwtPlotCurve *c, double start, double end, double **x,
-                        double **y);
+  virtual int curveData(QwtPlotCurve *c, double start, double end, double **x, double **y);
   //! Same as curveData, but sorts the points by their x value.
-  virtual int sortedCurveData(QwtPlotCurve *c, double start, double end,
-                              double **x, double **y);
+  virtual int sortedCurveData(QwtPlotCurve *c, double start, double end, double **x, double **y);
 
-  int curveRange(QwtPlotCurve *c, double start, double end, int *iStart,
-                 int *iEnd);
+  int curveRange(QwtPlotCurve *c, double start, double end, int *iStart, int *iEnd);
 
   //! Adds the result curve to the target output plot window. Creates a hidden
   // table and frees the input data from memory.
@@ -132,8 +125,7 @@ protected:
 
   //! Calculates the data for the output curve and store it in the X an Y
   // vectors
-  virtual void calculateOutputData(double *X,
-                                   double *Y){Q_UNUSED(X) Q_UNUSED(Y)};
+  virtual void calculateOutputData(double *X, double *Y){Q_UNUSED(X) Q_UNUSED(Y)};
 
   MultiLayer *createOutputGraph();
 

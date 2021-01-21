@@ -24,8 +24,7 @@ namespace Algorithms {
     @author Dennis Mikkelson
     @date 17/08/2010
  */
-class MANTID_ALGORITHMS_DLL MultipleScatteringCylinderAbsorption
-    : public API::DistributedAlgorithm {
+class MANTID_ALGORITHMS_DLL MultipleScatteringCylinderAbsorption : public API::DistributedAlgorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override;
@@ -33,8 +32,7 @@ public:
   /// Algorithm's version for identification overriding a virtual method
   int version() const override;
   const std::vector<std::string> seeAlso() const override {
-    return {"MonteCarloAbsorption", "MayersSampleCorrection",
-            "PearlMCAbsorption", "VesuvioCalculateMS"};
+    return {"MonteCarloAbsorption", "MayersSampleCorrection", "PearlMCAbsorption", "VesuvioCalculateMS"};
   }
 
   /// Algorithm's category for identification overriding a virtual method
@@ -52,12 +50,9 @@ private:
   void exec() override;
 
   /// MultipleScatteringCylinderAbsorption correction calculation.
-  void apply_msa_correction(const double angle_deg, const double radius,
-                            const double coeff1, const double coeff2,
-                            const double coeff3,
-                            const HistogramData::HistogramX &wavelength,
-                            HistogramData::HistogramY &y_val,
-                            HistogramData::HistogramE &errors);
+  void apply_msa_correction(const double angle_deg, const double radius, const double coeff1, const double coeff2,
+                            const double coeff3, const HistogramData::HistogramX &wavelength,
+                            HistogramData::HistogramY &y_val, HistogramData::HistogramE &errors);
 };
 
 } // namespace Algorithms

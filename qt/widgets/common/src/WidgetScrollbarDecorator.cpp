@@ -22,8 +22,7 @@ using namespace MantidQt::API;
  *
  * @param target The target widget to be extended with scrollbar functionality.
  */
-WidgetScrollbarDecorator::WidgetScrollbarDecorator(QWidget *target)
-    : m_target(target), m_enabled(false) {
+WidgetScrollbarDecorator::WidgetScrollbarDecorator(QWidget *target) : m_target(target), m_enabled(false) {
   // Off-screen widget to hold layout/widgets when scrolling disabled
   m_offscreen = new QWidget(nullptr);
 
@@ -117,9 +116,7 @@ void WidgetScrollbarDecorator::setEnabled(bool enable) {
  *
  * @param width Minimum width target may shrink to before scrollbars appear
  */
-void WidgetScrollbarDecorator::setThresholdWidth(int width) {
-  m_viewport->setMinimumWidth(width);
-}
+void WidgetScrollbarDecorator::setThresholdWidth(int width) { m_viewport->setMinimumWidth(width); }
 
 //-----------------------------------------------------------------------------
 /**
@@ -134,9 +131,7 @@ void WidgetScrollbarDecorator::setThresholdWidth(int width) {
  *
  * @param height Minimum height target may shrink to before scrollbars appear
  */
-void WidgetScrollbarDecorator::setThresholdHeight(int height) {
-  m_viewport->setMinimumHeight(height);
-}
+void WidgetScrollbarDecorator::setThresholdHeight(int height) { m_viewport->setMinimumHeight(height); }
 
 //-----------------------------------------------------------------------------
 /**
@@ -152,6 +147,4 @@ void WidgetScrollbarDecorator::setThresholdHeight(int height) {
  * @param width Minimum width target may shrink to before scrollbars appear
  * @param height Minimum height target may shrink to before scrollbars appear
  */
-void WidgetScrollbarDecorator::setThresholdSize(int width, int height) {
-  m_viewport->setMinimumSize(width, height);
-}
+void WidgetScrollbarDecorator::setThresholdSize(int width, int height) { m_viewport->setMinimumSize(width, height); }

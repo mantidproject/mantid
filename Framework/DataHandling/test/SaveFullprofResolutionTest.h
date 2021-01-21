@@ -29,9 +29,7 @@ class SaveFullprofResolutionTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static SaveFullprofResolutionTest *createSuite() {
-    return new SaveFullprofResolutionTest();
-  }
+  static SaveFullprofResolutionTest *createSuite() { return new SaveFullprofResolutionTest(); }
   static void destroySuite(SaveFullprofResolutionTest *suite) { delete suite; }
 
   void Ptest_Init() {
@@ -62,8 +60,7 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // Check file
-    std::string filename =
-        alg.getProperty("OutputFilename"); // Get full pathname
+    std::string filename = alg.getProperty("OutputFilename"); // Get full pathname
     bool outputfileexist = Poco::File(filename).exists();
     TS_ASSERT(outputfileexist);
 
@@ -96,17 +93,14 @@ public:
     alg.setPropertyValue("InputWorkspace", parwsname);
     alg.setProperty("OutputFilename", "bank2.irf");
     alg.setProperty("Bank", 2);
-    alg.setProperty(
-        "ProfileFunction",
-        "Back-to-back exponential convoluted with pseudo-voigt (profile 9)");
+    alg.setProperty("ProfileFunction", "Back-to-back exponential convoluted with pseudo-voigt (profile 9)");
 
     // Execute
     alg.execute();
     TS_ASSERT(alg.isExecuted());
 
     // Locate file
-    std::string filename =
-        alg.getProperty("OutputFilename"); // Get full pathname
+    std::string filename = alg.getProperty("OutputFilename"); // Get full pathname
     Poco::File irffile(filename);
     TS_ASSERT(irffile.exists());
     if (!irffile.exists()) {
@@ -139,9 +133,7 @@ public:
     alg.setPropertyValue("InputWorkspace", parwsname);
     alg.setProperty("OutputFilename", "bankall.irf");
     alg.setProperty("Bank", 1);
-    alg.setProperty(
-        "ProfileFunction",
-        "Back-to-back exponential convoluted with pseudo-voigt (profile 9)");
+    alg.setProperty("ProfileFunction", "Back-to-back exponential convoluted with pseudo-voigt (profile 9)");
 
     // Execute
     alg.execute();
@@ -154,9 +146,7 @@ public:
     alg2.setProperty("InputWorkspace", parwsname);
     alg2.setProperty("OutputFilename", "bankall.irf");
     alg2.setProperty("Bank", 2);
-    alg2.setProperty(
-        "ProfileFunction",
-        "Back-to-back exponential convoluted with pseudo-voigt (profile 9)");
+    alg2.setProperty("ProfileFunction", "Back-to-back exponential convoluted with pseudo-voigt (profile 9)");
     alg2.setProperty("Append", true);
 
     // Execute
@@ -164,8 +154,7 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // Locate file
-    std::string filename =
-        alg.getProperty("OutputFilename"); // Get full pathname
+    std::string filename = alg.getProperty("OutputFilename"); // Get full pathname
     Poco::File irffile(filename);
     TS_ASSERT(irffile.exists());
     if (!irffile.exists()) {
@@ -264,20 +253,15 @@ public:
   void createProfile10TableWS(const std::string &wsname) {
     // Create a map of string/double for parameters of profile 10
     std::map<std::string, double> parammap{
-        {"BANK", 1.},        {"Alph0", 1.88187},  {"Alph0t", 64.4102},
-        {"Alph1", 0.},       {"Alph1t", 0.},      {"Beta0", 6.2511},
-        {"Beta0t", 85.9189}, {"Beta1", 0.},       {"Beta1t", 0.},
-        {"CWL", 0.533},      {"Dtt1", 22584.5},   {"Dtt1t", 22604.9},
-        {"Dtt2", 0.},        {"Dtt2t", 0.3},      {"Gam0", 0.},
-        {"Gam1", 5.744},     {"Gam2", 0.},        {"Sig0", 0.},
-        {"Sig1", 3.16228},   {"Sig2", 16.7331},   {"Tcross", 0.356},
-        {"Width", 1.0521},   {"Zero", 0.},        {"Zerot", 11.3175},
-        {"step", 4.0002},    {"tof-max", 51000.}, {"tof-min", 5000.23},
-        {"twotheta", 90.0}};
+        {"BANK", 1.},        {"Alph0", 1.88187},   {"Alph0t", 64.4102}, {"Alph1", 0.},      {"Alph1t", 0.},
+        {"Beta0", 6.2511},   {"Beta0t", 85.9189},  {"Beta1", 0.},       {"Beta1t", 0.},     {"CWL", 0.533},
+        {"Dtt1", 22584.5},   {"Dtt1t", 22604.9},   {"Dtt2", 0.},        {"Dtt2t", 0.3},     {"Gam0", 0.},
+        {"Gam1", 5.744},     {"Gam2", 0.},         {"Sig0", 0.},        {"Sig1", 3.16228},  {"Sig2", 16.7331},
+        {"Tcross", 0.356},   {"Width", 1.0521},    {"Zero", 0.},        {"Zerot", 11.3175}, {"step", 4.0002},
+        {"tof-max", 51000.}, {"tof-min", 5000.23}, {"twotheta", 90.0}};
 
     // Crate table workspace
-    DataObjects::TableWorkspace_sptr geomws =
-        std::make_shared<TableWorkspace>();
+    DataObjects::TableWorkspace_sptr geomws = std::make_shared<TableWorkspace>();
 
     geomws->addColumn("str", "Name");
     geomws->addColumn("double", "Value");
@@ -298,8 +282,7 @@ public:
       double parvalue = mit->second;
 
       API::TableRow newrow = geomws->appendRow();
-      newrow << parname << parvalue << fitortie << 1.234 << minvalue << maxvalue
-             << stepsize;
+      newrow << parname << parvalue << fitortie << 1.234 << minvalue << maxvalue << stepsize;
     }
 
     AnalysisDataService::Instance().addOrReplace(wsname, geomws);

@@ -47,34 +47,23 @@ public:
 signals:
   void algorithmStarted(void *alg);
   void algorithmFinished(void *alg);
-  void needUpdateProgress(void *alg, double p, const QString &msg,
-                          double estimatedTime, int progressPrecision);
+  void needUpdateProgress(void *alg, double p, const QString &msg, double estimatedTime, int progressPrecision);
   void countChanged();
   void allAlgorithmsStopped();
 
 protected:
   /// Algorithm notification handlers
-  void handleAlgorithmFinishedNotification(
-      const Poco::AutoPtr<Mantid::API::Algorithm::FinishedNotification> &pNf);
-  Poco::NObserver<AlgorithmMonitor,
-                  Mantid::API::Algorithm::FinishedNotification>
-      m_finishedObserver;
+  void handleAlgorithmFinishedNotification(const Poco::AutoPtr<Mantid::API::Algorithm::FinishedNotification> &pNf);
+  Poco::NObserver<AlgorithmMonitor, Mantid::API::Algorithm::FinishedNotification> m_finishedObserver;
 
-  void handleAlgorithmProgressNotification(
-      const Poco::AutoPtr<Mantid::API::Algorithm::ProgressNotification> &pNf);
-  Poco::NObserver<AlgorithmMonitor,
-                  Mantid::API::Algorithm::ProgressNotification>
-      m_progressObserver;
+  void handleAlgorithmProgressNotification(const Poco::AutoPtr<Mantid::API::Algorithm::ProgressNotification> &pNf);
+  Poco::NObserver<AlgorithmMonitor, Mantid::API::Algorithm::ProgressNotification> m_progressObserver;
 
-  void handleAlgorithmErrorNotification(
-      const Poco::AutoPtr<Mantid::API::Algorithm::ErrorNotification> &pNf);
-  Poco::NObserver<AlgorithmMonitor, Mantid::API::Algorithm::ErrorNotification>
-      m_errorObserver;
+  void handleAlgorithmErrorNotification(const Poco::AutoPtr<Mantid::API::Algorithm::ErrorNotification> &pNf);
+  Poco::NObserver<AlgorithmMonitor, Mantid::API::Algorithm::ErrorNotification> m_errorObserver;
 
-  void handleAlgorithmStartingNotification(
-      const Poco::AutoPtr<Mantid::API::AlgorithmStartingNotification> &pNf);
-  Poco::NObserver<AlgorithmMonitor, Mantid::API::AlgorithmStartingNotification>
-      m_startingObserver;
+  void handleAlgorithmStartingNotification(const Poco::AutoPtr<Mantid::API::AlgorithmStartingNotification> &pNf);
+  Poco::NObserver<AlgorithmMonitor, Mantid::API::AlgorithmStartingNotification> m_startingObserver;
 
 public slots:
   void update();
@@ -105,8 +94,7 @@ public slots:
   void update();
   // The void* corresponds to Mantid::API::AlgorithmID, but Qt wasn't coping
   // with the typedef
-  void updateProgress(void *alg, const double p, const QString &msg,
-                      double estimatedTime, int progressPrecision);
+  void updateProgress(void *alg, const double p, const QString &msg, double estimatedTime, int progressPrecision);
 
 private:
   AlgorithmMonitor *m_algMonitor;

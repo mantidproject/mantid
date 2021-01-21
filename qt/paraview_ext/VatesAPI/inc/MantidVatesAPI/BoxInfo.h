@@ -24,8 +24,7 @@ Collection of functions related to box information
  * @param workspaceProvider :: an instance of the a workspace provider
  * @returns the appropriate recursion depth or nothing
  */
-boost::optional<int> DLLExport findRecursionDepthForTopLevelSplitting(
-    const std::string &workspaceName,
-    const WorkspaceProvider &workspaceProvider);
+boost::optional<int> DLLExport findRecursionDepthForTopLevelSplitting(const std::string &workspaceName,
+                                                                      const WorkspaceProvider &workspaceProvider);
 } // namespace VATES
 } // namespace Mantid

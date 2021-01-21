@@ -10,10 +10,8 @@
 #include "Script.h"
 #include "ScriptingWindow.h"
 
-RecoveryFailureView::RecoveryFailureView(QWidget *parent,
-                                         ProjectRecoveryPresenter *presenter)
-    : QDialog(parent), m_ui(std::make_unique<Ui::RecoveryFailure>()),
-      m_presenter(presenter) {
+RecoveryFailureView::RecoveryFailureView(QWidget *parent, ProjectRecoveryPresenter *presenter)
+    : QDialog(parent), m_ui(std::make_unique<Ui::RecoveryFailure>()), m_presenter(presenter) {
   m_ui->setupUi(this);
   m_ui->tableWidget->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
   m_ui->tableWidget->verticalHeader()->setResizeMode(QHeaderView::Stretch);
@@ -21,9 +19,8 @@ RecoveryFailureView::RecoveryFailureView(QWidget *parent,
   m_presenter->fillAllRows();
   // Set the table information
   addDataToTable();
-  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      Mantid::Kernel::FeatureType::Interface, "ProjectRecoveryFailureWindow",
-      true);
+  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(Mantid::Kernel::FeatureType::Interface,
+                                                                "ProjectRecoveryFailureWindow", true);
 }
 
 void RecoveryFailureView::addDataToTable() {
@@ -42,8 +39,7 @@ void RecoveryFailureView::onClickLastCheckpoint() {
   // Recover last checkpoint
   m_presenter->recoverLast();
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      Mantid::Kernel::FeatureType::Feature,
-      {"ProjectRecoveryFailureWindow", "RecoverLastCheckpoint"}, false);
+      Mantid::Kernel::FeatureType::Feature, {"ProjectRecoveryFailureWindow", "RecoverLastCheckpoint"}, false);
 }
 
 void RecoveryFailureView::onClickSelectedCheckpoint() {
@@ -57,8 +53,7 @@ void RecoveryFailureView::onClickSelectedCheckpoint() {
     m_presenter->recoverSelectedCheckpoint(text);
   }
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      Mantid::Kernel::FeatureType::Feature,
-      {"ProjectRecoveryFailureWindow", "RecoverSelectedCheckpoint"}, false);
+      Mantid::Kernel::FeatureType::Feature, {"ProjectRecoveryFailureWindow", "RecoverSelectedCheckpoint"}, false);
 }
 
 void RecoveryFailureView::onClickOpenSelectedInScriptWindow() {
@@ -72,51 +67,40 @@ void RecoveryFailureView::onClickOpenSelectedInScriptWindow() {
     m_presenter->openSelectedInEditor(text);
   }
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      Mantid::Kernel::FeatureType::Feature,
-      {"ProjectRecoveryFailureWindow", "OpenSelectedInScriptWindow"}, false);
+      Mantid::Kernel::FeatureType::Feature, {"ProjectRecoveryFailureWindow", "OpenSelectedInScriptWindow"}, false);
 }
 
 void RecoveryFailureView::onClickStartMantidNormally() {
   // Start save and close this, clear checkpoint that was offered for load
   m_presenter->startMantidNormally();
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      Mantid::Kernel::FeatureType::Feature,
-      {"ProjectRecoveryFailureWindow", "StartMantidNormally"}, false);
+      Mantid::Kernel::FeatureType::Feature, {"ProjectRecoveryFailureWindow", "StartMantidNormally"}, false);
 }
 
 void RecoveryFailureView::reject() {
   // Do nothing just absorb request
   m_presenter->startMantidNormally();
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      Mantid::Kernel::FeatureType::Feature,
-      {"ProjectRecoveryFailureWindow", "StartMantidNormally"}, false);
+      Mantid::Kernel::FeatureType::Feature, {"ProjectRecoveryFailureWindow", "StartMantidNormally"}, false);
 }
 
-void RecoveryFailureView::updateProgressBar(const int newValue,
-                                            const bool err) {
+void RecoveryFailureView::updateProgressBar(const int newValue, const bool err) {
   if (!err) {
     m_ui->progressBar->setValue(newValue);
   }
 }
 
-void RecoveryFailureView::setProgressBarMaximum(const int newValue) {
-  m_ui->progressBar->setMaximum(newValue);
-}
+void RecoveryFailureView::setProgressBarMaximum(const int newValue) { m_ui->progressBar->setMaximum(newValue); }
 
 void RecoveryFailureView::connectProgressBar() {
-  connect(&m_presenter->m_mainWindow->getScriptWindowHandle()
-               ->getCurrentScriptRunner(),
-          SIGNAL(currentLineChanged(int, bool)), this,
-          SLOT(updateProgressBar(int, bool)));
+  connect(&m_presenter->m_mainWindow->getScriptWindowHandle()->getCurrentScriptRunner(),
+          SIGNAL(currentLineChanged(int, bool)), this, SLOT(updateProgressBar(int, bool)));
 }
 
 void RecoveryFailureView::emitAbortScript() {
-  connect(this, SIGNAL(abortProjectRecoveryScript()),
-          m_presenter->m_mainWindow->getScriptWindowHandle(),
+  connect(this, SIGNAL(abortProjectRecoveryScript()), m_presenter->m_mainWindow->getScriptWindowHandle(),
           SLOT(abortCurrent()));
   emit(abortProjectRecoveryScript());
 }
 
-void RecoveryFailureView::changeStartMantidButton(const QString &string) {
-  m_ui->pushButton_3->setText(string);
-}
+void RecoveryFailureView::changeStartMantidButton(const QString &string) { m_ui->pushButton_3->setText(string); }

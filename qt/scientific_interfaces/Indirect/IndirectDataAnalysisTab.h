@@ -61,11 +61,9 @@ public:
   virtual ~IndirectDataAnalysisTab() override = default;
 
   /// Set the presenter for the output plotting options
-  void setOutputPlotOptionsPresenter(
-      std::unique_ptr<IndirectPlotOptionsPresenter> presenter);
+  void setOutputPlotOptionsPresenter(std::unique_ptr<IndirectPlotOptionsPresenter> presenter);
   /// Set the active workspaces used in the plotting options
-  void setOutputPlotOptionsWorkspaces(
-      std::vector<std::string> const &outputWorkspaces);
+  void setOutputPlotOptionsWorkspaces(std::vector<std::string> const &outputWorkspaces);
   /// Clear the workspaces held by the output plotting options
   void clearOutputPlotOptionsWorkspaces();
 
@@ -89,8 +87,7 @@ protected:
   Mantid::API::MatrixWorkspace_sptr getPreviewPlotWorkspace();
 
   /// Set preview plot workspace
-  void setPreviewPlotWorkspace(
-      const Mantid::API::MatrixWorkspace_sptr &previewPlotWorkspace);
+  void setPreviewPlotWorkspace(const Mantid::API::MatrixWorkspace_sptr &previewPlotWorkspace);
 
   /// Retrieve the selected spectrum
   int getSelectedSpectrum() const;
@@ -106,12 +103,10 @@ protected:
   void clearAndPlotInput(MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
                          MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot);
 
-  void updatePlot(const std::string &outputWSName, size_t index,
-                  MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
+  void updatePlot(const std::string &outputWSName, size_t index, MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
                   MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot);
 
-  void updatePlot(const Mantid::API::WorkspaceGroup_sptr &workspaceGroup,
-                  size_t index,
+  void updatePlot(const Mantid::API::WorkspaceGroup_sptr &workspaceGroup, size_t index,
                   MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
                   MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot);
 
@@ -119,8 +114,7 @@ protected:
                   MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
                   MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot);
 
-  void updatePlot(const std::string &workspaceName,
-                  MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
+  void updatePlot(const std::string &workspaceName, MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
                   MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot);
 
   void updatePlot(const Mantid::API::MatrixWorkspace_sptr &outputWS,

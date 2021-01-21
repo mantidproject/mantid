@@ -46,8 +46,7 @@ public:
    * @param parent :: parent widget
    * @param fl :: window flags
    */
-  ExportDialog(const QString &tableName, QWidget *parent = nullptr,
-               const Qt::WFlags &fl = nullptr);
+  ExportDialog(const QString &tableName, QWidget *parent = nullptr, const Qt::WFlags &fl = nullptr);
 
 private:
   void closeEvent(QCloseEvent *) override;

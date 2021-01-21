@@ -13,26 +13,22 @@
 
 int MantidPreferences::MantidMatrixColumnWidthY() {
   QSettings settings;
-  return settings.value("Mantid/Preferences/MantidMatrix/ColumnWidthY", 100)
-      .toInt();
+  return settings.value("Mantid/Preferences/MantidMatrix/ColumnWidthY", 100).toInt();
 }
 
 int MantidPreferences::MantidMatrixColumnWidthX() {
   QSettings settings;
-  return settings.value("Mantid/Preferences/MantidMatrix/ColumnWidthX", 100)
-      .toInt();
+  return settings.value("Mantid/Preferences/MantidMatrix/ColumnWidthX", 100).toInt();
 }
 
 int MantidPreferences::MantidMatrixColumnWidthE() {
   QSettings settings;
-  return settings.value("Mantid/Preferences/MantidMatrix/ColumnWidthE", 100)
-      .toInt();
+  return settings.value("Mantid/Preferences/MantidMatrix/ColumnWidthE", 100).toInt();
 }
 
 int MantidPreferences::MantidMatrixColumnWidthDx() {
   QSettings settings;
-  return settings.value("Mantid/Preferences/MantidMatrix/ColumnWidthDx", 100)
-      .toInt();
+  return settings.value("Mantid/Preferences/MantidMatrix/ColumnWidthDx", 100).toInt();
 }
 
 void MantidPreferences::MantidMatrixColumnWidthY(int width) {
@@ -64,26 +60,22 @@ void MantidPreferences::MantidMatrixColumnWidth(int width) {
 
 QChar MantidPreferences::MantidMatrixNumberFormatY() {
   QSettings settings;
-  return settings.value("Mantid/Preferences/MantidMatrix/NumberFormatY", 'g')
-      .toChar();
+  return settings.value("Mantid/Preferences/MantidMatrix/NumberFormatY", 'g').toChar();
 }
 
 QChar MantidPreferences::MantidMatrixNumberFormatX() {
   QSettings settings;
-  return settings.value("Mantid/Preferences/MantidMatrix/NumberFormatX", 'g')
-      .toChar();
+  return settings.value("Mantid/Preferences/MantidMatrix/NumberFormatX", 'g').toChar();
 }
 
 QChar MantidPreferences::MantidMatrixNumberFormatE() {
   QSettings settings;
-  return settings.value("Mantid/Preferences/MantidMatrix/NumberFormatE", 'g')
-      .toChar();
+  return settings.value("Mantid/Preferences/MantidMatrix/NumberFormatE", 'g').toChar();
 }
 
 QChar MantidPreferences::MantidMatrixNumberFormatDx() {
   QSettings settings;
-  return settings.value("Mantid/Preferences/MantidMatrix/NumberFormatDx", 'g')
-      .toChar();
+  return settings.value("Mantid/Preferences/MantidMatrix/NumberFormatDx", 'g').toChar();
 }
 
 void MantidPreferences::MantidMatrixNumberFormatY(const QChar &f) {
@@ -115,26 +107,22 @@ void MantidPreferences::MantidMatrixNumberFormat(const QChar &f) {
 
 int MantidPreferences::MantidMatrixNumberPrecisionY() {
   QSettings settings;
-  return settings.value("Mantid/Preferences/MantidMatrix/NumberPrecisionY", 6)
-      .toInt();
+  return settings.value("Mantid/Preferences/MantidMatrix/NumberPrecisionY", 6).toInt();
 }
 
 int MantidPreferences::MantidMatrixNumberPrecisionX() {
   QSettings settings;
-  return settings.value("Mantid/Preferences/MantidMatrix/NumberPrecisionX", 6)
-      .toInt();
+  return settings.value("Mantid/Preferences/MantidMatrix/NumberPrecisionX", 6).toInt();
 }
 
 int MantidPreferences::MantidMatrixNumberPrecisionE() {
   QSettings settings;
-  return settings.value("Mantid/Preferences/MantidMatrix/NumberPrecisionE", 6)
-      .toInt();
+  return settings.value("Mantid/Preferences/MantidMatrix/NumberPrecisionE", 6).toInt();
 }
 
 int MantidPreferences::MantidMatrixNumberPrecisionDx() {
   QSettings settings;
-  return settings.value("Mantid/Preferences/MantidMatrix/NumberPrecisionDx", 6)
-      .toInt();
+  return settings.value("Mantid/Preferences/MantidMatrix/NumberPrecisionDx", 6).toInt();
 }
 
 void MantidPreferences::MantidMatrixNumberPrecisionY(int p) {

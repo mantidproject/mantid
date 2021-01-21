@@ -43,8 +43,7 @@ public:
 
   // Prompt
   MOCK_METHOD0(requestNotebookPath, QString());
-  MOCK_METHOD3(askUserString,
-               QString(const QString &, const QString &, const QString &));
+  MOCK_METHOD3(askUserString, QString(const QString &, const QString &, const QString &));
   MOCK_METHOD2(askUserYesNo, bool(QString, QString));
   MOCK_METHOD2(giveUserWarning, void(QString, QString));
   MOCK_METHOD2(giveUserCritical, void(QString, QString));
@@ -70,8 +69,7 @@ public:
 
   MOCK_METHOD1(setModel, void(const QString &));
   MOCK_METHOD2(setInstrumentList, void(const QString &, const QString &));
-  MOCK_METHOD2(setOptionsHintStrategy,
-               void(MantidQt::MantidWidgets::HintStrategy *, int));
+  MOCK_METHOD2(setOptionsHintStrategy, void(MantidQt::MantidWidgets::HintStrategy *, int));
   MOCK_METHOD0(setItemDelegate, void());
 
   // Settings
@@ -96,9 +94,7 @@ public:
   MOCK_METHOD0(addActionsProxy, void());
 
   // Calls we don't care about
-  void showTable(std::shared_ptr<
-                 MantidQt::MantidWidgets::DataProcessor::AbstractTreeModel>)
-      override{};
+  void showTable(std::shared_ptr<MantidQt::MantidWidgets::DataProcessor::AbstractTreeModel>) override{};
   void saveSettings(const std::map<QString, QVariant> &) override{};
 
   void emitProcessClicked() override{};
@@ -117,8 +113,7 @@ public:
   MOCK_METHOD1(notifyADSChanged, void(const QSet<QString> &));
 
   // Prompt methods
-  MOCK_METHOD3(askUserString,
-               QString(const QString &, const QString &, const QString &));
+  MOCK_METHOD3(askUserString, QString(const QString &, const QString &, const QString &));
   MOCK_METHOD2(askUserYesNo, bool(QString, QString));
   MOCK_METHOD2(giveUserWarning, void(QString, QString));
   MOCK_METHOD2(giveUserCritical, void(QString, QString));
@@ -156,10 +151,8 @@ public:
   MOCK_CONST_METHOD0(selectedParents, std::set<int>());
   MOCK_CONST_METHOD0(selectedChildren, std::map<int, std::set<int>>());
   MOCK_CONST_METHOD0(isProcessing, bool());
-  MOCK_CONST_METHOD2(askUserYesNo,
-                     bool(const QString &prompt, const QString &title));
-  MOCK_CONST_METHOD2(giveUserWarning,
-                     void(const QString &prompt, const QString &title));
+  MOCK_CONST_METHOD2(askUserYesNo, bool(const QString &prompt, const QString &title));
+  MOCK_CONST_METHOD2(giveUserWarning, void(const QString &prompt, const QString &title));
   MOCK_METHOD0(publishCommandsMocked, void());
   MOCK_METHOD0(skipProcessing, void());
   MOCK_METHOD1(setPromptUser, void(const bool));
@@ -169,9 +162,7 @@ public:
 
 private:
   // Calls we don't care about
-  const std::map<QString, QVariant> &options() const override {
-    return m_options;
-  };
+  const std::map<QString, QVariant> &options() const override { return m_options; };
 
   std::vector<Command_uptr> publishCommands() override {
     std::vector<Command_uptr> commands;
@@ -203,9 +194,7 @@ public:
   MOCK_METHOD1(selectedData, TreeData(bool));
   MOCK_METHOD1(allData, TreeData(bool));
   // Calls we don't care about
-  std::vector<std::unique_ptr<Command>> publishCommands() override {
-    return std::vector<std::unique_ptr<Command>>();
-  };
+  std::vector<std::unique_ptr<Command>> publishCommands() override { return std::vector<std::unique_ptr<Command>>(); };
   bool isMultiLevel() const override { return false; }
   void appendRow() override{};
   void appendGroup() override{};
@@ -218,8 +207,7 @@ public:
   QString copySelected() override { return QString(); };
   void pasteSelected(const QString &) override{};
   void newTable(const WhiteList &) override{};
-  void newTable(Mantid::API::ITableWorkspace_sptr,
-                const WhiteList &) override{};
+  void newTable(Mantid::API::ITableWorkspace_sptr, const WhiteList &) override{};
   void transfer(const std::vector<std::map<QString, QString>> &) override{};
   void update(int, int, const QStringList &) override{};
   int rowCount() const override { return 0; };
@@ -234,19 +222,11 @@ public:
   void setError(const std::string &, int, int) override{};
   void invalidateAllProcessed() override{};
   void setCell(int, int, int, int, const std::string &) override{};
-  std::string getCell(int, int, int, int) const override {
-    return std::string();
-  };
+  std::string getCell(int, int, int, int) const override { return std::string(); };
   int getNumberOfRows() override { return 0; };
-  bool isValidModel(Mantid::API::Workspace_sptr, size_t) const override {
-    return false;
-  };
-  std::shared_ptr<AbstractTreeModel> getModel() override {
-    return std::shared_ptr<QTwoLevelTreeModel>();
-  };
-  Mantid::API::ITableWorkspace_sptr getTableWorkspace() override {
-    return Mantid::API::ITableWorkspace_sptr();
-  };
+  bool isValidModel(Mantid::API::Workspace_sptr, size_t) const override { return false; };
+  std::shared_ptr<AbstractTreeModel> getModel() override { return std::shared_ptr<QTwoLevelTreeModel>(); };
+  Mantid::API::ITableWorkspace_sptr getTableWorkspace() override { return Mantid::API::ITableWorkspace_sptr(); };
 };
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE

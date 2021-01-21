@@ -33,22 +33,19 @@
 
 #include <gsl/gsl_fft_halfcomplex.h>
 
-FFTFilter::FFTFilter(ApplicationWindow *parent, Graph *g,
-                     const QString &curveTitle, int m)
-    : Filter(parent, g) {
+FFTFilter::FFTFilter(ApplicationWindow *parent, Graph *g, const QString &curveTitle, int m) : Filter(parent, g) {
   setDataFromCurve(curveTitle);
   init(m);
 }
 
-FFTFilter::FFTFilter(ApplicationWindow *parent, Graph *g,
-                     const QString &curveTitle, double start, double end, int m)
+FFTFilter::FFTFilter(ApplicationWindow *parent, Graph *g, const QString &curveTitle, double start, double end, int m)
     : Filter(parent, g) {
   setDataFromCurve(curveTitle, start, end);
   init(m);
 }
 
-FFTFilter::FFTFilter(ApplicationWindow *parent, Table *t, const QString &xCol,
-                     const QString &yCol, int start, int end, int m)
+FFTFilter::FFTFilter(ApplicationWindow *parent, Table *t, const QString &xCol, const QString &yCol, int start, int end,
+                     int m)
     : Filter(parent, t) {
   setDataFromTable(t, xCol, yCol, start, end);
   init(m);
@@ -65,11 +62,9 @@ void FFTFilter::init(int m) {
 
 void FFTFilter::setFilterType(int type) {
   if (type < 1 || type > 4) {
-    QMessageBox::critical(
-        dynamic_cast<ApplicationWindow *>(parent()),
-        tr("MantidPlot") + " - " + tr("Error"),
-        tr("Unknown filter type. Valid values are: 1 - Low pass, 2 - High "
-           "Pass, 3 - Band Pass, 4 - Band block."));
+    QMessageBox::critical(dynamic_cast<ApplicationWindow *>(parent()), tr("MantidPlot") + " - " + tr("Error"),
+                          tr("Unknown filter type. Valid values are: 1 - Low pass, 2 - High "
+                             "Pass, 3 - Band Pass, 4 - Band block."));
     d_init_err = true;
     return;
   }
@@ -87,10 +82,8 @@ void FFTFilter::setBand(double lowFreq, double highFreq) {
   if (d_filter_type < 3)
     return;
   else if (lowFreq == highFreq) {
-    QMessageBox::critical(
-        dynamic_cast<ApplicationWindow *>(parent()),
-        tr("MantidPlot") + " - " + tr("Error"),
-        tr("Please enter different values for the band limits."));
+    QMessageBox::critical(dynamic_cast<ApplicationWindow *>(parent()), tr("MantidPlot") + " - " + tr("Error"),
+                          tr("Please enter different values for the band limits."));
     d_init_err = true;
     return;
   }
@@ -110,10 +103,7 @@ void FFTFilter::calculateOutputData(double *x, double *y) {
     y[i] = d_y[i];
   }
 
-  double df =
-      0.5 /
-      (double)(d_n *
-               (x[1] - x[0])); // half frequency sampling due to GSL storing
+  double df = 0.5 / (double)(d_n * (x[1] - x[0])); // half frequency sampling due to GSL storing
 
   gsl_fft_real_workspace *work = gsl_fft_real_workspace_alloc(d_n);
   gsl_fft_real_wavetable *real = gsl_fft_real_wavetable_alloc(d_n);

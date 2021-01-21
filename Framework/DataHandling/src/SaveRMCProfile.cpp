@@ -32,29 +32,22 @@ const std::string SaveRMCProfile::name() const { return "SaveRMCProfile"; }
 int SaveRMCProfile::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string SaveRMCProfile::category() const {
-  return "DataHandling\\Text";
-}
+const std::string SaveRMCProfile::category() const { return "DataHandling\\Text"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-const std::string SaveRMCProfile::summary() const {
-  return "Save files readable by RMCProfile";
-}
+const std::string SaveRMCProfile::summary() const { return "Save files readable by RMCProfile"; }
 
 /** Initialize the algorithm's properties.
  */
 void SaveRMCProfile::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                                        Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
                   "An input workspace to be saved.");
 
-  declareProperty("InputType", "",
-                  "To identify what input function is being used.");
+  declareProperty("InputType", "", "To identify what input function is being used.");
 
   declareProperty("Title", "", "The title line for the output file.");
 
-  declareProperty(std::make_unique<API::FileProperty>(
-                      "Filename", "", API::FileProperty::Save, ".fq"),
+  declareProperty(std::make_unique<API::FileProperty>("Filename", "", API::FileProperty::Save, ".fq"),
                   "The filename to use for the saved data");
 }
 
@@ -96,8 +89,7 @@ void SaveRMCProfile::exec() {
   out.close();
 }
 
-void SaveRMCProfile::writeMetaData(
-    std::ofstream &out, const API::MatrixWorkspace_const_sptr &inputWS) {
+void SaveRMCProfile::writeMetaData(std::ofstream &out, const API::MatrixWorkspace_const_sptr &inputWS) {
   const auto &y = inputWS->y(0);
   const std::string title = getProperty("Title");
   const std::string inputType = getProperty("InputType");
@@ -107,8 +99,7 @@ void SaveRMCProfile::writeMetaData(
   std::cout << "rmc " << inputType << " #  " << title << std::endl;
 }
 
-void SaveRMCProfile::writeWSData(
-    std::ofstream &out, const API::MatrixWorkspace_const_sptr &inputWS) {
+void SaveRMCProfile::writeWSData(std::ofstream &out, const API::MatrixWorkspace_const_sptr &inputWS) {
   const auto &x = inputWS->points(0);
   const auto &y = inputWS->y(0);
   for (size_t i = 0; i < x.size(); ++i) {

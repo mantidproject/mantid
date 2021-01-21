@@ -26,8 +26,7 @@ using Kernel::V3D;
  * @param base: the base (un-parametrized) IComponent
  * @param map: pointer to the ParameterMap
  * */
-Detector::Detector(const Detector *base, const ParameterMap *map)
-    : ObjComponent(base, map), m_id(base->m_id) {}
+Detector::Detector(const Detector *base, const ParameterMap *map) : ObjComponent(base, map), m_id(base->m_id) {}
 
 /** Constructor
  *  @param name :: The name of the component
@@ -44,8 +43,7 @@ Detector::Detector(const std::string &name, int id, IComponent *parent)
  * component
  *  @param parent :: The parent component
  */
-Detector::Detector(const std::string &name, int id,
-                   const std::shared_ptr<IObject> &shape, IComponent *parent)
+Detector::Detector(const std::string &name, int id, const std::shared_ptr<IObject> &shape, IComponent *parent)
     : IDetector(), ObjComponent(name, shape, parent), m_id(id) {}
 
 /** Gets the detector id
@@ -65,9 +63,7 @@ detid_t Detector::getID() const {
 /// Get the distance between the detector and another component
 ///@param comp :: The other component
 ///@return The distance
-double Detector::getDistance(const IComponent &comp) const {
-  return ObjComponent::getDistance(comp);
-}
+double Detector::getDistance(const IComponent &comp) const { return ObjComponent::getDistance(comp); }
 
 /// Get the twotheta angle between the detector and an observer
 ///@param observer :: The observer position
@@ -85,8 +81,7 @@ Get the two theata angle signed according the quadrant
 @param instrumentUp :: instrument up direction.
 @return The angle
 */
-double Detector::getSignedTwoTheta(const V3D &observer, const V3D &axis,
-                                   const V3D &instrumentUp) const {
+double Detector::getSignedTwoTheta(const V3D &observer, const V3D &axis, const V3D &instrumentUp) const {
   const V3D sampleDetVec = this->getPos() - observer;
   double angle = sampleDetVec.angle(axis);
 

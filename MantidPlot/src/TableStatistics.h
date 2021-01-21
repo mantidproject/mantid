@@ -42,16 +42,14 @@ class TableStatistics : public Table {
 public:
   //! supported statistics types
   enum Type { row, column };
-  TableStatistics(ScriptingEnv *env, QWidget *parent, Table *base, Type,
-                  const QList<int> &targets);
+  TableStatistics(ScriptingEnv *env, QWidget *parent, Table *base, Type, const QList<int> &targets);
   //! return the type of statistics
   Type type() const { return d_type; }
   //! return the base table of which statistics are displayed
   Table *base() const { return d_base; }
 
-  static MantidQt::API::IProjectSerialisable *
-  loadFromProject(const std::string &lines, ApplicationWindow *app,
-                  const int fileVersion);
+  static MantidQt::API::IProjectSerialisable *loadFromProject(const std::string &lines, ApplicationWindow *app,
+                                                              const int fileVersion);
   std::string saveToProject(ApplicationWindow *app) override;
 
 public slots:

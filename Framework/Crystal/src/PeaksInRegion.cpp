@@ -34,36 +34,30 @@ const std::string PeaksInRegion::category() const { return "Crystal\\Peaks"; }
 /** Initialize the algorithm's properties.
  */
 void PeaksInRegion::init() {
-  declareProperty(
-      std::make_unique<PropertyWithValue<bool>>("CheckPeakExtents", false),
-      "Include any peak in the region that has a shape extent "
-      "extending into that region.");
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("CheckPeakExtents", false),
+                  "Include any peak in the region that has a shape extent "
+                  "extending into that region.");
 
   this->initBaseProperties();
 
-  auto mandatoryExtents = std::make_shared<
-      Mantid::Kernel::MandatoryValidator<std::vector<double>>>();
+  auto mandatoryExtents = std::make_shared<Mantid::Kernel::MandatoryValidator<std::vector<double>>>();
 
   std::vector<double> extents(2, 0);
   extents[0] = -50;
   extents[1] = +50;
-  declareProperty(
-      std::make_unique<ArrayProperty<double>>("Extents", std::move(extents),
-                                              std::move(mandatoryExtents)),
-      "A comma separated list of min, max for each dimension,\n"
-      "specifying the extents of each dimension. Optional, default +-50 in "
-      "each dimension.");
+  declareProperty(std::make_unique<ArrayProperty<double>>("Extents", std::move(extents), std::move(mandatoryExtents)),
+                  "A comma separated list of min, max for each dimension,\n"
+                  "specifying the extents of each dimension. Optional, default +-50 in "
+                  "each dimension.");
 
-  setPropertySettings("PeakRadius", std::make_unique<EnabledWhenProperty>(
-                                        "CheckPeakExtents", IS_NOT_DEFAULT));
+  setPropertySettings("PeakRadius", std::make_unique<EnabledWhenProperty>("CheckPeakExtents", IS_NOT_DEFAULT));
 }
 
 void PeaksInRegion::validateExtentsInput() const {
   const size_t numberOfFaces = this->numberOfFaces();
   std::stringstream outbuff;
   if (m_extents.size() != numberOfFaces) {
-    throw std::invalid_argument(
-        "Six commma separated entries for the extents expected");
+    throw std::invalid_argument("Six commma separated entries for the extents expected");
   }
   if (m_extents[0] > m_extents[1]) {
     outbuff << "xmin > xmax " << m_extents[0] << " > " << m_extents[1];
@@ -80,25 +74,20 @@ void PeaksInRegion::validateExtentsInput() const {
 }
 
 bool PeaksInRegion::pointOutsideAnyExtents(const V3D &testPoint) const {
-  return testPoint[0] < m_extents[0] || testPoint[0] > m_extents[1] ||
-         testPoint[1] < m_extents[2] || testPoint[1] > m_extents[3] ||
-         testPoint[2] < m_extents[4] || testPoint[2] > m_extents[5];
+  return testPoint[0] < m_extents[0] || testPoint[0] > m_extents[1] || testPoint[1] < m_extents[2] ||
+         testPoint[1] > m_extents[3] || testPoint[2] < m_extents[4] || testPoint[2] > m_extents[5];
 }
 
-bool PeaksInRegion::pointInsideAllExtents(
-    const V3D &testPoint, const Mantid::Kernel::V3D & /*peakCenter*/) const {
-  return testPoint[0] >= m_extents[0] && testPoint[0] <= m_extents[1] &&
-         testPoint[1] >= m_extents[2] && testPoint[1] <= m_extents[3] &&
-         testPoint[2] >= m_extents[4] && testPoint[2] <= m_extents[5];
+bool PeaksInRegion::pointInsideAllExtents(const V3D &testPoint, const Mantid::Kernel::V3D & /*peakCenter*/) const {
+  return testPoint[0] >= m_extents[0] && testPoint[0] <= m_extents[1] && testPoint[1] >= m_extents[2] &&
+         testPoint[1] <= m_extents[3] && testPoint[2] >= m_extents[4] && testPoint[2] <= m_extents[5];
 }
 
-void PeaksInRegion::checkTouchPoint(const V3D &touchPoint, const V3D &normal,
-                                    const V3D &faceVertex) const {
+void PeaksInRegion::checkTouchPoint(const V3D &touchPoint, const V3D &normal, const V3D &faceVertex) const {
   if (normal.scalar_prod(touchPoint - faceVertex) != 0) {
-    throw std::runtime_error(
-        "Debugging. Calculation is wrong. touch point should always be on the "
-        "plane!"); // Remove this line later. Check that geometry is setup
-                   // properly.
+    throw std::runtime_error("Debugging. Calculation is wrong. touch point should always be on the "
+                             "plane!"); // Remove this line later. Check that geometry is setup
+                                        // properly.
   }
 }
 

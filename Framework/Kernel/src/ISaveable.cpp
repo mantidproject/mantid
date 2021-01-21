@@ -12,22 +12,17 @@ namespace Kernel {
 
 /** Constructor    */
 ISaveable::ISaveable()
-    : m_Busy(false), m_dataChanged(false), m_wasSaved(false), m_isLoaded(false),
-      m_BufMemorySize(0),
-      m_fileIndexStart(std::numeric_limits<uint64_t>::max()),
-      m_fileNumEvents(0) {}
+    : m_Busy(false), m_dataChanged(false), m_wasSaved(false), m_isLoaded(false), m_BufMemorySize(0),
+      m_fileIndexStart(std::numeric_limits<uint64_t>::max()), m_fileNumEvents(0) {}
 
 //----------------------------------------------------------------------------------------------
 /** Copy constructor --> needed for std containers and not to copy mutexes
     Note setting isLoaded to false to break connection with the file object
    which is not copyale */
 ISaveable::ISaveable(const ISaveable &other)
-    : m_Busy(other.m_Busy), m_dataChanged(other.m_dataChanged),
-      m_wasSaved(other.m_wasSaved), m_isLoaded(false),
-      m_BufPosition(other.m_BufPosition),
-      m_BufMemorySize(other.m_BufMemorySize),
-      m_fileIndexStart(other.m_fileIndexStart),
-      m_fileNumEvents(other.m_fileNumEvents)
+    : m_Busy(other.m_Busy), m_dataChanged(other.m_dataChanged), m_wasSaved(other.m_wasSaved), m_isLoaded(false),
+      m_BufPosition(other.m_BufPosition), m_BufMemorySize(other.m_BufMemorySize),
+      m_fileIndexStart(other.m_fileIndexStart), m_fileNumEvents(other.m_fileNumEvents)
 
 {}
 
@@ -38,8 +33,7 @@ ISaveable::ISaveable(const ISaveable &other)
  * @param newSize :: number of events in the file
  * @param wasSaved :: flag to mark if the info was saved, by default it does
  */
-void ISaveable::setFilePosition(uint64_t newPos, size_t newSize,
-                                bool wasSaved) {
+void ISaveable::setFilePosition(uint64_t newPos, size_t newSize, bool wasSaved) {
   std::lock_guard<std::mutex> lock(m_setter);
   this->m_fileIndexStart = newPos;
   this->m_fileNumEvents = static_cast<uint64_t>(newSize);
@@ -73,11 +67,9 @@ void ISaveable::saveAt(uint64_t newPos, uint64_t newSize) {
  * @returns the size of the object it currently occupies in memory. This size is
  * also stored by the object itself for further references
  */
-size_t
-ISaveable::setBufferPosition(std::list<ISaveable *>::iterator bufPosition) {
+size_t ISaveable::setBufferPosition(std::list<ISaveable *>::iterator bufPosition) {
   std::lock_guard<std::mutex> lock(m_setter);
-  m_BufPosition =
-      boost::optional<std::list<ISaveable *>::iterator>(bufPosition);
+  m_BufPosition = boost::optional<std::list<ISaveable *>::iterator>(bufPosition);
   m_BufMemorySize = this->getDataMemorySize();
 
   return m_BufMemorySize;

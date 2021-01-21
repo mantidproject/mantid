@@ -39,8 +39,7 @@ public:
 
   ~InstrumentRenderer();
 
-  void renderInstrument(const std::vector<bool> &visibleComps, bool showGuides,
-                        bool picking = false);
+  void renderInstrument(const std::vector<bool> &visibleComps, bool showGuides, bool picking = false);
 
   void reset();
 
@@ -67,8 +66,7 @@ public:
 private:
   void resetColors();
   void resetPickColors();
-  void draw(const std::vector<bool> &visibleComps, bool showGuides,
-            bool picking);
+  void draw(const std::vector<bool> &visibleComps, bool showGuides, bool picking);
   void drawGridBank(size_t bankIndex, bool picking);
   void drawRectangularBank(size_t bankIndex, bool picking);
   void drawStructuredBank(size_t bankIndex, bool picking);

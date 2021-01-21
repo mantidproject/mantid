@@ -40,8 +40,7 @@ public:
 
     // Create a bunch of input files
     std::vector<std::vector<std::string>> filenames;
-    Mantid::Kernel::SpecialCoordinateSystem appliedCoord =
-        Mantid::Kernel::QSample;
+    Mantid::Kernel::SpecialCoordinateSystem appliedCoord = Mantid::Kernel::QSample;
     Mantid::Geometry::QSample frame;
     std::vector<MDEventWorkspace3Lean::sptr> inWorkspaces;
     // how many events put into each file.
@@ -50,11 +49,9 @@ public:
       std::ostringstream mess;
       mess << "MergeMDFilesTestInput" << i;
       MDEventWorkspace3Lean::sptr ws =
-          MDAlgorithmsTestHelper::makeFileBackedMDEWwithMDFrame(
-              mess.str(), true, frame, -nFileEvents, appliedCoord);
+          MDAlgorithmsTestHelper::makeFileBackedMDEWwithMDFrame(mess.str(), true, frame, -nFileEvents, appliedCoord);
       inWorkspaces.emplace_back(ws);
-      filenames.emplace_back(
-          std::vector<std::string>(1, ws->getBoxController()->getFilename()));
+      filenames.emplace_back(std::vector<std::string>(1, ws->getBoxController()->getFilename()));
     }
 
     // Name of the output workspace.
@@ -64,10 +61,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filenames", filenames));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputFilename", OutputFilename));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputFilename", OutputFilename));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
 
     // clean up possible rubbish from previous runs
     std::string fullName = alg.getPropertyValue("OutputFilename");
@@ -82,9 +77,7 @@ public:
 
     // Retrieve the workspace from data service.
     MDEventWorkspace3Lean::sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance().retrieveWS<MDEventWorkspace3Lean>(
-            outWSName));
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<MDEventWorkspace3Lean>(outWSName));
     TS_ASSERT(ws);
     if (!ws)
       return;
@@ -109,8 +102,7 @@ public:
     // Cleanup generated input files
     for (auto &inWorkspace : inWorkspaces) {
       if (inWorkspace->getBoxController()->isFileBacked()) {
-        std::string fileName =
-            inWorkspace->getBoxController()->getFileIO()->getFileName();
+        std::string fileName = inWorkspace->getBoxController()->getFileIO()->getFileName();
         inWorkspace->clearFileBacked(false);
         Poco::File(fileName).remove();
       }

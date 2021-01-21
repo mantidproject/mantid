@@ -34,9 +34,7 @@ namespace {
 template <class T> struct SumGaussError {
   SumGaussError() {}
   /// Sums the arguments in quadrature
-  inline T operator()(const T &l, const T &r) const {
-    return std::sqrt(l * l + r * r);
-  }
+  inline T operator()(const T &l, const T &r) const { return std::sqrt(l * l + r * r); }
 };
 
 // Newer versions of boost::mpi::reduce (>=v1.55) will recognize std::vector
@@ -60,12 +58,10 @@ struct eplus : public SumGaussError<double> {};
 /// Sum for boostmpi MantidVec
 struct vplus : public std::binary_function<MantidVec, MantidVec,
                                            MantidVec> { // functor for operator+
-  MantidVec
-  operator()(const MantidVec &_Left,
-             const MantidVec &_Right) const { // apply operator+ to operands
+  MantidVec operator()(const MantidVec &_Left,
+                       const MantidVec &_Right) const { // apply operator+ to operands
     MantidVec v(_Left.size());
-    std::transform(_Left.begin(), _Left.end(), _Right.begin(), v.begin(),
-                   std::plus<double>());
+    std::transform(_Left.begin(), _Left.end(), _Right.begin(), v.begin(), std::plus<double>());
     return (v);
   }
 };
@@ -73,12 +69,10 @@ struct vplus : public std::binary_function<MantidVec, MantidVec,
 /// Sum for error for boostmpi MantidVec
 struct eplus : public std::binary_function<MantidVec, MantidVec,
                                            MantidVec> { // functor for operator+
-  MantidVec
-  operator()(const MantidVec &_Left,
-             const MantidVec &_Right) const { // apply operator+ to operands
+  MantidVec operator()(const MantidVec &_Left,
+                       const MantidVec &_Right) const { // apply operator+ to operands
     MantidVec v(_Left.size());
-    std::transform(_Left.begin(), _Left.end(), _Right.begin(), v.begin(),
-                   SumGaussError<double>());
+    std::transform(_Left.begin(), _Left.end(), _Right.begin(), v.begin(), SumGaussError<double>());
     return (v);
   }
 };
@@ -92,33 +86,30 @@ DECLARE_ALGORITHM(GatherWorkspaces)
 void GatherWorkspaces::init() {
   // Input workspace is optional, except for the root process
   if (mpi::communicator().rank())
-    declareProperty(std::make_unique<WorkspaceProperty<>>(
-        "InputWorkspace", "", Direction::Input, PropertyMode::Optional));
+    declareProperty(
+        std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input, PropertyMode::Optional));
   else
-    declareProperty(std::make_unique<WorkspaceProperty<>>(
-        "InputWorkspace", "", Direction::Input, PropertyMode::Mandatory));
+    declareProperty(
+        std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input, PropertyMode::Mandatory));
   // Output is optional - only the root process will output a workspace
-  declareProperty(std::make_unique<WorkspaceProperty<>>(
-      "OutputWorkspace", "", Direction::Output, PropertyMode::Optional));
   declareProperty(
-      "PreserveEvents", false,
-      "Keep the output workspace as an EventWorkspace, if the "
-      "input has events.\n"
-      "If false, then the workspace gets converted to a "
-      "Workspace2D histogram(default to save memory for reduced data)");
+      std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output, PropertyMode::Optional));
+  declareProperty("PreserveEvents", false,
+                  "Keep the output workspace as an EventWorkspace, if the "
+                  "input has events.\n"
+                  "If false, then the workspace gets converted to a "
+                  "Workspace2D histogram(default to save memory for reduced data)");
   std::vector<std::string> propOptions;
   propOptions.push_back("Add");
   // propOptions.push_back("Replace");
   propOptions.push_back("Append");
-  declareProperty(
-      "AccumulationMethod", "Append",
-      std::make_shared<StringListValidator>(propOptions),
-      "Method to use for accumulating each chunk from mpi processorss.\n"
-      " - Add: the processed chunk will be summed to the previous output "
-      "(default).\n"
-      //" - Replace: the processed chunk will replace the previous output.\n"
-      " - Append: the spectra of the chunk will be appended to the output "
-      "workspace, increasing its size.");
+  declareProperty("AccumulationMethod", "Append", std::make_shared<StringListValidator>(propOptions),
+                  "Method to use for accumulating each chunk from mpi processorss.\n"
+                  " - Add: the processed chunk will be summed to the previous output "
+                  "(default).\n"
+                  //" - Replace: the processed chunk will replace the previous output.\n"
+                  " - Append: the spectra of the chunk will be appended to the output "
+                  "workspace, increasing its size.");
 }
 
 void GatherWorkspaces::exec() {
@@ -143,25 +134,20 @@ void GatherWorkspaces::exec() {
   numBins = inputWorkspace->blocksize();
   std::vector<std::size_t> all_numBins;
   all_gather(included, numBins, all_numBins);
-  if (std::count(all_numBins.begin(), all_numBins.end(), numBins) !=
-      (int)all_numBins.size()) {
+  if (std::count(all_numBins.begin(), all_numBins.end(), numBins) != (int)all_numBins.size()) {
     // All the processes will error out if all the workspaces don't have the
     // same number of bins
-    throw Exception::MisMatch<std::size_t>(
-        numBins, 0, "All input workspaces must have the same number of bins");
+    throw Exception::MisMatch<std::size_t>(numBins, 0, "All input workspaces must have the same number of bins");
   }
   // Also check that all workspaces are either histogram or not
   // N.B. boost mpi doesn't seem to like me using booleans in the all_gather
   hist = inputWorkspace->isHistogramData();
   std::vector<int> all_hist;
   all_gather(included, hist, all_hist);
-  if (std::count(all_hist.begin(), all_hist.end(), hist) !=
-      (int)all_hist.size()) {
+  if (std::count(all_hist.begin(), all_hist.end(), hist) != (int)all_hist.size()) {
     // All the processes will error out if we don't have either all histogram or
     // all point-data workspaces
-    throw Exception::MisMatch<int>(
-        hist, 0,
-        "The input workspaces must be all histogram or all point data");
+    throw Exception::MisMatch<int>(hist, 0, "The input workspaces must be all histogram or all point data");
   }
 
   // How do we accumulate the data?
@@ -190,8 +176,7 @@ void GatherWorkspaces::exec() {
   if (included.rank() == 0) {
     g_log.debug() << "Total number of spectra is " << sumSpec << "\n";
     // Create the workspace for the output
-    outputWorkspace = WorkspaceFactory::Instance().create(
-        inputWorkspace, sumSpec, numBins + hist, numBins);
+    outputWorkspace = WorkspaceFactory::Instance().create(inputWorkspace, sumSpec, numBins + hist, numBins);
     setProperty("OutputWorkspace", outputWorkspace);
     ExperimentInfo_sptr inWS = inputWorkspace;
     outputWorkspace->copyExperimentInfoFrom(inWS.get());
@@ -202,10 +187,8 @@ void GatherWorkspaces::exec() {
       const auto &inSpec = inputWorkspace->getSpectrum(wi);
       if (accum == "Add") {
         outputWorkspace->dataX(wi) = inputWorkspace->readX(wi);
-        reduce(included, inputWorkspace->readY(wi), outputWorkspace->dataY(wi),
-               vplus(), 0);
-        reduce(included, inputWorkspace->readE(wi), outputWorkspace->dataE(wi),
-               eplus(), 0);
+        reduce(included, inputWorkspace->readY(wi), outputWorkspace->dataY(wi), vplus(), 0);
+        reduce(included, inputWorkspace->readE(wi), outputWorkspace->dataE(wi), eplus(), 0);
       } else if (accum == "Append") {
         // Copy over data from own input workspace
         outputWorkspace->dataX(wi) = inputWorkspace->readX(wi);
@@ -265,11 +248,9 @@ void GatherWorkspaces::execEvent() {
     g_log.debug() << "Total number of spectra is " << totalSpec << "\n";
     // Create the workspace for the output
     outputWorkspace = std::dynamic_pointer_cast<EventWorkspace>(
-        API::WorkspaceFactory::Instance().create("EventWorkspace", sumSpec,
-                                                 numBins + hist, numBins));
+        API::WorkspaceFactory::Instance().create("EventWorkspace", sumSpec, numBins + hist, numBins));
     // Copy geometry over.
-    API::WorkspaceFactory::Instance().initializeFromParent(
-        *eventW, *outputWorkspace, true);
+    API::WorkspaceFactory::Instance().initializeFromParent(*eventW, *outputWorkspace, true);
     setProperty("OutputWorkspace", outputWorkspace);
     ExperimentInfo_sptr inWS = inputWorkspace;
     outputWorkspace->copyExperimentInfoFrom(inWS.get());

@@ -19,8 +19,7 @@ namespace Functions {
   ComptonProfile functions
   that give the Neutron count rate.
 */
-class MANTID_CURVEFITTING_DLL ComptonScatteringCountRate
-    : public API::CompositeFunction {
+class MANTID_CURVEFITTING_DLL ComptonScatteringCountRate : public API::CompositeFunction {
 public:
   /// Constructor
   ComptonScatteringCountRate();
@@ -41,16 +40,14 @@ private:
   void updateCMatrixValues() const;
 
   /// Cache reference to workspace for use in setupForFit
-  void setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace> matrix,
-                          size_t wsIndex, double startX, double endX) override;
+  void setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace> matrix, size_t wsIndex, double startX,
+                          double endX) override;
   /// Cache ptrs to the individual profiles and their parameters
   void cacheFunctions();
   /// Cache ptr to the individual profile and its parameters
-  void cacheComptonProfile(const std::shared_ptr<ComptonProfile> &profile,
-                           const size_t paramsOffset);
+  void cacheComptonProfile(const std::shared_ptr<ComptonProfile> &profile, const size_t paramsOffset);
   /// Cache parameters positions for background function
-  void cacheBackground(const API::IFunction1D_sptr &function1D,
-                       const size_t paramsOffset);
+  void cacheBackground(const API::IFunction1D_sptr &function1D, const size_t paramsOffset);
   /// Set up the constraint matrices
   void createConstraintMatrices();
   /// Set up positivity constraint matrix

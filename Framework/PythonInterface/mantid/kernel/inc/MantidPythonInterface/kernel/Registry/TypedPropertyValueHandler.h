@@ -36,8 +36,7 @@ struct DLLExport TypedPropertyValueHandler : public PropertyValueHandler {
    * @param name :: The name of the property
    * @param value :: A boost python object that stores the value
    */
-  void set(Kernel::IPropertyManager *alg, const std::string &name,
-           const boost::python::object &value) const override {
+  void set(Kernel::IPropertyManager *alg, const std::string &name, const boost::python::object &value) const override {
     alg->setProperty<ValueType>(name, boost::python::extract<ValueType>(value));
   }
   /**
@@ -51,22 +50,19 @@ struct DLLExport TypedPropertyValueHandler : public PropertyValueHandler {
    * @param direction :: The direction of the property
    * @returns A pointer to a newly constructed property instance
    */
-  std::unique_ptr<Kernel::Property>
-  create(const std::string &name, const boost::python::object &defaultValue,
-         const boost::python::object &validator,
-         const unsigned int direction) const override {
+  std::unique_ptr<Kernel::Property> create(const std::string &name, const boost::python::object &defaultValue,
+                                           const boost::python::object &validator,
+                                           const unsigned int direction) const override {
     using boost::python::extract;
     using Mantid::Kernel::IValidator;
     using Mantid::Kernel::PropertyWithValue;
     const ValueType valueInC = extract<ValueType>(defaultValue)();
     std::unique_ptr<Kernel::Property> valueProp;
     if (isNone(validator)) {
-      valueProp = std::make_unique<PropertyWithValue<ValueType>>(name, valueInC,
-                                                                 direction);
+      valueProp = std::make_unique<PropertyWithValue<ValueType>>(name, valueInC, direction);
     } else {
       const IValidator *propValidator = extract<IValidator *>(validator);
-      valueProp = std::make_unique<PropertyWithValue<ValueType>>(
-          name, valueInC, propValidator->clone(), direction);
+      valueProp = std::make_unique<PropertyWithValue<ValueType>>(name, valueInC, propValidator->clone(), direction);
     }
     return valueProp;
   }

@@ -32,20 +32,16 @@ public:
   void setXLabel(const char *label);
   void setYLabel(const char *label);
   void setTitle(const char *label);
-  void tickLabelFormat(const char *axis, const char *style,
-                       const bool useOffset);
+  void tickLabelFormat(const char *axis, const char *style, const bool useOffset);
   /// @}
 
   /// @name Drawing
   /// @{
   Artist legend(const bool draggable);
   Artist legendInstance() const;
-  Line2D plot(std::vector<double> xdata, std::vector<double> ydata,
-              const char *format = "b-");
-  Line2D plot(std::vector<double> xdata, std::vector<double> ydata,
-              const QString &format, const QString &label);
-  Artist text(double x, double y, const QString &text,
-              const char *horizontalAlignment);
+  Line2D plot(std::vector<double> xdata, std::vector<double> ydata, const char *format = "b-");
+  Line2D plot(std::vector<double> xdata, std::vector<double> ydata, const QString &format, const QString &label);
+  Artist text(double x, double y, const QString &text, const char *horizontalAlignment);
   /// @}
 
   ///@name Scales

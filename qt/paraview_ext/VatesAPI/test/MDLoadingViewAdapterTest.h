@@ -38,7 +38,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(alias.getLoadInMemory());
 
     // Check the expectations.
-    TSM_ASSERT("Not wired-up correctly",
-               Mock::VerifyAndClearExpectations(&view));
+    TSM_ASSERT("Not wired-up correctly", Mock::VerifyAndClearExpectations(&view));
   }
 };

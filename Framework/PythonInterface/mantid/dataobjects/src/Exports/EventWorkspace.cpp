@@ -19,8 +19,7 @@ using namespace boost::python;
 GET_POINTER_SPECIALIZATION(EventWorkspace)
 
 void export_EventWorkspace() {
-  class_<EventWorkspace, bases<IEventWorkspace>, boost::noncopyable>(
-      "EventWorkspace", no_init);
+  class_<EventWorkspace, bases<IEventWorkspace>, boost::noncopyable>("EventWorkspace", no_init);
 
   // register pointers
   RegisterWorkspacePtrToPython<EventWorkspace>();

@@ -34,10 +34,7 @@ using namespace Mantid::Geometry;
 
 namespace {
 // function to compare two intersections (h,k,l,Momentum) by scattered momentum
-bool compareMomentum(const Mantid::Kernel::VMD &v1,
-                     const Mantid::Kernel::VMD &v2) {
-  return (v1[3] < v2[3]);
-}
+bool compareMomentum(const Mantid::Kernel::VMD &v1, const Mantid::Kernel::VMD &v2) { return (v1[3] < v2[3]); }
 } // namespace
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CalculateCoverageDGS)
@@ -45,25 +42,19 @@ DECLARE_ALGORITHM(CalculateCoverageDGS)
 /** Constructor
  */
 CalculateCoverageDGS::CalculateCoverageDGS()
-    : m_hmin(0.f), m_hmax(0.f), m_kmin(0.f), m_kmax(0.f), m_lmin(0.f),
-      m_lmax(0.f), m_dEmin(0.f), m_dEmax(0.f), m_Ei(0.), m_ki(0.), m_kfmin(0.),
-      m_kfmax(0.), m_hIntegrated(false), m_kIntegrated(false),
-      m_lIntegrated(false), m_dEIntegrated(false), m_hX(), m_kX(), m_lX(),
-      m_eX(), m_hIdx(-1), m_kIdx(-1), m_lIdx(-1), m_eIdx(-1), m_rubw(3, 3),
-      m_normWS() {}
+    : m_hmin(0.f), m_hmax(0.f), m_kmin(0.f), m_kmax(0.f), m_lmin(0.f), m_lmax(0.f), m_dEmin(0.f), m_dEmax(0.f),
+      m_Ei(0.), m_ki(0.), m_kfmin(0.), m_kfmax(0.), m_hIntegrated(false), m_kIntegrated(false), m_lIntegrated(false),
+      m_dEIntegrated(false), m_hX(), m_kX(), m_lX(), m_eX(), m_hIdx(-1), m_kIdx(-1), m_lIdx(-1), m_eIdx(-1),
+      m_rubw(3, 3), m_normWS() {}
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string CalculateCoverageDGS::name() const {
-  return "CalculateCoverageDGS";
-}
+const std::string CalculateCoverageDGS::name() const { return "CalculateCoverageDGS"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int CalculateCoverageDGS::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string CalculateCoverageDGS::category() const {
-  return "Inelastic\\Planning;MDAlgorithms\\Planning";
-}
+const std::string CalculateCoverageDGS::category() const { return "Inelastic\\Planning;MDAlgorithms\\Planning"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string CalculateCoverageDGS::summary() const {
@@ -75,8 +66,7 @@ const std::string CalculateCoverageDGS::summary() const {
  *Stores the X values from each H,K,L dimension as member variables
  */
 void CalculateCoverageDGS::cacheDimensionXValues() {
-  const double energyToK = 8.0 * M_PI * M_PI * PhysicalConstants::NeutronMass *
-                           PhysicalConstants::meV * 1e-20 /
+  const double energyToK = 8.0 * M_PI * M_PI * PhysicalConstants::NeutronMass * PhysicalConstants::meV * 1e-20 /
                            (PhysicalConstants::h * PhysicalConstants::h);
 
   auto &hDim = *m_normWS->getDimension(m_hIdx);
@@ -105,9 +95,8 @@ void CalculateCoverageDGS::cacheDimensionXValues() {
 /** Initialize the algorithm's properties.
  */
 void CalculateCoverageDGS::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<>>(
-                      "InputWorkspace", "", Mantid::Kernel::Direction::Input,
-                      std::make_shared<InstrumentValidator>()),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Mantid::Kernel::Direction::Input,
+                                                        std::make_shared<InstrumentValidator>()),
                   "An input workspace.");
 
   // clang-format off
@@ -120,56 +109,44 @@ void CalculateCoverageDGS::init() {
   Q1[0] = 1.;
   Q2[1] = 1.;
   Q3[2] = 1.;
-  declareProperty(std::make_unique<ArrayProperty<double>>(
-                      "Q1Basis", std::move(Q1), mustBe3D->clone()),
+  declareProperty(std::make_unique<ArrayProperty<double>>("Q1Basis", std::move(Q1), mustBe3D->clone()),
                   "Q1 projection direction in the x,y,z format. Q1, Q2, Q3 "
                   "must not be coplanar");
-  declareProperty(std::make_unique<ArrayProperty<double>>(
-                      "Q2Basis", std::move(Q2), mustBe3D->clone()),
+  declareProperty(std::make_unique<ArrayProperty<double>>("Q2Basis", std::move(Q2), mustBe3D->clone()),
                   "Q2 projection direction in the x,y,z format. Q1, Q2, Q3 "
                   "must not be coplanar");
-  declareProperty(std::make_unique<ArrayProperty<double>>(
-                      "Q3Basis", std::move(Q3), std::move(mustBe3D)),
+  declareProperty(std::make_unique<ArrayProperty<double>>("Q3Basis", std::move(Q3), std::move(mustBe3D)),
                   "Q3 projection direction in the x,y,z format. Q1, Q2, Q3 "
                   "must not be coplanar");
-  declareProperty(
-      std::make_unique<PropertyWithValue<double>>(
-          "IncidentEnergy", EMPTY_DBL(), std::move(mustBePositive),
-          Mantid::Kernel::Direction::Input),
-      "Incident energy. If set, will override Ei in the input workspace");
+  declareProperty(std::make_unique<PropertyWithValue<double>>("IncidentEnergy", EMPTY_DBL(), std::move(mustBePositive),
+                                                              Mantid::Kernel::Direction::Input),
+                  "Incident energy. If set, will override Ei in the input workspace");
 
   std::vector<std::string> options{"Q1", "Q2", "Q3", "DeltaE"};
 
   for (int i = 1; i <= 4; i++) {
     std::string dim("Dimension");
     dim += boost::lexical_cast<std::string>(i);
-    declareProperty(dim, options[i - 1],
-                    std::make_shared<StringListValidator>(options),
+    declareProperty(dim, options[i - 1], std::make_shared<StringListValidator>(options),
                     "Dimension to bin or integrate");
-    declareProperty(
-        dim + "Min", EMPTY_DBL(),
-        dim + " minimum value. If empty will take minimum possible value.");
-    declareProperty(
-        dim + "Max", EMPTY_DBL(),
-        dim + " maximum value. If empty will take maximum possible value.");
+    declareProperty(dim + "Min", EMPTY_DBL(), dim + " minimum value. If empty will take minimum possible value.");
+    declareProperty(dim + "Max", EMPTY_DBL(), dim + " maximum value. If empty will take maximum possible value.");
     declareProperty(dim + "Step", EMPTY_DBL(),
                     dim + " step size. If empty the dimension will be "
                           "integrated between minimum and maximum values");
   }
-  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-                      "OutputWorkspace", "", Mantid::Kernel::Direction::Output),
-                  "A name for the output data MDHistoWorkspace.");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<Workspace>>("OutputWorkspace", "", Mantid::Kernel::Direction::Output),
+      "A name for the output data MDHistoWorkspace.");
 }
 
 /** Execute the algorithm.
  */
 void CalculateCoverageDGS::exec() {
-  const double energyToK = 8.0 * M_PI * M_PI * PhysicalConstants::NeutronMass *
-                           PhysicalConstants::meV * 1e-20 /
+  const double energyToK = 8.0 * M_PI * M_PI * PhysicalConstants::NeutronMass * PhysicalConstants::meV * 1e-20 /
                            (PhysicalConstants::h * PhysicalConstants::h);
   // get the limits
-  Mantid::API::MatrixWorkspace_const_sptr inputWS =
-      getProperty("InputWorkspace");
+  Mantid::API::MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
   // cache two theta and phi
   const auto &detectorInfo = inputWS->detectorInfo();
@@ -189,12 +166,10 @@ void CalculateCoverageDGS::exec() {
       Kernel::Property *eiprop = inputWS->run().getProperty("Ei");
       m_Ei = boost::lexical_cast<double>(eiprop->value());
       if (m_Ei <= 0) {
-        throw std::invalid_argument(
-            "Ei stored in the workspace is not positive");
+        throw std::invalid_argument("Ei stored in the workspace is not positive");
       }
     } else {
-      throw std::invalid_argument(
-          "Could not find Ei in the workspace. Please enter a positive value");
+      throw std::invalid_argument("Could not find Ei in the workspace. Please enter a positive value");
     }
   }
 
@@ -251,9 +226,7 @@ void CalculateCoverageDGS::exec() {
         dENumBins = static_cast<size_t>((m_dEmax - m_dEmin) / dEstep);
         if (dEstep * static_cast<double>(dENumBins) + m_dEmin < m_dEmax) {
           dENumBins += 1;
-          m_dEmax =
-              static_cast<coord_t>(dEstep * static_cast<double>(dENumBins)) +
-              m_dEmin;
+          m_dEmax = static_cast<coord_t>(dEstep * static_cast<double>(dENumBins)) + m_dEmin;
         }
       }
     }
@@ -261,8 +234,7 @@ void CalculateCoverageDGS::exec() {
 
   if (affineMat.determinant() == 0.) {
     g_log.debug() << affineMat;
-    throw std::invalid_argument(
-        "Please make sure each dimension is selected only once.");
+    throw std::invalid_argument("Please make sure each dimension is selected only once.");
   }
 
   // Qmax is at  kf=kfmin or kf=kfmax
@@ -278,11 +250,9 @@ void CalculateCoverageDGS::exec() {
     m_kfmax = 0;
   }
 
-  double QmaxTemp =
-      sqrt(m_ki * m_ki + m_kfmin * m_kfmin - 2 * m_ki * m_kfmin * cos(ttmax));
+  double QmaxTemp = sqrt(m_ki * m_ki + m_kfmin * m_kfmin - 2 * m_ki * m_kfmin * cos(ttmax));
   double Qmax = QmaxTemp;
-  QmaxTemp =
-      sqrt(m_ki * m_ki + m_kfmax * m_kfmax - 2 * m_ki * m_kfmax * cos(ttmax));
+  QmaxTemp = sqrt(m_ki * m_ki + m_kfmax * m_kfmax - 2 * m_ki * m_kfmax * cos(ttmax));
   if (QmaxTemp > Qmax)
     Qmax = QmaxTemp;
 
@@ -385,18 +355,14 @@ void CalculateCoverageDGS::exec() {
   Mantid::Geometry::GeneralFrame frame2("Q2", "");
   Mantid::Geometry::GeneralFrame frame3("Q3", "");
   Mantid::Geometry::GeneralFrame frame4("meV", "");
-  auto out1 = std::make_shared<MDHistoDimension>(
-      "Q1", "Q1", frame1, static_cast<coord_t>(q1min),
-      static_cast<coord_t>(q1max), q1NumBins);
-  auto out2 = std::make_shared<MDHistoDimension>(
-      "Q2", "Q2", frame2, static_cast<coord_t>(q2min),
-      static_cast<coord_t>(q2max), q2NumBins);
-  auto out3 = std::make_shared<MDHistoDimension>(
-      "Q3", "Q3", frame3, static_cast<coord_t>(q3min),
-      static_cast<coord_t>(q3max), q3NumBins);
-  auto out4 = std::make_shared<MDHistoDimension>(
-      "DeltaE", "DeltaE", frame4, static_cast<coord_t>(m_dEmin),
-      static_cast<coord_t>(m_dEmax), dENumBins);
+  auto out1 = std::make_shared<MDHistoDimension>("Q1", "Q1", frame1, static_cast<coord_t>(q1min),
+                                                 static_cast<coord_t>(q1max), q1NumBins);
+  auto out2 = std::make_shared<MDHistoDimension>("Q2", "Q2", frame2, static_cast<coord_t>(q2min),
+                                                 static_cast<coord_t>(q2max), q2NumBins);
+  auto out3 = std::make_shared<MDHistoDimension>("Q3", "Q3", frame3, static_cast<coord_t>(q3min),
+                                                 static_cast<coord_t>(q3max), q3NumBins);
+  auto out4 = std::make_shared<MDHistoDimension>("DeltaE", "DeltaE", frame4, static_cast<coord_t>(m_dEmin),
+                                                 static_cast<coord_t>(m_dEmax), dENumBins);
 
   for (size_t row = 0; row <= 3; row++) {
     if (affineMat[row][0] == 1.) {
@@ -415,8 +381,7 @@ void CalculateCoverageDGS::exec() {
 
   m_normWS = std::make_shared<MDHistoWorkspace>(binDimensions);
   m_normWS->setTo(0., 0., 0.);
-  setProperty("OutputWorkspace",
-              std::dynamic_pointer_cast<Workspace>(m_normWS));
+  setProperty("OutputWorkspace", std::dynamic_pointer_cast<Workspace>(m_normWS));
 
   cacheDimensionXValues();
 
@@ -438,11 +403,8 @@ void CalculateCoverageDGS::exec() {
         continue; // Assume zero contribution if difference is small
       // Average between two intersections for final position
       std::vector<coord_t> pos(4);
-      std::transform(curIntSec.getBareArray(), curIntSec.getBareArray() + 4,
-                     prevIntSec.getBareArray(), pos.begin(),
-                     [](const double lhs, const double rhs) {
-                       return static_cast<coord_t>(0.5 * (lhs + rhs));
-                     });
+      std::transform(curIntSec.getBareArray(), curIntSec.getBareArray() + 4, prevIntSec.getBareArray(), pos.begin(),
+                     [](const double lhs, const double rhs) { return static_cast<coord_t>(0.5 * (lhs + rhs)); });
       // transform kf to energy transfer
       pos[3] = static_cast<coord_t>(m_Ei - pos[3] * pos[3] / energyToK);
 
@@ -465,31 +427,24 @@ void CalculateCoverageDGS::exec() {
  *@param phi Azimuthal angle with detector
  *@return A list of intersections in HKL+kf space
  */
-std::vector<Kernel::VMD>
-CalculateCoverageDGS::calculateIntersections(const double theta,
-                                             const double phi) {
-  V3D qout(sin(theta) * cos(phi), sin(theta) * sin(phi), cos(theta)),
-      qin(0., 0., m_ki);
+std::vector<Kernel::VMD> CalculateCoverageDGS::calculateIntersections(const double theta, const double phi) {
+  V3D qout(sin(theta) * cos(phi), sin(theta) * sin(phi), cos(theta)), qin(0., 0., m_ki);
   qout = m_rubw * qout;
   qin = m_rubw * qin;
   if (convention == "Crystallography") {
     qout *= -1;
     qin *= -1;
   }
-  double hStart = qin.X() - qout.X() * m_kfmin,
-         hEnd = qin.X() - qout.X() * m_kfmax;
-  double kStart = qin.Y() - qout.Y() * m_kfmin,
-         kEnd = qin.Y() - qout.Y() * m_kfmax;
-  double lStart = qin.Z() - qout.Z() * m_kfmin,
-         lEnd = qin.Z() - qout.Z() * m_kfmax;
+  double hStart = qin.X() - qout.X() * m_kfmin, hEnd = qin.X() - qout.X() * m_kfmax;
+  double kStart = qin.Y() - qout.Y() * m_kfmin, kEnd = qin.Y() - qout.Y() * m_kfmax;
+  double lStart = qin.Z() - qout.Z() * m_kfmin, lEnd = qin.Z() - qout.Z() * m_kfmax;
   double eps = 1e-10;
   auto hNBins = m_hX.size();
   auto kNBins = m_kX.size();
   auto lNBins = m_lX.size();
   auto eNBins = m_eX.size();
   std::vector<Kernel::VMD> intersections;
-  intersections.reserve(hNBins + kNBins + lNBins + eNBins +
-                        8); // 8 is 3*(min,max for each Q component)+kfmin+kfmax
+  intersections.reserve(hNBins + kNBins + lNBins + eNBins + 8); // 8 is 3*(min,max for each Q component)+kfmin+kfmax
 
   // calculate intersections with planes perpendicular to h
   if (fabs(hStart - hEnd) > eps) {
@@ -499,15 +454,13 @@ CalculateCoverageDGS::calculateIntersections(const double theta,
     if (!m_hIntegrated) {
       for (size_t i = 0; i < hNBins; i++) {
         double hi = m_hX[i];
-        if ((hi >= m_hmin) && (hi <= m_hmax) &&
-            ((hStart - hi) * (hEnd - hi) < 0)) {
+        if ((hi >= m_hmin) && (hi <= m_hmax) && ((hStart - hi) * (hEnd - hi) < 0)) {
           // if hi is between hStart and hEnd, then ki and li will be between
           // kStart, kEnd and lStart, lEnd and momi will be between m_kfmin and
           // m_kfmax
           double ki = fk * (hi - hStart) + kStart;
           double li = fl * (hi - hStart) + lStart;
-          if ((ki >= m_kmin) && (ki <= m_kmax) && (li >= m_lmin) &&
-              (li <= m_lmax)) {
+          if ((ki >= m_kmin) && (ki <= m_kmax) && (li >= m_lmin) && (li <= m_lmax)) {
             double momi = fmom * (hi - hStart) + m_kfmin;
             intersections.emplace_back(hi, ki, li, momi);
           }
@@ -520,8 +473,7 @@ CalculateCoverageDGS::calculateIntersections(const double theta,
       // khmin and lhmin
       double khmin = fk * (m_hmin - hStart) + kStart;
       double lhmin = fl * (m_hmin - hStart) + lStart;
-      if ((khmin >= m_kmin) && (khmin <= m_kmax) && (lhmin >= m_lmin) &&
-          (lhmin <= m_lmax)) {
+      if ((khmin >= m_kmin) && (khmin <= m_kmax) && (lhmin >= m_lmin) && (lhmin <= m_lmax)) {
         intersections.emplace_back(m_hmin, khmin, lhmin, momhMin);
       }
     }
@@ -530,8 +482,7 @@ CalculateCoverageDGS::calculateIntersections(const double theta,
       // khmax and lhmax
       double khmax = fk * (m_hmax - hStart) + kStart;
       double lhmax = fl * (m_hmax - hStart) + lStart;
-      if ((khmax >= m_kmin) && (khmax <= m_kmax) && (lhmax >= m_lmin) &&
-          (lhmax <= m_lmax)) {
+      if ((khmax >= m_kmin) && (khmax <= m_kmax) && (lhmax >= m_lmin) && (lhmax <= m_lmax)) {
         intersections.emplace_back(m_hmax, khmax, lhmax, momhMax);
       }
     }
@@ -545,15 +496,13 @@ CalculateCoverageDGS::calculateIntersections(const double theta,
     if (!m_kIntegrated) {
       for (size_t i = 0; i < kNBins; i++) {
         double ki = m_kX[i];
-        if ((ki >= m_kmin) && (ki <= m_kmax) &&
-            ((kStart - ki) * (kEnd - ki) < 0)) {
+        if ((ki >= m_kmin) && (ki <= m_kmax) && ((kStart - ki) * (kEnd - ki) < 0)) {
           // if ki is between kStart and kEnd, then hi and li will be between
           // hStart, hEnd and lStart, lEnd and momi will be between m_kfmin and
           // m_kfmax
           double hi = fh * (ki - kStart) + hStart;
           double li = fl * (ki - kStart) + lStart;
-          if ((hi >= m_hmin) && (hi <= m_hmax) && (li >= m_lmin) &&
-              (li <= m_lmax)) {
+          if ((hi >= m_hmin) && (hi <= m_hmax) && (li >= m_lmin) && (li <= m_lmax)) {
             double momi = fmom * (ki - kStart) + m_kfmin;
             intersections.emplace_back(hi, ki, li, momi);
           }
@@ -565,8 +514,7 @@ CalculateCoverageDGS::calculateIntersections(const double theta,
       // hkmin and lkmin
       double hkmin = fh * (m_kmin - kStart) + hStart;
       double lkmin = fl * (m_kmin - kStart) + lStart;
-      if ((hkmin >= m_hmin) && (hkmin <= m_hmax) && (lkmin >= m_lmin) &&
-          (lkmin <= m_lmax)) {
+      if ((hkmin >= m_hmin) && (hkmin <= m_hmax) && (lkmin >= m_lmin) && (lkmin <= m_lmax)) {
         intersections.emplace_back(hkmin, m_kmin, lkmin, momkMin);
       }
     }
@@ -575,8 +523,7 @@ CalculateCoverageDGS::calculateIntersections(const double theta,
       // hkmax and lkmax
       double hkmax = fh * (m_kmax - kStart) + hStart;
       double lkmax = fl * (m_kmax - kStart) + lStart;
-      if ((hkmax >= m_hmin) && (hkmax <= m_hmax) && (lkmax >= m_lmin) &&
-          (lkmax <= m_lmax)) {
+      if ((hkmax >= m_hmin) && (hkmax <= m_hmax) && (lkmax >= m_lmin) && (lkmax <= m_lmax)) {
         intersections.emplace_back(hkmax, m_kmax, lkmax, momkMax);
       }
     }
@@ -590,12 +537,10 @@ CalculateCoverageDGS::calculateIntersections(const double theta,
     if (!m_lIntegrated) {
       for (size_t i = 0; i < lNBins; i++) {
         double li = m_lX[i];
-        if ((li >= m_lmin) && (li <= m_lmax) &&
-            ((lStart - li) * (lEnd - li) < 0)) {
+        if ((li >= m_lmin) && (li <= m_lmax) && ((lStart - li) * (lEnd - li) < 0)) {
           double hi = fh * (li - lStart) + hStart;
           double ki = fk * (li - lStart) + kStart;
-          if ((hi >= m_hmin) && (hi <= m_hmax) && (ki >= m_kmin) &&
-              (ki <= m_kmax)) {
+          if ((hi >= m_hmin) && (hi <= m_hmax) && (ki >= m_kmin) && (ki <= m_kmax)) {
             double momi = fmom * (li - lStart) + m_kfmin;
             intersections.emplace_back(hi, ki, li, momi);
           }
@@ -607,8 +552,7 @@ CalculateCoverageDGS::calculateIntersections(const double theta,
       // hlmin and klmin
       double hlmin = fh * (m_lmin - lStart) + hStart;
       double klmin = fk * (m_lmin - lStart) + kStart;
-      if ((hlmin >= m_hmin) && (hlmin <= m_hmax) && (klmin >= m_kmin) &&
-          (klmin <= m_kmax)) {
+      if ((hlmin >= m_hmin) && (hlmin <= m_hmax) && (klmin >= m_kmin) && (klmin <= m_kmax)) {
         intersections.emplace_back(hlmin, klmin, m_lmin, momlMin);
       }
     }
@@ -617,8 +561,7 @@ CalculateCoverageDGS::calculateIntersections(const double theta,
       // hlmax and klmax
       double hlmax = fh * (m_lmax - lStart) + hStart;
       double klmax = fk * (m_lmax - lStart) + kStart;
-      if ((hlmax >= m_hmin) && (hlmax <= m_hmax) && (klmax >= m_kmin) &&
-          (klmax <= m_kmax)) {
+      if ((hlmax >= m_hmin) && (hlmax <= m_hmax) && (klmax >= m_kmin) && (klmax <= m_kmax)) {
         intersections.emplace_back(hlmax, klmax, m_lmax, momlMax);
       }
     }
@@ -632,8 +575,7 @@ CalculateCoverageDGS::calculateIntersections(const double theta,
         double h = qin.X() - qout.X() * kfi;
         double k = qin.Y() - qout.Y() * kfi;
         double l = qin.Z() - qout.Z() * kfi;
-        if ((h >= m_hmin) && (h <= m_hmax) && (k >= m_kmin) && (k <= m_kmax) &&
-            (l >= m_lmin) && (l <= m_lmax)) {
+        if ((h >= m_hmin) && (h <= m_hmax) && (k >= m_kmin) && (k <= m_kmax) && (l >= m_lmin) && (l <= m_lmax)) {
           intersections.emplace_back(h, k, l, kfi);
         }
       }
@@ -641,19 +583,18 @@ CalculateCoverageDGS::calculateIntersections(const double theta,
   }
 
   // endpoints
-  if ((hStart >= m_hmin) && (hStart <= m_hmax) && (kStart >= m_kmin) &&
-      (kStart <= m_kmax) && (lStart >= m_lmin) && (lStart <= m_lmax)) {
+  if ((hStart >= m_hmin) && (hStart <= m_hmax) && (kStart >= m_kmin) && (kStart <= m_kmax) && (lStart >= m_lmin) &&
+      (lStart <= m_lmax)) {
     intersections.emplace_back(hStart, kStart, lStart, m_kfmin);
   }
-  if ((hEnd >= m_hmin) && (hEnd <= m_hmax) && (kEnd >= m_kmin) &&
-      (kEnd <= m_kmax) && (lEnd >= m_lmin) && (lEnd <= m_lmax)) {
+  if ((hEnd >= m_hmin) && (hEnd <= m_hmax) && (kEnd >= m_kmin) && (kEnd <= m_kmax) && (lEnd >= m_lmin) &&
+      (lEnd <= m_lmax)) {
     intersections.emplace_back(hEnd, kEnd, lEnd, m_kfmax);
   }
 
   // sort intersections by final momentum
   using IterType = std::vector<Mantid::Kernel::VMD>::iterator;
-  std::stable_sort<IterType, bool (*)(const Mantid::Kernel::VMD &,
-                                      const Mantid::Kernel::VMD &)>(
+  std::stable_sort<IterType, bool (*)(const Mantid::Kernel::VMD &, const Mantid::Kernel::VMD &)>(
       intersections.begin(), intersections.end(), compareMomentum);
 
   return intersections;

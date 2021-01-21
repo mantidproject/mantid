@@ -69,9 +69,8 @@ public:
 
 private:
   /// Create an output workspace
-  API::MatrixWorkspace_sptr
-  createOutputWorkspace(const API::MatrixWorkspace_const_sptr &, const size_t,
-                        const std::vector<double> &);
+  API::MatrixWorkspace_sptr createOutputWorkspace(const API::MatrixWorkspace_const_sptr &, const size_t,
+                                                  const std::vector<double> &);
 
   void bootstrap(const API::MatrixWorkspace_const_sptr &);
   void calculate(const API::MatrixWorkspace_const_sptr &);

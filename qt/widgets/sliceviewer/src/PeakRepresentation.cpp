@@ -19,16 +19,13 @@ namespace SliceViewer {
  * @param viewInformation: information about the view into which the peak is
  * drawn
  */
-void PeakRepresentation::draw(
-    QPainter &painter, PeakViewColor &foregroundColor,
-    PeakViewColor &backgroundColor,
-    PeakRepresentationViewInformation viewInformation) {
+void PeakRepresentation::draw(QPainter &painter, PeakViewColor &foregroundColor, PeakViewColor &backgroundColor,
+                              PeakRepresentationViewInformation viewInformation) {
   // Setup the drawing information, eg positions, radii ...
   auto drawingInformation = getDrawingInformation(viewInformation);
 
   // Draw
-  doDraw(painter, foregroundColor, backgroundColor, drawingInformation,
-         viewInformation);
+  doDraw(painter, foregroundColor, backgroundColor, drawingInformation, viewInformation);
 }
 } // namespace SliceViewer
 } // namespace MantidQt

@@ -34,8 +34,8 @@ public:
   void do_test_MINITOPAZ(EventType type) {
 
     int numEventsPer = 100;
-    EventWorkspace_sptr inputW = Mantid::DataObjects::MDEventsTestHelper::
-        createDiffractionEventWorkspace(numEventsPer, 10000, 1600);
+    EventWorkspace_sptr inputW =
+        Mantid::DataObjects::MDEventsTestHelper::createDiffractionEventWorkspace(numEventsPer, 10000, 1600);
     AnalysisDataService::Instance().addOrReplace("testInEW", inputW);
     if (type == WEIGHTED)
       inputW *= 2.0;
@@ -70,9 +70,7 @@ public:
     TS_ASSERT(alg.isExecuted())
 
     EventWorkspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(
-            "testInEW"));
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("testInEW"));
     TS_ASSERT(ws);
     if (!ws)
       return;
@@ -91,8 +89,8 @@ public:
   void do_test_TOFRange(EventType type) {
 
     int numEventsPer = 100;
-    EventWorkspace_sptr inputW = Mantid::DataObjects::MDEventsTestHelper::
-        createDiffractionEventWorkspace(numEventsPer, 10000, 1600);
+    EventWorkspace_sptr inputW =
+        Mantid::DataObjects::MDEventsTestHelper::createDiffractionEventWorkspace(numEventsPer, 10000, 1600);
     AnalysisDataService::Instance().addOrReplace("testInEW", inputW);
     if (type == WEIGHTED) {
       inputW *= 2.0;
@@ -130,9 +128,7 @@ public:
     TS_ASSERT(alg.isExecuted())
 
     EventWorkspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(
-            "testInEW"));
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("testInEW"));
     TS_ASSERT(ws);
     if (!ws)
       return;
@@ -152,8 +148,8 @@ public:
 class MaskPeaksWorkspaceTestPerformance : public CxxTest::TestSuite {
 public:
   void setUp() override {
-    EventWorkspace_sptr inputWS = Mantid::DataObjects::MDEventsTestHelper::
-        createDiffractionEventWorkspace(1000, 10000, 16000);
+    EventWorkspace_sptr inputWS =
+        Mantid::DataObjects::MDEventsTestHelper::createDiffractionEventWorkspace(1000, 10000, 16000);
     AnalysisDataService::Instance().addOrReplace(inputWSName, inputWS);
 
     PeaksWorkspace_sptr peaksWS(new PeaksWorkspace());
@@ -167,9 +163,7 @@ public:
 
   void testPerformance() { mpwAlg.execute(); }
 
-  void tearDown() override {
-    AnalysisDataService::Instance().remove(inputWSName);
-  }
+  void tearDown() override { AnalysisDataService::Instance().remove(inputWSName); }
 
 private:
   MaskPeaksWorkspace mpwAlg;

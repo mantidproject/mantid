@@ -16,8 +16,6 @@ public:
     // with argument other than return it.
     Mantid::VATES::TimeStepToTimeStep proxy;
     int argument = 1;
-    TSM_ASSERT_EQUALS(
-        "The TimeStepToTimeStep proxy should return its own argument", argument,
-        proxy(argument));
+    TSM_ASSERT_EQUALS("The TimeStepToTimeStep proxy should return its own argument", argument, proxy(argument));
   }
 };

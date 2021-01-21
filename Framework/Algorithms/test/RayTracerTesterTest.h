@@ -20,9 +20,7 @@ using namespace Mantid::API;
 // The following class does precicely nothing.
 class RayTracerTesterTest : public CxxTest::TestSuite {
 public:
-  static RayTracerTesterTest *createSuite() {
-    return new RayTracerTesterTest();
-  }
+  static RayTracerTesterTest *createSuite() { return new RayTracerTesterTest(); }
   static void destroySuite(RayTracerTesterTest *suite) { delete suite; }
   void test_dummy() {
     // No tests. See comments above.
@@ -31,12 +29,8 @@ public:
 
 class RayTracerTesterTestPerformance : public CxxTest::TestSuite {
 public:
-  static RayTracerTesterTestPerformance *createSuite() {
-    return new RayTracerTesterTestPerformance();
-  }
-  static void destroySuite(RayTracerTesterTestPerformance *suite) {
-    delete suite;
-  }
+  static RayTracerTesterTestPerformance *createSuite() { return new RayTracerTesterTestPerformance(); }
+  static void destroySuite(RayTracerTesterTestPerformance *suite) { delete suite; }
 
   void setUp() override {
     TS_ASSERT_THROWS_NOTHING(alg.initialize())

@@ -32,9 +32,8 @@ class EXPORT_OPT_MANTIDQT_COMMON WhiteList {
 public:
   using const_iterator = ConstColumnIterator;
 
-  void addElement(const QString &colName, const QString &algProperty,
-                  const QString &description, bool showValue = false,
-                  const QString &prefix = "", bool isKey = false);
+  void addElement(const QString &colName, const QString &algProperty, const QString &description,
+                  bool showValue = false, const QString &prefix = "", bool isKey = false);
   int indexFromName(const QString &colName) const;
   QString name(int index) const;
   QString algorithmProperty(int index) const;

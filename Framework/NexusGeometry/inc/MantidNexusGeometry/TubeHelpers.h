@@ -22,13 +22,11 @@ namespace detail {
 class Tube;
 }
 namespace TubeHelpers {
-MANTID_NEXUSGEOMETRY_DLL std::vector<detail::TubeBuilder>
-findAndSortTubes(const Mantid::Geometry::IObject &detShape,
-                 const Pixels &detPositions,
-                 const std::vector<Mantid::detid_t> &detIDs);
-MANTID_NEXUSGEOMETRY_DLL std::vector<Mantid::detid_t>
-notInTubes(const std::vector<detail::TubeBuilder> &tubes,
-           std::vector<Mantid::detid_t> detIDs);
+MANTID_NEXUSGEOMETRY_DLL std::vector<detail::TubeBuilder> findAndSortTubes(const Mantid::Geometry::IObject &detShape,
+                                                                           const Pixels &detPositions,
+                                                                           const std::vector<Mantid::detid_t> &detIDs);
+MANTID_NEXUSGEOMETRY_DLL std::vector<Mantid::detid_t> notInTubes(const std::vector<detail::TubeBuilder> &tubes,
+                                                                 std::vector<Mantid::detid_t> detIDs);
 } // namespace TubeHelpers
 } // namespace NexusGeometry
 } // namespace Mantid

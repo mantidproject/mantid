@@ -29,8 +29,7 @@ using std::size_t;
  * @param inputWS pointer to input workspace
  * @returns True if the input workspace needs to be run through this algorithm
  */
-bool ConvertToHistogram::isProcessingRequired(
-    const MatrixWorkspace_sptr inputWS) const {
+bool ConvertToHistogram::isProcessingRequired(const MatrixWorkspace_sptr inputWS) const {
   if (inputWS->isHistogramData()) {
     g_log.information() << "Input workspace already contains histogram data. "
                         << "OutputWorkspace set to InputWorkspace value.\n";
@@ -44,9 +43,7 @@ bool ConvertToHistogram::isProcessingRequired(
  * @param ySize pointer to input workspace
  * @returns An integer giving the size of the new X vector
  */
-size_t ConvertToHistogram::getNewXSize(const std::size_t ySize) const {
-  return ySize + 1;
-}
+size_t ConvertToHistogram::getNewXSize(const std::size_t ySize) const { return ySize + 1; }
 
 /**
  * Calculate the histogram boundaries. For uniform bins this should work
@@ -56,10 +53,9 @@ size_t ConvertToHistogram::getNewXSize(const std::size_t ySize) const {
  * are guessed such that the boundary goes mid-way between each point
  * @param inputX :: A const reference to the input data
  */
-Kernel::cow_ptr<HistogramData::HistogramX> ConvertToHistogram::calculateXPoints(
-    Kernel::cow_ptr<HistogramData::HistogramX> inputX) const {
-  return HistogramData::BinEdges(HistogramData::Points(std::move(inputX)))
-      .cowData();
+Kernel::cow_ptr<HistogramData::HistogramX>
+ConvertToHistogram::calculateXPoints(Kernel::cow_ptr<HistogramData::HistogramX> inputX) const {
+  return HistogramData::BinEdges(HistogramData::Points(std::move(inputX))).cowData();
 }
 } // namespace Algorithms
 } // namespace Mantid

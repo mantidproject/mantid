@@ -31,16 +31,14 @@ const char *POS_PARAM = "Position";
 const char *WIDTH_PARAM = "SigmaGauss";
 
 /// Conversion constant
-const double MASS_TO_MEV =
-    0.5 * PhysicalConstants::NeutronMass / PhysicalConstants::meV;
+const double MASS_TO_MEV = 0.5 * PhysicalConstants::NeutronMass / PhysicalConstants::meV;
 const double STDDEV_TO_FWHM = 0.5 * std::sqrt(std::log(4.0));
 ///@endcond
 } // namespace
 
 ComptonPeakProfile::ComptonPeakProfile()
-    : API::ParamFunction(), API::IFunction1D(), m_wsIndex(0), m_mass(0.0),
-      m_voigtCutOff(5000.), m_gauss(), m_voigt(), m_efixed(0.0),
-      m_hwhmLorentz(0.0) {}
+    : API::ParamFunction(), API::IFunction1D(), m_wsIndex(0), m_mass(0.0), m_voigtCutOff(5000.), m_gauss(), m_voigt(),
+      m_efixed(0.0), m_hwhmLorentz(0.0) {}
 
 /// A string identifier for this function
 std::string ComptonPeakProfile::name() const { return "ComptonPeakProfile"; }
@@ -52,14 +50,11 @@ std::string ComptonPeakProfile::name() const { return "ComptonPeakProfile"; }
  * @param xValues The input X data array of size nData.
  * @param nData The length of the out & xValues arrays
  */
-void ComptonPeakProfile::function1D(double *out, const double *xValues,
-                                    const size_t nData) const {
-  double amp(getParameter(0)), pos(getParameter(1)),
-      gaussSigma(getParameter(2));
+void ComptonPeakProfile::function1D(double *out, const double *xValues, const size_t nData) const {
+  double amp(getParameter(0)), pos(getParameter(1)), gaussSigma(getParameter(2));
 
   if (m_efixed < m_voigtCutOff) {
-    double gaussFWHM(getParameter(2) * STDDEV_TO_FWHM),
-        lorentzFWHM(2.0 * m_hwhmLorentz);
+    double gaussFWHM(getParameter(2) * STDDEV_TO_FWHM), lorentzFWHM(2.0 * m_hwhmLorentz);
     m_voigt->setParameter(0, amp);
     m_voigt->setParameter(1, pos);
     m_voigt->setParameter(2, lorentzFWHM);
@@ -67,11 +62,9 @@ void ComptonPeakProfile::function1D(double *out, const double *xValues,
     m_voigt->functionLocal(out, xValues, nData);
     const double norm = 1.0 / (0.5 * M_PI * lorentzFWHM);
     using std::placeholders::_1;
-    std::transform(out, out + nData, out,
-                   std::bind(std::multiplies<double>(), _1, norm));
+    std::transform(out, out + nData, out, std::bind(std::multiplies<double>(), _1, norm));
   } else {
-    double sigmaTotalSq =
-        m_hwhmLorentz * m_hwhmLorentz + gaussSigma * gaussSigma;
+    double sigmaTotalSq = m_hwhmLorentz * m_hwhmLorentz + gaussSigma * gaussSigma;
     // Our gaussian isn't normalised by the width. Here we set the height to
     // amp/(2*sigma^2) so that it will be normalised correctly
     m_gauss->setParameter(0, 0.5 * amp / M_PI / sigmaTotalSq);
@@ -88,10 +81,8 @@ void ComptonPeakProfile::setUpForFit() {
   // Voigt & Gaussian
 
   using namespace Mantid::API;
-  m_gauss = std::dynamic_pointer_cast<IPeakFunction>(
-      FunctionFactory::Instance().createFunction("Gaussian"));
-  m_voigt = std::dynamic_pointer_cast<IPeakFunction>(
-      FunctionFactory::Instance().createFunction("Voigt"));
+  m_gauss = std::dynamic_pointer_cast<IPeakFunction>(FunctionFactory::Instance().createFunction("Gaussian"));
+  m_voigt = std::dynamic_pointer_cast<IPeakFunction>(FunctionFactory::Instance().createFunction("Voigt"));
 }
 
 /**
@@ -99,42 +90,33 @@ void ComptonPeakProfile::setUpForFit() {
  * Throws if it is not a MatrixWorkspace
  * @param ws The workspace set as input
  */
-void ComptonPeakProfile::setWorkspace(
-    std::shared_ptr<const API::Workspace> ws) {
+void ComptonPeakProfile::setWorkspace(std::shared_ptr<const API::Workspace> ws) {
   auto workspace = std::dynamic_pointer_cast<const API::MatrixWorkspace>(ws);
   if (!workspace) {
-    throw std::invalid_argument(
-        "ComptonPeakProfile expected an object of type MatrixWorkspace, type=" +
-        ws->id());
+    throw std::invalid_argument("ComptonPeakProfile expected an object of type MatrixWorkspace, type=" + ws->id());
   }
 
-  DetectorParams detpar =
-      ConvertToYSpace::getDetectorParameters(workspace, m_wsIndex);
+  DetectorParams detpar = ConvertToYSpace::getDetectorParameters(workspace, m_wsIndex);
   m_efixed = detpar.efixed;
 
   // Recoil time
   const double sth = sin(detpar.theta);
-  const double distFact =
-      (cos(detpar.theta) + sqrt(m_mass * m_mass - sth * sth)) / (m_mass + 1.0);
+  const double distFact = (cos(detpar.theta) + sqrt(m_mass * m_mass - sth * sth)) / (m_mass + 1.0);
   const double ei = detpar.efixed / pow(distFact, 2.0);
   const double v1 = std::sqrt(detpar.efixed / MASS_TO_MEV);
-  const double k1 =
-      std::sqrt(detpar.efixed / PhysicalConstants::E_mev_toNeutronWavenumberSq);
+  const double k1 = std::sqrt(detpar.efixed / PhysicalConstants::E_mev_toNeutronWavenumberSq);
   const double v2 = std::sqrt(ei / MASS_TO_MEV);
   const double trec = detpar.l1 / v1 + detpar.l2 / v2;
 
   // Compute lorentz width due to in Y due to spread in energy hwhm_lorentz
   const auto &det = workspace->spectrumInfo().detector(m_wsIndex);
   const auto &pmap = workspace->constInstrumentParameters();
-  const double dELorentz =
-      ConvertToYSpace::getComponentParameter(det, pmap, "hwhm_lorentz");
+  const double dELorentz = ConvertToYSpace::getComponentParameter(det, pmap, "hwhm_lorentz");
   double yplus(0.0), yminus(0.0), dummy(0.0);
   detpar.efixed += dELorentz;
-  ConvertToYSpace::calculateY(yplus, dummy, dummy, m_mass, trec, k1, v1,
-                              detpar);
+  ConvertToYSpace::calculateY(yplus, dummy, dummy, m_mass, trec, k1, v1, detpar);
   detpar.efixed -= 2.0 * dELorentz;
-  ConvertToYSpace::calculateY(yminus, dummy, dummy, m_mass, trec, k1, v1,
-                              detpar);
+  ConvertToYSpace::calculateY(yminus, dummy, dummy, m_mass, trec, k1, v1, detpar);
   // lorentzian width
   m_hwhmLorentz = 0.5 * (yplus - yminus);
 }
@@ -146,8 +128,7 @@ void ComptonPeakProfile::declareParameters() {
 }
 
 void ComptonPeakProfile::declareAttributes() {
-  declareAttribute(WSINDEX_NAME,
-                   IFunction::Attribute(static_cast<int>(m_wsIndex)));
+  declareAttribute(WSINDEX_NAME, IFunction::Attribute(static_cast<int>(m_wsIndex)));
   declareAttribute(MASS_NAME, IFunction::Attribute(m_mass));
   declareAttribute(VOIGT_CUT_OFF, IFunction::Attribute(m_voigtCutOff));
 }
@@ -156,8 +137,7 @@ void ComptonPeakProfile::declareAttributes() {
  * @param name The name of the attribute
  * @param value The attribute's value
  */
-void ComptonPeakProfile::setAttribute(const std::string &name,
-                                      const Attribute &value) {
+void ComptonPeakProfile::setAttribute(const std::string &name, const Attribute &value) {
   IFunction::setAttribute(name, value); // Make sure the base-class stores it
   if (name == WSINDEX_NAME)
     m_wsIndex = static_cast<size_t>(value.asInt());

@@ -35,17 +35,14 @@ IPeaksWorkspace_sptr create_peaks_WS(const Instrument_sptr &inst) {
 }
 
 // Helper function to create a MD Image workspace of labels.
-IMDHistoWorkspace_sptr create_HKL_MDWS(double min = -10, double max = 10,
-                                       int numberOfBins = 3,
-                                       double signalValue = 1,
+IMDHistoWorkspace_sptr create_HKL_MDWS(double min = -10, double max = 10, int numberOfBins = 3, double signalValue = 1,
                                        double errorValue = 1) {
   const int dimensionality = 3;
   int totalBins = 1;
   for (int i = 0; i < dimensionality; ++i) {
     totalBins *= numberOfBins;
   }
-  auto mdworkspaceAlg =
-      AlgorithmManager::Instance().createUnmanaged("CreateMDHistoWorkspace");
+  auto mdworkspaceAlg = AlgorithmManager::Instance().createUnmanaged("CreateMDHistoWorkspace");
   mdworkspaceAlg->setChild(true);
   mdworkspaceAlg->initialize();
   mdworkspaceAlg->setProperty("Dimensionality", dimensionality);
@@ -58,22 +55,18 @@ IMDHistoWorkspace_sptr create_HKL_MDWS(double min = -10, double max = 10,
   std::vector<double> errorValues(totalBins, errorValue);
   mdworkspaceAlg->setProperty("ErrorInput", errorValues);
   mdworkspaceAlg->setPropertyValue("Names", "H,K,L");
-  std::string units = Mantid::Kernel::Units::Symbol::RLU.ascii() + "," +
-                      Mantid::Kernel::Units::Symbol::RLU.ascii() + "," +
-                      Mantid::Kernel::Units::Symbol::RLU.ascii();
-  std::string frames = Mantid::Geometry::HKL::HKLName + "," +
-                       Mantid::Geometry::HKL::HKLName + "," +
-                       Mantid::Geometry::HKL::HKLName;
+  std::string units = Mantid::Kernel::Units::Symbol::RLU.ascii() + "," + Mantid::Kernel::Units::Symbol::RLU.ascii() +
+                      "," + Mantid::Kernel::Units::Symbol::RLU.ascii();
+  std::string frames =
+      Mantid::Geometry::HKL::HKLName + "," + Mantid::Geometry::HKL::HKLName + "," + Mantid::Geometry::HKL::HKLName;
   TS_ASSERT_THROWS_NOTHING(mdworkspaceAlg->setProperty("Frames", frames));
   TS_ASSERT_THROWS_NOTHING(mdworkspaceAlg->setProperty("Units", units));
-  mdworkspaceAlg->setPropertyValue("OutputWorkspace",
-                                   "IntegratePeaksMDTest_MDEWS");
+  mdworkspaceAlg->setPropertyValue("OutputWorkspace", "IntegratePeaksMDTest_MDEWS");
   mdworkspaceAlg->execute();
   IMDHistoWorkspace_sptr inWS = mdworkspaceAlg->getProperty("OutputWorkspace");
 
   // --- Set speical coordinates on fake mdworkspace --
-  auto coordsAlg =
-      AlgorithmManager::Instance().createUnmanaged("SetSpecialCoordinates");
+  auto coordsAlg = AlgorithmManager::Instance().createUnmanaged("SetSpecialCoordinates");
   coordsAlg->setChild(true);
   coordsAlg->initialize();
   coordsAlg->setProperty("InputWorkspace", inWS);
@@ -95,8 +88,7 @@ ITableWorkspace_sptr doExecute(IMDHistoWorkspace_sptr &inWS) {
   return outWS;
 }
 
-ITableWorkspace_sptr doExecuteWithFilter(IMDHistoWorkspace_sptr &inWS,
-                                         IPeaksWorkspace_sptr &filterWS) {
+ITableWorkspace_sptr doExecuteWithFilter(IMDHistoWorkspace_sptr &inWS, IPeaksWorkspace_sptr &filterWS) {
   FindClusterFaces alg;
   // alg.setRethrows(true);
   alg.setChild(true);
@@ -117,10 +109,8 @@ ITableWorkspace_sptr doExecuteWithFilter(IMDHistoWorkspace_sptr &inWS,
 class FindClusterFacesTest : public CxxTest::TestSuite {
 
 private:
-  void verify_table_row(ITableWorkspace_sptr &outWS, int expectedClusterId,
-                        double expectedWorkspaceIndex,
-                        int expectedNormalDimensionIndex,
-                        bool expectedMaxExtent, double expectedRadius = -1) {
+  void verify_table_row(ITableWorkspace_sptr &outWS, int expectedClusterId, double expectedWorkspaceIndex,
+                        int expectedNormalDimensionIndex, bool expectedMaxExtent, double expectedRadius = -1) {
     for (size_t rowIndex = 0; rowIndex < outWS->rowCount(); ++rowIndex) {
       auto clusterId = outWS->cell<int>(rowIndex, 0);
       auto wsIndex = outWS->cell<double>(rowIndex, 1);
@@ -128,21 +118,18 @@ private:
       auto maxExtent = outWS->cell<Mantid::API::Boolean>(rowIndex, 3);
       auto radius = outWS->cell<double>(rowIndex, 4);
       if (expectedClusterId == clusterId && expectedWorkspaceIndex == wsIndex &&
-          expectedNormalDimensionIndex == normalDimension &&
-          expectedMaxExtent == maxExtent && radius == expectedRadius) {
+          expectedNormalDimensionIndex == normalDimension && expectedMaxExtent == maxExtent &&
+          radius == expectedRadius) {
         return;
       }
     }
-    TSM_ASSERT("Expected row does not exist in the output table workspace",
-               false);
+    TSM_ASSERT("Expected row does not exist in the output table workspace", false);
   }
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static FindClusterFacesTest *createSuite() {
-    return new FindClusterFacesTest();
-  }
+  static FindClusterFacesTest *createSuite() { return new FindClusterFacesTest(); }
   static void destroySuite(FindClusterFacesTest *suite) { delete suite; }
 
   void test_Init() {
@@ -153,23 +140,22 @@ public:
 
   void test_throws_with_non_cluster_mdhistoworkspace() {
     const double nonIntegerSignalValue = 1.2;
-    IMDHistoWorkspace_sptr inWS = MDEventsTestHelper::makeFakeMDHistoWorkspace(
-        nonIntegerSignalValue, 1, 1);
+    IMDHistoWorkspace_sptr inWS = MDEventsTestHelper::makeFakeMDHistoWorkspace(nonIntegerSignalValue, 1, 1);
     TS_ASSERT_THROWS(doExecute(inWS), std::runtime_error &);
   }
 
   void test_find_no_edges_1D() {
-    IMDHistoWorkspace_sptr inWS = MDEventsTestHelper::makeFakeMDHistoWorkspace(
-        1, 1, 3); // Makes a 1 by 3 md ws with identical signal values.
+    IMDHistoWorkspace_sptr inWS =
+        MDEventsTestHelper::makeFakeMDHistoWorkspace(1, 1, 3); // Makes a 1 by 3 md ws with identical signal values.
     ITableWorkspace_const_sptr outWS = doExecute(inWS);
 
     TSM_ASSERT_EQUALS("There are no edge faces", outWS->rowCount(), 0);
   }
 
   void test_find_one_edges_1D() {
-    IMDHistoWorkspace_sptr inWS = MDEventsTestHelper::makeFakeMDHistoWorkspace(
-        1, 1, 3); // Makes a 1 by 3 md ws with identical signal values.
-    inWS->setSignalAt(2, 0); // Now we have a single edge!
+    IMDHistoWorkspace_sptr inWS =
+        MDEventsTestHelper::makeFakeMDHistoWorkspace(1, 1, 3); // Makes a 1 by 3 md ws with identical signal values.
+    inWS->setSignalAt(2, 0);                                   // Now we have a single edge!
 
     ITableWorkspace_sptr outWS = doExecute(inWS);
 
@@ -180,10 +166,10 @@ public:
   }
 
   void test_find_two_edges_1D() {
-    IMDHistoWorkspace_sptr inWS = MDEventsTestHelper::makeFakeMDHistoWorkspace(
-        1, 1, 3); // Makes a 1 by 3 md ws with identical signal values.
-    inWS->setSignalAt(2, 0); // Now we have a single edge!
-    inWS->setSignalAt(0, 0); // Now we have another edge!
+    IMDHistoWorkspace_sptr inWS =
+        MDEventsTestHelper::makeFakeMDHistoWorkspace(1, 1, 3); // Makes a 1 by 3 md ws with identical signal values.
+    inWS->setSignalAt(2, 0);                                   // Now we have a single edge!
+    inWS->setSignalAt(0, 0);                                   // Now we have another edge!
 
     ITableWorkspace_sptr outWS = doExecute(inWS);
 
@@ -193,10 +179,8 @@ public:
     double expectedWorkspaceIndex = 1.;
     int expectedNormalDimensionIndex = 0;
     bool maxExtent = true;
-    verify_table_row(outWS, clusterId, expectedWorkspaceIndex,
-                     expectedNormalDimensionIndex, maxExtent);
-    verify_table_row(outWS, clusterId, expectedWorkspaceIndex,
-                     expectedNormalDimensionIndex, !maxExtent);
+    verify_table_row(outWS, clusterId, expectedWorkspaceIndex, expectedNormalDimensionIndex, maxExtent);
+    verify_table_row(outWS, clusterId, expectedWorkspaceIndex, expectedNormalDimensionIndex, !maxExtent);
   }
 
   void test_find_three_edges_1D() {
@@ -217,8 +201,8 @@ public:
 
      --------------*/
 
-    IMDHistoWorkspace_sptr inWS = MDEventsTestHelper::makeFakeMDHistoWorkspace(
-        1, 1, 4); // Makes a 1 by 3 md ws with identical signal values.
+    IMDHistoWorkspace_sptr inWS =
+        MDEventsTestHelper::makeFakeMDHistoWorkspace(1, 1, 4); // Makes a 1 by 3 md ws with identical signal values.
 
     // This really creates four faces, with two non-zero label ids.
     inWS->setSignalAt(1, 0); // Now we have a single edge!
@@ -231,12 +215,9 @@ public:
     int clusterId = 1;
     int expectedNormalDimensionIndex = 0;
     const bool maxExtent = true;
-    verify_table_row(outWS, clusterId, 0 /*workspace index*/,
-                     expectedNormalDimensionIndex, maxExtent);
-    verify_table_row(outWS, clusterId, 2 /*workspace index*/,
-                     expectedNormalDimensionIndex, maxExtent);
-    verify_table_row(outWS, clusterId, 2 /*workspace index*/,
-                     expectedNormalDimensionIndex, !maxExtent);
+    verify_table_row(outWS, clusterId, 0 /*workspace index*/, expectedNormalDimensionIndex, maxExtent);
+    verify_table_row(outWS, clusterId, 2 /*workspace index*/, expectedNormalDimensionIndex, maxExtent);
+    verify_table_row(outWS, clusterId, 2 /*workspace index*/, expectedNormalDimensionIndex, !maxExtent);
   }
 
   void test_find_four_edges_2D() {
@@ -252,7 +233,7 @@ public:
      --------------*/
 
     IMDHistoWorkspace_sptr inWS = MDEventsTestHelper::makeFakeMDHistoWorkspace(
-        0, 2, 3); // Makes a 2 by 3 md ws with identical signal values of zero.
+        0, 2, 3);            // Makes a 2 by 3 md ws with identical signal values of zero.
     inWS->setSignalAt(4, 1); // Central point is non-zero
 
     ITableWorkspace_sptr outWS = doExecute(inWS);
@@ -261,14 +242,10 @@ public:
     int clusterId = 1;
     const bool maxExtent = true;
 
-    verify_table_row(outWS, clusterId, 4 /*workspace index*/,
-                     0 /*expectedNormalDimensionIndex*/, !maxExtent);
-    verify_table_row(outWS, clusterId, 4 /*workspace index*/,
-                     0 /*expectedNormalDimensionIndex*/, maxExtent);
-    verify_table_row(outWS, clusterId, 4 /*workspace index*/,
-                     1 /*expectedNormalDimensionIndex*/, !maxExtent);
-    verify_table_row(outWS, clusterId, 4 /*workspace index*/,
-                     1 /*expectedNormalDimensionIndex*/, maxExtent);
+    verify_table_row(outWS, clusterId, 4 /*workspace index*/, 0 /*expectedNormalDimensionIndex*/, !maxExtent);
+    verify_table_row(outWS, clusterId, 4 /*workspace index*/, 0 /*expectedNormalDimensionIndex*/, maxExtent);
+    verify_table_row(outWS, clusterId, 4 /*workspace index*/, 1 /*expectedNormalDimensionIndex*/, !maxExtent);
+    verify_table_row(outWS, clusterId, 4 /*workspace index*/, 1 /*expectedNormalDimensionIndex*/, maxExtent);
   }
 
   void test_find_two_edges_2D() {
@@ -284,7 +261,7 @@ public:
      --------------*/
 
     IMDHistoWorkspace_sptr inWS = MDEventsTestHelper::makeFakeMDHistoWorkspace(
-        0, 2, 3); // Makes a 2 by 3 md ws with identical signal values of zero.
+        0, 2, 3);            // Makes a 2 by 3 md ws with identical signal values of zero.
     inWS->setSignalAt(8, 1); // last point is non-zero
 
     ITableWorkspace_sptr outWS = doExecute(inWS);
@@ -293,10 +270,8 @@ public:
     int clusterId = 1;
     const bool maxExtent = true;
 
-    verify_table_row(outWS, clusterId, 8 /*workspace index*/,
-                     0 /*expectedNormalDimensionIndex*/, !maxExtent);
-    verify_table_row(outWS, clusterId, 8 /*workspace index*/,
-                     1 /*expectedNormalDimensionIndex*/, !maxExtent);
+    verify_table_row(outWS, clusterId, 8 /*workspace index*/, 0 /*expectedNormalDimensionIndex*/, !maxExtent);
+    verify_table_row(outWS, clusterId, 8 /*workspace index*/, 1 /*expectedNormalDimensionIndex*/, !maxExtent);
   }
 
   void test_find_six_edges_3D() {
@@ -319,7 +294,7 @@ public:
      --------------*/
 
     IMDHistoWorkspace_sptr inWS = MDEventsTestHelper::makeFakeMDHistoWorkspace(
-        0, 3, 3); // Makes a 3 by 3 md ws with identical signal values of zero.
+        0, 3, 3);             // Makes a 3 by 3 md ws with identical signal values of zero.
     inWS->setSignalAt(13, 1); // central point is non-zero
 
     ITableWorkspace_sptr outWS = doExecute(inWS);
@@ -328,18 +303,12 @@ public:
     int clusterId = 1;
     const bool maxExtent = true;
 
-    verify_table_row(outWS, clusterId, 13 /*workspace index*/,
-                     0 /*expectedNormalDimensionIndex*/, !maxExtent);
-    verify_table_row(outWS, clusterId, 13 /*workspace index*/,
-                     0 /*expectedNormalDimensionIndex*/, maxExtent);
-    verify_table_row(outWS, clusterId, 13 /*workspace index*/,
-                     1 /*expectedNormalDimensionIndex*/, !maxExtent);
-    verify_table_row(outWS, clusterId, 13 /*workspace index*/,
-                     1 /*expectedNormalDimensionIndex*/, maxExtent);
-    verify_table_row(outWS, clusterId, 13 /*workspace index*/,
-                     2 /*expectedNormalDimensionIndex*/, !maxExtent);
-    verify_table_row(outWS, clusterId, 13 /*workspace index*/,
-                     2 /*expectedNormalDimensionIndex*/, maxExtent);
+    verify_table_row(outWS, clusterId, 13 /*workspace index*/, 0 /*expectedNormalDimensionIndex*/, !maxExtent);
+    verify_table_row(outWS, clusterId, 13 /*workspace index*/, 0 /*expectedNormalDimensionIndex*/, maxExtent);
+    verify_table_row(outWS, clusterId, 13 /*workspace index*/, 1 /*expectedNormalDimensionIndex*/, !maxExtent);
+    verify_table_row(outWS, clusterId, 13 /*workspace index*/, 1 /*expectedNormalDimensionIndex*/, maxExtent);
+    verify_table_row(outWS, clusterId, 13 /*workspace index*/, 2 /*expectedNormalDimensionIndex*/, !maxExtent);
+    verify_table_row(outWS, clusterId, 13 /*workspace index*/, 2 /*expectedNormalDimensionIndex*/, maxExtent);
   }
 
   void test_find_three_edges_3D() {
@@ -362,7 +331,7 @@ public:
      --------------*/
 
     IMDHistoWorkspace_sptr inWS = MDEventsTestHelper::makeFakeMDHistoWorkspace(
-        0, 3, 3); // Makes a 3 by 3 md ws with identical signal values of zero.
+        0, 3, 3);             // Makes a 3 by 3 md ws with identical signal values of zero.
     inWS->setSignalAt(26, 1); // central point is non-zero
 
     ITableWorkspace_sptr outWS = doExecute(inWS);
@@ -371,30 +340,23 @@ public:
     int clusterId = 1;
     const bool maxExtent = true;
 
-    verify_table_row(outWS, clusterId, 26 /*workspace index*/,
-                     1 /*expectedNormalDimensionIndex*/, !maxExtent);
-    verify_table_row(outWS, clusterId, 26 /*workspace index*/,
-                     0 /*expectedNormalDimensionIndex*/, !maxExtent);
-    verify_table_row(outWS, clusterId, 26 /*workspace index*/,
-                     2 /*expectedNormalDimensionIndex*/, !maxExtent);
+    verify_table_row(outWS, clusterId, 26 /*workspace index*/, 1 /*expectedNormalDimensionIndex*/, !maxExtent);
+    verify_table_row(outWS, clusterId, 26 /*workspace index*/, 0 /*expectedNormalDimensionIndex*/, !maxExtent);
+    verify_table_row(outWS, clusterId, 26 /*workspace index*/, 2 /*expectedNormalDimensionIndex*/, !maxExtent);
   }
 
-  void
-  test_find_cluster_faces_throws_if_peaks_workspace_and_dimensionality_less_than_three() {
-    IMDHistoWorkspace_sptr inWS =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(0, 2, 1);
+  void test_find_cluster_faces_throws_if_peaks_workspace_and_dimensionality_less_than_three() {
+    IMDHistoWorkspace_sptr inWS = MDEventsTestHelper::makeFakeMDHistoWorkspace(0, 2, 1);
 
     IPeaksWorkspace_sptr filterWS = std::make_shared<PeaksWorkspace>();
-    TS_ASSERT_THROWS(doExecuteWithFilter(inWS, filterWS),
-                     std::invalid_argument &);
+    TS_ASSERT_THROWS(doExecuteWithFilter(inWS, filterWS), std::invalid_argument &);
   }
 
   void test_only_create_faces_for_clusters_corresponding_to_peaks() {
     const double min = 0;  // HKL
     const double max = 10; // HKL
 
-    Instrument_sptr inst =
-        ComponentCreationHelper::createTestInstrumentRectangular(1, 100, 0.05);
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular(1, 100, 0.05);
     IPeaksWorkspace_sptr filterWS = create_peaks_WS(inst);
 
     Peak peak(inst, 15050, 1.0);
@@ -404,10 +366,8 @@ public:
     const int nBins = 10;
     const double bulkSignalValue = 0;
     auto inWS = create_HKL_MDWS(min, max, nBins, bulkSignalValue);
-    inWS->setSignalAt(
-        0, 2); // Cluster at linear index 0. No corresponding peak position.
-    inWS->setSignalAt(
-        555, 1); // Cluster at linear index 125. Corresponds with peak position
+    inWS->setSignalAt(0, 2);   // Cluster at linear index 0. No corresponding peak position.
+    inWS->setSignalAt(555, 1); // Cluster at linear index 125. Corresponds with peak position
 
     ITableWorkspace_sptr faces = doExecuteWithFilter(inWS, filterWS);
     TSM_ASSERT_EQUALS("Should have exactly 6 entries in the table. One cluster "
@@ -426,8 +386,7 @@ public:
     const double min = 0;  // HKL
     const double max = 10; // HKL
 
-    Instrument_sptr inst =
-        ComponentCreationHelper::createTestInstrumentRectangular(1, 100, 0.05);
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular(1, 100, 0.05);
     IPeaksWorkspace_sptr filterWS = create_peaks_WS(inst);
 
     Peak centerPeak(inst, 15050, 1.0);
@@ -440,16 +399,13 @@ public:
 
     Peak outOfBoundsPeak(inst, 15050, 1.0);
     outOfBoundsPeak.setHKL(20, 20, 20); // Set HKL of peak
-    filterWS->addPeak(
-        outOfBoundsPeak); // Add an out of bounds peak. Produces 0 faces.
+    filterWS->addPeak(outOfBoundsPeak); // Add an out of bounds peak. Produces 0 faces.
 
     const int nBins = 10;
     const double bulkSignalValue = 0;
     auto inWS = create_HKL_MDWS(min, max, nBins, bulkSignalValue);
-    inWS->setSignalAt(
-        0, 2); // Cluster at linear index 0. No corresponding peak position.
-    inWS->setSignalAt(
-        555, 1); // Cluster at linear index 125. Corresponds with peak position
+    inWS->setSignalAt(0, 2);   // Cluster at linear index 0. No corresponding peak position.
+    inWS->setSignalAt(555, 1); // Cluster at linear index 125. Corresponds with peak position
 
     ITableWorkspace_sptr faces = doExecuteWithFilter(inWS, filterWS);
     TSM_ASSERT_EQUALS("Should have exactly 3+6 entries in the table. One "
@@ -459,10 +415,10 @@ public:
   }
 
   void test_ignore_row_limit() {
-    IMDHistoWorkspace_sptr inWS = MDEventsTestHelper::makeFakeMDHistoWorkspace(
-        1, 1, 3); // Makes a 1 by 3 md ws with identical signal values.
-    inWS->setSignalAt(2, 0); // Now we have a single edge!
-    inWS->setSignalAt(0, 0); // Now we have another edge!
+    IMDHistoWorkspace_sptr inWS =
+        MDEventsTestHelper::makeFakeMDHistoWorkspace(1, 1, 3); // Makes a 1 by 3 md ws with identical signal values.
+    inWS->setSignalAt(2, 0);                                   // Now we have a single edge!
+    inWS->setSignalAt(0, 0);                                   // Now we have another edge!
 
     const int rowMaximumLimit = 1;
 
@@ -483,10 +439,10 @@ public:
   }
 
   void test_limit_rows() {
-    IMDHistoWorkspace_sptr inWS = MDEventsTestHelper::makeFakeMDHistoWorkspace(
-        1, 1, 3); // Makes a 1 by 3 md ws with identical signal values.
-    inWS->setSignalAt(2, 0); // Now we have a single edge!
-    inWS->setSignalAt(0, 0); // Now we have another edge!
+    IMDHistoWorkspace_sptr inWS =
+        MDEventsTestHelper::makeFakeMDHistoWorkspace(1, 1, 3); // Makes a 1 by 3 md ws with identical signal values.
+    inWS->setSignalAt(2, 0);                                   // Now we have a single edge!
+    inWS->setSignalAt(0, 0);                                   // Now we have another edge!
 
     const int rowMaximumLimit = 1;
 
@@ -520,12 +476,8 @@ private:
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static FindClusterFacesTestPerformance *createSuite() {
-    return new FindClusterFacesTestPerformance();
-  }
-  static void destroySuite(FindClusterFacesTestPerformance *suite) {
-    delete suite;
-  }
+  static FindClusterFacesTestPerformance *createSuite() { return new FindClusterFacesTestPerformance(); }
+  static void destroySuite(FindClusterFacesTestPerformance *suite) { delete suite; }
 
   void test_Init() {
     FindClusterFaces alg;
@@ -542,8 +494,7 @@ public:
     const double bulkSignalValue = 0;
     m_inWS = create_HKL_MDWS(min, max, nBins, bulkSignalValue);
 
-    Instrument_sptr inst =
-        ComponentCreationHelper::createTestInstrumentRectangular(1, 100, 0.05);
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular(1, 100, 0.05);
     m_filterWS = create_peaks_WS(inst);
 
     // Add 50 cluster points and correspoinding peaks.
@@ -552,7 +503,7 @@ public:
 
       Peak peak(inst, 15050, 1.0);
       peak.setHKL(double(i), 0, 0); // Set HKL of peak
-      m_filterWS->addPeak(peak); // Add a valid center peak. Produces 6 faces.
+      m_filterWS->addPeak(peak);    // Add a valid center peak. Produces 6 faces.
     }
   }
 

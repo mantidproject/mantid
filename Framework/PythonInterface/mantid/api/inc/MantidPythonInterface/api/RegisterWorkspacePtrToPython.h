@@ -17,9 +17,8 @@ namespace Mantid::PythonInterface::Registry {
 
 // Specialization for shared_ptr<Workspace> and derived types.
 template <typename T>
-struct DLLExport TypedPropertyValueHandler<
-    std::shared_ptr<T>,
-    typename std::enable_if<std::is_base_of<API::Workspace, T>::value>::type>
+struct DLLExport TypedPropertyValueHandler<std::shared_ptr<T>,
+                                           typename std::enable_if<std::is_base_of<API::Workspace, T>::value>::type>
     : public PropertyValueHandler {
   /// Type required by TypeRegistry framework
   using HeldType = std::shared_ptr<T>;
@@ -35,14 +34,11 @@ struct DLLExport TypedPropertyValueHandler<
    * @param name :: The name of the property
    * @param value :: A boost python object that stores the value
    */
-  void set(Kernel::IPropertyManager *alg, const std::string &name,
-           const boost::python::object &value) const override {
+  void set(Kernel::IPropertyManager *alg, const std::string &name, const boost::python::object &value) const override {
     if (value == boost::python::object())
       alg->setProperty<HeldType>(name, std::shared_ptr<T>(nullptr));
     else
-      alg->setProperty<HeldType>(
-          name, std::dynamic_pointer_cast<T>(
-                    ExtractSharedPtr<API::Workspace>(value)()));
+      alg->setProperty<HeldType>(name, std::dynamic_pointer_cast<T>(ExtractSharedPtr<API::Workspace>(value)()));
   }
 
   /**
@@ -56,24 +52,21 @@ struct DLLExport TypedPropertyValueHandler<
    * @param direction :: The direction of the property
    * @returns A pointer to a newly constructed property instance
    */
-  std::unique_ptr<Kernel::Property>
-  create(const std::string &name, const boost::python::object &defaultValue,
-         const boost::python::object &validator,
-         const unsigned int direction) const override {
+  std::unique_ptr<Kernel::Property> create(const std::string &name, const boost::python::object &defaultValue,
+                                           const boost::python::object &validator,
+                                           const unsigned int direction) const override {
     using boost::python::extract;
     using Kernel::IValidator;
     using Kernel::Property;
     using Kernel::PropertyWithValue;
-    const PropertyValueType valueInC =
-        extract<PropertyValueType>(defaultValue)();
+    const PropertyValueType valueInC = extract<PropertyValueType>(defaultValue)();
     std::unique_ptr<Property> valueProp;
     if (isNone(validator)) {
-      valueProp = std::make_unique<PropertyWithValue<PropertyValueType>>(
-          name, valueInC, direction);
+      valueProp = std::make_unique<PropertyWithValue<PropertyValueType>>(name, valueInC, direction);
     } else {
       const IValidator *propValidator = extract<IValidator *>(validator);
-      valueProp = std::make_unique<PropertyWithValue<PropertyValueType>>(
-          name, valueInC, propValidator->clone(), direction);
+      valueProp =
+          std::make_unique<PropertyWithValue<PropertyValueType>>(name, valueInC, propValidator->clone(), direction);
     }
     return valueProp;
   }

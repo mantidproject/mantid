@@ -64,13 +64,9 @@ public:
 
   /// Algorithm's version
   int version() const override { return (1); }
-  const std::vector<std::string> seeAlso() const override {
-    return {"SaveDaveGrp"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"SaveDaveGrp"}; }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "DataHandling\\Text;Inelastic\\DataHandling";
-  }
+  const std::string category() const override { return "DataHandling\\Text;Inelastic\\DataHandling"; }
   /// Returns a confidence value that this algorithm can load a file
   int confidence(Kernel::FileDescriptor &descriptor) const override;
 
@@ -118,8 +114,7 @@ private:
    * @param xAxis the x axis data
    * @param yAxis the y axis data
    */
-  void setWorkspaceAxes(const API::MatrixWorkspace_sptr &workspace,
-                        const std::vector<double> &xAxis,
+  void setWorkspaceAxes(const API::MatrixWorkspace_sptr &workspace, const std::vector<double> &xAxis,
                         const std::vector<double> &yAxis) const;
 
   /**
@@ -128,8 +123,7 @@ private:
    * @param workspace handle to the distribution workspace to convert to a
    * histogram
    */
-  API::MatrixWorkspace_sptr
-  convertWorkspaceToHistogram(API::MatrixWorkspace_sptr workspace);
+  API::MatrixWorkspace_sptr convertWorkspaceToHistogram(API::MatrixWorkspace_sptr workspace);
 
   /**
    * Function to read a line from the data file. Makes handling comment lines

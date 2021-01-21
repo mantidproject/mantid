@@ -36,25 +36,20 @@ namespace Functions {
     @date 12/10/2016
 */
 
-class MANTID_CURVEFITTING_DLL FunctionQDepends
-    : virtual public Mantid::API::IFunction1D,
-      virtual public Mantid::API::ParamFunction {
+class MANTID_CURVEFITTING_DLL FunctionQDepends : virtual public Mantid::API::IFunction1D,
+                                                 virtual public Mantid::API::ParamFunction {
 
 public:
   /* -------------------
      Overridden methods
     -------------------*/
   virtual void declareAttributes() override;
-  virtual void
-  setAttribute(const std::string &attName,
-               const Mantid::API::IFunction::Attribute &attValue) override;
-  void setMatrixWorkspace(
-      std::shared_ptr<const Mantid::API::MatrixWorkspace> workspace, size_t wi,
-      double startX, double endX) override;
+  virtual void setAttribute(const std::string &attName, const Mantid::API::IFunction::Attribute &attValue) override;
+  void setMatrixWorkspace(std::shared_ptr<const Mantid::API::MatrixWorkspace> workspace, size_t wi, double startX,
+                          double endX) override;
 
 private:
-  std::vector<double>
-  extractQValues(const Mantid::API::MatrixWorkspace &workspace);
+  std::vector<double> extractQValues(const Mantid::API::MatrixWorkspace &workspace);
   // list of Q values associated to the spectra
   std::vector<double> m_vQ;
 

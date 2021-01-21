@@ -34,13 +34,9 @@ public:
 
   /// Algorithm's version
   int version() const override { return (1); }
-  const std::vector<std::string> seeAlso() const override {
-    return {"LoadGSASInstrumentFile", "SaveGSS"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"LoadGSASInstrumentFile", "SaveGSS"}; }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "Diffraction\\DataHandling";
-  }
+  const std::string category() const override { return "Diffraction\\DataHandling"; }
 
 private:
   /// Initialisation code
@@ -52,12 +48,11 @@ private:
   void processProperties();
 
   /// Set up some constant by default
-  void initConstants(
-      const std::map<unsigned int, std::map<std::string, double>> &profmap);
+  void initConstants(const std::map<unsigned int, std::map<std::string, double>> &profmap);
 
   /// Set up chopper/instrument constant parameters from profile map
-  std::shared_ptr<ChopperConfiguration> setupInstrumentConstants(
-      const std::map<unsigned int, std::map<std::string, double>> &profmap);
+  std::shared_ptr<ChopperConfiguration>
+  setupInstrumentConstants(const std::map<unsigned int, std::map<std::string, double>> &profmap);
 
   /// Set up for PG3 chopper constants
   std::shared_ptr<ChopperConfiguration> setupPG3Constants(int intfrequency);
@@ -65,52 +60,39 @@ private:
   std::shared_ptr<ChopperConfiguration> setupNOMConstants(int intfrequency);
 
   /// Parse profile table workspace to a map
-  void parseProfileTableWorkspace(
-      const API::ITableWorkspace_sptr &ws,
-      std::map<unsigned int, std::map<std::string, double>> &profilemap);
+  void parseProfileTableWorkspace(const API::ITableWorkspace_sptr &ws,
+                                  std::map<unsigned int, std::map<std::string, double>> &profilemap);
 
   /// Convert to GSAS instrument file
-  void convertToGSAS(const std::vector<unsigned int> &outputbankids,
-                     const std::string &gsasinstrfilename,
-                     const std::map<unsigned int, std::map<std::string, double>>
-                         &bankprofilemap);
+  void convertToGSAS(const std::vector<unsigned int> &outputbankids, const std::string &gsasinstrfilename,
+                     const std::map<unsigned int, std::map<std::string, double>> &bankprofilemap);
 
   /// Build a data structure for GSAS's tabulated peak profile
-  void buildGSASTabulatedProfile(
-      const std::map<unsigned int, std::map<std::string, double>>
-          &bankprofilemap,
-      unsigned int bankid);
+  void buildGSASTabulatedProfile(const std::map<unsigned int, std::map<std::string, double>> &bankprofilemap,
+                                 unsigned int bankid);
 
   /// Write the header of the file
-  void writePRMHeader(const std::vector<unsigned int> &banks,
-                      const std::string &prmfilename);
+  void writePRMHeader(const std::vector<unsigned int> &banks, const std::string &prmfilename);
 
   /// Write out .prm/.iparm file
-  void
-  writePRMSingleBank(const std::map<unsigned int, std::map<std::string, double>>
-                         &bankprofilemap,
-                     unsigned int bankid, const std::string &prmfilename);
+  void writePRMSingleBank(const std::map<unsigned int, std::map<std::string, double>> &bankprofilemap,
+                          unsigned int bankid, const std::string &prmfilename);
 
   /// Caclualte L2 from DIFFC and L1
   double calL2FromDtt1(double difc, double L1, double twotheta);
 
   /// Calculate TOF difference
-  double calTOF(double n, double ep, double eq, double er, double tp, double tq,
-                double tr, double dsp);
+  double calTOF(double n, double ep, double eq, double er, double tp, double tq, double tr, double dsp);
 
   /// Calculate a value related to (alph0, alph1, alph0t, alph1t) or (beta0,
   /// beta1, beta0t, beta1t)
-  double aaba(double n, double ea1, double ea2, double ta1, double ta2,
-              double dsp);
+  double aaba(double n, double ea1, double ea2, double ta1, double ta2, double dsp);
 
   /// Get parameter value from a map
-  double getValueFromMap(const std::map<std::string, double> &profilemap,
-                         const std::string &parname);
+  double getValueFromMap(const std::map<std::string, double> &profilemap, const std::string &parname);
 
   /// Get parameter value from class storage
-  double
-  getProfileParameterValue(const std::map<std::string, double> &profilemap,
-                           const std::string &paramname);
+  double getProfileParameterValue(const std::map<std::string, double> &profilemap, const std::string &paramname);
 
   /// Load fullprof resolution file.
   void loadFullprofResolutionFile(const std::string &irffilename);

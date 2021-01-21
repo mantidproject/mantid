@@ -37,8 +37,7 @@ std::string toNXPathString(FullNXPath &path) {
 
 // ported from NexusGeometryParser, for validating storage type of dataset
 // before reading its contents into a container
-template <typename ExpectedT>
-void validateStorageType(const H5::DataSet &data) {
+template <typename ExpectedT> void validateStorageType(const H5::DataSet &data) {
 
   const auto typeClass = data.getTypeClass();
   const size_t sizeOfType = data.getDataType().getSize();
@@ -49,22 +48,19 @@ void validateStorageType(const H5::DataSet &data) {
                                "floating point number");
     }
     if (sizeOfType != sizeof(ExpectedT)) {
-      throw std::runtime_error(
-          "Storage type mismatch for floats. This operation "
-          "is dangerous. Nexus stored has byte size:" +
-          std::to_string(sizeOfType));
+      throw std::runtime_error("Storage type mismatch for floats. This operation "
+                               "is dangerous. Nexus stored has byte size:" +
+                               std::to_string(sizeOfType));
     }
   } else if (std::is_integral<ExpectedT>::value) {
     if (H5T_INTEGER != typeClass) {
-      throw std::runtime_error(
-          "Storage type mismatch. Expecting to extract a integer");
+      throw std::runtime_error("Storage type mismatch. Expecting to extract a integer");
     }
     if (sizeOfType > sizeof(ExpectedT)) {
       // endianness not checked
-      throw std::runtime_error(
-          "Storage type mismatch for integer. Result "
-          "would result in truncation. Nexus stored has byte size:" +
-          std::to_string(sizeOfType));
+      throw std::runtime_error("Storage type mismatch for integer. Result "
+                               "would result in truncation. Nexus stored has byte size:" +
+                               std::to_string(sizeOfType));
     }
   }
 }
@@ -96,8 +92,7 @@ public:
         // Open the sub group
         auto childGroup = parentGroup.openGroup(childPath);
         // Iterate through attributes to find NX_class
-        for (uint32_t attribute_index = 0;
-             attribute_index < static_cast<uint32_t>(childGroup.getNumAttrs());
+        for (uint32_t attribute_index = 0; attribute_index < static_cast<uint32_t>(childGroup.getNumAttrs());
              ++attribute_index) {
           // Test attribute at current index for NX_class
           H5::Attribute attribute = childGroup.openAttribute(attribute_index);
@@ -120,8 +115,7 @@ public:
 
   // read a multidimensional dataset and returns vector containing the data
   template <typename T>
-  std::vector<T> readDataSetMultidimensional(FullNXPath &pathToGroup,
-                                             const std::string &dataSetName) {
+  std::vector<T> readDataSetMultidimensional(FullNXPath &pathToGroup, const std::string &dataSetName) {
 
     std::vector<T> dataInFile;
 
@@ -155,8 +149,7 @@ public:
   // child has expected CLASS_TYPE, and is in parent group with expected
   // parent
 
-  bool parentNXgroupHasChildNXgroup(const std::string &parentNX_CLASS_TYPE,
-                                    const std::string &childNX_CLASS_TYPE) {
+  bool parentNXgroupHasChildNXgroup(const std::string &parentNX_CLASS_TYPE, const std::string &childNX_CLASS_TYPE) {
 
     H5::Group rootGroup = m_file.openGroup(DEFAULT_ROOT_ENTRY_NAME);
 
@@ -198,11 +191,9 @@ public:
               // Open the sub group
               H5::Group grandchildGroup = childGroup.openGroup(grandchildPath);
               // check NX class
-              H5::Attribute grandchildAttribute =
-                  grandchildGroup.openAttribute(NX_CLASS);
+              H5::Attribute grandchildAttribute = grandchildGroup.openAttribute(NX_CLASS);
               std::string grandchildAttrVal;
-              grandchildAttribute.read(grandchildAttribute.getDataType(),
-                                       grandchildAttrVal);
+              grandchildAttribute.read(grandchildAttribute.getDataType(), grandchildAttrVal);
               if (childNX_CLASS_TYPE == grandchildAttrVal) {
                 return true;
               }
@@ -215,8 +206,7 @@ public:
     return false;
   } // namespace
 
-  double readDoubleFromDataset(const std::string &datasetName,
-                               const FullNXPath &pathToGroup) {
+  double readDoubleFromDataset(const std::string &datasetName, const FullNXPath &pathToGroup) {
     double value;
     int rank = 1;
     hsize_t dims[static_cast<hsize_t>(1)];
@@ -232,10 +222,8 @@ public:
   }
 
   // HERE
-  std::vector<double>
-  readDoubleVectorFrom_d_Attribute(const std::string &attrName,
-                                   const std::string &datasetName,
-                                   const FullNXPath &pathToGroup) {
+  std::vector<double> readDoubleVectorFrom_d_Attribute(const std::string &attrName, const std::string &datasetName,
+                                                       const FullNXPath &pathToGroup) {
 
     // open dataset and read.
     H5::Group parentGroup = openfullH5Path(pathToGroup);
@@ -255,8 +243,7 @@ public:
   }
 
   // HERE
-  bool hasDatasetWithNXAttribute(const std::string &pathToGroup,
-                                 const std::string &nx_attributeVal) {
+  bool hasDatasetWithNXAttribute(const std::string &pathToGroup, const std::string &nx_attributeVal) {
 
     H5::Group parentGroup = m_file.openGroup(pathToGroup);
     auto numOfChildren = parentGroup.getNumObjs();
@@ -277,8 +264,7 @@ public:
   }
 
   // HERE
-  bool hasDatasetWithAttribute(const std::string &pathToGroup,
-                               const std::string &attributeVal,
+  bool hasDatasetWithAttribute(const std::string &pathToGroup, const std::string &attributeVal,
                                const std::string &attrName) {
 
     H5::Group parentGroup = m_file.openGroup(pathToGroup);
@@ -315,8 +301,7 @@ public:
     return false;
   }
 
-  bool groupHasNxClass(const std::string &attrVal,
-                       const std::string &pathToGroup) const {
+  bool groupHasNxClass(const std::string &attrVal, const std::string &pathToGroup) const {
 
     H5::Attribute attribute;
     H5::Group parentGroup = m_file.openGroup(pathToGroup);
@@ -327,9 +312,8 @@ public:
     return attributeValue == attrVal;
   }
 
-  bool dataSetHasStrValue(
-      const std::string &dataSetName, const std::string &dataSetValue,
-      const FullNXPath &pathToGroup /*where the dataset lives*/) const {
+  bool dataSetHasStrValue(const std::string &dataSetName, const std::string &dataSetValue,
+                          const FullNXPath &pathToGroup /*where the dataset lives*/) const {
 
     H5::Group parentGroup = openfullH5Path(pathToGroup);
 
@@ -346,9 +330,7 @@ public:
   }
 
   // check if dataset or group has name-specific attribute
-  bool hasAttributeInGroup(const std::string &attrName,
-                           const std::string &attrVal,
-                           const FullNXPath &pathToGroup) {
+  bool hasAttributeInGroup(const std::string &attrName, const std::string &attrVal, const FullNXPath &pathToGroup) {
 
     H5::Group parentGroup = openfullH5Path(pathToGroup);
 
@@ -360,8 +342,7 @@ public:
     return attributeValue == attrVal;
   }
 
-  bool hasNXAttributeInGroup(const std::string &attrVal,
-                             const FullNXPath &pathToGroup) {
+  bool hasNXAttributeInGroup(const std::string &attrVal, const FullNXPath &pathToGroup) {
 
     H5::Group parentGroup = openfullH5Path(pathToGroup);
 
@@ -372,10 +353,8 @@ public:
     return attributeValue == attrVal;
   }
 
-  bool hasAttributeInDataSet(
-      const std::string &dataSetName, const std::string &attrName,
-      const std::string &attrVal,
-      const FullNXPath &pathToGroup /*where the dataset lives*/) {
+  bool hasAttributeInDataSet(const std::string &dataSetName, const std::string &attrName, const std::string &attrVal,
+                             const FullNXPath &pathToGroup /*where the dataset lives*/) {
 
     H5::Attribute attribute;
     H5::Group parentGroup = openfullH5Path(pathToGroup);
@@ -387,8 +366,7 @@ public:
     return attributeValue == attrVal;
   }
 
-  bool hasNXAttributeInDataSet(const std::string &dataSetName,
-                               const std::string &attrVal,
+  bool hasNXAttributeInDataSet(const std::string &dataSetName, const std::string &attrVal,
                                const FullNXPath &pathToGroup) {
     H5::Attribute attribute;
     H5::Group parentGroup = openfullH5Path(pathToGroup);

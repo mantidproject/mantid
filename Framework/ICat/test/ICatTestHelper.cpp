@@ -12,17 +12,12 @@ using namespace Mantid::API;
 
 namespace ICatTestHelper {
 
-FakeICatLogin::FakeICatLogin()
-    : m_loadTESTFacility("unit_testing/UnitTestFacilities.xml", "TEST") {
+FakeICatLogin::FakeICatLogin() : m_loadTESTFacility("unit_testing/UnitTestFacilities.xml", "TEST") {
   m_session = CatalogManager::Instance().login("", "", "", "TEST");
 }
 
-FakeICatLogin::~FakeICatLogin() {
-  CatalogManager::Instance().destroyCatalog(m_session->getSessionId());
-}
+FakeICatLogin::~FakeICatLogin() { CatalogManager::Instance().destroyCatalog(m_session->getSessionId()); }
 
-std::string FakeICatLogin::getSessionId() const {
-  return m_session->getSessionId();
-}
+std::string FakeICatLogin::getSessionId() const { return m_session->getSessionId(); }
 
 } // namespace ICatTestHelper

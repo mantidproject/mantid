@@ -23,8 +23,7 @@ namespace {
 /// Number of microseconds in one second (10^6)
 constexpr double MICROSECONDS_PER_SECOND{1000000.0};
 /// Muon lifetime in microseconds
-constexpr double MUON_LIFETIME_MICROSECONDS{
-    Mantid::PhysicalConstants::MuonLifetime * MICROSECONDS_PER_SECOND};
+constexpr double MUON_LIFETIME_MICROSECONDS{Mantid::PhysicalConstants::MuonLifetime * MICROSECONDS_PER_SECOND};
 } // namespace
 
 namespace Mantid {
@@ -42,17 +41,14 @@ DECLARE_ALGORITHM(MuonRemoveExpDecay)
  */
 void MuonRemoveExpDecay::init() {
   declareProperty(
-      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-          "InputWorkspace", "", Direction::Input),
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>("InputWorkspace", "", Direction::Input),
       "The name of the input 2D workspace.");
   declareProperty(
-      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-          "OutputWorkspace", "", Direction::Output),
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
       "The name of the output 2D workspace.");
   std::vector<int> empty;
-  declareProperty(
-      std::make_unique<Kernel::ArrayProperty<int>>("Spectra", std::move(empty)),
-      "The workspace indices to remove the exponential decay from.");
+  declareProperty(std::make_unique<Kernel::ArrayProperty<int>>("Spectra", std::move(empty)),
+                  "The workspace indices to remove the exponential decay from.");
 }
 
 /** Executes the algorithm
@@ -105,16 +101,13 @@ void MuonRemoveExpDecay::exec() {
     const auto specNum = static_cast<size_t>(spectra[i]);
     if (spectra[i] > numSpectra) {
       g_log.error("Spectra size greater than the number of spectra!");
-      throw std::invalid_argument(
-          "Spectra size greater than the number of spectra!");
+      throw std::invalid_argument("Spectra size greater than the number of spectra!");
     }
     auto emptySpectrum =
-        std::all_of(inputWS->y(specNum).begin(), inputWS->y(specNum).end(),
-                    [](double value) { return value == 0.; });
+        std::all_of(inputWS->y(specNum).begin(), inputWS->y(specNum).end(), [](double value) { return value == 0.; });
     if (emptySpectrum) {
       // if the y values are all zero do not change them
-      m_log.warning("Dead detector found at spectrum number " +
-                    std::to_string(specNum));
+      m_log.warning("Dead detector found at spectrum number " + std::to_string(specNum));
       outputWS->setHistogram(specNum, inputWS->histogram(specNum));
     } else {
       // Remove decay from Y and E
@@ -145,8 +138,7 @@ void MuonRemoveExpDecay::exec() {
  * @param histogram :: [input] Input histogram
  * @returns :: Histogram with exponential removed from Y and E
  */
-HistogramData::Histogram MuonRemoveExpDecay::removeDecay(
-    const HistogramData::Histogram &histogram) const {
+HistogramData::Histogram MuonRemoveExpDecay::removeDecay(const HistogramData::Histogram &histogram) const {
   HistogramData::Histogram result(histogram);
   const auto xPoints = result.points();
 
@@ -179,17 +171,14 @@ HistogramData::Histogram MuonRemoveExpDecay::removeDecay(
  * @param wsIndex :: workspace index
  * @return normalisation constant
  */
-double
-MuonRemoveExpDecay::calNormalisationConst(const API::MatrixWorkspace_sptr &ws,
-                                          int wsIndex) {
+double MuonRemoveExpDecay::calNormalisationConst(const API::MatrixWorkspace_sptr &ws, int wsIndex) {
   double retVal = 1.0;
 
   API::IAlgorithm_sptr fit;
   fit = createChildAlgorithm("Fit", -1, -1, true);
 
   std::stringstream ss;
-  ss << "name=LinearBackground,A0=" << ws->y(wsIndex)[0] << ",A1=" << 0.0
-     << ",ties=(A1=0.0)";
+  ss << "name=LinearBackground,A0=" << ws->y(wsIndex)[0] << ",A1=" << 0.0 << ",ties=(A1=0.0)";
   std::string function = ss.str();
 
   fit->setPropertyValue("Function", function);
@@ -205,16 +194,12 @@ MuonRemoveExpDecay::calNormalisationConst(const API::MatrixWorkspace_sptr &ws,
 
   // Check order of names
   if (paramnames[0] != "A0") {
-    g_log.error() << "Parameter 0 should be A0, but is " << paramnames[0]
-                  << '\n';
-    throw std::invalid_argument(
-        "Parameters are out of order @ 0, should be A0");
+    g_log.error() << "Parameter 0 should be A0, but is " << paramnames[0] << '\n';
+    throw std::invalid_argument("Parameters are out of order @ 0, should be A0");
   }
   if (paramnames[1] != "A1") {
-    g_log.error() << "Parameter 1 should be A1, but is " << paramnames[1]
-                  << '\n';
-    throw std::invalid_argument(
-        "Parameters are out of order @ 0, should be A1");
+    g_log.error() << "Parameter 1 should be A1, but is " << paramnames[1] << '\n';
+    throw std::invalid_argument("Parameters are out of order @ 0, should be A1");
   }
 
   if (fitStatus == "success") {
@@ -228,8 +213,7 @@ MuonRemoveExpDecay::calNormalisationConst(const API::MatrixWorkspace_sptr &ws,
       retVal = A0;
     }
   } else {
-    g_log.warning() << "Fit falled. Status = " << fitStatus
-                    << "\nFor workspace index " << wsIndex
+    g_log.warning() << "Fit falled. Status = " << fitStatus << "\nFor workspace index " << wsIndex
                     << "\nAsym norm constant set to 1.0\n";
   }
 

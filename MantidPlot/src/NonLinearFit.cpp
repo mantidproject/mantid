@@ -21,28 +21,21 @@
 
 #include <QMessageBox>
 
-NonLinearFit::NonLinearFit(ApplicationWindow *parent, Graph *g)
-    : Fit(parent, g) {
-  init();
-}
+NonLinearFit::NonLinearFit(ApplicationWindow *parent, Graph *g) : Fit(parent, g) { init(); }
 
-NonLinearFit::NonLinearFit(ApplicationWindow *parent, Graph *g,
-                           const QString &curveTitle)
-    : Fit(parent, g) {
+NonLinearFit::NonLinearFit(ApplicationWindow *parent, Graph *g, const QString &curveTitle) : Fit(parent, g) {
   init();
   setDataFromCurve(curveTitle);
 }
 
-NonLinearFit::NonLinearFit(ApplicationWindow *parent, Graph *g,
-                           const QString &curveTitle, double start, double end)
+NonLinearFit::NonLinearFit(ApplicationWindow *parent, Graph *g, const QString &curveTitle, double start, double end)
     : Fit(parent, g) {
   init();
   setDataFromCurve(curveTitle, start, end);
 }
 
-NonLinearFit::NonLinearFit(ApplicationWindow *parent, Table *t,
-                           const QString &xCol, const QString &yCol,
-                           int startRow, int endRow)
+NonLinearFit::NonLinearFit(ApplicationWindow *parent, Table *t, const QString &xCol, const QString &yCol, int startRow,
+                           int endRow)
     : Fit(parent, t) {
   init();
   setDataFromTable(t, xCol, yCol, startRow, endRow);
@@ -62,20 +55,16 @@ void NonLinearFit::init() {
 
 void NonLinearFit::setFormula(const QString &s) {
   if (s.isEmpty()) {
-    QMessageBox::critical(
-        static_cast<ApplicationWindow *>(parent()),
-        tr("MantidPlot - Input function error"),
-        tr("Please enter a valid non-empty expression! Operation aborted!"));
+    QMessageBox::critical(static_cast<ApplicationWindow *>(parent()), tr("MantidPlot - Input function error"),
+                          tr("Please enter a valid non-empty expression! Operation aborted!"));
     d_init_err = true;
     return;
   }
 
   if (!d_p) {
-    QMessageBox::critical(
-        static_cast<ApplicationWindow *>(parent()),
-        tr("MantidPlot - Fit Error"),
-        tr("There are no parameters specified for this fit operation. Please "
-           "define a list of parameters first!"));
+    QMessageBox::critical(static_cast<ApplicationWindow *>(parent()), tr("MantidPlot - Fit Error"),
+                          tr("There are no parameters specified for this fit operation. Please "
+                             "define a list of parameters first!"));
     d_init_err = true;
     return;
   }
@@ -96,8 +85,7 @@ void NonLinearFit::setFormula(const QString &s) {
     parser.Eval();
     delete[] param;
   } catch (mu::ParserError &e) {
-    QMessageBox::critical(static_cast<ApplicationWindow *>(parent()),
-                          tr("MantidPlot - Input function error"),
+    QMessageBox::critical(static_cast<ApplicationWindow *>(parent()), tr("MantidPlot - Input function error"),
                           QString::fromStdString(e.GetMsg()));
     d_init_err = true;
     return;
@@ -109,11 +97,9 @@ void NonLinearFit::setFormula(const QString &s) {
 
 void NonLinearFit::setParametersList(const QStringList &lst) {
   if (lst.count() < 1) {
-    QMessageBox::critical(
-        static_cast<ApplicationWindow *>(parent()),
-        tr("MantidPlot - Fit Error"),
-        tr("You must provide a list containing at least one parameter for this "
-           "type of fit. Operation aborted!"));
+    QMessageBox::critical(static_cast<ApplicationWindow *>(parent()), tr("MantidPlot - Fit Error"),
+                          tr("You must provide a list containing at least one parameter for this "
+                             "type of fit. Operation aborted!"));
     d_init_err = true;
     return;
   }

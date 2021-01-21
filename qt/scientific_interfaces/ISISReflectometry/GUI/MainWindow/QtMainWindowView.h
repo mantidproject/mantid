@@ -29,12 +29,11 @@ class QtOptionsDialogView;
 MainWindowView is the concrete main window view implementing the
 functionality defined by the interface IMainWindowView
 */
-class MANTIDQT_ISISREFLECTOMETRY_DLL QtMainWindowView
-    : public MantidQt::API::UserSubWindow,
-      public IMainWindowView,
-      public IMessageHandler,
-      public IFileHandler,
-      public IPythonRunner {
+class MANTIDQT_ISISREFLECTOMETRY_DLL QtMainWindowView : public MantidQt::API::UserSubWindow,
+                                                        public IMainWindowView,
+                                                        public IMessageHandler,
+                                                        public IFileHandler,
+                                                        public IPythonRunner {
   Q_OBJECT
 public:
   explicit QtMainWindowView(QWidget *parent = nullptr);
@@ -58,12 +57,9 @@ public:
   IBatchView *newBatch() override;
   void removeBatch(int batchIndex) override;
 
-  void giveUserCritical(const std::string &prompt,
-                        const std::string &title) override;
-  void giveUserInfo(const std::string &prompt,
-                    const std::string &title) override;
-  bool askUserOkCancel(const std::string &prompt,
-                       const std::string &title) override;
+  void giveUserCritical(const std::string &prompt, const std::string &title) override;
+  void giveUserInfo(const std::string &prompt, const std::string &title) override;
+  bool askUserOkCancel(const std::string &prompt, const std::string &title) override;
   std::string askUserForLoadFileName(std::string const &filter) override;
   std::string askUserForSaveFileName(std::string const &filter) override;
 
@@ -72,10 +68,8 @@ public:
 
   // TODO Remove Qt types from this interface - conversion should be done in
   // QtJSONUtils if possible
-  void saveJSONToFile(std::string const &filename,
-                      QMap<QString, QVariant> const &map) override;
-  QMap<QString, QVariant>
-  loadJSONFromFile(std::string const &filename) override;
+  void saveJSONToFile(std::string const &filename, QMap<QString, QVariant> const &map) override;
+  QMap<QString, QVariant> loadJSONFromFile(std::string const &filename) override;
 
 public slots:
   void helpPressed();

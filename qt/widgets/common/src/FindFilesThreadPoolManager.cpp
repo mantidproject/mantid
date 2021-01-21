@@ -30,8 +30,7 @@ static std::unique_ptr<QThreadPool> tp = {nullptr};
  *
  * @return a unique pointer to the QThreadPool
  */
-const std::unique_ptr<QThreadPool> &
-FindFilesThreadPoolManager::poolInstance() const {
+const std::unique_ptr<QThreadPool> &FindFilesThreadPoolManager::poolInstance() const {
   if (!tp)
     tp = std::make_unique<QThreadPool>();
   return tp;
@@ -50,9 +49,7 @@ void MantidQt::API::FindFilesThreadPoolManager::destroyThreadPool() {
 FindFilesThreadPoolManager::FindFilesThreadPoolManager() {
   // Default allocator function. This just creates a new worker
   // on the heap.
-  m_workerAllocator = [](const FindFilesSearchParameters &parameters) {
-    return new FindFilesWorker(parameters);
-  };
+  m_workerAllocator = [](const FindFilesSearchParameters &parameters) { return new FindFilesWorker(parameters); };
 }
 
 /** Set the allocator function for the thread pool.
@@ -63,12 +60,9 @@ FindFilesThreadPoolManager::FindFilesThreadPoolManager() {
  * @param allocator :: The thread allocator function to user to create new
  * worker objects
  */
-void FindFilesThreadPoolManager::setAllocator(ThreadAllocator allocator) {
-  m_workerAllocator = std::move(allocator);
-}
+void FindFilesThreadPoolManager::setAllocator(ThreadAllocator allocator) { m_workerAllocator = std::move(allocator); }
 
-void FindFilesThreadPoolManager::createWorker(
-    const QObject *parent, const FindFilesSearchParameters &parameters) {
+void FindFilesThreadPoolManager::createWorker(const QObject *parent, const FindFilesSearchParameters &parameters) {
   cancelWorker();
 
   // if parent is null then don't do anything as there will be no
@@ -95,21 +89,17 @@ void FindFilesThreadPoolManager::createWorker(
  *  @param parent :: the listening parent object waiting for search results
  *  @param worker :: the worker to connect signals/slots for.
  */
-void FindFilesThreadPoolManager::connectWorker(const QObject *parent,
-                                               const FindFilesWorker *worker) {
-  parent->connect(worker, SIGNAL(finished(const FindFilesSearchResults &)),
-                  parent,
-                  SLOT(inspectThreadResult(const FindFilesSearchResults &)),
+void FindFilesThreadPoolManager::connectWorker(const QObject *parent, const FindFilesWorker *worker) {
+  parent->connect(worker, SIGNAL(finished(const FindFilesSearchResults &)), parent,
+                  SLOT(inspectThreadResult(const FindFilesSearchResults &)), Qt::QueuedConnection);
+
+  parent->connect(worker, SIGNAL(finished(const FindFilesSearchResults &)), parent, SIGNAL(fileFindingFinished()),
                   Qt::QueuedConnection);
 
-  parent->connect(worker, SIGNAL(finished(const FindFilesSearchResults &)),
-                  parent, SIGNAL(fileFindingFinished()), Qt::QueuedConnection);
+  this->connect(worker, SIGNAL(finished(const FindFilesSearchResults &)), this, SLOT(searchFinished()),
+                Qt::QueuedConnection);
 
-  this->connect(worker, SIGNAL(finished(const FindFilesSearchResults &)), this,
-                SLOT(searchFinished()), Qt::QueuedConnection);
-
-  this->connect(this, SIGNAL(disconnectWorkers()), worker,
-                SLOT(disconnectWorker()), Qt::QueuedConnection);
+  this->connect(this, SIGNAL(disconnectWorkers()), worker, SLOT(disconnectWorker()), Qt::QueuedConnection);
 }
 
 /** Cancel the currently running worker
@@ -132,9 +122,7 @@ void FindFilesThreadPoolManager::cancelWorker() {
  *
  * @returns true if the current worker object is null
  */
-bool FindFilesThreadPoolManager::isSearchRunning() const {
-  return m_searchIsRunning;
-}
+bool FindFilesThreadPoolManager::isSearchRunning() const { return m_searchIsRunning; }
 
 /** Wait for all threads in the pool to finish running.
  *
@@ -142,9 +130,7 @@ bool FindFilesThreadPoolManager::isSearchRunning() const {
  * have finished executing. Using this in a GUI thread will cause the GUI
  * to freeze up.
  */
-void FindFilesThreadPoolManager::waitForDone() {
-  poolInstance()->waitForDone();
-}
+void FindFilesThreadPoolManager::waitForDone() { poolInstance()->waitForDone(); }
 
 /** Mark the search as being finished.
  */

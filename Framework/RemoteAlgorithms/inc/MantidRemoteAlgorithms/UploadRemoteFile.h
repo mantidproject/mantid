@@ -35,8 +35,7 @@ namespace RemoteAlgorithms {
     @date 04/30/2013
     */
 
-class DLLExport UploadRemoteFile : public API::Algorithm,
-                                   public API::DeprecatedAlgorithm {
+class DLLExport UploadRemoteFile : public API::Algorithm, public API::DeprecatedAlgorithm {
 public:
   /// Constructor
   UploadRemoteFile() { this->useAlgorithm("UploadRemoteFile", 2); }
@@ -45,9 +44,7 @@ public:
   const std::string name() const override { return "UploadRemoteFile"; }
 
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Uploads a file to the specified compute resource.";
-  }
+  const std::string summary() const override { return "Uploads a file to the specified compute resource."; }
 
   /// Algorithm's version
   int version() const override { return (1); }

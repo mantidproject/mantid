@@ -30,8 +30,7 @@ public:
 
 public:
   explicit Line2D(Common::Python::Object obj);
-  Line2D(Common::Python::Object obj, std::vector<double> &&xdataOwner,
-         std::vector<double> &&ydataOwner);
+  Line2D(Common::Python::Object obj, std::vector<double> &&xdataOwner, std::vector<double> &&ydataOwner);
   Line2D(Common::Python::Object obj, Line2D::Data &&dataOwner);
   ~Line2D() noexcept;
   Line2D(const Line2D &) = delete;
@@ -42,8 +41,7 @@ public:
   QColor getColor() const;
 
   const Data &rawData() const { return m_dataOwner; }
-  void setData(std::vector<double> &&xdataOwner,
-               std::vector<double> &&ydataOwner);
+  void setData(std::vector<double> &&xdataOwner, std::vector<double> &&ydataOwner);
   void setData(Line2D::Data &&lineDataOwner);
 
 private:

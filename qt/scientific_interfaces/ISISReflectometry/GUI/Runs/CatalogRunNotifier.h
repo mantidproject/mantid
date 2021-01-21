@@ -18,9 +18,7 @@ namespace ISISReflectometry {
 CatalogRunNotifier implements IRunNotifier to provide functionality to
 poll for new runs.
 */
-class MANTIDQT_ISISREFLECTOMETRY_DLL CatalogRunNotifier
-    : public IRunNotifier,
-      public RunsViewTimerSubscriber {
+class MANTIDQT_ISISREFLECTOMETRY_DLL CatalogRunNotifier : public IRunNotifier, public RunsViewTimerSubscriber {
 public:
   static auto constexpr POLLING_INTERVAL_MILLISECONDS = 5000;
 

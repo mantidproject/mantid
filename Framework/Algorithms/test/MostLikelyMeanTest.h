@@ -38,12 +38,8 @@ public:
 
 class MostLikelyMeanTestPerformance : public CxxTest::TestSuite {
 public:
-  static MostLikelyMeanTestPerformance *createSuite() {
-    return new MostLikelyMeanTestPerformance();
-  }
-  static void destroySuite(MostLikelyMeanTestPerformance *suite) {
-    delete suite;
-  }
+  static MostLikelyMeanTestPerformance *createSuite() { return new MostLikelyMeanTestPerformance(); }
+  static void destroySuite(MostLikelyMeanTestPerformance *suite) { delete suite; }
 
   void setUp() override {
     std::vector<double> input(10000);

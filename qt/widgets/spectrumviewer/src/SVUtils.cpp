@@ -48,8 +48,8 @@ void SVUtils::Format(int width, int precision, double value, std::string &str) {
  *                   the list
  *  @param list      The list of strings to which the name,value pair is added.
  */
-void SVUtils::PushNameValue(const std::string &name, int width, int precision,
-                            double value, std::vector<std::string> &list) {
+void SVUtils::PushNameValue(const std::string &name, int width, int precision, double value,
+                            std::vector<std::string> &list) {
   list.emplace_back(name);
 
   std::string value_str;
@@ -73,8 +73,7 @@ void SVUtils::PushNameValue(const std::string &name, int width, int precision,
  * @param max     Set to be greater than or equal to all values in the list
  *                and strictly more than min.
  */
-bool SVUtils::FindValidInterval(const QVector<double> &values, double &min,
-                                double &max) {
+bool SVUtils::FindValidInterval(const QVector<double> &values, double &min, double &max) {
   min = values[0];
   max = min;
   for (int i = 1; i < (int)values.size(); i++) {
@@ -235,8 +234,7 @@ int SVUtils::NumSteps(double min, double max, double step) {
  * @return true if the calculated value is in [newMin,newMax] and false
  *         if it is outside of the interval.
  */
-bool SVUtils::Interpolate(double min, double max, double val, double newMin,
-                          double newMax, double &newVal) {
+bool SVUtils::Interpolate(double min, double max, double val, double newMin, double newMax, double &newVal) {
   newVal = (val - min) / (max - min) * (newMax - newMin) + newMin;
 
   return !(newVal < newMin || newVal > newMax);
@@ -259,8 +257,7 @@ bool SVUtils::Interpolate(double min, double max, double val, double newMin,
  * @return true if the calculated value is in [newMin,newMax] and false
  *         if it is outside of the interval.
  */
-bool SVUtils::LogInterpolate(double min, double max, double val, double newMin,
-                             double newMax, double &newVal) {
+bool SVUtils::LogInterpolate(double min, double max, double val, double newMin, double newMax, double &newVal) {
   newVal = newMin * exp((val - min) / (max - min) * log(newMax / newMin));
 
   if (newVal < newMin || newVal > newMax)
@@ -295,9 +292,8 @@ bool SVUtils::LogInterpolate(double min, double max, double val, double newMin,
  *                      between the min and max values.  This will be adjusted
  *                      to be no more than the number of steps available.
  */
-bool SVUtils::CalculateInterval(double globalMin, double globalMax,
-                                size_t globalSteps, size_t &firstIndex,
-                                double &min, double &max, size_t &steps) {
+bool SVUtils::CalculateInterval(double globalMin, double globalMax, size_t globalSteps, size_t &firstIndex, double &min,
+                                double &max, size_t &steps) {
   double index;
 
   // Find bin containing min
@@ -310,8 +306,7 @@ bool SVUtils::CalculateInterval(double globalMin, double globalMax,
     min_index = 0;
 
   // Now set min to the value at the left edge of bin at min_index
-  Interpolate(0.0, (double)globalSteps, (double)min_index, globalMin, globalMax,
-              min);
+  Interpolate(0.0, (double)globalSteps, (double)min_index, globalMin, globalMax, min);
 
   // Find bin containing max
   Interpolate(globalMin, globalMax, max, 0.0, (double)globalSteps, index);
@@ -325,8 +320,7 @@ bool SVUtils::CalculateInterval(double globalMin, double globalMax,
     max_index = (int)globalSteps - 1;
 
   // Now set max to the value at the right edge of bin max_index
-  Interpolate(0, (double)globalSteps, (double)(max_index + 1), globalMin,
-              globalMax, max);
+  Interpolate(0, (double)globalSteps, (double)(max_index + 1), globalMin, globalMax, max);
 
   firstIndex = min_index;
 

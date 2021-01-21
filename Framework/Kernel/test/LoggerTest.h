@@ -60,8 +60,7 @@ public:
     PARALLEL_FOR_NO_WSP_CHECK()
     for (int i = 0; i < 1000; i++) {
       Logger otherLogger("MyOtherTestLogger");
-      level =
-          otherLogger.getLevel(); // here so the optimiser doesn't kill the loop
+      level = otherLogger.getLevel(); // here so the optimiser doesn't kill the loop
     }
 
     UNUSED_ARG(level);
@@ -83,9 +82,7 @@ public:
   }
 
   /** This will be called from the ThreadPool */
-  void doLogInParallel(int num) {
-    log.information() << "Information Message " << num << '\n';
-  }
+  void doLogInParallel(int num) { log.information() << "Information Message " << num << '\n'; }
 
   //---------------------------------------------------------------------------
   /** Log very quickly from a lot of Poco Threads.
@@ -93,8 +90,7 @@ public:
   void test_ThreadPool_ParallelLogging() {
     ThreadPool tp;
     for (int i = 0; i < 1000; i++)
-      tp.schedule(std::make_shared<FunctionTask>(
-          std::bind(&LoggerTest::doLogInParallel, &*this, i)));
+      tp.schedule(std::make_shared<FunctionTask>(std::bind(&LoggerTest::doLogInParallel, &*this, i)));
     tp.joinAll();
   }
 
@@ -108,9 +104,7 @@ public:
   }
 
   /** This will be called from the ThreadPool */
-  void accumulateParallel(int num) {
-    log.accumulate(std::to_string(num) + "\n");
-  }
+  void accumulateParallel(int num) { log.accumulate(std::to_string(num) + "\n"); }
 
   //---------------------------------------------------------------------------
   /** Log very quickly from a lot of Poco Threads.
@@ -119,8 +113,7 @@ public:
     log.purge();
     ThreadPool tp;
     for (int i = 0; i < 100; i++)
-      tp.schedule(std::make_shared<FunctionTask>(
-          std::bind(&LoggerTest::accumulateParallel, &*this, i)));
+      tp.schedule(std::make_shared<FunctionTask>(std::bind(&LoggerTest::accumulateParallel, &*this, i)));
     tp.joinAll();
     log.flush();
   }
@@ -132,9 +125,7 @@ class LoggerTestPerformance : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static LoggerTestPerformance *createSuite() {
-    return new LoggerTestPerformance();
-  }
+  static LoggerTestPerformance *createSuite() { return new LoggerTestPerformance(); }
   static void destroySuite(LoggerTestPerformance *suite) { delete suite; }
 
   void test_Logging_At_High_Frequency_At_Equal_Level_To_Current_Level() {
@@ -146,8 +137,7 @@ public:
     }
   }
 
-  void
-  test_Logging_At_High_Frequency_In_Parallel_At_Equal_Level_To_Current_Level() {
+  void test_Logging_At_High_Frequency_In_Parallel_At_Equal_Level_To_Current_Level() {
     Logger logger("LoggerTestPerformance");
     logger.setLevel(Logger::Priority::PRIO_INFORMATION);
 
@@ -166,8 +156,7 @@ public:
     }
   }
 
-  void
-  test_Logging_At_High_Frequency_In_Parallel_At_Lower_Than_Current_Level() {
+  void test_Logging_At_High_Frequency_In_Parallel_At_Lower_Than_Current_Level() {
     Logger logger("LoggerTestPerformance");
     logger.setLevel(Logger::Priority::PRIO_INFORMATION);
 

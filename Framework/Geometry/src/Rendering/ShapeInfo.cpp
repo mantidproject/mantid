@@ -15,8 +15,7 @@ using Kernel::V3D;
 namespace Geometry {
 namespace detail {
 ShapeInfo::ShapeInfo()
-    : m_points(), m_radius(0), m_height(0), m_innerRadius(0),
-      m_shape(ShapeInfo::GeometryShape::NOSHAPE) {}
+    : m_points(), m_radius(0), m_height(0), m_innerRadius(0), m_shape(ShapeInfo::GeometryShape::NOSHAPE) {}
 
 const std::vector<Kernel::V3D> &ShapeInfo::points() const { return m_points; }
 
@@ -28,10 +27,8 @@ double ShapeInfo::innerRadius() const { return m_innerRadius; }
 
 ShapeInfo::GeometryShape ShapeInfo::shape() const { return m_shape; }
 
-void ShapeInfo::getObjectGeometry(ShapeInfo::GeometryShape &shape,
-                                  std::vector<Kernel::V3D> &points,
-                                  double &innerRadius, double &radius,
-                                  double &height) const {
+void ShapeInfo::getObjectGeometry(ShapeInfo::GeometryShape &shape, std::vector<Kernel::V3D> &points,
+                                  double &innerRadius, double &radius, double &height) const {
   shape = m_shape;
   points = m_points;
   innerRadius = m_innerRadius;
@@ -46,8 +43,7 @@ ShapeInfo::CuboidGeometry ShapeInfo::cuboidGeometry() const {
 
 ShapeInfo::HexahedronGeometry ShapeInfo::hexahedronGeometry() const {
   assert(m_shape == GeometryShape::HEXAHEDRON);
-  return {m_points[0], m_points[1], m_points[2], m_points[3],
-          m_points[4], m_points[5], m_points[6], m_points[7]};
+  return {m_points[0], m_points[1], m_points[2], m_points[3], m_points[4], m_points[5], m_points[6], m_points[7]};
 }
 
 ShapeInfo::SphereGeometry ShapeInfo::sphereGeometry() const {
@@ -70,8 +66,7 @@ ShapeInfo::ConeGeometry ShapeInfo::coneGeometry() const {
   return {m_points.front(), m_points.back(), m_radius, m_height};
 }
 
-void ShapeInfo::setCuboid(const V3D &p1, const V3D &p2, const V3D &p3,
-                          const V3D &p4) {
+void ShapeInfo::setCuboid(const V3D &p1, const V3D &p2, const V3D &p3, const V3D &p4) {
   m_shape = GeometryShape::CUBOID;
   m_points.assign({p1, p2, p3, p4});
   m_radius = 0;
@@ -79,8 +74,7 @@ void ShapeInfo::setCuboid(const V3D &p1, const V3D &p2, const V3D &p3,
   m_innerRadius = 0;
 }
 
-void ShapeInfo::setHexahedron(const V3D &p1, const V3D &p2, const V3D &p3,
-                              const V3D &p4, const V3D &p5, const V3D &p6,
+void ShapeInfo::setHexahedron(const V3D &p1, const V3D &p2, const V3D &p3, const V3D &p4, const V3D &p5, const V3D &p6,
                               const V3D &p7, const V3D &p8) {
   m_shape = GeometryShape::HEXAHEDRON;
   m_points.assign({p1, p2, p3, p4, p5, p6, p7, p8});
@@ -97,9 +91,7 @@ void ShapeInfo::setSphere(const V3D &center, double radius) {
   m_innerRadius = 0;
 }
 
-void ShapeInfo::setCylinder(const V3D &centerBottomBase,
-                            const V3D &symmetryAxis, double radius,
-                            double height) {
+void ShapeInfo::setCylinder(const V3D &centerBottomBase, const V3D &symmetryAxis, double radius, double height) {
   m_shape = GeometryShape::CYLINDER;
   m_points.assign({centerBottomBase, symmetryAxis});
   m_radius = radius;
@@ -107,8 +99,7 @@ void ShapeInfo::setCylinder(const V3D &centerBottomBase,
   m_innerRadius = 0;
 }
 
-void ShapeInfo::setCone(const V3D &center, const V3D &symmetryAxis,
-                        double radius, double height) {
+void ShapeInfo::setCone(const V3D &center, const V3D &symmetryAxis, double radius, double height) {
   m_shape = GeometryShape::CONE;
   m_points.assign({center, symmetryAxis});
   m_radius = radius;
@@ -116,10 +107,8 @@ void ShapeInfo::setCone(const V3D &center, const V3D &symmetryAxis,
   m_innerRadius = 0;
 }
 
-void ShapeInfo::setHollowCylinder(const Kernel::V3D &centreBottomBase,
-                                  const Kernel::V3D &symmetryAxis,
-                                  double innerRadius, double outerRadius,
-                                  double height) {
+void ShapeInfo::setHollowCylinder(const Kernel::V3D &centreBottomBase, const Kernel::V3D &symmetryAxis,
+                                  double innerRadius, double outerRadius, double height) {
   m_shape = GeometryShape::HOLLOWCYLINDER;
   m_points.assign({centreBottomBase, symmetryAxis});
   m_radius = outerRadius;
@@ -128,14 +117,11 @@ void ShapeInfo::setHollowCylinder(const Kernel::V3D &centreBottomBase,
 }
 
 bool ShapeInfo::operator==(const ShapeInfo &other) {
-  return m_shape == other.m_shape &&
-         std::abs(m_height - other.m_height) < Kernel::Tolerance &&
-         std::abs(m_radius - other.m_radius) < Kernel::Tolerance &&
-         m_points == other.m_points;
+  return m_shape == other.m_shape && std::abs(m_height - other.m_height) < Kernel::Tolerance &&
+         std::abs(m_radius - other.m_radius) < Kernel::Tolerance && m_points == other.m_points;
 }
 
-std::ostream &operator<<(std::ostream &os,
-                         const ShapeInfo::GeometryShape shape) {
+std::ostream &operator<<(std::ostream &os, const ShapeInfo::GeometryShape shape) {
   switch (shape) {
   case ShapeInfo::GeometryShape::NOSHAPE:
     os << "NOSHAPE";

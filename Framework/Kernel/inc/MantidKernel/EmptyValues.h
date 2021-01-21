@@ -28,24 +28,18 @@ constexpr int EMPTY_INT() noexcept { return std::numeric_limits<int>::max(); }
  * Returns what we consider an "empty" long within a property
  * @returns An flag value
  */
-constexpr long EMPTY_LONG() noexcept {
-  return std::numeric_limits<long>::max();
-}
+constexpr long EMPTY_LONG() noexcept { return std::numeric_limits<long>::max(); }
 
 /**
  * Returns what we consider an "empty" int64_t within a property
  * @returns An flag value
  */
-constexpr int64_t EMPTY_INT64() noexcept {
-  return std::numeric_limits<int64_t>::max();
-}
+constexpr int64_t EMPTY_INT64() noexcept { return std::numeric_limits<int64_t>::max(); }
 
 /**
  * Returns what we consider an "empty" double within a property
  * @returns An flag value
  */
-constexpr double EMPTY_DBL() noexcept {
-  return std::numeric_limits<double>::max() / 2;
-}
+constexpr double EMPTY_DBL() noexcept { return std::numeric_limits<double>::max() / 2; }
 
 } // namespace Mantid

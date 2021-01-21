@@ -24,8 +24,7 @@ class PropertyFactory {};
 namespace propertyFactoryHelper {
 
 // Helper function to remove unique pointer and return a raw pointer
-Property *removeUniquePointer(const std::string &name,
-                              const boost::python::list &defaultValue) {
+Property *removeUniquePointer(const std::string &name, const boost::python::list &defaultValue) {
 
   // Get the unique pointer from the factory and convert it into a raw pointer
   auto ptr = PropertyWithValueFactory::createTimeSeries(name, defaultValue);
@@ -37,8 +36,7 @@ Property *removeUniquePointer(const std::string &name,
 // Export the PropertyFactory
 void export_PropertyFactory() {
   class_<PropertyFactory, boost::noncopyable>("PropertyFactory", no_init)
-      .def("createTimeSeries", &propertyFactoryHelper::removeUniquePointer,
-           arg("log_name"), arg("log_values"),
+      .def("createTimeSeries", &propertyFactoryHelper::removeUniquePointer, arg("log_name"), arg("log_values"),
            return_value_policy<manage_new_object>())
       .staticmethod("createTimeSeries");
 }

@@ -36,8 +36,7 @@ namespace MDF {
  */
 class DatasetPlotData {
 public:
-  DatasetPlotData(const QString &wsName, int wsIndex,
-                  const QString &outputWSName);
+  DatasetPlotData(const QString &wsName, int wsIndex, const QString &outputWSName);
   ~DatasetPlotData();
   void show(QwtPlot *plot);
   void hide();
@@ -48,8 +47,7 @@ private:
   // no copying
   DatasetPlotData(const DatasetPlotData &);
   DatasetPlotData &operator=(const DatasetPlotData &);
-  void setData(const Mantid::API::MatrixWorkspace *ws, int wsIndex,
-               const Mantid::API::MatrixWorkspace *outputWS);
+  void setData(const Mantid::API::MatrixWorkspace *ws, int wsIndex, const Mantid::API::MatrixWorkspace *outputWS);
   /// Curve object for the fit data (spectrum).
   QwtPlotCurve *m_dataCurve;
   /// Error bar curve for the data

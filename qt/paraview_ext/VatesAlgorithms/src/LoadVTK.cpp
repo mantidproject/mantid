@@ -119,12 +119,10 @@ const std::string LoadVTK::category() const { return "MDAlgorithms"; }
 
 void LoadVTK::init() {
   std::vector<std::string> exts{"vtk"};
-  this->declareProperty(
-      std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
-      "Binary legacy VTK uniform structured image file to load.");
+  this->declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
+                        "Binary legacy VTK uniform structured image file to load.");
 
-  auto manditorySignalArrayName =
-      std::make_shared<MandatoryValidator<std::string>>();
+  auto manditorySignalArrayName = std::make_shared<MandatoryValidator<std::string>>();
 
   this->declareProperty("SignalArrayName", "", manditorySignalArrayName,
                         "Point data array name to import as signal/intesity "
@@ -145,48 +143,37 @@ void LoadVTK::init() {
                         "the range min to max. Allow sparse regions to be "
                         "ignored. Defaults to 25%.");
 
-  setPropertySettings("KeepTopPercent", std::make_unique<EnabledWhenProperty>(
-                                            "AdaptiveBinned", IS_DEFAULT));
+  setPropertySettings("KeepTopPercent", std::make_unique<EnabledWhenProperty>("AdaptiveBinned", IS_DEFAULT));
 
-  declareProperty(std::make_unique<WorkspaceProperty<IMDWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<IMDWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "MDWorkspace equivalent of vtkStructuredPoints input.");
 
-  declareProperty(std::make_unique<PropertyWithValue<int>>("SignalMaximum", 0,
-                                                           Direction::Output),
+  declareProperty(std::make_unique<PropertyWithValue<int>>("SignalMaximum", 0, Direction::Output),
                   "Maximum signal value determined from input array.");
-  declareProperty(std::make_unique<PropertyWithValue<int>>("SignalMinimum", 0,
-                                                           Direction::Output),
+  declareProperty(std::make_unique<PropertyWithValue<int>>("SignalMinimum", 0, Direction::Output),
                   "Minimum signal value determined from input array.");
-  declareProperty(std::make_unique<PropertyWithValue<int>>("SignalThreshold", 0,
-                                                           Direction::Output),
+  declareProperty(std::make_unique<PropertyWithValue<int>>("SignalThreshold", 0, Direction::Output),
                   "Actual calculated signal threshold determined from "
                   "minimum, and maximum signal.");
 }
 
-void LoadVTK::execMDHisto(vtkUnsignedShortArray *signals,
-                          vtkUnsignedShortArray *errorsSQ,
-                          MDHistoDimension_sptr dimX,
-                          MDHistoDimension_sptr dimY,
-                          MDHistoDimension_sptr dimZ, Progress &prog,
-                          const int64_t nPoints, const int64_t frequency) {
+void LoadVTK::execMDHisto(vtkUnsignedShortArray *signals, vtkUnsignedShortArray *errorsSQ, MDHistoDimension_sptr dimX,
+                          MDHistoDimension_sptr dimY, MDHistoDimension_sptr dimZ, Progress &prog, const int64_t nPoints,
+                          const int64_t frequency) {
   MemoryStats memoryStats;
-  const size_t freeMemory = memoryStats.availMem(); // in kB
-  const size_t memoryCost =
-      MDHistoWorkspace::sizeOfElement() * nPoints / 1000; // in kB
+  const size_t freeMemory = memoryStats.availMem();                             // in kB
+  const size_t memoryCost = MDHistoWorkspace::sizeOfElement() * nPoints / 1000; // in kB
   if (memoryCost > freeMemory) {
-    std::string basicMessage =
-        "Loading this file requires more free memory than you have available.";
+    std::string basicMessage = "Loading this file requires more free memory than you have available.";
     std::stringstream sstream;
-    sstream << basicMessage << " Requires " << memoryCost
-            << " KB of contiguous memory. You have " << freeMemory << " KB.";
+    sstream << basicMessage << " Requires " << memoryCost << " KB of contiguous memory. You have " << freeMemory
+            << " KB.";
     g_log.notice(sstream.str());
     throw std::runtime_error(basicMessage);
   }
 
   prog.report("Converting to MD Histogram Workspace");
-  MDHistoWorkspace_sptr outputWS =
-      std::make_shared<MDHistoWorkspace>(dimX, dimY, dimZ);
+  MDHistoWorkspace_sptr outputWS = std::make_shared<MDHistoWorkspace>(dimX, dimY, dimZ);
 
   // cppcheck-suppress unreadVariable
   double *destinationSignals = outputWS->mutableSignalArray();
@@ -220,13 +207,9 @@ void LoadVTK::execMDHisto(vtkUnsignedShortArray *signals,
   this->setProperty("OutputWorkspace", outputWS);
 }
 
-void LoadVTK::execMDEvent(vtkDataSet *readDataset,
-                          vtkUnsignedShortArray *signals,
-                          vtkUnsignedShortArray *errorsSQ,
-                          MDHistoDimension_sptr dimX,
-                          MDHistoDimension_sptr dimY,
-                          MDHistoDimension_sptr dimZ, Progress &prog,
-                          const int64_t nPoints, const int64_t frequency) {
+void LoadVTK::execMDEvent(vtkDataSet *readDataset, vtkUnsignedShortArray *signals, vtkUnsignedShortArray *errorsSQ,
+                          MDHistoDimension_sptr dimX, MDHistoDimension_sptr dimY, MDHistoDimension_sptr dimZ,
+                          Progress &prog, const int64_t nPoints, const int64_t frequency) {
   unsigned int min = std::numeric_limits<unsigned int>::max();
   unsigned int max = std::numeric_limits<unsigned int>::min();
   for (unsigned int i = 0; i < readDataset->GetNumberOfPoints(); ++i) {
@@ -320,18 +303,16 @@ void LoadVTK::exec() {
   vtkSmartPointer<vtkStructuredPoints> readDataset;
   readDataset.TakeReference(reader->GetOutput());
 
-  vtkUnsignedShortArray *signals = vtkUnsignedShortArray::FastDownCast(
-      readDataset->GetPointData()->GetArray(signalArrayName.c_str()));
+  vtkUnsignedShortArray *signals =
+      vtkUnsignedShortArray::FastDownCast(readDataset->GetPointData()->GetArray(signalArrayName.c_str()));
   if (!signals) {
-    throw std::invalid_argument("Signal array: " + signalArrayName +
-                                " does not exist");
+    throw std::invalid_argument("Signal array: " + signalArrayName + " does not exist");
   }
 
-  vtkUnsignedShortArray *errorsSQ = vtkUnsignedShortArray::FastDownCast(
-      readDataset->GetPointData()->GetArray(errorSQArrayName.c_str()));
+  vtkUnsignedShortArray *errorsSQ =
+      vtkUnsignedShortArray::FastDownCast(readDataset->GetPointData()->GetArray(errorSQArrayName.c_str()));
   if (!errorSQArrayName.empty() && !errorsSQ) {
-    throw std::invalid_argument("Error squared array: " + errorSQArrayName +
-                                " does not exist");
+    throw std::invalid_argument("Error squared array: " + errorSQArrayName + " does not exist");
   }
 
   int dimensions[3];
@@ -340,26 +321,21 @@ void LoadVTK::exec() {
   readDataset->ComputeBounds();
   readDataset->GetBounds(bounds);
   Mantid::Geometry::UnknownFrame frame("");
-  auto dimX = std::make_shared<MDHistoDimension>(
-      "X", "X", frame, static_cast<coord_t>(bounds[0]),
-      static_cast<coord_t>(bounds[1]), dimensions[0]);
-  auto dimY = std::make_shared<MDHistoDimension>(
-      "Y", "Y", frame, static_cast<coord_t>(bounds[2]),
-      static_cast<coord_t>(bounds[3]), dimensions[1]);
-  auto dimZ = std::make_shared<MDHistoDimension>(
-      "Z", "Z", frame, static_cast<coord_t>(bounds[4]),
-      static_cast<coord_t>(bounds[5]), dimensions[2]);
+  auto dimX = std::make_shared<MDHistoDimension>("X", "X", frame, static_cast<coord_t>(bounds[0]),
+                                                 static_cast<coord_t>(bounds[1]), dimensions[0]);
+  auto dimY = std::make_shared<MDHistoDimension>("Y", "Y", frame, static_cast<coord_t>(bounds[2]),
+                                                 static_cast<coord_t>(bounds[3]), dimensions[1]);
+  auto dimZ = std::make_shared<MDHistoDimension>("Z", "Z", frame, static_cast<coord_t>(bounds[4]),
+                                                 static_cast<coord_t>(bounds[5]), dimensions[2]);
 
-  const int64_t nPoints =
-      static_cast<int64_t>(readDataset->GetNumberOfPoints());
+  const int64_t nPoints = static_cast<int64_t>(readDataset->GetNumberOfPoints());
   int64_t frequency = nPoints;
   if (nPoints > 100) {
     frequency = nPoints / 100;
   }
 
   if (adaptiveBinned) {
-    execMDEvent(readDataset, signals, errorsSQ, dimX, dimY, dimZ, prog, nPoints,
-                frequency);
+    execMDEvent(readDataset, signals, errorsSQ, dimX, dimY, dimZ, prog, nPoints, frequency);
   } else {
     execMDHisto(signals, errorsSQ, dimX, dimY, dimZ, prog, nPoints, frequency);
   }

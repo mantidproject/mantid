@@ -96,18 +96,14 @@ namespace {
 class KeyEquals {
 public:
   explicit KeyEquals(const std::string &key) : m_key(key) {}
-  bool
-  operator()(const std::pair<std::string, std::unique_ptr<Surface>> &element) {
-    return m_key == element.first;
-  }
+  bool operator()(const std::pair<std::string, std::unique_ptr<Surface>> &element) { return m_key == element.first; }
 
 private:
   std::string m_key;
 };
 } // namespace
 
-std::unique_ptr<Surface>
-SurfaceFactory::createSurface(const std::string &Key) const
+std::unique_ptr<Surface> SurfaceFactory::createSurface(const std::string &Key) const
 /**
   Creates an instance of tally
   given a valid key.
@@ -120,14 +116,12 @@ SurfaceFactory::createSurface(const std::string &Key) const
   MapType::const_iterator vc;
   vc = std::find_if(SGrid.begin(), SGrid.end(), KeyEquals(Key));
   if (vc == SGrid.end()) {
-    throw Kernel::Exception::NotFoundError("SurfaceFactory::createSurface",
-                                           Key);
+    throw Kernel::Exception::NotFoundError("SurfaceFactory::createSurface", Key);
   }
   return vc->second->clone();
 }
 
-std::unique_ptr<Surface>
-SurfaceFactory::createSurfaceID(const std::string &Key) const
+std::unique_ptr<Surface> SurfaceFactory::createSurfaceID(const std::string &Key) const
 /**
   Creates an instance of tally
   given a valid key.
@@ -141,15 +135,13 @@ SurfaceFactory::createSurfaceID(const std::string &Key) const
 
   mc = (Key.empty()) ? ID.end() : ID.find(static_cast<char>(tolower(Key[0])));
   if (mc == ID.end()) {
-    throw Kernel::Exception::NotFoundError("SurfaceFactory::createSurfaceID",
-                                           Key);
+    throw Kernel::Exception::NotFoundError("SurfaceFactory::createSurfaceID", Key);
   }
 
   return createSurface(mc->second);
 }
 
-std::unique_ptr<Surface>
-SurfaceFactory::processLine(const std::string &Line) const
+std::unique_ptr<Surface> SurfaceFactory::processLine(const std::string &Line) const
 /**
   Creates an instance of a surface
   given a valid line

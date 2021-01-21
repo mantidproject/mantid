@@ -62,11 +62,9 @@ namespace SimpleGui {
  * @param parent the parent widget for the view
  * @param rebinnedSourcesManager Pointer to a RebinnedSourcesManager
  */
-ViewBase::ViewBase(QWidget *parent,
-                   RebinnedSourcesManager *rebinnedSourcesManager)
+ViewBase::ViewBase(QWidget *parent, RebinnedSourcesManager *rebinnedSourcesManager)
     : QWidget(parent), m_rebinnedSourcesManager(rebinnedSourcesManager),
-      m_internallyRebinnedWorkspaceIdentifier("rebinned_vsi"),
-      m_colorScaleLock(nullptr) {}
+      m_internallyRebinnedWorkspaceIdentifier("rebinned_vsi"), m_colorScaleLock(nullptr) {}
 
 /**
  * This function creates a single standard ParaView view instance.
@@ -84,8 +82,8 @@ pqRenderView *ViewBase::createRenderView(QWidget *widget, QString viewName) {
 
   // Create a new render view.
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
-  pqRenderView *view = qobject_cast<pqRenderView *>(builder->createView(
-      viewName, pqActiveObjects::instance().activeServer()));
+  pqRenderView *view =
+      qobject_cast<pqRenderView *>(builder->createView(viewName, pqActiveObjects::instance().activeServer()));
   pqActiveObjects::instance().setActiveView(view);
 
   // Place the widget for the render view in the frame provided.
@@ -99,10 +97,8 @@ pqRenderView *ViewBase::createRenderView(QWidget *widget, QString viewName) {
  */
 void ViewBase::destroyFilter(const QString &name) {
   pqServer *server = pqActiveObjects::instance().activeServer();
-  pqServerManagerModel *smModel =
-      pqApplicationCore::instance()->getServerManagerModel();
-  const QList<pqPipelineSource *> sources =
-      smModel->findItems<pqPipelineSource *>(server);
+  pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
+  const QList<pqPipelineSource *> sources = smModel->findItems<pqPipelineSource *>(server);
 
   QSet<pqPipelineSource *> toDelete;
   foreach (pqPipelineSource *source, sources) {
@@ -196,9 +192,7 @@ void ViewBase::onColorMapChange(const Json::Value &model) {
  * @param min the minimum bound for the color scale
  * @param max the maximum bound for the color scale
  */
-void ViewBase::onColorScaleChange(double min, double max) {
-  this->colorUpdater.colorScaleChange(min, max);
-}
+void ViewBase::onColorScaleChange(double min, double max) { this->colorUpdater.colorScaleChange(min, max); }
 
 /**
  * This function sets logarithmic color scaling on the data.
@@ -211,9 +205,7 @@ void ViewBase::onLogScale(int state) { this->colorUpdater.logScale(state); }
  * object.
  * @param cs : Reference to the color selection widget
  */
-void ViewBase::setColorScaleState(ColorSelectionWidget *cs) {
-  this->colorUpdater.updateState(cs);
-}
+void ViewBase::setColorScaleState(ColorSelectionWidget *cs) { this->colorUpdater.updateState(cs); }
 
 /**
  * This function checks the current state from the color updater and
@@ -231,8 +223,7 @@ void ViewBase::setColorsForView(ColorSelectionWidget *colorScale) {
   if (this->colorUpdater.isAutoScale()) {
     this->onAutoScale(colorScale);
   } else {
-    this->onColorScaleChange(this->colorUpdater.getMinimumRange(),
-                             this->colorUpdater.getMaximumRange());
+    this->onColorScaleChange(this->colorUpdater.getMinimumRange(), this->colorUpdater.getMaximumRange());
   }
   if (this->colorUpdater.isLogScale()) {
     this->onLogScale(true);
@@ -254,8 +245,7 @@ bool ViewBase::isPeaksWorkspace(pqPipelineSource *src) {
   if (!src) {
     return false;
   }
-  QString wsType(vtkSMPropertyHelper(src->getProxy(), "WorkspaceTypeName", true)
-                     .GetAsString());
+  QString wsType(vtkSMPropertyHelper(src->getProxy(), "WorkspaceTypeName", true).GetAsString());
 
   if (wsType.isEmpty()) {
     wsType = src->getSMName();
@@ -269,8 +259,7 @@ bool ViewBase::isPeaksWorkspace(pqPipelineSource *src) {
  * @return the currently active representation
  */
 pqPipelineRepresentation *ViewBase::getPvActiveRep() {
-  pqDataRepresentation *drep =
-      pqActiveObjects::instance().activeRepresentation();
+  pqDataRepresentation *drep = pqActiveObjects::instance().activeRepresentation();
   return qobject_cast<pqPipelineRepresentation *>(drep);
 }
 
@@ -283,15 +272,13 @@ GNU_DIAG_OFF("strict-aliasing")
  * @param axesGridOn: if the axes grid should be on
  * @returns a pointer to the newly created pipeline source
  */
-pqPipelineSource *ViewBase::setPluginSource(QString pluginName, QString wsName,
-                                            bool axesGridOn) {
+pqPipelineSource *ViewBase::setPluginSource(QString pluginName, QString wsName, bool axesGridOn) {
   // Create the source from the plugin
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
   pqServer *server = pqActiveObjects::instance().activeServer();
   pqPipelineSource *src = builder->createSource("sources", pluginName, server);
   src->getProxy()->SetAnnotation("MdViewerWidget0", "1");
-  vtkSMPropertyHelper(src->getProxy(), "Mantid Workspace Name")
-      .Set(wsName.toStdString().c_str());
+  vtkSMPropertyHelper(src->getProxy(), "Mantid Workspace Name").Set(wsName.toStdString().c_str());
 
   // WORKAROUND BEGIN
   // We are setting the recursion depth to 1 when we are dealing with MDEvent
@@ -299,10 +286,8 @@ pqPipelineSource *ViewBase::setPluginSource(QString pluginName, QString wsName,
   // with top level splitting, but this is not updated in the plugin line edit
   // field.
   // We do this here.
-  auto workspaceProvider = std::make_unique<
-      Mantid::VATES::ADSWorkspaceProvider<Mantid::API::IMDEventWorkspace>>();
-  if (auto split = Mantid::VATES::findRecursionDepthForTopLevelSplitting(
-          wsName.toStdString(), *workspaceProvider)) {
+  auto workspaceProvider = std::make_unique<Mantid::VATES::ADSWorkspaceProvider<Mantid::API::IMDEventWorkspace>>();
+  if (auto split = Mantid::VATES::findRecursionDepthForTopLevelSplitting(wsName.toStdString(), *workspaceProvider)) {
     vtkSMPropertyHelper(src->getProxy(), "Recursion Depth").Set(split.get());
   }
   // WORKAROUND END
@@ -329,9 +314,7 @@ pqPipelineSource *ViewBase::setPluginSource(QString pluginName, QString wsName,
  * ActiveObjects mechanism.
  * @return the currently active source
  */
-pqPipelineSource *ViewBase::getPvActiveSrc() {
-  return pqActiveObjects::instance().activeSource();
-}
+pqPipelineSource *ViewBase::getPvActiveSrc() { return pqActiveObjects::instance().activeSource(); }
 
 /**
  * This function sets the status for the view mode control buttons. This
@@ -364,9 +347,7 @@ void ViewBase::setSplatterplot(bool visibility) {
  * value
  * @param visibility The state of the the standard view button.
  */
-void ViewBase::setStandard(bool visibility) {
-  emit this->setViewStatus(ModeControlWidget::STANDARD, visibility);
-}
+void ViewBase::setStandard(bool visibility) { emit this->setViewStatus(ModeControlWidget::STANDARD, visibility); }
 
 /**
  * This function sets the status for the view mode control buttons when the
@@ -399,8 +380,7 @@ void ViewBase::updateAnimationControls() {
   vtkSMSourceProxy *srcProxy1 = vtkSMSourceProxy::SafeDownCast(src->getProxy());
   srcProxy1->Modified();
   srcProxy1->UpdatePipelineInformation();
-  vtkSMDoubleVectorProperty *tsv = vtkSMDoubleVectorProperty::SafeDownCast(
-      srcProxy1->GetProperty("TimestepValues"));
+  vtkSMDoubleVectorProperty *tsv = vtkSMDoubleVectorProperty::SafeDownCast(srcProxy1->GetProperty("TimestepValues"));
   this->handleTimeInfo(tsv);
 }
 
@@ -412,15 +392,12 @@ void ViewBase::updateAnimationControls() {
  */
 long long ViewBase::getNumSources() {
   pqServer *server = pqActiveObjects::instance().activeServer();
-  pqServerManagerModel *smModel =
-      pqApplicationCore::instance()->getServerManagerModel();
-  const QList<pqPipelineSource *> sources =
-      smModel->findItems<pqPipelineSource *>(server);
+  pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
+  const QList<pqPipelineSource *> sources = smModel->findItems<pqPipelineSource *>(server);
 
-  return std::count_if(
-      sources.begin(), sources.end(), [](const pqPipelineSource *source) {
-        return strcmp(source->getProxy()->GetXMLGroup(), "sources") == 0;
-      });
+  return std::count_if(sources.begin(), sources.end(), [](const pqPipelineSource *source) {
+    return strcmp(source->getProxy()->GetXMLGroup(), "sources") == 0;
+  });
 }
 
 /**
@@ -458,8 +435,7 @@ void ViewBase::handleTimeInfo(vtkSMDoubleVectorProperty *dvp) {
  */
 void ViewBase::onResetCenterToPoint(double x, double y, double z) {
   pqRenderView *renderView = this->getPvActiveView();
-  pqDataRepresentation *repr =
-      pqActiveObjects::instance().activeRepresentation();
+  pqDataRepresentation *repr = pqActiveObjects::instance().activeRepresentation();
   if (!repr || !renderView) {
     // qDebug() << "Active source not shown in active view. Cannot set center.";
     return;
@@ -521,11 +497,9 @@ pqRenderView *ViewBase::getPvActiveView() {
  * @return the workspace name for the original pipeline object
  */
 QString ViewBase::getWorkspaceName() {
-  pqServerManagerModel *smModel =
-      pqApplicationCore::instance()->getServerManagerModel();
+  pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
   pqPipelineSource *src = smModel->getItemAtIndex<pqPipelineSource *>(0);
-  QString wsName(vtkSMPropertyHelper(src->getProxy(), "WorkspaceName", true)
-                     .GetAsString());
+  QString wsName(vtkSMPropertyHelper(src->getProxy(), "WorkspaceName", true).GetAsString());
   return wsName;
 }
 
@@ -553,8 +527,7 @@ bool ViewBase::srcHasTimeSteps(pqPipelineSource *src) {
   vtkSMSourceProxy *srcProxy1 = vtkSMSourceProxy::SafeDownCast(src->getProxy());
   srcProxy1->Modified();
   srcProxy1->UpdatePipelineInformation();
-  vtkSMDoubleVectorProperty *tsv = vtkSMDoubleVectorProperty::SafeDownCast(
-      srcProxy1->GetProperty("TimestepValues"));
+  vtkSMDoubleVectorProperty *tsv = vtkSMDoubleVectorProperty::SafeDownCast(srcProxy1->GetProperty("TimestepValues"));
   const unsigned int numTimesteps = tsv->GetNumberOfElements();
   return 0 < numTimesteps;
 }
@@ -598,8 +571,7 @@ bool ViewBase::isMDHistoWorkspace(pqPipelineSource *src) {
   if (!src) {
     return false;
   }
-  QString wsType(vtkSMPropertyHelper(src->getProxy(), "WorkspaceTypeName", true)
-                     .GetAsString());
+  QString wsType(vtkSMPropertyHelper(src->getProxy(), "WorkspaceTypeName", true).GetAsString());
 
   if (wsType.isEmpty()) {
     wsType = src->getSMName();
@@ -617,8 +589,7 @@ bool ViewBase::isInternallyRebinnedWorkspace(pqPipelineSource *src) {
     return false;
   }
 
-  QString wsName(vtkSMPropertyHelper(src->getProxy(), "WorkspaceName", true)
-                     .GetAsString());
+  QString wsName(vtkSMPropertyHelper(src->getProxy(), "WorkspaceName", true).GetAsString());
 
   if (wsName.contains(m_internallyRebinnedWorkspaceIdentifier) &&
       m_rebinnedSourcesManager->isRebinnedSourceBeingTracked(src)) {
@@ -650,10 +621,8 @@ void ViewBase::updateSettings() { this->backgroundRgbProvider.update(); }
  */
 bool ViewBase::hasFilter(const QString &name) {
   pqServer *server = pqActiveObjects::instance().activeServer();
-  pqServerManagerModel *smModel =
-      pqApplicationCore::instance()->getServerManagerModel();
-  const QList<pqPipelineSource *> sources =
-      smModel->findItems<pqPipelineSource *>(server);
+  pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
+  const QList<pqPipelineSource *> sources = smModel->findItems<pqPipelineSource *>(server);
   foreach (pqPipelineSource *source, sources) {
     const QString sourceName = source->getSMName();
     if (sourceName.startsWith(name)) {
@@ -671,14 +640,10 @@ bool ViewBase::hasFilter(const QString &name) {
  */
 pqPipelineSource *ViewBase::hasWorkspace(const QString &name) {
   pqServer *server = pqActiveObjects::instance().activeServer();
-  pqServerManagerModel *smModel =
-      pqApplicationCore::instance()->getServerManagerModel();
-  QList<pqPipelineSource *> sources =
-      smModel->findItems<pqPipelineSource *>(server);
+  pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
+  QList<pqPipelineSource *> sources = smModel->findItems<pqPipelineSource *>(server);
   foreach (pqPipelineSource *source, sources) {
-    QString wsName(
-        vtkSMPropertyHelper(source->getProxy(), "WorkspaceName", true)
-            .GetAsString());
+    QString wsName(vtkSMPropertyHelper(source->getProxy(), "WorkspaceName", true).GetAsString());
     if (!wsName.isEmpty()) {
       if (wsName == name) {
         return source;
@@ -696,15 +661,11 @@ pqPipelineSource *ViewBase::hasWorkspace(const QString &name) {
  */
 bool ViewBase::hasWorkspaceType(const QString &wsTypeName) {
   pqServer *server = pqActiveObjects::instance().activeServer();
-  pqServerManagerModel *smModel =
-      pqApplicationCore::instance()->getServerManagerModel();
-  const QList<pqPipelineSource *> sources =
-      smModel->findItems<pqPipelineSource *>(server);
+  pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
+  const QList<pqPipelineSource *> sources = smModel->findItems<pqPipelineSource *>(server);
   bool hasWsType = false;
   foreach (pqPipelineSource *source, sources) {
-    QString wsType(
-        vtkSMPropertyHelper(source->getProxy(), "WorkspaceTypeName", true)
-            .GetAsString());
+    QString wsType(vtkSMPropertyHelper(source->getProxy(), "WorkspaceTypeName", true).GetAsString());
 
     if (wsType.isEmpty()) {
       wsType = source->getSMName();
@@ -723,8 +684,7 @@ bool ViewBase::hasWorkspaceType(const QString &wsTypeName) {
  * @param useCurrentColorSettings If the view was switched or created.
  */
 void ViewBase::setColorForBackground(bool useCurrentColorSettings) {
-  backgroundRgbProvider.setBackgroundColor(this->getView(),
-                                           useCurrentColorSettings);
+  backgroundRgbProvider.setBackgroundColor(this->getView(), useCurrentColorSettings);
   backgroundRgbProvider.observe(this->getView());
 }
 
@@ -740,10 +700,7 @@ unsigned long ViewBase::setVisibleAxesColors() {
  * Set color scale lock
  * @param colorScaleLock: the color scale lock
  */
-void ViewBase::setColorScaleLock(
-    Mantid::VATES::ColorScaleLock *colorScaleLock) {
-  m_colorScaleLock = colorScaleLock;
-}
+void ViewBase::setColorScaleLock(Mantid::VATES::ColorScaleLock *colorScaleLock) { m_colorScaleLock = colorScaleLock; }
 
 /**
  * React to a change of the visibility of a representation of a source.
@@ -781,10 +738,8 @@ void ViewBase::onSourceDestroyed() {}
  */
 void ViewBase::destroyAllSourcesInView() {
   pqServer *server = pqActiveObjects::instance().activeServer();
-  pqServerManagerModel *smModel =
-      pqApplicationCore::instance()->getServerManagerModel();
-  const QList<pqPipelineSource *> sources =
-      smModel->findItems<pqPipelineSource *>(server);
+  pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
+  const QList<pqPipelineSource *> sources = smModel->findItems<pqPipelineSource *>(server);
 
   // Out of all pqPipelineSources, find the "true" sources, which were
   // created by a Source Plugin, i.e. MDEW Source, MDHW Source, PeakSource
@@ -798,9 +753,7 @@ void ViewBase::destroyAllSourcesInView() {
   // For each true source, go to the end of the pipeline and destroy it on the
   // way back
   // to the start. This assumes linear pipelines.
-  foreach (pqPipelineSource *trueSource, trueSources) {
-    destroySinglePipeline(trueSource);
-  }
+  foreach (pqPipelineSource *trueSource, trueSources) { destroySinglePipeline(trueSource); }
 }
 
 /**
@@ -834,19 +787,13 @@ void ViewBase::destroySinglePipeline(pqPipelineSource *source) {
 void ViewBase::setVisibilityListener() {
   // Set the connection to listen to a visibility change of the representation.
   pqServer *server = pqActiveObjects::instance().activeServer();
-  pqServerManagerModel *smModel =
-      pqApplicationCore::instance()->getServerManagerModel();
-  const QList<pqPipelineSource *> sources =
-      smModel->findItems<pqPipelineSource *>(server);
+  pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
+  const QList<pqPipelineSource *> sources = smModel->findItems<pqPipelineSource *>(server);
 
   // Attach the visibilityChanged signal for all sources.
   foreach (pqPipelineSource *source, sources) {
-    QObject::connect(
-        source,
-        SIGNAL(visibilityChanged(pqPipelineSource *, pqDataRepresentation *)),
-        this,
-        SLOT(onVisibilityChanged(pqPipelineSource *, pqDataRepresentation *)),
-        Qt::UniqueConnection);
+    QObject::connect(source, SIGNAL(visibilityChanged(pqPipelineSource *, pqDataRepresentation *)), this,
+                     SLOT(onVisibilityChanged(pqPipelineSource *, pqDataRepresentation *)), Qt::UniqueConnection);
   }
 }
 
@@ -856,18 +803,13 @@ void ViewBase::setVisibilityListener() {
 void ViewBase::removeVisibilityListener() {
   // Set the connection to listen to a visibility change of the representation.
   pqServer *server = pqActiveObjects::instance().activeServer();
-  pqServerManagerModel *smModel =
-      pqApplicationCore::instance()->getServerManagerModel();
-  const QList<pqPipelineSource *> sources =
-      smModel->findItems<pqPipelineSource *>(server);
+  pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
+  const QList<pqPipelineSource *> sources = smModel->findItems<pqPipelineSource *>(server);
 
   // Attach the visibilityChanged signal for all sources.
   foreach (pqPipelineSource *source, sources) {
-    QObject::disconnect(
-        source,
-        SIGNAL(visibilityChanged(pqPipelineSource *, pqDataRepresentation *)),
-        this,
-        SLOT(onVisibilityChanged(pqPipelineSource *, pqDataRepresentation *)));
+    QObject::disconnect(source, SIGNAL(visibilityChanged(pqPipelineSource *, pqDataRepresentation *)), this,
+                        SLOT(onVisibilityChanged(pqPipelineSource *, pqDataRepresentation *)));
   }
 }
 
@@ -877,9 +819,7 @@ void ViewBase::removeVisibilityListener() {
 void ViewBase::setAxesGrid(bool on) {
   if (on) {
     if (auto renderView = getView()) {
-      vtkSMProxy *gridAxes3DActor =
-          vtkSMPropertyHelper(renderView->getProxy(), "AxesGrid", true)
-              .GetAsProxy();
+      vtkSMProxy *gridAxes3DActor = vtkSMPropertyHelper(renderView->getProxy(), "AxesGrid", true).GetAsProxy();
       vtkSMPropertyHelper(gridAxes3DActor, "Visibility").Set(1);
       gridAxes3DActor->UpdateProperty("Visibility");
     }

@@ -25,19 +25,14 @@ size_t GridDomain::size() const {
   if (m_grids.empty())
     return 0;
   else
-    return std::accumulate(
-        m_grids.begin(), m_grids.end(), size_t{1},
-        [](size_t n, const std::shared_ptr<GridDomain> &grid) {
-          return n * grid->size();
-        });
+    return std::accumulate(m_grids.begin(), m_grids.end(), size_t{1},
+                           [](size_t n, const std::shared_ptr<GridDomain> &grid) { return n * grid->size(); });
 }
 
 /// number of dimensions of the grid
 size_t GridDomain::nDimensions() {
   return std::accumulate(m_grids.begin(), m_grids.end(), size_t{0},
-                         [](size_t n, std::shared_ptr<GridDomain> &grid) {
-                           return n + grid->nDimensions();
-                         });
+                         [](size_t n, std::shared_ptr<GridDomain> &grid) { return n + grid->nDimensions(); });
 }
 
 /* return item of member m_grids

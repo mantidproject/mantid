@@ -21,8 +21,7 @@ public:
   AlgorithmDockWidget(MantidUI *mui, ApplicationWindow *w);
 public slots:
   void update();
-  void updateProgress(void *alg, const double p, const QString &msg,
-                      double estimatedTime, int progressPrecision);
+  void updateProgress(void *alg, const double p, const QString &msg, double estimatedTime, int progressPrecision);
   void algorithmStarted(void *alg);
   void algorithmFinished(void *alg);
 

@@ -31,8 +31,7 @@ namespace {
 /// Number of microseconds in one second (10^6)
 constexpr double MICROSECONDS_PER_SECOND{1000000.0};
 /// Muon lifetime in microseconds
-constexpr double MUON_LIFETIME_MICROSECONDS{
-    Mantid::PhysicalConstants::MuonLifetime * MICROSECONDS_PER_SECOND};
+constexpr double MUON_LIFETIME_MICROSECONDS{Mantid::PhysicalConstants::MuonLifetime * MICROSECONDS_PER_SECOND};
 } // namespace
 
 namespace Mantid {
@@ -47,9 +46,7 @@ using std::size_t;
  * @param numGoodFrames :: [input] the number of good frames
  * @returns :: Histogram of the normalised counts
  */
-HistogramData::Histogram
-normaliseCounts(const HistogramData::Histogram &histogram,
-                const double numGoodFrames) {
+HistogramData::Histogram normaliseCounts(const HistogramData::Histogram &histogram, const double numGoodFrames) {
   HistogramData::Histogram result(histogram);
   const auto xPoints = result.points();
 
@@ -87,8 +84,7 @@ normaliseCounts(const HistogramData::Histogram &histogram,
  * @param  endX :: [input] the end time
  * @returns :: The normalization constant N_0
  */
-double estimateNormalisationConst(const HistogramData::Histogram &histogram,
-                                  const double numGoodFrames,
+double estimateNormalisationConst(const HistogramData::Histogram &histogram, const double numGoodFrames,
                                   const double startX, const double endX) {
 
   auto &&xData = histogram.binEdges();
@@ -120,10 +116,8 @@ double estimateNormalisationConst(const HistogramData::Histogram &histogram,
  * @param startX :: [input] the start time
  * @returns :: The index to start calculations from
  */
-size_t startIndexFromTime(const HistogramData::BinEdges &xData,
-                          const double startX) {
-  auto upper =
-      std::lower_bound(xData.rawData().begin(), xData.rawData().end(), startX);
+size_t startIndexFromTime(const HistogramData::BinEdges &xData, const double startX) {
+  auto upper = std::lower_bound(xData.rawData().begin(), xData.rawData().end(), startX);
 
   if (upper == xData.rawData().end()) {
     throw std::invalid_argument("Start of range is after data end.");
@@ -137,11 +131,9 @@ size_t startIndexFromTime(const HistogramData::BinEdges &xData,
  * @param endX :: [input] the end time
  * @returns :: The last index to  include in calculations
  */
-size_t endIndexFromTime(const HistogramData::BinEdges &xData,
-                        const double endX) {
+size_t endIndexFromTime(const HistogramData::BinEdges &xData, const double endX) {
 
-  auto lower =
-      std::upper_bound(xData.rawData().begin(), xData.rawData().end(), endX);
+  auto lower = std::upper_bound(xData.rawData().begin(), xData.rawData().end(), endX);
   if (lower == xData.rawData().begin()) {
     throw std::invalid_argument("End of range is before data start.");
   }
@@ -151,10 +143,8 @@ size_t endIndexFromTime(const HistogramData::BinEdges &xData,
 /*****
  The following functions are for manipulating the normalisation table
 ******/
-void updateNormalizationTable(Mantid::API::ITableWorkspace_sptr &table,
-                              const std::vector<std::string> &wsNames,
-                              const std::vector<double> &norms,
-                              const std::vector<std::string> &methods) {
+void updateNormalizationTable(Mantid::API::ITableWorkspace_sptr &table, const std::vector<std::string> &wsNames,
+                              const std::vector<double> &norms, const std::vector<std::string> &methods) {
 
   for (size_t j = 0; j < wsNames.size(); j++) {
     bool updated = false;

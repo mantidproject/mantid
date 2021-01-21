@@ -34,20 +34,16 @@ public:
   TestableFunctionParameterDecorator() {}
   ~TestableFunctionParameterDecorator() override {}
 
-  std::string name() const override {
-    return "TestableFunctionParameterDecorator";
-  }
+  std::string name() const override { return "TestableFunctionParameterDecorator"; }
 
-  void function(const FunctionDomain &domain,
-                FunctionValues &values) const override {
+  void function(const FunctionDomain &domain, FunctionValues &values) const override {
     throwIfNoFunctionSet();
 
     IFunction_sptr fn = getDecoratedFunction();
     fn->function(domain, values);
   }
 
-  void functionDeriv(const FunctionDomain &domain,
-                     Jacobian &jacobian) override {
+  void functionDeriv(const FunctionDomain &domain, Jacobian &jacobian) override {
     throwIfNoFunctionSet();
 
     IFunction_sptr fn = getDecoratedFunction();
@@ -69,16 +65,13 @@ public:
     declareParameter("Sigma");
   }
 
-  void function(const FunctionDomain &domain,
-                FunctionValues &values) const override {
+  void function(const FunctionDomain &domain, FunctionValues &values) const override {
     UNUSED_ARG(domain);
     UNUSED_ARG(values);
     // Does nothing, not required for this test.
   }
 
-  void setWorkspace(std::shared_ptr<const Workspace> ws) override {
-    m_workspace = ws;
-  }
+  void setWorkspace(std::shared_ptr<const Workspace> ws) override { m_workspace = ws; }
 
   Workspace_const_sptr getWorkspace() const { return m_workspace; }
 
@@ -102,8 +95,7 @@ public:
     declareAttribute("Attribute2", IFunction::Attribute("Test"));
   }
 
-  void function(const FunctionDomain &domain,
-                FunctionValues &values) const override {
+  void function(const FunctionDomain &domain, FunctionValues &values) const override {
     UNUSED_ARG(domain);
     UNUSED_ARG(values);
     // Does nothing, not required for this test.
@@ -116,12 +108,8 @@ class FunctionParameterDecoratorTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static FunctionParameterDecoratorTest *createSuite() {
-    return new FunctionParameterDecoratorTest();
-  }
-  static void destroySuite(FunctionParameterDecoratorTest *suite) {
-    delete suite;
-  }
+  static FunctionParameterDecoratorTest *createSuite() { return new FunctionParameterDecoratorTest(); }
+  static void destroySuite(FunctionParameterDecoratorTest *suite) { delete suite; }
 
   void testSetDecoratedFunction() {
     TestableFunctionParameterDecorator fn;
@@ -135,8 +123,7 @@ public:
 
   void testSetDecoratedFunctionInvalidName() {
     TestableFunctionParameterDecorator fn;
-    TS_ASSERT_THROWS(fn.setDecoratedFunction("INVALIDFUNCTION"),
-                     const Exception::NotFoundError &);
+    TS_ASSERT_THROWS(fn.setDecoratedFunction("INVALIDFUNCTION"), const Exception::NotFoundError &);
     TS_ASSERT(!fn.getDecoratedFunction());
   }
 
@@ -151,8 +138,7 @@ public:
     TestableFunctionParameterDecorator invalidFn;
     TS_ASSERT_EQUALS(invalidFn.nParams(), 0);
 
-    FunctionParameterDecorator_sptr fn =
-        getFunctionParameterDecoratorGaussian();
+    FunctionParameterDecorator_sptr fn = getFunctionParameterDecoratorGaussian();
     IFunction_sptr decoratedFunction = fn->getDecoratedFunction();
 
     TS_ASSERT_EQUALS(fn->nParams(), decoratedFunction->nParams());
@@ -171,16 +157,12 @@ public:
 
   void testGetSetParameter() {
     TestableFunctionParameterDecorator invalidFn;
-    TS_ASSERT_THROWS(invalidFn.setParameter(0, 2.0),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(invalidFn.setParameter(0, 2.0), const std::runtime_error &);
     TS_ASSERT_THROWS(invalidFn.getParameter(0), const std::runtime_error &);
-    TS_ASSERT_THROWS(invalidFn.setParameter("Height", 2.0),
-                     const std::runtime_error &);
-    TS_ASSERT_THROWS(invalidFn.getParameter("Height"),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(invalidFn.setParameter("Height", 2.0), const std::runtime_error &);
+    TS_ASSERT_THROWS(invalidFn.getParameter("Height"), const std::runtime_error &);
 
-    FunctionParameterDecorator_sptr fn =
-        getFunctionParameterDecoratorGaussian();
+    FunctionParameterDecorator_sptr fn = getFunctionParameterDecoratorGaussian();
 
     TS_ASSERT_THROWS_NOTHING(fn->setParameter(0, 2.0));
 
@@ -190,27 +172,23 @@ public:
     TS_ASSERT_THROWS(fn->getParameter(10), const std::out_of_range &);
 
     TS_ASSERT_THROWS_NOTHING(fn->setParameter("Height", 4.0));
-    TS_ASSERT_EQUALS(fn->getParameter("Height"),
-                     decoratedFunction->getParameter("Height"));
+    TS_ASSERT_EQUALS(fn->getParameter("Height"), decoratedFunction->getParameter("Height"));
     TS_ASSERT_EQUALS(fn->getParameter("Height"), 4.0);
-    TS_ASSERT_THROWS(fn->getParameter("DoesNotExist"),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(fn->getParameter("DoesNotExist"), const std::invalid_argument &);
   }
 
   void testExplicitelySet() {
     TestableFunctionParameterDecorator invalidFn;
     TS_ASSERT_THROWS(invalidFn.isExplicitlySet(0), const std::runtime_error &);
 
-    FunctionParameterDecorator_sptr fn =
-        getFunctionParameterDecoratorGaussian();
+    FunctionParameterDecorator_sptr fn = getFunctionParameterDecoratorGaussian();
 
     TS_ASSERT_THROWS_NOTHING(fn->setParameter(0, 2.0));
 
     IFunction_sptr decoratedFunction = fn->getDecoratedFunction();
 
     for (size_t i = 0; i < fn->nParams(); ++i) {
-      TS_ASSERT_EQUALS(fn->isExplicitlySet(i),
-                       decoratedFunction->isExplicitlySet(i));
+      TS_ASSERT_EQUALS(fn->isExplicitlySet(i), decoratedFunction->isExplicitlySet(i));
     }
   }
 
@@ -219,8 +197,7 @@ public:
     TS_ASSERT_THROWS(invalidFn.getError(0), const std::runtime_error &);
     TS_ASSERT_THROWS(invalidFn.setError(0, 2.0), const std::runtime_error &);
 
-    FunctionParameterDecorator_sptr fn =
-        getFunctionParameterDecoratorGaussian();
+    FunctionParameterDecorator_sptr fn = getFunctionParameterDecoratorGaussian();
     IFunction_sptr decoratedFunction = fn->getDecoratedFunction();
     TS_ASSERT_THROWS_NOTHING(fn->setError(0, 3.0));
     TS_ASSERT_THROWS_NOTHING(fn->setError("PeakCentre", 4.0));
@@ -237,8 +214,7 @@ public:
     TS_ASSERT_THROWS(invalidFn.fix(0), const std::runtime_error &);
     TS_ASSERT_THROWS(invalidFn.unfix(0), const std::runtime_error &);
 
-    FunctionParameterDecorator_sptr fn =
-        getFunctionParameterDecoratorGaussian();
+    FunctionParameterDecorator_sptr fn = getFunctionParameterDecoratorGaussian();
     IFunction_sptr decoratedFunction = fn->getDecoratedFunction();
 
     for (size_t i = 0; i < fn->nParams(); ++i) {
@@ -255,8 +231,7 @@ public:
     TestableFunctionParameterDecorator invalidFn;
     TS_ASSERT_EQUALS(invalidFn.nAttributes(), 0);
 
-    FunctionParameterDecorator_sptr fn =
-        getFunctionParameterDecoratorGaussian();
+    FunctionParameterDecorator_sptr fn = getFunctionParameterDecoratorGaussian();
     IFunction_sptr decoratedFunction = fn->getDecoratedFunction();
 
     TS_ASSERT_EQUALS(fn->nAttributes(), decoratedFunction->nAttributes());
@@ -268,8 +243,7 @@ public:
     TS_ASSERT_DIFFERS(fn->nAttributes(), 0);
 
     std::vector<std::string> decoratorAttributes = fn->getAttributeNames();
-    std::vector<std::string> wrappedAttributes =
-        decoratedFunction->getAttributeNames();
+    std::vector<std::string> wrappedAttributes = decoratedFunction->getAttributeNames();
 
     TS_ASSERT_EQUALS(decoratorAttributes.size(), wrappedAttributes.size());
 
@@ -277,16 +251,13 @@ public:
       TS_ASSERT_EQUALS(decoratorAttributes[i], wrappedAttributes[i]);
       std::string attribute = decoratorAttributes[i];
 
-      TS_ASSERT_EQUALS(fn->hasAttribute(attribute),
-                       decoratedFunction->hasAttribute(attribute));
+      TS_ASSERT_EQUALS(fn->hasAttribute(attribute), decoratedFunction->hasAttribute(attribute));
       TS_ASSERT_EQUALS(fn->hasAttribute(attribute), true);
     }
 
-    TS_ASSERT_THROWS_NOTHING(
-        fn->setAttribute(decoratorAttributes[0], IFunction::Attribute(4.0)));
-    TS_ASSERT_EQUALS(
-        fn->getAttribute(decoratorAttributes[0]).value(),
-        decoratedFunction->getAttribute(decoratorAttributes[0]).value());
+    TS_ASSERT_THROWS_NOTHING(fn->setAttribute(decoratorAttributes[0], IFunction::Attribute(4.0)));
+    TS_ASSERT_EQUALS(fn->getAttribute(decoratorAttributes[0]).value(),
+                     decoratedFunction->getAttribute(decoratorAttributes[0]).value());
   }
 
   void testTies() {
@@ -297,8 +268,7 @@ public:
     TS_ASSERT_THROWS(invalidFn.removeTie(0), const std::runtime_error &);
     TS_ASSERT_THROWS(invalidFn.getTie(0), const std::runtime_error &);
 
-    FunctionParameterDecorator_sptr fn =
-        getFunctionParameterDecoratorGaussian();
+    FunctionParameterDecorator_sptr fn = getFunctionParameterDecoratorGaussian();
     IFunction_sptr decoratedFunction = fn->getDecoratedFunction();
 
     fn->tie("Height", "Height=2.0*Sigma");
@@ -317,8 +287,7 @@ public:
   }
 
   void testTiesInComposite() {
-    FunctionParameterDecorator_sptr fn =
-        getFunctionParameterDecoratorGaussian();
+    FunctionParameterDecorator_sptr fn = getFunctionParameterDecoratorGaussian();
 
     CompositeFunction_sptr composite = std::make_shared<CompositeFunction>();
     composite->addFunction(fn);
@@ -331,16 +300,12 @@ public:
   }
 
   void testTiesInWrappedComposite() {
-    FunctionParameterDecorator_sptr outer =
-        std::make_shared<TestableFunctionParameterDecorator>();
+    FunctionParameterDecorator_sptr outer = std::make_shared<TestableFunctionParameterDecorator>();
     outer->setDecoratedFunction("CompositeFunction");
 
-    FunctionParameterDecorator_sptr fn =
-        getFunctionParameterDecoratorGaussian();
+    FunctionParameterDecorator_sptr fn = getFunctionParameterDecoratorGaussian();
 
-    CompositeFunction_sptr composite =
-        std::dynamic_pointer_cast<CompositeFunction>(
-            outer->getDecoratedFunction());
+    CompositeFunction_sptr composite = std::dynamic_pointer_cast<CompositeFunction>(outer->getDecoratedFunction());
     composite->addFunction(fn);
 
     TS_ASSERT_THROWS_NOTHING(outer->addTies("f0.Height=2.0*f0.Sigma"));
@@ -351,14 +316,12 @@ public:
   }
 
   void testParameterNames() {
-    FunctionParameterDecorator_sptr fn =
-        getFunctionParameterDecoratorGaussian();
+    FunctionParameterDecorator_sptr fn = getFunctionParameterDecoratorGaussian();
 
     IFunction_sptr decoratedFunction = fn->getDecoratedFunction();
 
     std::vector<std::string> decoratorNames = fn->getParameterNames();
-    std::vector<std::string> wrappedNames =
-        decoratedFunction->getParameterNames();
+    std::vector<std::string> wrappedNames = decoratedFunction->getParameterNames();
 
     TS_ASSERT_EQUALS(decoratorNames.size(), wrappedNames.size());
     TS_ASSERT_EQUALS(wrappedNames.size(), 3);
@@ -370,26 +333,20 @@ public:
 
   void testSetParameterDescription() {
     TestableFunctionParameterDecorator invalidFn;
-    TS_ASSERT_THROWS(invalidFn.setParameterDescription(0, "None"),
-                     const std::runtime_error &);
-    TS_ASSERT_THROWS(invalidFn.parameterDescription(0),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(invalidFn.setParameterDescription(0, "None"), const std::runtime_error &);
+    TS_ASSERT_THROWS(invalidFn.parameterDescription(0), const std::runtime_error &);
 
-    FunctionParameterDecorator_sptr fn =
-        getFunctionParameterDecoratorGaussian();
+    FunctionParameterDecorator_sptr fn = getFunctionParameterDecoratorGaussian();
 
     TS_ASSERT_THROWS_NOTHING(fn->setParameterDescription(0, "None"));
 
     IFunction_sptr decoratedFunction = fn->getDecoratedFunction();
-    TS_ASSERT_EQUALS(fn->parameterDescription(0),
-                     decoratedFunction->parameterDescription(0));
+    TS_ASSERT_EQUALS(fn->parameterDescription(0), decoratedFunction->parameterDescription(0));
     TS_ASSERT_EQUALS(fn->parameterDescription(0), "None");
     TS_ASSERT_THROWS(fn->parameterDescription(10), const std::out_of_range &);
 
-    TS_ASSERT_THROWS_NOTHING(
-        fn->setParameterDescription("Height", "Something"));
-    TS_ASSERT_THROWS(fn->setParameterDescription("DoesNotExist", "Something"),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS_NOTHING(fn->setParameterDescription("Height", "Something"));
+    TS_ASSERT_THROWS(fn->setParameterDescription("DoesNotExist", "Something"), const std::invalid_argument &);
   }
 
   void testBeforeDecoratedFunctionSetIsCalled() {
@@ -402,8 +359,7 @@ public:
   }
 
   void testClone() {
-    FunctionParameterDecorator_sptr fn =
-        getFunctionParameterDecoratorGaussian();
+    FunctionParameterDecorator_sptr fn = getFunctionParameterDecoratorGaussian();
 
     fn->setParameter("Height", 3.0);
     fn->setParameter("PeakCentre", 0.5);
@@ -413,8 +369,7 @@ public:
 
     TS_ASSERT(cloned);
 
-    FunctionParameterDecorator_sptr castedClone =
-        std::dynamic_pointer_cast<FunctionParameterDecorator>(cloned);
+    FunctionParameterDecorator_sptr castedClone = std::dynamic_pointer_cast<FunctionParameterDecorator>(cloned);
     TS_ASSERT(castedClone);
     TS_ASSERT_EQUALS(cloned->name(), fn->name());
 
@@ -430,29 +385,25 @@ public:
     TestableFunctionParameterDecorator invalidFn;
     TS_ASSERT_THROWS(invalidFn.setWorkspace(ws), const std::runtime_error &);
 
-    FunctionParameterDecorator_sptr fn =
-        getFunctionParameterDecoratorGaussian();
+    FunctionParameterDecorator_sptr fn = getFunctionParameterDecoratorGaussian();
 
     TS_ASSERT_THROWS_NOTHING(fn->setWorkspace(ws));
 
     std::shared_ptr<FunctionWithParameters> decorated =
-        std::dynamic_pointer_cast<FunctionWithParameters>(
-            fn->getDecoratedFunction());
+        std::dynamic_pointer_cast<FunctionWithParameters>(fn->getDecoratedFunction());
 
     TS_ASSERT_EQUALS(decorated->getWorkspace(), ws);
   }
 
 private:
   FunctionParameterDecorator_sptr getFunctionParameterDecoratorGaussian() {
-    FunctionParameterDecorator_sptr fn =
-        std::make_shared<TestableFunctionParameterDecorator>();
+    FunctionParameterDecorator_sptr fn = std::make_shared<TestableFunctionParameterDecorator>();
     fn->setDecoratedFunction("FunctionWithParameters");
 
     return fn;
   }
 
-  class MockTestableFunctionParameterDecorator
-      : public TestableFunctionParameterDecorator {
+  class MockTestableFunctionParameterDecorator : public TestableFunctionParameterDecorator {
   public:
     GNU_DIAG_OFF_SUGGEST_OVERRIDE
     MOCK_METHOD1(beforeDecoratedFunctionSet, void(const IFunction_sptr &));

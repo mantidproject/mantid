@@ -21,9 +21,7 @@ namespace MantidWidgets {
  * Construct an ImageInfo to store name/value pairs
  * @param names The names of the name/value pairs in the table
  */
-ImageInfoModel::ImageInfo::ImageInfo(
-    ImageInfoModel::ImageInfo::StringItems names)
-    : m_names(std::move(names)) {
+ImageInfoModel::ImageInfo::ImageInfo(ImageInfoModel::ImageInfo::StringItems names) : m_names(std::move(names)) {
   m_values.resize(m_names.size(), MissingValue);
 }
 

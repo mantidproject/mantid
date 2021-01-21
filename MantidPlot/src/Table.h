@@ -50,8 +50,7 @@ class MyTable : public QTableWidget {
   Q_OBJECT
 public:
   MyTable(QWidget *parent = nullptr, const char *name = nullptr);
-  MyTable(int numRows, int numCols, QWidget *parent = nullptr,
-          const char *name = nullptr);
+  MyTable(int numRows, int numCols, QWidget *parent = nullptr, const char *name = nullptr);
   void blockResizing(bool yes);
   QString text(int row, int col) const;
   void setText(int row, int col, const QString &txt);
@@ -94,32 +93,16 @@ class Table : public MdiSubWindow, public Scripted {
   Q_OBJECT
 
 public:
-  enum PlotDesignation {
-    All = -1,
-    None = 0,
-    X = 1,
-    Y = 2,
-    Z = 3,
-    xErr = 4,
-    yErr = 5,
-    Label = 6
-  };
-  enum ColType {
-    Numeric = 0,
-    Text = 1,
-    Date = 2,
-    Time = 3,
-    Month = 4,
-    Day = 5
-  };
+  enum PlotDesignation { All = -1, None = 0, X = 1, Y = 2, Z = 3, xErr = 4, yErr = 5, Label = 6 };
+  enum ColType { Numeric = 0, Text = 1, Date = 2, Time = 3, Month = 4, Day = 5 };
   enum ImportMode {
     NewColumns, //!< add file as new columns to this table
     NewRows,    //!< add file as new rows to this table
     Overwrite   //!< replace content of table with the imported file
   };
 
-  Table(ScriptingEnv *env, int r, int c, const QString &label, QWidget *parent,
-        const QString &name = QString(), const Qt::WFlags &f = nullptr);
+  Table(ScriptingEnv *env, int r, int c, const QString &label, QWidget *parent, const QString &name = QString(),
+        const Qt::WFlags &f = nullptr);
 
   int topSelectedRow() const { return d_table->topSelectedRow(); }
   int bottomSelectedRow() const { return d_table->bottomSelectedRow(); }
@@ -159,8 +142,7 @@ public slots:
 
   int colPlotDesignation(int col) { return col_plot_type[col]; };
   void setColPlotDesignation(int col, PlotDesignation pd);
-  virtual void setPlotDesignation(PlotDesignation pd,
-                                  bool rightColumns = false);
+  virtual void setPlotDesignation(PlotDesignation pd, bool rightColumns = false);
   QList<int> plotDesignations() { return col_plot_type; };
 
   void setHeader(const QStringList &header);
@@ -169,8 +151,7 @@ public slots:
   void setText(int row, int col, const QString &text);
   void setRandomValues();
   void setAscValues();
-  void setTextAlignment(int row, int col,
-                        const QFlags<Qt::AlignmentFlag> &alignment);
+  void setTextAlignment(int row, int col, const QFlags<Qt::AlignmentFlag> &alignment);
 
   virtual void cellEdited(int, int col);
   void moveCurrentCell();
@@ -231,8 +212,7 @@ public slots:
    * @param leadCol :: for sorting together, the column which determines the
    * permutation
    */
-  virtual void sortColumns(const QStringList &cols, int type = 0, int order = 0,
-                           const QString &leadCol = QString());
+  virtual void sortColumns(const QStringList &cols, int type = 0, int order = 0, const QString &leadCol = QString());
 
   /**\brief Display a dialog with some options for sorting all columns.
    *
@@ -244,8 +224,7 @@ public slots:
   void sort(int type = 0, int order = 0, const QString &leadCol = QString());
   //! Sort selected columns as in sortColumns(const QStringList&,int,int,const
   //! QString&).
-  void sortColumns(int type = 0, int order = 0,
-                   const QString &leadCol = QString());
+  void sortColumns(int type = 0, int order = 0, const QString &leadCol = QString());
 
   /**\brief Display a dialog with some options for sorting the selected columns.
    *
@@ -276,11 +255,9 @@ public slots:
   //! Set formula for column col.
   void setCommand(int col, const QString &com);
   //! Compute specified cells from column formula.
-  bool calculate(int col, int startRow, int endRow, bool forceMuParser = true,
-                 bool notifyChanges = true);
+  bool calculate(int col, int startRow, int endRow, bool forceMuParser = true, bool notifyChanges = true);
   //! Compute specified cells from column formula (optimized for muParser).
-  bool muParserCalculate(int col, int startRow, int endRow,
-                         bool notifyChanges = true);
+  bool muParserCalculate(int col, int startRow, int endRow, bool notifyChanges = true);
   //! Compute selected cells from column formulae; use current cell if there's
   //! no selection.
   bool calculate();
@@ -327,12 +304,8 @@ public slots:
   int selectedColumn() { return selectedCol; };
   int firstSelectedColumn();
   int numSelectedRows();
-  bool isRowSelected(int row, bool full = false) {
-    return d_table->isRowSelected(row, full);
-  }
-  bool isColumnSelected(int col, bool full = false) {
-    return d_table->isColumnSelected(col, full);
-  }
+  bool isRowSelected(int row, bool full = false) { return d_table->isRowSelected(row, full); }
+  bool isColumnSelected(int col, bool full = false) { return d_table->isColumnSelected(col, full); }
   //! Scroll to row (row starts with 1)
   void goToRow(int row);
   //! Scroll to column (column starts with 1)
@@ -365,14 +338,11 @@ public slots:
   void setMonthFormat(const QString &format, int col, bool updateCells = true);
   void setDayFormat(const QString &format, int col, bool updateCells = true);
 
-  bool exportASCII(const QString &fname, const QString &separator,
-                   bool withLabels = false, bool exportComments = false,
+  bool exportASCII(const QString &fname, const QString &separator, bool withLabels = false, bool exportComments = false,
                    bool exportSelection = false);
-  void importASCII(const QString &fname, const QString &sep, int ignoredLines,
-                   bool renameCols, bool stripSpaces, bool simplifySpaces,
-                   bool importComments, const QString &commentString,
-                   bool readOnly = false, ImportMode importAs = Overwrite,
-                   int endLine = 0, int maxRows = -1);
+  void importASCII(const QString &fname, const QString &sep, int ignoredLines, bool renameCols, bool stripSpaces,
+                   bool simplifySpaces, bool importComments, const QString &commentString, bool readOnly = false,
+                   ImportMode importAs = Overwrite, int endLine = 0, int maxRows = -1);
 
   //! \name Saving and Restoring
   //@{
@@ -399,9 +369,8 @@ public slots:
   void showComments(bool on = true);
   bool commentsEnabled() { return d_show_comments; }
 
-  static MantidQt::API::IProjectSerialisable *
-  loadFromProject(const std::string &lines, ApplicationWindow *app,
-                  const int fileVersion);
+  static MantidQt::API::IProjectSerialisable *loadFromProject(const std::string &lines, ApplicationWindow *app,
+                                                              const int fileVersion);
   /// Returns a list of workspace names that are used by this window
   std::vector<std::string> getWorkspaceNames() override;
 

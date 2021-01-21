@@ -31,14 +31,12 @@ class RebinnedSourcesManager;
 
  @date 24/05/2011
  */
-class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS StandardView
-    : public ViewBase {
+class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS StandardView : public ViewBase {
   Q_OBJECT
 
 public:
   /// Default constructor.
-  StandardView(QWidget *parent = nullptr,
-               RebinnedSourcesManager *rebinnedSourcesManager = nullptr,
+  StandardView(QWidget *parent = nullptr, RebinnedSourcesManager *rebinnedSourcesManager = nullptr,
                bool createRenderProxy = true);
   /// Default destructor.
   ~StandardView() override;
@@ -82,8 +80,7 @@ protected slots:
   /// On BinMD button clicked
   void onRebin();
   /// On scale completed
-  void onScaleRepresentationAdded(pqPipelineSource *, pqDataRepresentation *,
-                                  int);
+  void onScaleRepresentationAdded(pqPipelineSource *, pqDataRepresentation *, int);
 
 private:
   Q_DISABLE_COPY(StandardView)

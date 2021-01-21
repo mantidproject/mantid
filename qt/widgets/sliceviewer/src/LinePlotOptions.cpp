@@ -13,29 +13,22 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 
 LinePlotOptions::LinePlotOptions(QWidget *parent, bool logScaleOption)
-    : QWidget(parent), m_plotAxis(MantidQwtIMDWorkspaceData::PlotAuto),
-      m_normalize(Mantid::API::VolumeNormalization) {
+    : QWidget(parent), m_plotAxis(MantidQwtIMDWorkspaceData::PlotAuto), m_normalize(Mantid::API::VolumeNormalization) {
   ui.setupUi(this);
 
   ui.widgetLogOptions->setVisible(logScaleOption);
 
   addPlotRadioButton("Auto", "Automatically choose between plotting X or Y "
                              "depending on the angle of the line");
-  addPlotRadioButton(
-      "Distance",
-      "Use the distance from the start of the line as the X axis of the plot");
+  addPlotRadioButton("Distance", "Use the distance from the start of the line as the X axis of the plot");
   // Default to "Auto"
   m_radPlots[0]->setChecked(true);
 
   // Connect all the radio buttons
-  QObject::connect(ui.radNoNormalization, SIGNAL(toggled(bool)), this,
-                   SLOT(radNormalization_changed()));
-  QObject::connect(ui.radNumEventsNormalization, SIGNAL(toggled(bool)), this,
-                   SLOT(radNormalization_changed()));
-  QObject::connect(ui.radVolumeNormalization, SIGNAL(toggled(bool)), this,
-                   SLOT(radNormalization_changed()));
-  QObject::connect(ui.ckLog10, SIGNAL(toggled(bool)), this,
-                   SLOT(onYScalingChanged()));
+  QObject::connect(ui.radNoNormalization, SIGNAL(toggled(bool)), this, SLOT(radNormalization_changed()));
+  QObject::connect(ui.radNumEventsNormalization, SIGNAL(toggled(bool)), this, SLOT(radNormalization_changed()));
+  QObject::connect(ui.radVolumeNormalization, SIGNAL(toggled(bool)), this, SLOT(radNormalization_changed()));
+  QObject::connect(ui.ckLog10, SIGNAL(toggled(bool)), this, SLOT(onYScalingChanged()));
 }
 
 LinePlotOptions::~LinePlotOptions() {}
@@ -47,9 +40,7 @@ LinePlotOptions::~LinePlotOptions() {}
  * @param tooltip :: tooltip
  * @param bIntegrated :: flag to indicate that the dimension is integrated.
  */
-void LinePlotOptions::addPlotRadioButton(const std::string &text,
-                                         const std::string &tooltip,
-                                         const bool bIntegrated) {
+void LinePlotOptions::addPlotRadioButton(const std::string &text, const std::string &tooltip, const bool bIntegrated) {
   QRadioButton *rad;
   rad = new QRadioButton(ui.widgetPlotAxis);
   rad->setText(QString::fromStdString(text));
@@ -64,16 +55,14 @@ void LinePlotOptions::addPlotRadioButton(const std::string &text,
 
 //------------------------------------------------------------------------------
 /** Set the original workspace, to show the axes plot choice */
-void LinePlotOptions::setOriginalWorkspace(
-    const Mantid::API::IMDWorkspace_sptr &ws) {
+void LinePlotOptions::setOriginalWorkspace(const Mantid::API::IMDWorkspace_sptr &ws) {
   if (!ws)
     return;
 
   for (size_t d = 0; d < (ws->getNumDims()); d++) {
     IMDDimension_const_sptr dim = ws->getDimension(d);
     std::string text = dim->getName();
-    std::string tooltip =
-        "Use the " + dim->getName() + " dimension as the X plot axis.";
+    std::string tooltip = "Use the " + dim->getName() + " dimension as the X plot axis.";
     const bool bIntegrated = dim->getIsIntegrated();
     // Index into the radio buttons array
     int index = int(d) + 2;
@@ -116,9 +105,7 @@ void LinePlotOptions::setPlotAxis(int choice) {
 //------------------------------------------------------------------------------
 /** Get the normalization method to use
  * @return choice of normalization */
-Mantid::API::MDNormalization LinePlotOptions::getNormalization() const {
-  return m_normalize;
-}
+Mantid::API::MDNormalization LinePlotOptions::getNormalization() const { return m_normalize; }
 
 /** Set the normalization method to use
  *

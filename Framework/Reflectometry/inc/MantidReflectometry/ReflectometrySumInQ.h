@@ -58,25 +58,17 @@ private:
   void init() override;
   void exec() override;
   std::map<std::string, std::string> validateInputs() override;
-  API::MatrixWorkspace_sptr
-  constructIvsLamWS(const API::MatrixWorkspace &detectorWS,
-                    const Indexing::SpectrumIndexSet &indices,
-                    const Angles &refAngles);
-  MinMax findWavelengthMinMax(const API::MatrixWorkspace &detectorWS,
-                              const Indexing::SpectrumIndexSet &indices,
+  API::MatrixWorkspace_sptr constructIvsLamWS(const API::MatrixWorkspace &detectorWS,
+                                              const Indexing::SpectrumIndexSet &indices, const Angles &refAngles);
+  MinMax findWavelengthMinMax(const API::MatrixWorkspace &detectorWS, const Indexing::SpectrumIndexSet &indices,
                               const Angles &refAngles);
-  void processValue(const int inputIdx, const MinMax &twoThetaRange,
-                    const Angles &refAngles,
-                    const HistogramData::BinEdges &edges,
-                    const HistogramData::Counts &counts,
-                    const HistogramData::CountStandardDeviations &stdDevs,
-                    API::MatrixWorkspace &IvsLam, std::vector<double> &outputE);
-  MinMax projectedLambdaRange(const MinMax &wavelengthRange,
-                              const MinMax &twoThetaRange,
-                              const Angles &refAngles);
+  void processValue(const int inputIdx, const MinMax &twoThetaRange, const Angles &refAngles,
+                    const HistogramData::BinEdges &edges, const HistogramData::Counts &counts,
+                    const HistogramData::CountStandardDeviations &stdDevs, API::MatrixWorkspace &IvsLam,
+                    std::vector<double> &outputE);
+  MinMax projectedLambdaRange(const MinMax &wavelengthRange, const MinMax &twoThetaRange, const Angles &refAngles);
   Angles referenceAngles(const API::SpectrumInfo &spectrumInfo);
-  API::MatrixWorkspace_sptr sumInQ(const API::MatrixWorkspace &detectorWS,
-                                   const Indexing::SpectrumIndexSet &indices);
+  API::MatrixWorkspace_sptr sumInQ(const API::MatrixWorkspace &detectorWS, const Indexing::SpectrumIndexSet &indices);
 };
 
 } // namespace Reflectometry

@@ -22,31 +22,22 @@ Kernel::Logger g_log("MdControlWidget");
 ModeControlWidget::ModeControlWidget(QWidget *parent) : QWidget(parent) {
   this->ui.setupUi(this);
 
-  QObject::connect(this->ui.multiSliceButton, SIGNAL(clicked()), this,
-                   SLOT(onMultiSliceViewButtonClicked()));
-  QObject::connect(this->ui.standardButton, SIGNAL(clicked()), this,
-                   SLOT(onStandardViewButtonClicked()));
-  QObject::connect(this->ui.threeSliceButton, SIGNAL(clicked()), this,
-                   SLOT(onThreeSliceViewButtonClicked()));
-  QObject::connect(this->ui.splatterPlotButton, SIGNAL(clicked()), this,
-                   SLOT(onSplatterPlotViewButtonClicked()));
+  QObject::connect(this->ui.multiSliceButton, SIGNAL(clicked()), this, SLOT(onMultiSliceViewButtonClicked()));
+  QObject::connect(this->ui.standardButton, SIGNAL(clicked()), this, SLOT(onStandardViewButtonClicked()));
+  QObject::connect(this->ui.threeSliceButton, SIGNAL(clicked()), this, SLOT(onThreeSliceViewButtonClicked()));
+  QObject::connect(this->ui.splatterPlotButton, SIGNAL(clicked()), this, SLOT(onSplatterPlotViewButtonClicked()));
 
   // Add the mapping from string to the view enum
   MantidQt::API::MdConstants mdConstants;
-  mapFromStringToView.emplace(mdConstants.getStandardView(),
-                              ModeControlWidget::STANDARD);
-  mapFromStringToView.emplace(mdConstants.getThreeSliceView(),
-                              ModeControlWidget::THREESLICE);
-  mapFromStringToView.emplace(mdConstants.getMultiSliceView(),
-                              ModeControlWidget::MULTISLICE);
-  mapFromStringToView.emplace(mdConstants.getSplatterPlotView(),
-                              ModeControlWidget::SPLATTERPLOT);
+  mapFromStringToView.emplace(mdConstants.getStandardView(), ModeControlWidget::STANDARD);
+  mapFromStringToView.emplace(mdConstants.getThreeSliceView(), ModeControlWidget::THREESLICE);
+  mapFromStringToView.emplace(mdConstants.getMultiSliceView(), ModeControlWidget::MULTISLICE);
+  mapFromStringToView.emplace(mdConstants.getSplatterPlotView(), ModeControlWidget::SPLATTERPLOT);
 }
 
 ModeControlWidget::~ModeControlWidget() {}
 
-void ModeControlWidget::enableViewButtons(ModeControlWidget::Views initialView,
-                                          bool state) {
+void ModeControlWidget::enableViewButtons(ModeControlWidget::Views initialView, bool state) {
   // Set all buttons to the specified state
   this->ui.standardButton->setEnabled(state);
   this->ui.multiSliceButton->setEnabled(state);
@@ -102,9 +93,7 @@ void ModeControlWidget::onThreeSliceViewButtonClicked() {
   emit executeSwitchViews(ModeControlWidget::THREESLICE);
 }
 
-void ModeControlWidget::setToStandardView() {
-  this->onStandardViewButtonClicked();
-}
+void ModeControlWidget::setToStandardView() { this->onStandardViewButtonClicked(); }
 
 void ModeControlWidget::onSplatterPlotViewButtonClicked() {
   this->ui.splatterPlotButton->setEnabled(false);
@@ -146,8 +135,7 @@ void ModeControlWidget::setToSelectedView(ModeControlWidget::Views view) {
  * @param mode The view mode button to set state for
  * @param state Enable/diable the view mode button
  */
-void ModeControlWidget::enableViewButton(ModeControlWidget::Views mode,
-                                         bool state) {
+void ModeControlWidget::enableViewButton(ModeControlWidget::Views mode, bool state) {
   switch (mode) {
   case ModeControlWidget::STANDARD:
     this->ui.standardButton->setEnabled(state);
@@ -171,8 +159,7 @@ void ModeControlWidget::enableViewButton(ModeControlWidget::Views mode,
  * @param view A selected view.
  * @returns The selected view as enum or the standard view.
  */
-ModeControlWidget::Views
-ModeControlWidget::getViewFromString(const QString &view) {
+ModeControlWidget::Views ModeControlWidget::getViewFromString(const QString &view) {
   if (!view.isEmpty() && mapFromStringToView.count(view) == 1) {
     return mapFromStringToView[view];
   } else {

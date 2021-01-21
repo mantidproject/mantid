@@ -25,8 +25,7 @@ namespace Functions {
 /**
  * @brief Elastic part of the DiffSphere function
  */
-class MANTID_CURVEFITTING_DLL ElasticDiffSphere : public DeltaFunction,
-                                                  public FunctionQDepends {
+class MANTID_CURVEFITTING_DLL ElasticDiffSphere : public DeltaFunction, public FunctionQDepends {
 public:
   /// Constructor
   ElasticDiffSphere();

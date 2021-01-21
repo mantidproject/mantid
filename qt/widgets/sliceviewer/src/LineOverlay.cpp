@@ -22,9 +22,8 @@ namespace SliceViewer {
 /** Constructor
  */
 LineOverlay::LineOverlay(QwtPlot *plot, QWidget *parent)
-    : QWidget(parent), m_plot(plot), m_snapEnabled(false), m_snapX(0.1),
-      m_snapY(0.1), m_snapLength(0), m_shown(true), m_showHandles(true),
-      m_showLine(true), m_angleSnapMode(false), m_angleSnap(45) {
+    : QWidget(parent), m_plot(plot), m_snapEnabled(false), m_snapX(0.1), m_snapY(0.1), m_snapLength(0), m_shown(true),
+      m_showHandles(true), m_showLine(true), m_angleSnapMode(false), m_angleSnap(45) {
   m_creation = true; // Will create with the mouse
   m_rightButton = false;
   m_dragHandle = HandleNone;
@@ -167,15 +166,11 @@ std::string LineOverlay::saveToProject() const {
 //----------------------------------------------------------------------------------------------
 /** Turn angle snap on or off
  * @param angleSnap :: true for always angle snap. */
-void LineOverlay::setAngleSnapMode(bool angleSnap) {
-  m_angleSnapMode = angleSnap;
-}
+void LineOverlay::setAngleSnapMode(bool angleSnap) { m_angleSnapMode = angleSnap; }
 
 /** Sets the angle increments to snap to.
  * @param snapDegrees :: snap amount, in degrees */
-void LineOverlay::setAngleSnap(double snapDegrees) {
-  m_angleSnap = snapDegrees;
-}
+void LineOverlay::setAngleSnap(double snapDegrees) { m_angleSnap = snapDegrees; }
 
 //----------------------------------------------------------------------------------------------
 /// @return point A's position in plot coordinates
@@ -240,8 +235,7 @@ QPointF LineOverlay::snap(QPointF original) const {
 
 //----------------------------------------------------------------------------------------------
 /** Draw a handle (for dragging) at the given plot coordinates */
-QRect LineOverlay::drawHandle(QPainter &painter, QPointF coords,
-                              const QColor &brush) {
+QRect LineOverlay::drawHandle(QPainter &painter, QPointF coords, const QColor &brush) {
   int size = 8;
   QPoint center = transform(coords);
   QRect marker(center.x() - size / 2, center.y() - size / 2, size, size);
@@ -324,10 +318,8 @@ void LineOverlay::paintEvent(QPaintEvent * /*event*/) {
   m_handles.clear();
   m_handles.push_back(drawHandle(painter, m_pointA, QColor(0, 0, 0)));
   m_handles.push_back(drawHandle(painter, m_pointB, QColor(255, 255, 255)));
-  m_handles.push_back(drawHandle(
-      painter, (m_pointA + m_pointB) / 2 + widthOffset, QColor(0, 255, 255)));
-  m_handles.push_back(drawHandle(
-      painter, (m_pointA + m_pointB) / 2 - widthOffset, QColor(0, 255, 255)));
+  m_handles.push_back(drawHandle(painter, (m_pointA + m_pointB) / 2 + widthOffset, QColor(0, 255, 255)));
+  m_handles.push_back(drawHandle(painter, (m_pointA + m_pointB) / 2 - widthOffset, QColor(0, 255, 255)));
 }
 
 //==============================================================================================
@@ -369,8 +361,7 @@ bool LineOverlay::mouseOverCenter(QPoint pos) {
   QPointF pixA = transform(m_pointA);
   QPointF pixB = transform(m_pointB);
   QPointF diff = pixB - pixA;
-  double distance = fabs(diff.x() * (current.y() - pixA.y()) -
-                         (current.x() - pixA.x()) * diff.y()) /
+  double distance = fabs(diff.x() * (current.y() - pixA.y()) - (current.x() - pixA.x()) * diff.y()) /
                     sqrt(diff.x() * diff.x() + diff.y() * diff.y());
 
   // Margin of 6 pixels, and must be between the 2 limits (if the limits are not
@@ -378,12 +369,10 @@ bool LineOverlay::mouseOverCenter(QPoint pos) {
   bool retval = false;
   if (distance < 7) {
     retval = true;
-    if ((pixA.x() != pixB.x()) &&
-        (!isBetween(current.x(), pixA.x(), pixB.x()))) {
+    if ((pixA.x() != pixB.x()) && (!isBetween(current.x(), pixA.x(), pixB.x()))) {
       retval = false;
     }
-    if ((pixA.y() != pixB.y()) &&
-        (!isBetween(current.y(), pixA.y(), pixB.y()))) {
+    if ((pixA.y() != pixB.y()) && (!isBetween(current.y(), pixA.y(), pixB.y()))) {
       retval = false;
     }
   }
@@ -444,8 +433,7 @@ void LineOverlay::handleDrag(QMouseEvent *event) {
     } else if (fmod(angle, M_PI) == M_PI / 2) {
       length = fabs(currentDiff.y());
     } else {
-      length = sqrt(currentDiff.x() * currentDiff.x() +
-                    currentDiff.y() * currentDiff.y());
+      length = sqrt(currentDiff.x() * currentDiff.x() + currentDiff.y() * currentDiff.y());
     }
 
     // Round length to m_snapLength, if specified
@@ -473,8 +461,7 @@ void LineOverlay::handleDrag(QMouseEvent *event) {
   case HandleWidthTop:
     // Find the distance between the mouse and the line (see
     // http://mathworld.wolfram.com/Point-LineDistance2-Dimensional.html )
-    width = fabs(diff.x() * (current.y() - m_pointA.y()) -
-                 (current.x() - m_pointA.x()) * diff.y()) /
+    width = fabs(diff.x() * (current.y() - m_pointA.y()) - (current.x() - m_pointA.x()) * diff.y()) /
             sqrt(diff.x() * diff.x() + diff.y() * diff.y());
     setWidth(width);
     break;

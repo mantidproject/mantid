@@ -17,12 +17,10 @@
 class VTK_EXPORT vtkPeaksFilter : public vtkUnstructuredGridAlgorithm {
 public:
   static vtkPeaksFilter *New();
-  vtkTypeMacro(vtkPeaksFilter, vtkUnstructuredGridAlgorithm) void PrintSelf(
-      ostream &os, vtkIndent indent) override;
+  vtkTypeMacro(vtkPeaksFilter, vtkUnstructuredGridAlgorithm) void PrintSelf(ostream &os, vtkIndent indent) override;
   vtkPeaksFilter(const vtkPeaksFilter &) = delete;
   vtkPeaksFilter &operator=(const vtkPeaksFilter &) = delete;
-  void SetPeaksWorkspace(const std::string &peaksWorkspaceName,
-                         const std::string &delimiter);
+  void SetPeaksWorkspace(const std::string &peaksWorkspaceName, const std::string &delimiter);
   void SetRadiusNoShape(double radius);
   void SetRadiusType(int type);
   void updateAlgorithmProgress(double progress, const std::string &message);
@@ -31,10 +29,8 @@ public:
 protected:
   vtkPeaksFilter();
   ~vtkPeaksFilter() override;
-  int RequestInformation(vtkInformation *, vtkInformationVector **,
-                         vtkInformationVector *) override;
-  int RequestData(vtkInformation *, vtkInformationVector **,
-                  vtkInformationVector *) override;
+  int RequestInformation(vtkInformation *, vtkInformationVector **, vtkInformationVector *) override;
+  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *) override;
 
 private:
   std::vector<Mantid::API::IPeaksWorkspace_sptr>

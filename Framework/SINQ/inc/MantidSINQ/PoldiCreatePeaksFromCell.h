@@ -30,28 +30,23 @@ class MANTID_SINQ_DLL PoldiCreatePeaksFromCell : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;
-  const std::vector<std::string> seeAlso() const override {
-    return {"PoldiCreatePeaksFromFile"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"PoldiCreatePeaksFromFile"}; }
   const std::string category() const override;
   const std::string summary() const override;
 
   std::map<std::string, std::string> validateInputs() override;
 
 protected:
-  Geometry::SpaceGroup_const_sptr
-  getSpaceGroup(const std::string &spaceGroupString) const;
+  Geometry::SpaceGroup_const_sptr getSpaceGroup(const std::string &spaceGroupString) const;
 
   double getDMaxValue(const Geometry::UnitCell &unitCell) const;
 
   double getLargestDValue(const Geometry::UnitCell &unitCell) const;
 
   Geometry::UnitCell getUnitCellFromProperties() const;
-  Geometry::UnitCell getConstrainedUnitCell(
-      const Geometry::UnitCell &unitCell,
-      const Geometry::PointGroup::CrystalSystem &crystalSystem,
-      const Geometry::Group::CoordinateSystem &coordinateSystem =
-          Geometry::Group::Orthogonal) const;
+  Geometry::UnitCell
+  getConstrainedUnitCell(const Geometry::UnitCell &unitCell, const Geometry::PointGroup::CrystalSystem &crystalSystem,
+                         const Geometry::Group::CoordinateSystem &coordinateSystem = Geometry::Group::Orthogonal) const;
 
 private:
   void init() override;

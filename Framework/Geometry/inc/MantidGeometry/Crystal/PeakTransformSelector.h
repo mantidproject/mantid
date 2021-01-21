@@ -23,13 +23,11 @@ public:
   /// Register a candidate factory
   void registerCandidate(const PeakTransformFactory_sptr &candidate);
   /// Make choice
-  PeakTransformFactory_sptr makeChoice(const std::string &labelX,
-                                       const std::string &labelY) const;
+  PeakTransformFactory_sptr makeChoice(const std::string &labelX, const std::string &labelY) const;
   /// Make default choice
   PeakTransformFactory_sptr makeDefaultChoice() const;
   /// Has a factory capable of the requested transform.
-  bool hasFactoryForTransform(const std::string &labelX,
-                              const std::string &labelY) const;
+  bool hasFactoryForTransform(const std::string &labelX, const std::string &labelY) const;
   /// Get the number of registered factories
   size_t numberRegistered() const;
 

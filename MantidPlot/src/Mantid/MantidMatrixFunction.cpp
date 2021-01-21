@@ -9,8 +9,7 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
-MantidMatrixFunction::MantidMatrixFunction(MantidMatrix &matrix)
-    : m_outside(0) {
+MantidMatrixFunction::MantidMatrixFunction(MantidMatrix &matrix) : m_outside(0) {
 
   init(matrix.workspace());
 
@@ -35,8 +34,7 @@ MantidMatrixFunction::~MantidMatrixFunction() {
  *
  * @param workspace :: New workspace to use.
  */
-void MantidMatrixFunction::init(
-    const Mantid::API::MatrixWorkspace_const_sptr &workspace) {
+void MantidMatrixFunction::init(const Mantid::API::MatrixWorkspace_const_sptr &workspace) {
   m_workspace = workspace;
 
   if (!m_workspace->getAxis(1)) {
@@ -51,8 +49,7 @@ void MantidMatrixFunction::init(
  *
  * @param workspace :: New workspace to use.
  */
-void MantidMatrixFunction::reset(
-    const Mantid::API::MatrixWorkspace_const_sptr &workspace) {
+void MantidMatrixFunction::reset(const Mantid::API::MatrixWorkspace_const_sptr &workspace) {
   init(workspace);
   double minz, maxz;
   findYRange(workspace, minz, maxz);
@@ -96,9 +93,7 @@ double MantidMatrixFunction::getMinPositiveValue() const {
   return zmin;
 }
 
-QString MantidMatrixFunction::saveToString() const {
-  return "mantidMatrix3D\t";
-}
+QString MantidMatrixFunction::saveToString() const { return "mantidMatrix3D\t"; }
 
 /**
  * Connect to a viewer object to ask it to redraw when needed.
@@ -107,18 +102,13 @@ QString MantidMatrixFunction::saveToString() const {
  *update().
  */
 void MantidMatrixFunction::connectToViewer(QObject *viewer) {
-  m_observer->connect(m_observer, SIGNAL(requestRedraw()), viewer,
-                      SLOT(update()));
-  m_observer->connect(m_observer, SIGNAL(requestClose()), viewer,
-                      SLOT(close()));
+  m_observer->connect(m_observer, SIGNAL(requestRedraw()), viewer, SLOT(update()));
+  m_observer->connect(m_observer, SIGNAL(requestClose()), viewer, SLOT(close()));
 }
 
-double MantidMatrixFunction::value(size_t row, size_t col) const {
-  return m_workspace->y(row)[col];
-}
+double MantidMatrixFunction::value(size_t row, size_t col) const { return m_workspace->y(row)[col]; }
 
-void MantidMatrixFunction::getRowYRange(size_t row, double &ymin,
-                                        double &ymax) const {
+void MantidMatrixFunction::getRowYRange(size_t row, double &ymin, double &ymax) const {
   const Mantid::API::Axis &yAxis = *(m_workspace->getAxis(1));
 
   size_t i = row;
@@ -144,15 +134,13 @@ void MantidMatrixFunction::getRowYRange(size_t row, double &ymin,
   }
 }
 
-void MantidMatrixFunction::getRowXRange(int row, double &xmin,
-                                        double &xmax) const {
+void MantidMatrixFunction::getRowXRange(int row, double &xmin, double &xmax) const {
   const auto &X = m_workspace->x(row);
   xmin = X[0];
   xmax = X[X.size() - 1];
 }
 
-const Mantid::HistogramData::HistogramX &
-MantidMatrixFunction::getHistogramX(int row) const {
+const Mantid::HistogramData::HistogramX &MantidMatrixFunction::getHistogramX(int row) const {
   return m_workspace->x(row);
 }
 
@@ -191,8 +179,7 @@ size_t MantidMatrixFunction::indexX(size_t row, double xValue) const {
   const auto &X = m_workspace->x(row);
   const auto n = X.size();
 
-  auto provideIndexForPointData = [&X](size_t start, size_t stop, double xValue,
-                                       double midValue) {
+  auto provideIndexForPointData = [&X](size_t start, size_t stop, double xValue, double midValue) {
     if (fabs(X[stop] - xValue) < fabs(midValue - xValue))
       return stop;
     return start;
@@ -280,16 +267,13 @@ size_t MantidMatrixFunction::indexY(double s) const {
 
 /*--------------------------------------------------------------------------------------------*/
 
-MantidMatrixFunctionWorkspaceObserver::MantidMatrixFunctionWorkspaceObserver(
-    MantidMatrixFunction *fun)
+MantidMatrixFunctionWorkspaceObserver::MantidMatrixFunctionWorkspaceObserver(MantidMatrixFunction *fun)
     : m_function(fun) {}
 
-void MantidMatrixFunctionWorkspaceObserver::afterReplaceHandle(
-    const std::string &wsName,
-    const std::shared_ptr<Mantid::API::Workspace> &ws) {
+void MantidMatrixFunctionWorkspaceObserver::afterReplaceHandle(const std::string &wsName,
+                                                               const std::shared_ptr<Mantid::API::Workspace> &ws) {
   if (m_function->m_workspace && wsName == m_function->m_workspace->getName()) {
-    auto mws =
-        std::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(ws);
+    auto mws = std::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(ws);
     if (mws) {
       m_function->reset(mws);
       emit requestRedraw();
@@ -299,14 +283,11 @@ void MantidMatrixFunctionWorkspaceObserver::afterReplaceHandle(
   }
 }
 
-void MantidMatrixFunctionWorkspaceObserver::preDeleteHandle(
-    const std::string &wsName,
-    const std::shared_ptr<Mantid::API::Workspace> &) {
+void MantidMatrixFunctionWorkspaceObserver::preDeleteHandle(const std::string &wsName,
+                                                            const std::shared_ptr<Mantid::API::Workspace> &) {
   if (m_function->m_workspace && wsName == m_function->m_workspace->getName()) {
     emit requestClose();
   }
 }
 
-void MantidMatrixFunctionWorkspaceObserver::clearADSHandle() {
-  emit requestClose();
-}
+void MantidMatrixFunctionWorkspaceObserver::clearADSHandle() { emit requestClose(); }

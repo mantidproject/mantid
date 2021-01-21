@@ -36,19 +36,15 @@ LoadInstrumentFromRaw::LoadInstrumentFromRaw() {}
 void LoadInstrumentFromRaw::init() {
   // When used as a Child Algorithm the workspace name is not used - hence the
   // "Anonymous" to satisfy the validator
-  declareProperty(
-      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          "Workspace", "Anonymous", Direction::InOut),
-      "The name of the workspace in which to store the imported instrument.");
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("Workspace", "Anonymous", Direction::InOut),
+                  "The name of the workspace in which to store the imported instrument.");
 
   const std::vector<std::string> exts{".raw", ".s*"};
-  declareProperty(
-      std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
-      "The filename (including its full or relative path) of an ISIS RAW file. "
-      "The file extension must either be .raw or .s??");
-  declareProperty(
-      std::make_unique<ArrayProperty<int>>("MonitorList", Direction::Output),
-      "List of detector ids of monitors loaded into the workspace");
+  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
+                  "The filename (including its full or relative path) of an ISIS RAW file. "
+                  "The file extension must either be .raw or .s??");
+  declareProperty(std::make_unique<ArrayProperty<int>>("MonitorList", Direction::Output),
+                  "List of detector ids of monitors loaded into the workspace");
 }
 
 /** Executes the algorithm. Reading in the file and creating and populating
@@ -77,21 +73,18 @@ void LoadInstrumentFromRaw::exec() {
   // The L2 and 2-theta values from Raw file assumed to be relative to sample
   // position
 
-  Geometry::Component *samplepos =
-      new Geometry::Component("Sample", instrument.get());
+  Geometry::Component *samplepos = new Geometry::Component("Sample", instrument.get());
   instrument->add(samplepos);
   instrument->markAsSamplePos(samplepos);
   samplepos->setPos(0.0, 0.0, 0.0);
 
-  Geometry::ObjComponent *source =
-      new Geometry::ObjComponent("Source", instrument.get());
+  Geometry::ObjComponent *source = new Geometry::ObjComponent("Source", instrument.get());
   instrument->add(source);
   instrument->markAsSource(source);
 
   progress(0.5);
   // If user has provided an L1, use that
-  auto l1ConfigValue =
-      Kernel::ConfigService::Instance().getValue<double>("instrument.L1");
+  auto l1ConfigValue = Kernel::ConfigService::Instance().getValue<double>("instrument.L1");
   // Otherwise try and get it from the raw file
   double l1 = l1ConfigValue.get_value_or(iraw.ivpb.i_l1);
   // Default to 10 if the raw file doesn't have it set
@@ -111,17 +104,15 @@ void LoadInstrumentFromRaw::exec() {
   // Is ut01 (=phi) present? Sometimes an array is present but has wrong values
   // e.g.all 1.0 or all 2.0
   bool phiPresent = iraw.i_use > 0 && phi[0] != 1.0 && phi[0] != 2.0;
-  const int numMonitors = iraw.i_mon; // The number of monitors
-  const int *const monIndex =
-      iraw.mdet; // Index into the udet array for each monitor
+  const int numMonitors = iraw.i_mon;    // The number of monitors
+  const int *const monIndex = iraw.mdet; // Index into the udet array for each monitor
 
   double prog = 0.5;
   for (int i = 0; i < numDetector; ++i) {
     //    g_log.error() << " ## " << detID[i];
     // Create a new detector. Instrument will take ownership of pointer so no
     // need to delete.
-    Geometry::Detector *detector =
-        new Geometry::Detector("det", detID[i], samplepos);
+    Geometry::Detector *detector = new Geometry::Detector("det", detID[i], samplepos);
     Kernel::V3D pos;
 
     if (phiPresent)
@@ -136,11 +127,9 @@ void LoadInstrumentFromRaw::exec() {
 
     // Check monitor list to see if this is a monitor that should be marked as
     // such
-    if (std::find(monIndex, monIndex + numMonitors, i + 1) !=
-        monIndex + numMonitors) {
+    if (std::find(monIndex, monIndex + numMonitors, i + 1) != monIndex + numMonitors) {
       instrument->markAsMonitor(detector);
-      g_log.information() << "Detector with ID " << detID[i]
-                          << " marked as a monitor.\n";
+      g_log.information() << "Detector with ID " << detID[i] << " marked as a monitor.\n";
     }
     // otherwise mark as a detector
     else {
@@ -155,20 +144,19 @@ void LoadInstrumentFromRaw::exec() {
   std::vector<detid_t> monitorList = instrument->getMonitors();
   setProperty("MonitorList", monitorList);
   // Information to the user about what info is extracted from raw file
-  g_log.information()
-      << "SamplePos component added with position set to (0,0,0).\n"
-      << "Detector components added with position coordinates assumed to be "
-         "relative to the position of the sample; \n"
-      << "L2 and two-theta values were read from raw file and used to set the "
-         "r and theta spherical coordinates; \n"
-      << "the remaining spherical coordinate phi was set to zero.\n"
-      << "Source component added with position set to (0,0,-" << l1
-      << "). In standard configuration, with \n"
-      << "the beam along z-axis pointing from source to sample, this implies "
-         "the source is "
-      << l1 << "m in front \n"
-      << "of the sample. This value can be changed via the 'instrument.l1' "
-         "configuration property.\n";
+  g_log.information() << "SamplePos component added with position set to (0,0,0).\n"
+                      << "Detector components added with position coordinates assumed to be "
+                         "relative to the position of the sample; \n"
+                      << "L2 and two-theta values were read from raw file and used to set the "
+                         "r and theta spherical coordinates; \n"
+                      << "the remaining spherical coordinate phi was set to zero.\n"
+                      << "Source component added with position set to (0,0,-" << l1
+                      << "). In standard configuration, with \n"
+                      << "the beam along z-axis pointing from source to sample, this implies "
+                         "the source is "
+                      << l1 << "m in front \n"
+                      << "of the sample. This value can be changed via the 'instrument.l1' "
+                         "configuration property.\n";
 }
 
 } // namespace DataHandling

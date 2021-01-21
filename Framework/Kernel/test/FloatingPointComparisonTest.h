@@ -13,25 +13,17 @@
 
 class FloatingPointComparisonTest : public CxxTest::TestSuite {
 public:
-  void test_Same_Value_Compare_Equal() {
-    TS_ASSERT(Mantid::Kernel::equals(2.5, 2.5));
-  }
+  void test_Same_Value_Compare_Equal() { TS_ASSERT(Mantid::Kernel::equals(2.5, 2.5)); }
 
   void test_Difference_By_Machine_Eps_Compare_Equal() {
-    TS_ASSERT(Mantid::Kernel::equals(
-        2.5, 2.5 + std::numeric_limits<double>::epsilon()));
+    TS_ASSERT(Mantid::Kernel::equals(2.5, 2.5 + std::numeric_limits<double>::epsilon()));
   }
 
   void test_Difference_By_Machine_Eps_Plus_Small_Does_Not_Compare_Equal() {
-    TS_ASSERT_EQUALS(
-        Mantid::Kernel::equals(
-            2.5, 2.5 + 1.1 * std::numeric_limits<double>::epsilon()),
-        false);
+    TS_ASSERT_EQUALS(Mantid::Kernel::equals(2.5, 2.5 + 1.1 * std::numeric_limits<double>::epsilon()), false);
   }
 
-  void test_Same_Large_Numbers_Compare_Equal() {
-    TS_ASSERT(Mantid::Kernel::equals(DBL_MAX, DBL_MAX));
-  }
+  void test_Same_Large_Numbers_Compare_Equal() { TS_ASSERT(Mantid::Kernel::equals(DBL_MAX, DBL_MAX)); }
 
   void test_Numbers_Outside_Custom_Tolerance_Are_Not_Equal() {
     const double tol(1e-08);

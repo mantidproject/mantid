@@ -41,8 +41,7 @@ public:
   static void destroySuite(LoadSQW2Test *suite) { delete suite; }
 
   LoadSQW2Test()
-      : CxxTest::TestSuite(), m_4DFilename("test_horace_reader.sqw"),
-        m_3DCutFilename("test_horace_reader_3dcut.sqw") {}
+      : CxxTest::TestSuite(), m_4DFilename("test_horace_reader.sqw"), m_3DCutFilename("test_horace_reader_3dcut.sqw") {}
 
   //----------------------------------------------------------------------------
   // Success tests
@@ -124,14 +123,12 @@ public:
   //----------------------------------------------------------------------------
   void test_Filename_Property_Throws_If_Not_Found() {
     auto alg = createAlgorithm();
-    TS_ASSERT_THROWS(alg->setPropertyValue("Filename", "x.sqw"),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg->setPropertyValue("Filename", "x.sqw"), const std::invalid_argument &);
   }
 
   void test_Unknown_Q3DFrame_Is_Not_Accepted() {
     auto alg = createAlgorithm();
-    TS_ASSERT_THROWS(alg->setPropertyValue("Q3DFrames", "Unknown"),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg->setPropertyValue("Q3DFrames", "Unknown"), const std::invalid_argument &);
   }
 
   void test_Unsupported_SQW_Type_Throws_Error() {
@@ -160,8 +157,7 @@ private:
     SizeTList nbins;
   };
 
-  IMDEventWorkspace_sptr runAlgorithm(const std::string &filename,
-                                      const Arguments &args) {
+  IMDEventWorkspace_sptr runAlgorithm(const std::string &filename, const Arguments &args) {
     auto algm = createAlgorithm();
     algm->setProperty("Filename", filename);
     algm->setProperty("MetadataOnly", args.metadataOnly);
@@ -181,8 +177,7 @@ private:
     return alg;
   }
 
-  void checkGeometryAsExpected(const IMDEventWorkspace &outputWS,
-                               const std::string &outputFrame, DataType dtype) {
+  void checkGeometryAsExpected(const IMDEventWorkspace &outputWS, const std::string &outputFrame, DataType dtype) {
     TS_ASSERT_EQUALS(4, outputWS.getNumDims());
     auto expectedDim = getExpectedDimProperties(std::move(outputFrame), dtype);
     for (size_t i = 0; i < 4; ++i) {
@@ -198,13 +193,11 @@ private:
   }
 
   GNU_DIAG_OFF("missing-braces")
-  DimensionProperties getExpectedDimProperties(const std::string &outputFrame,
-                                               DataType dtype) {
+  DimensionProperties getExpectedDimProperties(const std::string &outputFrame, DataType dtype) {
     DimensionProperties expected;
     expected.ids = {"qx", "qy", "qz", "en"};
     if (outputFrame == "HKL") {
-      expected.units = {"in 2.189 A^-1", "in 2.189 A^-1", "in 2.189 A^-1",
-                        "meV"};
+      expected.units = {"in 2.189 A^-1", "in 2.189 A^-1", "in 2.189 A^-1", "meV"};
       expected.names = {"[H,0,0]", "[0,K,0]", "[0,0,L]", "en"};
       expected.frameNames = {"HKL", "HKL", "HKL", "meV"};
     } else if (outputFrame == "Q_sample") {
@@ -219,20 +212,16 @@ private:
     if (dtype == DataType::SQW) {
       expected.nbins = {3, 3, 2, 2};
       if (outputFrame == "HKL") {
-        expected.ulimits = {0.0439,  0.8959,  -0.4644, -0.4046,
-                            -0.7818, -0.5071, 2.5,     142.5};
+        expected.ulimits = {0.0439, 0.8959, -0.4644, -0.4046, -0.7818, -0.5071, 2.5, 142.5};
       } else {
-        expected.ulimits = {0.0962,  1.9615,  -1.0168, -0.8858,
-                            -1.7116, -1.1103, 2.5,     142.5};
+        expected.ulimits = {0.0962, 1.9615, -1.0168, -0.8858, -1.7116, -1.1103, 2.5, 142.5};
       }
     } else if (dtype == DataType::Cut3D) {
       expected.nbins = {3, 3, 1, 3};
       if (outputFrame == "HKL") {
-        expected.ulimits = {0.0439,  0.9271,  -0.4644, -0.4024,
-                            -0.7818, -0.5052, 2.5,     117.5};
+        expected.ulimits = {0.0439, 0.9271, -0.4644, -0.4024, -0.7818, -0.5052, 2.5, 117.5};
       } else {
-        expected.ulimits = {0.0962,  1.6247,   -1.01689, -0.909366,
-                            -1.7117, -1.13168, 2.5,      117.5};
+        expected.ulimits = {0.0962, 1.6247, -1.01689, -0.909366, -1.7117, -1.13168, 2.5, 117.5};
       }
     }
     return expected;
@@ -247,8 +236,7 @@ private:
     }
   }
 
-  void checkExperimentInfoAsExpected(const ExperimentInfo &expt,
-                                     const uint16_t index) {
+  void checkExperimentInfoAsExpected(const ExperimentInfo &expt, const uint16_t index) {
     checkRunAsExpected(expt.run(), index);
     checkSampleAsExpected(expt.sample(), index);
   }
@@ -271,12 +259,10 @@ private:
     if (index == 0) {
       expectedG = {1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0};
     } else {
-      expectedG = {1.0,  0.000304617, 0.0, -0.000304617, 1.0,
-                   -0.0, -0.0,        0.0, 1.0};
+      expectedG = {1.0, 0.000304617, 0.0, -0.000304617, 1.0, -0.0, -0.0, 0.0, 1.0};
     }
-    TSM_ASSERT_DELTA("Goniometer for run index " + std::to_string(index) +
-                         " is incorrect",
-                     expectedG, gR.getVector(), 1e-04);
+    TSM_ASSERT_DELTA("Goniometer for run index " + std::to_string(index) + " is incorrect", expectedG, gR.getVector(),
+                     1e-04);
   }
 
   void checkSampleAsExpected(const Sample &sample, const size_t) {
@@ -299,8 +285,7 @@ private:
     TS_ASSERT_DELTA(0.0, vVec[2], 1e-04);
   }
 
-  void checkDataAsExpected(const IMDEventWorkspace &outputWS,
-                           const Arguments &args, DataType dtype) {
+  void checkDataAsExpected(const IMDEventWorkspace &outputWS, const Arguments &args, DataType dtype) {
     if (args.metadataOnly) {
       TS_ASSERT_EQUALS(0, outputWS.getNEvents());
     } else {
@@ -313,16 +298,13 @@ private:
         auto nevents = iter->getNumEvents();
         for (size_t i = 0; i < nevents; ++i) {
           auto irun = iter->getInnerRunIndex(i);
-          TSM_ASSERT("Expected run index 0 or 1. Found " + std::to_string(irun),
-                     irun == 0 || irun == 1);
+          TSM_ASSERT("Expected run index 0 or 1. Found " + std::to_string(irun), irun == 0 || irun == 1);
           if (irun == 0)
             nexpt1++;
           else
             nexpt2++;
           auto idet = iter->getInnerDetectorID(i);
-          TSM_ASSERT("Expected 1 <= det ID <= 10. Found " +
-                         std::to_string(idet),
-                     1 <= idet || idet <= 10);
+          TSM_ASSERT("Expected 1 <= det ID <= 10. Found " + std::to_string(idet), 1 <= idet || idet <= 10);
           ids[idet - 1] += 1;
         }
       } while (iter->next());
@@ -344,8 +326,7 @@ private:
         std::vector<int> expectedIds(10, 48);
         TS_ASSERT_EQUALS(expectedIds, ids);
       } else {
-        throw std::runtime_error(
-            "LoadSQW2Test::checkDataAsExpected - Unexpected data type.");
+        throw std::runtime_error("LoadSQW2Test::checkDataAsExpected - Unexpected data type.");
       }
     }
 
@@ -354,8 +335,7 @@ private:
     }
   }
 
-  void checkOutputFile(const IMDEventWorkspace &outputWS,
-                       const std::string &outputFilename) {
+  void checkOutputFile(const IMDEventWorkspace &outputWS, const std::string &outputFilename) {
     TS_ASSERT(outputWS.isFileBacked());
     Poco::File fileback(outputFilename);
     TS_ASSERT(fileback.getSize() > 0);

@@ -53,8 +53,7 @@ public:
   void setSysArgs(const QStringList &args) override;
 
   /// Create a new script object that can execute code within this environment
-  Script *newScript(const QString &name, QObject *context,
-                    const Script::InteractionType interact) const override;
+  Script *newScript(const QString &name, QObject *context, const Script::InteractionType interact) const override;
 
   /// Create a new code lexer for Python
   QsciLexer *createCodeLexer() const override;
@@ -83,9 +82,7 @@ public:
   /// Set a reference to a QObject in the given dictionary
   bool setQObject(QObject *, const char *, PyObject *dict);
   /// Set a reference to a QObject in the global dictionary
-  bool setQObject(QObject *val, const char *name) override {
-    return setQObject(val, name, nullptr);
-  }
+  bool setQObject(QObject *val, const char *name) override { return setQObject(val, name, nullptr); }
   /// Set a reference to an int in the global dictionary
   bool setInt(int, const char *) override;
   bool setInt(int, const char *, PyObject *dict);

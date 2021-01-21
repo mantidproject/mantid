@@ -34,8 +34,7 @@
 #include <QGridLayout>
 #include <QUrl>
 
-ExtensibleFileDialog::ExtensibleFileDialog(QWidget *parent, bool extended,
-                                           const Qt::WFlags &flags)
+ExtensibleFileDialog::ExtensibleFileDialog(QWidget *parent, bool extended, const Qt::WFlags &flags)
     : QFileDialog(parent, flags) {
   d_extension = nullptr;
   d_extension_row = 0;
@@ -48,8 +47,7 @@ ExtensibleFileDialog::ExtensibleFileDialog(QWidget *parent, bool extended,
   QGridLayout *main_layout = qobject_cast<QGridLayout *>(layout());
   if (main_layout) {
     d_extension_row = main_layout->rowCount();
-    main_layout->addWidget(d_extension_toggle, d_extension_row,
-                           main_layout->columnCount() - 1);
+    main_layout->addWidget(d_extension_toggle, d_extension_row, main_layout->columnCount() - 1);
     main_layout->setRowStretch(d_extension_row, 0);
     main_layout->setRowStretch(d_extension_row + 1, 0);
   } else {
@@ -80,16 +78,13 @@ void ExtensibleFileDialog::setExtensionWidget(QWidget *extension) {
 
   QGridLayout *main_layout = qobject_cast<QGridLayout *>(layout());
   if (main_layout)
-    main_layout->addWidget(d_extension, d_extension_row, 0, 2,
-                           main_layout->columnCount() - 1);
+    main_layout->addWidget(d_extension, d_extension_row, 0, 2, main_layout->columnCount() - 1);
   else
     layout()->addWidget(d_extension);
 
   d_extension->setVisible(d_extension_toggle->isChecked());
-  connect(d_extension_toggle, SIGNAL(toggled(bool)), d_extension,
-          SLOT(setVisible(bool)));
-  connect(d_extension_toggle, SIGNAL(toggled(bool)), this,
-          SLOT(updateToggleButtonText(bool)));
+  connect(d_extension_toggle, SIGNAL(toggled(bool)), d_extension, SLOT(setVisible(bool)));
+  connect(d_extension_toggle, SIGNAL(toggled(bool)), this, SLOT(updateToggleButtonText(bool)));
 }
 
 void ExtensibleFileDialog::setEditableFilter(bool on) {
@@ -104,8 +99,7 @@ void ExtensibleFileDialog::setEditableFilter(bool on) {
     QComboBox *filterBox = qobject_cast<QComboBox *>(item->widget());
     if (filterBox) {
       filterBox->setEditable(on);
-      connect(filterBox, SIGNAL(editTextChanged(const QString &)), this,
-              SIGNAL(filterSelected(const QString &)));
+      connect(filterBox, SIGNAL(editTextChanged(const QString &)), this, SIGNAL(filterSelected(const QString &)));
       return;
     }
   }

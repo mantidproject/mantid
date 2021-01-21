@@ -18,26 +18,20 @@
 #include "LogisticFit.h"
 #include "fit_gsl.h"
 
-LogisticFit::LogisticFit(ApplicationWindow *parent, Graph *g) : Fit(parent, g) {
-  init();
-}
+LogisticFit::LogisticFit(ApplicationWindow *parent, Graph *g) : Fit(parent, g) { init(); }
 
-LogisticFit::LogisticFit(ApplicationWindow *parent, Graph *g,
-                         const QString &curveTitle)
-    : Fit(parent, g) {
+LogisticFit::LogisticFit(ApplicationWindow *parent, Graph *g, const QString &curveTitle) : Fit(parent, g) {
   init();
   setDataFromCurve(curveTitle);
 }
 
-LogisticFit::LogisticFit(ApplicationWindow *parent, Graph *g,
-                         const QString &curveTitle, double start, double end)
+LogisticFit::LogisticFit(ApplicationWindow *parent, Graph *g, const QString &curveTitle, double start, double end)
     : Fit(parent, g) {
   init();
   setDataFromCurve(curveTitle, start, end);
 }
 
-LogisticFit::LogisticFit(ApplicationWindow *parent, Table *t,
-                         const QString &xCol, const QString &yCol, int startRow,
+LogisticFit::LogisticFit(ApplicationWindow *parent, Table *t, const QString &xCol, const QString &yCol, int startRow,
                          int endRow)
     : Fit(parent, t) {
   init();
@@ -50,8 +44,7 @@ void LogisticFit::init() {
   d_df = logistic_df;
   d_fdf = logistic_fdf;
   d_fsimplex = logistic_d;
-  d_param_explain << tr("init value") << tr("final value") << tr("center")
-                  << tr("power");
+  d_param_explain << tr("init value") << tr("final value") << tr("center") << tr("power");
   d_param_names << "A1"
                 << "A2"
                 << "x0"

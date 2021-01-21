@@ -13,8 +13,7 @@ namespace MantidQt {
 namespace Widgets {
 namespace MplCpp {
 
-class MANTID_MPLCPP_DLL ErrorbarContainer
-    : public Common::Python::InstanceHolder {
+class MANTID_MPLCPP_DLL ErrorbarContainer : public Common::Python::InstanceHolder {
 public:
   explicit ErrorbarContainer(Common::Python::Object pyInstance);
 };

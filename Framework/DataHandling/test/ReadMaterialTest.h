@@ -59,8 +59,7 @@ public:
 
     auto result = ReadMaterial::validateInputs(params);
 
-    TS_ASSERT_EQUALS(result["AtomicNumber"],
-                     "Cannot specify both ChemicalFormula and AtomicNumber")
+    TS_ASSERT_EQUALS(result["AtomicNumber"], "Cannot specify both ChemicalFormula and AtomicNumber")
   }
 
   void testFailureValidateInputsNoCoherentXSection() {
@@ -78,10 +77,9 @@ public:
 
     auto result = ReadMaterial::validateInputs(params);
     TS_ASSERT_EQUALS(result.size(), 1)
-    TS_ASSERT_EQUALS(result["CoherentXSection"],
-                     "The cross section must be specified when "
-                     "no ChemicalFormula or AtomicNumber is "
-                     "given.")
+    TS_ASSERT_EQUALS(result["CoherentXSection"], "The cross section must be specified when "
+                                                 "no ChemicalFormula or AtomicNumber is "
+                                                 "given.")
   }
 
   void testFailureValidateInputsNoIncoherentXSection() {
@@ -99,10 +97,9 @@ public:
 
     auto result = ReadMaterial::validateInputs(params);
     TS_ASSERT_EQUALS(result.size(), 1)
-    TS_ASSERT_EQUALS(result["IncoherentXSection"],
-                     "The cross section must be specified when "
-                     "no ChemicalFormula or AtomicNumber is "
-                     "given.")
+    TS_ASSERT_EQUALS(result["IncoherentXSection"], "The cross section must be specified when "
+                                                   "no ChemicalFormula or AtomicNumber is "
+                                                   "given.")
   }
   void testFailureValidateInputsNoAttenuationXSection() {
     const ReadMaterial::MaterialParameters params = []() -> auto {
@@ -119,10 +116,9 @@ public:
 
     auto result = ReadMaterial::validateInputs(params);
     TS_ASSERT_EQUALS(result.size(), 1)
-    TS_ASSERT_EQUALS(result["AttenuationXSection"],
-                     "The cross section must be specified when "
-                     "no ChemicalFormula or AtomicNumber is "
-                     "given.")
+    TS_ASSERT_EQUALS(result["AttenuationXSection"], "The cross section must be specified when "
+                                                    "no ChemicalFormula or AtomicNumber is "
+                                                    "given.")
   }
   void testFailureValidateInputsNoScatteringXSection() {
     const ReadMaterial::MaterialParameters params = []() -> auto {
@@ -139,10 +135,9 @@ public:
 
     auto result = ReadMaterial::validateInputs(params);
     TS_ASSERT_EQUALS(result.size(), 1)
-    TS_ASSERT_EQUALS(result["ScatteringXSection"],
-                     "The cross section must be specified when "
-                     "no ChemicalFormula or AtomicNumber is "
-                     "given.")
+    TS_ASSERT_EQUALS(result["ScatteringXSection"], "The cross section must be specified when "
+                                                   "no ChemicalFormula or AtomicNumber is "
+                                                   "given.")
   }
   void testFailureValidateInputsNoNumberDensityParams() {
     const ReadMaterial::MaterialParameters params = []() -> auto {
@@ -159,9 +154,8 @@ public:
 
     auto result = ReadMaterial::validateInputs(params);
     TS_ASSERT_EQUALS(result.size(), 1)
-    TS_ASSERT_EQUALS(result["NumberDensity"],
-                     "The number density or effective number density must "
-                     " be specified with a user-defined material")
+    TS_ASSERT_EQUALS(result["NumberDensity"], "The number density or effective number density must "
+                                              " be specified with a user-defined material")
   }
 
   void testSuccessfullValidateInputsSampleNumber() {
@@ -240,11 +234,10 @@ public:
 
     auto result = ReadMaterial::validateInputs(params);
 
-    TS_ASSERT_EQUALS(result["NumberDensity"],
-                     "Number Density cannot be determined when "
-                     "both the effective number density and "
-                     "packing fraction are set. Only two can "
-                     "be specified at most.")
+    TS_ASSERT_EQUALS(result["NumberDensity"], "Number Density cannot be determined when "
+                                              "both the effective number density and "
+                                              "packing fraction are set. Only two can "
+                                              "be specified at most.")
   }
 
   void testFailureValidateInputsEffectiveWithMass() {
@@ -259,11 +252,9 @@ public:
 
     auto result = ReadMaterial::validateInputs(params);
 
-    TS_ASSERT_EQUALS(
-        result["EffectiveNumberDensity"],
-        "Cannot set effective number density when the mass density "
-        "is specified. The value specified will be overwritten "
-        "because it will be computed from the mass density.");
+    TS_ASSERT_EQUALS(result["EffectiveNumberDensity"], "Cannot set effective number density when the mass density "
+                                                       "is specified. The value specified will be overwritten "
+                                                       "because it will be computed from the mass density.");
   }
 
   void testFailureValidateInputsLargePackingFrac() {
@@ -280,8 +271,7 @@ public:
 
     auto result = ReadMaterial::validateInputs(params);
 
-    TS_ASSERT_EQUALS(result["PackingFraction"],
-                     "Cannot have a packing fraction larger than 2")
+    TS_ASSERT_EQUALS(result["PackingFraction"], "Cannot have a packing fraction larger than 2")
   }
 
   void testFailureValidateInputsNegativePackingFrac() {
@@ -298,8 +288,7 @@ public:
 
     auto result = ReadMaterial::validateInputs(params);
 
-    TS_ASSERT_EQUALS(result["PackingFraction"],
-                     "Cannot have a packing fraction less than 0")
+    TS_ASSERT_EQUALS(result["PackingFraction"], "Cannot have a packing fraction less than 0")
   }
 
   void testFailureValidateInputsPackingFracOnly() {
@@ -313,10 +302,9 @@ public:
 
     auto result = ReadMaterial::validateInputs(params);
 
-    TS_ASSERT_EQUALS(result["PackingFraction"],
-                     "Cannot determine number density from only "
-                     " the packing fraction. The number density "
-                     " or effective number density is also needed.")
+    TS_ASSERT_EQUALS(result["PackingFraction"], "Cannot determine number density from only "
+                                                " the packing fraction. The number density "
+                                                " or effective number density is also needed.")
   }
 
   void testFailureValidateInputsPackingWithAll() {
@@ -333,10 +321,9 @@ public:
 
     auto result = ReadMaterial::validateInputs(params);
 
-    TS_ASSERT_EQUALS(result["PackingFraction"],
-                     "Cannot set packing fraction when both the number density "
-                     "and effective number density are determined from "
-                     "the mass density and cell volume + zParameter.")
+    TS_ASSERT_EQUALS(result["PackingFraction"], "Cannot set packing fraction when both the number density "
+                                                "and effective number density are determined from "
+                                                "the mass density and cell volume + zParameter.")
   }
 
   void testSuccessfulValidateInputsPackingFracOnly() {
@@ -386,8 +373,7 @@ public:
 
     auto result = ReadMaterial::validateInputs(params);
 
-    TS_ASSERT_EQUALS(result["UnitCellVolume"],
-                     "UnitCellVolume must be provided with ZParameter")
+    TS_ASSERT_EQUALS(result["UnitCellVolume"], "UnitCellVolume must be provided with ZParameter")
   }
 
   void testSuccessfulValidateInputsNumWithMass() {
@@ -542,23 +528,16 @@ private:
 
   void compareMaterial(const Material &material, const Material &check) {
     std::vector<Material::FormulaUnit> checkFormula = check.chemicalFormula();
-    std::vector<Material::FormulaUnit> materialFormula =
-        material.chemicalFormula();
+    std::vector<Material::FormulaUnit> materialFormula = material.chemicalFormula();
 
     TS_ASSERT_EQUALS(material.numberDensity(), check.numberDensity());
-    TS_ASSERT_EQUALS(material.numberDensityEffective(),
-                     check.numberDensityEffective())
+    TS_ASSERT_EQUALS(material.numberDensityEffective(), check.numberDensityEffective())
     TS_ASSERT_EQUALS(material.packingFraction(), check.packingFraction())
-    TS_ASSERT_DELTA(material.cohScatterXSection(), check.cohScatterXSection(),
-                    PRECISION);
-    TS_ASSERT_DELTA(material.incohScatterXSection(),
-                    check.incohScatterXSection(), PRECISION);
-    TS_ASSERT_DELTA(material.absorbXSection(), check.absorbXSection(),
-                    PRECISION);
-    TS_ASSERT_DELTA(material.totalScatterXSection(),
-                    check.totalScatterXSection(), PRECISION);
-    TS_ASSERT_EQUALS(checkFormula[0].multiplicity,
-                     materialFormula[0].multiplicity);
+    TS_ASSERT_DELTA(material.cohScatterXSection(), check.cohScatterXSection(), PRECISION);
+    TS_ASSERT_DELTA(material.incohScatterXSection(), check.incohScatterXSection(), PRECISION);
+    TS_ASSERT_DELTA(material.absorbXSection(), check.absorbXSection(), PRECISION);
+    TS_ASSERT_DELTA(material.totalScatterXSection(), check.totalScatterXSection(), PRECISION);
+    TS_ASSERT_EQUALS(checkFormula[0].multiplicity, materialFormula[0].multiplicity);
     TS_ASSERT_EQUALS(checkFormula.size(), materialFormula.size())
   }
 };

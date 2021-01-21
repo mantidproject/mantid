@@ -34,12 +34,9 @@ using namespace Mantid::Kernel;
  *	@param experimentInfoIndex :: optional index in the array of
  *        ExperimentInfo objects. Should only be non-zero for MDWorkspaces.
  */
-MantidSampleLogDialog::MantidSampleLogDialog(const QString &wsname,
-                                             MantidUI *mui,
-                                             const Qt::WFlags &flags,
+MantidSampleLogDialog::MantidSampleLogDialog(const QString &wsname, MantidUI *mui, const Qt::WFlags &flags,
                                              size_t experimentInfoIndex)
-    : SampleLogDialogBase(wsname, mui->appWindow(), flags, experimentInfoIndex),
-      m_mantidUI(mui) {
+    : SampleLogDialogBase(wsname, mui->appWindow(), flags, experimentInfoIndex), m_mantidUI(mui) {
   setDialogWindowTitle(wsname);
 
   setTreeWidgetColumnNames();
@@ -55,8 +52,7 @@ MantidSampleLogDialog::MantidSampleLogDialog(const QString &wsname,
   filterPeriod = new QRadioButton("Period");
   filterStatusPeriod = new QRadioButton("Status + Period");
   filterStatusPeriod->setChecked(true);
-  const std::vector<QRadioButton *> filterRadioButtons{
-      filterNone, filterStatus, filterPeriod, filterStatusPeriod};
+  const std::vector<QRadioButton *> filterRadioButtons{filterNone, filterStatus, filterPeriod, filterStatusPeriod};
 
   // Add options to layout
   QVBoxLayout *vbox = new QVBoxLayout;
@@ -67,14 +63,12 @@ MantidSampleLogDialog::MantidSampleLogDialog(const QString &wsname,
 
   // Changing filter option updates stats
   for (auto *radioButton : filterRadioButtons) {
-    connect(radioButton, SIGNAL(toggled(bool)), this,
-            SLOT(showLogStatistics()));
+    connect(radioButton, SIGNAL(toggled(bool)), this, SLOT(showLogStatistics()));
   }
 
   // -------------- Statistics on logs ------------------------
   std::string stats[NUM_STATS] = {
-      "Min:",     "Max:",      "Mean:",         "Median:",
-      "Std Dev:", "Time Avg:", "Time Std Dev:", "Duration:"};
+      "Min:", "Max:", "Mean:", "Median:", "Std Dev:", "Time Avg:", "Time Std Dev:", "Duration:"};
   QGroupBox *statsBox = new QGroupBox("Log Statistics");
   QFormLayout *statsBoxLayout = new QFormLayout;
   for (size_t i = 0; i < NUM_STATS; i++) {
@@ -122,15 +116,12 @@ void MantidSampleLogDialog::importItem(QTreeWidgetItem *item) {
   int filter = 0;
   int key = item->data(1, Qt::UserRole).toInt();
   Mantid::Kernel::Property *logData = nullptr;
-  QString caption = QString::fromStdString(m_wsname) +
-                    QString::fromStdString("-") + item->text(0);
+  QString caption = QString::fromStdString(m_wsname) + QString::fromStdString("-") + item->text(0);
   switch (key) {
   case numeric:
   case string:
-    m_mantidUI->importString(
-        item->text(0), item->data(0, Qt::UserRole).toString(), QString(""),
-        QString::fromStdString(
-            m_wsname)); // Pretty much just print out the string
+    m_mantidUI->importString(item->text(0), item->data(0, Qt::UserRole).toString(), QString(""),
+                             QString::fromStdString(m_wsname)); // Pretty much just print out the string
     break;
   case numTSeries:
     if (filterStatus->isChecked())
@@ -139,21 +130,18 @@ void MantidSampleLogDialog::importItem(QTreeWidgetItem *item) {
       filter = 2;
     if (filterStatusPeriod->isChecked())
       filter = 3;
-    m_mantidUI->importNumSeriesLog(QString::fromStdString(m_wsname),
-                                   item->text(0), filter);
+    m_mantidUI->importNumSeriesLog(QString::fromStdString(m_wsname), item->text(0), filter);
     break;
   case stringTSeries:
-    m_mantidUI->importStrSeriesLog(item->text(0),
-                                   item->data(0, Qt::UserRole).toString(),
+    m_mantidUI->importStrSeriesLog(item->text(0), item->data(0, Qt::UserRole).toString(),
                                    QString::fromStdString(m_wsname));
     break;
   case numericArray:
     logData = m_ei->getLog(item->text(0).toStdString());
     if (!logData)
       return;
-    m_mantidUI->importString(
-        item->text(0), QString::fromStdString(logData->value()),
-        QString::fromStdString(","), QString::fromStdString(m_wsname));
+    m_mantidUI->importString(item->text(0), QString::fromStdString(logData->value()), QString::fromStdString(","),
+                             QString::fromStdString(m_wsname));
     break;
   default:
     throw std::invalid_argument("Error importing log entry, wrong data type");
@@ -164,8 +152,7 @@ void MantidSampleLogDialog::importItem(QTreeWidgetItem *item) {
  * Return filter type based on which radio button is selected
  * @returns :: Filter type selected in UI
  */
-Mantid::API::LogFilterGenerator::FilterType
-MantidSampleLogDialog::getFilterType() const {
+Mantid::API::LogFilterGenerator::FilterType MantidSampleLogDialog::getFilterType() const {
   if (filterStatus->isChecked()) {
     return Mantid::API::LogFilterGenerator::FilterType::Status;
   } else if (filterPeriod->isChecked()) {

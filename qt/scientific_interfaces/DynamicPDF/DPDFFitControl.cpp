@@ -41,10 +41,9 @@ namespace DynamicPDF {
  * @brief Constructor
  */
 FitControl::FitControl(QWidget *parent)
-    : QWidget(parent), m_functionBrowser{nullptr}, m_fitOptionsBrowser{nullptr},
-      m_inputDataControl{nullptr}, m_displayControl{nullptr},
-      m_fitRunner(), m_individualFitName{"DPDFIndivFit"}, m_modelEvaluationName{
-                                                              "DPDFModelEval"} {
+    : QWidget(parent), m_functionBrowser{nullptr}, m_fitOptionsBrowser{nullptr}, m_inputDataControl{nullptr},
+      m_displayControl{nullptr},
+      m_fitRunner(), m_individualFitName{"DPDFIndivFit"}, m_modelEvaluationName{"DPDFModelEval"} {
   this->initLayout();
 }
 
@@ -82,10 +81,8 @@ void FitControl::updateFitRangeFromDisplayControl() {
   // the fit-range in the DisplayCurveFit, which in turn sent a
   //  signal that is being received now by this slot.
   if ((startX != fitRange.first) || (endX != fitRange.second)) {
-    m_fitOptionsBrowser->setProperty(QString::fromStdString("StartX"),
-                                     QString::number(fitRange.first));
-    m_fitOptionsBrowser->setProperty(QString::fromStdString("EndX"),
-                                     QString::number(fitRange.second));
+    m_fitOptionsBrowser->setProperty(QString::fromStdString("StartX"), QString::number(fitRange.first));
+    m_fitOptionsBrowser->setProperty(QString::fromStdString("EndX"), QString::number(fitRange.second));
   }
 }
 
@@ -140,12 +137,10 @@ void FitControl::finishIndividualFit(bool error) {
   Mantid::API::IFunction_sptr fun;
   fun = m_fitRunner->getAlgorithm()->getProperty("Function");
   // prevent the function browser to emit signal after update
-  disconnect(m_functionBrowser,
-             SIGNAL(parameterChanged(const QString &, const QString &)), this,
+  disconnect(m_functionBrowser, SIGNAL(parameterChanged(const QString &, const QString &)), this,
              SLOT(slotEvaluateModel(const QString &, const QString &)));
   this->updateFunctionBrowser(fun);
-  connect(m_functionBrowser,
-          SIGNAL(parameterChanged(const QString &, const QString &)), this,
+  connect(m_functionBrowser, SIGNAL(parameterChanged(const QString &, const QString &)), this,
           SLOT(slotEvaluateModel(const QString &, const QString &)));
   const bool evaluateModel{true};
   this->fitIndividual(evaluateModel);
@@ -168,16 +163,14 @@ void FitControl::finishModelEvaluation(bool error) {
   if (error) {
     return;
   }
-  emit signalModelEvaluationFinished(
-      QString::fromStdString(m_modelEvaluationName + "_Workspace"));
+  emit signalModelEvaluationFinished(QString::fromStdString(m_modelEvaluationName + "_Workspace"));
 }
 
 /*
  * @brief Load a model from the built-in models in the Mantid settings
  * @param modelName name of the model function
  */
-void FitControl::updateFunctionBrowserWithBuiltInModel(
-    const QString &modelName) {
+void FitControl::updateFunctionBrowserWithBuiltInModel(const QString &modelName) {
   this->updateFunctionBrowser("BuiltInModels", modelName);
 }
 
@@ -197,13 +190,11 @@ void FitControl::initLayout() {
 
   // set SIGNAL/SLOTS connections between "internal" objects
   // update the range selector in StartX or EndX has changed in the browser
-  connect(m_fitOptionsBrowser, SIGNAL(doublePropertyChanged(QString)), this,
-          SLOT(updateFitRangeSelector(QString)));
+  connect(m_fitOptionsBrowser, SIGNAL(doublePropertyChanged(QString)), this, SLOT(updateFitRangeSelector(QString)));
   // user clicks the Fit push buttom to carry out the fit
   connect(m_uiForm.pushButtonFit, SIGNAL(clicked()), this, SLOT(fit()));
   // update the model evaluation after changes in the function browser
-  connect(m_functionBrowser,
-          SIGNAL(parameterChanged(const QString &, const QString &)), this,
+  connect(m_functionBrowser, SIGNAL(parameterChanged(const QString &, const QString &)), this,
           SLOT(slotEvaluateModel(const QString &, const QString &)));
 }
 
@@ -220,26 +211,20 @@ bool FitControl::isSliceSelectedForFitting() {
  */
 void FitControl::setConnections() {
   // rangeSelectorFit has been changed in the DisplayControl
-  connect(m_displayControl, SIGNAL(signalRangeSelectorFitUpdated()), this,
-          SLOT(updateFitRangeFromDisplayControl()));
-  connect(this, SIGNAL(signalModelEvaluationFinished(const QString &)),
-          m_displayControl,
+  connect(m_displayControl, SIGNAL(signalRangeSelectorFitUpdated()), this, SLOT(updateFitRangeFromDisplayControl()));
+  connect(this, SIGNAL(signalModelEvaluationFinished(const QString &)), m_displayControl,
           SLOT(updateModelEvaluationDisplay(const QString &)));
 }
 
 /**
  * @brief pass the InputDataControl object for initialization
  */
-void FitControl::setInputDataControl(InputDataControl *inputDataControl) {
-  m_inputDataControl = inputDataControl;
-}
+void FitControl::setInputDataControl(InputDataControl *inputDataControl) { m_inputDataControl = inputDataControl; }
 
 /**
  * @brief pass the DisplayControl object for initialization
  */
-void FitControl::setDisplayControl(DisplayControl *displayControl) {
-  m_displayControl = displayControl;
-}
+void FitControl::setDisplayControl(DisplayControl *displayControl) { m_displayControl = displayControl; }
 
 /**
  * @brief Sequential fitting in the absence of global parameters
@@ -276,8 +261,7 @@ void FitControl::fitIndividual(const bool &isEvaluation) {
     auto fitAlg = Mantid::API::AlgorithmManager::Instance().create("Fit");
     fitAlg->initialize();
     fitAlg->setProperty("Function", fun);
-    fitAlg->setPropertyValue("InputWorkspace",
-                             m_inputDataControl->getWorkspaceName());
+    fitAlg->setPropertyValue("InputWorkspace", m_inputDataControl->getWorkspaceName());
     auto index = static_cast<int>(m_inputDataControl->getWorkspaceIndex());
     fitAlg->setProperty("WorkspaceIndex", index);
     m_fitOptionsBrowser->copyPropertiesToAlgorithm(*fitAlg);
@@ -288,12 +272,12 @@ void FitControl::fitIndividual(const bool &isEvaluation) {
       auto range = m_inputDataControl->getCurrentRange();
       fitAlg->setProperty("StartX", range.first);
       fitAlg->setProperty("EndX", range.second);
-      connect(m_fitRunner.get(), SIGNAL(algorithmComplete(bool)), this,
-              SLOT(finishModelEvaluation(bool)), Qt::QueuedConnection);
+      connect(m_fitRunner.get(), SIGNAL(algorithmComplete(bool)), this, SLOT(finishModelEvaluation(bool)),
+              Qt::QueuedConnection);
     } else {
       fitAlg->setPropertyValue("Output", m_individualFitName);
-      connect(m_fitRunner.get(), SIGNAL(algorithmComplete(bool)), this,
-              SLOT(finishIndividualFit(bool)), Qt::QueuedConnection);
+      connect(m_fitRunner.get(), SIGNAL(algorithmComplete(bool)), this, SLOT(finishIndividualFit(bool)),
+              Qt::QueuedConnection);
     }
     m_fitRunner->startAlgorithm(fitAlg);
   } catch (std::exception &e) {
@@ -303,8 +287,7 @@ void FitControl::fitIndividual(const bool &isEvaluation) {
       mess = mess.mid(0, maxSize);
       mess += "...";
     }
-    QMessageBox::critical(this, "DynamicPDF - Error",
-                          QString("fitIndividual failed:\n\n  %1").arg(mess));
+    QMessageBox::critical(this, "DynamicPDF - Error", QString("fitIndividual failed:\n\n  %1").arg(mess));
   }
 } // FitControl::fitIndividual
 
@@ -321,8 +304,7 @@ void FitControl::updateFunctionBrowser(Mantid::API::IFunction_sptr fun) {
  * @param directory either "BuiltInModels" or "CustomModels"
  * @param modelName name of the model function
  */
-void FitControl::updateFunctionBrowser(const QString &directory,
-                                       const QString &modelName) {
+void FitControl::updateFunctionBrowser(const QString &directory, const QString &modelName) {
   QSettings settings;
   settings.beginGroup("Mantid/DynamicPDF/" + directory);
   QString function = settings.value(modelName).toString();

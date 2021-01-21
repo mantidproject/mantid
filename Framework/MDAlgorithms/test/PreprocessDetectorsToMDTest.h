@@ -17,23 +17,19 @@ using namespace Mantid::MDAlgorithms;
 
 class PrepcocessDetectorsToMDTestHelper : public PreprocessDetectorsToMD {
 public:
-  std::shared_ptr<DataObjects::TableWorkspace>
-  createTableWorkspace(const API::MatrixWorkspace_const_sptr &inputWS) {
+  std::shared_ptr<DataObjects::TableWorkspace> createTableWorkspace(const API::MatrixWorkspace_const_sptr &inputWS) {
     return PreprocessDetectorsToMD::createTableWorkspace(inputWS);
   }
   void processDetectorsPositions(const API::MatrixWorkspace_const_sptr &inputWS,
                                  DataObjects::TableWorkspace_sptr &targWS) {
     PreprocessDetectorsToMD::processDetectorsPositions(inputWS, targWS);
   }
-  void
-  buildFakeDetectorsPositions(const API::MatrixWorkspace_const_sptr &inputWS,
-                              DataObjects::TableWorkspace_sptr &targWS) {
+  void buildFakeDetectorsPositions(const API::MatrixWorkspace_const_sptr &inputWS,
+                                   DataObjects::TableWorkspace_sptr &targWS) {
     PreprocessDetectorsToMD::buildFakeDetectorsPositions(inputWS, targWS);
   }
 
-  PrepcocessDetectorsToMDTestHelper() : PreprocessDetectorsToMD() {
-    PreprocessDetectorsToMD::initialize();
-  }
+  PrepcocessDetectorsToMDTestHelper() : PreprocessDetectorsToMD() { PreprocessDetectorsToMD::initialize(); }
 };
 
 // Test is transformed from ConvetToQ3DdE but actually tests some aspects of
@@ -44,9 +40,7 @@ class PreprocessDetectorsToMDTest : public CxxTest::TestSuite {
   std::shared_ptr<DataObjects::TableWorkspace> tws;
 
 public:
-  static PreprocessDetectorsToMDTest *createSuite() {
-    return new PreprocessDetectorsToMDTest();
-  }
+  static PreprocessDetectorsToMDTest *createSuite() { return new PreprocessDetectorsToMDTest(); }
   static void destroySuite(PreprocessDetectorsToMDTest *suite) { delete suite; }
 
   void testCreateTarget() {
@@ -64,8 +58,7 @@ public:
 
     size_t nVal = tws->rowCount();
 
-    const std::vector<size_t> &spec2detMap =
-        tws->getColVector<size_t>("spec2detMap");
+    const std::vector<size_t> &spec2detMap = tws->getColVector<size_t>("spec2detMap");
     for (size_t i = 0; i < nVal; i++) {
       TS_ASSERT_EQUALS(i, spec2detMap[i]);
     }
@@ -74,17 +67,10 @@ public:
     uint32_t nDet(0);
     std::string InstrName;
     bool fakeDetectrors(false);
-    TS_ASSERT_THROWS_NOTHING(
-        nDet = tws->getLogs()->getPropertyValueAsType<uint32_t>(
-            "ActualDetectorsNum"));
-    TS_ASSERT_THROWS_NOTHING(
-        L1 = tws->getLogs()->getPropertyValueAsType<double>("L1"));
-    TS_ASSERT_THROWS_NOTHING(
-        InstrName = tws->getLogs()->getPropertyValueAsType<std::string>(
-            "InstrumentName"));
-    TS_ASSERT_THROWS_NOTHING(
-        fakeDetectrors =
-            tws->getLogs()->getPropertyValueAsType<bool>("FakeDetectors"));
+    TS_ASSERT_THROWS_NOTHING(nDet = tws->getLogs()->getPropertyValueAsType<uint32_t>("ActualDetectorsNum"));
+    TS_ASSERT_THROWS_NOTHING(L1 = tws->getLogs()->getPropertyValueAsType<double>("L1"));
+    TS_ASSERT_THROWS_NOTHING(InstrName = tws->getLogs()->getPropertyValueAsType<std::string>("InstrumentName"));
+    TS_ASSERT_THROWS_NOTHING(fakeDetectrors = tws->getLogs()->getPropertyValueAsType<bool>("FakeDetectors"));
 
     TS_ASSERT_DELTA(10, L1, 1.e-11);
     TS_ASSERT_EQUALS(4, nDet);
@@ -121,17 +107,10 @@ public:
     uint32_t nDet(0);
     std::string InstrName;
     bool fakeDetectrors(false);
-    TS_ASSERT_THROWS_NOTHING(
-        nDet = tws->getLogs()->getPropertyValueAsType<uint32_t>(
-            "ActualDetectorsNum"));
-    TS_ASSERT_THROWS_NOTHING(
-        L1 = tws->getLogs()->getPropertyValueAsType<double>("L1"));
-    TS_ASSERT_THROWS_NOTHING(
-        InstrName = tws->getLogs()->getPropertyValueAsType<std::string>(
-            "InstrumentName"));
-    TS_ASSERT_THROWS_NOTHING(
-        fakeDetectrors =
-            tws->getLogs()->getPropertyValueAsType<bool>("FakeDetectors"));
+    TS_ASSERT_THROWS_NOTHING(nDet = tws->getLogs()->getPropertyValueAsType<uint32_t>("ActualDetectorsNum"));
+    TS_ASSERT_THROWS_NOTHING(L1 = tws->getLogs()->getPropertyValueAsType<double>("L1"));
+    TS_ASSERT_THROWS_NOTHING(InstrName = tws->getLogs()->getPropertyValueAsType<std::string>("InstrumentName"));
+    TS_ASSERT_THROWS_NOTHING(fakeDetectrors = tws->getLogs()->getPropertyValueAsType<bool>("FakeDetectors"));
 
     TS_ASSERT_DELTA(1, L1, 1.e-11);
     TS_ASSERT_EQUALS(4, nDet);
@@ -142,38 +121,26 @@ public:
   void testTheAlg() {
     auto pAlg = std::make_unique<PrepcocessDetectorsToMDTestHelper>();
 
-    TS_ASSERT_THROWS_NOTHING(
-        pAlg->setPropertyValue("InputWorkspace", "testMatrWS"));
-    TS_ASSERT_THROWS_NOTHING(
-        pAlg->setPropertyValue("OutputWorkspace", "PreprocDetectorsWS"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("InputWorkspace", "testMatrWS"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("OutputWorkspace", "PreprocDetectorsWS"));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("UpdateMasksInfo", "1"));
 
     TS_ASSERT_THROWS_NOTHING(pAlg->execute());
     TSM_ASSERT("Should be successful ", pAlg->isExecuted());
 
-    API::Workspace_sptr wsOut =
-        API::AnalysisDataService::Instance().retrieve("PreprocDetectorsWS");
-    TSM_ASSERT("can not retrieve table worksapce from analysis data service ",
-               wsOut);
-    DataObjects::TableWorkspace_sptr tws =
-        std::dynamic_pointer_cast<DataObjects::TableWorkspace>(wsOut);
+    API::Workspace_sptr wsOut = API::AnalysisDataService::Instance().retrieve("PreprocDetectorsWS");
+    TSM_ASSERT("can not retrieve table worksapce from analysis data service ", wsOut);
+    DataObjects::TableWorkspace_sptr tws = std::dynamic_pointer_cast<DataObjects::TableWorkspace>(wsOut);
     TSM_ASSERT("can not interpet the workspace as table workspace", tws);
 
     double L1(0);
     uint32_t nDet(0);
     std::string InstrName;
     bool fakeDetectrors(false);
-    TS_ASSERT_THROWS_NOTHING(
-        nDet = tws->getLogs()->getPropertyValueAsType<uint32_t>(
-            "ActualDetectorsNum"));
-    TS_ASSERT_THROWS_NOTHING(
-        L1 = tws->getLogs()->getPropertyValueAsType<double>("L1"));
-    TS_ASSERT_THROWS_NOTHING(
-        InstrName = tws->getLogs()->getPropertyValueAsType<std::string>(
-            "InstrumentName"));
-    TS_ASSERT_THROWS_NOTHING(
-        fakeDetectrors =
-            tws->getLogs()->getPropertyValueAsType<bool>("FakeDetectors"));
+    TS_ASSERT_THROWS_NOTHING(nDet = tws->getLogs()->getPropertyValueAsType<uint32_t>("ActualDetectorsNum"));
+    TS_ASSERT_THROWS_NOTHING(L1 = tws->getLogs()->getPropertyValueAsType<double>("L1"));
+    TS_ASSERT_THROWS_NOTHING(InstrName = tws->getLogs()->getPropertyValueAsType<std::string>("InstrumentName"));
+    TS_ASSERT_THROWS_NOTHING(fakeDetectrors = tws->getLogs()->getPropertyValueAsType<bool>("FakeDetectors"));
 
     TS_ASSERT_DELTA(10, L1, 1.e-11);
     TS_ASSERT_EQUALS(4, nDet);
@@ -184,21 +151,16 @@ public:
   void testCreateWSWithEfixed() {
     auto pAlg = std::make_unique<PrepcocessDetectorsToMDTestHelper>();
 
-    TS_ASSERT_THROWS_NOTHING(
-        pAlg->setPropertyValue("InputWorkspace", "testMatrWS"));
-    TS_ASSERT_THROWS_NOTHING(
-        pAlg->setPropertyValue("OutputWorkspace", "PreprocDetectorsWS"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("InputWorkspace", "testMatrWS"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("OutputWorkspace", "PreprocDetectorsWS"));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("GetEFixed", "1"));
 
     TS_ASSERT_THROWS_NOTHING(pAlg->execute());
     TSM_ASSERT("Should be successful ", pAlg->isExecuted());
 
-    API::Workspace_sptr wsOut =
-        API::AnalysisDataService::Instance().retrieve("PreprocDetectorsWS");
-    TSM_ASSERT("can not retrieve table worksapce from analysis data service ",
-               wsOut);
-    DataObjects::TableWorkspace_sptr tws =
-        std::dynamic_pointer_cast<DataObjects::TableWorkspace>(wsOut);
+    API::Workspace_sptr wsOut = API::AnalysisDataService::Instance().retrieve("PreprocDetectorsWS");
+    TSM_ASSERT("can not retrieve table worksapce from analysis data service ", wsOut);
+    DataObjects::TableWorkspace_sptr tws = std::dynamic_pointer_cast<DataObjects::TableWorkspace>(wsOut);
     TSM_ASSERT("can not interpet the workspace as table workspace", tws);
 
     auto &Efixed = tws->getColVector<float>("eFixed");
@@ -210,22 +172,17 @@ public:
   void testUpdateMasks() {
     auto pAlg = std::make_unique<PrepcocessDetectorsToMDTestHelper>();
     // do first run which generates first masks
-    TS_ASSERT_THROWS_NOTHING(
-        pAlg->setPropertyValue("InputWorkspace", "testMatrWS"));
-    TS_ASSERT_THROWS_NOTHING(
-        pAlg->setPropertyValue("OutputWorkspace", "PreprocDetectorsWSMasks"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("InputWorkspace", "testMatrWS"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("OutputWorkspace", "PreprocDetectorsWSMasks"));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("GetMaskState", "1"));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("UpdateMasksInfo", "1"));
 
     TS_ASSERT_THROWS_NOTHING(pAlg->execute());
     TSM_ASSERT("Should be successful ", pAlg->isExecuted());
 
-    API::Workspace_sptr wsOut = API::AnalysisDataService::Instance().retrieve(
-        "PreprocDetectorsWSMasks");
-    TSM_ASSERT("can not retrieve table worksapce from analysis data service ",
-               wsOut);
-    DataObjects::TableWorkspace_sptr tws =
-        std::dynamic_pointer_cast<DataObjects::TableWorkspace>(wsOut);
+    API::Workspace_sptr wsOut = API::AnalysisDataService::Instance().retrieve("PreprocDetectorsWSMasks");
+    TSM_ASSERT("can not retrieve table worksapce from analysis data service ", wsOut);
+    DataObjects::TableWorkspace_sptr tws = std::dynamic_pointer_cast<DataObjects::TableWorkspace>(wsOut);
     TSM_ASSERT("can not interpet the workspace as table workspace", tws);
 
     auto &maskCol = tws->getColVector<int>("detMask");
@@ -233,8 +190,8 @@ public:
       TS_ASSERT_EQUALS(0, maskCol[i]);
     }
     // now mask a detector and check if masks are updated;
-    auto inputWS = std::dynamic_pointer_cast<API::MatrixWorkspace>(
-        API::AnalysisDataService::Instance().retrieve("testMatrWS"));
+    auto inputWS =
+        std::dynamic_pointer_cast<API::MatrixWorkspace>(API::AnalysisDataService::Instance().retrieve("testMatrWS"));
     const size_t nRows = inputWS->getNumberHistograms();
 
     // Now mask all detectors in the workspace
@@ -264,26 +221,20 @@ public:
   void testNoMasksColumnTrhows() {
     auto pAlg = std::make_unique<PrepcocessDetectorsToMDTestHelper>();
     // do first run which generates first masks
-    TS_ASSERT_THROWS_NOTHING(
-        pAlg->setPropertyValue("InputWorkspace", "testMatrWS"));
-    TS_ASSERT_THROWS_NOTHING(
-        pAlg->setPropertyValue("OutputWorkspace", "PreprocDetectorsWSMasks"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("InputWorkspace", "testMatrWS"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("OutputWorkspace", "PreprocDetectorsWSMasks"));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("GetMaskState", "0"));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("UpdateMasksInfo", "0"));
 
     TS_ASSERT_THROWS_NOTHING(pAlg->execute());
     TSM_ASSERT("Should be successful ", pAlg->isExecuted());
 
-    API::Workspace_sptr wsOut = API::AnalysisDataService::Instance().retrieve(
-        "PreprocDetectorsWSMasks");
-    TSM_ASSERT("can not retrieve table worksapce from analysis data service ",
-               wsOut);
-    DataObjects::TableWorkspace_sptr tws =
-        std::dynamic_pointer_cast<DataObjects::TableWorkspace>(wsOut);
+    API::Workspace_sptr wsOut = API::AnalysisDataService::Instance().retrieve("PreprocDetectorsWSMasks");
+    TSM_ASSERT("can not retrieve table worksapce from analysis data service ", wsOut);
+    DataObjects::TableWorkspace_sptr tws = std::dynamic_pointer_cast<DataObjects::TableWorkspace>(wsOut);
     TSM_ASSERT("can not interpet the workspace as table workspace", tws);
 
-    TSM_ASSERT_THROWS("No such column", tws->getColVector<int>("detMask"),
-                      const std::runtime_error &);
+    TSM_ASSERT_THROWS("No such column", tws->getColVector<int>("detMask"), const std::runtime_error &);
 
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("GetMaskState", "1"));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("UpdateMasksInfo", "1"));
@@ -292,8 +243,7 @@ public:
   PreprocessDetectorsToMDTest() {
     pAlg = std::make_unique<PrepcocessDetectorsToMDTestHelper>();
 
-    ws2D = WorkspaceCreationHelper::
-        createProcessedWorkspaceWithCylComplexInstrument(4, 10, true);
+    ws2D = WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(4, 10, true);
     // rotate the crystal by twenty degrees back;
     ws2D->mutableRun().mutableGoniometer().setRotationAngle(0, 20);
     // add workspace energy

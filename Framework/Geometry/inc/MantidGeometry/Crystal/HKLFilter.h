@@ -89,13 +89,11 @@ protected:
 };
 
 /// Logical "Not"-operation for HKLFilter.
-class MANTID_GEOMETRY_DLL HKLFilterNot final
-    : public HKLFilterUnaryLogicOperation {
+class MANTID_GEOMETRY_DLL HKLFilterNot final : public HKLFilterUnaryLogicOperation {
 public:
   /// Constructor, calls base class constructor, throws exception if filter is a
   /// null pointer.
-  HKLFilterNot(const HKLFilter_const_sptr &filter)
-      : HKLFilterUnaryLogicOperation(filter) {}
+  HKLFilterNot(const HKLFilter_const_sptr &filter) : HKLFilterUnaryLogicOperation(filter) {}
 
   std::string getDescription() const noexcept override;
   bool isAllowed(const Kernel::V3D &hkl) const noexcept override;
@@ -104,8 +102,7 @@ public:
 /// Base class for binary logic operations for HKLFilter.
 class MANTID_GEOMETRY_DLL HKLFilterBinaryLogicOperation : public HKLFilter {
 public:
-  HKLFilterBinaryLogicOperation(const HKLFilter_const_sptr &lhs,
-                                const HKLFilter_const_sptr &rhs);
+  HKLFilterBinaryLogicOperation(const HKLFilter_const_sptr &lhs, const HKLFilter_const_sptr &rhs);
 
   /// Returns the left-hand side operand of the operation.
   const HKLFilter_const_sptr &getLHS() const noexcept { return m_lhs; }
@@ -119,8 +116,7 @@ protected:
 };
 
 /// Logical "And"-operation for HKLFilter.
-class MANTID_GEOMETRY_DLL HKLFilterAnd final
-    : public HKLFilterBinaryLogicOperation {
+class MANTID_GEOMETRY_DLL HKLFilterAnd final : public HKLFilterBinaryLogicOperation {
 public:
   /// Constructor, calls base class constructor, throws exception if either of
   /// the operands is null.
@@ -132,8 +128,7 @@ public:
 };
 
 /// Logical "Or"-operation for HKLFilter.
-class MANTID_GEOMETRY_DLL HKLFilterOr final
-    : public HKLFilterBinaryLogicOperation {
+class MANTID_GEOMETRY_DLL HKLFilterOr final : public HKLFilterBinaryLogicOperation {
 public:
   /// Constructor, calls base class constructor, throws exception if either of
   /// the operands is null.
@@ -144,14 +139,13 @@ public:
   bool isAllowed(const Kernel::V3D &hkl) const noexcept override;
 };
 
-MANTID_GEOMETRY_DLL const HKLFilter_const_sptr
-operator~(const HKLFilter_const_sptr &filter);
+MANTID_GEOMETRY_DLL const HKLFilter_const_sptr operator~(const HKLFilter_const_sptr &filter);
 
-MANTID_GEOMETRY_DLL const HKLFilter_const_sptr
-operator&(const HKLFilter_const_sptr &lhs, const HKLFilter_const_sptr &rhs);
+MANTID_GEOMETRY_DLL const HKLFilter_const_sptr operator&(const HKLFilter_const_sptr &lhs,
+                                                         const HKLFilter_const_sptr &rhs);
 
-MANTID_GEOMETRY_DLL const HKLFilter_const_sptr
-operator|(const HKLFilter_const_sptr &lhs, const HKLFilter_const_sptr &rhs);
+MANTID_GEOMETRY_DLL const HKLFilter_const_sptr operator|(const HKLFilter_const_sptr &lhs,
+                                                         const HKLFilter_const_sptr &rhs);
 
 } // namespace Geometry
 } // namespace Mantid

@@ -27,8 +27,7 @@ public:
   ~MockOptionsDialogPresenter() override{};
 };
 
-class MockOptionsDialogPresenterSubscriber
-    : public OptionsDialogPresenterSubscriber {
+class MockOptionsDialogPresenterSubscriber : public OptionsDialogPresenterSubscriber {
 public:
   MOCK_CONST_METHOD0(notifyOptionsChanged, void());
 };

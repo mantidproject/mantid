@@ -28,10 +28,8 @@ using namespace MantidQt::API;
  *
  * @param parameters :: a struct representing the parameters of the file search
  */
-FindFilesWorker::FindFilesWorker(const FindFilesSearchParameters &parameters)
-    : QRunnable(), m_parameters(parameters) {
-  qRegisterMetaType<MantidQt::API::FindFilesSearchResults>(
-      "FindFilesSearchResults");
+FindFilesWorker::FindFilesWorker(const FindFilesSearchParameters &parameters) : QRunnable(), m_parameters(parameters) {
+  qRegisterMetaType<MantidQt::API::FindFilesSearchResults>("FindFilesSearchResults");
 }
 
 /**
@@ -58,20 +56,17 @@ void FindFilesWorker::run() {
     else
       error = "No files specified.";
 
-    const auto result = createFindFilesSearchResult(
-        error, filenames, valueForProperty.toStdString());
+    const auto result = createFindFilesSearchResult(error, filenames, valueForProperty.toStdString());
     finishSearching(result);
     return;
   }
 
-  Mantid::API::FileFinderImpl &fileSearcher =
-      Mantid::API::FileFinder::Instance();
+  Mantid::API::FileFinderImpl &fileSearcher = Mantid::API::FileFinder::Instance();
 
   try {
     // Use the property of the algorithm to find files, if one has been
     // specified.
-    if (m_parameters.algorithmName.length() != 0 &&
-        m_parameters.algorithmProperty.length() != 0) {
+    if (m_parameters.algorithmName.length() != 0 && m_parameters.algorithmProperty.length() != 0) {
       auto searchResult = getFilesFromAlgorithm();
       filenames = std::get<0>(searchResult);
       valueForProperty = QString::fromStdString(std::get<1>(searchResult));
@@ -90,8 +85,7 @@ void FindFilesWorker::run() {
     else {
       // Tokenise on ","
       std::vector<std::string> filestext;
-      filestext = boost::split(filestext, m_parameters.searchText,
-                               boost::is_any_of(","));
+      filestext = boost::split(filestext, m_parameters.searchText, boost::is_any_of(","));
 
       // Iterate over tokens.
       auto it = filestext.begin();
@@ -117,8 +111,7 @@ void FindFilesWorker::run() {
     filenames.clear();
   }
 
-  auto result = createFindFilesSearchResult(error, filenames,
-                                            valueForProperty.toStdString());
+  auto result = createFindFilesSearchResult(error, filenames, valueForProperty.toStdString());
   finishSearching(result);
 }
 
@@ -128,16 +121,13 @@ void FindFilesWorker::run() {
  * @return a tuple with a vector of filenames and a string for the property
  * value
  */
-std::pair<std::vector<std::string>, std::string>
-FindFilesWorker::getFilesFromAlgorithm() {
+std::pair<std::vector<std::string>, std::string> FindFilesWorker::getFilesFromAlgorithm() {
   std::vector<std::string> filenames;
   Mantid::API::IAlgorithm_sptr algorithm =
-      Mantid::API::AlgorithmManager::Instance().createUnmanaged(
-          m_parameters.algorithmName);
+      Mantid::API::AlgorithmManager::Instance().createUnmanaged(m_parameters.algorithmName);
 
   if (!algorithm)
-    throw std::invalid_argument("Cannot create algorithm " +
-                                m_parameters.algorithmName + ".");
+    throw std::invalid_argument("Cannot create algorithm " + m_parameters.algorithmName + ".");
 
   algorithm->initialize();
   const std::string propName = m_parameters.algorithmProperty;
@@ -155,8 +145,7 @@ FindFilesWorker::getFilesFromAlgorithm() {
     // This flattens any summed files to a set of single files so that you lose
     // the information about
     // what was summed
-    std::vector<std::vector<std::string>> propertyFilenames =
-        algorithm->getProperty(propName);
+    std::vector<std::vector<std::string>> propertyFilenames = algorithm->getProperty(propName);
     filenames = VectorHelper::flattenVector(propertyFilenames);
   }
 
@@ -187,9 +176,9 @@ void FindFilesWorker::finishSearching(const FindFilesSearchResults &result) {
  * @param valueForProperty :: a message to display on the algorithm's property
  * @return A struct holding the results of this search.
  */
-FindFilesSearchResults FindFilesWorker::createFindFilesSearchResult(
-    const std::string &error, const std::vector<std::string> &filenames,
-    const std::string &valueForProperty) {
+FindFilesSearchResults FindFilesWorker::createFindFilesSearchResult(const std::string &error,
+                                                                    const std::vector<std::string> &filenames,
+                                                                    const std::string &valueForProperty) {
   FindFilesSearchResults results;
   results.error = error;
   results.filenames = filenames;

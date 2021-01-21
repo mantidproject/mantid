@@ -12,30 +12,24 @@ namespace Kernel {
 
 /** Constructor
  */
-StringContainsValidator::StringContainsValidator() {
-  m_requiredStrings = std::vector<std::string>();
-}
+StringContainsValidator::StringContainsValidator() { m_requiredStrings = std::vector<std::string>(); }
 
 /** Constructor with required sub strings
  */
-StringContainsValidator::StringContainsValidator(
-    const std::vector<std::string> &strings) {
+StringContainsValidator::StringContainsValidator(const std::vector<std::string> &strings) {
   m_requiredStrings = strings;
 }
 
 /**
  * @return A clone of the current state of the validator
  */
-IValidator_sptr StringContainsValidator::clone() const {
-  return std::make_shared<StringContainsValidator>(*this);
-}
+IValidator_sptr StringContainsValidator::clone() const { return std::make_shared<StringContainsValidator>(*this); }
 
 /**
  * @param strings The vector of sub strings that need to be included to pass
  * validation
  */
-void StringContainsValidator::setRequiredStrings(
-    const std::vector<std::string> &strings) {
+void StringContainsValidator::setRequiredStrings(const std::vector<std::string> &strings) {
   m_requiredStrings = strings;
 }
 
@@ -44,8 +38,7 @@ void StringContainsValidator::setRequiredStrings(
  *  @return An empty string if the value is valid or an string containing
  *          a description of the error otherwise
  */
-std::string
-StringContainsValidator::checkValidity(const std::string &value) const {
+std::string StringContainsValidator::checkValidity(const std::string &value) const {
   std::string error;
   if (m_requiredStrings.empty() && !value.empty()) {
     return "";

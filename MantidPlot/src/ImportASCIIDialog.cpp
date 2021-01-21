@@ -49,8 +49,7 @@
 
 #include <gsl/gsl_math.h>
 
-ImportASCIIDialog::ImportASCIIDialog(bool new_windows_only, QWidget *parent,
-                                     bool extended, const Qt::WFlags &flags)
+ImportASCIIDialog::ImportASCIIDialog(bool new_windows_only, QWidget *parent, bool extended, const Qt::WFlags &flags)
     : ExtensibleFileDialog(parent, extended, flags) {
   setWindowTitle(tr("MantidPlot - Import ASCII File(s)"));
 
@@ -72,8 +71,7 @@ ImportASCIIDialog::ImportASCIIDialog(bool new_windows_only, QWidget *parent,
   // get rembered option values
   ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
   if (!app) {
-    throw std::logic_error(
-        "Parent of ImportASCIIDialog is not ApplicationWindow as expected.");
+    throw std::logic_error("Parent of ImportASCIIDialog is not ApplicationWindow as expected.");
   }
   setLocale(app->locale());
 
@@ -95,8 +93,7 @@ ImportASCIIDialog::ImportASCIIDialog(bool new_windows_only, QWidget *parent,
   boxDecimalSeparator->setEnabled(app->d_import_dec_separators);
   d_import_dec_separators->setChecked(app->d_import_dec_separators);
 
-  connect(d_import_mode, SIGNAL(currentIndexChanged(int)), this,
-          SLOT(updateImportMode(int)));
+  connect(d_import_mode, SIGNAL(currentIndexChanged(int)), this, SLOT(updateImportMode(int)));
 
   if (app->d_ASCII_import_mode < d_import_mode->count())
     d_import_mode->setCurrentIndex(app->d_ASCII_import_mode);
@@ -111,22 +108,17 @@ ImportASCIIDialog::ImportASCIIDialog(bool new_windows_only, QWidget *parent,
 
   initPreview(d_import_mode->currentIndex());
 
-  connect(d_preview_lines_box, SIGNAL(valueChanged(int)), this,
-          SLOT(preview()));
+  connect(d_preview_lines_box, SIGNAL(valueChanged(int)), this, SLOT(preview()));
   connect(d_rename_columns, SIGNAL(clicked()), this, SLOT(preview()));
   connect(d_import_comments, SIGNAL(clicked()), this, SLOT(preview()));
   connect(d_strip_spaces, SIGNAL(clicked()), this, SLOT(preview()));
   connect(d_simplify_spaces, SIGNAL(clicked()), this, SLOT(preview()));
   connect(d_ignored_lines, SIGNAL(valueChanged(int)), this, SLOT(preview()));
   connect(d_import_dec_separators, SIGNAL(clicked()), this, SLOT(preview()));
-  connect(d_column_separator, SIGNAL(currentIndexChanged(int)), this,
-          SLOT(preview()));
-  connect(boxDecimalSeparator, SIGNAL(currentIndexChanged(int)), this,
-          SLOT(preview()));
-  connect(d_comment_string, SIGNAL(textChanged(const QString &)), this,
-          SLOT(preview()));
-  connect(this, SIGNAL(currentChanged(const QString &)), this,
-          SLOT(changePreviewFile(const QString &)));
+  connect(d_column_separator, SIGNAL(currentIndexChanged(int)), this, SLOT(preview()));
+  connect(boxDecimalSeparator, SIGNAL(currentIndexChanged(int)), this, SLOT(preview()));
+  connect(d_comment_string, SIGNAL(textChanged(const QString &)), this, SLOT(preview()));
+  connect(this, SIGNAL(currentChanged(const QString &)), this, SLOT(changePreviewFile(const QString &)));
 }
 void ImportASCIIDialog::addColumnSeparators() {
   if (!d_column_separator)
@@ -149,9 +141,7 @@ void ImportASCIIDialog::addColumnSeparatorsforLoadAscii() {
   d_column_separator->addItem(tr("SemiColon"));
   d_column_separator->addItem(tr("Colon"));
 }
-QString ImportASCIIDialog::getselectedColumnSeparator() {
-  return d_column_separator->currentText();
-}
+QString ImportASCIIDialog::getselectedColumnSeparator() { return d_column_separator->currentText(); }
 void ImportASCIIDialog::initAdvancedOptions() {
   d_advanced_options = new QGroupBox();
   QVBoxLayout *main_layout = new QVBoxLayout(d_advanced_options);
@@ -184,12 +174,9 @@ void ImportASCIIDialog::initAdvancedOptions() {
   d_column_separator->setEditable(true);
   advanced_layout->addWidget(d_column_separator, 1, 1);
   // context-sensitive help
-  QString help_column_separator =
-      tr("The column separator can be customized. \nThe following special "
-         "codes can be used:\n\\t for a TAB character \n\\s for a SPACE");
-  help_column_separator +=
-      "\n" +
-      tr("The separator must not contain the following characters: \n0-9eE.+-");
+  QString help_column_separator = tr("The column separator can be customized. \nThe following special "
+                                     "codes can be used:\n\\t for a TAB character \n\\s for a SPACE");
+  help_column_separator += "\n" + tr("The separator must not contain the following characters: \n0-9eE.+-");
   d_column_separator->setWhatsThis(help_column_separator);
   label_column_separator->setToolTip(help_column_separator);
   d_column_separator->setToolTip(help_column_separator);
@@ -203,8 +190,7 @@ void ImportASCIIDialog::initAdvancedOptions() {
   d_ignored_lines->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
   advanced_layout->addWidget(d_ignored_lines, 2, 1);
 
-  advanced_layout->addWidget(new QLabel(tr("Ignore lines starting with")), 3,
-                             0);
+  advanced_layout->addWidget(new QLabel(tr("Ignore lines starting with")), 3, 0);
   d_comment_string = new QLineEdit();
   advanced_layout->addWidget(d_comment_string, 3, 1);
 
@@ -213,50 +199,41 @@ void ImportASCIIDialog::initAdvancedOptions() {
 
   d_import_comments = new QCheckBox(tr("Use second row as &comments"));
   advanced_layout->addWidget(d_import_comments, 1, 2, 1, 2);
-  connect(d_rename_columns, SIGNAL(toggled(bool)), d_import_comments,
-          SLOT(setEnabled(bool)));
+  connect(d_rename_columns, SIGNAL(toggled(bool)), d_import_comments, SLOT(setEnabled(bool)));
 
   d_strip_spaces = new QCheckBox(tr("&Remove white spaces from line ends"));
   advanced_layout->addWidget(d_strip_spaces, 2, 2, 1, 2);
   // context-sensitive help
-  QString help_strip_spaces =
-      tr("By checking this option all white spaces will be \nremoved from the "
-         "beginning and the end of \nthe lines in the ASCII file.",
-         "when translating this check the what's this functions and tool tips "
-         "to place the '\\n's correctly");
-  help_strip_spaces +=
-      "\n\n" +
-      tr("Warning: checking this option leads to column \noverlaping if the "
-         "columns in the ASCII file don't \nhave the same number of rows.");
-  help_strip_spaces +=
-      "\n" + tr("To avoid this problem you should precisely \ndefine the "
-                "column separator using TAB and \nSPACE characters.",
-                "when translating this check the what's this functions and "
-                "tool tips to place the '\\n's correctly");
+  QString help_strip_spaces = tr("By checking this option all white spaces will be \nremoved from the "
+                                 "beginning and the end of \nthe lines in the ASCII file.",
+                                 "when translating this check the what's this functions and tool tips "
+                                 "to place the '\\n's correctly");
+  help_strip_spaces += "\n\n" + tr("Warning: checking this option leads to column \noverlaping if the "
+                                   "columns in the ASCII file don't \nhave the same number of rows.");
+  help_strip_spaces += "\n" + tr("To avoid this problem you should precisely \ndefine the "
+                                 "column separator using TAB and \nSPACE characters.",
+                                 "when translating this check the what's this functions and "
+                                 "tool tips to place the '\\n's correctly");
   d_strip_spaces->setWhatsThis(help_strip_spaces);
   d_strip_spaces->setToolTip(help_strip_spaces);
 
   d_simplify_spaces = new QCheckBox(tr("&Simplify white spaces"));
   advanced_layout->addWidget(d_simplify_spaces, 3, 2, 1, 2);
   // context-sensitive help
-  QString help_simplify_spaces =
-      tr("By checking this option all white spaces will be \nremoved from the "
-         "beginning and the end of the \nlines and each sequence of internal "
-         "\nwhitespaces (including the TAB character) will \nbe replaced with "
-         "a single space.",
-         "when translating this check the what's this functions and tool tips "
-         "to place the '\\n's correctly");
-  help_simplify_spaces +=
-      "\n\n" +
-      tr("Warning: checking this option leads to column \noverlaping if the "
-         "columns in the ASCII file don't \nhave the same number of rows.",
-         "when translating this check the what's this functions and tool tips "
-         "to place the '\\n's correctly");
-  help_simplify_spaces +=
-      "\n" + tr("To avoid this problem you should precisely \ndefine the "
-                "column separator using TAB and \nSPACE characters.",
-                "when translating this check the what's this functions and "
-                "tool tips to place the '\\n's correctly");
+  QString help_simplify_spaces = tr("By checking this option all white spaces will be \nremoved from the "
+                                    "beginning and the end of the \nlines and each sequence of internal "
+                                    "\nwhitespaces (including the TAB character) will \nbe replaced with "
+                                    "a single space.",
+                                    "when translating this check the what's this functions and tool tips "
+                                    "to place the '\\n's correctly");
+  help_simplify_spaces += "\n\n" + tr("Warning: checking this option leads to column \noverlaping if the "
+                                      "columns in the ASCII file don't \nhave the same number of rows.",
+                                      "when translating this check the what's this functions and tool tips "
+                                      "to place the '\\n's correctly");
+  help_simplify_spaces += "\n" + tr("To avoid this problem you should precisely \ndefine the "
+                                    "column separator using TAB and \nSPACE characters.",
+                                    "when translating this check the what's this functions and "
+                                    "tool tips to place the '\\n's correctly");
   d_simplify_spaces->setWhatsThis(help_simplify_spaces);
   d_simplify_spaces->setToolTip(help_simplify_spaces);
 
@@ -269,8 +246,7 @@ void ImportASCIIDialog::initAdvancedOptions() {
   advanced_layout->addWidget(boxDecimalSeparator, 4, 1);
 
   d_import_dec_separators = new QCheckBox(tr("Import &decimal separators"));
-  connect(d_import_dec_separators, SIGNAL(toggled(bool)), boxDecimalSeparator,
-          SLOT(setEnabled(bool)));
+  connect(d_import_dec_separators, SIGNAL(toggled(bool)), boxDecimalSeparator, SLOT(setEnabled(bool)));
   advanced_layout->addWidget(d_import_dec_separators, 4, 2, 1, 2);
 
   advanced_layout->addWidget(new QLabel(tr("Endline character")), 5, 0);
@@ -384,8 +360,7 @@ void ImportASCIIDialog::setColumnSeparator(const QString &sep) {
     d_column_separator->setCurrentIndex(7);
   else {
     QString separator = sep;
-    d_column_separator->setEditText(
-        separator.replace(" ", "\\s").replace("\t", "\\t"));
+    d_column_separator->setEditText(separator.replace(" ", "\\s").replace("\t", "\\t"));
   }
 }
 
@@ -412,29 +387,23 @@ const QString ImportASCIIDialog::columnSeparator() const {
 }
 
 void ImportASCIIDialog::displayHelp() {
-  QString s =
-      tr("The column separator can be customized. The following special codes "
-         "can be used:\n\\t for a TAB character \n\\s for a SPACE");
-  s += "\n" +
-       tr("The separator must not contain the following characters: 0-9eE.+-") +
-       "\n\n";
+  QString s = tr("The column separator can be customized. The following special codes "
+                 "can be used:\n\\t for a TAB character \n\\s for a SPACE");
+  s += "\n" + tr("The separator must not contain the following characters: 0-9eE.+-") + "\n\n";
   s += tr("Remove white spaces from line ends") + ":\n";
   s += tr("By checking this option all white spaces will be removed from the "
           "beginning and the end of the lines in the ASCII file.") +
        "\n\n";
   s += tr("Simplify white spaces") + ":\n";
-  s +=
-      tr("By checking this option each sequence of internal whitespaces "
-         "(including the TAB character) will be replaced with a single space.");
+  s += tr("By checking this option each sequence of internal whitespaces "
+          "(including the TAB character) will be replaced with a single space.");
   s += tr("By checking this option all white spaces will be removed from the "
           "beginning and the end of the lines and each sequence of internal "
           "whitespaces (including the TAB character) will be replaced with a "
           "single space.");
 
-  s +=
-      "\n\n" +
-      tr("Warning: using these two last options leads to column overlapping if "
-         "the columns in the ASCII file don't have the same number of rows.");
+  s += "\n\n" + tr("Warning: using these two last options leads to column overlapping if "
+                   "the columns in the ASCII file don't have the same number of rows.");
   s += "\n" + tr("To avoid this problem you should precisely define the column "
                  "separator using TAB and SPACE characters.");
 
@@ -516,19 +485,16 @@ void ImportASCIIDialog::previewTable() {
 
   int importMode = d_import_mode->currentIndex();
   if (importMode == NewTables) {
-    importMode = ImportASCIIDialog::
-        NewWorkspace; //(ImportASCIIDialog::ImportMode)Table::Overwrite;
+    importMode = ImportASCIIDialog::NewWorkspace; //(ImportASCIIDialog::ImportMode)Table::Overwrite;
   } else {
     importMode -= 2;
   }
 
   d_preview_table->resetHeader();
-  d_preview_table->importASCII(
-      d_current_path, columnSeparator(), d_ignored_lines->value(),
-      d_rename_columns->isChecked(), d_strip_spaces->isChecked(),
-      d_simplify_spaces->isChecked(), d_import_comments->isChecked(),
-      d_comment_string->text(), (Table::ImportMode)importMode,
-      boxEndLine->currentIndex(), d_preview_lines_box->value());
+  d_preview_table->importASCII(d_current_path, columnSeparator(), d_ignored_lines->value(),
+                               d_rename_columns->isChecked(), d_strip_spaces->isChecked(),
+                               d_simplify_spaces->isChecked(), d_import_comments->isChecked(), d_comment_string->text(),
+                               (Table::ImportMode)importMode, boxEndLine->currentIndex(), d_preview_lines_box->value());
 
   if (d_import_dec_separators->isChecked())
     d_preview_table->updateDecimalSeparators(decimalSeparators());
@@ -548,8 +514,7 @@ void ImportASCIIDialog::previewMatrix() {
 
   int importMode = d_import_mode->currentIndex();
   if (importMode == NewMatrices) {
-    importMode = ImportASCIIDialog::
-        NewWorkspace; //(ImportASCIIDialog::ImportMode)Matrix::Overwrite;
+    importMode = ImportASCIIDialog::NewWorkspace; //(ImportASCIIDialog::ImportMode)Matrix::Overwrite;
   } else {
     // Overwrite-2 => NewColumns (in both Matrix::importMode and
     // ImportASCIIDialog::importMode)
@@ -560,11 +525,9 @@ void ImportASCIIDialog::previewMatrix() {
   if (d_import_dec_separators->isChecked())
     locale = decimalSeparators();
 
-  d_preview_matrix->importASCII(
-      d_current_path, columnSeparator(), d_ignored_lines->value(),
-      d_strip_spaces->isChecked(), d_simplify_spaces->isChecked(),
-      d_comment_string->text(), importMode, locale, boxEndLine->currentIndex(),
-      d_preview_lines_box->value());
+  d_preview_matrix->importASCII(d_current_path, columnSeparator(), d_ignored_lines->value(),
+                                d_strip_spaces->isChecked(), d_simplify_spaces->isChecked(), d_comment_string->text(),
+                                importMode, locale, boxEndLine->currentIndex(), d_preview_lines_box->value());
   d_preview_matrix->resizeColumnsToContents();
 }
 
@@ -577,10 +540,8 @@ void ImportASCIIDialog::changePreviewFile(const QString &path) {
     return;
 
   if (!fi.isReadable()) {
-    QMessageBox::critical(
-        this, tr("MantidPlot - File opening error"),
-        tr("You don't have the permission to open this file: <b>%1</b>")
-            .arg(path));
+    QMessageBox::critical(this, tr("MantidPlot - File opening error"),
+                          tr("You don't have the permission to open this file: <b>%1</b>").arg(path));
     return;
   }
 
@@ -614,9 +575,7 @@ void ImportASCIIDialog::setNewWindowsOnly(bool on) {
  *
  *****************************************************************************/
 
-PreviewTable::PreviewTable(int numRows, int numCols, QWidget *parent,
-                           const char *name)
-    : QTableWidget(parent) {
+PreviewTable::PreviewTable(int numRows, int numCols, QWidget *parent, const char *name) : QTableWidget(parent) {
   makeItemPrototype();
   setWindowTitle(name);
   setRowCount(numRows);
@@ -635,15 +594,11 @@ PreviewTable::PreviewTable(int numRows, int numCols, QWidget *parent,
 #endif
 }
 
-void PreviewTable::importASCII(const QString &fname, const QString &sep,
-                               int ignoredLines, bool renameCols,
-                               bool stripSpaces, bool simplifySpaces,
-                               bool importComments,
-                               const QString &commentString, int importMode,
-                               int endLine, int maxRows) {
+void PreviewTable::importASCII(const QString &fname, const QString &sep, int ignoredLines, bool renameCols,
+                               bool stripSpaces, bool simplifySpaces, bool importComments, const QString &commentString,
+                               int importMode, int endLine, int maxRows) {
   int rows;
-  QString name = MdiSubWindow::parseAsciiFile(fname, commentString, endLine,
-                                              ignoredLines, maxRows, rows);
+  QString name = MdiSubWindow::parseAsciiFile(fname, commentString, endLine, ignoredLines, maxRows, rows);
   if (name.isEmpty())
     return;
 
@@ -662,9 +617,8 @@ void PreviewTable::importASCII(const QString &fname, const QString &sep,
     int cols = line.size();
 
     bool allNumbers = true;
-    for (int i = 0; i < cols;
-         i++) { // verify if the strings in the line used to rename the columns
-                // are not all numbers
+    for (int i = 0; i < cols; i++) { // verify if the strings in the line used to rename the columns
+                                     // are not all numbers
       locale().toDouble(line[i], &allNumbers);
       if (!allNumbers)
         break;
@@ -803,8 +757,7 @@ void PreviewTable::setHeader() {
 #else
     auto head = horizontalHeader();
     int lines = columnWidth(i) / head->fontMetrics().averageCharWidth();
-    QString label =
-        s.remove("\n") + "\n" + QString(lines, '_') + "\n" + comments[i];
+    QString label = s.remove("\n") + "\n" + QString(lines, '_') + "\n" + comments[i];
     auto item = new QTableWidgetItem(label);
     setHorizontalHeaderItem(i, item);
 #endif
@@ -899,14 +852,10 @@ PreviewMatrix::PreviewMatrix(QWidget *parent, Matrix *m) : QTableView(parent) {
   verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);
 }
 
-void PreviewMatrix::importASCII(const QString &fname, const QString &sep,
-                                int ignoredLines, bool stripSpaces,
-                                bool simplifySpaces,
-                                const QString &commentString, int importAs,
-                                const QLocale &locale, int endLine,
-                                int maxRows) {
-  d_matrix_model->importASCII(fname, sep, ignoredLines, stripSpaces,
-                              simplifySpaces, commentString, importAs, locale,
+void PreviewMatrix::importASCII(const QString &fname, const QString &sep, int ignoredLines, bool stripSpaces,
+                                bool simplifySpaces, const QString &commentString, int importAs, const QLocale &locale,
+                                int endLine, int maxRows) {
+  d_matrix_model->importASCII(fname, sep, ignoredLines, stripSpaces, simplifySpaces, commentString, importAs, locale,
                               endLine, maxRows);
 }
 

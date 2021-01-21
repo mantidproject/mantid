@@ -25,9 +25,7 @@ using namespace Mantid::DataObjects;
 
 class LoadInstrumentFromRawTest : public CxxTest::TestSuite {
 public:
-  static LoadInstrumentFromRawTest *createSuite() {
-    return new LoadInstrumentFromRawTest();
-  }
+  static LoadInstrumentFromRawTest *createSuite() { return new LoadInstrumentFromRawTest(); }
   static void destroySuite(LoadInstrumentFromRawTest *suite) { delete suite; }
 
   LoadInstrumentFromRawTest() {}
@@ -44,8 +42,7 @@ public:
 
     // create a workspace with some sample data
     wsName = "LoadInstrumentFromRawTest";
-    Workspace_sptr ws =
-        WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
+    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
     Workspace2D_sptr ws2D = std::dynamic_pointer_cast<Workspace2D>(ws);
 
     // put this workspace in the data service
@@ -69,9 +66,7 @@ public:
 
     // Get back the saved workspace
     MatrixWorkspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(
-        output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            wsName));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName));
 
     std::shared_ptr<const Instrument> i = output->getInstrument();
     TS_ASSERT_EQUALS(i->getName(), "LOQ     ");

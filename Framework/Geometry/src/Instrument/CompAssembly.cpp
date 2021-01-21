@@ -24,8 +24,7 @@ using Kernel::V3D;
 
 /** Empty constructor
  */
-CompAssembly::CompAssembly()
-    : Component(), m_children(), m_cachedBoundingBox(nullptr) {}
+CompAssembly::CompAssembly() : Component(), m_children(), m_cachedBoundingBox(nullptr) {}
 
 /** Constructor for a parametrized CompAssembly
  * @param base: the base (un-parametrized) IComponent
@@ -94,8 +93,7 @@ IComponent *CompAssembly::clone() const { return new CompAssembly(*this); }
  */
 int CompAssembly::add(IComponent *comp) {
   if (m_map)
-    throw std::runtime_error(
-        "CompAssembly::add() called for a parametrized CompAssembly.");
+    throw std::runtime_error("CompAssembly::add() called for a parametrized CompAssembly.");
 
   if (comp) {
     comp->setParent(this);
@@ -114,8 +112,7 @@ int CompAssembly::add(IComponent *comp) {
  */
 int CompAssembly::addCopy(IComponent *comp) {
   if (m_map)
-    throw std::runtime_error(
-        "CompAssembly::addCopy() called for a parametrized CompAssembly.");
+    throw std::runtime_error("CompAssembly::addCopy() called for a parametrized CompAssembly.");
 
   if (comp) {
     IComponent *newcomp = comp->clone();
@@ -136,8 +133,7 @@ int CompAssembly::addCopy(IComponent *comp) {
  */
 int CompAssembly::addCopy(IComponent *comp, const std::string &n) {
   if (m_map)
-    throw std::runtime_error(
-        "CompAssembly::addCopy() called for a parametrized CompAssembly.");
+    throw std::runtime_error("CompAssembly::addCopy() called for a parametrized CompAssembly.");
 
   if (comp) {
     IComponent *newcomp = comp->clone();
@@ -155,8 +151,7 @@ int CompAssembly::addCopy(IComponent *comp, const std::string &n) {
  */
 int CompAssembly::remove(IComponent *comp) {
   if (m_map)
-    throw std::runtime_error(
-        "CompAssembly::remove() called for a parameterized CompAssembly.");
+    throw std::runtime_error("CompAssembly::remove() called for a parameterized CompAssembly.");
 
   // Look for the passed in component in the list of children
   auto it = std::find(m_children.begin(), m_children.end(), comp);
@@ -165,8 +160,7 @@ int CompAssembly::remove(IComponent *comp) {
     m_children.erase(it);
     delete comp;
   } else {
-    throw std::runtime_error("Component " + comp->getName() +
-                             " is not a child of this assembly.");
+    throw std::runtime_error("Component " + comp->getName() + " is not a child of this assembly.");
   }
 
   return static_cast<int>(m_children.size());
@@ -219,9 +213,7 @@ std::shared_ptr<IComponent> CompAssembly::getChild(const int i) const {
  * @return A shared pointer to the ith component
  * @throw std:runtime_error if i is out of range
  */
-std::shared_ptr<IComponent> CompAssembly::operator[](int i) const {
-  return this->getChild(i);
-}
+std::shared_ptr<IComponent> CompAssembly::operator[](int i) const { return this->getChild(i); }
 
 //------------------------------------------------------------------------------------------------
 /** Return a vector of all contained children components
@@ -230,16 +222,14 @@ std::shared_ptr<IComponent> CompAssembly::operator[](int i) const {
  * @param recursive :: if a child is a CompAssembly, returns its children
  *recursively
  */
-void CompAssembly::getChildren(std::vector<IComponent_const_sptr> &outVector,
-                               bool recursive) const {
+void CompAssembly::getChildren(std::vector<IComponent_const_sptr> &outVector, bool recursive) const {
   for (int i = 0; i < this->nelements(); i++) {
     std::shared_ptr<IComponent> comp = this->getChild(i);
     if (comp) {
       outVector.emplace_back(comp);
       // Look deeper, on option.
       if (recursive) {
-        std::shared_ptr<ICompAssembly> assemb =
-            std::dynamic_pointer_cast<ICompAssembly>(comp);
+        std::shared_ptr<ICompAssembly> assemb = std::dynamic_pointer_cast<ICompAssembly>(comp);
         if (assemb)
           assemb->getChildren(outVector, recursive);
       }
@@ -265,10 +255,8 @@ void CompAssembly::getChildren(std::vector<IComponent_const_sptr> &outVector,
  * In particular, nlevels=1, would force cname to be a full path name.
  * @returns A shared pointer to the component
  */
-std::shared_ptr<const IComponent>
-CompAssembly::getComponentByName(const std::string &cname, int nlevels) const {
-  std::shared_ptr<const ICompAssembly> thisNode =
-      std::shared_ptr<const ICompAssembly>(this, NoDeleting());
+std::shared_ptr<const IComponent> CompAssembly::getComponentByName(const std::string &cname, int nlevels) const {
+  std::shared_ptr<const ICompAssembly> thisNode = std::shared_ptr<const ICompAssembly>(this, NoDeleting());
 
   // If name has '/' in it, it is taken as part of a path name of the component.
   // Steps may be skipped at a '/' from the path name,
@@ -278,10 +266,8 @@ CompAssembly::getComponentByName(const std::string &cname, int nlevels) const {
   if (cut < cname.length()) {
     auto otherNode = this->getComponentByName(cname.substr(0, cut), nlevels);
     if (otherNode) {
-      std::shared_ptr<const ICompAssembly> asmb =
-          std::dynamic_pointer_cast<const ICompAssembly>(otherNode);
-      return asmb->getComponentByName(cname.substr(cut + 1, std::string::npos),
-                                      nlevels);
+      std::shared_ptr<const ICompAssembly> asmb = std::dynamic_pointer_cast<const ICompAssembly>(otherNode);
+      return asmb->getComponentByName(cname.substr(cut + 1, std::string::npos), nlevels);
     } else {
       return std::shared_ptr<const IComponent>(); // Search failed
     }
@@ -339,8 +325,7 @@ CompAssembly::getComponentByName(const std::string &cname, int nlevels) const {
           if ((!limitSearch) || (depth + 1 < nlevels)) {
             // don't bother adding things to the queue that aren't
             // assemblies
-            std::shared_ptr<const ICompAssembly> compAssembly =
-                std::dynamic_pointer_cast<const ICompAssembly>(comp);
+            std::shared_ptr<const ICompAssembly> compAssembly = std::dynamic_pointer_cast<const ICompAssembly>(comp);
             if (bool(compAssembly)) {
               nodeQueue.emplace_back(compAssembly);
             }
@@ -405,13 +390,11 @@ void CompAssembly::getBoundingBox(BoundingBox &assemblyBox) const {
  * @param searchQueue :: If a child is a sub-assembly then it is appended for
  *later searching
  */
-void CompAssembly::testIntersectionWithChildren(
-    Track &testRay, std::deque<IComponent_const_sptr> &searchQueue) const {
+void CompAssembly::testIntersectionWithChildren(Track &testRay, std::deque<IComponent_const_sptr> &searchQueue) const {
   int nchildren = this->nelements();
   for (int i = 0; i < nchildren; ++i) {
     std::shared_ptr<Geometry::IComponent> comp = this->getChild(i);
-    if (ICompAssembly_sptr childAssembly =
-            std::dynamic_pointer_cast<ICompAssembly>(comp)) {
+    if (ICompAssembly_sptr childAssembly = std::dynamic_pointer_cast<ICompAssembly>(comp)) {
       searchQueue.emplace_back(comp);
     }
     // Check the physical object intersection

@@ -27,10 +27,9 @@ using namespace Mantid::DataObjects;
 using namespace HistogramData;
 
 namespace {
-Workspace2D_sptr createInputWS(const std::string &name, size_t sizex,
-                               size_t sizey) {
-  Workspace2D_sptr inputWS = std::dynamic_pointer_cast<Workspace2D>(
-      WorkspaceFactory::Instance().create("Workspace2D", 1, sizex, sizey));
+Workspace2D_sptr createInputWS(const std::string &name, size_t sizex, size_t sizey) {
+  Workspace2D_sptr inputWS =
+      std::dynamic_pointer_cast<Workspace2D>(WorkspaceFactory::Instance().create("Workspace2D", 1, sizex, sizey));
   AnalysisDataService::Instance().addOrReplace(name, inputWS);
 
   return inputWS;
@@ -41,9 +40,7 @@ class ProcessBackgroundTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ProcessBackgroundTest *createSuite() {
-    return new ProcessBackgroundTest();
-  }
+  static ProcessBackgroundTest *createSuite() { return new ProcessBackgroundTest(); }
   static void destroySuite(ProcessBackgroundTest *suite) { delete suite; }
 
   /** Test option delete region
@@ -62,8 +59,7 @@ public:
     TS_ASSERT(alg.isInitialized());
 
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inpws));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("OutputWorkspace", "NewBackground"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "NewBackground"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Options", "DeleteRegion"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("LowerBound", 4.5));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("UpperBound", 6.3));
@@ -72,8 +68,8 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // 3. Check
-    Workspace2D_sptr outws = std::dynamic_pointer_cast<Workspace2D>(
-        AnalysisDataService::Instance().retrieve("NewBackground"));
+    Workspace2D_sptr outws =
+        std::dynamic_pointer_cast<Workspace2D>(AnalysisDataService::Instance().retrieve("NewBackground"));
     size_t newsize = outws->x(0).size();
 
     TS_ASSERT_EQUALS(newsize, 8);
@@ -107,8 +103,7 @@ public:
     TS_ASSERT(alg.isInitialized());
 
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inpws));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("OutputWorkspace", "NewBackground"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "NewBackground"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("ReferenceWorkspace", refws));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Options", "AddRegion"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("LowerBound", 1.001));
@@ -118,8 +113,8 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // 3. Check
-    Workspace2D_sptr outws = std::dynamic_pointer_cast<Workspace2D>(
-        AnalysisDataService::Instance().retrieve("NewBackground"));
+    Workspace2D_sptr outws =
+        std::dynamic_pointer_cast<Workspace2D>(AnalysisDataService::Instance().retrieve("NewBackground"));
     size_t newsize = outws->x(0).size();
 
     TS_ASSERT_EQUALS(newsize, 14);
@@ -143,9 +138,7 @@ public:
     Workspace2D_sptr dataws = createWorkspace2D(datafile);
     AnalysisDataService::Instance().addOrReplace("DiffractionData", dataws);
     /// Background points for bank 7
-    std::vector<double> bkgdpts = {57741.0,  63534.0,  69545.0,
-                                   89379.0,  89379.0,  115669.0,
-                                   134830.0, 165131.0, 226847.0};
+    std::vector<double> bkgdpts = {57741.0, 63534.0, 69545.0, 89379.0, 89379.0, 115669.0, 134830.0, 165131.0, 226847.0};
 
     // 2. Prepare algorithm
     ProcessBackground alg;
@@ -166,8 +159,8 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // 3. Check the result
-    Workspace2D_sptr bkgdws = std::dynamic_pointer_cast<Workspace2D>(
-        AnalysisDataService::Instance().retrieve("SelectedBackgroundPoints"));
+    Workspace2D_sptr bkgdws =
+        std::dynamic_pointer_cast<Workspace2D>(AnalysisDataService::Instance().retrieve("SelectedBackgroundPoints"));
     TS_ASSERT(bkgdws);
 
     return;
@@ -194,8 +187,7 @@ public:
     alg.setProperty("InputWorkspace", dataws);
     alg.setProperty("OutputWorkspace", "SelectedBackgroundPoints");
     alg.setProperty("Options", "SelectBackgroundPoints");
-    alg.setProperty("BackgroundPointSelectMode",
-                    "Input Background Points Only");
+    alg.setProperty("BackgroundPointSelectMode", "Input Background Points Only");
 
     alg.setProperty("SelectionMode", "FitGivenDataPoints");
     alg.setProperty("BackgroundType", "Polynomial");
@@ -209,8 +201,8 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // 3. Check the result
-    Workspace2D_sptr bkgdws = std::dynamic_pointer_cast<Workspace2D>(
-        AnalysisDataService::Instance().retrieve("SelectedBackgroundPoints"));
+    Workspace2D_sptr bkgdws =
+        std::dynamic_pointer_cast<Workspace2D>(AnalysisDataService::Instance().retrieve("SelectedBackgroundPoints"));
     TS_ASSERT(bkgdws);
     if (bkgdws) {
       TS_ASSERT_EQUALS(bkgdws->x(0).size(), bkgdpts.size());
@@ -231,8 +223,7 @@ public:
     auto dataws = createInputWS("DiffractionData2", wsSize, wsSize);
     for (size_t i = 0; i < wsSize; ++i) {
       dataws->mutableX(0)[i] = double(i);
-      dataws->mutableY(0)[i] =
-          double(i) * double(i) + sin(double(i) / 180. * 3.14);
+      dataws->mutableY(0)[i] = double(i) * double(i) + sin(double(i) / 180. * 3.14);
     }
 
     // Create background function
@@ -245,8 +236,7 @@ public:
     row1 << "A1" << 0.;
     TableRow row2 = functablews->appendRow();
     row2 << "A2" << 1.;
-    AnalysisDataService::Instance().addOrReplace("BackgroundParameters",
-                                                 functablews);
+    AnalysisDataService::Instance().addOrReplace("BackgroundParameters", functablews);
 
     // Create and set up algorithm
     ProcessBackground alg;
@@ -261,8 +251,7 @@ public:
     alg.setProperty("SelectionMode", "UserFunction");
     alg.setProperty("BackgroundTableWorkspace", functablews);
 
-    alg.setProperty("OutputBackgroundParameterWorkspace",
-                    "OutBackgroundParameters");
+    alg.setProperty("OutputBackgroundParameterWorkspace", "OutBackgroundParameters");
     alg.setProperty("UserBackgroundWorkspace", "VisualWS");
     alg.setProperty("OutputBackgroundType", "Chebyshev");
     alg.setProperty("OutputBackgroundOrder", 6);
@@ -274,16 +263,16 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // 3. Check the result
-    Workspace2D_sptr bkgdws = std::dynamic_pointer_cast<Workspace2D>(
-        AnalysisDataService::Instance().retrieve("SelectedBackgroundPoints2"));
+    Workspace2D_sptr bkgdws =
+        std::dynamic_pointer_cast<Workspace2D>(AnalysisDataService::Instance().retrieve("SelectedBackgroundPoints2"));
     TS_ASSERT(bkgdws);
     if (bkgdws) {
       TS_ASSERT(bkgdws->x(0).size() > 10);
       TS_ASSERT_EQUALS(bkgdws->getNumberHistograms(), 3);
     }
 
-    TableWorkspace_sptr bkgdparws = std::dynamic_pointer_cast<TableWorkspace>(
-        AnalysisDataService::Instance().retrieve("OutBackgroundParameters"));
+    TableWorkspace_sptr bkgdparws =
+        std::dynamic_pointer_cast<TableWorkspace>(AnalysisDataService::Instance().retrieve("OutBackgroundParameters"));
     TS_ASSERT(bkgdparws);
 
     AnalysisDataService::Instance().remove("DiffractionData2");
@@ -302,14 +291,12 @@ public:
 
     // 2. Create workspace
     size_t datasize = data.x().size();
-    DataObjects::Workspace2D_sptr dataws =
-        std::dynamic_pointer_cast<DataObjects::Workspace2D>(
-            API::WorkspaceFactory::Instance().create("Workspace2D", 1, datasize,
-                                                     datasize));
+    DataObjects::Workspace2D_sptr dataws = std::dynamic_pointer_cast<DataObjects::Workspace2D>(
+        API::WorkspaceFactory::Instance().create("Workspace2D", 1, datasize, datasize));
     dataws->setHistogram(0, data);
 
-    std::cout << "DBT505  dataX range: " << data.x()[0] << ", "
-              << data.x().back() << " sized " << data.x().size() << '\n';
+    std::cout << "DBT505  dataX range: " << data.x()[0] << ", " << data.x().back() << " sized " << data.x().size()
+              << '\n';
 
     return dataws;
   }
@@ -352,13 +339,9 @@ class ProcessBackgroundDRTestPerformance : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ProcessBackgroundDRTestPerformance *createSuite() {
-    return new ProcessBackgroundDRTestPerformance();
-  }
+  static ProcessBackgroundDRTestPerformance *createSuite() { return new ProcessBackgroundDRTestPerformance(); }
 
-  static void destroySuite(ProcessBackgroundDRTestPerformance *suite) {
-    delete suite;
-  }
+  static void destroySuite(ProcessBackgroundDRTestPerformance *suite) { delete suite; }
 
   void setUp() override {
     auto inpws = createInputWS("Background1", 1000000, 1000000);
@@ -375,9 +358,7 @@ public:
     dr.setProperty("UpperBound", 630000.0);
   }
 
-  void tearDown() override {
-    AnalysisDataService::Instance().remove("Background1");
-  }
+  void tearDown() override { AnalysisDataService::Instance().remove("Background1"); }
 
   void testPerformanceWS() { dr.execute(); }
 
@@ -390,13 +371,9 @@ class ProcessBackgroundARTestPerformance : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ProcessBackgroundARTestPerformance *createSuite() {
-    return new ProcessBackgroundARTestPerformance();
-  }
+  static ProcessBackgroundARTestPerformance *createSuite() { return new ProcessBackgroundARTestPerformance(); }
 
-  static void destroySuite(ProcessBackgroundARTestPerformance *suite) {
-    delete suite;
-  }
+  static void destroySuite(ProcessBackgroundARTestPerformance *suite) { delete suite; }
 
   void setUp() override {
     auto inpws = createInputWS("Background2", 80000, 80000);
@@ -436,13 +413,9 @@ class ProcessBackgroundSBGTestPerformance : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ProcessBackgroundSBGTestPerformance *createSuite() {
-    return new ProcessBackgroundSBGTestPerformance();
-  }
+  static ProcessBackgroundSBGTestPerformance *createSuite() { return new ProcessBackgroundSBGTestPerformance(); }
 
-  static void destroySuite(ProcessBackgroundSBGTestPerformance *suite) {
-    delete suite;
-  }
+  static void destroySuite(ProcessBackgroundSBGTestPerformance *suite) { delete suite; }
 
   void setUp() override {
     auto inpws = createInputWS("DiffractionData1", 1000000, 1000000);
@@ -461,8 +434,7 @@ public:
     sbg.setProperty("InputWorkspace", inpws);
     sbg.setProperty("OutputWorkspace", "SelectedBackgroundPoints");
     sbg.setProperty("Options", "SelectBackgroundPoints");
-    sbg.setProperty("BackgroundPointSelectMode",
-                    "Input Background Points Only");
+    sbg.setProperty("BackgroundPointSelectMode", "Input Background Points Only");
     sbg.setProperty("SelectionMode", "FitGivenDataPoints");
     sbg.setProperty("BackgroundType", "Polynomial");
     sbg.setProperty("BackgroundPoints", bkgdpts);
@@ -470,9 +442,7 @@ public:
     sbg.setProperty("NoiseTolerance", 100.0);
   }
 
-  void tearDown() override {
-    AnalysisDataService::Instance().remove("DiffractionData1");
-  }
+  void tearDown() override { AnalysisDataService::Instance().remove("DiffractionData1"); }
 
   void testPerformanceWS() { sbg.execute(); }
 
@@ -485,20 +455,15 @@ class ProcessBackgroundSBFIFTestPerformance : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ProcessBackgroundSBFIFTestPerformance *createSuite() {
-    return new ProcessBackgroundSBFIFTestPerformance();
-  }
+  static ProcessBackgroundSBFIFTestPerformance *createSuite() { return new ProcessBackgroundSBFIFTestPerformance(); }
 
-  static void destroySuite(ProcessBackgroundSBFIFTestPerformance *suite) {
-    delete suite;
-  }
+  static void destroySuite(ProcessBackgroundSBFIFTestPerformance *suite) { delete suite; }
 
   void setUp() override {
     auto dataws = createInputWS("DiffractionData2", 50000, 50000);
     for (size_t i = 0; i < 50000; ++i) {
       dataws->mutableX(0)[i] = double(i);
-      dataws->mutableY(0)[i] =
-          double(i) * double(i) + sin(double(i) / 180. * 3.14);
+      dataws->mutableY(0)[i] = double(i) * double(i) + sin(double(i) / 180. * 3.14);
     }
 
     // Create background function
@@ -511,8 +476,7 @@ public:
     row1 << "A1" << 0.;
     TableRow row2 = functablews->appendRow();
     row2 << "A2" << 1.;
-    AnalysisDataService::Instance().addOrReplace("BackgroundParameters",
-                                                 functablews);
+    AnalysisDataService::Instance().addOrReplace("BackgroundParameters", functablews);
 
     // Create and set up algorithm
     sbfif.initialize();
@@ -523,8 +487,7 @@ public:
     sbfif.setProperty("BackgroundType", "Polynomial");
     sbfif.setProperty("SelectionMode", "UserFunction");
     sbfif.setProperty("BackgroundTableWorkspace", functablews);
-    sbfif.setProperty("OutputBackgroundParameterWorkspace",
-                      "OutBackgroundParameters");
+    sbfif.setProperty("OutputBackgroundParameterWorkspace", "OutBackgroundParameters");
     sbfif.setProperty("UserBackgroundWorkspace", "VisualWS");
     sbfif.setProperty("OutputBackgroundType", "Chebyshev");
     sbfif.setProperty("OutputBackgroundOrder", 6);

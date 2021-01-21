@@ -27,16 +27,13 @@ class InstrumentWidgetTab;
 class InstrumentWindow : public MdiSubWindow {
   Q_OBJECT
 public:
-  explicit InstrumentWindow(const QString &wsName,
-                            const QString &label = QString(),
-                            ApplicationWindow *parent = nullptr,
-                            const QString &name = QString());
+  explicit InstrumentWindow(const QString &wsName, const QString &label = QString(),
+                            ApplicationWindow *parent = nullptr, const QString &name = QString());
   ~InstrumentWindow() override;
 
   /// Load the state of the instrument window for a Mantid project file
-  static MantidQt::API::IProjectSerialisable *
-  loadFromProject(const std::string &lines, ApplicationWindow *app,
-                  const int fileVersion);
+  static MantidQt::API::IProjectSerialisable *loadFromProject(const std::string &lines, ApplicationWindow *app,
+                                                              const int fileVersion);
   /// Returns a list of workspace names that are used by this window
   std::vector<std::string> getWorkspaceNames() override;
   /// Returns the user friendly name of the window
@@ -45,8 +42,7 @@ public:
   /// Save the state of the instrument window to a Mantid project file
   std::string saveToProject(ApplicationWindow *app) override;
   void selectTab(int tab);
-  MantidQt::MantidWidgets::InstrumentWidgetTab *
-  getTab(const QString &title) const;
+  MantidQt::MantidWidgets::InstrumentWidgetTab *getTab(const QString &title) const;
   MantidQt::MantidWidgets::InstrumentWidgetTab *getTab(int tab) const;
   void setBinRange(double min_value, double max_value);
   bool overlay(const QString &wsName);

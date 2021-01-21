@@ -15,8 +15,7 @@
 Function2D::Function2D() : Qwt3D::Function(), d_rows(0), d_columns(0) {}
 
 void Function2D::setMesh(size_t columns, size_t rows) {
-  Function::setMesh(static_cast<unsigned int>(columns),
-                    static_cast<unsigned int>(rows));
+  Function::setMesh(static_cast<unsigned int>(columns), static_cast<unsigned int>(rows));
   d_columns = columns;
   d_rows = rows;
 }
@@ -36,8 +35,7 @@ double UserFunction2D::operator()(double x, double y) {
     parser.SetExpr((const std::string)d_formula.toAscii().constData());
     result = parser.Eval();
   } catch (mu::ParserError &e) {
-    QMessageBox::critical(nullptr, "MantidPlot - Input function error",
-                          QString::fromStdString(e.GetMsg()));
+    QMessageBox::critical(nullptr, "MantidPlot - Input function error", QString::fromStdString(e.GetMsg()));
   }
   return result;
 }
@@ -53,6 +51,5 @@ double UserFunction2D::getMinPositiveValue() const { return 0.0001; }
  * @return :: Initialization string.
  */
 QString UserFunction2D::saveToString() const {
-  return formula() + ";" + QString::number(columns()) + ";" +
-         QString::number(rows());
+  return formula() + ";" + QString::number(columns()) + ";" + QString::number(rows());
 }

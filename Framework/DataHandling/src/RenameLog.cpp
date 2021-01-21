@@ -21,15 +21,10 @@ DECLARE_ALGORITHM(RenameLog)
 void RenameLog::init() {
 
   declareProperty(
-      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-          "Workspace", "Anonymous", Direction::InOut),
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>("Workspace", "Anonymous", Direction::InOut),
       "Workspace to have logs merged");
-  declareProperty("OriginalLogName", "",
-                  std::make_shared<MandatoryValidator<std::string>>(),
-                  "Log's original name.");
-  declareProperty("NewLogName", "",
-                  std::make_shared<MandatoryValidator<std::string>>(),
-                  "Log's new name.");
+  declareProperty("OriginalLogName", "", std::make_shared<MandatoryValidator<std::string>>(), "Log's original name.");
+  declareProperty("NewLogName", "", std::make_shared<MandatoryValidator<std::string>>(), "Log's new name.");
 }
 
 void RenameLog::exec() {

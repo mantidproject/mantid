@@ -35,8 +35,7 @@ Logger g_log("LogParser");
 @param name :: The name of the property
 @return A pointer to the created property.
 */
-Kernel::Property *LogParser::createLogProperty(const std::string &logFName,
-                                               const std::string &name) {
+Kernel::Property *LogParser::createLogProperty(const std::string &logFName, const std::string &name) {
   std::ifstream file(logFName.c_str());
   if (!file) {
     g_log.warning() << "Cannot open log file " << logFName << "\n";
@@ -64,10 +63,7 @@ Kernel::Property *LogParser::createLogProperty(const std::string &logFName,
       // if the line doesn't start with a time treat it as a continuation of the
       // previous data
       if (change_times.empty() || isNumeric) { // if there are no previous data
-        std::string mess = std::string("Cannot parse log file ")
-                               .append(logFName)
-                               .append(". Line:")
-                               .append(str);
+        std::string mess = std::string("Cannot parse log file ").append(logFName).append(". Line:").append(str);
         g_log.error(mess);
         throw std::logic_error(mess);
       }
@@ -159,8 +155,7 @@ Try to pass the periods
 @param idata : stream of input data
 @param periods : periods data to update
 */
-void LogParser::tryParsePeriod(const std::string &scom, const DateAndTime &time,
-                               std::istringstream &idata,
+void LogParser::tryParsePeriod(const std::string &scom, const DateAndTime &time, std::istringstream &idata,
                                Kernel::TimeSeriesProperty<int> *const periods) {
   int ip = -1;
   bool shouldAddPeriod = false;
@@ -192,27 +187,21 @@ void LogParser::tryParsePeriod(const std::string &scom, const DateAndTime &time,
  *  @param log :: A pointer to the property
  */
 LogParser::LogParser(const Kernel::Property *log) : m_nOfPeriods(1) {
-  Kernel::TimeSeriesProperty<int> *periods =
-      new Kernel::TimeSeriesProperty<int>(periodsLogName());
-  Kernel::TimeSeriesProperty<bool> *status =
-      new Kernel::TimeSeriesProperty<bool>(statusLogName());
+  Kernel::TimeSeriesProperty<int> *periods = new Kernel::TimeSeriesProperty<int>(periodsLogName());
+  Kernel::TimeSeriesProperty<bool> *status = new Kernel::TimeSeriesProperty<bool>(statusLogName());
   m_periods.reset(periods);
   m_status.reset(status);
 
-  const auto *icpLog =
-      dynamic_cast<const Kernel::TimeSeriesProperty<std::string> *>(log);
+  const auto *icpLog = dynamic_cast<const Kernel::TimeSeriesProperty<std::string> *>(log);
   if (!icpLog || icpLog->size() == 0) {
     periods->addValue(Types::Core::DateAndTime(), 1);
     status->addValue(Types::Core::DateAndTime(), true);
-    g_log.warning()
-        << "Cannot process ICPevent log. Period 1 assumed for all data.\n";
+    g_log.warning() << "Cannot process ICPevent log. Period 1 assumed for all data.\n";
     return;
   }
 
-  std::multimap<Types::Core::DateAndTime, std::string> logm =
-      icpLog->valueAsMultiMap();
-  CommandMap command_map =
-      createCommandMap(LogParser::isICPEventLogNewStyle(logm));
+  std::multimap<Types::Core::DateAndTime, std::string> logm = icpLog->valueAsMultiMap();
+  CommandMap command_map = createCommandMap(LogParser::isICPEventLogNewStyle(logm));
 
   m_nOfPeriods = 1;
 
@@ -251,13 +240,11 @@ LogParser::LogParser(const Kernel::Property *log) : m_nOfPeriods(1) {
  *  @return times requested period was active
  */
 Kernel::TimeSeriesProperty<bool> *LogParser::createPeriodLog(int period) const {
-  auto *periods =
-      dynamic_cast<Kernel::TimeSeriesProperty<int> *>(m_periods.get());
+  auto *periods = dynamic_cast<Kernel::TimeSeriesProperty<int> *>(m_periods.get());
   if (!periods) {
     throw std::logic_error("Failed to cast periods to TimeSeriesProperty");
   }
-  Kernel::TimeSeriesProperty<bool> *p = new Kernel::TimeSeriesProperty<bool>(
-      LogParser::currentPeriodLogName(period));
+  Kernel::TimeSeriesProperty<bool> *p = new Kernel::TimeSeriesProperty<bool>(LogParser::currentPeriodLogName(period));
   std::map<Types::Core::DateAndTime, int> pMap = periods->valueAsMap();
   auto it = pMap.begin();
   if (it->second != period)
@@ -285,22 +272,16 @@ Kernel::Property *LogParser::createCurrentPeriodLog(const int &period) const {
 }
 
 /// Ctreates a TimeSeriesProperty<int> with all data periods
-Kernel::Property *LogParser::createAllPeriodsLog() const {
-  return m_periods->clone();
-}
+Kernel::Property *LogParser::createAllPeriodsLog() const { return m_periods->clone(); }
 
 /// Creates a TimeSeriesProperty<bool> with running status
-Kernel::TimeSeriesProperty<bool> *LogParser::createRunningLog() const {
-  return m_status->clone();
-}
+Kernel::TimeSeriesProperty<bool> *LogParser::createRunningLog() const { return m_status->clone(); }
 
 namespace {
 /// Define operator for checking for new-style icp events
 struct hasNewStyleCommands {
-  bool operator()(
-      const std::pair<Mantid::Types::Core::DateAndTime, std::string> &p) {
-    return p.second.find(START_COLLECTION) != std::string::npos ||
-           p.second.find(STOP_COLLECTION) != std::string::npos;
+  bool operator()(const std::pair<Mantid::Types::Core::DateAndTime, std::string> &p) {
+    return p.second.find(START_COLLECTION) != std::string::npos || p.second.find(STOP_COLLECTION) != std::string::npos;
   }
 };
 } // namespace
@@ -311,8 +292,7 @@ struct hasNewStyleCommands {
  * and running status.
  * @param logm :: A log map created from a icp-event log.
  */
-bool LogParser::isICPEventLogNewStyle(
-    const std::multimap<Types::Core::DateAndTime, std::string> &logm) {
+bool LogParser::isICPEventLogNewStyle(const std::multimap<Types::Core::DateAndTime, std::string> &logm) {
   hasNewStyleCommands checker;
 
   return std::find_if(logm.begin(), logm.end(), checker) != logm.end();
@@ -347,8 +327,7 @@ double timeMean(const Kernel::Property *p) {
     Kernel::TimeInterval t = dp->nthInterval(static_cast<int>(i));
     Types::Core::time_duration dt = t.length();
     total += dt;
-    res += dp->nthValue(static_cast<int>(i)) *
-           Types::Core::DateAndTime::secondsFromDuration(dt);
+    res += dp->nthValue(static_cast<int>(i)) * Types::Core::DateAndTime::secondsFromDuration(dt);
   }
 
   double total_seconds = Types::Core::DateAndTime::secondsFromDuration(total);

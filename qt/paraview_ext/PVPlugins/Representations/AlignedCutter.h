@@ -66,8 +66,7 @@ public:
 protected:
   explicit AlignedCutter(vtkImplicitFunction *cf = nullptr);
   ~AlignedCutter() override;
-  int RequestData(vtkInformation *, vtkInformationVector **,
-                  vtkInformationVector *) override;
+  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *) override;
   void AlignedStructuredGridCutter(vtkDataSet *, vtkPolyData *);
   int AxisNumber{0};
 

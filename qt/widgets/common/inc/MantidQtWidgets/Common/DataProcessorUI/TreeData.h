@@ -52,8 +52,7 @@ public:
   /// Return the data value at the given index
   QString value(const int i);
   /// Set the data value at the given index
-  void setValue(const int i, const QString &value,
-                const bool isGenerated = false);
+  void setValue(const int i, const QString &value, const bool isGenerated = false);
 
   /// Get the algorithm input properties
   OptionsMap options() const;
@@ -84,8 +83,7 @@ public:
   /// Set a preprocessed property value
   void setPreprocessedOptionValue(const QString &name, const QString &value);
   /// Set a preprocessed property value
-  void setPreprocessedOptionValue(const std::string &name,
-                                  const std::string &value);
+  void setPreprocessedOptionValue(const std::string &name, const std::string &value);
   /// Get the number of slices for this row
   size_t numberOfSlices() const;
   /// Check whether a slice exists by index
@@ -93,8 +91,7 @@ public:
   /// Get a child slice
   RowData_sptr getSlice(const size_t sliceIndex);
   /// Add a child slice
-  RowData_sptr addSlice(const QString &sliceSuffix,
-                        const std::vector<QString> &workspaceProperties);
+  RowData_sptr addSlice(const QString &sliceSuffix, const std::vector<QString> &workspaceProperties);
   /// Reset the row to its unprocessed state
   void reset();
   /// Clear all slices from the row
@@ -115,8 +112,7 @@ public:
   QString reducedName(const QString &prefix = QString()) const;
   /// Set the reduced workspace name
   void setReducedName(const QString &name) { m_reducedName = name; }
-  bool hasOutputWorkspaceWithNameAndPrefix(const QString &workspaceName,
-                                           const QString &prefix) const;
+  bool hasOutputWorkspaceWithNameAndPrefix(const QString &workspaceName, const QString &prefix) const;
 
 private:
   /// Check if a preprocessed property exists

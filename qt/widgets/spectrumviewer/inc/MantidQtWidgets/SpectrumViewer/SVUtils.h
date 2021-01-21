@@ -29,12 +29,11 @@ public:
   static void Format(int width, int precision, double value, std::string &str);
 
   /// push a name, value pair onto a vector of strings
-  static void PushNameValue(const std::string &name, int width, int precision,
-                            double value, std::vector<std::string> &list);
+  static void PushNameValue(const std::string &name, int width, int precision, double value,
+                            std::vector<std::string> &list);
 
   /// find a non-degenerate interval containing all the specified values
-  static bool FindValidInterval(const QVector<double> &values, double &min,
-                                double &max);
+  static bool FindValidInterval(const QVector<double> &values, double &min, double &max);
 
   /// Adjust min and max so that min is strictly less than max
   static bool FindValidInterval(double &min, double &max);
@@ -48,19 +47,16 @@ public:
   /// Find point new_val that is spaced between new_min and new_max in the
   /// same proportion as val is between min and max. Return false if
   /// new_val is outside [new_min,new_max].
-  static bool Interpolate(double min, double max, double val, double newMin,
-                          double newMax, double &newVal);
+  static bool Interpolate(double min, double max, double val, double newMin, double newMax, double &newVal);
 
   /// Find the value in [new_min,new_max] on a logarithmic scale that
   /// would correspond to the point val on a linear scale on [min,max].
-  static bool LogInterpolate(double min, double max, double val, double newMin,
-                             double newMax, double &newVal);
+  static bool LogInterpolate(double min, double max, double val, double newMin, double newMax, double &newVal);
 
   /// adjust the values defining a subinterval to match the boundaries of
   /// the global data. (Currently only for uniformly spaced bins.)
-  static bool CalculateInterval(double globalMin, double globalMax,
-                                size_t globalSteps, size_t &firstIndex,
-                                double &min, double &max, size_t &steps);
+  static bool CalculateInterval(double globalMin, double globalMax, size_t globalSteps, size_t &firstIndex, double &min,
+                                double &max, size_t &steps);
 };
 
 } // namespace SpectrumView

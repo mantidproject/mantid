@@ -81,11 +81,9 @@ public:
 
   const std::string category() const override { return "Peak"; }
 
-  void function1D(double *out, const double *xValues,
-                  const size_t nData) const override;
+  void function1D(double *out, const double *xValues, const size_t nData) const override;
 
-  void functionDeriv1D(API::Jacobian *out, const double *xValues,
-                       const size_t nData) override;
+  void functionDeriv1D(API::Jacobian *out, const double *xValues, const size_t nData) override;
 
   size_t nAttributes() const override { return (size_t)1; }
 
@@ -105,8 +103,7 @@ public:
     return Attribute(CalcVariances);
   }
 
-  void setAttribute(const std::string &attName,
-                    const Attribute &value) override {
+  void setAttribute(const std::string &attName, const Attribute &value) override {
 
     if (!hasAttribute(attName))
       throw std::invalid_argument("Not a valid attribute name");
@@ -118,15 +115,12 @@ public:
     } else {
       declareParameter("SScol", 0.00, "Variance of the column(x) values");
       declareParameter("SSrow", 0.00, "Variance of the row(y) values");
-      declareParameter("SSrc", 0.00,
-                       "Covariance of the column(x) and row(y) values");
+      declareParameter("SSrc", 0.00, "Covariance of the column(x) and row(y) values");
       CalcVxx = CalcVyy = CalcVxy = false;
     }
   }
 
-  bool hasAttribute(const std::string &attName) const override {
-    return attName == "CalcVariances";
-  }
+  bool hasAttribute(const std::string &attName) const override { return attName == "CalcVariances"; }
 
   bool CalcVxx, CalcVyy, CalcVxy;
 
@@ -141,12 +135,9 @@ protected:
   /// common values
 
   // Returns penalty.
-  double initCoeff(const HistogramData::HistogramY &D,
-                   const HistogramData::HistogramY &X,
-                   const HistogramData::HistogramY &Y, double &coefNorm,
-                   double &expCoeffx2, double &expCoeffy2, double &expCoeffxy,
-                   int &NCells, double &Varxx, double &Varxy,
-                   double &Varyy) const;
+  double initCoeff(const HistogramData::HistogramY &D, const HistogramData::HistogramY &X,
+                   const HistogramData::HistogramY &Y, double &coefNorm, double &expCoeffx2, double &expCoeffy2,
+                   double &expCoeffxy, int &NCells, double &Varxx, double &Varxy, double &Varyy) const;
 
   double mIx, mx, mIy, my;                //< For calculating variances
   double SIxx, SIyy, SIxy, Sxx, Syy, Sxy; //< For calculating variances

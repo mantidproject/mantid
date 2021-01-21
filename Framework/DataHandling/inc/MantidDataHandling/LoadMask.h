@@ -43,13 +43,9 @@ public:
 
   /// Algorithm's version for identification
   int version() const override { return 1; };
-  const std::vector<std::string> seeAlso() const override {
-    return {"ExportSpectraMask", "LoadMask"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"ExportSpectraMask", "LoadMask"}; }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "DataHandling\\Masking;Transforms\\Masking";
-  }
+  const std::string category() const override { return "DataHandling\\Masking;Transforms\\Masking"; }
 
 private:
   /// Initialise the properties
@@ -63,25 +59,19 @@ private:
   /// Initialize a Mask Workspace
   void intializeMaskWorkspace();
   /// Convert component to detectors
-  void componentToDetectors(const std::vector<std::string> &componentnames,
-                            std::vector<detid_t> &detectors);
+  void componentToDetectors(const std::vector<std::string> &componentnames, std::vector<detid_t> &detectors);
   /// Convert bank to detector
-  void bankToDetectors(const std::vector<std::string> &singlebanks,
-                       std::vector<detid_t> &detectors);
+  void bankToDetectors(const std::vector<std::string> &singlebanks, std::vector<detid_t> &detectors);
 
-  void processMaskOnDetectors(const detid2index_map &indexmap, bool tomask,
-                              const std::vector<detid_t> &singledetids);
+  void processMaskOnDetectors(const detid2index_map &indexmap, bool tomask, const std::vector<detid_t> &singledetids);
   /// Convert spectrum to detector
-  void processMaskOnWorkspaceIndex(bool mask,
-                                   std::vector<specnum_t> &maskedSpecID,
-                                   std::vector<detid_t> &singleDetIds);
+  void processMaskOnWorkspaceIndex(bool mask, std::vector<specnum_t> &maskedSpecID, std::vector<detid_t> &singleDetIds);
 
   void initDetectors();
 
   std::map<std::string, std::string> validateInputs() override;
 
-  void convertSpMasksToDetIDs(const API::MatrixWorkspace &sourceWS,
-                              const std::vector<specnum_t> &maskedSpecID,
+  void convertSpMasksToDetIDs(const API::MatrixWorkspace &sourceWS, const std::vector<specnum_t> &maskedSpecID,
                               std::vector<detid_t> &singleDetIds);
 
   void reset();

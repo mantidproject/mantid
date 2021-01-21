@@ -21,9 +21,7 @@ bool TofEvent::operator==(const TofEvent &rhs) const {
 /** < comparison operator, using the TOF to do the comparison.
  * @param rhs: the other TofEvent to compare.
  * @return true if this->m_tof < rhs.m_tof*/
-bool TofEvent::operator>(const TofEvent &rhs) const {
-  return (this->m_tof > rhs.m_tof);
-}
+bool TofEvent::operator>(const TofEvent &rhs) const { return (this->m_tof > rhs.m_tof); }
 
 /**
  * Compare two events within the specified tolerance
@@ -35,8 +33,7 @@ bool TofEvent::operator>(const TofEvent &rhs) const {
  *
  * @return True if the are the same within the specifed tolerances
  */
-bool TofEvent::equals(const TofEvent &rhs, const double tolTof,
-                      const int64_t tolPulse) const {
+bool TofEvent::equals(const TofEvent &rhs, const double tolTof, const int64_t tolPulse) const {
   // compare m_tof
   if (std::fabs(this->m_tof - rhs.m_tof) > tolTof)
     return false;

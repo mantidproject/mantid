@@ -32,27 +32,21 @@
  *****************************************************************************/
 
 ScaleDraw::ScaleDraw(Plot *plot, const QString &formula)
-    : d_plot(plot), d_type(Numeric), d_numeric_format(Automatic), d_fmt('g'),
-      d_prec(4), d_formula(formula), d_majTicks(Out), d_minTicks(Out),
-      d_selected(false), d_name_format(ShortName),
-      d_date_time_origin(QDateTime::currentDateTime()),
-      d_format_info("YYYY-MM-DDTHH:MM:SS"), d_text_labels(QStringList()) {}
+    : d_plot(plot), d_type(Numeric), d_numeric_format(Automatic), d_fmt('g'), d_prec(4), d_formula(formula),
+      d_majTicks(Out), d_minTicks(Out), d_selected(false), d_name_format(ShortName),
+      d_date_time_origin(QDateTime::currentDateTime()), d_format_info("YYYY-MM-DDTHH:MM:SS"),
+      d_text_labels(QStringList()) {}
 
-ScaleDraw::ScaleDraw(Plot *plot, const QStringList &labels,
-                     const QString &format, ScaleType type)
-    : d_plot(plot), d_type(type), d_numeric_format(Automatic), d_fmt('g'),
-      d_prec(4), d_formula(""), d_majTicks(Out), d_minTicks(Out),
-      d_selected(false), d_name_format(ShortName),
-      d_date_time_origin(QDateTime::currentDateTime()), d_format_info(format),
-      d_text_labels(labels) {}
+ScaleDraw::ScaleDraw(Plot *plot, const QStringList &labels, const QString &format, ScaleType type)
+    : d_plot(plot), d_type(type), d_numeric_format(Automatic), d_fmt('g'), d_prec(4), d_formula(""), d_majTicks(Out),
+      d_minTicks(Out), d_selected(false), d_name_format(ShortName), d_date_time_origin(QDateTime::currentDateTime()),
+      d_format_info(format), d_text_labels(labels) {}
 
 ScaleDraw::ScaleDraw(Plot *plot, ScaleDraw *sd)
-    : d_plot(plot), d_type(sd->d_type), d_numeric_format(sd->d_numeric_format),
-      d_fmt(sd->d_fmt), d_prec(sd->d_prec), d_formula(sd->d_formula),
-      d_majTicks(sd->d_majTicks), d_minTicks(sd->d_minTicks),
-      d_selected(sd->d_selected), d_name_format(sd->d_name_format),
-      d_date_time_origin(sd->d_date_time_origin),
-      d_format_info(sd->d_format_info), d_text_labels(sd->d_text_labels) {
+    : d_plot(plot), d_type(sd->d_type), d_numeric_format(sd->d_numeric_format), d_fmt(sd->d_fmt), d_prec(sd->d_prec),
+      d_formula(sd->d_formula), d_majTicks(sd->d_majTicks), d_minTicks(sd->d_minTicks), d_selected(sd->d_selected),
+      d_name_format(sd->d_name_format), d_date_time_origin(sd->d_date_time_origin), d_format_info(sd->d_format_info),
+      d_text_labels(sd->d_text_labels) {
   setLabelAlignment(sd->labelAlignment());
   setLabelRotation(sd->labelRotation());
 }
@@ -60,8 +54,7 @@ ScaleDraw::ScaleDraw(Plot *plot, ScaleDraw *sd)
 QwtText ScaleDraw::label(double value) const {
   switch (d_type) {
   case Numeric: {
-    QLocale locale =
-        (static_cast<Graph *>(d_plot->parent()))->multiLayer()->locale();
+    QLocale locale = (static_cast<Graph *>(d_plot->parent()))->multiLayer()->locale();
     if (d_numeric_format == Superscripts) {
       QString txt = locale.toString(transformValue(value), 'e', d_prec);
       QStringList list = txt.split("e", QString::SkipEmptyParts);
@@ -135,13 +128,11 @@ QwtText ScaleDraw::label(double value) const {
   }
 
   case Time:
-    return QwtText(
-        d_date_time_origin.time().addMSecs((int)value).toString(d_format_info));
+    return QwtText(d_date_time_origin.time().addMSecs((int)value).toString(d_format_info));
     break;
 
   case Date:
-    return QwtText(
-        d_date_time_origin.addSecs((int)value).toString(d_format_info));
+    return QwtText(d_date_time_origin.addSecs((int)value).toString(d_format_info));
     break;
 
   case ColHeader:
@@ -153,8 +144,7 @@ QwtText ScaleDraw::label(double value) const {
     QwtValueList ticks = scDiv.ticks(QwtScaleDiv::MajorTick);
 
     double break_offset = 0;
-    ScaleEngine *se =
-        static_cast<ScaleEngine *>(d_plot->axisScaleEngine(axis()));
+    ScaleEngine *se = static_cast<ScaleEngine *>(d_plot->axisScaleEngine(axis()));
     /*QwtScaleEngine *qwtsc_engine=d_plot->axisScaleEngine(axis());
     ScaleEngine *se =dynamic_cast<ScaleEngine*>(qwtsc_engine);
     if(se!=NULL)
@@ -217,8 +207,7 @@ QwtText ScaleDraw::label(double value) const {
 void ScaleDraw::drawLabel(QPainter *painter, double value) const {
   if (!d_plot)
     return;
-  ScaleEngine *sc_engine =
-      static_cast<ScaleEngine *>(d_plot->axisScaleEngine(axis()));
+  ScaleEngine *sc_engine = static_cast<ScaleEngine *>(d_plot->axisScaleEngine(axis()));
   /*QwtScaleEngine *qwtsc_engine=d_plot->axisScaleEngine(axis());
 ScaleEngine *sc_engine =dynamic_cast< ScaleEngine*>(qwtsc_engine);
   if(sc_engine!=NULL)
@@ -336,8 +325,7 @@ int ScaleDraw::axis() const {
 }
 
 void ScaleDraw::drawTick(QPainter *p, double value, int len) const {
-  ScaleEngine *sc_engine =
-      static_cast<ScaleEngine *>(d_plot->axisScaleEngine(axis()));
+  ScaleEngine *sc_engine = static_cast<ScaleEngine *>(d_plot->axisScaleEngine(axis()));
   /*QwtScaleEngine *qwtsc_engine=d_plot->axisScaleEngine(axis());
 ScaleEngine *sc_engine =dynamic_cast< ScaleEngine*>(qwtsc_engine);
   if(sc_engine!=NULL)
@@ -380,8 +368,7 @@ void ScaleDraw::draw(QPainter *painter, const QPalette &palette) const {
 }
 
 void ScaleDraw::drawBreak(QPainter *painter) const {
-  ScaleEngine *sc_engine =
-      static_cast<ScaleEngine *>(d_plot->axisScaleEngine(axis()));
+  ScaleEngine *sc_engine = static_cast<ScaleEngine *>(d_plot->axisScaleEngine(axis()));
   /*const QwtScaleEngine * qwtsc_engine=d_plot->axisScaleEngine(axis());
   const ScaleEngine *sc_engine =dynamic_cast<const ScaleEngine*>(qwtsc_engine);
   if(sc_engine!=NULL)
@@ -440,8 +427,7 @@ void ScaleDraw::drawBreak(QPainter *painter) const {
 }
 
 void ScaleDraw::drawBackbone(QPainter *painter) const {
-  ScaleEngine *sc_engine =
-      static_cast<ScaleEngine *>(d_plot->axisScaleEngine(axis()));
+  ScaleEngine *sc_engine = static_cast<ScaleEngine *>(d_plot->axisScaleEngine(axis()));
   /*QwtScaleEngine *qwtsc_engine=d_plot->axisScaleEngine(axis());
   ScaleEngine *sc_engine =dynamic_cast<ScaleEngine*>(qwtsc_engine);
   if(sc_engine!=NULL)
@@ -453,20 +439,16 @@ void ScaleDraw::drawBackbone(QPainter *painter) const {
     QPoint pos = this->pos();
     switch (alignment()) {
     case LeftScale:
-      QwtPainter::drawLine(painter, pos.x() - bw2, pos.y(), pos.x() - bw2,
-                           pos.y() + len);
+      QwtPainter::drawLine(painter, pos.x() - bw2, pos.y(), pos.x() - bw2, pos.y() + len);
       break;
     case RightScale:
-      QwtPainter::drawLine(painter, pos.x() + bw2, pos.y(), pos.x() + bw2,
-                           pos.y() + len);
+      QwtPainter::drawLine(painter, pos.x() + bw2, pos.y(), pos.x() + bw2, pos.y() + len);
       break;
     case TopScale:
-      QwtPainter::drawLine(painter, pos.x(), pos.y() - bw2, pos.x() + len,
-                           pos.y() - bw2);
+      QwtPainter::drawLine(painter, pos.x(), pos.y() - bw2, pos.x() + len, pos.y() - bw2);
       break;
     case BottomScale:
-      QwtPainter::drawLine(painter, pos.x(), pos.y() + bw2, pos.x() + len,
-                           pos.y() + bw2);
+      QwtPainter::drawLine(painter, pos.x(), pos.y() + bw2, pos.x() + len, pos.y() + bw2);
       break;
     }
     return;

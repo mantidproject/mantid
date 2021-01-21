@@ -137,9 +137,7 @@ inline RectF &RectF::operator=(const RectF &rect) {
 
 inline bool RectF::isEmpty() const { return m_x0 == m_x1 || m_y0 == m_y1; }
 
-inline QPointF RectF::center() const {
-  return QPointF((m_x0 + m_x1) / 2, (m_y0 + m_y1) / 2);
-}
+inline QPointF RectF::center() const { return QPointF((m_x0 + m_x1) / 2, (m_y0 + m_y1) / 2); }
 
 inline double RectF::width() const { return fabs(m_x1 - m_x0); }
 
@@ -170,8 +168,7 @@ inline RectF RectF::translated(double dx, double dy) const {
 }
 
 inline RectF RectF::translated(const QPointF &p) const {
-  return RectF(QPointF(m_x0 + p.x(), m_y0 + p.y()),
-               QPointF(m_x1 + p.x(), m_y1 + p.y()));
+  return RectF(QPointF(m_x0 + p.x(), m_y0 + p.y()), QPointF(m_x1 + p.x(), m_y1 + p.y()));
 }
 
 inline void RectF::adjust(const QPointF &dp0, const QPointF &dp1) {
@@ -185,19 +182,15 @@ inline void RectF::xFlip() { std::swap(m_x0, m_x1); }
 
 inline void RectF::yFlip() { std::swap(m_y0, m_y1); }
 
-inline QRectF RectF::toQRectF() const {
-  return QRectF(m_x0, m_y0, xSpan(), ySpan());
-}
+inline QRectF RectF::toQRectF() const { return QRectF(m_x0, m_y0, xSpan(), ySpan()); }
 
 inline std::ostream &operator<<(std::ostream &ostr, const RectF &rect) {
-  ostr << '[' << rect.x0() << ',' << rect.x1() << ';' << rect.y0() << ','
-       << rect.y1() << ']';
+  ostr << '[' << rect.x0() << ',' << rect.x1() << ';' << rect.y0() << ',' << rect.y1() << ']';
   return ostr;
 }
 
 inline std::ostream &operator<<(std::ostream &ostr, const QRectF &rect) {
-  ostr << '[' << rect.left() << ',' << rect.right() << ';' << rect.top() << ','
-       << rect.bottom() << ']';
+  ostr << '[' << rect.left() << ',' << rect.right() << ';' << rect.top() << ',' << rect.bottom() << ']';
   return ostr;
 }
 

@@ -38,42 +38,26 @@ DECLARE_ALGORITHM(SaveReflectometryAscii)
 
 /// Initialise the algorithm
 void SaveReflectometryAscii::init() {
-  declareProperty(
-      std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "",
-                                                           Direction::Input),
-      "The name of the workspace containing the data you want to save.");
-  declareProperty(
-      std::make_unique<FileProperty>("Filename", "", FileProperty::Save),
-      "The output filename");
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input),
+                  "The name of the workspace containing the data you want to save.");
+  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Save), "The output filename");
   std::vector<std::string> extension = {".mft", ".txt", ".dat", "custom"};
-  declareProperty("FileExtension", ".mft",
-                  std::make_shared<StringListValidator>(extension),
+  declareProperty("FileExtension", ".mft", std::make_shared<StringListValidator>(extension),
                   "Choose the file extension according to the file format.");
-  auto mft = std::make_unique<VisibleWhenProperty>("FileExtension", IS_EQUAL_TO,
-                                                   "mft");
-  auto cus = std::make_unique<VisibleWhenProperty>("FileExtension", IS_EQUAL_TO,
-                                                   "custom");
-  declareProperty(std::make_unique<ArrayProperty<std::string>>("LogList"),
-                  "List of logs to write to file.");
-  setPropertySettings("LogList", std::make_unique<VisibleWhenProperty>(
-                                     std::move(mft), std::move(cus), OR));
+  auto mft = std::make_unique<VisibleWhenProperty>("FileExtension", IS_EQUAL_TO, "mft");
+  auto cus = std::make_unique<VisibleWhenProperty>("FileExtension", IS_EQUAL_TO, "custom");
+  declareProperty(std::make_unique<ArrayProperty<std::string>>("LogList"), "List of logs to write to file.");
+  setPropertySettings("LogList", std::make_unique<VisibleWhenProperty>(std::move(mft), std::move(cus), OR));
   declareProperty("WriteHeader", false, "Whether to write header lines.");
-  setPropertySettings("WriteHeader",
-                      std::make_unique<VisibleWhenProperty>(
-                          "FileExtension", IS_EQUAL_TO, "custom"));
+  setPropertySettings("WriteHeader", std::make_unique<VisibleWhenProperty>("FileExtension", IS_EQUAL_TO, "custom"));
   std::vector<std::string> separator = {"comma", "space", "tab"};
-  declareProperty(
-      "WriteResolution", true,
-      "Whether to compute resolution values and write them as fourth "
-      "data column.");
-  setPropertySettings("WriteResolution",
-                      std::make_unique<VisibleWhenProperty>(
-                          "FileExtension", IS_EQUAL_TO, "custom"));
-  declareProperty("Separator", "tab",
-                  std::make_shared<StringListValidator>(separator),
+  declareProperty("WriteResolution", true,
+                  "Whether to compute resolution values and write them as fourth "
+                  "data column.");
+  setPropertySettings("WriteResolution", std::make_unique<VisibleWhenProperty>("FileExtension", IS_EQUAL_TO, "custom"));
+  declareProperty("Separator", "tab", std::make_shared<StringListValidator>(separator),
                   "The separator used for splitting data columns.");
-  setPropertySettings("Separator", std::make_unique<VisibleWhenProperty>(
-                                       "FileExtension", IS_EQUAL_TO, "custom"));
+  setPropertySettings("Separator", std::make_unique<VisibleWhenProperty>("FileExtension", IS_EQUAL_TO, "custom"));
 }
 
 /// Input validation for single MatrixWorkspace
@@ -88,8 +72,7 @@ std::map<std::string, std::string> SaveReflectometryAscii::validateInputs() {
   m_ws = getProperty("InputWorkspace");
   if (!m_ws) {
     WorkspaceGroup_const_sptr group =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-            getPropertyValue("InputWorkspace"));
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(getPropertyValue("InputWorkspace"));
     if (!group)
       issues["InputWorkspace"] = "Must be a MatrixWorkspace";
   } else {
@@ -153,8 +136,7 @@ bool SaveReflectometryAscii::includeQResolution() const {
  *  @param val :: a value to be written
  *  @param firstColumn :: true if the value is the first column in the output
  */
-template <typename T>
-void SaveReflectometryAscii::outputval(const T &val, bool firstColumn) {
+template <typename T> void SaveReflectometryAscii::outputval(const T &val, bool firstColumn) {
   // cppcheck-suppress syntaxError
   if constexpr (std::is_floating_point<T>::value) {
     if (std::isinf(val))
@@ -186,8 +168,7 @@ std::string SaveReflectometryAscii::sampleLogValue(const std::string &logName) {
 std::string SaveReflectometryAscii::sampleLogUnit(const std::string &logName) {
   auto run = m_ws->run();
   try {
-    return " " +
-           boost::lexical_cast<std::string>(run.getLogData(logName)->units());
+    return " " + boost::lexical_cast<std::string>(run.getLogData(logName)->units());
   } catch (Exception::NotFoundError &) {
     return "";
   }
@@ -197,8 +178,7 @@ std::string SaveReflectometryAscii::sampleLogUnit(const std::string &logName) {
  *  @param logName :: the name of a SampleLog entry to get its value from
  *  @param logNameFixed :: the name of the SampleLog entry defined by the header
  */
-void SaveReflectometryAscii::writeInfo(const std::string &logName,
-                                       const std::string &logNameFixed) {
+void SaveReflectometryAscii::writeInfo(const std::string &logName, const std::string &logNameFixed) {
   const std::string logValue = sampleLogValue(logName);
   const std::string logUnit = sampleLogUnit(logName);
   if (!logNameFixed.empty()) {
@@ -215,8 +195,7 @@ void SaveReflectometryAscii::writeInfo(const std::string &logName,
 void SaveReflectometryAscii::header() {
   m_file << std::setfill(' ');
   m_file << "MFT\n";
-  std::vector<std::string> logs{"instrument.name", "user.namelocalcontact",
-                                "title", "start_time", "end_time"};
+  std::vector<std::string> logs{"instrument.name", "user.namelocalcontact", "title", "start_time", "end_time"};
   writeInfo("instrument.name", "Instrument");
   writeInfo("user.namelocalcontact", "User-local contact");
   writeInfo("title", "Title");
@@ -229,8 +208,7 @@ void SaveReflectometryAscii::header() {
   const std::vector<std::string> logList = getProperty("LogList");
   int nLogs = 0;
   for (const auto &log : logList) {
-    if (find(logs.cbegin(), logs.cend(), log) ==
-        logs.end()) { // do not repeat a log
+    if (find(logs.cbegin(), logs.cend(), log) == logs.end()) { // do not repeat a log
       writeInfo(log);
       ++nLogs;
     }
@@ -283,8 +261,7 @@ void SaveReflectometryAscii::exec() {
 bool SaveReflectometryAscii::checkGroups() {
   try {
     WorkspaceGroup_const_sptr group =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-            getPropertyValue("InputWorkspace"));
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(getPropertyValue("InputWorkspace"));
     if (!group)
       return false;
     for (auto i : group->getAllItems()) {

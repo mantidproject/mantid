@@ -14,25 +14,19 @@ namespace SliceViewer {
 
 /** PeakRepresentationEllipsoid : Draws an ellipse for elliptical peaks.
  */
-class EXPORT_OPT_MANTIDQT_SLICEVIEWER PeakRepresentationEllipsoid
-    : public PeakRepresentation {
+class EXPORT_OPT_MANTIDQT_SLICEVIEWER PeakRepresentationEllipsoid : public PeakRepresentation {
 public:
-  PeakRepresentationEllipsoid(
-      const Mantid::Kernel::V3D &origin, const std::vector<double> &peakRadii,
-      const std::vector<double> &backgroundInnerRadii,
-      const std::vector<double> &backgroundOuterRadii,
-      const std::vector<Mantid::Kernel::V3D> &directions,
-      std::shared_ptr<Mantid::SliceViewer::EllipsoidPlaneSliceCalculator>
-          calculator);
+  PeakRepresentationEllipsoid(const Mantid::Kernel::V3D &origin, const std::vector<double> &peakRadii,
+                              const std::vector<double> &backgroundInnerRadii,
+                              const std::vector<double> &backgroundOuterRadii,
+                              const std::vector<Mantid::Kernel::V3D> &directions,
+                              std::shared_ptr<Mantid::SliceViewer::EllipsoidPlaneSliceCalculator> calculator);
 
   /// Setter for the slice point
   void setSlicePoint(const double & /*z*/) override;
   /// Transform the coordinates.
-  void
-  movePosition(Mantid::Geometry::PeakTransform_sptr peakTransform) override;
-  void
-  movePositionNonOrthogonal(Mantid::Geometry::PeakTransform_sptr peakTransform,
-                            NonOrthogonalAxis &info) override {
+  void movePosition(Mantid::Geometry::PeakTransform_sptr peakTransform) override;
+  void movePositionNonOrthogonal(Mantid::Geometry::PeakTransform_sptr peakTransform, NonOrthogonalAxis &info) override {
     (void)info;
     movePosition(peakTransform);
   }
@@ -54,10 +48,8 @@ public:
   double getZoomOutFactor() const;
 
 protected:
-  std::shared_ptr<PeakPrimitives> getDrawingInformation(
-      PeakRepresentationViewInformation viewInformation) override;
-  void doDraw(QPainter &painter, PeakViewColor &foregroundColor,
-              PeakViewColor &backgroundColor,
+  std::shared_ptr<PeakPrimitives> getDrawingInformation(PeakRepresentationViewInformation viewInformation) override;
+  void doDraw(QPainter &painter, PeakViewColor &foregroundColor, PeakViewColor &backgroundColor,
               std::shared_ptr<PeakPrimitives> drawingInformation,
               PeakRepresentationViewInformation viewInformation) override;
 
@@ -109,8 +101,7 @@ private:
   bool m_showBackgroundRadii;
 
   /// A calculator to extract the ellipse parameters
-  std::shared_ptr<Mantid::SliceViewer::EllipsoidPlaneSliceCalculator>
-      m_calculator;
+  std::shared_ptr<Mantid::SliceViewer::EllipsoidPlaneSliceCalculator> m_calculator;
 };
 } // namespace SliceViewer
 } // namespace MantidQt

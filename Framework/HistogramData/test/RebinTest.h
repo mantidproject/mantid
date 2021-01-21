@@ -26,14 +26,10 @@ public:
   static RebinTest *createSuite() { return new RebinTest(); }
   static void destroySuite(RebinTest *suite) { delete suite; }
 
-  void testExecrebin() {
-    TS_ASSERT_THROWS_NOTHING(
-        rebin(getCountsHistogram(), BinEdges(10, LinearGenerator(0, 0.5))));
-  }
+  void testExecrebin() { TS_ASSERT_THROWS_NOTHING(rebin(getCountsHistogram(), BinEdges(10, LinearGenerator(0, 0.5)))); }
 
   void testExecRebinFrequency() {
-    TS_ASSERT_THROWS_NOTHING(
-        rebin(getFrequencyHistogram(), BinEdges(10, LinearGenerator(0, 0.5))));
+    TS_ASSERT_THROWS_NOTHING(rebin(getFrequencyHistogram(), BinEdges(10, LinearGenerator(0, 0.5))));
   }
 
   void testRebinNoYModeDefined() {
@@ -41,41 +37,34 @@ public:
     Points points(5, LinearGenerator(0, 1));
     Counts counts{10, 1, 3, 4, 7};
     // X Mode Points
-    TS_ASSERT_THROWS(rebin(Histogram(points, counts), edges),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(rebin(Histogram(points, counts), edges), const std::runtime_error &);
     // No YMode set
-    TS_ASSERT_THROWS(
-        rebin(Histogram(BinEdges(10, LinearGenerator(0, 0.5))), edges),
-        const std::runtime_error &);
+    TS_ASSERT_THROWS(rebin(Histogram(BinEdges(10, LinearGenerator(0, 0.5))), edges), const std::runtime_error &);
   }
 
   void testRebinFailsCentralBinEdgesInvalid() {
     std::vector<double> binEdges{1, 2, 3, 3, 5, 7};
     BinEdges edges(binEdges);
 
-    TS_ASSERT_THROWS(rebin(getCountsHistogram(), edges),
-                     const InvalidBinEdgesError &);
+    TS_ASSERT_THROWS(rebin(getCountsHistogram(), edges), const InvalidBinEdgesError &);
   }
 
   void testRebinFailsStartBinEdgesInvalid() {
     std::vector<double> binEdges{1, 1, 3, 4, 5, 7};
     BinEdges edges(binEdges);
 
-    TS_ASSERT_THROWS(rebin(getCountsHistogram(), edges),
-                     const InvalidBinEdgesError &);
+    TS_ASSERT_THROWS(rebin(getCountsHistogram(), edges), const InvalidBinEdgesError &);
   }
 
   void testRebinEndCentralBinEdgesInvalid() {
     std::vector<double> binEdges{1, 2, 3, 4, 5, 5};
     BinEdges edges(binEdges);
 
-    TS_ASSERT_THROWS(rebin(getCountsHistogram(), edges),
-                     const InvalidBinEdgesError &);
+    TS_ASSERT_THROWS(rebin(getCountsHistogram(), edges), const InvalidBinEdgesError &);
   }
 
   void testNegativeBinEdges() {
-    auto hist = Histogram(BinEdges(3, LinearGenerator(-3, 3)), Counts{20, 10},
-                          CountStandardDeviations{4.4721, 3.1622});
+    auto hist = Histogram(BinEdges(3, LinearGenerator(-3, 3)), Counts{20, 10}, CountStandardDeviations{4.4721, 3.1622});
     std::vector<double> binEdges{-3, -2, -1, 0, 1, 2, 3};
     BinEdges edges(std::move(binEdges));
 
@@ -121,14 +110,10 @@ public:
     auto outCounts = rebin(histCounts, BinEdges(10, LinearGenerator(30, 1)));
     auto outFreq = rebin(histFreq, BinEdges(10, LinearGenerator(30, 2)));
 
-    TS_ASSERT(std::all_of(outCounts.y().cbegin(), outCounts.y().cend(),
-                          [](const double i) { return i == 0; }));
-    TS_ASSERT(std::all_of(outCounts.e().cbegin(), outCounts.e().cend(),
-                          [](const double i) { return i == 0; }));
-    TS_ASSERT(std::all_of(outFreq.y().cbegin(), outFreq.y().cend(),
-                          [](const double i) { return i == 0; }));
-    TS_ASSERT(std::all_of(outFreq.e().cbegin(), outFreq.e().cend(),
-                          [](const double i) { return i == 0; }));
+    TS_ASSERT(std::all_of(outCounts.y().cbegin(), outCounts.y().cend(), [](const double i) { return i == 0; }));
+    TS_ASSERT(std::all_of(outCounts.e().cbegin(), outCounts.e().cend(), [](const double i) { return i == 0; }));
+    TS_ASSERT(std::all_of(outFreq.y().cbegin(), outFreq.y().cend(), [](const double i) { return i == 0; }));
+    TS_ASSERT(std::all_of(outFreq.e().cbegin(), outFreq.e().cend(), [](const double i) { return i == 0; }));
   }
 
   void testSplitBinSymmetric() {
@@ -146,9 +131,7 @@ public:
       TS_ASSERT_EQUALS(outCounts.y()[i], 5.0);
       TS_ASSERT_DELTA(outCounts.e()[i], std::sqrt(5), 1e-14);
       TS_ASSERT_EQUALS(outFreq.y()[i], 12.0);
-      TS_ASSERT_DELTA(outFreq.e()[i],
-                      std::sqrt(outFreq.y()[i] / (edges[i + 1] - edges[i])),
-                      1e-14);
+      TS_ASSERT_DELTA(outFreq.e()[i], std::sqrt(outFreq.y()[i] / (edges[i + 1] - edges[i])), 1e-14);
     }
   }
 
@@ -157,19 +140,16 @@ public:
     // |||||   becomes:
     // | | |
     Histogram hist(BinEdges(5, LinearGenerator(0, 1)), Counts{5, 7, 10, 6});
-    Histogram histFreq(BinEdges(5, LinearGenerator(0, 1)),
-                       Frequencies{3, 9, 8, 12});
+    Histogram histFreq(BinEdges(5, LinearGenerator(0, 1)), Frequencies{3, 9, 8, 12});
     BinEdges edges(3, LinearGenerator(0, 2));
 
     auto outCounts = rebin(hist, edges);
     auto outFreq = rebin(histFreq, edges);
 
     for (size_t i = 0; i < outCounts.y().size(); i++) {
-      TS_ASSERT_EQUALS(outCounts.y()[i],
-                       hist.y()[2 * i] + hist.y()[(2 * i) + 1]);
+      TS_ASSERT_EQUALS(outCounts.y()[i], hist.y()[2 * i] + hist.y()[(2 * i) + 1]);
       TS_ASSERT_DELTA(outCounts.e()[i], std::sqrt(outCounts.y()[i]), 1e-14);
-      TS_ASSERT_EQUALS(outFreq.y()[i],
-                       (histFreq.y()[2 * i] + histFreq.y()[(2 * i) + 1]) / 2);
+      TS_ASSERT_EQUALS(outFreq.y()[i], (histFreq.y()[2 * i] + histFreq.y()[(2 * i) + 1]) / 2);
       TS_ASSERT_DELTA(outFreq.e()[i], std::sqrt(outFreq.y()[i] / 2), 1e-14);
     }
   }
@@ -195,9 +175,7 @@ public:
 
     for (size_t i = 0; i < outCounts.y().size(); i++) {
       TS_ASSERT_DELTA(outCounts.e()[i], std::sqrt(outCounts.y()[i]), 1e-14);
-      TS_ASSERT_DELTA(outFreq.e()[i],
-                      std::sqrt(outFreq.y()[i] / (edges[i + 1] - edges[i])),
-                      1e-14);
+      TS_ASSERT_DELTA(outFreq.e()[i], std::sqrt(outFreq.y()[i] / (edges[i + 1] - edges[i])), 1e-14);
     }
   }
 
@@ -221,12 +199,8 @@ public:
     TS_ASSERT_DELTA(outCounts.e()[0], std::sqrt(outCounts.y()[0]), 1e-14);
     TS_ASSERT_DELTA(outCounts.e()[1], std::sqrt(outCounts.y()[1]), 1e-14);
 
-    TS_ASSERT_DELTA(outFreq.e()[0],
-                    std::sqrt(((histFreq.y()[0] / 2) + histFreq.y()[1]) / 2),
-                    1e-14);
-    TS_ASSERT_DELTA(outFreq.e()[1],
-                    std::sqrt(((histFreq.y()[2] / 2) + histFreq.y()[1]) / 2),
-                    1e-14);
+    TS_ASSERT_DELTA(outFreq.e()[0], std::sqrt(((histFreq.y()[0] / 2) + histFreq.y()[1]) / 2), 1e-14);
+    TS_ASSERT_DELTA(outFreq.e()[1], std::sqrt(((histFreq.y()[2] / 2) + histFreq.y()[1]) / 2), 1e-14);
   }
 
   void testSplitCombineBinsAsymmetric() {
@@ -241,21 +215,16 @@ public:
     auto outFreq = rebin(histFreq, edges);
 
     TS_ASSERT_EQUALS(outCounts.y()[0], hist.y()[0] / 2);
-    TS_ASSERT_EQUALS(outCounts.y()[1],
-                     ((hist.y()[0] + hist.y()[2]) / 2) + hist.y()[1]);
+    TS_ASSERT_EQUALS(outCounts.y()[1], ((hist.y()[0] + hist.y()[2]) / 2) + hist.y()[1]);
     TS_ASSERT_EQUALS(outCounts.y()[2], hist.y()[2] / 2);
 
     TS_ASSERT_EQUALS(outFreq.y()[0], histFreq.y()[0]);
-    TS_ASSERT_EQUALS(
-        outFreq.y()[1],
-        ((histFreq.y()[0] / 2) + histFreq.y()[1] + (histFreq.y()[2] / 2)) / 2);
+    TS_ASSERT_EQUALS(outFreq.y()[1], ((histFreq.y()[0] / 2) + histFreq.y()[1] + (histFreq.y()[2] / 2)) / 2);
     TS_ASSERT_EQUALS(outFreq.y()[2], histFreq.y()[2]);
 
     for (size_t i = 0; i < outCounts.y().size(); i++) {
       TS_ASSERT_DELTA(outCounts.e()[i], std::sqrt(outCounts.y()[i]), 1e-14);
-      TS_ASSERT_DELTA(outFreq.e()[i],
-                      std::sqrt(outFreq.y()[i] / (edges[i + 1] - edges[i])),
-                      1e-14);
+      TS_ASSERT_DELTA(outFreq.e()[i], std::sqrt(outFreq.y()[i] / (edges[i + 1] - edges[i])), 1e-14);
     }
   }
 
@@ -282,13 +251,9 @@ public:
     TS_ASSERT_DELTA(outCounts.e()[1], std::sqrt(outCounts.y()[1]), 1e-14);
     TS_ASSERT_DELTA(outCounts.e()[2], std::sqrt(outCounts.y()[2]), 1e-14);
 
-    TS_ASSERT_DELTA(
-        outFreq.e()[0],
-        std::sqrt(((histFreq.y()[0] / 2) + (histFreq.y()[1] * 2)) / 2), 1e-14);
+    TS_ASSERT_DELTA(outFreq.e()[0], std::sqrt(((histFreq.y()[0] / 2) + (histFreq.y()[1] * 2)) / 2), 1e-14);
     TS_ASSERT_DELTA(outFreq.e()[1], std::sqrt(histFreq.y()[1] * 2), 1e-14);
-    TS_ASSERT_DELTA(
-        outFreq.e()[2],
-        std::sqrt(((histFreq.y()[2] / 2) + (histFreq.y()[1] * 2)) / 2), 1e-14);
+    TS_ASSERT_DELTA(outFreq.e()[2], std::sqrt(((histFreq.y()[2] / 2) + (histFreq.y()[1] * 2)) / 2), 1e-14);
   }
 
   void testSmallerBinsAsymmetric() {
@@ -390,19 +355,14 @@ public:
 
 private:
   Histogram getCountsHistogram() {
-    return Histogram(BinEdges(10, LinearGenerator(0, 1)),
-                     Counts{10.5, 11.2, 19.3, 25.4, 36.8, 40.3, 17.7, 9.3, 4.6},
-                     CountStandardDeviations{3.2404, 3.3466, 4.3932, 5.0398,
-                                             6.0663, 6.3482, 4.2071, 3.0496,
-                                             2.1448});
+    return Histogram(BinEdges(10, LinearGenerator(0, 1)), Counts{10.5, 11.2, 19.3, 25.4, 36.8, 40.3, 17.7, 9.3, 4.6},
+                     CountStandardDeviations{3.2404, 3.3466, 4.3932, 5.0398, 6.0663, 6.3482, 4.2071, 3.0496, 2.1448});
   }
 
   Histogram getFrequencyHistogram() {
     return Histogram(
-        BinEdges(10, LinearGenerator(0, 1)),
-        Frequencies{10.5, 11.2, 19.3, 25.4, 36.8, 40.3, 17.7, 9.3, 4.6},
-        FrequencyStandardDeviations{3.2404, 3.3466, 4.3932, 5.0398, 6.0663,
-                                    6.3482, 4.2071, 3.0496, 2.1448});
+        BinEdges(10, LinearGenerator(0, 1)), Frequencies{10.5, 11.2, 19.3, 25.4, 36.8, 40.3, 17.7, 9.3, 4.6},
+        FrequencyStandardDeviations{3.2404, 3.3466, 4.3932, 5.0398, 6.0663, 6.3482, 4.2071, 3.0496, 2.1448});
   }
 };
 
@@ -410,16 +370,12 @@ class RebinTestPerformance : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static RebinTestPerformance *createSuite() {
-    return new RebinTestPerformance();
-  }
+  static RebinTestPerformance *createSuite() { return new RebinTestPerformance(); }
   static void destroySuite(RebinTestPerformance *suite) { delete suite; }
 
   RebinTestPerformance()
-      : hist(BinEdges(binSize, LinearGenerator(0, 1))),
-        histFreq(BinEdges(binSize, LinearGenerator(0, 1))),
-        smBins(binSize * 2, LinearGenerator(0, 0.5)),
-        lgBins(binSize / 2, LinearGenerator(0, 2)) {
+      : hist(BinEdges(binSize, LinearGenerator(0, 1))), histFreq(BinEdges(binSize, LinearGenerator(0, 1))),
+        smBins(binSize * 2, LinearGenerator(0, 0.5)), lgBins(binSize / 2, LinearGenerator(0, 2)) {
     setupOutput();
   }
 

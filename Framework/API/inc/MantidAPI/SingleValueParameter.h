@@ -24,8 +24,7 @@ in a very simple manner.
 @author Owen Arnold, Tessella plc
 @date 21/07/2011
 */
-template <typename Derived, typename ValType>
-class DLLExport SingleValueParameter : public ImplicitFunctionParameter {
+template <typename Derived, typename ValType> class DLLExport SingleValueParameter : public ImplicitFunctionParameter {
 public:
   using ValueType = ValType;
   SingleValueParameter(ValType value);
@@ -47,8 +46,7 @@ protected:
 /* Getter for the valid state.
 @return raw underlying value.
 */
-template <typename Derived, typename ValType>
-ValType SingleValueParameter<Derived, ValType>::getValue() const {
+template <typename Derived, typename ValType> ValType SingleValueParameter<Derived, ValType>::getValue() const {
   return m_value;
 }
 
@@ -56,8 +54,7 @@ ValType SingleValueParameter<Derived, ValType>::getValue() const {
 /* Getter for the valid state.
 @return true if the object is in a valid state.
 */
-template <typename Derived, typename ValType>
-bool SingleValueParameter<Derived, ValType>::isValid() const {
+template <typename Derived, typename ValType> bool SingleValueParameter<Derived, ValType>::isValid() const {
   return m_isValid;
 }
 
@@ -68,8 +65,7 @@ terms of derived class.
 @return Ref to assigned object.
 */
 template <typename Derived, typename ValType>
-Derived &SingleValueParameter<Derived, ValType>::
-operator=(const Derived &other) {
+Derived &SingleValueParameter<Derived, ValType>::operator=(const Derived &other) {
   if (&other != this) {
     this->m_isValid = other.m_isValid;
     this->m_value = other.m_value;
@@ -83,8 +79,7 @@ operator=(const Derived &other) {
 @return true only if the two objects are considered equal.
 */
 template <typename Derived, typename ValType>
-bool SingleValueParameter<Derived, ValType>::
-operator==(const Derived &other) const {
+bool SingleValueParameter<Derived, ValType>::operator==(const Derived &other) const {
   return other.m_value == this->m_value;
 }
 
@@ -94,8 +89,7 @@ operator==(const Derived &other) const {
 @return true only if the two objects are not considered equal.
 */
 template <typename Derived, typename ValType>
-bool SingleValueParameter<Derived, ValType>::
-operator!=(const Derived &other) const {
+bool SingleValueParameter<Derived, ValType>::operator!=(const Derived &other) const {
   return !(*this == other);
 }
 
@@ -104,29 +98,25 @@ operator!=(const Derived &other) const {
 @param other : ref to object to use as origin for the new instance.
 */
 template <typename Derived, typename ValType>
-SingleValueParameter<Derived, ValType>::SingleValueParameter(
-    const SingleValueParameter<Derived, ValType> &other)
+SingleValueParameter<Derived, ValType>::SingleValueParameter(const SingleValueParameter<Derived, ValType> &other)
     : m_value(other.m_value), m_isValid(other.m_isValid) {}
 
 /// Default constructor. Object is created in invalid state.
 template <typename Derived, typename ValType>
-SingleValueParameter<Derived, ValType>::SingleValueParameter()
-    : m_isValid(false) {}
+SingleValueParameter<Derived, ValType>::SingleValueParameter() : m_isValid(false) {}
 
 //----------------------------------------------------------------
 /* Constructor. Leads to a valid instance/state.
 @param value : Internal value for the object to wrap.
 */
 template <typename Derived, typename ValType>
-SingleValueParameter<Derived, ValType>::SingleValueParameter(ValType value)
-    : m_value(value), m_isValid(true) {}
+SingleValueParameter<Derived, ValType>::SingleValueParameter(ValType value) : m_value(value), m_isValid(true) {}
 
 //----------------------------------------------------------------
 /* Serializes the object to an xml string.
 @return xml string containing the underlying value.
 */
-template <typename Derived, typename ValType>
-std::string SingleValueParameter<Derived, ValType>::toXMLString() const {
+template <typename Derived, typename ValType> std::string SingleValueParameter<Derived, ValType>::toXMLString() const {
   std::string valueXMLtext = ElementTraits<ValType>::format(m_value);
   return this->parameterXMLTemplate(valueXMLtext);
 }
@@ -139,16 +129,15 @@ std::string SingleValueParameter<Derived, ValType>::toXMLString() const {
 // CRTP.
 //
 //-----------------------------------------------------------------------------------------------------------------//
-#define DECLARE_SINGLE_VALUE_PARAMETER(classname, type_)                       \
-  class classname                                                              \
-      : public Mantid::API::SingleValueParameter<classname, type_> {           \
-  public:                                                                      \
-    using SuperType = Mantid::API::SingleValueParameter<classname, type_>;     \
-    static std::string parameterName() { return #classname; }                  \
-    classname(type_ value) : SuperType(value) {}                               \
-    classname() : SuperType() {}                                               \
-    std::string getName() const override { return #classname; }                \
-    classname *clone() const override { return new classname(m_value); }       \
+#define DECLARE_SINGLE_VALUE_PARAMETER(classname, type_)                                                               \
+  class classname : public Mantid::API::SingleValueParameter<classname, type_> {                                       \
+  public:                                                                                                              \
+    using SuperType = Mantid::API::SingleValueParameter<classname, type_>;                                             \
+    static std::string parameterName() { return #classname; }                                                          \
+    classname(type_ value) : SuperType(value) {}                                                                       \
+    classname() : SuperType() {}                                                                                       \
+    std::string getName() const override { return #classname; }                                                        \
+    classname *clone() const override { return new classname(m_value); }                                               \
   };
 } // namespace API
 } // namespace Mantid

@@ -38,70 +38,54 @@ using namespace Mantid::Kernel;
 //--------------------------------------------------------------------------
 // Functions to make this a proper workflow algorithm
 //--------------------------------------------------------------------------
-const std::string DetectorDiagnostic::category() const {
-  return "Diagnostics;Workflow\\Diagnostics";
-}
+const std::string DetectorDiagnostic::category() const { return "Diagnostics;Workflow\\Diagnostics"; }
 
-const std::string DetectorDiagnostic::name() const {
-  return "DetectorDiagnostic";
-}
+const std::string DetectorDiagnostic::name() const { return "DetectorDiagnostic"; }
 
 int DetectorDiagnostic::version() const { return 1; }
 
 void DetectorDiagnostic::init() {
+  this->declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
+                        "Name of the integrated detector vanadium (white beam) workspace.");
   this->declareProperty(
-      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                            Direction::Input),
-      "Name of the integrated detector vanadium (white beam) workspace.");
-  this->declareProperty(
-      std::make_unique<WorkspaceProperty<>>(
-          "HardMaskWorkspace", "", Direction::Input, PropertyMode::Optional),
+      std::make_unique<WorkspaceProperty<>>("HardMaskWorkspace", "", Direction::Input, PropertyMode::Optional),
       "A hard mask to apply to the inputworkspace");
-  this->declareProperty(
-      std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                            Direction::Output),
-      "A MaskWorkspace containing the masked spectra as zeroes and ones.");
+  this->declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
+                        "A MaskWorkspace containing the masked spectra as zeroes and ones.");
   auto mustBePosInt = std::make_shared<BoundedValidator<int>>();
   mustBePosInt->setLower(0);
-  this->declareProperty(
-      "StartWorkspaceIndex", 0, mustBePosInt,
-      "The index number of the first spectrum to include in the calculation\n"
-      "(default 0)");
-  this->declareProperty(
-      "EndWorkspaceIndex", EMPTY_INT(), mustBePosInt,
-      "The index number of the last spectrum to include in the calculation\n"
-      "(default the last histogram)");
-  this->declareProperty(
-      "RangeLower", EMPTY_DBL(),
-      "No bin with a boundary at an x value less than this will be used\n"
-      "in the summation that decides if a detector is 'bad' (default: the\n"
-      "start of each histogram)");
-  this->declareProperty(
-      "RangeUpper", EMPTY_DBL(),
-      "No bin with a boundary at an x value higher than this value will\n"
-      "be used in the summation that decides if a detector is 'bad'\n"
-      "(default: the end of each histogram)");
+  this->declareProperty("StartWorkspaceIndex", 0, mustBePosInt,
+                        "The index number of the first spectrum to include in the calculation\n"
+                        "(default 0)");
+  this->declareProperty("EndWorkspaceIndex", EMPTY_INT(), mustBePosInt,
+                        "The index number of the last spectrum to include in the calculation\n"
+                        "(default the last histogram)");
+  this->declareProperty("RangeLower", EMPTY_DBL(),
+                        "No bin with a boundary at an x value less than this will be used\n"
+                        "in the summation that decides if a detector is 'bad' (default: the\n"
+                        "start of each histogram)");
+  this->declareProperty("RangeUpper", EMPTY_DBL(),
+                        "No bin with a boundary at an x value higher than this value will\n"
+                        "be used in the summation that decides if a detector is 'bad'\n"
+                        "(default: the end of each histogram)");
 
   string findDetOutLimGrp("Find Detectors Outside Limits");
-  this->declareProperty(
-      "LowThreshold", 0.0,
-      "Spectra whose total number of counts are equal to or below this value\n"
-      "will be marked bad (default 0)");
+  this->declareProperty("LowThreshold", 0.0,
+                        "Spectra whose total number of counts are equal to or below this value\n"
+                        "will be marked bad (default 0)");
   this->setPropertyGroup("LowThreshold", findDetOutLimGrp);
-  this->declareProperty(
-      "HighThreshold", EMPTY_DBL(),
-      "Spectra whose total number of counts are equal to or above this value\n"
-      "will be marked bad (default off)");
+  this->declareProperty("HighThreshold", EMPTY_DBL(),
+                        "Spectra whose total number of counts are equal to or above this value\n"
+                        "will be marked bad (default off)");
   this->setPropertyGroup("HighThreshold", findDetOutLimGrp);
 
   string medianDetTestGrp("Median Detector Test");
   auto mustBePositiveDbl = std::make_shared<BoundedValidator<double>>();
   mustBePositiveDbl->setLower(0);
-  this->declareProperty(
-      "LevelsUp", 0, mustBePosInt,
-      "Levels above pixel that will be used to compute the median.\n"
-      "If no level is specified, or 0, the median is over the whole "
-      "instrument.");
+  this->declareProperty("LevelsUp", 0, mustBePosInt,
+                        "Levels above pixel that will be used to compute the median.\n"
+                        "If no level is specified, or 0, the median is over the whole "
+                        "instrument.");
   this->setPropertyGroup("LevelsUp", medianDetTestGrp);
   this->declareProperty("SignificanceTest", 0.0, mustBePositiveDbl,
                         "Error criterion as a multiple of error bar i.e. to "
@@ -109,23 +93,15 @@ void DetectorDiagnostic::init() {
                         "difference with respect to the median value must also "
                         "exceed this number of error bars");
   this->setPropertyGroup("SignificanceTest", medianDetTestGrp);
-  this->declareProperty("LowThresholdFraction", 0.1,
-                        "Lower acceptable bound as fraction of median value");
+  this->declareProperty("LowThresholdFraction", 0.1, "Lower acceptable bound as fraction of median value");
   this->setPropertyGroup("LowThresholdFraction", medianDetTestGrp);
-  this->declareProperty("HighThresholdFraction", 1.5,
-                        "Upper acceptable bound as fraction of median value");
+  this->declareProperty("HighThresholdFraction", 1.5, "Upper acceptable bound as fraction of median value");
   this->setPropertyGroup("HighThresholdFraction", medianDetTestGrp);
-  this->declareProperty(
-      "LowOutlier", 0.01,
-      "Lower bound defining outliers as fraction of median value");
+  this->declareProperty("LowOutlier", 0.01, "Lower bound defining outliers as fraction of median value");
   this->setPropertyGroup("LowOutlier", medianDetTestGrp);
-  this->declareProperty(
-      "HighOutlier", 100.,
-      "Upper bound defining outliers as fraction of median value");
+  this->declareProperty("HighOutlier", 100., "Upper bound defining outliers as fraction of median value");
   this->setPropertyGroup("HighOutlier", medianDetTestGrp);
-  this->declareProperty(
-      "CorrectForSolidAngle", false,
-      "Flag to correct for solid angle efficiency. False by default.");
+  this->declareProperty("CorrectForSolidAngle", false, "Flag to correct for solid angle efficiency. False by default.");
   this->setPropertyGroup("CorrectForSolidAngle", medianDetTestGrp);
   this->declareProperty("ExcludeZeroesFromMedian", false,
                         "If false (default) zeroes will be included in "
@@ -135,43 +111,34 @@ void DetectorDiagnostic::init() {
 
   string detEffVarGrp("Detector Efficiency Variation");
   this->declareProperty(
-      std::make_unique<WorkspaceProperty<>>(
-          "DetVanCompare", "", Direction::Input, PropertyMode::Optional),
+      std::make_unique<WorkspaceProperty<>>("DetVanCompare", "", Direction::Input, PropertyMode::Optional),
       "Name of a matching second detector vanadium run from the same\n"
       "instrument. It must be treated in the same manner as the input detector "
       "vanadium.");
   this->setPropertyGroup("DetVanCompare", detEffVarGrp);
-  this->declareProperty(
-      "DetVanRatioVariation", 1.1, mustBePositiveDbl,
-      "Identify spectra whose total number of counts has changed by more\n"
-      "than this factor of the median change between the two input workspaces");
+  this->declareProperty("DetVanRatioVariation", 1.1, mustBePositiveDbl,
+                        "Identify spectra whose total number of counts has changed by more\n"
+                        "than this factor of the median change between the two input workspaces");
   this->setPropertyGroup("DetVanRatioVariation", detEffVarGrp);
-  this->setPropertySettings(
-      "DetVanRatioVariation",
-      std::make_unique<EnabledWhenProperty>("DetVanCompare", IS_NOT_DEFAULT));
+  this->setPropertySettings("DetVanRatioVariation",
+                            std::make_unique<EnabledWhenProperty>("DetVanCompare", IS_NOT_DEFAULT));
 
   string countsCheck("Check Sample Counts");
   this->declareProperty(
-      std::make_unique<WorkspaceProperty<>>("SampleTotalCountsWorkspace", "",
-                                            Direction::Input,
-                                            PropertyMode::Optional),
+      std::make_unique<WorkspaceProperty<>>("SampleTotalCountsWorkspace", "", Direction::Input, PropertyMode::Optional),
       "A sample workspace integrated over the full axis range.");
   this->setPropertyGroup("SampleTotalCountsWorkspace", countsCheck);
 
   string backgroundCheck("Check Sample Background");
   this->declareProperty(
-      std::make_unique<WorkspaceProperty<>>("SampleBackgroundWorkspace", "",
-                                            Direction::Input,
-                                            PropertyMode::Optional),
+      std::make_unique<WorkspaceProperty<>>("SampleBackgroundWorkspace", "", Direction::Input, PropertyMode::Optional),
       "A sample workspace integrated over the background region.");
   this->setPropertyGroup("SampleBackgroundWorkspace", backgroundCheck);
-  this->declareProperty(
-      "SampleBkgLowAcceptanceFactor", 0.0, mustBePositiveDbl,
-      "Low threshold for the background check MedianDetectorTest.");
+  this->declareProperty("SampleBkgLowAcceptanceFactor", 0.0, mustBePositiveDbl,
+                        "Low threshold for the background check MedianDetectorTest.");
   this->setPropertyGroup("SampleBkgLowAcceptanceFactor", backgroundCheck);
-  this->declareProperty(
-      "SampleBkgHighAcceptanceFactor", 5.0, mustBePositiveDbl,
-      "High threshold for the background check MedianDetectorTest.");
+  this->declareProperty("SampleBkgHighAcceptanceFactor", 5.0, mustBePositiveDbl,
+                        "High threshold for the background check MedianDetectorTest.");
   this->setPropertyGroup("SampleBkgHighAcceptanceFactor", backgroundCheck);
   this->declareProperty("SampleBkgSignificanceTest", 3.3, mustBePositiveDbl,
                         "Error criterion as a multiple of error bar i.e. to "
@@ -187,20 +154,16 @@ void DetectorDiagnostic::init() {
 
   string psdBleedMaskGrp("Create PSD Bleed Mask");
   this->declareProperty(
-      std::make_unique<WorkspaceProperty<>>(
-          "SampleWorkspace", "", Direction::Input, PropertyMode::Optional),
+      std::make_unique<WorkspaceProperty<>>("SampleWorkspace", "", Direction::Input, PropertyMode::Optional),
       "A sample workspace. This is used in the PSD Bleed calculation.");
   this->setPropertyGroup("SampleWorkspace", psdBleedMaskGrp);
-  this->declareProperty(
-      "MaxTubeFramerate", 0.0, mustBePositiveDbl,
-      "The maximum rate allowed for a tube in counts/us/frame.");
+  this->declareProperty("MaxTubeFramerate", 0.0, mustBePositiveDbl,
+                        "The maximum rate allowed for a tube in counts/us/frame.");
   this->setPropertyGroup("MaxTubeFramerate", psdBleedMaskGrp);
-  this->declareProperty("NIgnoredCentralPixels", 80, mustBePosInt,
-                        "The number of pixels about the centre to ignore.");
+  this->declareProperty("NIgnoredCentralPixels", 80, mustBePosInt, "The number of pixels about the centre to ignore.");
   this->setPropertyGroup("NIgnoredCentralPixels", psdBleedMaskGrp);
   this->setPropertySettings("NIgnoredCentralPixels",
-                            std::make_unique<EnabledWhenProperty>(
-                                "MaxTubeFramerate", IS_NOT_DEFAULT));
+                            std::make_unique<EnabledWhenProperty>("MaxTubeFramerate", IS_NOT_DEFAULT));
 
   this->declareProperty("NumberOfFailures", 0, Direction::Output);
 }
@@ -218,8 +181,7 @@ void DetectorDiagnostic::exec() {
 
   // Get the other workspaces
   MatrixWorkspace_sptr input2WS = this->getProperty("DetVanCompare");
-  MatrixWorkspace_sptr totalCountsWS =
-      this->getProperty("SampleTotalCountsWorkspace");
+  MatrixWorkspace_sptr totalCountsWS = this->getProperty("SampleTotalCountsWorkspace");
   MatrixWorkspace_sptr bkgWS = this->getProperty("SampleBackgroundWorkspace");
   MatrixWorkspace_sptr sampleWS = this->getProperty("SampleWorkspace");
 
@@ -267,8 +229,7 @@ void DetectorDiagnostic::exec() {
 
     // run the ChildAlgorithm
     IAlgorithm_sptr alg =
-        this->createChildAlgorithm("DetectorEfficiencyVariation", m_fracDone,
-                                   m_fracDone + m_progStepWidth);
+        this->createChildAlgorithm("DetectorEfficiencyVariation", m_fracDone, m_fracDone + m_progStepWidth);
     m_fracDone += m_progStepWidth;
     alg->setProperty("WhiteBeamBase", inputWS);
     alg->setProperty("WhiteBeamCompare", input2WS);
@@ -290,8 +251,8 @@ void DetectorDiagnostic::exec() {
     // apply mask to what we are going to input
     applyMask(totalCountsWS, maskWS);
 
-    IAlgorithm_sptr zeroChk = this->createChildAlgorithm(
-        "FindDetectorsOutsideLimits", m_fracDone, m_fracDone + m_progStepWidth);
+    IAlgorithm_sptr zeroChk =
+        this->createChildAlgorithm("FindDetectorsOutsideLimits", m_fracDone, m_fracDone + m_progStepWidth);
     m_fracDone += m_progStepWidth;
     zeroChk->setProperty("InputWorkspace", totalCountsWS);
     zeroChk->setProperty("StartWorkspaceIndex", m_minIndex);
@@ -316,8 +277,7 @@ void DetectorDiagnostic::exec() {
     bool correctSA = this->getProperty("SampleCorrectForSolidAngle");
 
     // run the ChildAlgorithm
-    IAlgorithm_sptr alg = this->createChildAlgorithm(
-        "MedianDetectorTest", m_fracDone, m_fracDone + m_progStepWidth);
+    IAlgorithm_sptr alg = this->createChildAlgorithm("MedianDetectorTest", m_fracDone, m_fracDone + m_progStepWidth);
     m_fracDone += m_progStepWidth;
     alg->setProperty("InputWorkspace", bkgWS);
     alg->setProperty("StartWorkspaceIndex", m_minIndex);
@@ -343,8 +303,7 @@ void DetectorDiagnostic::exec() {
     int numIgnore = this->getProperty("NIgnoredCentralPixels");
 
     // run the ChildAlgorithm
-    IAlgorithm_sptr alg = this->createChildAlgorithm(
-        "CreatePSDBleedMask", m_fracDone, m_fracDone + m_progStepWidth);
+    IAlgorithm_sptr alg = this->createChildAlgorithm("CreatePSDBleedMask", m_fracDone, m_fracDone + m_progStepWidth);
     m_fracDone += m_progStepWidth;
     alg->setProperty("InputWorkspace", sampleWS);
     alg->setProperty("MaxTubeFramerate", maxTubeFrameRate);
@@ -376,10 +335,8 @@ void DetectorDiagnostic::exec() {
  * @param inputWS : the workspace to mask
  * @param maskWS : the workspace containing the masking information
  */
-void DetectorDiagnostic::applyMask(const API::MatrixWorkspace_sptr &inputWS,
-                                   const API::MatrixWorkspace_sptr &maskWS) {
-  IAlgorithm_sptr maskAlg =
-      createChildAlgorithm("MaskDetectors"); // should set progress bar
+void DetectorDiagnostic::applyMask(const API::MatrixWorkspace_sptr &inputWS, const API::MatrixWorkspace_sptr &maskWS) {
+  IAlgorithm_sptr maskAlg = createChildAlgorithm("MaskDetectors"); // should set progress bar
   maskAlg->setProperty("Workspace", inputWS);
   maskAlg->setProperty("MaskedWorkspace", maskWS);
   maskAlg->setProperty("StartWorkspaceIndex", m_minIndex);
@@ -393,9 +350,7 @@ void DetectorDiagnostic::applyMask(const API::MatrixWorkspace_sptr &inputWS,
  * @param nFails : placeholder for the number of failures
  * @return : the resulting mask from the checks
  */
-API::MatrixWorkspace_sptr
-DetectorDiagnostic::doDetVanTest(const API::MatrixWorkspace_sptr &inputWS,
-                                 int &nFails) {
+API::MatrixWorkspace_sptr DetectorDiagnostic::doDetVanTest(const API::MatrixWorkspace_sptr &inputWS, int &nFails) {
   MatrixWorkspace_sptr localMask;
 
   // FindDetectorsOutsideLimits
@@ -403,8 +358,8 @@ DetectorDiagnostic::doDetVanTest(const API::MatrixWorkspace_sptr &inputWS,
   double lowThreshold = this->getProperty("LowThreshold");
   double highThreshold = this->getProperty("HighThreshold");
   // run the ChildAlgorithm
-  IAlgorithm_sptr fdol = this->createChildAlgorithm(
-      "FindDetectorsOutsideLimits", m_fracDone, m_fracDone + m_progStepWidth);
+  IAlgorithm_sptr fdol =
+      this->createChildAlgorithm("FindDetectorsOutsideLimits", m_fracDone, m_fracDone + m_progStepWidth);
   m_fracDone += m_progStepWidth;
   fdol->setProperty("InputWorkspace", inputWS);
   fdol->setProperty("OutputWorkspace", localMask);
@@ -434,8 +389,7 @@ DetectorDiagnostic::doDetVanTest(const API::MatrixWorkspace_sptr &inputWS,
   this->applyMask(inputWS, localMask);
 
   // run the ChildAlgorithm
-  IAlgorithm_sptr mdt = this->createChildAlgorithm(
-      "MedianDetectorTest", m_fracDone, m_fracDone + m_progStepWidth);
+  IAlgorithm_sptr mdt = this->createChildAlgorithm("MedianDetectorTest", m_fracDone, m_fracDone + m_progStepWidth);
   m_fracDone += m_progStepWidth;
   mdt->setProperty("InputWorkspace", inputWS);
   mdt->setProperty("StartWorkspaceIndex", m_minIndex);
@@ -463,9 +417,8 @@ DetectorDiagnostic::doDetVanTest(const API::MatrixWorkspace_sptr &inputWS,
 // Public member functions
 //--------------------------------------------------------------------------
 DetectorDiagnostic::DetectorDiagnostic()
-    : API::Algorithm(), m_fracDone(0.0), m_TotalTime(RTTotal), m_parents(0),
-      m_progStepWidth(0.0), m_minIndex(0), m_maxIndex(EMPTY_INT()),
-      m_rangeLower(EMPTY_DBL()), m_rangeUpper(EMPTY_DBL()) {}
+    : API::Algorithm(), m_fracDone(0.0), m_TotalTime(RTTotal), m_parents(0), m_progStepWidth(0.0), m_minIndex(0),
+      m_maxIndex(EMPTY_INT()), m_rangeLower(EMPTY_DBL()), m_rangeUpper(EMPTY_DBL()) {}
 
 //--------------------------------------------------------------------------
 // Protected member functions
@@ -482,9 +435,9 @@ DetectorDiagnostic::DetectorDiagnostic()
  * input is an EventWorkspace
  * @returns A workspace containing the integrated counts
  */
-MatrixWorkspace_sptr DetectorDiagnostic::integrateSpectra(
-    const MatrixWorkspace_sptr &inputWS, const int indexMin, const int indexMax,
-    const double lower, const double upper, const bool outputWorkspace2D) {
+MatrixWorkspace_sptr DetectorDiagnostic::integrateSpectra(const MatrixWorkspace_sptr &inputWS, const int indexMin,
+                                                          const int indexMax, const double lower, const double upper,
+                                                          const bool outputWorkspace2D) {
   g_log.debug() << "Integrating input spectra.\n";
   // If the input spectra only has one bin, assume it has been integrated
   // already
@@ -524,29 +477,24 @@ MatrixWorkspace_sptr DetectorDiagnostic::integrateSpectra(
  * @param inputWS The workspace to initialize from. The instrument is copied
  *from this.
  */
-DataObjects::MaskWorkspace_sptr DetectorDiagnostic::generateEmptyMask(
-    const API::MatrixWorkspace_const_sptr &inputWS) {
+DataObjects::MaskWorkspace_sptr DetectorDiagnostic::generateEmptyMask(const API::MatrixWorkspace_const_sptr &inputWS) {
   // Create a new workspace for the results, copy from the input to ensure that
   // we copy over the instrument and current masking
-  auto maskWS =
-      create<DataObjects::MaskWorkspace>(*inputWS, HistogramData::Points(1));
+  auto maskWS = create<DataObjects::MaskWorkspace>(*inputWS, HistogramData::Points(1));
   maskWS->setTitle(inputWS->getTitle());
 
   return maskWS;
 }
 
-std::vector<std::vector<size_t>>
-DetectorDiagnostic::makeInstrumentMap(const API::MatrixWorkspace &countsWS) {
-  return {
-      {boost::counting_iterator<std::size_t>(0),
-       boost::counting_iterator<std::size_t>(countsWS.getNumberHistograms())}};
+std::vector<std::vector<size_t>> DetectorDiagnostic::makeInstrumentMap(const API::MatrixWorkspace &countsWS) {
+  return {{boost::counting_iterator<std::size_t>(0),
+           boost::counting_iterator<std::size_t>(countsWS.getNumberHistograms())}};
 }
 /** This function will check how to group spectra when calculating median
  *
  *
  */
-std::vector<std::vector<size_t>>
-DetectorDiagnostic::makeMap(const API::MatrixWorkspace_sptr &countsWS) {
+std::vector<std::vector<size_t>> DetectorDiagnostic::makeMap(const API::MatrixWorkspace_sptr &countsWS) {
   std::multimap<Mantid::Geometry::ComponentID, size_t> mymap;
 
   Geometry::Instrument_const_sptr instrument = countsWS->getInstrument();
@@ -607,17 +555,15 @@ DetectorDiagnostic::makeMap(const API::MatrixWorkspace_sptr &countsWS) {
  * to it
  * @throw out_of_range if a value is negative
  */
-std::vector<double> DetectorDiagnostic::calculateMedian(
-    const API::MatrixWorkspace &input, bool excludeZeroes,
-    const std::vector<std::vector<size_t>> &indexmap) {
+std::vector<double> DetectorDiagnostic::calculateMedian(const API::MatrixWorkspace &input, bool excludeZeroes,
+                                                        const std::vector<std::vector<size_t>> &indexmap) {
   std::vector<double> medianvec;
   g_log.debug("Calculating the median count rate of the spectra");
 
   bool checkForMask = false;
   Geometry::Instrument_const_sptr instrument = input.getInstrument();
   if (instrument != nullptr) {
-    checkForMask = ((instrument->getSource() != nullptr) &&
-                    (instrument->getSample() != nullptr));
+    checkForMask = ((instrument->getSource() != nullptr) && (instrument->getSample() != nullptr));
   }
   const auto &spectrumInfo = input.spectrumInfo();
 
@@ -641,28 +587,23 @@ std::vector<double> DetectorDiagnostic::calculateMedian(
         throw std::out_of_range("Negative number of counts found, could be "
                                 "corrupted raw counts or solid angle data");
       }
-      if (!std::isfinite(yValue) ||
-          (excludeZeroes && yValue < DBL_EPSILON)) // NaNs/Infs
+      if (!std::isfinite(yValue) || (excludeZeroes && yValue < DBL_EPSILON)) // NaNs/Infs
       {
         continue;
       }
       // Now we have a good value
-      PARALLEL_CRITICAL(DetectorDiagnostic_median_d) {
-        medianInput.emplace_back(yValue);
-      }
+      PARALLEL_CRITICAL(DetectorDiagnostic_median_d) { medianInput.emplace_back(yValue); }
 
       PARALLEL_END_INTERUPT_REGION
     }
     PARALLEL_CHECK_INTERUPT_REGION
 
     if (medianInput.empty()) {
-      g_log.information(
-          "some group has no valid histograms. Will use 0 for median.");
+      g_log.information("some group has no valid histograms. Will use 0 for median.");
       medianInput.emplace_back(0.);
     }
 
-    Kernel::Statistics stats =
-        Kernel::getStatistics(medianInput, StatOptions::Median);
+    Kernel::Statistics stats = Kernel::getStatistics(medianInput, StatOptions::Median);
     double median = stats.median;
 
     if (median < 0 || median > DBL_MAX / 10.0) {
@@ -679,19 +620,16 @@ std::vector<double> DetectorDiagnostic::calculateMedian(
  * @param workspace :: The input workspace to convert to a count rate
  * @return distribution workspace with equiv. data
  */
-API::MatrixWorkspace_sptr
-DetectorDiagnostic::convertToRate(API::MatrixWorkspace_sptr workspace) {
+API::MatrixWorkspace_sptr DetectorDiagnostic::convertToRate(API::MatrixWorkspace_sptr workspace) {
   if (workspace->isDistribution()) {
-    g_log.information()
-        << "Workspace already contains a count rate, nothing to do.\n";
+    g_log.information() << "Workspace already contains a count rate, nothing to do.\n";
     return workspace;
   }
 
   g_log.information("Calculating time averaged count rates");
   // get percentage completed estimates for now, t0 and when we've finished t1
   double t0 = m_fracDone, t1 = advanceProgress(RTGetRate);
-  IAlgorithm_sptr childAlg =
-      createChildAlgorithm("ConvertToDistribution", t0, t1);
+  IAlgorithm_sptr childAlg = createChildAlgorithm("ConvertToDistribution", t0, t1);
   childAlg->setProperty<MatrixWorkspace_sptr>("Workspace", workspace);
   // Now execute the Child Algorithm but allow any exception to bubble up
   childAlg->execute();

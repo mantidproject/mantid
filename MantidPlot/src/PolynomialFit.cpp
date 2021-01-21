@@ -34,29 +34,25 @@
 #include <gsl/gsl_fit.h>
 #include <gsl/gsl_multifit.h>
 
-PolynomialFit::PolynomialFit(ApplicationWindow *parent, Graph *g, int order,
-                             bool legend)
+PolynomialFit::PolynomialFit(ApplicationWindow *parent, Graph *g, int order, bool legend)
     : Fit(parent, g), d_order(order), show_legend(legend) {
   init();
 }
 
-PolynomialFit::PolynomialFit(ApplicationWindow *parent, Graph *g,
-                             QString &curveTitle, int order, bool legend)
+PolynomialFit::PolynomialFit(ApplicationWindow *parent, Graph *g, QString &curveTitle, int order, bool legend)
     : Fit(parent, g), d_order(order), show_legend(legend) {
   init();
   setDataFromCurve(curveTitle);
 }
 
-PolynomialFit::PolynomialFit(ApplicationWindow *parent, Graph *g,
-                             QString &curveTitle, double start, double end,
+PolynomialFit::PolynomialFit(ApplicationWindow *parent, Graph *g, QString &curveTitle, double start, double end,
                              int order, bool legend)
     : Fit(parent, g), d_order(order), show_legend(legend) {
   init();
   setDataFromCurve(curveTitle, start, end);
 }
 
-PolynomialFit::PolynomialFit(ApplicationWindow *parent, Table *t,
-                             const QString &xCol, const QString &yCol,
+PolynomialFit::PolynomialFit(ApplicationWindow *parent, Table *t, const QString &xCol, const QString &yCol,
                              int startRow, int endRow, int order, bool legend)
     : Fit(parent, t), d_order(order), show_legend(legend) {
   init();
@@ -144,8 +140,7 @@ void PolynomialFit::fit() {
     return;
 
   if (d_p > d_n) {
-    QMessageBox::critical(static_cast<ApplicationWindow *>(parent()),
-                          tr("MantidPlot - Fit Error"),
+    QMessageBox::critical(static_cast<ApplicationWindow *>(parent()), tr("MantidPlot - Fit Error"),
                           tr("You need at least %1 data points for this fit "
                              "operation. Operation aborted!")
                               .arg(d_p));
@@ -166,8 +161,7 @@ void PolynomialFit::fit() {
   if (d_weighting == NoWeighting)
     gsl_multifit_linear(X, &y.vector, d_param_init, covar, &chi_2, work);
   else
-    gsl_multifit_wlinear(X, &w.vector, &y.vector, d_param_init, covar, &chi_2,
-                         work);
+    gsl_multifit_wlinear(X, &w.vector, &y.vector, d_param_init, covar, &chi_2, work);
 
   for (int i = 0; i < d_p; i++)
     d_results[i] = gsl_vector_get(d_param_init, i);
@@ -212,26 +206,21 @@ QString PolynomialFit::legendInfo() {
  *
  *****************************************************************************/
 
-LinearFit::LinearFit(ApplicationWindow *parent, Graph *g) : Fit(parent, g) {
-  init();
-}
+LinearFit::LinearFit(ApplicationWindow *parent, Graph *g) : Fit(parent, g) { init(); }
 
-LinearFit::LinearFit(ApplicationWindow *parent, Graph *g,
-                     const QString &curveTitle)
-    : Fit(parent, g) {
+LinearFit::LinearFit(ApplicationWindow *parent, Graph *g, const QString &curveTitle) : Fit(parent, g) {
   init();
   setDataFromCurve(curveTitle);
 }
 
-LinearFit::LinearFit(ApplicationWindow *parent, Graph *g,
-                     const QString &curveTitle, double start, double end)
+LinearFit::LinearFit(ApplicationWindow *parent, Graph *g, const QString &curveTitle, double start, double end)
     : Fit(parent, g) {
   init();
   setDataFromCurve(curveTitle, start, end);
 }
 
-LinearFit::LinearFit(ApplicationWindow *parent, Table *t, const QString &xCol,
-                     const QString &yCol, int startRow, int endRow)
+LinearFit::LinearFit(ApplicationWindow *parent, Table *t, const QString &xCol, const QString &yCol, int startRow,
+                     int endRow)
     : Fit(parent, t) {
   init();
   setDataFromTable(t, xCol, yCol, startRow, endRow);
@@ -264,8 +253,7 @@ void LinearFit::fit() {
     return;
 
   if (d_p > d_n) {
-    QMessageBox::critical(static_cast<ApplicationWindow *>(parent()),
-                          tr("MantidPlot - Fit Error"),
+    QMessageBox::critical(static_cast<ApplicationWindow *>(parent()), tr("MantidPlot - Fit Error"),
                           tr("You need at least %1 data points for this fit "
                              "operation. Operation aborted!")
                               .arg(d_p));
@@ -274,11 +262,9 @@ void LinearFit::fit() {
 
   double c0, c1, cov00, cov01, cov11;
   if (d_weighting == NoWeighting)
-    gsl_fit_linear(d_x, 1, d_y, 1, d_n, &c0, &c1, &cov00, &cov01, &cov11,
-                   &chi_2);
+    gsl_fit_linear(d_x, 1, d_y, 1, d_n, &c0, &c1, &cov00, &cov01, &cov11, &chi_2);
   else
-    gsl_fit_wlinear(d_x, 1, d_w, 1, d_y, 1, d_n, &c0, &c1, &cov00, &cov01,
-                    &cov11, &chi_2);
+    gsl_fit_wlinear(d_x, 1, d_w, 1, d_y, 1, d_n, &c0, &c1, &cov00, &cov01, &cov11, &chi_2);
 
   d_results[0] = c0;
   d_results[1] = c1;
@@ -319,28 +305,20 @@ void LinearFit::calculateFitCurveData(double *X, double *Y) {
  *
  *****************************************************************************/
 
-LinearSlopeFit::LinearSlopeFit(ApplicationWindow *parent, Graph *g)
-    : Fit(parent, g) {
-  init();
-}
+LinearSlopeFit::LinearSlopeFit(ApplicationWindow *parent, Graph *g) : Fit(parent, g) { init(); }
 
-LinearSlopeFit::LinearSlopeFit(ApplicationWindow *parent, Graph *g,
-                               const QString &curveTitle)
-    : Fit(parent, g) {
+LinearSlopeFit::LinearSlopeFit(ApplicationWindow *parent, Graph *g, const QString &curveTitle) : Fit(parent, g) {
   init();
   setDataFromCurve(curveTitle);
 }
 
-LinearSlopeFit::LinearSlopeFit(ApplicationWindow *parent, Graph *g,
-                               const QString &curveTitle, double start,
-                               double end)
+LinearSlopeFit::LinearSlopeFit(ApplicationWindow *parent, Graph *g, const QString &curveTitle, double start, double end)
     : Fit(parent, g) {
   init();
   setDataFromCurve(curveTitle, start, end);
 }
 
-LinearSlopeFit::LinearSlopeFit(ApplicationWindow *parent, Table *t,
-                               const QString &xCol, const QString &yCol,
+LinearSlopeFit::LinearSlopeFit(ApplicationWindow *parent, Table *t, const QString &xCol, const QString &yCol,
                                int startRow, int endRow)
     : Fit(parent, t) {
   init();
@@ -372,8 +350,7 @@ void LinearSlopeFit::fit() {
     return;
 
   if (d_p > d_n) {
-    QMessageBox::critical(static_cast<ApplicationWindow *>(parent()),
-                          tr("MantidPlot - Fit Error"),
+    QMessageBox::critical(static_cast<ApplicationWindow *>(parent()), tr("MantidPlot - Fit Error"),
                           tr("You need at least %1 data points for this fit "
                              "operation. Operation aborted!")
                               .arg(d_p));

@@ -40,17 +40,13 @@ DECLARE_ALGORITHM(Bin2DPowderDiffraction)
 //----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string Bin2DPowderDiffraction::name() const {
-  return "Bin2DPowderDiffraction";
-}
+const std::string Bin2DPowderDiffraction::name() const { return "Bin2DPowderDiffraction"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int Bin2DPowderDiffraction::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string Bin2DPowderDiffraction::category() const {
-  return "Diffraction\\Focussing";
-}
+const std::string Bin2DPowderDiffraction::category() const { return "Diffraction\\Focussing"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string Bin2DPowderDiffraction::summary() const {
@@ -68,39 +64,29 @@ void Bin2DPowderDiffraction::init() {
   wsValidator->add<HistogramValidator>();
 
   declareProperty(
-      std::make_unique<WorkspaceProperty<EventWorkspace>>(
-          "InputWorkspace", "", Direction::Input, wsValidator),
+      std::make_unique<WorkspaceProperty<EventWorkspace>>("InputWorkspace", "", Direction::Input, wsValidator),
       "An input EventWorkspace must be a Histogram workspace, not Point data. "
       "X-axis units must be wavelength.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<API::Workspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<API::Workspace>>("OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 
-  const std::string docString =
-      "A comma separated list of first bin boundary, width, last bin boundary. "
-      "Optionally "
-      "this can be followed by a comma and more widths and last boundary "
-      "pairs. "
-      "Negative width values indicate logarithmic binning.";
+  const std::string docString = "A comma separated list of first bin boundary, width, last bin boundary. "
+                                "Optionally "
+                                "this can be followed by a comma and more widths and last boundary "
+                                "pairs. "
+                                "Negative width values indicate logarithmic binning.";
   auto rebinValidator = std::make_shared<RebinParamsValidator>(true);
-  declareProperty(
-      std::make_unique<ArrayProperty<double>>("dSpaceBinning", rebinValidator),
-      docString);
-  declareProperty(std::make_unique<ArrayProperty<double>>(
-                      "dPerpendicularBinning", rebinValidator),
-                  docString);
+  declareProperty(std::make_unique<ArrayProperty<double>>("dSpaceBinning", rebinValidator), docString);
+  declareProperty(std::make_unique<ArrayProperty<double>>("dPerpendicularBinning", rebinValidator), docString);
 
   const std::vector<std::string> exts{".txt", ".dat"};
-  declareProperty(
-      std::make_unique<FileProperty>("BinEdgesFile", "",
-                                     FileProperty::OptionalLoad, exts),
-      "Optional: The ascii file containing the list of bin edges. "
-      "Either this or Axis1- and dPerpendicularBinning need to be specified.");
+  declareProperty(std::make_unique<FileProperty>("BinEdgesFile", "", FileProperty::OptionalLoad, exts),
+                  "Optional: The ascii file containing the list of bin edges. "
+                  "Either this or Axis1- and dPerpendicularBinning need to be specified.");
 
-  declareProperty(
-      std::make_unique<PropertyWithValue<bool>>("NormalizeByBinArea", true),
-      "Normalize the binned workspace by the bin area.");
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("NormalizeByBinArea", true),
+                  "Normalize the binned workspace by the bin area.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -109,8 +95,7 @@ void Bin2DPowderDiffraction::init() {
 void Bin2DPowderDiffraction::exec() {
   m_inputWS = this->getProperty("InputWorkspace");
   m_numberOfSpectra = static_cast<int>(m_inputWS->getNumberHistograms());
-  g_log.debug() << "Number of spectra in input workspace: " << m_numberOfSpectra
-                << "\n";
+  g_log.debug() << "Number of spectra in input workspace: " << m_numberOfSpectra << "\n";
 
   MatrixWorkspace_sptr outputWS = createOutputWorkspace();
 
@@ -130,8 +115,7 @@ std::map<std::string, std::string> Bin2DPowderDiffraction::validateInputs() {
 
   const auto useBinFile = !getPointerToProperty("BinEdgesFile")->isDefault();
   const auto useBinning1 = !getPointerToProperty("dSpaceBinning")->isDefault();
-  const auto useBinning2 =
-      !getPointerToProperty("dPerpendicularBinning")->isDefault();
+  const auto useBinning2 = !getPointerToProperty("dPerpendicularBinning")->isDefault();
   if (!useBinFile && !useBinning1 && !useBinning2) {
     const std::string msg = "You must specify either dSpaceBinning and "
                             "dPerpendicularBinning, or a BinEdgesFile.";
@@ -139,9 +123,8 @@ std::map<std::string, std::string> Bin2DPowderDiffraction::validateInputs() {
     result["dPerpendicularBinning"] = msg;
     result["BinEdgesFile"] = msg;
   } else if (useBinFile && (useBinning1 || useBinning2)) {
-    const std::string msg =
-        "You must specify either dSpaceBinning and "
-        "dPerpendicularBinning, or a BinEdgesFile, but not both.";
+    const std::string msg = "You must specify either dSpaceBinning and "
+                            "dPerpendicularBinning, or a BinEdgesFile, but not both.";
     result["BinEdgesFile"] = msg;
   }
 
@@ -182,11 +165,9 @@ MatrixWorkspace_sptr Bin2DPowderDiffraction::createOutputWorkspace() {
     // unify xbins
     dSize = UnifyXBins(fileXbins);
     g_log.debug() << "Maximal size of Xbins = " << dSize;
-    outputWS = WorkspaceFactory::Instance().create(m_inputWS, dPerpSize - 1,
-                                                   dSize, dSize - 1);
-    g_log.debug() << "Outws has " << outputWS->getNumberHistograms()
-                  << " histograms and " << outputWS->blocksize() << " bins."
-                  << std::endl;
+    outputWS = WorkspaceFactory::Instance().create(m_inputWS, dPerpSize - 1, dSize, dSize - 1);
+    g_log.debug() << "Outws has " << outputWS->getNumberHistograms() << " histograms and " << outputWS->blocksize()
+                  << " bins." << std::endl;
 
     size_t idx = 0;
     for (const auto &Xbins : fileXbins) {
@@ -197,14 +178,11 @@ MatrixWorkspace_sptr Bin2DPowderDiffraction::createOutputWorkspace() {
     }
 
   } else {
-    static_cast<void>(createAxisFromRebinParams(getProperty("dSpaceBinning"),
-                                                dBins.mutableRawData()));
+    static_cast<void>(createAxisFromRebinParams(getProperty("dSpaceBinning"), dBins.mutableRawData()));
     HistogramData::BinEdges binEdges(dBins);
-    dPerpSize =
-        createAxisFromRebinParams(getProperty("dPerpendicularBinning"), dPerp);
+    dPerpSize = createAxisFromRebinParams(getProperty("dPerpendicularBinning"), dPerp);
     dSize = binEdges.size();
-    outputWS = WorkspaceFactory::Instance().create(m_inputWS, dPerpSize - 1,
-                                                   dSize, dSize - 1);
+    outputWS = WorkspaceFactory::Instance().create(m_inputWS, dPerpSize - 1, dSize, dSize - 1);
     for (size_t idx = 0; idx < dPerpSize - 1; idx++)
       outputWS->setBinEdges(idx, binEdges);
     auto abscissa = std::make_unique<BinEdgeAxis>(dBins.mutableRawData());
@@ -216,17 +194,14 @@ MatrixWorkspace_sptr Bin2DPowderDiffraction::createOutputWorkspace() {
   auto verticalAxis = std::make_unique<BinEdgeAxis>(dPerp);
   auto verticalAxisRaw = verticalAxis.get();
   // Meta data
-  verticalAxis->unit() =
-      UnitFactory::Instance().create("dSpacingPerpendicular");
+  verticalAxis->unit() = UnitFactory::Instance().create("dSpacingPerpendicular");
   verticalAxis->title() = "d_p";
   outputWS->replaceAxis(1, std::move(verticalAxis));
 
   Progress prog(this, 0.0, 1.0, m_numberOfSpectra);
   auto numSpectra = static_cast<int64_t>(m_numberOfSpectra);
-  std::vector<std::vector<double>> newYValues(
-      dPerpSize - 1, std::vector<double>(dSize - 1, 0.0));
-  std::vector<std::vector<double>> newEValues(
-      dPerpSize - 1, std::vector<double>(dSize - 1, 0.0));
+  std::vector<std::vector<double>> newYValues(dPerpSize - 1, std::vector<double>(dSize - 1, 0.0));
+  std::vector<std::vector<double>> newEValues(dPerpSize - 1, std::vector<double>(dSize - 1, 0.0));
 
   // fill the workspace with data
   g_log.debug() << "newYSize = " << dPerpSize << std::endl;
@@ -240,14 +215,11 @@ MatrixWorkspace_sptr Bin2DPowderDiffraction::createOutputWorkspace() {
       double theta = 0.5 * spectrumInfo.twoTheta(snum);
       double sin_theta = sin(theta);
       if (sin_theta == 0) {
-        throw std::runtime_error(
-            "Spectrum " + std::to_string(snum) +
-            " has sin(theta)=0. Cannot calculate d-Spacing!");
+        throw std::runtime_error("Spectrum " + std::to_string(snum) + " has sin(theta)=0. Cannot calculate d-Spacing!");
       }
       if (cos(theta) <= 0) {
-        throw std::runtime_error(
-            "Spectrum " + std::to_string(snum) +
-            " has cos(theta) <= 0. Cannot calculate d-SpacingPerpendicular!");
+        throw std::runtime_error("Spectrum " + std::to_string(snum) +
+                                 " has cos(theta) <= 0. Cannot calculate d-SpacingPerpendicular!");
       }
       double log_cos_theta = log(cos(theta));
       EventList &evList = m_inputWS->getSpectrum(snum);
@@ -288,8 +260,7 @@ MatrixWorkspace_sptr Bin2DPowderDiffraction::createOutputWorkspace() {
   }
   idx = 0;
   for (auto &eVec : newEValues) {
-    std::transform(eVec.begin(), eVec.end(), eVec.begin(),
-                   static_cast<double (*)(double)>(sqrt));
+    std::transform(eVec.begin(), eVec.end(), eVec.begin(), static_cast<double (*)(double)>(sqrt));
     outputWS->setCountStandardDeviations(idx, eVec);
     idx++;
   }
@@ -303,8 +274,8 @@ MatrixWorkspace_sptr Bin2DPowderDiffraction::createOutputWorkspace() {
  * edges
  * @param[out] Xbins vector of vectors of doubles to save the dSpacing bin edges
  */
-void Bin2DPowderDiffraction::ReadBinsFromFile(
-    std::vector<double> &Ybins, std::vector<std::vector<double>> &Xbins) const {
+void Bin2DPowderDiffraction::ReadBinsFromFile(std::vector<double> &Ybins,
+                                              std::vector<std::vector<double>> &Xbins) const {
   const std::string beFileName = getProperty("BinEdgesFile");
   std::ifstream file(beFileName);
   std::string line;
@@ -350,8 +321,7 @@ void Bin2DPowderDiffraction::ReadBinsFromFile(
  *
  * @param[in] Xbins --- bins to unify. Will be overwritten.
  */
-size_t Bin2DPowderDiffraction::UnifyXBins(
-    std::vector<std::vector<double>> &Xbins) const {
+size_t Bin2DPowderDiffraction::UnifyXBins(std::vector<std::vector<double>> &Xbins) const {
   // get maximal vector size
   size_t max_size = 0;
   for (const auto &v : Xbins) {
@@ -365,13 +335,11 @@ size_t Bin2DPowderDiffraction::UnifyXBins(
   return max_size;
 }
 
-void Bin2DPowderDiffraction::normalizeToBinArea(
-    const MatrixWorkspace_sptr &outWS) {
+void Bin2DPowderDiffraction::normalizeToBinArea(const MatrixWorkspace_sptr &outWS) {
   NumericAxis *verticalAxis = dynamic_cast<NumericAxis *>(outWS->getAxis(1));
   const std::vector<double> &yValues = verticalAxis->getValues();
   auto nhist = outWS->getNumberHistograms();
-  g_log.debug() << "Number of hists: " << nhist
-                << " Length of YAxis: " << verticalAxis->length() << std::endl;
+  g_log.debug() << "Number of hists: " << nhist << " Length of YAxis: " << verticalAxis->length() << std::endl;
 
   for (size_t idx = 0; idx < nhist; ++idx) {
     double factor = 1.0 / (yValues[idx + 1] - yValues[idx]);
@@ -379,21 +347,15 @@ void Bin2DPowderDiffraction::normalizeToBinArea(
     outWS->convertToFrequencies(idx);
     auto &freqs = outWS->mutableY(idx);
     using std::placeholders::_1;
-    std::transform(freqs.begin(), freqs.end(), freqs.begin(),
-                   std::bind(std::multiplies<double>(), factor, _1));
+    std::transform(freqs.begin(), freqs.end(), freqs.begin(), std::bind(std::multiplies<double>(), factor, _1));
     auto &errors = outWS->mutableE(idx);
-    std::transform(errors.begin(), errors.end(), errors.begin(),
-                   std::bind(std::multiplies<double>(), factor, _1));
+    std::transform(errors.begin(), errors.end(), errors.begin(), std::bind(std::multiplies<double>(), factor, _1));
   }
 }
 
-double calcD(double wavelength, double sintheta) {
-  return wavelength * 0.5 / sintheta;
-}
+double calcD(double wavelength, double sintheta) { return wavelength * 0.5 / sintheta; }
 
-double calcDPerp(double wavelength, double logcostheta) {
-  return sqrt(wavelength * wavelength - 2.0 * logcostheta);
-}
+double calcDPerp(double wavelength, double logcostheta) { return sqrt(wavelength * wavelength - 2.0 * logcostheta); }
 
 } // namespace Algorithms
 } // namespace Mantid

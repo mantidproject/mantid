@@ -21,9 +21,8 @@ using namespace Mantid::API;
 namespace MantidQt {
 namespace MantidWidgets {
 
-FitScriptGeneratorPresenter::FitScriptGeneratorPresenter(
-    IFitScriptGeneratorView *view, IFitScriptGeneratorModel *model,
-    QStringList const &workspaceNames, double startX, double endX)
+FitScriptGeneratorPresenter::FitScriptGeneratorPresenter(IFitScriptGeneratorView *view, IFitScriptGeneratorModel *model,
+                                                         QStringList const &workspaceNames, double startX, double endX)
     : m_warnings(), m_view(view), m_model(model) {
   m_view->subscribePresenter(this);
   setWorkspaces(workspaceNames, startX, endX);
@@ -94,16 +93,14 @@ void FitScriptGeneratorPresenter::handleEndXChanged() {
   }
 }
 
-void FitScriptGeneratorPresenter::setWorkspaces(
-    QStringList const &workspaceNames, double startX, double endX) {
+void FitScriptGeneratorPresenter::setWorkspaces(QStringList const &workspaceNames, double startX, double endX) {
   for (auto const &workspaceName : workspaceNames)
     addWorkspace(workspaceName.toStdString(), startX, endX);
   checkForWarningMessages();
 }
 
-void FitScriptGeneratorPresenter::addWorkspaces(
-    std::vector<MatrixWorkspace_const_sptr> const &workspaces,
-    std::vector<WorkspaceIndex> const &workspaceIndices) {
+void FitScriptGeneratorPresenter::addWorkspaces(std::vector<MatrixWorkspace_const_sptr> const &workspaces,
+                                                std::vector<WorkspaceIndex> const &workspaceIndices) {
   for (auto const &workspace : workspaces)
     for (auto const &workspaceIndex : workspaceIndices) {
       auto const xData = workspace->x(workspaceIndex.value);
@@ -112,27 +109,24 @@ void FitScriptGeneratorPresenter::addWorkspaces(
   checkForWarningMessages();
 }
 
-void FitScriptGeneratorPresenter::addWorkspace(std::string const &workspaceName,
-                                               double startX, double endX) {
+void FitScriptGeneratorPresenter::addWorkspace(std::string const &workspaceName, double startX, double endX) {
   auto &ads = AnalysisDataService::Instance();
   if (ads.doesExist(workspaceName))
     addWorkspace(ads.retrieveWS<MatrixWorkspace>(workspaceName), startX, endX);
 }
 
-void FitScriptGeneratorPresenter::addWorkspace(
-    MatrixWorkspace_const_sptr const &workspace, double startX, double endX) {
+void FitScriptGeneratorPresenter::addWorkspace(MatrixWorkspace_const_sptr const &workspace, double startX,
+                                               double endX) {
   for (auto index = 0u; index < workspace->getNumberHistograms(); ++index)
     addWorkspace(workspace, WorkspaceIndex{index}, startX, endX);
 }
 
-void FitScriptGeneratorPresenter::addWorkspace(
-    MatrixWorkspace_const_sptr const &workspace, WorkspaceIndex workspaceIndex,
-    double startX, double endX) {
+void FitScriptGeneratorPresenter::addWorkspace(MatrixWorkspace_const_sptr const &workspace,
+                                               WorkspaceIndex workspaceIndex, double startX, double endX) {
   addWorkspace(workspace->getName(), workspaceIndex, startX, endX);
 }
 
-void FitScriptGeneratorPresenter::addWorkspace(std::string const &workspaceName,
-                                               WorkspaceIndex workspaceIndex,
+void FitScriptGeneratorPresenter::addWorkspace(std::string const &workspaceName, WorkspaceIndex workspaceIndex,
                                                double startX, double endX) {
   try {
     m_model->addWorkspaceDomain(workspaceName, workspaceIndex, startX, endX);
@@ -142,8 +136,7 @@ void FitScriptGeneratorPresenter::addWorkspace(std::string const &workspaceName,
   }
 }
 
-void FitScriptGeneratorPresenter::updateStartX(std::string const &workspaceName,
-                                               WorkspaceIndex workspaceIndex,
+void FitScriptGeneratorPresenter::updateStartX(std::string const &workspaceName, WorkspaceIndex workspaceIndex,
                                                double startX) {
   if (m_model->isStartXValid(workspaceName, workspaceIndex, startX))
     m_model->updateStartX(workspaceName, workspaceIndex, startX);
@@ -154,8 +147,7 @@ void FitScriptGeneratorPresenter::updateStartX(std::string const &workspaceName,
   }
 }
 
-void FitScriptGeneratorPresenter::updateEndX(std::string const &workspaceName,
-                                             WorkspaceIndex workspaceIndex,
+void FitScriptGeneratorPresenter::updateEndX(std::string const &workspaceName, WorkspaceIndex workspaceIndex,
                                              double endX) {
   if (m_model->isEndXValid(workspaceName, workspaceIndex, endX))
     m_model->updateEndX(workspaceName, workspaceIndex, endX);
@@ -169,8 +161,7 @@ void FitScriptGeneratorPresenter::updateEndX(std::string const &workspaceName,
 void FitScriptGeneratorPresenter::checkForWarningMessages() {
   if (!m_warnings.empty()) {
     std::stringstream ss;
-    std::copy(m_warnings.cbegin(), m_warnings.cend(),
-              std::ostream_iterator<std::string>(ss, "\n"));
+    std::copy(m_warnings.cbegin(), m_warnings.cend(), std::ostream_iterator<std::string>(ss, "\n"));
     m_view->displayWarning(ss.str());
     m_warnings.clear();
   }

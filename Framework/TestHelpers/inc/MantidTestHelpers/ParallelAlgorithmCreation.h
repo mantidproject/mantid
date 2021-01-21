@@ -26,8 +26,7 @@ namespace ParallelTestHelpers {
  * ParallelTestHelpers::runParallel(). The algorithm is setup such that
  * workspaces will not be stored in the ADS, i.e., it is not necessary to set
  * OutputWorkspace properties, just like for child algorithms. */
-template <class T>
-std::unique_ptr<T> create(const Mantid::Parallel::Communicator &comm) {
+template <class T> std::unique_ptr<T> create(const Mantid::Parallel::Communicator &comm) {
   using namespace Mantid;
   auto alg = std::make_unique<T>();
   alg->setChild(true);

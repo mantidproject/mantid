@@ -13,14 +13,10 @@ namespace {
 // implement our own trim function to avoid the locale overhead in boost::trim.
 
 // trim from start
-void trimTokenFromStart(std::string &s) {
-  s.erase(s.begin(), std::find_if_not(s.begin(), s.end(), ::isspace));
-}
+void trimTokenFromStart(std::string &s) { s.erase(s.begin(), std::find_if_not(s.begin(), s.end(), ::isspace)); }
 
 // trim from end
-void trimTokenFromEnd(std::string &s) {
-  s.erase(std::find_if_not(s.rbegin(), s.rend(), ::isspace).base(), s.end());
-}
+void trimTokenFromEnd(std::string &s) { s.erase(std::find_if_not(s.rbegin(), s.rend(), ::isspace).base(), s.end()); }
 
 // trim from both ends
 void trimToken(std::string &s) {
@@ -30,8 +26,7 @@ void trimToken(std::string &s) {
 
 // If the final character is a separator, we need to add an empty string to
 // tokens.
-void addEmptyFinalToken(const std::string &str, const std::string &delims,
-                        std::vector<std::string> &tokens) {
+void addEmptyFinalToken(const std::string &str, const std::string &delims, std::vector<std::string> &tokens) {
 
   const auto pos = std::find(delims.cbegin(), delims.cend(), str.back());
 
@@ -44,8 +39,7 @@ void addEmptyFinalToken(const std::string &str, const std::string &delims,
 // http://tcbrindle.github.io/posts/a-quicker-study-on-tokenising/
 // MIT licensed.
 template <class InputIt, class ForwardIt, class BinOp>
-void for_each_token(InputIt first, InputIt last, ForwardIt s_first,
-                    ForwardIt s_last, BinOp binary_op) {
+void for_each_token(InputIt first, InputIt last, ForwardIt s_first, ForwardIt s_last, BinOp binary_op) {
   while (first != last) {
     const auto pos = std::find_first_of(first, last, s_first, s_last);
     binary_op(first, pos);
@@ -55,51 +49,39 @@ void for_each_token(InputIt first, InputIt last, ForwardIt s_first,
   }
 }
 
-std::vector<std::string>
-splitKeepingWhitespaceEmptyTokens(const std::string &str,
-                                  const std::string &delims) {
+std::vector<std::string> splitKeepingWhitespaceEmptyTokens(const std::string &str, const std::string &delims) {
   std::vector<std::string> output;
   for_each_token(str.cbegin(), str.cend(), delims.cbegin(), delims.cend(),
-                 [&output](std::string::const_iterator first,
-                           std::string::const_iterator second) {
+                 [&output](std::string::const_iterator first, std::string::const_iterator second) {
                    output.emplace_back(first, second);
                  });
   return output;
 }
 
-std::vector<std::string>
-splitKeepingWhitespaceIgnoringEmptyTokens(const std::string &str,
-                                          const std::string &delims) {
+std::vector<std::string> splitKeepingWhitespaceIgnoringEmptyTokens(const std::string &str, const std::string &delims) {
   std::vector<std::string> output;
   for_each_token(str.cbegin(), str.cend(), delims.cbegin(), delims.cend(),
-                 [&output](std::string::const_iterator first,
-                           std::string::const_iterator second) {
+                 [&output](std::string::const_iterator first, std::string::const_iterator second) {
                    if (first != second)
                      output.emplace_back(first, second);
                  });
   return output;
 }
 
-std::vector<std::string>
-splitIgnoringWhitespaceKeepingEmptyTokens(const std::string &str,
-                                          const std::string &delims) {
+std::vector<std::string> splitIgnoringWhitespaceKeepingEmptyTokens(const std::string &str, const std::string &delims) {
   std::vector<std::string> output;
   for_each_token(str.cbegin(), str.cend(), delims.cbegin(), delims.cend(),
-                 [&output](std::string::const_iterator first,
-                           std::string::const_iterator second) {
+                 [&output](std::string::const_iterator first, std::string::const_iterator second) {
                    output.emplace_back(first, second);
                    trimToken(output.back());
                  });
   return output;
 }
 
-std::vector<std::string>
-splitIgnoringWhitespaceEmptyTokens(const std::string &str,
-                                   const std::string &delims) {
+std::vector<std::string> splitIgnoringWhitespaceEmptyTokens(const std::string &str, const std::string &delims) {
   std::vector<std::string> output;
   for_each_token(str.cbegin(), str.cend(), delims.cbegin(), delims.cend(),
-                 [&output](std::string::const_iterator first,
-                           std::string::const_iterator second) {
+                 [&output](std::string::const_iterator first, std::string::const_iterator second) {
                    if (first != second) {
                      output.emplace_back(first, second);
                      trimToken(output.back());
@@ -120,8 +102,7 @@ splitIgnoringWhitespaceEmptyTokens(const std::string &str,
  * @throw Throws std::runtime_error if options > 7.
  * @return a const reference to the index'th token.
  */
-Mantid::Kernel::StringTokenizer::StringTokenizer(const std::string &str,
-                                                 const std::string &separators,
+Mantid::Kernel::StringTokenizer::StringTokenizer(const std::string &str, const std::string &separators,
                                                  unsigned options) {
 
   // if str is empty, then there is no work to do. exit early.
@@ -163,7 +144,5 @@ Mantid::Kernel::StringTokenizer::StringTokenizer(const std::string &str,
   }
 
   // This point is reached only if options > 7.
-  throw std::runtime_error(
-      "Invalid option passed to Mantid::Kernel::StringTokenizer:" +
-      std::to_string(options));
+  throw std::runtime_error("Invalid option passed to Mantid::Kernel::StringTokenizer:" + std::to_string(options));
 }

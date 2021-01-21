@@ -21,8 +21,7 @@ class DLLExport vtkSinglePeakMarker {
 public:
   vtkSinglePeakMarker();
   ~vtkSinglePeakMarker();
-  vtkPolyData *createSinglePeakMarker(double x, double y, double z,
-                                      double radius);
+  vtkPolyData *createSinglePeakMarker(double x, double y, double z, double radius);
 };
 } // namespace VATES
 } // namespace Mantid

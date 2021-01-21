@@ -37,16 +37,14 @@ class EModeHandler;
     @author Dennis Mikkelson
     @date   2012-05-08
  */
-class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER MatrixWSDataSource
-    : public SpectrumDataSource {
+class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER MatrixWSDataSource : public SpectrumDataSource {
 public:
   /// Construct a DataSource object around the specifed MatrixWorkspace
   MatrixWSDataSource(const Mantid::API::MatrixWorkspace_const_sptr &matWs);
 
   ~MatrixWSDataSource() override;
 
-  bool hasData(const std::string &wsName,
-               const std::shared_ptr<Mantid::API::Workspace> &ws) override;
+  bool hasData(const std::string &wsName, const std::shared_ptr<Mantid::API::Workspace> &ws) override;
 
   /// Get the smallest 'x' value covered by the data
   double getXMin() override;
@@ -64,8 +62,7 @@ public:
   DataArray_const_sptr getDataArray(bool isLogX) override;
 
   /// Get DataArray covering restricted range of data
-  DataArray_const_sptr getDataArray(double xMin, double xMax, double yMin,
-                                    double yMax, size_t nRows, size_t nCols,
+  DataArray_const_sptr getDataArray(double xMin, double xMax, double yMin, double yMax, size_t nRows, size_t nCols,
                                     bool isLogX) override;
 
   /// Set the class that gets the emode & efixed info from the user.
@@ -75,9 +72,7 @@ public:
   std::vector<std::string> getInfoList(double x, double y) override;
 
   /// Get a pointer to the workspace
-  Mantid::API::MatrixWorkspace_const_sptr getWorkspace() const {
-    return m_matWs;
-  }
+  Mantid::API::MatrixWorkspace_const_sptr getWorkspace() const { return m_matWs; }
 
 private:
   Mantid::API::MatrixWorkspace_const_sptr m_matWs;

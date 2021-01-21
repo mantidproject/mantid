@@ -66,8 +66,7 @@ public:
   }
 
   void testSubPlotAcceptsProjection() {
-    Python::Object module{
-        Python::NewRef(PyImport_ImportModule("mantid.plots"))};
+    Python::Object module{Python::NewRef(PyImport_ImportModule("mantid.plots"))};
     Figure fig{false};
     TS_ASSERT_THROWS_NOTHING(fig.addSubPlot(111, "mantid"));
   }
@@ -82,7 +81,6 @@ public:
 
   // -------------------------- Failure tests ---------------------------
   void testFigureConstructedWithNonFigureThrows() {
-    TS_ASSERT_THROWS(Figure fig(Python::NewRef(Py_BuildValue("(i)", 1))),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(Figure fig(Python::NewRef(Py_BuildValue("(i)", 1))), const std::invalid_argument &);
   }
 };

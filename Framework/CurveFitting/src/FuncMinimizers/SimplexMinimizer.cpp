@@ -39,8 +39,7 @@ double SimplexMinimizer::fun(const gsl_vector *x, void *params) {
     }
   }
   std::shared_ptr<CostFunctions::CostFuncFitting> fitting =
-      std::dynamic_pointer_cast<CostFunctions::CostFuncFitting>(
-          minimizer.m_costFunction);
+      std::dynamic_pointer_cast<CostFunctions::CostFuncFitting>(minimizer.m_costFunction);
   if (fitting) {
     fitting->getFittingFunction()->applyTies();
   }
@@ -48,15 +47,14 @@ double SimplexMinimizer::fun(const gsl_vector *x, void *params) {
 }
 
 SimplexMinimizer::SimplexMinimizer(const double epsabs)
-    : m_epsabs(epsabs), m_costFunction(), m_size(1.0),
-      m_simplexStepSize(nullptr), m_startGuess(nullptr), m_gslSolver(nullptr) {
+    : m_epsabs(epsabs), m_costFunction(), m_size(1.0), m_simplexStepSize(nullptr), m_startGuess(nullptr),
+      m_gslSolver(nullptr) {
   gslContainer.f = nullptr;
   gslContainer.n = -1;
   gslContainer.params = nullptr;
 }
 
-void SimplexMinimizer::initialize(API::ICostFunction_sptr function,
-                                  size_t /*maxIterations*/) {
+void SimplexMinimizer::initialize(API::ICostFunction_sptr function, size_t /*maxIterations*/) {
   m_costFunction = function;
 
   const gsl_multimin_fminimizer_type *T = gsl_multimin_fminimizer_nmsimplex;
@@ -79,8 +77,7 @@ void SimplexMinimizer::initialize(API::ICostFunction_sptr function,
 
   // setup minimizer
   m_gslSolver = gsl_multimin_fminimizer_alloc(T, np);
-  gsl_multimin_fminimizer_set(m_gslSolver, &gslContainer, m_startGuess,
-                              m_simplexStepSize);
+  gsl_multimin_fminimizer_set(m_gslSolver, &gslContainer, m_startGuess, m_simplexStepSize);
 }
 
 /**

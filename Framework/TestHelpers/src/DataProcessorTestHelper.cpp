@@ -14,8 +14,7 @@ namespace DataProcessorTestHelper {
 /* Add a property value from a list to the given row data with an optional
  * prefix
  */
-void addPropertyValue(const RowData_sptr &rowData,
-                      const std::vector<std::string> &list, const size_t index,
+void addPropertyValue(const RowData_sptr &rowData, const std::vector<std::string> &list, const size_t index,
                       const std::string &property, const std::string &prefix) {
   if (index >= list.size() || list[index].empty())
     return;
@@ -28,8 +27,7 @@ void addPropertyValue(const RowData_sptr &rowData,
 
 /* Add a property value to the given row data
  */
-void addPropertyValue(const RowData_sptr &rowData, const std::string &property,
-                      const std::string &value) {
+void addPropertyValue(const RowData_sptr &rowData, const std::string &property, const std::string &value) {
   // Set the value and preprocessed value to the given value
   rowData->setOptionValue(property, value);
   rowData->setPreprocessedOptionValue(property, value);
@@ -46,10 +44,8 @@ void addPropertyValue(const RowData_sptr &rowData, const std::string &property,
  * @separator [in] : optional separator to use when appending the
  * value
  */
-void appendStringWithPrefixedValue(std::string &stringToEdit,
-                                   const std::vector<std::string> &list,
-                                   const std::vector<std::string> &prefixes,
-                                   const size_t i,
+void appendStringWithPrefixedValue(std::string &stringToEdit, const std::vector<std::string> &list,
+                                   const std::vector<std::string> &prefixes, const size_t i,
                                    const std::string &separator = "") {
   // do nothing if string to add is empty
   if (i >= list.size() || list[i].empty())
@@ -66,8 +62,7 @@ void appendStringWithPrefixedValue(std::string &stringToEdit,
 // (does not support multiple input runs or transmission runs, or entries
 // in the options/hidden columns). Assumes input workspaces are prefixed
 // with TOF_ and transmission runs with TRANS_
-RowData_sptr makeRowData(const std::vector<std::string> &list,
-                         const std::vector<std::string> &prefixes,
+RowData_sptr makeRowData(const std::vector<std::string> &list, const std::vector<std::string> &prefixes,
                          const size_t numSlices) {
   // Create the data and add default options
   auto rowData = std::make_shared<RowData>(list);
@@ -81,10 +76,8 @@ RowData_sptr makeRowData(const std::vector<std::string> &list,
 
   rowData->setReducedName(QString::fromStdString(reducedName));
   addPropertyValue(rowData, "OutputWorkspace", "IvsQ_" + reducedName);
-  addPropertyValue(rowData, "OutputWorkspaceBinned",
-                   "IvsQ_binned_" + reducedName);
-  addPropertyValue(rowData, "OutputWorkspaceWavelength",
-                   "IvsLam_" + reducedName);
+  addPropertyValue(rowData, "OutputWorkspaceBinned", "IvsQ_binned_" + reducedName);
+  addPropertyValue(rowData, "OutputWorkspaceWavelength", "IvsLam_" + reducedName);
 
   // Set other options from the row data values
   addPropertyValue(rowData, list, 0, "InputWorkspace", "TOF_");
@@ -96,12 +89,10 @@ RowData_sptr makeRowData(const std::vector<std::string> &list,
   addPropertyValue(rowData, list, 6, "ScaleFactor");
 
   // Add some slices if requested
-  std::vector<QString> workspaceProperties = {
-      "InputWorkspace", "OutputWorkspace", "OutputWorkspaceBinned",
-      "OutputWorkspaceWavelength"};
+  std::vector<QString> workspaceProperties = {"InputWorkspace", "OutputWorkspace", "OutputWorkspaceBinned",
+                                              "OutputWorkspaceWavelength"};
   for (size_t i = 0; i < numSlices; ++i) {
-    QString sliceName =
-        QString("_slice_") + QString::fromStdString(std::to_string(i));
+    QString sliceName = QString("_slice_") + QString::fromStdString(std::to_string(i));
     rowData->addSlice(sliceName, workspaceProperties);
   }
 

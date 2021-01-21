@@ -21,20 +21,15 @@ namespace Kernel {
 class MANTID_KERNEL_DLL ErrorReporter {
 public:
   /// Constructor
-  ErrorReporter(const std::string &application,
-                const Types::Core::time_duration &startTime,
+  ErrorReporter(const std::string &application, const Types::Core::time_duration &startTime,
                 const std::string &exitCode, bool share);
   /// Constructor
-  ErrorReporter(const std::string &application,
-                const Types::Core::time_duration &startTime,
-                const std::string &exitCode, bool share,
-                const std::string &name, const std::string &email,
+  ErrorReporter(const std::string &application, const Types::Core::time_duration &startTime,
+                const std::string &exitCode, bool share, const std::string &name, const std::string &email,
                 const std::string &textBox);
   /// Constructor
-  ErrorReporter(const std::string &application,
-                const Types::Core::time_duration &startTime,
-                const std::string &exitCode, bool share,
-                const std::string &name, const std::string &email,
+  ErrorReporter(const std::string &application, const Types::Core::time_duration &startTime,
+                const std::string &exitCode, bool share, const std::string &name, const std::string &email,
                 const std::string &textBox, const std::string &stacktrace);
   /// Sends an error report
   int sendErrorReport();

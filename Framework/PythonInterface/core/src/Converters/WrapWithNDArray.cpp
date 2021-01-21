@@ -76,17 +76,14 @@ void markReadOnly(PyArrayObject *arr) {
  * @return A pointer to a numpy ndarray object
  */
 template <typename ElementType>
-PyObject *wrapWithNDArray(const ElementType *carray, const int ndims,
-                          Py_intptr_t *dims, const NumpyWrapMode mode,
+PyObject *wrapWithNDArray(const ElementType *carray, const int ndims, Py_intptr_t *dims, const NumpyWrapMode mode,
                           const OwnershipMode oMode /* = Cpp */) {
   int datatype = NDArrayTypeIndex<ElementType>::typenum;
-  auto *nparray = (PyArrayObject *)PyArray_SimpleNewFromData(
-      ndims, dims, datatype,
-      static_cast<void *>(const_cast<ElementType *>(carray)));
+  auto *nparray = (PyArrayObject *)PyArray_SimpleNewFromData(ndims, dims, datatype,
+                                                             static_cast<void *>(const_cast<ElementType *>(carray)));
 
   if (oMode == Python) {
-    PyObject *capsule = PyCapsule_New(const_cast<ElementType *>(carray), NULL,
-                                      capsule_cleanup<ElementType>);
+    PyObject *capsule = PyCapsule_New(const_cast<ElementType *>(carray), NULL, capsule_cleanup<ElementType>);
     PyArray_SetBaseObject((PyArrayObject *)nparray, capsule);
   }
 
@@ -98,10 +95,9 @@ PyObject *wrapWithNDArray(const ElementType *carray, const int ndims,
 //-----------------------------------------------------------------------
 // Explicit instantiations
 //-----------------------------------------------------------------------
-#define INSTANTIATE_WRAPNUMPY(ElementType)                                     \
-  template DLLExport PyObject *wrapWithNDArray<ElementType>(                   \
-      const ElementType *, const int ndims, Py_intptr_t *dims,                 \
-      const NumpyWrapMode mode, const OwnershipMode oMode);
+#define INSTANTIATE_WRAPNUMPY(ElementType)                                                                             \
+  template DLLExport PyObject *wrapWithNDArray<ElementType>(const ElementType *, const int ndims, Py_intptr_t *dims,   \
+                                                            const NumpyWrapMode mode, const OwnershipMode oMode);
 
 ///@cond Doxygen doesn't seem to like this...
 INSTANTIATE_WRAPNUMPY(int)

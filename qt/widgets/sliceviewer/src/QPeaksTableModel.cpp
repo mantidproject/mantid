@@ -32,8 +32,7 @@ namespace SliceViewer {
  */
 static QString v3dAsString(const Mantid::Kernel::V3D &v3d) {
   const QString COMMA(",");
-  return QString::number(v3d.X(), 'f', 4) + COMMA +
-         QString::number(v3d.Y(), 'f', 4) + COMMA +
+  return QString::number(v3d.X(), 'f', 4) + COMMA + QString::number(v3d.Y(), 'f', 4) + COMMA +
          QString::number(v3d.Z(), 'f', 4);
 }
 
@@ -42,9 +41,7 @@ static QString v3dAsString(const Mantid::Kernel::V3D &v3d) {
  * @returns :: number of decimals to round displayed HKL values to.
  */
 static int getHKLPrecision() {
-  auto hklPrecConfigVal =
-      Mantid::Kernel::ConfigService::Instance().getValue<int>(
-          "PeakColumn.hklPrec");
+  auto hklPrecConfigVal = Mantid::Kernel::ConfigService::Instance().getValue<int>("PeakColumn.hklPrec");
   int hklPrec = hklPrecConfigVal.get_value_or(2);
   return hklPrec;
 }
@@ -151,8 +148,7 @@ int QPeaksTableModel::numCharacters(const int column) const {
 Constructor
 @param peaksWS : Workspace model.
 */
-QPeaksTableModel::QPeaksTableModel(
-    std::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS)
+QPeaksTableModel::QPeaksTableModel(std::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS)
     : QAbstractTableModel(nullptr), m_peaksWS(std::move(peaksWS)) {
   m_columnNameMap = {{0, RUNNUMBER},
                      {1, DETID},
@@ -198,9 +194,7 @@ QPeaksTableModel::QPeaksTableModel(
       [](const IPeak &peak) { return QVariant(peak.getSigmaIntensity()); },
       [](const IPeak &peak) { return QVariant(peak.getIntensityOverSigma()); },
       [](const IPeak &peak) { return QVariant(peak.getBinCount()); },
-      [](const IPeak &peak) {
-        return QVariant(QString::fromStdString(peak.getBankName()));
-      },
+      [](const IPeak &peak) { return QVariant(QString::fromStdString(peak.getBankName())); },
       [](const IPeak &peak) { return QVariant(peak.getRow()); },
       [](const IPeak &peak) { return QVariant(peak.getCol()); },
       [](const IPeak &peak) { return QVariant(peak.getQLabFrame().norm()); },
@@ -213,46 +207,20 @@ QPeaksTableModel::QPeaksTableModel(
   m_formattedValueLookup = {
       [](const IPeak &peak) { return QString::number(peak.getRunNumber()); },
       [](const IPeak &peak) { return QString::number(peak.getDetectorID()); },
-      [](const IPeak &peak) {
-        return QString::number(peak.getH(), 'f', getHKLPrecision());
-      },
-      [](const IPeak &peak) {
-        return QString::number(peak.getK(), 'f', getHKLPrecision());
-      },
-      [](const IPeak &peak) {
-        return QString::number(peak.getL(), 'f', getHKLPrecision());
-      },
-      [](const IPeak &peak) {
-        return QString::number(peak.getWavelength(), 'f', 4);
-      },
-      [](const IPeak &peak) {
-        return QString::number(peak.getInitialEnergy(), 'f', 4);
-      },
-      [](const IPeak &peak) {
-        return QString::number(peak.getFinalEnergy(), 'f', 4);
-      },
-      [](const IPeak &peak) {
-        return QString::number(peak.getEnergyTransfer(), 'f', 4);
-      },
+      [](const IPeak &peak) { return QString::number(peak.getH(), 'f', getHKLPrecision()); },
+      [](const IPeak &peak) { return QString::number(peak.getK(), 'f', getHKLPrecision()); },
+      [](const IPeak &peak) { return QString::number(peak.getL(), 'f', getHKLPrecision()); },
+      [](const IPeak &peak) { return QString::number(peak.getWavelength(), 'f', 4); },
+      [](const IPeak &peak) { return QString::number(peak.getInitialEnergy(), 'f', 4); },
+      [](const IPeak &peak) { return QString::number(peak.getFinalEnergy(), 'f', 4); },
+      [](const IPeak &peak) { return QString::number(peak.getEnergyTransfer(), 'f', 4); },
       [](const IPeak &peak) { return QString::number(peak.getTOF(), 'f', 1); },
-      [](const IPeak &peak) {
-        return QString::number(peak.getDSpacing(), 'f', 4);
-      },
-      [](const IPeak &peak) {
-        return QString::number(peak.getIntensity(), 'f', 1);
-      },
-      [](const IPeak &peak) {
-        return QString::number(peak.getSigmaIntensity(), 'f', 1);
-      },
-      [](const IPeak &peak) {
-        return QString::number(peak.getIntensityOverSigma(), 'f', 2);
-      },
-      [](const IPeak &peak) {
-        return QString::number(peak.getBinCount(), 'g', 2);
-      },
-      [](const IPeak &peak) {
-        return QString::fromStdString(peak.getBankName());
-      },
+      [](const IPeak &peak) { return QString::number(peak.getDSpacing(), 'f', 4); },
+      [](const IPeak &peak) { return QString::number(peak.getIntensity(), 'f', 1); },
+      [](const IPeak &peak) { return QString::number(peak.getSigmaIntensity(), 'f', 1); },
+      [](const IPeak &peak) { return QString::number(peak.getIntensityOverSigma(), 'f', 2); },
+      [](const IPeak &peak) { return QString::number(peak.getBinCount(), 'g', 2); },
+      [](const IPeak &peak) { return QString::fromStdString(peak.getBankName()); },
       [](const IPeak &peak) { return QString::number(peak.getRow()); },
       [](const IPeak &peak) { return QString::number(peak.getCol()); },
       [](const IPeak &peak) { return v3dAsString(peak.getQLabFrame()); },
@@ -261,8 +229,7 @@ QPeaksTableModel::QPeaksTableModel(
   };
 }
 
-void QPeaksTableModel::setPeaksWorkspace(
-    std::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS) {
+void QPeaksTableModel::setPeaksWorkspace(std::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS) {
   beginResetModel();
   emit layoutAboutToBeChanged();
   m_peaksWS = std::move(peaksWS);
@@ -274,9 +241,7 @@ void QPeaksTableModel::setPeaksWorkspace(
 /**
 @return the row count.
 */
-int QPeaksTableModel::rowCount(const QModelIndex & /*parent*/) const {
-  return static_cast<int>(m_peaksWS->rowCount());
-}
+int QPeaksTableModel::rowCount(const QModelIndex & /*parent*/) const { return static_cast<int>(m_peaksWS->rowCount()); }
 
 /**
 @return the number of columns in the model.
@@ -290,8 +255,7 @@ Find the column name at a given column index.
 @param colIndex : Index to find column name for.
 */
 QString QPeaksTableModel::findColumnName(const int colIndex) const {
-  ColumnIndexNameMap::const_iterator foundColName =
-      m_columnNameMap.find(colIndex);
+  ColumnIndexNameMap::const_iterator foundColName = m_columnNameMap.find(colIndex);
   if (foundColName == m_columnNameMap.end()) {
     throw std::runtime_error("Unknown column requested");
   }
@@ -332,8 +296,7 @@ Get the heading for a given section, orientation and role.
 @param role : Role mode of table.
 @return HeaderData.
 */
-QVariant QPeaksTableModel::headerData(int section, Qt::Orientation orientation,
-                                      int role) const {
+QVariant QPeaksTableModel::headerData(int section, Qt::Orientation orientation, int role) const {
   if (role != Qt::DisplayRole || section < 0)
     return QVariant();
 
@@ -363,8 +326,7 @@ std::vector<int> QPeaksTableModel::defaultHideCols() {
   Mantid::Geometry::Instrument_const_sptr instr = m_peaksWS->getInstrument();
   std::string instrName = instr->getName();
   try {
-    Mantid::Kernel::InstrumentInfo instrInfo =
-        Mantid::Kernel::ConfigService::Instance().getInstrument(instrName);
+    Mantid::Kernel::InstrumentInfo instrInfo = Mantid::Kernel::ConfigService::Instance().getInstrument(instrName);
     if (instrInfo.facility().name() != "SNS")
       result.emplace_back(COL_BANKNAME);
 

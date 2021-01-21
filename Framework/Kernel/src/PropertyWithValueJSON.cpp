@@ -31,13 +31,9 @@ template <typename T> using ValueAsTypeMemFn = T (Json::Value::*)() const;
 // the appropriate ToCpp conversion function defined in the header when
 // createProperty is called.
 struct FromJson {
-  template <typename T>
-  explicit FromJson(ValueAsTypeMemFn<T> /*unused*/)
-      : m_self{std::make_unique<ModelT<T>>()} {}
+  template <typename T> explicit FromJson(ValueAsTypeMemFn<T> /*unused*/) : m_self{std::make_unique<ModelT<T>>()} {}
 
-  std::unique_ptr<Property> createProperty(const std::string &name,
-                                           const Json::Value &value,
-                                           bool createArray) const {
+  std::unique_ptr<Property> createProperty(const std::string &name, const Json::Value &value, bool createArray) const {
     if (createArray)
       return m_self->arrayValueProperty(name, value);
     else
@@ -47,25 +43,19 @@ struct FromJson {
 private:
   struct ConceptT {
     virtual ~ConceptT() = default;
-    virtual std::unique_ptr<Property>
-    singleValueProperty(const std::string &name,
-                        const Json::Value &value) const = 0;
-    virtual std::unique_ptr<Property>
-    arrayValueProperty(const std::string &name,
-                       const Json::Value &value) const = 0;
+    virtual std::unique_ptr<Property> singleValueProperty(const std::string &name, const Json::Value &value) const = 0;
+    virtual std::unique_ptr<Property> arrayValueProperty(const std::string &name, const Json::Value &value) const = 0;
   };
 
   template <typename T> struct ModelT : ConceptT {
-    std::unique_ptr<Property>
-    singleValueProperty(const std::string &name,
-                        const Json::Value &value) const override final {
+    std::unique_ptr<Property> singleValueProperty(const std::string &name,
+                                                  const Json::Value &value) const override final {
       using ToCppT = pwvjdetail::ToCpp<T>;
       return std::make_unique<PropertyWithValue<T>>(name, ToCppT()(value));
     }
 
-    std::unique_ptr<Property>
-    arrayValueProperty(const std::string &name,
-                       const Json::Value &value) const override final {
+    std::unique_ptr<Property> arrayValueProperty(const std::string &name,
+                                                 const Json::Value &value) const override final {
       using ToCppVectorT = pwvjdetail::ToCpp<std::vector<T>>;
       return std::make_unique<ArrayProperty<T>>(name, ToCppVectorT()(value));
     }
@@ -83,14 +73,10 @@ const FromJsonConverters &converters() {
   static FromJsonConverters converters;
   if (converters.empty()) {
     // Build a map of Json types to FromJson converters of the appropriate type
-    converters.insert(
-        std::make_pair(Json::booleanValue, FromJson(&Json::Value::asBool)));
-    converters.insert(
-        std::make_pair(Json::intValue, FromJson(&Json::Value::asInt)));
-    converters.insert(
-        std::make_pair(Json::realValue, FromJson(&Json::Value::asDouble)));
-    converters.insert(
-        std::make_pair(Json::stringValue, FromJson(&Json::Value::asString)));
+    converters.insert(std::make_pair(Json::booleanValue, FromJson(&Json::Value::asBool)));
+    converters.insert(std::make_pair(Json::intValue, FromJson(&Json::Value::asInt)));
+    converters.insert(std::make_pair(Json::realValue, FromJson(&Json::Value::asDouble)));
+    converters.insert(std::make_pair(Json::stringValue, FromJson(&Json::Value::asString)));
   }
   return converters;
 }
@@ -105,8 +91,7 @@ const FromJsonConverters &converters() {
  * @return A pointer to a new Property object
  * @throws std::invalid_argument if the type of the Json::Value is not known
  */
-std::unique_ptr<Property> createSingleTypeProperty(const std::string &name,
-                                                   const Json::Value &value) {
+std::unique_ptr<Property> createSingleTypeProperty(const std::string &name, const Json::Value &value) {
   const auto isArray = value.isArray();
   FromJsonConverters::const_iterator conversionFnIter;
   // For an array use the first element as the type checker and the rest must
@@ -131,10 +116,8 @@ std::unique_ptr<Property> createSingleTypeProperty(const std::string &name,
  * @param keyValues A Json::objectValue containing key-value pairs
  * @return A new Property object
  */
-std::unique_ptr<Property> createKeyValueProperty(const std::string &name,
-                                                 const Json::Value &keyValues) {
-  return std::make_unique<PropertyManagerProperty>(
-      name, createPropertyManager(keyValues));
+std::unique_ptr<Property> createKeyValueProperty(const std::string &name, const Json::Value &keyValues) {
+  return std::make_unique<PropertyManagerProperty>(name, createPropertyManager(keyValues));
 }
 
 } // namespace
@@ -166,8 +149,7 @@ PropertyManager_sptr createPropertyManager(const Json::Value &keyValues) {
  * @throws std::invalid_argument If the value cannot be transformed to
  * a Property object
  */
-std::unique_ptr<Property> decodeAsProperty(const std::string &name,
-                                           const Json::Value &value) {
+std::unique_ptr<Property> decodeAsProperty(const std::string &name, const Json::Value &value) {
   if (value.isNull()) {
     throw std::invalid_argument("decodeAsProperty(): Found null Json value.");
   }

@@ -17,11 +17,10 @@
 namespace MantidQt {
 namespace SliceViewer {
 
-PeakOverlayInteractive::PeakOverlayInteractive(
-    PeaksPresenter *const peaksPresenter, QwtPlot *plot, const int plotXIndex,
-    const int plotYIndex, QWidget *parent)
-    : QWidget(parent), m_presenter(peaksPresenter), m_plot(plot),
-      m_plotXIndex(plotXIndex), m_plotYIndex(plotYIndex), m_tool(nullptr) {
+PeakOverlayInteractive::PeakOverlayInteractive(PeaksPresenter *const peaksPresenter, QwtPlot *plot,
+                                               const int plotXIndex, const int plotYIndex, QWidget *parent)
+    : QWidget(parent), m_presenter(peaksPresenter), m_plot(plot), m_plotXIndex(plotXIndex), m_plotYIndex(plotYIndex),
+      m_tool(nullptr) {
 
   setAttribute(Qt::WA_NoMousePropagation, false);
   setAttribute(Qt::WA_MouseTracking, true);
@@ -56,10 +55,8 @@ void PeakOverlayInteractive::peakDeletionMode() {
   QApplication::restoreOverrideCursor();
   auto *temp = m_tool;
   auto eraseIcon = new QPixmap(":/PickTools/eraser.png");
-  auto *eraseTool =
-      new MantidQt::MantidWidgets::InputControllerSelection(this, eraseIcon);
-  connect(eraseTool, SIGNAL(selection(QRect)), this, SLOT(erasePeaks(QRect)),
-          Qt::QueuedConnection);
+  auto *eraseTool = new MantidQt::MantidWidgets::InputControllerSelection(this, eraseIcon);
+  connect(eraseTool, SIGNAL(selection(QRect)), this, SLOT(erasePeaks(QRect)), Qt::QueuedConnection);
   m_tool = eraseTool;
   delete temp;
 }
@@ -69,8 +66,7 @@ void PeakOverlayInteractive::peakAdditionMode() {
   QApplication::restoreOverrideCursor();
   auto *temp = m_tool;
   auto *addTool = new MantidQt::MantidWidgets::InputControllerPick(this);
-  connect(addTool, SIGNAL(pickPointAt(int, int)), this,
-          SLOT(addPeakAt(int, int)));
+  connect(addTool, SIGNAL(pickPointAt(int, int)), this, SLOT(addPeakAt(int, int)));
   m_tool = addTool;
   delete temp;
 }
@@ -161,8 +157,7 @@ void PeakOverlayInteractive::erasePeaks(const QRect &rect) {
   const Bottom bottom(yMap.invTransform(rect.bottom()));
   const SlicePoint slicePoint(-1); // Not required.
 
-  m_presenter->deletePeaksIn(
-      PeakBoundingBox(left, right, top, bottom, slicePoint));
+  m_presenter->deletePeaksIn(PeakBoundingBox(left, right, top, bottom, slicePoint));
 }
 
 //----------------------------------------------------------------------------------------------
@@ -176,9 +171,7 @@ QSize PeakOverlayInteractive::sizeHint() const {
 
 QSize PeakOverlayInteractive::size() const { return m_plot->canvas()->size(); }
 
-int PeakOverlayInteractive::height() const {
-  return m_plot->canvas()->height();
-}
+int PeakOverlayInteractive::height() const { return m_plot->canvas()->height(); }
 
 int PeakOverlayInteractive::width() const { return m_plot->canvas()->width(); }
 } // namespace SliceViewer

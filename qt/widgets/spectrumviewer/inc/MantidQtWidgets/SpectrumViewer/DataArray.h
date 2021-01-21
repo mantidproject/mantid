@@ -29,8 +29,8 @@ namespace SpectrumView {
 class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER DataArray {
 public:
   /// Construct a DataArray "wrapper" around the data and region info
-  DataArray(double xMin, double xMax, double yMin, double yMax, bool isLogX,
-            size_t nRows, size_t nCols, const std::vector<float> &data);
+  DataArray(double xMin, double xMax, double yMin, double yMax, bool isLogX, size_t nRows, size_t nCols,
+            const std::vector<float> &data);
 
   ~DataArray();
 

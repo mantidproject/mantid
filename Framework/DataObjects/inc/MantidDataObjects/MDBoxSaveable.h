@@ -37,16 +37,12 @@ public:
   void clearDataFromMemory() override { m_MDNode->clearDataFromMemory(); }
 
   /// @return the amount of memory that the object takes up in the MRU.
-  uint64_t getTotalDataSize() const override {
-    return m_MDNode->getTotalDataSize();
-  }
+  uint64_t getTotalDataSize() const override { return m_MDNode->getTotalDataSize(); }
   /**@return the size of the event vector. ! Note that this is NOT necessarily
   the same as the number of points
   (because it might be cached to disk) or the size on disk (because you might
   have called AddEvents) */
-  size_t getDataMemorySize() const override {
-    return m_MDNode->getDataInMemorySize();
-  }
+  size_t getDataMemorySize() const override { return m_MDNode->getDataInMemorySize(); }
 
 private:
   API::IMDNode *const m_MDNode;

@@ -15,8 +15,7 @@ namespace Mantid {
 namespace CurveFitting {
 namespace Functions {
 
-class MANTID_CURVEFITTING_DLL MultivariateGaussianComptonProfile
-    : public ComptonProfile {
+class MANTID_CURVEFITTING_DLL MultivariateGaussianComptonProfile : public ComptonProfile {
 public:
   static const char *AMP_PARAM;
   static const char *SIGMA_X_PARAM;
@@ -42,16 +41,14 @@ private:
   /// Returns the indices of the intensity parameters
   std::vector<size_t> intensityParameterIndices() const override;
   /// Fill in the columns of the matrix for this mass
-  size_t
-  fillConstraintMatrix(Kernel::DblMatrix &cmatrix, const size_t start,
-                       const HistogramData::HistogramE &errors) const override;
+  size_t fillConstraintMatrix(Kernel::DblMatrix &cmatrix, const size_t start,
+                              const HistogramData::HistogramE &errors) const override;
 
   /// Compute the function
   void massProfile(double *result, const size_t nData) const override;
 
   /// Helper to allow the amplitude to be specified separately
-  void massProfile(double *result, const size_t nData,
-                   const double amplitude) const;
+  void massProfile(double *result, const size_t nData, const double amplitude) const;
 
   double calculateJ(std::vector<double> s2Cache, double y) const;
   double calculateFSE(std::vector<double> s2Cache, double y) const;
@@ -62,9 +59,7 @@ private:
    * @param y Y value
    * @return Integrand
    */
-  inline double calculateIntegrandJ(double s2, double y) const {
-    return s2 * exp(-(y * y) / (2.0 * s2));
-  }
+  inline double calculateIntegrandJ(double s2, double y) const { return s2 * exp(-(y * y) / (2.0 * s2)); }
 
   /**
    * @brief Calculates the integrand of the A3 FSE correction.
@@ -73,8 +68,7 @@ private:
    * @return Integrand
    */
   inline double calculateIntegrandFSE(double s2, double y) const {
-    return ((pow(y, 3) / pow(s2, 4)) - ((3 * y) / pow(s2, 2))) *
-           exp(-(y * y) / (2.0 * s2));
+    return ((pow(y, 3) / pow(s2, 4)) - ((3 * y) / pow(s2, 2))) * exp(-(y * y) / (2.0 * s2));
   }
 
   double intervalCoeff(int i, int j) const;

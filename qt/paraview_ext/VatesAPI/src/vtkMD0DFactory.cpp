@@ -37,14 +37,12 @@ vtkSmartPointer<vtkDataSet> vtkMD0DFactory::create(ProgressAction &) const {
                   << " is being used. You are viewing data with less than "
                      "three dimensions in the VSI. \n";
   vtkNullUnstructuredGrid nullGrid;
-  auto visualDataSet =
-      vtkSmartPointer<vtkDataSet>::Take(nullGrid.createNullData());
+  auto visualDataSet = vtkSmartPointer<vtkDataSet>::Take(nullGrid.createNullData());
   return visualDataSet;
 }
 
 /// Initalize with a target workspace.
-void vtkMD0DFactory::initialize(
-    const Mantid::API::Workspace_sptr & /*workspace*/) {}
+void vtkMD0DFactory::initialize(const Mantid::API::Workspace_sptr & /*workspace*/) {}
 
 /// Validate the workspace
 void vtkMD0DFactory::validate() const {}

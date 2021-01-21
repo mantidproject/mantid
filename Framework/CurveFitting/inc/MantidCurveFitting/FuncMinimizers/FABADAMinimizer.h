@@ -36,8 +36,7 @@ public:
   /// Name of the minimizer.
   std::string name() const override { return "FABADA"; }
   /// Initialize minimizer, i.e. pass a function to minimize.
-  void initialize(API::ICostFunction_sptr function,
-                  size_t maxIterations) override;
+  void initialize(API::ICostFunction_sptr function, size_t maxIterations) override;
   /// Do one iteration.
   bool iterate(size_t iter) override;
   /// Return current value of the cost function
@@ -49,20 +48,17 @@ public:
 
   /// If the new point is out of its bounds, it is changed to fit in the bound
   /// limits
-  void boundApplication(const size_t &parameterIndex, double &newValue,
-                        double &step);
+  void boundApplication(const size_t &parameterIndex, double &newValue, double &step);
 
 private:
   /// Returns the step from a Gaussian given sigma = Jump
   double gaussianStep(const double &jump);
   /// Applied to the other parameters first and sequentially, finally to the
   /// current one
-  void tieApplication(const size_t &parameterIndex, GSLVector &newParameters,
-                      double &newValue);
+  void tieApplication(const size_t &parameterIndex, GSLVector &newParameters, double &newValue);
   /// Given the new chi2, next position is calculated and updated.
   /// m_changes[ParameterIndex] updated too
-  void algorithmDisplacement(const size_t &parameterIndex,
-                             const double &chi2New, GSLVector &newParameters);
+  void algorithmDisplacement(const size_t &parameterIndex, const double &chi2New, GSLVector &newParameters);
   /// Updates the ParameterIndex-th parameter jump if appropriate
   void jumpUpdate(const size_t &parameterIndex);
   /// Check for convergence (including Overexploration convergence), updates
@@ -79,32 +75,25 @@ private:
   /// Output cost function
   void outputCostFunctionTable(size_t convLength, double mostProbableChi2);
   /// Output PDF
-  double outputPDF(std::size_t const &convLength,
-                   std::vector<std::vector<double>> &reducedChain);
+  double outputPDF(std::size_t const &convLength, std::vector<std::vector<double>> &reducedChain);
   void outputPDF(std::vector<double> &xValues, std::vector<double> &yValues,
-                 std::vector<std::vector<double>> &reducedChain,
-                 std::size_t const &convLength, int const &pdfLength);
+                 std::vector<std::vector<double>> &reducedChain, std::size_t const &convLength, int const &pdfLength);
   /// Finds the most probable Chi Squared value
-  double getMostProbableChiSquared(
-      std::size_t const &convLength,
-      std::vector<std::vector<double>> &reducedChain, int const &pdfLength,
-      std::vector<double> &xValues, std::vector<double> &yValues,
-      std::vector<double> &PDFYAxis, double const &start, double const &bin);
+  double getMostProbableChiSquared(std::size_t const &convLength, std::vector<std::vector<double>> &reducedChain,
+                                   int const &pdfLength, std::vector<double> &xValues, std::vector<double> &yValues,
+                                   std::vector<double> &PDFYAxis, double const &start, double const &bin);
   /// Computes the X and Y for the Parameter PDF's
-  void setParameterXAndYValuesForPDF(
-      std::vector<double> &xValues, std::vector<double> &yValues,
-      std::vector<std::vector<double>> &reducedChain,
-      std::size_t const &convLength, int const &pdfLength);
+  void setParameterXAndYValuesForPDF(std::vector<double> &xValues, std::vector<double> &yValues,
+                                     std::vector<std::vector<double>> &reducedChain, std::size_t const &convLength,
+                                     int const &pdfLength);
   /// Output parameter table
-  void outputParameterTable(const std::vector<double> &bestParameters,
-                            const std::vector<double> &errorsLeft,
+  void outputParameterTable(const std::vector<double> &bestParameters, const std::vector<double> &errorsLeft,
                             const std::vector<double> &errorsRight);
   /// Calculated converged chain and parameters
-  void calculateConvChainAndBestParameters(
-      size_t convLength, int nSteps,
-      std::vector<std::vector<double>> &reducedChain,
-      std::vector<double> &bestParameters, std::vector<double> &errorLeft,
-      std::vector<double> &errorRight);
+  void calculateConvChainAndBestParameters(size_t convLength, int nSteps,
+                                           std::vector<std::vector<double>> &reducedChain,
+                                           std::vector<double> &bestParameters, std::vector<double> &errorLeft,
+                                           std::vector<double> &errorRight);
   /// Initialize member variables related to fitting parameters
   void initChainsAndParameters();
   /// Initialize member variables related to simulated annealing

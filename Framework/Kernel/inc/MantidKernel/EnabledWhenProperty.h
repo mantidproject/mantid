@@ -54,13 +54,7 @@ class Property;
 // Forward deceleration of structs defined at end of header
 
 /** Enum for use in EnabledWhenProperty */
-enum ePropertyCriterion {
-  IS_DEFAULT,
-  IS_NOT_DEFAULT,
-  IS_EQUAL_TO,
-  IS_NOT_EQUAL_TO,
-  IS_MORE_OR_EQ
-};
+enum ePropertyCriterion { IS_DEFAULT, IS_NOT_DEFAULT, IS_EQUAL_TO, IS_NOT_EQUAL_TO, IS_MORE_OR_EQ };
 
 /** Enum for use when combining two EnabledWhenPropertyItems */
 enum eLogicOperator { AND, OR, XOR };
@@ -69,23 +63,19 @@ class DLLExport EnabledWhenProperty : public IPropertySettings {
 public:
   /// Constructs a EnabledWhenProperty object which checks the property
   /// with name given and if it matches the criteria enables it
-  EnabledWhenProperty(const std::string &otherPropName,
-                      const ePropertyCriterion when,
-                      const std::string &value = "");
+  EnabledWhenProperty(const std::string &otherPropName, const ePropertyCriterion when, const std::string &value = "");
 
   /// Constructs a EnabledWhenProperty object which copies two
   /// already constructed EnabledWhenProperty objects and returns the result
   /// of both of them with the specified logic operator
-  EnabledWhenProperty(const EnabledWhenProperty &conditionOne,
-                      const EnabledWhenProperty &conditionTwo,
+  EnabledWhenProperty(const EnabledWhenProperty &conditionOne, const EnabledWhenProperty &conditionTwo,
                       eLogicOperator logicOperator);
 
   /// Constructs a EnabledWhenProperty object which takes ownership of two
   /// already constructed EnabledWhenProperty objects and returns the result
   /// of both of them with the specified logic operator
   EnabledWhenProperty(std::shared_ptr<EnabledWhenProperty> &&conditionOne,
-                      std::shared_ptr<EnabledWhenProperty> &&conditionTwo,
-                      eLogicOperator logicOperator);
+                      std::shared_ptr<EnabledWhenProperty> &&conditionTwo, eLogicOperator logicOperator);
 
   /// Copy constructor
   EnabledWhenProperty(const EnabledWhenProperty &other);
@@ -143,8 +133,7 @@ protected:
 
 private:
   /// Holds an object containing details of multiple comparisons
-  std::shared_ptr<ComparisonDetails<EnabledWhenProperty>> m_comparisonDetails =
-      nullptr;
+  std::shared_ptr<ComparisonDetails<EnabledWhenProperty>> m_comparisonDetails = nullptr;
 };
 
 } // namespace Kernel

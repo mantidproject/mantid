@@ -26,9 +26,7 @@ public:
   MementoTableWorkspace(int nRows = 0);
 
   /// Returns a clone of the workspace
-  std::unique_ptr<MementoTableWorkspace> clone() const {
-    return std::unique_ptr<MementoTableWorkspace>(doClone());
-  }
+  std::unique_ptr<MementoTableWorkspace> clone() const { return std::unique_ptr<MementoTableWorkspace>(doClone()); }
 
   /// Returns a default-initialized clone of the workspace
   std::unique_ptr<MementoTableWorkspace> cloneEmpty() const {
@@ -40,13 +38,9 @@ protected:
   MementoTableWorkspace(const MementoTableWorkspace &) = default;
 
 private:
-  MementoTableWorkspace *doClone() const override {
-    return new MementoTableWorkspace(*this);
-  }
+  MementoTableWorkspace *doClone() const override { return new MementoTableWorkspace(*this); }
 
-  MementoTableWorkspace *doCloneEmpty() const override {
-    return new MementoTableWorkspace();
-  }
+  MementoTableWorkspace *doCloneEmpty() const override { return new MementoTableWorkspace(); }
 
   static bool expectedColumn(const Mantid::API::Column_const_sptr &expected,
                              const Mantid::API::Column_const_sptr &candidate);

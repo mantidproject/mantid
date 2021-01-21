@@ -29,8 +29,7 @@ namespace RenderingHelpers {
 /// Render IObjComponent
 MANTID_GEOMETRY_DLL void renderIObjComponent(const IObjComponent &objComp);
 /// Render Traingulated Surface
-MANTID_GEOMETRY_DLL void
-renderTriangulated(detail::GeometryTriangulator &triangulator);
+MANTID_GEOMETRY_DLL void renderTriangulated(detail::GeometryTriangulator &triangulator);
 /// Renders a sphere, cuboid, hexahedron, cone or cylinder
 MANTID_GEOMETRY_DLL void renderShape(const detail::ShapeInfo &shapeInfo);
 /// Renders a Bitmap (used for rendering RectangularDetector)

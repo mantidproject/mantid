@@ -21,15 +21,12 @@ DECLARE_ALGORITHM(LoadMappingTable)
 LoadMappingTable::LoadMappingTable() : Algorithm() {}
 
 void LoadMappingTable::init() {
-  declareProperty(
-      std::make_unique<FileProperty>("Filename", "", FileProperty::Load),
-      "The name of the RAW file from which to obtain the mapping "
-      "information, including its full or relative path.");
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("Workspace", "Anonymous",
-                                            Direction::InOut),
-      "The name of the input and output workspace on which to perform the "
-      "algorithm.");
+  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Load),
+                  "The name of the RAW file from which to obtain the mapping "
+                  "information, including its full or relative path.");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("Workspace", "Anonymous", Direction::InOut),
+                  "The name of the input and output workspace on which to perform the "
+                  "algorithm.");
 }
 
 void LoadMappingTable::exec() {
@@ -41,21 +38,18 @@ void LoadMappingTable::exec() {
   /// ISISRAW class instance which does raw file reading.
   auto iraw = std::make_unique<ISISRAW2>();
 
-  if (iraw->readFromFile(m_filename.c_str(), false) !=
-      0) // ReadFrom File with no data
+  if (iraw->readFromFile(m_filename.c_str(), false) != 0) // ReadFrom File with no data
   {
     g_log.error("Unable to open file " + m_filename);
     throw Kernel::Exception::FileError("Unable to open File:", m_filename);
   }
   progress(0.5);
-  const int number_spectra =
-      iraw->i_det; // Number of entries in the spectra/udet table
+  const int number_spectra = iraw->i_det; // Number of entries in the spectra/udet table
   if (number_spectra == 0) {
     g_log.warning("The spectra to detector mapping table is empty");
   }
   // Fill in the mapping in the workspace's ISpectrum objects
-  localWorkspace->updateSpectraUsing(
-      SpectrumDetectorMapping(iraw->spec, iraw->udet, number_spectra));
+  localWorkspace->updateSpectraUsing(SpectrumDetectorMapping(iraw->spec, iraw->udet, number_spectra));
   progress(1);
 }
 

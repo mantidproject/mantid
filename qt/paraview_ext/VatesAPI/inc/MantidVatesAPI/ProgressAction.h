@@ -30,8 +30,7 @@ public:
   /// Handle event updates.
   virtual void eventRaised(double progress) = 0;
 
-  void handler(
-      const Poco::AutoPtr<Mantid::API::Algorithm::ProgressNotification> &pNf);
+  void handler(const Poco::AutoPtr<Mantid::API::Algorithm::ProgressNotification> &pNf);
 };
 } // namespace VATES
 } // namespace Mantid

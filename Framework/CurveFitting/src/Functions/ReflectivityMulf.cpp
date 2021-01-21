@@ -43,8 +43,7 @@ void ReflectivityMulf::init() {
 //----------------------------------------------------------------------------------------------
 /** Function to calcualte reflectivity
  */
-void ReflectivityMulf::function1D(double *out, const double *xValues,
-                                  const size_t nData) const {
+void ReflectivityMulf::function1D(double *out, const double *xValues, const size_t nData) const {
   // 1. Use a vector for all coefficient
   vector<double> coeff(m_nlayer * 3 + 7, 0.0);
 
@@ -218,8 +217,7 @@ void ReflectivityMulf::function1D(double *out, const double *xValues,
         ans = real((ac1 * ac2) / (ac3 * ac4));
       }
 
-      gauss = (1.0 / dthetr) *
-              exp(-0.5 * ((theta0 - x) / dthet) * (theta0 - x) / dthet);
+      gauss = (1.0 / dthetr) * exp(-0.5 * ((theta0 - x) / dthet) * (theta0 - x) / dthet);
       f = ans * gauss;
       cy[j] = cy[j] + f * dt;
     }
@@ -237,8 +235,7 @@ void ReflectivityMulf::function1D(double *out, const double *xValues,
  * negative.
  * (identical to ReflectivityMulf)
  */
-void ReflectivityMulf::setAttribute(const std::string &attName,
-                                    const API::IFunction::Attribute &att) {
+void ReflectivityMulf::setAttribute(const std::string &attName, const API::IFunction::Attribute &att) {
   storeAttributeValue(attName, att);
   if (attName == "nlayer") {
     m_nlayer = att.asInt();

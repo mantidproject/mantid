@@ -43,26 +43,22 @@ DECLARE_ALGORITHM(PaddingAndApodization)
  */
 void PaddingAndApodization::init() {
   declareProperty(
-      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-          "InputWorkspace", "", Direction::Input),
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>("InputWorkspace", "", Direction::Input),
       "The name of the input 2D workspace.");
   declareProperty(
-      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-          "OutputWorkspace", "", Direction::Output),
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
       "The name of the output 2D workspace.");
-  declareProperty("ApodizationFunction", "None",
-                  std::make_shared<Mantid::Kernel::StringListValidator>(
-                      std::vector<std::string>{"None", "Lorentz", "Gaussian"}),
-                  "The apodization function to apply to the data");
-  declareProperty("DecayConstant", 1.5,
-                  "The decay constant for the apodization function.");
+  declareProperty(
+      "ApodizationFunction", "None",
+      std::make_shared<Mantid::Kernel::StringListValidator>(std::vector<std::string>{"None", "Lorentz", "Gaussian"}),
+      "The apodization function to apply to the data");
+  declareProperty("DecayConstant", 1.5, "The decay constant for the apodization function.");
   auto mustBePositive = std::make_shared<Kernel::BoundedValidator<int>>();
   mustBePositive->setLower(0);
-  declareProperty(
-      "Padding", 0, mustBePositive,
-      "The amount of padding to add to the data,"
-      "it is the number of multiples of the data set."
-      "i.e 0 means no padding and 1 will double the number of data points.");
+  declareProperty("Padding", 0, mustBePositive,
+                  "The amount of padding to add to the data,"
+                  "it is the number of multiples of the data set."
+                  "i.e 0 means no padding and 1 will double the number of data points.");
   declareProperty("NegativePadding", false,
                   "If true padding is added to "
                   "both sides of the original data. Both sides "
@@ -121,15 +117,12 @@ void PaddingAndApodization::exec() {
     const auto specNum = static_cast<size_t>(spectra[i]);
 
     if (spectra[i] > static_cast<int>(numSpectra)) {
-      throw std::invalid_argument("The spectral index " +
-                                  std::to_string(spectra[i]) +
+      throw std::invalid_argument("The spectral index " + std::to_string(spectra[i]) +
                                   " is greater than the number of spectra!");
     }
     // Create output ws
-    outputWS->setHistogram(specNum,
-                           applyApodizationFunction(
-                               addPadding(inputWS->histogram(specNum), padding),
-                               decayConstant, apodizationFunction));
+    outputWS->setHistogram(specNum, applyApodizationFunction(addPadding(inputWS->histogram(specNum), padding),
+                                                             decayConstant, apodizationFunction));
     prog.report();
     PARALLEL_END_INTERUPT_REGION
   }
@@ -152,8 +145,7 @@ fptr PaddingAndApodization::getApodizationFunction(const std::string &method) {
   } else if (method == "Gaussian") {
     return ApodizationFunctions::gaussian;
   }
-  throw std::invalid_argument("The apodization function selected " + method +
-                              " is not a valid option");
+  throw std::invalid_argument("The apodization function selected " + method + " is not a valid option");
 }
 /**
  * Applies the appodization function to the data.
@@ -162,9 +154,8 @@ fptr PaddingAndApodization::getApodizationFunction(const std::string &method) {
  * @param decayConstant :: [input] the decay constant for apodization function
  * @returns :: Histogram of the apodized data
  */
-HistogramData::Histogram PaddingAndApodization::applyApodizationFunction(
-    const HistogramData::Histogram &histogram, const double decayConstant,
-    fptr function) {
+HistogramData::Histogram PaddingAndApodization::applyApodizationFunction(const HistogramData::Histogram &histogram,
+                                                                         const double decayConstant, fptr function) {
   HistogramData::Histogram result(histogram);
 
   auto &xData = result.mutableX();
@@ -187,9 +178,8 @@ HistogramData::Histogram PaddingAndApodization::applyApodizationFunction(
  * @param padding :: [input] the amount of padding to add
  * @returns :: Histogram of the padded data
  */
-HistogramData::Histogram
-PaddingAndApodization::addPadding(const HistogramData::Histogram &histogram,
-                                  const int padding) {
+HistogramData::Histogram PaddingAndApodization::addPadding(const HistogramData::Histogram &histogram,
+                                                           const int padding) {
   if (padding == 0) {
     return histogram;
   }

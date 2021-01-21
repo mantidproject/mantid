@@ -14,8 +14,7 @@ namespace VATES {
   Constructional method.
   @return a fully constructed TimeToTimestep instance.
 */
-TimeToTimeStep TimeToTimeStep::construct(double timeMin, double timeMax,
-                                         size_t nIntervalSteps) {
+TimeToTimeStep TimeToTimeStep::construct(double timeMin, double timeMax, size_t nIntervalSteps) {
   return TimeToTimeStep(timeMin, timeMax, nIntervalSteps);
 }
 
@@ -25,13 +24,11 @@ TimeToTimeStep TimeToTimeStep::construct(double timeMin, double timeMax,
   @param timeMax : the maximum time/parameter in the range.
   @param nIntervalSteps : the number of interval steps available.
 */
-TimeToTimeStep::TimeToTimeStep(double timeMin, double timeMax,
-                               size_t nIntervalSteps)
+TimeToTimeStep::TimeToTimeStep(double timeMin, double timeMax, size_t nIntervalSteps)
     : m_timeMin(timeMin), m_timeMax(timeMax), m_runnable(true) {
   const double timeRange{timeMax - timeMin};
   if (timeRange <= 0) {
-    throw std::runtime_error(
-        "Range must be positive. timeMax should be > timeMin");
+    throw std::runtime_error("Range must be positive. timeMax should be > timeMin");
   }
   // This fraction is convenient to pre-calculate.
   m_fraction = (1 / timeRange) * static_cast<double>(nIntervalSteps);
@@ -54,8 +51,7 @@ size_t TimeToTimeStep::operator()(double time) const {
   if (time > m_timeMax || time < m_timeMin) {
     return 0;
   } else {
-    return static_cast<size_t>((time * m_fraction) +
-                               m_c); // Linear interpolation
+    return static_cast<size_t>((time * m_fraction) + m_c); // Linear interpolation
   }
 }
 } // namespace VATES

@@ -31,8 +31,7 @@ public:
 
   std::string name() const override { return "LatticeFunction"; }
 
-  void functionLattice(const API::LatticeDomain &latticeDomain,
-                       API::FunctionValues &values) const override;
+  void functionLattice(const API::LatticeDomain &latticeDomain, API::FunctionValues &values) const override;
 
   void setLatticeSystem(const std::string &crystalSystem) override;
   void setUnitCell(const std::string &unitCellString) override;

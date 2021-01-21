@@ -29,8 +29,7 @@ Logger g_log("RemoteJobManager");
 
 RemoteJobManager::RemoteJobManager(const Poco::XML::Element *elem)
     : m_displayName(elem->getAttribute("name")),
-      m_session(
-          nullptr) // Make sure this is always either NULL or a valid pointer.
+      m_session(nullptr) // Make sure this is always either NULL or a valid pointer.
 {
   // Sanity check m_displayName
   if (m_displayName.length() == 0) {
@@ -41,8 +40,7 @@ RemoteJobManager::RemoteJobManager(const Poco::XML::Element *elem)
   Poco::AutoPtr<Poco::XML::NodeList> nl = elem->getElementsByTagName("baseURL");
   if (nl->length() != 1) {
     g_log.error("HTTP Compute Resources must have exactly one baseURL tag");
-    throw std::runtime_error(
-        "HTTP Compute Resources must have exactly one baseURL tag");
+    throw std::runtime_error("HTTP Compute Resources must have exactly one baseURL tag");
   } else {
     nl = nl->item(0)->childNodes();
     if (nl->length() > 0) {
@@ -56,10 +54,8 @@ RemoteJobManager::RemoteJobManager(const Poco::XML::Element *elem)
 
 RemoteJobManager::~RemoteJobManager() {}
 
-std::istream &RemoteJobManager::httpGet(const std::string &path,
-                                        const std::string &query_str,
-                                        const std::string &username,
-                                        const std::string &password) {
+std::istream &RemoteJobManager::httpGet(const std::string &path, const std::string &query_str,
+                                        const std::string &username, const std::string &password) {
   Poco::Net::HTTPRequest req;
   initGetRequest(req, path, query_str);
 
@@ -91,10 +87,8 @@ std::istream &RemoteJobManager::httpGet(const std::string &path,
   return respStream;
 }
 
-std::istream &RemoteJobManager::httpPost(const std::string &path,
-                                         const PostDataMap &postData,
-                                         const PostDataMap &fileData,
-                                         const std::string &username,
+std::istream &RemoteJobManager::httpPost(const std::string &path, const PostDataMap &postData,
+                                         const PostDataMap &fileData, const std::string &username,
                                          const std::string &password) {
   Poco::Net::HTTPRequest req;
   initPostRequest(req, path);
@@ -112,8 +106,7 @@ std::istream &RemoteJobManager::httpPost(const std::string &path,
   // about
   // how the parts are delimited. See RFC 2045 & 2046 for details.
 
-  char httpLineEnd[3] = {0x0d, 0x0a,
-                         0x00}; // HTTP uses CRLF for its line endings
+  char httpLineEnd[3] = {0x0d, 0x0a, 0x00}; // HTTP uses CRLF for its line endings
 
   // boundary can be almost anything (again, see RFC 2046). The important part
   // is that it
@@ -130,8 +123,7 @@ std::istream &RemoteJobManager::httpPost(const std::string &path,
   auto it = postData.cbegin();
   while (it != postData.cend()) {
     postBody << boundaryLine;
-    postBody << "Content-Disposition: form-data; name=\"" << (*it).first
-             << "\"";
+    postBody << "Content-Disposition: form-data; name=\"" << (*it).first << "\"";
     postBody << httpLineEnd << httpLineEnd;
     postBody << (*it).second;
     postBody << httpLineEnd;
@@ -144,8 +136,7 @@ std::istream &RemoteJobManager::httpPost(const std::string &path,
   it = fileData.begin();
   while (it != fileData.end()) {
     postBody << boundaryLine;
-    postBody << "Content-Disposition: form-data; name=\"" << (*it).first
-             << "\"; filename=\"" << (*it).first << "\"";
+    postBody << "Content-Disposition: form-data; name=\"" << (*it).first << "\"; filename=\"" << (*it).first << "\"";
     postBody << httpLineEnd;
     postBody << "Content-Type: application/octet-stream";
     postBody << httpLineEnd << httpLineEnd;
@@ -182,23 +173,17 @@ std::istream &RemoteJobManager::httpPost(const std::string &path,
 
 // Wrappers for a lot of the boilerplate code needed to perform an HTTPS GET or
 // POST
-void RemoteJobManager::initGetRequest(Poco::Net::HTTPRequest &req,
-                                      const std::string &extraPath,
+void RemoteJobManager::initGetRequest(Poco::Net::HTTPRequest &req, const std::string &extraPath,
                                       const std::string &queryString) {
-  return initHTTPRequest(req, Poco::Net::HTTPRequest::HTTP_GET,
-                         std::move(extraPath), std::move(queryString));
+  return initHTTPRequest(req, Poco::Net::HTTPRequest::HTTP_GET, std::move(extraPath), std::move(queryString));
 }
 
-void RemoteJobManager::initPostRequest(Poco::Net::HTTPRequest &req,
-                                       const std::string &extraPath) {
-  return initHTTPRequest(req, Poco::Net::HTTPRequest::HTTP_POST,
-                         std::move(extraPath));
+void RemoteJobManager::initPostRequest(Poco::Net::HTTPRequest &req, const std::string &extraPath) {
+  return initHTTPRequest(req, Poco::Net::HTTPRequest::HTTP_POST, std::move(extraPath));
 }
 
-void RemoteJobManager::initHTTPRequest(Poco::Net::HTTPRequest &req,
-                                       const std::string &method,
-                                       const std::string &extraPath,
-                                       const std::string &queryString) {
+void RemoteJobManager::initHTTPRequest(Poco::Net::HTTPRequest &req, const std::string &method,
+                                       const std::string &extraPath, const std::string &queryString) {
   // Set up the session object
   if (m_session) {
 
@@ -211,18 +196,15 @@ void RemoteJobManager::initHTTPRequest(Poco::Net::HTTPRequest &req,
     // means we're not checking the SSL certificate that the server
     // sends to us. That's BAD!!
     Poco::Net::Context::Ptr context =
-        new Poco::Net::Context(Poco::Net::Context::CLIENT_USE, "", "", "",
-                               Poco::Net::Context::VERIFY_NONE, 9, false,
+        new Poco::Net::Context(Poco::Net::Context::CLIENT_USE, "", "", "", Poco::Net::Context::VERIFY_NONE, 9, false,
                                "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");
-    m_session = std::make_unique<Poco::Net::HTTPSClientSession>(
-        Poco::URI(m_serviceBaseUrl).getHost(),
-        Poco::URI(m_serviceBaseUrl).getPort(), context);
+    m_session = std::make_unique<Poco::Net::HTTPSClientSession>(Poco::URI(m_serviceBaseUrl).getHost(),
+                                                                Poco::URI(m_serviceBaseUrl).getPort(), context);
   } else {
     // Create a regular HTTP client session.  (NOTE: Using unencrypted HTTP is a
     // really bad idea! We'll be sending passwords in the clear!)
-    m_session = std::make_unique<Poco::Net::HTTPClientSession>(
-        Poco::URI(m_serviceBaseUrl).getHost(),
-        Poco::URI(m_serviceBaseUrl).getPort());
+    m_session = std::make_unique<Poco::Net::HTTPClientSession>(Poco::URI(m_serviceBaseUrl).getHost(),
+                                                               Poco::URI(m_serviceBaseUrl).getPort());
   }
 
   Poco::URI uri(m_serviceBaseUrl);

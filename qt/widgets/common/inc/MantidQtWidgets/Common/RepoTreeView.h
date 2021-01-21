@@ -29,8 +29,7 @@ signals:
 
 protected slots:
 
-  void currentChanged(const QModelIndex &current,
-                      const QModelIndex &previous) override {
+  void currentChanged(const QModelIndex &current, const QModelIndex &previous) override {
     QTreeView::currentChanged(current, previous);
     emit currentCell(current);
   };

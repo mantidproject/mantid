@@ -45,9 +45,7 @@ ISISRunLogs::ISISRunLogs(const API::Run &icpRun) {
  * Adds the status log to the this run.
  * @param exptRun :: The run that
  */
-void ISISRunLogs::addStatusLog(API::Run &exptRun) {
-  exptRun.addLogData(m_logParser->createRunningLog());
-}
+void ISISRunLogs::addStatusLog(API::Run &exptRun) { exptRun.addLogData(m_logParser->createRunningLog()); }
 
 /**
  * Adds period related logs, and applies log filtering
@@ -76,21 +74,17 @@ void ISISRunLogs::applyLogFiltering(Mantid::API::Run &exptRun) {
   const TimeSeriesProperty<bool> *maskProp{nullptr};
   std::unique_ptr<LogFilter> logFilter{nullptr};
   try {
-    auto runningLog =
-        exptRun.getTimeSeriesProperty<bool>(LogParser::statusLogName());
+    auto runningLog = exptRun.getTimeSeriesProperty<bool>(LogParser::statusLogName());
     logFilter = std::make_unique<LogFilter>(*runningLog);
   } catch (std::exception &) {
-    g_log.warning(
-        "Cannot find status log. Logs will be not be filtered by run status");
+    g_log.warning("Cannot find status log. Logs will be not be filtered by run status");
   }
 
   TimeSeriesProperty<bool> *currentPeriodLog = nullptr;
   bool multiperiod = false;
   try {
-    auto period =
-        exptRun.getPropertyAsIntegerValue(LogParser::currentPeriodLogName());
-    currentPeriodLog = exptRun.getTimeSeriesProperty<bool>(
-        LogParser::currentPeriodLogName(period));
+    auto period = exptRun.getPropertyAsIntegerValue(LogParser::currentPeriodLogName());
+    currentPeriodLog = exptRun.getTimeSeriesProperty<bool>(LogParser::currentPeriodLogName(period));
   } catch (const std::exception &) {
     g_log.warning("Cannot find period log. Logs will be not be filtered by "
                   "current period");
@@ -98,8 +92,7 @@ void ISISRunLogs::applyLogFiltering(Mantid::API::Run &exptRun) {
 
   try {
     // get the number of periods as the max of the periods log
-    auto periodsLog =
-        exptRun.getTimeSeriesProperty<int>(LogParser::periodsLogName());
+    auto periodsLog = exptRun.getTimeSeriesProperty<int>(LogParser::periodsLogName());
     multiperiod = (periodsLog->getStatistics().maximum > 1.);
   } catch (const std::exception &) {
     g_log.warning("Cannot find periods log. Logs will be not be filtered by "
@@ -119,8 +112,7 @@ void ISISRunLogs::applyLogFiltering(Mantid::API::Run &exptRun) {
 
   // Filter logs if we have anything to filter on
   if (maskProp)
-    exptRun.filterByLog(*maskProp,
-                        ISISRunLogs::getLogNamesExcludedFromFiltering(exptRun));
+    exptRun.filterByLog(*maskProp, ISISRunLogs::getLogNamesExcludedFromFiltering(exptRun));
 }
 
 /**
@@ -132,8 +124,7 @@ void ISISRunLogs::addPeriodLog(const int period, API::Run &exptRun) {
   exptRun.addLogData(m_logParser->createPeriodLog(period));
 }
 
-std::vector<std::string>
-ISISRunLogs::getLogNamesExcludedFromFiltering(const API::Run &run) {
+std::vector<std::string> ISISRunLogs::getLogNamesExcludedFromFiltering(const API::Run &run) {
   std::vector<std::string> retVal;
   if (run.hasProperty(LogParser::statusLogName())) {
     retVal.emplace_back(LogParser::statusLogName());
@@ -146,8 +137,7 @@ ISISRunLogs::getLogNamesExcludedFromFiltering(const API::Run &run) {
     // add all properties starting with period
     if (prop->name().rfind("period", 0) == 0) {
       // add if not already in the list
-      if (std::find(retVal.cbegin(), retVal.cend(), prop->name()) ==
-          retVal.cend()) {
+      if (std::find(retVal.cbegin(), retVal.cend(), prop->name()) == retVal.cend()) {
         retVal.emplace_back(prop->name());
       }
     }

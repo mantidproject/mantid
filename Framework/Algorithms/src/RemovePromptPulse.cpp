@@ -26,20 +26,16 @@ const string RemovePromptPulse::name() const { return "RemovePromptPulse"; }
 
 int RemovePromptPulse::version() const { return 1; }
 
-const string RemovePromptPulse::category() const {
-  return "CorrectionFunctions\\BackgroundCorrections";
-}
+const string RemovePromptPulse::category() const { return "CorrectionFunctions\\BackgroundCorrections"; }
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void RemovePromptPulse::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<>>(
-                      "InputWorkspace", "", Direction::Input,
-                      std::make_shared<WorkspaceUnitValidator>("TOF")),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input,
+                                                        std::make_shared<WorkspaceUnitValidator>("TOF")),
                   "An input workspace.");
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 
   auto validator = std::make_shared<BoundedValidator<double>>();
@@ -59,8 +55,7 @@ double getMedian(const API::Run &run, const std::string &name) {
   if (!run.hasProperty(name)) {
     return Mantid::EMPTY_DBL();
   }
-  auto *log =
-      dynamic_cast<Kernel::TimeSeriesProperty<double> *>(run.getLogData(name));
+  auto *log = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(run.getLogData(name));
   if (!log)
     return Mantid::EMPTY_DBL();
 
@@ -68,10 +63,8 @@ double getMedian(const API::Run &run, const std::string &name) {
   return stats.median;
 }
 
-void getTofRange(const MatrixWorkspace_const_sptr &wksp, double &tmin,
-                 double &tmax) {
-  DataObjects::EventWorkspace_const_sptr eventWksp =
-      std::dynamic_pointer_cast<const DataObjects::EventWorkspace>(wksp);
+void getTofRange(const MatrixWorkspace_const_sptr &wksp, double &tmin, double &tmax) {
+  DataObjects::EventWorkspace_const_sptr eventWksp = std::dynamic_pointer_cast<const DataObjects::EventWorkspace>(wksp);
   if (eventWksp == nullptr) {
     wksp->getXMinMax(tmin, tmax);
   } else {
@@ -108,18 +101,15 @@ void RemovePromptPulse::exec() {
   double tmin;
   double tmax;
   getTofRange(inputWS, tmin, tmax);
-  g_log.information() << "Data tmin=" << tmin << ", tmax=" << tmax
-                      << ", period=" << period << " microseconds\n";
+  g_log.information() << "Data tmin=" << tmin << ", tmax=" << tmax << ", period=" << period << " microseconds\n";
 
   // calculate the times for the prompt pulse
-  std::vector<double> pulseTimes =
-      this->calculatePulseTimes(tmin, tmax, period);
+  std::vector<double> pulseTimes = this->calculatePulseTimes(tmin, tmax, period);
   if (pulseTimes.empty()) {
     g_log.notice() << "Not applying filter since prompt pulse is not in data "
                       "range (period = "
                    << period << ")\n";
-    setProperty("OutputWorkspace",
-                std::const_pointer_cast<MatrixWorkspace>(inputWS));
+    setProperty("OutputWorkspace", std::const_pointer_cast<MatrixWorkspace>(inputWS));
     return;
   }
   g_log.information() << "Calculated prompt pulses at ";
@@ -131,17 +121,14 @@ void RemovePromptPulse::exec() {
   for (double &pulseTime : pulseTimes) {
     double right = pulseTime + width;
 
-    g_log.notice() << "Filtering tmin=" << pulseTime << ", tmax=" << right
-                   << " microseconds\n";
+    g_log.notice() << "Filtering tmin=" << pulseTime << ", tmax=" << right << " microseconds\n";
 
     // run maskbins to do the work on the first prompt pulse
     IAlgorithm_sptr algo = this->createChildAlgorithm("MaskBins");
     if (outputWS) {
-      algo->setProperty<MatrixWorkspace_sptr>(
-          "InputWorkspace", std::const_pointer_cast<MatrixWorkspace>(outputWS));
+      algo->setProperty<MatrixWorkspace_sptr>("InputWorkspace", std::const_pointer_cast<MatrixWorkspace>(outputWS));
     } else { // should only be first time
-      algo->setProperty<MatrixWorkspace_sptr>(
-          "InputWorkspace", std::const_pointer_cast<MatrixWorkspace>(inputWS));
+      algo->setProperty<MatrixWorkspace_sptr>("InputWorkspace", std::const_pointer_cast<MatrixWorkspace>(inputWS));
       outputWS = this->getProperty("OutputWorkspace");
     }
     // always write to correct output workspace
@@ -184,9 +171,7 @@ double RemovePromptPulse::getFrequency(const API::Run &run) {
  * @return A vector of all prompt pulse times possible within the time-of-flight
  * range.
  */
-std::vector<double>
-RemovePromptPulse::calculatePulseTimes(const double tmin, const double tmax,
-                                       const double period) {
+std::vector<double> RemovePromptPulse::calculatePulseTimes(const double tmin, const double tmax, const double period) {
   std::vector<double> times;
   double time = 0.;
 

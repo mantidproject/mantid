@@ -41,8 +41,7 @@ struct UnstructuredPoint {
  @date 24/01/2010
  */
 
-class DLLExport vtkDataSetFactory
-    : public Mantid::Kernel::Chainable<vtkDataSetFactory> {
+class DLLExport vtkDataSetFactory : public Mantid::Kernel::Chainable<vtkDataSetFactory> {
 
 public:
   /// Constructor
@@ -55,8 +54,7 @@ public:
   virtual void initialize(const Mantid::API::Workspace_sptr &workspace) = 0;
 
   /// Create the product in one step.
-  virtual vtkSmartPointer<vtkDataSet> oneStepCreate(Mantid::API::Workspace_sptr,
-                                                    ProgressAction &);
+  virtual vtkSmartPointer<vtkDataSet> oneStepCreate(Mantid::API::Workspace_sptr, ProgressAction &);
 
   /// Get the name of the type.
   virtual std::string getFactoryTypeName() const = 0;
@@ -66,15 +64,12 @@ public:
                                          // workspaces and put this method on
                                          // that subtype.
   {
-    throw std::runtime_error(
-        "vtkDataSetFactory does not implement ::setRecursionDepth");
+    throw std::runtime_error("vtkDataSetFactory does not implement ::setRecursionDepth");
   }
 
   /// Setter for whether a workspace defined transformation should be used or
   /// not.
-  virtual void setUseTransform(bool bUseTransform) {
-    m_useTransform = bUseTransform;
-  }
+  virtual void setUseTransform(bool bUseTransform) { m_useTransform = bUseTransform; }
 
   /// Getter for the use transform status.
   virtual bool getUseTransform() const { return m_useTransform; }
@@ -86,12 +81,7 @@ public:
   bool doesCheckDimensionality() const;
 
   /// Dimensionalities of interest.
-  enum Dimensionality {
-    OneDimensional = 1,
-    TwoDimensional = 2,
-    ThreeDimensional = 3,
-    FourDimensional = 4
-  };
+  enum Dimensionality { OneDimensional = 1, TwoDimensional = 2, ThreeDimensional = 3, FourDimensional = 4 };
 
   static const std::string ScalarName;
 
@@ -105,17 +95,13 @@ protected:
    @return whether the checks pass or fail.
    */
   template <typename IMDWorkspaceType, size_t ExpectedNDimensions>
-  bool checkWorkspace(const IMDWorkspaceType &imdws,
-                      bool bExactMatch = true) const {
+  bool checkWorkspace(const IMDWorkspaceType &imdws, bool bExactMatch = true) const {
     bool bPassesDimensionalityCheck = false;
-    size_t actualNonIntegratedDimensionality =
-        imdws.getNonIntegratedDimensions().size();
+    size_t actualNonIntegratedDimensionality = imdws.getNonIntegratedDimensions().size();
     if (bExactMatch) {
-      bPassesDimensionalityCheck =
-          (ExpectedNDimensions == actualNonIntegratedDimensionality);
+      bPassesDimensionalityCheck = (ExpectedNDimensions == actualNonIntegratedDimensionality);
     } else {
-      bPassesDimensionalityCheck =
-          (actualNonIntegratedDimensionality >= ExpectedNDimensions);
+      bPassesDimensionalityCheck = (actualNonIntegratedDimensionality >= ExpectedNDimensions);
     }
     if (this->doesCheckDimensionality() && !bPassesDimensionalityCheck) {
       // Abort as there are dimensionality checks to be applied and these checks
@@ -136,13 +122,9 @@ protected:
    checks fail.
    */
   template <typename IMDWorkspaceType, size_t ExpectedNDimensions>
-  std::shared_ptr<IMDWorkspaceType>
-  castAndCheck(Mantid::API::Workspace_sptr workspace,
-               bool bExactMatch = true) const {
-    std::shared_ptr<IMDWorkspaceType> imdws =
-        std::dynamic_pointer_cast<IMDWorkspaceType>(workspace);
-    if (imdws && this->checkWorkspace<IMDWorkspaceType, ExpectedNDimensions>(
-                     *imdws, bExactMatch)) {
+  std::shared_ptr<IMDWorkspaceType> castAndCheck(Mantid::API::Workspace_sptr workspace, bool bExactMatch = true) const {
+    std::shared_ptr<IMDWorkspaceType> imdws = std::dynamic_pointer_cast<IMDWorkspaceType>(workspace);
+    if (imdws && this->checkWorkspace<IMDWorkspaceType, ExpectedNDimensions>(*imdws, bExactMatch)) {
       return imdws;
     } else {
       // Abort as imdws cannot be dynamically cast to the target type.
@@ -161,17 +143,13 @@ protected:
   checks fail.
   */
   template <typename IMDWorkspaceType, size_t ExpectedNDimensions>
-  std::shared_ptr<IMDWorkspaceType>
-  doInitialize(Mantid::API::Workspace_sptr workspace,
-               bool bExactMatch = true) const {
+  std::shared_ptr<IMDWorkspaceType> doInitialize(Mantid::API::Workspace_sptr workspace, bool bExactMatch = true) const {
     if (!workspace) {
-      std::string message = this->getFactoryTypeName() +
-                            " initialize cannot operate on a null workspace";
+      std::string message = this->getFactoryTypeName() + " initialize cannot operate on a null workspace";
       throw std::invalid_argument(message);
     }
     std::shared_ptr<IMDWorkspaceType> imdws =
-        castAndCheck<IMDWorkspaceType, ExpectedNDimensions>(workspace,
-                                                            bExactMatch);
+        castAndCheck<IMDWorkspaceType, ExpectedNDimensions>(workspace, bExactMatch);
     if (!imdws) {
       if (this->hasSuccessor()) {
         m_successor->setUseTransform(m_useTransform);
@@ -196,13 +174,10 @@ protected:
   false.
   */
   template <typename IMDWorkspaceType, size_t ExpectedNDimensions>
-  vtkSmartPointer<vtkDataSet>
-  tryDelegatingCreation(Mantid::API::Workspace_sptr workspace,
-                        ProgressAction &progressUpdate,
-                        bool bExactMatch = true) const {
+  vtkSmartPointer<vtkDataSet> tryDelegatingCreation(Mantid::API::Workspace_sptr workspace,
+                                                    ProgressAction &progressUpdate, bool bExactMatch = true) const {
     std::shared_ptr<IMDWorkspaceType> imdws =
-        castAndCheck<IMDWorkspaceType, ExpectedNDimensions>(workspace,
-                                                            bExactMatch);
+        castAndCheck<IMDWorkspaceType, ExpectedNDimensions>(workspace, bExactMatch);
     if (!imdws) {
       if (this->hasSuccessor()) {
         return m_successor->create(progressUpdate);

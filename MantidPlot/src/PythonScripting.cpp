@@ -64,14 +64,11 @@ bool checkAndPrintError() {
 } // namespace
 
 // Factory function
-ScriptingEnv *PythonScripting::constructor(ApplicationWindow *parent) {
-  return new PythonScripting(parent);
-}
+ScriptingEnv *PythonScripting::constructor(ApplicationWindow *parent) { return new PythonScripting(parent); }
 
 /** Constructor */
 PythonScripting::PythonScripting(ApplicationWindow *parent)
-    : ScriptingEnv(parent, "Python"), m_globals(nullptr), m_math(nullptr),
-      m_sys(nullptr), m_mainThreadState(nullptr) {}
+    : ScriptingEnv(parent, "Python"), m_globals(nullptr), m_math(nullptr), m_sys(nullptr), m_mainThreadState(nullptr) {}
 
 PythonScripting::~PythonScripting() {}
 
@@ -96,20 +93,16 @@ void PythonScripting::setSysArgs(const QStringList &args) {
  * (NULL is allowed)
  * @return
  */
-Script *
-PythonScripting::newScript(const QString &name, QObject *context,
-                           const Script::InteractionType interact) const {
-  return new PythonScript(const_cast<PythonScripting *>(this), name, interact,
-                          context);
+Script *PythonScripting::newScript(const QString &name, QObject *context,
+                                   const Script::InteractionType interact) const {
+  return new PythonScript(const_cast<PythonScripting *>(this), name, interact, context);
 }
 
 /**
  * Create a code lexer for Python. Ownership of the created object is
  * transferred to the caller.
  */
-QsciLexer *PythonScripting::createCodeLexer() const {
-  return new QsciLexerPython;
-}
+QsciLexer *PythonScripting::createCodeLexer() const { return new QsciLexerPython; }
 
 /**
  * Turn redirects on/off
@@ -120,10 +113,8 @@ void PythonScripting::redirectStdOut(bool on) {
     setQObject(this, "stdout", m_sys);
     setQObject(this, "stderr", m_sys);
   } else {
-    PyDict_SetItem(m_sys, FROM_CSTRING("stdout"),
-                   PyDict_GetItemString(m_sys, "__stdout__"));
-    PyDict_SetItem(m_sys, FROM_CSTRING("stderr"),
-                   PyDict_GetItemString(m_sys, "__stderr__"));
+    PyDict_SetItem(m_sys, FROM_CSTRING("stdout"), PyDict_GetItemString(m_sys, "__stdout__"));
+    PyDict_SetItem(m_sys, FROM_CSTRING("stderr"), PyDict_GetItemString(m_sys, "__stderr__"));
   }
 }
 
@@ -174,8 +165,7 @@ bool PythonScripting::start() {
   // Set a smaller check interval so that it takes fewer 'ticks' to respond to
   // a KeyboardInterrupt
   // The choice of 5 is really quite arbitrary
-  PyObject_CallMethod(sysmod, STR_LITERAL("setcheckinterval"), STR_LITERAL("i"),
-                      5);
+  PyObject_CallMethod(sysmod, STR_LITERAL("setcheckinterval"), STR_LITERAL("i"), 5);
   Py_DECREF(sysmod);
 
   // Custom setup for sip/PyQt4 before import _qti
@@ -226,8 +216,7 @@ void PythonScripting::setupPythonPath() {
   // any .pth files
   const auto appPath = ConfigService::Instance().getPropertiesDir();
   PyObject *sitemod = PyImport_ImportModule("site");
-  Py_DECREF(PyObject_CallMethod(sitemod, STR_LITERAL("addsitedir"),
-                                STR_LITERAL("(s)"), appPath.c_str()));
+  Py_DECREF(PyObject_CallMethod(sitemod, STR_LITERAL("addsitedir"), STR_LITERAL("(s)"), appPath.c_str()));
   Py_DECREF(sitemod);
 
   // The python sys.path is then updated as follows:
@@ -246,14 +235,12 @@ void PythonScripting::setupPythonPath() {
 
   // These should contain only / separators
   // Python paths required by VTK and ParaView
-  const auto pvPythonPaths =
-      ConfigService::Instance().getString("paraview.pythonpaths");
+  const auto pvPythonPaths = ConfigService::Instance().getString("paraview.pythonpaths");
 
   if (!pvPythonPaths.empty()) {
-    Mantid::Kernel::StringTokenizer tokenizer(
-        pvPythonPaths, ";",
-        Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY |
-            Mantid::Kernel::StringTokenizer::TOK_TRIM);
+    Mantid::Kernel::StringTokenizer tokenizer(pvPythonPaths, ";",
+                                              Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY |
+                                                  Mantid::Kernel::StringTokenizer::TOK_TRIM);
     for (const auto &pvPath : tokenizer) {
       if (pvPath.substr(0, 3) == "../") {
         std::string fullPath = appPath + pvPath;
@@ -281,11 +268,9 @@ void PythonScripting::setupSip() {
   }
   if (sipmod) {
     constexpr std::array<const char *, 7> v2Types = {
-        {"QString", "QVariant", "QDate", "QDateTime", "QTextStream", "QTime",
-         "QUrl"}};
+        {"QString", "QVariant", "QDate", "QDateTime", "QTextStream", "QTime", "QUrl"}};
     for (const auto &className : v2Types) {
-      auto result = PyObject_CallMethod(sipmod, STR_LITERAL("setapi"),
-                                        STR_LITERAL("(si)"), className, 2);
+      auto result = PyObject_CallMethod(sipmod, STR_LITERAL("setapi"), STR_LITERAL("(si)"), className, 2);
       if (!result)
         PyErr_Print();
     }
@@ -361,12 +346,9 @@ long PythonScripting::toLong(PyObject *object, bool decref) {
  * @param id The associated Python thread id
  * @param exc The Python exception type
  */
-void PythonScripting::raiseAsyncException(long id, PyObject *exc) {
-  PyThreadState_SetAsyncExc(id, exc);
-}
+void PythonScripting::raiseAsyncException(long id, PyObject *exc) { PyThreadState_SetAsyncExc(id, exc); }
 
-bool PythonScripting::setQObject(QObject *val, const char *name,
-                                 PyObject *dict) {
+bool PythonScripting::setQObject(QObject *val, const char *name, PyObject *dict) {
   if (!val)
     return false;
   PyObject *pyobj = nullptr;
@@ -393,9 +375,7 @@ bool PythonScripting::setQObject(QObject *val, const char *name,
   return true;
 }
 
-bool PythonScripting::setInt(int val, const char *name) {
-  return setInt(val, name, nullptr);
-}
+bool PythonScripting::setInt(int val, const char *name) { return setInt(val, name, nullptr); }
 
 bool PythonScripting::setInt(int val, const char *name, PyObject *dict) {
   PyObject *pyobj = Py_BuildValue("i", val);
@@ -409,9 +389,7 @@ bool PythonScripting::setInt(int val, const char *name, PyObject *dict) {
   return true;
 }
 
-bool PythonScripting::setDouble(double val, const char *name) {
-  return setDouble(val, name, nullptr);
-}
+bool PythonScripting::setDouble(double val, const char *name) { return setDouble(val, name, nullptr); }
 
 bool PythonScripting::setDouble(double val, const char *name, PyObject *dict) {
   PyObject *pyobj = Py_BuildValue("d", val);
@@ -437,8 +415,7 @@ const QStringList PythonScripting::mathFunctions() const {
 }
 
 const QString PythonScripting::mathFunctionDoc(const QString &name) const {
-  PyObject *mathf =
-      PyDict_GetItemString(m_math, name.toAscii().constData()); // borrowed
+  PyObject *mathf = PyDict_GetItemString(m_math, name.toAscii().constData()); // borrowed
   if (!mathf)
     return "";
   PyObject *pydocstr = PyObject_GetAttrString(mathf, "__doc__"); // new
@@ -461,8 +438,7 @@ const QStringList PythonScripting::fileExtensions() const {
 bool PythonScripting::loadInitRCFile() {
   using Mantid::Kernel::ConfigService;
   // The file is expected to be next to the Mantid.properties file
-  QDir propDir(
-      QString::fromStdString(ConfigService::Instance().getPropertiesDir()));
+  QDir propDir(QString::fromStdString(ConfigService::Instance().getPropertiesDir()));
   QString filename = propDir.absoluteFilePath("mantidplotrc.py");
 
   // The Python/C PyRun_SimpleFile function crashes on Windows when trying
@@ -473,14 +449,12 @@ bool PythonScripting::loadInitRCFile() {
     QByteArray data = file.readAll();
     success = (PyRun_SimpleString(data.data()) == 0);
     if (!success) {
-      g_log.error() << "Error running init file \""
-                    << filename.toAscii().constData() << "\"\n";
+      g_log.error() << "Error running init file \"" << filename.toAscii().constData() << "\"\n";
       PyErr_Print();
     }
     file.close();
   } else {
-    g_log.error() << "Error: Cannot open file \""
-                  << filename.toAscii().constData() << "\"\n";
+    g_log.error() << "Error: Cannot open file \"" << filename.toAscii().constData() << "\"\n";
     success = false;
   }
   return success;

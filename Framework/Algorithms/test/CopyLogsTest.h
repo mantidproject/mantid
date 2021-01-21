@@ -30,10 +30,8 @@ public:
   }
 
   void test_exec() {
-    MatrixWorkspace_sptr inputWs =
-        WorkspaceCreationHelper::create2DWorkspace(10, 10);
-    MatrixWorkspace_sptr outputWs =
-        WorkspaceCreationHelper::create2DWorkspace(10, 10);
+    MatrixWorkspace_sptr inputWs = WorkspaceCreationHelper::create2DWorkspace(10, 10);
+    MatrixWorkspace_sptr outputWs = WorkspaceCreationHelper::create2DWorkspace(10, 10);
 
     WorkspaceCreationHelper::storeWS("alpha", outputWs);
 
@@ -46,10 +44,8 @@ public:
   }
 
   void test_mergeReplaceExisting() {
-    MatrixWorkspace_sptr inputWs =
-        WorkspaceCreationHelper::create2DWorkspace(10, 10);
-    MatrixWorkspace_sptr outputWs =
-        WorkspaceCreationHelper::create2DWorkspace(10, 10);
+    MatrixWorkspace_sptr inputWs = WorkspaceCreationHelper::create2DWorkspace(10, 10);
+    MatrixWorkspace_sptr outputWs = WorkspaceCreationHelper::create2DWorkspace(10, 10);
 
     WorkspaceCreationHelper::storeWS("alpha", outputWs);
 
@@ -76,10 +72,8 @@ public:
   }
 
   void test_mergeKeepExisting() {
-    MatrixWorkspace_sptr inputWs =
-        WorkspaceCreationHelper::create2DWorkspace(10, 10);
-    MatrixWorkspace_sptr outputWs =
-        WorkspaceCreationHelper::create2DWorkspace(10, 10);
+    MatrixWorkspace_sptr inputWs = WorkspaceCreationHelper::create2DWorkspace(10, 10);
+    MatrixWorkspace_sptr outputWs = WorkspaceCreationHelper::create2DWorkspace(10, 10);
 
     WorkspaceCreationHelper::storeWS("alpha", outputWs);
 
@@ -106,10 +100,8 @@ public:
   }
 
   void test_wipeExisting() {
-    MatrixWorkspace_sptr inputWs =
-        WorkspaceCreationHelper::create2DWorkspace(10, 10);
-    MatrixWorkspace_sptr outputWs =
-        WorkspaceCreationHelper::create2DWorkspace(10, 10);
+    MatrixWorkspace_sptr inputWs = WorkspaceCreationHelper::create2DWorkspace(10, 10);
+    MatrixWorkspace_sptr outputWs = WorkspaceCreationHelper::create2DWorkspace(10, 10);
 
     WorkspaceCreationHelper::storeWS("alpha", outputWs);
 
@@ -136,8 +128,7 @@ public:
   }
 
   // Run the Copy Logs algorithm
-  void runAlg(const MatrixWorkspace_sptr &in, const MatrixWorkspace_sptr &out,
-              const std::string &mode) {
+  void runAlg(const MatrixWorkspace_sptr &in, const MatrixWorkspace_sptr &out, const std::string &mode) {
     CopyLogs alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
@@ -149,15 +140,13 @@ public:
   }
 
   // Add a string sample log to the workspace
-  void addSampleLog(const MatrixWorkspace_sptr &ws, const std::string &name,
-                    const std::string &value) {
+  void addSampleLog(const MatrixWorkspace_sptr &ws, const std::string &name, const std::string &value) {
     Run &run = ws->mutableRun();
     run.addLogData(new PropertyWithValue<std::string>(name, value));
   }
 
   // Add a double sample log to the workspace
-  void addSampleLog(const MatrixWorkspace_sptr &ws, const std::string &name,
-                    const double value) {
+  void addSampleLog(const MatrixWorkspace_sptr &ws, const std::string &name, const double value) {
     Run &run = ws->mutableRun();
     run.addLogData(new PropertyWithValue<double>(name, value));
   }

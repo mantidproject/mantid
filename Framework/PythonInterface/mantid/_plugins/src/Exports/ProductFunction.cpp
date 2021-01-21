@@ -14,6 +14,5 @@ using namespace boost::python;
 
 void export_ProductFunction() {
 
-  class_<ProductFunction, bases<CompositeFunction>, boost::noncopyable>(
-      "ProductFunction", "Composite Fit functions");
+  class_<ProductFunction, bases<CompositeFunction>, boost::noncopyable>("ProductFunction", "Composite Fit functions");
 }

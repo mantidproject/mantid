@@ -167,9 +167,7 @@ class ColorPickerItem : public QFrame {
   Q_OBJECT
 
 public:
-  ColorPickerItem(const QColor &color = Qt::white,
-                  const QString &text = QString::null,
-                  QWidget *parent = nullptr);
+  ColorPickerItem(const QColor &color = Qt::white, const QString &text = QString::null, QWidget *parent = nullptr);
   ~ColorPickerItem() override;
 
   QColor color() const;
@@ -281,8 +279,7 @@ QtColorPicker::QtColorPicker(QWidget *parent, int cols, bool enableColorDialog)
 
   // Create color grid popup and connect to it.
   popup = new ColorPickerPopup(cols, withColorDialog, this);
-  connect(popup, SIGNAL(selected(const QColor &)),
-          SLOT(setCurrentColor(const QColor &)));
+  connect(popup, SIGNAL(selected(const QColor &)), SLOT(setCurrentColor(const QColor &)));
   connect(popup, SIGNAL(hid()), SLOT(popupClosed()));
 
   // Connect this push button's pressed() signal.
@@ -442,8 +439,7 @@ void QtColorPicker::setCurrentColor(const QColor &color) {
     automatically assigned a position, starting from left to right,
     top to bottom.
 */
-void QtColorPicker::insertColor(const QColor &color, const QString &text,
-                                int index) {
+void QtColorPicker::insertColor(const QColor &color, const QString &text, int index) {
   popup->insertColor(color, text, index);
   if (!firstInserted) {
     col = color;
@@ -460,9 +456,7 @@ void QtColorPicker::insertColor(const QColor &color, const QString &text,
     QColorDialog when clicked. The user will then be able to select
     any custom color they like.
 */
-void QtColorPicker::setColorDialogEnabled(bool enabled) {
-  withColorDialog = enabled;
-}
+void QtColorPicker::setColorDialogEnabled(bool enabled) { withColorDialog = enabled; }
 bool QtColorPicker::colorDialogEnabled() const { return withColorDialog; }
 
 /*!
@@ -511,9 +505,7 @@ QColor QtColorPicker::getColor(const QPoint &point, bool allowCustomColors) {
 
     Constructs the popup widget.
 */
-ColorPickerPopup::ColorPickerPopup(int width, bool withColorDialog,
-                                   QWidget *parent)
-    : QFrame(parent, Qt::Popup) {
+ColorPickerPopup::ColorPickerPopup(int width, bool withColorDialog, QWidget *parent) : QFrame(parent, Qt::Popup) {
   setFrameStyle(QFrame::StyledPanel);
   setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 
@@ -564,8 +556,7 @@ ColorPickerItem *ColorPickerPopup::find(const QColor &col) const {
     Adds \a item to the grid. The items are added from top-left to
     bottom-right.
 */
-void ColorPickerPopup::insertColor(const QColor &col, const QString &text,
-                                   int index) {
+void ColorPickerPopup::insertColor(const QColor &col, const QString &text, int index) {
   // Don't add colors that we have already.
   ColorPickerItem *existingItem = find(col);
   ColorPickerItem *lastSelectedItem = find(lastSelected());
@@ -629,8 +620,7 @@ void ColorPickerPopup::updateSelected() {
   while ((layoutItem = grid->itemAt(i)) != nullptr) {
     QWidget *w = layoutItem->widget();
     if (w && w->inherits("ColorPickerItem")) {
-      ColorPickerItem *litem =
-          reinterpret_cast<ColorPickerItem *>(layoutItem->widget());
+      ColorPickerItem *litem = reinterpret_cast<ColorPickerItem *>(layoutItem->widget());
       if (litem != sender())
         litem->setSelected(false);
     }
@@ -727,8 +717,7 @@ void ColorPickerPopup::keyPressEvent(QKeyEvent *e) {
       while ((layoutItem = grid->itemAt(i)) != nullptr) {
         QWidget *w = layoutItem->widget();
         if (w && w->inherits("ColorPickerItem")) {
-          ColorPickerItem *litem =
-              reinterpret_cast<ColorPickerItem *>(layoutItem->widget());
+          ColorPickerItem *litem = reinterpret_cast<ColorPickerItem *>(layoutItem->widget());
           if (litem != wi)
             litem->setSelected(false);
         }
@@ -747,8 +736,7 @@ void ColorPickerPopup::keyPressEvent(QKeyEvent *e) {
       while ((layoutItem = grid->itemAt(i)) != nullptr) {
         QWidget *w = layoutItem->widget();
         if (w && w->inherits("ColorPickerItem")) {
-          ColorPickerItem *litem =
-              reinterpret_cast<ColorPickerItem *>(layoutItem->widget());
+          ColorPickerItem *litem = reinterpret_cast<ColorPickerItem *>(layoutItem->widget());
           if (litem != wi)
             litem->setSelected(false);
         }
@@ -877,8 +865,7 @@ void ColorPickerPopup::getColorFromDialog() {
     Constructs a ColorPickerItem whose color is set to \a color, and
     whose name is set to \a text.
 */
-ColorPickerItem::ColorPickerItem(const QColor &color, const QString &text,
-                                 QWidget *parent)
+ColorPickerItem::ColorPickerItem(const QColor &color, const QString &text, QWidget *parent)
     : QFrame(parent), c(color), t(text), sel(false) {
   setToolTip(t);
   setFixedWidth(24);
@@ -975,9 +962,7 @@ void ColorPickerItem::paintEvent(QPaintEvent *) {
 /*!
 
 */
-ColorPickerButton::ColorPickerButton(QWidget *parent) : QFrame(parent) {
-  setFrameStyle(StyledPanel);
-}
+ColorPickerButton::ColorPickerButton(QWidget *parent) : QFrame(parent) { setFrameStyle(StyledPanel); }
 
 /*!
 
@@ -1008,11 +993,9 @@ void ColorPickerButton::mouseReleaseEvent(QMouseEvent *) {
 
 */
 void ColorPickerButton::keyPressEvent(QKeyEvent *e) {
-  if (e->key() == Qt::Key_Up || e->key() == Qt::Key_Down ||
-      e->key() == Qt::Key_Left || e->key() == Qt::Key_Right) {
+  if (e->key() == Qt::Key_Up || e->key() == Qt::Key_Down || e->key() == Qt::Key_Left || e->key() == Qt::Key_Right) {
     qApp->sendEvent(parent(), e);
-  } else if (e->key() == Qt::Key_Enter || e->key() == Qt::Key_Space ||
-             e->key() == Qt::Key_Return) {
+  } else if (e->key() == Qt::Key_Enter || e->key() == Qt::Key_Space || e->key() == Qt::Key_Return) {
     setFrameShadow(Sunken);
     update();
   } else {
@@ -1024,11 +1007,9 @@ void ColorPickerButton::keyPressEvent(QKeyEvent *e) {
 
 */
 void ColorPickerButton::keyReleaseEvent(QKeyEvent *e) {
-  if (e->key() == Qt::Key_Up || e->key() == Qt::Key_Down ||
-      e->key() == Qt::Key_Left || e->key() == Qt::Key_Right) {
+  if (e->key() == Qt::Key_Up || e->key() == Qt::Key_Down || e->key() == Qt::Key_Left || e->key() == Qt::Key_Right) {
     qApp->sendEvent(parent(), e);
-  } else if (e->key() == Qt::Key_Enter || e->key() == Qt::Key_Space ||
-             e->key() == Qt::Key_Return) {
+  } else if (e->key() == Qt::Key_Enter || e->key() == Qt::Key_Space || e->key() == Qt::Key_Return) {
     setFrameShadow(Raised);
     repaint();
     emit clicked();

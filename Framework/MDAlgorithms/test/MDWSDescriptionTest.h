@@ -22,17 +22,14 @@ class MDWSDescriptionTest : public CxxTest::TestSuite {
   Mantid::API::MatrixWorkspace_sptr ws2D;
 
 public:
-  static MDWSDescriptionTest *createSuite() {
-    return new MDWSDescriptionTest();
-  }
+  static MDWSDescriptionTest *createSuite() { return new MDWSDescriptionTest(); }
   static void destroySuite(MDWSDescriptionTest *suite) { delete suite; }
 
   void testBuildFromMatrixWS2D() {
     MDWSDescription WSD;
 
     // dimensions (min-max) have not been set
-    TS_ASSERT_THROWS(WSD.buildFromMatrixWS(ws2D, "|Q|", "Direct"),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(WSD.buildFromMatrixWS(ws2D, "|Q|", "Direct"), const std::invalid_argument &);
     std::vector<double> dimMin(2, -1);
     std::vector<double> dimMax(2, 1);
     WSD.setMinMax(dimMin, dimMax);
@@ -68,13 +65,11 @@ public:
     std::vector<std::string> PropNamews(2, "Ei");
     PropNamews[1] = "P";
     // no property named "P" is attached to workspace
-    TS_ASSERT_THROWS(WSD.buildFromMatrixWS(ws2D, "|Q|", "Direct", PropNamews),
-                     const Exception::NotFoundError &);
+    TS_ASSERT_THROWS(WSD.buildFromMatrixWS(ws2D, "|Q|", "Direct", PropNamews), const Exception::NotFoundError &);
 
     // H is attached
     PropNamews[1] = "H";
-    TS_ASSERT_THROWS_NOTHING(
-        WSD.buildFromMatrixWS(ws2D, "|Q|", "Indirect", PropNamews));
+    TS_ASSERT_THROWS_NOTHING(WSD.buildFromMatrixWS(ws2D, "|Q|", "Indirect", PropNamews));
     TS_ASSERT_EQUALS(4, WSD.nDimensions());
 
     std::vector<int> nBins(1, 100);
@@ -101,8 +96,7 @@ public:
     TS_ASSERT_EQUALS(100, nBinsSet[3]);
   }
   void testGetWS4DimIDFine() {
-    MatrixWorkspace_sptr ws2D = WorkspaceCreationHelper::
-        createProcessedWorkspaceWithCylComplexInstrument(4, 10, true);
+    MatrixWorkspace_sptr ws2D = WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(4, 10, true);
     ws2D->mutableRun().addProperty("Ei", 12., "meV", true);
 
     MDWSDescription TWS;
@@ -111,19 +105,14 @@ public:
 
     std::vector<std::string> other_dim_names;
 
-    TS_ASSERT_THROWS_NOTHING(
-        TWS.buildFromMatrixWS(ws2D, "Q3D", "Direct", other_dim_names));
+    TS_ASSERT_THROWS_NOTHING(TWS.buildFromMatrixWS(ws2D, "Q3D", "Direct", other_dim_names));
 
-    TSM_ASSERT_EQUALS("Inelastic workspace will produce 4 dimensions", 4,
-                      TWS.nDimensions());
+    TSM_ASSERT_EQUALS("Inelastic workspace will produce 4 dimensions", 4, TWS.nDimensions());
     std::vector<std::string> dim_units = TWS.getDimUnits();
-    TSM_ASSERT_EQUALS(
-        "Last dimension of Inelastic transformation should be DeltaE", "DeltaE",
-        dim_units[3]);
+    TSM_ASSERT_EQUALS("Last dimension of Inelastic transformation should be DeltaE", "DeltaE", dim_units[3]);
     TSM_ASSERT_EQUALS("Alg ID would be: ", "Q3D", TWS.AlgID);
 
-    TS_ASSERT_THROWS_NOTHING(
-        TWS.buildFromMatrixWS(ws2D, TWS.AlgID, "Indirect", other_dim_names));
+    TS_ASSERT_THROWS_NOTHING(TWS.buildFromMatrixWS(ws2D, TWS.AlgID, "Indirect", other_dim_names));
 
     // std::vector<std::string> dimID= TWS.getDefaultDimIDQ3D(1);
     // for(size_t i=0;i<4;i++)
@@ -147,8 +136,7 @@ public:
   }
 
   MDWSDescriptionTest() {
-    ws2D = WorkspaceCreationHelper::
-        createProcessedWorkspaceWithCylComplexInstrument(4, 10, true);
+    ws2D = WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(4, 10, true);
     // rotate the crystal by twenty degrees back;
     ws2D->mutableRun().mutableGoniometer().setRotationAngle(0, 20);
     // add workspace energy

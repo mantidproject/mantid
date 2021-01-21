@@ -54,8 +54,7 @@ public:
     fun->setParameter("a", 1.1);
     fun->setParameter("b", 2.2);
 
-    std::shared_ptr<CostFuncLeastSquares> costFun =
-        std::make_shared<CostFuncLeastSquares>();
+    std::shared_ptr<CostFuncLeastSquares> costFun = std::make_shared<CostFuncLeastSquares>();
     costFun->setFittingFunction(fun, domain, values);
 
     SimplexMinimizer s;
@@ -111,8 +110,7 @@ public:
     fun->setParameter("Height", 1.);
     fun->setParameter("Lifetime", 1.);
 
-    std::shared_ptr<CostFuncLeastSquares> costFun =
-        std::make_shared<CostFuncLeastSquares>();
+    std::shared_ptr<CostFuncLeastSquares> costFun = std::make_shared<CostFuncLeastSquares>();
     costFun->setFittingFunction(fun, domain, values);
 
     BFGS_Minimizer s;
@@ -144,8 +142,7 @@ public:
     fun->setParameter("a", 1.1);
     fun->setParameter("b", 2.2);
 
-    std::shared_ptr<CostFuncLeastSquares> costFun =
-        std::make_shared<CostFuncLeastSquares>();
+    std::shared_ptr<CostFuncLeastSquares> costFun = std::make_shared<CostFuncLeastSquares>();
     costFun->setFittingFunction(fun, domain, values);
     TS_ASSERT_DELTA(costFun->val(), 0.145,
                     1e-10); // == 0.5 *( 0.2^2 + 0.3^2 + 0.4^2 )
@@ -189,8 +186,7 @@ public:
     fun->setParameter("a", 1.1);
     fun->setParameter("b", 2.2);
 
-    std::shared_ptr<CostFuncLeastSquares> costFun =
-        std::make_shared<CostFuncLeastSquares>();
+    std::shared_ptr<CostFuncLeastSquares> costFun = std::make_shared<CostFuncLeastSquares>();
     costFun->setFittingFunction(fun, domain, values);
     TS_ASSERT_DELTA(costFun->val(), 0.145,
                     1e-10); // == 0.5 *( 0.2^2 + 0.3^2 + 0.4^2 )
@@ -225,8 +221,7 @@ public:
     fun->setParameter("Lifetime", 1.);
     fun->fix(1);
 
-    std::shared_ptr<CostFuncLeastSquares> costFun =
-        std::make_shared<CostFuncLeastSquares>();
+    std::shared_ptr<CostFuncLeastSquares> costFun = std::make_shared<CostFuncLeastSquares>();
     costFun->setFittingFunction(fun, domain, values);
 
     BFGS_Minimizer s;
@@ -273,8 +268,7 @@ public:
   }
 
   void testDerivatives() {
-    API::FunctionDomain1D_sptr domain(
-        new API::FunctionDomain1DVector(79300., 79600., 41));
+    API::FunctionDomain1D_sptr domain(new API::FunctionDomain1DVector(79300., 79600., 41));
     API::FunctionValues_sptr data(new API::FunctionValues(*domain));
     std::shared_ptr<UserFunction> fun0 = std::make_shared<UserFunction>();
     fun0->setAttributeValue("Formula", "b + h * exp(-((x-c)/s)^2)");
@@ -315,8 +309,7 @@ public:
     fnWithBk->addFunction(bk);
     fnWithBk->addFunction(fn);
 
-    std::shared_ptr<CostFuncLeastSquares> costFun =
-        std::make_shared<CostFuncLeastSquares>();
+    std::shared_ptr<CostFuncLeastSquares> costFun = std::make_shared<CostFuncLeastSquares>();
     // costFun->setFittingFunction(fun1,domain,values);
     costFun->setFittingFunction(fnWithBk, domain, values);
 

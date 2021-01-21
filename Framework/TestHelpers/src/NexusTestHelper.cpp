@@ -26,8 +26,7 @@
 //----------------------------------------------------------------------------------------------
 /** structor.
  * */
-NexusTestHelper::NexusTestHelper(bool deleteFile)
-    : file(nullptr), deleteFile(deleteFile) {}
+NexusTestHelper::NexusTestHelper(bool deleteFile) : file(nullptr), deleteFile(deleteFile) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor.
@@ -48,9 +47,7 @@ NexusTestHelper::~NexusTestHelper() {
  * @param barefilename :: simple filename (no path) to save to.
  * */
 void NexusTestHelper::createFile(std::string barefilename) {
-  filename = (Mantid::Kernel::ConfigService::Instance().getString(
-                  "defaultsave.directory") +
-              barefilename);
+  filename = (Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory") + barefilename);
   if (Poco::File(filename).exists())
     Poco::File(filename).remove();
   file = std::make_unique<::NeXus::File>(filename, NXACC_CREATE5);
@@ -61,8 +58,7 @@ void NexusTestHelper::createFile(std::string barefilename) {
 /** Close the newly created file and re-open it for reading back. */
 void NexusTestHelper::reopenFile() {
   if (!file)
-    throw std::runtime_error(
-        "NexusTestHelper: you must call createFile() before reopenFile().");
+    throw std::runtime_error("NexusTestHelper: you must call createFile() before reopenFile().");
   file->close();
   file = std::make_unique<::NeXus::File>(filename, NXACC_READ);
   file->openGroup("test_entry", "NXentry");

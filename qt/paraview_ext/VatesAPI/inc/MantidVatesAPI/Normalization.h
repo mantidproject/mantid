@@ -49,9 +49,8 @@ using NormFuncIMDNodePtr = Mantid::signal_t (Mantid::API::IMDNode::*)() const;
 /**
 Determine which normalization function will be called on an IMDNode
 */
-NormFuncIMDNodePtr makeMDEventNormalizationFunction(
-    VisualNormalization normalizationOption,
-    Mantid::API::IMDEventWorkspace const *const ws);
+NormFuncIMDNodePtr makeMDEventNormalizationFunction(VisualNormalization normalizationOption,
+                                                    Mantid::API::IMDEventWorkspace const *const ws);
 
 /**
 Determine which normalization function will be called on an IMDIterator of an

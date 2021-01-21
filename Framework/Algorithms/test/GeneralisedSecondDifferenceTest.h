@@ -23,8 +23,7 @@ class GeneralisedSecondDifferenceTest : public CxxTest::TestSuite {
 public:
   void testInit() {
 
-    IAlgorithm_sptr gsd = Mantid::API::AlgorithmManager::Instance().create(
-        "GeneralisedSecondDifference", 1);
+    IAlgorithm_sptr gsd = Mantid::API::AlgorithmManager::Instance().create("GeneralisedSecondDifference", 1);
 
     TS_ASSERT_EQUALS(gsd->name(), "GeneralisedSecondDifference");
     TS_ASSERT_EQUALS(gsd->category(), "Arithmetic");
@@ -34,14 +33,12 @@ public:
 
   void testExec() {
 
-    IAlgorithm_sptr gsd = Mantid::API::AlgorithmManager::Instance().create(
-        "GeneralisedSecondDifference", 1);
+    IAlgorithm_sptr gsd = Mantid::API::AlgorithmManager::Instance().create("GeneralisedSecondDifference", 1);
 
     auto x = Points{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
     auto y = Counts{0.3, 0.3, 0.3, 0.47, 3.9, 10.3, 3.9, 0.47, 0.3, 0.3};
 
-    MatrixWorkspace_sptr inputWs = WorkspaceFactory::Instance().create(
-        "Workspace2D", 1, y.size(), y.size());
+    MatrixWorkspace_sptr inputWs = WorkspaceFactory::Instance().create("Workspace2D", 1, y.size(), y.size());
     inputWs->setHistogram(0, x, y);
 
     gsd->setProperty("InputWorkspace", inputWs);
@@ -52,8 +49,7 @@ public:
     gsd->execute();
     TS_ASSERT(gsd->isExecuted());
 
-    MatrixWorkspace_sptr outWs = Mantid::API::AnalysisDataService::Instance()
-                                     .retrieveWS<MatrixWorkspace>("secondDiff");
+    MatrixWorkspace_sptr outWs = Mantid::API::AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("secondDiff");
     TS_ASSERT(outWs);
 
     TS_ASSERT_EQUALS(outWs->getNumberHistograms(), 1);
@@ -79,14 +75,11 @@ public:
     return new GeneralisedSecondDifferenceTestPerformance();
   }
 
-  static void destroySuite(GeneralisedSecondDifferenceTestPerformance *suite) {
-    delete suite;
-  }
+  static void destroySuite(GeneralisedSecondDifferenceTestPerformance *suite) { delete suite; }
 
   void setUp() override {
     inputMatrix = WorkspaceCreationHelper::create2DWorkspaceBinned(10000, 1000);
-    inputEvent =
-        WorkspaceCreationHelper::createEventWorkspace(10000, 1000, 5000);
+    inputEvent = WorkspaceCreationHelper::createEventWorkspace(10000, 1000, 5000);
   }
 
   void tearDown() override {

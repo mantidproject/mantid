@@ -23,8 +23,7 @@ using MantidQt::API::MantidDesktopServices;
  *
  * @param allCategories :: the set of all categories to be used in the model.
  */
-InterfaceCategoryModel::InterfaceCategoryModel(
-    const QSet<QString> &allCategories)
+InterfaceCategoryModel::InterfaceCategoryModel(const QSet<QString> &allCategories)
     : QAbstractListModel(), m_allCategories(allCategories.toList()) {
   qSort(m_allCategories);
   loadHiddenCategories();
@@ -51,9 +50,7 @@ int InterfaceCategoryModel::rowCount(const QModelIndex &parent) const {
  * @param role :: the "role" of the data, which can be one of several enum
  *values.  See Qt docs for more info.
  */
-QVariant InterfaceCategoryModel::headerData(int section,
-                                            Qt::Orientation orientation,
-                                            int role) const {
+QVariant InterfaceCategoryModel::headerData(int section, Qt::Orientation orientation, int role) const {
   UNUSED_ARG(section);
 
   if (role == Qt::DisplayRole && orientation == Qt::Horizontal)
@@ -69,8 +66,7 @@ QVariant InterfaceCategoryModel::headerData(int section,
  * @param role :: the "role" of the data, which can be one of several enum
  *values.  See Qt docs for more info.
  */
-QVariant InterfaceCategoryModel::data(const QModelIndex &index,
-                                      int role) const {
+QVariant InterfaceCategoryModel::data(const QModelIndex &index, int role) const {
   if (!index.isValid())
     return QVariant();
 
@@ -96,8 +92,7 @@ QVariant InterfaceCategoryModel::data(const QModelIndex &index,
  * @param role :: the "role" of the data, which can be one of several enum
  *values.  See Qt docs for more info.
  */
-bool InterfaceCategoryModel::setData(const QModelIndex &index,
-                                     const QVariant &value, int role) {
+bool InterfaceCategoryModel::setData(const QModelIndex &index, const QVariant &value, int role) {
   if (!index.isValid())
     return false;
 
@@ -127,8 +122,7 @@ Qt::ItemFlags InterfaceCategoryModel::flags(const QModelIndex &index) const {
  * Persist this model's data to the user preferences file.
  */
 void InterfaceCategoryModel::saveHiddenCategories() {
-  QString propValue =
-      static_cast<QStringList>(m_hiddenCategories.toList()).join(";");
+  QString propValue = static_cast<QStringList>(m_hiddenCategories.toList()).join(";");
 
   auto &config = Mantid::Kernel::ConfigService::Instance();
   config.setString("interfaces.categories.hidden", propValue.toStdString());
@@ -139,9 +133,8 @@ void InterfaceCategoryModel::saveHiddenCategories() {
  * Load this model's data from the user preferences file.
  */
 void InterfaceCategoryModel::loadHiddenCategories() {
-  const QString propValue = QString::fromStdString(
-      Mantid::Kernel::ConfigService::Instance().getString(
-          "interfaces.categories.hidden"));
+  const QString propValue =
+      QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("interfaces.categories.hidden"));
   m_hiddenCategories = propValue.split(";", QString::SkipEmptyParts).toSet();
 }
 
@@ -169,8 +162,7 @@ void ManageInterfaceCategories::initLayout() {
   m_uiForm.categoryTreeView->show();
 
   // OK button should save any changes and then exit.
-  connect(m_uiForm.okButton, SIGNAL(pressed()), &m_model,
-          SLOT(saveHiddenCategories()));
+  connect(m_uiForm.okButton, SIGNAL(pressed()), &m_model, SLOT(saveHiddenCategories()));
   connect(m_uiForm.okButton, SIGNAL(pressed()), this, SLOT(close()));
 
   // Cancel should just exit.

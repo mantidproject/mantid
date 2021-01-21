@@ -37,9 +37,7 @@ class ExtractQENSMembersTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ExtractQENSMembersTest *createSuite() {
-    return new ExtractQENSMembersTest();
-  }
+  static ExtractQENSMembersTest *createSuite() { return new ExtractQENSMembersTest(); }
   static void destroySuite(ExtractQENSMembersTest *suite) { delete suite; }
 
   ExtractQENSMembersTest() { FrameworkManager::Instance(); }
@@ -57,12 +55,10 @@ public:
     const auto &dataX = inputWS->dataX(0);
     auto resultGroup = createResultGroup(members, dataX, numSpectra);
 
-    WorkspaceGroup_sptr membersWorkspace =
-        extractMembers(inputWS, resultGroup, outputName);
+    WorkspaceGroup_sptr membersWorkspace = extractMembers(inputWS, resultGroup, outputName);
     membersWorkspace->sortByName();
 
-    checkMembersOutput(membersWorkspace, members, outputName, numSpectra,
-                       dataX);
+    checkMembersOutput(membersWorkspace, members, outputName, numSpectra, dataX);
 
     AnalysisDataService::Instance().clear();
   }
@@ -73,10 +69,8 @@ public:
     std::string fileName = runName + "_" + runSample;
 
     std::string outputName = "Extracted";
-    std::vector<std::string> original = {"MemberA", "MemberB", "MemberC",
-                                         "MemberD"};
-    std::vector<std::string> members = {"MemberA", "Convolution", "Convolution",
-                                        "MemberD"};
+    std::vector<std::string> original = {"MemberA", "MemberB", "MemberC", "MemberD"};
+    std::vector<std::string> members = {"MemberA", "Convolution", "Convolution", "MemberD"};
     std::vector<std::string> convolved = {"MemberB", "MemberC"};
 
     auto inputWS = loadWorkspace(fileName + "_red.nxs");
@@ -84,24 +78,19 @@ public:
     const auto &dataX = inputWS->dataX(0);
     auto resultGroup = createResultGroup(members, dataX, numSpectra);
 
-    WorkspaceGroup_sptr membersWorkspace =
-        extractMembers(inputWS, resultGroup, convolved, outputName);
+    WorkspaceGroup_sptr membersWorkspace = extractMembers(inputWS, resultGroup, convolved, outputName);
     membersWorkspace->sortByName();
 
-    checkMembersOutput(membersWorkspace, original, outputName, numSpectra,
-                       dataX);
+    checkMembersOutput(membersWorkspace, original, outputName, numSpectra, dataX);
 
     AnalysisDataService::Instance().clear();
   }
 
 private:
-  void checkMembersOutput(const WorkspaceGroup_sptr &membersWorkspace,
-                          const std::vector<std::string> &members,
-                          const std::string &outputName, size_t numSpectra,
-                          const std::vector<double> &dataX) const {
+  void checkMembersOutput(const WorkspaceGroup_sptr &membersWorkspace, const std::vector<std::string> &members,
+                          const std::string &outputName, size_t numSpectra, const std::vector<double> &dataX) const {
     for (auto i = 0u; i < members.size(); ++i) {
-      auto memberWorkspace = std::dynamic_pointer_cast<MatrixWorkspace>(
-          membersWorkspace->getItem(i));
+      auto memberWorkspace = std::dynamic_pointer_cast<MatrixWorkspace>(membersWorkspace->getItem(i));
       const auto &memberName = memberWorkspace->getName();
       const auto expectedName = outputName + "_" + members[i];
       const auto numMemberSpectra = memberWorkspace->getNumberHistograms();
@@ -113,48 +102,35 @@ private:
     }
   }
 
-  WorkspaceGroup_sptr extractMembers(const MatrixWorkspace_sptr &inputWs,
-                                     const WorkspaceGroup_sptr &resultGroupWs,
+  WorkspaceGroup_sptr extractMembers(const MatrixWorkspace_sptr &inputWs, const WorkspaceGroup_sptr &resultGroupWs,
                                      const std::string &outputWsName) const {
-    auto extractAlgorithm = extractMembersAlgorithm(
-        std::move(inputWs), std::move(resultGroupWs), outputWsName);
+    auto extractAlgorithm = extractMembersAlgorithm(std::move(inputWs), std::move(resultGroupWs), outputWsName);
     extractAlgorithm->execute();
-    return AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-        outputWsName);
+    return AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outputWsName);
   }
 
-  WorkspaceGroup_sptr
-  extractMembers(const MatrixWorkspace_sptr &inputWs,
-                 const WorkspaceGroup_sptr &resultGroupWs,
-                 const std::vector<std::string> &convolvedMembers,
-                 const std::string &outputWsName) const {
+  WorkspaceGroup_sptr extractMembers(const MatrixWorkspace_sptr &inputWs, const WorkspaceGroup_sptr &resultGroupWs,
+                                     const std::vector<std::string> &convolvedMembers,
+                                     const std::string &outputWsName) const {
     auto extractAlgorithm =
-        extractMembersAlgorithm(std::move(inputWs), std::move(resultGroupWs),
-                                convolvedMembers, outputWsName);
+        extractMembersAlgorithm(std::move(inputWs), std::move(resultGroupWs), convolvedMembers, outputWsName);
     extractAlgorithm->execute();
-    return AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-        outputWsName);
+    return AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outputWsName);
   }
 
-  IAlgorithm_sptr
-  extractMembersAlgorithm(const MatrixWorkspace_sptr &inputWs,
-                          const WorkspaceGroup_sptr &resultGroupWs,
-                          const std::string &outputWsName) const {
-    auto extractMembersAlg =
-        AlgorithmManager::Instance().create("ExtractQENSMembers");
+  IAlgorithm_sptr extractMembersAlgorithm(const MatrixWorkspace_sptr &inputWs, const WorkspaceGroup_sptr &resultGroupWs,
+                                          const std::string &outputWsName) const {
+    auto extractMembersAlg = AlgorithmManager::Instance().create("ExtractQENSMembers");
     extractMembersAlg->setProperty("InputWorkspace", inputWs);
     extractMembersAlg->setProperty("ResultWorkspace", resultGroupWs);
     extractMembersAlg->setProperty("OutputWorkspace", outputWsName);
     return extractMembersAlg;
   }
 
-  IAlgorithm_sptr
-  extractMembersAlgorithm(const MatrixWorkspace_sptr &inputWs,
-                          const WorkspaceGroup_sptr &resultGroupWs,
-                          const std::vector<std::string> &convolvedMembers,
-                          const std::string &outputWsName) const {
-    auto extractMembersAlg =
-        AlgorithmManager::Instance().create("ExtractQENSMembers");
+  IAlgorithm_sptr extractMembersAlgorithm(const MatrixWorkspace_sptr &inputWs, const WorkspaceGroup_sptr &resultGroupWs,
+                                          const std::vector<std::string> &convolvedMembers,
+                                          const std::string &outputWsName) const {
+    auto extractMembersAlg = AlgorithmManager::Instance().create("ExtractQENSMembers");
     extractMembersAlg->setProperty("InputWorkspace", inputWs);
     extractMembersAlg->setProperty("ResultWorkspace", resultGroupWs);
     extractMembersAlg->setProperty("OutputWorkspace", outputWsName);
@@ -163,35 +139,28 @@ private:
     return extractMembersAlg;
   }
 
-  WorkspaceGroup_sptr createResultGroup(const std::vector<std::string> &members,
-                                        const std::vector<double> &dataX,
+  WorkspaceGroup_sptr createResultGroup(const std::vector<std::string> &members, const std::vector<double> &dataX,
                                         size_t numSpectra) const {
     std::vector<std::string> resultWorkspaces;
     resultWorkspaces.reserve(numSpectra);
 
     for (auto i = 0u; i < numSpectra; ++i) {
       const auto name = "Result_" + std::to_string(i);
-      AnalysisDataService::Instance().addOrReplace(
-          name, createResultWorkspace(members, dataX));
+      AnalysisDataService::Instance().addOrReplace(name, createResultWorkspace(members, dataX));
       resultWorkspaces.emplace_back(name);
     }
     return groupWorkspaces(resultWorkspaces);
   }
 
-  MatrixWorkspace_sptr
-  createResultWorkspace(const std::vector<std::string> &members,
-                        const std::vector<double> &dataX) const {
-    MatrixWorkspace_sptr resultWorkspace =
-        WorkspaceCreationHelper::create2DWorkspaceNonUniformlyBinned(
-            static_cast<int>(members.size()), static_cast<int>(dataX.size()),
-            dataX.data());
+  MatrixWorkspace_sptr createResultWorkspace(const std::vector<std::string> &members,
+                                             const std::vector<double> &dataX) const {
+    MatrixWorkspace_sptr resultWorkspace = WorkspaceCreationHelper::create2DWorkspaceNonUniformlyBinned(
+        static_cast<int>(members.size()), static_cast<int>(dataX.size()), dataX.data());
 
     auto axis = std::make_unique<TextAxis>(members.size());
     for (auto i = 0u; i < members.size(); ++i) {
-      auto memberWS = createGenericWorkspace(
-          dataX, randomDataVector<double>(dataX.size() - 1, 0.0, 10.0));
-      memberWS->getAxis(0)->setUnit(
-          resultWorkspace->getAxis(0)->unit()->unitID());
+      auto memberWS = createGenericWorkspace(dataX, randomDataVector<double>(dataX.size() - 1, 0.0, 10.0));
+      memberWS->getAxis(0)->setUnit(resultWorkspace->getAxis(0)->unit()->unitID());
       resultWorkspace = appendSpectra(resultWorkspace, memberWS);
       axis->setLabel(i, members[i]);
     }
@@ -199,25 +168,21 @@ private:
     return resultWorkspace;
   }
 
-  MatrixWorkspace_sptr
-  createGenericWorkspace(const std::vector<double> &dataX,
-                         const std::vector<double> &dataY) const {
+  MatrixWorkspace_sptr createGenericWorkspace(const std::vector<double> &dataX,
+                                              const std::vector<double> &dataY) const {
     auto createWorkspace = createWorkspaceAlgorithm(dataX, dataY);
     createWorkspace->execute();
     return createWorkspace->getProperty("OutputWorkspace");
   }
 
-  MatrixWorkspace_sptr
-  appendSpectra(const MatrixWorkspace_sptr &workspace,
-                const MatrixWorkspace_sptr &spectraWS) const {
-    auto appendAlgorithm =
-        appendSpectraAlgorithm(std::move(workspace), std::move(spectraWS));
+  MatrixWorkspace_sptr appendSpectra(const MatrixWorkspace_sptr &workspace,
+                                     const MatrixWorkspace_sptr &spectraWS) const {
+    auto appendAlgorithm = appendSpectraAlgorithm(std::move(workspace), std::move(spectraWS));
     appendAlgorithm->execute();
     return appendAlgorithm->getProperty("OutputWorkspace");
   }
 
-  WorkspaceGroup_sptr
-  groupWorkspaces(const std::vector<std::string> &workspaces) const {
+  WorkspaceGroup_sptr groupWorkspaces(const std::vector<std::string> &workspaces) const {
     auto groupAlgorithm = groupWorkspacesAlgorithm(workspaces);
     groupAlgorithm->execute();
     return groupAlgorithm->getProperty("OutputWorkspace");
@@ -238,21 +203,16 @@ private:
     return loadAlg;
   }
 
-  IAlgorithm_sptr
-  groupWorkspacesAlgorithm(const std::vector<std::string> &workspaces) const {
-    auto groupWorkspaces =
-        AlgorithmManager::Instance().create("GroupWorkspaces");
+  IAlgorithm_sptr groupWorkspacesAlgorithm(const std::vector<std::string> &workspaces) const {
+    auto groupWorkspaces = AlgorithmManager::Instance().create("GroupWorkspaces");
     groupWorkspaces->setChild(true);
     groupWorkspaces->setProperty("InputWorkspaces", workspaces);
     groupWorkspaces->setProperty("OutputWorkspace", "__grouped");
     return groupWorkspaces;
   }
 
-  IAlgorithm_sptr
-  createWorkspaceAlgorithm(const std::vector<double> &dataX,
-                           const std::vector<double> &dataY) const {
-    auto createWorkspace =
-        AlgorithmManager::Instance().create("CreateWorkspace");
+  IAlgorithm_sptr createWorkspaceAlgorithm(const std::vector<double> &dataX, const std::vector<double> &dataY) const {
+    auto createWorkspace = AlgorithmManager::Instance().create("CreateWorkspace");
     createWorkspace->setChild(true);
     createWorkspace->setProperty("DataX", dataX);
     createWorkspace->setProperty("DataY", dataY);
@@ -261,9 +221,8 @@ private:
     return createWorkspace;
   }
 
-  IAlgorithm_sptr
-  appendSpectraAlgorithm(const MatrixWorkspace_sptr &workspace,
-                         const MatrixWorkspace_sptr &spectraWS) const {
+  IAlgorithm_sptr appendSpectraAlgorithm(const MatrixWorkspace_sptr &workspace,
+                                         const MatrixWorkspace_sptr &spectraWS) const {
     auto appendAlgorithm = AlgorithmManager::Instance().create("AppendSpectra");
     appendAlgorithm->setChild(true);
     appendAlgorithm->setProperty("InputWorkspace1", workspace);
@@ -273,16 +232,14 @@ private:
   }
 
   template <typename T>
-  std::vector<T>
-  randomDataVector(size_t size, T const &min = std::numeric_limits<T>::min(),
-                   T const &max = std::numeric_limits<T>::max()) const {
+  std::vector<T> randomDataVector(size_t size, T const &min = std::numeric_limits<T>::min(),
+                                  T const &max = std::numeric_limits<T>::max()) const {
     static std::random_device rd;
     static std::uniform_real_distribution<T> distribution(min, max);
     static std::mt19937 generator(rd());
 
     std::vector<T> data(size);
-    std::generate(data.begin(), data.end(),
-                  []() { return distribution(generator); });
+    std::generate(data.begin(), data.end(), []() { return distribution(generator); });
     return data;
   }
 };

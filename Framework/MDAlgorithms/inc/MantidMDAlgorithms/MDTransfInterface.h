@@ -62,9 +62,7 @@ public:
   /** MD transformation can often be used together with energy analysis mode;
      This function should be overloaded
         if the transformation indeed can do the energy analysis */
-  virtual std::vector<std::string> getEmodes() const {
-    return std::vector<std::string>(1, std::string("Undefined"));
-  }
+  virtual std::vector<std::string> getEmodes() const { return std::vector<std::string>(1, std::string("Undefined")); }
 
   //***************> the method below involved in the calculations of MD
   // coordinates
@@ -84,8 +82,7 @@ public:
    * @return true         -- if all Coord are within the range requested by the
    *conversion algorithm. false otherwise
    */
-  virtual bool calcGenericVariables(std::vector<coord_t> &Coord,
-                                    size_t n_ws_variabes) = 0;
+  virtual bool calcGenericVariables(std::vector<coord_t> &Coord, size_t n_ws_variabes) = 0;
 
   /** generalizes the code to calculate Y-variables within the detector's loop
    *of the  workspace
@@ -117,8 +114,7 @@ public:
    *place generalization here;
    * It should be overridden if the dependence on Y coordinate do exist.
    */
-  virtual bool calcMatrixCoordinates(const MantidVec &X, size_t i, size_t j,
-                                     std::vector<coord_t> &Coord, double &s,
+  virtual bool calcMatrixCoordinates(const MantidVec &X, size_t i, size_t j, std::vector<coord_t> &Coord, double &s,
                                      double &err) const {
     UNUSED_ARG(i);
     double X_ev = double(0.5 * (X[j] + X[j + 1])); // ! POSSIBLE FACTORY HERE
@@ -142,8 +138,7 @@ public:
       * @return true  -- if all Coord are within the range requested by
      algorithm. false otherwise
       * */
-  virtual bool calcMatrixCoord(const double &X, std::vector<coord_t> &Coord,
-                               double &signal, double &errSq) const = 0;
+  virtual bool calcMatrixCoord(const double &X, std::vector<coord_t> &Coord, double &signal, double &errSq) const = 0;
 
   /* clone method allowing to provide the copy of the particular class */
   virtual MDTransfInterface *clone() const = 0;
@@ -165,9 +160,7 @@ public:
    *extreme point depend on a detector number
    *                   (e.g. inelastic |Q| transformation)
    */
-  virtual std::vector<double> getExtremumPoints(const double xMin,
-                                                const double xMax,
-                                                size_t det_num) const = 0;
+  virtual std::vector<double> getExtremumPoints(const double xMin, const double xMax, size_t det_num) const = 0;
 
   //***************> the methods below are mainly involved in defining the
   // target workspace properties.
@@ -183,29 +176,25 @@ public:
    workspace
    used by the transformation have to be expressed in the units  with ID,
    returned by this method */
-  virtual const std::string
-  inputUnitID(Kernel::DeltaEMode::Type dEmode,
-              API::MatrixWorkspace_const_sptr inWS) const = 0;
+  virtual const std::string inputUnitID(Kernel::DeltaEMode::Type dEmode,
+                                        API::MatrixWorkspace_const_sptr inWS) const = 0;
   /** The transformation generates output MD events in particular units. This
    * method returns these Units ID-s */
-  virtual std::vector<std::string>
-  outputUnitID(Kernel::DeltaEMode::Type dEmode,
-               API::MatrixWorkspace_const_sptr inWS) const = 0;
+  virtual std::vector<std::string> outputUnitID(Kernel::DeltaEMode::Type dEmode,
+                                                API::MatrixWorkspace_const_sptr inWS) const = 0;
 
   /** when one builds MD workspace, he needs a dimension names/ID-s which can be
    different for different Q-transformations and in different E-mode
    The position of each dimID in the output vector should correspond the
    position of each coordinate in the Coord vector     */
-  virtual std::vector<std::string>
-  getDefaultDimID(Kernel::DeltaEMode::Type dEmode,
-                  API::MatrixWorkspace_const_sptr inWS) const = 0;
+  virtual std::vector<std::string> getDefaultDimID(Kernel::DeltaEMode::Type dEmode,
+                                                   API::MatrixWorkspace_const_sptr inWS) const = 0;
 
   /** return the number of dimensions, calculated by the transformation from the
    * workspace. This number is usually varies from 1 to 4
    * and depends on emode and possibly on some WS parameters.     */
-  virtual unsigned int
-  getNMatrixDimensions(Kernel::DeltaEMode::Type mode,
-                       API::MatrixWorkspace_const_sptr inWS) const = 0;
+  virtual unsigned int getNMatrixDimensions(Kernel::DeltaEMode::Type mode,
+                                            API::MatrixWorkspace_const_sptr inWS) const = 0;
 
   /**
    * Sets the display normalization
@@ -214,9 +203,8 @@ public:
    * @param underlyingWorkspace: the original workspace
    * be set
    */
-  virtual void setDisplayNormalization(
-      Mantid::API::IMDWorkspace_sptr mdWorkspace,
-      Mantid::API::MatrixWorkspace_sptr underlyingWorkspace) const = 0;
+  virtual void setDisplayNormalization(Mantid::API::IMDWorkspace_sptr mdWorkspace,
+                                       Mantid::API::MatrixWorkspace_sptr underlyingWorkspace) const = 0;
 };
 
 using MDTransf_sptr = std::shared_ptr<MDTransfInterface>;

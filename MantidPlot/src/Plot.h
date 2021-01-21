@@ -55,8 +55,7 @@ class Plot : public QwtPlot {
   Q_OBJECT
 
 public:
-  Plot(int width = 500, int height = 400, QWidget *parent = nullptr,
-       const char *name = nullptr);
+  Plot(int width = 500, int height = 400, QWidget *parent = nullptr, const char *name = nullptr);
 
   Grid *grid() { return static_cast<Grid *>(d_grid); };
   QList<int> curveKeys() { return d_curves.keys(); };
@@ -97,8 +96,7 @@ public:
   const QColor &paletteBackgroundColor() const;
 
   using QwtPlot::print; // Avoid Intel compiler warning
-  void print(QPainter *, const QRect &rect,
-             const QwtPlotPrintFilter & = QwtPlotPrintFilter()) const override;
+  void print(QPainter *, const QRect &rect, const QwtPlotPrintFilter & = QwtPlotPrintFilter()) const override;
   void updateLayout() override;
 
   void updateCurveLabels();
@@ -119,18 +117,14 @@ protected:
   // 'Dummy' QRect argument inserted into printCanvas method to avoid Intel
   // compiler warning (about printCanvas signature not matching that in base
   // class)
-  void printCanvas(QPainter *painter, const QRect &, const QRect &canvasRect,
-                   const QwtScaleMap map[axisCnt],
+  void printCanvas(QPainter *painter, const QRect &, const QRect &canvasRect, const QwtScaleMap map[axisCnt],
                    const QwtPlotPrintFilter &pfilter) const override;
-  void drawItems(QPainter *painter, const QRect &rect,
-                 const QwtScaleMap map[axisCnt],
+  void drawItems(QPainter *painter, const QRect &rect, const QwtScaleMap map[axisCnt],
                  const QwtPlotPrintFilter &pfilter) const override;
 
-  void drawInwardTicks(QPainter *painter, const QRect &rect,
-                       const QwtScaleMap &map, int axis, bool min,
+  void drawInwardTicks(QPainter *painter, const QRect &rect, const QwtScaleMap &map, int axis, bool min,
                        bool maj) const;
-  void drawBreak(QPainter *painter, const QRect &rect, const QwtScaleMap &map,
-                 int axis) const;
+  void drawBreak(QPainter *painter, const QRect &rect, const QwtScaleMap &map, int axis) const;
 
   bool eventFilter(QObject *obj, QEvent *ev) override;
 

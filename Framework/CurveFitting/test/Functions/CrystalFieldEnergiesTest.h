@@ -24,9 +24,7 @@ class CrystalFieldEnergiesTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static CrystalFieldEnergiesTest *createSuite() {
-    return new CrystalFieldEnergiesTest();
-  }
+  static CrystalFieldEnergiesTest *createSuite() { return new CrystalFieldEnergiesTest(); }
   static void destroySuite(CrystalFieldEnergiesTest *suite) { delete suite; }
 
   void test_Init() {
@@ -237,9 +235,8 @@ public:
   }
 
 private:
-  bool run(int nre, const std::map<std::string, double> &bkq,
-           const std::map<std::string, double> &bme, GSLVector &evalues,
-           ComplexMatrix &evectors, ComplexMatrix &hamiltonian) {
+  bool run(int nre, const std::map<std::string, double> &bkq, const std::map<std::string, double> &bme,
+           GSLVector &evalues, ComplexMatrix &evectors, ComplexMatrix &hamiltonian) {
     CrystalFieldEnergies alg;
     alg.setChild(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())

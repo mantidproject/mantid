@@ -19,21 +19,16 @@ namespace {
 
 constexpr char *WORKSPACE_NAME = "DummyWS";
 
-MatrixWorkspace_sptr createCountsTestWorkspace(const size_t numberOfHistograms,
-                                               const size_t numberOfBins,
+MatrixWorkspace_sptr createCountsTestWorkspace(const size_t numberOfHistograms, const size_t numberOfBins,
                                                bool addLogs = true) {
 
-  MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspace(
-      numberOfHistograms, numberOfBins);
+  MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspace(numberOfHistograms, numberOfBins);
   ws->setYUnit("Counts");
   if (addLogs) {
     for (size_t index = 0; index < numberOfHistograms; index++) {
 
-      ws->mutableRun().addProperty("First good spectra " +
-                                       std::to_string(index),
-                                   int(double(numberOfBins) / 2.));
-      ws->mutableRun().addProperty("Last good spectra " + std::to_string(index),
-                                   numberOfBins);
+      ws->mutableRun().addProperty("First good spectra " + std::to_string(index), int(double(numberOfBins) / 2.));
+      ws->mutableRun().addProperty("Last good spectra " + std::to_string(index), numberOfBins);
     }
   }
   AnalysisDataService::Instance().addOrReplace(WORKSPACE_NAME, ws);
@@ -41,11 +36,9 @@ MatrixWorkspace_sptr createCountsTestWorkspace(const size_t numberOfHistograms,
   return ws;
 }
 
-MatrixWorkspace_sptr createInvalidTestWorkspace(const size_t numberOfHistograms,
-                                                const size_t numberOfBins) {
+MatrixWorkspace_sptr createInvalidTestWorkspace(const size_t numberOfHistograms, const size_t numberOfBins) {
 
-  MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspace(
-      numberOfHistograms, numberOfBins);
+  MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspace(numberOfHistograms, numberOfBins);
   ws->setYUnit("Asymmetry");
   AnalysisDataService::Instance().addOrReplace(WORKSPACE_NAME, ws);
 
@@ -60,18 +53,12 @@ public:
   MockPSIBackgroundSubtraction() {}
 
   // set return fit and backgrounds
-  void setReturnFitQuality(const double fitQuality) {
-    m_fitQuality = fitQuality;
-  }
-  void setReturnBackground(const double background) {
-    m_background = background;
-  }
+  void setReturnFitQuality(const double fitQuality) { m_fitQuality = fitQuality; }
+  void setReturnBackground(const double background) { m_background = background; }
 
 private:
-  std::tuple<double, double>
-  calculateBackgroundFromFit(IAlgorithm_sptr &,
-                             const std::pair<double, double> &range,
-                             const int &index) override {
+  std::tuple<double, double> calculateBackgroundFromFit(IAlgorithm_sptr &, const std::pair<double, double> &range,
+                                                        const int &index) override {
     (void)range;
     (void)index;
     return std::make_tuple(m_background, m_fitQuality);
@@ -84,12 +71,8 @@ class PSIBackgroundSubtractionTest : public CxxTest::TestSuite {
 public:
   PSIBackgroundSubtractionTest() { Mantid::API::FrameworkManager::Instance(); }
 
-  static PSIBackgroundSubtractionTest *createSuite() {
-    return new PSIBackgroundSubtractionTest();
-  }
-  static void destroySuite(PSIBackgroundSubtractionTest *suite) {
-    delete suite;
-  }
+  static PSIBackgroundSubtractionTest *createSuite() { return new PSIBackgroundSubtractionTest(); }
+  static void destroySuite(PSIBackgroundSubtractionTest *suite) { delete suite; }
 
   void test_algorithm_initializes() {
     PSIBackgroundSubtraction alg;
@@ -123,13 +106,10 @@ public:
     PSIBackgroundSubtraction alg;
     int numberOfHistograms = 2;
     int numberOfBins = 100;
-    auto ws =
-        createCountsTestWorkspace(numberOfHistograms, numberOfBins, false);
+    auto ws = createCountsTestWorkspace(numberOfHistograms, numberOfBins, false);
     for (int index = 0; index < numberOfHistograms; index++) {
-      ws->mutableRun().addProperty(
-          "First good spectra " + std::to_string(index), -1);
-      ws->mutableRun().addProperty("Last good spectra " + std::to_string(index),
-                                   numberOfBins - 10);
+      ws->mutableRun().addProperty("First good spectra " + std::to_string(index), -1);
+      ws->mutableRun().addProperty("Last good spectra " + std::to_string(index), numberOfBins - 10);
     }
 
     alg.initialize();
@@ -143,13 +123,10 @@ public:
     PSIBackgroundSubtraction alg;
     int numberOfHistograms = 2;
     int numberOfBins = 100;
-    auto ws =
-        createCountsTestWorkspace(numberOfHistograms, numberOfBins, false);
+    auto ws = createCountsTestWorkspace(numberOfHistograms, numberOfBins, false);
     for (int index = 0; index < numberOfHistograms; index++) {
-      ws->mutableRun().addProperty(
-          "First good spectra " + std::to_string(index), 1);
-      ws->mutableRun().addProperty("Last good spectra " + std::to_string(index),
-                                   numberOfBins * 2);
+      ws->mutableRun().addProperty("First good spectra " + std::to_string(index), 1);
+      ws->mutableRun().addProperty("Last good spectra " + std::to_string(index), numberOfBins * 2);
     }
 
     alg.initialize();
@@ -163,13 +140,10 @@ public:
     PSIBackgroundSubtraction alg;
     int numberOfHistograms = 2;
     int numberOfBins = 100;
-    auto ws =
-        createCountsTestWorkspace(numberOfHistograms, numberOfBins, false);
+    auto ws = createCountsTestWorkspace(numberOfHistograms, numberOfBins, false);
     for (int index = 0; index < numberOfHistograms; index++) {
-      ws->mutableRun().addProperty(
-          "First good spectra " + std::to_string(index), 50);
-      ws->mutableRun().addProperty("Last good spectra " + std::to_string(index),
-                                   40);
+      ws->mutableRun().addProperty("First good spectra " + std::to_string(index), 50);
+      ws->mutableRun().addProperty("Last good spectra " + std::to_string(index), 40);
     }
 
     alg.initialize();

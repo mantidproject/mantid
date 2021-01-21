@@ -17,17 +17,12 @@ class VesuvioCalculateGammaBackgroundTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static VesuvioCalculateGammaBackgroundTest *createSuite() {
-    return new VesuvioCalculateGammaBackgroundTest();
-  }
-  static void destroySuite(VesuvioCalculateGammaBackgroundTest *suite) {
-    delete suite;
-  }
+  static VesuvioCalculateGammaBackgroundTest *createSuite() { return new VesuvioCalculateGammaBackgroundTest(); }
+  static void destroySuite(VesuvioCalculateGammaBackgroundTest *suite) { delete suite; }
 
   //------------------------------------ Success cases
   //---------------------------------------
-  void
-  test_Input_With_Spectrum_Number_Inside_Forward_Scatter_Range_Gives_Expected_Correction() {
+  void test_Input_With_Spectrum_Number_Inside_Forward_Scatter_Range_Gives_Expected_Correction() {
     using namespace Mantid::API;
     auto inputWS = createTestWorkspaceWithFoilChanger(); // specNo=1
     // Put spectrum in forward scatter range
@@ -78,8 +73,7 @@ public:
     TS_ASSERT_DELTA(backY.back(), 0.0144492041, 1e-08);
   }
 
-  void
-  test_Input_With_Spectrum_Number_Outside_Range_Leaves_Data_Uncorrected_And_Background_Zeroed() {
+  void test_Input_With_Spectrum_Number_Outside_Range_Leaves_Data_Uncorrected_And_Background_Zeroed() {
     using namespace Mantid::API;
     auto inputWS = createTestWorkspaceWithFoilChanger(); // specNo=1
     auto alg = runSuccessTestCase(inputWS);
@@ -202,22 +196,18 @@ public:
     alg->setRethrows(true);
 
     alg->setProperty("InputWorkspace", createTestWorkspaceWithFoilChanger());
-    alg->setPropertyValue("ComptonFunction",
-                          "name=GaussianComptonProfile;name=Gaussian");
+    alg->setPropertyValue("ComptonFunction", "name=GaussianComptonProfile;name=Gaussian");
     TS_ASSERT_THROWS(alg->execute(), const std::invalid_argument &);
     TS_ASSERT(!alg->isExecuted());
   }
 
 private:
-  Mantid::API::IAlgorithm_sptr
-  runSuccessTestCase(const Mantid::API::MatrixWorkspace_sptr &inputWS,
-                     const std::string &index = "") {
+  Mantid::API::IAlgorithm_sptr runSuccessTestCase(const Mantid::API::MatrixWorkspace_sptr &inputWS,
+                                                  const std::string &index = "") {
     auto alg = createAlgorithm();
     alg->setRethrows(true);
     alg->setProperty("InputWorkspace", inputWS);
-    alg->setPropertyValue(
-        "ComptonFunction",
-        "name=GaussianComptonProfile,Mass=1.0079,Width=2.9e-2,Intensity=4.29");
+    alg->setPropertyValue("ComptonFunction", "name=GaussianComptonProfile,Mass=1.0079,Width=2.9e-2,Intensity=4.29");
     if (!index.empty())
       alg->setPropertyValue("WorkspaceIndexList", index);
 
@@ -227,8 +217,7 @@ private:
   }
 
   Mantid::API::IAlgorithm_sptr createAlgorithm() {
-    Mantid::API::IAlgorithm_sptr alg =
-        std::make_shared<VesuvioCalculateGammaBackground>();
+    Mantid::API::IAlgorithm_sptr alg = std::make_shared<VesuvioCalculateGammaBackground>();
     alg->initialize();
     alg->setChild(true);
     alg->setPropertyValue("CorrectedWorkspace", "__UNUSED__");
@@ -238,24 +227,22 @@ private:
 
   Mantid::API::MatrixWorkspace_sptr createTestWorkspaceWithFoilChanger() {
     double x0(50.0), x1(300.0), dx(0.5);
-    return ComptonProfileTestHelpers::createTestWorkspace(
-        1, x0, x1, dx, ComptonProfileTestHelpers::NoiseType::None, true, true);
+    return ComptonProfileTestHelpers::createTestWorkspace(1, x0, x1, dx, ComptonProfileTestHelpers::NoiseType::None,
+                                                          true, true);
   }
 
   Mantid::API::MatrixWorkspace_sptr createTestWorkspaceWithNoFoilChanger() {
     double x0(165.0), x1(166.0), dx(0.5);
-    return ComptonProfileTestHelpers::createTestWorkspace(
-        1, x0, x1, dx, ComptonProfileTestHelpers::NoiseType::None, false);
+    return ComptonProfileTestHelpers::createTestWorkspace(1, x0, x1, dx, ComptonProfileTestHelpers::NoiseType::None,
+                                                          false);
   }
 
-  Mantid::API::MatrixWorkspace_sptr
-  createTwoSpectrumWorkspaceWithFoilChanger() {
+  Mantid::API::MatrixWorkspace_sptr createTwoSpectrumWorkspaceWithFoilChanger() {
     double x0(50.0), x1(300.0), dx(0.5);
     auto singleSpectrum = ComptonProfileTestHelpers::createTestWorkspace(
         1, x0, x1, dx, ComptonProfileTestHelpers::NoiseType::None, true, true);
     const size_t nhist = 2;
-    auto twoSpectrum =
-        Mantid::API::WorkspaceFactory::Instance().create(singleSpectrum, nhist);
+    auto twoSpectrum = Mantid::API::WorkspaceFactory::Instance().create(singleSpectrum, nhist);
     // Copy data
     for (size_t i = 0; i < nhist; ++i) {
       twoSpectrum->setHistogram(i, singleSpectrum->histogram(0));
@@ -275,8 +262,7 @@ public:
 
     auto singleSpectrum = ComptonProfileTestHelpers::createTestWorkspace(
         1, x0, x1, dx, ComptonProfileTestHelpers::NoiseType::None, true, true);
-    auto inWs =
-        Mantid::API::WorkspaceFactory::Instance().create(singleSpectrum, nhist);
+    auto inWs = Mantid::API::WorkspaceFactory::Instance().create(singleSpectrum, nhist);
 
     for (size_t i = 0; i < nhist; ++i) {
       inWs->setHistogram(i, singleSpectrum->histogram(0));
@@ -289,18 +275,15 @@ public:
 
     calcBackgroundAlg.initialize();
     calcBackgroundAlg.setProperty("InputWorkspace", inputWs);
-    calcBackgroundAlg.setPropertyValue(
-        "ComptonFunction",
-        "name=GaussianComptonProfile,Mass=1.0079,Width=2.9e-2,Intensity=4.29");
+    calcBackgroundAlg.setPropertyValue("ComptonFunction",
+                                       "name=GaussianComptonProfile,Mass=1.0079,Width=2.9e-2,Intensity=4.29");
     calcBackgroundAlg.setProperty("BackgroundWorkspace", outBackWsName);
     calcBackgroundAlg.setProperty("CorrectedWorkspace", outCorrWsName);
 
     calcBackgroundAlg.setRethrows(true);
   }
 
-  void testVesuvioCalculateGammaBackgroundPerformance() {
-    TS_ASSERT_THROWS_NOTHING(calcBackgroundAlg.execute());
-  }
+  void testVesuvioCalculateGammaBackgroundPerformance() { TS_ASSERT_THROWS_NOTHING(calcBackgroundAlg.execute()); }
 
 private:
   VesuvioCalculateGammaBackground calcBackgroundAlg;

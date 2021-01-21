@@ -80,9 +80,8 @@ class MultiLayer : public MdiSubWindow {
   Q_OBJECT
 
 public:
-  MultiLayer(QWidget *parent, int layers = 1, int rows = 1, int cols = 1,
-             const QString &label = "", const char *name = nullptr,
-             const Qt::WFlags &f = nullptr);
+  MultiLayer(QWidget *parent, int layers = 1, int rows = 1, int cols = 1, const QString &label = "",
+             const char *name = nullptr, const Qt::WFlags &f = nullptr);
   ~MultiLayer() override;
 
   /// Get the window type as a string
@@ -112,9 +111,8 @@ public:
 
   void setWaterfallLayout(bool on = true);
 
-  static MantidQt::API::IProjectSerialisable *
-  loadFromProject(const std::string &lines, ApplicationWindow *app,
-                  const int fileVersion);
+  static MantidQt::API::IProjectSerialisable *loadFromProject(const std::string &lines, ApplicationWindow *app,
+                                                              const int fileVersion);
   std::string saveToProject(ApplicationWindow *app) override;
   std::vector<std::string> getWorkspaceNames() override;
 
@@ -170,12 +168,10 @@ public slots:
   //@{
   QPixmap canvasPixmap();
   void exportToFile(const QString &fileName);
-  void exportImage(const QString &fileName, int quality = 100,
-                   bool transparent = false);
+  void exportImage(const QString &fileName, int quality = 100, bool transparent = false);
   void exportSVG(const QString &fname);
   void exportPDF(const QString &fname) override;
-  void exportVector(const QString &fileName, int res = 0, bool color = true,
-                    bool keepAspect = true,
+  void exportVector(const QString &fileName, int res = 0, bool color = true, bool keepAspect = true,
                     QPrinter::PageSize pageSize = QPrinter::Custom);
 
   void copyAllLayers();
@@ -184,8 +180,7 @@ public slots:
   void printActiveLayer();
   //@}
 
-  void setFonts(const QFont &titleFnt, const QFont &scaleFnt,
-                const QFont &numbersFnt, const QFont &legendFnt);
+  void setFonts(const QFont &titleFnt, const QFont &scaleFnt, const QFont &numbersFnt, const QFont &legendFnt);
 
   void connectLayer(Graph *g);
 
@@ -230,11 +225,9 @@ signals:
 
 private:
   /// Handle dropping of additional curves onto a MantidMDCurve.
-  void dropOntoMDCurve(Graph *g, MantidMDCurve *originalCurve,
-                       MantidQt::MantidWidgets::MantidTreeWidget *tree);
+  void dropOntoMDCurve(Graph *g, MantidMDCurve *originalCurve, MantidQt::MantidWidgets::MantidTreeWidget *tree);
   /// Handle dropping of additional curves onto a MantidMatrixCurve
-  void dropOntoMatrixCurve(Graph *g, MantidMatrixCurve *originalCurve,
-                           MantidQt::MantidWidgets::MantidTreeWidget *tree);
+  void dropOntoMatrixCurve(Graph *g, MantidMatrixCurve *originalCurve, MantidQt::MantidWidgets::MantidTreeWidget *tree);
 
   //! \name Event Handlers
   //@{

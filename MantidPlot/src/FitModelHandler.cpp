@@ -22,10 +22,8 @@
 
 FitModelHandler::FitModelHandler(Fit *fit) : d_fit(fit) { metFitTag = false; }
 
-bool FitModelHandler::startElement(const QString & /* namespaceURI */,
-                                   const QString & /* localName */,
-                                   const QString &qName,
-                                   const QXmlAttributes &attributes) {
+bool FitModelHandler::startElement(const QString & /* namespaceURI */, const QString & /* localName */,
+                                   const QString &qName, const QXmlAttributes &attributes) {
   if (!metFitTag && qName != "fit") {
     errorStr = QObject::tr("The file is not an QtiPlot fit model file.");
     return false;
@@ -34,8 +32,7 @@ bool FitModelHandler::startElement(const QString & /* namespaceURI */,
   if (qName == "fit") {
     QString version = attributes.value("version");
     if (!version.isEmpty() && version != "1.0") {
-      errorStr =
-          QObject::tr("The file is not an QtiPlot fit model version 1.0 file.");
+      errorStr = QObject::tr("The file is not an QtiPlot fit model version 1.0 file.");
       return false;
     }
     metFitTag = true;
@@ -45,8 +42,7 @@ bool FitModelHandler::startElement(const QString & /* namespaceURI */,
   return true;
 }
 
-bool FitModelHandler::endElement(const QString & /* namespaceURI */,
-                                 const QString & /* localName */,
+bool FitModelHandler::endElement(const QString & /* namespaceURI */, const QString & /* localName */,
                                  const QString &qName) {
   if (qName == "model")
     d_fit->setObjectName(currentText);

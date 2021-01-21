@@ -16,16 +16,13 @@
 
 using namespace Mantid::API;
 
-class FakeAnalysisDataServiceObserver
-    : public Mantid::API::AnalysisDataServiceObserver {
+class FakeAnalysisDataServiceObserver : public Mantid::API::AnalysisDataServiceObserver {
 
 public:
   FakeAnalysisDataServiceObserver()
-      : m_anyChangeHandleCalled(false), m_addHandleCalled(false),
-        m_replaceHandleCalled(false), m_deleteHandleCalled(false),
-        m_clearHandleCalled(false), m_renameHandleCalled(false),
-        m_groupHandleCalled(false), m_unGroupHandleCalled(false),
-        m_groupUpdateHandleCalled(false) {
+      : m_anyChangeHandleCalled(false), m_addHandleCalled(false), m_replaceHandleCalled(false),
+        m_deleteHandleCalled(false), m_clearHandleCalled(false), m_renameHandleCalled(false),
+        m_groupHandleCalled(false), m_unGroupHandleCalled(false), m_groupUpdateHandleCalled(false) {
     this->observeAll(false);
   }
 
@@ -37,48 +34,41 @@ public:
     UNUSED_ARG(ws)
     m_addHandleCalled = true;
   }
-  void replaceHandle(const std::string &wsName,
-                     const Workspace_sptr &ws) override {
+  void replaceHandle(const std::string &wsName, const Workspace_sptr &ws) override {
     UNUSED_ARG(wsName)
     UNUSED_ARG(ws)
     m_replaceHandleCalled = true;
   }
-  void deleteHandle(const std::string &wsName,
-                    const Workspace_sptr &ws) override {
+  void deleteHandle(const std::string &wsName, const Workspace_sptr &ws) override {
     UNUSED_ARG(wsName)
     UNUSED_ARG(ws)
     m_deleteHandleCalled = true;
   }
   void clearHandle() override { m_clearHandleCalled = true; }
-  void renameHandle(const std::string &wsName,
-                    const std::string &newName) override {
+  void renameHandle(const std::string &wsName, const std::string &newName) override {
     UNUSED_ARG(wsName)
     UNUSED_ARG(newName)
     m_renameHandleCalled = true;
   }
-  void groupHandle(const std::string &wsName,
-                   const Workspace_sptr &ws) override {
+  void groupHandle(const std::string &wsName, const Workspace_sptr &ws) override {
     UNUSED_ARG(wsName)
     UNUSED_ARG(ws)
     m_groupHandleCalled = true;
   }
-  void unGroupHandle(const std::string &wsName,
-                     const Workspace_sptr &ws) override {
+  void unGroupHandle(const std::string &wsName, const Workspace_sptr &ws) override {
     UNUSED_ARG(wsName)
     UNUSED_ARG(ws)
     m_unGroupHandleCalled = true;
   }
-  void groupUpdateHandle(const std::string &wsName,
-                         const Workspace_sptr &ws) override {
+  void groupUpdateHandle(const std::string &wsName, const Workspace_sptr &ws) override {
     UNUSED_ARG(wsName)
     UNUSED_ARG(ws)
     m_groupUpdateHandleCalled = true;
   }
 
 public:
-  bool m_anyChangeHandleCalled, m_addHandleCalled, m_replaceHandleCalled,
-      m_deleteHandleCalled, m_clearHandleCalled, m_renameHandleCalled,
-      m_groupHandleCalled, m_unGroupHandleCalled, m_groupUpdateHandleCalled;
+  bool m_anyChangeHandleCalled, m_addHandleCalled, m_replaceHandleCalled, m_deleteHandleCalled, m_clearHandleCalled,
+      m_renameHandleCalled, m_groupHandleCalled, m_unGroupHandleCalled, m_groupUpdateHandleCalled;
 };
 
 class AnalysisDataServiceObserverTest : public CxxTest::TestSuite {
@@ -89,17 +79,12 @@ private:
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static AnalysisDataServiceObserverTest *createSuite() {
-    return new AnalysisDataServiceObserverTest();
-  }
-  static void destroySuite(AnalysisDataServiceObserverTest *suite) {
-    delete suite;
-  }
+  static AnalysisDataServiceObserverTest *createSuite() { return new AnalysisDataServiceObserverTest(); }
+  static void destroySuite(AnalysisDataServiceObserverTest *suite) { delete suite; }
 
   AnalysisDataServiceObserverTest()
       : ads(AnalysisDataService::Instance()),
-        m_mockInheritingClass(
-            std::make_unique<FakeAnalysisDataServiceObserver>()) {
+        m_mockInheritingClass(std::make_unique<FakeAnalysisDataServiceObserver>()) {
     // Loads the framework manager
     Mantid::API::FrameworkManager::Instance();
   }
@@ -110,9 +95,7 @@ public:
   }
 
   void addWorkspaceToADS(const std::string &name = "dummy") {
-    IAlgorithm_sptr alg =
-        Mantid::API::AlgorithmManager::Instance().createUnmanaged(
-            "CreateSampleWorkspace");
+    IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("CreateSampleWorkspace");
     alg->setChild(true);
     alg->initialize();
     alg->setPropertyValue("OutputWorkspace", name);
@@ -166,9 +149,7 @@ public:
     addWorkspaceToADS("dummy");
 
     m_mockInheritingClass->observeRename();
-    IAlgorithm_sptr alg =
-        Mantid::API::AlgorithmManager::Instance().createUnmanaged(
-            "RenameWorkspace");
+    IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("RenameWorkspace");
     alg->initialize();
     alg->setPropertyValue("InputWorkspace", "dummy");
     alg->setPropertyValue("OutputWorkspace", "dummy2");
@@ -183,9 +164,7 @@ public:
 
     m_mockInheritingClass->observeGroup();
 
-    IAlgorithm_sptr alg =
-        Mantid::API::AlgorithmManager::Instance().createUnmanaged(
-            "GroupWorkspaces");
+    IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
     alg->initialize();
     alg->setPropertyValue("InputWorkspaces", "dummy,dummy2");
     alg->setPropertyValue("OutputWorkspace", "newGroup");
@@ -198,9 +177,7 @@ public:
     addWorkspaceToADS("dummy");
     addWorkspaceToADS("dummy2");
 
-    IAlgorithm_sptr alg =
-        Mantid::API::AlgorithmManager::Instance().createUnmanaged(
-            "GroupWorkspaces");
+    IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
     alg->initialize();
     alg->setPropertyValue("InputWorkspaces", "dummy,dummy2");
     alg->setPropertyValue("OutputWorkspace", "newGroup");
@@ -208,9 +185,7 @@ public:
 
     m_mockInheritingClass->observeUnGroup();
 
-    IAlgorithm_sptr alg2 =
-        Mantid::API::AlgorithmManager::Instance().createUnmanaged(
-            "UnGroupWorkspace");
+    IAlgorithm_sptr alg2 = Mantid::API::AlgorithmManager::Instance().createUnmanaged("UnGroupWorkspace");
     alg2->initialize();
     alg2->setPropertyValue("InputWorkspace", "newGroup");
     alg2->execute();
@@ -223,9 +198,7 @@ public:
     addWorkspaceToADS("dummy2");
     addWorkspaceToADS("dummy3");
 
-    IAlgorithm_sptr alg =
-        Mantid::API::AlgorithmManager::Instance().createUnmanaged(
-            "GroupWorkspaces");
+    IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
     alg->initialize();
     alg->setPropertyValue("InputWorkspaces", "dummy,dummy2");
     alg->setPropertyValue("OutputWorkspace", "newGroup");

@@ -24,9 +24,7 @@ class PeakShapeEllipsoidTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static PeakShapeEllipsoidTest *createSuite() {
-    return new PeakShapeEllipsoidTest();
-  }
+  static PeakShapeEllipsoidTest *createSuite() { return new PeakShapeEllipsoidTest(); }
   static void destroySuite(PeakShapeEllipsoidTest *suite) { delete suite; }
 
   void test_constructor() {
@@ -39,8 +37,8 @@ public:
     const int algorithmVersion = 3;
 
     // Construct it.
-    PeakShapeEllipsoid shape(directions, abcRadii, abcInnerRadii, abcOuterRadii,
-                             frame, algorithmName, algorithmVersion);
+    PeakShapeEllipsoid shape(directions, abcRadii, abcInnerRadii, abcOuterRadii, frame, algorithmName,
+                             algorithmVersion);
 
     TS_ASSERT_EQUALS(abcRadii, shape.abcRadii());
     TS_ASSERT_EQUALS(abcInnerRadii, shape.abcRadiiBackgroundInner());
@@ -63,21 +61,16 @@ public:
     const SpecialCoordinateSystem frame = Mantid::Kernel::HKL;
 
     TSM_ASSERT_THROWS("Should throw, bad directions",
-                      PeakShapeEllipsoid(bad_directions, abcRadii,
-                                         abcInnerRadii, abcOuterRadii, frame),
+                      PeakShapeEllipsoid(bad_directions, abcRadii, abcInnerRadii, abcOuterRadii, frame),
                       std::invalid_argument &);
     TSM_ASSERT_THROWS("Should throw, bad radii",
-                      PeakShapeEllipsoid(directions, bad_abcRadii,
-                                         abcInnerRadii, abcOuterRadii, frame),
+                      PeakShapeEllipsoid(directions, bad_abcRadii, abcInnerRadii, abcOuterRadii, frame),
                       std::invalid_argument &);
     TSM_ASSERT_THROWS("Should throw, bad inner radii",
-                      PeakShapeEllipsoid(directions, abcRadii,
-                                         bad_abcInnerRadii, abcOuterRadii,
-                                         frame),
+                      PeakShapeEllipsoid(directions, abcRadii, bad_abcInnerRadii, abcOuterRadii, frame),
                       std::invalid_argument &);
     TSM_ASSERT_THROWS("Should throw, bad outer radii",
-                      PeakShapeEllipsoid(directions, abcRadii, abcInnerRadii,
-                                         bad_abcOuterRadii, frame),
+                      PeakShapeEllipsoid(directions, abcRadii, abcInnerRadii, bad_abcOuterRadii, frame),
                       std::invalid_argument &);
   }
 
@@ -91,8 +84,7 @@ public:
     const int algorithmVersion = 3;
 
     // Construct it.
-    PeakShapeEllipsoid a(directions, abcRadii, abcInnerRadii, abcOuterRadii,
-                         frame, algorithmName, algorithmVersion);
+    PeakShapeEllipsoid a(directions, abcRadii, abcInnerRadii, abcOuterRadii, frame, algorithmName, algorithmVersion);
 
     PeakShapeEllipsoid b(a);
     TS_ASSERT_EQUALS(abcRadii, b.abcRadii());
@@ -105,11 +97,10 @@ public:
   }
 
   void test_assignment() {
-    PeakShapeEllipsoid a({V3D(1, 0, 0), V3D(0, 1, 0), V3D(0, 0, 1)}, {2, 3, 4},
-                         {5, 6, 7}, {8, 9, 10}, Mantid::Kernel::HKL, "foo", 1);
+    PeakShapeEllipsoid a({V3D(1, 0, 0), V3D(0, 1, 0), V3D(0, 0, 1)}, {2, 3, 4}, {5, 6, 7}, {8, 9, 10},
+                         Mantid::Kernel::HKL, "foo", 1);
 
-    PeakShapeEllipsoid b({V3D(0, 0, 0), V3D(0, 1, 0), V3D(0, 0, 1)}, {1, 3, 4},
-                         {1, 6, 7}, {8, 9, 10}, QLab, "bar", 2);
+    PeakShapeEllipsoid b({V3D(0, 0, 0), V3D(0, 1, 0), V3D(0, 0, 1)}, {1, 3, 4}, {1, 6, 7}, {8, 9, 10}, QLab, "bar", 2);
 
     b = a;
 
@@ -126,29 +117,21 @@ public:
 
     std::vector<double> radius = {1, 2, 3};
 
-    PeakShapeEllipsoid shape({V3D(1, 0, 0), V3D(0, 1, 0), V3D(0, 0, 1)}, radius,
-                             radius, radius, Mantid::Kernel::HKL);
+    PeakShapeEllipsoid shape({V3D(1, 0, 0), V3D(0, 1, 0), V3D(0, 0, 1)}, radius, radius, radius, Mantid::Kernel::HKL);
 
-    TSM_ASSERT_EQUALS("Radius should be taken to be the max of the ABC radii",
-                      3.0, shape.radius());
-    TSM_ASSERT_EQUALS(
-        "Radius should be taken to be the max of the ABC radii", 3.0,
-        shape.radius(Mantid::Geometry::PeakShape::RadiusType::Radius));
-    TSM_ASSERT_EQUALS(
-        "Radius should be taken to be the max of the ABC BackgroundInner radii",
-        3.0,
-        shape.radius(Mantid::Geometry::PeakShape::RadiusType::InnerRadius));
-    TSM_ASSERT_EQUALS(
-        "Radius should be taken to be the max of the ABC BackgroundOuter radii",
-        3.0,
-        shape.radius(Mantid::Geometry::PeakShape::RadiusType::OuterRadius));
+    TSM_ASSERT_EQUALS("Radius should be taken to be the max of the ABC radii", 3.0, shape.radius());
+    TSM_ASSERT_EQUALS("Radius should be taken to be the max of the ABC radii", 3.0,
+                      shape.radius(Mantid::Geometry::PeakShape::RadiusType::Radius));
+    TSM_ASSERT_EQUALS("Radius should be taken to be the max of the ABC BackgroundInner radii", 3.0,
+                      shape.radius(Mantid::Geometry::PeakShape::RadiusType::InnerRadius));
+    TSM_ASSERT_EQUALS("Radius should be taken to be the max of the ABC BackgroundOuter radii", 3.0,
+                      shape.radius(Mantid::Geometry::PeakShape::RadiusType::OuterRadius));
   }
 
   void test_shape_name() {
 
     // Construct it.
-    PeakShapeEllipsoid shape({V3D(1, 0, 0), V3D(0, 1, 0), V3D(0, 0, 1)},
-                             {2, 3, 4}, {5, 6, 7}, {8, 9, 10},
+    PeakShapeEllipsoid shape({V3D(1, 0, 0), V3D(0, 1, 0), V3D(0, 0, 1)}, {2, 3, 4}, {5, 6, 7}, {8, 9, 10},
                              Mantid::Kernel::HKL, "foo", 1);
 
     TS_ASSERT_EQUALS("ellipsoid", shape.shapeName());
@@ -165,8 +148,8 @@ public:
     const int algorithmVersion = 3;
 
     // Construct it.
-    PeakShapeEllipsoid shape(directions, abcRadii, abcInnerRadii, abcOuterRadii,
-                             frame, algorithmName, algorithmVersion);
+    PeakShapeEllipsoid shape(directions, abcRadii, abcInnerRadii, abcOuterRadii, frame, algorithmName,
+                             algorithmVersion);
 
     const std::string json = shape.toJSON();
 
@@ -183,12 +166,9 @@ public:
     TS_ASSERT_EQUALS(abcRadii[0], output["radius0"].asDouble());
     TS_ASSERT_EQUALS(abcRadii[1], output["radius1"].asDouble());
     TS_ASSERT_EQUALS(abcRadii[2], output["radius2"].asDouble());
-    TS_ASSERT_EQUALS(abcOuterRadii[0],
-                     output["background_outer_radius0"].asDouble());
-    TS_ASSERT_EQUALS(abcOuterRadii[1],
-                     output["background_outer_radius1"].asDouble());
-    TS_ASSERT_EQUALS(abcOuterRadii[2],
-                     output["background_outer_radius2"].asDouble());
+    TS_ASSERT_EQUALS(abcOuterRadii[0], output["background_outer_radius0"].asDouble());
+    TS_ASSERT_EQUALS(abcOuterRadii[1], output["background_outer_radius1"].asDouble());
+    TS_ASSERT_EQUALS(abcOuterRadii[2], output["background_outer_radius2"].asDouble());
   }
 
   void test_directionsInSpecificFrameThrowsForMatrixWithInvalidDimensions() {
@@ -201,8 +181,7 @@ public:
     const int algorithmVersion = 3;
 
     // Construct it.
-    PeakShapeEllipsoid a(directions, abcRadii, abcInnerRadii, abcOuterRadii,
-                         frame, algorithmName, algorithmVersion);
+    PeakShapeEllipsoid a(directions, abcRadii, abcInnerRadii, abcOuterRadii, frame, algorithmName, algorithmVersion);
     Mantid::Kernel::Matrix<double> matrix(3, 2);
     std::vector<double> column1;
     column1.emplace_back(1.0);
@@ -216,8 +195,7 @@ public:
     matrix.setColumn(0, column1);
     matrix.setColumn(1, column2);
 
-    TSM_ASSERT_THROWS("Should throw, bad goniometer matrix",
-                      a.getDirectionInSpecificFrame(matrix),
+    TSM_ASSERT_THROWS("Should throw, bad goniometer matrix", a.getDirectionInSpecificFrame(matrix),
                       std::invalid_argument &);
   }
 
@@ -231,8 +209,7 @@ public:
     const int algorithmVersion = 3;
 
     // Construct it.
-    PeakShapeEllipsoid a(directions, abcRadii, abcInnerRadii, abcOuterRadii,
-                         frame, algorithmName, algorithmVersion);
+    PeakShapeEllipsoid a(directions, abcRadii, abcInnerRadii, abcOuterRadii, frame, algorithmName, algorithmVersion);
 
     // 90 degree rotation around the z axis
     Mantid::Kernel::Matrix<double> matrix(3, 3);
@@ -256,29 +233,19 @@ public:
 
     std::vector<Mantid::Kernel::V3D> directionInNewFrame(3);
     TSM_ASSERT_THROWS_NOTHING("Should throw nothing, valid goniometer matrix",
-                              directionInNewFrame =
-                                  a.getDirectionInSpecificFrame(matrix));
+                              directionInNewFrame = a.getDirectionInSpecificFrame(matrix));
 
     const double delta = 1e-6;
-    TSM_ASSERT_DELTA("Should be rotated", directionInNewFrame[0][0], 0.0,
-                     delta);
-    TSM_ASSERT_DELTA("Should be rotated", directionInNewFrame[0][1], 1.0,
-                     delta);
-    TSM_ASSERT_DELTA("Should be rotated", directionInNewFrame[0][2], 0.0,
-                     delta);
+    TSM_ASSERT_DELTA("Should be rotated", directionInNewFrame[0][0], 0.0, delta);
+    TSM_ASSERT_DELTA("Should be rotated", directionInNewFrame[0][1], 1.0, delta);
+    TSM_ASSERT_DELTA("Should be rotated", directionInNewFrame[0][2], 0.0, delta);
 
-    TSM_ASSERT_DELTA("Should be rotated", directionInNewFrame[1][0], -1.0,
-                     delta);
-    TSM_ASSERT_DELTA("Should be rotated", directionInNewFrame[1][1], 0.0,
-                     delta);
-    TSM_ASSERT_DELTA("Should be rotated", directionInNewFrame[1][2], 0.0,
-                     delta);
+    TSM_ASSERT_DELTA("Should be rotated", directionInNewFrame[1][0], -1.0, delta);
+    TSM_ASSERT_DELTA("Should be rotated", directionInNewFrame[1][1], 0.0, delta);
+    TSM_ASSERT_DELTA("Should be rotated", directionInNewFrame[1][2], 0.0, delta);
 
-    TSM_ASSERT_DELTA("Should be rotated", directionInNewFrame[2][0], 0.0,
-                     delta);
-    TSM_ASSERT_DELTA("Should be rotated", directionInNewFrame[2][1], 0.0,
-                     delta);
-    TSM_ASSERT_DELTA("Should be rotated", directionInNewFrame[2][2], 1.0,
-                     delta);
+    TSM_ASSERT_DELTA("Should be rotated", directionInNewFrame[2][0], 0.0, delta);
+    TSM_ASSERT_DELTA("Should be rotated", directionInNewFrame[2][1], 0.0, delta);
+    TSM_ASSERT_DELTA("Should be rotated", directionInNewFrame[2][2], 1.0, delta);
   }
 };

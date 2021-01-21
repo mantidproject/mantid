@@ -32,24 +32,19 @@ Mantid::Kernel::Logger g_log("MantidMDCurve");
  *  @throw std::invalid_argument if the index is out of range for the given
  * workspace
  */
-MantidMDCurve::MantidMDCurve(const QString &wsName, Graph *g, bool err,
-                             bool distr, GraphOptions::CurveType style)
+MantidMDCurve::MantidMDCurve(const QString &wsName, Graph *g, bool err, bool distr, GraphOptions::CurveType style)
     : MantidCurve(wsName, err), m_wsName(wsName) {
   if (!g) {
-    throw std::invalid_argument(
-        "MantidMDCurve::MantidMDCurve() - NULL graph pointer not allowed");
+    throw std::invalid_argument("MantidMDCurve::MantidMDCurve() - NULL graph pointer not allowed");
   }
   init(g, distr, style);
 }
 
 MantidMDCurve::MantidMDCurve(const MantidMDCurve &c)
-    : MantidCurve(createCopyName(c.title().text()), c.m_drawErrorBars,
-                  c.m_drawAllErrorBars),
-      m_wsName(c.m_wsName) {
+    : MantidCurve(createCopyName(c.title().text()), c.m_drawErrorBars, c.m_drawAllErrorBars), m_wsName(c.m_wsName) {
   setData(c.data());
   observePostDelete();
-  connect(this, SIGNAL(resetData(const QString &)), this,
-          SLOT(dataReset(const QString &)));
+  connect(this, SIGNAL(resetData(const QString &)), this, SLOT(dataReset(const QString &)));
   observeAfterReplace();
   observeADSClear();
 }
@@ -62,15 +57,13 @@ MantidMDCurve::MantidMDCurve(const MantidMDCurve &c)
  *  @param multipleSpectra :: True if there are multiple spectra,
  *  not applicable here.
  */
-void MantidMDCurve::init(Graph *g, bool distr, GraphOptions::CurveType style,
-                         bool multipleSpectra) {
+void MantidMDCurve::init(Graph *g, bool distr, GraphOptions::CurveType style, bool multipleSpectra) {
   UNUSED_ARG(distr);
   UNUSED_ARG(multipleSpectra);
-  IMDWorkspace_const_sptr ws = std::dynamic_pointer_cast<IMDWorkspace>(
-      AnalysisDataService::Instance().retrieve(m_wsName.toStdString()));
+  IMDWorkspace_const_sptr ws =
+      std::dynamic_pointer_cast<IMDWorkspace>(AnalysisDataService::Instance().retrieve(m_wsName.toStdString()));
   if (!ws) {
-    std::string message =
-        "Could not extract IMDWorkspace of name: " + m_wsName.toStdString();
+    std::string message = "Could not extract IMDWorkspace of name: " + m_wsName.toStdString();
     throw std::runtime_error(message);
   }
   if (ws->getNonIntegratedDimensions().size() != 1) {
@@ -87,8 +80,7 @@ void MantidMDCurve::init(Graph *g, bool distr, GraphOptions::CurveType style,
 
   int lineWidth = 1;
   MultiLayer *ml = dynamic_cast<MultiLayer *>(g->parent()->parent()->parent());
-  if (ml && (style == GraphOptions::Unspecified ||
-             ml->applicationWindow()->applyCurveStyleToMantid)) {
+  if (ml && (style == GraphOptions::Unspecified || ml->applicationWindow()->applyCurveStyleToMantid)) {
     // FIXME: Style HorizontalSteps does NOT seem to be applied
     applyStyleChoice(style, ml, lineWidth);
   } else {
@@ -104,11 +96,9 @@ void MantidMDCurve::init(Graph *g, bool distr, GraphOptions::CurveType style,
   m_errorSettings->m_color = pen().color();
   m_errorSettings->setWidth(pen().widthF());
 
-  connect(g, SIGNAL(axisScaleChanged(int, bool)), this,
-          SLOT(axisScaleChanged(int, bool)));
+  connect(g, SIGNAL(axisScaleChanged(int, bool)), this, SLOT(axisScaleChanged(int, bool)));
   observePostDelete();
-  connect(this, SIGNAL(resetData(const QString &)), this,
-          SLOT(dataReset(const QString &)));
+  connect(this, SIGNAL(resetData(const QString &)), this, SLOT(dataReset(const QString &)));
   observeAfterReplace();
   observeADSClear();
 }
@@ -133,26 +123,20 @@ MantidMDCurve *MantidMDCurve::clone(const Graph *) const {
 
 void MantidMDCurve::setData(const QwtData &data) {
   if (!dynamic_cast<const MantidQwtIMDWorkspaceData *>(&data))
-    throw std::runtime_error(
-        "Only MantidQwtIMDWorkspaceData can be set to a MantidMDCurve");
+    throw std::runtime_error("Only MantidQwtIMDWorkspaceData can be set to a MantidMDCurve");
   PlotCurve::setData(data);
 }
 
-QwtDoubleRect MantidMDCurve::boundingRect() const {
-  return MantidCurve::boundingRect();
-}
+QwtDoubleRect MantidMDCurve::boundingRect() const { return MantidCurve::boundingRect(); }
 
-void MantidMDCurve::draw(QPainter *p, const QwtScaleMap &xMap,
-                         const QwtScaleMap &yMap, const QRect &rect) const {
+void MantidMDCurve::draw(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap, const QRect &rect) const {
   PlotCurve::draw(p, xMap, yMap, rect);
 
   if (m_drawErrorBars) // drawing error bars
   {
-    const MantidQwtIMDWorkspaceData *d =
-        dynamic_cast<const MantidQwtIMDWorkspaceData *>(&data());
+    const MantidQwtIMDWorkspaceData *d = dynamic_cast<const MantidQwtIMDWorkspaceData *>(&data());
     if (!d) {
-      throw std::runtime_error(
-          "Only MantidQwtIMDWorkspaceData can be set to a MantidMDCurve");
+      throw std::runtime_error("Only MantidQwtIMDWorkspaceData can be set to a MantidMDCurve");
     }
     doDraw(p, xMap, yMap, rect, d);
   }
@@ -168,12 +152,10 @@ void MantidMDCurve::dataReset(const QString &wsName) {
   const std::string wsNameStd = wsName.toStdString();
   Mantid::API::IMDWorkspace_sptr mws;
   try {
-    Mantid::API::Workspace_sptr base =
-        Mantid::API::AnalysisDataService::Instance().retrieve(wsNameStd);
+    Mantid::API::Workspace_sptr base = Mantid::API::AnalysisDataService::Instance().retrieve(wsNameStd);
     mws = std::dynamic_pointer_cast<Mantid::API::IMDWorkspace>(base);
   } catch (std::runtime_error &) {
-    g_log.information() << "Workspace " << wsNameStd
-                        << " could not be found - plotted curve(s) deleted\n";
+    g_log.information() << "Workspace " << wsNameStd << " could not be found - plotted curve(s) deleted\n";
     mws = Mantid::API::IMDWorkspace_sptr();
   }
 
@@ -190,9 +172,7 @@ void MantidMDCurve::dataReset(const QString &wsName) {
   } catch (std::range_error &) {
     // Get here if the new workspace has fewer spectra and the plotted one no
     // longer exists
-    g_log.information()
-        << "Workspace " << wsNameStd
-        << " now has fewer spectra - plotted curve(s) deleted\n";
+    g_log.information() << "Workspace " << wsNameStd << " now has fewer spectra - plotted curve(s) deleted\n";
     postDeleteHandle(wsNameStd);
   }
   delete new_mantidData;
@@ -203,14 +183,11 @@ void MantidMDCurve::dataReset(const QString &wsName) {
  */
 QString MantidMDCurve::saveToString() {
   QString s;
-  s = "MantidMDCurve\t" + m_wsName + "\t" + QString::number(m_drawErrorBars) +
-      "\n";
+  s = "MantidMDCurve\t" + m_wsName + "\t" + QString::number(m_drawErrorBars) + "\n";
   return s;
 }
 
-void MantidMDCurve::afterReplaceHandle(
-    const std::string &wsName,
-    const std::shared_ptr<Mantid::API::Workspace> &ws) {
+void MantidMDCurve::afterReplaceHandle(const std::string &wsName, const std::shared_ptr<Mantid::API::Workspace> &ws) {
   (void)ws;
 
   invalidateBoundingRect();
@@ -218,13 +195,11 @@ void MantidMDCurve::afterReplaceHandle(
 }
 
 MantidQwtIMDWorkspaceData *MantidMDCurve::mantidData() {
-  MantidQwtIMDWorkspaceData *d =
-      dynamic_cast<MantidQwtIMDWorkspaceData *>(&data());
+  MantidQwtIMDWorkspaceData *d = dynamic_cast<MantidQwtIMDWorkspaceData *>(&data());
   return d;
 }
 
 const MantidQwtIMDWorkspaceData *MantidMDCurve::mantidData() const {
-  const MantidQwtIMDWorkspaceData *d =
-      dynamic_cast<const MantidQwtIMDWorkspaceData *>(&data());
+  const MantidQwtIMDWorkspaceData *d = dynamic_cast<const MantidQwtIMDWorkspaceData *>(&data());
   return d;
 }

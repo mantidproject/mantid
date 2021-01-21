@@ -29,8 +29,7 @@ public:
     delete copy;
   }
 
-  void
-  test_Clone_With_Only_Length_And_Workspace_Returns_BinEdgeAxis_With_New_Length() {
+  void test_Clone_With_Only_Length_And_Workspace_Returns_BinEdgeAxis_With_New_Length() {
     BinEdgeAxis ax1(10);
     Mantid::API::Axis *copy = ax1.clone(20, nullptr);
     auto *typedCopy = dynamic_cast<BinEdgeAxis *>(copy);
@@ -76,7 +75,7 @@ public:
       ax1.setValue(i, static_cast<double>(i + 1));
     }
 
-    TS_ASSERT_THROWS(ax1.indexOfValue(0.9), const std::out_of_range &); // start
+    TS_ASSERT_THROWS(ax1.indexOfValue(0.9), const std::out_of_range &);  // start
     TS_ASSERT_THROWS(ax1.indexOfValue(10.1), const std::out_of_range &); // end
   }
 };

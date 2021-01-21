@@ -28,8 +28,7 @@ private:
   std::string createMatrixWorkspace(const bool withOrientedLattice = true) {
     auto ws = WorkspaceCreationHelper::create2DWorkspace(1, 2);
     if (withOrientedLattice) {
-      ws->mutableSample().setOrientedLattice(
-          std::make_unique<OrientedLattice>(1.0, 2.0, 3.0, 90, 90, 90));
+      ws->mutableSample().setOrientedLattice(std::make_unique<OrientedLattice>(1.0, 2.0, 3.0, 90, 90, 90));
     }
     const std::string wsName = "TestWorkspace";
     AnalysisDataService::Instance().addOrReplace(wsName, ws);
@@ -40,8 +39,7 @@ private:
   // Helper method to create a MDHW
   std::string createMDHistoWorkspace(const uint16_t nExperimentInfosToAdd = 2) {
     const std::string wsName = "TestWorkspace";
-    auto ws =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1, 1, 10, 10, 1, wsName);
+    auto ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1, 1, 10, 10, 1, wsName);
     ws->getExperimentInfo(0)->mutableSample().setOrientedLattice(
         std::make_unique<OrientedLattice>(1.0, 2.0, 3.0, 90, 90, 90));
 
@@ -100,14 +98,11 @@ public:
     // Name of the output workspace.
     const bool createOrientedLattice = false;
     const std::string wsName = createMatrixWorkspace(createOrientedLattice);
-    auto ws =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
-    TSM_ASSERT("No oriented lattice to begin with",
-               !ws->sample().hasOrientedLattice());
+    auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
+    TSM_ASSERT("No oriented lattice to begin with", !ws->sample().hasOrientedLattice());
 
     bool hasUB = true;
-    TSM_ASSERT_THROWS_NOTHING("Should safely handle this.",
-                              hasUB = doExecute(wsName));
+    TSM_ASSERT_THROWS_NOTHING("Should safely handle this.", hasUB = doExecute(wsName));
     TS_ASSERT(!hasUB);
 
     // Clean up.
@@ -121,8 +116,7 @@ public:
     AnalysisDataService::Instance().addOrReplace(wsName, inws);
 
     bool hasUB = true;
-    TSM_ASSERT_THROWS_NOTHING("Should safely handle this.",
-                              hasUB = doExecute(wsName));
+    TSM_ASSERT_THROWS_NOTHING("Should safely handle this.", hasUB = doExecute(wsName));
     TS_ASSERT(!hasUB);
 
     AnalysisDataService::Instance().remove(wsName);
@@ -131,10 +125,8 @@ public:
   void test_check_MatrixWorkspace() {
     // Name of the output workspace.
     const std::string wsName = createMatrixWorkspace();
-    auto ws =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
-    TSM_ASSERT("OrientedLattice should be present to begin with",
-               ws->sample().hasOrientedLattice());
+    auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
+    TSM_ASSERT("OrientedLattice should be present to begin with", ws->sample().hasOrientedLattice());
 
     bool hasUB = doExecute(wsName);
 

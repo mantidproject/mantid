@@ -31,14 +31,10 @@ class InstrumentPresenterTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static InstrumentPresenterTest *createSuite() {
-    return new InstrumentPresenterTest();
-  }
+  static InstrumentPresenterTest *createSuite() { return new InstrumentPresenterTest(); }
   static void destroySuite(InstrumentPresenterTest *suite) { delete suite; }
 
-  InstrumentPresenterTest() : m_view() {
-    Mantid::API::FrameworkManager::Instance();
-  }
+  InstrumentPresenterTest() : m_view() { Mantid::API::FrameworkManager::Instance(); }
 
   void testPresenterSubscribesToView() {
     EXPECT_CALL(m_view, subscribe(_)).Times(1);
@@ -162,12 +158,10 @@ public:
     auto presenter = makePresenter();
     auto const correctDetectors = !presenter.instrument().correctDetectors();
 
-    EXPECT_CALL(m_view, getCorrectDetectors())
-        .WillOnce(Return(correctDetectors));
+    EXPECT_CALL(m_view, getCorrectDetectors()).WillOnce(Return(correctDetectors));
     presenter.notifySettingsChanged();
 
-    TS_ASSERT_EQUALS(presenter.instrument().correctDetectors(),
-                     correctDetectors);
+    TS_ASSERT_EQUALS(presenter.instrument().correctDetectors(), correctDetectors);
     verifyAndClear();
   }
 
@@ -194,12 +188,10 @@ public:
   void testSetDetectorCorrectionTypeUpdatesModel() {
     auto presenter = makePresenter();
 
-    EXPECT_CALL(m_view, getDetectorCorrectionType())
-        .WillOnce(Return("RotateAroundSample"));
+    EXPECT_CALL(m_view, getDetectorCorrectionType()).WillOnce(Return("RotateAroundSample"));
     presenter.notifySettingsChanged();
 
-    TS_ASSERT_EQUALS(presenter.instrument().detectorCorrectionType(),
-                     DetectorCorrectionType::RotateAroundSample);
+    TS_ASSERT_EQUALS(presenter.instrument().detectorCorrectionType(), DetectorCorrectionType::RotateAroundSample);
     verifyAndClear();
   }
 
@@ -260,8 +252,8 @@ public:
   }
 
   void testInstrumentChangedUpdatesMonitorOptionsInView() {
-    auto model = makeModelWithMonitorOptions(MonitorCorrections(
-        2, true, RangeInLambda(17.0, 18.0), RangeInLambda(4.0, 10.0)));
+    auto model =
+        makeModelWithMonitorOptions(MonitorCorrections(2, true, RangeInLambda(17.0, 18.0), RangeInLambda(4.0, 10.0)));
     auto defaultOptions = expectDefaults(model);
     auto presenter = makePresenter(std::move(defaultOptions));
     EXPECT_CALL(m_view, setMonitorIndex(2)).Times(1);
@@ -275,17 +267,15 @@ public:
   }
 
   void testInstrumentChangedUpdatesMonitorOptionsInModel() {
-    auto model = makeModelWithMonitorOptions(MonitorCorrections(
-        2, true, RangeInLambda(17.0, 18.0), RangeInLambda(4.0, 10.0)));
+    auto model =
+        makeModelWithMonitorOptions(MonitorCorrections(2, true, RangeInLambda(17.0, 18.0), RangeInLambda(4.0, 10.0)));
     auto defaultOptions = expectDefaults(model);
     auto presenter = makePresenter(std::move(defaultOptions));
     presenter.notifyInstrumentChanged("POLREF");
     TS_ASSERT_EQUALS(presenter.instrument().monitorIndex(), 2);
     TS_ASSERT_EQUALS(presenter.instrument().integratedMonitors(), true);
-    TS_ASSERT_EQUALS(presenter.instrument().monitorBackgroundRange(),
-                     RangeInLambda(17.0, 18.0));
-    TS_ASSERT_EQUALS(presenter.instrument().monitorIntegralRange(),
-                     RangeInLambda(4.0, 10.0));
+    TS_ASSERT_EQUALS(presenter.instrument().monitorBackgroundRange(), RangeInLambda(17.0, 18.0));
+    TS_ASSERT_EQUALS(presenter.instrument().monitorIntegralRange(), RangeInLambda(4.0, 10.0));
     verifyAndClear();
   }
 
@@ -304,31 +294,28 @@ public:
     auto defaultOptions = expectDefaults(model);
     auto presenter = makePresenter(std::move(defaultOptions));
     presenter.notifyInstrumentChanged("POLREF");
-    TS_ASSERT_EQUALS(presenter.instrument().wavelengthRange(),
-                     RangeInLambda(1.5, 17.0));
+    TS_ASSERT_EQUALS(presenter.instrument().wavelengthRange(), RangeInLambda(1.5, 17.0));
     verifyAndClear();
   }
 
   void testInstrumentChangedUpdatesUpdatesDetectorOptionsInView() {
-    auto model = makeModelWithDetectorCorrections(
-        DetectorCorrections(true, DetectorCorrectionType::RotateAroundSample));
+    auto model =
+        makeModelWithDetectorCorrections(DetectorCorrections(true, DetectorCorrectionType::RotateAroundSample));
     auto defaultOptions = expectDefaults(model);
     auto presenter = makePresenter(std::move(defaultOptions));
     EXPECT_CALL(m_view, setCorrectDetectors(true)).Times(1);
-    EXPECT_CALL(m_view, setDetectorCorrectionType("RotateAroundSample"))
-        .Times(1);
+    EXPECT_CALL(m_view, setDetectorCorrectionType("RotateAroundSample")).Times(1);
     presenter.notifyInstrumentChanged("POLREF");
     verifyAndClear();
   }
 
   void testInstrumentChangedUpdatesUpdatesDetectorOptionsInModel() {
-    auto model = makeModelWithDetectorCorrections(
-        DetectorCorrections(true, DetectorCorrectionType::RotateAroundSample));
+    auto model =
+        makeModelWithDetectorCorrections(DetectorCorrections(true, DetectorCorrectionType::RotateAroundSample));
     auto defaultOptions = expectDefaults(model);
     auto presenter = makePresenter(std::move(defaultOptions));
     presenter.notifyInstrumentChanged("POLREF");
-    auto const expected =
-        DetectorCorrections(true, DetectorCorrectionType::RotateAroundSample);
+    auto const expected = DetectorCorrections(true, DetectorCorrectionType::RotateAroundSample);
     TS_ASSERT_EQUALS(presenter.instrument().detectorCorrections(), expected);
     verifyAndClear();
   }
@@ -337,39 +324,28 @@ private:
   NiceMock<MockInstrumentView> m_view;
   NiceMock<MockBatchPresenter> m_mainPresenter;
 
-  Instrument
-  makeModelWithMonitorOptions(MonitorCorrections monitorCorrections) {
+  Instrument makeModelWithMonitorOptions(MonitorCorrections monitorCorrections) {
     auto wavelengthRange = RangeInLambda(0.0, 0.0);
-    auto detectorCorrections =
-        DetectorCorrections(false, DetectorCorrectionType::VerticalShift);
-    return Instrument(std::move(wavelengthRange), std::move(monitorCorrections),
-                      std::move(detectorCorrections));
+    auto detectorCorrections = DetectorCorrections(false, DetectorCorrectionType::VerticalShift);
+    return Instrument(std::move(wavelengthRange), std::move(monitorCorrections), std::move(detectorCorrections));
   }
 
   Instrument makeModelWithWavelengthRange(RangeInLambda wavelengthRange) {
-    auto monitorCorrections = MonitorCorrections(
-        0, false, RangeInLambda(0.0, 0.0), RangeInLambda(0.0, 0.0));
-    auto detectorCorrections =
-        DetectorCorrections(false, DetectorCorrectionType::VerticalShift);
-    return Instrument(std::move(wavelengthRange), std::move(monitorCorrections),
-                      std::move(detectorCorrections));
+    auto monitorCorrections = MonitorCorrections(0, false, RangeInLambda(0.0, 0.0), RangeInLambda(0.0, 0.0));
+    auto detectorCorrections = DetectorCorrections(false, DetectorCorrectionType::VerticalShift);
+    return Instrument(std::move(wavelengthRange), std::move(monitorCorrections), std::move(detectorCorrections));
   }
 
-  Instrument
-  makeModelWithDetectorCorrections(DetectorCorrections detectorCorrections) {
+  Instrument makeModelWithDetectorCorrections(DetectorCorrections detectorCorrections) {
     auto wavelengthRange = RangeInLambda(0.0, 0.0);
-    auto monitorCorrections = MonitorCorrections(
-        0, false, RangeInLambda(0.0, 0.0), RangeInLambda(0.0, 0.0));
-    return Instrument(std::move(wavelengthRange), std::move(monitorCorrections),
-                      std::move(detectorCorrections));
+    auto monitorCorrections = MonitorCorrections(0, false, RangeInLambda(0.0, 0.0), RangeInLambda(0.0, 0.0));
+    return Instrument(std::move(wavelengthRange), std::move(monitorCorrections), std::move(detectorCorrections));
   }
 
-  InstrumentPresenter
-  makePresenter(std::unique_ptr<IInstrumentOptionDefaults> defaultOptions =
-                    std::make_unique<MockInstrumentOptionDefaults>()) {
+  InstrumentPresenter makePresenter(
+      std::unique_ptr<IInstrumentOptionDefaults> defaultOptions = std::make_unique<MockInstrumentOptionDefaults>()) {
     auto presenter =
-        InstrumentPresenter(&m_view, ModelCreationHelper::makeEmptyInstrument(),
-                            std::move(defaultOptions));
+        InstrumentPresenter(&m_view, ModelCreationHelper::makeEmptyInstrument(), std::move(defaultOptions));
     presenter.acceptMainPresenter(&m_mainPresenter);
     return presenter;
   }
@@ -379,8 +355,7 @@ private:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_mainPresenter));
   }
 
-  std::unique_ptr<MockInstrumentOptionDefaults>
-  expectDefaults(Instrument const &model) {
+  std::unique_ptr<MockInstrumentOptionDefaults> expectDefaults(Instrument const &model) {
     // Create a defaults object, set expectations on it, and return it so
     // that it can be passed to the presenter
     auto defaultOptions = std::make_unique<MockInstrumentOptionDefaults>();
@@ -388,30 +363,16 @@ private:
     return defaultOptions;
   }
 
-  void expectProcessing() {
-    EXPECT_CALL(m_mainPresenter, isProcessing())
-        .Times(1)
-        .WillOnce(Return(true));
-  }
+  void expectProcessing() { EXPECT_CALL(m_mainPresenter, isProcessing()).Times(1).WillOnce(Return(true)); }
 
-  void expectAutoreducing() {
-    EXPECT_CALL(m_mainPresenter, isAutoreducing())
-        .Times(1)
-        .WillOnce(Return(true));
-  }
+  void expectAutoreducing() { EXPECT_CALL(m_mainPresenter, isAutoreducing()).Times(1).WillOnce(Return(true)); }
 
   void expectNotProcessingOrAutoreducing() {
-    EXPECT_CALL(m_mainPresenter, isProcessing())
-        .Times(1)
-        .WillOnce(Return(false));
-    EXPECT_CALL(m_mainPresenter, isAutoreducing())
-        .Times(1)
-        .WillOnce(Return(false));
+    EXPECT_CALL(m_mainPresenter, isProcessing()).Times(1).WillOnce(Return(false));
+    EXPECT_CALL(m_mainPresenter, isAutoreducing()).Times(1).WillOnce(Return(false));
   }
 
-  void
-  runTestForValidWavelengthRange(RangeInLambda const &range,
-                                 boost::optional<RangeInLambda> const &result) {
+  void runTestForValidWavelengthRange(RangeInLambda const &range, boost::optional<RangeInLambda> const &result) {
     auto presenter = makePresenter();
     EXPECT_CALL(m_view, getLambdaMin()).WillOnce(Return(range.min()));
     EXPECT_CALL(m_view, getLambdaMax()).WillOnce(Return(range.max()));
@@ -431,9 +392,7 @@ private:
     verifyAndClear();
   }
 
-  void runTestForValidMonitorIntegralRange(
-      RangeInLambda const &range,
-      boost::optional<RangeInLambda> const &result) {
+  void runTestForValidMonitorIntegralRange(RangeInLambda const &range, boost::optional<RangeInLambda> const &result) {
     auto presenter = makePresenter();
     EXPECT_CALL(m_view, getMonitorIntegralMin()).WillOnce(Return(range.min()));
     EXPECT_CALL(m_view, getMonitorIntegralMax()).WillOnce(Return(range.max()));
@@ -449,19 +408,14 @@ private:
     EXPECT_CALL(m_view, getMonitorIntegralMax()).WillOnce(Return(range.max()));
     EXPECT_CALL(m_view, showMonitorIntegralRangeInvalid()).Times(1);
     presenter.notifySettingsChanged();
-    TS_ASSERT_EQUALS(presenter.instrument().monitorIntegralRange(),
-                     boost::none);
+    TS_ASSERT_EQUALS(presenter.instrument().monitorIntegralRange(), boost::none);
     verifyAndClear();
   }
 
-  void runTestForValidMonitorBackgroundRange(
-      RangeInLambda const &range,
-      boost::optional<RangeInLambda> const &result) {
+  void runTestForValidMonitorBackgroundRange(RangeInLambda const &range, boost::optional<RangeInLambda> const &result) {
     auto presenter = makePresenter();
-    EXPECT_CALL(m_view, getMonitorBackgroundMin())
-        .WillOnce(Return(range.min()));
-    EXPECT_CALL(m_view, getMonitorBackgroundMax())
-        .WillOnce(Return(range.max()));
+    EXPECT_CALL(m_view, getMonitorBackgroundMin()).WillOnce(Return(range.min()));
+    EXPECT_CALL(m_view, getMonitorBackgroundMax()).WillOnce(Return(range.max()));
     EXPECT_CALL(m_view, showMonitorBackgroundRangeValid()).Times(1);
     presenter.notifySettingsChanged();
     TS_ASSERT_EQUALS(presenter.instrument().monitorBackgroundRange(), result);
@@ -470,14 +424,11 @@ private:
 
   void runTestForInvalidMonitorBackgroundRange(RangeInLambda const &range) {
     auto presenter = makePresenter();
-    EXPECT_CALL(m_view, getMonitorBackgroundMin())
-        .WillOnce(Return(range.min()));
-    EXPECT_CALL(m_view, getMonitorBackgroundMax())
-        .WillOnce(Return(range.max()));
+    EXPECT_CALL(m_view, getMonitorBackgroundMin()).WillOnce(Return(range.min()));
+    EXPECT_CALL(m_view, getMonitorBackgroundMax()).WillOnce(Return(range.max()));
     EXPECT_CALL(m_view, showMonitorBackgroundRangeInvalid()).Times(1);
     presenter.notifySettingsChanged();
-    TS_ASSERT_EQUALS(presenter.instrument().monitorBackgroundRange(),
-                     boost::none);
+    TS_ASSERT_EQUALS(presenter.instrument().monitorBackgroundRange(), boost::none);
     verifyAndClear();
   }
 };

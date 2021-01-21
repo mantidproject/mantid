@@ -49,17 +49,12 @@ const QString MantidWSIndexWidget::CONTOUR_PLOT = "Contour Plot";
  * @param showTiledOption :: true if tiled plot enabled
  * @param isAdvanced :: true if advanced plotting has been selected
  */
-MantidWSIndexWidget::MantidWSIndexWidget(QWidget *parent,
-                                         const Qt::WindowFlags &flags,
-                                         const QList<QString> &wsNames,
-                                         const bool showWaterfallOption,
-                                         const bool showTiledOption,
+MantidWSIndexWidget::MantidWSIndexWidget(QWidget *parent, const Qt::WindowFlags &flags, const QList<QString> &wsNames,
+                                         const bool showWaterfallOption, const bool showTiledOption,
                                          const bool isAdvanced)
-    : QWidget(parent, flags), m_spectra(false),
-      m_waterfall(showWaterfallOption), m_tiled(showTiledOption),
-      m_advanced(isAdvanced), m_plotOptions(), m_wsNames(wsNames),
-      m_wsIndexIntervals(), m_spectraNumIntervals(), m_wsIndexChoice(),
-      m_spectraNumChoice() {
+    : QWidget(parent, flags), m_spectra(false), m_waterfall(showWaterfallOption), m_tiled(showTiledOption),
+      m_advanced(isAdvanced), m_plotOptions(), m_wsNames(wsNames), m_wsIndexIntervals(), m_spectraNumIntervals(),
+      m_wsIndexChoice(), m_spectraNumChoice() {
   checkForSpectraAxes();
   // Generate the intervals allowed to be plotted by the user.
   generateWsIndexIntervals();
@@ -90,8 +85,7 @@ MantidWSIndexWidget::UserInput MantidWSIndexWidget::getSelections() {
   }
 
   // Advanced options
-  if (m_advanced && (options.simple || options.waterfall || options.surface ||
-                     options.contour)) {
+  if (m_advanced && (options.simple || options.waterfall || options.surface || options.contour)) {
     UserInputAdvanced userInputAdvanced;
     if (options.surface || options.contour) {
       userInputAdvanced.accepted = true;
@@ -99,8 +93,7 @@ MantidWSIndexWidget::UserInput MantidWSIndexWidget::getSelections() {
       userInputAdvanced.axisName = getAxisName();
     }
     userInputAdvanced.logName = getLogName();
-    if (userInputAdvanced.logName == WORKSPACE_NAME ||
-        userInputAdvanced.logName == WORKSPACE_INDEX) {
+    if (userInputAdvanced.logName == WORKSPACE_NAME || userInputAdvanced.logName == WORKSPACE_INDEX) {
       // We want default names in legend, if log is workspace name or index
       userInputAdvanced.logName = "";
     }
@@ -114,8 +107,7 @@ MantidWSIndexWidget::UserInput MantidWSIndexWidget::getSelections() {
     options.isAdvanced = true;
     options.advanced = userInputAdvanced;
   } else {
-    options.isAdvanced =
-        false; // We don't want the view to look at options.advanced.
+    options.isAdvanced = false; // We don't want the view to look at options.advanced.
   }
   return options;
 }
@@ -179,17 +171,13 @@ const std::set<double> MantidWSIndexWidget::getCustomLogValues() const {
  * Gets the name that the user gave for the Y axis of the surface plot
  * @returns Name input by user for axis
  */
-const QString MantidWSIndexWidget::getAxisName() const {
-  return m_axisNameEdit->lineEdit()->text();
-}
+const QString MantidWSIndexWidget::getAxisName() const { return m_axisNameEdit->lineEdit()->text(); }
 
 /**
  * Gets the log that user selected to plot against
  * @returns Name of log, or "Workspace index"
  */
-const QString MantidWSIndexWidget::getLogName() const {
-  return m_logSelector->currentText();
-}
+const QString MantidWSIndexWidget::getLogName() const { return m_logSelector->currentText(); }
 
 /**
  * Returns the user-selected plots
@@ -212,15 +200,12 @@ QMultiMap<QString, std::set<int>> MantidWSIndexWidget::getPlots() const {
     for (const auto &wsName : m_wsNames) {
       // Convert the spectra choices of the user into workspace indices for us
       // to use.
-      Mantid::API::MatrixWorkspace_const_sptr ws =
-          std::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
-              Mantid::API::AnalysisDataService::Instance().retrieve(
-                  wsName.toStdString()));
+      Mantid::API::MatrixWorkspace_const_sptr ws = std::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
+          Mantid::API::AnalysisDataService::Instance().retrieve(wsName.toStdString()));
       if (nullptr == ws)
         continue;
 
-      const Mantid::spec2index_map spec2index =
-          ws->getSpectrumToWorkspaceIndexMap();
+      const Mantid::spec2index_map spec2index = ws->getSpectrumToWorkspaceIndexMap();
 
       std::set<int> origSet = m_spectraNumChoice.getIntSet();
       std::set<int>::iterator it = origSet.begin();
@@ -243,49 +228,37 @@ QMultiMap<QString, std::set<int>> MantidWSIndexWidget::getPlots() const {
  * Whether the user selected "1D plot"
  * @returns True if 1D plot selected
  */
-bool MantidWSIndexWidget::is1DPlotSelected() const {
-  return (m_plotOptions->currentText() == SIMPLE_PLOT);
-}
+bool MantidWSIndexWidget::is1DPlotSelected() const { return (m_plotOptions->currentText() == SIMPLE_PLOT); }
 
 /**
  * Whether the user selected "waterfall"
  * @returns True if waterfall plot selected
  */
-bool MantidWSIndexWidget::isWaterfallPlotSelected() const {
-  return (m_plotOptions->currentText() == WATERFALL_PLOT);
-}
+bool MantidWSIndexWidget::isWaterfallPlotSelected() const { return (m_plotOptions->currentText() == WATERFALL_PLOT); }
 
 /**
  * Whether the user selected "tiled"
  * @returns True if tiled plot selected
  */
-bool MantidWSIndexWidget::isTiledPlotSelected() const {
-  return (m_plotOptions->currentText() == "Tiled Plot");
-}
+bool MantidWSIndexWidget::isTiledPlotSelected() const { return (m_plotOptions->currentText() == "Tiled Plot"); }
 
 /**
  * Whether the user selected surface plot
  * @returns True if surfarce plot selected
  */
-bool MantidWSIndexWidget::isSurfacePlotSelected() const {
-  return (m_plotOptions->currentText() == SURFACE_PLOT);
-}
+bool MantidWSIndexWidget::isSurfacePlotSelected() const { return (m_plotOptions->currentText() == SURFACE_PLOT); }
 
 /**
  * Whether the user selected contour plot
  * @returns True if surfarce plot selected
  */
-bool MantidWSIndexWidget::isContourPlotSelected() const {
-  return (m_plotOptions->currentText() == CONTOUR_PLOT);
-}
+bool MantidWSIndexWidget::isContourPlotSelected() const { return (m_plotOptions->currentText() == CONTOUR_PLOT); }
 
 /**
  * Whether the user has selected plot with error bars
  * @returns True if error bars are selected
  */
-bool MantidWSIndexWidget::isErrorBarsSelected() const {
-  return m_showErrorBars->checkState();
-}
+bool MantidWSIndexWidget::isErrorBarsSelected() const { return m_showErrorBars->checkState(); }
 
 /**
  * Called when user edits workspace field
@@ -312,10 +285,8 @@ bool MantidWSIndexWidget::plotRequested() {
   int npos = 0;
   QString wsText = m_wsField->lineEdit()->text();
   QString spectraText = m_spectraField->lineEdit()->text();
-  QValidator::State wsState =
-      m_wsField->lineEdit()->validator()->validate(wsText, npos);
-  QValidator::State spectraState =
-      m_spectraField->lineEdit()->validator()->validate(spectraText, npos);
+  QValidator::State wsState = m_wsField->lineEdit()->validator()->validate(wsText, npos);
+  QValidator::State spectraState = m_spectraField->lineEdit()->validator()->validate(spectraText, npos);
   if (wsState == QValidator::Acceptable) {
     m_wsIndexChoice.addIntervals(m_wsField->lineEdit()->text());
     m_usingWsIndexChoice = true;
@@ -338,8 +309,7 @@ bool MantidWSIndexWidget::plotRequested() {
       m_spectraField->setError(error_message);
     if (wsText.isEmpty() && spectraText.isEmpty()) {
       m_wsField->setError("Workspace indices or spectra numbers are needed");
-      m_spectraField->setError(
-          "Spectra numbers or workspace indices are needed");
+      m_spectraField->setError("Spectra numbers or workspace indices are needed");
     }
   }
   // To give maximum feedback to user, we validate plot options,
@@ -393,8 +363,7 @@ bool MantidWSIndexWidget::validatePlotOptions() {
           // cpp-check unreadVariable
           previousValue = currentValue;
         } else {
-          m_logValues->setError(
-              "The custom log values must be in numerical order and distinct.");
+          m_logValues->setError("The custom log values must be in numerical order and distinct.");
           validOptions = false;
           break;
         }
@@ -406,16 +375,13 @@ bool MantidWSIndexWidget::validatePlotOptions() {
       QString nCustomLogValues;
       nCustomLogValues.setNum(numCustomLogValues);
       int numWorkspaces = m_wsNames.size();
-      if (m_plotOptions->currentText() == SURFACE_PLOT ||
-          m_plotOptions->currentText() == CONTOUR_PLOT) {
+      if (m_plotOptions->currentText() == SURFACE_PLOT || m_plotOptions->currentText() == CONTOUR_PLOT) {
         QString nWorkspaces;
         nWorkspaces.setNum(numWorkspaces);
 
         if (numCustomLogValues != numWorkspaces) {
-          m_logValues->setError("The number of custom log values (" +
-                                nCustomLogValues +
-                                ") is not equal to the number of workspaces (" +
-                                nWorkspaces + ").");
+          m_logValues->setError("The number of custom log values (" + nCustomLogValues +
+                                ") is not equal to the number of workspaces (" + nWorkspaces + ").");
           validOptions = false;
         }
       } else {
@@ -428,9 +394,8 @@ bool MantidWSIndexWidget::validatePlotOptions() {
         nPlots.setNum(numWorkspaces * numSpectra);
 
         if (numCustomLogValues != numWorkspaces * numSpectra) {
-          m_logValues->setError(
-              "The number of custom log values (" + nCustomLogValues +
-              ") is not equal to the number of plots (" + nPlots + ").");
+          m_logValues->setError("The number of custom log values (" + nCustomLogValues +
+                                ") is not equal to the number of plots (" + nPlots + ").");
           validOptions = false;
         }
       }
@@ -470,8 +435,7 @@ void MantidWSIndexWidget::initWorkspaceBox() {
   m_wsMessage = new QLabel(tr(qPrintable(label)));
   m_wsField = new QLineEditWithErrorMark();
 
-  m_wsField->lineEdit()->setValidator(
-      new IntervalListValidator(this, m_wsIndexIntervals));
+  m_wsField->lineEdit()->setValidator(new IntervalListValidator(this, m_wsIndexIntervals));
   if (wsIndices == "0") { // single spectrum
     m_wsField->lineEdit()->setEnabled(false);
     m_wsField->lineEdit()->setText("0");
@@ -480,8 +444,7 @@ void MantidWSIndexWidget::initWorkspaceBox() {
   m_wsBox->addWidget(m_wsField);
   m_outer->addItem(m_wsBox);
 
-  connect(m_wsField->lineEdit(), SIGNAL(textEdited(const QString &)), this,
-          SLOT(editedWsField()));
+  connect(m_wsField->lineEdit(), SIGNAL(textEdited(const QString &)), this, SLOT(editedWsField()));
 }
 
 /**
@@ -495,8 +458,7 @@ void MantidWSIndexWidget::initSpectraBox() {
   m_spectraField = new QLineEditWithErrorMark();
   m_orMessage = new QLabel(tr("<br>Or"));
 
-  m_spectraField->lineEdit()->setValidator(
-      new IntervalListValidator(this, m_spectraNumIntervals));
+  m_spectraField->lineEdit()->setValidator(new IntervalListValidator(this, m_spectraNumIntervals));
   if (spectraNumbers == "1") { // single spectrum
     m_spectraField->lineEdit()->setEnabled(false);
     m_spectraField->lineEdit()->setText("1");
@@ -508,8 +470,7 @@ void MantidWSIndexWidget::initSpectraBox() {
   if (usingSpectraNumbers())
     m_outer->addItem(m_spectraBox);
 
-  connect(m_spectraField->lineEdit(), SIGNAL(textEdited(const QString &)), this,
-          SLOT(editedSpectraField()));
+  connect(m_spectraField->lineEdit(), SIGNAL(textEdited(const QString &)), this, SLOT(editedSpectraField()));
 }
 
 /**
@@ -578,8 +539,7 @@ void MantidWSIndexWidget::initLogs() {
 
   m_outer->addWidget(m_logOptionsGroup);
 
-  connect(m_logSelector, SIGNAL(currentIndexChanged(const QString &)), this,
-          SLOT(onLogSelected(const QString &)));
+  connect(m_logSelector, SIGNAL(currentIndexChanged(const QString &)), this, SLOT(onLogSelected(const QString &)));
 }
 
 /**
@@ -602,8 +562,8 @@ void MantidWSIndexWidget::onLogSelected(const QString &logName) {
 void MantidWSIndexWidget::onPlotOptionChanged(const QString &plotOption) {
   auto useLogNames = m_advanced && isSuitableForLogValues(plotOption);
   auto isLogSelectorCustom = m_logSelector->currentText() == CUSTOM;
-  auto isSurfaceOrContourPlot = m_plotOptions->currentText() == SURFACE_PLOT ||
-                                m_plotOptions->currentText() == CONTOUR_PLOT;
+  auto isSurfaceOrContourPlot =
+      m_plotOptions->currentText() == SURFACE_PLOT || m_plotOptions->currentText() == CONTOUR_PLOT;
   // Enable widgets as appropriate
   m_showErrorBars->setEnabled(!isSurfaceOrContourPlot);
   m_logSelector->setEnabled(useLogNames);
@@ -611,8 +571,7 @@ void MantidWSIndexWidget::onPlotOptionChanged(const QString &plotOption) {
   m_axisNameEdit->setEnabled(isSurfaceOrContourPlot);
   if (useLogNames) {
     // Make sure an appropriate name is shown for the default log option.
-    if (m_plotOptions->currentText() == SURFACE_PLOT ||
-        m_plotOptions->currentText() == CONTOUR_PLOT) {
+    if (m_plotOptions->currentText() == SURFACE_PLOT || m_plotOptions->currentText() == CONTOUR_PLOT) {
       m_logSelector->setItemText(0, WORKSPACE_INDEX);
       if (m_axisNameEdit->lineEdit()->text() == WORKSPACE_NAME) {
         m_axisNameEdit->lineEdit()->setText(WORKSPACE_INDEX);
@@ -625,11 +584,8 @@ void MantidWSIndexWidget::onPlotOptionChanged(const QString &plotOption) {
 
 namespace {
 struct LogTestStruct {
-  LogTestStruct()
-      : isconstantvalue(true), value(std::numeric_limits<double>::quiet_NaN()) {
-  }
-  LogTestStruct(bool isconstantvalue, double value)
-      : isconstantvalue(isconstantvalue), value(value) {}
+  LogTestStruct() : isconstantvalue(true), value(std::numeric_limits<double>::quiet_NaN()) {}
+  LogTestStruct(bool isconstantvalue, double value) : isconstantvalue(isconstantvalue), value(value) {}
 
   bool isconstantvalue;
   double value;
@@ -654,13 +610,11 @@ void MantidWSIndexWidget::populateLogComboBox() {
   auto ws = getWorkspace(m_wsNames[0]);
   if (ws) {
     const auto runObj = ws->run();
-    const std::vector<Mantid::Kernel::Property *> &logData =
-        runObj.getLogData();
+    const std::vector<Mantid::Kernel::Property *> &logData = runObj.getLogData();
     for (auto &log : logData) {
       const std::string &name = log->name();
       try {
-        const auto value = runObj.getLogAsSingleValue(
-            name, Mantid::Kernel::Math::TimeAveragedMean);
+        const auto value = runObj.getLogAsSingleValue(name, Mantid::Kernel::Math::TimeAveragedMean);
         usableLogs[name] = LogTestStruct{true, value};
       } catch (std::invalid_argument &) {
         // it can't be represented as a double so ignore it
@@ -678,8 +632,7 @@ void MantidWSIndexWidget::populateLogComboBox() {
         if (runObj.hasProperty(logItem.first)) {
           // check the value if it is still considered constant
           if (logItem.second.isconstantvalue) {
-            const auto value = runObj.getLogAsSingleValue(
-                logItem.first, Mantid::Kernel::Math::TimeAveragedMean);
+            const auto value = runObj.getLogAsSingleValue(logItem.first, Mantid::Kernel::Math::TimeAveragedMean);
             // set the bool to whether the value is the same
             logItem.second.isconstantvalue = (value == logItem.second.value);
           }
@@ -701,23 +654,18 @@ void MantidWSIndexWidget::populateLogComboBox() {
   m_logSelector->addItem(CUSTOM);
 }
 
-Mantid::API::MatrixWorkspace_const_sptr
-MantidWSIndexWidget::getWorkspace(const QString &workspaceName) const {
+Mantid::API::MatrixWorkspace_const_sptr MantidWSIndexWidget::getWorkspace(const QString &workspaceName) const {
   return std::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
-      Mantid::API::AnalysisDataService::Instance().retrieve(
-          workspaceName.toStdString()));
+      Mantid::API::AnalysisDataService::Instance().retrieve(workspaceName.toStdString()));
 }
 
 // True if selected plot is suitable for plotting as contour of surface plot
-bool MantidWSIndexWidget::isSuitableForContourOrSurfacePlot() const {
-  return (m_wsNames.size() > 2);
-}
+bool MantidWSIndexWidget::isSuitableForContourOrSurfacePlot() const { return (m_wsNames.size() > 2); }
 
 // True if selected plot is suitable for putting log values in
-bool MantidWSIndexWidget::isSuitableForLogValues(
-    const QString &plotOption) const {
-  return (plotOption == SIMPLE_PLOT || plotOption == WATERFALL_PLOT ||
-          plotOption == SURFACE_PLOT || plotOption == CONTOUR_PLOT);
+bool MantidWSIndexWidget::isSuitableForLogValues(const QString &plotOption) const {
+  return (plotOption == SIMPLE_PLOT || plotOption == WATERFALL_PLOT || plotOption == SURFACE_PLOT ||
+          plotOption == CONTOUR_PLOT);
 }
 
 /**
@@ -730,10 +678,8 @@ void MantidWSIndexWidget::checkForSpectraAxes() {
   m_spectra = true;
 
   for (; it != m_wsNames.constEnd(); ++it) {
-    Mantid::API::MatrixWorkspace_const_sptr ws =
-        std::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(
-                (*it).toStdString()));
+    Mantid::API::MatrixWorkspace_const_sptr ws = std::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
+        Mantid::API::AnalysisDataService::Instance().retrieve((*it).toStdString()));
     if (nullptr == ws)
       continue;
     bool hasSpectra = false;
@@ -758,15 +704,12 @@ void MantidWSIndexWidget::generateWsIndexIntervals() {
 
   // Cycle through the workspaces ...
   for (; it != m_wsNames.constEnd(); ++it) {
-    Mantid::API::MatrixWorkspace_const_sptr ws =
-        std::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(
-                (*it).toStdString()));
+    Mantid::API::MatrixWorkspace_const_sptr ws = std::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
+        Mantid::API::AnalysisDataService::Instance().retrieve((*it).toStdString()));
     if (nullptr == ws)
       continue;
 
-    const int endWs = static_cast<int>(ws->getNumberHistograms() -
-                                       1); //= static_cast<int> (end->first);
+    const int endWs = static_cast<int>(ws->getNumberHistograms() - 1); //= static_cast<int> (end->first);
 
     Interval interval(0, endWs);
     // If no interval has been added yet, just add it ...
@@ -775,8 +718,7 @@ void MantidWSIndexWidget::generateWsIndexIntervals() {
     // ... else set the list as the intersection of what's already there
     // and what has just been added.
     else
-      m_wsIndexIntervals.setIntervalList(
-          IntervalList::intersect(m_wsIndexIntervals, interval));
+      m_wsIndexIntervals.setIntervalList(IntervalList::intersect(m_wsIndexIntervals, interval));
   }
 }
 
@@ -786,15 +728,12 @@ void MantidWSIndexWidget::generateWsIndexIntervals() {
 void MantidWSIndexWidget::generateSpectraNumIntervals() {
   bool firstWs = true;
   foreach (const QString wsName, m_wsNames) {
-    Mantid::API::MatrixWorkspace_const_sptr ws =
-        std::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(
-                wsName.toStdString()));
+    Mantid::API::MatrixWorkspace_const_sptr ws = std::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
+        Mantid::API::AnalysisDataService::Instance().retrieve(wsName.toStdString()));
     if (!ws)
       continue; // Belt and braces.
 
-    const Mantid::spec2index_map spec2index =
-        ws->getSpectrumToWorkspaceIndexMap();
+    const Mantid::spec2index_map spec2index = ws->getSpectrumToWorkspaceIndexMap();
 
     IntervalList spectraIntervalList;
     for (const auto &pair : spec2index) {
@@ -805,8 +744,7 @@ void MantidWSIndexWidget::generateSpectraNumIntervals() {
       m_spectraNumIntervals = spectraIntervalList;
       firstWs = false;
     } else {
-      m_spectraNumIntervals.setIntervalList(
-          IntervalList::intersect(m_spectraNumIntervals, spectraIntervalList));
+      m_spectraNumIntervals.setIntervalList(IntervalList::intersect(m_spectraNumIntervals, spectraIntervalList));
     }
   }
 }
@@ -832,13 +770,10 @@ bool MantidWSIndexWidget::usingSpectraNumbers() const {
  * @param showTiledOption :: If true the "Tiled" option is created
  * @param isAdvanced :: true if adanced plotting dialog is created
  */
-MantidWSIndexDialog::MantidWSIndexDialog(
-    QWidget *parent, const Qt::WindowFlags &flags,
-    const QList<QString> &wsNames, const bool showWaterfallOption,
-    const bool showPlotAll, const bool showTiledOption, const bool isAdvanced)
-    : QDialog(parent, flags),
-      m_widget(this, flags, wsNames, showWaterfallOption, showTiledOption,
-               isAdvanced),
+MantidWSIndexDialog::MantidWSIndexDialog(QWidget *parent, const Qt::WindowFlags &flags, const QList<QString> &wsNames,
+                                         const bool showWaterfallOption, const bool showPlotAll,
+                                         const bool showTiledOption, const bool isAdvanced)
+    : QDialog(parent, flags), m_widget(this, flags, wsNames, showWaterfallOption, showTiledOption, isAdvanced),
       m_plotAll(showPlotAll) {
   // Set up UI.
   init(isAdvanced);
@@ -848,66 +783,49 @@ MantidWSIndexDialog::MantidWSIndexDialog(
  * Returns the user-selected options
  * @returns Struct containing user options
  */
-MantidWSIndexWidget::UserInput MantidWSIndexDialog::getSelections() {
-  return m_widget.getSelections();
-}
+MantidWSIndexWidget::UserInput MantidWSIndexDialog::getSelections() { return m_widget.getSelections(); }
 
 /**
  * Returns the user-selected plots from the widget
  * @returns Plots selected by user
  */
-QMultiMap<QString, std::set<int>> MantidWSIndexDialog::getPlots() const {
-
-  return m_widget.getPlots();
-}
+QMultiMap<QString, std::set<int>> MantidWSIndexDialog::getPlots() const { return m_widget.getPlots(); }
 
 /**
  * Whether the user selected the simple 1D plot
  * @returns True if waterfall plot selected
  */
-bool MantidWSIndexDialog::is1DPlotSelected() const {
-  return m_widget.is1DPlotSelected();
-}
+bool MantidWSIndexDialog::is1DPlotSelected() const { return m_widget.is1DPlotSelected(); }
 
 /**
  * Whether the user selected the "waterfall" plot
  * @returns True if waterfall plot selected
  */
-bool MantidWSIndexDialog::isWaterfallPlotSelected() const {
-  return m_widget.isWaterfallPlotSelected();
-}
+bool MantidWSIndexDialog::isWaterfallPlotSelected() const { return m_widget.isWaterfallPlotSelected(); }
 
 /**
  * Whether the user selected the "tiled" plot
  * @returns True if tiled plot selected
  */
-bool MantidWSIndexDialog::isTiledPlotSelected() const {
-  return m_widget.isTiledPlotSelected();
-}
+bool MantidWSIndexDialog::isTiledPlotSelected() const { return m_widget.isTiledPlotSelected(); }
 
 /**
  * Whether the user selected the surface plot
  * @returns True if surface plot selected
  */
-bool MantidWSIndexDialog::isSurfacePlotSelected() const {
-  return m_widget.isSurfacePlotSelected();
-}
+bool MantidWSIndexDialog::isSurfacePlotSelected() const { return m_widget.isSurfacePlotSelected(); }
 
 /**
  * Whether the user selected the surface plot
  * @returns True if surface plot selected
  */
-bool MantidWSIndexDialog::isContourPlotSelected() const {
-  return m_widget.isContourPlotSelected();
-}
+bool MantidWSIndexDialog::isContourPlotSelected() const { return m_widget.isContourPlotSelected(); }
 
 /**
  * Whether the user selected error bars
  * @returns True if error bars selected
  */
-bool MantidWSIndexDialog::isErrorBarsSelected() const {
-  return m_widget.isErrorBarsSelected();
-}
+bool MantidWSIndexDialog::isErrorBarsSelected() const { return m_widget.isErrorBarsSelected(); }
 
 //----------------------------------
 // MantidWSIndexDialog private slots
@@ -1034,9 +952,7 @@ std::set<int> Interval::getIntSet() const {
   return intSet;
 }
 
-bool Interval::contains(const Interval &other) const {
-  return (other.m_start >= m_start && other.m_end <= m_end);
-}
+bool Interval::contains(const Interval &other) const { return (other.m_start >= m_start && other.m_end <= m_end); }
 
 std::string Interval::toStdString() const {
   std::string output;
@@ -1086,13 +1002,9 @@ void Interval::init(int start, int end) {
 //----------------------------------
 IntervalList::IntervalList(void) {}
 
-IntervalList::IntervalList(const QString &intervals) {
-  addIntervals(std::move(intervals));
-}
+IntervalList::IntervalList(const QString &intervals) { addIntervals(std::move(intervals)); }
 
-IntervalList::IntervalList(const Interval &interval) {
-  m_list.append(interval);
-}
+IntervalList::IntervalList(const Interval &interval) { m_list.append(interval); }
 
 const QList<Interval> &IntervalList::getList() const { return m_list; }
 
@@ -1235,9 +1147,7 @@ void IntervalList::addIntervalList(const IntervalList &intervals) {
   }
 }
 
-void IntervalList::setIntervalList(const IntervalList &intervals) {
-  m_list = QList<Interval>(intervals.getList());
-}
+void IntervalList::setIntervalList(const IntervalList &intervals) { m_list = QList<Interval>(intervals.getList()); }
 
 void IntervalList::clear() { m_list = QList<Interval>(); }
 
@@ -1270,8 +1180,7 @@ bool IntervalList::contains(const IntervalList &other) const {
   return true;
 }
 
-bool IntervalList::isParsable(const QString &input,
-                              const IntervalList &container) {
+bool IntervalList::isParsable(const QString &input, const IntervalList &container) {
   try {
     const IntervalList test(input);
     return container.contains(test);
@@ -1289,15 +1198,13 @@ bool IntervalList::isParsable(const QString &input) {
   }
 }
 
-IntervalList IntervalList::intersect(const IntervalList &aList,
-                                     const Interval &bInterval) {
+IntervalList IntervalList::intersect(const IntervalList &aList, const Interval &bInterval) {
   const IntervalList bList(bInterval);
 
   return IntervalList::intersect(aList, bList);
 }
 
-IntervalList IntervalList::intersect(const IntervalList &a,
-                                     const IntervalList &b) {
+IntervalList IntervalList::intersect(const IntervalList &a, const IntervalList &b) {
   IntervalList output;
 
   const std::set<int> aInts = a.getIntSet();
@@ -1315,12 +1222,10 @@ IntervalList IntervalList::intersect(const IntervalList &a,
 //----------------------------------
 // IntervalListValidator public methods
 //----------------------------------
-IntervalListValidator::IntervalListValidator(QObject *parent,
-                                             const IntervalList &intervalList)
+IntervalListValidator::IntervalListValidator(QObject *parent, const IntervalList &intervalList)
     : QValidator(parent), m_intervalList(intervalList) {}
 
-QValidator::State IntervalListValidator::validate(QString &input,
-                                                  int &pos) const {
+QValidator::State IntervalListValidator::validate(QString &input, int &pos) const {
   UNUSED_ARG(pos)
   if (IntervalList::isParsable(input, m_intervalList))
     return QValidator::Acceptable;
@@ -1337,9 +1242,7 @@ QValidator::State IntervalListValidator::validate(QString &input,
 //////////////////////////////////////
 // QLineEditWithErrorMark
 //////////////////////////////////////
-MantidWSIndexWidget::QLineEditWithErrorMark::QLineEditWithErrorMark(
-    QWidget *parent)
-    : QWidget(parent) {
+MantidWSIndexWidget::QLineEditWithErrorMark::QLineEditWithErrorMark(QWidget *parent) : QWidget(parent) {
   auto *layout = new QGridLayout();
   _lineEdit = new QLineEdit();
   m_validLbl = new QLabel("*"); // make it red
@@ -1352,8 +1255,7 @@ MantidWSIndexWidget::QLineEditWithErrorMark::QLineEditWithErrorMark(
   setLayout(layout);
 }
 
-void MantidWSIndexWidget::QLineEditWithErrorMark::setError(
-    const QString &error) {
+void MantidWSIndexWidget::QLineEditWithErrorMark::setError(const QString &error) {
   if (error.isEmpty()) {
     m_validLbl->setVisible(false);
   } else {

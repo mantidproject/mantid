@@ -42,8 +42,7 @@ class MANTID_GEOMETRY_DLL SymmetryOperationFactoryImpl {
 public:
   SymmetryOperation createSymOp(const std::string &identifier);
   std::vector<SymmetryOperation> createSymOps(const std::string &identifiers);
-  std::vector<SymmetryOperation>
-  createSymOps(const std::vector<std::string> &identifiers);
+  std::vector<SymmetryOperation> createSymOps(const std::vector<std::string> &identifiers);
 
   void subscribeSymOp(const std::string &identifier);
   void unsubscribeSymOp(const std::string &identifier);
@@ -63,23 +62,20 @@ private:
   SymmetryOperationFactoryImpl();
 };
 
-using SymmetryOperationFactory =
-    Mantid::Kernel::SingletonHolder<SymmetryOperationFactoryImpl>;
+using SymmetryOperationFactory = Mantid::Kernel::SingletonHolder<SymmetryOperationFactoryImpl>;
 
 } // namespace Geometry
 } // namespace Mantid
 
 namespace Mantid {
 namespace Kernel {
-EXTERN_MANTID_GEOMETRY template class MANTID_GEOMETRY_DLL Mantid::Kernel::
-    SingletonHolder<Mantid::Geometry::SymmetryOperationFactoryImpl>;
+EXTERN_MANTID_GEOMETRY template class MANTID_GEOMETRY_DLL
+    Mantid::Kernel::SingletonHolder<Mantid::Geometry::SymmetryOperationFactoryImpl>;
 }
 } // namespace Mantid
 
-#define DECLARE_SYMMETRY_OPERATION(operation, name)                            \
-  namespace {                                                                  \
-  Mantid::Kernel::RegistrationHelper register_symop_##name(                    \
-      ((Mantid::Geometry::SymmetryOperationFactory::Instance().subscribeSymOp( \
-           operation)),                                                        \
-       0));                                                                    \
+#define DECLARE_SYMMETRY_OPERATION(operation, name)                                                                    \
+  namespace {                                                                                                          \
+  Mantid::Kernel::RegistrationHelper                                                                                   \
+      register_symop_##name(((Mantid::Geometry::SymmetryOperationFactory::Instance().subscribeSymOp(operation)), 0));  \
   }

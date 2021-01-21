@@ -18,10 +18,7 @@ namespace Crystal {
  * Constructor
  * @param label : Label (taken as original) for Cluster
  */
-Cluster::Cluster(const size_t &label)
-    : m_originalLabel(label), m_rootCluster(this) {
-  m_indexes.reserve(1000);
-}
+Cluster::Cluster(const size_t &label) : m_originalLabel(label), m_rootCluster(this) { m_indexes.reserve(1000); }
 
 /**
  * Get the label
@@ -71,8 +68,7 @@ void Cluster::writeTo(Mantid::API::IMDHistoWorkspace_sptr ws) const {
  * @param ws : Image
  * @return : Integrated values
  */
-ICluster::ClusterIntegratedValues
-Cluster::integrate(Mantid::API::IMDHistoWorkspace_const_sptr ws) const {
+ICluster::ClusterIntegratedValues Cluster::integrate(Mantid::API::IMDHistoWorkspace_const_sptr ws) const {
   double errorIntSQ = 0;
   double sigInt = 0;
   // Integrate accross indexes owned by this workspace.
@@ -116,18 +112,14 @@ void Cluster::setRootCluster(ICluster const *root) { m_rootCluster = root; }
  * @param other : To compare with
  * @return True only if the objects are equal
  */
-bool Cluster::operator==(const Cluster &other) const {
-  return getLabel() == other.getLabel();
-}
+bool Cluster::operator==(const Cluster &other) const { return getLabel() == other.getLabel(); }
 
 /**
  * Does the cluster contain the label.
  * @param label : Label to find
  * @return : True only if the label exists.
  */
-bool Cluster::containsLabel(const size_t &label) const {
-  return (label == this->getLabel());
-}
+bool Cluster::containsLabel(const size_t &label) const { return (label == this->getLabel()); }
 
 } // namespace Crystal
 } // namespace Mantid

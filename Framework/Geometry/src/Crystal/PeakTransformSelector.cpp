@@ -16,17 +16,14 @@ PeakTransformSelector::PeakTransformSelector() {}
 Register a peak transform factory as a candidate.
 @param candidate : candidate peak transform factory
 */
-void PeakTransformSelector::registerCandidate(
-    const PeakTransformFactory_sptr &candidate) {
+void PeakTransformSelector::registerCandidate(const PeakTransformFactory_sptr &candidate) {
   m_candidateFactories.insert(candidate);
 }
 
 /**
 @return the number of registered candidates.
 */
-size_t PeakTransformSelector::numberRegistered() const {
-  return m_candidateFactories.size();
-}
+size_t PeakTransformSelector::numberRegistered() const { return m_candidateFactories.size(); }
 
 /**
 Make a choice for the peak transform factory, but use the default labels known
@@ -49,8 +46,7 @@ PeakTransformFactory_sptr PeakTransformSelector::makeDefaultChoice() const {
     }
   }
   if (!found) {
-    throw std::invalid_argument(
-        "PeakTransformSelector could not find a suitable transform");
+    throw std::invalid_argument("PeakTransformSelector could not find a suitable transform");
   }
   return selected;
 }
@@ -61,9 +57,8 @@ Make a choice for the peak transform factory.
 @param labelY: Y-label to use in determining selection.
 @return selected factory
 */
-PeakTransformFactory_sptr
-PeakTransformSelector::makeChoice(const std::string &labelX,
-                                  const std::string &labelY) const {
+PeakTransformFactory_sptr PeakTransformSelector::makeChoice(const std::string &labelX,
+                                                            const std::string &labelY) const {
   if (labelX.empty()) {
     throw std::invalid_argument("labelX is empty");
   }
@@ -101,8 +96,7 @@ transformation.
 @param labelY: Y-label to use in determining selection.
 @return TRUE only if such a factory is available.
 */
-bool PeakTransformSelector::hasFactoryForTransform(
-    const std::string &labelX, const std::string &labelY) const {
+bool PeakTransformSelector::hasFactoryForTransform(const std::string &labelX, const std::string &labelY) const {
   bool hasFactoryForTransform = true;
   try {
     this->makeChoice(labelX, labelY);

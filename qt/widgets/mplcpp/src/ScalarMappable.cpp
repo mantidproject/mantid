@@ -25,8 +25,7 @@ namespace MplCpp {
 
 namespace {
 
-Python::Object createScalarMappable(const NormalizeBase &norm,
-                                    const Colormap &cmap) {
+Python::Object createScalarMappable(const NormalizeBase &norm, const Colormap &cmap) {
   GlobalInterpreterLock lock;
   return cmModule().attr("ScalarMappable")(norm.pyobj(), cmap.pyobj());
 }
@@ -53,8 +52,7 @@ ScalarMappable::ScalarMappable(const NormalizeBase &norm, const Colormap &cmap)
  * @param norm Instance use to define the mapping from data to [0,1]
  * @param cmap A string name for a Colormap
  */
-ScalarMappable::ScalarMappable(const NormalizeBase &norm, const QString &cmap)
-    : ScalarMappable(norm, getCMap(cmap)) {}
+ScalarMappable::ScalarMappable(const NormalizeBase &norm, const QString &cmap) : ScalarMappable(norm, getCMap(cmap)) {}
 
 /// @return A reference to the colormap instance
 Colormap ScalarMappable::cmap() const {
@@ -75,8 +73,7 @@ void ScalarMappable::setCmap(const Colormap &cmap) {
  * @param cmap The name of a colormap
  */
 void ScalarMappable::setCmap(const QString &cmap) {
-  callMethodNoCheck<void, const char *>(pyobj(), "set_cmap",
-                                        cmap.toLatin1().constData());
+  callMethodNoCheck<void, const char *>(pyobj(), "set_cmap", cmap.toLatin1().constData());
 }
 
 /**
@@ -92,8 +89,7 @@ void ScalarMappable::setNorm(const NormalizeBase &norm) {
  * @param vmin An optional new minmum value
  * @param vmax An optional new maximum value
  */
-void ScalarMappable::setClim(boost::optional<double> vmin,
-                             boost::optional<double> vmax) {
+void ScalarMappable::setClim(boost::optional<double> vmin, boost::optional<double> vmax) {
   GlobalInterpreterLock lock;
   Python::Object none;
   auto setClimAttr = pyobj().attr("set_clim");
@@ -123,8 +119,7 @@ QRgb ScalarMappable::toRGBA(double x, double alpha) const {
  * @param alpha The alpha value (default = 1)
  * @return An array of QRgb values corresponding to the data points
  */
-std::vector<QRgb> ScalarMappable::toRGBA(const std::vector<double> &x,
-                                         double alpha) const {
+std::vector<QRgb> ScalarMappable::toRGBA(const std::vector<double> &x, double alpha) const {
   std::vector<QRgb> rgbaVector(x.size());
   GlobalInterpreterLock lock;
   auto ndarrayView = Python::NewRef(VectorToNDArray<double, WrapReadOnly>()(x));
@@ -132,26 +127,23 @@ std::vector<QRgb> ScalarMappable::toRGBA(const std::vector<double> &x,
   NDArray bytes{pyobj().attr("to_rgba")(ndarrayView, alpha, true)};
   // sanity check
   auto shape = bytes.get_shape();
-  if (bytes.get_typecode() == 'B' && bytes.get_nd() == 2 &&
-      static_cast<size_t>(shape[0]) == x.size() && shape[1] == 4) {
+  if (bytes.get_typecode() == 'B' && bytes.get_nd() == 2 && static_cast<size_t>(shape[0]) == x.size() &&
+      shape[1] == 4) {
     // The returned array is of shape (x.size(), 4)
     auto bytesRaw = reinterpret_cast<std::uint8_t *>(bytes.get_data());
     size_t bytesIndex{0};
     for (auto &rgb : rgbaVector) {
-      rgb = qRgba(bytesRaw[bytesIndex], bytesRaw[bytesIndex + 1],
-                  bytesRaw[bytesIndex + 2], bytesRaw[bytesIndex + 3]);
+      rgb = qRgba(bytesRaw[bytesIndex], bytesRaw[bytesIndex + 1], bytesRaw[bytesIndex + 2], bytesRaw[bytesIndex + 3]);
       bytesIndex += 4;
     }
   } else {
-    QString msg =
-        QString("Unexpected return type from "
-                "ScalarMappable.to_rgba. Expected "
-                "np.array(dtype=B) with shape (%1, 4) "
-                "but found np.array(dtype=%2) with shape (%3, %4). "
-                "Cannot continue. Please contact development team.")
-            .arg(QString::number(x.size()),
-                 QString::number(bytes.get_typecode()),
-                 QString::number(shape[0]), QString::number(shape[1]));
+    QString msg = QString("Unexpected return type from "
+                          "ScalarMappable.to_rgba. Expected "
+                          "np.array(dtype=B) with shape (%1, 4) "
+                          "but found np.array(dtype=%2) with shape (%3, %4). "
+                          "Cannot continue. Please contact development team.")
+                      .arg(QString::number(x.size()), QString::number(bytes.get_typecode()), QString::number(shape[0]),
+                           QString::number(shape[1]));
     throw std::runtime_error(msg.toLatin1().constData());
   }
   return rgbaVector;

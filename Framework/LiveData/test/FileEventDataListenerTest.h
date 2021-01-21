@@ -18,22 +18,18 @@ class FileEventDataListenerTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static FileEventDataListenerTest *createSuite() {
-    return new FileEventDataListenerTest();
-  }
+  static FileEventDataListenerTest *createSuite() { return new FileEventDataListenerTest(); }
   static void destroySuite(FileEventDataListenerTest *suite) { delete suite; }
 
   // This is just a test class to help with development, so let's keep the test
   // simple and all in one method
   void testTheListener() {
     // Set the properties that are required by this listener
-    ConfigService::Instance().setString("fileeventdatalistener.filename",
-                                        "REF_L_32035_neutron_event.dat");
+    ConfigService::Instance().setString("fileeventdatalistener.filename", "REF_L_32035_neutron_event.dat");
     ConfigService::Instance().setString("fileeventdatalistener.chunks", "2");
 
     // Create the listener. Remember: this will call connect()
-    ILiveListener_sptr listener =
-        LiveListenerFactory::Instance().create("FileEventDataListener", true);
+    ILiveListener_sptr listener = LiveListenerFactory::Instance().create("FileEventDataListener", true);
 
     // Test the 'property' methods
     TS_ASSERT(listener)
@@ -49,9 +45,7 @@ public:
     TS_ASSERT_EQUALS(listener->runStatus(), ILiveListener::BeginRun)
 
     MatrixWorkspace_const_sptr buffer;
-    TS_ASSERT_THROWS_NOTHING(
-        buffer = std::dynamic_pointer_cast<const MatrixWorkspace>(
-            listener->extractData()))
+    TS_ASSERT_THROWS_NOTHING(buffer = std::dynamic_pointer_cast<const MatrixWorkspace>(listener->extractData()))
     TS_ASSERT(buffer)
     // Check this is the only surviving reference to it
     TS_ASSERT_EQUALS(buffer.use_count(), 1)
@@ -61,9 +55,7 @@ public:
 
     MatrixWorkspace_const_sptr buffer2;
     // Call extractData again
-    TS_ASSERT_THROWS_NOTHING(
-        buffer2 = std::dynamic_pointer_cast<const MatrixWorkspace>(
-            listener->extractData()))
+    TS_ASSERT_THROWS_NOTHING(buffer2 = std::dynamic_pointer_cast<const MatrixWorkspace>(listener->extractData()))
     TS_ASSERT(buffer2)
     // Check this is the only surviving reference to it
     TS_ASSERT_EQUALS(buffer2.use_count(), 1)

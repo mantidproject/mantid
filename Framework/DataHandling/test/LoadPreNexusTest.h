@@ -39,10 +39,8 @@ public:
     LoadPreNexus alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("Filename", "CNCS_7860_runinfo.xml"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "CNCS_7860_runinfo.xml"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("ChunkNumber", 1));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("TotalChunks", 5));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
@@ -51,9 +49,7 @@ public:
     // Retrieve the workspace from data service. TODO: Change to your desired
     // type
     MatrixWorkspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            outWSName));
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSName));
     TS_ASSERT(ws);
     if (!ws)
       return;

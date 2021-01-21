@@ -29,26 +29,19 @@ using namespace API;
 void GeneralisedSecondDifference::init() {
 
   // Input and output workspaces
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input),
                   "Name of the input workspace");
-  declareProperty(
-      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          "OutputWorkspace", "", Direction::Output),
-      "The name of the workspace to be created as the output of the algorithm");
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
+                  "The name of the workspace to be created as the output of the algorithm");
 
   auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
-  declareProperty(
-      "M", 0, mustBePositive,
-      "The number of points for averaging, i.e. summing will be done in the\n"
-      "range [y(i-m),y(i+m)]");
-  declareProperty("Z", 0, mustBePositive,
-                  "The number of iteration steps in the averaging procedure");
-  declareProperty("WorkspaceIndexMin", 0, mustBePositive,
-                  "Lower bound of the spectrum range (default 0)");
-  declareProperty("WorkspaceIndexMax", 0, mustBePositive,
-                  "Upper bound of the spectrum range (default workspace max)");
+  declareProperty("M", 0, mustBePositive,
+                  "The number of points for averaging, i.e. summing will be done in the\n"
+                  "range [y(i-m),y(i+m)]");
+  declareProperty("Z", 0, mustBePositive, "The number of iteration steps in the averaging procedure");
+  declareProperty("WorkspaceIndexMin", 0, mustBePositive, "Lower bound of the spectrum range (default 0)");
+  declareProperty("WorkspaceIndexMax", 0, mustBePositive, "Upper bound of the spectrum range (default workspace max)");
 }
 
 /** Executes the algorithm
@@ -72,8 +65,7 @@ void GeneralisedSecondDifference::exec() {
     std::swap(spec_min, spec_max);
 
   if (spec_max > n_hists) {
-    message << "WorkspaceIndexMax " << spec_max
-            << " > number of histograms, WorkspaceIndexMax reset to "
+    message << "WorkspaceIndexMax " << spec_max << " > number of histograms, WorkspaceIndexMax reset to "
             << (n_hists - 1);
     g_log.information(message.str());
     message.str("");
@@ -93,14 +85,12 @@ void GeneralisedSecondDifference::exec() {
     throw std::invalid_argument("Invalid (M,Z) values");
   }
   // Create OuputWorkspace
-  auto out = DataObjects::create<HistoWorkspace>(
-      *inputWS, Indexing::extract(inputWS->indexInfo(), spec_min, spec_max),
-      HistogramData::BinEdges(n_points + 1));
+  auto out = DataObjects::create<HistoWorkspace>(*inputWS, Indexing::extract(inputWS->indexInfo(), spec_min, spec_max),
+                                                 HistogramData::BinEdges(n_points + 1));
 
   const int nsteps = 2 * n_av + 1;
 
-  std::shared_ptr<API::Progress> progress =
-      std::make_shared<API::Progress>(this, 0.0, 1.0, (spec_max - spec_min));
+  std::shared_ptr<API::Progress> progress = std::make_shared<API::Progress>(this, 0.0, 1.0, (spec_max - spec_min));
   for (int i = spec_min; i <= spec_max; i++) {
     int out_index = i - spec_min;
     const auto &refX = inputWS->x(i);
@@ -120,8 +110,7 @@ void GeneralisedSecondDifference::exec() {
       // Calculate \sum_{j}Cij.Y(j)
       (*itOutY) = std::inner_product(itInY, itInY + nsteps, m_Cij.begin(), 0.0);
       // Calculate the error bars sqrt(\sum_{j}Cij^2.E^2)
-      double err2 =
-          std::inner_product(itInE, itInE + nsteps, m_Cij2.cbegin(), 0.0);
+      double err2 = std::inner_product(itInE, itInE + nsteps, m_Cij2.cbegin(), 0.0);
       (*itOutE) = sqrt(err2);
     }
     progress->report();
@@ -145,8 +134,7 @@ void GeneralisedSecondDifference::computePrefactors() {
     m_Cij.resize(3);
     m_Cij.assign(previous.begin(), previous.end());
     m_Cij2.resize(3);
-    std::transform(m_Cij.cbegin(), m_Cij.cend(), m_Cij2.begin(),
-                   VectorHelper::Squares<double>());
+    std::transform(m_Cij.cbegin(), m_Cij.cend(), m_Cij2.begin(), VectorHelper::Squares<double>());
     return;
   }
   std::vector<double> next;
@@ -173,8 +161,7 @@ void GeneralisedSecondDifference::computePrefactors() {
   m_Cij.resize(2 * m_z * m_m + 3);
   m_Cij.assign(previous.begin(), previous.end());
   m_Cij2.resize(2 * m_z * m_m + 3);
-  std::transform(m_Cij.cbegin(), m_Cij.cend(), m_Cij2.begin(),
-                 VectorHelper::Squares<double>());
+  std::transform(m_Cij.cbegin(), m_Cij.cend(), m_Cij2.begin(), VectorHelper::Squares<double>());
 }
 
 } // namespace Algorithms

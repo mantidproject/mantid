@@ -102,12 +102,8 @@ public:
     mutableHistogramRef() = std::move(histogram);
   }
 
-  HistogramData::Histogram::YMode yMode() const {
-    return histogramRef().yMode();
-  }
-  void setYMode(HistogramData::Histogram::YMode ymode) {
-    mutableHistogramRef().setYMode(ymode);
-  }
+  HistogramData::Histogram::YMode yMode() const { return histogramRef().yMode(); }
+  void setYMode(HistogramData::Histogram::YMode ymode) { mutableHistogramRef().setYMode(ymode); }
   void convertToCounts() {
     checkIsYAndEWritable();
     mutableHistogramRef().convertToCounts();
@@ -138,24 +134,14 @@ public:
   template <typename... T> void setPointStandardDeviations(T &&... data) & {
     mutableHistogramRef().setPointStandardDeviations(std::forward<T>(data)...);
   }
-  virtual HistogramData::Counts counts() const {
-    return histogramRef().counts();
-  }
-  virtual HistogramData::CountVariances countVariances() const {
-    return histogramRef().countVariances();
-  }
-  virtual HistogramData::CountStandardDeviations
-  countStandardDeviations() const {
+  virtual HistogramData::Counts counts() const { return histogramRef().counts(); }
+  virtual HistogramData::CountVariances countVariances() const { return histogramRef().countVariances(); }
+  virtual HistogramData::CountStandardDeviations countStandardDeviations() const {
     return histogramRef().countStandardDeviations();
   }
-  virtual HistogramData::Frequencies frequencies() const {
-    return histogramRef().frequencies();
-  }
-  virtual HistogramData::FrequencyVariances frequencyVariances() const {
-    return histogramRef().frequencyVariances();
-  }
-  virtual HistogramData::FrequencyStandardDeviations
-  frequencyStandardDeviations() const {
+  virtual HistogramData::Frequencies frequencies() const { return histogramRef().frequencies(); }
+  virtual HistogramData::FrequencyVariances frequencyVariances() const { return histogramRef().frequencyVariances(); }
+  virtual HistogramData::FrequencyStandardDeviations frequencyStandardDeviations() const {
     return histogramRef().frequencyStandardDeviations();
   }
   template <typename... T> void setCounts(T &&... data) & {
@@ -181,23 +167,14 @@ public:
   }
   template <typename... T> void setFrequencyStandardDeviations(T &&... data) & {
     checkIsYAndEWritable();
-    mutableHistogramRef().setFrequencyStandardDeviations(
-        std::forward<T>(data)...);
+    mutableHistogramRef().setFrequencyStandardDeviations(std::forward<T>(data)...);
   }
   const HistogramData::HistogramX &x() const { return histogramRef().x(); }
-  virtual const HistogramData::HistogramY &y() const {
-    return histogramRef().y();
-  }
-  virtual const HistogramData::HistogramE &e() const {
-    return histogramRef().e();
-  }
+  virtual const HistogramData::HistogramY &y() const { return histogramRef().y(); }
+  virtual const HistogramData::HistogramE &e() const { return histogramRef().e(); }
   const HistogramData::HistogramDx &dx() const { return histogramRef().dx(); }
-  HistogramData::HistogramX &mutableX() & {
-    return mutableHistogramRef().mutableX();
-  }
-  HistogramData::HistogramDx &mutableDx() & {
-    return mutableHistogramRef().mutableDx();
-  }
+  HistogramData::HistogramX &mutableX() & { return mutableHistogramRef().mutableX(); }
+  HistogramData::HistogramDx &mutableDx() & { return mutableHistogramRef().mutableDx(); }
   HistogramData::HistogramY &mutableY() & {
     checkIsYAndEWritable();
     return mutableHistogramRef().mutableY();
@@ -206,24 +183,12 @@ public:
     checkIsYAndEWritable();
     return mutableHistogramRef().mutableE();
   }
-  Kernel::cow_ptr<HistogramData::HistogramX> sharedX() const {
-    return histogramRef().sharedX();
-  }
-  virtual Kernel::cow_ptr<HistogramData::HistogramY> sharedY() const {
-    return histogramRef().sharedY();
-  }
-  virtual Kernel::cow_ptr<HistogramData::HistogramE> sharedE() const {
-    return histogramRef().sharedE();
-  }
-  Kernel::cow_ptr<HistogramData::HistogramDx> sharedDx() const {
-    return histogramRef().sharedDx();
-  }
-  void setSharedX(const Kernel::cow_ptr<HistogramData::HistogramX> &x) & {
-    mutableHistogramRef().setSharedX(x);
-  }
-  void setSharedDx(const Kernel::cow_ptr<HistogramData::HistogramDx> &dx) & {
-    mutableHistogramRef().setSharedDx(dx);
-  }
+  Kernel::cow_ptr<HistogramData::HistogramX> sharedX() const { return histogramRef().sharedX(); }
+  virtual Kernel::cow_ptr<HistogramData::HistogramY> sharedY() const { return histogramRef().sharedY(); }
+  virtual Kernel::cow_ptr<HistogramData::HistogramE> sharedE() const { return histogramRef().sharedE(); }
+  Kernel::cow_ptr<HistogramData::HistogramDx> sharedDx() const { return histogramRef().sharedDx(); }
+  void setSharedX(const Kernel::cow_ptr<HistogramData::HistogramX> &x) & { mutableHistogramRef().setSharedX(x); }
+  void setSharedDx(const Kernel::cow_ptr<HistogramData::HistogramDx> &dx) & { mutableHistogramRef().setSharedDx(dx); }
   void setSharedY(const Kernel::cow_ptr<HistogramData::HistogramY> &y) & {
     checkIsYAndEWritable();
     mutableHistogramRef().setSharedY(y);

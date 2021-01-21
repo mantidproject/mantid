@@ -24,8 +24,7 @@ namespace SimpleGui {
  @author
  @date
  */
-class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS VatesParaViewApplication
-    : public QObject {
+class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS VatesParaViewApplication : public QObject {
   Q_OBJECT
 
 public:

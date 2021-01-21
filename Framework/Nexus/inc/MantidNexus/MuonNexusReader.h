@@ -33,22 +33,18 @@ class DLLExport MuonNexusReader {
 private:
   std::string nexus_instrument_name; ///< name read from nexus file
   std::string nexus_samplename;      ///< sample name read from Nexus
-  int nexusLogCount;         ///< number of NXlog sections read from file
-  std::vector<bool> logType; ///< true if i'th log is numeric
+  int nexusLogCount;                 ///< number of NXlog sections read from file
+  std::vector<bool> logType;         ///< true if i'th log is numeric
   std::vector<std::string> logNames; ///< stores name read from file
   void openFirstNXentry(NeXus::File &handle);
-  bool readMuonLogData(
-      NeXus::File &handle); ///< method to read the fields of open NXlog section
-  std::vector<std::vector<float>>
-      logValues, ///< array of values for i'th NXlog section
-      logTimes;  ///< arrys of times for i'th NXlog section
-  std::vector<std::vector<std::string>>
-      logStringValues;   ///< array of string values for i'th NXlog section
-  std::string startTime; ///< string startTime which must be read from Nexus
+  bool readMuonLogData(NeXus::File &handle);             ///< method to read the fields of open NXlog section
+  std::vector<std::vector<float>> logValues,             ///< array of values for i'th NXlog section
+      logTimes;                                          ///< arrys of times for i'th NXlog section
+  std::vector<std::vector<std::string>> logStringValues; ///< array of string values for i'th NXlog section
+  std::string startTime;                                 ///< string startTime which must be read from Nexus
   /// file to base all NXlog times on
-  std::time_t startTime_time_t; ///< startTime in time_t format
-  std::time_t
-  to_time_t(const boost::posix_time::ptime &t) ///< convert posix time to time_t
+  std::time_t startTime_time_t;                            ///< startTime in time_t format
+  std::time_t to_time_t(const boost::posix_time::ptime &t) ///< convert posix time to time_t
   {
     /**
     Take the input Posix time, subtract the unix epoch, and return the seconds
@@ -76,17 +72,14 @@ public:
                        const int &nbnds) const; ///< get time bin boundaries
                                                 /// return sample name
   std::string getSampleName() const { return nexus_samplename; };
-  int numberOfLogs() const; ///< Number of NXlog sections read from file
+  int numberOfLogs() const;                  ///< Number of NXlog sections read from file
   int getLogLength(const int i) const;       ///< Lenght of i'th log
   std::string getLogName(const int i) const; ///< Name of i'th log
-  void getLogValues(const int &logNumber, const int &logSequence,
-                    std::time_t &logTime,
+  void getLogValues(const int &logNumber, const int &logSequence, std::time_t &logTime,
                     double &value); ///< get logSequence pair of logNumber log
-  void getLogStringValues(
-      const int &logNumber, const int &logSequence, std::time_t &logTime,
-      std::string &value); ///< get logSequence pair of logNumber string log
-  bool
-  logTypeNumeric(const int i) const; ///< true if i'th log is of numeric type
+  void getLogStringValues(const int &logNumber, const int &logSequence, std::time_t &logTime,
+                          std::string &value); ///< get logSequence pair of logNumber string log
+  bool logTypeNumeric(const int i) const;      ///< true if i'th log is of numeric type
   // following ISISRAW.h
   int t_nsp1; ///< number of spectra in time regime 1
   int t_ntc1; ///< number of time channels in time regime 1

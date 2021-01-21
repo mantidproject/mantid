@@ -17,8 +17,7 @@ class MockMainWindowView : public IMainWindowView {
 public:
   MOCK_METHOD2(askUserOkCancel, bool(const std::string &, const std::string &));
   MOCK_METHOD2(giveUserWarning, void(const std::string &, const std::string &));
-  MOCK_METHOD2(giveUserCritical,
-               void(const std::string &, const std::string &));
+  MOCK_METHOD2(giveUserCritical, void(const std::string &, const std::string &));
   MOCK_METHOD2(giveUserInfo, void(const std::string &, const std::string &));
   MOCK_METHOD0(newBatch, IBatchView *());
   MOCK_METHOD1(subscribe, void(MainWindowSubscriber *));

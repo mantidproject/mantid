@@ -57,14 +57,10 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; };
-  const std::vector<std::string> seeAlso() const override {
-    return {"LoadInstrument"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"LoadInstrument"}; }
 
   /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override {
-    return "DataHandling\\Instrument;DataHandling\\Raw";
-  }
+  const std::string category() const override { return "DataHandling\\Instrument;DataHandling\\Raw"; }
 
 private:
   /// Overwrites Algorithm method. Does nothing at present
@@ -84,8 +80,7 @@ private:
    */
   struct AsciiFileHeader {
     AsciiFileHeader()
-        : colCount(0), rColIdx(0), thetaColIdx(0), phiColIdx(0) {
-    } // Zero is invalid as this is reserved for detID
+        : colCount(0), rColIdx(0), thetaColIdx(0), phiColIdx(0) {} // Zero is invalid as this is reserved for detID
 
     size_t colCount;
     size_t rColIdx, thetaColIdx, phiColIdx;
@@ -96,14 +91,11 @@ private:
   /// Parse the header and fill the headerInfo struct
   bool parseAsciiHeader(AsciiFileHeader &headerInfo);
   /// Set the new detector positions
-  void setDetectorPositions(const std::vector<int32_t> &detID,
-                            const std::vector<float> &l2,
-                            const std::vector<float> &theta,
-                            const std::vector<float> &phi);
+  void setDetectorPositions(const std::vector<int32_t> &detID, const std::vector<float> &l2,
+                            const std::vector<float> &theta, const std::vector<float> &phi);
   /// Set the new detector position for a single det ID
-  void setDetectorPosition(Geometry::DetectorInfo &detectorInfo,
-                           const size_t index, const float l2,
-                           const float theta, const float phi);
+  void setDetectorPosition(Geometry::DetectorInfo &detectorInfo, const size_t index, const float l2, const float theta,
+                           const float phi);
 
   /// The input workspace to modify
   API::MatrixWorkspace_sptr m_workspace;

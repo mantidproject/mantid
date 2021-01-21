@@ -27,21 +27,17 @@ using namespace API;
 /// Initialisation method.
 void ApplyCalibration::init() {
 
-  declareProperty(
-      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-          "Workspace", "", Direction::InOut),
-      "The name of the input workspace to apply the calibration to");
+  declareProperty(std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>("Workspace", "", Direction::InOut),
+                  "The name of the input workspace to apply the calibration to");
 
-  declareProperty(
-      std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
-          "CalibrationTable", "", Direction::Input, PropertyMode::Optional),
-      "The name of the table workspace containing the new "
-      "positions of detectors");
+  declareProperty(std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
+                      "CalibrationTable", "", Direction::Input, PropertyMode::Optional),
+                  "The name of the table workspace containing the new "
+                  "positions of detectors");
 
-  declareProperty(
-      std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
-          "PositionTable", "", Direction::Input, PropertyMode::Optional),
-      "Deprecated: Use Property 'CalibrationTable'");
+  declareProperty(std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>("PositionTable", "", Direction::Input,
+                                                                                 PropertyMode::Optional),
+                  "Deprecated: Use Property 'CalibrationTable'");
 }
 
 /** Executes the algorithm. Moving detectors of input workspace to positions
@@ -58,8 +54,7 @@ void ApplyCalibration::exec() {
 
   // Elucidate if using property PositionTable table instead of CalibrationTable
   if (!CalTable && !PosTable) {
-    throw std::runtime_error(
-        "Either CalibrationTable or PositionTable must be supplied");
+    throw std::runtime_error("Either CalibrationTable or PositionTable must be supplied");
   }
   if (PosTable && !CalTable) {
     logger.notice("Property 'PositionTable' has been deprecated. Please use "
@@ -73,8 +68,7 @@ void ApplyCalibration::exec() {
   ColumnVector<int> detectorID = CalTable->getVector("Detector ID");
 
   // Default calibration
-  if (std::find(columnNames.begin(), columnNames.end(), "Detector Position") !=
-      columnNames.end()) {
+  if (std::find(columnNames.begin(), columnNames.end(), "Detector Position") != columnNames.end()) {
     auto &detectorInfo = inputWS->mutableDetectorInfo();
     ColumnVector<V3D> detPos = CalTable->getVector("Detector Position");
     // PARALLEL_FOR_NO_WSP_CHECK()
@@ -85,13 +79,11 @@ void ApplyCalibration::exec() {
   }
 
   // Bar scan calibration: pixel Y-coordinate
-  if (std::find(columnNames.begin(), columnNames.end(),
-                "Detector Y Coordinate") != columnNames.end()) {
+  if (std::find(columnNames.begin(), columnNames.end(), "Detector Y Coordinate") != columnNames.end()) {
     // the detectorInfo index of a particular pixel detector is the same as the
     // componentInfo index for the same pixel detector
     auto &detectorInfo = inputWS->mutableDetectorInfo();
-    ColumnVector<double> yCoordinate =
-        CalTable->getVector("Detector Y Coordinate");
+    ColumnVector<double> yCoordinate = CalTable->getVector("Detector Y Coordinate");
     // PARALLEL_FOR_NO_WSP_CHECK()
     for (size_t i = 0; i < numDetector; ++i) {
       const auto index = detectorInfo.indexOf(detectorID[i]);
@@ -101,26 +93,21 @@ void ApplyCalibration::exec() {
   }
 
   // Apparent tube width calibration along X-coordinate
-  if (std::find(columnNames.begin(), columnNames.end(), "Detector Width") !=
-      columnNames.end()) {
+  if (std::find(columnNames.begin(), columnNames.end(), "Detector Width") != columnNames.end()) {
     auto &detectorInfo = inputWS->detectorInfo();
     auto &componentInfo = inputWS->mutableComponentInfo();
     ColumnVector<double> widths = CalTable->getVector("Detector Width");
     // PARALLEL_FOR_NO_WSP_CHECK()
     for (size_t i = 0; i < numDetector; ++i) {
       const auto index = detectorInfo.indexOf(detectorID[i]);
-      double nominalWidth =
-          componentInfo.shape(index).getBoundingBox().width().X();
+      double nominalWidth = componentInfo.shape(index).getBoundingBox().width().X();
       V3D oldScaleFactor = componentInfo.scaleFactor(index);
-      componentInfo.setScaleFactor(index,
-                                   V3D(widths[i] / nominalWidth,
-                                       oldScaleFactor.Y(), oldScaleFactor.Z()));
+      componentInfo.setScaleFactor(index, V3D(widths[i] / nominalWidth, oldScaleFactor.Y(), oldScaleFactor.Z()));
     }
   }
 
   // Bar scan calibration: pixel height
-  if (std::find(columnNames.begin(), columnNames.end(), "Detector Height") !=
-      columnNames.end()) {
+  if (std::find(columnNames.begin(), columnNames.end(), "Detector Height") != columnNames.end()) {
     // the detectorInfo index of a particular pixel detector is the same as the
     // componentInfo index for the same pixel detector
     auto &detectorInfo = inputWS->mutableDetectorInfo();
@@ -130,12 +117,9 @@ void ApplyCalibration::exec() {
     for (size_t i = 0; i < numDetector; ++i) {
       const auto index = detectorInfo.indexOf(detectorID[i]);
       // update pixel height along Y coordinate
-      double nominalHeight =
-          componentInfo.shape(index).getBoundingBox().width().Y();
+      double nominalHeight = componentInfo.shape(index).getBoundingBox().width().Y();
       V3D oldScaleFactor = componentInfo.scaleFactor(index);
-      componentInfo.setScaleFactor(index, V3D(oldScaleFactor.X(),
-                                              height[i] / nominalHeight,
-                                              oldScaleFactor.Z()));
+      componentInfo.setScaleFactor(index, V3D(oldScaleFactor.X(), height[i] / nominalHeight, oldScaleFactor.Z()));
     }
   }
 }

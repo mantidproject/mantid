@@ -58,8 +58,7 @@ public:
       auto constraint = static_cast<BConstraint *>(func->getConstraint(i));
       TS_ASSERT(constraint);
       TS_ASSERT_EQUALS(constraint->hasLower(), true);
-      TS_ASSERT_EQUALS(constraint->lower(),
-                       std::numeric_limits<double>::epsilon());
+      TS_ASSERT_EQUALS(constraint->lower(), std::numeric_limits<double>::epsilon());
     }
   }
 
@@ -88,17 +87,14 @@ public:
     std::vector<double> xValues(nData, 0);
     std::iota(xValues.begin(), xValues.end(), -10000.0);
     using std::placeholders::_1;
-    std::transform(xValues.begin(), xValues.end(), xValues.begin(),
-                   std::bind(std::multiplies<double>(), dE, _1));
+    std::transform(xValues.begin(), xValues.end(), xValues.begin(), std::bind(std::multiplies<double>(), dE, _1));
     // Evaluate the function on the domain
     std::vector<double> calculatedValues(nData, 0);
     func->function1D(calculatedValues.data(), xValues.data(), nData);
     // Integrate the evaluation
-    std::transform(calculatedValues.begin(), calculatedValues.end(),
-                   calculatedValues.begin(),
+    std::transform(calculatedValues.begin(), calculatedValues.end(), calculatedValues.begin(),
                    std::bind(std::multiplies<double>(), dE, _1));
-    auto integral =
-        std::accumulate(calculatedValues.begin(), calculatedValues.end(), 0.0);
+    auto integral = std::accumulate(calculatedValues.begin(), calculatedValues.end(), 0.0);
     std::cout << integral << std::endl;
     TS_ASSERT_DELTA(integral, 0.147393, 1e-5);
   }
@@ -106,8 +102,7 @@ public:
 private:
   class TestableInelasticIsoRotDiff : public InelasticIsoRotDiff {
   public:
-    void function1D(double *out, const double *xValues,
-                    const size_t nData) const override {
+    void function1D(double *out, const double *xValues, const size_t nData) const override {
       InelasticIsoRotDiff::function1D(out, xValues, nData);
     }
   };

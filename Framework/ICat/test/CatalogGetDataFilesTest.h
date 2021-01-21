@@ -17,9 +17,7 @@ using namespace ICatTestHelper;
 class CatalogGetDataFilesTest : public CxxTest::TestSuite {
 public:
   // This means the constructor isn't called when running other tests
-  static CatalogGetDataFilesTest *createSuite() {
-    return new CatalogGetDataFilesTest();
-  }
+  static CatalogGetDataFilesTest *createSuite() { return new CatalogGetDataFilesTest(); }
 
   static void destroySuite(CatalogGetDataFilesTest *suite) { delete suite; }
 
@@ -35,8 +33,7 @@ public:
       invstObj.initialize();
     invstObj.setPropertyValue("InvestigationId", "12576918");
     invstObj.setPropertyValue("Session", m_fakeLogin->getSessionId());
-    invstObj.setPropertyValue(
-        "OutputWorkspace", "investigation"); // selected invesigation data files
+    invstObj.setPropertyValue("OutputWorkspace", "investigation"); // selected invesigation data files
 
     TS_ASSERT_THROWS_NOTHING(invstObj.execute());
     TS_ASSERT(invstObj.isExecuted());

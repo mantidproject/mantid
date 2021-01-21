@@ -26,9 +26,8 @@ public:
   // Force the implementation to update itself
   virtual void performUpdate() = 0;
   // Deliver a new peaks workspace for replacement of an existing one.
-  virtual void updatePeaksWorkspace(
-      const std::string &toName,
-      std::shared_ptr<const Mantid::API::IPeaksWorkspace> toWorkspace) = 0;
+  virtual void updatePeaksWorkspace(const std::string &toName,
+                                    std::shared_ptr<const Mantid::API::IPeaksWorkspace> toWorkspace) = 0;
   // Destructor
   virtual ~UpdateableOnDemand() {}
 };

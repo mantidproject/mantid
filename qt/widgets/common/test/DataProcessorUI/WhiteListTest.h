@@ -109,8 +109,7 @@ public:
   void test_column_isKey() {
     WhiteList whitelist;
     whitelist.addElement("Column1", "Property1", "Description1");
-    whitelist.addElement("Column3", "Property3", "Description3", false,
-                         "prefix", true);
+    whitelist.addElement("Column3", "Property3", "Description3", false, "prefix", true);
 
     TS_ASSERT_EQUALS(whitelist.size(), 2);
     TS_ASSERT_EQUALS(whitelist.isKey(0), false);

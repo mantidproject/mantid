@@ -23,12 +23,10 @@ public:
   /// Constructor
   PeakTransformQSample();
   /// Constructor
-  PeakTransformQSample(const std::string &xPlotLabel,
-                       const std::string &yPlotLabel);
+  PeakTransformQSample(const std::string &xPlotLabel, const std::string &yPlotLabel);
   PeakTransform_sptr clone() const override;
   /// Transform peak.
-  Mantid::Kernel::V3D
-  transformPeak(const Mantid::Geometry::IPeak &peak) const override;
+  Mantid::Kernel::V3D transformPeak(const Mantid::Geometry::IPeak &peak) const override;
   /// Getter for the transform name.
   std::string getFriendlyName() const override { return name(); }
   /// Getter for the special coordinate representation of this transform type.
@@ -36,7 +34,6 @@ public:
 };
 
 /// Typedef a factory for type of PeaksTransform.
-using PeakTransformQSampleFactory =
-    ConcretePeakTransformFactory<PeakTransformQSample>;
+using PeakTransformQSampleFactory = ConcretePeakTransformFactory<PeakTransformQSample>;
 } // namespace Geometry
 } // namespace Mantid

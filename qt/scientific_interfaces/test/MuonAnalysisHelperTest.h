@@ -32,9 +32,7 @@ using Mantid::Types::Core::DateAndTime;
 /// destruction
 class RAII_ADS {
 public:
-  void add(const std::string &name, const Workspace_sptr &ws) {
-    AnalysisDataService::Instance().add(name, ws);
-  }
+  void add(const std::string &name, const Workspace_sptr &ws) { AnalysisDataService::Instance().add(name, ws); }
   void addToGroup(const std::string &group, const std::string &name) {
     AnalysisDataService::Instance().addToGroup(group, name);
   }
@@ -45,9 +43,7 @@ class MuonAnalysisHelperTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static MuonAnalysisHelperTest *createSuite() {
-    return new MuonAnalysisHelperTest();
-  }
+  static MuonAnalysisHelperTest *createSuite() { return new MuonAnalysisHelperTest(); }
   static void destroySuite(MuonAnalysisHelperTest *suite) { delete suite; }
 
   MuonAnalysisHelperTest() {
@@ -139,12 +135,9 @@ public:
   }
 
   void test_sumWorkspaces() {
-    MatrixWorkspace_sptr ws1 =
-        WorkspaceCreationHelper::create2DWorkspace123(1, 3);
-    MatrixWorkspace_sptr ws2 =
-        WorkspaceCreationHelper::create2DWorkspace123(1, 3);
-    MatrixWorkspace_sptr ws3 =
-        WorkspaceCreationHelper::create2DWorkspace123(1, 3);
+    MatrixWorkspace_sptr ws1 = WorkspaceCreationHelper::create2DWorkspace123(1, 3);
+    MatrixWorkspace_sptr ws2 = WorkspaceCreationHelper::create2DWorkspace123(1, 3);
+    MatrixWorkspace_sptr ws3 = WorkspaceCreationHelper::create2DWorkspace123(1, 3);
     DateAndTime start{"2015-12-23T15:32:40Z"};
     DateAndTime end{"2015-12-24T09:00:00Z"};
     addLog(ws1, "run_start", start.toSimpleString());
@@ -159,8 +152,7 @@ public:
 
     std::vector<Workspace_sptr> wsList{ws1, ws2, ws3};
 
-    auto result =
-        std::dynamic_pointer_cast<MatrixWorkspace>(sumWorkspaces(wsList));
+    auto result = std::dynamic_pointer_cast<MatrixWorkspace>(sumWorkspaces(wsList));
 
     TS_ASSERT(result);
     if (!result)
@@ -173,12 +165,9 @@ public:
     TS_ASSERT_EQUALS(result->y(0)[1], 6);
     TS_ASSERT_EQUALS(result->y(0)[2], 6);
 
-    TS_ASSERT_EQUALS(result->run().getProperty("run_number")->value(),
-                     "15189-91");
-    TS_ASSERT_EQUALS(result->run().getProperty("run_start")->value(),
-                     start.toSimpleString());
-    TS_ASSERT_EQUALS(result->run().getProperty("run_end")->value(),
-                     end.toSimpleString());
+    TS_ASSERT_EQUALS(result->run().getProperty("run_number")->value(), "15189-91");
+    TS_ASSERT_EQUALS(result->run().getProperty("run_start")->value(), start.toSimpleString());
+    TS_ASSERT_EQUALS(result->run().getProperty("run_end")->value(), end.toSimpleString());
 
     // Original workspaces shouldn't be touched
     TS_ASSERT_EQUALS(ws1->y(0)[0], 2);
@@ -229,11 +218,9 @@ public:
     Workspace_sptr ws = createWs("MUSR", 15189);
     DateAndTime start{"2015-12-23T15:32:40Z"};
     addLog(ws, "run_start", start.toSimpleString());
-    auto range =
-        findLogRange(ws, "run_start",
-                     [](const std::string &first, const std::string &second) {
-                       return DateAndTime(first) < DateAndTime(second);
-                     });
+    auto range = findLogRange(ws, "run_start", [](const std::string &first, const std::string &second) {
+      return DateAndTime(first) < DateAndTime(second);
+    });
     TS_ASSERT_EQUALS(range.first, start.toSimpleString());
     TS_ASSERT_EQUALS(range.second, start.toSimpleString());
   }
@@ -246,11 +233,9 @@ public:
     addLog(ws1, "run_start", start1.toSimpleString());
     addLog(ws2, "run_start", start2.toSimpleString());
     auto groupWS = groupWorkspaces({ws1, ws2});
-    auto range =
-        findLogRange(groupWS, "run_start",
-                     [](const std::string &first, const std::string &second) {
-                       return DateAndTime(first) < DateAndTime(second);
-                     });
+    auto range = findLogRange(groupWS, "run_start", [](const std::string &first, const std::string &second) {
+      return DateAndTime(first) < DateAndTime(second);
+    });
     TS_ASSERT_EQUALS(range.first, start2.toSimpleString());
     TS_ASSERT_EQUALS(range.second, start1.toSimpleString());
   }
@@ -263,11 +248,9 @@ public:
     addLog(ws1, "run_start", start1.toSimpleString());
     addLog(ws2, "run_start", start2.toSimpleString());
     std::vector<Workspace_sptr> workspaces = {ws1, ws2};
-    auto range =
-        findLogRange(workspaces, "run_start",
-                     [](const std::string &first, const std::string &second) {
-                       return DateAndTime(first) < DateAndTime(second);
-                     });
+    auto range = findLogRange(workspaces, "run_start", [](const std::string &first, const std::string &second) {
+      return DateAndTime(first) < DateAndTime(second);
+    });
     TS_ASSERT_EQUALS(range.first, start2.toSimpleString());
     TS_ASSERT_EQUALS(range.second, start1.toSimpleString());
   }
@@ -275,20 +258,15 @@ public:
   void test_findLogRange_notPresent() {
     Workspace_sptr ws = createWs("MUSR", 15189);
     // try a DateAndTime
-    auto timeRange =
-        findLogRange(ws, "run_start",
-                     [](const std::string &first, const std::string &second) {
-                       return DateAndTime(first) < DateAndTime(second);
-                     });
+    auto timeRange = findLogRange(ws, "run_start", [](const std::string &first, const std::string &second) {
+      return DateAndTime(first) < DateAndTime(second);
+    });
     TS_ASSERT_EQUALS(timeRange.first, "");
     TS_ASSERT_EQUALS(timeRange.second, "");
     // now try a double
-    auto numRange =
-        findLogRange(ws, "sample_temp",
-                     [](const std::string &first, const std::string &second) {
-                       return boost::lexical_cast<double>(first) <
-                              boost::lexical_cast<double>(second);
-                     });
+    auto numRange = findLogRange(ws, "sample_temp", [](const std::string &first, const std::string &second) {
+      return boost::lexical_cast<double>(first) < boost::lexical_cast<double>(second);
+    });
     TS_ASSERT_EQUALS(numRange.first, "");
     TS_ASSERT_EQUALS(numRange.second, "");
   }
@@ -299,12 +277,9 @@ public:
     addLog(ws1, "sample_magn_field", "15.4");
     addLog(ws2, "sample_magn_field", "250");
     std::vector<Workspace_sptr> workspaces = {ws1, ws2};
-    auto range =
-        findLogRange(workspaces, "sample_magn_field",
-                     [](const std::string &first, const std::string &second) {
-                       return boost::lexical_cast<double>(first) <
-                              boost::lexical_cast<double>(second);
-                     });
+    auto range = findLogRange(workspaces, "sample_magn_field", [](const std::string &first, const std::string &second) {
+      return boost::lexical_cast<double>(first) < boost::lexical_cast<double>(second);
+    });
     TS_ASSERT_EQUALS(range.first, "15.4");
     TS_ASSERT_EQUALS(range.second, "250");
   }
@@ -312,17 +287,12 @@ public:
   void test_appendTimeSeriesLogs() {
     Workspace_sptr ws1 = createWs("MUSR", 15189);
     Workspace_sptr ws2 = createWs("MUSR", 15190);
-    const DateAndTime time1{"2015-12-23T15:32:40Z"},
-        time2{"2015-12-23T15:32:41Z"}, time3{"2015-12-23T15:32:42Z"},
-        time4{"2015-12-23T15:32:43Z"}, time5{"2015-12-23T15:32:44Z"},
-        time6{"2015-12-23T15:32:45Z"};
-    const double value1(1), value2(2), value3(3), value4(4), value5(5),
-        value6(6);
+    const DateAndTime time1{"2015-12-23T15:32:40Z"}, time2{"2015-12-23T15:32:41Z"}, time3{"2015-12-23T15:32:42Z"},
+        time4{"2015-12-23T15:32:43Z"}, time5{"2015-12-23T15:32:44Z"}, time6{"2015-12-23T15:32:45Z"};
+    const double value1(1), value2(2), value3(3), value4(4), value5(5), value6(6);
     const std::string logName = "TSLog";
-    addTimeSeriesLog(ws1, logName, {time1, time2, time3},
-                     {value1, value2, value3});
-    addTimeSeriesLog(ws2, logName, {time4, time5, time6},
-                     {value4, value5, value6});
+    addTimeSeriesLog(ws1, logName, {time1, time2, time3}, {value1, value2, value3});
+    addTimeSeriesLog(ws2, logName, {time4, time5, time6}, {value4, value5, value6});
     appendTimeSeriesLogs(ws2, ws1, logName);
     auto matrixWS = std::dynamic_pointer_cast<MatrixWorkspace>(ws1);
     TS_ASSERT(matrixWS);
@@ -334,29 +304,17 @@ public:
     TS_ASSERT_EQUALS(6, prop->valueAsCorrectMap().size());
   }
 
-  void test_runNumberString_singlePeriod() {
-    doTestRunNumberString("15189", false);
-  }
+  void test_runNumberString_singlePeriod() { doTestRunNumberString("15189", false); }
 
-  void test_runNumberString_multiPeriod() {
-    doTestRunNumberString("15189", true);
-  }
+  void test_runNumberString_multiPeriod() { doTestRunNumberString("15189", true); }
 
-  void test_runNumberString_singlePeriod_runRange() {
-    doTestRunNumberString("15189-91", false);
-  }
+  void test_runNumberString_singlePeriod_runRange() { doTestRunNumberString("15189-91", false); }
 
-  void test_runNumberString_singlePeriod_runRangeNonContinuous() {
-    doTestRunNumberString("15189-90, 15192", false);
-  }
+  void test_runNumberString_singlePeriod_runRangeNonContinuous() { doTestRunNumberString("15189-90, 15192", false); }
 
-  void test_runNumberString_multiPeriod_runRange() {
-    doTestRunNumberString("15189-91", true);
-  }
+  void test_runNumberString_multiPeriod_runRange() { doTestRunNumberString("15189-91", true); }
 
-  void test_runNumberString_multiPeriod_runRangeNonContinuous() {
-    doTestRunNumberString("15189-90, 15192", true);
-  }
+  void test_runNumberString_multiPeriod_runRangeNonContinuous() { doTestRunNumberString("15189-90, 15192", true); }
 
   // This can happen when loading very old files in which the stored run number
   // is zero
@@ -385,8 +343,7 @@ public:
     addLog(currentWs, "main_field_direction", "Longitudinal");
     addLog(loadedWs, "main_field_direction", "Longitudinal");
     bool result = true;
-    TS_ASSERT_THROWS_NOTHING(
-        result = isReloadGroupingNecessary(currentWs, loadedWs));
+    TS_ASSERT_THROWS_NOTHING(result = isReloadGroupingNecessary(currentWs, loadedWs));
     TS_ASSERT_EQUALS(result, false);
   }
 
@@ -394,24 +351,21 @@ public:
     const auto currentWs = nullptr;
     const auto loadedWs = createWs("MUSR", 15190);
     bool result = false;
-    TS_ASSERT_THROWS_NOTHING(
-        result = isReloadGroupingNecessary(currentWs, loadedWs));
+    TS_ASSERT_THROWS_NOTHING(result = isReloadGroupingNecessary(currentWs, loadedWs));
     TS_ASSERT_EQUALS(result, true);
   }
 
   void test_isReloadGroupingNecessary_nullLoaded() {
     const auto currentWs = createWs("MUSR", 15189);
     const auto loadedWs = nullptr;
-    TS_ASSERT_THROWS(isReloadGroupingNecessary(currentWs, loadedWs),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(isReloadGroupingNecessary(currentWs, loadedWs), const std::invalid_argument &);
   }
 
   void test_isReloadGroupingNecessary_noLogs() {
     const auto currentWs = createWs("MUSR", 15189);
     const auto loadedWs = createWs("MUSR", 15190);
     bool result = true;
-    TS_ASSERT_THROWS_NOTHING(
-        result = isReloadGroupingNecessary(currentWs, loadedWs));
+    TS_ASSERT_THROWS_NOTHING(result = isReloadGroupingNecessary(currentWs, loadedWs));
     TS_ASSERT_EQUALS(result, false);
   }
 
@@ -421,8 +375,7 @@ public:
     addLog(currentWs, "main_field_direction", "Longitudinal");
     addLog(loadedWs, "main_field_direction", "Longitudinal");
     bool result = false;
-    TS_ASSERT_THROWS_NOTHING(
-        result = isReloadGroupingNecessary(currentWs, loadedWs));
+    TS_ASSERT_THROWS_NOTHING(result = isReloadGroupingNecessary(currentWs, loadedWs));
     TS_ASSERT_EQUALS(result, true);
   }
 
@@ -432,8 +385,7 @@ public:
     addLog(currentWs, "main_field_direction", "Longitudinal");
     addLog(loadedWs, "main_field_direction", "Transverse");
     bool result = false;
-    TS_ASSERT_THROWS_NOTHING(
-        result = isReloadGroupingNecessary(currentWs, loadedWs));
+    TS_ASSERT_THROWS_NOTHING(result = isReloadGroupingNecessary(currentWs, loadedWs));
     TS_ASSERT_EQUALS(result, true);
   }
 
@@ -443,8 +395,7 @@ public:
     addLog(currentWs, "main_field_direction", "Longitudinal");
     addLog(loadedWs, "main_field_direction", "Longitudinal");
     bool result = false;
-    TS_ASSERT_THROWS_NOTHING(
-        result = isReloadGroupingNecessary(currentWs, loadedWs));
+    TS_ASSERT_THROWS_NOTHING(result = isReloadGroupingNecessary(currentWs, loadedWs));
     TS_ASSERT_EQUALS(result, true);
   }
 
@@ -458,8 +409,7 @@ public:
     params.periods = "1+3-2+4";
     params.version = 2;
     const std::string wsName = generateWorkspaceName(params);
-    const std::string expected =
-        "MUSR00015189-90, 15192; Group; fwd; Counts; 1+3-2+4; #2";
+    const std::string expected = "MUSR00015189-90, 15192; Group; fwd; Counts; 1+3-2+4; #2";
     TS_ASSERT_EQUALS(expected, wsName);
   }
 
@@ -473,8 +423,7 @@ public:
     params.periods = "";
     params.version = 2;
     const std::string wsName = generateWorkspaceName(params);
-    const std::string expected =
-        "MUSR00015189-90, 15192; Group; fwd; Counts; #2";
+    const std::string expected = "MUSR00015189-90, 15192; Group; fwd; Counts; #2";
     TS_ASSERT_EQUALS(expected, wsName);
   }
 
@@ -489,14 +438,12 @@ public:
     params.periods = "1+3-2+4";
     params.version = 2;
     const std::string wsName = generateWorkspaceName(params);
-    const std::string expected =
-        "MyLabel00123; Group; fwd; Counts; 1+3-2+4; #2";
+    const std::string expected = "MyLabel00123; Group; fwd; Counts; 1+3-2+4; #2";
     TS_ASSERT_EQUALS(expected, wsName);
   }
 
   void test_parseWorkspaceName() {
-    const std::string workspaceName =
-        "MUSR00015189-90, 15192; Group; fwd; Counts; 1+3-2+4; #2";
+    const std::string workspaceName = "MUSR00015189-90, 15192; Group; fwd; Counts; 1+3-2+4; #2";
     const std::vector<int> expectedRuns{15189, 15190, 15192};
     const auto params = parseWorkspaceName(workspaceName);
     TS_ASSERT_EQUALS(params.instrument, "MUSR");
@@ -510,8 +457,7 @@ public:
   }
 
   void test_parseWorkspaceName_noPeriods() {
-    const std::string workspaceName =
-        "MUSR00015189-90, 15192; Group; fwd; Counts; #2";
+    const std::string workspaceName = "MUSR00015189-90, 15192; Group; fwd; Counts; #2";
     const std::vector<int> expectedRuns{15189, 15190, 15192};
     const auto params = parseWorkspaceName(workspaceName);
     TS_ASSERT_EQUALS(params.instrument, "MUSR");
@@ -572,8 +518,7 @@ public:
     const auto &tableTwo = createResultsTable({"A0", "A1"});
     const auto &tableThree = createResultsTable({"A0", "A1"});
     QMap<int, QColor> results;
-    TS_ASSERT_THROWS_NOTHING(
-        results = getWorkspaceColors({tableOne, tableTwo, tableThree}));
+    TS_ASSERT_THROWS_NOTHING(results = getWorkspaceColors({tableOne, tableTwo, tableThree}));
     TS_ASSERT_EQUALS(3, results.count());
     for (const auto &color : results) {
       TS_ASSERT_EQUALS(color, QColor("black"));
@@ -587,9 +532,7 @@ public:
     const auto &tableFour = createResultsTable({"A0", "A1"});
     const auto &tableFive = createResultsTable({"Alpha", "Delta"});
     QMap<int, QColor> results;
-    TS_ASSERT_THROWS_NOTHING(
-        results = getWorkspaceColors(
-            {tableOne, tableTwo, tableThree, tableFour, tableFive}));
+    TS_ASSERT_THROWS_NOTHING(results = getWorkspaceColors({tableOne, tableTwo, tableThree, tableFour, tableFive}));
     TS_ASSERT_EQUALS(5, results.count());
     TS_ASSERT_EQUALS(results[0], QColor("black"));
     TS_ASSERT_EQUALS(results[1], QColor("black"));
@@ -628,8 +571,7 @@ public:
     ads.addToGroup("GroupTwo", "MuonSimulFit_Label#2_MUSR15192_Workspace");
 
     QMap<int, QColor> results;
-    TS_ASSERT_THROWS_NOTHING(results =
-                                 getWorkspaceColors({groupOne, groupTwo}));
+    TS_ASSERT_THROWS_NOTHING(results = getWorkspaceColors({groupOne, groupTwo}));
     TS_ASSERT_EQUALS(2, results.count());
     TS_ASSERT_EQUALS(results[0], QColor("black"));
     TS_ASSERT_EQUALS(results[1], QColor("black"));
@@ -666,8 +608,7 @@ public:
     ads.addToGroup("GroupTwo", "MuonSimulFit_Label#2_MUSR15193_Workspace");
 
     QMap<int, QColor> results;
-    TS_ASSERT_THROWS_NOTHING(results =
-                                 getWorkspaceColors({groupOne, groupTwo}));
+    TS_ASSERT_THROWS_NOTHING(results = getWorkspaceColors({groupOne, groupTwo}));
     TS_ASSERT_EQUALS(2, results.count());
     TS_ASSERT_EQUALS(results[0], QColor("black"));
     TS_ASSERT_EQUALS(results[1], QColor("red"));
@@ -701,8 +642,7 @@ public:
     ads.addToGroup("GroupTwo", "MuonSimulFit_Label#2_MUSR15192_Workspace");
 
     QMap<int, QColor> results;
-    TS_ASSERT_THROWS_NOTHING(results =
-                                 getWorkspaceColors({groupOne, groupTwo}));
+    TS_ASSERT_THROWS_NOTHING(results = getWorkspaceColors({groupOne, groupTwo}));
     TS_ASSERT_EQUALS(2, results.count());
     TS_ASSERT_EQUALS(results[0], QColor("black"));
     TS_ASSERT_EQUALS(results[1], QColor("red"));
@@ -710,13 +650,10 @@ public:
 
 private:
   // Creates a single-point workspace with instrument and runNumber set
-  Workspace_sptr createWs(const std::string &instrName, int runNumber,
-                          size_t nSpectra = 1) {
-    Geometry::Instrument_const_sptr instr =
-        std::make_shared<Geometry::Instrument>(instrName);
+  Workspace_sptr createWs(const std::string &instrName, int runNumber, size_t nSpectra = 1) {
+    Geometry::Instrument_const_sptr instr = std::make_shared<Geometry::Instrument>(instrName);
 
-    MatrixWorkspace_sptr ws =
-        WorkspaceFactory::Instance().create("Workspace2D", nSpectra, 1, 1);
+    MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D", nSpectra, 1, 1);
     ws->setInstrument(instr);
 
     ws->mutableRun().addProperty("run_number", runNumber);
@@ -724,8 +661,7 @@ private:
     return ws;
   }
   // Adds a log to the workspace
-  void addLog(const Workspace_sptr &ws, const std::string &logName,
-              const std::string &logValue) {
+  void addLog(const Workspace_sptr &ws, const std::string &logName, const std::string &logValue) {
     auto alg = AlgorithmManager::Instance().create("AddSampleLog");
     alg->setChild(true);
     alg->setLogging(false);
@@ -737,8 +673,7 @@ private:
   }
 
   // Groups the supplied workspaces
-  WorkspaceGroup_sptr
-  groupWorkspaces(const std::vector<Workspace_sptr> &workspaces) {
+  WorkspaceGroup_sptr groupWorkspaces(const std::vector<Workspace_sptr> &workspaces) {
     auto group = std::make_shared<WorkspaceGroup>();
     for (auto ws : workspaces) {
       group->addWorkspace(ws);
@@ -747,10 +682,8 @@ private:
   }
 
   // Adds a time series log to the workspace
-  void
-  addTimeSeriesLog(const Workspace_sptr &ws, const std::string &logName,
-                   const std::vector<Mantid::Types::Core::DateAndTime> &times,
-                   const std::vector<double> &values) {
+  void addTimeSeriesLog(const Workspace_sptr &ws, const std::string &logName,
+                        const std::vector<Mantid::Types::Core::DateAndTime> &times, const std::vector<double> &values) {
     TS_ASSERT_EQUALS(times.size(), values.size());
     auto matrixWS = std::dynamic_pointer_cast<MatrixWorkspace>(ws);
     TS_ASSERT(matrixWS);
@@ -784,8 +717,7 @@ private:
   }
 
   /// Create a results table with the given parameters
-  ITableWorkspace_sptr
-  createResultsTable(const std::vector<std::string> &params) {
+  ITableWorkspace_sptr createResultsTable(const std::vector<std::string> &params) {
     auto table = WorkspaceFactory::Instance().createTable();
     auto nameCol = table->addColumn("str", "Name");
     nameCol->setPlotType(6); // label

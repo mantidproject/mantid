@@ -35,9 +35,7 @@ protected:
 
 struct BinEdgeAxisProxy : AxisProxy {
   using AxisProxy::AxisProxy;
-  double getCentre(const int index) override {
-    return (a->getValue(index) + a->getValue(index + 1)) / 2.;
-  }
+  double getCentre(const int index) override { return (a->getValue(index) + a->getValue(index + 1)) / 2.; }
 };
 
 } // namespace AxisHelper
@@ -49,19 +47,12 @@ public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "SaveAscii"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Saves a 2D workspace to a ascii file.";
-  }
+  const std::string summary() const override { return "Saves a 2D workspace to a ascii file."; }
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 2; }
   const std::vector<std::string> seeAlso() const override {
-    return {"LoadAscii",
-            "SaveCSV",
-            "SaveDiffFittingAscii",
-            "SaveReflectometryAscii",
-            "SaveOpenGenieAscii",
-            "SaveGSS",
-            "SaveFocusedXYE"};
+    return {"LoadAscii",          "SaveCSV", "SaveDiffFittingAscii", "SaveReflectometryAscii",
+            "SaveOpenGenieAscii", "SaveGSS", "SaveFocusedXYE"};
   }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "DataHandling\\Text"; }
@@ -71,10 +62,8 @@ private:
   void init() override;
   /// Overwrites Algorithm method
   void exec() override;
-  void writeTableWorkspace(const API::ITableWorkspace_const_sptr &tws,
-                           const std::string &filename, bool appendToFile,
-                           bool writeHeader, int prec, bool scientific,
-                           const std::string &comment);
+  void writeTableWorkspace(const API::ITableWorkspace_const_sptr &tws, const std::string &filename, bool appendToFile,
+                           bool writeHeader, int prec, bool scientific, const std::string &comment);
   /// Writes a spectrum to the file using a workspace index
   void writeSpectrum(const int &wsIndex, std::ofstream &file);
   std::vector<std::string> stringListToVector(std::string &inputString);
@@ -82,9 +71,7 @@ private:
   void populateSpectrumNumberMetaData();
   void populateAngleMetaData();
   void populateAllMetaData();
-  bool
-  findElementInUnorderedStringVector(const std::vector<std::string> &vector,
-                                     const std::string &toFind);
+  bool findElementInUnorderedStringVector(const std::vector<std::string> &vector, const std::string &toFind);
 
   /// Map the separator options to their string equivalents
   std::map<std::string, std::string> m_separatorIndex;

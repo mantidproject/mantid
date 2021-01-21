@@ -87,8 +87,7 @@ signals:
   void statusText(const QString &);
 
 protected:
-  int averageImagePixel(const QImage &image, int px, int py,
-                        bool moreHorizontal);
+  int averageImagePixel(const QImage &image, int px, int py, bool moreHorizontal);
   void addLineMarker(const QPoint &start, const QPoint &end);
   /**\brief Draw line during operation (replaced by a LineMarker at the end).
    */

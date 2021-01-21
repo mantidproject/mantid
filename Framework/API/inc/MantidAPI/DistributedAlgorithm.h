@@ -36,9 +36,8 @@ namespace API {
 */
 class MANTID_API_DLL DistributedAlgorithm : public Algorithm {
 protected:
-  Parallel::ExecutionMode getParallelExecutionMode(
-      const std::map<std::string, Parallel::StorageMode> &storageModes)
-      const override;
+  Parallel::ExecutionMode
+  getParallelExecutionMode(const std::map<std::string, Parallel::StorageMode> &storageModes) const override;
 };
 
 } // namespace API

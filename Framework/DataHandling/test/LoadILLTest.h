@@ -46,9 +46,7 @@ public:
 
   void test_LoadSANS_D16() { checkLoader("ILL/D16/218356", "LoadILLSANS"); }
 
-  void test_LoadDiffraction_D2B() {
-    checkLoader("ILL/D2B/535401", "LoadILLDiffraction");
-  }
+  void test_LoadDiffraction_D2B() { checkLoader("ILL/D2B/535401", "LoadILLDiffraction"); }
 
   void test_LoadDiffraction_D20() {
     checkLoader("ILL/D20/967076", "LoadILLDiffraction");
@@ -82,11 +80,7 @@ public:
     checkLoader("ILL/PANTHER/001723", "LoadILLTOF");
   }
 
-  void test_loadReflectometry_D17() {
-    checkLoader("ILL/D17/317370", "LoadILLReflectometry");
-  }
+  void test_loadReflectometry_D17() { checkLoader("ILL/D17/317370", "LoadILLReflectometry"); }
 
-  void test_loadReflectometry_FIGARO() {
-    checkLoader("ILL/Figaro/000002", "LoadILLReflectometry");
-  }
+  void test_loadReflectometry_FIGARO() { checkLoader("ILL/Figaro/000002", "LoadILLReflectometry"); }
 };

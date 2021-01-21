@@ -27,18 +27,14 @@ using namespace Mantid::Kernel;
  * @param mtdUI Pointer to the MantidUI object
  * @param flags Window flags
  */
-MantidSampleMaterialDialog::MantidSampleMaterialDialog(const QString &wsName,
-                                                       MantidUI *mtdUI,
-                                                       const Qt::WFlags &flags)
+MantidSampleMaterialDialog::MantidSampleMaterialDialog(const QString &wsName, MantidUI *mtdUI, const Qt::WFlags &flags)
     : QDialog(mtdUI->appWindow(), flags), m_wsName(wsName), m_mantidUI(mtdUI) {
   m_uiForm.setupUi(this);
 
   connect(m_uiForm.pbClose, SIGNAL(clicked()), this, SLOT(close()));
 
-  connect(m_uiForm.pbSetMaterial, SIGNAL(clicked()), this,
-          SLOT(handleSetMaterial()));
-  connect(m_uiForm.pbCopyMaterial, SIGNAL(clicked()), this,
-          SLOT(handleCopyMaterial()));
+  connect(m_uiForm.pbSetMaterial, SIGNAL(clicked()), this, SLOT(handleSetMaterial()));
+  connect(m_uiForm.pbCopyMaterial, SIGNAL(clicked()), this, SLOT(handleCopyMaterial()));
 }
 
 /**
@@ -46,9 +42,7 @@ MantidSampleMaterialDialog::MantidSampleMaterialDialog(const QString &wsName,
  * tree.
  */
 void MantidSampleMaterialDialog::updateMaterial() {
-  MatrixWorkspace_sptr ws =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-          m_wsName.toStdString());
+  MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_wsName.toStdString());
   if (!ws)
     return;
 

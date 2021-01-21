@@ -29,17 +29,13 @@ DECLARE_ALGORITHM(CreateMDHistoWorkspace)
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string CreateMDHistoWorkspace::name() const {
-  return "CreateMDHistoWorkspace";
-}
+const std::string CreateMDHistoWorkspace::name() const { return "CreateMDHistoWorkspace"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int CreateMDHistoWorkspace::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string CreateMDHistoWorkspace::category() const {
-  return "MDAlgorithms\\Creation";
-}
+const std::string CreateMDHistoWorkspace::category() const { return "MDAlgorithms\\Creation"; }
 
 //----------------------------------------------------------------------------------------------
 
@@ -50,61 +46,47 @@ void CreateMDHistoWorkspace::init() {
   auto validator = std::make_shared<CompositeValidator>();
   validator->add(std::make_shared<BoundedValidator<int>>(1, 9));
   validator->add(std::make_shared<MandatoryValidator<int>>());
-  auto mandatoryIntArrayValidator =
-      std::make_shared<MandatoryValidator<std::vector<int>>>();
-  auto mandatoryDoubleArrayValidator =
-      std::make_shared<MandatoryValidator<std::vector<double>>>();
-  auto mandatoryStrArrayValidator =
-      std::make_shared<MandatoryValidator<std::vector<std::string>>>();
+  auto mandatoryIntArrayValidator = std::make_shared<MandatoryValidator<std::vector<int>>>();
+  auto mandatoryDoubleArrayValidator = std::make_shared<MandatoryValidator<std::vector<double>>>();
+  auto mandatoryStrArrayValidator = std::make_shared<MandatoryValidator<std::vector<std::string>>>();
 
-  declareProperty(std::make_unique<ArrayProperty<double>>(
-                      "SignalInput", mandatoryDoubleArrayValidator),
+  declareProperty(std::make_unique<ArrayProperty<double>>("SignalInput", mandatoryDoubleArrayValidator),
                   "Signal array for n-dimensional workspace");
 
-  declareProperty(std::make_unique<ArrayProperty<double>>(
-                      "ErrorInput", mandatoryDoubleArrayValidator),
+  declareProperty(std::make_unique<ArrayProperty<double>>("ErrorInput", mandatoryDoubleArrayValidator),
                   "Error array for n-dimensional workspace");
 
-  declareProperty(
-      std::make_unique<ArrayProperty<double>>("NumberOfEvents",
-                                              std::vector<double>(0)),
-      "Number of pixels array for n-dimensional workspace. Optional, defaults "
-      "to 1 per bin.");
-  declareProperty(std::make_unique<PropertyWithValue<int>>(
-                      "Dimensionality", -1, validator, Direction::Input),
+  declareProperty(std::make_unique<ArrayProperty<double>>("NumberOfEvents", std::vector<double>(0)),
+                  "Number of pixels array for n-dimensional workspace. Optional, defaults "
+                  "to 1 per bin.");
+  declareProperty(std::make_unique<PropertyWithValue<int>>("Dimensionality", -1, validator, Direction::Input),
                   "Dimensionality of the data in the file.");
 
-  declareProperty(std::make_unique<ArrayProperty<double>>(
-                      "Extents", mandatoryDoubleArrayValidator),
+  declareProperty(std::make_unique<ArrayProperty<double>>("Extents", mandatoryDoubleArrayValidator),
                   "A comma separated list of min, max for each dimension,\n"
                   "specifying the extents of each dimension.");
 
-  declareProperty(std::make_unique<ArrayProperty<int>>(
-                      "NumberOfBins", mandatoryIntArrayValidator),
+  declareProperty(std::make_unique<ArrayProperty<int>>("NumberOfBins", mandatoryIntArrayValidator),
                   "Number of bin in each dimension.");
 
-  declareProperty(std::make_unique<ArrayProperty<std::string>>(
-                      "Names", mandatoryStrArrayValidator),
+  declareProperty(std::make_unique<ArrayProperty<std::string>>("Names", mandatoryStrArrayValidator),
                   "A comma separated list of the name of each dimension.");
 
-  declareProperty(std::make_unique<ArrayProperty<std::string>>(
-                      "Units", mandatoryStrArrayValidator),
+  declareProperty(std::make_unique<ArrayProperty<std::string>>("Units", mandatoryStrArrayValidator),
                   "A comma separated list of the units of each dimension.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "MDHistoWorkspace reflecting the input text file.");
-  declareProperty(
-      std::make_unique<ArrayProperty<std::string>>("Frames"),
-      " A comma separated list of the frames of each dimension. "
-      " The frames can be"
-      " **General Frame**: Any frame which is not a Q-based frame."
-      " **QLab**: Wave-vector converted into the lab frame."
-      " **QSample**: Wave-vector converted into the frame of the sample."
-      " **HKL**: Wave-vector converted into the crystal's HKL indices."
-      " Note if nothing is specified then the **General Frame** is being "
-      "selected. Also note that if you select a frame then this might override "
-      "your unit selection if it is not compatible with the frame.");
+  declareProperty(std::make_unique<ArrayProperty<std::string>>("Frames"),
+                  " A comma separated list of the frames of each dimension. "
+                  " The frames can be"
+                  " **General Frame**: Any frame which is not a Q-based frame."
+                  " **QLab**: Wave-vector converted into the lab frame."
+                  " **QSample**: Wave-vector converted into the frame of the sample."
+                  " **HKL**: Wave-vector converted into the crystal's HKL indices."
+                  " Note if nothing is specified then the **General Frame** is being "
+                  "selected. Also note that if you select a frame then this might override "
+                  "your unit selection if it is not compatible with the frame.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -124,17 +106,14 @@ void CreateMDHistoWorkspace::exec() {
   std::stringstream stream;
   stream << binProduct;
   if (binProduct != signalValues.size()) {
-    throw std::invalid_argument("Expected size of the SignalInput is: " +
-                                stream.str());
+    throw std::invalid_argument("Expected size of the SignalInput is: " + stream.str());
   }
   if (binProduct != errorValues.size()) {
-    throw std::invalid_argument("Expected size of the ErrorInput is: " +
-                                stream.str());
+    throw std::invalid_argument("Expected size of the ErrorInput is: " + stream.str());
   }
   if (!numberOfEvents.empty() && binProduct != numberOfEvents.size()) {
-    throw std::invalid_argument(
-        "Expected size of the NumberOfEvents is: " + stream.str() +
-        ". Leave empty to auto fill with 1.0");
+    throw std::invalid_argument("Expected size of the NumberOfEvents is: " + stream.str() +
+                                ". Leave empty to auto fill with 1.0");
   }
 
   // Auto fill number of events.

@@ -17,9 +17,7 @@ namespace ISISReflectometry {
 
 class EventPresenterFactory {
 public:
-  std::unique_ptr<IEventPresenter> make(IEventView *view) {
-    return std::make_unique<EventPresenter>(view);
-  }
+  std::unique_ptr<IEventPresenter> make(IEventView *view) { return std::make_unique<EventPresenter>(view); }
 };
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

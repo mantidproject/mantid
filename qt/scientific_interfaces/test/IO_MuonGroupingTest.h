@@ -25,9 +25,7 @@ class IO_MuonGroupingTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static IO_MuonGroupingTest *createSuite() {
-    return new IO_MuonGroupingTest();
-  }
+  static IO_MuonGroupingTest *createSuite() { return new IO_MuonGroupingTest(); }
   static void destroySuite(IO_MuonGroupingTest *suite) { delete suite; }
 
   /// Constructor
@@ -46,8 +44,7 @@ public:
       }
     }
 
-    TSM_ASSERT("Unable to find UnitTest data directory",
-               !m_testDataDir.empty());
+    TSM_ASSERT("Unable to find UnitTest data directory", !m_testDataDir.empty());
 
     m_tmpDir = ConfigService::Instance().getTempDir();
 
@@ -61,15 +58,13 @@ public:
     std::string tmpFile = m_tmpDir + "tmp_MUSRGrouping.xml";
 
     // Load grouping first
-    TS_ASSERT_THROWS_NOTHING(API::GroupingLoader::loadGroupingFromXML(
-        m_testDataDir + "MUSRGrouping.xml", g));
+    TS_ASSERT_THROWS_NOTHING(API::GroupingLoader::loadGroupingFromXML(m_testDataDir + "MUSRGrouping.xml", g));
 
     // Then save it
     TS_ASSERT_THROWS_NOTHING(MuonGroupingHelper::saveGroupingToXML(g, tmpFile));
 
     // And load it again
-    TS_ASSERT_THROWS_NOTHING(
-        API::GroupingLoader::loadGroupingFromXML(tmpFile, lg));
+    TS_ASSERT_THROWS_NOTHING(API::GroupingLoader::loadGroupingFromXML(tmpFile, lg));
 
     // Check that all the information was saved
     TS_ASSERT_EQUALS(lg.groupNames.size(), 2);

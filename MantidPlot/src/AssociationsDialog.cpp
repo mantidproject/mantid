@@ -47,8 +47,7 @@
 #include <QTableWidget>
 #include <utility>
 
-AssociationsDialog::AssociationsDialog(Graph *g, const Qt::WFlags &fl)
-    : QDialog(g, fl) {
+AssociationsDialog::AssociationsDialog(Graph *g, const Qt::WFlags &fl) : QDialog(g, fl) {
   setObjectName("AssociationsDialog");
   setWindowTitle(tr("MantidPlot - Plot Associations"));
   setModal(true);
@@ -70,12 +69,10 @@ AssociationsDialog::AssociationsDialog(Graph *g, const Qt::WFlags &fl)
   table->verticalHeader()->hide();
   table->verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);
   table->setMaximumHeight(8 * table->rowHeight(0));
-  table->setHorizontalHeaderLabels(
-      {tr("Column"), tr("X"), tr("Y"), tr("xErr"), tr("yErr")});
+  table->setHorizontalHeaderLabels({tr("Column"), tr("X"), tr("Y"), tr("xErr"), tr("yErr")});
   vl->addWidget(table);
 
-  connect(table, SIGNAL(itemClicked(QTableWidgetItem *)), this,
-          SLOT(processStateChange(QTableWidgetItem *)));
+  connect(table, SIGNAL(itemClicked(QTableWidgetItem *)), this, SLOT(processStateChange(QTableWidgetItem *)));
 
   associations = new QListWidget();
   associations->setSelectionMode(QListWidget::SingleSelection);
@@ -97,8 +94,7 @@ AssociationsDialog::AssociationsDialog(Graph *g, const Qt::WFlags &fl)
 
   active_table = nullptr;
 
-  connect(associations, SIGNAL(currentRowChanged(int)), this,
-          SLOT(updateTable(int)));
+  connect(associations, SIGNAL(currentRowChanged(int)), this, SLOT(updateTable(int)));
   connect(btnOK, SIGNAL(clicked()), this, SLOT(accept()));
   connect(btnCancel, SIGNAL(clicked()), this, SLOT(close()));
   connect(btnApply, SIGNAL(clicked()), this, SLOT(updateCurves()));
@@ -125,8 +121,7 @@ void AssociationsDialog::updateCurves() {
 }
 
 void AssociationsDialog::changePlotAssociation(int curve, const QString &text) {
-  DataCurve *c =
-      dynamic_cast<DataCurve *>(graph->curve(curve)); // c_keys[curve]);
+  DataCurve *c = dynamic_cast<DataCurve *>(graph->curve(curve)); // c_keys[curve]);
   if (!c)
     return;
 
@@ -170,8 +165,7 @@ void AssociationsDialog::changePlotAssociation(int curve, const QString &text) {
 
       QString xEndCol = lst[2].remove("(X)").remove("(A)");
       QString yEndCol = lst[3].remove("(Y)").remove("(M)");
-      if (v->vectorEndXAColName() != xEndCol ||
-          v->vectorEndYMColName() != yEndCol)
+      if (v->vectorEndXAColName() != xEndCol || v->vectorEndYMColName() != yEndCol)
         v->setVectorEnd(xEndCol, yEndCol);
       else
         v->loadData();
@@ -310,8 +304,7 @@ void AssociationsDialog::updateColumnTypes() {
     table->showColumn(3);
     table->showColumn(4);
 
-    if (cols[2].contains("(xErr)") ||
-        cols[2].contains("(yErr)")) { // if error bars
+    if (cols[2].contains("(xErr)") || cols[2].contains("(yErr)")) { // if error bars
       table->horizontalHeaderItem(3)->setText(tr("xErr"));
       table->horizontalHeaderItem(4)->setText(tr("yErr"));
     }
@@ -322,29 +315,25 @@ void AssociationsDialog::updateColumnTypes() {
     } else if (cols[2].contains("(yErr)")) {
       yerr = true;
       errColName = cols[2].remove("(yErr)");
-    } else if (cols.count() > 3 && cols[2].contains("(X)") &&
-               cols[3].contains("(Y)")) {
+    } else if (cols.count() > 3 && cols[2].contains("(X)") && cols[3].contains("(Y)")) {
       vectors = true;
       xEndColName = cols[2].remove("(X)");
       yEndColName = cols[3].remove("(Y)");
       table->horizontalHeaderItem(3)->setText(tr("xEnd"));
       table->horizontalHeaderItem(4)->setText(tr("yEnd"));
-    } else if (cols.count() > 3 && cols[2].contains("(A)") &&
-               cols[3].contains("(M)")) {
+    } else if (cols.count() > 3 && cols[2].contains("(A)") && cols[3].contains("(M)")) {
       vectors = true;
       xEndColName = cols[2].remove("(A)");
       yEndColName = cols[3].remove("(M)");
       table->horizontalHeaderItem(3)->setText(tr("Angle"));
-      table->horizontalHeaderItem(4)->setText(
-          tr("Magn.", "Magnitude, vector length"));
+      table->horizontalHeaderItem(4)->setText(tr("Magn.", "Magnitude, vector length"));
     }
   }
 
   for (int i = 0; i < table->rowCount(); i++) {
     it = table->item(i, 3);
     if (xerr || vectors) {
-      if (table->item(i, 0)->text() == errColName ||
-          table->item(i, 0)->text() == xEndColName)
+      if (table->item(i, 0)->text() == errColName || table->item(i, 0)->text() == xEndColName)
         it->setCheckState(Qt::Checked);
       else
         it->setCheckState(Qt::Unchecked);
@@ -353,8 +342,7 @@ void AssociationsDialog::updateColumnTypes() {
 
     it = table->item(i, 4);
     if (yerr || vectors) {
-      if (table->item(i, 0)->text() == errColName ||
-          table->item(i, 0)->text() == yEndColName)
+      if (table->item(i, 0)->text() == errColName || table->item(i, 0)->text() == yEndColName)
         it->setCheckState(Qt::Checked);
       else
         it->setCheckState(Qt::Unchecked);
@@ -392,9 +380,8 @@ void AssociationsDialog::setGraph(Graph *g) {
     }
   }
   associations->addItems(plotAssociationsList);
-  associations->setMaximumHeight(
-      (plotAssociationsList.count() + 1) *
-      associations->visualItemRect(associations->item(0)).height());
+  associations->setMaximumHeight((plotAssociationsList.count() + 1) *
+                                 associations->visualItemRect(associations->item(0)).height());
 }
 
 void AssociationsDialog::updatePlotAssociation(int row, int col) {
@@ -442,8 +429,7 @@ void AssociationsDialog::updatePlotAssociation(int row, int col) {
   QString old_as = plotAssociationsList[index];
   for (int i = 0; i < (int)plotAssociationsList.count(); i++) {
     QString as = plotAssociationsList[i];
-    if (as.contains(old_as) &&
-        (as.contains("(xErr)") || as.contains("(yErr)"))) {
+    if (as.contains(old_as) && (as.contains("(xErr)") || as.contains("(yErr)"))) {
       QStringList ls = as.split(",", QString::SkipEmptyParts);
       as = text + "," + ls[2];
       plotAssociationsList[i] = as;

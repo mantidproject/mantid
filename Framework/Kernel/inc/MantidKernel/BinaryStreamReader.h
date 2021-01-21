@@ -60,15 +60,9 @@ public:
 
   ///@name 2D methods
   /// @{
-  BinaryStreamReader &read(std::vector<std::string> &value,
-                           const std::vector<int32_t> &shape,
-                           MatrixOrdering order);
-  BinaryStreamReader &read(Kernel::Matrix<float> &value,
-                           const std::vector<int32_t> &shape,
-                           MatrixOrdering order);
-  BinaryStreamReader &read(Kernel::Matrix<double> &value,
-                           const std::vector<int32_t> &shape,
-                           MatrixOrdering order);
+  BinaryStreamReader &read(std::vector<std::string> &value, const std::vector<int32_t> &shape, MatrixOrdering order);
+  BinaryStreamReader &read(Kernel::Matrix<float> &value, const std::vector<int32_t> &shape, MatrixOrdering order);
+  BinaryStreamReader &read(Kernel::Matrix<double> &value, const std::vector<int32_t> &shape, MatrixOrdering order);
   /// @}
 
   /// Move the stream to nbytes past the beginning of the file

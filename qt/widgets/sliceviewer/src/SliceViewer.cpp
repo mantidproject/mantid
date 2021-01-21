@@ -93,22 +93,16 @@ const QString SliceViewer::NumEventsNormalizationKey = "# Events";
 //------------------------------------------------------------------------------
 /** Constructor */
 SliceViewer::SliceViewer(QWidget *parent)
-    : QWidget(parent), m_ws(), m_firstWorkspaceOpen(false), m_dimensions(),
-      m_data(nullptr), m_X(), m_Y(), m_dimX(0), m_dimY(1), m_logColor(false),
-      m_fastRender(true), m_rebinMode(false), m_rebinLocked(true),
-      m_mdSettings(new MantidQt::API::MdSettings()), m_logger("SliceViewer"),
-      m_firstNonOrthogonalWorkspaceOpen(true), m_nonOrthogonalDefault(false),
-      m_oldDimNonOrthogonal(false), m_canSwitchScales(false),
+    : QWidget(parent), m_ws(), m_firstWorkspaceOpen(false), m_dimensions(), m_data(nullptr), m_X(), m_Y(), m_dimX(0),
+      m_dimY(1), m_logColor(false), m_fastRender(true), m_rebinMode(false), m_rebinLocked(true),
+      m_mdSettings(new MantidQt::API::MdSettings()), m_logger("SliceViewer"), m_firstNonOrthogonalWorkspaceOpen(true),
+      m_nonOrthogonalDefault(false), m_oldDimNonOrthogonal(false), m_canSwitchScales(false),
       m_peaksPresenter(std::make_shared<CompositePeaksPresenter>(this)),
-      m_proxyPeaksPresenter(
-          std::make_shared<ProxyCompositePeaksPresenter>(m_peaksPresenter)),
-      m_peaksSliderWidget(nullptr), m_lastRatioState(Guess),
-      m_holdDisplayUpdates(false) {
+      m_proxyPeaksPresenter(std::make_shared<ProxyCompositePeaksPresenter>(m_peaksPresenter)),
+      m_peaksSliderWidget(nullptr), m_lastRatioState(Guess), m_holdDisplayUpdates(false) {
 
   ui.setupUi(this);
-  auto nonOrthogonalDefaultValue =
-      Kernel::ConfigService::Instance().getValue<bool>(
-          "sliceviewer.nonorthogonal");
+  auto nonOrthogonalDefaultValue = Kernel::ConfigService::Instance().getValue<bool>("sliceviewer.nonorthogonal");
   m_nonOrthogonalDefault = nonOrthogonalDefaultValue.get_value_or(false);
 
   m_inf = std::numeric_limits<double>::infinity();
@@ -122,8 +116,7 @@ SliceViewer::SliceViewer(QWidget *parent)
   // Set up the ColorBarWidget
   m_colorBar = ui.colorBarWidget;
   m_colorBar->setViewRange(0, 10);
-  QObject::connect(m_colorBar, SIGNAL(changedColorRange(double, double, bool)),
-                   this, SLOT(colorRangeChanged()));
+  QObject::connect(m_colorBar, SIGNAL(changedColorRange(double, double, bool)), this, SLOT(colorRangeChanged()));
 
   // ---- Set the color map on the data ------
   m_data = std::make_unique<API::QwtRasterDataMD>();
@@ -150,34 +143,23 @@ SliceViewer::SliceViewer(QWidget *parent)
   // ----------- Toolbar button signals ----------------
   QObject::connect(ui.btnResetZoom, SIGNAL(clicked()), this, SLOT(resetZoom()));
   QObject::connect(ui.btnClearLine, SIGNAL(clicked()), this, SLOT(clearLine()));
-  QObject::connect(ui.btnRangeFull, SIGNAL(clicked()), this,
-                   SLOT(setColorScaleAutoFull()));
-  QObject::connect(ui.btnRangeSlice, SIGNAL(clicked()), this,
-                   SLOT(setColorScaleAutoSlice()));
-  QObject::connect(ui.btnRebinRefresh, SIGNAL(clicked()), this,
-                   SLOT(rebinParamsChanged()));
-  QObject::connect(ui.btnAutoRebin, SIGNAL(toggled(bool)), this,
-                   SLOT(autoRebin_toggled(bool)));
-  QObject::connect(ui.btnPeakOverlay, SIGNAL(clicked()), this,
-                   SLOT(peakOverlay_clicked()));
+  QObject::connect(ui.btnRangeFull, SIGNAL(clicked()), this, SLOT(setColorScaleAutoFull()));
+  QObject::connect(ui.btnRangeSlice, SIGNAL(clicked()), this, SLOT(setColorScaleAutoSlice()));
+  QObject::connect(ui.btnRebinRefresh, SIGNAL(clicked()), this, SLOT(rebinParamsChanged()));
+  QObject::connect(ui.btnAutoRebin, SIGNAL(toggled(bool)), this, SLOT(autoRebin_toggled(bool)));
+  QObject::connect(ui.btnPeakOverlay, SIGNAL(clicked()), this, SLOT(peakOverlay_clicked()));
 
   // ----------- Other signals ----------------
-  QObject::connect(m_colorBar, SIGNAL(colorBarDoubleClicked()), this,
-                   SLOT(loadColorMapSlot()));
+  QObject::connect(m_colorBar, SIGNAL(colorBarDoubleClicked()), this, SLOT(loadColorMapSlot()));
 
   m_algoRunner = new AlgorithmRunner(this);
-  QObject::connect(m_algoRunner, SIGNAL(algorithmComplete(bool)), this,
-                   SLOT(dynamicRebinComplete(bool)));
+  QObject::connect(m_algoRunner, SIGNAL(algorithmComplete(bool)), this, SLOT(dynamicRebinComplete(bool)));
 
   // disconnect and reconnect here
-  QObject::connect(this, SIGNAL(changedShownDim(size_t, size_t)), this,
-                   SLOT(checkForHKLDimension()));
-  QObject::connect(this, SIGNAL(changedShownDim(size_t, size_t)), this,
-                   SLOT(switchAxis()));
-  QObject::connect(ui.btnNonOrthogonalToggle, SIGNAL(toggled(bool)), this,
-                   SLOT(switchQWTRaster(bool)));
-  QObject::connect(ui.btnNonOrthogonalToggle, SIGNAL(toggled(bool)), this,
-                   SLOT(setNonOrthogonalbtn()));
+  QObject::connect(this, SIGNAL(changedShownDim(size_t, size_t)), this, SLOT(checkForHKLDimension()));
+  QObject::connect(this, SIGNAL(changedShownDim(size_t, size_t)), this, SLOT(switchAxis()));
+  QObject::connect(ui.btnNonOrthogonalToggle, SIGNAL(toggled(bool)), this, SLOT(switchQWTRaster(bool)));
+  QObject::connect(ui.btnNonOrthogonalToggle, SIGNAL(toggled(bool)), this, SLOT(setNonOrthogonalbtn()));
 
   initMenus();
 
@@ -198,19 +180,15 @@ SliceViewer::SliceViewer(QWidget *parent)
   m_overlayWSOutline->setShown(false);
 
   // -------- Peak Overlay ----------------
-  m_peakTransformSelector.registerCandidate(
-      std::make_shared<PeakTransformHKLFactory>());
-  m_peakTransformSelector.registerCandidate(
-      std::make_shared<PeakTransformQSampleFactory>());
-  m_peakTransformSelector.registerCandidate(
-      std::make_shared<PeakTransformQLabFactory>());
+  m_peakTransformSelector.registerCandidate(std::make_shared<PeakTransformHKLFactory>());
+  m_peakTransformSelector.registerCandidate(std::make_shared<PeakTransformQSampleFactory>());
+  m_peakTransformSelector.registerCandidate(std::make_shared<PeakTransformQLabFactory>());
   this->setAcceptDrops(true);
 
   // --------- Rescaler --------------------
   m_rescaler = new QwtPlotRescaler(m_plot->canvas());
 
-  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      FeatureType::Interface, "SliceViewer", false);
+  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(FeatureType::Interface, "SliceViewer", false);
 }
 
 void SliceViewer::updateAspectRatios() {
@@ -223,8 +201,7 @@ void SliceViewer::updateAspectRatios() {
      * y units
      * are suitable.
      */
-    lockAspectRatios =
-        m_X->getMDUnits().isQUnit() && m_Y->getMDUnits().isQUnit();
+    lockAspectRatios = m_X->getMDUnits().isQUnit() && m_Y->getMDUnits().isQUnit();
 
   } else {
     // Lock everything (or not)
@@ -297,8 +274,7 @@ void SliceViewer::saveSettings() {
   settings.setValue("ColorScale", m_colorBar->getScale());
   settings.setValue("PowerScaleExponent", m_colorBar->getExponent());
   settings.setValue("LastSavedImagePath", m_lastSavedFile);
-  settings.setValue("TransparentZeros",
-                    (m_actionTransparentZeros->isChecked() ? 1 : 0));
+  settings.setValue("TransparentZeros", (m_actionTransparentZeros->isChecked() ? 1 : 0));
 
   settings.setValue("LockAspectRatios", static_cast<int>(m_aspectRatioType));
   settings.endGroup();
@@ -310,10 +286,8 @@ void SliceViewer::saveSettings() {
  * @param mode the mode of the icon
  * @param state on or off state of the icon
  */
-void SliceViewer::setIconFromString(QAbstractButton *btn,
-                                    const std::string &iconName,
-                                    QIcon::Mode mode = QIcon::Mode::Normal,
-                                    QIcon::State state = QIcon::State::Off) {
+void SliceViewer::setIconFromString(QAbstractButton *btn, const std::string &iconName,
+                                    QIcon::Mode mode = QIcon::Mode::Normal, QIcon::State state = QIcon::State::Off) {
   QIcon icon;
   icon.addFile(QString::fromStdString(iconName), QSize(), mode, state);
   btn->setIcon(icon);
@@ -324,10 +298,8 @@ void SliceViewer::setIconFromString(QAbstractButton *btn,
  * @param mode the mode of the icon
  * @param state on or off state of the icon
  */
-void SliceViewer::setIconFromString(QAction *action,
-                                    const std::string &iconName,
-                                    QIcon::Mode mode = QIcon::Mode::Normal,
-                                    QIcon::State state = QIcon::State::Off) {
+void SliceViewer::setIconFromString(QAction *action, const std::string &iconName,
+                                    QIcon::Mode mode = QIcon::Mode::Normal, QIcon::State state = QIcon::State::Off) {
   QIcon icon;
   icon.addFile(QString::fromStdString(iconName), QSize(), mode, state);
   action->setIcon(icon);
@@ -406,8 +378,7 @@ void SliceViewer::initMenus() {
 
   action = new QAction(QPixmap(), "Enable/Disable R&ebin Mode", this);
   m_syncRebinMode = new SyncedCheckboxes(action, ui.btnRebinMode, false);
-  connect(m_syncRebinMode, SIGNAL(toggled(bool)), this,
-          SLOT(RebinMode_toggled(bool)));
+  connect(m_syncRebinMode, SIGNAL(toggled(bool)), this, SLOT(RebinMode_toggled(bool)));
   m_menuView->addAction(action);
 
   action = new QAction(QPixmap(), "Rebin Current View", this);
@@ -433,16 +404,14 @@ void SliceViewer::initMenus() {
   QActionGroup *group = new QActionGroup(this);
 
   const QString normalization = " Normalization";
-  action = new QAction(QPixmap(),
-                       SliceViewer::NoNormalizationKey + normalization, this);
+  action = new QAction(QPixmap(), SliceViewer::NoNormalizationKey + normalization, this);
   m_menuView->addAction(action);
   action->setActionGroup(group);
   action->setCheckable(true);
   connect(action, SIGNAL(triggered()), this, SLOT(changeNormalizationNone()));
   m_actionNormalizeNone = action;
 
-  action = new QAction(
-      QPixmap(), SliceViewer::VolumeNormalizationKey + normalization, this);
+  action = new QAction(QPixmap(), SliceViewer::VolumeNormalizationKey + normalization, this);
   m_menuView->addAction(action);
   action->setActionGroup(group);
   action->setCheckable(true);
@@ -450,13 +419,11 @@ void SliceViewer::initMenus() {
   connect(action, SIGNAL(triggered()), this, SLOT(changeNormalizationVolume()));
   m_actionNormalizeVolume = action;
 
-  action = new QAction(
-      QPixmap(), SliceViewer::NumEventsNormalizationKey + normalization, this);
+  action = new QAction(QPixmap(), SliceViewer::NumEventsNormalizationKey + normalization, this);
   m_menuView->addAction(action);
   action->setActionGroup(group);
   action->setCheckable(true);
-  connect(action, SIGNAL(triggered()), this,
-          SLOT(changeNormalizationNumEvents()));
+  connect(action, SIGNAL(triggered()), this, SLOT(changeNormalizationNumEvents()));
   m_actionNormalizeNumEvents = action;
 
   // Mirror the menu options directly in the Ui.
@@ -464,8 +431,7 @@ void SliceViewer::initMenus() {
   ui.comboNormalization->addItem(SliceViewer::VolumeNormalizationKey);
   ui.comboNormalization->addItem(SliceViewer::NumEventsNormalizationKey);
 
-  connect(this->ui.comboNormalization,
-          SIGNAL(currentIndexChanged(const QString &)),
+  connect(this->ui.comboNormalization, SIGNAL(currentIndexChanged(const QString &)),
           SLOT(onNormalizationChanged(const QString &)));
 
   m_menuView->addSeparator();
@@ -541,22 +507,19 @@ void SliceViewer::initMenus() {
   action = new QAction(QPixmap(), "&Line Mode", this);
   action->setShortcut(Qt::Key_L + Qt::ControlModifier);
   m_syncLineMode = new SyncedCheckboxes(action, ui.btnDoLine, false);
-  connect(m_syncLineMode, SIGNAL(toggled(bool)), this,
-          SLOT(LineMode_toggled(bool)));
+  connect(m_syncLineMode, SIGNAL(toggled(bool)), this, SLOT(LineMode_toggled(bool)));
   m_menuLine->addAction(action);
 
   // Snap-to-grid, synced to the button
   action = new QAction(QPixmap(), "&Snap to Grid", this);
   m_syncSnapToGrid = new SyncedCheckboxes(action, ui.btnSnapToGrid, false);
-  connect(m_syncSnapToGrid, SIGNAL(toggled(bool)), this,
-          SLOT(SnapToGrid_toggled(bool)));
+  connect(m_syncSnapToGrid, SIGNAL(toggled(bool)), this, SLOT(SnapToGrid_toggled(bool)));
   m_menuLine->addAction(action);
 
   // --------------- Peaks Menu ----------------------------------------
   m_menuPeaks = new QMenu("&Peak", this);
   action = new QAction(QPixmap(), "&Overlay Options", this);
-  connect(action, SIGNAL(triggered()), this,
-          SLOT(onPeaksViewerOverlayOptions()));
+  connect(action, SIGNAL(triggered()), this, SLOT(onPeaksViewerOverlayOptions()));
   m_menuPeaks->addAction(action);
   action = new QAction(QPixmap(), "&Visible Columns", this);
   connect(action, SIGNAL(triggered()), this,
@@ -578,15 +541,13 @@ void SliceViewer::initMenus() {
 void SliceViewer::initZoomer() {
 
   QwtPlotPicker *zoomer = new QwtPlotPicker(m_plot->canvas());
-  zoomer->setSelectionFlags(QwtPicker::RectSelection |
-                            QwtPicker::DragSelection);
+  zoomer->setSelectionFlags(QwtPicker::RectSelection | QwtPicker::DragSelection);
   zoomer->setMousePattern(QwtEventPattern::MouseSelect1, Qt::LeftButton);
   zoomer->setTrackerMode(QwtPicker::AlwaysOff);
   const QColor c(Qt::darkBlue);
   zoomer->setRubberBand(QwtPicker::RectRubberBand);
   zoomer->setRubberBandPen(c);
-  QObject::connect(zoomer, SIGNAL(selected(const QwtDoubleRect &)), this,
-                   SLOT(zoomRectSlot(const QwtDoubleRect &)));
+  QObject::connect(zoomer, SIGNAL(selected(const QwtDoubleRect &)), this, SLOT(zoomRectSlot(const QwtDoubleRect &)));
 
   // Zoom in/out using middle-click+drag or the mouse wheel
   CustomMagnifier *magnif = new CustomMagnifier(m_plot->canvas());
@@ -597,20 +558,16 @@ void SliceViewer::initZoomer() {
   magnif->setZoomInKey(Qt::Key_Minus, Qt::NoModifier);
   magnif->setZoomOutKey(Qt::Key_Equal, Qt::NoModifier);
   // Hook-up listener to rescaled event
-  QObject::connect(magnif, SIGNAL(rescaled(double)), this,
-                   SLOT(magnifierRescaled(double)));
+  QObject::connect(magnif, SIGNAL(rescaled(double)), this, SLOT(magnifierRescaled(double)));
   // Pan using the right mouse button + drag
   QwtPlotPanner *panner = new QwtPlotPanner(m_plot->canvas());
   panner->setMouseButton(Qt::RightButton);
-  panner->setAxisEnabled(QwtPlot::yRight, false); // Don't do the colorbar axis
-  QObject::connect(panner, SIGNAL(panned(int, int)), this,
-                   SLOT(panned(int, int))); // Handle panning.
+  panner->setAxisEnabled(QwtPlot::yRight, false);                                   // Don't do the colorbar axis
+  QObject::connect(panner, SIGNAL(panned(int, int)), this, SLOT(panned(int, int))); // Handle panning.
 
   // Custom picker for showing the current coordinates
-  CustomPicker *picker =
-      new CustomPicker(m_spect->xAxis(), m_spect->yAxis(), m_plot->canvas());
-  QObject::connect(picker, SIGNAL(mouseMoved(double, double)), this,
-                   SLOT(showInfoAt(double, double)));
+  CustomPicker *picker = new CustomPicker(m_spect->xAxis(), m_spect->yAxis(), m_plot->canvas());
+  QObject::connect(picker, SIGNAL(mouseMoved(double, double)), this, SLOT(showInfoAt(double, double)));
 }
 
 //------------------------------------------------------------------------------
@@ -618,9 +575,7 @@ void SliceViewer::initZoomer() {
  *
  * @param visible :: true if you want to show the controls.
  */
-void SliceViewer::showControls(bool visible) {
-  ui.frmControls->setVisible(visible);
-}
+void SliceViewer::showControls(bool visible) { ui.frmControls->setVisible(visible); }
 
 //------------------------------------------------------------------------------
 /** Add (as needed) and update DimensionSliceWidget's. */
@@ -633,15 +588,11 @@ void SliceViewer::updateDimensionSliceWidgets() {
       ui.verticalLayoutControls->insertWidget(int(d), widget);
 
       // Slots for changes on the dimension widget
-      QObject::connect(widget, SIGNAL(changedShownDim(int, int, int)), this,
-                       SLOT(changedShownDim(int, int, int)));
-      QObject::connect(widget, SIGNAL(changedSlicePoint(int, double)), this,
-                       SLOT(updateDisplaySlot(int, double)));
+      QObject::connect(widget, SIGNAL(changedShownDim(int, int, int)), this, SLOT(changedShownDim(int, int, int)));
+      QObject::connect(widget, SIGNAL(changedSlicePoint(int, double)), this, SLOT(updateDisplaySlot(int, double)));
       // Slots for dynamic rebinning
-      QObject::connect(widget, SIGNAL(changedThickness(int, double)), this,
-                       SLOT(rebinParamsChanged()));
-      QObject::connect(widget, SIGNAL(changedNumBins(int, int)), this,
-                       SLOT(rebinParamsChanged()));
+      QObject::connect(widget, SIGNAL(changedThickness(int, double)), this, SLOT(rebinParamsChanged()));
+      QObject::connect(widget, SIGNAL(changedNumBins(int, int)), this, SLOT(rebinParamsChanged()));
 
       // Save in this list
       m_dimWidgets.emplace_back(widget);
@@ -657,13 +608,11 @@ void SliceViewer::updateDimensionSliceWidgets() {
   bool dimYset = false;
   // put non integrated dimensions first
   for (size_t d = 0; d < m_dimensions.size(); d++) {
-    if ((dimXset == false) &&
-        (m_ws->getDimension(d)->getIsIntegrated() == false)) {
+    if ((dimXset == false) && (m_ws->getDimension(d)->getIsIntegrated() == false)) {
       m_dimX = d;
       dimXset = true;
     }
-    if ((dimYset == false) &&
-        (m_ws->getDimension(d)->getIsIntegrated() == false) && (d != m_dimX)) {
+    if ((dimYset == false) && (m_ws->getDimension(d)->getIsIntegrated() == false) && (d != m_dimX)) {
       m_dimY = d;
       dimYset = true;
     }
@@ -781,16 +730,14 @@ void SliceViewer::setWorkspace(const Mantid::API::IMDWorkspace_sptr &ws) {
 
   // Go to no normalization by default for MatrixWorkspaces
   if (matrix)
-    this->setNormalization(Mantid::API::NoNormalization,
-                           false /* without updating */);
+    this->setNormalization(Mantid::API::NoNormalization, false /* without updating */);
 
   // Emit the signal that we changed the workspace
   emit workspaceChanged();
 
   // For MDEventWorkspace, estimate the resolution and change the # of bins
   // accordingly
-  IMDEventWorkspace_sptr mdew =
-      std::dynamic_pointer_cast<IMDEventWorkspace>(m_ws);
+  IMDEventWorkspace_sptr mdew = std::dynamic_pointer_cast<IMDEventWorkspace>(m_ws);
   std::vector<coord_t> binSizes = m_ws->estimateResolution();
 
   // Copy the dimensions to this so they can be modified
@@ -807,13 +754,11 @@ void SliceViewer::setWorkspace(const Mantid::API::IMDWorkspace_sptr &ws) {
       min = tmp;
     }
     if (!std::isfinite(min) || !std::isfinite(max)) {
-      mess << "Dimension " << m_ws->getDimension(d)->getName()
-           << " has a bad range: (";
+      mess << "Dimension " << m_ws->getDimension(d)->getName() << " has a bad range: (";
       mess << min << ", " << max << ")\n";
     }
     size_t numBins = static_cast<size_t>((max - min) / binSizes[d]);
-    MDHistoDimension_sptr dim(
-        new MDHistoDimension(m_ws->getDimension(d).get()));
+    MDHistoDimension_sptr dim(new MDHistoDimension(m_ws->getDimension(d).get()));
     dim->setRange(numBins, min, max);
     m_dimensions.emplace_back(dim);
   }
@@ -827,11 +772,9 @@ void SliceViewer::setWorkspace(const Mantid::API::IMDWorkspace_sptr &ws) {
 
   // Adjust the range to that of visible data
   if (mdew) {
-    std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> ext =
-        mdew->getMinimumExtents();
+    std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> ext = mdew->getMinimumExtents();
     for (size_t d = 0; d < mdew->getNumDims(); d++) {
-      size_t newNumBins =
-          size_t(ext[d].getSize() / m_dimensions[d]->getBinWidth() + 1);
+      size_t newNumBins = size_t(ext[d].getSize() / m_dimensions[d]->getBinWidth() + 1);
       m_dimensions[d]->setRange(newNumBins, ext[d].getMin(), ext[d].getMax());
     }
   }
@@ -844,8 +787,7 @@ void SliceViewer::setWorkspace(const Mantid::API::IMDWorkspace_sptr &ws) {
   // loaded. This always happens when a workspace is loaded for the first time.
   // For live event data workspaces subsequent updates might not lead to an auto
   // scaling of the color scale range (if this is explicitly turned off).
-  if (shouldAutoScaleForNewlySetWorkspace(m_firstWorkspaceOpen,
-                                          m_colorBar->getAutoScale())) {
+  if (shouldAutoScaleForNewlySetWorkspace(m_firstWorkspaceOpen, m_colorBar->getAutoScale())) {
     findRangeFull();
     m_colorBar->setViewRange(m_colorRangeFull);
     m_colorBar->updateColorMap();
@@ -858,13 +800,11 @@ void SliceViewer::setWorkspace(const Mantid::API::IMDWorkspace_sptr &ws) {
   // For showing the original coordinates
   ui.frmMouseInfo->setVisible(false);
   if (m_ws->hasOriginalWorkspace()) {
-    IMDWorkspace_sptr origWS =
-        std::dynamic_pointer_cast<IMDWorkspace>(m_ws->getOriginalWorkspace());
+    IMDWorkspace_sptr origWS = std::dynamic_pointer_cast<IMDWorkspace>(m_ws->getOriginalWorkspace());
     auto toOrig = m_ws->getTransformToOriginal();
     if (toOrig) {
       ui.frmMouseInfo->setVisible(true);
-      ui.lblOriginalWorkspace->setText(
-          QString::fromStdString("in '" + origWS->getName() + "'"));
+      ui.lblOriginalWorkspace->setText(QString::fromStdString("in '" + origWS->getName() + "'"));
     }
   }
 
@@ -876,8 +816,7 @@ void SliceViewer::setWorkspace(const Mantid::API::IMDWorkspace_sptr &ws) {
   m_canSwitchScales = true;
 
   holdDisplayUpdates.value() = false;
-  this->updateDisplay(
-      !m_firstWorkspaceOpen /*Force resetting the axes, the first time*/);
+  this->updateDisplay(!m_firstWorkspaceOpen /*Force resetting the axes, the first time*/);
 
   // Don't reset axes next time
   m_firstWorkspaceOpen = true;
@@ -893,14 +832,13 @@ void SliceViewer::setWorkspace(const Mantid::API::IMDWorkspace_sptr &ws) {
  *MatrixWorkspace
  */
 void SliceViewer::setWorkspace(const QString &wsName) {
-  IMDWorkspace_sptr ws = std::dynamic_pointer_cast<IMDWorkspace>(
-      AnalysisDataService::Instance().retrieve(wsName.toStdString()));
+  IMDWorkspace_sptr ws =
+      std::dynamic_pointer_cast<IMDWorkspace>(AnalysisDataService::Instance().retrieve(wsName.toStdString()));
   if (!ws)
     throw std::runtime_error("SliceViewer can only view MDWorkspaces.");
   if (std::dynamic_pointer_cast<MatrixWorkspace>(ws))
-    throw std::runtime_error(
-        "SliceViewer cannot view MatrixWorkspaces. "
-        "Please select a MDEventWorkspace or a MDHistoWorkspace.");
+    throw std::runtime_error("SliceViewer cannot view MatrixWorkspaces. "
+                             "Please select a MDEventWorkspace or a MDHistoWorkspace.");
   this->setWorkspace(ws);
 }
 
@@ -1001,17 +939,11 @@ void SliceViewer::setTransparentZeros(bool transparent) {
 
 //------------------------------------------------------------------------------
 /// Slot called when changing the normalization menu
-void SliceViewer::changeNormalizationNone() {
-  this->setNormalization(Mantid::API::NoNormalization, true);
-}
+void SliceViewer::changeNormalizationNone() { this->setNormalization(Mantid::API::NoNormalization, true); }
 
-void SliceViewer::changeNormalizationVolume() {
-  this->setNormalization(Mantid::API::VolumeNormalization, true);
-}
+void SliceViewer::changeNormalizationVolume() { this->setNormalization(Mantid::API::VolumeNormalization, true); }
 
-void SliceViewer::changeNormalizationNumEvents() {
-  this->setNormalization(Mantid::API::NumEventsNormalization, true);
-}
+void SliceViewer::changeNormalizationNumEvents() { this->setNormalization(Mantid::API::NumEventsNormalization, true); }
 
 /**
  * @brief Slot to handle change in normalization kicked-off from the combo box.
@@ -1034,8 +966,7 @@ void SliceViewer::onNormalizationChanged(const QString &normalizationKey) {
  * @param update :: update the displayed image. If false, just sets it and shows
  *the checkboxes.
  */
-void SliceViewer::setNormalization(Mantid::API::MDNormalization norm,
-                                   bool update) {
+void SliceViewer::setNormalization(Mantid::API::MDNormalization norm, bool update) {
 
   {
     SignalBlocker normalizeNone(m_actionNormalizeNone);
@@ -1043,10 +974,8 @@ void SliceViewer::setNormalization(Mantid::API::MDNormalization norm,
     SignalBlocker normalizeNumEvents(m_actionNormalizeNumEvents);
 
     m_actionNormalizeNone->setChecked(norm == Mantid::API::NoNormalization);
-    m_actionNormalizeVolume->setChecked(norm ==
-                                        Mantid::API::VolumeNormalization);
-    m_actionNormalizeNumEvents->setChecked(norm ==
-                                           Mantid::API::NumEventsNormalization);
+    m_actionNormalizeVolume->setChecked(norm == Mantid::API::VolumeNormalization);
+    m_actionNormalizeNumEvents->setChecked(norm == Mantid::API::NumEventsNormalization);
   }
 
   // Sync the normalization combobox.
@@ -1068,9 +997,7 @@ void SliceViewer::setNormalization(Mantid::API::MDNormalization norm,
 
 //------------------------------------------------------------------------------
 /** @return the current normalization */
-Mantid::API::MDNormalization SliceViewer::getNormalization() const {
-  return m_data->getNormalization();
-}
+Mantid::API::MDNormalization SliceViewer::getNormalization() const { return m_data->getNormalization(); }
 
 //------------------------------------------------------------------------------
 /** Set the thickness (above and below the plane) for dynamic rebinning.
@@ -1082,11 +1009,9 @@ Mantid::API::MDNormalization SliceViewer::getNormalization() const {
  */
 void SliceViewer::setRebinThickness(int dim, double thickness) {
   if (dim < 0 || dim >= static_cast<int>(m_dimWidgets.size()))
-    throw std::runtime_error(
-        "SliceViewer::setRebinThickness(): Invalid dimension index");
+    throw std::runtime_error("SliceViewer::setRebinThickness(): Invalid dimension index");
   if (thickness <= 0.0)
-    throw std::runtime_error(
-        "SliceViewer::setRebinThickness(): Thickness must be > 0.0");
+    throw std::runtime_error("SliceViewer::setRebinThickness(): Thickness must be > 0.0");
   m_dimWidgets[dim]->setThickness(thickness);
 }
 
@@ -1099,8 +1024,7 @@ void SliceViewer::setRebinThickness(int dim, double thickness) {
  */
 void SliceViewer::setRebinNumBins(int xBins, int yBins) {
   if (xBins < 1 || yBins < 1)
-    throw std::runtime_error(
-        "SliceViewer::setRebinNumBins(): Number of bins must be >= 1");
+    throw std::runtime_error("SliceViewer::setRebinNumBins(): Number of bins must be >= 1");
   m_dimWidgets[m_dimX]->setNumBins(xBins);
   m_dimWidgets[m_dimY]->setNumBins(yBins);
 }
@@ -1132,21 +1056,18 @@ void SliceViewer::LineMode_toggled(bool checked) {
   m_lineOverlay->setShown(checked);
 
   if (checked) {
-    setIconFromString(ui.btnDoLine, g_iconCutOn, QIcon::Mode::Normal,
-                      QIcon::State::Off);
+    setIconFromString(ui.btnDoLine, g_iconCutOn, QIcon::Mode::Normal, QIcon::State::Off);
     QString text;
     if (m_lineOverlay->getCreationMode())
       text = "Click and drag to draw an cut line.\n"
              "Hold Shift key to limit to 45 degree angles.";
     // Show a tooltip near the button
-    QToolTip::showText(ui.btnDoLine->mapToGlobal(ui.btnDoLine->pos()), text,
-                       this);
+    QToolTip::showText(ui.btnDoLine->mapToGlobal(ui.btnDoLine->pos()), text, this);
   }
   if (!checked) {
     // clear the old line
     clearLine();
-    setIconFromString(ui.btnDoLine, g_iconCut, QIcon::Mode::Normal,
-                      QIcon::State::On);
+    setIconFromString(ui.btnDoLine, g_iconCut, QIcon::Mode::Normal, QIcon::State::On);
   }
   emit showLineViewer(checked);
 }
@@ -1179,14 +1100,12 @@ void SliceViewer::SnapToGrid_toggled(bool checked) {
       m_lineOverlay->setSnapEnabled(true);
       m_lineOverlay->setSnapX(dlg->getSnapX());
       m_lineOverlay->setSnapY(dlg->getSnapY());
-      setIconFromString(ui.btnSnapToGrid, g_iconGridOn, QIcon::Normal,
-                        QIcon::On);
+      setIconFromString(ui.btnSnapToGrid, g_iconGridOn, QIcon::Normal, QIcon::On);
     } else {
       // Uncheck - the user clicked cancel
       ui.btnSnapToGrid->setChecked(false);
       m_lineOverlay->setSnapEnabled(false);
-      setIconFromString(ui.btnSnapToGrid, g_iconGrid, QIcon::Normal,
-                        QIcon::Off);
+      setIconFromString(ui.btnSnapToGrid, g_iconGrid, QIcon::Normal, QIcon::Off);
     }
   } else {
     m_lineOverlay->setSnapEnabled(false);
@@ -1247,21 +1166,18 @@ void SliceViewer::zoomRectSlot(const QwtDoubleRect &rect) {
 /// Slot for opening help page
 void SliceViewer::helpSliceViewer() {
   QString helpPage = "MantidPlot:_SliceViewer";
-  MantidDesktopServices::openUrl(
-      QUrl(QString("http://www.mantidproject.org/") + helpPage));
+  MantidDesktopServices::openUrl(QUrl(QString("http://www.mantidproject.org/") + helpPage));
 }
 
 /// Slot for opening help page
 void SliceViewer::helpLineViewer() {
   QString helpPage = "MantidPlot:_LineViewer";
-  MantidDesktopServices::openUrl(
-      QUrl(QString("http://www.mantidproject.org/") + helpPage));
+  MantidDesktopServices::openUrl(QUrl(QString("http://www.mantidproject.org/") + helpPage));
 }
 
 void SliceViewer::helpPeaksViewer() {
   QString helpPage = "PeaksViewer";
-  MantidDesktopServices::openUrl(
-      QUrl(QString("http://www.mantidproject.org/") + helpPage));
+  MantidDesktopServices::openUrl(QUrl(QString("http://www.mantidproject.org/") + helpPage));
 }
 
 //------------------------------------------------------------------------------
@@ -1292,12 +1208,10 @@ void SliceViewer::setXYLimitsDialog() {
   dlg->setYDim(m_Y);
   QwtDoubleInterval xint = this->getXLimits();
   QwtDoubleInterval yint = this->getYLimits();
-  dlg->setLimits(xint.minValue(), xint.maxValue(), yint.minValue(),
-                 yint.maxValue());
+  dlg->setLimits(xint.minValue(), xint.maxValue(), yint.minValue(), yint.maxValue());
   // Show the dialog
   if (dlg->exec() == QDialog::Accepted) {
-    this->setXYLimits(dlg->getXMin(), dlg->getXMax(), dlg->getYMin(),
-                      dlg->getYMax());
+    this->setXYLimits(dlg->getXMin(), dlg->getXMax(), dlg->getYMin(), dlg->getYMax());
   }
 }
 
@@ -1337,8 +1251,7 @@ QPixmap SliceViewer::getImage() {
   this->m_colorBar->setRenderMode(true);
   auto previousStyle = ui.frmPlot->styleSheet();
   ui.frmPlot->setStyleSheet("background-color: white;");
-  this->m_colorBar->setCheckBoxMode(
-      MantidWidgets::ColorBarWidget::ADD_AUTOSCALE_NONE);
+  this->m_colorBar->setCheckBoxMode(MantidWidgets::ColorBarWidget::ADD_AUTOSCALE_NONE);
 
   // Grab it
   QCoreApplication::processEvents();
@@ -1349,8 +1262,7 @@ QPixmap SliceViewer::getImage() {
   this->m_lineOverlay->setShowHandles(true);
   this->m_colorBar->setRenderMode(false);
   this->setFastRender(oldFast);
-  this->m_colorBar->setCheckBoxMode(
-      MantidWidgets::ColorBarWidget::ADD_AUTOSCALE_BOTH);
+  this->m_colorBar->setCheckBoxMode(MantidWidgets::ColorBarWidget::ADD_AUTOSCALE_BOTH);
   ui.frmPlot->setStyleSheet(previousStyle);
   return pix;
 }
@@ -1391,10 +1303,9 @@ QString SliceViewer::ensurePngExtension(const QString &fname) const {
 void SliceViewer::saveImage(const QString &filename) {
   QString fileselection;
   if (filename.isEmpty()) {
-    fileselection = QFileDialog::getSaveFileName(
-        this, tr("Pick a file to which to save the image"),
-        QFileInfo(m_lastSavedFile).absoluteFilePath(),
-        tr("PNG files(*.png *.png)"));
+    fileselection =
+        QFileDialog::getSaveFileName(this, tr("Pick a file to which to save the image"),
+                                     QFileInfo(m_lastSavedFile).absoluteFilePath(), tr("PNG files(*.png *.png)"));
     // User cancelled if filename is still empty
     if (fileselection.isEmpty())
       return;
@@ -1455,8 +1366,7 @@ void SliceViewer::setXYCenter(double x, double y) {
   double halfWidthX = xint.width() * 0.5;
   double halfWidthY = yint.width() * 0.5;
   // Perform the move
-  this->setXYLimits(x - halfWidthX, x + halfWidthX, y - halfWidthY,
-                    y + halfWidthY);
+  this->setXYLimits(x - halfWidthX, x + halfWidthX, y - halfWidthY, y + halfWidthY);
 }
 
 //------------------------------------------------------------------------------
@@ -1487,8 +1397,7 @@ void SliceViewer::findRangeFull() {
   ReadLock lock(*workspace_used);
 
   // Iterate through the entire workspace
-  m_colorRangeFull =
-      API::SignalRange(*workspace_used, this->getNormalization()).interval();
+  m_colorRangeFull = API::SignalRange(*workspace_used, this->getNormalization()).interval();
   double minR = m_colorRangeFull.minValue();
   if (minR <= 0 && this->getColorScaleType() == 1) {
     double maxR = m_colorRangeFull.maxValue();
@@ -1555,9 +1464,7 @@ void SliceViewer::findRangeSlice() {
     MDBoxImplicitFunction *function = new MDBoxImplicitFunction(min, max);
 
     // Iterate through the slice
-    m_colorRangeSlice =
-        API::SignalRange(*workspace_used, *function, this->getNormalization())
-            .interval();
+    m_colorRangeSlice = API::SignalRange(*workspace_used, *function, this->getNormalization()).interval();
     delete function;
 
     // In case of failure, use the full range instead
@@ -1594,8 +1501,7 @@ void SliceViewer::showInfoAt(double x, double y) {
     m_coordinateTransform->transform(coords, m_dimX, m_dimY, missingHKLDim);
   }
 
-  signal_t signal =
-      m_ws->getSignalWithMaskAtVMD(coords, this->m_data->getNormalization());
+  signal_t signal = m_ws->getSignalWithMaskAtVMD(coords, this->m_data->getNormalization());
 
   ui.lblInfoX->setText(QString::number(coords[m_dimX], 'g', 4));
   ui.lblInfoY->setText(QString::number(coords[m_dimY], 'g', 4));
@@ -1603,8 +1509,7 @@ void SliceViewer::showInfoAt(double x, double y) {
 
   // Now show the coords in the original workspace
   if (m_ws->hasOriginalWorkspace()) {
-    IMDWorkspace_sptr origWS =
-        std::dynamic_pointer_cast<IMDWorkspace>(m_ws->getOriginalWorkspace());
+    IMDWorkspace_sptr origWS = std::dynamic_pointer_cast<IMDWorkspace>(m_ws->getOriginalWorkspace());
     auto toOrig = m_ws->getTransformToOriginal();
     if (toOrig) {
       // Transform the coordinates
@@ -1678,9 +1583,8 @@ void SliceViewer::updateDisplay(bool resetAxes) {
   if (m_overlayWS) {
     bool overlayInSlice = true;
     for (size_t d = 0; d < m_overlayWS->getNumDims(); d++) {
-      if ((d != m_dimX && d != m_dimY) &&
-          (m_slicePoint[d] < m_overlayWS->getDimension(d)->getMinimum() ||
-           m_slicePoint[d] >= m_overlayWS->getDimension(d)->getMaximum()))
+      if ((d != m_dimX && d != m_dimY) && (m_slicePoint[d] < m_overlayWS->getDimension(d)->getMinimum() ||
+                                           m_slicePoint[d] >= m_overlayWS->getDimension(d)->getMaximum()))
         overlayInSlice = false;
     }
     m_overlayWSOutline->setShown(overlayInSlice);
@@ -1746,9 +1650,7 @@ void SliceViewer::checkForHKLDimension() {
   if (API::requiresSkewMatrix(*m_ws)) {
     m_coordinateTransform->checkDimensionsForHKL(*m_ws, m_dimX, m_dimY);
     auto isHKL = API::isHKLDimensions(*m_ws, m_dimX, m_dimY);
-    auto isNonOrthogonalQWTRasterData =
-        dynamic_cast<API::QwtRasterDataMDNonOrthogonal *>(m_data.get()) !=
-        nullptr;
+    auto isNonOrthogonalQWTRasterData = dynamic_cast<API::QwtRasterDataMDNonOrthogonal *>(m_data.get()) != nullptr;
     // 4 cases to consider
     // isHKL true and is isNonOrthgonalQWT true -> do nothing
     // isHKL false and isNonOrthgonalQWT false -> do nothing
@@ -1801,16 +1703,11 @@ int SliceViewer::getDimY() const { return int(m_dimY); }
  */
 void SliceViewer::setXYDim(int indexX, int indexY) {
   if (indexX >= int(m_dimWidgets.size()) || indexX < 0)
-    throw std::invalid_argument("There is no dimension # " +
-                                Strings::toString(indexX) +
-                                " in the workspace.");
+    throw std::invalid_argument("There is no dimension # " + Strings::toString(indexX) + " in the workspace.");
   if (indexY >= int(m_dimWidgets.size()) || indexY < 0)
-    throw std::invalid_argument("There is no dimension # " +
-                                Strings::toString(indexY) +
-                                " in the workspace.");
+    throw std::invalid_argument("There is no dimension # " + Strings::toString(indexY) + " in the workspace.");
   if (indexX == indexY)
-    throw std::invalid_argument(
-        "X dimension must be different than the Y dimension index.");
+    throw std::invalid_argument("X dimension must be different than the Y dimension index.");
 
   // Set the X and Y widgets
   m_dimWidgets[indexX]->setShownDim(0);
@@ -1855,8 +1752,7 @@ void SliceViewer::setXYDim(const QString &dimX, const QString &dimY) {
  */
 void SliceViewer::setSlicePoint(int dim, double value) {
   if (dim >= int(m_dimWidgets.size()) || dim < 0)
-    throw std::invalid_argument("There is no dimension # " +
-                                Strings::toString(dim) + " in the workspace.");
+    throw std::invalid_argument("There is no dimension # " + Strings::toString(dim) + " in the workspace.");
   m_dimWidgets[dim]->setSlicePoint(value);
 }
 
@@ -1870,8 +1766,7 @@ void SliceViewer::setSlicePoint(int dim, double value) {
  */
 double SliceViewer::getSlicePoint(int dim) const {
   if (dim >= int(m_dimWidgets.size()) || dim < 0)
-    throw std::invalid_argument("There is no dimension # " +
-                                Strings::toString(dim) + " in the workspace.");
+    throw std::invalid_argument("There is no dimension # " + Strings::toString(dim) + " in the workspace.");
   return m_slicePoint[dim];
 }
 
@@ -1923,8 +1818,7 @@ void SliceViewer::setColorScale(double min, double max, bool log) {
   if (max <= min)
     throw std::invalid_argument("Color scale maximum must be > minimum.");
   if (log && ((min <= 0) || (max <= 0)))
-    throw std::invalid_argument(
-        "For logarithmic color scales, both minimum and maximum must be > 0.");
+    throw std::invalid_argument("For logarithmic color scales, both minimum and maximum must be > 0.");
   m_colorBar->setViewRange(min, max);
   m_colorBar->setScale(log ? 1 : 0);
   this->colorRangeChanged();
@@ -1943,8 +1837,7 @@ void SliceViewer::setColorScale(double min, double max, int type) {
   if (max <= min)
     throw std::invalid_argument("Color scale maximum must be > minimum.");
   if (type == 1 && ((min <= 0) || (max <= 0)))
-    throw std::invalid_argument(
-        "For logarithmic color scales, both minimum and maximum must be > 0.");
+    throw std::invalid_argument("For logarithmic color scales, both minimum and maximum must be > 0.");
   m_colorBar->setViewRange(min, max);
   m_colorBar->setScale(type);
   this->colorRangeChanged();
@@ -2006,20 +1899,15 @@ void SliceViewer::setColorScaleMax(double max) {
  *        with a log color scale
  */
 void SliceViewer::setColorScaleLog(bool log) {
-  this->setColorScale(this->getColorScaleMin(), this->getColorScaleMax(),
-                      (int)log);
+  this->setColorScale(this->getColorScaleMin(), this->getColorScaleMax(), (int)log);
 }
 
 //------------------------------------------------------------------------------
 /** @return the value that corresponds to the lowest color on the color map */
-double SliceViewer::getColorScaleMin() const {
-  return m_colorBar->getMinimum();
-}
+double SliceViewer::getColorScaleMin() const { return m_colorBar->getMinimum(); }
 
 /** @return the value that corresponds to the highest color on the color map */
-double SliceViewer::getColorScaleMax() const {
-  return m_colorBar->getMaximum();
-}
+double SliceViewer::getColorScaleMax() const { return m_colorBar->getMaximum(); }
 
 /** @return True if the color scale is in logarithmic mode */
 bool SliceViewer::getColorScaleLog() const { return m_colorBar->getLog(); }
@@ -2065,8 +1953,7 @@ bool SliceViewer::getFastRender() const { return m_fastRender; }
  * @param ybottom :: y-value on the bottom of the graph
  * @param ytop    :: y-value on the top of the graph
  */
-void SliceViewer::setXYLimits(double xleft, double xright, double ybottom,
-                              double ytop) {
+void SliceViewer::setXYLimits(double xleft, double xright, double ybottom, double ytop) {
   // Set the limits in X and Y
   m_plot->setAxisScale(m_spect->xAxis(), xleft, xright);
   m_plot->setAxisScale(m_spect->yAxis(), ybottom, ytop);
@@ -2077,14 +1964,10 @@ void SliceViewer::setXYLimits(double xleft, double xright, double ybottom,
 
 //------------------------------------------------------------------------------
 /** @return Returns the [left, right] limits of the view in the X axis. */
-QwtDoubleInterval SliceViewer::getXLimits() const {
-  return m_plot->axisScaleDiv(m_spect->xAxis())->interval();
-}
+QwtDoubleInterval SliceViewer::getXLimits() const { return m_plot->axisScaleDiv(m_spect->xAxis())->interval(); }
 
 /** @return Returns the [bottom, top] limits of the view in the Y axis. */
-QwtDoubleInterval SliceViewer::getYLimits() const {
-  return m_plot->axisScaleDiv(m_spect->yAxis())->interval();
-}
+QwtDoubleInterval SliceViewer::getYLimits() const { return m_plot->axisScaleDiv(m_spect->yAxis())->interval(); }
 
 //------------------------------------------------------------------------------
 /** Opens a workspace and sets the view and slice points
@@ -2100,30 +1983,24 @@ void SliceViewer::openFromXML(const QString &xml) {
   try {
     pDoc = pParser.parseString(xml.toStdString());
   } catch (Poco::Exception &exc) {
-    throw std::runtime_error(
-        "SliceViewer::openFromXML(): Unable to parse XML. " +
-        std::string(exc.what()));
+    throw std::runtime_error("SliceViewer::openFromXML(): Unable to parse XML. " + std::string(exc.what()));
   } catch (...) {
-    throw std::runtime_error(
-        "SliceViewer::openFromXML(): Unspecified error parsing XML. ");
+    throw std::runtime_error("SliceViewer::openFromXML(): Unspecified error parsing XML. ");
   }
 
   // Get pointer to root element
   Poco::XML::Element *pRootElem = pDoc->documentElement();
   if (!pRootElem->hasChildNodes())
-    throw std::runtime_error(
-        "SliceViewer::openFromXML(): No root element in XML string.");
+    throw std::runtime_error("SliceViewer::openFromXML(): No root element in XML string.");
 
   // ------- Find the workspace ------------
   Poco::XML::Element *cur = pRootElem->getChildElement("MDWorkspaceName");
   if (!cur)
-    throw std::runtime_error(
-        "SliceViewer::openFromXML(): No MDWorkspaceName element.");
+    throw std::runtime_error("SliceViewer::openFromXML(): No MDWorkspaceName element.");
   std::string wsName = cur->innerText();
 
   if (wsName.empty())
-    throw std::runtime_error(
-        "SliceViewer::openFromXML(): Empty MDWorkspaceName found!");
+    throw std::runtime_error("SliceViewer::openFromXML(): Empty MDWorkspaceName found!");
 
   // Look for the rebinned workspace with a custom name:
   std::string histoName = wsName + "_visual_md";
@@ -2136,8 +2013,7 @@ void SliceViewer::openFromXML(const QString &xml) {
   if (!m_ws)
     throw std::runtime_error("SliceViewer::openFromXML(): Workspace no found!");
   if ((m_ws->getNumDims() < 3) || (m_ws->getNumDims() > 4))
-    throw std::runtime_error(
-        "SliceViewer::openFromXML(): Workspace should have 3 or 4 dimensions.");
+    throw std::runtime_error("SliceViewer::openFromXML(): Workspace should have 3 or 4 dimensions.");
 
   // Hard update to make sure axis reorientations are respected.
   this->updateDisplay(true);
@@ -2145,8 +2021,7 @@ void SliceViewer::openFromXML(const QString &xml) {
   // ------- Read which are the X/Y dimensions ------------
   Poco::XML::Element *dims = pRootElem->getChildElement("DimensionSet");
   if (!dims)
-    throw std::runtime_error(
-        "SliceViewer::openFromXML(): No DimensionSet element.");
+    throw std::runtime_error("SliceViewer::openFromXML(): No DimensionSet element.");
 
   // Map: The index = dimension in ParaView; Value = dimension of the workspace.
   int dimMap[4];
@@ -2160,13 +2035,10 @@ void SliceViewer::openFromXML(const QString &xml) {
     dimLetter[0] = dimChars[ind];
     Poco::XML::Element *dim = dims->getChildElement(dimLetter + "Dimension");
     if (!dim)
-      throw std::runtime_error("SliceViewer::openFromXML(): No " + dimLetter +
-                               "Dimension element.");
+      throw std::runtime_error("SliceViewer::openFromXML(): No " + dimLetter + "Dimension element.");
     cur = dim->getChildElement("RefDimensionId");
     if (!cur)
-      throw std::runtime_error(
-          "SliceViewer::openFromXML(): No RefDimensionId in " + dimLetter +
-          "Dimension element.");
+      throw std::runtime_error("SliceViewer::openFromXML(): No RefDimensionId in " + dimLetter + "Dimension element.");
     std::string dimName = cur->innerText();
     if (!dimName.empty())
       dimMap[ind] = int(m_ws->getDimensionIndexByName(dimName));
@@ -2177,9 +2049,8 @@ void SliceViewer::openFromXML(const QString &xml) {
       cur = dim->getChildElement("Value");
       if (cur) {
         if (!Kernel::Strings::convert(cur->innerText(), TimeValue))
-          throw std::runtime_error(
-              "SliceViewer::openFromXML(): Could not cast Value '" +
-              cur->innerText() + "' to double in TDimension element.");
+          throw std::runtime_error("SliceViewer::openFromXML(): Could not cast Value '" + cur->innerText() +
+                                   "' to double in TDimension element.");
       }
     }
   }
@@ -2189,12 +2060,10 @@ void SliceViewer::openFromXML(const QString &xml) {
   // ------- Read the plane function ------------
   Poco::XML::Element *func = pRootElem->getChildElement("Function");
   if (!func)
-    throw std::runtime_error(
-        "SliceViewer::openFromXML(): No Function element.");
+    throw std::runtime_error("SliceViewer::openFromXML(): No Function element.");
   Poco::XML::Element *paramlist = func->getChildElement("ParameterList");
   if (!paramlist)
-    throw std::runtime_error(
-        "SliceViewer::openFromXML(): No ParameterList element.");
+    throw std::runtime_error("SliceViewer::openFromXML(): No ParameterList element.");
 
   Poco::AutoPtr<NodeList> params = paramlist->getElementsByTagName("Parameter");
   Poco::AutoPtr<NodeList> paramvals;
@@ -2205,15 +2074,13 @@ void SliceViewer::openFromXML(const QString &xml) {
   param = params->item(0);
   paramvals = param->childNodes();
   if (!paramvals || paramvals->length() < 2)
-    throw std::runtime_error(
-        "SliceViewer::openFromXML(): Parameter has too few children");
+    throw std::runtime_error("SliceViewer::openFromXML(): Parameter has too few children");
   std::string normalStr = paramvals->item(1)->innerText();
 
   param = params->item(1);
   paramvals = param->childNodes();
   if (!paramvals || paramvals->length() < 2)
-    throw std::runtime_error(
-        "SliceViewer::openFromXML(): Parameter has too few children");
+    throw std::runtime_error("SliceViewer::openFromXML(): Parameter has too few children");
   std::string originStr = paramvals->item(1)->innerText();
 
   // ------- Apply the X/Y dimensions ------------
@@ -2327,8 +2194,7 @@ void SliceViewer::rebinParamsChanged() {
     // Set the BasisVector property...
     VMD basis(m_ws->getNumDims());
     basis[d] = 1.0;
-    std::string prop = dim->getName() + "," + dim->getUnits().ascii() + "," +
-                       basis.toString(",");
+    std::string prop = dim->getName() + "," + dim->getUnits().ascii() + "," + basis.toString(",");
     alg->setPropertyValue("BasisVector" + Strings::toString(d), prop);
   }
 
@@ -2359,8 +2225,7 @@ void SliceViewer::dynamicRebinComplete(bool error) {
   m_overlayWS.reset();
   if (!error) {
     if (AnalysisDataService::Instance().doesExist(m_overlayWSName))
-      m_overlayWS = AnalysisDataService::Instance().retrieveWS<IMDWorkspace>(
-          m_overlayWSName);
+      m_overlayWS = AnalysisDataService::Instance().retrieveWS<IMDWorkspace>(m_overlayWSName);
 
     // Set the normalization from the rebinned workspace.
     this->setNormalization(m_overlayWS->displayNormalization());
@@ -2417,9 +2282,7 @@ void SliceViewer::autoRebin_toggled(bool checked) {
 /**
 @return True only when Auto-Rebinning should be considered.
 */
-bool SliceViewer::isAutoRebinSet() const {
-  return ui.btnAutoRebin->isEnabled() && ui.btnAutoRebin->isChecked();
-}
+bool SliceViewer::isAutoRebinSet() const { return ui.btnAutoRebin->isEnabled() && ui.btnAutoRebin->isChecked(); }
 
 /**
 Auto rebin the workspace according the the current-view + rebin parameters if
@@ -2440,8 +2303,7 @@ void SliceViewer::setNonOrthogonalbtn() {
     m_oldDimNonOrthogonal = true;
   }
 
-  if (canShowSkewedWS && m_oldDimNonOrthogonal &&
-      !ui.btnNonOrthogonalToggle->isChecked()) {
+  if (canShowSkewedWS && m_oldDimNonOrthogonal && !ui.btnNonOrthogonalToggle->isChecked()) {
     ui.btnNonOrthogonalToggle->toggle();
     m_oldDimNonOrthogonal = false;
   }
@@ -2450,8 +2312,7 @@ void SliceViewer::setNonOrthogonalbtn() {
   if (canShowSkewedWS) {
     ui.btnNonOrthogonalToggle->setToolTip(QString("NonOrthogonal axes view"));
   } else {
-    ui.btnNonOrthogonalToggle->setToolTip(
-        QString("NonOrthogonal view requires HKL axes"));
+    ui.btnNonOrthogonalToggle->setToolTip(QString("NonOrthogonal view requires HKL axes"));
   }
 
   m_peaksPresenter->setNonOrthogonal(ui.btnNonOrthogonalToggle->isChecked());
@@ -2486,14 +2347,10 @@ void SliceViewer::disableOrthogonalAnalysisTools(bool checked) {
   // 1. Cut line feature
   // 2. Peak overlay feature
   if (checked) { // change tooltips to explain why buttons are disabled
-    ui.btnDoLine->setToolTip(
-        QString("Cut line is disabled in NonOrthogonal view"));
-    ui.btnSnapToGrid->setToolTip(
-        QString("Cut line is disabled in NonOrthogonal view"));
-    ui.btnClearLine->setToolTip(
-        QString("Cut line is disabled in NonOrthogonal view"));
-    ui.btnPeakOverlay->setToolTip(
-        QString("Peak overlay is disabled in NonOrthogonal view"));
+    ui.btnDoLine->setToolTip(QString("Cut line is disabled in NonOrthogonal view"));
+    ui.btnSnapToGrid->setToolTip(QString("Cut line is disabled in NonOrthogonal view"));
+    ui.btnClearLine->setToolTip(QString("Cut line is disabled in NonOrthogonal view"));
+    ui.btnPeakOverlay->setToolTip(QString("Peak overlay is disabled in NonOrthogonal view"));
 
   } else {
     ui.btnDoLine->setToolTip(QString("Draw a 1D cut line"));
@@ -2551,8 +2408,7 @@ void SliceViewer::disablePeakOverlays() {
   emit showPeaksViewer(false);
   m_menuPeaks->setEnabled(false);
 
-  setIconFromString(ui.btnPeakOverlay, g_iconPeakList, QIcon::Normal,
-                    QIcon::Off);
+  setIconFromString(ui.btnPeakOverlay, g_iconPeakList, QIcon::Normal, QIcon::Off);
   ui.btnPeakOverlay->setChecked(false);
 }
 
@@ -2560,14 +2416,12 @@ void SliceViewer::disablePeakOverlays() {
  * Show a collection of peaks workspaces as overplots
  * @param list : List of peak workspace names to show.
  */
-ProxyCompositePeaksPresenter *
-SliceViewer::setPeaksWorkspaces(const QStringList &list) {
+ProxyCompositePeaksPresenter *SliceViewer::setPeaksWorkspaces(const QStringList &list) {
 
   if (m_ws->getNumDims() < 2) {
 
-    this->m_logger.information(
-        "SliceViewer Cannot overplot a peaks workspace unless the "
-        "base workspace has two or more dimensions");
+    this->m_logger.information("SliceViewer Cannot overplot a peaks workspace unless the "
+                               "base workspace has two or more dimensions");
 
     disablePeakOverlays();
     return m_proxyPeaksPresenter.get();
@@ -2576,10 +2430,8 @@ SliceViewer::setPeaksWorkspaces(const QStringList &list) {
   PeakTransformFactory_sptr transformFactory;
   try {
     // Fetch the correct Peak Overlay Transform Factory;
-    const std::string xDim =
-        m_plot->axisTitle(QwtPlot::xBottom).text().toStdString();
-    const std::string yDim =
-        m_plot->axisTitle(QwtPlot::yLeft).text().toStdString();
+    const std::string xDim = m_plot->axisTitle(QwtPlot::xBottom).text().toStdString();
+    const std::string yDim = m_plot->axisTitle(QwtPlot::yLeft).text().toStdString();
 
     transformFactory = m_peakTransformSelector.makeChoice(xDim, yDim);
   } catch (std::invalid_argument &ex) {
@@ -2595,20 +2447,16 @@ SliceViewer::setPeaksWorkspaces(const QStringList &list) {
     if (!AnalysisDataService::Instance().doesExist(workspaceName)) {
       throw std::invalid_argument(workspaceName + " Does not exist");
     }
-    IPeaksWorkspace_sptr peaksWS =
-        AnalysisDataService::Instance().retrieveWS<IPeaksWorkspace>(
-            workspaceName);
+    IPeaksWorkspace_sptr peaksWS = AnalysisDataService::Instance().retrieveWS<IPeaksWorkspace>(workspaceName);
     const size_t numberOfChildPresenters = m_peaksPresenter->size();
 
     // Peak View factory, displays peaks on a peak by peak basis
-    auto peakViewFactory = std::make_shared<PeakViewFactory>(
-        m_ws, peaksWS, m_plot, m_plot->canvas(), m_spect->xAxis(),
-        m_spect->yAxis(), numberOfChildPresenters);
+    auto peakViewFactory = std::make_shared<PeakViewFactory>(m_ws, peaksWS, m_plot, m_plot->canvas(), m_spect->xAxis(),
+                                                             m_spect->yAxis(), numberOfChildPresenters);
 
     try {
       m_peaksPresenter->addPeaksPresenter(
-          std::make_shared<ConcretePeaksPresenter>(peakViewFactory, peaksWS,
-                                                   m_ws, transformFactory));
+          std::make_shared<ConcretePeaksPresenter>(peakViewFactory, peaksWS, m_ws, transformFactory));
     } catch (std::logic_error &ex) {
       // Incompatible PeaksWorkspace.
       disablePeakOverlays();
@@ -2620,8 +2468,7 @@ SliceViewer::setPeaksWorkspaces(const QStringList &list) {
   emit showPeaksViewer(true);
   m_menuPeaks->setEnabled(true);
 
-  setIconFromString(ui.btnPeakOverlay, g_iconPeakList, QIcon::Normal,
-                    QIcon::Off);
+  setIconFromString(ui.btnPeakOverlay, g_iconPeakList, QIcon::Normal, QIcon::Off);
   ui.btnPeakOverlay->setChecked(true);
   return m_proxyPeaksPresenter.get();
 }
@@ -2633,8 +2480,7 @@ Allow user to choose a suitable input peaks workspace
 
 */
 void SliceViewer::peakOverlay_clicked() {
-  MantidQt::MantidWidgets::SelectWorkspacesDialog dlg(this, "PeaksWorkspace",
-                                                      "Remove All");
+  MantidQt::MantidWidgets::SelectWorkspacesDialog dlg(this, "PeaksWorkspace", "Remove All");
 
   int ret = dlg.exec();
   if (ret == QDialog::Accepted) {
@@ -2648,12 +2494,10 @@ void SliceViewer::peakOverlay_clicked() {
     disablePeakOverlays();
   }
   if (m_peaksPresenter->size() > 0) {
-    setIconFromString(ui.btnPeakOverlay, g_iconPeakListOn, QIcon::Normal,
-                      QIcon::On);
+    setIconFromString(ui.btnPeakOverlay, g_iconPeakListOn, QIcon::Normal, QIcon::On);
     ui.btnPeakOverlay->setChecked(true);
   } else {
-    setIconFromString(ui.btnPeakOverlay, g_iconPeakList, QIcon::Normal,
-                      QIcon::Off);
+    setIconFromString(ui.btnPeakOverlay, g_iconPeakList, QIcon::Normal, QIcon::Off);
     ui.btnPeakOverlay->setChecked(false);
   }
   setNonOrthogonalbtn(); // currently disabling nonOrthogonal when peaks view on
@@ -2670,10 +2514,9 @@ void SliceViewer::updatePeakOverlaySliderWidget() {
         m_peaksSliderWidget = widget; // Cache the widget being used for this.
         auto xInterval = getXLimits();
         auto yInterval = getYLimits();
-        PeakBoundingBox viewableRegion(
-            Left(xInterval.minValue()), Right(xInterval.maxValue()),
-            Top(yInterval.maxValue()), Bottom(yInterval.minValue()),
-            SlicePoint(m_peaksSliderWidget->getSlicePoint()));
+        PeakBoundingBox viewableRegion(Left(xInterval.minValue()), Right(xInterval.maxValue()),
+                                       Top(yInterval.maxValue()), Bottom(yInterval.minValue()),
+                                       SlicePoint(m_peaksSliderWidget->getSlicePoint()));
 
         updatePeaksOverlay(); // Ensure that the presenter is up-to-date with
                               // the change
@@ -2690,10 +2533,8 @@ void SliceViewer::updatePeaksOverlay() {
   if (m_peaksSliderWidget != nullptr) {
     auto xInterval = getXLimits();
     auto yInterval = getYLimits();
-    PeakBoundingBox viewableRegion(
-        Left(xInterval.minValue()), Right(xInterval.maxValue()),
-        Top(yInterval.maxValue()), Bottom(yInterval.minValue()),
-        SlicePoint(m_peaksSliderWidget->getSlicePoint()));
+    PeakBoundingBox viewableRegion(Left(xInterval.minValue()), Right(xInterval.maxValue()), Top(yInterval.maxValue()),
+                                   Bottom(yInterval.minValue()), SlicePoint(m_peaksSliderWidget->getSlicePoint()));
     m_peaksPresenter->updateWithSlicePoint(viewableRegion);
   }
 }
@@ -2710,12 +2551,9 @@ transform (H, K, L) etc.
 void SliceViewer::enablePeakOverlaysIfAppropriate() {
   bool enablePeakOverlays = false;
   if (m_ws->getNumDims() >= 2) {
-    const std::string xDim =
-        m_plot->axisTitle(QwtPlot::xBottom).text().toStdString();
-    const std::string yDim =
-        m_plot->axisTitle(QwtPlot::yLeft).text().toStdString();
-    enablePeakOverlays =
-        m_peakTransformSelector.hasFactoryForTransform(xDim, yDim);
+    const std::string xDim = m_plot->axisTitle(QwtPlot::xBottom).text().toStdString();
+    const std::string yDim = m_plot->axisTitle(QwtPlot::yLeft).text().toStdString();
+    enablePeakOverlays = m_peakTransformSelector.hasFactoryForTransform(xDim, yDim);
   }
 
   if (!enablePeakOverlays) {
@@ -2726,10 +2564,7 @@ void SliceViewer::enablePeakOverlaysIfAppropriate() {
 /**
 Get the peaks proxy presenter.
 */
-std::shared_ptr<ProxyCompositePeaksPresenter>
-SliceViewer::getPeaksPresenter() const {
-  return m_proxyPeaksPresenter;
-}
+std::shared_ptr<ProxyCompositePeaksPresenter> SliceViewer::getPeaksPresenter() const { return m_proxyPeaksPresenter; }
 
 /**
 Zoom in upon a rectangle
@@ -2737,13 +2572,10 @@ Zoom in upon a rectangle
 */
 void SliceViewer::zoomToRectangle(const PeakBoundingBox &boundingBox) {
   // Set the limits in X and Y
-  m_plot->setAxisScale(m_spect->xAxis(), boundingBox.left(),
-                       boundingBox.right());
-  m_plot->setAxisScale(m_spect->yAxis(), boundingBox.bottom(),
-                       boundingBox.top());
+  m_plot->setAxisScale(m_spect->xAxis(), boundingBox.left(), boundingBox.right());
+  m_plot->setAxisScale(m_spect->yAxis(), boundingBox.bottom(), boundingBox.top());
 
-  const QString dimensionName =
-      QString::fromStdString(m_peaksSliderWidget->getDimName());
+  const QString dimensionName = QString::fromStdString(m_peaksSliderWidget->getDimName());
   this->setSlicePoint(dimensionName, boundingBox.slicePoint());
 
   // Set the color scale range for the current slice if required
@@ -2763,9 +2595,8 @@ void SliceViewer::resetView() { this->resetZoom(); }
  */
 void SliceViewer::detach() { this->disablePeakOverlays(); }
 
-void SliceViewer::peakWorkspaceChanged(
-    const std::string &wsName,
-    std::shared_ptr<Mantid::API::IPeaksWorkspace> &changedPeaksWS) {
+void SliceViewer::peakWorkspaceChanged(const std::string &wsName,
+                                       std::shared_ptr<Mantid::API::IPeaksWorkspace> &changedPeaksWS) {
   // Tell the composite presenter about it
   m_peaksPresenter->notifyWorkspaceChanged(wsName, changedPeaksWS);
 }
@@ -2795,8 +2626,7 @@ void SliceViewer::dropEvent(QDropEvent *e) {
       endIndex = text.indexOf("\"]", startIndex);
       QString candidate = text.mid(startIndex, endIndex - startIndex);
       if (std::dynamic_pointer_cast<IPeaksWorkspace>(
-              AnalysisDataService::Instance().retrieve(
-                  candidate.toStdString()))) {
+              AnalysisDataService::Instance().retrieve(candidate.toStdString()))) {
         wsNames.append(candidate);
         e->accept();
       } else {
@@ -2814,17 +2644,14 @@ void SliceViewer::dropEvent(QDropEvent *e) {
  * Set autoscaling for the color bar on or off
  * @param autoscale :: [input] On/off status for autoscaling
  */
-void SliceViewer::setColorBarAutoScale(bool autoscale) {
-  m_colorBar->setAutoScale(autoscale);
-}
+void SliceViewer::setColorBarAutoScale(bool autoscale) { m_colorBar->setAutoScale(autoscale); }
 
 /**
  * Apply the color scaling for the current slice. This will
  * be applied only if it is explicitly requested
  */
 void SliceViewer::applyColorScalingForCurrentSliceIfRequired() {
-  auto useAutoColorScaleforCurrentSlice =
-      m_colorBar->getAutoScaleforCurrentSlice();
+  auto useAutoColorScaleforCurrentSlice = m_colorBar->getAutoScaleforCurrentSlice();
   if (useAutoColorScaleforCurrentSlice) {
     setColorScaleAutoSlice();
   }
@@ -3015,12 +2842,10 @@ void SliceViewer::switchAxis() {
 
 /// Apply the non orthogonal axis scale draw
 void SliceViewer::applyNonOrthogonalAxisScaleDraw() {
-  m_nonOrthAxis0 = new QwtScaleDrawNonOrthogonal(
-      m_plot, QwtScaleDrawNonOrthogonal::ScreenDimension::X, m_ws, m_dimX,
-      m_dimY, m_slicePoint, m_nonOrthogonalOverlay);
-  m_nonOrthAxis1 = new QwtScaleDrawNonOrthogonal(
-      m_plot, QwtScaleDrawNonOrthogonal::ScreenDimension::Y, m_ws, m_dimX,
-      m_dimY, m_slicePoint, m_nonOrthogonalOverlay);
+  m_nonOrthAxis0 = new QwtScaleDrawNonOrthogonal(m_plot, QwtScaleDrawNonOrthogonal::ScreenDimension::X, m_ws, m_dimX,
+                                                 m_dimY, m_slicePoint, m_nonOrthogonalOverlay);
+  m_nonOrthAxis1 = new QwtScaleDrawNonOrthogonal(m_plot, QwtScaleDrawNonOrthogonal::ScreenDimension::Y, m_ws, m_dimX,
+                                                 m_dimY, m_slicePoint, m_nonOrthogonalOverlay);
   m_plot->setAxisScaleDraw(QwtPlot::xBottom, m_nonOrthAxis0);
   m_plot->setAxisScaleDraw(QwtPlot::yLeft, m_nonOrthAxis1);
 }
@@ -3035,8 +2860,7 @@ void SliceViewer::applyOrthogonalAxisScaleDraw() {
 }
 
 /// Transfer data between QwtRasterDataMD instances
-void SliceViewer::transferSettings(const API::QwtRasterDataMD *const from,
-                                   API::QwtRasterDataMD *to) const {
+void SliceViewer::transferSettings(const API::QwtRasterDataMD *const from, API::QwtRasterDataMD *to) const {
   from->transferSettingsTo(to);
 }
 

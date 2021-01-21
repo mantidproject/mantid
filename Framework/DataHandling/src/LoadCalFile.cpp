@@ -37,21 +37,17 @@ void LoadCalFile::getInstrument3WaysInit(Algorithm *alg) {
   std::string grpName("Specify the Instrument");
 
   alg->declareProperty(
-      std::make_unique<WorkspaceProperty<>>(
-          "InputWorkspace", "", Direction::Input, PropertyMode::Optional),
+      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input, PropertyMode::Optional),
       "Optional: An input workspace with the instrument we want to use.");
 
-  alg->declareProperty(std::make_unique<PropertyWithValue<std::string>>(
-                           "InstrumentName", "", Direction::Input),
+  alg->declareProperty(std::make_unique<PropertyWithValue<std::string>>("InstrumentName", "", Direction::Input),
                        "Optional: Name of the instrument to base the "
                        "GroupingWorkspace on which to base the "
                        "GroupingWorkspace.");
 
-  alg->declareProperty(
-      std::make_unique<FileProperty>("InstrumentFilename", "",
-                                     FileProperty::OptionalLoad, ".xml"),
-      "Optional: Path to the instrument definition file on "
-      "which to base the GroupingWorkspace.");
+  alg->declareProperty(std::make_unique<FileProperty>("InstrumentFilename", "", FileProperty::OptionalLoad, ".xml"),
+                       "Optional: Path to the instrument definition file on "
+                       "which to base the GroupingWorkspace.");
 
   alg->setPropertyGroup("InputWorkspace", grpName);
   alg->setPropertyGroup("InstrumentName", grpName);
@@ -75,8 +71,7 @@ bool LoadCalFile::instrumentIsSpecified(API::Algorithm *alg) {
  * InstrumentName, InstrumentFilename
  * @param alg :: algorithm from which to get the property values.
  * */
-Geometry::Instrument_const_sptr
-LoadCalFile::getInstrument3Ways(Algorithm *alg) {
+Geometry::Instrument_const_sptr LoadCalFile::getInstrument3Ways(Algorithm *alg) {
   MatrixWorkspace_sptr inWS = alg->getProperty("InputWorkspace");
   std::string InstrumentName = alg->getPropertyValue("InstrumentName");
   std::string InstrumentFilename = alg->getPropertyValue("InstrumentFilename");
@@ -104,14 +99,12 @@ LoadCalFile::getInstrument3Ways(Algorithm *alg) {
   if (inWS) {
     inst = inWS->getInstrument();
   } else {
-    Algorithm_sptr childAlg =
-        alg->createChildAlgorithm("LoadInstrument", 0.0, 0.2);
+    Algorithm_sptr childAlg = alg->createChildAlgorithm("LoadInstrument", 0.0, 0.2);
     MatrixWorkspace_sptr tempWS = std::make_shared<Workspace2D>();
     childAlg->setProperty<MatrixWorkspace_sptr>("Workspace", tempWS);
     childAlg->setPropertyValue("Filename", InstrumentFilename);
     childAlg->setPropertyValue("InstrumentName", InstrumentName);
-    childAlg->setProperty("RewriteSpectraMap",
-                          Mantid::Kernel::OptionalBool(false));
+    childAlg->setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(false));
     childAlg->executeAsChildAlg();
     inst = tempWS->getInstrument();
   }
@@ -125,32 +118,24 @@ LoadCalFile::getInstrument3Ways(Algorithm *alg) {
 void LoadCalFile::init() {
   LoadCalFile::getInstrument3WaysInit(this);
 
-  declareProperty(
-      std::make_unique<FileProperty>("CalFilename", "", FileProperty::Load,
-                                     ".cal"),
-      "Path to the old-style .cal grouping/calibration file (multi-column "
-      "ASCII). You must also specify the instrument.");
+  declareProperty(std::make_unique<FileProperty>("CalFilename", "", FileProperty::Load, ".cal"),
+                  "Path to the old-style .cal grouping/calibration file (multi-column "
+                  "ASCII). You must also specify the instrument.");
 
-  declareProperty(std::make_unique<PropertyWithValue<bool>>(
-                      "MakeGroupingWorkspace", true, Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("MakeGroupingWorkspace", true, Direction::Input),
                   "Set to true to create a GroupingWorkspace with called "
                   "WorkspaceName_group.");
 
-  declareProperty(std::make_unique<PropertyWithValue<bool>>(
-                      "MakeOffsetsWorkspace", true, Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("MakeOffsetsWorkspace", true, Direction::Input),
                   "Set to true to create a OffsetsWorkspace with called "
                   "WorkspaceName_offsets.");
 
-  declareProperty(
-      std::make_unique<PropertyWithValue<bool>>("MakeMaskWorkspace", true,
-                                                Direction::Input),
-      "Set to true to create a MaskWorkspace with called WorkspaceName_mask.");
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("MakeMaskWorkspace", true, Direction::Input),
+                  "Set to true to create a MaskWorkspace with called WorkspaceName_mask.");
 
-  declareProperty(
-      std::make_unique<PropertyWithValue<std::string>>("WorkspaceName", "",
-                                                       Direction::Input),
-      "The base of the output workspace names. Names will have '_group', "
-      "'_cal', '_offsets', '_mask' appended to them.");
+  declareProperty(std::make_unique<PropertyWithValue<std::string>>("WorkspaceName", "", Direction::Input),
+                  "The base of the output workspace names. Names will have '_group', "
+                  "'_cal', '_offsets', '_mask' appended to them.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -179,9 +164,8 @@ void LoadCalFile::exec() {
   if (MakeGroupingWorkspace) {
     groupWS = GroupingWorkspace_sptr(new GroupingWorkspace(inst));
     groupWS->setTitle(title);
-    declareProperty(std::make_unique<WorkspaceProperty<GroupingWorkspace>>(
-                        "OutputGroupingWorkspace", WorkspaceName + "_group",
-                        Direction::Output),
+    declareProperty(std::make_unique<WorkspaceProperty<GroupingWorkspace>>("OutputGroupingWorkspace",
+                                                                           WorkspaceName + "_group", Direction::Output),
                     "Set the the output GroupingWorkspace, if any.");
     groupWS->mutableRun().addProperty("Filename", CalFilename);
     setProperty("OutputGroupingWorkspace", groupWS);
@@ -191,8 +175,7 @@ void LoadCalFile::exec() {
     offsetsWS = OffsetsWorkspace_sptr(new OffsetsWorkspace(inst));
     offsetsWS->setTitle(title);
     declareProperty(std::make_unique<WorkspaceProperty<OffsetsWorkspace>>(
-                        "OutputOffsetsWorkspace", WorkspaceName + "_offsets",
-                        Direction::Output),
+                        "OutputOffsetsWorkspace", WorkspaceName + "_offsets", Direction::Output),
                     "Set the the output OffsetsWorkspace, if any.");
     offsetsWS->mutableRun().addProperty("Filename", CalFilename);
     setProperty("OutputOffsetsWorkspace", offsetsWS);
@@ -201,10 +184,9 @@ void LoadCalFile::exec() {
   if (MakeMaskWorkspace) {
     maskWS = MaskWorkspace_sptr(new MaskWorkspace(inst));
     maskWS->setTitle(title);
-    declareProperty(
-        std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-            "OutputMaskWorkspace", WorkspaceName + "_mask", Direction::Output),
-        "Set the the output MaskWorkspace, if any.");
+    declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputMaskWorkspace", WorkspaceName + "_mask",
+                                                                         Direction::Output),
+                    "Set the the output MaskWorkspace, if any.");
     maskWS->mutableRun().addProperty("Filename", CalFilename);
     setProperty("OutputMaskWorkspace", maskWS);
   }
@@ -217,10 +199,9 @@ void LoadCalFile::exec() {
     alg->executeAsChildAlg();
     ITableWorkspace_sptr calWS = alg->getProperty("OutputWorkspace");
     calWS->setTitle(title);
-    declareProperty(
-        std::make_unique<WorkspaceProperty<ITableWorkspace>>(
-            "OutputCalWorkspace", WorkspaceName + "_cal", Direction::Output),
-        "Set the output Diffraction Calibration workspace, if any.");
+    declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>("OutputCalWorkspace", WorkspaceName + "_cal",
+                                                                         Direction::Output),
+                    "Set the output Diffraction Calibration workspace, if any.");
     setProperty("OutputCalWorkspace", calWS);
   }
 }
@@ -236,10 +217,8 @@ void LoadCalFile::exec() {
  * @param maskWS :: optional, masking-type workspace to fill. Must be
  *initialized to the right instrument.
  */
-void LoadCalFile::readCalFile(const std::string &calFileName,
-                              const GroupingWorkspace_sptr &groupWS,
-                              const OffsetsWorkspace_sptr &offsetsWS,
-                              const MaskWorkspace_sptr &maskWS) {
+void LoadCalFile::readCalFile(const std::string &calFileName, const GroupingWorkspace_sptr &groupWS,
+                              const OffsetsWorkspace_sptr &offsetsWS, const MaskWorkspace_sptr &maskWS) {
   auto doGroup = bool(groupWS);
   auto doOffsets = bool(offsetsWS);
   auto doMask = bool(maskWS);
@@ -288,8 +267,8 @@ void LoadCalFile::readCalFile(const std::string &calFileName,
       if (offset <= -1.) // should never happen
       {
         std::stringstream msg;
-        msg << "Encountered offset = " << offset << " at index " << n
-            << " for udet = " << udet << ". Offsets must be greater than -1.";
+        msg << "Encountered offset = " << offset << " at index " << n << " for udet = " << udet
+            << ". Offsets must be greater than -1.";
         throw std::runtime_error(msg.str());
       }
 
@@ -341,16 +320,12 @@ void LoadCalFile::readCalFile(const std::string &calFileName,
   // Warn about any errors
 
   if (numErrors > 0)
-    Logger("LoadCalFile").warning()
-        << numErrors
-        << " errors (invalid Detector ID's) found when reading .cal file '"
-        << calFileName << "'.\n";
+    Logger("LoadCalFile").warning() << numErrors << " errors (invalid Detector ID's) found when reading .cal file '"
+                                    << calFileName << "'.\n";
   if (doGroup && (!hasGrouped))
-    Logger("LoadCalFile").warning()
-        << "'" << calFileName << "' has no spectra grouped\n";
+    Logger("LoadCalFile").warning() << "'" << calFileName << "' has no spectra grouped\n";
   if (doMask && (!hasUnmasked))
-    Logger("LoadCalFile").warning()
-        << "'" << calFileName << "' masks all spectra\n";
+    Logger("LoadCalFile").warning() << "'" << calFileName << "' masks all spectra\n";
 }
 
 /**
@@ -366,8 +341,8 @@ bool LoadCalFile::idIsMonitor(const Instrument_const_sptr &inst, int detID) {
   return (it != monitorList.end());
 }
 
-Parallel::ExecutionMode LoadCalFile::getParallelExecutionMode(
-    const std::map<std::string, Parallel::StorageMode> &storageModes) const {
+Parallel::ExecutionMode
+LoadCalFile::getParallelExecutionMode(const std::map<std::string, Parallel::StorageMode> &storageModes) const {
   // There is an optional input workspace which may have
   // StorageMode::Distributed but it is merely used for passing an instrument.
   // Output should always have StorageMode::Cloned, so we run with

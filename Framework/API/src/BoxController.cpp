@@ -41,25 +41,19 @@ BoxController *BoxController::clone() const {
 
 /*Private Copy constructor used in cloning */
 BoxController::BoxController(const BoxController &other)
-    : nd(other.nd), m_maxId(other.m_maxId),
-      m_SplitThreshold(other.m_SplitThreshold),
-      m_significantEventsNumber(other.m_significantEventsNumber),
-      m_maxDepth(other.m_maxDepth), m_numEventsAtMax(other.m_numEventsAtMax),
-      m_splitInto(other.m_splitInto), m_splitTopInto(other.m_splitTopInto),
+    : nd(other.nd), m_maxId(other.m_maxId), m_SplitThreshold(other.m_SplitThreshold),
+      m_significantEventsNumber(other.m_significantEventsNumber), m_maxDepth(other.m_maxDepth),
+      m_numEventsAtMax(other.m_numEventsAtMax), m_splitInto(other.m_splitInto), m_splitTopInto(other.m_splitTopInto),
       m_numSplit(other.m_numSplit), m_numTopSplit(other.m_numTopSplit),
       m_addingEvents_eventsPerTask(other.m_addingEvents_eventsPerTask),
-      m_addingEvents_numTasksPerBlock(other.m_addingEvents_numTasksPerBlock),
-      m_numMDBoxes(other.m_numMDBoxes),
-      m_numMDGridBoxes(other.m_numMDGridBoxes),
-      m_maxNumMDBoxes(other.m_maxNumMDBoxes),
+      m_addingEvents_numTasksPerBlock(other.m_addingEvents_numTasksPerBlock), m_numMDBoxes(other.m_numMDBoxes),
+      m_numMDGridBoxes(other.m_numMDGridBoxes), m_maxNumMDBoxes(other.m_maxNumMDBoxes),
       m_fileIO(std::shared_ptr<API::IBoxControllerIO>()) {}
 
 bool BoxController::operator==(const BoxController &other) const {
-  if (nd != other.nd || m_maxId != other.m_maxId ||
-      m_SplitThreshold != other.m_SplitThreshold ||
+  if (nd != other.nd || m_maxId != other.m_maxId || m_SplitThreshold != other.m_SplitThreshold ||
       m_maxDepth != other.m_maxDepth || m_numSplit != other.m_numSplit ||
-      m_splitInto.size() != other.m_splitInto.size() ||
-      m_numMDBoxes.size() != other.m_numMDBoxes.size() ||
+      m_splitInto.size() != other.m_splitInto.size() || m_numMDBoxes.size() != other.m_numMDBoxes.size() ||
       m_numMDGridBoxes.size() != other.m_numMDGridBoxes.size() ||
       m_maxNumMDBoxes.size() != other.m_maxNumMDBoxes.size())
     return false;
@@ -79,8 +73,7 @@ bool BoxController::operator==(const BoxController &other) const {
   }
 
   // Check top level splitting if they are set in both or not
-  if ((m_splitTopInto && !other.m_splitTopInto) ||
-      (!m_splitTopInto && other.m_splitTopInto)) {
+  if ((m_splitTopInto && !other.m_splitTopInto) || (!m_splitTopInto && other.m_splitTopInto)) {
     return false;
   }
 
@@ -143,40 +136,34 @@ std::string BoxController::toXMLString() const {
   std::string vecStr;
 
   element = pDoc->createElement("NumDims");
-  text =
-      pDoc->createTextNode(boost::str(boost::format("%d") % this->getNDims()));
+  text = pDoc->createTextNode(boost::str(boost::format("%d") % this->getNDims()));
   element->appendChild(text);
   pBoxElement->appendChild(element);
 
   element = pDoc->createElement("MaxId");
-  text =
-      pDoc->createTextNode(boost::str(boost::format("%d") % this->getMaxId()));
+  text = pDoc->createTextNode(boost::str(boost::format("%d") % this->getMaxId()));
   element->appendChild(text);
   pBoxElement->appendChild(element);
 
   element = pDoc->createElement("SplitThreshold");
-  text = pDoc->createTextNode(
-      boost::str(boost::format("%d") % this->getSplitThreshold()));
+  text = pDoc->createTextNode(boost::str(boost::format("%d") % this->getSplitThreshold()));
   element->appendChild(text);
   pBoxElement->appendChild(element);
 
   element = pDoc->createElement("MaxDepth");
-  text = pDoc->createTextNode(
-      boost::str(boost::format("%d") % this->getMaxDepth()));
+  text = pDoc->createTextNode(boost::str(boost::format("%d") % this->getMaxDepth()));
   element->appendChild(text);
   pBoxElement->appendChild(element);
 
   element = pDoc->createElement("SplitInto");
-  vecStr = Kernel::Strings::join(this->m_splitInto.begin(),
-                                 this->m_splitInto.end(), ",");
+  vecStr = Kernel::Strings::join(this->m_splitInto.begin(), this->m_splitInto.end(), ",");
   text = pDoc->createTextNode(vecStr);
   element->appendChild(text);
   pBoxElement->appendChild(element);
 
   element = pDoc->createElement("SplitTopInto");
   if (m_splitTopInto) {
-    vecStr = Kernel::Strings::join(this->m_splitTopInto.get().begin(),
-                                   this->m_splitTopInto.get().end(), ",");
+    vecStr = Kernel::Strings::join(this->m_splitTopInto.get().begin(), this->m_splitTopInto.get().end(), ",");
   } else {
     vecStr = "";
   }
@@ -185,15 +172,13 @@ std::string BoxController::toXMLString() const {
   pBoxElement->appendChild(element);
 
   element = pDoc->createElement("NumMDBoxes");
-  vecStr = Kernel::Strings::join(this->m_numMDBoxes.begin(),
-                                 this->m_numMDBoxes.end(), ",");
+  vecStr = Kernel::Strings::join(this->m_numMDBoxes.begin(), this->m_numMDBoxes.end(), ",");
   text = pDoc->createTextNode(vecStr);
   element->appendChild(text);
   pBoxElement->appendChild(element);
 
   element = pDoc->createElement("NumMDGridBoxes");
-  vecStr = Kernel::Strings::join(this->m_numMDGridBoxes.begin(),
-                                 this->m_numMDGridBoxes.end(), ",");
+  vecStr = Kernel::Strings::join(this->m_numMDGridBoxes.begin(), this->m_numMDGridBoxes.end(), ",");
   text = pDoc->createTextNode(vecStr);
   element->appendChild(text);
   pBoxElement->appendChild(element);
@@ -216,9 +201,7 @@ std::string BoxController::getFilename() const {
 }
 /** the function left for compartibility with the previous bc python interface.
 @return true if the workspace is file based and false otherwise */
-bool BoxController::useWriteBuffer() const {
-  return static_cast<bool>(m_fileIO);
-}
+bool BoxController::useWriteBuffer() const { return static_cast<bool>(m_fileIO); }
 
 //------------------------------------------------------------------------------------------------------
 /** Static method that sets the data inside this BoxController from an XML
@@ -236,14 +219,12 @@ void BoxController::fromXMLString(const std::string &xml) {
   s = pBoxElement->getChildElement("NumDims")->innerText();
   Strings::convert(s, nd);
   if (nd <= 0 || nd > 20)
-    throw std::runtime_error(
-        "BoxController::fromXMLString(): Bad number of dimensions found.");
+    throw std::runtime_error("BoxController::fromXMLString(): Bad number of dimensions found.");
 
   size_t ival;
   Strings::convert(pBoxElement->getChildElement("MaxId")->innerText(), ival);
   this->setMaxId(ival);
-  Strings::convert(pBoxElement->getChildElement("SplitThreshold")->innerText(),
-                   ival);
+  Strings::convert(pBoxElement->getChildElement("SplitThreshold")->innerText(), ival);
   this->setSplitThreshold(ival);
   Strings::convert(pBoxElement->getChildElement("MaxDepth")->innerText(), ival);
   this->setMaxDepth(ival);
@@ -254,8 +235,7 @@ void BoxController::fromXMLString(const std::string &xml) {
   // Need to make sure that we handle box controllers which did not have the
   // SplitTopInto
   // attribute
-  Poco::AutoPtr<NodeList> nodes =
-      pBoxElement->getElementsByTagName("SplitTopInto");
+  Poco::AutoPtr<NodeList> nodes = pBoxElement->getElementsByTagName("SplitTopInto");
   if (nodes->length() > 0) {
     s = pBoxElement->getChildElement("SplitTopInto")->innerText();
     if (s.empty()) {
@@ -296,15 +276,12 @@ void BoxController::clearFileBacked() {
  *@param fileName  -- if newFileIO comes without opened file, this is the file
  *name to open for the file based IO operations
  */
-void BoxController::setFileBacked(
-    const std::shared_ptr<IBoxControllerIO> &newFileIO,
-    const std::string &fileName) {
+void BoxController::setFileBacked(const std::shared_ptr<IBoxControllerIO> &newFileIO, const std::string &fileName) {
   if (!newFileIO->isOpened())
     newFileIO->openFile(fileName, "w");
 
   if (!newFileIO->isOpened()) {
-    throw(Kernel::Exception::FileError(
-        "Can not open target file for filebased box controller ", fileName));
+    throw(Kernel::Exception::FileError("Can not open target file for filebased box controller ", fileName));
   }
 
   this->m_fileIO = newFileIO;

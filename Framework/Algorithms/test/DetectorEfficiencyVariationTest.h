@@ -37,12 +37,8 @@ using Mantid::HistogramData::CountStandardDeviations;
 
 class DetectorEfficiencyVariationTest : public CxxTest::TestSuite {
 public:
-  static DetectorEfficiencyVariationTest *createSuite() {
-    return new DetectorEfficiencyVariationTest();
-  }
-  static void destroySuite(DetectorEfficiencyVariationTest *suite) {
-    delete suite;
-  }
+  static DetectorEfficiencyVariationTest *createSuite() { return new DetectorEfficiencyVariationTest(); }
+  static void destroySuite(DetectorEfficiencyVariationTest *suite) { delete suite; }
 
   bool runInit(DetectorEfficiencyVariation &alg) // this is run by both tests so
                                                  // I thought I'd take it out
@@ -77,10 +73,8 @@ public:
 
     // Get back the saved workspace
     Workspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(
-                                 "DetEfficVariTestWSO"));
-    MatrixWorkspace_sptr outputMat =
-        std::dynamic_pointer_cast<MatrixWorkspace>(output);
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve("DetEfficVariTestWSO"));
+    MatrixWorkspace_sptr outputMat = std::dynamic_pointer_cast<MatrixWorkspace>(output);
     TS_ASSERT(outputMat);
     TS_ASSERT_EQUALS(outputMat->YUnit(), "");
 
@@ -90,39 +84,32 @@ public:
     int firstGoodSpec = (Nhist / 2) - int((variation - 1) / m_ramp) + 1;
     int lastGoodSpec = (Nhist / 2) + int((variation - 1) / m_ramp) - 1;
     for (int lHist = 0; lHist < firstGoodSpec; lHist++) {
-      TS_ASSERT_EQUALS(static_cast<double>(outputMat->y(lHist).front()),
-                       static_cast<double>(BadVal))
+      TS_ASSERT_EQUALS(static_cast<double>(outputMat->y(lHist).front()), static_cast<double>(BadVal))
     }
     for (int lHist = firstGoodSpec; lHist <= lastGoodSpec; lHist++) {
-      TS_ASSERT_EQUALS(static_cast<double>(outputMat->y(lHist).front()),
-                       static_cast<double>(GoodVal))
+      TS_ASSERT_EQUALS(static_cast<double>(outputMat->y(lHist).front()), static_cast<double>(GoodVal))
     }
     for (int lHist = lastGoodSpec + 1; lHist < Nhist; lHist++) {
-      TS_ASSERT_EQUALS(static_cast<double>(outputMat->y(lHist).front()),
-                       static_cast<double>(BadVal))
+      TS_ASSERT_EQUALS(static_cast<double>(outputMat->y(lHist).front()), static_cast<double>(BadVal))
     }
   }
 
   DetectorEfficiencyVariationTest()
-      : m_WB1Name("DetEfficVariTestWSI1"), m_WB2Name("DetEfficVariTestWSI2"),
-        m_ramp(0.01) {
+      : m_WB1Name("DetEfficVariTestWSI1"), m_WB2Name("DetEfficVariTestWSI2"), m_ramp(0.01) {
     using namespace Mantid;
     // Set up a small workspace for testing
-    Workspace_sptr spaceA =
-        WorkspaceFactory::Instance().create("Workspace2D", Nhist, NXs, NXs - 1);
-    Workspace_sptr spaceB =
-        WorkspaceFactory::Instance().create("Workspace2D", Nhist, NXs, NXs - 1);
+    Workspace_sptr spaceA = WorkspaceFactory::Instance().create("Workspace2D", Nhist, NXs, NXs - 1);
+    Workspace_sptr spaceB = WorkspaceFactory::Instance().create("Workspace2D", Nhist, NXs, NXs - 1);
     Workspace2D_sptr inputA = std::dynamic_pointer_cast<Workspace2D>(spaceA);
     Workspace2D_sptr inputB = std::dynamic_pointer_cast<Workspace2D>(spaceB);
     BinEdges x(NXs, HistogramData::LinearGenerator(0.0, 1000.0));
     // random numbers that will be copied into the workspace spectra
     const short ySize = NXs - 1;
     double yArray[ySize] = {
-        0.2, 4,  50,  14,    0.001, 0,        0,    0,     1,  0, 1e-3, 15,
-        4,   0,  9,   0.001, 2e-10, 1,        0,    8,     0,  7, 1e-4, 1,
-        7,   11, 101, 6,     53,    0.345324, 3444, 13958, 0.8}; // NXs = 34 so
-                                                                 // we need that
-                                                                 // many numbers
+        0.2, 4, 50, 14, 0.001, 0,    0, 0, 1,  0,   1e-3, 15, 4,        0,    9,     0.001, 2e-10,
+        1,   0, 8,  0,  7,     1e-4, 1, 7, 11, 101, 6,    53, 0.345324, 3444, 13958, 0.8}; // NXs = 34 so
+                                                                                           // we need that
+                                                                                           // many numbers
 
     // the error values aren't used and aren't tested so we'll use some basic
     // data
@@ -138,8 +125,7 @@ public:
         forInputA.emplace_back(y);
         // there is going to be a small difference between the workspaces that
         // will vary with histogram number
-        forInputB.emplace_back(forInputA.back() *
-                               (1 + m_ramp * (j - (Nhist / 2))));
+        forInputB.emplace_back(forInputA.back() * (1 + m_ramp * (j - (Nhist / 2))));
       }
       // insert a particularly large value to pick up later
       m_LargeValue = 3.1;

@@ -31,10 +31,8 @@ namespace VATES {
  * @throw invalid_arument if view is null
  * @throw logic_error if cannot use the reader-presenter for this filetype.
  */
-MDHWNexusLoadingPresenter::MDHWNexusLoadingPresenter(
-    std::unique_ptr<MDLoadingView> view, const std::string &filename)
-    : MDHWLoadingPresenter(std::move(view)), m_filename(filename),
-      m_wsTypeName("") {
+MDHWNexusLoadingPresenter::MDHWNexusLoadingPresenter(std::unique_ptr<MDLoadingView> view, const std::string &filename)
+    : MDHWLoadingPresenter(std::move(view)), m_filename(filename), m_wsTypeName("") {
   if (this->m_filename.empty()) {
     throw std::invalid_argument("File name is an empty string.");
   }
@@ -73,10 +71,9 @@ bool MDHWNexusLoadingPresenter::canReadFile() const {
  * @param drawingProgressUpdate : Handler for GUI updates while
  * vtkDataSetFactory::create occurs.
  */
-vtkSmartPointer<vtkDataSet>
-MDHWNexusLoadingPresenter::execute(vtkDataSetFactory *factory,
-                                   ProgressAction &loadingProgressUpdate,
-                                   ProgressAction &drawingProgressUpdate) {
+vtkSmartPointer<vtkDataSet> MDHWNexusLoadingPresenter::execute(vtkDataSetFactory *factory,
+                                                               ProgressAction &loadingProgressUpdate,
+                                                               ProgressAction &drawingProgressUpdate) {
   using namespace Mantid::API;
   using namespace Mantid::Geometry;
 
@@ -120,9 +117,7 @@ MDHWNexusLoadingPresenter::~MDHWNexusLoadingPresenter() {}
  * Getter for the workspace type name.
  * @return Workspace Type Name
  */
-std::string MDHWNexusLoadingPresenter::getWorkspaceTypeName() {
-  return m_wsTypeName;
-}
+std::string MDHWNexusLoadingPresenter::getWorkspaceTypeName() { return m_wsTypeName; }
 
 std::vector<int> MDHWNexusLoadingPresenter::getExtents() {
 
@@ -148,37 +143,31 @@ void MDHWNexusLoadingPresenter::loadWorkspace() {
   alg->initialize();
   alg->setPropertyValue("Filename", this->m_filename);
   alg->setPropertyValue("OutputWorkspace", "MD_HISTO_WS_ID");
-  alg->setProperty(
-      "FileBackEnd",
-      !this->m_view->getLoadInMemory()); // Load from file by default.
+  alg->setProperty("FileBackEnd",
+                   !this->m_view->getLoadInMemory()); // Load from file by default.
   alg->execute();
-  Workspace_sptr result =
-      AnalysisDataService::Instance().retrieve("MD_HISTO_WS_ID");
-  auto preTranspose =
-      std::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(result);
+  Workspace_sptr result = AnalysisDataService::Instance().retrieve("MD_HISTO_WS_ID");
+  auto preTranspose = std::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(result);
   // Perform any necessary transpose.
   MDHWLoadingPresenter::transposeWs(preTranspose, m_histoWs);
 }
 
-void MDHWNexusLoadingPresenter::loadWorkspace(
-    ProgressAction &loadingProgressUpdate) {
+void MDHWNexusLoadingPresenter::loadWorkspace(ProgressAction &loadingProgressUpdate) {
   using namespace Mantid::API;
-  Poco::NObserver<ProgressAction, Mantid::API::Algorithm::ProgressNotification>
-      observer(loadingProgressUpdate, &ProgressAction::handler);
+  Poco::NObserver<ProgressAction, Mantid::API::Algorithm::ProgressNotification> observer(loadingProgressUpdate,
+                                                                                         &ProgressAction::handler);
 
   AnalysisDataService::Instance().remove("MD_HISTO_WS_ID");
   IAlgorithm_sptr alg = AlgorithmManager::Instance().create("LoadMD");
   alg->initialize();
   alg->setPropertyValue("Filename", this->m_filename);
   alg->setPropertyValue("OutputWorkspace", "MD_HISTO_WS_ID");
-  alg->setProperty(
-      "FileBackEnd",
-      !this->m_view->getLoadInMemory()); // Load from file by default.
+  alg->setProperty("FileBackEnd",
+                   !this->m_view->getLoadInMemory()); // Load from file by default.
   alg->addObserver(observer);
   alg->execute();
   alg->removeObserver(observer);
-  m_histoWs = AnalysisDataService::Instance()
-                  .retrieveWS<Mantid::API::IMDHistoWorkspace>("MD_HISTO_WS_ID");
+  m_histoWs = AnalysisDataService::Instance().retrieveWS<Mantid::API::IMDHistoWorkspace>("MD_HISTO_WS_ID");
 }
 } // namespace VATES
 } // namespace Mantid

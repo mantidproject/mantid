@@ -34,17 +34,14 @@ using namespace DataObjects;
  *
  */
 void SumNeighbours::init() {
-  declareProperty(
-      std::make_unique<WorkspaceProperty<Mantid::API::MatrixWorkspace>>(
-          "InputWorkspace", "", Direction::Input,
-          std::make_shared<InstrumentValidator>()),
-      "A workspace containing one or more rectangular area "
-      "detectors. Each spectrum needs to correspond to only one "
-      "pixelID (e.g. no grouping or previous calls to "
-      "SumNeighbours).");
+  declareProperty(std::make_unique<WorkspaceProperty<Mantid::API::MatrixWorkspace>>(
+                      "InputWorkspace", "", Direction::Input, std::make_shared<InstrumentValidator>()),
+                  "A workspace containing one or more rectangular area "
+                  "detectors. Each spectrum needs to correspond to only one "
+                  "pixelID (e.g. no grouping or previous calls to "
+                  "SumNeighbours).");
 
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "The name of the workspace to be created as the output of "
                   "the algorithm.");
 
@@ -77,8 +74,7 @@ void SumNeighbours::exec() {
   std::shared_ptr<const RectangularDetector> rect;
 
   if (parent) {
-    rect = std::dynamic_pointer_cast<const RectangularDetector>(
-        parent->getParent());
+    rect = std::dynamic_pointer_cast<const RectangularDetector>(parent->getParent());
   }
 
   Mantid::API::MatrixWorkspace_sptr outWS;
@@ -94,8 +90,7 @@ void SumNeighbours::exec() {
     smooth->setProperty("SumPixelsY", SumY);
   } else {
     smooth->setProperty<std::string>("RadiusUnits", "NumberOfPixels");
-    smooth->setProperty("Radius",
-                        static_cast<double>(SumX * SumY * SumX * SumY));
+    smooth->setProperty("Radius", static_cast<double>(SumX * SumY * SumX * SumY));
     smooth->setProperty("NumberOfNeighbours", SumX * SumY * SumX * SumY * 4);
     smooth->setProperty("SumNumberOfNeighbours", SumX * SumY);
   }

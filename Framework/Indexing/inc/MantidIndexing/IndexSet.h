@@ -28,16 +28,12 @@ namespace detail {
 template <class T> class IndexSet {
 public:
   class const_iterator
-      : public boost::iterator_facade<const_iterator, size_t,
-                                      boost::random_access_traversal_tag,
-                                      size_t> {
+      : public boost::iterator_facade<const_iterator, size_t, boost::random_access_traversal_tag, size_t> {
   public:
-    const_iterator(const IndexSet &indexSet, const size_t index)
-        : m_indexSet(indexSet), m_index(index) {}
+    const_iterator(const IndexSet &indexSet, const size_t index) : m_indexSet(indexSet), m_index(index) {}
     const_iterator &operator=(const const_iterator &other) {
       if (&m_indexSet != &other.m_indexSet) {
-        throw std::invalid_argument(
-            "Cannot assign iterators from different IndexSet objects.");
+        throw std::invalid_argument("Cannot assign iterators from different IndexSet objects.");
       }
       m_index = other.m_index;
       return *this;
@@ -62,14 +58,11 @@ public:
         --m_index;
     }
     void advance(int64_t delta) {
-      m_index = delta < 0 ? std::max(static_cast<int64_t>(0),
-                                     static_cast<int64_t>(m_index) + delta)
-                          : std::min(m_indexSet.size(),
-                                     m_index + static_cast<size_t>(delta));
+      m_index = delta < 0 ? std::max(static_cast<int64_t>(0), static_cast<int64_t>(m_index) + delta)
+                          : std::min(m_indexSet.size(), m_index + static_cast<size_t>(delta));
     }
     int64_t distance_to(const const_iterator &other) const {
-      return static_cast<int64_t>(other.m_index) -
-             static_cast<int64_t>(m_index);
+      return static_cast<int64_t>(other.m_index) - static_cast<int64_t>(m_index);
     }
 
     const IndexSet &m_indexSet;
@@ -115,13 +108,11 @@ private:
 template <class T> IndexSet<T>::IndexSet() : m_size(0) {}
 
 /// Constructor for a set covering the full range from 0 to fullRange-1.
-template <class T>
-IndexSet<T>::IndexSet(size_t fullRange) : m_size(fullRange) {}
+template <class T> IndexSet<T>::IndexSet(size_t fullRange) : m_size(fullRange) {}
 
 /// Constructor for a set covering the range from min to max. Range is verified
 /// at construction time.
-template <class T>
-IndexSet<T>::IndexSet(int64_t min, int64_t max, size_t fullRange) {
+template <class T> IndexSet<T>::IndexSet(int64_t min, int64_t max, size_t fullRange) {
   if (min < 0 || min > max)
     throw std::logic_error("IndexSet: specified min or max values are invalid");
   if (max >= static_cast<int64_t>(fullRange))
@@ -134,9 +125,7 @@ IndexSet<T>::IndexSet(int64_t min, int64_t max, size_t fullRange) {
 
 /// Constructor for a set containing all specified indices. Range is verified at
 /// construction time and duplicates cause an error.
-template <class T>
-IndexSet<T>::IndexSet(const std::vector<size_t> &indices, size_t fullRange)
-    : m_isRange(false) {
+template <class T> IndexSet<T>::IndexSet(const std::vector<size_t> &indices, size_t fullRange) : m_isRange(false) {
   // Validate indices, using m_indices as buffer (reassigned later).
   m_indices = indices;
   std::sort(m_indices.begin(), m_indices.end());

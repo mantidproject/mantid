@@ -18,8 +18,7 @@ using namespace boost::python;
 GET_POINTER_SPECIALIZATION(WorkspaceSingleValue)
 
 void export_WorkspaceSingleValue() {
-  class_<WorkspaceSingleValue, bases<MatrixWorkspace>, boost::noncopyable>(
-      "WorkspaceSingleValue", no_init);
+  class_<WorkspaceSingleValue, bases<MatrixWorkspace>, boost::noncopyable>("WorkspaceSingleValue", no_init);
 
   // register pointers
   RegisterWorkspacePtrToPython<WorkspaceSingleValue>();

@@ -31,8 +31,7 @@ DECLARE_ALGORITHM(GetQsInQENSData)
 
 // Initializes the Algorithm
 void GetQsInQENSData::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input),
                   "Input QENS data as MatrixWorkspace");
 
   declareProperty("RaiseMode", false,
@@ -40,8 +39,7 @@ void GetQsInQENSData::init() {
                   "any empty list of Q values, is "
                   "desired.");
 
-  declareProperty(
-      std::make_unique<ArrayProperty<double>>("Qvalues", Direction::Output));
+  declareProperty(std::make_unique<ArrayProperty<double>>("Qvalues", Direction::Output));
 }
 
 /*
@@ -87,8 +85,7 @@ void GetQsInQENSData::exec() {
  * @param workspace The workspace from which to extract Q-values.
  * @return          The extracted Q-values as a vector.
  */
-MantidVec GetQsInQENSData::extractQValues(
-    const Mantid::API::MatrixWorkspace_sptr &workspace) {
+MantidVec GetQsInQENSData::extractQValues(const Mantid::API::MatrixWorkspace_sptr &workspace) {
   size_t numSpectra = workspace->getNumberHistograms();
   Axis *qAxis;
 
@@ -114,8 +111,7 @@ MantidVec GetQsInQENSData::extractQValues(
       qValues.pop_back();
       qValues.erase(qValues.begin());
       using std::placeholders::_1;
-      std::transform(qValues.begin(), qValues.end(), qValues.begin(),
-                     std::bind(std::divides<double>(), _1, 2.0));
+      std::transform(qValues.begin(), qValues.end(), qValues.begin(), std::bind(std::divides<double>(), _1, 2.0));
     }
   } else {
 
@@ -129,8 +125,7 @@ MantidVec GetQsInQENSData::extractQValues(
         qValues[i] = UnitConversion::convertToElasticQ(theta, efixed);
       }
     } catch (std::exception &) {
-      throw std::runtime_error(
-          "Detectors are missing from the input workspace");
+      throw std::runtime_error("Detectors are missing from the input workspace");
     }
   }
 

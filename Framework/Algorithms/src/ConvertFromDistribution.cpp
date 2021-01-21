@@ -25,8 +25,7 @@ void ConvertFromDistribution::init() {
   auto wsValidator = std::make_shared<Kernel::CompositeValidator>();
   wsValidator->add<HistogramValidator>();
   wsValidator->add<RawCountValidator>(false);
-  declareProperty(std::make_unique<WorkspaceProperty<>>(
-                      "Workspace", "", Kernel::Direction::InOut, wsValidator),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("Workspace", "", Kernel::Direction::InOut, wsValidator),
                   "The name of the workspace to convert.");
 }
 

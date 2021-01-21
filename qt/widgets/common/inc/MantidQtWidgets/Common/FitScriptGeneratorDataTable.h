@@ -34,33 +34,24 @@ namespace MantidWidgets {
  * This table has been manually created and derived from QTableWidget to allow
  * the table rows to be highlighted when a hover event occurs.
  */
-class EXPORT_OPT_MANTIDQT_COMMON FitScriptGeneratorDataTable
-    : public QTableWidget {
+class EXPORT_OPT_MANTIDQT_COMMON FitScriptGeneratorDataTable : public QTableWidget {
   Q_OBJECT
 
 public:
-  enum ColumnIndex {
-    WorkspaceName = 0,
-    WorkspaceIndex = 1,
-    StartX = 2,
-    EndX = 3
-  };
+  enum ColumnIndex { WorkspaceName = 0, WorkspaceIndex = 1, StartX = 2, EndX = 3 };
 
   FitScriptGeneratorDataTable(QWidget *parent = nullptr);
   ~FitScriptGeneratorDataTable() = default;
 
   [[nodiscard]] std::string workspaceName(FitDomainIndex row) const;
-  [[nodiscard]] MantidWidgets::WorkspaceIndex
-  workspaceIndex(FitDomainIndex row) const;
+  [[nodiscard]] MantidWidgets::WorkspaceIndex workspaceIndex(FitDomainIndex row) const;
   [[nodiscard]] double startX(FitDomainIndex row) const;
   [[nodiscard]] double endX(FitDomainIndex row) const;
 
   [[nodiscard]] std::vector<FitDomainIndex> selectedRows() const;
 
-  void removeDomain(std::string const &workspaceName,
-                    MantidWidgets::WorkspaceIndex workspaceIndex);
-  void addDomain(QString const &workspaceName,
-                 MantidWidgets::WorkspaceIndex workspaceIndex, double startX,
+  void removeDomain(std::string const &workspaceName, MantidWidgets::WorkspaceIndex workspaceIndex);
+  void addDomain(QString const &workspaceName, MantidWidgets::WorkspaceIndex workspaceIndex, double startX,
                  double endX);
 
   void formatSelection();
@@ -76,8 +67,7 @@ private:
   bool eventFilter(QObject *widget, QEvent *event) override;
   QPersistentModelIndex hoveredRowIndex(QEvent *event);
 
-  int indexOfDomain(std::string const &workspaceName,
-                    MantidWidgets::WorkspaceIndex workspaceIndex) const;
+  int indexOfDomain(std::string const &workspaceName, MantidWidgets::WorkspaceIndex workspaceIndex) const;
 
   QString getText(FitDomainIndex row, int column) const;
 
@@ -100,18 +90,15 @@ class CustomItemDelegate : public QStyledItemDelegate {
   Q_OBJECT
 
 public:
-  CustomItemDelegate(FitScriptGeneratorDataTable *parent,
-                     ColumnIndex const &index);
+  CustomItemDelegate(FitScriptGeneratorDataTable *parent, ColumnIndex const &index);
 
 private slots:
   void handleItemEntered(QTableWidgetItem *item);
   void handleItemExited(int newRowIndex);
 
 private:
-  QWidget *createEditor(QWidget *parent, QStyleOptionViewItem const &option,
-                        QModelIndex const &index) const override;
-  void paint(QPainter *painter, QStyleOptionViewItem const &option,
-             QModelIndex const &index) const override;
+  QWidget *createEditor(QWidget *parent, QStyleOptionViewItem const &option, QModelIndex const &index) const override;
+  void paint(QPainter *painter, QStyleOptionViewItem const &option, QModelIndex const &index) const override;
 
   FitScriptGeneratorDataTable *m_tableWidget;
   ColumnIndex m_columnIndex;

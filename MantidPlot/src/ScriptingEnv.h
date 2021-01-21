@@ -67,8 +67,7 @@ public:
   virtual void setSysArgs(const QStringList &args) = 0;
 
   /// Create a script object that is responsible for executing actual code
-  virtual Script *newScript(const QString &name, QObject *context,
-                            const Script::InteractionType interact) const = 0;
+  virtual Script *newScript(const QString &name, QObject *context, const Script::InteractionType interact) const = 0;
 
   //! If an exception / error occurred, return a nicely formatted stack
   //! backtrace.
@@ -77,9 +76,7 @@ public:
   /// imported into the global namespace.
   virtual const QStringList mathFunctions() const { return QStringList(); }
   /// Return a documentation string for the given mathematical function.
-  virtual const QString mathFunctionDoc(const QString &) const {
-    return QString::null;
-  }
+  virtual const QString mathFunctionDoc(const QString &) const { return QString::null; }
   /// Return a list of file extensions commonly used for this language.
   virtual const QStringList fileExtensions() const { return QStringList(); }
   /// Construct a filter expression from fileExtension(), suitable for

@@ -22,13 +22,7 @@ namespace {
 // Time we'll wait on a receive call (in seconds)
 const long RECV_TIMEOUT = 60;
 
-typedef enum {
-  ISISDSUnknown = 0,
-  ISISDSInt32 = 1,
-  ISISDSReal32 = 2,
-  ISISDSReal64 = 3,
-  ISISDSChar = 4
-} ISISDSDataType;
+typedef enum { ISISDSUnknown = 0, ISISDSInt32 = 1, ISISDSReal32 = 2, ISISDSReal64 = 3, ISISDSChar = 4 } ISISDSDataType;
 
 typedef struct {
   int len;
@@ -80,10 +74,8 @@ public:
    * @param nspec :: Number of spectra in the simulated dataset.
    * @param nbins :: Number of bins in the simulated dataset.
    */
-  TestServerConnection(const Poco::Net::StreamSocket &soc, int nper = 1,
-                       int nspec = 100, int nbins = 30)
-      : Poco::Net::TCPServerConnection(soc), m_nPeriods(nper),
-        m_nSpectra(nspec), m_nBins(nbins), m_nMonitors(3),
+  TestServerConnection(const Poco::Net::StreamSocket &soc, int nper = 1, int nspec = 100, int nbins = 30)
+      : Poco::Net::TCPServerConnection(soc), m_nPeriods(nper), m_nSpectra(nspec), m_nBins(nbins), m_nMonitors(3),
         m_nMonitorBins(nbins * 2) {
     char buffer[1024];
     socket().receiveBytes(&buffer, 1024);
@@ -179,8 +171,7 @@ public:
     comm.dims_array[0] = static_cast<int>(arr.size());
     strncpy(comm.command, "OK", sizeof(comm.command));
     socket().sendBytes(&comm, sizeof(comm));
-    socket().sendBytes(arr.data(),
-                       static_cast<int>(sizeof(float) * arr.size()));
+    socket().sendBytes(arr.data(), static_cast<int>(sizeof(float) * arr.size()));
   }
   /**
    * Send an array of int numbers
@@ -239,8 +230,7 @@ public:
             *b = x;
           };
           sendFloatArray(bins);
-        } else if (command == "RTCB2" ||
-                   (command.size() > 5 && command.substr(0, 5) == "RTCB_")) {
+        } else if (command == "RTCB2" || (command.size() > 5 && command.substr(0, 5) == "RTCB_")) {
           std::vector<float> bins(m_nMonitorBins + 1);
           const float dx = 10.0f;
           float x = 10000.0f;
@@ -291,8 +281,7 @@ public:
 /**
  * Implements Poco TCPServerConnectionFactory
  */
-class TestServerConnectionFactory
-    : public Poco::Net::TCPServerConnectionFactory {
+class TestServerConnectionFactory : public Poco::Net::TCPServerConnectionFactory {
   int m_nPeriods; ///< Number of periods in the fake dataset
   int m_nSpectra; ///< Number of spectra in the fake dataset
   int m_nBins;    ///< Number of bins in the fake dataset
@@ -304,14 +293,12 @@ public:
    * @param nbins :: Number of bins in the simulated dataset.
    */
   TestServerConnectionFactory(int nper = 1, int nspec = 100, int nbins = 30)
-      : Poco::Net::TCPServerConnectionFactory(), m_nPeriods(nper),
-        m_nSpectra(nspec), m_nBins(nbins) {}
+      : Poco::Net::TCPServerConnectionFactory(), m_nPeriods(nper), m_nSpectra(nspec), m_nBins(nbins) {}
   /**
    * The factory method.
    * @param socket :: The socket.
    */
-  Poco::Net::TCPServerConnection *
-  createConnection(const Poco::Net::StreamSocket &socket) override {
+  Poco::Net::TCPServerConnection *createConnection(const Poco::Net::StreamSocket &socket) override {
     return new TestServerConnection(socket, m_nPeriods, m_nSpectra, m_nBins);
   }
 };
@@ -325,18 +312,11 @@ using namespace API;
  * Declare the algorithm properties
  */
 void FakeISISHistoDAE::init() {
-  declareProperty(
-      std::make_unique<PropertyWithValue<int>>("NPeriods", 1, Direction::Input),
-      "Number of periods.");
-  declareProperty(std::make_unique<PropertyWithValue<int>>("NSpectra", 100,
-                                                           Direction::Input),
-                  "Number of spectra.");
-  declareProperty(
-      std::make_unique<PropertyWithValue<int>>("NBins", 30, Direction::Input),
-      "Number of bins.");
-  declareProperty(
-      std::make_unique<PropertyWithValue<int>>("Port", 56789, Direction::Input),
-      "The port to broadcast on (default 56789, ISISDAE 6789).");
+  declareProperty(std::make_unique<PropertyWithValue<int>>("NPeriods", 1, Direction::Input), "Number of periods.");
+  declareProperty(std::make_unique<PropertyWithValue<int>>("NSpectra", 100, Direction::Input), "Number of spectra.");
+  declareProperty(std::make_unique<PropertyWithValue<int>>("NBins", 30, Direction::Input), "Number of bins.");
+  declareProperty(std::make_unique<PropertyWithValue<int>>("Port", 56789, Direction::Input),
+                  "The port to broadcast on (default 56789, ISISDAE 6789).");
 }
 
 /**
@@ -353,10 +333,8 @@ void FakeISISHistoDAE::exec() {
 
   socket.listen();
 
-  Poco::Net::TCPServer server(
-      TestServerConnectionFactory::Ptr(
-          new TestServerConnectionFactory(nper, nspec, nbins)),
-      socket);
+  Poco::Net::TCPServer server(TestServerConnectionFactory::Ptr(new TestServerConnectionFactory(nper, nspec, nbins)),
+                              socket);
   server.start();
   // Keep going until you get cancelled or an error occurs
   while (true) {

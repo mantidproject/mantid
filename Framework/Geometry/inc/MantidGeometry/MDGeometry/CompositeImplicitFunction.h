@@ -28,8 +28,7 @@ namespace Geometry {
  @date 01/10/2010
  */
 
-class DLLExport CompositeImplicitFunction
-    : public Mantid::Geometry::MDImplicitFunction {
+class DLLExport CompositeImplicitFunction : public Mantid::Geometry::MDImplicitFunction {
 public:
   //---------------------------------- Override base-class methods---
   bool isPointContained(const coord_t *coords) override;
@@ -38,8 +37,7 @@ public:
   using MDImplicitFunction::isPointContained;
   //-----------------------------------------------------------------
 
-  bool addFunction(
-      const Mantid::Geometry::MDImplicitFunction_sptr &constituentFunction);
+  bool addFunction(const Mantid::Geometry::MDImplicitFunction_sptr &constituentFunction);
   std::string getName() const override;
   std::string toXMLString() const override;
   int getNFunctions() const;
@@ -47,8 +45,7 @@ public:
 
 protected:
   std::vector<Mantid::Geometry::MDImplicitFunction_sptr> m_Functions;
-  using FunctionIterator =
-      std::vector<Mantid::Geometry::MDImplicitFunction_sptr>::const_iterator;
+  using FunctionIterator = std::vector<Mantid::Geometry::MDImplicitFunction_sptr>::const_iterator;
 };
 } // namespace Geometry
 } // namespace Mantid

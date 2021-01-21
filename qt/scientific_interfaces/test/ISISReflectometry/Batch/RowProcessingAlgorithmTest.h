@@ -12,24 +12,19 @@
 #include <cxxtest/TestSuite.h>
 
 using namespace MantidQt::CustomInterfaces::ISISReflectometry;
-using namespace MantidQt::CustomInterfaces::ISISReflectometry::
-    ModelCreationHelper;
+using namespace MantidQt::CustomInterfaces::ISISReflectometry::ModelCreationHelper;
 
 class RowProcessingAlgorithmTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static RowProcessingAlgorithmTest *createSuite() {
-    return new RowProcessingAlgorithmTest();
-  }
+  static RowProcessingAlgorithmTest *createSuite() { return new RowProcessingAlgorithmTest(); }
   static void destroySuite(RowProcessingAlgorithmTest *suite) { delete suite; }
 
   RowProcessingAlgorithmTest()
-      : m_instruments{"INTER", "OFFSPEC", "POLREF", "SURF", "CRISP"},
-        m_thetaTolerance(0.01), m_experiment(makeExperiment()),
-        m_instrument(makeInstrument()),
-        m_runsTable(m_instruments, m_thetaTolerance, ReductionJobs()),
-        m_slicing() {}
+      : m_instruments{"INTER", "OFFSPEC", "POLREF", "SURF", "CRISP"}, m_thetaTolerance(0.01),
+        m_experiment(makeExperiment()), m_instrument(makeInstrument()),
+        m_runsTable(m_instruments, m_thetaTolerance, ReductionJobs()), m_slicing() {}
 
   void testExperimentSettings() {
     auto model = Batch(m_experiment, m_instrument, m_runsTable, m_slicing);
@@ -192,8 +187,7 @@ public:
     // This tests adding a property via the options cell on a row, for a
     // property that does not get set anywhere else on the GUI
     auto model = Batch(m_experiment, m_instrument, m_runsTable, m_slicing);
-    auto row = makeRowWithOptionsCellFilled(
-        2.3, ReductionOptionsMap{{"ThetaLogName", "theta_log_name"}});
+    auto row = makeRowWithOptionsCellFilled(2.3, ReductionOptionsMap{{"ThetaLogName", "theta_log_name"}});
     auto result = createAlgorithmRuntimeProps(model, row);
     TS_ASSERT_EQUALS(result["ThetaLogName"], "theta_log_name");
   }
@@ -201,8 +195,7 @@ public:
   void testOptionsCellOverridesExperimentSettings() {
     auto model = Batch(m_experiment, m_instrument, m_runsTable, m_slicing);
     auto row = makeRowWithOptionsCellFilled(
-        2.3, ReductionOptionsMap{{"AnalysisMode", "PointDetectorAnalysis"},
-                                 {"ReductionType", "DivergentBeam"}});
+        2.3, ReductionOptionsMap{{"AnalysisMode", "PointDetectorAnalysis"}, {"ReductionType", "DivergentBeam"}});
     auto result = createAlgorithmRuntimeProps(model, row);
     TS_ASSERT_EQUALS(result["AnalysisMode"], "PointDetectorAnalysis");
     TS_ASSERT_EQUALS(result["ReductionType"], "DivergentBeam");
@@ -212,32 +205,27 @@ public:
     auto model = Batch(m_experiment, m_instrument, m_runsTable, m_slicing);
     // Use an angle that will match per-theta defaults. They should be
     // overridden by the cell values
-    auto row = makeRowWithOptionsCellFilled(
-        2.3, ReductionOptionsMap{{"ProcessingInstructions", "390-410"}});
+    auto row = makeRowWithOptionsCellFilled(2.3, ReductionOptionsMap{{"ProcessingInstructions", "390-410"}});
     auto result = createAlgorithmRuntimeProps(model, row);
     TS_ASSERT_EQUALS(result["ProcessingInstructions"], "390-410");
   }
 
   void testOptionsCellOverridesInstrumentSettings() {
     auto model = Batch(m_experiment, m_instrument, m_runsTable, m_slicing);
-    auto row = makeRowWithOptionsCellFilled(
-        2.3, ReductionOptionsMap{{"WavelengthMin", "3.3"}});
+    auto row = makeRowWithOptionsCellFilled(2.3, ReductionOptionsMap{{"WavelengthMin", "3.3"}});
     auto result = createAlgorithmRuntimeProps(model, row);
     TS_ASSERT_EQUALS(result["WavelengthMin"], "3.3");
   }
 
   void testOptionsCellOverridesSubtractBackgroundAndStillPicksUpSettings() {
-    auto experiment = Experiment(
-        AnalysisMode::MultiDetector, ReductionType::NonFlatSample,
-        SummationType::SumInQ, true, true,
-        BackgroundSubtraction(false, BackgroundSubtractionType::AveragePixelFit,
-                              3, CostFunctionType::UnweightedLeastSquares),
-        makePolarizationCorrections(), makeFloodCorrections(),
-        makeTransmissionStitchOptions(), makeStitchOptions(),
-        makePerThetaDefaultsWithTwoAnglesAndWildcard());
+    auto experiment =
+        Experiment(AnalysisMode::MultiDetector, ReductionType::NonFlatSample, SummationType::SumInQ, true, true,
+                   BackgroundSubtraction(false, BackgroundSubtractionType::AveragePixelFit, 3,
+                                         CostFunctionType::UnweightedLeastSquares),
+                   makePolarizationCorrections(), makeFloodCorrections(), makeTransmissionStitchOptions(),
+                   makeStitchOptions(), makePerThetaDefaultsWithTwoAnglesAndWildcard());
     auto model = Batch(experiment, m_instrument, m_runsTable, m_slicing);
-    auto row = makeRowWithOptionsCellFilled(
-        2.3, ReductionOptionsMap{{"SubtractBackground", "1"}});
+    auto row = makeRowWithOptionsCellFilled(2.3, ReductionOptionsMap{{"SubtractBackground", "1"}});
     auto result = createAlgorithmRuntimeProps(model, row);
     TS_ASSERT_EQUALS(result["SubtractBackground"], "1");
     TS_ASSERT_EQUALS(result["BackgroundCalculationMethod"], "AveragePixelFit");

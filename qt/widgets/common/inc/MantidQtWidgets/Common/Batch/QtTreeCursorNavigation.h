@@ -20,8 +20,7 @@ class QtTreeCursorNavigation {
 public:
   QtTreeCursorNavigation(QAbstractItemModel const *model);
   QModelIndex moveCursorPrevious(QModelIndex const &currentIndex) const;
-  QtTreeCursorNavigationResult
-  moveCursorNext(QModelIndex const &currentIndex) const;
+  QtTreeCursorNavigationResult moveCursorNext(QModelIndex const &currentIndex) const;
 
   QModelIndex previousCellInThisRow(QModelIndex const &index) const;
   QModelIndex lastCellInPreviousRow(QModelIndex const &index) const;
@@ -37,8 +36,7 @@ public:
 
 private:
   QAbstractItemModel const *m_model;
-  QtTreeCursorNavigationResult
-  withoutAppendedRow(QModelIndex const &index) const;
+  QtTreeCursorNavigationResult withoutAppendedRow(QModelIndex const &index) const;
   QtTreeCursorNavigationResult withAppendedRow(QModelIndex const &index) const;
 };
 } // namespace Batch

@@ -31,16 +31,10 @@ public:
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override {
-    return "DataHandling\\DataAcquisition";
-  }
-  const std::vector<std::string> seeAlso() const override {
-    return {"FakeISISEventDAE"};
-  }
+  const std::string category() const override { return "DataHandling\\DataAcquisition"; }
+  const std::vector<std::string> seeAlso() const override { return {"FakeISISEventDAE"}; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Simulates ISIS histogram DAE.";
-  }
+  const std::string summary() const override { return "Simulates ISIS histogram DAE."; }
 
 private:
   // Implement abstract Algorithm methods

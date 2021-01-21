@@ -77,11 +77,9 @@ QString StandardView::g_sliceMDLbl = "Complete (" + g_sliceMDName + ")";
 QString StandardView::g_cutMDLbl = "Horace style (" + g_cutMDName + ")";
 
 const QString tipBefore = "Run the ";
-const QString tipAfter =
-    " Mantid algorithm (the algorithm dialog will show up)";
+const QString tipAfter = " Mantid algorithm (the algorithm dialog will show up)";
 QString StandardView::g_binMDToolTipTxt = tipBefore + g_binMDName + tipAfter;
-QString StandardView::g_sliceMDToolTipTxt =
-    tipBefore + g_sliceMDName + tipAfter;
+QString StandardView::g_sliceMDToolTipTxt = tipBefore + g_sliceMDName + tipAfter;
 QString StandardView::g_cutMDToolTipTxt = tipBefore + g_cutMDName + tipAfter;
 const std::string StandardView::SurfaceRepresentation = "Surface";
 const std::string StandardView::WireFrameRepresentation = "Wireframe";
@@ -96,11 +94,9 @@ QMap<QString, QString> StandardView::g_actionToAlgName;
  * @param rebinnedSourcesManager Pointer to a RebinnedSourcesManager
  * @param createRenderProxy :: whether to create a render proxy for the view
  */
-StandardView::StandardView(QWidget *parent,
-                           RebinnedSourcesManager *rebinnedSourcesManager,
-                           bool createRenderProxy)
-    : ViewBase(parent, rebinnedSourcesManager), m_binMDAction(nullptr),
-      m_sliceMDAction(nullptr), m_cutMDAction(nullptr), m_unbinAction(nullptr) {
+StandardView::StandardView(QWidget *parent, RebinnedSourcesManager *rebinnedSourcesManager, bool createRenderProxy)
+    : ViewBase(parent, rebinnedSourcesManager), m_binMDAction(nullptr), m_sliceMDAction(nullptr),
+      m_cutMDAction(nullptr), m_unbinAction(nullptr) {
   this->m_ui.setupUi(this);
   this->m_cameraReset = false;
 
@@ -115,27 +111,22 @@ StandardView::StandardView(QWidget *parent,
   setupViewButtons();
 
   // Set the cut button to create a slice on the data
-  QObject::connect(this->m_ui.cutButton, SIGNAL(clicked()), this,
-                   SLOT(onCutButtonClicked()));
+  QObject::connect(this->m_ui.cutButton, SIGNAL(clicked()), this, SLOT(onCutButtonClicked()));
 
   // Set the cut button to create a slice on the data
-  QObject::connect(this->m_ui.thresholdButton, SIGNAL(clicked()), this,
-                   SLOT(onThresholdButtonClicked()));
+  QObject::connect(this->m_ui.thresholdButton, SIGNAL(clicked()), this, SLOT(onThresholdButtonClicked()));
 
   // Listen to a change in the active source, to adapt our rebin buttons
-  QObject::connect(&pqActiveObjects::instance(),
-                   SIGNAL(sourceChanged(pqPipelineSource *)), this,
+  QObject::connect(&pqActiveObjects::instance(), SIGNAL(sourceChanged(pqPipelineSource *)), this,
                    SLOT(activeSourceChangeListener(pqPipelineSource *)));
 
   // Set the scale button to create the ScaleWorkspace operator
-  QObject::connect(this->m_ui.scaleButton, SIGNAL(clicked()), this,
-                   SLOT(onScaleButtonClicked()));
+  QObject::connect(this->m_ui.scaleButton, SIGNAL(clicked()), this, SLOT(onScaleButtonClicked()));
 
   if (createRenderProxy) {
     this->m_view = this->createRenderView(this->m_ui.renderFrame);
 
-    QObject::connect(this->m_view.data(), SIGNAL(endRender()), this,
-                     SLOT(onRenderDone()));
+    QObject::connect(this->m_view.data(), SIGNAL(endRender()), this, SLOT(onRenderDone()));
   }
 }
 
@@ -144,8 +135,7 @@ StandardView::~StandardView() {}
 void StandardView::setupViewButtons() {
 
   // Populate the rebin button
-  QMenuWithToolTip *rebinMenu =
-      new QMenuWithToolTip(this->m_ui.rebinToolButton);
+  QMenuWithToolTip *rebinMenu = new QMenuWithToolTip(this->m_ui.rebinToolButton);
 
   m_binMDAction = new QAction(g_binMDLbl, rebinMenu);
   m_binMDAction->setToolTip(g_binMDToolTipTxt);
@@ -170,16 +160,12 @@ void StandardView::setupViewButtons() {
   this->m_ui.rebinToolButton->setPopupMode(QToolButton::InstantPopup);
   this->m_ui.rebinToolButton->setMenu(rebinMenu);
 
-  QObject::connect(m_binMDAction, SIGNAL(triggered()), this, SLOT(onRebin()),
-                   Qt::QueuedConnection);
-  QObject::connect(m_sliceMDAction, SIGNAL(triggered()), this, SLOT(onRebin()),
-                   Qt::QueuedConnection);
-  QObject::connect(m_cutMDAction, SIGNAL(triggered()), this, SLOT(onRebin()),
-                   Qt::QueuedConnection);
+  QObject::connect(m_binMDAction, SIGNAL(triggered()), this, SLOT(onRebin()), Qt::QueuedConnection);
+  QObject::connect(m_sliceMDAction, SIGNAL(triggered()), this, SLOT(onRebin()), Qt::QueuedConnection);
+  QObject::connect(m_cutMDAction, SIGNAL(triggered()), this, SLOT(onRebin()), Qt::QueuedConnection);
   // Set the unbinbutton to remove the rebinning on a workspace
   // which was binned in the VSI
-  QObject::connect(m_unbinAction, SIGNAL(triggered()), this, SIGNAL(unbin()),
-                   Qt::QueuedConnection);
+  QObject::connect(m_unbinAction, SIGNAL(triggered()), this, SIGNAL(unbin()), Qt::QueuedConnection);
 }
 
 void StandardView::destroyView() {
@@ -204,8 +190,7 @@ void StandardView::render() {
   }
 
   // Show the data
-  pqDataRepresentation *drep = builder->createDataRepresentation(
-      this->origSrc->getOutputPort(0), this->m_view);
+  pqDataRepresentation *drep = builder->createDataRepresentation(this->origSrc->getOutputPort(0), this->m_view);
   std::string reptype = StandardView::SurfaceRepresentation;
   if (this->isPeaksWorkspace(this->origSrc)) {
     reptype = StandardView::WireFrameRepresentation;
@@ -214,8 +199,7 @@ void StandardView::render() {
   drep->getProxy()->UpdateVTKObjects();
   this->origRep = qobject_cast<pqPipelineRepresentation *>(drep);
   if (!this->isPeaksWorkspace(this->origSrc)) {
-    vtkSMPVRepresentationProxy::SetScalarColoring(
-        drep->getProxy(), "signal", vtkDataObject::FIELD_ASSOCIATION_CELLS);
+    vtkSMPVRepresentationProxy::SetScalarColoring(drep->getProxy(), "signal", vtkDataObject::FIELD_ASSOCIATION_CELLS);
     drep->getProxy()->UpdateVTKObjects();
   }
 
@@ -260,8 +244,7 @@ void StandardView::onScaleButtonClicked() {
   }
 
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
-  this->m_scaler = builder->createFilter(
-      "filters", "MantidParaViewScaleWorkspace", this->getPvActiveSrc());
+  this->m_scaler = builder->createFilter("filters", "MantidParaViewScaleWorkspace", this->getPvActiveSrc());
 
   /*
    Paraview will try to set the respresentation to Outline. This is not good.
@@ -270,12 +253,8 @@ void StandardView::onScaleButtonClicked() {
    representation to be
    Surface instead.
    */
-  QObject::connect(this->m_scaler,
-                   SIGNAL(representationAdded(pqPipelineSource *,
-                                              pqDataRepresentation *, int)),
-                   this,
-                   SLOT(onScaleRepresentationAdded(
-                       pqPipelineSource *, pqDataRepresentation *, int)));
+  QObject::connect(this->m_scaler, SIGNAL(representationAdded(pqPipelineSource *, pqDataRepresentation *, int)), this,
+                   SLOT(onScaleRepresentationAdded(pqPipelineSource *, pqDataRepresentation *, int)));
 
   // We need to attach the visibility listener to the newly
   // created filter, this is required for automatic updating the color scale
@@ -323,13 +302,10 @@ void StandardView::setView(pqRenderView *view) {
   hbox->setMargin(0);
   hbox->addWidget(m_view->widget());
 
-  QObject::connect(this->m_view.data(), SIGNAL(endRender()), this,
-                   SLOT(onRenderDone()));
+  QObject::connect(this->m_view.data(), SIGNAL(endRender()), this, SLOT(onRenderDone()));
 }
 
-ModeControlWidget::Views StandardView::getViewType() {
-  return ModeControlWidget::Views::STANDARD;
-}
+ModeControlWidget::Views StandardView::getViewType() { return ModeControlWidget::Views::STANDARD; }
 
 /**
  * Check if the rebin and unbin buttons should be visible
@@ -343,10 +319,8 @@ void StandardView::setRebinAndUnbinButtons() {
   unsigned int numberOfPeakWorkspaces = 0;
 
   pqServer *server = pqActiveObjects::instance().activeServer();
-  pqServerManagerModel *smModel =
-      pqApplicationCore::instance()->getServerManagerModel();
-  const QList<pqPipelineSource *> sources =
-      smModel->findItems<pqPipelineSource *>(server);
+  pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
+  const QList<pqPipelineSource *> sources = smModel->findItems<pqPipelineSource *>(server);
 
   foreach (pqPipelineSource *source, sources) {
     if (isInternallyRebinnedWorkspace(source)) {
@@ -360,8 +334,7 @@ void StandardView::setRebinAndUnbinButtons() {
 
   // If there are any true MDHisto workspaces then the rebin button should be
   // disabled
-  bool allowRebinning =
-      numberOfTrueMDHistoWorkspaces > 0 || numberOfPeakWorkspaces > 0;
+  bool allowRebinning = numberOfTrueMDHistoWorkspaces > 0 || numberOfPeakWorkspaces > 0;
   this->allowRebinningOptions(allowRebinning);
 
   // If there are no internally rebinned workspaces the button should be
@@ -385,10 +358,8 @@ void StandardView::onRebin() {
  * Surface
  * @param representation : representation to modify
  */
-void StandardView::onScaleRepresentationAdded(
-    pqPipelineSource *, pqDataRepresentation *representation, int) {
-  vtkSMPropertyHelper(representation->getProxy(), "Representation")
-      .Set(StandardView::SurfaceRepresentation.c_str());
+void StandardView::onScaleRepresentationAdded(pqPipelineSource *, pqDataRepresentation *representation, int) {
+  vtkSMPropertyHelper(representation->getProxy(), "Representation").Set(StandardView::SurfaceRepresentation.c_str());
 }
 
 /**
@@ -403,9 +374,7 @@ void StandardView::allowRebinningOptions(bool allow) {
 /**
 Enable unbin option
 */
-void StandardView::allowUnbinOption(bool allow) {
-  this->m_unbinAction->setEnabled(allow);
-}
+void StandardView::allowUnbinOption(bool allow) { this->m_unbinAction->setEnabled(allow); }
 
 /**
  * Listen for a change of the active source in order to check if the

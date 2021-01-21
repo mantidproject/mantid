@@ -56,8 +56,7 @@ const boost::regex VERSION_REG_EXP{"^version=([0-9]+)"};
  * Use the files to determine if there is any "extra" columns that need to be
  * added to the output TableWorkspace.
  */
-std::vector<std::string>
-extra_columns(const std::vector<std::string> &filenames) {
+std::vector<std::string> extra_columns(const std::vector<std::string> &filenames) {
   // only version1 files generate extra columns
   if (filenames[F_INDEX_V1].empty())
     return std::vector<std::string>();
@@ -70,15 +69,13 @@ extra_columns(const std::vector<std::string> &filenames) {
     throw Exception::FileError("Unable to open file", filenames[F_INDEX_V1]);
   }
 
-  for (std::string line = Strings::getLine(file); !file.eof();
-       Strings::getLine(file, line)) {
+  for (std::string line = Strings::getLine(file); !file.eof(); Strings::getLine(file, line)) {
     boost::smatch result;
     // all instances of table headers
     if (boost::regex_search(line, result, V1_TABLE_REG_EXP)) {
       if (result.size() == 2) {
         line = Strings::strip(result[1]);
-        Kernel::StringTokenizer tokenizer(
-            line, " \t", Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+        Kernel::StringTokenizer tokenizer(line, " \t", Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
         for (const auto &token : tokenizer) {
           columnSet.insert(token);
         }
@@ -90,8 +87,7 @@ extra_columns(const std::vector<std::string> &filenames) {
 
   // convert the result to a sorted vector
   std::vector<std::string> columnnames;
-  std::copy(columnSet.begin(), columnSet.end(),
-            std::back_inserter(columnnames));
+  std::copy(columnSet.begin(), columnSet.end(), std::back_inserter(columnnames));
   std::sort(columnnames.begin(), columnnames.end());
 
   return columnnames;
@@ -100,56 +96,42 @@ extra_columns(const std::vector<std::string> &filenames) {
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string PDLoadCharacterizations::name() const {
-  return "PDLoadCharacterizations";
-}
+const std::string PDLoadCharacterizations::name() const { return "PDLoadCharacterizations"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int PDLoadCharacterizations::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string PDLoadCharacterizations::category() const {
-  return "Workflow\\DataHandling";
-}
+const std::string PDLoadCharacterizations::category() const { return "Workflow\\DataHandling"; }
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void PDLoadCharacterizations::init() {
   const auto exts = std::vector<std::string>({".txt"});
-  declareProperty(std::make_unique<MultipleFileProperty>("Filename", exts),
-                  "Characterizations file");
-  declareProperty(std::make_unique<FileProperty>(
-                      "ExpIniFilename", "", FileProperty::OptionalLoad, "ini"),
+  declareProperty(std::make_unique<MultipleFileProperty>("Filename", exts), "Characterizations file");
+  declareProperty(std::make_unique<FileProperty>("ExpIniFilename", "", FileProperty::OptionalLoad, "ini"),
                   "(Optional) exp.ini file used at NOMAD");
 
-  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "Output for the information of characterizations and runs");
 
-  declareProperty("IParmFilename", std::string(""),
-                  "Name of the gsas instrument parameter file.",
+  declareProperty("IParmFilename", std::string(""), "Name of the gsas instrument parameter file.", Direction::Output);
+  declareProperty("PrimaryFlightPath", EMPTY_DBL(), "Primary flight path L1 of the powder diffractomer. ",
                   Direction::Output);
-  declareProperty("PrimaryFlightPath", EMPTY_DBL(),
-                  "Primary flight path L1 of the powder diffractomer. ",
-                  Direction::Output);
-  declareProperty(std::make_unique<ArrayProperty<int32_t>>("SpectrumIDs",
-                                                           Direction::Output),
+  declareProperty(std::make_unique<ArrayProperty<int32_t>>("SpectrumIDs", Direction::Output),
                   "Spectrum Nos (note that it is not detector ID or workspace "
                   "indices). The list must be either empty or have a size "
                   "equal to input workspace's histogram number. ");
-  declareProperty(
-      std::make_unique<ArrayProperty<double>>("L2", Direction::Output),
-      "Secondary flight (L2) paths for each detector.  Number of L2 "
-      "given must be same as number of histogram.");
-  declareProperty(
-      std::make_unique<ArrayProperty<double>>("Polar", Direction::Output),
-      "Polar angles (two thetas) for detectors. Number of 2theta "
-      "given must be same as number of histogram.");
-  declareProperty(
-      std::make_unique<ArrayProperty<double>>("Azimuthal", Direction::Output),
-      "Azimuthal angles (out-of-plane) for detectors. "
-      "Number of azimuthal angles given must be same as number of histogram.");
+  declareProperty(std::make_unique<ArrayProperty<double>>("L2", Direction::Output),
+                  "Secondary flight (L2) paths for each detector.  Number of L2 "
+                  "given must be same as number of histogram.");
+  declareProperty(std::make_unique<ArrayProperty<double>>("Polar", Direction::Output),
+                  "Polar angles (two thetas) for detectors. Number of 2theta "
+                  "given must be same as number of histogram.");
+  declareProperty(std::make_unique<ArrayProperty<double>>("Azimuthal", Direction::Output),
+                  "Azimuthal angles (out-of-plane) for detectors. "
+                  "Number of azimuthal angles given must be same as number of histogram.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -202,8 +184,7 @@ int getVersion(const std::string &filename) {
   file.close(); // cleanup
 
   boost::smatch result;
-  if (boost::regex_search(line, result, VERSION_REG_EXP) &&
-      result.size() == 2) {
+  if (boost::regex_search(line, result, VERSION_REG_EXP) && result.size() == 2) {
     return boost::lexical_cast<int>(result[1]);
   }
 
@@ -212,19 +193,17 @@ int getVersion(const std::string &filename) {
 }
 
 template <typename T>
-T lexical_cast(const std::string &value, const std::string &filename,
-               const int linenum, const std::string &label = "") {
+T lexical_cast(const std::string &value, const std::string &filename, const int linenum,
+               const std::string &label = "") {
   try {
     return boost::lexical_cast<T>(value);
   } catch (boost::bad_lexical_cast &e) {
     // check for lexical cast and rethrow as parse error
     if (label.empty())
-      throw Exception::ParseError(
-          "While converting \"" + value + "\": " + e.what(), filename, linenum);
+      throw Exception::ParseError("While converting \"" + value + "\": " + e.what(), filename, linenum);
     else
-      throw Exception::ParseError("In " + label + " while converting \"" +
-                                      value + "\": " + e.what(),
-                                  filename, linenum);
+      throw Exception::ParseError("In " + label + " while converting \"" + value + "\": " + e.what(), filename,
+                                  linenum);
   }
 }
 } // anonymous namespace
@@ -237,11 +216,9 @@ T lexical_cast(const std::string &value, const std::string &filename,
 std::vector<std::string> PDLoadCharacterizations::getFilenames() {
   // get the values from the "Filename" property
   std::vector<std::string> filenamesFromPropertyUnraveld;
-  std::vector<std::vector<std::string>> filenamesFromProperty =
-      this->getProperty("Filename");
+  std::vector<std::vector<std::string>> filenamesFromProperty = this->getProperty("Filename");
   for (const auto &outer : filenamesFromProperty) {
-    filenamesFromPropertyUnraveld.insert(filenamesFromPropertyUnraveld.end(),
-                                         outer.cbegin(), outer.cend());
+    filenamesFromPropertyUnraveld.insert(filenamesFromPropertyUnraveld.end(), outer.cbegin(), outer.cend());
   }
   // error check that something sensible was supplied
   if (filenamesFromPropertyUnraveld.size() > 2) {
@@ -253,8 +230,7 @@ std::vector<std::string> PDLoadCharacterizations::getFilenames() {
   int v1_index = -1;
   for (size_t i = 0; i < filenamesFromPropertyUnraveld.size(); ++i) {
     const int version = getVersion(filenamesFromPropertyUnraveld[i]);
-    g_log.debug() << "Found version " << version << " in \""
-                  << filenamesFromPropertyUnraveld[i] << "\"\n";
+    g_log.debug() << "Found version " << version << " in \"" << filenamesFromPropertyUnraveld[i] << "\"\n";
     if (version == 0)
       v0_index = static_cast<int>(i);
     else if (version == 1)
@@ -297,8 +273,7 @@ std::vector<std::string> PDLoadCharacterizations::getFilenames() {
  * exceptions
  * @returns line number that file was read to
  */
-int PDLoadCharacterizations::readFocusInfo(std::ifstream &file,
-                                           const std::string &filename) {
+int PDLoadCharacterizations::readFocusInfo(std::ifstream &file, const std::string &filename) {
   // end early if already at the end of the file
   if (file.eof())
     return 0;
@@ -316,8 +291,7 @@ int PDLoadCharacterizations::readFocusInfo(std::ifstream &file,
   // parse the file
   // Strings::getLine skips blank lines and lines that start with #
   int linenum = 1; // first line of file was a keyword that this existed
-  for (std::string line = Strings::getLine(file); !file.eof();
-       Strings::getLine(file, line)) {
+  for (std::string line = Strings::getLine(file); !file.eof(); Strings::getLine(file, line)) {
     linenum += 1;
     line = Strings::strip(line);
     // skip empty lines and "comments"
@@ -327,34 +301,24 @@ int PDLoadCharacterizations::readFocusInfo(std::ifstream &file,
       continue;
 
     std::vector<std::string> splitted;
-    boost::split(splitted, line, boost::is_any_of("\t "),
-                 boost::token_compress_on);
+    boost::split(splitted, line, boost::is_any_of("\t "), boost::token_compress_on);
     if (splitted[0] == L1_KEY) {
-      this->setProperty(
-          "PrimaryFlightPath",
-          lexical_cast<double>(splitted[1], filename, linenum, "l1"));
+      this->setProperty("PrimaryFlightPath", lexical_cast<double>(splitted[1], filename, linenum, "l1"));
       break;
     } else if (splitted.size() >= 3) { // specid, L2, theta
-      specIds.emplace_back(lexical_cast<int32_t>(splitted[0], filename, linenum,
-                                                 "spectrum number"));
-      l2.emplace_back(
-          lexical_cast<double>(splitted[1], filename, linenum, "l2"));
-      polar.emplace_back(
-          lexical_cast<double>(splitted[2], filename, linenum, "polar"));
-      if (splitted.size() >= 4 &&
-          (!splitted[3].empty())) { // azimuthal was specified
-        azi.emplace_back(
-            lexical_cast<double>(splitted[3], filename, linenum, "azimuthal"));
+      specIds.emplace_back(lexical_cast<int32_t>(splitted[0], filename, linenum, "spectrum number"));
+      l2.emplace_back(lexical_cast<double>(splitted[1], filename, linenum, "l2"));
+      polar.emplace_back(lexical_cast<double>(splitted[2], filename, linenum, "polar"));
+      if (splitted.size() >= 4 && (!splitted[3].empty())) { // azimuthal was specified
+        azi.emplace_back(lexical_cast<double>(splitted[3], filename, linenum, "azimuthal"));
       } else { // just set it to zero
         azi.emplace_back(0.);
       }
     }
   }
   // confirm that everything is the same length
-  if (specIds.size() != l2.size() || specIds.size() != polar.size() ||
-      specIds.size() != azi.size())
-    throw Exception::FileError(
-        "Found different number of spectra, L2 and polar angles", filename);
+  if (specIds.size() != l2.size() || specIds.size() != polar.size() || specIds.size() != azi.size())
+    throw Exception::FileError("Found different number of spectra, L2 and polar angles", filename);
 
   // set the values
   this->setProperty("SpectrumIDs", specIds);
@@ -375,9 +339,7 @@ int PDLoadCharacterizations::readFocusInfo(std::ifstream &file,
  * @param linenum The line number that file was read to before starting this
  * function to be included in exceptions
  */
-void PDLoadCharacterizations::readCharInfo(std::ifstream &file,
-                                           ITableWorkspace_sptr &wksp,
-                                           const std::string &filename,
+void PDLoadCharacterizations::readCharInfo(std::ifstream &file, ITableWorkspace_sptr &wksp, const std::string &filename,
                                            int linenum) {
   // end early if already at the end of the file
   if (file.eof())
@@ -388,8 +350,7 @@ void PDLoadCharacterizations::readCharInfo(std::ifstream &file,
   const size_t num_of_columns = wksp->columnCount();
 
   // parse the file
-  for (std::string line = Strings::getLine(file); !file.eof();
-       Strings::getLine(file, line)) {
+  for (std::string line = Strings::getLine(file); !file.eof(); Strings::getLine(file, line)) {
     linenum += 1;
     line = Strings::strip(line);
     // skip empty lines and "comments"
@@ -400,8 +361,7 @@ void PDLoadCharacterizations::readCharInfo(std::ifstream &file,
     g_log.debug(line);
     // parse the line
     std::vector<std::string> splitted;
-    boost::split(splitted, line, boost::is_any_of("\t "),
-                 boost::token_compress_on);
+    boost::split(splitted, line, boost::is_any_of("\t "), boost::token_compress_on);
     while (splitted.size() < 12)
       splitted.emplace_back(ZERO); // extra values default to zero
 
@@ -419,10 +379,8 @@ void PDLoadCharacterizations::readCharInfo(std::ifstream &file,
     row << splitted[7]; // d_max
     row << lexical_cast<double>(splitted[8], filename, linenum, "tof_min");
     row << lexical_cast<double>(splitted[9], filename, linenum, "tof_max");
-    row << lexical_cast<double>(splitted[10], filename, linenum,
-                                "wavelength_min");
-    row << lexical_cast<double>(splitted[11], filename, linenum,
-                                "wavelength_max");
+    row << lexical_cast<double>(splitted[10], filename, linenum, "wavelength_min");
+    row << lexical_cast<double>(splitted[11], filename, linenum, "wavelength_max");
     // pad all extras with empty string - the 14 required columns have
     // already been added to the row
     for (size_t i = 14; i < num_of_columns; ++i) {
@@ -431,8 +389,7 @@ void PDLoadCharacterizations::readCharInfo(std::ifstream &file,
   }
 }
 
-void PDLoadCharacterizations::readVersion0(const std::string &filename,
-                                           API::ITableWorkspace_sptr &wksp) {
+void PDLoadCharacterizations::readVersion0(const std::string &filename, API::ITableWorkspace_sptr &wksp) {
   // don't bother if there isn't a filename
   if (filename.empty())
     return;
@@ -474,8 +431,7 @@ bool closeEnough(const double left, const double right) {
   return relativeDiff < .05;
 }
 
-int findRow(API::ITableWorkspace_sptr &wksp,
-            const std::vector<std::string> &values) {
+int findRow(API::ITableWorkspace_sptr &wksp, const std::vector<std::string> &values) {
   // don't have a good way to mark error location in these casts
   const auto frequency = boost::lexical_cast<double>(values[0]);
   const auto wavelength = boost::lexical_cast<double>(values[1]);
@@ -485,8 +441,7 @@ int findRow(API::ITableWorkspace_sptr &wksp,
   for (size_t i = 0; i < numRows; ++i) {
     const double frequencyRow = wksp->getRef<double>("frequency", i);
     const double wavelengthRow = wksp->getRef<double>("wavelength", i);
-    if (closeEnough(frequency, frequencyRow) &&
-        closeEnough(wavelength, wavelengthRow)) {
+    if (closeEnough(frequency, frequencyRow) && closeEnough(wavelength, wavelengthRow)) {
       return static_cast<int>(i);
     }
   }
@@ -494,8 +449,7 @@ int findRow(API::ITableWorkspace_sptr &wksp,
   return -1;
 }
 
-void updateRow(API::ITableWorkspace_sptr &wksp, const size_t rowNum,
-               const std::vector<std::string> &names,
+void updateRow(API::ITableWorkspace_sptr &wksp, const size_t rowNum, const std::vector<std::string> &names,
                const std::vector<std::string> &values) {
   wksp->getRef<std::string>("vanadium", rowNum) = values[2];
   wksp->getRef<std::string>("vanadium_background", rowNum) = values[3];
@@ -508,8 +462,7 @@ void updateRow(API::ITableWorkspace_sptr &wksp, const size_t rowNum,
 }
 } // namespace
 
-void PDLoadCharacterizations::readVersion1(const std::string &filename,
-                                           API::ITableWorkspace_sptr &wksp) {
+void PDLoadCharacterizations::readVersion1(const std::string &filename, API::ITableWorkspace_sptr &wksp) {
   // don't bother if there isn't a filename
   if (filename.empty())
     return;
@@ -525,20 +478,17 @@ void PDLoadCharacterizations::readVersion1(const std::string &filename,
   // first line must be version string
   std::string line = Strings::getLine(file);
   boost::smatch versionSearch;
-  if (boost::regex_search(line, versionSearch, VERSION_REG_EXP) &&
-      versionSearch.size() == 2) {
+  if (boost::regex_search(line, versionSearch, VERSION_REG_EXP) && versionSearch.size() == 2) {
     g_log.debug() << "Found version " << versionSearch[1] << "\n";
   } else {
     file.close();
-    throw Exception::ParseError(
-        "file must have \"version=1\" as the first line", filename, 0);
+    throw Exception::ParseError("file must have \"version=1\" as the first line", filename, 0);
   }
 
   // store the names of the columns in order
   int linenum = 0;
   std::vector<std::string> columnNames;
-  for (Strings::getLine(file, line); !file.eof();
-       Strings::getLine(file, line)) {
+  for (Strings::getLine(file, line); !file.eof(); Strings::getLine(file, line)) {
     linenum += 1;
     line = Strings::strip(line);
     if (line.empty())
@@ -552,25 +502,20 @@ void PDLoadCharacterizations::readVersion1(const std::string &filename,
     if (boost::regex_search(line, v1TableSearch, V1_TABLE_REG_EXP)) {
       if (v1TableSearch.size() == 2) {
         line = Strings::strip(v1TableSearch[1]);
-        Kernel::StringTokenizer tokenizer(
-            line, " \t", Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
-        std::move(tokenizer.begin(), tokenizer.end(),
-                  std::back_inserter(columnNames));
+        Kernel::StringTokenizer tokenizer(line, " \t", Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+        std::move(tokenizer.begin(), tokenizer.end(), std::back_inserter(columnNames));
       }
     } else {
       if (columnNames.empty()) // should never happen
         throw Exception::FileError("file missing column names", filename);
 
       line = Strings::strip(line);
-      Kernel::StringTokenizer tokenizer(
-          line, " \t", Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+      Kernel::StringTokenizer tokenizer(line, " \t", Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
       std::vector<std::string> valuesAsStr;
-      std::move(tokenizer.begin(), tokenizer.end(),
-                std::back_inserter(valuesAsStr));
+      std::move(tokenizer.begin(), tokenizer.end(), std::back_inserter(valuesAsStr));
       if (valuesAsStr.size() < columnNames.size() + INFO_OFFSET_V1) {
         std::stringstream msg;
-        msg << "Number of data columns (" << valuesAsStr.size()
-            << ") not compatible with number of column labels ("
+        msg << "Number of data columns (" << valuesAsStr.size() << ") not compatible with number of column labels ("
             << (columnNames.size() + INFO_OFFSET_V1) << ")";
         throw Exception::ParseError(msg.str(), filename, linenum);
       }
@@ -578,15 +523,12 @@ void PDLoadCharacterizations::readVersion1(const std::string &filename,
       const int rowIndex = findRow(wksp, valuesAsStr);
 
       if (rowIndex >= 0) {
-        updateRow(wksp, static_cast<size_t>(rowIndex), columnNames,
-                  valuesAsStr);
+        updateRow(wksp, static_cast<size_t>(rowIndex), columnNames, valuesAsStr);
       } else {
         // add the row
         API::TableRow row = wksp->appendRow();
-        row << lexical_cast<double>(valuesAsStr[0], filename, linenum,
-                                    "frequency");
-        row << lexical_cast<double>(valuesAsStr[1], filename, linenum,
-                                    "wavelength");
+        row << lexical_cast<double>(valuesAsStr[0], filename, linenum, "frequency");
+        row << lexical_cast<double>(valuesAsStr[1], filename, linenum, "wavelength");
         row << boost::lexical_cast<int32_t>(1); // bank
         row << valuesAsStr[2];                  // vanadium
         row << valuesAsStr[3];                  // vanadium_background
@@ -616,8 +558,7 @@ void PDLoadCharacterizations::readVersion1(const std::string &filename,
  * @param filename full path to a exp.ini file
  * @param wksp The table workspace to modify.
  */
-void PDLoadCharacterizations::readExpIni(const std::string &filename,
-                                         API::ITableWorkspace_sptr &wksp) {
+void PDLoadCharacterizations::readExpIni(const std::string &filename, API::ITableWorkspace_sptr &wksp) {
   // don't bother if there isn't a filename
   if (filename.empty())
     return;
@@ -635,8 +576,7 @@ void PDLoadCharacterizations::readExpIni(const std::string &filename,
   }
 
   // parse the file
-  for (std::string line = Strings::getLine(file); !file.eof();
-       Strings::getLine(file, line)) {
+  for (std::string line = Strings::getLine(file); !file.eof(); Strings::getLine(file, line)) {
     line = Strings::strip(line);
     // skip empty lines and "comments"
     if (line.empty())
@@ -646,8 +586,7 @@ void PDLoadCharacterizations::readExpIni(const std::string &filename,
 
     // split the line and see if it has something meaningful
     std::vector<std::string> splitted;
-    boost::split(splitted, line, boost::is_any_of("\t "),
-                 boost::token_compress_on);
+    boost::split(splitted, line, boost::is_any_of("\t "), boost::token_compress_on);
     if (splitted.size() < 2)
       continue;
 

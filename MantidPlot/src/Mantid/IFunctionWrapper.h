@@ -28,12 +28,8 @@ public:
 
   /// IFunction pointer
   std::shared_ptr<Mantid::API::IFunction> function() { return m_function; }
-  std::shared_ptr<Mantid::API::CompositeFunction> compositeFunction() {
-    return m_compositeFunction;
-  }
-  std::shared_ptr<Mantid::API::IPeakFunction> peakFunction() {
-    return m_peakFunction;
-  }
+  std::shared_ptr<Mantid::API::CompositeFunction> compositeFunction() { return m_compositeFunction; }
+  std::shared_ptr<Mantid::API::IPeakFunction> peakFunction() { return m_peakFunction; }
 
   /// Set a new function from a string
   void setFunction(const QString &name);

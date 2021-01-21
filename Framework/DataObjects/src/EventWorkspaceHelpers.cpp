@@ -20,10 +20,8 @@ namespace DataObjects {
  * @param inputMatrixW :: input event workspace
  * @return a MatrixWorkspace_sptr
  */
-MatrixWorkspace_sptr EventWorkspaceHelpers::convertEventTo2D(
-    const MatrixWorkspace_sptr &inputMatrixW) {
-  EventWorkspace_sptr inputW =
-      std::dynamic_pointer_cast<EventWorkspace>(inputMatrixW);
+MatrixWorkspace_sptr EventWorkspaceHelpers::convertEventTo2D(const MatrixWorkspace_sptr &inputMatrixW) {
+  EventWorkspace_sptr inputW = std::dynamic_pointer_cast<EventWorkspace>(inputMatrixW);
   if (!inputW)
     throw std::invalid_argument("EventWorkspaceHelpers::convertEventTo2D(): "
                                 "Input workspace is not an EventWorkspace.");
@@ -32,8 +30,7 @@ MatrixWorkspace_sptr EventWorkspaceHelpers::convertEventTo2D(
 
   // Make a workspace 2D version of it
   MatrixWorkspace_sptr outputW;
-  outputW = WorkspaceFactory::Instance().create(
-      "Workspace2D", inputW->getNumberHistograms(), numBins + 1, numBins);
+  outputW = WorkspaceFactory::Instance().create("Workspace2D", inputW->getNumberHistograms(), numBins + 1, numBins);
   WorkspaceFactory::Instance().initializeFromParent(*inputW, *outputW, false);
 
   // Now let's set all the X bins and values

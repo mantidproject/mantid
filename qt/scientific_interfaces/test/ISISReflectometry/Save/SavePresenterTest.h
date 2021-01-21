@@ -37,9 +37,8 @@ public:
   static void destroySuite(SavePresenterTest *suite) { delete suite; }
 
   SavePresenterTest()
-      : m_view(), m_savePath("/foo/bar/"), m_fileFormat(NamedFormat::Custom),
-        m_prefix("testoutput_"), m_includeHeader(true), m_separator(","),
-        m_includeQResolution(true) {}
+      : m_view(), m_savePath("/foo/bar/"), m_fileFormat(NamedFormat::Custom), m_prefix("testoutput_"),
+        m_includeHeader(true), m_separator(","), m_includeQResolution(true) {}
 
   void testPresenterSubscribesToView() {
     EXPECT_CALL(m_view, subscribe(_)).Times(1);
@@ -55,8 +54,7 @@ public:
   }
 
   void testSetDefaultSavePathOnConstruction() {
-    auto const path = Mantid::Kernel::ConfigService::Instance().getString(
-        "defaultsave.directory");
+    auto const path = Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory");
     EXPECT_CALL(m_view, setSavePath(path)).Times(1);
     auto presenter = makePresenter();
     verifyAndClear();
@@ -98,10 +96,8 @@ public:
   void testNotifyFilterWorkspaceList() {
     auto presenter = makePresenter();
     auto const filter = std::string("Ws");
-    auto const inputWorkspaces =
-        std::vector<std::string>{"someWsName", "different", "anotherWs"};
-    auto const filteredWorkspaces =
-        std::vector<std::string>{"anotherWs", "someWsName"};
+    auto const inputWorkspaces = std::vector<std::string>{"someWsName", "different", "anotherWs"};
+    auto const filteredWorkspaces = std::vector<std::string>{"anotherWs", "someWsName"};
     createWorkspaces(inputWorkspaces);
     EXPECT_CALL(m_view, getFilter()).Times(1).WillOnce(Return(filter));
     EXPECT_CALL(m_view, getRegexCheck()).Times(1).WillOnce(Return(false));
@@ -114,10 +110,8 @@ public:
   void testNotifyFilterWorkspaceListByRegex() {
     auto presenter = makePresenter();
     auto const filter = std::string("[a-zA-Z]*_[0-9]+");
-    auto const inputWorkspaces =
-        std::vector<std::string>{"_42", "apple_113", "grape_", "pear_cut"};
-    auto const filteredWorkspaces =
-        std::vector<std::string>{"_42", "apple_113"};
+    auto const inputWorkspaces = std::vector<std::string>{"_42", "apple_113", "grape_", "pear_cut"};
+    auto const filteredWorkspaces = std::vector<std::string>{"_42", "apple_113"};
     createWorkspaces(inputWorkspaces);
     EXPECT_CALL(m_view, getFilter()).Times(1).WillOnce(Return(filter));
     EXPECT_CALL(m_view, getRegexCheck()).Times(1).WillOnce(Return(true));
@@ -131,8 +125,7 @@ public:
   void testNotifyFilterWorkspaceListWithInvalidRegex() {
     auto presenter = makePresenter();
     auto const filter = std::string("w[.*kspace");
-    auto const inputWorkspaces = std::vector<std::string>{
-        "first_test_workspace", "test_ws_2", "dummy_wkspace"};
+    auto const inputWorkspaces = std::vector<std::string>{"first_test_workspace", "test_ws_2", "dummy_wkspace"};
     auto const filteredWorkspaces = std::vector<std::string>{};
     createWorkspaces(inputWorkspaces);
     EXPECT_CALL(m_view, getFilter()).Times(1).WillOnce(Return(filter));
@@ -154,9 +147,7 @@ public:
     createWorkspacesWithThetaLog({currentWorkspace});
     auto const expectedLogs = std::vector<std::string>{"Theta"};
     EXPECT_CALL(m_view, clearParametersList()).Times(1);
-    EXPECT_CALL(m_view, getCurrentWorkspaceName())
-        .Times(1)
-        .WillOnce(Return(currentWorkspace));
+    EXPECT_CALL(m_view, getCurrentWorkspaceName()).Times(1).WillOnce(Return(currentWorkspace));
     EXPECT_CALL(m_view, setParametersList(expectedLogs)).Times(1);
     presenter.notifyPopulateParametersList();
     verifyAndClear();
@@ -164,14 +155,11 @@ public:
 
   void testNotifySaveSelectedWorkspacesWithLogs() {
     auto presenter = makePresenter();
-    auto const inputWorkspaces =
-        std::vector<std::string>{"test1", "test2", "test3", "test4"};
+    auto const inputWorkspaces = std::vector<std::string>{"test1", "test2", "test3", "test4"};
     createWorkspacesWithThetaLog(inputWorkspaces);
     auto const logs = std::vector<std::string>{"Theta"};
     auto selectedWorkspaces = std::vector<std::string>{"test2", "test4"};
-    EXPECT_CALL(m_view, getSelectedWorkspaces())
-        .Times(1)
-        .WillOnce(Return(selectedWorkspaces));
+    EXPECT_CALL(m_view, getSelectedWorkspaces()).Times(1).WillOnce(Return(selectedWorkspaces));
     expectSaveWorkspaces(selectedWorkspaces, logs);
     presenter.notifySaveSelectedWorkspaces();
     verifyAndClear();
@@ -180,9 +168,7 @@ public:
   void testNotifySaveSelectedWorkspacesWhenNothingSelected() {
     auto presenter = makePresenter();
     auto emptyWorkspaceList = std::vector<std::string>{};
-    EXPECT_CALL(m_view, getSelectedWorkspaces())
-        .Times(1)
-        .WillOnce(Return(emptyWorkspaceList));
+    EXPECT_CALL(m_view, getSelectedWorkspaces()).Times(1).WillOnce(Return(emptyWorkspaceList));
     EXPECT_CALL(m_view, noWorkspacesSelected()).Times(1);
     presenter.notifySaveSelectedWorkspaces();
     verifyAndClear();
@@ -435,23 +421,19 @@ private:
   }
 
   void createTableWorkspace(const std::string &name) {
-    ITableWorkspace_sptr ws =
-        WorkspaceFactory::Instance().createTable("TableWorkspace");
+    ITableWorkspace_sptr ws = WorkspaceFactory::Instance().createTable("TableWorkspace");
     AnalysisDataService::Instance().addOrReplace(name, ws);
   }
 
-  std::vector<std::string> createWorkspaces(
-      std::vector<std::string> const &workspaceNames = {"test1", "test2"}) {
+  std::vector<std::string> createWorkspaces(std::vector<std::string> const &workspaceNames = {"test1", "test2"}) {
     for (auto name : workspaceNames) {
       createWorkspace(name);
     }
     return workspaceNames;
   }
 
-  void createWorkspaceGroup(const std::string &groupName,
-                            const std::vector<std::string> &workspaceNames) {
-    AnalysisDataService::Instance().add(groupName,
-                                        std::make_shared<WorkspaceGroup>());
+  void createWorkspaceGroup(const std::string &groupName, const std::vector<std::string> &workspaceNames) {
+    AnalysisDataService::Instance().add(groupName, std::make_shared<WorkspaceGroup>());
     createWorkspaces(workspaceNames);
     for (auto name : workspaceNames)
       AnalysisDataService::Instance().addToGroup(groupName, name);
@@ -459,8 +441,8 @@ private:
 
   /* Add some dummy workspaces to the ADS with the given names and a log value
    * Theta */
-  std::vector<std::string> createWorkspacesWithThetaLog(
-      std::vector<std::string> const &workspaceNames = {"test1", "test2"}) {
+  std::vector<std::string> createWorkspacesWithThetaLog(std::vector<std::string> const &workspaceNames = {"test1",
+                                                                                                          "test2"}) {
     for (auto name : workspaceNames) {
       auto workspace = createWorkspace(name);
       workspace->mutableRun().addProperty("Theta", 0.5, true);
@@ -478,79 +460,48 @@ private:
   }
 
   /* Set the presenter up so that autosave is disabled */
-  void disableAutosave(SavePresenter &presenter) {
-    presenter.notifyAutosaveDisabled();
-  }
+  void disableAutosave(SavePresenter &presenter) { presenter.notifyAutosaveDisabled(); }
 
-  void expectSetWorkspaceListFromADS(
-      std::vector<std::string> const &workspaceNames) {
+  void expectSetWorkspaceListFromADS(std::vector<std::string> const &workspaceNames) {
     EXPECT_CALL(m_view, clearWorkspaceList()).Times(1);
     EXPECT_CALL(m_view, setWorkspaceList(workspaceNames)).Times(1);
   }
 
   void expectGetValidSaveDirectory() {
     EXPECT_CALL(m_view, getSavePath()).Times(1).WillOnce(Return(m_savePath));
-    EXPECT_CALL(*m_asciiSaver, isValidSaveDirectory(m_savePath))
-        .Times(1)
-        .WillOnce(Return(true));
+    EXPECT_CALL(*m_asciiSaver, isValidSaveDirectory(m_savePath)).Times(1).WillOnce(Return(true));
   }
 
   void expectGetInvalidSaveDirectory() {
     EXPECT_CALL(m_view, getSavePath()).Times(1).WillOnce(Return(m_savePath));
-    EXPECT_CALL(*m_asciiSaver, isValidSaveDirectory(m_savePath))
-        .Times(1)
-        .WillOnce(Return(false));
+    EXPECT_CALL(*m_asciiSaver, isValidSaveDirectory(m_savePath)).Times(1).WillOnce(Return(false));
   }
 
   void expectGetSaveParametersFromView() {
-    EXPECT_CALL(m_view, getFileFormatIndex())
-        .Times(1)
-        .WillOnce(Return(static_cast<int>(m_fileFormat)));
+    EXPECT_CALL(m_view, getFileFormatIndex()).Times(1).WillOnce(Return(static_cast<int>(m_fileFormat)));
     EXPECT_CALL(m_view, getPrefix()).Times(1).WillOnce(Return(m_prefix));
-    EXPECT_CALL(m_view, getHeaderCheck())
-        .Times(1)
-        .WillOnce(Return(m_includeHeader));
+    EXPECT_CALL(m_view, getHeaderCheck()).Times(1).WillOnce(Return(m_includeHeader));
     EXPECT_CALL(m_view, getSeparator()).Times(1).WillOnce(Return(m_separator));
-    EXPECT_CALL(m_view, getQResolutionCheck())
-        .Times(1)
-        .WillOnce(Return(m_includeQResolution));
+    EXPECT_CALL(m_view, getQResolutionCheck()).Times(1).WillOnce(Return(m_includeQResolution));
   }
 
-  void expectSaveWorkspaces(
-      const std::vector<std::string> &workspaceNames,
-      const std::vector<std::string> &logs = std::vector<std::string>{}) {
-    EXPECT_CALL(m_view, getSelectedParameters())
-        .Times(1)
-        .WillOnce(Return(logs));
+  void expectSaveWorkspaces(const std::vector<std::string> &workspaceNames,
+                            const std::vector<std::string> &logs = std::vector<std::string>{}) {
+    EXPECT_CALL(m_view, getSelectedParameters()).Times(1).WillOnce(Return(logs));
     expectGetValidSaveDirectory();
     expectGetSaveParametersFromView();
     auto fileFormatOptions =
-        FileFormatOptions(m_fileFormat, m_prefix, m_includeHeader, m_separator,
-                          m_includeQResolution);
-    EXPECT_CALL(*m_asciiSaver,
-                save(m_savePath, workspaceNames, logs, fileFormatOptions))
-        .Times(1);
+        FileFormatOptions(m_fileFormat, m_prefix, m_includeHeader, m_separator, m_includeQResolution);
+    EXPECT_CALL(*m_asciiSaver, save(m_savePath, workspaceNames, logs, fileFormatOptions)).Times(1);
   }
 
-  void expectProcessing() {
-    EXPECT_CALL(m_mainPresenter, isProcessing())
-        .Times(1)
-        .WillOnce(Return(true));
-  }
+  void expectProcessing() { EXPECT_CALL(m_mainPresenter, isProcessing()).Times(1).WillOnce(Return(true)); }
 
-  void expectAutoreducing() {
-    EXPECT_CALL(m_mainPresenter, isAutoreducing())
-        .Times(1)
-        .WillOnce(Return(true));
-  }
+  void expectAutoreducing() { EXPECT_CALL(m_mainPresenter, isAutoreducing()).Times(1).WillOnce(Return(true)); }
 
   void expectNotProcessingOrAutoreducing() {
-    EXPECT_CALL(m_mainPresenter, isProcessing())
-        .Times(1)
-        .WillOnce(Return(false));
-    EXPECT_CALL(m_mainPresenter, isAutoreducing())
-        .Times(1)
-        .WillOnce(Return(false));
+    EXPECT_CALL(m_mainPresenter, isProcessing()).Times(1).WillOnce(Return(false));
+    EXPECT_CALL(m_mainPresenter, isAutoreducing()).Times(1).WillOnce(Return(false));
   }
 
   void expectFileFormatAndLocationControlsEnabled() {
@@ -564,28 +515,16 @@ private:
   }
 
   void expectFileFormat(NamedFormat fileFormat) {
-    EXPECT_CALL(m_view, getFileFormatIndex())
-        .Times(AtLeast(1))
-        .WillOnce(Return(static_cast<int>(fileFormat)));
+    EXPECT_CALL(m_view, getFileFormatIndex()).Times(AtLeast(1)).WillOnce(Return(static_cast<int>(fileFormat)));
   }
 
-  void expectHeaderOptionEnabled() {
-    EXPECT_CALL(m_view, getHeaderCheck())
-        .Times(AtLeast(1))
-        .WillOnce(Return(true));
-  }
+  void expectHeaderOptionEnabled() { EXPECT_CALL(m_view, getHeaderCheck()).Times(AtLeast(1)).WillOnce(Return(true)); }
 
-  void expectHeaderOptionDisabled() {
-    EXPECT_CALL(m_view, getHeaderCheck())
-        .Times(AtLeast(1))
-        .WillOnce(Return(false));
-  }
+  void expectHeaderOptionDisabled() { EXPECT_CALL(m_view, getHeaderCheck()).Times(AtLeast(1)).WillOnce(Return(false)); }
 
   void expectLogListEnabled() { EXPECT_CALL(m_view, enableLogList()).Times(1); }
 
-  void expectLogListDisabled() {
-    EXPECT_CALL(m_view, disableLogList()).Times(1);
-  }
+  void expectLogListDisabled() { EXPECT_CALL(m_view, disableLogList()).Times(1); }
 
   void expectCustomOptionsEnabled() {
     EXPECT_CALL(m_view, enableHeaderCheckBox()).Times(1);

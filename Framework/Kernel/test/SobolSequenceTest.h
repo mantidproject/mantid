@@ -16,9 +16,7 @@ using Mantid::Kernel::SobolSequence;
 class SobolSequenceTest : public CxxTest::TestSuite {
 
 public:
-  void test_That_Object_Construction_Does_Not_Throw() {
-    TS_ASSERT_THROWS_NOTHING(SobolSequence(1));
-  }
+  void test_That_Object_Construction_Does_Not_Throw() { TS_ASSERT_THROWS_NOTHING(SobolSequence(1)); }
 
   void test_That_Next_For_Two_Generators_Returns_Same_Value() {
     SobolSequence gen_1(3), gen_2(3);
@@ -57,8 +55,7 @@ public:
     }
   }
 
-  void
-  test_Save_Call_Restore_Call_Then_Restore_Gives_Sequence_From_Saved_Point() {
+  void test_Save_Call_Restore_Call_Then_Restore_Gives_Sequence_From_Saved_Point() {
     SobolSequence randGen(5);
     doNextValueCalls(25, randGen); // Move from start to test it doesn't just go
                                    // back to beginning
@@ -76,8 +73,7 @@ public:
   }
 
 private:
-  std::vector<std::vector<double>> doNextValueCalls(const unsigned int ncalls,
-                                                    SobolSequence &randGen) {
+  std::vector<std::vector<double>> doNextValueCalls(const unsigned int ncalls, SobolSequence &randGen) {
     std::vector<std::vector<double>> values(ncalls);
     for (unsigned int i = 0; i < ncalls; ++i) {
       values[i] = randGen.nextPoint();
@@ -85,8 +81,7 @@ private:
     return values;
   }
 
-  void
-  assert_Sequence_Is_As_Expected_For_Five_Dimensions(SobolSequence &randGen) {
+  void assert_Sequence_Is_As_Expected_For_Five_Dimensions(SobolSequence &randGen) {
     double expectedValues[3][5] = {
         {0.5, 0.5, 0.5, 0.5, 0.5},
         {0.75, 0.25, 0.75, 0.25, 0.75},

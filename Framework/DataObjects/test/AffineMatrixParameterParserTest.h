@@ -45,10 +45,9 @@ public:
 
   void testParse3by3() {
     Poco::XML::DOMParser pParser;
-    std::string xmlToParse =
-        "<?xml version=\"1.0\" "
-        "encoding=\"utf-8\"?><Parameter><Type>AffineMatrixParameter</"
-        "Type><Value>1,2,3;4,5,6;7,8,9</Value></Parameter>";
+    std::string xmlToParse = "<?xml version=\"1.0\" "
+                             "encoding=\"utf-8\"?><Parameter><Type>AffineMatrixParameter</"
+                             "Type><Value>1,2,3;4,5,6;7,8,9</Value></Parameter>";
     Poco::AutoPtr<Poco::XML::Document> pDoc = pParser.parseString(xmlToParse);
     Poco::XML::Element *pRootElem = pDoc->documentElement();
 
@@ -73,10 +72,9 @@ public:
 
   void testParse4by4() {
     Poco::XML::DOMParser pParser;
-    std::string xmlToParse =
-        "<?xml version=\"1.0\" "
-        "encoding=\"utf-8\"?><Parameter><Type>AffineMatrixParameter</"
-        "Type><Value>1,2,3,4;5,6,7,8;9,10,11,12</Value></Parameter>";
+    std::string xmlToParse = "<?xml version=\"1.0\" "
+                             "encoding=\"utf-8\"?><Parameter><Type>AffineMatrixParameter</"
+                             "Type><Value>1,2,3,4;5,6,7,8;9,10,11,12</Value></Parameter>";
     Poco::AutoPtr<Poco::XML::Document> pDoc = pParser.parseString(xmlToParse);
     Poco::XML::Element *pRootElem = pDoc->documentElement();
 
@@ -105,8 +103,7 @@ public:
   void testThrowsOnCallSetSuccessor() {
     AffineMatrixParameterParser parser;
     AffineMatrixParameterParser otherParser;
-    TS_ASSERT_THROWS(parser.setSuccessorParser(&otherParser),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(parser.setSuccessorParser(&otherParser), const std::runtime_error &);
   }
 
   void testThrowsIfWrongXML() {
@@ -119,7 +116,6 @@ public:
 
     AffineMatrixParameterParser parser;
 
-    TS_ASSERT_THROWS(parser.createParameter(pRootElem),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(parser.createParameter(pRootElem), const std::runtime_error &);
   }
 };

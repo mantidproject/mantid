@@ -33,20 +33,15 @@ using API::IConfiguredAlgorithm_sptr;
  * presenter
  * @param savePresenter :: [input] A pointer to the 'Save ASCII' tab presenter
  */
-BatchPresenter::BatchPresenter(
-    IBatchView *view, Batch model,
-    std::unique_ptr<IRunsPresenter> runsPresenter,
-    std::unique_ptr<IEventPresenter> eventPresenter,
-    std::unique_ptr<IExperimentPresenter> experimentPresenter,
-    std::unique_ptr<IInstrumentPresenter> instrumentPresenter,
-    std::unique_ptr<ISavePresenter> savePresenter)
-    : m_view(view), m_mainPresenter(),
-      m_runsPresenter(std::move(runsPresenter)),
-      m_eventPresenter(std::move(eventPresenter)),
-      m_experimentPresenter(std::move(experimentPresenter)),
-      m_instrumentPresenter(std::move(instrumentPresenter)),
-      m_savePresenter(std::move(savePresenter)), m_unsavedBatchFlag(false),
-      m_jobRunner(new BatchJobRunner(std::move(model))) {
+BatchPresenter::BatchPresenter(IBatchView *view, Batch model, std::unique_ptr<IRunsPresenter> runsPresenter,
+                               std::unique_ptr<IEventPresenter> eventPresenter,
+                               std::unique_ptr<IExperimentPresenter> experimentPresenter,
+                               std::unique_ptr<IInstrumentPresenter> instrumentPresenter,
+                               std::unique_ptr<ISavePresenter> savePresenter)
+    : m_view(view), m_mainPresenter(), m_runsPresenter(std::move(runsPresenter)),
+      m_eventPresenter(std::move(eventPresenter)), m_experimentPresenter(std::move(experimentPresenter)),
+      m_instrumentPresenter(std::move(instrumentPresenter)), m_savePresenter(std::move(savePresenter)),
+      m_unsavedBatchFlag(false), m_jobRunner(new BatchJobRunner(std::move(model))) {
 
   m_view->subscribe(this);
 
@@ -67,31 +62,23 @@ BatchPresenter::BatchPresenter(
 /** Accept a main presenter
  * @param mainPresenter :: [input] A main presenter
  */
-void BatchPresenter::acceptMainPresenter(IMainWindowPresenter *mainPresenter) {
-  m_mainPresenter = mainPresenter;
-}
+void BatchPresenter::acceptMainPresenter(IMainWindowPresenter *mainPresenter) { m_mainPresenter = mainPresenter; }
 
-void BatchPresenter::initInstrumentList() {
-  m_runsPresenter->initInstrumentList();
-}
+void BatchPresenter::initInstrumentList() { m_runsPresenter->initInstrumentList(); }
 
 bool BatchPresenter::requestClose() const { return true; }
 
-void BatchPresenter::notifyChangeInstrumentRequested(
-    const std::string &instrumentName) {
+void BatchPresenter::notifyChangeInstrumentRequested(const std::string &instrumentName) {
   m_mainPresenter->notifyChangeInstrumentRequested(instrumentName);
 }
 
-void BatchPresenter::notifyInstrumentChanged(
-    const std::string &instrumentName) {
+void BatchPresenter::notifyInstrumentChanged(const std::string &instrumentName) {
   m_runsPresenter->notifyInstrumentChanged(instrumentName);
   m_experimentPresenter->notifyInstrumentChanged(instrumentName);
   m_instrumentPresenter->notifyInstrumentChanged(instrumentName);
 }
 
-void BatchPresenter::notifyUpdateInstrumentRequested() {
-  m_mainPresenter->notifyUpdateInstrumentRequested();
-}
+void BatchPresenter::notifyUpdateInstrumentRequested() { m_mainPresenter->notifyUpdateInstrumentRequested(); }
 
 void BatchPresenter::notifySettingsChanged() { settingsChanged(); }
 
@@ -99,17 +86,11 @@ void BatchPresenter::notifyResumeReductionRequested() { resumeReduction(); }
 
 void BatchPresenter::notifyPauseReductionRequested() { pauseReduction(); }
 
-void BatchPresenter::notifyResumeAutoreductionRequested() {
-  resumeAutoreduction();
-}
+void BatchPresenter::notifyResumeAutoreductionRequested() { resumeAutoreduction(); }
 
-void BatchPresenter::notifyPauseAutoreductionRequested() {
-  pauseAutoreduction();
-}
+void BatchPresenter::notifyPauseAutoreductionRequested() { pauseAutoreduction(); }
 
-void BatchPresenter::notifyAutoreductionCompleted() {
-  autoreductionCompleted();
-}
+void BatchPresenter::notifyAutoreductionCompleted() { autoreductionCompleted(); }
 
 void BatchPresenter::notifyBatchComplete(bool error) {
   UNUSED_ARG(error);
@@ -130,29 +111,25 @@ void BatchPresenter::notifyBatchCancelled() {
   notifyAutoreductionPaused();
 }
 
-void BatchPresenter::notifyAlgorithmStarted(
-    IConfiguredAlgorithm_sptr algorithm) {
+void BatchPresenter::notifyAlgorithmStarted(IConfiguredAlgorithm_sptr algorithm) {
   auto const &item = m_jobRunner->algorithmStarted(algorithm);
   m_runsPresenter->notifyRowOutputsChanged(item);
   m_runsPresenter->notifyRowStateChanged(item);
 }
 
-void BatchPresenter::notifyAlgorithmComplete(
-    IConfiguredAlgorithm_sptr algorithm) {
+void BatchPresenter::notifyAlgorithmComplete(IConfiguredAlgorithm_sptr algorithm) {
   auto const &item = m_jobRunner->algorithmComplete(algorithm);
   m_runsPresenter->notifyRowOutputsChanged(item);
   m_runsPresenter->notifyRowStateChanged(item);
   /// TODO Longer term it would probably be better if algorithms took care
   /// of saving their outputs so we could remove this callback
   if (m_savePresenter->shouldAutosave()) {
-    auto const workspaces =
-        m_jobRunner->algorithmOutputWorkspacesToSave(algorithm);
+    auto const workspaces = m_jobRunner->algorithmOutputWorkspacesToSave(algorithm);
     m_savePresenter->saveWorkspaces(workspaces);
   }
 }
 
-void BatchPresenter::notifyAlgorithmError(IConfiguredAlgorithm_sptr algorithm,
-                                          std::string const &message) {
+void BatchPresenter::notifyAlgorithmError(IConfiguredAlgorithm_sptr algorithm, std::string const &message) {
   auto const &item = m_jobRunner->algorithmError(algorithm, message);
   m_runsPresenter->notifyRowOutputsChanged(item);
   m_runsPresenter->notifyRowStateChanged(item);
@@ -161,8 +138,7 @@ void BatchPresenter::notifyAlgorithmError(IConfiguredAlgorithm_sptr algorithm,
 /** Start processing the next batch of algorithms.
  * @returns : true if processing was started, false if there was nothing to do
  */
-bool BatchPresenter::startBatch(
-    std::deque<IConfiguredAlgorithm_sptr> algorithms) {
+bool BatchPresenter::startBatch(std::deque<IConfiguredAlgorithm_sptr> algorithms) {
   m_view->clearAlgorithmQueue();
   m_view->setAlgorithmQueue(std::move(algorithms));
   m_view->executeAlgorithmQueue();
@@ -174,11 +150,8 @@ void BatchPresenter::resumeReduction() {
   m_jobRunner->notifyReductionResumed();
   // Get the algorithms to process
   auto algorithms = m_jobRunner->getAlgorithms();
-  if (algorithms.size() < 1 ||
-      (m_jobRunner->getProcessAll() &&
-       m_mainPresenter->isProcessAllPrevented()) ||
-      (m_jobRunner->getProcessPartial() &&
-       m_mainPresenter->isProcessPartialGroupPrevented())) {
+  if (algorithms.size() < 1 || (m_jobRunner->getProcessAll() && m_mainPresenter->isProcessAllPrevented()) ||
+      (m_jobRunner->getProcessPartial() && m_mainPresenter->isProcessPartialGroupPrevented())) {
     notifyReductionPaused();
     return;
   }
@@ -263,29 +236,17 @@ void BatchPresenter::autoreductionCompleted() {
   m_runsPresenter->notifyRowStateChanged();
 }
 
-void BatchPresenter::notifyAnyBatchReductionResumed() {
-  m_runsPresenter->notifyAnyBatchReductionResumed();
-}
+void BatchPresenter::notifyAnyBatchReductionResumed() { m_runsPresenter->notifyAnyBatchReductionResumed(); }
 
-void BatchPresenter::notifyAnyBatchReductionPaused() {
-  m_runsPresenter->notifyAnyBatchReductionPaused();
-}
+void BatchPresenter::notifyAnyBatchReductionPaused() { m_runsPresenter->notifyAnyBatchReductionPaused(); }
 
-void BatchPresenter::notifyAnyBatchAutoreductionResumed() {
-  m_runsPresenter->notifyAnyBatchAutoreductionResumed();
-}
+void BatchPresenter::notifyAnyBatchAutoreductionResumed() { m_runsPresenter->notifyAnyBatchAutoreductionResumed(); }
 
-void BatchPresenter::notifyAnyBatchAutoreductionPaused() {
-  m_runsPresenter->notifyAnyBatchAutoreductionPaused();
-}
+void BatchPresenter::notifyAnyBatchAutoreductionPaused() { m_runsPresenter->notifyAnyBatchAutoreductionPaused(); }
 
-Mantid::Geometry::Instrument_const_sptr BatchPresenter::instrument() const {
-  return m_mainPresenter->instrument();
-}
+Mantid::Geometry::Instrument_const_sptr BatchPresenter::instrument() const { return m_mainPresenter->instrument(); }
 
-std::string BatchPresenter::instrumentName() const {
-  return m_mainPresenter->instrumentName();
-}
+std::string BatchPresenter::instrumentName() const { return m_mainPresenter->instrumentName(); }
 
 void BatchPresenter::settingsChanged() {
   setBatchUnsaved();
@@ -296,49 +257,37 @@ void BatchPresenter::settingsChanged() {
    Checks whether or not data is currently being processed in this batch
    * @return : Bool on whether data is being processed
    */
-bool BatchPresenter::isProcessing() const {
-  return m_jobRunner->isProcessing();
-}
+bool BatchPresenter::isProcessing() const { return m_jobRunner->isProcessing(); }
 
 /**
    Checks whether or not autoprocessing is currently running in this batch
    * i.e. whether we are polling for new runs
    * @return : Bool on whether data is being processed
    */
-bool BatchPresenter::isAutoreducing() const {
-  return m_jobRunner->isAutoreducing();
-}
+bool BatchPresenter::isAutoreducing() const { return m_jobRunner->isAutoreducing(); }
 
 /**
    Checks whether or not processing is currently running in any batch
    * i.e. whether we are polling for new runs
    * @return : Bool on whether data is being processed
    */
-bool BatchPresenter::isAnyBatchProcessing() const {
-  return m_mainPresenter->isAnyBatchProcessing();
-}
+bool BatchPresenter::isAnyBatchProcessing() const { return m_mainPresenter->isAnyBatchProcessing(); }
 
 /**
    Checks whether or not autoprocessing is currently running in any batch
    * i.e. whether we are polling for new runs
    * @return : Bool on whether data is being autoprocessed
    */
-bool BatchPresenter::isAnyBatchAutoreducing() const {
-  return m_mainPresenter->isAnyBatchAutoreducing();
-}
+bool BatchPresenter::isAnyBatchAutoreducing() const { return m_mainPresenter->isAnyBatchAutoreducing(); }
 
-bool BatchPresenter::isOverwriteBatchPrevented() const {
-  return m_mainPresenter->isOverwriteBatchPrevented(this);
-}
+bool BatchPresenter::isOverwriteBatchPrevented() const { return m_mainPresenter->isOverwriteBatchPrevented(this); }
 
 bool BatchPresenter::discardChanges(std::string const &message) const {
   return m_mainPresenter->discardChanges(message);
 }
 
 /** Returns whether there are any unsaved changes in the current batch */
-bool BatchPresenter::isBatchUnsaved() const {
-  return m_unsavedBatchFlag || m_runsPresenter->hasUnsavedChanges();
-}
+bool BatchPresenter::isBatchUnsaved() const { return m_unsavedBatchFlag || m_runsPresenter->hasUnsavedChanges(); }
 
 void BatchPresenter::setBatchUnsaved() { m_unsavedBatchFlag = true; }
 
@@ -347,24 +296,16 @@ void BatchPresenter::notifyChangesSaved() {
   m_runsPresenter->notifyChangesSaved();
 }
 
-void BatchPresenter::notifySetRoundPrecision(int &precision) {
-  m_runsPresenter->setRoundPrecision(precision);
-}
+void BatchPresenter::notifySetRoundPrecision(int &precision) { m_runsPresenter->setRoundPrecision(precision); }
 
-void BatchPresenter::notifyResetRoundPrecision() {
-  m_runsPresenter->resetRoundPrecision();
-}
+void BatchPresenter::notifyResetRoundPrecision() { m_runsPresenter->resetRoundPrecision(); }
 
 /** Get the percent of jobs that have been completed out of the current
     processing list
  */
-int BatchPresenter::percentComplete() const {
-  return m_jobRunner->percentComplete();
-}
+int BatchPresenter::percentComplete() const { return m_jobRunner->percentComplete(); }
 
-AlgorithmRuntimeProps BatchPresenter::rowProcessingProperties() const {
-  return m_jobRunner->rowProcessingProperties();
-}
+AlgorithmRuntimeProps BatchPresenter::rowProcessingProperties() const { return m_jobRunner->rowProcessingProperties(); }
 
 void BatchPresenter::postDeleteHandle(const std::string &wsName) {
   auto const item = m_jobRunner->notifyWorkspaceDeleted(wsName);
@@ -372,8 +313,7 @@ void BatchPresenter::postDeleteHandle(const std::string &wsName) {
   m_runsPresenter->notifyRowStateChanged(item);
 }
 
-void BatchPresenter::renameHandle(const std::string &oldName,
-                                  const std::string &newName) {
+void BatchPresenter::renameHandle(const std::string &oldName, const std::string &newName) {
   auto const item = m_jobRunner->notifyWorkspaceRenamed(oldName, newName);
   m_runsPresenter->notifyRowOutputsChanged(item);
   m_runsPresenter->notifyRowStateChanged(item);

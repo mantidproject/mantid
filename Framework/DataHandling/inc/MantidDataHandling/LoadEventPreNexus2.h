@@ -73,8 +73,7 @@ struct Pulse {
 };
 #pragma pack(pop)
 
-class DLLExport LoadEventPreNexus2
-    : public API::IFileLoader<Kernel::FileDescriptor> {
+class DLLExport LoadEventPreNexus2 : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
   /// Constructor
   LoadEventPreNexus2();
@@ -82,13 +81,9 @@ public:
   const std::string name() const override { return "LoadEventPreNexus"; }
   /// Algorithm's version
   int version() const override { return (2); }
-  const std::vector<std::string> seeAlso() const override {
-    return {"LoadPreNexus", "FilterEventsByLogValuePreNexus"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"LoadPreNexus", "FilterEventsByLogValuePreNexus"}; }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "DataHandling\\PreNexus";
-  }
+  const std::string category() const override { return "DataHandling\\PreNexus"; }
   /// Algorithm's aliases
   const std::string alias() const override { return "LoadEventPreNeXus2"; }
   /// Summary of algorithms purpose
@@ -133,10 +128,10 @@ private:
   std::size_t num_pulses; ///< the number of pulses
   uint32_t numpixel;      ///< the number of pixels
 
-  std::size_t num_good_events;  ///< The number of good events loaded
-  std::size_t num_error_events; ///< The number of error events encountered
-  std::size_t num_bad_events;   ///< The number of bad events. Part of error
-                                ///< events
+  std::size_t num_good_events;       ///< The number of good events loaded
+  std::size_t num_error_events;      ///< The number of error events encountered
+  std::size_t num_bad_events;        ///< The number of bad events. Part of error
+                                     ///< events
   std::size_t num_wrongdetid_events; ///< The number of events with wrong
   /// detector IDs. Part of error events.
   std::set<PixelType> wrongdetids; ///< set of all wrong detector IDs
@@ -187,18 +182,15 @@ private:
 
   void readPulseidFile(const std::string &filename, const bool throwError);
 
-  void runLoadInstrument(const std::string &eventfilename,
-                         const API::MatrixWorkspace_sptr &localWorkspace);
+  void runLoadInstrument(const std::string &eventfilename, const API::MatrixWorkspace_sptr &localWorkspace);
 
   inline void fixPixelId(PixelType &pixel, uint32_t &period) const;
 
   void procEvents(DataObjects::EventWorkspace_sptr &workspace);
 
   void procEventsLinear(DataObjects::EventWorkspace_sptr &workspace,
-                        std::vector<Types::Event::TofEvent> **arrayOfVectors,
-                        DasEvent *event_buffer,
-                        size_t current_event_buffer_size, size_t fileOffset,
-                        bool dbprint);
+                        std::vector<Types::Event::TofEvent> **arrayOfVectors, DasEvent *event_buffer,
+                        size_t current_event_buffer_size, size_t fileOffset, bool dbprint);
 
   void setProtonCharge(DataObjects::EventWorkspace_sptr &workspace);
 

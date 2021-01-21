@@ -26,10 +26,8 @@ namespace Functions {
 namespace {
 
 // Does the actual calculation of the magnetic moment
-void calculate(double *out, const double *xValues, const size_t nData,
-               const ComplexFortranMatrix &ham, const int nre,
-               const DoubleFortranVector &Hdir, const double Hmag,
-               const double convfact) {
+void calculate(double *out, const double *xValues, const size_t nData, const ComplexFortranMatrix &ham, const int nre,
+               const DoubleFortranVector &Hdir, const double Hmag, const double convfact) {
   const double k_B = PhysicalConstants::BoltzmannConstant;
   DoubleFortranVector en;
   ComplexFortranMatrix ev;
@@ -55,9 +53,8 @@ void calculate(double *out, const double *xValues, const size_t nData,
 }
 
 // Powder averaging - sum over calculations along x, y, z
-void calculate_powder(double *out, const double *xValues, const size_t nData,
-                      const ComplexFortranMatrix &ham, const int nre,
-                      const double Hmag, const double convfact) {
+void calculate_powder(double *out, const double *xValues, const size_t nData, const ComplexFortranMatrix &ham,
+                      const int nre, const double Hmag, const double convfact) {
   for (size_t j = 0; j < nData; j++) {
     out[j] = 0.;
   }
@@ -77,8 +74,7 @@ void calculate_powder(double *out, const double *xValues, const size_t nData,
 }
 } // namespace
 
-CrystalFieldMomentBase::CrystalFieldMomentBase()
-    : API::IFunction1D(), m_nre(0) {
+CrystalFieldMomentBase::CrystalFieldMomentBase() : API::IFunction1D(), m_nre(0) {
   declareAttribute("Hdir", Attribute(std::vector<double>{0., 0., 1.}));
   declareAttribute("Hmag", Attribute(1.0));
   declareAttribute("Unit", Attribute("bohr")); // others = "SI", "cgs"
@@ -87,8 +83,7 @@ CrystalFieldMomentBase::CrystalFieldMomentBase()
   declareAttribute("ScaleFactor", Attribute(1.0)); // Only for multi-site use
 }
 
-void CrystalFieldMomentBase::function1D(double *out, const double *xValues,
-                                        const size_t nData) const {
+void CrystalFieldMomentBase::function1D(double *out, const double *xValues, const size_t nData) const {
   // Get the field direction
   auto Hdir = getAttribute("Hdir").asVector();
   if (Hdir.size() != 3) {
@@ -96,8 +91,7 @@ void CrystalFieldMomentBase::function1D(double *out, const double *xValues,
   }
   auto Hmag = getAttribute("Hmag").asDouble();
   auto powder = getAttribute("powder").asBool();
-  double Hnorm =
-      sqrt(Hdir[0] * Hdir[0] + Hdir[1] * Hdir[1] + Hdir[2] * Hdir[2]);
+  double Hnorm = sqrt(Hdir[0] * Hdir[0] + Hdir[1] * Hdir[1] + Hdir[2] * Hdir[2]);
   DoubleFortranVector H(1, 3);
   if (fabs(Hnorm) > 1.e-6) {
     for (auto i = 0; i < 3; i++) {
@@ -109,9 +103,7 @@ void CrystalFieldMomentBase::function1D(double *out, const double *xValues,
   // Converts to different units - SI is in J/T/mol or Am^2/mol. cgs in emu/mol.
   // NB. Atomic ("bohr") units gives magnetisation in bohr magneton/ion, but
   // other units give the molar magnetisation.
-  double convfact = boost::iequals(unit, "SI")
-                        ? NAMUB
-                        : (boost::iequals(unit, "cgs") ? NAMUB * 1000. : 1.);
+  double convfact = boost::iequals(unit, "SI") ? NAMUB : (boost::iequals(unit, "cgs") ? NAMUB * 1000. : 1.);
   if (boost::iequals(unit, "cgs")) {
     Hmag *= 0.0001; // Converts field from Gauss to Tesla (calcs in SI).
   }
@@ -135,19 +127,16 @@ void CrystalFieldMomentBase::function1D(double *out, const double *xValues,
 
 DECLARE_FUNCTION(CrystalFieldMoment)
 
-CrystalFieldMoment::CrystalFieldMoment()
-    : CrystalFieldPeaksBase(), CrystalFieldMomentBase(), m_setDirect(false) {}
+CrystalFieldMoment::CrystalFieldMoment() : CrystalFieldPeaksBase(), CrystalFieldMomentBase(), m_setDirect(false) {}
 
 // Sets the base crystal field Hamiltonian matrix
-void CrystalFieldMoment::setHamiltonian(const ComplexFortranMatrix &ham,
-                                        const int nre) {
+void CrystalFieldMoment::setHamiltonian(const ComplexFortranMatrix &ham, const int nre) {
   m_setDirect = true;
   m_ham = ham;
   m_nre = nre;
 }
 
-void CrystalFieldMoment::function1D(double *out, const double *xValues,
-                                    const size_t nData) const {
+void CrystalFieldMoment::function1D(double *out, const double *xValues, const size_t nData) const {
   if (!m_setDirect) {
     DoubleFortranVector en;
     ComplexFortranMatrix wf;
@@ -158,12 +147,10 @@ void CrystalFieldMoment::function1D(double *out, const double *xValues,
   CrystalFieldMomentBase::function1D(out, xValues, nData);
 }
 
-CrystalFieldMomentCalculation::CrystalFieldMomentCalculation()
-    : API::ParamFunction(), CrystalFieldMomentBase() {}
+CrystalFieldMomentCalculation::CrystalFieldMomentCalculation() : API::ParamFunction(), CrystalFieldMomentBase() {}
 
 // Sets the base crystal field Hamiltonian matrix
-void CrystalFieldMomentCalculation::setHamiltonian(
-    const ComplexFortranMatrix &ham, const int nre) {
+void CrystalFieldMomentCalculation::setHamiltonian(const ComplexFortranMatrix &ham, const int nre) {
   m_ham = ham;
   m_nre = nre;
 }

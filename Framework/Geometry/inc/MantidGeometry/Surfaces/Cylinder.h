@@ -78,8 +78,7 @@ public:
 
   void write(std::ostream &) const override;
   void print() const override;
-  void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin,
-                      double &ymin, double &zmin) override;
+  void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin) override;
 
   /// The number of slices to approximate a cylinder
   constexpr static int g_NSLICES = 10;

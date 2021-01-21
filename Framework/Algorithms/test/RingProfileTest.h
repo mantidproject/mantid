@@ -32,24 +32,19 @@ public:
     TS_ASSERT(alg.isInitialized());
 
     // check numbins is only integer > 1
-    TS_ASSERT_THROWS(alg.setProperty("NumBins", -3),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg.setProperty("NumBins", -3), const std::invalid_argument &);
     // ange between [-360, 360]
-    TS_ASSERT_THROWS(alg.setProperty("StartAngle", 500.0),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg.setProperty("StartAngle", 500.0), const std::invalid_argument &);
 
     // centre must be 2 or 3 values (x,y) or (x,y,z)
     std::vector<double> justOne(1);
     justOne[0] = -0.35;
-    TS_ASSERT_THROWS(alg.setProperty("Centre", justOne),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg.setProperty("Centre", justOne), const std::invalid_argument &);
 
     std::vector<double> fourInputs(4, -0.45);
-    TS_ASSERT_THROWS(alg.setProperty("Centre", fourInputs),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg.setProperty("Centre", fourInputs), const std::invalid_argument &);
 
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
     // change to a 2d workspace
     MatrixWorkspace_sptr goodWS = create_2d_workspace();
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", goodWS));
@@ -71,8 +66,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
 
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
     // change to a 2d workspace
     MatrixWorkspace_sptr goodWS = create_rectangular_instrument_workspace();
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", goodWS));
@@ -115,8 +109,7 @@ public:
      ------------>X
    */
   static MatrixWorkspace_sptr create_2d_workspace() {
-    MatrixWorkspace_sptr goodWS =
-        WorkspaceCreationHelper::create2DWorkspaceBinned(5, 5, -0.3, 0.12);
+    MatrixWorkspace_sptr goodWS = WorkspaceCreationHelper::create2DWorkspaceBinned(5, 5, -0.3, 0.12);
     auto yAxis = std::make_unique<NumericAxis>(5);
 
     for (int i = 0; i < 5; ++i) {
@@ -148,16 +141,14 @@ public:
     return goodWS;
   }
 
-  void configure_ring_profile(RingProfile &alg, MatrixWorkspace_sptr inws,
-                              std::vector<double> centre, int num_bins,
-                              double start_angle = 0, double min_radius = 0,
-                              double max_radius = 1000, bool anticlock = true) {
+  void configure_ring_profile(RingProfile &alg, MatrixWorkspace_sptr inws, std::vector<double> centre, int num_bins,
+                              double start_angle = 0, double min_radius = 0, double max_radius = 1000,
+                              bool anticlock = true) {
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
     std::string outWSName("RingProfileTest_OutputWS");
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inws));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
 
     // set centre
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Centre", centre));
@@ -178,11 +169,9 @@ public:
       TS_ASSERT_THROWS_NOTHING(alg.setProperty("Sense", "ClockWise"));
   }
 
-  static MatrixWorkspace_sptr basic_checkup_on_output_workspace(Algorithm &alg,
-                                                                int num_bins) {
+  static MatrixWorkspace_sptr basic_checkup_on_output_workspace(Algorithm &alg, int num_bins) {
     MatrixWorkspace_sptr outws =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            alg.getPropertyValue("OutputWorkspace"));
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(alg.getPropertyValue("OutputWorkspace"));
     TS_ASSERT_EQUALS(outws->getNumberHistograms(), 1);
     TS_ASSERT_EQUALS(outws->readY(0).size(), num_bins);
     TS_ASSERT_EQUALS(outws->readX(0).size(), num_bins + 1);
@@ -198,8 +187,7 @@ public:
     // and for the ring that will get only the numbers 1, 4, 3, 2
     // set start angle = -45
     // set NumBins = 4
-    configure_ring_profile(alg, goodWS, std::vector<double>(2, 0.0), 4, -45.0,
-                           0.115, 0.13, true);
+    configure_ring_profile(alg, goodWS, std::vector<double>(2, 0.0), 4, -45.0, 0.115, 0.13, true);
 
     // execute the algorithm
     TS_ASSERT_EQUALS(alg.execute(), true);
@@ -229,8 +217,7 @@ public:
     // and for the ring that will get only the numbers 1, 4, 3, 2
     // set start angle = 45
     // set NumBins = 4
-    configure_ring_profile(alg, goodWS, std::vector<double>(2, 0.0), 4, 45.0,
-                           0.115, 0.13, true);
+    configure_ring_profile(alg, goodWS, std::vector<double>(2, 0.0), 4, 45.0, 0.115, 0.13, true);
 
     // execute the algorithm
     TS_ASSERT_EQUALS(alg.execute(), true);
@@ -256,8 +243,7 @@ public:
     // selecting 4 bins from 45 degres in clockwise sense
     // and for the ring that will get only the numbers 1,2,3,4
 
-    configure_ring_profile(alg, goodWS, std::vector<double>(2, 0.0), 4, 45.0,
-                           0.115, 0.13, false);
+    configure_ring_profile(alg, goodWS, std::vector<double>(2, 0.0), 4, 45.0, 0.115, 0.13, false);
 
     TS_ASSERT_EQUALS(alg.execute(), true);
     // check the result
@@ -281,8 +267,7 @@ public:
 
     TS_ASSERT_EQUALS(alg.execute(), true);
     // check the result
-    MatrixWorkspace_sptr outputWS =
-        basic_checkup_on_output_workspace(alg, num_bins);
+    MatrixWorkspace_sptr outputWS = basic_checkup_on_output_workspace(alg, num_bins);
 
     // the expected results
     const double exp_angles[] = {0, 90, 180, 270, 360};
@@ -300,13 +285,11 @@ public:
     int num_bins = 10;
     // selecting 10 bins;  centre 0,0 ; start_angle = -10; low_ring = 0;
     // high_ring=10; anti-clock;
-    configure_ring_profile(alg, goodWS, std::vector<double>(2, 0.0), num_bins,
-                           -10.0, 0, 10.0, true);
+    configure_ring_profile(alg, goodWS, std::vector<double>(2, 0.0), num_bins, -10.0, 0, 10.0, true);
 
     TS_ASSERT_EQUALS(alg.execute(), true);
     // check the result
-    MatrixWorkspace_sptr outputWS =
-        basic_checkup_on_output_workspace(alg, num_bins);
+    MatrixWorkspace_sptr outputWS = basic_checkup_on_output_workspace(alg, num_bins);
   }
 
   /**
@@ -336,9 +319,7 @@ public:
        ------------>X
      */
   static MatrixWorkspace_sptr create_rectangular_instrument_workspace() {
-    MatrixWorkspace_sptr goodWS =
-        WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(
-            1, 5, 1);
+    MatrixWorkspace_sptr goodWS = WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(1, 5, 1);
 
     // 0 values
     goodWS->dataY(0)[0] = goodWS->dataY(2)[0] = goodWS->dataY(4)[0] = 0;

@@ -26,33 +26,26 @@ namespace Mantid {
 namespace MDAlgorithms {
 
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string BinaryOperationMD::name() const {
-  return "BinaryOperationMD";
-}
+const std::string BinaryOperationMD::name() const { return "BinaryOperationMD"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int BinaryOperationMD::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string BinaryOperationMD::category() const {
-  return "MDAlgorithms\\MDArithmetic";
-}
+const std::string BinaryOperationMD::category() const { return "MDAlgorithms\\MDArithmetic"; }
 
 /** Initialize the algorithm's properties.
  */
 void BinaryOperationMD::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<IMDWorkspace>>(
-                      inputPropName1(), "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<IMDWorkspace>>(inputPropName1(), "", Direction::Input),
                   "An MDEventWorkspace, MDHistoWorkspace or "
                   "WorkspaceSingleValue as the left-hand side of the "
                   "operation.");
-  declareProperty(std::make_unique<WorkspaceProperty<IMDWorkspace>>(
-                      inputPropName2(), "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<IMDWorkspace>>(inputPropName2(), "", Direction::Input),
                   "An MDEventWorkspace, MDHistoWorkspace or "
                   "WorkspaceSingleValue as the right-hand side of the "
                   "operation.");
-  declareProperty(std::make_unique<WorkspaceProperty<IMDWorkspace>>(
-                      outputPropName(), "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<IMDWorkspace>>(outputPropName(), "", Direction::Output),
                   "Name of the output MDEventWorkspace or MDHistoWorkspace.");
   this->initExtraProperties();
 }
@@ -72,9 +65,7 @@ void BinaryOperationMD::exec() {
   //  1. A = B + A -> becomes -> A += B
   //  1. C = 1 + A -> becomes -> C = A + 1   (number is always on RHS if
   //  possible)
-  if (this->commutative() &&
-      ((m_out == m_rhs) ||
-       std::dynamic_pointer_cast<WorkspaceSingleValue>(m_lhs))) {
+  if (this->commutative() && ((m_out == m_rhs) || std::dynamic_pointer_cast<WorkspaceSingleValue>(m_lhs))) {
     // So we flip RHS/LHS
     Mantid::API::IMDWorkspace_sptr temp = m_lhs;
     m_lhs = m_rhs;
@@ -84,9 +75,8 @@ void BinaryOperationMD::exec() {
   // Do not compare conventions if one is single value
   if (!std::dynamic_pointer_cast<WorkspaceSingleValue>(m_rhs)) {
     if (m_lhs->getConvention() != m_rhs->getConvention()) {
-      throw std::runtime_error(
-          "Workspaces have different conventions for Q. "
-          "Use algorithm ChangeQConvention on one workspace. ");
+      throw std::runtime_error("Workspaces have different conventions for Q. "
+                               "Use algorithm ChangeQConvention on one workspace. ");
     }
   }
 
@@ -125,8 +115,7 @@ void BinaryOperationMD::exec() {
     // A = A * B. -> we will do A *= B
   } else {
     // C = A + B. -> So first we clone A (lhs) into C
-    IAlgorithm_sptr clone =
-        this->createChildAlgorithm("CloneMDWorkspace", 0.0, 0.5, true);
+    IAlgorithm_sptr clone = this->createChildAlgorithm("CloneMDWorkspace", 0.0, 0.5, true);
     clone->setProperty("InputWorkspace", m_lhs);
     clone->executeAsChildAlg();
     m_out = clone->getProperty("OutputWorkspace");
@@ -153,20 +142,17 @@ void BinaryOperationMD::exec() {
     // MDHistoWorkspace as the output
     if (m_operand_histo) {
       if (m_out_histo->getNumDims() != m_operand_histo->getNumDims())
-        throw std::invalid_argument(
-            "Cannot perform " + this->name() +
-            " on MDHistoWorkspace's with a different number of dimensions.");
+        throw std::invalid_argument("Cannot perform " + this->name() +
+                                    " on MDHistoWorkspace's with a different number of dimensions.");
       if (m_out_histo->getNPoints() != m_operand_histo->getNPoints())
-        throw std::invalid_argument(
-            "Cannot perform " + this->name() +
-            " on MDHistoWorkspace's with a different number of points.");
+        throw std::invalid_argument("Cannot perform " + this->name() +
+                                    " on MDHistoWorkspace's with a different number of points.");
 
       // Check that the dimensions span the same size, warn if they don't
       for (size_t d = 0; d < m_out_histo->getNumDims(); d++) {
         IMDDimension_const_sptr dimA = m_out_histo->getDimension(0);
         IMDDimension_const_sptr dimB = m_operand_histo->getDimension(0);
-        if (dimA->getMinimum() != dimB->getMinimum() ||
-            dimA->getMaximum() != dimB->getMaximum())
+        if (dimA->getMinimum() != dimB->getMinimum() || dimA->getMaximum() != dimB->getMaximum())
           g_log.warning() << "Dimension " << d << " (" << dimA->getName()
                           << ") has different extents in the two "
                              "MDHistoWorkspaces. The operation may not make "
@@ -176,10 +162,9 @@ void BinaryOperationMD::exec() {
     } else if (m_operand_scalar)
       this->execHistoScalar(m_out_histo, m_operand_scalar);
     else
-      throw std::runtime_error(
-          "Unexpected operand workspace type. Expected MDHistoWorkspace or "
-          "WorkspaceSingleValue, got " +
-          m_rhs->id());
+      throw std::runtime_error("Unexpected operand workspace type. Expected MDHistoWorkspace or "
+                               "WorkspaceSingleValue, got " +
+                               m_rhs->id());
 
     // Clear any masking flags from the output workspace
     if (m_out) {
@@ -193,10 +178,9 @@ void BinaryOperationMD::exec() {
     m_out_histo->getExperimentInfo(0)->mutableRun().addProperty(
         new PropertyWithValue<std::string>("mdhisto_was_modified", "1"), true);
   } else {
-    throw std::runtime_error(
-        "Unexpected output workspace type. Expected MDEventWorkspace or "
-        "MDHistoWorkspace, got " +
-        m_out->id());
+    throw std::runtime_error("Unexpected output workspace type. Expected MDEventWorkspace or "
+                             "MDHistoWorkspace, got " +
+                             m_out->id());
   }
 
   // Give the output

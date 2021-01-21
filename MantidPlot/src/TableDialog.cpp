@@ -45,8 +45,7 @@
 #include <QSpinBox>
 #include <QTextEdit>
 
-TableDialog::TableDialog(Table *t, const Qt::WFlags &fl)
-    : QDialog(t, fl), d_table(t) {
+TableDialog::TableDialog(Table *t, const Qt::WFlags &fl) : QDialog(t, fl), d_table(t) {
   setObjectName("TableDialog");
   setWindowTitle(tr("MantidPlot - Column options"));
   setSizeGripEnabled(true);
@@ -183,16 +182,13 @@ TableDialog::TableDialog(Table *t, const Qt::WFlags &fl)
   connect(buttonApply, SIGNAL(clicked()), this, SLOT(apply()));
   connect(buttonOk, SIGNAL(clicked()), this, SLOT(accept()));
   connect(buttonCancel, SIGNAL(clicked()), this, SLOT(close()));
-  connect(columnsBox, SIGNAL(activated(int)), this,
-          SLOT(setPlotDesignation(int)));
+  connect(columnsBox, SIGNAL(activated(int)), this, SLOT(setPlotDesignation(int)));
   connect(displayBox, SIGNAL(activated(int)), this, SLOT(updateDisplay(int)));
   connect(buttonPrev, SIGNAL(clicked()), this, SLOT(prevColumn()));
   connect(buttonNext, SIGNAL(clicked()), this, SLOT(nextColumn()));
   connect(formatBox, SIGNAL(activated(int)), this, SLOT(enablePrecision(int)));
-  connect(precisionBox, SIGNAL(valueChanged(int)), this,
-          SLOT(updatePrecision(int)));
-  connect(boxShowTableComments, SIGNAL(toggled(bool)), d_table,
-          SLOT(showComments(bool)));
+  connect(precisionBox, SIGNAL(valueChanged(int)), this, SLOT(updatePrecision(int)));
+  connect(boxShowTableComments, SIGNAL(toggled(bool)), d_table, SLOT(showComments(bool)));
 }
 
 void TableDialog::enablePrecision(int f) {
@@ -303,16 +299,13 @@ void TableDialog::apply() {
 
   QString name = colName->text().replace("-", "_");
   if (name.contains(QRegExp("\\W"))) {
-    QMessageBox::warning(
-        this, tr("MantidPlot - Error"),
-        tr("The column names must only contain letters and digits!"));
+    QMessageBox::warning(this, tr("MantidPlot - Error"), tr("The column names must only contain letters and digits!"));
     name.remove(QRegExp("\\W"));
   }
 
   int sc = d_table->selectedColumn();
   d_table->setColumnWidth(colWidth->value(), applyToAllBox->isChecked());
-  d_table->setColComment(
-      sc, comments->toPlainText().replace("\n", " ").replace("\t", " "));
+  d_table->setColComment(sc, comments->toPlainText().replace("\n", " ").replace("\t", " "));
   d_table->setColName(sc, name.replace("_", "-"), enumerateAllBox->isChecked());
 
   bool rightColumns = applyToRightCols->isChecked();
@@ -331,8 +324,7 @@ void TableDialog::apply() {
   int colType = displayBox->currentIndex();
   switch (colType) {
   case 0:
-    setNumericFormat(formatBox->currentIndex(), precisionBox->value(),
-                     rightColumns);
+    setNumericFormat(formatBox->currentIndex(), precisionBox->value(), rightColumns);
     break;
 
   case 1:
@@ -373,8 +365,7 @@ void TableDialog::closeEvent(QCloseEvent *ce) {
 }
 
 void TableDialog::setPlotDesignation(int i) {
-  d_table->setPlotDesignation((Table::PlotDesignation)i,
-                              applyToRightCols->isChecked());
+  d_table->setPlotDesignation((Table::PlotDesignation)i, applyToRightCols->isChecked());
   if (i == Table::Label) {
     displayBox->setCurrentIndex(1);
     updateDisplay(1);
@@ -401,8 +392,7 @@ void TableDialog::showPrecisionBox(int item) {
 }
 
 void TableDialog::updatePrecision(int prec) {
-  setNumericFormat(formatBox->currentIndex(), prec,
-                   applyToRightCols->isChecked());
+  setNumericFormat(formatBox->currentIndex(), prec, applyToRightCols->isChecked());
 }
 
 void TableDialog::updateDisplay(int item) {
@@ -485,8 +475,7 @@ void TableDialog::updateDisplay(int item) {
   }
 }
 
-void TableDialog::setDateTimeFormat(int type, const QString &format,
-                                    bool allRightColumns) {
+void TableDialog::setDateTimeFormat(int type, const QString &format, bool allRightColumns) {
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
   bool ok = false;
   int sc = d_table->selectedColumn();
@@ -507,13 +496,12 @@ void TableDialog::setDateTimeFormat(int type, const QString &format,
   QApplication::restoreOverrideCursor();
 
   if (!ok) {
-    QMessageBox::critical(
-        this, tr("MantidPlot - Error"),
-        tr("Couldn't guess the source data format, please specify it using the "
-           "'Format' box!") +
-            "\n\n" +
-            tr("For more information about the supported date/time formats "
-               "please read the Qt documentation for the QDateTime class!"));
+    QMessageBox::critical(this, tr("MantidPlot - Error"),
+                          tr("Couldn't guess the source data format, please specify it using the "
+                             "'Format' box!") +
+                              "\n\n" +
+                              tr("For more information about the supported date/time formats "
+                                 "please read the Qt documentation for the QDateTime class!"));
     return;
   }
 

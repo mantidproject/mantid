@@ -43,15 +43,12 @@ public:
   int error() { return parse_error; };
 
 private:
-  int arrowAngle(double length, double width) {
-    return int(ceil(45 * atan(0.5 * width / length) / atan(1.0)));
-  };
+  int arrowAngle(double length, double width) { return int(ceil(45 * atan(0.5 * width / length) / atan(1.0))); };
   int translateOrigin2QtiplotLineStyle(int linestyle);
   QString parseOriginText(const QString &str);
   QString parseOriginTags(const QString &str);
-  void addText(const text &_text, Graph *graph, LegendWidget *txt,
-               const rect &layerRect, double fFontScaleFactor, double fXScale,
-               double fYScale);
+  void addText(const text &_text, Graph *graph, LegendWidget *txt, const rect &layerRect, double fFontScaleFactor,
+               double fXScale, double fYScale);
   int parse_error;
   int xoffset;
   ApplicationWindow *mw;

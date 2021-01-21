@@ -44,7 +44,6 @@ public:
     auto fetchedWorkspace = provider.fetchWorkspace("");
     // Assert
     TSM_ASSERT("Should have a handle on a MDHistoWorkspace",
-               std::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(
-                   fetchedWorkspace));
+               std::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(fetchedWorkspace));
   }
 };

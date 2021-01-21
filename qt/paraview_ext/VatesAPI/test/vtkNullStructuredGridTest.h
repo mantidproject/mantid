@@ -25,11 +25,9 @@ public:
 
     vtkSmartPointer<vtkStructuredGrid> ugrid;
 
-    TSM_ASSERT_THROWS_NOTHING(
-        "Should create the unstructured grid without problems.",
-        ugrid.TakeReference(grid.createNullData()));
-    TSM_ASSERT("Should have exactly one point",
-               ugrid->GetNumberOfPoints() == 1);
+    TSM_ASSERT_THROWS_NOTHING("Should create the unstructured grid without problems.",
+                              ugrid.TakeReference(grid.createNullData()));
+    TSM_ASSERT("Should have exactly one point", ugrid->GetNumberOfPoints() == 1);
     TSM_ASSERT("Should have exactly one cell", ugrid->GetNumberOfCells() == 1);
     double coord[3];
     ugrid->GetPoint(0, coord);

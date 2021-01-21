@@ -36,8 +36,7 @@ class ScriptFileInterpreter : public QWidget {
 
 public:
   /// Construct the object
-  ScriptFileInterpreter(QWidget *parent = nullptr,
-                        const QString &settingsGroup = "");
+  ScriptFileInterpreter(QWidget *parent = nullptr, const QString &settingsGroup = "");
   /// Destroy the object
   ~ScriptFileInterpreter() override;
   /// Determine if the script is ready to be closed
@@ -94,11 +93,9 @@ public slots:
   virtual void spacesToTabs();
 
   /// Execute the whole script.
-  virtual bool
-  executeAll(const Script::ExecutionMode mode = Script::Asynchronous);
+  virtual bool executeAll(const Script::ExecutionMode mode = Script::Asynchronous);
   /// Execute the current selection
-  virtual void
-  executeSelection(const Script::ExecutionMode mode = Script::Asynchronous);
+  virtual void executeSelection(const Script::ExecutionMode mode = Script::Asynchronous);
   /// Request that the script execution be aborted
   virtual void abort();
   /// Clear the script variable cache
@@ -245,8 +242,7 @@ class ScriptCloseDialog : public QWidget {
   Q_OBJECT
 
 public:
-  ScriptCloseDialog(ScriptFileInterpreter &interpreter,
-                    QWidget *parent = nullptr);
+  ScriptCloseDialog(ScriptFileInterpreter &interpreter, QWidget *parent = nullptr);
 
   bool shouldScriptClose();
 

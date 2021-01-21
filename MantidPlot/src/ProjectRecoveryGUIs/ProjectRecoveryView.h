@@ -16,8 +16,7 @@ class ProjectRecoveryView : public QDialog {
   Q_OBJECT
 
 public:
-  explicit ProjectRecoveryView(QWidget *parent = 0,
-                               ProjectRecoveryPresenter *presenter = nullptr);
+  explicit ProjectRecoveryView(QWidget *parent = 0, ProjectRecoveryPresenter *presenter = nullptr);
   void reject() override;
   void setProgressBarMaximum(int newValue);
   void connectProgressBar();

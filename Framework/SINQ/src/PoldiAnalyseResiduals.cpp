@@ -26,17 +26,13 @@ DECLARE_ALGORITHM(PoldiAnalyseResiduals)
 //----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string PoldiAnalyseResiduals::name() const {
-  return "PoldiAnalyseResiduals";
-}
+const std::string PoldiAnalyseResiduals::name() const { return "PoldiAnalyseResiduals"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int PoldiAnalyseResiduals::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string PoldiAnalyseResiduals::category() const {
-  return "SINQ\\Poldi";
-}
+const std::string PoldiAnalyseResiduals::category() const { return "SINQ\\Poldi"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string PoldiAnalyseResiduals::summary() const {
@@ -45,24 +41,20 @@ const std::string PoldiAnalyseResiduals::summary() const {
 
 /// Sums the counts of all spectra specified by the supplied list of workspace
 /// indices.
-double PoldiAnalyseResiduals::sumCounts(
-    const DataObjects::Workspace2D_sptr &workspace,
-    const std::vector<int> &workspaceIndices) const {
+double PoldiAnalyseResiduals::sumCounts(const DataObjects::Workspace2D_sptr &workspace,
+                                        const std::vector<int> &workspaceIndices) const {
   return std::accumulate(workspaceIndices.begin(), workspaceIndices.end(), 0.0,
                          [&workspace](double sum, int workspaceIndex) {
                            auto &counts = workspace->y(workspaceIndex);
-                           return sum + std::accumulate(counts.cbegin(),
-                                                        counts.cend(), 0.0);
+                           return sum + std::accumulate(counts.cbegin(), counts.cend(), 0.0);
                          });
 }
 
 /// Counts the number of values in each spectrum specified by the list of
 /// workspace indices.
-size_t PoldiAnalyseResiduals::numberOfPoints(
-    const DataObjects::Workspace2D_sptr &workspace,
-    const std::vector<int> &workspaceIndices) const {
-  return std::accumulate(workspaceIndices.begin(), workspaceIndices.end(),
-                         size_t{0},
+size_t PoldiAnalyseResiduals::numberOfPoints(const DataObjects::Workspace2D_sptr &workspace,
+                                             const std::vector<int> &workspaceIndices) const {
+  return std::accumulate(workspaceIndices.begin(), workspaceIndices.end(), size_t{0},
                          [&workspace](size_t sum, int workspaceIndex) {
                            auto &counts = workspace->y(workspaceIndex);
                            return sum + counts.size();
@@ -71,9 +63,8 @@ size_t PoldiAnalyseResiduals::numberOfPoints(
 
 /// Adds the specified value to all spectra specified by the given workspace
 /// indices.
-void PoldiAnalyseResiduals::addValue(
-    DataObjects::Workspace2D_sptr &workspace, double value,
-    const std::vector<int> &workspaceIndices) const {
+void PoldiAnalyseResiduals::addValue(DataObjects::Workspace2D_sptr &workspace, double value,
+                                     const std::vector<int> &workspaceIndices) const {
   for (auto workspaceIndex : workspaceIndices) {
     workspace->mutableY(workspaceIndex) += value;
   }
@@ -81,58 +72,52 @@ void PoldiAnalyseResiduals::addValue(
 
 /// Initialize algorithm
 void PoldiAnalyseResiduals::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<DataObjects::Workspace2D>>(
-                      "MeasuredCountData", "", Direction::Input),
-                  "Input workspace containing the measured data.");
-  declareProperty(std::make_unique<WorkspaceProperty<DataObjects::Workspace2D>>(
-                      "FittedCountData", "", Direction::Input),
-                  "Input workspace containing the fitted data.");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<DataObjects::Workspace2D>>("MeasuredCountData", "", Direction::Input),
+      "Input workspace containing the measured data.");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<DataObjects::Workspace2D>>("FittedCountData", "", Direction::Input),
+      "Input workspace containing the fitted data.");
   declareProperty("LambdaMin", 1.1, "Minimum wavelength to be considered.");
   declareProperty("LambdaMax", 5.0, "Maximum wavelength to be considered.");
   declareProperty("MaxIterations", 0,
                   "Maximum number of iterations. Default 0 "
                   "does not limit number of iterations.");
-  declareProperty(
-      "MaxRelativeChange", 1.0,
-      "Relative change in counts (in percent) that should be reached.");
+  declareProperty("MaxRelativeChange", 1.0, "Relative change in counts (in percent) that should be reached.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<DataObjects::Workspace2D>>(
-                      "OutputWorkspace", "", Direction::Output),
-                  "Workspace containing the residual correlation spectrum.");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<DataObjects::Workspace2D>>("OutputWorkspace", "", Direction::Output),
+      "Workspace containing the residual correlation spectrum.");
 }
 
 /// Create workspace that contains the residuals.
-DataObjects::Workspace2D_sptr PoldiAnalyseResiduals::calculateResidualWorkspace(
-    const DataObjects::Workspace2D_sptr &measured,
-    const DataObjects::Workspace2D_sptr &calculated) {
+DataObjects::Workspace2D_sptr
+PoldiAnalyseResiduals::calculateResidualWorkspace(const DataObjects::Workspace2D_sptr &measured,
+                                                  const DataObjects::Workspace2D_sptr &calculated) {
   IAlgorithm_sptr minus = createChildAlgorithm("Minus");
   minus->setProperty("LHSWorkspace", measured);
   minus->setProperty("RHSWorkspace", calculated);
   minus->execute();
 
   MatrixWorkspace_sptr fg = minus->getProperty("OutputWorkspace");
-  DataObjects::Workspace2D_sptr residuals =
-      std::dynamic_pointer_cast<DataObjects::Workspace2D>(fg);
+  DataObjects::Workspace2D_sptr residuals = std::dynamic_pointer_cast<DataObjects::Workspace2D>(fg);
 
   return residuals;
 }
 
 /// Normalize residuals by subtracting the average value from each cell, so that
 /// the sum is 0 afterwards.
-void PoldiAnalyseResiduals::normalizeResiduals(
-    DataObjects::Workspace2D_sptr &residuals,
-    const std::vector<int> &validWorkspaceIndices) {
+void PoldiAnalyseResiduals::normalizeResiduals(DataObjects::Workspace2D_sptr &residuals,
+                                               const std::vector<int> &validWorkspaceIndices) {
   double sumOfResiduals = sumCounts(residuals, validWorkspaceIndices);
-  auto dataPointCount =
-      static_cast<double>(numberOfPoints(residuals, validWorkspaceIndices));
+  auto dataPointCount = static_cast<double>(numberOfPoints(residuals, validWorkspaceIndices));
 
   addValue(residuals, -sumOfResiduals / dataPointCount, validWorkspaceIndices);
 }
 
 /// Add workspaces and return result.
-DataObjects::Workspace2D_sptr
-PoldiAnalyseResiduals::addWorkspaces(const DataObjects::Workspace2D_sptr &lhs,
-                                     const DataObjects::Workspace2D_sptr &rhs) {
+DataObjects::Workspace2D_sptr PoldiAnalyseResiduals::addWorkspaces(const DataObjects::Workspace2D_sptr &lhs,
+                                                                   const DataObjects::Workspace2D_sptr &rhs) {
   IAlgorithm_sptr plus = createChildAlgorithm("Plus");
   plus->setProperty("LHSWorkspace", lhs);
   plus->setProperty("RHSWorkspace", rhs);
@@ -144,27 +129,22 @@ PoldiAnalyseResiduals::addWorkspaces(const DataObjects::Workspace2D_sptr &lhs,
 
 /// Output iteration information to log, report progress.
 void PoldiAnalyseResiduals::logIteration(int iteration, double relativeChange) {
-  g_log.information() << "Iteration " << iteration
-                      << ", change=" << relativeChange << "%\n";
+  g_log.information() << "Iteration " << iteration << ", change=" << relativeChange << "%\n";
 
   int maxIterations = getProperty("MaxIterations");
   if (maxIterations > 0) {
-    progress(static_cast<double>(iteration) /
-             static_cast<double>(maxIterations));
+    progress(static_cast<double>(iteration) / static_cast<double>(maxIterations));
   }
 }
 
 /// Checks if next iteration is allowed based on number of iterations so far and
 /// last relative change.
-bool PoldiAnalyseResiduals::nextIterationAllowed(int iterations,
-                                                 double relativeChange) {
-  return relativeChangeIsLargerThanLimit(relativeChange) &&
-         !iterationLimitReached(iterations);
+bool PoldiAnalyseResiduals::nextIterationAllowed(int iterations, double relativeChange) {
+  return relativeChangeIsLargerThanLimit(relativeChange) && !iterationLimitReached(iterations);
 }
 
 /// Returns true if the number is larger than the MaxRelativeChange-property
-bool PoldiAnalyseResiduals::relativeChangeIsLargerThanLimit(
-    double relativeChange) {
+bool PoldiAnalyseResiduals::relativeChangeIsLargerThanLimit(double relativeChange) {
   double maxRelativeChange = getProperty("MaxRelativeChange");
 
   return relativeChange > maxRelativeChange;
@@ -184,12 +164,11 @@ bool PoldiAnalyseResiduals::iterationLimitReached(int iterations) {
 
 /// Calculate the relative change in residuals with respect to the supplied
 /// total number of counts
-double PoldiAnalyseResiduals::relativeCountChange(
-    const DataObjects::Workspace2D_sptr &sum, double totalMeasuredCounts) {
+double PoldiAnalyseResiduals::relativeCountChange(const DataObjects::Workspace2D_sptr &sum,
+                                                  double totalMeasuredCounts) {
   auto &corrCounts = sum->y(0);
-  return std::accumulate(
-             corrCounts.cbegin(), corrCounts.cend(), 0.0,
-             [](double sum, double val) { return sum += fabs(val); }) /
+  return std::accumulate(corrCounts.cbegin(), corrCounts.cend(), 0.0,
+                         [](double sum, double val) { return sum += fabs(val); }) /
          totalMeasuredCounts * 100.0;
 }
 
@@ -197,21 +176,17 @@ void PoldiAnalyseResiduals::exec() {
   DataObjects::Workspace2D_sptr measured = getProperty("MeasuredCountData");
   DataObjects::Workspace2D_sptr calculated = getProperty("FittedCountData");
 
-  PoldiInstrumentAdapter_sptr poldiInstrument =
-      std::make_shared<PoldiInstrumentAdapter>(measured);
+  PoldiInstrumentAdapter_sptr poldiInstrument = std::make_shared<PoldiInstrumentAdapter>(measured);
   // Dead wires need to be taken into account
   PoldiAbstractDetector_sptr deadWireDetector =
-      std::make_shared<PoldiDeadWireDecorator>(measured->detectorInfo(),
-                                               poldiInstrument->detector());
+      std::make_shared<PoldiDeadWireDecorator>(measured->detectorInfo(), poldiInstrument->detector());
 
   // Since the valid workspace indices are required for some calculations, we
   // extract and keep them
-  const std::vector<int> &validWorkspaceIndices =
-      deadWireDetector->availableElements();
+  const std::vector<int> &validWorkspaceIndices = deadWireDetector->availableElements();
 
   // Subtract calculated from measured to get residuals
-  DataObjects::Workspace2D_sptr residuals =
-      calculateResidualWorkspace(measured, calculated);
+  DataObjects::Workspace2D_sptr residuals = calculateResidualWorkspace(measured, calculated);
 
   // Normalize residuals so that they are 0.
   normalizeResiduals(residuals, validWorkspaceIndices);
@@ -248,8 +223,7 @@ void PoldiAnalyseResiduals::exec() {
     logIteration(iteration, relativeChange);
   }
 
-  g_log.notice() << "Finished after " << iteration
-                 << " iterations, final change=" << relativeChange << '\n';
+  g_log.notice() << "Finished after " << iteration << " iterations, final change=" << relativeChange << '\n';
 
   // Return final correlation spectrum.
   setProperty("OutputWorkspace", std::dynamic_pointer_cast<Workspace>(sum));

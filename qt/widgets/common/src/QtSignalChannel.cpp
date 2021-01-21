@@ -20,8 +20,7 @@ namespace MantidWidgets {
  * source are emitted.
  * @param source A string specifying a source for the message
  */
-QtSignalChannel::QtSignalChannel(const QString &source)
-    : QObject(), Poco::Channel(), m_source(source) {}
+QtSignalChannel::QtSignalChannel(const QString &source) : QObject(), Poco::Channel(), m_source(source) {}
 
 QtSignalChannel::~QtSignalChannel() {}
 
@@ -40,8 +39,7 @@ void QtSignalChannel::setSource(const QString &source) { m_source = source; }
  */
 void QtSignalChannel::log(const Poco::Message &msg) {
   if (m_source.isEmpty() || this->source() == msg.getSource().c_str()) {
-    emit messageReceived(Message(QString::fromStdString(msg.getText() + "\n"),
-                                 msg.getPriority()));
+    emit messageReceived(Message(QString::fromStdString(msg.getText() + "\n"), msg.getPriority()));
   }
 }
 

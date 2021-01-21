@@ -78,19 +78,15 @@ protected:
   void init() override;
   void exec() override;
 
-  void outputYandEValues(const API::MatrixWorkspace_const_sptr &inputW,
-                         const HistogramData::BinEdges &XValues_new,
+  void outputYandEValues(const API::MatrixWorkspace_const_sptr &inputW, const HistogramData::BinEdges &XValues_new,
                          const API::MatrixWorkspace_sptr &outputW);
-  HistogramData::Histogram
-  cubicInterpolation(const HistogramData::Histogram &oldHistogram,
-                     const HistogramData::BinEdges &xNew) const;
+  HistogramData::Histogram cubicInterpolation(const HistogramData::Histogram &oldHistogram,
+                                              const HistogramData::BinEdges &xNew) const;
 
-  HistogramData::Histogram
-  noInterpolation(const HistogramData::Histogram &oldHistogram,
-                  const HistogramData::BinEdges &xNew) const;
+  HistogramData::Histogram noInterpolation(const HistogramData::Histogram &oldHistogram,
+                                           const HistogramData::BinEdges &xNew) const;
 
-  double estimateError(const HistogramData::Points &xsOld,
-                       const HistogramData::HistogramE &esOld,
+  double estimateError(const HistogramData::Points &xsOld, const HistogramData::HistogramE &esOld,
                        const double xNew) const;
 };
 

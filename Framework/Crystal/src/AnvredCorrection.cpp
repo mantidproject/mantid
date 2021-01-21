@@ -73,21 +73,18 @@ using namespace DataObjects;
 using namespace Mantid::PhysicalConstants;
 
 AnvredCorrection::AnvredCorrection()
-    : API::Algorithm(), m_smu(0.), m_amu(0.), m_radius(0.), m_power_th(0.),
-      m_lamda_weight(), m_onlySphericalAbsorption(false),
-      m_returnTransmissionOnly(false), m_useScaleFactors(false) {}
+    : API::Algorithm(), m_smu(0.), m_amu(0.), m_radius(0.), m_power_th(0.), m_lamda_weight(),
+      m_onlySphericalAbsorption(false), m_returnTransmissionOnly(false), m_useScaleFactors(false) {}
 
 void AnvredCorrection::init() {
 
   // The input workspace must have an instrument and units of wavelength
   auto wsValidator = std::make_shared<InstrumentValidator>();
 
-  declareProperty(std::make_unique<WorkspaceProperty<>>(
-                      "InputWorkspace", "", Direction::Input, wsValidator),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input, wsValidator),
                   "The X values for the input workspace must be in units of "
                   "wavelength or TOF");
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "Output workspace name");
 
   auto mustBePositive = std::make_shared<BoundedValidator<double>>();
@@ -98,8 +95,7 @@ void AnvredCorrection::init() {
   declareProperty("LinearAbsorptionCoef", EMPTY_DBL(), mustBePositive,
                   "Linear absorption coefficient at 1.8 Angstroms in 1/cm if "
                   "not set with SetSampleMaterial");
-  declareProperty("Radius", EMPTY_DBL(), mustBePositive,
-                  "Radius of the sample in centimeters");
+  declareProperty("Radius", EMPTY_DBL(), mustBePositive, "Radius of the sample in centimeters");
   declareProperty("PreserveEvents", true,
                   "Keep the output workspace as an EventWorkspace, if the "
                   "input has events (default).\n"
@@ -148,16 +144,14 @@ void AnvredCorrection::exec() {
   eventW = std::dynamic_pointer_cast<EventWorkspace>(m_inputWS);
   if (eventW)
     eventW->sortAll(TOF_SORT, nullptr);
-  if ((getProperty("PreserveEvents")) && (eventW != nullptr) &&
-      !m_returnTransmissionOnly) {
+  if ((getProperty("PreserveEvents")) && (eventW != nullptr) && !m_returnTransmissionOnly) {
     // Input workspace is an event workspace. Use the other exec method
     this->execEvent();
     this->cleanup();
     return;
   }
 
-  MatrixWorkspace_sptr correctionFactors =
-      WorkspaceFactory::Instance().create(m_inputWS);
+  MatrixWorkspace_sptr correctionFactors = WorkspaceFactory::Instance().create(m_inputWS);
 
   // needs to be a signed because OpenMP gives an error otherwise
   const auto numHists = static_cast<int64_t>(m_inputWS->getNumberHistograms());
@@ -213,10 +207,7 @@ void AnvredCorrection::exec() {
     // Loop through the bins in the current spectrum
     for (int64_t j = 0; j < specSize; j++) {
 
-      double lambda =
-          (unitStr == "TOF")
-              ? wl.convertSingleFromTOF(points[j], L1, L2, scattering, 0, 0, 0)
-              : points[j];
+      double lambda = (unitStr == "TOF") ? wl.convertSingleFromTOF(points[j], L1, L2, scattering, 0, 0, 0) : points[j];
 
       if (m_returnTransmissionOnly) {
         Y[j] = 1.0 / this->getEventWeight(lambda, scattering);
@@ -256,8 +247,7 @@ void AnvredCorrection::execEvent() {
   std::string unitStr = m_inputWS->getAxis(0)->unit()->unitID();
   auto correctionFactors = create<EventWorkspace>(*m_inputWS);
   correctionFactors->sortAll(TOF_SORT, nullptr);
-  bool inPlace = (this->getPropertyValue("InputWorkspace") ==
-                  this->getPropertyValue("OutputWorkspace"));
+  bool inPlace = (this->getPropertyValue("InputWorkspace") == this->getPropertyValue("OutputWorkspace"));
   if (inPlace)
     g_log.debug("Correcting EventWorkspace in-place.");
 
@@ -360,8 +350,7 @@ void AnvredCorrection::retrieveBaseProperties() {
   {
     NeutronAtom neutron(0, 0, 0.0, 0.0, m_smu, 0.0, m_smu, m_amu);
     auto shape = std::shared_ptr<IObject>(
-        m_inputWS->sample().getShape().cloneWithMaterial(
-            Material("SetInAnvredCorrection", neutron, 1.0)));
+        m_inputWS->sample().getShape().cloneWithMaterial(Material("SetInAnvredCorrection", neutron, 1.0)));
     m_inputWS->mutableSample().setShape(shape);
   }
   if (m_smu != EMPTY_DBL() && m_amu != EMPTY_DBL())
@@ -445,16 +434,14 @@ double AnvredCorrection::absor_sphere(double &twoth, double &wl) {
   if (mur < 0. || mur > 2.5) {
     std::ostringstream s;
     s << mur;
-    throw std::runtime_error("muR is not in range of Dwiggins' table :" +
-                             s.str());
+    throw std::runtime_error("muR is not in range of Dwiggins' table :" + s.str());
   }
 
   theta = twoth * radtodeg_half;
   if (theta < 0. || theta > 90.) {
     std::ostringstream s;
     s << theta;
-    throw std::runtime_error("theta is not in range of Dwiggins' table :" +
-                             s.str());
+    throw std::runtime_error("theta is not in range of Dwiggins' table :" + s.str());
   }
 
   //  using the polymial coefficients, calulate astar (= 1/transmission) at
@@ -468,8 +455,7 @@ double AnvredCorrection::absor_sphere(double &twoth, double &wl) {
 
   //  do a linear interpolation between theta values.
 
-  frac = theta -
-         static_cast<double>(static_cast<int>(theta / 5.)) * 5.; // theta%5.
+  frac = theta - static_cast<double>(static_cast<int>(theta / 5.)) * 5.; // theta%5.
   frac = frac / 5.;
 
   astar = astar1 * (1 - frac) + astar2 * frac; // astar is the correction
@@ -521,18 +507,15 @@ void AnvredCorrection::BuildLamdaWeights() {
   }
 }
 
-void AnvredCorrection::scale_init(const IDetector &det,
-                                  const Instrument_const_sptr &inst, double &L2,
-                                  double &depth, double &pathlength,
-                                  std::string &bankName) {
+void AnvredCorrection::scale_init(const IDetector &det, const Instrument_const_sptr &inst, double &L2, double &depth,
+                                  double &pathlength, std::string &bankName) {
   bankName = det.getParent()->getParent()->getName();
   // Distance to center of detector
   std::shared_ptr<const IComponent> det0 = inst->getComponentByName(bankName);
   if ("CORELLI" == inst->getName()) // for Corelli with sixteenpack under bank
   {
     std::vector<Geometry::IComponent_const_sptr> children;
-    auto asmb = std::dynamic_pointer_cast<const Geometry::ICompAssembly>(
-        inst->getComponentByName(bankName));
+    auto asmb = std::dynamic_pointer_cast<const Geometry::ICompAssembly>(inst->getComponentByName(bankName));
     asmb->getChildren(children, false);
     det0 = children[0];
   }
@@ -541,23 +524,17 @@ void AnvredCorrection::scale_init(const IDetector &det,
   pathlength = depth / cosA;
 }
 
-void AnvredCorrection::scale_exec(std::string &bankName, double &lambda,
-                                  double &depth,
-                                  const Instrument_const_sptr &inst,
-                                  double &pathlength, double &value) {
+void AnvredCorrection::scale_exec(std::string &bankName, double &lambda, double &depth,
+                                  const Instrument_const_sptr &inst, double &pathlength, double &value) {
   // correct for the slant path throught the scintillator glass
-  double mu = (9.614 * lambda) + 0.266; // mu for GS20 glass
-  double eff_center =
-      1.0 - std::exp(-mu * depth); // efficiency at center of detector
-  double eff_R = 1.0 - exp(-mu * pathlength); // efficiency at point R
-  value *= eff_center / eff_R;                // slant path efficiency ratio
+  double mu = (9.614 * lambda) + 0.266;            // mu for GS20 glass
+  double eff_center = 1.0 - std::exp(-mu * depth); // efficiency at center of detector
+  double eff_R = 1.0 - exp(-mu * pathlength);      // efficiency at point R
+  value *= eff_center / eff_R;                     // slant path efficiency ratio
   // Take out the "bank" part of the bank name
-  bankName.erase(
-      remove_if(bankName.begin(), bankName.end(), std::not_fn(::isdigit)),
-      bankName.end());
+  bankName.erase(remove_if(bankName.begin(), bankName.end(), std::not_fn(::isdigit)), bankName.end());
   if (inst->hasParameter("detScale" + bankName))
-    value *=
-        static_cast<double>(inst->getNumberParameter("detScale" + bankName)[0]);
+    value *= static_cast<double>(inst->getNumberParameter("detScale" + bankName)[0]);
 }
 
 } // namespace Crystal

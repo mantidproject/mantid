@@ -43,15 +43,11 @@ public:
     assert_shape_matches(tube, 1080, 2160, 7068, 1);
   }
 
-  void test_fail_invalid_stl_keyword() {
-    loadFailureTest("invalid_keyword.stl");
-  }
+  void test_fail_invalid_stl_keyword() { loadFailureTest("invalid_keyword.stl"); }
 
   void test_fail_invalid_stl_vertex() { loadFailureTest("invalid_vertex.stl"); }
 
-  void test_fail_invalid_stl_triangle() {
-    loadFailureTest("invalid_triangle.stl");
-  }
+  void test_fail_invalid_stl_triangle() { loadFailureTest("invalid_triangle.stl"); }
 
   void loadFailureTest(const std::string &filename) {
     std::string path = FileFinder::Instance().getFullPath(filename);
@@ -72,8 +68,7 @@ public:
   }
 
 private:
-  void assert_shape_matches(std::unique_ptr<Geometry::MeshObject> &shape,
-                            int vertices, int triangles, double volume,
+  void assert_shape_matches(std::unique_ptr<Geometry::MeshObject> &shape, int vertices, int triangles, double volume,
                             double delta) {
     TS_ASSERT(shape->hasValidShape());
     TS_ASSERT_EQUALS(shape->numberOfVertices(), vertices);

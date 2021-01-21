@@ -165,12 +165,11 @@ bool MantidEVWorker::isEventWorkspace(const std::string &event_ws_name) {
  *  @return true if the file was loaded and MD workspace was
  *          successfully created.
  */
-bool MantidEVWorker::loadAndConvertToMD(
-    const std::string &file_name, const std::string &ev_ws_name,
-    const std::string &md_ws_name, const double modQ, const double minQ,
-    const double maxQ, const bool do_lorentz_corr, const bool load_data,
-    const bool load_det_cal, const std::string &det_cal_file,
-    const std::string &det_cal_file2, const std::string &axisCORELLI) {
+bool MantidEVWorker::loadAndConvertToMD(const std::string &file_name, const std::string &ev_ws_name,
+                                        const std::string &md_ws_name, const double modQ, const double minQ,
+                                        const double maxQ, const bool do_lorentz_corr, const bool load_data,
+                                        const bool load_det_cal, const std::string &det_cal_file,
+                                        const std::string &det_cal_file2, const std::string &axisCORELLI) {
   try {
     if (load_data) {
       bool topaz = false;
@@ -196,13 +195,10 @@ bool MantidEVWorker::loadAndConvertToMD(
 
         if (!alg->execute())
           return false;
-      } else if (axisCORELLI.compare(
-                     "Select Goniometer Axis for CORELLI only") != 0) {
+      } else if (axisCORELLI.compare("Select Goniometer Axis for CORELLI only") != 0) {
         const auto &ADS = AnalysisDataService::Instance();
-        Mantid::API::MatrixWorkspace_sptr ev_ws =
-            ADS.retrieveWS<MatrixWorkspace>(ev_ws_name);
-        double phi = ev_ws->run().getLogAsSingleValue(
-            axisCORELLI, Mantid::Kernel::Math::TimeAveragedMean);
+        Mantid::API::MatrixWorkspace_sptr ev_ws = ADS.retrieveWS<MatrixWorkspace>(ev_ws_name);
+        double phi = ev_ws->run().getLogAsSingleValue(axisCORELLI, Mantid::Kernel::Math::TimeAveragedMean);
         ev_ws->mutableRun().mutableGoniometer().setRotationAngle(0, phi);
       }
 
@@ -268,20 +264,17 @@ bool MantidEVWorker::loadAndConvertToMD(
  *  @return true if the file was loaded and MD workspace was
  *          successfully created.
  */
-bool MantidEVWorker::convertToHKL(const std::string &ev_ws_name,
-                                  const std::string &md_ws_name,
-                                  const double minQ, const double maxQ) {
+bool MantidEVWorker::convertToHKL(const std::string &ev_ws_name, const std::string &md_ws_name, const double minQ,
+                                  const double maxQ) {
   try {
     IAlgorithm_sptr alg;
     const auto &ADS = AnalysisDataService::Instance();
-    Mantid::API::MatrixWorkspace_sptr ev_ws =
-        ADS.retrieveWS<MatrixWorkspace>(ev_ws_name);
+    Mantid::API::MatrixWorkspace_sptr ev_ws = ADS.retrieveWS<MatrixWorkspace>(ev_ws_name);
     double Q = maxQ;
     if (minQ != Mantid::EMPTY_DBL()) {
       Q = std::max(Q, -minQ);
     }
-    Mantid::Geometry::OrientedLattice o_lattice =
-        ev_ws->mutableSample().getOrientedLattice();
+    Mantid::Geometry::OrientedLattice o_lattice = ev_ws->mutableSample().getOrientedLattice();
     std::vector<V3D> hkl;
     hkl.emplace_back(o_lattice.hklFromQ(V3D(Q, Q, Q)));
     hkl.emplace_back(o_lattice.hklFromQ(V3D(Q, Q, -Q)));
@@ -368,12 +361,9 @@ bool MantidEVWorker::convertToHKL(const std::string &ev_ws_name,
  *  @param file_name  Filename for monitors
  *  @return true if FindPeaksMD completed successfully.
  */
-bool MantidEVWorker::findPeaks(const std::string &ev_ws_name,
-                               const std::string &md_ws_name,
-                               const std::string &peaks_ws_name, double max_abc,
-                               size_t num_to_find, double min_intensity,
-                               double minQPeaks, double maxQPeaks,
-                               const std::string &file_name) {
+bool MantidEVWorker::findPeaks(const std::string &ev_ws_name, const std::string &md_ws_name,
+                               const std::string &peaks_ws_name, double max_abc, size_t num_to_find,
+                               double min_intensity, double minQPeaks, double maxQPeaks, const std::string &file_name) {
   try {
     // Estimate a lower bound on the distance between
     // based on the maximum real space cell edge
@@ -389,45 +379,35 @@ bool MantidEVWorker::findPeaks(const std::string &ev_ws_name,
     if (alg->execute()) {
       double monitor_count = 0;
       try {
-        IAlgorithm_sptr mon_alg =
-            AlgorithmManager::Instance().create("LoadNexusMonitors");
+        IAlgorithm_sptr mon_alg = AlgorithmManager::Instance().create("LoadNexusMonitors");
         mon_alg->setProperty("Filename", file_name);
         mon_alg->setProperty("OutputWorkspace", ev_ws_name + "__monitors");
         mon_alg->execute();
 
-        Mantid::API::MatrixWorkspace_sptr mon_ws =
-            ADS.retrieveWS<MatrixWorkspace>(ev_ws_name + "_monitors");
-        IAlgorithm_sptr int_alg =
-            AlgorithmManager::Instance().create("Integration");
+        Mantid::API::MatrixWorkspace_sptr mon_ws = ADS.retrieveWS<MatrixWorkspace>(ev_ws_name + "_monitors");
+        IAlgorithm_sptr int_alg = AlgorithmManager::Instance().create("Integration");
         int_alg->setProperty("InputWorkspace", mon_ws);
         int_alg->setProperty("RangeLower", 1000.0);
         int_alg->setProperty("RangeUpper", 12500.0);
-        int_alg->setProperty("OutputWorkspace",
-                             ev_ws_name + "_integrated_monitor");
+        int_alg->setProperty("OutputWorkspace", ev_ws_name + "_integrated_monitor");
         int_alg->execute();
-        Mantid::API::MatrixWorkspace_sptr int_ws =
-            ADS.retrieveWS<MatrixWorkspace>(ev_ws_name + "_integrated_monitor");
+        Mantid::API::MatrixWorkspace_sptr int_ws = ADS.retrieveWS<MatrixWorkspace>(ev_ws_name + "_integrated_monitor");
         monitor_count = int_ws->y(0)[0];
-        g_log.notice() << "Beam monitor counts used for scaling = "
-                       << monitor_count << "\n";
+        g_log.notice() << "Beam monitor counts used for scaling = " << monitor_count << "\n";
       } catch (...) {
-        Mantid::API::MatrixWorkspace_sptr ev_ws =
-            ADS.retrieveWS<MatrixWorkspace>(ev_ws_name);
+        Mantid::API::MatrixWorkspace_sptr ev_ws = ADS.retrieveWS<MatrixWorkspace>(ev_ws_name);
         monitor_count = ev_ws->run().getProtonCharge() * 1000.0;
-        g_log.notice() << "Beam proton charge used for scaling = "
-                       << monitor_count << "\n";
+        g_log.notice() << "Beam proton charge used for scaling = " << monitor_count << "\n";
       }
 
-      IPeaksWorkspace_sptr peaks_ws =
-          ADS.retrieveWS<IPeaksWorkspace>(peaks_ws_name);
+      IPeaksWorkspace_sptr peaks_ws = ADS.retrieveWS<IPeaksWorkspace>(peaks_ws_name);
       for (int iPeak = 0; iPeak < peaks_ws->getNumberPeaks(); iPeak++) {
         Mantid::Geometry::IPeak &peak = peaks_ws->getPeak(iPeak);
         peak.setMonitorCount(monitor_count);
       }
 
       if (minQPeaks != Mantid::EMPTY_DBL()) {
-        IAlgorithm_sptr filter_alg =
-            AlgorithmManager::Instance().create("FilterPeaks");
+        IAlgorithm_sptr filter_alg = AlgorithmManager::Instance().create("FilterPeaks");
         filter_alg->setProperty("InputWorkspace", peaks_ws);
         filter_alg->setProperty("FilterVariable", "QMod");
         filter_alg->setProperty("FilterValue", minQPeaks);
@@ -437,8 +417,7 @@ bool MantidEVWorker::findPeaks(const std::string &ev_ws_name,
         peaks_ws = ADS.retrieveWS<IPeaksWorkspace>(peaks_ws_name);
       }
       if (maxQPeaks != Mantid::EMPTY_DBL()) {
-        IAlgorithm_sptr filter_alg =
-            AlgorithmManager::Instance().create("FilterPeaks");
+        IAlgorithm_sptr filter_alg = AlgorithmManager::Instance().create("FilterPeaks");
         filter_alg->setProperty("InputWorkspace", peaks_ws);
         filter_alg->setProperty("FilterVariable", "QMod");
         filter_alg->setProperty("FilterValue", maxQPeaks);
@@ -472,10 +451,8 @@ bool MantidEVWorker::findPeaks(const std::string &ev_ws_name,
  *
  *  @return true if PredictPeaks completed successfully.
  */
-bool MantidEVWorker::predictPeaks(const std::string &peaks_ws_name,
-                                  double min_pred_wl, double max_pred_wl,
-                                  double min_pred_dspacing,
-                                  double max_pred_dspacing) {
+bool MantidEVWorker::predictPeaks(const std::string &peaks_ws_name, double min_pred_wl, double max_pred_wl,
+                                  double min_pred_dspacing, double max_pred_dspacing) {
   try {
     IAlgorithm_sptr alg = AlgorithmManager::Instance().create("PredictPeaks");
     alg->setProperty("InputWorkspace", peaks_ws_name);
@@ -506,8 +483,7 @@ bool MantidEVWorker::predictPeaks(const std::string &peaks_ws_name,
  *
  *  @return true if LoadIsawPeaks completed successfully.
  */
-bool MantidEVWorker::loadIsawPeaks(const std::string &peaks_ws_name,
-                                   const std::string &file_name) {
+bool MantidEVWorker::loadIsawPeaks(const std::string &peaks_ws_name, const std::string &file_name) {
 
   IAlgorithm_sptr alg = AlgorithmManager::Instance().create("LoadIsawPeaks");
   alg->setProperty("Filename", file_name);
@@ -525,8 +501,7 @@ bool MantidEVWorker::loadIsawPeaks(const std::string &peaks_ws_name,
  *
  *  @return true if LoadNexusPeaks completed successfully.
  */
-bool MantidEVWorker::loadNexusPeaks(const std::string &peaks_ws_name,
-                                    const std::string &file_name) {
+bool MantidEVWorker::loadNexusPeaks(const std::string &peaks_ws_name, const std::string &file_name) {
 
   IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Load");
   alg->setProperty("Filename", file_name);
@@ -547,8 +522,7 @@ bool MantidEVWorker::loadNexusPeaks(const std::string &peaks_ws_name,
  *
  *  @return true if SaveIsawPeaks completed successfully.
  */
-bool MantidEVWorker::saveIsawPeaks(const std::string &peaks_ws_name,
-                                   const std::string &file_name, bool append) {
+bool MantidEVWorker::saveIsawPeaks(const std::string &peaks_ws_name, const std::string &file_name, bool append) {
 
   IAlgorithm_sptr alg = AlgorithmManager::Instance().create("SaveIsawPeaks");
   alg->setProperty("InputWorkspace", peaks_ws_name);
@@ -567,8 +541,7 @@ bool MantidEVWorker::saveIsawPeaks(const std::string &peaks_ws_name,
  *
  *  @return true if SaveNexusPeaks completed successfully.
  */
-bool MantidEVWorker::saveNexusPeaks(const std::string &peaks_ws_name,
-                                    const std::string &file_name, bool append) {
+bool MantidEVWorker::saveNexusPeaks(const std::string &peaks_ws_name, const std::string &file_name, bool append) {
   if (append) {
     std::string temp_peaks_ws_name = "__MantidEVWorker_peaks_ws";
     IAlgorithm_sptr load = AlgorithmManager::Instance().create("Load");
@@ -577,8 +550,7 @@ bool MantidEVWorker::saveNexusPeaks(const std::string &peaks_ws_name,
 
     load->execute();
 
-    IAlgorithm_sptr combine =
-        AlgorithmManager::Instance().create("CombinePeaksWorkspaces");
+    IAlgorithm_sptr combine = AlgorithmManager::Instance().create("CombinePeaksWorkspaces");
     combine->setProperty("LHSWorkspace", temp_peaks_ws_name);
     combine->setProperty("RHSWorkspace", peaks_ws_name);
     combine->setProperty("OutputWorkspace", peaks_ws_name);
@@ -604,8 +576,7 @@ bool MantidEVWorker::saveNexusPeaks(const std::string &peaks_ws_name,
  *
  *  @return true if FindUBusingFFT completed successfully.
  */
-bool MantidEVWorker::findUBUsingFFT(const std::string &peaks_ws_name,
-                                    double min_abc, double max_abc,
+bool MantidEVWorker::findUBUsingFFT(const std::string &peaks_ws_name, double min_abc, double max_abc,
                                     double tolerance) {
   if (!isPeaksWorkspace(peaks_ws_name))
     return false;
@@ -628,13 +599,11 @@ bool MantidEVWorker::findUBUsingFFT(const std::string &peaks_ws_name,
  *
  *  @return true if FindUBusingIndexedPeaks completed successfully.
  */
-bool MantidEVWorker::findUBUsingIndexedPeaks(const std::string &peaks_ws_name,
-                                             double tolerance) {
+bool MantidEVWorker::findUBUsingIndexedPeaks(const std::string &peaks_ws_name, double tolerance) {
   if (!isPeaksWorkspace(peaks_ws_name))
     return false;
 
-  IAlgorithm_sptr alg =
-      AlgorithmManager::Instance().create("FindUBUsingIndexedPeaks");
+  IAlgorithm_sptr alg = AlgorithmManager::Instance().create("FindUBUsingIndexedPeaks");
   alg->setProperty("PeaksWorkspace", peaks_ws_name);
   alg->setProperty("Tolerance", tolerance);
 
@@ -650,8 +619,7 @@ bool MantidEVWorker::findUBUsingIndexedPeaks(const std::string &peaks_ws_name,
  *
  *  @return true if LoadIsawUB completed successfully.
  */
-bool MantidEVWorker::loadIsawUB(const std::string &peaks_ws_name,
-                                const std::string &file_name) {
+bool MantidEVWorker::loadIsawUB(const std::string &peaks_ws_name, const std::string &file_name) {
   if (!isPeaksWorkspace(peaks_ws_name))
     return false;
 
@@ -672,8 +640,7 @@ bool MantidEVWorker::loadIsawUB(const std::string &peaks_ws_name,
  *
  *  @return true if SaveIsawUB completed successfully.
  */
-bool MantidEVWorker::saveIsawUB(const std::string &peaks_ws_name,
-                                const std::string &file_name) {
+bool MantidEVWorker::saveIsawUB(const std::string &peaks_ws_name, const std::string &file_name) {
   if (!isPeaksWorkspace(peaks_ws_name))
     return false;
 
@@ -696,10 +663,8 @@ bool MantidEVWorker::saveIsawUB(const std::string &peaks_ws_name,
  *  @return true if the OptimizeCrystalPlacement algorithm completes
  *          successfully.
  */
-bool MantidEVWorker::optimizePhiChiOmega(const std::string &peaks_ws_name,
-                                         double max_change) {
-  IAlgorithm_sptr alg =
-      AlgorithmManager::Instance().create("OptimizeCrystalPlacement");
+bool MantidEVWorker::optimizePhiChiOmega(const std::string &peaks_ws_name, double max_change) {
+  IAlgorithm_sptr alg = AlgorithmManager::Instance().create("OptimizeCrystalPlacement");
   alg->setProperty("PeaksWorkspace", peaks_ws_name);
   alg->setProperty("KeepGoniometerFixedfor", "");
   alg->setProperty("ModifiedPeaksWorkspace", peaks_ws_name);
@@ -727,8 +692,7 @@ bool MantidEVWorker::optimizePhiChiOmega(const std::string &peaks_ws_name,
  *
  *  @return true if the IndexPeaks algorithm completes successfully.
  */
-bool MantidEVWorker::indexPeaksWithUB(const std::string &peaks_ws_name,
-                                      double tolerance, bool round_hkls) {
+bool MantidEVWorker::indexPeaksWithUB(const std::string &peaks_ws_name, double tolerance, bool round_hkls) {
   if (!isPeaksWorkspace(peaks_ws_name))
     return false;
 
@@ -756,14 +720,12 @@ bool MantidEVWorker::indexPeaksWithUB(const std::string &peaks_ws_name,
  *
  *  @return true if the ShowPossibleCells algorithm completes successfully.
  */
-bool MantidEVWorker::showCells(const std::string &peaks_ws_name,
-                               double max_scalar_error, bool best_only,
+bool MantidEVWorker::showCells(const std::string &peaks_ws_name, double max_scalar_error, bool best_only,
                                bool allow_perm) {
   if (!isPeaksWorkspace(peaks_ws_name))
     return false;
 
-  IAlgorithm_sptr alg =
-      AlgorithmManager::Instance().create("ShowPossibleCells");
+  IAlgorithm_sptr alg = AlgorithmManager::Instance().create("ShowPossibleCells");
   alg->setProperty("PeaksWorkspace", peaks_ws_name);
   alg->setProperty("MaxScalarError", max_scalar_error);
   alg->setProperty("BestOnly", best_only);
@@ -788,10 +750,8 @@ bool MantidEVWorker::showCells(const std::string &peaks_ws_name,
  *
  *  @return true if the SelectCellOfType algorithm completes successfully.
  */
-bool MantidEVWorker::selectCellOfType(const std::string &peaks_ws_name,
-                                      const std::string &cell_type,
-                                      const std::string &centering,
-                                      bool allow_perm, double tolerance) {
+bool MantidEVWorker::selectCellOfType(const std::string &peaks_ws_name, const std::string &cell_type,
+                                      const std::string &centering, bool allow_perm, double tolerance) {
   if (!isPeaksWorkspace(peaks_ws_name))
     return false;
 
@@ -821,14 +781,12 @@ bool MantidEVWorker::selectCellOfType(const std::string &peaks_ws_name,
  *
  *  @return true if the SelectCellWithForm algorithm completes successfully.
  */
-bool MantidEVWorker::selectCellWithForm(const std::string &peaks_ws_name,
-                                        size_t form_num, bool allow_perm,
+bool MantidEVWorker::selectCellWithForm(const std::string &peaks_ws_name, size_t form_num, bool allow_perm,
                                         double tolerance) {
   if (!isPeaksWorkspace(peaks_ws_name))
     return false;
 
-  IAlgorithm_sptr alg =
-      AlgorithmManager::Instance().create("SelectCellWithForm");
+  IAlgorithm_sptr alg = AlgorithmManager::Instance().create("SelectCellWithForm");
   alg->setProperty("PeaksWorkspace", peaks_ws_name);
   alg->setProperty("FormNumber", (int)form_num);
   alg->setProperty("Apply", true);
@@ -852,10 +810,8 @@ bool MantidEVWorker::selectCellWithForm(const std::string &peaks_ws_name,
  *
  *  @return true if the TransformHKL algorithm completes successfully.
  */
-bool MantidEVWorker::changeHKL(const std::string &peaks_ws_name,
-                               const std::string &row_1_str,
-                               const std::string &row_2_str,
-                               const std::string &row_3_str) {
+bool MantidEVWorker::changeHKL(const std::string &peaks_ws_name, const std::string &row_1_str,
+                               const std::string &row_2_str, const std::string &row_3_str) {
   if (!isPeaksWorkspace(peaks_ws_name))
     return false;
 
@@ -902,12 +858,10 @@ bool MantidEVWorker::changeHKL(const std::string &peaks_ws_name,
  *  @return true if the unweighted workspace was successfully created and
  *          integrated using IntegratePeaksMD.
  */
-bool MantidEVWorker::sphereIntegrate(
-    const std::string &peaks_ws_name, const std::string &event_ws_name,
-    double peak_radius, double inner_radius, double outer_radius,
-    bool integrate_edge, bool use_cylinder_integration, double cylinder_length,
-    double cylinder_percent_bkg, const std::string &cylinder_profile_fit,
-    bool adaptiveQBkg, double adaptiveQMult) {
+bool MantidEVWorker::sphereIntegrate(const std::string &peaks_ws_name, const std::string &event_ws_name,
+                                     double peak_radius, double inner_radius, double outer_radius, bool integrate_edge,
+                                     bool use_cylinder_integration, double cylinder_length, double cylinder_percent_bkg,
+                                     const std::string &cylinder_profile_fit, bool adaptiveQBkg, double adaptiveQMult) {
   try {
     if (!isPeaksWorkspace(peaks_ws_name))
       return false;
@@ -915,8 +869,7 @@ bool MantidEVWorker::sphereIntegrate(
     if (!isEventWorkspace(event_ws_name))
       return false;
 
-    std::string temp_MD_ws_name =
-        "__MantidEVWorker_sphere_integrate_temp_MD_ws";
+    std::string temp_MD_ws_name = "__MantidEVWorker_sphere_integrate_temp_MD_ws";
     IAlgorithm_sptr alg = AlgorithmManager::Instance().create("ConvertToMD");
     alg->setProperty("InputWorkspace", event_ws_name);
     alg->setProperty("OutputWorkspace", temp_MD_ws_name);
@@ -995,11 +948,8 @@ bool MantidEVWorker::sphereIntegrate(
  *
  *  @return true if the PeakIntegration algorithm completed successfully.
  */
-bool MantidEVWorker::fitIntegrate(const std::string &peaks_ws_name,
-                                  const std::string &event_ws_name,
-                                  const std::string &rebin_param_str,
-                                  size_t n_bad_edge_pix,
-                                  bool use_ikeda_carpenter) {
+bool MantidEVWorker::fitIntegrate(const std::string &peaks_ws_name, const std::string &event_ws_name,
+                                  const std::string &rebin_param_str, size_t n_bad_edge_pix, bool use_ikeda_carpenter) {
   try {
     if (!isPeaksWorkspace(peaks_ws_name))
       return false;
@@ -1007,8 +957,7 @@ bool MantidEVWorker::fitIntegrate(const std::string &peaks_ws_name,
     if (!isEventWorkspace(event_ws_name))
       return false;
 
-    std::string temp_FIT_ws_name =
-        "__MantidEVWorker_FIT_integration_temp_event_ws";
+    std::string temp_FIT_ws_name = "__MantidEVWorker_FIT_integration_temp_event_ws";
     IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Rebin");
     alg->setProperty("InputWorkspace", event_ws_name);
     alg->setProperty("OutputWorkspace", temp_FIT_ws_name);
@@ -1070,10 +1019,8 @@ bool MantidEVWorker::fitIntegrate(const std::string &peaks_ws_name,
  *
  *  @return true if the IntegrateEllipsoids algorithm completed successfully.
  */
-bool MantidEVWorker::ellipsoidIntegrate(const std::string &peaks_ws_name,
-                                        const std::string &event_ws_name,
-                                        double region_radius, bool specify_size,
-                                        double peak_size, double inner_size,
+bool MantidEVWorker::ellipsoidIntegrate(const std::string &peaks_ws_name, const std::string &event_ws_name,
+                                        double region_radius, bool specify_size, double peak_size, double inner_size,
                                         double outer_size) {
   try {
     if (!isPeaksWorkspace(peaks_ws_name))
@@ -1082,8 +1029,7 @@ bool MantidEVWorker::ellipsoidIntegrate(const std::string &peaks_ws_name,
     if (!isEventWorkspace(event_ws_name))
       return false;
 
-    IAlgorithm_sptr alg =
-        AlgorithmManager::Instance().create("IntegrateEllipsoids");
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("IntegrateEllipsoids");
     alg->setProperty("InputWorkspace", event_ws_name);
     alg->setProperty("PeaksWorkspace", peaks_ws_name);
     alg->setProperty("RegionRadius", region_radius);
@@ -1126,14 +1072,12 @@ bool MantidEVWorker::showUB(const std::string &peaks_ws_name) {
   }
 
   const auto &ADS = AnalysisDataService::Instance();
-  IPeaksWorkspace_sptr peaks_ws =
-      ADS.retrieveWS<IPeaksWorkspace>(peaks_ws_name);
+  IPeaksWorkspace_sptr peaks_ws = ADS.retrieveWS<IPeaksWorkspace>(peaks_ws_name);
 
   try {
     char logInfo[200];
 
-    Mantid::Geometry::OrientedLattice o_lattice =
-        peaks_ws->mutableSample().getOrientedLattice();
+    Mantid::Geometry::OrientedLattice o_lattice = peaks_ws->mutableSample().getOrientedLattice();
     Matrix<double> UB = o_lattice.getUB();
 
     g_log.notice() << '\n';
@@ -1142,8 +1086,7 @@ bool MantidEVWorker::showUB(const std::string &peaks_ws_name) {
             std::string(" %12.8f %12.8f %12.8f\n %12.8f %12.8f "
                         "%12.8f\n %12.8f %12.8f %12.8f\n")
                 .c_str(),
-            UB[0][0], UB[0][1], UB[0][2], UB[1][0], UB[1][1], UB[1][2],
-            UB[2][0], UB[2][1], UB[2][2]);
+            UB[0][0], UB[0][1], UB[0][2], UB[1][0], UB[1][1], UB[1][2], UB[2][0], UB[2][1], UB[2][2]);
     g_log.notice(std::string(logInfo));
 
     g_log.notice() << "ISAW UB = \n";
@@ -1151,8 +1094,7 @@ bool MantidEVWorker::showUB(const std::string &peaks_ws_name) {
             std::string(" %12.8f %12.8f %12.8f\n %12.8f %12.8f "
                         "%12.8f\n %12.8f %12.8f %12.8f\n")
                 .c_str(),
-            UB[2][0], UB[0][0], UB[1][0], UB[2][1], UB[0][1], UB[1][1],
-            UB[2][2], UB[0][2], UB[1][2]);
+            UB[2][0], UB[0][0], UB[1][0], UB[2][1], UB[0][1], UB[1][1], UB[2][2], UB[0][2], UB[1][2]);
     g_log.notice(std::string(logInfo));
 
     double calc_a = o_lattice.a();
@@ -1162,19 +1104,14 @@ bool MantidEVWorker::showUB(const std::string &peaks_ws_name) {
     double calc_beta = o_lattice.beta();
     double calc_gamma = o_lattice.gamma();
     // Show the modified lattice parameters
-    sprintf(
-        logInfo,
-        std::string("Lattice Parameters: %8.3f %8.3f %8.3f %8.3f %8.3f %8.3f")
-            .c_str(),
-        calc_a, calc_b, calc_c, calc_alpha, calc_beta, calc_gamma);
+    sprintf(logInfo, std::string("Lattice Parameters: %8.3f %8.3f %8.3f %8.3f %8.3f %8.3f").c_str(), calc_a, calc_b,
+            calc_c, calc_alpha, calc_beta, calc_gamma);
 
     g_log.notice(std::string(logInfo));
 
-    sprintf(logInfo,
-            std::string("%19s %8.3f %8.3f %8.3f %8.3f %8.3f %8.3f").c_str(),
-            "Lattice Errors    :", o_lattice.errora(), o_lattice.errorb(),
-            o_lattice.errorc(), o_lattice.erroralpha(), o_lattice.errorbeta(),
-            o_lattice.errorgamma());
+    sprintf(logInfo, std::string("%19s %8.3f %8.3f %8.3f %8.3f %8.3f %8.3f").c_str(),
+            "Lattice Errors    :", o_lattice.errora(), o_lattice.errorb(), o_lattice.errorc(), o_lattice.erroralpha(),
+            o_lattice.errorbeta(), o_lattice.errorgamma());
 
     g_log.notice(std::string(logInfo));
   } catch (...) {
@@ -1200,19 +1137,16 @@ bool MantidEVWorker::showUB(const std::string &peaks_ws_name) {
  *  @return true if the UB matrix was found and returned in the UB
  *               parameter.
  */
-bool MantidEVWorker::getUB(const std::string &peaks_ws_name, bool lab_coords,
-                           Mantid::Kernel::Matrix<double> &UB) {
+bool MantidEVWorker::getUB(const std::string &peaks_ws_name, bool lab_coords, Mantid::Kernel::Matrix<double> &UB) {
   if (!isPeaksWorkspace(peaks_ws_name)) {
     return false;
   }
 
   const auto &ADS = AnalysisDataService::Instance();
-  IPeaksWorkspace_sptr peaks_ws =
-      ADS.retrieveWS<IPeaksWorkspace>(peaks_ws_name);
+  IPeaksWorkspace_sptr peaks_ws = ADS.retrieveWS<IPeaksWorkspace>(peaks_ws_name);
 
   try {
-    Mantid::Geometry::OrientedLattice o_lattice =
-        peaks_ws->mutableSample().getOrientedLattice();
+    Mantid::Geometry::OrientedLattice o_lattice = peaks_ws->mutableSample().getOrientedLattice();
     UB = o_lattice.getUB();
 
     if (lab_coords) // Try to get goniometer matrix from first peak
@@ -1240,8 +1174,7 @@ bool MantidEVWorker::getUB(const std::string &peaks_ws_name, bool lab_coords,
  *                        lattice to.
  *  @return true if the copy was done, false if something went wrong.
  */
-bool MantidEVWorker::copyLattice(const std::string &peaks_ws_name,
-                                 const std::string &md_ws_name,
+bool MantidEVWorker::copyLattice(const std::string &peaks_ws_name, const std::string &md_ws_name,
                                  const std::string &event_ws_name) {
   // fail if peaks workspace is not there
   if (!isPeaksWorkspace(peaks_ws_name)) {
@@ -1271,8 +1204,7 @@ bool MantidEVWorker::copyLattice(const std::string &peaks_ws_name,
       alg->execute();
     } catch (...) {
       g_log.notice() << "\n";
-      g_log.notice() << "CopySample from " << peaks_ws_name << " to "
-                     << md_ws_name << " FAILED\n\n";
+      g_log.notice() << "CopySample from " << peaks_ws_name << " to " << md_ws_name << " FAILED\n\n";
       return false;
     }
   }
@@ -1295,8 +1227,7 @@ bool MantidEVWorker::copyLattice(const std::string &peaks_ws_name,
       alg->execute();
     } catch (...) {
       g_log.notice() << "\n";
-      g_log.notice() << "CopySample from " << peaks_ws_name << " to "
-                     << event_ws_name << " FAILED\n\n";
+      g_log.notice() << "CopySample from " << peaks_ws_name << " to " << event_ws_name << " FAILED\n\n";
       return false;
     }
   }
@@ -1314,12 +1245,9 @@ bool MantidEVWorker::copyLattice(const std::string &peaks_ws_name,
  *                         it is in sample coordinates.
  * @param  Q               The Q-vector.
  */
-std::vector<std::pair<std::string, std::string>>
-MantidEVWorker::PointInfo(const std::string &peaks_ws_name, bool lab_coords,
-                          Mantid::Kernel::V3D Q) {
-  IPeaksWorkspace_sptr peaks_ws =
-      AnalysisDataService::Instance().retrieveWS<IPeaksWorkspace>(
-          peaks_ws_name);
+std::vector<std::pair<std::string, std::string>> MantidEVWorker::PointInfo(const std::string &peaks_ws_name,
+                                                                           bool lab_coords, Mantid::Kernel::V3D Q) {
+  IPeaksWorkspace_sptr peaks_ws = AnalysisDataService::Instance().retrieveWS<IPeaksWorkspace>(peaks_ws_name);
   return peaks_ws->peakInfo(Q, lab_coords);
 }
 

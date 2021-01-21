@@ -40,15 +40,12 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SpectrumDisplay : public QObject {
 
 public:
   /// Make an SpectrumDisplay to display with the given widgets and controls
-  SpectrumDisplay(QwtPlot *spectrumPlot, ISliderHandler *sliderHandler,
-                  IRangeHandler *rangeHandler, GraphDisplay *hGraph,
-                  GraphDisplay *vGraph, QTableWidget *tableWidget,
-                  bool isTrackingOn = true);
+  SpectrumDisplay(QwtPlot *spectrumPlot, ISliderHandler *sliderHandler, IRangeHandler *rangeHandler,
+                  GraphDisplay *hGraph, GraphDisplay *vGraph, QTableWidget *tableWidget, bool isTrackingOn = true);
 
   ~SpectrumDisplay() override;
 
-  virtual bool hasData(const std::string &wsName,
-                       const std::shared_ptr<Mantid::API::Workspace> &ws);
+  virtual bool hasData(const std::string &wsName, const std::shared_ptr<Mantid::API::Workspace> &ws);
 
   /// Set some properties of the SpectrumPlotItem object
   void setupSpectrumPlotItem();
@@ -66,15 +63,13 @@ public:
   void updateImage();
 
   /// Change the color tables used to map intensity to color
-  void setColorScales(std::vector<QRgb> &positiveColorTable,
-                      std::vector<QRgb> &negativeColorTable);
+  void setColorScales(std::vector<QRgb> &positiveColorTable, std::vector<QRgb> &negativeColorTable);
 
   /// Change the control parameter (0...100) used to brighten the image
   void setIntensity(double controlParameter);
 
   /// Record the point that the user is currently pointing at with the mouse
-  virtual QPair<double, double>
-  setPointedAtPoint(QPoint point, int mouseClick = 2, bool isFront = true);
+  virtual QPair<double, double> setPointedAtPoint(QPoint point, int mouseClick = 2, bool isFront = true);
 
   /// Record the point that the user is currently pointing in the scales
   /// coordinates

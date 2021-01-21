@@ -29,13 +29,9 @@ namespace PythonInterface {
 // All Python tests segfault on MSVC 2015 if the virtual specifiers are included
 // The segault happens on initializing this constructor. Conversely on all other
 // compilers it won't even compile without the virtual specifier.
-class IFunction1DAdapter : public API::ParamFunction,
-                           public API::IFunction1D,
-                           public IFunctionAdapter {
+class IFunction1DAdapter : public API::ParamFunction, public API::IFunction1D, public IFunctionAdapter {
 #else
-class IFunction1DAdapter : public virtual API::ParamFunction,
-                           public virtual API::IFunction1D,
-                           public IFunctionAdapter {
+class IFunction1DAdapter : public virtual API::ParamFunction, public virtual API::IFunction1D, public IFunctionAdapter {
 #endif
 public:
   // Convenience type def
@@ -54,14 +50,12 @@ public:
   /** @name Virtual methods */
   ///@{
   /// Base-class method
-  void function1D(double *out, const double *xValues,
-                  const size_t nData) const override;
+  void function1D(double *out, const double *xValues, const size_t nData) const override;
   /// Python-type signature
   boost::python::object function1D(const boost::python::object &xvals) const;
 
   /// Derivatives of function with respect to active parameters (C++ override)
-  void functionDeriv1D(API::Jacobian *out, const double *xValues,
-                       const size_t nData) override;
+  void functionDeriv1D(API::Jacobian *out, const double *xValues, const size_t nData) override;
   ///@}
 };
 } // namespace PythonInterface

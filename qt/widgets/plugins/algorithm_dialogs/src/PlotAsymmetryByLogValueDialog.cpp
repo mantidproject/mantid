@@ -40,20 +40,16 @@ using namespace MantidQt::API;
 /**
  * Constructor
  */
-PlotAsymmetryByLogValueDialog::PlotAsymmetryByLogValueDialog(QWidget *parent)
-    : AlgorithmDialog(parent) {
+PlotAsymmetryByLogValueDialog::PlotAsymmetryByLogValueDialog(QWidget *parent) : AlgorithmDialog(parent) {
   browseButtonMapper = new QSignalMapper();
 
-  connect(browseButtonMapper, SIGNAL(mapped(const QString &)), this,
-          SLOT(openFileDialog(const QString &)));
+  connect(browseButtonMapper, SIGNAL(mapped(const QString &)), this, SLOT(openFileDialog(const QString &)));
 }
 
 /**
  *Destructor
  */
-PlotAsymmetryByLogValueDialog::~PlotAsymmetryByLogValueDialog() {
-  delete browseButtonMapper;
-}
+PlotAsymmetryByLogValueDialog::~PlotAsymmetryByLogValueDialog() { delete browseButtonMapper; }
 
 /**
  * Reimplemented virtual function to set up the dialog
@@ -78,18 +74,14 @@ void PlotAsymmetryByLogValueDialog::initLayout() {
   tie(m_uiForm.dtcFile, "DeadTimeCorrFile");
 
   // Set-up browse button mapping
-  browseButtonMapper->setMapping(m_uiForm.dtcFileBrowseButton,
-                                 "DeadTimeCorrFile");
+  browseButtonMapper->setMapping(m_uiForm.dtcFileBrowseButton, "DeadTimeCorrFile");
 
   // Connect Browse buttons to the mapper
-  connect(m_uiForm.dtcFileBrowseButton, SIGNAL(clicked()), browseButtonMapper,
-          SLOT(map()));
+  connect(m_uiForm.dtcFileBrowseButton, SIGNAL(clicked()), browseButtonMapper, SLOT(map()));
 
-  connect(m_uiForm.runs, SIGNAL(fileFindingFinished()), this,
-          SLOT(fillLogBox()));
+  connect(m_uiForm.runs, SIGNAL(fileFindingFinished()), this, SLOT(fillLogBox()));
 
-  connect(m_uiForm.dtcType, SIGNAL(currentIndexChanged(int)), this,
-          SLOT(showHideDeadTimeFileWidget(int)));
+  connect(m_uiForm.dtcType, SIGNAL(currentIndexChanged(int)), this, SLOT(showHideDeadTimeFileWidget(int)));
 
   // Fill ComboBoxes with allowed values
   fillAndSetComboBox("Type", m_uiForm.typeBox);
@@ -111,18 +103,15 @@ void PlotAsymmetryByLogValueDialog::initLayout() {
  * Opens a file dialog. Updates the QLineEdit provided when the dialog is
  * closed.
  */
-void PlotAsymmetryByLogValueDialog::openFileDialog(
-    const QString &filePropName) {
+void PlotAsymmetryByLogValueDialog::openFileDialog(const QString &filePropName) {
   QString selectedPath = AlgorithmDialog::openFileDialog(filePropName);
 
   if (!selectedPath.isEmpty()) {
     // Save used directory for the next time
-    AlgorithmInputHistory::Instance().setPreviousDirectory(
-        QFileInfo(selectedPath).absoluteDir().path());
+    AlgorithmInputHistory::Instance().setPreviousDirectory(QFileInfo(selectedPath).absoluteDir().path());
 
     // Get the widget for the file property
-    QLineEdit *lineEdit =
-        dynamic_cast<QLineEdit *>(m_tied_properties[filePropName]);
+    QLineEdit *lineEdit = dynamic_cast<QLineEdit *>(m_tied_properties[filePropName]);
 
     if (!lineEdit)
       throw std::runtime_error("Widget of the file property was not found");
@@ -144,36 +133,29 @@ void PlotAsymmetryByLogValueDialog::fillLogBox() {
 
   m_uiForm.logBox->clear();
 
-  Mantid::API::IAlgorithm_sptr alg =
-      Mantid::API::AlgorithmFactory::Instance().create("LoadMuonNexus", -1);
+  Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmFactory::Instance().create("LoadMuonNexus", -1);
   alg->initialize();
   try {
     alg->setPropertyValue("Filename", nexusFileName.toStdString());
-    alg->setPropertyValue("OutputWorkspace",
-                          "PlotAsymmetryByLogValueDialog_tmp");
+    alg->setPropertyValue("OutputWorkspace", "PlotAsymmetryByLogValueDialog_tmp");
     alg->setPropertyValue("SpectrumList",
                           "1"); // Need to load at least one spectrum
     alg->execute();
     if (alg->isExecuted()) {
       std::string wsName = alg->getPropertyValue("OutputWorkspace");
-      Mantid::API::Workspace_sptr ws =
-          Mantid::API::AnalysisDataService::Instance().retrieve(wsName);
+      Mantid::API::Workspace_sptr ws = Mantid::API::AnalysisDataService::Instance().retrieve(wsName);
       if (!ws) {
         return;
       }
-      Mantid::API::MatrixWorkspace_sptr mws =
-          std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws);
-      Mantid::API::WorkspaceGroup_sptr gws =
-          std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(ws);
+      Mantid::API::MatrixWorkspace_sptr mws = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws);
+      Mantid::API::WorkspaceGroup_sptr gws = std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(ws);
       if (gws) {
         if (gws->getNumberOfEntries() < 2)
           return;
         mws = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(
-                gws->getNames()[1]));
+            Mantid::API::AnalysisDataService::Instance().retrieve(gws->getNames()[1]));
       }
-      const std::vector<Mantid::Kernel::Property *> &props =
-          mws->run().getLogData();
+      const std::vector<Mantid::Kernel::Property *> &props = mws->run().getLogData();
       if (gws) {
         m_uiForm.alpha->setEnabled(false);
         std::vector<std::string> wsNames = gws->getNames();
@@ -182,8 +164,7 @@ void PlotAsymmetryByLogValueDialog::fillLogBox() {
         }
       } else {
         m_uiForm.alpha->setEnabled(true);
-        Mantid::API::AnalysisDataService::Instance().remove(
-            "PlotAsymmetryByLogValueDialog_tmp");
+        Mantid::API::AnalysisDataService::Instance().remove("PlotAsymmetryByLogValueDialog_tmp");
       }
       for (auto prop : props) {
         m_uiForm.logBox->addItem(QString::fromStdString(prop->name()));
@@ -192,8 +173,7 @@ void PlotAsymmetryByLogValueDialog::fillLogBox() {
       QString displayed("");
       if (!isForScript()) {
         displayed =
-            MantidQt::API::AlgorithmInputHistory::Instance().previousInput(
-                "PlotAsymmetryByLogValue", "LogValue");
+            MantidQt::API::AlgorithmInputHistory::Instance().previousInput("PlotAsymmetryByLogValue", "LogValue");
       }
       if (!displayed.isEmpty()) {
         int index = m_uiForm.logBox->findText(displayed);
@@ -212,8 +192,7 @@ void PlotAsymmetryByLogValueDialog::fillLogBox() {
  * selected.
  * @param deadTimeTypeIndex Selected Dead Time Correction type index
  */
-void PlotAsymmetryByLogValueDialog::showHideDeadTimeFileWidget(
-    int deadTimeTypeIndex) {
+void PlotAsymmetryByLogValueDialog::showHideDeadTimeFileWidget(int deadTimeTypeIndex) {
   // Show only if "Using specified file" selected
   m_uiForm.dtcFileContainer->setVisible(deadTimeTypeIndex == 2);
 }

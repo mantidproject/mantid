@@ -179,8 +179,7 @@ public:
     // Calling on an ObjComponent without an associated geometric object will
     // throw
     ObjComponent comp("noShape");
-    TS_ASSERT_THROWS(comp.interceptSurface(track),
-                     const Exception::NullPointerException &);
+    TS_ASSERT_THROWS(comp.interceptSurface(track), const Exception::NullPointerException &);
   }
 
   void testSolidAngleCappedCylinder() {
@@ -209,8 +208,7 @@ public:
     // Calling on an ObjComponent without an associated geometric object will
     // throw
     ObjComponent B("noShape");
-    TS_ASSERT_THROWS(B.solidAngle(V3D(1, 2, 3)),
-                     const Exception::NullPointerException &);
+    TS_ASSERT_THROWS(B.solidAngle(V3D(1, 2, 3)), const Exception::NullPointerException &);
   }
 
   void testBoundingBoxCappedCylinder() {
@@ -284,8 +282,7 @@ public:
     TS_ASSERT_DELTA(point.Y(), 10.0, 1e-6);
     TS_ASSERT_DELTA(point.Z(), -10.0, 1e-6);
     // Cuboid not on principle axes
-    std::vector<std::string> planes{"px 0.5", "px 1.5",  "py -22",
-                                    "py -21", "pz -0.5", "pz 0.5"};
+    std::vector<std::string> planes{"px 0.5", "px 1.5", "py -22", "py -21", "pz -0.5", "pz 0.5"};
     ObjComponent D("ocube", createCuboid(planes));
     D.setPos(10, 0, 0);
     D.setRot(Quat(90.0, V3D(0, 0, 1)));
@@ -302,9 +299,7 @@ public:
     TS_ASSERT_DELTA(point.Z(), -31.5, 1e-6);
   }
 
-  ObjComponent *MakeWithScaleFactor(const ObjComponent *parent,
-                                    ParameterMap *map, double X, double Y,
-                                    double Z) {
+  ObjComponent *MakeWithScaleFactor(const ObjComponent *parent, ParameterMap *map, double X, double Y, double Z) {
     ObjComponent *ret = new ObjComponent(parent, map);
     map->addV3D(ret, "sca", V3D(X, Y, Z));
     return ret;
@@ -443,8 +438,7 @@ public:
     // Calling on an ObjComponent without an associated geometric object will
     // throw
     ObjComponent B("noShape");
-    TS_ASSERT_THROWS(B.solidAngle(V3D(1, 2, 3)),
-                     const Exception::NullPointerException &)
+    TS_ASSERT_THROWS(B.solidAngle(V3D(1, 2, 3)), const Exception::NullPointerException &)
     delete A;
   }
 

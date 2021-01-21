@@ -37,12 +37,10 @@ std::vector<std::string> getSymmetryOperationStrings(Group &self) {
 }
 
 Group_sptr constructGroupFromString(const std::string &initializerString) {
-  return std::const_pointer_cast<Group>(
-      GroupFactory::create<Group>(initializerString));
+  return std::const_pointer_cast<Group>(GroupFactory::create<Group>(initializerString));
 }
 
-Group_sptr
-constructGroupFromVector(const std::vector<SymmetryOperation> &symOps) {
+Group_sptr constructGroupFromVector(const std::vector<SymmetryOperation> &symOps) {
   return std::const_pointer_cast<Group>(GroupFactory::create<Group>(symOps));
 }
 
@@ -50,20 +48,17 @@ Group_sptr constructGroupFromPythonList(const boost::python::list &symOpList) {
   std::vector<SymmetryOperation> operations;
 
   for (int i = 0; i < len(symOpList); ++i) {
-    operations.emplace_back(
-        boost::python::extract<SymmetryOperation>(symOpList[i]));
+    operations.emplace_back(boost::python::extract<SymmetryOperation>(symOpList[i]));
   }
 
-  return std::const_pointer_cast<Group>(
-      GroupFactory::create<Group>(operations));
+  return std::const_pointer_cast<Group>(GroupFactory::create<Group>(operations));
 }
 
 bool isInvariantDefault(Group &self, const boost::python::object &tensor) {
   return self.isInvariant(PyObjectToMatrix(tensor)());
 }
 
-bool isInvariantTolerance(Group &self, const boost::python::object &tensor,
-                          double tolerance) {
+bool isInvariantTolerance(Group &self, const boost::python::object &tensor, double tolerance) {
   return self.isInvariant(PyObjectToMatrix(tensor)(), tolerance);
 }
 } // namespace
@@ -84,37 +79,29 @@ void export_Group() {
 
   class_<Group, boost::noncopyable>("Group", no_init)
       .def("__init__",
-           make_constructor(&constructGroupFromString, default_call_policies(),
-                            (arg("symmetryOperationString"))),
+           make_constructor(&constructGroupFromString, default_call_policies(), (arg("symmetryOperationString"))),
            "Construct a group from the provided initializer string.")
       .def("__init__",
-           make_constructor(&constructGroupFromVector, default_call_policies(),
-                            (arg("symmetryOperationVector"))),
+           make_constructor(&constructGroupFromVector, default_call_policies(), (arg("symmetryOperationVector"))),
            "Construct a group from the provided symmetry operation list.")
       .def("__init__",
-           make_constructor(&constructGroupFromPythonList,
-                            default_call_policies(),
-                            (arg("symmetryOperationList"))),
+           make_constructor(&constructGroupFromPythonList, default_call_policies(), (arg("symmetryOperationList"))),
            "Construct a group from a python generated symmetry operation list.")
-      .def("getOrder", &Group::order, arg("self"),
-           "Returns the order of the group.")
+      .def("getOrder", &Group::order, arg("self"), "Returns the order of the group.")
       .def("getCoordinateSystem", &Group::getCoordinateSystem, arg("self"),
            "Returns the type of coordinate system to distinguish groups with "
            "hexagonal system definition.")
       .def("getSymmetryOperations", &Group::getSymmetryOperations, arg("self"),
            "Returns the symmetry operations contained in the group.")
-      .def("getSymmetryOperationStrings", &getSymmetryOperationStrings,
-           arg("self"),
+      .def("getSymmetryOperationStrings", &getSymmetryOperationStrings, arg("self"),
            "Returns the x,y,z-strings for the contained symmetry operations.")
-      .def("containsOperation", &Group::containsOperation,
-           (arg("self"), arg("operation")),
+      .def("containsOperation", &Group::containsOperation, (arg("self"), arg("operation")),
            "Checks whether a SymmetryOperation is included in Group.")
 
       .def("isInvariant", &isInvariantDefault, (arg("self"), arg("tensor")),
            "Returns true if the tensor is not changed by the group's symmetry "
            "operations with a tolerance of 1e-8.")
-      .def("isInvariant", &isInvariantTolerance,
-           (arg("self"), arg("tensor"), arg("tolerance")),
+      .def("isInvariant", &isInvariantTolerance, (arg("self"), arg("tensor"), arg("tolerance")),
            "Returns true if the tensor is not changed by the group's symmetry "
            "operations with the given tolerance.")
       .def("isGroup", &Group::isGroup, arg("self"),

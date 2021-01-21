@@ -72,8 +72,7 @@ public:
   MOCK_CONST_METHOD0(getShowBackground, bool());
   MOCK_METHOD1(zoomToPeak, void(const int));
   MOCK_CONST_METHOD0(isHidden, bool());
-  MOCK_METHOD1(reInitialize,
-               void(std::shared_ptr<Mantid::API::IPeaksWorkspace> peaksWS));
+  MOCK_METHOD1(reInitialize, void(std::shared_ptr<Mantid::API::IPeaksWorkspace> peaksWS));
   MOCK_CONST_METHOD1(contentsDifferent, bool(const PeaksPresenter *other));
   MOCK_METHOD1(deletePeaksIn, bool(PeakBoundingBox));
   MOCK_METHOD1(peakEditMode, void(EditMode));
@@ -96,18 +95,13 @@ Mock Peak Transform
 ------------------------------------------------------------*/
 class MockPeakTransform : public Geometry::PeakTransform {
 public:
-  MockPeakTransform()
-      : PeakTransform("H (Lattice)", "K (Lattice)", regex("^H.*$"),
-                      regex("^K.*$"), regex("^L.*$")) {}
+  MockPeakTransform() : PeakTransform("H (Lattice)", "K (Lattice)", regex("^H.*$"), regex("^K.*$"), regex("^L.*$")) {}
   ~MockPeakTransform() override {}
   MOCK_CONST_METHOD0(clone, PeakTransform_sptr());
-  MOCK_CONST_METHOD1(transform,
-                     Mantid::Kernel::V3D(const Mantid::Kernel::V3D &));
-  MOCK_CONST_METHOD1(transformPeak,
-                     Mantid::Kernel::V3D(const Mantid::Geometry::IPeak &));
+  MOCK_CONST_METHOD1(transform, Mantid::Kernel::V3D(const Mantid::Kernel::V3D &));
+  MOCK_CONST_METHOD1(transformPeak, Mantid::Kernel::V3D(const Mantid::Geometry::IPeak &));
   MOCK_CONST_METHOD0(getFriendlyName, std::string());
-  MOCK_CONST_METHOD0(getCoordinateSystem,
-                     Mantid::Kernel::SpecialCoordinateSystem());
+  MOCK_CONST_METHOD0(getCoordinateSystem, Mantid::Kernel::SpecialCoordinateSystem());
 };
 
 /*------------------------------------------------------------
@@ -116,8 +110,7 @@ Mock Peak Transform Factory
 class MockPeakTransformFactory : public Geometry::PeakTransformFactory {
 public:
   MOCK_CONST_METHOD0(createDefaultTransform, PeakTransform_sptr());
-  MOCK_CONST_METHOD2(createTransform, PeakTransform_sptr(const std::string &,
-                                                         const std::string &));
+  MOCK_CONST_METHOD2(createTransform, PeakTransform_sptr(const std::string &, const std::string &));
 };
 
 /*------------------------------------------------------------
@@ -131,8 +124,7 @@ public:
   MOCK_METHOD0(hideView, void());
   MOCK_METHOD0(showView, void());
   MOCK_METHOD1(movePosition, void(PeakTransform_sptr));
-  MOCK_METHOD2(movePositionNonOrthogonal,
-               void(PeakTransform_sptr, NonOrthogonalAxis &));
+  MOCK_METHOD2(movePositionNonOrthogonal, void(PeakTransform_sptr, NonOrthogonalAxis &));
   MOCK_METHOD1(showBackgroundRadius, void(const bool));
   MOCK_CONST_METHOD1(getBoundingBox, PeakBoundingBox(const int));
   MOCK_METHOD1(changeOccupancyInView, void(const double));
@@ -158,14 +150,11 @@ Mock Widget Factory.
 ------------------------------------------------------------*/
 class MockPeakOverlayFactory : public PeakOverlayViewFactory {
 public:
-  MOCK_CONST_METHOD2(
-      createView, std::shared_ptr<PeakOverlayView>(PeaksPresenter *,
-                                                   PeakTransform_const_sptr));
+  MOCK_CONST_METHOD2(createView, std::shared_ptr<PeakOverlayView>(PeaksPresenter *, PeakTransform_const_sptr));
   MOCK_CONST_METHOD0(getPlotXLabel, std::string());
   MOCK_CONST_METHOD0(getPlotYLabel, std::string());
   MOCK_METHOD0(updateView, void());
-  MOCK_METHOD1(swapPeaksWorkspace,
-               void(std::shared_ptr<Mantid::API::IPeaksWorkspace> &));
+  MOCK_METHOD1(swapPeaksWorkspace, void(std::shared_ptr<Mantid::API::IPeaksWorkspace> &));
   MOCK_METHOD1(getNonOrthogonalInfo, void(NonOrthogonalAxis &));
 };
 
@@ -175,9 +164,7 @@ Mock MDGeometry
 class MockMDGeometry : public Mantid::API::MDGeometry {
 public:
   MOCK_CONST_METHOD0(getNumDims, size_t());
-  MOCK_CONST_METHOD1(
-      getDimension,
-      std::shared_ptr<const Mantid::Geometry::IMDDimension>(size_t));
+  MOCK_CONST_METHOD1(getDimension, std::shared_ptr<const Mantid::Geometry::IMDDimension>(size_t));
   ~MockMDGeometry() override {}
 };
 

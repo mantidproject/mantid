@@ -18,14 +18,10 @@ class DLLExport ThresholdMD : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Threshold an MDHistoWorkspace.";
-  }
+  const std::string summary() const override { return "Threshold an MDHistoWorkspace."; }
 
   int version() const override;
-  const std::vector<std::string> seeAlso() const override {
-    return {"SmoothMD"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"SmoothMD"}; }
   const std::string category() const override;
 
 private:

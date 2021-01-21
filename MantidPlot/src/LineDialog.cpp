@@ -29,8 +29,7 @@
 #include <QGroupBox>
 #include <QSpinBox>
 
-LineDialog::LineDialog(ArrowMarker *line, QWidget *parent, const Qt::WFlags &fl)
-    : QDialog(parent, fl) {
+LineDialog::LineDialog(ArrowMarker *line, QWidget *parent, const Qt::WFlags &fl) : QDialog(parent, fl) {
   unitBox = nullptr;
 
   setWindowTitle(tr("MantidPlot - Line options"));
@@ -142,8 +141,7 @@ LineDialog::LineDialog(ArrowMarker *line, QWidget *parent, const Qt::WFlags &fl)
 
   connect(btnOk, SIGNAL(clicked()), this, SLOT(accept()));
   connect(btnApply, SIGNAL(clicked()), this, SLOT(apply()));
-  connect(tw, SIGNAL(currentChanged(QWidget *)), this,
-          SLOT(enableButtonDefault(QWidget *)));
+  connect(tw, SIGNAL(currentChanged(QWidget *)), this, SLOT(enableButtonDefault(QWidget *)));
   connect(buttonDefault, SIGNAL(clicked()), this, SLOT(setDefaultValues()));
 }
 
@@ -333,10 +331,8 @@ void LineDialog::setDefaultValues() {
   if (!app)
     return;
 
-  app->setArrowDefaultSettings(widthBox->value(), colorBox->color(),
-                               Graph::getPenStyle(styleBox->currentIndex()),
-                               boxHeadLength->value(), boxHeadAngle->value(),
-                               filledBox->isChecked());
+  app->setArrowDefaultSettings(widthBox->value(), colorBox->color(), Graph::getPenStyle(styleBox->currentIndex()),
+                               boxHeadLength->value(), boxHeadAngle->value(), filledBox->isChecked());
 }
 
 void LineDialog::enableButtonDefault(QWidget *w) {

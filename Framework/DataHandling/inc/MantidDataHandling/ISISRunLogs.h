@@ -38,8 +38,7 @@ public:
   void addPeriodLog(const int period, API::Run &exptRun);
 
   /// gets the list of log names that should not be filtered
-  static std::vector<std::string>
-  getLogNamesExcludedFromFiltering(const API::Run &run);
+  static std::vector<std::string> getLogNamesExcludedFromFiltering(const API::Run &run);
 
   /// applies log filtering for a run
   static void applyLogFiltering(Mantid::API::Run &exptRun);

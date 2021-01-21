@@ -28,9 +28,7 @@ namespace SimpleGui {
 /**
  * @param parent the parent widget for the time control widget
  */
-TimeControlWidget::TimeControlWidget(QWidget *parent) : QWidget(parent) {
-  this->ui.setupUi(this);
-}
+TimeControlWidget::TimeControlWidget(QWidget *parent) : QWidget(parent) { this->ui.setupUi(this); }
 
 TimeControlWidget::~TimeControlWidget() {}
 
@@ -42,11 +40,8 @@ TimeControlWidget::~TimeControlWidget() {}
  * @param timeEnd the end "time" for the data
  * @param numTimesteps the number of "time" steps for the data
  */
-void TimeControlWidget::updateAnimationControls(double timeStart,
-                                                double timeEnd,
-                                                int numTimesteps) {
-  pqAnimationScene *scene =
-      pqPVApplicationCore::instance()->animationManager()->getActiveScene();
+void TimeControlWidget::updateAnimationControls(double timeStart, double timeEnd, int numTimesteps) {
+  pqAnimationScene *scene = pqPVApplicationCore::instance()->animationManager()->getActiveScene();
   vtkSMProxy *proxy = scene->getProxy();
   vtkSMPropertyHelper(proxy, "StartTime").Set(timeStart);
   vtkSMPropertyHelper(proxy, "EndTime").Set(timeEnd);
@@ -58,9 +53,7 @@ void TimeControlWidget::updateAnimationControls(double timeStart,
  * Function to enable or disable the entire animation controls widget.
  * @param state how to set the animation controls
  */
-void TimeControlWidget::enableAnimationControls(bool state) {
-  this->setEnabled(state);
-}
+void TimeControlWidget::enableAnimationControls(bool state) { this->setEnabled(state); }
 } // namespace SimpleGui
 } // namespace Vates
 } // namespace Mantid

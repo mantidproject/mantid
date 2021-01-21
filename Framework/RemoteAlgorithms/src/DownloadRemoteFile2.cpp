@@ -29,21 +29,14 @@ void DownloadRemoteFile2::init() {
   auto requireValue = std::make_shared<MandatoryValidator<std::string>>();
 
   // Compute Resources
-  std::vector<std::string> computes = Mantid::Kernel::ConfigService::Instance()
-                                          .getFacility()
-                                          .computeResources();
-  declareProperty(
-      "ComputeResource", "", std::make_shared<StringListValidator>(computes),
-      "The name of the remote computer holding the file", Direction::Input);
+  std::vector<std::string> computes = Mantid::Kernel::ConfigService::Instance().getFacility().computeResources();
+  declareProperty("ComputeResource", "", std::make_shared<StringListValidator>(computes),
+                  "The name of the remote computer holding the file", Direction::Input);
 
   // The transaction ID comes from the StartRemoteTransaction algortithm
-  declareProperty("TransactionID", "", requireValue,
-                  "The ID of the transaction that owns the file",
-                  Direction::Input);
-  declareProperty(
-      "RemoteFileName", "", requireValue,
-      "The name of the file on the remote machine. (Filename only; no path)",
-      Direction::Input);
+  declareProperty("TransactionID", "", requireValue, "The ID of the transaction that owns the file", Direction::Input);
+  declareProperty("RemoteFileName", "", requireValue,
+                  "The name of the file on the remote machine. (Filename only; no path)", Direction::Input);
   declareProperty("LocalFileName", "", requireValue,
                   "The full pathname on the local machine where the downloaded "
                   "file should be saved.",
@@ -57,8 +50,7 @@ void DownloadRemoteFile2::init() {
 void DownloadRemoteFile2::exec() {
 
   Mantid::API::IRemoteJobManager_sptr jobManager =
-      Mantid::API::RemoteJobManagerFactory::Instance().create(
-          getPropertyValue("ComputeResource"));
+      Mantid::API::RemoteJobManagerFactory::Instance().create(getPropertyValue("ComputeResource"));
 
   const std::string tid = getPropertyValue("TransactionID");
   const std::string remote = getPropertyValue("RemoteFileName");

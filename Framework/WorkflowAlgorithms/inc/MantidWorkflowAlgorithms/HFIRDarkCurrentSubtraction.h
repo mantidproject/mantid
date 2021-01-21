@@ -40,19 +40,13 @@ namespace WorkflowAlgorithms {
 class DLLExport HFIRDarkCurrentSubtraction : public API::Algorithm {
 public:
   /// Algorithm's name
-  const std::string name() const override {
-    return "HFIRDarkCurrentSubtraction";
-  }
+  const std::string name() const override { return "HFIRDarkCurrentSubtraction"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Perform HFIR SANS dark current subtraction.";
-  }
+  const std::string summary() const override { return "Perform HFIR SANS dark current subtraction."; }
   /// Algorithm's version
   int version() const override { return (1); }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "Workflow\\SANS\\UsesPropertyManager";
-  }
+  const std::string category() const override { return "Workflow\\SANS\\UsesPropertyManager"; }
 
 private:
   /// Initialisation code

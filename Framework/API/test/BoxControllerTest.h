@@ -107,20 +107,16 @@ public:
 
     boost::optional<std::vector<size_t>> splitTopInto = sc.getSplitTopInto();
 
-    TSM_ASSERT_EQUALS("Should have three dimensions", splitTopInto.get().size(),
-                      3);
-    TSM_ASSERT_EQUALS("Should have a value of 10 in the first dimension",
-                      splitTopInto.get()[0], 10);
-    TSM_ASSERT_EQUALS("Should have a value of 20 in the second dimension",
-                      splitTopInto.get()[1], 20);
-    TSM_ASSERT_EQUALS("Should have a value of 30 in the third dimension",
-                      splitTopInto.get()[2], 30);
+    TSM_ASSERT_EQUALS("Should have three dimensions", splitTopInto.get().size(), 3);
+    TSM_ASSERT_EQUALS("Should have a value of 10 in the first dimension", splitTopInto.get()[0], 10);
+    TSM_ASSERT_EQUALS("Should have a value of 20 in the second dimension", splitTopInto.get()[1], 20);
+    TSM_ASSERT_EQUALS("Should have a value of 30 in the third dimension", splitTopInto.get()[2], 30);
   }
 
   void test_setSplitTopIntoThrowsForWrongDimension() {
     BoxController sc(1);
-    TSM_ASSERT_THROWS("Should throw for setting a wrong dimension",
-                      sc.setSplitTopInto(1, 10), const std::invalid_argument &);
+    TSM_ASSERT_THROWS("Should throw for setting a wrong dimension", sc.setSplitTopInto(1, 10),
+                      const std::invalid_argument &);
   }
 
   void doTest_numBoxes(BoxController &bc, size_t expectedNumEntries) {
@@ -177,25 +173,19 @@ public:
 
     // This includes a forced top level split and a subsequent split of two
     // boxes
-    TSM_ASSERT_DELTA("The average depth should be 0", bc.getAverageDepth(), 0.0,
-                     1e-5);
+    TSM_ASSERT_DELTA("The average depth should be 0", bc.getAverageDepth(), 0.0, 1e-5);
     bc.trackNumBoxes(0);
-    TSM_ASSERT_DELTA("The average depth should be about 1",
-                     bc.getAverageDepth(), 1.0, 1e-5);
+    TSM_ASSERT_DELTA("The average depth should be about 1", bc.getAverageDepth(), 1.0, 1e-5);
 
     bc.trackNumBoxes(1);
     bc.trackNumBoxes(1);
 
     const std::vector<size_t> &num = bc.getNumMDBoxes();
     const std::vector<size_t> &numGridBoxes = bc.getNumMDGridBoxes();
-    TSM_ASSERT_EQUALS("Should be 1 MDGridBox structure at the 0th level",
-                      numGridBoxes[0], 1);
-    TSM_ASSERT_EQUALS("Should be 48 - 2 MDBox structures at the 1st level",
-                      num[1], 46);
-    TSM_ASSERT_EQUALS("Should be 2 MDGridBox structure at the 1st level",
-                      numGridBoxes[1], 2);
-    TSM_ASSERT_EQUALS("Should be 2 * 100 MDBox structures at the 2nd level.",
-                      num[2], 200);
+    TSM_ASSERT_EQUALS("Should be 1 MDGridBox structure at the 0th level", numGridBoxes[0], 1);
+    TSM_ASSERT_EQUALS("Should be 48 - 2 MDBox structures at the 1st level", num[1], 46);
+    TSM_ASSERT_EQUALS("Should be 2 MDGridBox structure at the 1st level", numGridBoxes[1], 2);
+    TSM_ASSERT_EQUALS("Should be 2 * 100 MDBox structures at the 2nd level.", num[2], 200);
   }
 
   void test_trackNumBoxesWithTopLevelSplittingAndSettingMaxDepth() {
@@ -210,25 +200,19 @@ public:
 
     // This includes a forced top level split and a subsequent split of two
     // boxes
-    TSM_ASSERT_DELTA("The average depth should be 0", bc.getAverageDepth(), 0.0,
-                     1e-5);
+    TSM_ASSERT_DELTA("The average depth should be 0", bc.getAverageDepth(), 0.0, 1e-5);
     bc.trackNumBoxes(0);
-    TSM_ASSERT_DELTA("The average depth should be about 1",
-                     bc.getAverageDepth(), 1.0, 1e-5);
+    TSM_ASSERT_DELTA("The average depth should be about 1", bc.getAverageDepth(), 1.0, 1e-5);
 
     bc.trackNumBoxes(1);
     bc.trackNumBoxes(1);
 
     const std::vector<size_t> &num = bc.getNumMDBoxes();
     const std::vector<size_t> &numGridBoxes = bc.getNumMDGridBoxes();
-    TSM_ASSERT_EQUALS("Should be 1 MDGridBox structure at the 0th level",
-                      numGridBoxes[0], 1);
-    TSM_ASSERT_EQUALS("Should be 48 - 2 MDBox structures at the 1st level",
-                      num[1], 46);
-    TSM_ASSERT_EQUALS("Should be 2 MDGridBox structure at the 1st level",
-                      numGridBoxes[1], 2);
-    TSM_ASSERT_EQUALS("Should be 2 * 100 MDBox structures at the 2nd level.",
-                      num[2], 200);
+    TSM_ASSERT_EQUALS("Should be 1 MDGridBox structure at the 0th level", numGridBoxes[0], 1);
+    TSM_ASSERT_EQUALS("Should be 48 - 2 MDBox structures at the 1st level", num[1], 46);
+    TSM_ASSERT_EQUALS("Should be 2 MDGridBox structure at the 1st level", numGridBoxes[1], 2);
+    TSM_ASSERT_EQUALS("Should be 2 * 100 MDBox structures at the 2nd level.", num[2], 200);
   }
 
   /// Compare two box controllers and assert each part of them.
@@ -250,8 +234,7 @@ public:
     // Check for top level splitting
     if (a.getSplitTopInto() && b.getSplitTopInto()) {
       for (size_t d = 0; d < a.getNDims(); d++) {
-        TS_ASSERT_EQUALS(a.getSplitTopInto().get()[d],
-                         b.getSplitTopInto().get()[d]);
+        TS_ASSERT_EQUALS(a.getSplitTopInto().get()[d], b.getSplitTopInto().get()[d]);
       }
     } else {
       TS_ASSERT_EQUALS(a.getSplitTopInto(), b.getSplitTopInto());
@@ -282,10 +265,8 @@ public:
     a.setSplitInto(10);
     a.setMaxDepth(10);
     a.setMaxId(123456);
-    TSM_ASSERT_THROWS_NOTHING("Should add the first dimension",
-                              a.setSplitTopInto(0, 10));
-    TSM_ASSERT_THROWS_NOTHING("Should add the second dimension",
-                              a.setSplitTopInto(1, 20));
+    TSM_ASSERT_THROWS_NOTHING("Should add the first dimension", a.setSplitTopInto(0, 10));
+    TSM_ASSERT_THROWS_NOTHING("Should add the second dimension", a.setSplitTopInto(1, 20));
 
     std::string xml = a.toXMLString();
     TS_ASSERT(!xml.empty());
@@ -314,10 +295,8 @@ public:
     a.setSplitInto(10);
     a.setMaxDepth(10);
     a.setMaxId(123456);
-    TSM_ASSERT_THROWS_NOTHING("Should add the first dimension",
-                              a.setSplitTopInto(0, 10));
-    TSM_ASSERT_THROWS_NOTHING("Should add the second dimension",
-                              a.setSplitTopInto(1, 20));
+    TSM_ASSERT_THROWS_NOTHING("Should add the first dimension", a.setSplitTopInto(0, 10));
+    TSM_ASSERT_THROWS_NOTHING("Should add the second dimension", a.setSplitTopInto(1, 20));
 
     auto b = BoxController_sptr(a.clone());
     // Check that settings are the same but BC are different
@@ -330,8 +309,7 @@ public:
     a->setSplitInto(10);
     a->setMaxDepth(10);
     a->setMaxId(123456);
-    std::shared_ptr<IBoxControllerIO> pS(
-        new MantidTestHelpers::BoxControllerDummyIO(a.get()));
+    std::shared_ptr<IBoxControllerIO> pS(new MantidTestHelpers::BoxControllerDummyIO(a.get()));
     TS_ASSERT_THROWS_NOTHING(a->setFileBacked(pS, "fakeFile"));
     TS_ASSERT(a->isFileBacked());
 
@@ -340,8 +318,7 @@ public:
     compareBoxControllers(*a, *b);
 
     TS_ASSERT(!b->isFileBacked());
-    std::shared_ptr<IBoxControllerIO> pS2(
-        new MantidTestHelpers::BoxControllerDummyIO(b.get()));
+    std::shared_ptr<IBoxControllerIO> pS2(new MantidTestHelpers::BoxControllerDummyIO(b.get()));
     TS_ASSERT_THROWS_NOTHING(b->setFileBacked(pS2, "fakeFile2"));
 
     // Check that settings are the same but BC are different
@@ -351,8 +328,7 @@ public:
 
   void test_MRU_access() {
     auto a = std::make_shared<BoxController>(2);
-    std::shared_ptr<IBoxControllerIO> pS(
-        new MantidTestHelpers::BoxControllerDummyIO(a.get()));
+    std::shared_ptr<IBoxControllerIO> pS(new MantidTestHelpers::BoxControllerDummyIO(a.get()));
     a->setFileBacked(pS, "existingFakeFile");
     DiskBuffer *dbuf = a->getFileIO();
 
@@ -365,8 +341,7 @@ public:
     // Check the constructor defaults.
     BoxController box_controller(2);
 
-    boost::optional<std::vector<size_t>> splitTopInto =
-        box_controller.getSplitTopInto();
+    boost::optional<std::vector<size_t>> splitTopInto = box_controller.getSplitTopInto();
     TS_ASSERT(!splitTopInto)
     TS_ASSERT_EQUALS(2, box_controller.getNDims());
     TS_ASSERT_EQUALS(1, box_controller.getNumSplit());
@@ -377,20 +352,17 @@ public:
     auto a = std::make_shared<BoxController>(2);
     TS_ASSERT(!a->isFileBacked());
 
-    std::shared_ptr<IBoxControllerIO> pS(
-        new MantidTestHelpers::BoxControllerDummyIO(a.get()));
+    std::shared_ptr<IBoxControllerIO> pS(new MantidTestHelpers::BoxControllerDummyIO(a.get()));
     TS_ASSERT_THROWS_NOTHING(a->setFileBacked(pS, "fakeFile"));
 
     TSM_ASSERT("Box controller should have open faked file", pS->isOpened());
     std::string fileName = pS->getFileName();
-    TSM_ASSERT_EQUALS(
-        "Box controller file should be named as requested ", 0,
-        fileName.compare(fileName.size() - 8, 8, std::string("fakeFile")));
+    TSM_ASSERT_EQUALS("Box controller file should be named as requested ", 0,
+                      fileName.compare(fileName.size() - 8, 8, std::string("fakeFile")));
     TS_ASSERT(a->isFileBacked());
 
     TS_ASSERT_THROWS_NOTHING(a->clearFileBacked());
     TS_ASSERT(!a->isFileBacked());
-    TSM_ASSERT("Box controller should now close the faked file",
-               !pS->isOpened());
+    TSM_ASSERT("Box controller should now close the faked file", !pS->isOpened());
   }
 };

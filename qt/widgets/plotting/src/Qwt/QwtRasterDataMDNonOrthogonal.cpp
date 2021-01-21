@@ -14,9 +14,7 @@ using namespace Mantid;
 using namespace Mantid::API;
 
 QwtRasterDataMDNonOrthogonal::QwtRasterDataMDNonOrthogonal()
-    : m_lookPoint(),
-      m_fromHklToXyz({{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}}),
-      m_missingHKLdim(0) {}
+    : m_lookPoint(), m_fromHklToXyz({{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}}), m_missingHKLdim(0) {}
 
 //-------------------------------------------------------------------------
 /** Return the data value to plot at the given position
@@ -41,17 +39,15 @@ double QwtRasterDataMDNonOrthogonal::value(double x, double y) const {
   }
 
   // Transform the lookpoint to the coordinate of the workspace
-  transformLookpointToWorkspaceCoord(m_lookPoint, m_fromHklToXyz, m_dimX,
-                                     m_dimY, m_missingHKLdim);
+  transformLookpointToWorkspaceCoord(m_lookPoint, m_fromHklToXyz, m_dimX, m_dimY, m_missingHKLdim);
   // Get the signal at that point
   signal_t value = 0;
 
   // Check if the overlay WS is within range of being viewed
-  if (m_overlayWS && m_overlayInSlice && (x >= m_overlayXMin) &&
-      (x < m_overlayXMax) && (y >= m_overlayYMin) && (y < m_overlayYMax)) {
+  if (m_overlayWS && m_overlayInSlice && (x >= m_overlayXMin) && (x < m_overlayXMax) && (y >= m_overlayYMin) &&
+      (y < m_overlayYMax)) {
     // Point is in the overlaid workspace
-    value = m_overlayWS->getSignalWithMaskAtCoord(m_lookPoint.data(),
-                                                  m_normalization);
+    value = m_overlayWS->getSignalWithMaskAtCoord(m_lookPoint.data(), m_normalization);
   } else {
     // No overlay, or not within range of that workspace
     value = m_ws->getSignalWithMaskAtCoord(m_lookPoint.data(), m_normalization);
@@ -79,10 +75,9 @@ void QwtRasterDataMDNonOrthogonal::setWorkspace(IMDWorkspace_const_sptr ws) {
   transformFromDoubleToCoordT(skewMatrix, m_fromHklToXyz);
 }
 
-void QwtRasterDataMDNonOrthogonal::setSliceParams(
-    size_t dimX, size_t dimY, Mantid::Geometry::IMDDimension_const_sptr X,
-    Mantid::Geometry::IMDDimension_const_sptr Y,
-    std::vector<Mantid::coord_t> &slicePoint) {
+void QwtRasterDataMDNonOrthogonal::setSliceParams(size_t dimX, size_t dimY, Mantid::Geometry::IMDDimension_const_sptr X,
+                                                  Mantid::Geometry::IMDDimension_const_sptr Y,
+                                                  std::vector<Mantid::coord_t> &slicePoint) {
   QwtRasterDataMD::setSliceParams(dimX, dimY, X, Y, slicePoint);
   // find missing HKL
   m_missingHKLdim = API::getMissingHKLDimensionIndex(m_ws, dimX, dimY);
@@ -101,9 +96,8 @@ QwtRasterDataMDNonOrthogonal *QwtRasterDataMDNonOrthogonal::copy() const {
  * @param source A source object to copy from
  * @param dest The destination object that receives the contents
  */
-void QwtRasterDataMDNonOrthogonal::copyFrom(
-    const QwtRasterDataMDNonOrthogonal &source,
-    QwtRasterDataMDNonOrthogonal &dest) const {
+void QwtRasterDataMDNonOrthogonal::copyFrom(const QwtRasterDataMDNonOrthogonal &source,
+                                            QwtRasterDataMDNonOrthogonal &dest) const {
   // base bounding box
   dest.setBoundingRect(source.boundingRect());
 
@@ -129,8 +123,7 @@ void QwtRasterDataMDNonOrthogonal::copyFrom(
   dest.m_missingHKLdim = source.m_missingHKLdim;
   dest.m_lookPoint = source.m_lookPoint;
 
-  std::copy(std::begin(source.m_fromHklToXyz), std::end(source.m_fromHklToXyz),
-            std::begin(dest.m_fromHklToXyz));
+  std::copy(std::begin(source.m_fromHklToXyz), std::end(source.m_fromHklToXyz), std::begin(dest.m_fromHklToXyz));
 }
 
 } // namespace API

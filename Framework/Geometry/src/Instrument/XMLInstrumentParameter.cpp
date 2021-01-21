@@ -50,23 +50,20 @@ using namespace Kernel;
  *  @param angleConvertConst :: angle conversion constant?????
  *  @param description :: text description of the parameter
  */
-XMLInstrumentParameter::XMLInstrumentParameter(
-    const std::string &logfileID, const std::string &value,
-    const std::shared_ptr<Kernel::Interpolation> &interpolation,
-    const std::string &formula, const std::string &formulaUnit,
-    const std::string &resultUnit, const std::string &paramName,
-    const std::string &type, const std::string &tie,
-    const std::vector<std::string> &constraint, std::string &penaltyFactor,
-    const std::string &fitFunc, const std::string &extractSingleValueAs,
-    const std::string &eq, const Geometry::IComponent *comp,
-    double angleConvertConst, const std::string &description)
-    : m_logfileID(logfileID), m_value(value), m_paramName(paramName),
-      m_type(type), m_tie(tie), m_constraint(constraint),
-      m_penaltyFactor(penaltyFactor), m_fittingFunction(fitFunc),
-      m_formula(formula), m_formulaUnit(formulaUnit), m_resultUnit(resultUnit),
-      m_interpolation(interpolation),
-      m_extractSingleValueAs(extractSingleValueAs), m_eq(eq), m_component(comp),
-      m_angleConvertConst(angleConvertConst), m_description("") {
+XMLInstrumentParameter::XMLInstrumentParameter(const std::string &logfileID, const std::string &value,
+                                               const std::shared_ptr<Kernel::Interpolation> &interpolation,
+                                               const std::string &formula, const std::string &formulaUnit,
+                                               const std::string &resultUnit, const std::string &paramName,
+                                               const std::string &type, const std::string &tie,
+                                               const std::vector<std::string> &constraint, std::string &penaltyFactor,
+                                               const std::string &fitFunc, const std::string &extractSingleValueAs,
+                                               const std::string &eq, const Geometry::IComponent *comp,
+                                               double angleConvertConst, const std::string &description)
+    : m_logfileID(logfileID), m_value(value), m_paramName(paramName), m_type(type), m_tie(tie),
+      m_constraint(constraint), m_penaltyFactor(penaltyFactor), m_fittingFunction(fitFunc), m_formula(formula),
+      m_formulaUnit(formulaUnit), m_resultUnit(resultUnit), m_interpolation(interpolation),
+      m_extractSingleValueAs(extractSingleValueAs), m_eq(eq), m_component(comp), m_angleConvertConst(angleConvertConst),
+      m_description("") {
   if (!description.empty()) { // remove multiple spaces
     static const boost::regex re("\\s+");
     std::string desc = boost::regex_replace(description, re, " ");
@@ -88,8 +85,7 @@ XMLInstrumentParameter::XMLInstrumentParameter(
  *  @throw InstrumentDefinitionError Thrown if issues with the content of XML
  *instrument definition file
  */
-double XMLInstrumentParameter::createParamValue(
-    TimeSeriesProperty<double> *logData) const {
+double XMLInstrumentParameter::createParamValue(TimeSeriesProperty<double> *logData) const {
   // If this parameter is a <look-up-table> or <formula> return 0.0. Such
   // parameter types are
   // associated with 'fitting' parameters. In some sense this method should
@@ -123,8 +119,7 @@ double XMLInstrumentParameter::createParamValue(
   if (!m_logfileID.empty()) {
     // get value from time series
 
-    using StatisticsMapType =
-        std::map<std::string, Kernel::Math::StatisticType>;
+    using StatisticsMapType = std::map<std::string, Kernel::Math::StatisticType>;
     StatisticsMapType statistics_types;
     statistics_types.emplace("first_value", Kernel::Math::FirstValue);
     statistics_types.emplace("last_value", Kernel::Math::LastValue);
@@ -134,21 +129,17 @@ double XMLInstrumentParameter::createParamValue(
     // to time_averaged_mean
     statistics_types.emplace("median", Kernel::Math::Median);
     statistics_types.emplace("minimum", Kernel::Math::Minimum);
-    StatisticsMapType::const_iterator statisics_choice =
-        statistics_types.find(m_extractSingleValueAs);
-    const bool bUsingStandardStatistics =
-        statisics_choice != statistics_types.end();
+    StatisticsMapType::const_iterator statisics_choice = statistics_types.find(m_extractSingleValueAs);
+    const bool bUsingStandardStatistics = statisics_choice != statistics_types.end();
 
     if (m_extractSingleValueAs == "mean") {
       extractedValue = timeMean(logData);
     } else if (bUsingStandardStatistics) {
-      extractedValue =
-          Kernel::filterByStatistic(logData, (*statisics_choice).second);
+      extractedValue = Kernel::filterByStatistic(logData, (*statisics_choice).second);
     }
     // Looking for string: "position n", where n is an integer and is a 1-based
     // index
-    else if (m_extractSingleValueAs.find("position") == 0 &&
-             m_extractSingleValueAs.size() >= 10) {
+    else if (m_extractSingleValueAs.find("position") == 0 && m_extractSingleValueAs.size() >= 10) {
       std::stringstream extractPosition(m_extractSingleValueAs);
       std::string dummy;
       int position;
@@ -157,18 +148,16 @@ double XMLInstrumentParameter::createParamValue(
       extractedValue = logData->nthValue(position - 1);
     } else {
       throw Kernel::Exception::InstrumentDefinitionError(
-          std::string("extract-single-value-as attribute for <parameter>") +
-          " element (eq=" + m_eq +
+          std::string("extract-single-value-as attribute for <parameter>") + " element (eq=" + m_eq +
           ") in instrument definition file is not recognised.");
     }
   } else {
     try {
       extractedValue = boost::lexical_cast<double>(m_value);
     } catch (boost::bad_lexical_cast &) {
-      throw Kernel::Exception::InstrumentDefinitionError(
-          std::string("<parameter> with name ") + m_paramName +
-          " much be set to a number,\n" +
-          "unless it is meant to be a 'string' parameter.");
+      throw Kernel::Exception::InstrumentDefinitionError(std::string("<parameter> with name ") + m_paramName +
+                                                         " much be set to a number,\n" +
+                                                         "unless it is meant to be a 'string' parameter.");
     }
   }
 
@@ -182,8 +171,7 @@ double XMLInstrumentParameter::createParamValue(
   found = equationStr.find("value");
   if (found == std::string::npos) {
     throw Kernel::Exception::InstrumentDefinitionError(
-        std::string("Equation attribute for <parameter>") +
-        " element (eq=" + m_eq +
+        std::string("Equation attribute for <parameter>") + " element (eq=" + m_eq +
         ") in instrument definition file must contain the string: \"value\"." +
         ". \"value\" is replaced by a value from the logfile.");
   }
@@ -206,9 +194,8 @@ double XMLInstrumentParameter::createParamValue(
     return p.Eval();
   } catch (mu::Parser::exception_type &e) {
     throw Kernel::Exception::InstrumentDefinitionError(
-        std::string("Equation attribute for <parameter>") + " element (eq=" +
-        m_eq + ") in instrument definition file cannot be parsed." +
-        ". Muparser error message is: " + e.GetMsg());
+        std::string("Equation attribute for <parameter>") + " element (eq=" + m_eq +
+        ") in instrument definition file cannot be parsed." + ". Muparser error message is: " + e.GetMsg());
   }
 }
 

@@ -17,21 +17,16 @@ using Mantid::Kernel::EqualBinsChecker;
  */
 class TestEqualBinsChecker : public EqualBinsChecker {
 public:
-  TestEqualBinsChecker(const Mantid::MantidVec &xData, const double errorLevel)
-      : EqualBinsChecker(xData, errorLevel){};
+  TestEqualBinsChecker(const Mantid::MantidVec &xData, const double errorLevel) : EqualBinsChecker(xData, errorLevel){};
   double wrapGetReferenceDx() const { return this->getReferenceDx(); }
-  double wrapGetDifference(const size_t bin, const double dx) const {
-    return this->getDifference(bin, dx);
-  }
+  double wrapGetDifference(const size_t bin, const double dx) const { return this->getDifference(bin, dx); }
 };
 
 class EqualBinsCheckerTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static EqualBinsCheckerTest *createSuite() {
-    return new EqualBinsCheckerTest();
-  }
+  static EqualBinsCheckerTest *createSuite() { return new EqualBinsCheckerTest(); }
   static void destroySuite(EqualBinsCheckerTest *suite) { delete suite; }
 
   void test_validate_pass() {

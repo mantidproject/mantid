@@ -36,8 +36,7 @@ class vtkDataSetToScaledDataSetTest : public CxxTest::TestSuite {
 private:
   vtkSmartPointer<vtkUnstructuredGrid> makeDataSet() {
     FakeProgressAction progressUpdate;
-    MDEventWorkspace3Lean::sptr ws =
-        MDEventsTestHelper::makeMDEW<3>(8, -10.0, 10.0, 1);
+    MDEventWorkspace3Lean::sptr ws = MDEventsTestHelper::makeMDEW<3>(8, -10.0, 10.0, 1);
     vtkMDHexFactory factory(VolumeNormalization);
     factory.initialize(ws);
     auto product = factory.create(progressUpdate);
@@ -52,16 +51,14 @@ private:
     auto v = vtkVector3d(-2, 2, 0);
     auto w = vtkVector3d(0, 0, 8);
 
-    vtkSmartPointer<vtkMatrix4x4> cobMatrix =
-        vtkSmartPointer<vtkMatrix4x4>::New();
+    vtkSmartPointer<vtkMatrix4x4> cobMatrix = vtkSmartPointer<vtkMatrix4x4>::New();
     cobMatrix->Identity();
     std::copy(u.GetData(), u.GetData() + 3, cobMatrix->Element[0]);
     std::copy(v.GetData(), v.GetData() + 3, cobMatrix->Element[1]);
     std::copy(w.GetData(), w.GetData() + 3, cobMatrix->Element[2]);
     cobMatrix->Transpose();
 
-    vtkPVChangeOfBasisHelper::AddChangeOfBasisMatrixToFieldData(grid,
-                                                                cobMatrix);
+    vtkPVChangeOfBasisHelper::AddChangeOfBasisMatrixToFieldData(grid, cobMatrix);
     return grid;
   }
 
@@ -86,12 +83,8 @@ private:
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static vtkDataSetToScaledDataSetTest *createSuite() {
-    return new vtkDataSetToScaledDataSetTest();
-  }
-  static void destroySuite(vtkDataSetToScaledDataSetTest *suite) {
-    delete suite;
-  }
+  static vtkDataSetToScaledDataSetTest *createSuite() { return new vtkDataSetToScaledDataSetTest(); }
+  static void destroySuite(vtkDataSetToScaledDataSetTest *suite) { delete suite; }
 
   void testThrowIfInputNull() {
     vtkUnstructuredGrid *in = nullptr;
@@ -105,8 +98,7 @@ public:
 
     vtkDataSetToScaledDataSet scaler;
     auto in = makeDataSet();
-    auto out =
-        vtkSmartPointer<vtkPointSet>::Take(scaler.execute(0.1, 0.5, 0.2, in));
+    auto out = vtkSmartPointer<vtkPointSet>::Take(scaler.execute(0.1, 0.5, 0.2, in));
 
     // Check bounds are scaled
     double *bb = out->GetBounds();
@@ -118,8 +110,7 @@ public:
     TS_ASSERT_EQUALS(2.0, bb[5]);
 
     // Check that the Change-Of-Basis-Matrix is correct
-    vtkSmartPointer<vtkMatrix4x4> cobMatrix =
-        vtkPVChangeOfBasisHelper::GetChangeOfBasisMatrix(out);
+    vtkSmartPointer<vtkMatrix4x4> cobMatrix = vtkPVChangeOfBasisHelper::GetChangeOfBasisMatrix(out);
     TS_ASSERT_EQUALS(0.1, cobMatrix->Element[0][0])
     TS_ASSERT_EQUALS(0.0, cobMatrix->Element[0][1])
     TS_ASSERT_EQUALS(0.0, cobMatrix->Element[0][2])
@@ -158,8 +149,7 @@ public:
 
     // Act
     vtkDataSetToScaledDataSet scaler;
-    auto out =
-        vtkSmartPointer<vtkPointSet>::Take(scaler.execute(0.1, 0.5, 0.2, in));
+    auto out = vtkSmartPointer<vtkPointSet>::Take(scaler.execute(0.1, 0.5, 0.2, in));
 
     auto fieldData = out->GetFieldData();
     MetadataJsonManager manager;
@@ -177,8 +167,7 @@ public:
 
     vtkDataSetToScaledDataSet scaler;
     auto in = makeDataSetWithNonOrthogonal();
-    auto out = vtkSmartPointer<vtkPointSet>::Take(
-        scaler.execute(0.25, 0.5, 0.125, in));
+    auto out = vtkSmartPointer<vtkPointSet>::Take(scaler.execute(0.25, 0.5, 0.125, in));
 
     // Check bounds are scaled
     double *bb = out->GetBounds();

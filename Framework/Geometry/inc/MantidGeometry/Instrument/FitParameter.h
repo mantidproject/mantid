@@ -41,17 +41,11 @@ public:
   /// get constraint
   std::string getConstraint() const;
   /// get penalty factor
-  const std::string &getConstraintPenaltyFactor() const {
-    return m_constraintPenaltyFactor;
-  }
+  const std::string &getConstraintPenaltyFactor() const { return m_constraintPenaltyFactor; }
   /// set constraint min
-  void setConstraintMin(const std::string &constraintMin) {
-    m_constraintMin = constraintMin;
-  }
+  void setConstraintMin(const std::string &constraintMin) { m_constraintMin = constraintMin; }
   /// set constraint max
-  void setConstraintMax(const std::string &constraintMax) {
-    m_constraintMax = constraintMax;
-  }
+  void setConstraintMax(const std::string &constraintMax) { m_constraintMax = constraintMax; }
   /// set the constraint penalty
   void setConstraintPenaltyFactor(const std::string &constraintPenaltyFactor) {
     m_constraintPenaltyFactor = constraintPenaltyFactor;
@@ -63,15 +57,11 @@ public:
   /// get formula unit, and Empty string is no unit has been specified
   const std::string &getFormulaUnit() const { return m_formulaUnit; }
   /// set formula unit
-  void setFormulaUnit(const std::string &formulaUnit) {
-    m_formulaUnit = formulaUnit;
-  }
+  void setFormulaUnit(const std::string &formulaUnit) { m_formulaUnit = formulaUnit; }
   /// get result formula unit, and Empty string is no unit has been specified
   const std::string &getResultUnit() const { return m_resultUnit; }
   /// set result formula unit
-  void setResultUnit(const std::string &resultUnit) {
-    m_resultUnit = resultUnit;
-  }
+  void setResultUnit(const std::string &resultUnit) { m_resultUnit = resultUnit; }
   /// get function
   const std::string &getFunction() const { return m_function; }
   /// set function
@@ -83,9 +73,7 @@ public:
   /// get look up table
   const Kernel::Interpolation &getLookUpTable() const { return m_lookUpTable; }
   /// set look up table
-  void setLookUpTable(const Kernel::Interpolation &lookupTable) {
-    m_lookUpTable = lookupTable;
-  }
+  void setLookUpTable(const Kernel::Interpolation &lookupTable) { m_lookUpTable = lookupTable; }
 
   /// Prints object to stream
   void printSelf(std::ostream &os) const;
@@ -111,8 +99,7 @@ private:
 };
 
 // defining operator << and >>
-MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &,
-                                             const FitParameter &);
+MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &, const FitParameter &);
 MANTID_GEOMETRY_DLL std::istream &operator>>(std::istream &, FitParameter &);
 
 } // namespace Geometry

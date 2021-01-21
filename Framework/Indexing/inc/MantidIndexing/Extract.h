@@ -21,13 +21,9 @@ class SpectrumIndexSet;
   @author Simon Heybrock
   @date 2016
 */
-MANTID_INDEXING_DLL IndexInfo extract(const IndexInfo &source,
-                                      const SpectrumIndexSet &indices);
-MANTID_INDEXING_DLL IndexInfo extract(const IndexInfo &source,
-                                      const std::vector<std::size_t> &indices);
-MANTID_INDEXING_DLL IndexInfo extract(const IndexInfo &source,
-                                      const std::size_t minIndex,
-                                      const std::size_t maxIndex);
+MANTID_INDEXING_DLL IndexInfo extract(const IndexInfo &source, const SpectrumIndexSet &indices);
+MANTID_INDEXING_DLL IndexInfo extract(const IndexInfo &source, const std::vector<std::size_t> &indices);
+MANTID_INDEXING_DLL IndexInfo extract(const IndexInfo &source, const std::size_t minIndex, const std::size_t maxIndex);
 
 } // namespace Indexing
 } // namespace Mantid

@@ -25,8 +25,8 @@
 #include <cmath>
 
 DoubleSpinBox::DoubleSpinBox(const char format, QWidget *parent)
-    : QAbstractSpinBox(parent), d_format(format), d_min_val(-DBL_MAX),
-      d_max_val(DBL_MAX), d_value(0.0), d_step(0.1), d_prec(14) {
+    : QAbstractSpinBox(parent), d_format(format), d_min_val(-DBL_MAX), d_max_val(DBL_MAX), d_value(0.0), d_step(0.1),
+      d_prec(14) {
   if (format == 'f')
     d_prec = 1;
 
@@ -115,14 +115,11 @@ void DoubleSpinBox::interpretText(bool notify) {
  * @param text QString with text to map
  * @param value Value to map it to
  */
-void DoubleSpinBox::addSpecialTextMapping(const QString &text, double value) {
-  m_specialTextMappings[text] = value;
-}
+void DoubleSpinBox::addSpecialTextMapping(const QString &text, double value) { m_specialTextMappings[text] = value; }
 
 void DoubleSpinBox::stepBy(int steps) {
   double val = d_value + steps * d_step;
-  if (fabs(fabs(d_value) - d_step) < 1e-14 &&
-      d_value * steps < 0) // possible zero
+  if (fabs(fabs(d_value) - d_step) < 1e-14 && d_value * steps < 0) // possible zero
     val = 0.0;
 
   if (setValue(val))
@@ -168,10 +165,7 @@ QString DoubleSpinBox::textFromValue(double value) const {
   return locale().toString(value, d_format, 6);
 }
 
-QValidator::State DoubleSpinBox::validate(QString & /*input*/,
-                                          int & /*pos*/) const {
-  return QValidator::Acceptable;
-}
+QValidator::State DoubleSpinBox::validate(QString & /*input*/, int & /*pos*/) const { return QValidator::Acceptable; }
 
 void DoubleSpinBox::focusInEvent(QFocusEvent *e) {
   emit activated(this);
@@ -184,8 +178,7 @@ void DoubleSpinBox::focusInEvent(QFocusEvent *e) {
  *
  *****************************************************************************/
 
-RangeLimitBox::RangeLimitBox(LimitType type, QWidget *parent)
-    : QWidget(parent), d_type(type) {
+RangeLimitBox::RangeLimitBox(LimitType type, QWidget *parent) : QWidget(parent), d_type(type) {
   d_checkbox = new QCheckBox();
   d_spin_box = new DoubleSpinBox();
   d_spin_box->setSpecialValueText(" ");
@@ -201,8 +194,7 @@ RangeLimitBox::RangeLimitBox(LimitType type, QWidget *parent)
 
   setFocusPolicy(Qt::StrongFocus);
   setFocusProxy(d_spin_box);
-  connect(d_checkbox, SIGNAL(toggled(bool)), d_spin_box,
-          SLOT(setEnabled(bool)));
+  connect(d_checkbox, SIGNAL(toggled(bool)), d_spin_box, SLOT(setEnabled(bool)));
 }
 
 double RangeLimitBox::value() {

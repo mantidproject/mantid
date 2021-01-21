@@ -17,11 +17,9 @@ class EnggDiffMultiRunFittingWidgetView;
 
 /// Functor for encapsulating a multi-run fitting widget view and adding it to a
 /// parent
-class EnggDiffMultiRunFittingWidgetAdder
-    : public IEnggDiffMultiRunFittingWidgetAdder {
+class EnggDiffMultiRunFittingWidgetAdder : public IEnggDiffMultiRunFittingWidgetAdder {
 public:
-  explicit EnggDiffMultiRunFittingWidgetAdder(
-      IEnggDiffMultiRunFittingWidgetView *widget);
+  explicit EnggDiffMultiRunFittingWidgetAdder(IEnggDiffMultiRunFittingWidgetView *widget);
 
   /// Add the widget to an owner
   void operator()(IEnggDiffMultiRunFittingWidgetOwner &owner) override;

@@ -28,9 +28,8 @@ std::vector<double> UniqueReflection::getWavelengths() const {
   std::vector<double> wavelengths;
   wavelengths.reserve(m_peaks.size());
 
-  std::transform(
-      m_peaks.begin(), m_peaks.end(), std::back_inserter(wavelengths),
-      [](const DataObjects::Peak &peak) { return peak.getWavelength(); });
+  std::transform(m_peaks.begin(), m_peaks.end(), std::back_inserter(wavelengths),
+                 [](const DataObjects::Peak &peak) { return peak.getWavelength(); });
 
   return wavelengths;
 }
@@ -41,9 +40,8 @@ std::vector<double> UniqueReflection::getIntensities() const {
   std::vector<double> intensities;
   intensities.reserve(m_peaks.size());
 
-  std::transform(
-      m_peaks.begin(), m_peaks.end(), std::back_inserter(intensities),
-      [](const DataObjects::Peak &peak) { return peak.getIntensity(); });
+  std::transform(m_peaks.begin(), m_peaks.end(), std::back_inserter(intensities),
+                 [](const DataObjects::Peak &peak) { return peak.getIntensity(); });
 
   return intensities;
 }
@@ -54,20 +52,17 @@ std::vector<double> UniqueReflection::getSigmas() const {
   std::vector<double> sigmas;
   sigmas.reserve(m_peaks.size());
 
-  std::transform(
-      m_peaks.begin(), m_peaks.end(), std::back_inserter(sigmas),
-      [](const DataObjects::Peak &peak) { return peak.getSigmaIntensity(); });
+  std::transform(m_peaks.begin(), m_peaks.end(), std::back_inserter(sigmas),
+                 [](const DataObjects::Peak &peak) { return peak.getSigmaIntensity(); });
 
   return sigmas;
 }
 
 /// Removes peaks whose intensity deviates more than sigmaCritical from the
 /// intensities' mean.
-UniqueReflection UniqueReflection::removeOutliers(double sigmaCritical,
-                                                  bool weightedZ) const {
+UniqueReflection UniqueReflection::removeOutliers(double sigmaCritical, bool weightedZ) const {
   if (sigmaCritical <= 0.0) {
-    throw std::invalid_argument(
-        "Critical sigma value has to be greater than 0.");
+    throw std::invalid_argument("Critical sigma value has to be greater than 0.");
   }
 
   UniqueReflection newReflection(m_hkl);
@@ -97,8 +92,7 @@ UniqueReflection UniqueReflection::removeOutliers(double sigmaCritical,
 }
 
 /// Sets the intensities and sigmas of all stored peaks to the supplied values.
-void UniqueReflection::setPeaksIntensityAndSigma(double intensity,
-                                                 double sigma) {
+void UniqueReflection::setPeaksIntensityAndSigma(double intensity, double sigma) {
   for (auto &peak : m_peaks) {
     peak.setIntensity(intensity);
     peak.setSigmaIntensity(sigma);
@@ -117,14 +111,12 @@ void UniqueReflection::setPeaksIntensityAndSigma(double intensity,
  * @param pointGroup :: Point group of the sample.
  * @param centering :: Lattice centering.
  */
-UniqueReflectionCollection::UniqueReflectionCollection(
-    const UnitCell &cell, const std::pair<double, double> &dLimits,
-    const PointGroup_sptr &pointGroup,
-    const ReflectionCondition_sptr &centering)
+UniqueReflectionCollection::UniqueReflectionCollection(const UnitCell &cell, const std::pair<double, double> &dLimits,
+                                                       const PointGroup_sptr &pointGroup,
+                                                       const ReflectionCondition_sptr &centering)
     : m_reflections(), m_pointgroup(pointGroup) {
   HKLGenerator generator(cell, dLimits.first);
-  auto dFilter = std::make_shared<const HKLFilterDRange>(cell, dLimits.first,
-                                                         dLimits.second);
+  auto dFilter = std::make_shared<const HKLFilterDRange>(cell, dLimits.first, dLimits.second);
   auto centeringFilter = std::make_shared<const HKLFilterCentering>(centering);
   auto filter = dFilter & centeringFilter;
 
@@ -139,14 +131,12 @@ UniqueReflectionCollection::UniqueReflectionCollection(
 
 /// Assigns the supplied peaks to the proper UniqueReflection. Peaks for which
 /// the reflection family can not be found are ignored.
-void UniqueReflectionCollection::addObservations(
-    const std::vector<Peak> &peaks) {
+void UniqueReflectionCollection::addObservations(const std::vector<Peak> &peaks) {
   for (auto const &peak : peaks) {
     V3D hkl = peak.getHKL();
     hkl.round();
 
-    auto reflection =
-        m_reflections.find(m_pointgroup->getReflectionFamily(hkl));
+    auto reflection = m_reflections.find(m_pointgroup->getReflectionFamily(hkl));
 
     if (reflection != m_reflections.end()) {
       (*reflection).second.addPeak(peak);
@@ -156,30 +146,23 @@ void UniqueReflectionCollection::addObservations(
 
 /// Returns a copy of the UniqueReflection with the supplied HKL. Raises an
 /// exception if the reflection is not found.
-UniqueReflection
-UniqueReflectionCollection::getReflection(const V3D &hkl) const {
+UniqueReflection UniqueReflectionCollection::getReflection(const V3D &hkl) const {
   return m_reflections.at(m_pointgroup->getReflectionFamily(hkl));
 }
 
 /// Total number of unique reflections (theoretically possible).
-size_t UniqueReflectionCollection::getUniqueReflectionCount() const {
-  return m_reflections.size();
-}
+size_t UniqueReflectionCollection::getUniqueReflectionCount() const { return m_reflections.size(); }
 
 /// Number of unique reflections that have more observations than the supplied
 /// number (default is 0 - gives number of ).
-size_t UniqueReflectionCollection::getObservedUniqueReflectionCount(
-    size_t moreThan) const {
+size_t UniqueReflectionCollection::getObservedUniqueReflectionCount(size_t moreThan) const {
   return std::count_if(
       m_reflections.cbegin(), m_reflections.cend(),
-      [=](const std::pair<Kernel::V3D, UniqueReflection> &item) {
-        return item.second.count() > moreThan;
-      });
+      [=](const std::pair<Kernel::V3D, UniqueReflection> &item) { return item.second.count() > moreThan; });
 }
 
 /// List of unobserved unique reflections in resolution range.
-std::vector<V3D>
-UniqueReflectionCollection::getUnobservedUniqueReflections() const {
+std::vector<V3D> UniqueReflectionCollection::getUnobservedUniqueReflections() const {
   std::vector<V3D> reflections;
   reflections.reserve(m_reflections.size());
 
@@ -194,20 +177,15 @@ UniqueReflectionCollection::getUnobservedUniqueReflections() const {
 
 /// Number of observed reflections.
 size_t UniqueReflectionCollection::getObservedReflectionCount() const {
-  return std::accumulate(
-      m_reflections.cbegin(), m_reflections.cend(), size_t(0),
-      [](size_t totalReflections,
-         const std::pair<Kernel::V3D, UniqueReflection> &item) {
-        return totalReflections + item.second.count();
-      });
+  return std::accumulate(m_reflections.cbegin(), m_reflections.cend(), size_t(0),
+                         [](size_t totalReflections, const std::pair<Kernel::V3D, UniqueReflection> &item) {
+                           return totalReflections + item.second.count();
+                         });
 }
 
 /// Returns the internally stored reflection map. May disappear or change if
 /// implementation changes.
-const std::map<V3D, UniqueReflection> &
-UniqueReflectionCollection::getReflections() const {
-  return m_reflections;
-}
+const std::map<V3D, UniqueReflection> &UniqueReflectionCollection::getReflections() const { return m_reflections; }
 
 /**
  * @brief PeaksStatistics::calculatePeaksStatistics
@@ -226,10 +204,9 @@ UniqueReflectionCollection::getReflections() const {
  * @param sigmaCritical :: Number of standard deviations for outliers.
  * @param weightedZ :: True for weighted Zscore
  */
-void PeaksStatistics::calculatePeaksStatistics(
-    const std::map<V3D, UniqueReflection> &uniqueReflections,
-    std::string &equivalentIntensities, double &sigmaCritical,
-    bool &weightedZ) {
+void PeaksStatistics::calculatePeaksStatistics(const std::map<V3D, UniqueReflection> &uniqueReflections,
+                                               std::string &equivalentIntensities, double &sigmaCritical,
+                                               bool &weightedZ) {
   double rMergeNumerator = 0.0;
   double rPimNumerator = 0.0;
   double intensitySumRValues = 0.0;
@@ -243,8 +220,7 @@ void PeaksStatistics::calculatePeaksStatistics(
       ++m_uniqueReflections;
 
       // Possibly remove outliers.
-      auto outliersRemoved =
-          unique.second.removeOutliers(sigmaCritical, weightedZ);
+      auto outliersRemoved = unique.second.removeOutliers(sigmaCritical, weightedZ);
 
       // I/sigma is calculated for all reflections, even if there is only one
       // observation.
@@ -257,8 +233,7 @@ void PeaksStatistics::calculatePeaksStatistics(
       if (outliersRemoved.count() > 1) {
         // Get mean, standard deviation for intensities
         auto intensityStatistics = Kernel::getStatistics(
-            intensities, StatOptions::Mean | StatOptions::UncorrectedStdDev |
-                             StatOptions::Median);
+            intensities, StatOptions::Mean | StatOptions::UncorrectedStdDev | StatOptions::Median);
 
         double meanIntensity = intensityStatistics.mean;
         if (equivalentIntensities == "Median")
@@ -272,39 +247,33 @@ void PeaksStatistics::calculatePeaksStatistics(
 
         // For both RMerge and RPim sum(|I - <I>|) is required
         double sumOfDeviationsFromMean =
-            std::accumulate(intensities.begin(), intensities.end(), 0.0,
-                            [meanIntensity](double sum, double intensity) {
-                              return sum + fabs(intensity - meanIntensity);
-                            });
+            std::accumulate(intensities.begin(), intensities.end(), 0.0, [meanIntensity](double sum, double intensity) {
+              return sum + fabs(intensity - meanIntensity);
+            });
 
         // Accumulate into total sum for numerator of RMerge
         rMergeNumerator += sumOfDeviationsFromMean;
 
         // For Rpim, the sum is weighted by a factor depending on N
-        double rPimFactor =
-            sqrt(1.0 / (static_cast<double>(outliersRemoved.count()) - 1.0));
+        double rPimFactor = sqrt(1.0 / (static_cast<double>(outliersRemoved.count()) - 1.0));
         rPimNumerator += (rPimFactor * sumOfDeviationsFromMean);
 
         // Collect sum of intensities for R-value calculation
-        intensitySumRValues +=
-            std::accumulate(intensities.begin(), intensities.end(), 0.0);
+        intensitySumRValues += std::accumulate(intensities.begin(), intensities.end(), 0.0);
       }
 
       const std::vector<Peak> &reflectionPeaks = outliersRemoved.getPeaks();
-      m_peaks.insert(m_peaks.end(), reflectionPeaks.begin(),
-                     reflectionPeaks.end());
+      m_peaks.insert(m_peaks.end(), reflectionPeaks.begin(), reflectionPeaks.end());
     }
   }
 
   m_measuredReflections = static_cast<int>(m_peaks.size());
 
   if (m_uniqueReflections > 0) {
-    m_redundancy = static_cast<double>(m_measuredReflections) /
-                   static_cast<double>(m_uniqueReflections);
+    m_redundancy = static_cast<double>(m_measuredReflections) / static_cast<double>(m_uniqueReflections);
   }
 
-  m_completeness = static_cast<double>(m_uniqueReflections) /
-                   static_cast<double>(uniqueReflections.size());
+  m_completeness = static_cast<double>(m_uniqueReflections) / static_cast<double>(uniqueReflections.size());
 
   if (intensitySumRValues > 0.0) {
     m_rMerge = rMergeNumerator / intensitySumRValues;
@@ -312,8 +281,7 @@ void PeaksStatistics::calculatePeaksStatistics(
   }
 
   if (m_measuredReflections > 0) {
-    m_meanIOverSigma =
-        iOverSigmaSum / static_cast<double>(m_measuredReflections);
+    m_meanIOverSigma = iOverSigmaSum / static_cast<double>(m_measuredReflections);
 
     auto dspacingLimits = getDSpacingLimits(m_peaks);
     m_dspacingMin = dspacingLimits.first;
@@ -323,33 +291,28 @@ void PeaksStatistics::calculatePeaksStatistics(
 
 /// Returns the sum of all I/sigma-ratios defined by the two vectors using
 /// std::inner_product.
-double PeaksStatistics::getIOverSigmaSum(
-    const std::vector<double> &sigmas,
-    const std::vector<double> &intensities) const {
-  return std::inner_product(intensities.begin(), intensities.end(),
-                            sigmas.begin(), 0.0, std::plus<double>(),
+double PeaksStatistics::getIOverSigmaSum(const std::vector<double> &sigmas,
+                                         const std::vector<double> &intensities) const {
+  return std::inner_product(intensities.begin(), intensities.end(), sigmas.begin(), 0.0, std::plus<double>(),
                             std::divides<double>());
 }
 
 /// Returns the Root mean square of the supplied vector.
 double PeaksStatistics::getRMS(const std::vector<double> &data) const {
-  double sumOfSquares =
-      std::inner_product(data.begin(), data.end(), data.begin(), 0.0);
+  double sumOfSquares = std::inner_product(data.begin(), data.end(), data.begin(), 0.0);
 
   return sqrt(sumOfSquares / static_cast<double>(data.size()));
 }
 
 /// Returns the lowest and hights wavelength in the peak list.
-std::pair<double, double>
-PeaksStatistics::getDSpacingLimits(const std::vector<Peak> &peaks) const {
+std::pair<double, double> PeaksStatistics::getDSpacingLimits(const std::vector<Peak> &peaks) const {
   if (peaks.empty()) {
     return std::make_pair(0.0, 0.0);
   }
 
-  auto dspacingLimitIterators = std::minmax_element(
-      peaks.begin(), peaks.end(), [](const Peak &lhs, const Peak &rhs) {
-        return lhs.getDSpacing() < rhs.getDSpacing();
-      });
+  auto dspacingLimitIterators = std::minmax_element(peaks.begin(), peaks.end(), [](const Peak &lhs, const Peak &rhs) {
+    return lhs.getDSpacing() < rhs.getDSpacing();
+  });
 
   return std::make_pair((*(dspacingLimitIterators.first)).getDSpacing(),
                         (*(dspacingLimitIterators.second)).getDSpacing());

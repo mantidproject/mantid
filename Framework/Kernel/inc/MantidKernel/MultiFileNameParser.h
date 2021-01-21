@@ -22,19 +22,16 @@ namespace Kernel {
 namespace MultiFileNameParsing {
 /// Parses a string consisting of only run number info, into a vector of vector
 /// of run numbers.
-MANTID_KERNEL_DLL std::vector<std::vector<unsigned int>>
-parseMultiRunString(std::string runString);
+MANTID_KERNEL_DLL std::vector<std::vector<unsigned int>> parseMultiRunString(std::string runString);
 /// Suggests a workspace name, given a vector of file names. (Which we assume
 /// will be added.)
-MANTID_KERNEL_DLL std::string
-suggestWorkspaceName(const std::vector<std::string> &fileNames);
+MANTID_KERNEL_DLL std::string suggestWorkspaceName(const std::vector<std::string> &fileNames);
 
 /// Regexs used to match / parse various strings.
 namespace Regexs {
 extern const std::string INST, UNDERSCORE, SPACE;
 extern const std::string COMMA, PLUS, MINUS, COLON;
-extern const std::string SINGLE, RANGE, STEP_RANGE, ADD_LIST, ADD_RANGE,
-    ADD_STEP_RANGE;
+extern const std::string SINGLE, RANGE, STEP_RANGE, ADD_LIST, ADD_RANGE, ADD_STEP_RANGE;
 extern const std::string ANY, LIST;
 } // namespace Regexs
 
@@ -78,9 +75,7 @@ public:
   /// Return the vector of vectors of parsed file names.
   std::vector<std::vector<unsigned int>> runs() const { return m_runs; }
   /// Return the vector of vectors of parsed file names.
-  std::vector<std::vector<std::string>> fileNames() const {
-    return m_fileNames;
-  }
+  std::vector<std::vector<std::string>> fileNames() const { return m_fileNames; }
   /// Return the parsed directory string.
   std::string dirString() const { return m_dirString; }
   /// Return the parsed instrument string.
@@ -105,8 +100,7 @@ private:
   /// The given string to parse.
   std::string m_multiFileName;
   /// The various sections of the given string to parse.
-  std::string m_dirString, m_instString, m_underscoreString, m_runString,
-      m_extString;
+  std::string m_dirString, m_instString, m_underscoreString, m_runString, m_extString;
   /// The instrument-specific run zero padding value.
   // int m_zeroPadding;
   /// All the valid instrument names.
@@ -121,8 +115,7 @@ private:
 class MANTID_KERNEL_DLL GenerateFileName {
 public:
   /// Constructor.
-  GenerateFileName(const std::string &prefix, const std::string &suffix,
-                   const std::string &instString);
+  GenerateFileName(const std::string &prefix, const std::string &suffix, const std::string &instString);
 
   /// Overloaded function operator that generates a vector of file names from a
   /// vector of runs.
@@ -153,9 +146,7 @@ public:
   RunRangeList();
 
   // Returns the list of run ranges.
-  std::set<std::pair<unsigned int, unsigned int>> rangeList() const {
-    return m_rangeList;
-  };
+  std::set<std::pair<unsigned int, unsigned int>> rangeList() const { return m_rangeList; };
 
   /// Add a run to the list of run ranges.
   void addRun(const unsigned int run);

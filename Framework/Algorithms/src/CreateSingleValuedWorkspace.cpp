@@ -19,24 +19,20 @@ DECLARE_ALGORITHM(CreateSingleValuedWorkspace)
 void CreateSingleValuedWorkspace::init() {
   using namespace Mantid::Kernel;
   using namespace Mantid::API;
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "Name to use for the output workspace");
   declareProperty("DataValue", 0.0, "The value to place in the workspace");
   auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
-  declareProperty("ErrorValue", 0.0, mustBePositive,
-                  "The error value to place in the workspace (default 0.0)");
+  declareProperty("ErrorValue", 0.0, mustBePositive, "The error value to place in the workspace (default 0.0)");
 }
 
 void CreateSingleValuedWorkspace::exec() {
   double dataValue = getProperty("DataValue");
   double errorValue = getProperty("ErrorValue");
 
-  Indexing::IndexInfo indexInfo(1, Parallel::StorageMode::Cloned,
-                                communicator());
-  auto singleValued = DataObjects::create<DataObjects::WorkspaceSingleValue>(
-      indexInfo, HistogramData::Points(1));
+  Indexing::IndexInfo indexInfo(1, Parallel::StorageMode::Cloned, communicator());
+  auto singleValued = DataObjects::create<DataObjects::WorkspaceSingleValue>(indexInfo, HistogramData::Points(1));
 
   singleValued->mutableX(0)[0] = 0.0;
   singleValued->mutableY(0)[0] = dataValue;

@@ -40,12 +40,10 @@
 #include <qwt_plot_canvas.h>
 
 ArrowMarker::ArrowMarker()
-    : d_start_arrow(false), d_end_arrow(true), d_fill_head(true),
-      d_head_angle(45), d_head_length(4), d_rect(0, 0, 1, 1), d_editable(false),
-      d_op(None) {}
+    : d_start_arrow(false), d_end_arrow(true), d_fill_head(true), d_head_angle(45), d_head_length(4),
+      d_rect(0, 0, 1, 1), d_editable(false), d_op(None) {}
 
-void ArrowMarker::draw(QPainter *p, const QwtScaleMap &xMap,
-                       const QwtScaleMap &yMap, const QRect &) const {
+void ArrowMarker::draw(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap, const QRect &) const {
   const int x0 = xMap.transform(d_rect.left());
   const int y0 = yMap.transform(d_rect.top());
   const int x1 = xMap.transform(d_rect.right());
@@ -160,8 +158,7 @@ double ArrowMarker::dist(int x, int y) {
   int ymin = qMin(y0, y1);
   int ymax = qMax(y0, y1);
 
-  if ((x > xmax || x < xmin || xmin == xmax) &&
-      (ymax < y || ymin > y || ymin == ymax))
+  if ((x > xmax || x < xmin || xmin == xmax) && (ymax < y || ymin > y || ymin == ymax))
     // return the shortest distance to one of the ends
     return qMin(sqrt(double((x - x0) * (x - x0) + (y - y0) * (y - y0))),
                 sqrt(double((x - x1) * (x - x1) + (y - y1) * (y - y1))));
@@ -255,13 +252,10 @@ QPoint ArrowMarker::startPoint() const {
   if (!plot())
     return QPoint();
 
-  return QPoint(plot()->transform(xAxis(), d_rect.left()),
-                plot()->transform(yAxis(), d_rect.top()));
+  return QPoint(plot()->transform(xAxis(), d_rect.left()), plot()->transform(yAxis(), d_rect.top()));
 }
 
-QwtDoublePoint ArrowMarker::startPointCoord() {
-  return QwtDoublePoint(d_rect.left(), d_rect.top());
-}
+QwtDoublePoint ArrowMarker::startPointCoord() { return QwtDoublePoint(d_rect.left(), d_rect.top()); }
 
 void ArrowMarker::setStartPoint(double x, double y) {
   if (d_rect.left() == x && d_rect.top() == y)
@@ -274,16 +268,14 @@ void ArrowMarker::setStartPoint(double x, double y) {
     return;
 
   plot()->updateLayout();
-  d_start =
-      QPoint(plot()->transform(xAxis(), x), plot()->transform(yAxis(), y));
+  d_start = QPoint(plot()->transform(xAxis(), x), plot()->transform(yAxis(), y));
 }
 
 QPoint ArrowMarker::endPoint() const {
   if (!plot())
     return QPoint();
 
-  return QPoint(plot()->transform(xAxis(), d_rect.right()),
-                plot()->transform(yAxis(), d_rect.bottom()));
+  return QPoint(plot()->transform(xAxis(), d_rect.right()), plot()->transform(yAxis(), d_rect.bottom()));
 }
 
 void ArrowMarker::setEndPoint(double x, double y) {
@@ -300,13 +292,10 @@ void ArrowMarker::setEndPoint(double x, double y) {
   d_end = QPoint(plot()->transform(xAxis(), x), plot()->transform(yAxis(), y));
 }
 
-QwtDoublePoint ArrowMarker::endPointCoord() {
-  return QwtDoublePoint(d_rect.right(), d_rect.bottom());
-}
+QwtDoublePoint ArrowMarker::endPointCoord() { return QwtDoublePoint(d_rect.right(), d_rect.bottom()); }
 
 void ArrowMarker::setBoundingRect(double xs, double ys, double xe, double ye) {
-  if (d_rect.left() == xs && d_rect.top() == ys && d_rect.right() == xe &&
-      d_rect.bottom() == ye)
+  if (d_rect.left() == xs && d_rect.top() == ys && d_rect.right() == xe && d_rect.bottom() == ye)
     return;
 
   d_rect.setLeft(xs);
@@ -318,10 +307,8 @@ void ArrowMarker::setBoundingRect(double xs, double ys, double xe, double ye) {
     return;
 
   plot()->updateLayout();
-  d_start =
-      QPoint(plot()->transform(xAxis(), xs), plot()->transform(yAxis(), ys));
-  d_end =
-      QPoint(plot()->transform(xAxis(), xe), plot()->transform(yAxis(), ye));
+  d_start = QPoint(plot()->transform(xAxis(), xs), plot()->transform(yAxis(), ys));
+  d_end = QPoint(plot()->transform(xAxis(), xe), plot()->transform(yAxis(), ye));
 }
 
 QwtDoubleRect ArrowMarker::boundingRect() const {
@@ -333,10 +320,8 @@ QwtDoubleRect ArrowMarker::boundingRect() const {
   const int x1 = xMap.transform(d_rect.right());
   const int y1 = yMap.transform(d_rect.bottom());
 
-  return QwtDoubleRect(x0 < x1 ? d_rect.left() : d_rect.right(),
-                       y0 < y1 ? d_rect.top() : d_rect.bottom(),
-                       qAbs(d_rect.left() - d_rect.right()),
-                       qAbs(d_rect.top() - d_rect.bottom()));
+  return QwtDoubleRect(x0 < x1 ? d_rect.left() : d_rect.right(), y0 < y1 ? d_rect.top() : d_rect.bottom(),
+                       qAbs(d_rect.left() - d_rect.right()), qAbs(d_rect.top() - d_rect.bottom()));
 }
 
 void ArrowMarker::updateBoundingRect() {
@@ -381,9 +366,7 @@ bool ArrowMarker::eventFilter(QObject *, QEvent *e) {
       d_op = MoveEnd;
       return true;
     }
-    int d = qRound(
-        width() +
-        (int)floor(headLength() * tan(M_PI * headAngle() / 180.0) + 0.5));
+    int d = qRound(width() + (int)floor(headLength() * tan(M_PI * headAngle() / 180.0) + 0.5));
     if (dist(me->pos().x(), me->pos().y()) <= d) {
       QApplication::changeOverrideCursor(QCursor(Qt::SizeAllCursor));
       d_op = MoveBoth;
@@ -428,10 +411,8 @@ bool ArrowMarker::eventFilter(QObject *, QEvent *e) {
       QApplication::restoreOverrideCursor();
       return true;
     case MoveBoth:
-      setXValue(
-          plot()->invTransform(xAxis(), me->pos().x() - d_op_startat.x()));
-      setYValue(
-          plot()->invTransform(yAxis(), me->pos().y() - d_op_startat.y()));
+      setXValue(plot()->invTransform(xAxis(), me->pos().x() - d_op_startat.x()));
+      setYValue(plot()->invTransform(yAxis(), me->pos().y() - d_op_startat.y()));
       plot()->replot();
       d_op = None;
       QApplication::restoreOverrideCursor();

@@ -16,18 +16,13 @@ using API::toQStringInternal;
 namespace SliceViewer {
 
 DimensionSliceWidget::DimensionSliceWidget(QWidget *parent)
-    : QWidget(parent), m_dim(), m_dimIndex(0), m_shownDim(0), m_slicePoint(0.0),
-      m_showRebinControls(false) {
+    : QWidget(parent), m_dim(), m_dimIndex(0), m_shownDim(0), m_slicePoint(0.0), m_showRebinControls(false) {
   ui.setupUi(this);
 
-  QObject::connect(ui.horizontalSlider, SIGNAL(valueChanged(double)), this,
-                   SLOT(sliderMoved()));
-  QObject::connect(ui.doubleSpinBox, SIGNAL(editingFinished()), this,
-                   SLOT(spinBoxChanged()));
-  QObject::connect(ui.spinThickness, SIGNAL(editingFinished()), this,
-                   SLOT(spinThicknessChanged()));
-  QObject::connect(ui.spinBins, SIGNAL(editingFinished()), this,
-                   SLOT(spinBinsChanged()));
+  QObject::connect(ui.horizontalSlider, SIGNAL(valueChanged(double)), this, SLOT(sliderMoved()));
+  QObject::connect(ui.doubleSpinBox, SIGNAL(editingFinished()), this, SLOT(spinBoxChanged()));
+  QObject::connect(ui.spinThickness, SIGNAL(editingFinished()), this, SLOT(spinThicknessChanged()));
+  QObject::connect(ui.spinBins, SIGNAL(editingFinished()), this, SLOT(spinBinsChanged()));
   QObject::connect(ui.btnX, SIGNAL(toggled(bool)), this, SLOT(btnXYChanged()));
   QObject::connect(ui.btnY, SIGNAL(toggled(bool)), this, SLOT(btnXYChanged()));
 
@@ -122,8 +117,7 @@ void DimensionSliceWidget::setShownDim(int dim) {
   } else {
     // Put the spacer back, if needed
     if (ui.horizontalSpacer == nullptr) {
-      ui.horizontalSpacer =
-          new QSpacerItem(1, 1, QSizePolicy::Expanding, QSizePolicy::Minimum);
+      ui.horizontalSpacer = new QSpacerItem(1, 1, QSizePolicy::Expanding, QSizePolicy::Minimum);
       ui.horizontalLayout->insertSpacerItem(3, ui.horizontalSpacer);
     }
   }
@@ -178,8 +172,7 @@ void DimensionSliceWidget::setMinMax(double min, double max) {
 
 //-------------------------------------------------------------------------------------------------
 /** Set the dimension to display */
-void DimensionSliceWidget::setDimension(
-    int index, Mantid::Geometry::IMDDimension_const_sptr dim) {
+void DimensionSliceWidget::setDimension(int index, Mantid::Geometry::IMDDimension_const_sptr dim) {
   m_dim = std::move(dim);
   m_dimIndex = index;
   // set the limits of the slider to be the bin centres and not
@@ -198,9 +191,7 @@ void DimensionSliceWidget::showRebinControls(bool show) {
 }
 
 /** @return whether the rebinning controls are shown */
-bool DimensionSliceWidget::showRebinControls() const {
-  return m_showRebinControls;
-}
+bool DimensionSliceWidget::showRebinControls() const { return m_showRebinControls; }
 
 //-------------------------------------------------------------------------------------------------
 /** @return the number of bins to rebin to */
@@ -214,9 +205,7 @@ void DimensionSliceWidget::setNumBins(int val) {
 
 //-------------------------------------------------------------------------------------------------
 /** @return the thickness to integrate when rebinning */
-double DimensionSliceWidget::getThickness() const {
-  return ui.spinThickness->value();
-}
+double DimensionSliceWidget::getThickness() const { return ui.spinThickness->value(); }
 
 /** Sets the thickness to integrate when rebinning */
 void DimensionSliceWidget::setThickness(double val) {
@@ -226,14 +215,10 @@ void DimensionSliceWidget::setThickness(double val) {
 
 //-------------------------------------------------------------------------------------------------
 /** Slot called when the thickness to rebin to is changed */
-void DimensionSliceWidget::spinThicknessChanged() {
-  emit changedThickness(m_dimIndex, this->getThickness());
-}
+void DimensionSliceWidget::spinThicknessChanged() { emit changedThickness(m_dimIndex, this->getThickness()); }
 
 //-------------------------------------------------------------------------------------------------
 /** Slot called when the number of bins to rebin to is changed */
-void DimensionSliceWidget::spinBinsChanged() {
-  emit changedNumBins(m_dimIndex, this->getNumBins());
-}
+void DimensionSliceWidget::spinBinsChanged() { emit changedNumBins(m_dimIndex, this->getNumBins()); }
 } // namespace SliceViewer
 } // namespace MantidQt

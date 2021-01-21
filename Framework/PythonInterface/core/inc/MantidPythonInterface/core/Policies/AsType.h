@@ -37,16 +37,14 @@ template <typename ReturnType, typename InputType> struct AsTypeImpl {
 
   inline PyTypeObject const *get_pytype() const {
     using namespace boost::python;
-    return converter::registered<ReturnType>::converters
-        .to_python_target_type();
+    return converter::registered<ReturnType>::converters.to_python_target_type();
   }
 };
 
 // Error handler for shared pointer types. If return type is wrong then user
 // sees the name of this
 // class in the output, which hopefully gives a clue as to what is going on
-template <typename T>
-struct AsType_Requires_New_Type_Automatically_Convertible_To_Original {};
+template <typename T> struct AsType_Requires_New_Type_Automatically_Convertible_To_Original {};
 
 } // namespace
 
@@ -57,11 +55,9 @@ template <class ReturnType> struct AsType {
   template <class InputType> struct apply {
     // Deduce if type is correct for policy, needs to be convertible to
     // ReturnType
-    using type = typename boost::mpl::if_c<
-        std::is_convertible<InputType, ReturnType>::value,
-        AsTypeImpl<ReturnType, InputType>,
-        AsType_Requires_New_Type_Automatically_Convertible_To_Original<
-            InputType>>::type;
+    using type =
+        typename boost::mpl::if_c<std::is_convertible<InputType, ReturnType>::value, AsTypeImpl<ReturnType, InputType>,
+                                  AsType_Requires_New_Type_Automatically_Convertible_To_Original<InputType>>::type;
   };
 };
 

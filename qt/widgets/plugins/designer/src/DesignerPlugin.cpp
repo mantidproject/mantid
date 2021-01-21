@@ -15,8 +15,7 @@ using namespace MantidQt::MantidWidgets;
  * Default constructor
  * @param parent :: The parent of the plugin (default: NULL)
  */
-DesignerPlugin::DesignerPlugin(QObject *parent)
-    : QObject(parent), m_initialized(false) {}
+DesignerPlugin::DesignerPlugin(QObject *parent) : QObject(parent), m_initialized(false) {}
 
 /**
  * Initialize the plugin
@@ -59,9 +58,7 @@ QIcon DesignerPlugin::icon() const { return QIcon(); }
  * The tooltip for the widget
  * @returns A string containing the tooltip for this widget
  */
-QString DesignerPlugin::toolTip() const {
-  return "Creates a widget of type " + this->name();
-}
+QString DesignerPlugin::toolTip() const { return "Creates a widget of type " + this->name(); }
 
 /** A short description of the widget
  * @returns A string containing a short description of the widget
@@ -96,8 +93,7 @@ QString DesignerPlugin::includeFile() const {
       n = n + 2;
     thisNamespace = name.substr(n, name.size() - n);
   }
-  std::string include =
-      "MantidQt" + thisNamespace + "/" + this->getShortName() + ".h";
+  std::string include = "MantidQt" + thisNamespace + "/" + this->getShortName() + ".h";
   return QString::fromStdString(include);
 }
 
@@ -110,8 +106,7 @@ QString DesignerPlugin::domXml() const {
   std::string name = this->getShortName();
   name[0] = static_cast<char>(tolower(static_cast<int>(name[0])));
 
-  return QString::fromStdString(
-      "<widget class=\"" + this->name().toStdString() + "\" name=\"" + name +
-      "\">\n"
-      "</widget>\n");
+  return QString::fromStdString("<widget class=\"" + this->name().toStdString() + "\" name=\"" + name +
+                                "\">\n"
+                                "</widget>\n");
 }

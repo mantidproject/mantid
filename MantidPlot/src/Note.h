@@ -44,13 +44,11 @@ class Note : public MdiSubWindow {
   Q_OBJECT
 
 public:
-  Note(const QString &label, QWidget *parent, const QString &name = QString(),
-       const Qt::WFlags &f = nullptr);
+  Note(const QString &label, QWidget *parent, const QString &name = QString(), const Qt::WFlags &f = nullptr);
   ~Note() override{};
 
-  static MantidQt::API::IProjectSerialisable *
-  loadFromProject(const std::string &lines, ApplicationWindow *app,
-                  const int fileVersion);
+  static MantidQt::API::IProjectSerialisable *loadFromProject(const std::string &lines, ApplicationWindow *app,
+                                                              const int fileVersion);
   std::string saveToProject(ApplicationWindow *app) override;
   std::vector<std::string> getWorkspaceNames() override;
 

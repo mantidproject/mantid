@@ -18,14 +18,9 @@ namespace API {
 /** Constructor
  */
 AlgorithmRunner::AlgorithmRunner(QObject *parent)
-    : QObject(parent),
-      m_finishedObserver(*this,
-                         &AlgorithmRunner::handleAlgorithmFinishedNotification),
-      m_progressObserver(*this,
-                         &AlgorithmRunner::handleAlgorithmProgressNotification),
-      m_errorObserver(*this,
-                      &AlgorithmRunner::handleAlgorithmErrorNotification),
-      m_asyncResult(nullptr) {}
+    : QObject(parent), m_finishedObserver(*this, &AlgorithmRunner::handleAlgorithmFinishedNotification),
+      m_progressObserver(*this, &AlgorithmRunner::handleAlgorithmProgressNotification),
+      m_errorObserver(*this, &AlgorithmRunner::handleAlgorithmErrorNotification), m_asyncResult(nullptr) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -70,11 +65,9 @@ void AlgorithmRunner::cancelRunningAlgorithm() {
  */
 void AlgorithmRunner::startAlgorithm(Mantid::API::IAlgorithm_sptr alg) {
   if (!alg)
-    throw std::invalid_argument(
-        "AlgorithmRunner::startAlgorithm() given a NULL Algorithm");
+    throw std::invalid_argument("AlgorithmRunner::startAlgorithm() given a NULL Algorithm");
   if (!alg->isInitialized())
-    throw std::invalid_argument(
-        "AlgorithmRunner::startAlgorithm() given an uninitialized Algorithm");
+    throw std::invalid_argument("AlgorithmRunner::startAlgorithm() given an uninitialized Algorithm");
 
   cancelRunningAlgorithm();
 
@@ -88,9 +81,7 @@ void AlgorithmRunner::startAlgorithm(Mantid::API::IAlgorithm_sptr alg) {
 }
 
 /// Get back a pointer to the running algorithm
-Mantid::API::IAlgorithm_sptr AlgorithmRunner::getAlgorithm() const {
-  return m_asyncAlg;
-}
+Mantid::API::IAlgorithm_sptr AlgorithmRunner::getAlgorithm() const { return m_asyncAlg; }
 
 //--------------------------------------------------------------------------------------
 /** Observer called when the asynchronous algorithm has completed.
@@ -102,8 +93,7 @@ Mantid::API::IAlgorithm_sptr AlgorithmRunner::getAlgorithm() const {
  *
  * @param pNf :: finished notification object.
  */
-void AlgorithmRunner::handleAlgorithmFinishedNotification(
-    const Poco::AutoPtr<Algorithm::FinishedNotification> &pNf) {
+void AlgorithmRunner::handleAlgorithmFinishedNotification(const Poco::AutoPtr<Algorithm::FinishedNotification> &pNf) {
   UNUSED_ARG(pNf);
   emit algorithmComplete(false);
 }
@@ -113,8 +103,7 @@ void AlgorithmRunner::handleAlgorithmFinishedNotification(
  *
  * @param pNf :: notification object
  */
-void AlgorithmRunner::handleAlgorithmProgressNotification(
-    const Poco::AutoPtr<Algorithm::ProgressNotification> &pNf) {
+void AlgorithmRunner::handleAlgorithmProgressNotification(const Poco::AutoPtr<Algorithm::ProgressNotification> &pNf) {
   emit algorithmProgress(pNf->progress, pNf->message);
 }
 
@@ -124,8 +113,7 @@ void AlgorithmRunner::handleAlgorithmProgressNotification(
  *
  * @param pNf :: notification object
  */
-void AlgorithmRunner::handleAlgorithmErrorNotification(
-    const Poco::AutoPtr<Algorithm::ErrorNotification> &pNf) {
+void AlgorithmRunner::handleAlgorithmErrorNotification(const Poco::AutoPtr<Algorithm::ErrorNotification> &pNf) {
   UNUSED_ARG(pNf);
   emit algorithmComplete(true);
 }

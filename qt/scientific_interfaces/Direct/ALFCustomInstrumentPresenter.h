@@ -19,14 +19,12 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class MANTIDQT_DIRECT_DLL ALFCustomInstrumentPresenter
-    : public MantidWidgets::BaseCustomInstrumentPresenter {
+class MANTIDQT_DIRECT_DLL ALFCustomInstrumentPresenter : public MantidWidgets::BaseCustomInstrumentPresenter {
   Q_OBJECT
 
 public:
-  ALFCustomInstrumentPresenter(
-      IALFCustomInstrumentView *view, IALFCustomInstrumentModel *model,
-      MantidWidgets::IPlotFitAnalysisPanePresenter *analysisPane);
+  ALFCustomInstrumentPresenter(IALFCustomInstrumentView *view, IALFCustomInstrumentModel *model,
+                               MantidWidgets::IPlotFitAnalysisPanePresenter *analysisPane);
   ~ALFCustomInstrumentPresenter() {
     delete m_extractSingleTubeObserver;
     delete m_averageTubeObserver;

@@ -16,8 +16,7 @@ namespace MDAlgorithms {
 /** FlippingRatioCorrectionMD : Algorithm to correct
  *  MDEvents for flipping ratio
  */
-class MANTID_MDALGORITHMS_DLL FlippingRatioCorrectionMD
-    : public API::Algorithm {
+class MANTID_MDALGORITHMS_DLL FlippingRatioCorrectionMD : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;
@@ -29,8 +28,7 @@ private:
   void exec() override;
   std::map<std::string, std::string> validateInputs() override;
   template <typename MDE, size_t nd>
-  void executeTemplatedMDE(
-      typename Mantid::DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
+  void executeTemplatedMDE(typename Mantid::DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
   std::vector<double> m_factor;
 };
 

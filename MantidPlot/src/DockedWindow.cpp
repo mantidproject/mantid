@@ -17,8 +17,7 @@
  * Constructor.
  */
 DockedWindow::DockedWindow(ApplicationWindow *appWindow)
-    : QMdiSubWindow(appWindow), d_app(appWindow),
-      m_draggingToTiledWindow(false), m_isInsideTiledWindow(false),
+    : QMdiSubWindow(appWindow), d_app(appWindow), m_draggingToTiledWindow(false), m_isInsideTiledWindow(false),
       m_dragMouseDown(false) {
   setFocusPolicy(Qt::StrongFocus);
   setAttribute(Qt::WA_DeleteOnClose);
@@ -27,9 +26,7 @@ DockedWindow::DockedWindow(ApplicationWindow *appWindow)
 /**
  * Returns the inner MdiSubWindow.
  */
-MdiSubWindow *DockedWindow::mdiSubWindow() const {
-  return static_cast<MdiSubWindow *>(widget());
-}
+MdiSubWindow *DockedWindow::mdiSubWindow() const { return static_cast<MdiSubWindow *>(widget()); }
 
 /**
  * Set the innner MdiSubWindow.
@@ -38,10 +35,8 @@ MdiSubWindow *DockedWindow::mdiSubWindow() const {
 void DockedWindow::setMdiSubWindow(MdiSubWindow *sw) {
   setWidget(sw);
   // setWindowIcon(sw->windowIcon());
-  connect(sw, SIGNAL(dragMousePress(QPoint)), this,
-          SLOT(dragMousePress(QPoint)));
-  connect(sw, SIGNAL(dragMouseRelease(QPoint)), this,
-          SLOT(dragMouseRelease(QPoint)));
+  connect(sw, SIGNAL(dragMousePress(QPoint)), this, SLOT(dragMousePress(QPoint)));
+  connect(sw, SIGNAL(dragMouseRelease(QPoint)), this, SLOT(dragMouseRelease(QPoint)));
   connect(sw, SIGNAL(dragMouseMove(QPoint)), this, SLOT(dragMouseMove(QPoint)));
 }
 
@@ -90,8 +85,7 @@ void DockedWindow::dragMouseRelease(QPoint) {
 
 void DockedWindow::dragMouseMove(QPoint pos) {
   if (m_dragMouseDown) {
-    if ((pos - m_dragStartPos).manhattanLength() <
-        QApplication::startDragDistance()) {
+    if ((pos - m_dragStartPos).manhattanLength() < QApplication::startDragDistance()) {
       return;
     }
 

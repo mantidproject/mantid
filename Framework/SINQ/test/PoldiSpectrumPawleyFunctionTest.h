@@ -48,8 +48,7 @@ public:
   MOCK_CONST_METHOD1(getPeakFunction, IPeakFunction_sptr(size_t));
   MOCK_CONST_METHOD1(getPeakHKL, V3D(size_t));
 
-  MOCK_METHOD4(setMatrixWorkspace,
-               void(MatrixWorkspace_const_sptr, size_t, double, double));
+  MOCK_METHOD4(setMatrixWorkspace, void(MatrixWorkspace_const_sptr, size_t, double, double));
   GNU_DIAG_ON_SUGGEST_OVERRIDE
 protected:
   void init() override { setDecoratedFunction("Gaussian"); }
@@ -61,22 +60,16 @@ class PoldiSpectrumPawleyFunctionTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static PoldiSpectrumPawleyFunctionTest *createSuite() {
-    return new PoldiSpectrumPawleyFunctionTest();
-  }
-  static void destroySuite(PoldiSpectrumPawleyFunctionTest *suite) {
-    delete suite;
-  }
+  static PoldiSpectrumPawleyFunctionTest *createSuite() { return new PoldiSpectrumPawleyFunctionTest(); }
+  static void destroySuite(PoldiSpectrumPawleyFunctionTest *suite) { delete suite; }
 
   PoldiSpectrumPawleyFunctionTest() {
-    m_detector =
-        std::shared_ptr<ConfiguredHeliumDetector>(new ConfiguredHeliumDetector);
+    m_detector = std::shared_ptr<ConfiguredHeliumDetector>(new ConfiguredHeliumDetector);
     m_chopper = std::make_shared<MockChopper>();
 
     m_spectrum = PoldiSourceSpectrum_sptr(new ConfiguredSpectrum);
 
-    EXPECT_CALL(*m_chopper, distanceFromSample())
-        .WillRepeatedly(Return(11800.0));
+    EXPECT_CALL(*m_chopper, distanceFromSample()).WillRepeatedly(Return(11800.0));
 
     EXPECT_CALL(*m_chopper, zeroOffset()).WillRepeatedly(Return(0.15));
 
@@ -88,10 +81,8 @@ public:
     fn.initialize();
 
     TS_ASSERT_THROWS_NOTHING(fn.setDecoratedFunction("PawleyFunction"));
-    TS_ASSERT_THROWS(fn.setDecoratedFunction("Gaussian"),
-                     const std::invalid_argument &);
-    TS_ASSERT_THROWS(fn.setDecoratedFunction("CompositeFunction"),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(fn.setDecoratedFunction("Gaussian"), const std::invalid_argument &);
+    TS_ASSERT_THROWS(fn.setDecoratedFunction("CompositeFunction"), const std::invalid_argument &);
   }
 
   void test_getPawleyFunction() {
@@ -113,13 +104,11 @@ public:
     fn.initialize();
     fn.setDecoratedFunction("MockPawleyFunction");
 
-    MatrixWorkspace_const_sptr ws =
-        WorkspaceCreationHelper::create2DWorkspace123(4, 10);
+    MatrixWorkspace_const_sptr ws = WorkspaceCreationHelper::create2DWorkspace123(4, 10);
 
     // Make sure the setMatrixWorkspace method can be called directly.
     IPawleyFunction_sptr pFn = fn.getPawleyFunction();
-    std::shared_ptr<MockPawleyFunction> mpFn =
-        std::dynamic_pointer_cast<MockPawleyFunction>(pFn);
+    std::shared_ptr<MockPawleyFunction> mpFn = std::dynamic_pointer_cast<MockPawleyFunction>(pFn);
     EXPECT_CALL(*mpFn, setMatrixWorkspace(_, _, _, _)).Times(1);
 
     mpFn->setMatrixWorkspace(ws, 0, 0.0, 0.0);
@@ -156,12 +145,11 @@ public:
 
     fn.function(domain, values);
 
-    std::array<double, 19> reference{
-        {0.214381692355321, 1.4396533098854, 7.69011673999647, 32.6747845396612,
-         110.432605589092, 296.883931458002, 634.864220660384, 1079.89069118744,
-         1461.11207069126, 1572.50503614829, 1346.18685763306, 916.691981263516,
-         496.502218342172, 213.861997764049, 73.2741206547921, 19.9697293956518,
-         4.32910692237627, 0.746498624291666, 0.102391587633906}};
+    std::array<double, 19> reference{{0.214381692355321, 1.4396533098854, 7.69011673999647, 32.6747845396612,
+                                      110.432605589092, 296.883931458002, 634.864220660384, 1079.89069118744,
+                                      1461.11207069126, 1572.50503614829, 1346.18685763306, 916.691981263516,
+                                      496.502218342172, 213.861997764049, 73.2741206547921, 19.9697293956518,
+                                      4.32910692237627, 0.746498624291666, 0.102391587633906}};
 
     for (size_t i = 0; i < reference.size(); ++i) {
       TS_ASSERT_DELTA(values[479 + i] / reference[i], 1.0, 1e-12);
@@ -169,8 +157,7 @@ public:
   }
 
 private:
-  class TestablePoldiSpectrumPawleyFunction
-      : public PoldiSpectrumPawleyFunction {
+  class TestablePoldiSpectrumPawleyFunction : public PoldiSpectrumPawleyFunction {
     friend class PoldiSpectrumPawleyFunctionTest;
   };
 

@@ -40,9 +40,7 @@ public:
     IAlgorithm_sptr alg = AlgorithmManager::Instance().create("LoadMD");
     alg->initialize();
     alg->setRethrows(true);
-    alg->setPropertyValue(
-        "Filename",
-        Mantid::API::FileFinder::Instance().getFullPath("MAPS_MDEW.nxs"));
+    alg->setPropertyValue("Filename", Mantid::API::FileFinder::Instance().getFullPath("MAPS_MDEW.nxs"));
     alg->setPropertyValue("OutputWorkspace", "MD_EVENT_WS_ID");
     alg->setProperty("FileBackEnd", false);
     alg->execute();
@@ -52,8 +50,7 @@ public:
   void testShouldNotFindInstrumentForBadWorkspace() {
     // Arrange
     // Return a table workspace.
-    Mantid::API::Workspace_sptr workspace =
-        WorkspaceFactory::Instance().createTable();
+    Mantid::API::Workspace_sptr workspace = WorkspaceFactory::Instance().createTable();
     Mantid::API::IMDHistoWorkspace_sptr histoWorkspace =
         std::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(workspace);
 
@@ -63,7 +60,6 @@ public:
     std::string instrument = extractor.extractInstrument(histoWorkspace.get());
 
     // Assert
-    TSM_ASSERT("Should find an empty instrment for invalid workspace",
-               instrument.empty())
+    TSM_ASSERT("Should find an empty instrment for invalid workspace", instrument.empty())
   }
 };

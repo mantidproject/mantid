@@ -37,13 +37,10 @@ XDataConverter::XDataConverter() : m_sharedX(false) {}
 /// Initialize the properties on the algorithm
 void XDataConverter::init() {
   using Kernel::Direction;
-  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                                        Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
                   "Name of the input workspace.");
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                            Direction::Output),
-      "Name of the output workspace, can be the same as the input.");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
+                  "Name of the output workspace, can be the same as the input.");
 }
 
 /// Execute the algorithm
@@ -59,13 +56,11 @@ void XDataConverter::exec() {
   const size_t numXValues = getNewXSize(numYValues);
   m_sharedX = API::WorkspaceHelpers::sharedXData(*inputWS);
   // Create the new workspace
-  MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(
-      inputWS, numSpectra, numXValues, numYValues);
+  MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(inputWS, numSpectra, numXValues, numYValues);
 
   // Copy over the 'vertical' axis
   if (inputWS->axes() > 1)
-    outputWS->replaceAxis(1, std::unique_ptr<API::Axis>(
-                                 inputWS->getAxis(1)->clone(outputWS.get())));
+    outputWS->replaceAxis(1, std::unique_ptr<API::Axis>(inputWS->getAxis(1)->clone(outputWS.get())));
 
   Progress prog(this, 0.0, 1.0, numSpectra);
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
@@ -89,8 +84,7 @@ void XDataConverter::exec() {
   setProperty("OutputWorkspace", outputWS);
 }
 
-std::size_t
-XDataConverter::getNewYSize(const API::MatrixWorkspace_sptr &inputWS) {
+std::size_t XDataConverter::getNewYSize(const API::MatrixWorkspace_sptr &inputWS) {
   // this is the old behavior of MatrixWorkspace::blocksize()
   return inputWS->y(0).size();
 }
@@ -101,15 +95,12 @@ XDataConverter::getNewYSize(const API::MatrixWorkspace_sptr &inputWS) {
  * @param inputWS :: The input workspace
  * @param index :: The index
  */
-void XDataConverter::setXData(const API::MatrixWorkspace_sptr &outputWS,
-                              const API::MatrixWorkspace_sptr &inputWS,
+void XDataConverter::setXData(const API::MatrixWorkspace_sptr &outputWS, const API::MatrixWorkspace_sptr &inputWS,
                               const int index) {
   if (m_sharedX) {
     PARALLEL_CRITICAL(XDataConverter_para) {
       if (!m_cachedX) {
-        PARALLEL_CRITICAL(XDataConverter_parb) {
-          m_cachedX = calculateXPoints(inputWS->sharedX(index));
-        }
+        PARALLEL_CRITICAL(XDataConverter_parb) { m_cachedX = calculateXPoints(inputWS->sharedX(index)); }
       }
     }
     outputWS->setSharedX(index, m_cachedX);

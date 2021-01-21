@@ -15,22 +15,15 @@ using namespace Mantid::API;
 namespace MantidQt {
 namespace CustomInterfaces {
 
-ALCPeakFittingView::ALCPeakFittingView(QWidget *widget)
-    : m_widget(widget), m_ui(), m_peakPicker(nullptr) {}
+ALCPeakFittingView::ALCPeakFittingView(QWidget *widget) : m_widget(widget), m_ui(), m_peakPicker(nullptr) {}
 
 ALCPeakFittingView::~ALCPeakFittingView() {}
 
-IFunction_const_sptr ALCPeakFittingView::function(QString index) const {
-  return m_ui.peaks->getFunctionByIndex(index);
-}
+IFunction_const_sptr ALCPeakFittingView::function(QString index) const { return m_ui.peaks->getFunctionByIndex(index); }
 
-boost::optional<QString> ALCPeakFittingView::currentFunctionIndex() const {
-  return m_ui.peaks->currentFunctionIndex();
-}
+boost::optional<QString> ALCPeakFittingView::currentFunctionIndex() const { return m_ui.peaks->currentFunctionIndex(); }
 
-IPeakFunction_const_sptr ALCPeakFittingView::peakPicker() const {
-  return m_peakPicker->peak();
-}
+IPeakFunction_const_sptr ALCPeakFittingView::peakPicker() const { return m_peakPicker->peak(); }
 
 void ALCPeakFittingView::initialize() {
   m_ui.setupUi(m_widget);
@@ -49,17 +42,14 @@ void ALCPeakFittingView::initialize() {
 
   connect(m_peakPicker, SIGNAL(changed()), SIGNAL(peakPickerChanged()));
 
-  connect(m_ui.peaks, SIGNAL(currentFunctionChanged()),
-          SIGNAL(currentFunctionChanged()));
-  connect(m_ui.peaks, SIGNAL(parameterChanged(QString, QString)),
-          SIGNAL(parameterChanged(QString, QString)));
+  connect(m_ui.peaks, SIGNAL(currentFunctionChanged()), SIGNAL(currentFunctionChanged()));
+  connect(m_ui.peaks, SIGNAL(parameterChanged(QString, QString)), SIGNAL(parameterChanged(QString, QString)));
 
   connect(m_ui.help, SIGNAL(clicked()), this, SLOT(help()));
   connect(m_ui.plotGuess, SIGNAL(clicked()), this, SLOT(plotGuess()));
 }
 
-void ALCPeakFittingView::setDataCurve(MatrixWorkspace_sptr workspace,
-                                      std::size_t const &workspaceIndex) {
+void ALCPeakFittingView::setDataCurve(MatrixWorkspace_sptr workspace, std::size_t const &workspaceIndex) {
   // These kwargs ensure only the data points are plotted with no line
   QHash<QString, QVariant> kwargs;
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
@@ -71,18 +61,15 @@ void ALCPeakFittingView::setDataCurve(MatrixWorkspace_sptr workspace,
 #endif
 
   m_ui.plot->clear();
-  m_ui.plot->addSpectrum("Corrected", workspace, workspaceIndex, Qt::black,
-                         kwargs);
+  m_ui.plot->addSpectrum("Corrected", workspace, workspaceIndex, Qt::black, kwargs);
 }
 
-void ALCPeakFittingView::setFittedCurve(MatrixWorkspace_sptr workspace,
-                                        std::size_t const &workspaceIndex) {
+void ALCPeakFittingView::setFittedCurve(MatrixWorkspace_sptr workspace, std::size_t const &workspaceIndex) {
   m_ui.plot->addSpectrum("Fit", workspace, workspaceIndex, Qt::red);
   m_ui.plot->replot();
 }
 
-void ALCPeakFittingView::setGuessCurve(MatrixWorkspace_sptr workspace,
-                                       std::size_t const &workspaceIndex) {
+void ALCPeakFittingView::setGuessCurve(MatrixWorkspace_sptr workspace, std::size_t const &workspaceIndex) {
   m_ui.plot->addSpectrum("Guess", workspace, workspaceIndex, Qt::green);
   m_ui.plot->replot();
 }
@@ -109,8 +96,7 @@ void ALCPeakFittingView::setFunction(const IFunction_const_sptr &newFunction) {
   }
 }
 
-void ALCPeakFittingView::setParameter(const QString &funcIndex,
-                                      const QString &paramName, double value) {
+void ALCPeakFittingView::setParameter(const QString &funcIndex, const QString &paramName, double value) {
   m_ui.peaks->setParameter(funcIndex + paramName, value);
 }
 
@@ -133,13 +119,9 @@ void ALCPeakFittingView::setPeakPicker(const IPeakFunction_const_sptr &peak) {
   m_ui.plot->replot();
 }
 
-void ALCPeakFittingView::help() {
-  MantidQt::API::HelpWindow::showCustomInterface(nullptr, QString("Muon ALC"));
-}
+void ALCPeakFittingView::help() { MantidQt::API::HelpWindow::showCustomInterface(nullptr, QString("Muon ALC")); }
 
-void ALCPeakFittingView::displayError(const QString &message) {
-  QMessageBox::critical(m_widget, "Error", message);
-}
+void ALCPeakFittingView::displayError(const QString &message) { QMessageBox::critical(m_widget, "Error", message); }
 
 void ALCPeakFittingView::emitFitRequested() {
   // Fit requested: reset "plot guess"

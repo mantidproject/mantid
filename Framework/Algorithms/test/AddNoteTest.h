@@ -24,14 +24,10 @@ public:
 
   void test_delete_existing_removes_complete_log_first() {
     auto ws = WorkspaceCreationHelper::create2DWorkspace(10, 10);
-    TS_ASSERT_THROWS_NOTHING(executeAlgorithm(
-        ws, "Test Name", "2010-09-14T04:20:12", "First Test String"));
-    checkLogWithEntryExists<std::string>(ws, "Test Name", "2010-09-14T04:20:12",
-                                         0, "First Test String", 0);
-    TS_ASSERT_THROWS_NOTHING(executeAlgorithm(
-        ws, "Test Name", "2010-09-14T04:20:19", "Second Test String", Delete));
-    checkLogWithEntryExists<std::string>(ws, "Test Name", "2010-09-14T04:20:19",
-                                         0, "Second Test String", 0);
+    TS_ASSERT_THROWS_NOTHING(executeAlgorithm(ws, "Test Name", "2010-09-14T04:20:12", "First Test String"));
+    checkLogWithEntryExists<std::string>(ws, "Test Name", "2010-09-14T04:20:12", 0, "First Test String", 0);
+    TS_ASSERT_THROWS_NOTHING(executeAlgorithm(ws, "Test Name", "2010-09-14T04:20:19", "Second Test String", Delete));
+    checkLogWithEntryExists<std::string>(ws, "Test Name", "2010-09-14T04:20:19", 0, "Second Test String", 0);
   }
 
   void test_empty_time_property_produces_current_time_in_log_output() {
@@ -39,14 +35,11 @@ public:
 
     // Get Current Date Time
     namespace pt = boost::posix_time;
-    auto dateTimeObj =
-        Mantid::Types::Core::DateAndTime(pt::second_clock::local_time());
+    auto dateTimeObj = Mantid::Types::Core::DateAndTime(pt::second_clock::local_time());
     std::string time = dateTimeObj.toISO8601String();
     std::string timeOffset = time;
-    TS_ASSERT_THROWS_NOTHING(
-        executeAlgorithm(ws, "Test Time", "", "Test String"));
-    checkLogWithEntryExists<std::string>(ws, "Test Time", time, 1,
-                                         "Test String", 0);
+    TS_ASSERT_THROWS_NOTHING(executeAlgorithm(ws, "Test Time", "", "Test String"));
+    checkLogWithEntryExists<std::string>(ws, "Test Time", time, 1, "Test String", 0);
   }
 
   //-------------------------- Failure cases----------------------------
@@ -54,16 +47,14 @@ public:
     Mantid::Algorithms::AddNote alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
-    TS_ASSERT_THROWS(alg.setPropertyValue("Name", ""),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg.setPropertyValue("Name", ""), const std::invalid_argument &);
   }
 
   void test_empty_value_not_allowed() {
     Mantid::Algorithms::AddNote alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
-    TS_ASSERT_THROWS(alg.setPropertyValue("Value", ""),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg.setPropertyValue("Value", ""), const std::invalid_argument &);
   }
 
   void test_empty_time_is_allowed() {
@@ -76,9 +67,8 @@ public:
     auto ws = WorkspaceCreationHelper::create2DWorkspace(10, 10);
     auto &run = ws->mutableRun();
     run.addProperty<std::string>("Test Name", "Test");
-    TS_ASSERT_THROWS(
-        executeAlgorithm(ws, "Test Name", "2010-09-14T04:20:12", "Test String"),
-        const std::invalid_argument &);
+    TS_ASSERT_THROWS(executeAlgorithm(ws, "Test Name", "2010-09-14T04:20:12", "Test String"),
+                     const std::invalid_argument &);
   }
 
   void test_Init() {
@@ -88,10 +78,8 @@ public:
   }
 
 private:
-  void executeAlgorithm(const Mantid::API::MatrixWorkspace_sptr &testWS,
-                        const std::string &logName, const std::string &logTime,
-                        const std::string &logValue,
-                        const UpdateType update = Update) {
+  void executeAlgorithm(const Mantid::API::MatrixWorkspace_sptr &testWS, const std::string &logName,
+                        const std::string &logTime, const std::string &logValue, const UpdateType update = Update) {
 
     Mantid::Algorithms::AddNote alg;
     alg.setChild(true);
@@ -110,24 +98,18 @@ private:
   }
 
   template <typename T>
-  void checkLogWithEntryExists(const Mantid::API::MatrixWorkspace_sptr &testWS,
-                               const std::string &logName,
-                               const std::string &logStartTime,
-                               const int &logEndTime,
-                               const std::string &logValue,
+  void checkLogWithEntryExists(const Mantid::API::MatrixWorkspace_sptr &testWS, const std::string &logName,
+                               const std::string &logStartTime, const int &logEndTime, const std::string &logValue,
                                const size_t position) {
     using Mantid::Kernel::TimeSeriesProperty;
     using Mantid::Types::Core::DateAndTime;
 
     const auto &run = testWS->run();
-    TSM_ASSERT("Run does not contain the expected log entry",
-               run.hasProperty(logName));
+    TSM_ASSERT("Run does not contain the expected log entry", run.hasProperty(logName));
 
     auto *prop = run.getLogData(logName);
     auto *timeSeries = dynamic_cast<TimeSeriesProperty<T> *>(prop);
-    TSM_ASSERT(
-        "A log entry with the given name exists but it is not a time series",
-        timeSeries);
+    TSM_ASSERT("A log entry with the given name exists but it is not a time series", timeSeries);
     auto times = timeSeries->timesAsVector();
     TS_ASSERT(times.size() >= position + 1);
     auto values = timeSeries->valuesAsVector();
@@ -135,10 +117,8 @@ private:
       TS_ASSERT_EQUALS(DateAndTime(logStartTime), times[position]);
     } else {
       int logMinTime = 0, logMaxTime = 0;
-      TS_ASSERT_THROWS_NOTHING(
-          logMinTime = (times[position].toISO8601String().at(15)) - '0');
-      TS_ASSERT_THROWS_NOTHING(logMaxTime =
-                                   (logStartTime.at(15) + logEndTime) - '0');
+      TS_ASSERT_THROWS_NOTHING(logMinTime = (times[position].toISO8601String().at(15)) - '0');
+      TS_ASSERT_THROWS_NOTHING(logMaxTime = (logStartTime.at(15) + logEndTime) - '0');
       const int remainder = logMaxTime - logMinTime;
       TS_ASSERT_LESS_THAN_EQUALS(0, remainder);
     }

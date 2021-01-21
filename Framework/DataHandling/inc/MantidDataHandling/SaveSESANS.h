@@ -38,9 +38,7 @@ public:
   const std::string name() const override;
   const std::string summary() const override;
   int version() const override;
-  const std::vector<std::string> seeAlso() const override {
-    return {"LoadSESANS"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"LoadSESANS"}; }
   const std::string category() const override;
   std::map<std::string, std::string> validateInputs() override;
 
@@ -48,28 +46,20 @@ private:
   // Length of the longest attribute name in headers (+4 for readability in the
   // file)
   const int MAX_HDR_LENGTH = 23;
-  const std::vector<std::string> fileExtensions{".ses", ".SES", ".sesans",
-                                                ".SESANS"};
-  const std::vector<std::string> mandatoryDoubleProperties{
-      "ThetaZMax", "ThetaYMax", "EchoConstant"};
+  const std::vector<std::string> fileExtensions{".ses", ".SES", ".sesans", ".SESANS"};
+  const std::vector<std::string> mandatoryDoubleProperties{"ThetaZMax", "ThetaYMax", "EchoConstant"};
 
   void init() override;
   void exec() override;
 
-  void writeHeaders(std::ofstream &outfile,
-                    API::MatrixWorkspace_const_sptr &ws);
-  void writeHeader(std::ofstream &outfile, const std::string &name,
-                   const std::string &value);
+  void writeHeaders(std::ofstream &outfile, API::MatrixWorkspace_const_sptr &ws);
+  void writeHeader(std::ofstream &outfile, const std::string &name, const std::string &value);
 
-  std::vector<double>
-  calculateSpinEchoLength(const HistogramData::Points &wavelength) const;
-  std::vector<double>
-  calculateDepolarisation(const HistogramData::HistogramY &yValues,
-                          const HistogramData::Points &wavelength) const;
-  Mantid::MantidVec
-  calculateError(const HistogramData::HistogramE &eValues,
-                 const HistogramData::HistogramY &yValues,
-                 const HistogramData::Points &wavelength) const;
+  std::vector<double> calculateSpinEchoLength(const HistogramData::Points &wavelength) const;
+  std::vector<double> calculateDepolarisation(const HistogramData::HistogramY &yValues,
+                                              const HistogramData::Points &wavelength) const;
+  Mantid::MantidVec calculateError(const HistogramData::HistogramE &eValues, const HistogramData::HistogramY &yValues,
+                                   const HistogramData::Points &wavelength) const;
 };
 
 } // namespace DataHandling

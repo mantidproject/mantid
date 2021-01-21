@@ -33,9 +33,7 @@ double qConventionFactor(const std::string &convention) {
 /**
  * @return qConventionFactor for Q.convention setting in ConfigService
  */
-double qConventionFactor() {
-  return qConventionFactor(ConfigService::Instance().getString("Q.convention"));
-}
+double qConventionFactor() { return qConventionFactor(ConfigService::Instance().getString("Q.convention")); }
 
 /**
  * Append the common set of properties that relate to modulation vectors
@@ -45,26 +43,20 @@ double qConventionFactor() {
 void ModulationProperties::appendTo(API::IAlgorithm *alg) {
   auto mustBeLengthThree = std::make_shared<ArrayLengthValidator<double>>(3);
   alg->declareProperty(
-      std::make_unique<ArrayProperty<double>>(ModulationProperties::ModVector1,
-                                              "0.0,0.0,0.0", mustBeLengthThree),
+      std::make_unique<ArrayProperty<double>>(ModulationProperties::ModVector1, "0.0,0.0,0.0", mustBeLengthThree),
       "Modulation Vector 1: dh, dk, dl");
   alg->declareProperty(
-      std::make_unique<ArrayProperty<double>>(ModulationProperties::ModVector2,
-                                              "0.0,0.0,0.0", mustBeLengthThree),
+      std::make_unique<ArrayProperty<double>>(ModulationProperties::ModVector2, "0.0,0.0,0.0", mustBeLengthThree),
       "Modulation Vector 2: dh, dk, dl");
   alg->declareProperty(
-      std::make_unique<ArrayProperty<double>>(ModulationProperties::ModVector3,
-                                              "0.0,0.0,0.0", mustBeLengthThree),
+      std::make_unique<ArrayProperty<double>>(ModulationProperties::ModVector3, "0.0,0.0,0.0", mustBeLengthThree),
       "Modulation Vector 3: dh, dk, dl");
   auto mustBePositiveOrZero = std::make_shared<BoundedValidator<int>>();
   mustBePositiveOrZero->setLower(0);
   alg->declareProperty(ModulationProperties::MaxOrder, 0, mustBePositiveOrZero,
-                       "Maximum order to apply Modulation Vectors. Default = 0",
-                       Direction::Input);
-  alg->declareProperty(
-      ModulationProperties::CrossTerms, false,
-      "Include combinations of modulation vectors in satellite search",
-      Direction::Input);
+                       "Maximum order to apply Modulation Vectors. Default = 0", Direction::Input);
+  alg->declareProperty(ModulationProperties::CrossTerms, false,
+                       "Include combinations of modulation vectors in satellite search", Direction::Input);
 }
 
 /**
@@ -75,11 +67,10 @@ void ModulationProperties::appendTo(API::IAlgorithm *alg) {
 ModulationProperties ModulationProperties::create(const API::IAlgorithm &alg) {
   const int maxOrder{alg.getProperty(ModulationProperties::MaxOrder)};
   const bool crossTerms{alg.getProperty(ModulationProperties::CrossTerms)};
-  auto offsets = generateOffsetVectors(
-      validModulationVectors(alg.getProperty(ModulationProperties::ModVector1),
-                             alg.getProperty(ModulationProperties::ModVector2),
-                             alg.getProperty(ModulationProperties::ModVector3)),
-      maxOrder, crossTerms);
+  auto offsets = generateOffsetVectors(validModulationVectors(alg.getProperty(ModulationProperties::ModVector1),
+                                                              alg.getProperty(ModulationProperties::ModVector2),
+                                                              alg.getProperty(ModulationProperties::ModVector3)),
+                                       maxOrder, crossTerms);
   const bool saveOnLattice{true};
   return {std::move(offsets), maxOrder, crossTerms, saveOnLattice};
 }
@@ -92,14 +83,12 @@ ModulationProperties ModulationProperties::create(const API::IAlgorithm &alg) {
  * @param modVector3 List of 3 doubles specifying an offset
  * @return A list of valid modulation vectors
  */
-std::vector<Kernel::V3D>
-validModulationVectors(const std::vector<double> &modVector1,
-                       const std::vector<double> &modVector2,
-                       const std::vector<double> &modVector3) {
+std::vector<Kernel::V3D> validModulationVectors(const std::vector<double> &modVector1,
+                                                const std::vector<double> &modVector2,
+                                                const std::vector<double> &modVector3) {
   std::vector<V3D> modVectors;
   auto addIfNonZero = [&modVectors](const auto &modVec) {
-    if (std::fabs(modVec[0]) > 0 || std::fabs(modVec[1]) > 0 ||
-        std::fabs(modVec[2]) > 0)
+    if (std::fabs(modVec[0]) > 0 || std::fabs(modVec[1]) > 0 || std::fabs(modVec[2]) > 0)
       modVectors.emplace_back(V3D(modVec[0], modVec[1], modVec[2]));
   };
   addIfNonZero(modVector1);
@@ -115,14 +104,11 @@ validModulationVectors(const std::vector<double> &modVector1,
  * @param modVector3 List of 3 doubles specifying an offset
  * @return A list of valid modulation vectors
  */
-std::vector<Kernel::V3D>
-addModulationVectors(const std::vector<double> &modVector1,
-                     const std::vector<double> &modVector2,
-                     const std::vector<double> &modVector3) {
+std::vector<Kernel::V3D> addModulationVectors(const std::vector<double> &modVector1,
+                                              const std::vector<double> &modVector2,
+                                              const std::vector<double> &modVector3) {
   std::vector<V3D> modVectors;
-  auto addVec = [&modVectors](const auto &modVec) {
-    modVectors.emplace_back(V3D(modVec[0], modVec[1], modVec[2]));
-  };
+  auto addVec = [&modVectors](const auto &modVec) { modVectors.emplace_back(V3D(modVec[0], modVec[1], modVec[2])); };
   addVec(modVector1);
   addVec(modVector2);
   addVec(modVector3);
@@ -139,9 +125,8 @@ addModulationVectors(const std::vector<double> &modVector1,
  * modulation structure number and V3D specifies the offset to
  * be tested
  */
-std::vector<MNPOffset>
-generateOffsetVectors(const std::vector<Kernel::V3D> &modVectors,
-                      const int maxOrder, const bool crossTerms) {
+std::vector<MNPOffset> generateOffsetVectors(const std::vector<Kernel::V3D> &modVectors, const int maxOrder,
+                                             const bool crossTerms) {
   assert(modVectors.size() <= 3);
 
   std::vector<MNPOffset> offsets;
@@ -156,8 +141,7 @@ generateOffsetVectors(const std::vector<Kernel::V3D> &modVectors,
         for (auto n = -maxOrder; n <= maxOrder; ++n) {
           if (m == 0 && n == 0)
             continue;
-          offsets.emplace_back(
-              std::make_tuple(m, n, 0, modVector0 * m + modVector1 * n));
+          offsets.emplace_back(std::make_tuple(m, n, 0, modVector0 * m + modVector1 * n));
         }
       }
     } else {
@@ -170,8 +154,7 @@ generateOffsetVectors(const std::vector<Kernel::V3D> &modVectors,
           for (auto p = -maxOrder; p <= maxOrder; ++p) {
             if (m == 0 && n == 0 && p == 0)
               continue;
-            offsets.emplace_back(
-                m, n, p, modVector0 * m + modVector1 * n + modVector2 * p);
+            offsets.emplace_back(m, n, p, modVector0 * m + modVector1 * n + modVector2 * p);
           }
         }
       }
@@ -214,20 +197,17 @@ generateOffsetVectors(const std::vector<Kernel::V3D> &modVectors,
  * @return A list of (1, 1, 1, V3D) were m,n,p specifies the
  * modulation structure number and V3D specifies the offset to
  * be tested */
-std::vector<MNPOffset>
-generateOffsetVectors(const std::vector<double> &hOffsets,
-                      const std::vector<double> &kOffsets,
-                      const std::vector<double> &lOffsets) {
+std::vector<MNPOffset> generateOffsetVectors(const std::vector<double> &hOffsets, const std::vector<double> &kOffsets,
+                                             const std::vector<double> &lOffsets) {
   std::vector<MNPOffset> offsets;
   for (double hOffset : hOffsets) {
     for (double kOffset : kOffsets) {
-      std::transform(
-          lOffsets.begin(), lOffsets.end(), std::back_inserter(offsets),
-          [&hOffset, &kOffset](double lOffset) {
-            // it's not quite clear how to interpret them as mnp
-            // indices so set to 0, 0, 0
-            return std::make_tuple(0, 0, 0, V3D(hOffset, kOffset, lOffset));
-          });
+      std::transform(lOffsets.begin(), lOffsets.end(), std::back_inserter(offsets),
+                     [&hOffset, &kOffset](double lOffset) {
+                       // it's not quite clear how to interpret them as mnp
+                       // indices so set to 0, 0, 0
+                       return std::make_tuple(0, 0, 0, V3D(hOffset, kOffset, lOffset));
+                     });
     }
   }
   return offsets;

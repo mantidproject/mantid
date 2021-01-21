@@ -38,30 +38,25 @@ public:
   StubbedWorkspaceAlgorithm() : Algorithm() {}
   ~StubbedWorkspaceAlgorithm() override {}
 
-  const std::string name() const override {
-    return "StubbedWorkspaceAlgorithm";
-  }
+  const std::string name() const override { return "StubbedWorkspaceAlgorithm"; }
   int version() const override { return 1; }
   const std::string category() const override { return "Cat;Leopard;Mink"; }
   const std::string summary() const override { return "Test summary"; }
 
   void init() override {
-    declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace1", "",
-                                                          Direction::Input));
-    declareProperty(std::make_unique<WorkspaceProperty<>>(
-        "InputWorkspace2", "", Direction::Input, PropertyMode::Optional));
-    declareProperty(std::make_unique<WorkspaceProperty<>>(
-        "InOutWorkspace", "", Direction::InOut, PropertyMode::Optional));
+    declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace1", "", Direction::Input));
+    declareProperty(
+        std::make_unique<WorkspaceProperty<>>("InputWorkspace2", "", Direction::Input, PropertyMode::Optional));
+    declareProperty(
+        std::make_unique<WorkspaceProperty<>>("InOutWorkspace", "", Direction::InOut, PropertyMode::Optional));
     declareProperty("Number", 0.0);
-    declareProperty(std::make_unique<WorkspaceProperty<>>(
-        "OutputWorkspace1", "", Direction::Output));
-    declareProperty(std::make_unique<WorkspaceProperty<>>(
-        "OutputWorkspace2", "", Direction::Output, PropertyMode::Optional));
+    declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace1", "", Direction::Output));
+    declareProperty(
+        std::make_unique<WorkspaceProperty<>>("OutputWorkspace2", "", Direction::Output, PropertyMode::Optional));
   }
 
   void exec() override {
-    const std::string outName = getPropertyValue("InputWorkspace1") + "+" +
-                                getPropertyValue("InputWorkspace2") + "+" +
+    const std::string outName = getPropertyValue("InputWorkspace1") + "+" + getPropertyValue("InputWorkspace2") + "+" +
                                 getPropertyValue("InOutWorkspace");
     auto out1 = std::make_shared<WorkspaceTester>();
     out1->initialize(10, 10, 10);
@@ -83,19 +78,15 @@ public:
   StubbedWorkspaceAlgorithm2() : Algorithm() {}
   ~StubbedWorkspaceAlgorithm2() override {}
 
-  const std::string name() const override {
-    return "StubbedWorkspaceAlgorithm2";
-  }
+  const std::string name() const override { return "StubbedWorkspaceAlgorithm2"; }
   int version() const override { return 2; }
   const std::string category() const override { return "Cat;Leopard;Mink"; }
   const std::string summary() const override { return "Test summary"; }
   void init() override {
-    declareProperty(std::make_unique<WorkspaceProperty<>>(
-        "NonLockingInputWorkspace", "", Direction::Input,
-        PropertyMode::Optional, LockMode::NoLock));
-    declareProperty(std::make_unique<WorkspaceProperty<>>(
-        "NonLockingOutputWorkspace", "", Direction::Output,
-        PropertyMode::Optional, LockMode::NoLock));
+    declareProperty(std::make_unique<WorkspaceProperty<>>("NonLockingInputWorkspace", "", Direction::Input,
+                                                          PropertyMode::Optional, LockMode::NoLock));
+    declareProperty(std::make_unique<WorkspaceProperty<>>("NonLockingOutputWorkspace", "", Direction::Output,
+                                                          PropertyMode::Optional, LockMode::NoLock));
   }
   void exec() override {}
 };
@@ -105,21 +96,13 @@ class AlgorithmWithValidateInputs : public Algorithm {
 public:
   AlgorithmWithValidateInputs() : Algorithm() {}
   ~AlgorithmWithValidateInputs() override {}
-  const std::string name() const override {
-    return "StubbedWorkspaceAlgorithm2";
-  }
+  const std::string name() const override { return "StubbedWorkspaceAlgorithm2"; }
   int version() const override { return 1; }
   const std::string category() const override { return "Cat;Leopard;Mink"; }
   const std::string summary() const override { return "Test summary"; }
-  const std::string workspaceMethodName() const override {
-    return "methodname";
-  }
-  const std::string workspaceMethodOnTypes() const override {
-    return "MatrixWorkspace;ITableWorkspace";
-  }
-  const std::string workspaceMethodInputProperty() const override {
-    return "InputWorkspace";
-  }
+  const std::string workspaceMethodName() const override { return "methodname"; }
+  const std::string workspaceMethodOnTypes() const override { return "MatrixWorkspace;ITableWorkspace"; }
+  const std::string workspaceMethodInputProperty() const override { return "InputWorkspace"; }
 
   void init() override {
     declareProperty("PropertyA", 12);
@@ -150,8 +133,7 @@ public:
   static const std::string FAIL_MSG;
 
   void init() override {
-    declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                                          Direction::Input));
+    declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input));
     declareProperty("WsNameToFail", "");
   }
 
@@ -173,20 +155,16 @@ class IndexingAlgorithm : public Algorithm {
 public:
   const std::string name() const override { return "IndexingAlgorithm"; }
   int version() const override { return 1; }
-  const std::string summary() const override {
-    return "Test indexing property creation";
-  }
+  const std::string summary() const override { return "Test indexing property creation"; }
   static const std::string FAIL_MSG;
 
   void init() override {
     declareWorkspaceInputProperties<MatrixWorkspace>("InputWorkspace", "");
-    declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-        "InputWorkspace2", "", Mantid::Kernel::Direction::Input));
-    declareWorkspaceInputProperties<
-        MatrixWorkspace, IndexType::SpectrumNum | IndexType::WorkspaceIndex>(
+    declareProperty(
+        std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace2", "", Mantid::Kernel::Direction::Input));
+    declareWorkspaceInputProperties<MatrixWorkspace, IndexType::SpectrumNum | IndexType::WorkspaceIndex>(
         "InputWorkspace3", "");
-    declareWorkspaceInputProperties<
-        MatrixWorkspace, IndexType::SpectrumNum | IndexType::WorkspaceIndex>(
+    declareWorkspaceInputProperties<MatrixWorkspace, IndexType::SpectrumNum | IndexType::WorkspaceIndex>(
         "InputWorkspace4", "", std::make_shared<HistogramValidator>());
   }
 
@@ -275,14 +253,11 @@ public:
   }
 
   void testAlgStartupLogging() {
-    TSM_ASSERT_EQUALS("Default logging should be true", true,
-                      alg.getAlgStartupLogging());
+    TSM_ASSERT_EQUALS("Default logging should be true", true, alg.getAlgStartupLogging());
     alg.setAlgStartupLogging(false);
-    TSM_ASSERT_EQUALS("After setting logging should be false", false,
-                      alg.getAlgStartupLogging());
+    TSM_ASSERT_EQUALS("After setting logging should be false", false, alg.getAlgStartupLogging());
     alg.setAlgStartupLogging(true);
-    TSM_ASSERT_EQUALS("After setting logging it back it should be true", true,
-                      alg.getAlgStartupLogging());
+    TSM_ASSERT_EQUALS("After setting logging it back it should be true", true, alg.getAlgStartupLogging());
   }
 
   void testInitialize() {
@@ -306,8 +281,7 @@ public:
 
   void testSetPropertyValue() {
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("prop1", "val"))
-    TS_ASSERT_THROWS(alg.setPropertyValue("prop3", "1"),
-                     const Exception::NotFoundError &)
+    TS_ASSERT_THROWS(alg.setPropertyValue("prop3", "1"), const Exception::NotFoundError &)
   }
 
   void testExistsProperty() {
@@ -319,8 +293,7 @@ public:
     std::string value;
     TS_ASSERT_THROWS_NOTHING(value = alg.getPropertyValue("prop2"))
     TS_ASSERT(!value.compare("1"))
-    TS_ASSERT_THROWS(alg.getPropertyValue("ghjkgh"),
-                     const Exception::NotFoundError &)
+    TS_ASSERT_THROWS(alg.getPropertyValue("ghjkgh"), const Exception::NotFoundError &)
   }
 
   void testGetProperties() {
@@ -400,19 +373,17 @@ public:
   }
 
   void test_Construction_Via_Valid_String_With_Version_And_Empty_Props() {
-    IAlgorithm_sptr testAlg =
-        runFromString("{\"name\":\"ToyAlgorithm\",\"properties\":{"
-                      "},\"version\":1}\n");
+    IAlgorithm_sptr testAlg = runFromString("{\"name\":\"ToyAlgorithm\",\"properties\":{"
+                                            "},\"version\":1}\n");
     TS_ASSERT_EQUALS(testAlg->name(), "ToyAlgorithm");
     TS_ASSERT_EQUALS(testAlg->version(), 1);
   }
 
   void test_Construction_Via_Valid_String_With_Set_Properties_And_Version() {
 
-    IAlgorithm_sptr testAlg =
-        runFromString("{\"name\":\"ToyAlgorithm\",\"properties\":{\"Binning\":"
-                      "\"0.2,0.2,1.4\",\"prop1\":\"val1\",\"prop2\":\"8\","
-                      "\"prop3\":\"10\"},\"version\":2}\n");
+    IAlgorithm_sptr testAlg = runFromString("{\"name\":\"ToyAlgorithm\",\"properties\":{\"Binning\":"
+                                            "\"0.2,0.2,1.4\",\"prop1\":\"val1\",\"prop2\":\"8\","
+                                            "\"prop3\":\"10\"},\"version\":2}\n");
     TS_ASSERT_EQUALS(testAlg->name(), "ToyAlgorithm");
     TS_ASSERT_EQUALS(testAlg->version(), 2);
 
@@ -447,9 +418,8 @@ public:
   }
 
   void test_Construction_Via_Valid_String_With_Single_Property_And_Version() {
-    IAlgorithm_sptr testAlg =
-        runFromString("{\"name\":\"ToyAlgorithm\",\"properties\":{"
-                      "\"prop3\":\"10.0\"},\"version\":2}\n");
+    IAlgorithm_sptr testAlg = runFromString("{\"name\":\"ToyAlgorithm\",\"properties\":{"
+                                            "\"prop3\":\"10.0\"},\"version\":2}\n");
     TS_ASSERT_EQUALS(testAlg->name(), "ToyAlgorithm");
     TS_ASSERT_EQUALS(testAlg->version(), 2);
 
@@ -468,9 +438,8 @@ public:
   }
 
   void test_Construction_Via_Valid_String_With_Single_Property_Array() {
-    IAlgorithm_sptr testAlg =
-        runFromString("{\"name\":\"ToyAlgorithm\",\"properties\":{"
-                      "\"Binning\":\"0.2,0.2,1.4\"},\"version\":2}\n");
+    IAlgorithm_sptr testAlg = runFromString("{\"name\":\"ToyAlgorithm\",\"properties\":{"
+                                            "\"Binning\":\"0.2,0.2,1.4\"},\"version\":2}\n");
     TS_ASSERT_EQUALS(testAlg->name(), "ToyAlgorithm");
     TS_ASSERT_EQUALS(testAlg->version(), 2);
 
@@ -484,8 +453,7 @@ public:
   }
 
   void test_Construction_Via_Valid_String_With_Empty_Properties() {
-    IAlgorithm_sptr testAlg =
-        runFromString(("{\"name\":\"ToyAlgorithm\",\"properties\":{}}\n"));
+    IAlgorithm_sptr testAlg = runFromString(("{\"name\":\"ToyAlgorithm\",\"properties\":{}}\n"));
     TS_ASSERT_EQUALS(testAlg->name(), "ToyAlgorithm");
     TS_ASSERT_EQUALS(testAlg->version(), 2);
     try {
@@ -512,13 +480,11 @@ public:
   /** Test of setting read and/or write locks
    * for various combinations of input/output workspaces.
    */
-  void do_test_locking(const std::string &in1, const std::string &in2,
-                       const std::string &inout, const std::string &out1,
-                       const std::string &out2) {
+  void do_test_locking(const std::string &in1, const std::string &in2, const std::string &inout,
+                       const std::string &out1, const std::string &out2) {
     for (size_t i = 0; i < 6; i++) {
       std::shared_ptr<WorkspaceTester> ws = std::make_shared<WorkspaceTester>();
-      AnalysisDataService::Instance().addOrReplace("ws" + Strings::toString(i),
-                                                   ws);
+      AnalysisDataService::Instance().addOrReplace("ws" + Strings::toString(i), ws);
     }
     StubbedWorkspaceAlgorithm alg;
     alg.initialize();
@@ -633,8 +599,7 @@ public:
    *        Make no group if blank, just 1 workspace
    * @return The new WorkspaceGroup object
    */
-  Workspace_sptr makeWorkspaceGroup(const std::string &group1,
-                                    std::string contents1) {
+  Workspace_sptr makeWorkspaceGroup(const std::string &group1, std::string contents1) {
     auto &ads = AnalysisDataService::Instance();
     if (contents1.empty()) {
       if (group1.empty())
@@ -645,8 +610,7 @@ public:
     }
 
     std::vector<std::string> names;
-    boost::split(names, contents1,
-                 boost::algorithm::detail::is_any_ofF<char>(","));
+    boost::split(names, contents1, boost::algorithm::detail::is_any_ofF<char>(","));
     if (names.size() >= 1) {
       auto wsGroup = WorkspaceGroup_sptr(new WorkspaceGroup());
       ads.addOrReplace(group1, wsGroup);
@@ -662,11 +626,9 @@ public:
   }
 
   //------------------------------------------------------------------------
-  WorkspaceGroup_sptr
-  do_test_groups(const std::string &group1, std::string contents1,
-                 const std::string &group2, std::string contents2,
-                 const std::string &group3, std::string contents3,
-                 bool expectFail = false, int expectedNumber = 3) {
+  WorkspaceGroup_sptr do_test_groups(const std::string &group1, std::string contents1, const std::string &group2,
+                                     std::string contents2, const std::string &group3, std::string contents3,
+                                     bool expectFail = false, int expectedNumber = 3) {
     makeWorkspaceGroup(group1, std::move(contents1));
     makeWorkspaceGroup(group2, std::move(contents2));
     makeWorkspaceGroup(group3, std::move(contents3));
@@ -704,14 +666,12 @@ public:
 
   void test_processGroups_failures() {
     // Fails due to unequal sizes.
-    do_test_groups("A", "A_1,A_2,A_3", "B", "B_1,B_2,B_3,B_4", "", "",
-                   true /*fails*/);
+    do_test_groups("A", "A_1,A_2,A_3", "B", "B_1,B_2,B_3,B_4", "", "", true /*fails*/);
   }
 
   /// All groups are the same size
   void test_processGroups_allSameSize() {
-    WorkspaceGroup_sptr group = do_test_groups(
-        "A", "A_1,A_2,A_3", "B", "B_1,B_2,B_3", "C", "C_1,C_2,C_3");
+    WorkspaceGroup_sptr group = do_test_groups("A", "A_1,A_2,A_3", "B", "B_1,B_2,B_3", "C", "C_1,C_2,C_3");
 
     TS_ASSERT_EQUALS(ws1->getName(), "D_1");
     TS_ASSERT_EQUALS(ws1->getTitle(), "A_1+B_1+C_1");
@@ -724,8 +684,7 @@ public:
 
   /// All groups are the same size, but they don't all match the rigid naming
   void test_processGroups_allSameSize_namesNotSimilar() {
-    WorkspaceGroup_sptr group = do_test_groups(
-        "A", "A_1,A_2,A_3", "B", "B_1,B_2,B_3", "C", "alice,bob,charlie");
+    WorkspaceGroup_sptr group = do_test_groups("A", "A_1,A_2,A_3", "B", "B_1,B_2,B_3", "C", "alice,bob,charlie");
 
     TS_ASSERT_EQUALS(ws1->getName(), "A_1_B_1_alice_D");
     TS_ASSERT_EQUALS(ws1->getTitle(), "A_1+B_1+alice");
@@ -738,8 +697,7 @@ public:
 
   /// One input is a group, rest are singles
   void test_processGroups_onlyOneGroup() {
-    WorkspaceGroup_sptr group =
-        do_test_groups("A", "A_1,A_2,A_3", "B", "", "C", "");
+    WorkspaceGroup_sptr group = do_test_groups("A", "A_1,A_2,A_3", "B", "", "C", "");
 
     TS_ASSERT_EQUALS(ws1->getName(), "D_1");
     TS_ASSERT_EQUALS(ws1->getTitle(), "A_1+B+C");
@@ -752,8 +710,7 @@ public:
 
   /// One optional WorkspaceProperty is not specified
   void test_processGroups_optionalInput() {
-    WorkspaceGroup_sptr group =
-        do_test_groups("A", "A_1,A_2,A_3", "B", "", "", "");
+    WorkspaceGroup_sptr group = do_test_groups("A", "A_1,A_2,A_3", "B", "", "", "");
 
     TS_ASSERT_EQUALS(ws1->getName(), "D_1");
     TS_ASSERT_EQUALS(ws1->getTitle(), "A_1+B+");
@@ -766,8 +723,7 @@ public:
 
   /// One optional WorkspaceProperty is not specified
   void test_processGroups_twoGroups_and_optionalInput() {
-    WorkspaceGroup_sptr group =
-        do_test_groups("A", "A_1,A_2,A_3", "", "", "C", "C_1,C_2,C_3");
+    WorkspaceGroup_sptr group = do_test_groups("A", "A_1,A_2,A_3", "", "", "C", "C_1,C_2,C_3");
 
     TS_ASSERT_EQUALS(ws1->getName(), "D_1");
     TS_ASSERT_EQUALS(ws1->getTitle(), "A_1++C_1");
@@ -780,8 +736,7 @@ public:
 
   /// One input is a group with only one member (not possible via GUI)
   void test_processGroups_onlyOneGroup_withOnlyOneMember() {
-    WorkspaceGroup_sptr group =
-        do_test_groups("A", "A_1", "B", "", "C", "", false, 1);
+    WorkspaceGroup_sptr group = do_test_groups("A", "A_1", "B", "", "C", "", false, 1);
 
     TS_ASSERT_EQUALS(ws1->getName(), "D_1");
     TS_ASSERT_EQUALS(ws1->getTitle(), "A_1+B+C");
@@ -790,8 +745,7 @@ public:
 
   /// Two inputs are groups with one member (each)
   void test_processGroups_twoGroup_withOnlyOneMember() {
-    WorkspaceGroup_sptr group =
-        do_test_groups("A", "A_1", "B", "B_1", "C", "", false, 1);
+    WorkspaceGroup_sptr group = do_test_groups("A", "A_1", "B", "B_1", "C", "", false, 1);
 
     TS_ASSERT_EQUALS(ws1->getName(), "D_1");
     TS_ASSERT_EQUALS(ws1->getTitle(), "A_1+B_1+C");
@@ -821,8 +775,7 @@ public:
 
   /// Rewrite first input group
   void test_processGroups_rewriteFirstGroup() {
-    WorkspaceGroup_sptr group =
-        do_test_groups("D", "D1,D2,D3", "B", "B1,B2,B3", "C", "C1,C2,C3");
+    WorkspaceGroup_sptr group = do_test_groups("D", "D1,D2,D3", "B", "B1,B2,B3", "C", "C1,C2,C3");
 
     TS_ASSERT_EQUALS(ws1->getName(), "D1");
     TS_ASSERT_EQUALS(ws1->getTitle(), "D1+B1+C1");
@@ -835,8 +788,7 @@ public:
 
   /// Rewrite second group
   void test_processGroups_rewriteSecondGroup() {
-    WorkspaceGroup_sptr group =
-        do_test_groups("A", "A1,A2,A3", "D", "D1,D2,D3", "C", "C1,C2,C3");
+    WorkspaceGroup_sptr group = do_test_groups("A", "A1,A2,A3", "D", "D1,D2,D3", "C", "C1,C2,C3");
 
     TS_ASSERT_EQUALS(ws1->getName(), "D1");
     TS_ASSERT_EQUALS(ws1->getTitle(), "A1+D1+C1");
@@ -849,8 +801,7 @@ public:
 
   /// Rewrite multiple group
   void test_processGroups_rewriteMultipleGroup() {
-    WorkspaceGroup_sptr group =
-        do_test_groups("A", "A1,A2,A3", "D", "D1,D2,D3", "D", "D1,D2,D3");
+    WorkspaceGroup_sptr group = do_test_groups("A", "A1,A2,A3", "D", "D1,D2,D3", "D", "D1,D2,D3");
 
     TS_ASSERT_EQUALS(ws1->getName(), "D1");
     TS_ASSERT_EQUALS(ws1->getTitle(), "A1+D1+D1");
@@ -861,11 +812,10 @@ public:
     TS_ASSERT_EQUALS(ws3->getTitle(), "A3+D3+D3");
   }
 
-  void doHistoryCopyTest(const std::string &inputWSName,
-                         const std::string &outputWSName) {
+  void doHistoryCopyTest(const std::string &inputWSName, const std::string &outputWSName) {
     auto inputWS = std::make_shared<WorkspaceTester>();
-    inputWS->history().addHistory(std::make_shared<AlgorithmHistory>(
-        "Load", 1, "b5b65a94-e656-468e-987c-644288fac655"));
+    inputWS->history().addHistory(
+        std::make_shared<AlgorithmHistory>("Load", 1, "b5b65a94-e656-468e-987c-644288fac655"));
     auto &ads = AnalysisDataService::Instance();
     ads.addOrReplace(inputWSName, inputWS);
 
@@ -879,8 +829,7 @@ public:
     const auto &outputHistory = outputWS->history();
     TS_ASSERT_EQUALS(2, outputHistory.size());
     TS_ASSERT_EQUALS("Load", outputHistory.getAlgorithmHistory(0)->name());
-    TS_ASSERT_EQUALS("StubbedWorkspaceAlgorithm",
-                     outputHistory.getAlgorithmHistory(1)->name());
+    TS_ASSERT_EQUALS("StubbedWorkspaceAlgorithm", outputHistory.getAlgorithmHistory(1)->name());
   }
 
   void test_singleInputWorkspaceHistoryCopiedToOutputWorkspace() {
@@ -891,17 +840,14 @@ public:
     doHistoryCopyTest("copyHistoryInOut", "copyHistoryInOut");
   }
 
-  void doHistoryCopyOnGroupsTest(const std::string &inputWSName,
-                                 const std::string &outputWSName) {
+  void doHistoryCopyOnGroupsTest(const std::string &inputWSName, const std::string &outputWSName) {
     using Mantid::Types::Core::DateAndTime;
-    const auto group =
-        std::dynamic_pointer_cast<WorkspaceGroup>(makeWorkspaceGroup(
-            inputWSName, inputWSName + "_1," + inputWSName + "_2"));
-    const DateAndTime execDate{
-        Mantid::Types::Core::DateAndTime::getCurrentTime()};
+    const auto group = std::dynamic_pointer_cast<WorkspaceGroup>(
+        makeWorkspaceGroup(inputWSName, inputWSName + "_1," + inputWSName + "_2"));
+    const DateAndTime execDate{Mantid::Types::Core::DateAndTime::getCurrentTime()};
     for (auto &item : *group) {
-      item->history().addHistory(std::make_shared<AlgorithmHistory>(
-          "Load", 1, "49ea7cb9-6172-4e5c-acf5-c3edccd0bb27", execDate));
+      item->history().addHistory(
+          std::make_shared<AlgorithmHistory>("Load", 1, "49ea7cb9-6172-4e5c-acf5-c3edccd0bb27", execDate));
     }
     auto &ads = AnalysisDataService::Instance();
     StubbedWorkspaceAlgorithm nextStep;
@@ -916,8 +862,7 @@ public:
       const auto &outputHistory = item->history();
       TS_ASSERT_EQUALS(2, outputHistory.size());
       TS_ASSERT_EQUALS("Load", outputHistory.getAlgorithmHistory(0)->name());
-      TS_ASSERT_EQUALS("StubbedWorkspaceAlgorithm",
-                       outputHistory.getAlgorithmHistory(1)->name());
+      TS_ASSERT_EQUALS("StubbedWorkspaceAlgorithm", outputHistory.getAlgorithmHistory(1)->name());
     }
   }
 
@@ -937,17 +882,14 @@ public:
     const std::string algName = "InputAlgorithm";
     IAlgorithm_sptr algInput(new StubbedWorkspaceAlgorithm());
     PropertyManagerHelper manager;
-    manager.declareProperty(algName, algInput,
-                            Mantid::Kernel::Direction::Input);
+    manager.declareProperty(algName, algInput, Mantid::Kernel::Direction::Input);
 
     // Check property can be obtained as const or non-const sptr
     IAlgorithm_const_sptr algConst;
     IAlgorithm_sptr algNonConst;
-    TS_ASSERT_THROWS_NOTHING(
-        algConst = manager.getValue<IAlgorithm_const_sptr>(algName));
+    TS_ASSERT_THROWS_NOTHING(algConst = manager.getValue<IAlgorithm_const_sptr>(algName));
     TS_ASSERT(algConst != nullptr);
-    TS_ASSERT_THROWS_NOTHING(algNonConst =
-                                 manager.getValue<IAlgorithm_sptr>(algName));
+    TS_ASSERT_THROWS_NOTHING(algNonConst = manager.getValue<IAlgorithm_sptr>(algName));
     TS_ASSERT(algNonConst != nullptr);
     TS_ASSERT_EQUALS(algConst, algNonConst);
 
@@ -967,71 +909,56 @@ public:
     TS_ASSERT_THROWS_NOTHING(indexAlg.init());
   }
 
-  void
-  testIndexingAlgorithm_setWorkspaceInputPropertiesWithWorkspacePointerAndVectorOfIntegers() {
-    auto wksp =
-        WorkspaceFactory::Instance().create("WorkspaceTester", 10, 10, 9);
+  void testIndexingAlgorithm_setWorkspaceInputPropertiesWithWorkspacePointerAndVectorOfIntegers() {
+    auto wksp = WorkspaceFactory::Instance().create("WorkspaceTester", 10, 10, 9);
     IndexingAlgorithm indexAlg;
     indexAlg.init();
-    TS_ASSERT_THROWS_NOTHING((indexAlg.setWorkspaceInputProperties(
-        "InputWorkspace", wksp, IndexType::WorkspaceIndex,
-        std::vector<int64_t>{1, 2, 3, 4, 5})));
+    TS_ASSERT_THROWS_NOTHING((indexAlg.setWorkspaceInputProperties("InputWorkspace", wksp, IndexType::WorkspaceIndex,
+                                                                   std::vector<int64_t>{1, 2, 3, 4, 5})));
   }
 
-  void
-  testIndexingAlgorithm_setWorkspaceInputPropertiesWithWorkspacePointerAndStringList() {
-    auto wksp =
-        WorkspaceFactory::Instance().create("WorkspaceTester", 10, 10, 9);
+  void testIndexingAlgorithm_setWorkspaceInputPropertiesWithWorkspacePointerAndStringList() {
+    auto wksp = WorkspaceFactory::Instance().create("WorkspaceTester", 10, 10, 9);
     IndexingAlgorithm indexAlg;
     indexAlg.init();
-    TS_ASSERT_THROWS_NOTHING(
-        (indexAlg.setWorkspaceInputProperties<MatrixWorkspace, std::string>(
-            "InputWorkspace", wksp, IndexType::WorkspaceIndex, "1:5")));
+    TS_ASSERT_THROWS_NOTHING((indexAlg.setWorkspaceInputProperties<MatrixWorkspace, std::string>(
+        "InputWorkspace", wksp, IndexType::WorkspaceIndex, "1:5")));
   }
 
-  void
-  testIndexingAlgorithm_setWorkspaceInputPropertiesWithWorkspaceNameAndVectorOfIntegers() {
-    auto wksp =
-        WorkspaceFactory::Instance().create("WorkspaceTester", 10, 10, 9);
+  void testIndexingAlgorithm_setWorkspaceInputPropertiesWithWorkspaceNameAndVectorOfIntegers() {
+    auto wksp = WorkspaceFactory::Instance().create("WorkspaceTester", 10, 10, 9);
     AnalysisDataService::Instance().add("wksp", wksp);
     IndexingAlgorithm indexAlg;
     indexAlg.init();
     // Requires workspace in ADS due to validity checks
-    TS_ASSERT_THROWS_NOTHING(
-        (indexAlg.setWorkspaceInputProperties<MatrixWorkspace>(
-            "InputWorkspace", "wksp", IndexType::WorkspaceIndex,
-            std::vector<int64_t>{1, 2, 3, 4, 5})));
+    TS_ASSERT_THROWS_NOTHING((indexAlg.setWorkspaceInputProperties<MatrixWorkspace>(
+        "InputWorkspace", "wksp", IndexType::WorkspaceIndex, std::vector<int64_t>{1, 2, 3, 4, 5})));
     AnalysisDataService::Instance().remove("wksp");
   }
 
-  void
-  testIndexingAlgorithm_setWorkspaceInputPropertiesWithWorkspaceNameAndStringList() {
-    auto wksp =
-        WorkspaceFactory::Instance().create("WorkspaceTester", 10, 10, 9);
+  void testIndexingAlgorithm_setWorkspaceInputPropertiesWithWorkspaceNameAndStringList() {
+    auto wksp = WorkspaceFactory::Instance().create("WorkspaceTester", 10, 10, 9);
     AnalysisDataService::Instance().add("wksp", wksp);
     IndexingAlgorithm indexAlg;
     indexAlg.init();
     // Requires workspace in ADS due to validity checks
-    TS_ASSERT_THROWS_NOTHING(
-        (indexAlg.setWorkspaceInputProperties<MatrixWorkspace, std::string>(
-            "InputWorkspace", "wksp", IndexType::WorkspaceIndex, "1:5")));
+    TS_ASSERT_THROWS_NOTHING((indexAlg.setWorkspaceInputProperties<MatrixWorkspace, std::string>(
+        "InputWorkspace", "wksp", IndexType::WorkspaceIndex, "1:5")));
     AnalysisDataService::Instance().remove("wksp");
   }
 
   void testIndexingAlgorithm_getWorkspaceAndIndicesMethod() {
     IndexingAlgorithm indexAlg;
     indexAlg.init();
-    auto wksp =
-        WorkspaceFactory::Instance().create("WorkspaceTester", 10, 10, 9);
-    indexAlg.setWorkspaceInputProperties<MatrixWorkspace, std::string>(
-        "InputWorkspace", wksp, IndexType::WorkspaceIndex, "1:5");
+    auto wksp = WorkspaceFactory::Instance().create("WorkspaceTester", 10, 10, 9);
+    indexAlg.setWorkspaceInputProperties<MatrixWorkspace, std::string>("InputWorkspace", wksp,
+                                                                       IndexType::WorkspaceIndex, "1:5");
 
     MatrixWorkspace_sptr wsTest;
     SpectrumIndexSet indexSet;
 
-    TS_ASSERT_THROWS_NOTHING(
-        std::tie(wsTest, indexSet) =
-            indexAlg.getWorkspaceAndIndices<MatrixWorkspace>("InputWorkspace"));
+    TS_ASSERT_THROWS_NOTHING(std::tie(wsTest, indexSet) =
+                                 indexAlg.getWorkspaceAndIndices<MatrixWorkspace>("InputWorkspace"));
 
     TS_ASSERT_EQUALS(wsTest, wksp);
 
@@ -1042,21 +969,17 @@ public:
   void testIndexingAlgorithm_accessFailInvalidPropertyType() {
     IndexingAlgorithm indexAlg;
 
-    TS_ASSERT_THROWS(
-        indexAlg.getWorkspaceAndIndices<MatrixWorkspace>("InputWorkspace2"),
-        const std::runtime_error &);
-    TS_ASSERT_THROWS(
-        (indexAlg.setWorkspaceInputProperties<MatrixWorkspace, std::string>(
-            "InputWorkspace2", "wksp", IndexType::SpectrumNum, "1:5")),
-        const std::runtime_error &);
+    TS_ASSERT_THROWS(indexAlg.getWorkspaceAndIndices<MatrixWorkspace>("InputWorkspace2"), const std::runtime_error &);
+    TS_ASSERT_THROWS((indexAlg.setWorkspaceInputProperties<MatrixWorkspace, std::string>(
+                         "InputWorkspace2", "wksp", IndexType::SpectrumNum, "1:5")),
+                     const std::runtime_error &);
   }
 
   void testIndexingAlgorithm_failExistingIndexProperty() {
     IndexingAlgorithm indexAlg;
     indexAlg.init();
     TS_ASSERT_THROWS(indexAlg.declareProperty(
-                         std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                             "InputWorkspace", "", Direction::Input)),
+                         std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input)),
                      const std::runtime_error &);
   }
 

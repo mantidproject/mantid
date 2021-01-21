@@ -26,8 +26,7 @@ namespace API {
 class MANTID_API_DLL GridDomain1D : public API::GridDomain {
 public:
   /// initialize
-  void initialize(double &startX, double &endX, size_t &n,
-                  const std::string &scaling);
+  void initialize(double &startX, double &endX, size_t &n, const std::string &scaling);
   /// number of grid point	s
   size_t size() const override { return m_points.size(); }
   /// number of dimensions in the grid

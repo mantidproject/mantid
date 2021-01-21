@@ -35,8 +35,7 @@ public:
    * @param parent :: parent widget
    * @param fl :: window flags
    */
-  MatrixSizeDialog(Matrix *m, QWidget *parent = nullptr,
-                   const Qt::WFlags &fl = nullptr);
+  MatrixSizeDialog(Matrix *m, QWidget *parent = nullptr, const Qt::WFlags &fl = nullptr);
 
 private slots:
   //! Accept changes and quit

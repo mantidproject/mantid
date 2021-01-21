@@ -38,30 +38,24 @@ SaveCSV::SaveCSV() {}
  *
  */
 void SaveCSV::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input),
                   "The filename of the output CSV file");
-  declareProperty(
-      std::make_unique<FileProperty>("Filename", "", FileProperty::Save,
-                                     ".csv"),
-      "The name of the workspace containing the data you want to save to\n"
-      "a CSV file");
-  declareProperty(
-      "Separator", ",",
-      "The separator that will go between the numbers on a line in the\n"
-      "output file (default ',')");
+  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Save, ".csv"),
+                  "The name of the workspace containing the data you want to save to\n"
+                  "a CSV file");
+  declareProperty("Separator", ",",
+                  "The separator that will go between the numbers on a line in the\n"
+                  "output file (default ',')");
   getPointerToProperty("Separator")->setAutoTrim(false);
   declareProperty("LineSeparator", "\n",
                   "The string to place at the end of lines (default new line\n"
                   "character)");
   getPointerToProperty("LineSeparator")->setAutoTrim(false);
-  declareProperty(
-      std::make_unique<PropertyWithValue<bool>>("SaveXerrors", false,
-                                                Direction::Input),
-      "This option saves out the x errors if any are present. If you have x "
-      "errors\n"
-      "in your workspace and you do not select this option, then the x errors\n"
-      "are not saved to the file.");
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("SaveXerrors", false, Direction::Input),
+                  "This option saves out the x errors if any are present. If you have x "
+                  "errors\n"
+                  "in your workspace and you do not select this option, then the x errors\n"
+                  "are not saved to the file.");
 }
 
 /** Executes the algorithm. Retrieve the Filename, separator and Lineseparator
@@ -104,8 +98,7 @@ void SaveCSV::exec() {
   // seperating out code depending on the workspace ID
 
   if (workspaceID.find("Workspace2D") != std::string::npos) {
-    const Workspace2D_sptr localworkspace =
-        std::dynamic_pointer_cast<Workspace2D>(inputWorkspace);
+    const Workspace2D_sptr localworkspace = std::dynamic_pointer_cast<Workspace2D>(inputWorkspace);
 
     // Get info from 2D workspace
     const size_t numberOfHist = localworkspace->getNumberHistograms();
@@ -178,16 +171,13 @@ void SaveCSV::exec() {
 
   } else {
     outCSV_File.close(); // and should probably delete file from disk as well
-    throw Exception::NotImplementedError(
-        "SaveCSV currently only works for 2D workspaces.");
+    throw Exception::NotImplementedError("SaveCSV currently only works for 2D workspaces.");
   }
   outCSV_File.close();
 }
 
-void SaveCSV::saveXerrors(
-    std::ofstream &stream,
-    const Mantid::DataObjects::Workspace2D_sptr &workspace,
-    const size_t numberOfHist) {
+void SaveCSV::saveXerrors(std::ofstream &stream, const Mantid::DataObjects::Workspace2D_sptr &workspace,
+                          const size_t numberOfHist) {
   // If there isn't a dx values present in the first entry then return
   if (!workspace->hasDx(0)) {
     return;

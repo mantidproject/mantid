@@ -60,8 +60,7 @@ ReferenceFrame::ReferenceFrame() : ReferenceFrame(Y, Z, Y, Right, "source") {}
  * @param handedness : Handedness
  * @param origin : origin
  */
-ReferenceFrame::ReferenceFrame(PointingAlong up, PointingAlong alongBeam,
-                               Handedness handedness, std::string origin)
+ReferenceFrame::ReferenceFrame(PointingAlong up, PointingAlong alongBeam, Handedness handedness, std::string origin)
     : ReferenceFrame(up, alongBeam, up, handedness, std::move(origin)) {}
 
 /**
@@ -72,18 +71,14 @@ ReferenceFrame::ReferenceFrame(PointingAlong up, PointingAlong alongBeam,
  * @param handedness : Handedness
  * @param origin : origin
  */
-ReferenceFrame::ReferenceFrame(PointingAlong up, PointingAlong alongBeam,
-                               PointingAlong thetaSign, Handedness handedness,
-                               std::string origin)
-    : m_up(up), m_alongBeam(alongBeam), m_thetaSign(thetaSign),
-      m_handedness(handedness), m_origin(std::move(origin)) {
+ReferenceFrame::ReferenceFrame(PointingAlong up, PointingAlong alongBeam, PointingAlong thetaSign,
+                               Handedness handedness, std::string origin)
+    : m_up(up), m_alongBeam(alongBeam), m_thetaSign(thetaSign), m_handedness(handedness), m_origin(std::move(origin)) {
   if (up == alongBeam) {
-    throw std::invalid_argument(
-        "Cannot have up direction the same as the beam direction");
+    throw std::invalid_argument("Cannot have up direction the same as the beam direction");
   }
   if (thetaSign == alongBeam) {
-    throw std::invalid_argument(
-        "Scattering angle sign axis cannot be the same as the beam direction");
+    throw std::invalid_argument("Scattering angle sign axis cannot be the same as the beam direction");
   }
   m_vecPointingUp = directionToVector(m_up);
   m_vecPointingAlongBeam = directionToVector(m_alongBeam);
@@ -105,26 +100,20 @@ PointingAlong ReferenceFrame::pointingAlongBeam() const { return m_alongBeam; }
  * Get the axis label for the pointing up direction.
  * @return label for up
  */
-std::string ReferenceFrame::pointingUpAxis() const {
-  return directionToString(m_up);
-}
+std::string ReferenceFrame::pointingUpAxis() const { return directionToString(m_up); }
 
 /**
  * Get the axis label for the pointing along direction.
  * @return label for up
  */
-std::string ReferenceFrame::pointingAlongBeamAxis() const {
-  return directionToString(m_alongBeam);
-}
+std::string ReferenceFrame::pointingAlongBeamAxis() const { return directionToString(m_alongBeam); }
 
 /**
  * Get the axis label for the pointing horizontal direction.
  * @return Axis label for the axis that is perpendicular to the beam and up
  * direction in the instrument
  */
-std::string ReferenceFrame::pointingHorizontalAxis() const {
-  return directionToString(pointingHorizontal());
-}
+std::string ReferenceFrame::pointingHorizontalAxis() const { return directionToString(pointingHorizontal()); }
 
 /**
  * Gets the pointing horizontal direction, i.e perpendicular to up & along beam
@@ -175,17 +164,13 @@ V3D ReferenceFrame::vecThetaSign() const { return m_vecThetaSign; }
 Getter for the along beam vector.
 @return along beam direction.
 */
-V3D ReferenceFrame::vecPointingAlongBeam() const {
-  return m_vecPointingAlongBeam;
-}
+V3D ReferenceFrame::vecPointingAlongBeam() const { return m_vecPointingAlongBeam; }
 
 /**
 Calculate the horizontal vector.
 @return horizontal direction.
 */
-V3D ReferenceFrame::vecPointingHorizontal() const {
-  return directionToVector(pointingHorizontal());
-}
+V3D ReferenceFrame::vecPointingHorizontal() const { return directionToVector(pointingHorizontal()); }
 
 /**
 Convenience method for checking whether or not a vector is aligned

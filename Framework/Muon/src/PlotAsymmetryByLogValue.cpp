@@ -45,10 +45,8 @@ namespace // anonymous
  * @return :: True if successful
  */
 template <typename T>
-bool convertLogToDouble(const Mantid::Kernel::Property *property, double &value,
-                        const std::string &function) {
-  const auto *log =
-      dynamic_cast<const Mantid::Kernel::TimeSeriesProperty<T> *>(property);
+bool convertLogToDouble(const Mantid::Kernel::Property *property, double &value, const std::string &function) {
+  const auto *log = dynamic_cast<const Mantid::Kernel::TimeSeriesProperty<T> *>(property);
   if (log) {
     if (function == "Mean") {
       value = static_cast<double>(log->timeAverageValue());
@@ -63,8 +61,7 @@ bool convertLogToDouble(const Mantid::Kernel::Property *property, double &value,
     }
     return true;
   }
-  auto tlog =
-      dynamic_cast<const Mantid::Kernel::PropertyWithValue<T> *>(property);
+  auto tlog = dynamic_cast<const Mantid::Kernel::PropertyWithValue<T> *>(property);
   if (tlog) {
     value = static_cast<double>(*tlog);
     return true;
@@ -85,13 +82,10 @@ using namespace DataObjects;
 DECLARE_ALGORITHM(PlotAsymmetryByLogValue)
 
 PlotAsymmetryByLogValue::PlotAsymmetryByLogValue()
-    : Algorithm(), m_filenameBase(), m_filenameExt(), m_filenameZeros(),
-      m_dtcType(), m_dtcFile(), m_forward_list(), m_backward_list(), m_rmap(),
-      m_int(true), m_red(-1), m_green(-1), m_minTime(-1.0), m_maxTime(-1.0),
-      m_logName(), m_logFunc(), m_logValue(), m_redY(), m_redE(), m_greenY(),
-      m_greenE(), m_sumY(), m_sumE(), m_diffY(), m_diffE(),
-      m_allProperties("default"), m_currResName("__PABLV_results"),
-      m_firstStart_ns(0) {}
+    : Algorithm(), m_filenameBase(), m_filenameExt(), m_filenameZeros(), m_dtcType(), m_dtcFile(), m_forward_list(),
+      m_backward_list(), m_rmap(), m_int(true), m_red(-1), m_green(-1), m_minTime(-1.0), m_maxTime(-1.0), m_logName(),
+      m_logFunc(), m_logValue(), m_redY(), m_redE(), m_greenY(), m_greenE(), m_sumY(), m_sumE(), m_diffY(), m_diffE(),
+      m_allProperties("default"), m_currResName("__PABLV_results"), m_firstStart_ns(0) {}
 
 /** Initialisation method. Declares properties to be used in algorithm.
  *
@@ -99,39 +93,28 @@ PlotAsymmetryByLogValue::PlotAsymmetryByLogValue()
 void PlotAsymmetryByLogValue::init() {
   std::string nexusExt(".nxs");
 
-  declareProperty(std::make_unique<FileProperty>(
-                      "FirstRun", "", FileProperty::OptionalLoad, nexusExt),
+  declareProperty(std::make_unique<FileProperty>("FirstRun", "", FileProperty::OptionalLoad, nexusExt),
                   "The name of the first workspace in the series.");
-  declareProperty(std::make_unique<FileProperty>(
-                      "LastRun", "", FileProperty::OptionalLoad, nexusExt),
+  declareProperty(std::make_unique<FileProperty>("LastRun", "", FileProperty::OptionalLoad, nexusExt),
                   "The name of the last workspace in the series.");
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                            Direction::Output),
-      "The name of the output workspace containing the resulting asymmetries.");
-  declareProperty("LogValue", "",
-                  std::make_shared<MandatoryValidator<std::string>>(),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
+                  "The name of the output workspace containing the resulting asymmetries.");
+  declareProperty("LogValue", "", std::make_shared<MandatoryValidator<std::string>>(),
                   "The name of the log values which will be used as the x-axis "
                   "in the output workspace.");
 
   std::vector<std::string> optionsLog{"Mean", "Min", "Max", "First", "Last"};
-  declareProperty(
-      "Function", "Last", std::make_shared<StringListValidator>(optionsLog),
-      "The function to apply: 'Mean', 'Min', 'Max', 'First' or 'Last'.");
+  declareProperty("Function", "Last", std::make_shared<StringListValidator>(optionsLog),
+                  "The function to apply: 'Mean', 'Min', 'Max', 'First' or 'Last'.");
 
   declareProperty("Red", 1, "The period number for the 'red' data.");
-  declareProperty("Green", EMPTY_INT(),
-                  "The period number for the 'green' data.");
+  declareProperty("Green", EMPTY_INT(), "The period number for the 'green' data.");
 
   std::vector<std::string> options{"Integral", "Differential"};
-  declareProperty("Type", "Integral",
-                  std::make_shared<StringListValidator>(options),
+  declareProperty("Type", "Integral", std::make_shared<StringListValidator>(options),
                   "The calculation type: 'Integral' or 'Differential'.");
-  declareProperty(
-      "TimeMin", EMPTY_DBL(),
-      "The beginning of the time interval used in the calculations.");
-  declareProperty("TimeMax", EMPTY_DBL(),
-                  "The end of the time interval used in the calculations.");
+  declareProperty("TimeMin", EMPTY_DBL(), "The beginning of the time interval used in the calculations.");
+  declareProperty("TimeMax", EMPTY_DBL(), "The end of the time interval used in the calculations.");
 
   declareProperty(std::make_unique<ArrayProperty<int>>("ForwardSpectra"),
                   "The list of spectra for the forward group. If not specified "
@@ -145,42 +128,30 @@ void PlotAsymmetryByLogValue::init() {
                   "available. The backward will use the second of these "
                   "groups.");
 
-  std::vector<std::string> deadTimeCorrTypes{"None", "FromRunData",
-                                             "FromSpecifiedFile"};
+  std::vector<std::string> deadTimeCorrTypes{"None", "FromRunData", "FromSpecifiedFile"};
 
-  declareProperty("DeadTimeCorrType", deadTimeCorrTypes[0],
-                  std::make_shared<StringListValidator>(deadTimeCorrTypes),
+  declareProperty("DeadTimeCorrType", deadTimeCorrTypes[0], std::make_shared<StringListValidator>(deadTimeCorrTypes),
                   "Type of Dead Time Correction to apply.");
 
-  declareProperty(std::make_unique<FileProperty>("DeadTimeCorrFile", "",
-                                                 FileProperty::OptionalLoad,
-                                                 nexusExt),
+  declareProperty(std::make_unique<FileProperty>("DeadTimeCorrFile", "", FileProperty::OptionalLoad, nexusExt),
                   "Custom file with Dead Times. Will be used only if "
                   "appropriate DeadTimeCorrType is set.");
-  declareProperty(std::make_unique<ArrayProperty<std::string>>(
-                      "WorkspaceNames", Direction::Input),
+  declareProperty(std::make_unique<ArrayProperty<std::string>>("WorkspaceNames", Direction::Input),
                   "The range of workspaces");
 
-  declareProperty("Alpha", 1.0,
-                  "The balance parameter passed to AsymmetryCalc");
+  declareProperty("Alpha", 1.0, "The balance parameter passed to AsymmetryCalc");
 }
 
 /// Validate the input properties
 std::map<std::string, std::string> PlotAsymmetryByLogValue::validateInputs() {
   std::map<std::string, std::string> helpMessages;
-  if (isDefault("FirstRun") && isDefault("LastRun") &&
-      isDefault("WorkspaceNames")) {
-    helpMessages["FirstRun"] =
-        "Must either supply WorkspaceNames or FirstRun and LastRun";
-    helpMessages["LastRun"] =
-        "Must either supply WorkspaceNames or FirstRun and LastRun";
-    helpMessages["WorkspaceNames"] =
-        "Must either supply WorkspaceNames or FirstRun and LastRun";
+  if (isDefault("FirstRun") && isDefault("LastRun") && isDefault("WorkspaceNames")) {
+    helpMessages["FirstRun"] = "Must either supply WorkspaceNames or FirstRun and LastRun";
+    helpMessages["LastRun"] = "Must either supply WorkspaceNames or FirstRun and LastRun";
+    helpMessages["WorkspaceNames"] = "Must either supply WorkspaceNames or FirstRun and LastRun";
   }
-  if ((!isDefault("FirstRun") && isDefault("LastRun") &&
-       isDefault("WorkspaceNames")) ||
-      (isDefault("FirstRun") && !isDefault("LastRun") &&
-       isDefault("WorkspaceNames"))) {
+  if ((!isDefault("FirstRun") && isDefault("LastRun") && isDefault("WorkspaceNames")) ||
+      (isDefault("FirstRun") && !isDefault("LastRun") && isDefault("WorkspaceNames"))) {
     helpMessages["FirstRun"] = "Must supply both FirstRun and LastRun";
     helpMessages["LastRun"] = "Must supply both FirstRun and LastRun";
   }
@@ -222,9 +193,8 @@ void PlotAsymmetryByLogValue::exec() {
   // Create the 2D workspace for the output
   int nplots = !m_greenY.empty() ? 4 : 1;
   size_t npoints = m_logValue.size();
-  MatrixWorkspace_sptr outWS = create<Workspace2D>(
-      nplots,         //  the number of plots
-      Points(npoints) //  the number of data points on a plot
+  MatrixWorkspace_sptr outWS = create<Workspace2D>(nplots,         //  the number of plots
+                                                   Points(npoints) //  the number of data points on a plot
   );
   // Populate output workspace with data
   populateOutputWorkspace(outWS, nplots);
@@ -240,8 +210,7 @@ void PlotAsymmetryByLogValue::exec() {
  *   @param fileName : [input] name of file
  *   @return string containing directory path
  */
-std::string PlotAsymmetryByLogValue::getDirectoryFromFileName(
-    const std::string &fileName) const {
+std::string PlotAsymmetryByLogValue::getDirectoryFromFileName(const std::string &fileName) const {
   const auto path = FileFinder::Instance().getFullPath(fileName);
   Poco::File fileBase(path);
   std::size_t found = fileBase.path().find_last_of("/\\");
@@ -255,16 +224,13 @@ std::string PlotAsymmetryByLogValue::getDirectoryFromFileName(
 
 /**  Loops files between first and last values and adds to vector of file names
  */
-void PlotAsymmetryByLogValue::populateFileNamesFromFirstLast(
-    std::string firstRun, std::string lastRun) {
+void PlotAsymmetryByLogValue::populateFileNamesFromFirstLast(std::string firstRun, std::string lastRun) {
   // Parse run names and get the number of runs
-  parseRunNames(firstRun, lastRun, m_filenameBase, m_filenameExt,
-                m_filenameZeros);
+  parseRunNames(firstRun, lastRun, m_filenameBase, m_filenameExt, m_filenameZeros);
   const auto firstRunNumber = std::stoul(firstRun); // starting run number
   const auto lastRunNumber = std::stoul(lastRun);   // last run number
   if (lastRunNumber < firstRunNumber) {
-    throw std::runtime_error(
-        "First run number is greater than last run number");
+    throw std::runtime_error("First run number is greater than last run number");
   }
 
   for (size_t i = firstRunNumber; i <= lastRunNumber; i++) {
@@ -286,8 +252,7 @@ void PlotAsymmetryByLogValue::populateFileNamesFromFirstLast(
  *   @param firstRunNumber :: [output] Number of the first run
  *   @param lastRunNumber :: [output] Number of the last run
  */
-void PlotAsymmetryByLogValue::checkProperties(size_t &firstRunNumber,
-                                              size_t &lastRunNumber) {
+void PlotAsymmetryByLogValue::checkProperties(size_t &firstRunNumber, size_t &lastRunNumber) {
 
   // Log Value
   m_logName = getPropertyValue("LogValue");
@@ -314,8 +279,7 @@ void PlotAsymmetryByLogValue::checkProperties(size_t &firstRunNumber,
 
   // If file names empty, first and last provided so need to populate vector
   if (m_fileNames.empty()) {
-    populateFileNamesFromFirstLast(getProperty("FirstRun"),
-                                   getProperty("LastRun"));
+    populateFileNamesFromFirstLast(getProperty("FirstRun"), getProperty("LastRun"));
   } else {
     // Get directory of first file
     const auto firstDir = getDirectoryFromFileName(m_fileNames[0]);
@@ -324,8 +288,7 @@ void PlotAsymmetryByLogValue::checkProperties(size_t &firstRunNumber,
     for (const auto &file : m_fileNames) {
       if (firstDir != getDirectoryFromFileName(file)) {
         // Error
-        throw std::runtime_error("All Files are not in the same directory (" +
-                                 firstDir + ").");
+        throw std::runtime_error("All Files are not in the same directory (" + firstDir + ").");
       }
     }
   }
@@ -344,8 +307,7 @@ void PlotAsymmetryByLogValue::checkProperties(size_t &firstRunNumber,
   std::ostringstream ss;
   ss << m_filenameBase << "," << m_filenameExt << "," << m_filenameZeros << ",";
   ss << m_dtcType << "," << m_dtcFile << ",";
-  ss << getPropertyValue("ForwardSpectra") << ","
-     << getPropertyValue("BackwardSpectra") << ",";
+  ss << getPropertyValue("ForwardSpectra") << "," << getPropertyValue("BackwardSpectra") << ",";
   ss << m_int << "," << m_minTime << "," << m_maxTime << ",";
   ss << m_red << "," << m_green << ",";
   ss << m_logName << ", " << m_logFunc << ",";
@@ -365,9 +327,7 @@ void PlotAsymmetryByLogValue::checkProperties(size_t &firstRunNumber,
   // 3. It has a title equal to m_allProperties
   // This ws stores previous results as described below
   if (AnalysisDataService::Instance().doesExist(m_currResName)) {
-    MatrixWorkspace_sptr prevResults =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            m_currResName);
+    MatrixWorkspace_sptr prevResults = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_currResName);
     if (prevResults) {
       if (m_allProperties == prevResults->getTitle()) {
         // We can re-use results
@@ -468,8 +428,7 @@ Workspace_sptr PlotAsymmetryByLogValue::doLoad(const std::string &fileName) {
  *   @param deadTimeFile :: [input] File to read corrections from
  *   @return :: Deadtime corrections loaded from file
  */
-Workspace_sptr PlotAsymmetryByLogValue::loadCorrectionsFromFile(
-    const std::string &deadTimeFile) {
+Workspace_sptr PlotAsymmetryByLogValue::loadCorrectionsFromFile(const std::string &deadTimeFile) {
 
   IAlgorithm_sptr alg = createChildAlgorithm("LoadNexusProcessed");
   alg->setPropertyValue("Filename", deadTimeFile);
@@ -483,8 +442,7 @@ Workspace_sptr PlotAsymmetryByLogValue::loadCorrectionsFromFile(
  *   @param outWS :: [input/output] Output workspace to populate
  *   @param nplots :: [input] Number of histograms
  */
-void PlotAsymmetryByLogValue::populateOutputWorkspace(
-    MatrixWorkspace_sptr &outWS, int nplots) {
+void PlotAsymmetryByLogValue::populateOutputWorkspace(MatrixWorkspace_sptr &outWS, int nplots) {
 
   auto tAxis = std::make_unique<TextAxis>(nplots);
   if (nplots == 1) {
@@ -528,8 +486,7 @@ void PlotAsymmetryByLogValue::populateOutputWorkspace(
  *   @param outWS :: [input/output] Output workspace to populate
  *   @param nplots :: [input] Number of histograms
  */
-void PlotAsymmetryByLogValue::saveResultsToADS(MatrixWorkspace_sptr &outWS,
-                                               int nplots) {
+void PlotAsymmetryByLogValue::saveResultsToADS(MatrixWorkspace_sptr &outWS, int nplots) {
 
   if (nplots == 2) {
     size_t i = 0;
@@ -576,9 +533,7 @@ void PlotAsymmetryByLogValue::saveResultsToADS(MatrixWorkspace_sptr &outWS,
  *   @param fnExt :: [output] Runs extension
  *   @param fnZeros :: [output] Number of zeros in run's name
  */
-void PlotAsymmetryByLogValue::parseRunNames(std::string &firstFN,
-                                            std::string &lastFN,
-                                            std::string &fnBase,
+void PlotAsymmetryByLogValue::parseRunNames(std::string &firstFN, std::string &lastFN, std::string &fnBase,
                                             std::string &fnExt, int &fnZeros) {
 
   // Parse first run's name
@@ -627,19 +582,16 @@ void PlotAsymmetryByLogValue::parseRunNames(std::string &firstFN,
     if (Poco::File(pathLast).exists()) {
       fnBase = firstBase;
       fnExt = firstExt;
-      g_log.warning()
-          << "First and last run are not in the same directory. File "
-          << pathLast << " will be used instead.\n";
+      g_log.warning() << "First and last run are not in the same directory. File " << pathLast
+                      << " will be used instead.\n";
     } else if (Poco::File(pathFirst).exists()) {
       // ...or viceversa
       fnBase = lastBase;
       fnExt = lastExt;
-      g_log.warning()
-          << "First and last run are not in the same directory. File "
-          << pathFirst << " will be used instead.\n";
+      g_log.warning() << "First and last run are not in the same directory. File " << pathFirst
+                      << " will be used instead.\n";
     } else {
-      throw std::runtime_error(
-          "First and last runs are not in the same directory.");
+      throw std::runtime_error("First and last runs are not in the same directory.");
     }
 
   } else {
@@ -660,9 +612,7 @@ int PlotAsymmetryByLogValue::extractRunNumberFromRunName(std::string runName) {
   runName = runName.substr(found + 1);
 
   // Remove all non-digits
-  runName.erase(std::remove_if(runName.begin(), runName.end(),
-                               [](auto c) { return !std::isdigit(c); }),
-                runName.end());
+  runName.erase(std::remove_if(runName.begin(), runName.end(), [](auto c) { return !std::isdigit(c); }), runName.end());
 
   // Return run number as int (removes leading 0's)
   return std::stoi(runName);
@@ -673,13 +623,11 @@ int PlotAsymmetryByLogValue::extractRunNumberFromRunName(std::string runName) {
  *   @param loadedWs :: [input/output] Workspace to apply corrections to
  *   @param deadTimes :: [input] Corrections to apply
  */
-void PlotAsymmetryByLogValue::applyDeadtimeCorr(Workspace_sptr &loadedWs,
-                                                Workspace_sptr deadTimes) {
+void PlotAsymmetryByLogValue::applyDeadtimeCorr(Workspace_sptr &loadedWs, Workspace_sptr deadTimes) {
   ScopedWorkspace ws(loadedWs);
   ScopedWorkspace dt(std::move(deadTimes));
 
-  IAlgorithm_sptr applyCorr =
-      AlgorithmManager::Instance().createUnmanaged("ApplyDeadTimeCorr");
+  IAlgorithm_sptr applyCorr = AlgorithmManager::Instance().createUnmanaged("ApplyDeadTimeCorr");
   applyCorr->initialize();
   applyCorr->setLogging(false);
   applyCorr->setRethrows(true);
@@ -698,9 +646,7 @@ void PlotAsymmetryByLogValue::applyDeadtimeCorr(Workspace_sptr &loadedWs,
  * @param bwd :: [Input] Backward spectra
  * @return :: Workspace containing custom grouping
  */
-Workspace_sptr
-PlotAsymmetryByLogValue::createCustomGrouping(const std::vector<int> &fwd,
-                                              const std::vector<int> &bwd) {
+Workspace_sptr PlotAsymmetryByLogValue::createCustomGrouping(const std::vector<int> &fwd, const std::vector<int> &bwd) {
 
   ITableWorkspace_sptr group = std::make_shared<TableWorkspace>();
   group->addColumn("vector_int", "group");
@@ -716,16 +662,14 @@ PlotAsymmetryByLogValue::createCustomGrouping(const std::vector<int> &fwd,
  *   @param loadedWs :: [input/output] Workspace to apply grouping to
  *   @param grouping :: [input] Workspace containing grouping to apply
  */
-void PlotAsymmetryByLogValue::groupDetectors(Workspace_sptr &loadedWs,
-                                             Workspace_sptr grouping) {
+void PlotAsymmetryByLogValue::groupDetectors(Workspace_sptr &loadedWs, Workspace_sptr grouping) {
 
   // Could be groups of workspaces, so need to work with ADS
   ScopedWorkspace inWS(loadedWs);
   ScopedWorkspace grWS(std::move(grouping));
   ScopedWorkspace outWS;
 
-  IAlgorithm_sptr alg =
-      AlgorithmManager::Instance().createUnmanaged("MuonGroupDetectors");
+  IAlgorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged("MuonGroupDetectors");
   alg->initialize();
   alg->setLogging(false);
   alg->setPropertyValue("InputWorkspace", inWS.name());
@@ -739,17 +683,14 @@ void PlotAsymmetryByLogValue::groupDetectors(Workspace_sptr &loadedWs,
  *   @param loadedWs :: [input] Workspace to apply analysis to
  *   @param index :: [input] Vector index where results will be stored
  */
-void PlotAsymmetryByLogValue::doAnalysis(const Workspace_sptr &loadedWs,
-                                         size_t index) {
+void PlotAsymmetryByLogValue::doAnalysis(const Workspace_sptr &loadedWs, size_t index) {
 
   // Check if workspace is a workspace group
-  WorkspaceGroup_sptr group =
-      std::dynamic_pointer_cast<WorkspaceGroup>(loadedWs);
+  WorkspaceGroup_sptr group = std::dynamic_pointer_cast<WorkspaceGroup>(loadedWs);
 
   // If it is not, we only have 'red' data
   if (!group) {
-    MatrixWorkspace_sptr ws_red =
-        std::dynamic_pointer_cast<MatrixWorkspace>(loadedWs);
+    MatrixWorkspace_sptr ws_red = std::dynamic_pointer_cast<MatrixWorkspace>(loadedWs);
 
     double Y, E;
     calcIntAsymmetry(ws_red, Y, E);
@@ -763,8 +704,7 @@ void PlotAsymmetryByLogValue::doAnalysis(const Workspace_sptr &loadedWs,
     // Process red data
     MatrixWorkspace_sptr ws_red;
     try {
-      ws_red =
-          std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(m_red - 1));
+      ws_red = std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(m_red - 1));
     } catch (std::out_of_range &) {
       throw std::out_of_range("Red period out of range");
     }
@@ -779,8 +719,7 @@ void PlotAsymmetryByLogValue::doAnalysis(const Workspace_sptr &loadedWs,
       // Process green period if supplied by user
       MatrixWorkspace_sptr ws_green;
       try {
-        ws_green = std::dynamic_pointer_cast<MatrixWorkspace>(
-            group->getItem(m_green - 1));
+        ws_green = std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(m_green - 1));
       } catch (std::out_of_range &) {
         throw std::out_of_range("Green period out of range");
       }
@@ -809,8 +748,7 @@ void PlotAsymmetryByLogValue::doAnalysis(const Workspace_sptr &loadedWs,
  *   @param Y :: Reference to a variable receiving the value of asymmetry
  *   @param E :: Reference to a variable receiving the value of the error
  */
-void PlotAsymmetryByLogValue::calcIntAsymmetry(const MatrixWorkspace_sptr &ws,
-                                               double &Y, double &E) {
+void PlotAsymmetryByLogValue::calcIntAsymmetry(const MatrixWorkspace_sptr &ws, double &Y, double &E) {
 
   // Output workspace
   MatrixWorkspace_sptr out;
@@ -858,16 +796,14 @@ void PlotAsymmetryByLogValue::calcIntAsymmetry(const MatrixWorkspace_sptr &ws,
  *   @param Y :: Reference to a variable receiving the value of asymmetry
  *   @param E :: Reference to a variable receiving the value of the error
  */
-void PlotAsymmetryByLogValue::calcIntAsymmetry(
-    const MatrixWorkspace_sptr &ws_red, const MatrixWorkspace_sptr &ws_green,
-    double &Y, double &E) {
+void PlotAsymmetryByLogValue::calcIntAsymmetry(const MatrixWorkspace_sptr &ws_red, const MatrixWorkspace_sptr &ws_green,
+                                               double &Y, double &E) {
   if (!m_int) { //  "Differential asymmetry"
     HistogramBuilder builder;
     builder.setX(ws_red->x(0).size());
     builder.setY(ws_red->y(0).size());
     builder.setDistribution(ws_red->isDistribution());
-    MatrixWorkspace_sptr tmpWS =
-        create<MatrixWorkspace>(*ws_red, 1, builder.build());
+    MatrixWorkspace_sptr tmpWS = create<MatrixWorkspace>(*ws_red, 1, builder.build());
     for (size_t i = 0; i < tmpWS->y(0).size(); i++) {
       double FNORM = ws_green->y(0)[i] + ws_red->y(0)[i];
       FNORM = FNORM != 0.0 ? 1.0 / FNORM : 1.0;
@@ -904,17 +840,13 @@ void PlotAsymmetryByLogValue::calcIntAsymmetry(
     integr->execute();
     MatrixWorkspace_sptr intWS_green = integr->getProperty("OutputWorkspace");
 
-    double YIF = (intWS_green->y(0)[0] - intWS_red->y(0)[0]) /
-                 (intWS_green->y(0)[0] + intWS_red->y(0)[0]);
-    double YIB = (intWS_green->y(1)[0] - intWS_red->y(1)[0]) /
-                 (intWS_green->y(1)[0] + intWS_red->y(1)[0]);
+    double YIF = (intWS_green->y(0)[0] - intWS_red->y(0)[0]) / (intWS_green->y(0)[0] + intWS_red->y(0)[0]);
+    double YIB = (intWS_green->y(1)[0] - intWS_red->y(1)[0]) / (intWS_green->y(1)[0] + intWS_red->y(1)[0]);
 
     Y = YIB - YIF;
 
-    double VARIF =
-        (1.0 + YIF * YIF) / (intWS_green->y(0)[0] + intWS_red->y(0)[0]);
-    double VARIB =
-        (1.0 + YIB * YIB) / (intWS_green->y(1)[0] + intWS_red->y(1)[0]);
+    double VARIF = (1.0 + YIF * YIF) / (intWS_green->y(0)[0] + intWS_red->y(0)[0]);
+    double VARIB = (1.0 + YIB * YIB) / (intWS_green->y(1)[0] + intWS_red->y(1)[0]);
 
     E = sqrt(VARIF + VARIB);
   }
@@ -948,11 +880,9 @@ double PlotAsymmetryByLogValue::getLogValue(MatrixWorkspace &ws) {
   // Return it as a double in seconds, relative to start of first run
   constexpr static double nanosec_to_sec = 1.e-9;
   if (m_logName == "run_start") {
-    return static_cast<double>(start.totalNanoseconds() - m_firstStart_ns) *
-           nanosec_to_sec;
+    return static_cast<double>(start.totalNanoseconds() - m_firstStart_ns) * nanosec_to_sec;
   } else if (m_logName == "run_end") {
-    return static_cast<double>(end.totalNanoseconds() - m_firstStart_ns) *
-           nanosec_to_sec;
+    return static_cast<double>(end.totalNanoseconds() - m_firstStart_ns) * nanosec_to_sec;
   }
 
   // Otherwise, try converting the log value to a double
@@ -977,9 +907,7 @@ double PlotAsymmetryByLogValue::getLogValue(MatrixWorkspace &ws) {
   if (convertLogToDouble<uint64_t>(property, value, m_logFunc))
     return value;
   // try if it's a string and can be lexically cast to double
-  auto slog =
-      dynamic_cast<const Mantid::Kernel::PropertyWithValue<std::string> *>(
-          property);
+  auto slog = dynamic_cast<const Mantid::Kernel::PropertyWithValue<std::string> *>(property);
   if (slog) {
     try {
       value = boost::lexical_cast<double>(slog->value());
@@ -989,8 +917,7 @@ double PlotAsymmetryByLogValue::getLogValue(MatrixWorkspace &ws) {
     }
   }
 
-  throw std::invalid_argument("Log " + m_logName +
-                              " cannot be converted to a double type.");
+  throw std::invalid_argument("Log " + m_logName + " cannot be converted to a double type.");
 }
 
 } // namespace Algorithms

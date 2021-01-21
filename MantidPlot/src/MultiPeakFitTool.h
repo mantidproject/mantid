@@ -49,14 +49,11 @@ class QwtPlotCurve;
 class MultiPeakFitTool : public QObject, public PlotToolInterface {
   Q_OBJECT
 public:
-  MultiPeakFitTool(Graph *graph, ApplicationWindow *app,
-                   MultiPeakFit::PeakProfile profile, int num_peaks,
+  MultiPeakFitTool(Graph *graph, ApplicationWindow *app, MultiPeakFit::PeakProfile profile, int num_peaks,
                    const QObject *status_target, const char *status_slot);
   ~MultiPeakFitTool() override;
 
-  int rtti() const override {
-    return PlotToolInterface::Rtti_MultiPeakFitTool;
-  };
+  int rtti() const override { return PlotToolInterface::Rtti_MultiPeakFitTool; };
 signals:
   /** Emitted whenever a new message should be presented to the user.
    *

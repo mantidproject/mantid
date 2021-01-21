@@ -35,8 +35,7 @@ class MuonAnalysisFitDataTab : MantidQt::API::UserSubWindow {
 
 public:
   /// Constructor.
-  explicit MuonAnalysisFitDataTab(Ui::MuonAnalysis &uiForm)
-      : m_uiForm(uiForm) {}
+  explicit MuonAnalysisFitDataTab(Ui::MuonAnalysis &uiForm) : m_uiForm(uiForm) {}
   /// Initialise.
   void init();
   /// Copy the given raw workspace and keep for later.

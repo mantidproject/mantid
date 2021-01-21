@@ -24,8 +24,7 @@ Mantid::Kernel::Logger g_log("MantidApplication");
 } // namespace
 
 /// Constructor
-MantidApplication::MantidApplication(int &argc, char **argv)
-    : QApplication(argc, argv) {
+MantidApplication::MantidApplication(int &argc, char **argv) : QApplication(argc, argv) {
   try {
     Mantid::Kernel::UsageService::Instance().setApplicationName("mantidplot");
   } catch (std::runtime_error &rexc) {
@@ -38,18 +37,15 @@ MantidApplication::MantidApplication(int &argc, char **argv)
   }
 }
 
-void MantidApplication::errorHandling(bool continueWork, int share,
-                                      const QString &name, const QString &email,
+void MantidApplication::errorHandling(bool continueWork, int share, const QString &name, const QString &email,
                                       const QString &textbox) {
   if (share == 0) {
-    Mantid::Kernel::ErrorReporter errorReporter(
-        "mantidplot", Mantid::Kernel::UsageService::Instance().getUpTime(), "",
-        true, name.toStdString(), email.toStdString(), textbox.toStdString());
+    Mantid::Kernel::ErrorReporter errorReporter("mantidplot", Mantid::Kernel::UsageService::Instance().getUpTime(), "",
+                                                true, name.toStdString(), email.toStdString(), textbox.toStdString());
     errorReporter.sendErrorReport();
   } else if (share == 1) {
-    Mantid::Kernel::ErrorReporter errorReporter(
-        "mantidplot", Mantid::Kernel::UsageService::Instance().getUpTime(), "",
-        false, name.toStdString(), email.toStdString(), textbox.toStdString());
+    Mantid::Kernel::ErrorReporter errorReporter("mantidplot", Mantid::Kernel::UsageService::Instance().getUpTime(), "",
+                                                false, name.toStdString(), email.toStdString(), textbox.toStdString());
     errorReporter.sendErrorReport();
   }
 
@@ -100,22 +96,19 @@ bool MantidApplication::notify(QObject *receiver, QEvent *event) {
     emit runAsPythonScript(pythonCode);
   } else if (error) {
     QMessageBox ask;
-    QAbstractButton *terminateButton =
-        ask.addButton(tr("Terminate"), QMessageBox::ActionRole);
+    QAbstractButton *terminateButton = ask.addButton(tr("Terminate"), QMessageBox::ActionRole);
     ask.addButton(tr("Continue"), QMessageBox::ActionRole);
     if (known_exception) {
-      ask.setText(
-          "Sorry, MantidPlot has caught an unexpected exception:\n\n" +
-          QString::fromStdString(unexpected_exception) +
-          "\n\nWould you like to terminate MantidPlot or try to continue "
-          "working?\nIf you choose to continue it is advisable to save "
-          "your data and restart the application.");
+      ask.setText("Sorry, MantidPlot has caught an unexpected exception:\n\n" +
+                  QString::fromStdString(unexpected_exception) +
+                  "\n\nWould you like to terminate MantidPlot or try to continue "
+                  "working?\nIf you choose to continue it is advisable to save "
+                  "your data and restart the application.");
     } else {
-      ask.setText(
-          "Sorry, MantidPlot has caught an unknown exception"
-          "\n\nWould you like to terminate MantidPlot or try to continue "
-          "working?\nIf you choose to continue it is advisable to save "
-          "your data and restart the application.");
+      ask.setText("Sorry, MantidPlot has caught an unknown exception"
+                  "\n\nWould you like to terminate MantidPlot or try to continue "
+                  "working?\nIf you choose to continue it is advisable to save "
+                  "your data and restart the application.");
     }
     ask.setIcon(QMessageBox::Critical);
     ask.exec();

@@ -35,8 +35,8 @@ DECLARE_ALGORITHM(RemoveLowResTOF)
 
 /// Default constructor
 RemoveLowResTOF::RemoveLowResTOF()
-    : m_inputWS(), m_inputEvWS(), m_DIFCref(0.), m_K(0.), m_Tmin(0.),
-      m_wavelengthMin(0.), m_numberOfSpectra(0), m_outputLowResTOF(false) {}
+    : m_inputWS(), m_inputEvWS(), m_DIFCref(0.), m_K(0.), m_Tmin(0.), m_wavelengthMin(0.), m_numberOfSpectra(0),
+      m_outputLowResTOF(false) {}
 
 /// Algorithm's name for identification overriding a virtual method
 const string RemoveLowResTOF::name() const { return "RemoveLowResTOF"; }
@@ -45,9 +45,7 @@ const string RemoveLowResTOF::name() const { return "RemoveLowResTOF"; }
 int RemoveLowResTOF::version() const { return 1; }
 
 /// Algorithm's category for identification overriding a virtual method
-const string RemoveLowResTOF::category() const {
-  return "Diffraction\\Corrections";
-}
+const string RemoveLowResTOF::category() const { return "Diffraction\\Corrections"; }
 
 void RemoveLowResTOF::init() {
   auto wsValidator = std::make_shared<CompositeValidator>();
@@ -56,24 +54,19 @@ void RemoveLowResTOF::init() {
   wsValidator->add<RawCountValidator>();
   wsValidator->add<InstrumentValidator>();
   declareProperty(
-      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          "InputWorkspace", "", Direction::Input, wsValidator),
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input, wsValidator),
       "A workspace with x values in units of TOF and y values in counts");
-  declareProperty(
-      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          "OutputWorkspace", "", Direction::Output),
-      "The name of the workspace to be created as the output of the algorithm");
-  declareProperty(
-      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          "LowResTOFWorkspace", "", Direction::Output, PropertyMode::Optional),
-      "The name of the optional output workspace that contains low resolution "
-      "TOF which are removed "
-      "from input workspace.");
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
+                  "The name of the workspace to be created as the output of the algorithm");
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("LowResTOFWorkspace", "", Direction::Output,
+                                                                       PropertyMode::Optional),
+                  "The name of the optional output workspace that contains low resolution "
+                  "TOF which are removed "
+                  "from input workspace.");
 
   auto validator = std::make_shared<BoundedValidator<double>>();
   validator->setLower(0.01);
-  declareProperty("ReferenceDIFC", Mantid::EMPTY_DBL(), validator,
-                  "The DIFC value for the reference");
+  declareProperty("ReferenceDIFC", Mantid::EMPTY_DBL(), validator, "The DIFC value for the reference");
 
   declareProperty("K", 3.22, validator,
                   "Some arbitrary number whose default "
@@ -88,12 +81,9 @@ void RemoveLowResTOF::init() {
                   "other parameters if specified.");
 
   // hide things when people cjoose the minimum wavelength
-  setPropertySettings("ReferenceDIFC", std::make_unique<EnabledWhenProperty>(
-                                           "MinWavelength", IS_DEFAULT));
-  setPropertySettings(
-      "K", std::make_unique<EnabledWhenProperty>("MinWavelength", IS_DEFAULT));
-  setPropertySettings("Tmin", std::make_unique<EnabledWhenProperty>(
-                                  "MinWavelength", IS_DEFAULT));
+  setPropertySettings("ReferenceDIFC", std::make_unique<EnabledWhenProperty>("MinWavelength", IS_DEFAULT));
+  setPropertySettings("K", std::make_unique<EnabledWhenProperty>("MinWavelength", IS_DEFAULT));
+  setPropertySettings("Tmin", std::make_unique<EnabledWhenProperty>("MinWavelength", IS_DEFAULT));
 }
 
 void RemoveLowResTOF::exec() {
@@ -132,8 +122,7 @@ void RemoveLowResTOF::exec() {
 
   this->getTminData(false);
 
-  for (size_t workspaceIndex = 0; workspaceIndex < m_numberOfSpectra;
-       workspaceIndex++) {
+  for (size_t workspaceIndex = 0; workspaceIndex < m_numberOfSpectra; workspaceIndex++) {
     // calculate where to zero out to
     const double tofMin = this->calcTofMin(workspaceIndex, spectrumInfo);
     const auto &X = m_inputWS->x(0);
@@ -164,13 +153,12 @@ void RemoveLowResTOF::execEvent(const SpectrumInfo &spectrumInfo) {
   }
   auto lowW = std::dynamic_pointer_cast<EventWorkspace>(matrixLowResW);
 
-  g_log.debug() << "TOF range was " << m_inputEvWS->getTofMin() << " to "
-                << m_inputEvWS->getTofMax() << " microseconds\n";
+  g_log.debug() << "TOF range was " << m_inputEvWS->getTofMin() << " to " << m_inputEvWS->getTofMax()
+                << " microseconds\n";
 
   std::size_t numEventsOrig = outW->getNumberEvents();
   // set up the progress bar
-  m_progress =
-      std::make_unique<Progress>(this, 0.0, 1.0, m_numberOfSpectra * 2);
+  m_progress = std::make_unique<Progress>(this, 0.0, 1.0, m_numberOfSpectra * 2);
 
   // algorithm assumes the data is sorted so it can jump out early
   outW->sortAll(Mantid::DataObjects::TOF_SORT, m_progress.get());
@@ -180,17 +168,13 @@ void RemoveLowResTOF::execEvent(const SpectrumInfo &spectrumInfo) {
   size_t numClearedEvents = 0;
 
   // do the actual work
-  for (size_t workspaceIndex = 0; workspaceIndex < m_numberOfSpectra;
-       workspaceIndex++) {
+  for (size_t workspaceIndex = 0; workspaceIndex < m_numberOfSpectra; workspaceIndex++) {
     if (outW->getSpectrum(workspaceIndex).getNumberEvents() > 0) {
       double tmin = this->calcTofMin(workspaceIndex, spectrumInfo);
       if (tmin != tmin) {
         // Problematic
-        g_log.warning() << "tmin for workspaceIndex " << workspaceIndex
-                        << " is nan. Clearing out data. "
-                        << "There are "
-                        << outW->getSpectrum(workspaceIndex).getNumberEvents()
-                        << " of it. \n";
+        g_log.warning() << "tmin for workspaceIndex " << workspaceIndex << " is nan. Clearing out data. "
+                        << "There are " << outW->getSpectrum(workspaceIndex).getNumberEvents() << " of it. \n";
         numClearedEventLists += 1;
         numClearedEvents += outW->getSpectrum(workspaceIndex).getNumberEvents();
         outW->getSpectrum(workspaceIndex).clear(false);
@@ -206,8 +190,7 @@ void RemoveLowResTOF::execEvent(const SpectrumInfo &spectrumInfo) {
         if (m_outputLowResTOF) {
           double tmax = lowW->getSpectrum(workspaceIndex).getTofMax();
           if (tmax != tmax) {
-            g_log.warning() << "tmax for workspaceIndex " << workspaceIndex
-                            << " is nan. Clearing out data. \n";
+            g_log.warning() << "tmax for workspaceIndex " << workspaceIndex << " is nan. Clearing out data. \n";
             lowW->getSpectrum(workspaceIndex).clear(false);
           } else {
             // There is possibility that tmin calculated is larger than TOF-MAX
@@ -225,24 +208,18 @@ void RemoveLowResTOF::execEvent(const SpectrumInfo &spectrumInfo) {
       } //
     }
   }
-  g_log.information() << "Went from " << numEventsOrig << " events to "
-                      << outW->getNumberEvents() << " events ("
-                      << (static_cast<double>(numEventsOrig -
-                                              outW->getNumberEvents()) *
-                          100. / static_cast<double>(numEventsOrig))
+  g_log.information() << "Went from " << numEventsOrig << " events to " << outW->getNumberEvents() << " events ("
+                      << (static_cast<double>(numEventsOrig - outW->getNumberEvents()) * 100. /
+                          static_cast<double>(numEventsOrig))
                       << "% removed)\n";
   if (numClearedEventLists > 0)
-    g_log.warning()
-        << numClearedEventLists << " spectra of " << m_numberOfSpectra
-        << " had all data removed.  The number of removed events is "
-        << numClearedEvents << ".\n";
-  g_log.debug() << "TOF range is now " << outW->getTofMin() << " to "
-                << outW->getTofMax() << " microseconds\n";
+    g_log.warning() << numClearedEventLists << " spectra of " << m_numberOfSpectra
+                    << " had all data removed.  The number of removed events is " << numClearedEvents << ".\n";
+  g_log.debug() << "TOF range is now " << outW->getTofMin() << " to " << outW->getTofMax() << " microseconds\n";
   outW->clearMRU();
 }
 
-double RemoveLowResTOF::calcTofMin(const std::size_t workspaceIndex,
-                                   const SpectrumInfo &spectrumInfo) {
+double RemoveLowResTOF::calcTofMin(const std::size_t workspaceIndex, const SpectrumInfo &spectrumInfo) {
 
   const double l1 = spectrumInfo.l1();
 
@@ -254,13 +231,11 @@ double RemoveLowResTOF::calcTofMin(const std::size_t workspaceIndex,
   double tmin = 0.;
   if (isEmpty(m_wavelengthMin)) {
     std::map<detid_t, double> offsets; // just an empty offsets map
-    double dspmap = Conversion::tofToDSpacingFactor(
-        l1, spectrumInfo.l2(workspaceIndex),
-        spectrumInfo.twoTheta(workspaceIndex), detNumbers, offsets);
+    double dspmap = Conversion::tofToDSpacingFactor(l1, spectrumInfo.l2(workspaceIndex),
+                                                    spectrumInfo.twoTheta(workspaceIndex), detNumbers, offsets);
 
     // this is related to the reference tof
-    double sqrtdmin =
-        sqrt(m_Tmin / m_DIFCref) + m_K * log10(dspmap * m_DIFCref);
+    double sqrtdmin = sqrt(m_Tmin / m_DIFCref) + m_K * log10(dspmap * m_DIFCref);
     if (sqrtdmin <= 0.)
       return 0.;
     tmin = sqrtdmin * sqrtdmin / dspmap;

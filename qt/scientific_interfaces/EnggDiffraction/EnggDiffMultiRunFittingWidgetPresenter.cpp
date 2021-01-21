@@ -17,27 +17,20 @@
 
 namespace {
 
-bool isDigit(const std::string &text) {
-  return std::all_of(text.cbegin(), text.cend(), isdigit);
+bool isDigit(const std::string &text) { return std::all_of(text.cbegin(), text.cend(), isdigit); }
+
+std::string generateFittedPeaksName(const MantidQt::CustomInterfaces::RunLabel &runLabel) {
+  return runLabel.runNumber + "_" + std::to_string(runLabel.bank) + "_fitted_peaks_external_plot";
 }
 
-std::string
-generateFittedPeaksName(const MantidQt::CustomInterfaces::RunLabel &runLabel) {
-  return runLabel.runNumber + "_" + std::to_string(runLabel.bank) +
-         "_fitted_peaks_external_plot";
-}
-
-std::string
-generateFocusedRunName(const MantidQt::CustomInterfaces::RunLabel &runLabel) {
-  return runLabel.runNumber + "_" + std::to_string(runLabel.bank) +
-         "_external_plot";
+std::string generateFocusedRunName(const MantidQt::CustomInterfaces::RunLabel &runLabel) {
+  return runLabel.runNumber + "_" + std::to_string(runLabel.bank) + "_external_plot";
 }
 
 size_t guessBankID(const Mantid::API::MatrixWorkspace_const_sptr &ws) {
   const static std::string bankIDName = "bankid";
   if (ws->run().hasProperty(bankIDName)) {
-    const auto log = dynamic_cast<Mantid::Kernel::PropertyWithValue<int> *>(
-        ws->run().getLogData(bankIDName));
+    const auto log = dynamic_cast<Mantid::Kernel::PropertyWithValue<int> *>(ws->run().getLogData(bankIDName));
     return boost::lexical_cast<size_t>(log->value());
   }
 
@@ -54,9 +47,8 @@ size_t guessBankID(const Mantid::API::MatrixWorkspace_const_sptr &ws) {
         // If we get a bad cast or something goes wrong then
         // the file is probably not what we were expecting
         // so throw a runtime error
-        throw std::runtime_error(
-            "Failed to fit file: The data was not what is expected. "
-            "Does the file contain a focused workspace?");
+        throw std::runtime_error("Failed to fit file: The data was not what is expected. "
+                                 "Does the file contain a focused workspace?");
       }
     }
   }
@@ -70,18 +62,16 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 EnggDiffMultiRunFittingWidgetPresenter::EnggDiffMultiRunFittingWidgetPresenter(
-    std::unique_ptr<IEnggDiffMultiRunFittingWidgetModel> model,
-    IEnggDiffMultiRunFittingWidgetView *view)
+    std::unique_ptr<IEnggDiffMultiRunFittingWidgetModel> model, IEnggDiffMultiRunFittingWidgetView *view)
     : m_model(std::move(model)), m_view(view) {}
 
-void EnggDiffMultiRunFittingWidgetPresenter::addFittedPeaks(
-    const RunLabel &runLabel, const Mantid::API::MatrixWorkspace_sptr ws) {
+void EnggDiffMultiRunFittingWidgetPresenter::addFittedPeaks(const RunLabel &runLabel,
+                                                            const Mantid::API::MatrixWorkspace_sptr ws) {
   m_model->addFittedPeaks(runLabel, ws);
   updatePlot(runLabel);
 }
 
-void EnggDiffMultiRunFittingWidgetPresenter::addFocusedRun(
-    const Mantid::API::MatrixWorkspace_sptr ws) {
+void EnggDiffMultiRunFittingWidgetPresenter::addFocusedRun(const Mantid::API::MatrixWorkspace_sptr ws) {
   const auto runNumber = std::to_string(ws->getRunNumber());
   const auto bankID = guessBankID(ws);
 
@@ -89,8 +79,7 @@ void EnggDiffMultiRunFittingWidgetPresenter::addFocusedRun(
   m_view->updateRunList(m_model->getAllWorkspaceLabels());
 }
 
-void EnggDiffMultiRunFittingWidgetPresenter::displayFitResults(
-    const RunLabel &runLabel) {
+void EnggDiffMultiRunFittingWidgetPresenter::displayFitResults(const RunLabel &runLabel) {
   const auto fittedPeaks = m_model->getFittedPeaks(runLabel);
   if (!fittedPeaks) {
     m_view->reportPlotInvalidFittedPeaks(runLabel);
@@ -100,35 +89,29 @@ void EnggDiffMultiRunFittingWidgetPresenter::displayFitResults(
   }
 }
 
-std::vector<RunLabel>
-EnggDiffMultiRunFittingWidgetPresenter::getAllRunLabels() const {
+std::vector<RunLabel> EnggDiffMultiRunFittingWidgetPresenter::getAllRunLabels() const {
   return m_view->getAllRunLabels();
 }
 
-std::unique_ptr<IEnggDiffMultiRunFittingWidgetAdder>
-EnggDiffMultiRunFittingWidgetPresenter::getWidgetAdder() const {
+std::unique_ptr<IEnggDiffMultiRunFittingWidgetAdder> EnggDiffMultiRunFittingWidgetPresenter::getWidgetAdder() const {
   return std::make_unique<EnggDiffMultiRunFittingWidgetAdder>(m_view);
 }
 
 boost::optional<Mantid::API::MatrixWorkspace_sptr>
-EnggDiffMultiRunFittingWidgetPresenter::getFittedPeaks(
-    const RunLabel &runLabel) const {
+EnggDiffMultiRunFittingWidgetPresenter::getFittedPeaks(const RunLabel &runLabel) const {
   return m_model->getFittedPeaks(runLabel);
 }
 
 boost::optional<Mantid::API::MatrixWorkspace_sptr>
-EnggDiffMultiRunFittingWidgetPresenter::getFocusedRun(
-    const RunLabel &runLabel) const {
+EnggDiffMultiRunFittingWidgetPresenter::getFocusedRun(const RunLabel &runLabel) const {
   return m_model->getFocusedRun(runLabel);
 }
 
-boost::optional<RunLabel>
-EnggDiffMultiRunFittingWidgetPresenter::getSelectedRunLabel() const {
+boost::optional<RunLabel> EnggDiffMultiRunFittingWidgetPresenter::getSelectedRunLabel() const {
   return m_view->getSelectedRunLabel();
 }
 
-void EnggDiffMultiRunFittingWidgetPresenter::notify(
-    IEnggDiffMultiRunFittingWidgetPresenter::Notification notif) {
+void EnggDiffMultiRunFittingWidgetPresenter::notify(IEnggDiffMultiRunFittingWidgetPresenter::Notification notif) {
   switch (notif) {
   case Notification::PlotPeaksStateChanged:
     processPlotPeaksStateChanged();
@@ -173,8 +156,7 @@ void EnggDiffMultiRunFittingWidgetPresenter::processPlotToSeparateWindow() {
   ADS.add(focusedRunName, *focusedRun);
 
   boost::optional<std::string> fittedPeaksName = boost::none;
-  if (m_view->showFitResultsSelected() &&
-      m_model->hasFittedPeaksForRun(*runLabel)) {
+  if (m_view->showFitResultsSelected() && m_model->hasFittedPeaksForRun(*runLabel)) {
     fittedPeaksName = generateFittedPeaksName(*runLabel);
     const auto fittedPeaks = m_model->getFittedPeaks(*runLabel);
     ADS.add(*fittedPeaksName, *fittedPeaks);
@@ -204,8 +186,7 @@ void EnggDiffMultiRunFittingWidgetPresenter::processSelectRun() {
   }
 }
 
-void EnggDiffMultiRunFittingWidgetPresenter::updatePlot(
-    const RunLabel &runLabel) {
+void EnggDiffMultiRunFittingWidgetPresenter::updatePlot(const RunLabel &runLabel) {
   const auto focusedRun = m_model->getFocusedRun(runLabel);
 
   if (!focusedRun) {
@@ -216,8 +197,7 @@ void EnggDiffMultiRunFittingWidgetPresenter::updatePlot(
     m_view->resetCanvas();
     m_view->plotFocusedRun(plottableCurve);
 
-    if (m_model->hasFittedPeaksForRun(runLabel) &&
-        m_view->showFitResultsSelected()) {
+    if (m_model->hasFittedPeaksForRun(runLabel) && m_view->showFitResultsSelected()) {
       displayFitResults(runLabel);
     }
   }

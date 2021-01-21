@@ -162,21 +162,16 @@ QColor ColorBox::defaultColor(int colorIndex) {
   return Qt::black; // default color is black.
 }
 
-bool ColorBox::isValidColor(const QColor &color) {
-  return colorList().contains(color);
-}
+bool ColorBox::isValidColor(const QColor &color) { return colorList().contains(color); }
 
 int ColorBox::numPredefinedColors() { return colors_count; }
 
 QStringList ColorBox::defaultColorNames() {
-  return {tr("black"),        tr("red"),        tr("green"),
-          tr("blue"),         tr("cyan"),       tr("magenta"),
-          tr("orange"),       tr("purple"),     tr("olive"),
-          tr("navy"),         tr("wine"),       tr("dark cyan"),
-          tr("royal"),        tr("violet"),     tr("pink"),
-          tr("white"),        tr("light gray"), tr("gray"),
-          tr("light yellow"), tr("light cyan"), tr("light magenta"),
-          tr("dark gray"),    tr("yellow"),     tr("dark yellow")};
+  return {tr("black"),         tr("red"),        tr("green"),  tr("blue"),         tr("cyan"),
+          tr("magenta"),       tr("orange"),     tr("purple"), tr("olive"),        tr("navy"),
+          tr("wine"),          tr("dark cyan"),  tr("royal"),  tr("violet"),       tr("pink"),
+          tr("white"),         tr("light gray"), tr("gray"),   tr("light yellow"), tr("light cyan"),
+          tr("light magenta"), tr("dark gray"),  tr("yellow"), tr("dark yellow")};
 }
 
 QList<QColor> ColorBox::defaultColors() {

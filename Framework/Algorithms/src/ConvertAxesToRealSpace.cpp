@@ -27,17 +27,13 @@ using namespace Mantid::DataObjects;
 DECLARE_ALGORITHM(ConvertAxesToRealSpace)
 
 /// Algorithm's name
-const std::string ConvertAxesToRealSpace::name() const {
-  return "ConvertAxesToRealSpace";
-}
+const std::string ConvertAxesToRealSpace::name() const { return "ConvertAxesToRealSpace"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int ConvertAxesToRealSpace::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string ConvertAxesToRealSpace::category() const {
-  return "Transforms\\Units;Transforms\\Axes";
-}
+const std::string ConvertAxesToRealSpace::category() const { return "Transforms\\Units;Transforms\\Axes"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string ConvertAxesToRealSpace::summary() const {
@@ -48,11 +44,9 @@ const std::string ConvertAxesToRealSpace::summary() const {
 /** Initialize the algorithm's properties.
  */
 void ConvertAxesToRealSpace::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input),
                   "An input workspace.");
-  declareProperty(std::make_unique<WorkspaceProperty<Workspace2D>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace2D>>("OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 
   std::vector<std::string> propOptions;
@@ -65,18 +59,14 @@ void ConvertAxesToRealSpace::init() {
   fillUnitMap(propOptions, m_unitMap, "2theta", "rad");
   fillUnitMap(propOptions, m_unitMap, "signed2theta", "rad");
 
-  declareProperty("VerticalAxis", "y",
-                  std::make_shared<StringListValidator>(propOptions),
+  declareProperty("VerticalAxis", "y", std::make_shared<StringListValidator>(propOptions),
                   "What will be the vertical axis ?\n");
-  declareProperty("HorizontalAxis", "2theta",
-                  std::make_shared<StringListValidator>(propOptions),
+  declareProperty("HorizontalAxis", "2theta", std::make_shared<StringListValidator>(propOptions),
                   "What will be the horizontal axis?\n");
 
-  declareProperty(std::make_unique<Kernel::PropertyWithValue<int>>(
-                      "NumberVerticalBins", 100),
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<int>>("NumberVerticalBins", 100),
                   "The number of bins along the vertical axis.");
-  declareProperty(std::make_unique<Kernel::PropertyWithValue<int>>(
-                      "NumberHorizontalBins", 100),
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<int>>("NumberHorizontalBins", 100),
                   "The number of bins along the horizontal axis.");
 }
 
@@ -100,8 +90,8 @@ void ConvertAxesToRealSpace::exec() {
 
   // Create the output workspace. Can't re-use the input one because we'll be
   // re-ordering the spectra.
-  MatrixWorkspace_sptr outputWs = WorkspaceFactory::Instance().create(
-      inputWs, axisVector[1].bins, axisVector[0].bins, axisVector[0].bins);
+  MatrixWorkspace_sptr outputWs =
+      WorkspaceFactory::Instance().create(inputWs, axisVector[1].bins, axisVector[0].bins, axisVector[0].bins);
 
   // first integrate the data
   IAlgorithm_sptr alg = this->createChildAlgorithm("Integration", 0, 0.4);
@@ -164,8 +154,7 @@ void ConvertAxesToRealSpace::exec() {
           axisVector[axisIndex].min = axisValue;
       }
     } catch (const Exception::NotFoundError &) {
-      g_log.debug() << "Could not find detector for workspace index " << i
-                    << '\n';
+      g_log.debug() << "Could not find detector for workspace index " << i << '\n';
       failedCount++;
       // flag this is the datavector
       dataVector[i].horizontalValue = std::numeric_limits<double>::min();
@@ -179,8 +168,7 @@ void ConvertAxesToRealSpace::exec() {
     progress.report("Calculating new coords");
   }
 
-  g_log.warning() << "Could not find detector for " << failedCount
-                  << " spectra, see the debug log for more details.\n";
+  g_log.warning() << "Could not find detector for " << failedCount << " spectra, see the debug log for more details.\n";
 
   // set up the axes on the output workspace
   std::vector<double> x_tmp(axisVector[0].bins);
@@ -190,8 +178,7 @@ void ConvertAxesToRealSpace::exec() {
 
   outputWs->getAxis(0)->unit() = UnitFactory::Instance().create("Label");
   Unit_sptr xUnit = outputWs->getAxis(0)->unit();
-  std::shared_ptr<Units::Label> xlabel =
-      std::dynamic_pointer_cast<Units::Label>(xUnit);
+  std::shared_ptr<Units::Label> xlabel = std::dynamic_pointer_cast<Units::Label>(xUnit);
   xlabel->setLabel(axisVector[0].label, m_unitMap[axisVector[0].label]);
 
   MantidVec &yRef = y.access();
@@ -200,8 +187,7 @@ void ConvertAxesToRealSpace::exec() {
 
   auto yAxis = std::make_unique<NumericAxis>(yRef);
   std::shared_ptr<Units::Label> ylabel =
-      std::dynamic_pointer_cast<Units::Label>(
-          UnitFactory::Instance().create("Label"));
+      std::dynamic_pointer_cast<Units::Label>(UnitFactory::Instance().create("Label"));
   ylabel->setLabel(axisVector[1].label, m_unitMap[axisVector[1].label]);
   yAxis->unit() = ylabel;
   outputWs->replaceAxis(1, std::move(yAxis));
@@ -215,14 +201,12 @@ void ConvertAxesToRealSpace::exec() {
       dataVector[i].horizontalIndex = -1;
       dataVector[i].verticalIndex = -1;
     } else {
-      int xIndex = static_cast<int>(std::distance(
-          x.cbegin(), std::lower_bound(x.cbegin(), x.cend(),
-                                       dataVector[i].horizontalValue)));
+      int xIndex = static_cast<int>(
+          std::distance(x.cbegin(), std::lower_bound(x.cbegin(), x.cend(), dataVector[i].horizontalValue)));
       if (xIndex > 0)
         --xIndex;
-      int yIndex = static_cast<int>(std::distance(
-          y->begin(),
-          std::lower_bound(y->begin(), y->end(), dataVector[i].verticalValue)));
+      int yIndex = static_cast<int>(
+          std::distance(y->begin(), std::lower_bound(y->begin(), y->end(), dataVector[i].verticalValue)));
       if (yIndex > 0)
         --yIndex;
 
@@ -264,8 +248,7 @@ void ConvertAxesToRealSpace::exec() {
   PARALLEL_FOR_IF(Kernel::threadSafe(*outputWs))
   for (int i = 0; i < nOutputHist; ++i) {
     auto &errorVec = outputWs->mutableE(i);
-    std::transform(errorVec.begin(), errorVec.end(), errorVec.begin(),
-                   static_cast<double (*)(double)>(sqrt));
+    std::transform(errorVec.begin(), errorVec.end(), errorVec.begin(), static_cast<double (*)(double)>(sqrt));
     progress.report("Completing Error Calculation");
   }
 
@@ -280,12 +263,9 @@ void ConvertAxesToRealSpace::exec() {
  * @param isHistogram true if the data should be a histogram rather than point
  * data
  */
-void ConvertAxesToRealSpace::fillAxisValues(MantidVec &vector,
-                                            const AxisData &axisData,
-                                            bool isHistogram) {
+void ConvertAxesToRealSpace::fillAxisValues(MantidVec &vector, const AxisData &axisData, bool isHistogram) {
   int numBins = axisData.bins;
-  double binDelta =
-      (axisData.max - axisData.min) / static_cast<double>(numBins);
+  double binDelta = (axisData.max - axisData.min) / static_cast<double>(numBins);
 
   if (isHistogram)
     numBins++;
@@ -301,10 +281,9 @@ void ConvertAxesToRealSpace::fillAxisValues(MantidVec &vector,
  * @param caption the caption of the unit
  * @param unit the unit of measure of the unit
  */
-void ConvertAxesToRealSpace::fillUnitMap(
-    std::vector<std::string> &orderedVector,
-    std::map<std::string, std::string> &unitMap, const std::string &caption,
-    const std::string &unit) {
+void ConvertAxesToRealSpace::fillUnitMap(std::vector<std::string> &orderedVector,
+                                         std::map<std::string, std::string> &unitMap, const std::string &caption,
+                                         const std::string &unit) {
   unitMap.emplace(caption, unit);
   orderedVector.emplace_back(caption);
 }

@@ -21,14 +21,10 @@ class DLLExport MinusMD : public BinaryOperationMD {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Subtract two MDWorkspaces.";
-  }
+  const std::string summary() const override { return "Subtract two MDWorkspaces."; }
 
   int version() const override;
-  const std::vector<std::string> seeAlso() const override {
-    return {"PlusMD", "MultiplyMD", "DivideMD", "PowerMD"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"PlusMD", "MultiplyMD", "DivideMD", "PowerMD"}; }
 
 private:
   /// Is the operation commutative?
@@ -37,22 +33,18 @@ private:
   /// Check the inputs and throw if the algorithm cannot be run
   void checkInputs() override;
 
-  template <typename MDE, size_t nd>
-  void
-  doMinus(typename Mantid::DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
+  template <typename MDE, size_t nd> void doMinus(typename Mantid::DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
 
   /// Run the algorithm with an MDEventWorkspace as output
   void execEvent() override;
 
   /// Run the algorithm with a MDHisotWorkspace as output and operand
-  void execHistoHisto(
-      Mantid::DataObjects::MDHistoWorkspace_sptr out,
-      Mantid::DataObjects::MDHistoWorkspace_const_sptr operand) override;
+  void execHistoHisto(Mantid::DataObjects::MDHistoWorkspace_sptr out,
+                      Mantid::DataObjects::MDHistoWorkspace_const_sptr operand) override;
 
   /// Run the algorithm with a MDHisotWorkspace as output, scalar and operand
-  void execHistoScalar(
-      Mantid::DataObjects::MDHistoWorkspace_sptr out,
-      Mantid::DataObjects::WorkspaceSingleValue_const_sptr scalar) override;
+  void execHistoScalar(Mantid::DataObjects::MDHistoWorkspace_sptr out,
+                       Mantid::DataObjects::WorkspaceSingleValue_const_sptr scalar) override;
 };
 
 } // namespace MDAlgorithms

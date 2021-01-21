@@ -28,22 +28,19 @@ namespace SliceViewer {
  * @author Janik Zikovsky
  * @date October 13, 2011
  */
-class EXPORT_OPT_MANTIDQT_SLICEVIEWER SliceViewerWindow
-    : public QMainWindow,
-      public MantidQt::API::WorkspaceObserver,
-      public MantidQt::API::IProjectSerialisable {
+class EXPORT_OPT_MANTIDQT_SLICEVIEWER SliceViewerWindow : public QMainWindow,
+                                                          public MantidQt::API::WorkspaceObserver,
+                                                          public MantidQt::API::IProjectSerialisable {
   Q_OBJECT
 
 public:
-  SliceViewerWindow(const QString &wsName, const QString &label = QString(),
-                    const Qt::WindowFlags &f = nullptr);
+  SliceViewerWindow(const QString &wsName, const QString &label = QString(), const Qt::WindowFlags &f = nullptr);
   ~SliceViewerWindow() override;
   MantidQt::SliceViewer::SliceViewer *getSlicer();
   MantidQt::SliceViewer::LineViewer *getLiner();
   const QString &getLabel() const;
   /// Load the state of the slice viewer from a Mantid project file
-  static API::IProjectSerialisable *loadFromProject(const std::string &lines,
-                                                    ApplicationWindow *app,
+  static API::IProjectSerialisable *loadFromProject(const std::string &lines, ApplicationWindow *app,
                                                     const int fileVersion);
   /// Save the state of the slice viewer to a Mantid project file
   virtual std::string saveToProject(ApplicationWindow *app) override;
@@ -69,8 +66,7 @@ protected slots:
   void changedSlicePoint(const Mantid::Kernel::VMD & /*slice*/);
   void lineChanging(QPointF start, QPointF end, double width);
   void lineChanged(QPointF start, QPointF end, double width);
-  void changeStartOrEnd(Mantid::Kernel::VMD /*start*/,
-                        Mantid::Kernel::VMD /*end*/);
+  void changeStartOrEnd(Mantid::Kernel::VMD /*start*/, Mantid::Kernel::VMD /*end*/);
   void changePlanarWidth(double /*width*/);
   void resizeWindow();
   void lineViewer_changedFixedBinWidth(bool fixed, double binWidth);
@@ -78,16 +74,11 @@ protected slots:
   void showPeaksViewer(bool /*visible*/);
 
 protected:
-  void
-  preDeleteHandle(const std::string &wsName,
-                  const std::shared_ptr<Mantid::API::Workspace> &ws) override;
-  void afterReplaceHandle(
-      const std::string &wsName,
-      const std::shared_ptr<Mantid::API::Workspace> &ws) override;
+  void preDeleteHandle(const std::string &wsName, const std::shared_ptr<Mantid::API::Workspace> &ws) override;
+  void afterReplaceHandle(const std::string &wsName, const std::shared_ptr<Mantid::API::Workspace> &ws) override;
   void resizeEvent(QResizeEvent *event) override;
 
-  void renameHandle(const std::string &oldName,
-                    const std::string &newName) override;
+  void renameHandle(const std::string &oldName, const std::string &newName) override;
 
   /// The SliceViewer
   MantidQt::SliceViewer::SliceViewer *m_slicer;

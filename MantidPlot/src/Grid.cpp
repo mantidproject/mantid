@@ -49,47 +49,39 @@ Grid::Grid()
   @param my :: Y axis
   @param r :: Contents rect of the plot canvas
   */
-void Grid::draw(QPainter *painter, const QwtScaleMap &mx, const QwtScaleMap &my,
-                const QRect &r) const {
+void Grid::draw(QPainter *painter, const QwtScaleMap &mx, const QwtScaleMap &my, const QRect &r) const {
   //  draw minor X gridlines
   painter->setPen(minPen());
 
   if (xMinEnabled()) {
-    drawLines(painter, r, Qt::Vertical, mx,
-              xScaleDiv().ticks(QwtScaleDiv::MinorTick));
-    drawLines(painter, r, Qt::Vertical, mx,
-              xScaleDiv().ticks(QwtScaleDiv::MediumTick));
+    drawLines(painter, r, Qt::Vertical, mx, xScaleDiv().ticks(QwtScaleDiv::MinorTick));
+    drawLines(painter, r, Qt::Vertical, mx, xScaleDiv().ticks(QwtScaleDiv::MediumTick));
   }
 
   //  draw minor Y gridlines
   painter->setPen(d_min_pen_y);
 
   if (yMinEnabled()) {
-    drawLines(painter, r, Qt::Horizontal, my,
-              yScaleDiv().ticks(QwtScaleDiv::MinorTick));
-    drawLines(painter, r, Qt::Horizontal, my,
-              yScaleDiv().ticks(QwtScaleDiv::MediumTick));
+    drawLines(painter, r, Qt::Horizontal, my, yScaleDiv().ticks(QwtScaleDiv::MinorTick));
+    drawLines(painter, r, Qt::Horizontal, my, yScaleDiv().ticks(QwtScaleDiv::MediumTick));
   }
 
   //  draw major X gridlines
   painter->setPen(majPen());
 
   if (xEnabled()) {
-    drawLines(painter, r, Qt::Vertical, mx,
-              xScaleDiv().ticks(QwtScaleDiv::MajorTick));
+    drawLines(painter, r, Qt::Vertical, mx, xScaleDiv().ticks(QwtScaleDiv::MajorTick));
   }
 
   //  draw major Y gridlines
   painter->setPen(d_maj_pen_y);
 
   if (yEnabled()) {
-    drawLines(painter, r, Qt::Horizontal, my,
-              yScaleDiv().ticks(QwtScaleDiv::MajorTick));
+    drawLines(painter, r, Qt::Horizontal, my, yScaleDiv().ticks(QwtScaleDiv::MajorTick));
   }
 }
 
-void Grid::drawLines(QPainter *painter, const QRect &rect,
-                     Qt::Orientation orientation, const QwtScaleMap &map,
+void Grid::drawLines(QPainter *painter, const QRect &rect, Qt::Orientation orientation, const QwtScaleMap &map,
                      const QwtValueList &values) const {
   const int x1 = rect.left();
   const int x2 = rect.right();
@@ -124,14 +116,10 @@ void Grid::load(const QStringList &grid) {
 
   QPen majPenX, minPenX, majPenY, minPenY;
   if (grid.count() >= 21) { // since 0.9 final
-    majPenX = QPen(QColor(grid[5]), grid[7].toDouble(),
-                   Graph::getPenStyle(grid[6].toInt()));
-    minPenX = QPen(QColor(grid[8]), grid[10].toDouble(),
-                   Graph::getPenStyle(grid[9].toInt()));
-    majPenY = QPen(QColor(grid[11]), grid[13].toDouble(),
-                   Graph::getPenStyle(grid[12].toInt()));
-    minPenY = QPen(QColor(grid[14]), grid[16].toDouble(),
-                   Graph::getPenStyle(grid[15].toInt()));
+    majPenX = QPen(QColor(grid[5]), grid[7].toDouble(), Graph::getPenStyle(grid[6].toInt()));
+    minPenX = QPen(QColor(grid[8]), grid[10].toDouble(), Graph::getPenStyle(grid[9].toInt()));
+    majPenY = QPen(QColor(grid[11]), grid[13].toDouble(), Graph::getPenStyle(grid[12].toInt()));
+    minPenY = QPen(QColor(grid[14]), grid[16].toDouble(), Graph::getPenStyle(grid[15].toInt()));
 
     xZeroOn = grid[17].toInt();
     yZeroOn = grid[18].toInt();
@@ -141,10 +129,8 @@ void Grid::load(const QStringList &grid) {
       setRenderHint(QwtPlotItem::RenderAntialiased, grid[21].toInt());
 
   } else { // older versions of QtiPlot (<= 0.9rc3)
-    majPenX = QPen(ColorBox::color(grid[5].toInt()), grid[7].toDouble(),
-                   Graph::getPenStyle(grid[6].toInt()));
-    minPenX = QPen(ColorBox::color(grid[8].toInt()), grid[10].toDouble(),
-                   Graph::getPenStyle(grid[9].toInt()));
+    majPenX = QPen(ColorBox::color(grid[5].toInt()), grid[7].toDouble(), Graph::getPenStyle(grid[6].toInt()));
+    minPenX = QPen(ColorBox::color(grid[8].toInt()), grid[10].toDouble(), Graph::getPenStyle(grid[9].toInt()));
     majPenY = majPenX;
     minPenY = minPenX;
 
@@ -189,8 +175,7 @@ void Grid::enableZeroLineX(bool enable) {
     double width = 1;
     if (d_plot->canvas()->lineWidth())
       width = d_plot->canvas()->lineWidth();
-    else if (d_plot->axisEnabled(QwtPlot::yLeft) ||
-             d_plot->axisEnabled(QwtPlot::yRight))
+    else if (d_plot->axisEnabled(QwtPlot::yLeft) || d_plot->axisEnabled(QwtPlot::yRight))
       width = d_plot->axesLinewidth();
 
     m->setLinePen(QPen(Qt::black, width, Qt::SolidLine));
@@ -216,8 +201,7 @@ void Grid::enableZeroLineY(bool enable) {
     double width = 1;
     if (d_plot->canvas()->lineWidth())
       width = d_plot->canvas()->lineWidth();
-    else if (d_plot->axisEnabled(QwtPlot::xBottom) ||
-             d_plot->axisEnabled(QwtPlot::xTop))
+    else if (d_plot->axisEnabled(QwtPlot::xBottom) || d_plot->axisEnabled(QwtPlot::xTop))
       width = d_plot->axesLinewidth();
 
     m->setLinePen(QPen(Qt::black, width, Qt::SolidLine));
@@ -245,8 +229,7 @@ void Grid::copy(Grid *grid) {
 
   enableZeroLineX(grid->xZeroLineEnabled());
   enableZeroLineY(grid->yZeroLineEnabled());
-  setRenderHint(QwtPlotItem::RenderAntialiased,
-                grid->testRenderHint(QwtPlotItem::RenderAntialiased));
+  setRenderHint(QwtPlotItem::RenderAntialiased, grid->testRenderHint(QwtPlotItem::RenderAntialiased));
 }
 
 std::string Grid::saveToString() {

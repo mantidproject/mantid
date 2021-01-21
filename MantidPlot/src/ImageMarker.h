@@ -115,8 +115,7 @@ public:
 
 private:
   //! Does the actual drawing; see QwtPlotItem::draw.
-  void draw(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap,
-            const QRect &r) const override;
+  void draw(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap, const QRect &r) const override;
 
   QPoint d_pos;  //!< The position in paint coordinates.
   QPixmap d_pic; //!< The pixmap to be drawn.

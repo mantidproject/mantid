@@ -19,17 +19,13 @@ DECLARE_ALGORITHM(CreateFlatEventWorkspace)
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string CreateFlatEventWorkspace::name() const {
-  return "CreateFlatEventWorkspace";
-}
+const std::string CreateFlatEventWorkspace::name() const { return "CreateFlatEventWorkspace"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int CreateFlatEventWorkspace::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string CreateFlatEventWorkspace::category() const {
-  return "CorrectionFunctions\\BackgroundCorrections";
-}
+const std::string CreateFlatEventWorkspace::category() const { return "CorrectionFunctions\\BackgroundCorrections"; }
 
 //----------------------------------------------------------------------------------------------
 
@@ -37,19 +33,15 @@ const std::string CreateFlatEventWorkspace::category() const {
 /** Initialize the algorithm's properties.
  */
 void CreateFlatEventWorkspace::init() {
-  this->declareProperty(
-      std::make_unique<Mantid::API::WorkspaceProperty<EventWorkspace>>(
-          "InputWorkspace", "", Mantid::Kernel::Direction::Input),
-      "An input event workspace to use as a source for the events.");
+  this->declareProperty(std::make_unique<Mantid::API::WorkspaceProperty<EventWorkspace>>(
+                            "InputWorkspace", "", Mantid::Kernel::Direction::Input),
+                        "An input event workspace to use as a source for the events.");
 
-  this->declareProperty("RangeStart", EMPTY_DBL(),
-                        "Set the lower bound for sampling the background.");
-  this->declareProperty("RangeEnd", EMPTY_DBL(),
-                        "Set the upper bound for sampling the background.");
+  this->declareProperty("RangeStart", EMPTY_DBL(), "Set the lower bound for sampling the background.");
+  this->declareProperty("RangeEnd", EMPTY_DBL(), "Set the upper bound for sampling the background.");
 
   this->declareProperty(
-      std::make_unique<Mantid::API::WorkspaceProperty<>>(
-          "OutputWorkspace", "", Mantid::Kernel::Direction::Output),
+      std::make_unique<Mantid::API::WorkspaceProperty<>>("OutputWorkspace", "", Mantid::Kernel::Direction::Output),
       "Output event workspace containing a flat background.");
 }
 
@@ -79,8 +71,7 @@ void CreateFlatEventWorkspace::exec() {
   // the entire tof/x range covered by the data ?
   auto nRegions = static_cast<int>((dataMax - dataMin) / sampleRange);
 
-  g_log.debug() << "We will need to replicate the selected region " << nRegions
-                << " times.\n";
+  g_log.debug() << "We will need to replicate the selected region " << nRegions << " times.\n";
 
   // Extract the region we are using for the background
   IAlgorithm_sptr crop_alg = this->createChildAlgorithm("CropWorkspace");
@@ -104,8 +95,7 @@ void CreateFlatEventWorkspace::exec() {
   clone->setPropertyValue("OutputWorkspace", "__background_chunk");
   clone->executeAsChildAlg();
   Workspace_sptr tmp = clone->getProperty("OutputWorkspace");
-  MatrixWorkspace_sptr tmpChunkWs =
-      std::dynamic_pointer_cast<MatrixWorkspace>(tmp);
+  MatrixWorkspace_sptr tmpChunkWs = std::dynamic_pointer_cast<MatrixWorkspace>(tmp);
 
   Progress progress(this, 0.0, 1.0, nRegions);
 
@@ -138,8 +128,7 @@ void CreateFlatEventWorkspace::exec() {
   finalcrop_alg->execute();
   outputWS = finalcrop_alg->getProperty("OutputWorkspace");
 
-  EventWorkspace_sptr outputEWS =
-      std::dynamic_pointer_cast<EventWorkspace>(outputWS);
+  EventWorkspace_sptr outputEWS = std::dynamic_pointer_cast<EventWorkspace>(outputWS);
   outputEWS->clearMRU();
 
   // Need to reset the matrixworkspace/histogram representation to be the

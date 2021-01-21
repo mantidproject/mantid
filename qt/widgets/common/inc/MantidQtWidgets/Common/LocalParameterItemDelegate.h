@@ -26,13 +26,10 @@ class LocalParameterEditor;
 class LocalParameterItemDelegate : public QStyledItemDelegate {
   Q_OBJECT
 public:
-  explicit LocalParameterItemDelegate(
-      EditLocalParameterDialog *parent = nullptr);
-  QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option,
-                        const QModelIndex &index) const override;
+  explicit LocalParameterItemDelegate(EditLocalParameterDialog *parent = nullptr);
+  QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
   void setEditorData(QWidget *editor, const QModelIndex &index) const override;
-  void setModelData(QWidget *editor, QAbstractItemModel *model,
-                    const QModelIndex &index) const override;
+  void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const override;
   void prepareForPastedData();
 
 signals:
@@ -47,8 +44,7 @@ signals:
   void setAllValuesToLog();
 
 protected:
-  void paint(QPainter *painter, const QStyleOptionViewItem &option,
-             const QModelIndex &index) const override;
+  void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
 
 private slots:
   void doSetValueToLog(int /*i*/);

@@ -33,19 +33,16 @@ public:
     testAlg.setChild(true);
     testAlg.setRethrows(true);
 
-    TS_ASSERT_THROWS_NOTHING(testAlg.setProperty(
-        "Filename", getTestFilePath("LoadSESANSTest_goodFile.ses")));
+    TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("Filename", getTestFilePath("LoadSESANSTest_goodFile.ses")));
     TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("OutputWorkspace", "ws"));
   }
 
   void test_exec() {
-    TS_ASSERT_THROWS_NOTHING(testAlg.setProperty(
-        "Filename", getTestFilePath("LoadSESANSTest_goodFile.ses")));
+    TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("Filename", getTestFilePath("LoadSESANSTest_goodFile.ses")));
     // Execute the algorithm
     TS_ASSERT_THROWS_NOTHING(testAlg.execute());
 
-    Mantid::API::MatrixWorkspace_sptr ws =
-        testAlg.getProperty("OutputWorkspace");
+    Mantid::API::MatrixWorkspace_sptr ws = testAlg.getProperty("OutputWorkspace");
     Mantid::API::Sample sample = ws->sample();
 
     // Make sure output properties were set correctly
@@ -77,30 +74,21 @@ public:
 
   void test_confidence() {
     // Cannot use Poco::TemporaryFile, as we need to specify the file extension
-    TS_ASSERT_THROWS_NOTHING(testAlg.setProperty(
-        "Filename", getTestFilePath("LoadSESANSTest_goodFile.ses")));
+    TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("Filename", getTestFilePath("LoadSESANSTest_goodFile.ses")));
 
-    Mantid::Kernel::FileDescriptor descriptor(
-        testAlg.getPropertyValue("Filename"));
+    Mantid::Kernel::FileDescriptor descriptor(testAlg.getPropertyValue("Filename"));
     TS_ASSERT_EQUALS(testAlg.confidence(descriptor), 70);
   }
 
-  void test_requireFFV() {
-    attemptToLoadBadFile("LoadSESANSTest_missingFFV.ses");
-  }
+  void test_requireFFV() { attemptToLoadBadFile("LoadSESANSTest_missingFFV.ses"); }
 
-  void test_mandatoryHeaders() {
-    attemptToLoadBadFile("LoadSESANSTest_missingHeaders.ses");
-  }
+  void test_mandatoryHeaders() { attemptToLoadBadFile("LoadSESANSTest_missingHeaders.ses"); }
 
-  void test_mandatoryColumns() {
-    attemptToLoadBadFile("LoadSESANSTest_missingColumns.ses");
-  }
+  void test_mandatoryColumns() { attemptToLoadBadFile("LoadSESANSTest_missingColumns.ses"); }
 
 private:
   std::string getTestFilePath(const std::string &filename) {
-    const std::string filepath =
-        Mantid::API::FileFinder::Instance().getFullPath(filename);
+    const std::string filepath = Mantid::API::FileFinder::Instance().getFullPath(filename);
     TS_ASSERT_DIFFERS(filepath, "");
     return filepath;
   }

@@ -19,8 +19,7 @@ MenuWithToolTips::MenuWithToolTips(QWidget *parent) : QMenu(parent) {}
  * @param title Title text for the menu
  * @param parent An optional parent. Default=nullptr
  */
-MenuWithToolTips::MenuWithToolTips(const QString &title, QWidget *parent)
-    : QMenu(title, parent) {}
+MenuWithToolTips::MenuWithToolTips(const QString &title, QWidget *parent) : QMenu(title, parent) {}
 
 /**
  * Override standard QMenu behaviour to show the tooltip when requested

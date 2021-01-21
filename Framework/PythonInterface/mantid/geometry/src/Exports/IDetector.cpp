@@ -19,16 +19,13 @@ void export_IDetector() {
   register_ptr_to_python<std::shared_ptr<IDetector>>();
   register_ptr_to_python<std::shared_ptr<const IDetector>>();
 
-  class_<IDetector, bases<IObjComponent>, boost::noncopyable>("IDetector",
-                                                              no_init)
+  class_<IDetector, bases<IObjComponent>, boost::noncopyable>("IDetector", no_init)
       .def("getID", &IDetector::getID, arg("self"), "Returns the detector ID")
       .def("solidAngle", &IDetector::solidAngle, (arg("self"), arg("observer")),
            "Return the solid angle in steradians between this "
            "detector and an observer")
-      .def("getTwoTheta", &IDetector::getTwoTheta,
-           (arg("self"), arg("observer"), arg("axis")),
+      .def("getTwoTheta", &IDetector::getTwoTheta, (arg("self"), arg("observer"), arg("axis")),
            "Calculate the angle between this detector, another component and "
            "an axis")
-      .def("getPhi", &IDetector::getPhi, arg("self"),
-           "Returns the azimuthal angle of this detector");
+      .def("getPhi", &IDetector::getPhi, arg("self"), "Returns the azimuthal angle of this detector");
 }

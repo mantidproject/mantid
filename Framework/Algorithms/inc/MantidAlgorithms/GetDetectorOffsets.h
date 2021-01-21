@@ -32,13 +32,10 @@ public:
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
   const std::vector<std::string> seeAlso() const override {
-    return {"GetDetOffsetsMultiPeaks", "CalibrateRectangularDetectors",
-            "AlignComponents"};
+    return {"GetDetOffsetsMultiPeaks", "CalibrateRectangularDetectors", "AlignComponents"};
   }
   /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override {
-    return "Diffraction\\Calibration";
-  }
+  const std::string category() const override { return "Diffraction\\Calibration"; }
 
 private:
   // Overridden Algorithm methods
@@ -48,19 +45,17 @@ private:
   double fitSpectra(const int64_t s, bool isAbsolbute);
   /// Create a function string from the given parameters and the algorithm
   /// inputs
-  API::IFunction_sptr createFunction(const double peakHeight,
-                                     const double peakLoc);
+  API::IFunction_sptr createFunction(const double peakHeight, const double peakLoc);
   /// Read in all the input parameters
   void retrieveProperties();
 
-  API::MatrixWorkspace_sptr inputW; ///< A pointer to the input workspace
-  DataObjects::OffsetsWorkspace_sptr
-      outputW;               ///< A pointer to the output workspace
-  double m_Xmin = DBL_MAX;   ///< The start of the X range for fitting
-  double m_Xmax = -DBL_MIN;  ///< The end of the X range for fitting
-  double m_maxOffset = 0.0;  ///< The maximum absolute value of offsets
-  double m_dreference = 0.0; ///< The expected peak position in d-spacing (?)
-  double m_dideal = 0.0; ///< The known peak centre value from the NIST standard
+  API::MatrixWorkspace_sptr inputW;           ///< A pointer to the input workspace
+  DataObjects::OffsetsWorkspace_sptr outputW; ///< A pointer to the output workspace
+  double m_Xmin = DBL_MAX;                    ///< The start of the X range for fitting
+  double m_Xmax = -DBL_MIN;                   ///< The end of the X range for fitting
+  double m_maxOffset = 0.0;                   ///< The maximum absolute value of offsets
+  double m_dreference = 0.0;                  ///< The expected peak position in d-spacing (?)
+  double m_dideal = 0.0;                      ///< The known peak centre value from the NIST standard
   /// information
   double m_step = 0.0; ///< The step size
 };

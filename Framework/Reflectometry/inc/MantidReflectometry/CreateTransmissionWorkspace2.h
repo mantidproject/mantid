@@ -15,15 +15,12 @@ namespace Reflectometry {
 /** CreateTransmissionWorkspace2 : Create a transmission run workspace in
  Wavelength given one or more TOF workspaces. Version 2 of the algorithm.
  */
-class MANTID_REFLECTOMETRY_DLL CreateTransmissionWorkspace2
-    : public ReflectometryWorkflowBase2 {
+class MANTID_REFLECTOMETRY_DLL CreateTransmissionWorkspace2 : public ReflectometryWorkflowBase2 {
 public:
   const std::string name() const override;
   const std::string summary() const override;
   int version() const override;
-  const std::vector<std::string> seeAlso() const override {
-    return {"CreateTransmissionWorkspaceAuto"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"CreateTransmissionWorkspaceAuto"}; }
   const std::string category() const override;
 
 private:
@@ -35,8 +32,7 @@ private:
   std::map<std::string, std::string> validateInputs() override;
 
   /// Normalize by monitors
-  API::MatrixWorkspace_sptr
-  normalizeDetectorsByMonitors(const API::MatrixWorkspace_sptr &IvsTOF);
+  API::MatrixWorkspace_sptr normalizeDetectorsByMonitors(const API::MatrixWorkspace_sptr &IvsTOF);
   /// Get the run numbers of the input workspaces
   void getRunNumbers();
   /// Get the run number of a given workspace

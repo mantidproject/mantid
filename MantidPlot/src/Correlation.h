@@ -34,11 +34,10 @@ class Correlation : public Filter {
   Q_OBJECT
 
 public:
-  Correlation(ApplicationWindow *parent, Table *t, const QString &colName1,
-              const QString &colName2, int startRow = 1, int endRow = -1);
+  Correlation(ApplicationWindow *parent, Table *t, const QString &colName1, const QString &colName2, int startRow = 1,
+              int endRow = -1);
 
-  bool setDataFromTable(Table *t, const QString &colName1,
-                        const QString &colName2, int startRow = 1,
+  bool setDataFromTable(Table *t, const QString &colName1, const QString &colName2, int startRow = 1,
                         int endRow = -1) override;
 
 protected:

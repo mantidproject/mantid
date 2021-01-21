@@ -114,14 +114,12 @@ private:
     const double sigmaSq = 0.7 * 0.7;
     std::vector<double> yValues(nBins);
     for (size_t j = 0; j < nBins; ++j) {
-      yValues[j] =
-          0.3 + 10.0 * exp(-0.5 * pow(xValues[j] - 2.5, 2.0) / sigmaSq);
+      yValues[j] = 0.3 + 10.0 * exp(-0.5 * pow(xValues[j] - 2.5, 2.0) / sigmaSq);
     }
 
     // create the workspace
     const int nHist = 2;
-    const MatrixWorkspace_sptr ws =
-        createWorkspace<Workspace2D>(nHist, nBins + 1, nBins);
+    const MatrixWorkspace_sptr ws = createWorkspace<Workspace2D>(nHist, nBins + 1, nBins);
     ws->getAxis(0)->setUnit("dSpacing");
 
     for (size_t i = 0; i < nHist; ++i) {
@@ -138,8 +136,7 @@ private:
 
   // Initialise the algorithm and set the properties. Creates a fake workspace
   // for the input and returns it.
-  MatrixWorkspace_const_sptr
-  setupAlgorithm(CrossCorrelate &alg, const double xmin, const double xmax) {
+  MatrixWorkspace_const_sptr setupAlgorithm(CrossCorrelate &alg, const double xmin, const double xmax) {
 
     // create the workspace
     const MatrixWorkspace_sptr inWS = makeFakeWorkspace();
@@ -160,8 +157,7 @@ private:
   }
 
   // Run the algorithm and do some basic checks. Returns the output workspace.
-  MatrixWorkspace_const_sptr
-  runAlgorithm(CrossCorrelate &alg, const MatrixWorkspace_const_sptr &inWS) {
+  MatrixWorkspace_const_sptr runAlgorithm(CrossCorrelate &alg, const MatrixWorkspace_const_sptr &inWS) {
     // run the algorithm
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
@@ -176,7 +172,5 @@ private:
 
   // Run the algorithm with invalid input and check that it throws a runtime
   // error
-  void runAlgorithmThrows(CrossCorrelate &alg) {
-    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
-  }
+  void runAlgorithmThrows(CrossCorrelate &alg) { TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &); }
 };

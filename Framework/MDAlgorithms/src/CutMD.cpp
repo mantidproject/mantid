@@ -33,8 +33,7 @@ using MinMax = std::pair<double, double>;
 
 MinMax getDimensionExtents(const IMDEventWorkspace_sptr &ws, size_t index) {
   if (!ws)
-    throw std::runtime_error(
-        "Invalid workspace passed to getDimensionExtents.");
+    throw std::runtime_error("Invalid workspace passed to getDimensionExtents.");
   auto dim = ws->getDimension(index);
   return std::make_pair(dim->getMinimum(), dim->getMaximum());
 }
@@ -47,28 +46,22 @@ std::string numToStringWithPrecision(const double num) {
   return s.str();
 }
 
-DblMatrix scaleProjection(const DblMatrix &inMatrix,
-                          const std::vector<std::string> &inUnits,
-                          std::vector<std::string> &outUnits,
-                          const IMDEventWorkspace_sptr &inWS) {
+DblMatrix scaleProjection(const DblMatrix &inMatrix, const std::vector<std::string> &inUnits,
+                          std::vector<std::string> &outUnits, const IMDEventWorkspace_sptr &inWS) {
   DblMatrix ret(inMatrix);
   // Check if we actually need to do anything
   if (std::equal(inUnits.begin(), inUnits.end(), outUnits.begin()))
     return ret;
 
   if (inUnits.size() != outUnits.size())
-    throw std::runtime_error(
-        "scaleProjection given different quantity of input and output units");
+    throw std::runtime_error("scaleProjection given different quantity of input and output units");
 
   assert(inWS->getNumExperimentInfo() > 0);
-  const OrientedLattice &orientedLattice =
-      inWS->getExperimentInfo(0)->sample().getOrientedLattice();
+  const OrientedLattice &orientedLattice = inWS->getExperimentInfo(0)->sample().getOrientedLattice();
 
   const size_t numDims = inUnits.size();
   for (size_t i = 0; i < numDims; ++i) {
-    const double dStar =
-        2 * M_PI *
-        orientedLattice.dstar(inMatrix[i][0], inMatrix[i][1], inMatrix[i][2]);
+    const double dStar = 2 * M_PI * orientedLattice.dstar(inMatrix[i][0], inMatrix[i][1], inMatrix[i][2]);
     if (inUnits[i] == outUnits[i])
       continue;
     else if (inUnits[i] == Mantid::MDAlgorithms::CutMD::InvAngstromSymbol) {
@@ -86,8 +79,7 @@ DblMatrix scaleProjection(const DblMatrix &inMatrix,
   return ret;
 }
 
-std::vector<MinMax> calculateExtents(const DblMatrix &inMatrix,
-                                     const std::vector<MinMax> &limits) {
+std::vector<MinMax> calculateExtents(const DblMatrix &inMatrix, const std::vector<MinMax> &limits) {
   DblMatrix invMat(inMatrix);
   invMat.Invert();
 
@@ -128,9 +120,8 @@ std::vector<MinMax> calculateExtents(const DblMatrix &inMatrix,
   return extents;
 }
 
-std::pair<std::vector<MinMax>, std::vector<int>>
-calculateSteps(const std::vector<MinMax> &inExtents,
-               const std::vector<std::vector<double>> &binning) {
+std::pair<std::vector<MinMax>, std::vector<int>> calculateSteps(const std::vector<MinMax> &inExtents,
+                                                                const std::vector<std::vector<double>> &binning) {
   std::vector<MinMax> outExtents(inExtents);
   std::vector<int> outBins;
 
@@ -143,8 +134,7 @@ calculateSteps(const std::vector<MinMax> &inExtents,
 
     } else if (nArgs == 1) {
       const double dimRange = inExtents[i].second - inExtents[i].first;
-      const double stepSize =
-          binning[i][0] < dimRange ? binning[i][0] : dimRange;
+      const double stepSize = binning[i][0] < dimRange ? binning[i][0] : dimRange;
       outBin = static_cast<int>(dimRange / stepSize);
       outExtents[i].second = inExtents[i].first + outBin * stepSize;
 
@@ -157,15 +147,13 @@ calculateSteps(const std::vector<MinMax> &inExtents,
       const double dimMin = binning[i][0];
       const double dimMax = binning[i][2];
       const double dimRange = dimMax - dimMin;
-      const double stepSize =
-          binning[i][1] < dimRange ? binning[i][1] : dimRange;
+      const double stepSize = binning[i][1] < dimRange ? binning[i][1] : dimRange;
       outBin = static_cast<int>(dimRange / stepSize);
       outExtents[i].second = dimMin + outBin * stepSize;
       outExtents[i].first = dimMin;
 
     } else {
-      throw std::runtime_error("Cannot handle " + std::to_string(nArgs) +
-                               " bins.");
+      throw std::runtime_error("Cannot handle " + std::to_string(nArgs) + " bins.");
     }
     if (outBin < 0)
       throw std::runtime_error("output bin calculated to be less than 0");
@@ -209,8 +197,7 @@ Determine the original q units. Assumes first 3 dimensions by index are r,l,d
 @param logger : logging object
 @return vector of markers
 */
-std::vector<std::string> findOriginalQUnits(const IMDWorkspace_const_sptr &inws,
-                                            Mantid::Kernel::Logger &logger) {
+std::vector<std::string> findOriginalQUnits(const IMDWorkspace_const_sptr &inws, Mantid::Kernel::Logger &logger) {
   std::vector<std::string> unitMarkers(3);
   for (size_t i = 0; i < inws->getNumDims() && i < 3; ++i) {
     auto units = inws->getDimension(i)->getUnits();
@@ -223,9 +210,8 @@ std::vector<std::string> findOriginalQUnits(const IMDWorkspace_const_sptr &inws,
       unitMarker = Mantid::MDAlgorithms::CutMD::RLUSymbol;
     }
     unitMarkers[i] = unitMarker;
-    logger.debug() << "In dimension with index " << i << " and units "
-                   << units.ascii() << " taken to be of type " << unitMarker
-                   << '\n';
+    logger.debug() << "In dimension with index " << i << " and units " << units.ascii() << " taken to be of type "
+                   << unitMarker << '\n';
   }
   return unitMarkers;
 }
@@ -242,28 +228,20 @@ const std::string CutMD::InvAngstromMethod = "Q in A^-1";
 //----------------------------------------------------------------------------------------------
 
 void CutMD::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<IMDWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<IMDWorkspace>>("InputWorkspace", "", Direction::Input),
                   "MDWorkspace to slice");
 
   declareProperty(
-      std::make_unique<WorkspaceProperty<ITableWorkspace>>(
-          "Projection", "", Direction::Input, PropertyMode::Optional),
+      std::make_unique<WorkspaceProperty<ITableWorkspace>>("Projection", "", Direction::Input, PropertyMode::Optional),
       "Projection");
 
-  declareProperty(std::make_unique<ArrayProperty<double>>("P1Bin"),
-                  "Projection 1 binning.");
-  declareProperty(std::make_unique<ArrayProperty<double>>("P2Bin"),
-                  "Projection 2 binning.");
-  declareProperty(std::make_unique<ArrayProperty<double>>("P3Bin"),
-                  "Projection 3 binning.");
-  declareProperty(std::make_unique<ArrayProperty<double>>("P4Bin"),
-                  "Projection 4 binning.");
-  declareProperty(std::make_unique<ArrayProperty<double>>("P5Bin"),
-                  "Projection 5 binning.");
+  declareProperty(std::make_unique<ArrayProperty<double>>("P1Bin"), "Projection 1 binning.");
+  declareProperty(std::make_unique<ArrayProperty<double>>("P2Bin"), "Projection 2 binning.");
+  declareProperty(std::make_unique<ArrayProperty<double>>("P3Bin"), "Projection 3 binning.");
+  declareProperty(std::make_unique<ArrayProperty<double>>("P4Bin"), "Projection 4 binning.");
+  declareProperty(std::make_unique<ArrayProperty<double>>("P5Bin"), "Projection 5 binning.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<IMDWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<IMDWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "Output cut workspace");
   declareProperty("NoPix", false,
                   "If False creates a full MDEventWorkspaces "
@@ -278,8 +256,7 @@ void CutMD::init() {
                   "Sets the maximum recursion depth to use. Can be used to "
                   "constrain the workspaces internal structure");
 
-  std::vector<std::string> propOptions{AutoMethod, RLUMethod,
-                                       InvAngstromMethod};
+  std::vector<std::string> propOptions{AutoMethod, RLUMethod, InvAngstromMethod};
   char buffer[1024];
   std::sprintf(buffer,
                "How will the Q units of the input workspace be interpreted? "
@@ -287,13 +264,11 @@ void CutMD::init() {
                "%s : Figure it out based on the label units\n"
                "%s : Force them to be rlu\n"
                "%s : Force them to be inverse angstroms",
-               AutoMethod.c_str(), RLUMethod.c_str(),
-               InvAngstromMethod.c_str());
+               AutoMethod.c_str(), RLUMethod.c_str(), InvAngstromMethod.c_str());
 
   std::string help(buffer);
   boost::algorithm::trim(help);
-  declareProperty("InterpretQDimensionUnits", AutoMethod,
-                  std::make_shared<StringListValidator>(propOptions), help);
+  declareProperty("InterpretQDimensionUnits", AutoMethod, std::make_shared<StringListValidator>(propOptions), help);
 }
 
 void CutMD::exec() {
@@ -304,9 +279,8 @@ void CutMD::exec() {
   const IMDWorkspace_sptr inWS = getProperty("InputWorkspace");
   const size_t numDims = inWS->getNumDims();
   const ITableWorkspace_sptr projectionWS = getProperty("Projection");
-  std::vector<std::vector<double>> pbins{
-      getProperty("P1Bin"), getProperty("P2Bin"), getProperty("P3Bin"),
-      getProperty("P4Bin"), getProperty("P5Bin")};
+  std::vector<std::vector<double>> pbins{getProperty("P1Bin"), getProperty("P2Bin"), getProperty("P3Bin"),
+                                         getProperty("P4Bin"), getProperty("P5Bin")};
 
   Workspace_sptr sliceWS; // output workspace
 
@@ -314,8 +288,7 @@ void CutMD::exec() {
   if (auto histInWS = std::dynamic_pointer_cast<IMDHistoWorkspace>(inWS)) {
 
     g_log.information("Integrating using binning parameters only.");
-    auto integrateAlg =
-        this->createChildAlgorithm("IntegrateMDHistoWorkspace", 0, 1);
+    auto integrateAlg = this->createChildAlgorithm("IntegrateMDHistoWorkspace", 0, 1);
     integrateAlg->setProperty("InputWorkspace", histInWS);
     integrateAlg->setProperty("P1Bin", pbins[0]);
     integrateAlg->setProperty("P2Bin", pbins[1]);
@@ -338,20 +311,15 @@ void CutMD::exec() {
     // Check PBin properties
     for (size_t i = 0; i < 5; ++i) {
       if (i < numDims && pbins[i].empty())
-        throw std::runtime_error(
-            "P" + std::to_string(i + 1) +
-            "Bin must be set when processing a workspace with " +
-            std::to_string(numDims) + " dimensions.");
+        throw std::runtime_error("P" + std::to_string(i + 1) + "Bin must be set when processing a workspace with " +
+                                 std::to_string(numDims) + " dimensions.");
       if (i >= numDims && !pbins[i].empty())
-        throw std::runtime_error(
-            "P" + std::to_string(i + 1) +
-            "Bin must NOT be set when processing a workspace with " +
-            std::to_string(numDims) + " dimensions.");
+        throw std::runtime_error("P" + std::to_string(i + 1) + "Bin must NOT be set when processing a workspace with " +
+                                 std::to_string(numDims) + " dimensions.");
     }
 
     // Get extents in projection
-    std::vector<MinMax> extentLimits{getDimensionExtents(eventInWS, 0),
-                                     getDimensionExtents(eventInWS, 1),
+    std::vector<MinMax> extentLimits{getDimensionExtents(eventInWS, 0), getDimensionExtents(eventInWS, 1),
                                      getDimensionExtents(eventInWS, 2)};
 
     // Scale projection
@@ -362,11 +330,9 @@ void CutMD::exec() {
 
     std::vector<std::string> targetUnits(3);
     for (size_t i = 0; i < 3; ++i)
-      targetUnits[i] =
-          projection.getUnit(i) == RLU ? RLUSymbol : InvAngstromSymbol;
+      targetUnits[i] = projection.getUnit(i) == RLU ? RLUSymbol : InvAngstromSymbol;
 
-    const std::string determineUnitsMethod =
-        this->getProperty("InterpretQDimensionUnits");
+    const std::string determineUnitsMethod = this->getProperty("InterpretQDimensionUnits");
     std::vector<std::string> originUnits;
     if (determineUnitsMethod == AutoMethod) {
       originUnits = findOriginalQUnits(inWS, g_log);
@@ -376,12 +342,10 @@ void CutMD::exec() {
       originUnits = std::vector<std::string>(3, InvAngstromSymbol);
     }
 
-    DblMatrix scaledProjectionMatrix =
-        scaleProjection(projectionMatrix, originUnits, targetUnits, eventInWS);
+    DblMatrix scaledProjectionMatrix = scaleProjection(projectionMatrix, originUnits, targetUnits, eventInWS);
 
     // Calculate extents for the first 3 dimensions
-    std::vector<MinMax> scaledExtents =
-        calculateExtents(scaledProjectionMatrix, extentLimits);
+    std::vector<MinMax> scaledExtents = calculateExtents(scaledProjectionMatrix, extentLimits);
     auto stepPair = calculateSteps(scaledExtents, pbins);
     std::vector<MinMax> steppedExtents = stepPair.first;
     std::vector<int> steppedBins = stepPair.second;
@@ -441,8 +405,7 @@ void CutMD::exec() {
 
         std::vector<std::string> vec(numDims, "0");
         for (size_t j = 0; j < 3; ++j)
-          vec[j] =
-              boost::lexical_cast<std::string>(scaledProjectionMatrix[i][j]);
+          vec[j] = boost::lexical_cast<std::string>(scaledProjectionMatrix[i][j]);
         vecStr = boost::algorithm::join(vec, ", ");
       } else {
         // Always orthogonal
@@ -454,9 +417,7 @@ void CutMD::exec() {
         vecStr = boost::algorithm::join(vec, ", ");
       }
 
-      const std::string value =
-          std::string(label).append(", ").append(unit).append(", ").append(
-              vecStr);
+      const std::string value = std::string(label).append(", ").append(unit).append(", ").append(vecStr);
       cutAlg->setProperty("BasisVector" + std::to_string(i), value);
     }
 
@@ -473,18 +434,15 @@ void CutMD::exec() {
     cutAlg->execute();
     sliceWS = cutAlg->getProperty("OutputWorkspace");
 
-    MultipleExperimentInfos_sptr sliceInfo =
-        std::dynamic_pointer_cast<MultipleExperimentInfos>(sliceWS);
+    MultipleExperimentInfos_sptr sliceInfo = std::dynamic_pointer_cast<MultipleExperimentInfos>(sliceWS);
 
     if (!sliceInfo)
-      throw std::runtime_error(
-          "Could not extract experiment info from child's OutputWorkspace");
+      throw std::runtime_error("Could not extract experiment info from child's OutputWorkspace");
 
     // Attach projection matrix to output
     if (sliceInfo->getNumExperimentInfo() > 0) {
       ExperimentInfo_sptr info = sliceInfo->getExperimentInfo(0);
-      info->mutableRun().addProperty("W_MATRIX", projectionMatrix.getVector(),
-                                     true);
+      info->mutableRun().addProperty("W_MATRIX", projectionMatrix.getVector(), true);
     }
   }
 

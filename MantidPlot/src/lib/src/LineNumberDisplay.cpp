@@ -32,8 +32,7 @@
 #include <QShowEvent>
 #include <QTextBlock>
 
-LineNumberDisplay::LineNumberDisplay(QTextEdit *te, QWidget *parent)
-    : QTextEdit(parent), d_text_edit(te) {
+LineNumberDisplay::LineNumberDisplay(QTextEdit *te, QWidget *parent) : QTextEdit(parent), d_text_edit(te) {
   setReadOnly(true);
   setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
   setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -49,13 +48,11 @@ LineNumberDisplay::LineNumberDisplay(QTextEdit *te, QWidget *parent)
   setPalette(palette);
 
   if (te) {
-    connect(this, SIGNAL(selectionChanged()), this,
-            SLOT(updateDocumentSelection()));
+    connect(this, SIGNAL(selectionChanged()), this, SLOT(updateDocumentSelection()));
 
-    connect(te->document(), SIGNAL(contentsChanged()), this,
-            SLOT(updateLineNumbers()));
-    connect((QObject *)te->verticalScrollBar(), SIGNAL(valueChanged(int)),
-            (QObject *)verticalScrollBar(), SLOT(setValue(int)));
+    connect(te->document(), SIGNAL(contentsChanged()), this, SLOT(updateLineNumbers()));
+    connect((QObject *)te->verticalScrollBar(), SIGNAL(valueChanged(int)), (QObject *)verticalScrollBar(),
+            SLOT(setValue(int)));
     connect(te, SIGNAL(currentCharFormatChanged(const QTextCharFormat &)), this,
             SLOT(changeCharFormat(const QTextCharFormat &)));
   }
@@ -66,8 +63,7 @@ void LineNumberDisplay::updateDocumentSelection() {
     return;
 
   QTextCursor c = textCursor();
-  int selectionStart =
-      document()->findBlock(c.selectionStart()).firstLineNumber();
+  int selectionStart = document()->findBlock(c.selectionStart()).firstLineNumber();
   int selectionEnd = document()->findBlock(c.selectionEnd()).firstLineNumber();
   int selectedLines = abs(selectionEnd - selectionStart);
 
@@ -112,6 +108,4 @@ void LineNumberDisplay::showEvent(QShowEvent *e) {
     updateLineNumbers();
 }
 
-void LineNumberDisplay::changeCharFormat(const QTextCharFormat &f) {
-  setCurrentFont(f.font());
-}
+void LineNumberDisplay::changeCharFormat(const QTextCharFormat &f) { setCurrentFont(f.font()); }

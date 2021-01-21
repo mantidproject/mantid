@@ -49,8 +49,7 @@ class Folder;
 class MdiSubWindowParent_t : public QFrame {
   Q_OBJECT
 public:
-  MdiSubWindowParent_t(QWidget *parent, const Qt::WFlags &f = nullptr)
-      : QFrame(parent, f), m_widget(nullptr) {}
+  MdiSubWindowParent_t(QWidget *parent, const Qt::WFlags &f = nullptr) : QFrame(parent, f), m_widget(nullptr) {}
   void setWidget(QWidget *w) {
     if (w == nullptr) { // removing widget
       if (m_widget) {
@@ -110,8 +109,7 @@ protected:
  *
  * \sa Folder, ApplicationWindow
  */
-class MdiSubWindow : public MdiSubWindowParent_t,
-                     public MantidQt::API::IProjectSerialisable {
+class MdiSubWindow : public MdiSubWindowParent_t, public MantidQt::API::IProjectSerialisable {
   Q_OBJECT
 
 public:
@@ -123,14 +121,13 @@ public:
    * @param f :: window flags
    * \sa setCaptionPolicy(), captionPolicy()
    */
-  MdiSubWindow(QWidget *parent, const QString &label = QString(),
-               const QString &name = QString(), const Qt::WFlags &f = nullptr);
+  MdiSubWindow(QWidget *parent, const QString &label = QString(), const QString &name = QString(),
+               const Qt::WFlags &f = nullptr);
 
   MdiSubWindow();
 
   /// Setup the window without constructor
-  void init(QWidget *parent, const QString &label, const QString &name,
-            const Qt::WFlags &flags);
+  void init(QWidget *parent, const QString &label, const QString &name, const Qt::WFlags &flags);
 
   //! Possible window captions.
   enum CaptionPolicy {
@@ -189,9 +186,7 @@ public slots:
 
   virtual void exportPDF(const QString &) {}
 
-  virtual QString saveToString(const QString &, bool = false) {
-    return QString();
-  }
+  virtual QString saveToString(const QString &, bool = false) { return QString(); }
 
   // TODO: make this return something useful
   //! Size of the widget as a string
@@ -235,9 +230,8 @@ public slots:
    * correctly read by QTextStream
    * and returns a path to this file.
    */
-  static QString parseAsciiFile(const QString &fname,
-                                const QString &commentString, int endLine,
-                                int ignoreFirstLines, int maxRows, int &rows);
+  static QString parseAsciiFile(const QString &fname, const QString &commentString, int endLine, int ignoreFirstLines,
+                                int maxRows, int &rows);
 
   void setconfirmcloseFlag(bool closeflag) { d_confirm_close = closeflag; }
 
@@ -277,9 +271,8 @@ public: // non-slot methods
   /// Set the label property on the widget
   void setLabel(const QString &label);
   /// Loads the given lines from the project file and applies them.
-  static MantidQt::API::IProjectSerialisable *
-  loadFromProject(const std::string &lines, ApplicationWindow *app,
-                  const int fileVersion);
+  static MantidQt::API::IProjectSerialisable *loadFromProject(const std::string &lines, ApplicationWindow *app,
+                                                              const int fileVersion);
   /// Serialises to a string that can be saved to a project file.
   std::string saveToProject(ApplicationWindow *app) override;
   /// Returns a list of workspace names that are used by this window
@@ -319,10 +312,8 @@ protected:
 
 private:
   //! Used to parse ASCII files with carriage return ('\r') endline.
-  static QString parseMacAsciiFile(const QString &fname,
-                                   const QString &commentString,
-                                   int ignoreFirstLines, int maxRows,
-                                   int &rows);
+  static QString parseMacAsciiFile(const QString &fname, const QString &commentString, int ignoreFirstLines,
+                                   int maxRows, int &rows);
   //! Set caption according to current CaptionPolicy, name and label
   void updateCaption();
   /// Store the pointer to the ApplicationWindow
@@ -359,12 +350,10 @@ using MDIWindowList = QList<MdiSubWindow *>;
  * is used in the call to its constructor to effect a call to the factory's
  * subscribe method.
  */
-#define DECLARE_WINDOW_WITH_NAME(classname, username)                          \
-  namespace {                                                                  \
-  Mantid::Kernel::RegistrationHelper                                           \
-      register_window_##username(((Mantid::API::WindowFactory::Instance()      \
-                                       .subscribe<classname>(#username)),      \
-                                  0));                                         \
+#define DECLARE_WINDOW_WITH_NAME(classname, username)                                                                  \
+  namespace {                                                                                                          \
+  Mantid::Kernel::RegistrationHelper                                                                                   \
+      register_window_##username(((Mantid::API::WindowFactory::Instance().subscribe<classname>(#username)), 0));       \
   }
 
 // Helper macro to subscribe a class to the factory with the same name as the

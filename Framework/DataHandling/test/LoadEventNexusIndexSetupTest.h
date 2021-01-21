@@ -27,12 +27,8 @@ class LoadEventNexusIndexSetupTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static LoadEventNexusIndexSetupTest *createSuite() {
-    return new LoadEventNexusIndexSetupTest();
-  }
-  static void destroySuite(LoadEventNexusIndexSetupTest *suite) {
-    delete suite;
-  }
+  static LoadEventNexusIndexSetupTest *createSuite() { return new LoadEventNexusIndexSetupTest(); }
+  static void destroySuite(LoadEventNexusIndexSetupTest *suite) { delete suite; }
 
   LoadEventNexusIndexSetupTest() {
     auto instrument = std::make_shared<Instrument>();
@@ -48,9 +44,7 @@ public:
     m_ws = create<WorkspaceTester>(instrument, 1, HistogramData::BinEdges(2));
   }
 
-  void test_construct() {
-    LoadEventNexusIndexSetup(m_ws, EMPTY_INT(), EMPTY_INT(), {});
-  }
+  void test_construct() { LoadEventNexusIndexSetup(m_ws, EMPTY_INT(), EMPTY_INT(), {}); }
 
   void test_makeIndexInfo_no_filter() {
     LoadEventNexusIndexSetup indexSetup(m_ws, EMPTY_INT(), EMPTY_INT(), {});
@@ -141,8 +135,7 @@ public:
   }
 
   void test_makeIndexInfo_range() {
-    LoadEventNexusIndexSetup indexSetup(m_ws, EMPTY_INT(), EMPTY_INT(),
-                                        {2, 11});
+    LoadEventNexusIndexSetup indexSetup(m_ws, EMPTY_INT(), EMPTY_INT(), {2, 11});
     const auto indexInfo = indexSetup.makeIndexInfo();
     TS_ASSERT_EQUALS(indexSetup.eventIDLimits().first, 2);
     TS_ASSERT_EQUALS(indexSetup.eventIDLimits().second, 11);
@@ -333,8 +326,7 @@ public:
     LoadEventNexusIndexSetup indexSetup(m_ws, EMPTY_INT(), EMPTY_INT(), {1});
     auto spec = {1};
     auto udet = {666};
-    TS_ASSERT_THROWS(indexSetup.makeIndexInfo({spec, udet}, false),
-                     const std::out_of_range &);
+    TS_ASSERT_THROWS(indexSetup.makeIndexInfo({spec, udet}, false), const std::out_of_range &);
   }
 
   void test_makeIndexInfo_from_isis_spec_udet_monitors() {

@@ -37,9 +37,7 @@ class AlignAndFocusPowderTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static AlignAndFocusPowderTest *createSuite() {
-    return new AlignAndFocusPowderTest();
-  }
+  static AlignAndFocusPowderTest *createSuite() { return new AlignAndFocusPowderTest(); }
   static void destroySuite(AlignAndFocusPowderTest *suite) { delete suite; }
 
   /* Test AlignAndFocusPowder basics */
@@ -64,21 +62,13 @@ public:
   /* Test AlignAndFocusPowder for HRP38692 raw data */
   void testHRP38692_useCalfile() { doTestHRP38692(true, false, false, false); }
 
-  void testHRP38692_useCalfile_useGroupfile() {
-    doTestHRP38692(true, false, true, false);
-  }
+  void testHRP38692_useCalfile_useGroupfile() { doTestHRP38692(true, false, true, false); }
 
-  void testHRP38692_useCalfile_useGroupWorkspace() {
-    doTestHRP38692(true, false, false, true);
-  }
+  void testHRP38692_useCalfile_useGroupWorkspace() { doTestHRP38692(true, false, false, true); }
 
-  void testHRP38692_useCalWorkspace_useGroupfile() {
-    doTestHRP38692(false, true, true, false);
-  }
+  void testHRP38692_useCalWorkspace_useGroupfile() { doTestHRP38692(false, true, true, false); }
 
-  void testHRP38692_useCalWorkspace_useGroupWorkspace() {
-    doTestHRP38692(false, true, false, true);
-  }
+  void testHRP38692_useCalWorkspace_useGroupWorkspace() { doTestHRP38692(false, true, false, true); }
 
   /* Test AlignAndFocusPowder for Event Workspace*/
   void testEventWksp_preserveEvents() {
@@ -429,10 +419,8 @@ public:
     m_useGroupAll = false;
     m_useResamplex = true;
     // require both inside AlignAndFocusPowder
-    m_compressStartTime =
-        "2010-01-01T00:20:00"; // start time is "2010-01-01T00:00:00"
-    m_compressWallClockTolerance =
-        "50.0"; // require both inside AlignAndFocusPowder
+    m_compressStartTime = "2010-01-01T00:20:00"; // start time is "2010-01-01T00:00:00"
+    m_compressWallClockTolerance = "50.0";       // require both inside AlignAndFocusPowder
 
     // Run the main test function
     doTestEventWksp();
@@ -463,8 +451,7 @@ public:
     TS_ASSERT(loader.isExecuted());
   }
 
-  void doTestHRP38692(bool useCalfile, bool useCalWksp, bool useGroupfile,
-                      bool useGroupWksp) {
+  void doTestHRP38692(bool useCalfile, bool useCalWksp, bool useGroupfile, bool useGroupWksp) {
 
     setUp_HRP38692();
 
@@ -484,31 +471,24 @@ public:
       align_and_focus.setPropertyValue("CalFilename", calfilename);
     else if (useCalWksp) {
       loadDiffCal(calfilename, false, true, true);
-      align_and_focus.setPropertyValue("GroupingWorkspace",
-                                       m_loadDiffWSName + "_group");
-      align_and_focus.setPropertyValue("CalibrationWorkspace",
-                                       m_loadDiffWSName + "_cal");
-      align_and_focus.setPropertyValue("MaskWorkspace",
-                                       m_loadDiffWSName + "_mask");
+      align_and_focus.setPropertyValue("GroupingWorkspace", m_loadDiffWSName + "_group");
+      align_and_focus.setPropertyValue("CalibrationWorkspace", m_loadDiffWSName + "_cal");
+      align_and_focus.setPropertyValue("MaskWorkspace", m_loadDiffWSName + "_mask");
     }
 
     if (useGroupfile)
       align_and_focus.setPropertyValue("GroupFilename", calfilename);
     else if (useGroupWksp) {
       loadDiffCal(calfilename, true, false, true);
-      align_and_focus.setPropertyValue("MaskWorkspace",
-                                       m_loadDiffWSName + "_mask");
-      align_and_focus.setPropertyValue("GroupingWorkspace",
-                                       m_loadDiffWSName + "_group");
+      align_and_focus.setPropertyValue("MaskWorkspace", m_loadDiffWSName + "_mask");
+      align_and_focus.setPropertyValue("GroupingWorkspace", m_loadDiffWSName + "_group");
     }
 
     TS_ASSERT_THROWS_NOTHING(align_and_focus.execute());
     TS_ASSERT(align_and_focus.isExecuted());
 
-    m_inWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_inputWS);
-    m_outWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_outputWS);
+    m_inWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_inputWS);
+    m_outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_outputWS);
 
     TS_ASSERT_EQUALS(m_inWS->size(), 263857);
     TS_ASSERT_EQUALS(m_inWS->blocksize(), 23987);
@@ -594,13 +574,11 @@ public:
       resamplex(inputHistoBins);
     } else {
       rebin(params);
-      m_inWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-          m_inputWS);
+      m_inWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_inputWS);
       numHistoBins = int(m_inWS->blocksize());
 
       rebin(input_params);
-      m_inWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-          m_inputWS);
+      m_inWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_inputWS);
       inputHistoBins = int(m_inWS->blocksize());
     }
 
@@ -623,8 +601,7 @@ public:
     // Compression for the wall clock time; controls whether all pulses are
     // compressed together
     if (m_compressWallClockTolerance != "0")
-      align_and_focus.setProperty("CompressWallClockTolerance",
-                                  m_compressWallClockTolerance);
+      align_and_focus.setProperty("CompressWallClockTolerance", m_compressWallClockTolerance);
 
     // Filtering for the start wall clock time; cuts off events before start
     // time
@@ -667,9 +644,7 @@ public:
     int numGroups{m_numBanks * m_numPixels * m_numPixels};
     if (m_useGroupAll) {
       groupAllBanks(m_inputWS);
-      auto group_wksp =
-          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-              m_groupWS);
+      auto group_wksp = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_groupWS);
       align_and_focus.setProperty("GroupingWorkspace", group_wksp->getName());
       numGroups = (int)group_wksp->blocksize();
     }
@@ -677,13 +652,10 @@ public:
     TS_ASSERT_THROWS_NOTHING(align_and_focus.execute());
     TS_ASSERT(align_and_focus.isExecuted());
 
-    m_inWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_inputWS);
-    m_outWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_outputWS);
+    m_inWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_inputWS);
+    m_outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_outputWS);
 
-    TS_ASSERT_EQUALS(m_inWS->size(),
-                     m_numBanks * m_numPixels * m_numPixels * inputHistoBins);
+    TS_ASSERT_EQUALS(m_inWS->size(), m_numBanks * m_numPixels * m_numPixels * inputHistoBins);
     TS_ASSERT_EQUALS(m_inWS->blocksize(), inputHistoBins);
 
     TS_ASSERT_EQUALS(m_outWS->getAxis(0)->unit()->unitID(), "TOF");
@@ -693,8 +665,7 @@ public:
   }
 
   /* Utility functions */
-  void loadDiffCal(const std::string &calfilename, bool group, bool cal,
-                   bool mask) {
+  void loadDiffCal(const std::string &calfilename, bool group, bool cal, bool mask) {
     LoadDiffCal loadDiffAlg;
     loadDiffAlg.initialize();
     loadDiffAlg.setPropertyValue("Filename", calfilename);
@@ -736,8 +707,7 @@ public:
     resamplexAlg.execute();
   }
 
-  std::string createArgForNumberHistograms(double val,
-                                           const MatrixWorkspace_sptr &ws,
+  std::string createArgForNumberHistograms(double val, const MatrixWorkspace_sptr &ws,
                                            const std::string &delimiter = ",") {
     std::vector<std::string> vec;
     for (size_t i = 0; i < ws->getNumberHistograms(); i++)
@@ -763,8 +733,7 @@ public:
     std::string time, minute;
     std::string prefix{"2010-01-01T00:"};
     for (int i = 0; i < 60; i++) {
-      minute =
-          std::string(2 - std::to_string(i).length(), '0') + std::to_string(i);
+      minute = std::string(2 - std::to_string(i).length(), '0') + std::to_string(i);
       time = prefix + minute + "00";
       logAlg.initialize();
       logAlg.setPropertyValue("Workspace", m_inputWS);

@@ -40,24 +40,20 @@
 #include "ImageMarker.h"
 #include "LegendWidget.h"
 
-SelectionMoveResizer::SelectionMoveResizer(LegendWidget *target)
-    : QWidget(target->parentWidget()) {
+SelectionMoveResizer::SelectionMoveResizer(LegendWidget *target) : QWidget(target->parentWidget()) {
   init();
   add(target);
 }
-SelectionMoveResizer::SelectionMoveResizer(ArrowMarker *target)
-    : QWidget(target->plot()->canvas()) {
+SelectionMoveResizer::SelectionMoveResizer(ArrowMarker *target) : QWidget(target->plot()->canvas()) {
   init();
   add(target);
 }
-SelectionMoveResizer::SelectionMoveResizer(ImageMarker *target)
-    : QWidget(target->plot()->canvas()) {
+SelectionMoveResizer::SelectionMoveResizer(ImageMarker *target) : QWidget(target->plot()->canvas()) {
   init();
   add(target);
 }
 
-SelectionMoveResizer::SelectionMoveResizer(QWidget *target)
-    : QWidget(target->parentWidget()) {
+SelectionMoveResizer::SelectionMoveResizer(QWidget *target) : QWidget(target->parentWidget()) {
   init();
   add(target);
 }
@@ -76,17 +72,14 @@ void SelectionMoveResizer::init() {
   setFocus();
 }
 
-SelectionMoveResizer::~SelectionMoveResizer() {
-  parentWidget()->removeEventFilter(this);
-}
+SelectionMoveResizer::~SelectionMoveResizer() { parentWidget()->removeEventFilter(this); }
 
 void SelectionMoveResizer::add(LegendWidget *target) {
   if (target->parentWidget() != parent())
     return;
   d_legend_markers << target;
   target->installEventFilter(this);
-  connect(target, SIGNAL(destroyed(QObject *)), this,
-          SLOT(removeLegend(QObject *)));
+  connect(target, SIGNAL(destroyed(QObject *)), this, SLOT(removeLegend(QObject *)));
 
   if (d_bounding_rect.isValid())
     d_bounding_rect |= target->geometry();
@@ -126,8 +119,7 @@ void SelectionMoveResizer::add(QWidget *target) {
     return;
   d_widgets << target;
   target->installEventFilter(this);
-  connect(target, SIGNAL(destroyed(QObject *)), this,
-          SLOT(removeWidget(QObject *)));
+  connect(target, SIGNAL(destroyed(QObject *)), this, SLOT(removeWidget(QObject *)));
 
   if (d_bounding_rect.isValid())
     d_bounding_rect |= target->frameGeometry();
@@ -139,8 +131,7 @@ void SelectionMoveResizer::add(QWidget *target) {
 
 int SelectionMoveResizer::removeAll(LegendWidget *target) {
   int result = d_legend_markers.removeAll(target);
-  if (d_legend_markers.isEmpty() && d_line_markers.isEmpty() &&
-      d_image_markers.isEmpty() && d_widgets.isEmpty())
+  if (d_legend_markers.isEmpty() && d_line_markers.isEmpty() && d_image_markers.isEmpty() && d_widgets.isEmpty())
     delete this;
   else
     recalcBoundingRect();
@@ -148,8 +139,7 @@ int SelectionMoveResizer::removeAll(LegendWidget *target) {
 }
 int SelectionMoveResizer::removeAll(ArrowMarker *target) {
   int result = d_line_markers.removeAll(target);
-  if (d_legend_markers.isEmpty() && d_line_markers.isEmpty() &&
-      d_image_markers.isEmpty() && d_widgets.isEmpty())
+  if (d_legend_markers.isEmpty() && d_line_markers.isEmpty() && d_image_markers.isEmpty() && d_widgets.isEmpty())
     delete this;
   else
     recalcBoundingRect();
@@ -157,8 +147,7 @@ int SelectionMoveResizer::removeAll(ArrowMarker *target) {
 }
 int SelectionMoveResizer::removeAll(ImageMarker *target) {
   int result = d_image_markers.removeAll(target);
-  if (d_legend_markers.isEmpty() && d_line_markers.isEmpty() &&
-      d_image_markers.isEmpty() && d_widgets.isEmpty())
+  if (d_legend_markers.isEmpty() && d_line_markers.isEmpty() && d_image_markers.isEmpty() && d_widgets.isEmpty())
     delete this;
   else
     recalcBoundingRect();
@@ -167,8 +156,7 @@ int SelectionMoveResizer::removeAll(ImageMarker *target) {
 
 int SelectionMoveResizer::removeAll(QWidget *target) {
   int result = d_widgets.removeAll(target);
-  if (d_legend_markers.isEmpty() && d_line_markers.isEmpty() &&
-      d_image_markers.isEmpty() && d_widgets.isEmpty())
+  if (d_legend_markers.isEmpty() && d_line_markers.isEmpty() && d_image_markers.isEmpty() && d_widgets.isEmpty())
     delete this;
   else
     recalcBoundingRect();
@@ -209,29 +197,22 @@ void SelectionMoveResizer::recalcBoundingRect() {
 const QRect SelectionMoveResizer::handlerRect(QRect rect, Operation op) {
   switch (op) {
   case Resize_N:
-    return QRect(QPoint(rect.center().x() - handler_size / 2, rect.top()),
-                 QSize(handler_size, handler_size));
+    return QRect(QPoint(rect.center().x() - handler_size / 2, rect.top()), QSize(handler_size, handler_size));
   case Resize_NE:
-    return QRect(QPoint(rect.right() - handler_size + 1, rect.top()),
-                 QSize(handler_size, handler_size));
+    return QRect(QPoint(rect.right() - handler_size + 1, rect.top()), QSize(handler_size, handler_size));
   case Resize_E:
-    return QRect(QPoint(rect.right() - handler_size + 1,
-                        rect.center().y() - handler_size / 2),
+    return QRect(QPoint(rect.right() - handler_size + 1, rect.center().y() - handler_size / 2),
                  QSize(handler_size, handler_size));
   case Resize_SE:
-    return QRect(QPoint(rect.right() - handler_size + 1,
-                        rect.bottom() - handler_size + 1),
+    return QRect(QPoint(rect.right() - handler_size + 1, rect.bottom() - handler_size + 1),
                  QSize(handler_size, handler_size));
   case Resize_S:
-    return QRect(QPoint(rect.center().x() - handler_size / 2,
-                        rect.bottom() - handler_size + 1),
+    return QRect(QPoint(rect.center().x() - handler_size / 2, rect.bottom() - handler_size + 1),
                  QSize(handler_size, handler_size));
   case Resize_SW:
-    return QRect(QPoint(rect.left(), rect.bottom() - handler_size + 1),
-                 QSize(handler_size, handler_size));
+    return QRect(QPoint(rect.left(), rect.bottom() - handler_size + 1), QSize(handler_size, handler_size));
   case Resize_W:
-    return QRect(QPoint(rect.left(), rect.center().y() - handler_size / 2),
-                 QSize(handler_size, handler_size));
+    return QRect(QPoint(rect.left(), rect.center().y() - handler_size / 2), QSize(handler_size, handler_size));
   case Resize_NW:
     return QRect(rect.topLeft(), QSize(handler_size, handler_size));
   default:
@@ -283,22 +264,18 @@ QRect SelectionMoveResizer::operateOn(const QRect &in) {
   double scale_y = ((double)boundary_out.height()) / d_bounding_rect.height();
   int offset_x = qRound(boundary_out.left() - d_bounding_rect.left() * scale_x);
   int offset_y = qRound(boundary_out.top() - d_bounding_rect.top() * scale_y);
-  return QRect(
-      QPoint(qRound(in.left() * scale_x) + offset_x,
-             qRound(in.top() * scale_y) + offset_y),
-      QSize(qRound(in.width() * scale_x), qRound(in.height() * scale_y)));
+  return QRect(QPoint(qRound(in.left() * scale_x) + offset_x, qRound(in.top() * scale_y) + offset_y),
+               QSize(qRound(in.width() * scale_x), qRound(in.height() * scale_y)));
 }
 
 void SelectionMoveResizer::operateOnTargets() {
   foreach (LegendWidget *i, d_legend_markers) {
     QRect new_rect = operateOn(i->geometry());
-    i->setFixedCoordinatesMode(
-        false); // make sure that we could move the legend by hand
+    i->setFixedCoordinatesMode(false); // make sure that we could move the legend by hand
     i->move(new_rect.topLeft());
     if (!i->text().isEmpty()) {
       QFont f = i->font();
-      f.setPointSize(f.pointSize() * new_rect.width() * new_rect.height() /
-                     (i->rect().width() * i->rect().height()));
+      f.setPointSize(f.pointSize() * new_rect.width() * new_rect.height() / (i->rect().width() * i->rect().height()));
       i->setFont(f);
       i->repaint();
       (static_cast<Graph *>(i->parent()->parent()))->notifyFontChange(f);
@@ -309,12 +286,10 @@ void SelectionMoveResizer::operateOnTargets() {
     QPoint p1 = i->startPoint();
     QPoint p2 = i->endPoint();
     QRect new_rect = operateOn(i->rect());
-    i->setStartPoint(
-        QPoint(p1.x() < p2.x() ? new_rect.left() : new_rect.right(),
-               p1.y() < p2.y() ? new_rect.top() : new_rect.bottom()));
-    i->setEndPoint(
-        QPoint(p2.x() < p1.x() ? new_rect.left() : new_rect.right(),
-               p2.y() < p1.y() ? new_rect.top() : new_rect.bottom()));
+    i->setStartPoint(QPoint(p1.x() < p2.x() ? new_rect.left() : new_rect.right(),
+                            p1.y() < p2.y() ? new_rect.top() : new_rect.bottom()));
+    i->setEndPoint(QPoint(p2.x() < p1.x() ? new_rect.left() : new_rect.right(),
+                          p2.y() < p1.y() ? new_rect.top() : new_rect.bottom()));
   }
 
   foreach (ImageMarker *i, d_image_markers) {
@@ -340,15 +315,13 @@ void SelectionMoveResizer::paintEvent(QPaintEvent *e) {
 
   QPen white_pen(Qt::white, 3, Qt::SolidLine, Qt::SquareCap, Qt::MiterJoin);
   p.setPen(white_pen);
-  p.drawRect(
-      QRect(QPoint(drawn_rect.left(), drawn_rect.top()), drawn_rect.size()));
+  p.drawRect(QRect(QPoint(drawn_rect.left(), drawn_rect.top()), drawn_rect.size()));
   white_pen.setWidth(2);
   p.setPen(white_pen);
   for (int i = 0; i < 8; i++)
     p.drawRect(handlerRect(drawn_rect, (Operation)i));
   p.setPen(QPen(Qt::black, 1, Qt::SolidLine));
-  p.drawRect(
-      QRect(QPoint(drawn_rect.left(), drawn_rect.top()), drawn_rect.size()));
+  p.drawRect(QRect(QPoint(drawn_rect.left(), drawn_rect.top()), drawn_rect.size()));
   for (int i = 0; i < 8; i++)
     p.fillRect(handlerRect(drawn_rect, (Operation)i), QBrush(Qt::black));
 
@@ -382,8 +355,7 @@ void SelectionMoveResizer::mousePressEvent(QMouseEvent *me) {
 }
 
 void SelectionMoveResizer::mouseMoveEvent(QMouseEvent *me) {
-  if (d_op == None && d_bounding_rect.contains(me->pos()) &&
-      me->button() == Qt::LeftButton) {
+  if (d_op == None && d_bounding_rect.contains(me->pos()) && me->button() == Qt::LeftButton) {
     d_op = Move;
     d_op_start = me->pos();
   }
@@ -421,8 +393,7 @@ void SelectionMoveResizer::mouseDoubleClickEvent(QMouseEvent *e) {
 }
 
 void SelectionMoveResizer::mouseReleaseEvent(QMouseEvent *me) {
-  if (me->button() != Qt::LeftButton || d_op == None ||
-      d_op_start == QPoint(-1, -1))
+  if (me->button() != Qt::LeftButton || d_op == None || d_op_start == QPoint(-1, -1))
     return QWidget::mouseReleaseEvent(me);
 
   d_op_dp = me->pos() - d_op_start;
@@ -504,10 +475,6 @@ bool SelectionMoveResizer::eventFilter(QObject *o, QEvent *e) {
   }
 }
 
-void SelectionMoveResizer::removeWidget(QObject *w) {
-  removeAll(static_cast<QWidget *>(w));
-}
+void SelectionMoveResizer::removeWidget(QObject *w) { removeAll(static_cast<QWidget *>(w)); }
 
-void SelectionMoveResizer::removeLegend(QObject *w) {
-  removeAll(static_cast<LegendWidget *>(w));
-}
+void SelectionMoveResizer::removeLegend(QObject *w) { removeAll(static_cast<LegendWidget *>(w)); }

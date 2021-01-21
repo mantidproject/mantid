@@ -45,16 +45,14 @@ static bool endswith(const std::string &s, const std::string &subs) {
   return tail == subs;
 }
 
-static bool checkIntersection(std::vector<std::string> v1,
-                              std::vector<std::string> v2) {
+static bool checkIntersection(std::vector<std::string> v1, std::vector<std::string> v2) {
   // Sort
   std::sort(v1.begin(), v1.end());
   std::sort(v2.begin(), v2.end());
 
   // Check intersectiom
   std::vector<std::string> intersectvec(v1.size() + v2.size());
-  auto outiter = std::set_intersection(v1.begin(), v1.end(), v2.begin(),
-                                       v2.end(), intersectvec.begin());
+  auto outiter = std::set_intersection(v1.begin(), v1.end(), v2.begin(), v2.end(), intersectvec.begin());
   return static_cast<int>(outiter - intersectvec.begin()) != 0;
 }
 
@@ -75,44 +73,31 @@ int LoadSpiceAscii::version() const { return 1; }
 //----------------------------------------------------------------------------------------------
 /** Category
  */
-const std::string LoadSpiceAscii::category() const {
-  return "DataHandling\\Text";
-}
+const std::string LoadSpiceAscii::category() const { return "DataHandling\\Text"; }
 
 //----------------------------------------------------------------------------------------------
 /** Summary
  */
-const std::string LoadSpiceAscii::summary() const {
-  return "Load Spice data to workspaces in general.";
-}
+const std::string LoadSpiceAscii::summary() const { return "Load Spice data to workspaces in general."; }
 
 //----------------------------------------------------------------------------------------------
 /** Declaration of properties
  */
 void LoadSpiceAscii::init() {
-  declareProperty(std::make_unique<FileProperty>(
-                      "Filename", "", API::FileProperty::Load, ".dat"),
+  declareProperty(std::make_unique<FileProperty>("Filename", "", API::FileProperty::Load, ".dat"),
                   "Name of SPICE data file.");
 
   // Logs to be float type sample log
-  auto floatspckeyprop = std::make_unique<ArrayProperty<std::string>>(
-      "FloatSampleLogNames", Direction::Input);
-  declareProperty(std::move(floatspckeyprop),
-                  "List of log names that will be imported as float property.");
+  auto floatspckeyprop = std::make_unique<ArrayProperty<std::string>>("FloatSampleLogNames", Direction::Input);
+  declareProperty(std::move(floatspckeyprop), "List of log names that will be imported as float property.");
 
   // Logs to be integer type sample log
-  auto intspckeyprop = std::make_unique<ArrayProperty<std::string>>(
-      "IntegerSampleLogNames", Direction::Input);
-  declareProperty(
-      std::move(intspckeyprop),
-      "List of log names that will be imported as integer property.");
+  auto intspckeyprop = std::make_unique<ArrayProperty<std::string>>("IntegerSampleLogNames", Direction::Input);
+  declareProperty(std::move(intspckeyprop), "List of log names that will be imported as integer property.");
 
   // Logs to be string type sample log
-  auto strspckeyprop = std::make_unique<ArrayProperty<std::string>>(
-      "StringSampleLogNames", Direction::Input);
-  declareProperty(
-      std::move(strspckeyprop),
-      "List of log names that will be imported as string property.");
+  auto strspckeyprop = std::make_unique<ArrayProperty<std::string>>("StringSampleLogNames", Direction::Input);
+  declareProperty(std::move(strspckeyprop), "List of log names that will be imported as string property.");
 
   declareProperty("IgnoreUnlistedLogs", false,
                   "If it is true, all log names are not listed in any of above "
@@ -127,19 +112,15 @@ void LoadSpiceAscii::init() {
   defaultlogformat[1] = "MM/DD/YYYY";
   defaultlogformat[2] = "time";
   defaultlogformat[3] = "HH:MM:SS AM";
-  declareProperty(std::make_unique<ArrayProperty<std::string>>(
-                      "DateAndTimeLog", std::move(defaultlogformat)),
+  declareProperty(std::make_unique<ArrayProperty<std::string>>("DateAndTimeLog", std::move(defaultlogformat)),
                   "Name and format for date and time");
 
   // Output
-  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "Name of TableWorkspace containing experimental data.");
 
-  declareProperty(
-      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          "RunInfoWorkspace", "", Direction::Output),
-      "Name of TableWorkspace containing experimental information.");
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("RunInfoWorkspace", "", Direction::Output),
+                  "Name of TableWorkspace containing experimental information.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -156,8 +137,7 @@ void LoadSpiceAscii::exec() {
 
   bool valid = validateLogNamesType(floatlognames, intlognames, strlognames);
   if (!valid)
-    throw std::runtime_error(
-        "At one log name appears in multiple log type lists");
+    throw std::runtime_error("At one log name appears in multiple log type lists");
 
   // Parse
   std::vector<std::vector<std::string>> datalist;
@@ -169,8 +149,8 @@ void LoadSpiceAscii::exec() {
   API::ITableWorkspace_sptr outws = createDataWS(datalist, titles);
 
   // Build run information workspace
-  API::MatrixWorkspace_sptr runinfows = createRunInfoWS(
-      runinfodict, floatlognames, intlognames, strlognames, ignoreunlisted);
+  API::MatrixWorkspace_sptr runinfows =
+      createRunInfoWS(runinfodict, floatlognames, intlognames, strlognames, ignoreunlisted);
 
   // Process date and time for run start explicitly
   setupRunStartTime(runinfows, datetimeprop);
@@ -188,10 +168,9 @@ void LoadSpiceAscii::exec() {
  * @param strlognames
  * @return
  */
-bool LoadSpiceAscii::validateLogNamesType(
-    const std::vector<std::string> &floatlognames,
-    const std::vector<std::string> &intlognames,
-    const std::vector<std::string> &strlognames) {
+bool LoadSpiceAscii::validateLogNamesType(const std::vector<std::string> &floatlognames,
+                                          const std::vector<std::string> &intlognames,
+                                          const std::vector<std::string> &strlognames) {
   std::vector<std::vector<std::string>> vec_lognamelist;
   vec_lognamelist.emplace_back(floatlognames);
   vec_lognamelist.emplace_back(intlognames);
@@ -204,8 +183,7 @@ bool LoadSpiceAscii::validateLogNamesType(
       hascommon = checkIntersection(vec_lognamelist[i], vec_lognamelist[j]);
       if (hascommon) {
         std::stringstream ess;
-        ess << "logsets[" << i << "] and log sets[" << j
-            << "] has intersection.";
+        ess << "logsets[" << i << "] and log sets[" << j << "] has intersection.";
         g_log.error(ess.str());
         break;
       }
@@ -222,11 +200,9 @@ bool LoadSpiceAscii::validateLogNamesType(
  * @param titles
  * @param runinfodict
  */
-void LoadSpiceAscii::parseSPICEAscii(
-    const std::string &filename,
-    std::vector<std::vector<std::string>> &datalist,
-    std::vector<std::string> &titles,
-    std::map<std::string, std::string> &runinfodict) {
+void LoadSpiceAscii::parseSPICEAscii(const std::string &filename, std::vector<std::vector<std::string>> &datalist,
+                                     std::vector<std::string> &titles,
+                                     std::map<std::string, std::string> &runinfodict) {
   // Import file
   std::ifstream spicefile(filename.c_str());
   if (!spicefile.is_open()) {
@@ -256,9 +232,7 @@ void LoadSpiceAscii::parseSPICEAscii(
         std::vector<std::string> terms;
         boost::split(terms, line, boost::is_any_of("="));
         boost::trim(terms[0]);
-        g_log.debug() << "Title = " << terms[0]
-                      << ", number of splitted terms = " << terms.size()
-                      << "\n";
+        g_log.debug() << "Title = " << terms[0] << ", number of splitted terms = " << terms.size() << "\n";
         std::string infovalue;
         if (terms.size() == 2) {
           infovalue = terms[1];
@@ -272,41 +246,35 @@ void LoadSpiceAscii::parseSPICEAscii(
           }
         } else {
           std::stringstream wss;
-          wss << "Line '" << line
-              << "' is hard to parse.  It has more than 1 '='.";
+          wss << "Line '" << line << "' is hard to parse.  It has more than 1 '='.";
           g_log.warning(wss.str());
         }
         runinfodict.emplace(terms[0], infovalue);
       } else if (line.find("Pt.") != std::string::npos) {
         // Title line
-        boost::split(titles, line, boost::is_any_of("\t\n "),
-                     boost::token_compress_on);
+        boost::split(titles, line, boost::is_any_of("\t\n "), boost::token_compress_on);
       } else if (endswith(line, "scan completed.")) {
         std::vector<std::string> terms;
-        boost::iter_split(terms, line,
-                          boost::algorithm::first_finder("scan completed."));
+        boost::iter_split(terms, line, boost::algorithm::first_finder("scan completed."));
         std::string time = terms.front();
         boost::trim(time);
         runinfodict.emplace("runend", time);
       } else {
         // Not supported
         std::stringstream wss;
-        wss << "File " << filename << ": line \"" << line
-            << "\" cannot be parsed. It is ignored then.";
+        wss << "File " << filename << ": line \"" << line << "\" cannot be parsed. It is ignored then.";
         g_log.warning(wss.str());
       }
     } // If for run info
     else {
       // data line
       std::vector<std::string> terms;
-      boost::split(terms, line, boost::is_any_of(" \t\n"),
-                   boost::token_compress_on);
+      boost::split(terms, line, boost::is_any_of(" \t\n"), boost::token_compress_on);
       datalist.emplace_back(terms);
     }
   }
 
-  g_log.debug() << "Run info dictionary has " << runinfodict.size()
-                << " entries."
+  g_log.debug() << "Run info dictionary has " << runinfodict.size() << " entries."
                 << "\n";
 }
 
@@ -318,12 +286,10 @@ Each row is a data point measured in experiment
  * @param titles
  * @return
  */
-API::ITableWorkspace_sptr LoadSpiceAscii::createDataWS(
-    const std::vector<std::vector<std::string>> &datalist,
-    const std::vector<std::string> &titles) {
+API::ITableWorkspace_sptr LoadSpiceAscii::createDataWS(const std::vector<std::vector<std::string>> &datalist,
+                                                       const std::vector<std::string> &titles) {
   // Create a table workspace with columns defined
-  DataObjects::TableWorkspace_sptr outws =
-      std::make_shared<DataObjects::TableWorkspace>();
+  DataObjects::TableWorkspace_sptr outws = std::make_shared<DataObjects::TableWorkspace>();
   size_t ipt = -1;
   for (size_t i = 0; i < titles.size(); ++i) {
     if (titles[i] == "Pt.") {
@@ -348,8 +314,7 @@ API::ITableWorkspace_sptr LoadSpiceAscii::createDataWS(
     }
   }
 
-  ITableWorkspace_sptr tablews =
-      std::dynamic_pointer_cast<ITableWorkspace>(outws);
+  ITableWorkspace_sptr tablews = std::dynamic_pointer_cast<ITableWorkspace>(outws);
   return tablews;
 }
 
@@ -363,15 +328,13 @@ API::ITableWorkspace_sptr LoadSpiceAscii::createDataWS(
  * @param ignoreunlisted
  * @return
  */
-API::MatrixWorkspace_sptr
-LoadSpiceAscii::createRunInfoWS(std::map<std::string, std::string> runinfodict,
-                                std::vector<std::string> &floatlognamelist,
-                                std::vector<std::string> &intlognamelist,
-                                std::vector<std::string> &strlognamelist,
-                                bool ignoreunlisted) {
+API::MatrixWorkspace_sptr LoadSpiceAscii::createRunInfoWS(std::map<std::string, std::string> runinfodict,
+                                                          std::vector<std::string> &floatlognamelist,
+                                                          std::vector<std::string> &intlognamelist,
+                                                          std::vector<std::string> &strlognamelist,
+                                                          bool ignoreunlisted) {
   // Create an empty workspace
-  API::MatrixWorkspace_sptr infows =
-      WorkspaceFactory::Instance().create("Workspace2D", 1, 2, 1);
+  API::MatrixWorkspace_sptr infows = WorkspaceFactory::Instance().create("Workspace2D", 1, 2, 1);
 
   // Sort
   std::sort(floatlognamelist.begin(), floatlognamelist.end());
@@ -384,11 +347,9 @@ LoadSpiceAscii::createRunInfoWS(std::map<std::string, std::string> runinfodict,
     const std::string title = miter->first;
     const std::string strvalue = miter->second;
 
-    g_log.debug() << "Trying to add property " << title << " with value "
-                  << strvalue << "\n";
+    g_log.debug() << "Trying to add property " << title << " with value " << strvalue << "\n";
 
-    if (std::binary_search(floatlognamelist.begin(), floatlognamelist.end(),
-                           title)) {
+    if (std::binary_search(floatlognamelist.begin(), floatlognamelist.end(), title)) {
       // Case as a double property
       bool adderrorvalue = false;
       double value, error;
@@ -398,8 +359,7 @@ LoadSpiceAscii::createRunInfoWS(std::map<std::string, std::string> runinfodict,
         adderrorvalue = true;
 
         std::vector<std::string> terms;
-        boost::iter_split(terms, strvalue,
-                          boost::algorithm::first_finder("+/-"));
+        boost::iter_split(terms, strvalue, boost::algorithm::first_finder("+/-"));
         value = std::stod(terms[0]);
         error = std::stod(terms[1]);
       } else {
@@ -414,13 +374,10 @@ LoadSpiceAscii::createRunInfoWS(std::map<std::string, std::string> runinfodict,
         tss << title << ".error";
         addProperty<double>(infows, tss.str(), error);
       }
-    } else if (std::binary_search(intlognamelist.begin(), intlognamelist.end(),
-                                  title)) {
+    } else if (std::binary_search(intlognamelist.begin(), intlognamelist.end(), title)) {
       // It is an integer log
       addProperty<int>(infows, title, std::stoi(strvalue));
-    } else if (!ignoreunlisted ||
-               std::binary_search(strlognamelist.begin(), strlognamelist.end(),
-                                  title)) {
+    } else if (!ignoreunlisted || std::binary_search(strlognamelist.begin(), strlognamelist.end(), title)) {
       // It is a string log or it is not defined but not ignored either
       addProperty<std::string>(infows, title, strvalue);
     }
@@ -435,9 +392,8 @@ LoadSpiceAscii::createRunInfoWS(std::map<std::string, std::string> runinfodict,
  * @param runinfows
  * @param datetimeprop
  */
-void LoadSpiceAscii::setupRunStartTime(
-    const API::MatrixWorkspace_sptr &runinfows,
-    const std::vector<std::string> &datetimeprop) {
+void LoadSpiceAscii::setupRunStartTime(const API::MatrixWorkspace_sptr &runinfows,
+                                       const std::vector<std::string> &datetimeprop) {
   // Check if no need to process run start time
   if (datetimeprop.empty()) {
     g_log.information("User chooses not to set up run start date and time.");
@@ -456,23 +412,20 @@ void LoadSpiceAscii::setupRunStartTime(
   // Parse
   std::string datelogname = datetimeprop[0];
   std::string timelogname = datetimeprop[2];
-  if (!(runinfows->run().hasProperty(datelogname) &&
-        runinfows->run().hasProperty(timelogname))) {
+  if (!(runinfows->run().hasProperty(datelogname) && runinfows->run().hasProperty(timelogname))) {
     std::stringstream errss;
-    errss << "Unable to locate user specified date and time sample logs "
-          << datelogname << " and " << timelogname << "."
+    errss << "Unable to locate user specified date and time sample logs " << datelogname << " and " << timelogname
+          << "."
           << "run_start will not be set up.";
     g_log.error(errss.str());
     return;
   }
 
-  const std::string &rawdatestring =
-      runinfows->run().getProperty(datelogname)->value();
+  const std::string &rawdatestring = runinfows->run().getProperty(datelogname)->value();
   const std::string &dateformat = datetimeprop[1];
   std::string mtddatestring = processDateString(rawdatestring, dateformat);
 
-  const std::string &rawtimestring =
-      runinfows->run().getProperty(timelogname)->value();
+  const std::string &rawtimestring = runinfows->run().getProperty(timelogname)->value();
   const std::string &timeformat = datetimeprop[3];
   std::string mtdtimestring = processTimeString(rawtimestring, timeformat);
 
@@ -490,8 +443,7 @@ void LoadSpiceAscii::setupRunStartTime(
  * @param dateformat
  * @return
  */
-std::string LoadSpiceAscii::processDateString(const std::string &rawdate,
-                                              const std::string &dateformat) {
+std::string LoadSpiceAscii::processDateString(const std::string &rawdate, const std::string &dateformat) {
   // Identify splitter
   std::string splitter;
   if (dateformat.find('/') != std::string::npos)
@@ -541,8 +493,7 @@ std::string LoadSpiceAscii::processDateString(const std::string &rawdate,
  * @param timeformat
  * @return
  */
-std::string LoadSpiceAscii::processTimeString(const std::string &rawtime,
-                                              const std::string &timeformat) {
+std::string LoadSpiceAscii::processTimeString(const std::string &rawtime, const std::string &timeformat) {
   // Process time format to find out it is 12 hour or 24 hour format
   std::string timeformatcpy(timeformat);
   boost::trim(timeformatcpy);
@@ -596,8 +547,7 @@ std::string LoadSpiceAscii::processTimeString(const std::string &rawtime,
  * @param pvalue
  */
 template <typename T>
-void LoadSpiceAscii::addProperty(const API::MatrixWorkspace_sptr &ws,
-                                 const std::string &pname, T pvalue) {
+void LoadSpiceAscii::addProperty(const API::MatrixWorkspace_sptr &ws, const std::string &pname, T pvalue) {
   ws->mutableRun().addLogData(new PropertyWithValue<T>(pname, pvalue));
 }
 

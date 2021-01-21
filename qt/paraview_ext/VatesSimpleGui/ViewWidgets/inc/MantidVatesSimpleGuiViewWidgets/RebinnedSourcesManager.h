@@ -40,25 +40,22 @@ namespace SimpleGui {
 
  @date 21/01/2015
  */
-class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS RebinnedSourcesManager
-    : public QWidget,
-      MantidQt::API::WorkspaceObserver {
+class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS RebinnedSourcesManager : public QWidget,
+                                                                            MantidQt::API::WorkspaceObserver {
   Q_OBJECT
 public:
   RebinnedSourcesManager(QWidget *parent = nullptr);
 
   ~RebinnedSourcesManager() override;
 
-  void checkSource(pqPipelineSource *source, std::string &inputWorkspace,
-                   std::string &outputWorkspace, std::string algorithmType);
+  void checkSource(pqPipelineSource *source, std::string &inputWorkspace, std::string &outputWorkspace,
+                   std::string algorithmType);
 
   void repipeRebinnedSource();
 
-  void repipeOriginalSource(pqPipelineSource *rebinnedSource,
-                            pqPipelineSource *originalSource);
+  void repipeOriginalSource(pqPipelineSource *rebinnedSource, pqPipelineSource *originalSource);
 
-  void getStoredWorkspaceNames(pqPipelineSource *source,
-                               std::string &originalWorkspaceName,
+  void getStoredWorkspaceNames(pqPipelineSource *source, std::string &originalWorkspaceName,
                                std::string &rebinnedWorkspaceName);
 
   void registerRebinnedSource(pqPipelineSource *source);
@@ -76,17 +73,12 @@ signals:
   void triggerAcceptForNewFilters();
 
 protected:
-  void
-  addHandle(const std::string &workspaceName,
-            const std::shared_ptr<Mantid::API::Workspace> &workspace) override;
+  void addHandle(const std::string &workspaceName, const std::shared_ptr<Mantid::API::Workspace> &workspace) override;
 
-  void
-  preDeleteHandle(const std::string &wsName,
-                  const std::shared_ptr<Mantid::API::Workspace> &) override;
+  void preDeleteHandle(const std::string &wsName, const std::shared_ptr<Mantid::API::Workspace> &) override;
 
-  void afterReplaceHandle(
-      const std::string &workspaceName,
-      const std::shared_ptr<Mantid::API::Workspace> &workspace) override;
+  void afterReplaceHandle(const std::string &workspaceName,
+                          const std::shared_ptr<Mantid::API::Workspace> &workspace) override;
 
 private slots:
   void onRebinnedSourceDestroyed();
@@ -115,18 +107,14 @@ private:
 
   pqPipelineSource *m_rebinnedSource;
 
-  std::vector<pqPipelineSource *>
-  findAllRebinnedSourcesForWorkspace(const std::string &workspaceName);
+  std::vector<pqPipelineSource *> findAllRebinnedSourcesForWorkspace(const std::string &workspaceName);
 
   void swapSources(pqPipelineSource *source1, pqPipelineSource *source2);
 
   void rebuildPipeline(pqPipelineSource *source1, pqPipelineSource *source2);
 
-  void processWorkspaceNames(std::string &inputWorkspace,
-                             std::string &outputWorkspace,
-                             pqPipelineSource *source,
-                             std::string workspaceName,
-                             const std::string &algorithmType);
+  void processWorkspaceNames(std::string &inputWorkspace, std::string &outputWorkspace, pqPipelineSource *source,
+                             std::string workspaceName, const std::string &algorithmType);
 
   void untrackWorkspaces(const std::pair<std::string, std::string> &key);
 
@@ -134,8 +122,7 @@ private:
 
   static void copySafe(vtkSMProxy *dest, vtkSMProxy *source);
 
-  void getWorkspaceInfo(pqPipelineSource *source, std::string &workspaceName,
-                        std::string &workSpaceType);
+  void getWorkspaceInfo(pqPipelineSource *source, std::string &workspaceName, std::string &workSpaceType);
 
   void removePipeline(pqPipelineSource *source);
 
@@ -143,14 +130,11 @@ private:
 
   std::string getSourceName(pqPipelineSource *source);
 
-  std::pair<std::string, std::string>
-  createKeyPairForSource(pqPipelineSource *source);
+  std::pair<std::string, std::string> createKeyPairForSource(pqPipelineSource *source);
 
   pqPipelineSource *goToPipelineBeginning(pqPipelineSource *source);
 
-  bool
-  doesSourceNeedToBeDeleted(const std::string &sourceName,
-                            const std::vector<std::string> &trackedSources);
+  bool doesSourceNeedToBeDeleted(const std::string &sourceName, const std::vector<std::string> &trackedSources);
 };
 
 } // namespace SimpleGui

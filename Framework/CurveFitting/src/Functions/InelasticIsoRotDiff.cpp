@@ -37,9 +37,7 @@ DECLARE_FUNCTION(InelasticIsoRotDiff)
 InelasticIsoRotDiff::InelasticIsoRotDiff() {
   this->declareParameter("Height", 1.0, "scaling factor");
   this->declareParameter("Radius", 0.98, "radius of rotation (Angstroms)");
-  this->declareParameter(
-      "Tau", 10.0,
-      "Relaxation time, inverse of the rotational diffusion coefficient (ps)");
+  this->declareParameter("Tau", 10.0, "Relaxation time, inverse of the rotational diffusion coefficient (ps)");
   this->declareParameter("Centre", 0.0, "Shift along the X-axis");
 
   this->declareAttribute("Q", API::IFunction::Attribute(0.3));
@@ -51,14 +49,11 @@ InelasticIsoRotDiff::InelasticIsoRotDiff() {
  */
 void InelasticIsoRotDiff::init() {
   // Ensure positive values for Height, Radius, and Diffusion constant
-  auto HeightConstraint = std::make_unique<BConstraint>(
-      this, "Height", std::numeric_limits<double>::epsilon(), true);
+  auto HeightConstraint = std::make_unique<BConstraint>(this, "Height", std::numeric_limits<double>::epsilon(), true);
   this->addConstraint(std::move(HeightConstraint));
-  auto RadiusConstraint = std::make_unique<BConstraint>(
-      this, "Radius", std::numeric_limits<double>::epsilon(), true);
+  auto RadiusConstraint = std::make_unique<BConstraint>(this, "Radius", std::numeric_limits<double>::epsilon(), true);
   this->addConstraint(std::move(RadiusConstraint));
-  auto DiffusionConstraint = std::make_unique<BConstraint>(
-      this, "Tau", std::numeric_limits<double>::epsilon(), true);
+  auto DiffusionConstraint = std::make_unique<BConstraint>(this, "Tau", std::numeric_limits<double>::epsilon(), true);
   this->addConstraint(std::move(DiffusionConstraint));
 }
 
@@ -68,16 +63,14 @@ void InelasticIsoRotDiff::init() {
  * @param xValues energy domain where function is evaluated
  * @param nData size of the energy domain
  */
-void InelasticIsoRotDiff::function1D(double *out, const double *xValues,
-                                     const size_t nData) const {
+void InelasticIsoRotDiff::function1D(double *out, const double *xValues, const size_t nData) const {
   double hbar(0.658211626); // ps*meV
   auto H = this->getParameter("Height");
   auto R = this->getParameter("Radius");
   auto T = this->getParameter("Tau");
   auto C = this->getParameter("Centre");
   auto Q = this->getAttribute("Q").asDouble();
-  auto N = static_cast<size_t>(
-      this->getAttribute("N").asInt()); // Number of Lorentzians
+  auto N = static_cast<size_t>(this->getAttribute("N").asInt()); // Number of Lorentzians
 
   // Penalize negative parameters
   if (R < std::numeric_limits<double>::epsilon()) {
@@ -91,10 +84,8 @@ void InelasticIsoRotDiff::function1D(double *out, const double *xValues,
   std::vector<double> al(N);
   std::vector<double> HWHM(N);
   for (size_t i = 0; i < N; i++) {
-    auto l = static_cast<unsigned int>(
-        i + 1); // avoid annoying warnings from implicit type conversion
-    auto ld = static_cast<double>(
-        l); // avoid annoying warnings from implicit type conversion
+    auto l = static_cast<unsigned int>(i + 1); // avoid annoying warnings from implicit type conversion
+    auto ld = static_cast<double>(l);          // avoid annoying warnings from implicit type conversion
     al[i] = (2 * ld + 1) * pow(boost::math::sph_bessel(l, Q * R), 2);
     HWHM[i] = ld * (ld + 1) * hbar / T;
   }

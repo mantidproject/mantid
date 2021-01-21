@@ -23,22 +23,18 @@ namespace SliceViewer {
 using VecPeakOverlayView = std::vector<std::shared_ptr<PeakOverlayView>>;
 
 /// Coordinate System Enum to String.
-std::string DLLExport
-coordinateToString(Mantid::Kernel::SpecialCoordinateSystem coordSystem);
+std::string DLLExport coordinateToString(Mantid::Kernel::SpecialCoordinateSystem coordSystem);
 
 /*---------------------------------------------------------
 ConcretePeaksPresenter
 
 Concrete implmentation of the Peaks presenter.
 ----------------------------------------------------------*/
-class EXPORT_OPT_MANTIDQT_SLICEVIEWER ConcretePeaksPresenter
-    : public PeaksPresenter {
+class EXPORT_OPT_MANTIDQT_SLICEVIEWER ConcretePeaksPresenter : public PeaksPresenter {
 public:
-  ConcretePeaksPresenter(
-      PeakOverlayViewFactory_sptr viewFactory,
-      const Mantid::API::IPeaksWorkspace_sptr &peaksWS,
-      const std::shared_ptr<Mantid::API::MDGeometry> &mdWS,
-      const Mantid::Geometry::PeakTransformFactory_sptr &transformFactory);
+  ConcretePeaksPresenter(PeakOverlayViewFactory_sptr viewFactory, const Mantid::API::IPeaksWorkspace_sptr &peaksWS,
+                         const std::shared_ptr<Mantid::API::MDGeometry> &mdWS,
+                         const Mantid::Geometry::PeakTransformFactory_sptr &transformFactory);
   void reInitialize(Mantid::API::IPeaksWorkspace_sptr peaksWS) override;
   ~ConcretePeaksPresenter() override;
   void setNonOrthogonal(bool nonOrthogonalEnabled) override;
@@ -106,8 +102,7 @@ private:
   /// Produce the views from the PeaksWorkspace
   void produceViews();
   /// Check workspace compatibilities.
-  void checkWorkspaceCompatibilities(
-      const std::shared_ptr<Mantid::API::MDGeometry> &mdWS);
+  void checkWorkspaceCompatibilities(const std::shared_ptr<Mantid::API::MDGeometry> &mdWS);
   /// Find peaks interacting with the slice and update the view.
   void doFindPeaksInRegion();
   /// make owner update.

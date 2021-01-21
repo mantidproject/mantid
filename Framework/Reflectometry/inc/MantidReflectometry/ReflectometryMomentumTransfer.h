@@ -16,8 +16,7 @@ namespace Reflectometry {
 /** Converts wavelength to momentum transfer and calculates the Qz
   resolution for reflectometers at continuous beam sources.
 */
-class MANTID_REFLECTOMETRY_DLL ReflectometryMomentumTransfer
-    : public API::Algorithm {
+class MANTID_REFLECTOMETRY_DLL ReflectometryMomentumTransfer : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;
@@ -57,18 +56,15 @@ private:
   void init() override;
   std::map<std::string, std::string> validateInputs() override;
   void exec() override;
-  static void addResolutionDX(const API::MatrixWorkspace &inWS,
-                              API::MatrixWorkspace &outWS, const Setup &setup,
+  static void addResolutionDX(const API::MatrixWorkspace &inWS, API::MatrixWorkspace &outWS, const Setup &setup,
                               const Beam &beam);
-  static double angularResolutionSquared(const API::MatrixWorkspace &ws,
-                                         const Setup &setup, const Beam &beam);
+  static double angularResolutionSquared(const API::MatrixWorkspace &ws, const Setup &setup, const Beam &beam);
   void convertToMomentumTransfer(API::MatrixWorkspace_sptr &ws);
   static const Beam createBeamStatistics(const API::MatrixWorkspace &ws);
   const Setup createSetup(const API::MatrixWorkspace &ws);
   double interslitDistance(const API::MatrixWorkspace &ws);
   double slitSize(const API::MatrixWorkspace &ws, const std::string &logEntry);
-  static double wavelengthResolutionSquared(const Setup &setup,
-                                            const double wavelength);
+  static double wavelengthResolutionSquared(const Setup &setup, const double wavelength);
 };
 
 } // namespace Reflectometry

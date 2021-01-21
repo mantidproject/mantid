@@ -30,15 +30,12 @@ public:
 
   /// Algorithm's version
   int version() const override { return 1; }
-  const std::vector<std::string> seeAlso() const override {
-    return {"ExtractMask"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"ExtractMask"}; }
   /// Algorithm's category for identification
   const std::string category() const override { return "Transforms\\Masking"; }
 
   /// Remove the items appeared in a vector from another
-  std::vector<detid_t> subtractVector(std::vector<detid_t> minuend,
-                                      std::vector<detid_t> subtrahend);
+  std::vector<detid_t> subtractVector(std::vector<detid_t> minuend, std::vector<detid_t> subtrahend);
 
 private:
   /// Initialisation code
@@ -53,8 +50,7 @@ private:
 
   /// Parse input TableWorkspace to get a list of detectors IDs of which
   /// detector are already masked
-  std::vector<detid_t>
-  parseMaskTable(const DataObjects::TableWorkspace_sptr &masktablews);
+  std::vector<detid_t> parseMaskTable(const DataObjects::TableWorkspace_sptr &masktablews);
 
   /// Parse a string containing list in format (x, xx-yy, x, x, ...) to a vector
   /// of detid_t
@@ -67,14 +63,12 @@ private:
   std::vector<detid_t> extractMaskFromMaskWorkspace();
 
   /// Copy table workspace content from one workspace to another
-  void
-  copyTableWorkspaceContent(const DataObjects::TableWorkspace_sptr &sourceWS,
-                            const DataObjects::TableWorkspace_sptr &targetWS);
+  void copyTableWorkspaceContent(const DataObjects::TableWorkspace_sptr &sourceWS,
+                                 const DataObjects::TableWorkspace_sptr &targetWS);
 
   /// Add a list of spectra (detector IDs) to the output table workspace
-  void addToTableWorkspace(const DataObjects::TableWorkspace_sptr &outws,
-                           std::vector<detid_t> maskeddetids, double xmin,
-                           double xmax, std::vector<detid_t> prevmaskedids);
+  void addToTableWorkspace(const DataObjects::TableWorkspace_sptr &outws, std::vector<detid_t> maskeddetids,
+                           double xmin, double xmax, std::vector<detid_t> prevmaskedids);
 };
 
 } // namespace Algorithms

@@ -24,9 +24,7 @@ class GroupToXResolutionTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static GroupToXResolutionTest *createSuite() {
-    return new GroupToXResolutionTest();
-  }
+  static GroupToXResolutionTest *createSuite() { return new GroupToXResolutionTest(); }
   static void destroySuite(GroupToXResolutionTest *suite) { delete suite; }
 
   void test_Init() {
@@ -39,8 +37,7 @@ public:
     HistogramData::Points Xs{0.23};
     HistogramData::Counts Ys{1.42};
     HistogramData::Histogram h(Xs, Ys);
-    API::MatrixWorkspace_sptr inputWS =
-        DataObjects::create<DataObjects::Workspace2D>(1, std::move(h));
+    API::MatrixWorkspace_sptr inputWS = DataObjects::create<DataObjects::Workspace2D>(1, std::move(h));
     auto Dxs = Kernel::make_cow<HistogramData::HistogramDx>(1, 1.);
     inputWS->setSharedDx(0, std::move(Dxs));
     Algorithms::GroupToXResolution alg;
@@ -48,8 +45,7 @@ public:
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
     API::MatrixWorkspace_sptr outputWS = alg.getProperty("OutputWorkspace");
@@ -68,8 +64,7 @@ public:
     HistogramData::Counts Ys{1.5, 2.5};
     HistogramData::CountStandardDeviations Es{2., 3.};
     HistogramData::Histogram h(Xs, Ys, Es);
-    API::MatrixWorkspace_sptr inputWS =
-        DataObjects::create<DataObjects::Workspace2D>(1, std::move(h));
+    API::MatrixWorkspace_sptr inputWS = DataObjects::create<DataObjects::Workspace2D>(1, std::move(h));
     auto Dxs = Kernel::make_cow<HistogramData::HistogramDx>(2);
     {
       auto &DxData = Dxs.access();
@@ -82,8 +77,7 @@ public:
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("FractionOfDx", 1.))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
@@ -93,11 +87,9 @@ public:
     TS_ASSERT_EQUALS(outputWS->blocksize(), 1)
     TS_ASSERT_EQUALS(outputWS->x(0).front(), (0.2 + 0.6) / 2.)
     TS_ASSERT_EQUALS(outputWS->y(0).front(), (1.5 + 2.5) / 2.)
-    TS_ASSERT_EQUALS(outputWS->e(0).front(),
-                     std::sqrt(pow<2>(2.) + pow<2>(3.)) / 2.)
+    TS_ASSERT_EQUALS(outputWS->e(0).front(), std::sqrt(pow<2>(2.) + pow<2>(3.)) / 2.)
     TS_ASSERT(outputWS->hasDx(0))
-    TS_ASSERT_EQUALS(outputWS->dx(0).front(),
-                     std::sqrt(pow<2>(1.2) + pow<2>(0.68 * (0.6 - 0.2))))
+    TS_ASSERT_EQUALS(outputWS->dx(0).front(), std::sqrt(pow<2>(1.2) + pow<2>(0.68 * (0.6 - 0.2))))
   }
 
   void test_two_spearate_points_remain_unchanged() {
@@ -105,8 +97,7 @@ public:
     HistogramData::Counts Ys{1.5, 2.5};
     HistogramData::CountStandardDeviations Es{2., 3.};
     HistogramData::Histogram h(Xs, Ys, Es);
-    API::MatrixWorkspace_sptr inputWS =
-        DataObjects::create<DataObjects::Workspace2D>(1, std::move(h));
+    API::MatrixWorkspace_sptr inputWS = DataObjects::create<DataObjects::Workspace2D>(1, std::move(h));
     auto Dxs = Kernel::make_cow<HistogramData::HistogramDx>(2);
     {
       auto &DxData = Dxs.access();
@@ -119,8 +110,7 @@ public:
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("FractionOfDx", 1.))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
@@ -144,8 +134,7 @@ public:
     HistogramData::Counts Ys{1.5, 2.5, -2.5, -1.5};
     HistogramData::CountStandardDeviations Es{2., 3., 2.5, 1.5};
     HistogramData::Histogram h(Xs, Ys, Es);
-    API::MatrixWorkspace_sptr inputWS =
-        DataObjects::create<DataObjects::Workspace2D>(1, std::move(h));
+    API::MatrixWorkspace_sptr inputWS = DataObjects::create<DataObjects::Workspace2D>(1, std::move(h));
     auto Dxs = Kernel::make_cow<HistogramData::HistogramDx>(4);
     {
       auto &DxData = Dxs.access();
@@ -157,8 +146,7 @@ public:
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("FractionOfDx", 1.))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
@@ -168,17 +156,13 @@ public:
     TS_ASSERT_EQUALS(outputWS->blocksize(), 2)
     TS_ASSERT_EQUALS(outputWS->x(0).front(), (0.2 + 0.6) / 2.)
     TS_ASSERT_EQUALS(outputWS->y(0).front(), (1.5 + 2.5) / 2.)
-    TS_ASSERT_EQUALS(outputWS->e(0).front(),
-                     std::sqrt(pow<2>(2.) + pow<2>(3.)) / 2.)
+    TS_ASSERT_EQUALS(outputWS->e(0).front(), std::sqrt(pow<2>(2.) + pow<2>(3.)) / 2.)
     TS_ASSERT(outputWS->hasDx(0))
-    TS_ASSERT_EQUALS(outputWS->dx(0).front(),
-                     std::sqrt(pow<2>(1.) + pow<2>(0.68 * (0.6 - 0.2))))
+    TS_ASSERT_EQUALS(outputWS->dx(0).front(), std::sqrt(pow<2>(1.) + pow<2>(0.68 * (0.6 - 0.2))))
     TS_ASSERT_EQUALS(outputWS->x(0).back(), (5.1 + 5.7) / 2.)
     TS_ASSERT_EQUALS(outputWS->y(0).back(), (-2.5 + -1.5) / 2)
-    TS_ASSERT_EQUALS(outputWS->e(0).back(),
-                     std::sqrt(pow<2>(2.5) + pow<2>(1.5)) / 2.)
-    TS_ASSERT_EQUALS(outputWS->dx(0).back(),
-                     std::sqrt(pow<2>(2.) + pow<2>(0.68 * (5.7 - 5.1))))
+    TS_ASSERT_EQUALS(outputWS->e(0).back(), std::sqrt(pow<2>(2.5) + pow<2>(1.5)) / 2.)
+    TS_ASSERT_EQUALS(outputWS->dx(0).back(), std::sqrt(pow<2>(2.) + pow<2>(0.68 * (5.7 - 5.1))))
   }
 };
 
@@ -186,12 +170,8 @@ class GroupToXResolutionTestPerformance : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static GroupToXResolutionTestPerformance *createSuite() {
-    return new GroupToXResolutionTestPerformance();
-  }
-  static void destroySuite(GroupToXResolutionTestPerformance *suite) {
-    delete suite;
-  }
+  static GroupToXResolutionTestPerformance *createSuite() { return new GroupToXResolutionTestPerformance(); }
+  static void destroySuite(GroupToXResolutionTestPerformance *suite) { delete suite; }
 
   GroupToXResolutionTestPerformance() : m_alg() {
     m_alg.setRethrows(true);
@@ -204,22 +184,18 @@ public:
     constexpr double xFirst{0.};
     constexpr double xSecond{0.4};
     constexpr size_t n{10000};
-    HistogramData::Points Xs(
-        n, HistogramData::QuadraticGenerator(xZeroth, xFirst, xSecond));
+    HistogramData::Points Xs(n, HistogramData::QuadraticGenerator(xZeroth, xFirst, xSecond));
     HistogramData::Counts Ys(n, 1.3);
     HistogramData::CountStandardDeviations Es(n, 1.1);
     HistogramData::Histogram h(Xs, Ys, Es);
-    API::MatrixWorkspace_sptr inputWS =
-        DataObjects::create<DataObjects::Workspace2D>(1, std::move(h));
+    API::MatrixWorkspace_sptr inputWS = DataObjects::create<DataObjects::Workspace2D>(1, std::move(h));
     // Construct DX such that in the beginning, we group multiple points
     // and after a crossover, no grouping happens.
     constexpr double initialGroupSize{10.};
     constexpr double crossover{0.8 * n};
     constexpr double dxZeroth{2. * initialGroupSize * xSecond};
-    constexpr double dxFirst{(2. * crossover - 2. * initialGroupSize + 1.) /
-                             crossover * xSecond};
-    auto Dxs = Kernel::make_cow<HistogramData::HistogramDx>(
-        n, HistogramData::LinearGenerator(dxZeroth, dxFirst));
+    constexpr double dxFirst{(2. * crossover - 2. * initialGroupSize + 1.) / crossover * xSecond};
+    auto Dxs = Kernel::make_cow<HistogramData::HistogramDx>(n, HistogramData::LinearGenerator(dxZeroth, dxFirst));
     inputWS->setSharedDx(0, std::move(Dxs));
     m_alg.setProperty("InputWorkspace", inputWS);
     m_alg.setProperty("OutputWorkspace", "_out");

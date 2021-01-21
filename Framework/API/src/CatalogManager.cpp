@@ -26,17 +26,11 @@ namespace API {
  * @param facility :: The facility of the catalog to log in to.
  * @return The session created if login was successful.
  */
-CatalogSession_sptr CatalogManagerImpl::login(const std::string &username,
-                                              const std::string &password,
-                                              const std::string &endpoint,
-                                              const std::string &facility) {
-  std::string className = Kernel::ConfigService::Instance()
-                              .getFacility(facility)
-                              .catalogInfo()
-                              .catalogName();
+CatalogSession_sptr CatalogManagerImpl::login(const std::string &username, const std::string &password,
+                                              const std::string &endpoint, const std::string &facility) {
+  std::string className = Kernel::ConfigService::Instance().getFacility(facility).catalogInfo().catalogName();
   auto catalog = CatalogFactory::Instance().create(className);
-  CatalogSession_sptr session =
-      catalog->login(username, password, endpoint, facility);
+  CatalogSession_sptr session = catalog->login(username, password, endpoint, facility);
   // Creates a new catalog and adds it to the compositeCatalog and activeCatalog
   // list.
   m_activeCatalogs.emplace(session, catalog);
@@ -66,9 +60,7 @@ ICatalog_sptr CatalogManagerImpl::getCatalog(const std::string &sessionID) {
 
   const auto found =
       std::find_if(m_activeCatalogs.cbegin(), m_activeCatalogs.cend(),
-                   [&sessionID](const auto &catalog) {
-                     return catalog.first->getSessionId() == sessionID;
-                   });
+                   [&sessionID](const auto &catalog) { return catalog.first->getSessionId() == sessionID; });
   if (found == m_activeCatalogs.cend()) {
     throw std::runtime_error("The session ID you have provided is invalid.");
   }
@@ -107,15 +99,12 @@ std::vector<CatalogSession_sptr> CatalogManagerImpl::getActiveSessions() {
   std::vector<CatalogSession_sptr> sessions;
   sessions.reserve(m_activeCatalogs.size());
 
-  std::transform(m_activeCatalogs.begin(), m_activeCatalogs.end(),
-                 std::back_inserter(sessions),
+  std::transform(m_activeCatalogs.begin(), m_activeCatalogs.end(), std::back_inserter(sessions),
                  [](const auto &activeCatalog) { return activeCatalog.first; });
   return sessions;
 }
 
 /// @returns An unsigned value indicating the number of active sessions
-size_t CatalogManagerImpl::numberActiveSessions() const {
-  return m_activeCatalogs.size();
-}
+size_t CatalogManagerImpl::numberActiveSessions() const { return m_activeCatalogs.size(); }
 } // namespace API
 } // namespace Mantid

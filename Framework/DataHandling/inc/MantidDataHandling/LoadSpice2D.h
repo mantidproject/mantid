@@ -68,13 +68,9 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
-  const std::vector<std::string> seeAlso() const override {
-    return {"LoadSpiceAscii", "LoadSpiceXML2DDet"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"LoadSpiceAscii", "LoadSpiceXML2DDet"}; }
   /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override {
-    return "DataHandling\\Text;SANS\\DataHandling";
-  }
+  const std::string category() const override { return "DataHandling\\Text;SANS\\DataHandling"; }
   /// Number of monitors
   static const int nMonitors = 2;
 
@@ -89,11 +85,9 @@ private:
 
   /// This method throws not found error if a element is not found in the xml
   /// file
-  void throwException(Poco::XML::Element *elem, const std::string &name,
-                      const std::string &fileName);
+  void throwException(Poco::XML::Element *elem, const std::string &name, const std::string &fileName);
   /// Run LoadInstrument Child Algorithm
-  void runLoadInstrument(const std::string &inst_name,
-                         const DataObjects::Workspace2D_sptr &localWorkspace);
+  void runLoadInstrument(const std::string &inst_name, const DataObjects::Workspace2D_sptr &localWorkspace);
 
   void setInputPropertiesAsMemberProperties();
 
@@ -101,24 +95,20 @@ private:
   std::pair<int, int> parseDetectorDimensions(const std::string &);
   void createWorkspace();
   std::vector<int> getData(const std::string &);
-  void createWorkspace(const std::vector<int> &data, const std::string &title,
-                       double monitor1_counts, double monitor2_counts);
+  void createWorkspace(const std::vector<int> &data, const std::string &title, double monitor1_counts,
+                       double monitor2_counts);
   void setWavelength(std::map<std::string, std::string> &metadata);
   template <class T>
-  T addRunProperty(std::map<std::string, std::string> &metadata,
-                   const std::string &oldName, const std::string &newName,
+  T addRunProperty(std::map<std::string, std::string> &metadata, const std::string &oldName, const std::string &newName,
                    const std::string &units = "");
-  template <class T>
-  void addRunProperty(const std::string &name, const T &value,
-                      const std::string &units = "");
+  template <class T> void addRunProperty(const std::string &name, const T &value, const std::string &units = "");
   void setBeamTrapRunProperty(std::map<std::string, std::string> &metadata);
   void detectorDistance(std::map<std::string, std::string> &metadata);
   void detectorTranslation(std::map<std::string, std::string> &metadata);
   void setMetadataAsRunProperties(std::map<std::string, std::string> &metadata);
   void rotateDetector(const double &);
   void setTimes();
-  void
-  setSansSpiceXmlFormatVersion(std::map<std::string, std::string> &metadata);
+  void setSansSpiceXmlFormatVersion(std::map<std::string, std::string> &metadata);
 
   // Member variables:
   DataObjects::Workspace2D_sptr m_workspace;

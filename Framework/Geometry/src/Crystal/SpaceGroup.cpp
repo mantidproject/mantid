@@ -24,8 +24,7 @@ using namespace Kernel;
  * @param group :: Group that contains all symmetry operations (including
  *centering).
  */
-SpaceGroup::SpaceGroup(size_t itNumber, const std::string &hmSymbol,
-                       const Group &group)
+SpaceGroup::SpaceGroup(size_t itNumber, const std::string &hmSymbol, const Group &group)
     : Group(group), m_number(itNumber), m_hmSymbol(hmSymbol) {}
 
 /// Returns the stored space group number
@@ -59,8 +58,7 @@ bool SpaceGroup::isAllowedReflection(const Kernel::V3D &hkl) const {
        *    | [(H . v) + delta] % 1.0 | > 1e-14 is checked
        * The transformation is only performed if necessary.
        */
-      if ((fabs(fmod(fabs(hkl.scalar_prod(operation.reducedVector())) + 1e-15,
-                     1.0)) > 1e-14) &&
+      if ((fabs(fmod(fabs(hkl.scalar_prod(operation.reducedVector())) + 1e-15, 1.0)) > 1e-14) &&
           (operation.transformHKL(hkl) == hkl)) {
         return false;
       }
@@ -72,9 +70,7 @@ bool SpaceGroup::isAllowedReflection(const Kernel::V3D &hkl) const {
 
 /// Convenience function for checking compatibility of a cell metric with the
 /// space group, see Group::isInvariant.
-bool SpaceGroup::isAllowedUnitCell(const UnitCell &cell) const {
-  return isInvariant(cell.getG());
-}
+bool SpaceGroup::isAllowedUnitCell(const UnitCell &cell) const { return isInvariant(cell.getG()); }
 
 /**
  * Returns the point group of the space group
@@ -104,12 +100,9 @@ Group_const_sptr SpaceGroup::getSiteSymmetryGroup(const V3D &position) const {
 
   std::vector<SymmetryOperation> siteSymmetryOps;
   AtomPositionsEqual comparator;
-  std::copy_if(m_allOperations.begin(), m_allOperations.end(),
-               std::inserter(siteSymmetryOps, siteSymmetryOps.begin()),
-               [&](const SymmetryOperation &op) {
-                 return Geometry::getWrappedVector(op * wrappedPosition) ==
-                        wrappedPosition;
-               });
+  std::copy_if(
+      m_allOperations.begin(), m_allOperations.end(), std::inserter(siteSymmetryOps, siteSymmetryOps.begin()),
+      [&](const SymmetryOperation &op) { return Geometry::getWrappedVector(op * wrappedPosition) == wrappedPosition; });
 
   return GroupFactory::create<Group>(siteSymmetryOps);
 }

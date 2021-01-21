@@ -33,8 +33,7 @@ class Property;
 */
 class MANTID_KERNEL_DLL PropertyHistory {
 public:
-  PropertyHistory(const std::string &name, const std::string &value,
-                  const std::string &type, const bool isdefault,
+  PropertyHistory(const std::string &name, const std::string &value, const std::string &type, const bool isdefault,
                   const unsigned int direction = 99);
 
   /// construct a property history from a property object
@@ -54,16 +53,15 @@ public:
   /// get direction flag of algorithm parameter const
   unsigned int direction() const { return m_direction; };
   /// print contents of object
-  void printSelf(std::ostream &, const int indent = 0,
-                 const size_t maxPropertyLength = 0) const;
+  void printSelf(std::ostream &, const int indent = 0, const size_t maxPropertyLength = 0) const;
   /// get whether algorithm parameter was left as default EMPTY_INT,LONG,DBL
   /// const
   bool isEmptyDefault() const;
 
   /// this is required for boost.python
   bool operator==(const PropertyHistory &other) const {
-    return name() == other.name() && value() == other.value() &&
-           type() == other.type() && isDefault() == other.isDefault();
+    return name() == other.name() && value() == other.value() && type() == other.type() &&
+           isDefault() == other.isDefault();
   }
 
 private:
@@ -84,8 +82,7 @@ using PropertyHistory_sptr = std::shared_ptr<PropertyHistory>;
 using PropertyHistory_const_sptr = std::shared_ptr<const PropertyHistory>;
 using PropertyHistories = std::vector<PropertyHistory_sptr>;
 
-MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &,
-                                           const PropertyHistory &);
+MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &, const PropertyHistory &);
 
 } // namespace Kernel
 } // namespace Mantid

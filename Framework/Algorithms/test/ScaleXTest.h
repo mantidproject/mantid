@@ -84,13 +84,11 @@ public:
     checkScaleFactorApplied(inputWS, result, factor, false); // multiply=false
   }
 
-  void
-  test_X_Scaled_By_Factor_Attached_To_Leaf_Component_Or_Higher_Level_Component_On_WS2D() {
+  void test_X_Scaled_By_Factor_Attached_To_Leaf_Component_Or_Higher_Level_Component_On_WS2D() {
     using namespace Mantid::API;
     using namespace Mantid::Geometry;
 
-    auto inputWS =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
     auto &pmap = inputWS->instrumentParameters();
     const std::string parname("factor");
 
@@ -114,32 +112,26 @@ public:
 
     // Test index 0 for factor 5
     double factor(det1Factor);
-    checkScaleFactorAppliedAtHistIndex(inputWS->histogram(0),
-                                       result->histogram(0), xsize, factor);
+    checkScaleFactorAppliedAtHistIndex(inputWS->histogram(0), result->histogram(0), xsize, factor);
 
     // Test index 1 for factor -10
     factor = det2Factor;
-    checkScaleFactorAppliedAtHistIndex(inputWS->histogram(1),
-                                       result->histogram(1), xsize, factor);
+    checkScaleFactorAppliedAtHistIndex(inputWS->histogram(1), result->histogram(1), xsize, factor);
 
     // Test the rest for factor 100
     // start at index 2 because 0 and 1 are checked above
     factor = instFactor;
     for (size_t i = 2; i < result->getNumberHistograms(); ++i) {
-      checkScaleFactorAppliedAtHistIndex(inputWS->histogram(i),
-                                         result->histogram(i), xsize, factor);
+      checkScaleFactorAppliedAtHistIndex(inputWS->histogram(i), result->histogram(i), xsize, factor);
     }
   }
 
-  void
-  test_X_Scaled_By_Factor_Attached_To_Leaf_Component_Or_Higher_Level_Component_On_Events() {
+  void test_X_Scaled_By_Factor_Attached_To_Leaf_Component_Or_Higher_Level_Component_On_Events() {
     using namespace Mantid::API;
     using namespace Mantid::Geometry;
 
     bool retainEventInfo = true;
-    auto inputWS =
-        WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(
-            2, 3, retainEventInfo);
+    auto inputWS = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(2, 3, retainEventInfo);
     auto &pmap = inputWS->instrumentParameters();
     const std::string parname("factor");
 
@@ -157,8 +149,7 @@ public:
     pmap.addDouble(inst->getComponentID(), parname, instFactor);
 
     auto result = runScaleX(inputWS, "Multiply", -1, parname);
-    auto resultEventWS =
-        std::dynamic_pointer_cast<Mantid::API::IEventWorkspace>(result);
+    auto resultEventWS = std::dynamic_pointer_cast<Mantid::API::IEventWorkspace>(result);
     TS_ASSERT(resultEventWS);
 
     const size_t xsize = result->blocksize();
@@ -166,36 +157,28 @@ public:
 
     // Test index 0 for factor 5
     double factor(det1Factor);
-    checkTimeOfFlightEvents(inputWS->getSpectrum(0),
-                            resultEventWS->getSpectrum(0), factor);
-    checkScaleFactorAppliedAtHistIndex(inputWS->histogram(0),
-                                       result->histogram(0), xsize, factor);
+    checkTimeOfFlightEvents(inputWS->getSpectrum(0), resultEventWS->getSpectrum(0), factor);
+    checkScaleFactorAppliedAtHistIndex(inputWS->histogram(0), result->histogram(0), xsize, factor);
 
     // Test index 1 for factor -10
     factor = det2Factor;
-    checkTimeOfFlightEvents(inputWS->getSpectrum(1),
-                            resultEventWS->getSpectrum(1), factor);
-    checkScaleFactorAppliedAtHistIndex(inputWS->histogram(1),
-                                       result->histogram(1), xsize, factor);
+    checkTimeOfFlightEvents(inputWS->getSpectrum(1), resultEventWS->getSpectrum(1), factor);
+    checkScaleFactorAppliedAtHistIndex(inputWS->histogram(1), result->histogram(1), xsize, factor);
 
     // Test the rest for factor 100
     // start at index 2 because 0 and 1 are checked above
     factor = instFactor;
     for (size_t i = 2; i < resultEventWS->getNumberHistograms(); ++i) {
-      checkTimeOfFlightEvents(inputWS->getSpectrum(i),
-                              resultEventWS->getSpectrum(i), factor);
-      checkScaleFactorAppliedAtHistIndex(inputWS->histogram(i),
-                                         result->histogram(i), xsize, factor);
+      checkTimeOfFlightEvents(inputWS->getSpectrum(i), resultEventWS->getSpectrum(i), factor);
+      checkScaleFactorAppliedAtHistIndex(inputWS->histogram(i), result->histogram(i), xsize, factor);
     }
   }
 
-  void
-  testMultiplyOperationWithCombineMulitpliesTheInstrumentAndFactorArguments() {
+  void testMultiplyOperationWithCombineMulitpliesTheInstrumentAndFactorArguments() {
     using namespace Mantid::API;
     using namespace Mantid::Kernel;
 
-    auto inputWS =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
     auto &pmap = inputWS->instrumentParameters();
     const std::string parname("factor");
     const double instFactor(10);
@@ -213,8 +196,7 @@ public:
     using namespace Mantid::API;
     using namespace Mantid::Kernel;
 
-    auto inputWS =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
     auto &pmap = inputWS->instrumentParameters();
     const std::string parname("factor");
     const double instFactor(10);
@@ -238,16 +220,12 @@ public:
     scale.initialize();
     scale.setRethrows(true);
 
-    auto inputWS =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
     AnalysisDataService::Instance().add("tomultiply", inputWS);
 
-    TS_ASSERT_THROWS_NOTHING(
-        scale.setPropertyValue("InputWorkspace", "tomultiply"));
-    TS_ASSERT_THROWS_NOTHING(
-        scale.setPropertyValue("OutputWorkspace", "multiplied"));
-    TS_ASSERT_THROWS_NOTHING(
-        scale.setPropertyValue("InstrumentParameter", "factor"));
+    TS_ASSERT_THROWS_NOTHING(scale.setPropertyValue("InputWorkspace", "tomultiply"));
+    TS_ASSERT_THROWS_NOTHING(scale.setPropertyValue("OutputWorkspace", "multiplied"));
+    TS_ASSERT_THROWS_NOTHING(scale.setPropertyValue("InstrumentParameter", "factor"));
 
     TS_ASSERT_THROWS(scale.execute(), const std::runtime_error &);
     TS_ASSERT(!scale.isExecuted());
@@ -263,14 +241,11 @@ public:
     scale.initialize();
     scale.setRethrows(true);
 
-    auto inputWS =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
     AnalysisDataService::Instance().add("tomultiply", inputWS);
 
-    TS_ASSERT_THROWS_NOTHING(
-        scale.setPropertyValue("InputWorkspace", "tomultiply"));
-    TS_ASSERT_THROWS_NOTHING(
-        scale.setPropertyValue("OutputWorkspace", "multiplied"));
+    TS_ASSERT_THROWS_NOTHING(scale.setPropertyValue("InputWorkspace", "tomultiply"));
+    TS_ASSERT_THROWS_NOTHING(scale.setPropertyValue("OutputWorkspace", "multiplied"));
     TS_ASSERT_THROWS_NOTHING(scale.setProperty("Combine", true));
 
     TS_ASSERT_THROWS(scale.execute(), const std::invalid_argument &);
@@ -280,23 +255,20 @@ public:
   }
 
 private:
-  Mantid::API::MatrixWorkspace_sptr
-  runScaleX(const Mantid::API::MatrixWorkspace_sptr &inputWS,
-            const std::string &op, const double factor = -1.0,
-            const std::string &instPar = "", const bool combine = false) {
+  Mantid::API::MatrixWorkspace_sptr runScaleX(const Mantid::API::MatrixWorkspace_sptr &inputWS, const std::string &op,
+                                              const double factor = -1.0, const std::string &instPar = "",
+                                              const bool combine = false) {
     Mantid::Algorithms::ScaleX scale;
     scale.initialize();
     scale.setChild(true);
 
     TS_ASSERT_THROWS_NOTHING(scale.setProperty("InputWorkspace", inputWS));
-    TS_ASSERT_THROWS_NOTHING(
-        scale.setPropertyValue("OutputWorkspace", "__unused"));
+    TS_ASSERT_THROWS_NOTHING(scale.setPropertyValue("OutputWorkspace", "__unused"));
     TS_ASSERT_THROWS_NOTHING(scale.setPropertyValue("Operation", op));
     if (factor > 0.0)
       TS_ASSERT_THROWS_NOTHING(scale.setProperty("Factor", factor));
     if (combine || !instPar.empty())
-      TS_ASSERT_THROWS_NOTHING(
-          scale.setPropertyValue("InstrumentParameter", instPar))
+      TS_ASSERT_THROWS_NOTHING(scale.setPropertyValue("InstrumentParameter", instPar))
     TS_ASSERT_THROWS_NOTHING(scale.setProperty("Combine", combine));
 
     TS_ASSERT_THROWS_NOTHING(scale.execute());
@@ -305,8 +277,7 @@ private:
     return scale.getProperty("OutputWorkspace");
   }
 
-  void checkTimeOfFlightEvents(const Mantid::API::IEventList &inEvents,
-                               const Mantid::API::IEventList &outEvents,
+  void checkTimeOfFlightEvents(const Mantid::API::IEventList &inEvents, const Mantid::API::IEventList &outEvents,
                                const double factor) {
 
     TS_ASSERT_EQUALS(outEvents.getNumberEvents(), inEvents.getNumberEvents());
@@ -320,10 +291,8 @@ private:
     }
   }
 
-  void checkScaleFactorApplied(
-      const Mantid::API::MatrixWorkspace_const_sptr &inputWS,
-      const Mantid::API::MatrixWorkspace_const_sptr &outputWS, double factor,
-      bool multiply) {
+  void checkScaleFactorApplied(const Mantid::API::MatrixWorkspace_const_sptr &inputWS,
+                               const Mantid::API::MatrixWorkspace_const_sptr &outputWS, double factor, bool multiply) {
 
     const size_t xsize = outputWS->blocksize();
     TS_ASSERT_EQUALS(inputWS->blocksize(), xsize);
@@ -356,9 +325,7 @@ private:
     }
   }
 
-  void checkScaleFactorAppliedAtHistIndex(const Histogram &input,
-                                          const Histogram &output,
-                                          const size_t xsize,
+  void checkScaleFactorAppliedAtHistIndex(const Histogram &input, const Histogram &output, const size_t xsize,
                                           const double factor) {
 
     // get all histograms of input and output
@@ -394,16 +361,13 @@ class ScaleXTestPerformance : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ScaleXTestPerformance *createSuite() {
-    return new ScaleXTestPerformance();
-  }
+  static ScaleXTestPerformance *createSuite() { return new ScaleXTestPerformance(); }
 
   static void destroySuite(ScaleXTestPerformance *suite) { delete suite; }
 
   void setUp() override {
     inputMatrix = WorkspaceCreationHelper::create2DWorkspaceBinned(10000, 1000);
-    inputEvent =
-        WorkspaceCreationHelper::createEventWorkspace(10000, 1000, 5000);
+    inputEvent = WorkspaceCreationHelper::createEventWorkspace(10000, 1000, 5000);
   }
 
   void tearDown() override {

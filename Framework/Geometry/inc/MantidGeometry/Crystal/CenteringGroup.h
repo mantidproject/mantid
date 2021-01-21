@@ -56,11 +56,9 @@ using CenteringGroup_const_sptr = std::shared_ptr<const CenteringGroup>;
 /// Helper class to keep this out of the interface of CenteringGroup.
 class MANTID_GEOMETRY_DLL CenteringGroupCreatorImpl {
 public:
-  CenteringGroup::CenteringType
-  getCenteringType(const std::string &centeringSymbol) const;
+  CenteringGroup::CenteringType getCenteringType(const std::string &centeringSymbol) const;
 
-  std::vector<SymmetryOperation>
-  getSymmetryOperations(CenteringGroup::CenteringType centeringType) const;
+  std::vector<SymmetryOperation> getSymmetryOperations(CenteringGroup::CenteringType centeringType) const;
 
 protected:
   std::vector<SymmetryOperation> getPrimitive() const;
@@ -79,15 +77,14 @@ private:
   friend struct Mantid::Kernel::CreateUsingNew<CenteringGroupCreatorImpl>;
 };
 
-using CenteringGroupCreator =
-    Mantid::Kernel::SingletonHolder<CenteringGroupCreatorImpl>;
+using CenteringGroupCreator = Mantid::Kernel::SingletonHolder<CenteringGroupCreatorImpl>;
 
 } // namespace Geometry
 } // namespace Mantid
 
 namespace Mantid {
 namespace Kernel {
-EXTERN_MANTID_GEOMETRY template class MANTID_GEOMETRY_DLL Mantid::Kernel::
-    SingletonHolder<Mantid::Geometry::CenteringGroupCreatorImpl>;
+EXTERN_MANTID_GEOMETRY template class MANTID_GEOMETRY_DLL
+    Mantid::Kernel::SingletonHolder<Mantid::Geometry::CenteringGroupCreatorImpl>;
 }
 } // namespace Mantid

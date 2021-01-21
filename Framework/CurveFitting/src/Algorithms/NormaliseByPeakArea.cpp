@@ -43,23 +43,18 @@ using namespace Kernel;
 /** Constructor
  */
 NormaliseByPeakArea::NormaliseByPeakArea()
-    : API::Algorithm(), m_inputWS(), m_mass(0.0), m_sumResults(true),
-      m_normalisedWS(), m_yspaceWS(), m_fittedWS(), m_symmetrisedWS(),
-      m_progress() {}
+    : API::Algorithm(), m_inputWS(), m_mass(0.0), m_sumResults(true), m_normalisedWS(), m_yspaceWS(), m_fittedWS(),
+      m_symmetrisedWS(), m_progress() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string NormaliseByPeakArea::name() const {
-  return "NormaliseByPeakArea";
-}
+const std::string NormaliseByPeakArea::name() const { return "NormaliseByPeakArea"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int NormaliseByPeakArea::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string NormaliseByPeakArea::category() const {
-  return "CorrectionFunctions\\NormalisationCorrections";
-}
+const std::string NormaliseByPeakArea::category() const { return "CorrectionFunctions\\NormalisationCorrections"; }
 
 //----------------------------------------------------------------------------------------------
 
@@ -71,36 +66,27 @@ void NormaliseByPeakArea::init() {
   wsValidator->add<HistogramValidator>(false); // point data
   wsValidator->add<InstrumentValidator>();
   wsValidator->add<WorkspaceUnitValidator>("TOF");
-  declareProperty(std::make_unique<WorkspaceProperty<>>(
-                      "InputWorkspace", "", Direction::Input, wsValidator),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input, wsValidator),
                   "An input workspace.");
 
   auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   mustBePositive->setLowerExclusive(true); // strictly greater than 0.0
-  declareProperty("Mass", -1.0, mustBePositive,
-                  "The mass, in AMU, defining the recoil peak to fit");
-  declareProperty(
-      "Sum", true,
-      "If true all spectra on the Y-space, fitted & symmetrised workspaces "
-      "are summed in quadrature to produce the final result");
+  declareProperty("Mass", -1.0, mustBePositive, "The mass, in AMU, defining the recoil peak to fit");
+  declareProperty("Sum", true,
+                  "If true all spectra on the Y-space, fitted & symmetrised workspaces "
+                  "are summed in quadrature to produce the final result");
 
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "Input workspace normalised by the fitted peak area");
-  declareProperty(std::make_unique<WorkspaceProperty<>>("YSpaceDataWorkspace",
-                                                        "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("YSpaceDataWorkspace", "", Direction::Output),
                   "Input workspace converted to units of Y-space");
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("FittedWorkspace", "",
-                                            Direction::Output),
-      "Output from fit of the single mass peakin y-space. The output units are "
-      "in momentum (A^-1)");
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("SymmetrisedWorkspace", "",
-                                            Direction::Output),
-      "The input data symmetrised about Y=0.  The output units are in momentum "
-      "(A^-1)");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("FittedWorkspace", "", Direction::Output),
+                  "Output from fit of the single mass peakin y-space. The output units are "
+                  "in momentum (A^-1)");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("SymmetrisedWorkspace", "", Direction::Output),
+                  "The input data symmetrised about Y=0.  The output units are in momentum "
+                  "(A^-1)");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -112,15 +98,13 @@ void NormaliseByPeakArea::exec() {
   createOutputWorkspaces(yspaceIn);
 
   const auto nhist = static_cast<int64_t>(yspaceIn->getNumberHistograms());
-  const auto nreports =
-      static_cast<int64_t>(yspaceIn->getNumberHistograms() +
-                           2 * m_symmetrisedWS->getNumberHistograms() *
-                               m_symmetrisedWS->blocksize());
+  const auto nreports = static_cast<int64_t>(yspaceIn->getNumberHistograms() +
+                                             2 * m_symmetrisedWS->getNumberHistograms() * m_symmetrisedWS->blocksize());
   m_progress = std::make_unique<API::Progress>(this, 0.10, 1.0, nreports);
 
   for (int64_t i = 0; i < nhist; ++i) {
     m_normalisedWS->setSharedX(i, m_inputWS->sharedX(i)); // TOF
-    if (!m_sumResults) // avoid setting multiple times if we are summing
+    if (!m_sumResults)                                    // avoid setting multiple times if we are summing
     {
       m_yspaceWS->setSharedX(i, yspaceIn->sharedX(i));      // momentum
       m_fittedWS->setSharedX(i, yspaceIn->sharedX(i));      // momentum
@@ -155,10 +139,8 @@ void NormaliseByPeakArea::retrieveInputs() {
  * Creates & cache output workspaces.
  * @param yspaceIn Workspace containing TOF input values converted to Y-space
  */
-void NormaliseByPeakArea::createOutputWorkspaces(
-    const API::MatrixWorkspace_sptr &yspaceIn) {
-  m_normalisedWS =
-      WorkspaceFactory::Instance().create(m_inputWS); // TOF data is not resized
+void NormaliseByPeakArea::createOutputWorkspaces(const API::MatrixWorkspace_sptr &yspaceIn) {
+  m_normalisedWS = WorkspaceFactory::Instance().create(m_inputWS); // TOF data is not resized
 
   const size_t nhist = m_sumResults ? 1 : yspaceIn->getNumberHistograms();
 
@@ -186,8 +168,7 @@ void NormaliseByPeakArea::createOutputWorkspaces(
 /**
  * @param workspace Workspace whose units should be altered
  */
-void NormaliseByPeakArea::setUnitsToMomentum(
-    const API::MatrixWorkspace_sptr &workspace) {
+void NormaliseByPeakArea::setUnitsToMomentum(const API::MatrixWorkspace_sptr &workspace) {
   // Units
   auto xLabel = std::make_shared<Units::Label>("Momentum", "A^-1");
   workspace->getAxis(0)->unit() = xLabel;
@@ -234,8 +215,7 @@ MatrixWorkspace_sptr NormaliseByPeakArea::convertInputToY() {
  * @param index Index of the spectrum to fit
  * @return The value of the peak area
  */
-double NormaliseByPeakArea::fitToMassPeak(const MatrixWorkspace_sptr &yspace,
-                                          const size_t index) {
+double NormaliseByPeakArea::fitToMassPeak(const MatrixWorkspace_sptr &yspace, const size_t index) {
   auto alg = createChildAlgorithm("Fit");
   auto func = FunctionFactory::Instance().createFunction("ComptonPeakProfile");
   func->setAttributeValue("Mass", m_mass);
@@ -255,27 +235,23 @@ double NormaliseByPeakArea::fitToMassPeak(const MatrixWorkspace_sptr &yspace,
   }
   func->setParameter("Intensity", areaGuess);
   if (g_log.is(Logger::Priority::PRIO_DEBUG)) {
-    g_log.debug() << "Starting values for peak fit on spectrum "
-                  << yspace->getSpectrum(index).getSpectrumNo() << ":\n"
+    g_log.debug() << "Starting values for peak fit on spectrum " << yspace->getSpectrum(index).getSpectrumNo() << ":\n"
                   << "area=" << areaGuess << "\n"
                   << "width=" << PEAK_WIDTH_GUESS << "\n"
                   << "position=" << PEAK_POS_GUESS << "\n";
   }
   alg->setProperty("Function", func);
-  alg->setProperty("InputWorkspace",
-                   std::static_pointer_cast<Workspace>(yspace));
+  alg->setProperty("InputWorkspace", std::static_pointer_cast<Workspace>(yspace));
   alg->setProperty("WorkspaceIndex", static_cast<int>(index));
   alg->setProperty("CreateOutput", true);
   alg->execute();
 
   MatrixWorkspace_sptr fitOutputWS = alg->getProperty("OutputWorkspace");
-  saveToOutput(m_fittedWS, fitOutputWS->sharedY(1), yspace->sharedE(index),
-               index);
+  saveToOutput(m_fittedWS, fitOutputWS->sharedY(1), yspace->sharedE(index), index);
 
   double area = func->getParameter("Intensity");
   if (g_log.is(Logger::Priority::PRIO_INFORMATION)) {
-    g_log.information() << "Calculated peak area for spectrum "
-                        << yspace->getSpectrum(index).getSpectrumNo() << ": "
+    g_log.information() << "Calculated peak area for spectrum " << yspace->getSpectrum(index).getSpectrumNo() << ": "
                         << area << "\n";
   }
   return area;
@@ -286,8 +262,7 @@ double NormaliseByPeakArea::fitToMassPeak(const MatrixWorkspace_sptr &yspace,
  * @param area Value to use as normalisation factor
  * @param index Index on input spectrum to normalise
  */
-void NormaliseByPeakArea::normaliseTOFData(const double area,
-                                           const size_t index) {
+void NormaliseByPeakArea::normaliseTOFData(const double area, const size_t index) {
   m_normalisedWS->mutableY(index) = m_inputWS->y(index) / area;
   m_normalisedWS->mutableE(index) = m_inputWS->e(index) / area;
 }
@@ -298,11 +273,9 @@ void NormaliseByPeakArea::normaliseTOFData(const double area,
  * @param eValues Input errors values for y-space
  * @param index Index of the workspace. Only used when not summing.
  */
-void NormaliseByPeakArea::saveToOutput(
-    const API::MatrixWorkspace_sptr &accumWS,
-    const Kernel::cow_ptr<HistogramData::HistogramY> &yValues,
-    const Kernel::cow_ptr<HistogramData::HistogramE> &eValues,
-    const size_t index) {
+void NormaliseByPeakArea::saveToOutput(const API::MatrixWorkspace_sptr &accumWS,
+                                       const Kernel::cow_ptr<HistogramData::HistogramY> &yValues,
+                                       const Kernel::cow_ptr<HistogramData::HistogramE> &eValues, const size_t index) {
   assert(yValues->rawData().size() == eValues->rawData().size());
 
   if (m_sumResults) {
@@ -345,8 +318,7 @@ void NormaliseByPeakArea::symmetriseYSpace() {
   // Symmetrise input data in Y-space
   const double dy = 0.1;
   const size_t npts(m_yspaceWS->blocksize());
-  const auto nhist =
-      static_cast<int64_t>(m_symmetrisedWS->getNumberHistograms());
+  const auto nhist = static_cast<int64_t>(m_symmetrisedWS->getNumberHistograms());
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_symmetrisedWS))
   for (int64_t i = 0; i < nhist; ++i) {

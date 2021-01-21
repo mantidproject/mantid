@@ -32,19 +32,15 @@ private:
   class MockvtkDataSetFactory : public Mantid::VATES::vtkDataSetFactory {
   public:
     GNU_DIAG_OFF_SUGGEST_OVERRIDE
-    MOCK_CONST_METHOD1(
-        create, vtkSmartPointer<vtkDataSet>(Mantid::VATES::ProgressAction &));
-    MOCK_METHOD1(initialize,
-                 void(const std::shared_ptr<Mantid::API::Workspace> &));
+    MOCK_CONST_METHOD1(create, vtkSmartPointer<vtkDataSet>(Mantid::VATES::ProgressAction &));
+    MOCK_METHOD1(initialize, void(const std::shared_ptr<Mantid::API::Workspace> &));
     MOCK_CONST_METHOD0(validate, void());
     MOCK_CONST_METHOD0(getFactoryTypeName, std::string());
     GNU_DIAG_ON_SUGGEST_OVERRIDE
     void setSuccessorConcrete(std::unique_ptr<vtkDataSetFactory> pSuccessor) {
       vtkDataSetFactory::setSuccessor(pSuccessor);
     }
-    bool hasSuccessorConcrete() const {
-      return vtkDataSetFactory::hasSuccessor();
-    }
+    bool hasSuccessorConcrete() const { return vtkDataSetFactory::hasSuccessor(); }
   };
 
   /// Fake helper type.
@@ -58,11 +54,9 @@ public:
     auto successor = new MockvtkDataSetFactory();
     auto uniqueSuccessor = std::unique_ptr<MockvtkDataSetFactory>(successor);
 
-    EXPECT_CALL(factory, getFactoryTypeName())
-        .WillOnce(testing::Return("TypeA"));
-    EXPECT_CALL(*successor, getFactoryTypeName())
-        .WillOnce(testing::Return("TypeB")); // Different type name, so setting
-                                             // the successor should work.
+    EXPECT_CALL(factory, getFactoryTypeName()).WillOnce(testing::Return("TypeA"));
+    EXPECT_CALL(*successor, getFactoryTypeName()).WillOnce(testing::Return("TypeB")); // Different type name, so setting
+                                                                                      // the successor should work.
     factory.setSuccessor(std::move(uniqueSuccessor));
 
     TSM_ASSERT("Successor should have been set", factory.hasSuccessor());
@@ -74,14 +68,12 @@ public:
     MockvtkDataSetFactory factory;
     auto successor = new MockvtkDataSetFactory();
     auto uniqueSuccessor = std::unique_ptr<MockvtkDataSetFactory>(successor);
-    EXPECT_CALL(factory, getFactoryTypeName())
-        .WillOnce(testing::Return("TypeA"));
+    EXPECT_CALL(factory, getFactoryTypeName()).WillOnce(testing::Return("TypeA"));
     EXPECT_CALL(*successor, getFactoryTypeName())
         .WillOnce(testing::Return("TypeA")); // Same type name. should NOT work.
     TSM_ASSERT_THROWS("By default, should throw when successor type is the "
                       "same as the container.",
-                      factory.setSuccessor(std::move(uniqueSuccessor)),
-                      const std::runtime_error &);
+                      factory.setSuccessor(std::move(uniqueSuccessor)), const std::runtime_error &);
     TS_ASSERT(testing::Mock::VerifyAndClearExpectations(&factory));
     TS_ASSERT(testing::Mock::VerifyAndClearExpectations(successor));
   }
@@ -120,12 +112,10 @@ public:
         .Times(1)
         .WillOnce(Return(vtkSmartPointer<vtkStructuredGrid>::New()));
 
-    IMDHistoWorkspace_sptr ws_sptr =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2);
+    IMDHistoWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2);
     auto product = factory.oneStepCreate(ws_sptr, progressUpdater);
     TS_ASSERT(product != nullptr);
-    TSM_ASSERT_EQUALS("Output not wired up correctly to ::create() method",
-                      "vtkStructuredGrid",
+    TSM_ASSERT_EQUALS("Output not wired up correctly to ::create() method", "vtkStructuredGrid",
                       std::string(product->GetClassName()));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&factory));
   }

@@ -21,11 +21,9 @@ namespace Reflectometry {
  @param numberOfBinsQx : Number of bins along the qx axis
  @param numberOfBinsQz : Number of bins along the qz axis
  */
-ReflectometryTransformQxQz::ReflectometryTransformQxQz(
-    double qxMin, double qxMax, double qzMin, double qzMax,
-    double incidentTheta, int numberOfBinsQx, int numberOfBinsQz)
-    : ReflectometryTransform("Qx", "qx", qxMin, qxMax, "Qz", "qz", qzMin, qzMax,
-                             numberOfBinsQx, numberOfBinsQz,
+ReflectometryTransformQxQz::ReflectometryTransformQxQz(double qxMin, double qxMax, double qzMin, double qzMax,
+                                                       double incidentTheta, int numberOfBinsQx, int numberOfBinsQz)
+    : ReflectometryTransform("Qx", "qx", qxMin, qxMax, "Qz", "qz", qzMin, qzMax, numberOfBinsQx, numberOfBinsQz,
                              new CalculateReflectometryQxQz()) {
   if (incidentTheta < 0 || incidentTheta > 90) {
     throw std::out_of_range("incident theta angle must be > 0 and < 90");

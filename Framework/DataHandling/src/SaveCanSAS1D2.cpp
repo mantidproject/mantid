@@ -61,29 +61,21 @@ void SaveCanSAS1D2::init() {
   SaveCanSAS1D::init();
 
   declareProperty(
-      std::make_unique<API::WorkspaceProperty<>>(
-          "Transmission", "", Kernel::Direction::Input, PropertyMode::Optional,
-          std::make_shared<API::WorkspaceUnitValidator>("Wavelength")),
+      std::make_unique<API::WorkspaceProperty<>>("Transmission", "", Kernel::Direction::Input, PropertyMode::Optional,
+                                                 std::make_shared<API::WorkspaceUnitValidator>("Wavelength")),
       "The transmission workspace. Optional. If given, will be saved at "
       "TransmissionSpectrum");
 
-  declareProperty(
-      std::make_unique<API::WorkspaceProperty<>>(
-          "TransmissionCan", "", Kernel::Direction::Input,
-          PropertyMode::Optional,
-          std::make_shared<API::WorkspaceUnitValidator>("Wavelength")),
-      "The transmission workspace of the Can. Optional. If given, will be "
-      "saved at TransmissionSpectrum");
+  declareProperty(std::make_unique<API::WorkspaceProperty<>>(
+                      "TransmissionCan", "", Kernel::Direction::Input, PropertyMode::Optional,
+                      std::make_shared<API::WorkspaceUnitValidator>("Wavelength")),
+                  "The transmission workspace of the Can. Optional. If given, will be "
+                  "saved at TransmissionSpectrum");
 
-  declareProperty(
-      "SampleTransmissionRunNumber", "",
-      "The run number for the sample transmission workspace. Optional.");
-  declareProperty("SampleDirectRunNumber", "",
-                  "The run number for the sample direct workspace. Optional.");
-  declareProperty("CanScatterRunNumber", "",
-                  "The run number for the can scatter workspace. Optional.");
-  declareProperty("CanDirectRunNumber", "",
-                  "The run number for the can direct workspace. Optional.");
+  declareProperty("SampleTransmissionRunNumber", "", "The run number for the sample transmission workspace. Optional.");
+  declareProperty("SampleDirectRunNumber", "", "The run number for the sample direct workspace. Optional.");
+  declareProperty("CanScatterRunNumber", "", "The run number for the can scatter workspace. Optional.");
+  declareProperty("CanDirectRunNumber", "", "The run number for the can direct workspace. Optional.");
 }
 
 /// Overwrites Algorithm method
@@ -92,13 +84,11 @@ void SaveCanSAS1D2::exec() {
   m_trans_ws = getProperty("Transmission");
   m_transcan_ws = getProperty("TransmissionCan");
   if (!m_workspace) {
-    throw std::invalid_argument(
-        "Invalid inputworkspace ,Error in  SaveCanSAS1D");
+    throw std::invalid_argument("Invalid inputworkspace ,Error in  SaveCanSAS1D");
   }
 
   if (m_workspace->getNumberHistograms() > 1) {
-    throw std::invalid_argument(
-        "Error in SaveCanSAS1D - more than one histogram.");
+    throw std::invalid_argument("Error in SaveCanSAS1D - more than one histogram.");
   }
 
   if ((m_trans_ws && m_trans_ws->getNumberHistograms() > 1) ||
@@ -236,8 +226,7 @@ void SaveCanSAS1D2::createSASProcessElement(std::string &sasProcess) {
   if (m_trans_ws) {
     // Add other run numbers
     // SampleTransmission
-    const auto sample_trans_run =
-        getPropertyValue("SampleTransmissionRunNumber");
+    const auto sample_trans_run = getPropertyValue("SampleTransmissionRunNumber");
     sasProcess += "\n\t\t\t<term name=\"sample_trans_run\">";
     sasProcess += sample_trans_run + "</term>";
 
@@ -293,8 +282,7 @@ void SaveCanSAS1D2::createSASProcessElement(std::string &sasProcess) {
  * @param name :: name of the type of spectrum. Two values are acceptable:
  * sample, can
  */
-void SaveCanSAS1D2::createSASTransElement(std::string &sasTrans,
-                                          const std::string &name) {
+void SaveCanSAS1D2::createSASTransElement(std::string &sasTrans, const std::string &name) {
   API::MatrixWorkspace_const_sptr m_ws;
   if (name == "sample") {
     m_ws = m_trans_ws;
@@ -355,15 +343,13 @@ void SaveCanSAS1D2::writeHeader(const std::string &fileName) {
   try {
     m_outFile.open(fileName.c_str(), std::ios::out | std::ios::trunc);
     // write the file header
-    m_outFile
-        << "<?xml version=\"1.0\"?>\n"
-        << "<?xml-stylesheet type=\"text/xsl\" href=\"cansas1d.xsl\" ?>\n";
+    m_outFile << "<?xml version=\"1.0\"?>\n"
+              << "<?xml-stylesheet type=\"text/xsl\" href=\"cansas1d.xsl\" ?>\n";
     std::string sasroot;
     createSASRootElement(sasroot);
     m_outFile << sasroot;
   } catch (std::fstream::failure &) {
-    throw Exception::FileError("Error opening the output file for writing",
-                               fileName);
+    throw Exception::FileError("Error opening the output file for writing", fileName);
   }
 }
 } // namespace DataHandling

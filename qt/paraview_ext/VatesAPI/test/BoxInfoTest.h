@@ -29,14 +29,11 @@ public:
     // Arrange
     const std::string wsName = "MD_HISTO_WS";
     auto ws = makeFakeMDHistoWorkspace(1.0, 4, 5, 1.0, 0.1, wsName);
-    auto workspaceProvider = std::make_unique<
-        Mantid::VATES::ADSWorkspaceProvider<Mantid::API::IMDEventWorkspace>>();
+    auto workspaceProvider = std::make_unique<Mantid::VATES::ADSWorkspaceProvider<Mantid::API::IMDEventWorkspace>>();
 
     // Act + Assert
     TSM_ASSERT("Should have no recursion depth for top level splitting.",
-               boost::none ==
-                   Mantid::VATES::findRecursionDepthForTopLevelSplitting(
-                       wsName, *workspaceProvider));
+               boost::none == Mantid::VATES::findRecursionDepthForTopLevelSplitting(wsName, *workspaceProvider));
 
     // Clean up
     AnalysisDataService::Instance().remove(wsName);
@@ -46,14 +43,11 @@ public:
     // Arrange
     const std::string wsName = "MD_EVENT_WS";
     auto ws = makeAnyMDEW<MDLeanEvent<3>, 3>(10, 0.0, 10.0, 1, wsName);
-    auto workspaceProvider = std::make_unique<
-        Mantid::VATES::ADSWorkspaceProvider<Mantid::API::IMDEventWorkspace>>();
+    auto workspaceProvider = std::make_unique<Mantid::VATES::ADSWorkspaceProvider<Mantid::API::IMDEventWorkspace>>();
 
     // Act + Assert
     TSM_ASSERT("Should have no recursion depth for top level splitting.",
-               boost::none ==
-                   Mantid::VATES::findRecursionDepthForTopLevelSplitting(
-                       wsName, *workspaceProvider));
+               boost::none == Mantid::VATES::findRecursionDepthForTopLevelSplitting(wsName, *workspaceProvider));
 
     // Clean up
     AnalysisDataService::Instance().remove(wsName);
@@ -68,16 +62,13 @@ public:
     boxController->setSplitTopInto(0, 10);
     boxController->setSplitTopInto(1, 20);
     boxController->setSplitTopInto(2, 30);
-    auto workspaceProvider = std::make_unique<
-        Mantid::VATES::ADSWorkspaceProvider<Mantid::API::IMDEventWorkspace>>();
+    auto workspaceProvider = std::make_unique<Mantid::VATES::ADSWorkspaceProvider<Mantid::API::IMDEventWorkspace>>();
 
     // Act
-    auto result = Mantid::VATES::findRecursionDepthForTopLevelSplitting(
-        wsName, *workspaceProvider);
+    auto result = Mantid::VATES::findRecursionDepthForTopLevelSplitting(wsName, *workspaceProvider);
     // Assert
 
-    TSM_ASSERT("Should have recursion depth of 1 for top level splitting.",
-               result.get() == 1);
+    TSM_ASSERT("Should have recursion depth of 1 for top level splitting.", result.get() == 1);
 
     // Clean up
     AnalysisDataService::Instance().remove(wsName);

@@ -27,28 +27,22 @@ void VatesKnowledgeSerializer::setImplicitFunction(
 }
 
 /// Set the workspace name to apply.
-void VatesKnowledgeSerializer::setWorkspace(
-    const Mantid::API::IMDWorkspace &workspace) {
+void VatesKnowledgeSerializer::setWorkspace(const Mantid::API::IMDWorkspace &workspace) {
 
-  this->m_wsNameXML = MDGeometryXMLDefinitions::workspaceNameXMLTagStart() +
-                      workspace.getName() +
+  this->m_wsNameXML = MDGeometryXMLDefinitions::workspaceNameXMLTagStart() + workspace.getName() +
                       MDGeometryXMLDefinitions::workspaceNameXMLTagEnd();
-  this->m_wsLocationXML =
-      MDGeometryXMLDefinitions::workspaceLocationXMLTagStart() + "" +
-      MDGeometryXMLDefinitions::workspaceLocationXMLTagEnd();
+  this->m_wsLocationXML = MDGeometryXMLDefinitions::workspaceLocationXMLTagStart() + "" +
+                          MDGeometryXMLDefinitions::workspaceLocationXMLTagEnd();
   this->m_geomXML = workspace.getGeometryXML();
 }
 
 void VatesKnowledgeSerializer::setWorkspaceName(const std::string &wsName) {
   this->m_wsName = wsName;
-  this->m_wsNameXML =
-      std::string(MDGeometryXMLDefinitions::workspaceNameXMLTagStart() +
-                  wsName + MDGeometryXMLDefinitions::workspaceNameXMLTagEnd());
+  this->m_wsNameXML = std::string(MDGeometryXMLDefinitions::workspaceNameXMLTagStart() + wsName +
+                                  MDGeometryXMLDefinitions::workspaceNameXMLTagEnd());
 }
 
-void VatesKnowledgeSerializer::setGeometryXML(const std::string &geomXML) {
-  this->m_geomXML = geomXML;
-}
+void VatesKnowledgeSerializer::setGeometryXML(const std::string &geomXML) { this->m_geomXML = geomXML; }
 
 /// Create the xml string correponding to the set values.
 std::string VatesKnowledgeSerializer::createXMLString() const {
@@ -58,41 +52,28 @@ std::string VatesKnowledgeSerializer::createXMLString() const {
   }
 
   if (this->m_wsNameXML ==
-      (MDGeometryXMLDefinitions::workspaceNameXMLTagStart() +
-       MDGeometryXMLDefinitions::workspaceNameXMLTagEnd())) {
+      (MDGeometryXMLDefinitions::workspaceNameXMLTagStart() + MDGeometryXMLDefinitions::workspaceNameXMLTagEnd())) {
     throw std::runtime_error("No workspace name provided on workspace.");
   }
   // Check to see if a function has been provided.
   if (m_spFunction) {
-    return std::string(
-        MDGeometryXMLDefinitions::workspaceInstructionXMLTagStart() +
-        m_wsNameXML + m_wsLocationXML + m_geomXML +
-        m_spFunction->toXMLString() +
-        MDGeometryXMLDefinitions::workspaceInstructionXMLTagEnd());
+    return std::string(MDGeometryXMLDefinitions::workspaceInstructionXMLTagStart() + m_wsNameXML + m_wsLocationXML +
+                       m_geomXML + m_spFunction->toXMLString() +
+                       MDGeometryXMLDefinitions::workspaceInstructionXMLTagEnd());
   } else {
     // Functions are optional, so don't provide them as part of the completed
     // xml if not present.
-    return std::string(
-        MDGeometryXMLDefinitions::workspaceInstructionXMLTagStart() +
-        m_wsNameXML + m_wsLocationXML + m_geomXML +
-        MDGeometryXMLDefinitions::workspaceInstructionXMLTagEnd());
+    return std::string(MDGeometryXMLDefinitions::workspaceInstructionXMLTagStart() + m_wsNameXML + m_wsLocationXML +
+                       m_geomXML + MDGeometryXMLDefinitions::workspaceInstructionXMLTagEnd());
   }
 }
 
-const std::string &VatesKnowledgeSerializer::getWorkspaceName() const {
-  return this->m_wsName;
-}
+const std::string &VatesKnowledgeSerializer::getWorkspaceName() const { return this->m_wsName; }
 
-const std::string &VatesKnowledgeSerializer::getWorkspaceGeometry() const {
-  return this->m_geomXML;
-}
+const std::string &VatesKnowledgeSerializer::getWorkspaceGeometry() const { return this->m_geomXML; }
 
-bool VatesKnowledgeSerializer::hasFunctionInfo() const {
-  return static_cast<bool>(m_spFunction);
-}
+bool VatesKnowledgeSerializer::hasFunctionInfo() const { return static_cast<bool>(m_spFunction); }
 
-bool VatesKnowledgeSerializer::hasGeometryInfo() const {
-  return !m_geomXML.empty() && !m_wsName.empty();
-}
+bool VatesKnowledgeSerializer::hasGeometryInfo() const { return !m_geomXML.empty() && !m_wsName.empty(); }
 } // namespace VATES
 } // namespace Mantid

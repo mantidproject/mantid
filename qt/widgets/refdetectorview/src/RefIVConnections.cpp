@@ -28,13 +28,10 @@ using namespace SpectrumView;
  * @param vGraphDisplay  The GraphDisplay object that will display
  *                       vertical cuts through the image
  */
-RefIVConnections::RefIVConnections(Ui_RefImageViewer *ui,
-                                   RefImageView *ivMainWindow,
-                                   RefImageDisplay *imageDisplay,
-                                   GraphDisplay *hGraphDisplay,
-                                   GraphDisplay *vGraphDisplay)
-    : m_ivUI(ui), m_ivMainWindow(ivMainWindow), m_imageDisplay(imageDisplay),
-      m_hGraphDisplay(hGraphDisplay), m_vGraphDisplay(vGraphDisplay) {
+RefIVConnections::RefIVConnections(Ui_RefImageViewer *ui, RefImageView *ivMainWindow, RefImageDisplay *imageDisplay,
+                                   GraphDisplay *hGraphDisplay, GraphDisplay *vGraphDisplay)
+    : m_ivUI(ui), m_ivMainWindow(ivMainWindow), m_imageDisplay(imageDisplay), m_hGraphDisplay(hGraphDisplay),
+      m_vGraphDisplay(vGraphDisplay) {
   // First disable a few un-implemented controls
   m_ivUI->menuGraph_Selected->setDisabled(true);
   m_ivUI->actionClear_Selections->setDisabled(true);
@@ -44,8 +41,7 @@ RefIVConnections::RefIVConnections(Ui_RefImageViewer *ui,
   m_ivUI->actionGraph_Rebinned_Data->setDisabled(true);
   m_ivUI->menuHelp->setDisabled(true);
 
-  QObject::connect(m_ivUI->actionClose, SIGNAL(triggered()), this,
-                   SLOT(closeViewer()));
+  QObject::connect(m_ivUI->actionClose, SIGNAL(triggered()), this, SLOT(closeViewer()));
 
   // Now set up the GUI components
   QList<int> image_sizes;
@@ -106,12 +102,10 @@ RefIVConnections::RefIVConnections(Ui_RefImageViewer *ui,
 
   // Point selections & connection works on mouse release
   m_imagePicker->setRubberBand(QwtPicker::CrossRubberBand);
-  m_imagePicker->setSelectionFlags(QwtPicker::PointSelection |
-                                   QwtPicker::DragSelection);
+  m_imagePicker->setSelectionFlags(QwtPicker::PointSelection | QwtPicker::DragSelection);
 
   m_imagePicker2->setRubberBand(QwtPicker::CrossRubberBand);
-  m_imagePicker2->setSelectionFlags(QwtPicker::PointSelection |
-                                    QwtPicker::DragSelection);
+  m_imagePicker2->setSelectionFlags(QwtPicker::PointSelection | QwtPicker::DragSelection);
 
   /*
      QObject::connect( m_imagePicker, SIGNAL(selected(const QwtPolygon &)),
@@ -143,54 +137,38 @@ RefIVConnections::RefIVConnections(Ui_RefImageViewer *ui,
      QwtPicker::ClickSelection  );
      */
 
-  QObject::connect(m_imagePicker2, SIGNAL(mouseMoved()), this,
-                   SLOT(imagePicker2Moved()));
+  QObject::connect(m_imagePicker2, SIGNAL(mouseMoved()), this, SLOT(imagePicker2Moved()));
 
-  QObject::connect(m_imagePicker, SIGNAL(mouseMoved()), this,
-                   SLOT(imagePickerMoved()));
+  QObject::connect(m_imagePicker, SIGNAL(mouseMoved()), this, SLOT(imagePickerMoved()));
 
   /*
    * Connections on the peak, back and TOF input boxes
    */
-  QObject::connect(m_ivUI->lineEdit_peakLeft, SIGNAL(returnPressed()), this,
-                   SLOT(editManualInput()));
-  QObject::connect(m_ivUI->lineEdit_peakRight, SIGNAL(returnPressed()), this,
-                   SLOT(editManualInput()));
-  QObject::connect(m_ivUI->lineEdit_backLeft, SIGNAL(returnPressed()), this,
-                   SLOT(editManualInput()));
-  QObject::connect(m_ivUI->lineEdit_backRight, SIGNAL(returnPressed()), this,
-                   SLOT(editManualInput()));
-  QObject::connect(m_ivUI->lineEdit_TOFmin, SIGNAL(returnPressed()), this,
-                   SLOT(editManualInput()));
-  QObject::connect(m_ivUI->lineEdit_TOFmax, SIGNAL(returnPressed()), this,
-                   SLOT(editManualInput()));
+  QObject::connect(m_ivUI->lineEdit_peakLeft, SIGNAL(returnPressed()), this, SLOT(editManualInput()));
+  QObject::connect(m_ivUI->lineEdit_peakRight, SIGNAL(returnPressed()), this, SLOT(editManualInput()));
+  QObject::connect(m_ivUI->lineEdit_backLeft, SIGNAL(returnPressed()), this, SLOT(editManualInput()));
+  QObject::connect(m_ivUI->lineEdit_backRight, SIGNAL(returnPressed()), this, SLOT(editManualInput()));
+  QObject::connect(m_ivUI->lineEdit_TOFmin, SIGNAL(returnPressed()), this, SLOT(editManualInput()));
+  QObject::connect(m_ivUI->lineEdit_TOFmax, SIGNAL(returnPressed()), this, SLOT(editManualInput()));
 
-  QObject::connect(m_ivUI->imageSplitter, SIGNAL(splitterMoved(int, int)), this,
-                   SLOT(imageSplitterMoved()));
+  QObject::connect(m_ivUI->imageSplitter, SIGNAL(splitterMoved(int, int)), this, SLOT(imageSplitterMoved()));
 
-  QObject::connect(m_ivUI->x_min_input, SIGNAL(returnPressed()), this,
-                   SLOT(imageHorizontalRangeChanged()));
+  QObject::connect(m_ivUI->x_min_input, SIGNAL(returnPressed()), this, SLOT(imageHorizontalRangeChanged()));
 
-  QObject::connect(m_ivUI->x_max_input, SIGNAL(returnPressed()), this,
-                   SLOT(imageHorizontalRangeChanged()));
+  QObject::connect(m_ivUI->x_max_input, SIGNAL(returnPressed()), this, SLOT(imageHorizontalRangeChanged()));
 
   //  QObject::connect(m_ivUI->step_input, SIGNAL( returnPressed() ),
   //                   this, SLOT(image_horizontal_range_changed()) );
 
-  QObject::connect(m_ivUI->imageVerticalScrollBar, SIGNAL(valueChanged(int)),
-                   this, SLOT(vScrollBarMoved()));
+  QObject::connect(m_ivUI->imageVerticalScrollBar, SIGNAL(valueChanged(int)), this, SLOT(vScrollBarMoved()));
 
-  QObject::connect(m_ivUI->imageHorizontalScrollBar, SIGNAL(valueChanged(int)),
-                   this, SLOT(hScrollBarMoved()));
+  QObject::connect(m_ivUI->imageHorizontalScrollBar, SIGNAL(valueChanged(int)), this, SLOT(hScrollBarMoved()));
 
-  QObject::connect(m_ivUI->action_Hscroll, SIGNAL(changed()), this,
-                   SLOT(toggleHScroll()));
+  QObject::connect(m_ivUI->action_Hscroll, SIGNAL(changed()), this, SLOT(toggleHScroll()));
 
-  QObject::connect(m_ivUI->action_Vscroll, SIGNAL(changed()), this,
-                   SLOT(toggleVScroll()));
+  QObject::connect(m_ivUI->action_Vscroll, SIGNAL(changed()), this, SLOT(toggleVScroll()));
 
-  QObject::connect(m_ivUI->intensity_slider, SIGNAL(valueChanged(int)), this,
-                   SLOT(intensitySliderMoved()));
+  QObject::connect(m_ivUI->intensity_slider, SIGNAL(valueChanged(int)), this, SLOT(intensitySliderMoved()));
 
   //  QObject::connect(m_ivUI->graph_max_slider, SIGNAL(valueChanged(int)),
   //                   this, SLOT(graphRangeChanged()) );
@@ -225,39 +203,29 @@ RefIVConnections::RefIVConnections(Ui_RefImageViewer *ui,
   m_colorGroup->addAction(m_ivUI->actionMulti);
   m_colorGroup->addAction(m_ivUI->actionSpectrum);
 
-  QObject::connect(m_ivUI->actionHeat, SIGNAL(triggered()), this,
-                   SLOT(heatColorScale()));
+  QObject::connect(m_ivUI->actionHeat, SIGNAL(triggered()), this, SLOT(heatColorScale()));
 
-  QObject::connect(m_ivUI->actionGray, SIGNAL(triggered()), this,
-                   SLOT(grayColorScale()));
+  QObject::connect(m_ivUI->actionGray, SIGNAL(triggered()), this, SLOT(grayColorScale()));
 
-  QObject::connect(m_ivUI->actionNegative_Gray, SIGNAL(triggered()), this,
-                   SLOT(negativeGrayColorScale()));
+  QObject::connect(m_ivUI->actionNegative_Gray, SIGNAL(triggered()), this, SLOT(negativeGrayColorScale()));
 
-  QObject::connect(m_ivUI->actionGreen_Yellow, SIGNAL(triggered()), this,
-                   SLOT(greenYellowColorScale()));
+  QObject::connect(m_ivUI->actionGreen_Yellow, SIGNAL(triggered()), this, SLOT(greenYellowColorScale()));
 
-  QObject::connect(m_ivUI->actionRainbow, SIGNAL(triggered()), this,
-                   SLOT(rainbowColorScale()));
+  QObject::connect(m_ivUI->actionRainbow, SIGNAL(triggered()), this, SLOT(rainbowColorScale()));
 
-  QObject::connect(m_ivUI->actionOptimal, SIGNAL(triggered()), this,
-                   SLOT(optimalColorScale()));
+  QObject::connect(m_ivUI->actionOptimal, SIGNAL(triggered()), this, SLOT(optimalColorScale()));
 
-  QObject::connect(m_ivUI->actionMulti, SIGNAL(triggered()), this,
-                   SLOT(multiColorScale()));
+  QObject::connect(m_ivUI->actionMulti, SIGNAL(triggered()), this, SLOT(multiColorScale()));
 
-  QObject::connect(m_ivUI->actionSpectrum, SIGNAL(triggered()), this,
-                   SLOT(spectrumColorScale()));
+  QObject::connect(m_ivUI->actionSpectrum, SIGNAL(triggered()), this, SLOT(spectrumColorScale()));
 
   m_hGraphPicker = new TrackingPicker(m_ivUI->h_graphPlot->canvas());
   m_hGraphPicker->setMousePattern(QwtPicker::MouseSelect1, Qt::RightButton);
   m_hGraphPicker->setTrackerMode(QwtPicker::ActiveOnly);
   m_hGraphPicker->setRubberBandPen(QColor(Qt::gray));
   m_hGraphPicker->setRubberBand(QwtPicker::CrossRubberBand);
-  m_hGraphPicker->setSelectionFlags(QwtPicker::PointSelection |
-                                    QwtPicker::DragSelection);
-  QObject::connect(m_hGraphPicker, SIGNAL(mouseMoved()), this,
-                   SLOT(hGraphPickerMoved()));
+  m_hGraphPicker->setSelectionFlags(QwtPicker::PointSelection | QwtPicker::DragSelection);
+  QObject::connect(m_hGraphPicker, SIGNAL(mouseMoved()), this, SLOT(hGraphPickerMoved()));
 
   // NOTE: This initialization could be a (static?) method in TrackingPicker
   m_vGraphPicker = new TrackingPicker(m_ivUI->v_graphPlot->canvas());
@@ -265,10 +233,8 @@ RefIVConnections::RefIVConnections(Ui_RefImageViewer *ui,
   m_vGraphPicker->setTrackerMode(QwtPicker::ActiveOnly);
   m_vGraphPicker->setRubberBandPen(QColor(Qt::gray));
   m_vGraphPicker->setRubberBand(QwtPicker::CrossRubberBand);
-  m_vGraphPicker->setSelectionFlags(QwtPicker::PointSelection |
-                                    QwtPicker::DragSelection);
-  QObject::connect(m_vGraphPicker, SIGNAL(mouseMoved()), this,
-                   SLOT(vGraphPickerMoved()));
+  m_vGraphPicker->setSelectionFlags(QwtPicker::PointSelection | QwtPicker::DragSelection);
+  QObject::connect(m_vGraphPicker, SIGNAL(mouseMoved()), this, SLOT(vGraphPickerMoved()));
 }
 
 RefIVConnections::~RefIVConnections() {}
@@ -289,9 +255,7 @@ void RefIVConnections::toggleVScroll() {
   m_imageDisplay->updateImage();
 }
 
-void RefIVConnections::imageHorizontalRangeChanged() {
-  m_imageDisplay->updateRange();
-}
+void RefIVConnections::imageHorizontalRangeChanged() { m_imageDisplay->updateRange(); }
 
 void RefIVConnections::graphRangeChanged() {
   //  double value = (double)m_ivUI->graph_max_slider->value();
@@ -325,8 +289,7 @@ void RefIVConnections::peakBackTofRangeUpdate() {
   QLineEdit *tof_max_control = m_ivUI->lineEdit_TOFmax;
   double tofmax = tof_max_control->text().toDouble();
 
-  emit peakBackTofRangeUpdate(peakmin, peakmax, backmin, backmax, tofmin,
-                              tofmax);
+  emit peakBackTofRangeUpdate(peakmin, peakmax, backmin, backmax, tofmin, tofmax);
 }
 
 void RefIVConnections::editManualInput() {
@@ -396,45 +359,28 @@ void RefIVConnections::intensitySliderMoved() {
 
 /* COLOUR MAP SLOTS */
 
-void RefIVConnections::heatColorScale() {
-  setColorScale(ColorMaps::HEAT, ColorMaps::GRAY);
-}
+void RefIVConnections::heatColorScale() { setColorScale(ColorMaps::HEAT, ColorMaps::GRAY); }
 
-void RefIVConnections::grayColorScale() {
-  setColorScale(ColorMaps::GRAY, ColorMaps::HEAT);
-}
+void RefIVConnections::grayColorScale() { setColorScale(ColorMaps::GRAY, ColorMaps::HEAT); }
 
-void RefIVConnections::negativeGrayColorScale() {
-  setColorScale(ColorMaps::NEGATIVE_GRAY, ColorMaps::HEAT);
-}
+void RefIVConnections::negativeGrayColorScale() { setColorScale(ColorMaps::NEGATIVE_GRAY, ColorMaps::HEAT); }
 
-void RefIVConnections::greenYellowColorScale() {
-  setColorScale(ColorMaps::GREEN_YELLOW, ColorMaps::GRAY);
-}
+void RefIVConnections::greenYellowColorScale() { setColorScale(ColorMaps::GREEN_YELLOW, ColorMaps::GRAY); }
 
-void RefIVConnections::rainbowColorScale() {
-  setColorScale(ColorMaps::RAINBOW, ColorMaps::GRAY);
-}
+void RefIVConnections::rainbowColorScale() { setColorScale(ColorMaps::RAINBOW, ColorMaps::GRAY); }
 
-void RefIVConnections::optimalColorScale() {
-  setColorScale(ColorMaps::OPTIMAL, ColorMaps::GRAY);
-}
+void RefIVConnections::optimalColorScale() { setColorScale(ColorMaps::OPTIMAL, ColorMaps::GRAY); }
 
-void RefIVConnections::multiColorScale() {
-  setColorScale(ColorMaps::MULTI, ColorMaps::GRAY);
-}
+void RefIVConnections::multiColorScale() { setColorScale(ColorMaps::MULTI, ColorMaps::GRAY); }
 
-void RefIVConnections::spectrumColorScale() {
-  setColorScale(ColorMaps::SPECTRUM, ColorMaps::GRAY);
-}
+void RefIVConnections::spectrumColorScale() { setColorScale(ColorMaps::SPECTRUM, ColorMaps::GRAY); }
 
 /**
  * Set the color scale to the given positive and negative scales
  * @param positive :: [input] Color scale for positive values
  * @param negative :: [input] Color scale for negative values
  */
-void RefIVConnections::setColorScale(ColorMaps::ColorScale positive,
-                                     ColorMaps::ColorScale negative) {
+void RefIVConnections::setColorScale(ColorMaps::ColorScale positive, ColorMaps::ColorScale negative) {
   auto positiveColorTable = ColorMaps::GetColorMap(positive, 256);
   auto negativeColorTable = ColorMaps::GetColorMap(negative, 256);
   m_imageDisplay->setColorScales(positiveColorTable, negativeColorTable);
@@ -452,8 +398,7 @@ void RefIVConnections::setColorScale(ColorMaps::ColorScale positive,
  *                               same number of entries as the positive
  *                               color table.
  */
-void RefIVConnections::showColorScale(std::vector<QRgb> &positiveColorTable,
-                                      std::vector<QRgb> &negativeColorTable) {
+void RefIVConnections::showColorScale(std::vector<QRgb> &positiveColorTable, std::vector<QRgb> &negativeColorTable) {
   size_t totalColors = positiveColorTable.size() + negativeColorTable.size();
 
   QImage image((int)totalColors, 1, QImage::Format_RGB32);
@@ -461,8 +406,7 @@ void RefIVConnections::showColorScale(std::vector<QRgb> &positiveColorTable,
 
   size_t numColors = negativeColorTable.size();
   for (size_t i = 0; i < numColors; i++) {
-    unsigned int pixel =
-        static_cast<unsigned int>(negativeColorTable[numColors - 1 - i]);
+    unsigned int pixel = static_cast<unsigned int>(negativeColorTable[numColors - 1 - i]);
     image.setPixel(index, 0, pixel);
     index++;
   }

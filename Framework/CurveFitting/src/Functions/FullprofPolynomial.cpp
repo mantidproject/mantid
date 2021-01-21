@@ -29,8 +29,7 @@ FullprofPolynomial::FullprofPolynomial() : m_n(6), m_bkpos(1.) {
 //----------------------------------------------------------------------------------------------
 /** Function to calcualteFullprofPolynomial
  */
-void FullprofPolynomial::function1D(double *out, const double *xValues,
-                                    const size_t nData) const {
+void FullprofPolynomial::function1D(double *out, const double *xValues, const size_t nData) const {
   // Generate a vector for all coefficient
   std::vector<double> B(m_n, 0.0);
   for (int i = 0; i < m_n; ++i)
@@ -64,9 +63,7 @@ void FullprofPolynomial::function1D(double *out, const double *xValues,
 //----------------------------------------------------------------------------------------------
 /** Function to calculate derivative analytically
  */
-void FullprofPolynomial::functionDeriv1D(API::Jacobian *out,
-                                         const double *xValues,
-                                         const size_t nData) {
+void FullprofPolynomial::functionDeriv1D(API::Jacobian *out, const double *xValues, const size_t nData) {
   for (size_t i = 0; i < nData; i++) {
     double tof = xValues[i];
     double x = tof / m_bkpos - 1.;
@@ -87,9 +84,7 @@ void FullprofPolynomial::functionDeriv1D(API::Jacobian *out,
 /** Get Attribute names
  * @return A list of attribute names (identical toFullprofPolynomial)
  */
-std::vector<std::string> FullprofPolynomial::getAttributeNames() const {
-  return {"n", "Bkpos"};
-}
+std::vector<std::string> FullprofPolynomial::getAttributeNames() const { return {"n", "Bkpos"}; }
 
 //----------------------------------------------------------------------------------------------
 /** Get Attribute
@@ -97,8 +92,7 @@ std::vector<std::string> FullprofPolynomial::getAttributeNames() const {
  * @return a value of attribute attName
  * (identical toFullprofPolynomial)
  */
-API::IFunction::Attribute
-FullprofPolynomial::getAttribute(const std::string &attName) const {
+API::IFunction::Attribute FullprofPolynomial::getAttribute(const std::string &attName) const {
   if (attName == "n") {
     return Attribute(m_n);
   } else if (attName == "Bkpos")
@@ -114,17 +108,14 @@ FullprofPolynomial::getAttribute(const std::string &attName) const {
  * negative.
  * (identical toFullprofPolynomial)
  */
-void FullprofPolynomial::setAttribute(const std::string &attName,
-                                      const API::IFunction::Attribute &att) {
+void FullprofPolynomial::setAttribute(const std::string &attName, const API::IFunction::Attribute &att) {
   if (attName == "n") {
     // set theFullprofPolynomial order
     int attint = att.asInt();
     if (attint < 0) {
-      throw std::invalid_argument(
-          "Polynomial:FullprofPolynomial order cannot be negative.");
+      throw std::invalid_argument("Polynomial:FullprofPolynomial order cannot be negative.");
     } else if (attint != 6 && attint != 12) {
-      throw std::runtime_error(
-          "FullprofPolynomial's order must be either 6 or 12. ");
+      throw std::runtime_error("FullprofPolynomial's order must be either 6 or 12. ");
     } else if (attint != m_n) {
       // Only order is (either 6 or 12) and different from current order
       clearAllParameters();

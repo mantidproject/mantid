@@ -85,19 +85,13 @@ public:
   virtual coord_t getX(size_t ind) const = 0;
 
   /** @return the width of each bin */
-  virtual coord_t getBinWidth() const {
-    return (getMaximum() - getMinimum()) / static_cast<coord_t>(getNBins());
-  }
+  virtual coord_t getBinWidth() const { return (getMaximum() - getMinimum()) / static_cast<coord_t>(getNBins()); }
 
   /// @return true if the dimension is integrated (e.g. has only one single bin)
   virtual bool getIsIntegrated() const { return getNBins() == 1; }
 
-  bool operator==(const IMDDimension &) const {
-    throw std::runtime_error("Not Implemented.");
-  }
-  bool operator!=(const IMDDimension &) const {
-    throw std::runtime_error("Not Implemented.");
-  }
+  bool operator==(const IMDDimension &) const { throw std::runtime_error("Not Implemented."); }
+  bool operator!=(const IMDDimension &) const { throw std::runtime_error("Not Implemented."); }
 };
 
 /// Shared Pointer for IMDDimension. Frequently used type in framework.

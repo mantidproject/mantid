@@ -34,8 +34,7 @@
 #include <QPushButton>
 
 ColorMapDialog::ColorMapDialog(QWidget *parent, const Qt::WFlags &fl)
-    : QDialog(parent, fl), applyBtn(nullptr), closeBtn(nullptr),
-      editor(nullptr), d_matrix(nullptr) {
+    : QDialog(parent, fl), applyBtn(nullptr), closeBtn(nullptr), editor(nullptr), d_matrix(nullptr) {
   setObjectName("ColorMapDialog");
   setWindowTitle(tr("MantidPlot") + " - " + tr("Custom Color Map"));
   editor = new ColorMapEditor();
@@ -75,8 +74,8 @@ void ColorMapDialog::setMatrix(Matrix *m) {
 }
 
 void ColorMapDialog::apply() {
-  d_matrix->undoStack()->push(new MatrixSetColorMapCommand(
-      d_matrix, d_matrix->colorMapType(), d_matrix->colorMap(), Matrix::Custom,
-      editor->colorMap(), tr("Set Custom Palette")));
+  d_matrix->undoStack()->push(new MatrixSetColorMapCommand(d_matrix, d_matrix->colorMapType(), d_matrix->colorMap(),
+                                                           Matrix::Custom, editor->colorMap(),
+                                                           tr("Set Custom Palette")));
   d_matrix->setColorMap(editor->colorMap());
 }

@@ -35,12 +35,10 @@ public:
     std::vector<specnum_t> expected = {2, 3, 4, 5, 6, 7, 8};
     size_t index = 0;
     for (; !generator->isDone(); generator->next(), ++index) {
-      TSM_ASSERT_EQUALS("Should take elements out of the DataBlock interval",
-                        expected[index], generator->getValue());
+      TSM_ASSERT_EQUALS("Should take elements out of the DataBlock interval", expected[index], generator->getValue());
     }
 
-    TSM_ASSERT_EQUALS("Should have been incremented 7 times", index,
-                      expected.size());
+    TSM_ASSERT_EQUALS("Should have been incremented 7 times", index, expected.size());
   }
 
   void test_that_two_data_blocks_are_equal() {

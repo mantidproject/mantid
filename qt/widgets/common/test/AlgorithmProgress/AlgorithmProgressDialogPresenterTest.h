@@ -29,8 +29,7 @@ using namespace MantidQt::MantidWidgets;
 class AlgorithmProgressDialogPresenterTest : public CxxTest::TestSuite {
 public:
   static AlgorithmProgressDialogPresenterTest *createSuite() {
-    AlgorithmFactory::Instance()
-        .subscribe<Mantid::Algorithms::ManualProgressReporter>();
+    AlgorithmFactory::Instance().subscribe<Mantid::Algorithms::ManualProgressReporter>();
     return new AlgorithmProgressDialogPresenterTest();
   }
   static void destroySuite(AlgorithmProgressDialogPresenterTest *suite) {
@@ -42,8 +41,7 @@ public:
     mockDialogView.reset();
     // The mock view also creates the presenter, because
     // so that is passes the correct type into the constructor
-    mockDialogView =
-        std::make_unique<NiceMock<MockAlgorithmProgressDialogWidget>>();
+    mockDialogView = std::make_unique<NiceMock<MockAlgorithmProgressDialogWidget>>();
   }
 
   /** This test runs the dev algorithm and sees if it was
@@ -59,8 +57,7 @@ public:
     // adding the expected calls prevents a bunch of GMock warnings
     EXPECT_CALL(*mainProgressBar.get(), algorithmStarted()).Times(1);
     for (const auto prog : {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0}) {
-      EXPECT_CALL(*mainProgressBar.get(),
-                  updateProgress(DoubleEq(prog), emptyQString, 0.0, 0));
+      EXPECT_CALL(*mainProgressBar.get(), updateProgress(DoubleEq(prog), emptyQString, 0.0, 0));
     }
     EXPECT_CALL(*mainProgressBar.get(), algorithmEnded()).Times(1);
     // End of assertions for the main progress bar
@@ -71,8 +68,7 @@ public:
     auto returnPair = std::make_pair(widget, progressBar);
 
     auto alg = AlgorithmManager::Instance().create("ManualProgressReporter");
-    ON_CALL(*mockDialogView.get(), addAlgorithm(alg))
-        .WillByDefault(Return(returnPair));
+    ON_CALL(*mockDialogView.get(), addAlgorithm(alg)).WillByDefault(Return(returnPair));
     EXPECT_CALL(*mockDialogView.get(), addAlgorithm(alg)).Times(Exactly(1));
 
     TS_ASSERT_THROWS_NOTHING(alg->initialize());
@@ -81,8 +77,7 @@ public:
     alg->setRethrows(true);
     alg->execute();
     QCoreApplication::processEvents();
-    TS_ASSERT_EQUALS(size_t{0},
-                     mockDialogView->m_presenter->getNumberTrackedAlgorithms());
+    TS_ASSERT_EQUALS(size_t{0}, mockDialogView->m_presenter->getNumberTrackedAlgorithms());
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDialogView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mainProgressBar));
@@ -104,8 +99,7 @@ public:
     // adding the expected calls prevents a bunch of GMock warnings
     EXPECT_CALL(*mainProgressBar.get(), algorithmStarted()).Times(1);
     for (const auto prog : {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0}) {
-      EXPECT_CALL(*mainProgressBar.get(),
-                  updateProgress(DoubleEq(prog), emptyQString, 0.0, 0));
+      EXPECT_CALL(*mainProgressBar.get(), updateProgress(DoubleEq(prog), emptyQString, 0.0, 0));
     }
     EXPECT_CALL(*mainProgressBar.get(), algorithmEnded()).Times(1);
     // End of assertions for the main progress bar
@@ -123,17 +117,14 @@ public:
     // so they can be destroyed at the end of the test.
     // There was an attempt to use unique_ptr, but it kept
     // deleting the pointers on the make_pair call, resulting in segfault
-    auto widgetPairs =
-        std::vector<std::pair<QTreeWidgetItem *, QProgressBar *>>();
+    auto widgetPairs = std::vector<std::pair<QTreeWidgetItem *, QProgressBar *>>();
     widgetPairs.reserve(numWidgets);
 
-    auto &expectedCallObject =
-        EXPECT_CALL(*mockDialogView.get(), addAlgorithm(_));
+    auto &expectedCallObject = EXPECT_CALL(*mockDialogView.get(), addAlgorithm(_));
     // The loop is done numWidgets times, to account for the algorithm
     // that is initialised in this test, as this is the 11th call
     for (int i = 0; i < numWidgets; ++i) {
-      widgetPairs.emplace_back(
-          std::make_pair(new QTreeWidgetItem(), new QProgressBar()));
+      widgetPairs.emplace_back(std::make_pair(new QTreeWidgetItem(), new QProgressBar()));
       // it's OK to use the reference, due to the lifetime of the vector
       // the objects will be alive until the end of the test
       const auto &pair = widgetPairs[i];
@@ -153,8 +144,7 @@ public:
     alg->setProperty("StartAnotherAlgorithm", true);
     alg->execute();
     QCoreApplication::processEvents();
-    TS_ASSERT_EQUALS(size_t{0},
-                     mockDialogView->m_presenter->getNumberTrackedAlgorithms());
+    TS_ASSERT_EQUALS(size_t{0}, mockDialogView->m_presenter->getNumberTrackedAlgorithms());
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDialogView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mainProgressBar));

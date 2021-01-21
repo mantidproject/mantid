@@ -32,8 +32,7 @@ using Mantid::Kernel::ReadLock;
 namespace Mantid {
 namespace VATES {
 
-vtkMDHistoHexFactory::vtkMDHistoHexFactory(
-    const VisualNormalization normalizationOption)
+vtkMDHistoHexFactory::vtkMDHistoHexFactory(const VisualNormalization normalizationOption)
     : m_normalizationOption(normalizationOption) {}
 
 /**
@@ -41,8 +40,7 @@ Assigment operator
 @param other : vtkMDHistoHexFactory to assign to this instance from.
 @return ref to assigned current instance.
 */
-vtkMDHistoHexFactory &vtkMDHistoHexFactory::
-operator=(const vtkMDHistoHexFactory &other) {
+vtkMDHistoHexFactory &vtkMDHistoHexFactory::operator=(const vtkMDHistoHexFactory &other) {
   if (this != &other) {
     this->m_normalizationOption = other.m_normalizationOption;
     this->m_workspace = other.m_workspace;
@@ -59,8 +57,7 @@ vtkMDHistoHexFactory::vtkMDHistoHexFactory(const vtkMDHistoHexFactory &other) {
   this->m_workspace = other.m_workspace;
 }
 
-void vtkMDHistoHexFactory::initialize(
-    const Mantid::API::Workspace_sptr &workspace) {
+void vtkMDHistoHexFactory::initialize(const Mantid::API::Workspace_sptr &workspace) {
   m_workspace = doInitialize<MDHistoWorkspace, 3>(workspace);
 }
 
@@ -77,13 +74,11 @@ namespace {
 template <class Array> struct CellGhostArrayWorker {
   Array *m_signal;
   vtkUnsignedCharArray *m_cga;
-  CellGhostArrayWorker(Array *signal, vtkUnsignedCharArray *cga)
-      : m_signal(signal), m_cga(cga) {}
+  CellGhostArrayWorker(Array *signal, vtkUnsignedCharArray *cga) : m_signal(signal), m_cga(cga) {}
   void operator()(vtkIdType begin, vtkIdType end) {
     for (vtkIdType index = begin; index < end; ++index) {
       if (!std::isfinite(m_signal->GetValue(index))) {
-        m_cga->SetValue(index, m_cga->GetValue(index) |
-                                   vtkDataSetAttributes::HIDDENCELL);
+        m_cga->SetValue(index, m_cga->GetValue(index) | vtkDataSetAttributes::HIDDENCELL);
       }
     }
   }
@@ -94,8 +89,7 @@ struct PointsWorker {
   coord_t incrementX, incrementY, incrementZ;
   coord_t minX, minY, minZ;
   vtkIdType nPointsX, nPointsY;
-  PointsWorker(Mantid::DataObjects::MDHistoWorkspace &ws, vtkPoints *pts)
-      : m_pts(pts) {
+  PointsWorker(Mantid::DataObjects::MDHistoWorkspace &ws, vtkPoints *pts) : m_pts(pts) {
     int nBinsX = static_cast<int>(ws.getXDimension()->getNBins());
     int nBinsY = static_cast<int>(ws.getYDimension()->getNBins());
     int nBinsZ = static_cast<int>(ws.getZDimension()->getNBins());
@@ -133,9 +127,8 @@ struct PointsWorker {
 } // namespace
 
 template <class ValueTypeT>
-static void InitializevtkMDHWSignalArray(
-    const MDHistoWorkspace &ws, VisualNormalization normalization,
-    vtkIdType offset, vtkMDHWSignalArray<ValueTypeT> *signal) {
+static void InitializevtkMDHWSignalArray(const MDHistoWorkspace &ws, VisualNormalization normalization,
+                                         vtkIdType offset, vtkMDHWSignalArray<ValueTypeT> *signal) {
   const vtkIdType nBinsX = static_cast<int>(ws.getXDimension()->getNBins());
   const vtkIdType nBinsY = static_cast<int>(ws.getYDimension()->getNBins());
   const vtkIdType nBinsZ = static_cast<int>(ws.getZDimension()->getNBins());
@@ -146,8 +139,7 @@ static void InitializevtkMDHWSignalArray(
   // a non-const array. Casting away const is preferable to attempting to get
   // a compatible version of ParaView given VATES will not be improved any
   // further and will be removed in the future.
-  signal->InitializeArray(const_cast<double *>(ws.getSignalArray()),
-                          const_cast<double *>(ws.getNumEventsArray()),
+  signal->InitializeArray(const_cast<double *>(ws.getSignalArray()), const_cast<double *>(ws.getNumEventsArray()),
                           ws.getInverseVolume(), norm, imageSize, offset);
 }
 
@@ -159,9 +151,7 @@ static void InitializevtkMDHWSignalArray(
  *stack.
  * @return the vtkDataSet created
  */
-vtkSmartPointer<vtkDataSet>
-vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
-                                   ProgressAction &progress) const {
+vtkSmartPointer<vtkDataSet> vtkMDHistoHexFactory::create3Dor4D(size_t timestep, ProgressAction &progress) const {
   // Acquire a scoped read-only lock to the workspace (prevent segfault from
   // algos modifying ws)
   ReadLock lock(*m_workspace);
@@ -174,8 +164,7 @@ vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
   // First multiplier
   indexMultiplier[0] = m_workspace->getDimension(0)->getNBins();
   for (size_t d = 1; d < nDims; d++) {
-    indexMultiplier[d] =
-        indexMultiplier[d - 1] * m_workspace->getDimension(d)->getNBins();
+    indexMultiplier[d] = indexMultiplier[d - 1] * m_workspace->getDimension(d)->getNBins();
   }
 
   const int nBinsX = static_cast<int>(m_workspace->getXDimension()->getNBins());
@@ -197,8 +186,7 @@ vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
   VisualNormalization norm;
   if (m_normalizationOption == AutoSelect) {
     // enum to enum.
-    norm =
-        static_cast<VisualNormalization>(m_workspace->displayNormalization());
+    norm = static_cast<VisualNormalization>(m_workspace->displayNormalization());
   } else {
     norm = static_cast<VisualNormalization>(m_normalizationOption);
   }
@@ -219,8 +207,7 @@ vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
     InitializevtkMDHWSignalArray(*m_workspace, norm, offset, normalized.Get());
     visualDataSet->GetCellData()->SetScalars(normalized.GetPointer());
     auto cga = visualDataSet->AllocateCellGhostArray();
-    CellGhostArrayWorker<vtkMDHWSignalArray<double>> cgafunc(normalized.Get(),
-                                                             cga);
+    CellGhostArrayWorker<vtkMDHWSignalArray<double>> cgafunc(normalized.Get(), cga);
     vtkSMPTools::For(0, imageSize, cgafunc);
     signal = normalized.Get();
   }
@@ -229,12 +216,9 @@ vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
   progress.eventRaised(0.33);
 
   vtkNew<vtkPoints> points;
-  const vtkIdType nPointsX =
-      static_cast<int>(m_workspace->getXDimension()->getNBoundaries());
-  const vtkIdType nPointsY =
-      static_cast<int>(m_workspace->getYDimension()->getNBoundaries());
-  const vtkIdType nPointsZ =
-      static_cast<int>(m_workspace->getZDimension()->getNBoundaries());
+  const vtkIdType nPointsX = static_cast<int>(m_workspace->getXDimension()->getNBoundaries());
+  const vtkIdType nPointsY = static_cast<int>(m_workspace->getYDimension()->getNBoundaries());
+  const vtkIdType nPointsZ = static_cast<int>(m_workspace->getZDimension()->getNBoundaries());
   points->SetNumberOfPoints(nPointsX * nPointsY * nPointsZ);
 
   PointsWorker ptsfunc(*m_workspace, points.GetPointer());
@@ -261,10 +245,8 @@ Create the vtkStructuredGrid from the provided workspace
 stack.
 @return fully constructed vtkDataSet.
 */
-vtkSmartPointer<vtkDataSet>
-vtkMDHistoHexFactory::create(ProgressAction &progressUpdating) const {
-  auto product =
-      tryDelegatingCreation<MDHistoWorkspace, 3>(m_workspace, progressUpdating);
+vtkSmartPointer<vtkDataSet> vtkMDHistoHexFactory::create(ProgressAction &progressUpdating) const {
+  auto product = tryDelegatingCreation<MDHistoWorkspace, 3>(m_workspace, progressUpdating);
   if (product) {
     return product;
   } else {

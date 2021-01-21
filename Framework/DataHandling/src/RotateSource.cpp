@@ -31,8 +31,7 @@ void RotateSource::init() {
 
   // When used as a Child Algorithm the workspace name is not used - hence the
   // "Anonymous" to satisfy the validator
-  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-                      "Workspace", "Anonymous", Direction::InOut),
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("Workspace", "Anonymous", Direction::InOut),
                   "The name of the workspace for which the new instrument "
                   "configuration will have an effect. Any other workspaces "
                   "stored in the analysis data service will be unaffected.");
@@ -50,8 +49,7 @@ void RotateSource::exec() {
   Workspace_sptr ws = getProperty("Workspace");
 
   MatrixWorkspace_sptr inputW = std::dynamic_pointer_cast<MatrixWorkspace>(ws);
-  DataObjects::PeaksWorkspace_sptr inputP =
-      std::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(ws);
+  DataObjects::PeaksWorkspace_sptr inputP = std::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(ws);
 
   // Get some stuff from the input workspace
   Instrument_const_sptr inst;

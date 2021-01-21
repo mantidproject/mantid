@@ -34,8 +34,7 @@ Kernel::IValidator_sptr WorkspaceUnitValidator::clone() const {
  * @param value :: The workspace to test
  * @return A user level description of the error or "" for no error
  */
-std::string
-WorkspaceUnitValidator::checkValidity(const MatrixWorkspace_sptr &value) const {
+std::string WorkspaceUnitValidator::checkValidity(const MatrixWorkspace_sptr &value) const {
   // This effectively checks for single-valued workspaces
   if (value->axes() == 0)
     return "A single valued workspace has no unit, which is required for "
@@ -45,16 +44,13 @@ WorkspaceUnitValidator::checkValidity(const MatrixWorkspace_sptr &value) const {
   // If m_unitID is empty it means that the workspace must have units, which
   // can be anything
   if (m_unitID.empty()) {
-    return (
-        unit && (!std::dynamic_pointer_cast<const Kernel::Units::Empty>(unit))
-            ? ""
-            : "The workspace must have units");
+    return (unit && (!std::dynamic_pointer_cast<const Kernel::Units::Empty>(unit)) ? ""
+                                                                                   : "The workspace must have units");
   }
   // now check if the units of the workspace is correct
   else {
     if ((!unit) || (unit->unitID().compare(m_unitID))) {
-      return "The workspace must have units of " +
-             m_unitID; //+ "; its unit is: " + unit->caption();
+      return "The workspace must have units of " + m_unitID; //+ "; its unit is: " + unit->caption();
     } else
       return "";
   }

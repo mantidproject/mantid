@@ -37,8 +37,7 @@ public:
     subscribe(typeid(typename HandlerType::HeldType), new HandlerType);
   }
   /// Subscribe a handler object for a given typeinfo
-  static void subscribe(const std::type_info &typeInfo,
-                        PropertyValueHandler *handler);
+  static void subscribe(const std::type_info &typeInfo, PropertyValueHandler *handler);
   /// Lookup a handler base on a given type_info object
   static const PropertyValueHandler &retrieve(const std::type_info &typeInfo);
 };

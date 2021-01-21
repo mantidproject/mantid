@@ -33,39 +33,32 @@ using namespace Mantid::HistogramData;
 
 ModeratorTzero::ModeratorTzero()
     : Mantid::API::Algorithm(),
-      m_convfactor(0.5e+12 * Mantid::PhysicalConstants::NeutronMass /
-                   Mantid::PhysicalConstants::meV),
-      m_niter(1), m_tolTOF(0.), m_t1min(200.0) {}
+      m_convfactor(0.5e+12 * Mantid::PhysicalConstants::NeutronMass / Mantid::PhysicalConstants::meV), m_niter(1),
+      m_tolTOF(0.), m_t1min(200.0) {}
 
 /// set attribute m_formula
-void ModeratorTzero::setFormula(const std::string &formula) {
-  m_formula = formula;
-}
+void ModeratorTzero::setFormula(const std::string &formula) { m_formula = formula; }
 
 void ModeratorTzero::init() {
 
   auto wsValidator = std::make_shared<WorkspaceUnitValidator>("TOF");
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input, wsValidator),
-                  "The name of the input workspace, containing events and/or "
-                  "histogram data, in units of time-of-flight");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input, wsValidator),
+      "The name of the input workspace, containing events and/or "
+      "histogram data, in units of time-of-flight");
   // declare the output workspace
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "The name of the output workspace");
 
   // declare the instrument scattering mode
   std::vector<std::string> EModeOptions{"Indirect", "Direct", "Elastic"};
-  this->declareProperty("EMode", "Indirect",
-                        std::make_shared<StringListValidator>(EModeOptions),
+  this->declareProperty("EMode", "Indirect", std::make_shared<StringListValidator>(EModeOptions),
                         "The energy mode (default: Indirect)");
 
-  declareProperty(std::make_unique<Kernel::PropertyWithValue<double>>(
-                      "tolTOF", 0.1, Kernel::Direction::Input),
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<double>>("tolTOF", 0.1, Kernel::Direction::Input),
                   "Tolerance in the calculation of the emission time, in "
                   "microseconds (default:1)");
-  declareProperty(std::make_unique<Kernel::PropertyWithValue<size_t>>(
-                      "Niter", 1, Kernel::Direction::Input),
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<size_t>>("Niter", 1, Kernel::Direction::Input),
                   "Number of iterations (default:1)");
 } // end of void ModeratorTzero::init()
 
@@ -93,8 +86,7 @@ void ModeratorTzero::exec() {
   m_formula = t0_formula[0];
 
   // Run execEvent if eventWorkSpace
-  EventWorkspace_const_sptr eventWS =
-      std::dynamic_pointer_cast<const EventWorkspace>(inputWS);
+  EventWorkspace_const_sptr eventWS = std::dynamic_pointer_cast<const EventWorkspace>(inputWS);
   if (eventWS != nullptr) {
     execEvent(emode);
     return;
@@ -146,8 +138,7 @@ void ModeratorTzero::exec() {
         L2 = spectrumInfo.l2(i);
       }
     } else {
-      g_log.error() << "Unable to calculate distances to/from detector" << i
-                    << '\n';
+      g_log.error() << "Unable to calculate distances to/from detector" << i << '\n';
     }
 
     if (L2 >= 0) {
@@ -161,11 +152,8 @@ void ModeratorTzero::exec() {
         if (spectrumInfo.isMonitor(i)) {
           t2 = 0.0;
         } else {
-          static const double convFact =
-              1.0e-6 *
-              sqrt(2 * PhysicalConstants::meV / PhysicalConstants::NeutronMass);
-          std::vector<double> wsProp =
-              spectrumInfo.detector(i).getNumberParameter("Efixed");
+          static const double convFact = 1.0e-6 * sqrt(2 * PhysicalConstants::meV / PhysicalConstants::NeutronMass);
+          std::vector<double> wsProp = spectrumInfo.detector(i).getNumberParameter("Efixed");
           if (!wsProp.empty()) {
             double E2 = wsProp.at(0);        //[E2]=meV
             double v2 = convFact * sqrt(E2); //[v2]=meter/microsec
@@ -224,8 +212,7 @@ void ModeratorTzero::exec() {
 void ModeratorTzero::execEvent(const std::string &emode) {
   g_log.information("Processing event workspace");
 
-  const MatrixWorkspace_const_sptr matrixInputWS =
-      getProperty("InputWorkspace");
+  const MatrixWorkspace_const_sptr matrixInputWS = getProperty("InputWorkspace");
 
   // generate the output workspace pointer
   API::MatrixWorkspace_sptr matrixOutputWS = getProperty("OutputWorkspace");
@@ -270,8 +257,7 @@ void ModeratorTzero::execEvent(const std::string &emode) {
           L2 = spectrumInfo.l2(i);
         }
       } else {
-        g_log.error() << "Unable to calculate distances to/from detector" << i
-                      << '\n';
+        g_log.error() << "Unable to calculate distances to/from detector" << i << '\n';
       }
 
       if (L2 >= 0) {
@@ -291,11 +277,8 @@ void ModeratorTzero::execEvent(const std::string &emode) {
           if (spectrumInfo.isMonitor(i)) {
             t2 = 0.0;
           } else {
-            static const double convFact =
-                1.0e-6 * sqrt(2 * PhysicalConstants::meV /
-                              PhysicalConstants::NeutronMass);
-            std::vector<double> wsProp =
-                spectrumInfo.detector(i).getNumberParameter("Efixed");
+            static const double convFact = 1.0e-6 * sqrt(2 * PhysicalConstants::meV / PhysicalConstants::NeutronMass);
+            std::vector<double> wsProp = spectrumInfo.detector(i).getNumberParameter("Efixed");
             if (!wsProp.empty()) {
               double E2 = wsProp.at(0);        //[E2]=meV
               double v2 = convFact * sqrt(E2); //[v2]=meter/microsec
@@ -355,8 +338,7 @@ void ModeratorTzero::execEvent(const std::string &emode) {
 
           MantidVec tofs = evlist.getTofs();
 
-          std::transform(tofs.begin(), tofs.end(), tofs.begin(),
-                         [&t0_direct](double tof) { return tof - t0_direct; });
+          std::transform(tofs.begin(), tofs.end(), tofs.begin(), [&t0_direct](double tof) { return tof - t0_direct; });
           evlist.setTofs(tofs);
           evlist.setSortOrder(Mantid::DataObjects::EventSortType::UNSORTED);
         } // end of else if(emode=="Direct")
@@ -371,8 +353,7 @@ void ModeratorTzero::execEvent(const std::string &emode) {
 
 /// Calculate emission time for a given detector (L1, t2)
 /// and TOF when Emode==Inelastic
-double ModeratorTzero::CalculateT0indirect(const double &tof, const double &L1,
-                                           const double &t2, double &E1,
+double ModeratorTzero::CalculateT0indirect(const double &tof, const double &L1, const double &t2, double &E1,
                                            mu::Parser &parser) {
 
   double t0_curr, t0_next;
@@ -393,8 +374,7 @@ double ModeratorTzero::CalculateT0indirect(const double &tof, const double &L1,
 
 /// Calculate emission time for a given detector (L1, t2)
 /// and TOF when Emode==Elastic
-double ModeratorTzero::CalculateT0elastic(const double &tof, const double &L12,
-                                          double &E1, mu::Parser &parser) {
+double ModeratorTzero::CalculateT0elastic(const double &tof, const double &L12, double &E1, mu::Parser &parser) {
   double t0_curr, t0_next;
   t0_curr = m_tolTOF; // current iteration emission time
   t0_next = 0.0;      // next iteration emission time, initialized to zero
@@ -403,7 +383,7 @@ double ModeratorTzero::CalculateT0elastic(const double &tof, const double &L12,
   while (std::fabs(t0_curr - t0_next) >= m_tolTOF && iiter < m_niter) {
     t0_curr = t0_next;
     double v1 = L12 / (tof - t0_curr); // v1 = v2 = v since emode is elastic
-    E1 = m_convfactor * v1 * v1; // Energy in meV if v1 in meter/microsecond
+    E1 = m_convfactor * v1 * v1;       // Energy in meV if v1 in meter/microsecond
     t0_next = parser.Eval();
     iiter++;
   }

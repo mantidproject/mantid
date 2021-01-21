@@ -37,9 +37,8 @@ namespace RefDetectorViewer {
  *  @param tofMin      The min time of flight value
  *  @param tofMax      The max time of flight value
  */
-RefImageView::RefImageView(SpectrumView::SpectrumDataSource_sptr dataSource,
-                           int peakMin, int peakMax, int backMin, int backMax,
-                           int tofMin, int tofMax)
+RefImageView::RefImageView(SpectrumView::SpectrumDataSource_sptr dataSource, int peakMin, int peakMax, int backMin,
+                           int backMax, int tofMin, int tofMax)
     : m_ui(new Ui::RefImageViewer()) {
   QMainWindow *window = this;
 
@@ -62,12 +61,10 @@ RefImageView::RefImageView(SpectrumView::SpectrumDataSource_sptr dataSource,
   m_hGraph = new SpectrumView::GraphDisplay(m_ui->h_graphPlot, nullptr, false);
   m_vGraph = new SpectrumView::GraphDisplay(m_ui->v_graphPlot, nullptr, true);
 
-  m_imageDisplay = new RefImageDisplay(m_ui->imagePlot, m_sliderHandler,
-                                       m_rangeHandler, limits_handler, m_hGraph,
+  m_imageDisplay = new RefImageDisplay(m_ui->imagePlot, m_sliderHandler, m_rangeHandler, limits_handler, m_hGraph,
                                        m_vGraph, m_ui->image_table);
 
-  auto *iv_connections =
-      new RefIVConnections(m_ui, this, m_imageDisplay, m_hGraph, m_vGraph);
+  auto *iv_connections = new RefIVConnections(m_ui, this, m_imageDisplay, m_hGraph, m_vGraph);
 
   // Set validators on the QLineEdits to restrict them to integers
   m_ui->lineEdit_peakLeft->setValidator(new QIntValidator(this));

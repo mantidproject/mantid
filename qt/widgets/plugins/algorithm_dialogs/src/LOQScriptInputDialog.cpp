@@ -27,8 +27,7 @@ using namespace MantidQt::CustomDialogs;
 //---------------------------------------
 
 /// Constructor
-LOQScriptInputDialog::LOQScriptInputDialog(QWidget *parent)
-    : AlgorithmDialog(parent) {}
+LOQScriptInputDialog::LOQScriptInputDialog(QWidget *parent) : AlgorithmDialog(parent) {}
 
 /**
  * Set up the dialog
@@ -36,8 +35,7 @@ LOQScriptInputDialog::LOQScriptInputDialog(QWidget *parent)
 void LOQScriptInputDialog::initLayout() {
   m_uiForm.setupUi(this);
 
-  connect(m_uiForm.browseButton, SIGNAL(clicked()), this,
-          SLOT(browseClicked()));
+  connect(m_uiForm.browseButton, SIGNAL(clicked()), this, SLOT(browseClicked()));
 
   fillLineEdit("SampleWorkspace", m_uiForm.sampleBox);
   fillLineEdit("EmptyCanWorkspace", m_uiForm.emptycanBox);
@@ -80,12 +78,9 @@ void LOQScriptInputDialog::parseInput() {
 
   storePropertyValue("SampleWorkspace", m_uiForm.sampleBox->text());
   storePropertyValue("EmptyCanWorkspace", m_uiForm.emptycanBox->text());
-  storePropertyValue("TransmissionSampleWorkspace",
-                     m_uiForm.transSampleBox->text());
-  storePropertyValue("TransmissionDirectWorkspace",
-                     m_uiForm.transDirectBox->text());
-  storePropertyValue("TransmissionEmptyCanWorkspace",
-                     m_uiForm.transEmptyBox->text());
+  storePropertyValue("TransmissionSampleWorkspace", m_uiForm.transSampleBox->text());
+  storePropertyValue("TransmissionDirectWorkspace", m_uiForm.transDirectBox->text());
+  storePropertyValue("TransmissionEmptyCanWorkspace", m_uiForm.transEmptyBox->text());
 
   storePropertyValue("Radius_min", m_uiForm.radMinBox->text());
   storePropertyValue("Radius_max", m_uiForm.radMaxBox->text());

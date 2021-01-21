@@ -19,21 +19,15 @@ processor interface presenter needs to support.
 */
 class ExportTableCommand : public CommandBase {
 public:
-  ExportTableCommand(DataProcessorPresenter *tablePresenter)
-      : CommandBase(tablePresenter){};
-  ExportTableCommand(const QDataProcessorWidget &widget)
-      : CommandBase(widget){};
+  ExportTableCommand(DataProcessorPresenter *tablePresenter) : CommandBase(tablePresenter){};
+  ExportTableCommand(const QDataProcessorWidget &widget) : CommandBase(widget){};
   virtual ~ExportTableCommand(){};
 
-  void execute() override {
-    m_presenter->notify(DataProcessorPresenter::ExportTableFlag);
-  };
+  void execute() override { m_presenter->notify(DataProcessorPresenter::ExportTableFlag); };
   QString name() override { return QString("Export .TBL"); }
   QString icon() override { return QString("://save_template.png"); }
   QString tooltip() override { return QString("Export .TBL file"); }
-  QString whatsthis() override {
-    return QString("Opens a dialog to export a table as .TBL file");
-  }
+  QString whatsthis() override { return QString("Opens a dialog to export a table as .TBL file"); }
   QString shortcut() override { return QString(); }
   bool modifiesSettings() override { return false; }
 };

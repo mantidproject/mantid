@@ -81,15 +81,12 @@ Mantid::VATES::ViewFrustum_const_sptr CameraManager::getCurrentViewFrustum() {
     far[k] = planes[k + 20];
   }
 
-  Mantid::VATES::ViewFrustum_const_sptr frustum =
-      std::make_shared<const Mantid::VATES::ViewFrustum>(
-          Mantid::VATES::LeftPlane(left[0], left[1], left[2], left[3]),
-          Mantid::VATES::RightPlane(right[0], right[1], right[2], right[3]),
-          Mantid::VATES::BottomPlane(bottom[0], bottom[1], bottom[2],
-                                     bottom[3]),
-          Mantid::VATES::TopPlane(top[0], top[1], top[2], top[3]),
-          Mantid::VATES::FarPlane(far[0], far[1], far[2], far[3]),
-          Mantid::VATES::NearPlane(near[0], near[1], near[2], near[3]));
+  Mantid::VATES::ViewFrustum_const_sptr frustum = std::make_shared<const Mantid::VATES::ViewFrustum>(
+      Mantid::VATES::LeftPlane(left[0], left[1], left[2], left[3]),
+      Mantid::VATES::RightPlane(right[0], right[1], right[2], right[3]),
+      Mantid::VATES::BottomPlane(bottom[0], bottom[1], bottom[2], bottom[3]),
+      Mantid::VATES::TopPlane(top[0], top[1], top[2], top[3]), Mantid::VATES::FarPlane(far[0], far[1], far[2], far[3]),
+      Mantid::VATES::NearPlane(near[0], near[1], near[2], near[3]));
 
   return frustum;
 }
@@ -101,8 +98,7 @@ Mantid::VATES::ViewFrustum_const_sptr CameraManager::getCurrentViewFrustum() {
  * @param zpos Z position of the peak.
  * @param peakRadius The radius of the peak.
  */
-void CameraManager::setCameraToPeak(double xpos, double ypos, double zpos,
-                                    double peakRadius) {
+void CameraManager::setCameraToPeak(double xpos, double ypos, double zpos, double peakRadius) {
   pqView *view = pqActiveObjects::instance().activeView();
   vtkSMRenderViewProxy *proxy = nullptr;
 

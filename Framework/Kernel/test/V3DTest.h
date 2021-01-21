@@ -581,9 +581,8 @@ public:
 
   void test_normalize_nullVector_throws() {
     constexpr V3D nullVector;
-    TS_ASSERT_THROWS_EQUALS(
-        normalize(nullVector), const std::runtime_error &e, e.what(),
-        std::string("Unable to normalize a zero length vector."))
+    TS_ASSERT_THROWS_EQUALS(normalize(nullVector), const std::runtime_error &e, e.what(),
+                            std::string("Unable to normalize a zero length vector."))
   }
 };
 

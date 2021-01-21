@@ -29,16 +29,12 @@ DECLARE_ALGORITHM(AddLogDerivative)
 /** Initialize the algorithm's properties.
  */
 void AddLogDerivative::init() {
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                            Direction::InOut),
-      "An input/output workspace. The new log will be added to it.");
-  declareProperty(
-      "LogName", "", std::make_shared<MandatoryValidator<std::string>>(),
-      "The name that will identify the log entry to perform a derivative.\n"
-      "This log must be a numerical series (double).");
-  declareProperty("Derivative", 1,
-                  std::make_shared<BoundedValidator<int>>(1, 10),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::InOut),
+                  "An input/output workspace. The new log will be added to it.");
+  declareProperty("LogName", "", std::make_shared<MandatoryValidator<std::string>>(),
+                  "The name that will identify the log entry to perform a derivative.\n"
+                  "This log must be a numerical series (double).");
+  declareProperty("Derivative", 1, std::make_shared<BoundedValidator<int>>(1, 10),
                   "How many derivatives to perform. Default 1.");
   declareProperty("NewLogName", "",
                   "Name of the newly created log. If not "
@@ -55,14 +51,13 @@ void AddLogDerivative::init() {
  * @param numDerivatives :: number of times to perform derivative.
  * @return
  */
-Mantid::Kernel::TimeSeriesProperty<double> *AddLogDerivative::makeDerivative(
-    API::Progress &progress, Mantid::Kernel::TimeSeriesProperty<double> *input,
-    const std::string &name, int numDerivatives) {
+Mantid::Kernel::TimeSeriesProperty<double> *
+AddLogDerivative::makeDerivative(API::Progress &progress, Mantid::Kernel::TimeSeriesProperty<double> *input,
+                                 const std::string &name, int numDerivatives) {
   if (input->size() < numDerivatives + 1)
-    throw std::runtime_error(
-        "Log " + input->name() + " only has " +
-        Strings::toString(input->size()) + " values. Need at least " +
-        Strings::toString(numDerivatives + 1) + " to make this derivative.");
+    throw std::runtime_error("Log " + input->name() + " only has " + Strings::toString(input->size()) +
+                             " values. Need at least " + Strings::toString(numDerivatives + 1) +
+                             " to make this derivative.");
 
   std::vector<double> values, dVal;
   std::vector<double> times, dTime;
@@ -129,12 +124,10 @@ void AddLogDerivative::exec() {
 
   Run &run = ws->mutableRun();
   if (!run.hasProperty(LogName))
-    throw std::invalid_argument("Log " + LogName +
-                                " not found in the workspace sample logs.");
+    throw std::invalid_argument("Log " + LogName + " not found in the workspace sample logs.");
   Property *prop = run.getProperty(LogName);
   if (!prop)
-    throw std::invalid_argument("Log " + LogName +
-                                " not found in the workspace sample logs.");
+    throw std::invalid_argument("Log " + LogName + " not found in the workspace sample logs.");
   auto *tsp = dynamic_cast<TimeSeriesProperty<double> *>(prop);
   if (!tsp)
     throw std::invalid_argument("Log " + LogName +
@@ -146,8 +139,7 @@ void AddLogDerivative::exec() {
   Progress progress(this, 0.0, 1.0, Derivative);
 
   // Perform derivative
-  TimeSeriesProperty<double> *output =
-      makeDerivative(progress, tsp, NewLogName, Derivative);
+  TimeSeriesProperty<double> *output = makeDerivative(progress, tsp, NewLogName, Derivative);
   // Add the log
   run.addProperty(output, true);
 

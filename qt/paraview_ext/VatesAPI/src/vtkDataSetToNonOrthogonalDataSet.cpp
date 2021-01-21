@@ -43,9 +43,8 @@ namespace {
 
 Mantid::Kernel::Logger g_log("vtkDataSetToNonOrthogonalDataSet");
 
-void addChangeOfBasisMatrixToFieldData(
-    vtkDataObject *dataObject, const MantidVec &u, const MantidVec &v,
-    const MantidVec &w, const std::array<double, 6> &boundingBox) {
+void addChangeOfBasisMatrixToFieldData(vtkDataObject *dataObject, const MantidVec &u, const MantidVec &v,
+                                       const MantidVec &w, const std::array<double, 6> &boundingBox) {
 
   if (!dataObject) {
     throw std::invalid_argument("Change of basis needs a vtkDataObject");
@@ -61,17 +60,14 @@ void addChangeOfBasisMatrixToFieldData(
   }
 
   vtkSmartPointer<vtkMatrix4x4> cobMatrix =
-      vtkPVChangeOfBasisHelper::GetChangeOfBasisMatrix(
-          vtkVector3d(&u[0]), vtkVector3d(&v[0]), vtkVector3d(&w[0]));
+      vtkPVChangeOfBasisHelper::GetChangeOfBasisMatrix(vtkVector3d(&u[0]), vtkVector3d(&v[0]), vtkVector3d(&w[0]));
 
-  if (!vtkPVChangeOfBasisHelper::AddChangeOfBasisMatrixToFieldData(dataObject,
-                                                                   cobMatrix)) {
+  if (!vtkPVChangeOfBasisHelper::AddChangeOfBasisMatrixToFieldData(dataObject, cobMatrix)) {
     g_log.warning("The Change-of-Basis-Matrix could not be added to the field "
                   "data of the data set.\n");
   }
 
-  if (!vtkPVChangeOfBasisHelper::AddBoundingBoxInBasis(dataObject,
-                                                       &boundingBox[0])) {
+  if (!vtkPVChangeOfBasisHelper::AddBoundingBoxInBasis(dataObject, &boundingBox[0])) {
     g_log.warning("The bounding box could not be added to the field data of "
                   "the data set.\n");
   }
@@ -88,11 +84,9 @@ namespace VATES {
  * @param workspaceProvider: The provider of one or multiple workspaces.
  */
 vtkDataSetToNonOrthogonalDataSet::vtkDataSetToNonOrthogonalDataSet(
-    vtkDataSet *dataset, std::string name,
-    std::unique_ptr<Mantid::VATES::WorkspaceProvider> workspaceProvider)
-    : m_dataSet(dataset), m_wsName(name), m_numDims(3), m_skewMat(),
-      m_basisNorm(), m_basisX(1, 0, 0), m_basisY(0, 1, 0), m_basisZ(0, 0, 1),
-      m_coordType(Kernel::HKL),
+    vtkDataSet *dataset, std::string name, std::unique_ptr<Mantid::VATES::WorkspaceProvider> workspaceProvider)
+    : m_dataSet(dataset), m_wsName(name), m_numDims(3), m_skewMat(), m_basisNorm(), m_basisX(1, 0, 0),
+      m_basisY(0, 1, 0), m_basisZ(0, 0, 1), m_coordType(Kernel::HKL),
       m_workspaceProvider(std::move(workspaceProvider)) {
   if (!m_dataSet) {
     throw std::runtime_error("Cannot construct "
@@ -115,8 +109,7 @@ namespace {
 struct Worker {
   Mantid::coord_t *m_skew;
   vtkFloatArray *m_pts;
-  Worker(Mantid::coord_t *skew, vtkFloatArray *pts)
-      : m_skew(skew), m_pts(pts) {}
+  Worker(Mantid::coord_t *skew, vtkFloatArray *pts) : m_skew(skew), m_pts(pts) {}
   void operator()(vtkIdType begin, vtkIdType end) {
     float in[3], out[3];
     for (vtkIdType index = begin; index < end; ++index) {
@@ -147,8 +140,7 @@ void vtkDataSetToNonOrthogonalDataSet::execute(ProgressAction *progress) {
 
   // Have to cast since inherited class doesn't provide access to all info
   if (boost::algorithm::find_first(wsType, "MDHistoWorkspace")) {
-    API::IMDHistoWorkspace_const_sptr infoWs =
-        std::dynamic_pointer_cast<const API::IMDHistoWorkspace>(ws);
+    API::IMDHistoWorkspace_const_sptr infoWs = std::dynamic_pointer_cast<const API::IMDHistoWorkspace>(ws);
 
     m_boundingBox[0] = infoWs->getXDimension()->getMinimum();
     m_boundingBox[1] = infoWs->getXDimension()->getMaximum();
@@ -160,13 +152,11 @@ void vtkDataSetToNonOrthogonalDataSet::execute(ProgressAction *progress) {
     m_numDims = infoWs->getNumDims();
     m_coordType = infoWs->getSpecialCoordinateSystem();
     if (Kernel::HKL != m_coordType) {
-      throw std::invalid_argument(
-          "Cannot create non-orthogonal view for non-HKL coordinates");
+      throw std::invalid_argument("Cannot create non-orthogonal view for non-HKL coordinates");
     }
     const API::Sample sample = infoWs->getExperimentInfo(0)->sample();
     if (!sample.hasOrientedLattice()) {
-      throw std::invalid_argument(
-          "OrientedLattice is not present on workspace");
+      throw std::invalid_argument("OrientedLattice is not present on workspace");
     }
     oLatt = sample.getOrientedLattice();
     const API::Run run = infoWs->getExperimentInfo(0)->run();
@@ -186,8 +176,7 @@ void vtkDataSetToNonOrthogonalDataSet::execute(ProgressAction *progress) {
   }
   // This is only here to make the unit test run.
   if (boost::algorithm::find_first(wsType, "MDEventWorkspace")) {
-    API::IMDEventWorkspace_const_sptr infoWs =
-        std::dynamic_pointer_cast<const API::IMDEventWorkspace>(ws);
+    API::IMDEventWorkspace_const_sptr infoWs = std::dynamic_pointer_cast<const API::IMDEventWorkspace>(ws);
 
     m_boundingBox[0] = infoWs->getXDimension()->getMinimum();
     m_boundingBox[1] = infoWs->getXDimension()->getMaximum();
@@ -199,13 +188,11 @@ void vtkDataSetToNonOrthogonalDataSet::execute(ProgressAction *progress) {
     m_numDims = infoWs->getNumDims();
     m_coordType = infoWs->getSpecialCoordinateSystem();
     if (Kernel::HKL != m_coordType) {
-      throw std::invalid_argument(
-          "Cannot create non-orthogonal view for non-HKL coordinates");
+      throw std::invalid_argument("Cannot create non-orthogonal view for non-HKL coordinates");
     }
     const API::Sample sample = infoWs->getExperimentInfo(0)->sample();
     if (!sample.hasOrientedLattice()) {
-      throw std::invalid_argument(
-          "OrientedLattice is not present on workspace");
+      throw std::invalid_argument("OrientedLattice is not present on workspace");
     }
     oLatt = sample.getOrientedLattice();
     const API::Run run = infoWs->getExperimentInfo(0)->run();
@@ -239,8 +226,7 @@ void vtkDataSetToNonOrthogonalDataSet::execute(ProgressAction *progress) {
   }
 
   // Get the original points
-  vtkFloatArray *points =
-      vtkFloatArray::FastDownCast(data->GetPoints()->GetData());
+  vtkFloatArray *points = vtkFloatArray::FastDownCast(data->GetPoints()->GetData());
   if (!points) {
     throw std::runtime_error("Failed to cast vtkDataArray to vtkFloatArray.");
   } else if (points->GetNumberOfComponents() != 3) {
@@ -265,9 +251,8 @@ void vtkDataSetToNonOrthogonalDataSet::execute(ProgressAction *progress) {
  * @param w : The tranform requested when MDworkspace was created
  * @param aff : The affine matrix taking care of coordinate transformations
  */
-void vtkDataSetToNonOrthogonalDataSet::createSkewInformation(
-    Geometry::OrientedLattice &ol, Kernel::DblMatrix &w,
-    Kernel::Matrix<coord_t> &aff) {
+void vtkDataSetToNonOrthogonalDataSet::createSkewInformation(Geometry::OrientedLattice &ol, Kernel::DblMatrix &w,
+                                                             Kernel::Matrix<coord_t> &aff) {
   // Get the B matrix
   Kernel::DblMatrix bMat = ol.getB();
   // Apply the W tranform matrix
@@ -336,8 +321,7 @@ void vtkDataSetToNonOrthogonalDataSet::createSkewInformation(
  * @param basis : The "base" basis vector.
  * @param scale : Scale factor for the basis vector.
  */
-void vtkDataSetToNonOrthogonalDataSet::findSkewBasis(Kernel::V3D &basis,
-                                                     double scale) {
+void vtkDataSetToNonOrthogonalDataSet::findSkewBasis(Kernel::V3D &basis, double scale) {
   basis = m_skewMat * basis;
   basis /= scale;
   basis.normalize();
@@ -367,8 +351,7 @@ void vtkDataSetToNonOrthogonalDataSet::stripMatrix(Kernel::DblMatrix &mat) {
  */
 void vtkDataSetToNonOrthogonalDataSet::updateMetaData(vtkDataSet *ugrid) {
   // Create and add the change of basis matrix
-  addChangeOfBasisMatrixToFieldData(ugrid, m_basisX, m_basisY, m_basisZ,
-                                    m_boundingBox);
+  addChangeOfBasisMatrixToFieldData(ugrid, m_basisX, m_basisY, m_basisZ, m_boundingBox);
 }
 
 } // namespace VATES

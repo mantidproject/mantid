@@ -380,8 +380,7 @@ public:
     TS_ASSERT_EQUALS(m(1, 1), 2.0);
     TS_ASSERT_EQUALS(m(2, 1), -3.0);
 
-    TS_ASSERT_THROWS(GSLMatrix({{1.0, 2.0}, {4.0, 2.0, 0.0}, {-1.0, -3.0}}),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(GSLMatrix({{1.0, 2.0}, {4.0, 2.0, 0.0}, {-1.0, -3.0}}), const std::runtime_error &);
   }
 
   void test_vector_mul() {

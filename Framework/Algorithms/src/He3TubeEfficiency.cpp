@@ -43,8 +43,8 @@ DECLARE_ALGORITHM(He3TubeEfficiency)
 
 /// Default constructor
 He3TubeEfficiency::He3TubeEfficiency()
-    : Algorithm(), m_inputWS(), m_outputWS(), m_paraMap(nullptr),
-      m_shapeCache(), m_samplePos(), m_spectraSkipped(), m_progress(nullptr) {
+    : Algorithm(), m_inputWS(), m_outputWS(), m_paraMap(nullptr), m_shapeCache(), m_samplePos(), m_spectraSkipped(),
+      m_progress(nullptr) {
   m_shapeCache.clear();
 }
 
@@ -58,39 +58,29 @@ void He3TubeEfficiency::init() {
   wsValidator->add<API::WorkspaceUnitValidator>("Wavelength");
   wsValidator->add<API::HistogramValidator>();
   wsValidator->add<API::InstrumentValidator>();
+  this->declareProperty(std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+                            "InputWorkspace", "", Kernel::Direction::Input, wsValidator),
+                        "Name of the input workspace");
   this->declareProperty(
-      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-          "InputWorkspace", "", Kernel::Direction::Input, wsValidator),
-      "Name of the input workspace");
-  this->declareProperty(
-      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-          "OutputWorkspace", "", Kernel::Direction::Output),
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>("OutputWorkspace", "", Kernel::Direction::Output),
       "Name of the output workspace, can be the same as the input");
   auto mustBePositive = std::make_shared<Kernel::BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
-  this->declareProperty(
-      std::make_unique<Kernel::PropertyWithValue<double>>("ScaleFactor", 1.0,
-                                                          mustBePositive),
-      "Constant factor with which to scale the calculated"
-      "detector efficiency. Same factor applies to all efficiencies.");
+  this->declareProperty(std::make_unique<Kernel::PropertyWithValue<double>>("ScaleFactor", 1.0, mustBePositive),
+                        "Constant factor with which to scale the calculated"
+                        "detector efficiency. Same factor applies to all efficiencies.");
 
   auto mustBePosArr = std::make_shared<Kernel::ArrayBoundedValidator<double>>();
   mustBePosArr->setLower(0.0);
-  this->declareProperty(
-      std::make_unique<Kernel::ArrayProperty<double>>("TubePressure",
-                                                      mustBePosArr),
-      "Provide overriding the default tube pressure. The pressure must "
-      "be specified in atm.");
-  this->declareProperty(
-      std::make_unique<Kernel::ArrayProperty<double>>("TubeThickness",
-                                                      mustBePosArr),
-      "Provide overriding the default tube thickness. The thickness must "
-      "be specified in metres.");
-  this->declareProperty(
-      std::make_unique<Kernel::ArrayProperty<double>>("TubeTemperature",
-                                                      mustBePosArr),
-      "Provide overriding the default tube temperature. The temperature must "
-      "be specified in Kelvin.");
+  this->declareProperty(std::make_unique<Kernel::ArrayProperty<double>>("TubePressure", mustBePosArr),
+                        "Provide overriding the default tube pressure. The pressure must "
+                        "be specified in atm.");
+  this->declareProperty(std::make_unique<Kernel::ArrayProperty<double>>("TubeThickness", mustBePosArr),
+                        "Provide overriding the default tube thickness. The thickness must "
+                        "be specified in metres.");
+  this->declareProperty(std::make_unique<Kernel::ArrayProperty<double>>("TubeTemperature", mustBePosArr),
+                        "Provide overriding the default tube temperature. The temperature must "
+                        "be specified in Kelvin.");
 }
 
 /**
@@ -134,9 +124,7 @@ void He3TubeEfficiency::exec() {
       // if we don't have all the data there will be spectra we can't correct,
       // avoid leaving the workspace part corrected
       m_outputWS->mutableY(i) = 0;
-      PARALLEL_CRITICAL(deteff_invalid) {
-        m_spectraSkipped.emplace_back(m_inputWS->getAxis(1)->spectraNo(i));
-      }
+      PARALLEL_CRITICAL(deteff_invalid) { m_spectraSkipped.emplace_back(m_inputWS->getAxis(1)->spectraNo(i)); }
     }
 
     // make regular progress reports
@@ -165,10 +153,8 @@ void He3TubeEfficiency::exec() {
  *  @throw NotFoundError if the detector or its gas pressure or wall thickness
  *  were not found
  */
-void He3TubeEfficiency::correctForEfficiency(
-    std::size_t spectraIndex, const API::SpectrumInfo &spectrumInfo) {
-  if (spectrumInfo.isMonitor(spectraIndex) ||
-      spectrumInfo.isMasked(spectraIndex)) {
+void He3TubeEfficiency::correctForEfficiency(std::size_t spectraIndex, const API::SpectrumInfo &spectrumInfo) {
+  if (spectrumInfo.isMonitor(spectraIndex) || spectrumInfo.isMasked(spectraIndex)) {
     return;
   }
 
@@ -186,17 +172,15 @@ void He3TubeEfficiency::correctForEfficiency(
 
   computeEfficiencyCorrection(effCorrection, wavelength, exp_constant, scale);
 
-  std::transform(
-      yValues.cbegin(), yValues.cend(), effCorrection.cbegin(), yOut.begin(),
-      [&](const double y, const double effcorr) { return y * effcorr; });
+  std::transform(yValues.cbegin(), yValues.cend(), effCorrection.cbegin(), yOut.begin(),
+                 [&](const double y, const double effcorr) { return y * effcorr; });
 
   const auto &eValues = m_inputWS->e(spectraIndex);
   auto &eOut = m_outputWS->mutableE(spectraIndex);
 
   // reset wavelength iterator
-  std::transform(
-      eValues.cbegin(), eValues.cend(), effCorrection.cbegin(), eOut.begin(),
-      [&](const double e, const double effcorr) { return e * effcorr; });
+  std::transform(eValues.cbegin(), eValues.cend(), effCorrection.cbegin(), eOut.begin(),
+                 [&](const double e, const double effcorr) { return e * effcorr; });
 }
 
 /**
@@ -207,16 +191,11 @@ void He3TubeEfficiency::correctForEfficiency(
  * @throw out_of_range if twice tube thickness is greater than tube diameter
  * @return the exponential contribution for the given detector
  */
-double
-He3TubeEfficiency::calculateExponential(std::size_t spectraIndex,
-                                        const Geometry::IDetector &idet) {
+double He3TubeEfficiency::calculateExponential(std::size_t spectraIndex, const Geometry::IDetector &idet) {
   // Get the parameters for the current associated tube
-  double pressure =
-      this->getParameter("TubePressure", spectraIndex, "tube_pressure", idet);
-  double tubethickness =
-      this->getParameter("TubeThickness", spectraIndex, "tube_thickness", idet);
-  double temperature = this->getParameter("TubeTemperature", spectraIndex,
-                                          "tube_temperature", idet);
+  double pressure = this->getParameter("TubePressure", spectraIndex, "tube_pressure", idet);
+  double tubethickness = this->getParameter("TubeThickness", spectraIndex, "tube_thickness", idet);
+  double temperature = this->getParameter("TubeTemperature", spectraIndex, "tube_temperature", idet);
 
   double detRadius(0.0);
   Kernel::V3D detAxis;
@@ -253,54 +232,41 @@ He3TubeEfficiency::calculateExponential(std::size_t spectraIndex,
  * @param detRadius :: An output parameter that contains the detector radius
  * @param detAxis :: An output parameter that contains the detector axis vector
  */
-void He3TubeEfficiency::getDetectorGeometry(const Geometry::IDetector &det,
-                                            double &detRadius,
-                                            Kernel::V3D &detAxis) {
+void He3TubeEfficiency::getDetectorGeometry(const Geometry::IDetector &det, double &detRadius, Kernel::V3D &detAxis) {
   std::shared_ptr<const Geometry::IObject> shape_sptr = det.shape();
   if (!shape_sptr) {
-    throw std::runtime_error(
-        "Detector geometry error: detector with id: " +
-        std::to_string(det.getID()) +
-        " does not have shape. Is this a detectors group?\n"
-        "The algorithm works for instruments with one-to-one "
-        "spectra-to-detector maps only!");
+    throw std::runtime_error("Detector geometry error: detector with id: " + std::to_string(det.getID()) +
+                             " does not have shape. Is this a detectors group?\n"
+                             "The algorithm works for instruments with one-to-one "
+                             "spectra-to-detector maps only!");
   }
   // std::map<const Geometry::Object *, std::pair<double,
   // Kernel::V3D>>::const_iterator
   auto it = m_shapeCache.find(shape_sptr.get());
   if (it == m_shapeCache.end()) {
-    double xDist = distToSurface(Kernel::V3D(DIST_TO_UNIVERSE_EDGE, 0, 0),
-                                 shape_sptr.get());
-    double zDist = distToSurface(Kernel::V3D(0, 0, DIST_TO_UNIVERSE_EDGE),
-                                 shape_sptr.get());
+    double xDist = distToSurface(Kernel::V3D(DIST_TO_UNIVERSE_EDGE, 0, 0), shape_sptr.get());
+    double zDist = distToSurface(Kernel::V3D(0, 0, DIST_TO_UNIVERSE_EDGE), shape_sptr.get());
     if (std::abs(zDist - xDist) < 1e-8) {
       detRadius = zDist / 2.0;
       detAxis = Kernel::V3D(0, 1, 0);
       // assume radii in z and x and the axis is in the y
-      PARALLEL_CRITICAL(deteff_shapecachea) {
-        m_shapeCache.insert({shape_sptr.get(), {detRadius, detAxis}});
-      }
+      PARALLEL_CRITICAL(deteff_shapecachea) { m_shapeCache.insert({shape_sptr.get(), {detRadius, detAxis}}); }
       return;
     }
-    double yDist = distToSurface(Kernel::V3D(0, DIST_TO_UNIVERSE_EDGE, 0),
-                                 shape_sptr.get());
+    double yDist = distToSurface(Kernel::V3D(0, DIST_TO_UNIVERSE_EDGE, 0), shape_sptr.get());
     if (std::abs(yDist - zDist) < 1e-8) {
       detRadius = yDist / 2.0;
       detAxis = Kernel::V3D(1, 0, 0);
       // assume that y and z are radii of the cylinder's circular cross-section
       // and the axis is perpendicular, in the x direction
-      PARALLEL_CRITICAL(deteff_shapecacheb) {
-        m_shapeCache.insert({shape_sptr.get(), {detRadius, detAxis}});
-      }
+      PARALLEL_CRITICAL(deteff_shapecacheb) { m_shapeCache.insert({shape_sptr.get(), {detRadius, detAxis}}); }
       return;
     }
 
     if (std::abs(xDist - yDist) < 1e-8) {
       detRadius = xDist / 2.0;
       detAxis = Kernel::V3D(0, 0, 1);
-      PARALLEL_CRITICAL(deteff_shapecachec) {
-        m_shapeCache.insert({shape_sptr.get(), {detRadius, detAxis}});
-      }
+      PARALLEL_CRITICAL(deteff_shapecachec) { m_shapeCache.insert({shape_sptr.get(), {detRadius, detAxis}}); }
       return;
     }
   } else {
@@ -321,8 +287,7 @@ void He3TubeEfficiency::getDetectorGeometry(const Geometry::IDetector &det,
  *  @throw invalid_argument if there is any error finding the distance
  * @returns The distance to the surface in metres
  */
-double He3TubeEfficiency::distToSurface(const Kernel::V3D start,
-                                        const Geometry::IObject *shape) const {
+double He3TubeEfficiency::distToSurface(const Kernel::V3D start, const Geometry::IObject *shape) const {
   // get a vector from the point that was passed to the origin
   const Kernel::V3D direction = normalize(-start);
   // put the point and the vector (direction) together to get a line,
@@ -335,8 +300,7 @@ double He3TubeEfficiency::distToSurface(const Kernel::V3D start,
   if (track.count() != 1) {
     // the track missed the shape, probably the shape is not centered on
     // the origin
-    throw std::invalid_argument(
-        "Fatal error interpreting the shape of a detector");
+    throw std::invalid_argument("Fatal error interpreting the shape of a detector");
   }
   // the first part of the track will be the part inside the shape,
   // return its length
@@ -350,8 +314,7 @@ double He3TubeEfficiency::distToSurface(const Kernel::V3D start,
  * @param scale_factor :: an overall value for scaling the efficiency
  * @return the calculated efficiency
  */
-double He3TubeEfficiency::detectorEfficiency(const double alpha,
-                                             const double scale_factor) const {
+double He3TubeEfficiency::detectorEfficiency(const double alpha, const double scale_factor) const {
   return (scale_factor / (1.0 - std::exp(-alpha)));
 }
 
@@ -361,8 +324,7 @@ double He3TubeEfficiency::detectorEfficiency(const double alpha,
 void He3TubeEfficiency::logErrors() const {
   std::vector<int>::size_type nspecs = m_spectraSkipped.size();
   if (nspecs > 0) {
-    this->g_log.warning() << "There were " << nspecs
-                          << " spectra that could not be corrected. ";
+    this->g_log.warning() << "There were " << nspecs << " spectra that could not be corrected. ";
     this->g_log.debug() << "Unaffected spectra numbers: ";
     for (size_t i = 0; i < nspecs; ++i) {
       this->g_log.debug() << m_spectraSkipped[i] << " ";
@@ -380,10 +342,8 @@ void He3TubeEfficiency::logErrors() const {
  * @param idet :: the current detector
  * @return the value of the detector property
  */
-double He3TubeEfficiency::getParameter(const std::string &wsPropName,
-                                       std::size_t currentIndex,
-                                       const std::string &detPropName,
-                                       const Geometry::IDetector &idet) {
+double He3TubeEfficiency::getParameter(const std::string &wsPropName, std::size_t currentIndex,
+                                       const std::string &detPropName, const Geometry::IDetector &idet) {
   std::vector<double> wsProp = this->getProperty(wsPropName);
 
   if (wsProp.empty()) {
@@ -403,8 +363,7 @@ double He3TubeEfficiency::getParameter(const std::string &wsPropName,
 void He3TubeEfficiency::execEvent() {
   this->g_log.information("Processing event workspace");
 
-  const API::MatrixWorkspace_const_sptr matrixInputWS =
-      getProperty("InputWorkspace");
+  const API::MatrixWorkspace_const_sptr matrixInputWS = getProperty("InputWorkspace");
 
   // generate the output workspace pointer
   API::MatrixWorkspace_sptr matrixOutputWS = getProperty("OutputWorkspace");
@@ -412,8 +371,7 @@ void He3TubeEfficiency::execEvent() {
     matrixOutputWS = matrixInputWS->clone();
     setProperty("OutputWorkspace", matrixOutputWS);
   }
-  auto m_outputWS =
-      std::dynamic_pointer_cast<DataObjects::EventWorkspace>(matrixOutputWS);
+  auto m_outputWS = std::dynamic_pointer_cast<DataObjects::EventWorkspace>(matrixOutputWS);
 
   std::size_t numHistograms = m_outputWS->getNumberHistograms();
   auto &spectrumInfo = m_outputWS->mutableSpectrumInfo();
@@ -478,14 +436,11 @@ void He3TubeEfficiency::execEvent() {
  * @param expConstant :: The exponential constant
  * @param scale :: The scale factor
  */
-void He3TubeEfficiency::computeEfficiencyCorrection(
-    std::vector<double> &effCorrection, const Points &xes,
-    const double expConstant, const double scale) const {
+void He3TubeEfficiency::computeEfficiencyCorrection(std::vector<double> &effCorrection, const Points &xes,
+                                                    const double expConstant, const double scale) const {
 
   std::transform(xes.cbegin(), xes.cend(), effCorrection.begin(),
-                 [&](double wavelen) {
-                   return detectorEfficiency(expConstant * wavelen, scale);
-                 });
+                 [&](double wavelen) { return detectorEfficiency(expConstant * wavelen, scale); });
 }
 
 /**
@@ -493,13 +448,11 @@ void He3TubeEfficiency::computeEfficiencyCorrection(
  * @param events :: the list of events to correct
  * @param expval :: the value of the exponent for the detector efficiency
  */
-template <class T>
-void He3TubeEfficiency::eventHelper(std::vector<T> &events, double expval) {
+template <class T> void He3TubeEfficiency::eventHelper(std::vector<T> &events, double expval) {
   const double scale = this->getProperty("ScaleFactor");
 
   for (auto &event : events) {
-    auto de = static_cast<float>(
-        this->detectorEfficiency(expval * event.tof(), scale));
+    auto de = static_cast<float>(this->detectorEfficiency(expval * event.tof(), scale));
     event.m_weight *= de;
     event.m_errorSquared *= de * de;
   }

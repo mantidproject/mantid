@@ -24,9 +24,7 @@ class AddLogDerivativeTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static AddLogDerivativeTest *createSuite() {
-    return new AddLogDerivativeTest();
-  }
+  static AddLogDerivativeTest *createSuite() { return new AddLogDerivativeTest(); }
   static void destroySuite(AddLogDerivativeTest *suite) { delete suite; }
 
   void test_Init() {
@@ -36,13 +34,11 @@ public:
   }
 
   /** Perform test, return result */
-  TimeSeriesProperty<double> *do_test(int Derivative, bool willFail = false,
-                                      bool addRepeatedTimes = false) {
+  TimeSeriesProperty<double> *do_test(int Derivative, bool willFail = false, bool addRepeatedTimes = false) {
     Workspace2D_sptr ws = WorkspaceCreationHelper::create2DWorkspace(10, 10);
     AnalysisDataService::Instance().addOrReplace("Dummy", ws);
 
-    TimeSeriesProperty<double> *p =
-        new TimeSeriesProperty<double>("doubleProp");
+    TimeSeriesProperty<double> *p = new TimeSeriesProperty<double>("doubleProp");
     TS_ASSERT_THROWS_NOTHING(p->addValue("2007-11-30T16:17:00", 1.00));
     TS_ASSERT_THROWS_NOTHING(p->addValue("2007-11-30T16:17:10", 2.00));
     TS_ASSERT_THROWS_NOTHING(p->addValue("2007-11-30T16:17:20", 0.00));

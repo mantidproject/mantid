@@ -43,13 +43,9 @@ QValidator *createXValidator() {
   return validator;
 }
 
-QValidator *createWSIndexValidator() {
-  return new QIntValidator(WS_INDEX_MIN, WS_INDEX_MAX);
-}
+QValidator *createWSIndexValidator() { return new QIntValidator(WS_INDEX_MIN, WS_INDEX_MAX); }
 
-QTableWidgetItem *createTableItem(QString const &value,
-                                  Qt::AlignmentFlag const &alignment,
-                                  bool editable) {
+QTableWidgetItem *createTableItem(QString const &value, Qt::AlignmentFlag const &alignment, bool editable) {
   auto item = new QTableWidgetItem(value);
   item->setTextAlignment(alignment);
   if (!editable)
@@ -57,17 +53,12 @@ QTableWidgetItem *createTableItem(QString const &value,
   return item;
 }
 
-QTableWidgetItem *createWSIndexTableItem(int value,
-                                         Qt::AlignmentFlag const &alignment,
-                                         bool editable) {
+QTableWidgetItem *createWSIndexTableItem(int value, Qt::AlignmentFlag const &alignment, bool editable) {
   return createTableItem(QString::number(value), alignment, editable);
 }
 
-QTableWidgetItem *createXTableItem(double value,
-                                   Qt::AlignmentFlag const &alignment,
-                                   bool editable) {
-  return createTableItem(QString::number(value, 'f', X_PRECISION), alignment,
-                         editable);
+QTableWidgetItem *createXTableItem(double value, Qt::AlignmentFlag const &alignment, bool editable) {
+  return createTableItem(QString::number(value, 'f', X_PRECISION), alignment, editable);
 }
 
 } // namespace
@@ -80,8 +71,8 @@ namespace MantidWidgets {
  */
 
 FitScriptGeneratorDataTable::FitScriptGeneratorDataTable(QWidget *parent)
-    : QTableWidget(parent), m_selectedRow(-1), m_selectedColumn(-1),
-      m_selectedValue(0.0), m_lastIndex(QPersistentModelIndex()) {
+    : QTableWidget(parent), m_selectedRow(-1), m_selectedColumn(-1), m_selectedValue(0.0),
+      m_lastIndex(QPersistentModelIndex()) {
   this->setSelectionBehavior(QAbstractItemView::SelectRows);
   this->setSelectionMode(QAbstractItemView::ExtendedSelection);
   this->setShowGrid(false);
@@ -102,19 +93,13 @@ FitScriptGeneratorDataTable::FitScriptGeneratorDataTable(QWidget *parent)
 
   this->viewport()->installEventFilter(this);
 
-  this->setItemDelegateForColumn(
-      ColumnIndex::WorkspaceName,
-      new CustomItemDelegate(this, ColumnIndex::WorkspaceName));
-  this->setItemDelegateForColumn(
-      ColumnIndex::WorkspaceIndex,
-      new CustomItemDelegate(this, ColumnIndex::WorkspaceIndex));
-  this->setItemDelegateForColumn(
-      ColumnIndex::StartX, new CustomItemDelegate(this, ColumnIndex::StartX));
-  this->setItemDelegateForColumn(
-      ColumnIndex::EndX, new CustomItemDelegate(this, ColumnIndex::EndX));
+  this->setItemDelegateForColumn(ColumnIndex::WorkspaceName, new CustomItemDelegate(this, ColumnIndex::WorkspaceName));
+  this->setItemDelegateForColumn(ColumnIndex::WorkspaceIndex,
+                                 new CustomItemDelegate(this, ColumnIndex::WorkspaceIndex));
+  this->setItemDelegateForColumn(ColumnIndex::StartX, new CustomItemDelegate(this, ColumnIndex::StartX));
+  this->setItemDelegateForColumn(ColumnIndex::EndX, new CustomItemDelegate(this, ColumnIndex::EndX));
 
-  connect(this, SIGNAL(itemClicked(QTableWidgetItem *)), this,
-          SLOT(handleItemClicked(QTableWidgetItem *)));
+  connect(this, SIGNAL(itemClicked(QTableWidgetItem *)), this, SLOT(handleItemClicked(QTableWidgetItem *)));
 }
 
 bool FitScriptGeneratorDataTable::eventFilter(QObject *widget, QEvent *event) {
@@ -133,31 +118,26 @@ bool FitScriptGeneratorDataTable::eventFilter(QObject *widget, QEvent *event) {
 void FitScriptGeneratorDataTable::handleItemClicked(QTableWidgetItem *item) {
   m_selectedRow = item->row();
   m_selectedColumn = item->column();
-  if (m_selectedColumn == ColumnIndex::StartX ||
-      m_selectedColumn == ColumnIndex::EndX)
+  if (m_selectedColumn == ColumnIndex::StartX || m_selectedColumn == ColumnIndex::EndX)
     m_selectedValue = item->text().toDouble();
 }
 
-QPersistentModelIndex
-FitScriptGeneratorDataTable::hoveredRowIndex(QEvent *event) {
+QPersistentModelIndex FitScriptGeneratorDataTable::hoveredRowIndex(QEvent *event) {
   auto index = m_lastIndex;
   auto const eventType = event->type();
   if (eventType == QEvent::HoverMove)
-    index = QPersistentModelIndex(
-        this->indexAt(static_cast<QHoverEvent *>(event)->pos()));
+    index = QPersistentModelIndex(this->indexAt(static_cast<QHoverEvent *>(event)->pos()));
   else if (eventType == QEvent::Leave)
     index = QPersistentModelIndex(QModelIndex());
 
   return index;
 }
 
-std::string
-FitScriptGeneratorDataTable::workspaceName(FitDomainIndex row) const {
+std::string FitScriptGeneratorDataTable::workspaceName(FitDomainIndex row) const {
   return getText(row, ColumnIndex::WorkspaceName).toStdString();
 }
 
-WorkspaceIndex
-FitScriptGeneratorDataTable::workspaceIndex(FitDomainIndex row) const {
+WorkspaceIndex FitScriptGeneratorDataTable::workspaceIndex(FitDomainIndex row) const {
   return getText(row, ColumnIndex::WorkspaceIndex).toInt();
 }
 
@@ -176,72 +156,58 @@ std::vector<FitDomainIndex> FitScriptGeneratorDataTable::selectedRows() const {
   if (selectionModel->hasSelection()) {
 
     for (auto const &rowIndex : selectionModel->selectedRows())
-      rowIndices.emplace_back(
-          FitDomainIndex(static_cast<std::size_t>(rowIndex.row())));
+      rowIndices.emplace_back(FitDomainIndex(static_cast<std::size_t>(rowIndex.row())));
 
     std::sort(rowIndices.rbegin(), rowIndices.rend());
   }
   return rowIndices;
 }
 
-void FitScriptGeneratorDataTable::removeDomain(
-    std::string const &workspaceName,
-    MantidWidgets::WorkspaceIndex workspaceIndex) {
+void FitScriptGeneratorDataTable::removeDomain(std::string const &workspaceName,
+                                               MantidWidgets::WorkspaceIndex workspaceIndex) {
   auto const removeIndex = indexOfDomain(workspaceName, workspaceIndex);
   if (removeIndex != -1)
     this->removeRow(removeIndex);
 }
 
-void FitScriptGeneratorDataTable::addDomain(
-    QString const &workspaceName, MantidWidgets::WorkspaceIndex workspaceIndex,
-    double startX, double endX) {
+void FitScriptGeneratorDataTable::addDomain(QString const &workspaceName, MantidWidgets::WorkspaceIndex workspaceIndex,
+                                            double startX, double endX) {
   this->blockSignals(true);
 
   auto const rowIndex = this->rowCount();
   this->insertRow(rowIndex);
 
-  this->setItem(rowIndex, ColumnIndex::WorkspaceName,
-                createTableItem(workspaceName, Qt::AlignVCenter, false));
+  this->setItem(rowIndex, ColumnIndex::WorkspaceName, createTableItem(workspaceName, Qt::AlignVCenter, false));
   this->setItem(rowIndex, ColumnIndex::WorkspaceIndex,
-                createWSIndexTableItem(static_cast<int>(workspaceIndex.value),
-                                       Qt::AlignCenter, false));
-  this->setItem(rowIndex, ColumnIndex::StartX,
-                createXTableItem(startX, Qt::AlignCenter, true));
-  this->setItem(rowIndex, ColumnIndex::EndX,
-                createXTableItem(endX, Qt::AlignCenter, true));
+                createWSIndexTableItem(static_cast<int>(workspaceIndex.value), Qt::AlignCenter, false));
+  this->setItem(rowIndex, ColumnIndex::StartX, createXTableItem(startX, Qt::AlignCenter, true));
+  this->setItem(rowIndex, ColumnIndex::EndX, createXTableItem(endX, Qt::AlignCenter, true));
 
   this->blockSignals(false);
 }
 
-int FitScriptGeneratorDataTable::indexOfDomain(
-    std::string const &workspaceName,
-    MantidWidgets::WorkspaceIndex workspaceIndex) const {
+int FitScriptGeneratorDataTable::indexOfDomain(std::string const &workspaceName,
+                                               MantidWidgets::WorkspaceIndex workspaceIndex) const {
   for (auto rowIndex = 0; rowIndex < this->rowCount(); ++rowIndex) {
-    if (this->workspaceName(rowIndex) == workspaceName &&
-        this->workspaceIndex(rowIndex) == workspaceIndex)
+    if (this->workspaceName(rowIndex) == workspaceName && this->workspaceIndex(rowIndex) == workspaceIndex)
       return rowIndex;
   }
   return -1;
 }
 
-QString FitScriptGeneratorDataTable::getText(FitDomainIndex row,
-                                             int column) const {
+QString FitScriptGeneratorDataTable::getText(FitDomainIndex row, int column) const {
   return this->item(static_cast<int>(row.value), column)->text();
 }
 
 void FitScriptGeneratorDataTable::formatSelection() {
-  setSelectedXValue(
-      this->item(m_selectedRow, m_selectedColumn)->text().toDouble());
+  setSelectedXValue(this->item(m_selectedRow, m_selectedColumn)->text().toDouble());
 }
 
-void FitScriptGeneratorDataTable::resetSelection() {
-  setSelectedXValue(m_selectedValue);
-}
+void FitScriptGeneratorDataTable::resetSelection() { setSelectedXValue(m_selectedValue); }
 
 void FitScriptGeneratorDataTable::setSelectedXValue(double xValue) {
   this->blockSignals(true);
-  this->setItem(m_selectedRow, m_selectedColumn,
-                createXTableItem(xValue, Qt::AlignCenter, true));
+  this->setItem(m_selectedRow, m_selectedColumn, createXTableItem(xValue, Qt::AlignCenter, true));
   this->blockSignals(false);
 }
 
@@ -249,17 +215,13 @@ void FitScriptGeneratorDataTable::setSelectedXValue(double xValue) {
  * CustomItemDelegate class methods.
  */
 
-CustomItemDelegate::CustomItemDelegate(FitScriptGeneratorDataTable *parent,
-                                       ColumnIndex const &index)
-    : QStyledItemDelegate(parent), m_tableWidget(parent), m_columnIndex(index),
-      m_hoveredIndex(-1) {
+CustomItemDelegate::CustomItemDelegate(FitScriptGeneratorDataTable *parent, ColumnIndex const &index)
+    : QStyledItemDelegate(parent), m_tableWidget(parent), m_columnIndex(index), m_hoveredIndex(-1) {
   m_tableWidget = parent;
   m_tableWidget->setMouseTracking(true);
 
-  connect(m_tableWidget, SIGNAL(itemEntered(QTableWidgetItem *)), this,
-          SLOT(handleItemEntered(QTableWidgetItem *)));
-  connect(m_tableWidget, SIGNAL(itemExited(int)), this,
-          SLOT(handleItemExited(int)));
+  connect(m_tableWidget, SIGNAL(itemEntered(QTableWidgetItem *)), this, SLOT(handleItemEntered(QTableWidgetItem *)));
+  connect(m_tableWidget, SIGNAL(itemExited(int)), this, SLOT(handleItemExited(int)));
 }
 
 void CustomItemDelegate::handleItemEntered(QTableWidgetItem *item) {
@@ -267,12 +229,9 @@ void CustomItemDelegate::handleItemEntered(QTableWidgetItem *item) {
   m_tableWidget->viewport()->update();
 }
 
-void CustomItemDelegate::handleItemExited(int newRowIndex) {
-  m_hoveredIndex = newRowIndex;
-}
+void CustomItemDelegate::handleItemExited(int newRowIndex) { m_hoveredIndex = newRowIndex; }
 
-QWidget *CustomItemDelegate::createEditor(QWidget *parent,
-                                          QStyleOptionViewItem const &option,
+QWidget *CustomItemDelegate::createEditor(QWidget *parent, QStyleOptionViewItem const &option,
                                           QModelIndex const &index) const {
   Q_UNUSED(option);
   Q_UNUSED(index);
@@ -295,9 +254,7 @@ QWidget *CustomItemDelegate::createEditor(QWidget *parent,
   return lineEdit;
 }
 
-void CustomItemDelegate::paint(QPainter *painter,
-                               QStyleOptionViewItem const &option,
-                               QModelIndex const &index) const {
+void CustomItemDelegate::paint(QPainter *painter, QStyleOptionViewItem const &option, QModelIndex const &index) const {
   auto opt = QStyleOptionViewItem(option);
   if (index.row() == m_hoveredIndex)
     opt.state |= QStyle::State_MouseOver;

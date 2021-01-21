@@ -42,8 +42,7 @@ namespace SimpleGui {
 /**
  * Note that the mode is currently set to standard.
  */
-AutoScaleRangeGenerator::AutoScaleRangeGenerator()
-    : mode(STANDARD), defaultValue(1e-2) {
+AutoScaleRangeGenerator::AutoScaleRangeGenerator() : mode(STANDARD), defaultValue(1e-2) {
   // Set the initial log scale state due to the mode
   m_mdSettings.setLastSessionLogScale(getLogScale());
 }
@@ -132,8 +131,7 @@ VsiColorScale AutoScaleRangeGenerator::getStandardColorScale() {
     // visible
     pqDataRepresentation *drep = source->getRepresentation(activeView);
     if (drep && drep->isVisible()) {
-      auto info = vtkSMPVRepresentationProxy::GetArrayInformationForColorArray(
-          drep->getProxy());
+      auto info = vtkSMPVRepresentationProxy::GetArrayInformationForColorArray(drep->getProxy());
       if (info) {
         double range[2];
         info->GetComponentFiniteRange(-1, range);
@@ -167,9 +165,7 @@ VsiColorScale AutoScaleRangeGenerator::getStandardColorScale() {
   }
 
   vsiColorScale.minValue = minValue;
-  vsiColorScale.maxValue =
-      minValue +
-      (maxValue - minValue) * m_mdConstants.getColorScaleStandardMax();
+  vsiColorScale.maxValue = minValue + (maxValue - minValue) * m_mdConstants.getColorScaleStandardMax();
 
   return vsiColorScale;
 }
@@ -180,8 +176,7 @@ VsiColorScale AutoScaleRangeGenerator::getStandardColorScale() {
 QList<pqPipelineSource *> AutoScaleRangeGenerator::getAllPVSources() {
   pqServer *server = pqActiveObjects::instance().activeServer();
 
-  pqServerManagerModel *smModel =
-      pqApplicationCore::instance()->getServerManagerModel();
+  pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
 
   QList<pqPipelineSource *> sources;
 
@@ -212,17 +207,13 @@ void AutoScaleRangeGenerator::sanityCheck(VsiColorScale &colorscale) {
 /**
  * Initializes the color scale state, in particular if it is a log scale.
  */
-void AutoScaleRangeGenerator::initializeColorScale() {
-  m_mdSettings.setLastSessionLogScale(getLogScale());
-}
+void AutoScaleRangeGenerator::initializeColorScale() { m_mdSettings.setLastSessionLogScale(getLogScale()); }
 
 /**
  * Update the log scale setting
  * @param logScale The log scale setting
  */
-void AutoScaleRangeGenerator::updateLogScaleSetting(bool logScale) {
-  m_mdSettings.setLastSessionLogScale(logScale);
-}
+void AutoScaleRangeGenerator::updateLogScaleSetting(bool logScale) { m_mdSettings.setLastSessionLogScale(logScale); }
 } // namespace SimpleGui
 } // namespace Vates
 } // namespace Mantid

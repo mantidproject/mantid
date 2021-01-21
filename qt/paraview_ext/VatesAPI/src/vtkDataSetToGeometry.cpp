@@ -20,8 +20,7 @@ Peforms the processing associated with these transformations.
 */
 void vtkDataSetToGeometry::execute() {
   FieldDataToMetadata convert;
-  m_xmlToProcess =
-      convert(m_dataSet->GetFieldData(), XMLDefinitions::metaDataId());
+  m_xmlToProcess = convert(m_dataSet->GetFieldData(), XMLDefinitions::metaDataId());
 
   return MDGeometryXMLParser::execute();
 }
@@ -30,11 +29,9 @@ void vtkDataSetToGeometry::execute() {
 Constructor
 @param dataSet : vtkDataSet to process
 */
-vtkDataSetToGeometry::vtkDataSetToGeometry(vtkDataSet *dataSet)
-    : m_dataSet(dataSet) {
+vtkDataSetToGeometry::vtkDataSetToGeometry(vtkDataSet *dataSet) : m_dataSet(dataSet) {
   // Format is to have DimensionSet as a nested element below MDInstructions.
-  SetRootNodeCheck(Mantid::Geometry::MDGeometryXMLDefinitions::
-                       workspaceGeometryElementName());
+  SetRootNodeCheck(Mantid::Geometry::MDGeometryXMLDefinitions::workspaceGeometryElementName());
 }
 
 /**
@@ -52,8 +49,7 @@ vtkDataSetToGeometry::vtkDataSetToGeometry(const vtkDataSetToGeometry &other)
 Assignment operator
 @return ref to assigned object.
 */
-vtkDataSetToGeometry &vtkDataSetToGeometry::
-operator=(const vtkDataSetToGeometry &other) {
+vtkDataSetToGeometry &vtkDataSetToGeometry::operator=(const vtkDataSetToGeometry &other) {
   if (this != &other) {
     MDGeometryXMLParser::operator=(other);
     m_dataSet = other.m_dataSet;

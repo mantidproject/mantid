@@ -11,8 +11,7 @@
 namespace Mantid {
 namespace PythonInterface {
 
-AnalysisDataServiceObserverAdapter::AnalysisDataServiceObserverAdapter(
-    PyObject *self)
+AnalysisDataServiceObserverAdapter::AnalysisDataServiceObserverAdapter(PyObject *self)
     : API::AnalysisDataServiceObserver(), m_self(self) {}
 
 void AnalysisDataServiceObserverAdapter::anyChangeHandle() {
@@ -23,8 +22,7 @@ void AnalysisDataServiceObserverAdapter::anyChangeHandle() {
   }
 }
 
-void AnalysisDataServiceObserverAdapter::addHandle(const std::string &wsName,
-                                                   const Workspace_sptr &ws) {
+void AnalysisDataServiceObserverAdapter::addHandle(const std::string &wsName, const Workspace_sptr &ws) {
   try {
     return callMethod<void>(getSelf(), "addHandle", wsName, ws);
   } catch (UndefinedAttributeError &) {
@@ -32,8 +30,7 @@ void AnalysisDataServiceObserverAdapter::addHandle(const std::string &wsName,
   }
 }
 
-void AnalysisDataServiceObserverAdapter::replaceHandle(
-    const std::string &wsName, const Workspace_sptr &ws) {
+void AnalysisDataServiceObserverAdapter::replaceHandle(const std::string &wsName, const Workspace_sptr &ws) {
   try {
     return callMethod<void>(getSelf(), "replaceHandle", wsName, ws);
   } catch (UndefinedAttributeError &) {
@@ -41,8 +38,7 @@ void AnalysisDataServiceObserverAdapter::replaceHandle(
   }
 }
 
-void AnalysisDataServiceObserverAdapter::deleteHandle(
-    const std::string &wsName, const Workspace_sptr &ws) {
+void AnalysisDataServiceObserverAdapter::deleteHandle(const std::string &wsName, const Workspace_sptr &ws) {
   try {
     return callMethod<void>(getSelf(), "deleteHandle", wsName, ws);
   } catch (UndefinedAttributeError &) {
@@ -58,8 +54,7 @@ void AnalysisDataServiceObserverAdapter::clearHandle() {
   }
 }
 
-void AnalysisDataServiceObserverAdapter::renameHandle(
-    const std::string &wsName, const std::string &newName) {
+void AnalysisDataServiceObserverAdapter::renameHandle(const std::string &wsName, const std::string &newName) {
   try {
     return callMethod<void>(getSelf(), "renameHandle", wsName, newName);
   } catch (UndefinedAttributeError &) {
@@ -67,8 +62,7 @@ void AnalysisDataServiceObserverAdapter::renameHandle(
   }
 }
 
-void AnalysisDataServiceObserverAdapter::groupHandle(const std::string &wsName,
-                                                     const Workspace_sptr &ws) {
+void AnalysisDataServiceObserverAdapter::groupHandle(const std::string &wsName, const Workspace_sptr &ws) {
   try {
     return callMethod<void>(getSelf(), "groupHandle", wsName, ws);
   } catch (UndefinedAttributeError &) {
@@ -76,8 +70,7 @@ void AnalysisDataServiceObserverAdapter::groupHandle(const std::string &wsName,
   }
 }
 
-void AnalysisDataServiceObserverAdapter::unGroupHandle(
-    const std::string &wsName, const Workspace_sptr &ws) {
+void AnalysisDataServiceObserverAdapter::unGroupHandle(const std::string &wsName, const Workspace_sptr &ws) {
   try {
     return callMethod<void>(getSelf(), "unGroupHandle", wsName, ws);
   } catch (UndefinedAttributeError &) {
@@ -85,8 +78,7 @@ void AnalysisDataServiceObserverAdapter::unGroupHandle(
   }
 }
 
-void AnalysisDataServiceObserverAdapter::groupUpdateHandle(
-    const std::string &wsName, const Workspace_sptr &ws) {
+void AnalysisDataServiceObserverAdapter::groupUpdateHandle(const std::string &wsName, const Workspace_sptr &ws) {
   try {
     return callMethod<void>(getSelf(), "groupUpdateHandle", wsName, ws);
   } catch (UndefinedAttributeError &) {

@@ -38,10 +38,8 @@ void correctEvents(MatrixWorkspace *ws) {
 
 /// Make sure that the returned flood workspace match the input workspace
 /// in number and order of the spectra.
-MatrixWorkspace_sptr makeEqualSizes(const MatrixWorkspace_sptr &input,
-                                    const MatrixWorkspace_sptr &flood) {
-  auto newFlood =
-      WorkspaceFactory::Instance().create(flood, input->getNumberHistograms());
+MatrixWorkspace_sptr makeEqualSizes(const MatrixWorkspace_sptr &input, const MatrixWorkspace_sptr &flood) {
+  auto newFlood = WorkspaceFactory::Instance().create(flood, input->getNumberHistograms());
   auto const table = BinaryOperation::buildBinaryOperationTable(input, flood);
   auto const floodBlocksize = flood->blocksize();
   const ISpectrum *missingSpectrum = nullptr;
@@ -69,9 +67,7 @@ namespace Algorithms {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ApplyFloodWorkspace)
 
-const std::string ApplyFloodWorkspace::name() const {
-  return "ApplyFloodWorkspace";
-}
+const std::string ApplyFloodWorkspace::name() const { return "ApplyFloodWorkspace"; }
 
 const std::string ApplyFloodWorkspace::summary() const {
   return "Algorithm to apply a flood correction to a workspace.";
@@ -83,22 +79,17 @@ const std::vector<std::string> ApplyFloodWorkspace::seeAlso() const {
   return {"ReflectometryReductionOneAuto", "CreateFloodWorkspace"};
 }
 
-const std::string ApplyFloodWorkspace::category() const {
-  return "Reflectometry\\ISIS";
-}
+const std::string ApplyFloodWorkspace::category() const { return "Reflectometry\\ISIS"; }
 
 void ApplyFloodWorkspace::init() {
 
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      Prop::INPUT_WORKSPACE, "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(Prop::INPUT_WORKSPACE, "", Direction::Input),
                   "The workspace to correct.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      Prop::FLOOD_WORKSPACE, "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(Prop::FLOOD_WORKSPACE, "", Direction::Input),
                   "The flood workspace.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      Prop::OUTPUT_WORKSPACE, "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(Prop::OUTPUT_WORKSPACE, "", Direction::Output),
                   "The corrected workspace.");
 }
 
@@ -111,8 +102,7 @@ void ApplyFloodWorkspace::exec() {
   }
 
   auto const inputXUnitId = input->getAxis(0)->unit()->unitID();
-  bool const doConvertUnits =
-      flood->getAxis(0)->unit()->unitID() != inputXUnitId;
+  bool const doConvertUnits = flood->getAxis(0)->unit()->unitID() != inputXUnitId;
   bool const doRebin = flood->blocksize() > 1;
 
   if (doRebin) {

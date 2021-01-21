@@ -55,8 +55,7 @@ namespace Kernel {
   @param phi :: The phi value (in degrees) = the azimuthal angle, where 0 points
   along +X and rotates counter-clockwise in the XY plane
 */
-void V3D::spherical(const double R, const double theta,
-                    const double phi) noexcept {
+void V3D::spherical(const double R, const double theta, const double phi) noexcept {
   constexpr double deg2rad = M_PI / 180.0;
   spherical_rad(R, theta * deg2rad, phi * deg2rad);
 }
@@ -69,8 +68,7 @@ void V3D::spherical(const double R, const double theta,
   @param azimuth :: the azimuthal angle (in radians), where 0 points along +X
   and rotates counter-clockwise in the XY plane
 */
-void V3D::spherical_rad(const double R, const double polar,
-                        const double azimuth) noexcept {
+void V3D::spherical_rad(const double R, const double polar, const double azimuth) noexcept {
   m_pt[2] = R * cos(polar);
   const double ct = R * sin(polar);
   m_pt[0] = ct * cos(azimuth);
@@ -95,8 +93,7 @@ void V3D::spherical_rad(const double R, const double polar,
   @param polar :: The polar value (in Radians)
 */
 
-void V3D::azimuth_polar_SNS(const double R, const double azimuth,
-                            const double polar) noexcept {
+void V3D::azimuth_polar_SNS(const double R, const double azimuth, const double polar) noexcept {
   m_pt[1] = R * cos(polar);
   const double ct = R * sin(polar);
   m_pt[0] = ct * cos(azimuth);
@@ -185,8 +182,7 @@ double V3D::cosAngle(const V3D &v) const {
   const double n1 = norm();
   const double n2 = v.norm();
   if (n1 == 0. || n2 == 0.) {
-    throw std::runtime_error(
-        "Cannot calculate an angle when one of the vectors has zero length.");
+    throw std::runtime_error("Cannot calculate an angle when one of the vectors has zero length.");
   }
   return this->scalar_prod(v) / (n1 * n2);
 }
@@ -302,8 +298,7 @@ int V3D::masterDir(const double tolerance) const noexcept {
  */
 std::vector<V3D> V3D::makeVectorsOrthogonal(const std::vector<V3D> &vectors) {
   if (vectors.size() != 2)
-    throw std::invalid_argument(
-        "makeVectorsOrthogonal() only works with 2 vectors");
+    throw std::invalid_argument("makeVectorsOrthogonal() only works with 2 vectors");
 
   const V3D v0 = Kernel::normalize(vectors[0]);
   V3D v1 = Kernel::normalize(vectors[1]);
@@ -360,9 +355,7 @@ void V3D::fromString(const std::string &str) {
   Prints a text representation of itself in format "[x,y,z]"
   @param os :: the Stream to output to
 */
-void V3D::printSelf(std::ostream &os) const {
-  os << "[" << m_pt[0] << "," << m_pt[1] << "," << m_pt[2] << "]";
-}
+void V3D::printSelf(std::ostream &os) const { os << "[" << m_pt[0] << "," << m_pt[1] << "," << m_pt[2] << "]"; }
 
 /**
   Read data from a stream in the format returned by printSelf ("[x,y,z]").
@@ -432,9 +425,7 @@ void V3D::loadNexus(::NeXus::File *file, const std::string &name) {
   std::vector<double> data;
   file->readData(name, data);
   if (data.size() != 3)
-    throw std::runtime_error(
-        "Unexpected data size when reading a V3D NXS field '" + name +
-        "'. Expected 3.");
+    throw std::runtime_error("Unexpected data size when reading a V3D NXS field '" + name + "'. Expected 3.");
   std::copy(data.cbegin(), data.cend(), m_pt.begin());
 }
 
@@ -453,8 +444,7 @@ double V3D::toMillerIndexes(double eps) {
   double amax = (ax > ay) ? ax : ay;
   amax = (az > amax) ? az : amax;
   if (amax < FLT_EPSILON)
-    throw(
-        std::invalid_argument("vector length is less then accuracy requested"));
+    throw(std::invalid_argument("vector length is less then accuracy requested"));
 
   if (ax < eps) {
     m_pt[0] = 0;
@@ -507,11 +497,9 @@ V3D V3D::directionAngles(bool inDegrees) const {
   const double conversionFactor = inDegrees ? 180. / M_PI : 1.0;
   const double divisor = this->norm();
   if (divisor == 0.) {
-    throw std::runtime_error(
-        "Cannot calculate direction angles for zero length vector");
+    throw std::runtime_error("Cannot calculate direction angles for zero length vector");
   }
-  return V3D(conversionFactor * acos(m_pt[0] / divisor),
-             conversionFactor * acos(m_pt[1] / divisor),
+  return V3D(conversionFactor * acos(m_pt[0] / divisor), conversionFactor * acos(m_pt[1] / divisor),
              conversionFactor * acos(m_pt[2] / divisor));
 }
 
@@ -534,17 +522,14 @@ int V3D::maxCoeff() {
   Calculates the absolute value.
   @return The absolute value
 */
-V3D V3D::absoluteValue() const {
-  return V3D(fabs(m_pt[0]), fabs(m_pt[1]), fabs(m_pt[2]));
-}
+V3D V3D::absoluteValue() const { return V3D(fabs(m_pt[0]), fabs(m_pt[1]), fabs(m_pt[2])); }
 
 /**
   Calculates the error of the HKL to compare with tolerance
   @return The error
 */
 double V3D::hklError() const {
-  return fabs(m_pt[0] - std::round(m_pt[0])) +
-         fabs(m_pt[1] - std::round(m_pt[1])) +
+  return fabs(m_pt[0] - std::round(m_pt[0])) + fabs(m_pt[1] - std::round(m_pt[1])) +
          fabs(m_pt[2] - std::round(m_pt[2]));
 }
 

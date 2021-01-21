@@ -28,19 +28,17 @@ Presenter for the fitting tab/widget of the enggineering diffraction
 GUI (presenter as in the MVP Model-View-Presenter pattern).
 */
 // needs to be dll-exported for the tests
-class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffFittingPresenter
-    : public QObject,
-      public IEnggDiffFittingPresenter,
-      public IEnggDiffractionCalibration,
-      public IEnggDiffractionParam {
+class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffFittingPresenter : public QObject,
+                                                              public IEnggDiffFittingPresenter,
+                                                              public IEnggDiffractionCalibration,
+                                                              public IEnggDiffractionParam {
   // Q_OBJECT for 'connect' with thread/worker
   Q_OBJECT
 
 public:
-  EnggDiffFittingPresenter(
-      IEnggDiffFittingView *view, std::unique_ptr<IEnggDiffFittingModel> model,
-      std::shared_ptr<IEnggDiffractionCalibration> mainCalib,
-      std::shared_ptr<IEnggDiffractionParam> mainParam);
+  EnggDiffFittingPresenter(IEnggDiffFittingView *view, std::unique_ptr<IEnggDiffFittingModel> model,
+                           std::shared_ptr<IEnggDiffractionCalibration> mainCalib,
+                           std::shared_ptr<IEnggDiffractionParam> mainParam);
   ~EnggDiffFittingPresenter() override;
 
   void notify(IEnggDiffFittingPresenter::Notification notif) override;
@@ -56,15 +54,12 @@ public:
   //@}
 
   std::string userHDFRunFilename(const std::string &runNumber) const override;
-  std::string userHDFMultiRunFilename(
-      const std::vector<RunLabel> &runLabels) const override;
+  std::string userHDFMultiRunFilename(const std::vector<RunLabel> &runLabels) const override;
 
   /// the fitting hard work that a worker / thread will run
-  void doFitting(const std::vector<RunLabel> &runLabels,
-                 const std::string &expectedPeaks);
+  void doFitting(const std::vector<RunLabel> &runLabels, const std::string &expectedPeaks);
 
-  void plotFocusedFile(bool plotSinglePeaks,
-                       const Mantid::API::MatrixWorkspace_sptr &focusedPeaksWS);
+  void plotFocusedFile(bool plotSinglePeaks, const Mantid::API::MatrixWorkspace_sptr &focusedPeaksWS);
 
   void plotAlignedWorkspace(const bool plotFittedPeaks);
 
@@ -93,13 +88,11 @@ private:
   void warnFileNotFound(const std::exception &ex);
 
   // Methods related single peak fits
-  virtual void startAsyncFittingWorker(const std::vector<RunLabel> &runLabels,
-                                       const std::string &expectedPeaks);
+  virtual void startAsyncFittingWorker(const std::vector<RunLabel> &runLabels, const std::string &expectedPeaks);
 
   std::string getBaseNameFromStr(const std::string &filePath) const;
 
-  void validateFittingInputs(const std::string &focusedRunNo,
-                             const std::string &expectedPeaks);
+  void validateFittingInputs(const std::string &focusedRunNo, const std::string &expectedPeaks);
 
   void browsePeaksToFit();
 

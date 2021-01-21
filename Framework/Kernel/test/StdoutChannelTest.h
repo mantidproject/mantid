@@ -46,8 +46,7 @@ public:
     lbuffer.str("");
 
     // Test console channel
-    Poco::AutoPtr<Poco::ConsoleChannel> consoleChannel(
-        new Poco::ConsoleChannel);
+    Poco::AutoPtr<Poco::ConsoleChannel> consoleChannel(new Poco::ConsoleChannel);
     Poco::Logger::root().setChannel(consoleChannel);
     log.error() << "Error Message 2\n";
     // the error should be in std::clog (or std:err)

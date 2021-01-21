@@ -28,8 +28,7 @@ void ExpDecayMuon::init() {
   declareParameter("Lambda", 0.2, "Decay rate");
 }
 
-void ExpDecayMuon::function1D(double *out, const double *xValues,
-                              const size_t nData) const {
+void ExpDecayMuon::function1D(double *out, const double *xValues, const size_t nData) const {
   const double gA0 = getParameter("A");
   const double gs = getParameter("Lambda");
 
@@ -38,8 +37,7 @@ void ExpDecayMuon::function1D(double *out, const double *xValues,
   }
 }
 
-void ExpDecayMuon::functionDeriv1D(Jacobian *out, const double *xValues,
-                                   const size_t nData) {
+void ExpDecayMuon::functionDeriv1D(Jacobian *out, const double *xValues, const size_t nData) {
   const double gA0 = getParameter("A");
   const double gs = getParameter("Lambda");
 

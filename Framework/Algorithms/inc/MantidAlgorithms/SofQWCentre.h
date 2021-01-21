@@ -47,16 +47,13 @@ public:
 
   /// Algorithm's version
   int version() const override { return (1); }
-  const std::vector<std::string> seeAlso() const override {
-    return {"SofQW", "Rebin2D"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"SofQW", "Rebin2D"}; }
   /// Algorithm's category for identification
   const std::string category() const override { return "Inelastic\\SofQW"; }
 
 private:
   /// Convert the workspace to a distribution
-  static void makeDistribution(API::MatrixWorkspace &outputWS,
-                               const std::vector<double> &qAxis);
+  static void makeDistribution(API::MatrixWorkspace &outputWS, const std::vector<double> &qAxis);
   /// Initialization code
   void init() override;
   /// Execution code

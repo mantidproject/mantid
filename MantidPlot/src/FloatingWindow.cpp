@@ -24,16 +24,14 @@
 /**
  * Constructor.
  */
-FloatingWindow::FloatingWindow(ApplicationWindow *appWindow,
-                               const Qt::WindowFlags &f)
+FloatingWindow::FloatingWindow(ApplicationWindow *appWindow, const Qt::WindowFlags &f)
     :
 #ifdef Q_OS_WIN
       QMainWindow(appWindow, f),
 #else
       QMainWindow(nullptr, f),
 #endif
-      d_app(appWindow), m_draggingToTiledWindow(false),
-      m_isInsideTiledWindow(false), m_dragMouseDown(false) {
+      d_app(appWindow), m_draggingToTiledWindow(false), m_isInsideTiledWindow(false), m_dragMouseDown(false) {
   setFocusPolicy(Qt::StrongFocus);
   setWindowIcon(QIcon(":/mantidplot.png"));
 #ifdef Q_OS_WIN
@@ -64,16 +62,12 @@ FloatingWindow::~FloatingWindow() {}
 /**
  * Returns the inner MdiSubWindow.
  */
-MdiSubWindow *FloatingWindow::mdiSubWindow() const {
-  return static_cast<MdiSubWindow *>(widget());
-}
+MdiSubWindow *FloatingWindow::mdiSubWindow() const { return static_cast<MdiSubWindow *>(widget()); }
 
 /**
  * Returns the inner MdiSubWindow as a QWidget.(?)
  */
-QWidget *FloatingWindow::widget() const {
-  return static_cast<MdiSubWindowParent_t *>(centralWidget())->widget();
-}
+QWidget *FloatingWindow::widget() const { return static_cast<MdiSubWindowParent_t *>(centralWidget())->widget(); }
 
 /**
  * Process state change events such as activation, minimizing or maximizing.
@@ -187,17 +181,14 @@ void FloatingWindow::removeStaysOnTopFlag() {
 void FloatingWindow::setMdiSubWindow(MdiSubWindow *sw) {
   setWidget(sw);
   setWindowIcon(sw->windowIcon());
-  connect(sw, SIGNAL(dragMousePress(QPoint)), this,
-          SLOT(dragMousePress(QPoint)));
-  connect(sw, SIGNAL(dragMouseRelease(QPoint)), this,
-          SLOT(dragMouseRelease(QPoint)));
+  connect(sw, SIGNAL(dragMousePress(QPoint)), this, SLOT(dragMousePress(QPoint)));
+  connect(sw, SIGNAL(dragMouseRelease(QPoint)), this, SLOT(dragMouseRelease(QPoint)));
   connect(sw, SIGNAL(dragMouseMove(QPoint)), this, SLOT(dragMouseMove(QPoint)));
 }
 
 /** removes the underlying MdiSubWindow */
 void FloatingWindow::removeMdiSubWindow() {
-  MdiSubWindowParent_t *wrapper =
-      dynamic_cast<MdiSubWindowParent_t *>(centralWidget());
+  MdiSubWindowParent_t *wrapper = dynamic_cast<MdiSubWindowParent_t *>(centralWidget());
   if (wrapper) {
     wrapper->setWidget(nullptr);
   }
@@ -230,8 +221,7 @@ void FloatingWindow::dragMouseRelease(QPoint) {
 
 void FloatingWindow::dragMouseMove(QPoint pos) {
   if (m_dragMouseDown) {
-    if ((pos - m_dragStartPos).manhattanLength() <
-        QApplication::startDragDistance()) {
+    if ((pos - m_dragStartPos).manhattanLength() < QApplication::startDragDistance()) {
       return;
     }
 

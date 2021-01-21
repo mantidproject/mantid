@@ -34,8 +34,7 @@ class Matrix;
 //! Histogram class
 class QwtHistogram : public QwtBarCurve {
 public:
-  QwtHistogram(Table *t, const QString &xColName, const QString &name,
-               int startRow, int endRow);
+  QwtHistogram(Table *t, const QString &xColName, const QString &name, int startRow, int endRow);
   explicit QwtHistogram(Matrix *m);
 
   void copy(const QwtHistogram *h);
@@ -59,13 +58,11 @@ public:
   Matrix *matrix() { return d_matrix; };
 
 private:
-  void draw(QPainter *painter, const QwtScaleMap &xMap, const QwtScaleMap &yMap,
-            int from, int to) const override;
+  void draw(QPainter *painter, const QwtScaleMap &xMap, const QwtScaleMap &yMap, int from, int to) const override;
   // Implement overloaded virtual method to just pass up to the base class to
   // avoid
   // an Intel compiler warning
-  void draw(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap,
-            const QRect &rect) const override {
+  void draw(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap, const QRect &rect) const override {
     DataCurve::draw(p, xMap, yMap, rect);
   }
 

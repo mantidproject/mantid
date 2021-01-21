@@ -44,8 +44,7 @@ public:
 
     boost::regex regex(".*_Definition.*\\.xml", boost::regex_constants::icase);
     Poco::DirectoryIterator end_iter;
-    for (Poco::DirectoryIterator dir_itr(ConfigService::Instance().getString(
-             "instrumentDefinition.directory"));
+    for (Poco::DirectoryIterator dir_itr(ConfigService::Instance().getString("instrumentDefinition.directory"));
          dir_itr != end_iter; ++dir_itr) {
       if (!Poco::File(dir_itr->path()).isFile())
         continue;
@@ -54,8 +53,7 @@ public:
 
       if (boost::regex_match(l_filenamePart, regex)) {
         std::string validFrom, validTo;
-        InstrumentFileFinder::getValidFromTo(dir_itr->path(), validFrom,
-                                             validTo);
+        InstrumentFileFinder::getValidFromTo(dir_itr->path(), validFrom, validTo);
 
         size_t found;
         found = l_filenamePart.find("_Definition");
@@ -86,13 +84,11 @@ public:
           if (it1 != it2) {
             // some more intelligent stuff here later
             std::stringstream messageBuffer;
-            messageBuffer
-                << "Two IDFs for one instrument have equal valid-from dates"
-                << "IDFs are: " << it1->first << " and " << it2->first
-                << " Date One: " << it1->second.from.toFormattedString()
-                << " Date Two: " << it2->second.from.toFormattedString();
-            TSM_ASSERT_DIFFERS(messageBuffer.str(), it2->second.from,
-                               it1->second.from);
+            messageBuffer << "Two IDFs for one instrument have equal valid-from dates"
+                          << "IDFs are: " << it1->first << " and " << it2->first
+                          << " Date One: " << it1->second.from.toFormattedString()
+                          << " Date Two: " << it2->second.from.toFormattedString();
+            TSM_ASSERT_DIFFERS(messageBuffer.str(), it2->second.from, it1->second.from);
           }
         }
       }
@@ -107,8 +103,7 @@ public:
     TS_ASSERT(boost::icontains(result, expectedFileName));
 
     // Should be case insensitive
-    const auto mixedResult =
-        InstrumentFileFinder::getParameterPath("GEM_defINITION.xml");
+    const auto mixedResult = InstrumentFileFinder::getParameterPath("GEM_defINITION.xml");
     TS_ASSERT_EQUALS(result, mixedResult);
   }
 
@@ -142,8 +137,7 @@ public:
 
   void testNonExistantIPFWithHint() {
     const auto tmpDir = Poco::Path::temp();
-    const auto result =
-        InstrumentFileFinder::getParameterPath("notThere", tmpDir);
+    const auto result = InstrumentFileFinder::getParameterPath("notThere", tmpDir);
     TS_ASSERT(result.empty());
   }
 
@@ -151,54 +145,41 @@ public:
   void testHelperFunctions() {
     ConfigService::Instance().updateFacilities();
     InstrumentFileFinder helper;
-    std::string boevs =
-        helper.getInstrumentFilename("BIOSANS", "2100-01-31 22:59:59");
+    std::string boevs = helper.getInstrumentFilename("BIOSANS", "2100-01-31 22:59:59");
     TS_ASSERT(!boevs.empty());
   }
 
   //
   void testHelper_TOPAZ_No_To_Date() {
     InstrumentFileFinder helper;
-    std::string boevs =
-        helper.getInstrumentFilename("TOPAZ", "2011-01-31 22:59:59");
+    std::string boevs = helper.getInstrumentFilename("TOPAZ", "2011-01-31 22:59:59");
     TS_ASSERT(!boevs.empty());
   }
 
   void testHelper_ValidDateOverlap() {
-    const std::string instDir =
-        ConfigService::Instance().getInstrumentDirectory();
+    const std::string instDir = ConfigService::Instance().getInstrumentDirectory();
     const std::string testDir = instDir + "unit_testing";
-    ConfigService::Instance().setString("instrumentDefinition.directory",
-                                        testDir);
+    ConfigService::Instance().setString("instrumentDefinition.directory", testDir);
     InstrumentFileFinder helper;
-    std::string boevs =
-        helper.getInstrumentFilename("ARGUS", "1909-01-31 22:59:59");
+    std::string boevs = helper.getInstrumentFilename("ARGUS", "1909-01-31 22:59:59");
     TS_ASSERT_DIFFERS(boevs.find("TEST1_ValidDateOverlap"), std::string::npos);
     boevs = helper.getInstrumentFilename("ARGUS", "1909-03-31 22:59:59");
     TS_ASSERT_DIFFERS(boevs.find("TEST2_ValidDateOverlap"), std::string::npos);
     boevs = helper.getInstrumentFilename("ARGUS", "1909-05-31 22:59:59");
     TS_ASSERT_DIFFERS(boevs.find("TEST1_ValidDateOverlap"), std::string::npos);
-    ConfigService::Instance().setString("instrumentDefinition.directory",
-                                        instDir);
+    ConfigService::Instance().setString("instrumentDefinition.directory", instDir);
 
     std::vector<std::string> formats = {"xml"};
     std::vector<std::string> dirs;
     dirs.emplace_back(testDir);
-    std::vector<std::string> fnames = helper.getResourceFilenames(
-        "ARGUS", formats, dirs, "1909-01-31 22:59:59");
-    TS_ASSERT_DIFFERS(fnames[0].find("TEST1_ValidDateOverlap"),
-                      std::string::npos);
+    std::vector<std::string> fnames = helper.getResourceFilenames("ARGUS", formats, dirs, "1909-01-31 22:59:59");
+    TS_ASSERT_DIFFERS(fnames[0].find("TEST1_ValidDateOverlap"), std::string::npos);
     TS_ASSERT_EQUALS(fnames.size(), 1);
-    fnames = helper.getResourceFilenames("ARGUS", formats, dirs,
-                                         "1909-03-31 22:59:59");
-    TS_ASSERT_DIFFERS(fnames[0].find("TEST2_ValidDateOverlap"),
-                      std::string::npos);
-    TS_ASSERT_DIFFERS(fnames[1].find("TEST1_ValidDateOverlap"),
-                      std::string::npos);
-    fnames = helper.getResourceFilenames("ARGUS", formats, dirs,
-                                         "1909-05-31 22:59:59");
-    TS_ASSERT_DIFFERS(fnames[0].find("TEST1_ValidDateOverlap"),
-                      std::string::npos);
+    fnames = helper.getResourceFilenames("ARGUS", formats, dirs, "1909-03-31 22:59:59");
+    TS_ASSERT_DIFFERS(fnames[0].find("TEST2_ValidDateOverlap"), std::string::npos);
+    TS_ASSERT_DIFFERS(fnames[1].find("TEST1_ValidDateOverlap"), std::string::npos);
+    fnames = helper.getResourceFilenames("ARGUS", formats, dirs, "1909-05-31 22:59:59");
+    TS_ASSERT_DIFFERS(fnames[0].find("TEST1_ValidDateOverlap"), std::string::npos);
     TS_ASSERT_EQUALS(fnames.size(), 1);
   }
 
@@ -207,7 +188,6 @@ public:
     InstrumentFileFinder info;
     const auto path = info.getInstrumentFilename(instrumentName, "");
     TS_ASSERT(!path.empty());
-    TS_ASSERT(
-        boost::regex_match(path, boost::regex(".*LOKI_Definition\\.hdf5$")));
+    TS_ASSERT(boost::regex_match(path, boost::regex(".*LOKI_Definition\\.hdf5$")));
   }
 };

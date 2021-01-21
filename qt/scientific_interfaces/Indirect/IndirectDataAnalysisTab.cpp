@@ -28,9 +28,8 @@ namespace IDA {
  * @param parent :: the parent widget (an IndirectDataAnalysis object).
  */
 IndirectDataAnalysisTab::IndirectDataAnalysisTab(QWidget *parent)
-    : IndirectTab(parent), m_dblEdFac(nullptr), m_blnEdFac(nullptr),
-      m_parent(nullptr), m_inputWorkspace(), m_previewPlotWorkspace(),
-      m_selectedSpectrum(0), m_minSpectrum(0), m_maxSpectrum(0) {
+    : IndirectTab(parent), m_dblEdFac(nullptr), m_blnEdFac(nullptr), m_parent(nullptr), m_inputWorkspace(),
+      m_previewPlotWorkspace(), m_selectedSpectrum(0), m_minSpectrum(0), m_maxSpectrum(0) {
   m_parent = dynamic_cast<IndirectDataAnalysis *>(parent);
 
   // Create Editor Factories
@@ -38,19 +37,15 @@ IndirectDataAnalysisTab::IndirectDataAnalysisTab(QWidget *parent)
   m_blnEdFac = new QtCheckBoxFactory(this);
 }
 
-void IndirectDataAnalysisTab::setOutputPlotOptionsPresenter(
-    std::unique_ptr<IndirectPlotOptionsPresenter> presenter) {
+void IndirectDataAnalysisTab::setOutputPlotOptionsPresenter(std::unique_ptr<IndirectPlotOptionsPresenter> presenter) {
   m_plotOptionsPresenter = std::move(presenter);
 }
 
-void IndirectDataAnalysisTab::setOutputPlotOptionsWorkspaces(
-    std::vector<std::string> const &outputWorkspaces) {
+void IndirectDataAnalysisTab::setOutputPlotOptionsWorkspaces(std::vector<std::string> const &outputWorkspaces) {
   m_plotOptionsPresenter->setWorkspaces(outputWorkspaces);
 }
 
-void IndirectDataAnalysisTab::clearOutputPlotOptionsWorkspaces() {
-  m_plotOptionsPresenter->clearWorkspaces();
-}
+void IndirectDataAnalysisTab::clearOutputPlotOptionsWorkspaces() { m_plotOptionsPresenter->clearWorkspaces(); }
 
 /**
  * Loads the tab's settings.
@@ -59,18 +54,14 @@ void IndirectDataAnalysisTab::clearOutputPlotOptionsWorkspaces() {
  *
  * @param settings :: the QSettings object from which to load
  */
-void IndirectDataAnalysisTab::loadTabSettings(const QSettings &settings) {
-  loadSettings(settings);
-}
+void IndirectDataAnalysisTab::loadTabSettings(const QSettings &settings) { loadSettings(settings); }
 
 /**
  * Prevents the loading of data with incorrect naming if passed true
  *
  * @param filter :: true if you want to allow filtering
  */
-void IndirectDataAnalysisTab::filterInputData(bool filter) {
-  setFileExtensionsByName(filter);
-}
+void IndirectDataAnalysisTab::filterInputData(bool filter) { setFileExtensionsByName(filter); }
 
 /**
  * Slot that can be called when a user edits an input.
@@ -82,17 +73,14 @@ void IndirectDataAnalysisTab::inputChanged() { validate(); }
  *
  * @return  The input workspace to be used in data analysis.
  */
-MatrixWorkspace_sptr IndirectDataAnalysisTab::getInputWorkspace() const {
-  return m_inputWorkspace;
-}
+MatrixWorkspace_sptr IndirectDataAnalysisTab::getInputWorkspace() const { return m_inputWorkspace; }
 
 /**
  * Sets the input workspace to be used in data analysis.
  *
  * @param inputWorkspace  The workspace to set.
  */
-void IndirectDataAnalysisTab::setInputWorkspace(
-    MatrixWorkspace_sptr inputWorkspace) {
+void IndirectDataAnalysisTab::setInputWorkspace(MatrixWorkspace_sptr inputWorkspace) {
   m_inputWorkspace = std::move(inputWorkspace);
 }
 
@@ -103,9 +91,7 @@ void IndirectDataAnalysisTab::setInputWorkspace(
  * @return  The workspace containing the data to be displayed in
  *          the preview plot.
  */
-MatrixWorkspace_sptr IndirectDataAnalysisTab::getPreviewPlotWorkspace() {
-  return m_previewPlotWorkspace.lock();
-}
+MatrixWorkspace_sptr IndirectDataAnalysisTab::getPreviewPlotWorkspace() { return m_previewPlotWorkspace.lock(); }
 
 /**
  * Sets the workspace containing the data to be displayed in the
@@ -113,8 +99,7 @@ MatrixWorkspace_sptr IndirectDataAnalysisTab::getPreviewPlotWorkspace() {
  *
  * @param previewPlotWorkspace The workspace to set.
  */
-void IndirectDataAnalysisTab::setPreviewPlotWorkspace(
-    const MatrixWorkspace_sptr &previewPlotWorkspace) {
+void IndirectDataAnalysisTab::setPreviewPlotWorkspace(const MatrixWorkspace_sptr &previewPlotWorkspace) {
   m_previewPlotWorkspace = previewPlotWorkspace;
 }
 
@@ -123,54 +108,42 @@ void IndirectDataAnalysisTab::setPreviewPlotWorkspace(
  *
  * @return  The selected spectrum.
  */
-int IndirectDataAnalysisTab::getSelectedSpectrum() const {
-  return m_selectedSpectrum;
-}
+int IndirectDataAnalysisTab::getSelectedSpectrum() const { return m_selectedSpectrum; }
 
 /**
  * Sets the selected spectrum.
  *
  * @param spectrum  The spectrum to set.
  */
-void IndirectDataAnalysisTab::setSelectedSpectrum(int spectrum) {
-  m_selectedSpectrum = spectrum;
-}
+void IndirectDataAnalysisTab::setSelectedSpectrum(int spectrum) { m_selectedSpectrum = spectrum; }
 
 /**
  * Retrieves the selected minimum spectrum.
  *
  * @return  The selected minimum spectrum.
  */
-int IndirectDataAnalysisTab::getMinimumSpectrum() const {
-  return m_minSpectrum;
-}
+int IndirectDataAnalysisTab::getMinimumSpectrum() const { return m_minSpectrum; }
 
 /**
  * Sets the selected spectrum.
  *
  * @param spectrum  The spectrum to set.
  */
-void IndirectDataAnalysisTab::setMinimumSpectrum(int spectrum) {
-  m_minSpectrum = spectrum;
-}
+void IndirectDataAnalysisTab::setMinimumSpectrum(int spectrum) { m_minSpectrum = spectrum; }
 
 /**
  * Retrieves the selected maximum spectrum.
  *
  * @return  The selected maximum spectrum.
  */
-int IndirectDataAnalysisTab::getMaximumSpectrum() const {
-  return m_maxSpectrum;
-}
+int IndirectDataAnalysisTab::getMaximumSpectrum() const { return m_maxSpectrum; }
 
 /**
  * Sets the selected maximum spectrum.
  *
  * @param spectrum  The spectrum to set.
  */
-void IndirectDataAnalysisTab::setMaximumSpectrum(int spectrum) {
-  m_maxSpectrum = spectrum;
-}
+void IndirectDataAnalysisTab::setMaximumSpectrum(int spectrum) { m_maxSpectrum = spectrum; }
 
 /**
  * Plots the current preview workspace, if none is set, plots
@@ -202,8 +175,7 @@ void IndirectDataAnalysisTab::plotCurrentPreview() {
  * @param previewPlot The preview plot widget in which to plot the input
  *                    input workspace.
  */
-void IndirectDataAnalysisTab::plotInput(
-    MantidQt::MantidWidgets::PreviewPlot *previewPlot) {
+void IndirectDataAnalysisTab::plotInput(MantidQt::MantidWidgets::PreviewPlot *previewPlot) {
   previewPlot->clear();
   auto inputWS = getInputWorkspace();
   auto spectrum = getSelectedSpectrum();
@@ -219,9 +191,8 @@ void IndirectDataAnalysisTab::plotInput(
  * @param fitPreviewPlot    The fit preview plot.
  * @param diffPreviewPlot   The difference preview plot.
  */
-void IndirectDataAnalysisTab::clearAndPlotInput(
-    MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
-    MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot) {
+void IndirectDataAnalysisTab::clearAndPlotInput(MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
+                                                MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot) {
   m_previewPlotWorkspace.reset();
   plotInput(fitPreviewPlot);
   diffPreviewPlot->clear();
@@ -238,14 +209,12 @@ void IndirectDataAnalysisTab::clearAndPlotInput(
  * @param fitPreviewPlot    The fit preview plot.
  * @param diffPreviewPlot   The difference preview plot.
  */
-void IndirectDataAnalysisTab::updatePlot(
-    const std::string &outputWSName, size_t index,
-    MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
-    MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot) {
+void IndirectDataAnalysisTab::updatePlot(const std::string &outputWSName, size_t index,
+                                         MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
+                                         MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot) {
 
   if (AnalysisDataService::Instance().doesExist(outputWSName)) {
-    auto workspace = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-        outputWSName);
+    auto workspace = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outputWSName);
 
     if (workspace) {
       updatePlot(workspace, index, fitPreviewPlot, diffPreviewPlot);
@@ -266,15 +235,13 @@ void IndirectDataAnalysisTab::updatePlot(
  * @param fitPreviewPlot    The fit preview plot.
  * @param diffPreviewPlot   The difference preview plot.
  */
-void IndirectDataAnalysisTab::updatePlot(
-    const WorkspaceGroup_sptr &outputWS, size_t index,
-    MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
-    MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot) {
+void IndirectDataAnalysisTab::updatePlot(const WorkspaceGroup_sptr &outputWS, size_t index,
+                                         MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
+                                         MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot) {
   // Check whether the specified index is within the bounds of the
   // fitted spectrum.
   if (outputWS && index < outputWS->size()) {
-    auto workspace =
-        std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(index));
+    auto workspace = std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(index));
     updatePlot(workspace, fitPreviewPlot, diffPreviewPlot);
   } else
     clearAndPlotInput(fitPreviewPlot, diffPreviewPlot);
@@ -289,22 +256,17 @@ void IndirectDataAnalysisTab::updatePlot(
  * @param fitPreviewPlot    The fit preview plot.
  * @param diffPreviewPlot   The difference preview plot.
  */
-void IndirectDataAnalysisTab::updatePlot(
-    const std::string &workspaceName,
-    MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
-    MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot) {
+void IndirectDataAnalysisTab::updatePlot(const std::string &workspaceName,
+                                         MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
+                                         MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot) {
 
   if (AnalysisDataService::Instance().doesExist(workspaceName)) {
-    auto groupWorkspace =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-            workspaceName);
+    auto groupWorkspace = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(workspaceName);
     // Check whether the specified workspace is a workspace group.
     if (groupWorkspace) {
       updatePlot(groupWorkspace, fitPreviewPlot, diffPreviewPlot);
     } else {
-      auto matWorkspace =
-          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-              workspaceName);
+      auto matWorkspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName);
       updatePlot(matWorkspace, fitPreviewPlot, diffPreviewPlot);
     }
   } else
@@ -322,14 +284,11 @@ void IndirectDataAnalysisTab::updatePlot(
  * @param fitPreviewPlot    The fit preview plot.
  * @param diffPreviewPlot   The difference preview plot.
  */
-void IndirectDataAnalysisTab::updatePlot(
-    const WorkspaceGroup_sptr &outputWS,
-    MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
-    MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot) {
-  if (outputWS && getSelectedSpectrum() >= getMinimumSpectrum() &&
-      getSelectedSpectrum() <= getMaximumSpectrum())
-    updatePlot(outputWS, getSelectedSpectrum() - getMinimumSpectrum(),
-               fitPreviewPlot, diffPreviewPlot);
+void IndirectDataAnalysisTab::updatePlot(const WorkspaceGroup_sptr &outputWS,
+                                         MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
+                                         MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot) {
+  if (outputWS && getSelectedSpectrum() >= getMinimumSpectrum() && getSelectedSpectrum() <= getMaximumSpectrum())
+    updatePlot(outputWS, getSelectedSpectrum() - getMinimumSpectrum(), fitPreviewPlot, diffPreviewPlot);
   else
     clearAndPlotInput(fitPreviewPlot, diffPreviewPlot);
 }
@@ -343,10 +302,9 @@ void IndirectDataAnalysisTab::updatePlot(
  * @param fitPreviewPlot    The fit preview plot.
  * @param diffPreviewPlot   The difference preview plot.
  */
-void IndirectDataAnalysisTab::updatePlot(
-    const MatrixWorkspace_sptr &outputWS,
-    MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
-    MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot) {
+void IndirectDataAnalysisTab::updatePlot(const MatrixWorkspace_sptr &outputWS,
+                                         MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
+                                         MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot) {
   fitPreviewPlot->clear();
   diffPreviewPlot->clear();
 

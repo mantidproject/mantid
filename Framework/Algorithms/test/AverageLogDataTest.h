@@ -39,8 +39,7 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // check average
-    const double av = alg.getProperty("Average"),
-                 err = alg.getProperty("Error");
+    const double av = alg.getProperty("Average"), err = alg.getProperty("Error");
     TS_ASSERT_DELTA(av, 0.1, 1e-8);
     TS_ASSERT_DELTA(err, 0.3, 1e-8);
 
@@ -60,8 +59,7 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // check average
-    const double av = alg.getProperty("Average"),
-                 err = alg.getProperty("Error");
+    const double av = alg.getProperty("Average"), err = alg.getProperty("Error");
     TS_ASSERT_DELTA(av, 0.1, 1e-8);
     TS_ASSERT_DELTA(err, 0.3, 1e-8);
 
@@ -82,8 +80,7 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // check average
-    const double av = alg.getProperty("Average"),
-                 err = alg.getProperty("Error");
+    const double av = alg.getProperty("Average"), err = alg.getProperty("Error");
     TS_ASSERT_DELTA(av, 1., 1e-8);
     TS_ASSERT_DELTA(err, 0., 1e-8);
 
@@ -104,8 +101,7 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // check average
-    const double av = alg.getProperty("Average"),
-                 err = alg.getProperty("Error");
+    const double av = alg.getProperty("Average"), err = alg.getProperty("Error");
     TS_ASSERT(std::isnan(av));
     TS_ASSERT(std::isnan(err));
 
@@ -117,8 +113,7 @@ private:
   std::string inputWS;
   void makeWS(double shift) {
     inputWS = "AverageLogDataTestWS";
-    Mantid::DataObjects::Workspace2D_sptr w =
-        WorkspaceCreationHelper::create2DWorkspace(1, 1);
+    Mantid::DataObjects::Workspace2D_sptr w = WorkspaceCreationHelper::create2DWorkspace(1, 1);
     Mantid::Types::Core::DateAndTime run_start("2010-01-01T00:00:00");
     Mantid::Kernel::TimeSeriesProperty<double> *pc, *p1;
     pc = new Mantid::Kernel::TimeSeriesProperty<double>("proton_charge");

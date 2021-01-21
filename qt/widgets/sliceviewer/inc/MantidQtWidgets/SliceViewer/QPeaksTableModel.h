@@ -33,22 +33,19 @@ QAbstractTableModel for serving up PeaksWorkspaces.
 @author Owen Arnold
 @date 07/01/2013
 */
-class EXPORT_OPT_MANTIDQT_SLICEVIEWER QPeaksTableModel
-    : public QAbstractTableModel {
+class EXPORT_OPT_MANTIDQT_SLICEVIEWER QPeaksTableModel : public QAbstractTableModel {
   Q_OBJECT
 public:
   QPeaksTableModel(std::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS);
   int rowCount(const QModelIndex &parent = QModelIndex()) const override;
   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
   QVariant data(const QModelIndex &index, int role) const override;
-  QVariant headerData(int section, Qt::Orientation orientation,
-                      int role) const override;
+  QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
   Qt::ItemFlags flags(const QModelIndex &index) const override;
   int numCharacters(const int column) const;
   std::vector<int> defaultHideCols();
   ~QPeaksTableModel() override;
-  void setPeaksWorkspace(
-      std::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS);
+  void setPeaksWorkspace(std::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS);
 signals:
   void peaksSorted(const std::string & /*_t1*/, const bool /*_t2*/);
 
@@ -153,8 +150,7 @@ private:
   /// Map from column index to raw peak data
   std::vector<QVariant (*)(const Mantid::Geometry::IPeak &)> m_dataLookup;
   /// Map from column index to formatted peak data
-  std::vector<QString (*)(const Mantid::Geometry::IPeak &)>
-      m_formattedValueLookup;
+  std::vector<QString (*)(const Mantid::Geometry::IPeak &)> m_formattedValueLookup;
   /// Collection of data for viewing.
   std::shared_ptr<const Mantid::API::IPeaksWorkspace> m_peaksWS;
   /// Map of column indexes to names

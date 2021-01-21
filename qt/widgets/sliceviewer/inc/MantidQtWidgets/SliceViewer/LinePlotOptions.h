@@ -46,8 +46,7 @@ signals:
   void changedYLogScaling();
 
 private:
-  void addPlotRadioButton(const std::string &text, const std::string &tooltip,
-                          const bool bIntegrated = false);
+  void addPlotRadioButton(const std::string &text, const std::string &tooltip, const bool bIntegrated = false);
 
   Ui::LinePlotOptionsClass ui;
 

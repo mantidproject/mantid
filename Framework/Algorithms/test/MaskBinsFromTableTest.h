@@ -27,9 +27,7 @@ class MaskBinsFromTableTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static MaskBinsFromTableTest *createSuite() {
-    return new MaskBinsFromTableTest();
-  }
+  static MaskBinsFromTableTest *createSuite() { return new MaskBinsFromTableTest(); }
   static void destroySuite(MaskBinsFromTableTest *suite) { delete suite; }
 
   /** In-place single mask test.
@@ -39,14 +37,12 @@ public:
     // 1. Create a dummy workspace
     const std::string workspaceName("raggedMask");
     int nBins = 10;
-    MatrixWorkspace_sptr WS =
-        WorkspaceCreationHelper::create2DWorkspaceBinned(5, nBins, 0.0);
+    MatrixWorkspace_sptr WS = WorkspaceCreationHelper::create2DWorkspaceBinned(5, nBins, 0.0);
     AnalysisDataService::Instance().add(workspaceName, WS);
 
     // 2. Generate a TableWorskpace
     DataObjects::TableWorkspace_sptr tablews =
-        std::shared_ptr<DataObjects::TableWorkspace>(
-            new DataObjects::TableWorkspace());
+        std::shared_ptr<DataObjects::TableWorkspace>(new DataObjects::TableWorkspace());
     tablews->addColumn("double", "XMin");
     tablews->addColumn("double", "XMax");
     tablews->addColumn("str", "SpectraList");
@@ -64,8 +60,7 @@ public:
     TS_ASSERT(maskalg.isExecuted());
 
     // 4. Check
-    WS = std::dynamic_pointer_cast<API::MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve(workspaceName));
+    WS = std::dynamic_pointer_cast<API::MatrixWorkspace>(AnalysisDataService::Instance().retrieve(workspaceName));
     TS_ASSERT(WS);
     for (int wi = 1; wi <= 3; wi++) {
       for (int bin = 3; bin < 6; bin++) {
@@ -87,14 +82,12 @@ public:
     const std::string workspaceName("raggedMask");
     const std::string opWSName("maskedWorkspace");
     int nBins = 10;
-    MatrixWorkspace_sptr WS =
-        WorkspaceCreationHelper::create2DWorkspaceBinned(5, nBins, 0.0);
+    MatrixWorkspace_sptr WS = WorkspaceCreationHelper::create2DWorkspaceBinned(5, nBins, 0.0);
     AnalysisDataService::Instance().add(workspaceName, WS);
 
     // 2. Generate a TableWorskpace
     DataObjects::TableWorkspace_sptr tablews =
-        std::shared_ptr<DataObjects::TableWorkspace>(
-            new DataObjects::TableWorkspace());
+        std::shared_ptr<DataObjects::TableWorkspace>(new DataObjects::TableWorkspace());
     tablews->addColumn("double", "XMin");
     tablews->addColumn("double", "XMax");
     tablews->addColumn("str", "SpectraList");
@@ -113,8 +106,7 @@ public:
 
     // 4. Check
     MatrixWorkspace_sptr outWS =
-        std::dynamic_pointer_cast<API::MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve(opWSName));
+        std::dynamic_pointer_cast<API::MatrixWorkspace>(AnalysisDataService::Instance().retrieve(opWSName));
     TS_ASSERT(outWS);
     for (int wi = 1; wi <= 3; wi++) {
       for (int bin = 3; bin < 6; bin++) {
@@ -137,14 +129,12 @@ public:
     const std::string workspaceName("raggedMask");
     int nBins = 10;
     int nHist = 12;
-    MatrixWorkspace_sptr WS =
-        WorkspaceCreationHelper::create2DWorkspaceBinned(nHist, nBins, 0.0);
+    MatrixWorkspace_sptr WS = WorkspaceCreationHelper::create2DWorkspaceBinned(nHist, nBins, 0.0);
     AnalysisDataService::Instance().add(workspaceName, WS);
 
     // 2. Generate a TableWorskpace
     DataObjects::TableWorkspace_sptr tablews =
-        std::shared_ptr<DataObjects::TableWorkspace>(
-            new DataObjects::TableWorkspace());
+        std::shared_ptr<DataObjects::TableWorkspace>(new DataObjects::TableWorkspace());
     tablews->addColumn("double", "XMin");
     tablews->addColumn("double", "XMax");
     tablews->addColumn("str", "SpectraList");
@@ -166,8 +156,7 @@ public:
     TS_ASSERT(maskalg.isExecuted());
 
     // 4. Check
-    WS = std::dynamic_pointer_cast<API::MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve(workspaceName));
+    WS = std::dynamic_pointer_cast<API::MatrixWorkspace>(AnalysisDataService::Instance().retrieve(workspaceName));
     TS_ASSERT(WS);
 
     // a) Table Line 0
@@ -224,14 +213,12 @@ public:
     // 1. Create a dummy workspace
     const std::string workspaceName("raggedMask");
     int nBins = 10;
-    MatrixWorkspace_sptr WS =
-        WorkspaceCreationHelper::create2DWorkspaceBinned(5, nBins, 0.0);
+    MatrixWorkspace_sptr WS = WorkspaceCreationHelper::create2DWorkspaceBinned(5, nBins, 0.0);
     AnalysisDataService::Instance().add(workspaceName, WS);
 
     // 2. Generate a TableWorskpace
     DataObjects::TableWorkspace_sptr tablews =
-        std::shared_ptr<DataObjects::TableWorkspace>(
-            new DataObjects::TableWorkspace());
+        std::shared_ptr<DataObjects::TableWorkspace>(new DataObjects::TableWorkspace());
     tablews->addColumn("str", "SpectraList");
     tablews->addColumn("double", "XMin");
     tablews->addColumn("double", "XMax");
@@ -249,8 +236,7 @@ public:
     TS_ASSERT(maskalg.isExecuted());
 
     // 4. Check
-    WS = std::dynamic_pointer_cast<API::MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve(workspaceName));
+    WS = std::dynamic_pointer_cast<API::MatrixWorkspace>(AnalysisDataService::Instance().retrieve(workspaceName));
     TS_ASSERT(WS);
     for (int wi = 1; wi <= 3; wi++) {
       for (int bin = 3; bin < 6; bin++) {
@@ -271,8 +257,7 @@ public:
     // Create a workspace to mask: 5 spectra, 10 bins
     const std::string workspaceName("raggedMask5");
     int nBins = 10;
-    MatrixWorkspace_sptr dataws =
-        WorkspaceCreationHelper::create2DWorkspaceBinned(5, nBins, 0.0);
+    MatrixWorkspace_sptr dataws = WorkspaceCreationHelper::create2DWorkspaceBinned(5, nBins, 0.0);
     AnalysisDataService::Instance().add(workspaceName, dataws);
 
     // Set up default detector IDs. Note there are no corresponding detectors.
@@ -300,8 +285,7 @@ public:
 
     // Check
     MatrixWorkspace_sptr outws =
-        std::dynamic_pointer_cast<API::MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve(workspaceName));
+        std::dynamic_pointer_cast<API::MatrixWorkspace>(AnalysisDataService::Instance().retrieve(workspaceName));
     TS_ASSERT(outws);
     for (int wi = 1; wi <= 3; wi++) {
       for (int bin = 3; bin < 6; bin++) {

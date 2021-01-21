@@ -19,8 +19,7 @@
 
 #include <algorithm>
 
-const Qt::PenStyle PenStyleBox::patterns[] = {Qt::SolidLine, Qt::DashLine,
-                                              Qt::DotLine, Qt::DashDotLine,
+const Qt::PenStyle PenStyleBox::patterns[] = {Qt::SolidLine, Qt::DashLine, Qt::DotLine, Qt::DashDotLine,
                                               Qt::DashDotDotLine};
 
 PenStyleBox::PenStyleBox(QWidget *parent) : QComboBox(parent) {
@@ -83,6 +82,4 @@ int PenStyleBox::styleIndex(const Qt::PenStyle &style) {
   //    return (int(ite - patterns));
 }
 
-size_t PenStyleBox::numberOfPatterns() {
-  return sizeof(patterns) / sizeof(Qt::PenStyle);
-}
+size_t PenStyleBox::numberOfPatterns() { return sizeof(patterns) / sizeof(Qt::PenStyle); }

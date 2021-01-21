@@ -56,8 +56,7 @@ public:
       TS_FAIL(e.what());
     }
 
-    MatrixWorkspace_const_sptr outputWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("output");
+    MatrixWorkspace_const_sptr outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("output");
 
     // Should give:
     // 10   20   30   40   X
@@ -87,8 +86,7 @@ public:
       TS_FAIL(e.what());
     }
 
-    MatrixWorkspace_const_sptr outputWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("output2");
+    MatrixWorkspace_const_sptr outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("output2");
 
     // 0   10   20   30    X
     //   0     2     5        Y
@@ -120,8 +118,7 @@ public:
       TS_FAIL(e.what());
     }
 
-    MatrixWorkspace_const_sptr outputWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("output3");
+    MatrixWorkspace_const_sptr outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("output3");
 
     // 0   10   20   30   40   X
     //   0     2     4     6       Y
@@ -148,10 +145,8 @@ public:
 
     TS_ASSERT(rb.execute())
 
-    MatrixWorkspace_const_sptr inputWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("input2D");
-    MatrixWorkspace_const_sptr outputWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("output4");
+    MatrixWorkspace_const_sptr inputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("input2D");
+    MatrixWorkspace_const_sptr outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("output4");
     TS_ASSERT_EQUALS(inputWS->x(0).rawData(), outputWS->x(0).rawData())
     TS_ASSERT_EQUALS(inputWS->x(1).rawData(), outputWS->x(1).rawData())
     TS_ASSERT_EQUALS(inputWS->y(1).rawData(), outputWS->y(1).rawData())
@@ -178,9 +173,7 @@ public:
 
     TS_ASSERT(rb.execute())
 
-    MatrixWorkspace_const_sptr outputWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            outputWSName);
+    MatrixWorkspace_const_sptr outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWSName);
     TS_ASSERT_EQUALS(inputWS->x(1).rawData(), outputWS->x(1).rawData())
     TS_ASSERT_EQUALS(inputWS->x(0).rawData(), outputWS->x(0).rawData())
     TS_ASSERT_EQUALS(inputWS->y(0).rawData(), outputWS->y(0).rawData())
@@ -194,8 +187,7 @@ public:
   }
 
   void testRangeUnit() {
-    MatrixWorkspace_sptr inputWS =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1, 10);
+    MatrixWorkspace_sptr inputWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1, 10);
     // scale x values up to 0-1000 range
     inputWS->getSpectrum(0).mutableX() *= 100;
     std::string wsName = "RemoveBins_RangeUnit";
@@ -218,9 +210,7 @@ public:
     if (algRU.isExecuted() == false)
       return;
 
-    MatrixWorkspace_const_sptr outputWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            wsNameOutput);
+    MatrixWorkspace_const_sptr outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsNameOutput);
 
     std::vector<double> expected = {2, 2, 2, 1.68054, 0, 0, 0.638921, 2, 2, 2};
     for (size_t i = 0; i < outputWS->y(0).size(); i++) {
@@ -259,9 +249,7 @@ private:
 
 class RemoveBinsTestPerformance : public CxxTest::TestSuite {
 public:
-  static RemoveBinsTestPerformance *createSuite() {
-    return new RemoveBinsTestPerformance();
-  }
+  static RemoveBinsTestPerformance *createSuite() { return new RemoveBinsTestPerformance(); }
 
   static void destroySuite(RemoveBinsTestPerformance *suite) { delete suite; }
 
@@ -274,8 +262,7 @@ public:
     for (size_t i = 0; i < numHists; i++)
       wksp->setBinEdges(i, edges);
 
-    wksp->getAxis(0)->unit() =
-        Mantid::Kernel::UnitFactory::Instance().create("TOF");
+    wksp->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("TOF");
 
     AnalysisDataService::Instance().addOrReplace("input", wksp);
   }

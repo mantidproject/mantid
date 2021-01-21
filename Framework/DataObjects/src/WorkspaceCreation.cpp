@@ -21,31 +21,23 @@ HistogramData::Histogram stripData(HistogramData::Histogram histogram) {
 
 template <> std::unique_ptr<EventWorkspace> createHelper() { return {nullptr}; }
 
-template <> std::unique_ptr<API::HistoWorkspace> createHelper() {
-  return std::make_unique<Workspace2D>();
-}
+template <> std::unique_ptr<API::HistoWorkspace> createHelper() { return std::make_unique<Workspace2D>(); }
 
-template <> std::unique_ptr<API::MatrixWorkspace> createHelper() {
-  return {nullptr};
-}
+template <> std::unique_ptr<API::MatrixWorkspace> createHelper() { return {nullptr}; }
 
 template <> std::unique_ptr<API::MatrixWorkspace> createConcreteHelper() {
-  throw std::runtime_error(
-      "Attempt to create instance of abstract type MatrixWorkspace");
+  throw std::runtime_error("Attempt to create instance of abstract type MatrixWorkspace");
   return {nullptr};
 }
 template <> std::unique_ptr<API::HistoWorkspace> createConcreteHelper() {
-  throw std::runtime_error(
-      "Attempt to create instance of abstract type HistoWorkspace");
+  throw std::runtime_error("Attempt to create instance of abstract type HistoWorkspace");
   return {nullptr};
 }
 
 template <class UseIndexInfo>
-void doInitializeFromParent(const API::MatrixWorkspace &parent,
-                            API::MatrixWorkspace &workspace,
+void doInitializeFromParent(const API::MatrixWorkspace &parent, API::MatrixWorkspace &workspace,
                             const bool differentSize) {
-  API::WorkspaceFactory::Instance().initializeFromParent(parent, workspace,
-                                                         differentSize);
+  API::WorkspaceFactory::Instance().initializeFromParent(parent, workspace, differentSize);
 }
 
 /** Same as WorkspaceFactory::initializeFromParent, with modifications for
@@ -58,8 +50,7 @@ void doInitializeFromParent(const API::MatrixWorkspace &parent,
  * - Y axis
  */
 template <>
-void doInitializeFromParent<std::true_type>(const API::MatrixWorkspace &parent,
-                                            API::MatrixWorkspace &child,
+void doInitializeFromParent<std::true_type>(const API::MatrixWorkspace &parent, API::MatrixWorkspace &child,
                                             const bool differentSize) {
   // Ignore flag since with IndexInfo the size is the same but we nevertheless
   // do not want to copy some data since spectrum order or definitions may have
@@ -81,11 +72,8 @@ void doInitializeFromParent<std::true_type>(const API::MatrixWorkspace &parent,
  * @param parent
  * @param ws
  */
-template <class UseIndexInfo>
-void initializeFromParent(const API::MatrixWorkspace &parent,
-                          API::MatrixWorkspace &ws) {
-  bool differentSize = (parent.x(0).size() != ws.x(0).size()) ||
-                       (parent.y(0).size() != ws.y(0).size());
+template <class UseIndexInfo> void initializeFromParent(const API::MatrixWorkspace &parent, API::MatrixWorkspace &ws) {
+  bool differentSize = (parent.x(0).size() != ws.x(0).size()) || (parent.y(0).size() != ws.y(0).size());
   doInitializeFromParent<UseIndexInfo>(parent, ws, differentSize);
   // For EventWorkspace, `ws.y(0)` put entry 0 in the MRU. However, clients
   // would typically expect an empty MRU and fail to clear it. This dummy call
@@ -93,17 +81,14 @@ void initializeFromParent(const API::MatrixWorkspace &parent,
   static_cast<void>(ws.mutableX(0));
 }
 
-template <>
-void fixDistributionFlag(API::MatrixWorkspace &workspace,
-                         const HistogramData::Histogram &histArg) {
-  workspace.setDistribution(histArg.yMode() ==
-                            HistogramData::Histogram::YMode::Frequencies);
+template <> void fixDistributionFlag(API::MatrixWorkspace &workspace, const HistogramData::Histogram &histArg) {
+  workspace.setDistribution(histArg.yMode() == HistogramData::Histogram::YMode::Frequencies);
 }
 
-template void MANTID_DATAOBJECTS_DLL initializeFromParent<std::true_type>(
-    const API::MatrixWorkspace &, API::MatrixWorkspace &);
-template void MANTID_DATAOBJECTS_DLL initializeFromParent<std::false_type>(
-    const API::MatrixWorkspace &, API::MatrixWorkspace &);
+template void MANTID_DATAOBJECTS_DLL initializeFromParent<std::true_type>(const API::MatrixWorkspace &,
+                                                                          API::MatrixWorkspace &);
+template void MANTID_DATAOBJECTS_DLL initializeFromParent<std::false_type>(const API::MatrixWorkspace &,
+                                                                           API::MatrixWorkspace &);
 } // namespace detail
 } // namespace DataObjects
 } // namespace Mantid

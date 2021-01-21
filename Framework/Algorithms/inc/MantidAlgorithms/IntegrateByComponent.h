@@ -19,14 +19,10 @@ class MANTID_ALGORITHMS_DLL IntegrateByComponent : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Averages up the instrument hierarchy.";
-  }
+  const std::string summary() const override { return "Averages up the instrument hierarchy."; }
 
   int version() const override;
-  const std::vector<std::string> seeAlso() const override {
-    return {"Integration"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"Integration"}; }
   const std::string category() const override;
 
 private:
@@ -34,11 +30,9 @@ private:
   void exec() override;
 
   /// method to check which spectra should be averaged
-  std::vector<std::vector<size_t>>
-  makeMap(const API::MatrixWorkspace_sptr &countsWS, int parents);
+  std::vector<std::vector<size_t>> makeMap(const API::MatrixWorkspace_sptr &countsWS, int parents);
   /// method to create the map with all spectra
-  std::vector<std::vector<size_t>>
-  makeInstrumentMap(const API::MatrixWorkspace_sptr &countsWS);
+  std::vector<std::vector<size_t>> makeInstrumentMap(const API::MatrixWorkspace_sptr &countsWS);
 };
 
 } // namespace Algorithms

@@ -29,17 +29,14 @@ namespace Registry {
  */
 class DLLExport PropertyWithValueFactory {
 public:
-  static std::unique_ptr<Kernel::Property>
-  create(const std::string &name, const boost::python::object &defaultValue,
-         const boost::python::object &validator, const unsigned int direction);
+  static std::unique_ptr<Kernel::Property> create(const std::string &name, const boost::python::object &defaultValue,
+                                                  const boost::python::object &validator, const unsigned int direction);
 
-  static std::unique_ptr<Kernel::Property>
-  create(const std::string &name, const boost::python::object &defaultValue,
-         const unsigned int direction);
+  static std::unique_ptr<Kernel::Property> create(const std::string &name, const boost::python::object &defaultValue,
+                                                  const unsigned int direction);
 
-  static std::unique_ptr<Kernel::Property>
-  createTimeSeries(const std::string &name,
-                   const boost::python::list &defaultValue);
+  static std::unique_ptr<Kernel::Property> createTimeSeries(const std::string &name,
+                                                            const boost::python::list &defaultValue);
 
 private:
   /// Return a handler that maps the python type to a C++ type

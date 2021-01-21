@@ -28,8 +28,7 @@ class RebinnedSourcesManager;
 
   @date 24/05/2011
  */
-class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS MultiSliceView
-    : public ViewBase {
+class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS MultiSliceView : public ViewBase {
   Q_OBJECT
 
 public:
@@ -39,8 +38,7 @@ public:
    * @param rebinnedSourcesManager Pointer to a RebinnedSourcesManager
    * @param createRenderProxy :: Whether to create a render proxy for this view
    */
-  MultiSliceView(QWidget *parent = nullptr,
-                 RebinnedSourcesManager *rebinnedSourcesManager = nullptr,
+  MultiSliceView(QWidget *parent = nullptr, RebinnedSourcesManager *rebinnedSourcesManager = nullptr,
                  bool createRenderProxy = true);
   /// Default constructor.
   ~MultiSliceView() override;
@@ -77,8 +75,7 @@ public:
 
 protected slots:
   /// Determine if slice is to be shown in SliceViewer.
-  void checkSliceClicked(int axisIndex, double sliceOffsetOnAxis, int button,
-                         int modifier);
+  void checkSliceClicked(int axisIndex, double sliceOffsetOnAxis, int button, int modifier);
   /// Launch SliceViewer with the specified cut.
   void showCutInSliceViewer(int axisIndex, double sliceOffsetOnAxis);
 

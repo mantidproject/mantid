@@ -65,15 +65,14 @@ enum class MantidAxType : int { Bin = 0, Spectrum = 1 };
  * @return Returns the figure that was created by the
  * function in Python
  */
-MANTID_MPLCPP_DLL Common::Python::Object
-plot(const std::vector<std::string> &workspaces,
-     boost::optional<std::vector<int>> spectrumNums,
-     boost::optional<std::vector<int>> wkspIndices,
-     boost::optional<Common::Python::Object> fig = boost::none,
-     boost::optional<QHash<QString, QVariant>> plotKwargs = boost::none,
-     boost::optional<QHash<QString, QVariant>> axProperties = boost::none,
-     boost::optional<std::string> windowTitle = boost::none,
-     bool errors = false, bool overplot = false, bool tiled = false);
+MANTID_MPLCPP_DLL Common::Python::Object plot(const std::vector<std::string> &workspaces,
+                                              boost::optional<std::vector<int>> spectrumNums,
+                                              boost::optional<std::vector<int>> wkspIndices,
+                                              boost::optional<Common::Python::Object> fig = boost::none,
+                                              boost::optional<QHash<QString, QVariant>> plotKwargs = boost::none,
+                                              boost::optional<QHash<QString, QVariant>> axProperties = boost::none,
+                                              boost::optional<std::string> windowTitle = boost::none,
+                                              bool errors = false, bool overplot = false, bool tiled = false);
 
 /**
  * \overload plot(const std::vector<std::string> &workspaces,
@@ -85,15 +84,14 @@ plot(const std::vector<std::string> &workspaces,
      boost::optional<std::string> windowTitle = boost::none,
      bool errors = false, bool overplot = false)
  */
-MANTID_MPLCPP_DLL Common::Python::Object
-plot(const QStringList &workspaces,
-     boost::optional<std::vector<int>> spectrumNums,
-     boost::optional<std::vector<int>> wkspIndices,
-     boost::optional<Common::Python::Object> fig = boost::none,
-     boost::optional<QHash<QString, QVariant>> plotKwargs = boost::none,
-     boost::optional<QHash<QString, QVariant>> axProperties = boost::none,
-     boost::optional<std::string> windowTitle = boost::none,
-     bool errors = false, bool overplot = false, bool tiled = false);
+MANTID_MPLCPP_DLL Common::Python::Object plot(const QStringList &workspaces,
+                                              boost::optional<std::vector<int>> spectrumNums,
+                                              boost::optional<std::vector<int>> wkspIndices,
+                                              boost::optional<Common::Python::Object> fig = boost::none,
+                                              boost::optional<QHash<QString, QVariant>> plotKwargs = boost::none,
+                                              boost::optional<QHash<QString, QVariant>> axProperties = boost::none,
+                                              boost::optional<std::string> windowTitle = boost::none,
+                                              bool errors = false, bool overplot = false, bool tiled = false);
 
 /**
  * Makes a call to mantidqt.plotting.plotsubplots.
@@ -124,15 +122,12 @@ plot(const QStringList &workspaces,
  * @return Returns the figure that was created by the
  * function in Python
  */
-MANTID_MPLCPP_DLL Common::Python::Object plotsubplots(
-    const QStringList &workspaces,
-    boost::optional<std::vector<int>> spectrumNums,
-    boost::optional<std::vector<int>> wkspIndices,
-    boost::optional<Common::Python::Object> fig = boost::none,
-    boost::optional<QHash<QString, QVariant>> plotKwargs = boost::none,
-    boost::optional<QHash<QString, QVariant>> axProperties = boost::none,
-    boost::optional<std::string> windowTitle = boost::none,
-    bool errors = false);
+MANTID_MPLCPP_DLL Common::Python::Object
+plotsubplots(const QStringList &workspaces, boost::optional<std::vector<int>> spectrumNums,
+             boost::optional<std::vector<int>> wkspIndices, boost::optional<Common::Python::Object> fig = boost::none,
+             boost::optional<QHash<QString, QVariant>> plotKwargs = boost::none,
+             boost::optional<QHash<QString, QVariant>> axProperties = boost::none,
+             boost::optional<std::string> windowTitle = boost::none, bool errors = false);
 
 /**
  * Makes a call to mantidqt.plotting.pcolormesh.
@@ -144,9 +139,8 @@ MANTID_MPLCPP_DLL Common::Python::Object plotsubplots(
  * @return Returns the figure that was created by the
  * function in Python
  */
-MANTID_MPLCPP_DLL Common::Python::Object
-pcolormesh(const QStringList &workspaces,
-           boost::optional<Common::Python::Object> fig = boost::none);
+MANTID_MPLCPP_DLL Common::Python::Object pcolormesh(const QStringList &workspaces,
+                                                    boost::optional<Common::Python::Object> fig = boost::none);
 
 } // namespace MplCpp
 } // namespace Widgets

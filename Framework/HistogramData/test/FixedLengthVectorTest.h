@@ -14,8 +14,7 @@
 using Mantid::HistogramData::detail::FixedLengthVector;
 using Mantid::Kernel::make_cow;
 
-struct FixedLengthVectorTester
-    : public FixedLengthVector<FixedLengthVectorTester> {
+struct FixedLengthVectorTester : public FixedLengthVector<FixedLengthVectorTester> {
   FixedLengthVectorTester() = default;
   using FixedLengthVector<FixedLengthVectorTester>::FixedLengthVector;
   using FixedLengthVector<FixedLengthVectorTester>::operator=;
@@ -25,9 +24,7 @@ class FixedLengthVectorTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static FixedLengthVectorTest *createSuite() {
-    return new FixedLengthVectorTest();
-  }
+  static FixedLengthVectorTest *createSuite() { return new FixedLengthVectorTest(); }
   static void destroySuite(FixedLengthVectorTest *suite) { delete suite; }
 
   void test_empty_constructor() {
@@ -135,8 +132,7 @@ public:
     std::vector<double> src(10, 0);
     FixedLengthVectorTester dest(5);
 
-    TS_ASSERT_THROWS(dest.assign(src.cbegin(), src.cend()),
-                     const std::logic_error &);
+    TS_ASSERT_THROWS(dest.assign(src.cbegin(), src.cend()), const std::logic_error &);
   }
 
   void test_length_value_assignment() {

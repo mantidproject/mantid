@@ -10,10 +10,8 @@
 #include "ImportWorkspaceDlg.h"
 
 ImportWorkspaceDlg::ImportWorkspaceDlg(QWidget *parent, size_t num)
-    : QDialog(parent), numHists(num), lowerLimit(0), upperLimit(0),
-      filtered(false), minValue(0), maxValue(100.) {
-  label = new QLabel(
-      QString("Set Histogram Range to Load (Max Number = %1):").arg(numHists));
+    : QDialog(parent), numHists(num), lowerLimit(0), upperLimit(0), filtered(false), minValue(0), maxValue(100.) {
+  label = new QLabel(QString("Set Histogram Range to Load (Max Number = %1):").arg(numHists));
 
   labelLow = new QLabel(tr("From:"));
   lineLow = new QLineEdit;
@@ -51,8 +49,7 @@ ImportWorkspaceDlg::ImportWorkspaceDlg(QWidget *parent, size_t num)
 
   connect(cancelButton, SIGNAL(clicked()), this, SLOT(reject()));
   connect(okButton, SIGNAL(clicked()), this, SLOT(okClicked()));
-  connect(checkFilter, SIGNAL(stateChanged(int)), this,
-          SLOT(enableFilter(int)));
+  connect(checkFilter, SIGNAL(stateChanged(int)), this, SLOT(enableFilter(int)));
 
   // Set the appearance
   QHBoxLayout *topRowLayout = new QHBoxLayout;
@@ -83,25 +80,23 @@ ImportWorkspaceDlg::ImportWorkspaceDlg(QWidget *parent, size_t num)
 ImportWorkspaceDlg::~ImportWorkspaceDlg() {}
 
 void ImportWorkspaceDlg::okClicked() {
-  if (!lineLow->text().isNull() && !lineLow->text().isEmpty() &&
-      !lineHigh->text().isNull() && !lineHigh->text().isEmpty()) {
+  if (!lineLow->text().isNull() && !lineLow->text().isEmpty() && !lineHigh->text().isNull() &&
+      !lineHigh->text().isEmpty()) {
     // Check range is valid
     bool ok;
     int low = lineLow->text().toInt(&ok, 10);
 
     if (!ok || low < 0 || low > static_cast<int>(numHists)) {
-      QMessageBox::warning(this, tr("Mantid"),
-                           tr("Lower limit is not valid - please change it.\n"),
-                           QMessageBox::Ok, QMessageBox::Ok);
+      QMessageBox::warning(this, tr("Mantid"), tr("Lower limit is not valid - please change it.\n"), QMessageBox::Ok,
+                           QMessageBox::Ok);
       return;
     }
 
     int high = lineHigh->text().toInt(&ok, 10);
 
     if (!ok || high < 0 || high > static_cast<int>(numHists)) {
-      QMessageBox::warning(this, tr("Mantid"),
-                           tr("Upper limit is not valid - please change it.\n"),
-                           QMessageBox::Ok, QMessageBox::Ok);
+      QMessageBox::warning(this, tr("Mantid"), tr("Upper limit is not valid - please change it.\n"), QMessageBox::Ok,
+                           QMessageBox::Ok);
       return;
     }
 
@@ -118,10 +113,8 @@ void ImportWorkspaceDlg::okClicked() {
       minValue = lineMinimum->text().toDouble(&ok);
       maxValue = lineMaximum->text().toDouble(&ok);
       if (!ok || maxValue < 0) {
-        QMessageBox::warning(
-            this, tr("Mantid"),
-            tr("Maximum value is not valid - please change it.\n"),
-            QMessageBox::Ok, QMessageBox::Ok);
+        QMessageBox::warning(this, tr("Mantid"), tr("Maximum value is not valid - please change it.\n"),
+                             QMessageBox::Ok, QMessageBox::Ok);
         return;
       }
     } else {

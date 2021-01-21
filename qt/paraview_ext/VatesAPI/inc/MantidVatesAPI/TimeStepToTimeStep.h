@@ -24,8 +24,7 @@ private:
 
 public:
   /// Constructional method.
-  static TimeStepToTimeStep construct(double timeMin, double timeMax,
-                                      size_t nIntervalSteps);
+  static TimeStepToTimeStep construct(double timeMin, double timeMax, size_t nIntervalSteps);
 
   TimeStepToTimeStep() = default;
 

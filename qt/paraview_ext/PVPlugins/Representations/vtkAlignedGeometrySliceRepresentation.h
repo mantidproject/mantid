@@ -32,16 +32,13 @@
 
 #include "vtkGeometryRepresentation.h"
 
-class VTK_EXPORT vtkAlignedGeometrySliceRepresentation
-    : public vtkGeometryRepresentation {
+class VTK_EXPORT vtkAlignedGeometrySliceRepresentation : public vtkGeometryRepresentation {
 public:
   static vtkAlignedGeometrySliceRepresentation *New();
-  vtkTypeMacro(vtkAlignedGeometrySliceRepresentation,
-               vtkGeometryRepresentation);
+  vtkTypeMacro(vtkAlignedGeometrySliceRepresentation, vtkGeometryRepresentation);
   void PrintSelf(ostream &os, vtkIndent indent) VTK_OVERRIDE;
 
-  int ProcessViewRequest(vtkInformationRequestKey *request_type,
-                         vtkInformation *inInfo,
+  int ProcessViewRequest(vtkInformationRequestKey *request_type, vtkInformation *inInfo,
                          vtkInformation *outInfo) VTK_OVERRIDE;
 
   enum { X_SLICE_ONLY, Y_SLICE_ONLY, Z_SLICE_ONLY, ALL_SLICES };
@@ -68,10 +65,8 @@ protected:
   bool RemoveFromView(vtkView *view) VTK_OVERRIDE;
 
 private:
-  vtkAlignedGeometrySliceRepresentation(
-      const vtkAlignedGeometrySliceRepresentation &) VTK_DELETE_FUNCTION;
-  void
-  operator=(const vtkAlignedGeometrySliceRepresentation &) VTK_DELETE_FUNCTION;
+  vtkAlignedGeometrySliceRepresentation(const vtkAlignedGeometrySliceRepresentation &) VTK_DELETE_FUNCTION;
+  void operator=(const vtkAlignedGeometrySliceRepresentation &) VTK_DELETE_FUNCTION;
 
   class vtkInternals;
   vtkInternals *Internals;

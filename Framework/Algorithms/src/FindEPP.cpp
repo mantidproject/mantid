@@ -30,9 +30,7 @@ const std::string FindEPP::name() const { return "FindEPP"; }
 int FindEPP::version() const { return 2; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string FindEPP::category() const {
-  return "Workflow\\MLZ\\TOFTOF;Utility";
-}
+const std::string FindEPP::category() const { return "Workflow\\MLZ\\TOFTOF;Utility"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string FindEPP::summary() const {
@@ -44,11 +42,9 @@ const std::string FindEPP::summary() const {
 /** Initialize the algorithm's properties.
  */
 void FindEPP::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>("InputWorkspace", "", Direction::Input),
                   "An input workspace.");
-  declareProperty(std::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<API::ITableWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }
 
@@ -112,8 +108,7 @@ void FindEPP::fitGaussian(int64_t index) {
         break;
       }
     }
-    g_log.debug() << "Peak in spectrum #" << spectrum
-                  << " has last bins above 0.5*max at " << leftHalf << "\t"
+    g_log.debug() << "Peak in spectrum #" << spectrum << " has last bins above 0.5*max at " << leftHalf << "\t"
                   << rightHalf << "\n";
 
     // We want to fit only if there are at least 3 bins (including the maximum
@@ -131,8 +126,7 @@ void FindEPP::fitGaussian(int64_t index) {
       function << "name=Gaussian,PeakCentre=";
       function << center << ",Height=" << height << ",Sigma=" << sigma;
 
-      g_log.debug() << "Fitting spectrum #" << spectrum
-                    << " with: " << function.str() << "\n";
+      g_log.debug() << "Fitting spectrum #" << spectrum << " with: " << function.str() << "\n";
 
       IAlgorithm_sptr fitAlg = createChildAlgorithm("Fit", 0., 0., false);
       fitAlg->setProperty("Function", function.str());
@@ -157,8 +151,7 @@ void FindEPP::fitGaussian(int64_t index) {
         m_outWS->cell<double>(spectrum, 7) = fitResult->cell<double>(3, 1);
         m_outWS->cell<std::string>(spectrum, 8) = status;
       } else {
-        g_log.debug() << "Fit failed in spectrum #" << spectrum
-                      << ". \nReason :" << status
+        g_log.debug() << "Fit failed in spectrum #" << spectrum << ". \nReason :" << status
                       << ". \nSetting the maximum.\n";
         m_outWS->cell<std::string>(spectrum, 8) = "fitFailed";
         m_outWS->cell<double>(spectrum, 1) = x[maxIndex];
@@ -168,8 +161,7 @@ void FindEPP::fitGaussian(int64_t index) {
       }
 
     } else {
-      g_log.information() << "Found <=3 bins above half maximum in spectrum #"
-                          << index << ". Not fitting.\n";
+      g_log.information() << "Found <=3 bins above half maximum in spectrum #" << index << ". Not fitting.\n";
       m_outWS->cell<std::string>(spectrum, 8) = "narrowPeak";
       m_outWS->cell<double>(spectrum, 1) = x[maxIndex];
       m_outWS->cell<double>(spectrum, 2) = 0.;
@@ -177,8 +169,7 @@ void FindEPP::fitGaussian(int64_t index) {
       m_outWS->cell<double>(spectrum, 6) = e[maxIndex];
     }
   } else {
-    g_log.notice() << "Negative maximum in spectrum #" << spectrum
-                   << ". Skipping.\n";
+    g_log.notice() << "Negative maximum in spectrum #" << spectrum << ". Skipping.\n";
     m_outWS->cell<std::string>(spectrum, 8) = "negativeMaximum";
   }
   m_progress->report();
@@ -191,9 +182,8 @@ void FindEPP::initWorkspace() {
 
   m_outWS = std::make_shared<TableWorkspace>();
 
-  const std::vector<std::string> columns = {
-      "PeakCentre", "PeakCentreError", "Sigma", "SigmaError",
-      "Height",     "HeightError",     "chiSq"};
+  const std::vector<std::string> columns = {"PeakCentre", "PeakCentreError", "Sigma", "SigmaError",
+                                            "Height",     "HeightError",     "chiSq"};
 
   m_outWS->addColumn("int", "WorkspaceIndex");
   m_outWS->getColumn(0)->setPlotType(1);

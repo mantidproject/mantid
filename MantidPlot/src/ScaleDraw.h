@@ -28,23 +28,14 @@
 class ScaleDraw : public QwtScaleDraw {
 public:
   enum TicksStyle { None = 0, Out = 1, Both = 2, In = 3 };
-  enum ScaleType {
-    Numeric = 0,
-    Text = 1,
-    Day = 2,
-    Month = 3,
-    Time = 4,
-    Date = 5,
-    ColHeader = 6
-  };
+  enum ScaleType { Numeric = 0, Text = 1, Day = 2, Month = 3, Time = 4, Date = 5, ColHeader = 6 };
   enum NumericFormat { Automatic, Decimal, Scientific, Superscripts };
   enum NameFormat { ShortName, LongName, Initial };
 
   //! Constructs a new scale draw which is a clone of sd.
   ScaleDraw(Plot *plot, ScaleDraw *sd);
   ScaleDraw(Plot *plot, const QString &formula = QString::null);
-  ScaleDraw(Plot *plot, const QStringList &labels, const QString &format,
-            ScaleType type = Text);
+  ScaleDraw(Plot *plot, const QStringList &labels, const QString &format, ScaleType type = Text);
 
   QString formatString();
   QString format() { return d_format_info; };

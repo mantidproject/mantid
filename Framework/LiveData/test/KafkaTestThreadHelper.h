@@ -39,8 +39,7 @@ namespace KafkaTesting {
 
 template <typename KafkaT> class KafkaTestThreadHelper {
 public:
-  KafkaTestThreadHelper(KafkaT &&testInstance)
-      : instance(std::move(testInstance)) {
+  KafkaTestThreadHelper(KafkaT &&testInstance) : instance(std::move(testInstance)) {
     instance.registerIterationEndCb([this] { callback(); });
     instance.registerErrorCb([this] { errCallback(); });
   }
@@ -66,11 +65,9 @@ public:
 
     cv.notify_one();
     // Make test wait until were told Kafka shouldn't be blocked
-    cv.wait_for(lock, DEADLOCK_TIMEOUT,
-                [this] { return blockedThread != Threads::TEST; });
+    cv.wait_for(lock, DEADLOCK_TIMEOUT, [this] { return blockedThread != Threads::TEST; });
 
-    assert(blockedThread != Threads::TEST &&
-           "Deadlock was detected as test thread was not unblocked");
+    assert(blockedThread != Threads::TEST && "Deadlock was detected as test thread was not unblocked");
 
     // Kafka is now blocked test can resume
   }
@@ -137,11 +134,9 @@ private:
 
     cv.notify_one();
     blockedThread = Threads::KAFKA;
-    cv.wait_for(lock, DEADLOCK_TIMEOUT,
-                [this] { return blockedThread != Threads::KAFKA; });
+    cv.wait_for(lock, DEADLOCK_TIMEOUT, [this] { return blockedThread != Threads::KAFKA; });
 
-    assert(blockedThread != Threads::KAFKA &&
-           "Deadlock was detected as test thread was not unblocked");
+    assert(blockedThread != Threads::KAFKA && "Deadlock was detected as test thread was not unblocked");
   }
 
   // After ~2 minutes we almost certainly are deadlocked and not just

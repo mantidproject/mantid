@@ -17,15 +17,11 @@ CutSelectedCommand defines the action "Cut Selected"
 */
 class CutSelectedCommand : public CommandBase {
 public:
-  CutSelectedCommand(DataProcessorPresenter *tablePresenter)
-      : CommandBase(tablePresenter){};
-  CutSelectedCommand(const QDataProcessorWidget &widget)
-      : CommandBase(widget){};
+  CutSelectedCommand(DataProcessorPresenter *tablePresenter) : CommandBase(tablePresenter){};
+  CutSelectedCommand(const QDataProcessorWidget &widget) : CommandBase(widget){};
   virtual ~CutSelectedCommand(){};
 
-  void execute() override {
-    m_presenter->notify(DataProcessorPresenter::CutSelectedFlag);
-  };
+  void execute() override { m_presenter->notify(DataProcessorPresenter::CutSelectedFlag); };
   QString name() override { return QString("Cut Selected"); }
   QString icon() override { return QString("://cut.png"); }
   QString tooltip() override { return QString("Cut selected"); }

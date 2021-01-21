@@ -106,8 +106,7 @@ protected:
   V3R m_translation;
 };
 
-using SymmetryElementTranslation_sptr =
-    std::shared_ptr<SymmetryElementTranslation>;
+using SymmetryElementTranslation_sptr = std::shared_ptr<SymmetryElementTranslation>;
 
 /** @class SymmetryElementWithAxis
 
@@ -125,8 +124,7 @@ public:
   V3R getTranslation() const { return m_translation; }
 
 protected:
-  SymmetryElementWithAxis(const std::string &symbol, const V3R &axis,
-                          const V3R &translation);
+  SymmetryElementWithAxis(const std::string &symbol, const V3R &axis, const V3R &translation);
 
   void setAxis(const V3R &axis);
 
@@ -149,13 +147,11 @@ using SymmetryElementWithAxis_sptr = std::shared_ptr<SymmetryElementWithAxis>;
     Symbol determination is perfomed by SymmetryElementRotationGenerator, which
     uses the SymmetryOperation to derive the Herrman-Mauguin symbol.
  */
-class MANTID_GEOMETRY_DLL SymmetryElementRotation
-    : public SymmetryElementWithAxis {
+class MANTID_GEOMETRY_DLL SymmetryElementRotation : public SymmetryElementWithAxis {
 public:
   enum RotationSense { Positive, Negative, NoRotation };
 
-  SymmetryElementRotation(const std::string &symbol, const V3R &axis,
-                          const V3R &translation = V3R(0, 0, 0),
+  SymmetryElementRotation(const std::string &symbol, const V3R &axis, const V3R &translation = V3R(0, 0, 0),
                           const RotationSense &rotationSense = Positive);
 
   SymmetryElement_sptr clone() const override;
@@ -178,11 +174,9 @@ using SymmetryElementRotation_sptr = std::shared_ptr<SymmetryElementRotation>;
     Symbol determination is perfomed by SymmetryElementMirrorGenerator, which
     uses the SymmetryOperation to derive the Herrman-Mauguin symbol.
  */
-class MANTID_GEOMETRY_DLL SymmetryElementMirror
-    : public SymmetryElementWithAxis {
+class MANTID_GEOMETRY_DLL SymmetryElementMirror : public SymmetryElementWithAxis {
 public:
-  SymmetryElementMirror(const std::string &symbol, const V3R &axis,
-                        const V3R &translation = V3R(0, 0, 0));
+  SymmetryElementMirror(const std::string &symbol, const V3R &axis, const V3R &translation = V3R(0, 0, 0));
 
   SymmetryElement_sptr clone() const override;
 };

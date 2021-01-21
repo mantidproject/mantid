@@ -35,38 +35,28 @@ public:
   /// Default constructor
   FitMD();
   /// Constructor
-  FitMD(Kernel::IPropertyManager *fit, const std::string &workspacePropertyName,
-        DomainType domainType = Simple);
+  FitMD(Kernel::IPropertyManager *fit, const std::string &workspacePropertyName, DomainType domainType = Simple);
   /// Constructor
   FitMD(DomainType domainType)
-      : API::IDomainCreator(nullptr, std::vector<std::string>(), domainType),
-        m_startIndex(0), m_count(0) {}
+      : API::IDomainCreator(nullptr, std::vector<std::string>(), domainType), m_startIndex(0), m_count(0) {}
   /// Initialize
-  void initialize(Kernel::IPropertyManager *pm,
-                  const std::string &workspacePropertyName,
+  void initialize(Kernel::IPropertyManager *pm, const std::string &workspacePropertyName,
                   DomainType domainType) override;
 
   /// declare properties that specify the dataset within the workspace to fit
   /// to.
-  void declareDatasetProperties(const std::string &suffix = "",
-                                bool addProp = true) override;
+  void declareDatasetProperties(const std::string &suffix = "", bool addProp = true) override;
   /// Create a domain from the input workspace
-  void createDomain(std::shared_ptr<API::FunctionDomain> &,
-                    std::shared_ptr<API::FunctionValues> &, size_t i0) override;
+  void createDomain(std::shared_ptr<API::FunctionDomain> &, std::shared_ptr<API::FunctionValues> &, size_t i0) override;
   std::shared_ptr<API::Workspace>
-  createOutputWorkspace(const std::string &baseName,
-                        API::IFunction_sptr function,
-                        std::shared_ptr<API::FunctionDomain> domain,
-                        std::shared_ptr<API::FunctionValues> values,
-                        const std::string &outputWorkspacePropertyName =
-                            "OutputWorkspace") override;
+  createOutputWorkspace(const std::string &baseName, API::IFunction_sptr function,
+                        std::shared_ptr<API::FunctionDomain> domain, std::shared_ptr<API::FunctionValues> values,
+                        const std::string &outputWorkspacePropertyName = "OutputWorkspace") override;
 
   /// Return the size of the domain to be created.
   size_t getDomainSize() const override;
   /// Set the workspace
-  void setWorkspace(std::shared_ptr<API::IMDWorkspace> IMDWorkspace) {
-    m_IMDWorkspace = std::move(IMDWorkspace);
-  }
+  void setWorkspace(std::shared_ptr<API::IMDWorkspace> IMDWorkspace) { m_IMDWorkspace = std::move(IMDWorkspace); }
   /// Set the range
   void setRange(size_t startIndex, size_t count);
   /// Set max size for Sequantial and Parallel domains
@@ -77,16 +67,15 @@ protected:
   /// Set all parameters
   void setParameters() const;
   /// Create event output workspace
-  std::shared_ptr<API::Workspace>
-  createEventOutputWorkspace(const std::string &baseName,
-                             const API::IMDEventWorkspace &inputWorkspace,
-                             const API::FunctionValues &values,
-                             const std::string &outputWorkspacePropertyName);
+  std::shared_ptr<API::Workspace> createEventOutputWorkspace(const std::string &baseName,
+                                                             const API::IMDEventWorkspace &inputWorkspace,
+                                                             const API::FunctionValues &values,
+                                                             const std::string &outputWorkspacePropertyName);
   /// Create histo output workspace
-  std::shared_ptr<API::Workspace> createHistoOutputWorkspace(
-      const std::string &baseName, const API::IFunction_sptr &function,
-      const std::shared_ptr<const API::IMDHistoWorkspace> &inputWorkspace,
-      const std::string &outputWorkspacePropertyName);
+  std::shared_ptr<API::Workspace>
+  createHistoOutputWorkspace(const std::string &baseName, const API::IFunction_sptr &function,
+                             const std::shared_ptr<const API::IMDHistoWorkspace> &inputWorkspace,
+                             const std::string &outputWorkspacePropertyName);
 
   /// Store workspace property name
   std::string m_workspacePropertyName;

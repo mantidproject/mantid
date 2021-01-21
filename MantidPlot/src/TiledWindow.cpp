@@ -36,8 +36,7 @@ const int acceptDropWidth(5);
  * Constructor.
  */
 Tile::Tile(QWidget *parent)
-    : QFrame(parent), m_tiledWindow(parent), m_widget(nullptr),
-      m_selected(false), m_acceptDrop(false) {
+    : QFrame(parent), m_tiledWindow(parent), m_widget(nullptr), m_selected(false), m_acceptDrop(false) {
   m_layout = new QVBoxLayout(this);
   m_layout->setContentsMargins(5, 5, 5, 5);
 }
@@ -200,8 +199,7 @@ private:
 InnerWidget *getInnerWidget(QWidget *w) {
   InnerWidget *innerWidget = dynamic_cast<InnerWidget *>(w);
   if (!innerWidget)
-    throw std::logic_error(
-        "Inner widget of TiledWindow is supposed to be an InnerWidget");
+    throw std::logic_error("Inner widget of TiledWindow is supposed to be an InnerWidget");
   return innerWidget;
 }
 } // namespace
@@ -213,14 +211,11 @@ InnerWidget *getInnerWidget(QWidget *w) {
  * @param name :: The name of the window.
  * @param f :: Window flags.
  */
-TiledWindow::TiledWindow(QWidget *parent, const QString &label,
-                         const QString &name, int nrows, int ncols,
+TiledWindow::TiledWindow(QWidget *parent, const QString &label, const QString &name, int nrows, int ncols,
                          const Qt::WFlags &f)
-    : MdiSubWindow(parent, label, name, f), m_scrollArea(nullptr),
-      m_layout(nullptr), m_buttonPressed(false) {
-  connect(this, SIGNAL(dropAtPositionQueued(MdiSubWindow *, QPoint, bool)),
-          this, SLOT(dropAtPosition(MdiSubWindow *, QPoint, bool)),
-          Qt::QueuedConnection);
+    : MdiSubWindow(parent, label, name, f), m_scrollArea(nullptr), m_layout(nullptr), m_buttonPressed(false) {
+  connect(this, SIGNAL(dropAtPositionQueued(MdiSubWindow *, QPoint, bool)), this,
+          SLOT(dropAtPosition(MdiSubWindow *, QPoint, bool)), Qt::QueuedConnection);
   init(nrows, ncols);
   setGeometry(0, 0, 500, 400);
   setAcceptDrops(true);
@@ -233,12 +228,10 @@ TiledWindow::TiledWindow(QWidget *parent, const QString &label,
  */
 void TiledWindow::init(int nrows, int ncols) {
   if (nrows < 1) {
-    throw std::invalid_argument(
-        "Number of rows in TiledWindow cannot be less then 1.");
+    throw std::invalid_argument("Number of rows in TiledWindow cannot be less then 1.");
   }
   if (ncols < 1) {
-    throw std::invalid_argument(
-        "Number of columns in TiledWindow cannot be less then 1.");
+    throw std::invalid_argument("Number of columns in TiledWindow cannot be less then 1.");
   }
 
   if (m_scrollArea) {
@@ -330,8 +323,7 @@ void TiledWindow::clear() {
  */
 void TiledWindow::reshape(int newColumnCount) {
   if (newColumnCount < 1) {
-    throw std::invalid_argument(
-        "Number of columns in a TiledWindow cannot be less than 1.");
+    throw std::invalid_argument("Number of columns in a TiledWindow cannot be less than 1.");
   }
 
   clearSelection();
@@ -470,16 +462,13 @@ void TiledWindow::addWidget(MdiSubWindow *widget, int row, int col) {
     widget->setAttribute(Qt::WA_TransparentForMouseEvents, true);
     // attach it to this window
     tile->setWidget(widget);
-    connect(widget, SIGNAL(detachFromParent(MdiSubWindow *)), this,
-            SLOT(removeWidget(MdiSubWindow *)));
-    connect(widget, SIGNAL(closedWindow(MdiSubWindow *)), this,
-            SLOT(removeWidget(MdiSubWindow *)));
+    connect(widget, SIGNAL(detachFromParent(MdiSubWindow *)), this, SLOT(removeWidget(MdiSubWindow *)));
+    connect(widget, SIGNAL(closedWindow(MdiSubWindow *)), this, SLOT(removeWidget(MdiSubWindow *)));
     // fill possible empty spaces with Tiles
     tileEmptyCells();
   } catch (std::invalid_argument &ex) {
     QMessageBox::critical(this, "MantidPlot- Error",
-                          "Cannot add a widget to a TiledWindow:\n\n" +
-                              QString::fromStdString(ex.what()));
+                          "Cannot add a widget to a TiledWindow:\n\n" + QString::fromStdString(ex.what()));
     sendWidgetTo(widget, Default);
   }
 }
@@ -533,8 +522,7 @@ MdiSubWindow *TiledWindow::getWidget(int row, int col) {
  * ready to become floating or docked.
  * @param to :: A wrapper window option: Floating, Docked or Default.
  */
-void TiledWindow::sendWidgetTo(MdiSubWindow *w,
-                               TiledWindow::RemoveDestination to) {
+void TiledWindow::sendWidgetTo(MdiSubWindow *w, TiledWindow::RemoveDestination to) {
   w->resizeToDefault();
   switch (to) {
   case (Floating):
@@ -558,16 +546,14 @@ void TiledWindow::sendWidgetTo(MdiSubWindow *w,
  * @param row :: The tile's row index.
  * @param col :: The tile's column index.
  */
-void TiledWindow::removeWidgetTo(int row, int col,
-                                 TiledWindow::RemoveDestination to) {
+void TiledWindow::removeWidgetTo(int row, int col, TiledWindow::RemoveDestination to) {
   try {
     deselectWidget(row, col);
     MdiSubWindow *widget = removeTile(row, col);
     sendWidgetTo(widget, to);
   } catch (std::runtime_error &ex) {
     QMessageBox::critical(this, "MantidPlot- Error",
-                          "Cannot remove a widget from a TiledWindow:\n\n" +
-                              QString::fromStdString(ex.what()));
+                          "Cannot remove a widget from a TiledWindow:\n\n" + QString::fromStdString(ex.what()));
   }
 }
 
@@ -576,18 +562,14 @@ void TiledWindow::removeWidgetTo(int row, int col,
  * @param row :: The tile's row index.
  * @param col :: The tile's column index.
  */
-void TiledWindow::removeWidgetToDocked(int row, int col) {
-  removeWidgetTo(row, col, Docked);
-}
+void TiledWindow::removeWidgetToDocked(int row, int col) { removeWidgetTo(row, col, Docked); }
 
 /**
  * Take a tile at position (row,col), remove it and make floating.
  * @param row :: The tile's row index.
  * @param col :: The tile's column index.
  */
-void TiledWindow::removeWidgetToFloating(int row, int col) {
-  removeWidgetTo(row, col, Floating);
-}
+void TiledWindow::removeWidgetToFloating(int row, int col) { removeWidgetTo(row, col, Floating); }
 
 /**
  * Remove (but don't delete) a tile.
@@ -692,8 +674,7 @@ void TiledWindow::mouseReleaseEvent(QMouseEvent *) { m_buttonPressed = false; }
  */
 void TiledWindow::mouseMoveEvent(QMouseEvent *ev) {
   if (!m_buttonPressed || !hasSelection() ||
-      (ev->pos() - m_dragStartPos).manhattanLength() <
-          QApplication::startDragDistance()) {
+      (ev->pos() - m_dragStartPos).manhattanLength() < QApplication::startDragDistance()) {
     return;
   }
 
@@ -823,9 +804,7 @@ int TiledWindow::calcFlatIndex(Tile *tile) const {
  * @param row :: The row number of a tile.
  * @param col :: The column number of a tile.
  */
-int TiledWindow::calcFlatIndex(int row, int col) const {
-  return row * columnCount() + col;
-}
+int TiledWindow::calcFlatIndex(int row, int col) const { return row * columnCount() + col; }
 
 /**
  * Calculate tile's row and column indices given it's flat index as returned
@@ -859,8 +838,7 @@ void TiledWindow::selectWidget(int row, int col) {
     addToSelection(getTile(row, col), false);
   } catch (std::runtime_error &ex) {
     QMessageBox::critical(this, "MantidPlot- Error",
-                          "Cannot select a widget in TiledWindow:\n\n" +
-                              QString::fromStdString(ex.what()));
+                          "Cannot select a widget in TiledWindow:\n\n" + QString::fromStdString(ex.what()));
   }
 }
 
@@ -903,8 +881,7 @@ void TiledWindow::selectRange(int row1, int col1, int row2, int col2) {
     addRangeToSelection(getTile(row2, col2));
   } catch (std::runtime_error &ex) {
     QMessageBox::critical(this, "MantidPlot- Error",
-                          "Cannot select widgets in TiledWindow:\n\n" +
-                              QString::fromStdString(ex.what()));
+                          "Cannot select widgets in TiledWindow:\n\n" + QString::fromStdString(ex.what()));
   }
 }
 
@@ -938,9 +915,7 @@ void TiledWindow::removeSelectionToFloating() { removeSelectionTo(Floating); }
  * will be either floating or docked depending on the default setting for
  * a particular MdiSubwindow type.
  */
-void TiledWindow::removeSelectionToDefaultWindowType() {
-  removeSelectionTo(Default);
-}
+void TiledWindow::removeSelectionToDefaultWindowType() { removeSelectionTo(Default); }
 
 /**
  * Populate a menu with actions.
@@ -948,13 +923,11 @@ void TiledWindow::removeSelectionToDefaultWindowType() {
  */
 void TiledWindow::populateMenu(QMenu *menu) {
   QAction *actionToDocked = new QAction("Selection to Docked", menu);
-  connect(actionToDocked, SIGNAL(triggered()), this,
-          SLOT(removeSelectionToDocked()));
+  connect(actionToDocked, SIGNAL(triggered()), this, SLOT(removeSelectionToDocked()));
   menu->addAction(actionToDocked);
 
   QAction *actionToFloating = new QAction("Selection to Floating", menu);
-  connect(actionToFloating, SIGNAL(triggered()), this,
-          SLOT(removeSelectionToFloating()));
+  connect(actionToFloating, SIGNAL(triggered()), this, SLOT(removeSelectionToFloating()));
   menu->addAction(actionToFloating);
 
   // reshape actions
@@ -983,9 +956,8 @@ void TiledWindow::populateMenu(QMenu *menu) {
   menu->addAction(actionClear);
 }
 
-MantidQt::API::IProjectSerialisable *
-TiledWindow::loadFromProject(const std::string &lines, ApplicationWindow *app,
-                             const int fileVersion) {
+MantidQt::API::IProjectSerialisable *TiledWindow::loadFromProject(const std::string &lines, ApplicationWindow *app,
+                                                                  const int fileVersion) {
   UNUSED_ARG(lines);
   UNUSED_ARG(app);
   UNUSED_ARG(fileVersion);
@@ -1016,9 +988,7 @@ std::string TiledWindow::saveToProject(ApplicationWindow *app) {
  * Check if a Tile can accept drops.
  * @param tile :: A tile to check.
  */
-bool TiledWindow::canAcceptDrops(Tile *tile) const {
-  return tile->widget() == nullptr;
-}
+bool TiledWindow::canAcceptDrops(Tile *tile) const { return tile->widget() == nullptr; }
 
 /**
  * Display a position in the layout where a widget will be inserted
@@ -1110,8 +1080,7 @@ void TiledWindow::dragEnterEvent(QDragEnterEvent *ev) {
   auto frmts = mimeData->formats();
   if (mimeData->hasFormat("TiledWindow")) {
     ev->accept();
-  } else if (mimeData->objectName() == "TiledWindow" &&
-             ev->source() == static_cast<QWidget *>(this)) {
+  } else if (mimeData->objectName() == "TiledWindow" && ev->source() == static_cast<QWidget *>(this)) {
     ev->accept();
   } else {
     ev->ignore();
@@ -1127,9 +1096,7 @@ void TiledWindow::dragLeaveEvent(QDragLeaveEvent *) { clearDrops(); }
  * The drag move event handler.
  * @param ev :: The event.
  */
-void TiledWindow::dragMoveEvent(QDragMoveEvent *ev) {
-  showInsertPosition(ev->pos(), false);
-}
+void TiledWindow::dragMoveEvent(QDragMoveEvent *ev) { showInsertPosition(ev->pos(), false); }
 
 /**
  * The drop event handler.
@@ -1145,8 +1112,7 @@ void TiledWindow::dropEvent(QDropEvent *ev) {
     MdiSubWindow *w = reinterpret_cast<MdiSubWindow *>(const_cast<char *>(ptr));
     // Indirect call to dropAtPosition(). Direct call may cause a crash.
     emit dropAtPositionQueued(w, ev->pos(), false);
-  } else if (mimeData->objectName() == "TiledWindow" &&
-             ev->source() == static_cast<QWidget *>(this)) {
+  } else if (mimeData->objectName() == "TiledWindow" && ev->source() == static_cast<QWidget *>(this)) {
     // re-arranging widgets within this window
     if (isFloating() || rect().contains(ev->pos())) {
       // this is how it should normally work, but it only works for floating

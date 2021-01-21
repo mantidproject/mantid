@@ -44,8 +44,8 @@ public:
     // create a workspace
     const int numspec = 9;
     const int nummask = 5;
-    Instrument_sptr instr = std::dynamic_pointer_cast<Instrument>(
-        ComponentCreationHelper::createTestInstrumentCylindrical(1));
+    Instrument_sptr instr =
+        std::dynamic_pointer_cast<Instrument>(ComponentCreationHelper::createTestInstrumentCylindrical(1));
     Detector *d = new Detector("det", 0, nullptr);
     instr->add(d);
     instr->markAsDetector(d);
@@ -85,8 +85,7 @@ public:
     // retrieve the workspace from data service. TODO: Change to your desired
     // type
     Workspace2D_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance().retrieveWS<Workspace2D>(wsName));
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<Workspace2D>(wsName));
     TS_ASSERT(ws);
     if (!ws)
       return;

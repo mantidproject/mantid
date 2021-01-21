@@ -17,27 +17,20 @@ namespace CustomInterfaces {
 /** ALCBaselineModellingModel : Concrete ALC Baseline Modelling step model
   implementation.
 */
-class MANTIDQT_MUONINTERFACE_DLL ALCBaselineModellingModel
-    : public IALCBaselineModellingModel {
+class MANTIDQT_MUONINTERFACE_DLL ALCBaselineModellingModel : public IALCBaselineModellingModel {
 public:
   Mantid::API::MatrixWorkspace_sptr data() const override;
 
-  void fit(Mantid::API::IFunction_const_sptr function,
-           const std::vector<Section> &sections) override;
+  void fit(Mantid::API::IFunction_const_sptr function, const std::vector<Section> &sections) override;
 
-  Mantid::API::IFunction_const_sptr fittedFunction() const override {
-    return m_fittedFunction;
-  }
+  Mantid::API::IFunction_const_sptr fittedFunction() const override { return m_fittedFunction; }
 
   Mantid::API::MatrixWorkspace_sptr correctedData() const override;
 
-  Mantid::API::MatrixWorkspace_sptr
-  baselineData(Mantid::API::IFunction_const_sptr function,
-               const std::vector<double> &xValues) const override;
+  Mantid::API::MatrixWorkspace_sptr baselineData(Mantid::API::IFunction_const_sptr function,
+                                                 const std::vector<double> &xValues) const override;
 
-  Mantid::API::ITableWorkspace_sptr parameterTable() const {
-    return m_parameterTable;
-  }
+  Mantid::API::ITableWorkspace_sptr parameterTable() const { return m_parameterTable; }
 
   const std::vector<Section> &sections() const { return m_sections; }
 
@@ -79,13 +72,11 @@ private:
   void setErrorsAfterFit(const Mantid::API::MatrixWorkspace_sptr &data);
 
   /// Disables points which shouldn't be used for fitting
-  static void disableUnwantedPoints(const Mantid::API::MatrixWorkspace_sptr &ws,
-                                    const std::vector<Section> &sections);
+  static void disableUnwantedPoints(const Mantid::API::MatrixWorkspace_sptr &ws, const std::vector<Section> &sections);
 
   /// Enable previously disabled points
-  static void
-  enableDisabledPoints(const Mantid::API::MatrixWorkspace_sptr &destWs,
-                       const Mantid::API::MatrixWorkspace_const_sptr &sourceWs);
+  static void enableDisabledPoints(const Mantid::API::MatrixWorkspace_sptr &destWs,
+                                   const Mantid::API::MatrixWorkspace_const_sptr &sourceWs);
 };
 
 } // namespace CustomInterfaces

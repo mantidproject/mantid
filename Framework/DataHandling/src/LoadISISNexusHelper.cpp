@@ -52,8 +52,7 @@ int64_t findNumberOfSpectra(const NXEntry &entry, const bool hasVMSBlock) {
  *   @return Returns a pair containing the Detector IDs corresponding Spectrum
  * numbers
  */
-std::tuple<NXInt, NXInt>
-findDetectorIDsAndSpectrumNumber(const NXEntry &entry, const bool hasVMSBlock) {
+std::tuple<NXInt, NXInt> findDetectorIDsAndSpectrumNumber(const NXEntry &entry, const bool hasVMSBlock) {
   if (hasVMSBlock) {
     NXInt udet = entry.openNXInt("isis_vms_compat/UDET");
     udet.load();
@@ -82,8 +81,7 @@ findDetectorIDsAndSpectrumNumber(const NXEntry &entry, const bool hasVMSBlock) {
  *   @param hasVMSBlock :: Whether the current nexus entry has a vms_compat
  * block
  */
-void loadSampleGeometry(Sample &sample, const NXEntry &entry,
-                        const bool hasVMSBlock) {
+void loadSampleGeometry(Sample &sample, const NXEntry &entry, const bool hasVMSBlock) {
 
   if (hasVMSBlock) {
     NXInt spb = entry.openNXInt("isis_vms_compat/SPB");
@@ -127,8 +125,7 @@ void loadSampleGeometry(Sample &sample, const NXEntry &entry,
  *   @param entry :: The Nexus entry
  *   @param hasVMSBlock :: Whether the current nexus entry has a vms_compat
  */
-void loadRunDetails(API::Run &run, const NXEntry &entry,
-                    const bool hasVMSBlock) {
+void loadRunDetails(API::Run &run, const NXEntry &entry, const bool hasVMSBlock) {
 
   // Charge is stored as a float
   double proton_charge = static_cast<double>(entry.getFloat("proton_charge"));
@@ -165,32 +162,27 @@ void loadRunDetails(API::Run &run, const NXEntry &entry,
     // Now double data
     NXFloat rpb_dbl = vms_compat.openNXFloat("RRPB");
     rpb_dbl.load();
-    run.addProperty(
-        "gd_prtn_chrg",
-        static_cast<double>(rpb_dbl[7])); // good proton charge (uA.hour)
-    run.addProperty(
-        "tot_prtn_chrg",
-        static_cast<double>(rpb_dbl[8]));   // total proton charge (uA.hour)
-    run.addProperty("goodfrm", rpb_int[9]); // good frames
-    run.addProperty("rawfrm", rpb_int[10]); // raw frames
-    run.addProperty("rb_proposal", rpb_int[21]); // RB (proposal)
+    run.addProperty("gd_prtn_chrg",
+                    static_cast<double>(rpb_dbl[7])); // good proton charge (uA.hour)
+    run.addProperty("tot_prtn_chrg",
+                    static_cast<double>(rpb_dbl[8])); // total proton charge (uA.hour)
+    run.addProperty("goodfrm", rpb_int[9]);           // good frames
+    run.addProperty("rawfrm", rpb_int[10]);           // raw frames
+    run.addProperty("rb_proposal", rpb_int[21]);      // RB (proposal)
     vms_compat.close();
   } else {
     NXFloat floatData = entry.openNXFloat("duration");
     floatData.load();
-    run.addProperty("dur", static_cast<double>(floatData[0]),
-                    floatData.attributes("units"), true);
+    run.addProperty("dur", static_cast<double>(floatData[0]), floatData.attributes("units"), true);
 
     // These variables have changed, gd_prtn_chrg is now proton_charge
     floatData = entry.openNXFloat("proton_charge");
     floatData.load();
-    run.addProperty("gd_prtn_chrg", static_cast<double>(floatData[0]),
-                    floatData.attributes("units"), true);
+    run.addProperty("gd_prtn_chrg", static_cast<double>(floatData[0]), floatData.attributes("units"), true);
     // Total_proton_charge is now proton_charge_raw
     floatData = entry.openNXFloat("proton_charge_raw");
     floatData.load();
-    run.addProperty("tot_prtn_chrg", static_cast<double>(floatData[0]),
-                    floatData.attributes("units"), true);
+    run.addProperty("tot_prtn_chrg", static_cast<double>(floatData[0]), floatData.attributes("units"), true);
 
     auto sourceEntry = entry.openNXGroup("instrument/source");
     if (sourceEntry.containsDataSet("frequency")) {
@@ -219,16 +211,14 @@ std::shared_ptr<HistogramData::HistogramX> loadTimeData(const NXEntry &entry) {
     auto timeBins = entry.openNXFloat("detector_1/time_of_flight");
     auto x_length = timeBins.dim0();
     timeBins.load();
-    auto timeData = std::make_shared<HistogramData::HistogramX>(
-        timeBins(), timeBins() + x_length);
+    auto timeData = std::make_shared<HistogramData::HistogramX>(timeBins(), timeBins() + x_length);
     return timeData;
   } else { // Muon V2 file
     auto timeBins = entry.openNXFloat("detector_1/raw_time");
     timeBins = entry.openNXFloat("detector_1/raw_time");
     auto x_length = timeBins.dim0();
     timeBins.load();
-    auto timeData = std::make_shared<HistogramData::HistogramX>(
-        timeBins(), timeBins() + x_length);
+    auto timeData = std::make_shared<HistogramData::HistogramX>(timeBins(), timeBins() + x_length);
     return timeData;
   }
 }

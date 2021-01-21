@@ -18,10 +18,8 @@ public:
   static vtkMDEWNexusReader *New();
   vtkMDEWNexusReader(const vtkMDEWNexusReader &) = delete;
   void operator=(const vtkMDEWNexusReader &) = delete;
-  vtkTypeMacro(vtkMDEWNexusReader, vtkUnstructuredGridAlgorithm) void PrintSelf(
-      ostream &os, vtkIndent indent) override;
-  vtkSetStringMacro(FileName)
-      vtkGetStringMacro(FileName) int CanReadFile(const char *fname);
+  vtkTypeMacro(vtkMDEWNexusReader, vtkUnstructuredGridAlgorithm) void PrintSelf(ostream &os, vtkIndent indent) override;
+  vtkSetStringMacro(FileName) vtkGetStringMacro(FileName) int CanReadFile(const char *fname);
   void SetInMemory(bool inMemory);
   void SetDepth(int depth);
 
@@ -44,10 +42,8 @@ public:
 protected:
   vtkMDEWNexusReader();
   ~vtkMDEWNexusReader() override;
-  int RequestInformation(vtkInformation *, vtkInformationVector **,
-                         vtkInformationVector *) override;
-  int RequestData(vtkInformation *, vtkInformationVector **,
-                  vtkInformationVector *) override;
+  int RequestInformation(vtkInformation *, vtkInformationVector **, vtkInformationVector *) override;
+  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *) override;
   /// Handle time variation.
   vtkMTimeType GetMTime() override;
 

@@ -22,8 +22,7 @@ namespace Impl {
 // Forward declare a conversion function. This should be specialized for each
 // container type that is to be wrapped
 template <typename ElementType>
-PyObject *wrapWithNDArray(const ElementType *, const int ndims,
-                          Py_intptr_t *dims, const NumpyWrapMode mode,
+PyObject *wrapWithNDArray(const ElementType *, const int ndims, Py_intptr_t *dims, const NumpyWrapMode mode,
                           const OwnershipMode oMode = OwnershipMode::Cpp);
 } // namespace Impl
 
@@ -55,8 +54,7 @@ struct WrapReadOnly {
      * dimensions
      * @return
      */
-    static PyObject *createFromArray(const ElementType *cdata, const int ndims,
-                                     Py_intptr_t *dims) {
+    static PyObject *createFromArray(const ElementType *cdata, const int ndims, Py_intptr_t *dims) {
       return Impl::wrapWithNDArray(cdata, ndims, dims, ReadOnly);
     }
   };
@@ -90,8 +88,7 @@ struct WrapReadWrite {
      * dimensions
      * @return
      */
-    static PyObject *createFromArray(const ElementType *cdata, const int ndims,
-                                     Py_intptr_t *dims) {
+    static PyObject *createFromArray(const ElementType *cdata, const int ndims, Py_intptr_t *dims) {
       return Impl::wrapWithNDArray(cdata, ndims, dims, ReadWrite);
     }
   };

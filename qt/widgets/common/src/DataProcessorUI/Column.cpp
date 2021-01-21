@@ -9,11 +9,10 @@ namespace MantidQt {
 namespace MantidWidgets {
 namespace DataProcessor {
 
-Column::Column(QString const &name, QString const &algorithmProperty,
-               bool isShown, QString const &prefix, QString const &description,
-               bool isKey)
-    : m_name(name), m_algorithmProperty(algorithmProperty), m_isShown(isShown),
-      m_prefix(prefix), m_description(description), m_isKey(isKey) {}
+Column::Column(QString const &name, QString const &algorithmProperty, bool isShown, QString const &prefix,
+               QString const &description, bool isKey)
+    : m_name(name), m_algorithmProperty(algorithmProperty), m_isShown(isShown), m_prefix(prefix),
+      m_description(description), m_isKey(isKey) {}
 
 QString const &Column::algorithmProperty() const { return m_algorithmProperty; }
 

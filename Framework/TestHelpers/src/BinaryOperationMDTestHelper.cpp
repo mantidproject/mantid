@@ -39,10 +39,8 @@ void setUpBinaryOperationMDTestHelper() {
 
   histo_A = MDEventsTestHelper::makeFakeMDHistoWorkspace(2.0, 2, 5, 10.0, 1.0);
   histo_B = MDEventsTestHelper::makeFakeMDHistoWorkspace(3.0, 2, 5, 10.0, 1.0);
-  histo_masked =
-      MDEventsTestHelper::makeFakeMDHistoWorkspace(2.0, 2, 5, 10.0, 1.0);
-  histo_zero =
-      MDEventsTestHelper::makeFakeMDHistoWorkspace(0.0, 2, 5, 10.0, 0.0);
+  histo_masked = MDEventsTestHelper::makeFakeMDHistoWorkspace(2.0, 2, 5, 10.0, 1.0);
+  histo_zero = MDEventsTestHelper::makeFakeMDHistoWorkspace(0.0, 2, 5, 10.0, 0.0);
   event_A = MDEventsTestHelper::makeMDEW<2>(3, 0.0, 10.0, 1);
   event_B = MDEventsTestHelper::makeMDEW<2>(3, 0.0, 10.0, 1);
   scalar = WorkspaceCreationHelper::createWorkspaceSingleValue(3.0);
@@ -54,16 +52,13 @@ void setUpBinaryOperationMDTestHelper() {
   AnalysisDataService::Instance().addOrReplace("event_B", event_B);
   AnalysisDataService::Instance().addOrReplace("scalar", scalar);
 
-  FrameworkManager::Instance().exec("MaskMD", 6, "Workspace", "histo_masked",
-                                    "Dimensions", "x,y", "Extents",
+  FrameworkManager::Instance().exec("MaskMD", 6, "Workspace", "histo_masked", "Dimensions", "x,y", "Extents",
                                     "0,10,0,10");
 }
 
 /// Run a binary algorithm.
-MDHistoWorkspace_sptr doTest(const std::string &algoName,
-                             const std::string &lhs, const std::string &rhs,
-                             const std::string &outName, bool succeeds,
-                             const std::string &otherProp,
+MDHistoWorkspace_sptr doTest(const std::string &algoName, const std::string &lhs, const std::string &rhs,
+                             const std::string &outName, bool succeeds, const std::string &otherProp,
                              const std::string &otherPropValue) {
   setUpBinaryOperationMDTestHelper();
 
@@ -78,16 +73,13 @@ MDHistoWorkspace_sptr doTest(const std::string &algoName,
   if (succeeds) {
     if (!alg->isExecuted())
       throw std::runtime_error("Algorithm " + algoName + " did not succeed.");
-    IMDWorkspace_sptr out = std::dynamic_pointer_cast<IMDWorkspace>(
-        AnalysisDataService::Instance().retrieve(outName));
+    IMDWorkspace_sptr out = std::dynamic_pointer_cast<IMDWorkspace>(AnalysisDataService::Instance().retrieve(outName));
     if (!out)
-      throw std::runtime_error("Algorithm " + algoName +
-                               " did not create the output workspace.");
+      throw std::runtime_error("Algorithm " + algoName + " did not create the output workspace.");
     return std::dynamic_pointer_cast<MDHistoWorkspace>(out);
   } else {
     if (alg->isExecuted())
-      throw std::runtime_error("Algorithm " + algoName +
-                               " did not fail as expected.");
+      throw std::runtime_error("Algorithm " + algoName + " did not fail as expected.");
     return (MDHistoWorkspace_sptr());
   }
 }
@@ -96,17 +88,11 @@ MDHistoWorkspace_sptr doTest(const std::string &algoName,
 
 namespace UnaryOperationMDTestHelper {
 
-MDHistoWorkspace_sptr doTest(const std::string &algoName,
-                             const std::string &inName,
-                             const std::string &outName, bool succeeds,
-                             const std::string &otherProp,
-                             const std::string &otherPropValue) {
-  MDHistoWorkspace_sptr histo =
-      MDEventsTestHelper::makeFakeMDHistoWorkspace(2.0, 2, 5, 10.0, 2.0);
-  IMDEventWorkspace_sptr event =
-      MDEventsTestHelper::makeMDEW<2>(3, 0.0, 10.0, 1);
-  WorkspaceSingleValue_sptr scalar =
-      WorkspaceCreationHelper::createWorkspaceSingleValue(2.5);
+MDHistoWorkspace_sptr doTest(const std::string &algoName, const std::string &inName, const std::string &outName,
+                             bool succeeds, const std::string &otherProp, const std::string &otherPropValue) {
+  MDHistoWorkspace_sptr histo = MDEventsTestHelper::makeFakeMDHistoWorkspace(2.0, 2, 5, 10.0, 2.0);
+  IMDEventWorkspace_sptr event = MDEventsTestHelper::makeMDEW<2>(3, 0.0, 10.0, 1);
+  WorkspaceSingleValue_sptr scalar = WorkspaceCreationHelper::createWorkspaceSingleValue(2.5);
   AnalysisDataService::Instance().addOrReplace("histo", histo);
   AnalysisDataService::Instance().addOrReplace("event", event);
   AnalysisDataService::Instance().addOrReplace("scalar", scalar);
@@ -121,16 +107,13 @@ MDHistoWorkspace_sptr doTest(const std::string &algoName,
   if (succeeds) {
     if (!alg->isExecuted())
       throw std::runtime_error("Algorithm " + algoName + " did not succeed.");
-    IMDWorkspace_sptr out = std::dynamic_pointer_cast<IMDWorkspace>(
-        AnalysisDataService::Instance().retrieve(outName));
+    IMDWorkspace_sptr out = std::dynamic_pointer_cast<IMDWorkspace>(AnalysisDataService::Instance().retrieve(outName));
     if (!out)
-      throw std::runtime_error("Algorithm " + algoName +
-                               " did not create the output workspace.");
+      throw std::runtime_error("Algorithm " + algoName + " did not create the output workspace.");
     return std::dynamic_pointer_cast<MDHistoWorkspace>(out);
   } else {
     if (alg->isExecuted())
-      throw std::runtime_error("Algorithm " + algoName +
-                               " did not fail as expected.");
+      throw std::runtime_error("Algorithm " + algoName + " did not fail as expected.");
     return (MDHistoWorkspace_sptr());
   }
 }

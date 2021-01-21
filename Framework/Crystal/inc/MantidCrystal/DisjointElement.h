@@ -42,13 +42,9 @@ public:
   /// Assignment operator.
   DisjointElement &operator=(const DisjointElement &other);
   /// Less than
-  inline bool operator<(const DisjointElement &other) const {
-    return m_id < other.getId();
-  }
+  inline bool operator<(const DisjointElement &other) const { return m_id < other.getId(); }
   /// Greater than
-  inline bool operator>(const DisjointElement &other) const {
-    return m_id > other.getId();
-  }
+  inline bool operator>(const DisjointElement &other) const { return m_id > other.getId(); }
 
 private:
   bool hasParent() const;

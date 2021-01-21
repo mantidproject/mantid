@@ -22,9 +22,7 @@ namespace Algorithms {
 */
 class MANTID_ALGORITHMS_DLL IdentifyNoisyDetectors : public API::Algorithm {
 public:
-  const std::string name() const override {
-    return "IdentifyNoisyDetectors";
-  } ///< @return the algorithms name
+  const std::string name() const override { return "IdentifyNoisyDetectors"; } ///< @return the algorithms name
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "This algorithm creates a single-column workspace where the Y "
@@ -33,23 +31,16 @@ public:
            "below.";
   }
 
-  const std::string category() const override {
-    return "Diagnostics";
-  } ///< @return the algorithms category
-  int version() const override {
-    return (1);
-  } ///< @return version number of algorithm
+  const std::string category() const override { return "Diagnostics"; } ///< @return the algorithms category
+  int version() const override { return (1); }                          ///< @return version number of algorithm
 
-  const std::vector<std::string> seeAlso() const override {
-    return {"CreatePSDBleedMask"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"CreatePSDBleedMask"}; }
 
 private:
   void init() override; ///< Initialise the algorithm. Declare properties, etc.
   void exec() override; ///< Executes the algorithm.
 
-  void getStdDev(API::Progress &progress,
-                 const Mantid::API::MatrixWorkspace_sptr &valid,
+  void getStdDev(API::Progress &progress, const Mantid::API::MatrixWorkspace_sptr &valid,
                  const Mantid::API::MatrixWorkspace_sptr &values);
 };
 } // namespace Algorithms

@@ -31,8 +31,7 @@ namespace {
 template <class T> struct IsPtrType : public std::is_pointer<T> {};
 /// Helper object to determine if a type is either a pointer/shared_ptr
 /// Specialized implementation for shared_ptr
-template <class T>
-struct IsPtrType<std::shared_ptr<T>> : public std::true_type {};
+template <class T> struct IsPtrType<std::shared_ptr<T>> : public std::true_type {};
 template <> struct IsPtrType<decltype(nullptr)> : public std::true_type {};
 } // namespace
 
@@ -56,9 +55,7 @@ public:
    *  @returns An error message to display to users or an empty string on no
    *error
    */
-  template <typename TYPE> std::string isValid(const TYPE &value) const {
-    return runCheck(value, IsPtrType<TYPE>());
-  }
+  template <typename TYPE> std::string isValid(const TYPE &value) const { return runCheck(value, IsPtrType<TYPE>()); }
 
   /**
    * Deal with a C-style string by first coverting it to a std::string
@@ -67,9 +64,7 @@ public:
    * @returns An error message to display to users or an empty string on no
    * error
    */
-  std::string isValid(const char *value) const {
-    return isValid(std::string(value));
-  }
+  std::string isValid(const char *value) const { return isValid(std::string(value)); }
 
   //------------------------------------------------------------------------------------------------------------
   /** The set of allowed values that this validator may have, if a discrete set
@@ -79,9 +74,7 @@ public:
    *  @return The set of allowed values that this validator may have or an empty
    * set
    */
-  virtual std::vector<std::string> allowedValues() const {
-    return std::vector<std::string>();
-  }
+  virtual std::vector<std::string> allowedValues() const { return std::vector<std::string>(); }
 
   /** Is Multiple Selection Allowed
    *  @return true if multiple selection is allowed
@@ -117,10 +110,8 @@ private:
    * @returns An error message to display to users or an empty string on no
    * error
    */
-  template <typename T>
-  std::string runCheck(const T &value, const std::false_type &) const {
-    const T *valuePtr =
-        &value; // Avoid a copy by storing the pointer in the any holder
+  template <typename T> std::string runCheck(const T &value, const std::false_type &) const {
+    const T *valuePtr = &value; // Avoid a copy by storing the pointer in the any holder
     return check(boost::any(valuePtr));
   }
 
@@ -129,12 +120,10 @@ private:
    * @returns An error message to display to users or an empty string on no
    * error
    */
-  template <typename T>
-  std::string runCheck(const T &value, const std::true_type &) const {
-    return runCheckWithDataItemPtr(
-        value, std::integral_constant < bool,
-        std::is_convertible<T, DataItem_sptr>::value &&
-            !std::is_same<T, decltype(nullptr)>::value > ());
+  template <typename T> std::string runCheck(const T &value, const std::true_type &) const {
+    return runCheckWithDataItemPtr(value, std::integral_constant < bool,
+                                   std::is_convertible<T, DataItem_sptr>::value &&
+                                       !std::is_same<T, decltype(nullptr)>::value > ());
   }
   /** Calls the validator for a pointer type that is NOT convertible to
    * DataItem_sptr
@@ -142,9 +131,7 @@ private:
    * @returns An error message to display to users or an empty string on no
    * error
    */
-  template <typename T>
-  std::string runCheckWithDataItemPtr(const T &value,
-                                      const std::false_type &) const {
+  template <typename T> std::string runCheckWithDataItemPtr(const T &value, const std::false_type &) const {
     return check(boost::any(value));
   }
   /** Calls the validator for a pointer type that IS convertible to
@@ -153,9 +140,7 @@ private:
    * @returns An error message to display to users or an empty string on no
    * error
    */
-  template <typename T>
-  std::string runCheckWithDataItemPtr(const T &value,
-                                      const std::true_type &) const {
+  template <typename T> std::string runCheckWithDataItemPtr(const T &value, const std::true_type &) const {
     return check(boost::any(std::static_pointer_cast<DataItem>(value)));
   }
 };

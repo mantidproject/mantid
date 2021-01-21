@@ -27,8 +27,7 @@ class MultipliableTester : public VectorOf<MultipliableTester, HistogramX>,
 };
 
 // Does Multipliable also work with FixedLengthVector instead of VectorOf?
-struct MultipliableTester2 : public FixedLengthVector<MultipliableTester2>,
-                             public Multipliable<MultipliableTester2> {
+struct MultipliableTester2 : public FixedLengthVector<MultipliableTester2>, public Multipliable<MultipliableTester2> {
   using FixedLengthVector<MultipliableTester2>::FixedLengthVector;
 };
 

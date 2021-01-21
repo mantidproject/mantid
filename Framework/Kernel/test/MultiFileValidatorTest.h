@@ -16,8 +16,7 @@
 namespace {
 // Convenience function, that wraps a string in a vector and adds it to a vector
 // of vectors.
-void addSingleFile(std::vector<std::vector<std::string>> &fileNames,
-                   const std::string &fileNameToAdd) {
+void addSingleFile(std::vector<std::vector<std::string>> &fileNames, const std::string &fileNameToAdd) {
   const std::vector<std::string> fileNameList(1, fileNameToAdd);
   fileNames.emplace_back(fileNameList);
 }
@@ -66,8 +65,7 @@ public:
       raw_file_1.createFile();
       raw_file_2.createFile();
     } catch (std::exception &) {
-      TS_FAIL(
-          "Error creating test file for \"testPassesOnExistentFile\" test.");
+      TS_FAIL("Error creating test file for \"testPassesOnExistentFile\" test.");
     }
 
     addSingleFile(txt_files, txt_file_1.path());
@@ -102,8 +100,7 @@ public:
       txt_file_1.createFile();
       txt_file_3.createFile();
     } catch (std::exception &) {
-      TS_FAIL(
-          "Error creating test file for \"testPassesOnExistentFile\" test.");
+      TS_FAIL("Error creating test file for \"testPassesOnExistentFile\" test.");
     }
 
     addSingleFile(txt_files, txt_file_1.path());
@@ -126,9 +123,7 @@ public:
 
   void testFailsOnNoFiles() {
     MultiFileValidator file_val;
-    TS_ASSERT_EQUALS(
-        file_val.isValid(std::vector<std::vector<std::string>>()).empty(),
-        false);
+    TS_ASSERT_EQUALS(file_val.isValid(std::vector<std::vector<std::string>>()).empty(), false);
   }
 
   void testFailsOnNonExistingFiles() {

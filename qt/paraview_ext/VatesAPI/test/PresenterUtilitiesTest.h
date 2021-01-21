@@ -17,9 +17,7 @@ public:
     // Act
     auto timeStampedName = Mantid::VATES::createTimeStampedName(name);
     // Assert
-    TSM_ASSERT("Time stamped name should be larger than the original name",
-               name.size() < timeStampedName.size());
-    TSM_ASSERT("Time stamped name should start with original name",
-               timeStampedName.find(name) == 0);
+    TSM_ASSERT("Time stamped name should be larger than the original name", name.size() < timeStampedName.size());
+    TSM_ASSERT("Time stamped name should start with original name", timeStampedName.find(name) == 0);
   }
 };

@@ -21,9 +21,7 @@ class ClusterRegisterTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ClusterRegisterTest *createSuite() {
-    return new ClusterRegisterTest();
-  }
+  static ClusterRegisterTest *createSuite() { return new ClusterRegisterTest(); }
   static void destroySuite(ClusterRegisterTest *suite) { delete suite; }
 
   void test_addClusters() {
@@ -79,9 +77,8 @@ public:
     cRegister.add(3, c);
     cRegister.merge(DisjointElement(2),
                     DisjointElement(3)); // Merge clusters 2 and 3
-    cRegister.merge(
-        DisjointElement(3),
-        DisjointElement(2)); // This is a duplicate call that should be ignored.
+    cRegister.merge(DisjointElement(3),
+                    DisjointElement(2)); // This is a duplicate call that should be ignored.
 
     auto combined = cRegister.clusters();
     TS_ASSERT_EQUALS(2, combined.size());
@@ -140,8 +137,7 @@ public:
     auto clusters = cRegister.clusters();
 
     TSM_ASSERT_EQUALS("One big cluster", clusters.size(), 1);
-    TSM_ASSERT_EQUALS("All four Clusters registered under big composite.",
-                      clusters[1]->size(), 4);
+    TSM_ASSERT_EQUALS("All four Clusters registered under big composite.", clusters[1]->size(), 4);
 
     auto label = clusters[1]->getLabel();
     TSM_ASSERT_EQUALS("Entire clustere labeled as minimum (1)", label, 1);

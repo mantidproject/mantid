@@ -98,12 +98,8 @@ public:
   static const std::string signalName() { return "signal"; }
   static const std::string geometryNodeName() { return "geometryNodeName"; }
   static const std::string functionNodeName() { return "functionNodeName"; }
-  static const std::string geometryOperatorInfo() {
-    return "geometryOperatorInfo";
-  }
-  static const std::string functionOperatorInfo() {
-    return "functionOperatorInfo";
-  }
+  static const std::string geometryOperatorInfo() { return "geometryOperatorInfo"; }
+  static const std::string functionOperatorInfo() { return "functionOperatorInfo"; }
   static const std::string RebinnedWSName() { return "RebinnedWS"; }
 };
 } // namespace VATES

@@ -68,20 +68,15 @@ private:
   void init() override;
   void exec() override;
 
-  void getGeometry(const API::MatrixWorkspace_const_sptr &WS,
-                   specnum_t mon0Spec, specnum_t mon1Spec, double &monitor0Dist,
-                   double &monitor1Dist) const;
-  std::vector<size_t>
-  getMonitorWsIndexs(const API::MatrixWorkspace_const_sptr &WS,
-                     specnum_t specNum1, specnum_t specNum2) const;
+  void getGeometry(const API::MatrixWorkspace_const_sptr &WS, specnum_t mon0Spec, specnum_t mon1Spec,
+                   double &monitor0Dist, double &monitor1Dist) const;
+  std::vector<size_t> getMonitorWsIndexs(const API::MatrixWorkspace_const_sptr &WS, specnum_t specNum1,
+                                         specnum_t specNum2) const;
   double timeToFly(double s, double E_KE) const;
-  double getPeakCentre(const API::MatrixWorkspace_const_sptr &WS,
-                       const size_t monitIn, const double peakTime);
+  double getPeakCentre(const API::MatrixWorkspace_const_sptr &WS, const size_t monitIn, const double peakTime);
   void extractSpec(int wsInd, double start, double end);
-  void getPeakEstimates(double &height, int64_t &centreInd,
-                        double &background) const;
-  double findHalfLoc(MantidVec::size_type startInd, const double height,
-                     const double noise, const direction go) const;
+  void getPeakEstimates(double &height, int64_t &centreInd, double &background) const;
+  double findHalfLoc(MantidVec::size_type startInd, const double height, const double noise, const direction go) const;
   double neutron_E_At(double speed) const;
   void advanceProgress(double toAdd);
 
@@ -99,8 +94,7 @@ private:
   static const int64_t PEAK_THRESH_W;
 
   // for estimating algorithm progress
-  static const double
-      CROP; ///< fraction of algorithm time taken up with running CropWorkspace
+  static const double CROP;           ///< fraction of algorithm time taken up with running CropWorkspace
   static const double GET_COUNT_RATE; ///< fraction of algorithm taken by a
   /// single call to ConvertToDistribution
   static const double FIT_PEAK; ///< fraction required to find a peak

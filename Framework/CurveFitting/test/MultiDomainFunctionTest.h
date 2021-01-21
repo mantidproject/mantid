@@ -34,17 +34,14 @@ class MultiDomainFunctionTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static MultiDomainFunctionTest *createSuite() {
-    return new MultiDomainFunctionTest();
-  }
+  static MultiDomainFunctionTest *createSuite() { return new MultiDomainFunctionTest(); }
   static void destroySuite(MultiDomainFunctionTest *suite) { delete suite; }
 
   MultiDomainFunctionTest() { FrameworkManager::Instance(); }
 
   void test_multidomain() {
     std::shared_ptr<JointDomain> domain;
-    TS_ASSERT_THROWS_NOTHING(domain =
-                                 Mantid::TestHelpers::makeMultiDomainDomain3());
+    TS_ASSERT_THROWS_NOTHING(domain = Mantid::TestHelpers::makeMultiDomainDomain3());
 
     auto values = std::make_shared<FunctionValues>(*domain);
     const double A0 = 0, A1 = 1, A2 = 2;
@@ -67,7 +64,6 @@ public:
     values->setFitWeights(1);
 
     std::shared_ptr<MultiDomainFunction> multi;
-    TS_ASSERT_THROWS_NOTHING(
-        multi = Mantid::TestHelpers::makeMultiDomainFunction3());
+    TS_ASSERT_THROWS_NOTHING(multi = Mantid::TestHelpers::makeMultiDomainFunction3());
   }
 };

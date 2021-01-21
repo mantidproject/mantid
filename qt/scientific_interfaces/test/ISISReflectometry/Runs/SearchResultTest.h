@@ -47,8 +47,7 @@ public:
 
   void testErrorIsSetIfThetaNotIncludedInDescription() {
     auto result = SearchResult("test run", "test description");
-    TS_ASSERT_EQUALS(result.error(),
-                     "Theta was not specified in the run title.")
+    TS_ASSERT_EQUALS(result.error(), "Theta was not specified in the run title.")
   }
 
   void testMultipleErrorsAreSetIfRunAndThetaMissing() {

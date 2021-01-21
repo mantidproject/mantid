@@ -19,19 +19,14 @@ using namespace Mantid::Geometry;
 using namespace Mantid::API;
 
 // Initializing static variables for DoubleValueExtractors
-const std::string PoldiInstrumentAdapter::m_chopperSpeedPropertyName =
-    "chopperspeed";
-const std::string PoldiInstrumentAdapter::m_chopperSpeedTargetPropertyName =
-    "ChopperSpeedTarget";
+const std::string PoldiInstrumentAdapter::m_chopperSpeedPropertyName = "chopperspeed";
+const std::string PoldiInstrumentAdapter::m_chopperSpeedTargetPropertyName = "ChopperSpeedTarget";
 
-std::map<std::string, AbstractDoubleValueExtractor_sptr>
-    PoldiInstrumentAdapter::m_extractors = {
-        {"dbl list", std::static_pointer_cast<AbstractDoubleValueExtractor>(
-                         std::make_shared<VectorDoubleValueExtractor>())},
-        {"int list", std::static_pointer_cast<AbstractDoubleValueExtractor>(
-                         std::make_shared<VectorIntValueExtractor>())},
-        {"number", std::static_pointer_cast<AbstractDoubleValueExtractor>(
-                       std::make_shared<NumberDoubleValueExtractor>())}};
+std::map<std::string, AbstractDoubleValueExtractor_sptr> PoldiInstrumentAdapter::m_extractors = {
+    {"dbl list",
+     std::static_pointer_cast<AbstractDoubleValueExtractor>(std::make_shared<VectorDoubleValueExtractor>())},
+    {"int list", std::static_pointer_cast<AbstractDoubleValueExtractor>(std::make_shared<VectorIntValueExtractor>())},
+    {"number", std::static_pointer_cast<AbstractDoubleValueExtractor>(std::make_shared<NumberDoubleValueExtractor>())}};
 
 /** Constructor with workspace argument
  *
@@ -41,10 +36,8 @@ std::map<std::string, AbstractDoubleValueExtractor_sptr>
  * @param matrixWorkspace :: Workspace with a valid POLDI instrument and run
  *information
  */
-PoldiInstrumentAdapter::PoldiInstrumentAdapter(
-    const MatrixWorkspace_const_sptr &matrixWorkspace) {
-  initializeFromInstrumentAndRun(matrixWorkspace->getInstrument(),
-                                 matrixWorkspace->run());
+PoldiInstrumentAdapter::PoldiInstrumentAdapter(const MatrixWorkspace_const_sptr &matrixWorkspace) {
+  initializeFromInstrumentAndRun(matrixWorkspace->getInstrument(), matrixWorkspace->run());
 }
 
 /** Constructor with instrument and run information arguments
@@ -56,8 +49,8 @@ PoldiInstrumentAdapter::PoldiInstrumentAdapter(
  *Mantid::Geometry::Instrument
  * @param runInformation :: Const Reference to Mantid::API::Run object
  */
-PoldiInstrumentAdapter::PoldiInstrumentAdapter(
-    const Instrument_const_sptr &mantidInstrument, const Run &runInformation) {
+PoldiInstrumentAdapter::PoldiInstrumentAdapter(const Instrument_const_sptr &mantidInstrument,
+                                               const Run &runInformation) {
   initializeFromInstrumentAndRun(mantidInstrument, runInformation);
 }
 
@@ -66,25 +59,19 @@ PoldiInstrumentAdapter::PoldiInstrumentAdapter(
  * @return Abstract chopper, configured according to instrument and run
  *(chopperspeed).
  */
-PoldiAbstractChopper_sptr PoldiInstrumentAdapter::chopper() const {
-  return m_chopper;
-}
+PoldiAbstractChopper_sptr PoldiInstrumentAdapter::chopper() const { return m_chopper; }
 
 /** Returns the detector stored in the adapter
  *
  * @return Abstract detector, configured with the data in instrument.
  */
-PoldiAbstractDetector_sptr PoldiInstrumentAdapter::detector() const {
-  return m_detector;
-}
+PoldiAbstractDetector_sptr PoldiInstrumentAdapter::detector() const { return m_detector; }
 
 /** Returns the spectrum stored in the adapter
  *
  * @return PoldiSourceSpectrum, as given in the insturment configuration.
  */
-PoldiSourceSpectrum_sptr PoldiInstrumentAdapter::spectrum() const {
-  return m_spectrum;
-}
+PoldiSourceSpectrum_sptr PoldiInstrumentAdapter::spectrum() const { return m_spectrum; }
 
 /** Initializes object from POLDI instrument definition and run information
  *
@@ -100,11 +87,10 @@ PoldiSourceSpectrum_sptr PoldiInstrumentAdapter::spectrum() const {
  *Mantid::Geometry::Instrument
  * @param runInformation :: Const Reference to Mantid::API::Run object
  */
-void PoldiInstrumentAdapter::initializeFromInstrumentAndRun(
-    const Instrument_const_sptr &mantidInstrument, const Run &runInformation) {
+void PoldiInstrumentAdapter::initializeFromInstrumentAndRun(const Instrument_const_sptr &mantidInstrument,
+                                                            const Run &runInformation) {
   if (!mantidInstrument) {
-    throw std::runtime_error(
-        "Can not construct POLDI classes from invalid instrument. Aborting.");
+    throw std::runtime_error("Can not construct POLDI classes from invalid instrument. Aborting.");
   }
 
   setDetector(mantidInstrument);
@@ -122,11 +108,9 @@ void PoldiInstrumentAdapter::initializeFromInstrumentAndRun(
  *
  * @param mantidInstrument :: Mantid instrument with POLDI detector setup data.
  */
-void PoldiInstrumentAdapter::setDetector(
-    const Instrument_const_sptr &mantidInstrument) {
+void PoldiInstrumentAdapter::setDetector(const Instrument_const_sptr &mantidInstrument) {
   PoldiDetectorFactory detectorFactory;
-  m_detector = PoldiAbstractDetector_sptr(
-      detectorFactory.createDetector(std::string("helium3-detector")));
+  m_detector = PoldiAbstractDetector_sptr(detectorFactory.createDetector(std::string("helium3-detector")));
   m_detector->loadConfiguration(mantidInstrument);
 }
 
@@ -140,8 +124,7 @@ void PoldiInstrumentAdapter::setDetector(
  * @param runInformation :: Run information that contains a "chopperspeed"
  *property.
  */
-void PoldiInstrumentAdapter::setChopper(
-    const Instrument_const_sptr &mantidInstrument, const Run &runInformation) {
+void PoldiInstrumentAdapter::setChopper(const Instrument_const_sptr &mantidInstrument, const Run &runInformation) {
   double rawChopperSpeed = getChopperSpeedFromRun(runInformation);
   double chopperSpeed = getCleanChopperSpeed(rawChopperSpeed);
 
@@ -150,8 +133,7 @@ void PoldiInstrumentAdapter::setChopper(
   }
 
   PoldiChopperFactory chopperFactory;
-  m_chopper = PoldiAbstractChopper_sptr(
-      chopperFactory.createChopper(std::string("default-chopper")));
+  m_chopper = PoldiAbstractChopper_sptr(chopperFactory.createChopper(std::string("default-chopper")));
   m_chopper->loadConfiguration(mantidInstrument);
   m_chopper->setRotationSpeed(chopperSpeed);
 }
@@ -166,8 +148,7 @@ void PoldiInstrumentAdapter::setChopper(
  * @param rawChopperSpeed :: Raw chopper rotation speed as found in the HDF-file
  * @return Next multiple of 500.
  */
-double
-PoldiInstrumentAdapter::getCleanChopperSpeed(double rawChopperSpeed) const {
+double PoldiInstrumentAdapter::getCleanChopperSpeed(double rawChopperSpeed) const {
   return floor((rawChopperSpeed + 250.0) / 500.0) * 500.0;
 }
 
@@ -182,8 +163,7 @@ PoldiInstrumentAdapter::getCleanChopperSpeed(double rawChopperSpeed) const {
  *chopper speed.
  * @return Chopper speed as stored in run information
  */
-double PoldiInstrumentAdapter::getChopperSpeedFromRun(
-    const Run &runInformation) const {
+double PoldiInstrumentAdapter::getChopperSpeedFromRun(const Run &runInformation) const {
   return extractPropertyFromRun(runInformation, m_chopperSpeedPropertyName);
 }
 
@@ -196,10 +176,8 @@ double PoldiInstrumentAdapter::getChopperSpeedFromRun(
  *target chopper speed.
  * @return Target chopper speed as stored in run information
  */
-double PoldiInstrumentAdapter::getChopperSpeedTargetFromRun(
-    const Run &runInformation) const {
-  return extractPropertyFromRun(runInformation,
-                                m_chopperSpeedTargetPropertyName);
+double PoldiInstrumentAdapter::getChopperSpeedTargetFromRun(const Run &runInformation) const {
+  return extractPropertyFromRun(runInformation, m_chopperSpeedTargetPropertyName);
 }
 
 /**
@@ -222,8 +200,7 @@ double PoldiInstrumentAdapter::getChopperSpeedTargetFromRun(
  * @return True if speed matches target or information is absent, false
  *otherwise.
  */
-bool PoldiInstrumentAdapter::chopperSpeedMatchesTarget(
-    const Run &runInformation, double chopperSpeed) const {
+bool PoldiInstrumentAdapter::chopperSpeedMatchesTarget(const Run &runInformation, double chopperSpeed) const {
   try {
     double targetChopperSpeed = getChopperSpeedTargetFromRun(runInformation);
     return fabs(targetChopperSpeed - chopperSpeed) <= 1e-4;
@@ -250,21 +227,18 @@ bool PoldiInstrumentAdapter::chopperSpeedMatchesTarget(
  * @param propertyName :: Property name that should be extracted
  * @return Value of property as double
  */
-double PoldiInstrumentAdapter::extractPropertyFromRun(
-    const Run &runInformation, const std::string &propertyName) const {
+double PoldiInstrumentAdapter::extractPropertyFromRun(const Run &runInformation,
+                                                      const std::string &propertyName) const {
   if (!runInformation.hasProperty(propertyName)) {
-    throw std::runtime_error("Cannot construct instrument without " +
-                             propertyName + "-property in log. Aborting.");
+    throw std::runtime_error("Cannot construct instrument without " + propertyName + "-property in log. Aborting.");
   }
 
   Kernel::Property *property = runInformation.getProperty(propertyName);
 
-  AbstractDoubleValueExtractor_sptr extractor =
-      getExtractorForProperty(property);
+  AbstractDoubleValueExtractor_sptr extractor = getExtractorForProperty(property);
 
   if (!extractor) {
-    throw std::invalid_argument(
-        "Cannot extract chopper speed from run information.");
+    throw std::invalid_argument("Cannot extract chopper speed from run information.");
   }
 
   return (*extractor)(runInformation, propertyName);
@@ -282,8 +256,7 @@ double PoldiInstrumentAdapter::extractPropertyFromRun(
  * @return Functor of type AbstractDoubleValueExtractor
  */
 AbstractDoubleValueExtractor_sptr
-PoldiInstrumentAdapter::getExtractorForProperty(
-    Kernel::Property *chopperSpeedProperty) const {
+PoldiInstrumentAdapter::getExtractorForProperty(Kernel::Property *chopperSpeedProperty) const {
   if (!chopperSpeedProperty) {
     throw std::invalid_argument("Cannot process null-Property.");
   }
@@ -302,8 +275,7 @@ PoldiInstrumentAdapter::getExtractorForProperty(
  * @param mantidInstrument :: Mantid instrument containing a lookup table with
  *a neutron wavelength spectrum.
  */
-void PoldiInstrumentAdapter::setSpectrum(
-    const Instrument_const_sptr &mantidInstrument) {
+void PoldiInstrumentAdapter::setSpectrum(const Instrument_const_sptr &mantidInstrument) {
   m_spectrum = std::make_shared<PoldiSourceSpectrum>(mantidInstrument);
 }
 

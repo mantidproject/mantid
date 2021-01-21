@@ -27,8 +27,7 @@ public:
   SmoothDataTest() {
     FrameworkManager::Instance();
     // Set up a small workspace for testing
-    MatrixWorkspace_sptr space =
-        WorkspaceFactory::Instance().create("Workspace2D", 2, 10, 10);
+    MatrixWorkspace_sptr space = WorkspaceFactory::Instance().create("Workspace2D", 2, 10, 10);
 
     auto &yVals = space->mutableY(0);
     auto &eVals = space->mutableE(0);
@@ -63,13 +62,10 @@ public:
     TS_ASSERT_THROWS_NOTHING(smooth2.initialize());
     TS_ASSERT_THROWS(smooth2.execute(), const std::runtime_error &);
     // Can't set Npoints to value less than 3
-    TS_ASSERT_THROWS(smooth2.setPropertyValue("NPoints", "1"),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(smooth2.setPropertyValue("NPoints", "1"), const std::invalid_argument &);
 
-    TS_ASSERT_THROWS_NOTHING(
-        smooth2.setPropertyValue("InputWorkspace", "noisy"));
-    TS_ASSERT_THROWS_NOTHING(
-        smooth2.setPropertyValue("OutputWorkspace", "something"));
+    TS_ASSERT_THROWS_NOTHING(smooth2.setPropertyValue("InputWorkspace", "noisy"));
+    TS_ASSERT_THROWS_NOTHING(smooth2.setPropertyValue("OutputWorkspace", "something"));
     // Will also fail if NPoints is larger than spectrum length
     TS_ASSERT_THROWS_NOTHING(smooth2.setPropertyValue("NPoints", "11"));
     TS_ASSERT_THROWS_NOTHING(smooth2.execute());
@@ -85,8 +81,7 @@ public:
     createWS.setChild(true);
     // setting property
     std::string outWSName("CreateWorkspaceTest_OutputWS");
-    TS_ASSERT_THROWS_NOTHING(
-        createWS.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(createWS.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(createWS.execute(););
     MatrixWorkspace_sptr outWS = createWS.getProperty("OutputWorkspace");
 
@@ -97,8 +92,7 @@ public:
     std::string outGWSName("CreateGroupingWorkspaceTest_OutputWS");
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", outWS));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("GroupNames", "bank1,bank2"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outGWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outGWSName));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
     GroupingWorkspace_sptr groupingWS = alg.getProperty("OutputWorkspace");
@@ -108,12 +102,10 @@ public:
     smooth.setChild(true);
     TS_ASSERT_THROWS_NOTHING(smooth.setProperty("InputWorkspace", outWS));
     std::string outputWS("smoothed");
-    TS_ASSERT_THROWS_NOTHING(
-        smooth.setPropertyValue("OutputWorkspace", outputWS));
+    TS_ASSERT_THROWS_NOTHING(smooth.setPropertyValue("OutputWorkspace", outputWS));
     // Set to 4 - algorithm should change it to 5
     TS_ASSERT_THROWS_NOTHING(smooth.setPropertyValue("NPoints", "3,5"));
-    TS_ASSERT_THROWS_NOTHING(
-        smooth.setProperty("GroupingWorkspace", groupingWS));
+    TS_ASSERT_THROWS_NOTHING(smooth.setProperty("GroupingWorkspace", groupingWS));
     TS_ASSERT_THROWS_NOTHING(smooth.execute());
     TS_ASSERT(smooth.isExecuted());
 
@@ -148,11 +140,9 @@ public:
     SmoothData smooth;
     smooth.initialize();
 
-    TS_ASSERT_THROWS_NOTHING(
-        smooth.setPropertyValue("InputWorkspace", "noisy"));
+    TS_ASSERT_THROWS_NOTHING(smooth.setPropertyValue("InputWorkspace", "noisy"));
     std::string outputWS("smoothed");
-    TS_ASSERT_THROWS_NOTHING(
-        smooth.setPropertyValue("OutputWorkspace", outputWS));
+    TS_ASSERT_THROWS_NOTHING(smooth.setPropertyValue("OutputWorkspace", outputWS));
     // Set to 4 - algorithm should change it to 5
     TS_ASSERT_THROWS_NOTHING(smooth.setPropertyValue("NPoints", "4"));
 
@@ -160,9 +150,7 @@ public:
     TS_ASSERT(smooth.isExecuted());
 
     MatrixWorkspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING(
-        output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            outputWS));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWS));
     const auto &Y = output->y(0);
     const auto &E = output->e(0);
     TS_ASSERT_EQUALS(Y[0], 2);
@@ -193,8 +181,7 @@ public:
     constexpr size_t numHistograms(1);
     constexpr size_t numBins(1000000);
 
-    inputWs =
-        WorkspaceCreationHelper::create2DWorkspace(numHistograms, numBins);
+    inputWs = WorkspaceCreationHelper::create2DWorkspace(numHistograms, numBins);
 
     auto &yVals = inputWs->mutableY(0);
     auto &eVals = inputWs->mutableE(0);
@@ -212,13 +199,9 @@ public:
     smoothAlg.setRethrows(true);
   }
 
-  void testSmoothDataPerformance() {
-    TS_ASSERT_THROWS_NOTHING(smoothAlg.execute());
-  }
+  void testSmoothDataPerformance() { TS_ASSERT_THROWS_NOTHING(smoothAlg.execute()); }
 
-  void tearDown() override {
-    AnalysisDataService::Instance().remove("outputWS");
-  }
+  void tearDown() override { AnalysisDataService::Instance().remove("outputWS"); }
 
 private:
   Workspace2D_sptr inputWs;

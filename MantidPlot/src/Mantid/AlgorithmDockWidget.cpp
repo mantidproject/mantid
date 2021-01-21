@@ -16,16 +16,15 @@
 AlgorithmDockWidget::AlgorithmDockWidget(MantidUI *mui, ApplicationWindow *w)
     : QDockWidget(w), m_progressBar(nullptr), m_algID(), m_mantidUI(mui) {
   setWindowTitle(tr("Algorithms"));
-  setObjectName(
-      "exploreAlgorithms"); // this is needed for QMainWindow::restoreState()
+  setObjectName("exploreAlgorithms"); // this is needed for QMainWindow::restoreState()
   setMinimumHeight(150);
   setMinimumWidth(200);
   w->addDockWidget(Qt::RightDockWidgetArea, this); //*/
 
   // Add the AlgorithmSelectorWidget
   m_selector = new MantidQt::MantidWidgets::AlgorithmSelectorWidget(this);
-  connect(m_selector, SIGNAL(executeAlgorithm(const QString &, const int)),
-          m_mantidUI, SLOT(showAlgorithmDialog(const QString &, const int)));
+  connect(m_selector, SIGNAL(executeAlgorithm(const QString &, const int)), m_mantidUI,
+          SLOT(showAlgorithmDialog(const QString &, const int)));
 
   m_runningLayout = new QHBoxLayout();
   m_runningLayout->setObjectName("testA");
@@ -35,8 +34,7 @@ AlgorithmDockWidget::AlgorithmDockWidget(MantidUI *mui, ApplicationWindow *w)
   m_runningLayout->addStretch();
   m_runningLayout->addWidget(m_runningButton);
   updateDetailsButton();
-  connect(m_runningButton, SIGNAL(clicked()), m_mantidUI,
-          SLOT(showAlgMonitor()));
+  connect(m_runningButton, SIGNAL(clicked()), m_mantidUI, SLOT(showAlgMonitor()));
 
   QFrame *f = new QFrame(this);
   QVBoxLayout *layout = new QVBoxLayout(f);
@@ -53,9 +51,7 @@ AlgorithmDockWidget::AlgorithmDockWidget(MantidUI *mui, ApplicationWindow *w)
 /** Update the list of algorithms in the dock */
 void AlgorithmDockWidget::update() { m_selector->update(); }
 
-void AlgorithmDockWidget::updateProgress(void *alg, const double p,
-                                         const QString &msg,
-                                         double estimatedTime,
+void AlgorithmDockWidget::updateProgress(void *alg, const double p, const QString &msg, double estimatedTime,
                                          int progressPrecision) {
   if (m_algID.empty())
     return;

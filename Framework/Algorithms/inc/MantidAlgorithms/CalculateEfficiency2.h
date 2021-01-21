@@ -61,16 +61,12 @@ public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "CalculateEfficiency"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Calculates the detector efficiency for a SANS instrument.";
-  }
+  const std::string summary() const override { return "Calculates the detector efficiency for a SANS instrument."; }
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return (2); }
   /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override {
-    return "SANS;CorrectionFunctions\\EfficiencyCorrections";
-  }
+  const std::string category() const override { return "SANS;CorrectionFunctions\\EfficiencyCorrections"; }
 
 private:
   // Overridden Algorithm methods
@@ -81,8 +77,7 @@ private:
   /// Sum all detectors, excluding monitors and masked detectors
   SummedResults sumUnmaskedAndDeadPixels(const API::MatrixWorkspace &workspace);
 
-  void averageAndNormalizePixels(API::MatrixWorkspace &workspace,
-                                 const SummedResults &results);
+  void averageAndNormalizePixels(API::MatrixWorkspace &workspace, const SummedResults &results);
 
   /// Minimum efficiency. Pixels with lower efficiency will be masked
   double m_minThreshold{0.};

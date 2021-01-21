@@ -15,8 +15,7 @@ namespace HistogramData {
  */
 class QuadraticGenerator {
 public:
-  QuadraticGenerator(double a0, double a1, double a2)
-      : a0(a0), a1(a1), a2(a2) {}
+  QuadraticGenerator(double a0, double a1, double a2) : a0(a0), a1(a1), a2(a2) {}
 
   double operator()() {
     const double x = static_cast<double>(count++);

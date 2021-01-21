@@ -38,8 +38,7 @@ const std::string SQRT_OR_ONE("sqrtOrOne");
 const std::string CUSTOM("custom");
 
 struct SetError {
-  explicit SetError(const double setTo, const double ifEqualTo,
-                    const double tolerance)
+  explicit SetError(const double setTo, const double ifEqualTo, const double tolerance)
       : valueToSet(setTo), valueToCompare(ifEqualTo), tolerance(tolerance) {}
 
   double operator()(const double error) {
@@ -83,38 +82,28 @@ void SetUncertainties::init() {
   auto mustBePositiveInt = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
   mustBePositiveInt->setLower(0);
-  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
-      "InputWorkspace", "", Direction::Input));
-  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
-      "OutputWorkspace", "", Direction::Output));
-  std::vector<std::string> errorTypes = {ZERO, SQRT, SQRT_OR_ONE, ONE_IF_ZERO,
-                                         CUSTOM};
-  declareProperty("SetError", ZERO,
-                  std::make_shared<StringListValidator>(errorTypes),
+  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>("InputWorkspace", "", Direction::Input));
+  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>("OutputWorkspace", "", Direction::Output));
+  std::vector<std::string> errorTypes = {ZERO, SQRT, SQRT_OR_ONE, ONE_IF_ZERO, CUSTOM};
+  declareProperty("SetError", ZERO, std::make_shared<StringListValidator>(errorTypes),
                   "How to reset the uncertainties");
-  declareProperty("SetErrorTo", 1.000, mustBePositive,
-                  "The error value to set when using custom mode");
-  setPropertySettings("SetErrorTo", std::make_unique<VisibleWhenProperty>(
-                                        "SetError", IS_EQUAL_TO, "custom"));
+  declareProperty("SetErrorTo", 1.000, mustBePositive, "The error value to set when using custom mode");
+  setPropertySettings("SetErrorTo", std::make_unique<VisibleWhenProperty>("SetError", IS_EQUAL_TO, "custom"));
 
   declareProperty("IfEqualTo", 0.000, mustBePositive,
                   "Which error values in the input workspace should be "
                   "replaced when using custom mode");
-  setPropertySettings("IfEqualTo", std::make_unique<VisibleWhenProperty>(
-                                       "SetError", IS_EQUAL_TO, "custom"));
+  setPropertySettings("IfEqualTo", std::make_unique<VisibleWhenProperty>("SetError", IS_EQUAL_TO, "custom"));
 
   declareProperty("Precision", 3, mustBePositiveInt,
                   "How many decimal places of ``IfEqualTo`` are taken into "
                   "account for matching when using custom mode");
-  setPropertySettings("Precision", std::make_unique<VisibleWhenProperty>(
-                                       "SetError", IS_EQUAL_TO, "custom"));
+  setPropertySettings("Precision", std::make_unique<VisibleWhenProperty>("SetError", IS_EQUAL_TO, "custom"));
 }
 
 void SetUncertainties::exec() {
   MatrixWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");
-  auto inputEventWorkspace =
-      std::dynamic_pointer_cast<const DataObjects::EventWorkspace>(
-          inputWorkspace);
+  auto inputEventWorkspace = std::dynamic_pointer_cast<const DataObjects::EventWorkspace>(inputWorkspace);
   MatrixWorkspace_sptr outputWorkspace = getProperty("OutputWorkspace");
   std::string errorType = getProperty("SetError");
   bool zeroError = (errorType == ZERO);
@@ -130,8 +119,7 @@ void SetUncertainties::exec() {
   // Create the output workspace. This will copy many aspects from the input
   // one.
 
-  const int64_t numHists =
-      static_cast<int64_t>(inputWorkspace->getNumberHistograms());
+  const int64_t numHists = static_cast<int64_t>(inputWorkspace->getNumberHistograms());
   if (inputEventWorkspace) {
     if (inputWorkspace == outputWorkspace && errorType == SQRT &&
         inputEventWorkspace->getEventType() == Mantid::API::EventType::TOF) {
@@ -165,16 +153,13 @@ void SetUncertainties::exec() {
       outputWorkspace->mutableE(i) = 0.0;
     }
     // ZERO mode doesn't calculate anything further
-    if ((!zeroError) &&
-        (!(spectrumInfo.hasDetectors(i) && spectrumInfo.isMasked(i)))) {
+    if ((!zeroError) && (!(spectrumInfo.hasDetectors(i) && spectrumInfo.isMasked(i)))) {
       auto &E = outputWorkspace->mutableE(i);
       if (takeSqrt) {
         const auto &Y = outputWorkspace->y(i);
-        std::transform(Y.begin(), Y.end(), E.begin(),
-                       SqrtError(resetOne ? 1. : 0.));
+        std::transform(Y.begin(), Y.end(), E.begin(), SqrtError(resetOne ? 1. : 0.));
       } else {
-        std::transform(E.begin(), E.end(), E.begin(),
-                       SetError(valueToSet, valueToCompare, tolerance));
+        std::transform(E.begin(), E.end(), E.begin(), SetError(valueToSet, valueToCompare, tolerance));
       }
     }
     prog.report();

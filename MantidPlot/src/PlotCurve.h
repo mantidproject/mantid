@@ -93,13 +93,12 @@ signals:
   void forgetMe();
 
 protected:
-  void drawCurve(QPainter *p, int style, const QwtScaleMap &xMap,
-                 const QwtScaleMap &yMap, int from, int to) const override;
-  void drawSideLines(QPainter *p, const QwtScaleMap &xMap,
-                     const QwtScaleMap &yMap, int from, int to) const;
+  void drawCurve(QPainter *p, int style, const QwtScaleMap &xMap, const QwtScaleMap &yMap, int from,
+                 int to) const override;
+  void drawSideLines(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap, int from, int to) const;
 
-  void drawSymbols(QPainter *p, const QwtSymbol &, const QwtScaleMap &xMap,
-                   const QwtScaleMap &yMap, int from, int to) const override;
+  void drawSymbols(QPainter *p, const QwtSymbol &, const QwtScaleMap &xMap, const QwtScaleMap &yMap, int from,
+                   int to) const override;
 
   void computeWaterfallOffsets(double &xDataOffset, double &yDataOffset);
 
@@ -115,8 +114,7 @@ protected:
 
 class DataCurve : public PlotCurve {
 public:
-  DataCurve(Table *t, const QString &xColName, const QString &name,
-            int startRow = 0, int endRow = -1);
+  DataCurve(Table *t, const QString &xColName, const QString &name, int startRow = 0, int endRow = -1);
   DataCurve(const DataCurve &c);
   DataCurve &operator=(const DataCurve &rhs) = delete;
   void clone(DataCurve *c);
@@ -186,8 +184,7 @@ public:
    * Column ids are of the form '&lt;name of table> "_" &lt;name of column>'.
    */
   virtual QString plotAssociation() const;
-  virtual void updateColumnNames(const QString &oldName, const QString &newName,
-                                 bool updateTableName);
+  virtual void updateColumnNames(const QString &oldName, const QString &newName, bool updateTableName);
 
   //! The list of attached error bars.
   QList<DataCurve *> errorBarsList() const { return d_error_bars; };
@@ -269,8 +266,7 @@ public:
 
 protected:
   //! Does the actual drawing; see QwtPlotItem::draw.
-  void draw(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap,
-            const QRect &r) const override;
+  void draw(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap, const QRect &r) const override;
 
   int d_index;
   double d_angle;

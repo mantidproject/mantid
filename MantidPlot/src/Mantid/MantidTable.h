@@ -17,9 +17,8 @@
 class MantidTable : public Table, public MantidQt::API::WorkspaceObserver {
   Q_OBJECT
 public:
-  MantidTable(ScriptingEnv *env, const Mantid::API::ITableWorkspace_sptr &ws,
-              const QString &label, ApplicationWindow *parent,
-              bool transpose = false);
+  MantidTable(ScriptingEnv *env, const Mantid::API::ITableWorkspace_sptr &ws, const QString &label,
+              ApplicationWindow *parent, bool transpose = false);
 
   /// returns the workspace name
   const std::string &getWorkspaceName() { return m_wsName; }
@@ -40,8 +39,7 @@ signals:
 public slots:
   void deleteRows(int startRow, int endRow) override;
   void cellEdited(int, int col) override;
-  void setPlotDesignation(PlotDesignation pd,
-                          bool rightColumns = false) override;
+  void setPlotDesignation(PlotDesignation pd, bool rightColumns = false) override;
 
 protected slots:
   void closeTable();
@@ -51,17 +49,12 @@ protected slots:
   void dealWithUnwantedResize();
 
 protected:
-  void
-  preDeleteHandle(const std::string &wsName,
-                  const std::shared_ptr<Mantid::API::Workspace> &ws) override;
-  void afterReplaceHandle(
-      const std::string &wsName,
-      const std::shared_ptr<Mantid::API::Workspace> &ws) override;
+  void preDeleteHandle(const std::string &wsName, const std::shared_ptr<Mantid::API::Workspace> &ws) override;
+  void afterReplaceHandle(const std::string &wsName, const std::shared_ptr<Mantid::API::Workspace> &ws) override;
 
   // Reimplemented methods for custom sorting of TableWorkspaces
   void sortColumn(int col, int order) override;
-  void sortColumns(const QStringList &cols, int type = 0, int order = 0,
-                   const QString &leadCol = QString()) override;
+  void sortColumns(const QStringList &cols, int type = 0, int order = 0, const QString &leadCol = QString()) override;
 
 private:
   /// Set the plot type on the workspace for each selected column

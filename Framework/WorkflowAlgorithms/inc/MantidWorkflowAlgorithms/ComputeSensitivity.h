@@ -21,15 +21,11 @@ public:
   /// Algorithm's name
   const std::string name() const override { return "ComputeSensitivity"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Workflow to calculate EQSANS sensitivity correction.";
-  }
+  const std::string summary() const override { return "Workflow to calculate EQSANS sensitivity correction."; }
   /// Algorithm's version
   int version() const override { return (1); }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "Workflow\\SANS\\UsesPropertyManager";
-  }
+  const std::string category() const override { return "Workflow\\SANS\\UsesPropertyManager"; }
 
 private:
   /// Initialisation code

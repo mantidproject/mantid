@@ -23,30 +23,23 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-ConvFitDataPresenter::ConvFitDataPresenter(ConvFitModel *model,
-                                           IIndirectFitDataView *view)
-    : IndirectFitDataPresenter(model, view,
-                               std::make_unique<ConvFitDataTablePresenter>(
-                                   model, view->getDataTable())),
+ConvFitDataPresenter::ConvFitDataPresenter(ConvFitModel *model, IIndirectFitDataView *view)
+    : IndirectFitDataPresenter(model, view, std::make_unique<ConvFitDataTablePresenter>(model, view->getDataTable())),
       m_convModel(model) {
   setResolutionHidden(false);
 
-  connect(view, SIGNAL(resolutionLoaded(const QString &)), this,
-          SLOT(setModelResolution(const QString &)));
-  connect(view, SIGNAL(resolutionLoaded(const QString &)), this,
-          SIGNAL(singleResolutionLoaded()));
+  connect(view, SIGNAL(resolutionLoaded(const QString &)), this, SLOT(setModelResolution(const QString &)));
+  connect(view, SIGNAL(resolutionLoaded(const QString &)), this, SIGNAL(singleResolutionLoaded()));
 }
 
 void ConvFitDataPresenter::setModelResolution(const QString &name) {
   auto const workspaceCount = m_convModel->numberOfWorkspaces();
-  auto const index = m_convModel->getWorkspace(TableDatasetIndex{0})
-                         ? workspaceCount - TableDatasetIndex{1}
-                         : workspaceCount;
+  auto const index =
+      m_convModel->getWorkspace(TableDatasetIndex{0}) ? workspaceCount - TableDatasetIndex{1} : workspaceCount;
   setModelResolution(name.toStdString(), index);
 }
 
-void ConvFitDataPresenter::setModelResolution(std::string const &name,
-                                              TableDatasetIndex const &index) {
+void ConvFitDataPresenter::setModelResolution(std::string const &name, TableDatasetIndex const &index) {
   try {
     m_convModel->setResolution(name, index);
     emit modelResolutionAdded(name, index);
@@ -56,8 +49,7 @@ void ConvFitDataPresenter::setModelResolution(std::string const &name,
 }
 
 void ConvFitDataPresenter::addDataToModel(IAddWorkspaceDialog const *dialog) {
-  if (const auto convDialog =
-          dynamic_cast<ConvFitAddWorkspaceDialog const *>(dialog)) {
+  if (const auto convDialog = dynamic_cast<ConvFitAddWorkspaceDialog const *>(dialog)) {
     addWorkspace(*convDialog, *m_convModel);
     auto const name = convDialog->resolutionName();
     auto const index = m_convModel->numberOfWorkspaces() - TableDatasetIndex{1};
@@ -66,8 +58,7 @@ void ConvFitDataPresenter::addDataToModel(IAddWorkspaceDialog const *dialog) {
   }
 }
 
-void ConvFitDataPresenter::addWorkspace(ConvFitAddWorkspaceDialog const &dialog,
-                                        IndirectFittingModel &model) {
+void ConvFitDataPresenter::addWorkspace(ConvFitAddWorkspaceDialog const &dialog, IndirectFittingModel &model) {
   model.addWorkspace(dialog.workspaceName(), dialog.workspaceIndices());
 }
 
@@ -81,22 +72,19 @@ void ConvFitDataPresenter::addModelData(const std::string &name) {
   }
 }
 
-std::unique_ptr<IAddWorkspaceDialog>
-ConvFitDataPresenter::getAddWorkspaceDialog(QWidget *parent) const {
+std::unique_ptr<IAddWorkspaceDialog> ConvFitDataPresenter::getAddWorkspaceDialog(QWidget *parent) const {
   auto dialog = std::make_unique<ConvFitAddWorkspaceDialog>(parent);
   dialog->setResolutionFBSuffices(getView()->getResolutionFBSuffices());
   dialog->setResolutionWSSuffices(getView()->getResolutionWSSuffices());
   return dialog;
 }
 
-void ConvFitDataPresenter::setMultiInputResolutionFBSuffixes(
-    IAddWorkspaceDialog *dialog) {
+void ConvFitDataPresenter::setMultiInputResolutionFBSuffixes(IAddWorkspaceDialog *dialog) {
   if (auto convDialog = dynamic_cast<ConvFitAddWorkspaceDialog *>(dialog))
     convDialog->setResolutionFBSuffices(getView()->getResolutionFBSuffices());
 }
 
-void ConvFitDataPresenter::setMultiInputResolutionWSSuffixes(
-    IAddWorkspaceDialog *dialog) {
+void ConvFitDataPresenter::setMultiInputResolutionWSSuffixes(IAddWorkspaceDialog *dialog) {
   if (auto convDialog = dynamic_cast<ConvFitAddWorkspaceDialog *>(dialog))
     convDialog->setResolutionWSSuffices(getView()->getResolutionWSSuffices());
 }

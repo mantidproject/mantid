@@ -24,9 +24,7 @@ public:
            "overridden) from the sample.";
   }
   int version() const override { return 1; }
-  const std::vector<std::string> seeAlso() const override {
-    return {"IndexSXPeaks"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"IndexSXPeaks"}; }
   const std::string category() const override { return "Crystal\\Peaks"; }
   std::map<std::string, std::string> validateInputs() override;
 

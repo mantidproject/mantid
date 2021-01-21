@@ -34,18 +34,14 @@ int SavePDFGui::version() const { return 1; }
 const std::string SavePDFGui::category() const { return "DataHandling\\Text"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-const std::string SavePDFGui::summary() const {
-  return "Save files readable by PDFGui";
-}
+const std::string SavePDFGui::summary() const { return "Save files readable by PDFGui"; }
 
 /** Initialize the algorithm's properties.
  */
 void SavePDFGui::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                                        Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
                   "An input workspace with units of Atomic Distance.");
-  declareProperty(std::make_unique<API::FileProperty>(
-                      "Filename", "", API::FileProperty::Save, ".gr"),
+  declareProperty(std::make_unique<API::FileProperty>("Filename", "", API::FileProperty::Save, ".gr"),
                   "The filename to use for the saved data");
 }
 
@@ -91,8 +87,7 @@ void SavePDFGui::exec() {
   out.close();
 }
 
-void SavePDFGui::writeMetaData(std::ofstream &out,
-                               const API::MatrixWorkspace_const_sptr &inputWS) {
+void SavePDFGui::writeMetaData(std::ofstream &out, const API::MatrixWorkspace_const_sptr &inputWS) {
   out << "#Comment: neutron";
   auto run = inputWS->run();
   if (run.hasProperty("Qmin")) {
@@ -119,8 +114,7 @@ void SavePDFGui::writeMetaData(std::ofstream &out,
   out << "#L r G(r) dr dG(r)\n";
 }
 
-void SavePDFGui::writeWSData(std::ofstream &out,
-                             const API::MatrixWorkspace_const_sptr &inputWS) {
+void SavePDFGui::writeWSData(std::ofstream &out, const API::MatrixWorkspace_const_sptr &inputWS) {
   const auto &x = inputWS->points(0);
   const auto &y = inputWS->y(0);
   const auto &dy = inputWS->e(0);
@@ -128,8 +122,7 @@ void SavePDFGui::writeWSData(std::ofstream &out,
   if (inputWS->sharedDx(0))
     dx = inputWS->dx(0);
   for (size_t i = 0; i < x.size(); ++i) {
-    out << "  " << x[i] << "  " << y[i] << "  " << dx[i] << "  " << dy[i]
-        << "\n";
+    out << "  " << x[i] << "  " << y[i] << "  " << dx[i] << "  " << dy[i] << "\n";
   }
 }
 

@@ -43,8 +43,7 @@ class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS ViewBase : public QWidget {
   Q_OBJECT
 public:
   /// Default constructor.
-  ViewBase(QWidget *parent = nullptr,
-           RebinnedSourcesManager *rebinnedSourcesManager = nullptr);
+  ViewBase(QWidget *parent = nullptr, RebinnedSourcesManager *rebinnedSourcesManager = nullptr);
 
   /// Default destructor.
   ~ViewBase() override {}
@@ -56,8 +55,7 @@ public:
   /// Close view generated sub-windows.
   virtual void closeSubWindows();
   /// Creates a single view instance.
-  virtual pqRenderView *createRenderView(QWidget *container,
-                                         QString viewName = QString(""));
+  virtual pqRenderView *createRenderView(QWidget *container, QString viewName = QString(""));
   /// Remove all filters of a given name: i.e. Slice.
   virtual void destroyFilter(const QString &name);
   /// Destroy sources and view relevant to mode switching.
@@ -100,8 +98,7 @@ public:
   /// Set the current color scale state
   virtual void setColorScaleState(ColorSelectionWidget *cs);
   /// Create source for plugin mode.
-  virtual pqPipelineSource *setPluginSource(QString pluginName, QString wsName,
-                                            bool axesGridOn);
+  virtual pqPipelineSource *setPluginSource(QString pluginName, QString wsName, bool axesGridOn);
   /// Determines if source has timesteps (4D).
   virtual bool srcHasTimeSteps(pqPipelineSource *src);
   /// Set the the background color for the view
@@ -130,9 +127,8 @@ public:
   void setAxesGrid(bool onOff);
   /// Set color scale lock
   void setColorScaleLock(Mantid::VATES::ColorScaleLock *colorScaleLock);
-  QPointer<pqPipelineSource> origSrc; ///< The original source
-  QPointer<pqPipelineRepresentation>
-      origRep; ///< The original source representation
+  QPointer<pqPipelineSource> origSrc;         ///< The original source
+  QPointer<pqPipelineRepresentation> origRep; ///< The original source representation
   /// Has active source
   bool hasActiveSource();
   /// Set the underlying view directly
@@ -164,8 +160,7 @@ public slots:
   /// Provide updates to View
   virtual void updateView();
   /// React when the visibility of a representation changes
-  virtual void onVisibilityChanged(pqPipelineSource *source,
-                                   pqDataRepresentation *representation);
+  virtual void onVisibilityChanged(pqPipelineSource *source, pqDataRepresentation *representation);
   virtual void onSourceDestroyed();
 
 signals:
@@ -248,7 +243,7 @@ private:
   /// Collect time information for animation controls.
   void handleTimeInfo(vtkSMDoubleVectorProperty *dvp);
 
-  ColorUpdater colorUpdater; ///< Handle to the color updating delegator
+  ColorUpdater colorUpdater;                   ///< Handle to the color updating delegator
   BackgroundRgbProvider backgroundRgbProvider; /// < Holds the manager for
                                                /// background color related
                                                /// tasks.

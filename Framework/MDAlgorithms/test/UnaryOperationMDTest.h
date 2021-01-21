@@ -40,9 +40,7 @@ class UnaryOperationMDTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static UnaryOperationMDTest *createSuite() {
-    return new UnaryOperationMDTest();
-  }
+  static UnaryOperationMDTest *createSuite() { return new UnaryOperationMDTest(); }
   static void destroySuite(UnaryOperationMDTest *suite) { delete suite; }
 
   MDHistoWorkspace_sptr histo;
@@ -60,8 +58,7 @@ public:
   }
 
   /// Run the mock algorithm
-  void doTest(MockUnaryOperationMD &alg, const std::string &inName,
-              const std::string &outName, bool succeeds = true) {
+  void doTest(MockUnaryOperationMD &alg, const std::string &inName, const std::string &outName, bool succeeds = true) {
     out.reset();
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
@@ -70,15 +67,12 @@ public:
     alg.execute();
     if (succeeds) {
       TS_ASSERT(alg.isExecuted());
-      TSM_ASSERT("Algorithm methods were called as expected",
-                 testing::Mock::VerifyAndClearExpectations(&alg));
-      out = std::dynamic_pointer_cast<IMDWorkspace>(
-          AnalysisDataService::Instance().retrieve(outName));
+      TSM_ASSERT("Algorithm methods were called as expected", testing::Mock::VerifyAndClearExpectations(&alg));
+      out = std::dynamic_pointer_cast<IMDWorkspace>(AnalysisDataService::Instance().retrieve(outName));
       TS_ASSERT(out);
     } else {
       TS_ASSERT(!alg.isExecuted());
-      TSM_ASSERT("Algorithm methods were called as expected",
-                 testing::Mock::VerifyAndClearExpectations(&alg));
+      TSM_ASSERT("Algorithm methods were called as expected", testing::Mock::VerifyAndClearExpectations(&alg));
     }
   }
 
@@ -91,8 +85,7 @@ public:
   /// Sub-class can abort
   void test_checkInputs() {
     MockUnaryOperationMD alg;
-    EXPECT_CALL(alg, checkInputs())
-        .WillOnce(Throw(std::runtime_error("Bad inputs!")));
+    EXPECT_CALL(alg, checkInputs()).WillOnce(Throw(std::runtime_error("Bad inputs!")));
     doTest(alg, "histo", "some_output", false /*it fails*/);
   }
 

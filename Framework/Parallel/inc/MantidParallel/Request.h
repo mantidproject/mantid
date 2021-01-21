@@ -52,8 +52,7 @@ private:
 };
 
 template <class Function>
-Request::Request(Function &&f)
-    : m_thread(std::forward<Function>(f)), m_threadingBackend{true} {}
+Request::Request(Function &&f) : m_thread(std::forward<Function>(f)), m_threadingBackend{true} {}
 
 } // namespace Parallel
 } // namespace Mantid

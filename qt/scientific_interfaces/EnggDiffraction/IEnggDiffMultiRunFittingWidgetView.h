@@ -31,19 +31,16 @@ public:
   virtual boost::optional<RunLabel> getSelectedRunLabel() const = 0;
 
   /// Plot a Qwt curve representing a fitted peaks workspace to the canvas
-  virtual void
-  plotFittedPeaks(const std::vector<std::shared_ptr<QwtData>> &curve) = 0;
+  virtual void plotFittedPeaks(const std::vector<std::shared_ptr<QwtData>> &curve) = 0;
 
   /// Plot a Qwt curve representing a focused run to the canvas
-  virtual void
-  plotFocusedRun(const std::vector<std::shared_ptr<QwtData>> &curve) = 0;
+  virtual void plotFocusedRun(const std::vector<std::shared_ptr<QwtData>> &curve) = 0;
 
   /// Plot focused run and fitted peaks to a separate window
   /// Pass fittedPeaksName an empty optional to not plot it
   /// Both workspaces should exist in the ADS
-  virtual void
-  plotToSeparateWindow(const std::string &focusedRunName,
-                       const boost::optional<std::string> fittedPeaksName) = 0;
+  virtual void plotToSeparateWindow(const std::string &focusedRunName,
+                                    const boost::optional<std::string> fittedPeaksName) = 0;
 
   /// Report that the user has tried to plot without selecting a run
   virtual void reportNoRunSelectedForPlot() = 0;
@@ -69,13 +66,11 @@ public:
 
   /// Connect a message provider to the view.  Used to remove circular
   /// dependency between view and presenter
-  virtual void setMessageProvider(
-      std::shared_ptr<IEnggDiffractionUserMsg> messageProvider) = 0;
+  virtual void setMessageProvider(std::shared_ptr<IEnggDiffractionUserMsg> messageProvider) = 0;
 
   /// Connect a presenter to the view. Used to remove circular dependency
   /// between view and presenter
-  virtual void setPresenter(
-      std::shared_ptr<IEnggDiffMultiRunFittingWidgetPresenter> presenter) = 0;
+  virtual void setPresenter(std::shared_ptr<IEnggDiffMultiRunFittingWidgetPresenter> presenter) = 0;
 
   /// Get whether the user has selected to overplot fit results
   virtual bool showFitResultsSelected() const = 0;

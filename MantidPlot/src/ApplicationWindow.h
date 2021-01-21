@@ -137,25 +137,10 @@ public:
   ~ApplicationWindow() override;
 
   enum ShowWindowsPolicy { HideAll, ActiveFolder, SubFolders };
-  enum WindowType {
-    NoWindow,
-    TableWindow,
-    MatrixWindow,
-    MultiLayerWindow,
-    NoteWindow,
-    Plot3DWindow
-  };
+  enum WindowType { NoWindow, TableWindow, MatrixWindow, MultiLayerWindow, NoteWindow, Plot3DWindow };
   enum MatrixToTableConversion { Direct, XYZ, YXZ };
   enum EndLineChar { LF = 0, CRLF = 1, CR = 2 };
-  enum Analysis {
-    NoAnalysis,
-    Integrate,
-    Diff,
-    FitLinear,
-    FitGauss,
-    FitLorentz,
-    FitSigmoidal
-  };
+  enum Analysis { NoAnalysis, Integrate, Diff, FitLinear, FitGauss, FitLorentz, FitSigmoidal };
 
   FolderListView *lv, *folders;
   QDockWidget *logWindow;
@@ -221,15 +206,11 @@ public slots:
   //@{
   void exitWithPresetCode();
   void open();
-  ApplicationWindow *open(const QString &fn, bool factorySettings = false,
-                          bool newProject = true);
+  ApplicationWindow *open(const QString &fn, bool factorySettings = false, bool newProject = true);
 
-  ApplicationWindow *openProject(const QString &workingDir,
-                                 const QString &filename,
-                                 const int fileVersion);
+  ApplicationWindow *openProject(const QString &workingDir, const QString &filename, const int fileVersion);
   ApplicationWindow *openProject(const QString &fn, const int fileVersion);
-  ApplicationWindow *importOPJ(const QString &fn, bool factorySettings = false,
-                               bool newProject = true);
+  ApplicationWindow *importOPJ(const QString &fn, bool factorySettings = false, bool newProject = true);
   /// Load mantid data files using generic load algorithm, opening user dialog
   void loadDataFile();
   /// Load mantid data files (generic load algorithm)
@@ -248,17 +229,14 @@ public slots:
   ApplicationWindow *plotFile(const QString &fn);
 
   /// Runs a script from a file. Mainly useful for automatically running scripts
-  void executeScriptFile(const QString &filename,
-                         const Script::ExecutionMode execMode);
+  void executeScriptFile(const QString &filename, const Script::ExecutionMode execMode);
   /// Slot to connect the script execution success
   void onScriptExecuteSuccess(const QString &message);
   /// Slot to connect the script execution errors to
-  void onScriptExecuteError(const QString &message, const QString &scriptName,
-                            int lineNumber);
+  void onScriptExecuteError(const QString &message, const QString &scriptName, int lineNumber);
   /// Runs an arbitrary lump of python code, return true/false on
   /// success/failure.
-  bool runPythonScript(const QString &code, bool asynchronous = false,
-                       bool quiet = false, bool redirect = true);
+  bool runPythonScript(const QString &code, bool asynchronous = false, bool quiet = false, bool redirect = true);
 
   QList<MdiSubWindow *> windowsList() const;
   QList<MdiSubWindow *> getAllWindows() const;
@@ -268,8 +246,7 @@ public slots:
   */
   void cascade();
 
-  void saveProjectAs(const QString &fileName = QString(),
-                     bool compress = false);
+  void saveProjectAs(const QString &fileName = QString(), bool compress = false);
   bool saveProject(bool compress = false);
   /// Run the project saver dialog
   int execSaveProjectDialog();
@@ -295,8 +272,7 @@ public slots:
   void changeAppStyle(const QString &s);
   void changeAppFont(const QFont &f);
   void updateAppFonts();
-  void setAppColors(const QColor &wc, const QColor &pc, const QColor &tpc,
-                    bool force = false);
+  void setAppColors(const QColor &wc, const QColor &pc, const QColor &tpc, bool force = false);
 
   QLocale locale() { return d_locale; };
   void setLocale(const QLocale &l) { d_locale = l; };
@@ -307,11 +283,9 @@ public slots:
   //! \name Multilayer Plots
   //@{
   MultiLayer *multilayerPlot(int c, int r, int style);
-  MultiLayer *multilayerPlot(Table *w, const QStringList &colList, int style,
-                             int startRow = 0, int endRow = -1);
+  MultiLayer *multilayerPlot(Table *w, const QStringList &colList, int style, int startRow = 0, int endRow = -1);
   //! used when restoring a plot from a project file
-  MultiLayer *multilayerPlot(const QString &caption, int layers = 1,
-                             int rows = 1, int cols = 1);
+  MultiLayer *multilayerPlot(const QString &caption, int layers = 1, int rows = 1, int cols = 1);
   //! used by the plot wizard
   MultiLayer *multilayerPlot(const QStringList &colList);
   MultiLayer *waterfallPlot();
@@ -342,28 +316,23 @@ public slots:
   //! \name 3D Data Plots
   //@{
   Graph3D *newPlot3D();
-  Graph3D *openMatrixPlot3D(const QString &caption, const QString &matrix_name,
-                            double xl, double xr, double yl, double yr,
-                            double zl, double zr);
+  Graph3D *openMatrixPlot3D(const QString &caption, const QString &matrix_name, double xl, double xr, double yl,
+                            double yr, double zl, double zr);
   Graph3D *plotXYZ(Table *table, const QString &zColName, int type);
   // when reading from .qti file
-  Graph3D *dataPlot3D(const QString &caption, const QString &formula, double xl,
-                      double xr, double yl, double yr, double zl, double zr);
-  Graph3D *openPlotXYZ(const QString &caption, const QString &formula,
-                       double xl, double xr, double yl, double yr, double zl,
-                       double zr);
+  Graph3D *dataPlot3D(const QString &caption, const QString &formula, double xl, double xr, double yl, double yr,
+                      double zl, double zr);
+  Graph3D *openPlotXYZ(const QString &caption, const QString &formula, double xl, double xr, double yl, double yr,
+                       double zl, double zr);
   //@}
 
   //! \name Surface Plots
   //@{
-  Graph3D *plotSurface(const QString &formula, double xl, double xr, double yl,
-                       double yr, double zl, double zr, size_t columns = 40,
-                       size_t rows = 30);
-  Graph3D *plotParametricSurface(const QString &xFormula,
-                                 const QString &yFormula,
-                                 const QString &zFormula, double ul, double ur,
-                                 double vl, double vr, int columns, int rows,
-                                 bool uPeriodic, bool vPeriodic);
+  Graph3D *plotSurface(const QString &formula, double xl, double xr, double yl, double yr, double zl, double zr,
+                       size_t columns = 40, size_t rows = 30);
+  Graph3D *plotParametricSurface(const QString &xFormula, const QString &yFormula, const QString &zFormula, double ul,
+                                 double ur, double vl, double vr, int columns, int rows, bool uPeriodic,
+                                 bool vPeriodic);
 
   void connectSurfacePlot(Graph3D *plot);
   void newSurfacePlot();
@@ -397,9 +366,8 @@ public slots:
 
   //! \name User-defined Functions
   //@{
-  MultiLayer *newFunctionPlot(QStringList &formulas, double start, double end,
-                              int points = 100, const QString &var = "x",
-                              int type = 0);
+  MultiLayer *newFunctionPlot(QStringList &formulas, double start, double end, int points = 100,
+                              const QString &var = "x", int type = 0);
 
   FunctionDialog *functionDialog(Graph *g = nullptr);
   FunctionDialog *showFunctionDialog();
@@ -450,8 +418,7 @@ public slots:
 
   //! Used when loading a table from a project file
   Table *newTable(const QString &caption, int r, int c);
-  Table *newTable(int r, int c, const QString &name = QString(),
-                  const QString &legend = QString());
+  Table *newTable(int r, int c, const QString &name = QString(), const QString &legend = QString());
   Table *newTable(const QString &caption, int r, int c, const QString &text);
   /**
    * \brief Create a Table which is initially hidden; used to return the result
@@ -463,14 +430,12 @@ public slots:
    * @param c :: number of columns
    * @param text :: tab/newline - separated initial content; may be empty
    */
-  Table *newHiddenTable(const QString &name, const QString &label, int r, int c,
-                        const QString &text = QString());
+  Table *newHiddenTable(const QString &name, const QString &label, int r, int c, const QString &text = QString());
   Table *table(const QString &name);
   Table *convertMatrixToTableDirect();
   Table *convertMatrixToTableXYZ();
   Table *convertMatrixToTableYXZ();
-  Table *matrixToTable(Matrix *m,
-                       MatrixToTableConversion conversionType = Direct);
+  Table *matrixToTable(Matrix *m, MatrixToTableConversion conversionType = Direct);
   QList<MdiSubWindow *> tableList();
   //! Returns true if the project contains tables
   bool hasTable();
@@ -480,25 +445,19 @@ public slots:
   void connectTable(Table *w);
   void initTable(Table *w, const QString &caption);
   void customTable(Table *w);
-  void customizeTables(const QColor &bgColor, const QColor &textColor,
-                       const QColor &headerColor, const QFont &textFont,
+  void customizeTables(const QColor &bgColor, const QColor &textColor, const QColor &headerColor, const QFont &textFont,
                        const QFont &headerFont, bool showComments);
   /// Turn on/off auto-update of curves from table
   void setUpdateCurvesFromTable(Table *table, bool on);
 
   void importASCII();
-  void importASCII(const QStringList &files, int import_mode,
-                   const QString &local_column_separator,
-                   int local_ignored_lines, bool local_rename_columns,
-                   bool local_strip_spaces, bool local_simplify_spaces,
-                   bool local_import_comments, bool update_dec_separators,
-                   const QLocale &local_separators,
-                   const QString &local_comment_string, bool import_read_only,
+  void importASCII(const QStringList &files, int import_mode, const QString &local_column_separator,
+                   int local_ignored_lines, bool local_rename_columns, bool local_strip_spaces,
+                   bool local_simplify_spaces, bool local_import_comments, bool update_dec_separators,
+                   const QLocale &local_separators, const QString &local_comment_string, bool import_read_only,
                    int endLineChar, const QString &sepforloadAscii);
-  void exportAllTables(const QString &sep, bool colNames, bool colComments,
-                       bool expSelection);
-  void exportASCII(const QString &tableName, const QString &sep, bool colNames,
-                   bool colComments, bool expSelection);
+  void exportAllTables(const QString &sep, bool colNames, bool colComments, bool expSelection);
+  void exportASCII(const QString &tableName, const QString &sep, bool colNames, bool colComments, bool expSelection);
 
   //! recalculate selected cells of current table
   void recalculateTable();
@@ -511,15 +470,11 @@ public slots:
   //@{
   void setPreferences(Graph *g);
   void setSpectrogramTickStyle(Graph *g);
-  void setGraphDefaultSettings(bool autoscale, bool scaleFonts,
-                               bool resizeLayers, bool antialiasing,
+  void setGraphDefaultSettings(bool autoscale, bool scaleFonts, bool resizeLayers, bool antialiasing,
                                bool fixedAspectRatio);
-  void setLegendDefaultSettings(int frame, const QFont &font,
-                                const QColor &textCol,
-                                const QColor &backgroundCol);
-  void setArrowDefaultSettings(double lineWidth, const QColor &c,
-                               Qt::PenStyle style, int headLength,
-                               int headAngle, bool fillHead);
+  void setLegendDefaultSettings(int frame, const QFont &font, const QColor &textCol, const QColor &backgroundCol);
+  void setArrowDefaultSettings(double lineWidth, const QColor &c, Qt::PenStyle style, int headLength, int headAngle,
+                               bool fillHead);
 
   void plotL();
   void plotP();
@@ -539,8 +494,8 @@ public slots:
   void plotBoxDiagram();
 
   /// Create a stem plot from a table and return a string representation of it
-  QString stemPlot(Table *t = nullptr, const QString &colName = QString(),
-                   int power = 0, int startRow = 0, int endRow = -1);
+  QString stemPlot(Table *t = nullptr, const QString &colName = QString(), int power = 0, int startRow = 0,
+                   int endRow = -1);
   Note *newStemPlot();
 
   //! Check whether a table is valid for a 3D plot and display an appropriate
@@ -628,8 +583,7 @@ public slots:
   QStringList multilayerDependencies(QWidget *w);
 
   std::string windowGeometryInfo(MdiSubWindow *w);
-  void restoreWindowGeometry(ApplicationWindow *app, MdiSubWindow *w,
-                             const QString &s);
+  void restoreWindowGeometry(ApplicationWindow *app, MdiSubWindow *w, const QString &s);
   void restoreApplicationGeometry();
   void resizeActiveWindow();
   void resizeWindow();
@@ -667,8 +621,7 @@ public slots:
 
   /// Prepares MultiLayer for plotting - creates if necessary, clears, applies
   /// initial settings
-  MultiLayer *prepareMultiLayer(bool &isNew, MultiLayer *window,
-                                const QString &newWindowName = "Graph",
+  MultiLayer *prepareMultiLayer(bool &isNew, MultiLayer *window, const QString &newWindowName = "Graph",
                                 bool clearWindow = false);
 
   void openRecentProject(QAction *action);
@@ -708,8 +661,7 @@ public slots:
   void pickPointerCursor();
   void disableTools();
   void selectMultiPeak(bool showFitPropertyBrowser = true);
-  void selectMultiPeak(MultiLayer *plot, bool showFitPropertyBrowser = true,
-                       double xmin = 0.0, double xmax = 0.0);
+  void selectMultiPeak(MultiLayer *plot, bool showFitPropertyBrowser = true, double xmin = 0.0, double xmax = 0.0);
   void pickDataTool(QAction *action);
 
   void updateLog(const QString &result);
@@ -737,10 +689,8 @@ public slots:
   //@}
 
   void addErrorBars();
-  void defineErrorBars(const QString &name, int type, const QString &percent,
-                       int direction, bool drawAll);
-  void defineErrorBars(const QString &curveName, const QString &errColumnName,
-                       int direction);
+  void defineErrorBars(const QString &name, int type, const QString &percent, int direction, bool drawAll);
+  void defineErrorBars(const QString &curveName, const QString &errColumnName, int direction);
   void removeErrorBars();
   void removeErrorBars(const QString &name);
   void movePoints();
@@ -872,8 +822,7 @@ public slots:
   void moveColumnFirst();
   void moveColumnLast();
 
-  void updateConfirmOptions(bool askTables, bool askMatrixes, bool askPlots2D,
-                            bool askPlots3D, bool askNotes,
+  void updateConfirmOptions(bool askTables, bool askMatrixes, bool askPlots2D, bool askPlots3D, bool askNotes,
                             bool askInstrWindow);
 
   //! \name Plot3D Tools
@@ -998,8 +947,7 @@ public slots:
    *mouse
    *buttom on an item from QListView "lv"
    */
-  void showFolderPopupMenu(QTreeWidgetItem *it, const QPoint &p,
-                           bool fromFolders);
+  void showFolderPopupMenu(QTreeWidgetItem *it, const QPoint &p, bool fromFolders);
 
   //!  connected to the SIGNAL contextMenuRequested from the list views
   void showFolderPopupMenu(const QPoint &p);
@@ -1029,8 +977,7 @@ public slots:
   void appendProject();
   //! Open the specified project file and add it as a subfolder to the
   // parentFolder or to the current folder if no parent folder is specified.
-  Folder *appendProject(const QString &file_name,
-                        Folder *parentFolder = nullptr);
+  Folder *appendProject(const QString &file_name, Folder *parentFolder = nullptr);
   void saveAsProject();
 
   //!  adds a folder list item to the list view "lv"
@@ -1047,8 +994,8 @@ public slots:
   Folder *projectFolder() const;
 
   //!  used by the findDialog
-  void find(const QString &s, bool windowNames, bool labels, bool folderNames,
-            bool caseSensitive, bool partialMatch, bool subfolders);
+  void find(const QString &s, bool windowNames, bool labels, bool folderNames, bool caseSensitive, bool partialMatch,
+            bool subfolders);
 
   void foldersMenuActivated(int id);
   //@}
@@ -1073,10 +1020,8 @@ public slots:
   void activateNewWindow();
 
   //   Methods for Floating windows
-  FloatingWindow *addMdiSubWindowAsFloating(MdiSubWindow *w,
-                                            QPoint pos = QPoint(-1, -1));
-  QMdiSubWindow *addMdiSubWindowAsDocked(MdiSubWindow *w,
-                                         QPoint pos = QPoint(-1, -1));
+  FloatingWindow *addMdiSubWindowAsFloating(MdiSubWindow *w, QPoint pos = QPoint(-1, -1));
+  QMdiSubWindow *addMdiSubWindowAsDocked(MdiSubWindow *w, QPoint pos = QPoint(-1, -1));
   void mdiWindowActivated(MdiSubWindow *w);
   void changeToFloating(MdiSubWindow *w);
   void changeToDocked(MdiSubWindow *w);
@@ -1101,9 +1046,7 @@ public slots:
   /// Show/hide MantidPlot toolbars.
   void setToolbarsVisible(bool visible);
   /// Get a list of serialisable project windows
-  QList<QObject *> getSerialisableWindows() const {
-    return m_serialisableWindows;
-  }
+  QList<QObject *> getSerialisableWindows() const { return m_serialisableWindows; }
   /// Add a serialisable window
   void addSerialisableWindow(QObject *window);
   /// Remove a serialisable window
@@ -1123,8 +1066,7 @@ public slots:
 
   bool isOfType(const QObject *obj, const char *toCompare) const;
 
-  bool loadProjectRecovery(const std::string &sourceFile,
-                           const std::string &recoveryFolder);
+  bool loadProjectRecovery(const std::string &sourceFile, const std::string &recoveryFolder);
 
   // The string must be copied from the other thread in saveProjectRecovery
   /// Saves the current project as part of recovery auto saving
@@ -1149,8 +1091,7 @@ private:
   QMenu *createPopupMenu() override { return nullptr; }
 
   /// this method saves the data on project save
-  void savedatainNexusFormat(const std::string &wsName,
-                             const std::string &fileName);
+  void savedatainNexusFormat(const std::string &wsName, const std::string &fileName);
   QPoint positionNewFloatingWindow(QSize sz) const;
   QPoint mdiAreaTopLeft() const;
   bool shouldExecuteAndQuit(const QString &arg);
@@ -1253,8 +1194,7 @@ private slots:
   /// Open up the FirstRunSetup dialog
   void showFirstTimeSetup();
 
-  ApplicationWindow *loadScript(const QString &fn,
-                                bool existingProject = false);
+  ApplicationWindow *loadScript(const QString &fn, bool existingProject = false);
 
 public:
   // TODO: a lot of this stuff should be private
@@ -1269,8 +1209,7 @@ public:
   //! Flag telling if the application is opening a project file or not
   bool d_opening_file;
   QString customActionsDirPath;
-  bool d_matrix_tool_bar, d_standard_tool_bar, d_column_tool_bar,
-      d_edit_tool_bar;
+  bool d_matrix_tool_bar, d_standard_tool_bar, d_column_tool_bar, d_edit_tool_bar;
   bool d_plot_tool_bar, d_display_tool_bar, d_format_tool_bar;
   bool d_backup_files;
   WindowType d_init_window_type;
@@ -1297,8 +1236,7 @@ public:
   EndLineChar d_ASCII_end_line;
   //! Last selected filter in import ASCII dialog
   QString d_ASCII_file_filter, d_ASCII_comment_string;
-  bool d_import_dec_separators, d_ASCII_import_comments,
-      d_ASCII_import_read_only, d_ASCII_import_preview;
+  bool d_import_dec_separators, d_ASCII_import_comments, d_ASCII_import_read_only, d_ASCII_import_preview;
   int d_ASCII_import_mode, d_preview_lines;
   //! Specifies if only the Tables/Matrices in the current folder should be
   // displayed in the Add/remove curve dialog.
@@ -1354,13 +1292,10 @@ public:
 
   //! Path to the folder where the last template file was opened/saved
   QString templatesDir;
-  bool smooth3DMesh, autoScaleFonts, autoResizeLayers, askForSupport,
-      autoSearchUpdates;
-  bool confirmCloseTable, confirmCloseMatrix, confirmClosePlot2D,
-      confirmClosePlot3D, confirmCloseInstrWindow;
+  bool smooth3DMesh, autoScaleFonts, autoResizeLayers, askForSupport, autoSearchUpdates;
+  bool confirmCloseTable, confirmCloseMatrix, confirmClosePlot2D, confirmClosePlot3D, confirmCloseInstrWindow;
   bool confirmCloseFolder, confirmCloseNotes;
-  bool titleOn, autoSave, autoscale2DPlots, antialiasing2DPlots,
-      fixedAspectRatio2DPlots;
+  bool titleOn, autoSave, autoscale2DPlots, antialiasing2DPlots, fixedAspectRatio2DPlots;
   //! \name User preferences for axes in new 2D plot layers
   //@{
   //! Axes to be shown
@@ -1380,8 +1315,7 @@ public:
   //@}
   bool d_synchronize_graph_scales;
 
-  int majTicksStyle, minTicksStyle, legendFrameStyle, autoSaveTime,
-      canvasFrameWidth;
+  int majTicksStyle, minTicksStyle, legendFrameStyle, autoSaveTime, canvasFrameWidth;
   bool autoDistribution1D;
   QColor legendBackground, legendTextColor, defaultArrowColor;
   int defaultArrowHeadLength, defaultArrowHeadAngle;
@@ -1397,22 +1331,19 @@ public:
   /// form Add Error bars dialog
   bool drawAllErrors;
   QFont appFont, plot3DTitleFont, plot3DNumbersFont, plot3DAxesFont;
-  QFont tableTextFont, tableHeaderFont, plotAxesFont, plotLegendFont,
-      plotNumbersFont, plotTitleFont;
+  QFont tableTextFont, tableHeaderFont, plotAxesFont, plotLegendFont, plotNumbersFont, plotTitleFont;
   QColor tableBkgdColor, tableTextColor, tableHeaderColor;
   QString projectname, columnSeparator, helpFilePath, appLanguage;
-  QString configFilePath, fitPluginsPath, fitModelsPath, asciiDirPath,
-      imagesDirPath, scriptsDirPath;
+  QString configFilePath, fitPluginsPath, fitModelsPath, asciiDirPath, imagesDirPath, scriptsDirPath;
   int ignoredLines, savingTimerId, plot3DResolution;
   bool renameColumns, strip_spaces, simplify_spaces;
   QStringList recentProjects, recentFiles;
-  bool saved, showPlot3DProjection, showPlot3DLegend, orthogonal3DPlots,
-      autoscale3DPlots;
+  bool saved, showPlot3DProjection, showPlot3DLegend, orthogonal3DPlots, autoscale3DPlots;
   QStringList plot3DColors, locales;
   QStringList functions; // user-defined functions;
   QStringList xFunctions, yFunctions, rFunctions,
-      thetaFunctions;      // user functions for parametric and polar plots
-  QStringList surfaceFunc; // user-defined surface functions;
+      thetaFunctions;               // user functions for parametric and polar plots
+  QStringList surfaceFunc;          // user-defined surface functions;
   QStringList d_param_surface_func; // user-defined parametric surface
                                     // functions;
   //! List of tables and matrices renamed in order to avoid conflicts when
@@ -1494,125 +1425,90 @@ private:
 
   QMenu *help, *plot2DMenu, *analysisMenu, *icat;
   QMenu *matrixMenu, *plot3DMenu, *plotDataMenu, *tablesDepend, *scriptingMenu;
-  QMenu *tableMenu, *fillMenu, *normMenu, *newMenu, *exportPlotMenu,
-      *smoothMenu, *filterMenu, *decayMenu, *saveMenu, *openMenu, *toolbarsMenu;
+  QMenu *tableMenu, *fillMenu, *normMenu, *newMenu, *exportPlotMenu, *smoothMenu, *filterMenu, *decayMenu, *saveMenu,
+      *openMenu, *toolbarsMenu;
   QMenu *tiledWindowMenu;
 
-  QAction *actionFileTools, *actionPlotTools, *actionDisplayBar,
-      *actionFormatToolBar;
-  QAction *actionEditCurveRange, *actionCurveFullRange, *actionShowAllCurves,
-      *actionHideCurve, *actionHideOtherCurves;
-  QAction *actionEditFunction, *actionRemoveCurve, *actionShowCurveWorksheet,
-      *actionShowCurvePlotDialog;
-  QAction *actionNewProject, *actionNewNote, *actionNewTable,
-      *actionNewFunctionPlot, *actionSaveFile;
+  QAction *actionFileTools, *actionPlotTools, *actionDisplayBar, *actionFormatToolBar;
+  QAction *actionEditCurveRange, *actionCurveFullRange, *actionShowAllCurves, *actionHideCurve, *actionHideOtherCurves;
+  QAction *actionEditFunction, *actionRemoveCurve, *actionShowCurveWorksheet, *actionShowCurvePlotDialog;
+  QAction *actionNewProject, *actionNewNote, *actionNewTable, *actionNewFunctionPlot, *actionSaveFile;
   QAction *actionNewSurfacePlot, *actionNewMatrix,
       *actionNewGraph; //, *actionNewFolder;
-  QAction *actionOpen, *actionLoadImage, *actionScriptRepo, *actionSaveProject,
-      *actionSaveProjectAs, *actionImportImage, *actionLoadFile,
-      *actionOpenProj;
+  QAction *actionOpen, *actionLoadImage, *actionScriptRepo, *actionSaveProject, *actionSaveProjectAs,
+      *actionImportImage, *actionLoadFile, *actionOpenProj;
   QAction *actionLoad;
   QAction *actionCopyWindow, *actionShowAllColumns, *actionHideSelectedColumns;
-  QAction *actionCutSelection, *actionCopySelection, *actionPasteSelection,
-      *actionClearSelection;
-  QAction *actionShowExplorer, *actionShowLog, *actionAddLayer,
-      *actionShowLayerDialog, *actionAutomaticLayout, *actionclearAllMemory;
-  QAction *actionCatalogLogin, *actionCatalogSearch, *actionCatalogPublish,
-      *actionCatalogLogout;
-  QAction *actionSwapColumns, *actionMoveColRight, *actionMoveColLeft,
-      *actionMoveColFirst, *actionMoveColLast;
-  QAction *actionExportGraph, *actionExportAllGraphs, *actionPrint,
-      *actionPrintAllPlots, *actionShowExportASCIIDialog;
+  QAction *actionCutSelection, *actionCopySelection, *actionPasteSelection, *actionClearSelection;
+  QAction *actionShowExplorer, *actionShowLog, *actionAddLayer, *actionShowLayerDialog, *actionAutomaticLayout,
+      *actionclearAllMemory;
+  QAction *actionCatalogLogin, *actionCatalogSearch, *actionCatalogPublish, *actionCatalogLogout;
+  QAction *actionSwapColumns, *actionMoveColRight, *actionMoveColLeft, *actionMoveColFirst, *actionMoveColLast;
+  QAction *actionExportGraph, *actionExportAllGraphs, *actionPrint, *actionPrintAllPlots, *actionShowExportASCIIDialog;
   QAction *actionExportPDF, *actionReadOnlyCol, *actionStemPlot;
-  QAction *actionCloseAllWindows, *actionShowPlotWizard,
-      *actionShowConfigureDialog;
-  QAction *actionShowCurvesDialog, *actionAddErrorBars, *actionRemoveErrorBars,
-      *actionAddFunctionCurve, *actionUnzoom, *actionNewLegend, *actionAddImage;
-  QAction *actionPlotL, *actionPlotP, *actionPlotLP,
-      *actionPlotVerticalDropLines, *actionPlotSpline;
+  QAction *actionCloseAllWindows, *actionShowPlotWizard, *actionShowConfigureDialog;
+  QAction *actionShowCurvesDialog, *actionAddErrorBars, *actionRemoveErrorBars, *actionAddFunctionCurve, *actionUnzoom,
+      *actionNewLegend, *actionAddImage;
+  QAction *actionPlotL, *actionPlotP, *actionPlotLP, *actionPlotVerticalDropLines, *actionPlotSpline;
   QAction *actionPlotVertSteps, *actionPlotHorSteps, *actionPlotVerticalBars;
-  QAction *actionPlotHorizontalBars, *actionPlotArea, *actionPlotPie,
-      *actionPlotVectXYAM, *actionPlotVectXYXY;
-  QAction *actionPlotHistogram, *actionPlotStackedHistograms,
-      *actionPlot2VerticalLayers, *actionPlot2HorizontalLayers,
+  QAction *actionPlotHorizontalBars, *actionPlotArea, *actionPlotPie, *actionPlotVectXYAM, *actionPlotVectXYXY;
+  QAction *actionPlotHistogram, *actionPlotStackedHistograms, *actionPlot2VerticalLayers, *actionPlot2HorizontalLayers,
       *actionPlot4Layers, *actionPlotStackedLayers;
-  QAction *actionPlot3DRibbon, *actionPlot3DBars, *actionPlot3DScatter,
-      *actionPlot3DTrajectory;
-  QAction *actionShowColStatistics, *actionShowRowStatistics,
-      *actionShowIntDialog, *actionIntegrate;
+  QAction *actionPlot3DRibbon, *actionPlot3DBars, *actionPlot3DScatter, *actionPlot3DTrajectory;
+  QAction *actionShowColStatistics, *actionShowRowStatistics, *actionShowIntDialog, *actionIntegrate;
   QAction *actionDifferentiate, *actionFitLinear, *actionShowFitPolynomDialog;
-  QAction *actionShowExpDecayDialog, *actionShowTwoExpDecayDialog,
-      *actionShowExpDecay3Dialog;
-  QAction *actionFitExpGrowth, *actionFitSigmoidal, *actionFitGauss,
-      *actionFitLorentz, *actionShowFitDialog;
+  QAction *actionShowExpDecayDialog, *actionShowTwoExpDecayDialog, *actionShowExpDecay3Dialog;
+  QAction *actionFitExpGrowth, *actionFitSigmoidal, *actionFitGauss, *actionFitLorentz, *actionShowFitDialog;
   QAction *actionShowAxisDialog, *actionShowTitleDialog;
-  QAction *actionShowColumnOptionsDialog, *actionShowColumnValuesDialog,
-      *actionShowColsDialog, *actionShowRowsDialog;
+  QAction *actionShowColumnOptionsDialog, *actionShowColumnValuesDialog, *actionShowColsDialog, *actionShowRowsDialog;
   QAction *actionTableRecalculate;
-  QAction *actionAbout, *actionShowHelp, *actionChooseHelpFolder,
-      *actionMantidConcepts, *actionMantidAlgorithms, *actionmantidplotHelp;
-  QAction *actionRename, *actionCloseWindow, *actionConvertTable,
-      *actionConvertTableToWorkspace, *actionConvertTableToMatrixWorkspace;
+  QAction *actionAbout, *actionShowHelp, *actionChooseHelpFolder, *actionMantidConcepts, *actionMantidAlgorithms,
+      *actionmantidplotHelp;
+  QAction *actionRename, *actionCloseWindow, *actionConvertTable, *actionConvertTableToWorkspace,
+      *actionConvertTableToMatrixWorkspace;
   QAction *actionAddColToTable, *actionDeleteLayer, *actionInterpolate;
   QAction *actionResizeActiveWindow, *actionHideActiveWindow;
-  QAction *actionShowMoreWindows, *actionPixelLineProfile,
-      *actionIntensityTable;
+  QAction *actionShowMoreWindows, *actionPixelLineProfile, *actionIntensityTable;
   QAction *actionShowLineDialog, *actionShowImageDialog, *actionShowTextDialog;
-  QAction *actionActivateWindow, *actionMinimizeWindow, *actionMaximizeWindow,
-      *actionHideWindow, *actionResizeWindow;
+  QAction *actionActivateWindow, *actionMinimizeWindow, *actionMaximizeWindow, *actionHideWindow, *actionResizeWindow;
   QAction *actionEditSurfacePlot, *actionAdd3DData;
-  QAction *actionMatrixDeterminant, *actionSetMatrixProperties,
-      *actionConvertMatrixXYZ, *actionConvertMatrixYXZ;
-  QAction *actionSetMatrixDimensions, *actionConvertMatrixDirect,
-      *actionSetMatrixValues, *actionTransposeMatrix, *actionInvertMatrix;
-  QAction *actionPlot3DWireFrame, *actionPlot3DHiddenLine,
-      *actionPlot3DPolygons, *actionPlot3DWireSurface;
-  QAction *actionColorMap, *actionContourMap, *actionGrayMap,
-      *actionNoContourColorMap;
+  QAction *actionMatrixDeterminant, *actionSetMatrixProperties, *actionConvertMatrixXYZ, *actionConvertMatrixYXZ;
+  QAction *actionSetMatrixDimensions, *actionConvertMatrixDirect, *actionSetMatrixValues, *actionTransposeMatrix,
+      *actionInvertMatrix;
+  QAction *actionPlot3DWireFrame, *actionPlot3DHiddenLine, *actionPlot3DPolygons, *actionPlot3DWireSurface;
+  QAction *actionColorMap, *actionContourMap, *actionGrayMap, *actionNoContourColorMap;
   QAction *actionDeleteFitTables, *actionShowGridDialog, *actionTimeStamp;
-  QAction *actionSmoothSavGol, *actionSmoothFFT, *actionSmoothAverage,
-      *actionFFT;
-  QAction *actionLowPassFilter, *actionHighPassFilter, *actionBandPassFilter,
-      *actionBandBlockFilter;
+  QAction *actionSmoothSavGol, *actionSmoothFFT, *actionSmoothAverage, *actionFFT;
+  QAction *actionLowPassFilter, *actionHighPassFilter, *actionBandPassFilter, *actionBandBlockFilter;
   QAction *actionSortTable, *actionSortSelection, *actionNormalizeSelection;
-  QAction *actionNormalizeTable, *actionConvolute, *actionDeconvolute,
-      *actionCorrelate, *actionAutoCorrelate;
+  QAction *actionNormalizeTable, *actionConvolute, *actionDeconvolute, *actionCorrelate, *actionAutoCorrelate;
   QAction *actionSetAscValues, *actionSetRandomValues;
-  QAction *actionSetXCol, *actionSetYCol, *actionSetZCol, *actionSetLabelCol,
-      *actionDisregardCol, *actionSetXErrCol, *actionSetYErrCol;
+  QAction *actionSetXCol, *actionSetYCol, *actionSetZCol, *actionSetLabelCol, *actionDisregardCol, *actionSetXErrCol,
+      *actionSetYErrCol;
   QAction *actionBoxPlot, *actionCheckUpdates;
-  QAction *actionDonate, *actionHomePage, *actionDownloadManual,
-      *actionTechnicalSupport, *actionTranslations;
+  QAction *actionDonate, *actionHomePage, *actionDownloadManual, *actionTechnicalSupport, *actionTranslations;
   QAction *actionHelpForums, *actionHelpBugReports, *actionAskHelp;
   QAction *actionShowPlotDialog, *actionShowScaleDialog;
   QAction *actionNextWindow, *actionPrevWindow;
-  QAction *actionScriptingLang, *actionClearTable, *actionGoToRow,
-      *actionGoToColumn;
+  QAction *actionScriptingLang, *actionClearTable, *actionGoToRow, *actionGoToColumn;
   QAction *actionSaveNote;
   QAction *actionShowScriptWindow, *actionShowScriptInterpreter;
-  QAction *actionAnimate, *actionPerspective, *actionFitFrame,
-      *actionResetRotation;
+  QAction *actionAnimate, *actionPerspective, *actionFitFrame, *actionResetRotation;
   QAction *actionDeleteRows, *actionDrawPoints;
-  QAction *btnCursor, *btnPicker, *btnRemovePoints, *btnMovePoints,
-      *btnMultiPeakPick;
+  QAction *btnCursor, *btnPicker, *btnRemovePoints, *btnMovePoints, *btnMultiPeakPick;
   QAction *btnZoomIn, *btnZoomOut, *btnPointer, *btnLine, *btnArrow, *btnLabel;
-  QAction *actionFlipMatrixVertically, *actionFlipMatrixHorizontally,
-      *actionRotateMatrix;
+  QAction *actionFlipMatrixVertically, *actionFlipMatrixHorizontally, *actionRotateMatrix;
   QAction *actionViewMatrixImage, *actionViewMatrix, *actionExportMatrix;
-  QAction *actionMatrixGrayScale, *actionMatrixRainbowScale,
-      *actionMatrixCustomScale, *actionRotateMatrixMinus;
+  QAction *actionMatrixGrayScale, *actionMatrixRainbowScale, *actionMatrixCustomScale, *actionRotateMatrixMinus;
   QAction *actionMatrixXY, *actionMatrixColumnRow, *actionImagePlot;
   QAction *actionMatrixFFTDirect, *actionMatrixFFTInverse;
   QAction *actionFontBold, *actionFontItalic, *actionFontBox, *actionFontSize;
-  QAction *actionSuperscript, *actionSubscript, *actionUnderline,
-      *actionGreekSymbol, *actionCustomActionDialog, *actionManageDirs,
-      *actionFirstTimeSetup;
+  QAction *actionSuperscript, *actionSubscript, *actionUnderline, *actionGreekSymbol, *actionCustomActionDialog,
+      *actionManageDirs, *actionFirstTimeSetup;
   QAction *actionGreekMajSymbol, *actionMathSymbol;
   QAction *Box, *Frame, *None;
-  QAction *front, *back, *right, *left, *ceil, *floor, *floordata, *flooriso,
-      *floornone;
-  QAction *wireframe, *hiddenline, *polygon, *filledmesh, *pointstyle,
-      *barstyle, *conestyle, *crossHairStyle;
+  QAction *front, *back, *right, *left, *ceil, *floor, *floordata, *flooriso, *floornone;
+  QAction *wireframe, *hiddenline, *polygon, *filledmesh, *pointstyle, *barstyle, *conestyle, *crossHairStyle;
   QActionGroup *coord, *floorstyle, *grids, *plotstyle, *dataTools;
   QAction *actionPanPlot;
   QAction *actionWaterfallPlot;

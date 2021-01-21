@@ -26,8 +26,7 @@ using namespace Mantid;
 using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets;
 
-InstrumentWindow::InstrumentWindow(const QString &wsName, const QString &label,
-                                   ApplicationWindow *parent,
+InstrumentWindow::InstrumentWindow(const QString &wsName, const QString &label, ApplicationWindow *parent,
                                    const QString &name)
     : MdiSubWindow(parent, label, name, nullptr) {
 
@@ -36,12 +35,10 @@ InstrumentWindow::InstrumentWindow(const QString &wsName, const QString &label,
   confirmClose(parent->confirmCloseInstrWindow);
   resize(m_instrumentWidget->size());
 
-  connect(m_instrumentWidget, SIGNAL(preDeletingHandle()), this,
-          SLOT(closeSafely()));
-  connect(m_instrumentWidget, SIGNAL(clearingHandle()), this,
-          SLOT(closeSafely()));
-  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      Mantid::Kernel::FeatureType::Interface, "InstrumentView", false);
+  connect(m_instrumentWidget, SIGNAL(preDeletingHandle()), this, SLOT(closeSafely()));
+  connect(m_instrumentWidget, SIGNAL(clearingHandle()), this, SLOT(closeSafely()));
+  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(Mantid::Kernel::FeatureType::Interface,
+                                                                "InstrumentView", false);
 }
 
 InstrumentWindow::~InstrumentWindow() {}
@@ -53,8 +50,8 @@ InstrumentWindow::~InstrumentWindow() {}
  * @param fileVersion :: version of the Mantid project file
  * @return handle to the created instrument window
  */
-MantidQt::API::IProjectSerialisable *InstrumentWindow::loadFromProject(
-    const std::string &lines, ApplicationWindow *app, const int fileVersion) {
+MantidQt::API::IProjectSerialisable *InstrumentWindow::loadFromProject(const std::string &lines, ApplicationWindow *app,
+                                                                       const int fileVersion) {
   Q_UNUSED(fileVersion);
 
   MantidQt::API::TSVSerialiser tsv(lines);
@@ -74,8 +71,7 @@ MantidQt::API::IProjectSerialisable *InstrumentWindow::loadFromProject(
   auto instr = ws->getInstrument();
   if (!instr || instr->getName().empty()) {
     QApplication::restoreOverrideCursor();
-    QMessageBox::critical(app, "MantidPlot - Error",
-                          "Instrument view cannot be opened");
+    QMessageBox::critical(app, "MantidPlot - Error", "Instrument view cannot be opened");
     return nullptr;
   }
 
@@ -97,8 +93,7 @@ MantidQt::API::IProjectSerialisable *InstrumentWindow::loadFromProject(
     return iw;
   } catch (const std::exception &e) {
     QApplication::restoreOverrideCursor();
-    QString errorMessage =
-        "Instrument view cannot be created:\n\n" + QString(e.what());
+    QString errorMessage = "Instrument view cannot be created:\n\n" + QString(e.what());
     QMessageBox::critical(app, "MantidPlot - Error", errorMessage);
   }
 
@@ -109,9 +104,7 @@ std::vector<std::string> InstrumentWindow::getWorkspaceNames() {
   return {m_instrumentWidget->getWorkspaceNameStdString()};
 }
 
-std::string InstrumentWindow::getWindowName() {
-  return m_instrumentWidget->windowTitle().toStdString();
-}
+std::string InstrumentWindow::getWindowName() { return m_instrumentWidget->windowTitle().toStdString(); }
 
 /**
  * Save the state of the instrument window to a Mantid project file
@@ -127,13 +120,9 @@ std::string InstrumentWindow::saveToProject(ApplicationWindow *app) {
   return tsv.outputLines();
 }
 
-void InstrumentWindow::selectTab(int tab) {
-  return m_instrumentWidget->selectTab(tab);
-}
+void InstrumentWindow::selectTab(int tab) { return m_instrumentWidget->selectTab(tab); }
 
-InstrumentWidgetTab *InstrumentWindow::getTab(const QString &title) const {
-  return m_instrumentWidget->getTab(title);
-}
+InstrumentWidgetTab *InstrumentWindow::getTab(const QString &title) const { return m_instrumentWidget->getTab(title); }
 
 InstrumentWidgetTab *InstrumentWindow::getTab(int tab) const {
   return m_instrumentWidget->getTab((InstrumentWidget::Tab)tab);
@@ -143,17 +132,11 @@ void InstrumentWindow::setBinRange(double min_value, double max_value) {
   return m_instrumentWidget->setBinRange(min_value, max_value);
 }
 
-bool InstrumentWindow::overlay(const QString &wsName) {
-  return m_instrumentWidget->overlay(wsName);
-}
+bool InstrumentWindow::overlay(const QString &wsName) { return m_instrumentWidget->overlay(wsName); }
 
-void InstrumentWindow::changeColormap() {
-  return m_instrumentWidget->changeColormap();
-}
+void InstrumentWindow::changeColormap() { return m_instrumentWidget->changeColormap(); }
 
-void InstrumentWindow::changeColormap(const QString &file) {
-  return m_instrumentWidget->changeColormap(file);
-}
+void InstrumentWindow::changeColormap(const QString &file) { return m_instrumentWidget->changeColormap(file); }
 
 void InstrumentWindow::setColorMapMinValue(double min_value) {
   return m_instrumentWidget->setColorMapMinValue(min_value);
@@ -167,18 +150,13 @@ void InstrumentWindow::setColorMapRange(double min_value, double max_value) {
   return m_instrumentWidget->setColorMapRange(min_value, max_value);
 }
 
-void InstrumentWindow::selectComponent(const QString &name) {
-  return m_instrumentWidget->selectComponent(name);
-}
+void InstrumentWindow::selectComponent(const QString &name) { return m_instrumentWidget->selectComponent(name); }
 
 void InstrumentWindow::setScaleType(GraphOptions::ScaleType type) {
-  return m_instrumentWidget->setScaleType(
-      static_cast<MantidColorMap::ScaleType>(type));
+  return m_instrumentWidget->setScaleType(static_cast<MantidColorMap::ScaleType>(type));
 }
 
-void InstrumentWindow::setViewType(const QString &type) {
-  return m_instrumentWidget->setViewType(type);
-}
+void InstrumentWindow::setViewType(const QString &type) { return m_instrumentWidget->setViewType(type); }
 
 void InstrumentWindow::closeSafely() {
   confirmClose(false);

@@ -46,13 +46,11 @@ class MatrixModel;
 
 class PreviewTable : public QTableWidget {
 public:
-  PreviewTable(int numRows, int numCols, QWidget *parent = nullptr,
-               const char *name = nullptr);
+  PreviewTable(int numRows, int numCols, QWidget *parent = nullptr, const char *name = nullptr);
 
-  void importASCII(const QString &fname, const QString &sep, int ignoredLines,
-                   bool renameCols, bool stripSpaces, bool simplifySpaces,
-                   bool importComments, const QString &commentString,
-                   int importMode, int endLine, int maxRows);
+  void importASCII(const QString &fname, const QString &sep, int ignoredLines, bool renameCols, bool stripSpaces,
+                   bool simplifySpaces, bool importComments, const QString &commentString, int importMode, int endLine,
+                   int maxRows);
   QString text(int row, int col) const;
   void setText(int row, int col, const QString &txt);
   void insertColumns(int col, int count = 1);
@@ -76,10 +74,8 @@ class PreviewMatrix : public QTableView {
 public:
   PreviewMatrix(QWidget *parent, Matrix *m = nullptr);
 
-  void importASCII(const QString &fname, const QString &sep, int ignoredLines,
-                   bool stripSpaces, bool simplifySpaces,
-                   const QString &commentString, int importAs,
-                   const QLocale &locale, int endLine, int maxRows);
+  void importASCII(const QString &fname, const QString &sep, int ignoredLines, bool stripSpaces, bool simplifySpaces,
+                   const QString &commentString, int importAs, const QLocale &locale, int endLine, int maxRows);
 
   void clear();
 
@@ -103,7 +99,7 @@ public:
     NewWorkspace, //!< create a new workspace  for each file
     NewColumns,   //!< add each file as new columns to the current table
     NewRows,      //!< add each file as new rows to the current table
-    Overwrite //!< replace content of current table with the selected file (like
+    Overwrite     //!< replace content of current table with the selected file (like
     // importing a single file in previous versions of QtiPlot)
 
   };
@@ -115,18 +111,14 @@ public:
    * @param extended :: flag: show/hide the advanced options on start-up
    * @param flags :: window flags
    */
-  ImportASCIIDialog(bool new_windows_only, QWidget *parent = nullptr,
-                    bool extended = true,
-                    const Qt::WFlags &flags = Qt::WindowCloseButtonHint |
-                                              Qt::WindowType::WindowTitleHint);
+  ImportASCIIDialog(bool new_windows_only, QWidget *parent = nullptr, bool extended = true,
+                    const Qt::WFlags &flags = Qt::WindowCloseButtonHint | Qt::WindowType::WindowTitleHint);
 
   //! Return the selected import mode
   /**
    * \sa ImportMode
    */
-  ImportMode importMode() const {
-    return (ImportMode)d_import_mode->currentIndex();
-  }
+  ImportMode importMode() const { return (ImportMode)d_import_mode->currentIndex(); }
   //! Return the selected column separator.
   const QString columnSeparator() const;
   //! Return the number of lines to be skipped at the start of each file.
@@ -148,9 +140,7 @@ public:
   QLocale decimalSeparators();
   //! Whether the user wants the decimal separators to be changed to application
   // settings.
-  bool updateDecimalSeparators() const {
-    return d_import_dec_separators->isChecked();
-  };
+  bool updateDecimalSeparators() const { return d_import_dec_separators->isChecked(); };
 
   //! Returns a string used to comment lines when importing ASCII files
   QString commentString() { return d_comment_string->text(); };
@@ -191,11 +181,9 @@ private:
   QCheckBox *d_read_only, *d_import_dec_separators;
   QPushButton *d_help_button;
   // the actual options
-  QComboBox *d_import_mode, *d_column_separator, *boxDecimalSeparator,
-      *boxEndLine;
+  QComboBox *d_import_mode, *d_column_separator, *boxDecimalSeparator, *boxEndLine;
   QSpinBox *d_ignored_lines, *d_preview_lines_box;
-  QCheckBox *d_rename_columns, *d_simplify_spaces, *d_strip_spaces,
-      *d_import_comments;
+  QCheckBox *d_rename_columns, *d_simplify_spaces, *d_strip_spaces, *d_import_comments;
   QLineEdit *d_comment_string;
   PreviewTable *d_preview_table;
   PreviewMatrix *d_preview_matrix;

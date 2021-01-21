@@ -50,9 +50,8 @@ This class represents the central widget for handling VATES visualization
 operations for 3D and 4D datasets.
 @date 11/08/2011
 */
-class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS MdViewerWidget
-    : public MantidQt::API::VatesViewerInterface,
-      MantidQt::API::WorkspaceObserver {
+class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS MdViewerWidget : public MantidQt::API::VatesViewerInterface,
+                                                                    MantidQt::API::WorkspaceObserver {
   Q_OBJECT
 
 public:
@@ -70,8 +69,7 @@ public:
   /// Filter events to check for hide.
   bool eventFilter(QObject *obj, QEvent *ev) override;
   /// See MantidQt::API::VatesViewerInterface
-  void renderWorkspace(QString workspaceName, int workspaceType,
-                       std::string instrumentName) override;
+  void renderWorkspace(QString workspaceName, int workspaceType, std::string instrumentName) override;
   /// See MantidQt::API::VatesViewerInterface
   void setupPluginMode(int WsType, const std::string &instrumentName) override;
   /// Load the state of the window from a Mantid project file
@@ -111,21 +109,16 @@ protected slots:
   /// On  unbin
   void onUnbin();
   /// On switching an MDEvent source to a temporary source.
-  void onSwitchSources(std::string rebinnedWorkspaceName,
-                       std::string sourceType);
+  void onSwitchSources(std::string rebinnedWorkspaceName, std::string sourceType);
   /// reset state of all the views
   void onResetViewsStateToAllData();
   void showOutputWidget();
 
 protected:
   /// Handle workspace preDeletion tasks.
-  void
-  preDeleteHandle(const std::string &wsName,
-                  const std::shared_ptr<Mantid::API::Workspace> &ws) override;
+  void preDeleteHandle(const std::string &wsName, const std::shared_ptr<Mantid::API::Workspace> &ws) override;
   /// Handle workspace replacement tasks.
-  void afterReplaceHandle(
-      const std::string &wsName,
-      const std::shared_ptr<Mantid::API::Workspace> &ws) override;
+  void afterReplaceHandle(const std::string &wsName, const std::shared_ptr<Mantid::API::Workspace> &ws) override;
   /// Detects if something is dragged onto the VSI
   void dragEnterEvent(QDragEnterEvent *e) override;
   /// Reacts to something being dropped onto the VSI
@@ -140,34 +133,29 @@ private:
   ViewBase *hiddenView;  ///< Holder for the view that is being switched from
   bool viewSwitched;
 
-  pqLoadDataReaction *dataLoader; ///< Holder for the load data reaction
-  double lodThreshold; ///< Default value for the LOD threshold (5 MB)
-  QAction *lodAction;  ///< Holder for the LOD threshold menu item
-  bool pluginMode;     ///< Flag to say widget is in plugin mode
-  RotationPointDialog *rotPointDialog; ///< Holder for the rotation point dialog
-  pqSaveScreenshotReaction *screenShot; ///< Holder for the screen shot reaction
-  Ui::MdViewerWidgetClass ui;           ///< The MD viewer's UI form
-  QHBoxLayout *viewLayout;              ///< Layout manager for the view widget
-  pqApplicationSettingsReaction
-      *viewSettings; ///< Holder for the view settings reaction
+  pqLoadDataReaction *dataLoader;              ///< Holder for the load data reaction
+  double lodThreshold;                         ///< Default value for the LOD threshold (5 MB)
+  QAction *lodAction;                          ///< Holder for the LOD threshold menu item
+  bool pluginMode;                             ///< Flag to say widget is in plugin mode
+  RotationPointDialog *rotPointDialog;         ///< Holder for the rotation point dialog
+  pqSaveScreenshotReaction *screenShot;        ///< Holder for the screen shot reaction
+  Ui::MdViewerWidgetClass ui;                  ///< The MD viewer's UI form
+  QHBoxLayout *viewLayout;                     ///< Layout manager for the view widget
+  pqApplicationSettingsReaction *viewSettings; ///< Holder for the view settings reaction
   bool useCurrentColorSettings;
-  ModeControlWidget::Views initialView; ///< Holds the initial view
-  MantidQt::API::MdSettings
-      mdSettings; ///< Holds the MD settings which are used to persist data
-  MantidQt::API::MdConstants mdConstants; /// < Holds the MD constants
+  ModeControlWidget::Views initialView;                        ///< Holds the initial view
+  MantidQt::API::MdSettings mdSettings;                        ///< Holds the MD settings which are used to persist data
+  MantidQt::API::MdConstants mdConstants;                      /// < Holds the MD constants
   RebinAlgorithmDialogProvider m_rebinAlgorithmDialogProvider; ///< Provides
                                                                /// dialogs to
                                                                /// execute rebin
                                                                /// algorithms
-  RebinnedSourcesManager
-      m_rebinnedSourcesManager;          ///< Holds the rebinned sources manager
-  QString m_rebinnedWorkspaceIdentifier; ///< Holds the identifier for temporary
-                                         /// workspaces
-  ColorMapEditorPanel
-      *m_colorMapEditorPanel; ///< Holder for the color map editor panel.
-  bool m_gridAxesStartUpOn;   /// flag for the initial grid axes setting
-  Mantid::VATES::ColorScaleLock
-      m_colorScaleLock; ///< Holds a color scale lock object
+  RebinnedSourcesManager m_rebinnedSourcesManager;             ///< Holds the rebinned sources manager
+  QString m_rebinnedWorkspaceIdentifier;                       ///< Holds the identifier for temporary
+                                                               /// workspaces
+  ColorMapEditorPanel *m_colorMapEditorPanel;                  ///< Holder for the color map editor panel.
+  bool m_gridAxesStartUpOn;                                    /// flag for the initial grid axes setting
+  Mantid::VATES::ColorScaleLock m_colorScaleLock;              ///< Holds a color scale lock object
 
   /// Holds the 'visual state' of the views. This relies on Load/SaveXMLState
   /// which
@@ -209,36 +197,27 @@ private:
   /// Creates the UI and mode switch connection.
   void setupUiAndConnections();
   /// Create the requested view.
-  ViewBase *createAndSetMainViewWidget(QWidget *container,
-                                       ModeControlWidget::Views v,
-                                       bool createRenderProxy = true);
+  ViewBase *createAndSetMainViewWidget(QWidget *container, ModeControlWidget::Views v, bool createRenderProxy = true);
   /// Helper function to swap current and hidden view pointers.
   void swapViews();
   /// Update the state of application widgets.
   void updateAppState();
   /// Get the initial view for the current workspace and user setting
-  ModeControlWidget::Views getInitialView(int workspaceType,
-                                          const std::string &instrumentName);
+  ModeControlWidget::Views getInitialView(int workspaceType, const std::string &instrumentName);
   /// Check that the view is valid for teh workspace type
-  ModeControlWidget::Views
-  checkViewAgainstWorkspace(ModeControlWidget::Views view, int workspaceType);
+  ModeControlWidget::Views checkViewAgainstWorkspace(ModeControlWidget::Views view, int workspaceType);
   /// Get the technique associated with an instrument.
-  const std::string
-  getTechniqueForInstrument(const std::string &instrumentName) const;
+  const std::string getTechniqueForInstrument(const std::string &instrumentName) const;
   /// Get the view for a specified instrument
   QString getViewForInstrument(const std::string &instrument) const;
   /// Check if a technique contains a keyword
-  bool checkIfTechniqueContainsKeyword(const std::set<std::string> &techniques,
-                                       const std::string &keyword) const;
+  bool checkIfTechniqueContainsKeyword(const std::set<std::string> &techniques, const std::string &keyword) const;
   /// Reset the current view to the appropriate initial view.
   void resetCurrentView(int workspaceType, const std::string &instrumentName);
   /// Render rebinned workspace
-  pqPipelineSource *
-  prepareRebinnedWorkspace(const std::string &rebinnedWorkspaceName,
-                           const std::string &sourceType);
+  pqPipelineSource *prepareRebinnedWorkspace(const std::string &rebinnedWorkspaceName, const std::string &sourceType);
   /// Handle drag and drop of peaks workspcaes
-  void handleDragAndDropPeaksWorkspaces(QEvent *e, const QString &text,
-                                        QStringList &wsNames);
+  void handleDragAndDropPeaksWorkspaces(QEvent *e, const QString &text, QStringList &wsNames);
   /// Set up the default color for the background of the view.
   void setColorForBackground();
   /// Sets axes colors that are visible against the background.
@@ -246,13 +225,11 @@ private:
   /// Set the color map
   void setColorMap();
   /// Render the original workspace
-  pqPipelineSource *
-  renderOriginalWorkspace(const std::string &originalWorkspaceName);
+  pqPipelineSource *renderOriginalWorkspace(const std::string &originalWorkspaceName);
 
   /// Remove the rebinning when switching views or otherwise.
-  void
-  removeRebinning(pqPipelineSource *source, bool forced,
-                  ModeControlWidget::Views view = ModeControlWidget::STANDARD);
+  void removeRebinning(pqPipelineSource *source, bool forced,
+                       ModeControlWidget::Views view = ModeControlWidget::STANDARD);
   /// Remove all rebinned sources
   void removeAllRebinning(ModeControlWidget::Views view);
   /// Sets a listener for when sources are being destroyed

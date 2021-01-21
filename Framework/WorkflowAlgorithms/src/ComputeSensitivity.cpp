@@ -27,18 +27,13 @@ using namespace API;
 using namespace DataObjects;
 
 void ComputeSensitivity::init() {
-  declareProperty(std::make_unique<API::FileProperty>(
-                      "Filename", "", API::FileProperty::Load, "_event.nxs"),
+  declareProperty(std::make_unique<API::FileProperty>("Filename", "", API::FileProperty::Load, "_event.nxs"),
                   "Flood field or sensitivity file.");
-  declareProperty(std::make_unique<WorkspaceProperty<>>("PatchWorkspace", "",
-                                                        Direction::Input,
-                                                        PropertyMode::Optional),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("PatchWorkspace", "", Direction::Input, PropertyMode::Optional),
                   "Workspace defining the area of the detector to be patched. "
                   "All masked pixels in this workspace will be patched.");
-  declareProperty("ReductionProperties", "__eqsans_reduction_properties",
-                  Direction::Input);
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty("ReductionProperties", "__eqsans_reduction_properties", Direction::Input);
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "Workspace containing the sensitivity correction.");
   declareProperty("OutputMessage", "", Direction::Output);
 }
@@ -57,10 +52,8 @@ void ComputeSensitivity::exec() {
     // const std::string algTxt =
     // reductionManager->getPropertyValue("SANSBeamFinderAlgorithm");
 
-    IAlgorithm_sptr ctrAlg =
-        reductionManager->getProperty("SANSBeamFinderAlgorithm");
-    ctrAlg->setPropertyValue("ReductionProperties",
-                             getPropertyValue("ReductionProperties"));
+    IAlgorithm_sptr ctrAlg = reductionManager->getProperty("SANSBeamFinderAlgorithm");
+    ctrAlg->setPropertyValue("ReductionProperties", getPropertyValue("ReductionProperties"));
     ctrAlg->setChild(true);
     ctrAlg->execute();
     std::string outMsg2 = ctrAlg->getPropertyValue("OutputMessage");
@@ -76,22 +69,19 @@ void ComputeSensitivity::exec() {
     IAlgorithm_sptr patchAlg = createChildAlgorithm("EQSANSPatchSensitivity");
     patchAlg->setPropertyValue("PatchWorkspace", patchWSName);
     if (!reductionManager->existsProperty("SensitivityPatchAlgorithm")) {
-      reductionManager->declareProperty(
-          std::make_unique<AlgorithmProperty>("SensitivityPatchAlgorithm"));
+      reductionManager->declareProperty(std::make_unique<AlgorithmProperty>("SensitivityPatchAlgorithm"));
     }
     reductionManager->setProperty("SensitivityPatchAlgorithm", patchAlg);
   }
 
   if (reductionManager->existsProperty("SensitivityAlgorithm")) {
     const std::string fileName = getPropertyValue("Filename");
-    IAlgorithm_sptr effAlg =
-        reductionManager->getProperty("SensitivityAlgorithm");
+    IAlgorithm_sptr effAlg = reductionManager->getProperty("SensitivityAlgorithm");
     effAlg->setChild(true);
     effAlg->setProperty("Filename", fileName);
     effAlg->setPropertyValue("OutputSensitivityWorkspace", outputWS);
     effAlg->execute();
-    MatrixWorkspace_sptr effWS =
-        effAlg->getProperty("OutputSensitivityWorkspace");
+    MatrixWorkspace_sptr effWS = effAlg->getProperty("OutputSensitivityWorkspace");
     setProperty("OutputWorkspace", effWS);
     std::string outMsg2 = effAlg->getPropertyValue("OutputMessage");
     outputMessage += outMsg2;

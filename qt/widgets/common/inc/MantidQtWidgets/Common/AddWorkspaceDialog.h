@@ -47,9 +47,8 @@ private slots:
   void selectAllSpectra(int state);
 
 private:
-  void addWorkspacesFromGroup(
-      std::vector<Mantid::API::MatrixWorkspace_const_sptr> &workspaces,
-      Mantid::API::WorkspaceGroup_const_sptr const &group) const;
+  void addWorkspacesFromGroup(std::vector<Mantid::API::MatrixWorkspace_const_sptr> &workspaces,
+                              Mantid::API::WorkspaceGroup_const_sptr const &group) const;
 
   QStringList availableWorkspaces() const;
   void findCommonMaxIndex(const QString &wsName);

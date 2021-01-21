@@ -69,12 +69,11 @@ public:
   /// Default constructor
   PeakBoundingBox();
   /// Constructor
-  PeakBoundingBox(const Left &left, const Right &right, const Top &top,
-                  const Bottom &bottom, const SlicePoint &slicePoint);
+  PeakBoundingBox(const Left &left, const Right &right, const Top &top, const Bottom &bottom,
+                  const SlicePoint &slicePoint);
   /// Constructor
-  PeakBoundingBox(const Left &left, const Right &right, const Top &top,
-                  const Bottom &bottom, const SlicePoint &slicePoint,
-                  const Front &front, const Back &back);
+  PeakBoundingBox(const Left &left, const Right &right, const Top &top, const Bottom &bottom,
+                  const SlicePoint &slicePoint, const Front &front, const Back &back);
   /// Destructor
   ~PeakBoundingBox();
   /// Copy constructor

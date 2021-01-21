@@ -26,12 +26,9 @@ class vtkDataSetFactory;
 
 class DLLExport MDEWInMemoryLoadingPresenter : public MDEWLoadingPresenter {
 public:
-  MDEWInMemoryLoadingPresenter(std::unique_ptr<MDLoadingView> view,
-                               WorkspaceProvider *repository,
-                               std::string wsName);
-  vtkSmartPointer<vtkDataSet>
-  execute(vtkDataSetFactory *factory, ProgressAction &rebinningProgressUpdate,
-          ProgressAction &drawingProgressUpdate) override;
+  MDEWInMemoryLoadingPresenter(std::unique_ptr<MDLoadingView> view, WorkspaceProvider *repository, std::string wsName);
+  vtkSmartPointer<vtkDataSet> execute(vtkDataSetFactory *factory, ProgressAction &rebinningProgressUpdate,
+                                      ProgressAction &drawingProgressUpdate) override;
   void executeLoadMetadata() override;
   ~MDEWInMemoryLoadingPresenter() override;
   bool canReadFile() const override;

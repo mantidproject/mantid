@@ -36,13 +36,12 @@ using Mantid::API::NullCoordTransform;
  * @param isDistribution :: is this a distribution (divide by bin width?)
  * @return
  */
-MantidQwtIMDWorkspaceData::MantidQwtIMDWorkspaceData(
-    Mantid::API::IMDWorkspace_const_sptr workspace, const bool logScaleY,
-    Mantid::Kernel::VMD start, Mantid::Kernel::VMD end,
-    Mantid::API::MDNormalization normalize, bool isDistribution)
-    : MantidQwtWorkspaceData(logScaleY), m_workspace(std::move(workspace)),
-      m_preview(false), m_start(start), m_end(end), m_normalization(normalize),
-      m_isDistribution(isDistribution), m_transform(nullptr),
+MantidQwtIMDWorkspaceData::MantidQwtIMDWorkspaceData(Mantid::API::IMDWorkspace_const_sptr workspace,
+                                                     const bool logScaleY, Mantid::Kernel::VMD start,
+                                                     Mantid::Kernel::VMD end, Mantid::API::MDNormalization normalize,
+                                                     bool isDistribution)
+    : MantidQwtWorkspaceData(logScaleY), m_workspace(std::move(workspace)), m_preview(false), m_start(start),
+      m_end(end), m_normalization(normalize), m_isDistribution(isDistribution), m_transform(nullptr),
       m_plotAxis(PlotDistance), m_currentPlotAxis(PlotDistance) {
   if (start.getNumDims() == 1 && end.getNumDims() == 1) {
     if (start[0] == 0.0 && end[0] == 0.0) {
@@ -85,8 +84,7 @@ MantidQwtIMDWorkspaceData::MantidQwtIMDWorkspaceData(
 
 //-----------------------------------------------------------------------------
 /// Copy constructor
-MantidQwtIMDWorkspaceData::MantidQwtIMDWorkspaceData(
-    const MantidQwtIMDWorkspaceData &data)
+MantidQwtIMDWorkspaceData::MantidQwtIMDWorkspaceData(const MantidQwtIMDWorkspaceData &data)
     : MantidQwtWorkspaceData(data) {
   copyData(data);
 }
@@ -96,8 +94,7 @@ MantidQwtIMDWorkspaceData::MantidQwtIMDWorkspaceData(
  *
  * @param data :: copy into this
  */
-MantidQwtIMDWorkspaceData &MantidQwtIMDWorkspaceData::
-operator=(const MantidQwtIMDWorkspaceData &data) {
+MantidQwtIMDWorkspaceData &MantidQwtIMDWorkspaceData::operator=(const MantidQwtIMDWorkspaceData &data) {
   copyData(data);
   return *this;
 }
@@ -109,16 +106,12 @@ MantidQwtIMDWorkspaceData::~MantidQwtIMDWorkspaceData() { delete m_transform; }
 /** Cloner/virtual copy constructor
  * @return a copy of this
  */
-QwtData *MantidQwtIMDWorkspaceData::copy() const {
-  return new MantidQwtIMDWorkspaceData(*this);
-}
+QwtData *MantidQwtIMDWorkspaceData::copy() const { return new MantidQwtIMDWorkspaceData(*this); }
 
 /// Return a new data object of the same type but with a new workspace
-MantidQwtIMDWorkspaceData *MantidQwtIMDWorkspaceData::copy(
-    Mantid::API::IMDWorkspace_sptr workspace) const {
+MantidQwtIMDWorkspaceData *MantidQwtIMDWorkspaceData::copy(Mantid::API::IMDWorkspace_sptr workspace) const {
   MantidQwtIMDWorkspaceData *out;
-  out = new MantidQwtIMDWorkspaceData(workspace, logScaleY(), m_start, m_end,
-                                      m_normalization, m_isDistribution);
+  out = new MantidQwtIMDWorkspaceData(workspace, logScaleY(), m_start, m_end, m_normalization, m_isDistribution);
   out->m_plotAxis = this->m_plotAxis;
   out->m_currentPlotAxis = this->m_currentPlotAxis;
   out->setPreviewMode(m_preview);
@@ -131,8 +124,7 @@ MantidQwtIMDWorkspaceData *MantidQwtIMDWorkspaceData::copy(
  *
  * @param data The pointer to the object to copy from
  */
-void MantidQwtIMDWorkspaceData::copyData(
-    const MantidQwtIMDWorkspaceData &data) {
+void MantidQwtIMDWorkspaceData::copyData(const MantidQwtIMDWorkspaceData &data) {
   if (this != &data) {
     static_cast<MantidQwtWorkspaceData &>(*this) = data;
     m_workspace = data.m_workspace;
@@ -205,9 +197,7 @@ double MantidQwtIMDWorkspaceData::getY(size_t i) const {
 }
 
 /// Returns the x position of the error bar for the i-th data point (bin)
-double MantidQwtIMDWorkspaceData::getEX(size_t i) const {
-  return this->getX(i);
-}
+double MantidQwtIMDWorkspaceData::getEX(size_t i) const { return this->getX(i); }
 
 /// Returns the error of the i-th data point
 double MantidQwtIMDWorkspaceData::getE(size_t i) const { return m_E[i]; }
@@ -241,8 +231,7 @@ void MantidQwtIMDWorkspaceData::setPlotAxisChoice(int choice) {
  *
  * @param choice :: one of MDNormalization enum
  */
-void MantidQwtIMDWorkspaceData::setNormalization(
-    Mantid::API::MDNormalization choice) {
+void MantidQwtIMDWorkspaceData::setNormalization(Mantid::API::MDNormalization choice) {
   m_normalization = choice;
   this->cacheLinePlot();
 }
@@ -270,19 +259,15 @@ void MantidQwtIMDWorkspaceData::setPreviewMode(bool preview) {
     // Refer to the last workspace = the intermediate in the case of MDHisto
     // binning
     const size_t indexOfWS = nOriginalWorkspaces - 1; // Get the last workspace
-    m_originalWorkspace = std::dynamic_pointer_cast<IMDWorkspace>(
-        m_workspace->getOriginalWorkspace(indexOfWS));
+    m_originalWorkspace = std::dynamic_pointer_cast<IMDWorkspace>(m_workspace->getOriginalWorkspace(indexOfWS));
   }
 
-  const size_t nTransformsToOriginal =
-      m_workspace->getNumberTransformsToOriginal();
+  const size_t nTransformsToOriginal = m_workspace->getNumberTransformsToOriginal();
   if (preview || (nTransformsToOriginal == 0)) {
     m_transform = new NullCoordTransform(m_workspace->getNumDims());
   } else {
-    const size_t indexOfTransform =
-        nTransformsToOriginal - 1; // Get the last transform
-    CoordTransform const *temp =
-        m_workspace->getTransformToOriginal(indexOfTransform);
+    const size_t indexOfTransform = nTransformsToOriginal - 1; // Get the last transform
+    CoordTransform const *temp = m_workspace->getTransformToOriginal(indexOfTransform);
     if (temp)
       m_transform = temp->clone();
   }
@@ -309,11 +294,8 @@ void MantidQwtIMDWorkspaceData::choosePlotAxis() {
       IMDWorkspace_const_sptr originalWS = m_originalWorkspace.lock();
 
       bool regularBinnedMDWorkspace = false;
-      if (auto mdew =
-              std::dynamic_pointer_cast<const Mantid::API::IMDEventWorkspace>(
-                  m_workspace)) {
-        Mantid::API::BoxController_const_sptr controller =
-            mdew->getBoxController();
+      if (auto mdew = std::dynamic_pointer_cast<const Mantid::API::IMDEventWorkspace>(m_workspace)) {
+        Mantid::API::BoxController_const_sptr controller = mdew->getBoxController();
         bool atLeastOneDimNotIntegrated = false;
         for (size_t i = 0; i < mdew->getNumDims(); ++i) {
           if (!mdew->getDimension(i)->getIsIntegrated()) {
@@ -323,14 +305,11 @@ void MantidQwtIMDWorkspaceData::choosePlotAxis() {
         regularBinnedMDWorkspace = atLeastOneDimNotIntegrated;
       }
 
-      if (nullptr !=
-              std::dynamic_pointer_cast<const Mantid::API::IMDHistoWorkspace>(
-                  originalWS) ||
+      if (nullptr != std::dynamic_pointer_cast<const Mantid::API::IMDHistoWorkspace>(originalWS) ||
           regularBinnedMDWorkspace) {
         for (size_t d = 0; d < diff.getNumDims(); d++) {
           if (fabs(diff[d]) > largest ||
-              (originalWS && originalWS->getDimension(m_currentPlotAxis)
-                                 ->getIsIntegrated())) {
+              (originalWS && originalWS->getDimension(m_currentPlotAxis)->getIsIntegrated())) {
             // Skip over any integrated dimensions
             if (originalWS && !originalWS->getDimension(d)->getIsIntegrated()) {
               largest = fabs(diff[d]);
@@ -358,9 +337,7 @@ void MantidQwtIMDWorkspaceData::choosePlotAxis() {
 /**
 @return the dimension index corresponding to the current plot X Axis.
 */
-int MantidQwtIMDWorkspaceData::currentPlotXAxis() const {
-  return m_currentPlotAxis;
-}
+int MantidQwtIMDWorkspaceData::currentPlotXAxis() const { return m_currentPlotAxis; }
 
 //-----------------------------------------------------------------------------
 /// @return the label for the X axis
@@ -370,10 +347,8 @@ QString MantidQwtIMDWorkspaceData::getXAxisLabel() const {
     return xLabel; // Empty string
   if (m_currentPlotAxis >= 0) {
     // One of the dimensions of the original
-    IMDDimension_const_sptr dim =
-        m_originalWorkspace.lock()->getDimension(m_currentPlotAxis);
-    xLabel = QString::fromStdString(dim->getName()) + " (" +
-             toQStringInternal(dim->getUnits().utf8()) + ")";
+    IMDDimension_const_sptr dim = m_originalWorkspace.lock()->getDimension(m_currentPlotAxis);
+    xLabel = QString::fromStdString(dim->getName()) + " (" + toQStringInternal(dim->getUnits().utf8()) + ")";
   } else {
     // Distance
     // Distance, or not set.

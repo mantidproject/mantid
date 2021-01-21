@@ -43,8 +43,7 @@ class InterpolationDialog : public QDialog {
   Q_OBJECT
 
 public:
-  InterpolationDialog(QWidget *parent = nullptr,
-                      const Qt::WFlags &fl = nullptr);
+  InterpolationDialog(QWidget *parent = nullptr, const Qt::WFlags &fl = nullptr);
 
 public slots:
   void activateCurve(const QString &curveName);

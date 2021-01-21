@@ -41,16 +41,12 @@ namespace SpectrumView {
  *                       at location will be displayed.
  * @param isTrackingOn  Flag to start SpectrumDisplay with tracking on or off.
  */
-SpectrumDisplay::SpectrumDisplay(QwtPlot *spectrumPlot,
-                                 ISliderHandler *sliderHandler,
-                                 IRangeHandler *rangeHander,
-                                 GraphDisplay *hGraph, GraphDisplay *vGraph,
-                                 QTableWidget *tableWidget, bool isTrackingOn)
-    : m_spectrumPlot(spectrumPlot), m_sliderHandler(sliderHandler),
-      m_rangeHandler(rangeHander), m_hGraphDisplay(hGraph),
-      m_vGraphDisplay(vGraph), m_pointedAtX(0.0), m_pointedAtY(0.0),
-      m_imageTable(tableWidget), m_totalXMin(0.0), m_totalXMax(0.0),
-      m_totalYMin(0.0), m_totalYMax(0.0), m_imagePicker(nullptr) {
+SpectrumDisplay::SpectrumDisplay(QwtPlot *spectrumPlot, ISliderHandler *sliderHandler, IRangeHandler *rangeHander,
+                                 GraphDisplay *hGraph, GraphDisplay *vGraph, QTableWidget *tableWidget,
+                                 bool isTrackingOn)
+    : m_spectrumPlot(spectrumPlot), m_sliderHandler(sliderHandler), m_rangeHandler(rangeHander),
+      m_hGraphDisplay(hGraph), m_vGraphDisplay(vGraph), m_pointedAtX(0.0), m_pointedAtY(0.0), m_imageTable(tableWidget),
+      m_totalXMin(0.0), m_totalXMax(0.0), m_totalYMin(0.0), m_totalYMax(0.0), m_imagePicker(nullptr) {
   m_positiveColorTable = ColorMaps::GetColorMap(ColorMaps::HEAT, 256);
   m_negativeColorTable = ColorMaps::GetColorMap(ColorMaps::GRAY, 256);
 
@@ -66,17 +62,13 @@ SpectrumDisplay::SpectrumDisplay(QwtPlot *spectrumPlot,
   m_imagePicker->setRubberBandPen(QColor(Qt::gray));
 
   m_imagePicker->setRubberBand(QwtPicker::CrossRubberBand);
-  m_imagePicker->setSelectionFlags(QwtPicker::PointSelection |
-                                   QwtPicker::DragSelection);
-  QObject::connect(m_imagePicker, SIGNAL(mouseMoved(const QPoint &)), this,
-                   SLOT(imagePickerMoved(const QPoint &)));
+  m_imagePicker->setSelectionFlags(QwtPicker::PointSelection | QwtPicker::DragSelection);
+  QObject::connect(m_imagePicker, SIGNAL(mouseMoved(const QPoint &)), this, SLOT(imagePickerMoved(const QPoint &)));
 }
 
 SpectrumDisplay::~SpectrumDisplay() { delete m_spectrumPlotItem; }
 
-bool SpectrumDisplay::hasData(
-    const std::string &wsName,
-    const std::shared_ptr<Mantid::API::Workspace> &ws) {
+bool SpectrumDisplay::hasData(const std::string &wsName, const std::shared_ptr<Mantid::API::Workspace> &ws) {
   return m_dataSource->hasData(wsName, ws);
 }
 
@@ -113,22 +105,16 @@ void SpectrumDisplay::setDataSource(SpectrumDataSource_sptr dataSource) {
   m_pointedAtX = DBL_MAX;
   m_pointedAtY = DBL_MAX;
 
-  int n_rows = static_cast<int>(
-      m_totalYMax - m_totalYMin); // get reasonable size initial image data
+  int n_rows = static_cast<int>(m_totalYMax - m_totalYMin); // get reasonable size initial image data
   int n_cols = 500;
 
   // m_dataArray is deleted in the SpectrumPlotItem
-  m_dataArray =
-      m_dataSource->getDataArray(m_totalXMin, m_totalXMax, m_totalYMin,
-                                 m_totalYMax, n_rows, n_cols, false);
+  m_dataArray = m_dataSource->getDataArray(m_totalXMin, m_totalXMax, m_totalYMin, m_totalYMax, n_rows, n_cols, false);
 
-  m_spectrumPlot->setAxisScale(QwtPlot::xBottom, m_dataArray->getXMin(),
-                               m_dataArray->getXMax());
-  m_spectrumPlot->setAxisScale(QwtPlot::yLeft, m_dataArray->getYMin(),
-                               m_dataArray->getYMax());
+  m_spectrumPlot->setAxisScale(QwtPlot::xBottom, m_dataArray->getXMin(), m_dataArray->getXMax());
+  m_spectrumPlot->setAxisScale(QwtPlot::yLeft, m_dataArray->getYMin(), m_dataArray->getYMax());
 
-  m_spectrumPlotItem->setData(m_dataArray, &m_positiveColorTable,
-                              &m_negativeColorTable);
+  m_spectrumPlotItem->setData(m_dataArray, &m_positiveColorTable, &m_negativeColorTable);
 
   m_rangeHandler->configureRangeControls(m_dataSource);
 
@@ -243,16 +229,12 @@ void SpectrumDisplay::updateImage() {
 
     if (x_step > 0) // linear scale, so interpolate linearly
     {
-      SVUtils::Interpolate(0, n_cols, x_min, scale_x_min, scale_x_max,
-                           new_x_min);
-      SVUtils::Interpolate(0, n_cols, x_max, scale_x_min, scale_x_max,
-                           new_x_max);
+      SVUtils::Interpolate(0, n_cols, x_min, scale_x_min, scale_x_max, new_x_min);
+      SVUtils::Interpolate(0, n_cols, x_max, scale_x_min, scale_x_max, new_x_max);
     } else // log scale, so interpolate "logarithmically"
     {
-      SVUtils::LogInterpolate(0, n_cols, x_min, scale_x_min, scale_x_max,
-                              new_x_min);
-      SVUtils::LogInterpolate(0, n_cols, x_max, scale_x_min, scale_x_max,
-                              new_x_max);
+      SVUtils::LogInterpolate(0, n_cols, x_min, scale_x_min, scale_x_max, new_x_min);
+      SVUtils::LogInterpolate(0, n_cols, x_max, scale_x_min, scale_x_max, new_x_max);
     }
 
     scale_x_min = new_x_min;
@@ -270,15 +252,13 @@ void SpectrumDisplay::updateImage() {
   bool is_log_x = (x_step < 0);
   // NOTE: The DataArray is deleted
   m_dataArray =
-      m_dataSource->getDataArray(scale_x_min, scale_x_max, scale_y_min,
-                                 scale_y_max, n_rows, n_cols, is_log_x);
+      m_dataSource->getDataArray(scale_x_min, scale_x_max, scale_y_min, scale_y_max, n_rows, n_cols, is_log_x);
 
   is_log_x = m_dataArray->isLogX(); // Data source might not be able to
                                     // provide log binned data, so check
                                     // if log binned data was returned.
 
-  m_spectrumPlot->setAxisScale(QwtPlot::xBottom, m_dataArray->getXMin(),
-                               m_dataArray->getXMax());
+  m_spectrumPlot->setAxisScale(QwtPlot::xBottom, m_dataArray->getXMin(), m_dataArray->getXMax());
 
   if (is_log_x) {
     auto *log_engine = new QwtLog10ScaleEngine();
@@ -288,11 +268,9 @@ void SpectrumDisplay::updateImage() {
     m_spectrumPlot->setAxisScaleEngine(QwtPlot::xBottom, linear_engine);
   }
 
-  m_spectrumPlot->setAxisScale(QwtPlot::yLeft, m_dataArray->getYMin(),
-                               m_dataArray->getYMax());
+  m_spectrumPlot->setAxisScale(QwtPlot::yLeft, m_dataArray->getYMin(), m_dataArray->getYMax());
 
-  m_spectrumPlotItem->setData(m_dataArray, &m_positiveColorTable,
-                              &m_negativeColorTable);
+  m_spectrumPlotItem->setData(m_dataArray, &m_positiveColorTable, &m_negativeColorTable);
   m_spectrumPlot->replot();
 
   setVGraph(m_pointedAtX);
@@ -315,8 +293,7 @@ void SpectrumDisplay::updateImage() {
  *                             same number of entries as the positive
  *                             color table.
  */
-void SpectrumDisplay::setColorScales(std::vector<QRgb> &positiveColorTable,
-                                     std::vector<QRgb> &negativeColorTable) {
+void SpectrumDisplay::setColorScales(std::vector<QRgb> &positiveColorTable, std::vector<QRgb> &negativeColorTable) {
   m_positiveColorTable.resize(positiveColorTable.size());
   for (size_t i = 0; i < positiveColorTable.size(); i++)
     m_positiveColorTable[i] = positiveColorTable[i];
@@ -371,8 +348,7 @@ QPair<double, double> SpectrumDisplay::getPlotInvTransform(QPoint point) {
  *display.
  * @return A pair containing the (x,y) values in the graph of the point
  */
-QPair<double, double>
-SpectrumDisplay::setPointedAtPoint(QPoint point, int mouseClick, bool isFront) {
+QPair<double, double> SpectrumDisplay::setPointedAtPoint(QPoint point, int mouseClick, bool isFront) {
   UNUSED_ARG(mouseClick);
   if (m_dataSource == nullptr || m_dataArray == nullptr)
     return qMakePair(0.0, 0.0);
@@ -568,25 +544,17 @@ void SpectrumDisplay::getDisplayRectangle(QRect &rect) {
 }
 
 bool SpectrumDisplay::dataSourceRangeChanged() {
-  return (m_totalYMin != m_dataSource->getYMin() ||
-          m_totalYMax != m_dataSource->getYMax() ||
-          m_totalXMin != m_dataSource->getXMin() ||
-          m_totalXMax != m_dataSource->getXMax());
+  return (m_totalYMin != m_dataSource->getYMin() || m_totalYMax != m_dataSource->getYMax() ||
+          m_totalXMin != m_dataSource->getXMin() || m_totalXMax != m_dataSource->getXMax());
 }
 
-void SpectrumDisplay::addOther(const std::shared_ptr<SpectrumDisplay> &other) {
-  m_otherDisplays.append(other);
+void SpectrumDisplay::addOther(const std::shared_ptr<SpectrumDisplay> &other) { m_otherDisplays.append(other); }
+
+void SpectrumDisplay::addOthers(const QList<std::shared_ptr<SpectrumDisplay>> &others) {
+  foreach (std::shared_ptr<SpectrumDisplay> sd, others) { m_otherDisplays.append(sd); }
 }
 
-void SpectrumDisplay::addOthers(
-    const QList<std::shared_ptr<SpectrumDisplay>> &others) {
-  foreach (std::shared_ptr<SpectrumDisplay> sd, others) {
-    m_otherDisplays.append(sd);
-  }
-}
-
-void SpectrumDisplay::removeOther(
-    const std::shared_ptr<SpectrumDisplay> &other) {
+void SpectrumDisplay::removeOther(const std::shared_ptr<SpectrumDisplay> &other) {
   QList<int> toRemove;
   for (int i = 0; i < m_otherDisplays.size(); ++i) {
     auto ds = m_otherDisplays[i].lock();
@@ -602,9 +570,7 @@ void SpectrumDisplay::removeOther(
  *
  * @param point The position moved to.
  */
-void SpectrumDisplay::imagePickerMoved(const QPoint &point) {
-  setPointedAtPoint(point);
-}
+void SpectrumDisplay::imagePickerMoved(const QPoint &point) { setPointedAtPoint(point); }
 
 /**
  * Set/unset mouse tracking "always on". When tracking is always on

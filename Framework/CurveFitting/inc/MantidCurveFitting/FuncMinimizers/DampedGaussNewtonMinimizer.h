@@ -26,8 +26,7 @@ namespace FuncMinimisers {
 
     @author Roman Tolchenov, Tessella plc
 */
-class MANTID_CURVEFITTING_DLL DampedGaussNewtonMinimizer
-    : public API::IFuncMinimizer {
+class MANTID_CURVEFITTING_DLL DampedGaussNewtonMinimizer : public API::IFuncMinimizer {
 public:
   /// Constructor
   DampedGaussNewtonMinimizer(double relTol = 0.0001);
@@ -35,8 +34,7 @@ public:
   std::string name() const override { return "DampedGaussNewtonMinimizer"; }
 
   /// Initialize minimizer, i.e. pass a function to minimize.
-  void initialize(API::ICostFunction_sptr function,
-                  size_t maxIterations = 0) override;
+  void initialize(API::ICostFunction_sptr function, size_t maxIterations = 0) override;
   /// Do one iteration.
   bool iterate(size_t) override;
   /// Return current value of the cost function

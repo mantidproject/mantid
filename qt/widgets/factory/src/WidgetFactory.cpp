@@ -55,9 +55,8 @@ WidgetFactory *WidgetFactory::Instance() {
  * @param label :: label for the window title
  * @return the created SliceViewerWindow *
  */
-MantidQt::SliceViewer::SliceViewerWindow *
-WidgetFactory::createSliceViewerWindow(const QString &wsName,
-                                       const QString &label) {
+MantidQt::SliceViewer::SliceViewerWindow *WidgetFactory::createSliceViewerWindow(const QString &wsName,
+                                                                                 const QString &label) {
   SliceViewerWindow *window = new SliceViewerWindow(wsName, label);
   QPointer<MantidQt::SliceViewer::SliceViewerWindow> pWindow(window);
 
@@ -75,20 +74,16 @@ WidgetFactory::createSliceViewerWindow(const QString &wsName,
  * @return the previously-created SliceViewerWindow *
  * @throw std::runtime_error if no open windows match the parameters
  */
-MantidQt::SliceViewer::SliceViewerWindow *
-WidgetFactory::getSliceViewerWindow(const QString &wsName,
-                                    const QString &label) {
+MantidQt::SliceViewer::SliceViewerWindow *WidgetFactory::getSliceViewerWindow(const QString &wsName,
+                                                                              const QString &label) {
   for (auto window : m_windows) {
     if (window) {
       // Match the ws name and the label
-      if ((window->getSlicer()->getWorkspace()->getName() ==
-           wsName.toStdString()) &&
-          (window->getLabel() == label))
+      if ((window->getSlicer()->getWorkspace()->getName() == wsName.toStdString()) && (window->getLabel() == label))
         return window;
     }
   }
-  throw std::runtime_error("No SliceViewer is open with the workspace '" +
-                           wsName.toStdString() + "' and label '" +
+  throw std::runtime_error("No SliceViewer is open with the workspace '" + wsName.toStdString() + "' and label '" +
                            label.toStdString() + "'.");
 }
 
@@ -125,8 +120,7 @@ void WidgetFactory::closeSliceViewerWindow(SliceViewerWindow *w) {
  *workspace.
  * @return the created SliceViewer *
  */
-MantidQt::SliceViewer::SliceViewer *
-WidgetFactory::createSliceViewer(const QString &wsName) {
+MantidQt::SliceViewer::SliceViewer *WidgetFactory::createSliceViewer(const QString &wsName) {
   auto *slicer = new MantidQt::SliceViewer::SliceViewer();
   // TODO: Save in a list ?
   if (!wsName.isEmpty())

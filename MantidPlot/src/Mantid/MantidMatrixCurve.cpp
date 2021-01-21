@@ -50,13 +50,10 @@ Mantid::Kernel::Logger g_log("MantidMatrixCurve");
  *  @throw std::invalid_argument if the index is out of range for the given
  *workspace
  */
-MantidMatrixCurve::MantidMatrixCurve(const QString &name, const QString &wsName,
-                                     Graph *g, int index, IndexDir indexType,
-                                     bool err, bool distr,
-                                     GraphOptions::CurveType style,
+MantidMatrixCurve::MantidMatrixCurve(const QString &name, const QString &wsName, Graph *g, int index,
+                                     IndexDir indexType, bool err, bool distr, GraphOptions::CurveType style,
                                      bool multipleSpectra)
-    : MantidCurve(err), m_wsName(wsName), m_index(index),
-      m_indexType(indexType) {
+    : MantidCurve(err), m_wsName(wsName), m_index(index), m_indexType(indexType) {
   if (!g) {
     throw std::invalid_argument("MantidMatrixCurve::MantidMatrixCurve - NULL "
                                 "graph pointer not allowed");
@@ -78,23 +75,18 @@ MantidMatrixCurve::MantidMatrixCurve(const QString &name, const QString &wsName,
  *  @throw std::invalid_argument if the index is out of range for the given
  * workspace
  */
-MantidMatrixCurve::MantidMatrixCurve(const QString &wsName, Graph *g, int index,
-                                     IndexDir indexType, bool err, bool distr,
-                                     GraphOptions::CurveType style)
-    : MantidCurve(err), m_wsName(wsName), m_index(index),
-      m_indexType(indexType) {
+MantidMatrixCurve::MantidMatrixCurve(const QString &wsName, Graph *g, int index, IndexDir indexType, bool err,
+                                     bool distr, GraphOptions::CurveType style)
+    : MantidCurve(err), m_wsName(wsName), m_index(index), m_indexType(indexType) {
   init(g, distr, style);
 }
 
 MantidMatrixCurve::MantidMatrixCurve(const MantidMatrixCurve &c)
-    : MantidCurve(createCopyName(c.title().text()), c.m_drawErrorBars,
-                  c.m_drawAllErrorBars),
-      m_wsName(c.m_wsName), m_index(c.m_index), m_indexType(c.m_indexType),
-      m_xUnits(c.m_xUnits), m_yUnits(c.m_yUnits) {
+    : MantidCurve(createCopyName(c.title().text()), c.m_drawErrorBars, c.m_drawAllErrorBars), m_wsName(c.m_wsName),
+      m_index(c.m_index), m_indexType(c.m_indexType), m_xUnits(c.m_xUnits), m_yUnits(c.m_yUnits) {
   setData(c.data());
   observePostDelete();
-  connect(this, SIGNAL(resetData(const QString &)), this,
-          SLOT(dataReset(const QString &)));
+  connect(this, SIGNAL(resetData(const QString &)), this, SLOT(dataReset(const QString &)));
   observeAfterReplace();
   observeADSClear();
 }
@@ -106,21 +98,16 @@ MantidMatrixCurve::MantidMatrixCurve(const MantidMatrixCurve &c)
  *  @param multipleSpectra :: indicates that there are multiple spectra and
  *  so spectrum numbers must always be shown in the plot legend.
  */
-void MantidMatrixCurve::init(Graph *g, bool distr,
-                             GraphOptions::CurveType style,
-                             bool multipleSpectra) {
+void MantidMatrixCurve::init(Graph *g, bool distr, GraphOptions::CurveType style, bool multipleSpectra) {
   // Will throw if name not found but return NULL ptr if the type is incorrect
   MatrixWorkspace_const_sptr workspace =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-          m_wsName.toStdString());
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_wsName.toStdString());
 
   if (!workspace) // The respective *Data classes will check for index validity
   {
     std::stringstream ss;
-    ss << "Workspace named '" << m_wsName.toStdString()
-       << "' found but it is not a MatrixWorkspace. ID='"
-       << AnalysisDataService::Instance().retrieve(m_wsName.toStdString())->id()
-       << "'";
+    ss << "Workspace named '" << m_wsName.toStdString() << "' found but it is not a MatrixWorkspace. ID='"
+       << AnalysisDataService::Instance().retrieve(m_wsName.toStdString())->id() << "'";
     throw std::invalid_argument(ss.str());
   }
 
@@ -148,8 +135,7 @@ void MantidMatrixCurve::init(Graph *g, bool distr,
   const bool log = g->isLog(QwtPlot::yLeft);
 
   // Y units are the same for both spectrum and bin plots, e.g. counts
-  m_yUnits.reset(new Mantid::Kernel::Units::Label(matrixWS->YUnit(),
-                                                  matrixWS->YUnitLabel()));
+  m_yUnits.reset(new Mantid::Kernel::Units::Label(matrixWS->YUnit(), matrixWS->YUnitLabel()));
 
   if (m_indexType == Spectrum) // Spectrum plot
   {
@@ -175,14 +161,12 @@ void MantidMatrixCurve::init(Graph *g, bool distr,
 
   int lineWidth = 1;
   MultiLayer *ml = dynamic_cast<MultiLayer *>(g->parent()->parent()->parent());
-  if (ml && (style == GraphOptions::Unspecified ||
-             ml->applicationWindow()->applyCurveStyleToMantid)) {
+  if (ml && (style == GraphOptions::Unspecified || ml->applicationWindow()->applyCurveStyleToMantid)) {
     applyStyleChoice(style, ml, lineWidth);
   } else if (matrixWS->isHistogramData() && !matrixWS->isDistribution()) {
     setStyle(QwtPlotCurve::Steps);
-    setCurveAttribute(
-        Inverted,
-        true); // this is the Steps style modifier that makes horizontal steps
+    setCurveAttribute(Inverted,
+                      true); // this is the Steps style modifier that makes horizontal steps
   } else {
     setStyle(QwtPlotCurve::Lines);
   }
@@ -196,11 +180,9 @@ void MantidMatrixCurve::init(Graph *g, bool distr,
   m_errorSettings->m_color = pen().color();
   m_errorSettings->setWidth(pen().widthF());
 
-  connect(g, SIGNAL(axisScaleChanged(int, bool)), this,
-          SLOT(axisScaleChanged(int, bool)));
+  connect(g, SIGNAL(axisScaleChanged(int, bool)), this, SLOT(axisScaleChanged(int, bool)));
   observePostDelete();
-  connect(this, SIGNAL(resetData(const QString &)), this,
-          SLOT(dataReset(const QString &)));
+  connect(this, SIGNAL(resetData(const QString &)), this, SLOT(dataReset(const QString &)));
   observeAfterReplace();
   observeADSClear();
 }
@@ -232,8 +214,7 @@ void MantidMatrixCurve::loadData() {
   Plot *plot = static_cast<Plot *>(this->plot());
   Graph *g = static_cast<Graph *>(plot->parent());
 
-  MantidQwtWorkspaceData &data =
-      dynamic_cast<MantidQwtWorkspaceData &>(this->data());
+  MantidQwtWorkspaceData &data = dynamic_cast<MantidQwtWorkspaceData &>(this->data());
 
   data.setWaterfallPlot(g->isWaterfallPlot());
   data.setXOffset(xDataOffset);
@@ -243,35 +224,28 @@ void MantidMatrixCurve::loadData() {
 
 void MantidMatrixCurve::setData(const QwtData &data) {
   if (!dynamic_cast<const MantidQwtWorkspaceData *>(&data))
-    throw std::runtime_error(
-        "Only MantidQwtWorkspaceData can be set to a MantidMatrixCurve");
+    throw std::runtime_error("Only MantidQwtWorkspaceData can be set to a MantidMatrixCurve");
   PlotCurve::setData(data);
 }
 
-QwtDoubleRect MantidMatrixCurve::boundingRect() const {
-  return MantidCurve::boundingRect();
-}
+QwtDoubleRect MantidMatrixCurve::boundingRect() const { return MantidCurve::boundingRect(); }
 
-void MantidMatrixCurve::draw(QPainter *p, const QwtScaleMap &xMap,
-                             const QwtScaleMap &yMap, const QRect &rect) const {
+void MantidMatrixCurve::draw(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap, const QRect &rect) const {
   p->translate(d_x_offset, -d_y_offset);
   PlotCurve::draw(p, xMap, yMap, rect);
 
   if (m_drawErrorBars) // drawing error bars
   {
-    const MantidQwtWorkspaceData *d =
-        dynamic_cast<const MantidQwtWorkspaceData *>(&data());
+    const MantidQwtWorkspaceData *d = dynamic_cast<const MantidQwtWorkspaceData *>(&data());
     if (!d) {
-      throw std::runtime_error(
-          "Only MantidQwtWorkspaceData can be set to a MantidMatrixCurve");
+      throw std::runtime_error("Only MantidQwtWorkspaceData can be set to a MantidMatrixCurve");
     }
     doDraw(p, xMap, yMap, rect, d);
   }
 }
 
 void MantidMatrixCurve::itemChanged() {
-  QwtWorkspaceSpectrumData *d =
-      dynamic_cast<QwtWorkspaceSpectrumData *>(&data());
+  QwtWorkspaceSpectrumData *d = dynamic_cast<QwtWorkspaceSpectrumData *>(&data());
   if (d && d->m_isHistogram) {
     if (style() == Steps)
       d->m_binCentres = false;
@@ -286,9 +260,8 @@ void MantidMatrixCurve::itemChanged() {
  * @param prefix :: prefix for name, if empty, workspace name is used.
  * @param ws :: Pointer to workspace
  */
-QString MantidMatrixCurve::createCurveName(
-    const QString &prefix,
-    const std::shared_ptr<const Mantid::API::MatrixWorkspace> &ws) {
+QString MantidMatrixCurve::createCurveName(const QString &prefix,
+                                           const std::shared_ptr<const Mantid::API::MatrixWorkspace> &ws) {
   QString name = "";
 
   if (prefix.isEmpty())
@@ -314,12 +287,10 @@ void MantidMatrixCurve::dataReset(const QString &wsName) {
   const std::string wsNameStd = wsName.toStdString();
   Mantid::API::MatrixWorkspace_sptr mws;
   try {
-    Mantid::API::Workspace_sptr base =
-        Mantid::API::AnalysisDataService::Instance().retrieve(wsNameStd);
+    Mantid::API::Workspace_sptr base = Mantid::API::AnalysisDataService::Instance().retrieve(wsNameStd);
     mws = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(base);
   } catch (std::runtime_error &) {
-    g_log.information() << "Workspace " << wsNameStd
-                        << " could not be found - plotted curve(s) deleted\n";
+    g_log.information() << "Workspace " << wsNameStd << " could not be found - plotted curve(s) deleted\n";
     mws = Mantid::API::MatrixWorkspace_sptr();
   }
   if (!mws)
@@ -338,16 +309,13 @@ void MantidMatrixCurve::dataReset(const QString &wsName) {
   } catch (std::range_error &) {
     // Get here if the new workspace has fewer spectra and the plotted one no
     // longer exists
-    g_log.information()
-        << "Workspace " << wsNameStd
-        << " now has fewer spectra - plotted curve(s) deleted\n";
+    g_log.information() << "Workspace " << wsNameStd << " now has fewer spectra - plotted curve(s) deleted\n";
     postDeleteHandle(wsNameStd);
   }
 }
 
-void MantidMatrixCurve::afterReplaceHandle(
-    const std::string &wsName,
-    const std::shared_ptr<Mantid::API::Workspace> &ws) {
+void MantidMatrixCurve::afterReplaceHandle(const std::string &wsName,
+                                           const std::shared_ptr<Mantid::API::Workspace> &ws) {
   (void)ws;
 
   invalidateBoundingRect();
@@ -358,9 +326,8 @@ void MantidMatrixCurve::afterReplaceHandle(
  */
 QString MantidMatrixCurve::saveToString() {
   QString s;
-  s = "MantidMatrixCurve\t" + m_wsName + "\t sp \t" + QString::number(m_index) +
-      "\t" + QString::number(m_drawErrorBars) + "\t" +
-      QString::number(isDistribution()) + "\t";
+  s = "MantidMatrixCurve\t" + m_wsName + "\t sp \t" + QString::number(m_index) + "\t" +
+      QString::number(m_drawErrorBars) + "\t" + QString::number(isDistribution()) + "\t";
   return s;
 }
 

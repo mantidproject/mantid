@@ -28,10 +28,9 @@ class DLLExport StringTokenizer final {
 public:
   /// Specify tokenizer options. These can be combined using + or |.
   enum Options {
-    TOK_IGNORE_EMPTY = 1, ///< ignore empty tokens
-    TOK_TRIM = 2, ///< remove leading and trailing whitespace from tokens
-    TOK_IGNORE_FINAL_EMPTY_TOKEN =
-        4 ///< ignore an empty token at the end of the string.
+    TOK_IGNORE_EMPTY = 1,            ///< ignore empty tokens
+    TOK_TRIM = 2,                    ///< remove leading and trailing whitespace from tokens
+    TOK_IGNORE_FINAL_EMPTY_TOKEN = 4 ///< ignore an empty token at the end of the string.
   };
   using TokenVec = std::vector<std::string>;
   using Iterator = std::vector<std::string>::iterator;
@@ -39,8 +38,7 @@ public:
   /// Constructs an object from an empty string.
   StringTokenizer() = default;
   /// Constructor requiring a string to tokenize and a string of separators.
-  StringTokenizer(const std::string &str, const std::string &separators,
-                  unsigned options = 0);
+  StringTokenizer(const std::string &str, const std::string &separators, unsigned options = 0);
 
   /// Destroys the tokenizer.
   ~StringTokenizer() = default;
@@ -80,9 +78,7 @@ public:
    * @param index Index of the requested token.
    * @return a const reference to the index'th token.
    */
-  const std::string &operator[](std::size_t index) const {
-    return m_tokens[index];
-  }
+  const std::string &operator[](std::size_t index) const { return m_tokens[index]; }
 
   /** Get a const reference to the index'th token. Indexing an out-of-range
    * element won't throw, but is otherwise undefined behavior.

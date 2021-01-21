@@ -69,14 +69,11 @@ public:
     EventList eventList;
     eventList.setHistogram(BinEdges{0.0, 2.0});
     eventList += TofEvent(1.0, 2);
-    std::unique_ptr<const ISpectrum> specHist =
-        std::make_unique<Histogram1D>(histogram);
-    std::unique_ptr<const ISpectrum> specEvent =
-        std::make_unique<EventList>(eventList);
+    std::unique_ptr<const ISpectrum> specHist = std::make_unique<Histogram1D>(histogram);
+    std::unique_ptr<const ISpectrum> specEvent = std::make_unique<EventList>(eventList);
     std::unique_ptr<ISpectrum> target = std::make_unique<EventList>();
 
-    TS_ASSERT_THROWS_EQUALS(target->copyDataFrom(*specHist),
-                            const std::runtime_error &e, std::string(e.what()),
+    TS_ASSERT_THROWS_EQUALS(target->copyDataFrom(*specHist), const std::runtime_error &e, std::string(e.what()),
                             "Incompatible types in ISpectrum::copyDataFrom");
 
     TS_ASSERT_THROWS_NOTHING(target->copyDataFrom(*specEvent));
@@ -89,8 +86,7 @@ public:
     EventList eventList;
     eventList.setHistogram(BinEdges{0.0, 2.0});
     eventList += TofEvent(1.0, 2);
-    std::unique_ptr<const ISpectrum> specEvent =
-        std::make_unique<EventList>(eventList);
+    std::unique_ptr<const ISpectrum> specEvent = std::make_unique<EventList>(eventList);
     std::unique_ptr<ISpectrum> target = std::make_unique<EventList>();
     target->setSpectrumNo(37);
     target->setDetectorID(42);
@@ -114,8 +110,7 @@ public:
     TS_ASSERT_EQUALS(target.getSortType(), eventList.getSortType());
     TS_ASSERT_EQUALS(target.getEvents(), eventList.getEvents());
     TS_ASSERT_THROWS(target.getWeightedEvents(), const std::runtime_error &);
-    TS_ASSERT_THROWS(target.getWeightedEventsNoTime(),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(target.getWeightedEventsNoTime(), const std::runtime_error &);
 
     eventList.switchTo(EventType::WEIGHTED);
     target.copyDataFrom(eventList);
@@ -123,8 +118,7 @@ public:
     TS_ASSERT_EQUALS(target.getSortType(), eventList.getSortType());
     TS_ASSERT_THROWS(target.getEvents(), const std::runtime_error &);
     TS_ASSERT_EQUALS(target.getWeightedEvents(), eventList.getWeightedEvents());
-    TS_ASSERT_THROWS(target.getWeightedEventsNoTime(),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(target.getWeightedEventsNoTime(), const std::runtime_error &);
 
     eventList.switchTo(EventType::WEIGHTED_NOTIME);
     target.copyDataFrom(eventList);
@@ -132,8 +126,7 @@ public:
     TS_ASSERT_EQUALS(target.getSortType(), eventList.getSortType());
     TS_ASSERT_THROWS(target.getEvents(), const std::runtime_error &);
     TS_ASSERT_THROWS(target.getWeightedEvents(), const std::runtime_error &);
-    TS_ASSERT_EQUALS(target.getWeightedEventsNoTime(),
-                     eventList.getWeightedEventsNoTime());
+    TS_ASSERT_EQUALS(target.getWeightedEventsNoTime(), eventList.getWeightedEventsNoTime());
   }
 
   //==================================================================================
@@ -198,8 +191,7 @@ public:
     TS_ASSERT_EQUALS(rel.size(), 19);
   }
 
-  template <class T>
-  void do_test_memory_handling(EventList &el2, std::vector<T> &events) {
+  template <class T> void do_test_memory_handling(EventList &el2, std::vector<T> &events) {
     std::vector<T> mylist{{45}, {89}, {34}};
     el2 += mylist;
     TS_ASSERT_EQUALS(events.size(), 3);
@@ -386,9 +378,7 @@ public:
   //==================================================================================
 
   /// Make a big bin holding all events
-  cow_ptr<HistogramX> one_big_bin() {
-    return make_cow<HistogramX>(std::initializer_list<double>{0, 1e10});
-  }
+  cow_ptr<HistogramX> one_big_bin() { return make_cow<HistogramX>(std::initializer_list<double>{0, 1e10}); }
 
   void test_MinusOperator_all_9_possibilites() {
     EventList lhs, rhs;
@@ -408,8 +398,7 @@ public:
         mess << "Minus operation of types " << i << " -= " << j << ".";
         TSM_ASSERT_THROWS_NOTHING(mess.str(), lhs -= rhs);
 
-        TSM_ASSERT_EQUALS(mess.str(), lhs.getNumberEvents(),
-                          2 * el.getNumberEvents());
+        TSM_ASSERT_EQUALS(mess.str(), lhs.getNumberEvents(), 2 * el.getNumberEvents());
 
         // Put a single big bin with all events
         lhs.setX(one_big_bin());
@@ -497,8 +486,7 @@ public:
 
     TS_ASSERT_DELTA(el.getEvent(0).weight(), 4.0, 1e-5);
     // Error^2 = 2.5*2.5 * 2.0*2.0 + 2.0*2.0*0.5*0.5
-    TS_ASSERT_DELTA(el.getEvent(0).errorSquared(),
-                    (2.5 * 2.5 * 2.0 * 2.0 + 2.0 * 2.0 * 0.5 * 0.5), 1e-5);
+    TS_ASSERT_DELTA(el.getEvent(0).errorSquared(), (2.5 * 2.5 * 2.0 * 2.0 + 2.0 * 2.0 * 0.5 * 0.5), 1e-5);
 
     // Go through each possible EventType as the input
     for (int this_type = 1; this_type < 3; this_type++) {
@@ -550,9 +538,7 @@ public:
           double errorsquared = value;
           // Check the formulae for value and error
           TS_ASSERT_DELTA(el.getEvent(i).weight(), 2.0 * value, 1e-6);
-          TS_ASSERT_DELTA(el.getEvent(i).errorSquared(),
-                          2.5 * 2.5 * value * value + 2.0 * 2.0 * errorsquared,
-                          1e-6);
+          TS_ASSERT_DELTA(el.getEvent(i).errorSquared(), 2.5 * 2.5 * value * value + 2.0 * 2.0 * errorsquared, 1e-6);
         }
       }
     }
@@ -756,8 +742,7 @@ public:
       el.switchTo(static_cast<EventType>(this_type));
       el.sort(TOF_SORT);
       for (size_t i = 1; i < 100; i++) {
-        TSM_ASSERT_LESS_THAN_EQUALS(this_type, el.getEvent(i - 1).tof(),
-                                    el.getEvent(i).tof());
+        TSM_ASSERT_LESS_THAN_EQUALS(this_type, el.getEvent(i - 1).tof(), el.getEvent(i).tof());
       }
     }
   }
@@ -778,8 +763,7 @@ public:
       el.switchTo(static_cast<EventType>(this_type));
       el.sort(PULSETIME_SORT);
       for (size_t i = 1; i < 100; i++) {
-        TSM_ASSERT_LESS_THAN_EQUALS(this_type, el.getEvent(i - 1).pulseTime(),
-                                    el.getEvent(i).pulseTime());
+        TSM_ASSERT_LESS_THAN_EQUALS(this_type, el.getEvent(i - 1).pulseTime(), el.getEvent(i).pulseTime());
       }
     }
   }
@@ -934,8 +918,7 @@ public:
 
     // Generate the histrogram bins
     MantidVec shared_x;
-    for (int pulse_time = 0; pulse_time < BIN_DELTA * (NUMBINS + 1);
-         pulse_time += BIN_DELTA) {
+    for (int pulse_time = 0; pulse_time < BIN_DELTA * (NUMBINS + 1); pulse_time += BIN_DELTA) {
       shared_x.emplace_back(pulse_time);
     }
 
@@ -968,8 +951,7 @@ public:
 
     // Generate the histrogram bins
     MantidVec shared_x;
-    for (int pulse_time = 0; pulse_time < BIN_DELTA * (NUMBINS + 1);
-         pulse_time += BIN_DELTA) {
+    for (int pulse_time = 0; pulse_time < BIN_DELTA * (NUMBINS + 1); pulse_time += BIN_DELTA) {
       shared_x.emplace_back(pulse_time);
     }
 
@@ -981,9 +963,8 @@ public:
     MantidVec Y;
     MantidVec E;
 
-    TSM_ASSERT_THROWS(
-        "We don't support WeightedEvents with this feature at present.",
-        eList.generateHistogramPulseTime(X, Y, E), const std::runtime_error &);
+    TSM_ASSERT_THROWS("We don't support WeightedEvents with this feature at present.",
+                      eList.generateHistogramPulseTime(X, Y, E), const std::runtime_error &);
   }
 
   void test_histogram_by_time_at_sample_pulse_only() {
@@ -992,8 +973,7 @@ public:
 
     // Generate the histrogram bins
     MantidVec shared_x;
-    for (int time_at_sample = 0; time_at_sample < BIN_DELTA * (NUMBINS + 1);
-         time_at_sample += BIN_DELTA) {
+    for (int time_at_sample = 0; time_at_sample < BIN_DELTA * (NUMBINS + 1); time_at_sample += BIN_DELTA) {
       shared_x.emplace_back(time_at_sample);
     }
 
@@ -1020,19 +1000,15 @@ public:
   void test_get_min_pulse_time() {
     EventList eList = this->fake_uniform_pulse_data();
     auto vec = eList.getPulseTimes();
-    int64_t expectedResult =
-        std::min_element(vec.begin(), vec.end())->totalNanoseconds();
-    TS_ASSERT_EQUALS(expectedResult,
-                     eList.getPulseTimeMin().totalNanoseconds());
+    int64_t expectedResult = std::min_element(vec.begin(), vec.end())->totalNanoseconds();
+    TS_ASSERT_EQUALS(expectedResult, eList.getPulseTimeMin().totalNanoseconds());
   }
 
   void test_get_max_pulse_time() {
     EventList eList = this->fake_uniform_pulse_data();
     auto vec = eList.getPulseTimes();
-    int64_t expectedResult =
-        std::max_element(vec.begin(), vec.end())->totalNanoseconds();
-    TS_ASSERT_EQUALS(expectedResult,
-                     eList.getPulseTimeMax().totalNanoseconds());
+    int64_t expectedResult = std::max_element(vec.begin(), vec.end())->totalNanoseconds();
+    TS_ASSERT_EQUALS(expectedResult, eList.getPulseTimeMax().totalNanoseconds());
   }
 
   void test_histogram_by_time_at_sample() {
@@ -1051,12 +1027,10 @@ public:
      * TOFevent per BIN_DELTA/2,
      * therefore we should expect 2 events in each bin in our output.
      */
-    for (int time_at_sample = 100; time_at_sample < MAX_TOF;
-         time_at_sample += BIN_DELTA) {
-      shared_x.emplace_back(time_at_sample *
-                            1e3); // Have x-axis in nanoseconds.
-                                  // Tof values are stored as
-                                  // microseconds.
+    for (int time_at_sample = 100; time_at_sample < MAX_TOF; time_at_sample += BIN_DELTA) {
+      shared_x.emplace_back(time_at_sample * 1e3); // Have x-axis in nanoseconds.
+                                                   // Tof values are stored as
+                                                   // microseconds.
     }
 
     el.setX(make_cow<HistogramX>(shared_x));
@@ -1085,12 +1059,9 @@ public:
     const double tofOffset = 0;
     this->el.sortTimeAtSample(tofFactor, tofOffset);
     TofEvent firstEvent = el.getEvent(0);
-    const int64_t expectedMinTimeAtSample =
-        calculatedTAtSample(firstEvent, tofFactor, tofOffset);
+    const int64_t expectedMinTimeAtSample = calculatedTAtSample(firstEvent, tofFactor, tofOffset);
 
-    TS_ASSERT_EQUALS(
-        expectedMinTimeAtSample,
-        el.getTimeAtSampleMin(tofFactor, tofOffset).totalNanoseconds());
+    TS_ASSERT_EQUALS(expectedMinTimeAtSample, el.getTimeAtSampleMin(tofFactor, tofOffset).totalNanoseconds());
   }
 
   void test_get_max_time_at_sample() {
@@ -1099,12 +1070,9 @@ public:
     const double tofOffset = 0;
     this->el.sortTimeAtSample(tofFactor, tofOffset);
     TofEvent lastEvent = el.getEvent(NUMEVENTS - 1);
-    const int64_t expectedMaxTimeAtSample =
-        calculatedTAtSample(lastEvent, tofFactor, tofOffset);
+    const int64_t expectedMaxTimeAtSample = calculatedTAtSample(lastEvent, tofFactor, tofOffset);
 
-    TS_ASSERT_EQUALS(
-        expectedMaxTimeAtSample,
-        el.getTimeAtSampleMax(tofFactor, tofOffset).totalNanoseconds());
+    TS_ASSERT_EQUALS(expectedMaxTimeAtSample, el.getTimeAtSampleMax(tofFactor, tofOffset).totalNanoseconds());
   }
 
   void test_histogram_weights_simple() {
@@ -1159,8 +1127,7 @@ public:
 
     // Generate the histrogram bins starting at 1000
     MantidVec shared_x;
-    for (double tof = BIN_DELTA * 10; tof < BIN_DELTA * (NUMBINS + 1);
-         tof += BIN_DELTA)
+    for (double tof = BIN_DELTA * 10; tof < BIN_DELTA * (NUMBINS + 1); tof += BIN_DELTA)
       shared_x.emplace_back(tof);
     el.setX(make_cow<HistogramX>(shared_x));
 
@@ -1183,8 +1150,7 @@ public:
     // event tof
     this->fake_uniform_data_weights();
     MantidVec shared_x;
-    for (double tof = BIN_DELTA * 10; tof < BIN_DELTA * (NUMBINS + 1);
-         tof += BIN_DELTA)
+    for (double tof = BIN_DELTA * 10; tof < BIN_DELTA * (NUMBINS + 1); tof += BIN_DELTA)
       shared_x.emplace_back(tof);
     el.setX(make_cow<HistogramX>(shared_x));
     const EventList el3(el); // need to copy to a const method in order to
@@ -1257,19 +1223,15 @@ public:
       this->fake_uniform_data();
       el.switchTo(static_cast<EventType>(this_type));
 
-      TSM_ASSERT_EQUALS(this_type, el.integrate(0, MAX_TOF, false),
-                        el.getNumberEvents());
-      TSM_ASSERT_EQUALS(this_type, el.integrate(10, 1, true),
-                        el.getNumberEvents());
+      TSM_ASSERT_EQUALS(this_type, el.integrate(0, MAX_TOF, false), el.getNumberEvents());
+      TSM_ASSERT_EQUALS(this_type, el.integrate(10, 1, true), el.getNumberEvents());
       // Two events per bin
       TSM_ASSERT_EQUALS(this_type, el.integrate(0, BIN_DELTA, false), 2);
-      TSM_ASSERT_EQUALS(
-          this_type, el.integrate(BIN_DELTA * 10, BIN_DELTA * 20, false), 20);
+      TSM_ASSERT_EQUALS(this_type, el.integrate(BIN_DELTA * 10, BIN_DELTA * 20, false), 20);
       // Exactly on the first event's TOF?
       TS_ASSERT_EQUALS(el.integrate(100, 100, false), 1);
       // Go past the ends?
-      TS_ASSERT_EQUALS(el.integrate(-MAX_TOF, MAX_TOF * 2, false),
-                       el.getNumberEvents());
+      TS_ASSERT_EQUALS(el.integrate(-MAX_TOF, MAX_TOF * 2, false), el.getNumberEvents());
       // Give max < min ?
       TS_ASSERT_EQUALS(el.integrate(1000, 100, false), 0);
     }
@@ -1277,19 +1239,15 @@ public:
 
   void test_integrate_weighted() {
     this->fake_uniform_data_weights();
-    TS_ASSERT_EQUALS(el.integrate(0, MAX_TOF, false),
-                     static_cast<double>(el.getNumberEvents()) * 2.0);
-    TS_ASSERT_EQUALS(el.integrate(10, 1, true),
-                     static_cast<double>(el.getNumberEvents()) * 2.0);
+    TS_ASSERT_EQUALS(el.integrate(0, MAX_TOF, false), static_cast<double>(el.getNumberEvents()) * 2.0);
+    TS_ASSERT_EQUALS(el.integrate(10, 1, true), static_cast<double>(el.getNumberEvents()) * 2.0);
     // Two events per bin
     TS_ASSERT_EQUALS(el.integrate(0, BIN_DELTA, false), 2 * 2.0);
-    TS_ASSERT_EQUALS(el.integrate(BIN_DELTA * 10, BIN_DELTA * 20, false),
-                     20 * 2.0);
+    TS_ASSERT_EQUALS(el.integrate(BIN_DELTA * 10, BIN_DELTA * 20, false), 20 * 2.0);
     // Exactly on the first event's TOF?
     TS_ASSERT_EQUALS(el.integrate(100, 100, false), 1 * 2.0);
     // Go past the ends?
-    TS_ASSERT_EQUALS(el.integrate(-MAX_TOF, MAX_TOF * 2, false),
-                     static_cast<double>(el.getNumberEvents()) * 2.0);
+    TS_ASSERT_EQUALS(el.integrate(-MAX_TOF, MAX_TOF * 2, false), static_cast<double>(el.getNumberEvents()) * 2.0);
     // Give max < min ?
     TS_ASSERT_EQUALS(el.integrate(1000, 100, false), 0);
   }
@@ -1456,8 +1414,7 @@ public:
       TS_ASSERT_EQUALS(old_num, this->el.getNumberEvents());
       // Original tofs were 100, 5100, 10100, etc.). This becomes 3^x^2
       TSM_ASSERT_EQUALS(this_type, this->el.getEvent(0).tof(), 3 * 100 * 100.);
-      TSM_ASSERT_EQUALS(this_type, this->el.getEvent(1).tof(),
-                        3 * 5100 * 5100.);
+      TSM_ASSERT_EQUALS(this_type, this->el.getEvent(1).tof(), 3 * 5100 * 5100.);
     }
   }
 
@@ -1516,15 +1473,9 @@ public:
         // Unchanged size
         TS_ASSERT_EQUALS(old_num, this->el.getNumberEvents());
         // original times were 0, 1, etc. nansoeconds
-        TSM_ASSERT_EQUALS(this_type,
-                          this->el.getEvent(0).pulseTime().totalNanoseconds(),
-                          123);
-        TSM_ASSERT_EQUALS(this_type,
-                          this->el.getEvent(1).pulseTime().totalNanoseconds(),
-                          124);
-        TSM_ASSERT_EQUALS(this_type,
-                          this->el.getEvent(2).pulseTime().totalNanoseconds(),
-                          125);
+        TSM_ASSERT_EQUALS(this_type, this->el.getEvent(0).pulseTime().totalNanoseconds(), 123);
+        TSM_ASSERT_EQUALS(this_type, this->el.getEvent(1).pulseTime().totalNanoseconds(), 124);
+        TSM_ASSERT_EQUALS(this_type, this->el.getEvent(2).pulseTime().totalNanoseconds(), 125);
       }
     }
   }
@@ -1555,15 +1506,9 @@ public:
         // Unchanged size
         TS_ASSERT_EQUALS(old_num, this->el.getNumberEvents());
         // original times were 0, 1, etc. nansoeconds
-        TSM_ASSERT_EQUALS(this_type,
-                          this->el.getEvent(0).pulseTime().totalNanoseconds(),
-                          123);
-        TSM_ASSERT_EQUALS(this_type,
-                          this->el.getEvent(1).pulseTime().totalNanoseconds(),
-                          124);
-        TSM_ASSERT_EQUALS(this_type,
-                          this->el.getEvent(2).pulseTime().totalNanoseconds(),
-                          125);
+        TSM_ASSERT_EQUALS(this_type, this->el.getEvent(0).pulseTime().totalNanoseconds(), 123);
+        TSM_ASSERT_EQUALS(this_type, this->el.getEvent(1).pulseTime().totalNanoseconds(), 124);
+        TSM_ASSERT_EQUALS(this_type, this->el.getEvent(2).pulseTime().totalNanoseconds(), 125);
       }
     }
   }
@@ -1586,8 +1531,7 @@ public:
       TS_ASSERT_THROWS_NOTHING(el.sortTimeAtSample(tofFactor, tofShift));
       if (curType != WEIGHTED_NOTIME) {
         for (size_t i = 1; i < el.getNumberEvents(); i++) {
-          TSM_ASSERT_LESS_THAN_EQUALS(this_type, el.getEvent(i - 1).pulseTime(),
-                                      el.getEvent(i).pulseTime());
+          TSM_ASSERT_LESS_THAN_EQUALS(this_type, el.getEvent(i - 1).pulseTime(), el.getEvent(i).pulseTime());
         }
       }
     }
@@ -1608,8 +1552,7 @@ public:
       TS_ASSERT_THROWS_NOTHING(el.sortTimeAtSample(tofFactor, tofShift));
 
       for (size_t i = 1; i < el.getNumberEvents(); i++) {
-        TSM_ASSERT_LESS_THAN_EQUALS(this_type, el.getEvent(i - 1).tof(),
-                                    el.getEvent(i).tof());
+        TSM_ASSERT_LESS_THAN_EQUALS(this_type, el.getEvent(i - 1).tof(), el.getEvent(i).tof());
       }
     }
   }
@@ -1630,10 +1573,10 @@ public:
       TS_ASSERT_THROWS_NOTHING(el.sortTimeAtSample(tofFactor, tofShift));
 
       for (size_t i = 1; i < el.getNumberEvents(); i++) {
-        auto tAtSample1 = el.getEvent(i - 1).pulseTime().totalNanoseconds() +
-                          static_cast<int64_t>(el.getEvent(i - 1).tof() * 1e3);
-        auto tAtSample2 = el.getEvent(i).pulseTime().totalNanoseconds() +
-                          static_cast<int64_t>(el.getEvent(i).tof() * 1e3);
+        auto tAtSample1 =
+            el.getEvent(i - 1).pulseTime().totalNanoseconds() + static_cast<int64_t>(el.getEvent(i - 1).tof() * 1e3);
+        auto tAtSample2 =
+            el.getEvent(i).pulseTime().totalNanoseconds() + static_cast<int64_t>(el.getEvent(i).tof() * 1e3);
         TSM_ASSERT_LESS_THAN_EQUALS(this_type, tAtSample1, tAtSample2);
       }
     }
@@ -1672,11 +1615,9 @@ public:
       TS_ASSERT_THROWS_NOTHING(el.sortPulseTimeTOF());
 
       for (size_t i = 1; i < el.getNumberEvents(); i++) {
-        TSM_ASSERT_LESS_THAN_EQUALS(this_type, el.getEvent(i - 1).pulseTime(),
-                                    el.getEvent(i).pulseTime());
+        TSM_ASSERT_LESS_THAN_EQUALS(this_type, el.getEvent(i - 1).pulseTime(), el.getEvent(i).pulseTime());
         if (el.getEvent(i - 1).pulseTime() == el.getEvent(i).pulseTime())
-          TSM_ASSERT_LESS_THAN_EQUALS(this_type, el.getEvent(i - 1).tof(),
-                                      el.getEvent(i).tof());
+          TSM_ASSERT_LESS_THAN_EQUALS(this_type, el.getEvent(i - 1).tof(), el.getEvent(i).tof());
       }
     }
   }
@@ -1695,27 +1636,23 @@ public:
       out.setSortOrder(Mantid::DataObjects::TOF_SORT);
 
       if (curType == WEIGHTED_NOTIME) {
-        TS_ASSERT_THROWS(el.filterByPulseTime(100, 200, out),
-                         const std::runtime_error &);
+        TS_ASSERT_THROWS(el.filterByPulseTime(100, 200, out), const std::runtime_error &);
       } else {
         TS_ASSERT_THROWS_NOTHING(el.filterByPulseTime(100, 200, out););
 
         int numGood = 0;
         for (std::size_t i = 0; i < el.getNumberEvents(); i++)
-          if ((el.getEvent(i).pulseTime() >= 100) &&
-              (el.getEvent(i).pulseTime() < 200))
+          if ((el.getEvent(i).pulseTime() >= 100) && (el.getEvent(i).pulseTime() < 200))
             numGood++;
 
         // Good # of events.
         TS_ASSERT_EQUALS(numGood, out.getNumberEvents());
         TS_ASSERT_EQUALS(curType, out.getEventType());
-        TS_ASSERT_EQUALS(Mantid::DataObjects::PULSETIME_SORT,
-                         out.getSortType());
+        TS_ASSERT_EQUALS(Mantid::DataObjects::PULSETIME_SORT, out.getSortType());
 
         for (std::size_t i = 0; i < out.getNumberEvents(); i++) {
           // Check that the times are within the given limits.
-          TSM_ASSERT_LESS_THAN_EQUALS(this_type, DateAndTime(100),
-                                      out.getEvent(i).pulseTime());
+          TSM_ASSERT_LESS_THAN_EQUALS(this_type, DateAndTime(100), out.getEvent(i).pulseTime());
           TS_ASSERT_LESS_THAN(out.getEvent(i).pulseTime(), DateAndTime(200));
         }
       }
@@ -1723,8 +1660,7 @@ public:
   }
 
   void test_filterByPulseTime_output_same_as_input_throws() {
-    TS_ASSERT_THROWS(el.filterByPulseTime(100, 200, el),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(el.filterByPulseTime(100, 200, el), const std::invalid_argument &);
   }
 
   void test_filter_by_time_at_sample_behaves_like_filter_by_pulse_time() {
@@ -1744,29 +1680,23 @@ public:
       out.setSortOrder(Mantid::DataObjects::TOF_SORT);
 
       if (curType == WEIGHTED_NOTIME) {
-        TS_ASSERT_THROWS(
-            el.filterByTimeAtSample(100, 200, tofFactor, tofOffset, out),
-            const std::runtime_error &);
+        TS_ASSERT_THROWS(el.filterByTimeAtSample(100, 200, tofFactor, tofOffset, out), const std::runtime_error &);
       } else {
-        TS_ASSERT_THROWS_NOTHING(
-            el.filterByTimeAtSample(100, 200, tofFactor, tofOffset, out););
+        TS_ASSERT_THROWS_NOTHING(el.filterByTimeAtSample(100, 200, tofFactor, tofOffset, out););
 
         int numGood = 0;
         for (std::size_t i = 0; i < el.getNumberEvents(); i++)
-          if ((el.getEvent(i).pulseTime() >= 100) &&
-              (el.getEvent(i).pulseTime() < 200))
+          if ((el.getEvent(i).pulseTime() >= 100) && (el.getEvent(i).pulseTime() < 200))
             numGood++;
 
         // Good # of events.
         TS_ASSERT_EQUALS(numGood, out.getNumberEvents());
         TS_ASSERT_EQUALS(curType, out.getEventType());
-        TS_ASSERT_EQUALS(Mantid::DataObjects::TIMEATSAMPLE_SORT,
-                         out.getSortType());
+        TS_ASSERT_EQUALS(Mantid::DataObjects::TIMEATSAMPLE_SORT, out.getSortType());
 
         for (std::size_t i = 0; i < out.getNumberEvents(); i++) {
           // Check that the times are within the given limits.
-          TSM_ASSERT_LESS_THAN_EQUALS(this_type, DateAndTime(100),
-                                      out.getEvent(i).pulseTime());
+          TSM_ASSERT_LESS_THAN_EQUALS(this_type, DateAndTime(100), out.getEvent(i).pulseTime());
           TS_ASSERT_LESS_THAN(out.getEvent(i).pulseTime(), DateAndTime(200));
         }
       }
@@ -1791,20 +1721,16 @@ public:
       EventList out = EventList();
 
       if (curType == WEIGHTED_NOTIME) {
-        TS_ASSERT_THROWS(el.filterByTimeAtSample(startTEpoch, endTEpoch,
-                                                 tofFactor, tofOffset, out),
+        TS_ASSERT_THROWS(el.filterByTimeAtSample(startTEpoch, endTEpoch, tofFactor, tofOffset, out),
                          const std::runtime_error &);
       } else {
-        TS_ASSERT_THROWS_NOTHING(el.filterByTimeAtSample(
-            startTEpoch, endTEpoch, tofFactor, tofOffset, out););
+        TS_ASSERT_THROWS_NOTHING(el.filterByTimeAtSample(startTEpoch, endTEpoch, tofFactor, tofOffset, out););
 
         // Simulate the filtering
         int numGood = 0;
         for (std::size_t i = 0; i < el.getNumberEvents(); i++) {
-          if ((el.getEvent(i).pulseTime() >=
-               startTEpoch + static_cast<int64_t>(tofOffset * 1e9)) &&
-              (el.getEvent(i).pulseTime() <
-               endTEpoch + static_cast<int64_t>(tofOffset * 1e9))) {
+          if ((el.getEvent(i).pulseTime() >= startTEpoch + static_cast<int64_t>(tofOffset * 1e9)) &&
+              (el.getEvent(i).pulseTime() < endTEpoch + static_cast<int64_t>(tofOffset * 1e9))) {
             numGood++;
           }
         }
@@ -1822,10 +1748,8 @@ public:
    * @param event
    * @return
    */
-  int64_t calculatedTAtSample(const TofEvent &event, const double &L1,
-                              const double &L2) {
-    return event.pulseTime().totalNanoseconds() +
-           static_cast<int64_t>(event.tof() * 1e3 * L1 / (L1 + L2));
+  int64_t calculatedTAtSample(const TofEvent &event, const double &L1, const double &L2) {
+    return event.pulseTime().totalNanoseconds() + static_cast<int64_t>(event.tof() * 1e3 * L1 / (L1 + L2));
   }
 
   void test_filter_by_time_at_sample() {
@@ -1848,12 +1772,10 @@ public:
       EventList out = EventList();
 
       if (curType == WEIGHTED_NOTIME) {
-        TS_ASSERT_THROWS(el.filterByTimeAtSample(startTEpoch, endTEpoch,
-                                                 tofFactor, tofOffset, out),
+        TS_ASSERT_THROWS(el.filterByTimeAtSample(startTEpoch, endTEpoch, tofFactor, tofOffset, out),
                          const std::runtime_error &);
       } else {
-        TS_ASSERT_THROWS_NOTHING(el.filterByTimeAtSample(
-            startTEpoch, endTEpoch, tofFactor, tofOffset, out););
+        TS_ASSERT_THROWS_NOTHING(el.filterByTimeAtSample(startTEpoch, endTEpoch, tofFactor, tofOffset, out););
 
         for (std::size_t i = 0; i < out.getNumberEvents(); i++) {
           int64_t eventTAtSample = calculatedTAtSample(out.getEvent(i), L1, L2);
@@ -1885,11 +1807,9 @@ public:
     for (int i = 1; i < 10; i++) {
       // Reject the odd hundreds pulse times (100-199, 300-399, etc).
       if ((i % 2) == 0)
-        split.emplace_back(
-            SplittingInterval(i * 1000000, (i + 1) * 1000000, i));
+        split.emplace_back(SplittingInterval(i * 1000000, (i + 1) * 1000000, i));
       else
-        split.emplace_back(
-            SplittingInterval(i * 1000000, (i + 1) * 1000000, -1));
+        split.emplace_back(SplittingInterval(i * 1000000, (i + 1) * 1000000, -1));
     }
 
     // Do the splitting
@@ -1934,13 +1854,11 @@ public:
     outputs.emplace(-1, new EventList());
 
     // Generate time splitters
-    std::vector<int64_t> vec_splitTimes{1000000, 2000000, 3000000, 4000000,
-                                        5000000, 6000000, 7000000, 8000000,
-                                        9000000, 10000000};
+    std::vector<int64_t> vec_splitTimes{1000000, 2000000, 3000000, 4000000, 5000000,
+                                        6000000, 7000000, 8000000, 9000000, 10000000};
     std::vector<int> vec_splitGroup{-1, 2, -1, 4, -1, 6, -1, 8, -1};
     // Do the splitting
-    el.splitByFullTimeMatrixSplitter(vec_splitTimes, vec_splitGroup, outputs,
-                                     false, 1.0, 0.0);
+    el.splitByFullTimeMatrixSplitter(vec_splitTimes, vec_splitGroup, outputs, false, 1.0, 0.0);
 
     // No events in the first ouput 0-99
     TS_ASSERT_EQUALS(outputs[0]->getNumberEvents(), 0);
@@ -1983,8 +1901,7 @@ public:
 
       if (curType == WEIGHTED_NOTIME) {
         // Error cause no time
-        TS_ASSERT_THROWS(el.splitByTime(split, outputs),
-                         const std::runtime_error &);
+        TS_ASSERT_THROWS(el.splitByTime(split, outputs), const std::runtime_error &);
       } else {
         // Do the splitting
         TS_ASSERT_THROWS_NOTHING(el.splitByTime(split, outputs););
@@ -2132,8 +2049,7 @@ public:
       Timer timer2;
       el.sortTof();
       if (verbose)
-        std::cout << "   - " << timer2.elapsed()
-                  << " seconds to sortTof (original).\n";
+        std::cout << "   - " << timer2.elapsed() << " seconds to sortTof (original).\n";
       TS_ASSERT(checkSort("sortTof"));
     }
   }
@@ -2174,18 +2090,15 @@ public:
           TS_ASSERT_DELTA(el_out->getEvent(0).tof(), 1.1, 1e-5);
           TS_ASSERT_DELTA(el_out->getEvent(0).weight(), 2 * mult, 1e-5);
           // Error squared is multiplied by mult (squared)
-          TS_ASSERT_DELTA(el_out->getEvent(0).errorSquared(), 2 * mult * mult,
-                          1e-5);
+          TS_ASSERT_DELTA(el_out->getEvent(0).errorSquared(), 2 * mult * mult, 1e-5);
 
           TS_ASSERT_DELTA(el_out->getEvent(1).tof(), 30.25, 1e-5);
           TS_ASSERT_DELTA(el_out->getEvent(1).weight(), 3 * mult, 1e-5);
-          TS_ASSERT_DELTA(el_out->getEvent(1).errorSquared(), 3 * mult * mult,
-                          1e-5);
+          TS_ASSERT_DELTA(el_out->getEvent(1).errorSquared(), 3 * mult * mult, 1e-5);
 
           TS_ASSERT_DELTA(el_out->getEvent(2).tof(), 34.0, 1e-5);
           TS_ASSERT_DELTA(el_out->getEvent(2).weight(), 1 * mult, 1e-5);
-          TS_ASSERT_DELTA(el_out->getEvent(2).errorSquared(), 1 * mult * mult,
-                          1e-5);
+          TS_ASSERT_DELTA(el_out->getEvent(2).errorSquared(), 1 * mult * mult, 1e-5);
 
           // Now the memory must be well used
           TS_ASSERT_EQUALS(el_out->getWeightedEventsNoTime().capacity(), 3);
@@ -2201,8 +2114,7 @@ public:
     // no pulse time should throw an exception
     EventList el_notime_output;
     EventList el_notime = this->fake_data(WEIGHTED_NOTIME);
-    TS_ASSERT_THROWS(el_notime.compressFatEvents(10., DateAndTime(0), 10.,
-                                                 &el_notime_output),
+    TS_ASSERT_THROWS(el_notime.compressFatEvents(10., DateAndTime(0), 10., &el_notime_output),
                      const std::invalid_argument &);
 
     // integration range
@@ -2212,27 +2124,22 @@ public:
     // regular events should compress decently well
     EventList el_output;
     this->fake_uniform_data_weights(TOF);
-    TS_ASSERT_THROWS_NOTHING(
-        el.compressFatEvents(20000., el.getPulseTimeMin(), 5., &el_output));
+    TS_ASSERT_THROWS_NOTHING(el.compressFatEvents(20000., el.getPulseTimeMin(), 5., &el_output));
     // TS_ASSERT_EQUALS(el_output.getNumberEvents(), 401); // osx creates 400
-    TS_ASSERT_EQUALS(el_output.integrate(XMIN, XMAX, true),
-                     el.integrate(XMIN, XMAX, true));
+    TS_ASSERT_EQUALS(el_output.integrate(XMIN, XMAX, true), el.integrate(XMIN, XMAX, true));
 
     // weighted events with time is the main use case
     EventList el_weight_output;
     this->fake_uniform_data_weights(WEIGHTED);
-    TS_ASSERT_THROWS_NOTHING(el.compressFatEvents(20000., el.getPulseTimeMin(),
-                                                  5., &el_weight_output));
+    TS_ASSERT_THROWS_NOTHING(el.compressFatEvents(20000., el.getPulseTimeMin(), 5., &el_weight_output));
     // TS_ASSERT_EQUALS(el_weight_output.getNumberEvents(), 401); // osx creates
     // 400
-    TS_ASSERT_EQUALS(el_weight_output.integrate(XMIN, XMAX, true),
-                     el.integrate(XMIN, XMAX, true));
+    TS_ASSERT_EQUALS(el_weight_output.integrate(XMIN, XMAX, true), el.integrate(XMIN, XMAX, true));
 
     // change the start time to see that events don't make it in
     el_weight_output.clear();
     // previous run's this->fake_uniform_data_weights(WEIGHTED);
-    TS_ASSERT_THROWS_NOTHING(el.compressFatEvents(20000., el.getPulseTimeMax(),
-                                                  5., &el_weight_output));
+    TS_ASSERT_THROWS_NOTHING(el.compressFatEvents(20000., el.getPulseTimeMax(), 5., &el_weight_output));
     TS_ASSERT_EQUALS(el_weight_output.getNumberEvents(), 1);
     TS_ASSERT_DELTA(el_weight_output.integrate(XMIN, XMAX, true), 2., .0001);
   }
@@ -2269,14 +2176,12 @@ public:
   void test_compressWeightedFatEvents() {
     this->fake_uniform_data_weights(WEIGHTED);
     EventList uniformOut;
-    TS_ASSERT_THROWS_NOTHING(
-        el.compressFatEvents(10000., el.getPulseTimeMin(), 30., &uniformOut));
+    TS_ASSERT_THROWS_NOTHING(el.compressFatEvents(10000., el.getPulseTimeMin(), 30., &uniformOut));
     TS_ASSERT_DIFFERS(el, uniformOut);
 
     this->fake_uniform_data_changing_weights();
     EventList varyingOut(el);
-    TS_ASSERT_THROWS_NOTHING(
-        el.compressFatEvents(10000., el.getPulseTimeMin(), 30., &varyingOut));
+    TS_ASSERT_THROWS_NOTHING(el.compressFatEvents(10000., el.getPulseTimeMin(), 30., &varyingOut));
     TS_ASSERT_DIFFERS(el, varyingOut);
 
     // they should give different results because they have different weighting
@@ -2419,8 +2324,7 @@ public:
     vec_splitGroup[8] = 1;
 
     // Do the splitting
-    el.splitByFullTimeMatrixSplitter(vec_splitTimes, vec_splitGroup, outputs,
-                                     true, 0.0, 2.0E-4);
+    el.splitByFullTimeMatrixSplitter(vec_splitTimes, vec_splitGroup, outputs, true, 0.0, 2.0E-4);
 
     // Examine result
     TS_ASSERT_EQUALS(outputs.size(), 11);
@@ -2491,8 +2395,7 @@ public:
     vec_splitGroup[8] = 1;
 
     // Do the splitting
-    el.splitByFullTimeMatrixSplitter(vec_splitTimes, vec_splitGroup, outputs,
-                                     true, 0.5, 2.0E-4);
+    el.splitByFullTimeMatrixSplitter(vec_splitTimes, vec_splitGroup, outputs, true, 0.5, 2.0E-4);
 
     // Examine result
     TS_ASSERT_EQUALS(outputs.size(), 11);
@@ -2545,8 +2448,7 @@ public:
       for (int i = 0; i < NUMEVENTS; i++) {
         // Random tof up to 10 ms
         // Random pulse time up to 1000
-        el += WeightedEvent(
-            TofEvent(1e7 * (rand() * 1.0 / RAND_MAX), rand() % 1000));
+        el += WeightedEvent(TofEvent(1e7 * (rand() * 1.0 / RAND_MAX), rand() % 1000));
       }
       break;
     case WEIGHTED_NOTIME:
@@ -2564,17 +2466,14 @@ public:
    Make some uniformly distributed fake event data distributed by pulse time,
    WITH A CONSTANT TOF.
    */
-  EventList fake_uniform_pulse_data(EventType eventType = TOF,
-                                    double events_per_bin = 2) {
+  EventList fake_uniform_pulse_data(EventType eventType = TOF, double events_per_bin = 2) {
     EventList el;
     if (eventType == TOF) {
-      for (double pulse_time = 0; pulse_time < MAX_PULSE_TIME;
-           pulse_time += BIN_DELTA / events_per_bin) {
+      for (double pulse_time = 0; pulse_time < MAX_PULSE_TIME; pulse_time += BIN_DELTA / events_per_bin) {
         el += TofEvent(100, static_cast<size_t>(pulse_time));
       }
     } else if (eventType == WEIGHTED) {
-      for (double pulse_time = 0; pulse_time < MAX_PULSE_TIME;
-           pulse_time += BIN_DELTA / events_per_bin) {
+      for (double pulse_time = 0; pulse_time < MAX_PULSE_TIME; pulse_time += BIN_DELTA / events_per_bin) {
         el += WeightedEvent(TofEvent(100, static_cast<size_t>(pulse_time)));
       }
     } else {
@@ -2583,8 +2482,7 @@ public:
     return el;
   }
 
-  EventList fake_random_tof_constant_pulse_data(EventType eventType = TOF,
-                                                const size_t nEvents = 1000) {
+  EventList fake_random_tof_constant_pulse_data(EventType eventType = TOF, const size_t nEvents = 1000) {
     EventList el;
     if (eventType == TOF) {
       for (size_t i = 0; i < nEvents; ++i) {
@@ -2597,15 +2495,13 @@ public:
         el += WeightedEvent(TofEvent(1e7 * (rand() * 1.0 / RAND_MAX), 0));
       }
     } else {
-      throw std::runtime_error(
-          "not implemented: fake_random_tof_constant_pulse_data");
+      throw std::runtime_error("not implemented: fake_random_tof_constant_pulse_data");
     }
     return el;
   }
 
   /** Create a uniform event list with no weights*/
-  void fake_uniform_data(double events_per_bin = 2,
-                         bool randomPulseTime = true) {
+  void fake_uniform_data(double events_per_bin = 2, bool randomPulseTime = true) {
     // Clear the list
     el = EventList();
     // Create some mostly-reasonable fake data.
@@ -2640,8 +2536,7 @@ public:
     const int64_t PULSETIME_DELTA = static_cast<int64_t>(BIN_DELTA / 1000);
     for (double tof = 100; tof < MAX_TOF; tof += BIN_DELTA / 2) {
       // add some jitter into the pulse time with rand
-      pulsetime = 10000 * (static_cast<int64_t>(tof) / PULSETIME_DELTA) +
-                  (rand() % 1000);
+      pulsetime = 10000 * (static_cast<int64_t>(tof) / PULSETIME_DELTA) + (rand() % 1000);
       // tof steps of 5 microseconds, starting at 100 ns, up to 20 msec
       if (eventType == TOF) {
         el += TofEvent(tof, pulsetime);
@@ -2663,8 +2558,7 @@ public:
     const int64_t PULSETIME_DELTA = static_cast<int64_t>(BIN_DELTA / 1000);
     for (double tof = 100; tof < MAX_TOF; tof += BIN_DELTA / 2) {
       // add some jitter into the pulse time with rand
-      pulsetime = 10000 * (static_cast<int64_t>(tof) / PULSETIME_DELTA) +
-                  (rand() % 1000);
+      pulsetime = 10000 * (static_cast<int64_t>(tof) / PULSETIME_DELTA) + (rand() % 1000);
       // tof steps of 5 microseconds, starting at 100 ns, up to 20 msec
       el += WeightedEvent(tof, pulsetime, 2.0,
                           tof / 100); // want non-uniform weights
@@ -2758,8 +2652,7 @@ public:
     el.setHistogram(HistogramData::BinEdges{0, 2});
     TS_ASSERT_THROWS(el.setCounts(1), const std::runtime_error &);
     TS_ASSERT_THROWS(el.setCountVariances(1), const std::runtime_error &);
-    TS_ASSERT_THROWS(el.setCountStandardDeviations(1),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(el.setCountStandardDeviations(1), const std::runtime_error &);
   }
 
   void test_setFrequencies_fails() {
@@ -2767,8 +2660,7 @@ public:
     el.setHistogram(HistogramData::BinEdges{0, 2});
     TS_ASSERT_THROWS(el.setFrequencies(1), const std::runtime_error &);
     TS_ASSERT_THROWS(el.setFrequencyVariances(1), const std::runtime_error &);
-    TS_ASSERT_THROWS(el.setFrequencyStandardDeviations(1),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(el.setFrequencyStandardDeviations(1), const std::runtime_error &);
   }
 
   void test_setShared_fails() {
@@ -2848,8 +2740,7 @@ public:
   void test_histogram_has_correct_YMode() {
     EventList e;
     e.setYMode(HistogramData::Histogram::YMode::Frequencies);
-    TS_ASSERT_EQUALS(e.histogram().yMode(),
-                     HistogramData::Histogram::YMode::Frequencies);
+    TS_ASSERT_EQUALS(e.histogram().yMode(), HistogramData::Histogram::YMode::Frequencies);
   }
 
   void test_YMode_affects_event_data_interpretation() {
@@ -2884,9 +2775,7 @@ class EventListTestPerformance : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static EventListTestPerformance *createSuite() {
-    return new EventListTestPerformance();
-  }
+  static EventListTestPerformance *createSuite() { return new EventListTestPerformance(); }
   static void destroySuite(EventListTestPerformance *suite) { delete suite; }
 
   /** Constructor */
@@ -2899,14 +2788,12 @@ public:
     // 10 million events, up to 1e5 tof
     el_sorted_original.clear();
     for (size_t i = 0; i < 10000000; i++)
-      el_sorted_original +=
-          TofEvent(static_cast<double>(i) / 100.0, rand() % 1000);
+      el_sorted_original += TofEvent(static_cast<double>(i) / 100.0, rand() % 1000);
     el_sorted_original.setSortOrder(TOF_SORT);
 
     el_sorted_weighted.clear();
     for (size_t i = 0; i < 10000000; i++)
-      el_sorted_weighted += WeightedEvent(static_cast<double>(i) / 100.0,
-                                          rand() % 1000, 2.34, 4.56);
+      el_sorted_weighted += WeightedEvent(static_cast<double>(i) / 100.0, rand() % 1000, 2.34, 4.56);
     el_sorted_weighted.setSortOrder(TOF_SORT);
 
     // A vector for histogramming, 100,000 steps of 1.0
@@ -2923,8 +2810,7 @@ public:
     Mantid::API::FrameworkManager::Instance();
   }
 
-  EventList el_random, el_random_source, el_sorted, el_sorted_original,
-      el_sorted_weighted, el4, el5;
+  EventList el_random, el_random_source, el_sorted, el_sorted_original, el_sorted_weighted, el4, el5;
   MantidVec fineX;
   MantidVec coarseX;
 

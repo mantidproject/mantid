@@ -50,8 +50,7 @@ public:
   All are of a different type
 */
 
-template <typename F, typename S, typename T>
-class MANTID_GEOMETRY_DLL DTriple {
+template <typename F, typename S, typename T> class MANTID_GEOMETRY_DLL DTriple {
 public:
   F first;  ///< First item
   S second; ///< Second item

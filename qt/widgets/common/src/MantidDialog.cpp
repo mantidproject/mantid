@@ -19,8 +19,7 @@ using namespace MantidQt::API;
 /**
  * Default Constructor
  */
-MantidDialog::MantidDialog(QWidget *parent, const Qt::WindowFlags &flags)
-    : QDialog(parent, flags), m_pyRunner() {
+MantidDialog::MantidDialog(QWidget *parent, const Qt::WindowFlags &flags) : QDialog(parent, flags), m_pyRunner() {
   // re-emit the run Python code from m_pyRunner, to work this signal must reach
   // the slot in QtiPlot
   connect(&m_pyRunner, SIGNAL(runAsPythonScript(const QString &, bool)), this,
@@ -56,8 +55,7 @@ bool MantidDialog::handle(QObject *receiver, const std::exception &e) {
  */
 void MantidDialog::handleException(const std::exception &e) {
   QMessageBox::critical(qobject_cast<QWidget *>(parent()), "Mantid - Error",
-                        "Exception is caught in dialog:\n\n" +
-                            QString::fromStdString(e.what()));
+                        "Exception is caught in dialog:\n\n" + QString::fromStdString(e.what()));
   close();
 }
 

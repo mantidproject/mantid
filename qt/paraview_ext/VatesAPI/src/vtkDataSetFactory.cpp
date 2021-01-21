@@ -12,8 +12,7 @@
 namespace Mantid {
 namespace VATES {
 
-vtkDataSetFactory::vtkDataSetFactory()
-    : m_useTransform(false), m_bCheckDimensionality(true) {}
+vtkDataSetFactory::vtkDataSetFactory() : m_useTransform(false), m_bCheckDimensionality(true) {}
 
 /**
  * Checks the successor and throws if invalid.
@@ -36,17 +35,13 @@ void vtkDataSetFactory::checkSuccessor() const {
 Set a flag indicating whether dimensionality should be checked
 @param flag : TRUE to check dimensionality otherwise FALSE.
 */
-void vtkDataSetFactory::setCheckDimensionality(bool flag) {
-  m_bCheckDimensionality = flag;
-}
+void vtkDataSetFactory::setCheckDimensionality(bool flag) { m_bCheckDimensionality = flag; }
 
 /*
 Get a flag indicating whether dimensionality should be checked
 @return true if dimensionality is checked.
 */
-bool vtkDataSetFactory::doesCheckDimensionality() const {
-  return m_bCheckDimensionality;
-}
+bool vtkDataSetFactory::doesCheckDimensionality() const { return m_bCheckDimensionality; }
 
 /*
 Convenience function. Creates an output visualisation data set in one-shot.
@@ -55,9 +50,8 @@ Convenience function. Creates an output visualisation data set in one-shot.
 @param progressUpdater : object used to update the progress action.
 @result vtkDataSet* interpreted from input.
 */
-vtkSmartPointer<vtkDataSet>
-vtkDataSetFactory::oneStepCreate(Mantid::API::Workspace_sptr ws,
-                                 ProgressAction &progressUpdater) {
+vtkSmartPointer<vtkDataSet> vtkDataSetFactory::oneStepCreate(Mantid::API::Workspace_sptr ws,
+                                                             ProgressAction &progressUpdater) {
   this->initialize(std::move(ws));
   return this->create(progressUpdater);
 }

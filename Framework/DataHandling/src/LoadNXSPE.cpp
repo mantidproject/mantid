@@ -78,8 +78,7 @@ int LoadNXSPE::confidence(Kernel::NexusDescriptor &descriptor) const {
   try {
     ::NeXus::File file = ::NeXus::File(descriptor.filename());
     string_map_t entries = file.getEntries();
-    for (string_map_t::const_iterator it = entries.begin(); it != entries.end();
-         ++it) {
+    for (string_map_t::const_iterator it = entries.begin(); it != entries.end(); ++it) {
       if (it->second == "NXentry") {
         file.openGroup(it->first, it->second);
         file.openData("definition");
@@ -96,11 +95,8 @@ int LoadNXSPE::confidence(Kernel::NexusDescriptor &descriptor) const {
  */
 void LoadNXSPE::init() {
   const std::vector<std::string> exts{".nxspe", ""};
-  declareProperty(
-      std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
-      "An NXSPE file");
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts), "An NXSPE file");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "The name of the workspace that will be created.");
 }
 
@@ -245,27 +241,23 @@ void LoadNXSPE::exec() {
   file.close();
 
   // check if dimensions of the vectors are correct
-  if ((error.size() != data.size()) || (azimuthal.size() != numSpectra) ||
-      (azimuthal_width.size() != numSpectra) || (polar.size() != numSpectra) ||
-      (polar_width.size() != numSpectra) ||
+  if ((error.size() != data.size()) || (azimuthal.size() != numSpectra) || (azimuthal_width.size() != numSpectra) ||
+      (polar.size() != numSpectra) || (polar_width.size() != numSpectra) ||
       ((energies.size() != numBins) && (energies.size() != numBins + 1))) {
-    throw std::invalid_argument(
-        "incompatible sizes of fields in the NXSPE file");
+    throw std::invalid_argument("incompatible sizes of fields in the NXSPE file");
   }
 
   MatrixWorkspace_sptr outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(
-      WorkspaceFactory::Instance().create("Workspace2D", numSpectra,
-                                          energies.size(), numBins));
+      WorkspaceFactory::Instance().create("Workspace2D", numSpectra, energies.size(), numBins));
   // Need to get hold of the parameter map
   outputWS->getAxis(0)->unit() = UnitFactory::Instance().create("DeltaE");
   outputWS->setYUnit("SpectraNumber");
 
   // add logs
-  outputWS->mutableRun().addLogData(
-      new PropertyWithValue<double>("Ei", fixed_energy));
+  outputWS->mutableRun().addLogData(new PropertyWithValue<double>("Ei", fixed_energy));
   outputWS->mutableRun().addLogData(new PropertyWithValue<double>("psi", psi));
-  outputWS->mutableRun().addLogData(new PropertyWithValue<std::string>(
-      "ki_over_kf_scaling", kikfscaling == 1 ? "true" : "false"));
+  outputWS->mutableRun().addLogData(
+      new PropertyWithValue<std::string>("ki_over_kf_scaling", kikfscaling == 1 ? "true" : "false"));
 
   // Set Goniometer
   Geometry::Goniometer gm;
@@ -273,8 +265,7 @@ void LoadNXSPE::exec() {
   outputWS->mutableRun().setGoniometer(gm, true);
 
   // generate instrument
-  Geometry::Instrument_sptr instrument(new Geometry::Instrument(
-      instrument_name.empty() ? "NXSPE" : instrument_name));
+  Geometry::Instrument_sptr instrument(new Geometry::Instrument(instrument_name.empty() ? "NXSPE" : instrument_name));
 
   Geometry::ObjComponent *source = new Geometry::ObjComponent("source");
   source->setPos(0.0, 0.0, -10.);
@@ -296,8 +287,7 @@ void LoadNXSPE::exec() {
     Kernel::V3D pos;
     pos.spherical(r, polar.at(i), azimuthal.at(i));
 
-    Geometry::Detector *det =
-        new Geometry::Detector("pixel", static_cast<int>(i + 1), sample);
+    Geometry::Detector *det = new Geometry::Detector("pixel", static_cast<int>(i + 1), sample);
     det->setPos(pos);
     det->setShape(cuboid);
     instrument->add(det);
@@ -305,8 +295,7 @@ void LoadNXSPE::exec() {
   }
   outputWS->setInstrument(instrument);
 
-  std::vector<double>::iterator itdata = data.begin(), iterror = error.begin(),
-                                itdataend, iterrorend;
+  std::vector<double>::iterator itdata = data.begin(), iterror = error.begin(), itdataend, iterrorend;
   auto &spectrumInfo = outputWS->mutableSpectrumInfo();
   API::Progress prog = API::Progress(this, 0.0, 0.9, numSpectra);
   BinEdges edges(std::move(energies));
@@ -330,15 +319,11 @@ void LoadNXSPE::exec() {
   // If an instrument name is defined, load instrument parameter file for Emode
   // NB. LoadParameterFile must be used on a workspace with an instrument
   if (!instrument_name.empty() && instrument_name != "NXSPE") {
-    std::string IDF_filename =
-        InstrumentFileFinder::getInstrumentFilename(instrument_name);
-    std::string instrument_parfile =
-        IDF_filename.substr(0, IDF_filename.find("_Definition")) +
-        "_Parameters.xml";
+    std::string IDF_filename = InstrumentFileFinder::getInstrumentFilename(instrument_name);
+    std::string instrument_parfile = IDF_filename.substr(0, IDF_filename.find("_Definition")) + "_Parameters.xml";
     if (Poco::File(instrument_parfile).exists()) {
       try {
-        IAlgorithm_sptr loadParamAlg =
-            createChildAlgorithm("LoadParameterFile");
+        IAlgorithm_sptr loadParamAlg = createChildAlgorithm("LoadParameterFile");
         loadParamAlg->setProperty("Filename", instrument_parfile);
         loadParamAlg->setProperty("Workspace", outputWS);
         loadParamAlg->execute();
@@ -352,8 +337,7 @@ void LoadNXSPE::exec() {
   setProperty("OutputWorkspace", outputWS);
 }
 
-std::shared_ptr<Geometry::CSGObject>
-LoadNXSPE::createCuboid(double dx, double dy, double dz) {
+std::shared_ptr<Geometry::CSGObject> LoadNXSPE::createCuboid(double dx, double dy, double dz) {
   UNUSED_ARG(dx)
   UNUSED_ARG(dy)
   UNUSED_ARG(dz)
@@ -417,8 +401,7 @@ LoadNXSPE::createCuboid(double dx, double dy, double dz) {
 
   // A sphere
   std::string ObjSphere = "-41";
-  std::shared_ptr<Geometry::CSGObject> retVal =
-      std::make_shared<Geometry::CSGObject>();
+  std::shared_ptr<Geometry::CSGObject> retVal = std::make_shared<Geometry::CSGObject>();
   retVal->setObject(41, ObjSphere);
   retVal->populate(SphSurMap);
 

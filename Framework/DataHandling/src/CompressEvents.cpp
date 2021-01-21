@@ -28,40 +28,33 @@ using namespace API;
 using namespace DataObjects;
 
 void CompressEvents::init() {
-  declareProperty(
-      std::make_unique<WorkspaceProperty<EventWorkspace>>("InputWorkspace", "",
-                                                          Direction::Input),
-      "The name of the EventWorkspace on which to perform the algorithm");
+  declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>("InputWorkspace", "", Direction::Input),
+                  "The name of the EventWorkspace on which to perform the algorithm");
 
-  declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "The name of the output EventWorkspace.");
 
   // Tolerance must be >= 0.0
   auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
-  declareProperty(
-      std::make_unique<PropertyWithValue<double>>(
-          "Tolerance", 1e-5, mustBePositive, Direction::Input),
-      "The tolerance on each event's X value (normally TOF, but may be a "
-      "different unit if you have used ConvertUnits).\n"
-      "Any events within Tolerance will be summed into a single event.");
+  declareProperty(std::make_unique<PropertyWithValue<double>>("Tolerance", 1e-5, mustBePositive, Direction::Input),
+                  "The tolerance on each event's X value (normally TOF, but may be a "
+                  "different unit if you have used ConvertUnits).\n"
+                  "Any events within Tolerance will be summed into a single event.");
 
   declareProperty(
-      std::make_unique<PropertyWithValue<double>>(
-          "WallClockTolerance", EMPTY_DBL(), mustBePositive, Direction::Input),
+      std::make_unique<PropertyWithValue<double>>("WallClockTolerance", EMPTY_DBL(), mustBePositive, Direction::Input),
       "The tolerance (in seconds) on the wall-clock time for comparison. Unset "
       "means compressing all wall-clock times together disabling pulsetime "
       "resolution.");
 
   auto dateValidator = std::make_shared<DateTimeValidator>();
   dateValidator->allowEmpty(true);
-  declareProperty(
-      "StartTime", "", dateValidator,
-      "An ISO formatted date/time string specifying the timestamp for "
-      "starting filtering. Ignored if WallClockTolerance is not specified. "
-      "Default is start of run",
-      Direction::Input);
+  declareProperty("StartTime", "", dateValidator,
+                  "An ISO formatted date/time string specifying the timestamp for "
+                  "starting filtering. Ignored if WallClockTolerance is not specified. "
+                  "Default is start of run",
+                  Direction::Input);
 }
 
 void CompressEvents::exec() {
@@ -98,43 +91,39 @@ void CompressEvents::exec() {
     outputWS = create<EventWorkspace>(*inputWS, HistogramData::BinEdges(2));
     // We DONT copy the data though
     // Loop over the histograms (detector spectra)
-    tbb::parallel_for(
-        tbb::blocked_range<size_t>(0, noSpectra),
-        [compressFat, toleranceTof, startTime, toleranceWallClock, &inputWS,
-         &outputWS, &prog](const tbb::blocked_range<size_t> &range) {
-          for (size_t index = range.begin(); index < range.end(); ++index) {
-            // The input event list
-            EventList &input_el = inputWS->getSpectrum(index);
-            // And on the output side
-            EventList &output_el = outputWS->getSpectrum(index);
-            // Copy other settings into output
-            output_el.setX(input_el.ptrX());
-            // The EventList method does the work.
-            if (compressFat)
-              input_el.compressFatEvents(toleranceTof, startTime,
-                                         toleranceWallClock, &output_el);
-            else
-              input_el.compressEvents(toleranceTof, &output_el);
-            prog.report("Compressing");
-          }
-        });
+    tbb::parallel_for(tbb::blocked_range<size_t>(0, noSpectra),
+                      [compressFat, toleranceTof, startTime, toleranceWallClock, &inputWS, &outputWS,
+                       &prog](const tbb::blocked_range<size_t> &range) {
+                        for (size_t index = range.begin(); index < range.end(); ++index) {
+                          // The input event list
+                          EventList &input_el = inputWS->getSpectrum(index);
+                          // And on the output side
+                          EventList &output_el = outputWS->getSpectrum(index);
+                          // Copy other settings into output
+                          output_el.setX(input_el.ptrX());
+                          // The EventList method does the work.
+                          if (compressFat)
+                            input_el.compressFatEvents(toleranceTof, startTime, toleranceWallClock, &output_el);
+                          else
+                            input_el.compressEvents(toleranceTof, &output_el);
+                          prog.report("Compressing");
+                        }
+                      });
   } else { // inplace
-    tbb::parallel_for(
-        tbb::blocked_range<size_t>(0, noSpectra),
-        [compressFat, toleranceTof, startTime, toleranceWallClock, &outputWS,
-         &prog](const tbb::blocked_range<size_t> &range) {
-          for (size_t index = range.begin(); index < range.end(); ++index) {
-            // The input (also output) event list
-            auto &output_el = outputWS->getSpectrum(index);
-            // The EventList method does the work.
-            if (compressFat)
-              output_el.compressFatEvents(toleranceTof, startTime,
-                                          toleranceWallClock, &output_el);
-            else
-              output_el.compressEvents(toleranceTof, &output_el);
-            prog.report("Compressing");
-          }
-        });
+    tbb::parallel_for(tbb::blocked_range<size_t>(0, noSpectra),
+                      [compressFat, toleranceTof, startTime, toleranceWallClock, &outputWS,
+                       &prog](const tbb::blocked_range<size_t> &range) {
+                        for (size_t index = range.begin(); index < range.end(); ++index) {
+                          // The input (also output) event list
+                          auto &output_el = outputWS->getSpectrum(index);
+                          // The EventList method does the work.
+                          if (compressFat)
+                            output_el.compressFatEvents(toleranceTof, startTime, toleranceWallClock, &output_el);
+                          else
+                            output_el.compressEvents(toleranceTof, &output_el);
+                          prog.report("Compressing");
+                        }
+                      });
   }
 
   // Cast to the matrixOutputWS and save it

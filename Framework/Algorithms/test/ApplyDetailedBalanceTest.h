@@ -27,12 +27,9 @@ class ApplyDetailedBalanceTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ApplyDetailedBalanceTest *createSuite() {
-    return new ApplyDetailedBalanceTest();
-  }
+  static ApplyDetailedBalanceTest *createSuite() { return new ApplyDetailedBalanceTest(); }
   static void destroySuite(ApplyDetailedBalanceTest *suite) { delete suite; }
-  ApplyDetailedBalanceTest()
-      : inputWSname("testADBInput"), outputWSname("testADBOutput") {}
+  ApplyDetailedBalanceTest() : inputWSname("testADBInput"), outputWSname("testADBOutput") {}
 
   void test_Init() {
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
@@ -43,35 +40,25 @@ public:
     createWorkspace2D(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputWorkspace", inputWSname));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outputWSname));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", inputWSname));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outputWSname));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Temperature", "300.0"));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
     Workspace2D_sptr inws, outws;
-    TS_ASSERT_THROWS_NOTHING(
-        outws = AnalysisDataService::Instance().retrieveWS<Workspace2D>(
-            outputWSname));
+    TS_ASSERT_THROWS_NOTHING(outws = AnalysisDataService::Instance().retrieveWS<Workspace2D>(outputWSname));
     TS_ASSERT(outws);
-    TS_ASSERT_THROWS_NOTHING(
-        inws = AnalysisDataService::Instance().retrieveWS<Workspace2D>(
-            inputWSname));
+    TS_ASSERT_THROWS_NOTHING(inws = AnalysisDataService::Instance().retrieveWS<Workspace2D>(inputWSname));
     TS_ASSERT(inws);
     if (!outws)
       return;
 
     for (std::size_t i = 0; i < 5; ++i) {
-      TS_ASSERT_DELTA(
-          outws->readY(0)[i],
-          M_PI *
-              (1 - std::exp(-11.604519 *
-                            (inws->readX(0)[i] + inws->readX(0)[i + 1]) / 2. /
-                            300.)) *
-              inws->readY(0)[i],
-          1e-8);
+      TS_ASSERT_DELTA(outws->readY(0)[i],
+                      M_PI * (1 - std::exp(-11.604519 * (inws->readX(0)[i] + inws->readX(0)[i + 1]) / 2. / 300.)) *
+                          inws->readY(0)[i],
+                      1e-8);
     }
     AnalysisDataService::Instance().remove(outputWSname);
     AnalysisDataService::Instance().remove(inputWSname);
@@ -81,43 +68,34 @@ public:
     createWorkspace2D(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputWorkspace", inputWSname));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outputWSname));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", inputWSname));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outputWSname));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Temperature", "x"));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(!alg.isExecuted());
     Workspace2D_sptr outws;
-    TS_ASSERT_THROWS_ANYTHING(
-        outws = AnalysisDataService::Instance().retrieveWS<Workspace2D>(
-            outputWSname));
+    TS_ASSERT_THROWS_ANYTHING(outws = AnalysisDataService::Instance().retrieveWS<Workspace2D>(outputWSname));
 
     // AnalysisDataService::Instance().remove(outputWSname);
     AnalysisDataService::Instance().remove(inputWSname);
   }
 
   void test_event() {
-    EventWorkspace_sptr evin = WorkspaceCreationHelper::createEventWorkspace(
-                            1, 5, 10, 0, 1, 3),
-                        evout;
+    EventWorkspace_sptr evin = WorkspaceCreationHelper::createEventWorkspace(1, 5, 10, 0, 1, 3), evout;
     evin->getAxis(0)->unit() = UnitFactory::Instance().create("DeltaE");
     AnalysisDataService::Instance().add(inputWSname, evin);
 
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputWorkspace", inputWSname));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outputWSname));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", inputWSname));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outputWSname));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Temperature", "100"));
 
     alg.execute();
     TS_ASSERT(alg.isExecuted());
 
     TS_ASSERT_THROWS_NOTHING(
-        evout = std::dynamic_pointer_cast<EventWorkspace>(
-            AnalysisDataService::Instance().retrieve(outputWSname)));
+        evout = std::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(outputWSname)));
 
     double temp = 100.;
     TS_ASSERT(evout); // should be an event workspace
@@ -133,8 +111,7 @@ public:
 
   void test_units() {
     createWorkspace2D(true);
-    Workspace2D_sptr inws =
-        AnalysisDataService::Instance().retrieveWS<Workspace2D>(inputWSname);
+    Workspace2D_sptr inws = AnalysisDataService::Instance().retrieveWS<Workspace2D>(inputWSname);
     TS_ASSERT_EQUALS(inws->getAxis(0)->unit()->unitID(), "DeltaE");
     alg.initialize();
     alg.setPropertyValue("InputWorkspace", inputWSname);
@@ -142,8 +119,7 @@ public:
     alg.setPropertyValue("Temperature", "300.0");
     alg.setPropertyValue("OutputUnits", "Frequency");
     alg.execute();
-    Workspace2D_sptr outws =
-        AnalysisDataService::Instance().retrieveWS<Workspace2D>(outputWSname);
+    Workspace2D_sptr outws = AnalysisDataService::Instance().retrieveWS<Workspace2D>(outputWSname);
     TS_ASSERT_EQUALS(outws->getAxis(0)->unit()->unitID(), "DeltaE_inFrequency");
   }
 

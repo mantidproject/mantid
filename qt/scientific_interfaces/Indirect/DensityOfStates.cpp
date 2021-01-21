@@ -22,14 +22,12 @@ Mantid::Kernel::Logger g_log("DensityOfStates");
 
 namespace MantidQt {
 namespace CustomInterfaces {
-DensityOfStates::DensityOfStates(QWidget *parent)
-    : IndirectSimulationTab(parent) {
+DensityOfStates::DensityOfStates(QWidget *parent) : IndirectSimulationTab(parent) {
   m_uiForm.setupUi(parent);
-  setOutputPlotOptionsPresenter(std::make_unique<IndirectPlotOptionsPresenter>(
-      m_uiForm.ipoPlotOptions, this, PlotWidget::Spectra));
+  setOutputPlotOptionsPresenter(
+      std::make_unique<IndirectPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, this, PlotWidget::Spectra));
 
-  connect(m_uiForm.mwInputFile, SIGNAL(filesFound()), this,
-          SLOT(handleFileChange()));
+  connect(m_uiForm.mwInputFile, SIGNAL(filesFound()), this, SLOT(handleFileChange()));
 
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
@@ -73,8 +71,7 @@ void DensityOfStates::run() {
   setRunIsRunning(true);
 
   // Get the SimulatedDensityOfStates algorithm
-  auto dosAlgo =
-      AlgorithmManager::Instance().create("SimulatedDensityOfStates");
+  auto dosAlgo = AlgorithmManager::Instance().create("SimulatedDensityOfStates");
 
   const auto filename = m_uiForm.mwInputFile->getFirstFilename();
   QFileInfo inputFileInfo(filename);
@@ -114,8 +111,7 @@ void DensityOfStates::run() {
     dosAlgo->setProperty("SpectrumType", "DOS");
 
     const auto crossSectionScale = m_uiForm.ckCrossSectionScale->isChecked();
-    const auto crossSectionScaleType =
-        m_uiForm.cbCrossSectionScale->currentText().toStdString();
+    const auto crossSectionScaleType = m_uiForm.cbCrossSectionScale->currentText().toStdString();
     if (crossSectionScale)
       dosAlgo->setProperty("ScaleByCrossSection", crossSectionScaleType);
 
@@ -143,8 +139,7 @@ void DensityOfStates::run() {
 
   m_batchAlgoRunner->addAlgorithm(dosAlgo);
 
-  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-          SLOT(dosAlgoComplete(bool)));
+  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(dosAlgoComplete(bool)));
   m_batchAlgoRunner->executeBatchAsync();
 }
 
@@ -154,8 +149,7 @@ void DensityOfStates::run() {
  * @param error If the algorithm failed
  */
 void DensityOfStates::dosAlgoComplete(bool error) {
-  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-             SLOT(dosAlgoComplete(bool)));
+  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(dosAlgoComplete(bool)));
 
   setRunIsRunning(false);
   if (error)
@@ -178,8 +172,7 @@ void DensityOfStates::handleFileChange() {
   if (isPhononFile) {
     filePropName = "PHONONFile";
     // Load the ion table to populate the list of ions
-    IAlgorithm_sptr ionTableAlgo =
-        AlgorithmManager::Instance().create("SimulatedDensityOfStates");
+    IAlgorithm_sptr ionTableAlgo = AlgorithmManager::Instance().create("SimulatedDensityOfStates");
     ionTableAlgo->initialize();
     ionTableAlgo->setProperty(filePropName, filename.toStdString());
     ionTableAlgo->setProperty("SpectrumType", "IonTable");
@@ -187,8 +180,7 @@ void DensityOfStates::handleFileChange() {
 
     m_batchAlgoRunner->addAlgorithm(ionTableAlgo);
 
-    connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-            SLOT(ionLoadComplete(bool)));
+    connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(ionLoadComplete(bool)));
     m_batchAlgoRunner->executeBatchAsync();
   } else {
     m_uiForm.lwIons->clear();
@@ -209,15 +201,13 @@ void DensityOfStates::handleFileChange() {
  * @param error If the algorithm failed
  */
 void DensityOfStates::ionLoadComplete(bool error) {
-  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-             SLOT(ionLoadComplete(bool)));
+  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(ionLoadComplete(bool)));
 
   if (error)
     g_log.error("Could not get a list of ions from .phonon file");
 
   // Get the list of ions from algorithm
-  auto ionTable =
-      AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("__dos_ions");
+  auto ionTable = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("__dos_ions");
   Column_sptr ionColumn = ionTable->getColumn("Species");
   size_t numIons = ionColumn->size();
 
@@ -227,8 +217,7 @@ void DensityOfStates::ionLoadComplete(bool error) {
   // Add ions to list
   QStringList ionSpecies;
   for (size_t ion = 0; ion < numIons; ion++) {
-    const QString species =
-        QString::fromStdString(ionColumn->cell<std::string>(ion));
+    const QString species = QString::fromStdString(ionColumn->cell<std::string>(ion));
     if (!ionSpecies.contains(species))
       ionSpecies << species;
   }
@@ -244,9 +233,7 @@ void DensityOfStates::ionLoadComplete(bool error) {
  *
  * @param settings :: The settings to loading into the interface
  */
-void DensityOfStates::loadSettings(const QSettings &settings) {
-  m_uiForm.mwInputFile->readSettings(settings.group());
-}
+void DensityOfStates::loadSettings(const QSettings &settings) { m_uiForm.mwInputFile->readSettings(settings.group()); }
 
 void DensityOfStates::runClicked() {
   clearOutputPlotOptionsWorkspaces();
@@ -272,13 +259,9 @@ void DensityOfStates::setButtonsEnabled(bool enabled) {
   setSaveEnabled(enabled);
 }
 
-void DensityOfStates::setRunEnabled(bool enabled) {
-  m_uiForm.pbRun->setEnabled(enabled);
-}
+void DensityOfStates::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(enabled); }
 
-void DensityOfStates::setSaveEnabled(bool enabled) {
-  m_uiForm.pbSave->setEnabled(enabled);
-}
+void DensityOfStates::setSaveEnabled(bool enabled) { m_uiForm.pbSave->setEnabled(enabled); }
 
 } // namespace CustomInterfaces
 } // namespace MantidQt

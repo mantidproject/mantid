@@ -25,14 +25,7 @@ This is an implementation of ProjectionSurface for viewing the instrument in 3D.
 */
 class Projection3D : public ProjectionSurface {
   Q_OBJECT
-  enum AxisDirection {
-    XPOSITIVE,
-    YPOSITIVE,
-    ZPOSITIVE,
-    XNEGATIVE,
-    YNEGATIVE,
-    ZNEGATIVE
-  };
+  enum AxisDirection { XPOSITIVE, YPOSITIVE, ZPOSITIVE, XNEGATIVE, YNEGATIVE, ZNEGATIVE };
 
 public:
   Projection3D(const InstrumentActor *rootActor, QSize viewportSize);

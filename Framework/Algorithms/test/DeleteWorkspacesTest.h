@@ -42,8 +42,7 @@ public:
 
     TS_ASSERT_EQUALS(dataStore.size(), storeSizeAtStart + 1);
     // Check that what is left is correct
-    MatrixWorkspace_sptr wsRemain = std::dynamic_pointer_cast<MatrixWorkspace>(
-        dataStore.retrieve(testName3));
+    MatrixWorkspace_sptr wsRemain = std::dynamic_pointer_cast<MatrixWorkspace>(dataStore.retrieve(testName3));
     TS_ASSERT(wsRemain);
     if (!wsRemain)
       TS_FAIL("Unable to retrieve remaining workspace.");
@@ -100,8 +99,7 @@ public:
     const std::string groupName = "DeleteWorkspaces_testGroup";
     Mantid::Algorithms::GroupWorkspaces groupingAlg;
     groupingAlg.initialize();
-    groupingAlg.setPropertyValue("InputWorkspaces",
-                                 testName1 + "," + testName2);
+    groupingAlg.setPropertyValue("InputWorkspaces", testName1 + "," + testName2);
     groupingAlg.setPropertyValue("OutputWorkspace", groupName);
     groupingAlg.execute();
     TS_ASSERT_EQUALS(dataStore.size(), storeSizeAtStart + 3);
@@ -109,8 +107,7 @@ public:
     Mantid::Algorithms::DeleteWorkspaces alg;
     alg.initialize();
     alg.setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(
-        "WorkspaceList", testName1 + ", " + testName2 + ", " + groupName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("WorkspaceList", testName1 + ", " + testName2 + ", " + groupName));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
@@ -122,8 +119,7 @@ public:
     using namespace Mantid::DataObjects;
 
     // create a test workspace registered within the ADS
-    Workspace2D_sptr testWS1 =
-        WorkspaceCreationHelper::create2DWorkspace(ylength, 10);
+    Workspace2D_sptr testWS1 = WorkspaceCreationHelper::create2DWorkspace(ylength, 10);
     AnalysisDataServiceImpl &dataStore = AnalysisDataService::Instance();
     dataStore.add(name, testWS1);
   }

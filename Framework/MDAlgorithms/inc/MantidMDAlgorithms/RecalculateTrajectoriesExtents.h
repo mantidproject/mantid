@@ -14,8 +14,7 @@ namespace MDAlgorithms {
 
 /** RecalculateTrajectoriesExtents :
  */
-class MANTID_MDALGORITHMS_DLL RecalculateTrajectoriesExtents
-    : public API::Algorithm {
+class MANTID_MDALGORITHMS_DLL RecalculateTrajectoriesExtents : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

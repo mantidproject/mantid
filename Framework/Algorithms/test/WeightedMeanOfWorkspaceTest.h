@@ -23,9 +23,7 @@ class WeightedMeanOfWorkspaceTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static WeightedMeanOfWorkspaceTest *createSuite() {
-    return new WeightedMeanOfWorkspaceTest();
-  }
+  static WeightedMeanOfWorkspaceTest *createSuite() { return new WeightedMeanOfWorkspaceTest(); }
   static void destroySuite(WeightedMeanOfWorkspaceTest *suite) { delete suite; }
 
   void testInit() {
@@ -44,16 +42,13 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
     // Retrieve the workspace from data service.
     MatrixWorkspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            outWSName));
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSName));
     TS_ASSERT(ws);
     if (!ws)
       return;
@@ -124,7 +119,5 @@ private:
     return WorkspaceCreationHelper::create2DWorkspace123(4, 3, true, masked);
   }
 
-  EventWorkspace_sptr createEventWorkspace() {
-    return WorkspaceCreationHelper::createEventWorkspace();
-  }
+  EventWorkspace_sptr createEventWorkspace() { return WorkspaceCreationHelper::createEventWorkspace(); }
 };

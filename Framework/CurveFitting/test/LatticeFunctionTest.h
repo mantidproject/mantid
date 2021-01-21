@@ -22,9 +22,7 @@ class LatticeFunctionTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static LatticeFunctionTest *createSuite() {
-    return new LatticeFunctionTest();
-  }
+  static LatticeFunctionTest *createSuite() { return new LatticeFunctionTest(); }
   static void destroySuite(LatticeFunctionTest *suite) { delete suite; }
 
   void testSetLatticeSystem() {
@@ -35,8 +33,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(fn.setLatticeSystem("Tetragonal"));
     TS_ASSERT_THROWS_NOTHING(fn.setLatticeSystem("triclinic"));
 
-    TS_ASSERT_THROWS(fn.setLatticeSystem("DoesNotExist"),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(fn.setLatticeSystem("DoesNotExist"), const std::invalid_argument &);
 
     fn.setLatticeSystem("Cubic");
     // a and ZeroShift

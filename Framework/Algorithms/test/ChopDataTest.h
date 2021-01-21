@@ -33,8 +33,7 @@ public:
   }
 
   void testExec() {
-    Mantid::DataObjects::Workspace2D_sptr inputWS =
-        WorkspaceCreationHelper::create2DWorkspaceBinned(149, 24974, 5, 4);
+    Mantid::DataObjects::Workspace2D_sptr inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(149, 24974, 5, 4);
 
     for (int i = 0; i < 4995; i++) {
       inputWS->mutableX(140)[i + 19980] = 0.2;
@@ -42,8 +41,7 @@ public:
 
     inputWS->getAxis(0)->setUnit("TOF");
 
-    TS_ASSERT_THROWS_NOTHING(Mantid::API::AnalysisDataService::Instance().add(
-        "chopdatatest_input", inputWS));
+    TS_ASSERT_THROWS_NOTHING(Mantid::API::AnalysisDataService::Instance().add("chopdatatest_input", inputWS));
 
     const size_t nHist = inputWS->getNumberHistograms();
 
@@ -51,25 +49,18 @@ public:
 
     alg = new ChopData();
     TS_ASSERT_THROWS_NOTHING(alg->initialize());
-    TS_ASSERT_THROWS_NOTHING(
-        alg->setPropertyValue("InputWorkspace", "chopdatatest_input"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg->setPropertyValue("OutputWorkspace", "chopdatatest_output"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg->setProperty<int>("MonitorWorkspaceIndex", 140));
-    TS_ASSERT_THROWS_NOTHING(
-        alg->setProperty<double>("IntegrationRangeLower", 5000.0));
-    TS_ASSERT_THROWS_NOTHING(
-        alg->setProperty<double>("IntegrationRangeUpper", 10000.0));
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("InputWorkspace", "chopdatatest_input"));
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("OutputWorkspace", "chopdatatest_output"));
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty<int>("MonitorWorkspaceIndex", 140));
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty<double>("IntegrationRangeLower", 5000.0));
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty<double>("IntegrationRangeUpper", 10000.0));
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
 
     // Get workspace group output by algorithm
     Mantid::API::WorkspaceGroup_sptr wsgroup;
-    TS_ASSERT_THROWS_NOTHING(
-        wsgroup = std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(
-                "chopdatatest_output")));
+    TS_ASSERT_THROWS_NOTHING(wsgroup = std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(
+                                 Mantid::API::AnalysisDataService::Instance().retrieve("chopdatatest_output")));
 
     TS_ASSERT_EQUALS(wsgroup->getNumberOfEntries(), 4);
 
@@ -78,13 +69,11 @@ public:
     Mantid::API::MatrixWorkspace_const_sptr output1;
     Mantid::API::MatrixWorkspace_const_sptr output4;
 
-    TS_ASSERT_THROWS_NOTHING(
-        output1 = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(wsnames[0])));
+    TS_ASSERT_THROWS_NOTHING(output1 = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+                                 Mantid::API::AnalysisDataService::Instance().retrieve(wsnames[0])));
 
-    TS_ASSERT_THROWS_NOTHING(
-        output4 = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(wsnames[3])));
+    TS_ASSERT_THROWS_NOTHING(output4 = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+                                 Mantid::API::AnalysisDataService::Instance().retrieve(wsnames[3])));
 
     TS_ASSERT_EQUALS(output1->getNumberHistograms(), nHist);
     TS_ASSERT_EQUALS(output4->getNumberHistograms(), nHist);

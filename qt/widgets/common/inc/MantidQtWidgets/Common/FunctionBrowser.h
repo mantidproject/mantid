@@ -37,14 +37,12 @@ using namespace Mantid::API;
  * Class FitPropertyBrowser implements QtPropertyBrowser to display
  * and control fitting function parameters and settings.
  */
-class EXPORT_OPT_MANTIDQT_COMMON FunctionBrowser : public QWidget,
-                                                   public IFunctionBrowser {
+class EXPORT_OPT_MANTIDQT_COMMON FunctionBrowser : public QWidget, public IFunctionBrowser {
   Q_OBJECT
 public:
   /// Constructor
-  FunctionBrowser(
-      QWidget *parent = nullptr, bool multi = false,
-      const std::vector<std::string> &categories = std::vector<std::string>());
+  FunctionBrowser(QWidget *parent = nullptr, bool multi = false,
+                  const std::vector<std::string> &categories = std::vector<std::string>());
   /// Destructor
   virtual ~FunctionBrowser() override;
   /// Clear the contents
@@ -85,23 +83,19 @@ public:
   /// Get value of a local parameter
   double getLocalParameterValue(const QString &parName, int i) const override;
   /// Set value of a local parameter
-  void setLocalParameterValue(const QString &parName, int i,
-                              double value) override;
+  void setLocalParameterValue(const QString &parName, int i, double value) override;
   /// Set value and error of a local parameter
-  void setLocalParameterValue(const QString &parName, int i, double value,
-                              double error);
+  void setLocalParameterValue(const QString &parName, int i, double value, double error);
   /// Get error of a local parameter
   double getLocalParameterError(const QString &parName, int i) const;
   /// Check if a local parameter is fixed
   bool isLocalParameterFixed(const QString &parName, int i) const override;
   /// Fix/unfix local parameter
-  void setLocalParameterFixed(const QString &parName, int i,
-                              bool fixed) override;
+  void setLocalParameterFixed(const QString &parName, int i, bool fixed) override;
   /// Get the tie for a local parameter.
   QString getLocalParameterTie(const QString &parName, int i) const override;
   /// Set a tie for a local parameter.
-  void setLocalParameterTie(const QString &parName, int i,
-                            QString tie) override;
+  void setLocalParameterTie(const QString &parName, int i, QString tie) override;
   /// Return the multidomain function if number of datasets is greater than 1
   IFunction_sptr getGlobalFunction() override;
   /// Update parameter values in the browser to match those of a function.

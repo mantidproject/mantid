@@ -46,10 +46,8 @@ DECLARE_WINDOW(TableStatistics)
 
 using namespace Mantid;
 
-TableStatistics::TableStatistics(ScriptingEnv *env, QWidget *parent,
-                                 Table *base, Type t, const QList<int> &targets)
-    : Table(env, 1, 1, "", parent, ""), d_base(base), d_type(t),
-      d_targets(targets) {
+TableStatistics::TableStatistics(ScriptingEnv *env, QWidget *parent, Table *base, Type t, const QList<int> &targets)
+    : Table(env, 1, 1, "", parent, ""), d_base(base), d_type(t), d_targets(targets) {
 
   setCaptionPolicy(MdiSubWindow::Both);
   if (d_type == row) {
@@ -111,12 +109,10 @@ TableStatistics::TableStatistics(ScriptingEnv *env, QWidget *parent,
   setColPlotDesignation(0, Table::X);
   setHeaderColType();
 
-  connect(d_base, SIGNAL(modifiedData(Table *, const QString &)), this,
-          SLOT(update(Table *, const QString &)));
-  connect(d_base, SIGNAL(changedColHeader(const QString &, const QString &)),
-          this, SLOT(renameCol(const QString &, const QString &)));
-  connect(d_base, SIGNAL(removedCol(const QString &)), this,
-          SLOT(removeCol(const QString &)));
+  connect(d_base, SIGNAL(modifiedData(Table *, const QString &)), this, SLOT(update(Table *, const QString &)));
+  connect(d_base, SIGNAL(changedColHeader(const QString &, const QString &)), this,
+          SLOT(renameCol(const QString &, const QString &)));
+  connect(d_base, SIGNAL(removedCol(const QString &)), this, SLOT(removeCol(const QString &)));
   connect(d_base, SIGNAL(destroyed()), this, SLOT(closedBase()));
 }
 
@@ -273,8 +269,8 @@ void TableStatistics::removeCol(const QString &col) {
     }
 }
 
-MantidQt::API::IProjectSerialisable *TableStatistics::loadFromProject(
-    const std::string &lines, ApplicationWindow *app, const int fileVersion) {
+MantidQt::API::IProjectSerialisable *TableStatistics::loadFromProject(const std::string &lines, ApplicationWindow *app,
+                                                                      const int fileVersion) {
   Q_UNUSED(fileVersion);
   std::vector<std::string> lineVec;
   boost::split(lineVec, lines, boost::is_any_of("\n"));
@@ -315,38 +311,32 @@ MantidQt::API::IProjectSerialisable *TableStatistics::loadFromProject(
   // create instance
   int typeCode = type == "row" ? TableStatistics::row : TableStatistics::column;
 
-  auto table = new TableStatistics(
-      app->scriptingEnv(), app, app->table(QString::fromStdString(tableName)),
-      (TableStatistics::Type)typeCode, targets);
+  auto table = new TableStatistics(app->scriptingEnv(), app, app->table(QString::fromStdString(tableName)),
+                                   (TableStatistics::Type)typeCode, targets);
 
   if (tsv.selectLine("geometry"))
-    app->restoreWindowGeometry(
-        app, table, QString::fromStdString(tsv.lineAsString("geometry")));
+    app->restoreWindowGeometry(app, table, QString::fromStdString(tsv.lineAsString("geometry")));
 
   if (tsv.selectLine("header")) {
-    QStringList header =
-        QString::fromUtf8(tsv.lineAsString("header").c_str()).split("\t");
+    QStringList header = QString::fromUtf8(tsv.lineAsString("header").c_str()).split("\t");
     header.pop_front();
     table->loadHeader(header);
   }
 
   if (tsv.selectLine("ColWidth")) {
-    QStringList colWidths =
-        QString::fromUtf8(tsv.lineAsString("ColWidth").c_str()).split("\t");
+    QStringList colWidths = QString::fromUtf8(tsv.lineAsString("ColWidth").c_str()).split("\t");
     colWidths.pop_front();
     table->setColWidths(colWidths);
   }
 
   if (tsv.selectLine("ColType")) {
-    QStringList colTypes =
-        QString::fromUtf8(tsv.lineAsString("ColType").c_str()).split("\t");
+    QStringList colTypes = QString::fromUtf8(tsv.lineAsString("ColType").c_str()).split("\t");
     colTypes.pop_front();
     table->setColumnTypes(colTypes);
   }
 
   if (tsv.selectLine("Comments")) {
-    QStringList comments =
-        QString::fromUtf8(tsv.lineAsString("Comments").c_str()).split("\t");
+    QStringList comments = QString::fromUtf8(tsv.lineAsString("Comments").c_str()).split("\t");
     comments.pop_front();
     table->setColComments(comments);
   }

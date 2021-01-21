@@ -25,8 +25,7 @@ namespace {
 Mantid::Kernel::Logger g_log("SampleEnvironment");
 
 // Typedef for cache
-using SampleEnvironmentSpecCache =
-    std::unordered_map<std::string, SampleEnvironmentSpec_uptr>;
+using SampleEnvironmentSpecCache = std::unordered_map<std::string, SampleEnvironmentSpec_uptr>;
 
 /**
  * If it doesn't exist create the static cache, otherwise return a reference to
@@ -45,9 +44,7 @@ SampleEnvironmentSpecCache &retrieveSpecCache() {
  * @param specName Name of spec
  * @return A key for the cache
  */
-std::string createCacheKey(const std::string &facility,
-                           const std::string &instrument,
-                           const std::string &specName) {
+std::string createCacheKey(const std::string &facility, const std::string &instrument, const std::string &specName) {
   return facility + "/" + instrument + "/" + specName;
 }
 } // namespace
@@ -60,8 +57,7 @@ std::string createCacheKey(const std::string &facility,
  * @param specFinder A reference to an object used to retrieve find a given
  * specification.
  */
-SampleEnvironmentFactory::SampleEnvironmentFactory(
-    ISampleEnvironmentSpecFinder_uptr specFinder)
+SampleEnvironmentFactory::SampleEnvironmentFactory(ISampleEnvironmentSpecFinder_uptr specFinder)
     : m_finder(std::move(specFinder)) {}
 
 /**
@@ -73,9 +69,10 @@ SampleEnvironmentFactory::SampleEnvironmentFactory(
  * @param canName The name of a can within the spec
  * @return A new instance of the given environment
  */
-Geometry::SampleEnvironment_uptr SampleEnvironmentFactory::create(
-    const std::string &facility, const std::string &instrument,
-    const std::string &specName, const std::string &canName) {
+Geometry::SampleEnvironment_uptr SampleEnvironmentFactory::create(const std::string &facility,
+                                                                  const std::string &instrument,
+                                                                  const std::string &specName,
+                                                                  const std::string &canName) {
   assert(m_finder);
   auto &specCache = retrieveSpecCache();
   auto cacheKey = createCacheKey(facility, instrument, specName);
@@ -95,9 +92,7 @@ Geometry::SampleEnvironment_uptr SampleEnvironmentFactory::create(
 /**
  * @return the number of cache entries
  */
-size_t SampleEnvironmentFactory::cacheSize() const {
-  return retrieveSpecCache().size();
-}
+size_t SampleEnvironmentFactory::cacheSize() const { return retrieveSpecCache().size(); }
 
 /**
  * Clear the cache of SampleEnvironmentSpec objects
@@ -116,12 +111,10 @@ void SampleEnvironmentFactory::clearCache() { retrieveSpecCache().clear(); }
  * then forms the path to find the named spec
  * @throws std::invalid_argument if the list is empty
  */
-SampleEnvironmentSpecFileFinder::SampleEnvironmentSpecFileFinder(
-    const std::vector<std::string> &directories)
+SampleEnvironmentSpecFileFinder::SampleEnvironmentSpecFileFinder(const std::vector<std::string> &directories)
     : m_rootDirs(directories) {
   if (m_rootDirs.empty()) {
-    throw std::invalid_argument(
-        "SampleEnvironmentSpecFileFinder() - Empty directory search list.");
+    throw std::invalid_argument("SampleEnvironmentSpecFileFinder() - Empty directory search list.");
   }
 }
 
@@ -132,10 +125,9 @@ SampleEnvironmentSpecFileFinder::SampleEnvironmentSpecFileFinder(
  * @param name The name of the spec
  * @return The SampleEnvironmentSpec_uptr
  */
-SampleEnvironmentSpec_uptr
-SampleEnvironmentSpecFileFinder::find(const std::string &facility,
-                                      const std::string &instrument,
-                                      const std::string &name) const {
+SampleEnvironmentSpec_uptr SampleEnvironmentSpecFileFinder::find(const std::string &facility,
+                                                                 const std::string &instrument,
+                                                                 const std::string &name) const {
   using Poco::File;
   using Poco::Path;
 
@@ -156,17 +148,15 @@ SampleEnvironmentSpecFileFinder::find(const std::string &facility,
         g_log.debug() << "Found environment at \"" << fullpath.path() << "\"\n";
         return parseSpec(name, fullpath.path());
       } else {
-        g_log.debug() << "Failed to find environment at \"" << fullpath.path()
-                      << "\"\n";
+        g_log.debug() << "Failed to find environment at \"" << fullpath.path() << "\"\n";
       }
     }
   }
 
   // no match if we get here
   std::ostringstream msg;
-  msg << "Unable to find sample environment file '" << name
-      << "' for facility '" << facility << "' and instrument '" << instrument
-      << "'";
+  msg << "Unable to find sample environment file '" << name << "' for facility '" << facility << "' and instrument '"
+      << instrument << "'";
   throw std::runtime_error(msg.str());
 }
 
@@ -176,14 +166,11 @@ SampleEnvironmentSpecFileFinder::find(const std::string &facility,
  * @param filename Assumed to be an absolute path to an existing specification
  * @return A parse specification
  */
-SampleEnvironmentSpec_uptr
-SampleEnvironmentSpecFileFinder::parseSpec(const std::string &name,
-                                           const std::string &filename) const {
+SampleEnvironmentSpec_uptr SampleEnvironmentSpecFileFinder::parseSpec(const std::string &name,
+                                                                      const std::string &filename) const {
   std::ifstream reader(filename, std::ios_base::in);
   if (!reader) {
-    throw std::runtime_error(
-        "SampleEnvironmentSpecFileFinder() - Error accessing file '" +
-        filename + "'");
+    throw std::runtime_error("SampleEnvironmentSpecFileFinder() - Error accessing file '" + filename + "'");
   }
   SampleEnvironmentSpecParser parser;
   return parser.parse(name, filename, reader);

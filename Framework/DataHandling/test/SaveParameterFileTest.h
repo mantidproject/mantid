@@ -77,16 +77,14 @@ public:
                   "linear ; TOF ; TOF");
   }
 
-  void setParam(const std::string &cName, const std::string &pName,
-                const std::string &value) {
+  void setParam(const std::string &cName, const std::string &pName, const std::string &value) {
     Instrument_const_sptr inst = m_ws->getInstrument();
     ParameterMap &paramMap = m_ws->instrumentParameters();
     std::shared_ptr<const IComponent> comp = inst->getComponentByName(cName);
     paramMap.addString(comp->getComponentID(), pName, value);
   }
 
-  void setParam(const std::string &cName, const std::string &pName,
-                double value) {
+  void setParam(const std::string &cName, const std::string &pName, double value) {
     Instrument_const_sptr inst = m_ws->getInstrument();
     ParameterMap &paramMap = m_ws->instrumentParameters();
     std::shared_ptr<const IComponent> comp = inst->getComponentByName(cName);
@@ -101,8 +99,7 @@ public:
     paramMap.addDouble(detector.getComponentID(), pName, value);
   }
 
-  void setFitParam(const std::string &cName, const std::string &pName,
-                   const std::string &value) {
+  void setFitParam(const std::string &cName, const std::string &pName, const std::string &value) {
     Instrument_const_sptr inst = m_ws->getInstrument();
     ParameterMap &paramMap = m_ws->instrumentParameters();
     std::shared_ptr<const IComponent> comp = inst->getComponentByName(cName);
@@ -111,8 +108,7 @@ public:
     paramMap.add(comp.get(), param);
   }
 
-  void checkParam(const std::string &cName, const std::string &pName,
-                  std::string value) {
+  void checkParam(const std::string &cName, const std::string &pName, std::string value) {
     Instrument_const_sptr inst = m_ws->getInstrument();
     ParameterMap &paramMap = m_ws->instrumentParameters();
     std::shared_ptr<const IComponent> comp = inst->getComponentByName(cName);
@@ -120,8 +116,7 @@ public:
     TS_ASSERT_EQUALS(value, param);
   }
 
-  void checkParam(const std::string &cName, const std::string &pName,
-                  double value) {
+  void checkParam(const std::string &cName, const std::string &pName, double value) {
     Instrument_const_sptr inst = m_ws->getInstrument();
     ParameterMap &paramMap = m_ws->instrumentParameters();
     std::shared_ptr<const IComponent> comp = inst->getComponentByName(cName);
@@ -138,14 +133,12 @@ public:
     TS_ASSERT_DELTA(value, pValue, 0.0001);
   }
 
-  void checkFitParam(const std::string &cName, const std::string &pName,
-                     const std::string &value) {
+  void checkFitParam(const std::string &cName, const std::string &pName, const std::string &value) {
     Instrument_const_sptr inst = m_ws->getInstrument();
     ParameterMap &paramMap = m_ws->instrumentParameters();
     std::shared_ptr<const IComponent> comp = inst->getComponentByName(cName);
     auto param = paramMap.get(comp.get(), pName, "fitting");
-    const Mantid::Geometry::FitParameter &fitParam =
-        param->value<FitParameter>();
+    const Mantid::Geometry::FitParameter &fitParam = param->value<FitParameter>();
 
     // Info about fitting parameter is in string value, see FitParameter class
     using tokenizer = Mantid::Kernel::StringTokenizer;
@@ -180,17 +173,14 @@ public:
     TS_ASSERT_THROWS_NOTHING(loaderIDF2.initialize());
 
     std::string wsName = "SaveParameterFileTestIDF2";
-    Workspace_sptr ws =
-        WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
+    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
     Workspace2D_sptr ws2D = std::dynamic_pointer_cast<Workspace2D>(ws);
 
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
 
-    loaderIDF2.setPropertyValue("Filename",
-                                "unit_testing/IDF_for_UNIT_TESTING2.xml");
+    loaderIDF2.setPropertyValue("Filename", "unit_testing/IDF_for_UNIT_TESTING2.xml");
     loaderIDF2.setPropertyValue("Workspace", wsName);
-    loaderIDF2.setProperty("RewriteSpectraMap",
-                           Mantid::Kernel::OptionalBool(true));
+    loaderIDF2.setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(true));
     TS_ASSERT_THROWS_NOTHING(loaderIDF2.execute());
     TS_ASSERT(loaderIDF2.isExecuted());
 

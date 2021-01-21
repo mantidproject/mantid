@@ -38,13 +38,13 @@ public:
   UnwrappedDetector(const UnwrappedDetector &other);
   UnwrappedDetector &operator=(const UnwrappedDetector &other);
   bool empty() const;
-  GLColor color; ///< red, green, blue colour components (0 - 255)
-  double u;      ///< horizontal "unwrapped" coordinate
-  double v;      ///< vertical "unwrapped" coordinate
-  double width;  ///< detector width in units of u
-  double height; ///< detector height in units of v
-  double uscale; ///< scaling factor in u direction
-  double vscale; ///< scaling factor in v direction
+  GLColor color;                                        ///< red, green, blue colour components (0 - 255)
+  double u;                                             ///< horizontal "unwrapped" coordinate
+  double v;                                             ///< vertical "unwrapped" coordinate
+  double width;                                         ///< detector width in units of u
+  double height;                                        ///< detector height in units of v
+  double uscale;                                        ///< scaling factor in u direction
+  double vscale;                                        ///< scaling factor in v direction
   size_t detIndex = std::numeric_limits<size_t>::max(); ///< Detector Index in
   ///< ComponentInfo/DetectorInfo.
 };

@@ -28,8 +28,7 @@ MatrixWorkspace_sptr makeWorkspace() {
   return ws;
 }
 
-MatrixWorkspace_sptr maskInstrument(const MatrixWorkspace_sptr &ws,
-                                    const std::vector<int> &detectorIDs) {
+MatrixWorkspace_sptr maskInstrument(const MatrixWorkspace_sptr &ws, const std::vector<int> &detectorIDs) {
   MaskInstrument alg;
   alg.setRethrows(true);
   alg.initialize();
@@ -42,15 +41,12 @@ MatrixWorkspace_sptr maskInstrument(const MatrixWorkspace_sptr &ws,
   return out;
 }
 
-MatrixWorkspace_sptr
-maskInstrumentInplace(const MatrixWorkspace_sptr &ws,
-                      const std::vector<int> &detectorIDs) {
+MatrixWorkspace_sptr maskInstrumentInplace(const MatrixWorkspace_sptr &ws, const std::vector<int> &detectorIDs) {
   MaskInstrument alg;
   alg.setRethrows(true);
   alg.initialize();
   alg.setProperty("InputWorkspace", ws);
-  TS_ASSERT_THROWS_NOTHING(
-      alg.setPropertyValue("OutputWorkspace", "_dummy_for_inplace"));
+  TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_dummy_for_inplace"));
   alg.setProperty("OutputWorkspace", ws);
   alg.setProperty("DetectorIDs", detectorIDs);
   alg.execute();

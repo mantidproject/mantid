@@ -26,16 +26,12 @@ class MANTIDQT_INDIRECT_DLL IndirectPlotOptionsPresenter : public QObject {
 
 public:
   IndirectPlotOptionsPresenter(
-      IndirectPlotOptionsView *view, IPyRunner *pythonRunner,
-      PlotWidget const &plotType = PlotWidget::Spectra,
+      IndirectPlotOptionsView *view, IPyRunner *pythonRunner, PlotWidget const &plotType = PlotWidget::Spectra,
       std::string const &fixedIndices = "",
-      boost::optional<std::map<std::string, std::string>> const
-          &availableActions = boost::none);
+      boost::optional<std::map<std::string, std::string>> const &availableActions = boost::none);
   /// Used by the unit tests so that the view and model can be mocked
-  IndirectPlotOptionsPresenter(IndirectPlotOptionsView *view,
-                               IndirectPlotOptionsModel *model,
-                               PlotWidget const &plotType = PlotWidget::Spectra,
-                               std::string const &fixedIndices = "");
+  IndirectPlotOptionsPresenter(IndirectPlotOptionsView *view, IndirectPlotOptionsModel *model,
+                               PlotWidget const &plotType = PlotWidget::Spectra, std::string const &fixedIndices = "");
   ~IndirectPlotOptionsPresenter() override;
 
   void setPlotType(PlotWidget const &plotType);
@@ -52,16 +48,14 @@ private slots:
   void plotTiled();
 
 private:
-  void setupPresenter(PlotWidget const &plotType,
-                      std::string const &fixedIndices);
+  void setupPresenter(PlotWidget const &plotType, std::string const &fixedIndices);
   void watchADS(bool on);
 
   void setPlotting(bool plotting);
   void setOptionsEnabled(bool enable);
 
   void onWorkspaceRemoved(Mantid::API::WorkspacePreDeleteNotification_ptr nf);
-  void
-  onWorkspaceReplaced(Mantid::API::WorkspaceBeforeReplaceNotification_ptr nf);
+  void onWorkspaceReplaced(Mantid::API::WorkspaceBeforeReplaceNotification_ptr nf);
 
   void setWorkspace(std::string const &plotWorkspace);
   void setIndices();
@@ -69,12 +63,8 @@ private:
   bool validateWorkspaceSize(MantidAxis const &axisType);
 
   // Observers for ADS Notifications
-  Poco::NObserver<IndirectPlotOptionsPresenter,
-                  Mantid::API::WorkspacePreDeleteNotification>
-      m_wsRemovedObserver;
-  Poco::NObserver<IndirectPlotOptionsPresenter,
-                  Mantid::API::WorkspaceBeforeReplaceNotification>
-      m_wsReplacedObserver;
+  Poco::NObserver<IndirectPlotOptionsPresenter, Mantid::API::WorkspacePreDeleteNotification> m_wsRemovedObserver;
+  Poco::NObserver<IndirectPlotOptionsPresenter, Mantid::API::WorkspaceBeforeReplaceNotification> m_wsReplacedObserver;
 
   IndirectPlotOptionsView *m_view;
   std::unique_ptr<IndirectPlotOptionsModel> m_model;

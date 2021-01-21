@@ -15,22 +15,16 @@
 #include <gtest/gtest.h>
 
 using namespace MantidQt::CustomInterfaces::ISISReflectometry;
-using namespace MantidQt::CustomInterfaces::ISISReflectometry::
-    ModelCreationHelper;
+using namespace MantidQt::CustomInterfaces::ISISReflectometry::ModelCreationHelper;
 using testing::Mock;
 using testing::NiceMock;
 using testing::Return;
 
-class RunsTablePresenterGroupDeletionTest : public CxxTest::TestSuite,
-                                            RunsTablePresenterTest {
+class RunsTablePresenterGroupDeletionTest : public CxxTest::TestSuite, RunsTablePresenterTest {
 public:
-  static RunsTablePresenterGroupDeletionTest *createSuite() {
-    return new RunsTablePresenterGroupDeletionTest();
-  }
+  static RunsTablePresenterGroupDeletionTest *createSuite() { return new RunsTablePresenterGroupDeletionTest(); }
 
-  static void destroySuite(RunsTablePresenterGroupDeletionTest *suite) {
-    delete suite;
-  }
+  static void destroySuite(RunsTablePresenterGroupDeletionTest *suite) { delete suite; }
 
   void testUpdatesViewWhenGroupDeletedFromDirectSelection() {
     auto reductionJobs = twoEmptyGroupsModel();

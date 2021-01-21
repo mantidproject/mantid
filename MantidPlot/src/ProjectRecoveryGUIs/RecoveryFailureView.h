@@ -16,8 +16,7 @@ class RecoveryFailureView : public QDialog {
   Q_OBJECT
 
 public:
-  explicit RecoveryFailureView(QWidget *parent = 0,
-                               ProjectRecoveryPresenter *presenter = nullptr);
+  explicit RecoveryFailureView(QWidget *parent = 0, ProjectRecoveryPresenter *presenter = nullptr);
   void reject() override;
 
   void setProgressBarMaximum(const int newValue);

@@ -49,16 +49,14 @@ private:
   /// Called upon a close event.
   void closeEvent(QCloseEvent * /*unused*/) override;
   /// handle POCO event
-  void
-  handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf);
+  void handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf);
   /// Load default interface settings for each tab
   void loadSettings();
 
   /// Map of tabs indexed by position on the window
   std::map<unsigned int, IndirectBayesTab *> m_bayesTabs;
   /// Change Observer for ConfigService (monitors user directories)
-  Poco::NObserver<IndirectBayes, Mantid::Kernel::ConfigValChangeNotification>
-      m_changeObserver;
+  Poco::NObserver<IndirectBayes, Mantid::Kernel::ConfigValChangeNotification> m_changeObserver;
   /// Main interface window
   Ui::IndirectBayes m_uiForm;
 };

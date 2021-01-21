@@ -26,33 +26,25 @@ using namespace API;
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(ConvertAxisByFormula)
 
-const std::string ConvertAxisByFormula::name() const {
-  return ("ConvertAxisByFormula");
-}
+const std::string ConvertAxisByFormula::name() const { return ("ConvertAxisByFormula"); }
 
 int ConvertAxisByFormula::version() const { return (1); }
 
-const std::string ConvertAxisByFormula::category() const {
-  return "Transforms\\Axes";
-}
+const std::string ConvertAxisByFormula::category() const { return "Transforms\\Axes"; }
 
 /** Initialisation method. Declares properties to be used in algorithm.
  *
  */
 void ConvertAxisByFormula::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input),
                   "Name of the input workspace");
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace");
 
   std::vector<std::string> axisOptions;
   axisOptions.emplace_back("X");
   axisOptions.emplace_back("Y");
-  declareProperty("Axis", "X",
-                  std::make_shared<StringListValidator>(axisOptions),
-                  "The axis to modify");
+  declareProperty("Axis", "X", std::make_shared<StringListValidator>(axisOptions), "The axis to modify");
 
   declareProperty("Formula", "",
                   "The formula to use to convert the values, x "
@@ -60,12 +52,8 @@ void ConvertAxisByFormula::init() {
                   "values.  l1, l2, twotheta and signedtwotheta"
                   "may be used to provide values from the "
                   "instrument geometry.");
-  declareProperty(
-      "AxisTitle", "",
-      "The label of he new axis. If not set then the title will not change.");
-  declareProperty(
-      "AxisUnits", "",
-      "The units of the new axis. If not set then the unit will not change");
+  declareProperty("AxisTitle", "", "The label of he new axis. If not set then the title will not change.");
+  declareProperty("AxisUnits", "", "The units of the new axis. If not set then the unit will not change");
 }
 
 /** Execution of the algorithm
@@ -82,11 +70,9 @@ void ConvertAxisByFormula::exec() {
   // Just overwrite if the change is in place
   MatrixWorkspace_sptr outputWs = getProperty("OutputWorkspace");
   if (outputWs != inputWs) {
-    IAlgorithm_sptr duplicate =
-        createChildAlgorithm("CloneWorkspace", 0.0, 0.6);
+    IAlgorithm_sptr duplicate = createChildAlgorithm("CloneWorkspace", 0.0, 0.6);
     duplicate->initialize();
-    duplicate->setProperty<Workspace_sptr>(
-        "InputWorkspace", std::dynamic_pointer_cast<Workspace>(inputWs));
+    duplicate->setProperty<Workspace_sptr>("InputWorkspace", std::dynamic_pointer_cast<Workspace>(inputWs));
     duplicate->execute();
     Workspace_sptr temp = duplicate->getProperty("OutputWorkspace");
     outputWs = std::dynamic_pointer_cast<MatrixWorkspace>(temp);
@@ -130,8 +116,7 @@ void ConvertAxisByFormula::exec() {
   variables.emplace_back(std::make_shared<Variable>("l2", true));
 
   bool isGeometryRequired = false;
-  for (auto variablesIter = variables.begin();
-       variablesIter != variables.end();) {
+  for (auto variablesIter = variables.begin(); variablesIter != variables.end();) {
     if (formula.find((*variablesIter)->name) != std::string::npos) {
       if ((*variablesIter)->isGeometric) {
         if (!spectrumAxisPtr) {
@@ -194,9 +179,8 @@ void ConvertAxisByFormula::exec() {
         prog.report();
       }
       if (failedDetectorCount != 0) {
-        g_log.information()
-            << "Unable to calculate sample-detector distance for "
-            << failedDetectorCount << " spectra. Masking spectrum.\n";
+        g_log.information() << "Unable to calculate sample-detector distance for " << failedDetectorCount
+                            << " spectra. Masking spectrum.\n";
       }
     } else {
       // common bins - we only have to calculate once
@@ -206,8 +190,7 @@ void ConvertAxisByFormula::exec() {
       calculateValues(p, vec, variables);
 
       // copy xVals to every spectra
-      auto numberOfSpectra_i = static_cast<int64_t>(
-          outputWs->getNumberHistograms()); // cast to make openmp happy
+      auto numberOfSpectra_i = static_cast<int64_t>(outputWs->getNumberHistograms()); // cast to make openmp happy
       auto xVals = outputWs->refX(0);
       Progress prog(this, 0.6, 1.0, numberOfSpectra_i);
       PARALLEL_FOR_IF(Kernel::threadSafe(*outputWs))
@@ -230,10 +213,8 @@ void ConvertAxisByFormula::exec() {
   // If the units conversion has flipped the ascending direction of X, reverse
   // all the vectors
   size_t midSpectra = outputWs->getNumberHistograms() / 2;
-  if (!outputWs->dataX(0).empty() &&
-      (outputWs->dataX(0).front() > outputWs->dataX(0).back() ||
-       outputWs->dataX(midSpectra).front() >
-           outputWs->dataX(midSpectra).back())) {
+  if (!outputWs->dataX(0).empty() && (outputWs->dataX(0).front() > outputWs->dataX(0).back() ||
+                                      outputWs->dataX(midSpectra).front() > outputWs->dataX(midSpectra).back())) {
     g_log.information("Reversing data within the workspace to keep the axes in "
                       "increasing order.");
     this->reverse(outputWs);
@@ -255,8 +236,7 @@ void ConvertAxisByFormula::exec() {
   }
 }
 
-void ConvertAxisByFormula::setAxisValue(const double &value,
-                                        std::vector<Variable_ptr> &variables) {
+void ConvertAxisByFormula::setAxisValue(const double &value, std::vector<Variable_ptr> &variables) {
   for (const auto &variable : variables) {
     if (!variable->isGeometric) {
       variable->value = value;
@@ -264,8 +244,7 @@ void ConvertAxisByFormula::setAxisValue(const double &value,
   }
 }
 
-void ConvertAxisByFormula::calculateValues(
-    mu::Parser &p, MantidVec &vec, std::vector<Variable_ptr> variables) {
+void ConvertAxisByFormula::calculateValues(mu::Parser &p, MantidVec &vec, std::vector<Variable_ptr> variables) {
   MantidVec::iterator iter;
   for (iter = vec.begin(); iter != vec.end(); ++iter) {
     setAxisValue(*iter, variables);
@@ -273,9 +252,8 @@ void ConvertAxisByFormula::calculateValues(
   }
 }
 
-void ConvertAxisByFormula::setGeometryValues(
-    const API::SpectrumInfo &specInfo, const size_t index,
-    std::vector<Variable_ptr> &variables) {
+void ConvertAxisByFormula::setGeometryValues(const API::SpectrumInfo &specInfo, const size_t index,
+                                             std::vector<Variable_ptr> &variables) {
   for (const auto &variable : variables) {
     if (variable->isGeometric) {
       if (variable->name == "twotheta") {

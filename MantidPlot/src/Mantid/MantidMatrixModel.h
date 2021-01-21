@@ -25,12 +25,10 @@ class MantidMatrixModel : public QAbstractTableModel {
   Q_OBJECT
 public:
   typedef enum { Y, X, E, DX } Type;
-  MantidMatrixModel(QObject *parent, const Mantid::API::MatrixWorkspace *ws,
-                    int rows, int cols, int start, Type type);
+  MantidMatrixModel(QObject *parent, const Mantid::API::MatrixWorkspace *ws, int rows, int cols, int start, Type type);
 
   /// Call this function if the workspace has changed
-  void setup(const Mantid::API::MatrixWorkspace *ws, int rows, int cols,
-             int start);
+  void setup(const Mantid::API::MatrixWorkspace *ws, int rows, int cols, int start);
 
   /// Implementation of QAbstractTableModel::rowCount() -- number of rows
   /// (spectra) that can be shown
@@ -58,8 +56,7 @@ public:
   /// function
   /// to retrieve data for displaying.
   QVariant data(const QModelIndex &index, int role) const override;
-  QVariant headerData(int section, Qt::Orientation orientation,
-                      int role = Qt::DisplayRole) const override;
+  QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
   Qt::ItemFlags flags(const QModelIndex &index) const override;
 
@@ -72,11 +69,9 @@ public slots:
   void resetData() { reset(); }
 
 private:
-  bool checkMonitorCache(
-      int row) const; // check the monitor cache and add to it if necessary
+  bool checkMonitorCache(int row) const; // check the monitor cache and add to it if necessary
 
-  bool checkMaskedCache(
-      int row) const; // check the masked cache and add to it if necessary
+  bool checkMaskedCache(int row) const; // check the masked cache and add to it if necessary
 
   bool checkMaskedBinCache(int row, int bin) const;
 
@@ -88,12 +83,12 @@ private:
   QLocale m_locale;
   Type m_type; ///< The type: X for bin boundaries, Y for the spectrum data, E
   /// for errors, DX for x errors
-  char m_format; //  Format of numbers returned by data(): 'f' - fixed, 'e' -
-                 //  scientific.
-  int m_prec;    //  Number precision
-  QColor m_mon_color;            // Monitor Specific background color
-  mutable QSet<int> m_monCache;  // monitor flag cache
-  QColor m_mask_color;           // Masked Detector Specific background color
-  mutable QSet<int> m_maskCache; // masked flag cache
+  char m_format;                                //  Format of numbers returned by data(): 'f' - fixed, 'e' -
+                                                //  scientific.
+  int m_prec;                                   //  Number precision
+  QColor m_mon_color;                           // Monitor Specific background color
+  mutable QSet<int> m_monCache;                 // monitor flag cache
+  QColor m_mask_color;                          // Masked Detector Specific background color
+  mutable QSet<int> m_maskCache;                // masked flag cache
   mutable QHash<int, QSet<int>> m_maskBinCache; // cache for masked bins
 };

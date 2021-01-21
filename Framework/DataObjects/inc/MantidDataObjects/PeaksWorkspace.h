@@ -33,8 +33,7 @@ namespace DataObjects {
     @author Ruth Mikkelson, SNS ORNL
     @date 3/10/2010
  */
-class MANTID_DATAOBJECTS_DLL PeaksWorkspace
-    : public Mantid::API::IPeaksWorkspace {
+class MANTID_DATAOBJECTS_DLL PeaksWorkspace : public Mantid::API::IPeaksWorkspace {
 public:
   using ColumnAndDirection = std::pair<std::string, bool>;
 
@@ -58,14 +57,10 @@ public:
   API::LogManager_const_sptr getLogs() const override;
 
   /// Returns a clone of the workspace
-  std::unique_ptr<PeaksWorkspace> clone() const {
-    return std::unique_ptr<PeaksWorkspace>(doClone());
-  }
+  std::unique_ptr<PeaksWorkspace> clone() const { return std::unique_ptr<PeaksWorkspace>(doClone()); }
 
   /// Returns a default-initialized clone of the workspace
-  std::unique_ptr<PeaksWorkspace> cloneEmpty() const {
-    return std::unique_ptr<PeaksWorkspace>(doCloneEmpty());
-  }
+  std::unique_ptr<PeaksWorkspace> cloneEmpty() const { return std::unique_ptr<PeaksWorkspace>(doCloneEmpty()); }
 
   void appendFile(std::string filename, Geometry::Instrument_sptr inst);
 
@@ -82,24 +77,19 @@ public:
   void addPeak(const Geometry::IPeak &peak) override;
   /// Move a peak object into this peaks workspace
   void addPeak(Peak &&peak);
-  void addPeak(const Kernel::V3D &position,
-               const Kernel::SpecialCoordinateSystem &frame) override;
+  void addPeak(const Kernel::V3D &position, const Kernel::SpecialCoordinateSystem &frame) override;
   Peak &getPeak(int peakNum) override;
   const Peak &getPeak(int peakNum) const override;
 
-  std::unique_ptr<Geometry::IPeak> createPeak(
-      const Kernel::V3D &QLabFrame,
-      boost::optional<double> detectorDistance = boost::none) const override;
+  std::unique_ptr<Geometry::IPeak> createPeak(const Kernel::V3D &QLabFrame,
+                                              boost::optional<double> detectorDistance = boost::none) const override;
 
-  std::unique_ptr<Geometry::IPeak>
-  createPeak(const Kernel::V3D &Position,
-             const Kernel::SpecialCoordinateSystem &frame) const override;
+  std::unique_ptr<Geometry::IPeak> createPeak(const Kernel::V3D &Position,
+                                              const Kernel::SpecialCoordinateSystem &frame) const override;
 
-  std::vector<std::pair<std::string, std::string>>
-  peakInfo(const Kernel::V3D &qFrame, bool labCoords) const override;
+  std::vector<std::pair<std::string, std::string>> peakInfo(const Kernel::V3D &qFrame, bool labCoords) const override;
 
-  std::unique_ptr<Geometry::IPeak>
-  createPeakHKL(const Kernel::V3D &HKL) const override;
+  std::unique_ptr<Geometry::IPeak> createPeakHKL(const Kernel::V3D &HKL) const override;
 
   int peakInfoNumber(const Kernel::V3D &qFrame, bool labCoords) const override;
 
@@ -114,8 +104,7 @@ public:
   API::ITableWorkspace_sptr createDetectorTable() const override;
 
   /// Set the special coordinate system.
-  void setCoordinateSystem(
-      const Kernel::SpecialCoordinateSystem coordinateSystem) override;
+  void setCoordinateSystem(const Kernel::SpecialCoordinateSystem coordinateSystem) override;
 
   /// Get the special coordinate system.
   Kernel::SpecialCoordinateSystem getSpecialCoordinateSystem() const override;
@@ -123,22 +112,18 @@ public:
   // ====================================== ITableWorkspace Methods
   // ==================================
   /// Number of columns in the workspace.
-  size_t columnCount() const override {
-    return static_cast<int>(columns.size());
-  }
+  size_t columnCount() const override { return static_cast<int>(columns.size()); }
 
   /// Number of rows in the workspace.
   size_t rowCount() const override { return getNumberPeaks(); }
 
   /// Gets the shared pointer to a column by name.
-  std::shared_ptr<Mantid::API::Column>
-  getColumn(const std::string &name) override {
+  std::shared_ptr<Mantid::API::Column> getColumn(const std::string &name) override {
     return getColumn(getColumnIndex(name));
   }
 
   /// Gets the shared pointer to a column by name.
-  std::shared_ptr<const Mantid::API::Column>
-  getColumn(const std::string &name) const override {
+  std::shared_ptr<const Mantid::API::Column> getColumn(const std::string &name) const override {
     return getColumn(getColumnIndex(name));
   }
 
@@ -156,9 +141,7 @@ public:
 
   //---------------------------------------------------------------------------------------------
   /// Returns a vector of all column names.
-  std::vector<std::string> getColumnNames() const override {
-    return this->columnNames;
-  }
+  std::vector<std::string> getColumnNames() const override { return this->columnNames; }
   /// This is always threadsafe
   bool threadSafe() const override { return true; }
 
@@ -173,31 +156,25 @@ protected:
 private:
   PeaksWorkspace *doClone() const override { return new PeaksWorkspace(*this); }
   PeaksWorkspace *doCloneEmpty() const override { return new PeaksWorkspace(); }
-  ITableWorkspace *
-  doCloneColumns(const std::vector<std::string> &colNames) const override;
+  ITableWorkspace *doCloneColumns(const std::vector<std::string> &colNames) const override;
 
   /// Initialize the table structure
   void initColumns();
   /// Adds a new PeakColumn of the given type
   void addPeakColumn(const std::string &name);
   /// Create a peak from a QSample position
-  std::unique_ptr<Geometry::IPeak>
-  createPeakQSample(const Kernel::V3D &position) const;
+  std::unique_ptr<Geometry::IPeak> createPeakQSample(const Kernel::V3D &position) const;
 
   // ====================================== ITableWorkspace Methods
   // ==================================
 
   // ===== Methods that are not implemented (read-only table) ==========
-  API::Column_sptr addColumn(const std::string & /*type*/,
-                             const std::string & /*name*/) override {
-    throw Mantid::Kernel::Exception::NotImplementedError(
-        "PeaksWorkspace structure is read-only. Cannot add column.");
+  API::Column_sptr addColumn(const std::string & /*type*/, const std::string & /*name*/) override {
+    throw Mantid::Kernel::Exception::NotImplementedError("PeaksWorkspace structure is read-only. Cannot add column.");
   }
 
-  bool addColumns(const std::string & /*type*/, const std::string & /*name*/,
-                  size_t /*n*/) override {
-    throw Mantid::Kernel::Exception::NotImplementedError(
-        "PeaksWorkspace structure is read-only. Cannot add columns.");
+  bool addColumns(const std::string & /*type*/, const std::string & /*name*/, size_t /*n*/) override {
+    throw Mantid::Kernel::Exception::NotImplementedError("PeaksWorkspace structure is read-only. Cannot add columns.");
   }
 
   void removeColumn(const std::string & /*name*/) override {
@@ -206,58 +183,43 @@ private:
   }
 
   void setRowCount(size_t /*count*/) override {
-    throw Mantid::Kernel::Exception::NotImplementedError(
-        "PeaksWorkspace structure is read-only. Cannot setRowCount");
+    throw Mantid::Kernel::Exception::NotImplementedError("PeaksWorkspace structure is read-only. Cannot setRowCount");
   }
 
   size_t insertRow(size_t /*index*/) override {
-    throw Mantid::Kernel::Exception::NotImplementedError(
-        "PeaksWorkspace structure is read-only. Cannot insertRow");
+    throw Mantid::Kernel::Exception::NotImplementedError("PeaksWorkspace structure is read-only. Cannot insertRow");
   }
 
   void removeRow(size_t /*index*/) override {
-    throw Mantid::Kernel::Exception::NotImplementedError(
-        "PeaksWorkspace structure is read-only. Cannot removeRow.");
+    throw Mantid::Kernel::Exception::NotImplementedError("PeaksWorkspace structure is read-only. Cannot removeRow.");
   }
 
   /// find method to get the index of integer cell value in a table workspace
-  void find(size_t /*value*/, size_t & /*row*/,
-            const size_t & /*col*/) override {
-    throw Mantid::Kernel::Exception::NotImplementedError(
-        "PeaksWorkspace::find() not implemented.");
+  void find(size_t /*value*/, size_t & /*row*/, const size_t & /*col*/) override {
+    throw Mantid::Kernel::Exception::NotImplementedError("PeaksWorkspace::find() not implemented.");
   }
   /// find method to get the index of  double cell value in a table workspace
-  void find(double /*value*/, size_t & /*row*/,
-            const size_t & /*col*/) override {
-    throw Mantid::Kernel::Exception::NotImplementedError(
-        "PeaksWorkspace::find() not implemented.");
+  void find(double /*value*/, size_t & /*row*/, const size_t & /*col*/) override {
+    throw Mantid::Kernel::Exception::NotImplementedError("PeaksWorkspace::find() not implemented.");
   }
   /// find method to get the index of  float cell value in a table workspace
-  void find(float /*value*/, size_t & /*row*/,
-            const size_t & /*col*/) override {
-    throw Mantid::Kernel::Exception::NotImplementedError(
-        "PeaksWorkspace::find() not implemented.");
+  void find(float /*value*/, size_t & /*row*/, const size_t & /*col*/) override {
+    throw Mantid::Kernel::Exception::NotImplementedError("PeaksWorkspace::find() not implemented.");
   }
   /// find method to get the index of  API::Boolean value cell in a table
   /// workspace
-  void find(API::Boolean /*value*/, size_t & /*row*/,
-            const size_t & /*col*/) override {
-    throw Mantid::Kernel::Exception::NotImplementedError(
-        "PeaksWorkspace::find() not implemented.");
+  void find(API::Boolean /*value*/, size_t & /*row*/, const size_t & /*col*/) override {
+    throw Mantid::Kernel::Exception::NotImplementedError("PeaksWorkspace::find() not implemented.");
   }
   /// find method to get the index of cellstd::string  value in a table
   /// workspace
-  void find(std::string /*value*/, size_t & /*row*/,
-            const size_t & /*col*/) override {
-    throw Mantid::Kernel::Exception::NotImplementedError(
-        "PeaksWorkspace::find() not implemented.");
+  void find(std::string /*value*/, size_t & /*row*/, const size_t & /*col*/) override {
+    throw Mantid::Kernel::Exception::NotImplementedError("PeaksWorkspace::find() not implemented.");
   }
   /// find method to get the index of  Mantid::Kernel::V3D cell value in a table
   /// workspace
-  void find(Mantid::Kernel::V3D /*value*/, size_t & /*row*/,
-            const size_t & /*col*/) override {
-    throw Mantid::Kernel::Exception::NotImplementedError(
-        "PeaksWorkspace::find() not implemented.");
+  void find(Mantid::Kernel::V3D /*value*/, size_t & /*row*/, const size_t & /*col*/) override {
+    throw Mantid::Kernel::Exception::NotImplementedError("PeaksWorkspace::find() not implemented.");
   }
 
   // ====================================== End ITableWorkspace Methods

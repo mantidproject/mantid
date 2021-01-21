@@ -64,9 +64,8 @@ void free_matrix(double **m, long nrl, long nrh, long ncl, long nch) {
   free((FREE_ARG)(m + nrl - NR_END));
 }
 
-double *
-vector(long nl,
-       long nh) { // allocate a double vector with subscript range v[nl..nh]
+double *vector(long nl,
+               long nh) { // allocate a double vector with subscript range v[nl..nh]
   double *v;
   v = (double *)malloc((size_t)((nh - nl + 1 + NR_END) * sizeof(double)));
   if (!v)
@@ -87,9 +86,7 @@ size_t *ivector(long nl, long nh) {
   return v - nl + NR_END;
 }
 
-void free_ivector(size_t *v, long nl, long) {
-  free((FREE_ARG)(v + nl - NR_END));
-}
+void free_ivector(size_t *v, long nl, long) { free((FREE_ARG)(v + nl - NR_END)); }
 
 int *intvector(long nl, long nh) {
   int *v;
@@ -99,9 +96,7 @@ int *intvector(long nl, long nh) {
   return v - nl + NR_END;
 }
 
-void free_intvector(int *v, long nl, long) {
-  free((FREE_ARG)(v + nl - NR_END));
-}
+void free_intvector(int *v, long nl, long) { free((FREE_ARG)(v + nl - NR_END)); }
 
 void savgol(double *c, int np, int nl, int nr, int ld, int m) {
   /*-------------------------------------------------------------------------------------------
@@ -127,8 +122,7 @@ void savgol(double *c, int np, int nl, int nr, int ld, int m) {
   int *indx = intvector(1, m + 1);
   a = matrix(1, m + 1, 1, m + 1);
   b = vector(1, m + 1);
-  for (ipj = 0; ipj <= (m << 1);
-       ipj++) { // Set up the normal equations of the desired least-squares fit
+  for (ipj = 0; ipj <= (m << 1); ipj++) { // Set up the normal equations of the desired least-squares fit
     sum = (ipj ? 0.0 : 1.0);
     for (k = 1; k <= nr; k++)
       sum += pow((double)k, (double)ipj);

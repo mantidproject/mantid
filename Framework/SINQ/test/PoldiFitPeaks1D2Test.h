@@ -40,15 +40,12 @@ class PoldiFitPeaks1D2Test : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static PoldiFitPeaks1D2Test *createSuite() {
-    return new PoldiFitPeaks1D2Test();
-  }
+  static PoldiFitPeaks1D2Test *createSuite() { return new PoldiFitPeaks1D2Test(); }
   static void destroySuite(PoldiFitPeaks1D2Test *suite) { delete suite; }
 
   PoldiFitPeaks1D2Test() {
-    m_testPeak =
-        PoldiPeak::create(MillerIndices(1, 1, 1), UncertainValue(1.108329),
-                          UncertainValue(2948.231), UncertainValue(0.002));
+    m_testPeak = PoldiPeak::create(MillerIndices(1, 1, 1), UncertainValue(1.108329), UncertainValue(2948.231),
+                                   UncertainValue(0.002));
     m_profileTestFunction = std::string("Gaussian");
     m_backgroundTestFunction = IFunction_sptr(new FlatBackground);
     m_backgroundTestFunction->initialize();
@@ -69,8 +66,7 @@ public:
     IFunction_sptr peakFunction = poldiFitPeaks.getPeakProfile(m_testPeak);
 
     // make sure that the profile is correct
-    IPeakFunction_sptr profile =
-        std::dynamic_pointer_cast<IPeakFunction>(peakFunction);
+    IPeakFunction_sptr profile = std::dynamic_pointer_cast<IPeakFunction>(peakFunction);
     TS_ASSERT(profile);
 
     TS_ASSERT_EQUALS(profile->centre(), m_testPeak->q());
@@ -92,8 +88,7 @@ public:
 
     TS_ASSERT_EQUALS(newPeak->q(), m_testPeak->q());
     TS_ASSERT_EQUALS(newPeak->intensity(), m_testPeak->intensity());
-    TS_ASSERT_EQUALS(newPeak->fwhm(PoldiPeak::AbsoluteQ),
-                     m_testPeak->fwhm(PoldiPeak::AbsoluteQ));
+    TS_ASSERT_EQUALS(newPeak->fwhm(PoldiPeak::AbsoluteQ), m_testPeak->fwhm(PoldiPeak::AbsoluteQ));
   }
 
   void testProperties() {
@@ -132,24 +127,19 @@ public:
 
     // Null pointer does not work
     PoldiPeak_sptr nullPeak;
-    TS_ASSERT_THROWS(RefinedRange invalid(nullPeak, 2.0),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(RefinedRange invalid(nullPeak, 2.0), const std::invalid_argument &);
 
     // 0 or fewer multiples does not work
-    TS_ASSERT_THROWS(RefinedRange invalid(m_testPeak, 0.0),
-                     const std::invalid_argument &);
-    TS_ASSERT_THROWS(RefinedRange invalid(m_testPeak, -1.0),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(RefinedRange invalid(m_testPeak, 0.0), const std::invalid_argument &);
+    TS_ASSERT_THROWS(RefinedRange invalid(m_testPeak, -1.0), const std::invalid_argument &);
   }
 
   void testRefinedRangeLimitConstructor() {
     std::vector<PoldiPeak_sptr> peaks(1, m_testPeak);
 
     TS_ASSERT_THROWS_NOTHING(RefinedRange range(0.0, 1.0, peaks));
-    TS_ASSERT_THROWS(RefinedRange invalid(1.0, 0.0, peaks),
-                     const std::invalid_argument &);
-    TS_ASSERT_THROWS(RefinedRange invalid(1.0, 1.0, peaks),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(RefinedRange invalid(1.0, 0.0, peaks), const std::invalid_argument &);
+    TS_ASSERT_THROWS(RefinedRange invalid(1.0, 1.0, peaks), const std::invalid_argument &);
 
     RefinedRange range(3.0, 4.0, peaks);
     TS_ASSERT_EQUALS(range.getXStart(), 3.0);
@@ -278,19 +268,16 @@ public:
 
     // Chebyshev polynomial should be best at 0 (= constant)
     RefinedRange_sptr range(new RefinedRange(m_testPeak, 3.0));
-    int chebyshevDegree =
-        poldiFitPeaks.getBestChebyshevPolynomialDegree(ws, range);
+    int chebyshevDegree = poldiFitPeaks.getBestChebyshevPolynomialDegree(ws, range);
     TS_ASSERT_EQUALS(chebyshevDegree, 0);
 
     // If range is too small, Fit will have problems, so the function should
     // return -1 to indicate failure.
     double center = m_testPeak->q();
     RefinedRange_sptr invalidRange(
-        new RefinedRange(center - 0.001, center + 0.001,
-                         std::vector<PoldiPeak_sptr>(1, m_testPeak)));
+        new RefinedRange(center - 0.001, center + 0.001, std::vector<PoldiPeak_sptr>(1, m_testPeak)));
 
-    int invalidChebyshevDegree =
-        poldiFitPeaks.getBestChebyshevPolynomialDegree(ws, invalidRange);
+    int invalidChebyshevDegree = poldiFitPeaks.getBestChebyshevPolynomialDegree(ws, invalidRange);
     TS_ASSERT_EQUALS(invalidChebyshevDegree, -1);
   }
 
@@ -313,8 +300,7 @@ private:
     peakFunction->function(domain, values);
 
     // put it into a workspace
-    Workspace2D_sptr ws =
-        WorkspaceCreationHelper::create1DWorkspaceConstant(50, 0.0, 1.0, false);
+    Workspace2D_sptr ws = WorkspaceCreationHelper::create1DWorkspaceConstant(50, 0.0, 1.0, false);
     std::vector<double> &x = ws->dataX(0);
     std::vector<double> &y = ws->dataY(0);
 

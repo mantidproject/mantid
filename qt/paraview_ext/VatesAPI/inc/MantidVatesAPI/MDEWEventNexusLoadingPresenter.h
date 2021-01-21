@@ -20,11 +20,9 @@ For loading conversion of MDEW workspaces into render-able vtk objects.
 class MDLoadingView;
 class DLLExport MDEWEventNexusLoadingPresenter : public MDEWLoadingPresenter {
 public:
-  MDEWEventNexusLoadingPresenter(std::unique_ptr<MDLoadingView> view,
-                                 const std::string &fileName);
-  vtkSmartPointer<vtkDataSet>
-  execute(vtkDataSetFactory *factory, ProgressAction &rebinningProgressUpdate,
-          ProgressAction &drawingProgressUpdate) override;
+  MDEWEventNexusLoadingPresenter(std::unique_ptr<MDLoadingView> view, const std::string &fileName);
+  vtkSmartPointer<vtkDataSet> execute(vtkDataSetFactory *factory, ProgressAction &rebinningProgressUpdate,
+                                      ProgressAction &drawingProgressUpdate) override;
   void executeLoadMetadata() override;
   ~MDEWEventNexusLoadingPresenter() override;
   bool canReadFile() const override;

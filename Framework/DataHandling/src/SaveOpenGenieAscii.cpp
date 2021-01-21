@@ -37,21 +37,17 @@ DECLARE_ALGORITHM(SaveOpenGenieAscii)
 
 void SaveOpenGenieAscii::init() {
   declareProperty(
-      std::make_unique<API::WorkspaceProperty<MatrixWorkspace>>(
-          "InputWorkspace", "", Kernel::Direction::Input),
+      std::make_unique<API::WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Kernel::Direction::Input),
       "The name of the workspace containing the data you wish to save");
 
   // Declare required parameters, filename with ext {.his} and input
   // workspace
   const std::vector<std::string> exts{".his", ".txt", ""};
-  declareProperty(std::make_unique<API::FileProperty>(
-                      "Filename", "", API::FileProperty::Save, exts),
+  declareProperty(std::make_unique<API::FileProperty>("Filename", "", API::FileProperty::Save, exts),
                   "The filename to use for the saved data");
-  declareProperty("IncludeHeader", true,
-                  "Whether to include the header lines (default: true)");
+  declareProperty("IncludeHeader", true, "Whether to include the header lines (default: true)");
   std::vector<std::string> header{"ENGIN-X Format"};
-  declareProperty("OpenGenieFormat", "ENGIN-X Format",
-                  std::make_shared<Kernel::StringListValidator>(header),
+  declareProperty("OpenGenieFormat", "ENGIN-X Format", std::make_shared<Kernel::StringListValidator>(header),
                   "The format required to successfully load the file to "
                   "OpenGenie: ENGIN-X Format (default)");
 }
@@ -143,14 +139,11 @@ void SaveOpenGenieAscii::applyEnginxFormat() {
  * @param unit :: The axis of this delta (e.g. 'X' or 'Y') as a string
  * @param values :: Pointer to the time series log values to process
  */
-void SaveOpenGenieAscii::calculateXYZDelta(const std::string &unit,
-                                           const Kernel::Property *values) {
+void SaveOpenGenieAscii::calculateXYZDelta(const std::string &unit, const Kernel::Property *values) {
   // Cast to TimeSeries so we can use the min/max value methods
-  const auto positionValues =
-      static_cast<const TimeSeriesProperty<double> *>(values);
+  const auto positionValues = static_cast<const TimeSeriesProperty<double> *>(values);
 
-  const double deltaValue =
-      positionValues->maxValue() - positionValues->minValue();
+  const double deltaValue = positionValues->maxValue() - positionValues->minValue();
 
   addToOutputBuffer('d' + unit, m_floatType, std::to_string(deltaValue));
 }
@@ -163,9 +156,7 @@ void SaveOpenGenieAscii::calculateXYZDelta(const std::string &unit,
  * @param axis :: The axis being processed (i.e 'x') as a character
  *
  */
-template <typename T>
-void SaveOpenGenieAscii::convertWorkspaceData(const T &histoData,
-                                              const char &axis) {
+template <typename T> void SaveOpenGenieAscii::convertWorkspaceData(const T &histoData, const char &axis) {
   // Padding to apply after 10 data values
   const std::string newLineStr = "\r\n    ";
   // Bank number - force to 1 at the moment
@@ -186,8 +177,7 @@ void SaveOpenGenieAscii::convertWorkspaceData(const T &histoData,
 
   // Have to put the number of values (second member of pair)
   // followed by a space then a new line then the data into a string
-  auto outDataString =
-      std::to_string(valueCount) + " \r\n" + std::move(outputString);
+  auto outDataString = std::to_string(valueCount) + " \r\n" + std::move(outputString);
   addToOutputBuffer(std::string(1, axis), outputType, std::move(outDataString));
 }
 
@@ -220,12 +210,11 @@ void SaveOpenGenieAscii::determineEnginXBankId() {
  */
 void SaveOpenGenieAscii::getSampleLogs() {
   // Maps Mantid log names -> Genie save file name / type
-  const std::unordered_map<std::string, std::pair<std::string, std::string>>
-      mantidGenieLogMapping = {
-          {"x", std::make_pair("x_pos", m_floatType)},
-          {"y", std::make_pair("y_pos", m_floatType)},
-          {"z", std::make_pair("z_pos", m_floatType)},
-          {"gd_prtn_chrg", std::make_pair("microamps", m_floatType)}};
+  const std::unordered_map<std::string, std::pair<std::string, std::string>> mantidGenieLogMapping = {
+      {"x", std::make_pair("x_pos", m_floatType)},
+      {"y", std::make_pair("y_pos", m_floatType)},
+      {"z", std::make_pair("z_pos", m_floatType)},
+      {"gd_prtn_chrg", std::make_pair("microamps", m_floatType)}};
 
   const std::vector<Property *> &logData = m_inputWS->run().getLogData();
 
@@ -250,8 +239,7 @@ void SaveOpenGenieAscii::getSampleLogs() {
     } else if (outName == "microamps") {
       // From reverse engineering the scripts the effective time is
       // the microamps * 50 - what 50 represents is not documented
-      const std::string effectiveTime =
-          std::to_string(std::stod(logEntry->value()) * 50.);
+      const std::string effectiveTime = std::to_string(std::stod(logEntry->value()) * 50.);
       addToOutputBuffer("effective_time", m_floatType, effectiveTime);
     }
 
@@ -332,13 +320,11 @@ void SaveOpenGenieAscii::storeEmptyFields() {
  */
 void SaveOpenGenieAscii::storeWorkspaceInformation() {
   // Run Number
-  addToOutputBuffer("run_no", m_stringType,
-                    std::to_string(m_inputWS->getRunNumber()));
+  addToOutputBuffer("run_no", m_stringType, std::to_string(m_inputWS->getRunNumber()));
   // Workspace title
   addToOutputBuffer("title", m_stringType, m_inputWS->getTitle());
   // Instrument name
-  addToOutputBuffer("inst_name", m_stringType,
-                    m_inputWS->getInstrument()->getName());
+  addToOutputBuffer("inst_name", m_stringType, m_inputWS->getInstrument()->getName());
   // Number of bins
   addToOutputBuffer("ntc", m_intType, std::to_string(m_inputWS->blocksize()));
   // L1 (Source to sample distance)
@@ -368,9 +354,7 @@ void SaveOpenGenieAscii::writeDataToFile(std::ofstream &outfile) {
 
   // Sort by parameter name
   std::sort(m_outputVector.begin(), m_outputVector.end(),
-            [](const OutputBufferEntry &t1, const OutputBufferEntry &t2) {
-              return std::get<0>(t1) < std::get<0>(t2);
-            });
+            [](const OutputBufferEntry &t1, const OutputBufferEntry &t2) { return std::get<0>(t1) < std::get<0>(t2); });
 
   for (const auto &outTuple : m_outputVector) {
     // Format is 2 spaces followed by parameter name, newline

@@ -29,8 +29,7 @@ Logger g_log("InstrumentInfo");
  * @param inst Pointer to InstrumentInfo that this LiveListenerInfo belongs to
  * @param elem The Poco::XML::Element to read the data from
  */
-LiveListenerInfo::LiveListenerInfo(InstrumentInfo *inst,
-                                   const Poco::XML::Element *elem) {
+LiveListenerInfo::LiveListenerInfo(InstrumentInfo *inst, const Poco::XML::Element *elem) {
   m_name = elem->getAttribute("name");
   if (m_name.empty()) {
     g_log.error() << "Listener connection name for " << inst->name()
@@ -39,14 +38,12 @@ LiveListenerInfo::LiveListenerInfo(InstrumentInfo *inst,
 
   m_address = elem->getAttribute("address");
   if (m_address.empty()) {
-    g_log.error() << "Listener address for " << inst->name()
-                  << " is not defined.\n";
+    g_log.error() << "Listener address for " << inst->name() << " is not defined.\n";
   }
 
   m_listener = elem->getAttribute("listener");
   if (m_listener.empty()) {
-    g_log.error() << "Listener class for " << inst->name()
-                  << " is not defined.\n";
+    g_log.error() << "Listener class for " << inst->name() << " is not defined.\n";
   }
 }
 
@@ -57,14 +54,11 @@ LiveListenerInfo::LiveListenerInfo(InstrumentInfo *inst,
  * @param address Address which listener should use to connect
  * @param name Name designator for this listener connection info
  */
-LiveListenerInfo::LiveListenerInfo(const std::string &listener,
-                                   const std::string &address,
-                                   const std::string &name)
+LiveListenerInfo::LiveListenerInfo(const std::string &listener, const std::string &address, const std::string &name)
     : m_name(name), m_address(address), m_listener(listener) {}
 
 bool LiveListenerInfo::operator==(const LiveListenerInfo &rhs) const {
-  return (this->address() == rhs.address() &&
-          this->listener() == rhs.listener());
+  return (this->address() == rhs.address() && this->listener() == rhs.listener());
 }
 
 const std::string &LiveListenerInfo::name() const { return m_name; }
@@ -83,10 +77,8 @@ const std::string &LiveListenerInfo::listener() const { return m_listener; }
  * @param listener :: A reference to a LiveListenerInfo object
  * @return A reference to the stream written to
  */
-std::ostream &operator<<(std::ostream &buffer,
-                         const LiveListenerInfo &listener) {
-  buffer << listener.name() << "(" << listener.address() << ", "
-         << listener.listener() << ")";
+std::ostream &operator<<(std::ostream &buffer, const LiveListenerInfo &listener) {
+  buffer << listener.name() << "(" << listener.address() << ", " << listener.listener() << ")";
   return buffer;
 }
 

@@ -41,8 +41,7 @@ public:
   ~vtkMDHistoQuadFactory() override;
 
   /// Factory Method.
-  vtkSmartPointer<vtkDataSet>
-  create(ProgressAction &progressUpdating) const override;
+  vtkSmartPointer<vtkDataSet> create(ProgressAction &progressUpdating) const override;
 
   void initialize(const Mantid::API::Workspace_sptr &workspace) override;
 
@@ -50,9 +49,7 @@ public:
 
   using Column = std::vector<UnstructuredPoint>;
 
-  std::string getFactoryTypeName() const override {
-    return "vtkMDHistoQuadFactory";
-  }
+  std::string getFactoryTypeName() const override { return "vtkMDHistoQuadFactory"; }
 
 protected:
   void validate() const override;

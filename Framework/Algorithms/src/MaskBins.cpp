@@ -28,12 +28,10 @@ using DataObjects::EventWorkspace_const_sptr;
 using DataObjects::EventWorkspace_sptr;
 
 void MaskBins::init() {
-  declareWorkspaceInputProperties<MatrixWorkspace>(
-      "InputWorkspace",
-      "The name of the input workspace. Must contain histogram data.",
-      std::make_shared<HistogramValidator>());
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareWorkspaceInputProperties<MatrixWorkspace>("InputWorkspace",
+                                                   "The name of the input workspace. Must contain histogram data.",
+                                                   std::make_shared<HistogramValidator>());
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "The name of the Workspace containing the masked bins.");
 
   // This validator effectively makes these properties mandatory
@@ -41,10 +39,8 @@ void MaskBins::init() {
   // MandatoryValidator is already taken!
   auto required = std::make_shared<BoundedValidator<double>>();
   required->setUpper(std::numeric_limits<double>::max() * 0.99);
-  declareProperty("XMin", std::numeric_limits<double>::max(), required,
-                  "The value to start masking from.");
-  declareProperty("XMax", std::numeric_limits<double>::max(), required,
-                  "The value to end masking at.");
+  declareProperty("XMin", std::numeric_limits<double>::max(), required, "The value to start masking from.");
+  declareProperty("XMax", std::numeric_limits<double>::max(), required, "The value to end masking at.");
 
   this->declareProperty(std::make_unique<ArrayProperty<int64_t>>("SpectraList"),
                         "Deprecated, use InputWorkspaceIndexSet.");
@@ -60,8 +56,7 @@ void MaskBins::exec() {
 
   if (m_startX > m_endX) {
     std::stringstream msg;
-    msg << "XMax (" << m_endX << ") must be greater than XMin (" << m_startX
-        << ")";
+    msg << "XMax (" << m_endX << ") must be greater than XMin (" << m_startX << ")";
     g_log.error(msg.str());
     throw std::invalid_argument(msg.str());
   }
@@ -78,8 +73,7 @@ void MaskBins::exec() {
   }
 
   MatrixWorkspace_sptr inputWS;
-  std::tie(inputWS, indexSet) =
-      getWorkspaceAndIndices<MatrixWorkspace>("InputWorkspace");
+  std::tie(inputWS, indexSet) = getWorkspaceAndIndices<MatrixWorkspace>("InputWorkspace");
 
   // Only create the output workspace if it's different to the input one
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
@@ -111,8 +105,7 @@ void MaskBins::exec() {
         this->findIndices(outputWS->binEdges(wi), startBinLoop, endBinLoop);
 
       // Loop over masking each bin in the range
-      for (auto j = static_cast<int>(startBinLoop);
-           j < static_cast<int>(endBinLoop); ++j) {
+      for (auto j = static_cast<int>(startBinLoop); j < static_cast<int>(endBinLoop); ++j) {
         outputWS->maskBin(wi, j);
       }
       progress.report();
@@ -148,11 +141,9 @@ void MaskBins::execEvent() {
  *  @param startBin :: Returns the bin index including the starting value
  *  @param endBin ::   Returns the bin index after the end value
  */
-void MaskBins::findIndices(const BinEdges &X,
-                           MantidVec::difference_type &startBin,
+void MaskBins::findIndices(const BinEdges &X, MantidVec::difference_type &startBin,
                            MantidVec::difference_type &endBin) {
-  startBin = std::distance(X.begin(),
-                           std::upper_bound(X.cbegin(), X.cend(), m_startX));
+  startBin = std::distance(X.begin(), std::upper_bound(X.cbegin(), X.cend(), m_startX));
   if (startBin != 0)
     --startBin;
   auto last = std::lower_bound(X.cbegin(), X.cend(), m_endX);

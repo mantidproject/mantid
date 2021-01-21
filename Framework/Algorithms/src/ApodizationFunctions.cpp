@@ -24,9 +24,7 @@ namespace ApodizationFunctions {
  * @param decayConstant :: [input] the decay constant (tau)
  * @returns :: Function evaluation
  */
-double lorentz(const double time, const double decayConstant) {
-  return exp(-time / decayConstant);
-}
+double lorentz(const double time, const double decayConstant) { return exp(-time / decayConstant); }
 /**
  * Returns the evaluation of the Gaussian
  * apodization function at a time (t) and

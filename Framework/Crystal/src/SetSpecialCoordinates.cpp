@@ -43,31 +43,23 @@ const std::string SetSpecialCoordinates::HKLOption() {
  */
 SetSpecialCoordinates::SetSpecialCoordinates() {
   m_specialCoordinatesNames.emplace_back(SetSpecialCoordinates::QLabOption());
-  m_specialCoordinatesNames.emplace_back(
-      SetSpecialCoordinates::QSampleOption());
+  m_specialCoordinatesNames.emplace_back(SetSpecialCoordinates::QSampleOption());
   m_specialCoordinatesNames.emplace_back(SetSpecialCoordinates::HKLOption());
 
-  m_specialCoordinatesMap.emplace(SetSpecialCoordinates::QLabOption(),
-                                  Mantid::Kernel::QLab);
-  m_specialCoordinatesMap.emplace(SetSpecialCoordinates::QSampleOption(),
-                                  Mantid::Kernel::QSample);
-  m_specialCoordinatesMap.emplace(SetSpecialCoordinates::HKLOption(),
-                                  Mantid::Kernel::HKL);
+  m_specialCoordinatesMap.emplace(SetSpecialCoordinates::QLabOption(), Mantid::Kernel::QLab);
+  m_specialCoordinatesMap.emplace(SetSpecialCoordinates::QSampleOption(), Mantid::Kernel::QSample);
+  m_specialCoordinatesMap.emplace(SetSpecialCoordinates::HKLOption(), Mantid::Kernel::HKL);
 }
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string SetSpecialCoordinates::name() const {
-  return "SetSpecialCoordinates";
-}
+const std::string SetSpecialCoordinates::name() const { return "SetSpecialCoordinates"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int SetSpecialCoordinates::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string SetSpecialCoordinates::category() const {
-  return "Crystal\\Corrections";
-}
+const std::string SetSpecialCoordinates::category() const { return "Crystal\\Corrections"; }
 
 //----------------------------------------------------------------------------------------------
 
@@ -75,25 +67,22 @@ const std::string SetSpecialCoordinates::category() const {
 /** Initialize the algorithm's properties.
  */
 void SetSpecialCoordinates::init() {
-  declareProperty(
-      std::make_unique<WorkspaceProperty<Workspace>>("InputWorkspace", "",
-                                                     Direction::InOut),
-      "An input/output workspace. The new log will be added to it. Important "
-      "Note: This has now only an effect on PeaksWorkspaces. MDEvent and "
-      "MDHisto worksapces are not affaceted by this algorithm");
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("InputWorkspace", "", Direction::InOut),
+                  "An input/output workspace. The new log will be added to it. Important "
+                  "Note: This has now only an effect on PeaksWorkspaces. MDEvent and "
+                  "MDHisto worksapces are not affaceted by this algorithm");
 
-  declareProperty(
-      "SpecialCoordinates", "Q (lab frame)",
-      std::make_shared<StringListValidator>(m_specialCoordinatesNames),
-      "What will be the dimensions of the output workspace?\n"
-      "  Q (lab frame): Wave-vector change of the lattice in the lab frame.\n"
-      "  Q (sample frame): Wave-vector change of the lattice in the frame of "
-      "the sample (taking out goniometer rotation).\n"
-      "  HKL: Use the sample's UB matrix to convert to crystal's HKL indices.");
+  declareProperty("SpecialCoordinates", "Q (lab frame)",
+                  std::make_shared<StringListValidator>(m_specialCoordinatesNames),
+                  "What will be the dimensions of the output workspace?\n"
+                  "  Q (lab frame): Wave-vector change of the lattice in the lab frame.\n"
+                  "  Q (sample frame): Wave-vector change of the lattice in the frame of "
+                  "the sample (taking out goniometer rotation).\n"
+                  "  HKL: Use the sample's UB matrix to convert to crystal's HKL indices.");
 }
 
-bool SetSpecialCoordinates::writeCoordinatesToMDEventWorkspace(
-    const Workspace_sptr &inWS, SpecialCoordinateSystem /*unused*/) {
+bool SetSpecialCoordinates::writeCoordinatesToMDEventWorkspace(const Workspace_sptr &inWS,
+                                                               SpecialCoordinateSystem /*unused*/) {
   bool written = false;
   if (auto mdEventWS = std::dynamic_pointer_cast<IMDEventWorkspace>(inWS)) {
     g_log.warning("SetSpecialCoordinates: This algorithm cannot set the "
@@ -104,8 +93,8 @@ bool SetSpecialCoordinates::writeCoordinatesToMDEventWorkspace(
   return written;
 }
 
-bool SetSpecialCoordinates::writeCoordinatesToMDHistoWorkspace(
-    const Workspace_sptr &inWS, SpecialCoordinateSystem /*unused*/) {
+bool SetSpecialCoordinates::writeCoordinatesToMDHistoWorkspace(const Workspace_sptr &inWS,
+                                                               SpecialCoordinateSystem /*unused*/) {
   bool written = false;
   if (auto mdHistoWS = std::dynamic_pointer_cast<IMDHistoWorkspace>(inWS)) {
     g_log.warning("SetSpecialCoordinates: This algorithm cannot set the "
@@ -116,8 +105,8 @@ bool SetSpecialCoordinates::writeCoordinatesToMDHistoWorkspace(
   return written;
 }
 
-bool SetSpecialCoordinates::writeCoordinatesToPeaksWorkspace(
-    const Workspace_sptr &inWS, SpecialCoordinateSystem coordinateSystem) {
+bool SetSpecialCoordinates::writeCoordinatesToPeaksWorkspace(const Workspace_sptr &inWS,
+                                                             SpecialCoordinateSystem coordinateSystem) {
   bool written = false;
   if (auto peaksWS = std::dynamic_pointer_cast<IPeaksWorkspace>(inWS)) {
     peaksWS->setCoordinateSystem(coordinateSystem);
@@ -135,15 +124,13 @@ void SetSpecialCoordinates::exec() {
 
   std::string requestedCoordinateSystem = getProperty("SpecialCoordinates");
 
-  SpecialCoordinateSystem coordinatesToUse =
-      this->m_specialCoordinatesMap.find(requestedCoordinateSystem)->second;
+  SpecialCoordinateSystem coordinatesToUse = this->m_specialCoordinatesMap.find(requestedCoordinateSystem)->second;
 
   // Try to write the coordinates to the various allowed types of workspace.
   if (!writeCoordinatesToMDEventWorkspace(inputWS, coordinatesToUse)) {
     if (!writeCoordinatesToMDHistoWorkspace(inputWS, coordinatesToUse)) {
       if (!writeCoordinatesToPeaksWorkspace(inputWS, coordinatesToUse)) {
-        throw std::invalid_argument(
-            "A workspace of this type cannot be processed/");
+        throw std::invalid_argument("A workspace of this type cannot be processed/");
       }
     }
   }

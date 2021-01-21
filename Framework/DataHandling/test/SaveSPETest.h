@@ -29,8 +29,7 @@ using namespace DataHandling;
 using Mantid::Geometry::Instrument;
 using Mantid::Kernel::UnitFactory;
 
-static const double MASK_FLAG =
-    -1e30; // values here need to match what is in the SaveSPE.h file
+static const double MASK_FLAG = -1e30; // values here need to match what is in the SaveSPE.h file
 static const double MASK_ERROR = 0.0;
 
 static const int NHIST = 3;
@@ -78,8 +77,7 @@ public:
     double tmp2;
 
     getline(file, tmp);
-    TS_ASSERT_EQUALS(tmp, "       " + boost::lexical_cast<std::string>(NHIST) +
-                              "      10")
+    TS_ASSERT_EQUALS(tmp, "       " + boost::lexical_cast<std::string>(NHIST) + "      10")
     getline(file, tmp);
     TS_ASSERT_EQUALS(tmp, "### Phi Grid")
     file >> tmp2;
@@ -94,10 +92,9 @@ public:
     TS_ASSERT_EQUALS(tmp2, 9)
     getline(file, tmp);
 
-    for (int i = 0; i < NHIST;
-         ++i) { // if the spectrum number (1+index number) is that of the masked
-                // spectrum look for the mask flag, otherwise value in the
-                // workspace
+    for (int i = 0; i < NHIST; ++i) { // if the spectrum number (1+index number) is that of the masked
+                                      // spectrum look for the mask flag, otherwise value in the
+                                      // workspace
       double value = i != THEMASKED ? DEFAU_Y : MASK_FLAG;
 
       getline(file, tmp);
@@ -154,16 +151,14 @@ private:
   MatrixWorkspace_sptr makeWorkspace(const std::string &input) {
     // all the Y values in this new workspace are set to DEFAU_Y, which
     // currently = 2
-    MatrixWorkspace_sptr inputWS =
-        WorkspaceCreationHelper::create2DWorkspaceBinned(NHIST, 10, 1.0);
+    MatrixWorkspace_sptr inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(NHIST, 10, 1.0);
     return setUpWorkspace(input, inputWS);
   }
 
   MatrixWorkspace_sptr makeWorkspaceWithNumericAxis(const std::string &input) {
     // all the Y values in this new workspace are set to DEFAU_Y, which
     // currently = 2
-    MatrixWorkspace_sptr inputWS =
-        WorkspaceCreationHelper::create2DWorkspaceBinned(NHIST, 10, 1.0);
+    MatrixWorkspace_sptr inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(NHIST, 10, 1.0);
     inputWS = setUpWorkspace(input, inputWS);
     API::Axis *axisOne = inputWS->getAxis(1);
     auto newAxisOne = std::make_unique<NumericAxis>(axisOne->length());
@@ -177,10 +172,8 @@ private:
     return inputWS;
   }
 
-  MatrixWorkspace_sptr setUpWorkspace(const std::string &input,
-                                      MatrixWorkspace_sptr inputWS) {
-    inputWS->getAxis(0)->unit() =
-        Mantid::Kernel::UnitFactory::Instance().create("DeltaE");
+  MatrixWorkspace_sptr setUpWorkspace(const std::string &input, MatrixWorkspace_sptr inputWS) {
+    inputWS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("DeltaE");
     AnalysisDataService::Instance().add(input, inputWS);
 
     // Load the instrument data

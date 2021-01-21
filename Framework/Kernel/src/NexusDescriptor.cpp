@@ -25,14 +25,12 @@ namespace Kernel {
 /// Size of HDF magic number
 const size_t NexusDescriptor::HDFMagicSize = 4;
 /// HDF cookie that is stored in the first 4 bytes of the file.
-const unsigned char NexusDescriptor::HDFMagic[4] = {
-    '\016', '\003', '\023', '\001'}; // From HDF4::hfile.h
+const unsigned char NexusDescriptor::HDFMagic[4] = {'\016', '\003', '\023', '\001'}; // From HDF4::hfile.h
 
 /// Size of HDF5 signature
 size_t NexusDescriptor::HDF5SignatureSize = 8;
 /// signature identifying a HDF5 file.
-const unsigned char NexusDescriptor::HDF5Signature[8] = {
-    137, 'H', 'D', 'F', '\r', '\n', '\032', '\n'};
+const unsigned char NexusDescriptor::HDF5Signature[8] = {137, 'H', 'D', 'F', '\r', '\n', '\032', '\n'};
 
 namespace {
 //---------------------------------------------------------------------------------------------------------------------------
@@ -51,8 +49,7 @@ namespace {
  */
 bool isHDFHandle(FILE *fileHandle, NexusDescriptor::Version version) {
   if (!fileHandle)
-    throw std::invalid_argument(
-        "HierarchicalFileDescriptor::isHierarchical - Invalid file handle");
+    throw std::invalid_argument("HierarchicalFileDescriptor::isHierarchical - Invalid file handle");
 
   bool result(false);
 
@@ -60,23 +57,18 @@ bool isHDFHandle(FILE *fileHandle, NexusDescriptor::Version version) {
   // Use same buffer and waste a few bytes if only checking HDF4
   unsigned char buffer[8] = {'0', '0', '0', '0', '0', '0', '0', '0'};
   if (NexusDescriptor::HDF5SignatureSize !=
-      std::fread(static_cast<void *>(&buffer), sizeof(unsigned char),
-                 NexusDescriptor::HDF5SignatureSize, fileHandle)) {
+      std::fread(static_cast<void *>(&buffer), sizeof(unsigned char), NexusDescriptor::HDF5SignatureSize, fileHandle)) {
     throw std::runtime_error("Error while reading file");
   }
 
   // Number of bytes read doesn't matter as if it is not enough then the memory
   // simply won't match
   // as the buffer has been "zeroed"
-  if (version == NexusDescriptor::Version5 ||
-      version == NexusDescriptor::AnyVersion) {
-    result = (std::memcmp(&buffer, &NexusDescriptor::HDF5Signature,
-                          NexusDescriptor::HDF5SignatureSize) == 0);
+  if (version == NexusDescriptor::Version5 || version == NexusDescriptor::AnyVersion) {
+    result = (std::memcmp(&buffer, &NexusDescriptor::HDF5Signature, NexusDescriptor::HDF5SignatureSize) == 0);
   }
-  if (!result && (version == NexusDescriptor::Version4 ||
-                  version == NexusDescriptor::AnyVersion)) {
-    result = (std::memcmp(&buffer, &NexusDescriptor::HDFMagic,
-                          NexusDescriptor::HDFMagicSize) == 0);
+  if (!result && (version == NexusDescriptor::Version4 || version == NexusDescriptor::AnyVersion)) {
+    result = (std::memcmp(&buffer, &NexusDescriptor::HDFMagic, NexusDescriptor::HDFMagicSize) == 0);
   }
 
   // Return file stream to start of file
@@ -96,13 +88,10 @@ bool isHDFHandle(FILE *fileHandle, NexusDescriptor::Version version) {
  * the required version
  * @return True if the file is considered hierarchical, false otherwise
  */
-bool NexusDescriptor::isReadable(const std::string &filename,
-                                 const Version version) {
+bool NexusDescriptor::isReadable(const std::string &filename, const Version version) {
   FILE *fd = fopen(filename.c_str(), "rb");
   if (!fd) {
-    throw std::invalid_argument(
-        "HierarchicalFileDescriptor::isHierarchical - Unable to open file '" +
-        filename + "'");
+    throw std::invalid_argument("HierarchicalFileDescriptor::isHierarchical - Unable to open file '" + filename + "'");
   }
   const bool result = isHDFHandle(fd, version); // use anonymous helper
   fclose(fd);
@@ -121,15 +110,12 @@ bool NexusDescriptor::isReadable(const std::string &filename,
  * file
  */
 NexusDescriptor::NexusDescriptor(const std::string &filename, const bool init)
-    : m_filename(), m_extension(), m_firstEntryNameType(), m_rootAttrs(),
-      m_pathsToTypes(), m_file(nullptr) {
+    : m_filename(), m_extension(), m_firstEntryNameType(), m_rootAttrs(), m_pathsToTypes(), m_file(nullptr) {
   if (filename.empty()) {
-    throw std::invalid_argument("NexusDescriptor() - Empty filename '" +
-                                filename + "'");
+    throw std::invalid_argument("NexusDescriptor() - Empty filename '" + filename + "'");
   }
   if (!Poco::File(filename).exists()) {
-    throw std::invalid_argument("NexusDescriptor() - File '" + filename +
-                                "' does not exist");
+    throw std::invalid_argument("NexusDescriptor() - File '" + filename + "' does not exist");
   }
 
   if (init) {
@@ -137,9 +123,8 @@ NexusDescriptor::NexusDescriptor(const std::string &filename, const bool init)
       // this is very expesive as it walk the entire file
       initialize(filename);
     } catch (::NeXus::Exception &e) {
-      throw std::invalid_argument(
-          "NexusDescriptor::initialize - File '" + filename +
-          "' does not look like a HDF file.\n Error was: " + e.what());
+      throw std::invalid_argument("NexusDescriptor::initialize - File '" + filename +
+                                  "' does not look like a HDF file.\n Error was: " + e.what());
     }
   }
 }
@@ -147,18 +132,13 @@ NexusDescriptor::NexusDescriptor(const std::string &filename, const bool init)
 NexusDescriptor::~NexusDescriptor() {}
 
 /// Returns the name & type of the first entry in the file
-const std::pair<std::string, std::string> &
-NexusDescriptor::firstEntryNameType() const {
-  return m_firstEntryNameType;
-}
+const std::pair<std::string, std::string> &NexusDescriptor::firstEntryNameType() const { return m_firstEntryNameType; }
 
 /**
  * @param name The name of an attribute
  * @return True if the attribute exists, false otherwise
  */
-bool NexusDescriptor::hasRootAttr(const std::string &name) const {
-  return (m_rootAttrs.count(name) == 1);
-}
+bool NexusDescriptor::hasRootAttr(const std::string &name) const { return (m_rootAttrs.count(name) == 1); }
 
 /**
  * @param path A string giving a path using UNIX-style path separators (/), e.g.
@@ -175,8 +155,7 @@ bool NexusDescriptor::pathExists(const std::string &path) const {
  * @param type A string specifying the required type
  * @return True if the path exists in the file, false otherwise
  */
-bool NexusDescriptor::pathOfTypeExists(const std::string &path,
-                                       const std::string &type) const {
+bool NexusDescriptor::pathOfTypeExists(const std::string &path, const std::string &type) const {
   auto it = m_pathsToTypes.find(path);
   if (it != m_pathsToTypes.end()) {
     return (it->second == type);
@@ -238,10 +217,8 @@ void NexusDescriptor::initialize(const std::string &filename) {
  * @param pmap [Out] An output map filled with mappings of path->type
  * @param level An integer defining the current level in the file
  */
-void NexusDescriptor::walkFile(::NeXus::File &file, const std::string &rootPath,
-                               const std::string &className,
-                               std::map<std::string, std::string> &pmap,
-                               int level) {
+void NexusDescriptor::walkFile(::NeXus::File &file, const std::string &rootPath, const std::string &className,
+                               std::map<std::string, std::string> &pmap, int level) {
   if (!rootPath.empty()) {
     pmap.emplace(rootPath, className);
   }
@@ -257,8 +234,7 @@ void NexusDescriptor::walkFile(::NeXus::File &file, const std::string &rootPath,
   for (auto it = dirents.begin(); it != itend; ++it) {
     const std::string &entryName = it->first;
     const std::string &entryClass = it->second;
-    const std::string entryPath =
-        std::string(rootPath).append("/").append(entryName);
+    const std::string entryPath = std::string(rootPath).append("/").append(entryName);
     if (entryClass == "SDS" || entryClass == "ILL_data_scan_vars") {
       pmap.emplace(entryPath, entryClass);
     } else if (entryClass == "CDF0.0") {

@@ -44,8 +44,7 @@ private:
    * @param runAlg :: set true to run the CreateWorkspace algorithm
    * @param outWSName :: output workspace name used if running CreateWorkspace
    */
-  void createUniformWorkspace(double xstart, double deltax, double value1,
-                              double value2, const std::string &outWSName,
+  void createUniformWorkspace(double xstart, double deltax, double value1, double value2, const std::string &outWSName,
                               bool runAlg = false) {
 
     const int nbins = 10;
@@ -72,8 +71,7 @@ private:
     MatrixWorkspace_sptr ws;
 
     if (!runAlg) {
-      ws = WorkspaceFactory::Instance().create("Workspace2D", 2, nbins + 1,
-                                               nbins);
+      ws = WorkspaceFactory::Instance().create("Workspace2D", 2, nbins + 1, nbins);
       ws->dataX(0) = xData1;
       ws->dataX(1) = xData2;
       ws->dataY(0) = yData1;
@@ -97,8 +95,7 @@ private:
       cw.setProperty("OutputWorkspace", outWSName);
       cw.execute();
 
-      ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-          outWSName);
+      ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSName);
     }
     AnalysisDataService::Instance().addOrReplace(outWSName, ws);
   }
@@ -108,15 +105,13 @@ private:
    * @param inputWSNames :: input workspaces names
    * @param outputWSName :: output workspace name
    */
-  void doGroupWorkspaces(const std::string &inputWSNames,
-                         const std::string &outWSName) {
+  void doGroupWorkspaces(const std::string &inputWSNames, const std::string &outWSName) {
     GroupWorkspaces gw;
     gw.initialize();
     gw.setProperty("InputWorkspaces", inputWSNames);
     gw.setProperty("OutputWorkspace", outWSName);
     gw.execute();
-    auto ws =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outWSName);
+    auto ws = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outWSName);
     AnalysisDataService::Instance().addOrReplace(outWSName, ws);
   }
 
@@ -624,8 +619,7 @@ public:
     TS_ASSERT(outws);
     auto group = std::dynamic_pointer_cast<WorkspaceGroup>(outws);
     TS_ASSERT_EQUALS(group->getNumberOfEntries(), 1);
-    auto stitched =
-        std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
+    auto stitched = std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
     TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(stitched->blocksize(), 25);
     // First spectrum, Y values
@@ -697,8 +691,7 @@ public:
     TS_ASSERT_EQUALS(group->getNumberOfEntries(), 2);
 
     // First item in the output group
-    auto stitched =
-        std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
+    auto stitched = std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
     TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(stitched->blocksize(), 17);
     // First spectrum, Y values
@@ -794,8 +787,7 @@ public:
     TS_ASSERT_EQUALS(group->getNumberOfEntries(), 2);
 
     // First item in the output group
-    auto stitched =
-        std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
+    auto stitched = std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
     TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(stitched->blocksize(), 17);
     // First spectrum, Y values
@@ -892,8 +884,7 @@ public:
     TS_ASSERT_EQUALS(group->getNumberOfEntries(), 2);
 
     // First item in the output group
-    auto stitched =
-        std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
+    auto stitched = std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
 
     TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(stitched->blocksize(), 25);
@@ -987,8 +978,7 @@ public:
     alg.setChild(true);
     alg.initialize();
     alg.setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("InputWorkspaces", "group1, group2, group3"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", "group1, group2, group3"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Params", "0.1, 0.1, 2.6"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("StartOverlaps", "0.8, 1.6"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("EndOverlaps", "1.1, 1.9"));
@@ -1009,8 +999,7 @@ public:
     TS_ASSERT_EQUALS(group->getNumberOfEntries(), 2);
 
     // First item in the output group
-    auto stitched =
-        std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
+    auto stitched = std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
     TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(stitched->blocksize(), 25);
     // First spectrum, Y values
@@ -1098,8 +1087,7 @@ public:
     alg0.setChild(true);
     alg0.initialize();
     alg0.setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING(
-        alg0.setProperty("InputWorkspaces", "group1, group2, group3"))
+    TS_ASSERT_THROWS_NOTHING(alg0.setProperty("InputWorkspaces", "group1, group2, group3"))
     TS_ASSERT_THROWS_NOTHING(alg0.setProperty("Params", "0.1, 0.1, 2.6"))
     TS_ASSERT_THROWS_NOTHING(alg0.setProperty("StartOverlaps", "0.8, 1.6"))
     TS_ASSERT_THROWS_NOTHING(alg0.setProperty("EndOverlaps", "1.1, 1.9"))
@@ -1115,8 +1103,7 @@ public:
     alg.setChild(true);
     alg.initialize();
     alg.setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("InputWorkspaces", "group1, group2, group3"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", "group1, group2, group3"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Params", "0.1, 0.1, 2.6"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("StartOverlaps", "0.8, 1.6"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("EndOverlaps", "1.1, 1.9"))
@@ -1137,8 +1124,7 @@ public:
     TS_ASSERT_EQUALS(group->getNumberOfEntries(), 1)
 
     // First item in the output group
-    auto stitched =
-        std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
+    auto stitched = std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
     TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2)
     TS_ASSERT_EQUALS(stitched->blocksize(), 25)
     // First spectrum, Y values
@@ -1193,8 +1179,7 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // Test output ws
-    auto stitched =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outws");
+    auto stitched = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outws");
 
     // Test the algorithm histories
     auto histNames = getHistory(stitched);
@@ -1231,8 +1216,7 @@ public:
     Stitch1DMany alg;
     alg.initialize();
     alg.setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("InputWorkspaces", "group1, group2"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", "group1, group2"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Params", "0.1"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("StartOverlaps", "0.8"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("EndOverlaps", "1.1"));
@@ -1241,13 +1225,11 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // Test output ws
-    auto group =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("outws");
+    auto group = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("outws");
     TS_ASSERT_EQUALS(group->getNumberOfEntries(), 2);
 
     // First item in the output group
-    auto stitched =
-        std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
+    auto stitched = std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
 
     // Test the algorithm histories
     std::vector<std::string> histNames = getHistory(stitched);
@@ -1291,8 +1273,7 @@ public:
     Stitch1DMany alg;
     alg.initialize();
     alg.setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("InputWorkspaces", "group1, group2, group3"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", "group1, group2, group3"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Params", "0.1, 0.1, 2.6"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("StartOverlaps", "0.8, 1.6"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("EndOverlaps", "1.1, 1.9"));
@@ -1303,10 +1284,8 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // Test output ws
-    auto group =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("outws");
-    auto stitched =
-        std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
+    auto group = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("outws");
+    auto stitched = std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
 
     // Test the algorithm histories
     std::vector<std::string> histNames = getHistory(stitched);

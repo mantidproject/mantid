@@ -23,31 +23,27 @@ namespace Functions {
 class CrystalFieldHeatCapacityBase : public API::IFunction1D {
 public:
   CrystalFieldHeatCapacityBase();
-  void function1D(double *out, const double *xValues,
-                  const size_t nData) const override;
+  void function1D(double *out, const double *xValues, const size_t nData) const override;
 
 protected:
   mutable DoubleFortranVector m_en;
 };
 
-class MANTID_CURVEFITTING_DLL CrystalFieldHeatCapacity
-    : public CrystalFieldPeaksBase,
-      public CrystalFieldHeatCapacityBase {
+class MANTID_CURVEFITTING_DLL CrystalFieldHeatCapacity : public CrystalFieldPeaksBase,
+                                                         public CrystalFieldHeatCapacityBase {
 public:
   CrystalFieldHeatCapacity();
   std::string name() const override { return "CrystalFieldHeatCapacity"; }
   const std::string category() const override { return "General"; }
   void setEnergy(const DoubleFortranVector &en);
-  void function1D(double *out, const double *xValues,
-                  const size_t nData) const override;
+  void function1D(double *out, const double *xValues, const size_t nData) const override;
 
 private:
   bool m_setDirect;
 };
 
-class MANTID_CURVEFITTING_DLL CrystalFieldHeatCapacityCalculation
-    : public API::ParamFunction,
-      public CrystalFieldHeatCapacityBase {
+class MANTID_CURVEFITTING_DLL CrystalFieldHeatCapacityCalculation : public API::ParamFunction,
+                                                                    public CrystalFieldHeatCapacityBase {
 public:
   CrystalFieldHeatCapacityCalculation();
   std::string name() const override { return "cv"; }

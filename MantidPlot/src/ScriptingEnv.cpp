@@ -44,8 +44,8 @@
 #include <cstring>
 
 ScriptingEnv::ScriptingEnv(ApplicationWindow *parent, const QString &langName)
-    : QObject(nullptr), d_initialized(false), d_parent(parent),
-      m_is_running(false), d_refcount(0), m_languageName(langName) {
+    : QObject(nullptr), d_initialized(false), d_parent(parent), m_is_running(false), d_refcount(0),
+      m_languageName(langName) {
   setObjectName(langName.toAscii().constData());
 }
 
@@ -80,9 +80,7 @@ const QString ScriptingEnv::fileFilter() const {
   if (extensions.isEmpty())
     return "";
   else
-    return tr("%1 Source (*.%2);;")
-        .arg(objectName())
-        .arg(extensions.join(" *."));
+    return tr("%1 Source (*.%2);;").arg(objectName()).arg(extensions.join(" *."));
 }
 
 void ScriptingEnv::incref() { d_refcount++; }
@@ -99,11 +97,10 @@ void ScriptingEnv::decref() {
 /**
  * A list of available languages
  */
-ScriptingLangManager::ScriptingLang ScriptingLangManager::g_langs[] = {
-    {"muParser", muParserScripting::constructor},
-    {"Python", PythonScripting::constructor},
-    // Sentinel defining the end of the list
-    {nullptr, nullptr}};
+ScriptingLangManager::ScriptingLang ScriptingLangManager::g_langs[] = {{"muParser", muParserScripting::constructor},
+                                                                       {"Python", PythonScripting::constructor},
+                                                                       // Sentinel defining the end of the list
+                                                                       {nullptr, nullptr}};
 
 ScriptingEnv *ScriptingLangManager::newEnv(ApplicationWindow *parent) {
   if (!g_langs[0].constructor) {
@@ -113,8 +110,7 @@ ScriptingEnv *ScriptingLangManager::newEnv(ApplicationWindow *parent) {
   }
 }
 
-ScriptingEnv *ScriptingLangManager::newEnv(const QString &name,
-                                           ApplicationWindow *parent) {
+ScriptingEnv *ScriptingLangManager::newEnv(const QString &name, ApplicationWindow *parent) {
   for (ScriptingLang *l = g_langs; l->constructor; l++) {
     if (name == QString(l->name)) {
       return l->constructor(parent);

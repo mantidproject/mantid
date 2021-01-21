@@ -37,8 +37,7 @@ namespace DynamicPDF {
 
   @date 2016-03-11
 */
-class MANTIDQT_DYNAMICPDF_DLL BackgroundRemover
-    : public MantidQt::API::UserSubWindow {
+class MANTIDQT_DYNAMICPDF_DLL BackgroundRemover : public MantidQt::API::UserSubWindow {
   Q_OBJECT
 
 public:

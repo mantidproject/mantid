@@ -80,18 +80,14 @@ public:
     PeaksWorkspace_sptr integratedPeaksWS = alg.getProperty("OutputWorkspace");
     TS_ASSERT(integratedPeaksWS);
 
-    TSM_ASSERT_EQUALS("Wrong number of peaks in output workspace",
-                      integratedPeaksWS->getNumberPeaks(),
+    TSM_ASSERT_EQUALS("Wrong number of peaks in output workspace", integratedPeaksWS->getNumberPeaks(),
                       peaksWS->getNumberPeaks());
     const auto &run = integratedPeaksWS->mutableRun();
-    TSM_ASSERT("Output workspace must be integrated",
-               run.hasProperty("PeaksIntegrated"));
-    TSM_ASSERT_EQUALS("Output workspace must be integrated",
-                      run.getProperty("PeaksIntegrated")->value(), "1");
+    TSM_ASSERT("Output workspace must be integrated", run.hasProperty("PeaksIntegrated"));
+    TSM_ASSERT_EQUALS("Output workspace must be integrated", run.getProperty("PeaksIntegrated")->value(), "1");
 
     for (int i = 0; i < 5; ++i) {
-      TSM_ASSERT_DELTA("Wrong intensity for peak " + std::to_string(i),
-                       integratedPeaksWS->getPeak(i).getIntensity(),
+      TSM_ASSERT_DELTA("Wrong intensity for peak " + std::to_string(i), integratedPeaksWS->getPeak(i).getIntensity(),
                        numEventsPerPeak, 5);
     }
   }
@@ -133,13 +129,11 @@ public:
     alg.setPropertyValue("OutputWorkspace", "dummy");
     alg.execute();
     PeaksWorkspace_sptr integratedPeaksWS = alg.getProperty("OutputWorkspace");
-    TSM_ASSERT_EQUALS("Wrong number of peaks in output workspace",
-                      integratedPeaksWS->getNumberPeaks(),
+    TSM_ASSERT_EQUALS("Wrong number of peaks in output workspace", integratedPeaksWS->getNumberPeaks(),
                       peaksWS->getNumberPeaks());
 
     for (int i = 0; i < 5; ++i) {
-      TSM_ASSERT_DELTA("Wrong intensity for peak " + std::to_string(i),
-                       integratedPeaksWS->getPeak(i).getIntensity(),
+      TSM_ASSERT_DELTA("Wrong intensity for peak " + std::to_string(i), integratedPeaksWS->getPeak(i).getIntensity(),
                        numEventsPerPeak, 5);
     }
   }
@@ -199,14 +193,12 @@ public:
     alg.setPropertyValue("OutputWorkspace", "dummy");
     alg.execute();
     PeaksWorkspace_sptr integratedPeaksWS = alg.getProperty("OutputWorkspace");
-    TSM_ASSERT_EQUALS("Wrong number of peaks in output workspace",
-                      integratedPeaksWS->getNumberPeaks(),
+    TSM_ASSERT_EQUALS("Wrong number of peaks in output workspace", integratedPeaksWS->getNumberPeaks(),
                       peaksWS->getNumberPeaks());
 
     const double binWidth{0.2};
     for (int i = 0; i < 5; ++i) {
-      TSM_ASSERT_DELTA("Wrong intensity for peak " + std::to_string(i),
-                       integratedPeaksWS->getPeak(i).getIntensity(),
+      TSM_ASSERT_DELTA("Wrong intensity for peak " + std::to_string(i), integratedPeaksWS->getPeak(i).getIntensity(),
                        numEventsPerPeak * binWidth, 5);
     }
   }
@@ -225,8 +217,7 @@ public:
     builder.setRandomSeed(1);
     builder.setNumPixels(100);
     builder.addBackground(true);
-    builder.setBackgroundParameters(nBackgroundEvents, backgroundDetSize,
-                                    backgroundTOFSize);
+    builder.setBackgroundParameters(nBackgroundEvents, backgroundDetSize, backgroundTOFSize);
 
     builder.addPeakByHKL(V3D(1, -5, -3), numEventsPerPeak, sigmas);
     builder.addPeakByHKL(V3D(1, -4, -4), numEventsPerPeak, sigmas);
@@ -260,18 +251,14 @@ public:
     PeaksWorkspace_sptr integratedPeaksWS = alg.getProperty("OutputWorkspace");
     TS_ASSERT(integratedPeaksWS);
 
-    TSM_ASSERT_EQUALS("Wrong number of peaks in output workspace",
-                      integratedPeaksWS->getNumberPeaks(),
+    TSM_ASSERT_EQUALS("Wrong number of peaks in output workspace", integratedPeaksWS->getNumberPeaks(),
                       peaksWS->getNumberPeaks());
     const auto &run = integratedPeaksWS->mutableRun();
-    TSM_ASSERT("Output workspace must be integrated",
-               run.hasProperty("PeaksIntegrated"));
-    TSM_ASSERT_EQUALS("Output workspace must be integrated",
-                      run.getProperty("PeaksIntegrated")->value(), "1");
+    TSM_ASSERT("Output workspace must be integrated", run.hasProperty("PeaksIntegrated"));
+    TSM_ASSERT_EQUALS("Output workspace must be integrated", run.getProperty("PeaksIntegrated")->value(), "1");
 
     for (int i = 0; i < 5; ++i) {
-      TSM_ASSERT_DELTA("Wrong intensity for peak " + std::to_string(i),
-                       integratedPeaksWS->getPeak(i).getIntensity(),
+      TSM_ASSERT_DELTA("Wrong intensity for peak " + std::to_string(i), integratedPeaksWS->getPeak(i).getIntensity(),
                        numEventsPerPeak, 450);
     }
   }
@@ -288,8 +275,7 @@ public:
     builder.setRandomSeed(1);
     builder.setNumPixels(100);
     builder.addBackground(true);
-    builder.setBackgroundParameters(nBackgroundEvents, backgroundDetSize,
-                                    backgroundTOFSize);
+    builder.setBackgroundParameters(nBackgroundEvents, backgroundDetSize, backgroundTOFSize);
     builder.outputAsHistogram(true);
     builder.setRebinParameters(rebinParams);
 
@@ -318,13 +304,11 @@ public:
     alg.setPropertyValue("OutputWorkspace", "dummy");
     alg.execute();
     PeaksWorkspace_sptr integratedPeaksWS = alg.getProperty("OutputWorkspace");
-    TSM_ASSERT_EQUALS("Wrong number of peaks in output workspace",
-                      integratedPeaksWS->getNumberPeaks(),
+    TSM_ASSERT_EQUALS("Wrong number of peaks in output workspace", integratedPeaksWS->getNumberPeaks(),
                       peaksWS->getNumberPeaks());
 
     for (int i = 0; i < 5; ++i) {
-      TSM_ASSERT_DELTA("Wrong intensity for peak " + std::to_string(i),
-                       integratedPeaksWS->getPeak(i).getIntensity(),
+      TSM_ASSERT_DELTA("Wrong intensity for peak " + std::to_string(i), integratedPeaksWS->getPeak(i).getIntensity(),
                        numEventsPerPeak, 700);
     }
   }
@@ -344,8 +328,7 @@ public:
     builder.setRandomSeed(1);
     builder.setNumPixels(100);
     builder.addBackground(true);
-    builder.setBackgroundParameters(nBackgroundEvents, backgroundDetSize,
-                                    backgroundTOFSize);
+    builder.setBackgroundParameters(nBackgroundEvents, backgroundDetSize, backgroundTOFSize);
 
     builder.addPeakByHKL(V3D(1, -5, -3), numEventsPerStrongPeak, sigmas);
     builder.addPeakByHKL(V3D(1, -4, -4), numEventsPerStrongPeak, sigmas);
@@ -384,35 +367,26 @@ public:
     PeaksWorkspace_sptr integratedPeaksWS = alg.getProperty("OutputWorkspace");
     TS_ASSERT(integratedPeaksWS);
 
-    TSM_ASSERT_EQUALS("Wrong number of peaks in output workspace",
-                      integratedPeaksWS->getNumberPeaks(),
+    TSM_ASSERT_EQUALS("Wrong number of peaks in output workspace", integratedPeaksWS->getNumberPeaks(),
                       peaksWS->getNumberPeaks());
     const auto &run = integratedPeaksWS->mutableRun();
-    TSM_ASSERT("Output workspace must be integrated",
-               run.hasProperty("PeaksIntegrated"));
-    TSM_ASSERT_EQUALS("Output workspace must be integrated",
-                      run.getProperty("PeaksIntegrated")->value(), "1");
+    TSM_ASSERT("Output workspace must be integrated", run.hasProperty("PeaksIntegrated"));
+    TSM_ASSERT_EQUALS("Output workspace must be integrated", run.getProperty("PeaksIntegrated")->value(), "1");
 
-    TSM_ASSERT_DELTA("Wrong intensity for peak " + std::to_string(0),
-                     integratedPeaksWS->getPeak(0).getIntensity(),
+    TSM_ASSERT_DELTA("Wrong intensity for peak " + std::to_string(0), integratedPeaksWS->getPeak(0).getIntensity(),
                      numEventsPerStrongPeak, 300);
-    TSM_ASSERT_DELTA("Wrong intensity for peak " + std::to_string(1),
-                     integratedPeaksWS->getPeak(1).getIntensity(),
+    TSM_ASSERT_DELTA("Wrong intensity for peak " + std::to_string(1), integratedPeaksWS->getPeak(1).getIntensity(),
                      numEventsPerStrongPeak, 300);
-    TSM_ASSERT_DELTA("Wrong intensity for peak " + std::to_string(2),
-                     integratedPeaksWS->getPeak(2).getIntensity(),
+    TSM_ASSERT_DELTA("Wrong intensity for peak " + std::to_string(2), integratedPeaksWS->getPeak(2).getIntensity(),
                      numEventsPerWeakPeak, 100);
-    TSM_ASSERT_DELTA("Wrong intensity for peak " + std::to_string(3),
-                     integratedPeaksWS->getPeak(3).getIntensity(),
+    TSM_ASSERT_DELTA("Wrong intensity for peak " + std::to_string(3), integratedPeaksWS->getPeak(3).getIntensity(),
                      numEventsPerWeakPeak, 100);
-    TSM_ASSERT_DELTA("Wrong intensity for peak " + std::to_string(4),
-                     integratedPeaksWS->getPeak(4).getIntensity(),
+    TSM_ASSERT_DELTA("Wrong intensity for peak " + std::to_string(4), integratedPeaksWS->getPeak(4).getIntensity(),
                      numEventsPerStrongPeak, 450);
-    TSM_ASSERT_DELTA("Wrong intensity for peak " + std::to_string(5),
-                     integratedPeaksWS->getPeak(5).getIntensity(),
+    TSM_ASSERT_DELTA("Wrong intensity for peak " + std::to_string(5), integratedPeaksWS->getPeak(5).getIntensity(),
                      numEventsPerStrongPeak, 800);
-    TSM_ASSERT_DELTA("Wrong intensity for peak " + std::to_string(6),
-                     integratedPeaksWS->getPeak(6).getIntensity(), 100, 10);
+    TSM_ASSERT_DELTA("Wrong intensity for peak " + std::to_string(6), integratedPeaksWS->getPeak(6).getIntensity(), 100,
+                     10);
   }
 
   void test_exec_events_with_adaptive_q() {
@@ -430,8 +404,7 @@ public:
     builder.setRandomSeed(1);
     builder.setNumPixels(100);
     builder.addBackground(true);
-    builder.setBackgroundParameters(nBackgroundEvents, backgroundDetSize,
-                                    backgroundTOFSize);
+    builder.setBackgroundParameters(nBackgroundEvents, backgroundDetSize, backgroundTOFSize);
 
     builder.addPeakByHKL(V3D(1, -5, -3), numEventsPerStrongPeak, sigmas);
     builder.addPeakByHKL(V3D(1, -4, -4), numEventsPerStrongPeak, sigmas);
@@ -467,29 +440,21 @@ public:
     PeaksWorkspace_sptr integratedPeaksWS = alg.getProperty("OutputWorkspace");
     TS_ASSERT(integratedPeaksWS);
 
-    TSM_ASSERT_EQUALS("Wrong number of peaks in output workspace",
-                      integratedPeaksWS->getNumberPeaks(),
+    TSM_ASSERT_EQUALS("Wrong number of peaks in output workspace", integratedPeaksWS->getNumberPeaks(),
                       peaksWS->getNumberPeaks());
     const auto &run = integratedPeaksWS->mutableRun();
-    TSM_ASSERT("Output workspace must be integrated",
-               run.hasProperty("PeaksIntegrated"));
-    TSM_ASSERT_EQUALS("Output workspace must be integrated",
-                      run.getProperty("PeaksIntegrated")->value(), "1");
+    TSM_ASSERT("Output workspace must be integrated", run.hasProperty("PeaksIntegrated"));
+    TSM_ASSERT_EQUALS("Output workspace must be integrated", run.getProperty("PeaksIntegrated")->value(), "1");
 
-    TSM_ASSERT_DELTA("Wrong intensity for peak " + std::to_string(0),
-                     integratedPeaksWS->getPeak(0).getIntensity(),
+    TSM_ASSERT_DELTA("Wrong intensity for peak " + std::to_string(0), integratedPeaksWS->getPeak(0).getIntensity(),
                      numEventsPerStrongPeak, 5100);
-    TSM_ASSERT_DELTA("Wrong intensity for peak " + std::to_string(1),
-                     integratedPeaksWS->getPeak(1).getIntensity(),
+    TSM_ASSERT_DELTA("Wrong intensity for peak " + std::to_string(1), integratedPeaksWS->getPeak(1).getIntensity(),
                      numEventsPerStrongPeak, 5100);
-    TSM_ASSERT_DELTA("Wrong intensity for peak " + std::to_string(2),
-                     integratedPeaksWS->getPeak(2).getIntensity(),
+    TSM_ASSERT_DELTA("Wrong intensity for peak " + std::to_string(2), integratedPeaksWS->getPeak(2).getIntensity(),
                      numEventsPerStrongPeak, 900);
-    TSM_ASSERT_DELTA("Wrong intensity for peak " + std::to_string(3),
-                     integratedPeaksWS->getPeak(3).getIntensity(),
+    TSM_ASSERT_DELTA("Wrong intensity for peak " + std::to_string(3), integratedPeaksWS->getPeak(3).getIntensity(),
                      numEventsPerWeakPeak, 300);
-    TSM_ASSERT_DELTA("Wrong intensity for peak " + std::to_string(4),
-                     integratedPeaksWS->getPeak(4).getIntensity(),
+    TSM_ASSERT_DELTA("Wrong intensity for peak " + std::to_string(4), integratedPeaksWS->getPeak(4).getIntensity(),
                      numEventsPerWeakPeak, 300);
   }
 };

@@ -15,8 +15,7 @@ namespace Reflectometry {
 
 /** Calculates statistical quantities of a reflectometry workspace.
  */
-class MANTID_REFLECTOMETRY_DLL ReflectometryBeamStatistics
-    : public API::Algorithm {
+class MANTID_REFLECTOMETRY_DLL ReflectometryBeamStatistics : public API::Algorithm {
 public:
   struct LogEntry {
     const static std::string BEAM_RMS_VARIATION;
@@ -26,9 +25,8 @@ public:
     const static std::string SAMPLE_WAVINESS;
     const static std::string SECOND_SLIT_ANGULAR_SPREAD;
   };
-  static double
-  slitSeparation(const Geometry::Instrument_const_sptr &instrument,
-                 const std::string &slit1Name, const std::string &slit2Name);
+  static double slitSeparation(const Geometry::Instrument_const_sptr &instrument, const std::string &slit1Name,
+                               const std::string &slit2Name);
   const std::string name() const override;
   int version() const override;
   const std::string category() const override;
@@ -63,25 +61,19 @@ private:
   void init() override;
   void exec() override;
   std::map<std::string, std::string> validateInputs() override;
-  double beamRMSVariation(API::MatrixWorkspace_sptr &ws, const size_t start,
-                          const size_t end);
-  static bool bentSample(const Setup &setup, const double sampleWaviness,
-                         const double firstSlitAngularSpread);
-  const Setup createSetup(const API::MatrixWorkspace &ws,
-                          const API::MatrixWorkspace &directWS);
-  static double detectorAngularResolution(const Setup &setup,
-                                          const double incidentFWHM);
+  double beamRMSVariation(API::MatrixWorkspace_sptr &ws, const size_t start, const size_t end);
+  static bool bentSample(const Setup &setup, const double sampleWaviness, const double firstSlitAngularSpread);
+  const Setup createSetup(const API::MatrixWorkspace &ws, const API::MatrixWorkspace &directWS);
+  static double detectorAngularResolution(const Setup &setup, const double incidentFWHM);
   static double firstSlitAngularSpread(const Setup &setup);
   double incidentAngularSpread(const Setup &setup);
   double interslitDistance(const API::MatrixWorkspace &ws);
-  static void rmsVariationToLogs(API::MatrixWorkspace &ws,
-                                 const double variation);
-  double sampleWaviness(const Setup &setup, const double beamFWHM,
-                        const double directBeamFWHM, const double incidentFWHM);
+  static void rmsVariationToLogs(API::MatrixWorkspace &ws, const double variation);
+  double sampleWaviness(const Setup &setup, const double beamFWHM, const double directBeamFWHM,
+                        const double incidentFWHM);
   double secondSlitAngularSpread(const Setup &setup);
   double slitSize(const API::MatrixWorkspace &ws, const std::string &logEntry);
-  static void statisticsToLogs(API::MatrixWorkspace &ws,
-                               const Statistics &statistics);
+  static void statisticsToLogs(API::MatrixWorkspace &ws, const Statistics &statistics);
 };
 
 } // namespace Reflectometry

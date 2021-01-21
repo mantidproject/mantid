@@ -41,8 +41,7 @@ public:
       a[i] = static_cast<double>(i) + 0.1;
     }
     for (int j = 0; j < 5; ++j) {
-      m_space->mutableX(j) =
-          Mantid::MantidVec(a.cbegin() + (5 * j), a.cbegin() + (5 * j) + 5);
+      m_space->mutableX(j) = Mantid::MantidVec(a.cbegin() + (5 * j), a.cbegin() + (5 * j) + 5);
     }
 
     // Create the axis that the tests will be performed on
@@ -92,9 +91,7 @@ public:
     TS_ASSERT_THROWS((*m_refAxis)(0, 5), const std::range_error &)
   }
 
-  void testSetValue() {
-    TS_ASSERT_THROWS(m_refAxis->setValue(0, 9.9), const std::domain_error &)
-  }
+  void testSetValue() { TS_ASSERT_THROWS(m_refAxis->setValue(0, 9.9), const std::domain_error &) }
 
   void testGetMin() {
     std::unique_ptr<Axis> newRefAxis(m_refAxis->clone(5, m_space2.get()));

@@ -36,9 +36,7 @@ namespace DataHandling {
 class DLLExport LoadDetectorsGroupingFile : public API::Algorithm {
 public:
   ///
-  const std::string name() const override {
-    return "LoadDetectorsGroupingFile";
-  };
+  const std::string name() const override { return "LoadDetectorsGroupingFile"; };
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "Load an XML or Map file, which contains definition of detectors "
@@ -47,13 +45,9 @@ public:
 
   /// Algorithm's version for identification
   int version() const override { return 1; };
-  const std::vector<std::string> seeAlso() const override {
-    return {"SaveDetectorsGrouping", "GroupDetectors"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"SaveDetectorsGrouping", "GroupDetectors"}; }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "DataHandling\\Grouping;Transforms\\Grouping";
-  }
+  const std::string category() const override { return "DataHandling\\Grouping;Transforms\\Grouping"; }
 
 private:
   /// Initialise the properties
@@ -77,12 +71,9 @@ private:
   /// Convert spectrum Nos combination string to vector of spectrum Nos
   void parseSpectrumNos(std::string inputstring, std::vector<int> &specids);
   /// Get attribute value from an XML node
-  static std::string getAttributeValueByName(Poco::XML::Node *pNode,
-                                             std::string attributename,
-                                             bool &found);
+  static std::string getAttributeValueByName(Poco::XML::Node *pNode, std::string attributename, bool &found);
   /// Split and convert string
-  void parseRangeText(std::string inputstr, std::vector<int32_t> &singles,
-                      std::vector<int32_t> &pairs);
+  void parseRangeText(std::string inputstr, std::vector<int32_t> &singles, std::vector<int32_t> &pairs);
   /// Generate a GroupingWorkspace w/o instrument
   void generateNoInstrumentGroupWorkspace();
 
@@ -108,9 +99,7 @@ public:
   LoadGroupXMLFile();
 
   void loadXMLFile(const std::string &xmlfilename);
-  void setDefaultStartingGroupID(int startgroupid) {
-    m_startGroupID = startgroupid;
-  }
+  void setDefaultStartingGroupID(int startgroupid) { m_startGroupID = startgroupid; }
 
   std::string getInstrumentName() { return m_instrumentName; }
   bool isGivenInstrumentName() { return m_userGiveInstrument; }
@@ -122,15 +111,9 @@ public:
   bool isGivenDescription() { return m_userGiveDescription; }
 
   /// Data structures to store XML to Group/Detector conversion map
-  std::map<int, std::vector<std::string>> getGroupComponentsMap() {
-    return m_groupComponentsMap;
-  }
-  std::map<int, std::vector<detid_t>> getGroupDetectorsMap() {
-    return m_groupDetectorsMap;
-  }
-  std::map<int, std::vector<int>> getGroupSpectraMap() {
-    return m_groupSpectraMap;
-  }
+  std::map<int, std::vector<std::string>> getGroupComponentsMap() { return m_groupComponentsMap; }
+  std::map<int, std::vector<detid_t>> getGroupDetectorsMap() { return m_groupDetectorsMap; }
+  std::map<int, std::vector<int>> getGroupSpectraMap() { return m_groupSpectraMap; }
 
   std::map<int, std::string> getGroupNamesMap() { return m_groupNamesMap; }
 
@@ -166,9 +149,7 @@ private:
   /// Parse XML
   void parseXML();
   /// Get attribute value from an XML node
-  static std::string getAttributeValueByName(Poco::XML::Node *pNode,
-                                             const std::string &attributename,
-                                             bool &found);
+  static std::string getAttributeValueByName(Poco::XML::Node *pNode, const std::string &attributename, bool &found);
 };
 
 /**
@@ -191,9 +172,7 @@ public:
   /// Return the map parsed from file. Should only be called after the file is
   /// parsed,
   /// otherwise a map will always be empty.
-  std::map<int, std::vector<int>> getGroupSpectraMap() {
-    return m_groupSpectraMap;
-  }
+  std::map<int, std::vector<int>> getGroupSpectraMap() { return m_groupSpectraMap; }
 
 private:
   /// Skips all the empty lines and comment lines, and returns next line with

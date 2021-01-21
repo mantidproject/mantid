@@ -30,8 +30,7 @@ public:
   /// overwrite IFunction base class methods
   std::string name() const override { return "B2B"; }
   const std::string category() const override { return "Peak"; }
-  void function1D(double *out, const double *xValues,
-                  const size_t nData) const override {
+  void function1D(double *out, const double *xValues, const size_t nData) const override {
     const double a = getParameter(0);
     const double b = getParameter(1);
     for (size_t i = 0; i < nData; ++i) {

@@ -215,16 +215,13 @@ int Rule::makeCNFcopy(std::unique_ptr<Rule> &TopRule)
       //  Time to see if we can apply rule 4 (propositional calculus)
       //  to expand (a ^ b) v c to (a v c) ^ (b v c)
       //
-      if (tmpA->type() == 1 && tmpB &&
-          tmpC) // it is an intersection otherwise no work to do
+      if (tmpA->type() == 1 && tmpB && tmpC) // it is an intersection otherwise no work to do
       {
         // require either the left or right to be unions.
-        if (tmpB->type() == -1 ||
-            tmpC->type() == -1) // this is a union expand....
+        if (tmpB->type() == -1 || tmpC->type() == -1) // this is a union expand....
         {
           std::unique_ptr<Rule> alpha, beta, gamma;
-          if (tmpB->type() ==
-              -1) // ok the LHS is a union. (a ^ b) v g ==> (a v g) ^ (b v g )
+          if (tmpB->type() == -1) // ok the LHS is a union. (a ^ b) v g ==> (a v g) ^ (b v g )
           {
             // Make copies of the Unions leaves (allowing for null union)
             alpha = (tmpB->leaf(0)) ? tmpB->leaf(0)->clone() : nullptr;
@@ -245,12 +242,9 @@ int Rule::makeCNFcopy(std::unique_ptr<Rule> &TopRule)
           // Note:: no part of this can be memory copy
           // hence we have to play games with a second
           // gamma->clone()
-          std::unique_ptr<Rule> tmp1 =
-              std::make_unique<Intersection>(std::move(alpha), gamma->clone());
-          std::unique_ptr<Rule> tmp2 =
-              std::make_unique<Intersection>(std::move(beta), std::move(gamma));
-          std::unique_ptr<Rule> partReplace =
-              std::make_unique<Union>(std::move(tmp1), std::move(tmp2));
+          std::unique_ptr<Rule> tmp1 = std::make_unique<Intersection>(std::move(alpha), gamma->clone());
+          std::unique_ptr<Rule> tmp2 = std::make_unique<Intersection>(std::move(beta), std::move(gamma));
+          std::unique_ptr<Rule> partReplace = std::make_unique<Union>(std::move(tmp1), std::move(tmp2));
           //
           // General replacement
           //
@@ -332,16 +326,13 @@ int Rule::makeCNF(std::unique_ptr<Rule> &TopRule)
       //  Time to see if we can apply rule 4 (propositional calculus)
       //  to expand (a ^ b) v c to (a v c) ^ (b v c)
       //
-      if (tmpA->type() == 1 && tmpB &&
-          tmpC) // it is an intersection otherwise no work to do
+      if (tmpA->type() == 1 && tmpB && tmpC) // it is an intersection otherwise no work to do
       {
         // require either the left or right to be unions.
-        if (tmpB->type() == -1 ||
-            tmpC->type() == -1) // this is a union expand....
+        if (tmpB->type() == -1 || tmpC->type() == -1) // this is a union expand....
         {
           std::unique_ptr<Rule> alpha, beta, gamma; // Uobj to be deleted
-          if (tmpB->type() ==
-              -1) // ok the LHS is a union. (a ^ b) v g ==> (a v g) ^ (b v g )
+          if (tmpB->type() == -1)                   // ok the LHS is a union. (a ^ b) v g ==> (a v g) ^ (b v g )
           {
             // Make copies of the Unions leaves (allowing for null union)
             alpha = tmpB->leaf(0)->clone();
@@ -362,17 +353,14 @@ int Rule::makeCNF(std::unique_ptr<Rule> &TopRule)
           // Note:: no part of this can be memory copy
           // hence we have to play games with a second
           // gamma->clone()
-          std::unique_ptr<Rule> tmp1 =
-              std::make_unique<Intersection>(std::move(alpha), gamma->clone());
-          std::unique_ptr<Rule> tmp2 =
-              std::make_unique<Intersection>(std::move(beta), std::move(gamma));
-          std::unique_ptr<Rule> partReplace =
-              std::make_unique<Union>(std::move(tmp1), std::move(tmp2));
+          std::unique_ptr<Rule> tmp1 = std::make_unique<Intersection>(std::move(alpha), gamma->clone());
+          std::unique_ptr<Rule> tmp2 = std::make_unique<Intersection>(std::move(beta), std::move(gamma));
+          std::unique_ptr<Rule> partReplace = std::make_unique<Union>(std::move(tmp1), std::move(tmp2));
           //
           // General replacement
           //
           Rule *Pnt = tmpA->getParent(); // parent
-          if (Pnt) // Not the top rule (so replace parents leaf)
+          if (Pnt)                       // Not the top rule (so replace parents leaf)
           {
             const int leafN = Pnt->findLeaf(tmpA);
             Pnt->setLeaf(std::move(partReplace), leafN);
@@ -406,16 +394,14 @@ int Rule::removeItem(std::unique_ptr<Rule> &TRule, const int SurfN)
     if (LevelTwo) /// Not the top level
     {
       // Decide which of the pairs is to be copied
-      Rule *PObj =
-          (LevelOne->leaf(0) != Ptr) ? LevelOne->leaf(0) : LevelOne->leaf(1);
+      Rule *PObj = (LevelOne->leaf(0) != Ptr) ? LevelOne->leaf(0) : LevelOne->leaf(1);
       //
       const int side = (LevelTwo->leaf(0) != LevelOne) ? 1 : 0;
       LevelTwo->setLeaf(PObj->clone(), side);
     } else if (LevelOne) // LevelOne is the top rule
     {
       // Decide which of the pairs is to be copied
-      Rule *PObj =
-          (LevelOne->leaf(0) != Ptr) ? LevelOne->leaf(0) : LevelOne->leaf(1);
+      Rule *PObj = (LevelOne->leaf(0) != Ptr) ? LevelOne->leaf(0) : LevelOne->leaf(1);
 
       PObj->setParent(nullptr); /// New Top rule
       TRule = PObj->clone();
@@ -549,8 +535,7 @@ int Rule::commonType() const
 */
 {
   // initial type
-  const int rtype =
-      this->type(); // note the dereference to get non-common comonents
+  const int rtype = this->type(); // note the dereference to get non-common comonents
   if (!rtype)
     return 0;
   // now this must be an intersection or a Union
@@ -574,8 +559,7 @@ int Rule::commonType() const
   return rtype;
 }
 
-int Rule::substituteSurf(const int SurfN, const int newSurfN,
-                         const std::shared_ptr<Surface> &SPtr)
+int Rule::substituteSurf(const int SurfN, const int newSurfN, const std::shared_ptr<Surface> &SPtr)
 /**
   Substitues a surface item if within a rule
   @param SurfN :: Number number to change

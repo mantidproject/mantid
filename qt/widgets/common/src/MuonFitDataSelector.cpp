@@ -22,8 +22,7 @@ namespace MantidWidgets {
  * Basic constructor
  * @param parent :: [input] Parent dialog for the widget
  */
-MuonFitDataSelector::MuonFitDataSelector(QWidget *parent)
-    : MantidWidget(parent) {
+MuonFitDataSelector::MuonFitDataSelector(QWidget *parent) : MantidWidget(parent) {
   m_multiFit = false;
   m_ui.setupUi(this);
   this->setDefaultValues();
@@ -40,16 +39,14 @@ MuonFitDataSelector::MuonFitDataSelector(QWidget *parent)
  * @param runNumber :: [input] Run number of initial workspace
  * @param instName :: [input] Name of instrument from initial workspace
  */
-MuonFitDataSelector::MuonFitDataSelector(QWidget *parent, int runNumber,
-                                         const QString &instName) /*
-  * numPeriods :: [input] Number of periods from initial workspace
-  * groups :: [input] Group names from initial workspace
-                                          size_t numPeriods,
-                                          const QStringList &groups)*/
+MuonFitDataSelector::MuonFitDataSelector(QWidget *parent, int runNumber, const QString &instName) /*
+                                  * numPeriods :: [input] Number of periods from initial workspace
+                                  * groups :: [input] Group names from initial workspace
+                                                                          size_t numPeriods,
+                                                                          const QStringList &groups)*/
     : MuonFitDataSelector(parent) {
   m_multiFit = false;
-  this->setWorkspaceDetails(QString::number(runNumber), instName,
-                            boost::optional<QString>{});
+  this->setWorkspaceDetails(QString::number(runNumber), instName, boost::optional<QString>{});
   // not used in this case
   // but leave these here as a remainder
   // for future changes that may need to assign them
@@ -64,19 +61,13 @@ MuonFitDataSelector::MuonFitDataSelector(QWidget *parent, int runNumber,
  */
 void MuonFitDataSelector::setUpConnections() {
   connect(m_ui.runs, SIGNAL(filesFound()), this, SLOT(userChangedRuns()));
-  connect(m_ui.rbCoAdd, SIGNAL(toggled(bool)), this,
-          SLOT(fitTypeChanged(bool)));
-  connect(m_ui.txtSimFitLabel, SIGNAL(editingFinished()), this,
-          SIGNAL(simulLabelChanged()));
-  connect(this, SIGNAL(workspaceChanged()), this,
-          SLOT(checkForMultiGroupPeriodSelection()));
-  connect(m_ui.cbDataset, SIGNAL(currentIndexChanged(int)), this,
-          SIGNAL(datasetIndexChanged(int)));
-  connect(m_ui.cbDataset, SIGNAL(currentIndexChanged(int)), this,
-          SLOT(updateNormalizationFromDropDown(int)));
+  connect(m_ui.rbCoAdd, SIGNAL(toggled(bool)), this, SLOT(fitTypeChanged(bool)));
+  connect(m_ui.txtSimFitLabel, SIGNAL(editingFinished()), this, SIGNAL(simulLabelChanged()));
+  connect(this, SIGNAL(workspaceChanged()), this, SLOT(checkForMultiGroupPeriodSelection()));
+  connect(m_ui.cbDataset, SIGNAL(currentIndexChanged(int)), this, SIGNAL(datasetIndexChanged(int)));
+  connect(m_ui.cbDataset, SIGNAL(currentIndexChanged(int)), this, SLOT(updateNormalizationFromDropDown(int)));
   connect(m_ui.btnNextDataset, SIGNAL(clicked()), this, SLOT(setNextDataset()));
-  connect(m_ui.btnPrevDataset, SIGNAL(clicked()), this,
-          SLOT(setPreviousDataset()));
+  connect(m_ui.btnPrevDataset, SIGNAL(clicked()), this, SLOT(setPreviousDataset()));
 }
 
 /**
@@ -118,9 +109,7 @@ double MuonFitDataSelector::getStartTime() const {
  * Set the start time in the UI WITHOUT sending signal
  * @param start :: [input] Start time in microseconds
  */
-void MuonFitDataSelector::setStartTimeQuietly(double start) {
-  m_startX = start;
-}
+void MuonFitDataSelector::setStartTimeQuietly(double start) { m_startX = start; }
 
 /**
  * Set the start time in the UI, and send signal
@@ -156,9 +145,7 @@ void MuonFitDataSelector::setEndTime(double end) {
  * Get the filenames of the supplied run numbers
  * @returns :: list of run filenames
  */
-QStringList MuonFitDataSelector::getFilenames() const {
-  return m_ui.runs->getFilenames();
-}
+QStringList MuonFitDataSelector::getFilenames() const { return m_ui.runs->getFilenames(); }
 
 /**
  * Set up run finder with initial run number and instrument
@@ -168,9 +155,8 @@ QStringList MuonFitDataSelector::getFilenames() const {
  * in the case of "load current run" when the file may have a special name like
  * MUSRauto_E.tmp
  */
-void MuonFitDataSelector::setWorkspaceDetails(
-    const QString &runNumbers, const QString &instName,
-    const boost::optional<QString> &filePath) {
+void MuonFitDataSelector::setWorkspaceDetails(const QString &runNumbers, const QString &instName,
+                                              const boost::optional<QString> &filePath) {
   // Set the file finder to the correct instrument (not Mantid's default)
   m_ui.runs->setInstrumentOverride(instName);
 
@@ -209,17 +195,13 @@ void MuonFitDataSelector::setDefaultValues() {
  * Returns a list of periods and combinations chosen in UI
  * @returns :: list of periods e.g. "1", "3", "1+2-3+4", or "" if single-period
  */
-QStringList MuonFitDataSelector::getPeriodSelections() const {
-  return m_chosenPeriods;
-}
+QStringList MuonFitDataSelector::getPeriodSelections() const { return m_chosenPeriods; }
 
 /**
  * Returns a list of the selected groups (checked boxes)
  * @returns :: list of selected groups
  */
-QStringList MuonFitDataSelector::getChosenGroups() const {
-  return m_chosenGroups;
-}
+QStringList MuonFitDataSelector::getChosenGroups() const { return m_chosenGroups; }
 
 /**
  *Gets user input in the form of a QVariant
@@ -278,9 +260,7 @@ IMuonFitDataSelector::FitType MuonFitDataSelector::getFitType() const {
   // If radio buttons disabled, it's a single fit unless multiple groups/periods
   // chosen
   if (!m_multiFit) {
-    return m_chosenGroups.size() <= 1 && m_chosenPeriods.size() <= 1
-               ? FitType::Single
-               : FitType::Simultaneous;
+    return m_chosenGroups.size() <= 1 && m_chosenPeriods.size() <= 1 ? FitType::Single : FitType::Simultaneous;
   } else {
     // which button is selected
     if (m_ui.rbCoAdd->isChecked()) {
@@ -313,9 +293,7 @@ void MuonFitDataSelector::setFitType(IMuonFitDataSelector::FitType type) {
  * for the data selector
  * @returns :: instrument name
  */
-QString MuonFitDataSelector::getInstrumentName() const {
-  return m_ui.runs->getInstrumentOverride();
-}
+QString MuonFitDataSelector::getInstrumentName() const { return m_ui.runs->getInstrumentOverride(); }
 
 /**
  * Return the runs entered by the user
@@ -334,8 +312,7 @@ QString MuonFitDataSelector::getRuns() const {
  * back to the normal, non-busy state.
  */
 void MuonFitDataSelector::unsetBusyState() {
-  disconnect(m_ui.runs, SIGNAL(fileInspectionFinished()), this,
-             SLOT(unsetBusyState()));
+  disconnect(m_ui.runs, SIGNAL(fileInspectionFinished()), this, SLOT(unsetBusyState()));
   this->setCursor(Qt::ArrowCursor);
 }
 
@@ -344,8 +321,7 @@ void MuonFitDataSelector::unsetBusyState() {
  * Connects up slot to reset busy state when search done.
  */
 void MuonFitDataSelector::setBusyState() {
-  connect(m_ui.runs, SIGNAL(fileInspectionFinished()), this,
-          SLOT(unsetBusyState()));
+  connect(m_ui.runs, SIGNAL(fileInspectionFinished()), this, SLOT(unsetBusyState()));
   this->setCursor(Qt::WaitCursor);
 }
 
@@ -353,9 +329,7 @@ void MuonFitDataSelector::setBusyState() {
  * Get text entered as the simultaneous fit label
  * @returns :: text entered in the textbox
  */
-QString MuonFitDataSelector::getSimultaneousFitLabel() const {
-  return m_ui.txtSimFitLabel->text();
-}
+QString MuonFitDataSelector::getSimultaneousFitLabel() const { return m_ui.txtSimFitLabel->text(); }
 
 /**
  * Set text of simultaneous fit label
@@ -381,8 +355,7 @@ void MuonFitDataSelector::setSimultaneousFitLabel(const QString &label) {
  * Called when groups/periods selection changes.
  */
 void MuonFitDataSelector::checkForMultiGroupPeriodSelection() {
-  m_ui.txtSimFitLabel->setEnabled(m_chosenGroups.size() > 1 ||
-                                  m_chosenPeriods.size() > 1 ||
+  m_ui.txtSimFitLabel->setEnabled(m_chosenGroups.size() > 1 || m_chosenPeriods.size() > 1 ||
                                   getFitType() == FitType::Simultaneous);
 }
 
@@ -390,17 +363,13 @@ void MuonFitDataSelector::checkForMultiGroupPeriodSelection() {
  * Return index of currently selected dataset
  * @returns :: index of dataset selected in combobox
  */
-int MuonFitDataSelector::getDatasetIndex() const {
-  return m_ui.cbDataset->currentIndex();
-}
+int MuonFitDataSelector::getDatasetIndex() const { return m_ui.cbDataset->currentIndex(); }
 
 /**
  * Return name of currently selected dataset
  * @returns :: name of dataset selected in combobox
  */
-QString MuonFitDataSelector::getDatasetName() const {
-  return m_ui.cbDataset->currentText();
-}
+QString MuonFitDataSelector::getDatasetName() const { return m_ui.cbDataset->currentText(); }
 
 /**
  * Replaces list of dataset names with the supplied list
@@ -468,12 +437,10 @@ void MuonFitDataSelector::setNextDataset() {
  * @returns :: True if user chose to overwrite, false if not.
  */
 bool MuonFitDataSelector::askUserWhetherToOverwrite() {
-  const int choice = QMessageBox::question(
-      this, tr("MantidPlot - Overwrite Warning"),
-      getSimultaneousFitLabel() +
-          tr(" already exists. Do you want to replace it?"),
-      QMessageBox::Yes | QMessageBox::Default,
-      QMessageBox::No | QMessageBox::Escape);
+  const int choice =
+      QMessageBox::question(this, tr("MantidPlot - Overwrite Warning"),
+                            getSimultaneousFitLabel() + tr(" already exists. Do you want to replace it?"),
+                            QMessageBox::Yes | QMessageBox::Default, QMessageBox::No | QMessageBox::Escape);
 
   return choice == QMessageBox::Yes;
 }

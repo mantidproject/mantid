@@ -16,14 +16,12 @@ namespace DataHandling {
 class LoadMuonNexusV2NexusHelper;
 
 // Create time zero table
-DataObjects::TableWorkspace_sptr
-createTimeZeroTable(const size_t numSpec, const std::vector<double> &timeZeros);
+DataObjects::TableWorkspace_sptr createTimeZeroTable(const size_t numSpec, const std::vector<double> &timeZeros);
 
 class DLLExport LoadMuonStrategy {
 public:
   // Constructor
-  LoadMuonStrategy(Kernel::Logger &g_log, std::string filename,
-                   LoadMuonNexusV2NexusHelper &nexusLoader);
+  LoadMuonStrategy(Kernel::Logger &g_log, std::string filename, LoadMuonNexusV2NexusHelper &nexusLoader);
   // Virtual destructor
   virtual ~LoadMuonStrategy() {}
   // Load muon log data
@@ -41,19 +39,15 @@ public:
 
 protected:
   // Create grouping table
-  DataObjects::TableWorkspace_sptr
-  createDetectorGroupingTable(const std::vector<detid_t> &specToLoad,
-                              const std::vector<detid_t> &grouping) const;
+  DataObjects::TableWorkspace_sptr createDetectorGroupingTable(const std::vector<detid_t> &specToLoad,
+                                                               const std::vector<detid_t> &grouping) const;
   // Create deadtimes table
-  DataObjects::TableWorkspace_sptr
-  createDeadTimeTable(const std::vector<detid_t> &detectorsLoaded,
-                      const std::vector<double> &deadTimes) const;
+  DataObjects::TableWorkspace_sptr createDeadTimeTable(const std::vector<detid_t> &detectorsLoaded,
+                                                       const std::vector<double> &deadTimes) const;
 
-  API::Workspace_sptr loadDefaultDetectorGrouping(
-      const DataObjects::Workspace2D &localWorkspace) const;
+  API::Workspace_sptr loadDefaultDetectorGrouping(const DataObjects::Workspace2D &localWorkspace) const;
 
-  std::vector<detid_t> getLoadedDetectorsFromWorkspace(
-      const DataObjects::Workspace2D &localWorkspace) const;
+  std::vector<detid_t> getLoadedDetectorsFromWorkspace(const DataObjects::Workspace2D &localWorkspace) const;
   // Logger
   Kernel::Logger &m_logger;
   // Filename, used for running child algorithms

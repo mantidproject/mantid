@@ -26,8 +26,7 @@ namespace Functions {
  @date 18/02/2015
  */
 
-class MANTID_CURVEFITTING_DLL DynamicKuboToyabe : public API::ParamFunction,
-                                                  public API::IFunction1D {
+class MANTID_CURVEFITTING_DLL DynamicKuboToyabe : public API::ParamFunction, public API::IFunction1D {
 public:
   /// Constructor
   DynamicKuboToyabe();
@@ -40,12 +39,9 @@ public:
   void setAttribute(const std::string &attName, const Attribute &) override;
 
 protected:
-  void function1D(double *out, const double *xValues,
-                  const size_t nData) const override;
-  void functionDeriv1D(API::Jacobian *out, const double *xValues,
-                       const size_t nData) override;
-  void functionDeriv(const API::FunctionDomain &domain,
-                     API::Jacobian &jacobian) override;
+  void function1D(double *out, const double *xValues, const size_t nData) const override;
+  void functionDeriv1D(API::Jacobian *out, const double *xValues, const size_t nData) override;
+  void functionDeriv(const API::FunctionDomain &domain, API::Jacobian &jacobian) override;
   void init() override;
   void setActiveParameter(size_t i, double value) override;
 

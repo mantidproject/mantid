@@ -35,8 +35,7 @@ class PythonScript : public Script, MantidQt::API::WorkspaceObserver {
   Q_OBJECT
 public:
   /// Constructor
-  PythonScript(PythonScripting *env, const QString &name,
-               const InteractionType interact, QObject *context);
+  PythonScript(PythonScripting *env, const QString &name, const InteractionType interact, QObject *context);
   /// Destructor
   ~PythonScript() override;
 
@@ -72,8 +71,7 @@ public:
   /// Special handle for syntax errors as they have no traceback
   QString constructSyntaxErrorStr(PyObject *syntaxError);
   /// Convert a traceback to a string
-  void tracebackToMsg(QTextStream &msgStream, PyTracebackObject *traceback,
-                      bool root = true);
+  void tracebackToMsg(QTextStream &msgStream, PyTracebackObject *traceback, bool root = true);
 
   /// Set the name of the passed object so that Python can refer to it
   bool setQObject(QObject *val, const char *name) override;

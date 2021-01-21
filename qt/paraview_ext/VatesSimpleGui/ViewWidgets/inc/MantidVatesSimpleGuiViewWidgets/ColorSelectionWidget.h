@@ -30,8 +30,7 @@ namespace SimpleGui {
 
   @date 07/06/2011
  */
-class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS ColorSelectionWidget
-    : public QWidget {
+class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS ColorSelectionWidget : public QWidget {
   Q_OBJECT
 
 public:
@@ -56,9 +55,7 @@ public:
   void setMinMax(double &min, double &max);
   /// Others need to know if this widget is in the process of updating colors at
   /// user's request
-  bool inProcessUserRequestedAutoScale() {
-    return m_inProcessUserRequestedAutoScale;
-  };
+  bool inProcessUserRequestedAutoScale() { return m_inProcessUserRequestedAutoScale; };
   /// To effectively block callbacks from external (Paraview) color changes
   void ignoreColorChangeCallbacks(bool ignore);
   bool isIgnoringColorCallbacks();

@@ -12,13 +12,11 @@
 namespace Mantid {
 namespace VATES {
 
-std::string FieldDataToMetadata::operator()(vtkFieldData *fieldData,
-                                            const std::string &id) const {
+std::string FieldDataToMetadata::operator()(vtkFieldData *fieldData, const std::string &id) const {
   return execute(fieldData, id);
 }
 
-std::string FieldDataToMetadata::execute(vtkFieldData *fieldData,
-                                         const std::string &id) const {
+std::string FieldDataToMetadata::execute(vtkFieldData *fieldData, const std::string &id) const {
   std::string sXml;
   if (!fieldData) {
     throw std::runtime_error("vtkFieldData argument is null");

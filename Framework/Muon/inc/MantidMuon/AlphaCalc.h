@@ -46,9 +46,7 @@ public:
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Muon"; }
   /// See also
-  const std::vector<std::string> seeAlso() const override {
-    return {"AsymmetryCalc", "CalculateMuonAsymmetry"};
-  };
+  const std::vector<std::string> seeAlso() const override { return {"AsymmetryCalc", "CalculateMuonAsymmetry"}; };
 
 private:
   // Overridden Algorithm methods

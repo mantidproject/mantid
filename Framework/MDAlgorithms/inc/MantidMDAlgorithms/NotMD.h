@@ -21,14 +21,10 @@ class DLLExport NotMD : public UnaryOperationMD {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Performs a boolean negation on a MDHistoWorkspace.";
-  }
+  const std::string summary() const override { return "Performs a boolean negation on a MDHistoWorkspace."; }
 
   int version() const override;
-  const std::vector<std::string> seeAlso() const override {
-    return {"AndMD", "OrMD", "XorMD"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"AndMD", "OrMD", "XorMD"}; }
 
 private:
   /// Check the inputs and throw if the algorithm cannot be run

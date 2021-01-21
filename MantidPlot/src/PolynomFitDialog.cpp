@@ -38,8 +38,7 @@
 #include <QMessageBox>
 #include <QSpinBox>
 
-PolynomFitDialog::PolynomFitDialog(QWidget *parent, const Qt::WFlags &fl)
-    : QDialog(parent, fl), graph(nullptr) {
+PolynomFitDialog::PolynomFitDialog(QWidget *parent, const Qt::WFlags &fl) : QDialog(parent, fl), graph(nullptr) {
   setObjectName("PolynomFitDialog");
   setWindowTitle(tr("MantidPlot - Polynomial Fit Options"));
   setSizeGripEnabled(true);
@@ -98,28 +97,23 @@ PolynomFitDialog::PolynomFitDialog(QWidget *parent, const Qt::WFlags &fl)
 
   connect(buttonFit, SIGNAL(clicked()), this, SLOT(fit()));
   connect(buttonCancel, SIGNAL(clicked()), this, SLOT(reject()));
-  connect(boxName, SIGNAL(activated(const QString &)), this,
-          SLOT(activateCurve(const QString &)));
+  connect(boxName, SIGNAL(activated(const QString &)), this, SLOT(activateCurve(const QString &)));
 }
 
 void PolynomFitDialog::fit() {
   QString curveName = boxName->currentText();
   QStringList curvesList = graph->analysableCurvesList();
   if (!curvesList.contains(curveName)) {
-    QMessageBox::critical(
-        this, tr("MantidPlot - Warning"),
-        tr("The curve <b> %1 </b> doesn't exist anymore! Operation aborted!")
-            .arg(curveName));
+    QMessageBox::critical(this, tr("MantidPlot - Warning"),
+                          tr("The curve <b> %1 </b> doesn't exist anymore! Operation aborted!").arg(curveName));
     boxName->clear();
     boxName->addItems(curvesList);
     return;
   }
 
   ApplicationWindow *app = static_cast<ApplicationWindow *>(this->parent());
-  PolynomialFit *fitter = new PolynomialFit(app, graph, boxOrder->value(),
-                                            boxShowFormula->isChecked());
-  if (fitter->setDataFromCurve(curveName, boxStart->text().toDouble(),
-                               boxEnd->text().toDouble())) {
+  PolynomialFit *fitter = new PolynomialFit(app, graph, boxOrder->value(), boxShowFormula->isChecked());
+  if (fitter->setDataFromCurve(curveName, boxStart->text().toDouble(), boxEnd->text().toDouble())) {
     fitter->setColor(boxColor->currentIndex());
     fitter->setOutputPrecision(app->fit_output_precision);
     fitter->generateFunction(app->generateUniformFitPoints, app->fitPoints);

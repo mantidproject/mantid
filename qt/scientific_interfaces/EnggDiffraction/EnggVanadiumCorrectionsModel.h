@@ -15,17 +15,13 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class MANTIDQT_ENGGDIFFRACTION_DLL EnggVanadiumCorrectionsModel
-    : public IEnggVanadiumCorrectionsModel {
+class MANTIDQT_ENGGDIFFRACTION_DLL EnggVanadiumCorrectionsModel : public IEnggVanadiumCorrectionsModel {
 
 public:
-  EnggVanadiumCorrectionsModel(const EnggDiffCalibSettings &calibSettings,
-                               const std::string &currentInstrument);
+  EnggVanadiumCorrectionsModel(const EnggDiffCalibSettings &calibSettings, const std::string &currentInstrument);
 
-  std::pair<Mantid::API::ITableWorkspace_sptr,
-            Mantid::API::MatrixWorkspace_sptr>
-  fetchCorrectionWorkspaces(
-      const std::string &vanadiumRunNumber) const override;
+  std::pair<Mantid::API::ITableWorkspace_sptr, Mantid::API::MatrixWorkspace_sptr>
+  fetchCorrectionWorkspaces(const std::string &vanadiumRunNumber) const override;
 
   void setCalibSettings(const EnggDiffCalibSettings &calibSettings) override;
 
@@ -39,40 +35,29 @@ protected:
 private:
   const static std::string VANADIUM_INPUT_WORKSPACE_NAME;
 
-  virtual std::pair<Mantid::API::ITableWorkspace_sptr,
-                    Mantid::API::MatrixWorkspace_sptr>
+  virtual std::pair<Mantid::API::ITableWorkspace_sptr, Mantid::API::MatrixWorkspace_sptr>
   calculateCorrectionWorkspaces(const std::string &vanadiumRunNumber) const;
 
-  Mantid::API::MatrixWorkspace_sptr
-  fetchCachedCurvesWorkspace(const std::string &vanadiumRunNumber) const;
+  Mantid::API::MatrixWorkspace_sptr fetchCachedCurvesWorkspace(const std::string &vanadiumRunNumber) const;
 
-  Mantid::API::ITableWorkspace_sptr
-  fetchCachedIntegratedWorkspace(const std::string &vanadiumRunNumber) const;
+  Mantid::API::ITableWorkspace_sptr fetchCachedIntegratedWorkspace(const std::string &vanadiumRunNumber) const;
 
-  std::string
-  generateCurvesFilename(const std::string &vanadiumRunNumber) const;
+  std::string generateCurvesFilename(const std::string &vanadiumRunNumber) const;
 
-  std::string
-  generateIntegratedFilename(const std::string &vanadiumRunNumber) const;
+  std::string generateIntegratedFilename(const std::string &vanadiumRunNumber) const;
 
-  std::string
-  generateVanadiumRunName(const std::string &vanadiumRunNumber) const;
+  std::string generateVanadiumRunName(const std::string &vanadiumRunNumber) const;
 
-  Mantid::API::MatrixWorkspace_sptr
-  loadMatrixWorkspace(const std::string &filename,
-                      const std::string &workspaceName) const;
+  Mantid::API::MatrixWorkspace_sptr loadMatrixWorkspace(const std::string &filename,
+                                                        const std::string &workspaceName) const;
 
-  Mantid::API::ITableWorkspace_sptr
-  loadTableWorkspace(const std::string &filename,
-                     const std::string &workspaceName) const;
+  Mantid::API::ITableWorkspace_sptr loadTableWorkspace(const std::string &filename,
+                                                       const std::string &workspaceName) const;
 
-  void saveCorrectionsToCache(
-      const std::string &runNumber,
-      const Mantid::API::MatrixWorkspace_sptr &curvesWorkspace,
-      const Mantid::API::ITableWorkspace_sptr &integratedWorkspace) const;
+  void saveCorrectionsToCache(const std::string &runNumber, const Mantid::API::MatrixWorkspace_sptr &curvesWorkspace,
+                              const Mantid::API::ITableWorkspace_sptr &integratedWorkspace) const;
 
-  void saveNexus(const std::string &filename,
-                 const Mantid::API::Workspace_sptr &workspace) const;
+  void saveNexus(const std::string &filename, const Mantid::API::Workspace_sptr &workspace) const;
 
   EnggDiffCalibSettings m_calibSettings;
 

@@ -40,14 +40,13 @@ public:
 protected:
   void init() override;
   //
-  DataObjects::TableWorkspace_const_sptr preprocessDetectorsPositions(
-      const Mantid::API::MatrixWorkspace_const_sptr &InWS2D,
-      const std::string &dEModeRequested, bool updateMasks,
-      const std::string &OutWSName);
-  DataObjects::TableWorkspace_sptr runPreprocessDetectorsToMDChildUpdatingMasks(
-      const Mantid::API::MatrixWorkspace_const_sptr &InWS2D,
-      const std::string &OutWSName, const std::string &dEModeRequested,
-      Kernel::DeltaEMode::Type &Emode);
+  DataObjects::TableWorkspace_const_sptr
+  preprocessDetectorsPositions(const Mantid::API::MatrixWorkspace_const_sptr &InWS2D,
+                               const std::string &dEModeRequested, bool updateMasks, const std::string &OutWSName);
+  DataObjects::TableWorkspace_sptr
+  runPreprocessDetectorsToMDChildUpdatingMasks(const Mantid::API::MatrixWorkspace_const_sptr &InWS2D,
+                                               const std::string &OutWSName, const std::string &dEModeRequested,
+                                               Kernel::DeltaEMode::Type &Emode);
 
   /// logger -> to provide logging, for MD dataset file operations
   static Mantid::Kernel::Logger &g_Log;

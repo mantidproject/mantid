@@ -14,12 +14,10 @@
 namespace Mantid {
 namespace API {
 
-HistoryView::HistoryView(const WorkspaceHistory &wsHist)
-    : m_wsHist(wsHist), m_historyItems() {
+HistoryView::HistoryView(const WorkspaceHistory &wsHist) : m_wsHist(wsHist), m_historyItems() {
   // add all of the top level algorithms to the view by default
   const auto &algorithms = wsHist.getAlgorithmHistories();
-  m_historyItems =
-      std::vector<HistoryItem>(algorithms.begin(), algorithms.end());
+  m_historyItems = std::vector<HistoryItem>(algorithms.begin(), algorithms.end());
 }
 
 /**
@@ -65,8 +63,7 @@ void HistoryView::unroll(std::vector<HistoryItem>::iterator &it) {
     it->unrolled(true);
 
     // insert each of the records, in order, at this position
-    std::vector<HistoryItem> tmpHistory(childHistories.cbegin(),
-                                        childHistories.cend());
+    std::vector<HistoryItem> tmpHistory(childHistories.cbegin(), childHistories.cend());
     // since we are using a std::vector, do all insertions at the same time.
     ++it; // move iterator forward to insertion position
     it = m_historyItems.insert(it, tmpHistory.begin(), tmpHistory.end());
@@ -184,15 +181,11 @@ void HistoryView::roll(std::vector<HistoryItem>::iterator &it) {
  * @param start Start of time range
  * @param end End of time range
  */
-void HistoryView::filterBetweenExecDate(Mantid::Types::Core::DateAndTime start,
-                                        Mantid::Types::Core::DateAndTime end) {
-  auto lastItem = std::remove_if(
-      m_historyItems.begin(), m_historyItems.end(),
-      [&start, &end](const HistoryItem &item) {
-        Mantid::Types::Core::DateAndTime algExecutionDate =
-            item.getAlgorithmHistory()->executionDate();
-        return algExecutionDate < start || algExecutionDate > end;
-      });
+void HistoryView::filterBetweenExecDate(Mantid::Types::Core::DateAndTime start, Mantid::Types::Core::DateAndTime end) {
+  auto lastItem = std::remove_if(m_historyItems.begin(), m_historyItems.end(), [&start, &end](const HistoryItem &item) {
+    Mantid::Types::Core::DateAndTime algExecutionDate = item.getAlgorithmHistory()->executionDate();
+    return algExecutionDate < start || algExecutionDate > end;
+  });
   m_historyItems.erase(lastItem, m_historyItems.end());
 }
 

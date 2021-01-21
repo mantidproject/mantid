@@ -39,8 +39,7 @@ public:
     // Name of the output workspace.
     std::string filename("./SaveDspacemapTest_Output.dat");
 
-    Instrument_sptr inst =
-        ComponentCreationHelper::createTestInstrumentCylindrical(1);
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(1);
     OffsetsWorkspace_sptr offsetsWS(new OffsetsWorkspace(inst));
     offsetsWS->setValue(1, 0.10);
     offsetsWS->setValue(2, 0.20);
@@ -75,8 +74,7 @@ public:
   void test_save_then_load() {
     std::string filename("./SaveDspacemapTest_Output.dat");
 
-    Instrument_sptr inst =
-        ComponentCreationHelper::createTestInstrumentCylindrical(1);
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(1);
     OffsetsWorkspace_sptr offsetsWS(new OffsetsWorkspace(inst));
     offsetsWS->setValue(1, 0.10);
     offsetsWS->setValue(2, 0.20);
@@ -94,9 +92,7 @@ public:
     LoadDspacemap load;
     TS_ASSERT_THROWS_NOTHING(load.initialize())
     TS_ASSERT(load.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(load.setProperty(
-        "InputWorkspace",
-        std::dynamic_pointer_cast<MatrixWorkspace>(offsetsWS)));
+    TS_ASSERT_THROWS_NOTHING(load.setProperty("InputWorkspace", std::dynamic_pointer_cast<MatrixWorkspace>(offsetsWS)));
     TS_ASSERT_THROWS_NOTHING(load.setPropertyValue("Filename", filename));
     TS_ASSERT_THROWS_NOTHING(load.setPropertyValue("FileType", "POWGEN"));
     TS_ASSERT_THROWS_NOTHING(load.setPropertyValue("OutputWorkspace", "dummy"));

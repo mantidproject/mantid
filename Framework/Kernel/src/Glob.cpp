@@ -31,8 +31,7 @@ namespace Kernel {
  *    @param files :: The names of the files that match the pattern
  *    @param options :: Options
  */
-void Glob::glob(const Poco::Path &pathPattern, std::set<std::string> &files,
-                int options) {
+void Glob::glob(const Poco::Path &pathPattern, std::set<std::string> &files, int options) {
 #ifdef _WIN32
   // There appears to be a bug in the glob for windows.
   // Putting case sensitive on then with reference to test
@@ -42,8 +41,7 @@ void Glob::glob(const Poco::Path &pathPattern, std::set<std::string> &files,
   // the case is wrong, but for some strange reason it then cannot find
   // IDF_for_UNiT_TESTiNG.xMl!!!!
   // Hence the reason to circumvent this by this #ifdef
-  Poco::Glob::glob(Poco::Path(pathPattern.toString()), files,
-                   Poco::Glob::GLOB_CASELESS);
+  Poco::Glob::glob(Poco::Path(pathPattern.toString()), files, Poco::Glob::GLOB_CASELESS);
 #else
   Poco::Glob::glob(Poco::Path(pathPattern.toString()), files, options);
 #endif

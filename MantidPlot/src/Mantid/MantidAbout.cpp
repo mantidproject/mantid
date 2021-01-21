@@ -14,8 +14,7 @@
  * @param parent :: The parent widget
  */
 
-MantidAbout::MantidAbout(QWidget *parent)
-    : MantidQt::API::MantidDialog(parent) {
+MantidAbout::MantidAbout(QWidget *parent) : MantidQt::API::MantidDialog(parent) {
   m_uiForm.setupUi(this);
 
   QLabel *releasedate = m_uiForm.release_datevalue;
@@ -33,12 +32,10 @@ MantidAbout::MantidAbout(QWidget *parent)
   release.append("\">on github</a>)</p>");
   QLabel *releaselabel = m_uiForm.revision_value;
   releaselabel->setText(release);
-  connect(releaselabel, SIGNAL(linkActivated(const QString &)), this,
-          SLOT(openExternalLink(const QString &)));
+  connect(releaselabel, SIGNAL(linkActivated(const QString &)), this, SLOT(openExternalLink(const QString &)));
 
   QLabel *builtusing_labelvalue = m_uiForm.builtusing_labelvalue;
-  QString builtusing = "QtiPlot " + QString::number(maj_version) + "." +
-                       QString::number(min_version) + "." +
+  QString builtusing = "QtiPlot " + QString::number(maj_version) + "." + QString::number(min_version) + "." +
                        QString::number(patch_version) + extra_version + "  ";
   builtusing += "Released: " + QString(release_date) + "<br>";
   builtusing += QString(copyright_string);
@@ -49,24 +46,18 @@ MantidAbout::MantidAbout(QWidget *parent)
                       "www.mantidproject.org</a></p>";
   QLabel *url = m_uiForm.mantidurl;
   url->setText(mantidurl);
-  connect(url, SIGNAL(linkActivated(const QString &)), this,
-          SLOT(openExternalLink(const QString &)));
+  connect(url, SIGNAL(linkActivated(const QString &)), this, SLOT(openExternalLink(const QString &)));
 
-  QString mantidDOI = QString::fromStdString(
-      "<p><a href = " + Mantid::Kernel::MantidVersion::doi() + ">" +
-      Mantid::Kernel::MantidVersion::doi() + "</a></p>");
+  QString mantidDOI = QString::fromStdString("<p><a href = " + Mantid::Kernel::MantidVersion::doi() + ">" +
+                                             Mantid::Kernel::MantidVersion::doi() + "</a></p>");
   m_uiForm.mantiddoi->setText(mantidDOI);
-  connect(m_uiForm.mantiddoi, SIGNAL(linkActivated(const QString &)), this,
-          SLOT(openExternalLink(const QString &)));
+  connect(m_uiForm.mantiddoi, SIGNAL(linkActivated(const QString &)), this, SLOT(openExternalLink(const QString &)));
 
-  QString mantidCitation = QString::fromStdString(
-      "<p><a href = " + Mantid::Kernel::MantidVersion::paperCitation() + ">" +
-      Mantid::Kernel::MantidVersion::paperCitation() + "</a></p>");
+  QString mantidCitation = QString::fromStdString("<p><a href = " + Mantid::Kernel::MantidVersion::paperCitation() +
+                                                  ">" + Mantid::Kernel::MantidVersion::paperCitation() + "</a></p>");
   m_uiForm.mantidcitation->setText(mantidCitation);
   connect(m_uiForm.mantidcitation, SIGNAL(linkActivated(const QString &)), this,
           SLOT(openExternalLink(const QString &)));
 }
 
-void MantidAbout::openExternalLink(const QString &link) {
-  MantidQt::API::MantidDesktopServices::openUrl(link);
-}
+void MantidAbout::openExternalLink(const QString &link) { MantidQt::API::MantidDesktopServices::openUrl(link); }

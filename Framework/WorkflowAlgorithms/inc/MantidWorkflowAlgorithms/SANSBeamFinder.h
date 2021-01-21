@@ -23,25 +23,19 @@ public:
   /// Algorithm's name
   const std::string name() const override { return "SANSBeamFinder"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Beam finder workflow algorithm for SANS instruments.";
-  }
+  const std::string summary() const override { return "Beam finder workflow algorithm for SANS instruments."; }
   /// Algorithm's version
   int version() const override { return (1); }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "Workflow\\SANS\\UsesPropertyManager";
-  }
+  const std::string category() const override { return "Workflow\\SANS\\UsesPropertyManager"; }
 
 private:
   /// Initialisation code
   void init() override;
   /// Execution code
   void exec() override;
-  API::MatrixWorkspace_sptr
-  loadBeamFinderFile(const std::string &beamCenterFile);
-  void maskEdges(const API::MatrixWorkspace_sptr &beamCenterWS, int high,
-                 int low, int left, int right,
+  API::MatrixWorkspace_sptr loadBeamFinderFile(const std::string &beamCenterFile);
+  void maskEdges(const API::MatrixWorkspace_sptr &beamCenterWS, int high, int low, int left, int right,
                  const std::string &componentName = "detector1");
 
   std::shared_ptr<Kernel::PropertyManager> m_reductionManager;

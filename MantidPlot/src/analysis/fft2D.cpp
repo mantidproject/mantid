@@ -44,14 +44,10 @@ void fft(double *x_int_re, double *x_int_im, int taille) {
     double tmp = base * i;
     double tmpcos = cos(tmp);
     double tmpsin = sin(tmp);
-    x_int_re[i] =
-        (pair_re[i] + impair_re[i] * tmpcos + impair_im[i] * tmpsin) / SQ_2;
-    x_int_im[i] =
-        (pair_im[i] + impair_im[i] * tmpcos - impair_re[i] * tmpsin) / SQ_2;
-    x_int_re[i + size_2] =
-        (pair_re[i] - impair_re[i] * tmpcos - impair_im[i] * tmpsin) / SQ_2;
-    x_int_im[i + size_2] =
-        (pair_im[i] - impair_im[i] * tmpcos + impair_re[i] * tmpsin) / SQ_2;
+    x_int_re[i] = (pair_re[i] + impair_re[i] * tmpcos + impair_im[i] * tmpsin) / SQ_2;
+    x_int_im[i] = (pair_im[i] + impair_im[i] * tmpcos - impair_re[i] * tmpsin) / SQ_2;
+    x_int_re[i + size_2] = (pair_re[i] - impair_re[i] * tmpcos - impair_im[i] * tmpsin) / SQ_2;
+    x_int_im[i + size_2] = (pair_im[i] - impair_im[i] * tmpcos + impair_re[i] * tmpsin) / SQ_2;
   }
 }
 
@@ -81,14 +77,10 @@ void fft_inv(double *x_int_re, double *x_int_im, int taille) {
     double tmp = base * i;
     double tmpcos = cos(tmp);
     double tmpsin = sin(tmp);
-    x_int_re[i] =
-        (pair_re[i] + impair_re[i] * tmpcos - impair_im[i] * tmpsin) / SQ_2;
-    x_int_im[i] =
-        (pair_im[i] + impair_im[i] * tmpcos + impair_re[i] * tmpsin) / SQ_2;
-    x_int_re[i + size_2] =
-        (pair_re[i] - impair_re[i] * tmpcos + impair_im[i] * tmpsin) / SQ_2;
-    x_int_im[i + size_2] =
-        (pair_im[i] - impair_im[i] * tmpcos - impair_re[i] * tmpsin) / SQ_2;
+    x_int_re[i] = (pair_re[i] + impair_re[i] * tmpcos - impair_im[i] * tmpsin) / SQ_2;
+    x_int_im[i] = (pair_im[i] + impair_im[i] * tmpcos + impair_re[i] * tmpsin) / SQ_2;
+    x_int_re[i + size_2] = (pair_re[i] - impair_re[i] * tmpcos + impair_im[i] * tmpsin) / SQ_2;
+    x_int_im[i + size_2] = (pair_im[i] - impair_im[i] * tmpcos - impair_re[i] * tmpsin) / SQ_2;
   }
 }
 
@@ -129,18 +121,15 @@ void fft2d(double **xtre, double **xtim, int width, int height) {
     fft(x_int_c.data(), x_int2_c.data(),
         height); // fft(x_int_c,x_int2_c, height) ;
     for (int i = 0; i < height; i++) {
-      xtre[(i + (height >> 1)) % height][(k + (width >> 1)) % width] =
-          x_int_c[i];
-      xtim[(i + (height >> 1)) % height][(k + (width >> 1)) % width] =
-          x_int2_c[i];
+      xtre[(i + (height >> 1)) % height][(k + (width >> 1)) % width] = x_int_c[i];
+      xtim[(i + (height >> 1)) % height][(k + (width >> 1)) % width] = x_int2_c[i];
     }
   }
   Matrix::freeMatrixData(xint_re, height);
   Matrix::freeMatrixData(xint_im, height);
 }
 
-void fft2d_inv(double **xtre, double **xtim, double **xrec_re, double **xrec_im,
-               int width, int height) {
+void fft2d_inv(double **xtre, double **xtim, double **xrec_re, double **xrec_im, int width, int height) {
   double **xint_re = Matrix::allocateMatrixData(height, width);
   if (!xint_re)
     return;

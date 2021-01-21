@@ -36,19 +36,13 @@ public:
   using fit_function_simplex = double (*)(const gsl_vector *, void *);
   using fit_function = int (*)(const gsl_vector *, void *, gsl_vector *);
   using fit_function_df = int (*)(const gsl_vector *, void *, gsl_matrix *);
-  using fit_function_fdf = int (*)(const gsl_vector *, void *, gsl_vector *,
-                                   gsl_matrix *);
+  using fit_function_fdf = int (*)(const gsl_vector *, void *, gsl_vector *, gsl_matrix *);
 
-  enum Algorithm {
-    ScaledLevenbergMarquardt,
-    UnscaledLevenbergMarquardt,
-    NelderMeadSimplex
-  };
+  enum Algorithm { ScaledLevenbergMarquardt, UnscaledLevenbergMarquardt, NelderMeadSimplex };
   enum WeightingMethod { NoWeighting, Instrumental, Statistical, Dataset };
   enum FitType { BuiltIn = 0, Plugin = 1, User = 2 };
 
-  Fit(ApplicationWindow *parent, Graph *g = nullptr,
-      const QString &name = QString());
+  Fit(ApplicationWindow *parent, Graph *g = nullptr, const QString &name = QString());
   Fit(ApplicationWindow *parent, Table *t, const QString &name = QString());
   ~Fit() override;
 
@@ -60,13 +54,10 @@ public:
   };
 
   //! Sets the data set to be used for weighting
-  bool setWeightingData(WeightingMethod w,
-                        const QString &colName = QString::null);
+  bool setWeightingData(WeightingMethod w, const QString &colName = QString::null);
 
   void setDataCurve(int curve, double start, double end) override;
-  bool setDataFromTable(Table *t, const QString &xColName,
-                        const QString &yColName, int from = 1,
-                        int to = -1) override;
+  bool setDataFromTable(Table *t, const QString &xColName, const QString &yColName, int from = 1, int to = -1) override;
 
   QString resultFormula() { return d_result_formula; };
   QString formula() { return d_formula; };
@@ -75,16 +66,10 @@ public:
   int numParameters() { return d_p; };
   QStringList parameterNames() { return d_param_names; };
   virtual void setParametersList(const QStringList &){};
-  void setParameterExplanations(const QStringList &lst) {
-    d_param_explain = lst;
-  };
+  void setParameterExplanations(const QStringList &lst) { d_param_explain = lst; };
 
-  double initialGuess(int parIndex) {
-    return gsl_vector_get(d_param_init, parIndex);
-  };
-  void setInitialGuess(int parIndex, double val) {
-    gsl_vector_set(d_param_init, parIndex, val);
-  };
+  double initialGuess(int parIndex) { return gsl_vector_get(d_param_init, parIndex); };
+  void setInitialGuess(int parIndex, double val) { gsl_vector_set(d_param_init, parIndex, val); };
   void setInitialGuesses(double *x_init);
 
   virtual void guessInitialValues(){};
@@ -137,12 +122,10 @@ private:
   void init();
 
   //! Pointer to the GSL multifit minimizer (for simplex algorithm)
-  gsl_multimin_fminimizer *fitSimplex(gsl_multimin_function f, int &iterations,
-                                      int &status);
+  gsl_multimin_fminimizer *fitSimplex(gsl_multimin_function f, int &iterations, int &status);
 
   //! Pointer to the GSL multifit solver
-  gsl_multifit_fdfsolver *fitGSL(gsl_multifit_function_fdf f, int &iterations,
-                                 int &status);
+  gsl_multifit_fdfsolver *fitGSL(gsl_multifit_function_fdf f, int &iterations, int &status);
 
   //! Customs and stores the fit results according to the derived class
   // specifications. Used by exponential fits.
@@ -155,16 +138,14 @@ protected:
   void freeWorkspace();
   //! Adds the result curve as a FunctionCurve to the plot, if d_gen_function =
   // true
-  void insertFitFunctionCurve(const QString &name, double *x, double *y,
-                              int penWidth = 1);
+  void insertFitFunctionCurve(const QString &name, double *x, double *y, int penWidth = 1);
 
   //! Adds the result curve to the plot
   virtual void generateFitCurve();
 
   //! Calculates the data for the output fit curve and store itin the X an Y
   // vectors
-  virtual void calculateFitCurveData(double *X,
-                                     double *Y){Q_UNUSED(X) Q_UNUSED(Y)};
+  virtual void calculateFitCurveData(double *X, double *Y){Q_UNUSED(X) Q_UNUSED(Y)};
 
   //! Output string added to the result log
   virtual QString logFitInfo(int iterations, int status);

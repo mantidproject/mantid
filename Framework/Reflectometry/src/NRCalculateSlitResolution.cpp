@@ -27,17 +27,13 @@ using namespace Mantid::Kernel;
 DECLARE_ALGORITHM(NRCalculateSlitResolution)
 
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string NRCalculateSlitResolution::name() const {
-  return "NRCalculateSlitResolution";
-}
+const std::string NRCalculateSlitResolution::name() const { return "NRCalculateSlitResolution"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int NRCalculateSlitResolution::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string NRCalculateSlitResolution::category() const {
-  return "Reflectometry\\ISIS";
-}
+const std::string NRCalculateSlitResolution::category() const { return "Reflectometry\\ISIS"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string NRCalculateSlitResolution::summary() const {
@@ -48,24 +44,17 @@ const std::string NRCalculateSlitResolution::summary() const {
 /** Initialize the algorithm's properties.
  */
 void NRCalculateSlitResolution::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<>>(
-                      "Workspace", "", Direction::Input,
-                      std::make_shared<InstrumentValidator>()),
-                  "Workspace to calculate the instrument resolution of.");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<>>("Workspace", "", Direction::Input, std::make_shared<InstrumentValidator>()),
+      "Workspace to calculate the instrument resolution of.");
 
-  declareProperty("TwoTheta", Mantid::EMPTY_DBL(),
-                  "Two theta scattering angle in degrees.");
-  declareProperty("FirstSlitName", "slit1",
-                  "Component name of the first slit.");
-  declareProperty("SecondSlitName", "slit2",
-                  "Component name of the second slit.");
-  declareProperty("VerticalGapParameter", "vertical gap",
-                  "Parameter the vertical gap of each slit can be found in.");
-  declareProperty("ThetaLogName", "Theta",
-                  "Name theta can be found in the run log as.");
+  declareProperty("TwoTheta", Mantid::EMPTY_DBL(), "Two theta scattering angle in degrees.");
+  declareProperty("FirstSlitName", "slit1", "Component name of the first slit.");
+  declareProperty("SecondSlitName", "slit2", "Component name of the second slit.");
+  declareProperty("VerticalGapParameter", "vertical gap", "Parameter the vertical gap of each slit can be found in.");
+  declareProperty("ThetaLogName", "Theta", "Name theta can be found in the run log as.");
 
-  declareProperty("Resolution", Mantid::EMPTY_DBL(),
-                  "Calculated resolution (dq/q).", Direction::Output);
+  declareProperty("Resolution", Mantid::EMPTY_DBL(), "Calculated resolution (dq/q).", Direction::Output);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -84,18 +73,15 @@ void NRCalculateSlitResolution::exec() {
     theta = twoTheta / 2.0;
   } else {
     const Kernel::Property *logData = ws->mutableRun().getLogData(thetaLogName);
-    auto logPWV =
-        dynamic_cast<const Kernel::PropertyWithValue<double> *>(logData);
-    auto logTSP =
-        dynamic_cast<const Kernel::TimeSeriesProperty<double> *>(logData);
+    auto logPWV = dynamic_cast<const Kernel::PropertyWithValue<double> *>(logData);
+    auto logTSP = dynamic_cast<const Kernel::TimeSeriesProperty<double> *>(logData);
 
     if (logPWV) {
       theta = *logPWV;
     } else if (logTSP && logTSP->realSize() > 0) {
       theta = logTSP->lastValue();
     } else {
-      throw std::runtime_error(
-          "Value for two theta could not be found in log.");
+      throw std::runtime_error("Value for two theta could not be found in log.");
     }
     g_log.notice() << "Found '" << theta << "' as value for theta in log.\n";
   }
@@ -105,17 +91,12 @@ void NRCalculateSlitResolution::exec() {
   IComponent_const_sptr slit2 = instrument->getComponentByName(slit2Name);
 
   if (!slit1)
-    throw std::runtime_error(
-        "Could not find component in instrument with name: '" + slit1Name +
-        "'");
+    throw std::runtime_error("Could not find component in instrument with name: '" + slit1Name + "'");
 
   if (!slit2)
-    throw std::runtime_error(
-        "Could not find component in instrument with name: '" + slit2Name +
-        "'");
+    throw std::runtime_error("Could not find component in instrument with name: '" + slit2Name + "'");
 
-  const V3D slitDiff =
-      (slit2->getPos() - slit1->getPos()) * 1000; // Convert from m to mm.
+  const V3D slitDiff = (slit2->getPos() - slit1->getPos()) * 1000; // Convert from m to mm.
 
   std::vector<double> slit1VGParam = slit1->getNumberParameter(vGapParam);
   std::vector<double> slit2VGParam = slit2->getNumberParameter(vGapParam);
@@ -134,12 +115,9 @@ void NRCalculateSlitResolution::exec() {
   const double slit2VG = slit2VGParam[0];
 
   const double totalVertGap = slit1VG + slit2VG;
-  const double slitDist =
-      sqrt(slitDiff.X() * slitDiff.X() + slitDiff.Y() * slitDiff.Y() +
-           slitDiff.Z() * slitDiff.Z());
+  const double slitDist = sqrt(slitDiff.X() * slitDiff.X() + slitDiff.Y() * slitDiff.Y() + slitDiff.Z() * slitDiff.Z());
 
-  double resolution =
-      atan(totalVertGap / slitDist) / (2 * std::tan(theta * M_PI / 180.0));
+  double resolution = atan(totalVertGap / slitDist) / (2 * std::tan(theta * M_PI / 180.0));
 
   setProperty("Resolution", resolution);
 }

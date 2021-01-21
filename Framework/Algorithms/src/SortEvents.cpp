@@ -28,14 +28,11 @@ using DataObjects::EventWorkspace_sptr;
  *
  */
 void SortEvents::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>(
-                      "InputWorkspace", "", Direction::InOut),
+  declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>("InputWorkspace", "", Direction::InOut),
                   "EventWorkspace to be sorted.");
 
-  std::vector<std::string> propOptions{"X Value", "Pulse Time",
-                                       "Pulse Time + TOF"};
-  declareProperty("SortBy", "X Value",
-                  std::make_shared<StringListValidator>(propOptions),
+  std::vector<std::string> propOptions{"X Value", "Pulse Time", "Pulse Time + TOF"};
+  declareProperty("SortBy", "X Value", std::make_shared<StringListValidator>(propOptions),
                   "How to sort the events:\n"
                   "  X Value: the x-position of the event in each pixel "
                   "(typically Time of Flight).\n"

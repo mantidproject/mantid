@@ -21,29 +21,21 @@ using DataObjects::PeaksWorkspace_const_sptr;
 using DataObjects::PeaksWorkspace_sptr;
 
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string DiffPeaksWorkspaces::name() const {
-  return "DiffPeaksWorkspaces";
-}
+const std::string DiffPeaksWorkspaces::name() const { return "DiffPeaksWorkspaces"; }
 /// Algorithm's version for identification. @see Algorithm::version
 int DiffPeaksWorkspaces::version() const { return 1; }
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string DiffPeaksWorkspaces::category() const {
-  return "Crystal\\Peaks";
-}
+const std::string DiffPeaksWorkspaces::category() const { return "Crystal\\Peaks"; }
 
 /** Initialises the algorithm's properties.
  */
 void DiffPeaksWorkspaces::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
-                      "LHSWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>("LHSWorkspace", "", Direction::Input),
                   "The first of peaks.");
-  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
-                      "RHSWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>("RHSWorkspace", "", Direction::Input),
                   "The second set of peaks.");
-  declareProperty(
-      std::make_unique<WorkspaceProperty<PeaksWorkspace>>("OutputWorkspace", "",
-                                                          Direction::Output),
-      "The set of peaks that are in the first, but not the second, workspace.");
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>("OutputWorkspace", "", Direction::Output),
+                  "The set of peaks that are in the first, but not the second, workspace.");
 
   auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
@@ -61,14 +53,12 @@ void DiffPeaksWorkspaces::exec() {
   const double Tolerance = getProperty("Tolerance");
 
   // Warn if not the same instrument, sample
-  if (LHSWorkspace->getInstrument()->getName() !=
-      RHSWorkspace->getInstrument()->getName()) {
+  if (LHSWorkspace->getInstrument()->getName() != RHSWorkspace->getInstrument()->getName()) {
     g_log.warning("The two input workspaces do not appear to come from data "
                   "take on the same instrument");
   }
   if (LHSWorkspace->sample().getName() != RHSWorkspace->sample().getName()) {
-    g_log.warning(
-        "The two input workspaces do not appear to relate to the same sample");
+    g_log.warning("The two input workspaces do not appear to relate to the same sample");
   }
 
   // Copy the first workspace to our output workspace
@@ -88,8 +78,7 @@ void DiffPeaksWorkspaces::exec() {
     // Not doing anything clever as peaks workspace are typically not large -
     // just a linear search
     for (int j = 0; j < output->getNumberPeaks(); ++j) {
-      const V3D deltaQ =
-          currentPeak.getQSampleFrame() - lhsPeaks[j].getQSampleFrame();
+      const V3D deltaQ = currentPeak.getQSampleFrame() - lhsPeaks[j].getQSampleFrame();
       if (deltaQ.nullVector(Tolerance)) // Using a V3D method that does the job
       {
         // As soon as we find a match, remove it from the output and move onto

@@ -65,15 +65,13 @@ public:
   std::string getRecoveryFolderOutputPR();
 
   /// Get a list of poco paths based on recoveryFolderPaths' directory
-  std::vector<Poco::Path>
-  getListOfFoldersInDirectoryPR(const std::string &recoveryFolderPath);
+  std::vector<Poco::Path> getListOfFoldersInDirectoryPR(const std::string &recoveryFolderPath);
 
   /// get Recovery Folder to loads location
   std::string getRecoveryFolderLoadPR();
 
   /// Exposing the getRecoveryFolderCheckpoints function
-  std::vector<Poco::Path>
-  getRecoveryFolderCheckpointsPR(const std::string &recoveryFolderPath);
+  std::vector<Poco::Path> getRecoveryFolderCheckpointsPR(const std::string &recoveryFolderPath);
 
   /// Expose the getRecoveryFolderCheck function
   std::string getRecoveryFolderCheckPR();
@@ -82,8 +80,7 @@ public:
   bool loadRecoveryCheckpoint(const Poco::Path &path);
 
   /// Open a recovery checkpoint in the scripting window
-  void openInEditor(const Poco::Path &inputFolder,
-                    const Poco::Path &historyDest);
+  void openInEditor(const Poco::Path &inputFolder, const Poco::Path &historyDest);
 
   /// Looks at the recovery checkpoints and repairs some faults
   void repairCheckpointDirectory();
@@ -94,15 +91,13 @@ private:
   std::thread createBackgroundThread();
 
   /// Creates a recovery script based on all .py scripts in a folder
-  void compileRecoveryScript(const Poco::Path &inputFolder,
-                             const Poco::Path &outputFile);
+  void compileRecoveryScript(const Poco::Path &inputFolder, const Poco::Path &outputFile);
 
   /// Deletes oldest checkpoints beyond the maximum number to keep
   void deleteExistingCheckpoints(size_t checkpointsToKeep) const;
 
   /// Deletes oldest checkpoints beyond the maximum number to keep at the path
-  void deleteExistingCheckpoints(size_t checkpointsToKeep,
-                                 Poco::Path path) const;
+  void deleteExistingCheckpoints(size_t checkpointsToKeep, Poco::Path path) const;
 
   /// Deletes oldest "unused" checkpoints beyond the maximum number to keep
   void deleteExistingUnusedCheckpoints(size_t checkpointsToKeep) const;
@@ -114,8 +109,7 @@ private:
   void projectSavingThread();
 
   /// Saves a project recovery file in Mantid
-  void saveOpenWindows(const std::string &projectDestFolder,
-                       bool autoSave = true);
+  void saveOpenWindows(const std::string &projectDestFolder, bool autoSave = true);
 
   /// Saves the current workspace's histories from Mantid
   void saveWsHistories(const Poco::Path &projectDestFile);
@@ -125,19 +119,15 @@ private:
 
   /// Finds any checkpoints older than a time defined inside the function and
   /// returns paths to them
-  std::vector<std::string>
-  findOlderCheckpoints(const std::string &recoverFolder,
-                       const std::vector<int> &possiblePids);
+  std::vector<std::string> findOlderCheckpoints(const std::string &recoverFolder, const std::vector<int> &possiblePids);
 
   /// Finds any checkpoints containing a Locked file and returns paths to them
-  std::vector<std::string>
-  findLockedCheckpoints(const std::string &recoverFolder,
-                        const std::vector<int> &possiblePids);
+  std::vector<std::string> findLockedCheckpoints(const std::string &recoverFolder,
+                                                 const std::vector<int> &possiblePids);
 
   /// Finds any checkpoints believed to be from previous versions of project
   /// recovery and returns them
-  std::vector<std::string>
-  findLegacyCheckpoints(const std::vector<Poco::Path> &checkpoints);
+  std::vector<std::string> findLegacyCheckpoints(const std::vector<Poco::Path> &checkpoints);
 
   /// Takes a list of potentially used PIDs and removes any used PIDs from that
   /// list
@@ -162,68 +152,66 @@ private:
   // part of the vector for which you want to ignore the property for then the
   // property name in the second part of the vector 0 and 1 as indexes
   // respectively
-  std::vector<std::vector<std::string>> m_propertiesToIgnore = {
-      {"StartLiveData", "MonitorLiveData"}};
+  std::vector<std::vector<std::string>> m_propertiesToIgnore = {{"StartLiveData", "MonitorLiveData"}};
 
   ProjectRecoveryPresenter *m_recoveryGui;
 
-  std::vector<std::string> m_algsToIgnore = {
-      "MonitorLiveData",
-      "EnggSaveGSASIIFitResultsToHDF5",
-      "EnggSaveSinglePeakFitResultsToHDF5",
-      "ExampleSaveAscii",
-      "SANSSave",
-      "SaveAscii",
-      "SaveBankScatteringAngles",
-      "SaveCSV",
-      "SaveCalFile",
-      "SaveCanSAS1D",
-      "SaveDaveGrp",
-      "SaveDetectorsGrouping",
-      "SaveDiffCal",
-      "SaveDiffFittingAscii",
-      "SaveDspacemap",
-      "SaveFITS",
-      "SaveFocusedXYE",
-      "SaveFullprofResolution",
-      "SaveGDA",
-      "SaveGEMMAUDParamFile",
-      "SaveGSASInstrumentFile",
-      "SaveGSS",
-      "SaveHKL",
-      "SaveISISNexus",
-      "SaveIsawDetCal",
-      "SaveIsawPeaks",
-      "SaveIsawQvector",
-      "SaveIsawUB",
-      "SaveLauenorm",
-      "SaveMD",
-      "SaveMDWorkspaceToVTK",
-      "SaveMask",
-      "SaveNISTDAT",
-      "SaveNXSPE",
-      "SaveNXTomo",
-      "SaveNXcanSAS",
-      "SaveNexus",
-      "SaveNexusPD",
-      "SaveNexusProcessed",
-      "SaveOpenGenieAscii",
-      "SavePAR",
-      "SavePDFGui",
-      "SavePHX",
-      "SaveParameterFile",
-      "SavePlot1D",
-      "SavePlot1DAsJson",
-      "SaveRKH",
-      "SaveReflections",
-      "SaveReflectometryAscii",
-      "SaveSESANS",
-      "SaveSPE",
-      "SaveTBL",
-      "SaveToSNSHistogramNexus",
-      "SaveVTK",
-      "SaveVulcanGSS",
-      "SaveYDA",
-      "SaveZODS"};
+  std::vector<std::string> m_algsToIgnore = {"MonitorLiveData",
+                                             "EnggSaveGSASIIFitResultsToHDF5",
+                                             "EnggSaveSinglePeakFitResultsToHDF5",
+                                             "ExampleSaveAscii",
+                                             "SANSSave",
+                                             "SaveAscii",
+                                             "SaveBankScatteringAngles",
+                                             "SaveCSV",
+                                             "SaveCalFile",
+                                             "SaveCanSAS1D",
+                                             "SaveDaveGrp",
+                                             "SaveDetectorsGrouping",
+                                             "SaveDiffCal",
+                                             "SaveDiffFittingAscii",
+                                             "SaveDspacemap",
+                                             "SaveFITS",
+                                             "SaveFocusedXYE",
+                                             "SaveFullprofResolution",
+                                             "SaveGDA",
+                                             "SaveGEMMAUDParamFile",
+                                             "SaveGSASInstrumentFile",
+                                             "SaveGSS",
+                                             "SaveHKL",
+                                             "SaveISISNexus",
+                                             "SaveIsawDetCal",
+                                             "SaveIsawPeaks",
+                                             "SaveIsawQvector",
+                                             "SaveIsawUB",
+                                             "SaveLauenorm",
+                                             "SaveMD",
+                                             "SaveMDWorkspaceToVTK",
+                                             "SaveMask",
+                                             "SaveNISTDAT",
+                                             "SaveNXSPE",
+                                             "SaveNXTomo",
+                                             "SaveNXcanSAS",
+                                             "SaveNexus",
+                                             "SaveNexusPD",
+                                             "SaveNexusProcessed",
+                                             "SaveOpenGenieAscii",
+                                             "SavePAR",
+                                             "SavePDFGui",
+                                             "SavePHX",
+                                             "SaveParameterFile",
+                                             "SavePlot1D",
+                                             "SavePlot1DAsJson",
+                                             "SaveRKH",
+                                             "SaveReflections",
+                                             "SaveReflectometryAscii",
+                                             "SaveSESANS",
+                                             "SaveSPE",
+                                             "SaveTBL",
+                                             "SaveToSNSHistogramNexus",
+                                             "SaveVTK",
+                                             "SaveVulcanGSS",
+                                             "SaveYDA",
+                                             "SaveZODS"};
 };
 } // namespace MantidQt

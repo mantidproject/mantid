@@ -25,16 +25,14 @@ class QProgressBar;
  */
 namespace MantidQt {
 namespace MantidWidgets {
-class AlgorithmProgressDialogWidget : public QDialog,
-                                      public IAlgorithmProgressDialogWidget {
+class AlgorithmProgressDialogWidget : public QDialog, public IAlgorithmProgressDialogWidget {
   Q_OBJECT
 public:
   AlgorithmProgressDialogWidget(QWidget *parent, AlgorithmProgressModel &model);
 
   /// Adds an algorithm to the dialog. Returns the item in the tree widget, and
   /// the progress bar within it
-  std::pair<QTreeWidgetItem *, QProgressBar *>
-  addAlgorithm(Mantid::API::IAlgorithm_sptr alg) override;
+  std::pair<QTreeWidgetItem *, QProgressBar *> addAlgorithm(Mantid::API::IAlgorithm_sptr alg) override;
 
 protected:
   void closeEvent(QCloseEvent *event) override;
@@ -54,11 +52,9 @@ private:
 class AlgorithmProgressDialogWidgetCancelButton : public QPushButton {
   Q_OBJECT
 public:
-  AlgorithmProgressDialogWidgetCancelButton(Mantid::API::IAlgorithm_sptr alg,
-                                            QWidget *parent = 0)
+  AlgorithmProgressDialogWidgetCancelButton(Mantid::API::IAlgorithm_sptr alg, QWidget *parent = 0)
       : QPushButton("Cancel", parent), m_alg(std::move(alg)) {
-    connect(this, &QPushButton::clicked, this,
-            &AlgorithmProgressDialogWidgetCancelButton::clickedWithAlgSlot);
+    connect(this, &QPushButton::clicked, this, &AlgorithmProgressDialogWidgetCancelButton::clickedWithAlgSlot);
   }
 
 signals:

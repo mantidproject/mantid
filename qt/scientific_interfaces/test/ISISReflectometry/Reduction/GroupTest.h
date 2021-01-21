@@ -11,8 +11,7 @@
 #include <cxxtest/TestSuite.h>
 
 using namespace MantidQt::CustomInterfaces::ISISReflectometry;
-using namespace MantidQt::CustomInterfaces::ISISReflectometry::
-    ModelCreationHelper;
+using namespace MantidQt::CustomInterfaces::ISISReflectometry::ModelCreationHelper;
 
 class GroupTest : public CxxTest::TestSuite {
 public:
@@ -21,9 +20,7 @@ public:
   static GroupTest *createSuite() { return new GroupTest(); }
   static void destroySuite(GroupTest *suite) { delete suite; }
 
-  ReductionWorkspaces workspaceNames() const {
-    return ReductionWorkspaces({}, TransmissionRunPair{});
-  }
+  ReductionWorkspaces workspaceNames() const { return ReductionWorkspaces({}, TransmissionRunPair{}); }
 
   void test_constructor_sets_group_name() {
     auto group = Group("Group1", {});

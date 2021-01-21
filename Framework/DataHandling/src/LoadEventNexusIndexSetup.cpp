@@ -24,8 +24,7 @@ namespace Mantid {
 namespace DataHandling {
 
 namespace {
-void setupConsistentSpectrumNumbers(IndexInfo &filtered,
-                                    const std::vector<detid_t> &detIDs) {
+void setupConsistentSpectrumNumbers(IndexInfo &filtered, const std::vector<detid_t> &detIDs) {
   std::vector<Indexing::SpectrumNumber> spectrumNumbers;
   // Temporary spectrum number in `filtered` was detector ID, now translate
   // to spectrum number, starting at 1. Note that we use detIDs and not
@@ -42,16 +41,13 @@ void setupConsistentSpectrumNumbers(IndexInfo &filtered,
 }
 } // namespace
 
-LoadEventNexusIndexSetup::LoadEventNexusIndexSetup(
-    MatrixWorkspace_const_sptr instrumentWorkspace, const int32_t min,
-    const int32_t max, const std::vector<int32_t> &range,
-    const Parallel::Communicator &communicator)
-    : m_instrumentWorkspace(std::move(instrumentWorkspace)), m_min(min),
-      m_max(max), m_range(range), m_communicator(communicator) {}
+LoadEventNexusIndexSetup::LoadEventNexusIndexSetup(MatrixWorkspace_const_sptr instrumentWorkspace, const int32_t min,
+                                                   const int32_t max, const std::vector<int32_t> &range,
+                                                   const Parallel::Communicator &communicator)
+    : m_instrumentWorkspace(std::move(instrumentWorkspace)), m_min(min), m_max(max), m_range(range),
+      m_communicator(communicator) {}
 
-std::pair<int32_t, int32_t> LoadEventNexusIndexSetup::eventIDLimits() const {
-  return {m_min, m_max};
-}
+std::pair<int32_t, int32_t> LoadEventNexusIndexSetup::eventIDLimits() const { return {m_min, m_max}; }
 
 IndexInfo LoadEventNexusIndexSetup::makeIndexInfo() {
   // The default 1:1 will suffice but exclude the monitors as they are always in
@@ -65,8 +61,8 @@ IndexInfo LoadEventNexusIndexSetup::makeIndexInfo() {
   // We need to filter based on detector IDs, but use IndexInfo for filtering
   // for a unified filtering mechanism. Thus we set detector IDs as (temporary)
   // spectrum numbers.
-  IndexInfo indexInfo(std::vector<SpectrumNumber>(detIDs.begin(), detIDs.end()),
-                      Parallel::StorageMode::Cloned, m_communicator);
+  IndexInfo indexInfo(std::vector<SpectrumNumber>(detIDs.begin(), detIDs.end()), Parallel::StorageMode::Cloned,
+                      m_communicator);
   indexInfo.setSpectrumDefinitions(specDefs);
 
   auto filtered = filterIndexInfo(indexInfo);
@@ -82,8 +78,7 @@ IndexInfo LoadEventNexusIndexSetup::makeIndexInfo() {
   return scatter(filtered);
 }
 
-IndexInfo LoadEventNexusIndexSetup::makeIndexInfo(
-    const std::vector<std::string> &bankNames) {
+IndexInfo LoadEventNexusIndexSetup::makeIndexInfo(const std::vector<std::string> &bankNames) {
   const auto &componentInfo = m_instrumentWorkspace->componentInfo();
   const auto &detectorInfo = m_instrumentWorkspace->detectorInfo();
   std::vector<SpectrumDefinition> spectrumDefinitions;
@@ -108,8 +103,7 @@ IndexInfo LoadEventNexusIndexSetup::makeIndexInfo(
                                "tree; or it did not contain any detectors. Try "
                                "unchecking SingleBankPixelsOnly.");
   }
-  Indexing::IndexInfo indexInfo(std::move(spectrumNumbers),
-                                Parallel::StorageMode::Cloned, m_communicator);
+  Indexing::IndexInfo indexInfo(std::move(spectrumNumbers), Parallel::StorageMode::Cloned, m_communicator);
   indexInfo.setSpectrumDefinitions(std::move(spectrumDefinitions));
   setupConsistentSpectrumNumbers(indexInfo, instrument->getDetectorIDs(true));
   // Filters are ignored when selecting bank names. Reset min/max to avoid
@@ -120,14 +114,11 @@ IndexInfo LoadEventNexusIndexSetup::makeIndexInfo(
 }
 
 IndexInfo LoadEventNexusIndexSetup::makeIndexInfo(
-    const std::pair<std::vector<int32_t>, std::vector<int32_t>>
-        &spectrumDetectorMapping,
-    const bool monitorsOnly) {
+    const std::pair<std::vector<int32_t>, std::vector<int32_t>> &spectrumDetectorMapping, const bool monitorsOnly) {
   const auto &spec = spectrumDetectorMapping.first;
   const auto &udet = spectrumDetectorMapping.second;
 
-  const std::vector<detid_t> monitors =
-      m_instrumentWorkspace->getInstrument()->getMonitors();
+  const std::vector<detid_t> monitors = m_instrumentWorkspace->getInstrument()->getMonitors();
   const auto &detectorInfo = m_instrumentWorkspace->detectorInfo();
   if (monitorsOnly) {
     std::vector<Indexing::SpectrumNumber> spectrumNumbers;
@@ -142,8 +133,7 @@ IndexInfo LoadEventNexusIndexSetup::makeIndexInfo(
         spectrumDefinitions.emplace_back(detectorInfo.indexOf(id));
       }
     }
-    Indexing::IndexInfo indexInfo(
-        spectrumNumbers, Parallel::StorageMode::Cloned, m_communicator);
+    Indexing::IndexInfo indexInfo(spectrumNumbers, Parallel::StorageMode::Cloned, m_communicator);
     indexInfo.setSpectrumDefinitions(std::move(spectrumDefinitions));
     return scatter(indexInfo);
   } else {
@@ -160,10 +150,8 @@ IndexInfo LoadEventNexusIndexSetup::makeIndexInfo(
         }
       }
     }
-    Indexing::IndexInfo indexInfo(
-        std::vector<Indexing::SpectrumNumber>(uniqueSpectra.begin(),
-                                              uniqueSpectra.end()),
-        Parallel::StorageMode::Cloned, m_communicator);
+    Indexing::IndexInfo indexInfo(std::vector<Indexing::SpectrumNumber>(uniqueSpectra.begin(), uniqueSpectra.end()),
+                                  Parallel::StorageMode::Cloned, m_communicator);
     indexInfo.setSpectrumDefinitions(std::move(spectrumDefinitions));
     return scatter(filterIndexInfo(indexInfo));
   }
@@ -174,31 +162,25 @@ IndexInfo LoadEventNexusIndexSetup::makeIndexInfo(
  * Checks the validity of user provided spectrum range/list. This method assumes
  * that spectrum numbers in `indexInfo` argument are sorted and that the
  * Parallel::StorageMode of `indexInfo` is `Cloned`. */
-IndexInfo
-LoadEventNexusIndexSetup::filterIndexInfo(const IndexInfo &indexInfo) {
+IndexInfo LoadEventNexusIndexSetup::filterIndexInfo(const IndexInfo &indexInfo) {
   // Check if range [SpectrumMin, SpectrumMax] was supplied
   if (m_min != EMPTY_INT() || m_max != EMPTY_INT()) {
     if (m_max == EMPTY_INT())
-      m_max =
-          static_cast<int32_t>(indexInfo.spectrumNumber(indexInfo.size() - 1));
+      m_max = static_cast<int32_t>(indexInfo.spectrumNumber(indexInfo.size() - 1));
     if (m_min == EMPTY_INT())
       m_min = static_cast<int32_t>(indexInfo.spectrumNumber(0));
     // Avoid adding non-existing indices (can happen if instrument has gaps in
     // its detector IDs). IndexInfo does the filtering for use.
-    const auto indices = indexInfo.makeIndexSet(
-        static_cast<SpectrumNumber>(m_min), static_cast<SpectrumNumber>(m_max));
+    const auto indices = indexInfo.makeIndexSet(static_cast<SpectrumNumber>(m_min), static_cast<SpectrumNumber>(m_max));
     for (const auto index : indices)
-      m_range.emplace_back(
-          static_cast<int32_t>(indexInfo.spectrumNumber(index)));
+      m_range.emplace_back(static_cast<int32_t>(indexInfo.spectrumNumber(index)));
   }
   // Check if SpectrumList was supplied (or filled via min/max above)
   if (!m_range.empty()) {
     std::sort(m_range.begin(), m_range.end());
-    const auto indices = indexInfo.makeIndexSet(
-        std::vector<SpectrumNumber>(m_range.begin(), m_range.end()));
+    const auto indices = indexInfo.makeIndexSet(std::vector<SpectrumNumber>(m_range.begin(), m_range.end()));
     m_min = static_cast<int32_t>(indexInfo.spectrumNumber(*indices.begin()));
-    m_max =
-        static_cast<int32_t>(indexInfo.spectrumNumber(*(indices.end() - 1)));
+    m_max = static_cast<int32_t>(indexInfo.spectrumNumber(*(indices.end() - 1)));
     return extract(indexInfo, indices);
   }
   return indexInfo;

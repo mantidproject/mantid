@@ -29,9 +29,7 @@ const std::string SetMDUsingMask::name() const { return "SetMDUsingMask"; }
 int SetMDUsingMask::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string SetMDUsingMask::category() const {
-  return "MDAlgorithms\\MDArithmetic";
-}
+const std::string SetMDUsingMask::category() const { return "MDAlgorithms\\MDArithmetic"; }
 
 //----------------------------------------------------------------------------------------------
 
@@ -39,27 +37,22 @@ const std::string SetMDUsingMask::category() const {
 /** Initialize the algorithm's properties.
  */
 void SetMDUsingMask::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>("InputWorkspace", "", Direction::Input),
                   "An input MDHistoWorkspace.");
-  declareProperty(
-      std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
-          "MaskWorkspace", "", Direction::Input),
-      "A mask MDHistoWorkspace, where true indicates where to set the value.");
+  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>("MaskWorkspace", "", Direction::Input),
+                  "A mask MDHistoWorkspace, where true indicates where to set the value.");
 
-  declareProperty(
-      std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
-          "ValueWorkspace", "", Direction::Input, PropertyMode::Optional),
-      "Workspace to copy to the output workspace over the input. Optional - "
-      "specify this or Value.");
+  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>("ValueWorkspace", "", Direction::Input,
+                                                                         PropertyMode::Optional),
+                  "Workspace to copy to the output workspace over the input. Optional - "
+                  "specify this or Value.");
 
   declareProperty("Value", DBL_MAX,
                   "Single number to set in the output "
                   "workspace. Optional - specify this or "
                   "ValueWorkspace");
 
-  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "An output MDHistoWorkspace.");
 }
 
@@ -76,44 +69,34 @@ void SetMDUsingMask::exec() {
   bool useValueWS = (value == DBL_MAX);
 
   if (useValueWS && !valueIWS)
-    throw std::invalid_argument(
-        "You must specify either ValueWorkspace or Value.");
+    throw std::invalid_argument("You must specify either ValueWorkspace or Value.");
   if (!useValueWS && valueIWS)
-    throw std::invalid_argument(
-        "You must specify either ValueWorkspace or Value, not both!");
+    throw std::invalid_argument("You must specify either ValueWorkspace or Value, not both!");
 
   if (maskIWS->getNumDims() != inIWS->getNumDims())
-    throw std::invalid_argument(
-        "Input and Mask workspace need to have the same number of dimensions.");
+    throw std::invalid_argument("Input and Mask workspace need to have the same number of dimensions.");
   if (maskIWS->getNPoints() != inIWS->getNPoints())
-    throw std::invalid_argument(
-        "Input and Mask workspace need to have the same number of points.");
+    throw std::invalid_argument("Input and Mask workspace need to have the same number of points.");
   if (valueIWS) {
     if (maskIWS->getNumDims() != valueIWS->getNumDims())
       throw std::invalid_argument("Input and Value workspace need to have the "
                                   "same number of dimensions.");
     if (maskIWS->getNPoints() != valueIWS->getNPoints())
-      throw std::invalid_argument(
-          "Input and Value workspace need to have the same number of points.");
+      throw std::invalid_argument("Input and Value workspace need to have the same number of points.");
   }
 
   if (outIWS != inIWS) {
     // Not in-place. So clone the input to the output
-    IAlgorithm_sptr clone =
-        this->createChildAlgorithm("CloneMDWorkspace", 0.0, 0.5, true);
-    clone->setProperty("InputWorkspace",
-                       std::dynamic_pointer_cast<IMDWorkspace>(inIWS));
+    IAlgorithm_sptr clone = this->createChildAlgorithm("CloneMDWorkspace", 0.0, 0.5, true);
+    clone->setProperty("InputWorkspace", std::dynamic_pointer_cast<IMDWorkspace>(inIWS));
     clone->executeAsChildAlg();
     IMDWorkspace_sptr temp = clone->getProperty("OutputWorkspace");
     outIWS = std::dynamic_pointer_cast<IMDHistoWorkspace>(temp);
   }
 
-  MDHistoWorkspace_sptr outWS =
-      std::dynamic_pointer_cast<MDHistoWorkspace>(outIWS);
-  MDHistoWorkspace_sptr maskWS =
-      std::dynamic_pointer_cast<MDHistoWorkspace>(maskIWS);
-  MDHistoWorkspace_sptr valueWS =
-      std::dynamic_pointer_cast<MDHistoWorkspace>(valueIWS);
+  MDHistoWorkspace_sptr outWS = std::dynamic_pointer_cast<MDHistoWorkspace>(outIWS);
+  MDHistoWorkspace_sptr maskWS = std::dynamic_pointer_cast<MDHistoWorkspace>(maskIWS);
+  MDHistoWorkspace_sptr valueWS = std::dynamic_pointer_cast<MDHistoWorkspace>(valueIWS);
 
   if (!outWS || !maskWS)
     throw std::runtime_error("Error creating output workspace.");

@@ -23,28 +23,20 @@ namespace ISISReflectometry {
  */
 class MANTIDQT_ISISREFLECTOMETRY_DLL PerThetaDefaultsValidator {
 public:
-  ValidationResult<PerThetaDefaults, std::vector<int>>
-  operator()(PerThetaDefaults::ValueArray const &cellText);
+  ValidationResult<PerThetaDefaults, std::vector<int>> operator()(PerThetaDefaults::ValueArray const &cellText);
 
 private:
-  boost::optional<boost::optional<double>>
-  parseThetaOrWhitespace(PerThetaDefaults::ValueArray const &cellText);
-  boost::optional<TransmissionRunPair>
-  parseTransmissionRuns(PerThetaDefaults::ValueArray const &cellText);
+  boost::optional<boost::optional<double>> parseThetaOrWhitespace(PerThetaDefaults::ValueArray const &cellText);
+  boost::optional<TransmissionRunPair> parseTransmissionRuns(PerThetaDefaults::ValueArray const &cellText);
   boost::optional<boost::optional<std::string>>
-  parseTransmissionProcessingInstructions(
-      PerThetaDefaults::ValueArray const &cellText);
-  boost::optional<RangeInQ>
-  parseQRange(PerThetaDefaults::ValueArray const &cellText);
-  boost::optional<boost::optional<double>>
-  parseScaleFactor(PerThetaDefaults::ValueArray const &cellText);
-  boost::optional<std::map<std::string, std::string>>
-  parseOptions(PerThetaDefaults::ValueArray const &cellText);
+  parseTransmissionProcessingInstructions(PerThetaDefaults::ValueArray const &cellText);
+  boost::optional<RangeInQ> parseQRange(PerThetaDefaults::ValueArray const &cellText);
+  boost::optional<boost::optional<double>> parseScaleFactor(PerThetaDefaults::ValueArray const &cellText);
+  boost::optional<std::map<std::string, std::string>> parseOptions(PerThetaDefaults::ValueArray const &cellText);
   boost::optional<boost::optional<std::string>>
   parseProcessingInstructions(PerThetaDefaults::ValueArray const &cellText);
   boost::optional<boost::optional<std::string>>
-  parseBackgroundProcessingInstructions(
-      PerThetaDefaults::ValueArray const &cellText);
+  parseBackgroundProcessingInstructions(PerThetaDefaults::ValueArray const &cellText);
 
   std::vector<int> m_invalidColumns;
 };

@@ -33,8 +33,7 @@ public:
   // calc target coordinates interface:
   bool calcGenericVariables(std::vector<coord_t> &Coord, size_t nd) override;
   bool calcYDepCoordinates(std::vector<coord_t> &Coord, size_t i) override;
-  bool calcMatrixCoord(const double &X, std::vector<coord_t> &Coord, double &s,
-                       double &err) const override;
+  bool calcMatrixCoord(const double &X, std::vector<coord_t> &Coord, double &s, double &err) const override;
   // constructor;
   MDTransfNoQ();
   /* clone method allowing to provide the copy of the particular class */
@@ -45,8 +44,7 @@ public:
   /**This transformation dos nothing with the workspace ranges, so extremum
    * points for this transformation coordinates are the
    * coordinates themselves */
-  std::vector<double> getExtremumPoints(const double xMin, const double xMax,
-                                        size_t det_num) const override;
+  std::vector<double> getExtremumPoints(const double xMin, const double xMax, size_t det_num) const override;
 
   // WARNING!!!! THESE METHODS ARE USED BEFORE INITIALIZE IS EXECUTED SO THEY
   // CAN NOT RELY ON THE CONTENTS OF THE CLASS TO BE DEFINED (THEY ARE VIRTUAL
@@ -56,24 +54,17 @@ public:
      workspace.
       Depending on ws axis units, the numebr here is either 1 or 2* and is
      independent on emode*/
-  unsigned int
-  getNMatrixDimensions(Kernel::DeltaEMode::Type mode,
-                       API::MatrixWorkspace_const_sptr inWS) const override;
+  unsigned int getNMatrixDimensions(Kernel::DeltaEMode::Type mode, API::MatrixWorkspace_const_sptr inWS) const override;
   /**function returns units ID-s which this transformation prodiuces its ouptut.
      here it is usually input ws units, which are independent on emode */
-  std::vector<std::string>
-  outputUnitID(Kernel::DeltaEMode::Type mode,
-               API::MatrixWorkspace_const_sptr inWS) const override;
-  std::vector<std::string>
-  getDefaultDimID(Kernel::DeltaEMode::Type mode,
-                  API::MatrixWorkspace_const_sptr inWS) const override;
-  const std::string
-  inputUnitID(Kernel::DeltaEMode::Type mode,
-              API::MatrixWorkspace_const_sptr inWS) const override;
+  std::vector<std::string> outputUnitID(Kernel::DeltaEMode::Type mode,
+                                        API::MatrixWorkspace_const_sptr inWS) const override;
+  std::vector<std::string> getDefaultDimID(Kernel::DeltaEMode::Type mode,
+                                           API::MatrixWorkspace_const_sptr inWS) const override;
+  const std::string inputUnitID(Kernel::DeltaEMode::Type mode, API::MatrixWorkspace_const_sptr inWS) const override;
 
-  void setDisplayNormalization(
-      Mantid::API::IMDWorkspace_sptr mdWorkspace,
-      Mantid::API::MatrixWorkspace_sptr underlyingWorkspace) const override;
+  void setDisplayNormalization(Mantid::API::IMDWorkspace_sptr mdWorkspace,
+                               Mantid::API::MatrixWorkspace_sptr underlyingWorkspace) const override;
 
 private:
   unsigned int m_NMatrixDim;
@@ -96,8 +87,8 @@ private:
 private:
   // internal helper function which extract one or two axis from input matrix
   // workspace;
-  static void getAxes(const API::MatrixWorkspace_const_sptr &inWS,
-                      API::NumericAxis *&pXAxis, API::NumericAxis *&pYAxis);
+  static void getAxes(const API::MatrixWorkspace_const_sptr &inWS, API::NumericAxis *&pXAxis,
+                      API::NumericAxis *&pYAxis);
 };
 
 } // namespace MDAlgorithms

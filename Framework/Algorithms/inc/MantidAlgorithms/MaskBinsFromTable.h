@@ -24,15 +24,11 @@ public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "MaskBinsFromTable"; };
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Mask bins from a table workspace. ";
-  }
+  const std::string summary() const override { return "Mask bins from a table workspace. "; }
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; };
-  const std::vector<std::string> seeAlso() const override {
-    return {"MaskBins"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"MaskBins"}; }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Transforms\\Masking"; }
 
@@ -43,15 +39,13 @@ private:
   void exec() override;
 
   /// Process input Mask bin TableWorkspace.
-  void
-  processMaskBinWorkspace(const DataObjects::TableWorkspace_sptr &masktblws,
-                          const API::MatrixWorkspace_sptr &dataws);
+  void processMaskBinWorkspace(const DataObjects::TableWorkspace_sptr &masktblws,
+                               const API::MatrixWorkspace_sptr &dataws);
   /// Call MaskBins
   void maskBins(const API::MatrixWorkspace_sptr &dataws);
   /// Convert a list of detector IDs list (string) to a list of
   /// spectra/workspace indexes list
-  std::string convertToSpectraList(const API::MatrixWorkspace_sptr &dataws,
-                                   const std::string &detidliststr);
+  std::string convertToSpectraList(const API::MatrixWorkspace_sptr &dataws, const std::string &detidliststr);
 
   /// Column indexes of XMin, XMax, SpectraList, DetectorIDsList
   int id_xmin, id_xmax, id_spec, id_dets;

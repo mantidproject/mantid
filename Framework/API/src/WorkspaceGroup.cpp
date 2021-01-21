@@ -22,11 +22,9 @@ Kernel::Logger g_log("WorkspaceGroup");
 } // namespace
 
 WorkspaceGroup::WorkspaceGroup(const Parallel::StorageMode storageMode)
-    : Workspace(storageMode),
-      m_deleteObserver(*this, &WorkspaceGroup::workspaceDeleteHandle),
-      m_beforeReplaceObserver(*this,
-                              &WorkspaceGroup::workspaceBeforeReplaceHandle),
-      m_workspaces(), m_observingADS(false) {}
+    : Workspace(storageMode), m_deleteObserver(*this, &WorkspaceGroup::workspaceDeleteHandle),
+      m_beforeReplaceObserver(*this, &WorkspaceGroup::workspaceBeforeReplaceHandle), m_workspaces(),
+      m_observingADS(false) {}
 
 WorkspaceGroup::~WorkspaceGroup() { observeADSNotifications(false); }
 
@@ -41,11 +39,9 @@ WorkspaceGroup::~WorkspaceGroup() { observeADSNotifications(false); }
 const std::string WorkspaceGroup::toString() const {
   const std::string firstLine = this->id() + "\n";
   std::lock_guard<std::recursive_mutex> _lock(m_mutex);
-  const auto descr =
-      std::accumulate(m_workspaces.cbegin(), m_workspaces.cend(), firstLine,
-                      [](const auto &string, const auto &workspace) {
-                        return string + " -- " + workspace->getName() + '\n';
-                      });
+  const auto descr = std::accumulate(
+      m_workspaces.cbegin(), m_workspaces.cend(), firstLine,
+      [](const auto &string, const auto &workspace) { return string + " -- " + workspace->getName() + '\n'; });
   return descr;
 }
 
@@ -59,18 +55,14 @@ const std::string WorkspaceGroup::toString() const {
 void WorkspaceGroup::observeADSNotifications(const bool observeADS) {
   if (observeADS) {
     if (!m_observingADS) {
-      AnalysisDataService::Instance().notificationCenter.addObserver(
-          m_deleteObserver);
-      AnalysisDataService::Instance().notificationCenter.addObserver(
-          m_beforeReplaceObserver);
+      AnalysisDataService::Instance().notificationCenter.addObserver(m_deleteObserver);
+      AnalysisDataService::Instance().notificationCenter.addObserver(m_beforeReplaceObserver);
       m_observingADS = true;
     }
   } else {
     if (m_observingADS) {
-      AnalysisDataService::Instance().notificationCenter.removeObserver(
-          m_deleteObserver);
-      AnalysisDataService::Instance().notificationCenter.removeObserver(
-          m_beforeReplaceObserver);
+      AnalysisDataService::Instance().notificationCenter.removeObserver(m_deleteObserver);
+      AnalysisDataService::Instance().notificationCenter.removeObserver(m_beforeReplaceObserver);
       m_observingADS = false;
     }
   }
@@ -101,9 +93,7 @@ void WorkspaceGroup::sortMembersByName() {
     return;
   }
   std::sort(m_workspaces.begin(), m_workspaces.end(),
-            [](const Workspace_sptr &w1, const Workspace_sptr &w2) {
-              return (w1->getName() < w2->getName());
-            });
+            [](const Workspace_sptr &w1, const Workspace_sptr &w2) { return (w1->getName() < w2->getName()); });
 }
 
 /**
@@ -118,8 +108,7 @@ void WorkspaceGroup::addWorkspace(const Workspace_sptr &workspace) {
     g_log.warning("Can't add a workspace as a child of itself!\n");
     return;
   }
-  const auto it =
-      std::find(m_workspaces.begin(), m_workspaces.end(), workspace);
+  const auto it = std::find(m_workspaces.begin(), m_workspaces.end(), workspace);
   if (it == m_workspaces.end()) {
     m_workspaces.emplace_back(workspace);
   } else {
@@ -157,9 +146,7 @@ bool WorkspaceGroup::containsInChildren(const std::string &wsName) const {
 bool WorkspaceGroup::contains(const std::string &wsName) const {
   std::lock_guard<std::recursive_mutex> _lock(m_mutex);
   return std::any_of(m_workspaces.cbegin(), m_workspaces.cend(),
-                     [&wsName](const auto &workspace) {
-                       return workspace->getName() == wsName;
-                     });
+                     [&wsName](const auto &workspace) { return workspace->getName() == wsName; });
 }
 
 /**
@@ -192,8 +179,7 @@ std::vector<std::string> WorkspaceGroup::getNames() const {
   std::lock_guard<std::recursive_mutex> _lock(m_mutex);
   out.reserve(m_workspaces.size());
 
-  std::transform(m_workspaces.begin(), m_workspaces.end(),
-                 std::back_inserter(out),
+  std::transform(m_workspaces.begin(), m_workspaces.end(), std::back_inserter(out),
                  [](const auto &ws) { return ws->getName(); });
 
   return out;
@@ -220,12 +206,9 @@ Workspace_sptr WorkspaceGroup::getItem(const size_t index) const {
 Workspace_sptr WorkspaceGroup::getItem(const std::string &wsName) const {
   std::lock_guard<std::recursive_mutex> _lock(m_mutex);
   const auto found = std::find_if(m_workspaces.cbegin(), m_workspaces.cend(),
-                                  [&wsName](const auto &workspace) {
-                                    return workspace->getName() == wsName;
-                                  });
+                                  [&wsName](const auto &workspace) { return workspace->getName() == wsName; });
   if (found == m_workspaces.cend()) {
-    throw std::out_of_range("Workspace " + wsName +
-                            " not contained in the group");
+    throw std::out_of_range("Workspace " + wsName + " not contained in the group");
   } else {
     return *found;
   }
@@ -262,8 +245,7 @@ void WorkspaceGroup::removeByADS(const std::string &wsName) {
 void WorkspaceGroup::print() const {
   std::lock_guard<std::recursive_mutex> _lock(m_mutex);
   for (const auto &workspace : m_workspaces) {
-    g_log.debug() << "Workspace name in group vector =  "
-                  << workspace->getName() << '\n';
+    g_log.debug() << "Workspace name in group vector =  " << workspace->getName() << '\n';
   }
 }
 
@@ -274,8 +256,7 @@ void WorkspaceGroup::print() const {
  */
 void WorkspaceGroup::throwIndexOutOfRangeError(int index) const {
   std::ostringstream os;
-  os << "WorkspaceGroup - index out of range. Requested=" << index
-     << ", current size=" << this->size();
+  os << "WorkspaceGroup - index out of range. Requested=" << index << ", current size=" << this->size();
   throw std::out_of_range(os.str());
 }
 
@@ -285,9 +266,7 @@ void WorkspaceGroup::throwIndexOutOfRangeError(int index) const {
  * @return  A non-const iterator pointing to the first workspace in this
  *          workspace group.
  */
-std::vector<Workspace_sptr>::iterator WorkspaceGroup::begin() {
-  return m_workspaces.begin();
-}
+std::vector<Workspace_sptr>::iterator WorkspaceGroup::begin() { return m_workspaces.begin(); }
 
 /**
  * Returns a const iterator pointing to the first element in the group.
@@ -295,9 +274,7 @@ std::vector<Workspace_sptr>::iterator WorkspaceGroup::begin() {
  * @return  A const iterator pointing to the first workspace in this
  *          workspace group.
  */
-std::vector<Workspace_sptr>::const_iterator WorkspaceGroup::begin() const {
-  return m_workspaces.begin();
-}
+std::vector<Workspace_sptr>::const_iterator WorkspaceGroup::begin() const { return m_workspaces.begin(); }
 
 /**
  * Returns an iterator pointing to the past-the-end element in the group.
@@ -305,9 +282,7 @@ std::vector<Workspace_sptr>::const_iterator WorkspaceGroup::begin() const {
  * @return  A non-const iterator pointing to the last workspace in this
  *          workspace group.
  */
-std::vector<Workspace_sptr>::iterator WorkspaceGroup::end() {
-  return m_workspaces.end();
-}
+std::vector<Workspace_sptr>::iterator WorkspaceGroup::end() { return m_workspaces.end(); }
 
 /** Returns a const iterator pointing to the past-the-end element in the
  * group.
@@ -315,9 +290,7 @@ std::vector<Workspace_sptr>::iterator WorkspaceGroup::end() {
  * @return  A const iterator pointing to the last workspace in this
  *          workspace group.
  */
-std::vector<Workspace_sptr>::const_iterator WorkspaceGroup::end() const {
-  return m_workspaces.end();
-}
+std::vector<Workspace_sptr>::const_iterator WorkspaceGroup::end() const { return m_workspaces.end(); }
 
 /**
  * Remove a workspace pointed to by an index. The workspace remains in the
@@ -334,8 +307,7 @@ void WorkspaceGroup::removeItem(const size_t index) {
   }
   if (index >= this->size()) {
     std::ostringstream os;
-    os << "WorkspaceGroup - index out of range. Requested=" << index
-       << ", current size=" << this->size();
+    os << "WorkspaceGroup - index out of range. Requested=" << index << ", current size=" << this->size();
     throw std::out_of_range(os.str());
   }
   auto it = m_workspaces.begin() + index;
@@ -350,8 +322,7 @@ void WorkspaceGroup::removeItem(const size_t index) {
  *
  * @param notice :: A pointer to a workspace delete notificiation object
  */
-void WorkspaceGroup::workspaceDeleteHandle(
-    Mantid::API::WorkspacePostDeleteNotification_ptr notice) {
+void WorkspaceGroup::workspaceDeleteHandle(Mantid::API::WorkspacePostDeleteNotification_ptr notice) {
   std::unique_lock<std::recursive_mutex> _lock(m_mutex);
   const std::string deletedName = notice->objectName();
   if (!this->contains(deletedName))
@@ -379,8 +350,7 @@ void WorkspaceGroup::workspaceDeleteHandle(
  * @param notice :: A pointer to a workspace before-replace notification
  * object
  */
-void WorkspaceGroup::workspaceBeforeReplaceHandle(
-    Mantid::API::WorkspaceBeforeReplaceNotification_ptr notice) {
+void WorkspaceGroup::workspaceBeforeReplaceHandle(Mantid::API::WorkspaceBeforeReplaceNotification_ptr notice) {
   std::lock_guard<std::recursive_mutex> _lock(m_mutex);
 
   const auto oldObject = notice->oldObject();
@@ -463,8 +433,7 @@ bool WorkspaceGroup::isMultiperiod() const {
   }
   // Loop through all inner workspaces, checking each one in turn.
   for (const auto &workspace : m_workspaces) {
-    if (MatrixWorkspace_sptr ws =
-            std::dynamic_pointer_cast<MatrixWorkspace>(workspace)) {
+    if (MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(workspace)) {
       try {
         Kernel::Property *nPeriodsProp = ws->run().getLogData("nperiods");
         int num = -1;
@@ -494,8 +463,7 @@ bool WorkspaceGroup::isMultiperiod() const {
  * @return :: True if the worspace is found in any of the nested groups in
  * this group.
  */
-bool WorkspaceGroup::isInGroup(const Workspace &workspaceToCheck,
-                               size_t level) const {
+bool WorkspaceGroup::isInGroup(const Workspace &workspaceToCheck, size_t level) const {
   // Check for a cycle.
   if (level > MAXIMUM_DEPTH) {
     throw std::runtime_error("WorkspaceGroup nesting level is too deep.");
@@ -519,9 +487,7 @@ size_t WorkspaceGroup::getMemorySize() const {
   for (auto workspace : m_workspaces) {
     // If the workspace is a group
     if (workspace->getMemorySize() == 0) {
-      total =
-          total +
-          std::dynamic_pointer_cast<WorkspaceGroup>(workspace)->getMemorySize();
+      total = total + std::dynamic_pointer_cast<WorkspaceGroup>(workspace)->getMemorySize();
       continue;
     }
     total = total + workspace->getMemorySize();
@@ -539,34 +505,26 @@ namespace Kernel {
 
 template <>
 MANTID_API_DLL Mantid::API::WorkspaceGroup_sptr
-IPropertyManager::getValue<Mantid::API::WorkspaceGroup_sptr>(
-    const std::string &name) const {
-  auto *prop =
-      dynamic_cast<PropertyWithValue<Mantid::API::WorkspaceGroup_sptr> *>(
-          getPointerToProperty(name));
+IPropertyManager::getValue<Mantid::API::WorkspaceGroup_sptr>(const std::string &name) const {
+  auto *prop = dynamic_cast<PropertyWithValue<Mantid::API::WorkspaceGroup_sptr> *>(getPointerToProperty(name));
   if (prop) {
     return *prop;
   } else {
     std::string message =
-        "Attempt to assign property " + name +
-        " to incorrect type. Expected shared_ptr<WorkspaceGroup>.";
+        "Attempt to assign property " + name + " to incorrect type. Expected shared_ptr<WorkspaceGroup>.";
     throw std::runtime_error(message);
   }
 }
 
 template <>
 MANTID_API_DLL Mantid::API::WorkspaceGroup_const_sptr
-IPropertyManager::getValue<Mantid::API::WorkspaceGroup_const_sptr>(
-    const std::string &name) const {
-  auto *prop =
-      dynamic_cast<PropertyWithValue<Mantid::API::WorkspaceGroup_sptr> *>(
-          getPointerToProperty(name));
+IPropertyManager::getValue<Mantid::API::WorkspaceGroup_const_sptr>(const std::string &name) const {
+  auto *prop = dynamic_cast<PropertyWithValue<Mantid::API::WorkspaceGroup_sptr> *>(getPointerToProperty(name));
   if (prop) {
     return prop->operator()();
   } else {
     std::string message =
-        "Attempt to assign property " + name +
-        " to incorrect type. Expected const shared_ptr<WorkspaceGroup>.";
+        "Attempt to assign property " + name + " to incorrect type. Expected const shared_ptr<WorkspaceGroup>.";
     throw std::runtime_error(message);
   }
 }

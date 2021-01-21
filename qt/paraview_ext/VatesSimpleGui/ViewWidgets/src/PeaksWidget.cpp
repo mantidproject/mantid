@@ -25,10 +25,8 @@ Constructor
 @param coordinateSystem : Name of coordinate system used
 @param parent : parent widget
 */
-PeaksWidget::PeaksWidget(Mantid::API::IPeaksWorkspace_sptr ws,
-                         const std::string &coordinateSystem, QWidget *parent)
-    : QWidget(parent), m_ws(ws), m_coordinateSystem(coordinateSystem),
-      m_originalTableWidth(1) {
+PeaksWidget::PeaksWidget(Mantid::API::IPeaksWorkspace_sptr ws, const std::string &coordinateSystem, QWidget *parent)
+    : QWidget(parent), m_ws(ws), m_coordinateSystem(coordinateSystem), m_originalTableWidth(1) {
   ui.setupUi(this);
 }
 
@@ -39,10 +37,9 @@ PeaksWidget::PeaksWidget(Mantid::API::IPeaksWorkspace_sptr ws,
  */
 void PeaksWidget::setupMvc(std::vector<bool> visiblePeaks) {
   // Create new table view
-  MantidQt::SliceViewer::QPeaksTableModel *model =
-      new MantidQt::SliceViewer::QPeaksTableModel(m_ws);
-  QObject::connect(model, SIGNAL(peaksSorted(const std::string &, const bool)),
-                   this, SLOT(onPeaksSorted(const std::string &, const bool)));
+  MantidQt::SliceViewer::QPeaksTableModel *model = new MantidQt::SliceViewer::QPeaksTableModel(m_ws);
+  QObject::connect(model, SIGNAL(peaksSorted(const std::string &, const bool)), this,
+                   SLOT(onPeaksSorted(const std::string &, const bool)));
   ui.tblPeaks->setModel(model);
   const std::vector<int> hideCols = model->defaultHideCols();
   for (auto it = hideCols.begin(); it != hideCols.end(); ++it)
@@ -52,14 +49,11 @@ void PeaksWidget::setupMvc(std::vector<bool> visiblePeaks) {
   m_originalTableWidth = ui.tblPeaks->horizontalHeader()->length();
   // calculate the average width (in pixels) of numbers
   QString allNums("0123456789");
-  double char_width =
-      static_cast<double>(
-          ui.tblPeaks->fontMetrics().boundingRect(allNums).width()) /
-      static_cast<double>(allNums.size());
+  double char_width = static_cast<double>(ui.tblPeaks->fontMetrics().boundingRect(allNums).width()) /
+                      static_cast<double>(allNums.size());
   // set the starting width of each column
   for (int i = 0; i < m_originalTableWidth; ++i) {
-    double width =
-        static_cast<double>(model->numCharacters(i) + 3) * char_width;
+    double width = static_cast<double>(model->numCharacters(i) + 3) * char_width;
     ui.tblPeaks->horizontalHeader()->resizeSection(i, static_cast<int>(width));
   }
 
@@ -72,16 +66,15 @@ void PeaksWidget::setupMvc(std::vector<bool> visiblePeaks) {
     }
   }
   QItemSelectionModel *selectionModel = ui.tblPeaks->selectionModel();
-  connect(selectionModel, SIGNAL(currentChanged(QModelIndex, QModelIndex)),
-          this, SLOT(onCurrentChanged(QModelIndex, QModelIndex)));
+  connect(selectionModel, SIGNAL(currentChanged(QModelIndex, QModelIndex)), this,
+          SLOT(onCurrentChanged(QModelIndex, QModelIndex)));
 }
 
 /**
  * Detects a newly selectedd peaks workspace.
  * @param current The currently selected index.
  */
-void PeaksWidget::onCurrentChanged(const QModelIndex &current,
-                                   const QModelIndex &) {
+void PeaksWidget::onCurrentChanged(const QModelIndex &current, const QModelIndex &) {
   if (current.isValid()) {
     emit zoomToPeak(m_ws, current.row());
   }
@@ -106,8 +99,7 @@ void PeaksWidget::updateModel(std::vector<bool> visiblePeaks) {
  * @param columnToSortBy The column by which to sort.
  * @param sortAscending If sort ascending or descending.
  */
-void PeaksWidget::onPeaksSorted(const std::string &columnToSortBy,
-                                const bool sortAscending) {
+void PeaksWidget::onPeaksSorted(const std::string &columnToSortBy, const bool sortAscending) {
   emit sortPeaks(columnToSortBy, sortAscending, m_ws);
 }
 

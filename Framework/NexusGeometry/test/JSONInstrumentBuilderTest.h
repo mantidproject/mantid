@@ -20,9 +20,7 @@ class JSONInstrumentBuilderTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static JSONInstrumentBuilderTest *createSuite() {
-    return new JSONInstrumentBuilderTest();
-  }
+  static JSONInstrumentBuilderTest *createSuite() { return new JSONInstrumentBuilderTest(); }
   static void destroySuite(JSONInstrumentBuilderTest *suite) { delete suite; }
 
   void test_constructor_pass_valid_instrument() {

@@ -38,13 +38,10 @@ void ManageCustomMenus::initLayout() {
   m_menusTree->setHeaderLabel("Custom Menus");
 
   // create qt connections
-  connect(m_uiForm.pbAddScript, SIGNAL(clicked()), this,
-          SLOT(addScriptClicked()));
-  connect(m_uiForm.pbRemoveScript, SIGNAL(clicked()), this,
-          SLOT(remScriptClicked()));
+  connect(m_uiForm.pbAddScript, SIGNAL(clicked()), this, SLOT(addScriptClicked()));
+  connect(m_uiForm.pbRemoveScript, SIGNAL(clicked()), this, SLOT(remScriptClicked()));
   connect(m_uiForm.pbAddItem, SIGNAL(clicked()), this, SLOT(addItemClicked()));
-  connect(m_uiForm.pbRemoveItem, SIGNAL(clicked()), this,
-          SLOT(remItemClicked()));
+  connect(m_uiForm.pbRemoveItem, SIGNAL(clicked()), this, SLOT(remItemClicked()));
   connect(m_uiForm.pbAddMenu, SIGNAL(clicked()), this, SLOT(addMenuClicked()));
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(helpClicked()));
   connect(m_uiForm.pbConfirm, SIGNAL(clicked()), this, SLOT(close()));
@@ -61,19 +58,16 @@ void ManageCustomMenus::populateMenuTree() {
   QListIterator<QMenu *> mItr(m_appWindow->getCustomMenus());
   while (mItr.hasNext()) {
     QMenu *customMenu = mItr.next();
-    QTreeWidgetItem *menu =
-        new QTreeWidgetItem(QStringList(customMenu->title()));
+    QTreeWidgetItem *menu = new QTreeWidgetItem(QStringList(customMenu->title()));
     m_widgetMap.insert(menu, customMenu);
-    menu->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled |
-                   Qt::ItemIsEditable);
+    menu->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsEditable);
     QList<QAction *> scripts = customMenu->actions();
     QListIterator<QAction *> kItr(scripts);
     while (kItr.hasNext()) {
       QAction *action = kItr.next();
       QTreeWidgetItem *item = new QTreeWidgetItem(QStringList(action->text()));
       m_widgetMap.insert(item, action);
-      item->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled |
-                     Qt::ItemIsEditable);
+      item->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsEditable);
       item->setData(0, Qt::UserRole, action->data().toString());
       item->setToolTip(0, action->data().toString());
       menu->addChild(item);
@@ -103,28 +97,21 @@ QTreeWidgetItem *ManageCustomMenus::getCurrentMenuSelection() {
  * Handles adding a script to the scripts tree, through a FileDialog.
  */
 void ManageCustomMenus::addScriptClicked() {
-  QString scriptsDir = QString::fromStdString(
-      Mantid::Kernel::ConfigService::Instance().getString(
-          "pythonscripts.directories"));
-  QStringList scriptFiles = QFileDialog::getOpenFileNames(
-      this, "Select Python Files", scriptsDir, "Python (*.py)");
+  QString scriptsDir =
+      QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("pythonscripts.directories"));
+  QStringList scriptFiles = QFileDialog::getOpenFileNames(this, "Select Python Files", scriptsDir, "Python (*.py)");
   if (!scriptFiles.isEmpty()) {
     // Add file items to m_scriptsTree
     QStringList::const_iterator itEnd = scriptFiles.constEnd();
-    for (QStringList::const_iterator itr = scriptFiles.constBegin();
-         itr != itEnd; ++itr) {
+    for (QStringList::const_iterator itr = scriptFiles.constBegin(); itr != itEnd; ++itr) {
       QString suggestedName = QFileInfo(*itr).baseName();
-      if (!m_scriptsTree
-               ->findItems(suggestedName,
-                           Qt::MatchFixedString | Qt::MatchCaseSensitive)
-               .isEmpty())
+      if (!m_scriptsTree->findItems(suggestedName, Qt::MatchFixedString | Qt::MatchCaseSensitive).isEmpty())
         continue;
 
       QTreeWidgetItem *item = new QTreeWidgetItem(QStringList(suggestedName));
       item->setData(0, Qt::UserRole, *itr);
       item->setToolTip(0, *itr);
-      item->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled |
-                     Qt::ItemIsEditable);
+      item->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsEditable);
       m_scriptsTree->insertTopLevelItem(0, item);
     }
   }
@@ -134,13 +121,9 @@ void ManageCustomMenus::addScriptClicked() {
  */
 void ManageCustomMenus::remScriptClicked() {
   if (m_scriptsTree->selectedItems().isEmpty()) {
-    QMessageBox::information(
-        this, "MantidPlot",
-        "No item selected - please select a script from the left-hand list.");
+    QMessageBox::information(this, "MantidPlot", "No item selected - please select a script from the left-hand list.");
   } else {
-    foreach (QTreeWidgetItem *item, m_scriptsTree->selectedItems()) {
-      delete item;
-    }
+    foreach (QTreeWidgetItem *item, m_scriptsTree->selectedItems()) { delete item; }
   }
 }
 /**
@@ -151,11 +134,10 @@ void ManageCustomMenus::addItemClicked() {
   QList<QTreeWidgetItem *> selection = getCurrentSelection();
   QTreeWidgetItem *menu = getCurrentMenuSelection();
   if (selection.isEmpty()) {
-    QMessageBox::information(
-        this, "MantidPlot",
-        "No item selected - please select a script in the left-hand list of "
-        "scripts.\n"
-        "If none are listed, use the 'Add Script' button to add some files.");
+    QMessageBox::information(this, "MantidPlot",
+                             "No item selected - please select a script in the left-hand list of "
+                             "scripts.\n"
+                             "If none are listed, use the 'Add Script' button to add some files.");
   } else if (menu == nullptr) {
     QMessageBox::information(this, "MantidPlot",
                              "No menu selected - please select a menu on the "
@@ -214,19 +196,15 @@ void ManageCustomMenus::remItemClicked() {
  */
 void ManageCustomMenus::addMenuClicked() {
   bool ok(false);
-  QString name = QInputDialog::getText(
-      this, "Create a Menu", "Menu name:", QLineEdit::Normal, "", &ok);
+  QString name = QInputDialog::getText(this, "Create a Menu", "Menu name:", QLineEdit::Normal, "", &ok);
   if (ok) {
-    if (m_menusTree
-            ->findItems(name, Qt::MatchFixedString | Qt::MatchCaseSensitive)
-            .isEmpty()) {
+    if (m_menusTree->findItems(name, Qt::MatchFixedString | Qt::MatchCaseSensitive).isEmpty()) {
       if (!name.isEmpty()) {
         m_appWindow->addUserMenu(name);
         populateMenuTree();
       }
     } else {
-      QMessageBox::information(this, "MantidPlot",
-                               "A menu with that name already exists.");
+      QMessageBox::information(this, "MantidPlot", "A menu with that name already exists.");
     }
   }
 }

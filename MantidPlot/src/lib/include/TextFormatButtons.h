@@ -50,8 +50,7 @@ public:
    * \param textEdit the QTextEdit that the buttons shall affect
    * \param parent parent widget
    */
-  TextFormatButtons(QTextEdit *textEdit, Buttons buttons = Plot3D,
-                    QWidget *parent = nullptr);
+  TextFormatButtons(QTextEdit *textEdit, Buttons buttons = Plot3D, QWidget *parent = nullptr);
   void setButtons(Buttons btns);
 
 private:

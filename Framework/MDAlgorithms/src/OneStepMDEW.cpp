@@ -26,22 +26,17 @@ using namespace Mantid::DataObjects;
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-OneStepMDEW::OneStepMDEW() {
-  this->useAlgorithm("ConvertToDiffractionMDWorkspace");
-}
+OneStepMDEW::OneStepMDEW() { this->useAlgorithm("ConvertToDiffractionMDWorkspace"); }
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void OneStepMDEW::init() {
-  this->declareProperty(
-      std::make_unique<FileProperty>("Filename", "", FileProperty::Load,
-                                     ".nxs"),
-      "The name (including its full or relative path) of the Nexus file to\n"
-      "attempt to load. The file extension must either be .nxs or .NXS");
+  this->declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Load, ".nxs"),
+                        "The name (including its full or relative path) of the Nexus file to\n"
+                        "attempt to load. The file extension must either be .nxs or .NXS");
 
-  this->declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-                            "OutputWorkspace", "", Direction::Output),
+  this->declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("OutputWorkspace", "", Direction::Output),
                         "Name of the output MDEventWorkspace.");
 }
 
@@ -58,13 +53,11 @@ void OneStepMDEW::exec() {
   loadAlg->setPropertyValue("OutputWorkspace", tempWsName);
   loadAlg->executeAsChildAlg();
   Workspace_sptr temp = loadAlg->getProperty("OutputWorkspace");
-  IEventWorkspace_sptr tempWS =
-      std::dynamic_pointer_cast<IEventWorkspace>(temp);
+  IEventWorkspace_sptr tempWS = std::dynamic_pointer_cast<IEventWorkspace>(temp);
 
   // --------- Now Convert -------------------------------
 
-  Algorithm_sptr childAlg =
-      createChildAlgorithm("ConvertToDiffractionMDWorkspace", 2, 4, true, 1);
+  Algorithm_sptr childAlg = createChildAlgorithm("ConvertToDiffractionMDWorkspace", 2, 4, true, 1);
   childAlg->setProperty("InputWorkspace", tempWS);
   childAlg->setProperty<bool>("ClearInputWorkspace", false);
   childAlg->setProperty<bool>("LorentzCorrection", true);

@@ -43,15 +43,13 @@ UsageServiceImpl &instance() {
 }
 
 /// Register feature usage from a python list
-void registerFeatureUsage(UsageServiceImpl &self,
-                          const Mantid::Kernel::FeatureType &type,
-                          const object &paths, const bool internal) {
+void registerFeatureUsage(UsageServiceImpl &self, const Mantid::Kernel::FeatureType &type, const object &paths,
+                          const bool internal) {
   ExtractStdString singleString(paths);
   if (singleString.check()) {
     self.registerFeatureUsage(type, singleString(), internal);
   } else {
-    self.registerFeatureUsage(type, PySequenceToVector<std::string>(paths)(),
-                              internal);
+    self.registerFeatureUsage(type, PySequenceToVector<std::string>(paths)(), internal);
   }
 }
 
@@ -64,35 +62,27 @@ void export_UsageService() {
       .value("Feature", Mantid::Kernel::FeatureType::Feature);
 
   class_<UsageServiceImpl, boost::noncopyable>("UsageServiceImpl", no_init)
-      .def("flush", &UsageServiceImpl::flush, arg("self"),
-           "Sends any pending usage information.")
+      .def("flush", &UsageServiceImpl::flush, arg("self"), "Sends any pending usage information.")
       .def("shutdown", &UsageServiceImpl::shutdown, arg("self"),
            "Sends any pending usage information, and disables the usage "
            "service.")
       .def("getUpTime", &UsageServiceImpl::getUpTime, arg("self"),
            "Returns the time that the instance of mantid has been running")
-      .def("isEnabled", &UsageServiceImpl::isEnabled, arg("self"),
-           "Returns if the usage service is enabled.")
-      .def("setEnabled", &UsageServiceImpl::setEnabled,
-           (arg("self"), arg("enabled")),
+      .def("isEnabled", &UsageServiceImpl::isEnabled, arg("self"), "Returns if the usage service is enabled.")
+      .def("setEnabled", &UsageServiceImpl::setEnabled, (arg("self"), arg("enabled")),
            "Enables or disables the usage service.")
-      .def("setInterval", &UsageServiceImpl::setEnabled,
-           (arg("self"), arg("seconds")),
+      .def("setInterval", &UsageServiceImpl::setEnabled, (arg("self"), arg("seconds")),
            "Sets the interval that the timer checks for tasks.")
-      .def("setApplicationName", &UsageServiceImpl::setApplicationName,
-           (arg("self"), arg("name")),
+      .def("setApplicationName", &UsageServiceImpl::setApplicationName, (arg("self"), arg("name")),
            "Sets the application name that has invoked Mantid.")
-      .def("getApplicationName", &UsageServiceImpl::getApplicationName,
-           arg("self"), "Gets the application name that has invoked Mantid.")
-      .def("registerStartup", &UsageServiceImpl::registerStartup, arg("self"),
-           "Registers the startup of Mantid.")
-      .def("registerFeatureUsage", &registerFeatureUsage,
-           (arg("self"), arg("type"), arg("name"), arg("internal")),
+      .def("getApplicationName", &UsageServiceImpl::getApplicationName, arg("self"),
+           "Gets the application name that has invoked Mantid.")
+      .def("registerStartup", &UsageServiceImpl::registerStartup, arg("self"), "Registers the startup of Mantid.")
+      .def("registerFeatureUsage", &registerFeatureUsage, (arg("self"), arg("type"), arg("name"), arg("internal")),
            "Registers the use of a feature in Mantid.")
       .def("getStartTime", &UsageServiceImpl::getStartTime, (arg("self")),
            "Returns the time at which Mantid was started")
-      .def("Instance", instance,
-           return_value_policy<reference_existing_object>(),
+      .def("Instance", instance, return_value_policy<reference_existing_object>(),
            "Returns a reference to the UsageService")
       .staticmethod("Instance");
 }

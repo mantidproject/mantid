@@ -32,13 +32,11 @@ using namespace Mantid::Geometry;
 // It is used to print out information,
 
 void SavePHX::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<>>(
-                      "InputWorkspace", "", Direction::Input,
-                      std::make_shared<InstrumentValidator>()),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input,
+                                                        std::make_shared<InstrumentValidator>()),
                   "The input workspace");
-  declareProperty(
-      std::make_unique<FileProperty>("Filename", "", FileProperty::Save),
-      "The filename to use for the saved data");
+  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Save),
+                  "The filename to use for the saved data");
 }
 
 void SavePHX::exec() {
@@ -60,8 +58,7 @@ void SavePHX::exec() {
   }
 
   // execute the ChildAlgorithm to calculate the detector's parameters;
-  IAlgorithm_sptr spCalcDetPar =
-      this->createChildAlgorithm("FindDetectorsPar", 0, 1, true, 1);
+  IAlgorithm_sptr spCalcDetPar = this->createChildAlgorithm("FindDetectorsPar", 0, 1, true, 1);
   spCalcDetPar->initialize();
   spCalcDetPar->setPropertyValue("InputWorkspace", inputWorkspace->getName());
   spCalcDetPar->setPropertyValue("ReturnLinearRanges", "0");
@@ -86,8 +83,7 @@ void SavePHX::exec() {
   const std::vector<double> &polar = pCalcDetPar->getPolar();
   const std::vector<double> &azimuthal_width = pCalcDetPar->getAzimWidth();
   const std::vector<double> &polar_width = pCalcDetPar->getPolarWidth();
-  const std::vector<double> &secondary_flightpath =
-      pCalcDetPar->getFlightPath();
+  const std::vector<double> &secondary_flightpath = pCalcDetPar->getFlightPath();
   const std::vector<size_t> &det_ID = pCalcDetPar->getDetID();
 
   size_t nDetectors = pCalcDetPar->getNDetectors();
@@ -103,9 +99,8 @@ void SavePHX::exec() {
 
     // Now write all the detector info.
     outPHX_file << std::fixed << std::setprecision(3);
-    outPHX_file << " " << secondary_flightpath[i] << "\t 0 \t\t" << polar[i]
-                << " \t" << azimuthal[i] << " \t" << polar_width[i] << " \t"
-                << azimuthal_width[i] << " \t\t" << det_ID[i] << '\n';
+    outPHX_file << " " << secondary_flightpath[i] << "\t 0 \t\t" << polar[i] << " \t" << azimuthal[i] << " \t"
+                << polar_width[i] << " \t" << azimuthal_width[i] << " \t\t" << det_ID[i] << '\n';
   }
 
   // Close the file

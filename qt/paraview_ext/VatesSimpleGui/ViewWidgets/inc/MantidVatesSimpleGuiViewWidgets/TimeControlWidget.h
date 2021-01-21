@@ -26,8 +26,7 @@ namespace SimpleGui {
  @author Michael Reuter
  @date 24/05/2011
  */
-class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS TimeControlWidget
-    : public QWidget {
+class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS TimeControlWidget : public QWidget {
   Q_OBJECT
 
 public:
@@ -40,8 +39,7 @@ public slots:
   /// Enable/disable the animation controls.
   void enableAnimationControls(bool state);
   /// Update information in animation controls.
-  void updateAnimationControls(double timeStart, double timeEnd,
-                               int numTimesteps);
+  void updateAnimationControls(double timeStart, double timeEnd, int numTimesteps);
 
 private:
   Ui::TimeControlWidgetClass ui; ///< The time control widget's UI form

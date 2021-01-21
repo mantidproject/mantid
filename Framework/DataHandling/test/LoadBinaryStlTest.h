@@ -50,16 +50,14 @@ public:
   // check that isBinaryStl returns false if the file contains an incomplete
   // vertex
   void test_fail_invalid_vertex() {
-    std::string path =
-        FileFinder::Instance().getFullPath("invalid_vertexBin.stl");
+    std::string path = FileFinder::Instance().getFullPath("invalid_vertexBin.stl");
     auto loader = LoadBinaryStl(path, units);
     TS_ASSERT(!(loader.isBinarySTL(path)));
   }
   // check that isBinaryStl returns false if the file contains an incomplete
   // triangle
   void test_fail_invalid_triangle() {
-    std::string path =
-        FileFinder::Instance().getFullPath("invalid_triangleBin.stl");
+    std::string path = FileFinder::Instance().getFullPath("invalid_triangleBin.stl");
     auto loader = LoadBinaryStl(path, units);
     TS_ASSERT(!(loader.isBinarySTL(path)));
   }
@@ -78,8 +76,7 @@ public:
   }
 
 private:
-  void assert_shape_matches(std::unique_ptr<Geometry::MeshObject> &shape,
-                            int vertices, int triangles, double volume,
+  void assert_shape_matches(std::unique_ptr<Geometry::MeshObject> &shape, int vertices, int triangles, double volume,
                             double delta) {
     TS_ASSERT(shape->hasValidShape());
     TS_ASSERT_EQUALS(shape->numberOfVertices(), vertices);

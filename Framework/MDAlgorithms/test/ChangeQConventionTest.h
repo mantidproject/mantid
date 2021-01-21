@@ -31,12 +31,10 @@ public:
 
   void test_exec() {
 
-    Mantid::Kernel::ConfigService::Instance().setString("Q.convention",
-                                                        "Inelastic");
+    Mantid::Kernel::ConfigService::Instance().setString("Q.convention", "Inelastic");
     std::string wsName = "ChangeQConventionTest_ws";
     // Make a 3D MDEventWorkspace
-    MDEventWorkspace3Lean::sptr ws =
-        MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 1);
+    MDEventWorkspace3Lean::sptr ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 1);
     // Make sure it is split
     ws->splitBox();
 

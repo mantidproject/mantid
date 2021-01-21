@@ -11,8 +11,7 @@ namespace Parallel {
 namespace IO {
 namespace detail {
 
-std::string readAttribute(const H5::DataSet &dataSet,
-                          const std::string &attributeName) {
+std::string readAttribute(const H5::DataSet &dataSet, const std::string &attributeName) {
   const auto &attr = dataSet.openAttribute(attributeName);
   std::string value;
   attr.read(attr.getDataType(), value);

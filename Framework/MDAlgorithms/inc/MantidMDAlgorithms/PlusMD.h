@@ -31,9 +31,7 @@ public:
 
   /// Algorithm's version for identification
   int version() const override { return 1; };
-  const std::vector<std::string> seeAlso() const override {
-    return {"MinusMD", "MultiplyMD", "DivideMD", "PowerMD"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"MinusMD", "MultiplyMD", "DivideMD", "PowerMD"}; }
 
 private:
   /// Is the operation commutative?
@@ -46,17 +44,14 @@ private:
   void execEvent() override;
 
   /// Run the algorithm with a MDHisotWorkspace as output and operand
-  void execHistoHisto(
-      Mantid::DataObjects::MDHistoWorkspace_sptr out,
-      Mantid::DataObjects::MDHistoWorkspace_const_sptr operand) override;
+  void execHistoHisto(Mantid::DataObjects::MDHistoWorkspace_sptr out,
+                      Mantid::DataObjects::MDHistoWorkspace_const_sptr operand) override;
 
   /// Run the algorithm with a MDHisotWorkspace as output, scalar and operand
-  void execHistoScalar(
-      Mantid::DataObjects::MDHistoWorkspace_sptr out,
-      Mantid::DataObjects::WorkspaceSingleValue_const_sptr scalar) override;
+  void execHistoScalar(Mantid::DataObjects::MDHistoWorkspace_sptr out,
+                       Mantid::DataObjects::WorkspaceSingleValue_const_sptr scalar) override;
 
-  template <typename MDE, size_t nd>
-  void doPlus(typename Mantid::DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
+  template <typename MDE, size_t nd> void doPlus(typename Mantid::DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
 
   /// Workspace into which stuff will get added
   Mantid::API::IMDEventWorkspace_sptr iws1;

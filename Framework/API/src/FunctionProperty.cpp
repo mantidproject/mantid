@@ -17,11 +17,9 @@ namespace API {
  *  @param name :: The name to assign to the property
  *  @param direction :: The direction of the function (i.e. input or output)
  */
-FunctionProperty::FunctionProperty(const std::string &name,
-                                   const unsigned int direction)
+FunctionProperty::FunctionProperty(const std::string &name, const unsigned int direction)
     : Kernel::PropertyWithValue<std::shared_ptr<IFunction>>(
-          name, std::shared_ptr<IFunction>(),
-          Kernel::IValidator_sptr(new Kernel::NullValidator()), direction) {}
+          name, std::shared_ptr<IFunction>(), Kernel::IValidator_sptr(new Kernel::NullValidator()), direction) {}
 
 /// Copy constructor
 FunctionProperty::FunctionProperty(const FunctionProperty &right)
@@ -40,18 +38,15 @@ FunctionProperty &FunctionProperty::operator=(const FunctionProperty &right) {
  * @param value :: The value to set to
  * @return assigned PropertyWithValue
  */
-FunctionProperty &FunctionProperty::
-operator=(const std::shared_ptr<IFunction> &value) {
+FunctionProperty &FunctionProperty::operator=(const std::shared_ptr<IFunction> &value) {
   Kernel::PropertyWithValue<std::shared_ptr<IFunction>>::operator=(value);
   return *this;
 }
 
 //--------------------------------------------------------------------------------------
 /// Add the value of another property
-FunctionProperty &FunctionProperty::
-operator+=(Kernel::Property const * /*right*/) {
-  throw Kernel::Exception::NotImplementedError(
-      "+= operator is not implemented for FunctionProperty.");
+FunctionProperty &FunctionProperty::operator+=(Kernel::Property const * /*right*/) {
+  throw Kernel::Exception::NotImplementedError("+= operator is not implemented for FunctionProperty.");
   return *this;
 }
 
@@ -69,9 +64,7 @@ std::string FunctionProperty::value() const {
  * @return A Json::Value object encoding the string representation of the
  * function
  */
-Json::Value FunctionProperty::valueAsJson() const {
-  return Json::Value(value());
-}
+Json::Value FunctionProperty::valueAsJson() const { return Json::Value(value()); }
 
 /** Get the value the property was initialised with -its default value
  *  @return The default value
@@ -86,8 +79,7 @@ std::string FunctionProperty::getDefault() const { return ""; }
 std::string FunctionProperty::setValue(const std::string &value) {
   std::string error;
   try {
-    m_value = std::shared_ptr<IFunction>(
-        FunctionFactory::Instance().createInitialized(value));
+    m_value = std::shared_ptr<IFunction>(FunctionFactory::Instance().createInitialized(value));
     m_definition = value;
   } catch (std::exception &e) {
     error = e.what();
@@ -124,15 +116,11 @@ std::string FunctionProperty::isValid() const {
 /** Indicates if the function has not been created yet.
  *  @return true if the function has not been created yet.
  */
-bool FunctionProperty::isDefault() const {
-  return m_value == std::shared_ptr<IFunction>();
-}
+bool FunctionProperty::isDefault() const { return m_value == std::shared_ptr<IFunction>(); }
 
 /// Create a history record
 /// @return A populated PropertyHistory for this class
-const Kernel::PropertyHistory FunctionProperty::createHistory() const {
-  return Kernel::PropertyHistory(this);
-}
+const Kernel::PropertyHistory FunctionProperty::createHistory() const { return Kernel::PropertyHistory(this); }
 
 } // namespace API
 } // namespace Mantid

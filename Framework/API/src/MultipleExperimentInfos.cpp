@@ -23,8 +23,7 @@ namespace API {
 /** Copy constructor
  *
  * @param other :: other workspace to copy    */
-MultipleExperimentInfos::MultipleExperimentInfos(
-    const MultipleExperimentInfos &other) {
+MultipleExperimentInfos::MultipleExperimentInfos(const MultipleExperimentInfos &other) {
   this->copyExperimentInfos(other);
 }
 
@@ -34,11 +33,9 @@ MultipleExperimentInfos::MultipleExperimentInfos(
  * @param runIndex :: 0-based index of the run to get.
  * @return shared ptr to the ExperimentInfo class
  */
-ExperimentInfo_sptr
-MultipleExperimentInfos::getExperimentInfo(const uint16_t runIndex) {
+ExperimentInfo_sptr MultipleExperimentInfos::getExperimentInfo(const uint16_t runIndex) {
   if (size_t(runIndex) >= m_expInfos.size())
-    throw std::invalid_argument(
-        "MDWorkspace::getExperimentInfo(): runIndex is out of range.");
+    throw std::invalid_argument("MDWorkspace::getExperimentInfo(): runIndex is out of range.");
   return m_expInfos[runIndex];
 }
 
@@ -48,11 +45,9 @@ MultipleExperimentInfos::getExperimentInfo(const uint16_t runIndex) {
  * @param runIndex :: 0-based index of the run to get.
  * @return shared ptr to the ExperimentInfo class
  */
-ExperimentInfo_const_sptr
-MultipleExperimentInfos::getExperimentInfo(const uint16_t runIndex) const {
+ExperimentInfo_const_sptr MultipleExperimentInfos::getExperimentInfo(const uint16_t runIndex) const {
   if (size_t(runIndex) >= m_expInfos.size())
-    throw std::invalid_argument(
-        "MDWorkspace::getExperimentInfo() const: runIndex is out of range.");
+    throw std::invalid_argument("MDWorkspace::getExperimentInfo() const: runIndex is out of range.");
   return m_expInfos[runIndex];
 }
 
@@ -63,11 +58,9 @@ MultipleExperimentInfos::getExperimentInfo(const uint16_t runIndex) const {
  * @return the runIndex at which it was added
  * @throw std::runtime_error if you reach the limit of 65536 entries.
  */
-uint16_t
-MultipleExperimentInfos::addExperimentInfo(const ExperimentInfo_sptr &ei) {
+uint16_t MultipleExperimentInfos::addExperimentInfo(const ExperimentInfo_sptr &ei) {
   m_expInfos.emplace_back(ei);
-  if (m_expInfos.size() >=
-      static_cast<size_t>(std::numeric_limits<uint16_t>::max()))
+  if (m_expInfos.size() >= static_cast<size_t>(std::numeric_limits<uint16_t>::max()))
     throw std::runtime_error("MDWorkspace: Reached the capacity for the number "
                              "of ExperimentInfos of 65536.");
   return uint16_t(m_expInfos.size() - 1);
@@ -79,25 +72,20 @@ MultipleExperimentInfos::addExperimentInfo(const ExperimentInfo_sptr &ei) {
  * @param runIndex :: 0-based index of the run to replace
  * @param ei :: shared ptr to the ExperimentInfo class to add
  */
-void MultipleExperimentInfos::setExperimentInfo(const uint16_t runIndex,
-                                                ExperimentInfo_sptr ei) {
+void MultipleExperimentInfos::setExperimentInfo(const uint16_t runIndex, ExperimentInfo_sptr ei) {
   if (size_t(runIndex) >= m_expInfos.size())
-    throw std::invalid_argument(
-        "MDEventWorkspace::setExperimentInfo(): runIndex is out of range.");
+    throw std::invalid_argument("MDEventWorkspace::setExperimentInfo(): runIndex is out of range.");
   m_expInfos[runIndex] = std::move(ei);
 }
 
 //-----------------------------------------------------------------------------------------------
 /// @return the number of ExperimentInfo's in this workspace
-uint16_t MultipleExperimentInfos::getNumExperimentInfo() const {
-  return uint16_t(m_expInfos.size());
-}
+uint16_t MultipleExperimentInfos::getNumExperimentInfo() const { return uint16_t(m_expInfos.size()); }
 
 //-----------------------------------------------------------------------------------------------
 /** Copy the experiment infos from another. Deep copy.
  * @param other :: other workspace to copy    */
-void MultipleExperimentInfos::copyExperimentInfos(
-    const MultipleExperimentInfos &other) {
+void MultipleExperimentInfos::copyExperimentInfos(const MultipleExperimentInfos &other) {
   m_expInfos.clear();
   m_expInfos.reserve(other.m_expInfos.size());
   // Do a deep copy of ExperimentInfo's

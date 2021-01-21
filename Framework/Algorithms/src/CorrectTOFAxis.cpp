@@ -89,8 +89,7 @@ template <typename Map> size_t mapIndex(const int index, const Map &indexMap) {
   try {
     return indexMap.at(index);
   } catch (std::out_of_range &) {
-    throw std::runtime_error(PropertyNames::REFERENCE_SPECTRA +
-                             " out of range.");
+    throw std::runtime_error(PropertyNames::REFERENCE_SPECTRA + " out of range.");
   }
 }
 
@@ -104,8 +103,7 @@ template <typename Map> size_t mapIndex(const int index, const Map &indexMap) {
  *
  *  @return A workspace index corresponding to index.
  */
-size_t toWorkspaceIndex(const int index, const std::string &indexType,
-                        const API::MatrixWorkspace_const_sptr &ws) {
+size_t toWorkspaceIndex(const int index, const std::string &indexType, const API::MatrixWorkspace_const_sptr &ws) {
   if (indexType == IndexTypes::DETECTOR_ID) {
     const auto indexMap = ws->getDetectorIDToWorkspaceIndexMap();
     return mapIndex(index, indexMap);
@@ -114,8 +112,7 @@ size_t toWorkspaceIndex(const int index, const std::string &indexType,
     return mapIndex(index, indexMap);
   } else {
     if (index < 0) {
-      throw std::runtime_error(PropertyNames::REFERENCE_SPECTRA +
-                               " out of range.");
+      throw std::runtime_error(PropertyNames::REFERENCE_SPECTRA + " out of range.");
     }
     return static_cast<size_t>(index);
   }
@@ -127,15 +124,13 @@ size_t toWorkspaceIndex(const int index, const std::string &indexType,
  *  @param workspaceIndices An output parameter for the transformed indices
  */
 template <typename Map>
-void mapIndices(const std::vector<int> &spectra, const Map &indexMap,
-                std::vector<size_t> &workspaceIndices) {
+void mapIndices(const std::vector<int> &spectra, const Map &indexMap, std::vector<size_t> &workspaceIndices) {
   auto back = std::back_inserter(workspaceIndices);
   std::transform(spectra.cbegin(), spectra.cend(), back, [&indexMap](int i) {
     try {
       return indexMap.at(i);
     } catch (std::out_of_range &) {
-      throw std::runtime_error(PropertyNames::REFERENCE_SPECTRA +
-                               " out of range.");
+      throw std::runtime_error(PropertyNames::REFERENCE_SPECTRA + " out of range.");
     }
   });
 }
@@ -150,9 +145,7 @@ const std::string CorrectTOFAxis::name() const { return "CorrectTOFAxis"; }
 int CorrectTOFAxis::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string CorrectTOFAxis::category() const {
-  return "Inelastic\\Corrections";
-}
+const std::string CorrectTOFAxis::category() const { return "Inelastic\\Corrections"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string CorrectTOFAxis::summary() const {
@@ -167,49 +160,39 @@ void CorrectTOFAxis::init() {
   auto tofWorkspace = std::make_shared<Kernel::CompositeValidator>();
   tofWorkspace->add<API::WorkspaceUnitValidator>("TOF");
   tofWorkspace->add<API::InstrumentValidator>();
-  auto mustBePositiveDouble =
-      std::make_shared<Kernel::BoundedValidator<double>>();
+  auto mustBePositiveDouble = std::make_shared<Kernel::BoundedValidator<double>>();
   mustBePositiveDouble->setLower(0);
   auto mustBePositiveInt = std::make_shared<Kernel::BoundedValidator<int>>();
   mustBePositiveInt->setLower(0);
 
+  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(PropertyNames::INPUT_WORKSPACE, "",
+                                                                            Direction::Input, tofWorkspace),
+                  "An input workspace.");
   declareProperty(
-      std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
-          PropertyNames::INPUT_WORKSPACE, "", Direction::Input, tofWorkspace),
-      "An input workspace.");
-  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
-                      PropertyNames::OUTPUT_WORKSPACE, "", Direction::Output),
-                  "An output workspace.");
-  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
-                      PropertyNames::REFERENCE_WORKSPACE, "", Direction::Input,
-                      API::PropertyMode::Optional, tofWorkspace),
+      std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(PropertyNames::OUTPUT_WORKSPACE, "", Direction::Output),
+      "An output workspace.");
+  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(PropertyNames::REFERENCE_WORKSPACE, "",
+                                                                            Direction::Input,
+                                                                            API::PropertyMode::Optional, tofWorkspace),
                   "A reference workspace from which to copy the TOF axis as "
                   "well as the 'Ei' and 'wavelength' sample logs.");
   declareProperty(std::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
-                      PropertyNames::EPP_TABLE.c_str(), "", Direction::Input,
-                      API::PropertyMode::Optional),
+                      PropertyNames::EPP_TABLE.c_str(), "", Direction::Input, API::PropertyMode::Optional),
                   "An input EPP table.");
-  const std::vector<std::string> indexTypes{IndexTypes::DETECTOR_ID,
-                                            IndexTypes::SPECTRUM_NUMBER,
+  const std::vector<std::string> indexTypes{IndexTypes::DETECTOR_ID, IndexTypes::SPECTRUM_NUMBER,
                                             IndexTypes::WORKSPACE_INDEX};
   declareProperty(PropertyNames::INDEX_TYPE, IndexTypes::DETECTOR_ID,
                   std::make_shared<Kernel::StringListValidator>(indexTypes),
-                  "The type of indices used in " +
-                      PropertyNames::REFERENCE_SPECTRA + " or " +
-                      PropertyNames::ELASTIC_BIN_INDEX + " (default: '" +
-                      IndexTypes::DETECTOR_ID + "').");
-  declareProperty(std::make_unique<Kernel::ArrayProperty<int>>(
-                      PropertyNames::REFERENCE_SPECTRA.c_str()),
+                  "The type of indices used in " + PropertyNames::REFERENCE_SPECTRA + " or " +
+                      PropertyNames::ELASTIC_BIN_INDEX + " (default: '" + IndexTypes::DETECTOR_ID + "').");
+  declareProperty(std::make_unique<Kernel::ArrayProperty<int>>(PropertyNames::REFERENCE_SPECTRA.c_str()),
                   "A list of reference spectra.");
-  declareProperty(
-      PropertyNames::ELASTIC_BIN_INDEX, EMPTY_INT(), mustBePositiveInt,
-      "Bin index of the nominal elastic TOF channel.", Direction::Input);
-  declareProperty(
-      PropertyNames::FIXED_ENERGY, EMPTY_DBL(), mustBePositiveDouble,
-      "Incident energy if the 'EI' sample log is not present/incorrect.",
-      Direction::Input);
-  declareProperty(PropertyNames::L2, EMPTY_DBL(), mustBePositiveDouble,
-                  "Sample to detector distance, in meters.", Direction::Input);
+  declareProperty(PropertyNames::ELASTIC_BIN_INDEX, EMPTY_INT(), mustBePositiveInt,
+                  "Bin index of the nominal elastic TOF channel.", Direction::Input);
+  declareProperty(PropertyNames::FIXED_ENERGY, EMPTY_DBL(), mustBePositiveDouble,
+                  "Incident energy if the 'EI' sample log is not present/incorrect.", Direction::Input);
+  declareProperty(PropertyNames::L2, EMPTY_DBL(), mustBePositiveDouble, "Sample to detector distance, in meters.",
+                  Direction::Input);
 }
 
 /** Validate the algorithm's input properties.
@@ -221,27 +204,22 @@ std::map<std::string, std::string> CorrectTOFAxis::validateInputs() {
   m_referenceWs = getProperty(PropertyNames::REFERENCE_WORKSPACE);
   if (m_referenceWs) {
     m_referenceWs = getProperty(PropertyNames::REFERENCE_WORKSPACE);
-    if (m_inputWs->getNumberHistograms() !=
-        m_referenceWs->getNumberHistograms()) {
+    if (m_inputWs->getNumberHistograms() != m_referenceWs->getNumberHistograms()) {
       issues[PropertyNames::REFERENCE_WORKSPACE] =
-          "Number of histograms don't match with" +
-          PropertyNames::INPUT_WORKSPACE + ".";
+          "Number of histograms don't match with" + PropertyNames::INPUT_WORKSPACE + ".";
     }
     for (size_t i = 0; i < m_inputWs->getNumberHistograms(); ++i) {
       if (m_inputWs->x(i).size() != m_referenceWs->x(i).size()) {
         issues[PropertyNames::REFERENCE_WORKSPACE] =
-            "X axis sizes don't match with " + PropertyNames::INPUT_WORKSPACE +
-            ".";
+            "X axis sizes don't match with " + PropertyNames::INPUT_WORKSPACE + ".";
         break;
       }
     }
     if (!m_referenceWs->run().hasProperty(SampleLog::INCIDENT_ENERGY)) {
-      issues[PropertyNames::REFERENCE_WORKSPACE] =
-          "'Ei' is missing from the sample logs.";
+      issues[PropertyNames::REFERENCE_WORKSPACE] = "'Ei' is missing from the sample logs.";
     }
     if (!m_referenceWs->run().hasProperty(SampleLog::WAVELENGTH)) {
-      issues[PropertyNames::REFERENCE_WORKSPACE] =
-          "'wavelength' is missing from the sample logs.";
+      issues[PropertyNames::REFERENCE_WORKSPACE] = "'wavelength' is missing from the sample logs.";
     }
     // If reference workspace is given, the rest of the properties are
     // skipped.
@@ -250,73 +228,59 @@ std::map<std::string, std::string> CorrectTOFAxis::validateInputs() {
   // If no reference workspace, we either use a predefined elastic channel
   // or EPP tables to declare the elastic TOF.
   const int elasticBinIndex = getProperty(PropertyNames::ELASTIC_BIN_INDEX);
-  const std::vector<int> spectra =
-      getProperty(PropertyNames::REFERENCE_SPECTRA);
+  const std::vector<int> spectra = getProperty(PropertyNames::REFERENCE_SPECTRA);
   const double l2 = getProperty(PropertyNames::L2);
   if (elasticBinIndex != EMPTY_INT()) {
     const std::string indexType = getProperty(PropertyNames::INDEX_TYPE);
     m_elasticBinIndex = toWorkspaceIndex(elasticBinIndex, indexType, m_inputWs);
     if (spectra.empty() && l2 == EMPTY_DBL()) {
       issues[PropertyNames::REFERENCE_SPECTRA] =
-          "Either " + PropertyNames::REFERENCE_SPECTRA + " or " +
-          PropertyNames::L2 + " has to be specified.";
+          "Either " + PropertyNames::REFERENCE_SPECTRA + " or " + PropertyNames::L2 + " has to be specified.";
       return issues;
     }
   } else {
     m_eppTable = getProperty(PropertyNames::EPP_TABLE);
     if (!m_eppTable) {
-      issues[PropertyNames::EPP_TABLE] = "No EPP table specified nor " +
-                                         PropertyNames::ELASTIC_BIN_INDEX +
-                                         " specified.";
+      issues[PropertyNames::EPP_TABLE] =
+          "No EPP table specified nor " + PropertyNames::ELASTIC_BIN_INDEX + " specified.";
       return issues;
     }
-    const auto peakPositionColumn =
-        m_eppTable->getColumn(EPPTableLiterals::PEAK_CENTRE_COLUMN);
-    const auto fitStatusColumn =
-        m_eppTable->getColumn(EPPTableLiterals::FIT_STATUS_COLUMN);
+    const auto peakPositionColumn = m_eppTable->getColumn(EPPTableLiterals::PEAK_CENTRE_COLUMN);
+    const auto fitStatusColumn = m_eppTable->getColumn(EPPTableLiterals::FIT_STATUS_COLUMN);
     if (!peakPositionColumn || !fitStatusColumn) {
-      issues[PropertyNames::EPP_TABLE] =
-          "EPP table doesn't contain the expected columns.";
+      issues[PropertyNames::EPP_TABLE] = "EPP table doesn't contain the expected columns.";
       return issues;
     }
     if (spectra.empty()) {
-      issues[PropertyNames::REFERENCE_SPECTRA] =
-          "No reference spectra selected.";
+      issues[PropertyNames::REFERENCE_SPECTRA] = "No reference spectra selected.";
       return issues;
     }
   }
   m_workspaceIndices = referenceWorkspaceIndices();
   std::sort(m_workspaceIndices.begin(), m_workspaceIndices.end());
-  m_workspaceIndices.erase(
-      std::unique(m_workspaceIndices.begin(), m_workspaceIndices.end()),
-      m_workspaceIndices.end());
+  m_workspaceIndices.erase(std::unique(m_workspaceIndices.begin(), m_workspaceIndices.end()), m_workspaceIndices.end());
   const auto &spectrumInfo = m_inputWs->spectrumInfo();
   for (const auto i : m_workspaceIndices) {
     if (spectrumInfo.isMonitor(i)) {
-      issues[PropertyNames::REFERENCE_SPECTRA] =
-          "Monitor found among the given spectra.";
+      issues[PropertyNames::REFERENCE_SPECTRA] = "Monitor found among the given spectra.";
       break;
     }
     if (!spectrumInfo.hasDetectors(i)) {
-      issues[PropertyNames::REFERENCE_SPECTRA] =
-          "No detectors attached to workspace index " + std::to_string(i) + ".";
+      issues[PropertyNames::REFERENCE_SPECTRA] = "No detectors attached to workspace index " + std::to_string(i) + ".";
       break;
     }
     if (m_eppTable) {
-      const auto peakPositionColumn =
-          m_eppTable->getColumn(EPPTableLiterals::PEAK_CENTRE_COLUMN);
+      const auto peakPositionColumn = m_eppTable->getColumn(EPPTableLiterals::PEAK_CENTRE_COLUMN);
       if (i >= peakPositionColumn->size()) {
         issues[PropertyNames::REFERENCE_SPECTRA] =
-            "Workspace index " + std::to_string(i) +
-            " not found in the EPP table.";
+            "Workspace index " + std::to_string(i) + " not found in the EPP table.";
       }
     }
   }
 
   if (getPointerToProperty(PropertyNames::FIXED_ENERGY)->isDefault()) {
     if (!m_inputWs->run().hasProperty(SampleLog::INCIDENT_ENERGY)) {
-      issues[PropertyNames::INPUT_WORKSPACE] =
-          "'Ei' is missing from the sample logs.";
+      issues[PropertyNames::INPUT_WORKSPACE] = "'Ei' is missing from the sample logs.";
     }
   }
   return issues;
@@ -327,8 +291,7 @@ std::map<std::string, std::string> CorrectTOFAxis::validateInputs() {
  */
 void CorrectTOFAxis::exec() {
   m_inputWs = getProperty(PropertyNames::INPUT_WORKSPACE);
-  API::MatrixWorkspace_sptr outputWs =
-      getProperty(PropertyNames::OUTPUT_WORKSPACE);
+  API::MatrixWorkspace_sptr outputWs = getProperty(PropertyNames::OUTPUT_WORKSPACE);
   if (outputWs != m_inputWs) {
     outputWs = m_inputWs->clone();
   }
@@ -345,29 +308,24 @@ void CorrectTOFAxis::exec() {
  *  corrected workspace.
  *  @param outputWs The corrected workspace
  */
-void CorrectTOFAxis::useReferenceWorkspace(
-    const API::MatrixWorkspace_sptr &outputWs) {
-  const auto histogramCount =
-      static_cast<int64_t>(m_referenceWs->getNumberHistograms());
+void CorrectTOFAxis::useReferenceWorkspace(const API::MatrixWorkspace_sptr &outputWs) {
+  const auto histogramCount = static_cast<int64_t>(m_referenceWs->getNumberHistograms());
   PARALLEL_FOR_IF(threadSafe(*m_referenceWs, *outputWs))
   for (int64_t i = 0; i < histogramCount; ++i) {
     PARALLEL_START_INTERUPT_REGION
-    std::copy(m_referenceWs->x(i).cbegin(), m_referenceWs->x(i).cend(),
-              outputWs->mutableX(i).begin());
+    std::copy(m_referenceWs->x(i).cbegin(), m_referenceWs->x(i).cend(), outputWs->mutableX(i).begin());
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
   if (outputWs->run().hasProperty(SampleLog::INCIDENT_ENERGY)) {
     outputWs->mutableRun()
         .getProperty(SampleLog::INCIDENT_ENERGY)
-        ->setValueFromProperty(
-            *m_referenceWs->run().getProperty(SampleLog::INCIDENT_ENERGY));
+        ->setValueFromProperty(*m_referenceWs->run().getProperty(SampleLog::INCIDENT_ENERGY));
   }
   if (outputWs->run().hasProperty(SampleLog::WAVELENGTH)) {
     outputWs->mutableRun()
         .getProperty(SampleLog::WAVELENGTH)
-        ->setValueFromProperty(
-            *m_referenceWs->run().getProperty(SampleLog::WAVELENGTH));
+        ->setValueFromProperty(*m_referenceWs->run().getProperty(SampleLog::WAVELENGTH));
   }
 }
 
@@ -378,8 +336,7 @@ void CorrectTOFAxis::useReferenceWorkspace(
  *  specifically, also adjusts the 'Ei' and 'wavelength' sample logs.
  *  @param outputWs The corrected workspace
  */
-void CorrectTOFAxis::correctManually(
-    const API::MatrixWorkspace_sptr &outputWs) {
+void CorrectTOFAxis::correctManually(const API::MatrixWorkspace_sptr &outputWs) {
   const auto &spectrumInfo = m_inputWs->spectrumInfo();
   const double l1 = spectrumInfo.l1();
   double l2 = 0;
@@ -398,21 +355,16 @@ void CorrectTOFAxis::correctManually(
   } else {
     // Save user-given Ei and wavelength to the output workspace.
     outputWs->mutableRun().addProperty(SampleLog::INCIDENT_ENERGY, Ei, true);
-    const double wavelength = Kernel::UnitConversion::run(
-        "Energy", "Wavelength", Ei, l1, l2, 0, Kernel::DeltaEMode::Direct, 0);
+    const double wavelength =
+        Kernel::UnitConversion::run("Energy", "Wavelength", Ei, l1, l2, 0, Kernel::DeltaEMode::Direct, 0);
     outputWs->mutableRun().addProperty(SampleLog::WAVELENGTH, wavelength, true);
   }
   // In microseconds.
-  const double TOF = (l1 + l2) /
-                     std::sqrt(2 * Ei * PhysicalConstants::meV /
-                               PhysicalConstants::NeutronMass) *
-                     1e6;
-  g_log.information() << "Calculated TOF for L1+L2 distance of " << l1 + l2
-                      << "m: " << TOF << '\n';
+  const double TOF = (l1 + l2) / std::sqrt(2 * Ei * PhysicalConstants::meV / PhysicalConstants::NeutronMass) * 1e6;
+  g_log.information() << "Calculated TOF for L1+L2 distance of " << l1 + l2 << "m: " << TOF << '\n';
   const double shift = TOF - epp;
   g_log.debug() << "TOF shift: " << shift << '\n';
-  const auto histogramCount =
-      static_cast<int64_t>(m_inputWs->getNumberHistograms());
+  const auto histogramCount = static_cast<int64_t>(m_inputWs->getNumberHistograms());
   PARALLEL_FOR_IF(threadSafe(*m_inputWs, *outputWs))
   for (int64_t i = 0; i < histogramCount; ++i) {
     PARALLEL_START_INTERUPT_REGION
@@ -429,12 +381,9 @@ void CorrectTOFAxis::correctManually(
  *  @param epp An output parameter for the average position
  *         of the detectors' elastic peak
  */
-void CorrectTOFAxis::averageL2AndEPP(const API::SpectrumInfo &spectrumInfo,
-                                     double &l2, double &epp) {
-  auto peakPositionColumn =
-      m_eppTable->getColumn(EPPTableLiterals::PEAK_CENTRE_COLUMN);
-  auto fitStatusColumn =
-      m_eppTable->getColumn(EPPTableLiterals::FIT_STATUS_COLUMN);
+void CorrectTOFAxis::averageL2AndEPP(const API::SpectrumInfo &spectrumInfo, double &l2, double &epp) {
+  auto peakPositionColumn = m_eppTable->getColumn(EPPTableLiterals::PEAK_CENTRE_COLUMN);
+  auto fitStatusColumn = m_eppTable->getColumn(EPPTableLiterals::FIT_STATUS_COLUMN);
   double l2Sum = 0;
   double eppSum = 0;
   size_t n = 0;
@@ -446,30 +395,25 @@ void CorrectTOFAxis::averageL2AndEPP(const API::SpectrumInfo &spectrumInfo,
     PARALLEL_START_INTERUPT_REGION
     const size_t index = m_workspaceIndices[i];
     interruption_point();
-    if (fitStatusColumn->cell<std::string>(index) ==
-        EPPTableLiterals::FIT_STATUS_SUCCESS) {
+    if (fitStatusColumn->cell<std::string>(index) == EPPTableLiterals::FIT_STATUS_SUCCESS) {
       if (!spectrumInfo.isMasked(index)) {
         const double d = spectrumInfo.l2(index);
         l2Sum += d;
         const double epp = (*peakPositionColumn)[index];
         eppSum += epp;
         ++n;
-        g_log.debug() << "Including workspace index " << index
-                      << " - distance: " << d << " EPP: " << epp << ".\n";
+        g_log.debug() << "Including workspace index " << index << " - distance: " << d << " EPP: " << epp << ".\n";
       } else {
         g_log.debug() << "Excluding masked workspace index " << index << ".\n";
       }
     } else {
-      g_log.debug()
-          << "Excluding detector with unsuccessful fit at workspace index "
-          << index << ".\n";
+      g_log.debug() << "Excluding detector with unsuccessful fit at workspace index " << index << ".\n";
     }
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
   if (n == 0) {
-    throw std::runtime_error("No successful detector fits found in " +
-                             PropertyNames::EPP_TABLE);
+    throw std::runtime_error("No successful detector fits found in " + PropertyNames::EPP_TABLE);
   }
   l2 = l2Sum / static_cast<double>(n);
   g_log.information() << "Average L2 distance: " << l2 << ".\n";
@@ -497,8 +441,7 @@ double CorrectTOFAxis::averageL2(const API::SpectrumInfo &spectrumInfo) {
   }
   PARALLEL_CHECK_INTERUPT_REGION
   if (n == 0) {
-    throw std::runtime_error("No unmasked detectors found in " +
-                             PropertyNames::REFERENCE_SPECTRA);
+    throw std::runtime_error("No unmasked detectors found in " + PropertyNames::REFERENCE_SPECTRA);
   }
   const double l2 = l2Sum / static_cast<double>(indexCount);
   g_log.information() << "Average L2 distance: " << l2 << ".\n";
@@ -509,14 +452,11 @@ double CorrectTOFAxis::averageL2(const API::SpectrumInfo &spectrumInfo) {
  *  @return The transformed workspace indices.
  */
 std::vector<size_t> CorrectTOFAxis::referenceWorkspaceIndices() const {
-  const std::vector<int> indices =
-      getProperty(PropertyNames::REFERENCE_SPECTRA);
+  const std::vector<int> indices = getProperty(PropertyNames::REFERENCE_SPECTRA);
   const std::string indexType = getProperty(PropertyNames::INDEX_TYPE);
   std::vector<size_t> workspaceIndices(indices.size());
   std::transform(indices.cbegin(), indices.cend(), workspaceIndices.begin(),
-                 [&indexType, this](int index) {
-                   return toWorkspaceIndex(index, indexType, m_inputWs);
-                 });
+                 [&indexType, this](int index) { return toWorkspaceIndex(index, indexType, m_inputWs); });
   return workspaceIndices;
 }
 

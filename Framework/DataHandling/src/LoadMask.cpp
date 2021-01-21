@@ -58,9 +58,7 @@ namespace {
  *                   from the input are added to it.
  */
 template <typename T>
-void convertToVector(const std::vector<T> &singles,
-                     const std::vector<T> &ranges,
-                     std::vector<T> &tot_singles) {
+void convertToVector(const std::vector<T> &singles, const std::vector<T> &ranges, std::vector<T> &tot_singles) {
 
   // find the size of the final vector of masked values
   size_t n_total(singles.size() + tot_singles.size());
@@ -88,13 +86,10 @@ void convertToVector(const std::vector<T> &singles,
  * @param pairs   -- vector of objects, defined as pairs, in the form min,max
  *                   value
  */
-template <typename T>
-void parseRangeText(const std::string &inputstr, std::vector<T> &singles,
-                    std::vector<T> &pairs) {
+template <typename T> void parseRangeText(const std::string &inputstr, std::vector<T> &singles, std::vector<T> &pairs) {
   // 1. Split ','
   std::vector<std::string> rawstrings;
-  boost::split(rawstrings, inputstr, boost::is_any_of(","),
-               boost::token_compress_on);
+  boost::split(rawstrings, inputstr, boost::is_any_of(","), boost::token_compress_on);
 
   for (auto &rawstring : rawstrings) {
     // a) Find '-':
@@ -107,19 +102,16 @@ void parseRangeText(const std::string &inputstr, std::vector<T> &singles,
     // Process appropriately
     if (containDash) { // 4. Treat pairs
       std::vector<std::string> ptemp;
-      boost::split(ptemp, rawstring, boost::is_any_of("-"),
-                   boost::token_compress_on);
+      boost::split(ptemp, rawstring, boost::is_any_of("-"), boost::token_compress_on);
       if (ptemp.size() != 2) {
-        std::string error =
-            "Range string " + rawstring + " has a wrong format!";
+        std::string error = "Range string " + rawstring + " has a wrong format!";
         throw std::invalid_argument(error);
       }
       // b) parse
       auto intstart = boost::lexical_cast<T>(ptemp[0]);
       auto intend = boost::lexical_cast<T>(ptemp[1]);
       if (intstart >= intend) {
-        std::string error =
-            "Range string " + rawstring + " has wrong order of detectors ID!";
+        std::string error = "Range string " + rawstring + " has wrong order of detectors ID!";
         throw std::invalid_argument(error);
       }
       pairs.emplace_back(intstart);
@@ -140,12 +132,10 @@ void parseRangeText(const std::string &inputstr, std::vector<T> &singles,
  * @param  ins    -- input string in ISIS ASCII format
  * @return ranges -- vector of a,b pairs converted from input
  */
-void parseISISStringToVector(const std::string &ins,
-                             std::vector<Mantid::specnum_t> &ranges) {
+void parseISISStringToVector(const std::string &ins, std::vector<Mantid::specnum_t> &ranges) {
   // 1. Split by space
   std::vector<string> splitstrings;
-  boost::split(splitstrings, ins, boost::is_any_of(" "),
-               boost::token_compress_on);
+  boost::split(splitstrings, ins, boost::is_any_of(" "), boost::token_compress_on);
 
   // 2. Replace a-b to a - b, remove a-b and insert a, -, b
   bool tocontinue = true;
@@ -158,8 +148,7 @@ void parseISISStringToVector(const std::string &ins,
 
     // b) Need to split?
     vector<string> temps;
-    boost::split(temps, splitstrings[index], boost::is_any_of("-"),
-                 boost::token_compress_on);
+    boost::split(temps, splitstrings[index], boost::is_any_of("-"), boost::token_compress_on);
     if (splitstrings[index] == "-" || temps.size() == 1) {
       // Nothing to split
       index++;
@@ -189,19 +178,16 @@ void parseISISStringToVector(const std::string &ins,
   index = 0;
   while (tocontinue) {
     // i)   push to the starting vector
-    ranges.emplace_back(
-        boost::lexical_cast<Mantid::specnum_t>(splitstrings[index]));
+    ranges.emplace_back(boost::lexical_cast<Mantid::specnum_t>(splitstrings[index]));
 
     // ii)  push the ending vector
     if (index == splitstrings.size() - 1 || splitstrings[index + 1] != "-") {
       // the next one is not '-'
-      ranges.emplace_back(
-          boost::lexical_cast<Mantid::specnum_t>(splitstrings[index]));
+      ranges.emplace_back(boost::lexical_cast<Mantid::specnum_t>(splitstrings[index]));
       index++;
     } else {
       // the next one is '-', thus read '-', next
-      ranges.emplace_back(
-          boost::lexical_cast<Mantid::specnum_t>(splitstrings[index + 2]));
+      ranges.emplace_back(boost::lexical_cast<Mantid::specnum_t>(splitstrings[index + 2]));
       index += 3;
     }
 
@@ -214,8 +200,7 @@ void parseISISStringToVector(const std::string &ins,
 @param isisfilename :: the string containing full path to an ISIS mask file
 @param SpectraMasks :: output list of the spectra numbers to mask.
 */
-void loadISISMaskFile(const std::string &isisfilename,
-                      std::vector<Mantid::specnum_t> &spectraMasks) {
+void loadISISMaskFile(const std::string &isisfilename, std::vector<Mantid::specnum_t> &spectraMasks) {
 
   std::vector<Mantid::specnum_t> ranges;
 
@@ -253,8 +238,7 @@ void loadISISMaskFile(const std::string &isisfilename,
  * @param toMask:     vector of string containing component names for masking
  * @param toUnmask    vector of strings containing component names for unmasking
  */
-void parseComponent(const std::string &valuetext, bool tomask,
-                    std::vector<std::string> &toMask,
+void parseComponent(const std::string &valuetext, bool tomask, std::vector<std::string> &toMask,
                     std::vector<std::string> &toUnmask) {
 
   // 1. Parse bank out
@@ -275,26 +259,22 @@ DECLARE_ALGORITHM(LoadMask)
 void LoadMask::init() {
 
   // 1. Declare property
-  declareProperty("Instrument", "",
-                  std::make_shared<MandatoryValidator<std::string>>(),
+  declareProperty("Instrument", "", std::make_shared<MandatoryValidator<std::string>>(),
                   "The name of the instrument to apply the mask.");
 
   const std::vector<std::string> maskExts{".xml", ".msk"};
-  declareProperty(std::make_unique<FileProperty>("InputFile", "",
-                                                 FileProperty::Load, maskExts),
+  declareProperty(std::make_unique<FileProperty>("InputFile", "", FileProperty::Load, maskExts),
                   "Masking file for masking. Supported file format is XML and "
                   "ISIS ASCII. ");
-  declareProperty(
-      std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
-          "RefWorkspace", "", Direction::Input, PropertyMode::Optional),
-      "The name of the workspace wich defines instrument and spectra, "
-      "used as the source of the spectra-detector map for the mask to load. "
-      "The instrument, attached to this workspace has to be the same as the "
-      "one specified by 'Instrument' property");
+  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>("RefWorkspace", "", Direction::Input,
+                                                                            PropertyMode::Optional),
+                  "The name of the workspace wich defines instrument and spectra, "
+                  "used as the source of the spectra-detector map for the mask to load. "
+                  "The instrument, attached to this workspace has to be the same as the "
+                  "one specified by 'Instrument' property");
 
   declareProperty(
-      std::make_unique<WorkspaceProperty<DataObjects::MaskWorkspace>>(
-          "OutputWorkspace", "Masking", Direction::Output),
+      std::make_unique<WorkspaceProperty<DataObjects::MaskWorkspace>>("OutputWorkspace", "Masking", Direction::Output),
       "Output Masking Workspace");
 }
 
@@ -334,8 +314,7 @@ void LoadMask::exec() {
     // 2.1 XML File
     this->initializeXMLParser(filename);
     this->parseXML();
-  } else if (boost::ends_with(filename, "k") ||
-             boost::ends_with(filename, "K")) {
+  } else if (boost::ends_with(filename, "k") || boost::ends_with(filename, "K")) {
     // 2.2 ISIS Masking file
     loadISISMaskFile(filename, m_maskSpecID);
     m_defaultToUse = true;
@@ -359,8 +338,7 @@ void LoadMask::exec() {
 
   // 4. Apply
   this->initDetectors();
-  const detid2index_map indexmap =
-      m_maskWS->getDetectorIDToWorkspaceIndexMap(true);
+  const detid2index_map indexmap = m_maskWS->getDetectorIDToWorkspaceIndexMap(true);
 
   this->processMaskOnDetectors(indexmap, true, m_maskDetID);
   // TODO: Not implemented, but should work as soon as m_unMask contains
@@ -385,13 +363,11 @@ void LoadMask::initDetectors() {
  *   @param tomask:  true to mask, false to unmask
  *   @param singledetids: list of individual det ids to mask
  */
-void LoadMask::processMaskOnDetectors(
-    const detid2index_map &indexmap, bool tomask,
-    const std::vector<detid_t> &singledetids) {
+void LoadMask::processMaskOnDetectors(const detid2index_map &indexmap, bool tomask,
+                                      const std::vector<detid_t> &singledetids) {
   // 1. Get index map
   // 2. Mask
-  g_log.debug() << "Mask = " << tomask
-                << "  Final Single IDs Size = " << singledetids.size() << '\n';
+  g_log.debug() << "Mask = " << tomask << "  Final Single IDs Size = " << singledetids.size() << '\n';
 
   for (auto detid : singledetids) {
     detid2index_map::const_iterator it;
@@ -413,17 +389,14 @@ void LoadMask::processMaskOnDetectors(
  * @param detectors      -- vector of detector ids, which belongs to components
  *provided as input.
  */
-void LoadMask::componentToDetectors(
-    const std::vector<std::string> &componentnames,
-    std::vector<detid_t> &detectors) {
+void LoadMask::componentToDetectors(const std::vector<std::string> &componentnames, std::vector<detid_t> &detectors) {
   Geometry::Instrument_const_sptr minstrument = m_maskWS->getInstrument();
 
   for (auto &componentname : componentnames) {
     g_log.debug() << "Component name = " << componentname << '\n';
 
     // a) get component
-    Geometry::IComponent_const_sptr component =
-        minstrument->getComponentByName(componentname);
+    Geometry::IComponent_const_sptr component = minstrument->getComponentByName(componentname);
     if (component)
       g_log.debug() << "Component ID = " << component->getComponentID() << '\n';
     else {
@@ -446,8 +419,7 @@ void LoadMask::componentToDetectors(
 
     for (const auto &child : children) {
       // c) convert component to detector
-      Geometry::IDetector_const_sptr det =
-          std::dynamic_pointer_cast<const Geometry::IDetector>(child);
+      Geometry::IDetector_const_sptr det = std::dynamic_pointer_cast<const Geometry::IDetector>(child);
 
       if (det) {
         detid_t detid = det->getID();
@@ -460,8 +432,8 @@ void LoadMask::componentToDetectors(
       }
     }
 
-    g_log.debug() << "Number of Detectors in Children = " << numdets
-                  << "  Range = " << id_min << ", " << id_max << '\n';
+    g_log.debug() << "Number of Detectors in Children = " << numdets << "  Range = " << id_min << ", " << id_max
+                  << '\n';
   } // for component
 }
 
@@ -471,8 +443,7 @@ void LoadMask::componentToDetectors(
  * @param   singlebanks -- vector of string containing bank names
  * @param  detectors   -- vector of detector-id-s belonging to these banks
  */
-void LoadMask::bankToDetectors(const std::vector<std::string> &singlebanks,
-                               std::vector<detid_t> &detectors) {
+void LoadMask::bankToDetectors(const std::vector<std::string> &singlebanks, std::vector<detid_t> &detectors) {
   std::stringstream infoss;
   infoss << "Bank IDs to be converted to detectors: \n";
   for (auto &singlebank : singlebanks) {
@@ -486,8 +457,7 @@ void LoadMask::bankToDetectors(const std::vector<std::string> &singlebanks,
     std::vector<Geometry::IDetector_const_sptr> idetectors;
 
     minstrument->getDetectorsInBank(idetectors, singlebank);
-    g_log.debug() << "Bank: " << singlebank << " has " << idetectors.size()
-                  << " detectors\n";
+    g_log.debug() << "Bank: " << singlebank << " has " << idetectors.size() << " detectors\n";
 
     // a) get information
     size_t numdets = idetectors.size();
@@ -500,9 +470,8 @@ void LoadMask::bankToDetectors(const std::vector<std::string> &singlebanks,
       detid_t detid = det->getID();
       detectors.emplace_back(detid);
     }
-    g_log.debug() << "Number of Detectors in Bank  " << singlebank
-                  << "  is: " << numdets << "\nRange From: " << detid_first
-                  << " To: " << detid_last << '\n';
+    g_log.debug() << "Number of Detectors in Bank  " << singlebank << "  is: " << numdets
+                  << "\nRange From: " << detid_first << " To: " << detid_last << '\n';
 
   } // ENDFOR
 }
@@ -515,8 +484,7 @@ void LoadMask::bankToDetectors(const std::vector<std::string> &singlebanks,
  *@param singleDetIds    -- vector of det-id-s to extend if workspace-
  *                          source of spectra-detector map is provided
  */
-void LoadMask::processMaskOnWorkspaceIndex(bool mask,
-                                           std::vector<int32_t> &maskedSpecID,
+void LoadMask::processMaskOnWorkspaceIndex(bool mask, std::vector<int32_t> &maskedSpecID,
                                            std::vector<int32_t> &singleDetIds) {
   // 1. Check
   if (maskedSpecID.empty())
@@ -525,8 +493,7 @@ void LoadMask::processMaskOnWorkspaceIndex(bool mask,
   if (m_sourceMapWS) {
     // convert spectra masks into det-id mask using source workspace
     convertSpMasksToDetIDs(*m_sourceMapWS, maskedSpecID, singleDetIds);
-    maskedSpecID
-        .clear(); // spectra ID not needed any more as all converted to det-ids
+    maskedSpecID.clear(); // spectra ID not needed any more as all converted to det-ids
     return;
   }
   // 2. Get Map
@@ -542,19 +509,15 @@ void LoadMask::processMaskOnWorkspaceIndex(bool mask,
     s2iter = s2imap.find(spec2mask);
     if (s2iter == s2imap.end()) {
       // spectrum not found.  bad branch
-      g_log.error()
-          << "Spectrum " << spec2mask
-          << " does not have an entry in GroupWorkspace's spec2index map\n";
+      g_log.error() << "Spectrum " << spec2mask << " does not have an entry in GroupWorkspace's spec2index map\n";
       throw std::runtime_error("Logic error");
     } else {
       size_t wsindex = s2iter->second;
       if (wsindex >= m_maskWS->getNumberHistograms()) {
         // workspace index is out of range.  bad branch
         g_log.error() << "Group workspace's spec2index map is set wrong: "
-                      << " Found workspace index = " << wsindex
-                      << " for spectrum No " << spec2mask
-                      << " with workspace size = "
-                      << m_maskWS->getNumberHistograms() << '\n';
+                      << " Found workspace index = " << wsindex << " for spectrum No " << spec2mask
+                      << " with workspace size = " << m_maskWS->getNumberHistograms() << '\n';
       } else {
         // Finally set the masking;
         m_maskWS->mutableY(wsindex)[0] = (mask) ? 1.0 : 0.0;
@@ -562,8 +525,7 @@ void LoadMask::processMaskOnWorkspaceIndex(bool mask,
     }   // IF-ELSE: spectrum No has an entry
 
     if (spec2mask > prev_masks + 1) {
-      g_log.debug() << "Masked Spectrum " << spec0 << "  To " << prev_masks
-                    << '\n';
+      g_log.debug() << "Masked Spectrum " << spec0 << "  To " << prev_masks << '\n';
       spec0 = spec2mask;
     }
   } // FOR EACH SpecNo
@@ -584,8 +546,7 @@ void LoadMask::initializeXMLParser(const std::string &filename) {
   try {
     m_pDoc = pParser.parseString(xmlText);
   } catch (Poco::Exception &exc) {
-    throw Kernel::Exception::FileError(
-        exc.displayText() + ". Unable to parse File:", filename);
+    throw Kernel::Exception::FileError(exc.displayText() + ". Unable to parse File:", filename);
   } catch (...) {
     throw Kernel::Exception::FileError("Unable to parse File:", filename);
   }
@@ -593,8 +554,7 @@ void LoadMask::initializeXMLParser(const std::string &filename) {
   m_pRootElem = m_pDoc->documentElement();
   if (!m_pRootElem->hasChildNodes()) {
     g_log.error("XML file: " + filename + "contains no root element.");
-    throw Kernel::Exception::InstrumentDefinitionError(
-        "No root element in XML instrument file", filename);
+    throw Kernel::Exception::InstrumentDefinitionError("No root element in XML instrument file", filename);
   }
 }
 
@@ -698,26 +658,22 @@ void LoadMask::parseXML() {
  * @param maskedSpecID   -- vector of spectra id to mask
  * @param singleDetIds   -- output vector of detector ids to mask
  */
-void LoadMask::convertSpMasksToDetIDs(const API::MatrixWorkspace &sourceWS,
-                                      const std::vector<int32_t> &maskedSpecID,
+void LoadMask::convertSpMasksToDetIDs(const API::MatrixWorkspace &sourceWS, const std::vector<int32_t> &maskedSpecID,
                                       std::vector<int32_t> &singleDetIds) {
 
   spec2index_map s2imap = sourceWS.getSpectrumToWorkspaceIndexMap();
-  detid2index_map sourceDetMap =
-      sourceWS.getDetectorIDToWorkspaceIndexMap(false);
+  detid2index_map sourceDetMap = sourceWS.getDetectorIDToWorkspaceIndexMap(false);
 
   std::multimap<size_t, Mantid::detid_t> spectr2index_map;
   for (auto &it : sourceDetMap) {
-    spectr2index_map.insert(
-        std::pair<size_t, Mantid::detid_t>(it.second, it.first));
+    spectr2index_map.insert(std::pair<size_t, Mantid::detid_t>(it.second, it.first));
   }
   spec2index_map new_map;
   for (int i : maskedSpecID) {
     // find spectra number from spectra ID for the source workspace
     const auto itSpec = s2imap.find(i);
     if (itSpec == s2imap.end()) {
-      throw std::runtime_error("Can not find spectra with ID: " +
-                               boost::lexical_cast<std::string>(i) +
+      throw std::runtime_error("Can not find spectra with ID: " + boost::lexical_cast<std::string>(i) +
                                " in the workspace" + sourceWS.getName());
     }
     size_t specN = itSpec->second;
@@ -725,9 +681,8 @@ void LoadMask::convertSpMasksToDetIDs(const API::MatrixWorkspace &sourceWS,
     // find detector range related to this spectra id in the source workspace
     const auto source_range = spectr2index_map.equal_range(specN);
     if (source_range.first == spectr2index_map.end()) {
-      throw std::runtime_error(
-          "Can not find spectra N: " + boost::lexical_cast<std::string>(specN) +
-          " in the workspace" + sourceWS.getName());
+      throw std::runtime_error("Can not find spectra N: " + boost::lexical_cast<std::string>(specN) +
+                               " in the workspace" + sourceWS.getName());
     }
     // add detectors to the masked det-id list
     for (auto it = source_range.first; it != source_range.second; ++it) {
@@ -742,13 +697,11 @@ void LoadMask::convertSpMasksToDetIDs(const API::MatrixWorkspace &sourceWS,
 void LoadMask::intializeMaskWorkspace() {
 
   if (m_sourceMapWS) {
-    m_maskWS = DataObjects::MaskWorkspace_sptr(
-        new DataObjects::MaskWorkspace(m_sourceMapWS->getInstrument()));
+    m_maskWS = DataObjects::MaskWorkspace_sptr(new DataObjects::MaskWorkspace(m_sourceMapWS->getInstrument()));
   } else {
     MatrixWorkspace_sptr tempWs(new DataObjects::Workspace2D());
     const bool ignoreDirs(true);
-    const std::string idfPath = API::FileFinder::Instance().getFullPath(
-        m_instrumentPropValue, ignoreDirs);
+    const std::string idfPath = API::FileFinder::Instance().getFullPath(m_instrumentPropValue, ignoreDirs);
 
     auto loadInst = createChildAlgorithm("LoadInstrument");
     loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", tempWs);
@@ -758,19 +711,15 @@ void LoadMask::intializeMaskWorkspace() {
     else
       loadInst->setPropertyValue("Filename", m_instrumentPropValue);
 
-    loadInst->setProperty("RewriteSpectraMap",
-                          Mantid::Kernel::OptionalBool(false));
+    loadInst->setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(false));
     loadInst->executeAsChildAlg();
 
     if (!loadInst->isExecuted()) {
-      g_log.error() << "Unable to load Instrument " << m_instrumentPropValue
-                    << '\n';
-      throw std::invalid_argument(
-          "Incorrect instrument name or invalid IDF given.");
+      g_log.error() << "Unable to load Instrument " << m_instrumentPropValue << '\n';
+      throw std::invalid_argument("Incorrect instrument name or invalid IDF given.");
     }
 
-    m_maskWS = DataObjects::MaskWorkspace_sptr(
-        new DataObjects::MaskWorkspace(tempWs->getInstrument()));
+    m_maskWS = DataObjects::MaskWorkspace_sptr(new DataObjects::MaskWorkspace(tempWs->getInstrument()));
   }
   m_maskWS->setTitle("Mask");
 }
@@ -808,15 +757,13 @@ std::map<std::string, std::string> LoadMask::validateInputs() {
       std::string Name = inst->getName();
       boost::algorithm::to_lower(Name);
       if (Name != InstrName && !IDF_provided) {
-        result["RefWorkspace"] =
-            "If both reference workspace and instrument name are defined, "
-            "workspace has to have the instrument with the same name\n"
-            "'Instrument' value: " +
-            InstrName + " Workspace Instrument name: " + Name;
+        result["RefWorkspace"] = "If both reference workspace and instrument name are defined, "
+                                 "workspace has to have the instrument with the same name\n"
+                                 "'Instrument' value: " +
+                                 InstrName + " Workspace Instrument name: " + Name;
       }
     } catch (Kernel::Exception::NotFoundError &) {
-      result["RefWorkspace"] =
-          "If reference workspace is defined, it mast have an instrument";
+      result["RefWorkspace"] = "If reference workspace is defined, it mast have an instrument";
     }
   }
 

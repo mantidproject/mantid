@@ -27,8 +27,7 @@ use the ADS under-the-hood.
 class DLLExport WorkspaceProvider {
 public:
   virtual bool canProvideWorkspace(std::string wsName) const = 0;
-  virtual Mantid::API::Workspace_sptr
-  fetchWorkspace(std::string wsName) const = 0;
+  virtual Mantid::API::Workspace_sptr fetchWorkspace(std::string wsName) const = 0;
   virtual void disposeWorkspace(std::string wsName) const = 0;
   virtual ~WorkspaceProvider() {}
 };

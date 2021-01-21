@@ -19,8 +19,7 @@ using Kernel::Strings::join;
  * @param flags A combination of SampleValidator::Requirements flags. Defaults
  * to requiring both a shape and material
  */
-SampleValidator::SampleValidator(const unsigned int flags)
-    : m_requires(flags) {}
+SampleValidator::SampleValidator(const unsigned int flags) : m_requires(flags) {}
 
 /**
  * @return A string type identifier for the object
@@ -30,9 +29,7 @@ std::string SampleValidator::getType() const { return "Sample"; }
 /**
  * @return A copy of the current state of the object
  */
-Kernel::IValidator_sptr SampleValidator::clone() const {
-  return std::make_shared<SampleValidator>(*this);
-}
+Kernel::IValidator_sptr SampleValidator::clone() const { return std::make_shared<SampleValidator>(*this); }
 
 /**
  * Check if the workspace satisfies the validation requirements
@@ -40,8 +37,7 @@ Kernel::IValidator_sptr SampleValidator::clone() const {
  * @return An empty string if the requirements are satisfied otherwise
  * a string containing a message indicating the problem(s)
  */
-std::string
-SampleValidator::checkValidity(const MatrixWorkspace_sptr &value) const {
+std::string SampleValidator::checkValidity(const MatrixWorkspace_sptr &value) const {
   const auto &shape = value->sample().getShape();
   std::list<std::string> missing;
   if ((m_requires & Shape) && !shape.hasValidShape())
@@ -53,8 +49,7 @@ SampleValidator::checkValidity(const MatrixWorkspace_sptr &value) const {
   if (missing.empty())
     return "";
   else {
-    return "The sample is missing the following properties: " +
-           join(missing.begin(), missing.end(), ",");
+    return "The sample is missing the following properties: " + join(missing.begin(), missing.end(), ",");
   }
 }
 

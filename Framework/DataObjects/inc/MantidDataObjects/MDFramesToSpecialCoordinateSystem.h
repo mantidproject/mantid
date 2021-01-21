@@ -19,16 +19,12 @@ namespace DataObjects {
 */
 class DLLExport MDFramesToSpecialCoordinateSystem {
 public:
-  boost::optional<Mantid::Kernel::SpecialCoordinateSystem>
-  operator()(const Mantid::API::IMDWorkspace *workspace) const;
+  boost::optional<Mantid::Kernel::SpecialCoordinateSystem> operator()(const Mantid::API::IMDWorkspace *workspace) const;
 
 private:
-  void checkQCompatibility(
-      Mantid::Kernel::SpecialCoordinateSystem specialCoordinateSystem,
-      boost::optional<Mantid::Kernel::SpecialCoordinateSystem> qFrameType)
-      const;
-  bool isUnknownFrame(
-      const Mantid::Geometry::IMDDimension_const_sptr &dimension) const;
+  void checkQCompatibility(Mantid::Kernel::SpecialCoordinateSystem specialCoordinateSystem,
+                           boost::optional<Mantid::Kernel::SpecialCoordinateSystem> qFrameType) const;
+  bool isUnknownFrame(const Mantid::Geometry::IMDDimension_const_sptr &dimension) const;
 };
 
 } // namespace DataObjects

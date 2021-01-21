@@ -20,14 +20,12 @@ namespace Kernel {
     @date 09/11/2010
 */
 template <typename TYPE>
-class MANTID_KERNEL_DLL ArrayBoundedValidator final
-    : public TypedValidator<std::vector<TYPE>> {
+class MANTID_KERNEL_DLL ArrayBoundedValidator final : public TypedValidator<std::vector<TYPE>> {
 public:
   ArrayBoundedValidator() = default;
   ArrayBoundedValidator(const ArrayBoundedValidator<TYPE> &abv) noexcept;
   ArrayBoundedValidator(const TYPE lowerBound, const TYPE upperBound) noexcept;
-  ArrayBoundedValidator(TYPE lowerBound, TYPE upperBound,
-                        bool exclusive) noexcept;
+  ArrayBoundedValidator(TYPE lowerBound, TYPE upperBound, bool exclusive) noexcept;
   ArrayBoundedValidator(BoundedValidator<TYPE> &bv) noexcept;
   /// Clone the current state
   IValidator_sptr clone() const override;

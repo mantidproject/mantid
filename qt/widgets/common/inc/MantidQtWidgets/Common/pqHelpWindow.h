@@ -51,9 +51,7 @@ class DelegatingWebPage : public QWebEnginePage {
 public:
   DelegatingWebPage(QObject *parent = nullptr) : QWebEnginePage(parent) {}
 
-  bool acceptNavigationRequest(const QUrl &url,
-                               QWebEnginePage::NavigationType type,
-                               bool) override {
+  bool acceptNavigationRequest(const QUrl &url, QWebEnginePage::NavigationType type, bool) override {
     if (type == QWebEnginePage::NavigationTypeLinkClicked) {
       emit linkClicked(url);
       if (url.scheme().startsWith("http") || url.toString().endsWith(".png")) {
@@ -77,8 +75,7 @@ class EXPORT_OPT_MANTIDQT_COMMON pqHelpWindow : public QMainWindow {
   using Superclass = QMainWindow;
 
 public:
-  pqHelpWindow(QHelpEngine *engine, QWidget *parent = nullptr,
-               const Qt::WindowFlags &flags = nullptr);
+  pqHelpWindow(QHelpEngine *engine, QWidget *parent = nullptr, const Qt::WindowFlags &flags = nullptr);
 
 public slots:
   /// Requests showing of a particular page. The url must begin with "qthelp:"
@@ -105,8 +102,7 @@ signals:
 
 protected slots:
   void search();
-  void linkHovered(const QString &link, const QString &title = "",
-                   const QString &textContent = "");
+  void linkHovered(const QString &link, const QString &title = "", const QString &textContent = "");
   void updateNavButtons();
 
 protected:

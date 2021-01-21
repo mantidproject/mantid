@@ -60,8 +60,7 @@ public:
   enum ExecutionMode { Serialised, Asynchronous, Running, NotExecuting };
 
   /// Constructor
-  Script(ScriptingEnv *env, const QString &name, const InteractionType interact,
-         QObject *context = nullptr);
+  Script(ScriptingEnv *env, const QString &name, const InteractionType interact, QObject *context = nullptr);
   /// Destructor
   ~Script() override;
   /// Returns the environment this script is tied to
@@ -139,9 +138,7 @@ signals:
 
 protected:
   /// Return the true line number by adding the offset
-  inline int getRealLineNo(const int codeLine) const {
-    return codeLine + m_code.offset();
-  }
+  inline int getRealLineNo(const int codeLine) const { return codeLine + m_code.offset(); }
   /// Return the code string
   inline const std::string &codeString() const { return m_code.codeString(); }
   /// Return the script code object

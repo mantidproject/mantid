@@ -18,9 +18,7 @@ class SplineSmoothingTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static SplineSmoothingTest *createSuite() {
-    return new SplineSmoothingTest();
-  }
+  static SplineSmoothingTest *createSuite() { return new SplineSmoothingTest(); }
   static void destroySuite(SplineSmoothingTest *suite) { delete suite; }
 
   // Functor for generating data
@@ -42,8 +40,7 @@ public:
 
     // create a binned workspace
     MatrixWorkspace_sptr inputWorkspace =
-        WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-            SplineFunc(), spectra, 0, 5, 0.02, false);
+        WorkspaceCreationHelper::create2DWorkspaceFromFunction(SplineFunc(), spectra, 0, 5, 0.02, false);
 
     // setup algorithm
     SplineSmoothing alg;
@@ -59,8 +56,7 @@ public:
 
     // create a binned workspace
     MatrixWorkspace_sptr inputWorkspace =
-        WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-            SplineFunc(), spectra, 0, 5, 0.02, true);
+        WorkspaceCreationHelper::create2DWorkspaceFromFunction(SplineFunc(), spectra, 0, 5, 0.02, true);
 
     SplineSmoothing alg;
     runAlgorithm(alg, order, inputWorkspace);
@@ -75,8 +71,7 @@ public:
 
     // create a binned workspace
     MatrixWorkspace_sptr inputWorkspace =
-        WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-            SplineFunc(), spectra, 0, 5, 0.02, true);
+        WorkspaceCreationHelper::create2DWorkspaceFromFunction(SplineFunc(), spectra, 0, 5, 0.02, true);
 
     SplineSmoothing alg;
     runAlgorithm(alg, order, inputWorkspace);
@@ -90,8 +85,7 @@ public:
     WorkspaceGroup_const_sptr derivs = alg.getProperty("OutputWorkspaceDeriv");
 
     for (size_t i = 0; i < ows->getNumberHistograms(); ++i) {
-      MatrixWorkspace_const_sptr derivsWs =
-          std::dynamic_pointer_cast<const MatrixWorkspace>(derivs->getItem(i));
+      MatrixWorkspace_const_sptr derivsWs = std::dynamic_pointer_cast<const MatrixWorkspace>(derivs->getItem(i));
       const auto &xs = ows->x(i);
       const auto &ys = ows->y(i);
       const auto &d1 = derivsWs->y(0);
@@ -106,8 +100,7 @@ public:
     }
   }
 
-  void runAlgorithm(SplineSmoothing &alg, int order,
-                    const Mantid::API::MatrixWorkspace_sptr &iws) const {
+  void runAlgorithm(SplineSmoothing &alg, int order, const Mantid::API::MatrixWorkspace_sptr &iws) const {
     alg.initialize();
     alg.setChild(true);
     alg.setPropertyValue("OutputWorkspace", "Anon");

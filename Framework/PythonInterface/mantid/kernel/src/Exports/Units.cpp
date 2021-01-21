@@ -21,8 +21,7 @@ namespace {
  * @param caption The name of the unit
  * @param label The symbol for the unit
  */
-void setLabelFromStdString(Label &self, const std::string &caption,
-                           const std::string &label) {
+void setLabelFromStdString(Label &self, const std::string &caption, const std::string &label) {
   self.setLabel(caption, label);
 }
 } // namespace
@@ -31,13 +30,10 @@ void setLabelFromStdString(Label &self, const std::string &caption,
 // have additional functionality over the base class
 void export_Label() {
   class_<Label, bases<Unit>, boost::noncopyable>("Label", no_init)
-      .def("setLabel", &setLabelFromStdString,
-           (arg("self"), arg("caption"), arg("label")),
+      .def("setLabel", &setLabelFromStdString, (arg("self"), arg("caption"), arg("label")),
            "Set the caption (e.g.Temperature) & label (K) on the unit")
 
-      .def("setLabel",
-           (void (Label::*)(const std::string &, const UnitLabel &)) &
-               Label::setLabel,
+      .def("setLabel", (void (Label::*)(const std::string &, const UnitLabel &)) & Label::setLabel,
            (arg("self"), arg("caption"), arg("label")),
            "Set the caption (e.g.Temperature) "
            "& label (K) on the unit, See the "

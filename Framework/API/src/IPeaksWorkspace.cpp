@@ -39,34 +39,26 @@ namespace Kernel {
 
 template <>
 MANTID_API_DLL Mantid::API::IPeaksWorkspace_sptr
-IPropertyManager::getValue<Mantid::API::IPeaksWorkspace_sptr>(
-    const std::string &name) const {
-  auto *prop =
-      dynamic_cast<PropertyWithValue<Mantid::API::IPeaksWorkspace_sptr> *>(
-          getPointerToProperty(name));
+IPropertyManager::getValue<Mantid::API::IPeaksWorkspace_sptr>(const std::string &name) const {
+  auto *prop = dynamic_cast<PropertyWithValue<Mantid::API::IPeaksWorkspace_sptr> *>(getPointerToProperty(name));
   if (prop) {
     return *prop;
   } else {
     std::string message =
-        "Attempt to assign property " + name +
-        " to incorrect type. Expected shared_ptr<PeaksWorkspace>.";
+        "Attempt to assign property " + name + " to incorrect type. Expected shared_ptr<PeaksWorkspace>.";
     throw std::runtime_error(message);
   }
 }
 
 template <>
 MANTID_API_DLL Mantid::API::IPeaksWorkspace_const_sptr
-IPropertyManager::getValue<Mantid::API::IPeaksWorkspace_const_sptr>(
-    const std::string &name) const {
-  auto *prop =
-      dynamic_cast<PropertyWithValue<Mantid::API::IPeaksWorkspace_sptr> *>(
-          getPointerToProperty(name));
+IPropertyManager::getValue<Mantid::API::IPeaksWorkspace_const_sptr>(const std::string &name) const {
+  auto *prop = dynamic_cast<PropertyWithValue<Mantid::API::IPeaksWorkspace_sptr> *>(getPointerToProperty(name));
   if (prop) {
     return prop->operator()();
   } else {
     std::string message =
-        "Attempt to assign property " + name +
-        " to incorrect type. Expected const shared_ptr<PeaksWorkspace>.";
+        "Attempt to assign property " + name + " to incorrect type. Expected const shared_ptr<PeaksWorkspace>.";
     throw std::runtime_error(message);
   }
 }

@@ -13,8 +13,7 @@
 #include <QStyle>
 #include <QVBoxLayout>
 
-ReportUsageDisableDialog::ReportUsageDisableDialog(FirstTimeSetup *parent)
-    : QDialog(parent) {
+ReportUsageDisableDialog::ReportUsageDisableDialog(FirstTimeSetup *parent) : QDialog(parent) {
   auto parentLayout = new QHBoxLayout(this);
   this->setLayout(parentLayout);
 
@@ -31,15 +30,13 @@ void ReportUsageDisableDialog::addLeftSide(QHBoxLayout *parentLayout) {
   labelButActuallyAnIcon->setPixmap(icon.pixmap(32, 32));
   iconLayout->addWidget(labelButActuallyAnIcon);
 
-  auto vspacer =
-      new QSpacerItem(1, 1, QSizePolicy::Minimum, QSizePolicy::Expanding);
+  auto vspacer = new QSpacerItem(1, 1, QSizePolicy::Minimum, QSizePolicy::Expanding);
   iconLayout->addSpacerItem(vspacer);
 
   parentLayout->addLayout(iconLayout);
 }
 
-void ReportUsageDisableDialog::addRightSide(QHBoxLayout *parentLayout,
-                                            FirstTimeSetup *parent) {
+void ReportUsageDisableDialog::addRightSide(QHBoxLayout *parentLayout, FirstTimeSetup *parent) {
   auto textLayout = new QVBoxLayout();
   this->setWindowTitle("Mantid: Report Usage Data ");
 
@@ -52,25 +49,22 @@ void ReportUsageDisableDialog::addRightSide(QHBoxLayout *parentLayout,
                  "MantidProject:Privacy_policy#Usage_Data_recorded_in_Mantid'"
                  ">Privacy Policy</a>)");
   label->setOpenExternalLinks(false);
-  connect(label, SIGNAL(linkActivated(const QString &)), parent,
-          SLOT(openExternalLink(const QString &)));
+  connect(label, SIGNAL(linkActivated(const QString &)), parent, SLOT(openExternalLink(const QString &)));
   textLayout->addWidget(label);
 
   auto labelInformation = new QLabel(this);
-  labelInformation->setText(
-      "All usage data is anonymous and untraceable.\n"
-      "We use the usage data to inform the future development of Mantid.\n"
-      "If you click \"Yes\" aspects you need risk being deprecated in "
-      "future versions if we think they are not used.\n\n"
-      "Are you sure you still want to disable reporting usage data?\n"
-      "Please click \"No\".");
+  labelInformation->setText("All usage data is anonymous and untraceable.\n"
+                            "We use the usage data to inform the future development of Mantid.\n"
+                            "If you click \"Yes\" aspects you need risk being deprecated in "
+                            "future versions if we think they are not used.\n\n"
+                            "Are you sure you still want to disable reporting usage data?\n"
+                            "Please click \"No\".");
   textLayout->addWidget(labelInformation);
 
   auto buttonLayout = new QHBoxLayout();
   {
 
-    auto leftSpacer =
-        new QSpacerItem(1, 1, QSizePolicy::Expanding, QSizePolicy::Minimum);
+    auto leftSpacer = new QSpacerItem(1, 1, QSizePolicy::Expanding, QSizePolicy::Minimum);
     buttonLayout->addSpacerItem(leftSpacer);
 
     auto noBtn = new QPushButton("No", this);
@@ -84,8 +78,7 @@ void ReportUsageDisableDialog::addRightSide(QHBoxLayout *parentLayout,
 
     buttonLayout->addWidget(yesBtn);
 
-    auto rightSpacer =
-        new QSpacerItem(1, 1, QSizePolicy::Expanding, QSizePolicy::Minimum);
+    auto rightSpacer = new QSpacerItem(1, 1, QSizePolicy::Expanding, QSizePolicy::Minimum);
     buttonLayout->addSpacerItem(rightSpacer);
   }
   textLayout->addLayout(buttonLayout);

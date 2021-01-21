@@ -35,13 +35,10 @@ DECLARE_ALGORITHM(LoadIsawSpectrum)
 /** Initialize the algorithm's properties.
  */
 void LoadIsawSpectrum::init() {
-  declareProperty(std::make_unique<FileProperty>(
-                      "SpectraFile", "", API::FileProperty::Load, ".dat"),
+  declareProperty(std::make_unique<FileProperty>("SpectraFile", "", API::FileProperty::Load, ".dat"),
                   "Incident spectrum and detector efficiency correction file.");
-  declareProperty(
-      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          "OutputWorkspace", "", Direction::Output),
-      "An output Workspace containing spectra for each detector bank.");
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
+                  "An output Workspace containing spectra for each detector bank.");
   // 3 properties for getting the right instrument
   getInstrument3WaysInit(this);
 }
@@ -114,8 +111,7 @@ void LoadIsawSpectrum::exec() {
             assem2 = std::dynamic_pointer_cast<ICompAssembly>((*assem)[j]);
             if (assem2) {
               for (int k = 0; k < assem2->nelements(); k++) {
-                det = std::dynamic_pointer_cast<RectangularDetector>(
-                    (*assem2)[k]);
+                det = std::dynamic_pointer_cast<RectangularDetector>((*assem2)[k]);
                 if (det) {
                   detList.emplace_back(det);
                 }
@@ -128,8 +124,7 @@ void LoadIsawSpectrum::exec() {
   }
 
   MatrixWorkspace_sptr outWS = std::dynamic_pointer_cast<MatrixWorkspace>(
-      API::WorkspaceFactory::Instance().create(
-          "Workspace2D", spectra.size(), spectra[0].size(), spectra[0].size()));
+      API::WorkspaceFactory::Instance().create("Workspace2D", spectra.size(), spectra[0].size(), spectra[0].size()));
   outWS->setInstrument(inst);
   outWS->getAxis(0)->setUnit("TOF");
   outWS->setYUnit("Counts");
@@ -142,8 +137,7 @@ void LoadIsawSpectrum::exec() {
     outSpec.clearDetectorIDs();
     for (int j = 0; j < detList[i]->xpixels(); j++)
       for (int k = 0; k < detList[i]->ypixels(); k++)
-        outSpec.addDetectorID(
-            static_cast<detid_t>(detList[i]->getDetectorIDAtXY(j, k)));
+        outSpec.addDetectorID(static_cast<detid_t>(detList[i]->getDetectorIDAtXY(j, k)));
     auto &outX = outSpec.mutableX();
     auto &outY = outSpec.mutableY();
     auto &outE = outSpec.mutableE();
@@ -158,8 +152,7 @@ void LoadIsawSpectrum::exec() {
     // scattered beam
     double theta2 = dir.angle(V3D(0.0, 0.0, 1.0));
 
-    Mantid::Kernel::Unit_sptr unit =
-        UnitFactory::Instance().create("Wavelength");
+    Mantid::Kernel::Unit_sptr unit = UnitFactory::Instance().create("Wavelength");
     unit->toTOF(xdata, ydata, l1, l2, theta2, 0, 0.0, 0.0);
     double one = xdata[0];
     double spect1 = spectrumCalc(one, iSpec, time, spectra, i);
@@ -174,14 +167,12 @@ void LoadIsawSpectrum::exec() {
         outY[j] = spect;
         outE[j] = relSigSpect;
       } else {
-        throw std::runtime_error(
-            "Wavelength for normalizing to spectrum is out of range.");
+        throw std::runtime_error("Wavelength for normalizing to spectrum is out of range.");
       }
     }
   }
 
-  Algorithm_sptr convertAlg =
-      createChildAlgorithm("ConvertToHistogram", 0.0, 0.2);
+  Algorithm_sptr convertAlg = createChildAlgorithm("ConvertToHistogram", 0.0, 0.2);
   convertAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", outWS);
   // Now execute the convert Algorithm but allow any exception to bubble up
   convertAlg->execute();
@@ -190,10 +181,8 @@ void LoadIsawSpectrum::exec() {
   setProperty("OutputWorkspace", outWS);
 }
 
-double LoadIsawSpectrum::spectrumCalc(double TOF, int iSpec,
-                                      std::vector<std::vector<double>> time,
-                                      std::vector<std::vector<double>> spectra,
-                                      size_t id) {
+double LoadIsawSpectrum::spectrumCalc(double TOF, int iSpec, std::vector<std::vector<double>> time,
+                                      std::vector<std::vector<double>> spectra, size_t id) {
   double spect = 0;
   if (iSpec == 1) {
     //"Calculate the spectrum using spectral coefficients for the GSAS Type 2
@@ -212,17 +201,15 @@ double LoadIsawSpectrum::spectrumCalc(double TOF, int iSpec,
     double c10 = spectra[id][9];
     double c11 = spectra[id][10];
 
-    spect = c1 + c2 * exp(-c3 / std::pow(T, 2)) / std::pow(T, 5) +
-            c4 * exp(-c5 * std::pow(T, 2)) + c6 * exp(-c7 * std::pow(T, 3)) +
-            c8 * exp(-c9 * std::pow(T, 4)) + c10 * exp(-c11 * std::pow(T, 5));
+    spect = c1 + c2 * exp(-c3 / std::pow(T, 2)) / std::pow(T, 5) + c4 * exp(-c5 * std::pow(T, 2)) +
+            c6 * exp(-c7 * std::pow(T, 3)) + c8 * exp(-c9 * std::pow(T, 4)) + c10 * exp(-c11 * std::pow(T, 5));
   } else {
     size_t i = 1;
     for (i = 1; i < spectra[0].size() - 1; ++i)
       if (TOF < time[id][i])
         break;
-    spect = spectra[id][i - 1] + (TOF - time[id][i - 1]) /
-                                     (time[id][i] - time[id][i - 1]) *
-                                     (spectra[id][i] - spectra[id][i - 1]);
+    spect = spectra[id][i - 1] +
+            (TOF - time[id][i - 1]) / (time[id][i] - time[id][i - 1]) * (spectra[id][i] - spectra[id][i - 1]);
   }
 
   return spect;
@@ -235,21 +222,17 @@ void LoadIsawSpectrum::getInstrument3WaysInit(Algorithm *alg) {
   std::string grpName("Specify the Instrument");
 
   alg->declareProperty(
-      std::make_unique<WorkspaceProperty<>>(
-          "InputWorkspace", "", Direction::Input, PropertyMode::Optional),
+      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input, PropertyMode::Optional),
       "Optional: An input workspace with the instrument we want to use.");
 
-  alg->declareProperty(std::make_unique<PropertyWithValue<std::string>>(
-                           "InstrumentName", "", Direction::Input),
+  alg->declareProperty(std::make_unique<PropertyWithValue<std::string>>("InstrumentName", "", Direction::Input),
                        "Optional: Name of the instrument to base the "
                        "GroupingWorkspace on which to base the "
                        "GroupingWorkspace.");
 
-  alg->declareProperty(
-      std::make_unique<FileProperty>("InstrumentFilename", "",
-                                     FileProperty::OptionalLoad, ".xml"),
-      "Optional: Path to the instrument definition file on "
-      "which to base the GroupingWorkspace.");
+  alg->declareProperty(std::make_unique<FileProperty>("InstrumentFilename", "", FileProperty::OptionalLoad, ".xml"),
+                       "Optional: Path to the instrument definition file on "
+                       "which to base the GroupingWorkspace.");
 
   alg->setPropertyGroup("InputWorkspace", grpName);
   alg->setPropertyGroup("InstrumentName", grpName);
@@ -261,8 +244,7 @@ void LoadIsawSpectrum::getInstrument3WaysInit(Algorithm *alg) {
  * InstrumentName, InstrumentFilename
  * @param alg :: algorithm from which to get the property values.
  * */
-Geometry::Instrument_const_sptr
-LoadIsawSpectrum::getInstrument3Ways(Algorithm *alg) {
+Geometry::Instrument_const_sptr LoadIsawSpectrum::getInstrument3Ways(Algorithm *alg) {
   MatrixWorkspace_sptr inWS = alg->getProperty("InputWorkspace");
   std::string InstrumentName = alg->getPropertyValue("InstrumentName");
   std::string InstrumentFilename = alg->getPropertyValue("InstrumentFilename");
@@ -290,14 +272,12 @@ LoadIsawSpectrum::getInstrument3Ways(Algorithm *alg) {
   if (inWS) {
     inst = inWS->getInstrument();
   } else {
-    Algorithm_sptr childAlg =
-        alg->createChildAlgorithm("LoadInstrument", 0.0, 0.2);
+    Algorithm_sptr childAlg = alg->createChildAlgorithm("LoadInstrument", 0.0, 0.2);
     MatrixWorkspace_sptr tempWS(new Workspace2D());
     childAlg->setProperty<MatrixWorkspace_sptr>("Workspace", tempWS);
     childAlg->setPropertyValue("Filename", InstrumentFilename);
     childAlg->setPropertyValue("InstrumentName", InstrumentName);
-    childAlg->setProperty("RewriteSpectraMap",
-                          Mantid::Kernel::OptionalBool(false));
+    childAlg->setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(false));
     childAlg->executeAsChildAlg();
     inst = tempWS->getInstrument();
   }

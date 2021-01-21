@@ -19,17 +19,14 @@ using namespace Kernel;
 using namespace API;
 
 void ExtractSingleSpectrum::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                                        Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
                   "The name of the input workspace.");
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "The name under which to store the output workspace.");
 
   auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
-  declareProperty("WorkspaceIndex", -1, mustBePositive,
-                  "The workspace index number of the spectrum to extract.");
+  declareProperty("WorkspaceIndex", -1, mustBePositive, "The workspace index number of the spectrum to extract.");
 }
 
 void ExtractSingleSpectrum::exec() {
@@ -38,20 +35,17 @@ void ExtractSingleSpectrum::exec() {
   const int indexToExtract = getProperty("WorkspaceIndex");
   const size_t numHist = inputWorkspace->getNumberHistograms();
   if (static_cast<size_t>(indexToExtract) >= numHist) {
-    throw Exception::IndexError(
-        indexToExtract, inputWorkspace->getNumberHistograms(), this->name());
+    throw Exception::IndexError(indexToExtract, inputWorkspace->getNumberHistograms(), this->name());
   }
 
   // Let crop do the rest
-  IAlgorithm_sptr cropper =
-      this->createChildAlgorithm("CropWorkspace", 0.0, 1.0);
+  IAlgorithm_sptr cropper = this->createChildAlgorithm("CropWorkspace", 0.0, 1.0);
   cropper->setProperty("InputWorkspace", inputWorkspace);
   cropper->setProperty("StartWorkspaceIndex", indexToExtract);
   cropper->setProperty("EndWorkspaceIndex", indexToExtract);
   cropper->executeAsChildAlg();
 
-  setProperty<MatrixWorkspace_sptr>("OutputWorkspace",
-                                    cropper->getProperty("OutputWorkspace"));
+  setProperty<MatrixWorkspace_sptr>("OutputWorkspace", cropper->getProperty("OutputWorkspace"));
 }
 
 } // namespace Algorithms

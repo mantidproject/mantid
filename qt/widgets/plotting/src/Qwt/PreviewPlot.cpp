@@ -34,23 +34,18 @@ bool isNegative(double v) { return v <= 0.0; }
 const QString PreviewPlot::g_yAxisMenuName = "Y Axis Menu";
 
 PreviewPlot::PreviewPlot(QWidget *parent, bool init)
-    : API::MantidWidget(parent),
-      m_removeObserver(*this, &PreviewPlot::handleRemoveEvent),
-      m_replaceObserver(*this, &PreviewPlot::handleReplaceEvent), m_init(init),
-      m_curves(), m_magnifyTool(nullptr), m_panTool(nullptr),
-      m_zoomTool(nullptr), m_contextMenu(new QMenu(this)),
-      m_showLegendAction(nullptr), m_showErrorsMenuAction(nullptr),
-      m_showErrorsMenu(nullptr), m_errorBarOptionCache(), m_curveStyle(),
+    : API::MantidWidget(parent), m_removeObserver(*this, &PreviewPlot::handleRemoveEvent),
+      m_replaceObserver(*this, &PreviewPlot::handleReplaceEvent), m_init(init), m_curves(), m_magnifyTool(nullptr),
+      m_panTool(nullptr), m_zoomTool(nullptr), m_contextMenu(new QMenu(this)), m_showLegendAction(nullptr),
+      m_showErrorsMenuAction(nullptr), m_showErrorsMenu(nullptr), m_errorBarOptionCache(), m_curveStyle(),
       m_curveSymbol(), m_axis("both"), m_style("sci"), m_useOffset(true) {
   m_uiForm.setupUi(this);
   m_uiForm.loLegend->addStretch();
   watchADS(init);
 
   // Setup plot manipulation tools
-  m_zoomTool =
-      new QwtPlotZoomer(QwtPlot::xBottom, QwtPlot::yLeft,
-                        QwtPicker::DragSelection | QwtPicker::CornerToCorner,
-                        QwtPicker::AlwaysOff, m_uiForm.plot->canvas());
+  m_zoomTool = new QwtPlotZoomer(QwtPlot::xBottom, QwtPlot::yLeft, QwtPicker::DragSelection | QwtPicker::CornerToCorner,
+                                 QwtPicker::AlwaysOff, m_uiForm.plot->canvas());
   m_zoomTool->setEnabled(false);
 
   m_panTool = new QwtPlotPanner(m_uiForm.plot->canvas());
@@ -62,8 +57,7 @@ PreviewPlot::PreviewPlot(QWidget *parent, bool init)
 
   // Handle showing the context menu
   m_uiForm.plot->setContextMenuPolicy(Qt::CustomContextMenu);
-  connect(m_uiForm.plot, SIGNAL(customContextMenuRequested(QPoint)), this,
-          SLOT(showContextMenu(QPoint)));
+  connect(m_uiForm.plot, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(showContextMenu(QPoint)));
   // Create the plot tool list for context menu
   m_plotToolGroup = new QActionGroup(m_contextMenu);
   m_plotToolGroup->setExclusive(true);
@@ -72,11 +66,9 @@ PreviewPlot::PreviewPlot(QWidget *parent, bool init)
   plotTools << "None"
             << "Pan"
             << "Zoom";
-  QList<QAction *> plotToolActions =
-      addOptionsToMenus("Plot Tools", m_plotToolGroup, plotTools, "None");
+  QList<QAction *> plotToolActions = addOptionsToMenus("Plot Tools", m_plotToolGroup, plotTools, "None");
   for (auto &plotToolAction : plotToolActions)
-    connect(plotToolAction, SIGNAL(triggered()), this,
-            SLOT(handleViewToolSelect()));
+    connect(plotToolAction, SIGNAL(triggered()), this, SLOT(handleViewToolSelect()));
 
   // Create the reset plot view option
   auto *resetPlotAction = new QAction("Reset Plot", m_contextMenu);
@@ -93,11 +85,9 @@ PreviewPlot::PreviewPlot(QWidget *parent, bool init)
   xAxisTypes << "Linear"
              << "Logarithmic"
              << "Squared";
-  QList<QAction *> xAxisTypeActions =
-      addOptionsToMenus("X Axis", m_xAxisTypeGroup, xAxisTypes, "Linear");
+  QList<QAction *> xAxisTypeActions = addOptionsToMenus("X Axis", m_xAxisTypeGroup, xAxisTypes, "Linear");
   for (auto &xAxisTypeAction : xAxisTypeActions)
-    connect(xAxisTypeAction, SIGNAL(triggered()), this,
-            SLOT(handleAxisTypeSelect()));
+    connect(xAxisTypeAction, SIGNAL(triggered()), this, SLOT(handleAxisTypeSelect()));
 
   // Create the Y axis type list for context menu
   m_yAxisTypeGroup = new QActionGroup(m_contextMenu);
@@ -106,19 +96,16 @@ PreviewPlot::PreviewPlot(QWidget *parent, bool init)
   QStringList yAxisTypes;
   yAxisTypes << "Linear"
              << "Logarithmic";
-  QList<QAction *> yAxisTypeActions =
-      addOptionsToMenus("Y Axis", m_yAxisTypeGroup, yAxisTypes, "Linear");
+  QList<QAction *> yAxisTypeActions = addOptionsToMenus("Y Axis", m_yAxisTypeGroup, yAxisTypes, "Linear");
   for (auto &yAxisTypeAction : yAxisTypeActions)
-    connect(yAxisTypeAction, SIGNAL(triggered()), this,
-            SLOT(handleAxisTypeSelect()));
+    connect(yAxisTypeAction, SIGNAL(triggered()), this, SLOT(handleAxisTypeSelect()));
 
   m_contextMenu->addSeparator();
 
   // Create the show legend option
   m_showLegendAction = new QAction("Show Legend", m_contextMenu);
   m_showLegendAction->setCheckable(true);
-  connect(m_showLegendAction, SIGNAL(toggled(bool)), this,
-          SLOT(showLegend(bool)));
+  connect(m_showLegendAction, SIGNAL(toggled(bool)), this, SLOT(showLegend(bool)));
   m_contextMenu->addAction(m_showLegendAction);
 
   // Create the show errors option
@@ -129,9 +116,8 @@ PreviewPlot::PreviewPlot(QWidget *parent, bool init)
 
   connect(this, SIGNAL(needToReplot()), this, SLOT(replot()));
   connect(this, SIGNAL(needToHardReplot()), this, SLOT(hardReplot()));
-  connect(this, SIGNAL(workspaceRemoved(Mantid::API::MatrixWorkspace_sptr)),
-          this, SLOT(removeWorkspace(Mantid::API::MatrixWorkspace_sptr)),
-          Qt::QueuedConnection);
+  connect(this, SIGNAL(workspaceRemoved(Mantid::API::MatrixWorkspace_sptr)), this,
+          SLOT(removeWorkspace(Mantid::API::MatrixWorkspace_sptr)), Qt::QueuedConnection);
 }
 
 /**
@@ -182,9 +168,7 @@ QColor PreviewPlot::canvasColour() { return m_uiForm.plot->canvasBackground(); }
  *
  * @param colour Plot canvas colour
  */
-void PreviewPlot::setCanvasColour(const QColor &colour) {
-  m_uiForm.plot->setCanvasBackground(colour);
-}
+void PreviewPlot::setCanvasColour(const QColor &colour) { m_uiForm.plot->setCanvasBackground(colour); }
 
 /**
  * Checks to see if the plot legend is visible.
@@ -231,8 +215,7 @@ void PreviewPlot::setAxisRange(QPair<double, double> range, AxisID axisID) {
  */
 std::tuple<double, double> PreviewPlot::getAxisRange(AxisID axisID) const {
   const auto scaleDiv = m_uiForm.plot->axisScaleDiv(toQwtAxis(axisID));
-  return std::make_tuple<double, double>(scaleDiv->lowerBound(),
-                                         scaleDiv->upperBound());
+  return std::make_tuple<double, double>(scaleDiv->lowerBound(), scaleDiv->upperBound());
 }
 
 /**
@@ -240,8 +223,7 @@ std::tuple<double, double> PreviewPlot::getAxisRange(AxisID axisID) const {
  *
  * @param ws Pointer to workspace
  */
-QPair<double, double>
-PreviewPlot::getCurveRange(const Mantid::API::MatrixWorkspace_sptr &ws) {
+QPair<double, double> PreviewPlot::getCurveRange(const Mantid::API::MatrixWorkspace_sptr &ws) {
   QStringList curveNames = getCurvesForWorkspace(ws);
 
   if (curveNames.size() == 0)
@@ -278,10 +260,8 @@ QPair<double, double> PreviewPlot::getCurveRange(const QString &curveName) {
  * @param wsIndex workspace index to plot
  * @param curveColour Colour of curve to plot
  */
-void PreviewPlot::addSpectrum(const QString &curveName,
-                              const MatrixWorkspace_sptr &ws,
-                              const size_t wsIndex, const QColor &curveColour,
-                              const QHash<QString, QVariant> &plotKwargs) {
+void PreviewPlot::addSpectrum(const QString &curveName, const MatrixWorkspace_sptr &ws, const size_t wsIndex,
+                              const QColor &curveColour, const QHash<QString, QVariant> &plotKwargs) {
   UNUSED_ARG(plotKwargs);
 
   if (curveName.isEmpty()) {
@@ -299,14 +279,11 @@ void PreviewPlot::addSpectrum(const QString &curveName,
     removeSpectrum(curveName);
 
   // Add the error bar option
-  m_curves[curveName].showErrorsAction =
-      new QAction(curveName, m_showErrorsMenuAction);
+  m_curves[curveName].showErrorsAction = new QAction(curveName, m_showErrorsMenuAction);
   m_curves[curveName].showErrorsAction->setCheckable(true);
   if (m_errorBarOptionCache.contains(curveName))
-    m_curves[curveName].showErrorsAction->setChecked(
-        m_errorBarOptionCache[curveName]);
-  connect(m_curves[curveName].showErrorsAction, SIGNAL(toggled(bool)), this,
-          SIGNAL(needToHardReplot()));
+    m_curves[curveName].showErrorsAction->setChecked(m_errorBarOptionCache[curveName]);
+  connect(m_curves[curveName].showErrorsAction, SIGNAL(toggled(bool)), this, SIGNAL(needToHardReplot()));
   m_showErrorsMenu->addAction(m_curves[curveName].showErrorsAction);
 
   // Create the curve
@@ -338,9 +315,8 @@ void PreviewPlot::addSpectrum(const QString &curveName,
  * @param wsIndex workspace index to plot
  * @param curveColour Colour of curve to plot
  */
-void PreviewPlot::addSpectrum(const QString &curveName, const QString &wsName,
-                              const size_t wsIndex, const QColor &curveColour,
-                              const QHash<QString, QVariant> &plotKwargs) {
+void PreviewPlot::addSpectrum(const QString &curveName, const QString &wsName, const size_t wsIndex,
+                              const QColor &curveColour, const QHash<QString, QVariant> &plotKwargs) {
   if (wsName.isEmpty()) {
     g_log.error("Cannot plot with empty workspace name");
     return;
@@ -348,12 +324,10 @@ void PreviewPlot::addSpectrum(const QString &curveName, const QString &wsName,
 
   // Try to get a pointer from the name
   std::string wsNameStr = wsName.toStdString();
-  auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-      wsName.toStdString());
+  auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName.toStdString());
 
   if (!ws)
-    throw std::runtime_error(
-        wsNameStr + " is not a MatrixWorkspace, not supported by PreviewPlot.");
+    throw std::runtime_error(wsNameStr + " is not a MatrixWorkspace, not supported by PreviewPlot.");
 
   addSpectrum(curveName, ws, wsIndex, curveColour, plotKwargs);
 }
@@ -394,8 +368,7 @@ void PreviewPlot::removeSpectrum(const QString &curveName) {
     removeCurve(m_curves[curveName].curve);
     removeCurve(m_curves[curveName].errorCurve);
     m_uiForm.loLegend->removeWidget(m_curves[curveName].label);
-    m_errorBarOptionCache[curveName] =
-        m_curves[curveName].showErrorsAction->isChecked();
+    m_errorBarOptionCache[curveName] = m_curves[curveName].showErrorsAction->isChecked();
     m_showErrorsMenu->removeAction(m_curves[curveName].showErrorsAction);
     delete m_curves[curveName].showErrorsAction;
     delete m_curves[curveName].label;
@@ -417,9 +390,7 @@ void PreviewPlot::removeSpectrum(const QString &curveName) {
  * @param curveName Curve name
  * @return True if curve is on plot
  */
-bool PreviewPlot::hasCurve(const QString &curveName) {
-  return m_curves.contains(curveName);
-}
+bool PreviewPlot::hasCurve(const QString &curveName) { return m_curves.contains(curveName); }
 
 /**
  * Creates a RangeSelector, adds it to the plot and stores it.
@@ -428,13 +399,11 @@ bool PreviewPlot::hasCurve(const QString &curveName) {
  * @param type Type of range selector to add
  * @return RangeSelector object
  */
-RangeSelector *PreviewPlot::addRangeSelector(const QString &rsName,
-                                             RangeSelector::SelectType type) {
+RangeSelector *PreviewPlot::addRangeSelector(const QString &rsName, RangeSelector::SelectType type) {
   if (hasRangeSelector(rsName))
     throw std::runtime_error("RangeSelector already exists on PreviewPlot");
 
-  m_rangeSelectors[rsName] =
-      new MantidWidgets::RangeSelector(m_uiForm.plot, type);
+  m_rangeSelectors[rsName] = new MantidWidgets::RangeSelector(m_uiForm.plot, type);
   m_rsVisibility[rsName] = m_rangeSelectors[rsName]->isVisible();
 
   return m_rangeSelectors[rsName];
@@ -475,9 +444,7 @@ void PreviewPlot::removeRangeSelector(const QString &rsName, bool del = true) {
  * @param rsName Name of range selector
  * @return True if the plot has a range selector with the given name
  */
-bool PreviewPlot::hasRangeSelector(const QString &rsName) {
-  return m_rangeSelectors.contains(rsName);
-}
+bool PreviewPlot::hasRangeSelector(const QString &rsName) { return m_rangeSelectors.contains(rsName); }
 
 /**
  * Creates a SingleSelector, adds it to the plot and stores it.
@@ -486,14 +453,11 @@ bool PreviewPlot::hasRangeSelector(const QString &rsName) {
  * @param type Type of single selector to add
  * @return SingleSelector object
  */
-SingleSelector *PreviewPlot::addSingleSelector(const QString &name,
-                                               SingleSelector::SelectType type,
-                                               double position) {
+SingleSelector *PreviewPlot::addSingleSelector(const QString &name, SingleSelector::SelectType type, double position) {
   if (m_singleSelectors.contains(name))
     throw std::runtime_error("SingleSelector already exists on PreviewPlot");
 
-  m_singleSelectors[name] =
-      new MantidWidgets::SingleSelector(m_uiForm.plot, type, position);
+  m_singleSelectors[name] = new MantidWidgets::SingleSelector(m_uiForm.plot, type, position);
   m_ssVisibility[name] = m_singleSelectors[name]->isVisible();
 
   return m_singleSelectors[name];
@@ -635,8 +599,7 @@ void PreviewPlot::hardReplot() {
   for (auto &key : keys) {
     removeCurve(m_curves[key].curve);
     removeCurve(m_curves[key].errorCurve);
-    addCurve(m_curves[key], m_curves[key].ws, m_curves[key].wsIndex,
-             m_curves[key].colour);
+    addCurve(m_curves[key], m_curves[key].ws, m_curves[key].wsIndex, m_curves[key].colour);
   }
 
   emit needToReplot();
@@ -672,10 +635,8 @@ void PreviewPlot::removeWorkspace(const MatrixWorkspace_sptr &ws) {
  *
  * @param pNf Poco notification
  */
-void PreviewPlot::handleReplaceEvent(
-    WorkspaceAfterReplaceNotification_ptr pNf) {
-  MatrixWorkspace_sptr ws =
-      std::dynamic_pointer_cast<MatrixWorkspace>(pNf->object());
+void PreviewPlot::handleReplaceEvent(WorkspaceAfterReplaceNotification_ptr pNf) {
+  MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(pNf->object());
 
   // Ignore non matrix worksapces
   if (!ws)
@@ -693,24 +654,19 @@ void PreviewPlot::handleReplaceEvent(
  * @param wsIndex Index of histogram to plot
  * @param curveColour Colour of curve
  */
-void PreviewPlot::addCurve(PlotCurveConfiguration &curveConfig,
-                           MatrixWorkspace_sptr ws, const size_t wsIndex,
-                           const QColor &curveColour,
-                           const QString &curveName) {
+void PreviewPlot::addCurve(PlotCurveConfiguration &curveConfig, MatrixWorkspace_sptr ws, const size_t wsIndex,
+                           const QColor &curveColour, const QString &curveName) {
   // Check the workspace index is in range
   if (wsIndex >= ws->getNumberHistograms())
     throw std::runtime_error("Workspace index is out of range, cannot plot.");
 
   // Check the X axis is large enough
   if (ws->x(0).size() < 2)
-    throw std::runtime_error(
-        "X axis is too small to generate a histogram plot.");
+    throw std::runtime_error("X axis is too small to generate a histogram plot.");
 
   // Convert X axis to squared if needed
   if (getAxisType(QwtPlot::xBottom) == "Squared") {
-    Mantid::API::IAlgorithm_sptr convertXAlg =
-        Mantid::API::AlgorithmManager::Instance().create(
-            "ConvertAxisByFormula");
+    Mantid::API::IAlgorithm_sptr convertXAlg = Mantid::API::AlgorithmManager::Instance().create("ConvertAxisByFormula");
     convertXAlg->initialize();
     convertXAlg->setChild(true);
     convertXAlg->setLogging(false);
@@ -729,8 +685,7 @@ void PreviewPlot::addCurve(PlotCurveConfiguration &curveConfig,
   if (logYScale) {
     // Remove negative data in order to search for minimum positive value
     std::vector<double> validData(wsDataY.size());
-    auto it = std::remove_copy_if(wsDataY.begin(), wsDataY.end(),
-                                  validData.begin(), isNegative);
+    auto it = std::remove_copy_if(wsDataY.begin(), wsDataY.end(), validData.begin(), isNegative);
     validData.resize(std::distance(validData.begin(), it));
 
     // Get minimum positive value
@@ -758,16 +713,14 @@ void PreviewPlot::addCurve(PlotCurveConfiguration &curveConfig,
   // Create the new curve
   curveConfig.curve = new QwtPlotCurve();
   curveConfig.curve->setStyle(curveStyle);
-  curveConfig.curve->setSymbol(
-      QwtSymbol(curveSymbol, QBrush(), QPen(), QSize(7, 7)));
+  curveConfig.curve->setSymbol(QwtSymbol(curveSymbol, QBrush(), QPen(), QSize(7, 7)));
   curveConfig.curve->setData(wsData);
   curveConfig.curve->setPen(curveColour);
   curveConfig.curve->attach(m_uiForm.plot);
 
   // Create error bars if needed
   if (curveConfig.showErrorsAction->isChecked()) {
-    curveConfig.errorCurve =
-        new ErrorCurve(curveConfig.curve, ws->e(wsIndex).rawData());
+    curveConfig.errorCurve = new ErrorCurve(curveConfig.curve, ws->e(wsIndex).rawData());
     curveConfig.errorCurve->attach(m_uiForm.plot);
   } else {
     curveConfig.errorCurve = nullptr;
@@ -821,9 +774,7 @@ void PreviewPlot::removeCurve(QwtPlotItem *curve) {
  * @param defaultItem Default item name
  * @return List of Actions added
  */
-QList<QAction *> PreviewPlot::addOptionsToMenus(const QString &menuName,
-                                                QActionGroup *group,
-                                                const QStringList &items,
+QList<QAction *> PreviewPlot::addOptionsToMenus(const QString &menuName, QActionGroup *group, const QStringList &items,
                                                 const QString &defaultItem) {
   auto *menu = new QMenu(m_contextMenu);
 
@@ -897,9 +848,7 @@ QStringList PreviewPlot::getCurvesForWorkspace(const MatrixWorkspace_sptr &ws) {
  *
  * @param position Position at which to show menu
  */
-void PreviewPlot::showContextMenu(QPoint position) {
-  m_contextMenu->popup(m_uiForm.plot->mapToGlobal(position));
-}
+void PreviewPlot::showContextMenu(QPoint position) { m_contextMenu->popup(m_uiForm.plot->mapToGlobal(position)); }
 
 /**
  * Handles the view tool being selected from the context menu.
@@ -974,8 +923,7 @@ void PreviewPlot::handleAxisTypeSelect() {
     }
   }
 
-  for (auto it = m_singleSelectors.begin(); it != m_singleSelectors.end();
-       ++it) {
+  for (auto it = m_singleSelectors.begin(); it != m_singleSelectors.end(); ++it) {
     const QString &ssName = it.key();
     SingleSelector *ss = it.value();
     SingleSelector::SelectType type = ss->getType();
@@ -1018,13 +966,11 @@ void PreviewPlot::disableContextMenu() {
   // it is not communicated through to the parent GUI which can cause issues,
   // for now we are disabling the context menu but is should be made to
   // communicate so it can be reactivated.
-  disconnect(m_uiForm.plot, SIGNAL(customContextMenuRequested(QPoint)), this,
-             SLOT(showContextMenu(QPoint)));
+  disconnect(m_uiForm.plot, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(showContextMenu(QPoint)));
 }
 
 // Needed for mpl, but can also be used for qwt
-void PreviewPlot::setOverrideAxisLabel(AxisID const &axisID,
-                                       char const *const label) {
+void PreviewPlot::setOverrideAxisLabel(AxisID const &axisID, char const *const label) {
   m_uiForm.plot->setAxisTitle(static_cast<int>(axisID), label);
 }
 

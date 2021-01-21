@@ -53,25 +53,18 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * camera
  * orientations as well as zoom-to-data and zoom-to-box.
  */
-class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS
-    pqCameraToolbarNonOrthogonalAxes : public QToolBar {
+class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS pqCameraToolbarNonOrthogonalAxes : public QToolBar {
   Q_OBJECT
   using Superclass = QToolBar;
 
 public:
-  pqCameraToolbarNonOrthogonalAxes(const QString &title,
-                                   QWidget *parentObject = nullptr)
+  pqCameraToolbarNonOrthogonalAxes(const QString &title, QWidget *parentObject = nullptr)
       : Superclass(title, parentObject) {
     this->constructor();
   }
-  pqCameraToolbarNonOrthogonalAxes(QWidget *parentObject = nullptr)
-      : Superclass(parentObject) {
-    this->constructor();
-  }
-  pqCameraToolbarNonOrthogonalAxes(const pqCameraToolbarNonOrthogonalAxes &) =
-      delete;
-  pqCameraToolbarNonOrthogonalAxes &
-  operator=(const pqCameraToolbarNonOrthogonalAxes &) = delete;
+  pqCameraToolbarNonOrthogonalAxes(QWidget *parentObject = nullptr) : Superclass(parentObject) { this->constructor(); }
+  pqCameraToolbarNonOrthogonalAxes(const pqCameraToolbarNonOrthogonalAxes &) = delete;
+  pqCameraToolbarNonOrthogonalAxes &operator=(const pqCameraToolbarNonOrthogonalAxes &) = delete;
 private slots:
   void updateEnabledState();
 

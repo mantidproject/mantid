@@ -32,9 +32,7 @@ public:
   /// Algorithm's version for identification
   int version() const override { return 1; };
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return R"(MDAlgorithms\Utility\Workspaces;MDAlgorithms\Creation)";
-  }
+  const std::string category() const override { return R"(MDAlgorithms\Utility\Workspaces;MDAlgorithms\Creation)"; }
 
 private:
   /// Initialise the properties
@@ -42,8 +40,7 @@ private:
   /// Run the algorithm
   void exec() override;
 
-  template <typename MDE, size_t nd>
-  void doClone(const typename DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
+  template <typename MDE, size_t nd> void doClone(const typename DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
 };
 
 } // namespace MDAlgorithms

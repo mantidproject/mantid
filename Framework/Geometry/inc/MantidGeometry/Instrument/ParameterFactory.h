@@ -40,8 +40,7 @@ class MANTID_GEOMETRY_DLL ParameterFactory {
 public:
   template <class C> static void subscribe(const std::string &className);
 
-  static std::shared_ptr<Parameter> create(const std::string &className,
-                                           const std::string &name);
+  static std::shared_ptr<Parameter> create(const std::string &className, const std::string &name);
 
 private:
   /// Private default constructor
@@ -62,14 +61,12 @@ private:
  *   @param className :: The parameter type name
  *   @tparam C The parameter type
  */
-template <class C>
-void ParameterFactory::subscribe(const std::string &className) {
+template <class C> void ParameterFactory::subscribe(const std::string &className) {
   auto it = s_map.find(className);
   if (!className.empty() && it == s_map.cend()) {
     s_map[className] = std::make_unique<Kernel::Instantiator<C, Parameter>>();
   } else {
-    throw std::runtime_error("Parameter type" + className +
-                             " is already registered.\n");
+    throw std::runtime_error("Parameter type" + className + " is already registered.\n");
   }
 }
 

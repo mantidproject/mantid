@@ -54,8 +54,7 @@ Detacher::Detacher(QwtPlotItem *plotItem) : m_plotItem(plotItem) {}
 
 Detacher::~Detacher() { delete m_plotItem; }
 
-Plot::Plot(int width, int height, QWidget *parent, const char *)
-    : QwtPlot(parent) {
+Plot::Plot(int width, int height, QWidget *parent, const char *) : QwtPlot(parent) {
   setAutoReplot(false);
 
   marker_key = 0;
@@ -130,9 +129,7 @@ Plot::Plot(int width, int height, QWidget *parent, const char *)
   setLineWidth(0);
 }
 
-QColor Plot::frameColor() {
-  return palette().color(QPalette::Active, QPalette::Foreground);
-}
+QColor Plot::frameColor() { return palette().color(QPalette::Active, QPalette::Foreground); }
 
 void Plot::printFrame(QPainter *painter, const QRect &rect) const {
   painter->save();
@@ -140,8 +137,7 @@ void Plot::printFrame(QPainter *painter, const QRect &rect) const {
   int lw = lineWidth();
   if (lw) {
     QColor color = palette().color(QPalette::Active, QPalette::Foreground);
-    painter->setPen(
-        QPen(color, lw, Qt::SolidLine, Qt::SquareCap, Qt::MiterJoin));
+    painter->setPen(QPen(color, lw, Qt::SolidLine, Qt::SquareCap, Qt::MiterJoin));
   } else
     painter->setPen(QPen(Qt::NoPen));
 
@@ -150,8 +146,7 @@ void Plot::printFrame(QPainter *painter, const QRect &rect) const {
   painter->restore();
 }
 
-void Plot::printCanvas(QPainter *painter, const QRect &,
-                       const QRect &canvasRect, const QwtScaleMap map[axisCnt],
+void Plot::printCanvas(QPainter *painter, const QRect &, const QRect &canvasRect, const QwtScaleMap map[axisCnt],
                        const QwtPlotPrintFilter &pfilter) const {
   painter->save();
 
@@ -171,10 +166,8 @@ void Plot::printCanvas(QPainter *painter, const QRect &,
   painter->save();
   int lw = plotCanvas->lineWidth();
   if (lw > 0) {
-    QColor color =
-        plotCanvas->palette().color(QPalette::Active, QPalette::Foreground);
-    painter->setPen(
-        QPen(color, lw, Qt::SolidLine, Qt::SquareCap, Qt::MiterJoin));
+    QColor color = plotCanvas->palette().color(QPalette::Active, QPalette::Foreground);
+    painter->setPen(QPen(color, lw, Qt::SolidLine, Qt::SquareCap, Qt::MiterJoin));
     QwtPainter::drawRect(painter, canvasRect.adjusted(0, 0, -1, -1));
   }
   painter->restore();
@@ -187,8 +180,7 @@ void Plot::printCanvas(QPainter *painter, const QRect &,
   }
 }
 
-void Plot::drawItems(QPainter *painter, const QRect &rect,
-                     const QwtScaleMap map[axisCnt],
+void Plot::drawItems(QPainter *painter, const QRect &rect, const QwtScaleMap map[axisCnt],
                      const QwtPlotPrintFilter &pfilter) const {
   painter->save();
   painter->setRenderHint(QPainter::Antialiasing);
@@ -203,8 +195,7 @@ void Plot::drawItems(QPainter *painter, const QRect &rect,
     if (!axisEnabled(i))
       continue;
 
-    const ScaleEngine *sc_engine =
-        static_cast<const ScaleEngine *>(axisScaleEngine(i));
+    const ScaleEngine *sc_engine = static_cast<const ScaleEngine *>(axisScaleEngine(i));
     /*const QwtScaleEngine *qwtsc_engine=axisScaleEngine(i);
     const ScaleEngine *sc_engine =dynamic_cast<const
     ScaleEngine*>(qwtsc_engine);
@@ -223,14 +214,10 @@ void Plot::drawItems(QPainter *painter, const QRect &rect,
     }
     QRegion cr(rect);
     if (i == QwtPlot::xBottom || i == QwtPlot::xTop)
-      painter->setClipRegion(
-          cr.subtracted(
-              QRegion(start, rect.y(), abs(end - start), rect.height())),
-          Qt::IntersectClip);
+      painter->setClipRegion(cr.subtracted(QRegion(start, rect.y(), abs(end - start), rect.height())),
+                             Qt::IntersectClip);
     else if (i == QwtPlot::yLeft || i == QwtPlot::yRight)
-      painter->setClipRegion(
-          cr.subtracted(QRegion(rect.x(), end, rect.width(), abs(end - start))),
-          Qt::IntersectClip);
+      painter->setClipRegion(cr.subtracted(QRegion(rect.x(), end, rect.width(), abs(end - start))), Qt::IntersectClip);
     //}
   }
 
@@ -244,18 +231,15 @@ void Plot::drawItems(QPainter *painter, const QRect &rect,
     int majorTicksType = sd->majorTicksStyle();
     int minorTicksType = sd->minorTicksStyle();
 
-    bool min =
-        (minorTicksType == ScaleDraw::In || minorTicksType == ScaleDraw::Both);
-    bool maj =
-        (majorTicksType == ScaleDraw::In || majorTicksType == ScaleDraw::Both);
+    bool min = (minorTicksType == ScaleDraw::In || minorTicksType == ScaleDraw::Both);
+    bool maj = (majorTicksType == ScaleDraw::In || majorTicksType == ScaleDraw::Both);
 
     if (min || maj)
       drawInwardTicks(painter, rect, map[i], i, min, maj);
   }
 }
 
-void Plot::drawInwardTicks(QPainter *painter, const QRect &rect,
-                           const QwtScaleMap &map, int axis, bool min,
+void Plot::drawInwardTicks(QPainter *painter, const QRect &rect, const QwtScaleMap &map, int axis, bool min,
                            bool maj) const {
   int x1 = rect.left();
   int x2 = rect.right();
@@ -388,10 +372,8 @@ void Plot::drawInwardTicks(QPainter *painter, const QRect &rect,
   painter->restore();
 }
 
-void Plot::drawBreak(QPainter *painter, const QRect &rect,
-                     const QwtScaleMap &map, int axis) const {
-  const ScaleEngine *sc_engine =
-      static_cast<const ScaleEngine *>(axisScaleEngine(axis));
+void Plot::drawBreak(QPainter *painter, const QRect &rect, const QwtScaleMap &map, int axis) const {
+  const ScaleEngine *sc_engine = static_cast<const ScaleEngine *>(axisScaleEngine(axis));
   /*const QwtScaleEngine *qwtsc_engine=axisScaleEngine(axis);
   const ScaleEngine *sc_engine =dynamic_cast<const ScaleEngine*>(qwtsc_engine);
   if(sc_engine!=NULL)
@@ -401,8 +383,7 @@ void Plot::drawBreak(QPainter *painter, const QRect &rect,
 
   painter->save();
 
-  QColor color =
-      axisWidget(axis)->palette().color(QPalette::Active, QPalette::Foreground);
+  QColor color = axisWidget(axis)->palette().color(QPalette::Active, QPalette::Foreground);
   painter->setPen(QPen(color, axesLinewidth(), Qt::SolidLine));
 
   int left = map.transform(sc_engine->axisBreakLeft());
@@ -493,8 +474,7 @@ int Plot::closestCurve(int xpos, int ypos, int &dist, int &point) {
 
   double dmin = std::numeric_limits<double>::max();
   int key = -1;
-  for (QMap<int, QwtPlotItem *>::iterator iter = d_curves.begin();
-       iter != d_curves.end(); ++iter) {
+  for (QMap<int, QwtPlotItem *>::iterator iter = d_curves.begin(); iter != d_curves.end(); ++iter) {
     QwtPlotItem *item = (QwtPlotItem *)iter.value();
     if (!item)
       continue;
@@ -503,8 +483,7 @@ int Plot::closestCurve(int xpos, int ypos, int &dist, int &point) {
       PlotCurve *c = static_cast<PlotCurve *>(item);
       DataCurve *dc = dynamic_cast<DataCurve *>(item);
       if (dc) {
-        if (c->type() != GraphOptions::Function && dc->hasLabels() &&
-            dc->selectedLabels(QPoint(xpos, ypos))) {
+        if (c->type() != GraphOptions::Function && dc->hasLabels() && dc->selectedLabels(QPoint(xpos, ypos))) {
           dist = 0;
           return iter.key();
         } else
@@ -539,8 +518,7 @@ int Plot::insertMarker(QwtPlotMarker *m) {
   marker_key++;
   if (!d_markers.contains(marker_key))
     d_markers.insert(marker_key, m);
-  m->setRenderHint(QwtPlotItem::RenderAntialiased,
-                   (static_cast<Graph *>(parent()))->antialiasing());
+  m->setRenderHint(QwtPlotItem::RenderAntialiased, (static_cast<Graph *>(parent()))->antialiasing());
   m->attach(((QwtPlot *)this));
   return marker_key;
 }
@@ -550,11 +528,9 @@ int Plot::insertCurve(QwtPlotItem *c) {
   if (!d_curves.contains(curve_key))
     d_curves.insert(curve_key, c);
   if (c->rtti() != QwtPlotItem::Rtti_PlotSpectrogram)
-    (static_cast<QwtPlotCurve *>(c))
-        ->setPaintAttribute(QwtPlotCurve::PaintFiltered);
+    (static_cast<QwtPlotCurve *>(c))->setPaintAttribute(QwtPlotCurve::PaintFiltered);
 
-  c->setRenderHint(QwtPlotItem::RenderAntialiased,
-                   (static_cast<Graph *>(parent()))->antialiasing());
+  c->setRenderHint(QwtPlotItem::RenderAntialiased, (static_cast<Graph *>(parent()))->antialiasing());
   c->attach(this);
   return curve_key;
 }
@@ -682,16 +658,13 @@ void Plot::updateLayout() {
   canvas()->setGeometry(plotLayout()->canvasRect());
 }
 
-const QColor &Plot::paletteBackgroundColor() const {
-  return palette().color(QPalette::Window);
-}
+const QColor &Plot::paletteBackgroundColor() const { return palette().color(QPalette::Window); }
 
 void Plot::updateCurveLabels() {
   QList<QwtPlotItem *> curves = curvesList();
   foreach (QwtPlotItem *i, curves) {
     DataCurve *dc = dynamic_cast<DataCurve *>(i);
-    if (dc && i->rtti() != QwtPlotItem::Rtti_PlotSpectrogram &&
-        dc->type() != GraphOptions::Function && dc->hasLabels())
+    if (dc && i->rtti() != QwtPlotItem::Rtti_PlotSpectrogram && dc->type() != GraphOptions::Function && dc->hasLabels())
       dc->updateLabelsPosition();
   }
 }
@@ -733,12 +706,10 @@ void Plot::showEvent(QShowEvent *event) {
   @param plotRect :: Bounding rectangle
   @param pfilter :: Print filter
 */
-void Plot::print(QPainter *painter, const QRect &plotRect,
-                 const QwtPlotPrintFilter &pfilter) const {
+void Plot::print(QPainter *painter, const QRect &plotRect, const QwtPlotPrintFilter &pfilter) const {
   int axisId;
 
-  if (painter == nullptr || !painter->isActive() || !plotRect.isValid() ||
-      size().isNull())
+  if (painter == nullptr || !painter->isActive() || !plotRect.isValid() || size().isNull())
     return;
 
   QwtText t = title();
@@ -767,8 +738,7 @@ void Plot::print(QPainter *painter, const QRect &plotRect,
     // the scale on the frame of the canvas.
 
     for (axisId = 0; axisId < QwtPlot::axisCnt; axisId++) {
-      QwtScaleWidget *scaleWidget =
-          const_cast<QwtScaleWidget *>(axisWidget(axisId));
+      QwtScaleWidget *scaleWidget = const_cast<QwtScaleWidget *>(axisWidget(axisId));
       if (scaleWidget) {
         baseLineDists[axisId] = scaleWidget->margin();
         scaleWidget->setMargin(0);
@@ -777,8 +747,7 @@ void Plot::print(QPainter *painter, const QRect &plotRect,
   }
   // Calculate the layout for the print.
 
-  int layoutOptions =
-      QwtPlotLayout::IgnoreScrollbars | QwtPlotLayout::IgnoreFrames;
+  int layoutOptions = QwtPlotLayout::IgnoreScrollbars | QwtPlotLayout::IgnoreFrames;
   if (!(pfilter.options() & QwtPlotPrintFilter::PrintMargin))
     layoutOptions |= QwtPlotLayout::IgnoreMargin;
   if (!(pfilter.options() & QwtPlotPrintFilter::PrintLegend))
@@ -786,11 +755,9 @@ void Plot::print(QPainter *painter, const QRect &plotRect,
 
   ((QwtPlot *)const_cast<Plot *>(this))
       ->plotLayout()
-      ->activate(this, QwtPainter::metricsMap().deviceToLayout(plotRect),
-                 layoutOptions);
+      ->activate(this, QwtPainter::metricsMap().deviceToLayout(plotRect), layoutOptions);
 
-  if ((pfilter.options() & QwtPlotPrintFilter::PrintTitle) &&
-      (!titleLabel()->text().isEmpty())) {
+  if ((pfilter.options() & QwtPlotPrintFilter::PrintTitle) && (!titleLabel()->text().isEmpty())) {
     printTitle(painter, plotLayout()->titleRect());
   }
 
@@ -847,8 +814,7 @@ void Plot::print(QPainter *painter, const QRect &plotRect,
   canvasRect = plotLayout()->canvasRect();
 
   for (axisId = 0; axisId < QwtPlot::axisCnt; axisId++) {
-    QwtScaleWidget *scaleWidget =
-        const_cast<QwtScaleWidget *>(axisWidget(axisId));
+    QwtScaleWidget *scaleWidget = const_cast<QwtScaleWidget *>(axisWidget(axisId));
     if (scaleWidget) {
       int baseDist = scaleWidget->margin();
 
@@ -877,8 +843,7 @@ void Plot::print(QPainter *painter, const QRect &plotRect,
   }
 
   if (!(pfilter.options() & 16)) {
-    QRect boundingRect(canvasRect.left() - 1, canvasRect.top() - 1,
-                       canvasRect.width() + 2, canvasRect.height() + 2);
+    QRect boundingRect(canvasRect.left() - 1, canvasRect.top() - 1, canvasRect.width() + 2, canvasRect.height() + 2);
     boundingRect = metricsMap.layoutToDevice(boundingRect);
     boundingRect.setWidth(boundingRect.width() - 1);
     boundingRect.setHeight(boundingRect.height() - 1);
@@ -894,8 +859,7 @@ void Plot::print(QPainter *painter, const QRect &plotRect,
   if (!(pfilter.options() & 16)) {
     // restore the previous base line dists
     for (axisId = 0; axisId < QwtPlot::axisCnt; axisId++) {
-      QwtScaleWidget *scaleWidget =
-          const_cast<QwtScaleWidget *>(axisWidget(axisId));
+      QwtScaleWidget *scaleWidget = const_cast<QwtScaleWidget *>(axisWidget(axisId));
       if (scaleWidget)
         scaleWidget->setMargin(baseLineDists[axisId]);
     }
@@ -913,14 +877,11 @@ bool Plot::eventFilter(QObject *obj, QEvent *ev) {
   QWidget *canvas = qobject_cast<QWidget *>(obj);
   if (canvas) {
     if (eventType == QEvent::MouseButtonPress) {
-      emit dragMousePress(
-          canvas->mapToGlobal(static_cast<QMouseEvent *>(ev)->pos()));
+      emit dragMousePress(canvas->mapToGlobal(static_cast<QMouseEvent *>(ev)->pos()));
     } else if (eventType == QEvent::MouseButtonRelease) {
-      emit dragMouseRelease(
-          canvas->mapToGlobal(static_cast<QMouseEvent *>(ev)->pos()));
+      emit dragMouseRelease(canvas->mapToGlobal(static_cast<QMouseEvent *>(ev)->pos()));
     } else if (eventType == QEvent::MouseMove) {
-      emit dragMouseMove(
-          canvas->mapToGlobal(static_cast<QMouseEvent *>(ev)->pos()));
+      emit dragMouseMove(canvas->mapToGlobal(static_cast<QMouseEvent *>(ev)->pos()));
     }
   }
 

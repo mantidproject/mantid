@@ -34,24 +34,21 @@
 #include <gsl/gsl_sort.h>
 #include <gsl/gsl_spline.h>
 
-Interpolation::Interpolation(ApplicationWindow *parent, Graph *g,
-                             const QString &curveTitle, int m)
+Interpolation::Interpolation(ApplicationWindow *parent, Graph *g, const QString &curveTitle, int m)
     : Filter(parent, g) {
   init(m);
   setDataFromCurve(curveTitle);
 }
 
-Interpolation::Interpolation(ApplicationWindow *parent, Graph *g,
-                             const QString &curveTitle, double start,
-                             double end, int m)
+Interpolation::Interpolation(ApplicationWindow *parent, Graph *g, const QString &curveTitle, double start, double end,
+                             int m)
     : Filter(parent, g) {
   init(m);
   setDataFromCurve(curveTitle, start, end);
 }
 
-Interpolation::Interpolation(ApplicationWindow *parent, Table *t,
-                             const QString &xCol, const QString &yCol,
-                             int start, int end, int m)
+Interpolation::Interpolation(ApplicationWindow *parent, Table *t, const QString &xCol, const QString &yCol, int start,
+                             int end, int m)
     : Filter(parent, t) {
   init(m);
   setDataFromTable(t, xCol, yCol, start, end);
@@ -59,8 +56,7 @@ Interpolation::Interpolation(ApplicationWindow *parent, Table *t,
 
 void Interpolation::init(int m) {
   if (m < 0 || m > 2) {
-    QMessageBox::critical(dynamic_cast<ApplicationWindow *>(this->parent()),
-                          tr("MantidPlot") + " - " + tr("Error"),
+    QMessageBox::critical(dynamic_cast<ApplicationWindow *>(this->parent()), tr("MantidPlot") + " - " + tr("Error"),
                           tr("Unknown interpolation method. Valid values are: "
                              "0 - Linear, 1 - Cubic, 2 - Akima."));
     d_init_err = true;
@@ -87,8 +83,7 @@ void Interpolation::init(int m) {
 
 void Interpolation::setMethod(int m) {
   if (m < 0 || m > 2) {
-    QMessageBox::critical(dynamic_cast<ApplicationWindow *>(this->parent()),
-                          tr("MantidPlot - Error"),
+    QMessageBox::critical(dynamic_cast<ApplicationWindow *>(this->parent()), tr("MantidPlot - Error"),
                           tr("Unknown interpolation method, valid values are: "
                              "0 - Linear, 1 - Cubic, 2 - Akima."));
     d_init_err = true;
@@ -96,11 +91,8 @@ void Interpolation::setMethod(int m) {
   }
   int min_points = m + 3;
   if (d_n < min_points) {
-    QMessageBox::critical(
-        dynamic_cast<ApplicationWindow *>(this->parent()),
-        tr("MantidPlot") + " - " + tr("Error"),
-        tr("You need at least %1 points in order to perform this operation!")
-            .arg(min_points));
+    QMessageBox::critical(dynamic_cast<ApplicationWindow *>(this->parent()), tr("MantidPlot") + " - " + tr("Error"),
+                          tr("You need at least %1 points in order to perform this operation!").arg(min_points));
     d_init_err = true;
     return;
   }
@@ -150,8 +142,7 @@ void Interpolation::calculateOutputData(double *x, double *y) {
   gsl_interp_accel_free(acc);
 }
 
-int Interpolation::sortedCurveData(QwtPlotCurve *c, double start, double end,
-                                   double **x, double **y) {
+int Interpolation::sortedCurveData(QwtPlotCurve *c, double start, double end, double **x, double **y) {
   if (!c || c->rtti() != QwtPlotItem::Rtti_PlotCurve)
     return 0;
 

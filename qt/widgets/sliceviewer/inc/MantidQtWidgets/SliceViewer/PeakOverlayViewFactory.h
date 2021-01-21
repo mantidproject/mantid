@@ -34,9 +34,8 @@ class PeaksPresenter;
 class EXPORT_OPT_MANTIDQT_SLICEVIEWER PeakOverlayViewFactory {
 public:
   /// Create a peak view from the index of a peak in the peaks workspace
-  virtual std::shared_ptr<PeakOverlayView>
-  createView(PeaksPresenter *const presenter,
-             Mantid::Geometry::PeakTransform_const_sptr transform) const = 0;
+  virtual std::shared_ptr<PeakOverlayView> createView(PeaksPresenter *const presenter,
+                                                      Mantid::Geometry::PeakTransform_const_sptr transform) const = 0;
   /// Destructor
   virtual ~PeakOverlayViewFactory() {}
   /// Get the plot x-axis label
@@ -44,8 +43,7 @@ public:
   /// Get the plot y-axis label
   virtual std::string getPlotYLabel() const = 0;
   /// Same factory settings for a different peaks workspace
-  virtual void swapPeaksWorkspace(
-      std::shared_ptr<Mantid::API::IPeaksWorkspace> &peaksWS) = 0;
+  virtual void swapPeaksWorkspace(std::shared_ptr<Mantid::API::IPeaksWorkspace> &peaksWS) = 0;
   virtual void getNonOrthogonalInfo(NonOrthogonalAxis &info) = 0;
 };
 

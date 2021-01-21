@@ -21,16 +21,12 @@ const std::string FilterByXValue::name() const { return "FilterByXValue"; }
 /// Algorithm's version for identification. @see Algorithm::version
 int FilterByXValue::version() const { return 1; }
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string FilterByXValue::category() const {
-  return "Events\\EventFiltering";
-}
+const std::string FilterByXValue::category() const { return "Events\\EventFiltering"; }
 
 void FilterByXValue::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>("InputWorkspace", "", Direction::Input),
                   "The input workspace.");
-  declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "The output workspace.");
   declareProperty("XMin", EMPTY_DBL(),
                   "The minimum X value (in the units of "

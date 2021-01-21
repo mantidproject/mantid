@@ -21,8 +21,7 @@ namespace DataObjects {
  * @param source : source JSON
  * @return PeakShape via this factory or it's successors
  */
-Mantid::Geometry::PeakShape *
-PeakShapeEllipsoidFactory::create(const std::string &source) const {
+Mantid::Geometry::PeakShape *PeakShapeEllipsoidFactory::create(const std::string &source) const {
   Json::Reader reader;
   Json::Value root;
   Mantid::Geometry::PeakShape *product = nullptr;
@@ -32,34 +31,25 @@ PeakShapeEllipsoidFactory::create(const std::string &source) const {
 
       const std::string algorithmName(root["algorithm_name"].asString());
       const int algorithmVersion(root["algorithm_version"].asInt());
-      const auto frame(
-          static_cast<SpecialCoordinateSystem>(root["frame"].asInt()));
-      std::vector<double> abcRadii, abcRadiiBackgroundInner,
-          abcRadiiBackgroundOuter;
+      const auto frame(static_cast<SpecialCoordinateSystem>(root["frame"].asInt()));
+      std::vector<double> abcRadii, abcRadiiBackgroundInner, abcRadiiBackgroundOuter;
       abcRadii.emplace_back(root["radius0"].asDouble());
       abcRadii.emplace_back(root["radius1"].asDouble());
       abcRadii.emplace_back(root["radius2"].asDouble());
-      abcRadiiBackgroundInner.emplace_back(
-          root["background_inner_radius0"].asDouble());
-      abcRadiiBackgroundInner.emplace_back(
-          root["background_inner_radius1"].asDouble());
-      abcRadiiBackgroundInner.emplace_back(
-          root["background_inner_radius2"].asDouble());
-      abcRadiiBackgroundOuter.emplace_back(
-          root["background_outer_radius0"].asDouble());
-      abcRadiiBackgroundOuter.emplace_back(
-          root["background_outer_radius1"].asDouble());
-      abcRadiiBackgroundOuter.emplace_back(
-          root["background_outer_radius2"].asDouble());
+      abcRadiiBackgroundInner.emplace_back(root["background_inner_radius0"].asDouble());
+      abcRadiiBackgroundInner.emplace_back(root["background_inner_radius1"].asDouble());
+      abcRadiiBackgroundInner.emplace_back(root["background_inner_radius2"].asDouble());
+      abcRadiiBackgroundOuter.emplace_back(root["background_outer_radius0"].asDouble());
+      abcRadiiBackgroundOuter.emplace_back(root["background_outer_radius1"].asDouble());
+      abcRadiiBackgroundOuter.emplace_back(root["background_outer_radius2"].asDouble());
 
       std::vector<V3D> directions(3);
       directions[0].fromString(root["direction0"].asString());
       directions[1].fromString(root["direction1"].asString());
       directions[2].fromString(root["direction2"].asString());
 
-      product = new PeakShapeEllipsoid(
-          directions, abcRadii, abcRadiiBackgroundInner,
-          abcRadiiBackgroundOuter, frame, algorithmName, algorithmVersion);
+      product = new PeakShapeEllipsoid(directions, abcRadii, abcRadiiBackgroundInner, abcRadiiBackgroundOuter, frame,
+                                       algorithmName, algorithmVersion);
 
     } else {
       if (m_successor) {
@@ -84,8 +74,7 @@ PeakShapeEllipsoidFactory::create(const std::string &source) const {
  * @brief Set successor
  * @param successorFactory : successor
  */
-void PeakShapeEllipsoidFactory::setSuccessor(
-    std::shared_ptr<const PeakShapeFactory> successorFactory) {
+void PeakShapeEllipsoidFactory::setSuccessor(std::shared_ptr<const PeakShapeFactory> successorFactory) {
   this->m_successor = successorFactory;
 }
 

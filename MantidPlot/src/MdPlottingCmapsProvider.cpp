@@ -28,12 +28,10 @@ MdPlottingCmapsProvider::MdPlottingCmapsProvider() {}
 
 MdPlottingCmapsProvider::~MdPlottingCmapsProvider() {}
 
-void MdPlottingCmapsProvider::getColorMapsForMdPlotting(
-    QStringList &colorMapNames, QStringList &colorMapFiles) {
+void MdPlottingCmapsProvider::getColorMapsForMdPlotting(QStringList &colorMapNames, QStringList &colorMapFiles) {
   // Get the installed color maps directory.
-  QString colorMapDirectory = QString::fromStdString(
-      Mantid::Kernel::ConfigService::Instance().getString(
-          "colormaps.directory"));
+  QString colorMapDirectory =
+      QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("colormaps.directory"));
   if (colorMapDirectory.isEmpty()) {
     return;
   }
@@ -42,18 +40,14 @@ void MdPlottingCmapsProvider::getColorMapsForMdPlotting(
   // files and in the .xml files of the VSI
   QStringList colorMapNamesSliceViewer;
   QStringList colorMapFilesSliceViewer;
-  appendAllFileNamesForFileType(colorMapNamesSliceViewer,
-                                colorMapFilesSliceViewer, colorMapDirectory,
-                                "map");
+  appendAllFileNamesForFileType(colorMapNamesSliceViewer, colorMapFilesSliceViewer, colorMapDirectory, "map");
 
   QStringList colorMapNamesVsi;
   getColorMapsForVSI(colorMapNamesVsi);
 
-  std::vector<int> indexList = getSliceViewerIndicesForCommonColorMaps(
-      colorMapNamesSliceViewer, colorMapNamesVsi);
+  std::vector<int> indexList = getSliceViewerIndicesForCommonColorMaps(colorMapNamesSliceViewer, colorMapNamesVsi);
 
-  for (std::vector<int>::iterator it = indexList.begin(); it != indexList.end();
-       ++it) {
+  for (std::vector<int>::iterator it = indexList.begin(); it != indexList.end(); ++it) {
     colorMapNames.append(colorMapNamesSliceViewer[*it]);
     colorMapFiles.append(colorMapFilesSliceViewer[*it]);
   }
@@ -67,12 +61,9 @@ void MdPlottingCmapsProvider::getColorMapsForVSI(QStringList &colorMapNames) {
   // already been loaded.
   auto viridisColormap = presets->GetFirstPresetWithName("hot");
   if (viridisColormap.empty()) {
-    const std::string filenames[3] = {"All_slice_viewer_cmaps_for_vsi.json",
-                                      "All_idl_cmaps.json",
+    const std::string filenames[3] = {"All_slice_viewer_cmaps_for_vsi.json", "All_idl_cmaps.json",
                                       "All_mpl_cmaps.json"};
-    const std::string colorMapDirectory =
-        Mantid::Kernel::ConfigService::Instance().getString(
-            "colormaps.directory");
+    const std::string colorMapDirectory = Mantid::Kernel::ConfigService::Instance().getString("colormaps.directory");
     for (const auto &baseName : filenames) {
       std::string colorMap = colorMapDirectory + baseName;
       presets->ImportPresets(colorMap.c_str());
@@ -88,9 +79,8 @@ void MdPlottingCmapsProvider::getColorMapsForVSI(QStringList &colorMapNames) {
 #endif
 }
 
-void MdPlottingCmapsProvider::appendAllFileNamesForFileType(
-    QStringList &colorMapNames, QStringList &colorMapFiles,
-    const QString &colorMapDirectory, const QString &fileType) {
+void MdPlottingCmapsProvider::appendAllFileNamesForFileType(QStringList &colorMapNames, QStringList &colorMapFiles,
+                                                            const QString &colorMapDirectory, const QString &fileType) {
   QDir directory(colorMapDirectory);
 
   QStringList filter(QString("*.%1").arg(fileType));
@@ -103,15 +93,13 @@ void MdPlottingCmapsProvider::appendAllFileNamesForFileType(
   }
 }
 
-std::vector<int>
-MdPlottingCmapsProvider::getSliceViewerIndicesForCommonColorMaps(
-    QStringList colorMapNamesSliceViewer, const QStringList &colorMapNamesVsi) {
+std::vector<int> MdPlottingCmapsProvider::getSliceViewerIndicesForCommonColorMaps(QStringList colorMapNamesSliceViewer,
+                                                                                  const QStringList &colorMapNamesVsi) {
   int index = 0;
 
   std::vector<int> indexVector;
 
-  for (QStringList::iterator it = colorMapNamesSliceViewer.begin();
-       it != colorMapNamesSliceViewer.end(); ++it) {
+  for (QStringList::iterator it = colorMapNamesSliceViewer.begin(); it != colorMapNamesSliceViewer.end(); ++it) {
     if (colorMapNamesVsi.indexOf(*it) != -1) {
       indexVector.emplace_back(index);
     }

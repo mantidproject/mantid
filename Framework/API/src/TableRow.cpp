@@ -13,8 +13,7 @@ namespace API {
 /**   Constructor
       @param trh :: TableRowHelper returned by TableWorkspace::getRow
   */
-TableRow::TableRow(const TableRowHelper &trh)
-    : m_row(trh.m_row), m_col(0), m_sep(",") {
+TableRow::TableRow(const TableRowHelper &trh) : m_row(trh.m_row), m_col(0), m_sep(",") {
   for (size_t i = 0; i < trh.m_workspace->columnCount(); i++)
     m_columns.emplace_back(trh.m_workspace->getColumn(i));
   if (!m_columns.empty())

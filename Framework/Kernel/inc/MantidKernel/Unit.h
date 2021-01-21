@@ -65,10 +65,8 @@ public:
   bool operator!=(const Unit &u) const;
 
   // Check whether the unit can be converted to another via a simple factor
-  bool quickConversion(const Unit &destination, double &factor,
-                       double &power) const;
-  bool quickConversion(std::string destUnitName, double &factor,
-                       double &power) const;
+  bool quickConversion(const Unit &destination, double &factor, double &power) const;
+  bool quickConversion(std::string destUnitName, double &factor, double &power) const;
 
   /** Convert from the concrete unit to time-of-flight. TOF is in microseconds.
    *  @param xdata ::    The array of X data to be converted
@@ -84,9 +82,8 @@ public:
    * meV)
    *  @param _delta ::    Not currently used
    */
-  void toTOF(std::vector<double> &xdata, std::vector<double> &ydata,
-             const double &_l1, const double &_l2, const double &_twoTheta,
-             const int &_emode, const double &_efixed, const double &_delta);
+  void toTOF(std::vector<double> &xdata, std::vector<double> &ydata, const double &_l1, const double &_l2,
+             const double &_twoTheta, const int &_emode, const double &_efixed, const double &_delta);
 
   /** Convert from the concrete unit to time-of-flight. TOF is in microseconds.
    *  @param xvalue ::   A single X-value to convert
@@ -100,10 +97,8 @@ public:
    *  @param delta ::    Not currently used
    *  @return the value in TOF units.
    */
-  double convertSingleToTOF(const double xvalue, const double &l1,
-                            const double &l2, const double &twoTheta,
-                            const int &emode, const double &efixed,
-                            const double &delta);
+  double convertSingleToTOF(const double xvalue, const double &l1, const double &l2, const double &twoTheta,
+                            const int &emode, const double &efixed, const double &delta);
 
   /** Convert from time-of-flight to the concrete unit. TOF is in microseconds.
    *  @param xdata ::    The array of X data to be converted
@@ -119,9 +114,8 @@ public:
    * meV)
    *  @param _delta ::    Not currently used
    */
-  void fromTOF(std::vector<double> &xdata, std::vector<double> &ydata,
-               const double &_l1, const double &_l2, const double &_twoTheta,
-               const int &_emode, const double &_efixed, const double &_delta);
+  void fromTOF(std::vector<double> &xdata, std::vector<double> &ydata, const double &_l1, const double &_l2,
+               const double &_twoTheta, const int &_emode, const double &_efixed, const double &_delta);
 
   /** Convert from the time-of-flight to the concrete unit. TOF is in
    * microseconds.
@@ -136,10 +130,8 @@ public:
    *  @param delta ::    Not currently used
    *  @return the value in these units.
    */
-  double convertSingleFromTOF(const double xvalue, const double &l1,
-                              const double &l2, const double &twoTheta,
-                              const int &emode, const double &efixed,
-                              const double &delta);
+  double convertSingleFromTOF(const double xvalue, const double &l1, const double &l2, const double &twoTheta,
+                              const int &emode, const double &efixed, const double &delta);
 
   /** Initialize the unit to perform conversion using singleToTof() and
    *singleFromTof()
@@ -153,9 +145,8 @@ public:
    *(in meV)
    *  @param _delta ::    Not currently used
    */
-  void initialize(const double &_l1, const double &_l2, const double &_twoTheta,
-                  const int &_emode, const double &_efixed,
-                  const double &_delta);
+  void initialize(const double &_l1, const double &_l2, const double &_twoTheta, const int &_emode,
+                  const double &_efixed, const double &_delta);
 
   /** Finalize the initialization. This will be overridden by subclasses as
    * needed. */
@@ -191,8 +182,7 @@ public:
 
 protected:
   // Add a 'quick conversion' for a unit pair
-  void addConversion(std::string to, const double &factor,
-                     const double &power = 1.0) const;
+  void addConversion(std::string to, const double &factor, const double &power = 1.0) const;
 
   /// The unit values have been initialized
   bool initialized;
@@ -216,12 +206,10 @@ private:
   using ConstantAndPower = std::pair<double, double>;
   /// Lists, for a given starting unit, the units to which a 'quick conversion'
   /// can be made
-  using UnitConversions =
-      tbb::concurrent_unordered_map<std::string, ConstantAndPower>;
+  using UnitConversions = tbb::concurrent_unordered_map<std::string, ConstantAndPower>;
   /// The possible 'quick conversions' are held in a map with the starting unit
   /// as the key
-  using ConversionsMap =
-      tbb::concurrent_unordered_map<std::string, UnitConversions>;
+  using ConversionsMap = tbb::concurrent_unordered_map<std::string, UnitConversions>;
   /// The table of possible 'quick conversions'
   static ConversionsMap s_conversionFactors;
 };
@@ -400,9 +388,7 @@ protected:
 class MANTID_KERNEL_DLL dSpacingPerpendicular : public Unit {
 public:
   const std::string unitID() const override; ///< "dSpacingPerpendicular"
-  const std::string caption() const override {
-    return "d-SpacingPerpendicular";
-  }
+  const std::string caption() const override { return "d-SpacingPerpendicular"; }
   const UnitLabel label() const override;
 
   double singleToTOF(const double x) const override;
@@ -687,17 +673,13 @@ private:
 
 //=================================================================================================
 
-MANTID_KERNEL_DLL double timeConversionValue(const std::string &input_unit,
-                                             const std::string &output_unit);
+MANTID_KERNEL_DLL double timeConversionValue(const std::string &input_unit, const std::string &output_unit);
 
 template <typename T>
-void timeConversionVector(std::vector<T> &vec, const std::string &input_unit,
-                          const std::string &output_unit) {
-  double factor =
-      timeConversionValue(std::move(input_unit), std::move(output_unit));
+void timeConversionVector(std::vector<T> &vec, const std::string &input_unit, const std::string &output_unit) {
+  double factor = timeConversionValue(std::move(input_unit), std::move(output_unit));
   if (factor != 1.0)
-    std::transform(vec.begin(), vec.end(), vec.begin(),
-                   [factor](T x) -> T { return x * static_cast<T>(factor); });
+    std::transform(vec.begin(), vec.end(), vec.begin(), [factor](T x) -> T { return x * static_cast<T>(factor); });
 }
 
 } // namespace Units

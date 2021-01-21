@@ -12,8 +12,7 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
-UnwrappedSphere::UnwrappedSphere(const InstrumentActor *rootActor,
-                                 const Mantid::Kernel::V3D &origin,
+UnwrappedSphere::UnwrappedSphere(const InstrumentActor *rootActor, const Mantid::Kernel::V3D &origin,
                                  const Mantid::Kernel::V3D &axis)
     : RotationSurface(rootActor, origin, axis) {
   init();
@@ -28,8 +27,8 @@ UnwrappedSphere::UnwrappedSphere(const InstrumentActor *rootActor,
  * @param uscale :: scaling for u direction
  * @param vscale :: scaling for v direction
  */
-void UnwrappedSphere::project(const Mantid::Kernel::V3D &pos, double &u,
-                              double &v, double &uscale, double &vscale) const {
+void UnwrappedSphere::project(const Mantid::Kernel::V3D &pos, double &u, double &v, double &uscale,
+                              double &vscale) const {
   // projection to cylinder axis
   v = pos.scalar_prod(m_zaxis);
   double x = pos.scalar_prod(m_xaxis);
@@ -43,8 +42,7 @@ void UnwrappedSphere::project(const Mantid::Kernel::V3D &pos, double &u,
   v = -acos(v / r);
 }
 
-void UnwrappedSphere::rotate(const UnwrappedDetector &udet,
-                             Mantid::Kernel::Quat &R) const {
+void UnwrappedSphere::rotate(const UnwrappedDetector &udet, Mantid::Kernel::Quat &R) const {
   // rotation from the global axes to those where
   // the z axis points to the detector
   Mantid::Kernel::Quat R1;

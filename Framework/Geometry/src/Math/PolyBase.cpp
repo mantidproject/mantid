@@ -93,8 +93,7 @@ double PolyBase::operator[](const int i) const
  */
 {
   if (i > iDegree || i < 0)
-    throw Kernel::Exception::IndexError(i, iDegree + 1,
-                                        "PolyBase::operator[] const");
+    throw Kernel::Exception::IndexError(i, iDegree + 1, "PolyBase::operator[] const");
   return afCoeff[i];
 }
 
@@ -280,8 +279,7 @@ PolyBase &PolyBase::operator*=(const double V)
  */
 {
   using std::placeholders::_1;
-  transform(afCoeff.begin(), afCoeff.end(), afCoeff.begin(),
-            std::bind(std::multiplies<double>(), _1, V));
+  transform(afCoeff.begin(), afCoeff.end(), afCoeff.begin(), std::bind(std::multiplies<double>(), _1, V));
   return *this;
 }
 
@@ -293,8 +291,7 @@ PolyBase &PolyBase::operator/=(const double V)
  */
 {
   using std::placeholders::_1;
-  transform(afCoeff.begin(), afCoeff.end(), afCoeff.begin(),
-            std::bind(std::divides<double>(), _1, V));
+  transform(afCoeff.begin(), afCoeff.end(), afCoeff.begin(), std::bind(std::divides<double>(), _1, V));
   return *this;
 }
 
@@ -372,8 +369,7 @@ void PolyBase::compress(const double epsilon)
   afCoeff.resize(iDegree + 1);
 }
 
-void PolyBase::divide(const PolyBase &pD, PolyBase &pQ, PolyBase &pR,
-                      const double epsilon) const
+void PolyBase::divide(const PolyBase &pD, PolyBase &pQ, PolyBase &pR, const double epsilon) const
 /**
   Carry out polynomial division of this / pD  (Euclidean algorithm)
   If 'this' is P(t) and the divisor is D(t) with degree(P) >= degree(D),
@@ -481,8 +477,7 @@ std::vector<std::complex<double>> PolyBase::calcRoots(const double epsilon)
   return Out;
 }
 
-int PolyBase::solveQuadratic(std::complex<double> &AnsA,
-                             std::complex<double> &AnsB) const
+int PolyBase::solveQuadratic(std::complex<double> &AnsA, std::complex<double> &AnsB) const
 /**
   Solves Complex Quadratic component.
   compress MUST have been called.
@@ -503,15 +498,13 @@ int PolyBase::solveQuadratic(std::complex<double> &AnsA,
     return (cf == 0) ? 1 : 2;
   }
 
-  std::complex<double> CQ(-0.5 * b,
-                          (b >= 0 ? -0.5 * sqrt(-cf) : 0.5 * sqrt(-cf)));
+  std::complex<double> CQ(-0.5 * b, (b >= 0 ? -0.5 * sqrt(-cf) : 0.5 * sqrt(-cf)));
   AnsA = CQ;
   AnsB = c / CQ;
   return 2;
 }
 
-int PolyBase::solveCubic(std::complex<double> &AnsA, std::complex<double> &AnsB,
-                         std::complex<double> &AnsC) const
+int PolyBase::solveCubic(std::complex<double> &AnsA, std::complex<double> &AnsB, std::complex<double> &AnsC) const
 /**
   Solves Cubic equation
   Compress MUST have been called.
@@ -565,10 +558,8 @@ int PolyBase::solveCubic(std::complex<double> &AnsA, std::complex<double> &AnsB,
     q3 = acos(-r / sqrt(q3));
     r13 = -2.0 * sqrt(q);
     AnsA = std::complex<double>(-termR + r13 * cos(q3 / 3.0), 0.0);
-    AnsB =
-        std::complex<double>(-termR + r13 * cos((q3 + 2.0 * M_PI) / 3.0), 0.0);
-    AnsC =
-        std::complex<double>(-termR + r13 * cos((q3 - 2.0 * M_PI) / 3.0), 0.0);
+    AnsB = std::complex<double>(-termR + r13 * cos((q3 + 2.0 * M_PI) / 3.0), 0.0);
+    AnsC = std::complex<double>(-termR + r13 * cos((q3 - 2.0 * M_PI) / 3.0), 0.0);
     return 3;
   }
 

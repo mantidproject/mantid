@@ -40,8 +40,7 @@ void DivideMD::checkInputs() {
   if (m_rhs_event)
     throw std::runtime_error("Cannot divide by a MDEventWorkspace on the RHS.");
   if (m_lhs_event && !m_rhs_scalar)
-    throw std::runtime_error(
-        "A MDEventWorkspace can only be divided by a scalar.");
+    throw std::runtime_error("A MDEventWorkspace can only be divided by a scalar.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -49,8 +48,7 @@ void DivideMD::checkInputs() {
  * Will do "ws /= scalar"
  * @param ws ::  MDEventWorkspace being modified
  */
-template <typename MDE, size_t nd>
-void DivideMD::execEventScalar(typename MDEventWorkspace<MDE, nd>::sptr ws) {
+template <typename MDE, size_t nd> void DivideMD::execEventScalar(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   // Get the scalar multiplying
   auto scalar = float(m_rhs_scalar->y(0)[0]);
   auto scalarError = float(m_rhs_scalar->e(0)[0]);
@@ -81,8 +79,7 @@ void DivideMD::execEventScalar(typename MDEventWorkspace<MDE, nd>::sptr ws) {
         float oldSignal = it->getSignal();
         float signal = oldSignal / scalar;
         float errorSquared = it->getErrorSquared() * inverseScalarSquared +
-                             scalarErrorSquared * oldSignal * oldSignal *
-                                 inverseScalarSquared * inverseScalarSquared;
+                             scalarErrorSquared * oldSignal * oldSignal * inverseScalarSquared * inverseScalarSquared;
         it->setSignal(signal);
         it->setErrorSquared(errorSquared);
         ic++;
@@ -105,28 +102,24 @@ void DivideMD::execEventScalar(typename MDEventWorkspace<MDE, nd>::sptr ws) {
 /// Run the algorithm with an MDEventWorkspace as output
 void DivideMD::execEvent() {
   if (m_lhs_event && !m_rhs_scalar)
-    throw std::runtime_error(
-        "A MDEventWorkspace can only be divided by a scalar.");
+    throw std::runtime_error("A MDEventWorkspace can only be divided by a scalar.");
   if (!m_out_event)
-    throw std::runtime_error(
-        "DivideMD::execEvent(): Error creating output MDEventWorkspace.");
+    throw std::runtime_error("DivideMD::execEvent(): Error creating output MDEventWorkspace.");
   // Call the method to do the dividing
   CALL_MDEVENT_FUNCTION(this->execEventScalar, m_out_event);
 }
 
 //----------------------------------------------------------------------------------------------
 /// Run the algorithm with a MDHisotWorkspace as output and operand
-void DivideMD::execHistoHisto(
-    Mantid::DataObjects::MDHistoWorkspace_sptr out,
-    Mantid::DataObjects::MDHistoWorkspace_const_sptr operand) {
+void DivideMD::execHistoHisto(Mantid::DataObjects::MDHistoWorkspace_sptr out,
+                              Mantid::DataObjects::MDHistoWorkspace_const_sptr operand) {
   out->divide(*operand);
 }
 
 //----------------------------------------------------------------------------------------------
 /// Run the algorithm with a MDHisotWorkspace as output, scalar and operand
-void DivideMD::execHistoScalar(
-    Mantid::DataObjects::MDHistoWorkspace_sptr out,
-    Mantid::DataObjects::WorkspaceSingleValue_const_sptr scalar) {
+void DivideMD::execHistoScalar(Mantid::DataObjects::MDHistoWorkspace_sptr out,
+                               Mantid::DataObjects::WorkspaceSingleValue_const_sptr scalar) {
   out->divide(scalar->y(0)[0], scalar->e(0)[0]);
 }
 

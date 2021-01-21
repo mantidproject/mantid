@@ -37,14 +37,14 @@
 #include "MyParser.h"
 
 FunctionCurve::FunctionCurve(const QString &name)
-    : PlotCurve(name), d_function_type(Normal), d_variable("x"), d_formulas(),
-      d_from(0.0), d_to(0.0), m_identifier(nullptr) {
+    : PlotCurve(name), d_function_type(Normal), d_variable("x"), d_formulas(), d_from(0.0), d_to(0.0),
+      m_identifier(nullptr) {
   setType(GraphOptions::Function);
 }
 
 FunctionCurve::FunctionCurve(const FunctionType &t, const QString &name)
-    : PlotCurve(name), d_function_type(t), d_variable("x"), d_formulas(),
-      d_from(0.0), d_to(0.0), m_identifier(nullptr) {
+    : PlotCurve(name), d_function_type(t), d_variable("x"), d_formulas(), d_from(0.0), d_to(0.0),
+      m_identifier(nullptr) {
   // d_variable = "x";
   setType(GraphOptions::Function);
 }
@@ -58,23 +58,19 @@ FunctionCurve::FunctionCurve(const FunctionType &t, const QString &name)
  * @param wsIndex :: An index in the workspace
  * @param name :: A name of the curve
  */
-FunctionCurve::FunctionCurve(const Mantid::API::IFunction *fun,
-                             const QString &wsName, int wsIndex,
-                             const QString &name)
+FunctionCurve::FunctionCurve(const Mantid::API::IFunction *fun, const QString &wsName, int wsIndex, const QString &name)
     : PlotCurve(name), d_function_type(FunctionCurve::Normal),
       d_variable(""), // This indicates that mu::Parser is not used
       d_from(0), d_to(0), m_identifier(fun) {
   setType(GraphOptions::Function);
 
   // Save construction information in d_formulas
-  d_formulas << "Mantid" << QString::fromStdString(fun->asString()) << wsName
-             << QString::number(wsIndex);
+  d_formulas << "Mantid" << QString::fromStdString(fun->asString()) << wsName << QString::number(wsIndex);
 }
 
 FunctionCurve::FunctionCurve(const FunctionCurve &c)
-    : PlotCurve(c.title().text()), d_function_type(c.d_function_type),
-      d_variable(c.d_variable), d_formulas(c.d_formulas), d_from(c.d_from),
-      d_to(c.d_to), m_identifier(c.m_identifier) {}
+    : PlotCurve(c.title().text()), d_function_type(c.d_function_type), d_variable(c.d_variable),
+      d_formulas(c.d_formulas), d_from(c.d_from), d_to(c.d_to), m_identifier(c.m_identifier) {}
 
 FunctionCurve::~FunctionCurve() {}
 
@@ -97,8 +93,7 @@ QString FunctionCurve::saveToString() {
   s += "<Title>" + title().text() + "</Title>\n";
   s += "<Expression>" + d_formulas.join("\t") + "</Expression>\n";
   s += "<Variable>" + d_variable + "</Variable>\n";
-  s += "<Range>" + QString::number(d_from, 'g', 15) + "\t" +
-       QString::number(d_to, 'g', 15) + "</Range>\n";
+  s += "<Range>" + QString::number(d_from, 'g', 15) + "\t" + QString::number(d_to, 'g', 15) + "</Range>\n";
   s += "<Points>" + QString::number(dataSize()) + "</Points>\n";
   s += saveCurveLayout();
   s += "</Function>\n";
@@ -121,8 +116,7 @@ QString FunctionCurve::legend() {
 
 void FunctionCurve::loadData(int points) {
   if (d_variable.isEmpty() && !d_formulas.isEmpty() &&
-      d_formulas[0].compare("Mantid") ==
-          0) { // Mantid::API::IFunction is used to calculate the data points
+      d_formulas[0].compare("Mantid") == 0) { // Mantid::API::IFunction is used to calculate the data points
     if (d_formulas.size() < 4)
       return;
 
@@ -131,10 +125,8 @@ void FunctionCurve::loadData(int points) {
     int wsIndex = d_formulas[3].toInt();
 
     try {
-      Mantid::API::MatrixWorkspace_const_sptr ws =
-          std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-              Mantid::API::AnalysisDataService::Instance().retrieve(
-                  wsName.toStdString()));
+      Mantid::API::MatrixWorkspace_const_sptr ws = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+          Mantid::API::AnalysisDataService::Instance().retrieve(wsName.toStdString()));
 
       if (wsIndex >= static_cast<int>(ws->getNumberHistograms()))
         return;
@@ -162,8 +154,7 @@ void FunctionCurve::loadData(int points) {
 
       // Create the function and initialize it using fnInput which was saved in
       // d_formulas[1]
-      auto f = Mantid::API::FunctionFactory::Instance().createInitialized(
-          fnInput.toStdString());
+      auto f = Mantid::API::FunctionFactory::Instance().createInitialized(fnInput.toStdString());
       f->setMatrixWorkspace(ws, wsIndex, d_from, d_to);
       f->applyTies();
       Mantid::API::FunctionDomain1DVector domain(X);
@@ -243,11 +234,8 @@ void FunctionCurve::loadData(int points) {
  * @param wi :: An index of a histogram with the data.
  * @param peakRadius :: A peak radius to pass to the domain.
  */
-void FunctionCurve::loadMantidData(
-    const Mantid::API::MatrixWorkspace_const_sptr &ws, size_t wi,
-    int peakRadius) {
-  if (!d_variable.isEmpty() || d_formulas.isEmpty() ||
-      d_formulas[0] != "Mantid")
+void FunctionCurve::loadMantidData(const Mantid::API::MatrixWorkspace_const_sptr &ws, size_t wi, int peakRadius) {
+  if (!d_variable.isEmpty() || d_formulas.isEmpty() || d_formulas[0] != "Mantid")
     return;
   if (d_formulas.size() < 2)
     return;
@@ -282,8 +270,7 @@ void FunctionCurve::loadMantidData(
 
     // Create the function and initialize it using fnInput which was saved in
     // d_formulas[1]
-    auto f = Mantid::API::FunctionFactory::Instance().createInitialized(
-        fnInput.toStdString());
+    auto f = Mantid::API::FunctionFactory::Instance().createInitialized(fnInput.toStdString());
     f->setMatrixWorkspace(ws, wi, d_from, d_to);
     f->applyTies();
     Mantid::API::FunctionDomain1DVector domain(X);

@@ -33,29 +33,17 @@ const std::string CAN_SAS_ATTR_CLASS("canSAS_class");
 
 template <typename NumT> DataType getType() { throw DataTypeIException(); }
 
-template <> MANTID_DATAHANDLING_DLL DataType getType<float>() {
-  return PredType::NATIVE_FLOAT;
-}
+template <> MANTID_DATAHANDLING_DLL DataType getType<float>() { return PredType::NATIVE_FLOAT; }
 
-template <> MANTID_DATAHANDLING_DLL DataType getType<double>() {
-  return PredType::NATIVE_DOUBLE;
-}
+template <> MANTID_DATAHANDLING_DLL DataType getType<double>() { return PredType::NATIVE_DOUBLE; }
 
-template <> MANTID_DATAHANDLING_DLL DataType getType<int32_t>() {
-  return PredType::NATIVE_INT32;
-}
+template <> MANTID_DATAHANDLING_DLL DataType getType<int32_t>() { return PredType::NATIVE_INT32; }
 
-template <> MANTID_DATAHANDLING_DLL DataType getType<uint32_t>() {
-  return PredType::NATIVE_UINT32;
-}
+template <> MANTID_DATAHANDLING_DLL DataType getType<uint32_t>() { return PredType::NATIVE_UINT32; }
 
-template <> MANTID_DATAHANDLING_DLL DataType getType<int64_t>() {
-  return PredType::NATIVE_INT64;
-}
+template <> MANTID_DATAHANDLING_DLL DataType getType<int64_t>() { return PredType::NATIVE_INT64; }
 
-template <> MANTID_DATAHANDLING_DLL DataType getType<uint64_t>() {
-  return PredType::NATIVE_UINT64;
-}
+template <> MANTID_DATAHANDLING_DLL DataType getType<uint64_t>() { return PredType::NATIVE_UINT64; }
 
 DataSpace getDataSpace(const size_t length) {
   hsize_t dims[] = {length};
@@ -68,11 +56,8 @@ template <typename NumT> DataSpace getDataSpace(const std::vector<NumT> &data) {
 
 namespace {
 
-template <typename NumT>
-H5::DataSet writeScalarDataSet(Group &group, const std::string &name,
-                               const NumT &value) {
-  static_assert(std::is_integral<NumT>::value ||
-                    std::is_floating_point<NumT>::value,
+template <typename NumT> H5::DataSet writeScalarDataSet(Group &group, const std::string &name, const NumT &value) {
+  static_assert(std::is_integral<NumT>::value || std::is_floating_point<NumT>::value,
                 "The writeNumAttribute function only accepts integral of "
                 "floating point values.");
   auto dataType = getType<NumT>();
@@ -83,9 +68,7 @@ H5::DataSet writeScalarDataSet(Group &group, const std::string &name,
 }
 
 template <>
-H5::DataSet writeScalarDataSet<std::string>(Group &group,
-                                            const std::string &name,
-                                            const std::string &value) {
+H5::DataSet writeScalarDataSet<std::string>(Group &group, const std::string &name, const std::string &value) {
   StrType dataType(0, value.length() + 1);
   DataSpace dataSpace = getDataSpace(1);
   H5::DataSet data = group.createDataSet(name, dataType, dataSpace);
@@ -99,36 +82,31 @@ H5::DataSet writeScalarDataSet<std::string>(Group &group,
 // write methods
 // -------------------------------------------------------------------
 
-Group createGroupNXS(H5File &file, const std::string &name,
-                     const std::string &nxtype) {
+Group createGroupNXS(H5File &file, const std::string &name, const std::string &nxtype) {
   auto group = file.createGroup(name);
   writeStrAttribute(group, NX_ATTR_CLASS, nxtype);
   return group;
 }
 
-Group createGroupNXS(Group &group, const std::string &name,
-                     const std::string &nxtype) {
+Group createGroupNXS(Group &group, const std::string &name, const std::string &nxtype) {
   auto outGroup = group.createGroup(name);
   writeStrAttribute(outGroup, NX_ATTR_CLASS, nxtype);
   return outGroup;
 }
 
-Group createGroupCanSAS(H5File &file, const std::string &name,
-                        const std::string &nxtype, const std::string &cstype) {
+Group createGroupCanSAS(H5File &file, const std::string &name, const std::string &nxtype, const std::string &cstype) {
   auto outGroup = createGroupNXS(file, name, nxtype);
   writeStrAttribute(outGroup, CAN_SAS_ATTR_CLASS, cstype);
   return outGroup;
 }
 
-Group createGroupCanSAS(Group &group, const std::string &name,
-                        const std::string &nxtype, const std::string &cstype) {
+Group createGroupCanSAS(Group &group, const std::string &name, const std::string &nxtype, const std::string &cstype) {
   auto outGroup = createGroupNXS(group, name, nxtype);
   writeStrAttribute(outGroup, CAN_SAS_ATTR_CLASS, cstype);
   return outGroup;
 }
 
-DSetCreatPropList setCompressionAttributes(const std::size_t length,
-                                           const int deflateLevel) {
+DSetCreatPropList setCompressionAttributes(const std::size_t length, const int deflateLevel) {
   DSetCreatPropList propList;
   hsize_t chunk_dims[1] = {length};
   propList.setChunk(1, chunk_dims);
@@ -137,8 +115,7 @@ DSetCreatPropList setCompressionAttributes(const std::size_t length,
 }
 
 template <typename LocationType>
-void writeStrAttribute(LocationType &location, const std::string &name,
-                       const std::string &value) {
+void writeStrAttribute(LocationType &location, const std::string &name, const std::string &value) {
   StrType attrType(0, H5T_VARIABLE);
   DataSpace attrSpace(H5S_SCALAR);
   auto attribute = location.createAttribute(name, attrType, attrSpace);
@@ -146,10 +123,8 @@ void writeStrAttribute(LocationType &location, const std::string &name,
 }
 
 template <typename NumT, typename LocationType>
-void writeNumAttribute(LocationType &location, const std::string &name,
-                       const NumT &value) {
-  static_assert(std::is_integral<NumT>::value ||
-                    std::is_floating_point<NumT>::value,
+void writeNumAttribute(LocationType &location, const std::string &name, const NumT &value) {
+  static_assert(std::is_integral<NumT>::value || std::is_floating_point<NumT>::value,
                 "The writeNumAttribute function only accepts integral or "
                 "floating point values.");
   auto attrType = getType<NumT>();
@@ -162,10 +137,8 @@ void writeNumAttribute(LocationType &location, const std::string &name,
 }
 
 template <typename NumT, typename LocationType>
-void writeNumAttribute(LocationType &location, const std::string &name,
-                       const std::vector<NumT> &value) {
-  static_assert(std::is_integral<NumT>::value ||
-                    std::is_floating_point<NumT>::value,
+void writeNumAttribute(LocationType &location, const std::string &name, const std::vector<NumT> &value) {
+  static_assert(std::is_integral<NumT>::value || std::is_floating_point<NumT>::value,
                 "The writeNumAttribute function only accepts integral of "
                 "floating point values.");
   auto attrType = getType<NumT>();
@@ -175,23 +148,18 @@ void writeNumAttribute(LocationType &location, const std::string &name,
   attribute.write(attrType, value.data());
 }
 
-void write(Group &group, const std::string &name, const std::string &value) {
-  writeScalarDataSet(group, name, value);
-}
+void write(Group &group, const std::string &name, const std::string &value) { writeScalarDataSet(group, name, value); }
 
 template <typename T>
-void writeScalarDataSetWithStrAttributes(
-    H5::Group &group, const std::string &name, const T &value,
-    const std::map<std::string, std::string> &attributes) {
+void writeScalarDataSetWithStrAttributes(H5::Group &group, const std::string &name, const T &value,
+                                         const std::map<std::string, std::string> &attributes) {
   auto data = writeScalarDataSet(group, name, value);
   for (const auto &attribute : attributes) {
     writeStrAttribute(data, attribute.first, attribute.second);
   }
 }
 
-template <typename NumT>
-void writeArray1D(Group &group, const std::string &name,
-                  const std::vector<NumT> &values) {
+template <typename NumT> void writeArray1D(Group &group, const std::string &name, const std::vector<NumT> &values) {
   DataType dataType(getType<NumT>());
   DataSpace dataSpace = getDataSpace(values);
 
@@ -240,8 +208,7 @@ std::string readString(H5::DataSet &dataset) {
  * @param name :: name of the dataset in the group (rank must be 1)
  * @return :: vector of strings
  */
-std::vector<std::string> readStringVector(Group &group,
-                                          const std::string &name) {
+std::vector<std::string> readStringVector(Group &group, const std::string &name) {
   hsize_t dims[1];
   char **rdata;
   std::vector<std::string> result;
@@ -266,16 +233,14 @@ std::vector<std::string> readStringVector(Group &group,
 }
 
 template <typename LocationType>
-std::string readAttributeAsString(LocationType &location,
-                                  const std::string &attributeName) {
+std::string readAttributeAsString(LocationType &location, const std::string &attributeName) {
   auto attribute = location.openAttribute(attributeName);
   std::string value;
   attribute.read(attribute.getDataType(), value);
   return value;
 }
 
-template <typename NumT>
-std::vector<NumT> readArray1DCoerce(H5::Group &group, const std::string &name) {
+template <typename NumT> std::vector<NumT> readArray1DCoerce(H5::Group &group, const std::string &name) {
   std::vector<NumT> result;
 
   try {
@@ -294,8 +259,7 @@ std::vector<NumT> readArray1DCoerce(H5::Group &group, const std::string &name) {
 
 namespace {
 template <typename InputNumT, typename OutputNumT>
-std::vector<OutputNumT> convertingRead(DataSet &dataset,
-                                       const DataType &dataType) {
+std::vector<OutputNumT> convertingRead(DataSet &dataset, const DataType &dataType) {
   DataSpace dataSpace = dataset.getSpace();
 
   std::vector<InputNumT> temp(dataSpace.getSelectNpoints());
@@ -313,9 +277,7 @@ std::vector<OutputNumT> convertingRead(DataSet &dataset,
 }
 
 template <typename InputNumT, typename OutputNumT>
-std::vector<OutputNumT>
-convertingNumArrayAttributeRead(Attribute &attribute,
-                                const DataType &dataType) {
+std::vector<OutputNumT> convertingNumArrayAttributeRead(Attribute &attribute, const DataType &dataType) {
   DataSpace dataSpace = attribute.getSpace();
 
   std::vector<InputNumT> temp(dataSpace.getSelectNpoints());
@@ -324,9 +286,8 @@ convertingNumArrayAttributeRead(Attribute &attribute,
   std::vector<OutputNumT> result;
   result.resize(temp.size());
 
-  std::transform(
-      temp.begin(), temp.end(), result.begin(),
-      [](const InputNumT a) { return boost::numeric_cast<OutputNumT>(a); });
+  std::transform(temp.begin(), temp.end(), result.begin(),
+                 [](const InputNumT a) { return boost::numeric_cast<OutputNumT>(a); });
 
   return result;
 }
@@ -342,8 +303,7 @@ OutputNumT convertingRead(Attribute &attribute, const DataType &dataType) {
 } // namespace
 
 template <typename NumT, typename LocationType>
-NumT readNumAttributeCoerce(LocationType &location,
-                            const std::string &attributeName) {
+NumT readNumAttributeCoerce(LocationType &location, const std::string &attributeName) {
   auto attribute = location.openAttribute(attributeName);
   auto dataType = attribute.getDataType();
 
@@ -371,9 +331,7 @@ NumT readNumAttributeCoerce(LocationType &location,
 }
 
 template <typename NumT, typename LocationType>
-std::vector<NumT>
-readNumArrayAttributeCoerce(LocationType &location,
-                            const std::string &attributeName) {
+std::vector<NumT> readNumArrayAttributeCoerce(LocationType &location, const std::string &attributeName) {
   auto attribute = location.openAttribute(attributeName);
   auto dataType = attribute.getDataType();
 
@@ -386,13 +344,11 @@ readNumArrayAttributeCoerce(LocationType &location,
   } else if (PredType::NATIVE_INT32 == dataType) {
     value = convertingNumArrayAttributeRead<int32_t, NumT>(attribute, dataType);
   } else if (PredType::NATIVE_UINT32 == dataType) {
-    value =
-        convertingNumArrayAttributeRead<uint32_t, NumT>(attribute, dataType);
+    value = convertingNumArrayAttributeRead<uint32_t, NumT>(attribute, dataType);
   } else if (PredType::NATIVE_INT64 == dataType) {
     value = convertingNumArrayAttributeRead<int64_t, NumT>(attribute, dataType);
   } else if (PredType::NATIVE_UINT64 == dataType) {
-    value =
-        convertingNumArrayAttributeRead<uint64_t, NumT>(attribute, dataType);
+    value = convertingNumArrayAttributeRead<uint64_t, NumT>(attribute, dataType);
   } else if (PredType::NATIVE_FLOAT == dataType) {
     value = convertingNumArrayAttributeRead<float, NumT>(attribute, dataType);
   } else if (PredType::NATIVE_DOUBLE == dataType) {
@@ -436,260 +392,190 @@ template <typename NumT> std::vector<NumT> readArray1DCoerce(DataSet &dataset) {
 // -------------------------------------------------------------------
 // instantiations for writeStrAttribute
 // -------------------------------------------------------------------
-template MANTID_DATAHANDLING_DLL void
-writeStrAttribute(H5::Group &location, const std::string &name,
-                  const std::string &value);
+template MANTID_DATAHANDLING_DLL void writeStrAttribute(H5::Group &location, const std::string &name,
+                                                        const std::string &value);
 
-template MANTID_DATAHANDLING_DLL void
-writeStrAttribute(H5::DataSet &location, const std::string &name,
-                  const std::string &value);
+template MANTID_DATAHANDLING_DLL void writeStrAttribute(H5::DataSet &location, const std::string &name,
+                                                        const std::string &value);
 
 // -------------------------------------------------------------------
 // instantiations for writeNumAttribute
 // -------------------------------------------------------------------
 
-template MANTID_DATAHANDLING_DLL void writeNumAttribute(H5::Group &location,
-                                                        const std::string &name,
+template MANTID_DATAHANDLING_DLL void writeNumAttribute(H5::Group &location, const std::string &name,
                                                         const float &value);
-template MANTID_DATAHANDLING_DLL void writeNumAttribute(H5::DataSet &location,
-                                                        const std::string &name,
+template MANTID_DATAHANDLING_DLL void writeNumAttribute(H5::DataSet &location, const std::string &name,
                                                         const float &value);
-template MANTID_DATAHANDLING_DLL void writeNumAttribute(H5::Group &location,
-                                                        const std::string &name,
+template MANTID_DATAHANDLING_DLL void writeNumAttribute(H5::Group &location, const std::string &name,
                                                         const double &value);
-template MANTID_DATAHANDLING_DLL void writeNumAttribute(H5::DataSet &location,
-                                                        const std::string &name,
+template MANTID_DATAHANDLING_DLL void writeNumAttribute(H5::DataSet &location, const std::string &name,
                                                         const double &value);
-template MANTID_DATAHANDLING_DLL void writeNumAttribute(H5::Group &location,
-                                                        const std::string &name,
+template MANTID_DATAHANDLING_DLL void writeNumAttribute(H5::Group &location, const std::string &name,
                                                         const int32_t &value);
-template MANTID_DATAHANDLING_DLL void writeNumAttribute(H5::DataSet &location,
-                                                        const std::string &name,
+template MANTID_DATAHANDLING_DLL void writeNumAttribute(H5::DataSet &location, const std::string &name,
                                                         const int32_t &value);
-template MANTID_DATAHANDLING_DLL void writeNumAttribute(H5::Group &location,
-                                                        const std::string &name,
+template MANTID_DATAHANDLING_DLL void writeNumAttribute(H5::Group &location, const std::string &name,
                                                         const uint32_t &value);
-template MANTID_DATAHANDLING_DLL void writeNumAttribute(H5::DataSet &location,
-                                                        const std::string &name,
+template MANTID_DATAHANDLING_DLL void writeNumAttribute(H5::DataSet &location, const std::string &name,
                                                         const uint32_t &value);
-template MANTID_DATAHANDLING_DLL void writeNumAttribute(H5::Group &location,
-                                                        const std::string &name,
+template MANTID_DATAHANDLING_DLL void writeNumAttribute(H5::Group &location, const std::string &name,
                                                         const int64_t &value);
-template MANTID_DATAHANDLING_DLL void writeNumAttribute(H5::DataSet &location,
-                                                        const std::string &name,
+template MANTID_DATAHANDLING_DLL void writeNumAttribute(H5::DataSet &location, const std::string &name,
                                                         const int64_t &value);
-template MANTID_DATAHANDLING_DLL void writeNumAttribute(H5::Group &location,
-                                                        const std::string &name,
+template MANTID_DATAHANDLING_DLL void writeNumAttribute(H5::Group &location, const std::string &name,
                                                         const uint64_t &value);
-template MANTID_DATAHANDLING_DLL void writeNumAttribute(H5::DataSet &location,
-                                                        const std::string &name,
+template MANTID_DATAHANDLING_DLL void writeNumAttribute(H5::DataSet &location, const std::string &name,
                                                         const uint64_t &value);
 
-template MANTID_DATAHANDLING_DLL void
-writeNumAttribute(H5::Group &location, const std::string &name,
-                  const std::vector<float> &value);
-template MANTID_DATAHANDLING_DLL void
-writeNumAttribute(H5::DataSet &location, const std::string &name,
-                  const std::vector<float> &value);
-template MANTID_DATAHANDLING_DLL void
-writeNumAttribute(H5::Group &location, const std::string &name,
-                  const std::vector<double> &value);
-template MANTID_DATAHANDLING_DLL void
-writeNumAttribute(H5::DataSet &location, const std::string &name,
-                  const std::vector<double> &value);
-template MANTID_DATAHANDLING_DLL void
-writeNumAttribute(H5::Group &location, const std::string &name,
-                  const std::vector<int32_t> &value);
-template MANTID_DATAHANDLING_DLL void
-writeNumAttribute(H5::DataSet &location, const std::string &name,
-                  const std::vector<int32_t> &value);
-template MANTID_DATAHANDLING_DLL void
-writeNumAttribute(H5::Group &location, const std::string &name,
-                  const std::vector<uint32_t> &value);
-template MANTID_DATAHANDLING_DLL void
-writeNumAttribute(H5::DataSet &location, const std::string &name,
-                  const std::vector<uint32_t> &value);
-template MANTID_DATAHANDLING_DLL void
-writeNumAttribute(H5::Group &location, const std::string &name,
-                  const std::vector<int64_t> &value);
-template MANTID_DATAHANDLING_DLL void
-writeNumAttribute(H5::DataSet &location, const std::string &name,
-                  const std::vector<int64_t> &value);
-template MANTID_DATAHANDLING_DLL void
-writeNumAttribute(H5::Group &location, const std::string &name,
-                  const std::vector<uint64_t> &value);
-template MANTID_DATAHANDLING_DLL void
-writeNumAttribute(H5::DataSet &location, const std::string &name,
-                  const std::vector<uint64_t> &value);
+template MANTID_DATAHANDLING_DLL void writeNumAttribute(H5::Group &location, const std::string &name,
+                                                        const std::vector<float> &value);
+template MANTID_DATAHANDLING_DLL void writeNumAttribute(H5::DataSet &location, const std::string &name,
+                                                        const std::vector<float> &value);
+template MANTID_DATAHANDLING_DLL void writeNumAttribute(H5::Group &location, const std::string &name,
+                                                        const std::vector<double> &value);
+template MANTID_DATAHANDLING_DLL void writeNumAttribute(H5::DataSet &location, const std::string &name,
+                                                        const std::vector<double> &value);
+template MANTID_DATAHANDLING_DLL void writeNumAttribute(H5::Group &location, const std::string &name,
+                                                        const std::vector<int32_t> &value);
+template MANTID_DATAHANDLING_DLL void writeNumAttribute(H5::DataSet &location, const std::string &name,
+                                                        const std::vector<int32_t> &value);
+template MANTID_DATAHANDLING_DLL void writeNumAttribute(H5::Group &location, const std::string &name,
+                                                        const std::vector<uint32_t> &value);
+template MANTID_DATAHANDLING_DLL void writeNumAttribute(H5::DataSet &location, const std::string &name,
+                                                        const std::vector<uint32_t> &value);
+template MANTID_DATAHANDLING_DLL void writeNumAttribute(H5::Group &location, const std::string &name,
+                                                        const std::vector<int64_t> &value);
+template MANTID_DATAHANDLING_DLL void writeNumAttribute(H5::DataSet &location, const std::string &name,
+                                                        const std::vector<int64_t> &value);
+template MANTID_DATAHANDLING_DLL void writeNumAttribute(H5::Group &location, const std::string &name,
+                                                        const std::vector<uint64_t> &value);
+template MANTID_DATAHANDLING_DLL void writeNumAttribute(H5::DataSet &location, const std::string &name,
+                                                        const std::vector<uint64_t> &value);
 
 // -------------------------------------------------------------------
 // instantiations for readAttributeAsString
 // -------------------------------------------------------------------
-template MANTID_DATAHANDLING_DLL std::string
-readAttributeAsString(H5::Group &location, const std::string &attributeName);
+template MANTID_DATAHANDLING_DLL std::string readAttributeAsString(H5::Group &location,
+                                                                   const std::string &attributeName);
 
-template MANTID_DATAHANDLING_DLL std::string
-readAttributeAsString(H5::DataSet &location, const std::string &attributeName);
+template MANTID_DATAHANDLING_DLL std::string readAttributeAsString(H5::DataSet &location,
+                                                                   const std::string &attributeName);
 
 // -------------------------------------------------------------------
 // instantiations for readNumAttributeCoerce
 // -------------------------------------------------------------------
-template MANTID_DATAHANDLING_DLL float
-readNumAttributeCoerce(H5::Group &location, const std::string &attributeName);
-template MANTID_DATAHANDLING_DLL float
-readNumAttributeCoerce(H5::DataSet &location, const std::string &attributeName);
-template MANTID_DATAHANDLING_DLL double
-readNumAttributeCoerce(H5::Group &location, const std::string &attributeName);
-template MANTID_DATAHANDLING_DLL double
-readNumAttributeCoerce(H5::DataSet &location, const std::string &attributeName);
-template MANTID_DATAHANDLING_DLL int32_t
-readNumAttributeCoerce(H5::Group &location, const std::string &attributeName);
-template MANTID_DATAHANDLING_DLL int32_t
-readNumAttributeCoerce(H5::DataSet &location, const std::string &attributeName);
-template MANTID_DATAHANDLING_DLL uint32_t
-readNumAttributeCoerce(H5::Group &location, const std::string &attributeName);
-template MANTID_DATAHANDLING_DLL uint32_t
-readNumAttributeCoerce(H5::DataSet &location, const std::string &attributeName);
-template MANTID_DATAHANDLING_DLL int64_t
-readNumAttributeCoerce(H5::Group &location, const std::string &attributeName);
-template MANTID_DATAHANDLING_DLL int64_t
-readNumAttributeCoerce(H5::DataSet &location, const std::string &attributeName);
-template MANTID_DATAHANDLING_DLL uint64_t
-readNumAttributeCoerce(H5::Group &location, const std::string &attributeName);
-template MANTID_DATAHANDLING_DLL uint64_t
-readNumAttributeCoerce(H5::DataSet &location, const std::string &attributeName);
+template MANTID_DATAHANDLING_DLL float readNumAttributeCoerce(H5::Group &location, const std::string &attributeName);
+template MANTID_DATAHANDLING_DLL float readNumAttributeCoerce(H5::DataSet &location, const std::string &attributeName);
+template MANTID_DATAHANDLING_DLL double readNumAttributeCoerce(H5::Group &location, const std::string &attributeName);
+template MANTID_DATAHANDLING_DLL double readNumAttributeCoerce(H5::DataSet &location, const std::string &attributeName);
+template MANTID_DATAHANDLING_DLL int32_t readNumAttributeCoerce(H5::Group &location, const std::string &attributeName);
+template MANTID_DATAHANDLING_DLL int32_t readNumAttributeCoerce(H5::DataSet &location,
+                                                                const std::string &attributeName);
+template MANTID_DATAHANDLING_DLL uint32_t readNumAttributeCoerce(H5::Group &location, const std::string &attributeName);
+template MANTID_DATAHANDLING_DLL uint32_t readNumAttributeCoerce(H5::DataSet &location,
+                                                                 const std::string &attributeName);
+template MANTID_DATAHANDLING_DLL int64_t readNumAttributeCoerce(H5::Group &location, const std::string &attributeName);
+template MANTID_DATAHANDLING_DLL int64_t readNumAttributeCoerce(H5::DataSet &location,
+                                                                const std::string &attributeName);
+template MANTID_DATAHANDLING_DLL uint64_t readNumAttributeCoerce(H5::Group &location, const std::string &attributeName);
+template MANTID_DATAHANDLING_DLL uint64_t readNumAttributeCoerce(H5::DataSet &location,
+                                                                 const std::string &attributeName);
 
 // -------------------------------------------------------------------
 // instantiations for readNumArrayAttributeCoerce
 // -------------------------------------------------------------------
-template MANTID_DATAHANDLING_DLL std::vector<float>
-readNumArrayAttributeCoerce(H5::Group &location,
-                            const std::string &attributeName);
-template MANTID_DATAHANDLING_DLL std::vector<float>
-readNumArrayAttributeCoerce(H5::DataSet &location,
-                            const std::string &attributeName);
-template MANTID_DATAHANDLING_DLL std::vector<double>
-readNumArrayAttributeCoerce(H5::Group &location,
-                            const std::string &attributeName);
-template MANTID_DATAHANDLING_DLL std::vector<double>
-readNumArrayAttributeCoerce(H5::DataSet &location,
-                            const std::string &attributeName);
-template MANTID_DATAHANDLING_DLL std::vector<int32_t>
-readNumArrayAttributeCoerce(H5::Group &location,
-                            const std::string &attributeName);
-template MANTID_DATAHANDLING_DLL std::vector<int32_t>
-readNumArrayAttributeCoerce(H5::DataSet &location,
-                            const std::string &attributeName);
-template MANTID_DATAHANDLING_DLL std::vector<uint32_t>
-readNumArrayAttributeCoerce(H5::Group &location,
-                            const std::string &attributeName);
-template MANTID_DATAHANDLING_DLL std::vector<uint32_t>
-readNumArrayAttributeCoerce(H5::DataSet &location,
-                            const std::string &attributeName);
-template MANTID_DATAHANDLING_DLL std::vector<int64_t>
-readNumArrayAttributeCoerce(H5::Group &location,
-                            const std::string &attributeName);
-template MANTID_DATAHANDLING_DLL std::vector<int64_t>
-readNumArrayAttributeCoerce(H5::DataSet &location,
-                            const std::string &attributeName);
-template MANTID_DATAHANDLING_DLL std::vector<uint64_t>
-readNumArrayAttributeCoerce(H5::Group &location,
-                            const std::string &attributeName);
-template MANTID_DATAHANDLING_DLL std::vector<uint64_t>
-readNumArrayAttributeCoerce(H5::DataSet &location,
-                            const std::string &attributeName);
+template MANTID_DATAHANDLING_DLL std::vector<float> readNumArrayAttributeCoerce(H5::Group &location,
+                                                                                const std::string &attributeName);
+template MANTID_DATAHANDLING_DLL std::vector<float> readNumArrayAttributeCoerce(H5::DataSet &location,
+                                                                                const std::string &attributeName);
+template MANTID_DATAHANDLING_DLL std::vector<double> readNumArrayAttributeCoerce(H5::Group &location,
+                                                                                 const std::string &attributeName);
+template MANTID_DATAHANDLING_DLL std::vector<double> readNumArrayAttributeCoerce(H5::DataSet &location,
+                                                                                 const std::string &attributeName);
+template MANTID_DATAHANDLING_DLL std::vector<int32_t> readNumArrayAttributeCoerce(H5::Group &location,
+                                                                                  const std::string &attributeName);
+template MANTID_DATAHANDLING_DLL std::vector<int32_t> readNumArrayAttributeCoerce(H5::DataSet &location,
+                                                                                  const std::string &attributeName);
+template MANTID_DATAHANDLING_DLL std::vector<uint32_t> readNumArrayAttributeCoerce(H5::Group &location,
+                                                                                   const std::string &attributeName);
+template MANTID_DATAHANDLING_DLL std::vector<uint32_t> readNumArrayAttributeCoerce(H5::DataSet &location,
+                                                                                   const std::string &attributeName);
+template MANTID_DATAHANDLING_DLL std::vector<int64_t> readNumArrayAttributeCoerce(H5::Group &location,
+                                                                                  const std::string &attributeName);
+template MANTID_DATAHANDLING_DLL std::vector<int64_t> readNumArrayAttributeCoerce(H5::DataSet &location,
+                                                                                  const std::string &attributeName);
+template MANTID_DATAHANDLING_DLL std::vector<uint64_t> readNumArrayAttributeCoerce(H5::Group &location,
+                                                                                   const std::string &attributeName);
+template MANTID_DATAHANDLING_DLL std::vector<uint64_t> readNumArrayAttributeCoerce(H5::DataSet &location,
+                                                                                   const std::string &attributeName);
 
 // -------------------------------------------------------------------
 // instantiations for writeArray1D
 // -------------------------------------------------------------------
-template MANTID_DATAHANDLING_DLL void
-writeArray1D(H5::Group &group, const std::string &name,
-             const std::vector<float> &values);
-template MANTID_DATAHANDLING_DLL void
-writeArray1D(H5::Group &group, const std::string &name,
-             const std::vector<double> &values);
-template MANTID_DATAHANDLING_DLL void
-writeArray1D(H5::Group &group, const std::string &name,
-             const std::vector<int32_t> &values);
-template MANTID_DATAHANDLING_DLL void
-writeArray1D(H5::Group &group, const std::string &name,
-             const std::vector<uint32_t> &values);
-template MANTID_DATAHANDLING_DLL void
-writeArray1D(H5::Group &group, const std::string &name,
-             const std::vector<int64_t> &values);
-template MANTID_DATAHANDLING_DLL void
-writeArray1D(H5::Group &group, const std::string &name,
-             const std::vector<uint64_t> &values);
+template MANTID_DATAHANDLING_DLL void writeArray1D(H5::Group &group, const std::string &name,
+                                                   const std::vector<float> &values);
+template MANTID_DATAHANDLING_DLL void writeArray1D(H5::Group &group, const std::string &name,
+                                                   const std::vector<double> &values);
+template MANTID_DATAHANDLING_DLL void writeArray1D(H5::Group &group, const std::string &name,
+                                                   const std::vector<int32_t> &values);
+template MANTID_DATAHANDLING_DLL void writeArray1D(H5::Group &group, const std::string &name,
+                                                   const std::vector<uint32_t> &values);
+template MANTID_DATAHANDLING_DLL void writeArray1D(H5::Group &group, const std::string &name,
+                                                   const std::vector<int64_t> &values);
+template MANTID_DATAHANDLING_DLL void writeArray1D(H5::Group &group, const std::string &name,
+                                                   const std::vector<uint64_t> &values);
 
 // -------------------------------------------------------------------
 // Instantiations for writeScalarWithStrAttributes
 // -------------------------------------------------------------------
-template MANTID_DATAHANDLING_DLL void writeScalarDataSetWithStrAttributes(
-    H5::Group &group, const std::string &name, const std::string &value,
-    const std::map<std::string, std::string> &attributes);
-template MANTID_DATAHANDLING_DLL void writeScalarDataSetWithStrAttributes(
-    H5::Group &group, const std::string &name, const float &value,
-    const std::map<std::string, std::string> &attributes);
-template MANTID_DATAHANDLING_DLL void writeScalarDataSetWithStrAttributes(
-    H5::Group &group, const std::string &name, const double &value,
-    const std::map<std::string, std::string> &attributes);
-template MANTID_DATAHANDLING_DLL void writeScalarDataSetWithStrAttributes(
-    H5::Group &group, const std::string &name, const int32_t &value,
-    const std::map<std::string, std::string> &attributes);
-template MANTID_DATAHANDLING_DLL void writeScalarDataSetWithStrAttributes(
-    H5::Group &group, const std::string &name, const uint32_t &value,
-    const std::map<std::string, std::string> &attributes);
-template MANTID_DATAHANDLING_DLL void writeScalarDataSetWithStrAttributes(
-    H5::Group &group, const std::string &name, const int64_t &value,
-    const std::map<std::string, std::string> &attributes);
-template MANTID_DATAHANDLING_DLL void writeScalarDataSetWithStrAttributes(
-    H5::Group &group, const std::string &name, const uint64_t &value,
-    const std::map<std::string, std::string> &attributes);
+template MANTID_DATAHANDLING_DLL void
+writeScalarDataSetWithStrAttributes(H5::Group &group, const std::string &name, const std::string &value,
+                                    const std::map<std::string, std::string> &attributes);
+template MANTID_DATAHANDLING_DLL void
+writeScalarDataSetWithStrAttributes(H5::Group &group, const std::string &name, const float &value,
+                                    const std::map<std::string, std::string> &attributes);
+template MANTID_DATAHANDLING_DLL void
+writeScalarDataSetWithStrAttributes(H5::Group &group, const std::string &name, const double &value,
+                                    const std::map<std::string, std::string> &attributes);
+template MANTID_DATAHANDLING_DLL void
+writeScalarDataSetWithStrAttributes(H5::Group &group, const std::string &name, const int32_t &value,
+                                    const std::map<std::string, std::string> &attributes);
+template MANTID_DATAHANDLING_DLL void
+writeScalarDataSetWithStrAttributes(H5::Group &group, const std::string &name, const uint32_t &value,
+                                    const std::map<std::string, std::string> &attributes);
+template MANTID_DATAHANDLING_DLL void
+writeScalarDataSetWithStrAttributes(H5::Group &group, const std::string &name, const int64_t &value,
+                                    const std::map<std::string, std::string> &attributes);
+template MANTID_DATAHANDLING_DLL void
+writeScalarDataSetWithStrAttributes(H5::Group &group, const std::string &name, const uint64_t &value,
+                                    const std::map<std::string, std::string> &attributes);
 
 // -------------------------------------------------------------------
 // instantiations for getDataSpace
 // -------------------------------------------------------------------
-template MANTID_DATAHANDLING_DLL DataSpace
-getDataSpace(const std::vector<float> &data);
-template MANTID_DATAHANDLING_DLL DataSpace
-getDataSpace(const std::vector<double> &data);
-template MANTID_DATAHANDLING_DLL DataSpace
-getDataSpace(const std::vector<int32_t> &data);
-template MANTID_DATAHANDLING_DLL DataSpace
-getDataSpace(const std::vector<uint32_t> &data);
-template MANTID_DATAHANDLING_DLL DataSpace
-getDataSpace(const std::vector<int64_t> &data);
-template MANTID_DATAHANDLING_DLL DataSpace
-getDataSpace(const std::vector<uint64_t> &data);
+template MANTID_DATAHANDLING_DLL DataSpace getDataSpace(const std::vector<float> &data);
+template MANTID_DATAHANDLING_DLL DataSpace getDataSpace(const std::vector<double> &data);
+template MANTID_DATAHANDLING_DLL DataSpace getDataSpace(const std::vector<int32_t> &data);
+template MANTID_DATAHANDLING_DLL DataSpace getDataSpace(const std::vector<uint32_t> &data);
+template MANTID_DATAHANDLING_DLL DataSpace getDataSpace(const std::vector<int64_t> &data);
+template MANTID_DATAHANDLING_DLL DataSpace getDataSpace(const std::vector<uint64_t> &data);
 
 // -------------------------------------------------------------------
 // instantiations for readArray1DCoerce
 // -------------------------------------------------------------------
-template MANTID_DATAHANDLING_DLL std::vector<float>
-readArray1DCoerce(H5::Group &group, const std::string &name);
-template MANTID_DATAHANDLING_DLL std::vector<double>
-readArray1DCoerce(H5::Group &group, const std::string &name);
-template MANTID_DATAHANDLING_DLL std::vector<int32_t>
-readArray1DCoerce(H5::Group &group, const std::string &name);
-template MANTID_DATAHANDLING_DLL std::vector<uint32_t>
-readArray1DCoerce(H5::Group &group, const std::string &name);
-template MANTID_DATAHANDLING_DLL std::vector<int64_t>
-readArray1DCoerce(H5::Group &group, const std::string &name);
-template MANTID_DATAHANDLING_DLL std::vector<uint64_t>
-readArray1DCoerce(H5::Group &group, const std::string &name);
+template MANTID_DATAHANDLING_DLL std::vector<float> readArray1DCoerce(H5::Group &group, const std::string &name);
+template MANTID_DATAHANDLING_DLL std::vector<double> readArray1DCoerce(H5::Group &group, const std::string &name);
+template MANTID_DATAHANDLING_DLL std::vector<int32_t> readArray1DCoerce(H5::Group &group, const std::string &name);
+template MANTID_DATAHANDLING_DLL std::vector<uint32_t> readArray1DCoerce(H5::Group &group, const std::string &name);
+template MANTID_DATAHANDLING_DLL std::vector<int64_t> readArray1DCoerce(H5::Group &group, const std::string &name);
+template MANTID_DATAHANDLING_DLL std::vector<uint64_t> readArray1DCoerce(H5::Group &group, const std::string &name);
 
-template MANTID_DATAHANDLING_DLL std::vector<float>
-readArray1DCoerce<float>(DataSet &dataset);
-template MANTID_DATAHANDLING_DLL std::vector<double>
-readArray1DCoerce<double>(DataSet &dataset);
-template MANTID_DATAHANDLING_DLL std::vector<int32_t>
-readArray1DCoerce<int32_t>(DataSet &dataset);
-template MANTID_DATAHANDLING_DLL std::vector<uint32_t>
-readArray1DCoerce<uint32_t>(DataSet &dataset);
-template MANTID_DATAHANDLING_DLL std::vector<int64_t>
-readArray1DCoerce<int64_t>(DataSet &dataset);
-template MANTID_DATAHANDLING_DLL std::vector<uint64_t>
-readArray1DCoerce<uint64_t>(DataSet &dataset);
+template MANTID_DATAHANDLING_DLL std::vector<float> readArray1DCoerce<float>(DataSet &dataset);
+template MANTID_DATAHANDLING_DLL std::vector<double> readArray1DCoerce<double>(DataSet &dataset);
+template MANTID_DATAHANDLING_DLL std::vector<int32_t> readArray1DCoerce<int32_t>(DataSet &dataset);
+template MANTID_DATAHANDLING_DLL std::vector<uint32_t> readArray1DCoerce<uint32_t>(DataSet &dataset);
+template MANTID_DATAHANDLING_DLL std::vector<int64_t> readArray1DCoerce<int64_t>(DataSet &dataset);
+template MANTID_DATAHANDLING_DLL std::vector<uint64_t> readArray1DCoerce<uint64_t>(DataSet &dataset);
 } // namespace H5Util
 } // namespace DataHandling
 } // namespace Mantid

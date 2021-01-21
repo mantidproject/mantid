@@ -25,19 +25,14 @@ namespace SliceViewer {
 /** PeakRepresentationCross : Draws a cross-shaped peak for peaks without
   any shape
 */
-class EXPORT_OPT_MANTIDQT_SLICEVIEWER PeakRepresentationCross
-    : public PeakRepresentation {
+class EXPORT_OPT_MANTIDQT_SLICEVIEWER PeakRepresentationCross : public PeakRepresentation {
 public:
-  PeakRepresentationCross(const Mantid::Kernel::V3D &origin, const double &maxZ,
-                          const double &minZ);
+  PeakRepresentationCross(const Mantid::Kernel::V3D &origin, const double &maxZ, const double &minZ);
   /// Setter for the slice point
   void setSlicePoint(const double & /*z*/) override;
   /// Transform the coordinates.
-  void
-  movePosition(Mantid::Geometry::PeakTransform_sptr peakTransform) override;
-  void
-  movePositionNonOrthogonal(Mantid::Geometry::PeakTransform_sptr peakTransform,
-                            NonOrthogonalAxis &info) override;
+  void movePosition(Mantid::Geometry::PeakTransform_sptr peakTransform) override;
+  void movePositionNonOrthogonal(Mantid::Geometry::PeakTransform_sptr peakTransform, NonOrthogonalAxis &info) override;
   /// Get the bounding box.
   PeakBoundingBox getBoundingBox() const override;
   /// Set the size of the cross peak in the viewing plane
@@ -52,10 +47,8 @@ public:
   void showBackgroundRadius(const bool show) override;
 
 protected:
-  std::shared_ptr<PeakPrimitives> getDrawingInformation(
-      PeakRepresentationViewInformation viewInformation) override;
-  void doDraw(QPainter &painter, PeakViewColor &foregroundColor,
-              PeakViewColor &backgroundColor,
+  std::shared_ptr<PeakPrimitives> getDrawingInformation(PeakRepresentationViewInformation viewInformation) override;
+  void doDraw(QPainter &painter, PeakViewColor &foregroundColor, PeakViewColor &backgroundColor,
               std::shared_ptr<PeakPrimitives> drawingInformation,
               PeakRepresentationViewInformation viewInformation) override;
 

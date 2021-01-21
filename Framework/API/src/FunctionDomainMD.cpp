@@ -21,10 +21,8 @@ namespace API {
  * @param start :: Index of the first iterator in this domain.
  * @param length :: Size of this domain. If 0 use all workspace.
  */
-FunctionDomainMD::FunctionDomainMD(const IMDWorkspace_const_sptr &ws,
-                                   size_t start, size_t length)
-    : m_iterator(ws->createIterator()), m_startIndex(start), m_currentIndex(0),
-      m_justReset(true), m_workspace(ws) {
+FunctionDomainMD::FunctionDomainMD(const IMDWorkspace_const_sptr &ws, size_t start, size_t length)
+    : m_iterator(ws->createIterator()), m_startIndex(start), m_currentIndex(0), m_justReset(true), m_workspace(ws) {
   size_t dataSize = m_iterator->getDataSize();
   m_size = length == 0 ? dataSize : length;
   if (start >= dataSize) {
@@ -70,9 +68,7 @@ const IMDIterator *FunctionDomainMD::getNextIterator() const {
 }
 
 /// Returns the pointer to the original workspace
-IMDWorkspace_const_sptr FunctionDomainMD::getWorkspace() const {
-  return m_workspace;
-}
+IMDWorkspace_const_sptr FunctionDomainMD::getWorkspace() const { return m_workspace; }
 
 } // namespace API
 } // namespace Mantid

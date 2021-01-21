@@ -16,8 +16,7 @@ namespace RefDetectorViewer {
     a QwtPlot for the SpectrumView data viewer.
  */
 
-class EXPORT_OPT_MANTIDQT_REFDETECTORVIEWER RefImagePlotItem
-    : public SpectrumView::SpectrumPlotItem {
+class EXPORT_OPT_MANTIDQT_REFDETECTORVIEWER RefImagePlotItem : public SpectrumView::SpectrumPlotItem {
 
 public:
   /// Construct basic plot item with NO data to plot.
@@ -26,8 +25,7 @@ public:
   ~RefImagePlotItem();
 
   /// Draw the image (this is called by QWT and must not be called directly.)
-  virtual void draw(QPainter *painter, const QwtScaleMap &xMap,
-                    const QwtScaleMap &yMap,
+  virtual void draw(QPainter *painter, const QwtScaleMap &xMap, const QwtScaleMap &yMap,
                     const QRect &canvasRect) const override;
 
 private:

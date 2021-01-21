@@ -23,23 +23,19 @@
 
 #include <gsl/gsl_fft_halfcomplex.h>
 
-SmoothFilter::SmoothFilter(ApplicationWindow *parent, Graph *g,
-                           const QString &curveTitle, int m)
-    : Filter(parent, g) {
+SmoothFilter::SmoothFilter(ApplicationWindow *parent, Graph *g, const QString &curveTitle, int m) : Filter(parent, g) {
   setDataFromCurve(curveTitle);
   init(m);
 }
 
-SmoothFilter::SmoothFilter(ApplicationWindow *parent, Graph *g,
-                           const QString &curveTitle, double start, double end,
+SmoothFilter::SmoothFilter(ApplicationWindow *parent, Graph *g, const QString &curveTitle, double start, double end,
                            int m)
     : Filter(parent, g) {
   setDataFromCurve(curveTitle, start, end);
   init(m);
 }
 
-SmoothFilter::SmoothFilter(ApplicationWindow *parent, Table *t,
-                           const QString &xCol, const QString &yCol, int start,
+SmoothFilter::SmoothFilter(ApplicationWindow *parent, Table *t, const QString &xCol, const QString &yCol, int start,
                            int end, int m)
     : Filter(parent, t) {
   setDataFromTable(t, xCol, yCol, start, end);
@@ -57,11 +53,9 @@ void SmoothFilter::init(int m) {
 
 void SmoothFilter::setMethod(int m) {
   if (m < 1 || m > 3) {
-    QMessageBox::critical(
-        static_cast<ApplicationWindow *>(parent()),
-        tr("MantidPlot") + " - " + tr("Error"),
-        tr("Unknown smooth filter. Valid values are: 1 - Savitky-Golay, 2 - "
-           "FFT, 3 - Moving Window Average."));
+    QMessageBox::critical(static_cast<ApplicationWindow *>(parent()), tr("MantidPlot") + " - " + tr("Error"),
+                          tr("Unknown smooth filter. Valid values are: 1 - Savitky-Golay, 2 - "
+                             "FFT, 3 - Moving Window Average."));
     d_init_err = true;
     return;
   }
@@ -76,18 +70,15 @@ void SmoothFilter::calculateOutputData(double *x, double *y) {
 
   switch ((int)d_method) {
   case 1:
-    d_explanation = QString::number(d_smooth_points) + " " + tr("points") +
-                    " " + tr("Savitzky-Golay smoothing");
+    d_explanation = QString::number(d_smooth_points) + " " + tr("points") + " " + tr("Savitzky-Golay smoothing");
     smoothSavGol(x, y);
     break;
   case 2:
-    d_explanation = QString::number(d_smooth_points) + " " + tr("points") +
-                    " " + tr("FFT smoothing");
+    d_explanation = QString::number(d_smooth_points) + " " + tr("points") + " " + tr("FFT smoothing");
     smoothFFT(x, y);
     break;
   case 3:
-    d_explanation = QString::number(d_smooth_points) + " " + tr("points") +
-                    " " + tr("average smoothing");
+    d_explanation = QString::number(d_smooth_points) + " " + tr("points") + " " + tr("average smoothing");
     smoothAverage(x, y);
     break;
   }
@@ -161,14 +152,12 @@ void SmoothFilter::smoothSavGol(double *, double *y) {
   int *index = intvector(1, np);
   index[1] = 0;
   int i, j = 3;
-  for (i = 2; i <= nl + 1;
-       i++) { // index(2)=-1; index(3)=-2; index(4)=-3; index(5)=-4; index(6)=-5
+  for (i = 2; i <= nl + 1; i++) { // index(2)=-1; index(3)=-2; index(4)=-3; index(5)=-4; index(6)=-5
     index[i] = i - j;
     j += 2;
   }
   j = 2;
-  for (i = nl + 2; i <= np;
-       i++) { // index(7)= 5; index(8)= 4; index(9)= 3; index(10)=2; index(11)=1
+  for (i = nl + 2; i <= np; i++) { // index(7)= 5; index(8)= 4; index(9)= 3; index(10)=2; index(11)=1
     index[i] = i - j;
     j += 2;
   }
@@ -195,17 +184,14 @@ void SmoothFilter::smoothSavGol(double *, double *y) {
 
 void SmoothFilter::setSmoothPoints(int points, int left_points) {
   if (points < 0 || left_points < 0) {
-    QMessageBox::critical(static_cast<ApplicationWindow *>(parent()),
-                          tr("MantidPlot") + " - " + tr("Error"),
+    QMessageBox::critical(static_cast<ApplicationWindow *>(parent()), tr("MantidPlot") + " - " + tr("Error"),
                           tr("The number of points must be positive!"));
     d_init_err = true;
     return;
   } else if (d_polynom_order > points + left_points) {
-    QMessageBox::critical(
-        static_cast<ApplicationWindow *>(parent()),
-        tr("MantidPlot") + " - " + tr("Error"),
-        tr("The polynomial order must be lower than the number of left points "
-           "plus the number of right points!"));
+    QMessageBox::critical(static_cast<ApplicationWindow *>(parent()), tr("MantidPlot") + " - " + tr("Error"),
+                          tr("The polynomial order must be lower than the number of left points "
+                             "plus the number of right points!"));
     d_init_err = true;
     return;
   }
@@ -216,19 +202,16 @@ void SmoothFilter::setSmoothPoints(int points, int left_points) {
 
 void SmoothFilter::setPolynomOrder(int order) {
   if (d_method != SavitzkyGolay) {
-    QMessageBox::critical(static_cast<ApplicationWindow *>(parent()),
-                          tr("MantidPlot") + " - " + tr("Error"),
+    QMessageBox::critical(static_cast<ApplicationWindow *>(parent()), tr("MantidPlot") + " - " + tr("Error"),
                           tr("Setting polynomial order is only available for "
                              "Savitzky-Golay smooth filters! Ignored option!"));
     return;
   }
 
   if (order > d_smooth_points + d_sav_gol_points) {
-    QMessageBox::critical(
-        static_cast<ApplicationWindow *>(parent()),
-        tr("MantidPlot") + " - " + tr("Error"),
-        tr("The polynomial order must be lower than the number of left points "
-           "plus the number of right points!"));
+    QMessageBox::critical(static_cast<ApplicationWindow *>(parent()), tr("MantidPlot") + " - " + tr("Error"),
+                          tr("The polynomial order must be lower than the number of left points "
+                             "plus the number of right points!"));
     d_init_err = true;
     return;
   }

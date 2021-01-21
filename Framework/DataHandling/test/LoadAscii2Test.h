@@ -162,8 +162,7 @@ public:
     for (int i = 0; i < 5; i++) {
       file << i << '\n';
       for (int j = 0; j < 4; j++) {
-        file << 1.5 * j / 0.9 << "," << (i + 1) * (2. + 4. * (1.5 * j / 0.9))
-             << "," << 1 << "," << 0 << ","
+        file << 1.5 * j / 0.9 << "," << (i + 1) * (2. + 4. * (1.5 * j / 0.9)) << "," << 1 << "," << 0 << ","
              << (i + 5) * (6. + 3. * (1.7 * j / 0.8)) << '\n';
       }
     }
@@ -201,8 +200,7 @@ public:
       file << i << '\n';
       for (int j = 0; j < 4; j++) {
         if (!(i == 3 && j == 2)) {
-          file << 1.5 * j / 0.9 << "," << (i + 1) * (2. + 4. * (1.5 * j / 0.9))
-               << "," << 1 << "," << 0 << '\n';
+          file << 1.5 * j / 0.9 << "," << (i + 1) * (2. + 4. * (1.5 * j / 0.9)) << "," << 1 << "," << 0 << '\n';
         }
       }
     }
@@ -222,11 +220,9 @@ public:
       file << i << '\n';
       for (int j = 0; j < 4; j++) {
         if (!(i == 3 && j == 2)) {
-          file << 1.5 * j / 0.9 << "," << (i + 1) * (2. + 4. * (1.5 * j / 0.9))
-               << "," << 1 << "," << 0 << '\n';
+          file << 1.5 * j / 0.9 << "," << (i + 1) * (2. + 4. * (1.5 * j / 0.9)) << "," << 1 << "," << 0 << '\n';
         } else {
-          file << 1.5 * j / 0.9 << "," << (i + 1) * (2. + 4. * (1.5 * j / 0.9))
-               << "," << 1 << '\n';
+          file << 1.5 * j / 0.9 << "," << (i + 1) * (2. + 4. * (1.5 * j / 0.9)) << "," << 1 << '\n';
         }
       }
     }
@@ -246,13 +242,10 @@ public:
       file << i << '\n';
       for (int j = 0; j < 4; j++) {
         if (!(i == 3 && j == 2)) {
-          file << 1.5 * j / 0.9 << "," << (i + 1) * (2. + 4. * (1.5 * j / 0.9))
-               << "," << 1 << "," << 0 << '\n';
+          file << 1.5 * j / 0.9 << "," << (i + 1) * (2. + 4. * (1.5 * j / 0.9)) << "," << 1 << "," << 0 << '\n';
         } else {
           // used e to make sure it'd not get mistaken for a scientific index
-          file << "e" << 1.5 * j / 0.9 << ","
-               << (i + 1) * (2. + 4. * (1.5 * j / 0.9)) << "," << 1 << "," << 0
-               << '\n';
+          file << "e" << 1.5 * j / 0.9 << "," << (i + 1) * (2. + 4. * (1.5 * j / 0.9)) << "," << 1 << "," << 0 << '\n';
         }
       }
     }
@@ -272,12 +265,9 @@ public:
       file << i << '\n';
       for (int j = 0; j < 4; j++) {
         if (!(i == 3 && j == 2)) {
-          file << 1.5 * j / 0.9 << "," << (i + 1) * (2. + 4. * (1.5 * j / 0.9))
-               << "," << 1 << "," << 0 << '\n';
+          file << 1.5 * j / 0.9 << "," << (i + 1) * (2. + 4. * (1.5 * j / 0.9)) << "," << 1 << "," << 0 << '\n';
         } else {
-          file << "@" << 1.5 * j / 0.9 << ","
-               << (i + 1) * (2. + 4. * (1.5 * j / 0.9)) << "," << 1 << "," << 0
-               << '\n';
+          file << "@" << 1.5 * j / 0.9 << "," << (i + 1) * (2. + 4. * (1.5 * j / 0.9)) << "," << 1 << "," << 0 << '\n';
         }
       }
     }
@@ -297,12 +287,10 @@ public:
       file << i << '\n';
       for (int j = 0; j < 4; j++) {
         if (!(i == 3 && j == 2)) {
-          file << 1.5 * j / 0.9 << "," << (i + 1) * (2. + 4. * (1.5 * j / 0.9))
-               << "," << 1 << "," << 0 << '\n';
+          file << 1.5 * j / 0.9 << "," << (i + 1) * (2. + 4. * (1.5 * j / 0.9)) << "," << 1 << "," << 0 << '\n';
         } else {
           // used e to make sure it'd not get mistaken for a scientific index
-          file << 1.5 * j / 0.9 << "," << (i + 1) * (2. + 4. * (1.5 * j / 0.9))
-               << "e"
+          file << 1.5 * j / 0.9 << "," << (i + 1) * (2. + 4. * (1.5 * j / 0.9)) << "e"
                << "," << 1 << "," << 0 << '\n';
         }
       }
@@ -323,11 +311,9 @@ public:
       file << i << '\n';
       for (int j = 0; j < 4; j++) {
         if (!(i == 3 && j == 2)) {
-          file << 1.5 * j / 0.9 << "," << (i + 1) * (2. + 4. * (1.5 * j / 0.9))
-               << "," << 1 << "," << 0 << '\n';
+          file << 1.5 * j / 0.9 << "," << (i + 1) * (2. + 4. * (1.5 * j / 0.9)) << "," << 1 << "," << 0 << '\n';
         } else {
-          file << 1.5 * j / 0.9 << "," << (i + 1) * (2. + 4. * (1.5 * j / 0.9))
-               << "/"
+          file << 1.5 * j / 0.9 << "," << (i + 1) * (2. + 4. * (1.5 * j / 0.9)) << "/"
                << "," << 1 << "," << 0 << '\n';
         }
       }
@@ -352,8 +338,7 @@ public:
         file << '\n';
       }
       for (int j = 0; j < 4; j++) {
-        file << 1.5 * j / 0.9 << "," << (i + 1) * (2. + 4. * (1.5 * j / 0.9))
-             << "," << 1 << "," << 0 << '\n';
+        file << 1.5 * j / 0.9 << "," << (i + 1) * (2. + 4. * (1.5 * j / 0.9)) << "," << 1 << "," << 0 << '\n';
       }
     }
     file.unsetf(std::ios_base::floatfield);
@@ -372,8 +357,7 @@ public:
 
     const std::string outputName(getTestFileName());
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", m_abspath));
-    TS_ASSERT_THROWS_NOTHING(
-        loader.setPropertyValue("OutputWorkspace", outputName));
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("OutputWorkspace", outputName));
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Separator", "Tab"));
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("CustomSeparator", ""));
 
@@ -387,8 +371,7 @@ public:
       TS_ASSERT_EQUALS(dataStore.doesExist(outputName), true);
       Workspace_sptr output;
       TS_ASSERT_THROWS_NOTHING(output = dataStore.retrieve(outputName));
-      TableWorkspace_sptr outputWS =
-          std::dynamic_pointer_cast<TableWorkspace>(output);
+      TableWorkspace_sptr outputWS = std::dynamic_pointer_cast<TableWorkspace>(output);
       if (outputWS) {
         checkTableData(outputWS);
       } else {
@@ -402,9 +385,7 @@ public:
   }
 
 private:
-  const std::string getTestFileName() const {
-    return m_filename + boost::lexical_cast<std::string>(m_testno) + m_ext;
-  }
+  const std::string getTestFileName() const { return m_filename + boost::lexical_cast<std::string>(m_testno) + m_ext; }
   std::string getAbsPath() {
     SaveAscii2 save;
     save.initialize();
@@ -413,8 +394,7 @@ private:
   }
 
   // Write the test file for a table workspace
-  std::string writeTableTestFile(const std::string &sep = "CSV",
-                                 const std::string &custsep = "") {
+  std::string writeTableTestFile(const std::string &sep = "CSV", const std::string &custsep = "") {
     SaveAscii2 save;
     save.initialize();
     save.setPropertyValue("Filename", getTestFileName());
@@ -460,11 +440,8 @@ private:
   }
 
   // Write the test file
-  std::string writeTestFile(const int cols, const bool header = true,
-                            const std::string &comment = "#",
-                            const bool scientific = true,
-                            const int precision = -1,
-                            const std::string &sep = "CSV",
+  std::string writeTestFile(const int cols, const bool header = true, const std::string &comment = "#",
+                            const bool scientific = true, const int precision = -1, const std::string &sep = "CSV",
                             const std::string &custsep = "") {
     SaveAscii2 save;
     save.initialize();
@@ -482,16 +459,14 @@ private:
       for (int i = 0; i < 5; i++) {
         file << i << '\n';
         for (int j = 0; j < 4; j++) {
-          file << 1.5 * j / 0.9 << "," << (i + 1) * (2. + 4. * (1.5 * j / 0.9))
-               << '\n';
+          file << 1.5 * j / 0.9 << "," << (i + 1) * (2. + 4. * (1.5 * j / 0.9)) << '\n';
         }
       }
       file.unsetf(std::ios_base::floatfield);
       file.close();
     } else {
-      Mantid::DataObjects::Workspace2D_sptr wsToSave =
-          std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
-              WorkspaceFactory::Instance().create("Workspace2D", 5, 4, 4));
+      Mantid::DataObjects::Workspace2D_sptr wsToSave = std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
+          WorkspaceFactory::Instance().create("Workspace2D", 5, 4, 4));
       for (int i = 0; i < 5; i++) {
         auto &X = wsToSave->mutableX(i);
         auto &Y = wsToSave->mutableY(i);
@@ -510,32 +485,26 @@ private:
       save.initialize();
       save.isInitialized();
       if (precision > -1) {
-        save.setPropertyValue("Precision",
-                              boost::lexical_cast<std::string>(precision));
+        save.setPropertyValue("Precision", boost::lexical_cast<std::string>(precision));
       }
       save.setPropertyValue("InputWorkspace", name);
       save.setPropertyValue("CommentIndicator", comment);
-      save.setPropertyValue("ScientificFormat",
-                            boost::lexical_cast<std::string>(scientific));
-      save.setPropertyValue("ColumnHeader",
-                            boost::lexical_cast<std::string>(header));
-      save.setPropertyValue("WriteXError",
-                            boost::lexical_cast<std::string>(cols == 4));
+      save.setPropertyValue("ScientificFormat", boost::lexical_cast<std::string>(scientific));
+      save.setPropertyValue("ColumnHeader", boost::lexical_cast<std::string>(header));
+      save.setPropertyValue("WriteXError", boost::lexical_cast<std::string>(cols == 4));
       save.setPropertyValue("Separator", sep);
       save.setPropertyValue("CustomSeparator", custsep);
       save.execute();
-      TSM_ASSERT("Failed to save test data using SaveAscii2.",
-                 save.isExecuted());
+      TSM_ASSERT("Failed to save test data using SaveAscii2.", save.isExecuted());
       AnalysisDataService::Instance().remove(name);
     }
 
     return filePath;
   }
 
-  Mantid::API::MatrixWorkspace_sptr
-  runTest(const int cols, const bool dataCheck = true,
-          const std::string &comment = "#", const std::string &sep = "CSV",
-          const bool execThrows = false, const std::string &custsep = "") {
+  Mantid::API::MatrixWorkspace_sptr runTest(const int cols, const bool dataCheck = true,
+                                            const std::string &comment = "#", const std::string &sep = "CSV",
+                                            const bool execThrows = false, const std::string &custsep = "") {
     using Mantid::DataHandling::LoadAscii2;
     using namespace Mantid::API;
 
@@ -544,13 +513,10 @@ private:
     loader.setRethrows(true);
     const std::string outputName(getTestFileName());
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", m_abspath));
-    TS_ASSERT_THROWS_NOTHING(
-        loader.setPropertyValue("OutputWorkspace", outputName));
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("OutputWorkspace", outputName));
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Separator", sep));
-    TS_ASSERT_THROWS_NOTHING(
-        loader.setPropertyValue("CustomSeparator", custsep));
-    TS_ASSERT_THROWS_NOTHING(
-        loader.setPropertyValue("CommentIndicator", comment));
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("CustomSeparator", custsep));
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("CommentIndicator", comment));
 
     if (execThrows) {
       TS_ASSERT_THROWS_ANYTHING(loader.execute());
@@ -565,8 +531,7 @@ private:
         TS_ASSERT_EQUALS(dataStore.doesExist(outputName), true);
         Workspace_sptr output;
         TS_ASSERT_THROWS_NOTHING(output = dataStore.retrieve(outputName));
-        MatrixWorkspace_sptr outputWS =
-            std::dynamic_pointer_cast<MatrixWorkspace>(output);
+        MatrixWorkspace_sptr outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(output);
         if (outputWS) {
           if (dataCheck) {
             checkData(outputWS, cols);
@@ -575,8 +540,7 @@ private:
             TS_ASSERT_EQUALS(outputWS->getAxis(0)->unit()->label(), "meV");
           }
           // Check if filename is saved
-          TS_ASSERT_EQUALS(loader.getPropertyValue("Filename"),
-                           outputWS->run().getProperty("Filename")->value());
+          TS_ASSERT_EQUALS(loader.getPropertyValue("Filename"), outputWS->run().getProperty("Filename")->value());
         } else {
           TS_FAIL(outputName + " does not exist.");
         }
@@ -590,8 +554,7 @@ private:
     return outputWS;
   }
 
-  void checkData(const Mantid::API::MatrixWorkspace_sptr &outputWS,
-                 const int cols) {
+  void checkData(const Mantid::API::MatrixWorkspace_sptr &outputWS, const int cols) {
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 5);
     TS_ASSERT_EQUALS(outputWS->blocksize(), 4);
 
@@ -654,9 +617,7 @@ public:
     loadAlg.setRethrows(true);
   }
 
-  void testLoadAscii2Performance() {
-    TS_ASSERT_THROWS_NOTHING(loadAlg.execute());
-  }
+  void testLoadAscii2Performance() { TS_ASSERT_THROWS_NOTHING(loadAlg.execute()); }
 
   void tearDown() override {
     TS_ASSERT_THROWS_NOTHING(Poco::File(filename).remove());
@@ -678,10 +639,8 @@ private:
     constexpr int numVecs = 100;
     constexpr int xyLen = 100;
 
-    Mantid::DataObjects::Workspace2D_sptr wsToSave =
-        std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
-            WorkspaceFactory::Instance().create("Workspace2D", numVecs, xyLen,
-                                                xyLen));
+    Mantid::DataObjects::Workspace2D_sptr wsToSave = std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
+        WorkspaceFactory::Instance().create("Workspace2D", numVecs, xyLen, xyLen));
 
     const std::string name = "SaveAsciiWS";
     AnalysisDataService::Instance().add(name, wsToSave);
@@ -697,12 +656,9 @@ private:
     save.setPropertyValue("Filename", "testFile");
     save.setPropertyValue("InputWorkspace", name);
     save.setPropertyValue("CommentIndicator", comment);
-    save.setPropertyValue("ScientificFormat",
-                          boost::lexical_cast<std::string>(scientific));
-    save.setPropertyValue("ColumnHeader",
-                          boost::lexical_cast<std::string>(true));
-    save.setPropertyValue("WriteXError",
-                          boost::lexical_cast<std::string>(false));
+    save.setPropertyValue("ScientificFormat", boost::lexical_cast<std::string>(scientific));
+    save.setPropertyValue("ColumnHeader", boost::lexical_cast<std::string>(true));
+    save.setPropertyValue("WriteXError", boost::lexical_cast<std::string>(false));
     save.setPropertyValue("Separator", sep);
     save.setPropertyValue("CustomSeparator", custsep);
     save.setRethrows(true);

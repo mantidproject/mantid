@@ -44,11 +44,9 @@
 #include <QPushButton>
 
 ExpDecayDialog::ExpDecayDialog(int type, QWidget *parent, const Qt::WFlags &fl)
-    : QDialog(parent, fl), fitter(nullptr), graph(nullptr), buttonFit(nullptr),
-      buttonCancel(nullptr), boxName(nullptr), boxAmplitude(nullptr),
-      boxFirst(nullptr), boxSecond(nullptr), boxThird(nullptr),
-      boxStart(nullptr), boxYOffset(nullptr), thirdLabel(nullptr),
-      dampingLabel(nullptr), boxColor(nullptr) {
+    : QDialog(parent, fl), fitter(nullptr), graph(nullptr), buttonFit(nullptr), buttonCancel(nullptr), boxName(nullptr),
+      boxAmplitude(nullptr), boxFirst(nullptr), boxSecond(nullptr), boxThird(nullptr), boxStart(nullptr),
+      boxYOffset(nullptr), thirdLabel(nullptr), dampingLabel(nullptr), boxColor(nullptr) {
   setObjectName("ExpDecayDialog");
 
   slopes = type;
@@ -60,8 +58,7 @@ ExpDecayDialog::ExpDecayDialog(int type, QWidget *parent, const Qt::WFlags &fl)
   gl1->addWidget(new QLabel(tr("Exponential Fit of")), 0, 0);
 
   boxName = new QComboBox();
-  connect(boxName, SIGNAL(activated(const QString &)), this,
-          SLOT(activateCurve(const QString &)));
+  connect(boxName, SIGNAL(activated(const QString &)), this, SLOT(activateCurve(const QString &)));
   gl1->addWidget(boxName, 0, 1);
 
   if (type < 0)
@@ -176,8 +173,7 @@ void ExpDecayDialog::activateCurve(const QString &curveName) {
   boxStart->setText(QString::number(qMin(start, end)));
   boxYOffset->setText(QString::number(c->minYValue(), 'g', precision));
   if (slopes < 2)
-    boxAmplitude->setText(
-        QString::number(c->maxYValue() - c->minYValue(), 'g', precision));
+    boxAmplitude->setText(QString::number(c->maxYValue() - c->minYValue(), 'g', precision));
 }
 
 void ExpDecayDialog::changeDataRange() {
@@ -191,10 +187,8 @@ void ExpDecayDialog::fit() {
   QwtPlotCurve *c = graph->curve(curve);
   QStringList curvesList = graph->analysableCurvesList();
   if (!c || !curvesList.contains(curve)) {
-    QMessageBox::critical(
-        this, tr("MantidPlot - Warning"),
-        tr("The curve <b> %1 </b> doesn't exist anymore! Operation aborted!")
-            .arg(curve));
+    QMessageBox::critical(this, tr("MantidPlot - Warning"),
+                          tr("The curve <b> %1 </b> doesn't exist anymore! Operation aborted!").arg(curve));
     boxName->clear();
     boxName->addItems(curvesList);
     return;
@@ -218,23 +212,20 @@ void ExpDecayDialog::fit() {
     fitter = new ThreeExpFit(app, graph);
     fitter->setInitialGuesses(x_init);
   } else if (slopes == 2) {
-    double x_init[5] = {1.0, boxFirst->text().toDouble(), 1.0,
-                        boxSecond->text().toDouble(),
+    double x_init[5] = {1.0, boxFirst->text().toDouble(), 1.0, boxSecond->text().toDouble(),
                         boxYOffset->text().toDouble()};
     delete fitter;
     fitter = new TwoExpFit(app, graph);
     fitter->setInitialGuesses(x_init);
   } else if (slopes == 1 || slopes == -1) {
-    double x_init[3] = {boxAmplitude->text().toDouble(),
-                        slopes / boxFirst->text().toDouble(),
+    double x_init[3] = {boxAmplitude->text().toDouble(), slopes / boxFirst->text().toDouble(),
                         boxYOffset->text().toDouble()};
     delete fitter;
     fitter = new ExponentialFit(app, graph, slopes == -1);
     fitter->setInitialGuesses(x_init);
   }
 
-  if (fitter->setDataFromCurve(boxName->currentText(),
-                               boxStart->text().toDouble(), c->maxXValue())) {
+  if (fitter->setDataFromCurve(boxName->currentText(), boxStart->text().toDouble(), c->maxXValue())) {
     fitter->setColor(boxColor->currentIndex());
     fitter->scaleErrors(app->fit_scale_errors);
     fitter->setOutputPrecision(app->fit_output_precision);

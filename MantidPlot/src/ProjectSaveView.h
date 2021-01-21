@@ -29,11 +29,9 @@ save view needs to implement.
 class ProjectSaveView : public QDialog, IProjectSaveView {
   Q_OBJECT
 public:
-  ProjectSaveView(
-      const QString &projectName, MantidQt::API::ProjectSerialiser &serialiser,
-      const std::vector<MantidQt::API::IProjectSerialisable *> &windows,
-      const std::vector<std::string> &activePythonInterfaces,
-      QWidget *parent = nullptr);
+  ProjectSaveView(const QString &projectName, MantidQt::API::ProjectSerialiser &serialiser,
+                  const std::vector<MantidQt::API::IProjectSerialisable *> &windows,
+                  const std::vector<std::string> &activePythonInterfaces, QWidget *parent = nullptr);
 
   /// Get all of the window handles passed to the view
   std::vector<MantidQt::API::IProjectSerialisable *> getWindows() override;
@@ -52,23 +50,17 @@ public:
   /// Set the current path of the project
   void setProjectPath(const QString &path) override;
   /// Update the list of workspaces with a collection of workspace info
-  void
-  updateWorkspacesList(const std::vector<WorkspaceInfo> &workspaces) override;
+  void updateWorkspacesList(const std::vector<WorkspaceInfo> &workspaces) override;
   /// Update the list of interfaces
-  virtual void
-  updateInterfacesList(const std::vector<std::string> &interfaces) override;
+  virtual void updateInterfacesList(const std::vector<std::string> &interfaces) override;
   /// Update the list of included windows with a collection of window info
-  void
-  updateIncludedWindowsList(const std::vector<WindowInfo> &windows) override;
+  void updateIncludedWindowsList(const std::vector<WindowInfo> &windows) override;
   /// Update the list of excluded windows with a collection of window info
-  void
-  updateExcludedWindowsList(const std::vector<WindowInfo> &windows) override;
+  void updateExcludedWindowsList(const std::vector<WindowInfo> &windows) override;
   /// Remove a collection of windows from the included window list
-  void removeFromIncludedWindowsList(
-      const std::vector<std::string> &windows) override;
+  void removeFromIncludedWindowsList(const std::vector<std::string> &windows) override;
   /// Remove a collection of windows from the excluded window list
-  void removeFromExcludedWindowsList(
-      const std::vector<std::string> &windows) override;
+  void removeFromExcludedWindowsList(const std::vector<std::string> &windows) override;
 
 signals:
   /// Signal emitted when the ProjectSerialiser has finished writing
@@ -86,9 +78,7 @@ private:
   /// Get a list of included windows names to be saved
   std::vector<std::string> getIncludedWindowNames() const;
   /// Get the name value of all items with a given check state in the given tree
-  std::vector<std::string>
-  getItemsWithCheckState(const QTreeWidget &tree,
-                         const Qt::CheckState state) const;
+  std::vector<std::string> getItemsWithCheckState(const QTreeWidget &tree, const Qt::CheckState state) const;
   /// Remove an item from a QTreeWidget
   void removeItem(QTreeWidget *widget, const std::string &name);
   /// Add an new window item QTreeWidget

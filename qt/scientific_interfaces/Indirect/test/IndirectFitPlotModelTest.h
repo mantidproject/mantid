@@ -25,8 +25,7 @@ using namespace MantidQt::CustomInterfaces::IDA;
 using namespace Mantid::IndirectFitDataCreationHelper;
 using namespace MantidQt::CustomInterfaces;
 
-using ConvolutionFitSequential =
-    Algorithms::ConvolutionFit<Algorithms::QENSFitSequential>;
+using ConvolutionFitSequential = Algorithms::ConvolutionFit<Algorithms::QENSFitSequential>;
 
 namespace {
 
@@ -34,8 +33,8 @@ namespace {
 std::string const INPUT_AND_GUESS_NAME = "__QENSInputAndGuess";
 
 // Resolution
-const std::vector<std::pair<std::string, size_t>> exampleResolution(
-    1, std::make_pair<std::string, size_t>("irs26173_graphite_002_res", 0));
+const std::vector<std::pair<std::string, size_t>>
+    exampleResolution(1, std::make_pair<std::string, size_t>("irs26173_graphite_002_res", 0));
 
 std::string getFittingFunctionString(std::string const &workspaceName) {
   return "name=LinearBackground,A0=0,A1=0,ties=(A0=0.000000,A1=0.0);"
@@ -47,25 +46,21 @@ std::string getFittingFunctionString(std::string const &workspaceName) {
          "0175)))";
 }
 
-MultiDomainFunction_sptr getFunction(std::string const &functionString,
-                                     size_t numDomains) {
+MultiDomainFunction_sptr getFunction(std::string const &functionString, size_t numDomains) {
 
-  return FunctionFactory::Instance().createInitializedMultiDomainFunction(
-      functionString, numDomains);
+  return FunctionFactory::Instance().createInitializedMultiDomainFunction(functionString, numDomains);
 }
 
 /// A dummy class used to create a model to pass to IndirectFitPlotModel's
 /// constructor
-class DummyModel
-    : public MantidQt::CustomInterfaces::IDA::IndirectFittingModel {
+class DummyModel : public MantidQt::CustomInterfaces::IDA::IndirectFittingModel {
 public:
   ~DummyModel(){};
 
 private:
   std::string sequentialFitOutputName() const override { return ""; };
   std::string simultaneousFitOutputName() const override { return ""; };
-  std::string singleFitOutputName(TableDatasetIndex index,
-                                  IDA::WorkspaceIndex spectrum) const override {
+  std::string singleFitOutputName(TableDatasetIndex index, IDA::WorkspaceIndex spectrum) const override {
     UNUSED_ARG(index);
     UNUSED_ARG(spectrum);
     return "";
@@ -73,15 +68,11 @@ private:
 };
 /// A dummy empty Conv class used to create a model to pass to
 /// IndirectFitPlotModel's constructor
-class DummyEmptyConvModel
-    : public MantidQt::CustomInterfaces::IDA::ConvFitModel {
+class DummyEmptyConvModel : public MantidQt::CustomInterfaces::IDA::ConvFitModel {
 public:
   ~DummyEmptyConvModel() {}
 
-  std::vector<std::pair<std::string, size_t>>
-  getResolutionsForFit() const override {
-    return m_resolutions;
-  };
+  std::vector<std::pair<std::string, size_t>> getResolutionsForFit() const override { return m_resolutions; };
 
 private:
   std::vector<std::pair<std::string, size_t>> m_resolutions;
@@ -94,17 +85,13 @@ public:
   DummyConvModel() : m_resolutions(exampleResolution) {}
   ~DummyConvModel() {}
 
-  std::vector<std::pair<std::string, size_t>>
-  getResolutionsForFit() const override {
-    return m_resolutions;
-  };
+  std::vector<std::pair<std::string, size_t>> getResolutionsForFit() const override { return m_resolutions; };
 
 private:
   std::vector<std::pair<std::string, size_t>> m_resolutions;
 };
 
-void setFittingFunction(IndirectFittingModel *model,
-                        std::string const &functionString, bool setFitFunction,
+void setFittingFunction(IndirectFittingModel *model, std::string const &functionString, bool setFitFunction,
                         size_t numDomains) {
   if (setFitFunction)
     model->setFitFunction(getFunction(functionString, numDomains));
@@ -112,37 +99,31 @@ void setFittingFunction(IndirectFittingModel *model,
 
 IndirectFittingModel *getEmptyDummyModel() { return new DummyModel(); }
 
-void addWorkspaceToModel(IndirectFittingModel *model,
-                         int const &numberOfSpectra,
-                         std::string workspaceName) {
-  Mantid::API::AnalysisDataService::Instance().addOrReplace(
-      workspaceName, createWorkspace(numberOfSpectra));
+void addWorkspaceToModel(IndirectFittingModel *model, int const &numberOfSpectra, std::string workspaceName) {
+  Mantid::API::AnalysisDataService::Instance().addOrReplace(workspaceName, createWorkspace(numberOfSpectra));
   model->addWorkspace(workspaceName);
 }
 template <class FitModel>
-IndirectFittingModel *createModelWithMultipleWorkspaces(
-    int const &numberOfSpectra, bool setFitFunction,
-    const std::vector<std::string> &workspaceNames) {
+IndirectFittingModel *createModelWithMultipleWorkspaces(int const &numberOfSpectra, bool setFitFunction,
+                                                        const std::vector<std::string> &workspaceNames) {
   auto model = new FitModel;
   for (auto name : workspaceNames) {
     addWorkspaceToModel(model, numberOfSpectra, name);
   }
-  setFittingFunction(model, getFittingFunctionString(workspaceNames[0]),
-                     setFitFunction, numberOfSpectra * workspaceNames.size());
+  setFittingFunction(model, getFittingFunctionString(workspaceNames[0]), setFitFunction,
+                     numberOfSpectra * workspaceNames.size());
   return model;
 }
 
-IndirectFittingModel *createModelWithSingleInstrumentWorkspace(
-    std::string const &workspaceName, int const &xLength, int const &yLength) {
+IndirectFittingModel *createModelWithSingleInstrumentWorkspace(std::string const &workspaceName, int const &xLength,
+                                                               int const &yLength) {
   auto model = getEmptyDummyModel();
-  SetUpADSWithWorkspace ads(workspaceName,
-                            createWorkspaceWithInstrument(xLength, yLength));
+  SetUpADSWithWorkspace ads(workspaceName, createWorkspaceWithInstrument(xLength, yLength));
   model->addWorkspace(workspaceName);
   return model;
 }
 
-IAlgorithm_sptr setupFitAlgorithm(const MatrixWorkspace_sptr &workspace,
-                                  std::string const &functionString) {
+IAlgorithm_sptr setupFitAlgorithm(const MatrixWorkspace_sptr &workspace, std::string const &functionString) {
   auto alg = std::make_shared<ConvolutionFitSequential>();
   alg->initialize();
   alg->setProperty("InputWorkspace", workspace);
@@ -159,20 +140,16 @@ IAlgorithm_sptr setupFitAlgorithm(const MatrixWorkspace_sptr &workspace,
   return alg;
 }
 
-IAlgorithm_sptr getSetupFitAlgorithm(IndirectFittingModel *model,
-                                     const MatrixWorkspace_sptr &workspace,
+IAlgorithm_sptr getSetupFitAlgorithm(IndirectFittingModel *model, const MatrixWorkspace_sptr &workspace,
                                      std::string const &workspaceName) {
   setFittingFunction(model, getFittingFunctionString(workspaceName), true, 20);
-  auto alg = setupFitAlgorithm(std::move(workspace),
-                               getFittingFunctionString(workspaceName));
+  auto alg = setupFitAlgorithm(std::move(workspace), getFittingFunctionString(workspaceName));
   return alg;
 }
 
-IAlgorithm_sptr getExecutedFitAlgorithm(IndirectFittingModel *model,
-                                        MatrixWorkspace_sptr workspace,
+IAlgorithm_sptr getExecutedFitAlgorithm(IndirectFittingModel *model, MatrixWorkspace_sptr workspace,
                                         std::string const &workspaceName) {
-  auto const alg =
-      getSetupFitAlgorithm(model, std::move(workspace), workspaceName);
+  auto const alg = getSetupFitAlgorithm(model, std::move(workspace), workspaceName);
   alg->execute();
   return alg;
 }
@@ -186,16 +163,12 @@ IndirectFittingModel *getModelWithFitOutputData() {
   return model;
 }
 
-template <class FitModel = DummyModel>
-IndirectFitPlotModel getFitPlotModel(bool setFitFunction = true) {
+template <class FitModel = DummyModel> IndirectFitPlotModel getFitPlotModel(bool setFitFunction = true) {
   return IndirectFitPlotModel(createModelWithMultipleWorkspaces<FitModel>(
-      10, setFitFunction,
-      std::vector<std::string>({"Workspace1", "Workspace2"})));
+      10, setFitFunction, std::vector<std::string>({"Workspace1", "Workspace2"})));
 }
 
-IndirectFitPlotModel getFitPlotModelWithFitData() {
-  return IndirectFitPlotModel(getModelWithFitOutputData());
-}
+IndirectFitPlotModel getFitPlotModelWithFitData() { return IndirectFitPlotModel(getModelWithFitOutputData()); }
 
 } // namespace
 
@@ -206,8 +179,7 @@ public:
 
   void tearDown() override { AnalysisDataService::Instance().clear(); }
 
-  void
-  test_that_IndirectFittingModel_instantiates_a_model_with_the_correct_starting_member_variables() {
+  void test_that_IndirectFittingModel_instantiates_a_model_with_the_correct_starting_member_variables() {
     auto const model = getFitPlotModel();
 
     TS_ASSERT_EQUALS(model.getActiveDataIndex(), TableDatasetIndex{0});
@@ -215,14 +187,12 @@ public:
     TS_ASSERT_EQUALS(model.numberOfWorkspaces(), TableDatasetIndex{2});
   }
 
-  void
-  test_that_getWorkspace_returns_a_workspace_with_the_correct_number_of_spectra() {
+  void test_that_getWorkspace_returns_a_workspace_with_the_correct_number_of_spectra() {
     auto const model = getFitPlotModel();
     TS_ASSERT_EQUALS(model.getWorkspace()->getNumberHistograms(), 10);
   }
 
-  void
-  test_that_getGuessWorkspace_will_create_and_then_return_a_guess_workspace_with_the_correct_number_of_spectra() {
+  void test_that_getGuessWorkspace_will_create_and_then_return_a_guess_workspace_with_the_correct_number_of_spectra() {
     /// Only creates a guess for the active spectra of the selected workspace
     auto const model = getFitPlotModel();
 
@@ -230,8 +200,7 @@ public:
     TS_ASSERT_EQUALS(model.getGuessWorkspace()->getNumberHistograms(), 1);
   }
 
-  void
-  test_that_getGuessWorkspace_returns_a_workspace_with_the_correct_range() {
+  void test_that_getGuessWorkspace_returns_a_workspace_with_the_correct_range() {
     auto model = getFitPlotModel();
     model.setStartX(3);
     model.setEndX(8);
@@ -240,31 +209,26 @@ public:
     TS_ASSERT_EQUALS(model.getGuessWorkspace()->x(0).back(), 8);
   }
 
-  void
-  test_that_getResultWorkspace_returns_a_nullptr_if_a_fit_has_not_yet_been_run() {
+  void test_that_getResultWorkspace_returns_a_nullptr_if_a_fit_has_not_yet_been_run() {
     auto const model = getFitPlotModel();
     TS_ASSERT(!model.getResultWorkspace());
   }
 
-  void
-  test_that_getResultWorkspace_returns_a_workspace_when_data_has_been_fit() {
+  void test_that_getResultWorkspace_returns_a_workspace_when_data_has_been_fit() {
     auto const model = getFitPlotModelWithFitData();
     TS_ASSERT(model.getResultWorkspace());
   }
 
-  void
-  test_that_getSpectra_returns_the_same_spectra_range_which_was_provided_as_input() {
+  void test_that_getSpectra_returns_the_same_spectra_range_which_was_provided_as_input() {
     auto const model = getFitPlotModel();
 
-    FunctionModelSpectra const spectra =
-        FunctionModelSpectra(IDA::WorkspaceIndex{0}, IDA::WorkspaceIndex{9});
+    FunctionModelSpectra const spectra = FunctionModelSpectra(IDA::WorkspaceIndex{0}, IDA::WorkspaceIndex{9});
     FunctionModelSpectra const storedSpectra = model.getSpectra();
 
     TS_ASSERT_EQUALS(storedSpectra, spectra);
   }
 
-  void
-  test_that_appendGuessToInput_returns_a_workspace_that_is_the_combination_of_the_input_and_guess_workspaces() {
+  void test_that_appendGuessToInput_returns_a_workspace_that_is_the_combination_of_the_input_and_guess_workspaces() {
     auto const model = getFitPlotModel();
     auto const guess = model.getGuessWorkspace();
 
@@ -281,8 +245,7 @@ public:
     TS_ASSERT_EQUALS(resultWorkspace->getNumberHistograms(), 2);
   }
 
-  void
-  test_that_getActiveDataIndex_returns_the_index_which_it_has_been_set_to() {
+  void test_that_getActiveDataIndex_returns_the_index_which_it_has_been_set_to() {
     auto model = getFitPlotModel();
 
     model.setActiveIndex(TableDatasetIndex{2});
@@ -290,8 +253,7 @@ public:
     TS_ASSERT_EQUALS(model.getActiveDataIndex(), TableDatasetIndex{2});
   }
 
-  void
-  test_that_getActiveSpectrum_returns_the_spectrum_which_it_has_been_set_to() {
+  void test_that_getActiveSpectrum_returns_the_spectrum_which_it_has_been_set_to() {
     auto model = getFitPlotModel();
 
     model.setActiveSpectrum(IDA::WorkspaceIndex{3});
@@ -303,18 +265,15 @@ public:
     auto const model = getFitPlotModel();
 
     TS_ASSERT_EQUALS(model.getFitDataName(), "Workspace1 (0-9)");
-    TS_ASSERT_EQUALS(model.getFitDataName(TableDatasetIndex{1}),
-                     "Workspace2 (0-9)");
+    TS_ASSERT_EQUALS(model.getFitDataName(TableDatasetIndex{1}), "Workspace2 (0-9)");
   }
 
-  void
-  test_that_getFitDataName_does_not_throw_when_provided_an_out_of_range_index() {
+  void test_that_getFitDataName_does_not_throw_when_provided_an_out_of_range_index() {
     auto const model = getFitPlotModel();
     TS_ASSERT_THROWS_NOTHING(model.getFitDataName(TableDatasetIndex{10000000}));
   }
 
-  void
-  test_that_getLastFitDataName_returns_the_name_for_the_last_workspace_in_the_model() {
+  void test_that_getLastFitDataName_returns_the_name_for_the_last_workspace_in_the_model() {
     auto const model = getFitPlotModel();
     TS_ASSERT_EQUALS(model.getLastFitDataName(), "Workspace2 (0-9)");
   }
@@ -329,8 +288,7 @@ public:
     TS_ASSERT_EQUALS(model.getRange().second, 8.8);
   }
 
-  void
-  test_that_setStartX_does_not_set_the_StartX_when_the_provided_value_is_larger_than_the_EndX() {
+  void test_that_setStartX_does_not_set_the_StartX_when_the_provided_value_is_larger_than_the_EndX() {
     auto model = getFitPlotModel();
 
     model.setEndX(2.2);
@@ -340,8 +298,7 @@ public:
     TS_ASSERT_EQUALS(model.getRange().second, 2.2);
   }
 
-  void
-  test_that_setEndX_does_not_set_the_EndX_when_the_provided_value_is_smaller_than_the_StartX() {
+  void test_that_setEndX_does_not_set_the_EndX_when_the_provided_value_is_smaller_than_the_StartX() {
     auto model = getFitPlotModel();
 
     model.setStartX(8.8);
@@ -358,28 +315,24 @@ public:
     TS_ASSERT_EQUALS(model.getWorkspaceRange().second, 10.0);
   }
 
-  void
-  test_that_getResultRange_returns_the_different_values_to_the_values_before_the_fit() {
+  void test_that_getResultRange_returns_the_different_values_to_the_values_before_the_fit() {
     auto const model = getFitPlotModelWithFitData();
 
     TS_ASSERT_DIFFERS(model.getResultRange().first, 0.0);
     TS_ASSERT_DIFFERS(model.getResultRange().second, 10.0);
   }
 
-  void
-  test_that_getFirstHWHM_returns_half_the_value_of_the_FWHM_in_the_fitting_function() {
+  void test_that_getFirstHWHM_returns_half_the_value_of_the_FWHM_in_the_fitting_function() {
     auto const model = getFitPlotModel();
     TS_ASSERT_EQUALS(model.getFirstHWHM(), 0.0175 / 2);
   }
 
-  void
-  test_that_getFirstPeakCentre_returns_the_value_of_the_first_PeakCentre_in_the_fitting_function() {
+  void test_that_getFirstPeakCentre_returns_the_value_of_the_first_PeakCentre_in_the_fitting_function() {
     auto const model = getFitPlotModel();
     TS_ASSERT_EQUALS(model.getFirstPeakCentre(), 1.0);
   }
 
-  void
-  test_that_getFirstBackgroundLevel_returns_the_value_of_the_first_background_level_in_the_fitting_function() {
+  void test_that_getFirstBackgroundLevel_returns_the_value_of_the_first_background_level_in_the_fitting_function() {
     auto const model = getFitPlotModel();
     TS_ASSERT_EQUALS(model.getFirstBackgroundLevel(), 0.0);
   }
@@ -404,32 +357,27 @@ public:
     TS_ASSERT_EQUALS(model.calculateHWHMMinimum(maximum), 1.00875);
   }
 
-  void
-  test_that_canCalculateGuess_returns_false_when_there_is_no_fitting_function() {
+  void test_that_canCalculateGuess_returns_false_when_there_is_no_fitting_function() {
     auto const model = getFitPlotModel(false);
     TS_ASSERT(!model.canCalculateGuess());
   }
 
-  void
-  test_that_canCalculateGuess_returns_false_when_required_resolution_not_loaded() {
+  void test_that_canCalculateGuess_returns_false_when_required_resolution_not_loaded() {
     auto const model = getFitPlotModel<DummyEmptyConvModel>();
     TS_ASSERT(!model.canCalculateGuess());
   }
 
-  void
-  test_that_canCalculateGuess_returns_true_when_required_resolution_loaded() {
+  void test_that_canCalculateGuess_returns_true_when_required_resolution_loaded() {
     auto const model = getFitPlotModel<DummyConvModel>();
     TS_ASSERT(model.canCalculateGuess());
   }
 
-  void
-  test_that_canCalculateGuess_returns_true_when_there_is_a_fitting_function_and_a_model_with_a_workspace() {
+  void test_that_canCalculateGuess_returns_true_when_there_is_a_fitting_function_and_a_model_with_a_workspace() {
     auto const model = getFitPlotModel();
     TS_ASSERT(model.canCalculateGuess());
   }
 
-  void
-  test_that_setFWHM_will_change_the_value_of_the_FWHM_in_the_fitting_function() {
+  void test_that_setFWHM_will_change_the_value_of_the_FWHM_in_the_fitting_function() {
     auto model = getFitPlotModel();
 
     auto const fwhm = 1.1;
@@ -438,8 +386,7 @@ public:
     TS_ASSERT_EQUALS(model.getFirstHWHM(), fwhm / 2);
   }
 
-  void
-  test_that_setBackground_will_change_the_value_of_A0_in_the_fitting_function() {
+  void test_that_setBackground_will_change_the_value_of_A0_in_the_fitting_function() {
     auto model = getFitPlotModel();
 
     auto const background = 0.12;
@@ -448,8 +395,7 @@ public:
     TS_ASSERT_EQUALS(model.getFirstBackgroundLevel(), background);
   }
 
-  void
-  test_that_deleteExternalGuessWorkspace_removes_the_guess_workspace_from_the_ADS() {
+  void test_that_deleteExternalGuessWorkspace_removes_the_guess_workspace_from_the_ADS() {
     auto model = getFitPlotModel();
 
     auto const guess = model.getGuessWorkspace();
@@ -460,8 +406,7 @@ public:
     TS_ASSERT(!AnalysisDataService::Instance().doesExist(INPUT_AND_GUESS_NAME));
   }
 
-  void
-  test_that_deleteExternalGuessWorkspace_does_not_throw_if_the_guess_workspace_does_not_exist() {
+  void test_that_deleteExternalGuessWorkspace_does_not_throw_if_the_guess_workspace_does_not_exist() {
     auto model = getFitPlotModel();
     TS_ASSERT_THROWS_NOTHING(model.deleteExternalGuessWorkspace());
   }

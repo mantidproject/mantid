@@ -30,17 +30,14 @@ class PoldiFitPeaks2DTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static PoldiFitPeaks2DTest *createSuite() {
-    return new PoldiFitPeaks2DTest();
-  }
+  static PoldiFitPeaks2DTest *createSuite() { return new PoldiFitPeaks2DTest(); }
   static void destroySuite(PoldiFitPeaks2DTest *suite) { delete suite; }
 
   PoldiFitPeaks2DTest() {
     FrameworkManager::Instance();
 
     m_instrument = PoldiInstrumentAdapter_sptr(new FakePoldiInstrumentAdapter);
-    m_timeTransformer =
-        PoldiTimeTransformer_sptr(new PoldiTimeTransformer(m_instrument));
+    m_timeTransformer = PoldiTimeTransformer_sptr(new PoldiTimeTransformer(m_instrument));
   }
 
   void testSetTimeTransformer() {
@@ -62,10 +59,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(spectrumCalculator.setDeltaT(2.0));
     TS_ASSERT_EQUALS(spectrumCalculator.m_deltaT, 2.0);
 
-    TS_ASSERT_THROWS(spectrumCalculator.setDeltaT(0.0),
-                     const std::invalid_argument &);
-    TS_ASSERT_THROWS(spectrumCalculator.setDeltaT(-1.0),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(spectrumCalculator.setDeltaT(0.0), const std::invalid_argument &);
+    TS_ASSERT_THROWS(spectrumCalculator.setDeltaT(-1.0), const std::invalid_argument &);
   }
 
   void testSetDeltaTFromWorkspace() {
@@ -75,10 +70,8 @@ public:
     spectrumCalculator.setDeltaTFromWorkspace(ws);
     TS_ASSERT_EQUALS(spectrumCalculator.m_deltaT, 1.0);
 
-    MatrixWorkspace_sptr invalidWs =
-        WorkspaceCreationHelper::create2DWorkspace123(1, 1);
-    TS_ASSERT_THROWS(spectrumCalculator.setDeltaTFromWorkspace(invalidWs),
-                     const std::invalid_argument &);
+    MatrixWorkspace_sptr invalidWs = WorkspaceCreationHelper::create2DWorkspace123(1, 1);
+    TS_ASSERT_THROWS(spectrumCalculator.setDeltaTFromWorkspace(invalidWs), const std::invalid_argument &);
   }
 
   void testIsValidDeltaT() {
@@ -91,45 +84,37 @@ public:
   void testGetPeakCollection() {
     TestablePoldiFitPeaks2D spectrumCalculator;
 
-    TableWorkspace_sptr peakTable =
-        PoldiPeakCollectionHelpers::createPoldiPeakTableWorkspace();
+    TableWorkspace_sptr peakTable = PoldiPeakCollectionHelpers::createPoldiPeakTableWorkspace();
     TS_ASSERT_THROWS_NOTHING(spectrumCalculator.getPeakCollection(peakTable));
 
-    PoldiPeakCollection_sptr collection =
-        spectrumCalculator.getPeakCollection(peakTable);
+    PoldiPeakCollection_sptr collection = spectrumCalculator.getPeakCollection(peakTable);
     TS_ASSERT_EQUALS(collection->peakCount(), peakTable->rowCount());
   }
 
   void testGetIntegratedPeakCollection() {
-    PoldiPeakCollection_sptr testPeaks =
-        PoldiPeakCollectionHelpers::createPoldiPeakCollectionMaximum();
+    PoldiPeakCollection_sptr testPeaks = PoldiPeakCollectionHelpers::createPoldiPeakCollectionMaximum();
 
     TestablePoldiFitPeaks2D spectrumCalculator;
     spectrumCalculator.initialize();
     // deltaT is not set, so this must fail
-    TS_ASSERT_THROWS(spectrumCalculator.getIntegratedPeakCollection(testPeaks),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(spectrumCalculator.getIntegratedPeakCollection(testPeaks), const std::invalid_argument &);
     spectrumCalculator.setDeltaT(3.0);
 
     // still fails, because time transformer is required.
-    TS_ASSERT_THROWS(spectrumCalculator.getIntegratedPeakCollection(testPeaks),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(spectrumCalculator.getIntegratedPeakCollection(testPeaks), const std::invalid_argument &);
     spectrumCalculator.setTimeTransformer(m_timeTransformer);
 
     // peak collection with some peaks, intensities are described by maximum,
     // this is the "happy case".
-    TS_ASSERT_THROWS_NOTHING(
-        spectrumCalculator.getIntegratedPeakCollection(testPeaks));
+    TS_ASSERT_THROWS_NOTHING(spectrumCalculator.getIntegratedPeakCollection(testPeaks));
 
-    PoldiPeakCollection_sptr integratedTestPeaks =
-        spectrumCalculator.getIntegratedPeakCollection(testPeaks);
+    PoldiPeakCollection_sptr integratedTestPeaks = spectrumCalculator.getIntegratedPeakCollection(testPeaks);
     // this should be a new peak collection
     TS_ASSERT(integratedTestPeaks != testPeaks);
     TS_ASSERT_EQUALS(integratedTestPeaks->peakCount(), testPeaks->peakCount());
 
     // checking the actual integration result agains reference.
-    PoldiPeakCollection_sptr integratedReference(
-        new PoldiPeakCollection(PoldiPeakCollection::Integral));
+    PoldiPeakCollection_sptr integratedReference(new PoldiPeakCollection(PoldiPeakCollection::Integral));
     for (size_t i = 0; i < testPeaks->peakCount(); ++i) {
       PoldiPeak_sptr peak = testPeaks->peak(i)->clone();
 
@@ -137,8 +122,7 @@ public:
       double fwhm = peak->fwhm(PoldiPeak::AbsoluteD);
 
       // Integral of gaussian is height * sigma * sqrt(2 * pi)
-      peak->setIntensity(UncertainValue(oldIntensity * fwhm /
-                                        (2.0 * sqrt(M_LN2)) * sqrt(M_PI)));
+      peak->setIntensity(UncertainValue(oldIntensity * fwhm / (2.0 * sqrt(M_LN2)) * sqrt(M_PI)));
       integratedReference->addPeak(peak);
     }
 
@@ -146,30 +130,25 @@ public:
     compareIntensities(integratedTestPeaks, integratedReference, 1e-6);
 
     // In case of integrated peaks nothing should happen
-    PoldiPeakCollection_sptr alreadyIntegratedPeaks(
-        new PoldiPeakCollection(PoldiPeakCollection::Integral));
+    PoldiPeakCollection_sptr alreadyIntegratedPeaks(new PoldiPeakCollection(PoldiPeakCollection::Integral));
     alreadyIntegratedPeaks->addPeak(PoldiPeak::create(2.0));
 
     PoldiPeakCollection_sptr alreadyIntegratedResult =
         spectrumCalculator.getIntegratedPeakCollection(alreadyIntegratedPeaks);
     TS_ASSERT(alreadyIntegratedResult != alreadyIntegratedPeaks);
-    TS_ASSERT_EQUALS(alreadyIntegratedResult->peakCount(),
-                     alreadyIntegratedPeaks->peakCount());
-    TS_ASSERT_EQUALS(alreadyIntegratedResult->peak(0)->d(),
-                     alreadyIntegratedPeaks->peak(0)->d());
+    TS_ASSERT_EQUALS(alreadyIntegratedResult->peakCount(), alreadyIntegratedPeaks->peakCount());
+    TS_ASSERT_EQUALS(alreadyIntegratedResult->peak(0)->d(), alreadyIntegratedPeaks->peak(0)->d());
 
     // Where there's no profile function in the peak collection, falling back to
     // the property PeakProfileFunction.
     // Default is Gaussian, so this is supposed to work.
     PoldiPeakCollection_sptr noProfilePeaks(new PoldiPeakCollection);
-    TS_ASSERT_THROWS_NOTHING(
-        spectrumCalculator.getIntegratedPeakCollection(noProfilePeaks));
+    TS_ASSERT_THROWS_NOTHING(spectrumCalculator.getIntegratedPeakCollection(noProfilePeaks));
 
     // When there is no valid PoldiPeakCollection, the method also throws
     PoldiPeakCollection_sptr invalidPeakCollection;
-    TS_ASSERT_THROWS(
-        spectrumCalculator.getIntegratedPeakCollection(invalidPeakCollection),
-        const std::invalid_argument &);
+    TS_ASSERT_THROWS(spectrumCalculator.getIntegratedPeakCollection(invalidPeakCollection),
+                     const std::invalid_argument &);
   }
 
   void testGetNormalizedPeakCollection() {
@@ -177,27 +156,21 @@ public:
 
     // first, test the failing cases
     PoldiPeakCollection_sptr invalidPeakCollection;
-    TS_ASSERT_THROWS(
-        spectrumCalculator.getNormalizedPeakCollection(invalidPeakCollection),
-        const std::invalid_argument &);
+    TS_ASSERT_THROWS(spectrumCalculator.getNormalizedPeakCollection(invalidPeakCollection),
+                     const std::invalid_argument &);
 
     // m_timeTransformer has not been assigned, so even a "good" PeakCollection
     // will throw
-    PoldiPeakCollection_sptr testPeaks =
-        PoldiPeakCollectionHelpers::createPoldiPeakCollectionMaximum();
-    TS_ASSERT_THROWS(spectrumCalculator.getNormalizedPeakCollection(testPeaks),
-                     const std::invalid_argument &);
+    PoldiPeakCollection_sptr testPeaks = PoldiPeakCollectionHelpers::createPoldiPeakCollectionMaximum();
+    TS_ASSERT_THROWS(spectrumCalculator.getNormalizedPeakCollection(testPeaks), const std::invalid_argument &);
 
     spectrumCalculator.setTimeTransformer(m_timeTransformer);
 
     // to verify the results, use actual results from after integration step
-    PoldiPeakCollection_sptr integratedPeaks =
-        PoldiPeakCollectionHelpers::createPoldiPeakCollectionIntegral();
-    TS_ASSERT_THROWS_NOTHING(
-        spectrumCalculator.getNormalizedPeakCollection(integratedPeaks));
+    PoldiPeakCollection_sptr integratedPeaks = PoldiPeakCollectionHelpers::createPoldiPeakCollectionIntegral();
+    TS_ASSERT_THROWS_NOTHING(spectrumCalculator.getNormalizedPeakCollection(integratedPeaks));
 
-    PoldiPeakCollection_sptr normalizedPeaks =
-        spectrumCalculator.getNormalizedPeakCollection(integratedPeaks);
+    PoldiPeakCollection_sptr normalizedPeaks = spectrumCalculator.getNormalizedPeakCollection(integratedPeaks);
     PoldiPeakCollection_sptr normalizedReferencePeaks =
         PoldiPeakCollectionHelpers::createPoldiPeakCollectionNormalized();
 
@@ -209,29 +182,21 @@ public:
 
     // first, test the failing cases
     PoldiPeakCollection_sptr invalidPeakCollection;
-    TS_ASSERT_THROWS(
-        spectrumCalculator.getCountPeakCollection(invalidPeakCollection),
-        const std::invalid_argument &);
+    TS_ASSERT_THROWS(spectrumCalculator.getCountPeakCollection(invalidPeakCollection), const std::invalid_argument &);
 
     // m_timeTransformer has not been assigned, so even a "good" PeakCollection
     // will throw
-    PoldiPeakCollection_sptr testPeaks =
-        PoldiPeakCollectionHelpers::createPoldiPeakCollectionNormalized();
-    TS_ASSERT_THROWS(spectrumCalculator.getCountPeakCollection(testPeaks),
-                     const std::invalid_argument &);
+    PoldiPeakCollection_sptr testPeaks = PoldiPeakCollectionHelpers::createPoldiPeakCollectionNormalized();
+    TS_ASSERT_THROWS(spectrumCalculator.getCountPeakCollection(testPeaks), const std::invalid_argument &);
 
     spectrumCalculator.setTimeTransformer(m_timeTransformer);
 
     // to verify the results, use actual results from after integration step
-    PoldiPeakCollection_sptr normalizedPeaks =
-        PoldiPeakCollectionHelpers::createPoldiPeakCollectionNormalized();
-    TS_ASSERT_THROWS_NOTHING(
-        spectrumCalculator.getCountPeakCollection(normalizedPeaks));
+    PoldiPeakCollection_sptr normalizedPeaks = PoldiPeakCollectionHelpers::createPoldiPeakCollectionNormalized();
+    TS_ASSERT_THROWS_NOTHING(spectrumCalculator.getCountPeakCollection(normalizedPeaks));
 
-    PoldiPeakCollection_sptr integratedPeaks =
-        spectrumCalculator.getCountPeakCollection(normalizedPeaks);
-    PoldiPeakCollection_sptr integratedReferencePeaks =
-        PoldiPeakCollectionHelpers::createPoldiPeakCollectionIntegral();
+    PoldiPeakCollection_sptr integratedPeaks = spectrumCalculator.getCountPeakCollection(normalizedPeaks);
+    PoldiPeakCollection_sptr integratedReferencePeaks = PoldiPeakCollectionHelpers::createPoldiPeakCollectionIntegral();
 
     compareIntensities(integratedPeaks, integratedReferencePeaks, 1.5e-6);
   }
@@ -240,11 +205,9 @@ public:
     TestablePoldiFitPeaks2D spectrumCalculator;
     spectrumCalculator.initialize();
 
-    PoldiPeakCollection_sptr peaks =
-        PoldiPeakCollectionHelpers::createPoldiPeakCollectionNormalized();
+    PoldiPeakCollection_sptr peaks = PoldiPeakCollectionHelpers::createPoldiPeakCollectionNormalized();
 
-    std::shared_ptr<Poldi2DFunction> poldi2DFunction =
-        spectrumCalculator.getFunctionFromPeakCollection(peaks);
+    std::shared_ptr<Poldi2DFunction> poldi2DFunction = spectrumCalculator.getFunctionFromPeakCollection(peaks);
 
     TS_ASSERT_EQUALS(poldi2DFunction->nFunctions(), peaks->peakCount());
 
@@ -257,8 +220,7 @@ public:
 
       IPeakFunction_sptr wrappedFunction = poldiFunction->getProfileFunction();
 
-      TS_ASSERT_DELTA(wrappedFunction->intensity(),
-                      static_cast<double>(peaks->peak(i)->intensity()), 1e-10);
+      TS_ASSERT_DELTA(wrappedFunction->intensity(), static_cast<double>(peaks->peak(i)->intensity()), 1e-10);
     }
   }
 
@@ -268,24 +230,20 @@ public:
     spectrumCalculator.setProperty("PeakProfileFunction", "Gaussian");
 
     // Create a function with some peaks
-    PoldiPeakCollection_sptr peaks =
-        PoldiPeakCollectionHelpers::createPoldiPeakCollectionNormalized();
-    std::shared_ptr<Poldi2DFunction> poldi2DFunction =
-        spectrumCalculator.getFunctionFromPeakCollection(peaks);
+    PoldiPeakCollection_sptr peaks = PoldiPeakCollectionHelpers::createPoldiPeakCollectionNormalized();
+    std::shared_ptr<Poldi2DFunction> poldi2DFunction = spectrumCalculator.getFunctionFromPeakCollection(peaks);
 
     // Make "Height" global, i.e. the same for all peaks
     spectrumCalculator.setProperty("GlobalParameters", "Height");
     std::string ties = spectrumCalculator.getUserSpecifiedTies(poldi2DFunction);
-    TS_ASSERT_EQUALS(
-        ties, "f1.Height=f0.Height,f2.Height=f0.Height,f3.Height=f0.Height");
+    TS_ASSERT_EQUALS(ties, "f1.Height=f0.Height,f2.Height=f0.Height,f3.Height=f0.Height");
 
     // Height and Sigma
     spectrumCalculator.setProperty("GlobalParameters", "Height,Sigma");
     ties = spectrumCalculator.getUserSpecifiedTies(poldi2DFunction);
 
-    TS_ASSERT_EQUALS(
-        ties, "f1.Height=f0.Height,f2.Height=f0.Height,f3.Height=f0.Height,"
-              "f1.Sigma=f0.Sigma,f2.Sigma=f0.Sigma,f3.Sigma=f0.Sigma");
+    TS_ASSERT_EQUALS(ties, "f1.Height=f0.Height,f2.Height=f0.Height,f3.Height=f0.Height,"
+                           "f1.Sigma=f0.Sigma,f2.Sigma=f0.Sigma,f3.Sigma=f0.Sigma");
 
     // Empty
     spectrumCalculator.setProperty("GlobalParameters", "");
@@ -300,8 +258,7 @@ public:
     // Valid and invalid
     spectrumCalculator.setProperty("GlobalParameters", "Height,Invalid");
     ties = spectrumCalculator.getUserSpecifiedTies(poldi2DFunction);
-    TS_ASSERT_EQUALS(
-        ties, "f1.Height=f0.Height,f2.Height=f0.Height,f3.Height=f0.Height");
+    TS_ASSERT_EQUALS(ties, "f1.Height=f0.Height,f2.Height=f0.Height,f3.Height=f0.Height");
 
     // Several empty
     spectrumCalculator.setProperty("GlobalParameters", ",,,,");
@@ -313,16 +270,13 @@ public:
     TestablePoldiFitPeaks2D spectrumCalculator;
     spectrumCalculator.initialize();
 
-    PoldiPeakCollection_sptr peaks =
-        PoldiPeakCollectionHelpers::createPoldiPeakCollectionNormalized();
-    IFunction_sptr poldi2DFunction =
-        spectrumCalculator.getFunctionFromPeakCollection(peaks);
+    PoldiPeakCollection_sptr peaks = PoldiPeakCollectionHelpers::createPoldiPeakCollectionNormalized();
+    IFunction_sptr poldi2DFunction = spectrumCalculator.getFunctionFromPeakCollection(peaks);
 
     size_t nParams = poldi2DFunction->nParams();
 
     // Make a matrix with diagonal elements = 0.05 and set as covariance matrix
-    std::shared_ptr<DblMatrix> matrix =
-        std::make_shared<DblMatrix>(nParams, nParams, true);
+    std::shared_ptr<DblMatrix> matrix = std::make_shared<DblMatrix>(nParams, nParams, true);
     matrix->operator*=(0.05);
     poldi2DFunction->setCovarianceMatrix(matrix);
 
@@ -331,8 +285,7 @@ public:
       poldi2DFunction->setError(i, sqrt(0.05));
     }
 
-    PoldiPeakCollection_sptr peaksFromFunction =
-        spectrumCalculator.getPeakCollectionFromFunction(poldi2DFunction);
+    PoldiPeakCollection_sptr peaksFromFunction = spectrumCalculator.getPeakCollectionFromFunction(poldi2DFunction);
 
     TS_ASSERT_EQUALS(peaksFromFunction->peakCount(), peaks->peakCount());
     for (size_t i = 0; i < peaksFromFunction->peakCount(); ++i) {
@@ -340,11 +293,9 @@ public:
       PoldiPeak_sptr referencePeak = peaks->peak(i);
 
       TS_ASSERT_EQUALS(functionPeak->d().value(), referencePeak->d().value());
-      TS_ASSERT_EQUALS(functionPeak->fwhm().value(),
-                       referencePeak->fwhm().value());
+      TS_ASSERT_EQUALS(functionPeak->fwhm().value(), referencePeak->fwhm().value());
       TS_ASSERT_DELTA(functionPeak->d().error(), sqrt(0.05), 1e-6);
-      TS_ASSERT_DELTA(functionPeak->fwhm(PoldiPeak::AbsoluteD).error(),
-                      sqrt(0.05) * (2.0 * sqrt(2.0 * M_LN2)), 1e-6);
+      TS_ASSERT_DELTA(functionPeak->fwhm(PoldiPeak::AbsoluteD).error(), sqrt(0.05) * (2.0 * sqrt(2.0 * M_LN2)), 1e-6);
     }
   }
 
@@ -361,12 +312,9 @@ public:
 
     TestablePoldiFitPeaks2D spectrumCalculator;
 
-    TS_ASSERT_THROWS(spectrumCalculator.assignMillerIndices(from, invalid),
-                     const std::invalid_argument &);
-    TS_ASSERT_THROWS(spectrumCalculator.assignMillerIndices(invalid, from),
-                     const std::invalid_argument &);
-    TS_ASSERT_THROWS(spectrumCalculator.assignMillerIndices(invalid, invalid),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(spectrumCalculator.assignMillerIndices(from, invalid), const std::invalid_argument &);
+    TS_ASSERT_THROWS(spectrumCalculator.assignMillerIndices(invalid, from), const std::invalid_argument &);
+    TS_ASSERT_THROWS(spectrumCalculator.assignMillerIndices(invalid, invalid), const std::invalid_argument &);
 
     TS_ASSERT_DIFFERS(peak1->hkl(), peak2->hkl());
 
@@ -375,16 +323,14 @@ public:
 
     to->addPeak(peak1);
 
-    TS_ASSERT_THROWS(spectrumCalculator.assignMillerIndices(from, to),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(spectrumCalculator.assignMillerIndices(from, to), const std::runtime_error &);
   }
 
   void testAddBackgroundFunctions() {
     TestablePoldiFitPeaks2D spectrumCalculator;
     spectrumCalculator.initialize();
 
-    std::shared_ptr<Poldi2DFunction> funDefault =
-        std::make_shared<Poldi2DFunction>();
+    std::shared_ptr<Poldi2DFunction> funDefault = std::make_shared<Poldi2DFunction>();
     TS_ASSERT_EQUALS(funDefault->nParams(), 0);
     TS_ASSERT_EQUALS(funDefault->nFunctions(), 0);
 
@@ -392,8 +338,7 @@ public:
     TS_ASSERT_EQUALS(funDefault->nParams(), 2);
     TS_ASSERT_EQUALS(funDefault->nFunctions(), 2);
 
-    std::shared_ptr<Poldi2DFunction> funLinear =
-        std::make_shared<Poldi2DFunction>();
+    std::shared_ptr<Poldi2DFunction> funLinear = std::make_shared<Poldi2DFunction>();
     spectrumCalculator.setProperty("FitConstantBackground", false);
     spectrumCalculator.addBackgroundTerms(funLinear);
 
@@ -402,8 +347,7 @@ public:
     TS_ASSERT_EQUALS(funLinear->parameterName(0), "f0.A1");
     TS_ASSERT_EQUALS(funLinear->nFunctions(), 1);
 
-    std::shared_ptr<Poldi2DFunction> funConstant =
-        std::make_shared<Poldi2DFunction>();
+    std::shared_ptr<Poldi2DFunction> funConstant = std::make_shared<Poldi2DFunction>();
     spectrumCalculator.setProperty("FitConstantBackground", true);
     spectrumCalculator.setProperty("FitLinearBackground", false);
     spectrumCalculator.addBackgroundTerms(funConstant);
@@ -416,29 +360,25 @@ public:
 
   void testGetRefinedStartingCell() {
     // Get Silicon peaks for testing
-    PoldiPeakCollection_sptr peaks =
-        PoldiPeakCollectionHelpers::createPoldiPeakCollectionNormalized();
+    PoldiPeakCollection_sptr peaks = PoldiPeakCollectionHelpers::createPoldiPeakCollectionNormalized();
 
     TestablePoldiFitPeaks2D alg;
 
     std::string refinedCell;
-    TS_ASSERT_THROWS_NOTHING(refinedCell = alg.getRefinedStartingCell(
-                                 "5.4 5.4 5.4 90 90 90", "Cubic", peaks));
+    TS_ASSERT_THROWS_NOTHING(refinedCell = alg.getRefinedStartingCell("5.4 5.4 5.4 90 90 90", "Cubic", peaks));
 
     UnitCell cell = strToUnitCell(refinedCell);
     TS_ASSERT_DELTA(cell.a(), 5.43111972, 1e-8);
 
     // With less accurate starting parameters the result should not change
-    TS_ASSERT_THROWS_NOTHING(refinedCell = alg.getRefinedStartingCell(
-                                 "5 5 5 90 90 90", "Cubic", peaks));
+    TS_ASSERT_THROWS_NOTHING(refinedCell = alg.getRefinedStartingCell("5 5 5 90 90 90", "Cubic", peaks));
 
     cell = strToUnitCell(refinedCell);
     TS_ASSERT_DELTA(cell.a(), 5.43111972, 1e-8);
 
     // Adding an unindexed peak should make the function return the initial
     peaks->addPeak(PoldiPeak::create(UncertainValue(1.0)));
-    TS_ASSERT_THROWS_NOTHING(refinedCell = alg.getRefinedStartingCell(
-                                 "5 5 5 90 90 90", "Cubic", peaks));
+    TS_ASSERT_THROWS_NOTHING(refinedCell = alg.getRefinedStartingCell("5 5 5 90 90 90", "Cubic", peaks));
     TS_ASSERT_EQUALS(refinedCell, "5 5 5 90 90 90");
   }
 
@@ -452,8 +392,7 @@ public:
     TS_ASSERT_EQUALS(alg.getLatticeSystemFromPointGroup(pgTetra), "Tetragonal");
 
     auto pgOrtho = PointGroupFactory::Instance().createPointGroup("mmm");
-    TS_ASSERT_EQUALS(alg.getLatticeSystemFromPointGroup(pgOrtho),
-                     "Orthorhombic");
+    TS_ASSERT_EQUALS(alg.getLatticeSystemFromPointGroup(pgOrtho), "Orthorhombic");
 
     auto pgMono = PointGroupFactory::Instance().createPointGroup("2/m");
     TS_ASSERT_EQUALS(alg.getLatticeSystemFromPointGroup(pgMono), "Monoclinic");
@@ -465,24 +404,20 @@ public:
     TS_ASSERT_EQUALS(alg.getLatticeSystemFromPointGroup(pgHex), "Hexagonal");
 
     auto pgTrigRh = PointGroupFactory::Instance().createPointGroup("-3m r");
-    TS_ASSERT_EQUALS(alg.getLatticeSystemFromPointGroup(pgTrigRh),
-                     "Rhombohedral");
+    TS_ASSERT_EQUALS(alg.getLatticeSystemFromPointGroup(pgTrigRh), "Rhombohedral");
 
     auto pgTrigHex = PointGroupFactory::Instance().createPointGroup("-3m");
-    TS_ASSERT_EQUALS(alg.getLatticeSystemFromPointGroup(pgTrigHex),
-                     "Hexagonal");
+    TS_ASSERT_EQUALS(alg.getLatticeSystemFromPointGroup(pgTrigHex), "Hexagonal");
 
     PointGroup_sptr invalid;
-    TS_ASSERT_THROWS(alg.getLatticeSystemFromPointGroup(invalid),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg.getLatticeSystemFromPointGroup(invalid), const std::invalid_argument &);
   }
 
 private:
   PoldiInstrumentAdapter_sptr m_instrument;
   PoldiTimeTransformer_sptr m_timeTransformer;
 
-  void compareIntensities(const PoldiPeakCollection_sptr &first,
-                          const PoldiPeakCollection_sptr &second,
+  void compareIntensities(const PoldiPeakCollection_sptr &first, const PoldiPeakCollection_sptr &second,
                           double relativePrecision) {
     for (size_t i = 0; i < first->peakCount(); ++i) {
       PoldiPeak_sptr peak = first->peak(i);
@@ -493,9 +428,7 @@ private:
       strm << "Error in Peak " << i << ": " << peak->intensity().value()
            << " != " << referencePeak->intensity().value();
 
-      TSM_ASSERT_DELTA(strm.str().c_str(),
-                       fabs(1.0 - peak->intensity().value() /
-                                      referencePeak->intensity().value()),
+      TSM_ASSERT_DELTA(strm.str().c_str(), fabs(1.0 - peak->intensity().value() / referencePeak->intensity().value()),
                        0.0, relativePrecision);
     }
   }

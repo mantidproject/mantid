@@ -17,9 +17,7 @@ namespace DataHandling {
  * @param zRotation The z rotation required in radians
  * @returns a matrix of doubles to use as the rotation matrix
  */
-Kernel::Matrix<double> MeshFileIO::generateMatrix(double xRotation,
-                                                  double yRotation,
-                                                  double zRotation) {
+Kernel::Matrix<double> MeshFileIO::generateMatrix(double xRotation, double yRotation, double zRotation) {
   Kernel::Matrix<double> xMatrix = generateXRotation(xRotation);
   Kernel::Matrix<double> yMatrix = generateYRotation(yRotation);
   Kernel::Matrix<double> zMatrix = generateZRotation(zRotation);
@@ -35,11 +33,9 @@ Kernel::Matrix<double> MeshFileIO::generateMatrix(double xRotation,
  * @param zRotation The z rotation required in radians
  * @returns a shared pointer to the newly rotated environment
  */
-std::shared_ptr<Geometry::MeshObject>
-MeshFileIO::rotate(std::shared_ptr<Geometry::MeshObject> environmentMesh,
-                   double xRotation, double yRotation, double zRotation) {
-  const std::vector<double> rotationMatrix =
-      generateMatrix(xRotation, yRotation, zRotation);
+std::shared_ptr<Geometry::MeshObject> MeshFileIO::rotate(std::shared_ptr<Geometry::MeshObject> environmentMesh,
+                                                         double xRotation, double yRotation, double zRotation) {
+  const std::vector<double> rotationMatrix = generateMatrix(xRotation, yRotation, zRotation);
   environmentMesh->rotate(rotationMatrix);
   return environmentMesh;
 }
@@ -86,17 +82,14 @@ Kernel::Matrix<double> MeshFileIO::generateZRotation(double zRotation) {
  * @param translationVector The 3D translation to apply
  * @returns a shared pointer to the newly translated environment
  */
-std::shared_ptr<Geometry::MeshObject>
-MeshFileIO::translate(std::shared_ptr<Geometry::MeshObject> environmentMesh,
-                      const std::vector<double> &translationVector) {
+std::shared_ptr<Geometry::MeshObject> MeshFileIO::translate(std::shared_ptr<Geometry::MeshObject> environmentMesh,
+                                                            const std::vector<double> &translationVector) {
   std::vector<double> checkVector = std::vector<double>(3, 0.0);
   if (translationVector != checkVector) {
     if (translationVector.size() != 3) {
-      throw std::invalid_argument(
-          "Invalid Translation vector, must have exactly 3 dimensions");
+      throw std::invalid_argument("Invalid Translation vector, must have exactly 3 dimensions");
     }
-    Kernel::V3D translate = createScaledV3D(
-        translationVector[0], translationVector[1], translationVector[2]);
+    Kernel::V3D translate = createScaledV3D(translationVector[0], translationVector[1], translationVector[2]);
     environmentMesh->translate(translate);
   }
   return environmentMesh;

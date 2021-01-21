@@ -30,29 +30,24 @@ using namespace API;
 
 void SumEventsByLogValue::init() {
   declareProperty(
-      std::make_unique<WorkspaceProperty<DataObjects::EventWorkspace>>(
-          "InputWorkspace", "", Direction::Input),
+      std::make_unique<WorkspaceProperty<DataObjects::EventWorkspace>>("InputWorkspace", "", Direction::Input),
       "The input EventWorkspace. Must contain 'raw' (unweighted) events");
-  declareProperty(
-      std::make_unique<WorkspaceProperty<DataObjects::EventWorkspace>>(
-          "MonitorWorkspace", "", Direction::Input, PropertyMode::Optional),
-      "A workspace containing the monitor counts relating to the input "
-      "workspace");
-  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<DataObjects::EventWorkspace>>(
+                      "MonitorWorkspace", "", Direction::Input, PropertyMode::Optional),
+                  "A workspace containing the monitor counts relating to the input "
+                  "workspace");
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("OutputWorkspace", "", Direction::Output),
                   "The name of the workspace to be created as the output of "
                   "the algorithm. The output workspace will be a "
                   "[[TableWorkspace]] in the case that a log holding integer "
                   "values is given, and a single-spectrum [[Workspace2D]] "
                   "otherwise.");
 
-  declareProperty("LogName", "",
-                  std::make_shared<MandatoryValidator<std::string>>(),
+  declareProperty("LogName", "", std::make_shared<MandatoryValidator<std::string>>(),
                   "The name of the number series log against which the data "
                   "should be summed");
   declareProperty(
-      std::make_unique<ArrayProperty<double>>(
-          "OutputBinning", "", std::make_shared<RebinParamsValidator>(true)),
+      std::make_unique<ArrayProperty<double>>("OutputBinning", "", std::make_shared<RebinParamsValidator>(true)),
       "Binning parameters for the output workspace (see [[Rebin]] for syntax) "
       "(Optional for logs holding integer values, mandatory otherwise)");
 }
@@ -70,15 +65,13 @@ std::map<std::string, std::string> SumEventsByLogValue::validateInputs() {
   // TODO: Either turn this check into a proper validator or amend the algorithm
   // to work for weighted events
   if (m_inputWorkspace->getEventType() != API::TOF) {
-    errors["InputWorkspace"] =
-        "This algorithm only works for unweighted ('raw') events";
+    errors["InputWorkspace"] = "This algorithm only works for unweighted ('raw') events";
   }
 
   // Check that the log exists for the given input workspace
   m_logName = getPropertyValue("LogName");
   try {
-    auto *log = dynamic_cast<ITimeSeriesProperty *>(
-        m_inputWorkspace->run().getLogData(m_logName));
+    auto *log = dynamic_cast<ITimeSeriesProperty *>(m_inputWorkspace->run().getLogData(m_logName));
     if (log == nullptr) {
       errors["LogName"] = "'" + m_logName + "' is not a time-series log.";
       return errors;
@@ -87,9 +80,8 @@ std::map<std::string, std::string> SumEventsByLogValue::validateInputs() {
       errors["LogName"] = "'" + m_logName + "' is empty.";
     }
   } catch (Exception::NotFoundError &) {
-    errors["LogName"] = "The log '" + m_logName +
-                        "' does not exist in the workspace '" +
-                        m_inputWorkspace->getName() + "'.";
+    errors["LogName"] =
+        "The log '" + m_logName + "' does not exist in the workspace '" + m_inputWorkspace->getName() + "'.";
     return errors;
   }
 
@@ -111,8 +103,7 @@ void SumEventsByLogValue::exec() {
     if (intLog != nullptr) {
       createTableOutput(intLog);
     } else {
-      throw std::invalid_argument(
-          "OutputBinning must be provided for floating-point number logs");
+      throw std::invalid_argument("OutputBinning must be provided for floating-point number logs");
     }
   } else // Binning parameters have been given
   {
@@ -127,8 +118,7 @@ void SumEventsByLogValue::exec() {
     //  TODO: Implement (if anyone ever asks for it).
     //}
     else {
-      throw std::runtime_error(
-          "This algorithm only supports number-series logs");
+      throw std::runtime_error("This algorithm only supports number-series logs");
     }
   }
 }
@@ -136,8 +126,7 @@ void SumEventsByLogValue::exec() {
 /** Produces the table workspace output for an integer TimeSeriesProperty.
  *  @param log The log to tabulate against
  */
-void SumEventsByLogValue::createTableOutput(
-    const Kernel::TimeSeriesProperty<int> *log) {
+void SumEventsByLogValue::createTableOutput(const Kernel::TimeSeriesProperty<int> *log) {
   // This is the version for integer logs when no binning parameters have been
   // given and has a data point per log value
   const int minVal = log->minValue();
@@ -145,14 +134,12 @@ void SumEventsByLogValue::createTableOutput(
   const int xLength = maxVal - minVal + 1;
 
   if (xLength > 10000) {
-    g_log.warning() << "Did you really want to create a " << xLength
-                    << " row table? This will take some time!\n";
+    g_log.warning() << "Did you really want to create a " << xLength << " row table? This will take some time!\n";
   }
 
   // Accumulate things in a local vector before transferring to the table
   std::vector<int> Y(xLength);
-  const auto numSpec =
-      static_cast<int>(m_inputWorkspace->getNumberHistograms());
+  const auto numSpec = static_cast<int>(m_inputWorkspace->getNumberHistograms());
   Progress prog(this, 0.0, 1.0, numSpec + xLength);
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWorkspace))
   for (int spec = 0; spec < numSpec; ++spec) {
@@ -165,13 +152,11 @@ void SumEventsByLogValue::createTableOutput(
   PARALLEL_CHECK_INTERUPT_REGION
 
   // Create a table workspace to hold the sum.
-  ITableWorkspace_sptr outputWorkspace =
-      WorkspaceFactory::Instance().createTable();
+  ITableWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().createTable();
   auto logValues = outputWorkspace->addColumn("int", m_logName);
   auto counts = outputWorkspace->addColumn("int", "Counts");
   auto errors = outputWorkspace->addColumn("double", "Error");
-  outputWorkspace->setRowCount(
-      xLength); // One row per log value across the full range
+  outputWorkspace->setRowCount(xLength); // One row per log value across the full range
   // Set type for benefit of MantidPlot
   logValues->setPlotType(1); // X
   counts->setPlotType(2);    // Y
@@ -195,8 +180,7 @@ void SumEventsByLogValue::createTableOutput(
   // Get hold of the proton charge log for later
   const TimeSeriesProperty<double> *protonChargeLog = nullptr;
   try {
-    protonChargeLog =
-        m_inputWorkspace->run().getTimeSeriesProperty<double>("proton_charge");
+    protonChargeLog = m_inputWorkspace->run().getTimeSeriesProperty<double>("proton_charge");
     // Set back to NULL if the log is empty or bad things will happen later
     if (protonChargeLog->realSize() == 0)
       protonChargeLog = nullptr;
@@ -226,8 +210,7 @@ void SumEventsByLogValue::createTableOutput(
 
     // This section ensures that the filter goes to the end of the run
     if (value == log->lastValue() && protonChargeLog) {
-      TimeInterval timeAfterLastLogValue(log->lastTime(),
-                                         m_inputWorkspace->getLastPulseTime());
+      TimeInterval timeAfterLastLogValue(log->lastTime(), m_inputWorkspace->getLastPulseTime());
       log->expandFilterToRange(filter, value, value, timeAfterLastLogValue);
     }
 
@@ -241,8 +224,7 @@ void SumEventsByLogValue::createTableOutput(
     interruption_point();
     // Sum up the proton charge for this log value
     if (protonChargeLog)
-      protonChgCol->cell<double>(row) =
-          sumProtonCharge(protonChargeLog, filter);
+      protonChgCol->cell<double>(row) = sumProtonCharge(protonChargeLog, filter);
     interruption_point();
 
     for (auto &otherLog : otherLogs) {
@@ -250,8 +232,7 @@ void SumEventsByLogValue::createTableOutput(
       // of the main log
       // Have to (maybe inefficiently) fetch back column by name - move outside
       // loop if too slow
-      outputWorkspace->getColumn(otherLog.first)->cell<double>(row) =
-          otherLog.second->averageValueInFilter(filter);
+      outputWorkspace->getColumn(otherLog.first)->cell<double>(row) = otherLog.second->averageValueInFilter(filter);
     }
     prog.report();
   }
@@ -270,9 +251,8 @@ void SumEventsByLogValue::createTableOutput(
  *  @param log       The TimeSeriesProperty log
  *  @param Y         The output vector to be filled
  */
-void SumEventsByLogValue::filterEventList(
-    const API::IEventList &eventList, const int minVal, const int maxVal,
-    const Kernel::TimeSeriesProperty<int> *log, std::vector<int> &Y) {
+void SumEventsByLogValue::filterEventList(const API::IEventList &eventList, const int minVal, const int maxVal,
+                                          const Kernel::TimeSeriesProperty<int> *log, std::vector<int> &Y) {
   if (log->realSize() == 0)
     return;
 
@@ -302,11 +282,9 @@ void SumEventsByLogValue::filterEventList(
  *  @param minVal          The minimum value of the log
  *  @param maxVal          The maximum value of the log
  */
-void SumEventsByLogValue::addMonitorCounts(
-    const ITableWorkspace_sptr &outputWorkspace,
-    const TimeSeriesProperty<int> *log, const int minVal, const int maxVal) {
-  DataObjects::EventWorkspace_const_sptr monitorWorkspace =
-      getProperty("MonitorWorkspace");
+void SumEventsByLogValue::addMonitorCounts(const ITableWorkspace_sptr &outputWorkspace,
+                                           const TimeSeriesProperty<int> *log, const int minVal, const int maxVal) {
+  DataObjects::EventWorkspace_const_sptr monitorWorkspace = getProperty("MonitorWorkspace");
   // If no monitor workspace was given, there's nothing to do
   if (!monitorWorkspace)
     return;
@@ -315,8 +293,7 @@ void SumEventsByLogValue::addMonitorCounts(
 
   const int xLength = maxVal - minVal + 1;
   // Loop over the spectra - there will be one per monitor
-  for (std::size_t spec = 0; spec < monitorWorkspace->getNumberHistograms();
-       ++spec) {
+  for (std::size_t spec = 0; spec < monitorWorkspace->getNumberHistograms(); ++spec) {
     try {
       // Create a column for this monitor
       const std::string monitorName = spectrumInfo.detector(spec).getName();
@@ -344,10 +321,8 @@ void SumEventsByLogValue::addMonitorCounts(
  *  @return A list holding the names of the found logs and pointers to the
  * corresponding properties
  */
-std::vector<std::pair<std::string, const Kernel::ITimeSeriesProperty *>>
-SumEventsByLogValue::getNumberSeriesLogs() {
-  std::vector<std::pair<std::string, const Kernel::ITimeSeriesProperty *>>
-      numberSeriesProps;
+std::vector<std::pair<std::string, const Kernel::ITimeSeriesProperty *>> SumEventsByLogValue::getNumberSeriesLogs() {
+  std::vector<std::pair<std::string, const Kernel::ITimeSeriesProperty *>> numberSeriesProps;
   const auto &logs = m_inputWorkspace->run().getLogData();
   for (auto log : logs) {
     const std::string logName = log->name();
@@ -367,8 +342,7 @@ SumEventsByLogValue::getNumberSeriesLogs() {
     // if ( tsp->realSize() < 2 ) continue;
     // Now make sure it's either an int or double tsp, and if so add log to the
     // list
-    if (dynamic_cast<TimeSeriesProperty<double> *>(log) ||
-        dynamic_cast<TimeSeriesProperty<int> *>(log)) {
+    if (dynamic_cast<TimeSeriesProperty<double> *>(log) || dynamic_cast<TimeSeriesProperty<int> *>(log)) {
       numberSeriesProps.emplace_back(logName, tsp);
     }
   }
@@ -381,12 +355,10 @@ SumEventsByLogValue::getNumberSeriesLogs() {
  *  @param filter          The times between which to integrate
  *  @returns The summed proton charge
  */
-double SumEventsByLogValue::sumProtonCharge(
-    const Kernel::TimeSeriesProperty<double> *protonChargeLog,
-    const Kernel::TimeSplitterType &filter) {
+double SumEventsByLogValue::sumProtonCharge(const Kernel::TimeSeriesProperty<double> *protonChargeLog,
+                                            const Kernel::TimeSplitterType &filter) {
   // Clone the proton charge log and filter the clone on this log value
-  std::unique_ptr<Kernel::TimeSeriesProperty<double>> protonChargeLogClone(
-      protonChargeLog->clone());
+  std::unique_ptr<Kernel::TimeSeriesProperty<double>> protonChargeLogClone(protonChargeLog->clone());
   protonChargeLogClone->filterByTimes(filter);
   // Seems like the only way to sum this is to yank out the values
   const std::vector<double> pcValues = protonChargeLogClone->valuesAsVector();
@@ -397,34 +369,27 @@ double SumEventsByLogValue::sumProtonCharge(
  *  log value, binned according to the parameters input to the algorithm.
  *  @param log The log against which to count the events.
  */
-template <typename T>
-void SumEventsByLogValue::createBinnedOutput(
-    const Kernel::TimeSeriesProperty<T> *log) {
+template <typename T> void SumEventsByLogValue::createBinnedOutput(const Kernel::TimeSeriesProperty<T> *log) {
   // If only the number of bins was given, add the min & max values of the log
   if (m_binningParams.size() == 1) {
     m_binningParams.insert(m_binningParams.begin(), log->minValue());
-    m_binningParams.emplace_back(
-        log->maxValue() *
-        1.000001); // Make it a tiny bit larger to cover full range
+    m_binningParams.emplace_back(log->maxValue() * 1.000001); // Make it a tiny bit larger to cover full range
   }
 
   // XValues will be resized in createAxisFromRebinParams()
   std::vector<double> XValues;
-  const int XLength =
-      VectorHelper::createAxisFromRebinParams(m_binningParams, XValues);
+  const int XLength = VectorHelper::createAxisFromRebinParams(m_binningParams, XValues);
   assert((int)XValues.size() == XLength);
 
   // Create the output workspace - the factory will give back a Workspace2D
-  MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(
-      "Workspace2D", 1, XLength, XLength - 1);
+  MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create("Workspace2D", 1, XLength, XLength - 1);
   // Copy the bin boundaries into the output workspace
   outputWorkspace->mutableX(0) = XValues;
   outputWorkspace->getAxis(0)->title() = m_logName;
   outputWorkspace->setYUnit("Counts");
 
   auto &Y = outputWorkspace->mutableY(0);
-  const auto numSpec =
-      static_cast<int>(m_inputWorkspace->getNumberHistograms());
+  const auto numSpec = static_cast<int>(m_inputWorkspace->getNumberHistograms());
   Progress prog(this, 0.0, 1.0, numSpec);
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWorkspace))
   for (int spec = 0; spec < numSpec; ++spec) {
@@ -447,8 +412,7 @@ void SumEventsByLogValue::createBinnedOutput(
 
   // The errors are the sqrt of the counts so long as we don't deal with
   // weighted events.
-  std::transform(Y.cbegin(), Y.cend(), outputWorkspace->mutableE(0).begin(),
-                 (double (*)(double))std::sqrt);
+  std::transform(Y.cbegin(), Y.cend(), outputWorkspace->mutableE(0).begin(), (double (*)(double))std::sqrt);
 
   setProperty("OutputWorkspace", outputWorkspace);
 }

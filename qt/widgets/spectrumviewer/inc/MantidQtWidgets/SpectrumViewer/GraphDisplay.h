@@ -37,8 +37,7 @@ public:
   void setDataSource(SpectrumDataSource_sptr dataSource);
 
   /// Set the actual data that will be displayed on the graph
-  void setData(const QVector<double> &xData, const QVector<double> &yData,
-               double cutValue, bool isFront = true);
+  void setData(const QVector<double> &xData, const QVector<double> &yData, double cutValue, bool isFront = true);
 
   /// Clear the graph(s) off the display
   void clear();

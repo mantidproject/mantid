@@ -41,8 +41,7 @@
 #include <QSpinBox>
 #include <QTextEdit>
 
-IntDialog::IntDialog(QWidget *parent, Graph *g, const Qt::WFlags &fl)
-    : QDialog(parent, fl), d_graph(g) {
+IntDialog::IntDialog(QWidget *parent, Graph *g, const Qt::WFlags &fl) : QDialog(parent, fl), d_graph(g) {
   setObjectName("IntegrationDialog");
   setAttribute(Qt::WA_DeleteOnClose);
   setWindowTitle(tr("MantidPlot - Integration Options"));
@@ -115,10 +114,8 @@ IntDialog::IntDialog(QWidget *parent, Graph *g, const Qt::WFlags &fl)
 
 void IntDialog::accept() {
   QString formula = boxName->toPlainText().remove("\n");
-  Integration *i =
-      new Integration(formula, boxVariable->text(),
-                      dynamic_cast<ApplicationWindow *>(this->parent()),
-                      d_graph, boxStart->value(), boxEnd->value());
+  Integration *i = new Integration(formula, boxVariable->text(), dynamic_cast<ApplicationWindow *>(this->parent()),
+                                   d_graph, boxStart->value(), boxEnd->value());
   i->setTolerance(boxTol->text().toDouble());
   i->setMaximumIterations(boxSteps->value());
   i->setMethodOrder(boxOrder->value());

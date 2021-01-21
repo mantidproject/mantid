@@ -14,12 +14,10 @@
  * The second operation that this macro performs is to provide the definition
  * of the unitID method for the concrete unit.
  */
-#define DECLARE_LISTENER(classname)                                            \
-  namespace {                                                                  \
-  Mantid::Kernel::RegistrationHelper register_listener_##classname(            \
-      ((Mantid::API::LiveListenerFactory::Instance().subscribe<classname>(     \
-           #classname)),                                                       \
-       0));                                                                    \
+#define DECLARE_LISTENER(classname)                                                                                    \
+  namespace {                                                                                                          \
+  Mantid::Kernel::RegistrationHelper register_listener_##classname(                                                    \
+      ((Mantid::API::LiveListenerFactory::Instance().subscribe<classname>(#classname)), 0));                           \
   }
 
 //----------------------------------------------------------------------
@@ -36,17 +34,14 @@ namespace API {
 class IAlgorithm;
 /** The factory for creating instances of ILiveListener implementations.
  */
-class MANTID_API_DLL LiveListenerFactoryImpl
-    : public Kernel::DynamicFactory<ILiveListener> {
+class MANTID_API_DLL LiveListenerFactoryImpl : public Kernel::DynamicFactory<ILiveListener> {
 public:
-  std::shared_ptr<ILiveListener>
-  create(const std::string &instrumentName, bool connect = false,
-         const API::IAlgorithm *callingAlgorithm = nullptr,
-         const std::string &listenerConnectionName = "") const;
+  std::shared_ptr<ILiveListener> create(const std::string &instrumentName, bool connect = false,
+                                        const API::IAlgorithm *callingAlgorithm = nullptr,
+                                        const std::string &listenerConnectionName = "") const;
 
-  std::shared_ptr<ILiveListener>
-  create(const Kernel::LiveListenerInfo &info, bool connect = false,
-         const API::IAlgorithm *callingAlgorithm = nullptr) const;
+  std::shared_ptr<ILiveListener> create(const Kernel::LiveListenerInfo &info, bool connect = false,
+                                        const API::IAlgorithm *callingAlgorithm = nullptr) const;
 
   LiveListenerFactoryImpl(const LiveListenerFactoryImpl &) = delete;
   LiveListenerFactoryImpl &operator=(const LiveListenerFactoryImpl &) = delete;
@@ -74,7 +69,6 @@ using LiveListenerFactory = Kernel::SingletonHolder<LiveListenerFactoryImpl>;
 
 namespace Mantid {
 namespace Kernel {
-EXTERN_MANTID_API template class MANTID_API_DLL
-    Kernel::SingletonHolder<Mantid::API::LiveListenerFactoryImpl>;
+EXTERN_MANTID_API template class MANTID_API_DLL Kernel::SingletonHolder<Mantid::API::LiveListenerFactoryImpl>;
 }
 } // namespace Mantid

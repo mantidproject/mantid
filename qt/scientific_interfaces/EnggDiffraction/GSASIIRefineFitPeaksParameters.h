@@ -19,16 +19,13 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 struct MANTIDQT_ENGGDIFFRACTION_DLL GSASIIRefineFitPeaksParameters {
-  GSASIIRefineFitPeaksParameters(
-      const Mantid::API::MatrixWorkspace_sptr &_inputWorkspace,
-      const RunLabel &_runLabel, const GSASRefinementMethod &_refinementMethod,
-      const std::string &_instParamsFile,
-      const std::vector<std::string> &_phaseFiles, const std::string &_gsasHome,
-      const std::string &_gsasProjectFile, const boost::optional<double> &_dMin,
-      const boost::optional<double> &_negativeWeight,
-      const boost::optional<double> &_xMin,
-      const boost::optional<double> &_xMax, const bool _refineSigma,
-      const bool _refineGamma);
+  GSASIIRefineFitPeaksParameters(const Mantid::API::MatrixWorkspace_sptr &_inputWorkspace, const RunLabel &_runLabel,
+                                 const GSASRefinementMethod &_refinementMethod, const std::string &_instParamsFile,
+                                 const std::vector<std::string> &_phaseFiles, const std::string &_gsasHome,
+                                 const std::string &_gsasProjectFile, const boost::optional<double> &_dMin,
+                                 const boost::optional<double> &_negativeWeight, const boost::optional<double> &_xMin,
+                                 const boost::optional<double> &_xMax, const bool _refineSigma,
+                                 const bool _refineGamma);
 
   const Mantid::API::MatrixWorkspace_sptr inputWorkspace;
   const RunLabel runLabel;
@@ -47,13 +44,11 @@ struct MANTIDQT_ENGGDIFFRACTION_DLL GSASIIRefineFitPeaksParameters {
   const bool refineGamma;
 };
 
-MANTIDQT_ENGGDIFFRACTION_DLL bool
-operator==(const GSASIIRefineFitPeaksParameters &lhs,
-           const GSASIIRefineFitPeaksParameters &rhs);
+MANTIDQT_ENGGDIFFRACTION_DLL bool operator==(const GSASIIRefineFitPeaksParameters &lhs,
+                                             const GSASIIRefineFitPeaksParameters &rhs);
 
-MANTIDQT_ENGGDIFFRACTION_DLL bool
-operator!=(const GSASIIRefineFitPeaksParameters &lhs,
-           const GSASIIRefineFitPeaksParameters &rhs);
+MANTIDQT_ENGGDIFFRACTION_DLL bool operator!=(const GSASIIRefineFitPeaksParameters &lhs,
+                                             const GSASIIRefineFitPeaksParameters &rhs);
 
 } // namespace CustomInterfaces
 } // namespace MantidQt

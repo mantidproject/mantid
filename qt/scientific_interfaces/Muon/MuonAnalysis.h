@@ -186,8 +186,7 @@ private slots:
   bool plotExists(const QString &wsName);
 
   /// Enable PP tool for the plot of the given WS and optional filepath
-  void selectMultiPeak(const QString &wsName, const bool update,
-                       const boost::optional<QString> &filePath);
+  void selectMultiPeak(const QString &wsName, const bool update, const boost::optional<QString> &filePath);
 
   /// Enable PP tool for the plot of the given WS overload to take just a ws
   void selectMultiPeak(const QString &wsName);
@@ -244,8 +243,7 @@ private slots:
   void updateNormalization(const QString &name);
 
 private:
-  void moveUnNormWS(const std::string &name, std::vector<std::string> &wsNames,
-                    bool raw);
+  void moveUnNormWS(const std::string &name, std::vector<std::string> &wsNames, bool raw);
   bool getIfTFAsymmStore() const;
   /// Initialize local Python environment
   void initLocalPython() override;
@@ -269,8 +267,7 @@ private:
   void inputFileChanged(const QStringList &filenames);
 
   /// Get grouping for the loaded workspace
-  std::shared_ptr<Muon::GroupResult>
-  getGrouping(const std::shared_ptr<Muon::LoadResult> &loadResult) const;
+  std::shared_ptr<Muon::GroupResult> getGrouping(const std::shared_ptr<Muon::LoadResult> &loadResult) const;
 
   /// Set whether the loading buttons and FileFinderWidget widget are enabled.
   void allowLoading(bool enabled);
@@ -280,21 +277,16 @@ private:
 
   /// Creates workspace for specified group/pair and plots it
   void plotItem(Muon::ItemType itemType, int tableRow, Muon::PlotType plotType);
-  std::string addItem(Muon::ItemType itemType, int tableRow,
-                      Muon::PlotType plotType);
+  std::string addItem(Muon::ItemType itemType, int tableRow, Muon::PlotType plotType);
   /// Creates workspace ready for analysis and plotting
-  Mantid::API::Workspace_sptr createAnalysisWorkspace(Muon::ItemType itemType,
-                                                      int tableRow,
-                                                      Muon::PlotType plotType,
-                                                      std::string wsName,
-                                                      bool isRaw = false);
+  Mantid::API::Workspace_sptr createAnalysisWorkspace(Muon::ItemType itemType, int tableRow, Muon::PlotType plotType,
+                                                      std::string wsName, bool isRaw = false);
 
   /// Returns PlotType as chosen using given selector
   Muon::PlotType parsePlotType(QComboBox *selector);
 
   /// Finds a name for new analysis workspace
-  std::string getNewAnalysisWSName(Muon::ItemType itemType, int tableRow,
-                                   Muon::PlotType plotType);
+  std::string getNewAnalysisWSName(Muon::ItemType itemType, int tableRow, Muon::PlotType plotType);
 
   /// Update front and pair combo box
   void updateFrontAndCombo(bool updateIndexAndPlot);
@@ -454,8 +446,7 @@ private:
 
   /// Separate the muon file. The current File will remove the path (i.e
   /// MUSR002413.nxs)
-  void separateMuonFile(QString &filePath, QString &currentFile, QString &run,
-                        int &runSize);
+  void separateMuonFile(QString &filePath, QString &currentFile, QString &run, int &runSize);
 
   /// Include the 0's fromt eh beginning of the file that were lost in
   /// conversion from QString to int
@@ -474,9 +465,7 @@ private:
   void loadWidgetValue(QWidget *target, const QVariant &defaultValue);
 
   /// Groups the workspace
-  Mantid::API::Workspace_sptr
-  groupWorkspace(const std::string &wsName,
-                 const std::string &groupingName) const;
+  Mantid::API::Workspace_sptr groupWorkspace(const std::string &wsName, const std::string &groupingName) const;
 
   /// Groups loaded workspace using information from Grouping Options tab
   void groupLoadedWorkspace();
@@ -498,8 +487,7 @@ private:
   /// handles fit data work
   MantidQt::CustomInterfaces::Muon::MuonAnalysisFitDataTab *m_fitDataTab;
   /// handles result table tab work
-  MantidQt::CustomInterfaces::Muon::MuonAnalysisResultTableTab
-      *m_resultTableTab;
+  MantidQt::CustomInterfaces::Muon::MuonAnalysisResultTableTab *m_resultTableTab;
 
   /// Time Zero as loaded from Data file
   double m_dataTimeZero;

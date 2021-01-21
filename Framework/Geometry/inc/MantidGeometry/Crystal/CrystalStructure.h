@@ -67,12 +67,10 @@ class StructureFactorCalculator;
   */
 class DLLExport CrystalStructure {
 public:
-  CrystalStructure(const UnitCell &unitCell,
-                   const SpaceGroup_const_sptr &spaceGroup,
+  CrystalStructure(const UnitCell &unitCell, const SpaceGroup_const_sptr &spaceGroup,
                    const CompositeBraggScatterer_sptr &scatterers);
 
-  CrystalStructure(const std::string &unitCellString,
-                   const std::string &spaceGroupString,
+  CrystalStructure(const std::string &unitCellString, const std::string &spaceGroupString,
                    const std::string &scattererString);
 
   UnitCell cell() const;
@@ -90,8 +88,7 @@ public:
 protected:
   void assignUnitCellToScatterers(const UnitCell &unitCell);
 
-  void
-  setReflectionConditionFromSpaceGroup(const SpaceGroup_const_sptr &spaceGroup);
+  void setReflectionConditionFromSpaceGroup(const SpaceGroup_const_sptr &spaceGroup);
 
   void initializeScatterers();
 

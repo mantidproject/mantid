@@ -85,9 +85,7 @@ private:
    * @param clientData vtk client data, not used here
    * @param callData vtk call data, not used here
    */
-  static void backgroundColorChangeCallbackFunction(vtkObject *caller,
-                                                    long unsigned int eventID,
-                                                    void *clientData,
+  static void backgroundColorChangeCallbackFunction(vtkObject *caller, long unsigned int eventID, void *clientData,
                                                     void *callData);
 
   static QColor currentBackgroundColor;

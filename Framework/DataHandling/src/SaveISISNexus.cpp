@@ -41,26 +41,22 @@ using namespace API;
 
 /// Empty default constructor
 SaveISISNexus::SaveISISNexus()
-    : Algorithm(), m_isisRaw(), handle(), rawFile(), nper(0), nsp(0), ntc(0),
-      nmon(0), ndet(0), counts_link(), period_index_link(),
-      spectrum_index_link(), time_of_flight_link(), time_of_flight_raw_link() {}
+    : Algorithm(), m_isisRaw(), handle(), rawFile(), nper(0), nsp(0), ntc(0), nmon(0), ndet(0), counts_link(),
+      period_index_link(), spectrum_index_link(), time_of_flight_link(), time_of_flight_raw_link() {}
 
 /** Initialisation method.
  *
  */
 void SaveISISNexus::init() {
   const std::vector<std::string> inputExts{".raw", ".s*", ".add"};
-  declareProperty(
-      std::make_unique<FileProperty>("InputFilename", "", FileProperty::Load,
-                                     inputExts),
-      "The name of the RAW file to read, including its full or relative\n"
-      "path. (N.B. case sensitive if running on Linux).");
+  declareProperty(std::make_unique<FileProperty>("InputFilename", "", FileProperty::Load, inputExts),
+                  "The name of the RAW file to read, including its full or relative\n"
+                  "path. (N.B. case sensitive if running on Linux).");
 
   // Declare required parameters, filename with ext {.nx,.nx5,xml} and input
   // workspace
   const std::vector<std::string> outputExts{".nxs", ".nx5", ".xml"};
-  declareProperty(std::make_unique<FileProperty>(
-                      "OutputFilename", "", FileProperty::Save, outputExts),
+  declareProperty(std::make_unique<FileProperty>("OutputFilename", "", FileProperty::Save, outputExts),
                   "The name of the Nexus file to write, as a full or relative\n"
                   "path");
 }
@@ -76,8 +72,7 @@ public:
    * @param alg This algorithm.
    * @param data Pointer to the data to be copied from
    */
-  getWithoutMonitors(SaveISISNexus *alg, T *data)
-      : m_alg(alg), m_data(data), m_index(-1) {}
+  getWithoutMonitors(SaveISISNexus *alg, T *data) : m_alg(alg), m_data(data), m_index(-1) {}
   /** function operator.
    * @return copies of data values that don't relate to monitors
    */
@@ -123,8 +118,7 @@ void SaveISISNexus::exec() {
 
   status = NXopen(outputFilename.c_str(), NXACC_CREATE5, &handle);
   if (status != NX_OK) {
-    throw std::runtime_error("Cannot open file " + outputFilename +
-                             " for writing.");
+    throw std::runtime_error("Cannot open file " + outputFilename + " for writing.");
   }
   NXmakegroup(handle, "raw_data_1", "NXentry");
   NXopengroup(handle, "raw_data_1", "NXentry");
@@ -138,14 +132,12 @@ void SaveISISNexus::exec() {
 
   saveStringOpen("definition", "TOFRAW");
   putAttr("version", "1.0");
-  putAttr("url",
-          "http://definition.nexusformat.org/instruments/TOFRAW/?version=1.0");
+  putAttr("url", "http://definition.nexusformat.org/instruments/TOFRAW/?version=1.0");
   close();
 
   saveStringOpen("definition_local", "ISISTOFRAW");
   putAttr("version", "1.0");
-  putAttr("url",
-          "http://svn.isis.rl.ac.uk/instruments/ISISTOFRAW/?version=1.0");
+  putAttr("url", "http://svn.isis.rl.ac.uk/instruments/ISISTOFRAW/?version=1.0");
   close();
 
   flt = static_cast<float>(m_isisRaw.rpb.r_dur);
@@ -156,8 +148,7 @@ void SaveISISNexus::exec() {
   start_time_str.assign(m_isisRaw.hdr.hd_date, m_isisRaw.hdr.hd_date + 12);
   toISO8601(start_time_str);
   start_time_str += 'T';
-  start_time_str +=
-      std::string(m_isisRaw.hdr.hd_time, m_isisRaw.hdr.hd_time + 8);
+  start_time_str += std::string(m_isisRaw.hdr.hd_time, m_isisRaw.hdr.hd_time + 8);
   saveCharOpen("start_time", &start_time_str[0], 19);
   putAttr("units", "ISO8601");
   close();
@@ -175,8 +166,7 @@ void SaveISISNexus::exec() {
   saveInt("good_frames", &m_isisRaw.rpb.r_goodfrm);
 
   std::string experiment_identifier = std::to_string(m_isisRaw.rpb.r_prop);
-  saveChar("experiment_identifier", &experiment_identifier[0],
-           static_cast<int>(experiment_identifier.size()));
+  saveChar("experiment_identifier", &experiment_identifier[0], static_cast<int>(experiment_identifier.size()));
   int tmp_int(0);
   saveInt("measurement_first_run", &tmp_int);
   saveString("measurement_id", " ");
@@ -315,9 +305,7 @@ void SaveISISNexus::saveFloatOpen(const char *name, void *data, int size) {
  * @param max_str_size :: The maximum string size
  * @return The line size
  */
-int SaveISISNexus::saveStringVectorOpen(const char *name,
-                                        const std::vector<std::string> &str_vec,
-                                        int max_str_size) {
+int SaveISISNexus::saveStringVectorOpen(const char *name, const std::vector<std::string> &str_vec, int max_str_size) {
   if (str_vec.empty()) {
     saveStringOpen(name, " ");
     return 0;
@@ -378,24 +366,17 @@ void SaveISISNexus::putAttr(const char *name, const std::string &value) {
   NXputattr(handle, name, buff.get(), static_cast<int>(value.size()), NX_CHAR);
 }
 
-void SaveISISNexus::putAttr(const char *name, char *value, int size) {
-  NXputattr(handle, name, value, size, NX_CHAR);
-}
+void SaveISISNexus::putAttr(const char *name, char *value, int size) { NXputattr(handle, name, value, size, NX_CHAR); }
 
-void SaveISISNexus::putAttr(const char *name, int value, int size) {
-  NXputattr(handle, name, &value, size, NX_INT32);
-}
+void SaveISISNexus::putAttr(const char *name, int value, int size) { NXputattr(handle, name, &value, size, NX_INT32); }
 
 void SaveISISNexus::toISO8601(std::string &str) {
-  static const std::string months[] = {"JAN", "FEB", "MAR", "APR",
-                                       "MAY", "JUN", "JUL", "AUG",
-                                       "SEP", "OCT", "NOV", "DEC"};
-  static const std::string monthsn[] = {"01", "02", "03", "04", "05", "06",
-                                        "07", "08", "09", "10", "11", "12"};
+  static const std::string months[] = {"JAN", "FEB", "MAR", "APR", "MAY", "JUN",
+                                       "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"};
+  static const std::string monthsn[] = {"01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"};
   const std::string mon = str.substr(3, 3);
   const std::string *i = std::find(months, months + 12, mon);
-  std::string iso8601 =
-      str.substr(7, 4) + "-" + monthsn[i - months] + "-" + str.substr(0, 2);
+  std::string iso8601 = str.substr(7, 4) + "-" + monthsn[i - months] + "-" + str.substr(0, 2);
   str = iso8601;
 }
 
@@ -445,8 +426,7 @@ void SaveISISNexus::write_isis_vms_compat() {
   saveInt("ULEN", &m_isisRaw.u_len);
   std::string user_info(160, ' ');
   if (m_isisRaw.u_len > 0) {
-    std::copy(reinterpret_cast<char *>(&m_isisRaw.user),
-              reinterpret_cast<char *>(&m_isisRaw.user) + m_isisRaw.u_len,
+    std::copy(reinterpret_cast<char *>(&m_isisRaw.user), reinterpret_cast<char *>(&m_isisRaw.user) + m_isisRaw.u_len,
               user_info.begin());
   }
   saveString("USER", user_info);
@@ -464,8 +444,7 @@ void SaveISISNexus::write_isis_vms_compat() {
   int n = m_isisRaw.logsect.nlines;
   log_notes.resize(n);
   for (int i = 0; i < n; ++i) {
-    log_notes[i].assign(m_isisRaw.logsect.lines[i].data,
-                        m_isisRaw.logsect.lines[i].len);
+    log_notes[i].assign(m_isisRaw.logsect.lines[i].data, m_isisRaw.logsect.lines[i].len);
   }
   int ll = saveStringVectorOpen("NOTE", log_notes);
   saveInt("NTNL", &n);
@@ -492,9 +471,7 @@ void SaveISISNexus::detector_1() {
   NXopengroup(handle, "detector_1", "NXdata");
 
   for (int i = 0; i < nmon; ++i) {
-    auto si = int(std::distance(
-        m_isisRaw.spec,
-        std::find(m_isisRaw.spec, m_isisRaw.spec + nsp, m_isisRaw.mdet[i])));
+    auto si = int(std::distance(m_isisRaw.spec, std::find(m_isisRaw.spec, m_isisRaw.spec + nsp, m_isisRaw.mdet[i])));
     monitor_index[si] = i;
   }
 
@@ -517,8 +494,7 @@ void SaveISISNexus::detector_1() {
     for (int si = 0; si < nsp; ++si) {
       if (monitor_index.find(si) != monitor_index.end()) {
         m_isisRaw.readData(rawFile, index);
-        monitorData.insert(monitorData.end(), m_isisRaw.dat1 + 1,
-                           m_isisRaw.dat1 + ntc + 1);
+        monitorData.insert(monitorData.end(), m_isisRaw.dat1 + 1, m_isisRaw.dat1 + ntc + 1);
       } else {
         m_isisRaw.readData(rawFile, index);
         int start[] = {p, ispec, 0};
@@ -534,8 +510,7 @@ void SaveISISNexus::detector_1() {
   NXmakelink(handle, &period_index_link);
 
   std::vector<int> spec_minus_monitors(nsp - nmon);
-  std::generate(spec_minus_monitors.begin(), spec_minus_monitors.end(),
-                getWithoutMonitors<int>(this, m_isisRaw.spec));
+  std::generate(spec_minus_monitors.begin(), spec_minus_monitors.end(), getWithoutMonitors<int>(this, m_isisRaw.spec));
   saveIntOpen("spectrum_index", &spec_minus_monitors[0], nsp - nmon);
   NXgetdataID(handle, &spectrum_index_link);
   close();
@@ -544,22 +519,19 @@ void SaveISISNexus::detector_1() {
   NXmakelink(handle, &time_of_flight_raw_link);
 
   std::vector<float> float_vec(ndet - nmon);
-  std::generate(float_vec.begin(), float_vec.end(),
-                getWithoutMonitors<float>(this, m_isisRaw.delt));
+  std::generate(float_vec.begin(), float_vec.end(), getWithoutMonitors<float>(this, m_isisRaw.delt));
   saveFloat("delt", &float_vec[0], ndet - nmon);
 
   saveFloat("source_detector_distance", &m_isisRaw.ivpb.i_sddist, 1);
 
   // using the same float_vec, size unchanged ndet-nmon
-  std::generate(float_vec.begin(), float_vec.end(),
-                getWithoutMonitors<float>(this, m_isisRaw.len2));
+  std::generate(float_vec.begin(), float_vec.end(), getWithoutMonitors<float>(this, m_isisRaw.len2));
   saveFloatOpen("distance", &float_vec[0], ndet - nmon);
   putAttr("units", "metre");
   close();
 
   // using the same float_vec, size unchanged ndet-nmon
-  std::generate(float_vec.begin(), float_vec.end(),
-                getWithoutMonitors<float>(this, m_isisRaw.tthe));
+  std::generate(float_vec.begin(), float_vec.end(), getWithoutMonitors<float>(this, m_isisRaw.tthe));
   saveFloatOpen("polar_angle", &float_vec[0], ndet - nmon);
   putAttr("units", "degree");
   close();
@@ -617,8 +589,7 @@ void SaveISISNexus::make_detector_1_link() {
  * @param imon Monitor index (not its spectrum number)
  */
 int *SaveISISNexus::getMonitorData(int period, int imon) {
-  return &monitorData[period * m_isisRaw.i_mon * m_isisRaw.t_ntc1 +
-                      imon * m_isisRaw.t_ntc1];
+  return &monitorData[period * m_isisRaw.i_mon * m_isisRaw.t_ntc1 + imon * m_isisRaw.t_ntc1];
 }
 
 void SaveISISNexus::write_monitors() {
@@ -724,8 +695,7 @@ void SaveISISNexus::sample() {
   if (i < 0 || i > 3)
     i = 3;
   saveString("shape", shape[i]);
-  std::string type[] = {"sample+can", "empty can",      "vanadium", "absorber",
-                        "nothing",    "sample, no can", "unknown"};
+  std::string type[] = {"sample+can", "empty can", "vanadium", "absorber", "nothing", "sample, no can", "unknown"};
   i = m_isisRaw.spb.e_type - 1;
   if (i < 0 || i > 6)
     i = 6;
@@ -772,8 +742,7 @@ void SaveISISNexus::runlog() {
   std::vector<float> np_ratio_vec;
 
   start_time_str[10] = ' '; // make it compatible with boost::posix_time::ptime
-  boost::posix_time::ptime start_time(
-      boost::posix_time::time_from_string(start_time_str));
+  boost::posix_time::ptime start_time(boost::posix_time::time_from_string(start_time_str));
   start_time_str[10] = 'T'; // revert
   std::string line;
   std::getline(fil, line); // skip the first line
@@ -792,13 +761,10 @@ void SaveISISNexus::runlog() {
     float count_rate;
     float np_ratio;
     std::istringstream istr(line);
-    istr >> date_time_str >> period >> is_running >> is_waiting >>
-        good_frames >> raw_frames >> proton_charge >> proton_charge_raw >>
-        monitor_sum_1 >> dae_beam_current >> total_counts >> count_rate >>
-        np_ratio;
+    istr >> date_time_str >> period >> is_running >> is_waiting >> good_frames >> raw_frames >> proton_charge >>
+        proton_charge_raw >> monitor_sum_1 >> dae_beam_current >> total_counts >> count_rate >> np_ratio;
     date_time_str[10] = ' ';
-    boost::posix_time::ptime time(
-        boost::posix_time::time_from_string(date_time_str));
+    boost::posix_time::ptime time(boost::posix_time::time_from_string(date_time_str));
     boost::posix_time::time_duration dt = time - start_time;
     time_vec.emplace_back(float(dt.total_seconds()));
     period_vec.emplace_back(period);
@@ -818,41 +784,28 @@ void SaveISISNexus::runlog() {
 
   run_status_vec.resize(time_vec.size());
   using std::placeholders::_1;
-  std::transform(is_running_vec.begin(), is_running_vec.end(),
-                 run_status_vec.begin(), std::bind(std::plus<int>(), _1, 1));
+  std::transform(is_running_vec.begin(), is_running_vec.end(), run_status_vec.begin(),
+                 std::bind(std::plus<int>(), _1, 1));
 
   NXmakegroup(handle, "runlog", "IXrunlog");
   NXopengroup(handle, "runlog", "IXrunlog");
 
   auto time_vec_size = static_cast<int>(time_vec.size());
 
-  write_runlog("period", &time_vec[0], &period_vec[0], NX_INT32, time_vec_size,
-               "none");
-  write_runlog("is_running", &time_vec[0], &is_running_vec[0], NX_INT32,
-               time_vec_size, "none");
-  write_runlog("is_waiting", &time_vec[0], &is_waiting_vec[0], NX_INT32,
-               time_vec_size, "none");
-  write_runlog("good_frames", &time_vec[0], &good_frames_vec[0], NX_INT32,
-               time_vec_size, "frames");
-  write_runlog("raw_frames", &time_vec[0], &raw_frames_vec[0], NX_INT32,
-               time_vec_size, "frames");
-  write_runlog("monitor_sum_1", &time_vec[0], &monitor_sum_1_vec[0], NX_INT32,
-               time_vec_size, "counts");
-  write_runlog("total_counts", &time_vec[0], &total_counts_vec[0], NX_INT32,
-               time_vec_size, "counts");
-  write_runlog("proton_charge", &time_vec[0], &proton_charge_vec[0], NX_FLOAT32,
-               time_vec_size, "uAh");
-  write_runlog("proton_charge_raw", &time_vec[0], &proton_charge_raw_vec[0],
-               NX_FLOAT32, time_vec_size, "uAh");
-  write_runlog("dae_beam_current", &time_vec[0], &dae_beam_current_vec[0],
-               NX_FLOAT32, time_vec_size, "uAh");
-  write_runlog("count_rate", &time_vec[0], &count_rate_vec[0], NX_FLOAT32,
-               time_vec_size, "counts");
-  write_runlog("np_ratio", &time_vec[0], &np_ratio_vec[0], NX_FLOAT32,
-               time_vec_size, "nones");
+  write_runlog("period", &time_vec[0], &period_vec[0], NX_INT32, time_vec_size, "none");
+  write_runlog("is_running", &time_vec[0], &is_running_vec[0], NX_INT32, time_vec_size, "none");
+  write_runlog("is_waiting", &time_vec[0], &is_waiting_vec[0], NX_INT32, time_vec_size, "none");
+  write_runlog("good_frames", &time_vec[0], &good_frames_vec[0], NX_INT32, time_vec_size, "frames");
+  write_runlog("raw_frames", &time_vec[0], &raw_frames_vec[0], NX_INT32, time_vec_size, "frames");
+  write_runlog("monitor_sum_1", &time_vec[0], &monitor_sum_1_vec[0], NX_INT32, time_vec_size, "counts");
+  write_runlog("total_counts", &time_vec[0], &total_counts_vec[0], NX_INT32, time_vec_size, "counts");
+  write_runlog("proton_charge", &time_vec[0], &proton_charge_vec[0], NX_FLOAT32, time_vec_size, "uAh");
+  write_runlog("proton_charge_raw", &time_vec[0], &proton_charge_raw_vec[0], NX_FLOAT32, time_vec_size, "uAh");
+  write_runlog("dae_beam_current", &time_vec[0], &dae_beam_current_vec[0], NX_FLOAT32, time_vec_size, "uAh");
+  write_runlog("count_rate", &time_vec[0], &count_rate_vec[0], NX_FLOAT32, time_vec_size, "counts");
+  write_runlog("np_ratio", &time_vec[0], &np_ratio_vec[0], NX_FLOAT32, time_vec_size, "nones");
 
-  write_runlog("run_status", &time_vec[0], &run_status_vec[0], NX_INT32,
-               time_vec_size, "none");
+  write_runlog("run_status", &time_vec[0], &run_status_vec[0], NX_INT32, time_vec_size, "none");
 
   // read in ICPevent file and create icp_event log
   std::ifstream icpevent_fil(ICPevent_filename.c_str());
@@ -869,8 +822,7 @@ void SaveISISNexus::runlog() {
       continue;
     std::string date_time_str = line.substr(0, 19);
     date_time_str[10] = ' ';
-    boost::posix_time::ptime time(
-        boost::posix_time::time_from_string(date_time_str));
+    boost::posix_time::ptime time(boost::posix_time::time_from_string(date_time_str));
     boost::posix_time::time_duration dt = time - start_time;
     time_vec.emplace_back(float(dt.total_seconds()));
     event_vec.emplace_back(line.substr(20));
@@ -903,8 +855,8 @@ void SaveISISNexus::runlog() {
  * @param size The size of the data
  * @param units The units of the data
  */
-void SaveISISNexus::write_runlog(const char *name, void *times, void *data,
-                                 int type, int size, const std::string &units) {
+void SaveISISNexus::write_runlog(const char *name, void *times, void *data, int type, int size,
+                                 const std::string &units) {
   write_logOpen(name, times, data, type, size, units);
   closegroup();
 }
@@ -918,8 +870,7 @@ void SaveISISNexus::write_runlog(const char *name, void *times, void *data,
  * @param size The size of the data
  * @param units The units of the data
  */
-void SaveISISNexus::write_logOpen(const char *name, void *times, void *data,
-                                  int type, int size,
+void SaveISISNexus::write_logOpen(const char *name, void *times, void *data, int type, int size,
                                   const std::string &units) {
   NXmakegroup(handle, name, "NXlog");
   NXopengroup(handle, name, "NXlog");
@@ -950,11 +901,9 @@ void SaveISISNexus::selog() {
     l_filenamePart.erase(i);
   }
   std::string base_name = l_filenamePart;
-  boost::regex regex(l_filenamePart + "_.*\\.txt",
-                     boost::regex_constants::icase);
+  boost::regex regex(l_filenamePart + "_.*\\.txt", boost::regex_constants::icase);
   Poco::DirectoryIterator end_iter;
-  for (Poco::DirectoryIterator dir_itr(Poco::Path(inputFilename).parent());
-       dir_itr != end_iter; ++dir_itr) {
+  for (Poco::DirectoryIterator dir_itr(Poco::Path(inputFilename).parent()); dir_itr != end_iter; ++dir_itr) {
     if (!Poco::File(dir_itr->path()).isFile())
       continue;
 
@@ -989,10 +938,8 @@ void SaveISISNexus::selog() {
       continue;
     }
 
-    start_time_str[10] =
-        ' '; // make it compatible with boost::posix_time::ptime
-    boost::posix_time::ptime start_time(
-        boost::posix_time::time_from_string(start_time_str));
+    start_time_str[10] = ' '; // make it compatible with boost::posix_time::ptime
+    boost::posix_time::ptime start_time(boost::posix_time::time_from_string(start_time_str));
     start_time_str[10] = 'T'; // revert
     std::vector<float> time_vec;
     std::vector<std::string> str_vec;
@@ -1004,8 +951,7 @@ void SaveISISNexus::selog() {
         continue;
       std::string date_time_str = line.substr(0, 19);
       date_time_str[10] = ' ';
-      boost::posix_time::ptime time(
-          boost::posix_time::time_from_string(date_time_str));
+      boost::posix_time::ptime time(boost::posix_time::time_from_string(date_time_str));
       boost::posix_time::time_duration dt = time - start_time;
       time_vec.emplace_back(float(dt.total_seconds()));
       std::istringstream istr(line.substr(20));

@@ -21,19 +21,15 @@ class DLLExport EqualToMD : public BooleanBinaryOperationMD {
 public:
   const std::string name() const override;
   int version() const override;
-  const std::vector<std::string> seeAlso() const override {
-    return {"GreaterThanMD", "LessThanMD", "NotMD"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"GreaterThanMD", "LessThanMD", "NotMD"}; }
 
 private:
   void initExtraProperties() override;
   bool acceptScalar() const override { return true; }
-  void execHistoHisto(
-      Mantid::DataObjects::MDHistoWorkspace_sptr out,
-      Mantid::DataObjects::MDHistoWorkspace_const_sptr operand) override;
-  void execHistoScalar(
-      Mantid::DataObjects::MDHistoWorkspace_sptr out,
-      Mantid::DataObjects::WorkspaceSingleValue_const_sptr scalar) override;
+  void execHistoHisto(Mantid::DataObjects::MDHistoWorkspace_sptr out,
+                      Mantid::DataObjects::MDHistoWorkspace_const_sptr operand) override;
+  void execHistoScalar(Mantid::DataObjects::MDHistoWorkspace_sptr out,
+                       Mantid::DataObjects::WorkspaceSingleValue_const_sptr scalar) override;
 };
 
 } // namespace MDAlgorithms

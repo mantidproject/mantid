@@ -17,6 +17,5 @@ using namespace boost::python;
  * appropriate CompAssembly leaf type
  */
 void export_CompAssembly() {
-  class_<CompAssembly, bases<ICompAssembly, Component>, boost::noncopyable>(
-      "CompAssembly", no_init);
+  class_<CompAssembly, bases<ICompAssembly, Component>, boost::noncopyable>("CompAssembly", no_init);
 }

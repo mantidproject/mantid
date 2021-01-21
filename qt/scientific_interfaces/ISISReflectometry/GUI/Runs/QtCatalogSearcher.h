@@ -22,11 +22,10 @@ namespace ISISReflectometry {
 QtCatalogSearcher implements ISearcher to provide ICAT search
 functionality.
 */
-class MANTIDQT_ISISREFLECTOMETRY_DLL QtCatalogSearcher
-    : public QObject,
-      public ISearcher,
-      public RunsViewSearchSubscriber,
-      public Mantid::API::AlgorithmObserver {
+class MANTIDQT_ISISREFLECTOMETRY_DLL QtCatalogSearcher : public QObject,
+                                                         public ISearcher,
+                                                         public RunsViewSearchSubscriber,
+                                                         public Mantid::API::AlgorithmObserver {
   Q_OBJECT
 public:
   explicit QtCatalogSearcher(IRunsView *view);
@@ -49,12 +48,10 @@ public:
 
 protected:
   void finishHandle(const Mantid::API::IAlgorithm *alg) override;
-  void errorHandle(const Mantid::API::IAlgorithm *alg,
-                   const std::string &what) override;
+  void errorHandle(const Mantid::API::IAlgorithm *alg, const std::string &what) override;
   virtual bool hasActiveCatalogSession() const;
   virtual Mantid::API::IAlgorithm_sptr createSearchAlgorithm();
-  virtual Mantid::API::ITableWorkspace_sptr
-  getSearchAlgorithmResultsTable(Mantid::API::IAlgorithm_sptr searchAlg);
+  virtual Mantid::API::ITableWorkspace_sptr getSearchAlgorithmResultsTable(Mantid::API::IAlgorithm_sptr searchAlg);
   bool requiresICat() const;
   virtual void logInToCatalog();
 
@@ -71,12 +68,9 @@ private:
   std::string activeSessionId() const;
   ISearchModel &results() const;
   void searchAsync();
-  SearchResults convertResultsTableToSearchResults(
-      Mantid::API::ITableWorkspace_sptr resultsTable);
-  SearchResults convertICatResultsTableToSearchResults(
-      Mantid::API::ITableWorkspace_sptr tableWorkspace);
-  SearchResults convertJournalResultsTableToSearchResults(
-      Mantid::API::ITableWorkspace_sptr tableWorkspace);
+  SearchResults convertResultsTableToSearchResults(Mantid::API::ITableWorkspace_sptr resultsTable);
+  SearchResults convertICatResultsTableToSearchResults(Mantid::API::ITableWorkspace_sptr tableWorkspace);
+  SearchResults convertJournalResultsTableToSearchResults(Mantid::API::ITableWorkspace_sptr tableWorkspace);
 
   friend class Encoder;
   friend class Decoder;

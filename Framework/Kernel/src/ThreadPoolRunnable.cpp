@@ -25,14 +25,10 @@ namespace Kernel {
  * @param waitSec :: how many seconds the thread is allowed to wait with no
  *tasks.
  */
-ThreadPoolRunnable::ThreadPoolRunnable(size_t threadnum,
-                                       ThreadScheduler *scheduler,
-                                       ProgressBase *prog, double waitSec)
-    : m_threadnum(threadnum), m_scheduler(scheduler), m_prog(prog),
-      m_waitSec(waitSec) {
+ThreadPoolRunnable::ThreadPoolRunnable(size_t threadnum, ThreadScheduler *scheduler, ProgressBase *prog, double waitSec)
+    : m_threadnum(threadnum), m_scheduler(scheduler), m_prog(prog), m_waitSec(waitSec) {
   if (!m_scheduler)
-    throw std::invalid_argument(
-        "NULL ThreadScheduler passed to ThreadPoolRunnable::ctor()");
+    throw std::invalid_argument("NULL ThreadScheduler passed to ThreadPoolRunnable::ctor()");
 }
 
 //-----------------------------------------------------------------------------------
@@ -49,7 +45,7 @@ void ThreadPoolRunnable::run() {
   // If there are no tasks yet, wait up to m_waitSec for them to come up
   while (m_scheduler->empty() && m_waitSec > 0.0) {
     Poco::Thread::sleep(10); // millisec
-    m_waitSec -= 0.01; // Subtract ten millisec from the time left to wait.
+    m_waitSec -= 0.01;       // Subtract ten millisec from the time left to wait.
   }
 
   while (!m_scheduler->empty()) {

@@ -23,23 +23,19 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffGSASFittingViewQtWidget
-    : public QWidget,
-      public IEnggDiffGSASFittingView {
+class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffGSASFittingViewQtWidget : public QWidget, public IEnggDiffGSASFittingView {
   Q_OBJECT
 
 public:
-  EnggDiffGSASFittingViewQtWidget(
-      std::shared_ptr<IEnggDiffractionUserMsg> userMessageProvider,
-      const std::shared_ptr<IEnggDiffractionPythonRunner> &pythonRunner,
-      std::shared_ptr<IEnggDiffractionParam> mainSettings);
+  EnggDiffGSASFittingViewQtWidget(std::shared_ptr<IEnggDiffractionUserMsg> userMessageProvider,
+                                  const std::shared_ptr<IEnggDiffractionPythonRunner> &pythonRunner,
+                                  std::shared_ptr<IEnggDiffractionParam> mainSettings);
 
   ~EnggDiffGSASFittingViewQtWidget() override;
 
   void addWidget(IEnggDiffMultiRunFittingWidgetView *widget) override;
 
-  void displayLatticeParams(
-      const Mantid::API::ITableWorkspace_sptr latticeParams) const override;
+  void displayLatticeParams(const Mantid::API::ITableWorkspace_sptr latticeParams) const override;
 
   void displayGamma(const double gamma) const override;
 
@@ -75,11 +71,9 @@ public:
 
   void showStatus(const std::string &status) const override;
 
-  void userError(const std::string &errorTitle,
-                 const std::string &errorDescription) const override;
+  void userError(const std::string &errorTitle, const std::string &errorDescription) const override;
 
-  void userWarning(const std::string &warningTitle,
-                   const std::string &warningDescription) const override;
+  void userWarning(const std::string &warningTitle, const std::string &warningDescription) const override;
 
 private slots:
   void browseFocusedRun();

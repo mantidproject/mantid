@@ -38,19 +38,15 @@ public:
   Value getValue() const;
 
 private:
-  friend MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &os,
-                                                    OptionalBool const &object);
-  friend MANTID_KERNEL_DLL std::istream &operator>>(std::istream &istream,
-                                                    OptionalBool &object);
+  friend MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &os, OptionalBool const &object);
+  friend MANTID_KERNEL_DLL std::istream &operator>>(std::istream &istream, OptionalBool &object);
 
   Value m_arg;
 };
 
-MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &os,
-                                           OptionalBool const &object);
+MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &os, OptionalBool const &object);
 
-MANTID_KERNEL_DLL std::istream &operator>>(std::istream &istream,
-                                           OptionalBool &object);
+MANTID_KERNEL_DLL std::istream &operator>>(std::istream &istream, OptionalBool &object);
 
 /// Encode an OptionalBool as a Json::Value.
 MANTID_KERNEL_DLL ::Json::Value encodeAsJson(const OptionalBool &);

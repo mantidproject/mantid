@@ -16,8 +16,7 @@
 */
 namespace Mantid {
 namespace API {
-class MANTID_API_DLL OrientedLatticeValidator
-    : public Kernel::TypedValidator<ExperimentInfo_sptr> {
+class MANTID_API_DLL OrientedLatticeValidator : public Kernel::TypedValidator<ExperimentInfo_sptr> {
 public:
   /// Gets the type of the validator
   std::string getType() const { return "orientedlattice"; }
@@ -26,8 +25,7 @@ public:
 
 private:
   /// Check for validity.
-  std::string
-  checkValidity(const ExperimentInfo_sptr &workspace) const override;
+  std::string checkValidity(const ExperimentInfo_sptr &workspace) const override;
 };
 
 } // namespace API

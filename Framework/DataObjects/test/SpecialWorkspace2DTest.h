@@ -24,10 +24,8 @@ class SpecialWorkspace2DTest : public CxxTest::TestSuite {
 public:
   void test_default_constructor() {
     SpecialWorkspace2D_sptr ws(new SpecialWorkspace2D());
-    TSM_ASSERT_THROWS_ANYTHING("Can't init with > 1 X or Y entries.",
-                               ws->initialize(100, 2, 1));
-    TSM_ASSERT_THROWS_ANYTHING("Can't init with > 1 X or Y entries.",
-                               ws->initialize(100, 1, 2));
+    TSM_ASSERT_THROWS_ANYTHING("Can't init with > 1 X or Y entries.", ws->initialize(100, 2, 1));
+    TSM_ASSERT_THROWS_ANYTHING("Can't init with > 1 X or Y entries.", ws->initialize(100, 1, 2));
     TS_ASSERT_THROWS_NOTHING(ws->initialize(100, 1, 1));
 
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 100);
@@ -36,8 +34,7 @@ public:
 
   void testClone() {
     // As test_setValue_getValue, set on ws, get on clone.
-    Instrument_sptr inst =
-        ComponentCreationHelper::createTestInstrumentCylindrical(5);
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(5);
     SpecialWorkspace2D_sptr ws(new SpecialWorkspace2D(inst));
 
     auto cloned = ws->clone();
@@ -62,8 +59,7 @@ public:
 
   void test_constructor_from_Instrument() {
     // Fake instrument with 5*9 pixels with ID starting at 1
-    Instrument_sptr inst =
-        ComponentCreationHelper::createTestInstrumentCylindrical(5);
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(5);
     SpecialWorkspace2D_sptr ws(new SpecialWorkspace2D(inst));
 
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 45);
@@ -78,8 +74,7 @@ public:
   }
 
   void test_setValue_getValue() {
-    Instrument_sptr inst =
-        ComponentCreationHelper::createTestInstrumentCylindrical(5);
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(5);
     SpecialWorkspace2D_sptr ws(new SpecialWorkspace2D(inst));
 
     TS_ASSERT_DIFFERS(ws->getValue(1), 12.3);
@@ -94,15 +89,12 @@ public:
   }
 
   void test_binaryOperator() {
-    Instrument_sptr inst1 =
-        ComponentCreationHelper::createTestInstrumentCylindrical(5);
+    Instrument_sptr inst1 = ComponentCreationHelper::createTestInstrumentCylindrical(5);
     SpecialWorkspace2D_sptr ws1(new SpecialWorkspace2D(inst1));
 
-    Instrument_sptr inst2 =
-        ComponentCreationHelper::createTestInstrumentCylindrical(5);
+    Instrument_sptr inst2 = ComponentCreationHelper::createTestInstrumentCylindrical(5);
     SpecialWorkspace2D_sptr ws2raw(new SpecialWorkspace2D(inst2));
-    SpecialWorkspace2D_const_sptr ws2 =
-        std::dynamic_pointer_cast<const SpecialWorkspace2D>(ws2raw);
+    SpecialWorkspace2D_const_sptr ws2 = std::dynamic_pointer_cast<const SpecialWorkspace2D>(ws2raw);
 
     // 1. AND operation
     ws1->setValue(2, 1);
@@ -170,39 +162,32 @@ public:
   }
 
   void test_checkcompatible() {
-    Instrument_sptr inst1 =
-        ComponentCreationHelper::createTestInstrumentCylindrical(5);
+    Instrument_sptr inst1 = ComponentCreationHelper::createTestInstrumentCylindrical(5);
     SpecialWorkspace2D_sptr ws1(new SpecialWorkspace2D(inst1));
 
-    Instrument_sptr inst2 =
-        ComponentCreationHelper::createTestInstrumentCylindrical(6);
+    Instrument_sptr inst2 = ComponentCreationHelper::createTestInstrumentCylindrical(6);
     SpecialWorkspace2D_sptr ws2(new SpecialWorkspace2D(inst2));
 
     // 1. AND operation
     ws1->setValue(2, 1);
     ws2->setValue(2, 1);
 
-    SpecialWorkspace2D_const_sptr cws2 =
-        std::dynamic_pointer_cast<const SpecialWorkspace2D>(ws2);
+    SpecialWorkspace2D_const_sptr cws2 = std::dynamic_pointer_cast<const SpecialWorkspace2D>(ws2);
     TS_ASSERT_THROWS_ANYTHING(ws1->binaryOperation(cws2, BinaryOperator::AND));
   }
 
   void test_binaryNOT() {
-    Instrument_sptr inst1 =
-        ComponentCreationHelper::createTestInstrumentCylindrical(5);
+    Instrument_sptr inst1 = ComponentCreationHelper::createTestInstrumentCylindrical(5);
     SpecialWorkspace2D_sptr ws1(new SpecialWorkspace2D(inst1));
 
-    Instrument_sptr inst2 =
-        ComponentCreationHelper::createTestInstrumentCylindrical(5);
+    Instrument_sptr inst2 = ComponentCreationHelper::createTestInstrumentCylindrical(5);
     SpecialWorkspace2D_sptr ws2(new SpecialWorkspace2D(inst2));
 
-    Instrument_sptr inst3 =
-        ComponentCreationHelper::createTestInstrumentCylindrical(5);
+    Instrument_sptr inst3 = ComponentCreationHelper::createTestInstrumentCylindrical(5);
     SpecialWorkspace2D_sptr ws3(new SpecialWorkspace2D(inst3));
 
     ws2->binaryOperation(BinaryOperator::NOT);
-    SpecialWorkspace2D_const_sptr cws2 =
-        std::dynamic_pointer_cast<const SpecialWorkspace2D>(ws2);
+    SpecialWorkspace2D_const_sptr cws2 = std::dynamic_pointer_cast<const SpecialWorkspace2D>(ws2);
 
     ws1->binaryOperation(cws2, BinaryOperator::AND);
     ws3->binaryOperation(cws2, BinaryOperator::OR);
@@ -215,10 +200,9 @@ public:
   }
 
   void test_known_to_property_for_unmangling() {
-    Mantid::API::WorkspaceProperty<DataObjects::SpecialWorkspace2D> property(
-        "DummyProperty", "DummyWorkspace", Mantid::Kernel::Direction::Input);
-    TS_ASSERT_EQUALS("SpecialWorkspace2D", Mantid::Kernel::getUnmangledTypeName(
-                                               *property.type_info()));
+    Mantid::API::WorkspaceProperty<DataObjects::SpecialWorkspace2D> property("DummyProperty", "DummyWorkspace",
+                                                                             Mantid::Kernel::Direction::Input);
+    TS_ASSERT_EQUALS("SpecialWorkspace2D", Mantid::Kernel::getUnmangledTypeName(*property.type_info()));
   }
 
   /**
@@ -234,11 +218,9 @@ public:
     // Check property can be obtained as const_sptr or sptr
     SpecialWorkspace2D_const_sptr wsConst;
     SpecialWorkspace2D_sptr wsNonConst;
-    TS_ASSERT_THROWS_NOTHING(
-        wsConst = manager.getValue<SpecialWorkspace2D_const_sptr>(wsName));
+    TS_ASSERT_THROWS_NOTHING(wsConst = manager.getValue<SpecialWorkspace2D_const_sptr>(wsName));
     TS_ASSERT(wsConst != nullptr);
-    TS_ASSERT_THROWS_NOTHING(
-        wsNonConst = manager.getValue<SpecialWorkspace2D_sptr>(wsName));
+    TS_ASSERT_THROWS_NOTHING(wsNonConst = manager.getValue<SpecialWorkspace2D_sptr>(wsName));
     TS_ASSERT(wsNonConst != nullptr);
     TS_ASSERT_EQUALS(wsConst, wsNonConst);
 

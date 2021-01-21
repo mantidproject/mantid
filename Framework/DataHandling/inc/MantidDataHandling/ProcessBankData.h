@@ -43,24 +43,19 @@ public:
    * @param max_event_id :: maximum detector ID to load
    * @return
    */ // API::IFileLoader<Kernel::NexusDescriptor>
-  ProcessBankData(DefaultEventLoader &loader, std::string entry_name,
-                  API::Progress *prog,
+  ProcessBankData(DefaultEventLoader &loader, std::string entry_name, API::Progress *prog,
                   std::shared_ptr<std::vector<uint32_t>> event_id,
-                  std::shared_ptr<std::vector<float>> event_time_of_flight,
-                  size_t numEvents, size_t startAt,
+                  std::shared_ptr<std::vector<float>> event_time_of_flight, size_t numEvents, size_t startAt,
                   std::shared_ptr<std::vector<uint64_t>> event_index,
-                  std::shared_ptr<BankPulseTimes> thisBankPulseTimes,
-                  bool have_weight,
-                  std::shared_ptr<std::vector<float>> event_weight,
-                  detid_t min_event_id, detid_t max_event_id);
+                  std::shared_ptr<BankPulseTimes> thisBankPulseTimes, bool have_weight,
+                  std::shared_ptr<std::vector<float>> event_weight, detid_t min_event_id, detid_t max_event_id);
 
   void run() override;
 
 private:
   size_t getWorkspaceIndexFromPixelID(const detid_t pixID);
   size_t getFirstEventIndex(const size_t pulseIndex) const;
-  size_t getLastEventIndex(const size_t pulseIndex,
-                           const size_t numPulses) const;
+  size_t getLastEventIndex(const size_t pulseIndex, const size_t numPulses) const;
 
   /// Algorithm being run
   DefaultEventLoader &m_loader;

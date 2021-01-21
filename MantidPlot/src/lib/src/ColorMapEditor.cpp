@@ -38,10 +38,9 @@
 #include <QPushButton>
 #include <QTableWidget>
 
-ColorMapEditor::ColorMapEditor(const QLocale &locale, int precision,
-                               QWidget *parent)
-    : QWidget(parent), color_map(QwtLinearColorMap()), min_val(0), max_val(1),
-      d_locale(locale), d_precision(precision) {
+ColorMapEditor::ColorMapEditor(const QLocale &locale, int precision, QWidget *parent)
+    : QWidget(parent), color_map(QwtLinearColorMap()), min_val(0), max_val(1), d_locale(locale),
+      d_precision(precision) {
   table = new QTableWidget();
   table->setColumnCount(2);
   table->setSelectionMode(QAbstractItemView::SingleSelection);
@@ -57,8 +56,7 @@ ColorMapEditor::ColorMapEditor(const QLocale &locale, int precision,
   table->setMinimumHeight(6 * table->horizontalHeader()->height() + 2);
   table->installEventFilter(this);
 
-  connect(table, SIGNAL(cellClicked(int, int)), this,
-          SLOT(showColorDialog(int, int)));
+  connect(table, SIGNAL(cellClicked(int, int)), this, SLOT(showColorDialog(int, int)));
 
   insertBtn = new QPushButton(tr("&Insert"));
   insertBtn->setEnabled(false);
@@ -74,8 +72,7 @@ ColorMapEditor::ColorMapEditor(const QLocale &locale, int precision,
 
   scaleColorsBox = new QCheckBox(tr("&Scale Colors"));
   scaleColorsBox->setChecked(true);
-  connect(scaleColorsBox, SIGNAL(toggled(bool)), this,
-          SLOT(setScaledColors(bool)));
+  connect(scaleColorsBox, SIGNAL(toggled(bool)), this, SLOT(setScaledColors(bool)));
 
   QVBoxLayout *vl = new QVBoxLayout(this);
   vl->setSpacing(0);
@@ -94,9 +91,7 @@ void ColorMapEditor::updateColorMap() {
   QwtLinearColorMap map(c_min, c_max);
   for (int i = 1; i < rows - 1; i++) {
     QwtDoubleInterval range = QwtDoubleInterval(min_val, max_val);
-    double val =
-        (((DoubleSpinBox *)table->cellWidget(i, 0))->value() - min_val) /
-        range.width();
+    double val = (((DoubleSpinBox *)table->cellWidget(i, 0))->value() - min_val) / range.width();
     map.addColorStop(val, QColor(table->item(i, 1)->text()));
   }
 
@@ -127,8 +122,7 @@ void ColorMapEditor::setColorMap(const QwtLinearColorMap &map) {
       sb->setRange(min_val, max_val);
 
     connect(sb, SIGNAL(valueChanged(double)), this, SLOT(updateColorMap()));
-    connect(sb, SIGNAL(activated(DoubleSpinBox *)), this,
-            SLOT(spinBoxActivated(DoubleSpinBox *)));
+    connect(sb, SIGNAL(activated(DoubleSpinBox *)), this, SLOT(spinBoxActivated(DoubleSpinBox *)));
     table->setCellWidget(i, 0, sb);
 
     QColor c = QColor(map.rgb(QwtDoubleInterval(0, 1), colors[i]));
@@ -180,8 +174,7 @@ void ColorMapEditor::insertLevel() {
   sb->setValue(val);
   sb->setRange(min_val, max_val);
   connect(sb, SIGNAL(valueChanged(double)), this, SLOT(updateColorMap()));
-  connect(sb, SIGNAL(activated(DoubleSpinBox *)), this,
-          SLOT(spinBoxActivated(DoubleSpinBox *)));
+  connect(sb, SIGNAL(activated(DoubleSpinBox *)), this, SLOT(spinBoxActivated(DoubleSpinBox *)));
   table->setCellWidget(row, 0, sb);
 
   QTableWidgetItem *it = new QTableWidgetItem(c.name());

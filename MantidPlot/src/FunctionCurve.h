@@ -47,16 +47,14 @@ public:
 
   FunctionCurve(const FunctionType &t, const QString &name = QString());
   explicit FunctionCurve(const QString &name = QString());
-  FunctionCurve(const Mantid::API::IFunction *fun, const QString &wsName,
-                int wsIndex = 0, const QString &name = QString());
+  FunctionCurve(const Mantid::API::IFunction *fun, const QString &wsName, int wsIndex = 0,
+                const QString &name = QString());
   FunctionCurve(const FunctionCurve &c);
   ~FunctionCurve() override;
 
   FunctionCurve &operator=(const FunctionCurve &rhs) = delete;
 
-  PlotCurve *clone(const Graph *) const override {
-    return new FunctionCurve(*this);
-  }
+  PlotCurve *clone(const Graph *) const override { return new FunctionCurve(*this); }
 
   double startRange() { return d_from; };
   double endRange() { return d_to; };
@@ -84,19 +82,13 @@ public:
 
   void loadData(int points = 0);
 
-  void
-  loadMantidData(const std::shared_ptr<const Mantid::API::MatrixWorkspace> &ws,
-                 size_t wi, int peakRadius = 0);
+  void loadMantidData(const std::shared_ptr<const Mantid::API::MatrixWorkspace> &ws, size_t wi, int peakRadius = 0);
 
   /// No error bars on this curve: Always return an empty list.
-  QList<ErrorBarSettings *> errorBarSettingsList() const override {
-    return QList<ErrorBarSettings *>();
-  }
+  QList<ErrorBarSettings *> errorBarSettingsList() const override { return QList<ErrorBarSettings *>(); }
 
   /// returns identifier where this curve plots a IFunction
-  const Mantid::API::IFunction *getIFunctionIdentifier() const {
-    return m_identifier;
-  };
+  const Mantid::API::IFunction *getIFunctionIdentifier() const { return m_identifier; };
 
 private:
   FunctionType d_function_type;

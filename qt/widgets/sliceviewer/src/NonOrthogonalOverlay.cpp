@@ -64,8 +64,7 @@ QPointF NonOrthogonalOverlay::invTransform(QPoint pixels) const {
   return QPointF(xA, yA);
 }
 
-void NonOrthogonalOverlay::updateXGridlines(QwtValueList xAxisTicks,
-                                            double xAngle) {
+void NonOrthogonalOverlay::updateXGridlines(QwtValueList xAxisTicks, double xAngle) {
   m_xAxisTicks = xAxisTicks;
   m_xAngle = xAngle;
   auto size = xAxisTicks.size();
@@ -85,8 +84,7 @@ void NonOrthogonalOverlay::updateXGridlines(QwtValueList xAxisTicks,
   }
 }
 
-void NonOrthogonalOverlay::updateYGridlines(QwtValueList yAxisTicks,
-                                            double yAngle) {
+void NonOrthogonalOverlay::updateYGridlines(QwtValueList yAxisTicks, double yAngle) {
   m_yAxisTicks = yAxisTicks;
   m_yAngle = yAngle;
   auto size = yAxisTicks.size();
@@ -126,9 +124,7 @@ void NonOrthogonalOverlay::paintEvent(QPaintEvent * /*event*/) {
   }
 }
 
-void NonOrthogonalOverlay::drawYLines(QPainter &painter, QPen &gridPen,
-                                      int widthScreen,
-                                      const QwtValueList &yAxisTicks,
+void NonOrthogonalOverlay::drawYLines(QPainter &painter, QPen &gridPen, int widthScreen, const QwtValueList &yAxisTicks,
                                       double yAngle) {
 
   auto offset = yAngle == 0. ? 0. : widthScreen * tan(yAngle);
@@ -141,10 +137,8 @@ void NonOrthogonalOverlay::drawYLines(QPainter &painter, QPen &gridPen,
   }
 }
 
-void NonOrthogonalOverlay::drawXLines(QPainter &painter, QPen &gridPen,
-                                      int heightScreen,
-                                      const QwtValueList &xAxisTicks,
-                                      double xAngle) {
+void NonOrthogonalOverlay::drawXLines(QPainter &painter, QPen &gridPen, int heightScreen,
+                                      const QwtValueList &xAxisTicks, double xAngle) {
   xAngle *= -1.f;
   auto offset = xAngle == 0. ? 0. : heightScreen * tan(xAngle);
   painter.setPen(gridPen);

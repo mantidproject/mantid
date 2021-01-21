@@ -65,8 +65,7 @@ public:
     // Reading and writing masking should throw: Masking is now stored in
     // DetectorInfo and ParameterMap should reject it.
     TS_ASSERT_THROWS(pmap->get(&det, "masked"), const std::runtime_error &);
-    TS_ASSERT_THROWS(pmap->addBool(&det, "masked", true),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(pmap->addBool(&det, "masked", true), const std::runtime_error &);
   }
 
   void testGetNumberParameter() {
@@ -89,8 +88,7 @@ public:
     std::shared_ptr<Detector> pdet(det.cloneParameterized(pmap.get()));
     IDetector *idet = static_cast<IDetector *>(pdet.get());
 
-    std::vector<Mantid::Kernel::V3D> pos =
-        idet->getPositionParameter("testparam");
+    std::vector<Mantid::Kernel::V3D> pos = idet->getPositionParameter("testparam");
 
     TS_ASSERT_EQUALS(pos.size(), 1);
     TS_ASSERT_DELTA(pos[0].X(), 0.5, 1e-08);
@@ -102,13 +100,11 @@ public:
     Detector det("det", 0, nullptr);
 
     ParameterMap_sptr pmap(new ParameterMap());
-    pmap->add("Quat", &det, "testparam",
-              Mantid::Kernel::Quat(1.0, 0.25, 0.5, 0.75));
+    pmap->add("Quat", &det, "testparam", Mantid::Kernel::Quat(1.0, 0.25, 0.5, 0.75));
     std::shared_ptr<Detector> pdet(det.cloneParameterized(pmap.get()));
     IDetector *idet = static_cast<IDetector *>(pdet.get());
 
-    std::vector<Mantid::Kernel::Quat> rot =
-        idet->getRotationParameter("testparam");
+    std::vector<Mantid::Kernel::Quat> rot = idet->getRotationParameter("testparam");
 
     TS_ASSERT_EQUALS(rot.size(), 1);
     TS_ASSERT_DELTA(rot[0].real(), 1.0, 1e-08);

@@ -37,9 +37,7 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
-  const std::vector<std::string> seeAlso() const override {
-    return {"FindPeaks", "MatchPeaks"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"FindPeaks", "MatchPeaks"}; }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Crystal\\Peaks"; }
 
@@ -50,48 +48,37 @@ private:
   void exec() override;
 
   /// Process algorithm properties
-  void processAlgProperties(std::string &peakfunctype,
-                            std::string &bkgdfunctype);
+  void processAlgProperties(std::string &peakfunctype, std::string &bkgdfunctype);
 
   /// Process column names with peak parameter names
   void processTableColumnNames();
 
-  void importPeaksFromTable(
-      std::map<specnum_t, std::vector<std::pair<double, API::IFunction_sptr>>>
-          &functionmap);
+  void importPeaksFromTable(std::map<specnum_t, std::vector<std::pair<double, API::IFunction_sptr>>> &functionmap);
 
   /// Import peak and background function parameters from vector
-  void importPeakFromVector(
-      std::vector<std::pair<double, API::IFunction_sptr>> &functionmap);
+  void importPeakFromVector(std::vector<std::pair<double, API::IFunction_sptr>> &functionmap);
 
   /// Generate peaks in output data workspaces
-  void generatePeaks(
-      const std::map<specnum_t,
-                     std::vector<std::pair<double, API::IFunction_sptr>>>
-          &functionmap,
-      const API::MatrixWorkspace_sptr &dataWS);
+  void generatePeaks(const std::map<specnum_t, std::vector<std::pair<double, API::IFunction_sptr>>> &functionmap,
+                     const API::MatrixWorkspace_sptr &dataWS);
 
   /// Check whether function has a certain parameter
-  bool hasParameter(const API::IFunction_sptr &function,
-                    const std::string &paramname);
+  bool hasParameter(const API::IFunction_sptr &function, const std::string &paramname);
 
   /// Create output workspace
   API::MatrixWorkspace_sptr createOutputWorkspace();
 
-  API::MatrixWorkspace_sptr
-  createDataWorkspace(std::vector<double> binparameters);
+  API::MatrixWorkspace_sptr createDataWorkspace(std::vector<double> binparameters);
 
   void createFunction(std::string &peaktype, std::string &bkgdtype);
 
   void getSpectraSet(const DataObjects::TableWorkspace_const_sptr &peakParmsWS);
 
   /// Get the IPeakFunction part in the input function
-  API::IPeakFunction_sptr
-  getPeakFunction(const API::IFunction_sptr &infunction);
+  API::IPeakFunction_sptr getPeakFunction(const API::IFunction_sptr &infunction);
 
   /// Add function parameter names to
-  std::vector<std::string>
-  addFunctionParameterNames(const std::vector<std::string> &funcnames);
+  std::vector<std::string> addFunctionParameterNames(const std::vector<std::string> &funcnames);
 
   /// Peak function
   API::IPeakFunction_sptr m_peakFunction;

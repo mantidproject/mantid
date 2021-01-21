@@ -47,19 +47,15 @@ bool isOfType(const QObject *obj, const char *toCompare) {
   return strcmp(obj->metaObject()->className(), toCompare) == 0;
 }
 
-muParserScript::muParserScript(ScriptingEnv *env, const QString &name,
-                               QObject *context, bool checkMultilineCode)
-    : Script(env, name, Script::NonInteractive, context),
-      d_warn_multiline_code(checkMultilineCode) {
+muParserScript::muParserScript(ScriptingEnv *env, const QString &name, QObject *context, bool checkMultilineCode)
+    : Script(env, name, Script::NonInteractive, context), d_warn_multiline_code(checkMultilineCode) {
   parser.DefineConst("pi", M_PI);
   parser.DefineConst("Pi", M_PI);
   parser.DefineConst("PI", M_PI);
   parser.DefineConst("e", M_E);
   parser.DefineConst("E", M_E);
 
-  for (const muParserScripting::mathFunction *i =
-           muParserScripting::math_functions;
-       i->name; i++)
+  for (const muParserScripting::mathFunction *i = muParserScripting::math_functions; i->name; i++)
     if (i->numargs == 1 && i->fun1 != nullptr)
       parser.DefineFun(i->name, i->fun1);
     else if (i->numargs == 2 && i->fun2 != nullptr)
@@ -86,8 +82,7 @@ muParserScript::~muParserScript() {
 
 double muParserScript::col(const QString &arg) {
   if (!isOfType(context(), "Table"))
-    throw Parser::exception_type(
-        tr("col() works only on tables!").toAscii().constData());
+    throw Parser::exception_type(tr("col() works only on tables!").toAscii().constData());
   QStringList items;
   QString item = "";
 
@@ -137,17 +132,11 @@ double muParserScript::col(const QString &arg) {
     return 0;
   clearVariables(rvariables);
   if (row < 0 || row >= table->numRows())
-    throw Parser::exception_type(tr("There's no row %1 in table %2!")
-                                     .arg(row + 1)
-                                     .arg(context()->objectName())
-                                     .toAscii()
-                                     .constData());
+    throw Parser::exception_type(
+        tr("There's no row %1 in table %2!").arg(row + 1).arg(context()->objectName()).toAscii().constData());
   if (col < 0 || col >= table->numCols())
-    throw Parser::exception_type(tr("There's no column %1 in table %2!")
-                                     .arg(col + 1)
-                                     .arg(context()->objectName())
-                                     .toAscii()
-                                     .constData());
+    throw Parser::exception_type(
+        tr("There's no column %1 in table %2!").arg(col + 1).arg(context()->objectName()).toAscii().constData());
   if (table->text(row, col).isEmpty())
     throw EmptySourceError();
   else {
@@ -157,8 +146,7 @@ double muParserScript::col(const QString &arg) {
 
 double muParserScript::tablecol(const QString &arg) {
   if (!isOfType(context(), "Table"))
-    throw Parser::exception_type(
-        tr("tablecol() works only on tables!").toAscii().constData());
+    throw Parser::exception_type(tr("tablecol() works only on tables!").toAscii().constData());
   QStringList items;
   QString item = "";
   for (int i = 0; i < arg.size(); i++) {
@@ -184,31 +172,17 @@ double muParserScript::tablecol(const QString &arg) {
   Parser local_parser(rparser);
   if (items.count() != 2)
     throw Parser::exception_type(
-        tr("tablecol: wrong number of arguments (need 2, got %1)")
-            .arg(items.count())
-            .toAscii()
-            .constData());
+        tr("tablecol: wrong number of arguments (need 2, got %1)").arg(items.count()).toAscii().constData());
   if (!items[0].startsWith("\"") || !items[0].endsWith("\""))
-    throw Parser::exception_type(
-        tr("tablecol: first argument must be a string (table name)")
-            .toAscii()
-            .constData());
-  Table *target_table = this_table->folder()->rootFolder()->table(
-      items[0].mid(1, items[0].length() - 2));
+    throw Parser::exception_type(tr("tablecol: first argument must be a string (table name)").toAscii().constData());
+  Table *target_table = this_table->folder()->rootFolder()->table(items[0].mid(1, items[0].length() - 2));
   if (!target_table)
-    throw Parser::exception_type(tr("Couldn't find a table named %1.")
-                                     .arg(items[0])
-                                     .toAscii()
-                                     .constData());
+    throw Parser::exception_type(tr("Couldn't find a table named %1.").arg(items[0]).toAscii().constData());
   if (items[1].startsWith("\"") && items[1].endsWith("\"")) {
-    col = target_table->colNames().indexOf(
-        items[1].mid(1, items[1].length() - 2));
+    col = target_table->colNames().indexOf(items[1].mid(1, items[1].length() - 2));
     if (col < 0)
-      throw Parser::exception_type(tr("There's no column named %1 in table %2!")
-                                       .arg(items[1])
-                                       .arg(target_table->name())
-                                       .toAscii()
-                                       .constData());
+      throw Parser::exception_type(
+          tr("There's no column named %1 in table %2!").arg(items[1]).arg(target_table->name()).toAscii().constData());
   } else {
     local_parser.SetExpr(items[1].toAscii().constData());
     col = qRound(local_parser.Eval()) - 1;
@@ -219,17 +193,11 @@ double muParserScript::tablecol(const QString &arg) {
     row = -1;
   clearVariables(rvariables);
   if (row < 0 || row >= target_table->numRows())
-    throw Parser::exception_type(tr("There's no row %1 in table %2!")
-                                     .arg(row + 1)
-                                     .arg(target_table->name())
-                                     .toAscii()
-                                     .constData());
+    throw Parser::exception_type(
+        tr("There's no row %1 in table %2!").arg(row + 1).arg(target_table->name()).toAscii().constData());
   if (col < 0 || col >= target_table->numCols())
-    throw Parser::exception_type(tr("There's no column %1 in table %2!")
-                                     .arg(col + 1)
-                                     .arg(target_table->name())
-                                     .toAscii()
-                                     .constData());
+    throw Parser::exception_type(
+        tr("There's no column %1 in table %2!").arg(col + 1).arg(target_table->name()).toAscii().constData());
   if (target_table->text(row, col).isEmpty())
     throw EmptySourceError();
   else
@@ -238,21 +206,14 @@ double muParserScript::tablecol(const QString &arg) {
 
 double muParserScript::cell(int row, int col) {
   if (!isOfType(context(), "Matrix"))
-    throw Parser::exception_type(
-        tr("cell() works only on tables and matrices!").toAscii().constData());
+    throw Parser::exception_type(tr("cell() works only on tables and matrices!").toAscii().constData());
   Matrix *matrix = static_cast<Matrix *>(const_cast<QObject *>(context()));
   if (row < 1 || row > matrix->numRows())
-    throw Parser::exception_type(tr("There's no row %1 in matrix %2!")
-                                     .arg(row)
-                                     .arg(context()->objectName())
-                                     .toAscii()
-                                     .constData());
+    throw Parser::exception_type(
+        tr("There's no row %1 in matrix %2!").arg(row).arg(context()->objectName()).toAscii().constData());
   if (col < 1 || col > matrix->numCols())
-    throw Parser::exception_type(tr("There's no column %1 in matrix %2!")
-                                     .arg(col)
-                                     .arg(context()->objectName())
-                                     .toAscii()
-                                     .constData());
+    throw Parser::exception_type(
+        tr("There's no column %1 in matrix %2!").arg(col).arg(context()->objectName()).toAscii().constData());
   if (matrix->text(row - 1, col - 1).isEmpty())
     throw EmptySourceError();
   else
@@ -261,21 +222,14 @@ double muParserScript::cell(int row, int col) {
 
 double muParserScript::tableCell(int col, int row) {
   if (!isOfType(context(), "Table"))
-    throw Parser::exception_type(
-        tr("cell() works only on tables and matrices!").toAscii().constData());
+    throw Parser::exception_type(tr("cell() works only on tables and matrices!").toAscii().constData());
   Table *table = static_cast<Table *>(const_cast<QObject *>(context()));
   if (row < 1 || row > table->numRows())
-    throw Parser::exception_type(tr("There's no row %1 in table %2!")
-                                     .arg(row)
-                                     .arg(context()->objectName())
-                                     .toAscii()
-                                     .constData());
+    throw Parser::exception_type(
+        tr("There's no row %1 in table %2!").arg(row).arg(context()->objectName()).toAscii().constData());
   if (col < 1 || col > table->numCols())
-    throw Parser::exception_type(tr("There's no column %1 in table %2!")
-                                     .arg(col)
-                                     .arg(context()->objectName())
-                                     .toAscii()
-                                     .constData());
+    throw Parser::exception_type(
+        tr("There's no column %1 in table %2!").arg(col).arg(context()->objectName()).toAscii().constData());
   if (table->text(row - 1, col - 1).isEmpty())
     throw EmptySourceError();
   else
@@ -345,9 +299,7 @@ bool muParserScript::setDouble(double val, const char *name) {
   return true;
 }
 
-bool muParserScript::setInt(int val, const char *name) {
-  return setDouble((double)val, name);
-}
+bool muParserScript::setInt(int val, const char *name) { return setDouble((double)val, name); }
 
 bool muParserScript::setQObject(QObject *, const char *) { return false; }
 
@@ -389,8 +341,7 @@ QString muParserScript::compileColArg(const QString &in) {
   return out + "\"";
 }
 
-QString muParserScript::evalSingleLineToString(const QLocale &locale, char f,
-                                               int prec) {
+QString muParserScript::evalSingleLineToString(const QLocale &locale, char f, int prec) {
   double val = 0.0;
   try {
     val = parser.Eval();
