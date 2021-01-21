@@ -150,7 +150,7 @@ class DrillProcessSANSTest(systemtesting.MantidSystemTest):
         self.editCell(2, "MaskFiles", maskFiles)
         self.editCell(2, "OutputWorkspace", "iq_s3")
 
-        QTest.mouseClick(self.drill.processAll, Qt.LeftButton)
+        QTest.mouseClick(self.drill.buttonProcessAll, Qt.LeftButton)
 
         while (("iq_s1" not in mtd)
                or ("iq_s2" not in mtd)
