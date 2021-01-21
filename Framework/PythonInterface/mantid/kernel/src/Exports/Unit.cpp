@@ -8,6 +8,7 @@
 #include "MantidPythonInterface/core/GetPointer.h"
 
 #include <boost/python/class.hpp>
+#include <boost/python/enum.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 #include <boost/python/tuple.hpp>
 
@@ -56,6 +57,15 @@ tuple quickConversionWrapper(Unit &self, const T &destUnitName) {
 void export_Unit() {
 
   register_ptr_to_python<std::shared_ptr<Unit>>();
+
+    enum_<Mantid::Kernel::UnitParams>("UnitParams")
+      .value("l2", Mantid::Kernel::UnitParams::l2)
+      .value("twoTheta", Mantid::Kernel::UnitParams::twoTheta)
+      .value("delta", Mantid::Kernel::UnitParams::delta)
+      .value("efixed", Mantid::Kernel::UnitParams::efixed)
+      .value("difa", Mantid::Kernel::UnitParams::difa)
+      .value("difc", Mantid::Kernel::UnitParams::difc)
+      .value("tzero", Mantid::Kernel::UnitParams::tzero);
 
   class_<Unit, boost::noncopyable>("Unit", no_init)
       .def("name", &deprecatedName, arg("self"),

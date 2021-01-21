@@ -32,6 +32,10 @@ double UnitConversion::run(const std::string &src, const std::string &dest,
                            const DeltaEMode::Type emode, const double efixed) {
   Unit_sptr srcUnit = UnitFactory::Instance().create(src);
   Unit_sptr destUnit = UnitFactory::Instance().create(dest);
+  if ((srcUnit->unitID() == "dSpacing") || (destUnit->unitID() == "dSpacing")) {
+    throw std::runtime_error(
+        "This signature is deprecated for d Spacing unit conversions");
+  }
   UnitParametersMap params{{UnitParams::l2, l2},
                            {UnitParams::twoTheta, theta},
                            {UnitParams::efixed, efixed}};
