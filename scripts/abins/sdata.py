@@ -293,14 +293,9 @@ class SDataByAngle(collections.abc.Sequence):
                 "Indices must be integers or slices, not {}.".format(type(item)))
 
         if isinstance(item, int):
-            if item >= n_items:
-                raise IndexError(item)
             return SData(data=data, **self._metadata)
 
         else:  # Must be a slice, return angle-resolved data
-            if (item.start >= n_items) or (item.stop) > n_items:
-                raise IndexError(item)
-
             return type(self)(data=data,
                               angles=self.angles[item],
                               **self._metadata)
