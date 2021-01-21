@@ -148,7 +148,8 @@ class GenerateLogbook(PythonAlgorithm):
                 mtd[logbook_ws].addRow(rowData)
 
     def _store_logbook_as_csv(self, logbook_ws):
-        pass
+        SaveAscii(InputWorkspace=logbook_ws, Filename=self.getProperty('OutputFile'),
+                  Separator='CSV', )
 
     def PyExec(self):
         self._data_directory = self.getPropertyValue('Directory')
