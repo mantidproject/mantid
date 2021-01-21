@@ -171,7 +171,7 @@ void Q1DWeighted::bootstrap(const MatrixWorkspace_const_sptr &inputWS) {
           M_PI * static_cast<double>(iw) / static_cast<double>(m_nWedges);
       if (m_asymmWedges)
         centerAngle *= 2;
-      centerAngle += wedgeOffset;
+      centerAngle += wedgeOffset * deg2rad;
       m_wedgesCenterAngle.push_back(centerAngle);
       m_wedgesAngleRange.push_back(wedgeAngle * deg2rad);
     }
