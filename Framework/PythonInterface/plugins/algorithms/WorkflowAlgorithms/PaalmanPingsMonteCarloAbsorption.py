@@ -120,7 +120,7 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
         self.setPropertyGroup('BeamWidth', 'Beam Options')
 
         # Shape Options
-        self.declareProperty(name='Shape', defaultValue='FlatPlate',
+        self.declareProperty(name='Shape', defaultValue='Preset',
                              validator=StringListValidator(['Preset', 'FlatPlate', 'Cylinder', 'Annulus']),
                              doc='Geometric shape of the sample environment')
 
@@ -312,10 +312,10 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
         progess_steps = 1. if not self._has_can else 0.25
         input_wave_ws = self._convert_to_wavelength(self._input_ws)
         self._set_beam(input_wave_ws)
-        if self._is_override_sample:
+        if self._override_shape:
             # make sure there is no container defined at this point
             self._set_sample(input_wave_ws, ['Sample'])
-        elif self._is_override_material_only:
+        elif self._is_override_sample_material_only:
             # in this instance, setsample will not be called again so this material change only needs to happen once
             self._set_sample_material_only(input_wave_ws)
         monte_carlo_alg = self.createChildAlgorithm("MonteCarloAbsorption", enableLogging=True,
@@ -331,7 +331,7 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
         self._output_ws = self._group_ws([ass_ws])
 
         if self._has_can:
-            if self._is_override_sample:
+            if self._override_shape:
                 self._set_sample(input_wave_ws, ['Sample', 'Container'])
             monte_carlo_alg_ssc = self.createChildAlgorithm("MonteCarloAbsorption", enableLogging=True,
                                                             startProgress=progess_steps, endProgress=2*progess_steps)
@@ -344,7 +344,7 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
             assc_ws = self._convert_from_wavelength(assc_ws)
             mtd.addOrReplace(self._assc_ws_name, assc_ws)
 
-            if self._is_override_sample:
+            if self._override_shape:
                 self._set_sample(input_wave_ws, ['Container'])
             monte_carlo_alg_cc = self.createChildAlgorithm("MonteCarloAbsorption", enableLogging=True,
                                                            startProgress=2*progess_steps, endProgress=3*progess_steps)
@@ -357,7 +357,7 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
             acc_ws = self._convert_from_wavelength(acc_ws)
             mtd.addOrReplace(self._acc_ws_name, acc_ws)
 
-            if self._is_override_sample:
+            if self._override_shape:
                 self._set_sample(input_wave_ws, ['Sample', 'Container'])
             monte_carlo_alg_csc = self.createChildAlgorithm("MonteCarloAbsorption", enableLogging=True,
                                                             startProgress=3*progess_steps, endProgress=1.)
@@ -467,17 +467,19 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
         material_dict = dict()
         if get_attribute('chemical_formula'):
             material_dict['ChemicalFormula'] = get_attribute('chemical_formula')
-        if (get_attribute('attenuation_cross_section') != 0 or get_attribute('coherent_cross_section') != 0
+        elif (get_attribute('attenuation_cross_section') != 0 or get_attribute('coherent_cross_section') != 0
                 or get_attribute('incoherent_cross_section') != 0):
             material_dict['CoherentXSection'] = get_attribute('coherent_cross_section')
             material_dict['IncoherentXSection'] = get_attribute('incoherent_cross_section')
             material_dict['AttenuationXSection'] = get_attribute('attenuation_cross_section')
             material_dict['ScatteringXSection'] = get_attribute('coherent_cross_section') \
                 + get_attribute('incoherent_cross_section')
+        else:
+            return material_dict
 
         if get_attribute('density_type') == 'Mass Density' and get_attribute('density') != 0:
             material_dict['SampleMassDensity'] = get_attribute('density')
-        if get_attribute('density_type') == 'Number Density':
+        elif get_attribute('density_type') == 'Number Density':
             if get_attribute('density') != 0:
                 material_dict['SampleNumberDensity'] = get_attribute('density')
             material_dict['NumberDensityUnit'] = get_attribute('number_density_unit')
@@ -530,10 +532,10 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
         self._container_density = self.getProperty('ContainerDensity').value
 
         self._shape = self.getProperty('Shape').value
-        self._is_override_sample = (self._shape != 'Preset')
-        self._is_override_material_only = bool(self._set_material_dict('sample'))
+        self._override_shape = (self._shape != 'Preset')
+        self._is_override_sample_material_only = bool(self._set_material_dict('sample'))
 
-        if self._is_override_sample:
+        if self._override_shape:
             self._height = self.getProperty('Height').value
             if self._shape == 'FlatPlate':
                 self._sample_width = self.getProperty('SampleWidth').value

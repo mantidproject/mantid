@@ -41,7 +41,7 @@ private slots:
   void changeCanMaterialOptions(int index);
   void setSampleDensity(double value);
   void setCanDensity(double value);
-  void setCanCbState(int index);
+  void handlePresetShapeChanges(int index);
   UserInputValidator doValidation();
 
 private:
@@ -50,6 +50,13 @@ private:
   bool validate() override;
   void loadSettings(const QSettings &settings) override;
   void setFileExtensionsByName(bool filter) override;
+
+  void
+  AbsorptionCorrections::validateSampleGeometryInputs(UserInputValidator &uiv,
+                                                      const QString &shape);
+  void
+  AbsorptionCorrections::validateContainerGeometryInputs(UserInputValidator &uiv,
+                                                      const QString &shape);
 
   void addSaveWorkspace(std::string const &wsName);
   void addShapeSpecificSampleOptions(const Mantid::API::IAlgorithm_sptr &alg,
