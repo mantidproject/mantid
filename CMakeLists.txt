@@ -30,7 +30,7 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/buildconfig/CMake")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 
-option(ENABLE_MANTIDPLOT "Enable Qt4-based gui & components" ON)
+option(ENABLE_MANTIDPLOT "Enable Qt4-based gui & components" OFF)
 option(ENABLE_WORKBENCH "Enable Qt5-based gui & components" ON)
 
 set(CPACK_INSTALL_CMAKE_PROJECTS "${CMAKE_BINARY_DIR}" "Mantid" "ALL" "/")
@@ -243,7 +243,7 @@ if(ENABLE_MANTIDPLOT OR ENABLE_WORKBENCH)
 endif()
 
 if(ENABLE_MANTIDPLOT)
-  add_subdirectory(MantidPlot)
+  message( ERROR "MantidPlot has been removed from the source code")
 endif()
 
 add_subdirectory(scripts)
