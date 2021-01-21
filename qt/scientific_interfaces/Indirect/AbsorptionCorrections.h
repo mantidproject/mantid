@@ -54,9 +54,8 @@ private:
   void
   AbsorptionCorrections::validateSampleGeometryInputs(UserInputValidator &uiv,
                                                       const QString &shape);
-  void
-  AbsorptionCorrections::validateContainerGeometryInputs(UserInputValidator &uiv,
-                                                      const QString &shape);
+  void AbsorptionCorrections::validateContainerGeometryInputs(
+      UserInputValidator &uiv, const QString &shape);
 
   void addSaveWorkspace(std::string const &wsName);
   void addShapeSpecificSampleOptions(const Mantid::API::IAlgorithm_sptr &alg,
