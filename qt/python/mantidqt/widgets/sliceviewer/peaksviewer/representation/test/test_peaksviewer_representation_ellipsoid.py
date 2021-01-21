@@ -58,7 +58,7 @@ class EllipsoidalIntergratedPeakRepresentationTest(unittest.TestCase):
         self._assert_painter_calls(
             painter,
             peak_center[:2],
-            cross_width=0.26,
+            cross_width=0.3,
             signal_width=2.6,
             signal_height=3.0,
             angle=90,
@@ -87,14 +87,14 @@ class EllipsoidalIntergratedPeakRepresentationTest(unittest.TestCase):
         self.assertTrue(painted is not None)
         self._assert_painter_calls(
             painter, (peak_center[2], peak_center[0]),
-            cross_width=0.182,
-            signal_width=1.82,
-            signal_height=2.1,
+            cross_width=0.192,
+            signal_width=1.92,
+            signal_height=1.79,
             angle=90,
             alpha=fake_alpha,
             fg_color=fg_color,
-            bkgd_width=4.4,
-            bkgd_height=4.77,
+            bkgd_width=4.73,
+            bkgd_height=4.55,
             thickness=0.1 / 2.6,
             bg_color=bg_color)
 
@@ -151,54 +151,58 @@ class EllipsoidalIntergratedPeakRepresentationSliceEllipsoidTest(unittest.TestCa
         axis_b = (0, 1, 0)
         axis_c = (0, 0, 1)
         a = 1
-        b = 1
+        b = 2
         c = 1
         zp = 0
 
-        expected_slice_origin = (0, 0, 0)
-        expected_major_radius = 1
-        expected_minar_radius = 1
-        expected_angle = 90
+        slice_transform = lambda x: (x[1], x[0], x[2]) # Y out of plane
 
-        self._run_slice_ellipsoid_and_compare((origin, axis_a, axis_b, axis_c, a, b, c, zp),
+        expected_slice_origin = (0, 0, 0)
+        expected_major_radius = 2
+        expected_minor_radius = 1
+        expected_angle = 0
+
+        self._run_slice_ellipsoid_and_compare((origin, axis_a, axis_b, axis_c, a, b, c, zp, slice_transform),
                                               (*expected_slice_origin,
                                                expected_major_radius,
-                                               expected_minar_radius,
+                                               expected_minor_radius,
                                                expected_angle))
 
         zp = np.sin(np.pi / 3)
         expected_slice_origin = (0, 0, zp)
-        expected_major_radius = 0.5  # cos(pi/3)
-        expected_minar_radius = 0.5  # cos(pi/3)
+        expected_major_radius = 1.0  # 2*cos(pi/3)
+        expected_minor_radius = 0.5  # cos(pi/3)
 
-        self._run_slice_ellipsoid_and_compare((origin, axis_a, axis_b, axis_c, a, b, c, zp),
+        self._run_slice_ellipsoid_and_compare((origin, axis_a, axis_b, axis_c, a, b, c, zp, slice_transform),
                                               (*expected_slice_origin,
                                                expected_major_radius,
-                                               expected_minar_radius,
+                                               expected_minor_radius,
                                                expected_angle))
 
         # This causes negative eignevalues there np.sqrt(eignevalues) gives NaN radius
         zp = 2
         expected_slice_origin = (0, 0, zp)
         expected_major_radius = np.nan
-        expected_minar_radius = np.nan
+        expected_minor_radius = np.nan
+        expected_angle = 90  # flips to 90 as x-axis (Y on view) has negative eigenvalue and is first in sorted list
 
-        self._run_slice_ellipsoid_and_compare((origin, axis_a, axis_b, axis_c, a, b, c, zp),
+        self._run_slice_ellipsoid_and_compare((origin, axis_a, axis_b, axis_c, a, b, c, zp, slice_transform),
                                               (*expected_slice_origin,
                                                expected_major_radius,
-                                               expected_minar_radius,
+                                               expected_minor_radius,
                                                expected_angle))
 
         # This causes `eigvalues, eigvectors = linalg.eig(MM)` to throw np.linalg.LinAlgError
         zp = 1
         expected_slice_origin = (0, 0, 0)
         expected_major_radius = np.nan
-        expected_minar_radius = np.nan
-        expected_angle = 0
-        self._run_slice_ellipsoid_and_compare((origin, axis_a, axis_b, axis_c, a, b, c, zp),
+        expected_minor_radius = np.nan
+        expected_angle = 0  # returns 0 is could not diag ellipMatrix
+
+        self._run_slice_ellipsoid_and_compare((origin, axis_a, axis_b, axis_c, a, b, c, zp, slice_transform),
                                               (*expected_slice_origin,
                                                expected_major_radius,
-                                               expected_minar_radius,
+                                               expected_minor_radius,
                                                expected_angle))
 
     def _run_slice_ellipsoid_and_compare(self, input_values, expectecd):
