@@ -104,7 +104,6 @@ class IO(object):
                      for key, value in previous_advanced_parameters.items()
                      if key not in current_advanced_parameters})
 
-
         sections = ('instruments', 'sampling', 'hdf_groups')
 
         for section in sections:
@@ -118,13 +117,10 @@ class IO(object):
                         print(new_group[key])
                         print("Previous values:")
                         print(old_group[key])
-
         if diff:
             return False
         else:
             return True
-
-
 
     def get_previous_ab_initio_program(self):
         """

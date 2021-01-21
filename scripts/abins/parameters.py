@@ -17,7 +17,6 @@ value dictionaries through the Python API if possible. e.g.::
 """
 
 import math
-import numpy as np
 from abins.constants import MILLI_EV_TO_WAVENUMBER
 
 # Instruments constants  #############################

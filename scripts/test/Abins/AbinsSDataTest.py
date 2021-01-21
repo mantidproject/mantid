@@ -130,7 +130,7 @@ class AbinsSDataByAngleTest(unittest.TestCase):
                                       {'order_1': np.array([2., 2.001, 3., 2., 0., 0.,])}},
                            'atom_1': {'s':
                                       {'order_1': np.array([2., 3.001, 2., 0., 2., 0.,])}}}
-                                      ]
+                          ]
 
         self.init_data = {'atom_0': {'s':
                                      {'order_1': np.array([[0., 0.001, 1., 1., 0., 0.],
