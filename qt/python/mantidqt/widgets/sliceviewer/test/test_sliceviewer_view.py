@@ -13,10 +13,8 @@ from unittest.mock import patch
 from numpy import hstack
 
 import matplotlib as mpl
-
-from mantidqt.widgets.colorbar.colorbar import MIN_LOG_VALUE
-
 mpl.use('Agg')
+from mantidqt.widgets.colorbar.colorbar import MIN_LOG_VALUE  # noqa: E402
 from mantid.simpleapi import (  # noqa: E402
     CreateMDHistoWorkspace, CreateMDWorkspace, CreateSampleWorkspace, DeleteWorkspace,
     FakeMDEventData, ConvertToDistribution, Scale, SetUB, RenameWorkspace)
@@ -26,6 +24,7 @@ from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder  # noqa: E
 from mantidqt.widgets.sliceviewer.presenter import SliceViewer  # noqa: E402
 from mantidqt.widgets.sliceviewer.toolbar import ToolItemText  # noqa: E402
 from qtpy.QtWidgets import QApplication  # noqa: E402
+from qtpy.QtGui import QCloseEvent  # noqa: E402
 from math import inf  # noqa: E402
 
 
@@ -243,11 +242,11 @@ class SliceViewerViewTest(unittest.TestCase, QtWidgetFinder):
     def test_close_event(self):
         pres = SliceViewer(self.histo_ws)
         self.assert_widget_created()
-        pres.close_called = mock.MagicMock()
+        pres.clear_observer = mock.MagicMock()
 
-        pres.view.closeEvent()
+        pres.view.closeEvent(QCloseEvent())
 
-        pres.close_called.assert_called_once()
+        pres.clear_observer.assert_called_once()
 
     def test_plot_matrix_xlimits_ignores_monitors(self):
         xmin = 5000
