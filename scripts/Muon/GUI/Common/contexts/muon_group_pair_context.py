@@ -61,8 +61,8 @@ def get_default_grouping(workspace, instrument, main_field_direction):
         return get_grouping_psi(workspace)
     instrument_directory = ConfigServiceImpl.Instance().getInstrumentDirectory()
     filename = os.path.join(instrument_directory, grouping_file)
-    new_groups, new_pairs, description, default = xml_utils.load_grouping_from_XML(filename)
-    return new_groups, new_pairs, default
+    new_groups, new_diffs, new_pairs, description, default = xml_utils.load_grouping_from_XML(filename)
+    return new_groups, new_diffs, new_pairs, default
 
 
 def construct_empty_group(group_names, group_index=0):
@@ -125,7 +125,7 @@ class MuonGroupPairContext(object):
         self._check_group_contains_valid_detectors = check_group_contains_valid_detectors
 
     def __getitem__(self, name):
-        for item in self._groups + self.pairs:
+        for item in self._groups + self.pairs + self.diffs:
             if item.name == name:
                 return item
         return None
@@ -276,18 +276,28 @@ class MuonGroupPairContext(object):
                 return
 
     def reset_group_and_pairs_to_default(self, workspace, instrument, main_field_direction, num_periods):
-        default_groups, default_pairs, default_selected = get_default_grouping(workspace, instrument, main_field_direction)
+        default_groups, default_diffs, default_pairs, default_selected = get_default_grouping(workspace, instrument, main_field_direction)
         if num_periods == 1:
             self._groups = default_groups
+            self._diffs = default_diffs
             self._pairs = default_pairs
             self._selected = default_selected
         else:
             periods = range(num_periods + 1)[1:]
             self._groups = []
+            self._diffs = []
             self._pairs = []
             for period in periods:
                 for group in default_groups:
                     self._groups.append(MuonGroup(group.name + str(period), group.detectors, [period]))
+
+            if default_diffs:
+                for diff in default_diffs:
+                    self._diffs.append(MuonDiff(diff.name, diff.forward, diff.backward))
+            else:
+                for period in range(1, len(periods)):
+                    for group in default_groups:
+                        self._diffs.append(MuonDiff(group.name+" "+str(period)+" minus "+str(period+1),group.name + str(period), group.name + str(period+1)))
 
             for period in periods:
                 for pair in default_pairs:
@@ -331,7 +341,7 @@ class MuonGroupPairContext(object):
         return workspace_list
 
     def get_equivalent_group_pair(self, workspace_name):
-        for item in self._groups + self._pairs:
+        for item in self._groups + self._pairs + self._diffs:
             equivalent_name = item.get_rebined_or_unbinned_version_of_workspace_if_it_exists(workspace_name)
             if equivalent_name:
                 return equivalent_name

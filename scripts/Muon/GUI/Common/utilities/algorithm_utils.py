@@ -287,3 +287,13 @@ def apply_deadtime(ws, output, table):
     alg.setProperty("DeadTimeTable", table)
     alg.execute()
     return alg.getProperty("OutputWorkspace").valueAsStr
+
+def calculate_diff_data(diff, forward_group_workspace_name, backward_group_workspace_name, output):
+    alg = mantid.AlgorithmManager.create("Minus")
+    alg.initialize()
+    alg.setAlwaysStoreInADS(True)
+    alg.setProperty("LHSWorkspace", forward_group_workspace_name)
+    alg.setProperty("RHSWorkspace", backward_group_workspace_name)
+    alg.setProperty("OutputWorkspace", output)
+    alg.execute()
+    return alg.getProperty("OutputWorkspace").valueAsStr

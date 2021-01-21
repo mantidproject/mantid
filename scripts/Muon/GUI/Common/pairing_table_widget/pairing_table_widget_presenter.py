@@ -129,7 +129,7 @@ class PairingTablePresenter(object):
         self._view.enable_updates()
 
     def update_group_selections(self):
-        groups = self._model.group_names
+        groups = self._model.group_names + self._model.diff_names
         self._view.update_group_selections(groups)
 
     def to_analyse_data_checkbox_changed(self, state, row, pair_name):

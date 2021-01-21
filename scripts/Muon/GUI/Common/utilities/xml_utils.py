@@ -9,7 +9,7 @@ import xml.etree.ElementTree as ET
 import xml.dom.minidom as MD
 import Muon.GUI.Common.utilities.run_string_utils as run_string_utils
 
-from Muon.GUI.Common.muon_group import MuonGroup
+from Muon.GUI.Common.muon_group import MuonGroup, MuonDiff
 from Muon.GUI.Common.muon_pair import MuonPair
 
 
@@ -40,13 +40,24 @@ def _create_XML_subElement_for_pairs(root_node, pairs):
         pair_nodes += [child]
     return pair_nodes
 
+def _create_XML_subElement_for_diffs(root_node, diffs):
+    diff_nodes = []
+    for diff in diffs:
+        child = ET.SubElement(root_node, 'diff', name=diff.name)
+        fwd_group = ET.SubElement(child, 'positive-group', val=diff.forward_group)
+        bwd_group = ET.SubElement(child, 'negative-group', val=diff.backward_group)
+        child.extend(fwd_group)
+        child.extend(bwd_group)
+        diff_nodes += [child]
+    return diff_nodes
 
-def save_grouping_to_XML(groups, pairs, filename, save=True, description=''):
+def save_grouping_to_XML(groups, diffs, pairs, filename, save=True, description=''):
     """
     Save a set of muon group and pair parameters to XML format file. Fewer checks are performed
     than with the XML loading.
 
     :param groups: A list of MuonGroup objects to save.
+    :param diffs: A list of MuonDiff objects to save
     :param pairs: A list of MuonPair objects to save.
     :param filename: The name of the XML file to save to.
     :param save: Whether to actually save the file.
@@ -61,14 +72,16 @@ def save_grouping_to_XML(groups, pairs, filename, save=True, description=''):
         raise AttributeError("groups must be MuonGroup type")
     if sum([0 if isinstance(pair, MuonPair) else 1 for pair in pairs]) > 0:
         raise AttributeError("pairs must be MuonPair type")
-
+    if sum([0 if isinstance(diff, MuonDiff) else 1 for diff in diffs]) > 0:
+        raise AttributeError("diffs must be MuonDiff type")
     root = ET.Element("detector-grouping")
     if description:
         root.set('description', description)
 
     # handle groups
     _create_XML_subElement_for_groups(root, groups)
-
+    #handle diffs
+    _create_XML_subElement_for_diffs(root, diffs)
     # handle pairs
     _create_XML_subElement_for_pairs(root, pairs)
 
@@ -98,19 +111,25 @@ def load_grouping_from_XML(filename):
         default = ''
 
     group_names, group_ids, periods = _get_groups_from_XML(root)
+    diff_names, diff_groups = _get_diffs_from_XML(root)
     pair_names, pair_groups, pair_alphas = _get_pairs_from_XML(root)
-    groups, pairs = [], []
+    groups, diffs, pairs = [], [], []
 
     for i, group_name in enumerate(group_names):
         period = periods[i] if periods and i<len(periods) else [1]
         groups += [MuonGroup(group_name=group_name,
                              detector_ids=group_ids[i], periods=period)]
+
+    for i, diff_name in enumerate(diff_names):
+        diffs +=[MuonDiff(diff_name,diff_groups[i][0],
+                           diff_groups[i][1])]
+
     for i, pair_name in enumerate(pair_names):
         pairs += [MuonPair(pair_name=pair_name,
                            forward_group_name=pair_groups[i][0],
                            backward_group_name=pair_groups[i][1],
                            alpha=pair_alphas[i])]
-    return groups, pairs, description, default
+    return groups, diffs, pairs, description, default
 
 
 def _get_groups_from_XML(root):
@@ -126,6 +145,13 @@ def _get_groups_from_XML(root):
                 pass
     return names, ids, periods
 
+def _get_diffs_from_XML(root):
+    names, groups = [], []
+    for child in root:
+        if child.tag == "diff":
+            names += [child.attrib['name']]
+            groups += [[child.find('positive-group').attrib['val'], child.find('negative-group').attrib['val']]]
+    return names, groups
 
 def _get_pairs_from_XML(root):
     names, groups, alphas = [], [], []

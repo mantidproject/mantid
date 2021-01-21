@@ -7,6 +7,7 @@
 import re
 
 group_str = "; Group; "
+DIFF_STR = "; Group Diff;"
 pair_str = "; Pair Asym; "
 phaseQuad_str = '; PhaseQuad; '
 PHASEQUAD_RE = '_Re_' # use _ on both sides to prevent accidental ID (e.g. Red)
@@ -52,6 +53,14 @@ def get_group_asymmetry_name(context, group_name, run, period_string, rebin):
     name += context.workspace_suffix
     return name
 
+def get_diff_asymmetry_name(context, diff_name, run,  rebin):
+    name = context.data_context._base_run_name(run) + DIFF_STR + diff_name + "; Asymmetry;"
+
+    if rebin:
+        name += "".join([' ', REBIN_STR, ';'])
+
+    name += context.workspace_suffix
+    return name
 
 def get_pair_asymmetry_name(context, pair_name, run, rebin):
     name = context.data_context._base_run_name(run) + pair_str + pair_name + ";"
@@ -90,6 +99,11 @@ def get_group_or_pair_from_name(name):
         end = name.find(";", index)
         group_found = name[index: end]
         return group_found.replace(" ", "")
+    elif DIFF_STR in name:
+        index = name.find(DIFF_STR) + len(DIFF_STR)
+        end = name.find(";", index)
+        diff_found = name[index: end]
+        return diff_found.replace(" ", "")
     elif pair_str in name:
         index = name.find(pair_str) + len(pair_str)
         end = name.find(";", index)

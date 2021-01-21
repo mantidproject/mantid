@@ -60,6 +60,10 @@ class GroupingTabModel(object):
         return self._groups_and_pairs.group_names
 
     @property
+    def diff_names(self):
+        return self._groups_and_pairs.diff_names
+
+    @property
     def pair_names(self):
         return self._groups_and_pairs.pair_names
 
@@ -82,6 +86,7 @@ class GroupingTabModel(object):
     def show_all_groups_and_pairs(self):
         self._context.show_all_groups()
         self._context.show_all_pairs()
+        self._context.show_all_diffs()
 
     def clear_groups(self):
         self._groups_and_pairs.clear_groups()
@@ -98,10 +103,15 @@ class GroupingTabModel(object):
     def clear_selected_groups(self):
         self._groups_and_pairs.clear_selected_groups()
 
+    def clear_selected_diffs(self):
+        self._groups_and_pairs.clear_selected_diffs()
+
     def clear(self):
         self.clear_groups()
         self.clear_pairs()
+        self.clear_diffs()
         self.clear_selected_groups()
+        self.clear_selected_diffs()
         self.clear_selected_pairs()
 
     def select_all_groups_to_analyse(self):

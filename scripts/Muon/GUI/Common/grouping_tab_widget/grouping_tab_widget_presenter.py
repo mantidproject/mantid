@@ -49,6 +49,7 @@ class GroupingTabPresenter(object):
         # notifiers
         self.groupingNotifier = GroupingTabPresenter.GroupingNotifier(self)
         self.grouping_table_widget.on_data_changed(self.group_table_changed)
+        self._diff_table.on_data_changed(self.diff_table_changed)
         self.pairing_table_widget.on_data_changed(self.pair_table_changed)
         self.enable_editing_notifier = GroupingTabPresenter.EnableEditingNotifier(self)
         self.disable_editing_notifier = GroupingTabPresenter.DisableEditingNotifier(self)
@@ -68,6 +69,7 @@ class GroupingTabPresenter(object):
 
     def update_view_from_model(self):
         self.grouping_table_widget.update_view_from_model()
+        self._diff_table.update_view_from_model()
         self.pairing_table_widget.update_view_from_model()
 
     def show(self):
@@ -140,12 +142,19 @@ class GroupingTabPresenter(object):
         if filename == '':
             return
 
-        groups, pairs, description, default = xml_utils.load_grouping_from_XML(filename)
+        groups, diffs, pairs, description, default = xml_utils.load_grouping_from_XML(filename)
 
         self._model.clear()
         for group in groups:
             try:
                 self._model.add_group(group)
+            except ValueError as error:
+                self._view.display_warning_box(str(error))
+
+        for diff in diffs:
+            try:
+                if diff.forward_group in self._model.group_names and diff.backward_group in self._model.group_names:
+                    self._model.add_diff(diff)
             except ValueError as error:
                 self._view.display_warning_box(str(error))
 
@@ -164,6 +173,7 @@ class GroupingTabPresenter(object):
                 self._model.add_pair_to_analysis(default)
 
         self.grouping_table_widget.update_view_from_model()
+        self._diff_table.update_view_from_model()
         self.pairing_table_widget.update_view_from_model()
         self.update_description_text(description)
         self._model._context.group_pair_context.selected = default
@@ -175,23 +185,27 @@ class GroupingTabPresenter(object):
     def disable_editing(self):
         self._view.set_buttons_enabled(False)
         self.grouping_table_widget.disable_editing()
+        self._diff_table.disable_editing()
         self.pairing_table_widget.disable_editing()
         self.disable_editing_notifier.notify_subscribers()
 
     def enable_editing(self, result=None):
         self._view.set_buttons_enabled(True)
         self.grouping_table_widget.enable_editing()
+        self._diff_table.enable_editing()
         self.pairing_table_widget.enable_editing()
         self.enable_editing_notifier.notify_subscribers()
 
     def disable_editing_without_notifying_subscribers(self):
         self._view.set_buttons_enabled(False)
         self.grouping_table_widget.disable_editing()
+        self._diff_table.disable_editing()
         self.pairing_table_widget.disable_editing()
 
     def enable_editing_without_notifying_subscribers(self):
         self._view.set_buttons_enabled(True)
         self.grouping_table_widget.enable_editing()
+        self._diff_table.enable_editing()
         self.pairing_table_widget.enable_editing()
 
     def calculate_all_data(self):
@@ -220,6 +234,7 @@ class GroupingTabPresenter(object):
             return
         self._model.reset_selected_groups_and_pairs()
         self.grouping_table_widget.update_view_from_model()
+        self._diff_table.update_view_from_model()
         self.pairing_table_widget.update_view_from_model()
         self.update_description_text()
         self.groupingNotifier.notify_subscribers()
@@ -229,6 +244,7 @@ class GroupingTabPresenter(object):
     def on_clear_requested(self):
         self._model.clear()
         self.grouping_table_widget.update_view_from_model()
+        self._diff_table.update_view_from_model()
         self.pairing_table_widget.update_view_from_model()
         self.update_description_text_to_empty()
 
@@ -245,7 +261,7 @@ class GroupingTabPresenter(object):
     def handle_save_grouping_file(self):
         filename = self._view.show_file_save_browser_and_return_selection()
         if filename != "":
-            xml_utils.save_grouping_to_XML(self._model.groups, self._model.pairs, filename,
+            xml_utils.save_grouping_to_XML(self._model.groups, self._model.diffs, self._model.pairs, filename,
                                            description=self._view.get_description_text())
 
     def create_update_thread(self):
@@ -266,10 +282,17 @@ class GroupingTabPresenter(object):
 
     def group_table_changed(self):
         self.pairing_table_widget.update_view_from_model()
+        self._diff_table.update_view_from_model()
         self.handle_update_all_clicked()
 
     def pair_table_changed(self):
         self.grouping_table_widget.update_view_from_model()
+        self._diff_table.update_view_from_model()
+        self.handle_update_all_clicked()
+
+    def diff_table_changed(self):
+        self.grouping_table_widget.update_view_from_model()
+        self.pairing_table_widget.update_view_from_model()
         self.handle_update_all_clicked()
 
     class LoadObserver(Observer):

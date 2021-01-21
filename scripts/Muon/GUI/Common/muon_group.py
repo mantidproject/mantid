@@ -7,61 +7,23 @@
 # pylint: disable=C0111
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
+from Muon.GUI.Common.muon_base import MuonRun, MuonBase
 from typing import List
 import itertools
 
-class MuonDiff(object):
+class MuonDiff(MuonBase):
     def __init__(self,diff_name,backward_group_name,forward_group_name):
-        self._name = diff_name
-        self._first = backward_group_name
-        self._second = forward_group_name
+        super(MuonDiff, self).__init__(diff_name)
+        self._positive = backward_group_name
+        self._negative = forward_group_name
 
     @property
     def forward_group(self):
-        return self._second
+        return self._positive
 
     @property
     def backward_group(self):
-        return self._first
-
-    @property
-    def name(self):
-        return self._name
-
-
-
-class MuonRun(object):
-    """
-    Holds the experimental runs a dataset corrosponds to.
-    Due to the ability to co-add runs on load this can be one to many.
-    This is used to index and referance by dataset.
-    """
-    def __init__(self, run_numbers: List[int]):
-        self._runs = tuple(run_numbers)
-
-    """
-    A range of runs should be returned seperated by a dash whilst
-    non-cosecutive runs should be comma seperated.
-    For example (62260, 62261, 62263, 62270)
-    should return '62260-62263, 62270'
-    """
-    def __str__(self):
-        return run_list_to_string(list(self._runs))
-
-    def __eq__(self, other):
-        return isinstance(other, self.__class__) and other._runs == self._runs
-
-    def __repr__(self):
-        return 'MuonRun({})'.format(self._runs)
-
-    """
-    We need to be able to hash this class so it can be used as
-    a key in dict objects. For this purpose just hashing the
-    internal tuple is sufficient.
-    """
-    def __hash__(self):
-        return hash(self._runs)
-
+        return self._negative
 
 class MuonGroup(object):
     """
@@ -107,6 +69,12 @@ class MuonGroup(object):
             return self._counts_workspace_rebin[MuonRun(run)].workspace_name
         else:
             return self._counts_workspace[MuonRun(run)].workspace_name
+
+    def get_asymmetry_workspace_for_run(self, run, rebin):
+        if rebin:
+            return self._asymmetry_estimate_rebin[MuonRun(run)].workspace_name
+        else:
+            return self._asymmetry_estimate[MuonRun(run)].workspace_name
 
     @property
     def name(self):
