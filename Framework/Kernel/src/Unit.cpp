@@ -438,16 +438,6 @@ Energy::Energy() : Unit(), factorTo(DBL_MIN), factorFrom(DBL_MIN) {
   addConversion("Momentum", 2 * M_PI / factor, 0.5);
 }
 
-void Energy::validateUnitParams(const int emode,
-                                const UnitParametersMap &params) {
-  auto it = params.find(UnitParams::l2);
-  if (it == params.end()) {
-    throw std::runtime_error("An l2 value must be supplied in the extra "
-                             "parameters when initialising " +
-                             this->unitID() + " for conversion via TOF");
-  }
-}
-
 void Energy::init() {
   auto it = m_params->find(UnitParams::l2);
   if (it != m_params->end()) {
@@ -506,7 +496,7 @@ Energy_inWavenumber::Energy_inWavenumber() : Unit(), factorTo(DBL_MIN), factorFr
   addConversion("Momentum", 2 * M_PI / factor, 0.5);
 }
 
-void Energy_inWavenumber::validateUnitParams(const int emode,
+void Energy_inWavenumber::validateUnitParams(const int,
                                              const UnitParametersMap &params) {
   auto it = params.find(UnitParams::l2);
   if (it == params.end()) {

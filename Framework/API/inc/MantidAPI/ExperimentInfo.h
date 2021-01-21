@@ -112,7 +112,7 @@ public:
                            nullptr}) const;
   double getEFixedGivenEMode(
       const std::shared_ptr<const Geometry::IDetector> &detector,
-      Kernel::DeltaEMode::Type emode) const;
+      const Kernel::DeltaEMode::Type emode) const;
   double getEFixedForIndirect(
       const std::shared_ptr<const Geometry::IDetector> &detector,
       const std::vector<std::string> &parameterNames) const;
@@ -158,15 +158,6 @@ public:
 
   void invalidateSpectrumDefinition(const size_t index);
   void updateSpectrumDefinitionIfNecessary(const size_t index) const;
-
-  void getDetectorValues(const API::SpectrumInfo &spectrumInfo,
-                         const Kernel::Unit &inputUnit,
-                         const Kernel::Unit &outputUnit,
-                         Kernel::DeltaEMode::Type emode, const bool signedTheta,
-                         int64_t wsIndex,
-                         Kernel::UnitParametersMap &pmap) const;
-  void createDetectorIdLogMessages(const std::vector<detid_t> &detids,
-                                   int64_t wsIndex) const;
 
 protected:
   size_t numberOfDetectorGroups() const;

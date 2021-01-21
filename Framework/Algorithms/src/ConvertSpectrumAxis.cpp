@@ -101,8 +101,7 @@ void ConvertSpectrumAxis::exec() {
                       << " Efixed: " << efixedProp << "\n";
       }
 
-      inputWS->getDetectorValues(spectrumInfo, *fromUnit, *toUnit, emode, false,
-                                 i, pmap);
+      spectrumInfo.getDetectorValues(*fromUnit, *toUnit, emode, false, i, pmap);
       try {
         fromUnit->toTOF(xval, emptyVector, l1, emode, pmap);
         toUnit->fromTOF(xval, emptyVector, l1, emode, pmap);

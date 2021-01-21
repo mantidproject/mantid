@@ -151,9 +151,8 @@ void CalculatePlaczekSelfScattering::exec() {
       Kernel::Units::TOF tof;
       Kernel::UnitParametersMap pmap{};
       double l1 = specInfo.l1();
-      inWS->getDetectorValues(specInfo, wavelength, tof,
-                              Kernel::DeltaEMode::Elastic, false, specIndex,
-                              pmap);
+      specInfo.getDetectorValues(wavelength, tof, Kernel::DeltaEMode::Elastic,
+                                 false, specIndex, pmap);
       double l2 = 0., twoTheta = 0.;
       if (pmap.find(Kernel::UnitParams::l2) != pmap.end()) {
         l2 = pmap[Kernel::UnitParams::l2];

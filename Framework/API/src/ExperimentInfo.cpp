@@ -635,6 +635,39 @@ double ExperimentInfo::getEFixed(const std::shared_ptr<const Geometry::IDetector
   return getEFixedGivenEMode(detector, emode);
 }
 
+double ExperimentInfo::getEFixedForIndirect(
+    const std::shared_ptr<const Geometry::IDetector> &detector,
+    const std::vector<std::string> &parameterNames) const {
+  double efixed = 0.;
+  for (auto &parameterName : parameterNames) {
+    Parameter_sptr par =
+        constInstrumentParameters().getRecursive(detector.get(), parameterName);
+    if (par) {
+      efixed = par->value<double>();
+    } else {
+      std::vector<double> efixedVec =
+          detector->getNumberParameter(parameterName);
+      if (efixedVec.empty()) {
+        int detid = detector->getID();
+        IDetector_const_sptr detectorSingle =
+            getInstrument()->getDetector(detid);
+        efixedVec = detectorSingle->getNumberParameter(parameterName);
+      }
+      if (!efixedVec.empty()) {
+        efixed = efixedVec.at(0);
+      }
+    }
+  }
+  if (efixed == 0.) {
+    std::ostringstream os;
+    os << "ExperimentInfo::getEFixed - Indirect mode efixed requested but "
+          "detector has no Efixed parameter attached. ID="
+       << detector->getID();
+    throw std::runtime_error(os.str());
+  }
+  return efixed;
+}
+
 /**
  * Easy access to the efixed value for this run & detector
  * @param detector :: The detector object to ask for the efixed mode. Only
@@ -644,37 +677,25 @@ double ExperimentInfo::getEFixed(const std::shared_ptr<const Geometry::IDetector
  */
 double ExperimentInfo::getEFixedGivenEMode(
     const std::shared_ptr<const Geometry::IDetector> &detector,
-    Kernel::DeltaEMode::Type emode) const {
+    const Kernel::DeltaEMode::Type emode) const {
   if (emode == Kernel::DeltaEMode::Direct) {
-    try {
-      return this->run().getPropertyValueAsType<double>("Ei");
-    } catch (Kernel::Exception::NotFoundError &) {
-      throw std::runtime_error("Experiment logs do not contain an Ei value. Have you run GetEi?");
+    double efixed = 0.;
+    for (auto &parameterName : {"Ei", "EnergyRequested", "EnergyEstimate"}) {
+      if (run().hasProperty(parameterName)) {
+        efixed = run().getPropertyValueAsType<double>(parameterName);
+        break;
+      }
     }
+    if (efixed == 0.) {
+      throw std::runtime_error("Experiment logs do not contain an Ei "
+                               "value. Have you run GetEi?");
+    }
+    return efixed;
   } else if (emode == Kernel::DeltaEMode::Indirect) {
     if (!detector)
       throw std::runtime_error("ExperimentInfo::getEFixed - Indirect mode "
                                "efixed requested without a valid detector.");
-    Parameter_sptr par = constInstrumentParameters().getRecursive(detector.get(), "Efixed");
-    if (par) {
-      return par->value<double>();
-    } else {
-      std::vector<double> efixedVec = detector->getNumberParameter("Efixed");
-      if (efixedVec.empty()) {
-        int detid = detector->getID();
-        IDetector_const_sptr detectorSingle = getInstrument()->getDetector(detid);
-        efixedVec = detectorSingle->getNumberParameter("Efixed");
-      }
-      if (!efixedVec.empty()) {
-        return efixedVec.at(0);
-      } else {
-        std::ostringstream os;
-        os << "ExperimentInfo::getEFixed - Indirect mode efixed requested but "
-              "detector has no Efixed parameter attached. ID="
-           << detector->getID();
-        throw std::runtime_error(os.str());
-      }
-    }
+    return getEFixedForIndirect(detector, {"Efixed", "EFixed-val"});
   } else {
     throw std::runtime_error("ExperimentInfo::getEFixed - EFixed requested for "
                              "elastic mode, don't know what to do!");
@@ -1262,108 +1283,6 @@ void ExperimentInfo::populateWithParameter(Geometry::ParameterMap &paramMap,
 void ExperimentInfo::populateIfNotLoaded() const {
   // The default implementation does nothing. Used by subclasses
   // (FileBackedExperimentInfo) to load content from files upon access.
-}
-
-/** Get the detector values relevant to unit conversion for a workspace index
- * @param specInfo :: SpectrumInfo object (should be available from
- * ExperimentInfo::spectrumInfo() but avoiding that for now because of
- * performance issue)
- * @param inputUnit :: The input unit (Empty implies "all")
- * @param outputUnit :: The output unit (Empty implies "all")
- * @param emode :: The energy mode
- * @param signedTheta :: Return twotheta with sign or without
- * @param wsIndex :: The workspace index
- * @param pmap :: a map containing values for conversion parameters that are not
-required by all unit classes to perform their conversions eg efixed. It can
-contain values on the way in if a look up isn't desired here eg if value
-supplied in parameters to the calling algorithm
- */
-void ExperimentInfo::getDetectorValues(const API::SpectrumInfo &specInfo,
-                                       const Kernel::Unit &inputUnit,
-                                       const Kernel::Unit &outputUnit,
-                                       Kernel::DeltaEMode::Type emode,
-                                       const bool signedTheta, int64_t wsIndex,
-                                       UnitParametersMap &pmap) const {
-  if (!specInfo.hasDetectors(wsIndex))
-    return;
-  pmap[UnitParams::l2] = specInfo.l2(wsIndex);
-
-  if (!specInfo.isMonitor(wsIndex)) {
-    // The scattering angle for this detector (in radians).
-    try {
-      if (signedTheta)
-        pmap[UnitParams::twoTheta] = specInfo.signedTwoTheta(wsIndex);
-      else
-        pmap[UnitParams::twoTheta] = specInfo.twoTheta(wsIndex);
-    } catch (const std::runtime_error &e) {
-      g_log.warning(e.what());
-      pmap[UnitParams::twoTheta] = std::numeric_limits<double>::quiet_NaN();
-    }
-    if (emode != Kernel::DeltaEMode::Elastic &&
-        pmap.find(UnitParams::efixed) == pmap.end()) {
-      if (specInfo.hasUniqueDetector(wsIndex)) {
-        std::shared_ptr<const IDetector> det(&specInfo.detector(wsIndex),
-                                             Mantid::NoDeleting());
-        try {
-          pmap[UnitParams::efixed] = getEFixedGivenEMode(det, emode);
-          g_log.debug() << "Detector: " << det->getID()
-                        << " EFixed: " << pmap[UnitParams::efixed] << "\n";
-        } catch (std::runtime_error) {
-          // let the unit classes work out if this is a problem
-        }
-      }
-      // Non-unique detector (i.e., DetectorGroup): use single provided value
-    }
-
-    std::vector<detid_t> warnDetIds;
-    try {
-      if ((emode == Kernel::DeltaEMode::Elastic) &&
-          ((inputUnit.unitID() == "dSpacing") ||
-           (inputUnit.unitID() == "Empty") ||
-           (outputUnit.unitID() == "dSpacing") ||
-           (outputUnit.unitID() == "Empty"))) {
-        auto [difa, difc, tzero] =
-            specInfo.diffractometerConstants(wsIndex, warnDetIds);
-        pmap[UnitParams::difa] = difa;
-        pmap[UnitParams::difc] = difc;
-        pmap[UnitParams::tzero] = tzero;
-        if (warnDetIds.size() > 0) {
-          createDetectorIdLogMessages(warnDetIds, wsIndex);
-        }
-      } else {
-        pmap[UnitParams::difc] = specInfo.difcUncalibrated(wsIndex);
-      }
-    } catch (const std::runtime_error &e) {
-      g_log.warning(e.what());
-    }
-  } else {
-    pmap[UnitParams::twoTheta] = 0.0;
-    pmap[UnitParams::efixed] = DBL_MIN;
-    // Energy transfer is meaningless for a monitor, so set l2 to 0.
-    if (outputUnit.unitID().find("DeltaE") != std::string::npos) {
-      pmap[UnitParams::l2] = 0.0;
-    }
-    pmap[UnitParams::difc] = 0;
-  }
-}
-
-void ExperimentInfo::createDetectorIdLogMessages(
-    const std::vector<detid_t> &detids, int64_t wsIndex) const {
-  std::string detIDstring;
-  auto iter = detids.begin();
-  auto itEnd = detids.end();
-  for (; iter != itEnd; ++iter) {
-    detIDstring += std::to_string(*iter) + ",";
-  }
-
-  if (!detIDstring.empty()) {
-    detIDstring.pop_back(); // Drop last comma
-  }
-  g_log.warning(
-      "Incomplete set of calibrated diffractometer constants found for "
-      "workspace index" +
-      std::to_string(wsIndex) + ". Using uncalibrated values for detectors " +
-      detIDstring);
 }
 
 } // namespace API

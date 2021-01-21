@@ -8,6 +8,8 @@
 
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/SpectrumInfoIterator.h"
+#include "MantidKernel/DeltaEMode.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/cow_ptr.h"
 
@@ -89,6 +91,14 @@ public:
   Kernel::V3D sourcePosition() const;
   Kernel::V3D samplePosition() const;
   double l1() const;
+
+  void getDetectorValues(const Kernel::Unit &inputUnit,
+                         const Kernel::Unit &outputUnit,
+                         const Kernel::DeltaEMode::Type emode,
+                         const bool signedTheta, int64_t wsIndex,
+                         Kernel::UnitParametersMap &pmap) const;
+  void createDetectorIdLogMessages(const std::vector<detid_t> &detids,
+                                   int64_t wsIndex) const;
 
   SpectrumInfoIterator<SpectrumInfo> begin();
   SpectrumInfoIterator<SpectrumInfo> end();

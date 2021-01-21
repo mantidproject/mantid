@@ -432,12 +432,23 @@ private:
     double tof;
     Units::Wavelength wl;
     for (int i = 0; i < pws->getNumberPeaks(); ++i) {
-      tof = pws->getPeak(i).getTOF();
-      pws->getPeak(i).setInstrument(pws->getInstrument());
-      wl.initialize(pws->getPeak(i).getL1(), pws->getPeak(i).getL2(), pws->getPeak(i).getScattering(), 0,
-                    pws->getPeak(i).getInitialEnergy(), 0.0);
-      pws->getPeak(i).setDetectorID(pws->getPeak(i).getDetectorID());
-      pws->getPeak(i).setWavelength(wl.singleFromTOF(tof));
+      Peak &pk = pws->getPeak(i);
+      V3D hkl =
+          V3D(boost::math::iround(pk.getH()), boost::math::iround(pk.getK()),
+              boost::math::iround(pk.getL()));
+
+      // make a standalone peak to calculate q vectors
+      Peak tmppk(pws->getInstrument(), pk.getDetectorID(), pk.getWavelength(),
+                 hkl, pk.getGoniometerMatrix());
+      Units::Wavelength wl;
+      wl.initialize(tmppk.getL1(), 0,
+                    {{UnitParams::l2, tmppk.getL2()},
+                     {UnitParams::twoTheta, tmppk.getScattering()},
+                     {UnitParams::efixed, tmppk.getInitialEnergy()}});
+      tmppk.setWavelength(wl.singleFromTOF(pk.getTOF() + dT0));
+
+      // only passing the q vector, not the energy info that relates T0
+      pk.setQSampleFrame(tmppk.getQSampleFrame());
     }
   }
 

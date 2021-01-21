@@ -1225,8 +1225,8 @@ void IFunction::convertValue(std::vector<double> &values, Kernel::Unit_sptr &out
     auto emode = ws->getEMode();
 
     Kernel::UnitParametersMap pmap{};
-    ws->getDetectorValues(spectrumInfo, *wsUnit, *outUnit, emode, false,
-                          wsIndex, pmap);
+    spectrumInfo.getDetectorValues(*wsUnit, *outUnit, emode, false, wsIndex,
+                                   pmap);
     std::vector<double> emptyVec;
     try {
       wsUnit->toTOF(values, emptyVec, l1, emode, pmap);

@@ -390,7 +390,6 @@ MatrixWorkspace_sptr ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUni
   /// @todo No implementation for any of these in the geometry yet so using
   /// properties
   const std::string emodeStr = getProperty("EMode");
-  // Convert back to an integer representation
   DeltaEMode::Type emode = DeltaEMode::fromString(emodeStr);
 
   // Not doing anything with the Y vector in to/fromTOF yet, so just pass
@@ -418,8 +417,8 @@ MatrixWorkspace_sptr ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUni
     pmap[UnitParams::efixed] = efixedProp;
   }
   size_t checkIndex = 0;
-  inputWS->getDetectorValues(spectrumInfo, *fromUnit, *outputUnit, emode,
-                             signedTheta, checkIndex, pmap);
+  spectrumInfo.getDetectorValues(*fromUnit, *outputUnit, emode, signedTheta,
+                                 checkIndex, pmap);
   // copy the X values for the check
   auto checkXValues = inputWS->readX(checkIndex);
   try {
@@ -455,8 +454,8 @@ MatrixWorkspace_sptr ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUni
     if (efixedProp != EMPTY_DBL()) {
       pmap[UnitParams::efixed] = efixed;
     }
-    outputWS->getDetectorValues(outSpectrumInfo, *fromUnit, *outputUnit, emode,
-                                signedTheta, i, pmap);
+    outSpectrumInfo.getDetectorValues(*fromUnit, *outputUnit, emode,
+                                      signedTheta, i, pmap);
     try {
       localFromUnit->toTOF(outputWS->dataX(i), emptyVec, l1, emode, pmap);
       // Convert from time-of-flight to the desired unit
