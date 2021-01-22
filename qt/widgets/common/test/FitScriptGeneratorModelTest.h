@@ -675,6 +675,32 @@ public:
     TS_ASSERT_EQUALS(m_model->getGlobalTies().size(), 0);
   }
 
+  void
+  test_that_all_previously_tied_parameters_have_the_same_value_when_a_global_tie_is_removed() {
+    m_model->setFittingMode(FittingMode::SIMULTANEOUS);
+
+    m_model->addWorkspaceDomain(m_wsName, m_wsIndex, m_startX, m_endX);
+    m_model->addWorkspaceDomain("Name2", m_wsIndex, m_startX, m_endX);
+
+    m_model->setFunction(m_wsName, m_wsIndex, m_expDecay->asString());
+    m_model->setFunction("Name2", m_wsIndex, m_expDecay->asString());
+
+    m_model->updateParameterTie(m_wsName, m_wsIndex, "f0.Height",
+                                "f1.Lifetime");
+    m_model->updateParameterTie("Name2", m_wsIndex, "f1.Height", "f1.Lifetime");
+
+    m_model->updateParameterValue("Name2", m_wsIndex, "f1.Lifetime", 2.0);
+
+    // Remove the ties
+    m_model->updateParameterTie(m_wsName, m_wsIndex, "f0.Height", "");
+    m_model->updateParameterTie("Name2", m_wsIndex, "f1.Height", "");
+
+    TS_ASSERT_EQUALS(
+        m_model->getFunction(m_wsName, m_wsIndex)->getParameter("Height"), 2.0);
+    TS_ASSERT_EQUALS(
+        m_model->getFunction("Name2", m_wsIndex)->getParameter("Height"), 2.0);
+  }
+
 private:
   void setup_model_data() {
     m_model->addWorkspaceDomain(m_wsName, m_wsIndex, m_startX, m_endX);

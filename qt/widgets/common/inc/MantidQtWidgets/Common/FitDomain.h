@@ -14,6 +14,7 @@
 
 #include <string>
 #include <utility>
+#include <vector>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -65,6 +66,9 @@ public:
                                  std::string const &parameter,
                                  std::string const &constraint);
 
+  [[nodiscard]] std::vector<std::string>
+  getParametersTiedTo(std::string const &parameter) const;
+
   [[nodiscard]] bool
   isParameterValueWithinConstraints(std::string const &parameter,
                                     double value) const;
@@ -72,6 +76,8 @@ public:
 private:
   [[nodiscard]] bool setParameterTie(std::string const &parameter,
                                      std::string const &tie);
+
+  [[nodiscard]] double getTieValue(std::string const &tie) const;
 
   [[nodiscard]] bool isValidParameterTie(std::string const &parameter,
                                          std::string const &tie) const;
@@ -97,6 +103,10 @@ private:
                                  std::string const &functionIndex,
                                  std::string const &parameter,
                                  std::string const &constraint);
+
+  void appendParametersTiedTo(std::vector<std::string> &tiedParameters,
+                              std::string const &parameter,
+                              std::size_t const &parameterIndex) const;
 
   void removeInvalidatedTies();
 

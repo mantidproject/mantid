@@ -237,14 +237,27 @@ void FitScriptGeneratorModel::updateParameterValue(
   if (!hasGlobalTie(fullParameter)) {
     auto const parameter = getAdjustedFunctionIndex(fullParameter);
     m_fitDomains[domainIndex.value]->setParameterValue(parameter, newValue);
-    if (m_fittingMode == FittingMode::SIMULTANEOUS)
-      updateParameterValuesWithGlobalTieTo(domainIndex, fullParameter);
+
+    updateParameterValuesWithLocalTieTo(domainIndex, parameter, newValue);
+    if (m_fittingMode == FittingMode::SIMULTANEOUS) {
+      updateParameterValuesWithGlobalTieTo(domainIndex, fullParameter,
+                                           newValue);
+    }
+  }
+}
+
+void FitScriptGeneratorModel::updateParameterValuesWithLocalTieTo(
+    FitDomainIndex domainIndex, std::string const &parameter, double newValue) {
+  for (auto const &tiedParameterName :
+       m_fitDomains[domainIndex.value]->getParametersTiedTo(parameter)) {
+    m_fitDomains[domainIndex.value]->setParameterValue(tiedParameterName,
+                                                       newValue);
   }
 }
 
 void FitScriptGeneratorModel::updateParameterValuesWithGlobalTieTo(
-    FitDomainIndex domainIndex, std::string const &fullParameter) {
-  auto const newValue = getParameterValue(domainIndex, fullParameter);
+    FitDomainIndex domainIndex, std::string const &fullParameter,
+    double newValue) {
   // Deep copy so that global ties can be removed whilst in this for loop
   auto const globalTies = m_globalTies;
   for (auto const &globalTie : globalTies)
@@ -386,8 +399,9 @@ bool FitScriptGeneratorModel::validGlobalTie(std::string const &fullParameter,
   if (!fullTie.empty() && !isNumber(fullTie) &&
       validParameter(getDomainIndexOf(fullTie), fullTie)) {
     auto const domainIndex = getDomainIndexOf(fullParameter);
+    auto const tieDomainIndex = getDomainIndexOf(fullTie);
     return isParameterValueWithinConstraints(
-        domainIndex, fullParameter, getParameterValue(domainIndex, fullTie));
+        domainIndex, fullParameter, getParameterValue(tieDomainIndex, fullTie));
   }
   return false;
 }

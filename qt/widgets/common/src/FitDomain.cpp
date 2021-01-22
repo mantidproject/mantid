@@ -174,6 +174,14 @@ double FitDomain::getParameterValue(std::string const &parameter) const {
                            parameter + ".");
 }
 
+double FitDomain::getTieValue(std::string const &tie) const {
+  if (tie.empty())
+    throw std::runtime_error("This tie does not have a value.");
+  else if (isNumber(tie))
+    return std::stod(tie);
+  return getParameterValue(tie);
+}
+
 void FitDomain::setAttributeValue(std::string const &attribute,
                                   IFunction::Attribute newValue) {
   if (m_function && m_function->hasAttribute(attribute))
@@ -220,8 +228,10 @@ bool FitDomain::updateParameterTie(std::string const &parameter,
 bool FitDomain::setParameterTie(std::string const &parameter,
                                 std::string const &tie) {
   try {
-    if (isValidParameterTie(parameter, tie))
+    if (isValidParameterTie(parameter, tie)) {
       m_function->tie(parameter, tie);
+      setParameterValue(parameter, getTieValue(tie));
+    }
   } catch (std::invalid_argument const &ex) {
     g_log.warning(ex.what());
     return false;
@@ -258,6 +268,26 @@ void FitDomain::updateParameterConstraint(CompositeFunction_sptr &composite,
     auto function = composite->getFunction(index);
     if (function->hasParameter(parameter))
       function->addConstraints(constraint);
+  }
+}
+
+std::vector<std::string>
+FitDomain::getParametersTiedTo(std::string const &parameter) const {
+  std::vector<std::string> tiedParameters;
+  if (m_function) {
+    for (auto paramIndex = 0u; paramIndex < m_function->nParams(); ++paramIndex)
+      appendParametersTiedTo(tiedParameters, parameter, paramIndex);
+  }
+  return tiedParameters;
+}
+
+void FitDomain::appendParametersTiedTo(
+    std::vector<std::string> &tiedParameters, std::string const &parameter,
+    std::size_t const &parameterIndex) const {
+  if (auto const tie = m_function->getTie(parameterIndex)) {
+    for (auto rhsParameter : tie->getRHSParameters())
+      if (parameter == rhsParameter.parameterName())
+        tiedParameters.emplace_back(m_function->parameterName(parameterIndex));
   }
 }
 

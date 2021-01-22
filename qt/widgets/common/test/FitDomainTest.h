@@ -463,7 +463,7 @@ public:
     m_fitDomain->setParameterValue("Lifetime", 2.0);
 
     TS_ASSERT(m_fitDomain->isParameterActive("Height"));
-    TS_ASSERT(m_fitDomain->getParameterValue("Height"), 1.0);
+    TS_ASSERT_EQUALS(m_fitDomain->getParameterValue("Height"), 1.0);
   }
 
   void
@@ -475,7 +475,7 @@ public:
     m_fitDomain->updateParameterTie("Height", "Lifetime");
 
     TS_ASSERT(m_fitDomain->isParameterActive("Height"));
-    TS_ASSERT(m_fitDomain->getParameterValue("Height"), 1.0);
+    TS_ASSERT_EQUALS(m_fitDomain->getParameterValue("Height"), 1.0);
   }
 
   void
@@ -496,6 +496,38 @@ public:
     m_fitDomain->updateParameterConstraint("", "Height", "0.5<Height<0.9");
 
     TS_ASSERT_EQUALS(m_fitDomain->getFunction()->getConstraint(0), nullptr);
+  }
+
+  void
+  test_that_isParameterValueWithinConstraints_returns_true_if_the_value_is_within_the_parameters_constraints() {
+    m_fitDomain->setFunction(m_expDecay);
+
+    m_fitDomain->updateParameterConstraint("", "Height", "0<Height<2");
+
+    TS_ASSERT(m_fitDomain->isParameterValueWithinConstraints("Height", 0.0));
+    TS_ASSERT(m_fitDomain->isParameterValueWithinConstraints("Height", 1.0));
+    TS_ASSERT(m_fitDomain->isParameterValueWithinConstraints("Height", 2.0));
+  }
+
+  void
+  test_that_isParameterValueWithinConstraints_returns_false_if_the_value_is_not_within_the_parameters_constraints() {
+    m_fitDomain->setFunction(m_expDecay);
+
+    m_fitDomain->updateParameterConstraint("", "Height", "0<Height<2");
+
+    TS_ASSERT(!m_fitDomain->isParameterValueWithinConstraints("Height", -0.1));
+    TS_ASSERT(!m_fitDomain->isParameterValueWithinConstraints("Height", 2.1));
+  }
+
+  void
+  test_that_getParametersTiedTo_will_return_the_names_of_parameters_tied_to_the_given_parameter() {
+    m_fitDomain->setFunction(m_expDecay);
+    m_fitDomain->updateParameterTie("Height", "Lifetime");
+
+    auto const tiedParameters = std::vector<std::string>{"Height"};
+    TS_ASSERT_EQUALS(m_fitDomain->getParametersTiedTo("Height").size(), 0);
+    TS_ASSERT_EQUALS(m_fitDomain->getParametersTiedTo("Lifetime"),
+                     tiedParameters);
   }
 
 private:

@@ -99,15 +99,15 @@ public:
                                  std::string const &functionIndex,
                                  std::string const &constraint) override;
 
-  [[nodiscard]] inline std::vector<GlobalTie> getGlobalTies() const
-      noexcept override {
+  [[nodiscard]] inline std::vector<GlobalTie>
+  getGlobalTies() const noexcept override {
     return m_globalTies;
   }
 
   void setGlobalParameters(std::vector<std::string> const &parameters) override;
 
-  [[nodiscard]] inline std::vector<GlobalParameter> getGlobalParameters() const
-      noexcept override {
+  [[nodiscard]] inline std::vector<GlobalParameter>
+  getGlobalParameters() const noexcept override {
     return m_globalParameters;
   }
 
@@ -141,8 +141,12 @@ private:
                                 std::string const &fullParameter,
                                 std::string const &fullTie);
 
+  void updateParameterValuesWithLocalTieTo(FitDomainIndex domainIndex,
+                                           std::string const &parameter,
+                                           double newValue);
   void updateParameterValuesWithGlobalTieTo(FitDomainIndex domainIndex,
-                                            std::string const &parameter);
+                                            std::string const &fullParameter,
+                                            double newValue);
   void updateParameterValueInGlobalTie(GlobalTie const &globalTie,
                                        double newValue);
 
