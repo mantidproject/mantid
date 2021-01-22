@@ -594,7 +594,7 @@ signals:
     void sequentialFitDone() const;
     void workspaceClicked(const QString &);
     void removePlotSignal(PropertyHandler *);
-
+    void fitResultsChanged(const QString &);
 };
 
 // ---------------------------------

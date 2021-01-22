@@ -201,7 +201,13 @@ class CurveProperties(dict):
         """Get a curve's errorbar properties and add to props dict"""
         props['hide_errors'] = getattr(curve, 'hide_errors',
                                        errorbars_hidden(curve))
-        props['errorevery'] = getattr(curve, 'errorevery', 1)
+        # ErrorbarContainer does not have 'errorevery' as an attribute directly
+        # So to get this property take from errorbar lines curve
+        try:
+            barlines = curve[2][0]
+            props['errorevery'] = int(barlines.axes.creation_args[len(barlines.axes.creation_args)-1]['errorevery'])
+        except (IndexError, TypeError, KeyError):
+            props['errorevery'] = 1
         try:
             caps = curve[1]
             props['capsize'] = float(caps[0].get_markersize() / 2)

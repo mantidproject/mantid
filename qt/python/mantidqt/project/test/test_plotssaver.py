@@ -135,7 +135,8 @@ class PlotsSaverTest(unittest.TestCase):
         self.fig.axes[0].creation_args = [{u"specNum": 2, "function": "plot"}]
         return_value = self.plot_saver.get_dict_from_fig(self.fig)
 
-        self.loader_plot_dict[u'creationArguments'] = [[{u"specNum": 2, "function": "plot"}]]
+        self.loader_plot_dict[u'creationArguments'] = [[{u"specNum": 2, "function": "plot", u"normalize_by_bin_width":
+                                                                                            True}]]
 
         self.maxDiff = None
         self.assertDictEqual(return_value, self.loader_plot_dict)
@@ -144,6 +145,7 @@ class PlotsSaverTest(unittest.TestCase):
         self.plot_saver.figure_creation_args = [{"function": "plot"}]
         return_value = self.plot_saver.get_dict_for_axes(self.fig.axes[0])
 
+        self.loader_plot_dict["axes"][0]['_is_norm'] = True
         expected_value = self.loader_plot_dict["axes"][0]
 
         self.maxDiff = None
