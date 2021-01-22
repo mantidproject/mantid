@@ -65,6 +65,11 @@ class CorelliPowderCalibrationCreateTest(unittest.TestCase):
         row = mtd['cal_adjustments'].row(1)
         target_position, target_orientation, target_rotation = [5.18, -0.32,  0.20], [0.001, 0.999, -0.027], 98.0
         # ToDO investigate the relatively large tolerance required for some operative systems, atol=0.05
+        assert_allclose([row[name] for name in ('Xposition', 'Yposition', 'Zposition')], [0., 0., -10.0], atol=0.001)
+        # Check position of first bank
+        row = mtd['cal_adjustments'].row(1)
+        target_position, target_orientation, target_rotation = [5.18, -0.32,  0.20], [0.001, 0.999, -0.027], 98.0
+        # ToDO investigate the relatively large tolerance required for some operative systems, atol=0.05
         assert_allclose([row[name] for name in ('Xposition', 'Yposition', 'Zposition')], target_position, atol=0.05)
         assert_allclose([row[name] for name in ('XdirectionCosine', 'YdirectionCosine', 'ZdirectionCosine')],
                         target_orientation, atol=0.05)
