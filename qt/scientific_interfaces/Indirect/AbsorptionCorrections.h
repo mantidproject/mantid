@@ -51,11 +51,10 @@ private:
   void loadSettings(const QSettings &settings) override;
   void setFileExtensionsByName(bool filter) override;
 
-  void
-  AbsorptionCorrections::validateSampleGeometryInputs(UserInputValidator &uiv,
-                                                      const QString &shape);
-  void AbsorptionCorrections::validateContainerGeometryInputs(
-      UserInputValidator &uiv, const QString &shape);
+  void validateSampleGeometryInputs(UserInputValidator &uiv,
+                                    const QString &shape);
+  void validateContainerGeometryInputs(UserInputValidator &uiv,
+                                       const QString &shape);
 
   void addSaveWorkspace(std::string const &wsName);
   void addShapeSpecificSampleOptions(const Mantid::API::IAlgorithm_sptr &alg,

@@ -406,9 +406,6 @@ void AbsorptionCorrections::validateSampleGeometryInputs(
     double const sampleThickness = m_uiForm.spFlatSampleThickness->value();
     hasZero = hasZero || isValueZero(sampleThickness);
 
-    double const sampleAngle = m_uiForm.spFlatSampleAngle->value();
-    hasZero = hasZero || isValueZero(sampleAngle);
-
   } else if (shape == "Annulus") {
     double const sampleHeight = m_uiForm.spAnnSampleHeight->value();
     hasZero = hasZero || isValueZero(sampleHeight);
