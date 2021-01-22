@@ -870,39 +870,6 @@ endif()
 
 mtd_add_qt_library(
   TARGET_NAME MantidQtWidgetsCommon
-  QT_VERSION 4
-  SRC ${SRC_FILES}
-  MOC ${MOC_FILES}
-  NOMOC ${INC_FILES}
-  UI ${UI_FILES}
-  DEFS
-    IN_MANTIDQT_COMMON
-    QSCINTILLA_DLL
-    QT4_DEFS
-    USE_QTWEBKIT
-  INCLUDE_DIRS
-    inc
-  SYSTEM_INCLUDE_DIRS
-    ${Boost_INCLUDE_DIRS}
-  LINK_LIBS
-    ${TARGET_LIBRARIES}
-  QT4_LINK_LIBS
-    Qt4::QtHelp
-    Qt4::QtNetwork
-    Qt4::QtWebKit
-    Qt4::Qscintilla
-    Qt4::QtScript
-  MTD_QT_LINK_LIBS
-    MantidQtIcons
-  INSTALL_DIR ${LIB_DIR}
-  OSX_INSTALL_RPATH
-    @loader_path/../MacOS
-    @loader_path/../Frameworks
-  LINUX_INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}"
-)
-
-mtd_add_qt_library(
-  TARGET_NAME MantidQtWidgetsCommon
   QT_VERSION 5
   SRC ${QT5_SRC_FILES}
   MOC ${QT5_MOC_FILES}
@@ -1070,30 +1037,3 @@ mtd_add_qt_tests(
   MTD_QT_LINK_LIBS MantidQtWidgetsCommon
   PARENT_DEPENDENCIES GUITests
 )
-
-#
-# Windows: Generate a qt.conf file so that the dev build finds the qt plugins in
-# third party. Done in two steps to get it into the build directory that is
-# selected at build time. This file is NOT packaged. See installers/WinInstaller
-# for the package version.
-#
-if(WIN32 AND ENABLE_MANTIDPLOT)
-  set(QT_CONF qt.conf)
-  configure_file(
-    qt.conf.template
-    ${CMAKE_CURRENT_BINARY_DIR}/${QT_CONF}
-    @ONLY
-  )
-  add_custom_command(
-    TARGET
-    MantidQtWidgetsCommonQt4
-    POST_BUILD
-    COMMAND
-      ${CMAKE_COMMAND}
-      ARGS
-      -E
-      copy_if_different
-      ${CMAKE_CURRENT_BINARY_DIR}/${QT_CONF}
-      ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/${QT_CONF}
-  )
-endif()

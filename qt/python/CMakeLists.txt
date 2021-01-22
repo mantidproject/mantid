@@ -3,15 +3,13 @@
 
 include(PythonPackageTargetFunctions)
 
-# Legacy wrappers for MantidPlot
-if(ENABLE_MANTIDPLOT)
-  add_subdirectory(mantidqtpython)
-endif()
-
 # mantidqt
-if(ENABLE_MANTIDPLOT OR ENABLE_WORKBENCH)
+if(ENABLE_WORKBENCH)
   if(APPLE)
-    set(_install_lib_dirs "${SITE_PACKAGES};${WORKBENCH_SITE_PACKAGES}")
+    set(_install_lib_dirs)
+    if(ENABLE_WORKBENCH)
+      list(APPEND _install_lib_dirs ${WORKBENCH_SITE_PACKAGES})
+    endif()
   else()
     set(_install_lib_dirs "${WORKBENCH_SITE_PACKAGES}")
   endif()
@@ -23,9 +21,6 @@ if(ENABLE_MANTIDPLOT OR ENABLE_WORKBENCH)
   # Setup dependency chain
   add_dependencies(mantidqt PythonInterface)
 
-  if(ENABLE_MANTIDPLOT)
-    add_dependencies(mantidqt mantidqt_commonqt4 mantidqt_iconsqt4)
-  endif()
   if(ENABLE_WORKBENCH)
     # Configure resources data in place for ease of development. The output file
     # is added to the toplevel gitignore
@@ -165,12 +160,5 @@ if(ENABLE_MANTIDPLOT OR ENABLE_WORKBENCH)
       ${CMAKE_CURRENT_SOURCE_DIR} mantidqt_qt5 ${PYTHON_TEST_FILES}
       ${PYTHON_WIDGET_QT5_ONLY_TESTS}
     )
-  endif()
-  if(ENABLE_MANTIDPLOT)
-    set(PYUNITTEST_QT_API pyqt)
-    pyunittest_add_test(
-      ${CMAKE_CURRENT_SOURCE_DIR} mantidqt_qt4 ${PYTHON_TEST_FILES}
-    )
-    unset(PYUNITTEST_QT_API)
   endif()
 endif()
