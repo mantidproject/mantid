@@ -106,10 +106,11 @@ class ALCDataLoadingPresenterTest : public CxxTest::TestSuite {
   MockALCDataLoadingView *m_view;
   ALCDataLoadingPresenter *m_presenter;
 
-  std::string loadingString =
-      std::string("Loading MUSR15189,15191-92");
-  std::string loadedString = std::string("Successfully loaded MUSR15189,15191-92");
-  std::string foundString = std::string("Successfully found MUSR15189,15191-92");
+  std::string loadingString = std::string("Loading MUSR15189,15191-92");
+  std::string loadedString =
+      std::string("Successfully loaded MUSR15189,15191-92");
+  std::string foundString =
+      std::string("Successfully found MUSR15189,15191-92");
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically

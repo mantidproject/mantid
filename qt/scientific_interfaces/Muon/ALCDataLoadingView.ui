@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>943</width>
-    <height>615</height>
+    <height>646</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -185,8 +185,8 @@
               </property>
               <property name="minimumSize">
                <size>
-                <width>6</width>
-                <height>0</height>
+                <width>0</width>
+                <height>80</height>
                </size>
               </property>
               <property name="toolTip">
@@ -870,8 +870,8 @@
   </connection>
  </connections>
  <buttongroups>
-  <buttongroup name="detectorGroupingType"/>
   <buttongroup name="calculationType"/>
+  <buttongroup name="detectorGroupingType"/>
   <buttongroup name="deadTimeCorrType"/>
  </buttongroups>
 </ui>
