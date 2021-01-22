@@ -48,6 +48,15 @@ class GenerateLogbook(PythonAlgorithm):
             if instrument not in instruments:
                 issues['Instrument'] = 'The instrument {} does not belong to {} facility.'.format(instrument, facility)
 
+        if not self.getProperty('CustomEntries').isDefault:
+            custom_entries = self.getPropertyValue('CustomEntries')
+            custom_entries = custom_entries.split(',')
+            if not self.getProperty('CustomHeaders').isDefault:
+                custom_headers = self.getPropertyValue('CustomHeaders')
+                custom_headers = custom_headers.split(',')
+                if len(custom_entries) != len(custom_headers):
+                    issues['CustomHeaders'] = 'Provide none or as many headers as custom entries.'
+
         return issues
 
     def PyInit(self):
