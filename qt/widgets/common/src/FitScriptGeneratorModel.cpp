@@ -244,7 +244,9 @@ void FitScriptGeneratorModel::updateParameterValue(
 void FitScriptGeneratorModel::updateParameterValuesWithGlobalTieTo(
     std::string const &fullParameter) {
   auto const newValue = getParameterValue(fullParameter);
-  for (auto const &globalTie : m_globalTies)
+  // Deep copy so that global ties can be removed whilst in this for loop
+  auto const globalTies = m_globalTies;
+  for (auto const &globalTie : globalTies)
     if (fullParameter == globalTie.m_tie)
       updateParameterValueInGlobalTie(globalTie, newValue);
 }
@@ -403,8 +405,10 @@ bool FitScriptGeneratorModel::isParameterValueWithinConstraints(
 
 void FitScriptGeneratorModel::clearGlobalTie(std::string const &fullParameter) {
   auto const removeIter = findGlobalTie(fullParameter);
-  if (removeIter != m_globalTies.cend())
+  if (removeIter != m_globalTies.cend()) {
     m_globalTies.erase(removeIter);
+    m_presenter->setGlobalTies(m_globalTies);
+  }
 }
 
 void FitScriptGeneratorModel::checkGlobalTies() {
