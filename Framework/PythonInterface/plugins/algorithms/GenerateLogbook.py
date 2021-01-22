@@ -104,8 +104,16 @@ class GenerateLogbook(PythonAlgorithm):
         if self._facility != 'ILL':
             facility_name_len = len(self._facility)
 
-        return sorted([os.path.splitext(f)[0] for f in fnmatch.filter(os.listdir(self._data_directory), '*.nxs')
-                       if self._numor_range[0] <= int(os.path.splitext(f[facility_name_len:])[0]) < self._numor_range[1]])
+        file_list = []
+        for file in sorted(fnmatch.filter(os.listdir(self._data_directory), '*.nxs')):
+            try:
+                numor = int(os.path.splitext(file[facility_name_len:])[0])
+            except ValueError:
+                self.log().debug("File {} cannot be cast into an integer numor".format(file))
+                continue
+            if self._numor_range[0] <= numor < self._numor_range[1]:
+                file_list.append(os.path.splitext(file)[0])
+        return file_list
 
     def _get_default_entries(self):
         self._metadata_entries = []
