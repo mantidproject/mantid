@@ -28,7 +28,7 @@ are supplied to the function in the parameters :math:`C_0`, :math:`C_2` and :mat
 to determine which polynomial terms are active, e.g "1 0 1" will cause :math:`C_0` and :math:`C_4` to be active.
 
 
-The instrument resolution, :math:`R_M`, is approximated by a :ref:`Voigt <func-Voigt>`  function.
+The instrument resolution, :math:`R_M`, is approximated by a :ref:`Voigt <func-Voigt>` function.
 
 .. attributes::
 
