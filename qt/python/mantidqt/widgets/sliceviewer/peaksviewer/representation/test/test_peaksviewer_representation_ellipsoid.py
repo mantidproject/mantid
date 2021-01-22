@@ -66,7 +66,7 @@ class EllipsoidalIntergratedPeakRepresentationTest(unittest.TestCase):
             fg_color=fg_color,
             bkgd_width=4.8,
             bkgd_height=5.2,
-            thickness=0.1,
+            thickness=0.1 / 2.6,
             bg_color=bg_color)
 
     def test_draw_respects_transform(self, compute_alpha_mock):
@@ -95,7 +95,7 @@ class EllipsoidalIntergratedPeakRepresentationTest(unittest.TestCase):
             fg_color=fg_color,
             bkgd_width=4.4,
             bkgd_height=4.77,
-            thickness=0.1,
+            thickness=0.1 / 2.6,
             bg_color=bg_color)
 
     # private
@@ -166,7 +166,7 @@ class EllipsoidalIntergratedPeakRepresentationSliceEllipsoidTest(unittest.TestCa
                                                expected_minar_radius,
                                                expected_angle))
 
-        zp = np.sin(np.pi/3)
+        zp = np.sin(np.pi / 3)
         expected_slice_origin = (0, 0, zp)
         expected_major_radius = 0.5  # cos(pi/3)
         expected_minar_radius = 0.5  # cos(pi/3)
