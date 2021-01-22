@@ -33,11 +33,11 @@ class EllipsoidalIntergratedPeakRepresentation():
         """
         shape_info = json_loads(peak_shape.toJSON())
         # use signal ellipse to see if it is valid at this slice
-        axes, signal_radii = _signal_ellipsoid_info(shape_info, slice_info.transform)
+        axes, signal_radii = _signal_ellipsoid_info(shape_info)
         peak_origin = slice_info.transform(peak_origin)
 
         slice_origin, major_radius, minor_radius, angle = slice_ellipsoid(
-            peak_origin, *axes, *signal_radii, slice_info.z_value)
+            peak_origin, *axes, *signal_radii, slice_info.z_value, slice_info.transform)
         if not np.any(np.isfinite((major_radius, minor_radius))):
             # slice not possible
             return None
@@ -69,11 +69,11 @@ class EllipsoidalIntergratedPeakRepresentation():
         ]
 
         # add background shell
-        a, b, c, shell_thick = _bkgd_ellipsoid_info(shape_info, slice_info.transform)
+        a, b, c, shell_thick = _bkgd_ellipsoid_info(shape_info)
         # only add background shell if it is greater than 0
         if shell_thick > 0:
             _, major_radius, minor_radius, angle = slice_ellipsoid(peak_origin, *axes, a, b, c,
-                                                                   slice_info.z_value)
+                                                                   slice_info.z_value, slice_info.transform)
             bkgd_width, bkgd_height = 2 * major_radius, 2 * minor_radius
 
             artists.append(
@@ -93,7 +93,7 @@ class EllipsoidalIntergratedPeakRepresentation():
         return Painted(painter, artists)
 
 
-def _signal_ellipsoid_info(shape_info, transform):
+def _signal_ellipsoid_info(shape_info):
     """
     Retrieve axes and radii from the PeakShape in the slice frame
     :param shape_info: A dictionary of ellipsoid properties
@@ -108,27 +108,28 @@ def _signal_ellipsoid_info(shape_info, transform):
         "direction2")
     a, b, c = float(shape_info["radius0"]), float(shape_info["radius1"]), float(
         shape_info["radius2"])
-    return transform((axis_a, axis_b, axis_c)), transform((a, b, c))
+    return (axis_a, axis_b, axis_c), (a, b, c)
 
 
-def _bkgd_ellipsoid_info(shape_info, transform):
+def _bkgd_ellipsoid_info(shape_info):
     """
     Retrieve background radii and width from the PeakShape in the slice frame
     :param shape_info: A dictionary of ellipsoid properties
-    :param transform: Callable to move to the slice frame
     """
     a, b, c = float(shape_info["background_outer_radius0"]), float(
         shape_info["background_outer_radius1"]), float(shape_info["background_outer_radius2"])
-    inner_a, inner_b, inner_c = float(shape_info["background_inner_radius0"]), float(
-        shape_info["background_inner_radius1"]), float(shape_info["background_inner_radius2"])
-    a, b, c = transform((a, b, c))
-    inner_a, inner_b, inner_c = transform((inner_a, inner_b, inner_c))
-    width = (max((a, b, c)) - max((inner_a, inner_b, inner_c))) / max((a, b, c))  # fractional width of shell
+    if min([a, b, c]) > 1e-15:
+        inner_a, inner_b, inner_c = float(shape_info["background_inner_radius0"]), float(
+            shape_info["background_inner_radius1"]), float(shape_info["background_inner_radius2"])
+        width = (max((a, b, c)) - max((inner_a, inner_b, inner_c))) / max((a, b, c))  # fractional width of shell
+    else:
+        # no background specified (inner bg defaults to peak radius) assign unphysical width
+        width = -1
 
-    return (a, b, c, width)
+    return a, b, c, width
 
 
-def slice_ellipsoid(origin, axis_a, axis_b, axis_c, a, b, c, zp):
+def slice_ellipsoid(origin, axis_a, axis_b, axis_c, a, b, c, zp, transform):
     """Return semi-axes lengths and angle of ellipse formed
     by cutting the ellipsoid with a plane at z=zp
     :param origin: Origin of ellipsoid
@@ -139,6 +140,7 @@ def slice_ellipsoid(origin, axis_a, axis_b, axis_c, a, b, c, zp):
     :param b: Axis 1 radius
     :param c: Axis 2 radius
     :param zp: Slice point in slice dimension
+    :param transform: Callable to move to the slice frame
     :return (slice_origin, major_radius, minor_radius, angle):
     """
     # From  https://en.wikipedia.org/wiki/Ellipsoid#As_quadric:
@@ -170,10 +172,10 @@ def slice_ellipsoid(origin, axis_a, axis_b, axis_c, a, b, c, zp):
     #
     #  c = m22*zk^2
     return slice_ellipsoid_matrix(origin, zp,
-                                  calculate_ellipsoid_matrix(axis_a, axis_b, axis_c, a, b, c))
+                                  calculate_ellipsoid_matrix(axis_a, axis_b, axis_c, a, b, c, transform))
 
 
-def calculate_ellipsoid_matrix(axis_a, axis_b, axis_c, a, b, c):
+def calculate_ellipsoid_matrix(axis_a, axis_b, axis_c, a, b, c, transform):
     """
     Compute matrix A defining ellipsoid
     https://en.wikipedia.org/wiki/Ellipsoid#As_quadric
@@ -183,17 +185,16 @@ def calculate_ellipsoid_matrix(axis_a, axis_b, axis_c, a, b, c):
     :param a: Axis 0 radius
     :param b: Axis 1 radius
     :param c: Axis 2 radius
+    :param transform: Callable to move to the slice frame
     """
     # Create matrix whose eigenvalues are squares of semi-axes lengths
     # and eigen vectors define principle axis vectors
     axes_lengths = np.diag((1 / a ** 2, 1 / b ** 2, 1 / c ** 2))
-    # yapf: disable
-    axes_dir = np.array((
-        (axis_a[0], axis_b[0], axis_c[0]),
-        (axis_a[1], axis_b[1], axis_c[1]),
-        (axis_a[2], axis_b[2], axis_c[2])
-    ))
-    # yapf: enable
+    # transformation matrix (inverse gives transform from MD to view basis)
+    R = np.vstack((transform((1, 0, 0)), transform((0, 1, 0)), transform((0, 0, 1))))
+    # matrix with eigenvectors (in view basis) in columns
+    axes_dir = linalg.inv(R) @ np.hstack((axis_a[:, None], axis_b[:, None], axis_c[:, None]))
+
     return axes_dir @ axes_lengths @ np.transpose(axes_dir)
 
 
@@ -201,7 +202,7 @@ def slice_ellipsoid_matrix(origin, zp, ellipMatrix):
     """
     :param origin: Origin of the ellipsoid
     :param zp: Slice point in the slicing dimension
-    :param M: Ellipsoid Matrix. See `calculate_ellipsoid_matrix` for definition
+    :param ellipMatrix: Ellipsoid Matrix. See `calculate_ellipsoid_matrix` for definition
     """
     # slice point in frame with ellipsoid at origin
     z = zp - origin[2]
@@ -235,11 +236,14 @@ def slice_ellipsoid_matrix(origin, zp, ellipMatrix):
     MM = A / (0.25 * np.transpose(B) @ linalg.inv(A) @ B - (c - 1))
     try:
         eigvalues, eigvectors = linalg.eig(MM)
+        isort = np.argsort(eigvalues)  # smallest eigenvalue corresponds to largest axis length
+        eigvalues = eigvalues[isort]
+        eigvectors = eigvectors[:, isort]
     except np.linalg.LinAlgError:
         # Sometimes the integration volume may not intersect the slices of data
         return origin, np.nan, np.nan, 0
-    minor_radius, major_radius = 1 / np.sqrt(eigvalues[0]), 1 / np.sqrt(eigvalues[1])
-    major_axis = eigvectors[:, 1]
+    minor_radius, major_radius = 1 / np.sqrt(eigvalues[1]), 1 / np.sqrt(eigvalues[0])
+    major_axis = eigvectors[:, 0]
     angle = np.rad2deg(np.arctan2(major_axis[1], major_axis[0]))
     slice_origin_xy = -0.5 * linalg.inv(A) @ B
     slice_origin = np.array(

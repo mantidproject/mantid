@@ -73,6 +73,7 @@ Bugfixes
 - Fixed bug in plotting elliptical shell of integrated peaks in sliceviewer - the inner background radius is now correct.
 - Fixed a bug in error bars tab in plot settings where the Error Every property was not being shown correctly
 - Fixed a bug where the fit action (Fit > Fit) in the fit browser wasn't disabled if all the functions were individually removed.
+- Fixed a bug in sliveviewer that wasn't transforming ellipsoid axes of integrated peaks correctly when axes swapped.
 
 
 :ref:`Release 6.0.0 <v6.0.0>`
