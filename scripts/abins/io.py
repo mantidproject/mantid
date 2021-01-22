@@ -24,6 +24,8 @@ class IO(object):
     """
     def __init__(self, input_filename=None, group_name=None, setting=''):
 
+        self._setting = setting
+
         if isinstance(input_filename, str):
 
             self._input_filename = input_filename
@@ -47,8 +49,6 @@ class IO(object):
             self._group_name = group_name
         else:
             raise ValueError("Invalid name of the group. String was expected.")
-
-        self._setting = setting
 
         if filename.split('.')[-1] in AB_INITIO_FILE_EXTENSIONS:
             core_name = filename[0:filename.rfind(".")]  # e.g. NaCl.phonon -> NaCl (core_name) -> NaCl.hdf5
@@ -80,8 +80,8 @@ class IO(object):
         Checks if setting matches content of HDF file.
         :returns: True if consistent, otherwise False.
         """
-        saved_hash = self.load(list_of_attributes=["setting"])
-        return self._hash_input_filename == saved_hash["attributes"]["setting"]
+        saved_setting = self.load(list_of_attributes=["setting"])
+        return self._setting == saved_setting["attributes"]["setting"]
 
     def _valid_advanced_parameters(self):
         """

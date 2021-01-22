@@ -77,6 +77,7 @@ class SPowderSemiEmpiricalCalculator:
 
         self._clerk = abins.IO(
             input_filename=filename,
+            setting=self._instrument.get_setting(),
             group_name=("{s_data_group}/{instrument}/{sample_form}/{temperature}K").format(
                 s_data_group=abins.parameters.hdf_groups['s_data'],
                 instrument=self._instrument,
@@ -255,10 +256,11 @@ class SPowderSemiEmpiricalCalculator:
                             "If unavailable, use None.")
 
     @staticmethod
-    def _report_progress(msg: str, reporter: Union[None, Progress] = None) -> None:
+    def _report_progress(msg: str, reporter: Union[None, Progress] = None, notice: bool = False) -> None:
         """
         :param msg:  message to print out
         :param reporter:  Progress object for visual feedback in Workbench
+        :param notice:  Log at "notice" level (i.e. visible by default)
 
         """
         # In order to avoid
@@ -273,7 +275,10 @@ class SPowderSemiEmpiricalCalculator:
         if reporter:
             reporter.report(msg)
 
-        logger.information(msg)
+        if notice:
+            logger.notice(msg)
+        else:
+            logger.information(msg)
 
     def _calculate_s_powder_one_atom(self, atom=None, q_index=None,
                                      existing_data: Optional[SDataByAngle] = None
@@ -654,7 +659,7 @@ class SPowderSemiEmpiricalCalculator:
             self._report_progress(f"{data} has been loaded from the HDF file.", reporter=self.progress_reporter)
 
         except (IOError, ValueError):
-            self._report_progress("Data not found in cache. Structure factors need to be calculated.")
+            self._report_progress("Data not found in cache. Structure factors need to be calculated.", notice=True)
             data = self.calculate_data()
 
             self._report_progress(f"{data} has been calculated.", reporter=self.progress_reporter)
