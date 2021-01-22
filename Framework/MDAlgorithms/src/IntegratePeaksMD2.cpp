@@ -268,8 +268,19 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   bool useOnePercentBackgroundCorrection =
       getProperty("UseOnePercentBackgroundCorrection");
 
-  if (BackgroundInnerRadius[0] < PeakRadius[0])
-    BackgroundInnerRadius[0] = PeakRadius[0];
+  bool manualEllip = false;
+  if (PeakRadius.size() > 1) {
+    manualEllip = true;
+  }
+
+  double minInnerRadius = PeakRadius[0];
+  for (size_t r = 0; r < BackgroundInnerRadius.size(); r++) {
+    if (manualEllip) {
+      minInnerRadius = PeakRadius[r];
+    }
+    if (BackgroundInnerRadius[r] < minInnerRadius)
+      BackgroundInnerRadius[r] = minInnerRadius;
+  }
   // Ellipsoid
   bool isEllipse = getProperty("Ellipsoid");
   bool qAxisIsFixed = getProperty("FixQAxis");
@@ -427,7 +438,9 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
         }
         lenQpeak = std::sqrt(lenQpeak);
       }
-      double adaptiveRadius = adaptiveQMultiplier * lenQpeak + PeakRadius[0];
+      double adaptiveRadius =
+          adaptiveQMultiplier * lenQpeak +
+          *std::max_element(PeakRadius.begin(), PeakRadius.end());
       if (adaptiveRadius <= 0.0) {
         g_log.error() << "Error: Radius for integration sphere of peak " << i
                       << " is negative =  " << adaptiveRadius << '\n';
@@ -441,9 +454,13 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
       }
       PeakRadiusVector[i] = adaptiveRadius;
       BackgroundInnerRadiusVector[i] =
-          adaptiveQBackgroundMultiplier * lenQpeak + BackgroundInnerRadius[0];
+          adaptiveQBackgroundMultiplier * lenQpeak +
+          *std::max_element(BackgroundInnerRadius.begin(),
+                            BackgroundInnerRadius.end());
       BackgroundOuterRadiusVector[i] =
-          adaptiveQBackgroundMultiplier * lenQpeak + BackgroundOuterRadius[0];
+          adaptiveQBackgroundMultiplier * lenQpeak +
+          *std::max_element(BackgroundOuterRadius.begin(),
+                            BackgroundOuterRadius.end());
       // define the radius squared for a sphere intially
       CoordTransformDistance getRadiusSq(nd, center, dimensionsUsed);
       // set spherical shape
@@ -478,7 +495,6 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
             bgSignal / (4 * M_PI * pow(PeakRadiusVector[i], 3) / 3);
         std::vector<V3D> eigenvects;
         std::vector<double> eigenvals;
-        bool manual = false;
         if (PeakRadius.size() == 1) {
           findEllipsoid<MDE, nd>(
               ws, getRadiusSq, pos,
@@ -487,7 +503,6 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
         } else {
           // Use the manually specified radii instead of finding them via
           // findEllipsoid
-          manual = true;
           eigenvals = PeakRadius;
           eigenvects.push_back(V3D(1.0, 0.0, 0.0));
           eigenvects.push_back(V3D(0.0, 1.0, 0.0));
@@ -501,19 +516,11 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
         // Integrate ellipsoid background shell if specified
         if (BackgroundOuterRadius[0] > PeakRadius[0]) {
           // Get the total signal inside "BackgroundOuterRadius"
-          /*
-          CoordTransformDistance getBackgroundRSq(
-              nd, center, dimensionsUsed, 1, eigenvects, BackgroundOuterRadius);
-          coord_t out[nd];
-          getBackgroundRSq.apply(center, out);
-          V3D outerSq(out[0], out[1], out[2]);
-          */
           bgSignal = 0;
           bgErrorSquared = 0;
           ws->getBox()->integrateSphere(
               getRadiusSq,
               static_cast<coord_t>(pow(BackgroundOuterRadiusVector[i], 2)),
-              // static_cast<coord_t>(outerSq.norm2()),
               bgSignal, bgErrorSquared,
               static_cast<coord_t>(pow(BackgroundInnerRadiusVector[i], 2)),
               useOnePercentBackgroundCorrection);
@@ -532,8 +539,7 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
           std::vector<double> backgroundOuterRadii(3, 0.0);
           for (size_t irad = 0; irad < peakRadii.size(); irad++) {
             auto scale = pow(eigenvals[irad], 0.5) / max_stdev;
-            if (manual) {
-              // peakRadii[irad] = PeakRadius[irad] * scale;
+            if (manualEllip) {
               peakRadii[irad] = PeakRadius[irad];
             } else {
               peakRadii[irad] = PeakRadiusVector[i] * scale;
