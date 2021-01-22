@@ -123,16 +123,45 @@ class GenerateLogbook(PythonAlgorithm):
         parameters = mtd[tmp_instr].getInstrument()
         try:
             logbook_entries = parameters.getStringParameter('logbook_default_entries')[0]
-            # logbook_optional_entries = parameters.getStringParameter('logbook_default_entries')[0]
             logbook_headers = parameters.getStringParameter('logbook_default_headers')[0]
             self._metadata_entries += logbook_entries.split(',')
             self._metadata_headers += logbook_headers.split(',')
         except IndexError:
-            raise RuntimeError("The logbook entries and headers are not defined for {}".format(self._instrument))
-        if not self.getProperty('MetadataEntries').isDefault:
-            self._metadata_entries.append(self.getProperty('MetadataEntries'))
-        if not self.getProperty('MetadataHeaders').isDefault:
-            self._metadata_entries.append(self.getProperty('MetadataHeaders'))
+            raise RuntimeError("The default logbook entries and headers are not defined for {}".format(self._instrument))
+        if not self.getProperty('OptionalHeaders').isDefault:
+            try:
+                logbook_optional_entries = parameters.getStringParameter('logbook_optional_entries')[0]
+                logbook_optional_headers = parameters.getStringParameter('logbook_optional_headers')[0]
+            except IndexError:
+                raise RuntimeError("Optional headers are requested but are not defined for {}.".format(self._instrument))
+            else:
+                logbook_optional_entries = logbook_optional_entries.split(',')
+                logbook_optional_headers = logbook_optional_headers.split(',')
+                optional_entries = {header : entry for header, entry in zip(logbook_optional_headers,
+                                                                            logbook_optional_entries)}
+                requested_headers = self.getPropertyValue('OptionalHeaders').split(',')
+                for header in requested_headers:
+                    if header in optional_entries:
+                        self._metadata_headers.append(header)
+                        self._metadata_entries.append(optional_entries[header])
+                    else:
+                        raise RuntimeError("Header {} requested, but not defined for {}.".format(header,
+                                                                                                 self._instrument))
+
+        if not self.getProperty('CustomEntries').isDefault:
+            logbook_custom_entries = self.getPropertyValue('CustomEntries')
+            logbook_custom_entries = logbook_custom_entries.split(',')
+            self._metadata_entries += logbook_custom_entries
+            if self.getProperty('CustomHeaders').isDefault:
+                # derive headers from custom entries:
+                for entry in logbook_custom_entries:
+                    header = entry[entry.rfind('/')+1:]
+                    self._metadata_headers.append(header)
+            else:
+                logbook_custom_headers = self.getPropertyValue('CustomHeaders')
+                logbook_custom_headers = logbook_custom_headers.split(',')
+                self._metadata_headers += logbook_custom_headers
+
         DeleteWorkspace(Workspace=tmp_instr)
 
     def _verify_contains_metadata(self, data_array):
