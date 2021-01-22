@@ -8,6 +8,7 @@ from mantidqt.utils.observer_pattern import GenericObserverWithArgPassing, Gener
 from Engineering.gui.engineering_diffraction.tabs.fitting.plotting.plot_model import FittingPlotModel
 from Engineering.gui.engineering_diffraction.tabs.fitting.plotting.plot_view import FittingPlotView
 from mantid.simpleapi import Fit, logger
+from copy import deepcopy
 
 PLOT_KWARGS = {"linestyle": "", "marker": "x", "markersize": "3"}
 
@@ -59,6 +60,8 @@ class FittingPlotPresenter(object):
             fit_output = Fit(**fitprop['properties'])
             fitprop['properties']['Function'] = str(fit_output.Function.fun)
             # save setup in fitprop browser (updates browser for next iteration of loop)
-            self.view.update_browser_setup(fitprop['properties']['Function'], ws)
-            fitprop_list.append(fitprop)
+            self.view.update_browser(fit_output.OutputStatus, fitprop['properties']['Function'], ws)
+            # append a deep copy to output list
+            fitprop_list.append(deepcopy(fitprop))
+        logger.notice('Sequential fitting finished.')
         self.seq_fit_done_notifier.notify_subscribers(fitprop_list)

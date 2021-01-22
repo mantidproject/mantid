@@ -24,9 +24,10 @@ class EllipticalShell(Patch):
     """
 
     def __str__(self):
-        return f"EllipticalShell(center={self.center}, width={self.width}, height={self.height}, thick={self.thick}, angle={self.angle})"
+        return f"EllipticalShell(center={self.center}, width={self.width}, height={self.height}, " \
+               f"frac_thick={self.frac_thick}, angle={self.angle})"
 
-    def __init__(self, center, width, height, thick, angle=0.0, **kwargs):
+    def __init__(self, center, width, height, frac_thick, angle=0.0, **kwargs):
         """
         Draw an elliptical ring centered at *x*, *y* center with outer width (horizontal diameter)
         *width* and outer height (vertical diameter) *height* with a fractional ring thickness of *thick*
@@ -37,7 +38,7 @@ class EllipticalShell(Patch):
         super().__init__(**kwargs)
         self.center = center
         self.height, self.width = height, width
-        self.thick = thick
+        self.frac_thick = frac_thick
         self.angle = angle
         self._recompute_path()
         # Note: This cannot be calculated until this is added to an Axes
@@ -48,7 +49,7 @@ class EllipticalShell(Patch):
         arc = Path.arc(theta1=0.0, theta2=360.0)
         # Draw the outer unit circle followed by a reversed and scaled inner circle
         v1 = arc.vertices
-        v2 = arc.vertices[::-1] * float(1.0 - self.thick)  # self.thick is fractional thickness
+        v2 = arc.vertices[::-1] * float(1.0 - self.frac_thick)
         v = np.vstack([v1, v2, v1[0, :], (0, 0)])
         c = np.hstack([arc.codes, arc.codes, Path.MOVETO, Path.CLOSEPOLY])
         c[len(arc.codes)] = Path.MOVETO
@@ -140,7 +141,7 @@ class MplPainter():
         """
         return self.axes.add_patch(Ellipse((x, y), width, height, angle, **kwargs))
 
-    def elliptical_shell(self, x, y, outer_width, outer_height, thick, angle=0.0, **kwargs):
+    def elliptical_shell(self, x, y, outer_width, outer_height, frac_thick, angle=0.0, **kwargs):
         """Draw an ellipse at the given location
         :param x: X coordinate of the center
         :param y: Y coordinate of the center
@@ -151,7 +152,7 @@ class MplPainter():
         :param kwargs: Additional matplotlib properties to pass to the call
         """
         return self.axes.add_patch(
-            EllipticalShell((x, y), outer_width, outer_height, thick, angle, **kwargs))
+            EllipticalShell((x, y), outer_width, outer_height, frac_thick, angle, **kwargs))
 
     def shell(self, x, y, outer_radius, thick, **kwargs):
         """Draw a wedge on the Axes
