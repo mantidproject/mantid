@@ -9,7 +9,8 @@ ComptonPeakProfile
 Description
 -----------
 
-The ComptonPeakProfile has three input parameters:
+The ComptonPeakProfile describes the Neutron Compton profile with either a Voigt or Gaussian approximation,
+depending on an energy cutoff value. It takes three input parameters:
 
 -  Intensity: :math:`I`
 -  Position: :math:`P`
