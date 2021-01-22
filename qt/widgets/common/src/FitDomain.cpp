@@ -144,14 +144,28 @@ void FitDomain::addFunctionToExisting(IFunction_sptr const &function) {
 
 void FitDomain::setParameterValue(std::string const &parameter,
                                   double newValue) {
-  if (hasParameter(parameter) && isValidParameterValue(parameter, newValue))
+  if (hasParameter(parameter) &&
+      isParameterValueWithinConstraints(parameter, newValue)) {
     m_function->setParameter(parameter, newValue);
+    removeInvalidatedTies();
+  }
+}
+
+void FitDomain::removeInvalidatedTies() {
+  for (auto paramIndex = 0u; paramIndex < m_function->nParams(); ++paramIndex) {
+    if (auto const tie = m_function->getTie(paramIndex)) {
+      auto const parameterName = m_function->parameterName(paramIndex);
+      if (!isParameterValueWithinConstraints(parameterName, tie->eval(false)))
+        clearParameterTie(parameterName);
+    }
+  }
 }
 
 double FitDomain::getParameterValue(std::string const &parameter) const {
   if (hasParameter(parameter))
     return m_function->getParameter(parameter);
-  throw std::runtime_error("The function does not contain this parameter.");
+  throw std::runtime_error("The function does not contain the parameter " +
+                           parameter + ".");
 }
 
 void FitDomain::setAttributeValue(std::string const &attribute,
@@ -200,8 +214,8 @@ bool FitDomain::updateParameterTie(std::string const &parameter,
 bool FitDomain::setParameterTie(std::string const &parameter,
                                 std::string const &tie) {
   try {
-    m_function->tie(parameter, tie);
-    return true;
+    if (isValidParameterTie(parameter, tie))
+      m_function->tie(parameter, tie);
   } catch (std::invalid_argument const &ex) {
     g_log.warning(ex.what());
     return false;
@@ -209,6 +223,7 @@ bool FitDomain::setParameterTie(std::string const &parameter,
     g_log.warning(ex.what());
     return false;
   }
+  return true;
 }
 
 void FitDomain::removeParameterConstraint(std::string const &parameter) {
@@ -240,8 +255,8 @@ void FitDomain::updateParameterConstraint(CompositeFunction_sptr &composite,
   }
 }
 
-bool FitDomain::isValidParameterValue(std::string const &parameter,
-                                      double value) const {
+bool FitDomain::isParameterValueWithinConstraints(std::string const &parameter,
+                                                  double value) const {
   auto const parameterIndex = m_function->parameterIndex(parameter);
   if (auto const constraint = m_function->getConstraint(parameterIndex)) {
     auto const limits = splitConstraintString(constraint->asString()).second;
@@ -249,6 +264,15 @@ bool FitDomain::isValidParameterValue(std::string const &parameter,
            value <= limits.second.toDouble();
   }
   return true;
+}
+
+bool FitDomain::isValidParameterTie(std::string const &parameter,
+                                    std::string const &tie) const {
+  if (tie.empty())
+    return true;
+  else if (isNumber(tie))
+    return isParameterValueWithinConstraints(parameter, std::stod(tie));
+  return isParameterValueWithinConstraints(parameter, getParameterValue(tie));
 }
 
 bool FitDomain::isValidStartX(double startX) const {

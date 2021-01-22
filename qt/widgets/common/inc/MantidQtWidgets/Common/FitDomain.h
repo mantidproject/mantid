@@ -69,8 +69,11 @@ private:
   [[nodiscard]] bool setParameterTie(std::string const &parameter,
                                      std::string const &tie);
 
-  [[nodiscard]] bool isValidParameterValue(std::string const &parameter,
-                                           double value) const;
+  [[nodiscard]] bool
+  isParameterValueWithinConstraints(std::string const &parameter,
+                                    double value) const;
+  [[nodiscard]] bool isValidParameterTie(std::string const &parameter,
+                                         std::string const &tie) const;
   [[nodiscard]] bool isValidStartX(double startX) const;
   [[nodiscard]] bool isValidEndX(double endX) const;
   [[nodiscard]] std::pair<double, double> xLimits() const;
@@ -89,6 +92,8 @@ private:
                                  std::string const &functionIndex,
                                  std::string const &parameter,
                                  std::string const &constraint);
+
+  void removeInvalidatedTies();
 
   std::string m_workspaceName;
   WorkspaceIndex m_workspaceIndex;

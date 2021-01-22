@@ -454,6 +454,30 @@ public:
     TS_ASSERT_EQUALS(m_flatBackground->getConstraint(0), nullptr);
   }
 
+  void
+  test_that_setting_the_value_of_a_parameter_to_a_value_outside_of_the_constraints_of_another_parameter_tied_to_it_will_remove_the_tie() {
+    m_fitDomain->setFunction(m_expDecay);
+    m_fitDomain->updateParameterConstraint("", "Height", "0.5<Height<1.5");
+    m_fitDomain->updateParameterTie("Height", "Lifetime");
+
+    m_fitDomain->setParameterValue("Lifetime", 2.0);
+
+    TS_ASSERT(m_fitDomain->isParameterActive("Height"));
+    TS_ASSERT(m_fitDomain->getParameterValue("Height"), 1.0);
+  }
+
+  void
+  test_that_attempting_to_tie_a_parameter_to_another_parameter_with_a_value_outside_the_allowed_constraints_will_not_perform_the_tie() {
+    m_fitDomain->setFunction(m_expDecay);
+    m_fitDomain->updateParameterConstraint("", "Height", "0.5<Height<1.5");
+    m_fitDomain->setParameterValue("Lifetime", 2.0);
+
+    m_fitDomain->updateParameterTie("Height", "Lifetime");
+
+    TS_ASSERT(m_fitDomain->isParameterActive("Height"));
+    TS_ASSERT(m_fitDomain->getParameterValue("Height"), 1.0);
+  }
+
 private:
   std::string m_wsName;
   WorkspaceIndex m_wsIndex;
