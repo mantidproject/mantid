@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.simpleapi import SANSILLAutoProcess, GroupWorkspaces, \
     SaveNexusProcessed, LoadNexusProcessed, config, mtd, MaskBTP, \
-    RenameWorkspace
+    RenameWorkspace, Plus
 import systemtesting
 from tempfile import gettempdir
 import os
@@ -189,12 +189,17 @@ class D11_AutoProcess_Multiple_Transmissions_Test(systemtesting.MantidSystemTest
         config['logging.loggers.root.level'] = 'Warning'
         config.appendDataSearchSubDir('ILL/D11/')
 
-        # prepares masks for all the cases
+        # prepare mask for instrument edges first:
+        MaskBTP(Instrument='D11', Tube='1-3,253-256')
+        RenameWorkspace(InputWorkspace='D11MaskBTP', OutputWorkspace='mask_vertical')
+        MaskBTP(Instrument='D11', Pixel='1-3,253-256')
+        Plus(LHSWorkspace='mask_vertical', RHSWorkspace='D11MaskBTP', OutputWorkspace='edge_masks')
+        # the edges mask can be used as a default mask for all distances and wavelengths
         MaskBTP(Instrument='D11', Tube='116-139', Pixel='90-116')
         RenameWorkspace(InputWorkspace='D11MaskBTP', OutputWorkspace='mask_39m_10A')
         MaskBTP(Instrument='D11', Tube='115-140', Pixel='115-140')
         RenameWorkspace(InputWorkspace='D11MaskBTP', OutputWorkspace='mask_8m_4_6A')
-        MaskBTP(Instrument='D11', Tube='112-140', Pixel='112-142')
+        MaskBTP(Instrument='D11', Tube='105-145', Pixel='105-145')
         RenameWorkspace(InputWorkspace='D11MaskBTP', OutputWorkspace='mask_1m_4_6A')
 
     def cleanup(self):
@@ -221,6 +226,7 @@ class D11_AutoProcess_Multiple_Transmissions_Test(systemtesting.MantidSystemTest
             SampleRuns=samples,
             BeamRuns=beams,
             ContainerRuns=containers,
+            DefaultMaskFile='edge_masks',
             MaskFiles='mask_39m_10A,mask_8m_4_6A,mask_1m_4_6A',
             SensitivityMaps='sens-lamp',
             SampleTransmissionRuns=sample_tr,
