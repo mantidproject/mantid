@@ -5,10 +5,12 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import AnalysisDataService, WorkspaceFactory
+from mantid.dataobjects import EventWorkspace
 from mantid.kernel import Logger, Property, PropertyManager
 from mantid.simpleapi import (AbsorptionCorrection, CreateCacheFilename, DeleteWorkspace, Divide,
-                              Load, Multiply, PaalmanPingsAbsorptionCorrection,
-                              PreprocessDetectorsToMD, SetSample, SaveNexusProcessed, mtd)
+                              Load, LoadNexus, Multiply, PaalmanPingsAbsorptionCorrection,
+                              PreprocessDetectorsToMD, ReNameWorkspace, SetSample,
+                              SaveNexusProcessed, UnGroupWorkspace, mtd)
 import numpy as np
 import os
 
@@ -100,16 +102,36 @@ def _getCachedData(absName, abs_method, sha1, cache_file_name):
 
     # step_1: check memory to see if the ws is already there
     # -- check SHA1
+    # NOTE: The new attribute absSHA1 should be there.
     if mtd.doesExist(wsn_as):
         found_as = mtd[wsn_as].run()["absSHA1"] == sha1
     if (wsn_ac is not None) and (mtd.doesExist(wsn_ac)):
         found_ac = mtd[wsn_ac].run()["absSHA1"] == sha1
 
     # step_2: try to load from cache_file provided
-    if not found_as:
-        pass  # load from file
-    if not found_ac:
-        pass  # load from file
+    if (not found_as) or (not found_ac):
+        # load from file
+        LoadNexus(Filename=cache_file_name, OutputWorkspace="__tmp")
+        # if the file contains only one workspace, then it must be from
+        # a previous run using SampleOnly
+        if isinstance(mtd["__tmp"], EventWorkspace):
+            ReNameWorkspace(InputWorkspace="__tmp", OutputWorkspace=wsn_as)
+        else:
+            # there should be exactly two workspaces inside, ungroup them will
+            # restore them with the orignal name (wsn_as, wsn_ac)
+            # NOTE:
+            #  If the original one is still in memory, a suffix of "_1" will be
+            #  added.
+            #  However, the previous memory check ensures that similar one does not
+            #  exist, therefore a simple ungroup should be sufficient here.
+            UnGroupWorkspace(InputWorkspace="__tmp")
+        # now check the memory again
+        # -- wsn_as exist for all three methods
+        # NOTE: The new attribute absSHA1 should be there.
+        if mtd.doesExist(wsn_as):
+            found_as = mtd[wsn_as].run()["absSHA1"] == sha1
+        if (wsn_ac is not None) and (mtd.doesExist(wsn_ac)):
+            found_ac = mtd[wsn_ac].run()["absSHA1"] == sha1
 
     # step_3: if we did not find the cache, set both to None
     wsn_as = wsn_as if found_as else None
@@ -225,6 +247,10 @@ def calculate_absorption_correction(
             log.information(f"-- Cannot locate all necessary cache, start from scrach")
             wsn_as, wsn_ac = calc_absorption_corr_using_wksp(donorWS, abs_method, element_size,
                                                              absName)
+            # NOTE:
+            #  We need to set the SHA1 first, then save.
+            #  Because the final check is always comparing SHA1 of given
+            #  workspace.
             # set the SHA1 to workspace in memory (for in-memory cache search)
             mtd[wsn_as].mutableRun()["absSHA1"] = sha1
             # case SampleOnly is the annoying one
