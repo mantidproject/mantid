@@ -65,13 +65,14 @@ public:
                                  std::string const &parameter,
                                  std::string const &constraint);
 
+  [[nodiscard]] bool
+  isParameterValueWithinConstraints(std::string const &parameter,
+                                    double value) const;
+
 private:
   [[nodiscard]] bool setParameterTie(std::string const &parameter,
                                      std::string const &tie);
 
-  [[nodiscard]] bool
-  isParameterValueWithinConstraints(std::string const &parameter,
-                                    double value) const;
   [[nodiscard]] bool isValidParameterTie(std::string const &parameter,
                                          std::string const &tie) const;
   [[nodiscard]] bool isValidStartX(double startX) const;

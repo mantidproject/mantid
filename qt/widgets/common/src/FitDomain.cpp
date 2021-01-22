@@ -260,8 +260,12 @@ bool FitDomain::isParameterValueWithinConstraints(std::string const &parameter,
   auto const parameterIndex = m_function->parameterIndex(parameter);
   if (auto const constraint = m_function->getConstraint(parameterIndex)) {
     auto const limits = splitConstraintString(constraint->asString()).second;
-    return limits.first.toDouble() <= value &&
-           value <= limits.second.toDouble();
+    auto const isValid =
+        limits.first.toDouble() <= value && value <= limits.second.toDouble();
+    if (!isValid)
+      g_log.warning("The provided value for " + parameter +
+                    " is not within its constraints.");
+    return isValid;
   }
   return true;
 }

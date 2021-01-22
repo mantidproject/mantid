@@ -645,6 +645,36 @@ public:
     m_model->setFittingMode(FittingMode::SIMULTANEOUS);
   }
 
+  void
+  test_that_setting_the_value_of_a_parameter_to_a_value_outside_of_the_constraints_of_another_parameter_globally_tied_to_it_will_remove_the_tie() {
+    setup_simultaneous_fit_with_no_ties();
+
+    m_model->updateParameterConstraint(m_wsName, m_wsIndex, "f0.",
+                                       "0.0<A0<1.0");
+    m_model->updateParameterTie(m_wsName, m_wsIndex, "f0.A0", "f1.A0");
+
+    m_model->updateParameterValue("Name2", m_wsIndex, "f1.A0", 2.0);
+
+    auto const function = m_model->getFunction(m_wsName, m_wsIndex);
+    TS_ASSERT_EQUALS(function->getParameter("A0"), 0.0);
+    TS_ASSERT_EQUALS(m_model->getGlobalTies().size(), 0);
+  }
+
+  void
+  test_that_attempting_to_globally_tie_a_parameter_to_another_parameter_with_a_value_outside_the_allowed_constraints_will_not_perform_the_tie() {
+    setup_simultaneous_fit_with_no_ties();
+
+    m_model->updateParameterConstraint(m_wsName, m_wsIndex, "f0.",
+                                       "0.0<A0<1.0");
+    m_model->updateParameterValue("Name2", m_wsIndex, "f1.A0", 2.0);
+
+    m_model->updateParameterTie(m_wsName, m_wsIndex, "f0.A0", "f1.A0");
+
+    auto const function = m_model->getFunction(m_wsName, m_wsIndex);
+    TS_ASSERT_EQUALS(function->getParameter("A0"), 0.0);
+    TS_ASSERT_EQUALS(m_model->getGlobalTies().size(), 0);
+  }
+
 private:
   void setup_model_data() {
     m_model->addWorkspaceDomain(m_wsName, m_wsIndex, m_startX, m_endX);

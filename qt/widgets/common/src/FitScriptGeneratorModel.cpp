@@ -67,6 +67,10 @@ bool isSameDomain(std::size_t const &domainIndex,
   return true;
 }
 
+FitDomainIndex getDomainIndexOf(std::string const &fullParameter) {
+  return FitDomainIndex(getFunctionIndexAt(fullParameter, 0));
+}
+
 } // namespace
 
 namespace MantidQt {
@@ -238,14 +242,21 @@ void FitScriptGeneratorModel::updateParameterValue(
 }
 
 void FitScriptGeneratorModel::updateParameterValuesWithGlobalTieTo(
-    std::string const &parameter) {
-  for (auto const &globalTie : m_globalTies) {
-    if (parameter == globalTie.m_tie) {
-      auto const domainIndex = getFunctionIndexAt(globalTie.m_parameter, 0);
-      m_fitDomains[domainIndex]->setParameterValue(
-          getAdjustedFunctionIndex(globalTie.m_parameter),
-          getParameterValue(parameter));
-    }
+    std::string const &fullParameter) {
+  auto const newValue = getParameterValue(fullParameter);
+  for (auto const &globalTie : m_globalTies)
+    if (fullParameter == globalTie.m_tie)
+      updateParameterValueInGlobalTie(globalTie, newValue);
+}
+
+void FitScriptGeneratorModel::updateParameterValueInGlobalTie(
+    GlobalTie const &globalTie, double newValue) {
+  if (validGlobalTie(globalTie.m_parameter, globalTie.m_tie)) {
+    auto const domainIndex = getFunctionIndexAt(globalTie.m_parameter, 0);
+    m_fitDomains[domainIndex]->setParameterValue(
+        getAdjustedFunctionIndex(globalTie.m_parameter), newValue);
+  } else {
+    clearGlobalTie(globalTie.m_parameter);
   }
 }
 
@@ -298,7 +309,7 @@ void FitScriptGeneratorModel::updateGlobalParameterTie(
     FitDomainIndex domainIndex, std::string const &fullParameter,
     std::string const &fullTie) {
   if (validParameter(domainIndex, fullParameter)) {
-    if (validGlobalTie(fullTie)) {
+    if (validGlobalTie(fullParameter, fullTie)) {
       clearGlobalTie(fullParameter);
 
       auto const parameter = getAdjustedFunctionIndex(fullParameter);
@@ -344,9 +355,10 @@ double FitScriptGeneratorModel::getParameterValue(
 
 bool FitScriptGeneratorModel::validParameter(
     FitDomainIndex domainIndex, std::string const &fullParameter) const {
-  auto const parameter = getAdjustedFunctionIndex(fullParameter);
-  if (domainIndex.value < numberOfDomains())
+  if (domainIndex.value < numberOfDomains()) {
+    auto const parameter = getAdjustedFunctionIndex(fullParameter);
     return m_fitDomains[domainIndex.value]->hasParameter(parameter);
+  }
   return false;
 }
 
@@ -367,10 +379,25 @@ bool FitScriptGeneratorModel::validTie(std::string const &tie) const {
   }
 }
 
-bool FitScriptGeneratorModel::validGlobalTie(std::string const &fullTie) const {
-  if (!fullTie.empty() && !isNumber(fullTie))
-    return validParameter(FitDomainIndex(getFunctionIndexAt(fullTie, 0)),
-                          fullTie);
+bool FitScriptGeneratorModel::validGlobalTie(std::string const &fullParameter,
+                                             std::string const &fullTie) const {
+  if (!fullTie.empty() && !isNumber(fullTie) &&
+      validParameter(getDomainIndexOf(fullTie), fullTie)) {
+    auto const domainIndex = getDomainIndexOf(fullParameter);
+    return isParameterValueWithinConstraints(domainIndex, fullParameter,
+                                             getParameterValue(fullTie));
+  }
+  return false;
+}
+
+bool FitScriptGeneratorModel::isParameterValueWithinConstraints(
+    FitDomainIndex domainIndex, std::string const &fullParameter,
+    double value) const {
+  if (domainIndex.value < numberOfDomains()) {
+    auto const parameter = getAdjustedFunctionIndex(fullParameter);
+    return m_fitDomains[domainIndex.value]->isParameterValueWithinConstraints(
+        parameter, value);
+  }
   return false;
 }
 
@@ -382,10 +409,9 @@ void FitScriptGeneratorModel::clearGlobalTie(std::string const &fullParameter) {
 
 void FitScriptGeneratorModel::checkGlobalTies() {
   auto const isTieInvalid = [&](GlobalTie const &globalTie) {
-    return !validParameter(
-               FitDomainIndex(getFunctionIndexAt(globalTie.m_parameter, 0)),
-               globalTie.m_parameter) ||
-           !validGlobalTie(globalTie.m_tie);
+    return !validParameter(getDomainIndexOf(globalTie.m_parameter),
+                           globalTie.m_parameter) ||
+           !validGlobalTie(globalTie.m_parameter, globalTie.m_tie);
   };
 
   auto const iter =
