@@ -467,11 +467,39 @@ public:
     EllipsoidTestHelper(-1.0, false, false, {0.05, 0.03, 0.02}, radii);
   }
 
+  void test_exec_EllipsoidRadii_NoBackground_SingleCount_FixQAxis() {
+    std::vector<double> radii = {0.05, 0.03, 0.02};
+    std::for_each(radii.begin(), radii.end(),
+                  [](double &r) { r = 4.0 * sqrt(r); });
+    EllipsoidTestHelper(-1.0, true, false, {0.05, 0.03, 0.02}, radii);
+  }
+
+  void test_exec_EllipsoidRadii_NoBackground_SingleCount_Qy() {
+    std::vector<double> radii = {0.03, 0.05, 0.02};
+    std::for_each(radii.begin(), radii.end(),
+                  [](double &r) { r = 4.0 * sqrt(r); });
+    EllipsoidTestHelper(-1.0, false, false, {0.03, 0.05, 0.02}, radii);
+  }
+
+  void test_exec_EllipsoidRadii_NoBackground_SingleCount_Qz() {
+    std::vector<double> radii = {0.03, 0.02, 0.05};
+    std::for_each(radii.begin(), radii.end(),
+                  [](double &r) { r = 4.0 * sqrt(r); });
+    EllipsoidTestHelper(-1.0, false, false, {0.03, 0.02, 0.05}, radii);
+  }
+
   void test_exec_EllipsoidRadii_NoBackground_NonSingleCount() {
     std::vector<double> radii = {0.05, 0.03, 0.02};
     std::for_each(radii.begin(), radii.end(),
                   [](double &r) { r = 4.0 * sqrt(r); });
     EllipsoidTestHelper(1.0, false, false, {0.05, 0.03, 0.02}, radii);
+  }
+
+  void test_exec_EllipsoidRadii_NoBackground_NonSingleCount_FixQAxis() {
+    std::vector<double> radii = {0.05, 0.03, 0.02};
+    std::for_each(radii.begin(), radii.end(),
+                  [](double &r) { r = 4.0 * sqrt(r); });
+    EllipsoidTestHelper(1.0, true, false, {0.05, 0.03, 0.02}, radii);
   }
 
   void test_exec_EllipsoidRadii_WithBackground_SingleCount() {
@@ -482,17 +510,6 @@ public:
     std::transform(radii.begin(), radii.end(), std::back_inserter(outer),
                    [](double &r) { return r * pow(2.0, (1.0 / 3.0)); });
     EllipsoidTestHelper(-1.0, false, true, {0.05, 0.03, 0.02}, radii, radii,
-                        outer);
-  }
-
-  void test_exec_EllipsoidRadii_WithBackground_NonSingleCount() {
-    std::vector<double> radii = {0.05, 0.03, 0.02};
-    std::for_each(radii.begin(), radii.end(),
-                  [](double &r) { return 4.0 * sqrt(r); });
-    std::vector<double> outer;
-    std::transform(radii.begin(), radii.end(), std::back_inserter(outer),
-                   [](double &r) { return r * pow(2.0, (1.0 / 3.0)); });
-    EllipsoidTestHelper(1.0, false, true, {0.05, 0.03, 0.02}, radii, radii,
                         outer);
   }
 
@@ -595,24 +612,17 @@ public:
     if (doBkgrd == true) {
       // add random uniform
       std::vector<std::pair<double, double>> range;
-      bool useAll = false;
       if (ellipsoidBgInnerRad.empty() && ellipsoidBgOuterRad.empty()) {
         bgInnerRadius.push_back(peakRadius);
         bgOuterRadius.push_back(
             peakRadius * pow(2.0, 1.0 / 3.0)); // twice vol of peak sphere
       } else {
-        useAll = true;
         bgInnerRadius = ellipsoidBgInnerRad;
         bgOuterRadius = ellipsoidBgOuterRad;
       }
       for (size_t d = 0; d < eigenvals.size(); d++) {
-        if (!useAll) {
-          range.push_back(
-              std::pair(Q[d] - bgOuterRadius[0], Q[d] + bgOuterRadius[0]));
-        } else {
-          range.push_back(
-              std::pair(Q[d] - bgOuterRadius[d], Q[d] + bgOuterRadius[d]));
-        }
+        range.push_back(
+            std::pair(Q[d] - bgOuterRadius[0], Q[d] + bgOuterRadius[0]));
       }
       addUniform(static_cast<size_t>(numEvents), range);
     }
@@ -694,13 +704,17 @@ public:
     // loop over eigen vectors
     for (size_t ivect = 0; ivect < eigenvals.size(); ivect++) {
       auto rad = sqrt(eigenvals[ivect] / eigenvals[0]);
-      if (ellipsoidRadii.empty()) {
+      if (ellipsoidRadii.size() < 3) {
         rad *= peakRadius;
       } else {
         rad *= ellipsoidRadii[0];
       }
 
-      double angle = axes[isort[ivect]].angle(V3D(
+      int ind = isort[ivect];
+      if (ellipsoidRadii.size() == 3) {
+        ind = ivect;
+      }
+      double angle = axes[ind].angle(V3D(
           eigenvects[ivect][0], eigenvects[ivect][1], eigenvects[ivect][2]));
       if (angle > M_PI / 2) {
         // axis is flipped
@@ -715,9 +729,9 @@ public:
         // compare eigenvalue (radii propto sqrt eigenval)
         if (doBkgrd == true) {
           // use much more lenient tolerance
-          TS_ASSERT_DELTA(radii[isort[ivect]], rad, 0.15 * rad);
+          TS_ASSERT_DELTA(radii[ind], rad, 0.15 * rad);
         } else {
-          TS_ASSERT_DELTA(radii[isort[ivect]], rad, 0.05 * rad);
+          TS_ASSERT_DELTA(radii[ind], rad, 0.05 * rad);
         }
         TS_ASSERT_DELTA(angle, 0, M_PI * (5.0 / 180.0));
       }
