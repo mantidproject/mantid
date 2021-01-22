@@ -536,7 +536,8 @@ class AlignComponents(PythonAlgorithm):
         xmap = self._mapOptions(x_0)  # pad null rotations when x_0 contains only translations
 
         if self._move:
-            api.MoveInstrumentComponent(wks_name, component, X=xmap[0], Y=xmap[1], Z=xmap[2], RelativePosition=False, EnableLogging=False)
+            api.MoveInstrumentComponent(wks_name, component, X=xmap[0], Y=xmap[1], Z=xmap[2],
+                                        RelativePosition=False, EnableLogging=False)
 
         if self._rotate:
             (rotw, rotx, roty, rotz) = self._eulerToAngleAxis(xmap[3], xmap[4], xmap[5], self._eulerConvention)  # YZX
