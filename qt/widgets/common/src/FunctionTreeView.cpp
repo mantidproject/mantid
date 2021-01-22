@@ -1907,7 +1907,8 @@ void FunctionTreeView::addConstraints() {
     return;
   QString functionIndex, name;
   std::tie(functionIndex, name) = splitParameterName(getParameterName(prop));
-  auto const constraint = "0<" + name + "<0";
+  auto const value = QString::number(getParameter(prop));
+  auto const constraint = value + "<" + name + "<" + value;
   addConstraintProperties(prop, constraint);
   emit parameterConstraintAdded(functionIndex, constraint);
 }
