@@ -18,6 +18,7 @@
 #include <stdexcept>
 
 using namespace Mantid::API;
+using namespace MantidQt::MantidWidgets;
 
 namespace {
 Mantid::Kernel::Logger g_log("FitDomain");
@@ -53,6 +54,11 @@ getFunctionNamesInString(std::string const &functionString) {
     if (str.substr(0, 5) == "name=")
       functionNames.emplace_back(str.substr(5));
   return functionNames;
+}
+
+bool isValueWithinConstraint(std::string const &constraint, double value) {
+  auto const limits = splitConstraintString(constraint).second;
+  return limits.first.toDouble() <= value && value <= limits.second.toDouble();
 }
 
 } // namespace
@@ -234,8 +240,8 @@ void FitDomain::removeParameterConstraint(std::string const &parameter) {
 void FitDomain::updateParameterConstraint(std::string const &functionIndex,
                                           std::string const &parameter,
                                           std::string const &constraint) {
-  if (m_function) {
-    if (functionIndex.empty() && m_function->hasParameter(parameter))
+  if (isValidParameterConstraint(functionIndex + parameter, constraint)) {
+    if (functionIndex.empty())
       m_function->addConstraints(constraint);
     else if (auto composite = toComposite(m_function))
       updateParameterConstraint(composite, functionIndex, parameter,
@@ -257,17 +263,16 @@ void FitDomain::updateParameterConstraint(CompositeFunction_sptr &composite,
 
 bool FitDomain::isParameterValueWithinConstraints(std::string const &parameter,
                                                   double value) const {
+  auto isValid = true;
+
   auto const parameterIndex = m_function->parameterIndex(parameter);
-  if (auto const constraint = m_function->getConstraint(parameterIndex)) {
-    auto const limits = splitConstraintString(constraint->asString()).second;
-    auto const isValid =
-        limits.first.toDouble() <= value && value <= limits.second.toDouble();
-    if (!isValid)
-      g_log.warning("The provided value for " + parameter +
-                    " is not within its constraints.");
-    return isValid;
-  }
-  return true;
+  if (auto const constraint = m_function->getConstraint(parameterIndex))
+    isValid = isValueWithinConstraint(constraint->asString(), value);
+
+  if (!isValid)
+    g_log.warning("The provided value for '" + parameter +
+                  "' is not within its constraints.");
+  return isValid;
 }
 
 bool FitDomain::isValidParameterTie(std::string const &parameter,
@@ -277,6 +282,19 @@ bool FitDomain::isValidParameterTie(std::string const &parameter,
   else if (isNumber(tie))
     return isParameterValueWithinConstraints(parameter, std::stod(tie));
   return isParameterValueWithinConstraints(parameter, getParameterValue(tie));
+}
+
+bool FitDomain::isValidParameterConstraint(
+    std::string const &parameter, std::string const &constraint) const {
+  auto isValid = false;
+  if (hasParameter(parameter)) {
+    auto const parameterValue = m_function->getParameter(parameter);
+    isValid = isValueWithinConstraint(constraint, parameterValue);
+    if (!isValid)
+      g_log.warning("The provided constraint for '" + parameter +
+                    "' does not encompass its current value.");
+  }
+  return isValid;
 }
 
 bool FitDomain::isValidStartX(double startX) const {

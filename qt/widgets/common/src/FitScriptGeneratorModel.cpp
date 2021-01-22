@@ -237,13 +237,14 @@ void FitScriptGeneratorModel::updateParameterValue(
   if (!hasGlobalTie(fullParameter)) {
     auto const parameter = getAdjustedFunctionIndex(fullParameter);
     m_fitDomains[domainIndex.value]->setParameterValue(parameter, newValue);
-    updateParameterValuesWithGlobalTieTo(fullParameter);
+    if (m_fittingMode == FittingMode::SIMULTANEOUS)
+      updateParameterValuesWithGlobalTieTo(domainIndex, fullParameter);
   }
 }
 
 void FitScriptGeneratorModel::updateParameterValuesWithGlobalTieTo(
-    std::string const &fullParameter) {
-  auto const newValue = getParameterValue(fullParameter);
+    FitDomainIndex domainIndex, std::string const &fullParameter) {
+  auto const newValue = getParameterValue(domainIndex, fullParameter);
   // Deep copy so that global ties can be removed whilst in this for loop
   auto const globalTies = m_globalTies;
   for (auto const &globalTie : globalTies)
@@ -317,7 +318,7 @@ void FitScriptGeneratorModel::updateGlobalParameterTie(
       auto const parameter = getAdjustedFunctionIndex(fullParameter);
       m_fitDomains[domainIndex.value]->clearParameterTie(parameter);
       m_fitDomains[domainIndex.value]->setParameterValue(
-          parameter, getParameterValue(fullTie));
+          parameter, getParameterValue(domainIndex, fullTie));
 
       m_globalTies.emplace_back(GlobalTie(fullParameter, fullTie));
     } else {
@@ -346,11 +347,10 @@ void FitScriptGeneratorModel::updateParameterConstraint(
 }
 
 double FitScriptGeneratorModel::getParameterValue(
-    std::string const &fullParameter) const {
-  auto const domainIndex = getFunctionIndexAt(fullParameter, 0);
+    FitDomainIndex domainIndex, std::string const &fullParameter) const {
   auto const parameter = getAdjustedFunctionIndex(fullParameter);
-  if (domainIndex < numberOfDomains())
-    return m_fitDomains[domainIndex]->getParameterValue(parameter);
+  if (domainIndex.value < numberOfDomains())
+    return m_fitDomains[domainIndex.value]->getParameterValue(parameter);
 
   throw std::runtime_error("The domain index provided does not exist.");
 }
@@ -386,8 +386,8 @@ bool FitScriptGeneratorModel::validGlobalTie(std::string const &fullParameter,
   if (!fullTie.empty() && !isNumber(fullTie) &&
       validParameter(getDomainIndexOf(fullTie), fullTie)) {
     auto const domainIndex = getDomainIndexOf(fullParameter);
-    return isParameterValueWithinConstraints(domainIndex, fullParameter,
-                                             getParameterValue(fullTie));
+    return isParameterValueWithinConstraints(
+        domainIndex, fullParameter, getParameterValue(domainIndex, fullTie));
   }
   return false;
 }

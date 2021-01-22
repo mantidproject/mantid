@@ -75,6 +75,10 @@ private:
 
   [[nodiscard]] bool isValidParameterTie(std::string const &parameter,
                                          std::string const &tie) const;
+  [[nodiscard]] bool
+  isValidParameterConstraint(std::string const &parameter,
+                             std::string const &constraint) const;
+
   [[nodiscard]] bool isValidStartX(double startX) const;
   [[nodiscard]] bool isValidEndX(double endX) const;
   [[nodiscard]] std::pair<double, double> xLimits() const;

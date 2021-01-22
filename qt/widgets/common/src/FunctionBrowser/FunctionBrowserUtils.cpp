@@ -101,7 +101,8 @@ splitConstraintString(const QString &constraint) {
     try // find position of the parameter name in expression
     {
       boost::lexical_cast<double>(expr[1].name());
-    } catch (...) {
+    }
+    catch (...) {
       paramPos = 1;
     }
     std::string op = expr[1].operator_name();
@@ -149,11 +150,14 @@ std::vector<std::string> splitStringBy(std::string const &str,
 
 std::size_t getFunctionIndexAt(std::string const &parameter,
                                std::size_t const &index) {
-  auto subStrings = splitStringBy(parameter, "f.");
-  if (index < subStrings.size())
-    return std::stoull(subStrings[index]);
+  auto const subStrings = splitStringBy(parameter, ".");
+  if (index < subStrings.size()) {
+    auto const functionIndex = splitStringBy(subStrings[index], "f");
+    if (functionIndex.size() == 1 && isNumber(functionIndex[0]))
+      return std::stoull(functionIndex[0]);
+  }
 
-  throw std::invalid_argument("Incorrect function index provided.");
+  throw std::invalid_argument("No function index was found.");
 }
 
 } // namespace MantidWidgets

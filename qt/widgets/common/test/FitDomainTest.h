@@ -478,6 +478,26 @@ public:
     TS_ASSERT(m_fitDomain->getParameterValue("Height"), 1.0);
   }
 
+  void
+  test_that_updateParameterConstraint_will_not_update_the_constraint_if_the_lower_bound_does_not_encompass_the_value_of_the_parameter() {
+    m_fitDomain->setFunction(m_expDecay);
+
+    // The value of Height is automatically 1.0
+    m_fitDomain->updateParameterConstraint("", "Height", "1.1<Height<1.5");
+
+    TS_ASSERT_EQUALS(m_fitDomain->getFunction()->getConstraint(0), nullptr);
+  }
+
+  void
+  test_that_updateParameterConstraint_will_not_update_the_constraint_if_the_upper_bound_does_not_encompass_the_value_of_the_parameter() {
+    m_fitDomain->setFunction(m_expDecay);
+
+    // The value of Height is automatically 1.0
+    m_fitDomain->updateParameterConstraint("", "Height", "0.5<Height<0.9");
+
+    TS_ASSERT_EQUALS(m_fitDomain->getFunction()->getConstraint(0), nullptr);
+  }
+
 private:
   std::string m_wsName;
   WorkspaceIndex m_wsIndex;

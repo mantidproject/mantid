@@ -141,12 +141,14 @@ private:
                                 std::string const &fullParameter,
                                 std::string const &fullTie);
 
-  void updateParameterValuesWithGlobalTieTo(std::string const &parameter);
+  void updateParameterValuesWithGlobalTieTo(FitDomainIndex domainIndex,
+                                            std::string const &parameter);
   void updateParameterValueInGlobalTie(GlobalTie const &globalTie,
                                        double newValue);
 
   [[nodiscard]] double
-  getParameterValue(std::string const &fullParameter) const;
+  getParameterValue(FitDomainIndex domainIndex,
+                    std::string const &fullParameter) const;
 
   [[nodiscard]] bool validParameter(FitDomainIndex domainIndex,
                                     std::string const &fullParameter) const;
