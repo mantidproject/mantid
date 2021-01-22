@@ -347,7 +347,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                              'DefaultQBinning', 'BinningFactor',
                              'OutputBinning', 'NPixelDivision',
                              'NumberOfWedges', 'WedgeAngle', 'WedgeOffset',
-                             'AsymmetricWedges', 'IQxQyLogBinning'])
+                             'AsymmetricWedges', 'IQxQyLogBinning', 'WavelengthRange'])
 
         self.setPropertyGroup('OutputType', 'Integration Options')
         self.setPropertyGroup('CalculateResolution', 'Integration Options')
@@ -717,7 +717,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                 DeltaQ=(self.deltaq[i]
                         if len(self.deltaq) == self.dimensionality
                         else self.deltaq[0]),
-                IQxQyLogBinning=self.getProperty('IQxQyLogBinning').value
+                IQxQyLogBinning=self.getProperty('IQxQyLogBinning').value,
+                WavelengthRange=self.getProperty('WavelengthRange').value
                 )
 
         # wedges ungrouping and renaming

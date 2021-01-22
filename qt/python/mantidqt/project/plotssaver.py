@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package
 #
+from copy import deepcopy
 import matplotlib.axis
 from matplotlib import ticker
 from matplotlib.image import AxesImage
@@ -13,13 +14,7 @@ from matplotlib.image import AxesImage
 from mantid import logger
 from mantid.plots.legend import LegendProperties
 
-try:
-    from matplotlib.colors import to_hex
-except ImportError:
-    from matplotlib.colors import colorConverter, rgb2hex
-
-    def to_hex(color):
-        return rgb2hex(colorConverter.to_rgb(color))
+from matplotlib.colors import to_hex, Normalize
 
 
 class PlotsSaver(object):
@@ -27,7 +22,7 @@ class PlotsSaver(object):
         self.figure_creation_args = {}
 
     def save_plots(self, plot_dict, is_project_recovery=False):
-        # if arguement is none return empty dictionary
+        # if argument is none return empty dictionary
         if plot_dict is None:
             return []
 
@@ -48,18 +43,37 @@ class PlotsSaver(object):
                     logger.debug(error_string)
         return plot_list
 
+    @staticmethod
+    def _convert_normalise_obj_to_dict(norm):
+        norm_dict = {'clip': norm.clip, 'vmin': norm.vmin, 'vmax': norm.vmax}
+        return norm_dict
+
+    @staticmethod
+    def _add_normalisation_kwargs(cargs_list, axes_list):
+        for ax_cargs, ax_dict in zip(cargs_list[0], axes_list):
+            is_norm = ax_dict.pop("_is_norm")
+            ax_cargs['normalize_by_bin_width'] = is_norm
+
     def get_dict_from_fig(self, fig):
         axes_list = []
         create_list = []
         for ax in fig.axes:
             try:
-                create_list.append(ax.creation_args)
-                self.figure_creation_args = ax.creation_args
+                creation_args = deepcopy(ax.creation_args)
+                # convert the normalise object (if present) into a dict so that it can be json serialised
+                for args_dict in creation_args:
+                    if 'norm' in args_dict.keys() and type(args_dict['norm']) is Normalize:
+                        norm_dict = self._convert_normalise_obj_to_dict(args_dict['norm'])
+                        args_dict['norm'] = norm_dict
+                create_list.append(creation_args)
+                self.figure_creation_args = creation_args
             except AttributeError:
                 logger.debug("Axis had an axis without creation_args - Common with a Colorfill plot")
                 continue
             axes_list.append(self.get_dict_for_axes(ax))
 
+        if create_list and axes_list:
+            self._add_normalisation_kwargs(create_list, axes_list)
         fig_dict = {"creationArguments": create_list,
                     "axes": axes_list,
                     "label": fig._label,
@@ -122,6 +136,11 @@ class PlotsSaver(object):
         else:
             legend_dict["exists"] = False
         ax_dict["legend"] = legend_dict
+
+        # add value to determine if ax has been normalised
+        ws_artists = [art for art in ax.tracked_workspaces.values()]
+        is_norm = all(art[0].is_normalized for art in ws_artists)
+        ax_dict["_is_norm"] = is_norm
 
         return ax_dict
 
