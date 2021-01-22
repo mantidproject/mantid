@@ -189,9 +189,13 @@ class D11_AutoProcess_Multiple_Transmissions_Test(systemtesting.MantidSystemTest
         config['logging.loggers.root.level'] = 'Warning'
         config.appendDataSearchSubDir('ILL/D11/')
 
-        # prepares mask for the 39m, 10A case that is not properly masked
+        # prepares masks for all the cases
         MaskBTP(Instrument='D11', Tube='116-139', Pixel='90-116')
         RenameWorkspace(InputWorkspace='D11MaskBTP', OutputWorkspace='mask_39m_10A')
+        MaskBTP(Instrument='D11', Tube='115-140', Pixel='115-140')
+        RenameWorkspace(InputWorkspace='D11MaskBTP', OutputWorkspace='mask_8m_4_6A')
+        MaskBTP(Instrument='D11', Tube='112-140', Pixel='112-142')
+        RenameWorkspace(InputWorkspace='D11MaskBTP', OutputWorkspace='mask_1m_4_6A')
 
     def cleanup(self):
         mtd.clear()
@@ -217,7 +221,7 @@ class D11_AutoProcess_Multiple_Transmissions_Test(systemtesting.MantidSystemTest
             SampleRuns=samples,
             BeamRuns=beams,
             ContainerRuns=containers,
-            MaskFiles='mask_39m_10A,mask1.nxs,mask2.nxs',
+            MaskFiles='mask_39m_10A,mask_8m_4_6A,mask_1m_4_6A',
             SensitivityMaps='sens-lamp',
             SampleTransmissionRuns=sample_tr,
             ContainerTransmissionRuns=container_tr,
